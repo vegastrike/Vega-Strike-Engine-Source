@@ -45,7 +45,7 @@ bool TargetWorthPursuing (Unit * parent, Unit * target) {
 }
 static void ActuallyWarpTo(Unit * parent,const QVector &tarpos, Vector tarvel, Unit* MatchSpeed=NULL) {
   Vector vel = parent->GetVelocity();
-  static float mindirveldot= XMLSupport::parse_float(vs_config->getVariable("physics","warp_cone",".5"));
+  static float mindirveldot= XMLSupport::parse_float(vs_config->getVariable("physics","warp_cone",".8"));
   tarvel.Normalize();
   vel.Normalize();
   Vector dir = tarpos-parent->Position();
