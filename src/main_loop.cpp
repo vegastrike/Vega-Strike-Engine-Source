@@ -421,7 +421,7 @@ void createObjects() {
 
     Flightgroup *fg=*siter;
 
-    string fullname=fg->type + ".xunit";
+    string fullname=fg->type;// + ".xunit";
 
     strcpy(fightername,fullname.c_str());
 	//	strcat(fightername,".xunit");
