@@ -5,6 +5,7 @@
 #include "vs_globals.h"
 #include "config_xml.h"
 #include <assert.h>
+#include "cmd/ai/aggressive.h"
 Unit& GetUnitMasterPartList () {
   static Unit MasterPartList ("master_part_list",true,_Universe->GetFaction("upgrades"));
   return MasterPartList;
@@ -234,7 +235,20 @@ void Unit::EjectCargo (unsigned int index) {
   }
   if (tmp) {
     if (tmp->quantity>0) {
-      Unit * cargo = new Unit (tmp->content.c_str(),false,_Universe->GetFaction("upgrades"));
+      const int sslen=strlen("starships");
+      Unit * cargo = NULL;
+      if (tmp->category.length()>=sslen) {
+	if (memcmp (tmp->category.c_str(),"starships",sslen)==0) {
+	  cargo = new Unit (tmp->content.c_str(),false,faction);
+	  cargo->PrimeOrders();
+	  cargo->SetAI (new Orders::AggressiveAI ("default.agg.xml","default.int.xml"));
+	  cargo->SetTurretAI();	  
+	  //he's alive!!!!!
+	}
+      }
+      if (!cargo) {
+	cargo = new Unit (tmp->content.c_str(),false,_Universe->GetFaction("upgrades"));
+      }
       if (cargo->name=="LOAD_FAILED") {
 	cargo->Kill();
 	cargo = new Unit ("generic_cargo",false,_Universe->GetFaction("upgrades"));
