@@ -16,6 +16,7 @@ protected:
   float distance;
   float gunspeed;
   float gunrange;
+  float lastchangedtarg;
   void FireWeapons (bool shouldfire,bool lockmissile);
   //  bool DealWithMultipleTargets();
   virtual void ChooseTargets(int num, bool force=false);//chooses n targets and puts the best to attack in unit's target container

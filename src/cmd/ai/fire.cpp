@@ -18,6 +18,7 @@ void FireAt::ReInit (float reaction_time, float aggressivitylevel) {
   agg = aggressivitylevel;
   rxntime = reaction_time;
   distance=1;
+  lastchangedtarg=-100000;
 }
 FireAt::FireAt (float reaction_time, float aggressivitylevel): CommunicatingAI (WEAPON,STARGET){
   ReInit (reaction_time,aggressivitylevel);
@@ -100,6 +101,10 @@ void FireAt::getAverageGunSpeed (float & speed, float & range) const{
   range= gunrange;
 }
 void FireAt::ChooseTargets (int numtargs, bool force) {
+  static float mintimetoswitch = XMLSupport::parse_float(vs_config->getVariable ("AI","Targetting","MinTimeToSwitchTargets","3"));
+  if (lastchangedtarg+mintimetoswitch>0) 
+    return;//don't switch if switching too soon
+  lastchangedtarg=0;
   parent->getAverageGunSpeed (gunspeed,gunrange);  
 
   UnitCollection::UnitIterator iter (_Universe->activeStarSystem()->getUnitList().createIterator());
@@ -235,7 +240,8 @@ bool FireAt::isJumpablePlanet(Unit * targ) {
 }
 void FireAt::PossiblySwitchTarget(bool istargetjumpableplanet ) {
   static float targetswitchprobability = XMLSupport::parse_float (vs_config->getVariable ("AI","Targetting","TargetSwitchProbability",".01"));
-  if ((!istargetjumpableplanet)&&(float(rand())/RAND_MAX)<targetswitchprobability*SIMULATION_ATOM) {
+  static float targettime = XMLSupport::parse_float (vs_config->getVariable ("AI","Targetting","TimeUntilSwitch","20"));
+  if ((!istargetjumpableplanet)&&/*(float(rand())/RAND_MAX)<targetswitchprobability*SIMULATION_ATOM*/lastchangedtarg+targettime<0) {
     bool switcht=true;
     Flightgroup * fg = parent->getFlightgroup();;
     if (fg) {
@@ -251,6 +257,8 @@ void FireAt::PossiblySwitchTarget(bool istargetjumpableplanet ) {
   }
 }
 void FireAt::Execute () {
+  lastchangedtarg-=SIMULATION_ATOM;
+  
   bool missilelock=false;
   bool tmp = done;
   Order::Execute();	

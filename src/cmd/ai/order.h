@@ -98,6 +98,7 @@ class Order {
  public:
   virtual void getAverageGunSpeed (float & speed, float & range) const;
   virtual float GetEffectiveRelationship (const Unit * target) const;
+  virtual void ChooseTarget() {/*not implemented see fire.cpp*/}
   ///clears the messasges of this order
   void ClearMessages();
   ///The varieties of order types  MOVEMENT,FACING, and WEAPON orders may not be mutually executed (lest one engine goes left, the other right)
