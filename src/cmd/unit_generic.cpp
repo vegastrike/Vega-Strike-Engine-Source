@@ -3738,14 +3738,14 @@ double computeDowngradePercent (double old, double upgrade, double isnew) {
   }
 }
 
-static int UpgradeFloat (double &result,double tobeupgraded, double upgrador, double templatelimit, double (*myadd) (double,double), bool (*betterthan) (double a, double b), double nothing,  double completeminimum, double (*computepercentage) (double oldvar, double upgrador, double newvar), double & percentage, bool forcedowngrade, bool usetemplate, double at_least_this,bool (*atLeastthiscompare)( double a, double b)=AGreaterB, bool clamp=false) {
-  if (upgrador!=nothing) {//if upgrador is better than nothing
+static int UpgradeFloat (double &result,double tobeupgraded, double upgrador, double templatelimit, double (*myadd) (double,double), bool (*betterthan) (double a, double b), double nothing,  double completeminimum, double (*computepercentage) (double oldvar, double upgrador, double newvar), double & percentage, bool forcedowngrade, bool usetemplate, double at_least_this,bool (*atLeastthiscompare)( double a, double b)=AGreaterB, bool clamp=false, bool force_nothing=false) {
+  if (upgrador!=nothing||force_nothing) {//if upgrador is better than nothing
     if (clamp) {
       if (tobeupgraded>upgrador)
 	upgrador=tobeupgraded;
     }
     float newsum = (*myadd)(tobeupgraded,upgrador);
-    if (newsum < tobeupgraded&&at_least_this>=upgrador&&at_least_this>newsum&&at_least_this>=tobeupgraded){//if we're downgrading
+    if (!force_nothing&&newsum < tobeupgraded&&at_least_this>=upgrador&&at_least_this>newsum&&at_least_this>=tobeupgraded){//if we're downgrading
         return newsum==upgrador?CAUSESDOWNGRADE:NOTTHERE;
     }
     if (newsum!=tobeupgraded&&(((*betterthan)(newsum, tobeupgraded)||forcedowngrade))) {
@@ -3759,7 +3759,7 @@ static int UpgradeFloat (double &result,double tobeupgraded, double upgrador, do
       }
       ///we know we can replace result with newsum
       percentage = (*computepercentage)(tobeupgraded,upgrador,newsum);
-      if ((*atLeastthiscompare)(at_least_this,newsum)) {
+      if ((*atLeastthiscompare)(at_least_this,newsum)&&(!force_nothing)) {
             if ((*atLeastthiscompare)(at_least_this,tobeupgraded)) {
                 newsum = tobeupgraded;//no shift
             }else {
@@ -3777,7 +3777,7 @@ static int UpgradeFloat (double &result,double tobeupgraded, double upgrador, do
 }
 
 
-int UpgradeBoolval (int a, int upga, bool touchme, bool downgrade, int &numave,double &percentage) {
+int UpgradeBoolval (int a, int upga, bool touchme, bool downgrade, int &numave,double &percentage, bool force_nothing) {
   if (downgrade) {
     if (a&&upga) {
       if (touchme) (a=false);
@@ -3789,7 +3789,11 @@ int UpgradeBoolval (int a, int upga, bool touchme, bool downgrade, int &numave,d
       if (touchme) a=true;
       numave++;
       percentage++;
-    }
+    }else if (force_nothing && a  && !upga) {
+      if (touchme) a=false;
+      numave++;
+      percentage++;
+	}
   }
   return a;
 }
@@ -4126,17 +4130,17 @@ bool Unit::UpgradeSubUnitsWithFactory (const Unit * up, int subunitoffset, bool 
   return cancompletefully;
 }
 
-bool Unit::canUpgrade (const Unit * upgrador, int mountoffset,  int subunitoffset, int additive, bool force,  double & percentage, const Unit * templ){
-  return UpAndDownGrade(upgrador,templ,mountoffset,subunitoffset,false,false,additive,force,percentage,this);
+bool Unit::canUpgrade (const Unit * upgrador, int mountoffset,  int subunitoffset, int additive, bool force,  double & percentage, const Unit * templ, bool force_change_on_nothing){
+  return UpAndDownGrade(upgrador,templ,mountoffset,subunitoffset,false,false,additive,force,percentage,this, force_change_on_nothing);
 }
-bool Unit::Upgrade (const Unit * upgrador, int mountoffset,  int subunitoffset, int additive, bool force,  double & percentage, const Unit * templ) {
-  return UpAndDownGrade(upgrador,templ,mountoffset,subunitoffset,true,false,additive,force,percentage,this);
+bool Unit::Upgrade (const Unit * upgrador, int mountoffset,  int subunitoffset, int additive, bool force,  double & percentage, const Unit * templ, bool force_change_on_nothing) {
+  return UpAndDownGrade(upgrador,templ,mountoffset,subunitoffset,true,false,additive,force,percentage,this, force_change_on_nothing);
 }
 bool Unit::canDowngrade (const Unit *downgradeor, int mountoffset, int subunitoffset, double & percentage, const Unit * downgradelimit){
-  return UpAndDownGrade(downgradeor,NULL,mountoffset,subunitoffset,false,true,false,true,percentage,downgradelimit);
+  return UpAndDownGrade(downgradeor,NULL,mountoffset,subunitoffset,false,true,false,true,percentage,downgradelimit,false);
 }
 bool Unit::Downgrade (const Unit * downgradeor, int mountoffset, int subunitoffset,  double & percentage,const Unit * downgradelimit){
-  return UpAndDownGrade(downgradeor,NULL,mountoffset,subunitoffset,true,true,false,true,percentage,downgradelimit);
+  return UpAndDownGrade(downgradeor,NULL,mountoffset,subunitoffset,true,true,false,true,percentage,downgradelimit,false);
 }
 double ComputeMinDowngradePercent() {
     static float MyPercentMin = XMLSupport::parse_float (vs_config->getVariable("general","remove_downgrades_less_than_percent",".9"));
@@ -4183,7 +4187,7 @@ std::set<std::string> GetListOfDowngrades () {
 //  return std::vector<std::string> (retval.begin(),retval.end());
   return retval;
 }
-bool Unit::UpAndDownGrade (const Unit * up, const Unit * templ, int mountoffset, int subunitoffset, bool touchme, bool downgrade, int additive, bool forcetransaction, double &percentage, const Unit * downgradelimit) {
+bool Unit::UpAndDownGrade (const Unit * up, const Unit * templ, int mountoffset, int subunitoffset, bool touchme, bool downgrade, int additive, bool forcetransaction, double &percentage, const Unit * downgradelimit,bool force_change_on_nothing) {
   percentage=0;
   int numave=0;
   bool cancompletefully=UpgradeMounts(up,mountoffset,touchme,downgrade,numave,templ,percentage);
@@ -4248,7 +4252,7 @@ bool Unit::UpAndDownGrade (const Unit * up, const Unit * templ, int mountoffset,
   int retval;
   double temppercent;
   static Unit * blankship = UnitFactory::createServerSideUnit ("blank",true,FactionUtil::GetFaction("upgrades"));
-#define STDUPGRADE_SPECIFY_DEFAULTS(my,oth,temp,noth,dgradelimer,dgradelimerdefault,clamp,value_to_lookat) retval=(UpgradeFloat(resultdoub,my,oth,(templ!=NULL)?temp:0,Adder,Comparer,noth,noth,Percenter, temppercent,forcetransaction,templ!=NULL,(downgradelimit!=NULL)?dgradelimer:dgradelimerdefault,AGreaterB,clamp)); if (retval==UPGRADEOK) {if (touchme){my=resultdoub;} percentage+=temppercent; numave++;AddToDowngradeMap (up->name,oth,((char *)&value_to_lookat)-(char *)this,tempdownmap);} else {if (retval!=NOTTHERE) cancompletefully=false;}
+#define STDUPGRADE_SPECIFY_DEFAULTS(my,oth,temp,noth,dgradelimer,dgradelimerdefault,clamp,value_to_lookat) retval=(UpgradeFloat(resultdoub,my,oth,(templ!=NULL)?temp:0,Adder,Comparer,noth,noth,Percenter, temppercent,forcetransaction,templ!=NULL,(downgradelimit!=NULL)?dgradelimer:dgradelimerdefault,AGreaterB,clamp,force_change_on_nothing)); if (retval==UPGRADEOK) {if (touchme){my=resultdoub;} percentage+=temppercent; numave++;AddToDowngradeMap (up->name,oth,((char *)&value_to_lookat)-(char *)this,tempdownmap);} else {if (retval!=NOTTHERE) cancompletefully=false;}
 
   
 #define STDUPGRADE(my,oth,temp,noth) STDUPGRADE_SPECIFY_DEFAULTS (my,oth,temp,noth,downgradelimit->my,blankship->my,false,this->my)
@@ -4280,7 +4284,9 @@ bool Unit::UpAndDownGrade (const Unit * up, const Unit * templ, int mountoffset,
   STDUPGRADE(limits.forward,tlimits_forward,templ->limits.forward,0);
   STDUPGRADE(limits.retro,tlimits_retro,templ->limits.retro,0);
   STDUPGRADE(limits.afterburn,tlimits_afterburn,templ->limits.afterburn,0);
-  STDUPGRADECLAMP(computer.radar.maxrange,up->computer.radar.maxrange,templ->computer.radar.maxrange,0);
+  bool use_template_maxrange= XMLSupport::parse_bool (vs_config->getVariable("physics","use_upgrade_template_maxrange","true"));
+  
+  STDUPGRADECLAMP(computer.radar.maxrange,up->computer.radar.maxrange,use_template_maxrange?templ->computer.radar.maxrange:FLT_MAX,0);
   STDUPGRADE(computer.max_combat_speed,tmax_speed,templ->computer.max_combat_speed,0);
   STDUPGRADE(computer.max_combat_ab_speed,tmax_ab_speed,templ->computer.max_combat_ab_speed,0);
   STDUPGRADE(computer.max_yaw,tmax_yaw,templ->computer.max_yaw,0);
@@ -4318,8 +4324,8 @@ bool Unit::UpAndDownGrade (const Unit * up, const Unit * templ, int mountoffset,
   }
   
 
-  computer.radar.color=UpgradeBoolval(computer.radar.color,up->computer.radar.color,touchme,downgrade,numave,percentage);
-  computer.itts=UpgradeBoolval(computer.itts,up->computer.radar.color,touchme,downgrade,numave,percentage);
+  computer.radar.color=UpgradeBoolval(computer.radar.color,up->computer.radar.color,touchme,downgrade,numave,percentage,force_change_on_nothing);
+  computer.itts=UpgradeBoolval(computer.itts,up->computer.radar.color,touchme,downgrade,numave,percentage,force_change_on_nothing);
   ///do the two reversed ones below
   
   double myleak=100-shield.leak;
@@ -4406,13 +4412,13 @@ bool Unit::UpAndDownGrade (const Unit * up, const Unit * templ, int mountoffset,
       cancompletefully=false;
     }
     
-    if (afterburnenergy>up->afterburnenergy&&up->afterburnenergy>0) {
+    if (afterburnenergy>up->afterburnenergy&&up->afterburnenergy>0||force_change_on_nothing) {
       numave++;
       if (touchme) afterburnenergy=up->afterburnenergy;
     }else if (afterburnenergy<=up->afterburnenergy&&afterburnenergy>0&&up->afterburnenergy>0&&up->afterburnenergy<65535) {
       cancompletefully=false;
     }
-    if (jump.drive==-2&&up->jump.drive>=-1) {
+    if (jump.drive==-2&&up->jump.drive>=-1||force_change_on_nothing) {
       if (touchme) {jump.drive = up->jump.drive;jump.damage=0;}
       numave++;
     }else if (jump.drive>=-1&&up->jump.drive>=-1) {
@@ -4472,13 +4478,25 @@ const Unit * loadUnitByCache(std::string name,int faction) {
 		  temprate = UnitConstCache::setCachedConst(StringIntKey(name,faction),UnitFactory::createUnit(name.c_str(),true,faction));
 	  return temprate;
 }
+bool Unit::ReduceToTemplate() {
+	int upfac = FactionUtil::GetFaction("upgrades");
+	const Unit * temprate = makeFinalBlankUpgrade (name,faction);
+    bool success=false;
+    double pct=0;
+    if (temprate->name!=string("LOAD_FAILED")) {
+        success = Upgrade(temprate,0,0,0,true,pct,NULL,true);
+	if (pct>0)
+	  success=true;
+    }
+    return success;
+}
 bool Unit::RepairUpgrade () {
 	int upfac = FactionUtil::GetFaction("upgrades");
 	const Unit * temprate = makeFinalBlankUpgrade (name,faction);
     bool success=false;
     double pct=0;
     if (temprate->name!=string("LOAD_FAILED")) {
-        success = Upgrade(temprate,0,0,0,false,pct,NULL);
+        success = Upgrade(temprate,0,0,0,false,pct,NULL,false);
 	if (pct>0)
 	  success=true;
     }
