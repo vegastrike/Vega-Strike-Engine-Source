@@ -48,9 +48,11 @@
 #include "networking/vsnet_clientstate.h"
 #include "networking/vsnet_debug.h"
 #include "networking/vsnet_dloadmgr.h"
+#include "networking/vsnet_notify.h"
 #include "vegastrike.h"
 #include "client.h"
 #include "networking/netbuffer.h"
+#include "networking/networkcomm.h"
 #include "md5.h"
 
 #ifdef micro_sleep
@@ -66,14 +68,7 @@ double NETWORK_ATOM;
 vector<string> globalsaves;
 extern vector<unorigdest *> pendingjump;
 extern Hashtable<std::string, StarSystem, char[127]> star_system_table;
-string serverip;
-string serverport;
 typedef vector<Client *>::iterator VC;
-#warning cannot call .c_str() on a string that has not been initd yet-- prolly just quote quote anyway
-const char* NetClient::_downloadSearchPaths[] = {
-    "FAILED - email daniel horn at mindspring dotten com for hlep",
-    NULL
-};
 
 /*************************************************************/
 /**** Tool functions                                      ****/
@@ -122,9 +117,11 @@ NetClient::NetClient()
 	selected_freq = MIN_COMMFREQ;
 #ifdef NETCOMM
 	NetComm = new NetworkCommunication();
+#else
+    NetComm = NULL;
 #endif
 
-    _downloadManagerClient.reset( new VsnetDownload::Client::Manager( _sock_set, _downloadSearchPaths ) );
+    _downloadManagerClient.reset( new VsnetDownload::Client::Manager( _sock_set ) );
     _sock_set.addDownloadManager( _downloadManagerClient );
 
 }
@@ -267,8 +264,8 @@ int		NetClient::checkAcctMsg( )
 				{
 					COUT << ">>> LOGIN DATA --------------------------------------"<<endl;
 					// We received game server info (the one we should connect to)
-					serverip = netbuf.getString();
-					serverport = netbuf.getString();
+					_serverip = netbuf.getString();
+					_serverport = netbuf.getString();
 					COUT << "<<< LOGIN DATA --------------------------------------"<<endl;
 				}
 				break;
@@ -420,13 +417,9 @@ vector<string>	NetClient::loginAcctLoop( string str_callsign, string str_passwd)
 	{
 		//this->callsign = str_callsign;
 		//savefiles = globalsaves;
-		COUT<<"Trying to connect to game server..."<<endl<<"\tIP="<<serverip<<":"<<serverport<<endl;
-		char * server_ip = new char[serverip.length()+1];
-		memset( server_ip, 0, serverip.length());
-		server_ip[serverip.length()] = 0;
-		memcpy( server_ip, serverip.c_str(), serverip.length());
-		this->init( server_ip, atoi( serverport.c_str()));
-		delete server_ip;
+		COUT << "Trying to connect to game server..." << endl
+             << "\tIP=" << _serverip << ":" << _serverport << endl;
+		this->init( _serverip.c_str(), atoi( _serverport.c_str()));
 	}
 	return globalsaves;
 }
@@ -453,7 +446,7 @@ SOCKETALT	NetClient::init_acct( char * addr, unsigned short port)
 /**** Initialize the client network                       ****/
 /*************************************************************/
 
-SOCKETALT	NetClient::init( char * addr, unsigned short port)
+SOCKETALT	NetClient::init( const char* addr, unsigned short port )
 {
     COUT << " enter " << __PRETTY_FUNCTION__
 	     << " with " << addr << ":" << port << endl;
@@ -1658,5 +1651,53 @@ void	NetClient::sendTextMessage( string message)
 	if( NetComm->IsActive())
 		NetComm->SendMessage( this->clt_sock, message);
 #endif
+}
+
+bool NetClient::IsNetcommActive() const
+{
+#ifdef NETCOMM
+    return ( this->NetComm==NULL ? false : this->NetComm->IsActive() );
+#else
+    return false;
+#endif
+}
+
+bool NetClient::canCompress() const
+{
+#ifdef HAVE_ZLIB_H
+    return true;
+#else
+    return false;
+#endif
+}
+
+
+ClientPtr NetClient::Clients::insert( int x, Client* c )
+{
+    if( c != NULL )
+    {
+        ClientPtr cp( c );
+        _map.insert( ClientPair( x, cp ) );
+        return cp;
+    }
+    else
+    {
+        return ClientPtr();
+    }
+}
+
+ClientPtr NetClient::Clients::get( int x )
+{
+    ClientIt it = _map.find(x);
+    if( it == _map.end() ) return ClientPtr();
+    return it->second;
+}
+
+bool NetClient::Clients::remove( int x )
+{
+    size_t s = _map.erase( x );
+    if( s == 0 ) return false;
+    return true;
+    // shared_ptr takes care of delete
 }
 

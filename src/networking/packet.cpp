@@ -401,6 +401,13 @@ void Packet::Header::hton( char* buf )
     h->flags       = htons( flags );
 }
 
+Cmd Packet::getBufCommand( const PacketMem& buf )
+{
+    Header h;
+    h.ntoh( buf.getConstBuf() );
+    return Cmd(h.command);
+}
+
 int Packet::send( )
 {
     //COUT << "sending " << Cmd(h.command) << " through " << socket << " to ";

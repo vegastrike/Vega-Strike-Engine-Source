@@ -64,11 +64,6 @@ char	input_buffer[MAXINPUT];
 int		nbchars;
 
 string	universe_file;
-#warning this FAILS when the local variables are initialized in the wrong order.
-const char* NetServer::_downloadSearchDirs[] = {
-    "FAILED - email danielhorn at mindspring dot com for help",
-    NULL
-};
 
 /**************************************************************/
 /**** Constructor / Destructor                             ****/
@@ -90,7 +85,7 @@ NetServer::NetServer()
 	serial_seed = (ObjSerial) (rand()*(500./(((double)(RAND_MAX))+1)));
 	globalsave = new SaveGame("");
 
-    _downloadManagerServer.reset( new VsnetDownload::Server::Manager( _sock_set, _downloadSearchDirs ) );
+    _downloadManagerServer.reset( new VsnetDownload::Server::Manager( _sock_set ) );
     _sock_set.addDownloadManager( _downloadManagerServer );
 }
 

@@ -1,9 +1,11 @@
 #include <config.h>
 
-#include "vsnet_dloadmgr.h"
-#include "vsnet_cmd.h"
-#include "netbuffer.h"
-#include "packet.h"
+#include "vs_path.h"
+#include "networking/vsnet_dloadmgr.h"
+#include "networking/vsnet_notify.h"
+#include "networking/vsnet_cmd.h"
+#include "networking/netbuffer.h"
+#include "networking/packet.h"
 
 using namespace std;
 
@@ -41,376 +43,8 @@ using namespace std;
 namespace VsnetDownload
 {
 
-/*------------------------------------------------------------*
- * definition VsnetDownload::Subcommand
- *------------------------------------------------------------*/
-
-/** Protocol:
- *
- *  resolve request
- *    CMD_DOWNLOAD, object serial 0, COMPRESS|SENDRELIABLE|LOPRI
- *    char                       : subcommand ResolveRequest
- *    int16                      : number of entries
- *    ( int16 stringlen, char* )*: list of filenames
- *
- *  resolve response
- *    CMD_DOWNLOAD, object serial 0, COMPRESS|SENDRELIABLE|LOPRI
- *    char                      : subcommand ResolveResponse
- *    int16                     : number of entries
- *    ( int16 stringlen, char*  : name
- *      char )*                 : ok(1), not ok(0)
- *
- *  download request
- *    CMD_DOWNLOAD, object serial 0, COMPRESS|SENDRELIABLE|LOPRI
- *    char                       : subcommand DownloadRequest
- *    int16                      : number of entries
- *    ( int16 stringlen, char* )*: list of filenames
- *
- *  download error
- *    CMD_DOWNLOAD, object serial 0, COMPRESS|SENDRELIABLE|LOPRI
- *    char                       : subcommand DownloadError
- *    ( int16 stringlen, char* ) : failed filename
- *    
- *  download entire file in one packet
- *    CMD_DOWNLOAD, object serial 0, COMPRESS|SENDRELIABLE|LOPRI
- *    char                       : subcommand Download
- *    ( int16 stringlen, char* ) : filename
- *    int16                      : payload length
- *    char*                      : payload
- *
- *  download first fragment of a file
- *    CMD_DOWNLOAD, object serial 0, COMPRESS|SENDRELIABLE|LOPRI
- *    char                       : subcommand DownloadFirstFragment
- *    ( int16 stringlen, char* ) : filename
- *    int32                      : file length
- *    int16                      : payload length
- *    char*                      : payload
- *
- *  download a middle fragment of a file
- *    CMD_DOWNLOAD, object serial 0, COMPRESS|SENDRELIABLE|LOPRI
- *    char                       : subcommand DownloadFragment
- *    int16                      : payload length
- *    char*                      : payload
- *
- *  download last fragment of a file
- *    CMD_DOWNLOAD, object serial 0, COMPRESS|SENDRELIABLE|LOPRI
- *    char                       : subcommand DownloadLastFragment
- *    int16                      : payload length
- *    char*                      : payload
- */
-
-std::ostream& operator<<( std::ostream& ostr, Subcommand e )
-{
-    switch( e )
-    {
-    case ResolveRequest :
-        ostr << "ResolveRequest";
-        break;
-    case ResolveResponse :
-        ostr << "ResolveResponse";
-        break;
-    case DownloadRequest :
-        ostr << "DownloadRequest";
-        break;
-    case DownloadError :
-        ostr << "DownloadError";
-        break;
-    case Download :
-        ostr << "Download";
-        break;
-    case DownloadFirstFragment :
-        ostr << "DownloadFirstFragment";
-        break;
-    case DownloadFragment :
-        ostr << "DownloadFragment";
-        break;
-    case DownloadLastFragment :
-        ostr << "DownloadLastFragment";
-        break;
-    case UnexpectedSubcommand :
-        ostr << "UnexpectedSubcommand";
-        break;
-    default :
-        ostr << "missing case";
-        break;
-    }
-    return ostr;
-}
-
 namespace Client
 {
-
-/*------------------------------------------------------------*
- * definition VsnetDownload::Client::State
- *------------------------------------------------------------*/
-
-std::ostream& operator<<( std::ostream& ostr, State s )
-{
-    switch( s )
-    {
-    case Idle :
-        ostr << "Idle";
-        break;
-    case Queued :
-        ostr << "Queued";
-        break;
-    case Resolving :
-        ostr << "Resolving";
-        break;
-    case Resolved :
-        ostr << "Resolved";
-        break;
-    case Requested :
-        ostr << "Requested";
-        break;
-    case FragmentReceived :
-        ostr << "FragmentReceived";
-        break;
-    case Completed :
-        ostr << "Completed";
-        break;
-    default :
-        ostr << "unknown";
-        break;
-    };
-    return ostr;
-}
-/*------------------------------------------------------------*
- * definition VsnetDownload::Client::Error
- *------------------------------------------------------------*/
-
-std::ostream& operator<<( std::ostream& ostr, Error e )
-{
-    switch( e )
-    {
-    case Ok :
-        ostr << "Ok";
-        break;
-    case SocketError :
-        ostr << "SocketError";
-        break;
-    case FileNotFound :
-        ostr << "FileNotFound";
-        break;
-    case LocalPermissionDenied :
-        ostr << "LocalPermissionDenied";
-        break;
-    case RemotePermissionDenied :
-        ostr << "RemotePermissionDenied";
-        break;
-    case DownloadInterrupted :
-        ostr << "DownloadInterrupted";
-        break;
-    default :
-        ostr << "unknown";
-        break;
-    };
-    return ostr;
-}
-
-/*------------------------------------------------------------*
- * definition VsnetDownload::Client::Item
- *------------------------------------------------------------*/
-
-Item::Item( SOCKETALT sock, const string& filename, NotifyPtr notify )
-    : _sock( sock )
-    , _filename( filename )
-    , _state( Idle )
-    , _error( Ok )
-    , _notify( notify )
-{
-}
-
-Item::~Item( )
-{
-}
-
-State Item::state( ) const
-{
-    _mx.lock( );
-    State ret = _state;
-    _mx.unlock( );
-    return ret;
-}
-
-Error Item::error( ) const
-{
-    _mx.lock( );
-    Error ret = _error;
-    _mx.unlock( );
-    return ret;
-}
-
-void Item::setSize( int len )
-{
-    childSetSize( len );
-    if( _notify ) _notify->setTotalBytes( len );
-}
-
-void Item::append( unsigned char* buffer, int bufsize )
-{
-    childAppend( buffer, bufsize );
-    if( _notify ) _notify->addBytes( bufsize );
-}
-
-void Item::changeState( State s )
-{
-    _mx.lock( );
-    _state = s;
-    Error e = _error;
-    _mx.unlock( );
-    if( _notify ) _notify->notify( s, e );
-}
-
-void Item::changeState( State s, Error e )
-{
-    _mx.lock( );
-    _state = s;
-    _error = e;
-    _mx.unlock( );
-    if( _notify ) _notify->notify( s, e );
-}
-
-const string& Item::getFilename( ) const
-{
-    return _filename;
-}
-
-SOCKETALT Item::getSock() const
-{
-    return _sock;
-}
-
-int Item::get_fd() const
-{
-    return _sock.get_fd( );
-}
-
-/*------------------------------------------------------------*
- * definition VsnetDownload::Client::File
- *------------------------------------------------------------*/
-
-File::File( SOCKETALT     sock,
-            const string& filename,
-            string        localbasepath,
-            NotifyPtr     notify )
-    : Item( sock, filename, notify )
-    , _localbasepath( localbasepath )
-    , _of( NULL )
-    , _len( 0 )
-    , _offset( 0 )
-{
-}
-
-File::~File( )
-{
-    if( _of )
-    {
-        _of->close( );
-        delete _of;
-    }
-}
-
-void File::childSetSize( int len )
-{
-    string filename = _localbasepath + "/" + getFilename();
-
-    _of = new ofstream( filename.c_str(), ios::out );
-    if( !_of->is_open() )
-    {
-        delete _of;
-        _of = NULL;
-    }
-    else
-    {
-        _len = len;
-    }
-}
-
-void File::childAppend( unsigned char* buffer, int bufsize )
-{
-    if( _of )
-    {
-        _of->write( (const char*)buffer, bufsize );
-        _offset += bufsize;
-        if( _offset >= _len )
-        {
-            _of->close( );
-            delete _of;
-            _of = NULL;
-        }
-    }
-}
-
-/*------------------------------------------------------------*
- * definition VsnetDownload::Client::Buffer
- *------------------------------------------------------------*/
-
-Buffer::Buffer( SOCKETALT sock, const string& filename, NotifyPtr notify )
-    : Item( sock, filename, notify )
-    , _len( 0 )
-    , _offset( 0 )
-{
-}
-
-Buffer::~Buffer( )
-{
-}
-
-boost::shared_array<Buffer::uchar> Buffer::getBuffer( ) const
-{
-    return _buf;
-}
-
-void Buffer::childSetSize( int len )
-{
-    _len    = len;
-    _offset = 0;
-    _buf.reset( new uchar[len] );
-}
-
-void Buffer::childAppend( unsigned char* buffer, int bufsize )
-{
-    if( _offset + bufsize <= _len )
-    {
-        memcpy( _buf.get()+_offset, buffer, bufsize );
-        _offset += bufsize;
-    }
-}
-
-/*------------------------------------------------------------*
- * definition VsnetDownload::Client::TestItem
- *------------------------------------------------------------*/
-
-TestItem::TestItem( SOCKETALT sock, const string& filename )
-    : Item( sock, filename, NotifyPtr(this) )
-    , _len( 0 )
-    , _offset( 0 )
-{
-    COUT << "Created TestItem for downloading " << filename << endl;
-}
-
-void TestItem::childSetSize( int len )
-{
-    _len = len;
-    COUT << "Expecting " << _len << " bytes from server" << endl;
-}
-
-void TestItem::childAppend( unsigned char* buffer, int bufsize )
-{
-    COUT << "Received buffer with " << bufsize << " bytes" << endl;
-    _offset += bufsize;
-    if( _offset > _len )
-        COUT << "Received too many bytes" << endl;
-    else if( _offset == _len )
-        COUT << "Download seems to be complete" << endl;
-}
-
-void TestItem::notify( State s, Error e )
-{
-    COUT << "State updated for download of " << getFilename()
-         << ", changed to " << s << " (" << e << ")" << endl;
-}
 
 /*------------------------------------------------------------*
  * definition VsnetDownload::Client::Manager
@@ -427,6 +61,14 @@ Manager::Manager( SocketSet& sets, const char** local_search_paths )
         _local_search_paths.push_back( *c );
         c++;
     }
+}
+
+Manager::Manager( SocketSet& sets )
+    : _set( sets )
+{
+    COUT << "Enter " << __PRETTY_FUNCTION__ << endl;
+
+    _local_search_paths.push_back( datadir );
 }
 
 void Manager::addItem( Item* item )
@@ -762,78 +404,6 @@ bool Manager::private_lower_test_access( Item* i )
     return false;
 }
 
-/*------------------------------------------------------------*
- * definition VsnetDownload::Client::FileSet::NotifyConclusion
- *------------------------------------------------------------*/
-
-class FileSet::NotifyConclusion : public Notify
-{
-public:
-    NotifyConclusion( FileSet* f, std::string s );
-    virtual ~NotifyConclusion( );
-
-    virtual void notify( State s, Error e );
-
-private:
-    FileSet*    _fileset;
-    std::string _file;
-};
-
-FileSet::NotifyConclusion::NotifyConclusion( FileSet* f, std::string s )
-    : _fileset( f )
-    , _file( s )
-{
-}
-
-FileSet::NotifyConclusion::~NotifyConclusion( )
-{
-}
-
-void FileSet::NotifyConclusion::notify( State s, Error e )
-{
-    if( s==Completed ) _fileset->update( _file, (e==Ok) );
-}
-
-/*------------------------------------------------------------*
- * definition VsnetDownload::Client::FileSet
- *------------------------------------------------------------*/
-
-FileSet::FileSet( boost::shared_ptr<Manager> mgr,
-                  SOCKETALT                  sock,
-                  std::list<std::string>     filenames,
-                  std::string                path )
-    : _to_go( 0 )
-{
-    std::list<std::string>::const_iterator cit;
-    std::list<Item*>                       items;
-
-    for( cit=filenames.begin(); cit!=filenames.end(); cit++ )
-    {
-        _files.insert( std::pair<std::string,int>( *cit, -1 ) );
-        NotifyPtr ptr( new NotifyConclusion( this, *cit ) );
-        items.push_back( new File( sock, *cit, path, ptr ) );
-        _to_go++;
-    }
-
-    mgr->addItems( items );
-}
-
-bool FileSet::isDone( ) const
-{
-    return ( _to_go == 0 );
-}
-
-void FileSet::update( std::string s, bool v )
-{
-    std::map<std::string,int>::iterator it;
-    it = _files.find( s );
-    if( it != _files.end() && it->second == -1 )
-    {
-        it->second = (v ? 1 : 0 );
-        _to_go--;
-    }
-}
-
 }; // namespace Client
 
 namespace Server
@@ -914,6 +484,14 @@ Manager::Manager( SocketSet& sets, const char** local_search_paths )
         _local_search_paths.push_back( *c );
         c++;
     }
+}
+
+Manager::Manager( SocketSet& sets )
+    : _set( sets )
+{
+    COUT << "Enter " << __PRETTY_FUNCTION__ << endl;
+
+    _local_search_paths.push_back( datadir );
 }
 
 void Manager::addCmdDownload( SOCKETALT sock, NetBuffer& buffer )

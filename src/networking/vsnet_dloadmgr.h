@@ -12,6 +12,7 @@
 #include "boost/shared_ptr.hpp"
 #include "boost/shared_array.hpp"
 
+#include "vsnet_dloadenum.h"
 #include "vsnet_headers.h"
 #include "vsnet_debug.h"
 #include "vsnet_thread.h"
@@ -21,24 +22,6 @@
 
 namespace VsnetDownload
 {
-/*------------------------------------------------------------*
- * declaration VsnetDownload::Subcommand
- *------------------------------------------------------------*/
-
-enum Subcommand
-{
-    ResolveRequest,
-    ResolveResponse,
-    DownloadRequest,
-    DownloadError,
-    Download,
-    DownloadFirstFragment,
-    DownloadFragment,
-    DownloadLastFragment,
-    UnexpectedSubcommand
-};
-
-std::ostream& operator<<( std::ostream& ostr, Subcommand e );
 
 namespace Client
 {
@@ -46,173 +29,10 @@ namespace Client
 class Manager;
 
 /*------------------------------------------------------------*
- * declaration VsnetDownload::Client::State
+ * forward declaration VsnetDownload::Client::Item
  *------------------------------------------------------------*/
 
-enum State
-{
-    Idle,
-    Queued,
-    Resolving,
-    Resolved,
-    Requested,
-    FragmentReceived,
-    Completed
-};
-
-std::ostream& operator<<( std::ostream& ostr, State s );
-
-/*------------------------------------------------------------*
- * declaration VsnetDownload::Client::Error
- *------------------------------------------------------------*/
-
-enum Error
-{
-    Ok,
-    SocketError,
-    FileNotFound,
-    LocalPermissionDenied,
-    RemotePermissionDenied,
-    DownloadInterrupted
-};
-
-const char * getState( State s);
-const char * getError( Error e);
-std::ostream& operator<<( std::ostream& ostr, Error e );
-
-/*------------------------------------------------------------*
- * declaration VsnetDownload::Client::Notify
- *------------------------------------------------------------*/
-
-class Notify
-{
-public:
-    virtual void notify( State s, Error e ) = 0;
-    virtual void setTotalBytes( int sz ) { }
-    virtual void addBytes( int sz ) { }
-};
-
-class VSNotify : public Notify
-{
-	public:
-		void notify( State s, Error e);
-    	void setTotalBytes( int sz );
-    	void addBytes( int sz );
-};
-
-typedef boost::shared_ptr<Notify> NotifyPtr;
-
-/*------------------------------------------------------------*
- * declaration VsnetDownload::Client::Item
- *------------------------------------------------------------*/
-
-class Item
-{
-public:
-    Item( SOCKETALT sock, const std::string& filename, NotifyPtr notify = NotifyPtr() );
-    virtual ~Item( );
-
-    State state( ) const;
-    Error error( ) const;
-
-    void changeState( State s );
-    void changeState( State s, Error e );
-
-    void setSize( int len );
-    void append( unsigned char* buffer, int bufsize );
-
-    const std::string& getFilename( ) const;
-    SOCKETALT          getSock() const;
-    int                get_fd() const;
-
-protected:
-    virtual void childSetSize( int len ) = 0;
-    virtual void childAppend( unsigned char* buffer, int bufsize ) = 0;
-
-private:
-    SOCKETALT         _sock;
-    const std::string _filename;
-
-    mutable VSMutex _mx;
-    State           _state;
-    Error           _error;
-    NotifyPtr       _notify;
-};
-
-/*------------------------------------------------------------*
- * declaration VsnetDownload::Client::File
- *------------------------------------------------------------*/
-
-class File : public Item
-{
-public:
-    File( SOCKETALT          sock,
-          const std::string& filename,
-          std::string        localbasepath,
-          NotifyPtr          notify = NotifyPtr() );
-
-    virtual ~File( );
-
-protected:
-    virtual void childSetSize( int len );
-    virtual void childAppend( unsigned char* buffer, int bufsize );
-
-private:
-    std::string    _localbasepath;
-    std::ofstream* _of;
-    int            _len;
-    int            _offset;
-};
-
-/*------------------------------------------------------------*
- * declaration VsnetDownload::Client::Buffer
- *------------------------------------------------------------*/
-
-class Buffer : public Item
-{
-    typedef unsigned char uchar;
-
-public:
-    Buffer( SOCKETALT          sock,
-            const std::string& filename,
-            NotifyPtr          notify = NotifyPtr() );
-
-    virtual ~Buffer( );
-
-    boost::shared_array<uchar> getBuffer( ) const;
-
-protected:
-    virtual void childSetSize( int len );
-    virtual void childAppend( unsigned char* buffer, int bufsize );
-
-private:
-    boost::shared_array<uchar> _buf;
-    int                        _len;
-    int                        _offset;
-};
-
-/*------------------------------------------------------------*
- * declaration VsnetDownload::Client::TestItem
- *------------------------------------------------------------*/
-
-class TestItem : public Item, public Notify
-{
-public:
-    TestItem( SOCKETALT sock,
-              const std::string& filename );
-
-    virtual ~TestItem( ) { }
-
-    virtual void notify( State s, Error e );
-
-protected:
-    virtual void childSetSize( int len );
-    virtual void childAppend( unsigned char* buffer, int bufsize );
-
-private:
-    int _len;
-    int _offset;
-};
+class Item;
 
 /*------------------------------------------------------------*
  * declaration VsnetDownload::Client::Manager
@@ -228,6 +48,7 @@ class Manager
 {
 public:
     Manager( SocketSet& set, const char** local_search_paths );
+    Manager( SocketSet& set );
 
     void addItem( Item* item );
     void addItems( std::list<Item*>& items );
@@ -283,154 +104,6 @@ private:
     ItemSockMap       _currentItems;
 };
 
-/*------------------------------------------------------------*
- * declaration VsnetDownload::Client::FileSet
- *------------------------------------------------------------*/
-
-/** We can't really support blocking until a set of files has been
- *  downloaded inside this class. The problem is that the variables
- *  that we must wait for exist in netserver, netclient and
- *  accountserver, and they are called in several places and potentially
- *  several threads.
- *  Therefore the waiting itself should be handled in those classes.
- *  This helper class allows a simple check.
- *
- *  Create a FileSet with the appropriate Manager, the socket to the
- *  remote side that you want to use, the list of filenames as string,
- *  and the existing(!) directory where you want to store the files.
- *  Then call isDone() a couple of times. If it returns true, the downloads
- *  are all completed (but they may have failed - if you need to check that,
- *  add a function for reading the int values from the member variable
- *  _files, 1 success, 0 failure).
- */
-class FileSet
-{
-public:
-    FileSet( boost::shared_ptr<Manager> mgr,
-             SOCKETALT                  sock,
-             std::list<std::string>     filesnames,
-             std::string                localbasepath );
-
-    bool isDone( ) const;
-    void update( std::string s, bool v );
-
-private:
-    std::map<std::string,int> _files;
-    int                       _to_go;
-
-private:
-    class NotifyConclusion;
-};
-
-/*------------------------------------------------------------*
- * declaration VsnetDownload::Client::Notify_f
- *------------------------------------------------------------*/
-
-class Notify_f : public Notify
-{
-public:
-    typedef void (*NotifyFunction)( std::string str, State s, Error e, int total, int offset );
-
-public:
-    Notify_f( std::string filename, NotifyFunction fun )
-        : _filename( filename )
-        , _fun( fun )
-        , _total( 0 )
-        , _offset( 0 )
-    { }
-
-    virtual ~Notify_f() { }
-
-    virtual void notify( State s, Error e ) {
-        (*_fun)( _filename, s, e, _total, _offset );
-    }
-
-    virtual void setTotalBytes( int sz ) {
-        _total = sz;
-    }
-
-    virtual void addBytes( int sz ) {
-        _offset += sz;
-    }
-
-private:
-    std::string    _filename;
-    NotifyFunction _fun;
-    int            _total;
-    int            _offset;
-};
-
-/*------------------------------------------------------------*
- * declaration VsnetDownload::Client::Notify_fp
- *------------------------------------------------------------*/
-
-struct Notify_fp : public NotifyPtr
-{
-    typedef void (*NotifyFunction)( std::string str, State s, Error e, int total, int offset );
-
-    Notify_fp( std::string filename, NotifyFunction fun )
-        : NotifyPtr( new Notify_f(filename,fun) )
-    { }
-};
-
-/*------------------------------------------------------------*
- * declaration VsnetDownload::Client::Notify_t<T>
- *------------------------------------------------------------*/
-
-template <class T> class Notify_t : public Notify
-{
-public:
-    typedef void (T::*NotifyFunction)( State s, Error e );
-
-public:
-    Notify_t( T* object, NotifyFunction fun )
-        : _object( object )
-        , _fun( fun )
-        , _total( 0 )
-        , _offset( 0 )
-    { }
-
-    virtual void notify( State s, Error e ) {
-        (_object->*_fun)( s, e );
-    }
-
-    virtual void setTotalBytes( int sz ) {
-        _total = sz;
-    }
-
-    virtual void addBytes( int sz ) {
-        _offset += sz;
-    }
-
-    inline int total( ) const {
-        return _total;
-    }
-
-    inline int offset( ) const {
-        return _offset;
-    }
-
-private:
-    T*             _object;
-    NotifyFunction _fun;
-    int            _total;
-    int            _offset;
-};
-
-/*------------------------------------------------------------*
- * declaration VsnetDownload::Client::Notify_tp<T>
- *------------------------------------------------------------*/
-
-template <class T> struct Notify_tp : public NotifyPtr
-{
-    typedef typename Notify_t<T>::NotifyFunction T_Function;
-    typedef Notify_t<T>                          T_Class;
-
-    Notify_tp( T* object, T_Function fun )
-        : NotifyPtr( new T_Class(object,fun) )
-    { }
-};
-
 }; // namespace Client
 
 namespace Server
@@ -472,6 +145,7 @@ class Manager
 {
 public:
     Manager( SocketSet& set, const char** local_search_paths );
+    Manager( SocketSet& set );
 
     /** NetServer::processPacket calls this. NetServer doesn't care, but we
      *  process the NetBuffer actually already in the main thread before

@@ -31,6 +31,12 @@ soundserver_LDADD = -L/usr/local/lib -lSDL -lSDL_mixer
 soundserver_SOURCES = inet.cpp inet.h soundserver.cpp
 
 libnetgeneric = \
+	vsnet_dloadmgr.cpp	\
+	vsnet_dloadmgr.h	\
+	vsnet_dloadenum.cpp	\
+	vsnet_dloadenum.h	\
+	vsnet_notify.cpp	\
+	vsnet_notify.h		\
 	accountsxml.cpp		\
 	accountsxml.h		\
 	acctserver.h		\
@@ -66,9 +72,6 @@ libnetgeneric = \
 	vsnet_clientstate.h		\
 	vsnet_cmd.cpp		\
 	vsnet_cmd.h		\
-	vsnet_dloadmgr.cpp		\
-	vsnet_notify.cpp		\
-	vsnet_dloadmgr.h		\
 	vsnet_err.h		\
 	vsnet_pipe.cpp		\
 	vsnet_pipe.h		\

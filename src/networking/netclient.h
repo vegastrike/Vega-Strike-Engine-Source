@@ -35,7 +35,6 @@
 #include "cmd/container.h"   // for UnitContainer
 #include "gfx/quaternion.h"  // for Transformation
 
-#include "networking/networkcomm.h"
 #include "networking/clientptr.h"
 
 class Packet;
@@ -43,6 +42,7 @@ class Unit;
 class Client;
 class ClientState;
 class NetUI;
+class NetworkCommunication;
 
 namespace VsnetDownload {
   namespace Client {
@@ -62,54 +62,32 @@ class	NetClient
         ClientMap _map;
 
     public:
-        ClientPtr insert( int x, Client* c ) {
-            if( c != NULL ) {
-                ClientPtr cp( c );
-                _map.insert( ClientPair( x, cp ) );
-                return cp;
-            }
-            else {
-                return ClientPtr();
-            }
-        }
-        ClientPtr get( int x ) {
-            ClientIt it = _map.find(x);
-            if( it == _map.end() ) return ClientPtr();
-            return it->second;
-        }
-        bool remove( int x ) {
-            size_t s = _map.erase( x );
-            if( s == 0 ) return false;
-            return true;
-            // shared_ptr takes care of delete
-        }
+        ClientPtr insert( int x, Client* c );
+        ClientPtr get( int x );
+        bool      remove( int x );
     };
 
-		UnitContainer		game_unit;		// Unit struct from the game corresponding to that client
+        UnitContainer		game_unit;		// Unit struct from the game corresponding to that client
 
-		SOCKETALT			clt_sock;		// Comm. socket
-		SOCKETALT			acct_sock;		// Connection socket for account server
+        string              _serverip;      // used during login
+        string              _serverport;    // used during login
+        SOCKETALT			clt_sock;		// Comm. socket
+        SOCKETALT			acct_sock;		// Connection socket for account server
         SocketSet           _sock_set;      // Encapsulates select()
-		SaveGame			save;
-		ObjSerial			serial;			// Serial # of client
-		int					nbclients;		// Number of clients in the zone
-		int					zone;			// Zone id in universe
-		char				keeprun;		// Bool to test client stop
-		string				callsign;		// Callsign of the networked player
-		// Client *			Clients[MAXCLIENTS];		// Clients in the same zone
-		Clients 			Clients;		// Clients in the same zone
-		Unit *				Units[MAXOBJECTS];			// Server controlled units in the same zone
-		// a vector because always accessed by their IDs
+        SaveGame			save;
+        ObjSerial			serial;			// Serial # of client
+        int					nbclients;		// Number of clients in the zone
+        int					zone;			// Zone id in universe
+        char				keeprun;		// Bool to test client stop
+        string				callsign;		// Callsign of the networked player
+        Clients 			Clients;		// Clients in the same zone
+        // Unit *				Units[MAXOBJECTS];			// Server controlled units in the same zone
+	    // a vector because always accessed by their IDs
 
-	class NetworkCommunication *	NetComm;// DO NOT use #defines in class defn's -- Daniel
+	    NetworkCommunication*	NetComm;
+
 	public:
-		inline bool IsNetcommActive() const {
-#ifdef NETCOMM
-			return this->NetComm->IsActive();
-#else
-			return false;
-#endif
-		}
+		bool IsNetcommActive() const;
 
 	private:
 
@@ -151,7 +129,7 @@ class	NetClient
 		bool	PacketLoop( Cmd command );
 		vector<string>	loginLoop( string str_callsign, string str_passwd); // Loops until receiving login response
 		vector<string>	loginAcctLoop( string str_callsign, string str_passwd);
-		SOCKETALT	init( char * addr, unsigned short port);
+		SOCKETALT	init( const char* addr, unsigned short port);
 		SOCKETALT	init_acct( char * addr, unsigned short port);
 		void	start( char * addr, unsigned short port);
 		void	checkKey();
@@ -209,11 +187,7 @@ class	NetClient
 		void	sendTextMessage( string message);
 
     private:
-#ifdef HAVE_ZLIB_H
-        inline bool canCompress() const { return true; }
-#else
-        inline bool canCompress() const { return false; }
-#endif
+        bool canCompress() const;
 };
 
 #endif

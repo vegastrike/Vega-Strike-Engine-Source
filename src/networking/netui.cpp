@@ -32,7 +32,7 @@ static void static_initNetwork( )
 // Creates and bind the socket designed to receive coms
 // host == NULL -> localhost
 
-SOCKETALT NetUITCP::createSocket( char * host, unsigned short srv_port, SocketSet& set )
+SOCKETALT NetUITCP::createSocket( const char * host, unsigned short srv_port, SocketSet& set )
 {
     COUT << "enter " << __PRETTY_FUNCTION__ << std::endl;
 
@@ -177,7 +177,7 @@ ServerSocket* NetUITCP::createServerSocket( unsigned short port, SocketSet& set 
 // Creates and bind the socket designed to receive coms
 // host == NULL -> localhost
 
-SOCKETALT NetUIUDP::createSocket( char * host, unsigned short srv_port, SocketSet& set )
+SOCKETALT NetUIUDP::createSocket( const char * host, unsigned short srv_port, SocketSet& set )
 {
     COUT << " enter " << __PRETTY_FUNCTION__ << std::endl;
     static_initNetwork( );

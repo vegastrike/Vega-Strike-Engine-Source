@@ -104,6 +104,10 @@ class Packet
         inline void            setFlags( unsigned short fl ) { h.flags = fl; }
         void                   setNetwork( const AddressIP * dst, SOCKETALT sock);
 
+        /** Peek into an arriving PacketMem to quick-check the command.
+         */
+        static Cmd getBufCommand( const PacketMem& buf );
+
         // void            ack( );
 
         char*       getData();
