@@ -77,8 +77,12 @@ void Missile::UpdatePhysics (const Transformation &trans, const Matrix &transmat
     this->time-=SIMULATION_ATOM;
     if (NULL!=targ) {
       if ((Position()-targ->Position()).Magnitude()-targ->rSize()-rSize()<detonation_radius) {
-	Discharge();
-	time=-1;
+	Vector norm;
+	float dist;
+	if (targ->queryBoundingBox (Position(),detonation_radius+rSize())) {
+	  Discharge();
+	  time=-1;
+	}
       }
     }
     if (time<0) {
