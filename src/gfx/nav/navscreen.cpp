@@ -410,7 +410,7 @@ void NavigationSystem::Draw()
  
 
 	GFXEnable (TEXTURE0);
-	GFXEnable (DEPTHTEST);
+	GFXDisable (DEPTHTEST);
 	GFXClear (GFXFALSE);
 
 	GFXEnable(LIGHTING);
