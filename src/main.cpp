@@ -78,8 +78,8 @@ Universe * _Universe;
 TextPlane *bs_tp=NULL;
 char SERVER=0;
 
-// true if command line option --nonet is given to start without network
-static bool ignore_network = false;
+// false if command line option --net is given to start without network
+static bool ignore_network = true;
 
 /* 
  * Function definitions
@@ -780,9 +780,9 @@ std::string ParseCommandLine(int argc, char ** lpCmdLine) {
           benchmark=atof(lpCmdLine[i+1]);
           i++;
         }
-        else if(strcmp(lpCmdLine[i], "--nonet")==0) {
-          // ignore the network section of the config file
-          ignore_network=true;
+        else if(strcmp(lpCmdLine[i], "--net")==0) {
+          // don't ignore the network section of the config file
+          ignore_network=false;
         }
         else if(strcmp(lpCmdLine[i], "--help")==0) {
           cout << helpmessage;
