@@ -37,7 +37,6 @@ void FlyByJoystick::Execute() {
     Up(-y);   // pretty easy
     Right(-x);
 
-
 #if 0
     for(int i=0;i<joystick[0]->NumButtons();i++){
       if( ( (1<<i) & buttons )==(1<<i)){
@@ -57,8 +56,9 @@ void FlyByJoystick::Execute() {
     }
 #endif
     */
-    FlyByKeyboard::Execute();
+
   }
+  FlyByKeyboard::Execute();
 }
 FlyByJoystick::~FlyByJoystick() {
 
