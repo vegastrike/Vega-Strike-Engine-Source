@@ -105,12 +105,17 @@ int TextPlane::Draw(const string & newText, int offset,bool startlower, bool for
   void * fnt = g_game.x_resolution>=800?GLUT_BITMAP_HELVETICA_12:GLUT_BITMAP_HELVETICA_10;
   static float std_wid=glutStrokeWidth (GLUT_STROKE_ROMAN,'W');
   myFontMetrics.i=font_point*std_wid/(119.05+33.33);
+  if (use_bit)
+	  myFontMetrics.i=glutBitmapWidth(fnt,'W');
   myFontMetrics.j=font_point;
   myFontMetrics.i/=.5*g_game.x_resolution;
   myFontMetrics.j/=.5*g_game.y_resolution;
   float tmp,row, col;
   GetPos (row,col);
   float rowheight=(use_bit)?((fnt==GLUT_BITMAP_HELVETICA_12)?(26./g_game.y_resolution):(22./g_game.y_resolution)):(myFontMetrics.j);
+  myFontMetrics.j=rowheight;
+
+	  
   if (startlower) {
       row -= rowheight;
 
@@ -200,7 +205,7 @@ int TextPlane::Draw(const string & newText, int offset,bool startlower, bool for
       }
     }
     if(*text_it=='\t') {
-      col+=glutBitmapWidth (fnt,' ')*5./(2*g_game.x_resolution);;
+      col+=glutBitmapWidth (fnt,' ')*5./(.5*g_game.x_resolution);;
       glutBitmapCharacter (fnt,' ');
       glutBitmapCharacter (fnt,' ');
       glutBitmapCharacter (fnt,' ');
@@ -208,12 +213,12 @@ int TextPlane::Draw(const string & newText, int offset,bool startlower, bool for
       glutBitmapCharacter (fnt,' ');
     } else {
       if (use_bit) {
-	col+=glutBitmapWidth (fnt,*text_it)/(float)(2*g_game.x_resolution);;
+	col+=glutBitmapWidth (fnt,*text_it)/(float)(.5*g_game.x_resolution);;
       }else {
 		  col+=myFontMetrics.i*glutStrokeWidth(GLUT_STROKE_ROMAN,*text_it)/std_wid;
       }
     }
-    if(col+((text_it+1!=newText.end())?(use_bit?(glutBitmapWidth(fnt,*text_it)/(float)(2*g_game.x_resolution)):myFontMetrics.i):0)>=myDims.i||*text_it == '\n') {
+    if(col+((text_it+1!=newText.end())?(use_bit?(glutBitmapWidth(fnt,*text_it)/(float)(.5*g_game.x_resolution)):myFontMetrics.i):0)>=myDims.i||*text_it == '\n') {
       GetPos (tmp,col);
       row -= rowheight;
       glPopMatrix();
@@ -221,7 +226,7 @@ int TextPlane::Draw(const string & newText, int offset,bool startlower, bool for
       glLoadIdentity();
 	  if (drawbg) {
 		GFXColorf(this->bgcol);
-		DrawSquare(col,this->myDims.i,row-rowheight*.25,row+rowheight);
+		DrawSquare(col,this->myDims.i,row-rowheight*.25,row+rowheight*.75);
 		GFXColorf(this->col);
 	  }
       if (*text_it=='\n') {
