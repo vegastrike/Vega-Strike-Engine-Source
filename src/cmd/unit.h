@@ -717,7 +717,7 @@ struct Unit::XML {
   float ymin, ymax, ycur;
   float pmin, pmax, pcur;
   float rmin, rmax, rcur;
-
+  std::string cargo_category;
 };
 
 inline Unit * UnitContainer::GetUnit() {

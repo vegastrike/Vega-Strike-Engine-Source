@@ -136,7 +136,8 @@ namespace UnitXML {
       VOLUME,
       QUANTITY,
       CARGO,
-      HOLD
+      HOLD,
+      CATEGORY
     };
 
   const EnumMap::Pair element_names[] = {
@@ -170,7 +171,8 @@ namespace UnitXML {
     EnumMap::Pair ("Jump", JUMP),
     EnumMap::Pair ("Dock", DOCK),
     EnumMap::Pair ("Hold",HOLD),
-    EnumMap::Pair ("Cargo",CARGO)
+    EnumMap::Pair ("Cargo",CARGO),
+    EnumMap::Pair ("Category",CATEGORY)
 
   };
   const EnumMap::Pair attribute_names[] = {
@@ -255,7 +257,7 @@ namespace UnitXML {
     
 };
 
-  const EnumMap element_map(element_names, 31);
+  const EnumMap element_map(element_names, 32);
   const EnumMap attribute_map(attribute_names, 78);
 }
 
@@ -349,9 +351,19 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
 	break;
       }
     }
-    image->unitwriter->AddTag ("Cargo");
-    image->unitwriter->AddElement ("mass",Unit::cargoSerializer,XMLType ((int)0));
-    image->unitwriter->EndTag ("Cargo");
+    image->unitwriter->AddTag ("Category");
+    image->unitwriter->AddElement ("file",Unit::cargoSerializer,XMLType ((int)0));
+    image->unitwriter->EndTag ("Category");
+    break;
+  case CATEGORY:
+    xml->unitlevel++;
+    for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
+      switch(attribute_map.lookup((*iter).name)) {
+      case XFILE:
+	xml->cargo_category = (*iter).value;
+	break;
+      }
+    }
     break;
   case CARGO:
     ///handling taken care of above;

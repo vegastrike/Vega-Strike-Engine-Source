@@ -16,7 +16,7 @@ Cargo * GetMasterPartList(const char *input_buffer){
 using XMLSupport::tostring;
 using namespace std;
 std::string CargoToString (const Cargo& cargo) {
-  return XMLSupport::tostring((float)cargo.mass)+string("\" price=\"") +XMLSupport::tostring((float)cargo.price)+ string("\" volume=\"")+XMLSupport::tostring((float)cargo.volume)+string("\" quantity=\"")+XMLSupport::tostring((int)cargo.quantity)+string("\" file=\"")+cargo.content;
+  return string ("\t\t\t<Cargo mass=\"")+XMLSupport::tostring((float)cargo.mass)+string("\" price=\"") +XMLSupport::tostring((float)cargo.price)+ string("\" volume=\"")+XMLSupport::tostring((float)cargo.volume)+string("\" quantity=\"")+XMLSupport::tostring((int)cargo.quantity)+string("\" file=\"")+cargo.content+string("/>\n");
 }
 
 std::string Unit::cargoSerializer (const XMLType &input, void * mythis) {
@@ -25,6 +25,7 @@ std::string Unit::cargoSerializer (const XMLType &input, void * mythis) {
     return string("0");
   }
   std::sort (un->image->cargo.begin(),un->image->cargo.end());
+
   for (unsigned int i=0;i+1<un->image->cargo.size();i++) {
     if (un->image->cargo[i].content==un->image->cargo[i+1].content) {
       float tmpmass = un->image->cargo[i].quantity*un->image->cargo[i].mass+un->image->cargo[i+1].quantity*un->image->cargo[i+1].mass;
@@ -39,10 +40,19 @@ std::string Unit::cargoSerializer (const XMLType &input, void * mythis) {
     }
 
   }
-  string retval= CargoToString(un->image->cargo[0]);
-
-  for (unsigned int kk=1;kk<un->image->cargo.size();kk++) {
-    retval+= string ("\"/><Cargo mass=\"")+CargoToString(un->image->cargo[kk]);
+  string retval("");
+  if (!(un->image->cargo.empty())) {
+    retval= un->image->cargo[0].category+string ("\">\n")+CargoToString(un->image->cargo[0]);
+    
+    for (unsigned int kk=1;kk<un->image->cargo.size();kk++) {
+      if (un->image->cargo[kk].category!=un->image->cargo[kk-1].category) {
+	retval+=string("\t\t</Category>\n\t\t<Category file=\"")+un->image->cargo[kk].category+string ("\">\n");
+      }
+      retval+=CargoToString(un->image->cargo[kk]); 
+    }
+    retval+=string("\t\t</Category>\n\t\t<Category file=\"nothing");
+  }else {
+    retval= string ("nothing");//nothing
   }
   return retval;
 }

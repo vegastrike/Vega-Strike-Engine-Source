@@ -35,6 +35,7 @@ struct DockedUnits {
 struct Cargo {
   int quantity;
   std::string content;
+  std::string category;
   float price;
   float mass;
   float volume;
@@ -43,7 +44,7 @@ struct Cargo {
     return content==other.content;
   }
   bool operator < (const Cargo &other)const {
-    return content<other.content;
+    return (category==other.category)?(content<other.content):(category<other.category);
   }
 };
 
