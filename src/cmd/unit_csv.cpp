@@ -913,12 +913,12 @@ string Unit::WriteUnitString () {
                       subunits[k].pos.i,
                       subunits[k].pos.j,
                       subunits[k].pos.k,
-                      subunits[k].Q.i,
-                      subunits[k].Q.j,
-                      subunits[k].Q.k,
                       subunits[k].R.i,
                       subunits[k].R.j,
                       subunits[k].R.k,
+                      subunits[k].Q.i,
+                      subunits[k].Q.j,
+                      subunits[k].Q.k,
                       ((double)acos(subunits[k].restricted)*180./VS_PI));
               str+="{"+subunits[k].filename+tmp;
             }
