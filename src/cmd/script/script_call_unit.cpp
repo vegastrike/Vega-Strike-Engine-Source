@@ -248,7 +248,7 @@ varInst *Mission::call_unit(missionNode *node,int mode){
 	Vector pos;
 	
 	printf("VELMAG:%f\n",vel_mag);
-	if(vel_mag!=0){
+	if(fabs (vel_mag)> 10e-6){
 	  pos=my_unit->GetVelocity()/vel_mag;
 	}
 	else{
