@@ -1055,15 +1055,18 @@ int NetClient::recvMsg( Packet* outpacket )
 			}
 			break;
 			case CMD_STARTNETCOMM :
+#ifdef NETCOMM
 			{
 				// Check this is not us
 				if( packet_serial != this->serial)
 				{
-					// Add the client to netcomm list in NetComm
+					// Add the client to netcomm list in NetComm ?
 				}
 			}
+#endif
 			break;
 			case CMD_STOPNETCOMM :
+#ifdef NETCOMM
 			{
 				// Check this is not us
 				if( packet_serial != this->serial)
@@ -1071,6 +1074,7 @@ int NetClient::recvMsg( Packet* outpacket )
 					// Remove the client to netcomm list in NetComm
 				}
 			}
+#endif
 			break;
             default :
                 COUT << ">>> " << local_serial << " >>> UNKNOWN COMMAND =( " << hex << cmd
@@ -1594,7 +1598,7 @@ void	NetClient::startCommunication()
 	Packet p;
 	p.send( CMD_STARTNETCOMM, serial, netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, NULL, this->clt_sock,
             __FILE__, PSEUDO__LINE__(1565) );
-	cerr<<"Started communication session\n\n"<<endl;
+	cerr<<"Starting communication session\n\n"<<endl;
 	//NetComm->GrabImage();
 #endif
 }

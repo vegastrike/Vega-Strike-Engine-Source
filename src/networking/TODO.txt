@@ -1,6 +1,9 @@
 
 *** GENERAL ************************************************************
 
+- Add text message support to NetworkCommunication class
+- Complete jVoIP support
+- About NetworkCommunications : assign a different freq range for each faction ?
 - NOTE : network communication system is only working when 1 local player
 - Implement a download manager -> Carsten is on that one
 - Use and "hand-shake" protocol between server and client
@@ -15,7 +18,6 @@
 *** GAME SERVER ********************************************************
 
 - In savegame : add stardate loading and saving stuff to dynamic universe
-- Add a communication system allowing the player to either broacast a message or to send it on a given subspace channel ;)
 - Handle a timeout between the time the player logged in and the time he really enters the game
 - Turn mount_num into a char ?
 - Add options to server keyboard control : KILL A SERVER UNIT, KICK A PLAYER, SEND A PLAYER TO JAIL SYSTEM, SEND ADMIN MESSAGE TO PLAYERS...
