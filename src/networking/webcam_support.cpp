@@ -11,14 +11,7 @@ extern bool cleanexit;
 #include "gldrv/winsys.h"
 
 #ifdef __APPLE__
-//#include <Quickdraw.h>
-//#include <ApplicationServices/ApplicationServices.h>
-//#include <Carbon.h>
-#include <FixMath.h>
-#include <ImageCompression.h>
-#include <Movies.h>
 #include <QuickTimeComponents.h>
-#include <StandardFile.h>
 OSErr	ExhaustiveError(void)
 {
 	OSErr iErr;
@@ -461,15 +454,35 @@ char *	WebcamSupport::CaptureImage()
 	ImageDescriptionHandle desc = (ImageDescriptionHandle) NewHandle(4);
 	MoveHHi( jpeg_handle);
 	HLock( jpeg_handle);
-	jpeg_data = StripAddress( *jpeg_handle);
+	jpeg_data = *jpeg_handle;
 	iErr = CompressImage( GetGWorldPixMap( video->sg_world), &r, codecNormalQuality, kJPEGCodecType, desc, jpeg_data);
 	if (iErr!=noErr)
 		DoError( iErr, "CompressImage failed.");
 	FSSpec spec;
-	string path = datadir+"/testcam.jpg";
-	FSMakeFSSpec( 1, 0, path.c_str(), &spec);
+	FInfo finfo;
+	string dir = datadir.substr( 0, datadir.length()-2);
+	string path = dir+"testcam";
+	cerr<<"File path : "<<path<<endl;
+	unsigned char cpath[256];
+	memset( cpath, 0, 256);
+	memcpy( cpath, path.c_str(), path.length());
+	cerr<<"Trying to open file : "<<cpath<<endl;
+	FSMakeFSSpec( 0, 0, cpath, &spec);
 	short fp;
 	long nbwritten;
+	// Create file if doesn't exist
+	if( (iErr = FSpGetFInfo( &spec, &finfo)) != noErr)
+	{
+		// If file was not found we create it
+		if( iErr == fnfErr)
+		{
+			iErr = FSpCreate( &spec, 'JPEG', 'JPEG', smSystemScript);
+			if( iErr)
+				DoError( iErr, "FSpCreate failed.");
+		}
+		else
+			DoError( iErr, "FSpGetFInfo failed.");
+	}
 	// Open for writing
 	iErr = FSpOpenDF( &spec, fsWrPerm, &fp);
 	if (iErr)

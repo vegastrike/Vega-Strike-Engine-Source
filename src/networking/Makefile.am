@@ -1,5 +1,11 @@
-if USEBOOST128
-INCLUDES=-I$(top_srcdir)/src \
+if MACOSX
+incl2 = \
+	 -I/System/Library/Frameworks/QuickTime.framework/Headers \
+	 -I/System/Library/Frameworks/Carbon.framework/Versions/A/Headers
+endif
+
+incl = \
+	 -I$(top_srcdir)/src \
      -I$(top_srcdir)/src/jvoiplib \
 	 -I$(top_srcdir)/src/jvoiplib/libcomponents/base	\
 	 -I$(top_srcdir)/src/jvoiplib/libcomponents/impl	\
@@ -7,18 +13,13 @@ INCLUDES=-I$(top_srcdir)/src \
 	 -I$(top_srcdir)/src/jvoiplib/thirdparty/lpc 		\
 	 -I$(top_srcdir)/src/jvoiplib/thirdparty/gsm/inc	\
 	 -I$(top_srcdir)/src/jthread \
-	 -I$(top_srcdir)/src/jrtplib \
+	 -I$(top_srcdir)/src/jrtplib
+
+if USEBOOST128
+INCLUDES= $(incl) $(incl2) \
 	 -I$(top_srcdir)/src/boost
 else
-INCLUDES=-I$(top_srcdir)/src \
-     -I$(top_srcdir)/src/jvoiplib \
-	 -I$(top_srcdir)/src/jvoiplib/libcomponents/base	\
-	 -I$(top_srcdir)/src/jvoiplib/libcomponents/impl	\
-	 -I$(top_srcdir)/src/jvoiplib/componentframework	\
-	 -I$(top_srcdir)/src/jvoiplib/thirdparty/lpc 		\
-	 -I$(top_srcdir)/src/jvoiplib/thirdparty/gsm/inc	\
-	 -I$(top_srcdir)/src/jthread \
-	 -I$(top_srcdir)/src/jrtplib \
+INCLUDES= $(incl) $(incl2) \
 	 -I$(top_srcdir)/src/boost129
 endif
 
