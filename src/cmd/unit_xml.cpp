@@ -16,7 +16,7 @@
 #include "xml_serializer.h"
 #include "vs_path.h"
 #include "gfx/cockpit_generic.h"
-#include "unit_bsp.h"
+//#include "unit_bsp.h"
 #include "unit_collide.h"
 #include "gfx/bsp.h"
 #include "unit_generic.h"

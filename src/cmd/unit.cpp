@@ -19,13 +19,12 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-
 #include "vs_path.h"
 #include "vs_globals.h"
 #include "file_main.h"
 #include "gfx/halo.h"
 
-//#include "unit.h"
+
 #include "unit_factory.h"
 
 #include "gfx/sprite.h"
@@ -52,6 +51,16 @@
 #include "gfx/particle.h"
 #include "cmd/ai/aggressive.h"
 #include "cmd/base.h"
+
+
+#include "unit_jump.cpp"
+#include "unit_cargo.cpp"
+#include "unit_customize.cpp"
+#include "unit_damage.cpp"
+#include "unit_physics.cpp"
+#include "unit_weapon.cpp"
+#include "unit_bsp_gfx.h"
+#include "unit_click.cpp"
 //if the PQR of the unit may be variable...for radius size computation
 //#define VARIABLE_LENGTH_PQR
 

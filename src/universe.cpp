@@ -34,7 +34,7 @@
 #include "config_xml.h"
 #include "vs_globals.h"
 #include "xml_support.h"
-
+#include "audiolib.h"
 #include "cmd/script/mission.h"
 #include "cmd/unit.h"
 #include "in_kb.h"

@@ -34,6 +34,7 @@
 #include "cmd/script/flightgroup.h"
 #include "load_mission.h"
 #include "gfx/particle.h"
+#include "gfx/lerp.h"
 #include "gfx/warptrail.h"
 extern Music *muzak;
 extern Vector mouseline;

@@ -23,6 +23,7 @@
 #include "cmd/enhancement.h"
 #include "main_loop.h"
 #include "cmd/script/flightgroup.h"
+#include "universe_util.h"
 extern vector <char *> ParseDestinations (const string &value);
 
 	

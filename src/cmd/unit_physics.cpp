@@ -21,6 +21,7 @@
 
 #include "gfx/mesh.h"
 //#include "unit.h"
+//#include "unit_template.h"
 #include "lin_time.h"
 //#include "physics.h"
 #include "beam.h"

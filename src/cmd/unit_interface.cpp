@@ -18,6 +18,7 @@
 #include "music.h"
 #include "unit_const_cache.h"
 #include "configxml.h"
+#include "unit_util.h"
 extern Music *muzak;
 #ifdef _WIN32
 #define strcasecmp stricmp

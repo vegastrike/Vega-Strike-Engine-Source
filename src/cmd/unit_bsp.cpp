@@ -1,14 +1,8 @@
 #include "endianness.h"
 #include <assert.h>
-
-#ifndef PROPHECY
 #include "unit_bsp.h"
-#include "configxml.h"
-#include "vs_globals.h"
-#else
-#include <vector>
-
 using std::vector;
+#ifdef PROPHECY
 struct Vector {
   double i,j,k;
 };

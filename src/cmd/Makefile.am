@@ -85,8 +85,8 @@ libcmd_a_SOURCES =$(libcmdgeneric) 				\
 	terrain.cpp			\
 	terrain.h			\
 	unit.h				\
+	unit_bsp.cpp			\
 	unit_interface.cpp		\
-	unit_bsp.cpp		\
 	unit_factory.cpp		\
 	weapon_xml.cpp			\
 	weapon_xml.h			\
@@ -95,3 +95,10 @@ libcmd_a_SOURCES =$(libcmdgeneric) 				\
 	missile.h			\
 	mount.cpp			\
 	unit_functions.cpp
+#	unit_jump.cpp				\
+#	unit_cargo.cpp				\
+#	unit_customize.cpp			\
+#	unit_damage.cpp				\
+#	unit_physics.cpp			\
+#	unit_weapon.cpp				\
+#	unit.cpp				\

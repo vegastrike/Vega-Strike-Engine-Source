@@ -17,8 +17,9 @@
 #include "gfx/car_assist.h"
 #include "cmd/unit_util.h"
 #include <algorithm>
-
-
+#include "fire.h"
+//for getatmospheric
+#include "cmd/role_bitmask.h"
 FireKeyboard::FireKeyboard (unsigned int whichplayer, unsigned int whichjoystick): Order (WEAPON,0){
   this->cloaktoggle=true;
   this->whichjoystick = whichjoystick;

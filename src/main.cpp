@@ -51,6 +51,7 @@
 #include "universe.h"
 #include "save_util.h"
 #include "gfx/masks.h"
+#include "cmd/music.h"
 int nadanixnuthin() {
   float a=0;
   int test=0;

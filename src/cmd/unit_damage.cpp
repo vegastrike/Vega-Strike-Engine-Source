@@ -1,4 +1,5 @@
 //#include "unit.h"
+//#include "unit_template.h"
 #include "unit_factory.h"
 #include "ai/order.h"
 #include "gfx/animation.h"
