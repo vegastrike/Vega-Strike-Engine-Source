@@ -459,6 +459,62 @@ void GameCockpit::DrawTargetBox () {
 
 }
 
+void GameCockpit::DrawTurretTargetBoxes () {
+
+  static GFXColor black_and_white=DockBoxColor ("black_and_white");
+  Unit * parun = parent.GetUnit();
+  UnitCollection::UnitIterator iter = parun->getSubUnits();
+  Unit * un;
+  while (NULL!=(un=iter.current())) {
+	float speed,range;
+	if (!un)
+      return;
+	if (un->GetNebula()!=NULL)
+	  return;
+    Unit *target = un->Target();
+    if (!target)
+      return;
+	Vector CamP,CamQ,CamR;
+    _Universe->AccessCamera()->GetPQR(CamP,CamQ,CamR);
+    //Vector Loc (un->ToLocalCoordinates(target->Position()-un->Position()));
+    QVector Loc(target->Position()-_Universe->AccessCamera()->GetPosition());
+    GFXDisable (TEXTURE0);
+    GFXDisable (TEXTURE1);
+    GFXDisable (DEPTHTEST);
+    GFXDisable (DEPTHWRITE);
+    GFXBlendMode (SRCALPHA,INVSRCALPHA);
+    GFXDisable (LIGHTING);
+    DrawNavigationSymbol (un->GetComputerData().NavPoint,CamP,CamQ, CamR.Cast().Dot((un->GetComputerData().NavPoint).Cast()-_Universe->AccessCamera()->GetPosition()));
+    GFXColorf (un->GetComputerData().radar.color?unitToColor(un,target):black_and_white);
+
+    //DrawOneTargetBox (Loc, target->rSize(), CamP, CamQ, CamR,computeLockingSymbol(un),un->TargetLocked());
+
+	// ** jay
+	float rSize = target->rSize();
+	GFXBegin(GFXLINE);
+	GFXVertexf (Loc+(CamP).Cast()*rSize*1.3);
+    GFXVertexf (Loc+(CamP).Cast()*rSize*.8);
+
+	GFXVertexf (Loc+(-CamP).Cast()*rSize*1.3);
+    GFXVertexf (Loc+(-CamP).Cast()*rSize*.8);
+
+	GFXVertexf (Loc+(CamQ).Cast()*rSize*1.3);
+    GFXVertexf (Loc+(CamQ).Cast()*rSize*.8);
+
+	GFXVertexf (Loc+(-CamQ).Cast()*rSize*1.3);
+    GFXVertexf (Loc+(-CamQ).Cast()*rSize*.8);
+	GFXEnd();
+
+
+    GFXEnable (TEXTURE0);
+    GFXEnable (DEPTHTEST);
+    GFXEnable (DEPTHWRITE);
+
+    iter.advance();
+  }
+
+}
+
 void GameCockpit::Eject() {
   ejecting=true;
 }
@@ -610,7 +666,7 @@ void GameCockpit::DrawEliteBlips (Unit * un) {
 }
 float GameCockpit::LookupTargetStat (int stat, Unit *target) {
   static float game_speed = XMLSupport::parse_float (vs_config->getVariable("physics","game_speed","1"));
-  static bool lie=XMLSupport::parse_float (vs_config->getVariable("physics","game_speed_lying","true"));
+  static bool lie=XMLSupport::parse_bool (vs_config->getVariable("physics","game_speed_lying","true"));
   static float fpsval=0;
   const float fpsmax=1;
   static float numtimes=fpsmax;
@@ -1119,6 +1175,7 @@ void GameCockpit::Draw() {
   GFXDisable (DEPTHWRITE);
   GFXColor4f(1,1,1,1);
   DrawTargetBox();
+  DrawTurretTargetBoxes();
   if(draw_all_boxes){
     DrawTargetBoxes();
   }

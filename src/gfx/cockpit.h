@@ -95,6 +95,8 @@ private:
   void DrawTargetBox ();
   ///draws the target box around all units
   void DrawTargetBoxes ();
+  ///draws a target cross around all units targeted by your turrets // ** jay
+  void DrawTurretTargetBoxes ();
   ///Draws all teh blips on the radar.
   void DrawBlips(Unit * un);
   ///Draws all teh blips on the radar in Elite-style
