@@ -225,6 +225,11 @@ namespace UnitUtil {
                 }
                 return (cp - _Universe->AccessCockpit(0));
         }
+  void setSpeed (Unit * my_unit, float speed) {
+    if (my_unit) {
+      my_unit->GetComputerData().set_speed = speed;
+    }
+  }
   void setECM (Unit * my_unit, short NewECM) {
     if (!my_unit)
       return;

@@ -40,6 +40,7 @@ namespace UnitUtil {
 	int isPlayerStarship (Unit * un);
 	void setECM (Unit * un, short NewECM);
 	short getECM (Unit * un);
+	void setSpeed (Unit * un, float speed);
 }
 
 #endif
