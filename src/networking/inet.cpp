@@ -3,6 +3,8 @@
 #include <winsock.h>
 #else
 #define SOCKET_ERROR -1
+#include <sys/time.h>
+#include <sys/types.h>
 #include <error.h>
 #include <netdb.h>
 #include <string.h>
