@@ -956,8 +956,9 @@ static bool TryDock(Unit * parent, Unit * targ, unsigned char playa, int severit
     isDone=true;
     c.SetCurrentState (c.fsm->GetDockNode(),NULL,0);
     abletodock(3);
-    vectorOfKeyboardInput[playa].req=true;
+    //vectorOfKeyboardInput[playa].req=true;
     parent->getAIState()->Communicate (c);
+    parent->UpgradeInterface(targ);
   }else {
     if (UnDockNow(parent,targ)) {
       isDone=true;
@@ -977,7 +978,7 @@ static void DoDockingOps (Unit * parent, Unit * targ,unsigned char playa, unsign
     if (targ) {
       for (int severity=0;severity<maxseverity;++severity) { 
         targ->RequestClearance(parent);
-        if ((isDone=TryDock(parent,targ,playa,0))!=false){
+        if ((isDone=TryDock(parent,targ,playa,severity))!=false){
           break;
         }else {
             //if (targ!=parent->Target())
