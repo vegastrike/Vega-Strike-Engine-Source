@@ -745,7 +745,7 @@ void	NetServer::checkTimedoutClients_udp()
 			// Here considering a delta > 0xFFFFFFFF*X where X should be at least something like 0.9
 			// This allows a packet not to be considered as "old" if timestamp has been "recycled" on client
 			// side -> when timestamp has grown enough to became bigger than what an u_int can store
-			if( (*i)->zone>0 && deltatmp > clienttimeout && deltatmp < (0xFFFFFFFF*0.8) )
+			if( (*i)->zone>-1 && deltatmp > clienttimeout && deltatmp < (0xFFFFFFFF*0.8) )
 			{
 				cout<<"ACTIVITY TIMEOUT for client number "<<(*i)->serial<<endl;
 				cout<<"\t\tCurrent time : "<<curtime<<endl;
@@ -753,7 +753,7 @@ void	NetServer::checkTimedoutClients_udp()
 				cout<<"t\tDifference : "<<deltatmp<<endl;
 				discList.push_back( *i);
 			}
-			else if( !(*i)->zone>0 && deltatmp > logintimeout)
+			else if( !(*i)->zone>-1 && deltatmp > logintimeout)
 			{
 				cout<<"LOGIN TIMEOUT for client number "<<(*i)->serial<<endl;
 				cout<<"\t\tCurrent time : "<<curtime<<endl;

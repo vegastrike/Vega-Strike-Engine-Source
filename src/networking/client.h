@@ -80,6 +80,7 @@ struct	Client
 		latest_timeout=0;
 		old_timeout=0;
 		deltatime=0;
+		zone = -1;
 	}
 
 	Client( SOCKETALT& s, bool tcp )
@@ -93,6 +94,7 @@ struct	Client
 		latest_timeout=0;
 		old_timeout=0;
 		deltatime=0;
+		zone = -1;
 	}
 
 	inline bool isTcp( ) const {

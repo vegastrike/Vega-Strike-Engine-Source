@@ -604,16 +604,15 @@ void	NetClient::addClient( const Packet* packet )
 	if( !isLocalSerial( cltserial))
 	{
 		// The save buffer and XML buffer come after the ClientState
-		const char * buf = packet->getData()+sizeof( ClientState);
-		unsigned int savelen = ntohl( *( (unsigned int *)(buf)));
-		unsigned int xmllen = ntohl( *( (unsigned int *)(buf+sizeof( unsigned int)+savelen)));
-		cout<<"\t\t>>>>>>>>>>>>>> RECEIVED SAVES : save_size = "<<savelen<<" - xml_size = "<<xmllen<<" <<<<<<<<<<<<<<<"<<endl;
-		char * savebuf = new char[savelen+1];
-		memcpy( savebuf, buf+sizeof( unsigned int), savelen);
-		savebuf[savelen]=0;
-		char * xmlbuf = new char[xmllen+1];
-		memcpy( xmlbuf, buf+2*sizeof( unsigned int)+savelen, xmllen);
-		xmlbuf[xmllen]=0;
+		vector<string> saves;
+		saves = FileUtil::GetSaveFromBuffer( packet->getData()+sizeof( ClientState));
+		char * savebuf = new char[saves[1].length()+1];
+		memcpy( savebuf, saves[1].c_str(), saves[1].length());
+		savebuf[saves[1].length()] = 0;
+		char * xmlbuf = new char[saves[0].length()+1];
+		memcpy( xmlbuf, saves[0].c_str(), saves[0].length());
+		xmlbuf[saves[0].length()] = 0;
+		cout<<"XML="<<saves[0].length()<<" bytes - SAVE="<<saves[1].length()<<" bytes"<<endl;
 
 		// We will ignore - starsys as if a client enters he is in the same system
 		//                - pos since we received a ClientState
