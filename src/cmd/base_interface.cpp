@@ -23,6 +23,11 @@ static char makingstate=0;
 extern const char *mission_key; //defined in main.cpp
 bool BaseInterface::Room::BaseTalk::hastalked=false;
 
+static void CalculateRealXAndY (int xbeforecalc, int ybeforecalc, float *x, float *y) {
+	(*x)=(((float)(xbeforecalc*2))/g_game.x_resolution)-1;
+	(*y)=-(((float)(ybeforecalc*2))/g_game.y_resolution)+1;
+}
+
 BaseInterface::Room::~Room () {
 	int i;
 	for (i=0;i<links.size();i++) {
@@ -150,14 +155,13 @@ int BaseInterface::Room::MouseOver (BaseInterface *base,float x, float y) {
 }
 
 BaseInterface *BaseInterface::CurrentBase=0;
-bool BaseInterface::CallComp=false;
 
 bool RefreshGUI(void) {
 	bool retval=false;
 	if (_Universe->AccessCockpit()) {
 		if (BaseInterface::CurrentBase) {
 			if (_Universe->AccessCockpit()->GetParent()==BaseInterface::CurrentBase->caller.GetUnit()){
-				if (BaseInterface::CallComp) {
+				if (BaseInterface::CurrentBase->CallComp) {
 					return RefreshInterface ();	
 				} else {
 					BaseInterface::CurrentBase->Draw();
@@ -278,7 +282,7 @@ void BaseInterface::Room::Click (BaseInterface* base,float x, float y, int butto
 					int x=(((curlink->x+(curlink->wid/2))+1)/2)*g_game.x_resolution;
 					int y=-(((curlink->y+(curlink->hei/2))-1)/2)*g_game.y_resolution;
 					winsys_warp_pointer(x,y);
-					MouseOverWin(x,y);
+					PassiveMouseOverWin(x,y);
 					break;
 				}
 			}
@@ -287,7 +291,9 @@ void BaseInterface::Room::Click (BaseInterface* base,float x, float y, int butto
 	}
 }
 
-void BaseInterface::MouseOver (float x, float y) {
+void BaseInterface::MouseOver (int xbeforecalc, int ybeforecalc) {
+	float x, y;
+	CalculateRealXAndY(xbeforecalc,ybeforecalc,&x,&y);
 	int i=rooms[curroom]->MouseOver(this,x,y);
 	Room::Link *link=0;
 	if (i<0) {
@@ -306,20 +312,43 @@ void BaseInterface::MouseOver (float x, float y) {
 	}
 }
 
-void BaseInterface::Click (float x, float y, int button, int state) {
+void BaseInterface::Click (int xint, int yint, int button, int state) {
+	float x,y;
+	CalculateRealXAndY(xint,yint,&x,&y);
 	rooms[curroom]->Click(this,x,y,button,state);
 }
 
 void BaseInterface::ClickWin (int button, int state, int x, int y) {
 	if (CurrentBase) {
-		CurrentBase->Click((((float)(x*2))/g_game.x_resolution)-1,-(((float)(y*2))/g_game.y_resolution)+1,button,state);
+		if (CurrentBase->CallComp) {
+			UpgradingInfo::ProcessMouseClick(button,state,x,y);
+		} else {
+			CurrentBase->Click(x,y,button,state);
+		}
 	}
 }
 
-void BaseInterface::MouseOverWin (int x, int y) {
+
+void BaseInterface::PassiveMouseOverWin (int x, int y) {
 	SetSoftwareMousePosition(x,y);
-	if (CurrentBase)
-		CurrentBase->MouseOver((((float)(x*2))/g_game.x_resolution)-1,-(((float)(y*2))/g_game.y_resolution)+1);
+	if (CurrentBase) {
+		if (CurrentBase->CallComp) {
+			UpgradingInfo::ProcessMousePassive(x,y);
+	 	} else {
+			CurrentBase->MouseOver(x,y);
+		}
+	}
+}
+
+void BaseInterface::ActiveMouseOverWin (int x, int y) {
+	SetSoftwareMousePosition(x,y);
+	if (CurrentBase) {
+		if (CurrentBase->CallComp) {
+			UpgradingInfo::ProcessMouseActive(x,y);
+		} else {
+			CurrentBase->MouseOver(x,y);
+		}
+	}
 }
 
 void BaseInterface::GotoLink (int linknum) {
@@ -362,8 +391,8 @@ BaseInterface::~BaseInterface () {
 
 void BaseInterface::InitCallbacks () {
 	winsys_set_mouse_func(ClickWin);
-	winsys_set_motion_func(MouseOverWin);
-	winsys_set_passive_motion_func(MouseOverWin);
+	winsys_set_motion_func(ActiveMouseOverWin);
+	winsys_set_passive_motion_func(PassiveMouseOverWin);
 	CurrentBase=this;
 //	UpgradeCompInterface(caller,baseun);
 	CallComp=false;
@@ -447,6 +476,7 @@ const char * compute_time_of_day (Unit * base,Unit *un) {
 BaseInterface::BaseInterface (const char *basefile, Unit *base, Unit*un)
 		: curtext(GFXColor(0,1,0,1),GFXColor(0,0,0,1)) , othtext(GFXColor(1,1,.5,1),GFXColor(0,0,0,1)) {
 	CurrentBase=this;
+	CallComp=false;
 	caller=un;
 	curlinkindex=0;
 	this->baseun=base;
@@ -496,7 +526,7 @@ void BaseInterface::Room::Comp::Click (BaseInterface *base,float x, float y, int
 		Unit *un=base->caller.GetUnit();
 		Unit *baseun=base->baseun.GetUnit();
 		if (un&&baseun) {
-			BaseInterface::CallComp=true;
+			base->CallComp=true;
 			UpgradeCompInterface(un,baseun,modes);
 		}
 	}

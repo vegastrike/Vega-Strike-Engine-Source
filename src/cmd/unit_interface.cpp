@@ -567,7 +567,7 @@ bool RefreshInterface(void) {
   return retval;
 }
 
-static void ProcessMouseClick(int button, int state, int x, int y) {
+void UpgradingInfo::ProcessMouseClick(int button, int state, int x, int y) {
   SetSoftwareMousePosition (x,y);
   int cur = _Universe->CurrentCockpit();
   _Universe->SetActiveCockpit (_Universe->AccessCockpit(player_upgrading));
@@ -575,7 +575,7 @@ static void ProcessMouseClick(int button, int state, int x, int y) {
   _Universe->SetActiveCockpit(_Universe->AccessCockpit(cur));
 }
 
-static void ProcessMouseActive(int x, int y) {
+void UpgradingInfo::ProcessMouseActive(int x, int y) {
   SetSoftwareMousePosition (x,y);
   int cur = _Universe->CurrentCockpit();
   _Universe->SetActiveCockpit (_Universe->AccessCockpit(player_upgrading));
@@ -583,7 +583,7 @@ static void ProcessMouseActive(int x, int y) {
   _Universe->SetActiveCockpit(_Universe->AccessCockpit(cur));
 }
 
-static void ProcessMousePassive(int x, int y) {
+void UpgradingInfo::ProcessMousePassive(int x, int y) {
   SetSoftwareMousePosition(x,y);
   int cur = _Universe->CurrentCockpit();
   _Universe->SetActiveCockpit (_Universe->AccessCockpit(player_upgrading));
@@ -597,9 +597,9 @@ void UpgradeCompInterface(Unit *un,Unit * base, vector <UpgradingInfo::BaseMode>
     }
   }
   printf("Starting docking\n");
-  winsys_set_mouse_func(ProcessMouseClick);
-  winsys_set_motion_func(ProcessMouseActive);
-  winsys_set_passive_motion_func(ProcessMousePassive);
+  winsys_set_mouse_func(UpgradingInfo::ProcessMouseClick);
+  winsys_set_motion_func(UpgradingInfo::ProcessMouseActive);
+  winsys_set_passive_motion_func(UpgradingInfo::ProcessMousePassive);
   //(x, y, width, height, with scrollbar)
   upgr=( new UpgradingInfo (un,base,modes));
   player_upgrading=(_Universe->CurrentCockpit());
@@ -758,7 +758,7 @@ void UpgradingInfo::DoDone() {
 		readnews=false;
 	}
 	BaseInterface::CurrentBase->InitCallbacks();
-	BaseInterface::CallComp=false;
+	BaseInterface::CurrentBase->CallComp=false;
 	if (upgr==this) {
 		delete upgr;
 		upgr=NULL;

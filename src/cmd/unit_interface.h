@@ -54,6 +54,9 @@ public:
   UpgradingInfo(Unit * un, Unit * base, vector<BaseMode> modes);
   ~UpgradingInfo();
   void Render();
+  static void ProcessMouseClick(int button, int state, int x, int y);
+  static void ProcessMouseActive(int x, int y);
+  static void ProcessMousePassive(int x, int y);
   void SelectLastSelected();
   bool SelectItem (const char * str, int button, int state);
   void CommitItem (const char * str, int button, int state);
