@@ -205,7 +205,7 @@ JoyStick::JoyStick(int which): mouse(which==MOUSE_JOYSTICK) {
   nr_of_hats=SDL_JoystickNumHats(joy);
 #else
     //WE HAVE GLUT
-    if (which>0) {
+    if (which>0&&which!=MOUSE_JOYSTICK) {
         joy_available=false;
         return;
     }
