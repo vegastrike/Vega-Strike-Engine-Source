@@ -43,7 +43,7 @@ class PlanetaryOrbit : public AI {
   }
   AI *Execute();
 
-  friend Planet;
+  friend class Planet;
 };
 
 class Planet : public Unit {
@@ -102,8 +102,8 @@ class Planet : public Unit {
   };
   Iterator *createIterator() { return new PlanetIterator(this);}
 
-  friend Planet::PlanetIterator;
-  friend PlanetaryOrbit;
+  friend class Planet::PlanetIterator;
+  friend class PlanetaryOrbit;
 };
 
 #endif
