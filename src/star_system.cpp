@@ -556,13 +556,19 @@ void StarSystem::Update(float priority , bool executeDirector) {
 	if (_Universe->getActiveStarSystem(0)==this) {
 #endif
 	  if (executeDirector) {
+		int curcockpit= _Universe->AccessCockpit()-_Universe->AccessCockpit(0);
 	    for (unsigned int i=0;i<active_missions.size();i++) {
 	      if (active_missions[i]) {
-		mission=active_missions[i];
-		active_missions[i]->DirectorLoop();
-		active_missions[i]->DirectorBenchmark();
+			  _Universe->SetActiveCockpit(active_missions[i]->player_num);
+			   StarSystem * ss=_Universe->AccessCockpit()->activeStarSystem;
+			  if (ss) _Universe->pushActiveStarSystem(ss);
+			  mission=active_missions[i];
+			  active_missions[i]->DirectorLoop();
+			  active_missions[i]->DirectorBenchmark();
+			  if (ss)_Universe->popActiveStarSystem();
 	      }
 	    }
+		_Universe->SetActiveCockpit(curcockpit);
 		mission=active_missions[0];
 	  }
 #ifdef RUN_ONLY_FOR_PLAYER_STARSYSTEM

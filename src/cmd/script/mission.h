@@ -416,6 +416,7 @@ class PythonMissionBaseClass;
 
 class Mission {
  public:
+  unsigned int player_num;
   struct Objective {
     float completeness;
 	std::string objective;

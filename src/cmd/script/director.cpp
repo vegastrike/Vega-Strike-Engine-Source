@@ -184,6 +184,7 @@ void Mission::DirectorStart(missionNode *node){
 }
 
 void Mission::DirectorInitgame(){
+  this->player_num=(_Universe->AccessCockpit()-_Universe->AccessCockpit(0));
   if (nextpythonmission) {
     runtime.pymissions=(pythonMission::FactoryString (nextpythonmission));
     delete [] nextpythonmission; //delete the allocated memory
