@@ -64,4 +64,4 @@ EXPORT_UTIL(getCurrentPlayer,0)
 voidEXPORT_UTIL(addParticle)
 voidEXPORT_UTIL(TargetEachOther)
 voidEXPORT_UTIL(StopTargettingEachOther)	
-	
+EXPORT_UTIL(LookupUnitStat,"")
