@@ -37,6 +37,7 @@ public:
 struct asteroid {
   Vector center;
   float radius;
+  int num_polys;
   vector <Vector> points;
   vector <Tri> polygon;
 };
@@ -44,6 +45,53 @@ struct asteroid {
 
 char texture [100] ="asteroid";
 float scale=1;
+void determine_centers_and_radii (vector <asteroid> & field, const Vector &cube_sides, const float radiusmin, const float radiusmax, const int poly_min, const int poly_max) {
+  for (unsigned int i=0;i<field.size();i++) {
+    field[i].center.i = cube_sides.i * ((float)rand())/RAND_MAX-cube_sides.i/2;
+    field[i].center.j = cube_sides.j * ((float)rand())/RAND_MAX-cube_sides.j/2;
+    field[i].center.k = cube_sides.k * ((float)rand())/RAND_MAX-cube_sides.k/2;
+    float radiusratio = ((float)rand())/RAND_MAX;
+    field[i].radius = radiusmin+(radiusmax-radiusmin)*radiusratio;    
+    radiusratio*=(poly_max+1-poly_min);
+    field[i].num_polys = (int)radiusratio+poly_min;
+    if (field[i].num_polys<4)
+      field[i].num_polys=4;
+  }
+}
+
+float R(float minr,float maxr) {
+  return ((maxr-minr)*((float)rand())/RAND_MAX)+minr;
+}
+void generateTet (vector <Vector> &v, vector <Tri> & p, const float minr, const float maxr) {
+
+}
+void generateNTet (vector <Vector> &v, vector <Tri> & p, const float minr, const float maxr,int stacks, int slices) {
+  
+}
+void generateDoubleTet (vector <Vector> &v, vector <Tri> & p, const float minr, const float maxr, int num) {
+  generateNTet (v,p,minr,maxr,1,num);
+}
+
+void createShapes (asteroid & a, float dev) {
+  if (a.num_polys<6) {
+    generateTet (a.points,a.polygon,a.radius*(1-dev),a.radius*(1+dev));
+  } else if (a.num_polys <8) {
+    generateDoubleTet (a.points,a.polygon,a.radius*(1-dev),a.radius*(1+dev),3);
+  } else if (a.num_polys<10) {
+    generateDoubleTet (a.points,a.polygon, a.radius*(1-dev), a.radius*(1+dev),4);
+  } else if (a.num_polys<12) {
+    generateDoubleTet (a.points,a.polygon, a.radius*(1-dev),a.radius*(1+dev),6);
+  }else if (a.num_polys<36) {
+    generateNTet (a.points,a.polygon, a.radius*(1-dev),a.radius*(1+dev),a.num_polys/6,a.num_polys%6+3);
+  } else {
+    generateNTet (a.points,a.polygon, a.radius*(1-dev),a.radius*(1+dev),a.num_polys/12,a.num_polys%12+6);
+  }
+}
+void createShapes (vector <asteroid> &field, float deviation) {
+  for (unsigned int i=0;i<field.size();i++) {
+    createShapes (field[i],deviation);
+  }
+}
 
 void write_mesh (FILE * fp, vector <asteroid> &field) {
   fprintf (fp,"<MESH texture=\"%s\" scale=\"%d\">\n<Points>\n",texture, scale);
