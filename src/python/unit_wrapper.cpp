@@ -9,6 +9,7 @@
 #include <boost/python/objects.hpp>
 #include "universe_util.h"
 #include "cmd/unit_util.h"
+#include "faction.h"
 #include "cmd/ai/fire.h"
 //makes to_python for both vector and qvector turn them into tuples :-)
 using namespace UnitUtil;
@@ -96,6 +97,10 @@ PYTHON_BEGIN_MODULE(VS)
 #undef voidEXPORT_UTIL
 #define EXPORT_UTIL(name,aff) VS.def(&UniverseUtil::name,#name);
 #define voidEXPORT_UTIL(name) EXPORT_UTIL(name,0)
+#undef EXPORT_FACTION
+#undef voidEXPORT_FACTION
+#define EXPORT_FACTION(name,aff) VS.def(&FactionUtil::name,#name);
+#define voidEXPORT_FACTION(name) EXPORT_FACTION(name,0)
 EXPORT_UTIL(SafeEntrancePoint,(10000000,0,0))
 voidEXPORT_UTIL(pushSystem)
 voidEXPORT_UTIL(popSystem)
@@ -107,11 +112,11 @@ EXPORT_UTIL(getNumUnits,0)
 EXPORT_UTIL(launchJumppoint,Unit())
 EXPORT_UTIL(launch,Unit())
 EXPORT_UTIL(getRandCargo,Cargo())
-EXPORT_UTIL(GetFactionName,"")
-EXPORT_UTIL(GetFactionIndex,-1)
-EXPORT_UTIL(GetRelation,0)
-voidEXPORT_UTIL(AdjustRelation)
-EXPORT_UTIL(GetNumFactions,0)
+EXPORT_FACTION(GetFactionName,"")
+EXPORT_FACTION(GetFactionIndex,-1)
+EXPORT_FACTION(GetRelation,0)
+voidEXPORT_FACTION(AdjustRelation)
+EXPORT_FACTION(GetNumFactions,0)
 EXPORT_UTIL(GetGameTime,0)
 voidEXPORT_UTIL(SetTimeCompression)
 EXPORT_UTIL(GetAdjacentSystem,"")

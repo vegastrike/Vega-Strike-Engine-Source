@@ -2,11 +2,12 @@
 #include "python_class.h"
 #include "cmd/briefing.h"
 #include "cmd/script/mission.h"
+#include "faction.h"
 
 namespace BriefingUtil {
 	int addShip(string name, string faction, Vector vec){
 		return mission->briefing->AddStarship(name.c_str(),
-			_Universe->GetFaction(faction.c_str()),
+			FactionUtil::GetFaction(faction.c_str()),
 			vec);
 	}
 	void removeShip(int whichship) {
