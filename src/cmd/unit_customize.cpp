@@ -416,6 +416,9 @@ cout << "Starting docking\n";
 	CargoList->AddTextItem("b","And another just to be sure");
 
 	OK = new Button(-0.94, -0.85, 0.12, 0.1, "Done");
+
+	CargoList->RenderText();
+
 	GFXLoop (RefreshGUI);
 	//	glutMainLoop();
 }
@@ -488,7 +491,19 @@ void ProcessMousePassive(int x, int y) {
 // type=2 is mouse drag
 // type=3 is mouse movement
 void ProcessMouse(int type, int x, int y, int button, int state) {
+	int ours = 0;
+	float cur_x = 0, cur_y = 0, new_x = x, new_y = y;
 
+	cur_x = ((new_x / g_game.x_resolution) * 2) - 1;
+	cur_y = ((new_y / g_game.y_resolution) * -2) + 1;
+
+	ours = CargoList->DoMouse(type, cur_x, cur_y, button, state);
+	if (ours == 0) { ours = CargoInfo->DoMouse(type, cur_x, cur_y, button, state); }
+	if (ours == 0) { ours = OK->DoMouse(type, cur_x, cur_y, button, state); }
+	if (ours == 1 && type == 1) {
+		// done button was clicked
+		cout << "You clicked done\n";
+	}
 }
 
 /*
