@@ -18,8 +18,10 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#include "vs_globals.h"
+
+
 #include "vs_path.h"
+#include "vs_globals.h"
 #include "file_main.h"
 #include "gfx/halo.h"
 #include "beam.h"

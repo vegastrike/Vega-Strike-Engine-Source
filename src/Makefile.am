@@ -35,6 +35,7 @@ vegastrike_SOURCES =				\
 	in_handler.h				\
 	lin_time.h				\
 	lin_time.cpp				\
+	load_mission.cpp			\
 	main.cpp				\
 	main_loop.h				\
 	main_loop.cpp				\

@@ -187,6 +187,8 @@ enum callback_module_unit_type {
   CMT_UNIT_UNKNOWN=0,
   CMT_UNIT_getUnit ,
   CMT_UNIT_getPlayer ,
+  CMT_UNIT_getCredits ,
+  CMT_UNIT_addCredits ,
   CMT_UNIT_launch ,
     CMT_UNIT_getPosition ,
     CMT_UNIT_getFaction ,

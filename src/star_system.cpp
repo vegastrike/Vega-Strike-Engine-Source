@@ -511,7 +511,6 @@ void StarSystem::Update(float priority ) {
   fflush (stderr);
 #endif
 	Terrain::CollideAll();
-	current_stage=PHY_COLLIDE;
 #ifdef UPDATEDEBUG
   fprintf (stderr,"Ani");
   fflush (stderr);
@@ -529,7 +528,17 @@ void StarSystem::Update(float priority ) {
   fflush (stderr);
 #endif
 	  Unit::ProcessDeleteQueue();
-      } else if (current_stage==PHY_COLLIDE) {
+	  current_stage=MISSION_SIMULATION;
+      }else if (current_stage==MISSION_SIMULATION) {
+	for (unsigned int i=0;i<active_missions.size();i++) {
+	  if (active_missions[i]) {
+	    active_missions[i]->DirectorLoop();
+	    active_missions[i]->DirectorBenchmark();
+	  }
+	}
+
+	current_stage=PHY_COLLIDE;
+      }else if (current_stage==PHY_COLLIDE) {
 	if (no_collision_time) {
 	  no_collision_time--;//don't resolve physics until 2 seconds
 	}else {

@@ -56,10 +56,15 @@ Mission::Mission(char *configfile){
   easyDomFactory<missionNode> *domf= new easyDomFactory<missionNode>();
 
  top=domf->LoadXML(configfile);
-
-  if(top==NULL){
+ static bool dontpanic=false;
+  if(top==NULL&&!dontpanic){
     cout << "Panic exit - mission file " << configfile << " not found" << endl;
     exit(0);
+  } else {
+    dontpanic=true;
+  }
+  if (top==NULL) {
+    return;
   }
   //top->walk(0);
 
@@ -82,6 +87,8 @@ Mission::Mission(char *configfile){
 }
 
 void Mission::initMission(){
+  if (!top)
+    return;
   msgcenter=new MessageCenter();
   msgcenter->add("game","all","Welcome to Vegastrike");
 

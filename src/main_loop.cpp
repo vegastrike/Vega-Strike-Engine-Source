@@ -176,7 +176,11 @@ namespace CockpitKeys {
     }
     */
 	if(newState==PRESS||newState==DOWN) {
-	  mission->DirectorEnd();
+	  for (unsigned int i=0;i<active_missions.size();i++) {
+	    if (active_missions[i]) {
+	      active_missions[i]->DirectorEnd();
+	    }
+	  }
 	  exit(0);
 	}
    
@@ -334,7 +338,6 @@ int numf = 0;
 CoordinateSelect *locSel=NULL;
 //Background * bg = NULL;
 SphereMesh *bg2=NULL;
-Animation *  explosion= NULL;
 ClickList *shipList =NULL;
 Unit *midway = NULL;
 /*
@@ -393,7 +396,7 @@ _Universe->AccessCockpit()->GetParent();
 #endif
 void createObjects(std::string fighter0name) {
   //  GFXFogMode (FOG_OFF);
-  explosion= new Animation ("explosion_orange.ani",false,.1,BILINEAR,false);
+  static Animation explosion("explosion_orange.ani",false,.1,BILINEAR,false);
 
   Vector TerrainScale (XMLSupport::parse_float (vs_config->getVariable ("terrain","xscale","1")),XMLSupport::parse_float (vs_config->getVariable ("terrain","yscale","1")),XMLSupport::parse_float (vs_config->getVariable ("terrain","zscale","1")));
 
@@ -646,20 +649,9 @@ void destroyObjects() {
   //  delete cockpit;
   delete [] fighters;
   delete locSel;
-  delete explosion;
-  explosion=NULL;
-  //delete t;
-  //delete s;
-  //delete carrier;
-  //delete fighter2;
-  //delete fighter;
 }
 
 
-//extern double gametime;
-
-//double gametime=0.0;
-//int total_nr_frames=0;
 
 int getmicrosleep () {
   static int microsleep = XMLSupport::parse_int (vs_config->getVariable ("audio","threadtime","2000"));
@@ -674,31 +666,12 @@ void restore_main_loop() {
 
 }
 void main_loop() {
-
-
-
-
   _Universe->StartDraw();
-
   if(myterrain){
     myterrain->AdjustTerrain(_Universe->activeStarSystem());
   }
-
-      
   ProcessInput();
 
-  mission->DirectorBenchmark();
-
-#ifdef UPDATEDEBUG
-  fprintf (stderr,"dl");
-  fflush (stderr);
-#endif
-
-  mission->DirectorLoop();
-#ifdef UPDATEDEBUG
-  fprintf (stderr,"ld\n");
-  fflush (stderr);
-#endif
 
 }
 

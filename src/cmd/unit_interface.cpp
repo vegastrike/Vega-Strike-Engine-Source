@@ -8,6 +8,7 @@
 #include <algorithm>
 #include "gfx/cockpit.h"
 #include "savegame.h"
+#include "cmd/script/mission.h"
 #ifdef _WIN32
 #define strcasecmp stricmp
 #endif
@@ -16,7 +17,7 @@ static float usedPrice (float percentage) {
   return .66*percentage;
 }
 
-
+extern void LoadMission (const char *, bool loadfirst);
 extern void SwitchUnits (Unit * ol, Unit * nw);
 extern Cargo * GetMasterPartList(const char *input_buffer);
 extern Unit&GetUnitMasterPartList();
@@ -252,6 +253,18 @@ void Unit::UpgradeInterface(Unit * base) {
   upgr = new UpgradingInfo (this,base);
   GFXLoop (RefreshGUI);
 }
+
+void CargoToMission (const char * item,TextArea * ta) {
+  char * item1 = strdup (item);
+  int tmp;
+  sscanf (item,"%d %s",&tmp,item1);
+  Mission temp (item1);
+  free (item1);
+  temp.initMission();
+  ta->ChangeTextItem ("name",temp.getVariable ("mission_name","").c_str());
+  ta->ChangeTextItem ("price",temp.getVariable("description","").c_str());  
+}
+
 void UpgradingInfo::SelectItem (const char *item, int button, int buttonstate) {
   switch (mode) {
   case BUYMODE:
@@ -275,6 +288,7 @@ void UpgradingInfo::SelectItem (const char *item, int button, int buttonstate) {
     }
     break;
   case MISSIONMODE:
+    CargoToMission (item,CargoInfo);
     break;
   }
 
@@ -400,7 +414,12 @@ void UpgradingInfo::CommitItem (const char *inp_buf, int button, int state) {
     }  
     break;
   case MISSIONMODE:
-
+    LoadMission (input_buffer,false);
+    if ((un=this->base.GetUnit())) {
+      unsigned int index;
+      un->GetCargo(input_buffer,index);
+      un->RemoveCargo(index,1,true);
+    }
     break;
 
   }

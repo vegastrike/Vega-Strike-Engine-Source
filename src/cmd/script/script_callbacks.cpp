@@ -808,6 +808,8 @@ void Mission::initCallbackMaps(){
   module_string_map["begins"]=CMT_STRING_begins; 
 
   module_unit_map["getUnit"]=CMT_UNIT_getUnit ;
+  module_unit_map["getCredits"]=CMT_UNIT_getCredits ;
+  module_unit_map["addCredits"]=CMT_UNIT_addCredits ;
   module_unit_map["getPlayer"]=CMT_UNIT_getPlayer ;
   module_unit_map["launch"]=CMT_UNIT_launch ;
     module_unit_map["getPosition"]=CMT_UNIT_getPosition ;

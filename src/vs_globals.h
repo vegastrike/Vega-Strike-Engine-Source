@@ -27,7 +27,7 @@ extern VegaConfig *vs_config;
 
 class Mission;
 extern Mission *mission;
-
+extern std::vector <Mission *>active_missions;
 class ForceFeedback;
 extern ForceFeedback *forcefeedback;
 

@@ -380,7 +380,7 @@ void Mission::runScript(string modulename,string scriptname,unsigned int classid
 void Mission::DirectorBenchmark(){
   double elapsed=GetElapsedTime();
 
-  gametime+=elapsed;
+  gametime+=SIMULATION_ATOM;//elapsed;
   total_nr_frames++;
 
   //cout << "elapsed= " << elapsed << " fps= " << 1.0/elapsed << " average= " << ((double)total_nr_frames)/gametime << " in " << gametime << " seconds" << endl;

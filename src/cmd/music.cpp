@@ -1,6 +1,7 @@
 
-#include "vs_globals.h"
+
 #include "vegastrike.h"
+#include "vs_globals.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include "audiolib.h"

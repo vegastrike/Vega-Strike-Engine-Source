@@ -25,7 +25,7 @@
 #import <sys/param.h>
 #endif
 
-#include "vs_globals.h"
+
 #include "gfxlib.h"
 #include "in_kb.h"
 #include "lin_time.h"
@@ -34,6 +34,7 @@
 #include "cmd/script/mission.h"
 #include "audiolib.h"
 #include "vs_path.h"
+#include "vs_globals.h"
 #include "gfx/animation.h"
 #include "cmd/unit.h"
 #include "gfx/cockpit.h"
@@ -91,6 +92,7 @@ void cleanup(void)
 
 VegaConfig *vs_config;
 Mission *mission;
+vector <Mission *> active_missions;
 double benchmark=-1.0;
 
 char mission_name[1024];
@@ -211,7 +213,7 @@ void bootstrap_main_loop () {
   bootstrap_draw (SplashScreen);
   if (LoadMission) {
     LoadMission=false;
-    mission=new Mission(mission_name);
+    active_missions.push_back(mission=new Mission(mission_name));
 
     mission->initMission();
 

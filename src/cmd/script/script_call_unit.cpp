@@ -85,8 +85,6 @@ varInst *Mission::call_unit(missionNode *node,int mode){
 
    callback_module_unit_type method_id=(callback_module_unit_type) node->script.method_id;
 
-
-
   if(method_id==CMT_UNIT_getUnit){
     missionNode *nr_node=getArgument(node,mode,0);
     int unit_nr=doIntVar(nr_node,mode);
@@ -215,7 +213,20 @@ varInst *Mission::call_unit(missionNode *node,int mode){
     viret=newVarInst(VI_TEMP);
       viret->type=VAR_VOID;
       return viret;
-  }
+  }else if (method_id==CMT_UNIT_getCredits) {
+     viret=newVarInst(VI_TEMP);
+     viret->type=VAR_FLOAT;
+     viret->float_val=0;
+     if (mode==SCRIPT_RUN) {
+       viret->float_val=_Universe->AccessCockpit()->credits;
+     }
+   } else if (method_id==CMT_UNIT_addCredits) {
+     missionNode *nr_node=getArgument(node,mode,0);
+     float credits=doFloatVar(nr_node,mode);
+     if (mode==SCRIPT_RUN) {
+       _Universe->AccessCockpit()->credits+=credits;
+     }
+   }
   else{
     varInst *ovi=getObjectArg(node,mode);
     Unit *my_unit=getUnitObject(node,mode,ovi);

@@ -1,5 +1,6 @@
-#include "vs_globals.h"
+
 #include "vs_path.h"
+#include "vs_globals.h"
 #include "vegastrike.h"
 #include "gauge.h"
 #include "cockpit.h"
