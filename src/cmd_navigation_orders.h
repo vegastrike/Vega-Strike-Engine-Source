@@ -20,6 +20,7 @@ public:
     targetlocation = target;
     done=false;
   }
+  void SetDest (const Vector&);
   AI *Execute();
 };
 
@@ -31,6 +32,7 @@ class ChangeHeading : public Order {
   void TurnToward (float angle, float ang_vel, float &torque);
  public:
    ChangeHeading(const Vector &final_heading, float limit=0) : Order(), final_heading(final_heading), optimal_speed(limit) { type = 1;}
+  void SetDest (const Vector&);
   AI *Execute();
 };
 }

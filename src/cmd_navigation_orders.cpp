@@ -52,6 +52,11 @@ static float CalculateDecelTime (float l, float v, float &F, float D,  float mas
   return (-v + sqrtf (v*v - 2*accel*((.5*v*v/decel) - l)/(1+accel/decel)))/accel;
 } 
 
+void MoveTo::SetDest (const Vector &target) {
+    type = LOCATION;
+    targetlocation = target;
+    done = false;
+  }
 
 bool MoveTo::OptimizeSpeed (float v, float &a) {
   v += (a/parent->GetMass())*SIMULATION_ATOM;
@@ -130,6 +135,11 @@ void ChangeHeading::TurnToward (float atancalc, float ang_veli, float &torquei) 
   }
   fprintf (stderr," angle: %f\n", atancalc);
 }
+void ChangeHeading::SetDest (const Vector &target) {
+    final_heading = target;
+    done = false;
+  }
+
 bool ChangeHeading::Done(const Vector & local_heading, const Vector & ang_vel) {
   return (fabs(ang_vel.i) < THRESHOLD&&
 	  fabs(ang_vel.j) < THRESHOLD&&
