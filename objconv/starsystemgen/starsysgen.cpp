@@ -10,6 +10,18 @@
 #define M_PI 3.1415926536
 #endif
 using namespace std;
+static unsigned int starsysrandom=time (NULL);
+static void seedrand(int seed) {
+  starsysrandom=seed;
+} 
+
+static unsigned int ssrand()
+{
+        starsysrandom = ( starsysrandom * 1103515245 + 12345) % ((u_long)RAND_MAX + 1);
+        return starsysrandom;
+}
+
+namespace StarSystemGent {
 
 float mmax (float a, float b) {
   return (a>b)?a:b;
@@ -18,7 +30,7 @@ float mmax (float a, float b) {
 
 
 int rnd(int lower, int upper) {
-  return (int)( lower+ (((float(upper-lower))*rand())/(float (RAND_MAX)+1.)));
+  return (int)( lower+ (((float(upper-lower))*ssrand())/(float (RAND_MAX)+1.)));
 }
 const char nada[1]="";
 
@@ -123,7 +135,7 @@ public:
 };
 
 float grand () {
-  return float (rand())/RAND_MAX;
+  return float (ssrand())/RAND_MAX;
 }
 vector <Color> lights;
 FILE * fp =NULL;
@@ -179,6 +191,8 @@ vector <GradColor> colorGradiant;
 
 void readColorGrads (vector <string> &entity,const char * file) {
   FILE * fp = fopen (file,"r");
+  if (!fp)
+    return;
   char input_buffer[1000];
   char output_buffer[1000];
   GradColor g;
@@ -358,7 +372,7 @@ void WriteUnit(string tag, string name, string filename, Vector r, Vector s, Vec
   if (destination.length()) {
     fprintf (fp, "destination=\"%s\" ",destination.c_str()); 
   } else if (faction){
-    fprintf (fp,"faction=\"%s\" ",::faction.c_str());
+    fprintf (fp,"faction=\"%s\" ",StarSystemGent::faction.c_str());
   }
   fprintf (fp," />\n");
 }
@@ -721,6 +735,72 @@ const char * noslash (const char * in) {
   else
     return tmp;
 }
+}
+using namespace StarSystemGent;
+string getStarSystemFileName (string input) {
+  return input+string (".system");
+
+}
+string getStarSystemName (string in) {
+  char * tmp= strdup (noslash (in.c_str()));
+  tmp[0]=toupper (tmp[0]);
+  string tmP (tmp);
+  free (tmp);
+  return tmP;
+}
+string getStarSystemSector (string in) {
+  char * tmp = strdup (in.c_str());
+  char * freer=tmp;
+  while (*tmp++) {
+    if (*tmp=='/')
+      break;
+  }
+  if (*tmp=='/')
+    tmp++;
+  string sectorname (tmp);
+  free (freer);
+  return sectorname; 
+}
+void generateStarSystem (string datapath, int seed, string sector, string system, string outputfile, float sunradius, int numstars, int numgasgiants, int numrockyplanets, int nummoons, bool nebulae, bool asteroids, int numnaturalphenomena, int numstarbases, string factions, string namelist, const vector <string> &jumplocations) {
+  if (seed)
+    seedrand (seed);
+  else
+    seedrand (time(NULL));
+  nument[0]=numstars;
+  nument[1]=numgasgiants;
+  nument[2]=numrockyplanets;
+  nument[3]=nummoons;
+  numun[0]=numnaturalphenomena;
+  numun[1]=numstarbases;
+  starradius.push_back (sunradius);
+  readColorGrads (gradtex,(datapath+"stars.txt").c_str());
+  readentity (entities[1],(datapath+"planets.txt").c_str());
+  readentity (entities[2],(datapath+"gas_giants.txt").c_str());
+  readentity (entities[3],(datapath+"moons.txt").c_str());
+  readentity (units[1],(datapath+"smallunits.txt").c_str());
+  readentity (background,(datapath+"background.txt").c_str());
+  if (nebulae) {
+    readentity (units[0],(datapath+"nebulae.txt").c_str());
+  }
+  if (asteroids) {
+    readentity (units[0],(datapath+"asteroids.txt").c_str());
+  }
+  readnames (names,(datapath+namelist).c_str());
+
+  fp = fopen (outputfile.c_str(),"w");
+  for (unsigned int i=0;i<jumplocations.size();i++) {
+    entities[JUMP].push_back (jumplocations[i]);
+    
+  }
+  nument[JUMP]=entities[JUMP].size();
+  ::faction = factions;
+  CreateStarSystem();
+  fclose (fp);
+
+
+}
+#define CONSOLE_APP
+#ifdef CONSOLE_APP
 int main (int argc, char ** argv) {
 
   if (argc<9) {
@@ -731,66 +811,47 @@ int main (int argc, char ** argv) {
   if (1!=sscanf (argv[1],"%d",&seed)) {
     return 1;
   }
-  if (seed)
-    srand (seed);
-  else
-    srand (time(NULL));
-  readColorGrads (gradtex,"stars.txt");
-  readentity (entities[1],"planets.txt");
-  readentity (entities[2],"gas_giants.txt");
-  readentity (entities[3],"moons.txt");
-  readentity (units[1],"smallunits.txt");
-  readentity (background,"background.txt");
-  readnames (names,argv[11]);
-  char *filename=(char *)malloc (strlen(argv[2])+100);
-  strcpy (filename,argv[2]);
-  strcat (filename,".system");
-  fp = fopen (filename,"w");
-  strcpy (filename,noslash (argv[2]));
-  filename[0]= toupper (filename[0]);
-  systemname=string(filename);
-  free(filename);
-  starradius.push_back(0);
-  if (1!=sscanf (argv[3],"%f",&starradius[0])) {
-    return -1;
+  string sectorname (getStarSystemSector(argv[2]));
+  string filen (getStarSystemFileName (argv[2]));
+  string systemname=string(getStarSystemName ( argv[2]));
+  int numbigthings;
+  bool nebula=true;
+  bool asteroid=true;
+  vector <string> jumps;
+  for (unsigned int i=12;i<argc;i++) {
+    jumps.push_back (string(argv[i]));
+    
   }
-  if (1!=sscanf(argv[4],"%d",&nument[0])) {
-    return -1;
-  }
-  if (1!=sscanf(argv[5],"%d",&nument[1])) {
-    return -1;
-  }
-  if (1!=sscanf(argv[6],"%d",&nument[2])) {
-    return -1;
-  }
-  if (1!=sscanf(argv[7],"%d",&nument[3])) {
-    return -1; 
-  }
-  if (1==sscanf(argv[8],"AN%d",&numun[0])||1==sscanf (argv[8],"NA%d",&numun[0])) {
-    readentity (units[0],"asteroids.txt");
-    readentity (units[0],"nebulae.txt");
-  } else if (1==sscanf (argv[8],"A%d",&numun[0])) {
-    readentity (units[0],"asteroids.txt"); 
-  } else if (1==sscanf (argv[8],"N%d",&numun[0])) {
-    readentity (units[0],"nebulae.txt");
-  }else if (1==sscanf (argv[8],"%d",&numun[0])) {
-    readentity (units[0],"asteroids.txt");
-    readentity (units[0],"nebulae.txt");
+  if (1==sscanf(argv[8],"AN%d",&numbigthings)||1==sscanf (argv[8],"NA%d",&numun[0])) {
+    nebula=asteroid=true;
+  } else if (1==sscanf (argv[8],"A%d",&numbigthings)) {
+    asteroid=true;
+  } else if (1==sscanf (argv[8],"N%d",&numbigthings)) {
+    nebula=true;
+  }else if (1==sscanf (argv[8],"%d",&numbigthings)) {
+    nebula=asteroid=true;
   } else {
     return -1;
   }
-  if (1!=sscanf(argv[9],"%d",&numun[1])) {
-    return -1;
-  }
-  faction=argv[10];
 
-  unsigned int count=0;
-  for (unsigned int i=12;i<argc;i++,count++) {
-    entities[JUMP].push_back (string(argv[i]));
-    
-  }
-  nument[JUMP]=entities[JUMP].size();
-  CreateStarSystem();
-  fclose (fp);
+  generateStarSystem ("./",
+		      seed,
+		      sectorname,
+		      systemname,
+		      filen,
+		      strtol (argv[3],NULL,10),
+		      strtol (argv[4],NULL,10),
+		      strtol (argv[5],NULL,10),
+		      strtol (argv[6],NULL,10),
+		      strtol (argv[7],NULL,10),
+		      nebula,
+		      asteroid,
+		      numbigthings,
+		      strtol (argv[9],NULL,10),
+		      argv[10],
+		      argv[11],
+		      jumps);
+
   return 0;
 }
+#endif

@@ -456,6 +456,10 @@ void StarSystem::Update() {
 
   time += GetElapsedTime();
   _Universe->pushActiveStarSystem(this);
+  //WARNING PERFORMANCE HACK!!!!!
+  if (time>2*SIMULATION_ATOM) {
+    time = 2*SIMULATION_ATOM;
+  }
   if(time/SIMULATION_ATOM>=(1./PHY_NUM)) {
     while(time/SIMULATION_ATOM >= (1./PHY_NUM)) { // Chew up all SIMULATION_ATOMs that have elapsed since last update
       UnitCollection::UnitIterator iter;

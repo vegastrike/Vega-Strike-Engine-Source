@@ -36,6 +36,7 @@ struct SystemInfo {
   string name;
   string filename;
   float sunradius;
+  float compactness;
   int numstars;
   int numgas;
   int numplanets;
@@ -58,13 +59,14 @@ string getUniversePath () {
 
 void MyLoadSystem (SystemInfo si) {
 
-  generateStarSystem (getUniversePath(),si.seed,si.sector,si.name,si.filename,si.sunradius,si.numstars,si.numgas,si.numplanets,si.nummoons,si.nebulae,si.asteroids, si.numun1,si.numun2,si.faction,si.names,si.jumps);
+  generateStarSystem (getUniversePath(),si.seed,si.sector,si.name,si.filename,si.sunradius,si.compactness,si.numstars,si.numgas,si.numplanets,si.nummoons,si.nebulae,si.asteroids, si.numun1,si.numun2,si.faction,si.names,si.jumps);
 
 }
 
 SystemInfo GetSystemMin (Galaxy * galaxy) {
   SystemInfo si;
   si.sunradius=parse_float(galaxy->getVariable ("unknown_sector","min","sun_radius","5000"));
+  si.compactness=parse_float(galaxy->getVariable ("unknown_sector","min","compactness","1.5"));
   si.numstars=parse_int(galaxy->getVariable ("unknown_sector","min","num_stars","1"));
   si.numgas=parse_int(galaxy->getVariable ("unknown_sector","min","num_gas_giants","0"));
   si.numplanets=parse_int(galaxy->getVariable ("unknown_sector","min","num_planets","1"));
@@ -82,6 +84,7 @@ SystemInfo GetSystemMin (Galaxy * galaxy) {
 SystemInfo GetSystemMax (Galaxy * galaxy) {
   SystemInfo si;
   si.sunradius=parse_float(galaxy->getVariable ("unknown_sector","max","sun_radius","50000"));
+  si.compactness =parse_float(galaxy->getVariable ("unknown_sector","max","compactness","2.4"));
   si.numstars=parse_int(galaxy->getVariable ("unknown_sector","max","num_stars","2"));
   si.numgas=parse_int(galaxy->getVariable ("unknown_sector","max","num_gas_giants","3"));
   si.numplanets=parse_int(galaxy->getVariable ("unknown_sector","max","num_planets","10"));
@@ -112,6 +115,7 @@ SystemInfo AvgSystems (SystemInfo a, SystemInfo b) {
   SystemInfo si;
 
   si.sunradius=fav (a.sunradius,b.sunradius);
+  si.compactness=fav (a.compactness,b.compactness);
   si.numstars=iav (a.numstars,b.numstars);
   si.numgas=iav (a.numgas,b.numgas);
   si.numplanets=iav (a.numplanets,b.numplanets);
@@ -148,6 +152,7 @@ void MakeStarSystem (string file, Galaxy *galaxy, string origin, int forcerandom
   si.name =RemoveDotSystem (getStarSystemName (file).c_str()); 
   si.filename=MakeSharedStarSysPath(file);
   si.sunradius=parse_float(galaxy->getVariable (si.sector,si.name,"sun_radius",tostring(Ave.sunradius)));
+  si.compactness=parse_float(galaxy->getVariable (si.sector,si.name,"compactness",tostring(Ave.compactness)));
   si.numstars=parse_int(galaxy->getVariable (si.sector,si.name,"num_stars",tostring(Ave.numstars)));
   si.numgas=parse_int(galaxy->getVariable (si.sector,si.name,"num_gas_giants",tostring(Ave.numgas)));
   si.numplanets=parse_int(galaxy->getVariable (si.sector,si.name,"num_planets",tostring(Ave.numplanets)));

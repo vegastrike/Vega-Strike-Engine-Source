@@ -183,7 +183,7 @@ const float maxspeed=8;
 vector <float> starradius;
 string faction;
 vector <GradColor> colorGradiant;
-
+  float compactness=2;
   void ResetGlobalVariables () {
     nument[STAR]=nument[GAS]=nument[PLANET]=nument[MOON]=nument[JUMP]=0;
     entities[STAR].clear();
@@ -196,6 +196,7 @@ vector <GradColor> colorGradiant;
     starradius.clear();
     faction=string ("");
     colorGradiant.clear();
+    compactness=2;
   }
 
 void Tab () {
@@ -289,7 +290,7 @@ void CreateLight(unsigned int i) {
 
 Vector generateCenter (float minradii) {
   Vector r;
-  r = Vector (3*grand()+1,3*grand()+1,3*grand()+1);
+  r = Vector (compactness*grand()+1,compactness*grand()+1,compactness*grand()+1);
   r.i*=minradii;
   r.j*=minradii;
   r.k*=minradii;
@@ -322,10 +323,10 @@ float makeRS (Vector &r, Vector &s,float minradii) {
   r.i/=sm;  r.j/=sm;  r.k/=sm;
   bool tmp=false;
   float rm;
-  rm= (2*grand()+1); if (rm<1) {rm=(1+grand()*.5);tmp=true;}
+  rm= (compactness*grand()+1); if (rm<1) {rm=(1+grand()*.5);tmp=true;}
   rm*=minradii;
   r.i*=rm;r.j*=rm;r.k*=rm;
-  sm= (2*grand()+1); if (tmp) sm=(1+grand()*.5);
+  sm= (compactness*grand()+1); if (tmp) sm=(1+grand()*.5);
   sm*=minradii;
   s.i*=sm;s.j*=sm;s.k*=sm;
   return mmax (rm,sm);
@@ -600,7 +601,7 @@ void MakePlanet(float radius, int entitytype, bool forceRS, Vector R, Vector S, 
       MakeSmallUnit ();
     }
     MakeMoons ((entitytype!=JUMP&&entitytype!=MOON)?.4*radius:.8*radius,MOON,entitytype,entitytype==JUMP||entitytype==MOON);
-    MakeMoons ((entitytype!=JUMP&&entitytype!=MOON)?.4*radius:.8*radius,MOON,entitytype,entitytype==JUMP||entitytype==JUMP);
+    MakeMoons ((entitytype!=JUMP&&entitytype!=MOON)?.2*radius:.5*radius,JUMP,entitytype,entitytype==JUMP||entitytype==MOON);
   }
   radii.pop_back();
   Tab();fprintf (fp,"</Planet>\n"); 
@@ -781,9 +782,10 @@ void readnames (vector <string> &entity, const char * filename) {
 
 }
 
-void generateStarSystem (string datapath, int seed, string sector, string system, string outputfile, float sunradius, int numstars, int numgasgiants, int numrockyplanets, int nummoons, bool nebulae, bool asteroids, int numnaturalphenomena, int numstarbases, string factions, string namelist, const vector <string> &jumplocations) {
+void generateStarSystem (string datapath, int seed, string sector, string system, string outputfile, float sunradius, float compac,  int numstars, int numgasgiants, int numrockyplanets, int nummoons, bool nebulae, bool asteroids, int numnaturalphenomena, int numstarbases, string factions, string namelist, const vector <string> &jumplocations) {
   ResetGlobalVariables();
   systemname=system;
+  compactness = compac;
   if (seed)
     seedrand (seed);
   else
@@ -825,7 +827,7 @@ void generateStarSystem (string datapath, int seed, string sector, string system
 int main (int argc, char ** argv) {
 
   if (argc<9) {
-    fprintf (stderr,"Usage: starsysgen <seed> <sector>/<system> <sunradius> <numstars> <numgasgiants> <numrockyplanets> <nummoons> [N][A]<numnaturalphenomena> <numstarbases> <faction> <namelist> [OtherSystemJumpNodes]...\n");
+    fprintf (stderr,"Usage: starsysgen <seed> <sector>/<system> <sunradius>/<compactness> <numstars> <numgasgiants> <numrockyplanets> <nummoons> [N][A]<numnaturalphenomena> <numstarbases> <faction> <namelist> [OtherSystemJumpNodes]...\n");
     return 1;
   }
   int seed;
@@ -838,6 +840,9 @@ int main (int argc, char ** argv) {
   int numbigthings;
   bool nebula=true;
   bool asteroid=true;
+  float srad;
+  float comp;
+  sscanf (argv[3],"%f/%f", &srad &comp);
   vector <string> jumps;
   for (unsigned int i=12;i<argc;i++) {
     jumps.push_back (string(argv[i]));
@@ -860,7 +865,7 @@ int main (int argc, char ** argv) {
 		      sectorname,
 		      systemname,
 		      filen,
-		      strtol (argv[3],NULL,10),
+		      srad,comp;
 		      strtol (argv[4],NULL,10),
 		      strtol (argv[5],NULL,10),
 		      strtol (argv[6],NULL,10),
