@@ -27,7 +27,7 @@
 
 
 TextPlane::TextPlane(const char *filename) {
-  myDims.i = 2;  myDims.j=2;
+  myDims.i = 2;  myDims.j=-2;
   char font[64]={0};
   char fonta[64]={0};
   FILE * fp = fopen (filename, "r");
@@ -61,7 +61,7 @@ void TextPlane::Draw(const string & newText)
 {
 	// some stuff to draw the text stuff
   string::const_iterator text_it = newText.begin();
-  float row, col;
+  float tmp,row, col;
   GetPos (row,col);
   myFont->MakeActive();
   GFXPushBlendMode();
@@ -71,7 +71,7 @@ void TextPlane::Draw(const string & newText)
   GFXDisable (LIGHTING);
   GFXEnable(TEXTURE0);
   GFXBegin(GFXQUAD);
-  while(text_it != newText.end() && row>-myDims.j) {
+  while(text_it != newText.end() && row>myDims.j) {
     if(*text_it>=32 && *text_it<=127) {//always true
       GlyphPosition g = myGlyphPos[*text_it-32];
       
@@ -89,8 +89,8 @@ void TextPlane::Draw(const string & newText)
       col+=myFontMetrics.i*5;
     else
       col+=myFontMetrics.i;
-    if(col>myDims.i||*text_it == '\n') {
-      col = 0.0;
+    if(col+myFontMetrics.i>myDims.i||*text_it == '\n') {
+      GetPos (tmp,col);
       row -= myFontMetrics.j;
     }
     text_it++;

@@ -3,6 +3,7 @@
 #include "gauge.h"
 #include <float.h>
 #include "hud.h"
+#include "vdu.h"
 using XMLSupport::EnumMap;
 using XMLSupport::Attribute;
 using XMLSupport::AttributeList;
@@ -21,6 +22,8 @@ namespace CockpitXML {
       XFILE,
       XCENT,
       YCENT,
+      TOPY,
+      BOTY,
       XSIZE,
       YSIZE,
       MYFONT,
@@ -88,17 +91,19 @@ namespace CockpitXML {
     EnumMap::Pair ("ycent", YCENT),
     EnumMap::Pair ("width", XSIZE),
     EnumMap::Pair ("height", YSIZE),
+    EnumMap::Pair ("Top", TOPY),
+    EnumMap::Pair ("Bottom", BOTY),
     EnumMap::Pair ("ViewOffset", VIEWOFFSET),
     EnumMap::Pair ("CockpitOffset", COCKPITOFFSET),
     EnumMap::Pair ("GaugeUp",G_UP),
     EnumMap::Pair ("GaugeDown",G_DOWN),
     EnumMap::Pair ("GaugeLeft",G_LEFT),
-    EnumMap::Pair ("GaugeRight",G_RIGHT),
+    EnumMap::Pair ("GaugeRight",G_RIGHT)
 
   };
 
   const EnumMap element_map(element_names, 22);
-  const EnumMap attribute_map(attribute_names, 17);
+  const EnumMap attribute_map(attribute_names, 19);
 }
 
 using XMLSupport::EnumMap;
@@ -117,12 +122,17 @@ void Cockpit::endElement(void *userData, const XML_Char *name) {
 void Cockpit::beginElement(const string &name, const AttributeList &attributes) {
   AttributeList::const_iterator iter;
   Gauge::DIRECTION tmpdir=Gauge::GAUGE_UP;
-  Sprite ** newsprite;
+  Sprite ** newsprite=NULL;
+  VDU **newvdu=NULL;
+  Sprite * adjsprite=NULL;
   std::string gaugename ("shieldstat.spr");
   std::string myfont ("9x12.font");
   Names elem = (Names)element_map.lookup(name);
   Names attr;
+  unsigned char mymodes;
   float xsize=-1,ysize=-1,xcent=FLT_MAX,ycent=FLT_MAX;
+  float leftx=-10;  float rightx=-10;
+  float topy=-10; float boty = -10;
   switch (elem) {
   case COCKPIT:
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) { 
@@ -170,8 +180,20 @@ void Cockpit::beginElement(const string &name, const AttributeList &attributes) 
       case XFILE:
 	gaugename = (*iter).value;
 	break;
+      case TOPY:
+	topy = XMLSupport::parse_float ((*iter).value);
+	break;
+      case BOTY:
+	boty = XMLSupport::parse_float ((*iter).value);
+	break;
+      case LEFT:
+	leftx = XMLSupport::parse_float ((*iter).value);
+	break;
+      case RIGHT:
+	rightx = XMLSupport::parse_float ((*iter).value);
+	break;
       case XSIZE:
-		  xsize = XMLSupport::parse_float ((*iter).value);
+	xsize = XMLSupport::parse_float ((*iter).value);
 	break;
       case YSIZE:
 	ysize = XMLSupport::parse_float ((*iter).value);
@@ -203,6 +225,10 @@ void Cockpit::beginElement(const string &name, const AttributeList &attributes) 
     if (xcent!=FLT_MAX) {
       gauges[elem-KARMORF]->SetPosition (xcent,ycent);
     }
+    if (leftx!=-10&&rightx!=-10&&topy!=-10&&boty!=-10) {
+      gauges[elem-KARMORF]->SetPosition (.5*(leftx+rightx),.5*(topy+boty));
+      gauges[elem-KARMORF]->SetSize (fabs(leftx-rightx),fabs(topy-boty));
+    }
     break;
   case CROSSHAIRS:
   case PANEL: 
@@ -214,13 +240,31 @@ void Cockpit::beginElement(const string &name, const AttributeList &attributes) 
     }
     goto loadsprite;
   case RADAR: newsprite = &Radar;goto loadsprite;
-  case LVDU: newsprite = &VDU[0]; goto loadsprite;
-  case RVDU: newsprite = &VDU[1]; goto loadsprite;
+  case LVDU: newvdu = &vdu[0];mymodes=VDU::WEAPON|VDU::DAMAGE;goto loadsprite;
+  case RVDU: newvdu = &vdu[1];mymodes=VDU::NAV|VDU::TARGET;goto loadsprite;
   loadsprite:
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) { 
       switch (attribute_map.lookup((*iter).name)) {
       case XFILE:
-	(*newsprite) = new Sprite ((*iter).value.c_str());
+	if (newsprite) {
+	  (*newsprite) = new Sprite ((*iter).value.c_str());
+	  adjsprite = *newsprite;
+	} else if (newvdu) {
+	  (*newvdu) = new VDU ((*iter).value.c_str(),text,mymodes);
+	  adjsprite = *newvdu;
+	}
+	break;
+      case TOPY:
+	topy = XMLSupport::parse_float ((*iter).value);
+	break;
+      case BOTY:
+	boty = XMLSupport::parse_float ((*iter).value);
+	break;
+      case LEFT:
+	leftx = XMLSupport::parse_float ((*iter).value);
+	break;
+      case RIGHT:
+	rightx = XMLSupport::parse_float ((*iter).value);
 	break;
       case XSIZE:
 	xsize = XMLSupport::parse_float ((*iter).value);
@@ -236,12 +280,16 @@ void Cockpit::beginElement(const string &name, const AttributeList &attributes) 
 	break;
       }
     }
-    if (*newsprite) {
+    if (adjsprite) {
       if (xsize!=-1) {
-	(*newsprite)->SetSize (xsize,ysize);
+	adjsprite->SetSize (xsize,ysize);
       }
       if (xcent!=FLT_MAX) {
-	(*newsprite)->SetPosition (xcent,ycent);
+	adjsprite->SetPosition (xcent,ycent);
+      }
+      if (leftx!=-10&&rightx!=-10&&topy!=-10&&boty!=-10) {
+	adjsprite->SetPosition (.5*(leftx+rightx),.5*(topy+boty));
+	adjsprite->SetSize (fabs(leftx-rightx),fabs(topy-boty));
       }
     } else {
       if (newsprite==&Panel.back()) {
@@ -249,6 +297,8 @@ void Cockpit::beginElement(const string &name, const AttributeList &attributes) 
       }
     }
     break;
+
+    
   }
   
 }

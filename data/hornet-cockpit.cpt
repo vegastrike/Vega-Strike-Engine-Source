@@ -13,6 +13,7 @@
 	<Eject file="eject.spr"/>
 	<Speed file="radar.spr" xcent="-.28" ycent="-.30" width=".02" height=".04"/>
 	<SetSpeed file="radar.spr" xcent=".28" ycent="-.30" width=".02" height=".04"/>
-
+	<LeftVDU file="lvdu.spr" xcent="-.72" ycent="-.735" width=".42" height=".36"/>
+	<RightVDU file="rvdu.spr" xcent=".73" ycent="-.735" width=".42" height=".36"/>
 
 </Cockpit>

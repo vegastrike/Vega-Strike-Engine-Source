@@ -53,6 +53,8 @@ libgfx_a_SOURCES =	\
 	sprite.h	\
 	matrix.cpp	\
 	matrix.h	\
+	vdu.cpp		\
+	vdu.h		\
 	vec.h	\
 	vec.cpp	\
 	quaternion.cpp	\

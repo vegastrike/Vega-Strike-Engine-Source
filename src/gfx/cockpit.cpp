@@ -8,6 +8,7 @@
 #include "cmd/iterator.h"
 #include "cmd/collection.h"
 #include "hud.h"
+#include "vdu.h"
 static void LocalToRadar (const Vector & pos, float &s, float &t) {
   s = (pos.k>0?pos.k:0)+1;
   t = 2*sqrtf(pos.i*pos.i + pos.j*pos.j + s*s);
@@ -153,6 +154,7 @@ void Cockpit::DrawGauges(Unit * un) {
       gauges[i]->Draw(LookupTargetStat (i,un));
     }
   }
+  text->SetSize (2,-2);
   for (i=KPS;i<NUMGAUGES;i++) {
     if (gauges[i]) {
       float sx,sy,px,py;
@@ -208,13 +210,13 @@ void Cockpit::Delete () {
     delete Radar;
     Radar = NULL;
   }
-  if (VDU[0]) {
-    delete VDU[0];
-    VDU[0]=NULL;
+  if (vdu[0]) {
+    delete vdu[0];
+    vdu[0]=NULL;
   }
-  if (VDU[1]) {
-    delete VDU[1];
-    VDU[1]=NULL;
+  if (vdu[1]) {
+    delete vdu[1];
+    vdu[1]=NULL;
   }
   for (unsigned int j=0;j<Panel.size();j++) {
     assert (Panel[j]);
@@ -224,7 +226,8 @@ void Cockpit::Delete () {
 }
 Cockpit::Cockpit (const char * file, Unit * parent): parent (parent),cockpit_offset(0), viewport_offset(0), view(CP_FRONT), zoomfactor (1.2) {
   text=NULL;
-  Radar=VDU[0]=VDU[1]=Pit[0]=Pit[1]=Pit[2]=Pit[3]=NULL;
+  vdu[0]=vdu[1]=NULL;
+  Radar=Pit[0]=Pit[1]=Pit[2]=Pit[3]=NULL;
   for (int i=0;i<NUMGAUGES;i++) {
     gauges[i]=NULL;
   }
@@ -253,13 +256,13 @@ void Cockpit::Draw() {
 
   if ((un = parent.GetUnit())) {
     if (view==CP_FRONT) {//only draw crosshairs for front view
-      if (VDU[0]) {
-	VDU[0]->Draw();
+      if (vdu[0]) {
+	vdu[0]->Draw(un);
 	//process VDU 0:targetting VDU
       }
       DrawGauges(un);
-      if (VDU[1]) {
-      VDU[1]->Draw();
+      if (vdu[1]) {
+      vdu[1]->Draw(un);
       //process VDU, damage VDU, targetting VDU
       }
       if (Radar) {

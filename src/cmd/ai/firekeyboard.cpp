@@ -24,10 +24,18 @@ static KBSTATE jtargetkey=UP;
 static KBSTATE jmissilekey = UP;
 
 void FireKeyboard::FireKey(int, KBSTATE k) {
-  firekey = k;
+  if (k==UP&&firekey==RELEASE) {
+
+  } else {
+    firekey = k;
+  }
 }
 void FireKeyboard::JFireKey(KBSTATE k, float, float,int i) {
-  jfirekey = k;
+  if (k==UP&&jfirekey==RELEASE) {
+
+  } else {
+    jfirekey = k;
+  }
 } 
 void FireKeyboard::TargetKey(int, KBSTATE k) {
   if (targetkey!=PRESS)
@@ -92,7 +100,9 @@ void FireKeyboard::Execute () {
     parent->Fire(false);
   if (missilekey==DOWN||jmissilekey==DOWN)
     parent->Fire(true);
-  else if (firekey==UP&&jfirekey==UP) {
+  else if (firekey==RELEASE||jfirekey==RELEASE) {
+    firekey=UP;
+    jfirekey=UP;
     parent->UnFire();
   }
   if (targetkey==PRESS||jtargetkey==PRESS) {

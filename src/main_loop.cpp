@@ -261,17 +261,17 @@ void clickhandler (KBSTATE k, int x, int y, int delx, int dely, int mod) {
 
 void InitializeInput() {
 
-  	BindKey(GLUT_KEY_F1, Inside);
-	BindKey(GLUT_KEY_F2, InsideLeft);
-	BindKey(GLUT_KEY_F3, InsideRight);
-	BindKey(GLUT_KEY_F4, InsideBack);
+  	BindKey(KEY_SPECIAL_OFFSET+GLUT_KEY_F1, Inside);
+	BindKey(KEY_SPECIAL_OFFSET+GLUT_KEY_F2, InsideLeft);
+	BindKey(KEY_SPECIAL_OFFSET+GLUT_KEY_F3, InsideRight);
+	BindKey(KEY_SPECIAL_OFFSET+GLUT_KEY_F4, InsideBack);
 
 
-	BindKey(GLUT_KEY_F5, Behind);
-	BindKey(GLUT_KEY_F6, Pan);
+	BindKey(KEY_SPECIAL_OFFSET+GLUT_KEY_F5, Behind);
+	BindKey(KEY_SPECIAL_OFFSET+GLUT_KEY_F6, Pan);
 
-	BindKey(GLUT_KEY_F11, ZoomIn);
-	BindKey(GLUT_KEY_F12, ZoomOut);
+	BindKey(KEY_SPECIAL_OFFSET+GLUT_KEY_F11, ZoomIn);
+	BindKey(KEY_SPECIAL_OFFSET+GLUT_KEY_F12, ZoomOut);
 
 	BindKey('w', PitchDown);
 	BindKey('z', PitchUp);

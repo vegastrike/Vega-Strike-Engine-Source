@@ -9,6 +9,7 @@ class TextPlane;
 class Sprite;
 class Gauge;
 class Unit;
+class VDU;
 enum VIEWSTYLE {CP_FRONT, CP_LEFT, CP_RIGHT, CP_BACK, CP_CHASE, CP_PAN};
 class Cockpit {
   enum GAGUES {ARMORF,ARMORR,ARMORL,ARMORB,FUEL, SHIELDF,SHIELDR,SHIELDL,SHIELDB, ENERGY, EJECT, LOCK, HULL, KPS, SETKPS, NUMGAUGES};
@@ -17,7 +18,7 @@ class Cockpit {
   UnitContainer parent;
   Sprite *Pit [4];
   Sprite *Radar;
-  Sprite *VDU [2];
+  VDU *vdu [2];
   TextPlane *text;
   Gauge *gauges[NUMGAUGES];
   std::vector <Sprite *> Panel;
