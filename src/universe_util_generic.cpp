@@ -381,13 +381,22 @@ namespace UniverseUtil {
 								playVictoryTune();
 						mission->terminateMission();
 				}
+  static string dontBlankOut(string objective) {
+    while(1) {
+      std::string::size_type where=objective.find(".blank");
+      if (where!=string::npos) {
+        objective = objective.substr(0,where)+objective.substr(where+strlen(".blank"));
+      }else return objective;
+    }
+    return objective;
+  }
 				int addObjective(string objective) {
-						mission->objectives.push_back(Mission::Objective(0,objective));
+						mission->objectives.push_back(Mission::Objective(0,dontBlankOut(objective)));
 						return mission->objectives.size()-1;
 				}
 				void setObjective(int which, string newobjective) {
 						if (which<(int)mission->objectives.size()) {
-								mission->objectives[which].objective=newobjective;
+								mission->objectives[which].objective=dontBlankOut(newobjective);
 						}
 				}
 				void setCompleteness(int which, float completeNess) {

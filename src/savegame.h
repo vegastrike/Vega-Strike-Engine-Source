@@ -61,12 +61,12 @@ class SaveGame {
   std::string WriteSaveGame (const char * systemname, const class QVector &Pos,float credits, std::vector <std::string> unitname, int player_num, std::string fact="", bool write=true);
   std::string WritePlayerData( const QVector &FP, std::vector<std::string> unitname, const char * systemname, float credits, std::string fact="");
   std::string WriteDynamicUniverse();
-  void ReadSavedPackets (char * &buf);
+  void ReadSavedPackets (char * &buf, bool commitfaction);
   ///cast address to long (for 64 bits compatibility)
   void AddUnitToSave (const char * unitname, int type, const char * faction, long address);
   void RemoveUnitFromSave (long address);//cast it to a long
   //void ParseSaveGame (std::string filename, std::string &ForceStarSystem, std::string originalstarsystem, QVector & pos, bool &shouldupdatedfighter0pos, float &credits, std::vector <std::string> & originalunit, int player_num, char * savebuf=NULL, bool read=true);
-  void ParseSaveGame (std::string filename, std::string &ForceStarSystem, std::string originalstarsystem, QVector & pos, bool &shouldupdatedfighter0pos, float &credits, std::vector <std::string> & originalunit, int player_num, std::string savestr="", bool read=true);
+  void ParseSaveGame (std::string filename, std::string &ForceStarSystem, std::string originalstarsystem, QVector & pos, bool &shouldupdatedfighter0pos, float &credits, std::vector <std::string> & originalunit, int player_num, std::string savestr="", bool read=true, bool commitFaction=true);
 };
 void WriteSaveGame (class Cockpit * cp, bool auto_save);
 void CopySavedShips(std::string filename, int player_num,const std::vector<std::string>&starships,bool load);

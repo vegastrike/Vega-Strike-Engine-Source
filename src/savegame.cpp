@@ -585,7 +585,7 @@ void SaveGame::ReadStardate( char * &buf)
 	_Universe->current_stardate.InitTrek( stardate);
 }
 
-void SaveGame::ReadSavedPackets (char * &buf) {
+void SaveGame::ReadSavedPackets (char * &buf, bool commitfactions) {
   int a=0;
   char unitname[1024];
   char factname[1024];
@@ -596,7 +596,7 @@ void SaveGame::ReadSavedPackets (char * &buf) {
         buf+=hopto (buf,' ','\n',0);
         buf+=hopto (buf,' ','\n',0);
     if (a==0&&0==strcmp(unitname,"factions")&&0==strcmp(factname,"begin")) {
-      FactionUtil::LoadSerializedFaction(buf);
+      if (commitfactions) FactionUtil::LoadSerializedFaction(buf);
       return;//GOT TO BE THE LAST>... cus it's stupid :-) and mac requires the factions to be loaded AFTER this function call
     }else if (a==0&&0==strcmp(unitname,"mission")&&0==strcmp(factname,"data")) {
       ReadMissionData(buf);
@@ -605,10 +605,10 @@ void SaveGame::ReadSavedPackets (char * &buf) {
     }else if (a==0&&0==strcmp(unitname,"python")&&0==strcmp(factname,"data")) {
       last_written_pickled_data=last_pickled_data=UnpickleAllMissions(buf);
     }else if (a==0&&0==strcmp(unitname,"news")&&0==strcmp(factname,"data")) {
-      ReadNewsData(buf);
+      if (commitfactions) ReadNewsData(buf);
     }else if (a==0&&0==strcmp(unitname,"stardate")&&0==strcmp(factname,"data")) {
 	  // On server side we expect the latest saved stardate in dynaverse.dat too
-      ReadStardate(buf);
+      if (commitfactions) ReadStardate(buf);
     }else {
       printf ("buf unrecognized %s",buf);
       //su.push_back (SavedUnits (unitname,(clsptr)a,factname));
@@ -739,7 +739,7 @@ void SaveGame::SetSavedCredits (float c) {
 		savedcredits = c;
 }
 
-void SaveGame::ParseSaveGame (string filename, string &FSS, string originalstarsystem, QVector &PP, bool & shouldupdatepos,float &credits, vector <string> &savedstarship, int player_num, string str, bool read) {
+void SaveGame::ParseSaveGame (string filename, string &FSS, string originalstarsystem, QVector &PP, bool & shouldupdatepos,float &credits, vector <string> &savedstarship, int player_num, string str, bool read, bool commitfaction) {
 	char *tempfullbuf=0;
 	int tempfulllength=2048;
 	int readlen=0;
@@ -821,7 +821,7 @@ void SaveGame::ParseSaveGame (string filename, string &FSS, string originalstars
 			PlayerLocation=tmppos;//LaunchUnitNear(tmppos);
 		  }
 		  buf+=readlen;
-		  ReadSavedPackets (buf);
+		  ReadSavedPackets (buf,commitfaction);
 		}
 		free(freetmp2);freetmp2=NULL;
 		tmp2=NULL;

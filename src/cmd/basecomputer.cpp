@@ -2349,7 +2349,7 @@ static std::string GarnerInfoFromSaveGame(string text) {
   std::string sillytemp=CurrentSaveGameName;
   CurrentSaveGameName=text;
   savegame.SetStarSystem("");
-  savegame.ParseSaveGame(text,system,"",pos,updatepos,creds,Ships,_Universe->CurrentCockpit(),"",true);
+  savegame.ParseSaveGame(text,system,"",pos,updatepos,creds,Ships,_Universe->CurrentCockpit(),"",true,false);
   CurrentSaveGameName=sillytemp;
   text="Savegame: "+text+"#n#_________________#n#";  
   text+="Credits: "+tostring((unsigned int)creds)+"."+tostring(((unsigned int)(creds*100))%100)+"#n#";

@@ -251,7 +251,7 @@ void	NetServer::start(int argc, char **argv)
 	{
 		string dynaverse = f.ReadFull();
 		char * dynchar = strdup( dynaverse.c_str());
-		globalsave->ReadSavedPackets( dynchar);
+		globalsave->ReadSavedPackets( dynchar,true);
 		f.Close();
 	}
 
