@@ -21,6 +21,7 @@ class FlyByKeyboard: public FlyByWire {
   static void RollRightKey (int,KBSTATE);
   FlyByKeyboard (const char *configfile);
   virtual ~FlyByKeyboard();
+  void Execute (bool);//should we reset our ang velocity
   void Execute();
 };
 

@@ -69,9 +69,12 @@ FlyByKeyboard::~FlyByKeyboard() {
 }
 
 #define FBWABS(m) (m>=0?m:-m)
-
 void FlyByKeyboard::Execute () {
-  desired_ang_velocity=Vector(0,0,0);
+  FlyByKeyboard::Execute (true);
+}
+void FlyByKeyboard::Execute (bool resetangvelocity) {
+  if (resetangvelocity)
+    desired_ang_velocity=Vector(0,0,0);
 #define SSCK starshipcontrolkeys
 
   if (SSCK.dirty) {

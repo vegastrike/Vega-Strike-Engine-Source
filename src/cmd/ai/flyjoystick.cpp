@@ -26,6 +26,7 @@ void FlyByJoystick::JDecelKey (KBSTATE k, float, float, int) {
 }
 
 void FlyByJoystick::Execute() {
+  desired_ang_velocity=Vector(0,0,0); 
   if (joystick[which_joystick]->isAvailable()) {
     JoyStick *joy=joystick[which_joystick];
 
@@ -58,7 +59,7 @@ void FlyByJoystick::Execute() {
     */
 
   }
-  FlyByKeyboard::Execute();
+  FlyByKeyboard::Execute(false);
 }
 FlyByJoystick::~FlyByJoystick() {
 
