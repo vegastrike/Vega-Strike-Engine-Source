@@ -177,6 +177,7 @@ bool Mount::PhysicsAlignedFire(const Transformation &Cumulative, const Matrix & 
 						fclose(fp);
 						temp->EnqueueAI (new AIScript ((type->file+".xai").c_str()));
 						temp->EnqueueAI (new Orders::FireAllYouGot);
+						temp->GetComputerData().velocity_ref.SetUnit(target);
 					}else {
 						temp->EnqueueAI(new Orders::AggressiveAI("default.agg.xml","default.int.xml"));
 						temp->SetTurretAI();
