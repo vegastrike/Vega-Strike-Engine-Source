@@ -373,8 +373,15 @@ void Unit::RegenShields () {
   }
 
 }
-
-
+Cockpit * Unit::GetVelocityDifficultyMult(float &difficulty) const{
+  difficulty=1;
+  Cockpit * player_cockpit=_Universe->isPlayerStarship(this);
+  if ((player_cockpit)==NULL) {
+    static float exp = XMLSupport::parse_float (vs_config->getVariable ("physics","difficulty_speed_exponent",".4"));
+    difficulty = pow(g_game.difficulty,exp);
+  }
+  return player_cockpit;
+}
 void Unit::UpdatePhysics (const Transformation &trans, const Matrix &transmat, const Vector & cum_vel,  bool lastframe, UnitCollection *uc) {
   static float VELOCITY_MAX=XMLSupport::parse_float(vs_config->getVariable ("physics","velocity_max","10000"));
   if (docked&DOCKING_UNITS) {
@@ -439,12 +446,9 @@ void Unit::UpdatePhysics (const Transformation &trans, const Matrix &transmat, c
   if(AngularVelocity.i||AngularVelocity.j||AngularVelocity.k) {
     Rotate (SIMULATION_ATOM*(AngularVelocity));
   }
-  float difficulty =1;
-  Cockpit * player_cockpit=_Universe->isPlayerStarship(this);
-  if ((player_cockpit)==NULL) {
-    static float exp = XMLSupport::parse_float (vs_config->getVariable ("physics","difficulty_speed_exponent",".4"));
-    difficulty = pow(g_game.difficulty,exp);
-  }
+  float difficulty;
+  Cockpit * player_cockpit=GetVelocityDifficultyMult (difficulty);
+
   curr_physical_state.position = curr_physical_state.position +  (Velocity*SIMULATION_ATOM*difficulty).Cast();
 #ifdef DEPRECATEDPLANETSTUFF
   if (planet) {

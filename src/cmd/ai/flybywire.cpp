@@ -15,7 +15,7 @@ using Orders::MatchAngularVelocity;
 //#define MATCHLINVELSETUP()   Vector desired (desired_velocity);  /* cout << "desired= " << desired << endl; */ if (!(desired.i==-2 && desired.j==0 && desired.k==0) && !LocalVelocity) {     desired = parent->ToLocalCoordinates (desired);   }   Vector velocity (parent->UpCoordinateLevel(parent->GetVelocity()));
 //#define MATCHLINVELEXECUTE()  if(!(desired.i==-2 && desired.j==0 && desired.k==0)){ parent->Thrust ( (parent->GetMass()*(desired-velocity)/SIMULATION_ATOM), afterburn); }
 
-#define MATCHLINVELSETUP()   Unit *match=parent->VelocityReference(); Vector desired (desired_velocity); Vector FrameOfRef ((match!=NULL)?parent->ToLocalCoordinates(match->GetVelocity()):Vector(0,0,0));  if (!LocalVelocity) {desired = parent->ToLocalCoordinates (desired);}   Vector velocity (parent->UpCoordinateLevel(parent->GetVelocity()));
+#define MATCHLINVELSETUP()   Unit *match=parent->VelocityReference(); Vector desired (desired_velocity);  Vector FrameOfRef(0,0,0); if (match!=NULL) {float dif1,dif2; match->GetVelocityDifficultyMult(dif1);parent->GetVelocityDifficultyMult(dif2);FrameOfRef=parent->ToLocalCoordinates(match->GetVelocity()*dif1/dif2);};  if (!LocalVelocity) {desired = parent->ToLocalCoordinates (desired);}   Vector velocity (parent->UpCoordinateLevel(parent->GetVelocity()));
 #define MATCHLINVELEXECUTE()  { parent->Thrust ( (parent->GetMass()*(parent->ClampVelocity(desired,afterburn)+FrameOfRef-velocity)/SIMULATION_ATOM), afterburn); }
 /**
  * don't need to clamp thrust since the Thrust does it for you

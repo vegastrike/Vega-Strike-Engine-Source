@@ -754,6 +754,8 @@ public:
   const Vector &GetAngularVelocity() const { return AngularVelocity; }
   ///Return unit-space velocity
   const Vector &GetVelocity() const { return cumulative_velocity; }
+
+  class Cockpit * GetVelocityDifficultyMult(float &) const;
   void SetVelocity (const Vector & v) {Velocity = v;}
   void SetAngularVelocity (const Vector & v) {AngularVelocity = v;}
   
