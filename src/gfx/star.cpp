@@ -108,12 +108,16 @@ bool computeStarColor (float &r, float &g, float &b, Vector luminmax, float dist
 	g*=lum;
 	b*=lum;
 	static float starcolorcutoff = XMLSupport::parse_float(vs_config->getVariable("graphics","starcolorcutoff",".1"));
+	if (lum>starcolorcutoff){
+		printf ("lum %f",lum);
+	}
 	return lum>starcolorcutoff;
 }
 namespace StarSystemGent {
 extern GFXColor getStarColorFromRadius(float radius);
 }
-StarVlist::StarVlist (int num ,float spread,const std::string &our_system_name) {
+StarVlist::StarVlist (int num ,float spread,const std::string &sysnam) {
+	std::string our_system_name(sysnam);
 	lasttime=0;
 	_Universe->AccessCamera()->GetPQR(newcamr,camq,camr);
 	newcamr=camr;
@@ -137,6 +141,23 @@ StarVlist::StarVlist (int num ,float spread,const std::string &our_system_name) 
 	Vector starmax(0,0,0);
 	float minlumin=1;
 	float maxlumin=1;
+	static string allowedSectors = vs_config->getVariable("graphics","star_allowable_sectors","Vega Sol");
+	if (our_system_name.size()>0) {
+		string lumi=_Universe->getGalaxyProperty(our_system_name,"luminosity");;
+		if (lumi.length()==0||strtod(lumi.c_str(),NULL)==0) {
+			our_system_name="";
+		}else {
+		unsigned int slash =our_system_name.find("/");
+		if (slash!=string::npos) {
+			string sec = our_system_name.substr(0,slash);
+			if (allowedSectors.find(sec)==string::npos) {
+				our_system_name="";
+			}
+		}else {
+			our_system_name="";
+		}
+		}
+	}
 	if (our_system_name.size()>0) {
 		sscanf (_Universe->getGalaxyProperty(our_system_name,"xyz").c_str(),
 				"%f %f %f",
@@ -168,7 +189,8 @@ StarVlist::StarVlist (int num ,float spread,const std::string &our_system_name) 
 						maxlumin=lumin;
 					}
 					if (lumin<minlumin)
-						minlumin=lumin;
+						if (lumin>0)
+							minlumin=lumin;
 				}
 			}
 		}
@@ -185,9 +207,10 @@ StarVlist::StarVlist (int num ,float spread,const std::string &our_system_name) 
 		tmpvertex[j+1].x = -.5*xyzspread+rand()*((float)xyzspread/RAND_MAX);
 		tmpvertex[j+1].y = -.5*xyzspread+rand()*((float)xyzspread/RAND_MAX);
 		tmpvertex[j+1].z = -.5*xyzspread+rand()*((float)xyzspread/RAND_MAX);
-		tmpvertex[j+1].r=1;
-		tmpvertex[j+1].g=1;
-		tmpvertex[j+1].b=1;
+		float brightness = .1+.9*((float)rand())/RAND_MAX;
+		tmpvertex[j+1].r=brightness;
+		tmpvertex[j+1].g=brightness;
+		tmpvertex[j+1].b=brightness;
 		
 		tmpvertex[j+1].i=.57735;
 		tmpvertex[j+1].j=.57735;
@@ -245,6 +268,9 @@ StarVlist::StarVlist (int num ,float spread,const std::string &our_system_name) 
 		tmpvertex[j].r=0;
 		tmpvertex[j].g=0;
 		tmpvertex[j].b=0;
+		if (incj) {
+			printf ("%f %f %f\n",tmpvertex[j+1].r,tmpvertex[j+1].g,tmpvertex[j+1].b);
+		}
 		j+=incj;
 	}
 	fprintf (stderr,"Read In Star Count %d used: %d\n",starcount,j/2);
