@@ -23,6 +23,7 @@
 #include "vsfilesystem.h"
 #include "cmd/unit_generic.h"
 #include "aux_texture.h"
+#include "ani_texture.h"
 #include "sprite.h"
 #include "matrix.h"
 #include "gfxlib.h"
@@ -30,6 +31,9 @@
 #include "vs_globals.h"
 #include <assert.h>
 #include <math.h>
+#ifdef _WIN32
+#include <direct.h>
+#endif
 #ifndef M_PI_2
 # define M_PI_2		1.57079632679489661923	/* pi/2 */
 #endif
@@ -52,9 +56,9 @@ VSSprite::VSSprite(const char *file, enum FILTER texturefilter,GFXBOOL force) {
 	err = f.OpenReadOnly( file, VSSpriteFile);
   }
   if (err<=Ok) {
-    char texture[64]={0};
-    char texturea[64]={0};
-    f.Fscanf( "%63s %63s", texture, texturea);
+    char texture[127]={0};
+    char texturea[127]={0};
+    f.Fscanf( "%126s %126s", texture, texturea);
     f.Fscanf( "%f %f", &widtho2, &heighto2);
     f.Fscanf( "%f %f", &xcenter, &ycenter);
     
@@ -62,10 +66,30 @@ VSSprite::VSSprite(const char *file, enum FILTER texturefilter,GFXBOOL force) {
     heighto2/=-2;
     surface=NULL;
     if (g_game.use_sprites||force==GFXTRUE) {
-      if (texturea[0]=='0') {
-		surface = new Texture(texture,0,texturefilter,TEXTURE2D,TEXTURE_2D,GFXTRUE);    
+      int len=strlen(texture);
+      if (len>4&&texture[len-1]=='i'&&texture[len-2]=='n'&&texture[len-3]=='a'&&texture[len-4]=='.') {
+        char olddir[1023];
+        char *newtex=NULL;
+        for (int i=len-1;i>0;--i) {
+          if (texture[i]=='/') {
+            newtex=texture+i+1;
+            break;
+          }
+        }
+        if (newtex) {
+          getcwd(olddir,1022);
+          for (int i=len-1;i>0;--i) {
+            if (texture[i]=='/') {
+              texture[i]='\0';
+            }
+          }
+          chdir(texture);
+        }
+        surface=surface = new AnimatedTexture(f,0,texturefilter,GFXFALSE);
+      } else if (texturea[0]=='0') {
+        surface = new Texture(texture,0,texturefilter,TEXTURE2D,TEXTURE_2D,GFXTRUE,65536,GFXFALSE);
       } else {
-		surface = new Texture(texture,texturea,0,texturefilter,TEXTURE2D,TEXTURE_2D,1,0,GFXTRUE);    
+        surface = new Texture(texture,texturea,0,texturefilter,TEXTURE2D,TEXTURE_2D,1,0,GFXTRUE,65536,GFXFALSE);    
       }
       
       if (!surface->LoadSuccess()) {

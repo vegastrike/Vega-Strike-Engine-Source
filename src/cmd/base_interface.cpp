@@ -14,6 +14,7 @@
 #include "save_util.h"
 #include "unit_util.h"
 #include "gfx/cockpit.h"
+#include "gfx/ani_texture.h"
 #ifdef RENDER_FROM_TEXTURE
 #include "gfx/stream_texture.h"
 #endif
@@ -742,6 +743,7 @@ static void AnimationDraw() {
 void BaseInterface::Draw () {
 	GFXColor(0,0,0,0);
 	StartGUIFrame(GFXTRUE);
+	AnimatedTexture::UpdateAllFrame();
 	Room::BaseTalk::hastalked=false;
 	rooms[curroom]->Draw(this);
         AnimationDraw();

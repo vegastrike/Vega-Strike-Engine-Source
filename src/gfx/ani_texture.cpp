@@ -75,10 +75,15 @@ void AnimatedTexture::AniInit() {
   active=0;
   original = NULL;
 }
-AnimatedTexture::AnimatedTexture (FILE * fp, int stage, enum FILTER imm, bool detailtex){
+//AnimatedTexture::AnimatedTexture (FILE * fp, int stage, enum FILTER imm, bool detailtex){
+//  AniInit();
+//  if (fp)
+//    Load (fp,stage,imm,detailtex);
+//}
+
+AnimatedTexture::AnimatedTexture (VSFileSystem::VSFile &fp, int stage, enum FILTER imm, bool detailtex){
   AniInit();
-  if (fp)
-    Load (fp,stage,imm,detailtex);
+  Load (fp,stage,imm,detailtex);
 }
 
 Texture *AnimatedTexture::Original(){
@@ -163,57 +168,6 @@ void AnimatedTexture::Load( char * buffer, int length, int nframe, enum FILTER i
 }
 */
 
-void AnimatedTexture::Load(FILE * fp, int stage, enum FILTER ismipmapped, bool detailtex) {
-  myvec.push_back (this);
-  VSFileSystem::vs_fscanf (fp,"%d %f",&numframes,&timeperframe);
-  cumtime=0;
-  Reset();
-
-  active=0;
-  Decal = new Texture * [numframes];
-  char temp[512]="white.bmp";
-  char file[512]="white.bmp";
-  char alp[512]="white.bmp";
-  int i=0;
-  bool loadall=true;
-  if (g_game.use_animations==0||(g_game.use_animations!=0&&g_game.use_textures==0)) {
-    
-    loadall=false;
-  }
-
-
-  for (;i<numframes;i++) {
-    int numgets=0;
-    while (numgets<=0&&!VSFileSystem::vs_feof (fp)) {
-		if (fgets (temp,511,fp)) {
-			temp[511]='\0';
-			file[0]='z';file[1]='\0';
-			alp[0]='z';alp[1]='\0';//windo	ws crashes on null
-  
-			numgets = sscanf (temp,"%s %s",file,alp);
-		}else break;
-    }
-    if (loadall||i==numframes/2) {
-      if (numgets==2) {
-	Decal[i]=new Texture (file,alp,stage,ismipmapped,TEXTURE2D,TEXTURE_2D,1,0,(g_game.use_animations)?GFXTRUE:GFXFALSE,65536,detailtex?GFXTRUE:GFXFALSE);
-      }else {
-	Decal[i]=new Texture (file,stage,ismipmapped,TEXTURE2D,TEXTURE_2D,(g_game.use_animations)?GFXTRUE:GFXFALSE,65536,detailtex?GFXTRUE:GFXFALSE);
-      }    
-    }
-  }
-  if (!loadall) {
-    Texture * dec = Decal[numframes/2];
-    timeperframe*=numframes;
-    numframes=1;
-    if (Decal) {
-      delete [] Decal;
-    }
-    Decal = new Texture * [1];
-    Decal[0]=dec;
-  }
-  original = NULL;
-}
-
 void AnimatedTexture::Load(VSFileSystem::VSFile & f, int stage, enum FILTER ismipmapped, bool detailtex) {
   myvec.push_back (this);
   f.Fscanf ("%d %f",&numframes,&timeperframe);
@@ -263,4 +217,5 @@ void AnimatedTexture::Load(VSFileSystem::VSFile & f, int stage, enum FILTER ismi
     Decal[0]=dec;
   }
   original = NULL;
+  name=0; // for loadsuccess
 }

@@ -20,9 +20,7 @@ class AnimatedTexture: public Texture {
   virtual float framesPerSecond()const {return 1/timeperframe;}
   AnimatedTexture ();
   AnimatedTexture (const char * file, int stage, enum FILTER imm, bool detailtexture=false);
-  AnimatedTexture (FILE * openedfile, int stage, enum FILTER imm,bool detailtexture=false);
-  //void Load (char * buffer, int length, int nframe, enum FILTER imm,bool detailtexture=false);
-  void Load (FILE * openedfile, int stage, enum FILTER imm,bool detailtexture=false);
+  AnimatedTexture (VSFileSystem::VSFile &openedfile, int stage, enum FILTER imm,bool detailtexture=false);
   void Load(VSFileSystem::VSFile & f, int stage, enum FILTER ismipmapped, bool detailtex=false);
   void Destroy();
   virtual Texture *Original();
