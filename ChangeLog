@@ -1,5 +1,12 @@
 2002-02-06 Alexander Rawass <alexannika@users.sourceforge.net>
 	
+	* set the color of planets in the radar to blue
+	* begun to write a new targetting scheme
+	  (not working, not used yet)
+
+	
+2002-02-06 Alexander Rawass <alexannika@users.sourceforge.net>
+	
 	* various improvements on missions:
 	  - moved benchmarking/gametime from main_loop.cpp to director
 	  - message display shows the time when the message came

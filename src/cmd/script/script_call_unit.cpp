@@ -274,6 +274,19 @@ varInst *Mission::call_unit(missionNode *node,int mode){
 	viret->type=VAR_FLOAT;
 	viret->float_val=dist;
     }
+    else if(cmd=="getAngle"){
+      Unit *other_unit=getUnitArg(node,mode,1);
+
+	float angle=0.0;
+	float dist=0.0;
+	if(mode==SCRIPT_RUN){
+	  angle=my_unit->cosAngleTo(other_unit,dist);
+	  printf("angle: %f\n",angle);
+	}
+	viret=newVarInst(VI_TEMP);
+	viret->type=VAR_FLOAT;
+	viret->float_val=angle;
+    }
     else if(cmd=="getFShieldData"){
       float res=0.0;
       if(mode==SCRIPT_RUN){

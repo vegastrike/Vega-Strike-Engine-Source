@@ -798,3 +798,51 @@ const string Unit::getFgID()  {
       return fullname;
     }
 };
+
+void Unit::setTargetFg(string primary,string secondary,string tertiary){
+  target_fgid[0]=primary;
+  target_fgid[1]=secondary;
+  target_fgid[2]=tertiary;
+
+  ReTargetFg(0);
+}
+
+void Unit::ReTargetFg(int which_target){
+#if 0
+      StarSystem *ssystem=_Universe->activeStarSystem();
+      UnitCollection *unitlist=ssystem->getUnitList();
+      Iterator *uiter=unitlist->createIterator();
+
+      Unit *other_unit=uiter->current();
+      Unit *found_target=NULL;
+      int found_attackers=1000;
+
+      while(other_unit!=NULL){
+	string other_fgid=other_unit->getFgID();
+	if(other_unit->matchesFg(target_fgid[which_target])){
+	  // the other unit matches our primary target
+
+	  int num_attackers=other_unit->getNumAttackers();
+	  if(num_attackers<found_attackers){
+	    // there's less ships attacking this target than the previous one
+	    found_target=other_unit;
+	    found_attackers=num_attackers;
+	    setTarget(found_target);
+	  }
+	}
+
+	other_unit=uiter->advance();
+      }
+
+      if(found_target==NULL){
+	// we haven't found a target yet, search again
+	if(which_target<=1){
+	  ReTargetFg(which_target+1);
+	}
+	else{
+	  // we can't find any target
+	  setTarget(NULL);
+	}
+      }
+#endif
+}

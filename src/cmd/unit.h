@@ -621,6 +621,9 @@ public:
  private:
   Flightgroup *flightgroup;
   int flightgroup_subnumber;
+  
+  string target_fgid[3];
+
  protected:
   string fullname;
  public:
@@ -630,6 +633,11 @@ public:
   const string getFgID();
   void setFullname(string name)  { fullname=name; };
   
+  void setTargetFg(string primary,string secondary=string(),string tertiary=string());
+  void ReTargetFg(int which_target=0);
+  
+  int getNumAttackers();
+
 };
 ///Holds temporary values for inter-function XML communication Saves deprecated restr info
 struct Unit::XML {
