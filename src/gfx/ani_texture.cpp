@@ -11,8 +11,9 @@ static vector <AnimatedTexture *> myvec;
 
 
 void AnimatedTexture::MakeActive () {
-  if (Decal)
+  if (Decal) {
     Decal[active]->MakeActive();
+  }
 }
 void AnimatedTexture::UpdateAllPhysics() {
   for (unsigned int i=0;i<myvec.size();i++) {

@@ -479,6 +479,9 @@ bool Unit::Explode (bool drawit, float timeit) {
       //Translate (tmp,meshdata[i]->Position());
       //MultMatrix (tmp2,cumulative_transformation_matrix,tmp);
       image->explosion->SetPosition(cumulative_transformation_matrix[12],cumulative_transformation_matrix[13],cumulative_transformation_matrix[14]);
+      Vector p,q,r;
+      GetOrientation (p,q,r);
+      image->explosion->SetOrientation(p,q,r);
       if (image->explosion->Done()) {
 	delete image->explosion;	
 	image->explosion=NULL;
