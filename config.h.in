@@ -1,59 +1,58 @@
 /* config.h.in.  Generated automatically from configure.in by autoheader.  */
 
-/* Define to empty if the keyword does not work.  */
-#undef const
-
-/* Define if you have the ANSI C header files.  */
-#undef STDC_HEADERS
-
-/* Define if you can safely include both <sys/time.h> and <time.h>.  */
-#undef TIME_WITH_SYS_TIME
-
-/* Define if you have the finite function.  */
+/* Define if you have the `finite' function. */
 #undef HAVE_FINITE
 
-/* Define if you have the _finite function.  */
-#undef HAVE__FINITE
-
-/* Define if you have the getcwd function.  */
+/* Define if you have the `getcwd' function. */
 #undef HAVE_GETCWD
 
-/* Define if you have the gettimeofday function.  */
+/* Define if you have the `gettimeofday' function. */
 #undef HAVE_GETTIMEOFDAY
 
-/* Define if you have the glXGetProcAddressARB function.  */
+/* Define if you have the `glXGetProcAddressARB' function. */
 #undef HAVE_GLXGETPROCADDRESSARB
 
-/* Define if you have the isnan function.  */
-#undef HAVE_ISNAN
-
-/* Define if you have the _isnan function.  */
-#undef HAVE__ISNAN
-
-/* Define if you have the SDL_JoystickOpen function.  */
-#undef HAVE_SDL_JOYSTICKOPEN
-
-/* Define if you have the strdup function.  */
-#undef HAVE_STRDUP
-
-/* Define if you have the <AL/alext.h> header file.  */
-#undef HAVE_AL_ALEXT_H
-
-/* Define if you have the <GL/glext.h> header file.  */
-#undef HAVE_GL_GLEXT_H
-
-/* Define if you have the <ieeefp.h> header file.  */
+/* Define if you have the <ieeefp.h> header file. */
 #undef HAVE_IEEEFP_H
 
-/* Define if you have the <sys/time.h> header file.  */
+/* Define if you have the `isnan' function. */
+#undef HAVE_ISNAN
+
+/* Define if you have the `SDL_JoystickOpen' function. */
+#undef HAVE_SDL_JOYSTICKOPEN
+
+/* Define if you have the `strdup' function. */
+#undef HAVE_STRDUP
+
+/* Define if you have the <sys/time.h> header file. */
 #undef HAVE_SYS_TIME_H
 
-/* Define if you have the <unistd.h> header file.  */
+/* Define if you have the <unistd.h> header file. */
 #undef HAVE_UNISTD_H
+
+/* Define if you have the <"AL/alext.h"> header file. */
+#undef HAVE__AL_ALEXT_H_
+
+/* Define if you have the `_finite' function. */
+#undef HAVE__FINITE
+
+/* Define if you have the <"GL/glext.h"> header file. */
+#undef HAVE__GL_GLEXT_H_
+
+/* Define if you have the `_isnan' function. */
+#undef HAVE__ISNAN
 
 /* Name of package */
 #undef PACKAGE
 
+/* Define if you have the ANSI C header files. */
+#undef STDC_HEADERS
+
+/* Define if you can safely include both <sys/time.h> and <time.h>. */
+#undef TIME_WITH_SYS_TIME
+
 /* Version number of package */
 #undef VERSION
 
+/* Define to empty if `const' does not conform to ANSI C. */
+#undef const
