@@ -6,6 +6,7 @@
 #include <string>
 #include "config_xml.h"
 #include "vs_globals.h"
+#include "config_xml.h"
 #include "savegame.h"
 using namespace std;
 static std::string ForceStarSystem("") ;
@@ -91,7 +92,7 @@ vector<SavedUnits> ParseSaveGame (const string filename, string &FSS, string ori
   changehome();
   vschdir ("save");
   FILE * fp = NULL;
-  if (filename.length())
+  if (filename!=vs_config->getVariable ("player","callsign",""))
 	  fp = fopen (filename.c_str(),"r");
   vscdup();
   returnfromhome();
