@@ -619,8 +619,8 @@ void beginStar (float radius, unsigned int which) {
   Vector r,s;
   Vector center=generateAndUpdateRS (r,s,radius);
 
-  char b[2]="A";
-  b[0]+=which;
+  char b[3]=" A";
+  b[1]+=which;
   Tab();fprintf (fp,"<Planet name=\"%s\" file=\"%s\" ",(systemname+b).c_str(),entities[0][which].c_str());
   fprintf (fp,"ri=\"%f\" rj=\"%f\" rk=\"%f\" si=\"%f\" sj=\"%f\" sk=\"%f\" ",r.i,r.j,r.k,s.i,s.j,s.k);
   fprintf (fp,"radius=\"%f\" x=\"0\" y=\"0\" z=\"0\" ",radius);
@@ -782,8 +782,8 @@ void readnames (vector <string> &entity, const char * filename) {
 }
 
 void generateStarSystem (string datapath, int seed, string sector, string system, string outputfile, float sunradius, int numstars, int numgasgiants, int numrockyplanets, int nummoons, bool nebulae, bool asteroids, int numnaturalphenomena, int numstarbases, string factions, string namelist, const vector <string> &jumplocations) {
-  systemname=system;
   ResetGlobalVariables();
+  systemname=system;
   if (seed)
     seedrand (seed);
   else
