@@ -67,9 +67,9 @@ private:
   ///A list of all factions 
   
  public:
-  virtual Cockpit * isPlayerStarship (const Unit* fighter) {return NULL;}
+  Cockpit * isPlayerStarship (const Unit* fighter);
   Cockpit *AccessCockpit() {return cockpit[current_cockpit];}
-  virtual Cockpit *AccessCockpit (int i) {return cockpit[i];}
+  Cockpit *AccessCockpit (int i) {return cockpit[i];}
   unsigned int CurrentCockpit(){return current_cockpit;}
   ///Wrapper function for Star System
   virtual Camera *AccessCamera(int num) { return NULL;}
@@ -79,10 +79,10 @@ private:
   ///Wrapper function for star system
   virtual void SetViewport() {}
   virtual int numPlayers () {return 0;}
-  virtual void SetActiveCockpit (int whichcockpit) {}
-  virtual void SetActiveCockpit (Cockpit * which) {}
+  void SetActiveCockpit (int whichcockpit);
+  void SetActiveCockpit (Cockpit * which);
   virtual void WriteSaveGame(bool auto_save) {}
-  virtual void SetupCockpits (std::vector <std::string> players) {}
+  virtual void SetupCockpits (std::vector <std::string> players);
   virtual void activateLightMap() {}
   virtual void SelectCamera(int cam) {}
   //virtual unsigned int CurrentCockpit(){return 0;}

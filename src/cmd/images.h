@@ -80,6 +80,10 @@ public:
   }
 };
 
+class Box;
+class Sprite;
+class Animation;
+
 struct UnitImages {
   UnitImages() {
     VSCONSTRUCT1('i')
@@ -119,6 +123,8 @@ struct UnitImages {
   UnitContainer DockedTo;
   float unitscale;//for output
   class XMLSerializer *unitwriter;
+
+  enum GAUGES {ARMORF,ARMORB,ARMORR,ARMORL,FUEL, SHIELDF,SHIELDR,SHIELDL,SHIELDB, ENERGY, AUTOPILOT,EJECT, LOCK, HULL, KPS, SETKPS, COCKPIT_FPS, COCKPIT_LAG,NUMGAUGES};
 };
 
 struct UnitSounds {

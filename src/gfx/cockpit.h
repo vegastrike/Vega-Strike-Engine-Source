@@ -1,7 +1,6 @@
 #ifndef _COCKPIT_H_
 #define _COCKPIT_H_
-#include "xml_support.h"
-#include "cmd/container.h"
+#include "gfx/cockpit_generic.h"
 #include "gfxlib.h"
 #include "gfxlib_struct.h"
 #include <vector>
@@ -10,7 +9,6 @@ class TextPlane;
 class Sprite;
 class Gauge;
 class Unit;
-#include "in.h"
 #include "vdu.h"
 #include "camera.h"
 #define MAXVDUS 10
@@ -20,25 +18,13 @@ class Unit;
  * Gauges are used to indicate analog controls, and some diagital ones
  * The ones starting from KPS are digital with text readout
  */
-class Cockpit {
-public:
-  enum GAGUES {ARMORF,ARMORB,ARMORR,ARMORL,FUEL, SHIELDF,SHIELDR,SHIELDL,SHIELDB, ENERGY, AUTOPILOT,EJECT, LOCK, HULL, KPS, SETKPS,  FPS, NUMGAUGES, LAG};
+class GameCockpit: public Cockpit {
 private:
   Camera cam[NUM_CAM];
-  int currentcamera;
-  float radar_time;
-  float gauge_time [NUMGAUGES];
   float vdu_time [MAXVDUS];
   /// 4 armor vals and 1 for startfuel
   unsigned short StartArmor[5];
   ///saved values to compare with current values (might need more for damage)
-  float maxfuel, maxhull;
-  ///this is the parent that Cockpit will read data from
-  UnitContainer parent; 
-  UnitContainer parentturret; 
-  int unitfaction;
-  ///4 views f/r/l/b
-  float shakin;
   std::list <Matrix> headtrans;
   class Mesh * mesh;
   Sprite *Pit [4];
@@ -51,18 +37,9 @@ private:
   GFXColor textcol;
   ///The font that the entire cockpit will use. Currently without color
   TextPlane *text;
-  Gauge *gauges[NUMGAUGES];
+  Gauge *gauges[UnitImages::NUMGAUGES];
   ///holds misc panels.  Panel[0] is always crosshairs (and adjusted to be in center of view screen, not cockpit)
   std::vector <Sprite *> Panel;
-  //0 means no autopilot...positive autopilto in progress
-  float autopilot_time;
-  UnitContainer autopilot_target;//usually null
-  /**  
-   * two values that represent the adjustment to perspective needed to center teh crosshairs in the perceived view.
-   */
-  float cockpit_offset, viewport_offset;
-  ///style of current view (chase cam, inside)
-  enum VIEWSTYLE view;
   ///flag to decide whether to draw all target boxes
   bool draw_all_boxes;
   bool draw_line_to_target,draw_line_to_targets_target;
@@ -81,8 +58,6 @@ private:
   void LocalToRadar (const Vector & pos, float &s, float &t);
 
   void LoadXML (const char *file);
-  static void beginElement(void *userData, const XML_Char *name, const XML_Char **atts);
-  static void endElement(void *userData, const XML_Char *name);
   void beginElement(const string &name, const AttributeList &attributes);
   void endElement(const string &name);
   ///Destructs cockpit info for new loading
@@ -100,41 +75,21 @@ private:
   void DrawEliteBlips(Unit * un);
   ///Draws gauges
   void DrawGauges(Unit * un);
-  float cockpit_time;
-  bool ejecting;
  public:
   void InitStatic ();
   void Shake (float amt);
-  float godliness;
-  void Autopilot (Unit * target);
-  void RestoreGodliness();
+  int Autopilot (Unit * target);
  ///Restores the view from the IDentity Matrix needed to draw sprites
   void RestoreViewPort();
-  std::string GetUnitFileName () {return unitfilename;}
-  std::string GetUnitModifications() {return unitmodname;}
-  std::string communication_choices;
-  float credits;//how much money player has
-  ///How far away chasecam and pan cam is
-  float zoomfactor;
-  Cockpit (const char * file, Unit * parent, const std::string &pilotname);
-  ~Cockpit();
+  GameCockpit (const char * file, Unit * parent, const std::string &pilotname);
+  ~GameCockpit();
   ///Looks up a particular Gauge stat on target unit
   float LookupTargetStat (int stat, Unit *target);
   ///Loads cockpit info...just as constructor
   void Init (const char * file);
-  ///Sets owner of this cockpit
-  //  unsigned int whichcockpit;//0 is the first player, 1 is the second and so forth
-  class Flightgroup * fg;
-  class StarSystem* activeStarSystem;//used for context switch in Universe
-  void SetParent(Unit * unit, const char * filename, const char * unitmodname,const QVector &startloc);
-  Unit * GetParent () {return parent.GetUnit();}
-  Unit * GetSaveParent ();
   ///Draws Cockpit then restores viewport
   void Draw();
   void Update();//respawns and the like.
-  ///Sets the current viewstyle
-  void SetView (const enum VIEWSTYLE tmp);
-  enum VIEWSTYLE GetView () {return view;}
   ///Sets up the world for rendering...call before draw
   void SetupViewPort (bool clip=true);
   void VDUSwitch (int vdunum);

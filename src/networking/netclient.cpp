@@ -406,7 +406,7 @@ void	NetClient::getZoneData()
 			memcpy( &Clients[nser]->current_state, &cs, state_size);
 			memcpy( &Clients[nser]->current_desc, &cd, desc_size);
 			// Launch the unit in the game
-			Clients[nser]->game_unit = GameUniverseUtil::launch (string(""),"avenger",string(""),string( "unit"), string("default"),1,0, cs.getPosition(), string(""));
+			Clients[nser]->game_unit = UniverseUtil::launch (string(""),"avenger",string(""),string( "unit"), string("default"),1,0, cs.getPosition(), string(""));
 			/*
 			Clients[nser]->game_unit = UnitFactory::createUnit( "avenger",false,0,string(""),NULL,0);
 			Clients[nser]->game_unit->SetTurretAI();
@@ -465,7 +465,7 @@ void	NetClient::addClient()
     _Universe.activeStarSystem()->AddUnit(Clients[cltserial]->game_unit);
 	*/
 	// Or :
-	Clients[cltserial]->game_unit = GameUniverseUtil::launch (string(""),"avenger",string(""),string( "unit"), string("default"),1,0, cs.getPosition(), string(""));
+	Clients[cltserial]->game_unit = UniverseUtil::launch (string(""),"avenger",string(""),string( "unit"), string("default"),1,0, cs.getPosition(), string(""));
 	Clients[cltserial]->game_unit->PrimeOrders();
 	Clients[cltserial]->game_unit->SetNetworkMode( true);
 	//cout<<"Addclient 4"<<endl;

@@ -1,14 +1,27 @@
 #include "configxml.h"
-#include "unit_generic.h"
+#include "cmd/unit_generic.h"
 #include "lin_time.h"
 #include "xml_serializer.h"
 #include "vs_path.h"
 #include "file_main.h"
 #include "unit_factory.h"
+#include "unit_util.h"
+#include "script/mission.h"
+#include "script/flightgroup.h"
+#include "cmd/ai/fire.h"
+#include "cmd/ai/turretai.h"
+#include "cmd/ai/navigation.h"
+#include "cmd/ai/script.h"
+#include "cmd/ai/missionscript.h"
+#include "cmd/ai/flybywire.h"
+#include "cmd/ai/aggressive.h"
+#include "python/python_class.h"
 #include <algorithm>
 #ifdef _WIN32
 #define strcasecmp stricmp
 #endif
+
+using namespace Orders;
 
 float copysign (float x, float y) {
 	if (y>0)
@@ -17,6 +30,9 @@ float copysign (float x, float y) {
 			return -x;
 }
 
+float rand01 () {
+	return ((float)rand()/(float)RAND_MAX);
+}
 float capship_size=500;
 unsigned short apply_float_to_short (float tmp) {
   unsigned  short ans = (unsigned short) tmp;
@@ -456,7 +472,7 @@ void Unit::Init()
 
   scanner.last_scantime=0.0;
   // No cockpit reference here
- //int numg= 1+MAXVDUS+Cockpit::NUMGAUGES;
+ //int numg= 1+MAXVDUS+UnitImages::NUMGAUGES;
   //image->cockpit_damage=(float*)malloc((numg)*sizeof(float));
   //for (unsigned int damageiterator=0;damageiterator<numg;damageiterator++) {
 //	image->cockpit_damage[damageiterator]=1;
@@ -468,8 +484,7 @@ void Unit::Init()
   CollideInfo.Mini.Set (0,0,0);
   CollideInfo.Maxi.Set (0,0,0);
   */
-  // No AI here
-  //SetAI (new Order());
+  SetAI (new Order());
   /*
   yprrestricted=0;
   ymin = pmin = rmin = -PI;
@@ -491,6 +506,15 @@ void Unit::Init()
   //  Fire();
 }
 
+static bool CheckAccessory (Unit * tur) {
+  bool accessory = tur->name.find ("accessory")!=string::npos;
+  if (accessory) {
+    tur->SetAngularVelocity(tur->DownCoordinateLevel(Vector (tur->GetComputerData().max_pitch,
+							   tur->GetComputerData().max_yaw,
+							   tur->GetComputerData().max_roll)));
+  }
+  return accessory;
+}
 
 const string Unit::getFgID()  {
     if(flightgroup!=NULL){
@@ -675,10 +699,236 @@ void Unit::SetVisible(bool invis) {
 
 float Unit::GetElasticity() {return .5;}
 
+/***********************************************************************************/
+/**** UNIT AI STUFF                                                                */
+/***********************************************************************************/
+void Unit::LoadAIScript(const std::string & s) {
+  static bool init=false;
+  //  static bool initsuccess= initPythonAI();
+  if (s.find (".py")!=string::npos) {
+    Order * ai = PythonClass <FireAt>::Factory (s);
+    PrimeOrders (ai);
+    return;
+  }else {
+    if (s.length()>0) {
+      if (*s.begin()=='_') {
+	mission->addModule (s.substr (1));
+	PrimeOrders (new AImissionScript (s.substr(1)));
+      }else {
+	string ai_agg=s+".agg.xml";
+	string ai_int=s+".int.xml";
+	PrimeOrders( new Orders::AggressiveAI (ai_agg.c_str(), ai_int.c_str()));
+      }
+    }else {
+      PrimeOrders();
+    }
+  }
+}
+void Unit::eraseOrderType (unsigned int type) {
+	if (aistate) {
+		aistate->eraseType(type);
+	}
+}
+bool Unit::LoadLastPythonAIScript() {
+  Order * pyai = PythonClass <Orders::FireAt>::LastPythonClass();
+  if (pyai) {
+    PrimeOrders (pyai);
+  }else if (!aistate) {
+    PrimeOrders();
+    return false;
+  }
+  return true;
+}
+bool Unit::EnqueueLastPythonAIScript() {
+  Order * pyai = PythonClass <Orders::FireAt>::LastPythonClass();
+  if (pyai) {
+    EnqueueAI (pyai);
+  }else if (!aistate) {
+    return false;
+  }
+  return true;
+}
+
+void Unit::PrimeOrders (Order * newAI) {
+  if (newAI) {
+    if (aistate) {
+      aistate->Destroy();
+    }
+    aistate = newAI;
+    newAI->SetParent (this);
+  }else {
+    PrimeOrders();
+  }
+}
+void Unit::PrimeOrders () {
+  if (aistate) {
+    aistate->Destroy();
+    aistate=NULL;
+  }
+  aistate = new Order; //get 'er ready for enqueueing
+  aistate->SetParent (this);
+}
+
+void Unit::SetAI(Order *newAI)
+{
+  newAI->SetParent(this);
+  if (aistate) {
+    aistate->ReplaceOrder (newAI);
+  }else {
+    aistate = newAI;
+  }
+}
+void Unit::EnqueueAI(Order *newAI) {
+  newAI->SetParent(this);
+  if (aistate) {
+    aistate->EnqueueOrder (newAI);
+  }else {
+    aistate = newAI;
+  }
+}
+void Unit::EnqueueAIFirst(Order *newAI) {
+  newAI->SetParent(this);
+  if (aistate) {
+    aistate->EnqueueOrderFirst (newAI);
+  }else {
+    aistate = newAI;
+  }
+}
+void Unit::ExecuteAI() {
+  if (flightgroup) {
+      Unit * leader = flightgroup->leader.GetUnit();
+      if (leader?(flightgroup->leader_decision>-1)&&(leader->getFgSubnumber()>=getFgSubnumber()):true) {//no heirarchy in flight group
+	if (!leader) {
+	  flightgroup->leader_decision = flightgroup->nr_ships;
+	}
+	flightgroup->leader.SetUnit(this);
+      }
+      flightgroup->leader_decision--;
+  
+  }
+  if(aistate) aistate->Execute();
+  if (!SubUnits.empty()) {
+    un_iter iter =getSubUnits();
+    Unit * un;
+    while ((un = iter.current())) {
+      un->ExecuteAI();//like dubya
+      iter.advance();
+    }
+  }
+}
+
+string Unit::getFullAIDescription(){
+  if (getAIState()) {
+    return getFgID()+":"+getAIState()->createFullOrderDescription(0).c_str();
+  }else {
+    return "no order";
+  }
+}
+
+float Unit::getRelation (Unit * targ) {
+  if (aistate) {
+    return aistate->GetEffectiveRelationship (targ);
+  }else {
+    return FactionUtil::GetIntRelation (faction,targ->faction);
+  }
+}
+
+void Unit::setTargetFg(string primary,string secondary,string tertiary){
+  target_fgid[0]=primary;
+  target_fgid[1]=secondary;
+  target_fgid[2]=tertiary;
+
+  ReTargetFg(0);
+}
+
+void Unit::ReTargetFg(int which_target){
+#if 0
+      StarSystem *ssystem=_Universe.activeStarSystem();
+      UnitCollection *unitlist=ssystem->getUnitList();
+      Iterator uiter=unitlist->createIterator();
+
+      GameUnit *other_unit=uiter.current();
+      GameUnit *found_target=NULL;
+      int found_attackers=1000;
+
+      while(other_unit!=NULL){
+	string other_fgid=other_unit->getFgID();
+	if(other_unit->matchesFg(target_fgid[which_target])){
+	  // the other unit matches our primary target
+
+	  int num_attackers=other_unit->getNumAttackers();
+	  if(num_attackers<found_attackers){
+	    // there's less ships attacking this target than the previous one
+	    found_target=other_unit;
+	    found_attackers=num_attackers;
+	    setTarget(found_target);
+	  }
+	}
+
+	other_unit=uiter.advance();
+      }
+
+      if(found_target==NULL){
+	// we haven't found a target yet, search again
+	if(which_target<=1){
+	  ReTargetFg(which_target+1);
+	}
+	else{
+	  // we can't find any target
+	  setTarget(NULL);
+	}
+      }
+#endif
+}
+
+void Unit::SetTurretAI () {
+  static bool talkinturrets = XMLSupport::parse_bool(vs_config->getVariable("AI","independent_turrets","false"));
+  if (talkinturrets) {
+    UnitCollection::UnitIterator iter = getSubUnits();
+    Unit * un;
+    while (NULL!=(un=iter.current())) {
+      if (!CheckAccessory(un)) {
+	un->EnqueueAIFirst (new Orders::FireAt(.2,15));
+	un->EnqueueAIFirst (new Orders::FaceTarget (false,3));
+      }
+      un->SetTurretAI ();
+      iter.advance();
+    }
+  }else {
+    UnitCollection::UnitIterator iter = getSubUnits();
+    Unit * un;
+    while (NULL!=(un=iter.current())) {
+      if (!CheckAccessory(un)) {
+	if (un->aistate) {
+	  un->aistate->Destroy();
+	}
+	un->aistate = (new Orders::TurretAI());
+	un->aistate->SetParent (un);
+      }
+      un->SetTurretAI ();
+      iter.advance();
+    }    
+  }
+}
+void Unit::DisableTurretAI () {
+  UnitCollection::UnitIterator iter = getSubUnits();
+  Unit * un;
+  while (NULL!=(un=iter.current())) {
+    if (un->aistate) {
+      un->aistate->Destroy();
+    }
+    un->aistate = new Order; //get 'er ready for enqueueing
+    un->aistate->SetParent (un);
+    un->UnFire();
+    un->DisableTurretAI ();
+    iter.advance();
+  }
+}
 
 /***********************************************************************************/
 /**** UNIT_PHYSICS STUFF                                                           */
 /***********************************************************************************/
+
 
 void Unit::Rotate (const Vector &axis)
 {
@@ -701,7 +951,7 @@ void Unit::Rotate (const Vector &axis)
 	}
 }
 
-void Unit:: FireEngines (const Vector &Direction/*unit vector... might default to "r"*/,
+void Unit::FireEngines (const Vector &Direction/*unit vector... might default to "r"*/,
 					float FuelSpeed,
 					float FMass)
 {
@@ -1065,6 +1315,212 @@ Vector Unit::ToWorldCoordinates(const Vector &v) const {
 /**** UNIT_DAMAGE STUFF                                                            */
 /***********************************************************************************/
 
+// TO TEST
+float Unit::ApplyLocalDamage (const Vector & pnt, const Vector & normal, float amt, Unit * affectedUnit,const GFXColor &color, float phasedamage) {
+  static bool nodockdamage = XMLSupport::parse_float (vs_config->getVariable("physics","no_damage_to_docked_ships","false"));
+  if (nodockdamage) {
+    if (DockedOrDocking()&(DOCKED_INSIDE|DOCKED)) {
+      return -1;
+    }
+  }
+  static float nebshields=XMLSupport::parse_float(vs_config->getVariable ("physics","nebula_shield_recharge",".5"));
+  if (affectedUnit!=this) {
+    affectedUnit->ApplyLocalDamage (pnt,normal,amt,affectedUnit,color,phasedamage);
+    return -1;
+  }
+  amt *= 1-.01*shield.leak;
+  float percentage=0;
+  if (GetNebula()==NULL||(nebshields>0)) {
+    percentage = DealDamageToShield (pnt,amt);
+  }
+  return percentage;
+}
+
+// Changed order of things -> Vectors and ApplyLocalDamage are computed before Cockpit thing now
+void Unit::ApplyDamage (const Vector & pnt, const Vector & normal, float amt, Unit * affectedUnit, const GFXColor & color, Unit * ownerDoNotDereference, float phasedamage) {
+  Vector localpnt (InvTransform(cumulative_transformation_matrix,pnt));
+  Vector localnorm (ToLocalCoordinates (normal));
+  ApplyLocalDamage(localpnt, localnorm, amt,affectedUnit,color,phasedamage);
+}
+
+// NUMGAUGES has been moved to images.h in UnitImages
+void Unit::DamageRandSys(float dam, const Vector &vec) {
+	float deg = fabs(180*atan2 (vec.i,vec.k)/M_PI);
+	float randnum=rand01();
+	float degrees=deg;
+	if (degrees>180) {
+		degrees=360-degrees;
+	}
+	if (degrees>=0&&degrees<20) {
+		//DAMAGE COCKPIT
+		if (randnum>=.85) {
+			computer.set_speed=(rand01()*computer.max_speed*(5/3))-(computer.max_speed*(2/3)); //Set the speed to a random speed
+		} else if (randnum>=.775) {
+			computer.itts=false; //Set the computer to not have an itts
+		} else if (randnum>=.7) {
+			computer.radar.color=false; //set the radar to not have color
+		} else if (randnum>=.5) {
+			computer.target=NULL; //set the target to NULL
+		} else if (randnum>=.4) {
+			limits.retro*=dam;
+		} else if (randnum>=.3275) {
+			computer.radar.maxcone+=(1-dam);
+			if (computer.radar.maxcone>.9)
+				computer.radar.maxcone=.9;
+		}else if (randnum>=.325) {
+			computer.radar.lockcone+=(1-dam);
+			if (computer.radar.lockcone>.95)
+				computer.radar.lockcone=.95;
+		} else if (randnum>=.25) {
+			computer.radar.trackingcone+=(1-dam);
+			if (computer.radar.trackingcone>.98)
+				computer.radar.trackingcone=.98;
+		} else if (randnum>=.175) {
+			computer.radar.maxrange*=dam;
+		} else {
+		  int which= rand()%(1+UnitImages::NUMGAUGES+MAXVDUS);
+		  image->cockpit_damage[which]*=dam;
+		  if (image->cockpit_damage[which]<.1) {
+		    image->cockpit_damage[which]=0;
+		  }
+		}
+		return;
+	}
+	if (degrees>=20&&degrees<35) {
+		//DAMAGE MOUNT
+		if (randnum>=.65&&randnum<.9) {
+			image->ecm*=dam;
+		} else if (GetNumMounts()) {
+			unsigned int whichmount=rand()%GetNumMounts();
+			if (randnum>=.9) {
+				mounts[whichmount]->status=GameUnit::GameMount::DESTROYED;
+			}else if (mounts[whichmount]->ammo>0&&randnum>=.4) {
+			  mounts[whichmount]->ammo*=dam;
+			} else if (randnum>=.1) {
+				mounts[whichmount]->time_to_lock+=(100-(100*dam));
+			} else {
+				mounts[whichmount]->size&=(~weapon_info::AUTOTRACKING);
+			}
+		}
+		return;
+	}
+	if (degrees>=35&&degrees<60) {
+		//DAMAGE FUEL
+		if (randnum>=.75) {
+			fuel*=dam;
+		} else if (randnum>=.5) {
+			this->afterburnenergy+=((1-dam)*recharge);
+		} else if (randnum>=.25) {
+			image->cargo_volume*=dam;
+		} else {  //Do something NASTY to the cargo
+			if (image->cargo.size()>0) {
+				int i=0;
+				unsigned int cargorand;
+				do {
+					cargorand=rand()%image->cargo.size();
+				} while (image->cargo[cargorand].quantity!=0&&++i<image->cargo.size());
+				image->cargo[cargorand].quantity*=dam;
+			}
+		}
+		return;
+	}
+	if (degrees>=60&&degrees<90) {
+		//DAMAGE ROLL/YAW/PITCH/THRUST
+		if (randnum>=.8) {
+			computer.max_pitch*=dam;
+		} else if (randnum>=.6) {
+			computer.max_yaw*=dam;
+		} else if (randnum>=.55) {
+			computer.max_roll*=dam;
+		} else if (randnum>=.5) {
+			limits.roll*=dam;
+		} else if (randnum>=.3) {
+			limits.yaw*=dam;
+		} else if (randnum>=.1) {
+			limits.pitch*=dam;
+		} else {
+			limits.lateral*=dam;
+		}
+		return;
+	}
+	if (degrees>=90&&degrees<120) {
+		//DAMAGE Shield
+		//DAMAGE cloak
+		if (randnum>=.95) {
+			this->cloaking=-1;
+		} else if (randnum>=.78) {
+			image->cloakenergy+=((1-dam)*recharge);
+		} else if (randnum>=.7) {
+			cloakmin+=(rand()%(32000-cloakmin));
+		}
+		switch (shield.number) {
+		case 2:
+			if (randnum>=.35&&randnum<.7) {
+				shield.fb[2]*=dam;
+			} else {
+				shield.fb[3]*=dam;
+			}
+			break;
+		case 4:
+			if (randnum>=.5&&randnum<.7) {
+				shield.fbrl.frontmax*=dam;
+			} else if (randnum>=.3) {
+				shield.fbrl.backmax*=dam;
+			} else if (deg>180) {
+				shield.fbrl.leftmax*=dam;
+			} else {
+				shield.fbrl.rightmax*=dam;
+			}
+			break;
+		case 6:
+			if (randnum>=.4&&randnum<.7) {
+				shield.fbrltb.fbmax*=dam;
+			} else {
+				shield.fbrltb.rltbmax*=dam;
+			}
+			break;
+		}
+		return;
+	}
+	if (degrees>=120&&degrees<150) {
+		//DAMAGE Reactor
+		//DAMAGE JUMP
+		if (randnum>=.9) {
+			shield.leak+=((1-dam)*100);
+		} else if (randnum>=.7) {
+			shield.recharge*=dam;
+		} else if (randnum>=.5) {
+			this->recharge*=dam;
+		} else if (randnum>=.3) {
+			this->maxenergy*=dam;
+		} else if (randnum>=.2) {
+			this->jump.energy*=(2-dam);
+		} else if (randnum>=.03){
+			this->jump.damage+=100*(1-dam);
+		} else {
+		  if (image->repair_droid>0) {
+		    image->repair_droid--;
+		  }
+		}
+		return;
+	}
+	if (degrees>=150&&degrees<=180) {
+		//DAMAGE ENGINES
+		if (randnum>=.8) {
+			computer.max_ab_speed*=dam;
+		} else if (randnum>=.6) {
+			computer.max_speed*=dam;
+		} else if (randnum>=.4) {
+			limits.afterburn*=dam;
+		} else if (randnum>=.2) {
+			limits.vertical*=dam;
+		} else {
+			limits.forward*=dam;
+		}
+		return;
+	}
+}
+
 void Unit::Kill(bool erasefromsave) {
   if (docked&(DOCKING_UNITS)) {
     vector <Unit *> dockedun;
@@ -1237,7 +1693,7 @@ void Unit::ProcessDeleteQueue() {
   }
 }
 
-float Unit::DealDamageToHullReturnArmor (const Vector & pnt, float damage, unsigned short * &target) {
+float Unit::DealDamageToHullReturnArmor (const Vector & pnt, float damage, unsigned short * &targ) {
   float percent;
 #ifndef ISUCK
   if (hull<0) {
@@ -1246,18 +1702,19 @@ float Unit::DealDamageToHullReturnArmor (const Vector & pnt, float damage, unsig
 #endif
   if (fabs  (pnt.k)>fabs(pnt.i)) {
     if (pnt.k>0) {
-      target = &armor.front;
+      targ = &armor.front;
     }else {
-      target = &armor.back;
+      targ = &armor.back;
     }
   }else {
     if (pnt.i>0) {
-      target = &armor.left;
+      targ = &armor.left;
     }else {
-      target = &armor.right;
+      targ = &armor.right;
     }
   }
-  percent = damage/(*target+hull);
+  percent = damage/(*targ+hull);
+
   return percent;
 }
 
@@ -1598,6 +2055,110 @@ void Unit::SetCollisionParent (Unit * name) {
 /***********************************************************************************/
 /**** UNIT_DOCK STUFF                                                            */
 /***********************************************************************************/
+
+bool Unit::RequestClearance (Unit * dockingunit) {
+    static float clearencetime=(XMLSupport::parse_float (vs_config->getVariable ("general","dockingtime","20")));
+    EnqueueAIFirst (new ExecuteFor (new Orders::MatchVelocity (Vector(0,0,0),
+							       Vector(0,0,0),
+							       true,
+							       false,
+							       true),clearencetime));
+    if (std::find (image->clearedunits.begin(),image->clearedunits.end(),dockingunit)==image->clearedunits.end())
+      image->clearedunits.push_back (dockingunit);
+    return true;
+}
+
+void Unit::FreeDockingPort (unsigned int i) {
+      if (image->dockedunits.size()==1) {
+	docked&= (~DOCKING_UNITS);
+      }
+      unsigned int whichdock =image->dockedunits[i]->whichdock;
+      image->dockingports[whichdock].used=false;      
+      image->dockedunits[i]->uc.SetUnit(NULL);
+      delete image->dockedunits[i];
+      image->dockedunits.erase (image->dockedunits.begin()+i);
+
+}
+static Transformation HoldPositionWithRespectTo (Transformation holder, const Transformation &changeold, const Transformation &changenew) {
+  Quaternion bak = holder.orientation;
+  holder.position=holder.position-changeold.position;
+
+  Quaternion invandrest =changeold.orientation.Conjugate();
+  invandrest*=  changenew.orientation;
+  holder.orientation*=invandrest;
+  Matrix m;
+
+  invandrest.to_matrix(m);
+  holder.position = TransformNormal (m,holder.position);
+
+  holder.position=holder.position+changenew.position;
+  static bool changeddockedorient=(XMLSupport::parse_bool (vs_config->getVariable ("physics","change_docking_orientation","false")));
+  if (!changeddockedorient) {
+    holder.orientation = bak;
+  }
+  return holder;
+}
+void Unit::PerformDockingOperations () {
+  for (unsigned int i=0;i<image->dockedunits.size();i++) {
+    Unit * un;
+    if ((un=image->dockedunits[i]->uc.GetUnit())==NULL) {
+      FreeDockingPort (i);
+      i--;
+      continue;
+    }
+    Transformation t = un->prev_physical_state;
+    un->prev_physical_state=un->curr_physical_state;
+    un->curr_physical_state =HoldPositionWithRespectTo (un->curr_physical_state,prev_physical_state,curr_physical_state);
+    un->NetForce=Vector(0,0,0);
+    un->NetLocalForce=Vector(0,0,0);
+    un->NetTorque=Vector(0,0,0);
+    un->NetLocalTorque=Vector (0,0,0);
+    un->AngularVelocity=Vector (0,0,0);
+    un->Velocity=Vector (0,0,0);
+    if (un==_Universe.AccessCockpit()->GetParent()) {
+      ///CHOOSE NEW MISSION
+      for (unsigned int i=0;i<image->clearedunits.size();i++) {
+	if (image->clearedunits[i]==un) {//this is a hack because we don't have an interface to say "I want to buy a ship"  this does it if you press shift-c in the base
+	  image->clearedunits.erase(image->clearedunits.begin()+i);
+	  un->UpgradeInterface(this);
+	}
+      }
+    }
+    //now we know the unit's still alive... what do we do to him *G*
+    ///force him in a box...err where he is
+  }
+}
+bool Unit::Dock (Unit * utdw) {
+  if (docked&(DOCKED_INSIDE|DOCKED))
+    return false;
+  std::vector <Unit *>::iterator lookcleared;
+  if ((lookcleared = std::find (utdw->image->clearedunits.begin(),
+				utdw->image->clearedunits.end(),this))!=utdw->image->clearedunits.end()) {
+    int whichdockport;
+    if ((whichdockport=utdw->CanDockWithMe(this))!=-1) {
+      utdw->image->dockingports[whichdockport].used=true;
+      utdw->docked|=DOCKING_UNITS;
+      utdw->image->clearedunits.erase (lookcleared);
+      utdw->image->dockedunits.push_back (new DockedUnits (this,whichdockport));
+      if (utdw->image->dockingports[whichdockport].internal) {
+	RemoveFromSystem();	
+       	invisible=true;
+	docked|=DOCKED_INSIDE;
+      }else {
+	docked|= DOCKED;
+      }
+      image->DockedTo.SetUnit (utdw);
+      computer.set_speed=0;
+      if (this==_Universe.AccessCockpit()->GetParent()) {
+		  this->RestoreGodliness();
+	//_Universe.AccessCockpit()->RestoreGodliness();
+      }
+      
+      return true;
+    }
+  }
+  return false;
+}
 
 inline bool insideDock (const DockingPorts &dock, const Vector & pos, float radius) {
   if (dock.used)
@@ -2222,7 +2783,7 @@ bool Unit::UpAndDownGrade (Unit * up, Unit * templ, int mountoffset, int subunit
   STDUPGRADE(computer.max_roll,up->computer.max_roll,templ->computer.max_roll,0);
   STDUPGRADE(fuel,up->fuel,templ->fuel,0);
 
-  for (unsigned int upgr=0;upgr<Cockpit::NUMGAUGES+1+MAXVDUS;upgr++) {
+  for (unsigned int upgr=0;upgr<UnitImages::NUMGAUGES+1+MAXVDUS;upgr++) {
 	STDUPGRADE(image->cockpit_damage[upgr],up->image->cockpit_damage[upgr],templ->image->cockpit_damage[upgr],1);
 	if (image->cockpit_damage[upgr]>1) {
 	  image->cockpit_damage[upgr]=1;//keep it real

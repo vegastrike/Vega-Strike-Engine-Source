@@ -27,7 +27,6 @@
 #include "animation.h"
 #include "mesh.h"
 #include "universe_util.h"
-#include "universe_util_generic.h"
 #include "in_mouse.h"
 #include "gui/glut_support.h"
 #include "networking/netclient.h"
@@ -53,21 +52,21 @@ void DrawRadarCircles (float x, float y, float wid, float hei, const GFXColor &c
 	GFXEnd();
 	GFXDisable(SMOOTH);
 }
- void Cockpit::LocalToRadar (const Vector & pos, float &s, float &t) {
+ void GameCockpit::LocalToRadar (const Vector & pos, float &s, float &t) {
   s = (pos.k>0?pos.k:0)+1;
   t = 2*sqrtf(pos.i*pos.i + pos.j*pos.j + s*s);
   s = -pos.i/t;
   t = pos.j/t;
 }
 
-void Cockpit::LocalToEliteRadar (const Vector & pos, float &s, float &t,float &h){
+void GameCockpit::LocalToEliteRadar (const Vector & pos, float &s, float &t,float &h){
   s=-pos.i/1000.0;
   t=pos.k/1000.0;
   h=pos.j/1000.0;
 }
 
 
-GFXColor Cockpit::unitToColor (Unit *un,Unit *target) {
+GFXColor GameCockpit::unitToColor (Unit *un,Unit *target) {
  	if(target->isUnit()==PLANETPTR){
 	  // this is a planet
 	  return planet;
@@ -90,7 +89,7 @@ GFXColor Cockpit::unitToColor (Unit *un,Unit *target) {
 	}
 }
 
-GFXColor Cockpit::relationToColor (float relation) {
+GFXColor GameCockpit::relationToColor (float relation) {
  if (relation>0) {
     return GFXColor (relation*friendly.r+(1-relation)*neutral.r,relation*friendly.g+(1-relation)*neutral.g,relation*friendly.b+(1-relation)*neutral.b,relation*friendly.a+(1-relation)*neutral.a);
   } 
@@ -100,7 +99,7 @@ GFXColor Cockpit::relationToColor (float relation) {
     return GFXColor (-relation*enemy.r+(1+relation)*neutral.r,-relation*enemy.g+(1+relation)*neutral.g,-relation*enemy.b+(1+relation)*neutral.b,-relation*enemy.a+(1+relation)*neutral.a);
   }
 }
-void Cockpit::DrawNavigationSymbol (const Vector &Loc, const Vector & P, const Vector & Q, float size) {
+void GameCockpit::DrawNavigationSymbol (const Vector &Loc, const Vector & P, const Vector & Q, float size) {
   GFXColor4f (1,1,1,1);
   static bool draw_nav_symbol=XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","drawNavSymbol","false"));
   if (draw_nav_symbol) {
@@ -131,23 +130,7 @@ void Cockpit::DrawNavigationSymbol (const Vector &Loc, const Vector & P, const V
   }
 }
 
-float Unit::computeLockingPercent() {
-  float most=-1024;
-  for (int i=0;i<GetNumMounts();i++) {
-    if (mounts[i]->type->type==weapon_info::PROJECTILE||(mounts[i]->type->size&(weapon_info::SPECIALMISSILE|weapon_info::LIGHTMISSILE|weapon_info::MEDIUMMISSILE|weapon_info::HEAVYMISSILE|weapon_info::CAPSHIPLIGHTMISSILE|weapon_info::CAPSHIPHEAVYMISSILE|weapon_info::SPECIAL))) {
-      if (mounts[i]->status==Unit::Mount::ACTIVE&&mounts[i]->type->LockTime>0) {
-	float rat = mounts[i]->time_to_lock/mounts[i]->type->LockTime;
-	if (rat<.99) {
-	  if (rat>most) {
-	    most = rat;
-	  }
-	}
-      }
-    }
-  }
-  return (most==-1024)?1:most;
-}
-float Cockpit::computeLockingSymbol(Unit * par) {
+float GameCockpit::computeLockingSymbol(Unit * par) {
   return par->computeLockingPercent();
 }
 inline void DrawOneTargetBox (const QVector & Loc, const float rSize, const Vector &CamP, const Vector & CamQ, const Vector & CamR, float lock_percent, bool ComputerLockon, bool Diamond=false) {
@@ -329,7 +312,7 @@ inline void DrawDockingBoxes(Unit * un,Unit *target, const Vector & CamP, const 
   }
 }
 
-void Cockpit::DrawTargetBoxes(){
+void GameCockpit::DrawTargetBoxes(){
   
   Unit * un = parent.GetUnit();
   if (!un)
@@ -378,7 +361,7 @@ void Cockpit::DrawTargetBoxes(){
 }
 
 
-void Cockpit::DrawTargetBox () {
+void GameCockpit::DrawTargetBox () {
   float speed,range;
   static GFXColor black_and_white=DockBoxColor ("black_and_white"); 
   Unit * un = parent.GetUnit();
@@ -440,10 +423,10 @@ void Cockpit::DrawTargetBox () {
 
 }
 
-void Cockpit::Eject() {
+void GameCockpit::Eject() {
   ejecting=true;
 }
-void Cockpit::DrawBlips (Unit * un) {
+void GameCockpit::DrawBlips (Unit * un) {
   static GFXColor black_and_white=DockBoxColor ("black_and_white"); 
 
   Unit::Computer::RADARLIM * radarl = &un->GetComputerData().radar;
@@ -503,7 +486,7 @@ void Cockpit::DrawBlips (Unit * un) {
   GFXEnable (TEXTURE0);
 }
 
-void Cockpit::DrawEliteBlips (Unit * un) {
+void GameCockpit::DrawEliteBlips (Unit * un) {
   static GFXColor black_and_white=DockBoxColor ("black_and_white"); 
   Unit::Computer::RADARLIM * radarl = &un->GetComputerData().radar;
   UnitCollection * drawlist = &_Universe.activeStarSystem()->getUnitList();
@@ -582,7 +565,7 @@ void Cockpit::DrawEliteBlips (Unit * un) {
   GFXColor4f (1,1,1,1);
   GFXEnable (TEXTURE0);
 }
-float Cockpit::LookupTargetStat (int stat, Unit *target) {
+float GameCockpit::LookupTargetStat (int stat, Unit *target) {
   static float game_speed = XMLSupport::parse_float (vs_config->getVariable("physics","game_speed","1"));
   static float fpsval=0;
   const float fpsmax=1;
@@ -590,49 +573,49 @@ float Cockpit::LookupTargetStat (int stat, Unit *target) {
   unsigned short armordat[4];
   Unit * tmpunit;
   switch (stat) {
-  case SHIELDF:
+  case UnitImages::SHIELDF:
     return target->FShieldData();
-  case SHIELDR:
+  case UnitImages::SHIELDR:
     return target->RShieldData();
-  case SHIELDL:
+  case UnitImages::SHIELDL:
     return target->LShieldData();
-  case SHIELDB:
+  case UnitImages::SHIELDB:
     return target->BShieldData();
-  case ARMORF:
-  case ARMORR:
-  case ARMORL:
-  case ARMORB:
+  case UnitImages::ARMORF:
+  case UnitImages::ARMORR:
+  case UnitImages::ARMORL:
+  case UnitImages::ARMORB:
     target->ArmorData (armordat);
-    if (armordat[stat-ARMORF]>StartArmor[stat-ARMORF]) {
-      StartArmor[stat-ARMORF]=armordat[stat-ARMORF];
+    if (armordat[stat-UnitImages::ARMORF]>StartArmor[stat-UnitImages::ARMORF]) {
+      StartArmor[stat-UnitImages::ARMORF]=armordat[stat-UnitImages::ARMORF];
     }
-    return ((float)armordat[stat-ARMORF])/StartArmor[stat-ARMORF];
-  case FUEL:
+    return ((float)armordat[stat-UnitImages::ARMORF])/StartArmor[stat-UnitImages::ARMORF];
+  case UnitImages::FUEL:
     if (maxfuel>0) return target->FuelData()/maxfuel;return 0;
-  case ENERGY:
+  case UnitImages::ENERGY:
     return target->EnergyData();
-  case HULL:
+  case UnitImages::HULL:
     if (maxhull<target->GetHull()) {
       maxhull = target->GetHull();
     }
     return target->GetHull()/maxhull;
-  case EJECT:
+  case UnitImages::EJECT:
     return (((target->GetHull()/maxhull)<.25)&&(target->BShieldData()<.25||target->FShieldData()<.25))?1:0;
-  case LOCK:
+  case UnitImages::LOCK:
     if  ((tmpunit = target->GetComputerData().threat.GetUnit())) {
       return (tmpunit->cosAngleTo (target,*(float*)&armordat[0],FLT_MAX,FLT_MAX)>.95);
     }
     return 0;
-  case KPS:
+  case UnitImages::KPS:
     return (target->GetVelocity().Magnitude())*10/game_speed;
-  case SETKPS:
+  case UnitImages::SETKPS:
     return target->GetComputerData().set_speed*10/game_speed;
-  case AUTOPILOT:
+  case UnitImages::AUTOPILOT:
     if (target) {
       return (target->AutoPilotTo(target)?1:0);
     }
     return 0;
-  case FPS:
+  case UnitImages::COCKPIT_FPS:
     if (fpsval>=0&&fpsval<.5*FLT_MAX)
       numtimes-=.1+fpsval;
     if (numtimes<=0) {
@@ -641,7 +624,7 @@ float Cockpit::LookupTargetStat (int stat, Unit *target) {
     }
 	if( fpsval)
    	 return 1./fpsval;
-  case LAG:
+  case UnitImages::COCKPIT_LAG:
     if ( Network != NULL)
    	 return Network[0].getLag();
 	else
@@ -649,17 +632,17 @@ float Cockpit::LookupTargetStat (int stat, Unit *target) {
   }
   return 1;
 }
-void Cockpit::DrawGauges(Unit * un) {
+void GameCockpit::DrawGauges(Unit * un) {
 
   int i;
-  for (i=0;i<KPS;i++) {
+  for (i=0;i<UnitImages::KPS;i++) {
     if (gauges[i]) {
       gauges[i]->Draw(LookupTargetStat (i,un));
 /*      if (rand01()>un->GetImageInformation().cockpit_damage[0]) {
         static Animation gauge_ani("static.ani",true,.1,BILINEAR);
         gauge_ani.DrawAsSprite(Radar);
       }*/
-      float damage = un->GetImageInformation().cockpit_damage[(1+MAXVDUS+i)%(MAXVDUS+1+NUMGAUGES)];
+      float damage = un->GetImageInformation().cockpit_damage[(1+MAXVDUS+i)%(MAXVDUS+1+UnitImages::NUMGAUGES)];
       if (gauge_time[i]>=0) {
         if (damage>.0001&&(cockpit_time>(gauge_time[i]+(1-damage)))) {
 	  if (rand01()>SWITCH_CONST) {
@@ -682,7 +665,7 @@ void Cockpit::DrawGauges(Unit * un) {
 	  return;
   text->SetSize (2,-2);
   GFXColorf (textcol);
-  for (i=KPS;i<NUMGAUGES;i++) {
+  for (i=UnitImages::KPS;i<UnitImages::NUMGAUGES;i++) {
     if (gauges[i]) {
       float sx,sy,px,py;
       gauges[i]->GetSize (sx,sy);
@@ -698,53 +681,15 @@ void Cockpit::DrawGauges(Unit * un) {
   }
   GFXColor4f (1,1,1,1);
 }
-void Cockpit::Init (const char * file) {
-  shakin=0;
-  autopilot_time=0;
-  if (strlen(file)==0) {
-    Init ("disabled-cockpit.cpt");
-    return;
-  }
-  Delete();
-  vschdir (file);
-  LoadXML(file);
-  vscdup();
+void GameCockpit::Init (const char * file) {
+  Cockpit::Init( file);
   if (Panel.size()>0) {
     float x,y;
     Panel.front()->GetPosition (x,y);
     Panel.front()->SetPosition (x,y+viewport_offset);  
   }
 }
-Unit *  Cockpit::GetSaveParent() {
-  Unit * un = parentturret.GetUnit();
-  if (!un) {
-    un = parent.GetUnit();
-  }
-  return un;
-}
-void Cockpit::SetParent (Unit * unit, const char * filename, const char * unitmodname, const QVector & pos) {
-  if (unit->getFlightgroup()!=NULL) {
-    fg = unit->getFlightgroup();
-  }
-  activeStarSystem= _Universe.activeStarSystem();//cannot switch to units in other star systems.
-  parent.SetUnit (unit);
-  savegame->SetPlayerLocation(pos);
-  if (filename[0]!='\0') {
-    this->unitfilename=std::string(filename);
-    this->unitmodname=std::string(unitmodname);
-  }
-  if (unit) {
-    this->unitfaction = unit->faction;
-    unit->ArmorData (StartArmor);
-    if (StartArmor[0]==0) StartArmor[0]=1;
-    if (StartArmor[1]==0) StartArmor[1]=1;
-    if (StartArmor[2]==0) StartArmor[2]=1;
-    if (StartArmor[3]==0) StartArmor[3]=1;
-    maxfuel = unit->FuelData();
-    maxhull = unit->GetHull();
-  }
-}
-void Cockpit::Delete () {
+void GameCockpit::Delete () {
   int i;
   if (text) {
     delete text;
@@ -761,7 +706,7 @@ void Cockpit::Delete () {
       Pit[i] = NULL;
     }
   }
-  for (i=0;i<NUMGAUGES;i++) {
+  for (i=0;i<UnitImages::NUMGAUGES;i++) {
     if (gauges[i]) {
       delete gauges[i];
       gauges[i]=NULL;
@@ -785,16 +730,9 @@ void Cockpit::Delete () {
   }
   Panel.clear();
 }
-void Cockpit::RestoreGodliness() {
-  static float maxgodliness = XMLSupport::parse_float(vs_config->getVariable("physics","player_godliness","0"));
-  godliness = maxgodliness;
-  if (godliness>maxgodliness)
-    godliness=maxgodliness;
-}
-
-void Cockpit::InitStatic () {  
+void GameCockpit::InitStatic () {  
   int i;
-  for (i=0;i<NUMGAUGES;i++) {
+  for (i=0;i<UnitImages::NUMGAUGES;i++) {
     gauge_time[i]=0;
   }
   for (i=0;i<MAXVDUS;i++) {
@@ -805,25 +743,20 @@ void Cockpit::InitStatic () {
   cockpit_time=0;
 }
 
-Cockpit::Cockpit (const char * file, Unit * parent,const std::string &pilot_name): parent (parent),textcol (1,1,1,1),text(NULL),cockpit_offset(0), viewport_offset(0), view(CP_FRONT), zoomfactor (1.5),savegame (new SaveGame(pilot_name)) {
+/***** WARNING CHANGED ORDER *****/
+GameCockpit::GameCockpit (const char * file, Unit * parent,const std::string &pilot_name): Cockpit( file, parent, pilot_name),textcol (1,1,1,1),text(NULL)
+{
   static int headlag = XMLSupport::parse_int (vs_config->getVariable("graphics","head_lag","10"));
   int i;
-  fg=NULL;
   for (i=0;i<headlag;i++) {
     headtrans.push_back (Matrix());
     Identity(headtrans.back());
   }
-  for (i=0;i<NUMGAUGES;i++) {
+  for (i=0;i<UnitImages::NUMGAUGES;i++) {
     gauges[i]=NULL;
   }
-  activeStarSystem=NULL;
-  InitStatic();
   mesh=NULL;
-  ejecting=false;
-  currentcamera = 0;	
   Radar=Pit[0]=Pit[1]=Pit[2]=Pit[3]=NULL;
-  RestoreGodliness();
-
 
   draw_all_boxes=XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","drawAllTargetBoxes","false"));
   draw_line_to_target=XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","drawLineToTarget","false"));
@@ -846,11 +779,8 @@ Cockpit::Cockpit (const char * file, Unit * parent,const std::string &pilot_name
     vs_config->getColor("targetting_ship",&targetting.r);
     vs_config->getColor("planet",&planet.r);
   }
- 
-
-  Init (file);
 }
-void Cockpit::SelectProperCamera () {
+void GameCockpit::SelectProperCamera () {
     SelectCamera(view);
 }
 static vector <int> respawnunit;
@@ -866,7 +796,7 @@ void RespawnNow (Cockpit * cp) {
     }
   }
 }
-void Cockpit::SwitchControl (int,KBSTATE k) {
+void GameCockpit::SwitchControl (int,KBSTATE k) {
   if (k==PRESS) {
     while (switchunit.size()<=_Universe.CurrentCockpit())
       switchunit.push_back(0);
@@ -933,7 +863,7 @@ void MapKey (int, KBSTATE k) {
 }
 
 
-void Cockpit::TurretControl (int,KBSTATE k) {
+void GameCockpit::TurretControl (int,KBSTATE k) {
   if (k==PRESS) {
     while (turretcontrol.size()<=_Universe.CurrentCockpit())
       turretcontrol.push_back(0);
@@ -941,7 +871,7 @@ void Cockpit::TurretControl (int,KBSTATE k) {
   }
 
 }
-void Cockpit::Respawn (int,KBSTATE k) {
+void GameCockpit::Respawn (int,KBSTATE k) {
   if (k==PRESS) {
     while (respawnunit.size()<=_Universe.CurrentCockpit())
       respawnunit.push_back(0);
@@ -962,11 +892,14 @@ static void FaceTarget (Unit * un) {
     un->SetOrientation (qq,dir);
   }
 }
-void Cockpit::Autopilot (Unit * target) {
+
+// SAME AS IN COCKPIT BUT ADDS SETVIEW and ACCESSCAMERA -> ~ DUPLICATE CODE
+int GameCockpit::Autopilot (Unit * target) {
+  int retauto = 0;
   if (target) {
     Unit * un=NULL;
     if ((un=GetParent())) {
-      if (un->AutoPilotTo(un)) {//can he even start to autopilot
+      if ((retauto = un->AutoPilotTo(un))) {//can he even start to autopilot
 	SetView (CP_PAN);
 
 	static bool face_target_on_auto = XMLSupport::parse_bool (vs_config->getVariable ( "physics","face_on_auto", "false"));
@@ -990,6 +923,7 @@ void Cockpit::Autopilot (Unit * target) {
       }
     }
   }
+  return retauto;
 }
 void SwitchUnits (Unit * ol, Unit * nw) {
   bool pointingtool=false;
@@ -1043,7 +977,7 @@ static void SwitchUnitsTurret (Unit *ol, Unit *nw) {
 }
 
 extern void reset_time_compression(int i, KBSTATE a);
-void Cockpit::Shake (float amt) {
+void GameCockpit::Shake (float amt) {
   static float shak= XMLSupport::parse_float(vs_config->getVariable("graphics","cockpit_shake","3"));
   static float shak_max= XMLSupport::parse_float(vs_config->getVariable("graphics","cockpit_shake_max","20"));
   shakin+=shak;
@@ -1078,7 +1012,7 @@ static void DrawCrosshairs (float x, float y, float wid, float hei, const GFXCol
 	GFXEnable(TEXTURE0);
 }
 
-void Cockpit::Draw() { 
+void GameCockpit::Draw() { 
   cockpit_time+=GetElapsedTime();
   if (cockpit_time>=100000)
     InitStatic();
@@ -1297,7 +1231,7 @@ void Cockpit::Draw() {
   GFXEnable (DEPTHWRITE);
   GFXEnable (DEPTHTEST);
 }
-int Cockpit::getScrollOffset (unsigned int whichtype) {
+int GameCockpit::getScrollOffset (unsigned int whichtype) {
   for (unsigned int i=0;i<vdu.size();i++) {
     if (vdu[i]->getMode()&whichtype) {
       return vdu[i]->scrolloffset;
@@ -1321,7 +1255,7 @@ Unit * GetFinalTurret(Unit * baseTurret) {
   return un;
 }
 
-void Cockpit::Update () {
+void GameCockpit::Update () {
   if (autopilot_time!=0) {
     autopilot_time-=SIMULATION_ATOM;
     if (autopilot_time<= 0) {
@@ -1481,43 +1415,40 @@ void Cockpit::Update () {
   }
 
 }
-Cockpit::~Cockpit () {
+GameCockpit::~GameCockpit () {
   Delete();
   delete savegame;
 }
 
-void Cockpit::SetView (const enum VIEWSTYLE tmp) {
-  view = tmp;
-}
-void Cockpit::VDUSwitch (int vdunum) {
+void GameCockpit::VDUSwitch (int vdunum) {
   if (vdunum<(int)vdu.size()) {
     if (vdu[vdunum]) {
       vdu[vdunum]->SwitchMode();
     }
   }
 }
-void Cockpit::ScrollVDU (int vdunum, int howmuch) {
+void GameCockpit::ScrollVDU (int vdunum, int howmuch) {
   if (vdunum<(int)vdu.size()) {
     if (vdu[vdunum]) {
       vdu[vdunum]->Scroll(howmuch);
     }
   }
 }
-void Cockpit::ScrollAllVDU (int howmuch) {
+void GameCockpit::ScrollAllVDU (int howmuch) {
   for (unsigned int i=0;i<vdu.size();i++) {
     ScrollVDU (i,howmuch);
   }
 }
 
 
-void Cockpit::SetCommAnimation (Animation * ani) {
+void GameCockpit::SetCommAnimation (Animation * ani) {
   for (unsigned int i=0;i<vdu.size();i++) {
     if (vdu[i]->SetCommAnimation (ani)) {
       break;
     }
   }
 }
-void Cockpit::RestoreViewPort() {
+void GameCockpit::RestoreViewPort() {
   _Universe.AccessCamera()->RestoreViewPort(0,0);
 }
 
@@ -1525,7 +1456,7 @@ static void ShoveCamBehindUnit (int cam, Unit * un, float zoomfactor) {
   QVector unpos = un->GetPlanetOrbit()?un->LocalPosition():un->Position();
   _Universe.AccessCamera(cam)->SetPosition(unpos-_Universe.AccessCamera()->GetR().Cast()*un->rSize()*zoomfactor);
 }
-void Cockpit::SetupViewPort (bool clip) {
+void GameCockpit::SetupViewPort (bool clip) {
   _Universe.AccessCamera()->RestoreViewPort (0,(view==CP_FRONT?viewport_offset:0));
    GFXViewPort (0,(int)((view==CP_FRONT?viewport_offset:0)*g_game.y_resolution), g_game.x_resolution,g_game.y_resolution);
   _Universe.AccessCamera()->setCockpitOffset (view<CP_CHASE?cockpit_offset:0);
@@ -1592,11 +1523,11 @@ void Cockpit::SetupViewPort (bool clip) {
     
   //  parent->UpdateHudMatrix();
 }
-void Cockpit::SelectCamera(int cam){
+void GameCockpit::SelectCamera(int cam){
     if(cam<NUM_CAM&&cam>=0)
       currentcamera = cam;
 }
-Camera* Cockpit::AccessCamera(int num){
+Camera* GameCockpit::AccessCamera(int num){
   if(num<NUM_CAM&&num>=0)
     return &cam[num];
   else

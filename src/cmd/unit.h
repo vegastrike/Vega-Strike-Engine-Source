@@ -113,16 +113,16 @@ public:
   void EjectCargo (unsigned int index);
   bool CanAddCargo (const Cargo &carg) const;
   ///The faction of this unit
-  vector <struct Cargo>& FilterDowngradeList (vector <struct Cargo> & mylist);
-  vector <struct Cargo>& FilterUpgradeList (vector <struct Cargo> & mylist);
+  vector <class Cargo>& FilterDowngradeList (vector <class Cargo> & mylist);
+  vector <class Cargo>& FilterUpgradeList (vector <class Cargo> & mylist);
 
 /***************************************************************************************/
 /**** DOCKING STUFF                                                                 ****/
 /***************************************************************************************/
 
-  void PerformDockingOperations();
-  void FreeDockingPort(unsigned int whichport);
-  bool Dock (Unit * unitToDockWith);
+  void RestoreGodliness() {
+	_Universe.AccessCockpit()->RestoreGodliness();
+  }
 
 /***************************************************************************************/
 /**** GFX/MESHES STUFF                                                              ****/
@@ -221,19 +221,6 @@ public:
   /**Queries the bounding sphere with a duo of mouse coordinates that project
    * to the center of a ship and compare with a sphere...pretty fast*/
   bool querySphereClickList (int,int, float err, Camera *activeCam);
-  ///Sets up a null queue for orders
-  void PrimeOrders();
-  void PrimeOrders(Order * newAI);
-  ///Sets the AI to be a specific order
-  void SetAI(Order *newAI);
-  ///Enqueues an order to the unit's order queue
-  void EnqueueAI(Order *newAI);
-  ///EnqueuesAI first
-  void EnqueueAIFirst (Order * newAI);
-  ///num subunits
-  void LoadAIScript (const std::string &aiscript);
-  bool LoadLastPythonAIScript ();
-  bool EnqueueLastPythonAIScript ();
   Unit * BeamInsideCollideTree(const QVector &start, const QVector &end, QVector & pos, Vector & norm, double & distance);
   bool InsideCollideTree (Unit * smaller, QVector & bigpos, Vector & bigNormal, QVector & smallpos, Vector & smallNormal);
   virtual void reactToCollision(Unit * smaller, const QVector & biglocation, const Vector & bignormal, const QVector & smalllocation, const Vector & smallnormal, float dist);
@@ -248,10 +235,11 @@ public:
 /**** PHYSICS STUFF                                                                    */
 /***************************************************************************************/
 
+ bool AutoPilotTo(Unit * un, bool ignore_friendlies=false);
+
   ///Updates physics given unit space transformations and if this is the last physics frame in the current gfx frame
   virtual void UpdatePhysics (const Transformation &trans, const Matrix &transmat, const Vector & CumulativeVelocity, bool ResolveLast, UnitCollection *uc=NULL);
   class Cockpit * GetVelocityDifficultyMult(float &) const;
-  void DamageRandSys (float dam,const Vector &vec);
   ///executes a repair if the repair bot is up to it
   void Repair();
   ///Thrusts by ammt and clamps accordingly (afterburn or not)
@@ -261,7 +249,7 @@ public:
   ///deletes
   void Kill(bool eraseFromSave=true);
   ///Applies damage to the local area given by pnt
-  void ApplyLocalDamage (const Vector &pnt, const Vector & normal, float amt, Unit * affectedSubUnit, const GFXColor &, float phasedamage=0);
+  float ApplyLocalDamage (const Vector &pnt, const Vector & normal, float amt, Unit * affectedSubUnit, const GFXColor &, float phasedamage=0);
   ///Applies damage to the pre-transformed area of the ship
   void ApplyDamage (const Vector & pnt, const Vector & normal, float amt, Unit * affectedSubUnit, const GFXColor &,  Unit *ownerDoNotDereference, float phasedamage=0 );
   ///Deals remaining damage to the hull at point and applies lighting effects
@@ -278,28 +266,6 @@ public:
   bool UpgradeSubUnits (Unit * up, int subunitoffset, bool touchme, bool downgrade, int &numave, double &percentage);
   double Upgrade (const std::string &file, int mountoffset, int subunitoffset, bool force, bool loop_through_mounts);
 
-/***************************************************************************************/
-/**** AI STUFF                                                                         */
-/***************************************************************************************/
-
-  ///Erases all orders that bitwise OR with that type
-  void eraseOrderType (unsigned int type);
-  ///Executes 1 frame of physics-based AI
-  void ExecuteAI();
-
- public:
-  ///tries to warp as close to un as possible abiding by the distances of various enemy ships...it might not make it all the way
-  bool AutoPilotTo(Unit * un, bool ignore_friendlies=false);
-  void SetTurretAI ();
-  void DisableTurretAI ();
-  string getFullAIDescription();
-  ///not used yet
-  void setTargetFg(string primary,string secondary=string(),string tertiary=string());
-  ///not used yet
-  void ReTargetFg(int which_target=0);
-  ///not used yet
-
-  float getRelation(Unit *other);
 };
 
 class GameUnit::GameMount: public Unit::Mount {

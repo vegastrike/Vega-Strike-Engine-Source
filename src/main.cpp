@@ -46,7 +46,6 @@
 #include "gfx/hud.h"
 #include "gldrv/winsys.h"
 #include "universe_util.h"
-#include "universe_util_generic.h"
 #include "networking/netclient.h"
 
 /*
@@ -85,6 +84,8 @@ bool STATIC_VARS_DESTROYED=false;
 void ParseCommandLine(int argc, char ** CmdLine);
 void cleanup(void)
 {
+	fprintf( stdout, "\n\nLoop average : %s\n\n", avg_loop);
+	fprintf( stderr, "\n\nLoop average : %s\n\n", avg_loop);
 	if( Network!=NULL)
 	{
 		for( int i=0; i<_Universe.numPlayers(); i++)
@@ -509,6 +510,7 @@ void bootstrap_main_loop () {
 			Network[l].inGame();
 	}
 
+	cur_check = getNewTime();
     _Universe.Loop(main_loop);
     ///return to idle func which now should call main_loop mohahahah
   }

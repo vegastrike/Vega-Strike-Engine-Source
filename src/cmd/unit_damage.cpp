@@ -164,187 +164,7 @@ void GameUnit::Kill(bool erasefromsave) {
   }
 }
 
-float rand01 () {
-	return ((float)rand()/(float)RAND_MAX);
-}
-
-// Uses a Cockpit static member !!!!!
-void GameUnit::DamageRandSys(float dam, const Vector &vec) {
-	float deg = fabs(180*atan2 (vec.i,vec.k)/M_PI);
-	float randnum=rand01();
-	float degrees=deg;
-	if (degrees>180) {
-		degrees=360-degrees;
-	}
-	if (degrees>=0&&degrees<20) {
-		//DAMAGE COCKPIT
-		if (randnum>=.85) {
-			computer.set_speed=(rand01()*computer.max_speed*(5/3))-(computer.max_speed*(2/3)); //Set the speed to a random speed
-		} else if (randnum>=.775) {
-			computer.itts=false; //Set the computer to not have an itts
-		} else if (randnum>=.7) {
-			computer.radar.color=false; //set the radar to not have color
-		} else if (randnum>=.5) {
-			computer.target=NULL; //set the target to NULL
-		} else if (randnum>=.4) {
-			limits.retro*=dam;
-		} else if (randnum>=.3275) {
-			computer.radar.maxcone+=(1-dam);
-			if (computer.radar.maxcone>.9)
-				computer.radar.maxcone=.9;
-		}else if (randnum>=.325) {
-			computer.radar.lockcone+=(1-dam);
-			if (computer.radar.lockcone>.95)
-				computer.radar.lockcone=.95;
-		} else if (randnum>=.25) {
-			computer.radar.trackingcone+=(1-dam);
-			if (computer.radar.trackingcone>.98)
-				computer.radar.trackingcone=.98;
-		} else if (randnum>=.175) {
-			computer.radar.maxrange*=dam;
-		} else {
-		  int which= rand()%(1+Cockpit::NUMGAUGES+MAXVDUS);
-		  image->cockpit_damage[which]*=dam;
-		  if (image->cockpit_damage[which]<.1) {
-		    image->cockpit_damage[which]=0;
-		  }
-		}
-		return;
-	}
-	if (degrees>=20&&degrees<35) {
-		//DAMAGE MOUNT
-		if (randnum>=.65&&randnum<.9) {
-			image->ecm*=dam;
-		} else if (GetNumMounts()) {
-			unsigned int whichmount=rand()%GetNumMounts();
-			if (randnum>=.9) {
-				mounts[whichmount]->status=GameUnit::GameMount::DESTROYED;
-			}else if (mounts[whichmount]->ammo>0&&randnum>=.4) {
-			  mounts[whichmount]->ammo*=dam;
-			} else if (randnum>=.1) {
-				mounts[whichmount]->time_to_lock+=(100-(100*dam));
-			} else {
-				mounts[whichmount]->size&=(~weapon_info::AUTOTRACKING);
-			}
-		}
-		return;
-	}
-	if (degrees>=35&&degrees<60) {
-		//DAMAGE FUEL
-		if (randnum>=.75) {
-			fuel*=dam;
-		} else if (randnum>=.5) {
-			this->afterburnenergy+=((1-dam)*recharge);
-		} else if (randnum>=.25) {
-			image->cargo_volume*=dam;
-		} else {  //Do something NASTY to the cargo
-			if (image->cargo.size()>0) {
-				int i=0;
-				unsigned int cargorand;
-				do {
-					cargorand=rand()%image->cargo.size();
-				} while (image->cargo[cargorand].quantity!=0&&++i<image->cargo.size());
-				image->cargo[cargorand].quantity*=dam;
-			}
-		}
-		return;
-	}
-	if (degrees>=60&&degrees<90) {
-		//DAMAGE ROLL/YAW/PITCH/THRUST
-		if (randnum>=.8) {
-			computer.max_pitch*=dam;
-		} else if (randnum>=.6) {
-			computer.max_yaw*=dam;
-		} else if (randnum>=.55) {
-			computer.max_roll*=dam;
-		} else if (randnum>=.5) {
-			limits.roll*=dam;
-		} else if (randnum>=.3) {
-			limits.yaw*=dam;
-		} else if (randnum>=.1) {
-			limits.pitch*=dam;
-		} else {
-			limits.lateral*=dam;
-		}
-		return;
-	}
-	if (degrees>=90&&degrees<120) {
-		//DAMAGE Shield
-		//DAMAGE cloak
-		if (randnum>=.95) {
-			this->cloaking=-1;
-		} else if (randnum>=.78) {
-			image->cloakenergy+=((1-dam)*recharge);
-		} else if (randnum>=.7) {
-			cloakmin+=(rand()%(32000-cloakmin));
-		}
-		switch (shield.number) {
-		case 2:
-			if (randnum>=.35&&randnum<.7) {
-				shield.fb[2]*=dam;
-			} else {
-				shield.fb[3]*=dam;
-			}
-			break;
-		case 4:
-			if (randnum>=.5&&randnum<.7) {
-				shield.fbrl.frontmax*=dam;
-			} else if (randnum>=.3) {
-				shield.fbrl.backmax*=dam;
-			} else if (deg>180) {
-				shield.fbrl.leftmax*=dam;
-			} else {
-				shield.fbrl.rightmax*=dam;
-			}
-			break;
-		case 6:
-			if (randnum>=.4&&randnum<.7) {
-				shield.fbrltb.fbmax*=dam;
-			} else {
-				shield.fbrltb.rltbmax*=dam;
-			}
-			break;
-		}
-		return;
-	}
-	if (degrees>=120&&degrees<150) {
-		//DAMAGE Reactor
-		//DAMAGE JUMP
-		if (randnum>=.9) {
-			shield.leak+=((1-dam)*100);
-		} else if (randnum>=.7) {
-			shield.recharge*=dam;
-		} else if (randnum>=.5) {
-			this->recharge*=dam;
-		} else if (randnum>=.3) {
-			this->maxenergy*=dam;
-		} else if (randnum>=.2) {
-			this->jump.energy*=(2-dam);
-		} else if (randnum>=.03){
-			this->jump.damage+=100*(1-dam);
-		} else {
-		  if (image->repair_droid>0) {
-		    image->repair_droid--;
-		  }
-		}
-		return;
-	}
-	if (degrees>=150&&degrees<=180) {
-		//DAMAGE ENGINES
-		if (randnum>=.8) {
-			computer.max_ab_speed*=dam;
-		} else if (randnum>=.6) {
-			computer.max_speed*=dam;
-		} else if (randnum>=.4) {
-			limits.afterburn*=dam;
-		} else if (randnum>=.2) {
-			limits.vertical*=dam;
-		} else {
-			limits.forward*=dam;
-		}
-		return;
-	}
-}
+extern float rand01 ();
 
 float GameUnit::DealDamageToHullReturnArmor (const Vector & pnt, float damage, unsigned short * &t ) {
   float percent;
@@ -418,13 +238,7 @@ float GameUnit::DealDamageToShield (const Vector &pnt, float &damage) {
   return percent;
 }
 
-void GameUnit::ApplyLocalDamage (const Vector & pnt, const Vector & normal, float amt, Unit * affectedUnit,const GFXColor &color, float phasedamage) {
-  static bool nodockdamage = XMLSupport::parse_float (vs_config->getVariable("physics","no_damage_to_docked_ships","false"));
-  if (nodockdamage) {
-    if (DockedOrDocking()&(DOCKED_INSIDE|DOCKED)) {
-      return;
-    }
-  }
+float GameUnit::ApplyLocalDamage (const Vector & pnt, const Vector & normal, float amt, Unit * affectedUnit,const GFXColor &color, float phasedamage) {
   static float nebshields=XMLSupport::parse_float(vs_config->getVariable ("physics","nebula_shield_recharge",".5"));
   //  #ifdef REALLY_EASY
   Cockpit * cpt;
@@ -437,13 +251,11 @@ void GameUnit::ApplyLocalDamage (const Vector & pnt, const Vector & normal, floa
     }
   }
   //  #endif
-  if (affectedUnit!=this) {
-    affectedUnit->ApplyLocalDamage (pnt,normal,amt,affectedUnit,color,phasedamage);
-    return;
-  }
-  float leakamt = phasedamage+amt*.01*shield.leak;
-  amt *= 1-.01*shield.leak;
   float percentage=0;
+  percentage = Unit::ApplyLocalDamage( pnt, normal, amt, affectedUnit, color, phasedamage);
+  float leakamt = phasedamage+amt*.01*shield.leak;
+  if( percentage==-1)
+	return -1;
   if (GetNebula()==NULL||(nebshields>0)) {
     percentage = DealDamageToShield (pnt,amt);
     if (meshdata.back()&&percentage>0&&amt==0) {//shields are up
@@ -465,6 +277,7 @@ void GameUnit::ApplyLocalDamage (const Vector & pnt, const Vector & normal, floa
       }
     }
   }
+  return 1;
 }
 
 //un scored a faction kill

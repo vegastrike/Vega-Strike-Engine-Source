@@ -50,9 +50,6 @@ private:
   ///A list of all factions 
   
  public:
-  Cockpit * isPlayerStarship (const Unit* fighter);
-  void SetActiveCockpit (int whichcockpit);
-  void SetActiveCockpit (Cockpit * which);
   void WriteSaveGame(bool auto_save);
   void SetupCockpits (std::vector <std::string> players);
   void activateLightMap();

@@ -13,4 +13,3 @@ libpython_a_SOURCES =				\
 	unit_wrapper.cpp	\
 	briefing_wrapper.cpp	
 
-

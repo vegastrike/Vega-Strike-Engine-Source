@@ -11,6 +11,12 @@
 	extern GameUniverse _Universe;
 #endif
 
+extern int	loop_count;
+extern int	avg_loop;
+extern int	nb_checks;
+extern double last_check;
+extern double cur_check;
+
 /* All global data is stored in a variable of this type */
 typedef struct {
   char use_textures;

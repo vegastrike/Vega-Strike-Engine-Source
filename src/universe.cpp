@@ -80,7 +80,7 @@ void GameUniverse::Init( int argc, char** argv, const char * galaxy)
 }
 void GameUniverse::SetupCockpits(vector  <string> playerNames) {
 	for (unsigned int i=0;i<playerNames.size();i++) {
-	  cockpit.push_back( new Cockpit ("",NULL,playerNames[i]));
+	  cockpit.push_back( new GameCockpit ("",NULL,playerNames[i]));
 	}
 }
 GameUniverse::GameUniverse(int argc, char** argv, const char * galaxy)
@@ -145,32 +145,7 @@ void GameUniverse::StartGFX()
 	*/
       	GFXEndScene();
 }
-void GameUniverse::SetActiveCockpit (int i) {
-#ifdef VS_DEBUG
-  if (i<0||i>=cockpit.size()) {
-    fprintf (stderr,"ouch invalid cockpit %d",i);
-  }
-#endif 
-  current_cockpit=i;
-}
-void GameUniverse::SetActiveCockpit (Cockpit * cp) {
-  for (unsigned int i=0;i<cockpit.size();i++) {
-    if (cockpit[i]==cp) {
-      SetActiveCockpit (i);
-      return;
-    }
-  }
-}
 
-Cockpit * GameUniverse::isPlayerStarship(const Unit * doNotDereference) {
-  if (!doNotDereference)
-    return NULL;
-  for (unsigned int i=0;i<cockpit.size();i++) {
-    if (doNotDereference==cockpit[i]->GetParent())
-      return cockpit[i];
-  }
-  return NULL;
-}
 void GameUniverse::Loop(void main_loop()) {
   GFXLoop(main_loop);
 }

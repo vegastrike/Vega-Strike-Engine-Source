@@ -1,172 +1,89 @@
 /*
-
  * Vega Strike
-
  * Copyright (C) 2001-2002 Daniel Horn
-
  *
-
  * http://vegastrike.sourceforge.net/
-
  *
-
  * This program is free software; you can redistribute it and/or
-
  * modify it under the terms of the GNU General Public License
-
  * as published by the Free Software Foundation; either version 2
-
  * of the License, or (at your option) any later version.
-
  *
-
  * This program is distributed in the hope that it will be useful,
-
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
-
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-
  * GNU General Public License for more details.
-
  *
-
  * You should have received a copy of the GNU General Public License
-
  * along with this program; if not, write to the Free Software
-
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-
  */
 
 #include "gfx/mesh.h"
-
 #include "unit.h"
-
 #include "lin_time.h"
-
 //#include "physics.h"
-
 #include "beam.h"
-
 #include "planet.h"
-
 #include "audiolib.h"
-
 #include "config_xml.h"
-
 #include "vs_globals.h"
-
 //#ifdef WIN32
-
 #include "gfx/planetary_transform.h"
-
 #include "gfx/cockpit.h"
-
 #include "unit_util.h"
-
 #include "universe_util.h"
-#include "universe_util_generic.h"
-
 #include "cmd/script/mission.h"
-
 #include "networking/netclient.h"
-
 //#endif
-
 extern float copysign (float x, float y);
 
-
-
 // the rotation should be applied in world coordinates
-
 /** MISNOMER...not really clamping... more like renomalizing  slow too
-
 Vector Unit::ClampTorque(const Vector &amt1) {
-
   Vector norm = amt1;
-
   norm.Normalize();
-
   Vector max = MaxTorque(norm);
 
-
-
   if(max.Magnitude() > amt1.Magnitude())
-
     return amt1;
-
   else 
-
     return max;
-
 }
-
 */
-
 //FIXME 062201
 
 extern unsigned short apply_float_to_short (float tmp);
-
 //    float max_speed;
-
 //    float max_ab_speed;
-
 //    float max_yaw;
-
 //    float max_pitch;
-
 //    float max_roll;
 
-
-
-
-
 void GameUnit::Thrust(const Vector &amt1,bool afterburn){
-
   Vector amt = ClampThrust(amt1,afterburn);
-
   ApplyLocalForce(amt);  
-
-if (_Universe.AccessCockpit(0)->GetParent()==this)
-
+ if (_Universe.AccessCockpit(0)->GetParent()==this)
   if (afterburn!=AUDIsPlaying (sound->engine)) {
-
     if (afterburn)
-
       AUDPlay (sound->engine,cumulative_transformation.position,cumulative_velocity,1);
-
     else
-
       //    if (Velocity.Magnitude()<computer.max_speed)
-
       AUDStopPlaying (sound->engine);
-
   }
-
 }
 
-
-
 Cockpit * GameUnit::GetVelocityDifficultyMult(float &difficulty) const{
-
   difficulty=1;
-
   Cockpit * player_cockpit=_Universe.isPlayerStarship(this);
-
   if ((player_cockpit)==NULL) {
-
     static float exp = XMLSupport::parse_float (vs_config->getVariable ("physics","difficulty_speed_exponent",".2"));
-
     difficulty = pow(g_game.difficulty,exp);
-
   }
-
   return player_cockpit;
-
 }
 
 void GameUnit::UpdatePhysics (const Transformation &trans, const Matrix &transmat, const Vector & cum_vel,  bool lastframe, UnitCollection *uc) {
-
   static float VELOCITY_MAX=XMLSupport::parse_float(vs_config->getVariable ("physics","velocity_max","10000"));
 
 	Transformation old_physical_state = curr_physical_state;
@@ -680,119 +597,63 @@ void GameUnit::UpdatePhysics (const Transformation &trans, const Matrix &transma
 }
 
 void GameUnit::SetPlanetOrbitData (PlanetaryTransform *t) {
-
   if (isUnit()!=BUILDINGPTR)
-
         return;
-
   if (!planet)
-
     planet = (PlanetaryOrbitData *)malloc (sizeof (PlanetaryOrbitData));
-
   else if (!t) {
-
     free (planet);
-
     planet=NULL;
-
   }
-
   if (t) {
-
     planet->trans = t;
-
     planet->dirty=true;
-
   }
-
 }
 
 PlanetaryTransform * GameUnit::GetPlanetOrbit () const {
-
   if (planet==NULL)
-
     return NULL;
-
   return planet->trans;
-
 }
 
-
-
 bool GameUnit::jumpReactToCollision (Unit * smalle) {
-
   if (!GetDestinations().empty()) {//only allow big with small
-
     if ((smalle->GetJumpStatus().drive>=0||image->forcejump)) {
-
       smalle->DeactivateJumpDrive();
-
       GameUnit * jumppoint = this;
-
       _Universe.activeStarSystem()->JumpTo (smalle, jumppoint, std::string(GetDestinations()[smalle->GetJumpStatus().drive%GetDestinations().size()]));
-
       return true;
-
     }
-
     return true;
-
   }
-
   if (!smalle->GetDestinations().empty()) {
-
     if ((GetJumpStatus().drive>=0||smalle->image->forcejump)) {
-
       DeactivateJumpDrive();
-
       Unit * jumppoint = smalle;
-
       _Universe.activeStarSystem()->JumpTo (this, jumppoint, std::string(smalle->GetDestinations()[GetJumpStatus().drive%smalle->GetDestinations().size()]));
-
       return true;
-
     }
-
     return true;
-
   }
-
-
-
   return false;
-
 }
 
 void GameUnit::reactToCollision(Unit * smalle, const QVector & biglocation, const Vector & bignormal, const QVector & smalllocation, const Vector & smallnormal,  float dist) {
-
   clsptr smltyp = smalle->isUnit();
-
   if (smltyp==ENHANCEMENTPTR||smltyp==MISSILEPTR) {
-
     if (isUnit()!=ENHANCEMENTPTR&&isUnit()!=MISSILEPTR) {
-
       smalle->reactToCollision (this,smalllocation,smallnormal,biglocation,bignormal,dist);
-
       return;
-
     }
-
   }	       
-
   //don't bounce if you can Juuuuuuuuuuuuuump
-
   if (!jumpReactToCollision(smalle)) {
-
 #ifdef NOBOUNCECOLLISION
-
 #else
-
     static float bouncepercent = XMLSupport::parse_float (vs_config->getVariable ("physics","BouncePercent",".1"));
-
     smalle->ApplyForce (bignormal*.4*bouncepercent*smalle->GetMass()*fabs(bignormal.Dot (((smalle->GetVelocity()-this->GetVelocity())/SIMULATION_ATOM))+fabs (dist)/(SIMULATION_ATOM*SIMULATION_ATOM)));
-
     this->ApplyForce (smallnormal*.4*bouncepercent*GetMass()*fabs(smallnormal.Dot ((smalle->GetVelocity()-this->GetVelocity()/SIMULATION_ATOM))+fabs (dist)/(SIMULATION_ATOM*SIMULATION_ATOM)));
-
     float m1=smalle->GetMass(),m2=GetMass();
     Vector Elastic_dvl = (m1-m2)/(m1+m2)*smalle->GetVelocity() + smalle->GetVelocity()*2*m2/(m1+m2);
     Vector Elastic_dvs = (m2-m1)/(m1+m2)*smalle->GetVelocity() + smalle->GetVelocity()*2*m1/(m1+m2);
@@ -808,278 +669,138 @@ void GameUnit::reactToCollision(Unit * smalle, const QVector & biglocation, cons
     smalle->ApplyDamage (biglocation.Cast(),bignormal,small_damage,smalle,GFXColor(1,1,1,2),NULL);
     this->ApplyDamage (smalllocation.Cast(),smallnormal,large_damage,this,GFXColor(1,1,1,2),NULL);
 
-
-
     //OLDE METHODE
-
     //    smalle->ApplyDamage (biglocation.Cast(),bignormal,.33*g_game.difficulty*(  .5*fabs((smalle->GetVelocity()-this->GetVelocity()).MagnitudeSquared())*this->mass*SIMULATION_ATOM),smalle,GFXColor(1,1,1,2),NULL);
-
     //    this->ApplyDamage (smalllocation.Cast(),smallnormal, .33*g_game.difficulty*(.5*fabs((smalle->GetVelocity()-this->GetVelocity()).MagnitudeSquared())*smalle->mass*SIMULATION_ATOM),this,GFXColor(1,1,1,2),NULL);
 
-
-
 #endif
-
-    
-
   //each mesh with each mesh? naw that should be in one way collide
-
   }
-
 }
 
 Vector GameUnit::ResolveForces (const Transformation &trans, const Matrix &transmat) {
-
 #ifndef PERFRAMESOUND
-
   AUDAdjustSound (sound->engine,cumulative_transformation.position, cumulative_velocity); 
-
 #endif
-
 	return Unit::ResolveForces( trans, transmat);
-
-}
-
-
-
-static float getAutoRSize (Unit * orig,Unit * un, bool ignore_friend=false) {
-
-  static float friendly_autodist =  XMLSupport::parse_float (vs_config->getVariable ("physics","friendly_auto_radius","100"));
-
-  static float neutral_autodist =  XMLSupport::parse_float (vs_config->getVariable ("physics","neutral_auto_radius","1000"));
-
-  static float hostile_autodist =  XMLSupport::parse_float (vs_config->getVariable ("physics","hostile_auto_radius","8000"));
-
-  static int upgradefaction = FactionUtil::GetFaction("upgrades");
-
-  static int neutral = FactionUtil::GetFaction("neutral");
-
-
-
-  if (un->isUnit()==PLANETPTR||(un->getFlightgroup()==orig->getFlightgroup()&&orig->getFlightgroup())) {
-
-    //same flihgtgroup
-
-    return orig->rSize();
-
-  }
-
-  if (un->faction==upgradefaction) {
-
-    return ignore_friend?-FLT_MAX:(-orig->rSize()-un->rSize());
-
-  }
-
-  float rel=un->getRelation(orig);
-
-  if (orig == un->Target())
-
-	rel-=1.5;
-
-  if (rel>.1||un->faction==neutral) {
-
-	  return ignore_friend?-FLT_MAX:friendly_autodist;//min distance apart
-
-  }else if (rel<-.1) {
-
-    
-
-    return hostile_autodist;
-
-  }else {
-
-	  return ignore_friend?-FLT_MAX:neutral_autodist;
-
-  }
-
 }
 
 static signed char  ComputeAutoGuarantee (GameUnit * un) {
-
   Cockpit * cp;
-
   int cpnum=-1;
-
   if ((cp =_Universe.isPlayerStarship (un))) {
-
     cpnum = cp-_Universe.AccessCockpit(0);
-
   }else {
-
     return Mission::AUTO_ON;
-
   }
-
   unsigned int i;
-
   for (i=0;i<active_missions.size();i++) {
-
     if(active_missions[i]->player_num==cpnum&&active_missions[i]->player_autopilot!=Mission::AUTO_NORMAL) {
-
       return active_missions[i]->player_autopilot;
-
     }
-
   }
-
   for (i=0;i<active_missions.size();i++) {
-
     if(active_missions[i]->global_autopilot!=Mission::AUTO_NORMAL) {
-
       return active_missions[i]->global_autopilot;
-
     }
-
   }
-
   return Mission::AUTO_NORMAL;
-
 }
 
+static float getAutoRSize (Unit * orig,Unit * un, bool ignore_friend=false) {
+  static float friendly_autodist =  XMLSupport::parse_float (vs_config->getVariable ("physics","friendly_auto_radius","100"));
+  static float neutral_autodist =  XMLSupport::parse_float (vs_config->getVariable ("physics","neutral_auto_radius","1000"));
+  static float hostile_autodist =  XMLSupport::parse_float (vs_config->getVariable ("physics","hostile_auto_radius","8000"));
+  static int upgradefaction = FactionUtil::GetFaction("upgrades");
+  static int neutral = FactionUtil::GetFaction("neutral");
 
+  if (un->isUnit()==PLANETPTR||(un->getFlightgroup()==orig->getFlightgroup()&&orig->getFlightgroup())) {
+    //same flihgtgroup
+    return orig->rSize();
+  }
+  if (un->faction==upgradefaction) {
+    return ignore_friend?-FLT_MAX:(-orig->rSize()-un->rSize());
+  }
+  float rel=un->getRelation(orig);
+  if (orig == un->Target())
+	rel-=1.5;
+  if (rel>.1||un->faction==neutral) {
+	  return ignore_friend?-FLT_MAX:friendly_autodist;//min distance apart
+  }else if (rel<-.1) {
+    return hostile_autodist;
+  }else {
+	  return ignore_friend?-FLT_MAX:neutral_autodist;
+  }
+}
 
 bool GameUnit::AutoPilotTo (Unit * target, bool ignore_friendlies) {
-
   signed char Guaranteed = ComputeAutoGuarantee (this);
-
   if (Guaranteed==Mission::AUTO_OFF) {
-
     return false;
-
   }
-
   static float autopilot_term_distance = XMLSupport::parse_float (vs_config->getVariable ("physics","auto_pilot_termination_distance","6000"));
-
 //  static float autopilot_p_term_distance = XMLSupport::parse_float (vs_config->getVariable ("physics","auto_pilot_planet_termination_distance","60000"));
-
   if (SubUnit) {
-
     return false;//we can't auto here;
-
   }
-
   StarSystem * ss = activeStarSystem;
-
   if (ss==NULL) {
-
     ss = _Universe.activeStarSystem();
-
   }
 
   Unit * un=NULL;
-
   QVector start (Position());
-
   QVector end (target->LocalPosition());
-
   float totallength = (start-end).Magnitude();
-
   if (totallength>1) {
-
     //    float apt = (target->isUnit()==PLANETPTR&&target->GetDestinations().empty())?autopilot_p_term_distance:autopilot_term_distance;
-
 	  float apt = (target->isUnit()==PLANETPTR)?(autopilot_term_distance+target->rSize()*UnitUtil::getPlanetRadiusPercent()):autopilot_term_distance;
-
     float percent = (getAutoRSize(this,this)+rSize()+target->rSize()+apt)/totallength;
-
     if (percent>1) {
-
       end=start;
-
     }else {
-
       end = start*percent+end*(1-percent);
-
     }
-
   }
-
   bool ok=true;
-
   if (Guaranteed==Mission::AUTO_NORMAL&&CloakVisible()>.5) {
-
-    for (un_iter i=ss->getUnitList().createIterator();
-
-	 (un=*i)!=NULL; 
-
-	 ++i) {
-
+    for (un_iter i=ss->getUnitList().createIterator(); (un=*i)!=NULL; ++i) {
       if (un->isUnit()!=NEBULAPTR) {
-
-	
-
-	if (un!=this&&un!=target) {
-
-	  if ((start-un->Position()).Magnitude()-getAutoRSize (this,this,ignore_friendlies)-rSize()-un->rSize()-getAutoRSize(this,un,ignore_friendlies)<=0) {
-
+		if (un!=this&&un!=target) {
+    	  if ((start-un->Position()).Magnitude()-getAutoRSize (this,this,ignore_friendlies)-rSize()-un->rSize()-getAutoRSize(this,un,ignore_friendlies)<=0) {
 	    return false;
-
 	  }
-
 	  float intersection = un->querySphere (start,end,getAutoRSize (this,un,ignore_friendlies));
-
 	  if (intersection>0) {
-
 	    end = start+ (end-start)*intersection;
-
 	    ok=false;
-
 	  }
-
-	}
-
-      }
-
+	 }
     }
-
+   }
   }
 
   if (this!=target) {
-
     SetCurPosition(end);
-
     if (_Universe.isPlayerStarship (this)&&getFlightgroup()!=NULL) {
-
       Unit * other=NULL;
-
-      for (un_iter ui=ss->getUnitList().createIterator();
-
-	   NULL!=(other = *ui);
-
-	   ++ui) {
-
-	Flightgroup * ff = other->getFlightgroup();
-
-	bool leadah=(ff==getFlightgroup());
-
-	if (ff) {
-
-		if (ff->leader.GetUnit()==this) {
-
-			leadah=true;
-
+      for (un_iter ui=ss->getUnitList().createIterator(); NULL!=(other = *ui); ++ui) {
+    	Flightgroup * ff = other->getFlightgroup();
+		bool leadah=(ff==getFlightgroup());
+		if (ff) {
+			if (ff->leader.GetUnit()==this) {
+				leadah=true;
 		}
-
 	}
-
 	if (leadah) {
-
 	  if (NULL==_Universe.isPlayerStarship (other)) {
-
 	    //other->AutoPilotTo(this);
-
 	    other->SetPosition(UniverseUtil::SafeEntrancePoint (LocalPosition(),other->rSize()*1.5));
-
 	   }
-
 	}
-
       }
-
     }
-
   }
-
   return ok;
-
 }
+

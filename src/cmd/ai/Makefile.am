@@ -1,6 +1,27 @@
-noinst_LIBRARIES = libai.a
+noinst_LIBRARIES = libai.a libaiserver.a
 
 INCLUDES = -I ../../ -I../../boost/
+
+libaiserver_a_SOURCES =	\
+	comm_ai.h			\
+	comm_ai.cpp			\
+	communication.h		\
+	communication.cpp 	\
+	navigation.cpp		\
+	script.h			\
+	navigation.h		\
+	fire.cpp			\
+	fire.h				\
+	order.cpp			\
+	aggressive.cpp		\
+	pythonai.cpp		\
+	pythonai.h			\
+	script.cpp			\
+	script.h			\
+	missionscript.cpp	\
+	missionscript.h 	\
+	turretai.cpp 		\
+	turretai.h
 
 libai_a_SOURCES =	\
 	comm_ai.h	\
@@ -23,8 +44,8 @@ libai_a_SOURCES =	\
 	flyjoystick.cpp	\
 	hard_coded_scripts.cpp	\
 	hard_coded_scripts.h	\
-	order.cpp	\
 	order_comm.cpp \
+	order.cpp	\
 	aggressive.cpp	\
 	fire.h		\
 	input_dfa.cpp	\

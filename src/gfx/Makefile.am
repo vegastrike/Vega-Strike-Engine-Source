@@ -23,6 +23,8 @@ libgfx_a_SOURCES =	\
 	bsp.h		\
 	camera.cpp	\
 	camera.h	\
+	cockpit_generic.h	\
+	cockpit_generic.cpp	\
 	cockpit.h	\
 	cockpit.cpp	\
 	cockpit_xml.cpp	\

@@ -20,45 +20,7 @@ using std::string;
 
 #define activeSys _Universe.activeStarSystem() //less to write
 
-namespace GameUniverseUtil {
-	Cargo getRandCargo(int quantity, string category) {
-	  Cargo *ret=NULL;
-	  Unit *mpl = &GetUnitMasterPartList();
-	  unsigned int max=mpl->numCargo();
-	  if (!category.empty()) {
-	    vector <Cargo> cat;
-	    mpl->GetCargoCat (category,cat);
-	    if (!cat.empty()) {
-	      unsigned int i;
-	      ret = mpl->GetCargo(cat[rand()%cat.size()].content,i);
-	    }
-	  }else {
-	    if (mpl->numCargo()) {
-	      for (unsigned int i=0;i<500;i++) {
-		ret = &mpl->GetCargo(rand()%max);  
-		if (ret->content.find("mission")==string::npos) {
-		  break;
-		}
-	      }
-	    }		  
-	  }
-	  if (ret) {
-		Cargo tempret = *ret;
-		tempret.quantity=quantity;
-	    return tempret;//uses copy
-	  }else {
-	    Cargo newret;
-	    newret.quantity=0;
-	    return newret;
-	  }
-	}
-	//NOTEXPORTEDYET
-	float GetGameTime () {
-		return mission->gametime;
-	}
-	void SetTimeCompression () {
-		setTimeCompression(1.0);
-	}
+namespace UniverseUtil {
 	int musicAddList(string str) {
 		return muzak->Addlist(str.c_str());
 	}
@@ -90,21 +52,6 @@ namespace GameUniverseUtil {
         unsigned int getCurrentPlayer() {
 	  return _Universe.CurrentCockpit();
         }
-	Unit *getPlayer(){
-		return _Universe.AccessCockpit()->GetParent();;
-	}
-	int getNumPlayers () {
-		return _Universe.numPlayers();
-	}
-	Unit *getPlayerX(int which){
-		if (which>=getNumPlayers()) {
-			return NULL;
-		}
-		return _Universe.AccessCockpit(which)->GetParent();
-	}
-	Unit *GetMasterPartList () {
-		return UnitFactory::getMasterPartList();
-	}
 	Unit *launchJumppoint(string name_string,
 			string faction_string,
 			string type_string,
@@ -136,9 +83,6 @@ namespace GameUniverseUtil {
 		Unit *tmp= mission->call_unit_launch(&cf,clstype,destinations);
 		mission->number_of_ships+=nr_of_ships;
 		return tmp;
-	}
-	Unit* launch (string name_string,string type_string,string faction_string,string unittype, string ai_string,int nr_of_ships,int nr_of_waves, QVector pos, string sqadlogo){
-		return launchJumppoint(name_string,faction_string,type_string,unittype,ai_string,nr_of_ships,nr_of_waves,pos,sqadlogo,"");
 	}
 }
 #undef activeSys

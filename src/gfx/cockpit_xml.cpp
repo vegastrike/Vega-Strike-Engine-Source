@@ -63,7 +63,7 @@ namespace CockpitXML {
       G_DOWN,
       G_LEFT,
       G_RIGHT,
-	  LAG
+	  COCKPIT_LAG
     };
 
   const EnumMap::Pair element_names[] = {
@@ -121,7 +121,7 @@ namespace CockpitXML {
     EnumMap::Pair ("g", GREEN),
     EnumMap::Pair ("b", BLUE),
     EnumMap::Pair ("type", VDUTYPE),
-    EnumMap::Pair ("lag", LAG)
+    EnumMap::Pair ("lag", COCKPIT_LAG)
   };
 
   const EnumMap element_map(element_names, 25);
@@ -135,14 +135,7 @@ using namespace CockpitXML;
 
 
 
-void Cockpit::beginElement(void *userData, const XML_Char *name, const XML_Char **atts) {
-  ((Cockpit*)userData)->beginElement(name, AttributeList(atts));
-}
-
-void Cockpit::endElement(void *userData, const XML_Char *name) {
-  ((Cockpit*)userData)->endElement(name);
-}
-void Cockpit::beginElement(const string &name, const AttributeList &attributes) {
+void GameCockpit::beginElement(const string &name, const AttributeList &attributes) {
   AttributeList::const_iterator iter;
   Gauge::DIRECTION tmpdir=Gauge::GAUGE_UP;
   Sprite ** newsprite=NULL;
@@ -358,13 +351,13 @@ void Cockpit::beginElement(const string &name, const AttributeList &attributes) 
   }
   
 }
-void Cockpit::endElement(const string &name) {
+void GameCockpit::endElement(const string &name) {
 
 }
 
 
 
-void Cockpit::LoadXML (const char * filename) {
+void GameCockpit::LoadXML (const char * filename) {
   const int chunk_size = 16384;
 
   FILE * inFile=NULL;

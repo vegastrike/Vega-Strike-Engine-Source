@@ -69,7 +69,7 @@ void GameUnit::Repair() {
     }//nobreak
   case 2:
     {
-      int whichgauge=rand()%(Cockpit::NUMGAUGES+1+MAXVDUS);
+      int whichgauge=rand()%(UnitImages::NUMGAUGES+1+MAXVDUS);
       if (image->cockpit_damage[whichgauge]<1) {
 	image->cockpit_damage[whichgauge]+=workunit;
 	if (image->cockpit_damage[whichgauge]>1)

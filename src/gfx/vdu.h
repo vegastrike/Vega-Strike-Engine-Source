@@ -1,10 +1,10 @@
 #ifndef _GFX_VDU_H_
 #define _GFX_VDU_H_
 
+#include "cockpit_generic.h"
 #include "sprite.h"
 #include <string>
 #include <vector>
-enum VIEWSTYLE {CP_FRONT,  CP_BACK,CP_LEFT, CP_RIGHT, CP_VIEWTARGET, CP_CHASE, CP_PAN,  CP_PANTARGET, CP_TARGET};
 
 class Unit;
 class TextPlane;

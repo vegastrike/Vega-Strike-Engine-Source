@@ -20,7 +20,10 @@
 
 #include <iostream>
 #include <stdlib.h>
+#include "vs_globals.h"
 #include "networking/netserver.h"
+
+Universe _Universe;
 
 int main( int argc, char **argv)
 {

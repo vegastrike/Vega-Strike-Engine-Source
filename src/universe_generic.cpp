@@ -3,12 +3,42 @@
 #include <algorithm>
 #include "universe_generic.h"
 #include "galaxy_xml.h"
-//#include "config_xml.h"
+#include "gfx/cockpit.h"
 #include "cmd/unit_generic.h"
 #include "vs_globals.h"
 #include "xml_support.h"
 
 using namespace std;
+Cockpit * Universe::isPlayerStarship(const Unit * doNotDereference) {
+  if (!doNotDereference)
+    return NULL;
+  for (unsigned int i=0;i<cockpit.size();i++) {
+    if (doNotDereference==cockpit[i]->GetParent())
+      return cockpit[i];
+  }
+  return NULL;
+}
+void Universe::SetActiveCockpit (int i) {
+#ifdef VS_DEBUG
+  if (i<0||i>=cockpit.size()) {
+    fprintf (stderr,"ouch invalid cockpit %d",i);
+  }
+#endif 
+  current_cockpit=i;
+}
+void Universe::SetActiveCockpit (Cockpit * cp) {
+  for (unsigned int i=0;i<cockpit.size();i++) {
+    if (cockpit[i]==cp) {
+      SetActiveCockpit (i);
+      return;
+    }
+  }
+}
+void Universe::SetupCockpits(vector  <string> playerNames) {
+	for (unsigned int i=0;i<playerNames.size();i++) {
+	  cockpit.push_back( new Cockpit ("",NULL,playerNames[i]));
+	}
+}
 void SortStarSystems (std::vector <StarSystem *> &ss, StarSystem * drawn) {
   if ((*ss.begin())==drawn) {
     return;

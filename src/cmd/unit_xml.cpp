@@ -1553,7 +1553,7 @@ void GameUnit::LoadXML(const char *filename, const char * modifications, char * 
   }
   {
   unsigned int i;
-  for (i=0;i<=(Cockpit::NUMGAUGES+MAXVDUS);i++) {
+  for (i=0;i<=(UnitImages::NUMGAUGES+MAXVDUS);i++) {
 	image->unitwriter->AddTag("CockpitDamage");
 	image->unitwriter->AddElement("damage",floatStarHandler,XMLType(&image->cockpit_damage[i]));
 	image->unitwriter->EndTag("CockpitDamage");

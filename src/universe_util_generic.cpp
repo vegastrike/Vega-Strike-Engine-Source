@@ -1,15 +1,16 @@
 #include "cmd/script/mission.h"
+#include "universe_util.h"
 #include "universe_generic.h"
 #include "cmd/unit_generic.h"
 #include "cmd/unit_interface.h"
-//#include "cmd/unit_factory.h" //for UnitFactory::getMasterPartList()
+#include "cmd/unit_factory_generic.h" //for UnitFactory::getMasterPartList()
 #include "cmd/collection.h"
 #include "star_system_generic.h"
 #include <string>
 //#include "cmd/music.h"
 //#include "audiolib.h"
 //#include "gfx/animation.h"
-//#include "lin_time.h"
+#include "lin_time.h"
 #include "load_mission.h"
 #include "config_xml.h"
 #include "vs_globals.h"
@@ -21,6 +22,47 @@ using std::string;
 #define activeSys _Universe.activeStarSystem() //less to write
 
 namespace UniverseUtil {
+	Cargo getRandCargo(int quantity, string category) {
+	  Cargo *ret=NULL;
+	  Unit *mpl = &GetUnitMasterPartList();
+	  unsigned int max=mpl->numCargo();
+	  if (!category.empty()) {
+	    vector <Cargo> cat;
+	    mpl->GetCargoCat (category,cat);
+	    if (!cat.empty()) {
+	      unsigned int i;
+	      ret = mpl->GetCargo(cat[rand()%cat.size()].content,i);
+	    }
+	  }else {
+	    if (mpl->numCargo()) {
+	      for (unsigned int i=0;i<500;i++) {
+		ret = &mpl->GetCargo(rand()%max);  
+		if (ret->content.find("mission")==string::npos) {
+		  break;
+		}
+	      }
+	    }		  
+	  }
+	  if (ret) {
+		Cargo tempret = *ret;
+		tempret.quantity=quantity;
+	    return tempret;//uses copy
+	  }else {
+	    Cargo newret;
+	    newret.quantity=0;
+	    return newret;
+	  }
+	}
+	//NOTEXPORTEDYET
+	float GetGameTime () {
+		return mission->gametime;
+	}
+	void SetTimeCompression () {
+		setTimeCompression(1.0);
+	}
+	Unit *GetMasterPartList () {
+		return UnitFactory::getMasterPartList();
+	}
 	void pushSystem (string name) {
 		StarSystem * ss = _Universe.GenerateStarSystem (name.c_str(),"",Vector(0,0,0));
 		_Universe.pushActiveStarSystem(ss);
@@ -205,11 +247,6 @@ namespace UniverseUtil {
     void IOmessage(int delay,string from,string to,string message){
 		mission->msgcenter->add(from,to,message,delay);
 	}
-	/*
-	Unit *GetMasterPartList () {
-		return UnitFactory::getMasterPartList();
-	}
-	*/
 	Unit *GetContrabandList (string faction) {
 		return FactionUtil::GetContraband(FactionUtil::GetFaction(faction.c_str()));
 	}
@@ -271,7 +308,21 @@ namespace UniverseUtil {
     }
     return pos;
   }
-
+	Unit* launch (string name_string,string type_string,string faction_string,string unittype, string ai_string,int nr_of_ships,int nr_of_waves, QVector pos, string sqadlogo){
+		return launchJumppoint(name_string,faction_string,type_string,unittype,ai_string,nr_of_ships,nr_of_waves,pos,sqadlogo,"");
+	}
+	Unit *getPlayer(){
+		return _Universe.AccessCockpit()->GetParent();;
+	}
+	int getNumPlayers () {
+		return _Universe.numPlayers();
+	}
+	Unit *getPlayerX(int which){
+		if (which>=getNumPlayers()) {
+			return NULL;
+		}
+		return _Universe.AccessCockpit(which)->GetParent();
+	}
 }
 
 #undef activeSys

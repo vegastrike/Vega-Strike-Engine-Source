@@ -52,7 +52,6 @@
 #include "cmd/script/flightgroup.h"
 #include "force_feedback.h"
 #include "universe_util.h"
-#include "universe_util_generic.h"
 #include "networking/netclient.h"
 using namespace std;
 
@@ -718,6 +717,18 @@ void restore_main_loop() {
 
 }
 void main_loop() {
+  // Don't forget to initialize cur_check to getNewTime just before entering main_loop() --> done !
+  // Evaluate number of loops per second each 200 loops
+  if( loop_count==200 && last_check!=1)
+  {
+	// Time to update test
+	cur_check = getNewTime();
+	last_check = cur_check;
+	nb_checks++;
+	avg_loop = ((nb_checks-1)*avg_loop+(loop_count/(cur_check-last_check)))/nb_checks;
+	loop_count=0;
+  }
+  loop_count++;
   //  SuicideKey (0,PRESS);
 
   //  Cockpit::Respawn (0,PRESS);
@@ -736,6 +747,4 @@ void main_loop() {
 	  Network[jj].checkMsg();
   }
 }
-
-
 

@@ -31,11 +31,6 @@
 #include "gfx/sprite.h"
 #include "lin_time.h"
 
-#include "ai/turretai.h"
-#include "ai/navigation.h"
-#include "ai/fire.h"
-#include "ai/script.h"
-#include "ai/flybywire.h"
 #include "gfx/vsbox.h"
 #include "bolt.h"
 #include "gfx/lerp.h"
@@ -70,13 +65,6 @@ GameUnit::GameUnit( int /*dummy*/ ) {
 }
 
 #define PARANOIA .4
-float GameUnit::getRelation (Unit * targ) {
-  if (aistate) {
-    return aistate->GetEffectiveRelationship (targ);
-  }else {
-    return FactionUtil::GetIntRelation (faction,targ->faction);
-  }
-}
 
 GameUnit::GameMount::GameMount (){static weapon_info wi(weapon_info::BEAM); type=&wi; size=weapon_info::NOWEAP; ammo=-1;status= UNCHOSEN; processed=GameMount::PROCESSED;ref.gun=NULL; sound=-1;}
 
@@ -160,7 +148,7 @@ extern void UncheckUnit (Unit * un);
 void GameUnit::Init()
 {
   this->Unit::Init();
-  int numg= 1+MAXVDUS+Cockpit::NUMGAUGES;
+  int numg= 1+MAXVDUS+UnitImages::NUMGAUGES;
   image->cockpit_damage=(float*)malloc((numg)*sizeof(float));
   for (unsigned int damageiterator=0;damageiterator<numg;damageiterator++) {
 	image->cockpit_damage[damageiterator]=1;
@@ -650,73 +638,7 @@ using Orders::FireAt;
 
 
  
-void GameUnit::LoadAIScript(const std::string & s) {
-  static bool init=false;
-  //  static bool initsuccess= initPythonAI();
-  if (s.find (".py")!=string::npos) {
-    Order * ai = PythonClass <FireAt>::Factory (s);
-    PrimeOrders (ai);
-    return;
-  }else {
-    if (s.length()>0) {
-      if (*s.begin()=='_') {
-	mission->addModule (s.substr (1));
-	PrimeOrders (new AImissionScript (s.substr(1)));
-      }else {
-	string ai_agg=s+".agg.xml";
-	string ai_int=s+".int.xml";
-	PrimeOrders( new Orders::AggressiveAI (ai_agg.c_str(), ai_int.c_str()));
-      }
-    }else {
-      PrimeOrders();
-    }
-  }
-}
-void GameUnit::eraseOrderType (unsigned int type) {
-	if (aistate) {
-		aistate->eraseType(type);
-	}
-}
-bool GameUnit::LoadLastPythonAIScript() {
-  Order * pyai = PythonClass <Orders::FireAt>::LastPythonClass();
-  if (pyai) {
-    PrimeOrders (pyai);
-  }else if (!aistate) {
-    PrimeOrders();
-    return false;
-  }
-  return true;
-}
-bool GameUnit::EnqueueLastPythonAIScript() {
-  Order * pyai = PythonClass <Orders::FireAt>::LastPythonClass();
-  if (pyai) {
-    EnqueueAI (pyai);
-  }else if (!aistate) {
-    return false;
-  }
-  return true;
-}
 
-
-void GameUnit::PrimeOrders (Order * newAI) {
-  if (newAI) {
-    if (aistate) {
-      aistate->Destroy();
-    }
-    aistate = newAI;
-    newAI->SetParent (this);
-  }else {
-    PrimeOrders();
-  }
-}
-void GameUnit::PrimeOrders () {
-  if (aistate) {
-    aistate->Destroy();
-    aistate=NULL;
-  }
-  aistate = new Order; //get 'er ready for enqueueing
-  aistate->SetParent (this);
-}
 #if 0
 void GameUnit::SwapOutHalos() {
   for (int i=0;i<numhalos;i++) {
@@ -734,163 +656,8 @@ void GameUnit::SwapInHalos() {
   }
 }
 #endif
-static bool CheckAccessory (Unit * tur) {
-  bool accessory = tur->name.find ("accessory")!=string::npos;
-  if (accessory) {
-    tur->SetAngularVelocity(tur->DownCoordinateLevel(Vector (tur->GetComputerData().max_pitch,
-							   tur->GetComputerData().max_yaw,
-							   tur->GetComputerData().max_roll)));
-  }
-  return accessory;
-}
-void GameUnit::SetTurretAI () {
-  static bool talkinturrets = XMLSupport::parse_bool(vs_config->getVariable("AI","independent_turrets","false"));
-  if (talkinturrets) {
-    UnitCollection::UnitIterator iter = getSubUnits();
-    Unit * un;
-    while (NULL!=(un=iter.current())) {
-      if (!CheckAccessory(un)) {
-	un->EnqueueAIFirst (new Orders::FireAt(.2,15));
-	un->EnqueueAIFirst (new Orders::FaceTarget (false,3));
-      }
-      un->SetTurretAI ();
-      iter.advance();
-    }
-  }else {
-    UnitCollection::UnitIterator iter = getSubUnits();
-    Unit * un;
-    while (NULL!=(un=iter.current())) {
-      if (!CheckAccessory(un)) {
-	if (un->aistate) {
-	  un->aistate->Destroy();
-	}
-	un->aistate = (new Orders::TurretAI());
-	un->aistate->SetParent (un);
-      }
-      un->SetTurretAI ();
-      iter.advance();
-    }    
-  }
-}
-void GameUnit::DisableTurretAI () {
-  UnitCollection::UnitIterator iter = getSubUnits();
-  Unit * un;
-  while (NULL!=(un=iter.current())) {
-    if (un->aistate) {
-      un->aistate->Destroy();
-    }
-    un->aistate = new Order; //get 'er ready for enqueueing
-    un->aistate->SetParent (un);
-    un->UnFire();
-    un->DisableTurretAI ();
-    iter.advance();
-  }
-}
-
-void GameUnit::SetAI(Order *newAI)
-{
-  newAI->SetParent(this);
-  if (aistate) {
-    aistate->ReplaceOrder (newAI);
-  }else {
-    aistate = newAI;
-  }
-}
-void GameUnit::EnqueueAI(Order *newAI) {
-  newAI->SetParent(this);
-  if (aistate) {
-    aistate->EnqueueOrder (newAI);
-  }else {
-    aistate = newAI;
-  }
-}
-void GameUnit::EnqueueAIFirst(Order *newAI) {
-  newAI->SetParent(this);
-  if (aistate) {
-    aistate->EnqueueOrderFirst (newAI);
-  }else {
-    aistate = newAI;
-  }
-}
-void GameUnit::ExecuteAI() {
-  if (flightgroup) {
-      Unit * leader = flightgroup->leader.GetUnit();
-      if (leader?(flightgroup->leader_decision>-1)&&(leader->getFgSubnumber()>=getFgSubnumber()):true) {//no heirarchy in flight group
-	if (!leader) {
-	  flightgroup->leader_decision = flightgroup->nr_ships;
-	}
-	flightgroup->leader.SetUnit(this);
-      }
-      flightgroup->leader_decision--;
-  
-  }
-  if(aistate) aistate->Execute();
-  if (!SubUnits.empty()) {
-    un_iter iter =getSubUnits();
-    Unit * un;
-    while ((un = iter.current())) {
-      un->ExecuteAI();//like dubya
-      iter.advance();
-    }
-  }
-}
-
-string GameUnit::getFullAIDescription(){
-  if (getAIState()) {
-    return getFgID()+":"+getAIState()->createFullOrderDescription(0).c_str();
-  }else {
-    return "no order";
-  }
-}
-
-void GameUnit::setTargetFg(string primary,string secondary,string tertiary){
-  target_fgid[0]=primary;
-  target_fgid[1]=secondary;
-  target_fgid[2]=tertiary;
-
-  ReTargetFg(0);
-}
-
-void GameUnit::ReTargetFg(int which_target){
-#if 0
-      StarSystem *ssystem=_Universe.activeStarSystem();
-      UnitCollection *unitlist=ssystem->getUnitList();
-      Iterator uiter=unitlist->createIterator();
-
-      GameUnit *other_unit=uiter.current();
-      GameUnit *found_target=NULL;
-      int found_attackers=1000;
-
-      while(other_unit!=NULL){
-	string other_fgid=other_unit->getFgID();
-	if(other_unit->matchesFg(target_fgid[which_target])){
-	  // the other unit matches our primary target
-
-	  int num_attackers=other_unit->getNumAttackers();
-	  if(num_attackers<found_attackers){
-	    // there's less ships attacking this target than the previous one
-	    found_target=other_unit;
-	    found_attackers=num_attackers;
-	    setTarget(found_target);
-	  }
-	}
-
-	other_unit=uiter.advance();
-      }
-
-      if(found_target==NULL){
-	// we haven't found a target yet, search again
-	if(which_target<=1){
-	  ReTargetFg(which_target+1);
-	}
-	else{
-	  // we can't find any target
-	  setTarget(NULL);
-	}
-      }
-#endif
-}
-
+// MAYBE MOVE THAT TO UNIT TOO
+// BUT USES GETMINDIS and GETMINDIS USES meshdata which is not member of Unit for now
 void GameUnit::scanSystem(){
 
   double nowtime=mission->getGametime();

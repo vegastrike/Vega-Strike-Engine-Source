@@ -85,7 +85,7 @@ enum clsptr {
 class VDU;
 struct UnitImages;
 struct UnitSounds;
-struct Cargo;
+class Cargo;
 class Mesh;
 
 /// used to scan the system - faster than c_alike code
@@ -184,7 +184,6 @@ public:
 // Uses mmm... stuff not desired here ?
   virtual bool UpgradeSubUnits (Unit * up, int subunitoffset, bool touchme, bool downgrade, int &numave, double &percentage);
   bool UpgradeMounts (const Unit * up, int subunitoffset, bool touchme, bool downgrade, int &numave, Unit * templ, double &percentage);
-  virtual bool Dock (Unit * unitToDockWith){return false;}
   /// the turrets and spinning parts fun fun stuff
   UnitCollection SubUnits; 
 
@@ -236,7 +235,7 @@ protected:
   friend class UpgradingInfo;//needed to actually upgrade unit through interface
  public:
 // Uses a static member of Cockpit class -- TO CHECK
-//  void DamageRandSys (float dam,const Vector &vec);
+  void DamageRandSys (float dam,const Vector &vec);
   void SetNebula (Nebula *neb) {
     nebula = neb;
     if (!SubUnits.empty()) {
@@ -416,6 +415,7 @@ private:
 protected:
   virtual float ExplosionRadius();
 public:
+  virtual bool AutoPilotTo(Unit * un, bool ignore_friendlies=false) {return false;}
   ///The owner of this unit. This may not collide with owner or units owned by owner. Do not dereference (may be dead pointer)
   Unit *owner;
   ///The previous state in last physics frame to interpolate within
@@ -548,15 +548,15 @@ public:
   ///convenient shortcut to applying torques with vector and position
   void ApplyLocalTorque(const Vector &torque); 
   ///Applies damage to the local area given by pnt
-  virtual void ApplyLocalDamage (const Vector &pnt, const Vector & normal, float amt, Unit * affectedSubUnit, const GFXColor &, float phasedamage=0) {}
+  virtual float ApplyLocalDamage (const Vector &pnt, const Vector & normal, float amt, Unit * affectedSubUnit, const GFXColor &, float phasedamage=0);
   ///Applies damage to the pre-transformed area of the ship
-  virtual void ApplyDamage (const Vector & pnt, const Vector & normal, float amt, Unit * affectedSubUnit, const GFXColor &,  Unit *ownerDoNotDereference, float phasedamage=0 ) {}
+  virtual void ApplyDamage (const Vector & pnt, const Vector & normal, float amt, Unit * affectedSubUnit, const GFXColor &,  Unit *ownerDoNotDereference, float phasedamage=0 );
   ///Deals remaining damage to the hull at point and applies lighting effects
   virtual float DealDamageToHullReturnArmor (const Vector &pnt, float Damage, unsigned short * &targ);
   float DealDamageToHull (const Vector &pnt, float Damage)
   {
-	  unsigned short * nullvar = NULL;
-	  return this->DealDamageToHullReturnArmor( pnt, Damage, nullvar);
+	 unsigned short * nullvar = NULL;
+	 return this->DealDamageToHullReturnArmor( pnt, Damage, nullvar);
   }
 
   ///Clamps thrust to the limits struct
@@ -776,9 +776,9 @@ public:
   virtual void Target (Unit * targ) {}
 
   ///not used yet
-  virtual void setTargetFg(string primary,string secondary=string(),string tertiary=string()) {}
+  void setTargetFg(string primary,string secondary=string(),string tertiary=string());
   ///not used yet
-  virtual void ReTargetFg(int which_target=0) {}
+  void ReTargetFg(int which_target=0);
   ///not used yet
 
 /***************************************************************************************/
@@ -816,36 +816,31 @@ public:
   Order *getAIState() const{return aistate;}
   ///Sets up a null queue for orders
 // Uses AI so only in NetUnit and Unit classes
-  virtual void PrimeOrders() {}
-//  void PrimeOrders(Order * newAI);
+  void PrimeOrders();
+  void PrimeOrders(Order * newAI);
   ///Sets the AI to be a specific order
-  virtual void SetAI(Order *newAI) {}
+  void SetAI(Order *newAI);
   ///Enqueues an order to the unit's order queue
-  virtual void EnqueueAI(Order *newAI) {}
+  void EnqueueAI(Order *newAI);
   ///EnqueuesAI first
-  virtual void EnqueueAIFirst (Order * newAI) {}
+  void EnqueueAIFirst (Order * newAI);
   ///num subunits
-  virtual void LoadAIScript (const std::string &aiscript) {}
-  virtual bool LoadLastPythonAIScript () {return false;}
-  virtual bool EnqueueLastPythonAIScript () {return false;}
+  void LoadAIScript (const std::string &aiscript);
+  bool LoadLastPythonAIScript ();
+  bool EnqueueLastPythonAIScript ();
 // Uses Order class but just a poiner so ok
 // Uses AI so only in NetUnit and Unit classes
   virtual double getMinDis(const QVector &pnt){ return 1;}//for clicklist
 // Uses AI stuff so only in NetUnit and Unit classes
-  virtual void SetTurretAI () {}
-  virtual void DisableTurretAI () {}
+  void SetTurretAI ();
+  void DisableTurretAI ();
 // AI so only in NetUnit and Unit classes
-  virtual string getFullAIDescription() { return string("");}
+  string getFullAIDescription();
    ///Erases all orders that bitwise OR with that type
 // Uses AI so only in NetUnit and Unit classes
-//  void eraseOrderType (unsigned int type);
+  void eraseOrderType (unsigned int type);
   ///Executes 1 frame of physics-based AI
-// Uses AI so only in NetUnit and Unit classes
-  virtual void ExecuteAI() {}
-
-/*************** T O   C H E C K ! ! ! *******************/
-// Uses UnitUtil stuff but needed in NetUnit and Unit classes -- TO CHECK
-  virtual bool AutoPilotTo(Unit * un, bool ignore_friendlies=false) {return false;}
+  void ExecuteAI();
 
 /***************************************************************************************/
 /**** COLLISION STUFF                                                               ****/
@@ -933,17 +928,17 @@ public:
   ///returns -1 if unit cannot dock, otherwise returns which dock it can dock at
   enum DOCKENUM {NOT_DOCKED=0x0, DOCKED_INSIDE=0x1, DOCKED=0x2, DOCKING_UNITS=0x4};
   int CanDockWithMe (Unit * dockingunit) ;
-  virtual void PerformDockingOperations() {}
-  virtual void FreeDockingPort(unsigned int whichport) {}
+  void PerformDockingOperations();
+  void FreeDockingPort(unsigned int whichport);
   virtual const vector <struct DockingPorts> &DockingPortLocations() { return image->dockingports;}
   char DockedOrDocking()const {return docked;}
   bool IsCleared (Unit * dockignunit);
   bool isDocked ( Unit *dockingUnit);
   bool UnDock (Unit * unitToDockWith);
 // Use AI
-  virtual bool RequestClearance (Unit * dockingunit) {return false;}
-// Uses Cockpit stuff
-//  bool Dock (Unit * unitToDockWith);
+  bool RequestClearance (Unit * dockingunit);
+  bool Dock (Unit * unitToDockWith);
+  virtual void RestoreGodliness() {}
 
 /***************************************************************************************/
 /**** FACTION/FLIGHTGROUP STUFF                                                     ****/
@@ -969,8 +964,8 @@ public:
 
 
 // Uses Universe stuff
-  virtual vector <struct Cargo>& FilterDowngradeList (vector <struct Cargo> & mylist) { return mylist;}
-  virtual vector <struct Cargo>& FilterUpgradeList (vector <struct Cargo> & mylist) { return mylist;}
+  virtual vector <class Cargo>& FilterDowngradeList (vector <class Cargo> & mylist) { return mylist;}
+  virtual vector <class Cargo>& FilterUpgradeList (vector <class Cargo> & mylist) { return mylist;}
 
 /***************************************************************************************/
 /**** MISC STUFF                                                                    ****/
@@ -1010,8 +1005,7 @@ public:
   bool isEnemy(Unit *other){ if(FactionUtil::GetIntRelation(this->faction,other->faction)<0.0){ return true; } return false; };
   bool isFriend(Unit *other){ if(FactionUtil::GetIntRelation(this->faction,other->faction)>0.0){ return true; } return false; };
   bool isNeutral(Unit *other){ if(FactionUtil::GetIntRelation(this->faction,other->faction)==0.0){ return true; } return false; };
-  // Uses AI
-  virtual float getRelation(Unit *other){return false;}
+  float getRelation(Unit *other);
 };
 
 ///Holds temporary values for inter-function XML communication Saves deprecated restr info
