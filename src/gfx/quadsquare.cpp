@@ -789,19 +789,6 @@ void	quadsquare::UpdateAux(const quadcornerdata& cd, const Vector & ViewerLocati
 float	VertexArray[9 * 3];
 unsigned int	ColorArray[9];
 unsigned char	VertList[24];
-	
-/*DEPRECATED!!!
-
-static void	InitVert(int index, float x, float y, float z)
-// Initializes the indexed vertex of VertexArray[] with the
-// given values.
-{
-	int	i = index * 3;
-	VertexArray[i] = x;
-	VertexArray[i+1] = y;
-	VertexArray[i+2] = z;
-}
-*/
 
 int	quadsquare::Render(const quadcornerdata& cd)
 // Draws the heightfield represented by this tree.
@@ -811,28 +798,9 @@ int	quadsquare::Render(const quadcornerdata& cd)
   vertices->LoadDrawState();
   vertices->BeginDrawState (GFXTRUE);
   indices.clear();
-  //Should we have somethign like th is?	glScalef(1.0, VERTICAL_SCALE, 1.0);
-	
-		// Set up automatic texture-coordinate generation.
-		// Basically we're just stretching the current texture over the entire 64K x 64K terrain.
-  /**hmm is this necessary?  how will we do texturing?
-		glTexGeni(GL_S, GL_TEXTURE_GEN_MODE, GL_OBJECT_LINEAR);
-		float	p[4] = { 1.0 / 65536, 0, 0, 0 };
-		glTexGenfv(GL_S, GL_OBJECT_PLANE, p);
-
-		glTexGeni(GL_T, GL_TEXTURE_GEN_MODE, GL_OBJECT_LINEAR);
-		p[0] = 0;	p[2] = 1.0 / 65536;
-		glTexGenfv(GL_T, GL_OBJECT_PLANE, p);
-
-		glEnable(GL_TEXTURE_GEN_S);
-		glEnable(GL_TEXTURE_GEN_T);
-  */
 
 	RenderAux(cd, GFX_PARTIALLY_VISIBLE);
-	/*
-	glDisable(GL_TEXTURE_GEN_S);
-	glDisable(GL_TEXTURE_GEN_T);
-	*/
+
 	unsigned int isize = indices.size();
 	vertices->Draw(GFXTRI,isize, indices.begin());
 	vertices->EndDrawState();
