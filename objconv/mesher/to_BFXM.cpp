@@ -1107,51 +1107,51 @@ int32bit appendmeshfromxml(XML memfile, FILE* Outputfile){
 		runningbytenum+=sizeof(float32bit)*fwrite(&floatbuf,sizeof(float32bit),1,Outputfile);//t coord
 	}
   }
-  intbuf= VSSwapHostIntToLittle(memfile.linestrips.size());
+  intbuf= VSSwapHostIntToLittle(memfile.tristrips.size());
   runningbytenum+=sizeof(int32bit)*fwrite(&intbuf,sizeof(int32bit),1,Outputfile);//Number of tristrips
-  for(int32bit ts=0;ts<memfile.linestrips.size();ts++){
-	intbuf= VSSwapHostIntToLittle(memfile.linestrips[ts].points.size());
+  for(int32bit ts=0;ts<memfile.tristrips.size();ts++){
+	intbuf= VSSwapHostIntToLittle(memfile.tristrips[ts].points.size());
 	runningbytenum+=sizeof(int32bit)*fwrite(&intbuf,sizeof(int32bit),1,Outputfile);//Number of elements in current tristrip
-	intbuf= VSSwapHostIntToLittle(memfile.linestrips[ts].flatshade);
+	intbuf= VSSwapHostIntToLittle(memfile.tristrips[ts].flatshade);
 	runningbytenum+=sizeof(int32bit)*fwrite(&intbuf,sizeof(int32bit),1,Outputfile);//Flatshade flag
-	for(int32bit tmpcounter=0;tmpcounter<memfile.linestrips[ts].points.size();tmpcounter++){
-		intbuf= VSSwapHostIntToLittle(memfile.linestrips[ts].points[tmpcounter].indexref);
+	for(int32bit tmpcounter=0;tmpcounter<memfile.tristrips[ts].points.size();tmpcounter++){
+		intbuf= VSSwapHostIntToLittle(memfile.tristrips[ts].points[tmpcounter].indexref);
 		runningbytenum+=sizeof(int32bit)*fwrite(&intbuf,sizeof(int32bit),1,Outputfile);//point index
-		floatbuf= VSSwapHostFloatToLittle(memfile.linestrips[ts].points[tmpcounter].s);
+		floatbuf= VSSwapHostFloatToLittle(memfile.tristrips[ts].points[tmpcounter].s);
 		runningbytenum+=sizeof(float32bit)*fwrite(&floatbuf,sizeof(float32bit),1,Outputfile);//s coord
-		floatbuf= VSSwapHostFloatToLittle(memfile.linestrips[ts].points[tmpcounter].t);
+		floatbuf= VSSwapHostFloatToLittle(memfile.tristrips[ts].points[tmpcounter].t);
 		runningbytenum+=sizeof(float32bit)*fwrite(&floatbuf,sizeof(float32bit),1,Outputfile);//t coord
 	}
   }
-  intbuf= VSSwapHostIntToLittle(memfile.linestrips.size());
+  intbuf= VSSwapHostIntToLittle(memfile.trifans.size());
   runningbytenum+=sizeof(int32bit)*fwrite(&intbuf,sizeof(int32bit),1,Outputfile);//Number of trifans
-  for(int32bit tf=0;tf<memfile.linestrips.size();tf++){
-	intbuf= VSSwapHostIntToLittle(memfile.linestrips[tf].points.size());
+  for(int32bit tf=0;tf<memfile.trifans.size();tf++){
+	intbuf= VSSwapHostIntToLittle(memfile.trifans[tf].points.size());
 	runningbytenum+=sizeof(int32bit)*fwrite(&intbuf,sizeof(int32bit),1,Outputfile);//Number of elements in current trifan
-	intbuf= VSSwapHostIntToLittle(memfile.linestrips[tf].flatshade);
+	intbuf= VSSwapHostIntToLittle(memfile.trifans[tf].flatshade);
 	runningbytenum+=sizeof(int32bit)*fwrite(&intbuf,sizeof(int32bit),1,Outputfile);//Flatshade flag
-	for(int32bit tmpcounter=0;tmpcounter<memfile.linestrips[tf].points.size();tmpcounter++){
-		intbuf= VSSwapHostIntToLittle(memfile.linestrips[tf].points[tmpcounter].indexref);
+	for(int32bit tmpcounter=0;tmpcounter<memfile.trifans[tf].points.size();tmpcounter++){
+		intbuf= VSSwapHostIntToLittle(memfile.trifans[tf].points[tmpcounter].indexref);
 		runningbytenum+=sizeof(int32bit)*fwrite(&intbuf,sizeof(int32bit),1,Outputfile);//point index
-		floatbuf= VSSwapHostFloatToLittle(memfile.linestrips[tf].points[tmpcounter].s);
+		floatbuf= VSSwapHostFloatToLittle(memfile.trifans[tf].points[tmpcounter].s);
 		runningbytenum+=sizeof(float32bit)*fwrite(&floatbuf,sizeof(float32bit),1,Outputfile);//s coord
-		floatbuf= VSSwapHostFloatToLittle(memfile.linestrips[tf].points[tmpcounter].t);
+		floatbuf= VSSwapHostFloatToLittle(memfile.trifans[tf].points[tmpcounter].t);
 		runningbytenum+=sizeof(float32bit)*fwrite(&floatbuf,sizeof(float32bit),1,Outputfile);//t coord
 	}
   }
-  intbuf= VSSwapHostIntToLittle(memfile.linestrips.size());
+  intbuf= VSSwapHostIntToLittle(memfile.quadstrips.size());
   runningbytenum+=sizeof(int32bit)*fwrite(&intbuf,sizeof(int32bit),1,Outputfile);//Number of quadstrips
-  for(int32bit qs=0;qs<memfile.linestrips.size();qs++){
-	intbuf= VSSwapHostIntToLittle(memfile.linestrips[qs].points.size());
+  for(int32bit qs=0;qs<memfile.quadstrips.size();qs++){
+	intbuf= VSSwapHostIntToLittle(memfile.quadstrips[qs].points.size());
 	runningbytenum+=sizeof(int32bit)*fwrite(&intbuf,sizeof(int32bit),1,Outputfile);//Number of elements in current quadstrip
-	intbuf= VSSwapHostIntToLittle(memfile.linestrips[qs].flatshade);
+	intbuf= VSSwapHostIntToLittle(memfile.quadstrips[qs].flatshade);
 	runningbytenum+=sizeof(int32bit)*fwrite(&intbuf,sizeof(int32bit),1,Outputfile);//Flatshade flag
-	for(int32bit tmpcounter=0;tmpcounter<memfile.linestrips[qs].points.size();tmpcounter++){
-		intbuf= VSSwapHostIntToLittle(memfile.linestrips[qs].points[tmpcounter].indexref);
+	for(int32bit tmpcounter=0;tmpcounter<memfile.quadstrips[qs].points.size();tmpcounter++){
+		intbuf= VSSwapHostIntToLittle(memfile.quadstrips[qs].points[tmpcounter].indexref);
 		runningbytenum+=sizeof(int32bit)*fwrite(&intbuf,sizeof(int32bit),1,Outputfile);//point index
-		floatbuf= VSSwapHostFloatToLittle(memfile.linestrips[qs].points[tmpcounter].s);
+		floatbuf= VSSwapHostFloatToLittle(memfile.quadstrips[qs].points[tmpcounter].s);
 		runningbytenum+=sizeof(float32bit)*fwrite(&floatbuf,sizeof(float32bit),1,Outputfile);//s coord
-		floatbuf= VSSwapHostFloatToLittle(memfile.linestrips[qs].points[tmpcounter].t);
+		floatbuf= VSSwapHostFloatToLittle(memfile.quadstrips[qs].points[tmpcounter].t);
 		runningbytenum+=sizeof(float32bit)*fwrite(&floatbuf,sizeof(float32bit),1,Outputfile);//t coord
 	}
   }
