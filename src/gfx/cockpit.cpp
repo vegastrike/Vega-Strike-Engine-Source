@@ -1533,10 +1533,17 @@ void GameCockpit::Draw() {
 	zoomfactor=dietime*10;
 	}
   }
-  if (QuitAllow) {
+  if (QuitAllow||getTimeCompression()<.5) {
+    if (QuitAllow){ 
 	  static VSSprite QuitSprite("quit.spr",BILINEAR,GFXTRUE);
+          
 	  GFXEnable(TEXTURE0);
 	  QuitSprite.Draw();	  
+    }else {
+	  static VSSprite PauseSprite("pause.spr",BILINEAR,GFXTRUE);          
+	  GFXEnable(TEXTURE0);
+	  PauseSprite.Draw();	        
+    }
   }
   GFXAlphaTest (ALWAYS,0);  
   GFXHudMode (false);
