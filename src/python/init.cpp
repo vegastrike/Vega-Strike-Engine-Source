@@ -220,9 +220,9 @@ void Python::initpaths(){
   // Find all the mods dir (ignore homedir)
   for( int i=1; i<VSFileSystem::Rootdir.size(); i++)
   {
-	  modpaths += "\""+VSFileSystem::Rootdir[i]+"/modules/builtin/\",";
-	  modpaths += "\""+VSFileSystem::Rootdir[i]+"/"+moduledir+"/\",";
-	  modpaths += "\""+VSFileSystem::Rootdir[i]+"/"+basesdir+"/\"";
+	  modpaths += "r\""+VSFileSystem::Rootdir[i]+"/modules/builtin/\",";
+	  modpaths += "r\""+VSFileSystem::Rootdir[i]+"/"+moduledir+"/\",";
+	  modpaths += "r\""+VSFileSystem::Rootdir[i]+"/"+basesdir+"/\"";
 	  if( i+1<VSFileSystem::Rootdir.size())
 		  modpaths+= ",";
   }
