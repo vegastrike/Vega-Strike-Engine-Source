@@ -527,9 +527,11 @@ void GameCockpit::DrawTurretTargetBoxes () {
 }
 
 
-void GameCockpit::drawUnToTarget ( Unit * un, Unit* target,float xcent,float ycent, float xsize, float ysize){
+void GameCockpit::drawUnToTarget ( Unit * un, Unit* target,float xcent,float ycent, float xsize, float ysize, bool reardar){
   static GFXColor black_and_white=DockBoxColor ("black_and_white"); 
       Vector localcoord (un->LocalCoordinates(target));
+	  if (reardar)
+		  localcoord.k=-localcoord.k;
 	  float s,t;
       this->LocalToRadar (localcoord,s,t);
       GFXColor localcol (un->GetComputerData().radar.color?this->unitToColor (un,target):black_and_white);
@@ -566,20 +568,36 @@ void GameCockpit::DrawBlips (Unit * un) {
 
 
   Unit::Computer::RADARLIM * radarl = &un->GetComputerData().radar;
+
   UnitCollection * drawlist = &_Universe->activeStarSystem()->getUnitList();
   un_iter iter = drawlist->createIterator();
+
   Unit * target;
   Unit * makeBigger = un->Target();
   float s,t;
-  float xsize,ysize,xcent,ycent;
-  Radar->GetSize (xsize,ysize);
-  xsize = fabs (xsize);
-  ysize = fabs (ysize);
-  Radar->GetPosition (xcent,ycent);
+  
+  float xsize[2],ysize[2],xcent[2],ycent[2];
+  if (Radar[0]) {
+	  Radar[0]->GetSize (xsize[0],ysize[0]);
+	 xsize[0] = fabs (xsize[0]);
+	 ysize[0] = fabs (ysize[0]);
+	Radar[0]->GetPosition (xcent[0],ycent[0]);
+  }
+  if (Radar[1]) {
+	Radar[1]->GetSize (xsize[1],ysize[1]);
+	xsize[1] = fabs (xsize[1]);
+	ysize[1] = fabs (ysize[1]);
+	Radar[1]->GetPosition (xcent[1],ycent[1]);
+  }
   GFXDisable (TEXTURE0);
   GFXDisable (LIGHTING);
-  if ((!g_game.use_sprites)||Radar->LoadSuccess()) {
-    DrawRadarCircles (xcent,ycent,xsize,ysize,textcol);
+  if (Radar[0]) 
+  if ((!g_game.use_sprites)||Radar[0]->LoadSuccess()) {
+    DrawRadarCircles (xcent[0],ycent[0],xsize[0],ysize[0],textcol);
+  }
+  if (Radar[1])
+  if ((!g_game.use_sprites)||Radar[1]->LoadSuccess()) {
+    DrawRadarCircles (xcent[1],ycent[1],xsize[1],ysize[1],textcol);
   }
   GFXPointSize (2);
   GFXBegin(GFXPOINT);
@@ -593,11 +611,17 @@ void GameCockpit::DrawBlips (Unit * un) {
 	iter.advance();	
 	continue;
       }
-	  drawUnToTarget (un,target,xcent,ycent,xsize,ysize);
+	  if (Radar[0])
+		  drawUnToTarget (un,target,xcent[0],ycent[0],xsize[0],ysize[0],false);
+	  if (Radar[1])
+		  drawUnToTarget (un,target,xcent[1],ycent[1],xsize[1],ysize[1],true);
 	  if (target->isPlanet()==PLANETPTR) {
 		  Unit * sub=NULL;
 		  for (un_iter i=target->getSubUnits();(sub=*i)!=NULL;++i) {
-			  drawUnToTarget(un,sub,xcent,ycent, xsize,ysize);
+			  if (Radar[0])
+			  drawUnToTarget(un,sub,xcent[0],ycent[0], xsize[0],ysize[0],false);
+			  if (Radar[1])
+			  drawUnToTarget(un,sub,xcent[1],ycent[1], xsize[1],ysize[1],true);
 		  }
 	  }
     }
@@ -610,6 +634,8 @@ void GameCockpit::DrawBlips (Unit * un) {
 }
 
 void GameCockpit::DrawEliteBlips (Unit * un) {
+	if (!Radar[0])
+		return;
   static GFXColor black_and_white=DockBoxColor ("black_and_white"); 
   Unit::Computer::RADARLIM * radarl = &un->GetComputerData().radar;
   UnitCollection * drawlist = &_Universe->activeStarSystem()->getUnitList();
@@ -618,13 +644,13 @@ void GameCockpit::DrawEliteBlips (Unit * un) {
   Unit * makeBigger = un->Target();
   float s,t,es,et,eh;
   float xsize,ysize,xcent,ycent;
-  Radar->GetSize (xsize,ysize);
+  Radar[0]->GetSize (xsize,ysize);
   xsize = fabs (xsize);
   ysize = fabs (ysize);
-  Radar->GetPosition (xcent,ycent);
+  Radar[0]->GetPosition (xcent,ycent);
   GFXDisable (TEXTURE0);
   GFXDisable (LIGHTING);
-  if (Radar->LoadSuccess()) {
+  if (Radar[0]->LoadSuccess()) {
     DrawRadarCircles (xcent,ycent,xsize,ysize,textcol);
   }
   while ((target = iter.current())!=NULL) {
@@ -890,9 +916,13 @@ void GameCockpit::Delete () {
       gauges[i]=NULL;
     }
   }
-  if (Radar) {
-    delete Radar;
-    Radar = NULL;
+  if (Radar[0]) {
+    delete Radar[0];
+    Radar[0] = NULL;
+  }
+  if (Radar[1]) {
+    delete Radar[1];
+    Radar[1] = NULL;
   }
   unsigned int j;
   for (j=0;j<vdu.size();j++) {
@@ -934,7 +964,7 @@ GameCockpit::GameCockpit (const char * file, Unit * parent,const std::string &pi
     gauges[i]=NULL;
   }
   mesh=NULL;
-  Radar=Pit[0]=Pit[1]=Pit[2]=Pit[3]=NULL;
+  Radar[0]=Radar[1]=Pit[0]=Pit[1]=Pit[2]=Pit[3]=NULL;
 
   draw_all_boxes=XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","drawAllTargetBoxes","false"));
   draw_line_to_target=XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","drawLineToTarget","false"));
@@ -1349,7 +1379,8 @@ void GameCockpit::Draw() {
           }
         } else {
           static Animation radar_ani("static_round.ani",true,.1,BILINEAR);
-          radar_ani.DrawAsSprite(Radar);	
+          radar_ani.DrawAsSprite(Radar[0]);	
+          radar_ani.DrawAsSprite(Radar[1]);	
         }
       } else {
         if (cockpit_time>((1-(-radar_time))+damage)) {

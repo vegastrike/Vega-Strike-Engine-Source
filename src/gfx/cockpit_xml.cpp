@@ -18,6 +18,7 @@ namespace CockpitXML {
       MESH,
       CROSSHAIRS,
       RADAR,
+	  REARRADAR,
       LVDU,
       RVDU,
       AVDU,
@@ -74,6 +75,7 @@ namespace CockpitXML {
     EnumMap::Pair ("UNKNOWN", UNKNOWN),
     EnumMap::Pair ("Cockpit", COCKPIT),
     EnumMap::Pair ("Radar", RADAR),
+    EnumMap::Pair ("RearRadar", REARRADAR),
     EnumMap::Pair ("LeftVDU", LVDU),
     EnumMap::Pair ("VDU", AVDU),
     EnumMap::Pair ("RightVDU", RVDU),
@@ -128,8 +130,8 @@ namespace CockpitXML {
     EnumMap::Pair ("type", VDUTYPE)
   };
 
-  const EnumMap element_map(element_names, 26);
-  const EnumMap attribute_map(attribute_names, 27);
+  const EnumMap element_map(element_names, 27);
+  const EnumMap attribute_map(attribute_names, 28);
 }
 
 using XMLSupport::EnumMap;
@@ -281,6 +283,12 @@ void GameCockpit::beginElement(const string &name, const AttributeList &attribut
       Panel.front()=NULL;//make sure null at the beginning
     }
     goto loadsprite;
+<<<<<<< cockpit_xml.cpp
+  case RADAR: newsprite = &Radar[0];goto loadsprite;
+  case REARRADAR: newsprite = &Radar[1];goto loadsprite;
+  case LVDU: vdu.push_back(NULL);newvdu = &vdu.back();mymodes=VDU::MANIFEST|VDU::WEAPON|VDU::DAMAGE|VDU::SHIELD;goto loadsprite;
+  case RVDU: vdu.push_back(NULL);newvdu = &vdu.back();mymodes=VDU::TARGETMANIFEST|VDU::NAV|VDU::TARGET;goto loadsprite;
+=======
   case RADAR: newsprite = &Radar;goto loadsprite;
   case LVDU: vdu.push_back(NULL);newvdu = &vdu.back();mymodes=VDU::MANIFEST|VDU::WEAPON|VDU::DAMAGE|VDU::SHIELD;
   	if( Network!=NULL)
@@ -288,6 +296,7 @@ void GameCockpit::beginElement(const string &name, const AttributeList &attribut
 	goto loadsprite;
   case RVDU: vdu.push_back(NULL);newvdu = &vdu.back();mymodes=VDU::TARGETMANIFEST|VDU::NAV|VDU::TARGET;
   goto loadsprite;
+>>>>>>> 1.48
   case AVDU:vdu.push_back(NULL);newvdu = &vdu.back();mymodes=VDU::MSG;
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) { 
       switch (attribute_map.lookup((*iter).name)) {

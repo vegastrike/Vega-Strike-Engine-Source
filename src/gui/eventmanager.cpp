@@ -63,7 +63,7 @@ void EventManager::addToDeleteQueue(EventResponder *controlToDelete) {
 		char tempstr[254];
 		sprintf(tempstr, "\nERROR: duplicate delete of object %X.\n\n", (int)controlToDelete);
 		fputs(tempstr, stderr);
-#if defined (_MSC_VER) && defined(_DEBUG)
+#if defined (_MSC_VER) && defined(_DEBUG) && 0
 		if (DEBUG_ERROR_IN_MY_CODE) {
 			_RPT0(_CRT_ERROR, tempstr);
 		}

@@ -225,7 +225,7 @@ int SocketSet::private_select( timeval* timeout )
     
     if( !_client_mgr.expired() )
     {
-        boost::shared_ptr<VsnetDownload::Client::Manager> mgr( make_shared(_client_mgr) );
+        boost::shared_ptr<VsnetDownload::Client::Manager> mgr( boost::make_shared(_client_mgr) );
         if( (bool)mgr )
         {
             mgr->lower_check_queues( );
@@ -234,7 +234,7 @@ int SocketSet::private_select( timeval* timeout )
 
     if( !_server_mgr.expired() )
     {
-        boost::shared_ptr<VsnetDownload::Server::Manager> mgr( make_shared(_server_mgr) );
+        boost::shared_ptr<VsnetDownload::Server::Manager> mgr( boost::make_shared(_server_mgr) );
         if( (bool)mgr )
         {
             mgr->lower_check_queues( );

@@ -687,7 +687,7 @@ void VDU::DrawStarSystemAgain (float x,float y,float w,float h, VIEWSTYLE viewSt
 
 
 void VDU::DrawWeapon (Unit * parent) {
-    
+  static bool drawweapsprite = XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","draw_weapon_sprite","false"));
   float x,y,w,h;
   const float percent = .6;
   string buf("G: ");
@@ -696,8 +696,10 @@ void VDU::DrawWeapon (Unit * parent) {
   int mlen = mbuf.length();
   int count=1;int mcount=1;
   GFXColor4f (1,1,1,1);
+  if (drawweapsprite) {
   GFXEnable(TEXTURE0);
   DrawTargetSpr (parent->getHudImage (),percent,x,y,w,h);
+  }
   GFXDisable (TEXTURE0);
   GFXDisable(LIGHTING);
   for (int i=0;i<parent->GetNumMounts();i++) {
@@ -728,7 +730,10 @@ pos.i*fabs(w)/parent->rSize()*percent+x;
       GFXColor4f (0,.2,0,1);
       break;
     }
-    DrawGun (pos,w,h,parent->mounts[i].type->size);
+    if (drawweapsprite) {
+
+      DrawGun (pos,w,h,parent->mounts[i].type->size);
+	}
   }
   GFXColor4f(0,1,.2,1);
   if (mbuf.length()!=(unsigned int)mlen) {
