@@ -1,7 +1,5 @@
 #include "quadsquare.h"
-
 int	MaxCreateDepth = 0;
-
 
 void	quadsquare::EnableEdgeVertex(int index, bool IncrementCount, const quadcornerdata& cd)
 // Enable the specified edge vertex.  Indices go { e, n, w, s }.
@@ -231,6 +229,7 @@ static unsigned int calculatestage (unsigned int numstages, unsigned int whichst
 void	quadsquare::Update(const quadcornerdata& cd, const Vector & ViewerLocation, float Detail, unsigned short numstages, unsigned short whichstage) {
   DetailThreshold = Detail;
   UpdateAux(cd, nonlinear_trans->InvTransform(ViewerLocation), 0,calculatestage (numstages,whichstage));
+
 }
 
 
@@ -266,6 +265,7 @@ void	quadsquare::UpdateAux(const quadcornerdata& cd, const Vector & ViewerLocati
 		quadcornerdata	q;
 		if (whichChildren) {
 		  //if we want to mask out certain vertices for pipelined execution
+
 		  if ((EnabledFlags & 32)&&(whichChildren&0x1)) {
 		    SetupCornerData(&q, cd, 1);
 		    Child[1]->UpdateAux(q, ViewerLocation, Error[3],whichChildren>>4);

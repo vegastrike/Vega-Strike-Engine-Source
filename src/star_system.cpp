@@ -219,7 +219,7 @@ void StarSystem::Update() {
       } else
       if (current_stage==PHY_COLLIDE) {
 	static int stage=0;
-	qt->Update(16,((stage++)%16));
+	qt->Update(64,((stage++)%64));
 	numframes++;//don't resolve physics until 2 seconds
 	if (numframes>2/(SIMULATION_ATOM)) {
 	  iter = drawList->createIterator();
