@@ -109,11 +109,6 @@ void UnitCollection::FastIterator::remove() {
 }
 
 
-void UnitCollection::UnitIterator::GetNextValidUnit () {
-  while (pos->next->unit?pos->next->unit->Killed():false) {
-    remove();
-  }
-}
 
 
 void UnitCollection::ConstIterator::GetNextValidUnit () {

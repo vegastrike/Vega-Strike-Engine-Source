@@ -11,7 +11,7 @@
 #include "ai/flybywire.h"
 #include "images.h"
 #include "missile.h"
-
+#include "cmd/ai/fire.h"
 #include "gfx/cockpit.h"
 
 #include "force_feedback.h"
@@ -178,12 +178,14 @@ bool Unit::Mount::PhysicsAlignedFire(const Transformation &Cumulative, const flo
       new Bolt (type,mat, velocity,  owner);//FIXME:turrets won't work      
       break;
     case weapon_info::PROJECTILE:
-      temp = new Missile (type.file.c_str(),owner->faction,"",type.Damage,type.PhaseDamage,type.Range/type.Speed);
+      temp = new Missile (type.file.c_str(),owner->faction,"",type.Damage,type.PhaseDamage,type.Range/type.Speed,type.Radius,type.RadialSpeed);
       if (target&&target!=owner) {
 	temp->Target (target);
 	temp->EnqueueAI (new AIScript ((type.file+".xai").c_str()));
+	temp->EnqueueAI (new Orders::FireAt (.2,1));
       } else {
 	temp->EnqueueAI (new Orders::MatchLinearVelocity(Vector (0,0,100000),true,false));
+	temp->EnqueueAI (new Orders::FireAt(.2,1));
       }
       temp->SetOwner (owner);
       temp->Velocity = velocity;
@@ -327,9 +329,4 @@ void Unit::Cloak (bool loak) {
     if (cloaking==cloakmin)
       cloaking++;
   }
-}
-float Unit::CloakVisible() const {
-  if (cloaking<0)
-    return 1;
-  return ((float)cloaking)/32767;
 }

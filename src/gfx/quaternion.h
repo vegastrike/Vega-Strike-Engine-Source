@@ -40,6 +40,12 @@ inline QFLOAT DotProduct(const QVector &a,const QVector &b)
 inline QVector operator * (const QFLOAT a, const QVector &b) {
   return (QVector (a*b.i,a*b.j,a*b.k));
 } 
+inline Vector::Vector (const QVector &a) {
+  i=a.i;
+  j=a.j;
+  k=a.k;
+}
+
 struct Quaternion {
   QFLOAT s;
   QVector v;

@@ -50,5 +50,6 @@ libcmd_a_SOURCES =				\
 	collection.cpp			\
 	container.h				\
 	container.cpp			\
-	missile.h
+	missile.h			\
+	missile.cpp
 

@@ -574,6 +574,7 @@ void StarSystem::Update(float priority , bool executeDirector) {
 	  }
 
 	}
+	UpdateMissiles();//do explosions
 	current_stage=PHY_TERRAIN;
       } else if (current_stage==PHY_TERRAIN) {
 #ifdef UPDATEDEBUG

@@ -1,12 +1,6 @@
 #include "quaternion.h"
 #include <iostream>
 
-Vector::Vector (const QVector &a) {
-  i=a.i;
-  j=a.j;
-  k=a.k;
-}
-
 using std::ostream;
 ostream &operator<<(ostream &os, const Quaternion &v) {
   os << "(" << v.s << ", <" << v.v.i << ", " << v.v.j <<", " << v.v.k << "> )";

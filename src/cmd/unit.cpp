@@ -136,15 +136,6 @@ void Unit::DeactivateJumpDrive () {
     jump.drive=-1;
   }
 }
-void Unit::SetNebula (Nebula * neb) {
-  nebula = neb;
-  un_fiter iter =SubUnits.fastIterator();
-  Unit * un;
-  while ((un = iter.current())) {
-    un->SetNebula (neb);
-    iter.advance();
-  }
-}
 void Unit::Init()
 {
   activeStarSystem=NULL;
@@ -584,7 +575,10 @@ float Unit::cosAngleTo (Unit * targ, float &dist, float speed, float range) cons
    } else {
      tmpcos /= dist;
    }
-   dist /= range;//WARNING POTENTIAL DIV/0
+   dist = (dist-rSize()-targ->rSize())/range;//WARNING POTENTIAL DIV/0
+   if (!finite(dist)||dist<0) {
+     dist=0;
+   }
    return tmpcos;
 }
 float Unit::cosAngleFromMountTo (Unit * targ, float & dist) const{
@@ -874,23 +868,15 @@ void Unit::EnqueueAIFirst(Order *newAI) {
   }
 }
 void Unit::ExecuteAI() {
-#ifdef ORDERDEBUG
-  fprintf (stderr,"ux%x",this);
-  fflush (stderr);
-#endif
-
   if(aistate) aistate->Execute();
-  un_iter iter =getSubUnits();
-  Unit * un;
-  while ((un = iter.current())) {
-    un->ExecuteAI();//like dubya
-    iter.advance();
+  if (!SubUnits.empty()) {
+    un_iter iter =getSubUnits();
+    Unit * un;
+    while ((un = iter.current())) {
+      un->ExecuteAI();//like dubya
+      iter.advance();
+    }
   }
-
-#ifdef ORDERDEBUG
-  fprintf (stderr,"ux");
-  fflush (stderr);
-#endif
 }
 void Unit::Select() {
   selected = true;
@@ -898,14 +884,7 @@ void Unit::Select() {
 void Unit::Deselect() {
   selected = false;
 }
-bool Unit::InRange (Unit *target, Vector &localcoord) const {
-  localcoord =Vector(ToLocalCoordinates(target->Position()-Position()));
-  float mm= localcoord.Magnitude();
-  if (owner==target||this==target||((mm-rSize()-target->rSize())>computer.radar.maxrange&&target->isUnit()!=PLANETPTR)||(localcoord.k/mm)<computer.radar.maxcone||target->CloakVisible()<.8||target->rSize()<computer.radar.mintargetsize) {
-    return false;
-  }
-  return true;
-}
+
 un_iter Unit::getSubUnits () {
   return SubUnits.createIterator();
 }

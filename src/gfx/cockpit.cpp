@@ -521,8 +521,10 @@ void Cockpit::SetParent (Unit * unit, const char * filename, const char * unitmo
   activeStarSystem= _Universe->activeStarSystem();//cannot switch to units in other star systems.
   parent.SetUnit (unit);
   unitlocation=pos;
-  this->unitfilename=std::string(filename);
-  this->unitmodname=std::string(unitmodname);
+  if (filename[0]!='\0') {
+    this->unitfilename=std::string(filename);
+    this->unitmodname=std::string(unitmodname);
+  }
   if (unit) {
     this->unitfaction = unit->faction;
     unit->ArmorData (StartArmor);

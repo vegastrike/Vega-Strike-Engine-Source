@@ -46,7 +46,7 @@ class UnitCollection {
     ///the position in the list
     UnitListNode *pos;
     ///Finds the next unit (or NULL) that isn't Killed()
-    void GetNextValidUnit();
+    inline void GetNextValidUnit();
   public:
     UnitIterator(){}
     ///Creates this unit iterator
@@ -118,6 +118,7 @@ class UnitCollection {
 #ifdef _TEST_
   friend void Iterate (UnitCollection &c);
 #endif
+  //could be empty and this returns false...but usually correct...never has units when it returns true
   bool empty() const {return (u.next->unit==NULL);}
   UnitIterator createIterator() {return UnitIterator(&u);}
   ConstIterator constIterator() const {return ConstIterator (&u);}

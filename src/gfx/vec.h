@@ -43,7 +43,7 @@ class Vector {
  public:
   float i,j,k;
   Vector () {}
-  Vector (const QVector &);
+  inline Vector (const QVector &);
   Vector(float i,float j,float k) {
     this->i = i;
     this->j = j;

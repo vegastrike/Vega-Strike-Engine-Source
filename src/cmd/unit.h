@@ -98,8 +98,8 @@ struct Scanner {
 class PlanetaryTransform;
 struct PlanetaryOrbitData;
 class Unit {
-  bool Unit::UpgradeSubUnits (Unit * up, int subunitoffset, bool touchme, bool downgrade, int &numave, double &percentage);
-  bool Unit::UpgradeMounts (Unit * up, int subunitoffset, bool touchme, bool downgrade, int &numave, Unit * templ, double &percentage);
+  bool UpgradeSubUnits (Unit * up, int subunitoffset, bool touchme, bool downgrade, int &numave, double &percentage);
+  bool UpgradeMounts (Unit * up, int subunitoffset, bool touchme, bool downgrade, int &numave, Unit * templ, double &percentage);
 
   Nebula * nebula;
   PlanetaryOrbitData * planet;
@@ -111,7 +111,17 @@ class Unit {
   friend class UpgradingInfo;//needed to actually upgrade unit through interface
  public:
   void DamageRandSys (float dam,const Vector &vec);
-  void SetNebula (Nebula *neb);
+  void SetNebula (Nebula *neb) {
+    nebula = neb;
+    if (!SubUnits.empty()) {
+      un_fiter iter =SubUnits.fastIterator();
+      Unit * un;
+      while ((un = iter.current())) {
+	un->SetNebula (neb);
+	iter.advance();
+      }
+    } 
+  }
   inline Nebula * GetNebula () const{return nebula;}
   const std::vector <char *> &GetDestinations () const;
   void AddDestination (const char *);
@@ -171,6 +181,7 @@ class Unit {
   void endElement(const std::string &name);
 
  protected:
+  virtual float ExplosionRadius();
   StarSystem * activeStarSystem;//the star system I'm in
   bool BuyCargo (unsigned int i, unsigned int quantity, Unit * buyer, float &creds);
   bool BuyCargo (const std::string &cargo,unsigned int quantity, Unit * buyer, float & creds);
@@ -469,9 +480,21 @@ public:
   ///explodes then deletes
   void Destroy();
   const LineCollide &GetCollideInfo () {return CollideInfo;}
-  bool InRange (Unit *target, Vector &localcoord) const;
+  bool InRange (Unit *target, Vector &localcoord) const{
+    localcoord =Vector(ToLocalCoordinates(target->Position()-Position()));
+    float mm= localcoord.Magnitude();
+    if (owner==target||this==target||((mm-rSize()-target->rSize())>computer.radar.maxrange&&target->isUnit()!=PLANETPTR)||(localcoord.k/mm)<computer.radar.maxcone||target->CloakVisible()<.8||target->rSize()<computer.radar.mintargetsize) {
+      return false;
+    }
+    return true;
+  }
   ///how visible the ship is from 0 to 1
-  float CloakVisible () const;
+  float CloakVisible() const {
+    if (cloaking<0)
+      return 1;
+    return ((float)cloaking)/32767;
+  }
+
   ///cloaks or decloaks the starship depending on the bool
   void Cloak (bool cloak);
   ///deletes
@@ -769,6 +792,11 @@ struct Unit::XML {
   std::string hudimage;
   int damageiterator;
 };
+inline void UnitCollection::UnitIterator::GetNextValidUnit () {
+  while (pos->next->unit?pos->next->unit->Killed():false) {
+    remove();
+  }
+}
 
 inline Unit * UnitContainer::GetUnit() {
   if (unit==NULL)

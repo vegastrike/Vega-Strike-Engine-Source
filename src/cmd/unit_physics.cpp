@@ -284,9 +284,63 @@ void Unit::RollTorque(float amt) {
   else if(amt<-limits.roll) amt = -limits.roll;
   ApplyLocalTorque(amt * Vector(0,0,1));
 }
+static int applyto (unsigned short &shield, const unsigned short max, const float amt) {
+  shield+=apply_float_to_short(amt);
+  if (shield>max)
+    shield=max;
+  return (shield>=max)?1:0;
+}
+void Unit::RegenShields () {
+  int rechargesh=1;
+  energy +=apply_float_to_short (recharge *SIMULATION_ATOM);
 
-const float VELOCITY_MAX=1000;
+  float rec = shield.recharge*SIMULATION_ATOM>energy?energy:shield.recharge*SIMULATION_ATOM;
+  if ((image->ecm>0)) {
+    static float ecmadj = XMLSupport::parse_float(vs_config->getVariable ("physics","ecm_energy_cost",".05"));
+    float sim_atom_ecm = ecmadj * image->ecm*SIMULATION_ATOM;
+    if (energy-10>sim_atom_ecm) {
+      energy-=sim_atom_ecm;
+    }else {
+      energy=energy<10?energy:10;
+    }
+  }
+  if (GetNebula()!=NULL) {
+    static float nebshields=XMLSupport::parse_float(vs_config->getVariable ("physics","nebula_shield_recharge",".5"));
+    rec *=nebshields;
+  }
+  switch (shield.number) {
+  case 2:
+    shield.fb[0]+=rec;
+    shield.fb[1]+=rec;
+    if (shield.fb[0]>shield.fb[2]) {
+      shield.fb[0]=shield.fb[2];
+    } else {
+      rechargesh=0;
+    }
+    if (shield.fb[1]>shield.fb[3]) {
+      shield.fb[1]=shield.fb[3];
+
+    } else {
+      rechargesh=0;
+    }
+    break;
+  case 4:
+    rechargesh = applyto (shield.fbrl.front,shield.fbrl.frontmax,rec)*(applyto (shield.fbrl.back,shield.fbrl.backmax,rec))*applyto (shield.fbrl.right,shield.fbrl.rightmax,rec)*applyto (shield.fbrl.left,shield.fbrl.leftmax,rec);
+    break;
+  case 6:
+    rechargesh = (applyto(shield.fbrltb.v[0],shield.fbrltb.fbmax,rec))*applyto(shield.fbrltb.v[1],shield.fbrltb.fbmax,rec)*applyto(shield.fbrltb.v[2],shield.fbrltb.rltbmax,rec)*applyto(shield.fbrltb.v[3],shield.fbrltb.rltbmax,rec)*applyto(shield.fbrltb.v[4],shield.fbrltb.rltbmax,rec)*applyto(shield.fbrltb.v[5],shield.fbrltb.rltbmax,rec);
+    break;
+  }
+  if (rechargesh==0)
+    energy-=(short unsigned int)rec;
+  if (energy>maxenergy)//allow shields to absorb xtra power
+    energy=maxenergy;  
+
+}
+
+
 void Unit::UpdatePhysics (const Transformation &trans, const Matrix transmat, const Vector & cum_vel,  bool lastframe, UnitCollection *uc) {
+  static float VELOCITY_MAX=XMLSupport::parse_float(vs_config->getVariable ("physics","velocity_max","10000"));
   if (docked&DOCKING_UNITS) {
     PerformDockingOperations();
   }
@@ -475,8 +529,10 @@ bool Unit::jumpReactToCollision (Unit * smalle) {
 void Unit::reactToCollision(Unit * smalle, const Vector & biglocation, const Vector & bignormal, const Vector & smalllocation, const Vector & smallnormal,  float dist) {
   clsptr smltyp = smalle->isUnit();
   if (smltyp==ENHANCEMENTPTR||smltyp==MISSILEPTR) {
-    smalle->reactToCollision (this,smalllocation,smallnormal,biglocation,bignormal,dist);
-    return;
+    if (isUnit()!=ENHANCEMENTPTR&&isUnit()!=MISSILEPTR) {
+      smalle->reactToCollision (this,smalllocation,smallnormal,biglocation,bignormal,dist);
+      return;
+    }
   }	       
   //don't bounce if you can Juuuuuuuuuuuuuump
   if (!jumpReactToCollision(smalle)) {

@@ -259,12 +259,6 @@ void Universe::AdjustRelation(const int Myfaction, const int TheirFaction, float
   assert (factions[Myfaction]->faction[TheirFaction].stats.index == TheirFaction);
   factions[Myfaction]->faction[TheirFaction].relationship+=factor*rank;  
 }
-float Universe::GetRelation (const int Myfaction, const int TheirFaction) {
-  if (Myfaction==TheirFaction)
-    return 1;
-  assert (factions[Myfaction]->faction[TheirFaction].stats.index == TheirFaction);
-  return factions[Myfaction]->faction[TheirFaction].relationship;
-}
 
 void Universe::SerializeFaction(FILE * fp) {
   for (unsigned int i=0;i<factions.size();i++) {
@@ -332,14 +326,14 @@ void Universe::Faction::ParseAllAllies(Universe * thisuni) {
 	// the work around is A.) make the scope of the variable in the function level or not to re-define it in subsequent loops
 	unsigned int i = 0;
 	for (i=0;i<thisuni->factions.size();i++) {
-		thisuni->factions[i]->ParseAllies(thisuni);
+		thisuni->factions[i]->ParseAllies(thisuni,i);
 		
 	}
 	for (i=0;i<thisuni->factions.size();i++) {
 	  thisuni->factions[i]->faction[i].relationship=1;
 	}
 }
-void Universe::Faction::ParseAllies (Universe * thisuni) {
+void Universe::Faction::ParseAllies (Universe * thisuni, unsigned int thisfaction) {
 	unsigned int i,j;
 	vector <faction_stuff> tempvec;
 	for (i=0;i<faction.size();i++) {
@@ -354,7 +348,8 @@ void Universe::Faction::ParseAllies (Universe * thisuni) {
 	for (i=0;i<thisuni->factions.size();i++) {
 		tempvec.push_back (faction_stuff());
 		tempvec[i].stats.index=i;
-		tempvec[i].relationship =0;
+		
+		tempvec[i].relationship =((i==thisfaction)?1:0);
 	}
 	for (i=0;i<faction.size();i++) {
 		tempvec[faction[i].stats.index].relationship = faction[i].relationship;

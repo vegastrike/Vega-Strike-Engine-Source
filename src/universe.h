@@ -101,7 +101,7 @@ private:
     Unit * contraband;
     ///Figures out the relationships of each faction with each other
     static void ParseAllAllies(Universe * thisuni);
-    void ParseAllies(Universe * thisuni);
+    void ParseAllies(Universe * thisuni, unsigned int whichfaction);
     
     static void LoadXML(const char * factionfile, Universe * thisuni);  
     static void beginElement(void *userData, const XML_Char *name, const XML_Char **atts);
@@ -150,7 +150,9 @@ private:
    * 1 is happy. 0 is neutral (btw 1 and 0 will not attack)
    * -1 is mad. <0 will attack
    */
-  float GetRelation (const int myfaction, const int theirfaction);
+  float GetRelation (const int myfaction, const int theirfaction){
+    return factions[myfaction]->faction[theirfaction].relationship;
+  }
   unsigned int GetNumFactions () {
     return factions.size();
   }

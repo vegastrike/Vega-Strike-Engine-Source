@@ -235,7 +235,7 @@ void Unit::EjectCargo (unsigned int index) {
 	  PrimeOrders();
 	  cargo->SetTurretAI();
 	  cargo->faction=faction;
-	  cp->SetParent (cargo,"eject","",Position());
+	  cp->SetParent (cargo,"","",Position());
 	  SwitchUnits (NULL,cargo);
 	}
 	_Universe->activeStarSystem()->AddUnit(cargo);

@@ -112,20 +112,22 @@ void FireAt::Execute () {
   }
   done = tmp;
   Unit * targ;
-  static float cont_update_time = XMLSupport::parse_float (vs_config->getVariable ("AI","AI","ContrabandUpdateTime","1"));
-  if (rand()<RAND_MAX*SIMULATION_ATOM/cont_update_time) {
-    UpdateContrabandSearch();
-  }
-  static float cont_initiate_time = XMLSupport::parse_float (vs_config->getVariable ("AI","AI","CommInitiateTime","300"));
-  if ((float)rand()<((float)RAND_MAX*(SIMULATION_ATOM/cont_initiate_time))) {
-    static float contraband_initiate_time = XMLSupport::parse_float (vs_config->getVariable ("AI","AI","ContrabandInitiateTime","3000"));
-    unsigned int modulo = ((unsigned int)(contraband_initiate_time/cont_initiate_time));
-    if (modulo<1)
-      modulo=1;
-    if (rand()%modulo) {
-      RandomInitiateCommunication(.5,.25);
-    }else {
-      InitiateContrabandSearch (.98,.02);
+  if (parent->isUnit()==UNITPTR) {
+    static float cont_update_time = XMLSupport::parse_float (vs_config->getVariable ("AI","AI","ContrabandUpdateTime","1"));
+    if (rand()<RAND_MAX*SIMULATION_ATOM/cont_update_time) {
+      UpdateContrabandSearch();
+    }
+    static float cont_initiate_time = XMLSupport::parse_float (vs_config->getVariable ("AI","AI","CommInitiateTime","300"));
+    if ((float)rand()<((float)RAND_MAX*(SIMULATION_ATOM/cont_initiate_time))) {
+      static float contraband_initiate_time = XMLSupport::parse_float (vs_config->getVariable ("AI","AI","ContrabandInitiateTime","3000"));
+      unsigned int modulo = ((unsigned int)(contraband_initiate_time/cont_initiate_time));
+      if (modulo<1)
+	modulo=1;
+      if (rand()%modulo) {
+	RandomInitiateCommunication(.5,.25);
+      }else {
+	InitiateContrabandSearch (.98,.02);
+      }
     }
   }
 

@@ -255,6 +255,12 @@ namespace BeamXML {
 	case DAMAGE:
 	  tmpweapon.Damage = XMLSupport::parse_float((*iter).value);
 	  break;
+	case RADIUS:
+	  tmpweapon.Radius = XMLSupport::parse_float ((*iter).value);
+	  break;
+	case RADIALSPEED:
+	  tmpweapon.RadialSpeed = XMLSupport::parse_float ((*iter).value);
+	  break;
 	case PHASEDAMAGE:
 	  tmpweapon.PhaseDamage = XMLSupport::parse_float((*iter).value);
 	  break;

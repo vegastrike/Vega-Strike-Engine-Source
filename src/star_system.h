@@ -74,7 +74,10 @@ class StarSystem {
   void AddStarsystemToUniverse(const string &filename);
   void RemoveStarsystemFromUniverse();
   int lightcontext;
+  vector <class MissileEffect *> dischargedMissiles;
  public:
+  void AddMissileToQueue(class MissileEffect *);
+  void UpdateMissiles();
   class CollideTable *collidetable;
   class bolt_draw *bolts;
   Background* getBackground() {return bg;}
