@@ -39,7 +39,7 @@ static const double GLUT_WIDTH_HACK = 0.6;
 static const char SPACE_CHAR = ' ';
 
 bool useStroke() {
-  static bool tmp=XMLSupport::parse_bool(vs_config->getVariable ("graphics","high_quality_font","false"));
+  static bool tmp=XMLSupport::parse_bool(vs_config->getVariable ("graphics","high_quality_font_computer",vs_config->getVariable ("graphics","high_quality_font","false")));
   return !tmp;
 }
 // Calculate the metrics for this font.
