@@ -9,6 +9,7 @@
 #include "savegame.h"
 #include "config_xml.h"
 #include "xml_serializer.h"
+#include "audiolib.h"
 #define UPGRADEOK 1
 #define NOTTHERE 0
 #define CAUSESDOWNGRADE -1
@@ -28,6 +29,7 @@ void Unit::Mount::SwapMounts (Unit::Mount &other) {
   *this=other;
   other=mnt;
   volume=thisvol;
+
   other.volume=othervol;//volumes stay the same even if you swap out
   Transformation t =this->GetMountLocation();
   this->SetMountPosition(other.GetMountLocation());
@@ -40,6 +42,7 @@ void Unit::Mount::ReplaceMounts (const Unit::Mount &other) {
   Transformation t =this->GetMountLocation();
   *this=other;
   this->size=thissize;
+  sound = AUDCreateSound (sound,type->type!=weapon_info::PROJECTILE);//copy constructor basically
   volume=thisvol;
   this->SetMountPosition(t);
   ref.gun=NULL;  

@@ -1729,7 +1729,12 @@ void Unit::LoadXML(const char *filename, const char * modifications)
 	  b=a+1;
       mounts[b].sound = AUDCreateSound (mounts[b].type->sound,mounts[b].type->type!=weapon_info::PROJECTILE);
     } else if ((!half_sounds)||mounts[a].type->type == weapon_info::PROJECTILE) {
-      mounts[a].sound = AUDCreateSound (mounts[a].type->sound,false);      
+      mounts[a].sound = AUDCreateSound (mounts[a].type->sound,mounts[a].type->type!=weapon_info::PROJECTILE);    //lloping also flase in unit_customize  
+    }
+    if (a>0) {
+      if (mounts[a].sound==mounts[a-1].sound&&mounts[a].sound!=-1) {
+	printf ("error");
+      }
     }
   }
   for( a=0; a<(int)xml->units.size(); a++) {

@@ -571,7 +571,7 @@ void Unit::UpdatePhysics (const Transformation &trans, const Matrix &transmat, c
       if ((0!=(mounts[i].size&weapon_info::AUTOTRACKING))) {
 	autotrack = computer.itts?2:1;
       }
-      mounts[i].PhysicsAlignedFire (t1,m1,cumulative_velocity,owner==NULL?this:owner,target,autotrack, computer.radar.trackingcone);
+      mounts[i].PhysicsAlignedFire (t1,m1,cumulative_velocity,(!SubUnit||owner==NULL)?this:owner,target,autotrack, computer.radar.trackingcone);
       if (mounts[i].ammo==0&&mounts[i].type->type==weapon_info::PROJECTILE) {
 	ToggleWeapon (true);
       }

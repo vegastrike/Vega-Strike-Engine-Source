@@ -14,6 +14,7 @@
 #endif
 #include <vector>
 #include "vs_globals.h"
+#include <algorithm>
 #ifdef HAVE_AL
 std::vector <unsigned int> dirtysounds;
 std::vector <OurSound> sounds;
@@ -220,12 +221,18 @@ void AUDDeleteSound (int sound, bool music){
       } else
 	AUDStopPlaying (sound);
     }
-    dirtysounds.push_back (sound);
+    if (std::find (dirtysounds.begin(),dirtysounds.end(),sound)==dirtysounds.end()) {
+      dirtysounds.push_back (sound);
+    }else {
+      fprintf (stderr,"double delete of sound");
+      return;
+    }
     //FIXME??
     //    alDeleteSources(1,&sounds[sound].source);
     if (music) {
       alDeleteBuffers (1,&sounds[sound].buffer);
     }
+
     sounds[sound].buffer=(ALuint)0;
   }
 #endif

@@ -8,6 +8,8 @@
 using namespace Orders;
 #include "lin_time.h"
 #include "cmd/script/flightgroup.h"
+#include "config_xml.h"
+#include "vs_globals.h"
 /**
  * the time we need to start slowing down from now calculation (if it's in this frame we'll only accelerate for partial
  * vslowdown - decel * t = 0               t = vslowdown/decel
@@ -211,25 +213,34 @@ bool ChangeHeading::Done(const Vector & ang_vel) {
   return false;
 }
 void ChangeHeading::Execute() {
-  Vector local_heading (parent->UpCoordinateLevel(parent->GetAngularVelocity()));
+  Vector ang_vel=parent->GetAngularVelocity();
+  Vector local_heading (parent->UpCoordinateLevel(ang_vel));
   char xswitch = (copysign(1.0F,local_heading.i)!=copysign(1.0F,last_velocity.i)||(!local_heading.i))?1:0;
   char yswitch = (copysign(1.0F,local_heading.j)!=copysign(1.0F,last_velocity.j)||(!local_heading.j))?1:0;
-  if (xswitch) {
-    if (yswitch) {
-      parent->SetAngularVelocity(Vector (0,0,0));
-    }else {
-      local_heading.i=0;
-      parent->SetAngularVelocity(parent->DownCoordinateLevel (local_heading));
+  static bool AICheat = XMLSupport::parse_bool(vs_config->getVariable ("AI","turn_cheat","true"));
+  if (AICheat) {
+    
+    if (xswitch) {
+      if (yswitch) {
+	local_heading = Vector (copysign (.00000001,local_heading.i),
+				copysign (.00000001,local_heading.j),
+				copysign (.00000001,local_heading.k));
+      }else {
+
+	local_heading.i=copysign (.0000001,local_heading.i);
+      }
+    }else if (yswitch) {
+      local_heading.j=copysign (.0000001,local_heading.j);
     }
-  }else {
-      local_heading.j=0;
-      parent->SetAngularVelocity(parent->DownCoordinateLevel (local_heading));
+    if (xswitch||yswitch) {
+	parent->SetAngularVelocity(parent->DownCoordinateLevel (local_heading));
+    }
   }
   terminatingX += xswitch;
   terminatingY += yswitch;
   last_velocity = local_heading;
   local_heading = parent->ToLocalCoordinates ((final_heading-parent->Position()).Cast());
-  if (done) return ;
+  if (done||(xswitch&&yswitch)) return ;
   Vector torque (parent->Limits().pitch, parent->Limits().yaw,0);//set torque to max accel in any direction
   if (terminatingX>switchbacks&&terminatingY>switchbacks) {
     if (Done (last_velocity)) {
