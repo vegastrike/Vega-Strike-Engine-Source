@@ -193,7 +193,7 @@ StarSystem * Universe::Init (string systemfile, const Vector & centr,const strin
 }
 
 extern void micro_sleep (unsigned int howmuch);
-extern int getmicrosleep ();
+
 
 StarSystem *Universe::getStarSystem(string name){
 

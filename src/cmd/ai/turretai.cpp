@@ -7,11 +7,13 @@ using namespace Orders;
 TurretAI::TurretAI ():FaceTargetITTS (false) {
   type|=WEAPON;
   range=-1;
+  speed=1;
+  mrange=1;
 }
 void TurretAI::getAverageGunSpeed (float &speed, float & range, float &mrange) const {
   speed=this->speed;range=this->range;mrange=this->mrange;
 }
-extern unsigned int FireBitmask (Unit * parent, bool shouldfire, float missileprob);
+extern unsigned int FireBitmask (Unit * parent, bool shouldfire, bool firemissile);
 void TurretAI::Execute () {
   Unit * targ = parent->Target();
   if (range==-1) {
@@ -45,8 +47,13 @@ void TurretAI::Execute () {
       double mag = Pos.Magnitude();
       Pos=Pos/mag;
       float dot = R.Dot (Pos.Cast());
-      bool shouldfire = (mag-targ->rSize()-parent->rSize()<1.2*range&&dot>dot_cutoff);
-      parent->Fire(FireBitmask(parent,shouldfire,missile_prob),true);
+      static int neu=FactionUtil::GetFaction("neutral");
+      static int upg=FactionUtil::GetFaction("upgrades");   
+      bool isplayerstarship=_Universe->isPlayerStarship(parent->owner)!=NULL;
+      
+      bool shouldfire = ((mag-targ->rSize()-parent->rSize()<range&&dot>dot_cutoff)&&(isplayerstarship==false||targ->faction==upg||(isplayerstarship&&(targ->getRelation(parent->owner/*now that it is a player, we know it's dereferencable*/)<0||targ->Target()==parent->owner)))&&targ->faction!=neu);
+
+      parent->Fire(FireBitmask(parent,shouldfire,rand()<missile_prob*RAND_MAX*SIMULATION_ATOM),true);
       if (!shouldfire)
 	parent->UnFire();
       

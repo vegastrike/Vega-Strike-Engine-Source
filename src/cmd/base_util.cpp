@@ -21,7 +21,12 @@ namespace BaseUtil {
 #ifdef BASE_MAKER
 		((BaseInterface::Room::BaseVSSprite*)newroom->objs.back())->texfile=file;
 #endif
-		((BaseInterface::Room::BaseVSSprite*)newroom->objs.back())->spr.SetPosition(x,y);
+                float tx=0, ty=0;
+                static bool addspritepos = XMLSupport::parse_bool(vs_config->getVariable("graphics","offset_sprites_by_pos","true"));
+                if (addspritepos)
+                  ((BaseInterface::Room::BaseVSSprite*)newroom->objs.back())->spr.GetPosition(tx,ty);
+                
+		((BaseInterface::Room::BaseVSSprite*)newroom->objs.back())->spr.SetPosition(x+tx,y+ty);
 	}
 	void Ship (int room, std::string index,QVector pos,Vector Q, Vector R) {
 		BaseInterface::Room *newroom=CheckRoom(room);
@@ -30,6 +35,28 @@ namespace BaseUtil {
 		P.Normalize();
 		newroom->objs.push_back(new BaseInterface::Room::BaseShip(P.i,P.j,P.k,Q.i,Q.j,Q.k,R.i,R.j,R.k,pos,index));
 //		return BaseInterface::CurrentBase->rooms[BaseInterface::CurrentBase->curroom]->links.size()-1;
+	}
+	void RunScript (int room, std::string ind, std::string pythonfile, float time) {
+		BaseInterface::Room *newroom=CheckRoom(room);
+		if (!newroom) return;
+		newroom->objs.push_back(new BaseInterface::Room::BasePython(ind, pythonfile, time));
+	}
+	void TextBox (int room, std::string ind, std::string text, float x, float y, Vector widheimult, Vector backcol, float backalp, Vector forecol) {
+		BaseInterface::Room *newroom=CheckRoom(room);
+		if (!newroom) return;
+		newroom->objs.push_back(new BaseInterface::Room::BaseText(text, x, y, widheimult.i, widheimult.j, widheimult.k, GFXColor(backcol, backalp), GFXColor(forecol), ind));
+	}
+	void SetTextBoxText(int room, std::string ind, std::string text) {
+		BaseInterface::Room *newroom=CheckRoom(room);
+		if (!newroom) return;
+		for (int i=0;i<newroom->objs.size();i++) {
+			if (newroom->objs[i]) {
+				if (newroom->objs[i]->index==ind) {
+					// FIXME: Will crash if not a Text object.
+					dynamic_cast<BaseInterface::Room::BaseText*>(newroom->objs[i])->SetText(text);
+				}
+			}
+		}
 	}
 	static void BaseLink (BaseInterface::Room *room,float x, float y, float wid, float hei, std::string text,bool reverse=false) {
 		BaseInterface::Room::Link *lnk;
@@ -138,10 +165,11 @@ namespace BaseUtil {
 	void EraseLink (int room, std::string index) {
 		BaseInterface::Room *newroom=CheckRoom(room);
 		if (!newroom) return;
-		for (int i=0;i<newroom->links.size();i++) {
+		for (int i=0;i<(int)newroom->links.size();i++) {
 			if (newroom->links[i]) {
 				if (newroom->links[i]->index==index) {
 					newroom->links.erase(newroom->links.begin()+i);
+                                        i--;
 //					break;
 				}
 			}
@@ -150,10 +178,11 @@ namespace BaseUtil {
 	void EraseObj (int room, std::string index) {
 		BaseInterface::Room *newroom=CheckRoom(room);
 		if (!newroom) return;
-		for (int i=0;i<newroom->objs.size();i++) {
+		for (int i=0;i<(int)newroom->objs.size();i++) {
 			if (newroom->objs[i]) {
 				if (newroom->objs[i]->index==index) {
 					newroom->objs.erase(newroom->objs.begin()+i);
+                                        i--;
 //					break;
 				}
 			}
@@ -162,6 +191,12 @@ namespace BaseUtil {
 	int GetCurRoom () {
 		if (!BaseInterface::CurrentBase) return -1;
 		return BaseInterface::CurrentBase->curroom;
+	}
+	void SetCurRoom (int room) {
+		BaseInterface::Room *newroom=CheckRoom(room);
+		if (!newroom) return;
+		if (!BaseInterface::CurrentBase) return;
+		BaseInterface::CurrentBase->GotoLink(room);
 	}
 	int GetNumRoom () {
 		if (!BaseInterface::CurrentBase) return -1;

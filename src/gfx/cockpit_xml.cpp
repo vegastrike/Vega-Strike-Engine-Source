@@ -149,6 +149,7 @@ using namespace CockpitXML;
 
 void GameCockpit::beginElement(const string &name, const AttributeList &attributes) {
   static bool cockpit_smooth=XMLSupport::parse_bool(vs_config->getVariable("graphics","cockpit_smooth_texture","false"));
+  static bool crosshair_smooth=XMLSupport::parse_bool(vs_config->getVariable("graphics","crosshair_smooth_texture","true"));
   AttributeList::const_iterator iter;
   Gauge::DIRECTION tmpdir=Gauge::GAUGE_UP;
   VSSprite ** newsprite=NULL;
@@ -164,6 +165,7 @@ void GameCockpit::beginElement(const string &name, const AttributeList &attribut
   float topy=-10; float boty = -10;
   short rows=13;
   short cols=15;
+  int default_mode=VDU::TARGET;
   switch (elem) {
   case COCKPIT:
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) { 
@@ -297,21 +299,25 @@ void GameCockpit::beginElement(const string &name, const AttributeList &attribut
     goto loadsprite;
   case RADAR: newsprite = &Radar[0];goto loadsprite;
   case REARRADAR: newsprite = &Radar[1];goto loadsprite;
-  case LVDU: vdu.push_back(NULL);newvdu = &vdu.back();mymodes=VDU::MANIFEST|VDU::WEAPON|VDU::DAMAGE|VDU::SHIELD;
+  case LVDU: vdu.push_back(NULL);newvdu = &vdu.back();mymodes=VDU::MANIFEST|VDU::WEAPON|VDU::DAMAGE|VDU::OBJECTIVES|VDU::SHIELD;default_mode=VDU::OBJECTIVES;
 #ifdef NETCOMM_WEBCAM
 		mymodes = mymodes | VDU::WEBCAM;
 #endif
   	if( Network!=NULL)
 		mymodes = mymodes | VDU::NETWORK;
 	goto loadsprite;
-  case RVDU: vdu.push_back(NULL);newvdu = &vdu.back();mymodes=VDU::TARGETMANIFEST|VDU::NAV|VDU::TARGET;
+  case RVDU: vdu.push_back(NULL);newvdu = &vdu.back();mymodes=VDU::TARGETMANIFEST|VDU::NAV|VDU::TARGET;default_mode=VDU::TARGET;
   goto loadsprite;
   case AVDU:vdu.push_back(NULL);newvdu = &vdu.back();mymodes=VDU::MSG;
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) { 
       switch (attribute_map.lookup((*iter).name)) {
       case VDUTYPE:
-		mymodes=parse_vdu_type ((*iter).value.c_str());
-	  break;
+        {
+          mymodes=parse_vdu_type ((*iter).value.c_str());
+          std::string firstmode=(*iter).value.substr(0,(*iter).value.find(" "));
+          default_mode=parse_vdu_type(firstmode.c_str());
+        }
+        break;
       default:
 	break;
       }
@@ -322,11 +328,18 @@ void GameCockpit::beginElement(const string &name, const AttributeList &attribut
       switch (attribute_map.lookup((*iter).name)) {
       case XFILE:
 	if (newsprite) {
-	  (*newsprite) = new VSSprite ((*iter).value.c_str(),cockpit_smooth?BILINEAR:NEAREST);
+	  (*newsprite) = new VSSprite ((*iter).value.c_str(),crosshair_smooth?BILINEAR:NEAREST);
 	  adjsprite = *newsprite;
 	} else if (newvdu) {
-	  (*newvdu) = new VDU ((*iter).value.c_str(),text,mymodes,rows,cols,&StartArmor[0],&maxhull);
+          VDU * tmp=new VDU ((*iter).value.c_str(),text,mymodes,rows,cols,&StartArmor[0],&maxhull);         
+	  (*newvdu) =  tmp;
 	  adjsprite = *newvdu;
+          if (tmp->getMode()!=default_mode)
+            for (int i=0;i<32;++i) {
+              tmp->SwitchMode(NULL);
+              if (tmp->getMode()==default_mode)
+                break;
+            }
 	}
 	break;
       case TOPY:

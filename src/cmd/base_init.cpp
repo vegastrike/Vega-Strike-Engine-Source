@@ -43,6 +43,7 @@ static boost::python::tuple GetRandomBarMessage () {
 
 PYTHON_BEGIN_MODULE(Base)
 	PYTHON_DEFINE_GLOBAL(Base,&BaseUtil::Room,"Room");
+	PYTHON_DEFINE_GLOBAL(Base,&BaseUtil::SetCurRoom,"SetCurRoom");
 	PYTHON_DEFINE_GLOBAL(Base,&BaseUtil::GetCurRoom,"GetCurRoom");
 	PYTHON_DEFINE_GLOBAL(Base,&BaseUtil::GetNumRoom,"GetNumRoom");
 	PYTHON_DEFINE_GLOBAL(Base,&BaseUtil::Comp,"Comp");
@@ -61,6 +62,9 @@ PYTHON_BEGIN_MODULE(Base)
 	PYTHON_DEFINE_GLOBAL(Base,&BaseUtil::Message,"Message");
 	PYTHON_DEFINE_GLOBAL(Base,&BaseUtil::EraseObj,"EraseObj");
 	PYTHON_DEFINE_GLOBAL(Base,&GetRandomBarMessage,"GetRandomBarMessage");
+	PYTHON_DEFINE_GLOBAL(Base,&BaseUtil::RunScript, "RunScript");
+	PYTHON_DEFINE_GLOBAL(Base,&BaseUtil::TextBox, "TextBox");
+	PYTHON_DEFINE_GLOBAL(Base,&BaseUtil::SetTextBoxText, "SetTextBoxText");
 PYTHON_END_MODULE(Base)
 
 void InitBase() {

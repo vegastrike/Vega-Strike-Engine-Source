@@ -135,20 +135,8 @@ class Mount {
     Mount();
     Mount(const std::string& name, int ammo, int volume, float xyscale, float zscale, float functionality, float maxfunctionality); //short fix
 
-	void Activate (bool Missile) {
-	  if ((type->type==weapon_info::PROJECTILE)==Missile) {
-		if (status==INACTIVE)
-		  status = ACTIVE;
-	  }
-	}
-	///Sets this gun to inactive, unless unchosen or destroyed
-	void DeActive (bool Missile) {
-	  if ((type->type==weapon_info::PROJECTILE)==Missile) {
-		if (status==ACTIVE)
-		  status = INACTIVE;
-	  }
-	}
-
+    void Activate (bool Missile);
+    void DeActive (bool Missile);
     ///Sets this gun's position on the mesh
     void SetMountPosition (const Vector & v) {pos=v;}
 	void SetMountOrientation(const Quaternion &t) {orient = t;}
@@ -490,7 +478,12 @@ public:
     float max_combat_speed; float max_combat_ab_speed;
     float max_speed () const; float max_ab_speed() const;
     ///Computer's restrictions of YPR to limit space combat maneuvers
-    float max_yaw; float max_pitch; float max_roll;
+    float max_yaw_left; 
+    float max_yaw_right; 
+    float max_pitch_down; 
+    float max_pitch_up; 
+    float max_roll_left; 
+    float max_roll_right;
     ///Whether or not an 'lead' indicator appears in front of target
     unsigned char slide_start;
     unsigned char slide_end;
@@ -500,7 +493,7 @@ public:
 
     Computer() : NavPoint(0,0,0) , threatlevel(0) , set_speed(0)
         , max_combat_speed(0) , max_combat_ab_speed(0)
-        , max_yaw(0) , max_pitch(0) , max_roll(0) , slide_start(0) , slide_end(0)
+        , max_yaw_left(0) ,max_yaw_right(0), max_pitch_down(0), max_pitch_up(0), max_roll_left(0) ,max_roll_right(0), slide_start(0) , slide_end(0)
         , itts(false) , combat_mode(false) { }
   };
   Computer computer;
@@ -508,7 +501,7 @@ public:
   bool CombatMode();
 // SHOULD TRY TO COME BACK HERE
   virtual bool TransferUnitToSystem (StarSystem *NewSystem);
-  virtual void TransferUnitToSystem (unsigned int whichJumpQueue, class StarSystem *&previouslyActiveStarSystem, bool DoSightAndSound) {}
+  virtual bool TransferUnitToSystem (unsigned int whichJumpQueue, class StarSystem *&previouslyActiveStarSystem, bool DoSightAndSound) {return false;}
   StarSystem * getStarSystem();
     struct UnitJump {
     float warpDriveRating;
@@ -603,6 +596,7 @@ public:
   UnitImages *image;
   ///mass of this unit (may change with cargo)
   float Mass;
+  float HeatSink;
 protected:
   ///are shields tight to the hull.  zero means bubble
   float shieldtight;
@@ -684,6 +678,8 @@ public:
   float EnergyData() const;
   float WarpEnergyData() const;
   float GetWarpEnergy() {return warpenergy;} //short fix
+  void DecreaseWarpEnergy(bool insystem, float time=1.0f);
+  bool RefillWarpEnergy();
   ///Should we resolve forces on this unit (is it free to fly or in orbit)
   bool resolveforces;
   ///What's the size of this unit
@@ -861,6 +857,7 @@ protected:
   ///the current order
   ///how much the energy recharges per second
   float recharge;
+
   ///maximum energy
   float maxenergy;
   ///current energy
@@ -991,8 +988,10 @@ public:
   bool BuyCargo (unsigned int i, unsigned int quantity, Unit * buyer, float &creds);
   bool BuyCargo (const std::string &cargo,unsigned int quantity, Unit * buyer, float & creds);
   void EjectCargo (unsigned int index);
-  float EmptyCargoVolume(void) const;
-  float CargoVolume(void) const;
+  float getEmptyCargoVolume(void) const;
+  float getCargoVolume(void) const;
+  float getEmptyUpgradeVolume(void) const;
+  float getUpgradeVolume(void) const;
 
 /***************************************************************************************/
 /**** AI STUFF                                                                      ****/

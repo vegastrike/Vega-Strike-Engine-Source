@@ -22,6 +22,7 @@
 //for getatmospheric
 #include "cmd/role_bitmask.h"
 FireKeyboard::FireKeyboard (unsigned int whichplayer, unsigned int whichjoystick): Order (WEAPON,0){
+  memset (savedTargets,0,sizeof(void*)*NUMSAVEDTARGETS);
   this->cloaktoggle=true;
   this->whichjoystick = whichjoystick;
   this->whichplayer=whichplayer;
@@ -30,13 +31,15 @@ FireKeyboard::FireKeyboard (unsigned int whichplayer, unsigned int whichjoystick
   sex = XMLSupport::parse_int( vs_config->getVariable ("player","sex","0"));
 }
 const unsigned int NUMCOMMKEYS=10;
+
 struct FIREKEYBOARDTYPE {
   FIREKEYBOARDTYPE() {
-    togglewarpdrive=toggleglow=toggleanimation=lockkey=ECMkey=commKeys[0]=commKeys[1]=commKeys[2]=commKeys[3]=commKeys[4]=commKeys[5]=commKeys[6]=commKeys[7]=commKeys[8]=commKeys[9]=turretaikey = UP;
-    eject=ejectcargo=firekey=missilekey=jfirekey=jtargetkey=jmissilekey=weapk=misk=rweapk=rmisk=cloakkey=
+    togglewarpdrive=toggleglow=toggleanimation=lockkey=ECMkey=commKeys[0]=commKeys[1]=commKeys[2]=commKeys[3]=commKeys[4]=commKeys[5]=commKeys[6]=commKeys[7]=commKeys[8]=commKeys[9]=turretaikey = saveTargetKeys[0]=saveTargetKeys[1]=saveTargetKeys[2]=saveTargetKeys[3]=saveTargetKeys[4]=saveTargetKeys[5]=saveTargetKeys[6]=saveTargetKeys[7]=saveTargetKeys[8]=saveTargetKeys[9]=turretaikey = restoreTargetKeys[0]=restoreTargetKeys[1]=restoreTargetKeys[2]=restoreTargetKeys[3]=restoreTargetKeys[4]=restoreTargetKeys[5]=restoreTargetKeys[6]=restoreTargetKeys[7]=restoreTargetKeys[8]=restoreTargetKeys[9]=turretaikey = UP;
+
+    eject=ejectcargo=ejectnonmissioncargo=firekey=missilekey=jfirekey=jtargetkey=jmissilekey=weapk=misk=rweapk=rmisk=cloakkey=
       neartargetkey=targetskey=targetukey=threattargetkey=picktargetkey=subtargetkey=targetkey=
       rneartargetkey=rtargetskey=rtargetukey=rthreattargetkey=rpicktargetkey=rtargetkey=
-      nearturrettargetkey =threatturrettargetkey= pickturrettargetkey=turrettargetkey=UP;
+      nearturrettargetkey =threatturrettargetkey= pickturrettargetkey=turrettargetkey=enslave=freeslave=UP;
       shieldpowerstate=1;
 #ifdef CAR_SIM
     blinkleftkey=blinkrightkey=headlightkey=sirenkey=UP;
@@ -71,6 +74,7 @@ struct FIREKEYBOARDTYPE {
  KBSTATE eject;
  KBSTATE lockkey;
  KBSTATE ejectcargo;
+ KBSTATE ejectnonmissioncargo;
  KBSTATE cloakkey;
  KBSTATE ECMkey;
  KBSTATE neartargetkey;
@@ -85,10 +89,14 @@ struct FIREKEYBOARDTYPE {
  KBSTATE togglewarpdrive;
  KBSTATE toggleanimation;	
  KBSTATE commKeys[NUMCOMMKEYS];
+ KBSTATE saveTargetKeys[NUMSAVEDTARGETS];
+ KBSTATE restoreTargetKeys[NUMSAVEDTARGETS];
  KBSTATE nearturrettargetkey;
  KBSTATE threatturrettargetkey;
  KBSTATE pickturrettargetkey;
  KBSTATE turrettargetkey;
+ KBSTATE enslave;
+ KBSTATE freeslave;
 };
 static std::vector <FIREKEYBOARDTYPE> vectorOfKeyboardInput;
 static FIREKEYBOARDTYPE &g() {
@@ -103,85 +111,196 @@ FIREKEYBOARDTYPE &FireKeyboard::f() {
 FIREKEYBOARDTYPE &FireKeyboard::j() {
   return vectorOfKeyboardInput[whichjoystick];
 }
-void FireKeyboard::SetShieldsOneThird(int,KBSTATE k) {
-  if (k==DOWN) {
-    g().shieldpowerstate=1./3;
+void FireKeyboard::SetShieldsOneThird(const KBData&,KBSTATE k) {
+  if (k==PRESS) {
+    float pow=1./3;
+    if (g().shieldpowerstate!=pow)
+      g().shieldpowerstate=pow;
+    else
+      g().shieldpowerstate=1;
   }
 }
-void FireKeyboard::SetShieldsTwoThird(int,KBSTATE k) {
-  if (k==DOWN) {
-    g().shieldpowerstate=2./3;
+
+void FireKeyboard::SetShieldsTwoThird(const KBData&,KBSTATE k) {
+  if (k==PRESS) {
+    float pow=2./3;
+    if (g().shieldpowerstate!=pow)
+      g().shieldpowerstate=pow;
+    else
+      g().shieldpowerstate=1;
   }
 }
-void FireKeyboard::ToggleGlow (int,KBSTATE k) {
+void FireKeyboard::ToggleGlow (const KBData&,KBSTATE k) {
 	if (k==PRESS) {
 		g().toggleglow=PRESS;
 	}
 }
 
-void FireKeyboard::ToggleWarpDrive (int,KBSTATE k) {
+void FireKeyboard::ToggleWarpDrive (const KBData&,KBSTATE k) {
 	if (k==PRESS) {
 		g().togglewarpdrive=PRESS;
 	}
 }
 
-void FireKeyboard::ToggleAnimation (int,KBSTATE k) {
+void FireKeyboard::ToggleAnimation (const KBData&,KBSTATE k) {
 	if (k==PRESS) {
 		g().toggleanimation=PRESS;
 	}
 }
-void FireKeyboard::PressComm1Key (int, KBSTATE k) {
+void FireKeyboard::PressComm1Key (const KBData&,KBSTATE k) {
   if (k==PRESS) {
     g().commKeys[0]=PRESS;
   }
 }
-void FireKeyboard::PressComm2Key (int, KBSTATE k) {
+void FireKeyboard::PressComm2Key (const KBData&,KBSTATE k) {
   if (k==PRESS) {
     g().commKeys[1]=PRESS;
   }
 }
-void FireKeyboard::PressComm3Key (int, KBSTATE k) {
+void FireKeyboard::PressComm3Key (const KBData&,KBSTATE k) {
   if (k==PRESS) {
     g().commKeys[2]=PRESS;
   }
 }
-void FireKeyboard::PressComm4Key (int, KBSTATE k) {
+void FireKeyboard::PressComm4Key (const KBData&,KBSTATE k) {
   if (k==PRESS) {
     g().commKeys[3]=PRESS;
   }
 }
-void FireKeyboard::PressComm5Key (int, KBSTATE k) {
+void FireKeyboard::PressComm5Key (const KBData&,KBSTATE k) {
   if (k==PRESS) {
     g().commKeys[4]=PRESS;
   }
 }
-void FireKeyboard::PressComm6Key (int, KBSTATE k) {
+void FireKeyboard::PressComm6Key (const KBData&,KBSTATE k) {
   if (k==PRESS) {
     g().commKeys[5]=PRESS;
   }
 }
-void FireKeyboard::PressComm7Key (int, KBSTATE k) {
+void FireKeyboard::PressComm7Key (const KBData&,KBSTATE k) {
   if (k==PRESS) {
     g().commKeys[6]=PRESS;
   }
 }
-void FireKeyboard::PressComm8Key (int, KBSTATE k) {
+void FireKeyboard::PressComm8Key (const KBData&,KBSTATE k) {
   if (k==PRESS) {
     g().commKeys[7]=PRESS;
   }
 }
-void FireKeyboard::PressComm9Key (int, KBSTATE k) {
+void FireKeyboard::PressComm9Key (const KBData&,KBSTATE k) {
   if (k==PRESS) {
     g().commKeys[8]=PRESS;
   }
 }
-void FireKeyboard::PressComm10Key (int, KBSTATE k) {
+void FireKeyboard::PressComm10Key (const KBData&,KBSTATE k) {
   if (k==PRESS) {
     g().commKeys[9]=PRESS;
   }
 }
+void FireKeyboard::SaveTarget1Key (const KBData&,KBSTATE k) {
+  if (k==PRESS) {
+    g().saveTargetKeys[0]=PRESS;
+  }
+}
+void FireKeyboard::SaveTarget2Key (const KBData&,KBSTATE k) {
+  if (k==PRESS) {
+    g().saveTargetKeys[1]=PRESS;
+  }
+}
+void FireKeyboard::SaveTarget3Key (const KBData&,KBSTATE k) {
+  if (k==PRESS) {
+    g().saveTargetKeys[2]=PRESS;
+  }
+}
+void FireKeyboard::SaveTarget4Key (const KBData&,KBSTATE k) {
+  if (k==PRESS) {
+    g().saveTargetKeys[3]=PRESS;
+  }
+}
+void FireKeyboard::SaveTarget5Key (const KBData&,KBSTATE k) {
+  if (k==PRESS) {
+    g().saveTargetKeys[4]=PRESS;
+  }
+}
+void FireKeyboard::SaveTarget6Key (const KBData&,KBSTATE k) {
+  if (k==PRESS) {
+    g().saveTargetKeys[5]=PRESS;
+  }
+}
+void FireKeyboard::SaveTarget7Key (const KBData&,KBSTATE k) {
+  if (k==PRESS) {
+    g().saveTargetKeys[6]=PRESS;
+  }
+}
+void FireKeyboard::SaveTarget8Key (const KBData&,KBSTATE k) {
+  if (k==PRESS) {
+    g().saveTargetKeys[7]=PRESS;
+  }
+}
+void FireKeyboard::SaveTarget9Key (const KBData&,KBSTATE k) {
+  if (k==PRESS) {
+    g().saveTargetKeys[8]=PRESS;
+  }
+}
+void FireKeyboard::SaveTarget10Key (const KBData&,KBSTATE k) {
+  if (k==PRESS) {
+    g().saveTargetKeys[9]=PRESS;
+  }
+}
+void FireKeyboard::RestoreTarget1Key (const KBData&,KBSTATE k) {
+  if (k==PRESS) {
+    g().restoreTargetKeys[0]=PRESS;
+  }
+}
+void FireKeyboard::RestoreTarget2Key (const KBData&,KBSTATE k) {
+  if (k==PRESS) {
+    g().restoreTargetKeys[1]=PRESS;
+  }
+}
+void FireKeyboard::RestoreTarget3Key (const KBData&,KBSTATE k) {
+  if (k==PRESS) {
+    g().restoreTargetKeys[2]=PRESS;
+  }
+}
+void FireKeyboard::RestoreTarget4Key (const KBData&,KBSTATE k) {
+  if (k==PRESS) {
+    g().restoreTargetKeys[3]=PRESS;
+  }
+}
+void FireKeyboard::RestoreTarget5Key (const KBData&,KBSTATE k) {
+  if (k==PRESS) {
+    g().restoreTargetKeys[4]=PRESS;
+  }
+}
+void FireKeyboard::RestoreTarget6Key (const KBData&,KBSTATE k) {
+  if (k==PRESS) {
+    g().restoreTargetKeys[5]=PRESS;
+  }
+}
+void FireKeyboard::RestoreTarget7Key (const KBData&,KBSTATE k) {
+  if (k==PRESS) {
+    g().restoreTargetKeys[6]=PRESS;
+  }
+}
+void FireKeyboard::RestoreTarget8Key (const KBData&,KBSTATE k) {
+  if (k==PRESS) {
+    g().restoreTargetKeys[7]=PRESS;
+  }
+}
+void FireKeyboard::RestoreTarget9Key (const KBData&,KBSTATE k) {
+  if (k==PRESS) {
+    g().restoreTargetKeys[8]=PRESS;
+  }
+}
+void FireKeyboard::RestoreTarget10Key (const KBData&,KBSTATE k) {
+  if (k==PRESS) {
+    g().restoreTargetKeys[9]=PRESS;
+  }
+}
 
-void FireKeyboard::RequestClearenceKey(int, KBSTATE k) {
+
+
+void FireKeyboard::RequestClearenceKey(const KBData&,KBSTATE k) {
 
     if (k==PRESS) {
       g().req=true;      
@@ -190,7 +309,7 @@ void FireKeyboard::RequestClearenceKey(int, KBSTATE k) {
       g().req=false;      
     }
 }
-void FireKeyboard::DockKey(int, KBSTATE k) {
+void FireKeyboard::DockKey(const KBData&,KBSTATE k) {
 
     if (k==PRESS) {
       g().doc=true;      
@@ -199,7 +318,7 @@ void FireKeyboard::DockKey(int, KBSTATE k) {
       g().doc=false;      
     }
 }
-void FireKeyboard::UnDockKey(int, KBSTATE k) {
+void FireKeyboard::UnDockKey(const KBData&,KBSTATE k) {
     if (k==PRESS) {
       g().und=true;      
     }
@@ -207,14 +326,14 @@ void FireKeyboard::UnDockKey(int, KBSTATE k) {
       g().und=false;      
     }
 }
-void FireKeyboard::EjectKey (int, KBSTATE k) {
+void FireKeyboard::EjectKey (const KBData&,KBSTATE k) {
   if (k==PRESS) {
     g().eject= k;
   }
 }
 
 
-void FireKeyboard::TurretAI (int, KBSTATE k) {
+void FireKeyboard::TurretAI (const KBData&,KBSTATE k) {
   if (k==PRESS) {
     if (g().turretaikey==UP) {
 
@@ -227,25 +346,43 @@ void FireKeyboard::TurretAI (int, KBSTATE k) {
 }
 
 
-void FireKeyboard::EjectCargoKey (int, KBSTATE k) {
+void FireKeyboard::EjectCargoKey (const KBData&,KBSTATE k) {
     if (k==PRESS) {
       g().ejectcargo = k;      
     }
   
 }
-void FireKeyboard::CloakKey(int, KBSTATE k) {
+void FireKeyboard::EnslaveKey (const KBData&,KBSTATE k) {
+    if (k==PRESS) {
+      g().enslave = k;      
+    }
+  
+}
+void FireKeyboard::FreeSlaveKey (const KBData&,KBSTATE k) {
+    if (k==PRESS) {
+      g().freeslave = k;      
+    }
+  
+}
+void FireKeyboard::EjectNonMissionCargoKey (const KBData&,KBSTATE k) {
+    if (k==PRESS) {
+      g().ejectnonmissioncargo = k;      
+    }
+  
+}
+void FireKeyboard::CloakKey(const KBData&,KBSTATE k) {
 
     if (k==PRESS) {
       g().cloakkey = k;      
     }
 }
-void FireKeyboard::LockKey(int, KBSTATE k) {
+void FireKeyboard::LockKey(const KBData&,KBSTATE k) {
 
     if (k==PRESS) {
       g().lockkey = k;      
     }
 }
-void FireKeyboard::ECMKey(int, KBSTATE k) {
+void FireKeyboard::ECMKey(const KBData&,KBSTATE k) {
 
     if (k==PRESS) {
       g().ECMkey = k;      
@@ -254,7 +391,7 @@ void FireKeyboard::ECMKey(int, KBSTATE k) {
       g().ECMkey = k;
     }
 }
-void FireKeyboard::FireKey(int key, KBSTATE k) {
+void FireKeyboard::FireKey(const KBData&, KBSTATE k) {
   if(g().firekey==DOWN && k==UP){
     return;
   }
@@ -266,84 +403,110 @@ void FireKeyboard::FireKey(int key, KBSTATE k) {
     //    printf("firekey %d %d\n",k,key);
   }
 }
-
-void FireKeyboard::TargetKey(int, KBSTATE k) {
+void ExamineWhenTargetKey();
+void FireKeyboard::TargetKey(const KBData&,KBSTATE k) {
   if (g().targetkey!=PRESS)
     g().targetkey = k;
   if (k==RESET) {
     g().targetkey=PRESS;
   }
+  if (k==PRESS)
+    ExamineWhenTargetKey();
 }
-void FireKeyboard::PickTargetKey(int, KBSTATE k) {
+void FireKeyboard::PickTargetKey(const KBData&,KBSTATE k) {
   if (g().picktargetkey!=PRESS)
     g().picktargetkey = k;
   if (k==RESET) {
     g().picktargetkey=PRESS;
   }
+  if (k==PRESS)
+    ExamineWhenTargetKey();
 }
 
-void FireKeyboard::NearestTargetKey(int, KBSTATE k) {
+void FireKeyboard::NearestTargetKey(const KBData&,KBSTATE k) {
   if (g().neartargetkey!=PRESS)
     g().neartargetkey = k;
+  if (k==PRESS)
+    ExamineWhenTargetKey();
 
 }
-void FireKeyboard::SubUnitTargetKey(int, KBSTATE k) {
+void FireKeyboard::SubUnitTargetKey(const KBData&,KBSTATE k) {
   if (g().subtargetkey!=PRESS)
     g().subtargetkey = k;
+  if (k==PRESS)
+    ExamineWhenTargetKey();
 
 }
-void FireKeyboard::ThreatTargetKey(int, KBSTATE k) {
+void FireKeyboard::ThreatTargetKey(const KBData&,KBSTATE k) {
   if (g().threattargetkey!=PRESS)
     g().threattargetkey = k;
+  if (k==PRESS)
+    ExamineWhenTargetKey();
 }
 
-void FireKeyboard::UnitTargetKey(int, KBSTATE k) {
+void FireKeyboard::UnitTargetKey(const KBData&,KBSTATE k) {
   if (g().targetukey!=PRESS)
     g().targetukey = k;
+  if (k==PRESS)
+    ExamineWhenTargetKey();
 }
 
-void FireKeyboard::SigTargetKey(int, KBSTATE k) {
+void FireKeyboard::SigTargetKey(const KBData&,KBSTATE k) {
   if (g().targetskey!=PRESS)
     g().targetskey = k;
+  if (k==PRESS)
+    ExamineWhenTargetKey();
 }
 
-void FireKeyboard::ReverseTargetKey(int, KBSTATE k) {
+void FireKeyboard::ReverseTargetKey(const KBData&,KBSTATE k) {
   if (g().rtargetkey!=PRESS)
     g().rtargetkey = k;
   if (k==RESET) {
     g().rtargetkey=PRESS;
   }
+  if (k==PRESS)
+    ExamineWhenTargetKey();
 }
-void FireKeyboard::ReversePickTargetKey(int, KBSTATE k) {
+void FireKeyboard::ReversePickTargetKey(const KBData&,KBSTATE k) {
   if (g().rpicktargetkey!=PRESS)
     g().rpicktargetkey = k;
   if (k==RESET) {
     g().rpicktargetkey=PRESS;
   }
+  if (k==PRESS)
+    ExamineWhenTargetKey();
 }
-void FireKeyboard::ReverseNearestTargetKey(int, KBSTATE k) {
+void FireKeyboard::ReverseNearestTargetKey(const KBData&,KBSTATE k) {
   if (g().rneartargetkey!=PRESS)
     g().rneartargetkey = k;
 
+  if (k==PRESS)
+    ExamineWhenTargetKey();
 }
-void FireKeyboard::ReverseThreatTargetKey(int, KBSTATE k) {
+void FireKeyboard::ReverseThreatTargetKey(const KBData&,KBSTATE k) {
   if (g().rthreattargetkey!=PRESS)
     g().rthreattargetkey = k;
+  if (k==PRESS)
+    ExamineWhenTargetKey();
 }
 
-void FireKeyboard::ReverseUnitTargetKey(int, KBSTATE k) {
+void FireKeyboard::ReverseUnitTargetKey(const KBData&,KBSTATE k) {
   if (g().rtargetukey!=PRESS)
     g().rtargetukey = k;
+  if (k==PRESS)
+    ExamineWhenTargetKey();
 }
 
-void FireKeyboard::ReverseSigTargetKey(int, KBSTATE k) {
+void FireKeyboard::ReverseSigTargetKey(const KBData&,KBSTATE k) {
   if (g().rtargetskey!=PRESS)
     g().rtargetskey = k;
+  if (k==PRESS)
+    ExamineWhenTargetKey();
 }
 
 
 #ifdef CAR_SIM
-void FireKeyboard::BlinkLeftKey(int, KBSTATE k) {
+void FireKeyboard::BlinkLeftKey(const KBData&,KBSTATE k) {
     if (k==PRESS) {
       g().blinkleftkey = k;      
     }
@@ -352,7 +515,7 @@ void FireKeyboard::BlinkLeftKey(int, KBSTATE k) {
     }
 
 }
-void FireKeyboard::BlinkRightKey(int, KBSTATE k) {
+void FireKeyboard::BlinkRightKey(const KBData&,KBSTATE k) {
     if (k==PRESS) {
       g().blinkrightkey = k;      
     }
@@ -361,7 +524,7 @@ void FireKeyboard::BlinkRightKey(int, KBSTATE k) {
     }
 
 }
-void FireKeyboard::SirenKey(int, KBSTATE k) {
+void FireKeyboard::SirenKey(const KBData&,KBSTATE k) {
     if (k==PRESS) {
       g().sirenkey = k;      
     }
@@ -369,7 +532,7 @@ void FireKeyboard::SirenKey(int, KBSTATE k) {
       g().sirenkey = k;
     }
 }
-void FireKeyboard::HeadlightKey(int, KBSTATE k) {
+void FireKeyboard::HeadlightKey(const KBData&,KBSTATE k) {
     if (k==PRESS) {
       g().headlightkey = k;      
     }
@@ -378,7 +541,7 @@ void FireKeyboard::HeadlightKey(int, KBSTATE k) {
     }
 }
 #endif
-extern void DoSpeech (Unit * un, Unit *player_un, const FSM::Node &convNode);
+extern unsigned int DoSpeech (Unit * un, Unit *player_un, const FSM::Node &convNode);
 extern void LeadMe (Unit * un, string directive, string speech);
 
 static void LeadMe (string directive, string speech) {
@@ -391,7 +554,7 @@ void HelpOut (bool crit, std::string conv) {
   Unit * un = _Universe->AccessCockpit()->GetParent();
   if (un) {
     Unit * par=NULL;
-    DoSpeech(  un,NULL, FSM::Node(conv,.1));
+    DoSpeech(  un,NULL, FSM::Node::MakeNode(conv,.1));
     for (un_iter ui = _Universe->activeStarSystem()->getUnitList().createIterator();
 	 (par = (*ui));
 	 ++ui) {
@@ -411,7 +574,7 @@ void HelpOut (bool crit, std::string conv) {
     }
   }
 }
-void FireKeyboard::JoinFg (int, KBSTATE k) {
+void FireKeyboard::JoinFg (const KBData&,KBSTATE k) {
   if (k==PRESS) {
     Unit * un = _Universe->AccessCockpit()->GetParent();
     if (un) {
@@ -437,85 +600,93 @@ void FireKeyboard::JoinFg (int, KBSTATE k) {
 
 }
 
-void FireKeyboard::AttackTarget (int, KBSTATE k) {
+void FireKeyboard::AttackTarget (const KBData&,KBSTATE k) {
   if (k==PRESS) {
     LeadMe ("a","Attack my target!");
   }
 }
-void FireKeyboard::HelpMeOut (int, KBSTATE k) {
+void FireKeyboard::HelpMeOut (const KBData&,KBSTATE k) {
   if (k==PRESS) {
     LeadMe ("h","Help me out!");
   }
 }
-void FireKeyboard::HelpMeOutFaction (int, KBSTATE k) {
+void FireKeyboard::HelpMeOutFaction (const KBData&,KBSTATE k) {
   if (k==PRESS) {
     HelpOut (false,"Help me out! I need critical assistance!");
   }
 }
-void FireKeyboard::HelpMeOutCrit (int, KBSTATE k) {
+void FireKeyboard::HelpMeOutCrit (const KBData&,KBSTATE k) {
   if (k==PRESS) {
     HelpOut (true,"Help me out! Systems going critical!");
   }
 }
 
-void FireKeyboard::FormUp (int, KBSTATE k) {
+void FireKeyboard::FormUp (const KBData&,KBSTATE k) {
   if (k==PRESS) {
     LeadMe ("f","Form on my wing.");
   }
 }
-void FireKeyboard::BreakFormation(int, KBSTATE k) {
+void FireKeyboard::BreakFormation(const KBData&,KBSTATE k) {
   if (k==PRESS) {
     LeadMe ("b","Break formation and open fire!");
   }
 }
 
 
-void FireKeyboard::TargetTurretKey(int, KBSTATE k) {
+void FireKeyboard::TargetTurretKey(const KBData&,KBSTATE k) {
   if (g().turrettargetkey!=PRESS)
     g().turrettargetkey = k;
   if (k==RESET) {
     g().turrettargetkey=PRESS;
   }
+  if (k==PRESS)
+    ExamineWhenTargetKey();
 }
-void FireKeyboard::PickTargetTurretKey(int, KBSTATE k) {
+void FireKeyboard::PickTargetTurretKey(const KBData&,KBSTATE k) {
   if (g().pickturrettargetkey!=PRESS)
     g().pickturrettargetkey = k;
   if (k==RESET) {
     g().pickturrettargetkey=PRESS;
   }
+  if (k==PRESS)
+    ExamineWhenTargetKey();
 }
 
-void FireKeyboard::NearestTargetTurretKey(int, KBSTATE k) {
+void FireKeyboard::NearestTargetTurretKey(const KBData&,KBSTATE k) {
   if (g().nearturrettargetkey!=PRESS)
     g().nearturrettargetkey = k;
+  if (k==PRESS)
+    ExamineWhenTargetKey();
 
 }
-void FireKeyboard::ThreatTargetTurretKey(int, KBSTATE k) {
+void FireKeyboard::ThreatTargetTurretKey(const KBData&,KBSTATE k) {
   if (g().threatturrettargetkey!=PRESS)
     g().threatturrettargetkey = k;
+  if (k==PRESS)
+    ExamineWhenTargetKey();
 }
 
 
 
-void FireKeyboard::ReverseWeapSelKey(int, KBSTATE k) {
+void FireKeyboard::ReverseWeapSelKey(const KBData&,KBSTATE k) {
   if (g().rweapk!=PRESS)
     g().rweapk = k;
 }
-void FireKeyboard::ReverseMisSelKey(int, KBSTATE k) {
+void FireKeyboard::ReverseMisSelKey(const KBData&,KBSTATE k) {
   if (g().rmisk!=PRESS)
     g().rmisk = k;
 } 
 
-void FireKeyboard::WeapSelKey(int, KBSTATE k) {
+void FireKeyboard::WeapSelKey(const KBData&,KBSTATE k) {
   if (g().weapk!=PRESS)
     g().weapk = k;
 }
-void FireKeyboard::MisSelKey(int, KBSTATE k) {
+void FireKeyboard::MisSelKey(const KBData&,KBSTATE k) {
   if (g().misk!=PRESS)
     g().misk = k;
 } 
 
-void FireKeyboard::MissileKey(int, KBSTATE k) {
+void FireKeyboard::MissileKey(const KBData&,KBSTATE k) {
   if (g().missilekey!=PRESS)
    g().missilekey = k;
 }
@@ -709,10 +880,11 @@ void FireKeyboard::ChooseTargets (bool turret,bool significant,bool reverse) {
 #endif
 
 bool TargAll (Unit *me,Unit *target) {
-	return me->InRange(target,true,false)||me->InRange(target,true,true);
+  static bool can_target_sun=XMLSupport::parse_bool(vs_config->getVariable("graphics","can_target_sun","false"));
+	return (me->InRange(target,true,false)||me->InRange(target,true,true))&&(can_target_sun||!UnitUtil::isSun(target));
 }
 bool TargUn (Unit *me,Unit *target) {
-	return me->InRange(target,true,false)&&(target->isUnit()==UNITPTR||target->isUnit()==MISSILEPTR||target->isUnit()==ENHANCEMENTPTR);
+	return me->InRange(target,true,false)&&(target->isUnit()==UNITPTR||target->isUnit()==ENHANCEMENTPTR);
 }
 bool TargSig (Unit *me,Unit *target) {
 	return me->InRange(target,true,true)&&UnitUtil::isSignificant(target);
@@ -752,7 +924,8 @@ bool TargThreat (Unit *me,Unit *target) {
 	return false;
 }
 bool TargNear (Unit *me,Unit *target) {
-	return (me->getRelation(target)<0||TargThreat(me,target)||target->getRelation(me)<0)&&TargAll(me,target)&&target->isUnit()!=MISSILEPTR;
+  static bool can_target_sun=XMLSupport::parse_bool(vs_config->getVariable("graphics","can_target_sun","false"));
+	return (me->getRelation(target)<0||TargThreat(me,target)||target->getRelation(me)<0)&&TargAll(me,target)&&target->isUnit()!=MISSILEPTR&&(can_target_sun||!UnitUtil::isSun(target));
 }
 
 void ChooseTargets(Unit * me, bool (*typeofunit)(Unit *,Unit *), bool reverse) {
@@ -867,7 +1040,7 @@ static bool UnDockNow (Unit* me, Unit * targ) {
 }
 //#include <cmd/music.h>
 //extern Music *muzak;
-
+void Enslave (Unit*, bool);
 void abletodock(int dock) {
 //	char dumb[2]={'\0'};
 //	dumb[0]=(dock+'0');
@@ -891,12 +1064,18 @@ void abletodock(int dock) {
 		break;
 	case 3:{
 		static soundContainer reqsound;
-		if (reqsound.sound==-2) {
-			static string str=vs_config->getVariable("cockpitaudio","docking_complete","docking_complete");
-			reqsound.loadsound(str);
-		}
-		reqsound.playsound();}
-		break;
+                static string otherstr = vs_config->getVariable("audio","automatic_docking_zone","automatic_landing_zone.wav");
+                if (otherstr!=""&&rand()<RAND_MAX/2) {
+                  static int s = AUDCreateSoundWAV(otherstr,false);
+                  AUDPlay(s,QVector(0,0,0),Vector(0,0,0),1);
+                }else {
+                  if (reqsound.sound==-2) {
+                    static string str=vs_config->getVariable("cockpitaudio","docking_complete","docking_complete");
+                    reqsound.loadsound(str);
+                  }
+                  reqsound.playsound();}
+          }
+          break;
 	case 2:{
 		static soundContainer reqsound;
 		if (reqsound.sound==-2) {
@@ -928,110 +1107,175 @@ static bool NoDockWithClear() {
 	static bool nodockwithclear = XMLSupport::parse_bool (vs_config->getVariable ("physics","dock_with_clear_planets","true"));
 	return nodockwithclear;
 }
-
-static void DoDockingOps (Unit * parent, Unit * targ,unsigned char playa, unsigned char sex) {
-  bool nodockwithclear=NoDockWithClear();
-  bool wasdock=vectorOfKeyboardInput[playa].doc;
-    if (vectorOfKeyboardInput[playa].doc) {
-     if (targ->isUnit()==PLANETPTR) {
-      if (((Planet * )targ)->isAtmospheric()&&nodockwithclear) {
-	targ = getAtmospheric (targ);
-	if (!targ) {
-	  mission->msgcenter->add("game","all","[Computer] Cannot dock with insubstantial object, target another object and retry.");
-	  abletodock(2);
-	  return;
-	}
-	parent->Target(targ);
-      }
-      }
-      CommunicationMessage c(targ,parent,NULL,0);
-
-      bool hasDock = parent->Dock(targ);
-      if (hasDock) {
-	  c.SetCurrentState (c.fsm->GetDockNode(),NULL,0);
-	  abletodock(3);
-	  vectorOfKeyboardInput[playa].req=true;
-      }else {
-        if (UnDockNow(parent,targ)) {
-	  c.SetCurrentState (c.fsm->GetUnDockNode(),NULL,0);
-	  abletodock(5);
-        }else {
-          //docking is unsuccess
-	  abletodock(2);
-	  c.SetCurrentState (c.fsm->GetFailDockNode(),NULL,0);
+static bool SuperDock(Unit * parent, Unit* target) {
+  if (UnitUtil::getSignificantDistance(parent,target)<parent->rSize()) {
+    if (UnitUtil::isDockableUnit(target)) {
+      for (unsigned int i=0;i<target->GetImageInformation().dockingports.size();++i) {
+        if (target->GetImageInformation().dockingports[i].used==false) {
+          return parent->ForceDock(target,i)!=0;
         }
       }
-      parent->getAIState()->Communicate (c);
-      vectorOfKeyboardInput[playa].doc=false;
-
     }
-    if (vectorOfKeyboardInput[playa].req) {
-      bool request=RequestClearence(parent,targ,sex);
-      if (!request) {
-        mission->msgcenter->add("game","all","[Computer] Cannot dock with insubstantial object, target another object and retry.");
-        abletodock(0);
-        return;
-      } else if (!wasdock) {
-        abletodock(1);
-      }
-      vectorOfKeyboardInput[playa].req=false;
-    }
+  }
+  return false;
+}
+static bool TryDock(Unit * parent, Unit * targ, unsigned char playa, int severity) {
+  static float min_docking_relationship = XMLSupport::parse_float(vs_config->getVariable("AI","min_docking_relationship","-.002"));
+  static bool can_dock_to_enemy_base = XMLSupport::parse_bool(vs_config->getVariable("AI","can_dock_to_enemy_base","true"));
+  unsigned char sex=0;
+  vector <Animation *>* anim = NULL;
+  if (targ->getAIState()){
+    anim=targ->getAIState()->getCommFaces(sex);
+  }
+  bool isDone=false;  
+  if (targ->getRelation(parent)>=min_docking_relationship||(can_dock_to_enemy_base&&UnitUtil::getFlightgroupName(targ)=="Base")) {
+    bool hasDock = severity==0?parent->Dock(targ):SuperDock(parent,targ);
 
-    if (vectorOfKeyboardInput[playa].und) {
-      CommunicationMessage c(targ,parent,NULL,0);
+    CommunicationMessage c(targ,parent,anim,sex);    
+    if (hasDock) {
+      isDone=true;
+      c.SetCurrentState (c.fsm->GetDockNode(),anim,sex);
+      abletodock(3);
+      //vectorOfKeyboardInput[playa].req=true;
+      if (parent->getAIState()) parent->getAIState()->Communicate (c);
+      parent->UpgradeInterface(targ);
+    }else {
       if (UnDockNow(parent,targ)) {
-	c.SetCurrentState (c.fsm->GetUnDockNode(),NULL,0);
-	abletodock(5);
-      }else {
-	c.SetCurrentState (c.fsm->GetFailDockNode(),NULL,0);
- 	abletodock(4);
-     }
-      parent->getAIState()->Communicate (c);
-      vectorOfKeyboardInput[playa].und=0;
+        isDone=true;
+        c.SetCurrentState (c.fsm->GetUnDockNode(),anim,sex);
+        if (parent->getAIState()) parent->getAIState()->Communicate (c);
+        abletodock(5);
+      }
     }
+  }else {
+    if (parent->GetComputerData().target==targ) {
+      CommunicationMessage c(targ,parent,anim,sex);  
+      c.SetCurrentState (c.fsm->GetNoNode(),anim,sex);
+      if (parent->getAIState()) parent->getAIState()->Communicate(c);
+    }
+  }
+  return isDone;
+}
+static bool ExecuteRequestClearenceKey(Unit * parent, Unit * endt) {
+  bool tmp=endt->RequestClearance(parent);
+  if (endt->getRelation(parent)>=0) {
+    if (endt->graphicOptions.InWarp)
+      endt->graphicOptions.WarpRamping=1;
+    endt->graphicOptions.InWarp=0;
+  }
+  return tmp;
+}
+static void DoDockingOps (Unit * parent, Unit * targ,unsigned char playa, unsigned char sex) {
+  static int maxseverity=XMLSupport::parse_bool(vs_config->getVariable("AI","dock_to_area","false"))?2:1;
+  Unit * endt=targ;
+  bool nodockwithclear=NoDockWithClear();
+  bool wasdock=vectorOfKeyboardInput[playa].doc;
+  if (vectorOfKeyboardInput[playa].doc) {
+    bool isDone=false;
+    if (targ) {
+      for (int severity=0;severity<maxseverity;++severity) { 
+        targ->RequestClearance(parent);
+        if ((isDone=TryDock(parent,targ,playa,severity))!=false){
+          parent->EndRequestClearance(targ);
+          break;
+        }else {
+            //if (targ!=parent->Target())
+          parent->EndRequestClearance(targ);
+        }
+      }
+    }
+    if (!isDone) {
+      for (int severity=0;severity<maxseverity&&!isDone;++severity) {
+      for (un_iter u=_Universe->activeStarSystem()->getUnitList().createIterator();
+           (targ=*u)!=NULL&&!isDone;
+           ++u) {
+        if (targ!=parent) {
+          targ->RequestClearance(parent);
+          if (TryDock(parent,targ,playa,severity)) {
+            parent->Target(targ);
+            isDone=true;
+            parent->EndRequestClearance(targ);
+            break;
+          }else {
+            //if (targ!=parent->Target())
+            parent->EndRequestClearance(targ);
+          }
+        }
+      }
+      }
+    }
+    if (!isDone) {
+      if (endt) {
+        ExecuteRequestClearenceKey(parent,endt);
+      }
+      abletodock(0);
+    }
+    vectorOfKeyboardInput[playa].doc=false;
+    
+  }
+  if (vectorOfKeyboardInput[playa].req) {
+    bool request=ExecuteRequestClearenceKey(parent,targ);
+    if (!request) {
+      mission->msgcenter->add("game","all","[Computer] Cannot dock with insubstantidisabal object, target another object and retry.");
+      abletodock(0);
+      return;
+    } else if (!wasdock) {
+      abletodock(1);
+    }
+    vectorOfKeyboardInput[playa].req=false;
+  }
+  
+  if (vectorOfKeyboardInput[playa].und) {
+    CommunicationMessage c(targ,parent,NULL,0);
+    if (UnDockNow(parent,targ)) {
+      c.SetCurrentState (c.fsm->GetUnDockNode(),NULL,0);
+      abletodock(5);
+    }else {
+      c.SetCurrentState (c.fsm->GetFailDockNode(),NULL,0);
+      abletodock(4);
+    }
+    parent->getAIState()->Communicate (c);
+    vectorOfKeyboardInput[playa].und=0;
+  }
 }
 using std::list;
-void FireKeyboard::DoSpeechAndAni(Unit * un, Unit* parent, class CommunicationMessage&c) {
+unsigned int FireKeyboard::DoSpeechAndAni(Unit * un, Unit* parent, class CommunicationMessage&c) {
   this->AdjustRelationTo(un,c.getCurrentState()->messagedelta);
-  DoSpeech (un,parent,*c.getCurrentState());
+  unsigned int retval=DoSpeech (un,parent,*c.getCurrentState());
   if (parent==_Universe->AccessCockpit()->GetParent()) {
     _Universe->AccessCockpit()->SetCommAnimation (c.ani);
   }
   this->refresh_target=true;
+  return retval;
 }
 void FireKeyboard::ProcessCommMessage (class CommunicationMessage&c){
 
   Unit * un = c.sender.GetUnit();
-  int sound=c.getCurrentState()->GetSound(c.sex);
-  //AUDAdjustSound(sound,parent->Position(),parent->GetVelocity());
-  if (!AUDIsPlaying (sound)) {
-    AUDStartPlaying(sound);
-  }
+  unsigned int whichsound=0;
   bool foundValidMessage=false;
   if (un) {
     for (list<CommunicationMessage>::iterator i=resp.begin();i!=resp.end();i++) {
       if ((*i).sender.GetUnit()==un) {
-#if 0
-        //caused the docking clearence nodes to be duplicated
-        if ((*i).curstate>=(*i).fsm->GetUnDockNode()&&(*i).curstate<(*i).fsm->nodes.size()) {
-          DoSpeechAndAni(un,parent,(*i));
-          foundValidMessage=true;
-        }        
-#endif
 	i = resp.erase (i);
       }
     }
     resp.push_back(c);
     if (!foundValidMessage)
-      DoSpeechAndAni(un,parent,c);
+      whichsound=DoSpeechAndAni(un,parent,c);
   }else {
-    DoSpeech (NULL,NULL,*c.getCurrentState());
+    whichsound=DoSpeech (NULL,NULL,*c.getCurrentState());
     if (parent==_Universe->AccessCockpit()->GetParent()) {
       static Animation Statuc ("static.ani");
       _Universe->AccessCockpit()->SetCommAnimation (&Statuc);
     }
 
   }
+  int sound=c.getCurrentState()->GetSound(c.sex,whichsound);
+  //AUDAdjustSound(sound,parent->Position(),parent->GetVelocity());
+  if (!AUDIsPlaying (sound)) {
+    AUDPlay(sound,QVector(0,0,0),Vector(0,0,0),1);
+  }
+
 }
 using std::list;
 
@@ -1165,6 +1409,15 @@ static void PowerDownShield(Shield *shield, float howmuch){
   }
 
 }
+
+static void ForceChangeTarget(Unit*  parent) {
+  Unit * curtarg = parent->Target();
+  ChooseTargets(parent,TargThreat,false);
+  if (parent->Target()==curtarg)
+    ChooseTargets(parent,TargNear,false);
+  if (parent->Target()==curtarg)
+    ChooseTargets(parent,TargAll,false);
+}
 void FireKeyboard::Execute () {
 	
   while (vectorOfKeyboardInput.size()<=whichplayer||vectorOfKeyboardInput.size()<=whichjoystick) {
@@ -1176,17 +1429,17 @@ void FireKeyboard::Execute () {
     ShouldFire (targ);
     DoDockingOps(parent,targ,whichplayer,sex);
     if (targ->GetHull()<0) {
-      ChooseTargets(parent,TargAll,false);
+      ForceChangeTarget(parent);
       refresh_target=true;
     }
   } else {
-    ChooseTargets(parent,TargAll,false);
+    ForceChangeTarget(parent);
     refresh_target=true;
   }
   if (f().shieldpowerstate!=1) {
     Shield  * shield = &parent->shield;
     PowerDownShield(shield,f().shieldpowerstate);
-    f().shieldpowerstate=1;
+    //f().shieldpowerstate=1;
   }
   if (f().firekey==PRESS||f().jfirekey==PRESS||j().firekey==DOWN||j().jfirekey==DOWN){
     if (!_Universe->AccessCockpit()->CanDrawNavSystem())
@@ -1414,7 +1667,26 @@ void FireKeyboard::Execute () {
     }
     missound.playsound();
   }
-  for (unsigned int i=0;i<NUMCOMMKEYS;i++) {
+  unsigned int i;
+  for (i=0;i<NUMSAVEDTARGETS;i++) {  
+    if (f().saveTargetKeys[i]==PRESS) {
+      f().saveTargetKeys[i]=RELEASE;
+      savedTargets[i]=parent->Target();
+    }
+    if (f().restoreTargetKeys[i]==PRESS) {
+      f().restoreTargetKeys[i]=RELEASE;
+      Unit * un;
+      for (un_iter u=_Universe->activeStarSystem()->getUnitList().createIterator();
+           (un=*u)!=NULL;
+           ++u) {
+        if (un==savedTargets[i]) {
+          parent->Target(un);
+          break;
+        }
+      }
+    }
+  }
+  for (i=0;i<NUMCOMMKEYS;i++) {
     if (f().commKeys[i]==PRESS) {
       f().commKeys[i]=RELEASE;
       Unit * targ=parent->Target();
@@ -1423,11 +1695,11 @@ void FireKeyboard::Execute () {
         FSM *fsm =FactionUtil::GetConversation (parent->faction,targ->faction);
 	if (mymsg==NULL||mymsg->curstate>=fsm->nodes.size()) {
 	  CommunicationMessage c(parent,targ,i,NULL,sex);
-	  DoSpeech (targ,targ,*c.getCurrentState());
-          int sound = c.getCurrentState()->GetSound(c.sex);
+	  unsigned int whichspeech=DoSpeech (targ,targ,*c.getCurrentState());
+          int sound = c.getCurrentState()->GetSound(c.sex,whichspeech);
           //AUDAdjustSound(sound,parent->Position(),parent->GetVelocity());
 	  if (!AUDIsPlaying (sound)) {
-	    AUDStartPlaying(sound);
+	    AUDPlay(sound,QVector(0,0,0),Vector(0,0,0),1);
 	  }
 	  Order * o = targ->getAIState();
 	  if (o)
@@ -1438,11 +1710,11 @@ void FireKeyboard::Execute () {
 	  FSM::Node * n = mymsg->getCurrentState();
 	  if (i<n->edges.size()) {
 	    CommunicationMessage c(parent,targ,*mymsg,i,NULL,sex);
-	    DoSpeech (targ,targ,*c.getCurrentState());
-            int sound=c.getCurrentState()->GetSound(c.sex);
+	    unsigned int whichmessage=DoSpeech (targ,targ,*c.getCurrentState());
+            int sound=c.getCurrentState()->GetSound(c.sex,whichmessage);
             //AUDAdjustSound(sound,parent->Position(),parent->GetVelocity());
 	    if (!AUDIsPlaying (sound)) {
-	      AUDStartPlaying(sound);
+	      AUDPlay(sound,QVector(0,0,0),Vector(0,0,0),1);
 	    }
             Order * oo = targ->getAIState();
             if (oo)
@@ -1467,15 +1739,33 @@ void FireKeyboard::Execute () {
       _Universe->AccessCockpit()->communication_choices="\nNo Communication\nLink\nEstablished";
     }
   }
-  if (f().ejectcargo==PRESS) {
+  if (f().enslave==PRESS||f().freeslave==PRESS) {
+    Enslave(parent,f().enslave==PRESS);
+    f().enslave=RELEASE;
+    f().freeslave=RELEASE;
+  }
+  if (f().ejectcargo==PRESS||f().ejectnonmissioncargo==PRESS) {
+    bool missiontoo=(f().ejectcargo==PRESS);
+    f().ejectnonmissioncargo=RELEASE;
+    f().ejectcargo=RELEASE;
     int offset = _Universe->AccessCockpit()->getScrollOffset (VDU::MANIFEST);
     if (offset<3) {
       offset=0;
     }else {
       offset-=3;
     }
-    parent->EjectCargo(offset);
-    f().ejectcargo=DOWN;
+    for(;offset<parent->numCargo();++offset) {
+      Cargo * tmp=&parent->GetCargo(offset);
+      if (tmp->category.find("upgrades")==string::npos&&(missiontoo||tmp->mission==false)) {
+        parent->EjectCargo(offset);
+        break;
+      }
+    }
+    if (missiontoo) {
+      f().ejectnonmissioncargo=DOWN;
+    }else {
+      f().ejectcargo=DOWN;
+    }
   }
   if (f().eject==PRESS) {
     f().eject=DOWN;
@@ -1484,7 +1774,9 @@ void FireKeyboard::Execute () {
       cp->Eject();
     }
   }
-  if (parent->EnergyRechargeData()==0) {
+  static bool actually_arrest=XMLSupport::parse_bool(vs_config->getVariable("AI","arrest_energy_zero","false"));
+  
+  if (actually_arrest&&parent->EnergyRechargeData()==0) {
 	  Arrested(parent);
   }
 }

@@ -51,9 +51,9 @@ Control::Control(void)
 :
 m_rect(0.0,0.0,0.0,0.0),
 m_id(),
-m_color( GUI_OPAQUE_WHITE ),
+m_color( GUI_OPAQUE_WHITE() ),
 m_outlineColor( GUI_CLEAR),
-m_textColor( GUI_OPAQUE_BLACK ),
+m_textColor( GUI_OPAQUE_BLACK() ),
 m_font(0.1),
 m_hidden(false)
 {

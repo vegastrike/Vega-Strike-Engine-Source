@@ -110,7 +110,7 @@ void GameUnit<UnitType>::SetPlanetHackTransformation (Transformation *&ct,Matrix
 }
 
 template <class UnitType>
-GameUnit<UnitType>::GameUnit<UnitType>( int /*dummy*/ ) {
+GameUnit<UnitType>::GameUnit( int /*dummy*/ ) {
 		this->Unit::Init();
 }
 
@@ -151,12 +151,12 @@ VSSprite * GameUnit<UnitType>::getHudImage () const{
 }
 
 template <class UnitType>
-GameUnit<UnitType>::GameUnit<UnitType> (std::vector <Mesh *>& meshes, bool SubU, int fact):UnitType( meshes, SubU, fact) {
+GameUnit<UnitType>::GameUnit (std::vector <Mesh *>& meshes, bool SubU, int fact):UnitType( meshes, SubU, fact) {
 
 }
 extern void update_ani_cache();
 template <class UnitType>
-GameUnit<UnitType>::GameUnit<UnitType>(const char *filename, bool SubU, int faction,std::string unitModifications, Flightgroup *flightgrp,int fg_subnumber, string * netxml) {
+GameUnit<UnitType>::GameUnit(const char *filename, bool SubU, int faction,std::string unitModifications, Flightgroup *flightgrp,int fg_subnumber, string * netxml) {
 	Unit::Init( filename, SubU, faction, unitModifications, flightgrp, fg_subnumber, netxml);
 }
 
@@ -298,7 +298,7 @@ void GameUnit<UnitType>::DrawNow (const Matrix &mato, float lod) {
 //      Mesh * gun = WeaponMeshCache::getCachedMutable (mounts[i]->type->weapon_name);
 	 if (mahnt->xyscale!=0&&mahnt->zscale!=0) {		
            Mesh * gun = mahnt->type->gun;	  
-           if (gun) {
+           if (gun&&mahnt->status!=Mount::UNCHOSEN) {
              glEnable(GL_NORMALIZE);
              Transformation mountLocation(mahnt->GetMountOrientation(),mahnt->GetMountLocation().Cast());
              Matrix mountmat; mountLocation.to_matrix(mountmat);
@@ -306,12 +306,12 @@ void GameUnit<UnitType>::DrawNow (const Matrix &mato, float lod) {
              MultMatrix(ct,mat,mountmat);
              ScaleMatrix(ct,Vector(mahnt->xyscale,mahnt->xyscale,mahnt->zscale));
              gun->setCurrentFrame(this->mounts[i].ComputeAnimatedFrame(gun));		  
-             gun->DrawNow(100,0,ct,1,cloak);//cloakign and nebula
+             gun->DrawNow(lod,0,ct,1,cloak);//cloakign and nebula
              if (mahnt->type->gun1){
                gun = mahnt->type->gun1;
                gun->setCurrentFrame(this->mounts[i].ComputeAnimatedFrame(gun));		  
 
-               gun->DrawNow(100,0,ct,1,cloak);//cloakign and nebula			  
+               gun->DrawNow(lod,0,ct,1,cloak);//cloakign and nebula			  
              }
              glDisable(GL_NORMALIZE);
            }
@@ -467,18 +467,20 @@ void GameUnit<UnitType>::Draw(const Transformation &parent, const Matrix &parent
 //      Mesh * gun = WeaponMeshCache::getCachedMutable (mounts[i]->type->weapon_name);
 	 if (mahnt->xyscale!=0&&mahnt->zscale!=0) {		
       Mesh * gun = mahnt->type->gun;	  
-      if (gun) {
+      if (gun&&mahnt->status!=Mount::UNCHOSEN) {
 		  Transformation mountLocation(mahnt->GetMountOrientation(),mahnt->GetMountLocation().Cast());
 		  mountLocation.Compose (*ct,this->WarpMatrix(*ctm));
 		  Matrix mat;
 		  mountLocation.to_matrix(mat);
+                  float d = (mat.p-_Universe->AccessCamera()->GetPosition()).Magnitude();
+                  float lod =g_game.detaillevel*g_game.x_resolution*2*gun->rSize()/GFXGetZPerspective((d-gun->rSize()<g_game.znear)?g_game.znear:d-gun->rSize());
 		  ScaleMatrix(mat,Vector(mahnt->xyscale,mahnt->xyscale,mahnt->zscale));
 		  gun->setCurrentFrame(this->mounts[i].ComputeAnimatedFrame(gun));		  
-		  gun->Draw(100,mat,1,cloak,(_Universe->AccessCamera()->GetNebula()==this->nebula&&this->nebula!=NULL)?-1:0,chardamage,true);//cloakign and nebula
+		  gun->Draw(lod,mat,1,cloak,(_Universe->AccessCamera()->GetNebula()==this->nebula&&this->nebula!=NULL)?-1:0,chardamage,true);//cloakign and nebula
 		  if (mahnt->type->gun1){
 			  gun = mahnt->type->gun1;
 			  gun->setCurrentFrame(this->mounts[i].ComputeAnimatedFrame(gun));		  
-			  gun->Draw(100,mat,1,cloak,(_Universe->AccessCamera()->GetNebula()==this->nebula&&this->nebula!=NULL)?-1:0,chardamage,true);//cloakign and nebula			  
+			  gun->Draw(lod,mat,1,cloak,(_Universe->AccessCamera()->GetNebula()==this->nebula&&this->nebula!=NULL)?-1:0,chardamage,true);//cloakign and nebula			  
 		  }
       }
 	 }

@@ -64,7 +64,18 @@ MatchLinearVelocity::~MatchLinearVelocity () {
 #endif
 }
 
-
+void Orders::MatchRoll::Execute() {
+  bool temp=done;
+  Order::Execute();
+  done=temp;
+  Vector angvel(parent->UpCoordinateLevel(parent->GetAngularVelocity())); 
+  if (willfinish) {
+    if (fabs(desired_roll-angvel.k)<VELTHRESHOLD ) {
+      return;
+    }
+  }
+  parent->ApplyLocalTorque (parent->GetMoment()*Vector(0,0,desired_roll-angvel.k)/SIMULATION_ATOM);
+}
 /*  //deprecated: now inherits from MatchAngVelocity and uses LinVel macros
 
 #define MATCHANGVELOCITYSETUP() \
@@ -170,7 +181,7 @@ void FlyByWire::Stop (float per) {
 
 void FlyByWire::Right (float per) {
 
-  desired_ang_velocity += (-per*parent->GetComputerData().max_yaw/getTimeCompression())*Vector (0,1,0);
+  desired_ang_velocity += (-per*(per>0?parent->GetComputerData().max_yaw_left:parent->GetComputerData().max_yaw_right)/getTimeCompression())*Vector (0,1,0);
 
 }
 
@@ -178,7 +189,7 @@ void FlyByWire::Right (float per) {
 
 void FlyByWire::Up (float per) {
 
-  desired_ang_velocity += (-per*parent->GetComputerData().max_pitch/getTimeCompression())*Vector (1,0,0);
+  desired_ang_velocity += (-per*(per>0?parent->GetComputerData().max_pitch_down:parent->GetComputerData().max_pitch_up)/getTimeCompression())*Vector (1,0,0);
 
 }
 
@@ -186,7 +197,7 @@ void FlyByWire::Up (float per) {
 
 void FlyByWire::RollRight (float per) {
 
-  desired_ang_velocity += (-per*parent->GetComputerData().max_roll/getTimeCompression())*Vector (0,0,1);
+  desired_ang_velocity += (-per*(per>0?parent->GetComputerData().max_roll_left:parent->GetComputerData().max_roll_right)/getTimeCompression())*Vector (0,0,1);
 
 }
 
@@ -239,11 +250,10 @@ void FlyByWire::Accel (float per) {
   if (cpu->set_speed>cpu->max_speed())
 
     cpu->set_speed=cpu->max_speed();
-
-  if (cpu->set_speed<-cpu->max_speed()*parent->Limits().retro/parent->Limits().forward)
-
-    cpu->set_speed = -cpu->max_speed()*parent->Limits().retro/parent->Limits().forward;
-
+  static float reverse_speed_limit = XMLSupport::parse_float(vs_config->getVariable("physics","reverse_speed_limit","1.0"));
+  if (cpu->set_speed<-cpu->max_speed()*reverse_speed_limit) {
+    cpu->set_speed = -cpu->max_speed()*reverse_speed_limit;
+  }
   afterburn =false;
 
   desired_velocity= Vector (0,0,cpu->set_speed);

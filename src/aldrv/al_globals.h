@@ -28,6 +28,7 @@ extern std::vector <ALuint> unusedsrcs;
 extern std::vector<ALuint> buffers;
 extern std::vector <OurSound> sounds;
 extern Hashtable<std::string, ALuint,127> soundHash;
+float AUDDistanceSquared(const int sound);
 typedef ALboolean (mp3Loader)(ALuint, ALvoid *, ALint);
 extern mp3Loader *alutLoadMP3p;
 extern unsigned int maxallowedsingle;

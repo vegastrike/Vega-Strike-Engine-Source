@@ -77,9 +77,12 @@ void PlanetaryOrbit::Execute() {
   
   parent->Velocity =parent->cumulative_velocity= (((origin - focus + x_offset+y_offset-parent->LocalPosition())*div2pi*(1./SIMULATION_ATOM)).Cast());
   //const int Unreasonable_value=(int)(100000/SIMULATION_ATOM);
-  const float Unreasonable_value = XMLSupport::parse_float(vs_config->getVariable("physics","velocity_max","10000"));
-  if (parent->Velocity.Dot (parent->Velocity)>Unreasonable_value*Unreasonable_value) {
+  static float Unreasonable_value = XMLSupport::parse_float(vs_config->getVariable("physics","planet_ejection_stophack","2000"));
+  float v2=parent->Velocity.Dot (parent->Velocity);
+  //double uglinesscheck=velocity*velocity*(x_size+y_size)*(x_size+y_size)*4*PI*PI;
+  if (v2>Unreasonable_value*Unreasonable_value/*||v2>uglinesscheck*/) {
     parent->Velocity.Set (0,0,0);
+    parent->cumulative_velocity.Set (0,0,0);
     parent->SetCurPosition (origin-focus+x_offset+y_offset);
   }
 }
@@ -291,6 +294,7 @@ void Planet::InitPlanet(QVector x,QVector y,float vely,const Vector & rotvel, fl
 
   this->faction = faction;
   killed=false;
+  bool destempty=dest.empty();
   while (!dest.empty()) {
     AddDestination(dest.back());
     dest.pop_back();
@@ -304,8 +308,8 @@ void Planet::InitPlanet(QVector x,QVector y,float vely,const Vector & rotvel, fl
   static  float densityOfRock = XMLSupport::parse_float(vs_config->getVariable("physics","density_of_rock","3"));
   static  float densityOfJumpPoint = XMLSupport::parse_float(vs_config->getVariable("physics","density_of_jump_point","100000"));
   //static  float massofplanet = XMLSupport::parse_float(vs_config->getVariable("physics","mass_of_planet","10000000"));
-  hull = (4./3)*M_PI*radius*radius*radius*(dest.empty()?densityOfRock:densityOfJumpPoint);
-  this->Mass = (4./3)*M_PI*radius*radius*radius*(dest.empty()?densityOfRock:(densityOfJumpPoint/100000));
+  hull = (4./3)*M_PI*radius*radius*radius*(destempty?densityOfRock:densityOfJumpPoint);
+  this->Mass = (4./3)*M_PI*radius*radius*radius*(destempty?densityOfRock:(densityOfJumpPoint/100000));
   SetAI(new PlanetaryOrbit(this, vely, pos, x, y, orbitcent, parent)); // behavior
   terraintrans=NULL;
 
@@ -314,7 +318,7 @@ void Planet::InitPlanet(QVector x,QVector y,float vely,const Vector & rotvel, fl
   static int numdock = XMLSupport::parse_int(vs_config->getVariable ("physics","num_planet_docking_port","4"));
   static float planetdockportsize= XMLSupport::parse_float(vs_config->getVariable ("physics","planet_port_size","1.2"));
   static float planetdockportminsize= XMLSupport::parse_float(vs_config->getVariable ("physics","planet_port_min_size","300"));
-  if ((!atmospheric) && dest.size()==0) {
+  if ((!atmospheric) && destempty) {
     for (int pdp=0;pdp<numdock;pdp++) {
       float dock = radius*planetdockportsize;
       if (dock-radius<planetdockportminsize) {
@@ -329,13 +333,17 @@ void Planet::InitPlanet(QVector x,QVector y,float vely,const Vector & rotvel, fl
   Unit * un = UnitFactory::createUnit (tempname.c_str(),true,FactionUtil::GetFaction("planets"));
   if (un->name!=string("LOAD_FAILED")) {
     image->cargo=un->GetImageInformation().cargo;
-    image->cargo_volume=un->GetImageInformation().cargo_volume;
+    image->CargoVolume=un->GetImageInformation().CargoVolume;
+    image->UpgradeVolume=un->GetImageInformation().UpgradeVolume;
   }
   un->Kill();
 }
 
 Planet::Planet(QVector x,QVector y,float vely,const Vector & rotvel, float pos,float gravity,float radius,const char * filename, vector<char *> dest, const QVector &orbitcent, Unit * parent, int faction,string fullname, bool inside_out, unsigned int lights_num)
 {
+	inside=false;
+	terraintrans = NULL;
+	atmospheric = false;
 	this->InitPlanet( x, y, vely, rotvel, pos, gravity, radius, filename, dest, orbitcent, parent, faction, fullname, inside_out, lights_num);
   for (unsigned int i=0;i<lights_num;i++) {
     int l=-1;

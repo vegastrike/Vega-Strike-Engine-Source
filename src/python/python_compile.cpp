@@ -6,6 +6,8 @@
 #include "vs_globals.h"
 #include "vsfilesystem.h"
 #include "init.h"
+#include "universe_util.h"
+#include "in_kb_data.h"
 Hashtable <string,PyCodeObject,1023> compiled_python;
 
 
@@ -104,4 +106,51 @@ PyObject * CreateTuple (const std::vector <PythonBasicType> & values) {
     }
   }
   return retval;
+}
+static void pySetScratchVector(const KBSTATE k) {
+  switch (k) {
+  case PRESS:
+    UniverseUtil::setScratchVector(Vector(1,1,0));
+    break;
+  case RELEASE:
+    UniverseUtil::setScratchVector(Vector(0,1,0));
+    break;
+  case UP:
+    UniverseUtil::setScratchVector(Vector(0,0,0));
+    break;
+  case DOWN:
+    UniverseUtil::setScratchVector(Vector(1,0,0));
+    break;
+  default:
+    break;
+  }
+}
+void RunPythonPress(const KBData&s,KBSTATE k){
+  if (k==PRESS&&s.data.length()){
+    pySetScratchVector(k);
+    CompileRunPython(s.data);
+    UniverseUtil::setScratchVector(Vector(0,0,0));
+  }
+}
+void RunPythonRelease(const KBData&s,KBSTATE k){
+  if (k==RELEASE&&s.data.length()){
+    pySetScratchVector(k);
+    CompileRunPython(s.data);
+    UniverseUtil::setScratchVector(Vector(0,0,0));
+  }
+}
+void RunPythonToggle(const KBData&s,KBSTATE k){
+  if ((k==RELEASE||k==PRESS)&&s.data.length()){
+    pySetScratchVector(k);
+    CompileRunPython(s.data);
+    UniverseUtil::setScratchVector(Vector(0,0,0));
+  }
+  
+}
+void RunPythonPhysicsFrame(const KBData&s,KBSTATE k){
+  if ((k==DOWN||k==UP)&&s.data.length()){
+    pySetScratchVector(k);
+    CompileRunPython(s.data);
+    UniverseUtil::setScratchVector(Vector(0,0,0));
+  }  
 }

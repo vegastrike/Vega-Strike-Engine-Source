@@ -5,7 +5,7 @@
 #include "event_xml.h"
 #include "communication.h"
 //all unified AI's should inherit from FireAt, so they can choose targets together.
-
+#define NUMSAVEDTARGETS 10
 class FireKeyboard: public Order {
   unsigned char sex;
   bool itts;
@@ -19,70 +19,93 @@ class FireKeyboard: public Order {
   std::list <CommunicationMessage> resp;
  public:
 #ifdef CAR_SIM
-  static void BlinkLeftKey (int,KBSTATE);
-  static void BlinkRightKey (int,KBSTATE);
-  static void HeadlightKey (int,KBSTATE);
-  static void SirenKey (int,KBSTATE);
+  static void BlinkLeftKey (const KBData&,KBSTATE);
+  static void BlinkRightKey (const KBData&,KBSTATE);
+  static void HeadlightKey (const KBData&,KBSTATE);
+  static void SirenKey (const KBData&,KBSTATE);
 #endif
-  static void SetShieldsOneThird (int,KBSTATE);
-  static void SetShieldsTwoThird (int,KBSTATE);
-  static void ToggleGlow (int,KBSTATE);
-  static void ToggleWarpDrive (int,KBSTATE);
-  static void ToggleAnimation (int,KBSTATE);	
-  static void PressComm1Key (int,KBSTATE);
-  static void PressComm2Key (int,KBSTATE);
-  static void PressComm3Key (int,KBSTATE);
-  static void PressComm4Key (int,KBSTATE);
-  static void PressComm5Key (int,KBSTATE);
-  static void PressComm6Key (int,KBSTATE);
-  static void PressComm7Key (int,KBSTATE);
-  static void PressComm8Key (int,KBSTATE);
-  static void PressComm9Key (int,KBSTATE);
-  static void PressComm10Key (int,KBSTATE);
-  static void RequestClearenceKey(int, KBSTATE);
-  static void UnDockKey(int, KBSTATE);
-  static void EjectKey(int, KBSTATE);
-  static void EjectCargoKey(int, KBSTATE);
-  static void DockKey(int, KBSTATE);
-  static void FireKey(int, KBSTATE);
-  static void MissileKey(int, KBSTATE);
-  static void TargetKey(int, KBSTATE k);
-  static void PickTargetKey(int, KBSTATE k);
-  static void NearestTargetKey(int, KBSTATE k);
-  static void SubUnitTargetKey(int, KBSTATE k);
-  static void ThreatTargetKey(int, KBSTATE k);
-  static void UnitTargetKey(int, KBSTATE k);
-  static void SigTargetKey(int, KBSTATE k);
-  static void ReverseTargetKey(int, KBSTATE k);
-  static void ReversePickTargetKey(int, KBSTATE k);
-  static void ReverseNearestTargetKey(int, KBSTATE k);
-  static void ReverseThreatTargetKey(int, KBSTATE k);
-  static void ReverseUnitTargetKey(int, KBSTATE k);
-  static void ReverseSigTargetKey(int, KBSTATE k);
-  static void NearestTargetTurretKey (int, KBSTATE);
-  static void ThreatTargetTurretKey (int, KBSTATE);
-  static void TargetTurretKey(int, KBSTATE);
-  static void PickTargetTurretKey(int, KBSTATE);
+  static void SetShieldsOneThird (const KBData&,KBSTATE);
+  static void SetShieldsTwoThird (const KBData&,KBSTATE);
+  static void ToggleGlow (const KBData&,KBSTATE);
+  static void ToggleWarpDrive (const KBData&,KBSTATE);
+  static void ToggleAnimation (const KBData&,KBSTATE);	
+  static void PressComm1Key (const KBData&,KBSTATE);
+  static void PressComm2Key (const KBData&,KBSTATE);
+  static void PressComm3Key (const KBData&,KBSTATE);
+  static void PressComm4Key (const KBData&,KBSTATE);
+  static void PressComm5Key (const KBData&,KBSTATE);
+  static void PressComm6Key (const KBData&,KBSTATE);
+  static void PressComm7Key (const KBData&,KBSTATE);
+  static void PressComm8Key (const KBData&,KBSTATE);
+  static void PressComm9Key (const KBData&,KBSTATE);
+  static void PressComm10Key (const KBData&,KBSTATE);
+  static void SaveTarget1Key (const KBData&,KBSTATE);
+  static void SaveTarget2Key (const KBData&,KBSTATE);
+  static void SaveTarget3Key (const KBData&,KBSTATE);
+  static void SaveTarget4Key (const KBData&,KBSTATE);
+  static void SaveTarget5Key (const KBData&,KBSTATE);
+  static void SaveTarget6Key (const KBData&,KBSTATE);
+  static void SaveTarget7Key (const KBData&,KBSTATE);
+  static void SaveTarget8Key (const KBData&,KBSTATE);
+  static void SaveTarget9Key (const KBData&,KBSTATE);
+  static void SaveTarget10Key (const KBData&,KBSTATE);
+  static void RestoreTarget1Key (const KBData&,KBSTATE);
+  static void RestoreTarget2Key (const KBData&,KBSTATE);
+  static void RestoreTarget3Key (const KBData&,KBSTATE);
+  static void RestoreTarget4Key (const KBData&,KBSTATE);
+  static void RestoreTarget5Key (const KBData&,KBSTATE);
+  static void RestoreTarget6Key (const KBData&,KBSTATE);
+  static void RestoreTarget7Key (const KBData&,KBSTATE);
+  static void RestoreTarget8Key (const KBData&,KBSTATE);
+  static void RestoreTarget9Key (const KBData&,KBSTATE);
+  static void RestoreTarget10Key (const KBData&,KBSTATE);
+  static void RequestClearenceKey(const KBData&,KBSTATE);
+  static void UnDockKey(const KBData&,KBSTATE);
+  static void EjectKey(const KBData&,KBSTATE);
+  static void EjectCargoKey(const KBData&,KBSTATE);
+  static void EjectNonMissionCargoKey(const KBData&,KBSTATE);
+  static void DockKey(const KBData&,KBSTATE);
+  static void FireKey(const KBData&,KBSTATE);
+  static void MissileKey(const KBData&,KBSTATE);
+  static void TargetKey(const KBData&,KBSTATE k);
+  static void PickTargetKey(const KBData&,KBSTATE k);
+  static void NearestTargetKey(const KBData&,KBSTATE k);
+  static void SubUnitTargetKey(const KBData&,KBSTATE k);
+  static void ThreatTargetKey(const KBData&,KBSTATE k);
+  static void UnitTargetKey(const KBData&,KBSTATE k);
+  static void SigTargetKey(const KBData&,KBSTATE k);
+  static void ReverseTargetKey(const KBData&,KBSTATE k);
+  static void ReversePickTargetKey(const KBData&,KBSTATE k);
+  static void ReverseNearestTargetKey(const KBData&,KBSTATE k);
+  static void ReverseThreatTargetKey(const KBData&,KBSTATE k);
+  static void ReverseUnitTargetKey(const KBData&,KBSTATE k);
+  static void ReverseSigTargetKey(const KBData&,KBSTATE k);
+  static void NearestTargetTurretKey (const KBData&,KBSTATE);
+  static void ThreatTargetTurretKey (const KBData&,KBSTATE);
+  static void TargetTurretKey(const KBData&,KBSTATE);
+  static void PickTargetTurretKey(const KBData&,KBSTATE);
   static void JFireKey(KBSTATE,float,float,int);  
   static void JMissileKey(KBSTATE,float,float,int);  
   static void JTargetKey(KBSTATE,float,float,int);  
-  static void WeapSelKey (int,KBSTATE);
-  static void MisSelKey (int, KBSTATE);
-  static void ReverseWeapSelKey (int,KBSTATE);
-  static void ReverseMisSelKey (int, KBSTATE);
-  static void CloakKey (int, KBSTATE);
-  static void LockKey (int, KBSTATE);
-  static void ECMKey (int,KBSTATE);
-  static void HelpMeOut (int,KBSTATE);
-  static void HelpMeOutFaction (int,KBSTATE);
-
-  static void HelpMeOutCrit (int,KBSTATE);
-  static void JoinFg (int,KBSTATE);
-  static void BreakFormation (int,KBSTATE);
-  static void FormUp (int,KBSTATE);
-  static void AttackTarget (int,KBSTATE);
-  static void TurretAI (int,KBSTATE);
+  static void WeapSelKey (const KBData&,KBSTATE);
+  static void MisSelKey (const KBData&,KBSTATE);
+  static void ReverseWeapSelKey (const KBData&,KBSTATE);
+  static void ReverseMisSelKey (const KBData&,KBSTATE);
+  static void CloakKey (const KBData&, KBSTATE);
+  static void LockKey (const KBData&, KBSTATE);
+  static void ECMKey (const KBData&,KBSTATE);
+  static void HelpMeOut (const KBData&,KBSTATE);
+  static void HelpMeOutFaction (const KBData&,KBSTATE);
+  static void EnslaveKey( const KBData&,KBSTATE);
+  static void FreeSlaveKey( const KBData&,KBSTATE);
+  static void HelpMeOutCrit (const KBData&,KBSTATE);
+  static void JoinFg (const KBData&,KBSTATE);
+  static void BreakFormation (const KBData&,KBSTATE);
+  static void FormUp (const KBData&,KBSTATE);
+  static void AttackTarget (const KBData&,KBSTATE);
+  static void TurretAI (const KBData&,KBSTATE);
 protected:
+  void * savedTargets[NUMSAVEDTARGETS];
   float distance;
 #if 0
   void ChooseTargets(bool targetturrets);//chooses n targets and puts the best to attack in unit's target container
@@ -95,7 +118,7 @@ protected:
   unsigned int whichjoystick;
   struct FIREKEYBOARDTYPE &f();
   struct FIREKEYBOARDTYPE &j();
-  void DoSpeechAndAni(Unit * un, Unit * parent, class CommunicationMessage&c);
+  unsigned int DoSpeechAndAni(Unit * un, Unit * parent, class CommunicationMessage&c);
 public:
   virtual void ProcessCommMessage (class CommunicationMessage&c);
   FireKeyboard (unsigned int whichjoystick, unsigned int whichplayer);//weapon prefs?

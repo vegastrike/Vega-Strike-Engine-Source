@@ -39,6 +39,7 @@ Camera::Camera(ProjectionType proj) : projectionType(proj), myPhysics(0.1,0.075,
 	Coord.i = 0;
 	Coord.j = 0;
 	Coord.k = -1;
+        velocity=angular_velocity=Vector(0,0,0);
 	lastpos.Set(0,0,0);
 	cockpit_offset=0;
 	SetPlanetaryTransform(NULL);

@@ -25,7 +25,38 @@
 #include "vsfilesystem.h"
 //All or's are coded with the assumption that the inside of the object has a much bigger impact than the outside of the object when both need to be analyzed
 //#define BSPHACK .1
-BSPNode::BSPNode(BSPDiskNode **input) {
+
+class BSPDiskNodeArray{
+  BSPDiskNode *array;
+  BSPDiskNode Terrible;
+  size_t bounds;
+  size_t cur;
+public:
+  BSPDiskNodeArray(BSPDiskNode*array, size_t bounds) {
+    this->array=array;
+    this->bounds=bounds;
+    this->cur=0;
+    Terrible.x=0;
+    Terrible.y=0;
+    Terrible.z=1;
+    Terrible.d=3e10;
+    Terrible.isVirtual=false;
+    Terrible.hasFront=false;
+    Terrible.hasBack=false;
+  }
+  BSPDiskNode* operator *() {
+    if (cur<bounds) return &array[cur];
+    fprintf (stderr,"Serious BSP Building Fault:: Array out of bounds! and accessed. (averted crash by returning 0 filled values).");
+    return &Terrible;
+  }
+  bool Inc() {
+    cur+=1;
+    if (cur>=bounds) 
+      fprintf (stderr,"BSP Building Fault:: Array out of bounds (averted crash).\n");
+    return cur<bounds;
+  }
+};
+BSPNode::BSPNode(BSPDiskNodeArray &input) {
   
   isVirtual = (*input)->isVirtual;
   n.i = (*input)->x;
@@ -34,16 +65,23 @@ BSPNode::BSPNode(BSPDiskNode **input) {
   d = (*input)->d;
   bool hasFront = (*input)->hasFront;
   bool hasBack = (*input)->hasBack;
-  if (hasFront|hasBack)
-    (*input)++;
+  if (hasFront||hasBack){
+    if (!input.Inc()){
+      hasFront=false;
+      hasBack=false;
+    }
+  }
   if(hasFront) {
     front = new BSPNode(input);
-  }
-  else {
+  }else {
     front = NULL;
   }
-  if (hasFront|hasBack)
-    (*input)++;
+  if (hasFront||hasBack) {
+    if (!input.Inc()){
+      hasFront=false;
+      hasBack=false;
+    }
+  }
   if(hasBack) {
     back = new BSPNode(input);
   }
@@ -153,10 +191,9 @@ bool BSPTree::intersects(const BSPTree *t1) const {
 	return root->intersects(t1);;
 }
 
-BSPTree::BSPTree(BSPDiskNode *input) {
+BSPTree::BSPTree(BSPDiskNodeArray &input) {
   VSCONSTRUCT2('s')
-  BSPDiskNode * inp = input;
-  root = new BSPNode(&inp);
+  root = new BSPNode(input);
 }
 
 bool CheckBSP (const char * filename) {
@@ -175,7 +212,6 @@ BSPTree::BSPTree(const char *filename) {
   int size = fp.Size();
   int numRecords = size / (sizeof(float)*4+2);
   BSPDiskNode *nodes = new BSPDiskNode[numRecords];
-  BSPDiskNode * tmpnode;
   for(int a=0; a<numRecords; a++) {
     nodes[a].x= readf (fp);
     nodes[a].y= readf (fp);
@@ -190,8 +226,8 @@ BSPTree::BSPTree(const char *filename) {
     if(byte) nodes[a].hasBack = true;
     else nodes[a].hasBack = false;
   }
-  tmpnode = nodes;
-  root = new BSPNode(&tmpnode);
+  BSPDiskNodeArray tmpnode (nodes,numRecords);
+  root = new BSPNode(tmpnode);
   delete [] nodes;
   fp.Close();
 }

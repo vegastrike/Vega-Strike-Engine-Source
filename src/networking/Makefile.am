@@ -15,7 +15,7 @@ soundserver_LDADD = -L/usr/local/lib $(SDL_LIBS) $(SDL_MIXER_LIBS)
 
 SUBDIRS = lowlevel
 
-soundserver_SOURCES = inet.cpp inet.h soundserver.cpp
+soundserver_SOURCES = inet.cpp inet_file.cpp inet_file.h inet.h soundserver.cpp
 
 libacctserver = \
 	client.cpp		\
@@ -33,6 +33,7 @@ libnetgeneric = \
 	$(libacctserver) \
 	cubicsplines.cpp		\
 	cubicsplines.h		\
+	inet_file.cpp		\
 	prediction.cpp		\
 	prediction.h		\
 	mangle.cpp		\
@@ -64,6 +65,8 @@ libnetclientserver =	$(libnetgeneric) \
 
 libnet_a_SOURCES =	\
 	inet.cpp		\
+	inet_file.cpp		\
+	inet_file.h		\
 	inet.h
 
 libnetclient = $(libnetclientserver) \

@@ -203,13 +203,20 @@ static void setup_sdl_video_mode()
     }
 
     bpp = gl_options.color_depth;
+    
+    int otherbpp;
+    int otherattributes;
     if (bpp==16) {
+      otherattributes=8;
+      otherbpp=32;
       SDL_GL_SetAttribute( SDL_GL_RED_SIZE, 5 );
       SDL_GL_SetAttribute( SDL_GL_GREEN_SIZE, 5 );
       SDL_GL_SetAttribute( SDL_GL_BLUE_SIZE, 5 );
       SDL_GL_SetAttribute( SDL_GL_DEPTH_SIZE, 24 );
       SDL_GL_SetAttribute( SDL_GL_DOUBLEBUFFER, 1 );
     }else {
+      otherattributes=5;
+      otherbpp=16;
       SDL_GL_SetAttribute( SDL_GL_RED_SIZE, 8 );
       SDL_GL_SetAttribute( SDL_GL_GREEN_SIZE, 8 );
       SDL_GL_SetAttribute( SDL_GL_BLUE_SIZE, 8 );
@@ -224,19 +231,28 @@ static void setup_sdl_video_mode()
     {
 	VSFileSystem::vs_fprintf( stderr, "Couldn't initialize video: %s", 
 		 SDL_GetError() );
-        SDL_GL_SetAttribute( SDL_GL_DEPTH_SIZE, 32 );      
-        if ( ( screen = SDL_SetVideoMode( width, height, bpp, video_flags|SDL_ANYFORMAT ) ) == 
-             NULL )
-        {          
-          SDL_GL_SetAttribute( SDL_GL_DEPTH_SIZE, 16 );      
-          if ( ( screen = SDL_SetVideoMode( width, height, bpp, video_flags|SDL_ANYFORMAT ) ) == 
-               NULL )
-          {          
-            
-            VSFileSystem::vs_fprintf( stderr, "Couldn't initialize video: %s", 
-                                      SDL_GetError() );
-            exit(1);
+        for (int counter=0;screen==NULL&&counter<2;++counter) {
+          for (int bpd=4;bpd>1;--bpd) {
+            SDL_GL_SetAttribute( SDL_GL_DEPTH_SIZE, bpd*8 );      
+            if ( ( screen = SDL_SetVideoMode( width, height, bpp, video_flags|SDL_ANYFORMAT ) ) == 
+                 NULL )
+            { 
+              VSFileSystem::vs_fprintf( stderr, "Couldn't initialize video bpp %d depth %d: %s\n", 
+                                        bpp,bpd*8,SDL_GetError() );
+            }else {
+              break;
+            }
           }
+          if (screen==NULL) {
+            SDL_GL_SetAttribute( SDL_GL_RED_SIZE, otherattributes );   
+            SDL_GL_SetAttribute( SDL_GL_GREEN_SIZE, otherattributes );   
+            SDL_GL_SetAttribute( SDL_GL_BLUE_SIZE, otherattributes );             
+            gl_options.color_depth=bpp=otherbpp;
+          }
+        }
+        if (screen==NULL) {
+          printf ("FAILED to initialize video\n");
+          exit(1);
         }
     }
     printf ("Setting Screen to w %d h %d and pitch of %d and %d bpp %d bytes per pix mode\n",screen->w,screen->h,screen->pitch, screen->format->BitsPerPixel, screen->format->BytesPerPixel);
@@ -482,7 +498,7 @@ void winsys_exit( int code )
 {
   winsys_shutdown();
     if ( atexit_func ) {
-	(*atexit_func)();
+	  (*atexit_func)();
     }
     
     exit( code );
@@ -552,19 +568,41 @@ void winsys_set_reshape_func( winsys_reshape_func_t func )
     glutReshapeFunc( func );
 }
 
-
+char AdjustKeyCtrl(char ch) {
+  if (ch=='\0') {
+    ch='2';
+  }else if (ch>='0'&&ch<='9'){
+    
+  }else if (ch>=27&&ch<=31){
+    ch=ch+'0'-24;
+  }else if (ch==127) {
+    ch='8';
+  }else if (ch<=26) {
+    ch+='a'-1;
+  }
+  return ch;
+}
 /* Keyboard callbacks */
 static void glut_keyboard_cb( unsigned char ch, int x, int y ) 
 {
   
     if ( keyboard_func ) {
-	(*keyboard_func)( ch, glutGetModifiers(), false, x, y );
+      int gm = glutGetModifiers();
+      if (gm) {
+        printf ("Down Modifier %d for char %d %c\n",gm,(int)ch,ch);
+      }
+      if (gm&GLUT_ACTIVE_CTRL) {
+        ch=AdjustKeyCtrl(ch);
+      }
+      (*keyboard_func)( ch, gm, false, x, y );
+      
     }
 }
 
 static void glut_special_cb( int key, int x, int y ) 
 {
     if ( keyboard_func ) {
+      
 	(*keyboard_func)( key+128, glutGetModifiers(), false, x, y );
     }
 }
@@ -572,7 +610,14 @@ static void glut_special_cb( int key, int x, int y )
 static void glut_keyboard_up_cb( unsigned char ch, int x, int y ) 
 {
     if ( keyboard_func ) {
-	(*keyboard_func)( ch, glutGetModifiers(), true, x, y );
+      int gm = glutGetModifiers();
+      if (gm) {
+        printf ("Up Modifier %d for char %d %c\n",gm,(int)ch,ch);
+      }
+      if (gm&GLUT_ACTIVE_CTRL) {
+        ch=AdjustKeyCtrl(ch);
+      }      
+      (*keyboard_func)( ch, gm, true, x, y );
     }
 }
 

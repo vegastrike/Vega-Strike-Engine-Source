@@ -5,33 +5,42 @@
 void bootstrap_draw (const std::string &message, Animation * SplashScreen=NULL);
 
 namespace CockpitKeys {
-  void SkipMusicTrack(int,KBSTATE newState);
-   void  PitchDown(int,KBSTATE newState) ;
-   void  PitchUp(int,KBSTATE newState) ;
-   void  YawLeft(int,KBSTATE newState) ;
-   void  YawRight(int,KBSTATE newState) ;
-   void  Inside(int,KBSTATE newState) ;
-   void  ZoomOut (int, KBSTATE newState) ;
-   void  ZoomIn (int, KBSTATE newState) ;
-   void  InsideLeft(int,KBSTATE newState) ;
-   void InsideRight(int,KBSTATE newState) ;
-   void  InsideBack(int,KBSTATE newState) ;
-   void  SwitchLVDU(int,KBSTATE newState) ;
-   void  SwitchRVDU(int,KBSTATE newState) ;
-   void  SwitchMVDU(int,KBSTATE newState) ;
-   void  SwitchULVDU(int,KBSTATE newState) ;
-   void  SwitchURVDU(int,KBSTATE newState) ;
-   void  SwitchUMVDU(int,KBSTATE newState) ;
-
-
-   void  ScrollUp(int,KBSTATE newState) ;
-   void  ScrollDown(int,KBSTATE newState) ;
-   void  Behind(int,KBSTATE newState) ;
-   void  Pan(int,KBSTATE newState) ;
-   void  PanTarget(int,KBSTATE newState) ;
-   void  ViewTarget(int,KBSTATE newState) ;
-   void  OutsideTarget(int,KBSTATE newState) ;
-   void  Quit(int,KBSTATE newState) ;
+  void SkipMusicTrack(const KBData&,KBSTATE newState);
+   void  PitchDown(const KBData&,KBSTATE newState) ;
+   void  PitchUp(const KBData&,KBSTATE newState) ;
+   void  YawLeft(const KBData&,KBSTATE newState) ;
+   void  YawRight(const KBData&,KBSTATE newState) ;
+   void  Inside(const KBData&,KBSTATE newState) ;
+   void  ZoomOut (const KBData&,KBSTATE newState) ;
+   void  ZoomIn (const KBData&,KBSTATE newState) ;
+   void  InsideLeft(const KBData&,KBSTATE newState) ;
+   void InsideRight(const KBData&,KBSTATE newState) ;
+   void  InsideBack(const KBData&,KBSTATE newState) ;
+   void  SwitchLVDU(const KBData&,KBSTATE newState) ;
+   void  SwitchRVDU(const KBData&,KBSTATE newState) ;
+   void  SwitchMVDU(const KBData&,KBSTATE newState) ;
+   void  SwitchULVDU(const KBData&,KBSTATE newState) ;
+   void  SwitchURVDU(const KBData&,KBSTATE newState) ;
+   void  SwitchUMVDU(const KBData&,KBSTATE newState) ;
+   void  CommModeVDU(const KBData&,KBSTATE);
+   void  ObjectiveModeVDU(const KBData&,KBSTATE);
+   void  TargetModeVDU(const KBData&,KBSTATE);
+   void  ManifestModeVDU(const KBData&,KBSTATE);
+   void  DamageModeVDU(const KBData&,KBSTATE);
+   void  GunModeVDU(const KBData&,KBSTATE);
+   void  MissileModeVDU(const KBData&,KBSTATE);
+   void  ScanningModeVDU(const KBData&,KBSTATE);
+   void  ReverseGunModeVDU(const KBData&,KBSTATE);
+   void  ReverseMissileModeVDU(const KBData&,KBSTATE);
+   void  ViewModeVDU(const KBData&,KBSTATE);
+   void  ScrollUp(const KBData&,KBSTATE newState) ;
+   void  ScrollDown(const KBData&,KBSTATE newState) ;
+   void  Behind(const KBData&,KBSTATE newState) ;
+   void  Pan(const KBData&,KBSTATE newState) ;
+   void  PanTarget(const KBData&,KBSTATE newState) ;
+   void  ViewTarget(const KBData&,KBSTATE newState) ;
+   void  OutsideTarget(const KBData&,KBSTATE newState) ;
+   void  Quit(const KBData&,KBSTATE newState) ;
 
    void  QuitNow();
 }

@@ -337,7 +337,7 @@ void GFXInit (int argc, char ** argv){
 			glPixelStorei(GL_UNPACK_SKIP_PIXELS, 0);
 			glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 			glPixelStorei(GL_UNPACK_SWAP_BYTES, 0);
-			glPixelStorei(GL_PACK_ROW_LENGTH, 256);
+
 
 			// Spherical texture coordinate generation
 			if (i==1) {			

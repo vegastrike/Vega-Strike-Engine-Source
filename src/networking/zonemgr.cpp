@@ -200,12 +200,13 @@ void	ZoneMgr::removeClient( ClientPtr clt )
         exit( 1);
     }
 	for (ClientWeakList::iterator q = lst->begin();
-		q!=lst->end();
-		++q) {
+		q!=lst->end();) {
 			ClientWeakPtr cwp = *q;
 			ClientWeakPtr ocwp (clt);
 			if ((!(cwp<ocwp))&&!(ocwp<cwp)) {
-				lst->erase(q);
+				q=lst->erase(q);
+			} else {
+				++q;
 			}
 		}
 	zone_clients[zonenum]--;
@@ -696,7 +697,8 @@ void	ZoneMgr::addDamage( NetBuffer & netbuf, Unit * un)
 		{
 			netbuf.addFloat( un->FuelData());
 			netbuf.addShort( un->AfterburnData());
-			netbuf.addFloat( un->image->cargo_volume);
+			netbuf.addFloat( un->image->CargoVolume);
+			netbuf.addFloat( un->image->UpgradeVolume);
 			for( it=0; it<un->image->cargo.size(); it++)
 				netbuf.addInt32( un->image->cargo[it].quantity);
 		}
@@ -719,9 +721,12 @@ void	ZoneMgr::addDamage( NetBuffer & netbuf, Unit * un)
 		}
 		if( damages & Unit::LIMITS_DAMAGED)
 		{
-			netbuf.addFloat( un->computer.max_pitch);
-			netbuf.addFloat( un->computer.max_yaw);
-			netbuf.addFloat( un->computer.max_roll);
+			netbuf.addFloat( un->computer.max_pitch_down);
+			netbuf.addFloat( un->computer.max_pitch_up);
+			netbuf.addFloat( un->computer.max_yaw_left);
+			netbuf.addFloat( un->computer.max_yaw_right);
+			netbuf.addFloat( un->computer.max_roll_left);
+			netbuf.addFloat( un->computer.max_roll_right);
 			netbuf.addFloat( un->limits.roll);
 			netbuf.addFloat( un->limits.yaw);
 			netbuf.addFloat( un->limits.pitch);

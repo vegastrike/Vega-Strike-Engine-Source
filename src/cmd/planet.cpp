@@ -74,6 +74,7 @@ Mesh * MakeFogMesh (const AtmosphericFogMesh & f, float radius) {
   vector<string> override;
   override.push_back(nam);
   Mesh * ret=Mesh::LoadMesh(f.meshname.c_str(),Vector(f.scale*radius,f.scale*radius,f.scale*radius),0,NULL,override);
+  ret->setConvex(true);
   SetFogMaterialColor(ret,GFXColor (f.er,f.eg,f.eb,f.ea),GFXColor(f.dr,f.dg,f.db,f.da));
   return ret;
 }
@@ -314,7 +315,7 @@ GamePlanet::GamePlanet(QVector x,QVector y,float vely, const Vector & rotvel, fl
 
   calculate_extent(false);
   if (wormhole) {
-	  static float radscale=XMLSupport::parse_float(vs_config->getVariable("physics","jump_radius_scale",".5"));
+	  static float radscale=XMLSupport::parse_float(vs_config->getVariable("physics","jump_mesh_radius_scale",".5"));
 	  radius*=radscale;
 	  corner_min.i=corner_min.j=corner_min.k=-radius;
 	  corner_max.i=corner_max.j=corner_max.k=radius;
@@ -364,7 +365,7 @@ GamePlanet::GamePlanet(QVector x,QVector y,float vely, const Vector & rotvel, fl
       if (shines.empty()) {
 	shines.push_back("shine.ani");
       }
-      shine = new Animation (shines[rand()%shines.size()],true,.1,MIPMAP,true,true,c);//GFXColor(ourmat.er,ourmat.eg,ourmat.eb,ourmat.ea));
+      shine = new Animation (shines[rand()%shines.size()],true,.1,BILINEAR,false,true,c);//GFXColor(ourmat.er,ourmat.eg,ourmat.eb,ourmat.ea));
       shine->SetDimensions ( glowradius*radius,glowradius*radius);
     
       if (!drawstar) {
@@ -484,7 +485,7 @@ void GamePlanet::DrawTerrain() {
 
 
 
-
+extern void abletodock(int dock);
 void GamePlanet::reactToCollision(Unit * un, const QVector & biglocation, const Vector & bignormal, const QVector & smalllocation, const Vector & smallnormal, float dist) {
 #ifdef JUMP_DEBUG
   VSFileSystem::vs_fprintf (stderr,"%s reacting to collision with %s drive %d", name.c_str(),un->name.c_str(), un->GetJumpStatus().drive);
@@ -527,6 +528,17 @@ void GamePlanet::reactToCollision(Unit * un, const QVector & biglocation, const 
   //screws with earth having an atmosphere... blahrgh
   if (!terrain&&GetDestinations().empty()&&!atmospheric) {//no place to go and acts like a ship
     GameUnit<Planet>::reactToCollision (un,biglocation,bignormal,smalllocation,smallnormal,dist);
+	static bool planet_crash_docks = XMLSupport::parse_bool(vs_config->getVariable("physics","planet_collision_docks","true"));
+	if (_Universe->isPlayerStarship(un)&&planet_crash_docks) {
+		int whichdockport=this->CanDockWithMe(un);
+		if (whichdockport!=-1) {
+			QVector place=UniverseUtil::SafeEntrancePoint(un->Position(),un->rSize()*1.5);
+			un->SetPosAndCumPos(place);
+			if (un->ForceDock(this,whichdockport)>0)
+				abletodock(3);
+  		        un->UpgradeInterface(this);
+		}
+	}
   }
 
   //nothing happens...you fail to do anythign :-)

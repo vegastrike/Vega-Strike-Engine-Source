@@ -106,9 +106,11 @@ Unit * getNetworkUnit( ObjSerial cserial)
 NetClient::NetClient()
     : save("")
 {
+	deltatime = 0;
     game_unit = NULL;
     old_timestamp = 0;
     latest_timestamp = 0;
+	elapsed_since_packet=0;
     //old_time = 0;
     cur_time = 0;
     enabled = 0;
@@ -651,7 +653,8 @@ int NetClient::recvMsg( Packet* outpacket )
 					{
 						un->SetFuel( netbuf.getFloat());
 						un->SetAfterBurn(netbuf.getShort());
-						un->image->cargo_volume = netbuf.getFloat();
+						un->image->CargoVolume = netbuf.getFloat();
+						un->image->UpgradeVolume = netbuf.getFloat();
 						for( it=0; it<un->image->cargo.size(); it++)
 							un->image->cargo[it].quantity = netbuf.getInt32();
 					}
@@ -674,9 +677,12 @@ int NetClient::recvMsg( Packet* outpacket )
 					}
 					if( damages & Unit::LIMITS_DAMAGED)
 					{
-						un->computer.max_pitch = netbuf.getFloat( );
-						un->computer.max_yaw = netbuf.getFloat( );
-						un->computer.max_roll = netbuf.getFloat( );
+						un->computer.max_pitch_down = netbuf.getFloat( );
+						un->computer.max_pitch_up = netbuf.getFloat( );
+						un->computer.max_yaw_left = netbuf.getFloat( );
+						un->computer.max_yaw_right = netbuf.getFloat( );
+						un->computer.max_roll_left = netbuf.getFloat( );
+						un->computer.max_roll_right = netbuf.getFloat( );
 						un->limits.roll = netbuf.getFloat( );
 						un->limits.yaw = netbuf.getFloat( );
 						un->limits.pitch = netbuf.getFloat( );

@@ -247,7 +247,7 @@ void Beam::RemoveFromSystem(bool eradicate) {
 #endif
 #endif
 }
-void Beam::UpdatePhysics(const Transformation &trans, const Matrix &m, Unit * targ, float tracking_cone, Unit * targetToCollideWith) {
+void Beam::UpdatePhysics(const Transformation &trans, const Matrix &m, Unit * targ, float tracking_cone, Unit * targetToCollideWith, float HeatSink) {
   curlength += SIMULATION_ATOM*speed;
   if (curlength<0) {
     curlength=0;
@@ -257,7 +257,7 @@ void Beam::UpdatePhysics(const Transformation &trans, const Matrix &m, Unit * ta
     //#endif
     if (AUDIsPlaying(sound)&&refiretime>=SIMULATION_ATOM)
       AUDStopPlaying (sound);
-    refiretime +=SIMULATION_ATOM;
+    refiretime +=SIMULATION_ATOM*HeatSink;
  
     return;
   }
@@ -363,32 +363,54 @@ bool Beam::Collide (Unit * target) {
     if ((appldam<0&&phasdam>0)||(appldam>0&&phasdam<0)) {
       //tractor beam!
       target->ApplyForce (direction*appldam);
-      if ((center-target->Position()).Magnitude()<fabs(phasdam)) {
+      if ((center-target->Position()).Magnitude()<2*target->rSize()+fabs(phasdam)) {
 
 	un_iter ui= _Universe->activeStarSystem()->getUnitList().createIterator();
 	Unit *un;
 	for (;(un=*ui)!=NULL;++ui) {
 	  if (((void *)un)==owner) {
-	    static float nbig = .1;
-	    if (target->faction==FactionUtil::GetFaction("upgrades")||un->rSize()*nbig>target->rSize()) {
+	    static float nbig = XMLSupport::parse_float(vs_config->getVariable("physics","percent_to_tractor",".1"));
+            static int upgradesfaction=FactionUtil::GetFaction("upgrades");
+	    if (target->faction==upgradesfaction||un->rSize()*nbig>target->rSize()) {
 	      //we have our man!
 	      //lets add our cargo to him
 	      Cargo *c = GetMasterPartList (target->name.c_str());
 	      Cargo tmp;
-	      if (c==NULL) {
+              bool isnotcargo = (c==NULL);
+              if (!isnotcargo) {
+                if (c->category.find("upgrades")==0)
+                  isnotcargo=true;// add upgrades as space junk
+              }
+	      if (isnotcargo) {
 		c=&tmp;
-		tmp.content="spacejunk";
-		tmp.category="misc";
-		tmp.price=200;
+		tmp.content="Space_Salvage";
+		tmp.category="Uncategorized_Cargo";
+                static float spacejunk=parse_float (vs_config->getVariable ("cargo","space_junk_price","10"));
+		tmp.price=spacejunk;
 		tmp.quantity=1;
 		tmp.mass=.001;
 		tmp.volume=1;
+                if (target->faction!=upgradesfaction) {
+                  tmp.content= target->name;
+                  tmp.category="starships";
+                  static float starshipprice = XMLSupport::parse_float(vs_config->getVariable("cargo","junk_starship_price","100000"));
+                  static float starshipmass = XMLSupport::parse_float(vs_config->getVariable("cargo","junk_starship_mass","50"));                  
+                  static float starshipvolume = XMLSupport::parse_float(vs_config->getVariable("cargo","junk_starship_volume","1500"));
+                  tmp.price=starshipprice;
+                  tmp.quantity=1;
+                  tmp.mass=starshipmass;
+                  tmp.volume=starshipvolume;
+                }
 	      }
 	      if (c!=NULL) {
 		Cargo adder = *c;
 		adder.quantity=1;
 		if (un->CanAddCargo(adder)) {
 		  un->AddCargo(adder);
+                  if (_Universe->isPlayerStarship(un)) {
+                    static int tractor_onboard = AUDCreateSoundWAV(vs_config->getVariable("unitaudio","player_tractor_cargo","tractor_onboard.wav"));
+                    AUDPlay(tractor_onboard,QVector(0,0,0),Vector(0,0,0),1);
+                  }
 		  target->Kill();
 		}
 	      }

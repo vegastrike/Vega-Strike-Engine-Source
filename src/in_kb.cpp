@@ -27,6 +27,7 @@
 #include "in_kb.h"
 #include "in_handler.h"
 #include "gldrv/winsys.h"
+#include "in_kb_data.h"
 //#include "cmd_unit.h"
 /*
 extern queue<InputListener*> activationreqqueue;
@@ -34,21 +35,31 @@ extern list<InputListener*> listeners;
 
 extern InputListener* activelistener;
 */
+static void DefaultKBHandler(const KBData&,KBSTATE newState) {
+	// do nothing
+	return;
+}
+struct HandlerCall{
+  KBHandler function;
+  KBData data;
+  HandlerCall() {
+    function=DefaultKBHandler;
+  }
+};
+static HandlerCall keyBindings [LAST_MODIFIER][WSK_LAST];
+static unsigned int playerBindings [LAST_MODIFIER][WSK_LAST];
+KBSTATE keyState [LAST_MODIFIER][WSK_LAST];
 
-static KBHandler keyBindings [WSK_LAST];
-static unsigned int playerBindings [WSK_LAST];
-KBSTATE keyState [WSK_LAST];
-
-static void kbGetInput(int key, bool release, int x, int y){
+static void kbGetInput(int key, int modifiers, bool release, int x, int y){
   int i=_Universe->CurrentCockpit();
-  _Universe->SetActiveCockpit(playerBindings[key]);
+  _Universe->SetActiveCockpit(playerBindings[modifiers][key]);
 
 
-  if ((keyState[key]==RESET||keyState[key]==UP)&&!release)
-    keyBindings[key](key,PRESS);
-  if ((keyState[key]==DOWN||keyState[key]==RESET)&&release)
-    keyBindings[key](key,RELEASE);
-  keyState[key] = release?UP:DOWN;
+  if ((keyState[modifiers][key]==RESET||keyState[modifiers][key]==UP)&&!release)
+    keyBindings[modifiers][key].function(keyBindings[modifiers][key].data,PRESS);
+  if ((keyState[modifiers][key]==DOWN||keyState[modifiers][key]==RESET)&&release)
+    keyBindings[modifiers][key].function(keyBindings[modifiers][key].data,RELEASE);
+  keyState[modifiers][key] = release?UP:DOWN;
   _Universe->SetActiveCockpit(i);
 }
 int shiftup (int ch) {
@@ -139,25 +150,54 @@ int shiftdown (int ch) {
   return tolower(ch);
 }
 
-
-
+unsigned int getModifier(const char* mod_name){
+  if (mod_name[0]=='\0')
+    return 0;
+  if (strstr(mod_name,"ctrl")||strstr(mod_name,"cntrl")||strstr(mod_name,"control"))
+    return 2;
+  if (strstr(mod_name,"alt")||strstr(mod_name,"alternate"))
+    return 1;
+  return 0;
+}
+int getModifier(bool alton, bool cntrlon) {
+  return cntrlon?2:(alton?1:0);
+}
  void glut_keyboard_cb( unsigned int  ch,unsigned int mod, bool release, int x, int y ) 
 {
   bool shifton=false;
+  int alton=false;
+  int ctrlon=false;
+  
   //  VSFileSystem::Fprintf (stderr,"keyboard  %d",ch);
   if ((WSK_MOD_LSHIFT==(mod&WSK_MOD_LSHIFT))||(WSK_MOD_RSHIFT==(mod&WSK_MOD_RSHIFT))) {
     ch = shiftup(ch);
     shifton=true;
   }
-  kbGetInput( ch, release, x, y );
+  if ((WSK_MOD_LALT==(mod&WSK_MOD_LALT))||(WSK_MOD_RALT==(mod&WSK_MOD_RALT))) {
+    alton=true;
+  }
+  if ((WSK_MOD_LCTRL==(mod&WSK_MOD_LCTRL))||(WSK_MOD_RCTRL==(mod&WSK_MOD_RCTRL))) {
+    ctrlon=true;
+  }
+  int curmod=getModifier(alton,ctrlon);
+  kbGetInput( ch, curmod,release, x, y );
   if (release) {
-    if (shifton) {
-      if (((unsigned int)shiftdown (ch))!=ch&&keyState[shiftdown(ch)]==DOWN) {
-	kbGetInput (shiftdown(ch),release,x,y);
-      }
-    }else {
-      if (((unsigned int)shiftup (ch))!=ch&&keyState[shiftup(ch)]==DOWN) {
-	kbGetInput (shiftup(ch),release,x,y);
+    for (int i=0;i<LAST_MODIFIER;++i) {
+      if (i!=curmod){
+        if(keyState[i][shiftdown(ch)]==DOWN)
+          kbGetInput (shiftdown(ch),i,release,x,y);
+        if(keyState[i][shiftup(ch)]==DOWN)
+          kbGetInput (shiftup(ch),i,release,x,y);
+      }else{
+        if (shifton) {
+          if (((unsigned int)shiftdown (ch))!=ch&&keyState[i][shiftdown(ch)]==DOWN) {
+            kbGetInput (shiftdown(ch),i,release,x,y);
+          }
+        }else {
+          if (((unsigned int)shiftup (ch))!=ch&&keyState[i][shiftup(ch)]==DOWN) {
+            kbGetInput (shiftup(ch),i,release,x,y);
+          }
+        }
       }
     }
   }
@@ -182,14 +222,24 @@ static void glut_special_up_cb( int key, int x, int y )
 }
 */
 void RestoreKB() {
+  for (int i=0;i<LAST_MODIFIER;++i) {
+    for(int a=0; a<KEYMAP_SIZE; a++) {
+      if (keyState[i][a]==DOWN) {
+        keyBindings[i][a].function(keyBindings[i][a].data,RELEASE);      
+        keyState[i][a] = UP;
+      }
+    }
+  }
   winsys_set_keyboard_func( glut_keyboard_cb );
 }
 
 void InitKB()
 {
-  for(int a=0; a<KEYMAP_SIZE; a++) {
-    keyState[a] = UP;
-    UnbindKey(a);
+  for (int i=0;i<LAST_MODIFIER;++i) {
+    for(int a=0; a<KEYMAP_SIZE; a++) {
+      keyState[i][a] = UP;
+      UnbindKey(a,i);
+    }
   }
   RestoreKB();
 }
@@ -213,24 +263,23 @@ void ProcessKB(unsigned int player)
       activelistener = newactive;
     //empty & analyze to see which one deserves to be activated
     }*/
-  for(int a=0; a<KEYMAP_SIZE; a++) {
-    if (playerBindings[a]==player)
-      keyBindings[a](a,keyState[a]);
+  for(int mod=0; mod<LAST_MODIFIER; mod++) {
+    for(int a=0; a<KEYMAP_SIZE; a++) {
+      if (playerBindings[mod][a]==player)
+        keyBindings[mod][a].function(keyBindings[mod][a].data,keyState[mod][a]);
+    }
   }
 }	
 
-void BindKey(int key, unsigned int player, KBHandler handler) {
-	keyBindings[key] = handler;
-	playerBindings[key]=player;
-	handler(-1,RESET); // key is not used in handler
+void BindKey(int key,unsigned int mod, unsigned int player, KBHandler handler, const KBData&data) {
+	keyBindings[mod][key].function = handler;
+	keyBindings[mod][key].data = data;
+	playerBindings[mod][key]=player;
+	handler(std::string(),RESET); // key is not used in handler
 }
 
-static void DefaultKBHandler(int key, KBSTATE newState) {
-	// do nothing
-	return;
-}
 
-void UnbindKey(int key) {
-  keyBindings[key] = DefaultKBHandler;
+void UnbindKey(int key,unsigned int mod) {
+  keyBindings[mod][key] = HandlerCall();
 }
 

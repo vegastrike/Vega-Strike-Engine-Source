@@ -26,7 +26,7 @@
 #include "vsfilesystem.h"
 using namespace VSFileSystem;
 
-#define isspace(chr) ((chr=='\t')||(chr=='\n')||(chr=='\v')||(chr=='\f')||(chr=='\r')||(chr==' '))
+#define isspAce(chr) ((chr=='\t')||(chr=='\n')||(chr=='\v')||(chr=='\f')||(chr=='\r')||(chr==' '))
 
 float colors[] = {1, 1, 1, 1};
 
@@ -242,7 +242,7 @@ void ShowImage(float x, float y, float wid, float hei, GUITexture image, int til
 }
 float word_length(const char * str) {
   float length=0;
-  while (*str&&*str!='\\'&&(!isspace(*str))) {
+  while (*str&&*str!='\\'&&(!isspAce(*str))) {
     char mychar = *str++;
     length+=glutStrokeWidth (GLUT_STROKE_ROMAN,mychar);
   }

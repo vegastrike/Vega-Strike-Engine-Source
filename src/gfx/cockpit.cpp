@@ -34,6 +34,7 @@
 #include "audiolib.h"
 #include "save_util.h"
 #include "cmd/base.h"
+#include "in_kb_data.h"
 extern float rand01();
 #define SWITCH_CONST .9
 
@@ -52,8 +53,8 @@ void soundContainer::loadsound (string soundfile,bool looping) {
 }
 void soundContainer::playsound () {
 	if (sound>=0) {
-		AUDAdjustSound(sound,_Universe->AccessCockpit()->AccessCamera()->GetPosition(),Vector(0,0,0));
-		AUDStartPlaying (sound);
+		AUDAdjustSound(sound,QVector(0,0,0),Vector(0,0,0));
+		AUDPlay (sound,QVector(0,0,0),Vector(0,0,0),1);
 	}
 }
 soundContainer::~soundContainer () {
@@ -929,6 +930,8 @@ void GameCockpit::Init (const char * file) {
     Panel.front()->GetPosition (x,y);
     Panel.front()->SetPosition (x,y+viewport_offset);  
   }
+
+  
 }
 void GameCockpit::Delete () {
   int i;
@@ -1052,10 +1055,10 @@ extern vector <int> suicide;
 
 void DoCockpitKeys()
 {
-	CockpitKeys::Pan(0,PRESS);
-	CockpitKeys::Inside(0,PRESS);
+	CockpitKeys::Pan(KBData(),PRESS);
+	CockpitKeys::Inside(KBData(),PRESS);
 }
-void GameCockpit::NavScreen (int, KBSTATE k) // scheherazade
+void GameCockpit::NavScreen (const KBData&,KBSTATE k) // scheherazade
 {
    if (k==PRESS)
      {
@@ -1075,9 +1078,6 @@ void GameCockpit::NavScreen (int, KBSTATE k) // scheherazade
 	 winsys_set_mouse_func(BaseInterface::ClickWin);
 	 winsys_set_motion_func(BaseInterface::ActiveMouseOverWin);
 	 winsys_set_passive_motion_func(BaseInterface::PassiveMouseOverWin);
-
-
-//	 _Universe->AccessCockpit()->ThisNav.currentsystem=_Universe->AccessCockpit()->ThisNav.selectedsystem=UniverseUtil::getSystemFile();
     }
   }
 }
@@ -1115,7 +1115,7 @@ void RespawnNow (Cockpit * cp) {
     }
   }
 }
-void GameCockpit::SwitchControl (int,KBSTATE k) {
+void GameCockpit::SwitchControl (const KBData&,KBSTATE k) {
   if (k==PRESS) {
     while (switchunit.size()<=_Universe->CurrentCockpit())
       switchunit.push_back(0);
@@ -1123,7 +1123,7 @@ void GameCockpit::SwitchControl (int,KBSTATE k) {
   }
 
 }
-void SuicideKey (int, KBSTATE k) {
+void SuicideKey (const KBData&,KBSTATE k) {
   if (k==PRESS) {
     while (suicide.size()<=_Universe->CurrentCockpit())
       suicide.push_back(0);
@@ -1165,7 +1165,7 @@ public:
   }
 };
 std::vector <UnivMap> univmap;
-void MapKey (int, KBSTATE k) {
+void MapKey (const KBData&,KBSTATE k) {
   if (k==PRESS) {
     static VSSprite ul("upper-left-map.spr");
     static VSSprite ur("upper-right-map.spr");
@@ -1182,7 +1182,7 @@ void MapKey (int, KBSTATE k) {
 }
 
 
-void GameCockpit::TurretControl (int,KBSTATE k) {
+void GameCockpit::TurretControl (const KBData&,KBSTATE k) {
   if (k==PRESS) {
     while (turretcontrol.size()<=_Universe->CurrentCockpit())
       turretcontrol.push_back(0);
@@ -1190,7 +1190,7 @@ void GameCockpit::TurretControl (int,KBSTATE k) {
   }
 
 }
-void GameCockpit::Respawn (int,KBSTATE k) {
+void GameCockpit::Respawn (const KBData&,KBSTATE k) {
   if (k==PRESS) {
     while (respawnunit.size()<=_Universe->CurrentCockpit())
       respawnunit.push_back(0);
@@ -1244,19 +1244,9 @@ int GameCockpit::Autopilot (Unit * target) {
 		if (face_target_on_auto) {
 			//	  FaceTarget(un,un->LocalPosition(),un->Target());
 		}	  
-		static double averagetime = GetElapsedTime()/getTimeCompression();
+
 		static double numave = 1.0;
-		averagetime+=GetElapsedTime()/getTimeCompression();
-		static float autospeed = XMLSupport::parse_float (vs_config->getVariable ("physics","autospeed",".020"));//10 seconds for auto to kick in;
-		numave++;
-		if (autopan) {
-		  AccessCamera(CP_PAN)->myPhysics.SetAngularVelocity(Vector(0,0,0));
-		  AccessCamera(CP_PAN)->myPhysics.ApplyBalancedLocalTorque(_Universe->AccessCamera()->P,
-								   _Universe->AccessCamera()->R,
-								   averagetime*autospeed/(numave));
-		  static float initialzoom=XMLSupport::parse_float(vs_config->getVariable("graphics","inital_zoom_factor","2.25"));
-		  zoomfactor=initialzoom;
-		}
+		
 		static float autotime = XMLSupport::parse_float (vs_config->getVariable ("physics","autotime","10"));//10 seconds for auto to kick in;
 
 		autopilot_time=autotime;
@@ -1266,7 +1256,7 @@ int GameCockpit::Autopilot (Unit * target) {
   }
   return retauto;
 }
-extern void reset_time_compression(int i, KBSTATE a);
+extern void reset_time_compression(const KBData&, KBSTATE a);
 void GameCockpit::Shake (float amt) {
   static float shak= XMLSupport::parse_float(vs_config->getVariable("graphics","cockpit_shake","3"));
   static float shak_max= XMLSupport::parse_float(vs_config->getVariable("graphics","cockpit_shake_max","20"));
@@ -1302,6 +1292,7 @@ static void DrawCrosshairs (float x, float y, float wid, float hei, const GFXCol
 	GFXEnable(TEXTURE0);
 }
 extern bool QuitAllow;
+extern bool screenshotkey;
 void GameCockpit::Draw() { 
   cockpit_time+=GetElapsedTime();
   if (cockpit_time>=100000)
@@ -1314,7 +1305,7 @@ void GameCockpit::Draw() {
   GFXDisable (DEPTHWRITE);
   GFXColor4f(1,1,1,1);
   static bool draw_any_boxes = XMLSupport::parse_bool (vs_config->getVariable("graphics","hud","DrawTargettingBoxes","true"));
-  if (draw_any_boxes) {
+  if (draw_any_boxes&&screenshotkey==false) {
   DrawTargetBox();
   DrawTurretTargetBoxes();
   if(draw_all_boxes){
@@ -1367,13 +1358,15 @@ void GameCockpit::Draw() {
   GFXDisable (DEPTHWRITE);
 
   Unit * un;
+  float crosscenx=0,crossceny=0;
   if (view==CP_FRONT) {
-    if (Panel.size()>0) {
+    if (Panel.size()>0&&screenshotkey==false) {
       static bool drawCrosshairs=parse_bool(vs_config->getVariable("graphics","draw_rendered_crosshairs","true"));
+      Panel.front()->GetPosition(crosscenx,crossceny);
       if (drawCrosshairs) {
         float x,y,wid,hei;
         Panel.front()->GetSize(wid,hei);
-        Panel.front()->GetPosition(x,y);
+        x=crosscenx;y=crossceny;
         DrawCrosshairs(x,y,wid,hei,textcol);
       } else {
         GFXBlendMode(SRCALPHA,INVSRCALPHA);
@@ -1383,7 +1376,7 @@ void GameCockpit::Draw() {
     }
   }
   static bool mouseCursor = XMLSupport::parse_bool (vs_config->getVariable ("joystick","mouse_cursor","false"));
-  if (mouseCursor) {  
+  if (mouseCursor&&screenshotkey==false) {  
     GFXBlendMode (SRCALPHA,INVSRCALPHA);
     GFXColor4f (1,1,1,1);
     GFXEnable(TEXTURE0);
@@ -1391,8 +1384,9 @@ void GameCockpit::Draw() {
     //    GFXDisable(TEXTURE1);
     static int revspr = XMLSupport::parse_bool (vs_config->getVariable ("joystick","reverse_mouse_spr","true"))?1:-1;
     static string blah = vs_config->getVariable("joystick","mouse_crosshair","crosshairs.spr");
+    static int num=printf ("CROSS %f\n",crossceny);
     static VSSprite MouseVSSprite (blah.c_str(),BILINEAR,GFXTRUE);
-    MouseVSSprite.SetPosition (-1+float(mousex)/(.5*g_game.x_resolution),-revspr+float(revspr*mousey)/(.5*g_game.y_resolution));
+    MouseVSSprite.SetPosition ((-1+float(mousex)/(.5*g_game.x_resolution))*(1-fabs(crosscenx))+crosscenx,(-revspr+float(revspr*mousey)/(.5*g_game.y_resolution))*(1-fabs(crossceny))+crossceny);
     
     MouseVSSprite.Draw();
     //    DrawGlutMouse(mousex,mousey,&MouseVSSprite);
@@ -1462,36 +1456,37 @@ void GameCockpit::Draw() {
 	  vdu[vd]->Draw(un,textcol);
 	  GFXColor4f (1,1,1,1);
 	  float damage = un->GetImageInformation().cockpit_damage[(1+vd)%(MAXVDUS+1)];
-	if (damage<.985) {
-	  if (vdu_time[vd]>=0) {
-	    if (damage>.001&&(cockpit_time>(vdu_time[vd]+(1-damage)))) {
-	      if (rand01()>SWITCH_CONST) {
-		vdu_time[vd]=-cockpit_time;
-	      }
-	    } else {
-	      static Animation vdu_ani("static.ani",true,.1,BILINEAR);
-	      GFXEnable(TEXTURE0);
-	      vdu_ani.DrawAsVSSprite(vdu[vd]);	
-	    }
-	  } else {
-	    if (cockpit_time>((1-(-vdu_time[vd]))+(damage))) {
-	      if (rand01()>SWITCH_CONST) {
-		vdu_time[vd]=cockpit_time;
-	      }
+          if (vdu[vd]->staticable()) {
+            if (damage<.985) {
+              if (vdu_time[vd]>=0) {
+                if (damage>.001&&(cockpit_time>(vdu_time[vd]+(1-damage)))) {
+                  if (rand01()>SWITCH_CONST) {
+                    vdu_time[vd]=-cockpit_time;
+                  }
+                } else {
+                  static Animation vdu_ani("static.ani",true,.1,BILINEAR);
+                  GFXEnable(TEXTURE0);
+                  vdu_ani.DrawAsVSSprite(vdu[vd]);	
+                  
+                }
+              } else {
+                if (cockpit_time>((1-(-vdu_time[vd]))+(damage))) {
+                  if (rand01()>SWITCH_CONST) {
+                    vdu_time[vd]=cockpit_time;
+                  }
+                }
+              }
 	    }
 	  }
-	}
-	  //process VDU, damage VDU, targetting VDU
-	}
-      }
-
+        }              //process VDU, damage VDU, targetting VDU
+      }      
     }
     GFXColor4f (1,1,1,1);
     if (un->GetHull()>=0)
       die = false;
     if (un->Threat()!=NULL) {
       if (0&&getTimeCompression()>1) {
-	reset_time_compression(0,PRESS);
+	reset_time_compression(std::string(),PRESS);
       }
       un->Threaten (NULL,0);
     }
@@ -1539,10 +1534,17 @@ void GameCockpit::Draw() {
 	zoomfactor=dietime*10;
 	}
   }
-  if (QuitAllow) {
+  if (QuitAllow||getTimeCompression()<.5) {
+    if (QuitAllow){ 
 	  static VSSprite QuitSprite("quit.spr",BILINEAR,GFXTRUE);
+          
 	  GFXEnable(TEXTURE0);
 	  QuitSprite.Draw();	  
+    }else {
+	  static VSSprite PauseSprite("pause.spr",BILINEAR,GFXTRUE);          
+	  GFXEnable(TEXTURE0);
+	  PauseSprite.Draw();	        
+    }
   }
   GFXAlphaTest (ALWAYS,0);  
   GFXHudMode (false);
@@ -1612,13 +1614,38 @@ string GameCockpit::getsoundfile(string sound) {
 		return "";
 	}
 }
-
+void	SetStartupView(Cockpit*);
 void GameCockpit::UpdAutoPilot()
 {
   static bool autopan = XMLSupport::parse_bool (vs_config->getVariable ("graphics","pan_on_auto","true"));
   if (autopilot_time!=0) {
     autopilot_time-=SIMULATION_ATOM;
+    {
+      static float autospeed = XMLSupport::parse_float (vs_config->getVariable ("physics","autospeed",".020"));//10 seconds for auto to kick in;
+      if (autopan) {
+        Vector origR=Vector(0,0,1);
+        Vector origP=Vector(1,0,0);
+        
+        static float rotspd=XMLSupport::parse_float(vs_config->getVariable("graphics","autopilot_rotation_speed",".15"));
+
+        static float curtime=0;
+        curtime+=SIMULATION_ATOM;
+        float ang = curtime*rotspd;
+        origR.Yaw(ang);
+        origP.Yaw(ang);
+        Vector origQ = Vector(0,1,0);
+        origP.Normalize();
+        origQ.Normalize();
+        origR.Normalize();
+        AccessCamera(CP_PAN)->myPhysics.SetAngularVelocity(Vector(0,0,0));//hack
+        AccessCamera(CP_PAN)->SetOrientation(origP,origQ,origR);
+        static float initialzoom=XMLSupport::parse_float(vs_config->getVariable("graphics","inital_zoom_factor","2.25"));
+        zoomfactor=initialzoom;
+      }
+
+    }
     if (autopilot_time<= 0) {
+      AccessCamera(CP_PAN)->myPhysics.SetAngularVelocity(Vector(0,0,0));
       if (disableautosound.sound<0) {
 	static string str=vs_config->getVariable("cockpitaudio","autopilot_disabled","autopilot_disabled");
 	disableautosound.loadsound(str);
@@ -1626,7 +1653,7 @@ void GameCockpit::UpdAutoPilot()
       disableautosound.playsound();
       if (autopan) {
 	AccessCamera(CP_PAN)->myPhysics.SetAngularVelocity(Vector(0,0,0));
-	SetView(CP_FRONT);
+	SetStartupView(this);
       }
       autopilot_time=0;
       Unit * par = GetParent();
@@ -1676,11 +1703,17 @@ GameCockpit::~GameCockpit () {
   Delete();
   delete savegame;
 }
-
+int GameCockpit::getVDUMode(int vdunum) {
+  if (vdunum<(int)vdu.size()) {
+    if (vdu[vdunum]) {
+      return vdu[vdunum]->getMode();
+    }
+  }return 0;
+}
 void GameCockpit::VDUSwitch (int vdunum) {
   if (soundfile>=0) {
     //AUDPlay (soundfile, AccessCamera()->GetPosition(), Vector (0,0,0), .5);
-	AUDStartPlaying(soundfile);
+	AUDPlay(soundfile,QVector(0,0,0),Vector(0,0,0),1);
   }
   if (vdunum<(int)vdu.size()) {
     if (vdu[vdunum]) {
@@ -1691,7 +1724,7 @@ void GameCockpit::VDUSwitch (int vdunum) {
 void GameCockpit::ScrollVDU (int vdunum, int howmuch) {
   if (soundfile>=0) {
     //AUDPlay (soundfile, AccessCamera()->GetPosition(), Vector (0,0,0),.5);
-	AUDStartPlaying (soundfile);
+	AUDPlay (soundfile,QVector(0,0,0),Vector(0,0,0),1);
   }
   if (vdunum<(int)vdu.size()) {
     if (vdu[vdunum]) {
@@ -1707,10 +1740,19 @@ void GameCockpit::ScrollAllVDU (int howmuch) {
 
 
 void GameCockpit::SetCommAnimation (Animation * ani) {
+  bool seti=false;
   for (unsigned int i=0;i<vdu.size();i++) {
-    if (vdu[i]->SetCommAnimation (ani)) {
+    if (vdu[i]->SetCommAnimation (ani,false)) {
+      seti=true;
       break;
     }
+  }
+  if (!seti) {
+    for (unsigned int i=0;i<vdu.size();i++) {
+      if (vdu[i]->SetCommAnimation (ani,true)) {
+        break;
+      }
+    }    
   }
 }
 void GameCockpit::RestoreViewPort() {

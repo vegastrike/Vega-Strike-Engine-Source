@@ -63,6 +63,7 @@ class VDU: public VSSprite {
 void  DrawStarSystemAgain (float x,float y,float w,float h, VIEWSTYLE viewStyle,Unit *parent,Unit *target);
 public:
   void	ReceivedTargetData() { got_target_info = true;}
+  bool staticable();
  unsigned int getMode() {return thismode.back();}
   int scrolloffset;
   ///Alert! To add a mode must change const array on the bottom. VIEW must remain LAST
@@ -74,7 +75,7 @@ public:
   void SwitchMode( Unit * parent);
   void SetViewingStyle (VIEWSTYLE vm);
   void Scroll (int howmuch);
-  bool SetCommAnimation (Animation *ani);
+  bool SetCommAnimation (Animation *ani, bool force);
 };
 
 int parse_vdu_type (const char * s);

@@ -143,6 +143,19 @@ namespace UnitUtil {
 		my_unit->SetTurretAI();
 		return percentage;
 	}
+	int removeWeapon(Unit * my_unit, string weapon_name, int mountoffset, bool loop) {
+          if (!my_unit)return -1;
+          int maxmount=my_unit->mounts.size();
+          int max=maxmount+mountoffset;
+          for (int i=mountoffset;i<max;++i) {
+            int index=i%maxmount;
+            if (my_unit->mounts[i].type->weapon_name==weapon_name&&(my_unit->mounts[i].status==Mount::ACTIVE||my_unit->mounts[i].status==Mount::INACTIVE)) {
+              my_unit->mounts[i].status=Mount::UNCHOSEN;
+              return i;
+            }
+          }
+          return -1;
+	}
 	int addCargo (Unit *my_unit,Cargo carg) {
 	  if (!my_unit)return 0;
 	  int i;
@@ -155,6 +168,11 @@ namespace UnitUtil {
 	  }else {
 	    carg.quantity=0;
 	  }
+	  return carg.quantity; 
+	}
+	int forceAddCargo (Unit *my_unit,Cargo carg) {
+	  if (!my_unit)return 0;
+          my_unit->AddCargo(carg);
 	  return carg.quantity; 
 	}
 	int hasCargo (Unit * my_unit, string mycarg) {
@@ -185,11 +203,13 @@ namespace UnitUtil {
 			index = rand()%my_unit->numCargo();
 			Cargo c(my_unit->GetCargo(index));	  
 			c.quantity=quantity;
-			if (my_unit->CanAddCargo(c)) {
-				my_unit->AddCargo(c);
-				my_unit->GetCargo(index).price*=percentagechange;
-				return true;
-			}
+                        if (c.price!=0) {
+                          if (my_unit->CanAddCargo(c)) {
+                            my_unit->AddCargo(c);
+                            my_unit->GetCargo(index).price*=percentagechange;
+                            return true;
+                          }
+                        }
 		}
 		return false;
 	}
@@ -234,7 +254,7 @@ namespace UnitUtil {
 	bool isDockableUnit(Unit *my_unit) {
 		if (!my_unit) return false;
 		std::string unit_fgid = getFlightgroupName(my_unit);
-		return ((((my_unit->isPlanet ())&&(!isSun(my_unit))&&isSignificant(my_unit)&&(!my_unit->isJumppoint()))||unit_fgid=="Base")&&my_unit->DockingPortLocations().size()>0);
+		return ((((my_unit->isPlanet ())&&(!isSun(my_unit))&&isSignificant(my_unit)&&(!my_unit->isJumppoint()))||unit_fgid=="Base"||my_unit->isUnit()==UNITPTR)&&my_unit->DockingPortLocations().size()>0);
 	}
 	float getDistance(Unit *my_unit,Unit *un){
 	  if (my_unit==NULL||un==NULL)
@@ -309,11 +329,11 @@ namespace UnitUtil {
 		}
 		return found;
 	}
-        void performDockingOperations (Unit * un, Unit * unitToDockWith) {
+        void performDockingOperations (Unit * un, Unit * unitToDockWith,int actually_dock) {
 	  if (un && unitToDockWith) {
 	    Order * ai = un->aistate;
 	    un->aistate = NULL;
-	    un->PrimeOrders (new Orders::DockingOps (unitToDockWith, ai));
+	    un->PrimeOrders (new Orders::DockingOps (unitToDockWith, ai,actually_dock!=0));
 	  }
 	}
 }

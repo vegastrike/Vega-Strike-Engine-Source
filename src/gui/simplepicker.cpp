@@ -28,7 +28,7 @@ static const int CHILD_VECTOR_RESERVE = 20;         // Make sure we don't get ma
 
 
 // Add a child to the list of children of this cell.
-void SimplePickerCell::addChild(const SimplePickerCell& c) {
+void SimplePickerCell::addChild(SimplePickerCell *c) {
     createEmptyChildList();
 
     m_children->addCell(c);
@@ -87,6 +87,13 @@ SimplePickerCells::SimplePickerCells(void) {
     m_cells.reserve(CHILD_VECTOR_RESERVE);
 }
 
+void SimplePickerCells::clear(void) {
+  for(vector<PickerCell*>::iterator i=m_cells.begin(); i<m_cells.end(); ++i)
+    delete (*i);
+  
+  m_cells.clear();
+} 
+
 
 ////////////////////////////////////////////////////////////////////////////
 
@@ -96,7 +103,7 @@ void SimplePicker::clear(void) {
     m_selectedCell = NULL;
     m_highlightedCell = NULL;
 
-    m_realCells.clear();
+    static_cast<SimplePickerCells*>(m_cells)->clear();
 
     setMustRecalc();
 }
@@ -104,8 +111,9 @@ void SimplePicker::clear(void) {
 
 // Constructor.
 SimplePicker::SimplePicker(void) {
-    m_cells = &m_realCells;
+    m_cells = new SimplePickerCells();
 }
 
 SimplePicker::~SimplePicker(void) {
+  clear();
 }

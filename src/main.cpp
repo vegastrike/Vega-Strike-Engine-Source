@@ -120,10 +120,14 @@ VegaConfig * createVegaConfig( char * file)
 }
 
 extern QVector DockToSavedBases (int playernum);
-
+extern bool soundServerPipes();
 std::string ParseCommandLine(int argc, char ** CmdLine);
 void VSExit( int code)
 {
+   if (muzak) {
+      delete muzak;
+      muzak=NULL;
+    }
 	winsys_exit(code);
 }
 
@@ -193,9 +197,37 @@ void nothinghappens (unsigned int, unsigned int, bool,int,int) {
 }
 int main( int argc, char *argv[] ) 
 {
+#if defined(WITH_MACOSX_BUNDLE)||defined(_WIN32)
+  {
+    char *parentdir;
+    int pathlen=strlen(argv[0]);
+    parentdir=new char[pathlen+1];
+    char *c;
+    strncpy ( parentdir, argv[0], pathlen+1 );
+    c = (char*) parentdir;
+    while (*c != '\0')     /* go to end */
+      c++;
+    
+    while ((*c != '/')&&(*c != '\\')&&c>parentdir)      /* back up to parent */
+      c--;
+    
+    *c = '\0';             /* cut off last part (binary name) */
+    if (strlen (parentdir)>0) {  
+      chdir (parentdir);/* chdir to the binary app's parent */
+    }
+    delete []parentdir;
+  }    
+#endif
 	CONFIGFILE=0;
 	mission_name[0]='\0';
-
+#if defined (WITH_MACOSX_BUNDLE)
+        {
+          //chdir("../Resources");
+          char pwd[8192]="";
+          getcwd(pwd,8191);
+          printf (" In path %s\n",pwd);
+        }
+#endif
     /* Print copyright notice */
 	printf("Vega Strike "  " \n"
 		   "See http://www.gnu.org/copyleft/gpl.html for license details.\n\n" );
@@ -226,8 +258,8 @@ int main( int argc, char *argv[] )
     //can use the vegastrike config variable to read in the default mission
 
   g_game.music_enabled = XMLSupport::parse_bool (vs_config->getVariable ("audio","Music","true"));
-#ifndef _WIN32
-  if (g_game.music_enabled) {
+#if !defined( _WIN32)
+  if (g_game.music_enabled&&!soundServerPipes()) {
     int pid=fork();
     if (!pid) {
 	  string soundserver_path = VSFileSystem::datadir+"/bin/soundserver";
@@ -427,6 +459,10 @@ void bootstrap_first_loop() {
     _Universe->Loop(bootstrap_main_loop);
   }
 }
+void SetStartupView(Cockpit * cp) {
+      static std::string startupview = vs_config->getVariable("graphics","startup_cockpit_view","front");
+      cp->SetView(startupview=="view_target"?CP_TARGET:(startupview=="back"?CP_BACK:(startupview=="chase"?CP_CHASE:CP_FRONT)));
+}
 void bootstrap_main_loop () {
 
   static bool LoadMission=true;
@@ -444,9 +480,9 @@ void bootstrap_main_loop () {
     //      delete SplashScreen;
     //    SplashScreen = new Animation (mission->getVariable ("splashscreen",vs_config->getVariable ("graphics","splash_screen","vega_splash.ani")).c_str(),0); 
     bootstrap_draw ("Vegastrike Loading...",SplashScreen);
-    if (g_game.music_enabled) {
+    if (g_game.music_enabled&&!soundServerPipes()) {
 #if defined( _WIN32) && !defined( __CYGWIN__)
-	  string ss_path = VSFileSystem::datadir+"/soundserver.exe";
+      string ss_path = VSFileSystem::datadir+"/soundserver.exe";
       int pid=spawnl(P_NOWAIT,ss_path.c_str(),ss_path.c_str(),NULL);
       if (pid==-1) {
 		ss_path = VSFileSystem::datadir+"/bin/soundserver.exe";
@@ -544,12 +580,14 @@ void bootstrap_main_loop () {
 	}
 
     _Universe->SetupCockpits(playername);
-
+    
 	/************************* NETWORK INIT ***************************/
-	vector<std::string>::iterator it, jt;
-	unsigned int k=0;
+    vector<std::string>::iterator it, jt;
+    unsigned int k=0;
     for (k=0, it=playername.begin(), jt=playerpasswd.begin();k<(unsigned int)_Universe->numPlayers();k++, it++, jt++) {
-	  bool setplayerXloc=false;
+      Cockpit *cp = _Universe->AccessCockpit(k);
+      SetStartupView(cp);
+      bool setplayerXloc=false;
       std::string psu;
       if (k==0) {
 		QVector myVec;
@@ -615,6 +653,7 @@ void bootstrap_main_loop () {
 	  }
 	  else
 		_Universe->AccessCockpit(k)->savegame->ParseSaveGame (savegamefile,mysystem,mysystem,pos,setplayerXloc,credits,_Universe->AccessCockpit()->unitfilename,k);
+          CopySavedShips(playername[k],k,_Universe->AccessCockpit()->unitfilename,true);
 	  playersaveunit.push_back(_Universe->AccessCockpit(k)->GetUnitFileName());
 	  _Universe->AccessCockpit(k)->credits=credits;
 		  ss.push_back (_Universe->Init (mysystem,Vector(0,0,0),planetname));
@@ -660,13 +699,13 @@ void bootstrap_main_loop () {
 		string str=vs_config->getVariable ("general","intro1","Welcome to Vega Strike! Use #8080FFTab#000000 to afterburn (#8080FF+,-#000000 cruise control), #8080FFarrows#000000 to steer.");
 		if (!str.empty()) {
 			UniverseUtil::IOmessage (0,"game","all",str);
-			str=vs_config->getVariable ("general","intro2","The #8080FFt#000000 key targets objects; #8080FFspace#000000 fires at them & #8080FFa#000000 auto pilots there. Time");
+			str=vs_config->getVariable ("general","intro2","The #8080FFt#000000 key targets objects; #8080FFspace#000000 fires at them & #8080FFa#000000 activates the SPEC drive. To");
 			if (!str.empty()) {
 				UniverseUtil::IOmessage (4,"game","all",str);
-				str=vs_config->getVariable ("general","intro3","Compression: #8080FFF9; F10#000000 resets. Buy a jump drive for 10000 fly to a blue ball and");
+				str=vs_config->getVariable ("general","intro3","go to another star system, buy a jump drive for about 10000 credits, fly to a");
 				if (!str.empty()) {
 					UniverseUtil::IOmessage (8,"game","all",str);
-					str = vs_config->getVariable ("general","intro4","press #8080FFj#000000 to warp to a near star. Target a base or planet;");
+					str = vs_config->getVariable ("general","intro4","wireframe jump-point and press #8080FFj#000000 to warp to a near star. Target a base or planet;");
 					if (!str.empty()) {
 						UniverseUtil::IOmessage (12,"game","all",str);
 						str=vs_config->getVariable ("general","intro5","When you get close a green box will appear. Inside the box, #8080FFd#000000 will land.");
@@ -702,7 +741,10 @@ void bootstrap_main_loop () {
 		}
 	}
 	cur_check = getNewTime();
-    _Universe->Loop(main_loop);
+        for (unsigned int i=0;i<_Universe->numPlayers();++i) {
+          _Universe->AccessCockpit(i)->savegame->LoadSavedMissions();
+        }
+        _Universe->Loop(main_loop);
     ///return to idle func which now should call main_loop mohahahah
   }
   ///Draw Texture
@@ -768,8 +810,9 @@ std::string ParseCommandLine(int argc, char ** lpCmdLine) {
 	break;
       case 'P':
       case 'p':
-	sscanf (lpCmdLine[i]+2,"%lf,%lf,%lf",&PlayerLocation.i,&PlayerLocation.j,&PlayerLocation.k);
-	SetPlayerLoc (PlayerLocation,true);
+	if (3==sscanf (lpCmdLine[i]+2,"%lf,%lf,%lf",&PlayerLocation.i,&PlayerLocation.j,&PlayerLocation.k)) {
+          SetPlayerLoc (PlayerLocation,true);
+        }
 	break;
       case 'J':
       case 'j'://low rez

@@ -83,7 +83,7 @@ textureholder makeTextureHolder(std::string str, int which) {
   ret.name.insert(ret.name.begin(),str.begin(),str.end());
   return ret;
 }
-void ObjToBFXM (FILE* obj, FILE * mtl, FILE * outputFile) {
+void ObjToBFXM (FILE* obj, FILE * mtl, FILE * outputFile,bool forcenormals) {
    fseek (obj,0,SEEK_END);
    int osize=ftell(obj);
    fseek (obj,0,SEEK_SET);
@@ -204,7 +204,7 @@ void ObjToBFXM (FILE* obj, FILE * mtl, FILE * outputFile) {
       if (1==sscanf(buf,"usemtl %s\n",str)) {
          if (changemat) {
             //write out unit file;
-           xmeshToBFXM(xml,outputFile,textnum==0?'c':'a');
+           xmeshToBFXM(xml,outputFile,textnum==0?'c':'a',forcenormals);
            textnum++;
          }
          changemat=true;
@@ -229,6 +229,9 @@ void ObjToBFXM (FILE* obj, FILE * mtl, FILE * outputFile) {
          xml.blend_src = mtls[str].blend_src;
          xml.blend_dst = mtls[str].blend_dst;
          xml.reflect=mtls[str].reflect;
+		 if(forcenormals){
+			mtls[str].usenormals=true;
+		 }
          xml.usenormals=mtls[str].usenormals;
          continue;
       }
@@ -362,7 +365,7 @@ void ObjToBFXM (FILE* obj, FILE * mtl, FILE * outputFile) {
         continue;
       }
    }   
-   xmeshToBFXM(xml,outputFile,textnum==0?'c':'a');
+   xmeshToBFXM(xml,outputFile,textnum==0?'c':'a',forcenormals);
    textnum++;
 
 }

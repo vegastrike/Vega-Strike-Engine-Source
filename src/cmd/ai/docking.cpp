@@ -3,8 +3,21 @@
 #include "config_xml.h"
 #include "cmd/unit_generic.h"
 #include "warpto.h"
+#include "universe_util.h"
+#include "python/python_compile.h"
+static void DockedScript(Unit * docker, Unit * base) {
+  static string script = vs_config->getVariable("AI","DockedToScript","");
+  if (script.length()>0) {
+    Unit * targ = docker->Target();
+    docker->GetComputerData().target.SetUnit(base);
+    UniverseUtil::setScratchUnit(docker);
+    CompileRunPython(script);
+    UniverseUtil::setScratchUnit(NULL);
+    docker->GetComputerData().target.SetUnit(targ);//should be NULL;
+  }
+}
 namespace Orders {
-  DockingOps::DockingOps (Unit * unitToDockWith, Order * ai): MoveTo (QVector (0,0,1),
+  DockingOps::DockingOps (Unit * unitToDockWith, Order * ai,bool physical_docking): MoveTo (QVector (0,0,1),
 								      false,
 								      10,false),
 							      
@@ -12,8 +25,11 @@ namespace Orders {
 							      state(GETCLEARENCE),
 							      oldstate(ai){
     formerOwnerDoNotDereference = NULL;
+    facedtarget=false;
+    physicallyDock=true;//physical_docking;
     port=-1;
-    timer = XMLSupport::parse_float (vs_config->getVariable ("physics","docking_time","10"));
+    static float temptimer=XMLSupport::parse_float (vs_config->getVariable ("physics","docking_time","10"));
+    timer = temptimer;
     
   }
   void DockingOps::SetParent (Unit * par) {
@@ -99,7 +115,7 @@ namespace Orders {
     return num;
   }
   bool DockingOps::RequestClearence (Unit * utdw) {
-    if (!utdw->RequestClearance(parent))
+    if (physicallyDock&&!utdw->RequestClearance(parent))
       return false;
     port =SelectDockPort (utdw, parent);
     if (port == -1) {
@@ -107,30 +123,49 @@ namespace Orders {
     }
     return true;
   }
+  QVector DockingOps::Movement(Unit * utdw) {
+    const QVector loc (Transform (utdw->GetTransformation(),utdw->DockingPortLocations()[port].pos.Cast()));
+    SetDest (loc);
+    
+    SetAfterburn (DistanceWarrantsTravelTo(parent,(loc-parent->Position()).Magnitude(),true));
+    if (!facedtarget) {
+      facedtarget=true;
+      EnqueueOrder(new ChangeHeading(loc,4,1,true));
+    }
+    MoveTo::Execute();
+    if (rand()%256==0){
+      WarpToP(parent,utdw,true);     
+    }
+    return loc;
+  }
   bool DockingOps::DockToTarget(Unit * utdw) {
     if (utdw->DockingPortLocations()[port].used) {
       state = GETCLEARENCE;
       return false; 
     }
-    const QVector loc (Transform (utdw->GetTransformation(),utdw->DockingPortLocations()[port].pos.Cast()));
-    SetDest (loc);
-    SetAfterburn (DistanceWarrantsTravelTo(parent,(loc-parent->Position()).Magnitude()));
-    
-    MoveTo::Execute();
-    if (rand()%256==0){
-      WarpToP(parent,utdw);
-      
-    }
+    QVector loc=Movement(utdw);
     float rad = utdw->DockingPortLocations()[port].radius+parent->rSize();
     float diss =(parent->Position()-loc).MagnitudeSquared()-.1;
-    if (diss<=parent->rSize()*parent->rSize()) {
-      return parent->Dock(utdw);
+    bool isplanet=utdw->isUnit()==PLANETPTR;
+    if (diss<=(isplanet?rad*rad:parent->rSize()*parent->rSize())) {
+      DockedScript(parent,utdw);      
+      if (physicallyDock)
+        return parent->Dock(utdw);
+      else{
+        parent->RefillWarpEnergy();
+        return true;
+      }
     }else {
       if (diss <=1.2*rad*rad) {
 	timer+=SIMULATION_ATOM;
 	static float tmp=XMLSupport::parse_float (vs_config->getVariable ("physics","docking_time","10"));
 	if (timer>=1.5*tmp) {
-	  return parent->Dock(utdw);
+          if (physicallyDock)
+            return parent->Dock(utdw);
+          else {
+            parent->RefillWarpEnergy();
+            return true;
+          }
 	}
       }
     }
@@ -138,8 +173,31 @@ namespace Orders {
   }
   bool DockingOps::PerformDockingOperations(Unit * utdw) {
     timer-=SIMULATION_ATOM;
-    if (timer<0)
-      return parent->UnDock (utdw);
+    bool isplanet=utdw->isUnit()==PLANETPTR;
+    if (timer<0){ 
+      static float tmp=XMLSupport::parse_float (vs_config->getVariable ("physics","un_docking_time","180"));
+      timer=tmp;
+      EnqueueOrder(new ChangeHeading(parent->Position()*2-utdw->Position(),4,1,true));
+      if (physicallyDock)
+        return parent->UnDock (utdw);
+      else 
+        return true;
+    }else {
+      if (!physicallyDock) {
+        if (isplanet) {
+          //orbit;
+          QVector cur=utdw->Position()-parent->Position();
+          QVector up = QVector(0,1,0);
+          if (up.i==cur.i&&up.j==cur.j&&up.k==cur.k) {
+            up=QVector(0,0,1);
+          }
+          SetDest(cur.Cross(up)*10000);
+          MoveTo::Execute();        
+        }else {
+          Movement(utdw);
+        }
+      }
+    }
     return false;
   }
   bool DockingOps::Undock(Unit * utdw) {//this is a good heuristic... find the location where you are.compare with center...then fly the fuck away
@@ -148,6 +206,7 @@ namespace Orders {
     awaydir *= len;
     SetDest(awaydir+utdw->Position());
     MoveTo::Execute();
-    return (len<1)||done;
+    timer-=SIMULATION_ATOM;
+    return (len<1)||done||timer<0;
   }
 }

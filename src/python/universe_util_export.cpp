@@ -1,3 +1,4 @@
+
 #ifndef USE_BOOST_128
 
 #include "cmd/container.h"
@@ -15,8 +16,8 @@
 #include "cmd/unit_util.h"
 #include "faction_generic.h"
 #include "cmd/ai/fire.h"
-void StarSystemExports () {
 
+void StarSystemExports () {
 #define EXPORT_UTIL(name,aff) PYTHON_DEFINE_GLOBAL(VS,&UniverseUtil::name,#name);
 #define voidEXPORT_UTIL(name) EXPORT_UTIL(name,0)
 #undef EXPORT_FACTION

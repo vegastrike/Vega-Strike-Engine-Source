@@ -612,8 +612,9 @@ using namespace UnitXML;
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(attribute_map.lookup((*iter).name)) {
       case VOLUME:
-	ADDELEM(floatStarHandler,XMLType(&image->cargo_volume));
-	image->cargo_volume=parse_float ((*iter).value);
+	ADDELEM(floatStarHandler,XMLType(&image->CargoVolume));
+	ADDELEM(floatStarHandler,XMLType(&image->UpgradeVolume));
+	image->UpgradeVolume=image->CargoVolume=parse_float ((*iter).value);
 	break;
       }
     }
@@ -1223,7 +1224,7 @@ using namespace UnitXML;
       sound->hull=AUDCreateSound (vs_config->getVariable ("unitaudio","armor","sfx08.wav"),false);
     }
     if (sound->explode==-1) {
-      sound->explode=AUDCreateSound (vs_config->getVariable ("unitaudio","explode","sfx03.wav"),false);
+      sound->explode=AUDCreateSound (vs_config->getVariable ("unitaudio","explode","explosion.wav"),false);
     }
     if (sound->jump==-1) {
       sound->jump=AUDCreateSound (vs_config->getVariable ("unitaudio","explode","sfx43.wav"),false);
@@ -1522,16 +1523,16 @@ using namespace UnitXML;
 	ADDELEM(speedStarHandler,XMLType(&computer.max_combat_ab_speed));
 	break;
       case YAW:
-	computer.max_yaw=parse_float((*iter).value)*(VS_PI/180);
-	ADDELEM (angleStarHandler, XMLType(&computer.max_yaw));
+	computer.max_yaw_right=computer.max_yaw_left=parse_float((*iter).value)*(VS_PI/180);
+	ADDELEM (angleStarHandler, XMLType(&computer.max_yaw_right));
 	break;
       case PITCH:
-	computer.max_pitch=parse_float((*iter).value)*(VS_PI/180);
-	ADDELEM (angleStarHandler,XMLType(&computer.max_pitch));
+	computer.max_pitch_up=computer.max_pitch_down=parse_float((*iter).value)*(VS_PI/180);
+	ADDELEM (angleStarHandler,XMLType(&computer.max_pitch_up));
 	break;
       case ROLL:
-	computer.max_roll=parse_float((*iter).value)*(VS_PI/180);
-	ADDELEM (angleStarHandler,XMLType(&computer.max_roll));
+	computer.max_roll_right=computer.max_roll_left=parse_float((*iter).value)*(VS_PI/180);
+	ADDELEM (angleStarHandler,XMLType(&computer.max_roll_right));
 	break;
       case SLIDE_START:
 	computer.slide_start = parse_int ((*iter).value);

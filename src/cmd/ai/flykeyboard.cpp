@@ -7,7 +7,7 @@
 #include "vs_globals.h"
 #include "gfx/cockpit.h" 
 #include "networking/netclient.h"
-
+#include "lin_time.h"
 struct StarShipControlKeyboard {
   bool switchmode;
   bool setunvel;
@@ -42,6 +42,7 @@ struct StarShipControlKeyboard {
   bool dirty;//it wasn't updated...
   bool autopilot;
   bool switch_combat_mode;
+  bool ASAP;
   bool terminateauto;
   bool realauto;
   bool startcomm;
@@ -50,7 +51,7 @@ struct StarShipControlKeyboard {
   bool switchsecured;
   bool freq_increase;
   bool freq_decrease;
-  void UnDirty() {sheltonpress=sheltonrelease=uppress=uprelease=downpress=downrelease=leftpress=leftrelease=rightpress=rightrelease=ABpress=ABrelease=accelpress=accelrelease=decelpress=decelrelease=rollrightpress=rollrightrelease=rollleftpress=rollleftrelease=0;jumpkey=startpress=stoppress=autopilot=dirty=switch_combat_mode=terminateauto=setunvel=switchmode=setnulvel=realauto=matchspeed=false;axial=vertical=horizontal=0;commchanged=startcomm=false;switchwebcam=false;switchsecured=false;freq_increase=false;freq_decrease=false;}
+  void UnDirty() {sheltonpress=sheltonrelease=uppress=uprelease=downpress=downrelease=leftpress=leftrelease=rightpress=rightrelease=ABpress=ABrelease=accelpress=accelrelease=decelpress=decelrelease=rollrightpress=rollrightrelease=rollleftpress=rollleftrelease=0;jumpkey=startpress=stoppress=autopilot=dirty=switch_combat_mode=terminateauto=setunvel=switchmode=setnulvel=realauto=matchspeed=ASAP=false;axial=vertical=horizontal=0;commchanged=startcomm=false;switchwebcam=false;switchsecured=false;freq_increase=false;freq_decrease=false;}
   StarShipControlKeyboard() {UnDirty();}
 };
 static vector <StarShipControlKeyboard> starshipcontrolkeys;
@@ -63,12 +64,13 @@ static StarShipControlKeyboard &g() {
 
 extern void JoyStickToggleDisable();
 FlyByKeyboard::FlyByKeyboard (unsigned int whichplayer): FlyByWire (),axis_key(0,0,0) {
-  
+  this->last_jumped=0;
   this->whichplayer=whichplayer;
   while(starshipcontrolkeys.size()<=whichplayer) {
     starshipcontrolkeys.push_back (StarShipControlKeyboard());
   }
   autopilot=NULL;
+  inauto=false;
 }
 float FlyByKeyboard::clamp_axis (float v) {
   static int axis_scale =XMLSupport::parse_int (vs_config->getVariable ("physics","slide_start","3"));
@@ -187,7 +189,13 @@ void FlyByKeyboard::Execute (bool resetangvelocity) {
   }
   if (SSCK.setunvel) {
     SSCK.setunvel=false;
-    parent->VelocityReference (parent->Target());
+    Unit * t=parent->Target();
+    static int neu=FactionUtil::GetFaction("neutral");
+    static int upg=FactionUtil::GetFaction("upgrades");   
+    static bool allowanyreference=XMLSupport::parse_bool(vs_config->getVariable("AI","AllowAnySpeedReference","false"));
+    if (t)
+      if (t->getRelation(parent)>=0||t->faction==neu||t->faction==upg||allowanyreference)
+        parent->VelocityReference (parent->Target());
   }
   if (SSCK.setnulvel) {
     SSCK.setnulvel=false;
@@ -197,11 +205,25 @@ void FlyByKeyboard::Execute (bool resetangvelocity) {
     SSCK.switch_combat_mode=false;
     parent->SwitchCombatFlightMode();
   }
+  if (SSCK.ASAP) {
+    SSCK.ASAP=false;
+	if(FlyByKeyboard::inauto){
+		this->eraseType(FACING|MOVEMENT);
+		FlyByKeyboard::inauto=false;
+	} else {
+		Orders::AutoLongHaul* temp = new Orders::AutoLongHaul();
+		temp->SetParent(parent);
+		Order::EnqueueOrderFirst(temp);
+		FlyByKeyboard::inauto=true;
+    }
+  }
+  bool enteredautopilot=false;
   if (SSCK.realauto) {
     Cockpit * cp = _Universe->isPlayerStarship(parent);
     if (cp) {
       cp->Autopilot (parent->Target());
     }
+    enteredautopilot=true;
     SSCK.realauto=false;
   }
   if (autopilot) {
@@ -305,7 +327,7 @@ void FlyByKeyboard::Execute (bool resetangvelocity) {
   if (SSCK.stoppress) {
     Stop(0);
   }
-  if (SSCK.startpress) {
+  if (SSCK.startpress||enteredautopilot) {
     Stop(1);
   }
   if (SSCK.sheltonpress>0) {
@@ -342,15 +364,21 @@ void FlyByKeyboard::Execute (bool resetangvelocity) {
     if (targ)
       MatchSpeed (targ->GetVelocity());
   }
+  static unsigned int counter=0;
+  counter++;
   if (SSCK.jumpkey) {
-    parent->ActivateJumpDrive();
-    if (parent->GetJumpStatus().drive>=0) {
-      static soundContainer foobar;
-      if (foobar.sound==-2) {
-	static string str=vs_config->getVariable("cockpitaudio","jump_engaged","jump");
-	foobar.loadsound(str);
+    static float jump_key_delay=XMLSupport::parse_float(vs_config->getVariable("general","jump_key_delay",".125"));
+    if (counter-last_jumped>(int)(jump_key_delay/SIMULATION_ATOM)||last_jumped==0) {
+      last_jumped=counter;
+      parent->ActivateJumpDrive();
+      if (parent->GetJumpStatus().drive>=0) {
+        static soundContainer foobar;
+        if (foobar.sound==-2) {
+          static string str=vs_config->getVariable("cockpitaudio","jump_engaged","jump");
+          foobar.loadsound(str);
+        }
+        foobar.playsound();
       }
-      foobar.playsound();
     }
     SSCK.jumpkey=false;
   }else {
@@ -359,14 +387,18 @@ void FlyByKeyboard::Execute (bool resetangvelocity) {
   SSCK.dirty=true;
 #undef SSCK
 
-  FlyByWire::Execute();
+  if(FlyByKeyboard::inauto){
+	  Order::Execute();
+  } else {
+	  FlyByWire::Execute();
+  }
 
 }
 
 // Changing the frequency doesn't kill a communication anymore until the player stopped its current one
 // and starts a new one in that other frequency
 
-void FlyByKeyboard::DownFreq (int,KBSTATE k) {
+void FlyByKeyboard::DownFreq (const KBData&,KBSTATE k) {
 if(Network!=NULL)
 {
   if (g().dirty)g().UnDirty();
@@ -383,7 +415,7 @@ if(Network!=NULL)
 }
 }
 
-void FlyByKeyboard::UpFreq (int,KBSTATE k) {
+void FlyByKeyboard::UpFreq (const KBData&,KBSTATE k) {
 if(Network!=NULL)
 {
   if (g().dirty)g().UnDirty();
@@ -400,7 +432,7 @@ if(Network!=NULL)
 }
 }
 
-void FlyByKeyboard::ChangeCommStatus (int,KBSTATE k) {
+void FlyByKeyboard::ChangeCommStatus (const KBData&,KBSTATE k) {
 if(Network!=NULL)
 {
   if (g().dirty)g().UnDirty();
@@ -423,7 +455,7 @@ if(Network!=NULL)
 }
 }
 
-void FlyByKeyboard::SwitchWebcam(int,KBSTATE k)
+void FlyByKeyboard::SwitchWebcam(const KBData&,KBSTATE k)
 {
 if(Network!=NULL)
 {
@@ -443,7 +475,7 @@ if(Network!=NULL)
 }
 }
 
-void FlyByKeyboard::SwitchSecured(int,KBSTATE k)
+void FlyByKeyboard::SwitchSecured(const KBData&,KBSTATE k)
 {
 if(Network!=NULL)
 {
@@ -463,7 +495,7 @@ if(Network!=NULL)
 }
 }
 
-void FlyByKeyboard::SetVelocityRefKey(int, KBSTATE k) {
+void FlyByKeyboard::SetVelocityRefKey(const KBData&,KBSTATE k) {
   if (g().dirty) g().UnDirty();
   switch (k) {
   case UP:
@@ -473,7 +505,7 @@ void FlyByKeyboard::SetVelocityRefKey(int, KBSTATE k) {
   default:break;
   }
 }
-void FlyByKeyboard::SetNullVelocityRefKey(int, KBSTATE k) {
+void FlyByKeyboard::SetNullVelocityRefKey(const KBData&,KBSTATE k) {
   if (g().dirty) g().UnDirty();
   switch (k) {
   case UP:
@@ -485,7 +517,7 @@ void FlyByKeyboard::SetNullVelocityRefKey(int, KBSTATE k) {
 }
 
 
-void FlyByKeyboard::SheltonKey(int, KBSTATE k) {
+void FlyByKeyboard::SheltonKey(const KBData&,KBSTATE k) {
   if (g().dirty) g().UnDirty();
   switch (k) {
   case UP:
@@ -496,7 +528,7 @@ void FlyByKeyboard::SheltonKey(int, KBSTATE k) {
   default:break;
   }
 }
-void FlyByKeyboard::JumpKey(int, KBSTATE k) {
+void FlyByKeyboard::JumpKey(const KBData&,KBSTATE k) {
   switch (k) {
   case PRESS:
     g().jumpkey=true;
@@ -509,7 +541,7 @@ void FlyByKeyboard::JumpKey(int, KBSTATE k) {
     break;
   }
 }
-void FlyByKeyboard::UpKey(int, KBSTATE k) {
+void FlyByKeyboard::UpKey(const KBData&,KBSTATE k) {
   if (g().dirty) g().UnDirty();
   switch (k) {
   case UP: g().uprelease++;
@@ -524,7 +556,7 @@ void FlyByKeyboard::UpKey(int, KBSTATE k) {
   default:break;
   }
 }
-void FlyByKeyboard::KThrustRight (int,KBSTATE k) {
+void FlyByKeyboard::KThrustRight (const KBData&,KBSTATE k) {
   if (g().dirty)g().UnDirty();
   switch (k) {
   case DOWN:g().horizontal+=1;
@@ -536,7 +568,7 @@ void FlyByKeyboard::KThrustRight (int,KBSTATE k) {
     break;
   }
 }
-void FlyByKeyboard::KThrustLeft (int,KBSTATE k) {
+void FlyByKeyboard::KThrustLeft (const KBData&,KBSTATE k) {
   if (g().dirty)g().UnDirty();
   switch (k) {
   case DOWN:g().horizontal-=1;
@@ -548,7 +580,7 @@ void FlyByKeyboard::KThrustLeft (int,KBSTATE k) {
     break;
   }
 }
-void FlyByKeyboard::KThrustUp (int,KBSTATE k) {
+void FlyByKeyboard::KThrustUp (const KBData&,KBSTATE k) {
   if (g().dirty)g().UnDirty();
   switch (k) {
   case DOWN:g().vertical+=1;
@@ -560,7 +592,7 @@ void FlyByKeyboard::KThrustUp (int,KBSTATE k) {
     break;
   }
 }
-void FlyByKeyboard::KThrustDown (int,KBSTATE k) {
+void FlyByKeyboard::KThrustDown (const KBData&,KBSTATE k) {
   if (g().dirty)g().UnDirty();
   switch (k) {
   case DOWN:g().vertical-=1;
@@ -572,7 +604,7 @@ void FlyByKeyboard::KThrustDown (int,KBSTATE k) {
     break;
   }
 }
-void FlyByKeyboard::KThrustFront(int,KBSTATE k) {
+void FlyByKeyboard::KThrustFront(const KBData&,KBSTATE k) {
   if (g().dirty)g().UnDirty();
   switch (k) {
   case DOWN:g().axial+=1;
@@ -584,7 +616,7 @@ void FlyByKeyboard::KThrustFront(int,KBSTATE k) {
     break;
   }
 }
-void FlyByKeyboard::KThrustBack (int,KBSTATE k) {
+void FlyByKeyboard::KThrustBack (const KBData&,KBSTATE k) {
   if (g().dirty)g().UnDirty();
   switch (k) {
   case DOWN:g().axial-=1;
@@ -597,7 +629,7 @@ void FlyByKeyboard::KThrustBack (int,KBSTATE k) {
   }
 }
 
-void FlyByKeyboard::DownKey (int,KBSTATE k) {
+void FlyByKeyboard::DownKey (const KBData&,KBSTATE k) {
   if (g().dirty)g().UnDirty();
   switch (k) {
   case UP: g().downrelease++;
@@ -614,7 +646,7 @@ void FlyByKeyboard::DownKey (int,KBSTATE k) {
 }
 
 
-void FlyByKeyboard::LeftKey (int, KBSTATE k) {
+void FlyByKeyboard::LeftKey (const KBData&,KBSTATE k) {
   if (g().dirty) g().UnDirty();
   switch (k) {
   case UP: g().leftrelease++;
@@ -629,7 +661,7 @@ void FlyByKeyboard::LeftKey (int, KBSTATE k) {
   default:break;
   }
 }
-void FlyByKeyboard::KSwitchFlightMode (int,KBSTATE k) {
+void FlyByKeyboard::KSwitchFlightMode (const KBData&,KBSTATE k) {
   if (g().dirty) g().UnDirty();
   switch (k) {
   case PRESS:
@@ -639,7 +671,7 @@ void FlyByKeyboard::KSwitchFlightMode (int,KBSTATE k) {
     break;
   }
 }
-void FlyByKeyboard::RightKey (int,KBSTATE k) {
+void FlyByKeyboard::RightKey (const KBData&,KBSTATE k) {
   if (g().dirty)  g().UnDirty();
   switch (k) {
   case UP: g().rightrelease++;
@@ -654,7 +686,7 @@ void FlyByKeyboard::RightKey (int,KBSTATE k) {
   default:break;
   }
 }
-void FlyByKeyboard::ABKey (int, KBSTATE k) {
+void FlyByKeyboard::ABKey (const KBData&,KBSTATE k) {
   if (g().dirty)  g().UnDirty();
   switch (k) {
   case UP: g().ABrelease++;
@@ -669,19 +701,27 @@ void FlyByKeyboard::ABKey (int, KBSTATE k) {
   }
 }
 
-void FlyByKeyboard::AutoKey (int, KBSTATE k) {
+void FlyByKeyboard::AutoKey (const KBData&,KBSTATE k) {
   if (g().dirty)  g().UnDirty();
   if (k==PRESS) {
     g().realauto=true;
   }
 }
-void FlyByKeyboard::SwitchCombatModeKey (int, KBSTATE k) {
+
+void FlyByKeyboard::EngageSpecAuto (const KBData&,KBSTATE k) {
+  if (g().dirty)  g().UnDirty();
+  if (k==PRESS) {
+    g().ASAP=true;
+  }
+}
+
+void FlyByKeyboard::SwitchCombatModeKey (const KBData&,KBSTATE k) {
   if (g().dirty)  g().UnDirty();
   if (k==PRESS) {
     g().switch_combat_mode=true;
   }
 }
-void FlyByKeyboard::StopAutoKey (int, KBSTATE k) {
+void FlyByKeyboard::StopAutoKey (const KBData&,KBSTATE k) {
   
   if (g().dirty)  g().UnDirty();
   if (k==PRESS) {
@@ -689,7 +729,7 @@ void FlyByKeyboard::StopAutoKey (int, KBSTATE k) {
   }
 }
 
-void FlyByKeyboard::StopKey (int,KBSTATE k)  {
+void FlyByKeyboard::StopKey (const KBData&,KBSTATE k)  {
   if (g().dirty)  g().UnDirty();
   switch (k) {
   case UP: g().stoppress=false;
@@ -699,7 +739,7 @@ void FlyByKeyboard::StopKey (int,KBSTATE k)  {
   default:break;
   }
 }
-void FlyByKeyboard::AccelKey (int,KBSTATE k) {
+void FlyByKeyboard::AccelKey (const KBData&,KBSTATE k) {
   if (g().dirty)  g().UnDirty();
   switch (k) {
   case UP: g().accelrelease++;
@@ -713,7 +753,7 @@ void FlyByKeyboard::AccelKey (int,KBSTATE k) {
   default:break;
   }
 }
-void FlyByKeyboard::DecelKey (int,KBSTATE k) {
+void FlyByKeyboard::DecelKey (const KBData&,KBSTATE k) {
   if (g().dirty)  g().UnDirty();
   switch (k) {
   case UP: g().decelrelease++;
@@ -729,7 +769,7 @@ void FlyByKeyboard::DecelKey (int,KBSTATE k) {
 }
 
 
-void FlyByKeyboard::StartKey (int,KBSTATE k)  {
+void FlyByKeyboard::StartKey (const KBData&,KBSTATE k)  {
   if (g().dirty)  g().UnDirty();
   switch (k) {
   case UP: g().startpress=false;
@@ -743,7 +783,7 @@ void FlyByKeyboard::StartKey (int,KBSTATE k)  {
 
 
 
-void FlyByKeyboard::RollRightKey (int,KBSTATE k) {
+void FlyByKeyboard::RollRightKey (const KBData&,KBSTATE k) {
   if (g().dirty)  g().UnDirty();
   switch (k) {
   case UP: g().rollrightrelease++;
@@ -757,13 +797,13 @@ void FlyByKeyboard::RollRightKey (int,KBSTATE k) {
   default:break;
   }
 }
-void FlyByKeyboard::MatchSpeedKey (int, KBSTATE k) {
+void FlyByKeyboard::MatchSpeedKey (const KBData&,KBSTATE k) {
   if (k==PRESS) {
     if (g().dirty)  g().UnDirty();
     g().matchspeed=true;
   }
 }
-void FlyByKeyboard::RollLeftKey (int,KBSTATE k) {
+void FlyByKeyboard::RollLeftKey (const KBData&,KBSTATE k) {
   if (g().dirty)  g().UnDirty();
   switch (k) {
   case UP: g().rollleftrelease++;

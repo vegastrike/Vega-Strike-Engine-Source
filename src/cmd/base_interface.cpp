@@ -22,6 +22,36 @@
 #include "gfx/stream_texture.h"
 #endif
 #include "main_loop.h"
+static void biModifyMouseSensitivity(int &x, int &y, bool invert){
+  int xrez=g_game.x_resolution;
+  int yrez=g_game.y_resolution;
+  static int whentodouble=XMLSupport::parse_int(vs_config->getVariable("joystick","double_mouse_position","1280"));
+  static float factor=XMLSupport::parse_float(vs_config->getVariable("joystick","double_mouse_factor","2"));
+  if (xrez>=whentodouble) {
+    x-=g_game.x_resolution/2;
+    y-=g_game.y_resolution/2;
+    if (invert) {
+      x/=factor;
+      y/=factor;
+    }else {
+      x*=factor;
+      y*=factor;
+    }
+    x+=g_game.x_resolution/2;
+    y+=g_game.y_resolution/2;
+    if (x>g_game.x_resolution)
+      x=g_game.x_resolution;
+    if (y>g_game.y_resolution)
+      y=g_game.y_resolution;
+    if (x<0) x=0;
+    if (y<0) y=0;
+  }
+}
+static bool createdbase=false;
+
+void ModifyMouseSensitivity(int &x, int &y) {
+  biModifyMouseSensitivity(x,y,false);
+}
 #ifdef BASE_MAKER
  #include <stdio.h>
  #ifdef _WIN32
@@ -43,7 +73,19 @@ static void CalculateRealXAndY (int xbeforecalc, int ybeforecalc, float *x, floa
 	(*x)=(((float)(xbeforecalc*2))/g_game.x_resolution)-1;
 	(*y)=-(((float)(ybeforecalc*2))/g_game.y_resolution)+1;
 }
-
+#define mymin(a,b) (((a)<(b))?(a):(b))
+static void SetupViewport() {
+        static int base_max_width=XMLSupport::parse_int(vs_config->getVariable("graphics","base_max_width","0"));
+        static int base_max_height=XMLSupport::parse_int(vs_config->getVariable("graphics","base_max_height","0"));
+        if (base_max_width&&base_max_height) {
+          int xrez = mymin(g_game.x_resolution,base_max_width);
+          int yrez = mymin(g_game.y_resolution,base_max_height);
+          int offsetx = (g_game.x_resolution-xrez)/2;
+          int offsety = (g_game.y_resolution-yrez)/2;
+          glViewport(offsetx,offsety,xrez,yrez);
+        }
+}
+#undef mymin
 BaseInterface::Room::~Room () {
 	int i;
 	for (i=0;i<links.size();i++) {
@@ -98,19 +140,25 @@ void BaseInterface::Room::BaseShip::Draw (BaseInterface *base) {
 		newmat.p.i*=newmat.p.k;
 		newmat.p.j*=newmat.p.k;
 		MultMatrix (final,cam,newmat);
+                SetupViewport();
 		GFXClear(GFXFALSE);//clear the zbuf
+
 		GFXEnable (DEPTHTEST);
 		GFXEnable (DEPTHWRITE);
 		GFXEnable(LIGHTING);
 		int light=0;
 		GFXCreateLight(light,GFXLight(true,GFXColor(1,1,1,1),GFXColor(1,1,1,1),GFXColor(1,1,1,1),GFXColor(.1,.1,.1,1),GFXColor(1,0,0),GFXColor(1,1,1,0),24),true);
-		(un)->DrawNow(final);
+
+		(un)->DrawNow(final,FLT_MAX);
 		GFXDeleteLight(light);
 		GFXDisable (DEPTHTEST);
 		GFXDisable (DEPTHWRITE);
 		GFXDisable(LIGHTING);
+                GFXDisable(TEXTURE1);
+                GFXEnable(TEXTURE0);
 		_Universe->AccessCamera()->setCockpitOffset(co);
 		_Universe->AccessCamera()->UpdateGFX();
+                SetupViewport();                
 //		_Universe->AccessCockpit()->SetView (CP_PAN);
 		GFXHudMode (GFXTRUE);
 	}
@@ -119,9 +167,113 @@ void BaseInterface::Room::BaseShip::Draw (BaseInterface *base) {
 void BaseInterface::Room::Draw (BaseInterface *base) {
 	int i;
 	for (i=0;i<objs.size();i++) {
-		if (objs[i])
+		if (objs[i]) {
+			GFXBlendMode(SRCALPHA,INVSRCALPHA);
 			objs[i]->Draw(base);
+			
+		}
 	}
+	GFXBlendMode(SRCALPHA,INVSRCALPHA);
+	// draw location markers
+	//<!-- config options in the "graphics" section -->
+	//<var name="base_enable_locationmarkers" value="true"/>
+	//<var name="base_locationmarker_sprite" value="base_locationmarker.spr"/>
+	//<var name="base_draw_locationtext" value="true"/>
+	//<var name="base_locationmarker_textoffset_x" value="0.025"/>
+	//<var name="base_locationmarker_textoffset_y" value="0.025"/>
+	//<var name="base_locationmarker_drawalways" value="false"/>
+	//<var name="base_locationmarker_distance" value="0.5"/>
+	//<var name="base_locationmarker_textcolor_r" value="1.0"/>
+	//<var name="base_locationmarker_textcolor_g" value="1.0"/>
+	//<var name="base_locationmarker_textcolor_b" value="1.0"/>
+	//<var name="base_drawlocationborders" value="false"/>
+	static bool enable_markers = XMLSupport::parse_bool(vs_config->getVariable("graphics","base_enable_locationmarkers","false"));
+	static bool draw_text      = XMLSupport::parse_bool(vs_config->getVariable("graphics","base_draw_locationtext","false"));
+	static bool draw_always    = XMLSupport::parse_bool(vs_config->getVariable("graphics","base_locationmarker_drawalways","false"));
+	static float y_lower       = -0.9; // shows the offset on the lower edge of the screen (for the textline there) -> Should be defined globally somewhere
+	if (enable_markers) {
+		float x, y, text_wid, text_hei;
+		for (int i=0; i<links.size(); i++) { //loop through all links and draw a marker for each
+			if (links[i]) {
+			if ((links[i]->alpha < 1) || (draw_always)) {
+				if (draw_always) { links[i]->alpha = 1; }  // set all alphas to visible
+				x = (links[i]->x + (links[i]->wid / 2));   // get the center of the location
+				y = (links[i]->y + (links[i]->hei / 2));   // get the center of the location
+
+				/* draw marker */
+				static string spritefile_marker = vs_config->getVariable("graphics","base_locationmarker_sprite","");
+				if (spritefile_marker.length()) {
+					static VSSprite *spr_marker = new VSSprite(spritefile_marker.c_str());
+					float wid,hei;
+					spr_marker->GetSize(wid,hei);
+					// check if the sprite is near a screenedge and correct its position if necessary
+					if ((x + (wid / 2)) >=  1     ) {x = ( 1      - (wid / 2));}
+					if ((y + (hei / 2)) >=  1     ) {y = ( 1      - (hei / 2));}
+					if ((x - (wid / 2)) <= -1     ) {x = (-1      + (wid / 2));}
+					if ((y - (hei / 2)) <= y_lower) {y = (y_lower + (hei / 2));}
+					spr_marker->SetPosition(x, y);
+					GFXDisable(TEXTURE1);
+					GFXEnable(TEXTURE0);
+					GFXColor4f(1,1,1,links[i]->alpha);
+					spr_marker->Draw();
+				} // if spritefile
+
+				if (draw_text) {
+					GFXDisable(TEXTURE0);
+					//get offset from config;
+					static float text_offset_x = XMLSupport::parse_float(vs_config->getVariable("graphics","base_locationmarker_textoffset_x","0"));
+					static float text_offset_y = XMLSupport::parse_float(vs_config->getVariable("graphics","base_locationmarker_textoffset_y","0"));
+					static float text_color_r  = XMLSupport::parse_float(vs_config->getVariable("graphics","base_locationmarker_textcolor_r","1"));
+					static float text_color_g  = XMLSupport::parse_float(vs_config->getVariable("graphics","base_locationmarker_textcolor_g","1"));
+					static float text_color_b  = XMLSupport::parse_float(vs_config->getVariable("graphics","base_locationmarker_textcolor_b","1"));
+					TextPlane text_marker;
+					text_marker.SetText(links[i]->text);
+					text_marker.GetCharSize(text_wid, text_hei);     // get average charactersize
+					float text_pos_x = x + text_offset_x;            // align right ...
+					float text_pos_y = y + text_offset_y + text_hei; // ...and on top
+					text_wid = text_wid * links[i]->text.length() * 0.25;     // calc ~width of text (=multiply the average characterwidth with the number of characters)
+					if ((text_pos_x + text_offset_x + text_wid) >= 1) {       // check right screenborder
+						text_pos_x = (x - abs(text_offset_x) - text_wid);     // align left
+					}
+					if ((text_pos_y + text_offset_y) >= 1) {                  // check upper screenborder
+						text_pos_y = (y - abs(text_offset_y));                // align on bottom
+					}
+					if ((text_pos_y + text_offset_y - text_hei) <= y_lower) { // check lower screenborder
+						text_pos_y = (y + abs(text_offset_y) + text_hei);     // align on top
+					}
+					text_marker.col = GFXColor(text_color_r, text_color_g, text_color_b, links[i]->alpha);
+					text_marker.SetPos(text_pos_x, text_pos_y);
+					text_marker.Draw();
+					GFXEnable(TEXTURE0);
+				} // if draw_text
+			}
+			} // if link
+		}  // for i
+		static bool draw_borders = XMLSupport::parse_bool(vs_config->getVariable("graphics","base_drawlocationborders","false"));
+		if (draw_borders) {
+			for (int i=0; i<links.size(); i++) { //loop through all links and draw a marker for each
+				if (links[i]) {
+					GFXColor4f(1,1,1,1);
+					GFXDisable(TEXTURE0);
+					GFXBegin (GFXLINE);
+					GFXVertex3d (links[i]->x              ,links[i]->y              ,0.0);
+					GFXVertex3d (links[i]->x              ,links[i]->y+links[i]->hei,0.0);
+
+					GFXVertex3d (links[i]->x              ,links[i]->y+links[i]->hei,0.0);
+					GFXVertex3d (links[i]->x+links[i]->wid,links[i]->y+links[i]->hei,0.0);
+
+					GFXVertex3d (links[i]->x+links[i]->wid,links[i]->y+links[i]->hei,0.0);
+ 					GFXVertex3d (links[i]->x+links[i]->wid,links[i]->y              ,0.0);
+
+					GFXVertex3d (links[i]->x+links[i]->wid,links[i]->y              ,0.0);
+					GFXVertex3d (links[i]->x              ,links[i]->y              ,0.0);
+					GFXEnd();
+					GFXEnable (TEXTURE0);
+				} // if link
+			} // for i
+		} // if draw_borders
+	} // enable_markers
+
 }
 static std::vector<BaseInterface::Room::BaseTalk *> active_talks;
 
@@ -130,6 +282,58 @@ BaseInterface::Room::BaseTalk::BaseTalk (std::string msg,std::string ind, bool o
 		active_talks.clear();
 	}
 	active_talks.push_back(this);
+}
+
+void BaseInterface::Room::BaseText::Draw (BaseInterface *base) {
+  int tmpx=g_game.x_resolution;
+  int tmpy=g_game.y_resolution;
+  static int base_max_width=XMLSupport::parse_int(vs_config->getVariable("graphics","base_max_width","0"));
+  static int base_max_height=XMLSupport::parse_int(vs_config->getVariable("graphics","base_max_height","0"));
+  if (base_max_width&&base_max_height) {
+    if (base_max_width<tmpx)
+      g_game.x_resolution=base_max_width;
+    if (base_max_height<tmpy)
+      g_game.y_resolution=base_max_height;
+  }
+  text.Draw();
+  g_game.x_resolution=tmpx;
+  g_game.y_resolution=tmpy;
+}
+
+void RunPython(const char *filnam) {
+	printf("Run python:\n%s\n", filnam);
+	if (filnam[0]) {
+		if (filnam[0]=='#') {
+			::Python::reseterrors();
+			PyRun_SimpleString(const_cast<char*>(filnam));
+			::Python::reseterrors();
+		}else {
+			FILE *fp=VSFileSystem::vs_open(filnam,"r");
+			if (fp) {
+				int length=strlen(filnam);
+				char *newfile=new char[length+1];
+				strncpy(newfile,filnam,length);
+				newfile[length]='\0';
+				::Python::reseterrors();
+				PyRun_SimpleFile(fp,newfile);
+				::Python::reseterrors();
+				fclose(fp);
+				processDelayedMissions();
+			} else {
+				fprintf(stderr,"Warning:python link file '%s' not found\n",filnam);
+			}
+		}
+	}
+}
+
+void BaseInterface::Room::BasePython::Draw (BaseInterface *base) {
+	timeleft+=GetElapsedTime()/getTimeCompression();
+	if (timeleft>=maxtime) {
+		timeleft=0;
+		printf("Running python script... ");
+		RunPython(this->pythonfile.c_str());
+		return; //do not do ANYTHING with 'this' after the previous statement...
+	}
 }
 
 void BaseInterface::Room::BaseTalk::Draw (BaseInterface *base) {
@@ -189,6 +393,7 @@ int BaseInterface::Room::MouseOver (BaseInterface *base,float x, float y) {
 
 BaseInterface *BaseInterface::CurrentBase=NULL;
 static BaseInterface *lastBaseDoNotDereference=NULL;
+
 bool RefreshGUI(void) {
 	bool retval=false;
 	if (_Universe->AccessCockpit()) {
@@ -216,13 +421,14 @@ void base_main_loop() {
 	UpdateTime();
 	muzak->Listen();
 	GFXBeginScene();
-	if (lastBaseDoNotDereference!=BaseInterface::CurrentBase) {
-		static int i=0;
-		if (i++%4==3) {
-			lastBaseDoNotDereference=BaseInterface::CurrentBase;
-		}
+	if (createdbase) {
+
+          //		static int i=0;
+          //		if (i++%4==3) {
+                  createdbase=false;
+                  //		}
 		AUDStopAllSounds();
-	}
+	}        
 	if (!RefreshGUI()) {
 		restore_main_loop();
 	}else {
@@ -340,6 +546,7 @@ void BaseInterface::Room::Click (BaseInterface* base,float x, float y, int butto
 				if (curlink) {
 					int x=(((curlink->x+(curlink->wid/2))+1)/2)*g_game.x_resolution;
 					int y=-(((curlink->y+(curlink->hei/2))-1)/2)*g_game.y_resolution;
+                                        biModifyMouseSensitivity(x,y,true);
 					winsys_warp_pointer(x,y);
 					PassiveMouseOverWin(x,y);
 					break;
@@ -369,7 +576,26 @@ void BaseInterface::MouseOver (int xbeforecalc, int ybeforecalc) {
 		curtext.col=GFXColor(0,1,0,1);
 		drawlinkcursor=false;
 	}
+        static bool  draw_always      = XMLSupport::parse_bool(vs_config->getVariable("graphics","base_locationmarker_drawalways","false"));
+        static float defined_distance = XMLSupport::parse_float(vs_config->getVariable("graphics","base_locationmarker_distance","0.5"));
+		defined_distance = abs(defined_distance);
+        if (!draw_always) {
+          float cx, cy, wid, hei;
+          float dist_cur2link;
+          for (i=0; i<rooms[curroom]->links.size(); i++) {
+            cx = (rooms[curroom]->links[i]->x + (rooms[curroom]->links[i]->wid / 2));   //get the center of the location
+            cy = (rooms[curroom]->links[i]->y + (rooms[curroom]->links[i]->hei / 2));   //get the center of the location
+            dist_cur2link = sqrt(pow((cx-x),2) + pow((cy-y),2));
+            if ( dist_cur2link < defined_distance ) {
+              rooms[curroom]->links[i]->alpha = (1 - (dist_cur2link / defined_distance));
+            }
+            else {
+              rooms[curroom]->links[i]->alpha = 1;
+            } //if
+          } // for i
+        } // if !draw_always
 }
+
 
 void BaseInterface::Click (int xint, int yint, int button, int state) {
 	float x,y;
@@ -378,6 +604,7 @@ void BaseInterface::Click (int xint, int yint, int button, int state) {
 }
 
 void BaseInterface::ClickWin (int button, int state, int x, int y) {
+        ModifyMouseSensitivity(x,y);
 	if (CurrentBase) {
 		if (CurrentBase->CallComp) {
 #ifdef NEW_GUI
@@ -396,6 +623,7 @@ void BaseInterface::ClickWin (int button, int state, int x, int y) {
 
 
 void BaseInterface::PassiveMouseOverWin (int x, int y) {
+        ModifyMouseSensitivity(x,y);
 	SetSoftwareMousePosition(x,y);
 	if (CurrentBase) {
 		if (CurrentBase->CallComp) {
@@ -414,6 +642,7 @@ void BaseInterface::PassiveMouseOverWin (int x, int y) {
 }
 
 void BaseInterface::ActiveMouseOverWin (int x, int y) {
+        ModifyMouseSensitivity(x,y);
 	SetSoftwareMousePosition(x,y);
 	if (CurrentBase) {
 		if (CurrentBase->CallComp) {
@@ -563,10 +792,13 @@ const char * compute_time_of_day (Unit * base,Unit *un) {
     return "night";
   return "sunset";
 }
+
+extern void ExecuteDirector();
 BaseInterface::BaseInterface (const char *basefile, Unit *base, Unit*un)
 		: curtext(GFXColor(0,1,0,1),GFXColor(0,0,0,1)) , othtext(GFXColor(1,1,.5,1),GFXColor(0,0,0,1)) {
 	CurrentBase=this;
 	CallComp=false;
+        createdbase=true;
 	caller=un;
         curroom=0;
 	curlinkindex=0;
@@ -601,6 +833,11 @@ BaseInterface::BaseInterface (const char *basefile, Unit *base, Unit*un)
 #endif
 	}
 	GotoLink(0);
+        {
+          for (unsigned int i=0;i<16;++i) {
+            ExecuteDirector();
+          }
+        }
 }
 
 void BaseInterface::Room::Python::Click (BaseInterface *base,float x, float y, int button, int state) {
@@ -719,30 +956,9 @@ void BaseInterface::Room::Talk::Click (BaseInterface *base,float x, float y, int
 
 void BaseInterface::Room::Link::Click (BaseInterface *base,float x, float y, int button, int state) {
 	if (state==WS_MOUSE_UP) {
-		const char * filnam=this->pythonfile.c_str();
-		if (filnam[0]) {
-                  if (filnam[0]=='#') {
-                    ::Python::reseterrors();
-                    PyRun_SimpleString(const_cast<char*>(filnam));
-                    ::Python::reseterrors();
-                  }else {
-			FILE *fp=VSFileSystem::vs_open(filnam,"r");
-			if (fp) {
-				int length=strlen(filnam);
-				char *newfile=new char[length+1];
-				strncpy(newfile,filnam,length);
-				newfile[length]='\0';
-				::Python::reseterrors();
-				PyRun_SimpleFile(fp,newfile);
-				::Python::reseterrors();
-				fclose(fp);
-                                processDelayedMissions();
-			} else {
-				fprintf(stderr,"Warning:python link file '%s' not found\n",filnam);
-			}
-                  }
-		}
-	}}
+		RunPython(this->pythonfile.c_str());
+	}
+}
 
 struct BaseColor {
   unsigned char r,g,b,a;
@@ -777,16 +993,18 @@ static void AnimationDraw() {
   GFXEnd();
 #endif
 }
-
 void BaseInterface::Draw () {
 	GFXColor(0,0,0,0);
+        SetupViewport();
 	StartGUIFrame(GFXTRUE);
-	AnimatedTexture::UpdateAllFrame();
+        if (GetElapsedTime()<1)
+          AnimatedTexture::UpdateAllFrame();
 	Room::BaseTalk::hastalked=false;
 	rooms[curroom]->Draw(this);
         AnimationDraw();
 
 	float x,y;
+        glViewport (0, 0, g_game.x_resolution,g_game.y_resolution);
 	curtext.GetCharSize(x,y);
 	curtext.SetPos(-.99,-1+(y*1.5));
 //	if (!drawlinkcursor)
@@ -797,7 +1015,9 @@ void BaseInterface::Draw () {
 	othtext.SetPos(-.99,1);
 //	GFXColor4f(0,.5,1,1);
 	othtext.Draw();
+        SetupViewport();
 	EndGUIFrame (drawlinkcursor);
+        glViewport (0, 0, g_game.x_resolution,g_game.y_resolution);
 	Unit *un=caller.GetUnit();
 	Unit *base=baseun.GetUnit();
 	if (un&&(!base)) {

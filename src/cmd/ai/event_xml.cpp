@@ -10,6 +10,7 @@
 #include "vsfilesystem.h"
 #include "vs_globals.h"
 #include "configxml.h"
+extern bool validateHardCodedScript(std::string s);
 //serves to run through a XML file that nests things for "and". 
 
 
@@ -21,17 +22,27 @@ using XMLSupport::parse_float;
 using XMLSupport::parse_bool;
 using XMLSupport::parse_int;
 namespace AIEvents {
-  AIEvresult::AIEvresult (int type, float const min, const float max, float timetofinish,float timeuntilinterrupts, const std::string &aiscript) {
+  AIEvresult::AIEvresult (int type, float const min, const float max, float timetofinish,float timeuntilinterrupts, float priority , const std::string &aiscript) {
 	 this->timetointerrupt=timeuntilinterrupts;
 	 this->timetofinish=timetofinish;
 	 this->type = type; 
-
+         this->priority=priority;
 	 this->max = max; 
 
 	 this->min = min; 
 
 	 this->script = aiscript;
 
+         if (!validateHardCodedScript(this->script)) {
+           static int aidebug = XMLSupport::parse_int(vs_config->getVariable("AI","debug_level","0"));
+           if (aidebug) {
+             for (int i=0;i<10;++i) {               
+               printf ("SERIOUS WARNING %s\n",this->script.c_str());
+               fprintf (stderr,"SERIOUS WARNING: %s\n",this->script.c_str());
+             }
+           }
+           printf ("SERIOUS WARNING in AI script: no fast method to perform %s\nwhen type %d is at least %f and at most %f with priority %f for %f time\n",this->script.c_str(),type,min,max,priority,timetofinish);
+         }
   }
 
   const int  AIUNKNOWN=0;
@@ -42,6 +53,7 @@ namespace AIEvents {
   const int TIMEIT=5;
   const int OBEDIENCE=6;
   const int TIMETOINTERRUPT=7;
+  const int PRIORITY=8;
   const XMLSupport::EnumMap::Pair AIattribute_names[] = {
     EnumMap::Pair ("UNKNOWN", AIUNKNOWN),
     EnumMap::Pair ("min", AIMIN), 
@@ -50,9 +62,10 @@ namespace AIEvents {
     EnumMap::Pair ("Script", AISCRIPT),
     EnumMap::Pair ("time", TIMEIT),
     EnumMap::Pair ("obedience", OBEDIENCE),
-    EnumMap::Pair ("timetointerrupt", TIMETOINTERRUPT)	
+    EnumMap::Pair ("timetointerrupt", TIMETOINTERRUPT),
+    EnumMap::Pair ("priority", PRIORITY)	
   };
-  const XMLSupport::EnumMap attr_map(AIattribute_names, 8);
+  const XMLSupport::EnumMap attr_map(AIattribute_names, 9);
 
   void GeneralAIEventBegin (void *userData, const XML_Char *name, const XML_Char **atts) {
     AttributeList attributes (atts);
@@ -63,8 +76,11 @@ namespace AIEvents {
 	float timetointerrupt = 0;
     int elem = eam->element_map.lookup(name);
     AttributeList::const_iterator iter;
+    float priority=4;
     eam->level++;
     if (elem==0) {
+      eam->result.push_back(std::list<AIEvresult>());
+      eam->result.push_back(std::list<AIEvresult>());
       for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
 	switch(attr_map.lookup((*iter).name)) {
 	case TIMEIT:
@@ -75,9 +91,9 @@ namespace AIEvents {
 	}
       }
     }else {
-      assert (eam->level!=1);//might not have a back on result();
-      if (eam->level==2) 
-	eam->result.push_back(std::list<AIEvresult>());
+      assert (eam->level!=1&&eam->result.size()>=2);//might not have a back on result();
+      if (eam->result.back().size()!=eam->result[eam->result.size()-2].size())
+	eam->result.push_back(eam->result.back());
 
       for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
 	switch(attr_map.lookup((*iter).name)) {
@@ -94,45 +110,73 @@ namespace AIEvents {
 	  aiscriptname = (*iter).value;
 	  break;
 	case TIMEIT:
-		timetofinish=XMLSupport::parse_float ((*iter).value);
-		break;
+          timetofinish=XMLSupport::parse_float ((*iter).value);
+          break;
 	case TIMETOINTERRUPT:
-		timetointerrupt=XMLSupport::parse_float((*iter).value);
-		break;
+          timetointerrupt=XMLSupport::parse_float((*iter).value);
+          break;
+        case PRIORITY:
+          priority = XMLSupport::parse_float((*iter).value);
+          break;
 	default: 
 	  break;
 	}
       }
-      eam->result.back().push_back (AIEvresult(elem, min,max,timetofinish,timetointerrupt,aiscriptname));
+      AIEvresult newelem(elem, min,max,timetofinish,timetointerrupt,priority,aiscriptname);
+      eam->result.back().push_back (newelem);
+      eam->result[eam->result.size()-2].push_back (newelem);
     }
   }  
 
   void GeneralAIEventEnd (void *userData, const XML_Char *name) {
-    ((ElemAttrMap *)userData)->level--;    
-    
+    ElemAttrMap * eam = ((ElemAttrMap *)userData);
+    eam->level--;    
+    if (eam->result.back().size()==0) {
+      eam->result.pop_back();     
+      assert(eam->level==0);
+    }else {
+      eam->result.back().pop_back();
+    }        
   }  
   void LoadAI(const char * filename, ElemAttrMap &result, const string &faction) {//returns obedience
 	using namespace VSFileSystem;
     const int chunk_size = 16384;
-    string full_filename;
+
     result.obedience=XMLSupport::parse_float (vs_config->getVariable ("AI",
 								      "Targetting",
 								      "obedience",
 								      ".99"));
     result.maxtime=10;
     //full_filename = string("ai/events/") + faction+string("/")+filename;
-    full_filename = faction+string("/")+filename;
     //FILE * inFile = VSFileSystem::vs_open (full_filename.c_str(), "r");
-	VSFile f;
-	VSError err = f.OpenReadOnly( full_filename);
-    if (err>Ok) {
-      full_filename = filename;
-      err = f.OpenReadOnly (full_filename, AiFile);
-    }
+    VSFile f;
+    VSError err;
+    err = f.OpenReadOnly (filename, AiFile);
     if(err>Ok) {
       printf("ai file %s not found\n",filename);
-      assert(0);
-      return;
+      string full_filename=filename;
+      full_filename=full_filename.substr(0,strlen(filename)-4);
+      string::size_type where = full_filename.find_last_of(".");
+      string type=".agg.xml";
+      if (where!=string::npos) {
+        type = full_filename.substr(where);
+        full_filename=full_filename.substr(0,where)+".agg.xml";
+        err = f.OpenReadOnly (full_filename, AiFile);              
+      }
+      if (err>Ok) {
+        printf("ai file %s again not found\n",full_filename.c_str());
+        full_filename="default";
+        full_filename+=type;
+        err = f.OpenReadOnly (full_filename, AiFile);
+      }
+      if (err>Ok) {
+        printf("ai file again %s again not found\n",full_filename.c_str());
+        err = f.OpenReadOnly ("default.agg.xml", AiFile);
+        if (err>Ok) {
+          printf("ai file again default.agg.xml again not found\n");
+          
+        }
+      }
     }	
     XML_Parser parser = XML_ParserCreate (NULL);
     XML_SetUserData (parser, &result);

@@ -1,4 +1,4 @@
-ld    -force_flat_namespace -nomultidefs  -o vegastrike debug_vs.o			\
+ld   -nomultidefs  -o vegastrike debug_vs.o			\
 	gfxlib_struct.o		\
 	in_joystick.o			\
 	force_feedback.o		\
@@ -7,6 +7,7 @@ ld    -force_flat_namespace -nomultidefs  -o vegastrike debug_vs.o			\
 	in_sdl.o				\
 	in_mouse.o			\
 	in_main.o				\
+	main.o				\
 	in_handler.o			\
 	main_loop.o			\
 	physics.o				\
@@ -38,5 +39,11 @@ ld    -force_flat_namespace -nomultidefs  -o vegastrike debug_vs.o			\
 	load_mission.o			\
 	savegame.o				\
 	vs_globals.o				\
-	vs_path.o					\
-aldrv/libaldrv.a common/libvscommon.a networking/libnetclient.a cmd/script/script_call_briefing.o cmd/script/libscript.a cmd/script/c_alike/libc_alike.a python/briefing_wrapper.o cmd/libcmd.a cmd/base_init.o python/libpython.a gfx/libgfx.a cmd/ai/libai.a gldrv/libgldrv.a gui/libgui.a networking/libnet.a cmd/collide/libcollide.a  boost/libboost_python.a -lpthread  -lobjc -L/System/Library/Frameworks/OpenGL.framework/Libraries -lGL -lGLU  -framework GLUT /sw/lib/libexpat.a /sw/lib/libjpeg.a /sw/lib/python2.2/config/libpython2.2.a /Users/daniel/Install/libpng-1.2.5/libpng.a /users/daniel/install/zlib/libz.a  /usr/lib/gcc/darwin/3.1/libstdc++.a
+	vsfilesystem.o					\
+	pk3.o					\
+aldrv/libaldrv.a common/libvscommon.a networking/libnetclient.a cmd/script/script_call_briefing.o cmd/script/libscript.a cmd/script/c_alike/libc_alike.a python/briefing_wrapper.o cmd/libcmd.a cmd/base_init.o python/libpython.a gfx/nav/libnav.a gfx/libgfx.a cmd/ai/libai.a gldrv/libgldrv.a gui/libgui.a networking/libnet.a networking/lowlevel/libnetlowlevel.a cmd/collide/libcollide.a  boost/libboost_python.a  -lpthread   -framework OpenGL -framework GLUT /sw/lib/libexpat.a /sw/lib/libjpeg.a /Users/daniel/Install/libpng/libpng.a /users/daniel/install/zlib/libz.a  /usr/lib/gcc/darwin/3.1/libstdc++.a -framework AppKit /users/daniel/Vega/openal/linux/src/libopenal.a /usr/lib/gcc/darwin/3.1/libgcc.a  /Developer/SDKs/MacOSX10.2.8.sdk/usr/lib/crt1.o -ldl /Users/daniel/Vega/Python-2.2.3/libpython2.2.a  /Users/daniel/Install/SDL-1.2.7/src/.libs/libSDL.a -framework IOKit -framework Foundation -framework CoreFoundation -framework ApplicationServices -framework CoreServices  -framework Carbon -lcups -lbsm -framework SystemConfiguration -framework CoreAudio -framework AudioUnit -framework AudioToolbox -framework Quicktime
+
+#/sw/lib/python2.2/config/libpython2.2.a 
+#/usr/lib/dyld
+#
+#/Developer/SDKs/MacOSX10.2.8.sdk/usr/lib/dylib1.o 

@@ -1336,8 +1336,8 @@ vector <Mesh*> Mesh::LoadMeshes(const char * filename, const Vector &scale, int 
     return retval;
   }else {
     f.Close();
-    int dummyXML;
-    Mesh * m = new Mesh (filename,scale,faction,fg,dummyXML);
+    bool original=false;
+    Mesh * m = new Mesh (filename,scale,faction,fg,original);
     vector <Mesh*> ret;
     ret.push_back(m);
     return ret;    

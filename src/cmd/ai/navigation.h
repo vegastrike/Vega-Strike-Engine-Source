@@ -28,7 +28,7 @@ class MoveToParent {
   unsigned char terminatingY;
   unsigned char terminatingZ;
   Vector last_velocity;
-  bool OptimizeSpeed (Unit * parent, float v, float &a);
+  bool OptimizeSpeed (Unit * parent, float v, float &a, float max_speed);
   bool Done (const Vector &);
   bool selfterminating;
 public:
@@ -74,7 +74,7 @@ class ChangeHeading : public Order {
   Vector last_velocity;
   QVector final_heading;
   bool terminating;
-  bool OptimizeAngSpeed(float limit, float v, float &a);
+  bool OptimizeAngSpeed(float limitpos,float limitneg, float v, float &a);
   bool Done (const Vector &);
   void TurnToward (float angle, float ang_vel, float &torque);
 protected:
@@ -82,7 +82,7 @@ protected:
  
  public:
   ///takes in the destination target, and the ammount of accuracy (how many times it should miss destination and come back) should be used
-   ChangeHeading(const QVector &final_heading, int switchback, float turning_speed=1) : Order(FACING,SLOCATION), turningspeed(turning_speed), switchbacks(switchback),terminatingX(0),terminatingY(0),last_velocity(0,0,0),final_heading(final_heading), terminating(false) {}
+   ChangeHeading(const QVector &final_heading, int switchback, float turning_speed=1, bool term=false) : Order(FACING,SLOCATION), turningspeed(turning_speed), switchbacks(switchback),terminatingX(0),terminatingY(0),last_velocity(0,0,0),final_heading(final_heading), terminating(term) {}
   void SetDest (const QVector&);
   virtual void Execute();
   virtual string getOrderDescription() { return "chhead"; };
@@ -99,6 +99,19 @@ public:
   virtual void Execute ();
   virtual string getOrderDescription() { return "facet"; };
   virtual ~FaceTarget();
+};
+/**
+ * This class analyzes a Unit's position and adjusts ChangeHeading to
+ * SPEC towards target
+ */
+class AutoLongHaul : public ChangeHeading {
+  bool finish;
+public:
+  AutoLongHaul (bool fini=false, int accuracy =1);
+  virtual void Execute ();
+  virtual void SetParent(Unit* parent1);
+  virtual string getOrderDescription() { return "ASAP"; };
+  virtual ~AutoLongHaul();
 };
 /**
  * This class analyzes a Unit's position and adjusts ChangeHeading to face

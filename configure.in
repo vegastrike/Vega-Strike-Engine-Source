@@ -335,7 +335,6 @@ AC_MSG_RESULT([${is_freebsd}])
 #if test "x$is_freebsd" = "xyes" ; then
 #    VS_LIBS="$VS_LIBS -lutil"
 #fi
-VS_LIBS="$VS_LIBS -lutil"
 dnl --------------------------------------------------------------------------
 dnl Check if compiling for MacOSX
 dnl --------------------------------------------------------------------------
@@ -348,16 +347,18 @@ AC_EGREP_CPP(yes,
 ], [is_macosx=yes], [is_macosx=no] )
 AC_MSG_RESULT([${is_macosx}])
 
+
+
 if test "x$is_macosx" = "xyes" ; then
-	CXXFLAGS="$CXXFLAGS -I/System/Library/Frameworks/Carbon.framework/Libraries/CIncludes"
+	CXXFLAGS="$CXXFLAGS -I/Developer/SDKs/MacOSX10.2.8sdk/System/Library/Frameworks/Carbon.framework/Libraries/CIncludes"
 	CPPFLAGS="$CPPFLAGS -Wno-long-double"
     dnl GL_CPPFLAGS="$GL_CPPFLAGS -framework OpenGL"
     dnl GLUT_CPPFLAGS="$GLUT_CPPFLAGS -framework GLUT"
-	VS_LIBS="$VS_LIBS -framework OpenGL -framework GLUT"
-    with_gl_inc=/System/Library/Frameworks/Carbon.framework/Libraries/CIncludes
-    with_gl_libs=/System/Library/Frameworks/OpenGL.framework/Libraries
-    with_al_inc=/Library/Frameworks/OpenAL.framework/Headers
-    with_al_libs=/Library/Frameworks/OpenAL.framework/
+	VS_LIBS="$VS_LIBS -F/Developer/SDKs/MacOSX10.2.8.sdk/System/Library/Frameworks  -framework OpenGL -framework GLUT"
+    with_gl_inc=/Developer/SDKs/MacOSX10.2.8.sdk/System/Library/Frameworks/Carbon.framework/Libraries/CIncludes
+    with_gl_libs=/Developer/SDKs/MacOSX10.2.8.sdk/System/Library/Frameworks/OpenGL.framework/Libraries
+    with_al_inc="/Developer/SDKs/MacOSX10.2.8.sdk/Library/Frameworks/OpenAL.framework/Headers -I/sw/include"
+    with_al_libs="/Developer/SDKs/MacOSX10.2.8.sdk/Library/Frameworks/OpenAL.framework/ -L/sw/lib"
     with_expat_libs=/sw/lib
     with_png_libs=/sw/lib
     with_jpeg_libs=/sw/lib
@@ -367,6 +368,8 @@ if test "x$is_macosx" = "xyes" ; then
     PYTHON_LDOPTS="-L/Library/Frameworks/Python.framework"
     with_python_inc=/Library/Frameworks/Python.framework/Headers
     VS_LIBS="$VS_LIBS -lobjc"
+else
+    VS_LIBS="$VS_LIBS -lutil"
 fi
 
 dnl
@@ -583,7 +586,7 @@ fi
 
 saved_LIBS="$LIBS"
 
-AC_DEFUN( CHECK_FOR_GL_LIB, [
+AC_DEFUN([CHECK_FOR_GL_LIB], [
     AC_MSG_CHECKING([for $GL_LIB_NAME library])
     LIBS="$saved_LIBS $VS_LIBS $GL_LDOPTS -l$GL_LIB_NAME"
     AC_TRY_LINK( , , have_GL=yes, have_GL=no)
@@ -606,7 +609,7 @@ AC_DEFUN( CHECK_FOR_GL_LIB, [
     fi
 ])
 
-AC_DEFUN( FIND_GL_LIB, [
+AC_DEFUN([FIND_GL_LIB], [
     if test "x$with_gl_lib_name" = "x" ; then
         GL_LIB_NAME="GL"
     else
@@ -675,7 +678,7 @@ fi
 
 saved_LIBS="$LIBS"
 
-AC_DEFUN( CHECK_FOR_GLU_LIB, [
+AC_DEFUN([CHECK_FOR_GLU_LIB], [
     AC_MSG_CHECKING([for $GLU_LIB_NAME library])
     LIBS="$saved_LIBS $VS_LIBS $GLU_LDOPTS -l$GLU_LIB_NAME"
     AC_TRY_LINK( , , have_GLU=yes, have_GLU=no)
@@ -697,7 +700,7 @@ AC_DEFUN( CHECK_FOR_GLU_LIB, [
     fi
 ])
 
-AC_DEFUN( FIND_GLU_LIB, [
+AC_DEFUN([FIND_GLU_LIB], [
     if test "x$with_glu_lib_name" = "x" ; then
         GLU_LIB_NAME="GLU"
     else
@@ -758,7 +761,7 @@ fi
 
 dnl check for gl.h
 saved_CPPFLAGS="$CPPFLAGS"
-AC_DEFUN( CHECK_FOR_GL_H, [
+AC_DEFUN([CHECK_FOR_GL_H], [
     CPPFLAGS="$saved_CPPFLAGS $GL_CPPFLAGS $VS_CPPFLAGS"
 
     AC_MSG_CHECKING([for GL/gl.h])
@@ -788,14 +791,21 @@ dnl Check for glext.h
 if test "x$is_macosx" = "xyes" ; then
     have_glext_h=yes
 else
-    AC_CHECK_HEADERS(GL/glext.h, have_glext_h=yes, have_glext_h=no )
+    AC_CHECK_HEADERS([GL/gl.h GL/glext.h], [have_glext_h=yes], [have_glext_h=no],
+    [[
+    #include <GL/gl.h>    
+    #include <GL/glext.h>
+    #if (!defined(GL_ARB_vertex_buffer_object) ) && GL_GLEXT_VERSION<21
+    #error "Download http://oss.sgi.com/projects/ogl-sample/ABI/glext.h; Place it in the directory /usr/include/GL."
+    #endif
+    ]])
 fi
 
 if test "x$have_glext_h" = "xno" ; then
     AC_MSG_ERROR([
 *****************************************************************
-You are missing the file glext.h.
-You can get a copy at
+Your file glext.h is too old. (Must be Version 21 or greater)
+You can get a new copy at
 http://oss.sgi.com/projects/ogl-sample/ABI/glext.h
 Place it in the directory /usr/include/GL.
 *****************************************************************])
@@ -842,7 +852,7 @@ else
     GLUT_LDOPTS="-L$with_glut_libs"
 fi
 
-AC_DEFUN( CHECK_FOR_GLUT_LIB, [
+AC_DEFUN([CHECK_FOR_GLUT_LIB], [
     AC_MSG_CHECKING([for $GLUT_LIB_NAME library])
     if test "x$is_macosx" = "xyes" ; then
         LIBS="$saved_LIBS $VS_LIBS $GLUT_LDOPTS -framework GLUT"
@@ -917,7 +927,7 @@ else
     EXPAT_LDOPTS="-L$with_expat_libs"
 fi
 
-AC_DEFUN( CHECK_FOR_EXPAT_LIB, [
+AC_DEFUN([CHECK_FOR_EXPAT_LIB], [
     AC_MSG_CHECKING([for $EXPAT_LIB_NAME library])
     LIBS="$EXPAT_LDOPTS -l$EXPAT_LIB_NAME"
     AC_TRY_LINK( , , have_expat_lib=yes, have_expat_lib=no )
@@ -984,7 +994,7 @@ else
     PNG_LDOPTS="-L$with_png_libs"
 fi
 
-AC_DEFUN( CHECK_FOR_PNG_LIB, [
+AC_DEFUN([CHECK_FOR_PNG_LIB], [
     AC_MSG_CHECKING([for $PNG_LIB_NAME library])
     LIBS="$PNG_LDOPTS -l$PNG_LIB_NAME"
     AC_TRY_LINK( , , have_png_lib=yes, have_png_lib=no )
@@ -1055,7 +1065,7 @@ else
     JPEG_LDOPTS="-L$with_jpeg_libs"
 fi
 
-AC_DEFUN( CHECK_FOR_JPEG_LIB, [
+AC_DEFUN([CHECK_FOR_JPEG_LIB], [
     AC_MSG_CHECKING([for $JPEG_LIB_NAME library])
     LIBS="$JPEG_LDOPTS -l$JPEG_LIB_NAME"
     AC_TRY_LINK( , , have_jpeg_lib=yes, have_jpeg_lib=no )
@@ -1121,9 +1131,9 @@ if test "x$sdl_sound" != "xno" ; then
         OPENAL_LDOPTS="-L$with_openal_libs"
     fi
 
-    AC_DEFUN( CHECK_FOR_OPENAL_LIB, [
+    AC_DEFUN([CHECK_FOR_OPENAL_LIB], [
         AC_MSG_CHECKING([for $OPENAL_LIB_NAME library])
-	LIBS="$MACORPCLIBS"
+	LIBS="$MACORPCLIBS $OPENAL_LDOPTS"
         AC_TRY_LINK( , , have_openal_lib=yes, have_openal_lib=no )
         AC_MSG_RESULT([$have_openal_lib])
     ]) 
@@ -1136,10 +1146,15 @@ if test "x$sdl_sound" != "xno" ; then
 
     if test "x$is_macosx" = "xyes" ; then
       MACORPCLIBS="$OPENAL_LDOPTS -framework OpenAL"
+      CHECK_FOR_OPENAL_LIB
+    fi
+    if test "x$have_openal_lib" = "xyes" ; then
+      EPEE_DAY="september 30"
     else
       MACORPCLIBS="$OPENAL_LDOPTS -l$OPENAL_LIB_NAME"
+      CHECK_FOR_OPENAL_LIB
     fi
-        CHECK_FOR_OPENAL_LIB
+
     
         if test "x$have_openal_lib" = "xyes" ; then
             LIBS="$saved_LIBS"
@@ -1156,7 +1171,7 @@ if test "x$sdl_sound" != "xno" ; then
 
 fi
 
-
+	
 dnl --------------------------------------------------------------------------
 dnl Check for OpenAL headers
 dnl --------------------------------------------------------------------------
@@ -1172,7 +1187,7 @@ fi
 dnl check for al.h
 saved_CPPFLAGS="$CPPFLAGS"
 
-AC_DEFUN( CHECK_FOR_AL_H, [
+AC_DEFUN([CHECK_FOR_AL_H], [
     CPPFLAGS="$saved_CPPFLAGS $AL_CPPFLAGS"
     if test "x$is_macosx" = "xno" ; then
         CPPFLAGS="$VS_CPPFLAGS $AL_CPPFLAGS"
@@ -1215,6 +1230,50 @@ else
     fi
 fi
 
+AC_ARG_ENABLE(vorbis_sound, AC_HELP_STRING([--disable-vorbis], [Disable vorbis support]),vorbis_sound=$enableval)
+
+AC_ARG_WITH(vorbis-libs, AC_HELP_STRING([--with-vorbis-libs=DIR], [Location of vorbis library]))
+AC_ARG_WITH(vorbis-inc, AC_HELP_STRING([--with-vorbis-inc=DIR], [Location of vorbis includes]))
+if test "x$vorbis_sound" != "xno" ;then
+    if test "x$with_vorbis_libs" = "x" ; then
+        VORBIS_LDOPTS=""
+    else
+        VORBIS_LDOPTS="-L$with_vorbis_libs"
+    fi
+    saved_lIBS="$RRLIBS"
+    
+    AC_MSG_CHECKING([for vorbis library])
+    LIBS=" $VORBIS_LDOPTS -lvorbisfile -lvorbis -logg "
+    AC_TRY_LINK( , , have_vorbis=yes, have_vorbis=no)
+    AC_MSG_RESULT([$have_vorbis])
+    
+
+    if test "x$have_openal_lib" = "xyes" ; then
+       LIBS="$saved_LIBS"
+       VS_LIBS="$VS_LIBS $VORBIS_LDOPTS -lvorbisfile -lvorbis -logg "
+       if test "x$with_vorbis_libs" = "x" ; then
+           VORBIS_CFLAGS=""
+       else
+           VORBIS_CFLAGS="-I$with_vorbis_inc"
+       fi
+       	   LIBS=" $VORBIS_LDOPTS -lvorbisfile -lvorbis -logg "
+	   saved_CPPFLAGS="$CPPFLAGS"
+	   CPPFLAGS="$saved_CPPFLAGS $VORBIS_CFLAGS"
+	   AC_MSG_CHECKING([for vorbis header])
+	   AC_TRY_CPP([#include <vorbis/vorbisfile.h> ] ,have_vorbis_h=yes , have_vorbis_h=no)
+	   AC_MSG_RESULT([$have_vorbis_h])]
+	   if test "x$have_vorbis_h" = "xyes" ; then
+	      VS_CPPFLAGS="${VS_CPPFLAGS} ${VORBIS_CFLAGS} -DHAVE_OGG "
+	      echo "found VORBIS header: Enabling ingame ogg support:: ${VS_CPPFLAGS}"
+	   else
+	      echo "failed to locate VORBIS  install vorbis/vorbisfile.h"
+	   fi
+	   
+       
+    else
+	echo "failed to locate VORBIS library"
+    fi
+fi
 
 CPPFLAGS="$saved_CPPFLAGS" 
 VS_CPPFLAGS="${VS_CPPFLAGS} ${AL_CPPFLAGS}"
@@ -1241,7 +1300,7 @@ dnl AC_ARG_ENABLE(crypto, AC_HELP_STRING([--enable-crypto], [Enable crypto++ lib
 				[])
 
 if test "$CRYPTO" = "1" ; then
-	dnl AC_DEFUN( CHECK_FOR_CRYPTOLIB_H, [
+	dnl AC_DEFUN([CHECK_FOR_CRYPTOLIB_H], [
 	dnl	CPPFLAGS="$CPPFLAGS $CRYPTO_FLAGS"
 	dnl    dnl AC_MSG_CHECKING([for crypto++/cryptlib.h])
     dnl    AC_CHECK_HEADERS(crypto++/cryptlib.h, have_crypto_h=yes, have_crypto_h=no )
@@ -1263,7 +1322,7 @@ if test "$CRYPTO" = "1" ; then
 	dnl	fi
 	dnl fi
 
-    AC_DEFUN( CHECK_FOR_CRYPTO_LIB, [
+    AC_DEFUN([CHECK_FOR_CRYPTO_LIB], [
         AC_MSG_CHECKING([for crypto++ library with $CRYPTO_LIB])
 		VS_LIBS="$VS_LIBS $CRYPTO_LIB"
 		LIBS="$VS_LIBS"
@@ -1349,31 +1408,31 @@ if test "$TESTNETCOMM" = "1" ; then
 	dnl check for oss headers under Linux
 
 	if test "$TESTNETCOMM_NOSOUND" = "0"; then
-		AC_DEFUN( CHECK_FOR_OSS_H, [
+		AC_DEFUN([CHECK_FOR_OSS_H], [
 		    AC_MSG_CHECKING([for sys/soundcard.h])
 		    AC_TRY_CPP( [ #include <sys/soundcard.h> ], have_oss_h=yes, have_oss_h=no )
 		    AC_MSG_RESULT([$have_oss_h])
 		])
 
-		AC_DEFUN( CHECK_FOR_JVOIP_H, [
+		AC_DEFUN([CHECK_FOR_JVOIP_H], [
 		    AC_MSG_CHECKING([for jvoiplib/jvoipsession.h])
 		    AC_TRY_CPP( [ #include <jvoiplib/jvoipsession.h> ], have_jvoip_h=yes, have_jvoip_h=no )
 		    AC_MSG_RESULT([$have_jvoip_h])
 		])
 
-		AC_DEFUN( CHECK_FOR_JTHREAD_H, [
+		AC_DEFUN([CHECK_FOR_JTHREAD_H], [
 		    AC_MSG_CHECKING([for jthread/jthread.h])
 		    AC_TRY_CPP( [ #include <jthread/jthread.h> ], have_jthread_h=yes, have_jthread_h=no )
 		    AC_MSG_RESULT([$have_jthread_h])
 		])
 
-		AC_DEFUN( CHECK_FOR_JRTP_H, [
+		AC_DEFUN([CHECK_FOR_JRTP]_H, [
 		    AC_MSG_CHECKING([for jrtp/rtpsession.h])
 		    AC_TRY_CPP( [ #include <jrtp/rtpsession.h> ], have_jrtp_h=yes, have_jrtp_h=no )
 		    AC_MSG_RESULT([$have_jrtp_h])
 		])
 
-		AC_DEFUN( CHECK_FOR_COREAUDIO_H, [
+		AC_DEFUN([CHECK_FOR_COREAUDIO_H], [
 		    AC_MSG_CHECKING([for CoreAudio/CoreAudio.h])
 		    AC_TRY_CPP( [ #include <CoreAudio/CoreAudio.h> ], have_core_audio_h=yes, have_core_audio_h=no )
 		    AC_MSG_RESULT([$have_core_audio_h])
@@ -1445,7 +1504,7 @@ if test "$TESTNETCOMM" = "1" ; then
 	fi
 
 	dnl Check for video for linux headers under linux
-	AC_DEFUN( CHECK_FOR_VFL_H, [
+	AC_DEFUN([CHECK_FOR_VFL_H], [
 	    AC_MSG_CHECKING([for linux/videodev.h])
 	    AC_TRY_CPP( [ #include <linux/videodev.h> ], have_vfl_h=yes, have_vfl_h=no )
 	    AC_MSG_RESULT([$have_vfl_h])
@@ -1467,7 +1526,7 @@ if test "$TESTNETCOMM" = "1" ; then
 
 	dnl Check for QuickTime headers under MacOS X
 	dnl saved_CPPFLAGS="$CPPFLAGS"
-	AC_DEFUN( CHECK_FOR_QT_H, [
+	AC_DEFUN([CHECK_FOR_QT_H], [
 	    AC_MSG_CHECKING([for QuickTimeComponents.h])
 	    AC_TRY_CPP( [ #include <QuickTimeComponents.h> ], have_qt_h=yes, have_qt_h=no )
 	    AC_MSG_RESULT([$have_qt_h])

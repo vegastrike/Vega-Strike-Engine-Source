@@ -10,7 +10,7 @@ void Mission::call_unit_toxml(missionNode *node,int mode,varInst *ovi){
    Flightgroup *fg=my_object->getFlightgroup();
 
   
-   var_out << "<unit fgid=" << qu(fgid) << "/>\n";
+
   }
 }
 

@@ -14,7 +14,7 @@ LocationSelect::LocationSelect (Vector start,Vector Plane1, Vector Plane2, Vecto
   CrosshairSize=2;
   MoveLocation (start,Plane1,Plane2,Plane3);
 }
-extern KBSTATE keyState[KEYMAP_SIZE];
+extern KBSTATE keyState[LAST_MODIFIER][KEYMAP_SIZE];
 Vector DeltaPosition(0,0,0);
 bool changed = false;
 bool vert = false;
@@ -22,7 +22,7 @@ bool vert = false;
 
 
 void LocationSelect::MouseMoveHandle (KBSTATE kk,int x, int y, int delx, int dely, int mod) {
-  if (keyState['z']==DOWN) {
+  if (keyState[0]['z']==DOWN) {
 #ifdef DELTA_MOVEMENT
     if (kk==PRESS) {
       DeltaPosition.k=dely;

@@ -10,6 +10,7 @@ class TextPlane;
 class VSSprite;
 class Gauge;
 class Unit;
+class NavigationSystem;
 #include "vdu.h"
 #include "camera.h"
 #include "nav/navscreen.h"
@@ -116,7 +117,7 @@ private:
   void DrawArrowToTarget(Unit *, Unit *);
  public:
   void	ReceivedTargetInfo();
-  static void NavScreen (int, KBSTATE k); // scheherazade
+  static void NavScreen (const KBData&,KBSTATE k); // scheherazade
   static string getsoundending(int which=0);
   static string getsoundfile(string filename);
   void InitStatic ();
@@ -136,18 +137,21 @@ private:
   void UpdAutoPilot();
   ///Sets up the world for rendering...call before draw
   void SetupViewPort (bool clip=true);
+  int getVDUMode(int vdunum);
   void VDUSwitch (int vdunum);
   void ScrollVDU (int vdunum, int howmuch);
   void ScrollAllVDU (int howmuch);
   int getScrollOffset (unsigned int whichtype);
   void SelectProperCamera ();
   void Eject ();
-  static void Respawn (int,KBSTATE);
-  static void SwitchControl (int,KBSTATE);
-  static void TurretControl (int, KBSTATE);
+  static void Respawn (const KBData&,KBSTATE);
+  static void SwitchControl (const KBData&,KBSTATE);
+  static void TurretControl (const KBData&,KBSTATE);
   void SetSoundFile (std::string sound);
   int GetSoundFile () {return soundfile;}
   void SetCommAnimation (Animation * ani);
+  ///Accesses the current navigationsystem
+  NavigationSystem *AccessNavSystem() {return &ThisNav;}
   ///Accesses the current camera
   Camera *AccessCamera() {return &cam[currentcamera];}
   ///Returns the passed in cam

@@ -24,9 +24,9 @@
 #include "painttext.h"
 
 #include "vs_globals.h"
-
+#include "config_xml.h"
 const int PaintText::END_LINE = 1000000;           // Draw to the end.
-
+extern bool useStroke();
 // This function allows a number of formatting characters.  Here are the rules:
 //  -- The formatting char is "#".
 //  -- Format commands are indicated by a single character, which is case-sensitive.
@@ -202,15 +202,23 @@ void PaintText::calcLayoutIfNeeded(void) const {
 
 
 // Draw a fragment of text.  Assumes graphics origin and scaling are correct.
-static void drawChars(const string& str, int start, int end, const Font& font, const GFXColor& color) {
+static float drawChars(const string& str, int start, int end, const Font& font, const GFXColor& color, float inRasterPos) {
     // Make sure the graphics state is right.
     glColor4f(color.r, color.g, color.b, color.a);
-    glLineWidth(font.strokeWidth());
+    if (useStroke()) 
+      glLineWidth(font.strokeWidth());
+    else {
+      static bool setRasterPos= XMLSupport::parse_bool(vs_config->getVariable("graphics","set_raster_text_color","true"));
+      if (setRasterPos)
+        glRasterPos2f(inRasterPos/(g_game.x_resolution/2),0);
+    }
 
+  
     // Draw all the characters.
     for(int charPos=start; charPos<=end; charPos++) {
-        font.drawChar(str[charPos]);
+      inRasterPos+=font.drawChar(str[charPos]);
     }
+    return inRasterPos;
 }
 
 // Draw specified lines of text.
@@ -247,22 +255,28 @@ void PaintText::drawLines(int start, int count) const {
         // Position at the start of the line.
         glLoadIdentity();
         glTranslatef(m_rect.origin.x+line.x, lineTop-line.baseLine, 0.0);
-        glScaled(m_horizontalScaling, m_verticalScaling, 1.0);
-
+        if (line.fragments.size()) {
+          GFXColorf(line.fragments[0].color);
+        }        
+        if (!useStroke()){
+          glRasterPos2f(0,0);
+        }else
+          glScaled(m_horizontalScaling, m_verticalScaling, 1.0);
+        float rasterpos=0;
         // Draw each fragment.
         for(vector<TextFragment>::const_iterator frag=line.fragments.begin(); frag!=line.fragments.end(); frag++) {
             if(frag->start == ELLIPSIS_FRAGMENT) {
                 // We have a special-case for the ellipsis at the end of a line.
-                drawChars(ELLIPSIS_STRING, 0, 2, frag->font, frag->color);
+                drawChars(ELLIPSIS_STRING, 0, 2, frag->font, frag->color,rasterpos);
             } else {
-                drawChars(m_text, frag->start, frag->end, frag->font, frag->color);
+                rasterpos+=drawChars(m_text, frag->start, frag->end, frag->font, frag->color,rasterpos);
             }
         }
 
         // Top of next line.
         lineTop -= line.height;
     }
-
+    glRasterPos2f(0,0);
     // Undo graphics state
     GFXPopBlendMode();
     glDisable(GL_LINE_SMOOTH);
@@ -817,7 +831,7 @@ PaintText::PaintText(void)
 :
 m_rect(),
 m_text(),
-m_color(GUI_OPAQUE_BLACK),
+m_color(GUI_OPAQUE_BLACK()),
 m_font(),
 m_justification(RIGHT_JUSTIFY),
 m_widthExceeded(ELLIPSIS),

@@ -15,6 +15,7 @@ enum VIEWSTYLE {CP_FRONT,  CP_BACK,CP_LEFT, CP_RIGHT, CP_VIEWTARGET, CP_CHASE, C
 class Unit;
 class Camera;
 class Animation;
+class NavigationSystem;
 #include "in.h"
 #include "cmd/images.h"
 /**
@@ -88,6 +89,10 @@ protected:
   double TimeOfLastCollision;
   char jumpok;
   virtual void	ReceivedTargetInfo() {}
+  bool autoInProgress() {
+    return autopilot_time>0;
+  }
+  bool unitInAutoRegion(Unit * un);
   std::vector<std::string> unitfilename;
   ///Sets the current viewstyle
   void SetView (const enum VIEWSTYLE tmp) {view = tmp;}
@@ -124,17 +129,20 @@ protected:
   virtual void UpdAutoPilot();
   ///Sets up the world for rendering...call before draw
   virtual void SetupViewPort (bool clip=true) {}
+  virtual int getVDUMode (int vdunum) {return 0;}
   virtual void VDUSwitch (int vdunum) {}
   virtual void ScrollVDU (int vdunum, int howmuch) {}
   virtual void ScrollAllVDU (int howmuch) {}
   virtual int getScrollOffset (unsigned int whichtype) { return 1;}
   virtual void SelectProperCamera () {}
   virtual void Eject ();
-  static void Respawn (int,KBSTATE) {}
-  static void SwitchControl (int,KBSTATE) {}
-  static void TurretControl (int, KBSTATE) {}
+  static void Respawn (const KBData&,KBSTATE) {}
+  static void SwitchControl (const KBData&,KBSTATE) {}
+  static void TurretControl (const KBData&,KBSTATE) {}
   virtual void SetCommAnimation (Animation * ani) {}
   class SaveGame * savegame;
+  ///Accesses the current navigationsystem
+  virtual NavigationSystem *AccessNavSystem() {return NULL;}
   ///Accesses the current camera
   virtual Camera *AccessCamera() {return NULL;}
   ///Returns the passed in cam

@@ -2,9 +2,13 @@
 #include "gfx/vec.h"
 #include "gfx/cockpit_generic.h"
 #include "faction_generic.h"
+#include "ai/communication.h"
 #include "savegame.h"
 #include "xml_support.h"
 #include "unit_factory.h"
+#include "unit_util.h"
+#include "universe_util.h"
+#include "unit_const_cache.h"
 // Various functions that were used in .cpp files that are now included because of
 // the temple GameUnit class
 // If not separated from those files functions would be defined in multiple places
@@ -12,7 +16,7 @@
 
 // From unit.cpp
 double interpolation_blend_factor;
-
+extern const char * DamagedCategory;
 int cloakVal (int cloak, int cloakmin, int cloakrate, bool cloakglass) { // Short fix ?
     if (cloak<0&&cloakrate<0) {
       cloak=-2147483647-1;//intended warning should be max neg :-) leave it be
@@ -26,6 +30,24 @@ int cloakVal (int cloak, int cloakmin, int cloakrate, bool cloakglass) { // Shor
       cloak+=1;
     }
     return cloak;
+}
+const Unit* getUnitFromUpgradeName(const string& upgradeName, int myUnitFaction = 0) {
+    const char* name = upgradeName.c_str();
+    const Unit* partUnit = UnitConstCache::getCachedConst(StringIntKey(name, FactionUtil::GetFaction("upgrades")));
+    if (!partUnit) {
+        partUnit = UnitConstCache::setCachedConst(StringIntKey(name,
+	    FactionUtil::GetFaction("upgrades")),
+	    UnitFactory::createUnit(name, true, FactionUtil::GetFaction("upgrades")));
+    }
+    if (partUnit->name == "LOAD_FAILED") {
+	partUnit = UnitConstCache::getCachedConst(StringIntKey(name, myUnitFaction));
+	if (!partUnit) {
+        partUnit = UnitConstCache::setCachedConst(StringIntKey(name, myUnitFaction),
+	    UnitFactory::createUnit(name, true, myUnitFaction));
+	}
+    }
+    return partUnit;
+
 }
 
 // From unit_customize.cpp
@@ -59,10 +81,13 @@ void SetShieldZero(Unit * un) {
 }
 
 //un scored a faction kill
-void ScoreKill (Cockpit * cp, Unit * un, int faction) {
+void ScoreKill (Cockpit * cp, Unit * un, Unit * killedUnit) {
+  if (un->isUnit()!=UNITPTR||killedUnit->isUnit()!=UNITPTR)
+	return;
   static float KILL_FACTOR=-XMLSupport::parse_float(vs_config->getVariable("AI","kill_factor",".2"));
+  int faction= killedUnit->faction;
   FactionUtil::AdjustIntRelation(faction,un->faction,KILL_FACTOR,1);
-  static float FRIEND_FACTOR=-XMLSupport::parse_float(vs_config->getVariable("AI","friend_factor",".1"));
+  static float FRIEND_FACTOR=-XMLSupport::parse_float(vs_config->getVariable("AI","friend_factor",".1"));  
   for (unsigned int i=0;i<FactionUtil::GetNumFactions();i++) {
     float relation;
     if (faction!=(int)i&&un->faction!=(int)i) {
@@ -71,14 +96,30 @@ void ScoreKill (Cockpit * cp, Unit * un, int faction) {
         FactionUtil::AdjustIntRelation(i,un->faction,FRIEND_FACTOR*relation,1);
     }
   }
-  vector <float> * killlist = &cp->savegame->getMissionData (string("kills"));
-  while (killlist->size()<=FactionUtil::GetNumFactions()) {
-    killlist->push_back ((float)0.0);
+  if (cp!=NULL) {
+    vector <float> * killlist = &cp->savegame->getMissionData (string("kills"));
+    while (killlist->size()<=FactionUtil::GetNumFactions()) {
+      killlist->push_back ((float)0.0);
+    }
+    if ((int)killlist->size()>faction) {
+      (*killlist)[faction]++;
+    }
+    killlist->back()++;
+  }else if (FactionUtil::GetIntRelation(un->faction,faction)<0) {
+    int whichcp= rand()%_Universe->numPlayers();
+    Unit * whichrecv = _Universe->AccessCockpit(whichcp)->GetParent();
+    if (whichrecv!=NULL) {
+      if (UnitUtil::getUnitSystemFile(whichrecv)==UnitUtil::getUnitSystemFile(un)) {
+        if (un->getAIState()&&whichrecv->getAIState()) {      
+          unsigned char sex;
+          vector< Animation *>* anim = un->getAIState()->getCommFaces(sex);
+          CommunicationMessage c(un,whichrecv,anim,sex);
+          c.SetCurrentState(c.fsm->GetScoreKillNode(),anim,sex);
+          whichrecv->getAIState()->Communicate (c);
+        }
+      }
+    }
   }
-  if ((int)killlist->size()>faction) {
-    (*killlist)[faction]++;
-  }
-  killlist->back()++;
 }
 
 //From unit_physics.cpp
@@ -224,7 +265,7 @@ void RecomputeUnitUpgrades (Unit * un) {
 	unsigned int i;
 	for (i=0;i<un->numCargo();++i) {
 		Cargo * c = &un->GetCargo(i);
-		if (c->category.find("upgrades"==0)) {
+		if (c->category.find("upgrades")==0&&c->category.find(DamagedCategory)!=0) {
 			if (c->content.find("mult_")!=0 &&
 				c->content.find("add_")!=0 ) {
 				un->Upgrade(c->content,0,0,true,false);
@@ -233,7 +274,7 @@ void RecomputeUnitUpgrades (Unit * un) {
 	}
 	for (i=0;i<un->numCargo();++i) {
 		Cargo * c = &un->GetCargo(i);
-		if (c->category.find("upgrades"==0)) {
+		if (c->category.find("upgrades")==0&&c->category.find(DamagedCategory)!=0) {
 			if (c->content.find("add_")==0 ) {
 				for (int j=0;j<c->quantity;++j) {
 					un->Upgrade(c->content,0,0,true,false);
@@ -243,7 +284,7 @@ void RecomputeUnitUpgrades (Unit * un) {
 	}
 	for (i=0;i<un->numCargo();++i) {
 		Cargo * c = &un->GetCargo(i);
-		if (c->category.find("upgrades"==0)) {
+		if (c->category.find("upgrades")==0&&c->category.find(DamagedCategory)!=0) {
 			if (c->content.find("mult_")==0) {
 				for (int j=0;j<c->quantity;++j) {
 					un->Upgrade(c->content,0,0,true,false);
@@ -252,4 +293,41 @@ void RecomputeUnitUpgrades (Unit * un) {
 		}
 	}
 
+}
+
+void Enslave (Unit* parent, bool enslave) {
+  bool free=!enslave;
+  int i;
+  vector<Cargo> ToBeChanged;
+  unsigned int numcargo=parent->numCargo();
+  for (i=numcargo-1;i>=0;--i) {
+    Cargo * carg= &parent->GetCargo(i);
+    if (enslave) {
+      if (carg->category.find("Passengers")!=string::npos&&carg->content!="Hitchhiker") {
+        ToBeChanged.push_back(*carg);
+        parent->RemoveCargo(i,carg->quantity,true);
+      }
+    }else {
+      if (carg->content=="Slaves"||carg->content=="Pilot") {
+        ToBeChanged.push_back(*carg);
+        parent->RemoveCargo(i,carg->quantity,true);
+      }
+    }
+  }
+  unsigned int dummy;
+  Cargo *newCarg  = UniverseUtil::GetMasterPartList()->GetCargo(enslave?"Slaves":"Hitchhiker",dummy);
+  if (newCarg) {
+    Cargo slave=*newCarg;
+    for (i=0;i<ToBeChanged.size();++i) {
+      slave.quantity=ToBeChanged[i].quantity;
+      while (parent->CanAddCargo(slave)==false&&(--slave.quantity)>0){
+        
+      }
+      if (slave.quantity){
+        if (parent->CanAddCargo(slave)) {
+          parent->AddCargo(slave,true);
+        }
+      }
+    }
+  }
 }

@@ -229,7 +229,7 @@ void Mesh::Draw(float lod, const Matrix &m, float toofar, int cloak, float nebdi
   c.damage=hulldamage;
   static float too_far_dist = XMLSupport::parse_float (vs_config->getVariable ("graphics","mesh_far_percent",".8"));
   //c.mesh_seq=((toofar+rSize()>too_far_dist*g_game.zfar)/*&&draw_sequence==0*/)?NUM_ZBUF_SEQ:draw_sequence;
-  c.mesh_seq=((toofar+((MeshType()==1)?0:rSize())>too_far_dist*g_game.zfar)/*&&draw_sequence==0*/)?NUM_ZBUF_SEQ:draw_sequence;
+  c.mesh_seq=((toofar+((getConvex()==1)?0:rSize())>too_far_dist*g_game.zfar)/*&&draw_sequence==0*/)?NUM_ZBUF_SEQ:draw_sequence;
   c.cloaked=MeshDrawContext::NONE;
   if (nebdist<0) {
     c.cloaked|=MeshDrawContext::FOG;
@@ -269,8 +269,8 @@ void Mesh::Draw(float lod, const Matrix &m, float toofar, int cloak, float nebdi
   if(!(origmesh->will_be_drawn&(1<<c.mesh_seq))) {
     origmesh->will_be_drawn |= (1<<c.mesh_seq);
     //    VSFileSystem::vs_fprintf (stderr,"origmesh %x",origmesh);
-	for (unsigned int i=0;i<Decal.size()&& i < NUM_PASSES;++i) {
-		if (Decal[i]) {
+	for (unsigned int i=0;i<origmesh->Decal.size()&& i < NUM_PASSES;++i) {
+		if (origmesh->Decal[i]) {
 			undrawn_meshes[c.mesh_seq][i].push_back(OrigMeshContainer(origmesh,toofar-rSize()));//FIXME will not work if many of hte same mesh are blocking each other
 		}
 	}

@@ -20,6 +20,8 @@
 #include "vsfilesystem.h"
 #include "cmd/unit_util.h"
 #include "networking/netserver.h"
+#include "cmd/csv.h"
+
 //extern class Music *muzak;
 //extern unsigned int AddAnimation (const QVector & pos, const float size, bool mvolatile, const std::string &name, float percentgrow );
 extern Unit&GetUnitMasterPartList();
@@ -57,6 +59,10 @@ namespace UniverseUtil {
 			cout<<"ERROR --> Received a fire order for non-existing UNIT"<<endl;
 		return un;
 	}
+	std::string vsConfig(std::string category,std::string option,std::string def){
+		return vs_config->getVariable(category,option,def);
+	}
+
 	Unit *launchJumppoint(string name_string,
 			string faction_string,
 			string type_string,
@@ -127,9 +133,26 @@ namespace UniverseUtil {
 	void SetTimeCompression () {
 		setTimeCompression(1.0);
 	}
+	static UnitContainer scratch_unit;
+	static QVector scratch_vector;
+
 	Unit *GetMasterPartList () {
 		return UnitFactory::getMasterPartList();
 	}
+	Unit *getScratchUnit () {
+		return scratch_unit.GetUnit();
+	}
+        void setScratchUnit (Unit * un) {
+		scratch_unit.SetUnit(un);
+	}
+
+	QVector getScratchVector () {
+		return scratch_vector;
+	}
+        void setScratchVector (QVector un) {
+		scratch_vector=un;
+	}
+
 	void pushSystem (string name) {
 		StarSystem * ss = _Universe->GenerateStarSystem (name.c_str(),"",Vector(0,0,0));
 		_Universe->pushActiveStarSystem(ss);
@@ -172,6 +195,7 @@ namespace UniverseUtil {
 			UnitUtil::setFgDirective (en,"h");//help me out here!
 		}
 	}
+
 	///tells the respective flightgroups in this system to stop killing each other urgently...they may still attack--just not warping and stuff
 	void StopTargettingEachOther(string fgname, string faction, string enfgname, string enfaction){
 		int fac = FactionUtil::GetFaction(faction.c_str());
@@ -195,9 +219,9 @@ namespace UniverseUtil {
 	
 	
 	bool systemInMemory(string nam) {
-	  unsigned int nass = _Universe->getNumActiveStarSystem();
+	  unsigned int nass = _Universe->star_system.size();;
 	  for (unsigned int i=0;i<nass;i++) {
-	    if (_Universe->getActiveStarSystem(i)->getFileName()==nam)
+	    if (_Universe->star_system[i]->getFileName()==nam)
 	      return true;
 	  }
 	  return false;
@@ -362,13 +386,22 @@ namespace UniverseUtil {
 								playVictoryTune();
 						mission->terminateMission();
 				}
+  static string dontBlankOut(string objective) {
+    while(1) {
+      std::string::size_type where=objective.find(".blank");
+      if (where!=string::npos) {
+        objective = objective.substr(0,where)+objective.substr(where+strlen(".blank"));
+      }else return objective;
+    }
+    return objective;
+  }
 				int addObjective(string objective) {
-						mission->objectives.push_back(Mission::Objective(0,objective));
+						mission->objectives.push_back(Mission::Objective(0,dontBlankOut(objective)));
 						return mission->objectives.size()-1;
 				}
 				void setObjective(int which, string newobjective) {
 						if (which<(int)mission->objectives.size()) {
-								mission->objectives[which].objective=newobjective;
+								mission->objectives[which].objective=dontBlankOut(newobjective);
 						}
 				}
 				void setCompleteness(int which, float completeNess) {
@@ -385,12 +418,12 @@ namespace UniverseUtil {
 				}
 				void setOwnerII(int which,Unit *owner) {
 						if (which<(int)mission->objectives.size()) {
-								mission->objectives[which].owner=owner;
+								mission->objectives[which].setOwner(owner);
 						}
 				}
 				Unit* getOwner(int which) {
 						if (which<(int)mission->objectives.size()) {
-								return mission->objectives[which].owner.GetUnit();
+								return mission->objectives[which].getOwner();
 						} else {
 								return 0;
 						}
@@ -409,10 +442,10 @@ namespace UniverseUtil {
 						return FactionUtil::GetContraband(FactionUtil::GetFaction(faction.c_str()));
 				}
 				void LoadMission (string missionname) {
-						delayLoadMission (missionname);
+					::LoadMission (missionname.c_str(),"",false);
 				}
 				void LoadMissionScript (string missionscript) {
-						delayLoadMission ("nothing.mission",missionscript);
+					::LoadMission ("nothing.mission",missionscript,false);
 				}
 
 				void SetAutoStatus (int global_auto, int player_auto) {
@@ -516,6 +549,28 @@ namespace UniverseUtil {
 				Unit* launch (string name_string,string type_string,string faction_string,string unittype, string ai_string,int nr_of_ships,int nr_of_waves, QVector pos, string sqadlogo){
 						return launchJumppoint(name_string,faction_string,type_string,unittype,ai_string,nr_of_ships,nr_of_waves,pos,sqadlogo,"");
 				}
+
+	string LookupUnitStat(string unitname, string faction, string statname){
+		string hashname=unitname+"__"+faction;
+		unsigned int where; //gets munged
+		for (vector<CSVTable*>::reverse_iterator i=unitTables.rbegin();i!=unitTables.rend();++i) {
+			unsigned int where;
+			if ((*i)->RowExists(hashname,where)) {
+				return CSVRow((*i),where)[statname]; 
+			}else if ((*i)->RowExists(unitname,where)) {
+				return CSVRow((*i),where)[statname];
+			}
+		} 
+		return "";
+	}
+
+
+	
+                                static std::vector <Unit *> cachedUnits;
+				void precacheUnit (string type_string,string faction_string){
+                                  cachedUnits.push_back(UnitFactory::createUnit(type_string.c_str(),true,FactionUtil::GetFactionIndex(faction_string)));
+                                  
+                                }
 				Unit *getPlayer(){
 						return _Universe->AccessCockpit()->GetParent();;
 				}
@@ -637,8 +692,8 @@ namespace UniverseUtil {
 						}
 				  }
 
-void	ComputeGalaxySerials( std::vector<std::string> & stak)
-{
+	void	ComputeGalaxySerials( std::vector<std::string> & stak)
+	{
 	cout<<"Going through "<<stak.size()<<" sectors"<<endl;
 	cout<<"Generating random serial numbers :"<<endl;
 	static string sysdir = vs_config->getVariable("data","sectors","sectors");
@@ -655,7 +710,7 @@ void	ComputeGalaxySerials( std::vector<std::string> & stak)
 		ComputeSystemSerials( sys);
 	}
 	cout<<"Computing done."<<endl;
-}
+	}
 }
 
 #undef activeSys

@@ -168,8 +168,8 @@ namespace BeamXML {
     VOLUME,
     DETONATIONRADIUS,
     LOCKTIME,
-	ROLE,
-	TEXTURESTRETCH
+    ROLE,ANTIROLE,
+    TEXTURESTRETCH
 	
     //YAW,
     //PITCH,
@@ -218,11 +218,12 @@ namespace BeamXML {
     EnumMap::Pair ("OffsetY",OFFSETY),
     EnumMap::Pair ("OffsetZ",OFFSETZ),
     EnumMap::Pair ("Volume", VOLUME),
-	EnumMap::Pair("Role",ROLE),
-	EnumMap::Pair ("TextureStretch",TEXTURESTRETCH)
+    EnumMap::Pair("Role",ROLE),
+    EnumMap::Pair("AntiRole",ANTIROLE),
+    EnumMap::Pair ("TextureStretch",TEXTURESTRETCH)
   };
   const EnumMap element_map(element_names, 10);
-  const EnumMap attribute_map(attribute_names, 31);
+  const EnumMap attribute_map(attribute_names, 32);
   Hashtable <string, weapon_info, 257> lookuptable;
   string curname;
   weapon_info tmpweapon(weapon_info::BEAM);
@@ -282,6 +283,10 @@ namespace BeamXML {
 	  break;
 	case ROLE:
   	  tmpweapon.role_bits = ROLES::readBitmask(iter->value);
+	  break;
+	case ANTIROLE:
+  	  tmpweapon.role_bits = ROLES::readBitmask(iter->value);
+          tmpweapon.role_bits = ~tmpweapon.role_bits;
 	  break;
 	case WEAPSIZE:
 	  tmpweapon.MntSize (lookupMountSize ((*iter).value.c_str()));
@@ -369,7 +374,8 @@ namespace BeamXML {
 	}
       }      
       break;
-    case DAMAGE:
+    case DAMAGE: {
+      static float damagemodifier = XMLSupport::parse_float(vs_config->getVariable("physics","weapon_damage_efficiency","1.0"));
       assert (level==1);
       level++;
       for (iter= attributes.begin(); iter!=attributes.end();iter++) {
@@ -378,7 +384,7 @@ namespace BeamXML {
 	  VSFileSystem::vs_fprintf (stderr,"Unknown Weapon Element %s",(*iter).name.c_str());
 	  break;
 	case DAMAGE:
-	  tmpweapon.Damage = XMLSupport::parse_float((*iter).value);
+	  tmpweapon.Damage = damagemodifier*XMLSupport::parse_float((*iter).value);
 	  break;
 	case RADIUS:
 	  tmpweapon.Radius = XMLSupport::parse_float ((*iter).value);
@@ -387,10 +393,10 @@ namespace BeamXML {
 	  tmpweapon.RadialSpeed = XMLSupport::parse_float ((*iter).value);
 	  break;
 	case PHASEDAMAGE:
-	  tmpweapon.PhaseDamage = XMLSupport::parse_float((*iter).value);
+	  tmpweapon.PhaseDamage = damagemodifier*XMLSupport::parse_float((*iter).value);
 	  break;
 	case RATE:
-	  tmpweapon.Damage = XMLSupport::parse_float ((*iter).value);
+	  tmpweapon.Damage = damagemodifier*XMLSupport::parse_float ((*iter).value);
 	  break;
 	case LONGRANGE:
 	  tmpweapon.Longrange = XMLSupport::parse_float ((*iter).value);
@@ -401,6 +407,7 @@ namespace BeamXML {
 	}
       }
       break;
+    }
     case DISTANCE:
       assert (level==1);
       level++;

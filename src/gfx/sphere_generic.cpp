@@ -42,6 +42,7 @@ string truncateByPipe (string & input) {
   return ret;
 }
 void SphereMesh::InitSphere(float radius, int stacks, int slices, const char *texture, const char *alpha,bool Insideout,  const BLENDFUNC a, const BLENDFUNC b, bool envMapping, float rho_min, float rho_max, float theta_min, float theta_max, FILTER mipmap, bool reverse_normals,bool subclass){
+  setConvex(true);
   int numspheres = (stacks+slices)/8;
   if (numspheres<1)
     numspheres =1;
@@ -231,7 +232,8 @@ void CityLights::RestoreCullFace (int whichdrawqueue) {
 float CityLights::wrapx=1;
 float CityLights::wrapy=1;
 
-CityLights::CityLights (float radius, int stacks, int slices, const char *texture, int zzwrapx, int zzwrapy,  bool insideout, const BLENDFUNC a, const BLENDFUNC b, bool envMap, float rho_min, float rho_max, float theta_min, float theta_max,bool reversed_normals):SphereMesh() { 
+CityLights::CityLights (float radius, int stacks, int slices, const char *texture, int zzwrapx, int zzwrapy,  bool insideout, const BLENDFUNC a, const BLENDFUNC b, bool envMap, float rho_min, float rho_max, float theta_min, float theta_max,bool reversed_normals):SphereMesh() {
+  setConvex(true);
   wrapx = zzwrapx;
   wrapy = zzwrapy;
   /*    if (texture!=NULL) {

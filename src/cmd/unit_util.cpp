@@ -26,14 +26,6 @@ namespace UnitUtil {
 		fg = Flightgroup::newFlightgroup (arg,type,FactionUtil::GetFaction(my_unit->faction),order,nr_ships,nr_waves_left,"","",mission);
 		my_unit->SetFg (fg,fg->nr_ships_left-1);
 	}
-	bool isSignificant(Unit *my_unit){
-		if (!my_unit)return false;
-		bool res=false;
-		clsptr typ = my_unit->isUnit();
-		string s=getFlightgroupName(my_unit);
-		res=((typ==PLANETPTR&&!((Planet *)my_unit)->hasLights())||typ==ASTEROIDPTR||typ==NEBULAPTR||s=="Base");
-		return res;
-	}
 	bool isSun(Unit *my_unit){
 		if (!my_unit)return false;
 		bool res=false;
@@ -42,6 +34,14 @@ namespace UnitUtil {
 			res = ((Planet *)my_unit)->hasLights();
 		}
 		return res;
+	}
+	bool isSignificant(Unit *my_unit){
+		if (!my_unit)return false;
+		bool res=false;
+		clsptr typ = my_unit->isUnit();
+		string s=getFlightgroupName(my_unit);
+		res=(typ==PLANETPTR||typ==ASTEROIDPTR||typ==NEBULAPTR||s=="Base");
+		return res&&!isSun(my_unit);
 	}
 	int communicateTo(Unit *my_unit,Unit *other_unit,float mood){
 		if (!my_unit)return 0;

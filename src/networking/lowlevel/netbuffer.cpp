@@ -57,7 +57,7 @@ void	NetBuffer::resizeBuffer( int newsize)
 				char * tmp = new char [newsize+1];
 				memset( tmp, 0, newsize+1);
 				VsnetOSS::memcpy( tmp, buffer, size);
-				delete buffer;
+				delete []buffer;
 				buffer = tmp;
 				size = newsize+1;
 			}

@@ -1,7 +1,9 @@
 #include <assert.h>
 #include "faction_generic.h"
 #include "vsfilesystem.h"
-
+#include "universe.h"
+#include "config_xml.h"
+#include "vs_globals.h"
 using namespace FactionUtil;
 
 FSM* FactionUtil::GetConversation(int Myfaction, int TheirFaction) {
@@ -49,15 +51,40 @@ float FactionUtil::GetRelation (string myfaction, string theirfaction){
 string FactionUtil::GetFactionName(int index) {
 	return GetFaction(index);
 }
+
+static bool isPlayerFaction(const int MyFaction) {
+  unsigned int numplayers=_Universe->numPlayers();
+  for (unsigned int i=0;i<numplayers;++i) {
+    Unit * un=_Universe->AccessCockpit(i)->GetParent();
+    if (un) {
+      if (un->faction==MyFaction)
+        return true;
+    }
+  }
+  return false;
+}
 void FactionUtil::AdjustIntRelation(const int Myfaction, const int TheirFaction, float factor, float rank) {
   assert (factions[Myfaction]->faction[TheirFaction].stats.index == TheirFaction);
   if (strcmp (factions[Myfaction]->factionname,"neutral")!=0) {
     if (strcmp (factions[Myfaction]->factionname,"upgrades")!=0) {
       if (strcmp (factions[TheirFaction]->factionname,"neutral")!=0) {
 	if (strcmp (factions[TheirFaction]->factionname,"upgrades")!=0) {
-	  factions[Myfaction]->faction[TheirFaction].relationship+=factor*rank;  
-          if (factions[Myfaction]->faction[TheirFaction].relationship>1)
-            factions[Myfaction]->faction[TheirFaction].relationship=1;
+          static bool allow_civil_war= XMLSupport::parse_bool(vs_config->getVariable("AI","AllowCivilWar","false"));
+          static bool capped= XMLSupport::parse_bool(vs_config->getVariable("AI","CappedFactionRating","true"));
+          static bool allow_nonplayer_adjustments=XMLSupport::parse_bool(vs_config->getVariable("AI","AllowNonplayerFactionChange","false"));
+          if (isPlayerFaction(TheirFaction)||allow_nonplayer_adjustments) {
+            if (allow_civil_war||Myfaction!=TheirFaction) {
+              
+              factions[Myfaction]->faction[TheirFaction].relationship+=factor*rank;            
+              
+              if (factions[Myfaction]->faction[TheirFaction].relationship>1&&capped) {
+                factions[Myfaction]->faction[TheirFaction].relationship=1;
+              }
+              if (!allow_nonplayer_adjustments) {
+                factions[TheirFaction]->faction[Myfaction].relationship=factions[Myfaction]->faction[TheirFaction].relationship;//reflect if player
+              }
+            }
+          }
 	}
       }
     }
@@ -131,9 +158,21 @@ void FactionUtil::LoadSerializedFaction(FILE * fp) {
 	k++;
       }
       tmp2+=k;
+      if (*tmp2=='\r'||*tmp2=='\n'){
+        break;
+      }
     }
     delete [] tmp;
   }
+}
+bool whitespaceNewline(char * inp) {
+  for (;*inp;inp++) {
+    if (inp[0]=='\n'||inp[0]=='\r')
+      return true;
+    if (inp[0]!=' '&&inp[0]!='\t')
+      break;
+  }
+  return false;
 }
 string savedFactions;
 void FactionUtil::LoadSerializedFaction(char * &buf) {
@@ -166,6 +205,9 @@ void FactionUtil::LoadSerializedFaction(char * &buf) {
 	k++;
       }
       buf+=k;
+      if (whitespaceNewline(buf)) {
+        break;
+      }
     }
   }
 }

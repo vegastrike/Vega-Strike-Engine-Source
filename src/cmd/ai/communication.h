@@ -7,13 +7,18 @@ class FSM {
 
  public:
   struct Node {
-    std::string message;
-    vector <int> sound;//one sound for each sex
+    vector <std::string> messages;
+    vector <int> sounds;//messages.size() sound for each sex
     float messagedelta;
     vector <unsigned int> edges;
-    int GetSound (unsigned char sex);
+    int GetSound (unsigned char sex, unsigned int multiple)const;
+    std::string GetMessage(unsigned int &multiple)const;
     void AddSound (int sound, unsigned char sex);
-    Node (const std::string &message, float messagedel): message(message),messagedelta(messagedel){}
+    Node (const vector<std::string> &message, float messagedel): messages(message),messagedelta(messagedel){if (messages.size()==0) messages.push_back("<static>");}
+    static Node MakeNode(std::string message,float messagedel) {
+      vector<string> tmp;tmp.push_back(message);
+      return Node(tmp,messagedel);
+    }
   };
   vector <Node> nodes;
   FSM (const char * filename);
@@ -33,6 +38,9 @@ class FSM {
   int GetYesNode ()const;
   int GetNoNode()const;
   int GetHitNode ()const;
+  int GetDamagedNode() const;
+  int GetDealtDamageNode() const;
+  int GetScoreKillNode() const;
   int GetRequestLandNode()const;
   int GetContrabandInitiateNode()const;
   int GetContrabandUnDetectedNode()const;
@@ -55,7 +63,7 @@ class CommunicationMessage {
   CommunicationMessage(Unit * send, Unit * recv, int prevvstate, int curstate, std::vector <class Animation *>* ani,unsigned char sex);
   CommunicationMessage(Unit * send, Unit * recv, const  CommunicationMessage &prevsvtate, int curstate, std::vector <class Animation *>* ani,unsigned char sex);
   void SetCurrentState(int message, std::vector <class Animation *> *ani,unsigned char sex);
-  FSM::Node * getCurrentState() {if (curstate<fsm->nodes.size()) return &fsm->nodes[curstate]; else return &fsm->nodes[fsm->getDefaultState(0)];}
+  FSM::Node * getCurrentState() {if (curstate<(int)fsm->nodes.size()) return &fsm->nodes[curstate]; else return &fsm->nodes[fsm->getDefaultState(0)];}
   const vector <FSM::Node> &GetPossibleState () const;
   float getDeltaRelation()const {return fsm->getDeltaRelation (prevstate,curstate);}
 };

@@ -22,8 +22,10 @@ namespace UnitUtil {
 	int getFgSubnumber(Unit *my_unit);
 	int removeCargo(Unit *my_unit,string s, int quantity, bool erasezero);
         bool repair (Unit * my_unit);
+        int removeWeapon(Unit *my_unit, string weapon,int mountoffset,bool loop_through_mounts); // -1 tells no weapon removed
 	float upgrade(Unit *my_unit, string file,int mountoffset,int subunitoffset, bool force,bool loop_through_mounts);
 	int addCargo (Unit *my_unit,Cargo carg);
+	int forceAddCargo (Unit *my_unit,Cargo carg);
 	bool incrementCargo(Unit *my_unit,float percentagechange,int quantity);
 	bool decrementCargo(Unit *my_unit,float percentagechange);
 	float getDistance(Unit *my_unit,Unit *un);
@@ -48,7 +50,7 @@ namespace UnitUtil {
 	Unit *owner (Unit *un);
 	float maxSpeed (Unit *un);
 	float maxAfterburnerSpeed (Unit *un);
-	void performDockingOperations (Unit * un, Unit * unitToDockWith);
+	void performDockingOperations (Unit * un, Unit * unitToDockWith,int actuallyDockP);
 }
 
 #endif

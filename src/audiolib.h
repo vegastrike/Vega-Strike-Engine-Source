@@ -33,7 +33,7 @@ void AUDDeleteSound (int sound, bool music=false);
 ///Changes the velocity and/or position of a given sound
 void AUDAdjustSound (const int sound, const QVector &pos, const Vector &vel);
 ///Changes the gain of a loaded sound
-void AUDSoundGain (const int sound, const float gain);
+void AUDSoundGain (int sound, float gain);
 ///Is a loaded sound still playing
 bool AUDIsPlaying (const int sound);
 ///Stops a loaded sound

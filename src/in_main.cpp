@@ -32,7 +32,7 @@ using namespace std;
 #include "in_joystick.h"
 #include "in_handler.h"
 
-extern KBSTATE keyState[KEYMAP_SIZE];
+extern KBSTATE keyState[LAST_MODIFIER][KEYMAP_SIZE];
 
 queue<InputListener*> activationreqqueue;
 list <InputListener*> listeners;

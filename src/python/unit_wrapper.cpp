@@ -41,6 +41,7 @@ namespace UniverseUtil {
 }
 PYTHON_INIT_INHERIT_GLOBALS(VS,FireAt);
 PYTHON_BEGIN_MODULE(VS)
+
 //#undef EXPORT_UTIL
 //#undef voidEXPORT_UTIL
 #define EXPORT_UTIL(name,aff) PYTHON_DEFINE_GLOBAL(VS,&UniverseUtil::name,#name);
@@ -50,6 +51,8 @@ PYTHON_BEGIN_MODULE(VS)
 #define EXPORT_FACTION(name,aff) PYTHON_DEFINE_GLOBAL(VS,&FactionUtil::name,#name);
 #define voidEXPORT_FACTION(name) EXPORT_FACTION(name,0)
 EXPORT_UTIL(getUnitList,un_iter())
+EXPORT_UTIL(getScratchUnit,Unit())
+voidEXPORT_UTIL(setScratchUnit)
 EXPORT_UTIL(getNumPlayers,1)
 EXPORT_UTIL(getVariable,"")
 EXPORT_UTIL(getSubVariable,"")

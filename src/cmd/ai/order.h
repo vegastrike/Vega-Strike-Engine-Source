@@ -139,8 +139,9 @@ class Order {
   void setActionString(std::string astring) { actionstring=astring; };
   std::string getActionString() { return actionstring; };
   Animation * getCommFace(float mood, unsigned char & sex);
- protected:
+  virtual float getMood() {return 0;}
   virtual std::vector <Animation *>* getCommFaces(unsigned char &sex);
+ protected:
   std::string  actionstring;
 };
 ///Convenience order factory for "clicking to create an order"

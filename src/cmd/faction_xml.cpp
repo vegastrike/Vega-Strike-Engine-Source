@@ -77,8 +77,8 @@ namespace FactionXML {
 	SPARKRED,
 	SPARKGREEN,
 	SPARKBLUE,
-	SPARKALPHA
-
+	SPARKALPHA,
+        SHIPMODIFIER
   };
 
   const EnumMap::Pair element_names[] = {
@@ -90,7 +90,8 @@ namespace FactionXML {
   	EnumMap::Pair ("Stats", STATS),
   	EnumMap::Pair ("CommAnimation", COMM_ANIMATION),
   	EnumMap::Pair ("MoodAnimation", MOOD_ANIMATION),
-  	EnumMap::Pair ("Explosion", EXPLOSION)
+  	EnumMap::Pair ("Explosion", EXPLOSION),
+        EnumMap::Pair ("ShipModifier",SHIPMODIFIER)
   };
   const EnumMap::Pair attribute_names[] = {
 	EnumMap::Pair ("UNKNOWN", UNKNOWN),
@@ -110,7 +111,7 @@ namespace FactionXML {
 };
 
 
-  const EnumMap element_map(element_names, 9);
+  const EnumMap element_map(element_names, 10);
   const EnumMap attribute_map(attribute_names, 14);
 
 }
@@ -150,6 +151,26 @@ void Faction::beginElement(void *userData, const XML_Char *names, const XML_Char
 	break;
       }
     }      
+    break;
+  case SHIPMODIFIER:
+    assert (unitlevel==2);
+    unitlevel++;
+    {
+      string name;float rel=0;
+      for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
+        switch(attribute_map.lookup((*iter).name)) {
+        case NAME:
+          name= (*iter).value;
+          break;
+        case RELATION:
+          rel=XMLSupport::parse_float((*iter).value);
+          break;
+        }
+      }
+      if (rel!=0&&name.length()) {
+        factions.back()->ship_relation_modifier[name]=rel;
+      }
+    }
     break;
   case COMM_ANIMATION:
     assert (unitlevel==2);

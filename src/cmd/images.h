@@ -144,7 +144,8 @@ struct UnitImages {
   bool cloakglass;
   ///if the unit is a wormhole
   bool forcejump;
-  float cargo_volume;///mass just makes you turn worse
+  float UpgradeVolume;
+  float CargoVolume;///mass just makes you turn worse
   float equipment_volume;///mass just makes you turn worse
   std::vector <Cargo> cargo;
   std::vector <char *> destination;

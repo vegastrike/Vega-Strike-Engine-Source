@@ -37,22 +37,32 @@
 #include "cmd/unit_collide.h"
 #include "savegame.h"
 #include "networking/netclient.h"
+#include "in_kb_data.h"
 #ifndef USE_BOOST_128
+
 #if defined (_MSC_VER) && _MSC_VER<=1200
+
 #define Vector Vactor
+
 #endif
+
 #include <boost/python.hpp>
+
 #if defined (_MSC_VER) && _MSC_VER<=1200
+
 #undef Vector
+
 #endif
+
 #else
+
 #include <boost/python/detail/extension_class.hpp>
+
 #endif
 vector<Vector> perplines;
 //static SphereMesh *foo;
 //static Unit *earth;
 
-//extern void reset_time_compression (int,KBSTATE);
 
 //Atmosphere *theAtmosphere;
 extern std::vector <unorigdest *>pendingjump;
@@ -347,7 +357,7 @@ void StarSystem::UpdateUnitPhysics (bool firstframe) {
 	    Vector diff (owner->Position()-unit->Position());
 	    if (diff.Dot(diff)<neardist*neardist) {
 	      if (0&&getTimeCompression!=.0000001) {//if not paused
-		reset_time_compression(0,PRESS);
+		reset_time_compression(std::string(),PRESS);
 	      }
 	    }
 	  }
@@ -375,7 +385,7 @@ extern void UpdateCameraSnds();
 extern void NebulaUpdate( StarSystem * ss);
 extern void TestMusic();
 
-extern void reset_time_compression (int,KBSTATE);
+extern void reset_time_compression (const KBData&,KBSTATE);
 
 extern float getTimeCompression();
 void StarSystem::Update( float priority)
@@ -494,7 +504,7 @@ void StarSystem::Update( float priority)
 }
 void ExecuteDirector () {
 	    unsigned int curcockpit= _Universe->CurrentCockpit();
-	    for (unsigned int i=0;i<active_missions.size();i++) {
+		{for (unsigned int i=0;i<active_missions.size();i++) {
 			if (active_missions[i]) {
 				_Universe->SetActiveCockpit(active_missions[i]->player_num);
 				StarSystem * ss=_Universe->AccessCockpit()->activeStarSystem;
@@ -504,11 +514,11 @@ void ExecuteDirector () {
 				active_missions[i]->DirectorBenchmark();
 				if (ss)_Universe->popActiveStarSystem();
 			}
-	    }
+		}}
 		_Universe->SetActiveCockpit(curcockpit);
 		mission=active_missions[0];
 		processDelayedMissions();
-	    for (unsigned int i=1;i<active_missions.size();) {
+		{for (unsigned int i=1;i<active_missions.size();) {
               if (active_missions[i]) {
                 if(active_missions[i]->runtime.pymissions) {
                   i++;
@@ -524,7 +534,7 @@ void ExecuteDirector () {
                 active_missions.Get()->erase(active_missions.Get()->begin()+i);
                 
               }
-            }
+        }}
 
 }
 void StarSystem::Update(float priority , bool executeDirector) {
@@ -669,7 +679,7 @@ void StarSystem::Update(float priority , bool executeDirector) {
 	  if (0&&getTimeCompression()>1) {//if not paused
 	    if (!owner->AutoPilotTo (owner,true)) {
 	      
-	      reset_time_compression(0,PRESS);
+	      reset_time_compression(KBData(),PRESS);
 	    }
 	  }
 	}
@@ -726,6 +736,8 @@ std::vector <unorigdest *> pendingjump;
 bool PendingJumpsEmpty() {
 	return pendingjump.empty();
 }
+extern void SetShieldZero(Unit*);
+
 void StarSystem::ProcessPendingJumps() {
   for (unsigned int kk=0;kk<pendingjump.size();kk++) {
 	Unit * un = pendingjump[kk]->un.GetUnit();
@@ -736,9 +748,16 @@ void StarSystem::ProcessPendingJumps() {
 			float dist =delta.Magnitude();
 			if (pendingjump[kk]->delay>0) {
 				float speed = dist/pendingjump[kk]->delay;
-				if (dist>10) {
-					un->SetCurPosition(un->LocalPosition()+SIMULATION_ATOM*delta*(speed/dist));
-				}
+                                bool player=(_Universe->isPlayerStarship(un)!=NULL);
+                                if (dist>10&&player) {
+                                  if (un->activeStarSystem==pendingjump[kk]->orig)
+                                    un->SetCurPosition(un->LocalPosition()+SIMULATION_ATOM*delta*(speed/dist));
+                                }else if (!player){
+                                  un->SetVelocity(Vector(0,0,0));
+                                }		
+                                static bool setshieldzero=XMLSupport::parse_bool(vs_config->getVariable("physics","jump_disables_shields","true"));
+                                if (setshieldzero)
+                                  SetShieldZero(un);
 			}
 		}
 		double time = GetElapsedTime();
@@ -775,7 +794,9 @@ void StarSystem::ProcessPendingJumps() {
 	    }
 	    bool dosightandsound = ((pendingjump[kk]->dest==savedStarSystem)||_Universe->isPlayerStarship(un));
 	    _Universe->setActiveStarSystem (pendingjump[kk]->orig);
-	    un->TransferUnitToSystem (kk, savedStarSystem,dosightandsound);
+
+	    if (un->TransferUnitToSystem (kk, savedStarSystem,dosightandsound)) 
+              un->DecreaseWarpEnergy(false,1.0f);
 	    if (dosightandsound) {
 	      _Universe->activeStarSystem()->DoJumpingComeSightAndSound(un);
 	    }
@@ -804,7 +825,13 @@ void ActivateAnimation(Unit * jumppoint) {
 		ActivateAnimation(un);
 	}
 }
-
+static bool isJumping(const vector <unorigdest*>&pending,Unit * un) {
+	for (size_t i =0;i<pending.size();++i) {
+		if (pending[i]->un==un)
+			return true;
+	}
+	return false;
+}
 bool StarSystem::JumpTo (Unit * un, Unit * jumppoint, const std::string &system, bool force) {
   if ((un->DockedOrDocking()&(~Unit::DOCKING_UNITS))!=0) {
     return false;
@@ -833,7 +860,7 @@ bool StarSystem::JumpTo (Unit * un, Unit * jumppoint, const std::string &system,
     justloaded=true;
     ss = _Universe->GenerateStarSystem (ssys.c_str(),filename.c_str(),Vector (0,0,0));
   }
-  if(ss) {
+  if(ss&&!isJumping(pendingjump,un)) {
 #ifdef JUMP_DEBUG
 	VSFileSystem::vs_fprintf (stderr,"Pushing back to pending queue!\n");
 #endif
@@ -858,6 +885,7 @@ bool StarSystem::JumpTo (Unit * un, Unit * jumppoint, const std::string &system,
       }
     
 #endif
+
   } else {
 #ifdef JUMP_DEBUG
 	VSFileSystem::vs_fprintf (stderr,"Failed to retrieve!\n");

@@ -9,9 +9,9 @@ int CoordinateSelectChange =0;
 int  CoordinateSelectmousex ;
 int  CoordinateSelectmousey ;
 extern Vector MouseCoordinate (int mouseX, int mouseY);
-extern KBSTATE keyState[KEYMAP_SIZE];
+extern KBSTATE keyState[LAST_MODIFIER][KEYMAP_SIZE];
 void CoordinateSelect::MouseMoveHandle (KBSTATE,int x,int y,int,int,int) {
-  if (keyState['z']==DOWN) {
+  if (keyState[0]['z']==DOWN) {
     CoordinateSelectChange = 2;
   } else {  
     CoordinateSelectChange = 1;

@@ -18,7 +18,7 @@ extern PyObject *to_python (Unit *x);
 
 BOOST_PYTHON_END_CONVERSION_NAMESPACE
 bool useAfterburner () {
-	static bool useafterburner = XMLSupport::parse_float(vs_config->getVariable("AI","use_afterburner","true"));
+	static bool useafterburner = XMLSupport::parse_bool(vs_config->getVariable("AI","use_afterburner","true"));
 	return useafterburner;
 }
 void AddOrd (Order *aisc, Unit * un, Order * ord) {
@@ -88,6 +88,46 @@ void FireAt::LastPythonScript () {
 	lastOrder = PythonAI<Orders::FireAt>::LastPythonClass();
 }
 
+
+
+class EvadeLeftRightC:public FlyByWire {
+  bool updown;
+  Vector facing;
+  bool dir;
+public:
+  EvadeLeftRightC( bool updown) {
+    this->updown=updown;    
+    facing=Vector(0,0,0);    
+    desired_ang_velocity=Vector(0,0,0);
+    dir=(rand()<RAND_MAX/2);
+  }
+  void SetOppositeDir() {
+    dir=!dir;
+    SetDesiredAngularVelocity(Vector(0.0f,0.0f,0.0f),true);
+    if (updown) {
+      Up(dir?1.0f:-1.0f);
+    }else {
+      Right(dir?1.0f:-1.0f);
+    }
+    Vector P=Vector(0,0,0),Q=Vector(0,0,0);
+    parent->GetOrientation(P,Q,facing);
+  }
+  virtual void SetParent(Unit * parent1) {
+    FlyByWire::SetParent(parent1);
+    SetOppositeDir();
+  }
+  void Execute() {    
+    FlyByWire::Execute();
+    Vector P,Q,R;
+    parent->GetOrientation(P,Q,R);
+    static float ang = cos(XMLSupport::parse_float(vs_config->getVariable("AI","evasion_angle","45")));
+    if (R.Dot(facing)<ang||(desired_ang_velocity.i==0&&desired_ang_velocity.j==0&&desired_ang_velocity.k==0)) {
+      SetOppositeDir();
+    }    
+  }
+};
+
+
 void AfterburnTurnTowards (Order * aisc, Unit * un) {
   Vector vec (0,0,10000);
   bool afterburn = useAfterburner();
@@ -129,6 +169,28 @@ void BarrelRoll (Order * aisc, Unit*un) {
 	broll->Afterburn(afterburn);
 }
 
+static void EvadeWavy (Order * aisc, Unit*un, bool updown, bool ab) {
+  EvadeLeftRightC * broll=NULL;
+  broll= new EvadeLeftRightC(updown);
+  AddOrd(aisc,un,broll);
+  bool afterburn = ab&&useAfterburner();
+  broll->MatchSpeed(Vector(0,0,afterburn?un->GetComputerData().max_ab_speed():un->GetComputerData().max_speed()));
+  broll->Afterburn(afterburn);        
+}
+void AfterburnEvadeLeftRight(Order *aisc, Unit* un) {
+  EvadeWavy(aisc,un,false,true);
+}
+void AfterburnEvadeUpDown(Order *aisc, Unit* un) {
+  EvadeWavy(aisc,un,true,true);
+}
+void EvadeLeftRight(Order *aisc, Unit* un) {
+  EvadeWavy(aisc,un,false,false);
+}
+void EvadeUpDown(Order *aisc, Unit* un) {
+  EvadeWavy(aisc,un,true,false);
+}
+
+
 namespace Orders{
 class LoopAround: public Orders::FaceTargetITTS{
 	Orders::MoveToParent m;
@@ -136,10 +198,13 @@ class LoopAround: public Orders::FaceTargetITTS{
 	float pp;
 	Vector rr;// place to go for @ end
 	bool aggressive;
+	bool afterburn;
+	bool force_afterburn;
 public:
-	LoopAround(bool aggressive, int seed):FaceTargetITTS(false,3),m(false,2,false) {
+	LoopAround(bool aggressive, bool afterburn, bool force_afterburn, int seed):FaceTargetITTS(false,3),m(false,2,false) {
 		VSRandom vsr(seed);
-		
+		this->afterburn=afterburn;
+		this->force_afterburn=force_afterburn;
 		this->aggressive=aggressive;
 		static float loopdis=XMLSupport::parse_float (vs_config->getVariable("AI","loop_around_distance","1"));
 		qq=pp=0;
@@ -168,15 +233,16 @@ public:
 		if (targ) {
 			Vector relloc = parent->Position()-targ->Position();
 			Vector r =targ->cumulative_transformation_matrix.getR();
-			bool afterburn = useAfterburner();
+			bool afterburn = useAfterburner()&&this->afterburn;
+                        bool ab_needed=force_afterburn||targ->GetVelocity().MagnitudeSquared()>parent->GetComputerData().max_speed();
 			if (r.Dot(relloc) <0) {
 				FaceTargetITTS::Execute();
-				m.SetAfterburn (afterburn);
+				m.SetAfterburn (afterburn&&ab_needed);
 				m.Execute(parent,targ->Position()-r.Scale(rr.k*parent->rSize()+targ->rSize())+targ->cumulative_transformation_matrix.getP()*(rr.i*parent->rSize())+targ->cumulative_transformation_matrix.getQ()*(rr.j*parent->rSize()));
 			}else {
 				done=false;
 				if (afterburn)
-					m.SetAfterburn (targ->GetVelocity().MagnitudeSquared()>parent->GetComputerData().max_speed());
+					m.SetAfterburn (ab_needed);
 				else
 					m.SetAfterburn(0);
 				Vector scala=targ->cumulative_transformation_matrix.getQ().Scale(qq*(parent->rSize()+targ->rSize()))+targ->cumulative_transformation_matrix.getP().Scale(pp*(parent->rSize()+targ->rSize()));								
@@ -194,15 +260,44 @@ public:
 };
 }
 void LoopAround(Order* aisc, Unit * un) {
-	Order* broll = new Orders::LoopAround(false,(int)un);
+	Order* broll = new Orders::LoopAround(false,true,false,(int)un);
 	AddOrd(aisc,un,broll);
 	
 }
 void AggressiveLoopAround(Order* aisc, Unit * un) {
-	Order* broll = new Orders::LoopAround(true,(int)un);
+	Order* broll = new Orders::LoopAround(true,true,false,(int)un);
 	AddOrd(aisc,un,broll);
 	
 }
+void RollLeft(Order *aisc, Unit* un) {
+  if (un->aistate)
+    AddOrd(un->aistate,un,new ExecuteFor(new Orders::MatchRoll(un->GetComputerData().max_roll_right,false),1.0f));
+}
+void RollRight(Order *aisc, Unit* un) {
+  if (un->aistate)
+    AddOrd(un->aistate,un,new ExecuteFor(new Orders::MatchRoll(-un->GetComputerData().max_roll_left,false),1.0f));
+}
+void LoopAroundFast(Order* aisc, Unit * un) {
+	Order* broll = new Orders::LoopAround(false,true,true,(int)un);
+	AddOrd(aisc,un,broll);
+	
+}
+void AggressiveLoopAroundFast(Order* aisc, Unit * un) {
+	Order* broll = new Orders::LoopAround(true,true,true,(int)un);
+	AddOrd(aisc,un,broll);
+	
+}
+void LoopAroundSlow(Order* aisc, Unit * un) {
+	Order* broll = new Orders::LoopAround(false,false,false,(int)un);
+	AddOrd(aisc,un,broll);
+	
+}
+void AggressiveLoopAroundSlow(Order* aisc, Unit * un) {
+	Order* broll = new Orders::LoopAround(true,false,false,(int)un);
+	AddOrd(aisc,un,broll);
+	
+}
+#if 0
 void Evade(Order * aisc, Unit * un) {
   QVector v(un->Position());
   QVector u(v);
@@ -220,6 +315,7 @@ void Evade(Order * aisc, Unit * un) {
   ord = new Orders::MatchLinearVelocity(un->ClampVelocity(Vector (10000,0,10000),afterburn),false, afterburn,true);  
   AddOrd (aisc,un,ord);
 }
+#endif
 void MoveTo(Order * aisc, Unit * un) {
   QVector Targ (un->Position());
   Unit * untarg = un->Target();
@@ -245,7 +341,7 @@ void Kickstop(Order * aisc, Unit * un) {
 void MatchVelocity(Order * aisc, Unit * un) {
   KickstopBase(aisc,un,false);
 }
-Vector VectorThrustHelper(Order * aisc, Unit * un) {
+static Vector VectorThrustHelper(Order * aisc, Unit * un, bool ab=false) {
   Vector vec (0,0,0);
   Vector retval(0,0,0);
   if (un->Target()) {
@@ -254,7 +350,7 @@ Vector VectorThrustHelper(Order * aisc, Unit * un) {
     CrossProduct(relpos,Vector(1,0,0),vec);
     retval+=tpos;
   }
-  Order * ord = new Orders::MatchLinearVelocity(un->ClampVelocity(vec,false),true,false,true);
+  Order * ord = new Orders::MatchLinearVelocity(un->ClampVelocity(vec,ab),true,ab,true);
   AddOrd (aisc,un,ord);
   return retval;
 }
@@ -270,6 +366,11 @@ void VeerAwayITTS(Order * aisc, Unit * un) {
 }
 void VeerAndTurnAway(Order * aisc, Unit * un) {
   Vector retval=VectorThrustHelper (aisc,un);
+  Order *ord = new Orders::ChangeHeading(retval,3,1);
+  AddOrd (aisc,un,ord);  
+}
+void AfterburnVeerAndTurnAway(Order * aisc, Unit * un) {
+  Vector retval=VectorThrustHelper (aisc,un,true);
   Order *ord = new Orders::ChangeHeading(retval,3,1);
   AddOrd (aisc,un,ord);  
 }
@@ -346,7 +447,7 @@ void Stop (Order * aisc, Unit * un) {
   Order * ord = new Orders::MatchLinearVelocity(un->ClampVelocity(vec,false),true,false,false);
   AddOrd (aisc,un,ord);//<!-- should we fini? -->
 }
-void TurnAway(Order * aisc, Unit * un) {
+void AfterburnTurnAway(Order * aisc, Unit * un) {
   QVector v(un->Position());
   QVector u(v);
   Unit * targ =un->Target();
@@ -354,6 +455,19 @@ void TurnAway(Order * aisc, Unit * un) {
     u=targ->Position();
   }
   bool afterburn = useAfterburner();
+  Order * ord = new Orders::MatchLinearVelocity(un->ClampVelocity(200*(v-u).Cast(),afterburn),false,afterburn,false);
+  AddOrd (aisc,un,ord);
+  ord = new Orders::ChangeHeading ((200*(v-u)) + v,3);
+  AddOrd (aisc,un,ord);
+}
+void TurnAway(Order * aisc, Unit * un) {
+  QVector v(un->Position());
+  QVector u(v);
+  Unit * targ =un->Target();
+  if (targ) {
+    u=targ->Position();
+  }
+  bool afterburn = false;
   Order * ord = new Orders::MatchLinearVelocity(un->ClampVelocity(200*(v-u).Cast(),afterburn),false,afterburn,false);
   AddOrd (aisc,un,ord);
   ord = new Orders::ChangeHeading ((200*(v-u)) + v,3);
@@ -371,11 +485,15 @@ void FlyStraight(Order * aisc, Unit * un) {
   Vector vec (0,0,10000);
   Order * ord = new Orders::MatchVelocity(un->ClampVelocity(vec,false),Vector(0,0,0),true,false,false);
   AddOrd (aisc,un,ord);
+  ord = new Orders::MatchAngularVelocity(Vector(0,0,0),1,false);
+  AddOrd (aisc,un,ord);
 }
 void FlyStraightAfterburner(Order * aisc, Unit * un) {
   Vector vec (0,0,10000);
   bool afterburn=useAfterburner();
   Order * ord = new Orders::MatchVelocity(un->ClampVelocity(vec,afterburn),Vector(0,0,0),true,afterburn,false);
+  AddOrd (aisc,un,ord);
+  ord = new Orders::MatchAngularVelocity(Vector(0,0,0),1,false);
   AddOrd (aisc,un,ord);
 }
 void CloakForScript(Order * aisc, Unit * un) {
@@ -395,3 +513,20 @@ void TurnTowardsITTS(Order * aisc, Unit * un) {
   AddOrd (aisc,un,ord);    
 
 }
+void DropCargo(Order*aisc, Unit * un) {
+      if (un->numCargo() > 0)
+      {
+              int dropcount=(un->numCargo()/10)+1;
+
+              {for(int i=0; i<dropcount; i++)
+              {
+                      un->EjectCargo(0);  
+              }}
+              Stop(aisc,un);
+      }
+      else
+      {
+              TurnAway(aisc, un);
+      }
+}
+

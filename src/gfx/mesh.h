@@ -165,6 +165,7 @@ protected:
   ///Whether this original will be drawn this frame
   GFXBOOL will_be_drawn;  
   ///The blend functions
+  bool convex;
   enum BLENDFUNC blendSrc;  enum BLENDFUNC blendDst;
   /// Support for reorganized rendering
   vector<MeshDrawContext> *draw_queue;
@@ -180,6 +181,7 @@ protected:
   vector <MeshFX> LocalFX;
   ///Returing the mesh relevant to "size" pixels LOD of this mesh
   Mesh *getLOD (float lod);
+
 public:
   Mesh();
   Mesh(const Mesh &m);
@@ -193,6 +195,8 @@ public:
   float getTextureFramesPerSecond();
   double getTextureCumulativeTime();
   void setTextureCumulativeTime(double );
+  bool getConvex()const{return this->convex;}
+  void setConvex(bool b);
   virtual int MeshType() {return 0;}
   BLENDFUNC getBlendSrc() {return blendSrc;}
   BLENDFUNC getBlendDst() {return blendDst;}		

@@ -16,7 +16,7 @@
 #include "ai/aggressive.h"
 #include "lin_time.h"
 extern char SERVER;
-
+extern bool isMissile(const weapon_info *);
 Mount::Mount() {
 	static weapon_info wi(weapon_info::BEAM);
         functionality=1;
@@ -35,6 +35,12 @@ Mount::Mount() {
 	serial = 0;
 }
 extern double interpolation_blend_factor;
+void DestroyMount (Mount * mount) {
+  mount->UnFire();
+  AUDStopPlaying(mount->sound); 
+  mount->status=Mount::DESTROYED;
+
+}
 float Mount::ComputeAnimatedFrame(Mesh * gun) {
 	if (type->type==weapon_info::BEAM) {
 		if (ref.gun) {
@@ -142,32 +148,43 @@ void Mount::ReplaceMounts (const Mount * other) {
 	}
 }
 double Mount::Percentage (const Mount *newammo) const{
-	  float percentage=0;
+	  float percentage=1./1024;
 	  int thingstocompare=0;
 	  if (status==UNCHOSEN||status==DESTROYED)
-		return 0;
+            return percentage;
 	  if (newammo->ammo==-1) {
 		if (ammo!=-1) {
 		  thingstocompare++;
-		}
+		}else {
+                  if (newammo->type->Range==type->Range&&newammo->type->Damage==type->Damage&&newammo->type->PhaseDamage==type->PhaseDamage)
+                    return 1;
+                  if (newammo->type->weapon_name==type->weapon_name)
+                    return 1;             
+                }
 	  } else {
 		if (newammo->ammo>0) {
-		  percentage+=ammo/newammo->ammo;
+		  percentage+=.25;
 		  thingstocompare++;
+                  if (ammo>0) {
+                    if (newammo->type->Range==type->Range&&newammo->type->Damage==type->Damage&&newammo->type->PhaseDamage==type->PhaseDamage)
+                      return 1;
+                    if (newammo->type->weapon_name==type->weapon_name)
+                      return 1;                                 
+                  }
 		}
 	  }
 	  if (newammo->type->Range) {
-		percentage+= type->Range/newammo->type->Range;
+            if (type->Range>newammo->type->Range)percentage+= .25;
 		thingstocompare++;
 	  }
 	  if (newammo->type->Damage+100*newammo->type->PhaseDamage) {
-		percentage += (type->Damage+100*type->PhaseDamage)/(newammo->type->Damage+100*newammo->type->PhaseDamage);
+                if (type->Damage+100*type->PhaseDamage>newammo->type->Damage+100*newammo->type->PhaseDamage) percentage+=.75;
 		thingstocompare++;
 	  }
 	  if (thingstocompare) {
 		return percentage/thingstocompare;
 	  }else {
-		return 0;
+		return 1./1024;
 	  }
 }
 //bool returns whether to refund the cost of firing
@@ -234,7 +251,7 @@ bool Mount::PhysicsAlignedFire(const Transformation &Cumulative, const Matrix & 
 						if (match_speed_with_target)
 							temp->GetComputerData().velocity_ref.SetUnit(target);
 					}else {
-						temp->EnqueueAI(new Orders::AggressiveAI("default.agg.xml","default.int.xml"));
+						temp->EnqueueAI(new Orders::AggressiveAI("default.agg.xml"));
 						temp->SetTurretAI();
 						temp->TargetTurret(target);
 
@@ -253,10 +270,11 @@ bool Mount::PhysicsAlignedFire(const Transformation &Cumulative, const Matrix & 
 			}
 
     static bool use_separate_sound=XMLSupport::parse_bool (vs_config->getVariable ("audio","high_quality_weapon","true"));
+    static bool ai_use_separate_sound=XMLSupport::parse_bool (vs_config->getVariable ("audio","ai_high_quality_weapon","false"));
 	static bool ai_sound=XMLSupport::parse_bool (vs_config->getVariable ("audio","ai_sound","true"));
 	Cockpit * cp;
 	bool ips = ((cp=_Universe->isPlayerStarship(owner))!=NULL);
-    if ((((!use_separate_sound)||type->type==weapon_info::BEAM)||(!ips))&&(type->type!=weapon_info::PROJECTILE)) {
+    if ((((!use_separate_sound)||type->type==weapon_info::BEAM)||((!ai_use_separate_sound)&&!ips))&&(isMissile(type)==false)) {
 		if (ai_sound||(ips&&type->type==weapon_info::BEAM)) {
 			if (!AUDIsPlaying (sound)) {
 				AUDPlay (sound,tmp.position,velocity,1);
@@ -269,6 +287,8 @@ bool Mount::PhysicsAlignedFire(const Transformation &Cumulative, const Matrix & 
 			int snd =AUDCreateSound(sound,false);
                         if (ips&&cp!=NULL&&cp->GetView()<=CP_RIGHT) {
                           AUDAdjustSound(snd,Vector(0,0,0),velocity);
+                          static float gain=XMLSupport::parse_float(vs_config->getVariable("audio","weapon_gain",".25"));
+                          AUDSoundGain(snd,gain);
                         }else {
                           AUDAdjustSound(snd,tmp.position,velocity);
                         }
@@ -286,7 +306,7 @@ bool Mount::Fire (Unit * owner, bool Missile, bool listen_to_owner) {
     processed=UNFIRED;
   }
   static bool reduce_beam_ammo = XMLSupport::parse_bool (vs_config->getVariable ("physics","reduce_beam_ammo","0"));
-  if (processed==FIRED||status!=ACTIVE||(Missile!=(type->type==weapon_info::PROJECTILE))||ammo==0)
+  if (processed==FIRED||status!=ACTIVE||(Missile!=(isMissile(type)))||ammo==0)
     return false;
   if (type->type==weapon_info::BEAM) {
 	  bool fireit=ref.gun==NULL;

@@ -40,6 +40,24 @@ void CommunicatingAI::SetParent (Unit * par) {
   Order::SetParent(par);
   comm_face = FactionUtil::GetRandAnimation(par->faction,sex);
 }
+bool MatchingMood(const CommunicationMessage& c,float mood, float randomresponse, float relationship) {
+
+  static float pos_limit =XMLSupport::parse_float(vs_config->getVariable ("AI",
+                                                                          "LowestPositiveCommChoice",
+                                                                          "0"));
+  static float neg_limit =XMLSupport::parse_float(vs_config->getVariable ("AI",
+                                                                          "LowestNegativeCommChoice",
+                                                                          "-.00001"));
+  const FSM::Node *n = c.curstate<c.fsm->nodes.size()?(&c.fsm->nodes[c.curstate]):(&c.fsm->nodes[c.fsm->getDefaultState(relationship)]);
+  std::vector<unsigned int>::const_iterator iend= n->edges.end();
+  for (std::vector<unsigned int>::const_iterator i=n->edges.begin();i!=iend;++i) {
+    if (c.fsm->nodes[*i].messagedelta>=pos_limit&&relationship>=0)
+      return true;
+    if (c.fsm->nodes[*i].messagedelta<=neg_limit&&relationship<0)
+      return true;
+  }
+  return false;
+}
 int CommunicatingAI::selectCommunicationMessageMood (CommunicationMessage &c, float mood) {
 
   Unit * targ = c.sender.GetUnit();
@@ -47,10 +65,12 @@ int CommunicatingAI::selectCommunicationMessageMood (CommunicationMessage &c, fl
 
   if (targ) {
     relationship= GetEffectiveRelationship(targ);
+    if (targ==parent->Target()&&relationship>-1.0)
+      relationship=-1.0;
     mood+=(1-randomresponse)*relationship;
   }
   //breaks stuff
-  if (!(c.curstate<c.fsm->GetUnDockNode())) {
+  if ((c.curstate>=c.fsm->GetUnDockNode())||!MatchingMood(c,mood,randomresponse,relationship)) {
     c.curstate = c.fsm->getDefaultState(relationship);//hijack the current state
   }
   return c.fsm->getCommMessageMood (c.curstate,mood,randomresponse,relationship);
@@ -64,29 +84,79 @@ float CommunicatingAI::getAnger(const Unit * target)const {
   if (i!=effective_relationship.end()) {
     rel = (*i).second;
   }
+  static int pirates=FactionUtil::GetFactionIndex("pirates");
+  if (_Universe->isPlayerStarship(target)){
+    if (parent->faction==pirates) {
+      static unsigned int cachedCargoNum=0;
+      static bool good=true;
+      if (cachedCargoNum!=target->numCargo()) {
+        cachedCargoNum=target->numCargo();
+        good=true;
+        for (unsigned int i=0;i<cachedCargoNum;++i) {
+          Cargo * c=&target->image->cargo[i];
+          if (c->quantity!=0&&c->category.find("upgrades")==string::npos){
+            good=false;
+            break;
+          }
+        }
+      }
+      if (good) {
+        static float goodness_for_nocargo=XMLSupport::parse_float(vs_config->getVariable("AI","pirate_bonus_for_empty_hold",".75"));
+        rel+=goodness_for_nocargo;
+      }    
+    }
+    {
+      int fac=parent->faction;
+      MapStringFloat::iterator mapiter=factions[fac]->ship_relation_modifier.find(target->name);
+      if (mapiter!=factions[fac]->ship_relation_modifier.end()) {
+        rel+=(*mapiter).second;
+      }
+    }
+  }
   return rel;
 }
 float CommunicatingAI::GetEffectiveRelationship (const Unit * target)const {
   return Order::GetEffectiveRelationship (target)+getAnger(target);
 }
-static void AllUnitsCloseAndEngage(Unit * un, int faction) {
+static void GetMadAt(Unit* un, Unit * parent, int numhits=0) {
+  if (numhits==0) {
+    static float snumhits = XMLSupport::parse_float(vs_config->getVariable("AI","ContrabandMadness","5"));
+    numhits =snumhits;
+  }
+  CommunicationMessage hit (un,parent,NULL,0);
+  hit.SetCurrentState(hit.fsm->GetHitNode(),NULL,0);
+  for (         int i=0;i<numhits;i++) {
+    parent->getAIState()->Communicate(hit);
+  }
+
+}
+
+void AllUnitsCloseAndEngage(Unit * un, int faction) {
 	Unit * ally;
 	static float contraband_assist_range = XMLSupport::parse_float (vs_config->getVariable("physics","contraband_assist_range","50000"));
+        float relation=0;
+        static float minrel = XMLSupport::parse_float (vs_config->getVariable("AI","max_faction_contraband_relation","-.05"));
+        static float adj = XMLSupport::parse_float (vs_config->getVariable("AI","faction_contraband_relation_adjust","-.025"));
+        if ((relation=FactionUtil::GetIntRelation(faction,un->faction))>minrel) {
+          FactionUtil::AdjustIntRelation(faction,un->faction,minrel-relation,1);
+        }else {
+          FactionUtil::AdjustIntRelation(faction,un->faction,adj,1);
+        }
 	for (un_iter i=_Universe->activeStarSystem()->getUnitList().createIterator();
 		(ally = *i)!=NULL;
 		++i) {
 		//Vector loc;
-
+          
 		if (ally->faction==faction) {
 			//if (ally->InRange (un,loc,true)) {
 				if ((ally->Position()-un->Position()).Magnitude()<contraband_assist_range) {
+                                        GetMadAt(un,ally);
 					Flightgroup * fg = ally->getFlightgroup();
 					if (fg) {
 						if (fg->directive.empty()?true:toupper(*fg->directive.begin())!=*fg->directive.begin()) {
 							ally->Target (un);
 							ally->TargetTurret (un);
-
-							fg->directive=string("a");//attack my target (of leader)
+                                                        
 						}else {
 							ally->Target (un);
 							ally->TargetTurret (un);
@@ -105,8 +175,7 @@ void CommunicatingAI::TerminateContrabandSearch(bool contraband_detected) {
     CommunicationMessage c(parent,un,comm_face,sex);
     if (contraband_detected) {
       c.SetCurrentState(c.fsm->GetContrabandDetectedNode(),comm_face,sex);
-      static int numHitsPerContrabandFail=3;
-      GetMadAt (un,numHitsPerContrabandFail);
+      GetMadAt (un,0);
       AllUnitsCloseAndEngage(un,parent->faction);
 
     }else {
@@ -120,12 +189,7 @@ void CommunicatingAI::TerminateContrabandSearch(bool contraband_detected) {
 
 }
 void CommunicatingAI::GetMadAt (Unit * un, int numHitsPerContrabandFail) {
-
-      CommunicationMessage hit (un,parent,NULL,0);
-      hit.SetCurrentState(hit.fsm->GetHitNode(),comm_face,sex);
-      for (         int i=0;i<numHitsPerContrabandFail;i++) {
-		  parent->getAIState()->Communicate(hit);
-      }
+  ::GetMadAt(un,parent,numHitsPerContrabandFail);
 }
 
 static bool InList (std::string item, Unit * un) {
@@ -174,7 +238,7 @@ void CommunicatingAI::InitiateContrabandSearch (float playaprob, float targprob)
   if (u) {
     Unit * un =FactionUtil::GetContraband (parent->faction);
     if (un) {
-    if (un->numCargo()>0&&UnitUtil::getUnitSystemFile(un)==UnitUtil::getUnitSystemFile(parent)&&UnitUtil::getFlightgroupName(parent)!="Base"&&!isDockedAtAll(un)) {
+    if (un->numCargo()>0&&UnitUtil::getUnitSystemFile(u)==UnitUtil::getUnitSystemFile(parent)&&!UnitUtil::isDockableUnit(parent)) {
     Unit * v;
     if ((v=contraband_searchee.GetUnit())) {
       if (v==u) {
@@ -223,14 +287,17 @@ void CommunicatingAI::AdjustRelationTo (Unit * un, float factor) {
   mood+=factor*moodswingyness;
 }
 
+
+//modified not to check player when hostiles are around--unless player IS the hostile
 Unit * CommunicatingAI::GetRandomUnit (float playaprob, float targprob) {
   float a =rand ();
   Unit * target=NULL;
-  if (a<RAND_MAX*playaprob&&_Universe->AccessCockpit()->GetParent()!=parent) {
+  Unit * originaltarget=parent->Target();
+  if (originaltarget==NULL&&a<RAND_MAX*playaprob&&_Universe->AccessCockpit()->GetParent()!=parent) {
     target = _Universe->AccessCockpit()->GetParent();
   }
-  if (a>RAND_MAX*(1-targprob)) {
-    target = parent->Target();
+  if (originaltarget!=NULL||a>RAND_MAX*(1-targprob)) {
+    target = originaltarget;
   }
   if (target!=NULL) {
   if ((!parent->InRange (target))) {
@@ -258,7 +325,9 @@ void CommunicatingAI::RandomInitiateCommunication (float playaprob, float targpr
         }
       }
       //ok we're good to put a default msg in the queue as a fake message;
-      messagequeue.push_back (new CommunicationMessage (target,this->parent,comm_face,sex));
+      FSM * fsm = FactionUtil::GetConversation(target->faction,this->parent->faction);
+      int state =fsm->getDefaultState(parent->getRelation(target));
+      messagequeue.push_back (new CommunicationMessage (target,this->parent,state,state,comm_face,sex));
     }
   }
 }
@@ -271,7 +340,10 @@ int CommunicatingAI::selectCommunicationMessage (CommunicationMessage &c,Unit * 
     else
       return 0;
   }else {
-    return selectCommunicationMessageMood (c,.5*mood+.5*getAnger (un));
+    static float moodmul = XMLSupport::parse_float(vs_config->getVariable ("AI","MoodAffectsRespose","0"));
+    static float angermul = XMLSupport::parse_float(vs_config->getVariable ("AI","AngerAffectsRespose","1"));
+    static float staticrelmul = XMLSupport::parse_float(vs_config->getVariable ("AI","StaticRelationshipAffectsResponse","1"));
+    return selectCommunicationMessageMood (c,moodmul*mood+angermul*getAnger (un)+staticrelmul*Order::GetEffectiveRelationship(un));
   }
 }
 

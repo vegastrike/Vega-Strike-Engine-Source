@@ -13,35 +13,53 @@
 
 
 typedef std::map<string,CCScript *> HardCodedMap;
-HardCodedMap MakeHardCodedScripts() {
+static HardCodedMap MakeHardCodedScripts() {
   HardCodedMap tmp;
   typedef pair<string, CCScript *> MyPair;
+  tmp.insert (MyPair ("loop around fast",&LoopAroundFast));
+  tmp.insert (MyPair ("aggressive loop around fast",&AggressiveLoopAroundFast));  
+  tmp.insert (MyPair ("loop around slow",&LoopAroundSlow));
+  tmp.insert (MyPair ("aggressive loop around slow",&AggressiveLoopAroundSlow));  
   tmp.insert (MyPair ("loop around",&LoopAround));
   tmp.insert (MyPair ("aggressive loop around",&AggressiveLoopAround));  
   tmp.insert (MyPair ("barrel roll",&BarrelRoll));
   tmp.insert (MyPair ("veer away",&VeerAway));
   tmp.insert (MyPair ("veer away itts",&VeerAwayITTS));
   tmp.insert (MyPair ("veer and turn away",&VeerAndTurnAway));
+  tmp.insert (MyPair ("afterburn veer away",&AfterburnVeerAndTurnAway));
   tmp.insert (MyPair ("match velocity",&MatchVelocity));
   tmp.insert (MyPair ("fly straight",&FlyStraight));
   tmp.insert (MyPair ("fly straight afterburner",&FlyStraightAfterburner));
+  tmp.insert (MyPair ("afterburn fly straight",&FlyStraightAfterburner));
   tmp.insert (MyPair ("afterburn turn towards",&AfterburnTurnTowards));  
   tmp.insert (MyPair ("afterburn turn towards itts",&AfterburnTurnTowardsITTS));  
   tmp.insert (MyPair ("cloak",&CloakForScript));  
-  tmp.insert (MyPair ("evade",&Evade));    
+  tmp.insert (MyPair ("evade",&AfterburnEvadeLeftRight));    
   tmp.insert (MyPair ("kick stop",&Kickstop));      
   tmp.insert (MyPair ("move to",&MoveTo));      
   tmp.insert (MyPair ("shelton slide",&SheltonSlide));      
-  tmp.insert (MyPair ("skilled afterbuner slide",&SkilledABSlide));
+  tmp.insert (MyPair ("skilled afterburner slide",&SkilledABSlide));
   tmp.insert (MyPair ("afterburner slide",&AfterburnerSlide));        
   tmp.insert (MyPair ("stop",&Stop));      
   tmp.insert (MyPair ("turn away",&TurnAway));      
+  tmp.insert (MyPair ("afterburn turn away",&AfterburnTurnAway));      
   tmp.insert (MyPair ("turn towards",&TurnTowards));      
   tmp.insert (MyPair ("turn towards itts",&TurnTowardsITTS));      
+  tmp.insert (MyPair ("drop cargo",&DropCargo));   
+  tmp.insert (MyPair ("roll right",&RollRight));   
+  tmp.insert (MyPair ("roll left",&RollLeft));   
+  tmp.insert (MyPair ("evade left right",&EvadeLeftRight));   
+  tmp.insert (MyPair ("evade up down",&EvadeUpDown));   
+  tmp.insert (MyPair ("afterburn evade left right",&AfterburnEvadeLeftRight));   
+  tmp.insert (MyPair ("afterburn evade up down",&AfterburnEvadeUpDown));   
   return tmp;
 }
 
 static HardCodedMap hard_coded_scripts= MakeHardCodedScripts(); 
+bool validateHardCodedScript(std::string s) {
+   if (s.length()==0) return true;
+   return hard_coded_scripts.find(s)!=hard_coded_scripts.end();
+}
 struct AIScriptXML {
   int unitlevel;
   int acc;
@@ -752,7 +770,7 @@ using namespace VSFileSystem;
 	  if (aidebug>1)
 		  VSFileSystem::vs_fprintf (stderr,"using soft coded script %s",filename);
 	  if (aidebug>0)
-		  UniverseUtil::IOmessage(0,parent->name,"all",string("using script ")+string(filename)+" threat "+XMLSupport::tostring(parent->GetComputerData().threatlevel));
+		  UniverseUtil::IOmessage(0,parent->name,"all",string("FAILED(or missile) script ")+string(filename)+" threat "+XMLSupport::tostring(parent->GetComputerData().threatlevel));
   }
 #ifdef AIDBG
   VSFileSystem::vs_fprintf (stderr,"chd");

@@ -60,7 +60,7 @@ public:
   QVector GetPosition() const {return local_transformation.position;}
   void SetPosition (const QVector &);
   void SetOrientation(const Vector &p, const Vector &q, const Vector &r);
-  void UpdatePhysics(const Transformation & , const Matrix & , class Unit * target, float trackingcone, Unit * targetToCollideWith/*prevent AI friendly fire--speed up app*/);
+  void UpdatePhysics(const Transformation & , const Matrix & , class Unit * target, float trackingcone, Unit * targetToCollideWith/*prevent AI friendly fire--speed up app*/, float HeatSink);
   void Draw(const Transformation & , const Matrix & ,class  Unit * target, float trackingcone);
   void Destabilize () {impact=UNSTABLE;}
   bool Dissolved () {return curthick==0;} 

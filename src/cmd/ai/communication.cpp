@@ -6,28 +6,28 @@
 FSM::FSM (const char * filename) {
     //loads a conversation finite state machine with deltaRelation weight transition from an XML?
   if (strlen(filename)==0) {
-    nodes.push_back (Node("welcome to cachunkcachunk.com",0));
-    nodes.push_back (Node("I love you!",.1));
-    nodes.push_back (Node("J00 0wnz m3",.08));
-    nodes.push_back (Node("You are cool!",.06));
-    nodes.push_back (Node("You are nice!",.05));
-    nodes.push_back (Node("Ya you're naled! NALED PAL!",-.02));
-    nodes.push_back (Node("i 0wnz j00",-.08));
-    nodes.push_back (Node("I hate you!",-.1));
+    nodes.push_back (Node::MakeNode("welcome to cachunkcachunk.com",0));
+    nodes.push_back (Node::MakeNode("I love you!",.1));
+    nodes.push_back (Node::MakeNode("J00 0wnz m3",.08));
+    nodes.push_back (Node::MakeNode("You are cool!",.06));
+    nodes.push_back (Node::MakeNode("You are nice!",.05));
+    nodes.push_back (Node::MakeNode("Ya you're naled! NALED PAL!",-.02));
+    nodes.push_back (Node::MakeNode("i 0wnz j00",-.08));
+    nodes.push_back (Node::MakeNode("I hate you!",-.1));
 
-    nodes.push_back (Node("Docking operation complete.",0));
-    nodes.push_back (Node("Please move into a green docking box and press d.",0));
-    nodes.push_back (Node("Docking operation begun.",0));
-    nodes.push_back (Node("Clearance denied.",0));
-    nodes.push_back (Node("Clearance granted.",0));
-    nodes.push_back (Node("No.",0));
-    nodes.push_back (Node("Yes.",0));
-    nodes.push_back (Node("Prepare To Be Searched. Maintain Speed and Course.",0));
-    nodes.push_back (Node("No contraband detected: You may proceed.",0));
-    nodes.push_back (Node("Contraband detected! All units close and engage!",0));
-    nodes.push_back (Node("Your Course is deviating! Maintain Course!",0));
-    nodes.push_back (Node("Request Clearence To Land.",0));
-    nodes.push_back (Node("*hit*",-.2));
+    nodes.push_back (Node::MakeNode("Docking operation complete.",0));
+    nodes.push_back (Node::MakeNode("Please move into a green docking box and press d.",0));
+    nodes.push_back (Node::MakeNode("Docking operation begun.",0));
+    nodes.push_back (Node::MakeNode("Clearance denied.",0));
+    nodes.push_back (Node::MakeNode("Clearance granted.",0));
+    nodes.push_back (Node::MakeNode("No.",0));
+    nodes.push_back (Node::MakeNode("Yes.",0));
+    nodes.push_back (Node::MakeNode("Prepare To Be Searched. Maintain Speed and Course.",0));
+    nodes.push_back (Node::MakeNode("No contraband detected: You may proceed.",0));
+    nodes.push_back (Node::MakeNode("Contraband detected! All units close and engage!",0));
+    nodes.push_back (Node::MakeNode("Your Course is deviating! Maintain Course!",0));
+    nodes.push_back (Node::MakeNode("Request Clearence To Land.",0));
+    nodes.push_back (Node::MakeNode("*hit*",-.2));
     vector <unsigned int> edges;
     unsigned int i;
     for (i=0;i<nodes.size()-13;i++) {
@@ -41,58 +41,78 @@ FSM::FSM (const char * filename) {
   }
 }
 int FSM::GetUnDockNode() const{
-  return nodes.size()-13;
+  return nodes.size()-16;
 }
 int FSM::GetFailDockNode()const {
-  return nodes.size()-12;
+  return nodes.size()-15;
 }
 int FSM::GetDockNode() const{
-  return nodes.size()-11;
-}
-int FSM::GetAbleToDockNode() const{
-  return nodes.size()-9;
+  return nodes.size()-14;
 }
 int FSM::GetUnAbleToDockNode() const{
-  return nodes.size()-10;
+  return nodes.size()-13;
+}
+int FSM::GetAbleToDockNode() const{
+  return nodes.size()-12;
 }
 int FSM::GetNoNode() const{
-  return nodes.size()-8;
+  return nodes.size()-11;
 }
 int FSM::GetYesNode() const{
-  return nodes.size()-7;
+  return nodes.size()-10;
 }
 int FSM::GetContrabandInitiateNode() const{
-  return nodes.size()-6;
+  return nodes.size()-9;
 }
 int FSM::GetContrabandUnDetectedNode() const{
-  return nodes.size()-5;
+  return nodes.size()-8;
 }
 int FSM::GetContrabandDetectedNode() const{
-  return nodes.size()-4;
+  return nodes.size()-7;
 }
 int FSM::GetContrabandWobblyNode() const{
-  return nodes.size()-3;
+  return nodes.size()-6;
 }
 int FSM::GetRequestLandNode () const{
-  return nodes.size()-2;
+  return nodes.size()-5;
 }
 int FSM::GetHitNode () const{
   return nodes.size()-1;
 }
+int FSM::GetDamagedNode () const{
+  return nodes.size()-2;
+}
+int FSM::GetDealtDamageNode () const{
+  return nodes.size()-3;
+}
+int FSM::GetScoreKillNode () const{
+  return nodes.size()-4;
+}
 static float sq (float i) {return i*i;}
 bool nonneg (float i) {return i>=0;}
-int FSM::Node::GetSound (unsigned char sex) {
-  if (((unsigned int)sex)<sound.size()) {
-    return sound[sex];
+std::string FSM::Node::GetMessage(unsigned int &multiple)const {
+  multiple = rand ()%messages.size();
+  return messages[multiple];
+}
+int FSM::Node::GetSound (unsigned char sex, unsigned int multiple) const{
+  unsigned int index =multiple+((unsigned int)sex)*messages.size();
+  if (index<sounds.size()) {
+    return sounds[index];
   }else {
     return -1;
   }
 }
-void FSM::Node::AddSound (int sounds, unsigned char sex) {
-  while (((unsigned int) sex)>=sound.size()) {
-    sound.push_back (-1);
+void FSM::Node::AddSound (int sounde, unsigned char sex) {
+  for (int multiple=0;;++multiple) {
+    unsigned int index = ((unsigned int) sex)*messages.size()+multiple;
+    while (index>=sounds.size()) {
+      sounds.push_back (-1);
+    }  
+    if (sounds[index]==-1) {
+      sounds[index]=sounde;
+      break;  
+    }
   }
-  sound[sex]=sounds;
 }
 
 int FSM::getCommMessageMood (int curstate, float mood, float randomresponse,float relationship) const{
@@ -123,10 +143,10 @@ int FSM::getCommMessageMood (int curstate, float mood, float randomresponse,floa
 	vector <unsigned int>b;
 	static float pos_limit =XMLSupport::parse_float(vs_config->getVariable ("AI",
 											"LowestPositiveCommChoice",
-											"-.015"));
+											"0"));
 	static float neg_limit =XMLSupport::parse_float(vs_config->getVariable ("AI",
 											"LowestNegativeCommChoice",
-											".025"));
+											"-.00001"));
 
 	for (unsigned int i=0;i<n->edges.size();i++) {
 		float md=nodes[n->edges[i]].messagedelta;
@@ -137,7 +157,7 @@ int FSM::getCommMessageMood (int curstate, float mood, float randomresponse,floa
 			b.push_back(i);
 		}
 	}
-	if(((g.size()!=0)&&(mood)>0)||(b.size()==0)) {
+	if(((g.size()!=0)&&relationship>0)||(b.size()==0)) {
 		choice=g[(rand()%g.size())];
 	}else {
 		if (b.size()) {
@@ -147,7 +167,8 @@ int FSM::getCommMessageMood (int curstate, float mood, float randomresponse,floa
 	return choice;
 }
 int FSM::getDefaultState (float relationship) const{
-
+  if (relationship<-1)relationship=-1;
+  if (relationship>1) relationship=1;//clamp it
   float mood=relationship;
   float randomresponse=.01;
   int curstate=0;
@@ -156,7 +177,7 @@ int FSM::getDefaultState (float relationship) const{
   mood+=-randomresponse+2*randomresponse*((float)rand())/RAND_MAX;
   
   int choice=0;
-  float bestchoice=4;
+  float bestchoice=16;
   bool fitmood=false;
   for (unsigned i=0;i<n->edges.size();i++) {
     float md = nodes[n->edges[i]].messagedelta;
@@ -178,7 +199,7 @@ int FSM::getDefaultState (float relationship) const{
 std::string FSM::GetEdgesString (int curstate) {
   std::string retval="\n";
   for (unsigned int i=0;i<nodes[curstate].edges.size();i++) {
-    retval+= tostring ((int)((i+1)%10))+"."+nodes[nodes[curstate].edges[i]].message+"\n";
+    retval+= tostring ((int)((i+1)%10))+"."+nodes[nodes[curstate].edges[i]].messages[0]+"\n";
   }
   retval+= "0. Request Docking Clearence";
   return retval;

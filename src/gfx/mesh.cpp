@@ -66,6 +66,7 @@ int Mesh::getNumAnimationFrames(string which)const {
 }
 
 void Mesh::InitUnit() {
+  convex=false;
   polygon_offset=0;
   framespersecond=0;
   numlods=1;
@@ -151,11 +152,17 @@ Mesh::Mesh (const Mesh & m) {
     return;
   }
 }
-
+void Mesh::setConvex(bool b) {
+	this->convex=b;
+	if (orig&&orig!=this) {
+		orig->setConvex(b);
+	}
+}
 using namespace VSFileSystem;
 extern Hashtable<std::string, std::vector <Mesh*>, 127> bfxmHashTable;
 Mesh::Mesh(std::string filename,const Vector & scale, int faction, Flightgroup *fg, bool orig):hash_name(filename)
 {
+  this->convex=false;
   Mesh* cpy=LoadMesh(filename.c_str(),scale,faction,fg,vector<std::string>());
   if (cpy->orig) {
     LoadExistant(cpy->orig);
@@ -190,6 +197,7 @@ Mesh::Mesh(std::string filename,const Vector & scale, int faction, Flightgroup *
   }
 }
 Mesh::Mesh(const char * filename,const Vector & scale, int faction, Flightgroup *fg, bool orig, const vector<string>&textureOverride):hash_name(filename){
+	this->convex=false;
     this->orig=NULL;
     InitUnit();
     Mesh *oldmesh;

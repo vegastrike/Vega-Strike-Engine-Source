@@ -30,7 +30,7 @@ using std::map;
 
 int VSFS_DEBUG() {
   if (vs_config) {
-    static bool vs_debug = XMLSupport::parse_bool(vs_config->getVariable("general","debug_fs","0"));
+    static int vs_debug = XMLSupport::parse_int(vs_config->getVariable("general","debug_fs","0"));
     return vs_debug;
   }
   return 0;
@@ -184,6 +184,7 @@ namespace VSFileSystem
 	string sharedsectors;
 	string sharedcockpits;
 	string shareduniverse;
+        string aidir;
 	string sharedanims;
 	string sharedsprites;
 	string savedunitpath;
@@ -452,6 +453,7 @@ namespace VSFileSystem
 		data_paths.push_back( "..");
 		data_paths.push_back( "../data");
 		data_paths.push_back( "../../data");
+		data_paths.push_back( "../Resources");
 		data_paths.push_back( "../Resources/data");
 		data_paths.push_back( "/usr/share/local/vegastrike/data");
 		data_paths.push_back( "/usr/local/share/vegastrike/data");
@@ -735,6 +737,7 @@ namespace VSFileSystem
 		sharedsounds = vs_config->getVariable ("data","sharedsounds","sounds");
 		sharedmeshes = vs_config->getVariable ("data","sharedmeshes","meshes");
 		sharedunits = vs_config->getVariable ("data","sharedunits","units");
+		aidir = vs_config->getVariable ("data","ai_directory","ai");
 		universe_name = vs_config->getVariable( "general", "galaxy", "milky_way.xml");
 
 		// Setup the directory lists we know about - note these are relative paths to datadir or homedir
@@ -773,7 +776,7 @@ namespace VSFileSystem
 		Directories[AnimFile] = sharedanims;
 		Directories[VSSpriteFile] = sharedsprites;
 
-		Directories[AiFile] = "ai";
+		Directories[AiFile] = aidir;
 		SubDirectories[AiFile].push_back( "events");
 		SubDirectories[AiFile].push_back( "script");
 
@@ -1628,26 +1631,34 @@ namespace VSFileSystem
 
 				bool nl_found = false;
 				int i=0;
-				//cerr<<"READLINE STARTING OFFSET="<<offset;
+				if (VSFS_DEBUG()>1) {
+					cerr<<"READLINE STARTING OFFSET="<<offset;
+				}
 				for( i=0; !nl_found && i<length && offset<size; offset++, i++)
 				{
 					if( pk3_extracted_file[offset]=='\n' || pk3_extracted_file[offset]=='\r')
 					{
 						nl_found = true;
-						if( pk3_extracted_file[offset]=='\n')
-							cerr<<"\\n ";
-						if( pk3_extracted_file[offset]=='\r')
-							cerr<<"\\r ";
+						if (VSFS_DEBUG()>1) {
+							if( pk3_extracted_file[offset]=='\n')
+								cerr<<"\\n ";
+							if( pk3_extracted_file[offset]=='\r')
+								cerr<<"\\r ";
+						}
 					}
 					else
 					{
 						ret[i] = pk3_extracted_file[offset];
-						cerr<<hex<<ret[i]<<" ";
+						if (VSFS_DEBUG()>1) {
+							cerr<<hex<<ret[i]<<" ";
+						}
 					}
 				}
 				this->GoAfterEOL( length);
 				ret[i] = 0;
-				cerr<<dec<<" - read "<<i<<" char - "<<ret<<endl;
+				if (VSFS_DEBUG()>1) {
+					cerr<<dec<<" - read "<<i<<" char - "<<ret<<endl;
+				}
 				if( !nl_found)
 					return Unspecified;
 			}
@@ -2028,10 +2039,10 @@ namespace VSFileSystem
 	{
 		while( this->offset<length && this->offset<this->size && (this->pk3_extracted_file[offset]=='\r' || this->pk3_extracted_file[offset]=='\n'))
 		{
-			if( pk3_extracted_file[offset]=='\n')
+                  /*			if( pk3_extracted_file[offset]=='\n')
 				cerr<<"\\n ";
 			if( pk3_extracted_file[offset]=='\r')
-				cerr<<"\\r ";
+                        cerr<<"\\r ";*/
 			this->offset++;
 		}
 	}
@@ -2039,10 +2050,10 @@ namespace VSFileSystem
 	{
 		while( this->offset<this->size && (this->pk3_extracted_file[offset]=='\r' || this->pk3_extracted_file[offset]=='\n'))
 		{
-			if( pk3_extracted_file[offset]=='\n')
+                  /*			if( pk3_extracted_file[offset]=='\n')
 				cerr<<"\\n ";
 			if( pk3_extracted_file[offset]=='\r')
-				cerr<<"\\r ";
+                        cerr<<"\\r ";*/
 			this->offset++;
 		}
 	}

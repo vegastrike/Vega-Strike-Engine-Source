@@ -31,7 +31,7 @@
  *  interpreted as representing official policies, either expressed or 
  *  implied, of the LibPK3 Project or Viktor Liehr alias picard.
  *
- *  $Id: pk3.cpp 7514 2003-10-09 12:27:07Z surfdargent $
+ *  $Id: pk3.cpp 8887 2004-11-29 08:08:13Z hellcatv $
  *
  */
 
@@ -326,7 +326,7 @@ int  CPK3::FileExists( const char * lpname)
 
   memset(&str, 0, sizeof(str));
   //cerr<<"\t\tSearching through "<<m_nEntries<<" files"<<endl;
-  for(int i=1; idx==-1 && i<m_nEntries; i++)
+  for(int i=0; idx==-1 && i<m_nEntries; i++)
   {
 		GetFilename(i, str);
 		//cerr<<"\t\tExamining file num."<<i<<" filename : "<<str<<"\tand compared to : "<<lpname<<endl;
@@ -383,7 +383,7 @@ char *CPK3::ExtractFile(const char *lpname, int *file_size)
 
   memset(&str, 0, sizeof(str));
 
-  for(int i=1; index==-1 && i<m_nEntries; i++)
+  for(int i=0; index==-1 && i<m_nEntries; i++)
 	{
 		GetFilename(i, str);
     	//printf("%s",str);

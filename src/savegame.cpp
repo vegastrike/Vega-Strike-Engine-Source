@@ -13,6 +13,7 @@
 #include "gfx/cockpit_generic.h"
 #include "networking/const.h"
 #include "vsfilesystem.h"
+#include <Python.h>
 using namespace std;
 using namespace VSFileSystem;
 std::string CurrentSaveGameName="";
@@ -44,7 +45,7 @@ if( Network==NULL)
 	  // IF save.4.x.txt DOES NOT EXIST WE CREATE ONE WITH "default" AS SAVENAME
 	  err = f.OpenCreateWrite( "save.4.x.txt", UnknownFile);
       if (err<=Ok) {
-		f.Write("default\n",8);
+		f.Write("New_Game\n",9);
 		f.Close();
       }
 	  else
@@ -289,8 +290,50 @@ string createPipedString(vector <string> s) {
     ret+=s.back();
   return ret;
 }
+void CopySavedShips(std::string filename, int player_num, const std::vector<std::string> &starships, bool load) {
+  Cockpit * cp = _Universe->AccessCockpit(player_num);
+  for (int i=0;i<starships.size();i+=2) {
+    if (i==2) i=1;
+    VSFile src,dst;
+    string srcnam=filename;//cp->GetUnitModifications();
+    string dstnam= GetWritePlayerSaveGame(player_num);
+    string tmp;
+    if (load) {
+      tmp=srcnam;
+      srcnam=dstnam;
+      dstnam=tmp;
+    }
+    VSError e = src.OpenReadOnly(srcnam+"/"+starships[i]+".csv",UnitSaveFile);
+    if (e<=Ok) {
+
+      VSFileSystem::CreateDirectoryHome (VSFileSystem::savedunitpath+"/"+dstnam);
+      VSError f = dst.OpenCreateWrite(dstnam+"/"+starships[i]+".csv",UnitFile);
+      if (f<=Ok) {
+        string srcdata=src.ReadFull();
+        dst.Write(srcdata);
+      }else {
+        printf ("Error: Cannot Copy Unit %s from save file %s to %s\n",
+                    starships[i].c_str(),
+                srcnam.c_str(),
+                dstnam.c_str());
+        
+      }
+    }else {
+      printf ("Error: Cannot Open Unit %s from save file %s.\n",
+              starships[i].c_str(),
+              srcnam.c_str());
+      
+    }        
+  }
+
+}
 void WriteSaveGame (Cockpit * cp,bool auto_save) {
-  int player_num= cp-_Universe->AccessCockpit(0);
+  
+  int player_num= 0;
+  for (int kk=0;kk<_Universe->numPlayers();++kk) {
+    if (_Universe->AccessCockpit(kk)==cp)
+      player_num=kk;
+  }
   Unit * un = cp->GetSaveParent();
   if (!un) {
     return;
@@ -303,33 +346,7 @@ void WriteSaveGame (Cockpit * cp,bool auto_save) {
       cp->savegame->SetStarSystem(cp->activeStarSystem->getFileName());
       //      un->WriteUnit(GetWritePlayerSaveGame(player_num).c_str());
       cp->savegame->SetPlayerLocation(un->LocalPosition());    
-      for (int i=0;i<cp->unitfilename.size();i+=2) {
-        if (i==2) i=1;
-        VSFile src,dst;
-        string srcnam=cp->GetUnitModifications();
-
-        VSError e = src.OpenReadOnly(srcnam+"/"+cp->unitfilename[i]+".csv",UnitSaveFile);
-        if (e<=Ok) {
-          string dstnam= GetWritePlayerSaveGame(player_num);
-          VSFileSystem::CreateDirectoryHome (VSFileSystem::savedunitpath+"/"+dstnam);
-          VSError f = dst.OpenCreateWrite(dstnam+"/"+cp->unitfilename[i]+".csv",UnitFile);
-          if (f<=Ok) {
-            string srcdata=src.ReadFull();
-            dst.Write(srcdata);
-          }else {
-            printf ("Error: Cannot Copy Unit %s from save file %s to %s\n",
-                    cp->unitfilename[i].c_str(),
-                    srcnam.c_str(),
-                    dstnam.c_str());
-                    
-          }
-        }else {
-            printf ("Error: Cannot Open Unit %s from save file %s.\n",
-                    cp->unitfilename[i].c_str(),
-                    srcnam.c_str());
-                    
-        }        
-      }
+      CopySavedShips(cp->GetUnitModifications(),player_num,cp->unitfilename,false);
     }
   }
 
@@ -569,7 +586,7 @@ void SaveGame::ReadStardate( char * &buf)
 	_Universe->current_stardate.InitTrek( stardate);
 }
 
-void SaveGame::ReadSavedPackets (char * &buf) {
+void SaveGame::ReadSavedPackets (char * &buf, bool commitfactions) {
   int a=0;
   char unitname[1024];
   char factname[1024];
@@ -580,8 +597,9 @@ void SaveGame::ReadSavedPackets (char * &buf) {
         buf+=hopto (buf,' ','\n',0);
         buf+=hopto (buf,' ','\n',0);
     if (a==0&&0==strcmp(unitname,"factions")&&0==strcmp(factname,"begin")) {
-      FactionUtil::LoadSerializedFaction(buf);
-      return;//GOT TO BE THE LAST>... cus it's stupid :-) and mac requires the factions to be loaded AFTER this function call
+      if (commitfactions) FactionUtil::LoadSerializedFaction(buf);
+
+      break;//GOT TO BE THE LAST>... cus it's stupid :-) and mac requires the factions to be loaded AFTER this function call
     }else if (a==0&&0==strcmp(unitname,"mission")&&0==strcmp(factname,"data")) {
       ReadMissionData(buf);
     }else if (a==0&&0==strcmp(unitname,"missionstring")&&0==strcmp(factname,"data")) {
@@ -589,16 +607,37 @@ void SaveGame::ReadSavedPackets (char * &buf) {
     }else if (a==0&&0==strcmp(unitname,"python")&&0==strcmp(factname,"data")) {
       last_written_pickled_data=last_pickled_data=UnpickleAllMissions(buf);
     }else if (a==0&&0==strcmp(unitname,"news")&&0==strcmp(factname,"data")) {
-      ReadNewsData(buf);
+      if (commitfactions) ReadNewsData(buf);
     }else if (a==0&&0==strcmp(unitname,"stardate")&&0==strcmp(factname,"data")) {
 	  // On server side we expect the latest saved stardate in dynaverse.dat too
-      ReadStardate(buf);
+      if (commitfactions) ReadStardate(buf);
     }else {
       printf ("buf unrecognized %s",buf);
       //su.push_back (SavedUnits (unitname,(clsptr)a,factname));
     }
   }
- cout<<"\tExiting ReadSavedPackets"<<endl;
+  cout<<"\tExiting ReadSavedPackets"<<endl;
+}
+
+void SaveGame::LoadSavedMissions() {
+  vector<std::string> scripts = getMissionStringData("active_scripts");
+  vector<std::string> missions = getMissionStringData("active_missions");
+  for (unsigned int i=0;i<scripts.size()&&i<missions.size();++i) {
+    try {
+      LoadMission(missions[i].c_str(),scripts[i],false);
+    }catch (...) {
+      if (PyErr_Occurred()) {
+        PyErr_Print();
+        PyErr_Clear();
+        fflush(stderr);         
+        fflush(stdout);
+      }else throw;    
+      
+    }
+    
+  }
+  getMissionStringData("active_scripts")=scripts;
+  getMissionStringData("active_missions")=missions;
 }
 string SaveGame::WriteSavedUnit (SavedUnits* su) {
   return string("\n")+XMLSupport::tostring(su->type)+string(" ")+su->filename+" "+su->faction;
@@ -723,7 +762,7 @@ void SaveGame::SetSavedCredits (float c) {
 		savedcredits = c;
 }
 
-void SaveGame::ParseSaveGame (string filename, string &FSS, string originalstarsystem, QVector &PP, bool & shouldupdatepos,float &credits, vector <string> &savedstarship, int player_num, string str, bool read) {
+void SaveGame::ParseSaveGame (string filename, string &FSS, string originalstarsystem, QVector &PP, bool & shouldupdatepos,float &credits, vector <string> &savedstarship, int player_num, string str, bool read, bool commitfaction) {
 	char *tempfullbuf=0;
 	int tempfulllength=2048;
 	int readlen=0;
@@ -805,7 +844,7 @@ void SaveGame::ParseSaveGame (string filename, string &FSS, string originalstars
 			PlayerLocation=tmppos;//LaunchUnitNear(tmppos);
 		  }
 		  buf+=readlen;
-		  ReadSavedPackets (buf);
+		  ReadSavedPackets (buf,commitfaction);
 		}
 		free(freetmp2);freetmp2=NULL;
 		tmp2=NULL;

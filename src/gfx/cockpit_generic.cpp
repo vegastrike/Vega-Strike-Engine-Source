@@ -97,7 +97,6 @@ void Cockpit::Init (const char * file, bool isDisabled) {
 	  return;
   }
   Delete();
-//  string cpdir=vs_config->getVariable("data","cockpits","");
   LoadXML(f);
   f.Close();
 } 
@@ -151,7 +150,15 @@ void Cockpit::InitStatic () {
   radar_time=0;
   cockpit_time=0;
 }
-
+bool Cockpit::unitInAutoRegion(Unit * un) {
+  static float autopilot_term_distance = XMLSupport::parse_float (vs_config->getVariable ("physics","auto_pilot_termination_distance","6000"));     
+  Unit * targ =autopilot_target.GetUnit();
+  if (targ) {
+    return UnitUtil::getSignificantDistance(un,targ)<autopilot_term_distance*2.5;// if both guys just auto'd in.
+  }else {
+    return false;
+  }
+}
 Cockpit::Cockpit (const char * file, Unit * parent,const std::string &pilot_name): view(CP_FRONT),parent (parent), cockpit_offset(0), viewport_offset(0), zoomfactor (XMLSupport::parse_float(vs_config->getVariable("graphics","inital_zoom_factor","2.25"))),savegame (new SaveGame(pilot_name)) {
   //  static int headlag = XMLSupport::parse_int (vs_config->getVariable("graphics","head_lag","10"));
   //int i;
@@ -216,7 +223,7 @@ void RespawnNow (Cockpit * cp) {
     }
   }
 }
-void Cockpit::SwitchControl (int,KBSTATE k) {
+void Cockpit::SwitchControl (const KBData&,KBSTATE k) {
   if (k==PRESS) {
     while (switchunit.size()<=_Universe->CurrentCockpit())
       switchunit.push_back(0);
@@ -225,7 +232,7 @@ void Cockpit::SwitchControl (int,KBSTATE k) {
 
 }
 
-void Cockpit::Respawn (int,KBSTATE k) {
+void Cockpit::Respawn (const KBData&,KBSTATE k) {
   if (k==PRESS) {
     while (respawnunit.size()<=_Universe->CurrentCockpit())
       respawnunit.push_back(0);
@@ -303,7 +310,7 @@ void SwitchUnits (Unit * ol, Unit * nw) {
       }
     }
     ol->PrimeOrders();
-    ol->SetAI (new Orders::AggressiveAI ("default.agg.xml","default.int.xml"));
+    ol->SetAI (new Orders::AggressiveAI ("default.agg.xml"));
     ol->SetVisible (true);
   }
   SwitchUnits2( nw);
@@ -319,7 +326,7 @@ static void SwitchUnitsTurret (Unit *ol, Unit *nw) {
   }
 
 }
-extern void reset_time_compression(int i, KBSTATE a);
+
 
 Unit * GetFinalTurret(Unit * baseTurret) {
   Unit * un = baseTurret;
@@ -390,10 +397,24 @@ void Cockpit::Update () {
 		  break;
 		}
 		if (k==_Universe->numPlayers()) k=0;
+                if (active_missions.size()>1){
+                  for (int i=active_missions.size()-1;i>0;--i){// don't terminate zeroth mission
+                    if (active_missions[i]->player_num==k)
+                      active_missions[i]->terminateMission();
+                  }
+                }
+                int whichcp=k;
 		string newsystem;QVector pos; bool setplayerXloc;
                 savegame->SetStarSystem("");
 		savegame->ParseSaveGame(savegamefile,newsystem,newsystem,pos,setplayerXloc,this->credits,unitfilename,k);
-		newsystem= savegame->GetStarSystem()+".system";
+                CopySavedShips(savegame->GetCallsign(),whichcp,unitfilename,true);
+		bool actually_have_save=false;
+		if (savegame->GetStarSystem()!="") {
+			actually_have_save=true;
+			newsystem= savegame->GetStarSystem()+".system";
+		}else {
+			newsystem = _Universe->activeStarSystem()->getFileName();
+		}
 		StarSystem * ss = _Universe->GenerateStarSystem (newsystem.c_str(),"",Vector(0,0,0));
 		_Universe->getActiveStarSystem(0)->SwapOut();
 		this->activeStarSystem=ss;
@@ -428,11 +449,14 @@ void Cockpit::Update () {
 		SwitchUnits (NULL,un);
 		this->credits = savegame->GetSavedCredits();
 		DoCockpitKeys();
-		savegame->ReloadPickledData();
 		_Universe->popActiveStarSystem();
-                _Universe->pushActiveStarSystem(ss);
-		DockToSavedBases((int)(this - _Universe->AccessCockpit(0)));
-                _Universe->popActiveStarSystem();
+		_Universe->pushActiveStarSystem(ss);
+		savegame->ReloadPickledData();
+                savegame->LoadSavedMissions();
+		if (actually_have_save) {
+                  DockToSavedBases(whichcp);
+                }
+		_Universe->popActiveStarSystem();
       }
 	} 
   }

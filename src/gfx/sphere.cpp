@@ -38,7 +38,7 @@ void CityLights::SelectCullFace (int whichdrawqueue) {
 }
 
 void CityLights::ProcessDrawQueue(int whichpass,int whichdrawqueue) {
-  GFXPolygonOffset (0,-1);
+  GFXPolygonOffset (0,-3);
   const GFXColor citycol (1,1,1,1);
   GFXColor tmpcol (0,0,0,1);
   GFXGetLightContextAmbient(tmpcol);

@@ -32,7 +32,7 @@ class InputListener
 {
 public:
 	int *mousex, *mousey;
-	KBSTATE *keystate;
+	KBSTATE (*keystate)[KEYMAP_SIZE];
 
 	Unit *parent;
 

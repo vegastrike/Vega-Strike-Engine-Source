@@ -227,7 +227,12 @@ void LoadMission (const char * nission_name, const std::string &script, bool loa
     return;
   }
   f.Close();
+  if (active_missions.size()) {
+    _Universe->AccessCockpit()->savegame->getMissionStringData("active_scripts").push_back(script);
+    _Universe->AccessCockpit()->savegame->getMissionStringData("active_missions").push_back(nission_name);
+  }
   active_missions.push_back (new Mission(mission_name.c_str(),script));
+  
   mission = active_missions.back();
   active_missions.back()->initMission();
 

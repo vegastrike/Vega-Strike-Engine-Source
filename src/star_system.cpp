@@ -43,7 +43,6 @@ extern Vector mouseline;
 //static SphereMesh *foo;
 //static Unit *earth;
 
-extern void reset_time_compression (int,KBSTATE);
 
 
 
@@ -246,8 +245,7 @@ void GameStarSystem::SwapIn () {
 }
 
 void GameStarSystem::SwapOut () {
-	AUDStopAllSounds();
-	printf ("stopping all sounds\n");
+  //AUDStopAllSounds();
   /*
   for (un_iter un_i=drawList.createIterator();NULL!= (un=*un_i);++un_i) {
     un->SwapOutHalos();
@@ -658,7 +656,7 @@ void GameStarSystem::Update(float priority , bool executeDirector) {
 	  if (getTimeCompression()>1) {//if not paused
 	    if (!owner->AutoPilotTo (owner,true)) {
 	      
-	      reset_time_compression(0,PRESS);
+	      reset_time_compression("",PRESS);
 	    }
 	  }
 	}
