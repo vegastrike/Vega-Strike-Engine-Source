@@ -790,6 +790,7 @@ public:
   bool AutoPilotTo(Unit * un);
   void WriteUnit(const char * modificationname="");
   void SetTurretAI ();
+  void DisableTurretAI ();
   ///get the flightgroup description
   Flightgroup *getFlightgroup() const { return flightgroup; };
   ///reduces shields to X percentage and reduces shield recharge to Y percentage

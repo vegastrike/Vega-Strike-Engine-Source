@@ -21,7 +21,7 @@ FireKeyboard::FireKeyboard (unsigned int whichplayer, unsigned int whichjoystick
 const unsigned int NUMCOMMKEYS=10;
 struct FIREKEYBOARDTYPE {
   FIREKEYBOARDTYPE() {
-    commKeys[0]=commKeys[1]=commKeys[2]=commKeys[3]=commKeys[4]=commKeys[5]=commKeys[6]=commKeys[7]=commKeys[8]=commKeys[9]=UP;
+    commKeys[0]=commKeys[1]=commKeys[2]=commKeys[3]=commKeys[4]=commKeys[5]=commKeys[6]=commKeys[7]=commKeys[8]=commKeys[9]=turretaikey = UP;
     eject=ejectcargo=firekey=missilekey=jfirekey=rtargetkey=jtargetkey=jmissilekey=weapk=misk=cloakkey=neartargetkey=threattargetkey=picktargetkey=targetkey=nearturrettargetkey =threatturrettargetkey= pickturrettargetkey=turrettargetkey=UP;
     doc=und=req=0;
   }
@@ -44,6 +44,7 @@ struct FIREKEYBOARDTYPE {
  KBSTATE threattargetkey;
  KBSTATE picktargetkey;
  KBSTATE targetkey;
+ KBSTATE turretaikey;
 
   KBSTATE commKeys[NUMCOMMKEYS];
  KBSTATE nearturrettargetkey;
@@ -148,6 +149,20 @@ void FireKeyboard::EjectKey (int, KBSTATE k) {
     g().eject= k;
   }
 }
+
+
+void FireKeyboard::TurretAI (int, KBSTATE k) {
+  if (k==PRESS) {
+    if (g().turretaikey==UP) {
+
+      g().turretaikey=PRESS;
+    }else {
+
+      g().turretaikey=RELEASE;
+    }
+  }
+}
+
 
 void FireKeyboard::EjectCargoKey (int, KBSTATE k) {
     if (k==PRESS) {
@@ -668,8 +683,14 @@ void FireKeyboard::Execute () {
     refresh_target=true;
   }
 
-
-
+  if (f().turretaikey == PRESS) {
+      parent->DisableTurretAI();
+      f().turretaikey = DOWN;
+  }
+  if (f().turretaikey==RELEASE) {
+    f().turretaikey = UP;
+    parent->SetTurretAI();
+  }
   if (f().turrettargetkey==PRESS) {
     f().turrettargetkey=DOWN;
     //    ChooseTargets(true);

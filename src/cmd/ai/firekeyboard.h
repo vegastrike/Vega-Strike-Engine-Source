@@ -60,6 +60,7 @@ class FireKeyboard: public Order {
   static void BreakFormation (int,KBSTATE);
   static void FormUp (int,KBSTATE);
   static void AttackTarget (int,KBSTATE);
+  static void TurretAI (int,KBSTATE);
 protected:
   float distance;
 

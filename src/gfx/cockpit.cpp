@@ -802,7 +802,10 @@ void Cockpit::Autopilot (Unit * target) {
     if ((un=GetParent())) {
       if (un->AutoPilotTo(un)) {//can he even start to autopilot
 	CockpitKeys::Pan(0,PRESS);
-	FaceTarget(un);
+	static bool face_target_on_auto = XMLSupport::parse_bool (vs_config->getVariable ( "physics","face_on_auto", "false"));
+	if (face_target_on_auto) {
+	  FaceTarget(un);
+	}
 	AccessCamera(CP_PAN)->myPhysics.ApplyBalancedLocalTorque(_Universe->AccessCamera()->P,
 							      _Universe->AccessCamera()->R,
 							      GetElapsedTime()/100);

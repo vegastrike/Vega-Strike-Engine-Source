@@ -940,6 +940,19 @@ void Unit::SetTurretAI () {
     iter.advance();
   }
 }
+void Unit::DisableTurretAI () {
+  UnitCollection::UnitIterator iter = getSubUnits();
+  Unit * un;
+  while (NULL!=(un=iter.current())) {
+    if (un->aistate) {
+      delete un->aistate;
+    }
+    un->aistate = new Order; //get 'er ready for enqueueing
+    un->aistate->SetParent (this);
+    un->DisableTurretAI ();
+    iter.advance();
+  }
+}
 
 void Unit::SetAI(Order *newAI)
 {

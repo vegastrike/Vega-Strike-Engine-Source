@@ -310,6 +310,9 @@ void Unit::Target (Unit *targ) {
   }
   if (targ) {
     if (targ->activeStarSystem==_Universe->activeStarSystem()||targ->activeStarSystem==NULL) {
+      for (int i=0;i<nummounts;i++){ 
+	mounts[i].time_to_lock = mounts[i].type->LockTime;
+      }
       computer.target.SetUnit(targ);
     }else {
       if (jump.drive!=-1) {
