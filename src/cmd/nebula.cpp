@@ -3,7 +3,7 @@
 #include "vs_path.h"
 #include <assert.h>
 #include "xml_support.h"
-
+#include "gfx/mesh.h"
 namespace NebulaXML {
 	FOGMODE parse_fogmode (string val) {
 		if (val=="exp") {
@@ -28,10 +28,11 @@ namespace NebulaXML {
 		NEBFAR,
 		DENSITY,
 		LIMITS,
-		INDEX
+		INDEX,
+		EXPLOSIONTIME
 	};
 	const unsigned short int MAXENAMES=4;
-	const unsigned short int MAXANAMES=9;
+	const unsigned short int MAXANAMES=10;
 
 	const EnumMap::Pair element_names[MAXENAMES] = {
 		EnumMap::Pair ("UNKNOWN", UNKNOWN),
@@ -49,7 +50,8 @@ namespace NebulaXML {
 		EnumMap::Pair ("Far", NEBFAR),
 		EnumMap::Pair ("Density", DENSITY),
 		EnumMap::Pair ("Mode", MODE),
-		EnumMap::Pair ("Index", INDEX)
+		EnumMap::Pair ("Index", INDEX),
+		EnumMap::Pair ("ExplosionTime",EXPLOSIONTIME)
 	};
 
 	const EnumMap element_map(element_names, MAXENAMES);
@@ -86,6 +88,9 @@ void Nebula::beginElem(const std::string& name, const AttributeList& atts) {
 			case MODE: 
 				fogmode = parse_fogmode ((*iter).value);
 				break;
+			case EXPLOSIONTIME:
+			        explosiontime= parse_float ((*iter).value);
+			        break;
 			}
 		}
 		break;
@@ -162,6 +167,7 @@ Nebula::Nebula(const char * filename, const char * unitfile, bool SubU, int fact
   Unit (unitfile,true,SubU,faction,fg,fg_snumber) {
 	vssetdir (GetSharedUnitPath().c_str());
 	vschdir (unitfile);
+	explosiontime=0;
 	FILE *fp = fopen (unitfile,"r");
 	if (!fp) {
 		vscdup();
@@ -191,5 +197,11 @@ void Nebula::UpdatePhysics (const Transformation &trans, const Matrix transmat, 
   float dis;
   if (Inside (_Universe->AccessCamera()->GetPosition(),0,t1,dis)) {
     _Universe->AccessCamera()->SetNebula (this);
+  }
+  for (unsigned int i=0;i<nummesh;i++) {
+    Vector randexpl (rand()%2*rSize()-rSize(),rand()%2*rSize()-rSize(),rand()%2*rSize()-rSize());
+    if (((int)(explosiontime/SIMULATION_ATOM))!=0) 
+      if (!(rand()%((int)(explosiontime/SIMULATION_ATOM)))) 
+	meshdata[i]->AddDamageFX(randexpl,Vector (0,0,0),.00001,color);
   }
 }

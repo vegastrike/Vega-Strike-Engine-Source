@@ -243,7 +243,8 @@ void Cockpit::DrawBlips (Unit * un) {
 	GFXPointSize(4);
 	GFXBegin (GFXPOINT);
       }
-      GFXVertex3f (xcent+xsize*(s-.5*radarl->error+(radarl->error*rand())/RAND_MAX),ycent+ysize*(t+-.5*radarl->error+(radarl->error*rand())/RAND_MAX),0);
+      float rerror = radarl->error+((un->Getnebula()!=NULL)?.03:0)+(target->Getnebula()!=NULL?.06:0);
+      GFXVertex3f (xcent+xsize*(s-.5*rerror+(rerror*rand())/RAND_MAX),ycent+ysize*(t+-.5*rerror+(rerror*rand())/RAND_MAX),0);
       if (target==makeBigger) {
 	GFXEnd();
 	GFXPointSize (2);
@@ -301,10 +302,11 @@ void Cockpit::DrawEliteBlips (Unit * un) {
       }
 #endif
       float xerr,yerr,y2,x2;
-      xerr=xcent+xsize*(es-.5*radarl->error+(radarl->error*rand())/RAND_MAX);
-      yerr=ycent+ysize*(et+-.5*radarl->error+(radarl->error*rand())/RAND_MAX);
-      x2=xcent+xsize*((es+0)-.5*radarl->error+(radarl->error*rand())/RAND_MAX);
-      y2=ycent+ysize*((et+t)-.5*radarl->error+(radarl->error*rand())/RAND_MAX);
+      float rerror = radarl->error+((un->Getnebula()!=NULL)?.03:0)+(target->Getnebula()!=NULL?.06:0);
+      xerr=xcent+xsize*(es-.5*rerror+(rerror*rand())/RAND_MAX);
+      yerr=ycent+ysize*(et+-.5*rerror+(rerror*rand())/RAND_MAX);
+      x2=xcent+xsize*((es+0)-.5*rerror+(rerror*rand())/RAND_MAX);
+      y2=ycent+ysize*((et+t)-.5*rerror+(rerror*rand())/RAND_MAX);
 
       //      printf("xerr,yerr: %f %f xcent %f xsize %f\n",xerr,yerr,xcent,xsize);
 

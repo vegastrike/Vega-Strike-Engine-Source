@@ -292,6 +292,8 @@ float Unit::DealDamageToHull (const Vector & pnt, float damage ) {
 bool Unit::ShieldUp (const Vector &pnt) const{
   const int shieldmin=5;
   int index;
+  if (nebula!=NULL)
+    return false;
   switch (shield.number){
   case 2:
     index = (pnt.k>0)?0:1;
@@ -422,14 +424,17 @@ float Unit::DealDamageToShield (const Vector &pnt, float &damage) {
 void Unit::ApplyLocalDamage (const Vector & pnt, const Vector & normal, float amt, const GFXColor &color) {
   float leakamt = amt*.01*shield.leak;
   amt *= 1-.01*shield.leak;
-  float percentage = DealDamageToShield (pnt,amt);
-  if (meshdata[nummesh]&&percentage>0&&amt==0) {//shields are up
-    /*      meshdata[nummesh]->LocalFX.push_back (GFXLight (true,
-						      GFXColor(pnt.i+normal.i,pnt.j+normal.j,pnt.k+normal.k),
-						      GFXColor (.3,.3,.3), GFXColor (0,0,0,1), 
-						      GFXColor (.5,.5,.5),GFXColor (1,0,.01)));*/
-    //calculate percentage
-    meshdata[nummesh]->AddDamageFX(pnt,shieldtight?shieldtight*normal:Vector(0,0,0),percentage,color);
+  float percentage=0;
+  if (Getnebula()!=NULL) {
+    percentage = DealDamageToShield (pnt,amt);
+    if (meshdata[nummesh]&&percentage>0&&amt==0) {//shields are up
+      /*      meshdata[nummesh]->LocalFX.push_back (GFXLight (true,
+	      GFXColor(pnt.i+normal.i,pnt.j+normal.j,pnt.k+normal.k),
+	      GFXColor (.3,.3,.3), GFXColor (0,0,0,1), 
+	      GFXColor (.5,.5,.5),GFXColor (1,0,.01)));*/
+      //calculate percentage
+      meshdata[nummesh]->AddDamageFX(pnt,shieldtight?shieldtight*normal:Vector(0,0,0),percentage,color);
+    }
   }
   if (shield.leak>0||!meshdata[nummesh]||percentage==0||amt>0) {
     percentage = DealDamageToHull (pnt, leakamt+amt);
