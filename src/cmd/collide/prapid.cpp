@@ -105,6 +105,16 @@ csRapidCollider::csRapidCollider (const std::vector <bsp_polygon> &polygons)
   GeometryInitialize (polygons);
 }
 
+
+Vector csRapidCollider::getVertex(unsigned int which) const {
+  
+  csVector3 k=m_pCollisionModel->getVertex(which);
+  return Vector(k.x,k.y,k.z);
+}
+unsigned int csRapidCollider::getNumVertex()const {
+  return m_pCollisionModel->getNumVertex();
+}
+
 inline float min3 (float a, float b, float c)
 { return (a < b ? (a < c ? a : (c < b ? c : b)) : (b < c ? b : c)); }
 inline float max3(float a, float b, float c)

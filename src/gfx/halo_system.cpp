@@ -16,7 +16,8 @@
 #include "lin_time.h"
 #include "animation.h"
 #include "car_assist.h"
-
+#include "cmd/collide/rapcol.h"
+#include "cmd/unit_collide.h"
 static float ffmax(float a, float b) {
   return a>b?a:b;
 }
@@ -63,20 +64,41 @@ void DoParticles (QVector pos, float percent, const Vector & velocity, float rad
 }
   
 
-void LaunchOneParticle (const Matrix &mat,const Vector &vel,unsigned int seed, Mesh * mush, float hull,int faction) {
-	if (mush){
-		static bool ignoreGetBlendDst = XMLSupport::parse_bool (vs_config->getVariable ("graphics","sparkleoffglow","true"));
-	if (mush->getBlendDst()!=ONE||ignoreGetBlendDst) {		
-		unsigned int numvert = mush->numVertices();
-		if (numvert) {
-			unsigned int whichvert = seed%numvert;
-			QVector v (mush->GetVertex(whichvert).Cast());
-			v=Transform(mat,v);
-			static float sciz = XMLSupport::parse_float (vs_config->getVariable ("graphics","sparkleenginesizerelativetoship",".0625"));
-			DoParticles (v,hull,vel,0,mush->rSize()*sciz,faction);
-		}
+void LaunchOneParticle (const Matrix &mat,const Vector &vel,unsigned int seed, Unit * mush, float hull,int faction) {
+  static float sciz = XMLSupport::parse_float (vs_config->getVariable ("graphics","sparkleenginesizerelativetoship",".0625"));
+  
+  if (mush){
+          bool done=false;
+          collideTrees * colTrees=mush->colTrees;
+          if (colTrees) {
+            if (colTrees->usingColTree()) {            
+              csRapidCollider * colTree=colTrees->rapidColliders[0];
+              unsigned int numvert=colTree->getNumVertex();
+              if (numvert) {
+                unsigned int whichvert = seed%numvert;
+                QVector v (colTree->getVertex(whichvert).Cast());
+                v=Transform(mat,v);
+                DoParticles (v,hull,vel,0,mush->rSize()*sciz,faction);
+                done=true;
+              }
+            }
+          }
+          if (!done) {
+            // get it from the BSP
+            
+          }
+          if (!done) {
+            unsigned int siz=(unsigned int) (2*mush->rSize());
+            if (siz!=0){
+              QVector v((seed%siz)-siz/2,
+                        (seed%siz)-siz/2,
+                        (seed%siz)-siz/2);
+              DoParticles(v,hull,vel,0,mush->rSize()*sciz,faction);
+              done=true;
+            }
+          }
 	}
-	}
+
 }
 
 

@@ -65,6 +65,24 @@ bool csCdModel::AddTriangle (const csVector3 &p1, const csVector3 &p2,
   return true;
 }
 
+csVector3 csCdModel::getVertex(unsigned int which) const{
+  unsigned int k=which/3;
+  if (m_NumTriangles==0){
+    return csVector3(0,0,0);
+  }
+  if (k>=m_NumTriangles)
+    k=m_NumTriangles-1;
+  csCdTriangle* a=&m_pTriangles[k];
+  switch (which%3) {
+  case 0:
+    return a->p1;
+  case 1:
+    return a->p2;
+  default:
+    return a->p3;
+  }
+}
+
 /*
  * There are <n> csCdTriangle structures in an array starting at <t>.
  *

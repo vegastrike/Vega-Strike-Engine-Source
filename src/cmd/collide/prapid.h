@@ -189,7 +189,10 @@ protected:
   bool BuildHierarchy();
 
 public:
-
+  unsigned int getNumVertex() const {
+    return m_NumTriangles*3;
+  }
+  csVector3 getVertex(unsigned int which)const;
   /// Create a model object given number of triangles
   csCdModel(int NumberOfTriangles);
 

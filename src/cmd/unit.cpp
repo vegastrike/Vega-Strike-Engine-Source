@@ -513,38 +513,17 @@ void GameUnit<UnitType>::Draw(const Transformation &parent, const Matrix &parent
 		unsigned int switcher=(damagelevel>.8)?1:
 			(damagelevel>.6)?2:(damagelevel>.4)?3:(damagelevel>.2)?4:5;
 		const unsigned long thus=(unsigned long)this;
-		Mesh * tmp;
 		switch (switcher) {
 		case 5:
-			tmp=this->meshdata[(thus+5)%(numm)];
-			if (tmp)
-				if (tmp->getBlendDst()==ONE)
-					tmp=this->meshdata[(thus+5+17)%(numm)];
-			LaunchOneParticle(*ctm,this->GetVelocity(),((long)this)+165,tmp,damagelevel,this->faction);
+			LaunchOneParticle(*ctm,this->GetVelocity(),((long)this)+165,this,damagelevel,this->faction);
 		case 4:
-			tmp=this->meshdata[(thus+47)%(numm)];
-			if (tmp)
-				if (tmp->getBlendDst()==ONE)
-					tmp=this->meshdata[(thus+47+17)%(numm)];			
-			LaunchOneParticle(*ctm,this->GetVelocity(),((long)this)+47,tmp,damagelevel,this->faction);
+			LaunchOneParticle(*ctm,this->GetVelocity(),((long)this)+47,this,damagelevel,this->faction);
 		case 3:
-			tmp=this->meshdata[(thus+61)%(numm)];
-			if (tmp)
-				if (tmp->getBlendDst()==ONE)
-					tmp=this->meshdata[(thus+47+61)%(numm)];						
-			LaunchOneParticle(*ctm,this->GetVelocity(),((long)this)+61,tmp,damagelevel,this->faction);
+			LaunchOneParticle(*ctm,this->GetVelocity(),((long)this)+61,this,damagelevel,this->faction);
 		case 2:
-			tmp=this->meshdata[(thus+2)%(numm)];
-			if (tmp)
-				if (tmp->getBlendDst()==ONE)
-					tmp=this->meshdata[(thus+1)%(numm)];						
-			LaunchOneParticle(*ctm,this->GetVelocity(),((long)this)+65537,tmp,damagelevel,this->faction);			
+			LaunchOneParticle(*ctm,this->GetVelocity(),((long)this)+65537,this,damagelevel,this->faction);			
 		default:
-			tmp=this->meshdata[(thus)%(numm)];
-			if (tmp)
-				if (tmp->getBlendDst()==ONE)
-					tmp=this->meshdata[(thus+129)%(numm)];
-			LaunchOneParticle(*ctm,this->GetVelocity(),((long)this)+257,tmp,damagelevel,this->faction);
+			LaunchOneParticle(*ctm,this->GetVelocity(),((long)this)+257,this,damagelevel,this->faction);
 		}
 	}
   }

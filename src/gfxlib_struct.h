@@ -283,6 +283,8 @@ class /*GFXDRVAPI*/ GFXVertexList {
   friend class GFXSphereVertexList;
 protected:
   ///Num vertices allocated
+  const GFXVertex * GetVertex (int index)const;
+  const GFXColorVertex * GetColorVertex (int index)const;
   int numVertices;
   ///Vertices and colors stored
   union VDAT{
@@ -339,8 +341,6 @@ public:
     Init(poly,numVertices,0,colors, numlists,offsets,Mutable, index);
   }
   virtual ~GFXVertexList();
-  const GFXVertex * GetVertex (int index)const;
-  const GFXColorVertex * GetColorVertex (int index)const;
   ///Returns number of Triangles in vertex list (counts tri strips)
   virtual int numTris ()const;
   ///Returns number of Quads in vertex list (counts quad strips)

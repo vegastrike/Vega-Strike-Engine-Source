@@ -110,18 +110,6 @@ bool Mesh::LoadExistant (Mesh * oldmesh) {
     orig = oldmesh;
     return true;
 }
-Vector Mesh::GetVertex (int index) const {
-	if (vlist->hasColor()) {
-		const GFXColorVertex * v=vlist->GetColorVertex(index);
-		return Vector(v->x,v->y,v->z);
-	}else {
-		const GFXVertex * v=vlist->GetVertex(index);
-		return Vector(v->x,v->y,v->z);
-	}
-}
-int Mesh::numVertices() const {
-	return vlist->GetNumVertices();
-}
 bool Mesh::LoadExistant (const string filehash, const Vector& scale, int faction) {
   Mesh * oldmesh;
 

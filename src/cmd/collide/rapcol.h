@@ -86,7 +86,8 @@ private:
   
 public:
   static int numHits;
- 
+  Vector getVertex(unsigned int which)const ;
+  unsigned int getNumVertex()const ;
   /// Create a collider based on geometry.
   csRapidCollider (const std::vector<bsp_polygon> &mesh);
 
