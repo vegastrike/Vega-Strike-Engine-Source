@@ -4142,17 +4142,17 @@ void showUnitStats(Unit * playerUnit,string &text,int subunitlevel, int mode, Ca
 	
 	if(!subunitlevel){
 		if(!mode&&(playerUnit->GetMass()!=0)){
-			PRETTY_ADDU(statcolor+"Fore acceleration: #-c",playerUnit->limits.forward/(10*playerUnit->GetMass()),2,"gravities");
-			PRETTY_ADDU(statcolor+"Aft acceleration: #-c",playerUnit->limits.retro/(10*playerUnit->GetMass()),2,"gravities")
+			PRETTY_ADDU(statcolor+"Fore acceleration: #-c",playerUnit->limits.forward/(9.8*playerUnit->GetMass()),2,"gravities");
+			PRETTY_ADDU(statcolor+"Aft acceleration: #-c",playerUnit->limits.retro/(9.8*playerUnit->GetMass()),2,"gravities")
 			if (playerUnit->limits.lateral==playerUnit->limits.vertical) {
-				PRETTY_ADDU(statcolor+"Orthogonal acceleration: #-c",playerUnit->limits.vertical/(10*playerUnit->GetMass()),2,"gravities");
+				PRETTY_ADDU(statcolor+"Orthogonal acceleration: #-c",playerUnit->limits.vertical/(9.8*playerUnit->GetMass()),2,"gravities");
     				text+=statcolor+" (vertical and lateral axes)#-c";
     		}else {
-				PRETTY_ADDN(statcolor+" Lateral acceleration #-c",playerUnit->limits.lateral/(10*playerUnit->GetMass()),2);
-				PRETTY_ADDN(statcolor+" Vertical acceleration #-c",playerUnit->limits.vertical/(10*playerUnit->GetMass()),2);
+				PRETTY_ADDN(statcolor+" Lateral acceleration #-c",playerUnit->limits.lateral/(9.8*playerUnit->GetMass()),2);
+				PRETTY_ADDN(statcolor+" Vertical acceleration #-c",playerUnit->limits.vertical/(9.8*playerUnit->GetMass()),2);
 				text+=" gravities";
     		}
-			PRETTY_ADDU(statcolor+"Forward acceleration with Afterburner: #-c",playerUnit->limits.afterburn/(10*playerUnit->GetMass()),2,"gravities");
+			PRETTY_ADDU(statcolor+"Forward acceleration with Afterburner: #-c",playerUnit->limits.afterburn/(9.8*playerUnit->GetMass()),2,"gravities");
     		text.append("#n##n##c0:1:.5#"+prefix+"[GOVERNOR SETTINGS]#n##-c");
 		} else {
 			switch(replacement_mode){
