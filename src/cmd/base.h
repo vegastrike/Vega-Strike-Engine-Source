@@ -129,9 +129,10 @@ class Base {
 	TextPlane curtext;
 	int curroom;
 	int unitlevel;
+public:
 	std::vector <Room*> rooms;
 	TextPlane othtext;
-public:
+
 	static Base *CurrentBase;
 	static bool CallComp;
 	UnitContainer caller;
