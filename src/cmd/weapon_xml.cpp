@@ -9,6 +9,7 @@
 #include "beam.h"
 #include "unit_const_cache.h"
 #include "vs_path.h"
+#include "role_bitmask.h"
 /*
 weapon_info& weapon_info::operator = (const weapon_info &tmp){
   size = tmp.size;
@@ -72,7 +73,8 @@ namespace BeamXML {
     PHASEDAMAGE,
     VOLUME,
     DETONATIONRADIUS,
-    LOCKTIME
+    LOCKTIME,
+	ROLE
     //YAW,
     //PITCH,
     //ROLL
@@ -120,12 +122,10 @@ namespace BeamXML {
     EnumMap::Pair ("OffsetY",OFFSETY),
     EnumMap::Pair ("OffsetZ",OFFSETZ),
     EnumMap::Pair ("Volume", VOLUME),
-    //EnumMap::Pair ("Yaw",YAW),
-    // EnumMap::Pair ("Pitch",PITCH),
-    // EnumMap::Pair ("Roll",ROLL)
+	EnumMap::Pair("Role",ROLE)
   };
   const EnumMap element_map(element_names, 10);
-  const EnumMap attribute_map(attribute_names, 29);
+  const EnumMap attribute_map(attribute_names, 30);
   Hashtable <string, weapon_info,char[257]> lookuptable;
   string curname;
   weapon_info tmpweapon(weapon_info::BEAM);
@@ -182,6 +182,9 @@ namespace BeamXML {
 	case NAME:
 	  curname = (*iter).value;
 	  tmpweapon.weapon_name=curname;
+	  break;
+	case ROLE:
+  	  tmpweapon.role_bits = ROLES::readBitmask(iter->value);
 	  break;
 	case WEAPSIZE:
 	  tmpweapon.MntSize (lookupMountSize ((*iter).value.c_str()));

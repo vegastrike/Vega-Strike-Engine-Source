@@ -165,8 +165,8 @@ public:
   void RemoveFromSystem ();
   void Target (Unit * targ);
   void TargetTurret (Unit * targ);
-  ///Fires all active guns that are or arent Missiles
-  void Fire(bool Missile);
+  ///Fires all active guns that are in that bitmask... if (1<<31) is set then only autotracking
+  void Fire(unsigned int Mount_roles);
 
 /***************************************************************************************/
 /**** COLLISION STUFF                                                               ****/

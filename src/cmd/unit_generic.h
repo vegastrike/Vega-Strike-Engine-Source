@@ -207,7 +207,7 @@ protected:
 public:
   bool UpAndDownGrade (const Unit * up, const Unit * templ, int mountoffset, int subunitoffset, bool touchme, bool downgrade, int additive, bool forcetransaction, double &percentage, const Unit * downgrade_min);
   void ImportPartList (const std::string& category, float price, float pricedev,  float quantity, float quantdev);
-
+  unsigned char RecomputeRole();//changes own role
   int GetNumMounts ()const  {return mounts.size();}
 
   ///Loads a user interface for the user to upgrade his ship
@@ -230,8 +230,9 @@ public:
   ///number of meshes (each with separate texture) this unit has
 
   std::vector <Mesh *> meshdata;
-
+  unsigned char combatRole() {return combat_role;}
 protected:
+  unsigned char combat_role;
   Nebula * nebula;
   PlanetaryOrbitData * planet;
   ///The orbit needs to have access to the velocity directly to disobey physics laws to precalculate orbits
@@ -727,7 +728,8 @@ public:
   float GetHull() const{return hull;}
   float GetHullPercent() const{return maxhull!=0?hull/maxhull:hull;}
   ///Fires all active guns that are or arent Missiles
-  virtual void Fire(bool Missile) {}
+  // if bitmask is (1<<31) then fire off autotracking of that type;
+  virtual void Fire(unsigned int bitmask);
   ///Stops all active guns from firing
   void UnFire();
   ///reduces shields to X percentage and reduces shield recharge to Y percentage
@@ -1051,6 +1053,7 @@ struct Unit::XML {
   std::string cargo_category;
   std::string hudimage;
   int damageiterator;
+  bool calculated_role;
 };
 
 class Mount {

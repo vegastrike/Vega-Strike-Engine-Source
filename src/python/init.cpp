@@ -16,7 +16,6 @@
 #include "configxml.h"
 #include "vs_globals.h"
 #include "vs_path.h"
-#include <strstream>
 #include "init.h"
 #include "python_compile.h"
 #include "python_class.h"

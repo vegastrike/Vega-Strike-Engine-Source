@@ -22,7 +22,7 @@ extern unsigned short apply_float_to_short (float tmp);
 extern void AdjustMatrix (Matrix &mat, Unit * target, float speed, bool lead, float cone);
 
 template <class UnitType>
-void GameUnit<UnitType>::Fire (bool Missile) {
+void GameUnit<UnitType>::Fire (unsigned int Missile) {//FIXME FIRE
   if (cloaking>=0)
     return;
   for (int i=0;i<GetNumMounts();i++) {

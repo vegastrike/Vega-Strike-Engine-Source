@@ -21,6 +21,7 @@
 #include "gfx/bsp.h"
 #include "unit.h"
 #include "gfx/sphere.h"
+#include "role_bitmask.h"
 #define VS_PI 3.1415926536
 
 int GetModeFromName (const char * input_buffer) {
@@ -173,10 +174,11 @@ namespace UnitXML {
       TRACKINGCONE,
       MISSIONCARGO,
       MAXIMUM,
-      LIGHTTYPE
+      LIGHTTYPE,
+	  COMBATROLE
     };
 
-  const EnumMap::Pair element_names[36]= {
+  const EnumMap::Pair element_names[37]= {
     EnumMap::Pair ("UNKNOWN", UNKNOWN),
     EnumMap::Pair ("Unit", UNIT),
     EnumMap::Pair ("SubUnit", SUBUNIT),
@@ -212,10 +214,11 @@ namespace UnitXML {
     EnumMap::Pair ("Category",CATEGORY),
     EnumMap::Pair ("Import",IMPORT),
     EnumMap::Pair ("CockpitDamage",COCKPITDAMAGE),
-    EnumMap::Pair ("Upgrade",UPGRADE      )
+    EnumMap::Pair ("Upgrade",UPGRADE      ),
+	EnumMap::Pair ("Description",DESCRIPTION)
 
   };
-  const EnumMap::Pair attribute_names[94] = {
+  const EnumMap::Pair attribute_names[95] = {
     EnumMap::Pair ("UNKNOWN", UNKNOWN),
     EnumMap::Pair ("missing",MISSING),
     EnumMap::Pair ("file", XFILE), 
@@ -309,11 +312,12 @@ namespace UnitXML {
     EnumMap::Pair ("SlideStart",SLIDE_END),
     EnumMap::Pair ("MissionCargo",MISSIONCARGO),
     EnumMap::Pair ("Maximum",MAXIMUM),
-    EnumMap::Pair ("LightType",LIGHTTYPE)
+    EnumMap::Pair ("LightType",LIGHTTYPE),
+	EnumMap::Pair ("CombatRole",COMBATROLE)
   };
 
-  const EnumMap element_map(element_names, 36);
-  const EnumMap attribute_map(attribute_names, 94);
+  const EnumMap element_map(element_names, 37);
+  const EnumMap attribute_map(attribute_names, 95);
 }
 
 using XMLSupport::EnumMap;
@@ -1315,7 +1319,18 @@ using namespace UnitXML;
       }
     }
     break;
-
+  case DESCRIPTION:
+	ADDTAG;
+    for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
+      switch(attribute_map.lookup((*iter).name)) {
+      case COMBATROLE:
+		  ADDDEFAULT;
+		  xml->calculated_role=true;
+		  combat_role = ROLES::getRole(iter->value);
+		break;
+	  }
+	}
+	break;
   case ROLL:
     ADDTAG;
     xml->yprrestricted+=Unit::XML::RRESTR;
@@ -1467,7 +1482,15 @@ void Unit::endElement(const string &name) {
     break;
   }
 }
+unsigned char Unit::RecomputeRole() {
+	//combat_role = 0;
+	unsigned int mount_bitmask;
+	for (unsigned int i=0;i<mounts.size();i++) {
+		mount_bitmask |=mounts[i]->type->role_bits;
+	}
 
+	return combatRole();
+}
 void Unit::WriteUnit (const char * modifications) {
   if (image->unitwriter)
     image->unitwriter->Write(modifications);
@@ -1635,6 +1658,7 @@ void Unit::LoadXML(const char *filename, const char * modifications, char * xmlb
   }
   image->CockpitCenter.Set (0,0,0);
   xml = new XML();
+  xml->calculated_role=false;
   xml->damageiterator=0;
   xml->unitModifications = modifications;
   xml->shieldmesh = NULL;

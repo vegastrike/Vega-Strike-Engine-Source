@@ -62,7 +62,7 @@ void Unit::reactToCollision(Unit * smalle, const QVector & biglocation, const Ve
 	Vector thisforce=(smallnormal*.4*GetMass()*fabs(smallnormal.Dot ((smalle->GetVelocity()-this->GetVelocity()/SIMULATION_ATOM))+fabs (dist)/(SIMULATION_ATOM*SIMULATION_ATOM)));
 	smforce = (smforce/smforce.Magnitude())*(large_damage+small_damage)*INVERSEFORCEDISTANCE*bouncepercent;
 	thisforce = (thisforce/thisforce.Magnitude())*(large_damage+small_damage)*INVERSEFORCEDISTANCE*bouncepercent;
-	//	UniverseUtil::IOmessage(0,"game","all",string("damaging collision ")+XMLSupport::tostring(smforce.i)+string(",")+XMLSupport::tostring(smforce.j)+string(",")+XMLSupport::tostring(smforce.k)+string(" resultantkinetic ")+XMLSupport::tostring(FinalInelasticKE)+string(" resultant damages ")+XMLSupport::tostring(small_damage)+string(" ")+XMLSupport::tostring(large_damage)); 
+	//UniverseUtil::IOmessage(0,"game","all",string("damaging collision ")+XMLSupport::tostring(smforce.i)+string(",")+XMLSupport::tostring(smforce.j)+string(",")+XMLSupport::tostring(smforce.k)+string(" resultantkinetic ")+XMLSupport::tostring(FinalInelasticKE)+string(" resultant damages ")+XMLSupport::tostring(small_damage)+string(" ")+XMLSupport::tostring(large_damage)+string(" bouncepercent ")+XMLSupport::tostring(bouncepercent)); 
     
 	if(smalle->isUnit()!=MISSILEPTR){ 
 	  smalle->ApplyForce (smforce);
@@ -614,7 +614,10 @@ void Unit::Init()
   //static float lc =XMLSupport::parse_float (vs_config->getVariable ("physics","lock_cone",".8"));// DO NOT CHANGE see unit_customize.cpp
   //  Fire();
 }
-
+void Unit::Fire (unsigned int bitmask) {
+//FIXME FIRE
+	//FIXME MULTIPLAYE
+}
 static bool CheckAccessory (Unit * tur) {
   bool accessory = tur->name.find ("accessory")!=string::npos;
   if (accessory) {

@@ -67,7 +67,6 @@ void Missile::Kill (bool erase) {
 void Missile::reactToCollision (Unit * smaller, const QVector & biglocation, const Vector & bignormal, const QVector & smalllocation, const Vector & smallnormal, float dist) {
   static bool doesmissilebounce  = XMLSupport::parse_bool (vs_config->getVariable("physics","missile_bounce","false"));
   if (doesmissilebounce) {
-	fprintf(stderr,"missilebounce\n");
     Unit::reactToCollision (smaller,biglocation,bignormal,smalllocation,smallnormal,dist);
   }
   Discharge();

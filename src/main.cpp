@@ -20,7 +20,7 @@
 #if defined(HAVE_SDL)
 #include <SDL/SDL.h>
 #endif
-
+#include "cmd/role_bitmask.h"
 #if defined(WITH_MACOSX_BUNDLE)
 #import <sys/param.h>
 #endif
@@ -266,8 +266,17 @@ int main( int argc, char *argv[] )
     Python::test();
 #endif
 
-    
-
+	fprintf (stderr,"Max role value %d\n",ROLES::maxRoleValue()); 
+	fprintf (stderr,"role value of FIGHTER %d\n", ROLES::readBitmask("FIgHteR"));
+	fprintf (stderr,"role value of FIGHTER %d\n", ROLES::readBitmask("FIgHteR BOMber MISSile"));
+	fprintf (stderr,"role value of FIGHTER %d\n", ROLES::readBitmask("AERO BOMb"));
+	vector <vector <char> >temp=ROLES::getAllRolePriorities();
+	for(unsigned int i=0;i<temp.size();i++) {
+		for (unsigned int j=0;j<temp[i].size();j++) {
+			fprintf (stderr,"%d ",(int)temp[i][j]);
+		}
+		fprintf (stderr,"\n");
+	}
 #if defined(HAVE_SDL)
 #ifndef NO_SDL_JOYSTICK
     // && defined(HAVE_SDL_MIXER)
