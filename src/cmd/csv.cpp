@@ -1,6 +1,26 @@
 #include "csv.h"
 #include "vsfilesystem.h"
 using namespace std;
+vector <std::string> readCSV (std::string s) {
+	vector <std::string> v;
+	std::string::size_type loc;
+	int sub1=s.find ("\r");
+	s=s.substr(0,sub1);
+	int sub2=s.find("\n");
+	s=s.substr(0,sub2);
+		do {
+			loc=s.find (",");
+			string t =s.substr (0,loc);
+				if (v.size() >=32) {
+					VSFileSystem::vs_fprintf (stderr,"ERROR with bitmasking. Only 32 ship types allowed");
+				}
+				v.push_back(t);
+			if (loc!=string::npos)
+				s = s.substr (loc+1);
+		} while (loc!=string::npos);
+	return v;
+}
+
 void CSVTable::Init (VSFileSystem::VSFile&f) {
    int len = f.Size();
    char * buffer = (char*)malloc(sizeof(char)*(len+1));
