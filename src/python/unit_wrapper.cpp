@@ -317,8 +317,8 @@ class Unit:
   WRAPPED1(bool,__ne__,UnitWrapper,oth,true);
   voidWRAPPED0(Kill);
   voidWRAPPED0(setNull);
-  voidWRAPPED0(__nonzero__);
-  voidWRAPPED0(isNull);
+  WRAPPED0(int,__nonzero__,0);
+  WRAPPED0(int,isNull,1);
   voidWRAPPED1(SetTarget,UnitWrapper,un);
   WRAPPED0(UnitWrapper, GetTarget,Unit());
   WRAPPED0(UnitWrapper, GetVelocityReference,Unit())

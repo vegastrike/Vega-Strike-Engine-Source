@@ -35,7 +35,7 @@
   WRAPPED0(QVector,Position,QVector(0,0,0))
   WRAPPED0(QVector, LocalPosition,QVector(0,0,0))
 
-  WRAPPED0(UnitWrapper, Threat,UnitWrapper(0))
+  WRAPPED0(UnitWrapper, Threat,UnitWrapper())
   voidWRAPPED1( TargetTurret ,UnitWrapper,targ)
   WRAPPED0(UnitCollection::UnitIterator, getSubUnits,0)
   voidWRAPPED2( Threaten ,UnitWrapper,targ, float,danger)
@@ -109,7 +109,7 @@
   EXPORT_UTIL(getName,'')
   EXPORT_UTIL(getFlightgroupName,'')
   EXPORT_UTIL(getFgDirective,'')
-  EXPORT_UTIL(getFlightgroupLeader,Unit)
+  EXPORT_UTIL(getFlightgroupLeader,Unit())
   voidEXPORT_UTIL(addCredits)
   voidEXPORT_UTIL(switchFg)
   EXPORT_UTIL(getCredits,0)
@@ -123,6 +123,8 @@
   EXPORT_UTIL(removeCargo,0)
   EXPORT_UTIL(upgrade,0)
   EXPORT_UTIL(addCargo,0)
+  EXPORT_UTIL(getDistance,0)
   EXPORT_UTIL(incrementCargo,false)
   EXPORT_UTIL(decrementCargo,false)
+  EXPORT_UTIL(getSignificantDistance,0);
 
