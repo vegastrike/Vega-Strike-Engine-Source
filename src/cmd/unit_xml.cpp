@@ -836,6 +836,7 @@ void Unit::LoadXML(const char *filename) {
  // rrestricted=yrestricted=prestricted=false;
   FILE * inFile = fopen (filename, "r");
   if(!inFile) {
+    printf("could not load unit xml file %s\n",filename);
     assert(0);
     return;
   }

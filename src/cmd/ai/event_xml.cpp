@@ -96,6 +96,7 @@ namespace AIEvents {
     vscdup();
     vscdup();
     if(!inFile) {
+      printf("ai file %s not found\n",filename);
       assert(0);
       return;
     }	

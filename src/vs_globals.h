@@ -34,5 +34,9 @@ extern game_data_t g_game;
 
 class VegaConfig;
 extern VegaConfig *vs_config;
+
+class Mission;
+extern Mission *mission;
+
 #endif
 

@@ -35,19 +35,35 @@ using std::string;
 
 using XMLSupport::AttributeList;
 
+class Flightgroup {
+ public:
+  string name,faction,type,ainame;
+  int waves,nr_ships;
+  float pos[3];
+  float rot[3];
+};
+
 class Mission {
  public:
   Mission(char *configfile);
+
+  int number_of_flightgroups;
+
+  vector<Flightgroup *> flightgroups;
+
+  Flightgroup *findFlightgroup(string offset_name);
 
  private:
   //  string getVariable(easyDomNode *section,string name,string defaultval);
 
   easyDomNode *variables;
 
+
   bool checkMission(easyDomNode *node);
   void doVariables(easyDomNode *node);
   void checkVar(easyDomNode *node);
   void doFlightgroups(easyDomNode *node);
+  void doOrder(easyDomNode *node);
   void checkFlightgroup(easyDomNode *node);
   bool doPosition(easyDomNode *node,float pos[3]);
   bool doRotation(easyDomNode *node,float rot[3]);

@@ -73,7 +73,10 @@ void cleanup(void)
   destroyObjects();
   delete _Universe;
 }
+
 VegaConfig *vs_config;
+Mission *mission;
+
 int main( int argc, char **argv ) 
 {
 
@@ -88,7 +91,7 @@ int main( int argc, char **argv )
     // loads the configuration file .vegastrikerc from home dir if such exists
     initpaths();
     
-    Mission *mission=new Mission("test1.mission");
+    mission=new Mission("test1.mission");
 
     //            exit(0);
 

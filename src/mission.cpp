@@ -42,7 +42,7 @@
 //#include "vegastrike.h"
 
 Mission::Mission(char *configfile){
-  //LoadXML(configfile);
+  number_of_flightgroups=0;
 
   easyDomFactory *domf = new easyDomFactory();
 
@@ -111,7 +111,7 @@ void Mission::checkVar(easyDomNode *node){
 
 void Mission::doFlightgroups(easyDomNode *node){
   vector<easyDomNode *>::const_iterator siter;
-  
+
   for(siter= node->subnodes.begin() ; siter!=node->subnodes.end() ; siter++){
     checkFlightgroup(*siter);
   }
@@ -136,8 +136,8 @@ void Mission::checkFlightgroup(easyDomNode *node){
     return;
   }
 
-  int waves_i=atoi(waves.data());
-  int nr_ships_i=atoi(nr_ships.data());
+  int waves_i=atoi(waves.c_str());
+  int nr_ships_i=atoi(nr_ships.c_str());
 
   bool have_pos=false;
   bool have_rot=false;
@@ -148,26 +148,47 @@ void Mission::checkFlightgroup(easyDomNode *node){
   rot[0]=rot[1]=rot[2]=0.0;
 
   vector<easyDomNode *>::const_iterator siter;
+
+      printf("before checking pos\n");
   
   for(siter= node->subnodes.begin() ; siter!=node->subnodes.end() ; siter++){
     if((*siter)->Name()=="pos"){
+      printf("checking pos\n");
       have_pos=doPosition(*siter,pos);
     }
     else if((*siter)->Name()=="rot"){
       have_rot=doRotation(*siter,rot);
     }
+    else if((*siter)->Name()=="order"){
+      doOrder(*siter);
+    }
   }
 
   if(!have_pos){
-    cout << "don;t have a position" << endl;
+    cout << "don;t have a position in flightgroup " << name << endl;
     return;
   }
 
   // now enter the stuff (not yet)
   cout << "flightgroup: " << name << " " << faction << " " << type << " " << ainame << " " << waves << " " << nr_ships << endl;
-  cout << "   pos: " << pos[0] << " " << pos[0] << " " << pos[0] << " " << endl;
-  cout << "   rot: " << rot[0] << " " << rot[0] << " " << rot[0] << " " << endl;
+  cout << "   pos: " << pos[0] << " " << pos[1] << " " << pos[2] << " " << endl;
+  cout << "   rot: " << rot[0] << " " << rot[1] << " " << rot[2] << " " << endl;
 
+  Flightgroup *fg=new Flightgroup();
+
+  fg->name=name;
+  fg->faction=faction;
+  fg->type=type;
+  fg->ainame=ainame;
+  
+  for(int i=0;i<3;i++){
+    fg->pos[i]=pos[i];
+    fg->rot[i]=rot[i];
+  }
+
+  flightgroups.push_back(fg);
+
+  number_of_flightgroups++;
 }
 
 bool Mission::doPosition(easyDomNode *node,float pos[3]){
@@ -176,21 +197,49 @@ bool Mission::doPosition(easyDomNode *node,float pos[3]){
   string z=node->attr_value("z");
   string offset=node->attr_value("offset");
 
+  cout << "POS: x=" << x << " y=" << y << " z=" << z << endl;
+
   if(x.empty() || y.empty() || z.empty() ){
     cout << "no valid position" << endl;
     return false;
   }
 
-  pos[0]=atof(x.data());
-  pos[1]=atof(y.data());
-  pos[2]=atof(z.data());
+  pos[0]=atof(x.c_str());
+  pos[1]=atof(y.c_str());
+  pos[2]=atof(z.c_str());
 
-  // offset not yet
+  if(!offset.empty()){
+    Flightgroup *fg=findFlightgroup(offset);
+    if(fg==NULL){
+      cout << "can't find flightgroup " << offset << " for offset" << endl;
+    }
+    else{
+      pos[0]+=fg->pos[0];
+      pos[1]+=fg->pos[1];
+      pos[2]+=fg->pos[2];
+    }
+  }
+
 
   return true;
+}
+
+Flightgroup *Mission::findFlightgroup(string offset_name){
+  vector<Flightgroup *>::const_iterator siter;
+
+  for(siter= flightgroups.begin() ; siter!=flightgroups.end() ; siter++){
+    if((*siter)->name==offset_name){
+      return *siter;
+    }
+  }
+  return NULL;
 }
 
 bool Mission::doRotation(easyDomNode *node,float rot[3]){
   //not yet
   return true;
+}
+
+void Mission::doOrder(easyDomNode *node){
+  // nothing yet
 }

@@ -40,8 +40,10 @@
 #include "cmd/music.h"
 #include "audiolib.h"
 #include "vs_path.h"
+#include "mission.h"
 #include "xml_support.h"
 #include "config_xml.h"
+
 using namespace std;
 
 static Music * muzak=NULL;
@@ -339,6 +341,8 @@ void createObjects() {
 //GOOD!!
   ****/
   BindKey (1,CoordinateSelect::MouseMoveHandle);
+
+#if 0
   FILE * fp = fopen ("testmission.txt", "r");
   if (fp) {
     fscanf (fp, "%d\n", &numf);
@@ -397,6 +401,90 @@ void createObjects() {
   shipList = _Universe->activeStarSystem()->getClickList();
   locSel = new CoordinateSelect (Vector (0,0,5));
   UpdateTime();
+#endif
+
+  int numf=mission->number_of_flightgroups;
+
+  fighters = new Unit * [numf];
+  int * tmptarget = new int [numf];
+
+  GFXEnable(TEXTURE0);
+  GFXEnable(TEXTURE1);
+  
+  char fightername [1024]="hornet.xunit";
+  int a=0;
+    vector<Flightgroup *>::const_iterator siter;
+    vector<Flightgroup *> fg=mission->flightgroups;
+
+  for(siter= fg.begin() ; siter!=fg.end() ; siter++,a++){
+    Vector pox (1000+150*a,100*a,100);
+
+    Flightgroup *fg=*siter;
+
+    string fullname=fg->type + ".xunit";
+
+    strcpy(fightername,fullname.c_str());
+	//	strcat(fightername,".xunit");
+
+	pox.i=fg->pos[0];
+	pox.j=fg->pos[1];
+	pox.k=fg->pos[2];
+
+	string ainame=fg->ainame;
+
+	tmptarget[a]=1; // that should not be in xml?
+
+      if (pox.i==pox.j&&pox.j==pox.k&&pox.k==0) {
+	pox.i=rand()*10000./RAND_MAX-5000;
+	pox.j=rand()*10000./RAND_MAX-5000;
+	pox.k=rand()*10000./RAND_MAX-5000;
+
+      }
+
+
+
+    fighters[a] = new Unit(fightername, true, false,tmptarget[a]);
+    fighters[a]->SetPosition (pox);
+    
+    //    fighters[a]->SetAI(new Order());
+    if (a!=0) {
+      string ai_agg=ainame+".agg.xml";
+      string ai_int=ainame+".int.xml";
+
+      char ai_agg_c[1024];
+      char ai_int_c[1024];
+      strcpy(ai_agg_c,ai_agg.c_str());
+      strcpy(ai_int_c,ai_int.c_str());
+      printf("1 - %s  2 - %s\n",ai_agg_c,ai_int_c);
+
+      fighters[a]->EnqueueAI( new Orders::AggressiveAI (ai_agg_c, ai_int_c));
+
+    }
+    _Universe->activeStarSystem()->AddUnit(fighters[a]);
+  } // end of for flightgroups
+
+  //  for (a=0;a<numf;a++) {
+  //      fighters[a]->Target (fighters[tmptarget[a]]);
+  //  }//now it just sets their faction :-D
+  delete [] tmptarget;
+
+ 
+  fighters[0]->EnqueueAI(new AIScript("aitest.xml"));
+  fighters[0]->EnqueueAI(new FlyByJoystick (0,"player1.kbconf"));
+  fighters[0]->EnqueueAI(new FireKeyboard (0,""));
+
+  vschdir ("hornet-cockpit.cpt");
+  tmpcockpittexture = new Texture ("hornet-cockpit.bmp","hornet-cockpitalp.bmp",0,NEAREST);
+  vscdup();
+
+  muzak = new Music (fighters[0]);
+  AUDListenerSize (fighters[0]->rSize()*4);
+  _Universe->AccessCockpit()->Init ("hornet-cockpit.cpt");
+  _Universe->AccessCockpit()->SetParent(fighters[0]);
+  shipList = _Universe->activeStarSystem()->getClickList();
+  locSel = new CoordinateSelect (Vector (0,0,5));
+  UpdateTime();
+
 }
 
 void destroyObjects() {  

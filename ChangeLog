@@ -1,3 +1,12 @@
+2001-10-23 Alexander Rawass <alexannika@users.sourceforge.net>
+
+	* modified main_loop to use xml-missions
+	* modified unit_xml/event_xml to output filenames if not found
+	* added mission to vs_globals.h
+	* call to Mission is done in main.cpp
+	* modified test1.mission
+
+
 2001-10-22 Alexander Rawass <alexannika@users.sourceforge.net>
 
 	* added bindings for joy-buttons
@@ -12,6 +21,7 @@
 	* modified animations to go in <currentdir>/animations
 	* modified sprites to go in <currentdir>/sprites
 	* allowed flat data directories too :-)
+
 	* changed the number of times the sound's location was updated to once every physics phase
 	* fixed  a problem with weapons (one that had been there for a while) that weapons would be fired by the AI script and not be aligned to a physics frame... this produced a somewhat cool but undesirable effect to have the weapons seem to carry with them a lot of inertia  so I made the unit remember when a shot was fired, and then instead "fire it" at the physics frame 
 	* problem caused: because the physics frame deals with the "next" frame instead of this one....  so I had to use the saved data from the previous frame...which is somewhat inaccurate as I do not know the parent of this unit (may cause problems with a turret on a wildly evading starship)
