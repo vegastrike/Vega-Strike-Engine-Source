@@ -23,6 +23,7 @@
 #include "xml_support.h"
 #include "config_xml.h"
 #include "winsys.h"
+#include <assert.h>
 //#include "gl_globals.h"
 
 #ifndef WIN32
