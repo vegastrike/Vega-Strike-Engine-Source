@@ -331,6 +331,10 @@ void bootstrap_main_loop () {
 
     }
     SetStarSystemLoading (true);
+    InitializeInput();
+
+    vs_config->bindKeys();//gotta do this before we do ai
+
     createObjects(playersaveunit,ss,playerNloc);
 
     if (setplayerloc&&fighters) {
@@ -344,9 +348,6 @@ void bootstrap_main_loop () {
       savedun.pop_back();
     }
     
-    InitializeInput();
-
-    vs_config->bindKeys();
 
     forcefeedback=new ForceFeedback();
 

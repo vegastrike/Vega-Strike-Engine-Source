@@ -128,16 +128,28 @@ void JoyStick::InitMouse (int which) {
 bool JoyStick::isAvailable(){
   return joy_available;
 }
+extern bool warpedmouse;
 void JoyStick::GetMouse (float &x, float &y, float &z, int &buttons) {
+  static int savex = g_game.x_resolution/2;
+  static int savey = g_game.x_resolution/2;
   static bool warp_pointer = XMLSupport::parse_bool(vs_config->getVariable ("joystick","warp_mouse","false"));
   static float mouse_sensitivity = XMLSupport::parse_float(vs_config->getVariable ("joystick","mouse_sensitivity","5"));
-  joy_axis[0]=x = (float(mousex-g_game.x_resolution/2))/(g_game.x_resolution/mouse_sensitivity);
-  joy_axis[1]=y = (float(mousey-g_game.y_resolution/2))/(g_game.y_resolution/mouse_sensitivity);
+  if (warp_pointer) {
+    if (warpedmouse) {
+      warpedmouse=false;
+      savex =g_game.x_resolution/2;
+      savey =g_game.x_resolution/2;
+    }
+    joy_axis[0]=x=(float(mousex-savex))/(g_game.x_resolution/mouse_sensitivity);
+    joy_axis[1]=y = (float(mousey-savey))/(g_game.y_resolution/mouse_sensitivity);
+    savex=mousex;
+    savey=mousey;
+  }else {
+    joy_axis[0]=x = (float(mousex-g_game.x_resolution/2))/(g_game.x_resolution/mouse_sensitivity);
+    joy_axis[1]=y = (float(mousey-g_game.y_resolution/2))/(g_game.y_resolution/mouse_sensitivity);
+  }
   joy_axis[2]=z=0;
   buttons = getMouseButtonStatus();
-  if (warp_pointer) {
-    warpMousePointer(g_game.x_resolution/2,g_game.y_resolution/2);
-  }
 }
 void JoyStick::GetJoyStick(float &x,float &y, float &z, int &buttons)
 {

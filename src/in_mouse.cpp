@@ -25,6 +25,8 @@
 #include "in_handler.h"
 #include "in_mouse.h"
 #include <deque>
+#include "vs_globals.h"
+#include "config_xml.h"
 using std::deque;
 #define NUM_BUTTONS 15
 
@@ -94,14 +96,25 @@ void  mouseDrag( int x, int y ) {
   mousey = y;
   
 }	
-
+bool warpedmouse=true;
 void mouseMotion(int x, int y) {
+  static bool warp_pointer = XMLSupport::parse_bool(vs_config->getVariable ("joystick","warp_mouse","false"));
+  static int mouse_warp_zone = XMLSupport::parse_int(vs_config->getVariable ("joystick","warp_mouse_zone","100"));
   //  int mod =glutGetModifiers();
   for (int i=0;i<NUM_BUTTONS+1;i++) {
     mouseBindings[i](MouseState[i],x,y,x-mousex,y-mousey,0);
   }
+ if (warp_pointer) {
+    if (x<mouse_warp_zone||y<mouse_warp_zone||x>g_game.x_resolution-mouse_warp_zone||y>g_game.y_resolution-mouse_warp_zone) {
+    warpMousePointer(g_game.x_resolution/2,g_game.y_resolution/2);
+    warpedmouse=true;
+    x= x-mousex+g_game.x_resolution/2;
+    y= y-mousey+g_game.y_resolution/2;
+  }
   mousex = x;
   mousey = y;
+
+  }
 }
 
 
@@ -124,7 +137,7 @@ void UnbindMouse (int key) {
 
 }
 void warpMousePointer(int x, int y) {
-  glutWarpPointer(x-mousex,y-mousey);
+  glutWarpPointer(x,y);
 }
 void BindKey (int key, MouseHandler handler) {
   mouseBindings[key]=handler;
