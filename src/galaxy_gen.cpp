@@ -711,7 +711,30 @@ void MakePlanet(float radius, int entitytype, bool forceRS, Vector R, Vector S, 
       atmosphere="sol/earthcloudmaptrans.png";
     }
     string NAME = thisname+" Atmosphere";
-    Tab();fprintf (fp,"<Atmosphere file=\"%s\" alpha=\"SRCALPHA INVSRCALPHA\" radius=\"%f\"/>\n",atmosphere.c_str(),radius*1.03);
+	{
+	bool doalphaatmosphere = (temprandom<.08||temprandom>.3);
+	if (doalphaatmosphere) 
+		Tab();fprintf (fp,"<Atmosphere file=\"%s\" alpha=\"SRCALPHA INVSRCALPHA\" radius=\"%f\"/>\n",atmosphere.c_str(),radius*1.03);
+
+	float r=.5,g=.5,b=.5,a=.5;
+	float dr=.5,dg=.5,db=.5,da=.5;
+	if (!doalphaatmosphere) {
+		if (temprandom>.26||temprandom<.09) {
+			r=.25;g=.6;b=.25;
+		}else if (temprandom>.24||temprandom<.092) {
+			r=.7;g=.3;b=.2;
+		}
+	}
+	static float concavity = XMLSupport::parse_float (vs_config->getVariable ("graphics","fog","concavity","0"));
+	static float focus = XMLSupport::parse_float (vs_config->getVariable ("graphics","fog","focus",".5"));
+	Tab();fprintf (fp,"<Fog>\n");
+	Tab();Tab();fprintf (fp,"<FogElement file=\"sphereatm.xmesh\" ScaleAtmosphereHeight=\"1.01\"  red=\"%f\" blue=\"%f\" green=\"%f\" alpha=\"%f\" dired=\"%f\" diblue=\"%f\" digreen=\"%f\" dialpha=\"%f\" concavity=\"%f\" focus=\"%f\" minalpha=\"0\" maxalpha=\"1\"/>\n",r,g,b,a,dr,dg,db,da,concavity,focus);
+	Tab();Tab();fprintf (fp,"<FogElement file=\"sphereatm.xmesh\" ScaleAtmosphereHeight=\"1.0175\"  red=\"%f\" blue=\"%f\" green=\"%f\" alpha=\"%f\" dired=\"%f\" diblue=\"%f\" digreen=\"%f\" dialpha=\"%f\" concavity=\"%f\" focus=\"%f\" minalpha=\"0\" maxalpha=\"1\"/>\n",r,g,b,a,dr,dg,db,da,concavity,focus);
+	Tab();Tab();fprintf (fp,"<FogElement file=\"sphereatm.xmesh\" ScaleAtmosphereHeight=\"1.025\"  red=\"%f\" blue=\"%f\" green=\"%f\" alpha=\"%f\" dired=\"%f\" diblue=\"%f\" digreen=\"%f\" dialpha=\"%f\" concavity=\"%f\" focus=\"%f\" minalpha=\"0\" maxalpha=\"1\"/>\n",r,g,b,a,dr,dg,db,da,concavity,focus);
+	Tab();Tab();fprintf (fp,"<FogElement file=\"sphereatm.xmesh\" ScaleAtmosphereHeight=\"1.0325\"  red=\"%f\" blue=\"%f\" green=\"%f\" alpha=\"%f\" dired=\"%f\" diblue=\"%f\" digreen=\"%f\" dialpha=\"%f\" concavity=\"%f\" focus=\"%f\" minalpha=\"0\" maxalpha=\"1\"/>\n",r,g,b,a,dr,dg,db,da,concavity,focus);
+	Tab();Tab();fprintf (fp,"<FogElement file=\"sphereatm.xmesh\" ScaleAtmosphereHeight=\"1.04\"  red=\"%f\" blue=\"%f\" green=\"%f\" alpha=\"%f\" dired=\"%f\" diblue=\"%f\" digreen=\"%f\" dialpha=\"%f\" concavity=\"%f\" focus=\"%f\" minalpha=\"0\" maxalpha=\"1\"/>\n",r,g,b,a,dr,dg,db,da,concavity,focus);		
+	Tab();fprintf (fp,"</Fog>\n");
+	}
   }
 
   radii.push_back (entitytype!=GAS?radius:1.4*radius);
