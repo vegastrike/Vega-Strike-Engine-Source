@@ -1,70 +1,161 @@
 ----------------------------------------------
-Readme for VegaStrike version 0.0.9 Pre-Beta
+Readme for VegaStrike version 0.2.0 Beta2
 ----------------------------------------------
-Vegastrike has finally reached playability!  Now you can dual against an arbitrary number of ships in deadly combat!
-Ships have been taken directly out of vegastrike classic and put here for your entertainment! They intelligently combat
-I have attempted to recreate original Wing COmmander statistics so boost your enjoyment of the scenerio where you and Jazz fly against a number of kilrathi ships. But will Jazz remain loyal?
+Vegastrike has finally reached the state of being multisystem!
+This means that many user requests have been accomplished including sound, joystick support, cloaking, bolt weapons, Target viewscreen, nebulae, asteroids, multiple systems, ingame-respawn... the list goes on
+All of the ships are original, never before seen ships modelled by the Vegastrike team!
+Mail me any comments or suggestions to vegastrike-users@lists.sourceforge.net
+And if you can design some missions it would rock!
 
-Mail me any comments or suggestions to hellcatv@hotmail.com
-I would welcome any changes or additions to shield.bmp that would make the shield look more realistic!   
+----------------------------------------------
+Running Vegastrike
+---------------------------------------------
+Vegastrike takes a single command parameter indicating which mission it should load
+
+vegastrike mission/explore_universe.mission
+
+is an example of a valid mission call
+
+the -l flag (must be flush with the system) will force a player to begin in a star system.
+
+vegastrike -lvega_sector/vega mission/bomber.mission
+
+will force the bomber mission to run in the vega sector
+
+-------------------------------------------------
+Interstellar Warp Transit (Jump Drive)
+------------------------------------------------
+Most starships come equipped with a warp drive.  Unfortunately they can only be used at large singularities in the space-time continuum.  Your computer signals these points by placing glowing blue balls in those areas.  Their relative size indicates how small a starship must be to fit through the jump point.
+To engage a jump drive, position your ship inside and press 'j'.
+Regulations state that starships should be stopped before jumping-- disasters have resulted from starships travelling at any great speed into a jump point.
+
+------------------------------------------------
+Time Compression
+-----------------------------------------------
+Often interstellar travel requires going great distances. To facilitate this, we have provided time compression.  Press F9 to increase time compression to get where you're going.  Press F10 to drop out of time compression.  F10 will happen automatically if enemies are nearby.
+
+------------------------------------------------
+ReSpawn
+-----------------------------------------------
+If you sadly lose your life in combat you may respawn by pressing ':'
+A new starship will be created for you by Bob.
+
+-------------------------------------------------
+Transfer Command
+-------------------------------------------------
+if you wish to transfer command to another starship, simply press '[' to switch over.  This is useful if you have died and do not wish to call on Bob for help.
+
+-----------
+ Controls:
+-----------
+Arrow keys: Flight Sim style turning
+\ full throttle
+backspace zero throttle
+=,+ accel
+- decel
+ENTER fire missile
+space Fire Guns
+backspace  stop
+TAB Afterburners
+j engage interstellar warp drive (use at clear blue balls)
+*,ins Spin Right
+/,del Spin Left
+~ (hold down, engage shelton slide)
+y match speed
+t target
+p target nearest to center of screen
+n target enemy targetting you
+T target enemies for your turret
+m change active missile
+g change active gun
+v switch targetting computer mode to navigation mode and then view mode
+w switch left targetting cpu
+Shift-W shift weapons computer mode to damage mode
+
+F1 toggle cockpit/background display
+F2 left
+F3 right
+F4 back
+F5 Chasecam
+F6 Panning Cam (s,a,w,z pan)
+F7 Target Cam
+F8 Strange Cam
+F9 Increase Time Compression
+F10 Reset Time Compression
+F11 Zoom in
+F12 Zoom out
+
+a,d,w,z pan ghost cam
+
+: respawn -- use after death to recreate your starship
+[ switch ships in battle (use to control allies)
 
 -----------
  Features:
 -----------
+-Time compression
+-Multiple Systems
+-Entire Sol sector and Vega sector included!
+-Fly through huge multilayered asteroid fields
+-Explore nebulae where your radar fritzes out
+-Jump to other systems at blue jump points with the 'j' key
+-Respawn with the ':' key (shift and semicolon)
+-Switch Ships with the '[' key
+-Joystick support for a full featured joystick
+-Sound effects that make starships roar as they pass and zap as they die
+-Bolt weapons with glowing lighting effects
+-Cloaking that renders a ship partially/fully invisible
+-All new starships
+-Customizable fully working HUD with targetting displays, etc
+- Customizable Alien Race logos that will change on all starships by editing TerranPriA.bmp and TechPriA.bmp
 -Intelligent, Programmable AI
 -Varied weapons on different starships
 -Explosions that literally tear a starship into pieces
 -Shields That Glow upon hit (in the location hit)
 -Customizable missions
 -Stars that fly past as you explore the system
+-RAPID collision system that allows no problems with collisions
 -BSP Trees that allow one to fly close to a starship, and in the runway of (well formed) models...unlike the victory from WC3. 
 -the Normal Force which bounces starships off of each other
--The rings of saturn--a feature oft-missed in previous versions... now added for all to enjoy... just don't fire at 'em ;-)
------------
- Controls:
------------
-Arrow keys: WC style turning
-\ full throttle
-backspace zero throttle
-=,+ accel
-- decel
-t target
-ENTER fire missile
-space Fie Guns
-TAB Afterburners
-*,ins Spin Right
-/,del Spin Left
-~ (hold down, engage shelton slide)
-
------------
-Command Line Arguments
-------------
--M     add music
--S     add sound 
--16    color depth 16
--32    color depth 32
--f     fullscrn
--l     640x480
--a     800x600
--h     1024x768
--v     1280x1024
 
 --------------------------------------
-Editing Missions  (By Darkmage)
+Editing Missions  
 --------------------------------------
 How to make Vegastrike Missions
-An example mission(this is stored in the testmission.txt file)
+An example mission(this is stored in the test1.mission file)
+A mission must begin with the headers:
 
-3
-rapier.xunit 6000 0 0 0
-venture.xunit 6000 6000 200 0
-dralthi.xunit 6000 6000 -200 0
+<mission>
+	<variables>
+		<var name="defaultplayer" value="blue"/>
+		<var name="mission_name" value="4 versus 4" />
+		<var name="splashscreen" value="bad_guys_vs_good_guys.bmp" />
+		<var name="system" value="sol" />
+		<var name="description" value="4vs4.txt" />
+	</variables>
 
-the three at the top indicates the number of ships in the mission
-to add a ship give it some X Y Z coordinatesas shown above. to make the ships fight against you leve the number on the right end as 0 to make them fly against themselves change that value to 1, or 2, etc.  If the number is equal to or greater than the number at the beginning, vegastrike will not be happy.
-You can add as many ships as you like. Make sure to edit the very top number appropriately
-While factions have been finished, currently all ships are nonaligned and equally hostile. (expect a fix soon)
+Currently all of these options are ignored except for the "system".  it loads sol.system  as the star system (which is in XML and stores all present planets)
+The only other system included in this beta release is the blank.mission
+which has 1 planet, 1 sun and 2 starbases.
+After this, comes the actors in the mission, the flightgroups of fighters.
+        <flightgroups>
+You must begin the flight group tag as above, and terminate it after all of your flight groups
 
+                <flightgroup name="blue" faction="confed" type="nova" ainame="default" waves="8" nr_ships="3">
+The name will be used later for targetting and offset purposes.  The faction is a faction listed in factions.xml (should be self explanatory 0 is neutral 1 is happy -1 is mad) Currently confed and aera are the two active factions.  AI must be default in this version as no ohter AI scripts are yet written.  nr_ships indicates how many starships will be in this flight squadron.
+			<pos x="10000.0" y="0.0" z="3000.0"/>
+This indicates the flight group's position... be sure it is unique
+			<rot x="180.0" y="180.0" z="180.0"/>
+			<order order="tmptarget" target="omikron"/>
+			<order priority="0" order="superiority" target="enemy"/>
+			<order priority="1" order="bomber" target="omikron"/>
+			<order priority="2" order="escort" target="blue"/>
+the rest is in development
+		</flightgroup>
+you must end all flight group tags
+continue with any other flightgroups... you can have as many as you want from as many named factions are you want...
+      </flightgroup>
+</mission>
 
 ---------------------------------------
 Editing AI
@@ -126,5 +217,7 @@ So that's how to use AI scripts.
 If you want to know more about writing actual maneuvers (like turnaway.xml  which as you can see is in the directory) please contact me at hellcatv@hotmail.com
 you need to have a heavy background in vector math.
 
-© 2001 Daniel Horn, Patrick Horn, & James Carthew
-Wing Commander TM is a trademark of origin systems and Electronic Arts no threat to their status is intended.
+© 2002 Daniel Horn, Patrick Horn, Alan Shieh, and Aleksander Rawass
+       Sabarok Aresh, Stefan Stapelberg
+
+© 2002 Graphic Art Daniel Aleksandrow, James Carthew, Jason Wizenreid, Warden, and many more that I do not have the brains to say right now...
