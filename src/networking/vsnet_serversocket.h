@@ -57,7 +57,7 @@ public:
     inline const AddressIP& get_adr( ) const { return _srv_ip; }
 
     inline void watch( SocketSet& set ) { set.set(_fd); }
-    inline bool isActive( SocketSet& set ) const { return set.isset(_fd); }
+    inline bool isActive( SocketSet& set ) const { return set.is_set(_fd); }
 
     virtual void      watchForNewConn( SocketSet& set, int ) = 0;
     virtual SOCKETALT acceptNewConn( SocketSet& set ) = 0;

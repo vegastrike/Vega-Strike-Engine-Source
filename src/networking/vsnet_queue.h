@@ -89,7 +89,7 @@ public:
     inline bool valid() const { return (fd>0); }
 
     inline void watch( SocketSet& set ) { set.set(fd); }
-    inline bool isActive( SocketSet& set ) const { return set.isset(fd); }
+    inline bool isActive( SocketSet& set ) const { return set.is_set(fd); }
 
     int  sendbuf( void* buffer, unsigned int len, const AddressIP* to);
     void ack( );

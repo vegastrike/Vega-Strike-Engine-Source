@@ -63,9 +63,14 @@ SOCKETALT ServerSocketTCP::acceptNewConn( SocketSet& set )
     cout << __FILE__ << ":" << __LINE__ << " enter " << __PRETTY_FUNCTION__ << endl;
 
     struct sockaddr_in remote_ip;
-    socklen_t          len = sizeof( struct sockaddr_in );
+#ifdef __APPLE__
+    int
+#else
+    socklen_t          
+#endif
+      len = sizeof( struct sockaddr_in );
 
-    if( set.isset( _fd ) )
+    if( set.is_set( _fd ) )
     {
         int sock = accept( _fd, (sockaddr *)&remote_ip, &len );
         if( sock > 0 )

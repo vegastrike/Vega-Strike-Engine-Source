@@ -33,10 +33,14 @@
 	#include <sys/socket.h>
 	#include <sys/time.h>
 #endif
-
+#ifdef __APPLE__
+#include <sys/types.h>
+#include <sys/time.h>
+#include <unistd.h>
+#endif
 class SocketSet
 {
-    fd_set _set;
+    fd_set _s3t;
     int    _max_sock;
 public:
     SocketSet( ) : _max_sock( 0 )
@@ -44,12 +48,15 @@ public:
 	clear();
     }
 
-    inline void set( int fd ) {
-	FD_SET( fd, &_set);
+    void set( int fd ) {
+	FD_SET( fd, &this->_s3t);
 		if( fd >= _max_sock ) _max_sock = fd+1;
     }
-    inline bool isset( int fd ) const { return FD_ISSET( fd, &_set); }
-    inline void clear( ) { FD_ZERO( &_set ); }
+    bool is_set( int fd ) const { 
+      bool i=FD_ISSET( fd, &this->_s3t); 
+      return i;
+    }
+    void clear( ) { FD_ZERO( &this->_s3t ); }
 
     int select( timeval* timeout );
 

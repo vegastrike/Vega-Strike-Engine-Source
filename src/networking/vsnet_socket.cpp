@@ -52,7 +52,7 @@ public:
 
     virtual void dump( std::ostream& ostr );
 
-    virtual bool isActive( SocketSet& set ) { return set.isset(fd); }
+    virtual bool isActive( SocketSet& set ) { return set.is_set(fd); }
 };
 
 /***********************************************************************
@@ -488,7 +488,7 @@ bool VsnetTCPSocket::isActive( SocketSet& set )
         return true;
     }
 
-    if( set.isset(fd) == false )
+    if( set.is_set(fd) == false )
     {
         COUT << "leave " << __FUNCTION__ << endl;
         return false;

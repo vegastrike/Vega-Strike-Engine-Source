@@ -55,8 +55,22 @@ GameStarSystem::GameStarSystem(): StarSystem()
   collidetable = new CollideTable(this);
 }
 */
+extern bool GetStarSystemLoading();
+extern void SetStarSystemLoading(bool);
+extern void SetSplashScreen (Animation *);
+void bootstrap_draw (const std::string &message, float x, float y, Animation * newSplashScreen);
 GameStarSystem::GameStarSystem(const char * filename, const Vector & centr,const float timeofyear) {
-
+  bool bootstrapping = GetStarSystemLoading();
+  if (!bootstrapping) {
+    SetStarSystemLoading(true);
+    Animation a("vega_spash.ani",0);
+    string s("Jumping to ");
+    s+=filename;
+    bootstrap_draw(s.c_str(),-.135,0,&a);
+    bootstrap_draw(s.c_str(),-.135,0,&a);
+    SetSplashScreen(NULL);
+    SetStarSystemLoading(false);
+  }
   no_collision_time=0;//(int)(1+2.000/SIMULATION_ATOM);
   ///adds to jumping table;
   name = NULL;
@@ -150,7 +164,10 @@ GameStarSystem::GameStarSystem(const char * filename, const Vector & centr,const
 
   theAtmosphere = new Atmosphere(params);
   _Universe->popActiveStarSystem ();
-
+  //  if (!bootstrapping) {
+  //    bootstrap_draw(s.c_str(),-.135,0,NULL);
+  //    SetStarSystemLoading(false);
+  //  }
 }
 void GameStarSystem::activateLightMap() {
   GFXActiveTexture (1);

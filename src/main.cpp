@@ -175,11 +175,14 @@ LeakVector<Mission *> active_missions;
 char mission_name[1024];
 
 void bootstrap_main_loop();
+void bootstrap_first_loop();
 
 #if defined(WITH_MACOSX_BUNDLE)
  #undef main
 #endif
+void nothinghappens (unsigned int, unsigned int, bool,int,int) {
 
+}
 int main( int argc, char *argv[] ) 
 {
 	CONFIGFILE=0;
@@ -306,7 +309,8 @@ int main( int argc, char *argv[] )
     */
     _Universe= new GameUniverse(argc,argv,vs_config->getVariable ("general","galaxy","milky_way.xml").c_str());
 	//_Universe.Init(argc, argv, vs_config->getVariable ("general","galaxy","milky_way.xml").c_str());
-    _Universe->Loop(bootstrap_main_loop);
+    //    winsys_set_keyboard_func(nothinghappens);
+    _Universe->Loop(bootstrap_first_loop);
     return 0;
 }
   static Animation * SplashScreen = NULL;
@@ -314,14 +318,19 @@ static bool BootstrapMyStarSystemLoading=true;
 void SetStarSystemLoading (bool value) {
   BootstrapMyStarSystemLoading=value;
 }
-
+bool GetStarSystemLoading () {
+  return BootstrapMyStarSystemLoading;
+}
+void SetSplashScreen(Animation * ss) {
+  SplashScreen=ss;
+}
 void bootstrap_draw (const std::string &message, float x, float y, Animation * newSplashScreen) {
 
   static Animation *ani=NULL;
   if (!BootstrapMyStarSystemLoading) {
     return;
   }
-  if(SplashScreen==NULL){
+  if(SplashScreen==NULL&&newSplashScreen==NULL){
     // if there's no splashscreen, we don't draw on it
     // this happens, when the splash screens texture is loaded
     return;
@@ -394,7 +403,19 @@ bool SetPlayerSystem (std::string &sys, bool set) {
     return isset;
   }
 }
-
+void bootstrap_first_loop() {
+  static int i=0;
+  std::string ss=vs_config->getVariable ("graphics","splash_screen","vega_splash.ani");
+  if (i==0) {
+    SplashScreen = new Animation (ss.c_str(),0);
+    bs_tp=new TextPlane();
+  }
+  bootstrap_draw ("Vegastrike Loading...",-.135,0,SplashScreen);
+  
+  if (i++>4) {
+    _Universe->Loop(bootstrap_main_loop);
+  }
+}
 void bootstrap_main_loop () {
 
   static bool LoadMission=true;
@@ -408,9 +429,9 @@ void bootstrap_main_loop () {
 
     mission->initMission();
 
-    bs_tp=new TextPlane();
- 
-    SplashScreen = new Animation (mission->getVariable ("splashscreen",vs_config->getVariable ("graphics","splash_screen","vega_splash.ani")).c_str(),0);
+    //    if (SplashScreen)
+    //      delete SplashScreen;
+    //    SplashScreen = new Animation (mission->getVariable ("splashscreen",vs_config->getVariable ("graphics","splash_screen","vega_splash.ani")).c_str(),0); 
     bootstrap_draw ("Vegastrike Loading...",-.135,0,SplashScreen);
   if (g_game.music_enabled) {
 #ifdef _WIN32
