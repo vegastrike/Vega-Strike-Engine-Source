@@ -726,6 +726,8 @@ std::vector <unorigdest *> pendingjump;
 bool PendingJumpsEmpty() {
 	return pendingjump.empty();
 }
+extern void SetShieldZero(Unit*);
+
 void StarSystem::ProcessPendingJumps() {
   for (unsigned int kk=0;kk<pendingjump.size();kk++) {
 	Unit * un = pendingjump[kk]->un.GetUnit();
@@ -736,9 +738,13 @@ void StarSystem::ProcessPendingJumps() {
 			float dist =delta.Magnitude();
 			if (pendingjump[kk]->delay>0) {
 				float speed = dist/pendingjump[kk]->delay;
-				if (dist>10) {
-					un->SetCurPosition(un->LocalPosition()+SIMULATION_ATOM*delta*(speed/dist));
-				}
+                                bool player=(_Universe->isPlayerStarship(un)!=NULL);
+                                if (dist>10&&player) {
+                                  un->SetCurPosition(un->LocalPosition()+SIMULATION_ATOM*delta*(speed/dist));
+                                }else if (!player){
+                                  un->SetVelocity(Vector(0,0,0));
+                                }			      
+                                SetShieldZero(un);
 			}
 		}
 		double time = GetElapsedTime();
