@@ -109,13 +109,6 @@ void GameStarSystem::DrawJumpStars() {
 }
 
 
-void GameStarSystem::DoJumpingSightAndSound (Unit * un) {
-      static float JumpStarSize = XMLSupport::parse_float (vs_config->getVariable ("graphics","jumpgatesize","1.75"));
-      Vector p,q,r;
-      un->GetOrientation (p,q,r);
-      unsigned int myani = AddJumpAnimation (un->LocalPosition(),un->rSize()*JumpStarSize,true);
-      VolatileJumpAnimations[myani].a->SetOrientation (p,q,r);
-}
 void TentativeJumpTo (StarSystem * ss, Unit * un, Unit * jumppoint, const std::string &system) {
   for (unsigned int i=0;i<pendingjump.size();i++) {
     if (pendingjump[i]->un.GetUnit()==un) {
@@ -124,57 +117,19 @@ void TentativeJumpTo (StarSystem * ss, Unit * un, Unit * jumppoint, const std::s
   }
   ss->JumpTo (un,jumppoint,system);
 }
-bool GameStarSystem::JumpTo (Unit * un, Unit * jumppoint, const std::string &system) {
-  if ((un->DockedOrDocking()&(~Unit::DOCKING_UNITS))!=0) {
-    return false;
-  }
-#ifdef JUMP_DEBUG
-  fprintf (stderr,"jumping to %s.  ",system.c_str());
-#endif
-  StarSystem *ss = star_system_table.Get(system);
-  std::string ssys (system+".system");
-  if (!ss) {
-    ss = star_system_table.Get (ssys);
-  }
-  bool justloaded=false;
-  if (!ss) {
-    justloaded=true;
-    ss = _Universe->GenerateStarSystem (ssys.c_str(),filename.c_str(),Vector (0,0,0));
-  }
-  if(ss) {
-#ifdef JUMP_DEBUG
-	fprintf (stderr,"Pushing back to pending queue!\n");
-#endif
-    Vector p,q,r;
-    un->GetOrientation (p,q,r);
-    bool dosightandsound = ((this==_Universe->getActiveStarSystem (0))||un==_Universe->AccessCockpit()->GetParent());
-    int ani =-1;
-    if (dosightandsound) {
+void GameStarSystem::DoJumpingComeSightAndSound (Unit * un) {
+      static float JumpStarSize = XMLSupport::parse_float (vs_config->getVariable ("graphics","jumpgatesize","1.75"));
+      Vector p,q,r;
+      un->GetOrientation (p,q,r);
+      unsigned int myani = AddJumpAnimation (un->LocalPosition(),un->rSize()*JumpStarSize,true);
+      VolatileJumpAnimations[myani].a->SetOrientation (p,q,r);
+}
+int GameStarSystem::DoJumpingLeaveSightAndSound (Unit * un) {
+  int ani;
+      Vector p,q,r;
+      un->GetOrientation (p,q,r);
       ani = AddJumpAnimation (un->Position()+r.Cast()*un->rSize()*(un->GetJumpStatus().delay+.25), 10*un->rSize());
       static int jumpleave=AUDCreateSound(vs_config->getVariable ("unitaudio","jumpleave", "sfx43.wav"),false);
       AUDPlay (jumpleave,un->LocalPosition(),un->GetVelocity(),1);
-    }
-    pendingjump.push_back (new unorigdest (un,jumppoint, this,ss,un->GetJumpStatus().delay,ani,justloaded ));
-#if 0
-    UnitImages * im=  &un->GetImageInformation();
-    for (unsigned int i=0;i<=im->dockedunits.size();i++) {
-      Unit* unk =NULL;
-      if (i<im->dockedunits.size()) {
-	im->dockedunits[i]->uc.GetUnit();
-      }else {
-	unk = im->DockedTo.GetUnit();
-      }
-      if (unk!=NULL) {
-	TentativeJumpTo (this,unk,jumppoint,system);
-      }
-    }
-    
-#endif
-  } else {
-#ifdef JUMP_DEBUG
-	fprintf (stderr,"Failed to retrieve!\n");
-#endif
-    return false;
-  }
-  return true;
+      return ani;
 }

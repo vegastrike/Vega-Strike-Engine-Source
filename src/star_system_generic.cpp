@@ -152,44 +152,6 @@ StarSystem::~StarSystem() {
   RemoveStarsystemFromUniverse();
   
 }
-extern std::vector <unorigdest *>pendingjump;
-void StarSystem::ProcessPendingJumps() {
-  for (unsigned int kk=0;kk<pendingjump.size();kk++) {
-    if (pendingjump[kk]->delay>=0) {
-      pendingjump[kk]->delay-=GetElapsedTime();
-      continue;
-    } else {
-#ifdef JUMP_DEBUG
-  fprintf (stderr,"Volitalizing pending jump animation.\n");
-#endif
-      _Universe->activeStarSystem()->VolitalizeJumpAnimation (pendingjump[kk]->animation);
-    }
-    Unit * un=pendingjump[kk]->un.GetUnit();
-    
-    if (un==NULL||!_Universe->StillExists (pendingjump[kk]->dest)||!_Universe->StillExists(pendingjump[kk]->orig)) {
-#ifdef JUMP_DEBUG
-      fprintf (stderr,"Adez Mon! Unit destroyed during jump!\n");
-#endif
-      delete pendingjump[kk];
-      pendingjump.erase (pendingjump.begin()+kk);
-      kk--;
-      continue;
-    }
-    StarSystem * savedStarSystem = _Universe->activeStarSystem();
-    bool dosightandsound = ((pendingjump[kk]->dest==savedStarSystem)||_Universe->isPlayerStarship(un));
-    _Universe->setActiveStarSystem (pendingjump[kk]->orig);
-    un->TransferUnitToSystem (kk, savedStarSystem,dosightandsound);
-    if (dosightandsound) {
-      _Universe->activeStarSystem()->DoJumpingSightAndSound(un);
-    }
-    delete pendingjump[kk];
-    pendingjump.erase (pendingjump.begin()+kk);
-    kk--;
-    _Universe->setActiveStarSystem(savedStarSystem);
-  }
-
-}
-
 
 
 /********* FROM STAR SYSTEM XML *********/
@@ -548,4 +510,93 @@ StarSystem *GetLoadedStarSystem(const char * system) {
     ss = star_system_table.Get (ssys);
   }
   return ss;
+}
+
+extern std::vector <unorigdest *>pendingjump;
+void StarSystem::ProcessPendingJumps() {
+  for (unsigned int kk=0;kk<pendingjump.size();kk++) {
+    if (pendingjump[kk]->delay>=0) {
+      pendingjump[kk]->delay-=GetElapsedTime();
+      continue;
+    } else {
+#ifdef JUMP_DEBUG
+  fprintf (stderr,"Volitalizing pending jump animation.\n");
+#endif
+      _Universe->activeStarSystem()->VolitalizeJumpAnimation (pendingjump[kk]->animation);
+    }
+    Unit * un=pendingjump[kk]->un.GetUnit();
+    
+    if (un==NULL||!_Universe->StillExists (pendingjump[kk]->dest)||!_Universe->StillExists(pendingjump[kk]->orig)) {
+#ifdef JUMP_DEBUG
+      fprintf (stderr,"Adez Mon! Unit destroyed during jump!\n");
+#endif
+      delete pendingjump[kk];
+      pendingjump.erase (pendingjump.begin()+kk);
+      kk--;
+      continue;
+    }
+    StarSystem * savedStarSystem = _Universe->activeStarSystem();
+    bool dosightandsound = ((pendingjump[kk]->dest==savedStarSystem)||_Universe->isPlayerStarship(un));
+    _Universe->setActiveStarSystem (pendingjump[kk]->orig);
+    un->TransferUnitToSystem (kk, savedStarSystem,dosightandsound);
+    if (dosightandsound) {
+      _Universe->activeStarSystem()->DoJumpingComeSightAndSound(un);
+    }
+    delete pendingjump[kk];
+    pendingjump.erase (pendingjump.begin()+kk);
+    kk--;
+    _Universe->setActiveStarSystem(savedStarSystem);
+  }
+
+}
+
+bool StarSystem::JumpTo (Unit * un, Unit * jumppoint, const std::string &system) {
+  if ((un->DockedOrDocking()&(~Unit::DOCKING_UNITS))!=0) {
+    return false;
+  }
+#ifdef JUMP_DEBUG
+  fprintf (stderr,"jumping to %s.  ",system.c_str());
+#endif
+  StarSystem *ss = star_system_table.Get(system);
+  std::string ssys (system+".system");
+  if (!ss) {
+    ss = star_system_table.Get (ssys);
+  }
+  bool justloaded=false;
+  if (!ss) {
+    justloaded=true;
+    ss = _Universe->GenerateStarSystem (ssys.c_str(),filename.c_str(),Vector (0,0,0));
+  }
+  if(ss) {
+#ifdef JUMP_DEBUG
+	fprintf (stderr,"Pushing back to pending queue!\n");
+#endif
+    bool dosightandsound = ((this==_Universe->getActiveStarSystem (0))||_Universe->isPlayerStarship (un));
+    int ani =-1;
+    if (dosightandsound) {
+      ani=_Universe->activeStarSystem()->DoJumpingLeaveSightAndSound (un);
+    }
+    pendingjump.push_back (new unorigdest (un,jumppoint, this,ss,un->GetJumpStatus().delay,ani,justloaded ));
+#if 0
+    UnitImages * im=  &un->GetImageInformation();
+    for (unsigned int i=0;i<=im->dockedunits.size();i++) {
+      Unit* unk =NULL;
+      if (i<im->dockedunits.size()) {
+	im->dockedunits[i]->uc.GetUnit();
+      }else {
+	unk = im->DockedTo.GetUnit();
+      }
+      if (unk!=NULL) {
+	TentativeJumpTo (this,unk,jumppoint,system);
+      }
+    }
+    
+#endif
+  } else {
+#ifdef JUMP_DEBUG
+	fprintf (stderr,"Failed to retrieve!\n");
+#endif
+    return false;
+  }
+  return true;
 }
