@@ -716,12 +716,14 @@ void Base::Room::Link::EndXML (FILE *fp) {
 }
 
 void Base::Room::Goto::EndXML (FILE *fp) {
+	Indent(fp);
 	fprintf(fp,"Base.Link (");
 	Link::EndXML(fp);
 	fprintf(fp,", room%d)\n", Goto::index+1);
 }
 
 void Base::Room::Python::EndXML (FILE *fp) {
+	Indent(fp);
 	fprintf(fp,"Base.Python (");
 	Link::EndXML(fp);
 	fprintf(fp,", '%s')\n",file.c_str());
@@ -730,13 +732,14 @@ void Base::Room::Python::EndXML (FILE *fp) {
 void Base::Room::Talk::EndXML (FILE *fp) {
 	char randstr[100];
 	sprintf(randstr,"NEW_SCRIPT_%d.py",(int)(rand()));
+	Indent(fp);
 	fprintf(fp,"Base.Python (");
 	Link::EndXML(fp);
 	fprintf(fp,", '%s')\n",randstr);
 	FILE *py=fopen(randstr,"wt");
 	fprintf(py,"import Base\nimport VS\nimport random\n\nrandnum=random.randrange(0,%d)\n",say.size());
 	for (int i=0;i<say.size();i++) {
-		fprintf(fp,"if (randnum==%d):\n",i);
+		fprintf(py,"if (randnum==%d):\n",i);
 		for (int j=0;j<say[i].size();j++) {
 			if (say[i][j]=='\n') {
 				say[i][j]='\\';
@@ -744,9 +747,9 @@ void Base::Room::Talk::EndXML (FILE *fp) {
 				say[i].insert(j,ins);
 			}
 		}
-		fprintf(fp,"  Base.Message ('%s')\n",say[i].c_str());
+		fprintf(py,"  Base.Message ('%s')\n",say[i].c_str());
 		if (!(soundfiles[i].empty()))
-			fprintf(fp,"  VS.playSound ('%s', (0,0,0), (0,0,0))\n",soundfiles[i].c_str());
+			fprintf(py,"  VS.playSound ('%s', (0,0,0), (0,0,0))\n",soundfiles[i].c_str());
 	}
 	//obolete... creates a file that uses the Python function instead.
 }
@@ -826,7 +829,7 @@ void Base::Room::BaseVSSprite::EndXML (FILE *fp) {
 	float x,y;
 	spr.GetPosition(x,y);
 	Indent(fp);
-	fprintf(fp,"Base.Texture (room, '%s', '%s'+time_of_day+'.%s', %g, %g)\n",index.c_str(),texfile.c_str(),extension.c_str(),x,y);
+	fprintf(fp,"Base.Texture (room, '%s', 'bases/%s/%s'+time_of_day+'.spr', %g, %g)\n",index.c_str(),Base::CurrentBase->basefile.c_str(),texfile.c_str(),x,y);
 }
 
 bool room1=false;
@@ -853,10 +856,10 @@ void Base::EndXML () {
 	chdir("bases");
 	FILE *fp=NULL;
 	if (time_of_day) {
-		const char *times_of_day[3]={"day","night","sunset"};
+		const char *times_of_day[3]={"_day","_night","_sunset"};
 		for (int i=0;i<3;++i) {
-			fp=fopen((basefile+"_"+times_of_day[i]+".py").c_str(),"wt");
-			fprintf(fp,"import Base\nimport sys\ninport %s_lib\ntime_of_day='%s'\n\n(landing_platform,bar,weap) = %s_lib.Make%s (time_of_day)\n",basefile.c_str(),times_of_day[i],basefile.c_str(),basefile.c_str());
+			fp=fopen((basefile+times_of_day[i]+".py").c_str(),"wt");
+			fprintf(fp,"import Base\nimport sys\nimport %s_lib\ntime_of_day='%s'\n\n(landing_platform,bar,weap) = %s_lib.Make%s (time_of_day)\n",basefile.c_str(),times_of_day[i],basefile.c_str(),basefile.c_str());
 			fclose(fp);
 		}
 		fp=fopen((basefile+"_lib.py").c_str(),"wt");
@@ -873,7 +876,7 @@ void Base::EndXML () {
 	Indent(fp);fprintf(fp,"bar=-1\n");
 	Indent(fp);fprintf(fp,"weap=-1\n");
 	Indent(fp);fprintf(fp,"room1=-1\n");
-	Indent(fp);fprintf(fp,"plist=VS.musicAddList('agricultural.m3u')\n");
+	Indent(fp);fprintf(fp,"plist=VS.musicAddList('%s.m3u')\n",basefile.c_str());
 	Indent(fp);fprintf(fp,"VS.musicPlayList(plist)\n");
 	Indent(fp);fprintf(fp,"dynamic_mission.CreateMissions()\n");
 	for (int i=0;i<rooms.size();i++) {
@@ -1011,7 +1014,7 @@ void InputDraw() {
 	glClear(GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT);
 //	static int draw=0;
 //	draw++;
-	TextPlane drawificator(GFXColor(.5,.5,.5,1),GFXColor(0,0,0,1));
+	TextPlane drawificator(GFXColor(.8,.8,.8,1),GFXColor(0,0,0,1));
 	float x,y;
 	std::string add;
 //	if (draw>10) {
@@ -1081,13 +1084,24 @@ bool AddRoomSprite(std::string input, void *dat1, void *dat2, const void *dat3, 
 		objs->push_back(new Base::Room::BaseShip(-1,0,0,0,0,-1,0,1,0,QVector((x+tmp_xy.x)/2,(tmp_xy.y+y)/2,(tmp_xy.x-x)<0?(x-tmp_xy.x):(tmp_xy.x-x)),"my_ship"));
 		// FIXME: orientation cannot be changed from editor.
 	} else {
-		FILE *fp=fopen(("sprites/bases/"+Base::CurrentBase->basefile+"/"+input+(Base::CurrentBase->time_of_day?"_day":"")+".spr").c_str(),"rt");
-		string startdir;
-		if (fp) {
-			fclose(fp);
-			startdir="sprites/bases/"+Base::CurrentBase->basefile+"/";
-		}
 		bool time=false;
+		string startdir;
+		if (Base::CurrentBase->time_of_day) {
+			FILE *fp=fopen(("sprites/bases/"+Base::CurrentBase->basefile+"/"+input+"_day.spr").c_str(),"rt");
+			if (fp) {
+				fclose(fp);
+				startdir="sprites/bases/"+Base::CurrentBase->basefile+"/";
+				time=true;
+			}
+		}
+		if (!time) {
+			FILE *fp=fopen(("sprites/bases/"+Base::CurrentBase->basefile+"/"+input+".spr").c_str(),"rt");
+			if (fp) {
+				fclose(fp);
+				startdir="sprites/bases/"+Base::CurrentBase->basefile+"/";
+			}
+		}
+//		bool time=false;
 		string extension="png";
 		if (Base::CurrentBase->time_of_day) {
 			FILE *fp=fopen((startdir+input+"_day.png").c_str(),"rb");
@@ -1119,6 +1133,7 @@ bool AddRoomSprite(std::string input, void *dat1, void *dat2, const void *dat3, 
 				}
 			}
 		}
+		const char * thetimes[4]={"_day","_sunset","_night",""};
 		if (startdir.empty()) {
 //			if (time==false) {
 //				return;
@@ -1127,7 +1142,6 @@ bool AddRoomSprite(std::string input, void *dat1, void *dat2, const void *dat3, 
 			float hei=tmp_xy.y-y;
 			if (wid<0)wid=-wid;
 			if (hei<0)hei=-hei;
-			const char * thetimes[4]={"_day","_sunset","_night",""};
 			for (int i=time?0:3;i<4;++i) {
 				FILE *fp=fopen(("sprites/bases/"+Base::CurrentBase->basefile+"/"+input+std::string(thetimes[i])+".spr").c_str(),"wt");
 				std::string curfilename=input+thetimes[i]+"."+extension;
@@ -1136,21 +1150,23 @@ bool AddRoomSprite(std::string input, void *dat1, void *dat2, const void *dat3, 
 				fclose(fp);
 				rename(curfilename.c_str(),("sprites/"+filename).c_str());
 			}
-		}
-		Base::Room::BaseVSSprite *tmp=new Base::Room::BaseVSSprite(("bases/"+Base::CurrentBase->basefile+"/"+input+".spr").c_str(),string((char*)dat3));
-		if (tmp->spr.LoadSuccess()&&tmp->spr.getTexture()->LoadSuccess()) {
-			objs->push_back(tmp);
-			if (time) {
-				((Base::Room::BaseVSSprite*)objs->back())->texfile=input;
-				((Base::Room::BaseVSSprite*)objs->back())->extension=extension;
-			} else {
-				((Base::Room::BaseVSSprite*)objs->back())->texfile=input+"."+extension;
-				((Base::Room::BaseVSSprite*)objs->back())->extension="";
-			}
-			((Base::Room::BaseVSSprite*)objs->back())->spr.SetPosition((tmp_xy.x+x)/2,(tmp_xy.y+y)/2);
+			AddRoomSprite(input, dat1, dat2, dat3, x, y);
 		} else {
-			Error("Invalid texture!");
-			return false;
+			Base::Room::BaseVSSprite *tmp=new Base::Room::BaseVSSprite(("bases/"+Base::CurrentBase->basefile+"/"+input+thetimes[time?0:3]+".spr").c_str(),string((char*)dat3));
+			if (tmp->spr.LoadSuccess()&&tmp->spr.getTexture()->LoadSuccess()) {
+				objs->push_back(tmp);
+				if (time) {
+					((Base::Room::BaseVSSprite*)objs->back())->texfile=input;
+					((Base::Room::BaseVSSprite*)objs->back())->extension=extension;
+				} else {
+					((Base::Room::BaseVSSprite*)objs->back())->texfile=input+"."+extension;
+					((Base::Room::BaseVSSprite*)objs->back())->extension="";
+				}
+				((Base::Room::BaseVSSprite*)objs->back())->spr.SetPosition((tmp_xy.x+x)/2,(tmp_xy.y+y)/2);
+			} else {
+				Error("Invalid texture!");
+				return false;
+			}
 		}
 	}
 	return true;
@@ -1159,11 +1175,6 @@ bool AddRoomSprite(std::string input, void *dat1, void *dat2, const void *dat3, 
 Base::Room::Room (unsigned int index) : index(index) {
 	tmp_xy.x=-0.97;
 	tmp_xy.y=0.97;
-//	if (Base::CurrentBase&&Base::CurrentBase->rooms.size()==0) {
-//		AddRoomSprite(Base::CurrentBase->basefile, &objs, NULL, "background", 0.97, -0.97);
-//	} else {
-		Input("What is the texture for this room (No extension; file must be png or jpeg format.)?", &AddRoomSprite, false, &objs, NULL, "background", 0.97, -0.97);
-//	}
 }
 
 void Base::Room::BaseObj::Draw (Base *base) {
@@ -1340,7 +1351,6 @@ bool LinkStage2(std::string input, void *dat1, void *dat2, const void *dat3, flo
 	links->back()->hei=y-tmp_xy.y;
 	if (links->back()->hei<0)
 		links->back()->hei=-links->back()->hei;
-	makingstate=1;
 	return ret;
 }
 
@@ -1488,6 +1498,19 @@ void Base::ActiveMouseOverWin (int x, int y) {
 	}
 }
 
+bool SetRoomString(std::string input, void *dat1, void *dat2, const void *dat3, float x, float y) {
+	if (input.empty())
+		return false;
+	std::string *deftext=(std::string*)dat1;
+	dat1=deftext;
+//	if (Base::CurrentBase&&Base::CurrentBase->rooms.size()==0) {
+//		AddRoomSprite(Base::CurrentBase->basefile, &objs, NULL, "background", 0.97, -0.97);
+//	} else {
+		Input("What is the texture for this room (No extension; file must be png or jpeg format.)?", &AddRoomSprite, false, dat2, NULL, "background", 0.97, -0.97);
+//	}
+	return false;
+}
+
 void Base::GotoLink (int linknum) {
 	othtext.SetText("");
 	if (rooms.size()>linknum&&linknum>=0) {
@@ -1501,9 +1524,7 @@ void Base::GotoLink (int linknum) {
 #else
 		while(rooms.size()<=linknum) {
 			rooms.push_back(new Room(rooms.size()));
-			char roomnum [50];
-			sprintf(roomnum,"Room #%d",linknum);
-			rooms.back()->deftext=roomnum;
+			Input("Input Name of Room (Shown at bottom of screen): ", &SetRoomString, false, &(rooms.back()->deftext), &(rooms.back()->objs), NULL, 0, 0);
 		}
 		GotoLink(linknum);
 #endif
@@ -1514,7 +1535,7 @@ Base::~Base () {
 #ifdef BASE_MAKER
 	EndXML();
 #endif
-	CurrentBase=0;
+	Base::CurrentBase=NULL;
 	for (int i=0;i<rooms.size();i++) {
 		delete rooms[i];
 	}
@@ -1593,9 +1614,6 @@ Base::Base (const char *basefile)
 		  ,0755
 #endif
 		);
-	if (!rooms.size()) {
-		rooms.push_back(new Room (0));
-	}
 	GotoLink(0);
 }
 
@@ -1624,7 +1642,6 @@ void Base::Room::Comp::Click (Base *base,float x, float y, int button, int state
 	}
 }
 void Base::Terminate() {
-  Base::CurrentBase=NULL;
   delete this;
 }
 extern void abletodock(int dock);
