@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#define M_PI 3.14159265358979323846264338328
 float safety_zone=0;
 using std::vector;
 class Vector {
@@ -11,7 +12,7 @@ public:
   float k;
   float s;
   float t;
-  Vector (float x, float y, float z) {
+  Vector (float x=0, float y=0, float z=0) {
     i=x;
     j=y;
     k=z;
@@ -22,6 +23,9 @@ public:
     k=z;
     this->s=s;
     this->t=t;
+  }
+  Vector operator + (Vector b) {
+	  return Vector(i+b.i,j+b.j,k+b.k);
   }
   float Mag () {return sqrtf(i*i+j*j+k*k);}
   void Yaw(float rad) //only works with unit vector
@@ -138,8 +142,8 @@ void determine_centers_and_radii (vector <asteroid> & field, const Vector &cube_
     field[i].center.j = cube_sides.j * ((float)rand())/RAND_MAX-cube_sides.j/2;
     field[i].center.k = cube_sides.k * ((float)rand())/RAND_MAX-cube_sides.k/2;
     float radiusratio = ((float)rand())/RAND_MAX;
-    field[i].radius = radiusmin+(radiusmax-radiusmin)*radiusratio;    
-    radiusratio*=(poly_max+1-poly_min);
+    field[i].radius = radiusmin+(radiusmax-radiusmin)*radiusratio;
+    radiusratio*=radiusratio*(poly_max+1-poly_min);
     field[i].num_polys = (int)radiusratio+poly_min;
     if (field[i].num_polys<4)
       field[i].num_polys=4;
@@ -290,6 +294,131 @@ void createShapes (vector <asteroid> &field, float deviation) {
   }
 }
 
+bool isBoxInsideOuterRadius (Vector center, float sizeofBox, float radius) {
+	if (center.Mag()>radius)
+		return false;
+	return true;
+}
+
+bool isBoxOutsideInnerRadius (Vector center, float sizeofBox, float radius) {
+	if (radius<=0)
+		return true;
+	Vector pnts[8];
+	sizeofBox/=2;
+	float mini=-radius;
+	float maxi=radius;
+	float minj=-radius;
+	float maxj=radius;
+	float mink=-radius;
+	float maxk=radius;
+	
+	pnts[0]=center+Vector(-sizeofBox,sizeofBox,-sizeofBox);
+	pnts[1]=center+Vector(-sizeofBox,sizeofBox,sizeofBox);
+	pnts[2]=center+Vector(-sizeofBox,-sizeofBox,-sizeofBox);
+	pnts[3]=center+Vector(-sizeofBox,-sizeofBox,sizeofBox);
+	pnts[4]=center+Vector(sizeofBox,sizeofBox,-sizeofBox);
+	pnts[5]=center+Vector(sizeofBox,sizeofBox,sizeofBox);
+	pnts[6]=center+Vector(sizeofBox,-sizeofBox,-sizeofBox);
+	pnts[7]=center+Vector(sizeofBox,-sizeofBox,sizeofBox);
+	int i;
+	for (i=0;i<8;i++) {
+		if (pnts[i].i<maxi)
+			break;
+	}
+	if (i==8) {
+		return true;
+	}
+	for (i=0;i<8;i++) {
+		if (pnts[i].i>mini)
+			break;
+	}
+	if (i==8) {
+		return true;
+	}
+	for (i=0;i<8;i++) {
+		if (pnts[i].j<maxj)
+			break;
+	}
+	if (i==8) {
+		return true;
+	}
+	for (i=0;i<8;i++) {
+		if (pnts[i].j>minj)
+			break;
+	}
+	if (i==8) {
+		return true;
+	}
+	for (i=0;i<8;i++) {
+		if (pnts[i].k<maxk)
+			break;
+	}
+	if (i==8) {
+		return true;
+	}
+	for (i=0;i<8;i++) {
+		if (pnts[i].k>mink)
+			break;
+	}
+	if (i==8) {
+		return true;
+	}
+
+	return false;
+}
+
+
+
+#ifdef RAND
+float randRadius (float radius) {
+	return ((rand()*2*radius)/RAND_MAX)-radius;
+}
+Vector randVecInCube (float radius) {
+	return Vector (randRadius(radius),randRadius(radius),randRadius(radius));
+}
+#else
+float randRadius (float BoxSize) {
+	return ((rand()*BoxSize)/RAND_MAX)-(BoxSize/2);
+}
+Vector randVecInCube (float BoxSize, float x, float y, float z) {
+
+	return Vector (randRadius(BoxSize)+x,randRadius(BoxSize)+y,randRadius(BoxSize)+z);
+}
+#endif
+
+#ifdef RAND
+void write_unit (FILE *fp, char *astFile, int num_cubes, float innerRadius, float outerRadius, float BoxSize) {
+	fprintf(fp,"<Unit>");
+	if (!innerRadius) {
+		num_cubes--;
+		fprintf(fp,"\n\t<SubUnit file=\"%s\" />",astFile);
+	}
+	for (int i=0;i<num_cubes;i++) {
+		printf ("\nNumber %d out of %d",i,(int)num_cubes);
+		Vector vec;
+		do {
+			vec=randVecInCube(outerRadius);
+		} while(!(isBoxInsideOuterRadius(vec,BoxSize,outerRadius)&&isBoxOutsideInnerRadius(vec,BoxSize,innerRadius)));
+		fprintf(fp,"\n\t<SubUnit file=\"%s\" x=\"%f\" y=\"%f\" z=\"%f\" />",astFile,vec.i,vec.j,vec.k);
+	}
+#else
+void write_unit (FILE *fp, char *astFile, float offset, float innerRadius, float outerRadius, float BoxSize) {
+	fprintf(fp,"<Unit>");
+	for (float x=-outerRadius;x<outerRadius;x+=offset) {
+		for (float y=-outerRadius;y<outerRadius;y+=offset) {
+			for (float z=-outerRadius;z<outerRadius;z+=offset) {
+				Vector vec;
+				vec=randVecInCube(BoxSize,x,y,z);
+				if ((isBoxInsideOuterRadius(vec,BoxSize,outerRadius)&&isBoxOutsideInnerRadius(vec,BoxSize,innerRadius)))
+					fprintf(fp,"\n\t<SubUnit file=\"%s\" x=\"%f\" y=\"%f\" z=\"%f\" />",astFile,vec.i,vec.j,vec.k);
+			//	printf("\nIteration with Vector <%f,%f,%f>",vec.i,vec.j,vec.k);
+			}
+		}
+	}
+#endif
+	fprintf(fp,"\n\t<Thrust>\n\t\t<Engine Afterburner=\"00.000000\" Forward=\"0\" Retro=\"0\" Left=\"0\" Right=\"0\" Top=\"0\" Bottom=\"0\" />\n\t\t<Maneuver yaw=\"0\" pitch=\"0\" roll=\"0\" />\n\t</Thrust>\n\t<Defense HudImage=\"af-hud.spr\">\n\t\t<Hull strength=\"400000000\" />\n\t</Defense>\n\t<Stats mass=\"60\" momentofinertia=\"60\" fuel=\"20000\">\n\t</Stats>\n</Unit>");
+}
+
 
 int main (int argc, char ** argv) {
   vector <asteroid> field;
@@ -297,7 +426,11 @@ int main (int argc, char ** argv) {
   float radiusmin,radiusmax;
   int poly_min,poly_max;
   float deviation;
-
+  char unitfilename[16384];
+  int num_cubes=0;
+  float offset=0;
+  float innerRadius;
+  float outerRadius;
   char filename[16384];
   int numroids;
   int randomseed=0;
@@ -315,10 +448,20 @@ int main (int argc, char ** argv) {
       sscanf (argv[9],"%f",&safety_zone);
       if (argc>=11) {
 	sscanf (argv[10],"%d",&randomseed);
+	if (argc>=15) {
+      sscanf (argv[11],"%s",&unitfilename);
+#ifdef RAND
+      sscanf (argv[12],"%d",&num_cubes);
+#else
+      sscanf (argv[12],"%f",&offset);
+#endif
+      sscanf (argv[13],"%f",&innerRadius);
+      sscanf (argv[14],"%f",&outerRadius);
+	}
       }
     }
   }else {
-    printf ("Enter Ouput File: ");
+    printf ("Enter Output File:\n");
 
     scanf ("%s",filename);
     printf ("Enter Size of field?\n");
@@ -336,12 +479,33 @@ int main (int argc, char ** argv) {
     scanf ("%f",&safety_zone);
     printf ("Enter random seed (0 to use clock\n");
     scanf ("%f",&randomseed);
-   
+    printf ("Do you want a unit file? (y/n)\n");
+    scanf("%c",num_cubes);
+    if (num_cubes=='y') {
+      printf ("Enter Output Unit File:\n");
+      scanf ("%s",&unitfilename);
+#ifdef RAND
+      printf ("Enter number of cubes?\n");
+      scanf ("%d",&num_cubes);
+#else
+      printf ("Enter offset of cubes?\n");
+      scanf ("%f",&offset);
+#endif
+      printf ("Enter inner radius?\n");
+      scanf ("%f",&innerRadius);
+      printf ("Enter outer radius?\n");
+      scanf ("%f",&outerRadius);
+    } else {
+      num_cubes=0;
+	  offset=0;
+    }
   }
   if (randomseed!=0) {
     srand (randomseed);
   }else {
-    srand (time(NULL));
+#ifndef _WIN32
+	  srand (time(NULL));
+#endif
   }
   for (int i=0;i<numroids;i++) {
     field.push_back (asteroid());
@@ -351,5 +515,15 @@ int main (int argc, char ** argv) {
   FILE * fp= fopen (filename,"w");
   write_mesh (fp,field);
   fclose (fp);
+  if (num_cubes||offset) {
+    char *newfilename="asteroids";
+    fp= fopen (unitfilename,"w");
+#ifdef RAND
+    write_unit(fp,newfilename,num_cubes,innerRadius,outerRadius,cube_sides.i);
+#else
+    write_unit(fp,newfilename,offset,innerRadius,outerRadius,cube_sides.i);
+#endif
+    fclose (fp);
+  }
   return 0;
 }
