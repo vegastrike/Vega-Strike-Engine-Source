@@ -149,6 +149,7 @@ using namespace CockpitXML;
 
 void GameCockpit::beginElement(const string &name, const AttributeList &attributes) {
   static bool cockpit_smooth=XMLSupport::parse_bool(vs_config->getVariable("graphics","cockpit_smooth_texture","false"));
+  static bool crosshair_smooth=XMLSupport::parse_bool(vs_config->getVariable("graphics","crosshair_smooth_texture","true"));
   AttributeList::const_iterator iter;
   Gauge::DIRECTION tmpdir=Gauge::GAUGE_UP;
   VSSprite ** newsprite=NULL;
@@ -327,7 +328,7 @@ void GameCockpit::beginElement(const string &name, const AttributeList &attribut
       switch (attribute_map.lookup((*iter).name)) {
       case XFILE:
 	if (newsprite) {
-	  (*newsprite) = new VSSprite ((*iter).value.c_str(),cockpit_smooth?BILINEAR:NEAREST);
+	  (*newsprite) = new VSSprite ((*iter).value.c_str(),crosshair_smooth?BILINEAR:NEAREST);
 	  adjsprite = *newsprite;
 	} else if (newvdu) {
           VDU * tmp=new VDU ((*iter).value.c_str(),text,mymodes,rows,cols,&StartArmor[0],&maxhull);         
