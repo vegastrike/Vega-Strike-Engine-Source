@@ -3501,7 +3501,7 @@ public:
 	typedef std::set<WeaponGroup, WeaponComparator<FORWARD> > WeaponGroupSet;
 
 	static bool checkmount(Unit *un, int i, bool missile) {
-		return (un->mounts[i].status<Mount::DESTROYED&&((un->mounts[i].type->type==weapon_info::PROJECTILE)==missile));
+		return (un->mounts[i].status<Mount::DESTROYED&&((un->mounts[i].type->type==weapon_info::PROJECTILE)==missile)&&un->mounts[i].ammo!=0);
 	}
 
 	static bool isSpecial(const Mount &mount) {
