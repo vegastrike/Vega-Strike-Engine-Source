@@ -15,6 +15,10 @@
 #include "config_xml.h"
 #include "vs_globals.h"
 #include "gfx/particle.h"
+
+
+
+
 extern unsigned int AddAnimation (const QVector & pos, const float size, bool mvolatile, const std::string &name, float percentgrow );
 
 using std::string;
@@ -25,6 +29,16 @@ using std::string;
   }
 
 namespace UniverseUtil {
+
+	Unit * PythonUnitIter::current(){
+		Unit * ret=NULL;
+		while ((ret= UnitIterator::current())) {
+			if (ret->hull>0)
+				return ret;
+			advance();
+		}
+		return ret;
+	}
 	void playVictoryTune () {
 	  static string newssong=vs_config->getVariable("audio","missionvictorysong","../music/victory.ogg");
 	  muzak->GotoSong(newssong);

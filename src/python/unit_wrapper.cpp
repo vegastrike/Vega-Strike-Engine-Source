@@ -110,15 +110,15 @@ ExportUnit (Class);
   DefineOddUnitFunctions(Class);
 PYTHON_END_CLASS(VS,UnitWrapper)
 
-PYTHON_BEGIN_CLASS(VS,UnitCollection::UnitIterator,"un_iter")
-  PYTHON_DEFINE_METHOD(Class,&UnitCollection::UnitIterator::current,"current");
-  PYTHON_DEFINE_METHOD(Class,&UnitCollection::UnitIterator::isDone,"isDone");
-  PYTHON_DEFINE_METHOD(Class,&UnitCollection::UnitIterator::notDone,"notDone");
-  PYTHON_DEFINE_METHOD(Class,&UnitCollection::UnitIterator::advance,"advance");
-  PYTHON_DEFINE_METHOD(Class,&UnitCollection::UnitIterator::next,"next");
-  PYTHON_DEFINE_METHOD(Class,&UnitCollection::UnitIterator::remove,"remove");
-  PYTHON_DEFINE_METHOD(Class,&UnitCollection::UnitIterator::preinsert,"preinsert");
-PYTHON_END_CLASS(VS,UnitCollection::UnitIterator)
+PYTHON_BEGIN_CLASS(VS,UniverseUtil::PythonUnitIter,"un_iter")
+  PYTHON_DEFINE_METHOD(Class,&UniverseUtil::PythonUnitIter::current,"current");
+  PYTHON_DEFINE_METHOD(Class,&UniverseUtil::PythonUnitIter::isDone,"isDone");
+  PYTHON_DEFINE_METHOD(Class,&UniverseUtil::PythonUnitIter::notDone,"notDone");
+  PYTHON_DEFINE_METHOD(Class,&UniverseUtil::PythonUnitIter::advance,"advance");
+  PYTHON_DEFINE_METHOD(Class,&UniverseUtil::PythonUnitIter::next,"next");
+  PYTHON_DEFINE_METHOD(Class,&UniverseUtil::PythonUnitIter::remove,"remove");
+  PYTHON_DEFINE_METHOD(Class,&UniverseUtil::PythonUnitIter::preinsert,"preinsert");
+PYTHON_END_CLASS(VS,UniverseUtil::PythonUnitIter)
 typedef PythonAI<FireAt> PythonAIFireAt;
 PYTHON_BEGIN_INHERIT_CLASS(VS,PythonAIFireAt ,FireAt,"PythonAI")
   PYTHON_DEFINE_METHOD_DEFAULT(Class,&FireAt::Execute,"Execute",PythonAI< FireAt >::default_Execute);

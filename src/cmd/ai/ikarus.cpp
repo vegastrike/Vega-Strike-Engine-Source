@@ -63,7 +63,7 @@ void Ikarus::DecideTarget( ) {
     Unit * targ = parent->Target();
     if (!targ||/*some other qualifying factor for changing targets*/0) {
         Unit * un=NULL;
-        for (un_iter i=UniverseUtil::getUnitList();(un=*i);++i) {
+        for (UniverseUtil::PythonUnitIter i=UniverseUtil::getUnitList();(un=i.current());i.advance()) {
             if (GetEffectiveRelationship (un)<0) {
                 parent->Target(un);
                 break;

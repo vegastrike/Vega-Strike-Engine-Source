@@ -8,7 +8,6 @@
 #include "config_xml.h"
 #include "vs_globals.h"
 using std::string;
-
 namespace UnitUtil {
 	void switchFg(Unit *my_unit,string arg){
 		if (!my_unit)return;

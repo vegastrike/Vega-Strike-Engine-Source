@@ -197,7 +197,7 @@ namespace UniverseUtil {
 	int getMissionOwner() {
 		return mission->player_num;
 	}
-	un_iter getUnitList() {
+	UniverseUtil::PythonUnitIter getUnitList() {
 		return activeSys->getUnitList().createIterator();
 	}
 	Unit *getUnit(int index) {

@@ -29,7 +29,8 @@ class UnitWrapper : public UnitContainer{
 public:
 #include "python_unit_wrap.h"
 ///////////////////////////////MANUAL WRAP//////
-  WRAPPED0(UnitCollection::UnitIterator, getSubUnits,0)
+//WRAPPED0(UnitCollection::UnitIterator, getSubUnits,0)
+  UniverseUtil::PythonUnitIter getSubUnits() { {CHECKME UniverseUtil::PythonUnitIter();} return unit->getSubUnits();}
   void Kill () {{CHECKME;}unit->Kill(true);}
   UnitWrapper GetTarget () {{CHECKME 0;}return unit->Target();}
   UnitWrapper GetVelocityReference() {{CHECKME 0;}return unit->VelocityReference();}

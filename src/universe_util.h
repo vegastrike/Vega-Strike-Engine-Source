@@ -14,6 +14,21 @@ class StarSystem;
 class Cargo;
 
 namespace UniverseUtil {
+
+class PythonUnitIter: public UnitCollection::UnitIterator {
+public:
+	PythonUnitIter ():UnitIterator(){}
+//	PythonUnitIterator (UnitListNode * start):UnitIterator(start){}
+	PythonUnitIter (const UnitCollection::UnitIterator &t):UnitIterator(t){}
+	Unit *  current();
+	void advance () {UnitIterator::advance();}
+	Unit * next () {advance();return current();}
+	void preinsert (Unit * unit) {UnitIterator::preinsert(unit);}
+	bool isDone(){return UnitIterator::isDone();}
+	bool notDone(){return UnitIterator::notDone();}
+	void remove (){UnitIterator::remove();}
+};
+	
 	Unit * GetUnitFromSerial( ObjSerial serial);
 ///this gets a unit with 1 of each cargo type in it
 	Unit *GetMasterPartList ();
@@ -28,7 +43,7 @@ namespace UniverseUtil {
 ///this function gets the current system's nickname (not useful)
 	string getSystemName();
 ///this function gets an iterator into the units in the current system... do NOT keep an iterator across a frame--it may get deleted!
-	un_iter getUnitList();
+	PythonUnitIter getUnitList();
 ///This function gets a unit given a number (how many iterations to go down in the iterator)
 	Unit *getUnit(int index);
 	int getNumUnits();
