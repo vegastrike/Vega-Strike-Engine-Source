@@ -163,7 +163,7 @@ class GFXLight {
   GFXLight (const bool enabled, const GFXColor &vect, const GFXColor &diffuse= GFXColor (0,0,0,1), const GFXColor &specular=GFXColor (0,0,0,1), const GFXColor &ambient=GFXColor(0,0,0,1), const GFXColor&attenuate=GFXColor(1,0,0), const GFXColor &direction=GFXColor(0,0,0), float exp=0.0, float cutoff=180.0);
   
   void SetProperties (enum LIGHT_TARGET, const GFXColor & color);
-  GFXColor GetProperties (enum LIGHT_TARGET);
+  GFXColor GetProperties (enum LIGHT_TARGET) const;
   void disable ();
   void enable ();
   bool attenuated ();
