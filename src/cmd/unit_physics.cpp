@@ -345,6 +345,7 @@ void Unit::UpdatePhysics (const Transformation &trans, const Matrix transmat, co
   bool dead=true;
   for (i=0;i<numsubunit;i++) {
     subunits[i]->UpdatePhysics(cumulative_transformation,cumulative_transformation_matrix,cumulative_velocity,lastframe,uc); 
+    subunits[i]->cloaking = cloaking;
     if (hull<0) {
       UnFire();//don't want to go off shooting while your body's splitting everywhere
       subunits[i]->hull-=SIMULATION_ATOM;
