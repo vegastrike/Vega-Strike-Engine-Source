@@ -53,6 +53,7 @@ libgfx_a_SOURCES =	\
 	pipelined_texture.h	\
 	png_texture.h	\
 	png_texture.cpp	\
+	png_write.cpp	\
 	quadtree.cpp	\
 	quadtree.h	\
 	quadsquare.cpp	\

@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "vs_path.h"
+#include "png_texture.h"
 #ifndef WIN32
 typedef unsigned long DWORD;
 typedef long  LONG;
@@ -105,8 +106,11 @@ static void Lighting (RGBColor &Col, const Vector &Norm)
 
 
 }
-const float oo128 = 1./128.;
-const float PIo128 = 3.1415926535/128.;
+static float oo128 = 1./128.;
+static float PIo128 = 3.1415926535/128.;
+static int lmwid =256;
+static int lmhei =256;
+static char bytepp=4;
 static void GenerateLightMap ()
 {
 	L[0].Dir.i = 0;//.403705173615;
@@ -133,12 +137,12 @@ static void GenerateLightMap ()
 	float Theta;
 	Vector Normal;
 	RGBColor Col;
-	unsigned char LightMap [65536*3];
-	for (int t=0; t<256; t++) //keep in mind that t = 128 (sin phi) +128
+	unsigned char *LightMap= new unsigned char [lmwid*lmhei*4];
+	for (int t=0; t<lmhei; t++) //keep in mind that t = 128 (sin phi) +128
 	{
 		SinPhi = ((float)t)*oo128 -1;
 		CosPhi = sqrt (1-SinPhi*SinPhi);//yes I know (-) ... but -PI/2<Phi<PI/2 so cos >0 like I said
-		for (int s = 0; s < 256; s++) // is is none other than Theta * 128/PI
+		for (int s = 0; s < lmwid; s++) // is is none other than Theta * 128/PI
 		{
 			Theta = s*PIo128;// 128oPI = 128/3.1415926535
 			//now that we have all this wonderful stuff, we must calculate lighting on this one point.
@@ -147,28 +151,21 @@ static void GenerateLightMap ()
 			Normal.j = CosPhi * sin (Theta);
 			Normal.k = SinPhi;
 			Lighting (Col, Normal);//find what the lighting is
-			LightMap[768*t+3*s] = 256*Col.r;
-			LightMap[768*t+3*s+1] = 256*Col.g;
-			LightMap[768*t+3*s+2] = 256*Col.b;
+			LightMap[lmwid*bytepp*t+bytepp*s] = 255*Col.r;
+			LightMap[lmwid*bytepp*t+bytepp*s+1] = 255*Col.g;
+			LightMap[lmwid*bytepp*t+bytepp*s+2] = 255*Col.b;
+			LightMap[lmwid*bytepp*t+bytepp*s+3] = 255;
 		}
 	}
 
 
 
 
-	FILE * fp = fopen ("blank.bmp", "rb");
-	BITMAPFILEHEADER bmfh;
-	fread (&bmfh,SIZEOF_BITMAPFILEHEADER,1,fp);
-	long temp;
-	BITMAPINFOHEADER info;
-	fread(&info, SIZEOF_BITMAPINFOHEADER,1,fp);
-	fclose (fp);
 	char tmp [256];
+	assert (0);
 	strcpy (tmp,OutputName);
-	fp = fopen (strcat (tmp,"1.bmp"), "wb");
-	fwrite (&bmfh,SIZEOF_BITMAPFILEHEADER,1,fp);
-	fwrite (&info, SIZEOF_BITMAPINFOHEADER,1,fp);
-	fwrite (LightMap,256*256*3,1,fp);
+	FILE *fp = fopen (strcat (tmp,"1.bmp"), "wb");
+	png_write (strcat (tmp,"1.bmp"),LightMap, lmwid,lmhei,true,bytepp*8);
 	fclose (fp);
 }
 struct CubeCoord {
@@ -266,89 +263,117 @@ static void TexMap (CubeCoord & Tex, Vector Normal)
 
 	}
 }
-
-static bool LoadTex(char * FileName, unsigned char scdata [256][256][3]){
+const int ltwid = 256;
+const int lthei = 256;
+static bool LoadTex(char * FileName, unsigned char scdata [lthei][ltwid][3]){
 
   unsigned char ctemp;
   FILE *fp = NULL;
   fp = fopen (FileName, "rb");
+  int sizeX;
+  int sizeY;
 	if (!fp)
 	{
 		return false;
 	}
-	fseek (fp,SIZEOF_BITMAPFILEHEADER,SEEK_SET);
-	long temp;
-	BITMAPINFOHEADER info;
-	fread(&info, SIZEOF_BITMAPINFOHEADER,1,fp);
-	int sizeX = info.biWidth;
-	int sizeY = info.biHeight;
-	unsigned char* data;
-	if(info.biBitCount == 24)
-	{
-		data = NULL;
-		data= new unsigned char [3*sizeY*sizeX];
-		if (!data)
-			return false;
-		for (int i=sizeY-1; i>=0;i--)
+	int bpp;
+	int format;
+	unsigned char * palette;
+	unsigned char * data = readImage (fp,bpp,format,*(unsigned int*)&sizeX,*(unsigned int*)&sizeY,palette,texTransform,true);
+	bpp/=8;
+	if (format&PNG_HAS_ALPHA) {
+	  bpp*=4;
+	}else {
+	  bpp*=3;
+	}
+	if (data) {
+	  int ii;
+	  int jj;
+	  for (int i=0;i<lthei;i++) {
+	    ii=(i*sizeY)/lthei;
+	    for (int j=0;j<ltwid;j++) {
+	      jj= (j*sizeX)/ltwid;
+	      scdata[i][j][0]=data[(ii*sizeX+jj)*bpp];
+	      scdata[i][j][1]=data[(ii*sizeX+jj)*bpp+1];
+	      scdata[i][j][2]=data[(ii*sizeX+jj)*bpp+2];
+	    }
+	  }
+	}else {
+	  fseek (fp,SIZEOF_BITMAPFILEHEADER,SEEK_SET);
+	  long temp;
+	  BITMAPINFOHEADER info;
+	  fread(&info, SIZEOF_BITMAPINFOHEADER,1,fp);
+	  sizeX = info.biWidth;
+	  sizeY = info.biHeight;
+
+	  if(info.biBitCount == 24)
+	    {
+	      data = NULL;
+	      data= new unsigned char [3*sizeY*sizeX];
+	      if (!data)
+		return false;
+	      for (int i=sizeY-1; i>=0;i--)
 		{
-			int itimes3width= 3*i*sizeX;//speed speed speed (well if I really wanted speed Pos'd have wrote this function)
-			for (int j=0; j<sizeX;j++)
-			{
+		  int itimes3width= 3*i*sizeX;//speed speed speed (well if I really wanted speed Pos'd have wrote this function)
+		  for (int j=0; j<sizeX;j++)
+		    {
 				//for (int k=2; k>=0;k--)
 				//{
-			  fread (data+3*j+itimes3width,sizeof (unsigned char)*3,1,fp);
-				
+		      fread (data+3*j+itimes3width,sizeof (unsigned char)*3,1,fp);
+		      unsigned char tmp = data[3*j+itimes3width];
+		      data[3*j+itimes3width]= data[3*j+itimes3width+2];
+		      data[3*j+itimes3width+2]=tmp;
 				//}
-				
-			}
+		      
+		    }
 		}
-	}
-	else if(info.biBitCount == 8)
-	{
-		data = NULL;
-		data= new unsigned char [sizeY*sizeX*3];
-		unsigned char palette[256*3+1];
-		unsigned char * paltemp = palette;
-
+	    }
+	  else if(info.biBitCount == 8)
+	    {
+	      data = NULL;
+	      data= new unsigned char [sizeY*sizeX*3];
+	      unsigned char palette[256*3+1];
+	      unsigned char * paltemp = palette;
+	      
 		for(int palcount = 0; palcount < 256; palcount++)
-		{
-			fread(paltemp, sizeof(RGBQUAD), 1, fp);
-			//			ctemp = paltemp[0];//don't reverse
-			//			paltemp[0] = paltemp[2];
-			//			paltemp[2] = ctemp;
-			paltemp+=3;
-		}
+		  {
+		    fread(paltemp, sizeof(RGBQUAD), 1, fp);
+		    //			ctemp = paltemp[0];//don't reverse
+		    //			paltemp[0] = paltemp[2];
+		    //			paltemp[2] = ctemp;
+		    paltemp+=3;
+		  }
 		if (!data)
-			return false;
+		  return false;
 		int k=0;
 		for (int i=sizeY-1; i>=0;i--)
-		{
+		  {
 			for (int j=0; j<sizeX;j++)
-			{
-				fread (&ctemp,sizeof (unsigned char),1,fp);
-				data [3*(i*sizeX+j)] = palette[((short)ctemp)*3];	
-				data [3*(i*sizeX+j)+1] = palette[((short)ctemp)*3+1];
-				data [3*(i*sizeX+j)+2] = palette[((short)ctemp)*3+2];
-			}
-		}
-	}
-	float scaledconstX = sizeX/256;
-	float scaledconstY = sizeY/256;
-	for (int t=0; t<256; t++)
-	{
-		for (int s=0; s<256;s++)
+			  {
+			    fread (&ctemp,sizeof (unsigned char),1,fp);
+			    data [3*(i*sizeX+j)+2] = palette[((short)ctemp)*3];	
+			    data [3*(i*sizeX+j)+1] = palette[((short)ctemp)*3+1];
+			    data [3*(i*sizeX+j)] = palette[((short)ctemp)*3+2];
+			  }
+		  }
+	    }
+	  float scaledconstX = sizeX/256;
+	  float scaledconstY = sizeY/256;
+	  for (int t=0; t<256; t++)
+	    {
+	      for (int s=0; s<256;s++)
 		{
-			int index = (scaledconstX*3*s)+(scaledconstY*3*t*sizeX);
-			
-
-			scdata[t][s][0] = data[index];
-			scdata[t][s][1] = data[index+1];
-			scdata[t][s][2] = data[index+2];
-
-
+		  int index = (scaledconstX*3*s)+(scaledconstY*3*t*sizeX);
+		  
+		  
+		  scdata[t][s][0] = data[index];
+		  scdata[t][s][1] = data[index+1];
+		  scdata[t][s][2] = data[index+2];
+		  
+		  
 		}
+	    }
 	}
-
 	
 	delete [] data;
  	fclose (fp);
@@ -606,10 +631,10 @@ static void Spherize (CubeCoord Tex [256][256],CubeCoord gluSph [256][256],unsig
 			if (gg>255) gg=255;
 			if (bb>255) bb=255;
 
-			Col[3*256*(t)+3*(255-s)] = rr;
-			Col[3*256*(t)+3*(255-s)+1] = gg;
-			Col[3*256*(t)+3*(255-s)+2] = bb;
-			
+			Col[4*(256*(255-t)+(255-s))] = rr;
+			Col[4*(256*(255-t)+(255-s))+1] = gg;
+			Col[4*(256*(255-t)+(255-s))+2] = bb;
+			Col[4*(256*(255-t)+(255-s))+3] = 255;
 		}
 	}
 
@@ -626,7 +651,7 @@ static void GenerateSphereMap()
 	RGBColor Col;
 	static CubeCoord TexCoord [256][256];
 	static CubeCoord gluSphereCoord [256][256];
-	unsigned char LightMap [65536*3];
+	unsigned char *LightMap =(unsigned char *)malloc (lmwid*lmhei*4);
 	int t;
 	for (t=0; t<256; t++) //keep in mind that t = 128 (sin phi) +128
 	{
@@ -692,11 +717,11 @@ static void GenerateSphereMap()
 
 	char tmp [256];
 	strcpy (tmp,OutputName);
-	fp = fopen (strcat (tmp,".bmp"), "wb");
-	fwrite (&bmfh,SIZEOF_BITMAPFILEHEADER,1,fp);
-	fwrite (&info, SIZEOF_BITMAPINFOHEADER,1,fp);
-	fwrite (LightMap,256*256*3,1,fp);
-	fclose (fp);
+	//	fp = fopen (strcat (tmp,".png"), "wb");
+	//	fwrite (&bmfh,SIZEOF_BITMAPFILEHEADER,1,fp);
+	//	fwrite (&info, SIZEOF_BITMAPINFOHEADER,1,fp);
+	png_write (strcat(tmp,".bmp"),LightMap,256,256,true,8);
+	//fclose (fp);
 		
 
 }
