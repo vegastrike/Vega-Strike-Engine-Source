@@ -7,15 +7,13 @@ BOOST_PYTHON_BEGIN_CONVERSION_NAMESPACE
 
 
 BOOST_PYTHON_TO_PYTHON_BY_VALUE(Unit*,::boost::python::to_python_value <UnitWrapper> ()(UnitWrapper(x)));
-namespace default_result_converter{
-template <class MYTYPE> struct apply;
 template <>
-struct apply<Unit *>
+struct default_result_converter::apply<Unit *>
 {
 //	typedef boost::python::to_python_value<Unit *> type;
 	typedef ::boost::python::default_result_converter::apply<UnitWrapper>::type type;
 };
-}
+
 /*namespace converter{
 
 template <>
