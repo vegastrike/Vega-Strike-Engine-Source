@@ -861,7 +861,15 @@ void Unit::Fire (unsigned int weapon_type_bitmask, bool listen_to_owner) {
 								// info the server sends with ack for fire
 								// FOR NOW WE TRUST THE CLIENT SINCE THE SERVER CAN REFUSE A FIRE
 								// if( Network==NULL || SERVER)
-								energy -=apply_float_to_short((*i).type->type==weapon_info::BEAM?(*i).type->EnergyRate*SIMULATION_ATOM:(*i).type->EnergyRate);
+								if ((*i).type->type==weapon_info::BEAM) {
+									if ((*i).ref.gun)
+										if ((!(*i).ref.gun->Dissolved())||(*i).ref.gun->Ready()) {
+											energy -=(*i).type->EnergyRate*SIMULATION_ATOM;
+										}
+									
+								}else{
+									energy-=(*i).type->EnergyRate;
+								}
 								// IF WE REFRESH ENERGY FROM SERVER : Think to send the energy update to the firing client with ACK TO fireRequest
 								if (mis) weapon_type_bitmask &= (~ROLES::FIRE_MISSILES);//fire only 1 missile at a time
 							}
