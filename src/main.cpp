@@ -102,7 +102,6 @@ int main( int argc, char *argv[] )
 
     setup_game_data(); 
 
-    mission=new Mission(mission_name);
 
 
     // loads the configuration file .vegastrikerc from home dir if such exists
@@ -113,6 +112,8 @@ int main( int argc, char *argv[] )
 	Python::init();
 
 #endif
+
+    mission=new Mission(mission_name);
 
     float col[4];
     vs_config->gethColor("default","testcolor",col,0xff00ff00);

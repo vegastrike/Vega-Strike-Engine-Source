@@ -62,6 +62,9 @@ class Flightgroup {
 
 #define SCRIPT_PARSE 0
 #define SCRIPT_RUN 1
+#define SCRIPT_PARSE_DECL 2
+
+enum parsemode_type { PARSE_FULL,PARSE_DECL };
 
 enum tag_type { 
   DTAG_UNKNOWN,
@@ -73,7 +76,9 @@ enum tag_type {
   DTAG_AND_EXPR,DTAG_OR_EXPR,DTAG_NOT_EXPR,DTAG_TEST_EXPR,
   DTAG_FMATH,DTAG_VMATH,
   DTAG_VAR_EXPR, DTAG_DEFVAR,
-  DTAG_CONST
+  DTAG_CONST,
+  DTAG_ARGUMENTS,
+  DTAG_GLOBALS
 };
 
 enum var_type { VAR_BOOL,VAR_FLOAT,VAR_VECTOR,VAR_OBJECT,VAR_STRING,VAR_VOID };
@@ -143,6 +148,10 @@ class missionNode : public tagDomNode {
     enum var_type vartype; // defvar
     string initval;
     missionNode *context_block_node; // defvar
+    map<string,missionNode *> scripts; // module
+    missionNode *exec_node; // exec
+    int nr_arguments; // script
+    missionNode *argument_node; //script
   } script;
 };
 
@@ -165,6 +174,10 @@ class Mission {
  private:
   //  string getVariable(easyDomNode *section,string name,string defaultval);
 
+  int debuglevel;
+
+  parsemode_type parsemode;
+
   easyDomNode *variables;
   easyDomNode *origin_node;
 
@@ -182,6 +195,7 @@ class Mission {
 
   // used only for parsing
   vector<missionNode *> scope_stack;
+  missionNode *current_module;
 
   void initTagMap();
   void DirectorStart(missionNode *node);
@@ -207,7 +221,7 @@ void  doModule(missionNode *node,int mode);
   void removeContextStack();
   void addContextStack(missionNode *node);
 
-void  doScript(missionNode *node,int mode);
+void  doScript(missionNode *node,int mode,varInstMap *varmap=NULL);
 void  doBlock(missionNode *node,int mode);
 bool  doBooleanVar(missionNode *node,int mode);
 varInst * lookupLocalVariable(missionNode *asknode);
@@ -239,6 +253,8 @@ scriptContext *makeContext(missionNode *node);
  float doFloatVar(missionNode *node,int mode);
  float doFMath(missionNode *node,int mode);
 
+ void doArguments(missionNode *node,int mode,varInstMap *varmap=NULL);
+
  void fatalError(missionNode *node,int mode,string message);
  void runtimeFatal(string message);
  void warning(string message);
@@ -251,6 +267,8 @@ void printNode(missionNode *node,int mode);
  void printThread(missionThread *thread);
  void printVarmap(const varInstMap & vmap);
  void printVarInst(varInst *vi);
+
+ string modestring(int mode);
 
  varInst *searchScopestack(string name);
 

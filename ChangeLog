@@ -1,3 +1,14 @@
+2001-12-03 Alexander Rawass <alexannika@users.sourceforge.net>
+
+	* added more script tests
+	* improved interpreter
+	  - multiple scripts in module
+	  - exec to call scripts from scripts
+	  - arguments to exec
+	* added section "interpreter" to vegastrike.conf
+	  added variable "debuglevel" to that section
+
+	
 2001-12-02 Alexander Rawass <alexannika@users.sourceforge.net>
 
 	* mission script interpreter working

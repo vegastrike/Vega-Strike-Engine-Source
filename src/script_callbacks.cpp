@@ -58,12 +58,12 @@ varInst *Mission::callPrintFloats(missionNode *node,int mode){
   for(int i=0; i<len;i++){
     float res=checkFloatExpr((missionNode *)node->subnodes[i],mode);
     if(mode==SCRIPT_RUN){
-      cout << res << "," ;
+      cout << " " << res << " ," ;
     }
   }
 
   if(mode==SCRIPT_RUN){
-    cout << s2 << endl;
+    cout << " " << s2 << endl;
   }
 
   varInst *vi=new varInst;
