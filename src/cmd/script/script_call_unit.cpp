@@ -1199,8 +1199,9 @@ Unit * Mission::call_unit_launch(CreateFlightgroup *fg, int type, const string &
    for(u=0;u<fg->nr_ships;u++){
      Unit * my_unit;
      if (type==PLANETPTR) {
-       float radius;
+       float radius=1;
        char * tex = strdup (fg->fg->type.c_str());
+       char * nam = strdup (fg->fg->type.c_str());
        char * bsrc = strdup (fg->fg->type.c_str());
        char * bdst = strdup (fg->fg->type.c_str());
        char * citylights = strdup (fg->fg->type.c_str());
@@ -1208,7 +1209,7 @@ Unit * Mission::call_unit_launch(CreateFlightgroup *fg, int type, const string &
        bsrc[0]='\0';//have at least 1 char
        bdst[0]='\0';
        citylights[0]='\0';
-       //int ret =sscanf (fg->fg->type.c_str(),"%f %s %s %s",&radius,tex,bsrc,bdst);
+       int ret =sscanf (fg->fg->type.c_str(),"%f %s %s (%s %s) %s",&radius,tex,nam,bsrc,bdst,citylights);
        GFXMaterial mat;
        GFXGetMaterial (0,mat);
       
@@ -1218,11 +1219,12 @@ Unit * Mission::call_unit_launch(CreateFlightgroup *fg, int type, const string &
 	 d=parse_alpha (bdst);
        if (bsrc[0]!='\0') 
 	 s=parse_alpha (bsrc);
-       my_unit = UnitFactory::createPlanet (QVector(0,0,0),QVector(0,0,0),0,Vector(0,0,0), 0,0,radius,tex,s,d, ParseDestinations(destinations),QVector(0,0,0),NULL,mat,vector<GFXLightLocal>(),faction_nr,tex);
+       my_unit = UnitFactory::createPlanet (QVector(0,0,0),QVector(0,0,0),0,Vector(0,0,0), 0,0,radius,tex,s,d, ParseDestinations(destinations),QVector(0,0,0),NULL,mat,vector<GFXLightLocal>(),faction_nr,nam);
 
        free (bsrc);
        free (bdst);
        free (tex);
+       free (nam);
        free (citylights);
      }else if (type==NEBULAPTR) {
        my_unit=UnitFactory::createNebula (fg->fg->type.c_str(),false,faction_nr,fg->fg,u);
