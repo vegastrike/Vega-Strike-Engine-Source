@@ -32,7 +32,7 @@
 //#include "gfx/particle.h"
 //extern Music *muzak;
 //extern Vector mouseline;
-
+#include "cmd/unit_collide.h"
 //vector<Vector> perplines;
 //static SphereMesh *foo;
 //static Unit *earth;
