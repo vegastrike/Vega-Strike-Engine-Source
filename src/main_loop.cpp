@@ -150,6 +150,35 @@ extern bool cleanexit;
       }
     }
   }
+void ExamineWhenTargetKey() {
+  static bool reallySwitch=XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","switchToTargetModeOnKey","true"));
+  if (reallySwitch) {
+    int view=0;
+    int examine=0;    
+    for (;view<2;++view) {
+      if (_Universe->AccessCockpit()->getVDUMode(view)==VDU::VIEW)
+        break;
+    }
+    for (;examine<2;++examine) {
+      if (_Universe->AccessCockpit()->getVDUMode(view)==VDU::TARGET)
+        break;
+    }
+    if (examine==2){
+      switch (view) {
+      case 2:
+        SwitchVDUTo(VDU::TARGET);
+        break;
+      default:        
+        SwitchVDUTo(VDU::TARGET);
+        if (_Universe->AccessCockpit()->getVDUMode(view)!=VIEW) {
+          SwitchVDUTo(VDU::TARGET);
+          SwitchVDUTo(VDU::VIEW);          
+        }
+        break;
+      }
+    }
+  }
+}
 namespace CockpitKeys {
   
   void QuitNow () {

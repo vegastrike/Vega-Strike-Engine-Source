@@ -388,13 +388,15 @@ void FireKeyboard::FireKey(const KBData&, KBSTATE k) {
     //    printf("firekey %d %d\n",k,key);
   }
 }
-
+void ExamineWhenTargetKey();
 void FireKeyboard::TargetKey(const KBData&,KBSTATE k) {
   if (g().targetkey!=PRESS)
     g().targetkey = k;
   if (k==RESET) {
     g().targetkey=PRESS;
   }
+  if (k==PRESS)
+    ExamineWhenTargetKey();
 }
 void FireKeyboard::PickTargetKey(const KBData&,KBSTATE k) {
   if (g().picktargetkey!=PRESS)
@@ -402,31 +404,43 @@ void FireKeyboard::PickTargetKey(const KBData&,KBSTATE k) {
   if (k==RESET) {
     g().picktargetkey=PRESS;
   }
+  if (k==PRESS)
+    ExamineWhenTargetKey();
 }
 
 void FireKeyboard::NearestTargetKey(const KBData&,KBSTATE k) {
   if (g().neartargetkey!=PRESS)
     g().neartargetkey = k;
+  if (k==PRESS)
+    ExamineWhenTargetKey();
 
 }
 void FireKeyboard::SubUnitTargetKey(const KBData&,KBSTATE k) {
   if (g().subtargetkey!=PRESS)
     g().subtargetkey = k;
+  if (k==PRESS)
+    ExamineWhenTargetKey();
 
 }
 void FireKeyboard::ThreatTargetKey(const KBData&,KBSTATE k) {
   if (g().threattargetkey!=PRESS)
     g().threattargetkey = k;
+  if (k==PRESS)
+    ExamineWhenTargetKey();
 }
 
 void FireKeyboard::UnitTargetKey(const KBData&,KBSTATE k) {
   if (g().targetukey!=PRESS)
     g().targetukey = k;
+  if (k==PRESS)
+    ExamineWhenTargetKey();
 }
 
 void FireKeyboard::SigTargetKey(const KBData&,KBSTATE k) {
   if (g().targetskey!=PRESS)
     g().targetskey = k;
+  if (k==PRESS)
+    ExamineWhenTargetKey();
 }
 
 void FireKeyboard::ReverseTargetKey(const KBData&,KBSTATE k) {
@@ -435,6 +449,8 @@ void FireKeyboard::ReverseTargetKey(const KBData&,KBSTATE k) {
   if (k==RESET) {
     g().rtargetkey=PRESS;
   }
+  if (k==PRESS)
+    ExamineWhenTargetKey();
 }
 void FireKeyboard::ReversePickTargetKey(const KBData&,KBSTATE k) {
   if (g().rpicktargetkey!=PRESS)
@@ -442,25 +458,35 @@ void FireKeyboard::ReversePickTargetKey(const KBData&,KBSTATE k) {
   if (k==RESET) {
     g().rpicktargetkey=PRESS;
   }
+  if (k==PRESS)
+    ExamineWhenTargetKey();
 }
 void FireKeyboard::ReverseNearestTargetKey(const KBData&,KBSTATE k) {
   if (g().rneartargetkey!=PRESS)
     g().rneartargetkey = k;
 
+  if (k==PRESS)
+    ExamineWhenTargetKey();
 }
 void FireKeyboard::ReverseThreatTargetKey(const KBData&,KBSTATE k) {
   if (g().rthreattargetkey!=PRESS)
     g().rthreattargetkey = k;
+  if (k==PRESS)
+    ExamineWhenTargetKey();
 }
 
 void FireKeyboard::ReverseUnitTargetKey(const KBData&,KBSTATE k) {
   if (g().rtargetukey!=PRESS)
     g().rtargetukey = k;
+  if (k==PRESS)
+    ExamineWhenTargetKey();
 }
 
 void FireKeyboard::ReverseSigTargetKey(const KBData&,KBSTATE k) {
   if (g().rtargetskey!=PRESS)
     g().rtargetskey = k;
+  if (k==PRESS)
+    ExamineWhenTargetKey();
 }
 
 
@@ -598,6 +624,8 @@ void FireKeyboard::TargetTurretKey(const KBData&,KBSTATE k) {
   if (k==RESET) {
     g().turrettargetkey=PRESS;
   }
+  if (k==PRESS)
+    ExamineWhenTargetKey();
 }
 void FireKeyboard::PickTargetTurretKey(const KBData&,KBSTATE k) {
   if (g().pickturrettargetkey!=PRESS)
@@ -605,16 +633,22 @@ void FireKeyboard::PickTargetTurretKey(const KBData&,KBSTATE k) {
   if (k==RESET) {
     g().pickturrettargetkey=PRESS;
   }
+  if (k==PRESS)
+    ExamineWhenTargetKey();
 }
 
 void FireKeyboard::NearestTargetTurretKey(const KBData&,KBSTATE k) {
   if (g().nearturrettargetkey!=PRESS)
     g().nearturrettargetkey = k;
+  if (k==PRESS)
+    ExamineWhenTargetKey();
 
 }
 void FireKeyboard::ThreatTargetTurretKey(const KBData&,KBSTATE k) {
   if (g().threatturrettargetkey!=PRESS)
     g().threatturrettargetkey = k;
+  if (k==PRESS)
+    ExamineWhenTargetKey();
 }
 
 
