@@ -271,7 +271,7 @@ def abbreviate(l,planets):
 			print 'Error no abbreviation! for '+longname	
 	return ret
 			
-def getPlanets(fac,planets):
+def getPlanets(fac,planets, sun_radius):
 	numplan=rak.randint(0,5)
 	if (numplan>=4):
 		numplan = rak.randint(1,10)
@@ -303,9 +303,9 @@ def getPlanets(fac,planets):
 			mon = '*'+mon
 			ret.append(mon)
 	return ret
-def getPlanetsString(fac,planets):
+def getPlanetsString(fac,planets, sun_radius):
 	ret=""
-	for p in getPlanets(fac,planets):
+	for p in getPlanets(fac,planets,sun_radius):
 		if (len(ret)):
 			ret+=' '
 		ret+=p
@@ -315,7 +315,7 @@ if (remakePlanets):
 		removeVal(s,'planets')
 		newchild = xml.dom.minidom.Element('var')
 		newchild.setAttribute('name','planets')
-		newchild.setAttribute('value',getPlanetsString(getVal(s,'faction'),planets))
+		newchild.setAttribute('value',getPlanetsString(getVal(s,'faction'),planets,float(getVal(s,"sun_radius"))))
 		s.insertBefore(newchild,s.firstChild)
 	
 fil = open (sys.argv[2],"w")
