@@ -15,6 +15,7 @@ libgldrv_a_SOURCES =				\
 	hashtable_3d.h				\
 	gl_fog.cpp				\
 	gl_init.cpp				\
+	gl_include.h				\
 	gl_init.h				\
 	gl_light.h				\
 	gl_light.cpp				\
