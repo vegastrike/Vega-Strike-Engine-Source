@@ -39,6 +39,8 @@ int		md5SumFile( const char * filename, unsigned char * digest);
 int		md5CheckFile( string filename, unsigned char * md5digest);
 int		md5Compute( string filename, unsigned char * md5digest);
 
+void	displayError( ObjSerial error_code);
+
 // Network part of a client description
 struct	Client
 {

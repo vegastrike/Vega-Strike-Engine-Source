@@ -9,6 +9,17 @@
 #include "md5.h"
 #include "vs_path.h"
 
+void	displayError( ObjSerial error_code)
+{
+	switch( error_code)
+	{
+		case 0 :
+		break;
+		default:
+		break;
+	}
+}
+
 int	md5Compute( string filename, unsigned char * md5digest)
 {
 	// Add the galaxy md5sum in the netbuffer (as we should be at the end of it) in order to control on client side

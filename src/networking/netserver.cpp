@@ -1130,6 +1130,7 @@ void	NetServer::processPacket( Client * clt, unsigned char cmd, const AddressIP&
 			unsigned char * client_md5;
 			unsigned char * md5 = new unsigned char[MD5_DIGEST_SIZE];
 			bool found = false;
+			NetBuffer	netbuf2;
 
 			StarSystem * sts;
 			Cockpit * cp;
@@ -1140,6 +1141,7 @@ void	NetServer::processPacket( Client * clt, unsigned char cmd, const AddressIP&
 				COUT<<"ERROR --> Received a jump request for non-existing UNIT"<<endl;
 			else
 			{
+					netbuf2.addString( newsystem);
 					// Verify if there really is a jump point to the new starsystem
 					adjacent = _Universe->getAdjacentStarSystems( cp->savegame->GetStarSystem()+".system");
 					for( int i=0; !found && i<adjacent.size(); i++)
@@ -1162,32 +1164,29 @@ void	NetServer::processPacket( Client * clt, unsigned char cmd, const AddressIP&
 						cp->savegame->SetStarSystem( newsystem);
 	
 						client_md5 = netbuf.getBuffer( MD5_DIGEST_SIZE);
-						if( md5CheckFile( newsystem, client_md5))
+						if( 0 /* md5CheckFile( newsystem, client_md5) */)
 						{
 							// Send an ASKFILE packet with serial == 0 to say file is ok
-							p2.send( CMD_ASKFILE, 0, NULL, 0, SENDRELIABLE, &clt->cltadr, clt->sock, __FILE__, PSEUDO__LINE__(1164) );
+							p2.send( CMD_ASKFILE, un->GetSerial(), NULL, 0, SENDRELIABLE, &clt->cltadr, clt->sock, __FILE__, PSEUDO__LINE__(1164) );
 						}
 						else
 						{
 							// Add that file to download queue with client serial !!
+							// Maybe send a code or info to know what we should do when that particular download is finished
+							// like we must add that guy in a new zone ...
 						}
+						p2.send( CMD_JUMP, un->GetSerial(), netbuf2.getData(), netbuf2.getDataLength(), SENDRELIABLE, &clt->cltadr, clt->sock, __FILE__, PSEUDO__LINE__(1164) );
 					}
-				/*
-				if( UnitUtil::JumpTo( un, newsystem))
-				{
-					// Remove unit/client from its old system
-					zonemgr->removeClient( clt);
-					// Update its star system in its savegame
-					cp = _Universe->isPlayerStarship( un);
-					cp->savegame->SetStarSystem( newsystem);
-					// Add it in the new one
-					this->addClient( clt);
-					// Send a CMD_JUMP to client with name of system (and md5 string ?)
-					netbuf.Reset();
-					netbuf.addString( newsystem);
-					p2.send( CMD_JUMP, clt->game_unit.GetUnit()->GetSerial(), netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, &clt->cltadr, clt->sock, __FILE__, PSEUDO__LINE__(1184) );
-				}
-				*/
+					else
+					{
+						// NOTE THAT THIS SHOULD NOT HAPPEN AND THAT WHEN A CLIENT WANTS TO JUMP IN AN UNKNOW
+						// (FROM SERVER POINT OF VIEW) SYSTEM -> IT WILL BE VULNERABLE WHILE IT DOES
+						// JUMP ANIMATION AND WILL STAY ALIVE IN ITS CURRENT SYSTEM FOR OTHER PLAYER...
+						// TOO BAD FOR CHEATERS ;)
+
+						// Set 0 as serial to say client must stay in its current zone/starsystem
+						p2.send( CMD_JUMP, 0, netbuf2.getData(), netbuf2.getDataLength(), SENDRELIABLE, &clt->cltadr, clt->sock, __FILE__, PSEUDO__LINE__(1164) );
+					}
 			}	
 			delete md5;
 		}

@@ -712,7 +712,7 @@ int NetClient::recvMsg( char* netbuffer, Packet* outpacket )
 				string filename;
 				string file;
 				// If packet serial == 0 then it means we have an up to date file
-				if( packet_serial)
+				if( packet_serial==this->game_unit.GetUnit()->GetSerial())
 				{
 					// Receive the file and write it (trunc if exists)
 					filename = netbuf.getString();
@@ -728,6 +728,11 @@ int NetClient::recvMsg( char* netbuffer, Packet* outpacket )
 						cerr<<"!!! ERROR : writing received file !!!"<<endl;
 						exit(1);
 					}
+				}
+				else
+				{
+					// Something is wrong
+					displayError( packet_serial);
 				}
 			}
 			break;
@@ -997,7 +1002,6 @@ int NetClient::recvMsg( char* netbuffer, Packet* outpacket )
 				else
 					COUT<<"!!! Problem -> CANNOT KILL UNIT NOT FOUND !!!"<<endl;
 			break;
-			// CMD_JUMP IS NOT USED ANYMORE !!!!
 			case CMD_JUMP :
 			{
 				StarSystem * sts;
@@ -1005,9 +1009,12 @@ int NetClient::recvMsg( char* netbuffer, Packet* outpacket )
 				int i=0;
 				// Set the delay of the pending jump to 0
 				string newsystem = netbuf.getString();
+				string system2 = _Universe->isPlayerStarship( this->game_unit.GetUnit())->savegame->GetStarSystem();
+					
 				// Get the pointer to the new star system
 				if( !(sts=star_system_table.Get( newsystem)))
 				{
+					// The system should have been loaded just before we asked for the jump so this is just a safety check
 					cerr<<"!!! ERROR : Couldn't find destination Star system !!!"<<endl;
 					exit(1);
 				}
@@ -1015,7 +1022,12 @@ int NetClient::recvMsg( char* netbuffer, Packet* outpacket )
 				{
 					// Find the corresponding destination
 					if( pendingjump[i]->dest == sts)
+					{
+						// Packet serial == 0 -> jump refused so we stay in the same system
+						if( packet_serial == 0)
+							pendingjump[i]->dest = star_system_table.Get( system2);
 						found = true;
+					}
 				}
 				if( !found)
 				{
@@ -1024,8 +1036,11 @@ int NetClient::recvMsg( char* netbuffer, Packet* outpacket )
 				}
 				else
 				{
-					// Set the ddelay to 0 so that it will be executed next time ProcessPendingJump is called
+					// Set the delay to 0 so that it will be executed next time ProcessPendingJump is called
 					pendingjump[i]->delay = 0;
+					// Should wait for the system file or the confirmation we have the good one here if we are authorized to jump
+					if( packet_serial != 0)
+						this->PacketLoop( CMD_ASKFILE);
 				}
 				//UnitUtil::JumpTo( this->game_unit.GetUnit(), newsystem);
 			}
@@ -1543,7 +1558,7 @@ void	NetClient::jumpRequest( string newsystem)
 			1326
 #endif
 			);
-	// Should wait for the system file or the confirmation we have the good one here
-	this->PacketLoop( CMD_ASKFILE);
+	// Should wait for jump authorization
+	this->PacketLoop( CMD_JUMP);
 }
 
