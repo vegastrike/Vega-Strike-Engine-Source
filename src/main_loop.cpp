@@ -435,22 +435,24 @@ void InitializeInput() {
 	BindKey('s', FighterPitchUp);*/
 }
 Animation * s=NULL;
-
+Animation *ss=NULL;
+Animation *sss=NULL;
+Animation *Preload = NULL;
 void createObjects() {
-
-    s = new Animation ("explosion_orange.ani",false,.1,false,false);
-    delete s;
+    ss = new Animation ("explosion_sml_orange.ani",false,.1,false,false);
+    Preload = new Animation ("explosion_orange.ani",false,.1,false,false);
+    //delete s;
     s = NULL;
   fprintf(stderr,"Unit size: %d\nMesh size: %d\n", sizeof(Unit), sizeof(Mesh));
   //SetPriorityClass(GetCurrentProcess(), REALTIME_PRIORITY_CLASS);
   //SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_IDLE);
 
-  carrier = new Unit("ucarrier.dat");
+  //0.0.4  carrier = new Unit("ucarrier.dat");
   //star_system = new StarSystem(new Planet("test_system.dat"));  
   //Unit *fighter = new Unit("uospreys.dat");
-  fighter = new Unit("uosprey.dat");
+  //0.0.4fighter = new Unit("uosprey.dat");
   //Unit *fighter2 = new Unit("uosprey.dat");
-  fighter2 = new Unit("uosprey.dat");
+  //0.0.4fighter2 = new Unit("uosprey.dat");
   bg = new Background("cube");
   //bg2 = new SphereMesh (20.0,8,8,"sun.bmp",true,true);
   //HUDElement *t = new HUDElement("ucarrier.dat");
@@ -558,16 +560,19 @@ void createObjects() {
 void destroyObjects() {  
   for(int a = 0; a < numf; a++)
   	delete fighters[a];
+  delete Preload;
   delete textplane;
   delete locSel;
   //delete t;
   //delete s;
-  delete carrier;
-  delete fighter2;
-  delete fighter;
+  //delete carrier;
+  //delete fighter2;
+  //delete fighter;
   delete bg;
   //  delete bg2;  if you delete a sphere wiht paletted texture and its refcount you'll get a malloc problem
   if (s) delete s;
+  if (ss) delete ss;
+  if (sss) delete sss;
 }
 
 void main_loop() {
@@ -576,8 +581,15 @@ void main_loop() {
   if ((rand()%1000)==299) {
     midcachunk = true;
     s = new Animation ("explosion_orange.ani",false,.1,false,false);
-    s->SetPosition (fighters[0]->GetPosition());
-    s->SetDimensions (10,10);
+
+    sss = new Animation ("explosion_sml_orange.ani",false,.1,false,false);
+
+    ss->SetDimensions (3,3);
+    s->SetDimensions (8,8);
+
+    
+    sss->SetDimensions (4,4);
+
   }
   _GFX->StartDraw();
   
@@ -594,10 +606,18 @@ void main_loop() {
     locSel->Draw();
   static float time=0;
   if (midcachunk) {
-
+    GFXBlendMode (SRCALPHA,INVSRCALPHA);
     time += GetElapsedTime();
+    s->SetPosition (fighters[0]->GetPosition());
+    ss->SetPosition (fighters[0]->GetPosition()+Vector (1,.24,.25));
+    sss->SetPosition (fighters[0]->GetPosition()+Vector (-1,0,-.3));    
+
     s->Draw();
-    if (time > 1.5)
+    if (time>.25)
+      ss->Draw();
+    if (time > .125)
+      sss->Draw();
+    if (time > .5)
       fighters[0]->Destroy();
   }
 
