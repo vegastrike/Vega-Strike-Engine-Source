@@ -1118,11 +1118,11 @@ Vector Unit::ClampTorque (const Vector &amt1) {
 }
 float Unit::Computer::max_speed() const {
   static float combat_mode_mult = XMLSupport::parse_float (vs_config->getVariable ("physics","combat_speed_boost","100"));
-  return combat_mode?combat_mode_mult*max_combat_speed:max_combat_speed;
+  return (!combat_mode)?combat_mode_mult*max_combat_speed:max_combat_speed;
 }
 float Unit::Computer::max_ab_speed() const {
   static float combat_mode_mult = XMLSupport::parse_float (vs_config->getVariable ("physics","combat_speed_boost","100"));
-  return combat_mode?combat_mode_mult*max_combat_speed:max_combat_ab_speed;//same capped big speed as combat...else different
+  return (!combat_mode)?combat_mode_mult*max_combat_speed:max_combat_ab_speed;//same capped big speed as combat...else different
 }
 void Unit::SwitchCombatFlightMode() {
   if (computer.combat_mode)
