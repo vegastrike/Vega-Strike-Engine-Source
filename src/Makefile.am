@@ -8,7 +8,15 @@ endif
 
 bin_PROGRAMS = vegastrike vegaserver accountserver
 
+if NETCOMM
+SUBDIRS = jvoiplib jthread jrtplib cmd gfx gldrv aldrv python gui networking boost common boost129
+ld_add = \
+jvoiplib/libjvoip.a jvoiplib/libgsm.a jvoiplib/liblpc.a \
+jthread/libjthread.a				\
+jrtplib/libjrtp.a
+else
 SUBDIRS = cmd gfx gldrv aldrv python gui networking boost common boost129
+endif
 
 vegastrike_LDADD =  				\
 networking/netserver.o 				\
@@ -30,6 +38,7 @@ networking/libnet.a 				\
 cmd/collide/libcollide.a 			\
 boost129/libboost_python.a boost/libboost_python.a \
 gfx/nav/libnav.a 					\
+$(ld_add)							\
 -lpthread 
 
 vegaserver_LDADD =  			\

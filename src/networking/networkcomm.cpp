@@ -1,5 +1,7 @@
 #include "networking/webcam_support.h"
 #include "networking/networkcomm.h"
+#include "jvoipsession.h"
+#include "jvoiprtptransmission.h"
 
 NetworkCommunication::NetworkCommunication()
 {
@@ -20,5 +22,11 @@ NetworkCommunication::~NetworkCommunication()
 {
 	if( Webcam != NULL)
 		delete Webcam;
+	if( session)
+		delete session;
+	if( params)
+		delete params;
+	if( rtpparams)
+		delete rtpparams;
 }
 

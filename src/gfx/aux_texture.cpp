@@ -193,6 +193,135 @@ void Texture::FileNotFound(const string &texfilename) {
 	  return;
 
 }
+Texture::Texture (char * buffer, int length, int stage, enum FILTER  mipmap, enum TEXTURE_TARGET target, enum TEXTURE_IMAGE_TARGET imagetarget, float alpha, int zeroval, GFXBOOL force_load, int maxdimension)
+//Texture::Texture(const char * buffer, int length, int stage, enum FILTER mipmap, enum TEXTURE_TARGET target, enum TEXTURE_IMAGE_TARGET imagetarget, GFXBOOL force_load, int maxdimension)
+{
+
+  data = NULL;
+  ismipmapped  = mipmap;
+  InitTexture();
+  palette = NULL;
+  texture_target =target;
+  image_target=imagetarget;
+  int offset = 0;
+  this->stage = stage;
+  //bootstrap_draw("Loading "+string(FileName));
+
+	//	strcpy(filename, FileName);
+	int bpp;
+	int format;
+	data = readImage (buffer,length,bpp,format,sizeX,sizeY,palette,NULL/*texTransform*/,true);
+	if (data) {
+	  //FIXME deal with palettes and grayscale with alpha
+	  if (!(format&PNG_HAS_COLOR)||(format&PNG_HAS_PALETTE)) {
+	    mode=_8BIT;
+	    if (!(format&PNG_HAS_COLOR)){
+	      palette = (unsigned char *) malloc(sizeof(unsigned char)*(256*4+1));
+	      for (unsigned int i =0;i<256;i++) {
+		palette[i*4]=i;
+		palette[i*4+1]=i;
+		palette[i*4+2]=i;
+		palette[i*4+3]=255;
+	      }
+	    }
+	  } 
+	  if (format&PNG_HAS_COLOR) {
+	    if (format&PNG_HAS_ALPHA) {
+	      mode=_24BITRGBA;
+	    } else {
+	      mode=_24BIT;
+	    }
+	  }
+	}else {
+	  char head1;
+	  char head2;
+	  //fseek (fp,0,SEEK_SET);
+	  memcpy( &head1, buffer, 1);
+	  offset += 1;
+	  memcpy( &head2, buffer+offset, 1);
+	  //fread (&head1,1,1,fp);
+	  //fread (&head2,1,1,fp);
+	  if (toupper(head1)!='B'||toupper (head2)!='M') {
+		FileNotFound(texfilename);
+		return;
+	  }
+	  //seek back to beginning
+	  //fseek (fp,SIZEOF_BITMAPFILEHEADER,SEEK_SET);
+	  offset += SIZEOF_BITMAPFILEHEADER;
+	  //long temp;
+	  BITMAPINFOHEADER info;
+	  //fread(&info, SIZEOF_BITMAPINFOHEADER,1,fp);
+	  memcpy(&info, buffer+offset, SIZEOF_BITMAPINFOHEADER);
+	  offset += SIZEOF_BITMAPINFOHEADER;
+	  sizeX = le32_to_cpu(info.biWidth);	
+	  sizeY = le32_to_cpu(info.biHeight);
+	  
+	  
+	  //while(1);
+	  
+	  if(le16_to_cpu(info.biBitCount) == 24)
+	    {
+	      mode = _24BITRGBA;
+	      data = NULL;
+	      data= (unsigned char *)malloc (sizeof(unsigned char)*4*sizeY*sizeX); // all bitmap data needs to be 32 bits
+	      if (!data)
+		return;
+	      for (int i=sizeY-1; i>=0;i--)
+		{
+		  int itimes4width= 4*i*sizeX;//speed speed speed (well if I really wanted speed Pos'd have wrote this function)
+		  for (unsigned int j=0; j<sizeX;j++)
+		    {
+			*(data+3) = 0xff; // default alpha = 1
+		      for (int k=2; k>=0;k--)
+				{
+					//fread (data+k+4*j+itimes4width,sizeof (unsigned char),1,fp);
+					memcpy( data+k+4*j+itimes4width, buffer+offset, sizeof( unsigned char));
+					offset += sizeof( unsigned char);
+				}
+		    }
+		}
+	    }
+	  else if(le16_to_cpu(info.biBitCount) == 8)
+	    {
+	      mode = _8BIT;
+	      data = NULL;
+	      data= (unsigned char *)malloc(sizeof(unsigned char)*sizeY*sizeX);
+	      palette = (unsigned char *)malloc(sizeof(unsigned char)* (256*4+1));
+	      memset (palette,0,(256*4+1)*sizeof(unsigned char));
+	      unsigned char *paltemp = palette;
+	      unsigned char ctemp;
+		for(int palcount = 0; palcount < 256; palcount++)
+		  {
+		    //fread(paltemp, SIZEOF_RGBQUAD, 1, fp);
+			memcpy( paltemp, buffer+offset, SIZEOF_RGBQUAD);
+			offset+=SIZEOF_RGBQUAD;
+		    ctemp = paltemp[0];
+		    paltemp[0] = paltemp[2];
+		    paltemp[2] = ctemp;
+		    paltemp+=4; // pal size
+		  }
+		if (!data)
+		  return;
+		for (int i=sizeY-1; i>=0;i--)
+		  {
+		    for (unsigned int j=0; j<sizeX;j++)
+		      {
+				//fread (data+ j + i * sizeX,sizeof (unsigned char),1,fp);
+				memcpy( data+j+i*sizeX, buffer+offset, sizeof( unsigned char));
+				offset+= sizeof( unsigned char);
+		      }
+		  }
+	    }
+	}
+	fprintf (stderr,"Bind... ");
+	Bind(maxdimension);
+	if (data)
+	  free(data);
+	data = NULL;
+	setold();
+	fprintf (stderr," Load Success\n");
+}
+
 Texture::Texture(const char * FileName, int stage, enum FILTER mipmap, enum TEXTURE_TARGET target, enum TEXTURE_IMAGE_TARGET imagetarget, GFXBOOL force_load, int maxdimension)
 {
 

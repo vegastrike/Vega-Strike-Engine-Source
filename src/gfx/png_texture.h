@@ -6,4 +6,5 @@ textureTransform heightmapTransform;
 textureTransform terrainTransform;
 textureTransform texTransform;
 unsigned char * readImage (FILE * fp, int &bpp, int &format, unsigned long &width, unsigned long &height, unsigned char *&palette, textureTransform *tt, bool strip_16);
+unsigned char * readImage (char * buffer, int length, int &bpp, int &format, unsigned long &width, unsigned long &height, unsigned char *&palette, textureTransform *tt, bool strip_16);
 void png_write (const char * myfile, unsigned char * data, unsigned int width, unsigned int height, bool alpha, char bpp);

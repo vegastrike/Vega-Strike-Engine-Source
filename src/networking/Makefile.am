@@ -1,8 +1,24 @@
 if USEBOOST128
 INCLUDES=-I$(top_srcdir)/src \
+     -I$(top_srcdir)/src/jvoiplib \
+	 -I$(top_srcdir)/src/jvoiplib/libcomponents/base	\
+	 -I$(top_srcdir)/src/jvoiplib/libcomponents/impl	\
+	 -I$(top_srcdir)/src/jvoiplib/componentframework	\
+	 -I$(top_srcdir)/src/jvoiplib/thirdparty/lpc 		\
+	 -I$(top_srcdir)/src/jvoiplib/thirdparty/gsm/inc	\
+	 -I$(top_srcdir)/src/jthread \
+	 -I$(top_srcdir)/src/jrtplib
 	 -I$(top_srcdir)/src/boost
 else
 INCLUDES=-I$(top_srcdir)/src \
+     -I$(top_srcdir)/src/jvoiplib \
+	 -I$(top_srcdir)/src/jvoiplib/libcomponents/base	\
+	 -I$(top_srcdir)/src/jvoiplib/libcomponents/impl	\
+	 -I$(top_srcdir)/src/jvoiplib/componentframework	\
+	 -I$(top_srcdir)/src/jvoiplib/thirdparty/lpc 		\
+	 -I$(top_srcdir)/src/jvoiplib/thirdparty/gsm/inc	\
+	 -I$(top_srcdir)/src/jthread \
+	 -I$(top_srcdir)/src/jrtplib
 	 -I$(top_srcdir)/src/boost129
 endif
 
@@ -66,15 +82,21 @@ libnet_a_SOURCES =	\
 	inet.h
 
 if NETCOMM
-libnetclient_a_SOURCES = $(libnetclientserver) \
+libnetclient = $(libnetclientserver) \
 	networkcomm.cpp		\
 	networkcomm.h		\
 	webcam_support.cpp	\
-	webcam_support.h	\
+	webcam_support.h
+else
+libnetclient = $(libnetclientserver)
+endif
+
+if LINUX
+libnetclient_a_SOURCES = $(libnetclient) \
 	bgrab.c				\
 	bgrab.h
 else
-libnetclient_a_SOURCES = $(libnetclientserver)
+libnetclient_a_SOURCES = $(libnetclient)
 endif
 
 libnetacct_a_SOURCES = $(libnetgeneric) \

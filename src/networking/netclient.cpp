@@ -126,7 +126,7 @@ NetClient::~NetClient()
             delete Clients[i];
     }
 	*/
-#ifdef NETCOM
+#ifdef NETCOMM
 	if( NetComm!=NULL)
 		delete NetComm;
 #endif

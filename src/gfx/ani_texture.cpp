@@ -122,6 +122,37 @@ void AnimatedTexture::Reset () {
   active=0;
   physicsactive = numframes*timeperframe;
 }
+void AnimatedTexture::Load( char * buffer, int length, int nframe, enum FILTER ismipmapped)
+{
+	myvec.push_back (this);
+	numframes = nframe;
+	timeperframe = 100;
+	cumtime=0;
+	int i=0;
+	Reset();
+
+	active=0;
+	Decal = new Texture * [numframes];
+  bool loadall=true;
+  if (g_game.use_animations==0||(g_game.use_animations!=0&&g_game.use_textures==0)) {
+    loadall=false;
+  }
+  for (;i<numframes;i++) {
+	Decal[i]=new Texture (buffer,length,stage,ismipmapped,TEXTURE2D,TEXTURE_2D,1,0,(g_game.use_animations)?GFXTRUE:GFXFALSE);
+  }
+  if (!loadall) {
+    Texture * dec = Decal[numframes/2];
+    timeperframe*=numframes;
+    numframes=1;
+    if (Decal) {
+      delete [] Decal;
+    }
+    Decal = new Texture * [1];
+    Decal[0]=dec;
+  }
+  original = NULL;
+}
+
 void AnimatedTexture::Load(FILE * fp, int stage, enum FILTER ismipmapped) {
   myvec.push_back (this);
   fscanf (fp,"%d %f",&numframes,&timeperframe);

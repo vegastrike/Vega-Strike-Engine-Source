@@ -3,12 +3,11 @@
 
 #include <list>
 #include "client.h"
-#ifdef __VOIP
-#include "jvoiplib/jvoipsession.h"
-#include "jvoiplib/jvoiprtptransmission.h"
-#endif
 
 class WebcamSupport;
+class JVOIPSession;
+class JVOIPSessionParams;
+class JVOIPRTPTransmissionParams;
 
 class NetworkCommunication
 {
@@ -17,11 +16,9 @@ class NetworkCommunication
 		list<Client *>	commClients;
 		// Webcam support
 		WebcamSupport *		Webcam;
-#ifdef __VOIP
-		JVOIPSession				session;
-		JVOIPSessionParams			params;
-		JVOIPRTPTransmissionParams	rtpparams;
-#endif
+		JVOIPSession *				session;
+		JVOIPSessionParams *		params;
+		JVOIPRTPTransmissionParams* rtpparams;
 
 	public:
 		NetworkCommunication();

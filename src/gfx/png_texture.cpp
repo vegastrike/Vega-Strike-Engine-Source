@@ -16,6 +16,10 @@ extern "C" {
 }
 #endif
 
+void user_read_data(png_structp png_ptr, png_bytep data, png_size_t length);
+void user_write_data(png_structp png_ptr, png_bytep data, png_size_t length);
+void user_flush_data(png_structp png_ptr);
+
 //#define PNGDEBUG
 int PNG_HAS_PALETTE =1;
 int PNG_HAS_COLOR=2;
@@ -171,6 +175,18 @@ METHODDEF(void) my_error_exit(j_common_ptr cinfo)
   // Return control to the setjmp point
   longjmp(myerr->setjmp_buffer, 1);
 }
+unsigned char * readVSJpeg2 (char *buffer, int length, int & bpp, int &color_type, unsigned long &width, unsigned long &height, textureTransform * tt) {
+	printf( "Error : reading JPEG from memory is not implemented yet");
+	return NULL;
+}
+
+#else
+unsigned char * readVSJpeg2 (char *buffer, int length, int & bpp, int &color_type, unsigned long &width, unsigned long &height, textureTransform * tt) {
+  return NULL;
+}
+#endif // JPEG_SUPPORT
+
+#ifdef JPEG_SUPPORT
 unsigned char * readVSJpeg (FILE *fp, int & bpp, int &color_type, unsigned long &width, unsigned long &height, textureTransform * tt) {
   bpp = 8;
    jpeg_decompress_struct cinfo;
@@ -242,6 +258,112 @@ unsigned char * readVSJpeg (FILE *fp, int & bpp, int &color_type, unsigned long 
   return NULL;
 }
 #endif // JPEG_SUPPORT
+
+unsigned char * readImage (char *buffer, int length, int & bpp, int &color_type, unsigned long &width, unsigned long &height, unsigned char * &palette, textureTransform * tt, bool strip_16) {
+  palette = NULL;
+  unsigned char sig[8];
+  png_structp png_ptr;
+  png_bytepp row_pointers;
+  png_infop info_ptr;
+  int  interlace_type;
+  memcpy(sig, buffer, 8);
+  if (!png_check_sig(sig, 8)) {
+    //fseek (fp,0,SEEK_SET);
+    return readVSJpeg2 (buffer, length ,bpp,color_type,width,height,tt);
+  }
+    png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL,
+      (png_error_ptr)png_cexcept_error, 
+	  (png_error_ptr)NULL);
+	if (png_ptr == NULL)
+   {
+      return NULL;
+   }
+   info_ptr = png_create_info_struct(png_ptr);
+   if (info_ptr == NULL)
+   {
+      png_destroy_read_struct(&png_ptr, (png_infopp)NULL, (png_infopp)NULL);
+      return NULL;
+   }
+   if (setjmp(png_jmpbuf(png_ptr))) {
+      /* Free all of the memory associated with the png_ptr and info_ptr */
+      png_destroy_read_struct(&png_ptr, &info_ptr, (png_infopp)NULL);
+      /* If we get here, we had a problem reading the file */
+      return NULL;
+   }
+   //png_init_io(png_ptr, fp);
+   png_set_read_fn( png_ptr, buffer, user_read_data);
+   // Write should not be needed
+   //png_set_write_fn( png_ptr, buffer, user_write_data);
+   png_set_sig_bytes(png_ptr, 8);
+#ifdef PNGDEBUG
+   fprintf (stderr,"Loading Done. Decompressing\n");
+#endif
+   png_read_info(png_ptr, info_ptr);  /* read all PNG info up to image data */
+   png_get_IHDR(png_ptr, info_ptr, (png_uint_32 *)&width, (png_uint_32 *)&height, &bpp, &color_type, &interlace_type, NULL, NULL);
+# if __BYTE_ORDER != __BIG_ENDIAN
+   if (bpp==16)
+     png_set_swap (png_ptr);
+#endif
+
+   if (bpp==16&&strip_16)
+     png_set_strip_16(png_ptr);
+   if (strip_16&&color_type == PNG_COLOR_TYPE_PALETTE)
+     png_set_palette_to_rgb(png_ptr);
+   
+   if (color_type == PNG_COLOR_TYPE_GRAY &&
+       bpp < 8) png_set_gray_1_2_4_to_8(png_ptr);
+   
+
+
+   png_set_expand (png_ptr);
+   png_read_update_info (png_ptr,info_ptr);
+   png_get_IHDR(png_ptr, info_ptr, (png_uint_32 *)&width, (png_uint_32 *)&height, &bpp, &color_type, &interlace_type, NULL, NULL);
+   row_pointers = (unsigned char **)malloc (sizeof (unsigned char *) *height);
+   int numchan=1;
+   if (color_type&PNG_COLOR_MASK_COLOR)
+     numchan =3;
+   if (color_type &PNG_COLOR_MASK_PALETTE)
+     numchan =1;
+   if (color_type&PNG_COLOR_MASK_ALPHA)
+     numchan++;
+   unsigned long stride = numchan*sizeof (unsigned char)*bpp/8;
+   unsigned char * image = (unsigned char *) malloc (stride*width*height);
+   for (unsigned int i=0;i<height;i++) {
+     row_pointers[i] = &image[i*stride*width];
+   }
+   png_read_image (png_ptr,row_pointers);
+   //   png_read_image(png_ptr, info_ptr, PNG_TRANSFORM_EXPAND , NULL);
+   //row_pointers = png_get_rows(png_ptr, info_ptr);
+   unsigned char * result;
+   if (tt) {
+     result = (*tt) (bpp,color_type,width,height,row_pointers);
+     
+     free (image);
+   }else {
+     result = image;
+   }
+   free (row_pointers);
+   //   png_infop end_info;
+   png_read_end(png_ptr, info_ptr);
+   png_destroy_read_struct(&png_ptr, &info_ptr, NULL);
+#ifdef PNGDEBUG
+   fprintf (stderr,"Decompressing Done.\n");
+#endif
+   /* close the file */
+   return result;
+}
+
+void user_read_data(png_structp png_ptr, png_bytep data, png_size_t length)
+{
+	// CHECK IF THE ARG ORDER IS CORRECT
+	memcpy( png_ptr, data, length);
+}
+void user_write_data(png_structp png_ptr, png_bytep data, png_size_t length)
+{
+}
+void user_flush_data(png_structp png_ptr)
+{
+}
 
 unsigned char * readImage (FILE *fp, int & bpp, int &color_type, unsigned long &width, unsigned long &height, unsigned char * &palette, textureTransform * tt, bool strip_16) {
   palette = NULL;

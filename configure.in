@@ -156,10 +156,33 @@ dnl Add libs required for Windows
 dnl I don't use -mwindows since I like having the console around
 dnl If the console annoys you then remove "-luser32 -lgdi32" and replace
 dnl with "-mwindows"
+WIN32="0"
 if test "x$is_win32" = "xyes" ; then
     TR_LIBS="$TR_LIBS -luser32 -lgdi32"
 	TR_CFLAGS="$TR_CFLAGS -DNOMINMAX"
 	TR_CXXFLAGS="$TR_CXXFLAGS -DNOMINMAX"
+	WIN32="1"
+fi
+
+dnl --------------------------------------------------------------------------
+dnl Check if compiling for Linux
+dnl --------------------------------------------------------------------------
+AC_MSG_CHECKING([for Linux platform])
+AC_EGREP_CPP(yes,
+[ 
+#if defined(linux)
+  yes
+#endif
+], is_linux=yes, is_linux=no )
+AC_MSG_RESULT([$is_linux])
+
+dnl Add libs required for Windows
+dnl I don't use -mwindows since I like having the console around
+dnl If the console annoys you then remove "-luser32 -lgdi32" and replace
+dnl with "-mwindows"
+LINUX="0"
+if test "x$is_linux" = "xyes" ; then
+	LINUX="1"
 fi
 
 dnl --------------------------------------------------------------------------
@@ -392,20 +415,6 @@ dnl Check for SDL_mixer
 	echo "*** Configuring without networking support."
 	NET_LIBS=""
 	else
-
-dnl	Added a simple check to see if we can use libSDL_net
-	AC_CHECK_HEADER( SDL/SDL_net.h, have_SDL_net=yes, have_SDL_net=no)
-	if test "x$have_SDL_net" = "xyes"; then
-		NET_LIBS=" -lSDL_net"
-		TR_CPPFLAGS="$TR_CPPFLAGS -DHAVE_SDLnet=1"
-		echo "Configuring with SDL Networking."
-	else
-		NET_LIBS=""
-		echo "*** SDL_net not found.  Configuring with standard sockets support."
-	fi
-	fi
-	AC_SUBST(NET_LIBS)
-
 
     LIBS="$saved_LIBS"
 else
@@ -1092,8 +1101,27 @@ dnl --------------------------------------------------------------------------
 dnl Check for network communication system
 dnl --------------------------------------------------------------------------
 NETCOMM="0"
-AC_ARG_ENABLE(netcomm, AC_HELP_STRING([--enable-netcomm], [Enable hazardous network communications (Webcam and VOIP)]), [NETCOMM="1"; TR_CPPFLAGS="$TR_CPPFLAGS -DNETCOMM "; echo "Network communication system enabled"])
+AC_ARG_ENABLE(netcomm, AC_HELP_STRING([--enable-netcomm], [Enable hazardous network communications (Webcam and VOIP)]), [NETCOMM="1"; echo "Network communication system enabled"])
 
+if test "$NETCOMM" = "1" ; then
+	dnl check for oss headers
+	saved_CPPFLAGS="$CPPFLAGS"
+
+	AC_DEFUN( CHECK_FOR_OSS_H, [
+	    AC_MSG_CHECKING([for sys/soundcard.h])
+	    AC_TRY_CPP( [ #include <sys/soundcard.h> ], have_oss_h=yes, have_oss_h=no )
+	    AC_MSG_RESULT([$have_oss_h])
+	])
+
+	CHECK_FOR_OSS_H
+
+	if test "x$have_oss_h" = "xno" ; then
+	    echo "*** OSS headers not found : networking communication system disabled."
+		NETCOMM="0"
+	else
+		TR_CPPFLAGS="$TR_CPPFLAGS -DNET_COMM"
+	fi
+fi
 
 dnl --------------------------------------------------------------------------
 dnl Other options
@@ -1130,13 +1158,15 @@ AC_SUBST([BOOST_LIBS])
 AC_SUBST([BOOST_CPPFLAGS])
 AM_CONDITIONAL(USEBOOST128, test "$TESTUSEBOOST129" = "0")
 AM_CONDITIONAL(NETCOMM, test "$NETCOMM" = "1")
+AM_CONDITIONAL(WIN32, test "$WIN32" = "1")
+AM_CONDITIONAL(LINUX, test "$LINUX" = "1")
 
 CPPFLAGS="$CPPFLAGS $TR_CPPFLAGS $PYTHON_CPPFLAGS $BOOST_CPPFLAGS "
 CFLAGS="$CFLAGS $TR_CFLAGS  -pipe "
 CXXFLAGS="$CXXFLAGS $TR_CXXFLAGS -pipe "
 LIBS="$LIBS $TR_LIBS $PYTHON_LIBS"
-AC_OUTPUT(Makefile src/Makefile src/gldrv/Makefile src/aldrv/Makefile src/gfx/Makefile src/gfx/nav/Makefile src/cmd/Makefile src/cmd/ai/Makefile src/cmd/collide/Makefile src/cmd/script/Makefile src/cmd/script/c_alike/Makefile src/cmd/collide/csgeom/Makefile src/python/Makefile launcher/Makefile src/networking/Makefile src/boost/Makefile objconv/Makefile src/gui/Makefile src/common/Makefile src/boost129/Makefile )
+AC_OUTPUT(Makefile src/Makefile src/jvoiplib/Makefile src/jthread/Makefile src/jrtplib/Makefile src/gldrv/Makefile src/aldrv/Makefile src/gfx/Makefile src/gfx/nav/Makefile src/cmd/Makefile src/cmd/ai/Makefile src/cmd/collide/Makefile src/cmd/script/Makefile src/cmd/script/c_alike/Makefile src/cmd/collide/csgeom/Makefile src/python/Makefile launcher/Makefile src/networking/Makefile src/boost/Makefile objconv/Makefile src/gui/Makefile src/common/Makefile src/boost129/Makefile )
 
-dnl AC_CONFIG_FILES(Makefile src/Makefile src/gldrv/Makefile src/aldrv/Makefile src/gfx/Makefile src/gfx/nav/Makefile src/cmd/Makefile src/cmd/ai/Makefile src/cmd/collide/Makefile src/cmd/script/Makefile src/cmd/script/c_alike/Makefile src/cmd/collide/csgeom/Makefile src/python/Makefile launcher/Makefile src/networking/Makefile src/boost/Makefile objconv/Makefile src/gui/Makefile src/common/Makefile src/boost129/Makefile)
+dnl AC_CONFIG_FILES(Makefile src/Makefile src/jthread/Makefile src/jrtplib/Makefile src/gldrv/Makefile src/aldrv/Makefile src/gfx/Makefile src/gfx/nav/Makefile src/cmd/Makefile src/cmd/ai/Makefile src/cmd/collide/Makefile src/cmd/script/Makefile src/cmd/script/c_alike/Makefile src/cmd/collide/csgeom/Makefile src/python/Makefile launcher/Makefile src/networking/Makefile src/boost/Makefile objconv/Makefile src/gui/Makefile src/common/Makefile src/boost129/Makefile)
 dnl AC_OUTPUT
 

@@ -1,0 +1,18 @@
+CXX		= @CXX@
+CFLAGS		= @JVOIP_CFLAGS@
+INCLUDES	= -I .
+
+JVOIPLIBDIR	= ../../../lib/
+JVOIPINCLUDEDIR	= ../../../include/
+OBJECTS 	= lpccodec.o
+
+all: $(OBJECTS)
+	cp -f $(OBJECTS) $(JVOIPLIBDIR)
+	cp -f lpccodec.h $(JVOIPINCLUDEDIR) 
+
+clean:
+	rm -f $(OBJECTS)
+
+lpccodec.o: lpccodec.cpp lpccodec.h
+	$(CXX) $(CFLAGS) $(INCLUDES) -c -o lpccodec.o lpccodec.cpp
+

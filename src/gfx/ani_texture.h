@@ -12,6 +12,7 @@ class AnimatedTexture: public Texture {
   AnimatedTexture ();
   AnimatedTexture (const char * file, int stage, enum FILTER imm);
   AnimatedTexture (FILE * openedfile, int stage, enum FILTER imm);
+  void Load (char * buffer, int length, int nframe, enum FILTER imm);
   void Load (FILE * openedfile, int stage, enum FILTER imm);
   void Destroy();
   virtual Texture *Original();

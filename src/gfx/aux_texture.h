@@ -75,6 +75,7 @@ struct Texture{
   public:
   ///Creates a texture with a single bitmap as color data and another grayscale .bmp as alpha data
   Texture(const char *,const char *, int stage = 0, enum FILTER mipmap= MIPMAP, enum TEXTURE_TARGET target=TEXTURE2D, enum TEXTURE_IMAGE_TARGET imagetarget=TEXTURE_2D, float alpha=1, int zeroval=0, GFXBOOL force=GFXFALSE, int max_dimension_size=65536);
+  Texture(char *,int length, int stage = 0, enum FILTER mipmap= MIPMAP, enum TEXTURE_TARGET target=TEXTURE2D, enum TEXTURE_IMAGE_TARGET imagetarget=TEXTURE_2D, float alpha=1, int zeroval=0, GFXBOOL force=GFXFALSE, int max_dimension_size=65536);
   ///Creates a texture with only color data as a single bitmap
   Texture(const char * FileName, int stage = 0, enum FILTER mipmap = MIPMAP, enum TEXTURE_TARGET target=TEXTURE2D, enum TEXTURE_IMAGE_TARGET imagetarget=TEXTURE_2D, GFXBOOL force=GFXFALSE, int max_dimension_size=65536);
   virtual Texture * Original();
