@@ -224,6 +224,7 @@ bool shouldreflect (string r) {
 	return false;
 }
 void Mesh::beginElement(const string &name, const AttributeList &attributes) {
+	static bool use_detail_texture = XMLSupport::parse_bool(vs_config->getVariable("graphics","use_detail_texture","true"));
   //static bool flatshadeit=false;
   AttributeList::const_iterator iter;
   float flotsize=1;
@@ -234,7 +235,7 @@ void Mesh::beginElement(const string &name, const AttributeList &attributes) {
   bool texture_found = false;
   switch(elem) {
       case XML::DETAILPLANE:
-	  {
+	  if (use_detail_texture) {
 		  Vector vec (detailPlanes.size()>=2?1:0,detailPlanes.size()==1?1:0,detailPlanes.size()==0?1:0);
 		  for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
 		    switch(XML::attribute_map.lookup((*iter).name)) {
@@ -250,7 +251,7 @@ void Mesh::beginElement(const string &name, const AttributeList &attributes) {
 				break;
 			}
 		  }
-		  static float detailscale = XMLSupport::parse_float(vs_config->getVariable("graphics","detail_texture_scale",".01"));
+		  static float detailscale = XMLSupport::parse_float(vs_config->getVariable("graphics","detail_texture_scale","1"));
 		  if (detailPlanes.size()<6) {
 			  detailPlanes.push_back(vec*detailscale);
 		  }
@@ -396,7 +397,8 @@ void Mesh::beginElement(const string &name, const AttributeList &attributes) {
 	}
 	break;
 	  case XML::DETAILTEXTURE:
-		  detailTexture = TempGetTexture(iter->value,FactionUtil::GetFaction(xml->faction),GFXTRUE);
+		  if (use_detail_texture)
+			  detailTexture = TempGetTexture(iter->value,FactionUtil::GetFaction(xml->faction),GFXTRUE);
 		  break;
       case XML::TEXTURE:
           //NO BREAK..goes to next statement

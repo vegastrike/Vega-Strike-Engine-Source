@@ -21,7 +21,7 @@
 #include "gl_globals.h"
 #include "vs_globals.h"
 #include "vegastrike.h"
-
+#include "config_xml.h"
 #include "gfxlib.h"
 
 #ifndef GL_TEXTURE_CUBE_MAP_EXT
@@ -83,22 +83,25 @@ static void ConvertPalette(unsigned char *dest, unsigned char *src)
 int tmp_abs (int num) {
   return num<0?-num:num;
 }
-bool isPowerOfTwo (int num) {
+bool isPowerOfTwo (int num, int &which) {
+  which=0;
   while (tmp_abs(num)>1) {
     if ((num/2)*2!=num) {
       return false;
     }
+	which++;
     num/=2;
   }
   return true;
 }
 GFXBOOL /*GFXDRVAPI*/ GFXCreateTexture(int width, int height, TEXTUREFORMAT textureformat, int *handle, char *palette , int texturestage, enum FILTER mipmap, enum TEXTURE_TARGET texture_target)
 {
-  if (!isPowerOfTwo (width)) {
+  int dummy=0;
+  if (!isPowerOfTwo (width,dummy)) {
     fprintf (stderr,"Width %d not a power of two",width);
     //    assert (false);
   }
-  if (!isPowerOfTwo (height)) {
+  if (!isPowerOfTwo (height,dummy)) {
     fprintf (stderr,"Height %d not a power of two",height);
     //    assert (false);
     
@@ -183,14 +186,16 @@ void /*GFXDRVAPI*/ GFXAttachPalette (unsigned char *palette, int handle)
   ConvertPalette(textures[handle].palette, palette);
   //memcpy (textures[handle].palette,palette,768);
 }
-static void DownSampleTexture (unsigned char **newbuf,const unsigned char * oldbuf, int height, int width, int pixsize, int handle, int maxdimension) {
+static void DownSampleTexture (unsigned char **newbuf,const unsigned char * oldbuf, int height, int width, int pixsize, int handle, int maxwidth,int maxheight,float newfade) {
   int i,j,k,l,m;
-  if (MAX_TEXTURE_SIZE<maxdimension)
-    maxdimension=MAX_TEXTURE_SIZE;
+  if (MAX_TEXTURE_SIZE<maxwidth)
+    maxwidth=MAX_TEXTURE_SIZE;
+  if (MAX_TEXTURE_SIZE<maxheight)
+    maxheight=MAX_TEXTURE_SIZE;
   float *temp = (float *)malloc (pixsize*sizeof(float));
-  int newwidth = width>maxdimension?maxdimension:width;
+  int newwidth = width>maxwidth?maxwidth:width;
   int scalewidth = width/newwidth;
-  int newheight = height>maxdimension?maxdimension:height;
+  int newheight = height>maxheight?maxheight:height;
   int scaleheight = height/newheight;
   *newbuf = (unsigned char*)malloc (newwidth*newheight*pixsize*sizeof(unsigned char));
   for (i=0;i<newheight;i++) {
@@ -206,7 +211,7 @@ static void DownSampleTexture (unsigned char **newbuf,const unsigned char * oldb
 	}
       }
       for (m=0;m<pixsize;m++) {
-	(*newbuf)[m+pixsize*(j+i*newwidth)] = (unsigned char)(temp[m]/(scaleheight*scalewidth));
+	(*newbuf)[m+pixsize*(j+i*newwidth)] = (unsigned char)(temp[m]*newfade/(scaleheight*scalewidth));
       }
     }
   }
@@ -301,7 +306,9 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture (unsigned char *buffer, int handle,  TE
 {	
   if (handle<0)
     return GFXFALSE;
-  if (!isPowerOfTwo (textures[handle].width)|| !isPowerOfTwo (textures[handle].height)) {
+  int logsize=1;
+  int logwid=1;
+  if (!isPowerOfTwo (textures[handle].width,logwid)|| !isPowerOfTwo (textures[handle].height,logsize)) {
     static unsigned char NONPOWEROFTWO[1024]={255,127,127,255,
 					    255,255,0,255,
 					    255,255,0,255,
@@ -311,6 +318,7 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture (unsigned char *buffer, int handle,  TE
     textures[handle].height=2;
     //    assert (false);
   }
+  logsize = logsize>logwid?logsize:logwid;
   if (maxdimension==65536) {
     maxdimension = gl_options.max_texture_dimension;
   }
@@ -321,15 +329,49 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture (unsigned char *buffer, int handle,  TE
   GLenum image2D=GetImageTarget (imagetarget);
   glBindTexture(textures[handle].targets, textures[handle].name);
   if (textures[handle].width>maxdimension||textures[handle].height>maxdimension||textures[handle].width>MAX_TEXTURE_SIZE||textures[handle].height>MAX_TEXTURE_SIZE) {
-    DownSampleTexture (&tempbuf,buffer,textures[handle].height,textures[handle].width,(internformat==PALETTE8?1:(internformat==RGBA32?4:3))* sizeof(unsigned char ), handle,maxdimension);
+    DownSampleTexture (&tempbuf,buffer,textures[handle].height,textures[handle].width,(internformat==PALETTE8?1:(internformat==RGBA32?4:3))* sizeof(unsigned char ), handle,maxdimension,maxdimension,1);
     buffer = tempbuf;
   }
   if (internformat!=PALETTE8) {
     internalformat = GetTextureFormat (internformat);
-    if (textures[handle].mipmapped&&gl_options.mipmap>=2)
-      gluBuild2DMipmaps(image2D, internalformat, textures[handle].width, textures[handle].height, textures[handle].textureformat, GL_UNSIGNED_BYTE, buffer);
-    else
+    if ((textures[handle].mipmapped&&gl_options.mipmap>=2)||detail_texture){
+		if (detail_texture) {
+			static FILTER fil = XMLSupport::parse_bool(vs_config->getVariable("graphics","detail_texture_trilinear","false"))?TRILINEAR:MIPMAP;
+			textures[handle].mipmapped= 	fil;
+			glTexParameteri (textures[handle].targets, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+			if (fil&TRILINEAR) {
+				glTexParameteri (textures[handle].targets, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+			}else {
+				glTexParameteri (textures[handle].targets, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
+			}
+		}
+		int width=textures[handle].width,height=textures[handle].height;
+		int count=0;
+		static int blankout = XMLSupport::parse_int(vs_config->getVariable("graphics","detail_texture_blankout","3"));
+		static int fullout = XMLSupport::parse_int(vs_config->getVariable("graphics","detail_texture_full_color","1"))-1;
+		float numdivisors = logsize>fullout+blankout?(1./(logsize-fullout-blankout)):1;
+		float detailscale=1;
+		while(1){
+			glTexImage2D(image2D,count,internalformat,width,height,0,textures[handle].textureformat,GL_UNSIGNED_BYTE,buffer);
+			if (width==1&&height==1)
+				break;
+			int newwidth = width>2?width/2:1;
+			int newheight = height>2?height/2:1;
+			tempbuf=NULL;
+			count++;			
+			DownSampleTexture(&tempbuf,buffer,height,width,(internformat==PALETTE8?1:(internformat==RGBA32?4:3))* sizeof(unsigned char ),handle,newheight,newwidth,detail_texture?detailscale:1);
+			if (count>fullout) {
+				detailscale-=numdivisors;
+			}
+			if (detailscale<0)
+				detailscale=0;
+			buffer=tempbuf;
+			width=newwidth;
+			height=newheight;
+		}
+    }else {
       glTexImage2D(image2D, 0, internalformat, textures[handle].width, textures[handle].height, 0, textures[handle].textureformat, GL_UNSIGNED_BYTE, buffer);
+	}
   }else {
 #if defined(GL_COLOR_INDEX8_EXT)	// IRIX has no GL_COLOR_INDEX8 extension
     if (gl_options.PaletteExt) {
@@ -341,10 +383,11 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture (unsigned char *buffer, int handle,  TE
 	  free(tempbuf);
 	return GFXFALSE;
       }
-      if (textures[handle].mipmapped&&gl_options.mipmap>=2)
-	gluBuild2DMipmaps(image2D, GL_COLOR_INDEX8_EXT, textures[handle].width, textures[handle].height, GL_COLOR_INDEX, GL_UNSIGNED_BYTE, buffer);
-      else
-	glTexImage2D(image2D, 0, GL_COLOR_INDEX8_EXT, textures[handle].width, textures[handle].height, 0, GL_COLOR_INDEX, GL_UNSIGNED_BYTE, buffer);
+      if (textures[handle].mipmapped&&gl_options.mipmap>=2){
+			  gluBuild2DMipmaps(image2D, GL_COLOR_INDEX8_EXT, textures[handle].width, textures[handle].height, GL_COLOR_INDEX, GL_UNSIGNED_BYTE, buffer);
+      }else{
+		  glTexImage2D(image2D, 0, GL_COLOR_INDEX8_EXT, textures[handle].width, textures[handle].height, 0, GL_COLOR_INDEX, GL_UNSIGNED_BYTE, buffer);
+	  }
 #if 0
       error = glGetError();
       if (error) {
@@ -368,15 +411,14 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture (unsigned char *buffer, int handle,  TE
 	  tbuf[i+3]= textures[handle].palette[4*buffer[j]+3];//used to be 255
 	  j ++;
 	}
+	  GFXTransferTexture(tbuf,handle,RGBA32,imagetarget,maxdimension,detail_texture);
+/* KILL duplicate code!
       if (textures[handle].mipmapped&&gl_options.mipmap>=2)
-	gluBuild2DMipmaps(image2D, 4, textures[handle].width, textures[handle].height, GL_RGBA, GL_UNSIGNED_BYTE, tbuf);
+		  gluXXXBuild2DMipmaps(image2D, 4, textures[handle].width, textures[handle].height, GL_RGBA, GL_UNSIGNED_BYTE, tbuf);
       else
-	glTexImage2D(image2D, 0, 4, textures[handle].width, textures[handle].height, 0, GL_RGBA, GL_UNSIGNED_BYTE, tbuf);
-      
-      //unashiehized			glTexImage2D(image2D,0,3,textures[handle].width, textures[handle].height,0,GL_RGBA, GL_UNSIGNED_BYTE, tbuf);
+		  glXXXTexImage2D(image2D, 0, 4, textures[handle].width, textures[handle].height, 0, GL_RGBA, GL_UNSIGNED_BYTE, tbuf);
+*/
       free (tbuf);
-      //delete [] buffer;
-      //buffer = tbuf;
     }
  
   }
