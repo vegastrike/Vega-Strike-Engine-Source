@@ -7,6 +7,9 @@
 #include <float.h>
 #include <ctype.h>
 #include <algorithm>
+#ifdef _WIN32
+#include <sys/stat.h>
+#endif
 using std::vector;
 using std::map;
 using std::string;
@@ -218,19 +221,30 @@ vector<System> readfile (const char * name) {
 		printf("unable to open %s\n",name);
 		return systems;
 	}
-	fseek (fp,0,SEEK_END);
-	int len = ftell (fp);
-	fseek (fp,0,SEEK_SET);
+	int len;
+#ifdef _WIN32
+	struct stat st;
+	if (fstat(fileno(fp), &st)==0) {
+		len=st.st_size;
+	} else {
+		// fstat B0rken.
+#else
+	{
+#endif
+		fseek (fp,0,SEEK_END);
+		len = ftell (fp);
+		fseek (fp,0,SEEK_SET);
+	}
 	char * line = (char *)malloc (len+1);
 	line[len]=0;
 	fgets(line,len,fp);
-	vector<string> keys = readCSV(line);
-	for (vector<string>::iterator i =keys.begin();i!=keys.end();++i) {
+	std::vector<string> keys = readCSV(line);
+	for (std::vector<string>::iterator i =keys.begin();i!=keys.end();++i) {
 		*i = strtoupper(*i);
 	}
 	while(fgets (line,len,fp)) {
 		System in;
-		vector <string> content = readCSV(line);
+		std::vector <string> content = readCSV(line);
 		for (int i = 0;i<content.size();++i) {
 			if (keys[i].find("DISTANCE")!=string::npos) {
 				in.distance = atof (content[i].c_str());
@@ -271,12 +285,12 @@ vector<System> readfile (const char * name) {
 }
 
 
-void writesystems(FILE * fp, vector<System> s) {
+void writesystems(FILE * fp, std::vector<System> s) {
 	std::sort(s.begin(),s.end());//sort into sector categories
 	string cursector;
 	fprintf(fp,"<galaxy><systems>\n");
 	int iter=0;
-	for (vector<System>::iterator i = s.begin();i!=s.end();++i) {
+	for (std::vector<System>::iterator i = s.begin();i!=s.end();++i) {
 		if ((*i).sector != cursector) {
  			//start sectortag;
 			if (cursector!="")
@@ -285,7 +299,7 @@ void writesystems(FILE * fp, vector<System> s) {
 			cursector = (*i).sector;
 		}
 		fprintf(fp,"\t\t<sector name=\"%s\">\n",(*i).name.c_str());
-		for (map<string,string>::iterator j = (*i).begin();j!=(*i).end();++j) {
+		for (std::map<string,string>::iterator j = (*i).begin();j!=(*i).end();++j) {
 			fprintf (fp, "\t\t\t<var name=\"%s\" value=\"%s\"/>\n",(*j).first.c_str(),(*j).second.c_str());			
 		}
 		fprintf (fp,"\t\t\t<var name=\"faction\" value=\"confed\"/>\n");
@@ -304,12 +318,12 @@ string getSector(const System &s, vec3 min, vec3 max) {
 double sqr (double x){
 	return x*x;
 }
-void processsystems (vector <System> & s){
+void processsystems (std::vector <System> & s){
 	vec3 min,max;
 	computeminmax(s,min,max);
 	for (unsigned int i=0;i<s.size();++i) {
 		s[i].sector=getSector(s[i],min,max);
-		map <double,string> jumps;
+		std::map <double,string> jumps;
 		if (s[i].habitable)
 		for (unsigned int j=0;j<s.size();++j) {
 			if (j!=i && (s[j].habitable||rand()<RAND_MAX*.001)){
@@ -318,7 +332,7 @@ void processsystems (vector <System> & s){
 				if (jumps.size()>=desired_size) {
 					if (jumps.upper_bound(dissqr)!=jumps.end() && rand()<RAND_MAX*.995) {
 						jumps[dissqr]=s[j].fullName();
-						map<double,string>::iterator k = jumps.end();
+						std::map<double,string>::iterator k = jumps.end();
 						k--;
 						jumps.erase(k);//erase last one
 					}
@@ -329,7 +343,7 @@ void processsystems (vector <System> & s){
 		}
 		string j;
 		if (jumps.size()) {
-			map<double,string>::iterator k= jumps.begin();
+			std::map<double,string>::iterator k= jumps.begin();
 			j=(*k).second;			
 			++k;
 			for (;k!=jumps.end();++k) {
@@ -345,7 +359,7 @@ int main (int argc, char ** argv) {
 		return 1;
 	}
 
-	vector <System> s=readfile(argv[1]);
+	std::vector <System> s=readfile(argv[1]);
 	processsystems(s);
 	FILE * fp = fopen (argv[2],"w");
 	if (fp){
