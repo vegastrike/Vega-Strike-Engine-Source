@@ -2217,10 +2217,10 @@ bool BaseComputer::loadSavePickerChangedSelection(const EventCommandId& command,
         // No selection.  Clear desc.  (Not sure how this can happen, but it's easy to cover.)
         desc->setText("");
     } else {
-        desc->setText(cell->text());
-		if (inputbox!=NULL)
-			inputbox->setText(cell->text());
-		
+      desc->setText(cell->text());
+      if (inputbox!=NULL)
+        inputbox->setText(cell->text());
+      
     }
 
 
@@ -4850,9 +4850,13 @@ bool BaseComputer::actionSaveGame(const EventCommandId& command, Control* contro
 				actionConfirmedSaveGame();
 			} else {
 				fp.Close();
-				LoadSaveQuitConfirm *saver= new LoadSaveQuitConfirm(this,"Save","Do you want to overwrite your old saved game?");
-				saver->init();
-				saver->run();
+                                if (string("New_Game")!=tmp) {
+                                  LoadSaveQuitConfirm *saver= new LoadSaveQuitConfirm(this,"Save","Do you want to overwrite your old saved game?");
+                                  saver->init();
+                                  saver->run();
+                                } else {
+                                  showAlert("You may not save to the name New_Game.");
+                                }
 			}
 		}
 	}

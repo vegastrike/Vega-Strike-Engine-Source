@@ -44,7 +44,7 @@ if( Network==NULL)
 	  // IF save.4.x.txt DOES NOT EXIST WE CREATE ONE WITH "default" AS SAVENAME
 	  err = f.OpenCreateWrite( "save.4.x.txt", UnknownFile);
       if (err<=Ok) {
-		f.Write("default\n",8);
+		f.Write("New_Game\n",9);
 		f.Close();
       }
 	  else

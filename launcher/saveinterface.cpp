@@ -120,11 +120,7 @@ GdkWindow * Help (const char *title, const char *text) {
     return (GdkWindow*)window;
 }
 
-#ifdef __MINGW32__
 void save_stuff( const char *filename) {
-#else
-void save_stuff(char *filename) {
-#endif
   changehome();
     FILE *file=fopen("../save.4.x.txt","wt");
     if (file) {
@@ -308,7 +304,9 @@ void hello( GtkWidget *widget, gpointer   data ) {
       LoadMissionDialog("Select Mission",i);
       break;
     case 0:
-      LoadSaveDialog("New Game","Please type or select the name of the pilot that you wish to create.",i);
+      save_stuff("New_Game");
+      launch_mission();
+      //LoadSaveDialog("New Game","Please type or select the name of the pilot that you wish to create.",i);
       break;
     case 1:
       LoadSaveDialog("Open Game","Please type or select the name of the pilot that you wish to load.",i);
