@@ -326,7 +326,7 @@ protected:
   void RefreshDisplayList();
   virtual void Draw (enum POLYTYPE *poly, const INDEX index, const int numLists, const int *offsets);
   void RenormalizeNormals();
-  GFXVertexList() {}//private, only for inheriters
+  GFXVertexList();
 public:
   ///creates a vertex list with 1 polytype and a given number of vertices
   inline GFXVertexList(enum POLYTYPE poly, int numVertices, const GFXVertex *vertices,int numindices, bool Mutable=false, unsigned int * index=0){Init (&poly, numVertices, vertices,0, 1,&numindices, Mutable,index);}

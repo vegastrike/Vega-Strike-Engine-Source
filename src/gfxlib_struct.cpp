@@ -317,3 +317,10 @@ void GFXVertexList::EndMutate (int newvertexsize) {
 
 
 }
+
+
+GFXVertexList::GFXVertexList() {
+  vbo_data=0;
+  display_list=0;
+  memset(this,0,sizeof(GFXVertexList));
+}//private, only for inheriters

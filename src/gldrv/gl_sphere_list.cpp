@@ -160,6 +160,7 @@ GFXSphereVertexList::GFXSphereVertexList(float radius, int detail, bool Insideou
   data.vertices=sphere->data.vertices;
   index.i=sphere->index.i;
   display_list = sphere->display_list;
+  vbo_data=sphere->vbo_data;
   mode = sphere->mode;
   offsets=sphere->offsets;  
 }
@@ -173,5 +174,5 @@ GFXSphereVertexList::~GFXSphereVertexList() {
   numlists=0;
   display_list=0;
   offsets=0;
-  
+  vbo_data=0;
 }
