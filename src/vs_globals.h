@@ -17,7 +17,7 @@ extern Universe * _Universe;
 
 extern void cleanup();
 extern bool STATIC_VARS_DESTROYED;
-extern bool SERVER;
+extern char SERVER;
 extern int	loop_count;
 extern double	avg_loop;
 extern int	nb_checks;
