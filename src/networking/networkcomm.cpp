@@ -122,7 +122,7 @@ NetworkCommunication::NetworkCommunication()
 	this->active = false;
 	this->max_messages = 25;
 	this->method = ClientBroadcast;
-	this->crypt_key = XMLSupport::parse_int( vs_config->getVariable( "network", "encryption_key", "0"));
+	memcpy( this->crypt_key, vs_config->getVariable( "network", "encryption_key", "").c_str(), DESKEY_SIZE);
 	use_pa = XMLSupport::parse_bool( vs_config->getVariable( "network", "use_portaudio", "false"));
 
 #ifdef NETCOMM_JVOIP
@@ -510,7 +510,7 @@ void	NetworkCommunication::SwitchSecured()
 		secured=0;
 	else
 	{
-		if( crypt_key!=0)
+		if( crypt_key[0]!=0)
 			secured = 1;
 	}
 }

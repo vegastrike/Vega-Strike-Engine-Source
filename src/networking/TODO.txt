@@ -1,7 +1,9 @@
 
 *** GENERAL ************************************************************
 
+- Use crypto lib md5 class instead of the 2 md5 files I'm using now
 - Wait for DloadMgr buffer to buffer download support and use it to transfer webcam captures
+- Use crypto++ lib to implement comms encryption
 - LOW : Complete jVoIP support
 - PortAudio : tune MAX_PA_CPU_LOAD when support is complete
 - Netcomm : Add support for secure channels (encrypt with a key every data send on those channels)

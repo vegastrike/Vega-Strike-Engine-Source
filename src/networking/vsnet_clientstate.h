@@ -53,6 +53,7 @@ class	ClientState
 		Vector		getVelocity() { return this->veloc;}
 		Vector		getAcceleration() { return this->accel;}
 		ObjSerial	getSerial() { return this->client_serial;}
+		ObjSerial	getSerial() const { return this->client_serial;}
 		unsigned int	getDelay() { return this->delay;}
 		void		setDelay( unsigned int del) { this->delay = del;}
 		void		setSerial( ObjSerial ser) { this->client_serial = ser;}

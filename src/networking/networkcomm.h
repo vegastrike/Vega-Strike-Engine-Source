@@ -1,6 +1,7 @@
 #ifndef __NETWORKCOMM_H
 #define __NETWORKCOMM_H
 
+#include "const.h"
 #include "client.h"
 #include "clientptr.h"
 #include <string>
@@ -24,6 +25,9 @@ class JVOIPRTPTransmissionParams;
 #define MAX_PA_CPU_LOAD		0.5
 // (MAX_PA_CPU_LOAD*100)% CPU LOAD
 #endif
+#ifdef CRYPTO
+#include <crypto++/cryptlib.h>
+#endif
 
 typedef list<ClientPtr>::iterator CltPtrIterator;
 namespace VsnetDownload {
@@ -46,11 +50,11 @@ class NetworkCommunication
 		list<ClientPtr>			commClients;			// List of client communicating on the same frequency
 		CltPtrIterator			webcamClient;			// The client we are watching the webcam
 
-		unsigned int	crypt_key;		// Key used for encryption on secured channels
-		float			freq;			// Current communication frequency
-		bool			active;			// Tell wether the communication system is active
-		char			secured;		// Tell wether we are on a secured channel or not
-		unsigned char	method;			// Method used to spread comms
+		char	crypt_key[DESKEY_SIZE];		// Key used for encryption on secured channels
+		float				freq;			// Current communication frequency
+		bool				active;			// Tell wether the communication system is active
+		char				secured;		// Tell wether we are on a secured channel or not
+		unsigned char		method;			// Method used to spread comms
 #ifndef NETCOMM_NOWEBCAM
 		// Webcam support
 		WebcamSupport *		Webcam;
@@ -77,6 +81,9 @@ class NetworkCommunication
 
 		friend int	Pa_RecordCallback( void * inputBuffer, void * outputBuffer, unsigned long framesPerBuffer, PaTimestamp outTime, void * userdata);
 		friend int	Pa_PlayCallback( void * inputBuffer, void * outputBuffer, unsigned long framesPerBuffer, PaTimestamp outTime, void * userdata);
+#endif
+#ifdef CRYPTO
+		Algorithm *			cryptalgo;
 #endif
 
 	public:
