@@ -16,6 +16,10 @@ typedef std::map<string,CCScript *> HardCodedMap;
 HardCodedMap MakeHardCodedScripts() {
   HardCodedMap tmp;
   typedef pair<string, CCScript *> MyPair;
+  tmp.insert (MyPair ("loop around fast",&LoopAroundFast));
+  tmp.insert (MyPair ("aggressive loop around fast",&AggressiveLoopAroundFast));  
+  tmp.insert (MyPair ("loop around slow",&LoopAroundSlow));
+  tmp.insert (MyPair ("aggressive loop around slow",&AggressiveLoopAroundSlow));  
   tmp.insert (MyPair ("loop around",&LoopAround));
   tmp.insert (MyPair ("aggressive loop around",&AggressiveLoopAround));  
   tmp.insert (MyPair ("barrel roll",&BarrelRoll));

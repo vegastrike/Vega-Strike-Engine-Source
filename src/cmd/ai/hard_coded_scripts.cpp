@@ -136,10 +136,13 @@ class LoopAround: public Orders::FaceTargetITTS{
 	float pp;
 	Vector rr;// place to go for @ end
 	bool aggressive;
+	bool afterburn;
+	bool force_afterburn;
 public:
-	LoopAround(bool aggressive, int seed):FaceTargetITTS(false,3),m(false,2,false) {
+	LoopAround(bool aggressive, bool afterburn, bool force_afterburn, int seed):FaceTargetITTS(false,3),m(false,2,false) {
 		VSRandom vsr(seed);
-		
+		this->afterburn=afterburn;
+		this->force_afterburn=force_afterburn;
 		this->aggressive=aggressive;
 		static float loopdis=XMLSupport::parse_float (vs_config->getVariable("AI","loop_around_distance","1"));
 		qq=pp=0;
@@ -168,15 +171,16 @@ public:
 		if (targ) {
 			Vector relloc = parent->Position()-targ->Position();
 			Vector r =targ->cumulative_transformation_matrix.getR();
-			bool afterburn = useAfterburner();
+			bool afterburn = useAfterburner()&&this->afterburn;
+                        bool ab_needed=force_afterburn||targ->GetVelocity().MagnitudeSquared()>parent->GetComputerData().max_speed();
 			if (r.Dot(relloc) <0) {
 				FaceTargetITTS::Execute();
-				m.SetAfterburn (afterburn);
+				m.SetAfterburn (afterburn&&ab_needed);
 				m.Execute(parent,targ->Position()-r.Scale(rr.k*parent->rSize()+targ->rSize())+targ->cumulative_transformation_matrix.getP()*(rr.i*parent->rSize())+targ->cumulative_transformation_matrix.getQ()*(rr.j*parent->rSize()));
 			}else {
 				done=false;
 				if (afterburn)
-					m.SetAfterburn (targ->GetVelocity().MagnitudeSquared()>parent->GetComputerData().max_speed());
+					m.SetAfterburn (ab_needed);
 				else
 					m.SetAfterburn(0);
 				Vector scala=targ->cumulative_transformation_matrix.getQ().Scale(qq*(parent->rSize()+targ->rSize()))+targ->cumulative_transformation_matrix.getP().Scale(pp*(parent->rSize()+targ->rSize()));								
@@ -194,12 +198,32 @@ public:
 };
 }
 void LoopAround(Order* aisc, Unit * un) {
-	Order* broll = new Orders::LoopAround(false,(int)un);
+	Order* broll = new Orders::LoopAround(false,true,false,(int)un);
 	AddOrd(aisc,un,broll);
 	
 }
 void AggressiveLoopAround(Order* aisc, Unit * un) {
-	Order* broll = new Orders::LoopAround(true,(int)un);
+	Order* broll = new Orders::LoopAround(true,true,false,(int)un);
+	AddOrd(aisc,un,broll);
+	
+}
+void LoopAroundFast(Order* aisc, Unit * un) {
+	Order* broll = new Orders::LoopAround(false,true,true,(int)un);
+	AddOrd(aisc,un,broll);
+	
+}
+void AggressiveLoopAroundFast(Order* aisc, Unit * un) {
+	Order* broll = new Orders::LoopAround(true,true,true,(int)un);
+	AddOrd(aisc,un,broll);
+	
+}
+void LoopAroundSlow(Order* aisc, Unit * un) {
+	Order* broll = new Orders::LoopAround(false,false,false,(int)un);
+	AddOrd(aisc,un,broll);
+	
+}
+void AggressiveLoopAroundSlow(Order* aisc, Unit * un) {
+	Order* broll = new Orders::LoopAround(true,false,false,(int)un);
 	AddOrd(aisc,un,broll);
 	
 }

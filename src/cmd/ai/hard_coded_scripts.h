@@ -27,6 +27,10 @@ CCScript BarrelRoll;
 CCScript EvadeThrust;
 CCScript LoopAround;
 CCScript AggressiveLoopAround;
+CCScript LoopAroundFast;
+CCScript AggressiveLoopAroundFast;
+CCScript LoopAroundSlow;
+CCScript AggressiveLoopAroundSlow;
 
 #endif
 
