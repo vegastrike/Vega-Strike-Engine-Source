@@ -262,14 +262,26 @@ void JoyStick::GetMouse (float &x, float &y, float &z, int &buttons) {
     std::list<mouseData>::iterator i=md.begin();
     float ttime=getNewTime();
     float lasttime=ttime-joystickblur;
-    int avg=1;
+    int avg=(_dx||_dy)?1:0;
     float valx=_dx;
     float valy=_dy;
     for(;i!=md.end();) {
       if ((*i).time>=lasttime) {
-        valx+=(*i).dx;
-        valy+=(*i).dy;
-        avg++;
+        bool found=false;
+        int ldx=(*i).dx;
+        int ldy=(*i).dy;
+        if ((ldx>=0)*_dx*ldx==(_dx>=0)*_dx*ldx) {
+          //make sure same sign or zero
+          valx+=(*i).dx;
+          found=true;
+        }
+        if ((ldy>=0)*_dy*ldy==(_dy>=0)*_dy*ldy) {
+          //make sure same sign or zero
+          valy+=(*i).dy;
+          found=true;
+        }
+        if (found)
+          avg++;
         ++i;
       } else {
         i=md.erase(i);
@@ -277,8 +289,10 @@ void JoyStick::GetMouse (float &x, float &y, float &z, int &buttons) {
     }
     if (_dx||_dy)
       md.push_back(mouseData(_dx,_dy,ttime));
-    _dx=valx/avg;
-    _dy=valy/avg;
+    if (avg) {
+      _dx=valx/avg;
+      _dy=valy/avg;
+    }
     fdx=float(valx)/joystickblur;
     fdy=float(valy)/joystickblur;
     //printf (" x:%.2f y:%.2f %d ",fdx,fdy,avg);
