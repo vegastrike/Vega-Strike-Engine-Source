@@ -248,6 +248,29 @@ void ObjToBFXM (FILE* obj, FILE * mtl, FILE * outputFile) {
         xml.quads.push_back(xml.quadtemp);
         continue;
       }
+      if (3== sscanf(buf,"l %s %s\n",str,str1)) {
+        IntRef A = parsePoly(str);        
+        IntRef B = parsePoly(str1);        
+        temp.i = xml.vertices[B.v].x-xml.vertices[A.v].x;
+        temp.j = xml.vertices[B.v].y-xml.vertices[A.v].y;
+        temp.k = xml.vertices[B.v].z-xml.vertices[A.v].z;
+        float len = sqrt(temp.i*temp.i+temp.j*temp.j+temp.k*temp.k);
+        temp.i/=len;temp.j/=len;temp.k/=len;
+        AddNormal(xml.vertices[B.v],temp);
+        temp.i*=-1;temp.j*=-1;temp.k*=-1;
+        AddNormal(xml.vertices[A.v],temp);
+        xml.linetemp.indexref[0]=A.v;
+        if (A.t>=0&&A.t<tex.size()) {
+          xml.linetemp.s[0]=tex[A.t].first;
+          xml.linetemp.t[0]=tex[A.t].second;
+        }
+        xml.linetemp.indexref[1]=B.v;
+        if (B.t>=0&&B.t<tex.size()) {
+          xml.linetemp.s[1]=tex[B.t].first;
+          xml.linetemp.t[1]=tex[B.t].second;
+        }
+        xml.lines.push_back(xml.linetemp);
+      }
       if (3== sscanf(buf,"f %s %s %s\n",str,str1,str2)) {
         IntRef A = parsePoly(str);        
         IntRef B = parsePoly(str1);        

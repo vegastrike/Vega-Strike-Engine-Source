@@ -348,6 +348,19 @@ void BFXMToXmesh(FILE* Inputfile, FILE* Outputfile, FILE * OutputObj, FILE * mtl
 			float32bit t2=VSSwapHostFloatToLittle(inmemfile[word32index+2].f32val);//t
 			word32index+=NUMFIELDSPERREFERENCEDVERTEX;
 			fprintf(Outputfile,"\t<Line flatshade=\"%d\">\n\t\t<Vertex point=\"%d\" s=\"%f\" t=\"%f\"/>\n\t\t<Vertex point=\"%d\" s=\"%f\" t=\"%f\"/>\n\t</Line>\n",flatshade,ind1,s1,t1,ind2,s2,t2);
+                        int texind1 = ind1+texoffset;
+                        int texind2 = ind2+texoffset;
+                        if (!sharevert) {
+                          fprintf (OutputObj,"vt %f %f\n",s1,t1);
+                          fprintf (OutputObj,"vt %f %f\n",s2,t2);
+                          texcount+=2;
+                          texind1=texcount-2;
+                          texind2=texcount-1;
+                        }
+                        fprintf (OutputObj,"f %d/%d/%d %d/%d/%d\n",
+                                 ind1+indoffset,texind1,ind1+normoffset,
+                                 ind2+indoffset,texind2,ind2+normoffset);
+
 		  }
 		  //End Lines
 		  //Triangles
