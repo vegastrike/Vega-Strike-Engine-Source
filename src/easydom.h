@@ -123,7 +123,7 @@ domNodeType *LoadXML(const char *filename) {
   topnode=NULL;
   // Not really nice but should do its job
   unsigned int length = strlen( filename);
-  assert( length > 16);
+  assert( length > 8);
   VSFile f;
   VSError err;
   if( !memcmp( (filename+length-7), "mission", 7))

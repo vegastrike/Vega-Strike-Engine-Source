@@ -223,7 +223,8 @@ int main( int argc, char *argv[] )
   if (g_game.music_enabled) {
     int pid=fork();
     if (!pid) {
-      pid=execlp("./soundserver","./soundserver",NULL);
+	  string soundserver_path = VSFileSystem::datadir+"/soundserver";
+      pid=execlp(soundserver_path.c_str() , soundserver_path.c_str(),NULL);
       g_game.music_enabled=false;
       VSFileSystem::vs_fprintf(stderr,"Unable to spawn music player server\n");
       exit (0);
@@ -421,14 +422,16 @@ void bootstrap_main_loop () {
     bootstrap_draw ("Vegastrike Loading...",SplashScreen);
     if (g_game.music_enabled) {
 #if defined( _WIN32) && !defined( __CYGWIN__)
-      int pid=spawnl(P_NOWAIT,"./soundserver.exe","./soundserver.exe",NULL);
+	  string ss_path = VSFileSystem::datadir+"/soundserver.exe";
+      int pid=spawnl(P_NOWAIT,ss_path.c_str(),ss_path.c_str(),NULL);
       if (pid==-1) {
-		 chdir("bin");
-	int pid=spawnl(P_NOWAIT,"./soundserver.exe","./soundserver.exe",NULL);
-	if (pid==-1) {
-	  g_game.music_enabled=false;
-	  VSFileSystem::vs_fprintf(stderr,"Unable to spawn music player server Error (%d)\n",pid);
-	}
+		ss_path = VSFileSystem::datadir+"/bin/soundserver.exe";
+		chdir("bin");
+		int pid=spawnl(P_NOWAIT,ss_path.c_str(),ss_path.c_str(),NULL);
+		if (pid==-1) {
+			g_game.music_enabled=false;
+			VSFileSystem::vs_fprintf(stderr,"Unable to spawn music player server Error (%d)\n",pid);
+		}
       }
 #endif
     }

@@ -376,26 +376,19 @@ static void endPlanetElement (void *userData, const XML_Char *name) {
 
 static std::map<std::string, std::string> readPlanetTypes(std::string filename) {
 	std::map<std::string, std::string> planetTypes;
-	FILE *fp=fopen(filename.c_str(),"r");
-	if (!fp) {
+	VSFile f;
+	VSError err = f.OpenReadOnly( filename, UniverseFile);
+	if (err<=Ok) {
 		return planetTypes;
 	}
-	int len;
-	{
-		struct stat st;
-		if (fstat(fileno(fp), &st)!=0) {
-			return planetTypes;
-		} else {
-			len=st.st_size;
-		}
-	}
+	int len = f.Size();
 	XML_Parser parser=XML_ParserCreate(NULL);
 	void *buff = XML_GetBuffer(parser, len);
 	if (buff == NULL) {
 		fprintf(stderr, "Fatal error: out of memory for planet name file\n");
 		return planetTypes;
 	}
-	len=fread(buff, 1, len, fp);
+	len=f.Read(buff, len);
 	XML_SetElementHandler(parser, &beginPlanetElement, &endPlanetElement);
 	XML_SetUserData(parser, &planetTypes);
 	XML_ParseBuffer(parser, len, 1);
@@ -404,7 +397,7 @@ static std::map<std::string, std::string> readPlanetTypes(std::string filename) 
 }
 
 string Planet::getHumanReadablePlanetType () const{
-	  static std::map<std::string, std::string> planetTypes (readPlanetTypes("universe/planet_types.xml"));
+	  static std::map<std::string, std::string> planetTypes (readPlanetTypes("planet_types.xml"));
   	  string temp =getCargoUnitName();
 	  return planetTypes[temp];
 }

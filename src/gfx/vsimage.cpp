@@ -20,6 +20,10 @@ typedef int INT32;
 #endif
 #endif
 
+#if defined(__CYGWIN__)
+#define XMD_H
+#endif
+
 extern "C" {
 #include <jpeglib.h>
 }

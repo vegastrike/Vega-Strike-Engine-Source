@@ -659,18 +659,18 @@ namespace VSFileSystem
 				cerr<<"Found data in "<<(*vsit)<<endl;
 				getcwd( tmppath, 16384);
 				if( (*vsit).substr( 0, 1) == ".")
-				{
 					datadir = string( tmppath)+"/"+(*vsit);
-					if( chdir( datadir.c_str())<0)
-					{
-						cerr<<"Error changing to datadir"<<endl;
-						exit(1);
-					}
-					getcwd( tmppath, 16384);
-					datadir = string( tmppath);
-				}
 				else
 					datadir = (*vsit);
+
+				if( chdir( datadir.c_str())<0)
+				{
+					cerr<<"Error changing to datadir"<<endl;
+					exit(1);
+				}
+				getcwd( tmppath, 16384);
+				datadir = string( tmppath);
+
 				cerr<<"Using "<<datadir<<" as data directory"<<endl;
 				break;
 			}
@@ -1238,7 +1238,7 @@ namespace VSFileSystem
 		unsigned int i=0, j=0;
 
 		// FIRST LOOK IN HOMEDIR FOR A STANDARD FILE, SO WHEN USING VOLUME WE DO NOT LOOK FIRST IN VOLUMES
-		if( found<0 && UseVolumes[type])
+		if( found<0 && UseVolumes[curtype])
 		{
 			curpath = homedir;
 			subdir = "";
@@ -1246,13 +1246,13 @@ namespace VSFileSystem
 				subdir += extra;
 			found = FileExists( curpath, (subdir+"/"+f.GetFilename()).c_str(), type, false);
 	
-			for( j=0; found<0 && j<SubDirectories[type].size(); j++)
+			for( j=0; found<0 && j<SubDirectories[curtype].size(); j++)
 			{
-				subdir = SubDirectories[type][j];
+				subdir = SubDirectories[curtype][j];
 				if( extra!="")
 					subdir += extra;
 
-				found = FileExists( curpath, (subdir+"/"+f.GetFilename()).c_str(), type, false);
+				found = FileExists( curpath, (subdir+"/"+f.GetFilename()).c_str(), curtype, false);
 				f.SetVolume( None);
 			}
 		}
@@ -1266,14 +1266,14 @@ namespace VSFileSystem
 				subdir += extra;
 			found = FileExists( curpath, (subdir+"/"+f.GetFilename()).c_str(), type);
 
-			for( j=0; found<0 && j<SubDirectories[type].size(); j++)
+			for( j=0; found<0 && j<SubDirectories[curtype].size(); j++)
 			{
 				curpath = Rootdir[i];
-				subdir = SubDirectories[type][j];
+				subdir = SubDirectories[curtype][j];
 				if( extra!="")
 					subdir += extra;
 
-				found = FileExists( curpath, (subdir+"/"+f.GetFilename()).c_str(), type);
+				found = FileExists( curpath, (subdir+"/"+f.GetFilename()).c_str(), curtype);
 			}
 		}
 
@@ -1286,9 +1286,7 @@ namespace VSFileSystem
 	#endif
 		if( found>=0)
 		{
-			bool thatlong = i<Rootdir.size();
-			if (thatlong)thatlong = Rootdir[i]==homedir;
-			if( type==SystemFile && thatlong)
+			if( type==SystemFile && i==0 /* Rootdir[i]==homedir*/ )
 				shared = true;
 			f.SetDirectory( Directories[curtype]);
 			f.SetSubDirectory( subdir);

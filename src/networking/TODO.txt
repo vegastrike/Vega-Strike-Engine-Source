@@ -1,8 +1,6 @@
 
 *** GENERAL ************************************************************
 
-- Move accounts.xml into datadir/accounts/ dir
-- Fix accounts.xml being written in homedir instead of datadir in acctserver.cpp when account subscription from web
 - Fix the generated BSP save path
 TO TEST - Possibility of specifying a mod
 TO TEST - Add the command line datapath if supplied !
@@ -68,6 +66,8 @@ MAYBE NOT - Make webcam capture size part of config file (and later part of serv
 
 === GENERAL STUFF =======================================================
 
+DONE - Move accounts.xml into datadir/accounts/ dir
+DONE - Fix accounts.xml being written in homedir instead of datadir in acctserver.cpp when account subscription from web
 DONE - Use scandir to list all mods found in datadir/mods and homedir/mods
 DONE - Add a vector that keeps track of what FileType use volumes instead of checking everytime against Unknown
 DONE - Always look for the real file in homedir even when using volume
