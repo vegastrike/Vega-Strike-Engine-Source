@@ -3397,7 +3397,7 @@ void showUnitStats(Unit * playerUnit,string &text,int subunitlevel, int mode, Ca
     	text+="#n#"+prefix+statcolor+"Turning Response: #-c";
 	}
     if (playerUnit->limits.yaw==playerUnit->limits.pitch &&playerUnit->limits.yaw==playerUnit->limits.roll) {
-		prettyPrintFloat(conversionBuffer,playerUnit->limits.yaw/(playerUnit->GetMoment()!=0)?playerUnit->GetMoment():1,0,2);
+		prettyPrintFloat(conversionBuffer,playerUnit->limits.yaw/((playerUnit->GetMoment()!=0)?playerUnit->GetMoment():1),0,4);
 		if(!mode){
 			text+=conversionBuffer;
 			text+=" radians/second^2 "+statcolor+"(yaw, pitch, roll)#-c";
@@ -3422,9 +3422,10 @@ void showUnitStats(Unit * playerUnit,string &text,int subunitlevel, int mode, Ca
 		}
 	} else {
 		if(!mode){
-			PRETTY_ADDN(statcolor+" yaw #-c",playerUnit->limits.yaw/(playerUnit->GetMoment()),2);
-			PRETTY_ADDN(statcolor+"  pitch #-c",playerUnit->limits.pitch/(playerUnit->GetMoment()),2);
-			PRETTY_ADDN(statcolor+"  roll #-c",playerUnit->limits.roll/(playerUnit->GetMoment()),2);
+			float moment = (playerUnit->GetMoment()==0)?playerUnit->GetMoment():1;
+			PRETTY_ADDN(statcolor+" yaw #-c",playerUnit->limits.yaw/(moment),4);
+			PRETTY_ADDN(statcolor+"  pitch #-c",playerUnit->limits.pitch/(moment),4);
+			PRETTY_ADDN(statcolor+"  roll #-c",playerUnit->limits.roll/(moment),4);
 			text+=" radians/second^2";
 		} else {
 			if(playerUnit->limits.yaw!=blankUnit->limits.yaw||playerUnit->limits.pitch!=blankUnit->limits.pitch||playerUnit->limits.roll!=blankUnit->limits.roll){
@@ -3576,7 +3577,7 @@ void showUnitStats(Unit * playerUnit,string &text,int subunitlevel, int mode, Ca
 			text+=" Radians/second "+statcolor+"(yaw, pitch, roll)#-c";
 			}
 		else {
-			text+=("#n#"+prefix+"Max turn rates: ");
+			text+=("#n#"+prefix+statcolor+"Max turn rates:#-c ");
 			PRETTY_ADDN(statcolor+"  yaw #-c",uc.max_yaw,2);
 			PRETTY_ADDN(statcolor+"  pitch #-c",uc.max_pitch,2);
 			PRETTY_ADDN(statcolor+"  roll #-c",uc.max_roll,2);
