@@ -465,8 +465,10 @@ BaseInterface::~BaseInterface () {
 	}
 }
 void base_main_loop();
+int shiftup(int);
 static void base_keyboard_cb( unsigned int  ch,unsigned int mod, bool release, int x, int y ) {
-	base_keyboard_queue.push_back (ch);
+	if (!release)
+		base_keyboard_queue.push_back (((WSK_MOD_LSHIFT==(mod&WSK_MOD_LSHIFT))||(WSK_MOD_RSHIFT==(mod&WSK_MOD_RSHIFT)))?shiftup(ch):ch);
 }
 void BaseInterface::InitCallbacks () {
 	winsys_set_keyboard_func(base_keyboard_cb);	
@@ -476,7 +478,10 @@ void BaseInterface::InitCallbacks () {
 	CurrentBase=this;
 //	UpgradeCompInterface(caller,baseun);
 	CallComp=false;
-	GFXLoop(base_main_loop);		
+	static bool simulate_while_at_base=XMLSupport::parse_bool(vs_config->getVariable("physics","simulate_while_docked","false"));
+	if (!(simulate_while_at_base||_Universe->numPlayers()>1)) {
+		GFXLoop(base_main_loop);
+	}
 }
 
 BaseInterface::Room::Talk::Talk (std::string ind,std::string pythonfile)

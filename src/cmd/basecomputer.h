@@ -47,6 +47,7 @@ public:
         MISSIONS,           // Show available missions.
         NEWS,               // Show news items.
         INFO,				// Show basic info.
+		LOADSAVE,           // LOAD SAVE
         DISPLAY_MODE_COUNT, // Number of display modes.
         NULL_DISPLAY = DISPLAY_MODE_COUNT,   // No display.
     };
@@ -90,6 +91,8 @@ protected:
     // HANDLERS
     // The selection in the News picker changed.
     bool newsPickerChangedSelection(const EventCommandId& command, Control* control);
+    // The selection in the News picker changed.
+    bool loadSavePickerChangedSelection(const EventCommandId& command, Control* control);
     // Something in a Picker was selected.
     bool pickerChangedSelection(const EventCommandId& command, Control* control);
     // Buy an item from the cargo list.
@@ -114,7 +117,15 @@ protected:
     bool sellShip(const EventCommandId& command, Control* control);
     // Accept a mission.
     bool acceptMission(const EventCommandId& command, Control* control);
-    // Show options.
+	// Quit Game
+    bool actionLoadGame(const EventCommandId& command, Control* control);
+	// Save Game
+    bool actionSaveGame(const EventCommandId& command, Control* control);
+	// Load Game
+    bool actionQuitGame(const EventCommandId& command, Control* control);
+
+
+// Show options.
     bool showOptionsMenu(const EventCommandId& command, Control* control);
     // Show the player's basic information.
     bool showPlayerInfo(const EventCommandId& command, Control* control);
@@ -132,7 +143,8 @@ protected:
     bool changeToMissionsMode(const EventCommandId& command, Control* control);
     // Change display mode to INFO.
     bool changeToInfoMode(const EventCommandId& command, Control* control);
-
+    // Change display mode to LOAD/SAVE
+	bool changeToLoadSaveMode(const EventCommandId& command, Control* control);
     // Redo the title string.
     void recalcTitle(void);
 
@@ -182,6 +194,8 @@ protected:
 
     // Load the controls for the NEWS display.
     void loadNewsControls(void);
+
+    void loadLoadSaveControls(void);
 
     // Load the controls for the MISSIONS display.
     void loadMissionsControls(void);

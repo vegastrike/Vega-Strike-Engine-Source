@@ -15,11 +15,23 @@
 #include "vsfilesystem.h"
 using namespace std;
 using namespace VSFileSystem;
-
+std::string CurrentSaveGameName="";
  std::string GetHelperPlayerSaveGame (int num) {
 
 if( Network==NULL)
 {
+	if (CurrentSaveGameName.length()>0){
+		VSFile f;
+		VSError err = f.OpenCreateWrite( "save.4.x.txt", UnknownFile);
+		if (err<=Ok) {
+			f.Write(CurrentSaveGameName);
+			f.Close();
+		}		
+		if (num!=0) {
+			return CurrentSaveGameName+XMLSupport::tostring(num);
+		}
+		return CurrentSaveGameName;
+	}
     cout << "Hi helper play " << num << endl;
   static string *res=NULL;
   if (res==NULL) {

@@ -79,7 +79,8 @@ namespace BaseUtil {
 			EnumMap::Pair ("ShipDealer", BaseComputer::SHIP_DEALER), 
 			EnumMap::Pair ("Missions", BaseComputer::MISSIONS),
 			EnumMap::Pair ("News", BaseComputer::NEWS), 
-			EnumMap::Pair ("Info", BaseComputer::INFO), 
+			EnumMap::Pair ("Info", BaseComputer::INFO),
+			EnumMap::Pair ("LoadSave", BaseComputer::LOADSAVE), 
 		};
 		static const EnumMap modemap (modelist,BaseComputer::DISPLAY_MODE_COUNT);
 		const char *newmode=modes.c_str();

@@ -49,6 +49,73 @@
 #include "unit_xml.h"
 #include "gfx/sprite.h"
 #include "gfx/aux_texture.h"
+
+//for directory thing
+#if defined(_WIN32) && !defined(__CYGWIN__)
+#include <direct.h>
+#include <config.h>
+#include <string.h>
+#include <windows.h>
+#include <stdlib.h>
+struct dirent { char d_name[1]; };
+#else
+#include <unistd.h>
+#include <pwd.h>
+#include <sys/types.h>
+#include <dirent.h>
+#endif
+
+//end for directory thing
+
+
+extern vector<unsigned int > base_keyboard_queue;
+
+class TextInputDisplay: public StaticDisplay{
+	std::vector <unsigned int> local_keyboard_queue;
+	std::vector <unsigned int> *keyboard_queue;
+	const char * disallowed;
+public:
+	TextInputDisplay(std::vector <unsigned int> *keyboard_input_queue, const char * disallowed) {
+		if (keyboard_input_queue) {
+			this->keyboard_queue=keyboard_input_queue;
+		}else {
+			this->keyboard_queue=&local_keyboard_queue;
+		}
+		keyboard_input_queue->clear();
+		this->disallowed=disallowed;
+	}
+	virtual void draw() {
+		std::string text = this->text();
+		bool reset=false;
+		size_t LN=keyboard_queue->size();
+		for (size_t i=0;i<LN;++i) {
+			unsigned int c=(*keyboard_queue)[i];
+			if (c==8||c==127) {
+				text=text.substr(0,text.length()-1);
+				reset=true;
+			}else if (c!='\0'&&c<256) {
+				bool allowed=true;
+				for (int j=0;disallowed[j];++j) {
+					if (c==disallowed[j])
+						allowed=false;
+				}
+				if (allowed ) {
+					char tmp[2]={0,0};
+					tmp[0]=(char)c;
+					text+=tmp;
+					reset=true;
+				}				
+			}
+		}
+		keyboard_queue->clear();
+		if (reset)
+			this->setText(text);
+		this->StaticDisplay::draw();
+	}
+};
+
+	
+
 using namespace std;
 
 
@@ -153,7 +220,8 @@ static const ModeInfo modeInfo[] = {
     ModeInfo ( "New Ships  ", "Ships", "ShipDealerMode", "ShipDealerGroup" ),
     ModeInfo ( "Missions BBS  ", "Missions", "MissionsMode", "MissionsGroup" ),
     ModeInfo ( "GNN News  ", "News", "NewsMode", "NewsGroup" ),
-    ModeInfo ( "Info/Stats  ", "Info", "InfoMode", "InfoGroup" )
+    ModeInfo ( "Info/Stats  ", "Info", "InfoMode", "InfoGroup" ),
+	ModeInfo ( "Load / Save ", "LoadSave", "LoadSaveMode", "LoadSaveGroup" )
 };
 
 
@@ -164,6 +232,7 @@ static const ModeInfo modeInfo[] = {
 //  later have an entry with an empty control id to cover the other cases.
 const BaseComputer::WctlTableEntry BaseComputer::WctlCommandTable[] = {
     BaseComputer::WctlTableEntry ( "Picker::NewSelection", "NewsPicker", &BaseComputer::newsPickerChangedSelection ),
+    BaseComputer::WctlTableEntry ( "Picker::NewSelection", "LoadSavePicker", &BaseComputer::loadSavePickerChangedSelection ),	
     BaseComputer::WctlTableEntry ( "Picker::NewSelection", "", &BaseComputer::pickerChangedSelection ),
     BaseComputer::WctlTableEntry ( modeInfo[CARGO].command, "", &BaseComputer::changeToCargoMode ),
     BaseComputer::WctlTableEntry ( modeInfo[UPGRADE].command, "", &BaseComputer::changeToUpgradeMode ),
@@ -171,6 +240,7 @@ const BaseComputer::WctlTableEntry BaseComputer::WctlCommandTable[] = {
     BaseComputer::WctlTableEntry ( modeInfo[NEWS].command, "", &BaseComputer::changeToNewsMode ),
     BaseComputer::WctlTableEntry ( modeInfo[MISSIONS].command, "", &BaseComputer::changeToMissionsMode ),
     BaseComputer::WctlTableEntry ( modeInfo[INFO].command, "", &BaseComputer::changeToInfoMode ),
+	BaseComputer::WctlTableEntry ( modeInfo[LOADSAVE].command, "", &BaseComputer::changeToLoadSaveMode ),
     BaseComputer::WctlTableEntry ( "BuyCargo", "", &BaseComputer::buyCargo ),
     BaseComputer::WctlTableEntry ( "Buy10Cargo", "", &BaseComputer::buy10Cargo ),
     BaseComputer::WctlTableEntry ( "BuyAllCargo", "", &BaseComputer::buyAllCargo ),
@@ -184,7 +254,10 @@ const BaseComputer::WctlTableEntry BaseComputer::WctlCommandTable[] = {
     BaseComputer::WctlTableEntry ( "AcceptMission", "", &BaseComputer::acceptMission ),
     BaseComputer::WctlTableEntry ( "ShowPlayerInfo", "", &BaseComputer::showPlayerInfo ),
     BaseComputer::WctlTableEntry ( "ShowShipStats", "", &BaseComputer::showShipStats ),
-    BaseComputer::WctlTableEntry ( "ShowOptionsMenu", "", &BaseComputer::showOptionsMenu ),
+    BaseComputer::WctlTableEntry ( "ShowOptionsMenu", "", &BaseComputer::changeToLoadSaveMode ),
+    BaseComputer::WctlTableEntry ( "Quit", "", &BaseComputer::actionQuitGame ),
+    BaseComputer::WctlTableEntry ( "Load", "", &BaseComputer::actionLoadGame ),
+    BaseComputer::WctlTableEntry ( "Save", "", &BaseComputer::actionSaveGame ),		
     BaseComputer::WctlTableEntry ( "", "", NULL )
 };
 
@@ -325,6 +398,8 @@ GFXColor BaseComputer::getColorForGroup(std::string id) {
 			return GFXColor(1,0,0);
 		} else if (id=="ShipDealerGroup") {
 			return GFXColor(1,1,0);
+		} else if (id=="LoadSaveGroup") {
+			return GFXColor(0,1,1);
 		} else {
 			return GFXColor(0,0,0);
 		}
@@ -746,6 +821,138 @@ void BaseComputer::constructControls(void) {
 
         newsGroup->addChild(descScroller);	// Want scroller "over" description box.
     }
+	{
+		GroupControl * loadSaveGroup = new GroupControl;
+		loadSaveGroup->setId("LoadSaveGroup");
+		window()->addControl(loadSaveGroup);
+		GFXColor color=getColorForGroup("LoadSaveGroup");
+        // Scroller for picker.
+        Scroller* pickScroller = new Scroller;
+        pickScroller->setRect( Rect(-.20, -.4, .05, .95) );
+        pickScroller->setColor( GFXColor(color.r,color.g,color.b,.1) );
+        pickScroller->setThumbColor( GFXColor(color.r*.4,color.g*.4,color.b*.4), GUI_OPAQUE_WHITE );
+        pickScroller->setButtonColor( GFXColor(color.r*.4,color.g*.4,color.b*.4) );
+        pickScroller->setTextColor(GUI_OPAQUE_WHITE);
+		pickScroller->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY);
+
+        // News picker.
+        SimplePicker* pick = new SimplePicker;
+        pick->setRect( Rect(-.96, -.4, .76, .95) );
+        pick->setColor( GFXColor(color.r,color.g,color.b,.1) );
+		pick->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY);
+        pick->setTextColor(GUI_OPAQUE_WHITE);
+        pick->setSelectionColor(GFXColor(0,.6,0,.8));
+        pick->setHighlightColor(GFXColor(0,.6,0,.35));
+        pick->setHighlightTextColor(GUI_OPAQUE_WHITE);
+        pick->setFont( Font(.07) );
+        pick->setTextMargins(Size(0.02,0.01));
+        pick->setId("LoadSavePicker");
+        pick->setScroller(pickScroller);
+        loadSaveGroup->addChild(pick);
+
+        loadSaveGroup->addChild(pickScroller);		// Want scroller "over" picker.
+
+        // Scroller for description.
+        Scroller* descScroller = new Scroller;
+        descScroller->setRect( Rect(.91, -.4, .05, .95) );
+        descScroller->setColor( GFXColor(color.r,color.g,color.b,.1) );
+        descScroller->setThumbColor( GFXColor(color.r*.4,color.g*.4,color.b*.4), GUI_OPAQUE_WHITE );
+        descScroller->setButtonColor( GFXColor(color.r*.4,color.g*.4,color.b*.4) );
+        descScroller->setTextColor(GUI_OPAQUE_WHITE);
+		descScroller->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY);
+
+        // Description box.
+        StaticDisplay* ms = new StaticDisplay;
+        ms->setRect( Rect(.15, -.4, .76, .95) );
+        ms->setColor( GFXColor(color.r,color.g,color.b,.1) );
+		ms->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY);
+        ms->setFont( Font(.07) );
+        ms->setMultiLine(true);
+        ms->setTextColor(GUI_OPAQUE_WHITE);
+        ms->setTextMargins(Size(.02,.01));
+        ms->setId("Description");
+        ms->setScroller(descScroller);
+        loadSaveGroup->addChild(ms);
+
+        loadSaveGroup->addChild(descScroller);	// Want scroller "over" description box.
+
+
+
+        // Scroller for description.
+        Scroller* inputTextScroller = new Scroller;
+        inputTextScroller->setRect( Rect(.91, -.95, .05, .5) );
+        inputTextScroller->setColor( GFXColor(color.r,color.g,color.b,.1) );
+        inputTextScroller->setThumbColor( GFXColor(color.r*.4,color.g*.4,color.b*.4), GUI_OPAQUE_WHITE );
+        inputTextScroller->setButtonColor( GFXColor(color.r*.4,color.g*.4,color.b*.4) );
+        inputTextScroller->setTextColor(GUI_OPAQUE_WHITE);
+		inputTextScroller->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY);
+
+        // Description box.
+        StaticDisplay* inputText = new TextInputDisplay(&base_keyboard_queue,"\n \t\r");
+        inputText->setRect( Rect(-.6, -.95, 1.51, .5) );
+        inputText->setColor( GFXColor(color.r,color.g,color.b,.1) );
+		inputText->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY);
+        inputText->setFont( Font(.07) );
+        inputText->setMultiLine(true);
+        inputText->setTextColor(GUI_OPAQUE_WHITE);
+        inputText->setTextMargins(Size(.02,.01));
+        inputText->setId("InputText");
+        inputText->setScroller(descScroller);
+        loadSaveGroup->addChild(inputText);
+
+        loadSaveGroup->addChild(inputTextScroller);	// Want scroller "over" description box.
+
+
+// Accept button.
+        NewButton* buy10 = new NewButton;
+        buy10->setRect( Rect(-.11, .3, .22, .12) );
+        buy10->setColor( GFXColor(0,1,1,.1) );
+        buy10->setTextColor(GUI_OPAQUE_WHITE);
+		buy10->setDownColor( GFXColor(0,1,1,.4) );
+		buy10->setDownTextColor( GFXColor(.2,.2,.2) );
+		buy10->setVariableBorderCycleTime(1.0);
+		buy10->setBorderColor( GFXColor(.2,.2,.2) );
+		buy10->setEndBorderColor( GFXColor(.4,.4,.4) );
+		buy10->setShadowWidth(2.0);
+        buy10->setFont(Font(.08, BOLD_STROKE));
+        buy10->setId("Commit10");
+		buy10->setLabel("Save");
+		buy10->setCommand("Save");
+        loadSaveGroup->addChild(buy10);
+		
+        NewButton* accept = new NewButton;
+        accept->setRect( Rect(-.11,-.1, .22, .12) );
+        accept->setColor( GFXColor(0,1,1,.1) );
+        accept->setTextColor(GUI_OPAQUE_WHITE);
+		accept->setDownColor( GFXColor(0,1,1,.4) );
+		accept->setDownTextColor( GFXColor(.2,.2,.2) );
+		accept->setVariableBorderCycleTime(1.0);
+		accept->setBorderColor( GFXColor(.2,.2,.2) );
+		accept->setEndBorderColor( GFXColor(.4,.4,.4) );
+		accept->setShadowWidth(2.0);
+        accept->setFont(Font(.08, BOLD_STROKE));
+        accept->setId("Commit");
+		accept->setLabel("Load");
+		accept->setCommand("Load");
+		loadSaveGroup->addChild(accept);
+        NewButton* quit = new NewButton;
+        quit->setRect( Rect(-.95, -.8, .34, .13) );
+        quit->setColor( GFXColor(0,1,1,.1) );
+        quit->setTextColor(GUI_OPAQUE_WHITE);
+		quit->setDownColor( GFXColor(0,1,1,.4) );
+		quit->setDownTextColor( GFXColor(.2,.2,.2) );
+		quit->setVariableBorderCycleTime(1.0);
+		quit->setBorderColor( GFXColor(.2,.2,.2) );
+		quit->setEndBorderColor( GFXColor(.4,.4,.4) );
+		quit->setShadowWidth(2.0);
+        quit->setFont(Font(.1, BOLD_STROKE));
+        quit->setId("CommitAll");
+		quit->setLabel("QuitGame");
+		quit->setCommand("Quit");
+        loadSaveGroup->addChild(quit);
+		
+		
+	}
     {
         // MISSIONS group control.
         GroupControl* missionsGroup = new GroupControl;
@@ -1056,6 +1263,16 @@ bool BaseComputer::changeToCargoMode(const EventCommandId& command, Control* con
     }
     return true;
 }
+
+
+bool BaseComputer::changeToLoadSaveMode(const EventCommandId& command, Control* control) {
+    if(m_currentDisplay != LOADSAVE) {
+        switchToControls(LOADSAVE);
+        loadLoadSaveControls();
+    }
+    return true;
+}
+
 
 // Set up the window and get everything ready.
 void BaseComputer::init(void) {
@@ -1986,6 +2203,30 @@ bool BaseComputer::newsPickerChangedSelection(const EventCommandId& command, Con
 //	}
     return true;
 }
+// The selection in the News picker changed.
+bool BaseComputer::loadSavePickerChangedSelection(const EventCommandId& command, Control* control) {
+    assert(control != NULL);
+    Picker* picker = static_cast<Picker*>(control);
+    PickerCell* cell = picker->selectedCell();
+
+    StaticDisplay* desc = static_cast<StaticDisplay*>( window()->findControlById("Description") );
+	StaticDisplay* inputbox = static_cast<StaticDisplay*>( window()->findControlById("InputText") );
+    assert(desc != NULL);
+
+    if(cell == NULL) {
+        // No selection.  Clear desc.  (Not sure how this can happen, but it's easy to cover.)
+        desc->setText("");
+    } else {
+        desc->setText(cell->text());
+		if (inputbox!=NULL)
+			inputbox->setText(cell->text());
+		
+    }
+
+
+
+	return true;
+}
 
 // Load the controls for the News display.
 void BaseComputer::loadNewsControls(void) {
@@ -2014,6 +2255,54 @@ void BaseComputer::loadNewsControls(void) {
             }
         }
     }
+
+    // Make sure the description is empty.
+    StaticDisplay* desc = static_cast<StaticDisplay*>( window()->findControlById("Description") );
+    assert(desc != NULL);
+    desc->setText("");
+
+    // Make the title right.
+    recalcTitle();
+}
+#if defined (__FreeBSD__) || defined(__APPLE__)
+static int	nodirs( struct dirent * entry)
+#else
+static int	nodirs( const struct dirent * entry)
+#endif	
+{
+#if defined(_WIN32)
+	// Have to check if we have the full path or just relative (which would be a problem)
+	cerr<<"Read directory entry : "<<(curmodpath+entry->d_name)<<endl;
+	struct stat s;
+	if( (s.st_mode & S_IFDIR)==0 && string( entry->d_name)!="." && string( entry->d_name)!="..")
+	{
+		return 1;
+	}
+#else
+	if( entry->d_type!=DT_DIR && string( entry->d_name)!="." && string( entry->d_name)!="..")
+		return 1;
+#endif
+	return 0;
+}
+
+
+// Load the controls for the News display.
+void BaseComputer::loadLoadSaveControls(void) {
+    SimplePicker* picker = static_cast<SimplePicker*>( window()->findControlById("LoadSavePicker") );
+    assert(picker != NULL);
+    picker->clear();
+
+	// Get news from save game.
+	Unit* playerUnit = m_player.GetUnit();
+	if(playerUnit) {
+		const int playerNum=UnitUtil::isPlayerStarship(playerUnit);
+		struct dirent ** dirlist;
+		std::string savedir = VSFileSystem::homedir+"/save/";
+		int ret = scandir (savedir.c_str(),&dirlist,nodirs,0);
+		while( ret-->0) {
+			picker->addCell(SimplePickerCell(dirlist[ret]->d_name));
+		}		
+	}
 
     // Make sure the description is empty.
     StaticDisplay* desc = static_cast<StaticDisplay*>( window()->findControlById("Description") );
@@ -4511,7 +4800,59 @@ void BaseComputer::OptionsMenu::init(void) {
 namespace CockpitKeys {
 	void QuitNow();
 }
+extern std::string CurrentSaveGameName;
 
+bool BaseComputer::actionQuitGame(const EventCommandId& command, Control* control) {
+        CockpitKeys::QuitNow();
+		return true;
+}
+bool BaseComputer::actionSaveGame(const EventCommandId& command, Control* control) {
+	Unit* player = m_player.GetUnit();
+    StaticDisplay* desc = static_cast<StaticDisplay*>( window()->findControlById("InputText") );
+	bool ok=true;
+	if (desc) {	   
+		std::string tmp = desc->text();
+		if (tmp.length()>0) {
+			CurrentSaveGameName=tmp;
+		}else {
+			ok=false;
+		}
+	}
+	if(player&&ok) {
+		Cockpit* cockpit = _Universe->isPlayerStarship(player);
+		if(cockpit) {
+			WriteSaveGame(cockpit, false);
+			loadLoadSaveControls();			
+			showAlert("Game saved successfully.");
+		}
+	}
+	if (!ok) {
+		showAlert ("You Must Type In a Name To Save....");
+	}
+	return true;
+}
+bool BaseComputer::actionLoadGame(const EventCommandId& command, Control* control) {
+        Unit* player = m_player.GetUnit();
+		StaticDisplay* desc = static_cast<StaticDisplay*>( window()->findControlById("InputText") );
+		if (desc) {
+			std::string tmp = desc->text();
+			if (tmp.length()>0) {
+				CurrentSaveGameName=tmp;	
+				if(player) {
+					Cockpit* cockpit = _Universe->isPlayerStarship(player);
+					if(cockpit) {
+						player->Kill();
+						RespawnNow(cockpit);
+						globalWindowManager().shutDown();
+						TerminateCurrentBase();  //BaseInterface::CurrentBase->Terminate();
+					}
+				}							
+			}else {
+				showAlert ("You Must Type In a Name To Load....");				
+			}
+		}		
+		return true;
+}
 // Process a command event from the Options Menu window.
 bool BaseComputer::OptionsMenu::processWindowCommand(const EventCommandId& command, Control* control) {
     if(command == "Save") {
