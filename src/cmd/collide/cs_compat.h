@@ -10,7 +10,8 @@
 #include "collide/csgeom/matrix3.h"
 typedef unsigned char uint8;
 #include "collide/csgeom/box.h"
-#include "collide/csgeom/transfrm.h"
+
+
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>

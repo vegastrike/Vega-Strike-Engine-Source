@@ -67,6 +67,7 @@
 #include "prapid.h"
 #include "garray.h"
 #include "gfx/mesh.h"
+#include "collide/csgeom/transfrm.h"
 #define CD_MAX_COLLISION    1000
 
 // This array contains the colliding pairs
