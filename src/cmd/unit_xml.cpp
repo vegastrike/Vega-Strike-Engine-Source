@@ -810,7 +810,7 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
     xml->units[indx]->SetOrientation (Q,R);
     R.Normalize();
     xml->units[indx]->prev_physical_state = xml->units[indx]->curr_physical_state;
-    xml->units[indx]->Position()=pos;
+    xml->units[indx]->SetPosition(pos);
     //    xml->units[indx]->prev_physical_state= Transformation(Quaternion::from_vectors(P,Q,R),pos);
     //    xml->units[indx]->curr_physical_state=xml->units[indx]->prev_physical_state;
     xml->units[indx]->limits.structurelimits=R;
