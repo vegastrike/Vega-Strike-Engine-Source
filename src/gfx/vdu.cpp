@@ -6,15 +6,13 @@ VDU::VDU (const char * file, TextPlane *textp, unsigned char modes, short rwws, 
 
 };
 
-void VDU::DrawTargetSpr (Sprite *s, float per) {
-  float w,h;
+void VDU::DrawTargetSpr (Sprite *s, float per, float &sx, float &sy, float &w, float &h) {
   float nw,nh;
-  float sx, sy;
+  GetPosition (sx,sy);
+  GetSize (w,h);
   if (!s)
     return;
-  GetPosition (sx,sy);
   s->SetPosition (sx,sy);
-  GetSize (w,h);
   s->GetSize (nw,nh);
   h=-fabs (h*per);
   w= fabs(nw*h/nh);
@@ -24,23 +22,56 @@ void VDU::DrawTargetSpr (Sprite *s, float per) {
 }
 
 void VDU::DrawTarget(Unit * target) {
+  float x,y,w,h;
   char t[32];
   sprintf (t,"\n%4.1f %4.1f",target->FShieldData()*100,target->RShieldData()*100);
   tp->Draw (std::string("\n")+target->name+t);
-  DrawTargetSpr (target->getHudImage (),.6);
+  DrawTargetSpr (target->getHudImage (),.6,x,y,w,h);
   
 }
 
 void VDU::DrawNav (const Vector & nav) {
 
 }
+static void DrawGun (const Vector & pos, weapon_info::MOUNT_SIZE sz) {
+  GFXPointSize (4);
+  GFXBegin (GFXPOINT);
+  GFXVertexf (pos);
+  GFXEnd ();
+  
+}
 void VDU::DrawDamage(Unit * parent) {
-  DrawTargetSpr (parent->getHudImage (),.6);
-
+  float x,y,w,h;
+  const float percent = .6;
+  DrawTargetSpr (parent->getHudImage (),percent,x,y,w,h);
+  GFXDisable (TEXTURE0);
+  GFXDisable (LIGHTING); 
+  for (int i=0;i<parent->nummounts;i++) {
+    Vector pos (parent->mounts[i].GetMountLocation().position);
+    pos.i=pos.i*w/parent->rSize()*percent+x;
+    pos.j=pos.k*h/parent->rSize()*percent+y;
+    pos.k=0;
+    switch (parent->mounts[i].status) {
+    case Unit::Mount::ACTIVE:
+      GFXColor4f (0,1,.2,1);
+      break;
+    case Unit::Mount::INACTIVE:
+      GFXColor4f (0,.5,0,1);
+      break;
+    case Unit::Mount::DESTROYED:
+      GFXColor4f (.2,.2,.2,1);
+      break;
+    case Unit::Mount::UNCHOSEN:
+      GFXColor4f (1,1,1,1);
+      break;
+    }
+    DrawGun (pos,parent->mounts[i].type.size);
+  }
 }
 
 void VDU::DrawWeapon (Unit * parent) {
-
+  //  DrawTargetSpr (parent->getHudImage (),.6);
+  
 }
 
 void VDU::Draw (Unit * parent) {

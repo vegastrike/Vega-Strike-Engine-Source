@@ -29,7 +29,7 @@ struct GFXColor;
 #include "weapon_xml.h"
 #include "hashtable_3d.h"
 #include "container.h"
-
+#include "gfx/vdu.h"
 
 #include "xml_support.h"
 class Beam;
@@ -56,6 +56,8 @@ enum clsptr {
 	PLANETPTR
 };
 
+class VDU;
+
 /**
  * Unit contains any physical object that may collide with something
  * And may be physically affected by forces.
@@ -66,6 +68,9 @@ enum clsptr {
 class Unit {
   ///The orbit needs to have access to the velocity directly to disobey physics laws to precalculate orbits
   friend class PlanetaryOrbit;
+  ///VDU needs mount data to draw weapon displays
+  friend void VDU::DrawWeapon (Unit * parent);
+  friend void VDU::DrawDamage (Unit * parent);
  public:
   /**
    * The computer holds all data in the navigation computer of the current unit
