@@ -47,11 +47,20 @@ void GameUnit<UnitType>::Kill(bool eraseFromSave)
 template<class UnitType>
 void GameUnit<UnitType>::Split (int level) {
   int i;
+  Vector PlaneNorm;
+  for (int i=0;i<nummesh();) {
+	  if (meshdata[i]){
+		  if (meshdata[i]->getBlendDst()==ONE){
+			  delete meshdata[i];
+			  meshdata.erase(meshdata.begin()+i);
+		  }else{i++;}
+	  }else{meshdata.erase(meshdata.begin()+i);}
+  }
   int nm = nummesh();
   if (nm<=0) {
     return;
   }
-  Vector PlaneNorm;
+  
   std::vector <Mesh *> old = meshdata;
 
   for (int split=0;split<level;split++) {

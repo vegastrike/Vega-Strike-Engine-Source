@@ -33,7 +33,7 @@ void DoParticles (QVector pos, float percent, const Vector & velocity, float rad
   static float spread = XMLSupport::parse_float (vs_config->getVariable("graphics",
 								       "sparklespread",
 								       
-								       ".1"));
+								       ".04"));
   if (i<(RAND_MAX*percent)*(GetElapsedTime()*scale)) {
       ParticlePoint pp;
       float r1 = rand()/((float)RAND_MAX*.5)-1;
@@ -50,7 +50,9 @@ void DoParticles (QVector pos, float percent, const Vector & velocity, float rad
   
 
 void LaunchOneParticle (const Matrix &mat,const Vector &vel,unsigned int seed, Mesh * mush, float hull,int faction) {
-	if (mush) {
+	if (mush){
+		static bool ignoreGetBlendDst = XMLSupport::parse_bool (vs_config->getVariable ("graphics","sparkleoffglow","true"));
+	if (mush->getBlendDst()!=ONE||ignoreGetBlendDst) {		
 		unsigned int numvert = mush->numVertices();
 		if (numvert) {
 			unsigned int whichvert = seed%numvert;
@@ -58,6 +60,7 @@ void LaunchOneParticle (const Matrix &mat,const Vector &vel,unsigned int seed, M
 			v=Transform(mat,v);
 			DoParticles (v,hull,vel,0,faction);
 		}
+	}
 	}
 }
 
