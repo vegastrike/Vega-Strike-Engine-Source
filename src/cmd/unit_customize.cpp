@@ -33,6 +33,18 @@ void Unit::Mount::SwapMounts (Unit::Mount &other) {
   this->SetMountPosition(other.GetMountLocation());
   other.SetMountPosition (t);  
 }
+
+void Unit::Mount::ReplaceMounts (const Unit::Mount &other) {
+  short thisvol = volume;
+  short thissize = size;
+  Transformation t =this->GetMountLocation();
+  *this=other;
+  this->size=thissize;
+  volume=thisvol;
+  this->SetMountPosition(t);
+  ref.gun=NULL;  
+}
+
 double Unit::Mount::Percentage (const Unit::Mount &newammo) const{
   float percentage=0;
   int thingstocompare=0;
@@ -116,7 +128,7 @@ double computeDowngradePercent (double old, double upgrade, double isnew) {
   }
 }
 
-bool Unit::UpgradeMounts (Unit *up, int mountoffset, bool touchme, bool downgrade, int &numave, Unit * templ, double &percentage) {
+bool Unit::UpgradeMounts (const Unit *up, int mountoffset, bool touchme, bool downgrade, int &numave, Unit * templ, double &percentage) {
   int j;
   int i;
   bool cancompletefully=true;
@@ -145,7 +157,7 @@ bool Unit::UpgradeMounts (Unit *up, int mountoffset, bool touchme, bool downgrad
 	      }
 	      percentage+=mounts[jmod].Percentage(up->mounts[i]);//compute here
 	      if (touchme) {//if we wish to modify the mounts
-		mounts[jmod].SwapMounts (up->mounts[i]);//switch this mount with the upgrador mount
+		mounts[jmod].ReplaceMounts (up->mounts[i]);//switch this mount with the upgrador mount
 	      }
 	    }else {
 	      int tmpammo = mounts[jmod].ammo;
@@ -641,8 +653,23 @@ bool Unit::UpAndDownGrade (Unit * up, Unit * templ, int mountoffset, int subunit
 extern char * GetUnitDir (const char *);
 double Unit::Upgrade (const std::string &file, int mountoffset, int subunitoffset, bool force, bool loop_through_mounts) {
 	Unit * up = UnitFactory::createUnit (file.c_str(),true,_Universe->GetFaction("upgrades"));
+	static Unit * last_template=NULL;
 	char * unitdir  = GetUnitDir(name.c_str());
-	Unit * templ = UnitFactory::createUnit ((string (unitdir)+".template").c_str(),true,this->faction);
+	
+	Unit * templ = NULL;
+	if (last_template!=NULL) {
+	  if (last_template->name==(string (unitdir)+".template")) {
+	    templ = last_template;
+	    printf ("cache hit");
+	  }else {
+	    last_template->Kill();
+	    last_template=NULL;
+	  }
+	}
+	if (templ==NULL) {
+	  templ = UnitFactory::createUnit ((string (unitdir)+".template").c_str(),true,this->faction);
+	  last_template=templ;
+	}
 	free (unitdir);
 	double percentage=0;
 	if (up->name!="LOAD_FAILED") {
@@ -656,7 +683,6 @@ double Unit::Upgrade (const std::string &file, int mountoffset, int subunitoffse
 	    }
 	  }
 	}
-	templ->Kill();
 	up->Kill();
 	return percentage;
 }

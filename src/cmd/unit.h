@@ -100,7 +100,7 @@ struct PlanetaryOrbitData;
 class Unit
 {
   bool UpgradeSubUnits (Unit * up, int subunitoffset, bool touchme, bool downgrade, int &numave, double &percentage);
-  bool UpgradeMounts (Unit * up, int subunitoffset, bool touchme, bool downgrade, int &numave, Unit * templ, double &percentage);
+  bool UpgradeMounts (const Unit * up, int subunitoffset, bool touchme, bool downgrade, int &numave, Unit * templ, double &percentage);
 
   Nebula * nebula;
   PlanetaryOrbitData * planet;
@@ -232,6 +232,7 @@ class Unit
     Transformation LocalPosition;
   public:
     void SwapMounts (Mount & othermount);
+    void ReplaceMounts (const Mount & othermount);
     double Percentage (const Mount& oldmount) const;
     union REF{
       ///only beams are actually coming out of the gun at all times...bolts, balls, etc aren't
