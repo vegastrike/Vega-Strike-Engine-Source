@@ -19,6 +19,12 @@ StarDate::StarDate( string date)
 	initial_star_time = this->ConvertStarDate( date);
 }
 
+void	StarDate::Init( string date)
+{
+	initial_time = getNewTime();
+	initial_star_time = this->ConvertStarDate( date);
+}
+
 // Convert a StarDate time into a Stardate string
 string	StarDate::ConvertFullStarDate( double date)
 {
@@ -35,7 +41,7 @@ string	StarDate::ConvertFullStarDate( double date)
 	unsigned int hrs = (hours*100+minutes)/24;
 	unsigned int secs = seconds + (hours*100+minutes)%24;
 
-	sprintf( cdate, "%d.%d:%d", days, hrs, secs);
+	sprintf( cdate, "%d.%.2d:%.2d", days, hrs, secs);
 	return string( cdate);
 }
 
@@ -53,18 +59,35 @@ string	StarDate::ConvertStarDate( double date)
 	char cdate[32];
 	unsigned int hrs = (hours*100+minutes)/24;
 
-	sprintf( cdate, "%d.%d", days, hrs);
+	sprintf( cdate, "%d.%.2d", days, hrs);
 	return string( cdate);
 }
 
 // Convert a StarDate into a number of seconds
 double	StarDate::ConvertStarDate( string date)
 {
-	unsigned int days, hours, minutes, seconds;
-	if( sscanf( date.c_str(), "%d.%d.%d:%d", &days, &hours, &minutes, &seconds)!=4)
+	unsigned int days, hours, minutes, seconds, nb, pos;
+	double res;
+	// Replace the dot with 'a' so sscanf won't take it for a decimal symbol
+	pos = date.find( ".");
+	date.replace( pos, 1, "a");
+	if( (nb=sscanf( date.c_str(), "%da%2d:%2d", &days, &minutes, &seconds))!=3)
+	{
 		cerr<<"!!! ERROR reading date"<<endl;
+	}
+	/*
+	cerr<<"!!! Read "<<nb<<" arguments"<<endl;
+	cerr<<"!!! Dot position : "<<pos<<endl;
+	cerr<<"!!! String = "<<date<<" read = "<<days<<"."<<minutes<<":"<<seconds<<endl;
+	*/
 
-	return days*(24*60*60)*hours*(60*60)*minutes*(60)*seconds;
+	int temphours = minutes*24;
+	hours = temphours/100;
+	minutes = temphours%100;
+
+	res = days*(24*60*60)+hours*(60*60)+minutes*(60)+seconds;
+	cerr<<"!!! Converted date to = "<<res<<" which stardate is "<<ConvertStarDate(res)<<endl;
+	return res;
 }
 
 // Get the current StarDate time in seconds

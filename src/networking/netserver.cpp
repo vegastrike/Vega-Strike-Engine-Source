@@ -485,27 +485,33 @@ void	NetServer::start(int argc, char **argv)
 	mission = new Mission( strmission.c_str());
 	mission->initMission( false);
 
+	string strstardate = vs_config->getVariable( "server", "initial_stardate", "2000.00:00");
+	_Universe->current_stardate.Init( strstardate);
+	cout<<"Starting STARDATE : "<<_Universe->current_stardate.GetFullCurrentStarDate()<<endl;
+
 	// Loads dynamic universe
 	string dynpath = datadir+"/dynaverse.dat";
 	FILE * fp = fopen( dynpath.c_str(), "rb");
 	if( !fp)
 	{
 		cerr<<"!!! ERROR : opening dynamic universe file " << dynpath.c_str() << " !!!"<<endl;
-		exit(1);
 	}
-	fseek( fp, 0, SEEK_END);
-	int dynsize = ftell( fp);
-	fseek( fp, 0, SEEK_SET);
-	char * dynaverse = new char[dynsize+1];
-	dynaverse[dynsize] = 0;
-	int nbread;
-	if( (nbread = fread( dynaverse, sizeof( char), dynsize, fp)) != dynsize)
+	else
 	{
-		cerr<<"!!! ERROR : read "<<nbread<<" bytes, there were "<<dynsize<<" to read !!!"<<endl;
-		exit(1);
-	}
+		fseek( fp, 0, SEEK_END);
+		int dynsize = ftell( fp);
+		fseek( fp, 0, SEEK_SET);
+		char * dynaverse = new char[dynsize+1];
+		dynaverse[dynsize] = 0;
+		int nbread;
+		if( (nbread = fread( dynaverse, sizeof( char), dynsize, fp)) != dynsize)
+		{
+			cerr<<"!!! ERROR : read "<<nbread<<" bytes, there were "<<dynsize<<" to read !!!"<<endl;
+			exit(1);
+		}
 
-	globalsave->ReadSavedPackets( dynaverse);
+		globalsave->ReadSavedPackets( dynaverse);
+	}
 
 	// Server loop
 	while( keeprun)
@@ -1412,9 +1418,10 @@ void	NetServer::addClient( Client * clt)
 	Packet pp;
 	netbuf.Reset();
 	netbuf.addShort( zoneid);
+	netbuf.addString( _Universe->current_stardate.GetFullCurrentStarDate());
 	pp.send( CMD_ADDEDYOU, un->GetSerial(), netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, &clt->cltadr, clt->sock, __FILE__, PSEUDO__LINE__(1325) );
 
-	COUT<<"ADDED client n "<<un->GetSerial()<<" in ZONE "<<clt->zone<<endl;
+	COUT<<"ADDED client n "<<un->GetSerial()<<" in ZONE "<<clt->zone<<" at STARDATE "<<_Universe->current_stardate.GetFullCurrentStarDate()<<endl;
 	//delete cltsbuf;
 	//COUT<<"<<< SENT ADDED YOU -----------------------------------------------------------------------"<<endl;
 }

@@ -20,6 +20,7 @@ class StarDate
 	public:
 		StarDate();
 		StarDate( string date);
+		void	Init( string date);
 
 		string	ConvertStarDate( double date);
 		string	ConvertFullStarDate( double date);

@@ -14,6 +14,7 @@
 
 *** GAME SERVER ********************************************************
 
+- In savegame : add stardate loading and saving stuff to dynamic universe
 - Add a communication system allowing the player to either broacast a message or to send it on a given subspace channel ;)
 - Handle a timeout between the time the player logged in and the time he really enters the game
 - Turn mount_num into a char ?

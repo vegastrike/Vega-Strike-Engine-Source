@@ -775,6 +775,8 @@ int NetClient::recvMsg( Packet* outpacket )
                      << packet_serial << " )= --------------------------------------" << endl;
 				// Get the zone id in the packet
 				this->zone = netbuf.getShort();
+				_Universe->current_stardate.Init( netbuf.getString());
+				cout<<"WE ARE ON STARDATE "<<_Universe->current_stardate.GetFullCurrentStarDate()<<endl;
                 //this->getZoneData( &p1 );
                 break;
             case CMD_DISCONNECT :
