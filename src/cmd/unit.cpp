@@ -73,7 +73,7 @@ void Unit::Threaten (Unit * targ, float danger) {
   }
 }
 
-void Unit::calculate_extent() {  
+void Unit::calculate_extent(bool update_collide_queue) {  
   int a;
   corner_min=Vector (FLT_MAX,FLT_MAX,FLT_MAX);
   corner_max=Vector (-FLT_MAX,-FLT_MAX,-FLT_MAX);
@@ -101,7 +101,7 @@ void Unit::calculate_extent() {
     if (!SubUnit)
       image->selectionBox = new Box(corner_min, corner_max);
   }
-  if (!SubUnit) {
+  if (!SubUnit&&update_collide_queue) {
     UpdateCollideQueue();
   }
   if (isUnit()==PLANETPTR) {
@@ -286,7 +286,7 @@ Unit::Unit (Mesh ** meshes, int num, bool SubU, int faction) {
   memcpy (meshdata,meshes,(num)*sizeof (Mesh *));
   nummesh = num;
   meshdata[nummesh]=NULL;//turn off shield
-  calculate_extent();
+  calculate_extent(false);
 }
 char * GetUnitDir (const char * filename) {
   char * retval=strdup (filename);
@@ -356,7 +356,7 @@ Unit::Unit(const char *filename, bool SubU, int faction,std::string unitModifica
 	  LoadXML(filename,unitModifications.c_str());
 	}
 	if (1) {
-	  calculate_extent();
+	  calculate_extent(false);
 	  ToggleWeapon(true);//change missiles to only fire 1
        	  vscdup();
 	  if (doubleup) 
@@ -422,7 +422,7 @@ Unit::Unit(const char *filename, bool SubU, int faction,std::string unitModifica
 
 
 	CloseFile();
-	calculate_extent();
+	calculate_extent(false);
 	ToggleWeapon(true);//change missiles to only fire 1
 	vscdup();
 	if (fp) 

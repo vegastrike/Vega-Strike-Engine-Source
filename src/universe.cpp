@@ -86,7 +86,11 @@ void Universe::UnloadStarSystem (StarSystem * s) {
   //not sure what to do here? serialize?
 }
 StarSystem * Universe::Init (string systemfile, const Vector & centr,const string planetname) {
-  CacheJumpStar(false);
+  static bool js = true;
+  if (js) {
+	js=false;
+	CacheJumpStar(false);
+  }
   string fullname=systemfile+".system";
   return GenerateStarSystem((char *)fullname.c_str(),"",centr);
 }
@@ -258,8 +262,10 @@ void Universe::StartDraw()
   StarSystem::ProcessPendingJumps();
   for (i=0;i<cockpit.size();i++) {
     SetActiveCockpit(i);
+	pushActiveStarSystem(AccessCockpit(i)->activeStarSystem);
     cockpit[i]->Update();
     ProcessInput(i);
+	popActiveStarSystem();
   }
   //  micro_sleep (getmicrosleep());//so we don't starve the audio thread  
   GFXEndScene();

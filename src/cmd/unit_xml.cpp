@@ -1565,9 +1565,9 @@ void Unit::LoadXML(const char *filename, const char * modifications)
   for( a=0; a<(int)xml->units.size(); a++) {
     SubUnits.prepend(xml->units[a]);
   }
-  calculate_extent();
+  calculate_extent(false);
   if (!SubUnit) {
-    UpdateCollideQueue();
+    //UpdateCollideQueue();
   }
   *myscale=xml->unitscale;
   string tmpname (filename);

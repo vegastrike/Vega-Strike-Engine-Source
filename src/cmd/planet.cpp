@@ -201,7 +201,7 @@ Planet::Planet(Vector x,Vector y,float vely, const Vector & rotvel, float pos,fl
   meshdata[0]->SetMaterial (ourmat);
   nummesh = 1;
 
-  calculate_extent();
+  calculate_extent(false);
 
   /*stupid Sphere BSP when intersection should do
   string tmpname ("sphere");

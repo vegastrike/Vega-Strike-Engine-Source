@@ -592,7 +592,8 @@ void StarSystem::Update(float priority , bool executeDirector) {
 	  if (muzak)
 	    muzak->Listen();
 	}
-	_Universe->AccessCamera()->SetNebula(NULL);//Update physics should set this
+	if (_Universe->AccessCockpit()->activeStarSystem==this)
+		_Universe->AccessCamera()->SetNebula(NULL);//Update physics should set this
 #ifdef UPDATEDEBUG
   fprintf (stderr,"unphi");
   fflush (stderr);

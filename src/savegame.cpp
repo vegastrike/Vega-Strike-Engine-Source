@@ -71,9 +71,9 @@ void SaveGame::WriteSaveGame (const char *systemname, const Vector &FP, float cr
     vscdup();
     returnfromhome();
     Vector FighterPos= PlayerLocation-FP;
-    if (originalsystem!=systemname) {
-      FighterPos=-FP;
-    }
+//    if (originalsystem!=systemname) {
+      FighterPos=FP;
+//    }
     fprintf (fp,"%s^%f^%s %f %f %f",systemname,credits,unitname.c_str(),FighterPos.i,FighterPos.j,FighterPos.k);
     SetSavedCredits (credits);
     while (myvec.empty()==false) {

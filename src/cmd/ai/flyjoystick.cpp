@@ -77,7 +77,7 @@ void FlyByJoystick::Execute() {
 
     joy_nr=vs_config->axis_joy[AXIS_Y];
 
-    if (_Universe->numPlayers()>1) {
+    if (joy_nr!=-1&&_Universe->numPlayers()>1) {
       joy_nr = which_joystick;
     }
     if( joy_nr!= -1 && joystick[joy_nr]->isAvailable()){
@@ -90,7 +90,7 @@ void FlyByJoystick::Execute() {
     }
 
     joy_nr=vs_config->axis_joy[AXIS_X];
-    if (_Universe->numPlayers()>1) {
+    if (joy_nr!=-1&&_Universe->numPlayers()>1) {
       joy_nr = which_joystick;
     }
 
@@ -104,7 +104,7 @@ void FlyByJoystick::Execute() {
     }
 
     joy_nr=vs_config->axis_joy[AXIS_Z];
-    if (_Universe->numPlayers()>1) {
+    if (joy_nr!=-1&&_Universe->numPlayers()>1) {
       joy_nr = which_joystick;
     }
 
@@ -118,7 +118,7 @@ void FlyByJoystick::Execute() {
     }
 
     joy_nr=vs_config->axis_joy[AXIS_THROTTLE];
-    if (_Universe->numPlayers()>1) {
+    if (joy_nr!=-1&&_Universe->numPlayers()>1) {
       joy_nr = which_joystick;
     }
 

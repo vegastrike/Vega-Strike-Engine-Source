@@ -228,12 +228,13 @@ void Nebula::UpdatePhysics (const Transformation &trans, const Matrix transmat, 
   Vector t1;
   float dis;
   unsigned int i;
+  if (_Universe->activeStarSystem()==_Universe->AccessCockpit()->activeStarSystem) {
   for (i=0;i<NUM_CAM;i++) {
     if (Inside (_Universe->AccessCamera(i)->GetPosition(),0,t1,dis)) {
       _Universe->AccessCamera(i)->SetNebula (this);
     }
   }
-
+  }
   if (nummesh) {
     i = rand()%nummesh;
     Vector randexpl (rand()%2*rSize()-rSize(),rand()%2*rSize()-rSize(),rand()%2*rSize()-rSize());

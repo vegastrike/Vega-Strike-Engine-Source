@@ -216,15 +216,15 @@ void bootstrap_draw (const std::string &message, float x, float y, Animation * n
   GFXEnable (TEXTURE0);
   GFXDisable (TEXTURE1);
   GFXColor4f (1,1,1,1);
-  ScaleMatrix (tmp,Vector (7,7,0));
   GFXClear (GFXTRUE);
   GFXLoadIdentity (PROJECTION);
   GFXLoadIdentityView();
   GFXLoadMatrix (MODEL,tmp);
   GFXBeginScene();
   bs_tp->SetPos (x,y);
-  //  bs_tp.SetCharSize (.4,.8);
-
+  bs_tp->SetCharSize (.4,.8);
+  ScaleMatrix (tmp,Vector (7,7,0));
+  GFXLoadMatrix (MODEL,tmp);
   if (ani) {
     ani->UpdateAllFrame();
     ani->DrawNow(tmp);
@@ -298,41 +298,44 @@ void bootstrap_main_loop () {
     string savegamefile = mission->getVariable ("savegame","");
     vector <SavedUnits> savedun;
     vector <string> playersaveunit;
-
+	vector <StarSystem *> ss;
+	vector <string> starsysname;
+	vector <Vector> playerNloc;
     for (unsigned int k=0;k<_Universe->cockpit.size();k++) {
       bool setplayerXloc=false;
       std::string psu;
-      
       if (k==0) {
-	Vector myVec;
-	if (SetPlayerLoc (myVec,false)) {
-	  _Universe->cockpit[0]->savegame->SetPlayerLocation(myVec);
-	}
-	std::string st;
-	if (SetPlayerSystem (st,false)) {
-	  _Universe->cockpit[0]->savegame->SetStarSystem(st);
-	}
+		Vector myVec;
+		if (SetPlayerLoc (myVec,false)) {
+		  _Universe->cockpit[0]->savegame->SetPlayerLocation(myVec);
+		}
+		std::string st;
+		if (SetPlayerSystem (st,false)) {
+		  _Universe->cockpit[0]->savegame->SetStarSystem(st);
+		}
       }
       vector <SavedUnits> saved=_Universe->cockpit[k]->savegame->ParseSaveGame (savegamefile,mysystem,mysystem,pos,setplayerXloc,credits,psu);
       playersaveunit.push_back(psu);
       _Universe->cockpit[k]->credits=credits;
-      if (k==0) {
-	setplayerloc=setplayerXloc;//FIX ME will only set first player where he was
-	_Universe->Init (mysystem,pos,planetname);
-      }
-      for (unsigned int j=0;j<saved.size();j++) {
-	savedun.push_back(saved[j]);
+  	  ss.push_back (_Universe->Init (mysystem,Vector(0,0,0),planetname));
+	  if (setplayerXloc) {
+	   	  playerNloc.push_back(pos);
+	  }else {
+		  playerNloc.push_back(Vector(FLT_MAX,FLT_MAX,FLT_MAX));
+	  }
+	  setplayerloc=setplayerXloc;//FIX ME will only set first player where he was
 
+      for (unsigned int j=0;j<saved.size();j++) {
+		savedun.push_back(saved[j]);
       }
 
     }
     SetStarSystemLoading (true);
-    vector <StarSystem *>sss;vector<Vector>v;
-    createObjects(playersaveunit,sss,v);
+    createObjects(playersaveunit,ss,playerNloc);
 
     if (setplayerloc&&fighters) {
       if (fighters[0]) {
-	fighters[0]->SetPosition (Vector (0,0,0));
+	//fighters[0]->SetPosition (Vector (0,0,0));
       }
     }
     

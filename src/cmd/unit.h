@@ -383,7 +383,7 @@ class Unit {
   Vector corner_min, corner_max; 
   struct collideTrees * colTrees;
   ///fils in corner_min,corner_max and radial_size
-  void calculate_extent();
+  void calculate_extent(bool update_collide_queue);
   ///applies damage from the given pnt to the shield, and returns % damage applied and applies lighitn
   float DealDamageToShield (const Vector & pnt, float &Damage);
   ///Deals remaining damage to the hull at point and applies lighting effects

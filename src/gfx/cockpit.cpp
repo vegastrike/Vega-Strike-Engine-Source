@@ -884,6 +884,11 @@ void Cockpit::Update () {
 	un_iter ui= par->getSubUnits();
 	Unit * un;
 	while ((un=ui.current())) {
+		if (_Universe->isPlayerStarship(un)){
+			++ui;
+			continue;
+		}
+
 	  if (i++==index) {
 	    tmp=true;
 	    index++;
@@ -905,7 +910,7 @@ void Cockpit::Update () {
       if (tmp==false) {
 	if (tmpgot) index=0;
 	Unit * un = parentturret.GetUnit();
-	if (un) {
+	if (un&&(!_Universe->isPlayerStarship(un))) {
 	  
 	  SetParent (un,unitfilename.c_str(),this->unitmodname.c_str(),unitlocation);
 	  SwitchUnits (NULL,un);
@@ -929,7 +934,7 @@ void Cockpit::Update () {
     while ((un=ui.current())) {
       if (un->faction==this->unitfaction) {
 	
-	if ((i++)>=index&&(un!=GetParent())) {
+	if ((i++)>=index&&(!_Universe->isPlayerStarship(un))) {
 	  found=true;
 	  index++;
 	  Unit * k=GetParent(); 

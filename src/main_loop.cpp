@@ -479,18 +479,35 @@ void createObjects(std::vector <std::string> &fighter0name, std::vector <StarSys
       if (fg_terrain==-1||(fg_terrain==-2&&myterrain==NULL)) {
 	string modifications ("");
 	if (s==0&&squadnum<(int)fighter0name.size()) {
-	  fighter0indices.push_back(a);
+	  _Universe->AccessCockpit(squadnum)->activeStarSystem=ssys[squadnum];
+  	  fighter0indices.push_back(a);
 	  if (fighter0name[squadnum].length()==0)
 	    fighter0name[squadnum]=string(fightername);
 	  else
 	    strcpy(fightername,fighter0name[squadnum].c_str());
-	  if (mission->getVariable ("savegame","").length()>0) {  
+	  if (mission->getVariable ("savegame","").length()>0) {
+		  if (savedloc[squadnum].i!=FLT_MAX) {
+			pox = savedloc[squadnum];
+		  }
 	    fighter0mods.push_back(modifications =vs_config->getVariable (string("player")+((squadnum>0)?tostring(squadnum+1):string("")),"callsign","")+mission->getVariable("savegame",""));
 	  }else {
 	    fighter0mods.push_back("");
 	  }
 	}
-	fighters[a] = new Unit(fightername, false,tmptarget[a],modifications,fg,s);
+    if (squadnum<(int)fighter0name.size()) {
+		_Universe->pushActiveStarSystem (_Universe->AccessCockpit(squadnum)->activeStarSystem);
+	}
+  	fighters[a] = new Unit(fightername, false,tmptarget[a],modifications,fg,s);
+    _Universe->activeStarSystem()->AddUnit(fighters[a]);
+	if (s==0) {
+		_Universe->AccessCockpit(squadnum)->Init (fighters[a]->getCockpit().c_str());
+	    _Universe->AccessCockpit(squadnum)->SetParent(fighters[a],fighter0name[squadnum].c_str(),fighter0mods[squadnum].c_str(),pox);
+	}
+
+    if (squadnum<(int)fighter0name.size()) {
+		_Universe->popActiveStarSystem ();
+	}
+
       }else {
 	if (fg_terrain==-2) {
 	  fighters[a]= new Building (myterrain,isvehicle,fightername,false,tmptarget[a],string(""),fg);
@@ -507,6 +524,8 @@ void createObjects(std::vector <std::string> &fighter0name, std::vector <StarSys
 	  }
 	  
 	}
+      _Universe->activeStarSystem()->AddUnit(fighters[a]);
+
       }
       fighters[a]->SetPosAndCumPos (pox);
       
@@ -537,7 +556,6 @@ void createObjects(std::vector <std::string> &fighter0name, std::vector <StarSys
 	}
 	fighters[a]->SetTurretAI ();
       }
-      _Universe->activeStarSystem()->AddUnit(fighters[a]);
       a++;
     } // for nr_ships
     squadnum++;
@@ -562,8 +580,6 @@ void createObjects(std::vector <std::string> &fighter0name, std::vector <StarSys
       fighters[fighter0indices[cnum]]->EnqueueAI(new FlyByJoystick (cnum,cnum));
       fighters[fighter0indices[cnum]]->EnqueueAI(new FireKeyboard (cnum,cnum));
     }
-    _Universe->AccessCockpit(cnum)->Init (fighters[fighter0indices[cnum]]->getCockpit().c_str());
-    _Universe->AccessCockpit(cnum)->SetParent(fighters[fighter0indices[cnum]],fighter0name[cnum].c_str(),fighter0mods[cnum].c_str(),fighters[fighter0indices[cnum]]->LocalPosition());
     fighters[fighter0indices[cnum]]->SetTurretAI ();
   }
 
