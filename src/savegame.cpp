@@ -627,8 +627,9 @@ void SaveGame::ParseSaveGame (string filename, string &FSS, string originalstars
 	    char * buf = new char[str.length()+1];
 		buf[str.length()]='\0';
 		memcpy( buf, str.c_str(), str.length());
-		
+		char * deletebuf = buf;
 		char *tmp2= (char *)malloc(savestring.length()+2);
+		char * freetmp2 = tmp2;
 		QVector tmppos;
 		if (4==sscanf (buf,"%s %lf %lf %lf\n",tmp2,&tmppos.i,&tmppos.j,&tmppos.k)) {
 		  // Put readlen to point to the end of the line we just parsed
@@ -657,8 +658,9 @@ void SaveGame::ParseSaveGame (string filename, string &FSS, string originalstars
 		  buf+=readlen;
 		  ReadSavedPackets (buf);
 		}
-		free(tmp2);tmp2=NULL;
-		delete buf;
+		free(freetmp2);freetmp2=NULL;
+		tmp2=NULL;
+		delete deletebuf;
 	  }
 	  if( read)
 	  	fclose (fp);
