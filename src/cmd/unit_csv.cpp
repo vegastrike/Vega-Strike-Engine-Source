@@ -1,5 +1,6 @@
 #include "unit_generic.h"
 #include "csv.h"
+#include "savegame.h"
 #include "xml_serializer.h"
 #include "gfx/sphere.h"
 #include "unit_collide.h"
@@ -1087,7 +1088,8 @@ Unit * Unit::makeMasterPartList() {
   ret->name="master_part_list";
   CSVTable table(mpl);
   unsigned int siz=table.rows.size();
-  for (unsigned int i=0;i<siz;++i) {
+  unsigned int i;
+  for (i=0;i<siz;++i) {
     CSVRow row(&table,i);
     Cargo carg;
     carg.content=row["file"];
@@ -1099,6 +1101,26 @@ Unit * Unit::makeMasterPartList() {
     carg.description=row["description"];    
     ret->GetImageInformation().cargo.push_back(carg);
   } 
+  for (i=0;i<_Universe->numPlayers();++i) {
+    Cockpit* cp = _Universe->AccessCockpit(i);
+    std::vector<std::string>* addedcargoname= &cp->savegame->getMissionStringData("master_part_list_content");
+    std::vector<std::string>* addedcargocat= &cp->savegame->getMissionStringData("master_part_list_category");
+    std::vector<std::string>* addedcargovol= &cp->savegame->getMissionStringData("master_part_list_volume");
+    std::vector<std::string>* addedcargoprice= &cp->savegame->getMissionStringData("master_part_list_price");
+    std::vector<std::string>* addedcargomass= &cp->savegame->getMissionStringData("master_part_list_mass");
+    std::vector<std::string>* addedcargodesc= &cp->savegame->getMissionStringData("master_part_list_description");
+    for (unsigned int j=0;j<addedcargoname->size();++j) {
+      Cargo carg;
+      carg.content=(*addedcargoname)[j];
+      carg.category=(j<addedcargocat->size()?(*addedcargocat)[j]:std::string("Uncategorized"));
+      carg.volume=(j<addedcargovol->size()?XMLSupport::parse_float((*addedcargovol)[j]):1.0);
+      carg.price=(j<addedcargoprice->size()?XMLSupport::parse_float((*addedcargoprice)[j]):0.0);
+      carg.mass=(j<addedcargomass->size()?XMLSupport::parse_float((*addedcargomass)[j]):.01);
+      carg.description=(j<addedcargodesc->size()?(*addedcargodesc)[j]:std::string("No Description Added"));
+      carg.quantity=1;
+      ret->GetImageInformation().cargo.push_back(carg);
+    }
+  }
   ret->SortCargo();
   return ret;
 }
