@@ -13,13 +13,11 @@ Goals for 0.4.2 release:
 ** Fix a bit of the system generation code: so we can specify everything in the milky_way.xml
 
 * Resource management/organization:
-** Make un-modded units appear in 1 big table, not dozens of xml files
 ** trim redundant thrust animation images
 
 * UI:
 ** Add cargo pics
 ** Warp vs. Auto graphic
-** Give Beam damage in MJ/sec
 
 * AI:
 ** Fix AI range trigger happiness
@@ -55,6 +53,8 @@ Goals for 'Sometime over the rainbow'
 
 * UI:
 ** Merge BaseComputer modes with NavScreen?
+** radio chatter from: to:
+
 
 * Universe consistency
 ** make pirates... more pirate-like
