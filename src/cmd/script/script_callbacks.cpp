@@ -22,7 +22,7 @@
 /*
   xml Mission Scripting written by Alexander Rawass <alexannika@users.sourceforge.net>
 */
-
+#include <algorithm>
 #include <stdlib.h>
 #include <stdio.h>
 #include <errno.h>
@@ -127,6 +127,10 @@ varInst *Mission::doCall(missionNode *node,int mode,string module,string method)
     else if(method_id==CMT_STD_Int){
       vi=call_int_cast(node,mode);
     }
+    else if(method_id==CMT_STD_terminateMission){
+      vi=terminateMission(node,mode);
+    }
+
   }
   else if(module_id==CMT_OLIST){
     vi=call_olist(node,mode);
@@ -232,6 +236,30 @@ varInst *Mission::call_setNull(missionNode *node,int mode){
   viret->type=VAR_VOID;
 
   deleteVarInst(ovi);
+  return viret;
+}
+static std::vector <Mission *> Mission_delqueue;
+void Mission::wipeDeletedMissions() {
+  while (!Mission_delqueue.empty()) {
+    delete Mission_delqueue.back();
+    Mission_delqueue.pop_back();
+  }
+}
+varInst *Mission::terminateMission(missionNode *node,int mode){
+  //  varInst *ovi=getObjectArg(node,mode);
+  getBoolArg(node,mode,0);
+  if (mode==SCRIPT_RUN) {
+    vector<Mission *>::iterator f = std::find (active_missions.begin(),active_missions.end(),this);
+    if (f!=active_missions.end()) {
+      active_missions.erase (f);
+    }
+    if (this!=mission) {
+      Mission_delqueue.push_back(this);//only delete if we arent' the base mission
+    }
+  }
+  varInst *viret=newVarInst(VI_TEMP);
+  viret->type=VAR_VOID;
+
   return viret;
 }
 

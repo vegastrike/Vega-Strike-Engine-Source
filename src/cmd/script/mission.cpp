@@ -48,7 +48,9 @@
 //#include "vegastrike.h"
 
 /* *********************************************************** */
-
+Mission::~Mission() {
+  fprintf (stderr,"Mission Cleanup Not Yet Implemented");
+}
 Mission::Mission(char *configfile){
   number_of_flightgroups=0;
   number_of_ships=0;

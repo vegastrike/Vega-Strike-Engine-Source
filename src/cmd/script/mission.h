@@ -118,7 +118,8 @@ enum callback_module_std_type {
   CMT_STD_setNull ,
   CMT_STD_equal ,
   CMT_STD_Int ,
-  CMT_STD_Float
+  CMT_STD_Float,
+  CMT_STD_terminateMission
 };
 
 enum callback_module_olist_type {
@@ -388,7 +389,10 @@ class Mission {
  public:
   Mission(char *configfile);
   void initMission();
-
+  ///alex Please help me make this function...this is called between mission loops
+  ~Mission();
+  //deletes missions pushed back onto a delete queue at a *safe time*
+  static void wipeDeletedMissions();
   int number_of_flightgroups,number_of_ships;
 
   vector<Flightgroup *> flightgroups;
@@ -654,6 +658,8 @@ varInst *newVarInst(scope_type scopetype);
  int string_counter,old_string_counter;
 
 void deleteVarMap(varInstMap *vmap);
+  //pushes this mission onto a destruct queue for future destruction and removes from activeMission
+  varInst * terminateMission(missionNode *node, int mode);
 
 varInst * call_order(missionNode *node,int mode);
 Order * getOrderObject(missionNode *node,int mode,varInst *ovi);
