@@ -741,9 +741,13 @@ bool Unit::AutoPilotTo (Unit * target) {
   if (SubUnit) {
     return false;//we can't auto here;
   }
+  StarSystem * ss = activeStarSystem;
+  if (ss==NULL) {
+    ss = _Universe->activeStarSystem();
+  }
   Unit * un=NULL;
   Vector start (Position());
-  Vector end (target->Position());
+  Vector end (target->LocalPosition());
   float totallength = (start-end).Magnitude();
   if (totallength>1) {
     float percent = (getAutoRSize(this,this)+rSize()+target->rSize()+autopilot_term_distance)/totallength;
@@ -754,7 +758,7 @@ bool Unit::AutoPilotTo (Unit * target) {
     }
   }
   bool ok=true;
-  for (un_iter i=_Universe->activeStarSystem()->getUnitList().createIterator();
+  for (un_iter i=ss->getUnitList().createIterator();
        (un=*i)!=NULL; 
        ++i) {
     if (un->isUnit()!=NEBULAPTR) {
@@ -773,6 +777,18 @@ bool Unit::AutoPilotTo (Unit * target) {
   }
   if (this!=target) {
     SetCurPosition(end);
+    if (_Universe->isPlayerStarship (this)&&getFlightgroup()!=NULL) {
+      Unit * other=NULL;
+      for (un_iter ui=ss->getUnitList().createIterator();
+	   NULL!=(other = *ui);
+	   ++ui) {
+	if (other->getFlightgroup()==getFlightgroup()) {
+	  if (NULL==_Universe->isPlayerStarship (other)) {
+	    other->AutoPilotTo(this);
+	  }
+	}
+      }
+    }
   }
   return ok;
 }
