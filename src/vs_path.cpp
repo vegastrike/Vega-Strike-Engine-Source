@@ -25,6 +25,7 @@ std::string sharedsounds;
 std::string sharedmeshes;
 std::string datadir;
 std::string homedir;
+std::string HOMESUBDIR(".vegastrike");
 std::vector <std::string> curdir;//current dir starting from datadir
 std::vector <std::vector <std::string> > savedcurdir;//current dir starting from datadir
 void changehome(bool makehomedir) {
@@ -43,9 +44,9 @@ void changehome(bool makehomedir) {
   vsresetdir();
 #endif
   vssetdir (pw_dir);
-  if (chdir (HOMESUBDIR)==-1) {
+  if (chdir (HOMESUBDIR.c_str())==-1) {
       //      system ("mkdir " HOMESUBDIR);
-      mkdir (HOMESUBDIR
+    mkdir (HOMESUBDIR.c_str()
 #if !defined(_WIN32) || defined(__CYGWIN__) 
 		  , 0xFFFFFFFF
 #endif		  
@@ -53,22 +54,21 @@ void changehome(bool makehomedir) {
     } else {
       chdir ("..");
     }
-
-    if (chdir (HOMESUBDIR "/generatedbsp")==-1) {
-		mkdir (HOMESUBDIR "/generatedbsp"
+  std::string genbsp(HOMESUBDIR +"/generatedbsp");
+    if (chdir (genbsp.c_str())==-1) {
+                        mkdir (genbsp.c_str()
 #if !defined(_WIN32) || defined(__CYGWIN__) 
 			, 0xFFFFFFFF
 #endif
 		);
 
 		
-		//system ("mkdir " HOMESUBDIR "/generatedbsp");
     }else {
 		chdir (pw_dir);
     }
-
-    if (chdir (HOMESUBDIR "/save")==-1) {
-      mkdir (HOMESUBDIR "/save"
+    std::string savetmp  (HOMESUBDIR+"/save");
+    if (chdir (savetmp.c_str())==-1) {
+      mkdir (savetmp.c_str()
 #if !defined(_WIN32) || defined(__CYGWIN__) 
 		  , 0xFFFFFFFF
 #endif		  
@@ -78,7 +78,7 @@ void changehome(bool makehomedir) {
       chdir (pw_dir);
     }
   }
-  vschdir (HOMESUBDIR);
+  vschdir (HOMESUBDIR.c_str());
 }
 void returnfromhome() {
   vscdup();
@@ -92,12 +92,14 @@ void initpaths (const std::string& modname) {
 	
   datadir = getdatadir();
   if (modname.size())
+    HOMESUBDIR = string(".")+modname;
+  if (modname.size())
 	  datadir+=string(DELIMSTR)+modname;
 #else
   if (modname.size())
     chdir (modname.c_str());
   getcwd(pwd,65534);
-
+  
   pwd[65534]=0;
   datadir=pwd;
 #endif
@@ -246,7 +248,6 @@ std::string MakeSharedPathReturnHome (const std::string &newpath) {
 #else
     mkdir (newpath.c_str(), 0xFFFFFFFF);
 #endif
-    //system ("mkdir " HOMESUBDIR "/generatedbsp");
   }else {
     chdir ("..");
   }
