@@ -828,16 +828,16 @@ void BaseComputer::constructControls(void) {
 		GFXColor color=getColorForGroup("LoadSaveGroup");
         // Scroller for picker.
         Scroller* pickScroller = new Scroller;
-        pickScroller->setRect( Rect(-.20, -.4, .05, .95) );
+        pickScroller->setRect( Rect(-.20, -.7, .05, 1.4) );
         pickScroller->setColor( GFXColor(color.r,color.g,color.b,.1) );
         pickScroller->setThumbColor( GFXColor(color.r*.4,color.g*.4,color.b*.4), GUI_OPAQUE_WHITE );
         pickScroller->setButtonColor( GFXColor(color.r*.4,color.g*.4,color.b*.4) );
         pickScroller->setTextColor(GUI_OPAQUE_WHITE);
 		pickScroller->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY);
 
-        // News picker.
+        // Save game picker.
         SimplePicker* pick = new SimplePicker;
-        pick->setRect( Rect(-.96, -.4, .76, .95) );
+        pick->setRect( Rect(-.96, -.7, .76, 1.4) );
         pick->setColor( GFXColor(color.r,color.g,color.b,.1) );
 		pick->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY);
         pick->setTextColor(GUI_OPAQUE_WHITE);
@@ -854,7 +854,7 @@ void BaseComputer::constructControls(void) {
 
         // Scroller for description.
         Scroller* descScroller = new Scroller;
-        descScroller->setRect( Rect(.91, -.4, .05, .95) );
+        descScroller->setRect( Rect(.91, -.7, .05, 1.4) );
         descScroller->setColor( GFXColor(color.r,color.g,color.b,.1) );
         descScroller->setThumbColor( GFXColor(color.r*.4,color.g*.4,color.b*.4), GUI_OPAQUE_WHITE );
         descScroller->setButtonColor( GFXColor(color.r*.4,color.g*.4,color.b*.4) );
@@ -863,7 +863,7 @@ void BaseComputer::constructControls(void) {
 
         // Description box.
         StaticDisplay* ms = new StaticDisplay;
-        ms->setRect( Rect(.15, -.4, .76, .95) );
+        ms->setRect( Rect(.15, -.7, .76, 1.4) );
         ms->setColor( GFXColor(color.r,color.g,color.b,.1) );
 		ms->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY);
         ms->setFont( Font(.07) );
@@ -880,7 +880,7 @@ void BaseComputer::constructControls(void) {
 
         // Scroller for description.
         Scroller* inputTextScroller = new Scroller;
-        inputTextScroller->setRect( Rect(.91, -.95, .05, .5) );
+        inputTextScroller->setRect( Rect(.91, -0.95, .05, .2) );
         inputTextScroller->setColor( GFXColor(color.r,color.g,color.b,.1) );
         inputTextScroller->setThumbColor( GFXColor(color.r*.4,color.g*.4,color.b*.4), GUI_OPAQUE_WHITE );
         inputTextScroller->setButtonColor( GFXColor(color.r*.4,color.g*.4,color.b*.4) );
@@ -888,8 +888,8 @@ void BaseComputer::constructControls(void) {
 		inputTextScroller->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY);
 
         // Description box.
-        StaticDisplay* inputText = new TextInputDisplay(&base_keyboard_queue,"\n \t\r");
-        inputText->setRect( Rect(-.6, -.95, 1.51, .5) );
+        StaticDisplay* inputText = new TextInputDisplay(&base_keyboard_queue,"\x1b\n \t\r*?\\/|:<>\"^");
+        inputText->setRect( Rect(-.6, -.95, 1.51, .2) );
         inputText->setColor( GFXColor(color.r,color.g,color.b,.1) );
 		inputText->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY);
         inputText->setFont( Font(.07) );
@@ -897,7 +897,7 @@ void BaseComputer::constructControls(void) {
         inputText->setTextColor(GUI_OPAQUE_WHITE);
         inputText->setTextMargins(Size(.02,.01));
         inputText->setId("InputText");
-        inputText->setScroller(descScroller);
+        inputText->setScroller(inputTextScroller);
         loadSaveGroup->addChild(inputText);
 
         loadSaveGroup->addChild(inputTextScroller);	// Want scroller "over" description box.
@@ -905,7 +905,7 @@ void BaseComputer::constructControls(void) {
 
 // Accept button.
         NewButton* buy10 = new NewButton;
-        buy10->setRect( Rect(-.11, .3, .22, .12) );
+        buy10->setRect( Rect(-.11, 0, .22, .12) );
         buy10->setColor( GFXColor(0,1,1,.1) );
         buy10->setTextColor(GUI_OPAQUE_WHITE);
 		buy10->setDownColor( GFXColor(0,1,1,.4) );
@@ -921,7 +921,7 @@ void BaseComputer::constructControls(void) {
         loadSaveGroup->addChild(buy10);
 		
         NewButton* accept = new NewButton;
-        accept->setRect( Rect(-.11,-.1, .22, .12) );
+        accept->setRect( Rect(-.11,-.2, .22, .12) );
         accept->setColor( GFXColor(0,1,1,.1) );
         accept->setTextColor(GUI_OPAQUE_WHITE);
 		accept->setDownColor( GFXColor(0,1,1,.4) );
@@ -936,18 +936,18 @@ void BaseComputer::constructControls(void) {
 		accept->setCommand("Load");
 		loadSaveGroup->addChild(accept);
         NewButton* quit = new NewButton;
-        quit->setRect( Rect(-.95, -.8, .34, .13) );
-        quit->setColor( GFXColor(0,1,1,.1) );
+        quit->setRect( Rect(-.95, -.9, .3, .1) );
+        quit->setColor( GFXColor(.8,1,.1,.1) );
         quit->setTextColor(GUI_OPAQUE_WHITE);
-		quit->setDownColor( GFXColor(0,1,1,.4) );
+		quit->setDownColor( GFXColor(.8,1,.1,.4) );
 		quit->setDownTextColor( GFXColor(.2,.2,.2) );
 		quit->setVariableBorderCycleTime(1.0);
-		quit->setBorderColor( GFXColor(.2,.2,.2) );
-		quit->setEndBorderColor( GFXColor(.4,.4,.4) );
+		quit->setBorderColor( GFXColor(.5,.2,.2) );
+		quit->setEndBorderColor( GFXColor(.7,.4,.4) );
 		quit->setShadowWidth(2.0);
-        quit->setFont(Font(.1, BOLD_STROKE));
+        quit->setFont(Font(.07, BOLD_STROKE));
         quit->setId("CommitAll");
-		quit->setLabel("QuitGame");
+		quit->setLabel("Quit Game");
 		quit->setCommand("Quit");
         loadSaveGroup->addChild(quit);
 		
@@ -4703,121 +4703,115 @@ bool BaseComputer::showShipStats(const EventCommandId& command, Control* control
 
 
 
-// Create the controls for the Options Menu window.
-static void CreateOptionsMenuControls(Window* window) {
-
-    window->setSizeAndCenter(Size(.6,.9));
-	window->setTexture("basecomputer.png");
-    window->setColor( GFXColor(0,1,0,.1) );
-    window->setOutlineColor( GFXColor(.7,.7,.7) );
-    window->setOutlineWidth(2.0);
-
-    // Save button.
-    NewButton* save = new NewButton;
-    save->setRect( Rect(-.20, .25, .40, .1) );
-    save->setLabel("Save");
-    save->setCommand("Save");
-    save->setColor( GFXColor(0,1,0,.25) );
-    save->setTextColor( GUI_OPAQUE_WHITE );
-    save->setDownColor( GFXColor(0,1,0,.6) );
-    save->setDownTextColor( GUI_OPAQUE_BLACK );
-    save->setHighlightColor( GFXColor(0,1,0,.4) );
-    save->setFont(Font(.08, BOLD_STROKE));
-    // Put the button on the window.
-    window->addControl(save);
-
-    // Load button.
-    NewButton* load = new NewButton;
-    load->setRect( Rect(-.20, .05, .40, .1) );
-    load->setLabel("Load");
-    load->setCommand("Load");
-    load->setColor( GFXColor(0,1,0,.25) );
-    load->setTextColor( GUI_OPAQUE_WHITE );
-    load->setDownColor( GFXColor(0,1,0,.6) );
-    load->setDownTextColor( GUI_OPAQUE_BLACK );
-    load->setHighlightColor( GFXColor(0,1,0,.4) );
-    load->setFont(Font(.08, BOLD_STROKE));
-    // Put the button on the window.
-    window->addControl(load);
-
-    // Quit Game button.
-    NewButton* quit = new NewButton;
-    quit->setRect( Rect(-.20, -.15, .40, .1) );
-    quit->setLabel("Quit Game");
-    quit->setCommand("Quit");
-    quit->setColor( GFXColor(0,1,0,.25) );
-    quit->setTextColor( GUI_OPAQUE_WHITE );
-    quit->setDownColor( GFXColor(0,1,0,.6) );
-    quit->setDownTextColor( GUI_OPAQUE_BLACK );
-    quit->setHighlightColor( GFXColor(0,1,0,.4) );
-    quit->setFont(Font(.08, BOLD_STROKE));
-    // Put the button on the window.
-    window->addControl(quit);
-
-    // Resume Game button.
-    NewButton* resume = new NewButton;
-    resume->setRect( Rect(-.20, -.35, .40, .1) );
-    resume->setLabel("Resume Game");
-    resume->setCommand("Window::Close");
-    resume->setColor( GFXColor(0,1,0,.25) );
-    resume->setTextColor( GUI_OPAQUE_WHITE );
-    resume->setDownColor( GFXColor(0,1,0,.6) );
-    resume->setDownTextColor( GUI_OPAQUE_BLACK );
-    resume->setHighlightColor( GFXColor(0,1,0,.4) );
-    resume->setFont(Font(.08, BOLD_STROKE));
-    // Put the button on the window.
-    window->addControl(resume);
-}
-
-// This class runs a simple window for doing Options in the base computer.
-// It probably shouldn't be private to the BaseComputer class, but I wasn't sure
-//  where to put it.
-class BaseComputer::OptionsMenu : public WindowController
-{
-public:
-    // Set up the window and get everything ready.
-    virtual void init(void);
-
-    // Process a command event from the window.
-    virtual bool processWindowCommand(const EventCommandId& command, Control* control);
-
-    // CONSTRUCTION.
-    OptionsMenu(Unit* player) : m_player(player) {};
-    virtual ~OptionsMenu(void) {};
-
-protected:
-    UnitContainer m_player;                 // Ship info, etc.
-};
-
-// Create the window and controls for the Options Menu.
-void BaseComputer::OptionsMenu::init(void) {
-    Window* window = new Window;
-    setWindow(window);
-
-    CreateOptionsMenuControls(window);
-
-    window->setModal(true);
-}
 
 namespace CockpitKeys {
 	void QuitNow();
 }
 extern std::string CurrentSaveGameName;
 
-bool BaseComputer::actionQuitGame(const EventCommandId& command, Control* control) {
-        CockpitKeys::QuitNow();
-		return true;
+// Create the window and controls for the Options Menu.
+void BaseComputer::LoadSaveQuitConfirm::init(void) {
+	Window* window = new Window;
+	setWindow(window);
+	
+	window->setSizeAndCenter(Size(.9,.5));
+	window->setTexture("basecomputer.png");
+	window->setColor( GFXColor(0,1,0,.1) );
+	window->setOutlineColor( GFXColor(.7,.7,.7) );
+	window->setOutlineWidth(2.0);
+	window->setController(this);
+
+	// Information.
+	StaticDisplay* text = new StaticDisplay;
+	text->setRect( Rect(-.4, -.15, .8, .3) );
+	text->setText(this->text);
+	text->setTextColor(GFXColor(.7,1,.4));
+	text->setMultiLine(true);
+	text->setColor(GUI_CLEAR);
+	text->setFont( Font(.07, 1.25) );
+	text->setId("Information");
+	// Put it on the window.
+	window->addControl(text);
+
+	// Save button.
+	NewButton* cont = new NewButton;
+	cont->setRect( Rect(.05, -.19, .30, .1) );
+	cont->setLabel(type);
+	cont->setCommand(type);
+	cont->setColor( GFXColor(1,.5,0,.25) );
+	cont->setTextColor( GUI_OPAQUE_WHITE );
+	cont->setDownColor( GFXColor(1,.5,0,.6) );
+	cont->setDownTextColor( GUI_OPAQUE_BLACK );
+	cont->setHighlightColor( GFXColor(0,1,0,.4) );
+	cont->setFont(Font(.08, BOLD_STROKE));
+	// Put the button on the window.
+	window->addControl(cont);
+
+	// Resume Game button.
+	NewButton* resume = new NewButton;
+	resume->setRect( Rect(-.35, -.20, .30, .12) );
+	resume->setLabel("Cancel");
+	resume->setCommand("Window::Close");
+	resume->setColor( GFXColor(0,1,0,.25) );
+	resume->setTextColor( GUI_OPAQUE_WHITE );
+	resume->setDownColor( GFXColor(0,1,0,.6) );
+	resume->setDownTextColor( GUI_OPAQUE_BLACK );
+	resume->setHighlightColor( GFXColor(0,1,0,.4) );
+	resume->setFont(Font(.08, BOLD_STROKE));
+	// Put the button on the window.
+	window->addControl(resume);
+
+	window->setModal(true);
 }
-bool BaseComputer::actionSaveGame(const EventCommandId& command, Control* control) {
+
+// Process a command event from the Options Menu window.
+bool BaseComputer::LoadSaveQuitConfirm::processWindowCommand(const EventCommandId& command, Control* control) {
+	if(command == "Save") {
+		m_parent->actionConfirmedSaveGame();
+	} else if(command == "Load") {
+		m_parent->actionConfirmedLoadGame();
+	} else if(command == "Quit") {
+		m_parent->actionConfirmedQuitGame();
+	} else {
+		// Not a command we know about.
+		return WindowController::processWindowCommand(command, control);
+	}
+
+	return true;
+}
+
+// Show options.
+
+bool BaseComputer::actionConfirmedQuitGame() {
+	CockpitKeys::QuitNow();
+	return true;
+}
+bool BaseComputer::actionQuitGame(const EventCommandId& command, Control* control) {
+	LoadSaveQuitConfirm *saver= new LoadSaveQuitConfirm(this,"Quit","Are you sure that you want to quit?");
+	saver->init();
+	saver->run();
+	return true;
+}
+
+bool BaseComputer::actionConfirmedSaveGame() {
 	Unit* player = m_player.GetUnit();
-    StaticDisplay* desc = static_cast<StaticDisplay*>( window()->findControlById("InputText") );
+	StaticDisplay* desc = static_cast<StaticDisplay*>( window()->findControlById("InputText") );
 	bool ok=true;
 	if (desc) {	   
 		std::string tmp = desc->text();
-		if (tmp.length()>0) {
-			CurrentSaveGameName=tmp;
-		}else {
+		VSFileSystem::VSFile fp;
+		VSFileSystem::VSError err = fp.OpenCreateWrite(tmp,SaveFile);
+		if (err>Ok) {
+			showAlert ("Could not create the saved game because it contains invalid characters or you do not have permissions or free space.");
 			ok=false;
+			return true;
+		}else {
+			fp.Close();
+			if (tmp.length()>0) {
+				CurrentSaveGameName=tmp;
+			}else {
+				ok=false;
+			}
 		}
 	}
 	if(player&&ok) {
@@ -4829,17 +4823,49 @@ bool BaseComputer::actionSaveGame(const EventCommandId& command, Control* contro
 		}
 	}
 	if (!ok) {
-		showAlert ("You Must Type In a Name To Save....");
+		showAlert ("You Must Type In a Name To Save.");
 	}
 	return true;
 }
-bool BaseComputer::actionLoadGame(const EventCommandId& command, Control* control) {
-        Unit* player = m_player.GetUnit();
+bool BaseComputer::actionSaveGame(const EventCommandId& command, Control* control) {
+	Unit* player = m_player.GetUnit();
+	StaticDisplay* desc = static_cast<StaticDisplay*>( window()->findControlById("InputText") );
+	bool ok=true;
+	std::string tmp;
+	if (desc) {
+		tmp = desc->text();
+		if (tmp.length()<=0) {
+			ok=false;
+		}
+	}
+	if(player&&ok) {
+		Cockpit* cockpit = _Universe->isPlayerStarship(player);
+		if(cockpit) {
+			VSFileSystem::VSFile fp;
+			VSFileSystem::VSError err = fp.OpenReadOnly(tmp,SaveFile);
+			if (err>Ok) {
+				actionConfirmedSaveGame();
+			} else {
+				fp.Close();
+				LoadSaveQuitConfirm *saver= new LoadSaveQuitConfirm(this,"Save","Do you want to overwrite your old saved game?");
+				saver->init();
+				saver->run();
+			}
+		}
+	}
+	if (!ok) {
+		showAlert ("You Must Type In a Name To Save.");
+	}
+	return true;
+}
+
+bool BaseComputer::actionConfirmedLoadGame() {
+		Unit* player = m_player.GetUnit();
 		StaticDisplay* desc = static_cast<StaticDisplay*>( window()->findControlById("InputText") );
 		if (desc) {
 			std::string tmp = desc->text();
 			if (tmp.length()>0) {
-				CurrentSaveGameName=tmp;	
+				CurrentSaveGameName=tmp;
 				if(player) {
 					Cockpit* cockpit = _Universe->isPlayerStarship(player);
 					if(cockpit) {
@@ -4850,51 +4876,31 @@ bool BaseComputer::actionLoadGame(const EventCommandId& command, Control* contro
 					}
 				}							
 			}else {
-				showAlert ("You Must Type In a Name To Load....");				
+				showAlert ("You Must Type In a Name To Load....");
 			}
 		}		
 		return true;
 }
+bool BaseComputer::actionLoadGame(const EventCommandId& command, Control* control) {
+		Unit* player = m_player.GetUnit();
+		StaticDisplay* desc = static_cast<StaticDisplay*>( window()->findControlById("InputText") );
+		if (desc) {
+			std::string tmp = desc->text();
+			if (tmp.length()>0) {
+				CurrentSaveGameName=tmp;	
+				if(player) {
+					Cockpit* cockpit = _Universe->isPlayerStarship(player);
+					if(cockpit) {
+						LoadSaveQuitConfirm *saver= new LoadSaveQuitConfirm(this,"Load","Are you sure that you want to load this game?");
+						saver->init();
+						saver->run();
+						return true;
+					}
+				}
+			}
+		}
+		showAlert ("You Must Type In a Name To Load....");
+		return true;
+}
+
 // Process a command event from the Options Menu window.
-bool BaseComputer::OptionsMenu::processWindowCommand(const EventCommandId& command, Control* control) {
-    if(command == "Save") {
-        // Save the game.
-        Unit* player = m_player.GetUnit();
-        if(player) {
-            Cockpit* cockpit = _Universe->isPlayerStarship(player);
-            if(cockpit) {
-                WriteSaveGame(cockpit, false);
-                showAlert("Game saved successfully.");
-            }
-        }
-    } else if(command == "Load") {
-        // Load the game.
-        Unit* player = m_player.GetUnit();
-        if(player) {
-            Cockpit* cockpit = _Universe->isPlayerStarship(player);
-            if(cockpit) {
-                player->Kill();
-                RespawnNow(cockpit);
-                globalWindowManager().shutDown();
-                TerminateCurrentBase();  //BaseInterface::CurrentBase->Terminate();
-            }
-        }
-    } else if(command == "Quit") {
-        // Quit the game.
-        CockpitKeys::QuitNow();
-    } else {
-        // Not a command we know about.
-        return WindowController::processWindowCommand(command, control);
-    }
-
-    return true;
-}
-
-// Show options.
-bool BaseComputer::showOptionsMenu(const EventCommandId& command, Control* control) {
-    OptionsMenu* menu = new OptionsMenu(m_player.GetUnit());
-    menu->init();
-    menu->run();
-
-    return true;
-}

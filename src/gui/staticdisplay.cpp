@@ -64,7 +64,9 @@ void StaticDisplay::draw(void)
         const int lineCount = m_paintText.lineCount();
         const int visible = m_paintText.visibleLineCountStartingWith(m_scrollPosition, m_rect.size.height);
         m_scroller->setRangeValues(lineCount-1, visible);
-        m_scrollPosition = 0;
+		if (m_scrollPosition>lineCount-2&&lineCount>visible) {
+			m_scrollPosition = lineCount-1;
+		}
         m_scroller->setScrollPosition(m_scrollPosition);
         m_layoutVersion = m_paintText.layoutVersion();      // Remember layout version for next time.
     }
