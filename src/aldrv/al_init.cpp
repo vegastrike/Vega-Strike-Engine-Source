@@ -6,7 +6,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "al_globals.h"
-
+#include <vector>
 static void fixup_function_pointers(void) {
   alutLoadMP3p = (mp3Loader *) alGetProcAddress((ALubyte *)"alutLoadMP3_LOKI");
   if(alutLoadMP3p == NULL) {
@@ -110,9 +110,15 @@ bool AUDInit () {
 #endif
 	return false;
 }
+
+extern std::vector<ALuint> buffers;
 void AUDDestroy() {
 #ifdef HAVE_AL
   //Go through and delete all loaded wavs
+  for (unsigned int i=0;i<buffers.size();i++) {
+    alDeleteBuffers (1,&buffers[i]);
+  }
+  buffers.clear();
   if (context_id)
     alcDestroyContext(context_id);
   if (dev)

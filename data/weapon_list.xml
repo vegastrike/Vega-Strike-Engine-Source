@@ -6,7 +6,7 @@
 </Damage>
 <Distance speed="140" radialspeed="3" radius=".5" length="1.5" pulsespeed="15" range="800" >
 </Distance>
-<Appearance file="bolt.bmp" r="1" g="0" b="0" a="1" >
+<Appearance file="bolt.bmp" soundwav="bolt.wav" r="1" g="0" b="0" a="1" >
 </Appearance>
 </Beam>
 

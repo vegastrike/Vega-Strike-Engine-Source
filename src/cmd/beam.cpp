@@ -222,10 +222,11 @@ void Beam::ProcessDrawQueue() {
 void Beam::UpdatePhysics(const Transformation &trans, const Matrix m) {
   curlength += SIMULATION_ATOM*speed;
   if (curlength<0) {
-    AUDStopPlaying (sound);
     curlength=0;
   }
   if (curthick ==0) {
+    if (AUDIsPlaying(sound))
+      AUDStopPlaying (sound);
     refiretime +=SIMULATION_ATOM;
     return;
   }

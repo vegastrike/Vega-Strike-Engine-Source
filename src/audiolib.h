@@ -14,7 +14,7 @@ int AUDCreateSoundMP3 (const std::string &, const bool LOOP=false);
 ///copies other sound loaded through AUDCreateSound
 int AUDCreateSound (int sound,const bool LOOP=false);
 ///deletes a given sound
-int AUDDeleteSound (int sound);
+void AUDDeleteSound (int sound);
 ///Changes the velocity and/or position of a given sound
 void AUDAdjustSound (const int sound, const Vector &pos, const Vector &vel);
 ///Changes the gain of a loaded sound
