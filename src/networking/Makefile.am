@@ -64,6 +64,8 @@ libnetclientserver =	$(libnetgeneric) \
 
 libnet_a_SOURCES =	\
 	inet.cpp		\
+	inet_file.cpp		\
+	inet_file.h		\
 	inet.h
 
 libnetclient = $(libnetclientserver) \

@@ -498,7 +498,7 @@ void winsys_exit( int code )
 {
   winsys_shutdown();
     if ( atexit_func ) {
-	(*atexit_func)();
+	  (*atexit_func)();
     }
     
     exit( code );

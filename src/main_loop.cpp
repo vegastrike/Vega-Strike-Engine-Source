@@ -183,7 +183,7 @@ namespace CockpitKeys {
       }
 	  if( forcefeedback)
 		delete forcefeedback;
-      winsys_exit(0);
+      VSExit(0);
     }
     
   }

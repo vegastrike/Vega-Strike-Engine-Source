@@ -7,7 +7,8 @@
 class Music {
   bool random;
   float maxhull;
-  int socket;
+  int socketr;
+  int socketw;
   UnitContainer p;
   int song;//currently playing song
   int lastlist;
