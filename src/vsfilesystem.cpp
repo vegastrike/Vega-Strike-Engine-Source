@@ -1096,6 +1096,9 @@ namespace VSFileSystem
 			extra = "/"+string( f.GetFilename());
 
 		// This test lists all the VSFileType that should be looked for in the current directory
+		unsigned int i=0, j=0;
+
+                for (int LC=0;LC<2&&found<0;(LC+=(extra==""?2:1)),extra="") {
 		if( current_path.back()!="" && (type==TextureFile || type==MeshFile || type==VSSpriteFile || type==AnimFile))
 		{
 			curpath = current_path.back();
@@ -1117,7 +1120,6 @@ namespace VSFileSystem
 				shared = true;
 			}
 		}
-		unsigned int i=0, j=0;
 
 		// FIRST LOOK IN HOMEDIR FOR A STANDARD FILE, SO WHEN USING VOLUME WE DO NOT LOOK FIRST IN VOLUMES
 		if( found<0 && UseVolumes[curtype])
@@ -1181,7 +1183,7 @@ namespace VSFileSystem
 				}
 			}
 		}
-
+                }
                 if (VSFS_DEBUG()>1) {
 		//cerr<<failed<<" - VOLUME TYPE="<<isin_bigvolumes<<endl;
                   if( isin_bigvolumes>VSFSNone)

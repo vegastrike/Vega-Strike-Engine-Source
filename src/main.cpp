@@ -253,23 +253,18 @@ int main( int argc, char *argv[] )
  {
    VSFile allUnits;
 
-   VSError err = allUnits.OpenReadOnly("units/units.csv",UnknownFile);
-   if (err>Ok)
-     VSError err = allUnits.OpenReadOnly("units.csv",UnitFile);
+   VSError err = allUnits.OpenReadOnly("units.csv",UnitFile);
    if (err<=Ok) {
      unitTables.push_back(new CSVTable(allUnits));
      allUnits.Close();
    }
-   static string unitdata= vs_config->getVariable("data","UnitCSV","../units.csv");
+   static string unitdata= vs_config->getVariable("data","UnitCSV","modunits.csv");
    while (unitdata.length()!=0) {
      string::size_type  where=unitdata.find(" ");
      if (where==string::npos)
        where=unitdata.length();
      string tmp = unitdata.substr(0,where);     
-     err = allUnits.OpenReadOnly(tmp,UnknownFile);
-     if (err>Ok) {
-       err = allUnits.OpenReadOnly(tmp,UnitFile);
-     }
+     err = allUnits.OpenReadOnly(tmp,UnitFile);
      if (err<=Ok) {
        unitTables.push_back(new CSVTable(allUnits));
        allUnits.Close();
