@@ -543,7 +543,7 @@ void Unit::SetPlanetHackTransformation (Transformation *&ct,float *&ctm) {
   static Transformation planet_temp_transformation;
   static Matrix planet_temp_matrix;
   if (planet) {
-    if (planet->trans==_Universe->AccessCamera()->GetPlanetaryTransform()) {
+    if (planet->trans==_Universe->AccessCamera()->GetPlanetaryTransform()&&planet->trans!=NULL) {
       Matrix tmp;
       Vector p,q,r,c;
       MatrixToVectors (cumulative_transformation_matrix,p,q,r,c);
