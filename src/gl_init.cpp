@@ -103,7 +103,7 @@ void init_opengl_extensions()
 }
 BOOL GFXInit (int argc, char ** argv){
     glutInit( &argc, argv );
-    
+     
 #ifdef USE_STENCIL_BUFFER
     glutInitDisplayMode( GLUT_RGBA | GLUT_DEPTH | GLUT_DOUBLE/* | GLUT_STENCIL*/ );
 #else
@@ -115,7 +115,7 @@ BOOL GFXInit (int argc, char ** argv){
       glutGameModeString(str);
 
     /* Create a window */
-      if (g_game.fullscreen /*&&glutGameModeGet(GLUT_GAME_MODE_POSSIBLE)*/) {
+      if (g_game.fullscreen &&glutGameModeGet(GLUT_GAME_MODE_POSSIBLE)) {
 	glutInitWindowPosition( 0, 0 );
 	glutEnterGameMode();
     } else {

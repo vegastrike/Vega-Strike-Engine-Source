@@ -99,9 +99,10 @@ void TextPlane::Draw()
 		nq = Transform(pp,pq,pr,q),
 		nr = Transform(pp,pq,pr,r),
 		npos = ppos+pos;
-
-	meshdata->Draw(transformation, np, nq, nr, npos);
-	
+	for (int i=0;i<nummesh;i++) {
+	  GFXLoadMatrix (MODEL,transformation) ;
+	  meshdata[i]->Draw(np, nq, nr, npos);
+	}
 	Matrix tmatrix;
 	GFXGetMatrix(VIEW, tmatrix);
 	GFXLoadMatrix(VIEW, mview);

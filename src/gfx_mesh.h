@@ -32,6 +32,8 @@
 class Mesh:public Primitive
 {
 	int refcount;
+	float maxSizeX,maxSizeY,maxSizeZ,minSizeX,minSizeY,minSizeZ;
+	float radialSize;
 	Mesh *orig;
 
 	int numvertex;
@@ -112,3 +114,9 @@ public:
 	bool intersects(Mesh *mesh);
 };
 #endif
+
+
+
+
+
+

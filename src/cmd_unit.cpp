@@ -27,54 +27,7 @@
 
 #include "gfx_hud.h"
 
-MeshGroup::MeshGroup(char *filename)
-{
-	Identity(tmatrix);
-
-	/*
-	FILE *fp = fopen(filename, "r");
-	
-	fscanf("%d", &nummesh);
-	meshes = new *Mesh[nummesh];
-	for(int meshcount = 0; meshcount < nummesh; meshcount++)
-	{
-		char meshfilename[64];
-		fscanf("%s", meshfilename);
-		meshes[meshcount] = new Mesh(meshfilename);
-	}
-
-	fclose(fp);
-	*/
-	ResetVectors(pp,pq,pr);
-	ppos = Vector(0,0,0);
-
-	ReadInt(nummesh);
-	meshes = new Mesh*[nummesh];
-	for(int meshcount = 0; meshcount < nummesh; meshcount++)
-	{
-		int meshtype;
-		ReadInt(meshtype);
-		char meshfilename[64];
-		float x,y,z;
-		ReadMesh(meshfilename, x,y,z);
-		if(meshtype == 0)
-			meshes[meshcount] = new Mesh(meshfilename);
-		else
-			meshes[meshcount] = new Sprite(meshfilename);
-		meshes[meshcount]->SetPosition(x,y,z);
-	}
-}
-
-MeshGroup::~MeshGroup()
-{
-	if(meshes)
-	{
-		for(int meshcount = 0; meshcount < nummesh; meshcount++)
-			delete meshes[meshcount];
-		delete [] meshes;
-	}
-}
-
+/*
 void MeshGroup::Draw()
 {
 	Vector np = pp, 
@@ -86,9 +39,10 @@ void MeshGroup::Draw()
 	{
 		GFXLoadMatrix(MODEL, tmatrix); // not a problem with overhead if the mesh count is kept down
 
-		meshes[meshcount]->Draw(np, nq, nr, npos);
+		meshdata[meshcount]->Draw(np, nq, nr, npos);
 	}
 }
+
 void MeshGroup::Draw(Matrix tmatrix)
 {
 	CopyMatrix(this->tmatrix, tmatrix);
@@ -114,7 +68,7 @@ void MeshGroup::Draw(Matrix tmatrix, const Vector &pp, const Vector &pq, const V
 	CopyMatrix(this->tmatrix, tmatrix);
 	Draw();
 }
-
+*/
 /*UNIT CRAP*/
 
 void Unit::Init()
@@ -152,8 +106,23 @@ Unit::Unit(char *filename):Mesh()
 
 	/*Insert file loading stuff here*/
 	LoadFile(filename);
-	meshdata = new MeshGroup(filename);
-	
+
+	ReadInt(nummesh);
+	meshdata = new Mesh*[nummesh];
+	for(int meshcount = 0; meshcount < nummesh; meshcount++)
+	{
+		int meshtype;
+		ReadInt(meshtype);
+		char meshfilename[64];
+		float x,y,z;
+		ReadMesh(meshfilename, x,y,z);
+		if(meshtype == 0)
+			meshdata[meshcount] = new Mesh(meshfilename);
+		else
+			meshdata[meshcount] = new Sprite(meshfilename);
+		meshdata[meshcount]->SetPosition(x,y,z);
+	}
+
 	ReadInt(numsubunit);
 	for(int unitcount = 0; unitcount < numsubunit; unitcount++)
 	{
@@ -211,8 +180,12 @@ Unit::Unit(char *filename):Mesh()
 
 Unit::~Unit()
 {
-	if(meshdata)
-		delete meshdata;
+	if(meshdata&&nummesh>0)
+	{
+		for(int meshcount = 0; meshcount < nummesh; meshcount++)
+			delete meshdata[meshcount];
+		delete [] meshdata;
+	}
 	if(subunits)
 	{
 		for(int subcount = 0; subcount < numsubunit; subcount++)
@@ -246,7 +219,11 @@ void Unit::Draw()
 		nq = Transform(pp,pq,pr,q),
 		nr = Transform(pp,pq,pr,r),
 		npos = ppos+pos;
-	meshdata->Draw(transformation, np, nq, nr, npos);
+	 
+	for (int i=0;i<nummesh;i++) {
+	  GFXLoadMatrix(MODEL, transformation); // not a problem with overhead if the mesh count is kept down
+	  meshdata[i]->Draw(np, nq, nr, npos);
+	}
 	for(int subcount = 0; subcount < numsubunit; subcount++)
 		subunits[subcount]->Draw(tmatrix, np, nq, nr, npos);
 	if(aistate)

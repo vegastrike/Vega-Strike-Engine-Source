@@ -32,7 +32,7 @@
 class Gun;
 class Warhead;
 class AI;
-
+/*
 class MeshGroup{
 	Mesh **meshes; // "siblings"
 	int nummesh;
@@ -49,13 +49,14 @@ public:
 	void Draw(Matrix tmatrix);
 	void Draw(Matrix tmatrix, const Vector &pp, const Vector &pq, const Vector &pr, const Vector &ppos);
 };
-
+*/
 enum Aggression{
 	LOW, MEDIUM, HIGH, DISABLE, DESTROY
 };
 class Unit:public Mesh{
 protected:
-	MeshGroup *meshdata;
+  int nummesh;
+	Mesh **meshdata;
 	Unit **subunits; // the new children fun fun stuff
 	//Gun **weapons; // the guns
 	

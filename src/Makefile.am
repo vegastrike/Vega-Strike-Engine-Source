@@ -9,6 +9,14 @@ bin_PROGRAMS = vegastrike
 #	gfx_hud.h				\
 #	gfx_light.cpp				\
 #	gfx_light.h				\
+#	joystick.c				\
+#	joystick.h				\
+#	sdl_audio.c				\
+#	sdl_audio.h				\
+#	sdl_audio_data.c			\
+#	sdl_audio_data.h			\
+#	sdl_init.h				\
+#	sdl_init.c				\
 
 
 
@@ -91,8 +99,6 @@ vegastrike_SOURCES =				\
 	in_main.h				\
 	in_handler.cpp				\
 	in_handler.h				\
-	joystick.c				\
-	joystick.h				\
 	lin_time.h				\
 	lin_time.cpp				\
         list.c					\
@@ -110,12 +116,6 @@ vegastrike_SOURCES =				\
 	quadgeom.hpp				\
 	screenshot.c				\
 	screenshot.h				\
-	sdl_audio.c				\
-	sdl_audio.h				\
-	sdl_audio_data.c			\
-	sdl_audio_data.h			\
-	sdl_init.h				\
-	sdl_init.c				\
 	string_util.c				\
 	string_util.h				\
 	tex_font_metrics.c			\

@@ -1,15 +1,13 @@
-class ClickIterator {
+Vector MouseCoordinate(int x, int y, float zplane); //finds the vector of the location of the mouse cursor on the plane 'z' away from the camera
 
-
-} 
-
-class ClickList: UnitIterator
+class ClickList
 {
  private:
-  iterator * UnitCollection;
-
+  UnitCollection *parentIter;
+  StarSystem *parentSys;
  public:
-  boolean queryShip (int mouseX,int mouseY);//returns if the ship's in iterator utilizes
+
+  bool queryShip (int mouseX,int mouseY);//returns if the ship's in iterator utilizes
   Clicklist (UnitCollection *parentIter, StarSystem *parentSystem);
   UnitCollection * requestIterator (int mouseX, int mouseY);
 };

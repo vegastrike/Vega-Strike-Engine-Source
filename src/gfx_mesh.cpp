@@ -52,7 +52,7 @@ void Mesh::InitUnit()
 	changed = TRUE;
 	vlist = NULL;
 	
-
+	radialSize=minSizeX=minSizeY=minSizeZ=maxSizeY=maxSizeZ=maxSizeX=0;
 	//GFXVertex *vertexlist;
 	GFXVertex *alphalist;
 
@@ -65,7 +65,7 @@ void Mesh::InitUnit()
 	ymin = pmin = rmin = -PI;
 	ymax = pmax = rmax = PI;
 	ycur = pcur = rcur = 0;
-
+	
 	//	texturename[0] = -1;
 	numforcelogo = numsquadlogo = 0;
 	GFXGetMaterial(0, myMat);
@@ -162,15 +162,34 @@ Mesh:: Mesh(char * filename/*, Texture* ForceLog, Texture* SquadLog*/):Primitive
 	j = new float [NumPoints];
 	k = new float [NumPoints]; 
 	int ii;
+	
 	for (ii=0; ii<NumPoints; ii++)
 	{
+	  
 		x[ii] = readf (fp);
+		if (x[ii]>maxSizeX)
+		  maxSizeX = x[ii];
+		if (x[ii]<minSizeX)
+		  minSizeX=x[ii];
 		y[ii] = readf (fp);
+
+		if (y[ii]>maxSizeY)
+		  maxSizeY = y[ii];
+		if (y[ii]<minSizeY)
+		  minSizeY=y[ii];
 		z[ii] = readf (fp);
+
+		if (z[ii]>maxSizeZ)
+		  maxSizeZ = z[ii];
+		if (z[ii]<minSizeZ)
+		  minSizeZ=z[ii];
 		i[ii] = readf (fp);
 		j[ii] = readf (fp);
 		k[ii] = readf (fp);
+		
 	}
+	radialSize = sqrtf(max(fabs(minSizeX),fabs(maxSizeX))*max(fabs(minSizeX),fabs(maxSizeX))+max(fabs(minSizeY),fabs(maxSizeY))*max(fabs(minSizeY),fabs(maxSizeY))+max(fabs(minSizeZ),fabs(maxSizeZ))*max(fabs(minSizeZ),fabs(maxSizeZ)));
+	
 	NumTris = readi (fp);
 
 	Tris = new int* [NumTris];
@@ -904,8 +923,12 @@ bool Mesh::intersects(const Vector &start, const Vector &end) {
 	return bspTree->intersects(start, end);
 }
 
+
+
 bool Mesh::intersects(const Vector &pt) {
-	return bspTree->intersects(pt);
+  if (pt.i < maxSizeX||pt.i <minSizeX||pt.j>maxSizeY||pt.j<minSizeY||pt.k>maxSizeZ||pt.k<minSizeZ)
+    return false;
+  return bspTree->intersects(pt);
 }
 
 bool Mesh::intersects(Mesh *mesh) {
