@@ -172,6 +172,12 @@ GFXBOOL /*GFXDRVAPI*/ GFXLightContextAmbient (const GFXColor &amb) {
   glLightModelfv (GL_LIGHT_MODEL_AMBIENT,tmp);
   return GFXTRUE;
 }
+GFXBOOL /*GFXDRVAPI*/ GFXGetLightContextAmbient (GFXColor &amb) {
+  if (_currentContext >=_ambient_light.size())
+    return GFXFALSE;
+  amb = (_ambient_light[_currentContext]);
+  return GFXTRUE;
+}
 
 GFXBOOL /*GFXDRVAPI*/ GFXCreateLight (int &light, const GFXLight &templatecopy, const bool global) {
   for (light=0;light<_llights->size();light++) {

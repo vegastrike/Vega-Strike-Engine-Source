@@ -34,7 +34,8 @@
 #include "vs_path.h"
 #include "lin_time.h"
 #include "gfxlib.h"
-
+#include "vs_globals.h"
+#include "config_xml.h"
 #include "hashtable.h"
 #include "vegastrike.h"
 
@@ -289,8 +290,19 @@ void Mesh::DrawNow(float lod,  bool centered, const Transformation &transform /*
 }
 
 
+static GFXColor getMeshColor () {
+  float color[4];
+  vs_config->getColor ("ship_ambient",color);
+  GFXColor tmp (color[0],color[1],color[2],color[3]);
+  return tmp;
+}
 
 void Mesh::ProcessUndrawnMeshes(bool pushSpecialEffects) {
+  GFXColor meshcolor (getMeshColor());
+  GFXColor tmpcol (0,0,0,1);
+  GFXGetLightContextAmbient(tmpcol);
+  GFXLightContextAmbient(meshcolor);
+
   GFXEnable(DEPTHWRITE);
   GFXEnable(DEPTHTEST);
   GFXEnable(LIGHTING);
@@ -326,6 +338,7 @@ void Mesh::ProcessUndrawnMeshes(bool pushSpecialEffects) {
     l->ProcessDrawQueue();
     l->will_be_drawn = false;
     }
+  GFXLightContextAmbient(tmpcol);
 }
 
 void Mesh::ProcessDrawQueue(int whichdrawqueue) {
@@ -420,6 +433,7 @@ inline bool OpenWithin (const Vector &query, const Vector &mn, const Vector &mx,
   case EX_Y:
     return (query.i>=mn.i-err)&&(query.k>=mn.k-err)&&(query.i<=mx.i+err)&&(query.k<=mx.k+err);
   case EX_Z:
+  default:
     return (query.j>=mn.j-err)&&(query.i>=mn.i-err)&&(query.j<=mx.j+err)&&(query.i<=mx.i+err);
   }
 } 

@@ -1,7 +1,8 @@
 #include "sphere.h"
 #include "aux_texture.h"
 #include "vegastrike.h"
-
+#include "config_xml.h"
+#include "vs_globals.h"
 #include "xml_support.h"
 #ifndef M_PI
 #define M_PI 3.1415926536F
@@ -22,7 +23,7 @@ SphereMesh::SphereMesh(float radius, int stacks, int slices, char *texture, char
   if (LoadExistant (hash_name.c_str())) {
     return;
   }
-  oldmesh = new Mesh[numspheres];//have to!
+  oldmesh = new SphereMesh[numspheres];//FIXME::RISKY::MIGHT HAVE DIFFERENT SIZES!! DON"T YOU DARE ADD XTRA VARS TO SphereMesh calsshave to!
   numlods=numspheres;
   
   meshHashTable.Put (hash_name, oldmesh);
@@ -31,8 +32,6 @@ SphereMesh::SphereMesh(float radius, int stacks, int slices, char *texture, char
   mn = Vector (-radialSize,-radialSize,-radialSize);
   mx = Vector (radialSize,radialSize,radialSize);
   vector <MeshDrawContext> *odq=NULL;
-  int origst = stacks;
-  int origsl = slices;
   for (int l=0;l<numspheres;l++) {
     
     draw_queue = new vector<MeshDrawContext>;
@@ -178,6 +177,18 @@ void SphereMesh::Draw(float lod,  bool centered, const Transformation &transform
     Mesh::Draw(lod,transform,m);
   } 
 }
-
-
+static GFXColor getSphereColor () {
+  float color[4];
+  vs_config->getColor ("planet_ambient",color);
+  GFXColor tmp (color[0],color[1],color[2],color[3]);
+  return tmp;
+}
+void SphereMesh::ProcessDrawQueue(int whichdrawqueue) {
+  static GFXColor spherecol (getSphereColor ());
+  GFXColor tmpcol (0,0,0,1);
+  GFXGetLightContextAmbient(tmpcol);
+  GFXLightContextAmbient(spherecol);
+  Mesh::ProcessDrawQueue (whichdrawqueue);
+  GFXLightContextAmbient(tmpcol);
+}
 

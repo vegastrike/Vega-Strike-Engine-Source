@@ -75,7 +75,8 @@ void /*GFXDRVAPI*/ GFXDeleteLightContext(const int con_number);
 void /*GFXDRVAPI*/ GFXSetLightContext(const int con_number);
 ///Sets the ambient light value
 GFXBOOL /*GFXDRVAPI*/ GFXLightContextAmbient (const GFXColor &amb);
-
+///Gets the ambient light value
+GFXBOOL /*GFXDRVAPI*/ GFXGetLightContextAmbient (GFXColor &amb);
 ///picks and activates local lights near to "center"
 void /*GFXDRVAPI*/ GFXPickLights(const Vector &center, const float radius);
 ///Sets the light model to have separate specular color (if available)
