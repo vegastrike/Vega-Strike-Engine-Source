@@ -822,8 +822,10 @@ int main (int argc, char ** argv)
 	  }
 	}
 	Tab();Tag ("Thrust");
-	float abspeed =.066666666666666666667*((float)Stat.MaxAftSpd);
-	float nspeed = .0666666666666666666667*((float)Stat.MaxSpeed);
+	//	float abspeed =.066666666666666666667*((float)Stat.MaxAftSpd);
+	//	float nspeed = .0666666666666666666667*((float)Stat.MaxSpeed);
+	float abspeed =.13333333333333333333*((float)Stat.MaxAftSpd);
+	float nspeed = .13333333333333333333*((float)Stat.MaxSpeed);
 	LVector ypr;
 	ypr.i = 2.3*Stat.Yaw*180/3.1415926536;
 	ypr.j = 2.3*Stat.Pitch*180/3.1415926536;

@@ -10,7 +10,7 @@
 //extern Unit ** fighters;
 Stars::Stars(int num, float spread): spread(spread){
   int curnum = num/STARnumvlist+1;
-  
+  blend=true;
   GFXVertex * tmpvertex = new GFXVertex [curnum];
   memset (tmpvertex,0,sizeof (GFXVertex)*curnum);
   ResetPosition(Vector(0,0,0));
@@ -23,7 +23,9 @@ Stars::Stars(int num, float spread): spread(spread){
   
   delete []tmpvertex;
 }
-
+void Stars::SetBlend(bool blendit) {
+	blend = blendit;
+}
 void Stars::Draw() {
   const Vector cp (_Universe->AccessCamera()->GetPosition());
   UpdatePosition(cp);
@@ -34,6 +36,11 @@ void Stars::Draw() {
   GFXDisable (TEXTURE1);
   GFXEnable (LIGHTING);
   GFXEnable (DEPTHTEST);
+  if (blend) {
+	GFXBlendMode (ONE,ONE);
+  } else {
+	GFXBlendMode (ONE,ZERO);
+  }
   int ligh;
   GFXSelectMaterial (0);
   GFXLight FadeLight (true, GFXColor (cp.i,cp.j,cp.k), GFXColor (0,0,0,1), GFXColor (0,0,0,1), GFXColor (1,1,1,1), GFXColor (.01,0,1/(.4*spread*spread)));
