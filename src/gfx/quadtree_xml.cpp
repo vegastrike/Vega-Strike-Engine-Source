@@ -18,10 +18,11 @@ struct TerrainData {
 struct TerraXML {
   float scales;
   float scalet;
-	float detail;
-	std::vector <std::string> alpha;
-  	std::vector <GFXMaterial> mat;
-	std::vector <TerrainData> data;
+  float radius;
+  float detail;
+  std::vector <std::string> alpha;
+  std::vector <GFXMaterial> mat;
+  std::vector <TerrainData> data;
 };
 
 void QuadTree::beginElement(void *userData, const XML_Char *name, const XML_Char **atts) {
@@ -63,7 +64,8 @@ namespace TerrainXML {
 		GREEN,
 		BLUE,
 		ALPHA,
-		POWER
+		POWER,
+		RADIUS
 	};
 	const EnumMap::Pair element_names[] = {
 		EnumMap::Pair ("UNKNOWN", UNKNOWN),
@@ -96,10 +98,11 @@ namespace TerrainXML {
 		EnumMap::Pair ("green", GREEN),
 		EnumMap::Pair ("blue", BLUE),
 		EnumMap::Pair ("alpha", ALPHA),
-		EnumMap::Pair ("power", POWER)
+		EnumMap::Pair ("power", POWER),
+		EnumMap::Pair ("radius", RADIUS)
 	};
 	const EnumMap element_map(element_names,9);
-	const EnumMap attribute_map(attribute_names,20);
+	const EnumMap attribute_map(attribute_names,21);
 }
 using XMLSupport::EnumMap;
 using XMLSupport::Attribute;
@@ -134,6 +137,9 @@ void QuadTree::beginElement(const string &name, const AttributeList &attributes)
 			  break;
 			case SCALET:
 			  xml->scalet = parse_float ((*iter).value);
+			  break;
+			case RADIUS:
+			  xml->radius = parse_float ((*iter).value);
 			  break;
 			}
 		}
@@ -291,6 +297,7 @@ void QuadTree::LoadXML (const char *filename) {
   xml = new TerraXML;
   xml->scales = .001;
   xml->scalet = .001;
+  xml->radius = 10000;
   xml->detail=20;
   XML_Parser parser = XML_ParserCreate(NULL);
   XML_SetUserData(parser, this);
@@ -325,6 +332,7 @@ void QuadTree::LoadXML (const char *filename) {
 
   } 
   root = new quadsquare (&RootCornerData);
+  bool biggest=true;
   for (i=0;i<xml->data.size();i++) {
     HeightMapInfo hm;
     hm.XOrigin =(int)xml->data[i].OriginX;
@@ -345,7 +353,15 @@ void QuadTree::LoadXML (const char *filename) {
     
     if (hm.Data&&hm.terrainmap) {
       assert (xsize==hm.XSize&&zsize==hm.ZSize);
+
+
       hm.RowWidth = hm.XSize;
+      if (biggest){
+	biggest = false;
+	nonlinear_transform.SetR (xml->radius);
+	//	transformation[12]-=xml->radius;
+	nonlinear_transform.SetXZ (hm.XSize<<hm.Scale,hm.ZSize<<hm.Scale);
+      }
       root->AddHeightMap (RootCornerData,hm);
       free (hm.Data);
       free (hm.terrainmap);

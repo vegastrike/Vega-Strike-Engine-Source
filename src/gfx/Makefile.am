@@ -45,6 +45,7 @@ libgfx_a_SOURCES =	\
 	mesh_fx.cpp	\
 	mesh_poly.cpp	\
 	mesh_xml.cpp	\
+	nonlinear_transform.h \
 	png_texture.h	\
 	png_texture.cpp	\
 	quadtree.cpp	\

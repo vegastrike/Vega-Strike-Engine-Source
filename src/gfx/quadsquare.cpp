@@ -17,27 +17,6 @@
 #include "gfxlib.h"
 #include "aux_texture.h"
 using std::vector;
-Vector IdentityTransform::Transform (const Vector & v) {
-  return v;
-}
-
-Vector IdentityTransform::TransformNormal (const Vector & n) {
-  return n;
-}
-
-void IdentityTransform::TransformBox (Vector &min, Vector & max) {
-  
-}
-
-Vector IdentityTransform::InvTransform (const Vector &v) {
-  return v;
-}
-float IdentityTransform::TransformS (float x, float scales) {
-  return x*scales;
-}
-float IdentityTransform::TransformT (float y, float scalet) {
-  return y*scalet;
-}
 
 unsigned int * quadsquare::VertexAllocated;
 unsigned int *quadsquare::VertexCount;
@@ -48,7 +27,7 @@ std::vector <unsigned int> *quadsquare::unusedvertices;
 IdentityTransform *quadsquare::nonlinear_trans;
 std::vector <TerrainTexture> *quadsquare::textures;
 Vector quadsquare::normalscale;
-
+Vector quadsquare::camerapos;
 
 unsigned int quadsquare::SetVertices (GFXVertex * vertexs, const quadcornerdata &pcd) {
 	unsigned int half= 1<<pcd.Level;

@@ -1,6 +1,8 @@
 #include "quadsquare.h"
 #include "aux_texture.h"
 
+float SphereTransformRenderlevel=0;
+
 
 static void TerrainMakeActive (const TerrainTexture &text) {
   if (text.tex.t) {
@@ -35,8 +37,8 @@ typedef std::vector <TerrainTexture> vecTextureStar;
  * Draws the heightfield represented by this tree
  * Returns teh number of triangles rendered (not including multipass 
  */
-int	quadsquare::Render(const quadcornerdata& cd) {
-  
+int	quadsquare::Render(const quadcornerdata& cd, const Vector &camvec) {
+  quadsquare::camerapos = camvec;
   vertices->LoadDrawState();
   vertices->BeginDrawState (GFXTRUE);
 
@@ -170,7 +172,9 @@ void	quadsquare::RenderAux(const quadcornerdata& cd,  CLIPSTATE vis)
 // Does the work of rendering this square.  Uses the enabled vertices only.
 // Recurses as necessary.
 {
-	unsigned int	whole = 2 << cd.Level;	
+  
+	unsigned int	whole = 2 << cd.Level;
+	SphereTransformRenderlevel++;	
 	// If this square is outside the frustum, then don't render it.
 	if (vis != GFX_TOTALLY_VISIBLE) {
 		Vector	min, max;
@@ -180,11 +184,11 @@ void	quadsquare::RenderAux(const quadcornerdata& cd,  CLIPSTATE vis)
 		max.i = cd.xorg + whole;
 		max.j = MaxY;
 		max.k = cd.zorg + whole;
-		nonlinear_trans->TransformBox(min,max);
-		vis = GFXBoxInFrustum(min, max);
+		vis = nonlinear_trans->BoxInFrustum(min,max,quadsquare::camerapos);
 		if (vis == GFX_NOT_VISIBLE) {
+		  SphereTransformRenderlevel--;
 			// This square is completely outside the view frustum.
-			return;
+		  return;
 		}
 	}
 	
@@ -201,8 +205,11 @@ void	quadsquare::RenderAux(const quadcornerdata& cd,  CLIPSTATE vis)
 			flags |= mask;
 		}
 	}
+	SphereTransformRenderlevel--;
+	if (flags == 0) {
 
-	if (flags == 0) return;
+	  return;
+	}
 
 // Local macro to make the triangle logic shorter & hopefully clearer.
 	//#define tri(aa,ta,bb,tb,cc,tc) (indices[ta].q.push_back (aa), indices[ta].q.push_back (bb), indices[ta].q.push_back (cc))
@@ -262,6 +269,7 @@ void	quadsquare::RenderAux(const quadcornerdata& cd,  CLIPSTATE vis)
 #undef t6
 #undef T7
 #undef T8
+
 }
 
 

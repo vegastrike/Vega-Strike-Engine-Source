@@ -45,6 +45,7 @@ struct GFXVertex
   GFXVertex &SetNormal(const Vector &norm) {i = norm.i; j = norm.j; k = norm.k; return *this;}
   GFXVertex &SetVertex(const Vector &vert) {x = vert.i; y = vert.j; z = vert.k; return *this;}
   Vector GetVertex () {return Vector (x,y,z);}
+  const Vector & GetConstVertex () const {return (*((Vector *)&x));}
   Vector GetNormal () {return Vector (i,j,k);}
 };
 

@@ -329,12 +329,18 @@ void createObjects() {
   explosion= new Animation ("explosion_orange.ani",false,.1,BILINEAR,false);
   LoadWeapons("weapon_list.xml");
   Vector TerrainScale (XMLSupport::parse_float (vs_config->getVariable ("terrain","xscale","1")),XMLSupport::parse_float (vs_config->getVariable ("terrain","yscale","1")),XMLSupport::parse_float (vs_config->getVariable ("terrain","zscale","1")));
-  Terrain * terr = new Terrain (mission->getVariable("terrain","terrain.xml").c_str(), TerrainScale);
-  Matrix tmp;
-  Identity (tmp);
-  tmp[0]=TerrainScale.i;tmp[5]=TerrainScale.j;tmp[10]=TerrainScale.k;
-  
-  terr->SetTransformation (tmp);
+
+  std::string stdstr= mission->getVariable("terrain","");
+  if (stdstr.length()>0) {
+    Terrain * terr = new Terrain (stdstr.c_str(), TerrainScale);
+    Matrix tmp;
+    Identity (tmp);
+    tmp[0]=TerrainScale.i;tmp[5]=TerrainScale.j;tmp[10]=TerrainScale.k;
+    Vector pos;
+    mission->GetOrigin (pos,stdstr);
+    tmp[12]=-pos.i;tmp[13]=-pos.j;tmp[14]=-pos.k;
+    terr->SetTransformation (tmp);
+  }
   //  qt = new QuadTree("terrain.xml");
   /****** 
   locSel = new LocationSelect(Vector (0,-2,2),

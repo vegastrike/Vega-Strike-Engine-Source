@@ -2,6 +2,7 @@
 #define QUADTREE_H_
 #include "quadsquare.h"
 #include "xml_support.h"
+
 struct Texture;
 /** 
  * This class is a wrapper class for quadsquare
@@ -11,7 +12,7 @@ struct Texture;
 struct TerraXML;
 class QuadTree {
   float detail;
-  IdentityTransform * nonlinear_transform;
+  SphericalTransform nonlinear_transform;
   Matrix transformation;
   quadcornerdata RootCornerData;
   quadsquare *root;

@@ -16,6 +16,7 @@
 #include "gfxlib.h"
 #include <vector>
 #include "resizable.h"
+#include "nonlinear_transform.h"
 struct Texture;
 struct TerrainTexture {
   BLENDFUNC blendSrc;
@@ -59,23 +60,6 @@ struct TextureIndex {
   void Clear() {q.clear();c.clear();}
 };
 
-/**
- * We could make it virtual and ahve a sphere-map or cube-map version of this
- *
- */
-class IdentityTransform {
- public:
-  ///Transforms in a possibly nonlinear way the point to some new space
-  virtual Vector Transform (const Vector &);
-  ///transforms a direction to some new space
-  virtual Vector TransformNormal (const Vector &);
-  ///Transforms in reverse the vector into quadsquare space
-  virtual Vector InvTransform (const Vector &);
-  ///Transforms a min and a max vector and figures out what is bigger
-  virtual void TransformBox (Vector &min, Vector &max);
-  float TransformS (float x, float scale);
-  float TransformT (float y, float scale);
-};
 
 struct	VertInfo {
   unsigned short Y;
@@ -131,10 +115,10 @@ class quadsquare {
 	int	CountNodes();
   ///Make sure to translate into Quadtree Space
 	void	Update(const quadcornerdata& cd, const Vector &ViewerLocation, float Detail, unsigned short numstages, unsigned short whichstage);
-	int	Render(const quadcornerdata& cd);
+	int	Render(const quadcornerdata& cd, const Vector &camera);
 
 	float	GetHeight(const quadcornerdata& cd, float x, float z, Vector & normal);
-	static Vector MakeLightness (float xslope, float zslope);
+	static Vector MakeLightness (float xslope, float zslope, const Vector & loc);
   static void SetCurrentTerrain (unsigned int * VertexAllocated, unsigned int * VertexCount, GFXVertexList *vertices, std::vector <unsigned int> *unusedvertices, IdentityTransform * transform, std::vector <TerrainTexture> *texturelist, const Vector & NormalScale );
 	
 private:
@@ -165,6 +149,7 @@ private:
 	static std::vector <TerrainTexture> *textures;
 	static std::vector <TextureIndex> indices;
 	static Vector normalscale;
+	static Vector camerapos;
 };
 
 

@@ -327,8 +327,8 @@ void	quadsquare::UpdateAux(const quadcornerdata& cd, const Vector & ViewerLocati
 inline Vector Normalise (const Vector & vec, const float scale) {
   return vec*(scale/vec.Magnitude());
 }
-Vector	quadsquare::MakeLightness(float xslope, float zslope) {
-  Vector tmp (nonlinear_trans->TransformNormal(Vector (xslope, 1, zslope)));
+Vector	quadsquare::MakeLightness(float xslope, float zslope, const Vector & loc) {
+  Vector tmp (nonlinear_trans->TransformNormal(loc, Vector (xslope, 1, zslope)));
   tmp.Normalize();
   return (Vector (tmp.i*normalscale.i,tmp.j*normalscale.j,tmp.k*normalscale.k));
 }
@@ -405,29 +405,41 @@ float quadsquare::RecomputeErrorAndLighting(const quadcornerdata& cd) {
 
 	float	OneOverSize = 1.0 / (2 << cd.Level);
 	GFXVertex *vertexs = vertices->BeginMutate(0)->vertices; 
-	vertexs[Vertex[0].vertindex].SetNormal ( MakeLightness((Vertex[1].Y - Vertex[3].Y) * OneOverSize,
-				       (Vertex[4].Y - Vertex[2].Y) * OneOverSize));
+	GFXVertex * V = &vertexs[Vertex[0].vertindex];
+	V->SetNormal ( MakeLightness((Vertex[1].Y - Vertex[3].Y) * OneOverSize,
+				     (Vertex[4].Y - Vertex[2].Y) * OneOverSize,
+				     V->GetConstVertex()));
+
 
 	float	v;
 	quadsquare*	s = GetNeighbor(0, cd);
 	if (s) v = s->Vertex[0].Y; else v = Vertex[1].Y;
-	vertexs[Vertex[1].vertindex].SetNormal (MakeLightness((v - Vertex[0].Y) * OneOverSize,
-				       (cd.Verts[3].Y - cd.Verts[0].Y) * OneOverSize));
+	
+	V=&vertexs[Vertex[1].vertindex];
+	V->SetNormal (MakeLightness((v - Vertex[0].Y) * OneOverSize,
+				    (cd.Verts[3].Y-cd.Verts[0].Y)*OneOverSize,
+				    V->GetConstVertex()));
 	
 	s = GetNeighbor(1, cd);
 	if (s) v = s->Vertex[0].Y; else v = Vertex[2].Y;
-	vertexs[Vertex[2].vertindex].SetNormal (MakeLightness((cd.Verts[0].Y - cd.Verts[1].Y) * OneOverSize,
-				       (Vertex[0].Y - v) * OneOverSize));
+	V=&vertexs[Vertex[2].vertindex];
+	V->SetNormal (MakeLightness((cd.Verts[0].Y - cd.Verts[1].Y) * OneOverSize,
+				    (Vertex[0].Y - v) * OneOverSize,
+				    V->GetConstVertex()));
 	
 	s = GetNeighbor(2, cd);
 	if (s) v = s->Vertex[0].Y; else v = Vertex[3].Y;
-	vertexs[Vertex[3].vertindex].SetNormal (MakeLightness((Vertex[0].Y - v) * OneOverSize,
-						      (cd.Verts[2].Y - cd.Verts[1].Y) * OneOverSize));
+	V = &vertexs[Vertex[3].vertindex];
+	V->SetNormal (MakeLightness((Vertex[0].Y - v) * OneOverSize,
+				    (cd.Verts[2].Y - cd.Verts[1].Y) * OneOverSize,
+				    V->GetConstVertex()));
 	
 	s = GetNeighbor(3, cd);
 	if (s) v = s->Vertex[0].Y; else v = Vertex[4].Y;
-	vertexs[Vertex[4].vertindex].SetNormal (MakeLightness((cd.Verts[3].Y - cd.Verts[2].Y) * OneOverSize,
-				       (v - Vertex[0].Y) * OneOverSize));
+	V =&vertexs[Vertex[4].vertindex];
+	V->SetNormal (MakeLightness((cd.Verts[3].Y - cd.Verts[2].Y) * OneOverSize,
+				    (v - Vertex[0].Y) * OneOverSize,
+				    V->GetConstVertex()));
 	vertices->EndMutate();
 
 	// The error, MinY/MaxY, and lighting values for this node and descendants are correct now.

@@ -38,7 +38,8 @@ template<class KEY, class VALUE, class SIZ> class Hashtable {
 		VALUE *value;
 		HashElement(KEY k, VALUE *v) {key = k; value = v;}
 	};
-	list<HashElement> table[sizeof (SIZ)];
+	typedef list<HashElement> listOfHashElement;
+	listOfHashElement table[sizeof (SIZ)];
   static int hash(const int key) {
     return key%sizeof(SIZ);
   }
@@ -62,8 +63,10 @@ public:
 	VALUE *Get(const KEY &key) const
 	{
 		int hashval = hash(key);
-		list<HashElement>::const_iterator iter = table[hashval].begin(), end = table[hashval].end();
-
+		struct listOfHashElement::const_iterator iter; 
+		struct listOfHashElement::const_iterator end; 
+		iter = table[hashval].begin(); 
+		end = table[hashval].end();
 		for(;iter!=end;iter++)
 			if((*iter).key == key)
 				break;
@@ -82,7 +85,8 @@ public:
 	void Delete(const KEY &key)
 	{
 		int hashval = hash(key);
-		list<HashElement>::iterator iter = table[hashval].begin(), end = table[hashval].end();
+		listOfHashElement::iterator iter = table[hashval].begin();
+		listOfHashElement::iterator end = table[hashval].end();
 
 		for(;iter!=end;iter++)
 			if((*iter).key == key)

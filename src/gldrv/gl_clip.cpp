@@ -15,6 +15,30 @@ CLIPSTATE GFXTransformedBoxInFrustum (const Vector &min, const Vector &max) {
   return GFXBoxInFrustum (frust,min,max);
 }
 
+CLIPSTATE /*GFXDRVAPI*/ GFXSpherePartiallyInFrustum (const Vector &Cnt, float radius) {
+  return GFXSpherePartiallyInFrustum(BoxFrust,Cnt,radius);
+}
+CLIPSTATE /*GFXDRVAPI*/ GFXTransformedSpherePartiallyInFrustum (const Vector &Cnt, float radius) {
+  return GFXSpherePartiallyInFrustum(frust,Cnt,radius);
+}
+
+CLIPSTATE /*GFXDRVAPI*/ GFXSpherePartiallyInFrustum (float f [6][4],const Vector &Cnt, const float radius) {
+   int p;
+   float d;
+   CLIPSTATE retval=GFX_TOTALLY_VISIBLE;;
+   for( p = 0; p < 6; p++ )//does not evaluate for yon
+   {
+     d = f[p][0] * Cnt.i + f[p][1] * Cnt.j + f[p][2] * Cnt.k + f[p][3];
+     if( d <= -radius )
+         return GFX_NOT_VISIBLE;
+     else if (d<=radius) {
+       retval=GFX_PARTIALLY_VISIBLE;
+     }
+   }
+   return retval;
+}
+
+
 CLIPSTATE GFXBoxInFrustum (float f [6][4], const Vector &min, const Vector &max) {
   	// Doesn't do a perfect test for NOT_VISIBLE.  Just checks to
 	// see if all box vertices are outside at least one frustum
