@@ -668,7 +668,7 @@ public:
   ///Is dead yet?
   inline bool Killed() const {return killed;}
   ///returns the current ammt of armor left
-  unsigned float AfterburnData() const{ return afterburnenergy;} //short fix
+  float AfterburnData() const{ return afterburnenergy;} //short fix
   void			 SetAfterBurn( float aft) { afterburnenergy = aft;} //short fix
   float FuelData() const;
   void  SetFuel( float f) { fuel = f;}
