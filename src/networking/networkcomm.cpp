@@ -735,7 +735,11 @@ string	NetworkCommunication::DecryptBuffer( const char * buffer, unsigned int le
 		StringSource privstr(privkey, true, new HexDecoder);
 		RSAES_OAEP_SHA_Decryptor priv(privstr);
 
+#if CRYPTO==50
+		StringSource( buffer, true, new HexDecoder(new PK_DecryptorFilter( priv, new StringSink(result))));
+#else
 		StringSource( buffer, true, new HexDecoder(new PK_DecryptorFilter( randPool, priv, new StringSink(result))));
+#endif
 	}
 	else if( crypto_method == "3des")
 	{

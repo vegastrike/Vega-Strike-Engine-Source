@@ -132,14 +132,17 @@
 /* Define to 1 if you have the `_isnan' function. */
 #undef HAVE__ISNAN
 
-/* enable hazardous network communications (Webcam and VOIP) */
+/* enable hazardous network communications (Webcam and VoIP) */
 #undef NETCOMM
 
-/* disable sound with NETCOMM */
-#undef NETCOMM_NOSOUND
+/* enable JVoIP library for sound support with NETCOMM */
+#undef NETCOMM_JVOIP
 
 /* disable video with NETCOMM */
 #undef NETCOMM_NOWEBCAM
+
+/* enable PortAudio library for sound support with NETCOMM */
+#undef NETCOMM_PORTAUDIO
 
 /* Name of package */
 #undef PACKAGE
@@ -164,9 +167,6 @@
 
 /* Define to 1 if you can safely include both <sys/time.h> and <time.h>. */
 #undef TIME_WITH_SYS_TIME
-
-/* Use JThreads */
-#undef USE_NET_THREAD_J
 
 /* Use no threads */
 #undef USE_NET_THREAD_NONE

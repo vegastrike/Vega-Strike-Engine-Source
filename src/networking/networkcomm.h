@@ -1,14 +1,19 @@
 #ifndef __NETWORKCOMM_H
 #define __NETWORKCOMM_H
 
+#ifdef CRYPTO
+#include <crypto++/randpool.h>
+using namespace CryptoPP;
+#endif
+
 #include "const.h"
 #include "client.h"
 #include "clientptr.h"
 #include <string>
 #include <list>
 #include <deque>
-#include <config.h>
 #include "boost/shared_ptr.hpp"
+#include <config.h>
 
 #ifndef NETCOMM_NOWEBCAM
 class WebcamSupport;
@@ -24,10 +29,6 @@ class JVOIPRTPTransmissionParams;
 #include <pa/portaudio.h>
 #define MAX_PA_CPU_LOAD		0.5
 // (MAX_PA_CPU_LOAD*100)% CPU LOAD
-#endif
-#ifdef CRYPTO
-#include <crypto++/randpool.h>
-using namespace CryptoPP;
 #endif
 
 typedef list<ClientPtr>::iterator CltPtrIterator;
