@@ -556,25 +556,12 @@ namespace UniverseUtil {
 				{
 						using namespace VSFileSystem;
 						// Read the file
-						std::string systemfile( systempath);
 						VSFile f;
-						VSError err = f.OpenReadOnly( systemfile, SystemFile);
+						VSError err = f.OpenReadOnly( systempath, SystemFile);
 						if( err<=Ok)
 						{
 							cout<<"\t\tcomputing serials for "<<systempath<<"...";
-							int readsize = 0;
-							int file_size = f.Size();
-							cerr<<"Size = "<<file_size<<" for "<<systempath<<endl;
-							char * systembuf = new char[file_size+1];
-							readsize = f.Read( systembuf, file_size);
-							if( readsize!=file_size)
-							{
-								cout<<"Error reading system file : "<<systemfile<<" read ("<<readsize<<") -  to be read("<<file_size<<")"<<endl;
-								exit( 1);
-							}
-							cerr<<"System file size = "<<readsize<<endl;
-							systembuf[file_size] = 0;
-							string system( systembuf);
+							std::string system = f.ReadFull();
 
 							// Now looking for "<planet ", "<Planet ", "<PLANET ", "<unit ", "<Unit ", "<UNIT ", same for nebulas
 							std::vector<std::string> search_patterns;
@@ -634,7 +621,7 @@ namespace UniverseUtil {
 								cerr<<"!!! ERROR : opening "<<systempath<<" for writing"<<endl;
 								VSExit(1);
 							}
-							if( f.Write( system.c_str(), system.length()) != system.length() )
+							if( f.Write( system) != system.length() )
 							{
 								cerr<<"!!! ERROR : writing system file"<<endl;
 								VSExit(1);
@@ -642,7 +629,6 @@ namespace UniverseUtil {
 							f.Close();
 
 							cout<<" OK !"<<endl;
-							delete systembuf;
 						}
 						else
 						{

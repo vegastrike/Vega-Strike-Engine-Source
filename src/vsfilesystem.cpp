@@ -1190,9 +1190,9 @@ namespace VSFileSystem
 		{
 			failed = "";
 			if( !UseVolumes[type])
-				failed += "\tTRY LOADING : "+fullpath+"... SUCCESS";
+				failed += "\tTRY LOADING : "+nameof( type)+" "+fullpath+"... SUCCESS";
 			else
-				failed += "\tTRY LOADING in "+fullpath+" : "+file+"... SUCCESS";
+				failed += "\tTRY LOADING in "+nameof( type)+" "+fullpath+" : "+file+"... SUCCESS";
 		}
 		return found;
 	}
@@ -1454,7 +1454,7 @@ namespace VSFileSystem
 
 		VSError err = Ok;
 
-		cerr<<"Loading a " << type << " :\n";
+		cerr<<"Loading a " << type << " :"<<endl;
 		if( !UseVolumes[type])
 		{
 			if( type==Unknown)
