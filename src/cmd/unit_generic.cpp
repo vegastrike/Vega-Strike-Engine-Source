@@ -1068,7 +1068,7 @@ StarSystem * Unit::getStarSystem () {
 }
 
 void Unit::Fire (unsigned int weapon_type_bitmask, bool listen_to_owner) {
-    if (cloaking>=0)
+    if (cloaking>=0||graphicOptions.InWarp)
         return;
 	int nm = 0;
 	vector <Mount>
