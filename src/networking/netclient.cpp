@@ -107,7 +107,7 @@ NetClient::NetClient()
 {
     game_unit = NULL;
     old_timestamp = 0;
-    current_timestamp = 0;
+    latest_timestamp = 0;
     old_time = 0;
     cur_time = 0;
     enabled = 0;
@@ -172,7 +172,7 @@ bool	NetClient::PacketLoop( Cmd command)
 		{
 			COUT<<"Timed out"<<endl;
 			timeout = true;
-			cleanup();
+			VSExit(1);
 		}
 		ret=this->checkMsg( &packet );
 		if( ret>0)
@@ -184,14 +184,14 @@ bool	NetClient::PacketLoop( Cmd command)
 				COUT<<"Got a response with unexpected command : ";
 				displayCmd( packet.getCommand());
 				COUT<<endl<<"!!! PROTOCOL ERROR -> EXIT !!!"<<endl;
-				cleanup();
+				VSExit(1);
 			}
 			recv = true;
 		}
 		else if( ret<0)
 		{
 			COUT<<"!!! Error, dead connection to server -> EXIT !!!"<<endl;
-			cleanup();
+			VSExit(1);
 		}
 
 		micro_sleep( 40000);
@@ -291,7 +291,7 @@ void	NetClient::start( char * addr, unsigned short port)
 	{
 		perror( "Error login in ");
 		cleanexit=true;
-		winsys_exit(1);
+		VSExit(1);
 	}
 
 	cout<<"Initiating client loop"<<endl;
@@ -401,9 +401,11 @@ int NetClient::recvMsg( Packet* outpacket )
 	        *outpacket = p1;
 	    }
         packet_serial     = p1.getSerial();
-        old_timestamp     = current_timestamp;
-        current_timestamp = p1.getTimestamp();
-        deltatime         = current_timestamp - old_timestamp;
+		/*
+        old_timestamp     = latest_timestamp;
+        latest_timestamp = p1.getTimestamp();
+        deltatime         = latest_timestamp - old_timestamp;
+		*/
 	    Cmd cmd           = p1.getCommand( );
 	    COUT << "Rcvd: " << cmd << " ";
         switch( cmd )
@@ -428,12 +430,12 @@ int NetClient::recvMsg( Packet* outpacket )
 					if (!fp)
 					{
 						cerr<<"!!! ERROR : opening received file !!!"<<endl;
-						exit(1);
+						VSExit(1);
 					}
 					if( fwrite( file.c_str(), sizeof( char), file.length(), fp) != file.length())
 					{
 						cerr<<"!!! ERROR : writing received file !!!"<<endl;
-						exit(1);
+						VSExit(1);
 					}
 				}
 				else
@@ -481,9 +483,6 @@ int NetClient::recvMsg( Packet* outpacket )
             case CMD_SNAPSHOT :
                 // Should update another client's position
                 //COUT<<"Received a SNAPSHOT from server"<<endl;
-				// We don't want to consider a late snapshot
-				if( old_timestamp > current_timestamp)
-					break;
                 this->receivePosition( &p1 );
                 break;
             case CMD_ENTERCLIENT :
@@ -516,12 +515,12 @@ int NetClient::recvMsg( Packet* outpacket )
                 /*** TO REDO IN A CLEAN WAY ***/
                 COUT << ">>> " << local_serial << " >>> DISCONNECTED -> Client killed =( serial n°"
                      << packet_serial << " )= --------------------------------------" << endl;
-                exit(1);
+                VSExit(1);
                 break;
 //             case CMD_ACK :
 //                 /*** RECEIVED AN ACK FOR A PACKET : comparison on packet timestamp and the client serial in it ***/
 //                 /*** We must make sure those 2 conditions are enough ***/
-//                 COUT << ">>> ACK =( " << current_timestamp
+//                 COUT << ">>> ACK =( " << latest_timestamp
 //                      << " )= ---------------------------------------------------" << endl;
 // 				p1.ack( );
 //                 break;
@@ -761,7 +760,7 @@ int NetClient::recvMsg( Packet* outpacket )
 				{
 					// The system should have been loaded just before we asked for the jump so this is just a safety check
 					cerr<<"!!! ERROR : Couldn't find destination Star system !!!"<<endl;
-					exit(1);
+					VSExit(1);
 				}
 				// If unserial == un->GetSerial() -> then we are jumping otherwise it is another unit/player
 				if( unserial == un->GetSerial())
@@ -914,7 +913,7 @@ int NetClient::recvMsg( Packet* outpacket )
 void	NetClient::disconnect()
 {
 	keeprun = 0;
-	// Disconnection is handled in the cleanup() function for each player
+	// Disconnection is handled in the VSExit(1) function for each player
 }
 
 void	NetClient::logout()

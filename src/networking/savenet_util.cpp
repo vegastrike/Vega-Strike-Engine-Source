@@ -60,7 +60,7 @@ void	SaveNetUtil::SaveFiles( string savestr, string xmlstr, string path, string 
 	if( !fp)
 	{
 		cout<<"Error opening save file "<<savefile<<endl;
-		exit(1);
+		VSExit(1);
 	}
 	fwrite( xmlstr.c_str(), sizeof( char), xmlstr.length(), fp);
 	fclose( fp);
@@ -70,7 +70,7 @@ void	SaveNetUtil::SaveFiles( string savestr, string xmlstr, string path, string 
 	if( !fp)
 	{
 		cout<<"Error opening save file "<<savefile<<endl;
-		exit(1);
+		VSExit(1);
 	}
 	fwrite( savestr.c_str(), sizeof( char), savestr.length(), fp);
 	fclose( fp);

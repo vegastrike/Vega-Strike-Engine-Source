@@ -29,6 +29,12 @@ char SERVER = 1;
 Universe * _Universe;
 LeakVector<Mission *> active_missions;
 
+void	VSExit( int code)
+{
+	Server->closeAllSockets();
+	exit(1);
+}
+
 int main( int argc, char **argv)
 {
 	Server = new NetServer;

@@ -202,7 +202,7 @@ void	NetServer::start(int argc, char **argv)
 		if( vs_config->getVariable( "network", "accountsrvip", "")=="")
 		{
 			cout<<"Account server IP not specified, exiting"<<endl;
-			cleanup();
+			VSExit(1);
 		}
 		memset( srvip, 0, 256);
 		memcpy( srvip, (vs_config->getVariable( "network", "accountsrvip", "")).c_str(), 256);
@@ -214,7 +214,7 @@ void	NetServer::start(int argc, char **argv)
 		if( !acct_sock.valid())
 		{
 			cerr<<"Cannot connect to account server... quitting"<<endl;
-			cleanup();
+			VSExit(1);
 		}
 		COUT <<"accountserver on socket "<<acct_sock<<" done."<<endl;
 	}
@@ -254,7 +254,7 @@ void	NetServer::start(int argc, char **argv)
 		if( (nbread = fread( dynaverse, sizeof( char), dynsize, fp)) != dynsize)
 		{
 			cerr<<"!!! ERROR : read "<<nbread<<" bytes, there were "<<dynsize<<" to read !!!"<<endl;
-			exit(1);
+			VSExit(1);
 		}
 
 		globalsave->ReadSavedPackets( dynaverse);
@@ -312,7 +312,7 @@ void	NetServer::start(int argc, char **argv)
 				{
 					perror( "ERROR sending redirected login request to ACCOUNT SERVER : ");
 					COUT<<"SOCKET was : "<<acct_sock<<endl;
-					cleanup();
+					VSExit(1);
 				}
 				delete buflist;
 			}
@@ -425,7 +425,7 @@ void	NetServer::checkKey( SocketSet & sets)
 		{
 			if( !strncmp( input_buffer, "quit", 4) || !strncmp( input_buffer, "QUIT", 4))
 			{
-				cleanup();
+				VSExit(1);
 			}
 			else if( !strncmp( input_buffer, "stats", 4) || !strncmp( input_buffer, "STATS", 4))
 			{
@@ -527,29 +527,43 @@ bool	NetServer::updateTimestamps( ClientPtr cltp, Packet & p )
         Client* clt = cltp.get();
 
 		bool 	  ret = true;
-        double    ts = p.getTimestamp();
+		// A packet's timestamp is in ms whereas getNewTime is in seconds
+		unsigned int int_ts = p.getTimestamp();
 
-		// We know which client it is so we update its timeout
 		double curtime = getNewTime();
-		clt->latest_timeout = curtime;
-
-		clt->old_timestamp = clt->latest_timestamp;
-		// In case the timestamp is superior to the received tmestamp
-		if( ts < clt->latest_timestamp) 
+		// Check for late packet : compare received timestamp to the latest we have
+		if( int_ts < clt->latest_timestamp)
 		{
 			// If ts > 0xFFFFFFF0 (15 seconds before the maxin an u_int) 
 			// This is not really a reliable test -> we may still have late packet in that range of timestamps
+			/*
 			if( (clt->isTcp() && ts > 0xFFFFFFF0) || (clt->isUdp() && ts > 0xFFFFFFF0 && !(p.getFlags() & SENDANDFORGET)) )
 				clt->deltatime = 0xFFFFFFFF - clt->latest_timestamp + ts;
-			// Only check for late packets when sent non reliable because we need others
 			else if( clt->isUdp() && p.getFlags() & SENDANDFORGET)
+			*/
+			// Only check for late packets when sent non reliable because we need others
+			if( clt->isUdp() && p.getFlags() & SENDANDFORGET)
 				ret = false;
 		}
 		else
-			clt->deltatime = (ts - clt->latest_timestamp);
-		// Only update latest_timestamp if we didn't receive a late packet (always true for TCP)
-		if( ret)
-			clt->latest_timestamp = ts;
+		{
+			// Update the timeout vals anytime we receive a packet
+			// Set old_timeout to the old_latest one and latest_timeout to current time in seconds
+			clt->old_timeout = clt->latest_timeout;
+			clt->latest_timeout = curtime;
+
+			// Packet is not late so we update timestamps only when receving a CMD_SNAPSHOT
+			// because we predict and interpolate based on the elapsed time between 2 SNAPSHOTS
+			if( p.getCommand()==CMD_SNAPSHOT)
+			{
+				// Set old_timestamp to the old latest_timestamp and the latest_timestamp to the received one
+				clt->old_timestamp = clt->latest_timestamp;
+				clt->latest_timestamp = int_ts;
+				// Compute the deltatime that is time between packet_timestamp in ms and the old_timestamp in ms
+				clt->deltatime = (unsigned int) (int_ts - clt->old_timestamp);
+				cerr<<"DELTATIME = "<<clt->deltatime<<" --------------------"<<endl;
+			}
+		}
 
 		return ret;
 }
@@ -619,7 +633,7 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
 				{
 					perror( "ERROR sending redirected login request to ACCOUNT SERVER : ");
 					COUT<<"SOCKET was : "<<acct_sock<<endl;
-					cleanup();
+					VSExit(1);
 				}
             }
             COUT<<"<<< LOGIN REQUEST --------------------------------------"<<endl;

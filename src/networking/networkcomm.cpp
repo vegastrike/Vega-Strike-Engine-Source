@@ -1,6 +1,7 @@
 //#include "cmd/unit_generic.h"
 #include "networking/networkcomm.h"
 #include "vs_path.h"
+#include "vs_globals.h"
 #ifdef CRYPTO
 #include <crypto++/filters.h>
 #include <crypto++/hex.h>
@@ -47,7 +48,7 @@ void	CheckVOIPError( int val)
 	string error = JVOIPGetErrorString( val);
 	cerr<<"!!! JVOIP ERROR : "<<error<<endl;
 	cleanexit = true;
-	winsys_exit(1);
+	VSExit(1);
 }
 #endif /* NETCOMM_JVOIP */
 #ifdef NETCOMM_PORTAUDIO
@@ -61,7 +62,7 @@ void	CheckPAError( PaError err, const char * fun)
 		if( err==paHostError)
 			cerr<<"!!! PA HOST ERROR : "<<Pa_GetHostError()<<" - "<<Pa_GetErrorText( Pa_GetHostError())<<endl;
 		cleanexit = true;
-		winsys_exit(1);
+		VSExit(1);
 	}
 }
 
@@ -224,13 +225,13 @@ NetworkCommunication::NetworkCommunication()
 		if( fread( pubk, sizeof( char), publength, fp1)!=publength)
 		{
 			cerr<<"!!! ERROR : reading crypto public key"<<endl;
-			exit(1);
+			VSExit(1);
 		}
 		char * privk = new char[privlength];
 		if( fread( privk, sizeof( char), privlength, fp2)!=privlength)
 		{
 			cerr<<"!!! ERROR : reading crypto private key"<<endl;
-			exit(1);
+			VSExit(1);
 		}
 		this->pubkey = string( pubk);
 		this->privkey = string( privk);

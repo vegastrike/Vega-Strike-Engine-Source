@@ -1,4 +1,5 @@
 #include "fileutil.h"
+#include "vs_globals.h"
 #include "networking/lowlevel/vsnet_headers.h"
 #include "vs_path.h"
 
@@ -22,7 +23,7 @@ void	FileUtil::WriteSaveFiles( string savestr, string xmlstr, string path, strin
 	if( !fp)
 	{
 		cout<<"Error opening save file "<<savefile<<endl;
-		exit(1);
+		VSExit(1);
 	}
 	fwrite( savestr.c_str(), sizeof( char), savestr.length(), fp);
 	fclose( fp);
@@ -32,7 +33,7 @@ void	FileUtil::WriteSaveFiles( string savestr, string xmlstr, string path, strin
 	if( !fp)
 	{
 		cout<<"Error opening save file "<<savefile<<endl;
-		exit(1);
+		VSExit(1);
 	}
 	fwrite( xmlstr.c_str(), sizeof( char), xmlstr.length(), fp);
 	fclose( fp);
@@ -108,7 +109,7 @@ int		FileUtil::HashCompute( const char * filename, unsigned char * digest)
 		else
 		{
 			cerr<<"!!! ERROR = couldn't compute hash digest on "<<filename<<" file !!!"<<endl;
-			exit(1);
+			VSExit(1);
 			//return -1;
 		}
 	}

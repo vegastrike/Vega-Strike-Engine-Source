@@ -116,8 +116,11 @@ void	NetServer::sendDockAuthorize( ObjSerial serial, ObjSerial utdw_serial, int 
 {
 	// Set client not ingame while docked
 	ClientPtr clt = this->getClientFromSerial( serial);
-	clt->ingame = true;
+	clt->ingame = false;
+	// Set timestamps to 0 so we won't have prediction problem when undocking
+	clt->old_timestamp = clt->latest_timestamp = 0;
 	StarSystem * currentsys = clt->game_unit.GetUnit()->activeStarSystem;
+	// Remove the unit from the system list
 	currentsys->RemoveUnit( clt->game_unit.GetUnit());
 
 	NetBuffer netbuf;
@@ -146,6 +149,7 @@ void	NetServer::sendUnDock( ObjSerial serial, ObjSerial utdwserial, unsigned sho
 	// Set client ingame
 	ClientPtr clt = this->getClientFromSerial( serial);
 	clt->ingame = true;
+	// Add the unit back into the system list
 	StarSystem * currentsys = clt->game_unit.GetUnit()->activeStarSystem;
 	currentsys->AddUnit( clt->game_unit.GetUnit());
 }

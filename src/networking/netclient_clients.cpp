@@ -24,7 +24,7 @@ void	NetClient::addClient( const Packet* packet )
 	{
 		// Maybe just ignore here
 		COUT<<"FATAL ERROR : RECEIVED INFO ABOUT ME !"<<endl;
-		exit(1);
+		VSExit(1);
 	}
 	*/
 
@@ -173,72 +173,84 @@ void	NetClient::receivePosition( const Packet* packet )
 	bool			localplayer = false;
 
 	nbclts = packet->getSerial();
-	COUT << "Received update for " << nbclts << " clients - LENGTH="
-	     << packet->getDataLength() << endl;
-	databuf = packet->getData();
-	NetBuffer netbuf( packet->getData(), packet->getDataLength());
 
-	// Loop throught received snapshot
-	for( i=0, j=0; (i+j)<nbclts;)
+	// Computes deltatime only when receiving a snapshot since we interpolate positions between 2 snapshots
+	// We don't want to consider a late snapshot
+	unsigned int int_ts = packet->getTimestamp();
+	if( latest_timestamp < int_ts)
 	{
-		// Get the command from buffer
-		cmd = netbuf.getChar();
-		// Get the serial number of current element
-		sernum = netbuf.getSerial();
-		// Test if it is a client or a unit
-		if( !(clt = Clients.get(sernum)))
+	    old_timestamp     = latest_timestamp;
+	    latest_timestamp  = int_ts;
+	    deltatime         = latest_timestamp - old_timestamp;
+		cerr<<"DELTATIME = "<<deltatime<<" --------------------------------"<<endl;
+
+		COUT << "Received update for " << nbclts << " clients - LENGTH="
+		     << packet->getDataLength() << endl;
+		databuf = packet->getData();
+		NetBuffer netbuf( packet->getData(), packet->getDataLength());
+
+		// Loop throught received snapshot
+		for( i=0, j=0; (i+j)<nbclts;)
 		{
-			if( !(un = UniverseUtil::GetUnitFromSerial( sernum)))
+			// Get the command from buffer
+			cmd = netbuf.getChar();
+			// Get the serial number of current element
+			sernum = netbuf.getSerial();
+			// Test if it is a client or a unit
+			if( !(clt = Clients.get(sernum)))
 			{
-				COUT<<"WARNING : No client, no unit found for this serial ("<<sernum<<")"<<endl;
+				if( !(un = UniverseUtil::GetUnitFromSerial( sernum)))
+				{
+					COUT<<"WARNING : No client, no unit found for this serial ("<<sernum<<")"<<endl;
+				}
 			}
-		}
-		// Test if local player
-		else
-			localplayer = _Universe->isPlayerStarship( Clients.get(sernum)->game_unit.GetUnit());
+			// Test if local player
+			else
+				localplayer = _Universe->isPlayerStarship( Clients.get(sernum)->game_unit.GetUnit());
 
-		if( clt && !localplayer || un)
-		{
-			if( clt)
-				un = clt->game_unit.GetUnit();
-
-			if( cmd == CMD_FULLUPDATE)
+			if( clt && !localplayer || un)
 			{
-				// Do what needed with update
-				COUT<<"Received FULLSTATE ";
-				// Tell we received the ClientState so we can convert byte order from network to host
-				//cs.display();
-				cs = netbuf.getClientState();
-				cs.display();
+				if( clt)
+					un = clt->game_unit.GetUnit();
+	
+				if( cmd == CMD_FULLUPDATE)
+				{
+					// Do what needed with update
+					COUT<<"Received FULLSTATE ";
+					// Tell we received the ClientState so we can convert byte order from network to host
+					//cs.display();
+					cs = netbuf.getClientState();
+					cs.display();
 
-				// Backup old state
-				un->BackupState();
-				// Update concerned client with predicted position directly in network client list
-				un->curr_physical_state.position = cs.getPosition();
-				un->curr_physical_state.orientation = cs.getOrientation();
-				prediction->InitInterpolation( clt);
-				un->curr_physical_state = prediction->Interpolate( clt);
-				un->Velocity = cs.getVelocity();
-				QVector predpos = un->curr_physical_state.position;
-				cerr<<"Predicted location : x="<<predpos.i<<",y="<<predpos.j<<",z="<<predpos.k<<endl;
+					// Backup old state
+					un->BackupState();
+					// Update concerned client with predicted position directly in network client list
+					un->curr_physical_state.position = cs.getPosition();
+					un->curr_physical_state.orientation = cs.getOrientation();
+					prediction->InitInterpolation( clt);
+					un->curr_physical_state = prediction->Interpolate( clt);
+					un->Velocity = cs.getVelocity();
+					QVector predpos = un->curr_physical_state.position;
+					cerr<<"Predicted location : x="<<predpos.i<<",y="<<predpos.j<<",z="<<predpos.k<<endl;
 
-				i++;
-			}
-			else if( cmd == CMD_POSUPDATE)
-			{
-				// Get the serial #
-				sernum = netbuf.getShort();
-				clt = Clients.get(sernum);
-				//COUT<<"Received POSUPDATE for serial "<<sernum<<" -> ";
+					i++;
+				}
+				else if( cmd == CMD_POSUPDATE)
+				{
+					// Get the serial #
+					sernum = netbuf.getShort();
+					clt = Clients.get(sernum);
+					//COUT<<"Received POSUPDATE for serial "<<sernum<<" -> ";
 
-				// Backup old state
-				un->BackupState();
-				// Set the new received position in curr_physical_state
-				un->curr_physical_state.position = netbuf.getQVector();
-				prediction->InitInterpolation( clt);
-				un->curr_physical_state.position = prediction->InterpolatePosition( clt);
-				//predict( sernum);
-				j++;
+					// Backup old state
+					un->BackupState();
+					// Set the new received position in curr_physical_state
+					un->curr_physical_state.position = netbuf.getQVector();
+					prediction->InitInterpolation( clt);
+					un->curr_physical_state.position = prediction->InterpolatePosition( clt);
+					//predict( sernum);
+					j++;
+				}
 			}
 		}
 	}

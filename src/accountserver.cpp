@@ -22,6 +22,11 @@
 #include <stdlib.h>
 #include "networking/acctserver.h"
 
+void	VSExit( int code)
+{
+	exit( code);
+}
+
 char SERVER = 2;
 float simulation_atom_var = (float)1.0/10.0;
 class NetClient

@@ -48,13 +48,14 @@ ClientPtr NetServer::newConnection_tcp( )
 void	NetServer::checkTimedoutClients_udp()
 {
 	/********* Method 1 : compare latest_timestamp to current time and see if > CLIENTTIMEOUT */
-	double curtime = (unsigned int) getNewTime();
+	double curtime = getNewTime();
 	double deltatmp = 0;
 	for (LI i=allClients.begin(); i!=allClients.end(); i++)
 	{
         ClientPtr cl = *i;
         if( cl->isUdp() )
         {
+			// Time elapsed since latest packet in seconds
 		    deltatmp = (fabs(curtime - cl->latest_timeout));
 		    if( cl->latest_timeout!=0)
 		    {
@@ -62,7 +63,9 @@ void	NetServer::checkTimedoutClients_udp()
 			    // Here considering a delta > 0xFFFFFFFX where X should be at least something like 0.9
 			    // This allows a packet not to be considered as "old" if timestamp has been "recycled" on client
 			    // side -> when timestamp has grown enough to became bigger than what an u_int can store
-			    if( cl->ingame && deltatmp > clienttimeout && deltatmp < (0xFFFFFFFF*0.9) )
+
+			    //if( cl->ingame && deltatmp > clienttimeout && deltatmp < (0xFFFFFFFF*0.9) )
+			    if( cl->ingame==true && deltatmp > clienttimeout)
 			    {
 	                Unit * un;
 				    un = cl->game_unit.GetUnit();

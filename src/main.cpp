@@ -116,6 +116,11 @@ VegaConfig * createVegaConfig( char * file)
 extern QVector DockToSavedBases (int playernum);
 
 std::string ParseCommandLine(int argc, char ** CmdLine);
+void VSExit( int code)
+{
+	winsys_exit(code);
+}
+
 void cleanup(void)
 {
   fprintf( stdout, "\n\nLoop average : %g\n\n", avg_loop);

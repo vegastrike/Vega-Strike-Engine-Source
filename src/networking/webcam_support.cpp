@@ -4,6 +4,7 @@
 #include "webcam_support.h"
 #include "lin_time.h"
 #include "vs_path.h"
+#include "vs_globals.h"
 #include "gldrv/winsys.h"
 
 using std::cerr;
@@ -32,34 +33,34 @@ STDMETHODIMP SampleGrabberCallback::BufferCB( double Time, BYTE *pBuffer, long B
 			{
 				cerr<<"GetConnectedMediaType"<<endl;
 				cleanexit = true;
-				winsys_exit(1);
+				VSExit(1);
 			}
 			if(MediaType.majortype != MEDIATYPE_Video)
 			{
 				cerr<<"INVALID MEDIA TYPE 1"<<endl;
 				cleanexit = true;
-				winsys_exit(1);
+				VSExit(1);
 				return VFW_E_INVALIDMEDIATYPE;
 			}
 			if(MediaType.formattype != FORMAT_VideoInfo)
 			{
 				cerr<<"INVALID MEDIA TYPE 2"<<endl;
 				cleanexit = true;
-				winsys_exit(1);
+				VSExit(1);
 				return VFW_E_INVALIDMEDIATYPE;
 			}
 			if(MediaType.cbFormat < sizeof(VIDEOINFOHEADER))
 			{
 				cerr<<"INVALID MEDIA TYPE 3"<<endl;
 				cleanexit = true;
-				winsys_exit(1);
+				VSExit(1);
 				return VFW_E_INVALIDMEDIATYPE;
 			}
 			if(MediaType.pbFormat == NULL)
 			{
 				cerr<<"INVALID MEDIA TYPE 4"<<endl;
 				cleanexit = true;
-				winsys_exit(1);
+				VSExit(1);
 				return VFW_E_INVALIDMEDIATYPE;
 			}
 
@@ -89,7 +90,7 @@ STDMETHODIMP SampleGrabberCallback::BufferCB( double Time, BYTE *pBuffer, long B
 				cerr<<" - code : "<<hr<<" HEX : ";
 				cerr<<hex<<hr<<endl;
 				cleanexit = true;
-				winsys_exit(1);
+				VSExit(1);
 			}
 			*/
 			/*
@@ -130,17 +131,17 @@ STDMETHODIMP SampleGrabberCallback::BufferCB( double Time, BYTE *pBuffer, long B
 			if( !fp)
 			{
 				cerr<<"opening jpeg file failed"<<endl;
-				exit(1);
+				VSExit(1);
 			}
 			if( fwrite( &BitmapInfo, 1, sizeof(BITMAPINFOHEADER), fp)!=sizeof(BITMAPINFOHEADER))
 			{
 				cerr<<"!!! ERROR : writing jpeg description to file 1"<<endl;
-				exit(1);
+				VSExit(1);
 			}
 			if( fwrite( pBuffer, 1, BufferLen, fp)!=BufferLen)
 			{
 				cerr<<"!!! ERROR : writing jpeg description to file"<<endl;
-				exit(1);
+				VSExit(1);
 			}
 			fclose( fp);
 			*/
@@ -224,12 +225,12 @@ pascal OSErr processFrame( SGChannel c, Ptr p, long len, long * offset, long chR
 			if( !fp)
 			{
 				cerr<<"opening jpeg file failed"<<endl;
-				exit(1);
+				VSExit(1);
 			}
 			if( fwrite( p, 1, len, fp)!=len)
 			{
 				cerr<<"writing jpeg description to file"<<endl;
-				exit(1);
+				VSExit(1);
 			}
 			fclose( fp);
 		}
@@ -252,7 +253,7 @@ void	WebcamSupport::DoError( long error, char * message)
 		cerr<<hex<<error<<endl;
 		this->Shutdown();
 		cleanexit = true;
-		winsys_exit(1);
+		VSExit(1);
 	}
 }
 
@@ -848,7 +849,7 @@ char * JpegFromBmp( BITMAPFILEHEADER & bfh, LPBITMAPINFOHEADER & lpbi, BYTE * bm
     if (quality < 0 || quality > 100 || bmpbuffer == NULL || (!csJpeg.size()) )
 	{
 		cerr<<"Bad parameters";
-		exit(1);
+		VSExit(1);
 	}
 
     byte *buf2 = 0;
@@ -867,7 +868,7 @@ char * JpegFromBmp( BITMAPFILEHEADER & bfh, LPBITMAPINFOHEADER & lpbi, BYTE * bm
     if ((pOutFile = fopen(csJpeg.c_str(), "wb")) == NULL)
 	{
 		cerr<<"opening of jpeg file failed.";
-		exit(1);
+		VSExit(1);
 	}
 
     jpeg_stdio_dest(&cinfo, pOutFile);
@@ -914,7 +915,7 @@ char * JpegFromCapture(HANDLE     hDib, BYTE * bmpBuffer, long bmpLength, int jp
         (!csJpeg.size()))
     {
 		cerr<<"!!! ERROR JpegFromDib : Bad Parameters"<<endl;
-		winsys_exit(1);
+		VSExit(1);
     }
 
     LPBITMAPINFOHEADER lpbi = (LPBITMAPINFOHEADER)hDib;
@@ -1097,7 +1098,7 @@ BOOL DibToSamps2( BITMAPFILEHEADER & bfh, LPBITMAPINFOHEADER & pbBmHdr, BYTE * b
    if (bmpbuffer == NULL || nSampsPerRow <= 0 ) 
    {
 		cerr<<"DibToSamps failed"<<endl;
-		exit(1);
+		VSExit(1);
    }
 
    int r=0, p=0, q=0, b=0, n=0, 
@@ -1124,7 +1125,7 @@ BOOL DibToSamps2( BITMAPFILEHEADER & bfh, LPBITMAPINFOHEADER & pbBmHdr, BYTE * b
 
       default:
 		  cerr<<"Invalid bitmap bit count";
-		  exit(1);
+		  VSExit(1);
    }
 
    //Point to the color table and pixels

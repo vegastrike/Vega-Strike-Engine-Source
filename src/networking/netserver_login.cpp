@@ -94,7 +94,7 @@ void	NetServer::sendLoginAccept( ClientPtr clt, AddressIP ipadr, int newacct)
 		if( !clt )
 		{
 		    COUT << "Error creating new client connection"<<endl;
-			exit(1);
+			VSExit(1);
 		}
 	}
 

@@ -113,7 +113,7 @@ void	NetServer::save()
 	if( !fp)
 	{
 		cerr<<"Error opening dynamic universe file"<<endl;
-		cleanup();
+		VSExit(1);
 	}
 	else
 	{
@@ -122,7 +122,7 @@ void	NetServer::save()
 		if( wlen != dyn_univ.length())
 		{
 			cerr<<"Error writing dynamic universe file"<<endl;
-			cleanup();
+			VSExit(1);
 		}
 		fclose( fp);
 		fp = NULL;
@@ -145,7 +145,7 @@ void	NetServer::save()
 			if( !clt )
 			{
 				cerr<<"Error client not found in save process !!!!"<<endl;
-				exit(1);
+				VSExit(1);
 			}
 			netbuf.addString( savestr);
 			netbuf.addString( xmlstr);

@@ -112,7 +112,6 @@ class NetServer
 		void			startMsg();						// Startup showing text
 		void			disconnect( ClientPtr clt, const char* debug_from_file, int debug_from_line );		// Disconnect a client
 		void			logout( ClientPtr clt);			// Clean disconnect a client
-		void			closeAllSockets();				// Disconnect all clients for shutdown
         void            checkTimedoutClients_udp();     // Check for timed out clients  
 
         ClientPtr       addNewClient( SOCKETALT sock, bool is_tcp );  // Adds a new client to listen for
@@ -145,6 +144,8 @@ class NetServer
 
 		void	addSystem( string & sysname, string & system);
 		friend class ZoneMgr;
+
+		void			closeAllSockets();				// Disconnect all clients for shutdown
 
 private:
 #ifdef HAVE_ZLIB_H

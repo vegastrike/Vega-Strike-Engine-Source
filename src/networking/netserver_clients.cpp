@@ -140,7 +140,7 @@ void	NetServer::posUpdate( ClientPtr clt)
 	if( clt_serial != un->GetSerial())
 	{
 		cerr<<"!!! ERROR : Received an update from a serial that differs with the client we found !!!"<<endl;
-		exit(1);
+		VSExit(1);
 	}
 	ClientState cs;
 	// Set old position
@@ -220,7 +220,7 @@ void	NetServer::disconnect( ClientPtr clt, const char* debug_from_file, int debu
         else
         {
 			COUT<<"!!! ERROR : UNIT==NULL !!!"<<endl;
-			// exit(1);
+			// VSExit(1);
         }
 	    COUT << "There were " << allClients.size() << " clients - ";
 	    allClients.remove( clt );
@@ -240,14 +240,15 @@ void	NetServer::disconnect( ClientPtr clt, const char* debug_from_file, int debu
         else
         {
             COUT << "Could not get Unit for " << clt->callsign << endl;
-			// exit(1);
+			// VSExit(1);
         }
 	}
 	// Removes the client from its starsystem
 	if( clt->ingame==true )
 		this->removeClient( clt );
 	// Say true as 2nd arg because we don't want the server to broadcast since player is leaving hte game
-	un->Kill( true, true);
+	if( un)
+		un->Kill( true, true);
 	clt.reset();
 	COUT << allClients.size() << " clients left" << endl;
 	nbclients--;
@@ -292,7 +293,8 @@ void	NetServer::logout( ClientPtr clt )
 	if( clt->ingame==true)
 		this->removeClient( clt );
 	// Say true as 2nd arg because we don't want the server to broadcast since player is leaving hte game
-	un->Kill( true, true);
+	if( un)
+		un->Kill( true, true);
 	clt.reset( );
 	COUT << allClients.size() <<" clients left"<<endl;
 	nbclients--;

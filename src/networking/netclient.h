@@ -97,7 +97,7 @@ class	NetClient
 		double				cur_time;
 		// Timestamps from packets
 		unsigned int		old_timestamp;
-		unsigned int		current_timestamp;
+		unsigned int		latest_timestamp;
 		unsigned int		deltatime;
 		bool				jumpok;
 		bool				ingame;

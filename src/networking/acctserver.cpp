@@ -4,6 +4,7 @@
 #include "lin_time.h"
 #include "networking/lowlevel/vsnet_serversocket.h"
 #include "vs_path.h"
+#include "vs_globals.h"
 #include "networking/lowlevel/netbuffer.h"
 #include "networking/lowlevel/vsnet_debug.h"
 #include "networking/fileutil.h"
@@ -79,7 +80,7 @@ void    AccountServer::start()
     if(Cltacct.size()<=0)
     {
         cout<<"No account found in accounts.xml"<<endl;
-		exit(1);
+		VSExit(1);
     }
     cout<<Cltacct.size()<<" accounts loaded."<<endl;
 
@@ -95,7 +96,7 @@ void    AccountServer::start()
     if( !Network)
     {
         cout<<"Error cannot start server... quitting."<<endl;
-        exit(1);
+        VSExit(1);
     }
     cout<<"done."<<endl;
 
@@ -319,7 +320,7 @@ void    AccountServer::recvMsg( SOCKETALT sock)
                         cout<<"ERROR opening accounts file";
                         if( packet2.send( (Cmd) 0, packet.getSerial(), (char *)NULL, 0, SENDRELIABLE, NULL, sock, __FILE__, __LINE__ ) < 0 )
                             cout<<"ERROR sending errormsg to subscription website"<<endl;
-                        exit(1);
+                        VSExit(1);
                     }
                     else
                     {
@@ -340,7 +341,7 @@ void    AccountServer::recvMsg( SOCKETALT sock)
                         if( !fp)
                         {
                             cerr<<"!!! ERROR : opening account file in write mode !!!"<<endl;
-                            exit(1);
+                            VSExit(1);
                         }
                         acctlines.push_back( "\t<PLAYER name=\""+callsign+"\"\tpassword=\""+passwd+"\" />\n");
                         acctlines.push_back( "</ACCOUNTS>\n");
@@ -350,14 +351,14 @@ void    AccountServer::recvMsg( SOCKETALT sock)
                             if( fputs( acctlines[i].c_str(), fp) < 0)
                             {
                                 cout<<"!!! ERROR : writing to account file !!!"<<endl;
-                                exit(1);
+                                VSExit(1);
                             }
                         }
                         /*
                         if( fputs( acctstr.c_str(), fp) < 0)
                         {
                             cout<<"ERROR writing new account to account file"<<endl;
-                            exit(1);
+                            VSExit(1);
                         }
                         */
                         fclose( fp);
@@ -532,7 +533,7 @@ void    AccountServer::sendAuthorized( SOCKETALT sock, Account * acct)
         else
         {
             cout<<"Error, default save not found"<<endl;
-			exit(1);
+			VSExit(1);
         }
         // Put the name and passwd of the player in the packet
         netbuf.addString( acct->callsign);
@@ -557,7 +558,7 @@ void    AccountServer::sendAuthorized( SOCKETALT sock, Account * acct)
         else
         {
             cout<<"Error, default xml not found"<<endl;
-			exit(1);
+			VSExit(1);
         }
         netbuf.addString( string( xmlbuf));
         cout<<"Save size = "<<readsize<<" - XML size = "<<readsize2<<endl;

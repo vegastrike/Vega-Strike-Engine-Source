@@ -24,6 +24,9 @@
 
 *** GAME SERVER ********************************************************
 
+- Script call unit : broadcast a message to starsystems' client to make them create units created in script_call_unit.cpp
+                     add the created units in the zone's unit list
+- When testing timed out clients if we never received a position update it might be a problem
 - Fix ping computation
 - Depending on ping -> send the player its own info in order to update himself periodicaly (like 1 time per 2 or 3 seconds)
 - Add a timeout between the time the player logged in and the time he really enters the game

@@ -3,11 +3,6 @@
 #include "star_system_generic.h"
 #include "cmd/unit_generic.h"
 
-void cleanup()
-{
-	exit(1);
-}
-
 VegaConfig * createVegaConfig( char * file)
 {
 	return new VegaConfig( file);
