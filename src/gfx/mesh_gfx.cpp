@@ -371,12 +371,11 @@ bool SetupSpecMapFirstPass (vector <Texture *> &decal, unsigned int mat, bool en
     }
     return retval;
 }
-extern bool GFXMultiTexAvailable();
 void SetupSpecMapSecondPass(Texture * decal,unsigned int mat,BLENDFUNC blendsrc, bool envMap, const GFXColor &cloakFX) {
     GFXSelectMaterialHighlights(mat,
                                 GFXColor(0,0,0,0),
                                 GFXColor(0,0,0,0),
-                                cloakFX,
+				cloakFX,
                                 (envMap&&GFXMultiTexAvailable())?GFXColor (1,1,1,1):GFXColor(0,0,0,0));
     GFXBlendMode (blendsrc,ONE);
     decal->MakeActive();
@@ -386,7 +385,7 @@ void SetupSpecMapSecondPass(Texture * decal,unsigned int mat,BLENDFUNC blendsrc,
     GFXDisable(DEPTHWRITE);
     if (envMap){
       GFXActiveTexture(1);
-      GFXTextureAddOrModulate(true); 
+      GFXTextureAddOrModulate(1,true); 
       GFXEnable(TEXTURE1);
     }
 }
@@ -396,7 +395,7 @@ void RestoreSpecMapState(bool envMap, bool write_to_depthmap) {
     GFXPolygonOffset (a, b+1);
     if (envMap) {
       GFXActiveTexture(1);
-      GFXTextureAddOrModulate(false); //restore modulate
+      GFXTextureAddOrModulate(1,false); //restore modulate
     }
     if (write_to_depthmap) {
         GFXEnable(DEPTHWRITE);
@@ -471,7 +470,7 @@ void Mesh::ProcessDrawQueue(int whichdrawqueue) {
     if (SpecMap) {
       GFXPushBlendMode();
         SetupSpecMapSecondPass(Decal[1],myMatNum,blendSrc,getEnvMap(), c.CloakFX);
-        vlist->Draw();
+	        vlist->Draw();
         RestoreSpecMapState(getEnvMap(),write_to_depthmap);
 	GFXPopBlendMode();
     }

@@ -306,8 +306,16 @@ void /*GFXDRVAPI*/ GFXSelectTexcoordSet(const int stage, const int texset)
 	}
 }
 
-void GFXTextureAddOrModulate ( bool add) {
-  glTexEnvi(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,add?GL_ADD:GL_MODULATE);
+void GFXTextureAddOrModulate (int stage, bool add) {
+  if (stage>=1) {
+    if (GFXMultiTexAvailable()) {
+      GFXActiveTexture (stage);
+      glTexEnvi(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,add?GL_ADD:GL_MODULATE);
+    }
+  }else {
+    GFXActiveTexture (stage);
+    glTexEnvi (GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,add?GL_ADD:GL_MODULATE);
+  }
 }
 void GFXActiveTexture (const int stage) {
 #if !defined(IRIX)
