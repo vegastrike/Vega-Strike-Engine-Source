@@ -114,9 +114,9 @@ void Mission::initMission(bool loadscripts){
   */
   checkMission(top,loadscripts);
   mission_name = getVariable("mission_name","");
-  objectives.push_back (Objective(0.0,"cachunk"));
-  objectives.push_back (Objective(1,"cachunk.org"));
-  objectives.push_back (Objective(-1,"cachunk.com"));
+  //  objectives.push_back (Objective(0.0,"cachunk"));
+  //  objectives.push_back (Objective(1,"cachunk.org"));
+  //  objectives.push_back (Objective(-1,"cachunk.com"));
 }
 
 /* *********************************************************** */
