@@ -763,7 +763,7 @@ void xmeshToBFXM(XML memfile,FILE* Outputfile,char mode){//converts input file t
  
 int32bit writesuperheader(XML memfile, FILE* Outputfile){
   unsigned int32bit intbuf;
-  int32bit versionnumber=VSSwapHostIntToLittle(10);
+  int32bit versionnumber=VSSwapHostIntToLittle(20);
   char8bit bytebuf;
   int32bit runningbytenum=0;
   //SUPER HEADER
@@ -780,11 +780,11 @@ int32bit writesuperheader(XML memfile, FILE* Outputfile){
   intbuf=VSSwapHostIntToLittle(0);//Length of File Placeholder
   runningbytenum+=sizeof(int32bit)*fwrite(&intbuf,sizeof(int32bit),1,Outputfile);// Number of bytes in file
   //Super-Header Meaty part
-  intbuf=VSSwapHostIntToLittle(4+(8*sizeof(int32bit)));//Super-Header length in Bytes for version 0.10
+  intbuf=VSSwapHostIntToLittle(4+(9*sizeof(int32bit)));//Super-Header length in Bytes for version 0.10
   runningbytenum+=sizeof(int32bit)*fwrite(&intbuf,sizeof(int32bit),1,Outputfile);// Number of bytes in Superheader
   intbuf=VSSwapHostIntToLittle(8);//Number of fields per vertex
   runningbytenum+=sizeof(int32bit)*fwrite(&intbuf,sizeof(int32bit),1,Outputfile);//
-  intbuf=VSSwapHostIntToLittle(3);//Number of fields per polygon structure
+  intbuf=VSSwapHostIntToLittle(1);//Number of fields per polygon structure
   runningbytenum+=sizeof(int32bit)*fwrite(&intbuf,sizeof(int32bit),1,Outputfile);// 
   intbuf=VSSwapHostIntToLittle(3);//Number of fields per referenced vertex
   runningbytenum+=sizeof(int32bit)*fwrite(&intbuf,sizeof(int32bit),1,Outputfile);// 
@@ -792,7 +792,8 @@ int32bit writesuperheader(XML memfile, FILE* Outputfile){
   runningbytenum+=sizeof(int32bit)*fwrite(&intbuf,sizeof(int32bit),1,Outputfile);// 
   intbuf=VSSwapHostIntToLittle(0);//Number of records - initially 0
   runningbytenum+=sizeof(int32bit)*fwrite(&intbuf,sizeof(int32bit),1,Outputfile);// Number of records
-
+  intbuf=VSSwapHostIntToLittle(1);//Number of fields per animation def
+  runningbytenum+=sizeof(int32bit)*fwrite(&intbuf,sizeof(int32bit),1,Outputfile);// 
   return runningbytenum;
 }
 
