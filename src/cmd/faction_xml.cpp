@@ -321,7 +321,16 @@ FSM* Universe::GetConversation(int Myfaction, int TheirFaction) {
 }
 void Universe::AdjustRelation(const int Myfaction, const int TheirFaction, float factor, float rank) {
   assert (factions[Myfaction]->faction[TheirFaction].stats.index == TheirFaction);
-  factions[Myfaction]->faction[TheirFaction].relationship+=factor*rank;  
+  if (strcmp (factions[Myfaction]->factionname,"neutral")!=0) {
+    if (strcmp (factions[Myfaction]->factionname,"upgrades")!=0) {
+      if (strcmp (factions[TheirFaction]->factionname,"neutral")!=0) {
+	if (strcmp (factions[TheirFaction]->factionname,"upgrades")!=0) {
+	  factions[Myfaction]->faction[TheirFaction].relationship+=factor*rank;  
+	}
+      }
+    }
+
+  }
 }
 
 void Universe::SerializeFaction(FILE * fp) {
