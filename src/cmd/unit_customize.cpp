@@ -303,7 +303,7 @@ bool Unit::UpAndDownGrade (Unit * up, Unit * templ, int mountoffset, int subunit
   STDUPGRADE(computer.max_pitch,up->computer.max_pitch,templ->computer.max_pitch,0);
   STDUPGRADE(computer.max_roll,up->computer.max_roll,templ->computer.max_roll,0);
   STDUPGRADE(fuel,up->fuel,templ->fuel,0);
-  STDUPGRADE(image->cargo_volume,up->image->cargo_volume,templ->image->cargo_volume,0);
+
   for (unsigned int upgr=0;upgr<Cockpit::NUMGAUGES+1+MAXVDUS;upgr++) {
 	STDUPGRADE(image->cockpit_damage[upgr],up->image->cockpit_damage[upgr],templ->image->cockpit_damage[upgr],1);
 
@@ -349,6 +349,7 @@ bool Unit::UpAndDownGrade (Unit * up, Unit * templ, int mountoffset, int subunit
   
   //NO CLUE FOR BELOW
   if (downgrade) {
+    STDUPGRADE(image->cargo_volume,up->image->cargo_volume,templ->image->cargo_volume,0);
     if (jump.drive>=-1&&up->jump.drive>=-1) {
       if (touchme) jump.drive=-2;
       numave++;
@@ -366,6 +367,14 @@ bool Unit::UpAndDownGrade (Unit * up, Unit * templ, int mountoffset, int subunit
       percentage++;
     }
   }else {
+    if (image->cargo_volume<up->image->cargo_volume) {
+      
+      if (templ!=NULL?up->image->cargo_volume+image->cargo_volume<templ->image->cargo_volume:true) {
+	if (touchme)image->cargo_volume+=up->image->cargo_volume;
+	numave++;
+	percentage++;
+      }
+    }
     if (cloaking==-1&&up->cloaking!=-1) {
       if (touchme) {cloaking=up->cloaking;cloakmin=up->cloakmin;image->cloakrate=up->image->cloakrate; image->cloakglass=up->image->cloakglass;image->cloakenergy=up->image->cloakenergy;}
       numave++;

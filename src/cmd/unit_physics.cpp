@@ -292,6 +292,7 @@ static int applyto (unsigned short &shield, const unsigned short max, const floa
 }
 void Unit::RegenShields () {
   int rechargesh=1;
+  float maxshield=0;
   energy +=apply_float_to_short (recharge *SIMULATION_ATOM);
 
   float rec = shield.recharge*SIMULATION_ATOM>energy?energy:shield.recharge*SIMULATION_ATOM;
@@ -310,6 +311,7 @@ void Unit::RegenShields () {
   }
   switch (shield.number) {
   case 2:
+    maxshield = .5*(shield.fb[2]+shield.fb[3]);
     shield.fb[0]+=rec;
     shield.fb[1]+=rec;
     if (shield.fb[0]>shield.fb[2]) {
@@ -325,17 +327,22 @@ void Unit::RegenShields () {
     }
     break;
   case 4:
+    maxshield = .25*(float(shield.fbrl.frontmax)+shield.fbrl.backmax+shield.fbrl.leftmax+shield.fbrl.rightmax);
     rechargesh = applyto (shield.fbrl.front,shield.fbrl.frontmax,rec)*(applyto (shield.fbrl.back,shield.fbrl.backmax,rec))*applyto (shield.fbrl.right,shield.fbrl.rightmax,rec)*applyto (shield.fbrl.left,shield.fbrl.leftmax,rec);
     break;
   case 6:
+    maxshield = .25*float(shield.fbrltb.fbmax)+.75*shield.fbrltb.rltbmax;
     rechargesh = (applyto(shield.fbrltb.v[0],shield.fbrltb.fbmax,rec))*applyto(shield.fbrltb.v[1],shield.fbrltb.fbmax,rec)*applyto(shield.fbrltb.v[2],shield.fbrltb.rltbmax,rec)*applyto(shield.fbrltb.v[3],shield.fbrltb.rltbmax,rec)*applyto(shield.fbrltb.v[4],shield.fbrltb.rltbmax,rec)*applyto(shield.fbrltb.v[5],shield.fbrltb.rltbmax,rec);
     break;
   }
   if (rechargesh==0)
     energy-=(short unsigned int)rec;
-  if (energy>maxenergy)//allow shields to absorb xtra power
-    energy=maxenergy;  
-
+  if (maxenergy>maxshield) {
+    if (energy>maxenergy-maxshield)//allow shields to absorb xtra power
+      energy=maxenergy-maxshield;  
+  }else {
+    energy=0;
+  }
 }
 
 
