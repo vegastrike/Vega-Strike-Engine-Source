@@ -19,6 +19,7 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 #include "gl_globals.h"
+#include "gl_include.h"
 #include "vs_globals.h"
 #include "xml_support.h"
 #include "config_xml.h"
