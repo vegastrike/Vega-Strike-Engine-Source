@@ -305,6 +305,14 @@ char * GetUnitDir (const char * filename) {
   }
   return retval;
 }
+void Unit::GetCargoCat (const std::string &cat, vector <Cargo> &cats) {
+  unsigned int max = numCargo();
+  for (unsigned int i=0;i<max;i++) {
+    if (GetCargo(i).category==cat) {
+      cats.push_back (GetCargo(i));
+    }
+  }
+}
 vector <Mesh *> Unit::StealMeshes() {
   vector <Mesh *>ret;
   Mesh * shield = meshdata[nummesh];

@@ -272,8 +272,11 @@ varInst *Mission::call_unit(missionNode *node,int mode){
     return viret;
   }   
   else if(method_id==CMT_UNIT_getRandCargo){
-    missionNode *nr_node=getArgument(node,mode,0);
-    int quantity=doIntVar(nr_node,mode);
+    int quantity=getIntArg(node,mode,0);
+    string category;
+    if (node->subnodes.size()>1) {
+      category = getStringArgument(node,mode,1);
+    }
     Unit *my_unit=NULL;
     varInst *vireturn=NULL;
     vireturn=call_olist_new(node,mode);
@@ -281,10 +284,20 @@ varInst *Mission::call_unit(missionNode *node,int mode){
 		Cargo *ret=NULL;
 		Unit *mpl = &GetUnitMasterPartList();
 		unsigned int max=mpl->numCargo();
-		if (max>0) {
-		  ret = &mpl->GetCargo(rand()%max);
-		}else {
-		  ret = new Cargo();//mem leak--won't happen
+		if (!category.empty()) {
+		  vector <Cargo> cat;
+		  mpl->GetCargoCat (category,cat);
+		  if (!cat.empty()) {
+		    unsigned int i;
+		    ret = mpl->GetCargo(cat[rand()%cat.size()].content,i);
+		  }
+		}
+		if (!ret) {
+		  if (mpl->numCargo()) {
+		    ret = &mpl->GetCargo(rand()%max);
+		  }else {
+		    ret = new Cargo();//mem leak--won't happen
+		  }
 		}
 		ret->quantity=quantity;
 		

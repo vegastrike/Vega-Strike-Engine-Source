@@ -602,7 +602,7 @@ varInst *Mission::doConst(missionNode *node,int mode){
     string typestr=node->attr_value("type");
     string valuestr=node->attr_value("value");
 
-    if(typestr.empty() || valuestr.empty()){
+    if(typestr.empty()){
       fatalError(node,mode,"no valid const declaration");
       assert(0);
     }
