@@ -96,7 +96,8 @@ class FireKeyboard: public Order {
   static void ECMKey (const KBData&,KBSTATE);
   static void HelpMeOut (const KBData&,KBSTATE);
   static void HelpMeOutFaction (const KBData&,KBSTATE);
-
+  static void EnslaveKey( const KBData&,KBSTATE);
+  static void FreeSlaveKey( const KBData&,KBSTATE);
   static void HelpMeOutCrit (const KBData&,KBSTATE);
   static void JoinFg (const KBData&,KBSTATE);
   static void BreakFormation (const KBData&,KBSTATE);

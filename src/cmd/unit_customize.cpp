@@ -57,7 +57,7 @@ double GameUnit<UnitType>::Upgrade (const std::string &file, int mountoffset, in
 		  if (!this->Unit::Upgrade(up,mountoffset+i, subunitoffset+i, GetModeFromName(file.c_str()),force, percentage,(templ->name=="LOAD_FAILED")?NULL:templ),false) {
 	      percentage=0;
 	    }
-	    if (!loop_through_mounts||(i+1>=this->GetNumMounts ())) {
+	    if (!loop_through_mounts||(i+1>=this->GetNumMounts ())||percentage>0) {
 	      break;
 	    }
 	  }

@@ -7,6 +7,7 @@
 #include "xml_support.h"
 #include "unit_factory.h"
 #include "unit_util.h"
+#include "universe_util.h"
 // Various functions that were used in .cpp files that are now included because of
 // the temple GameUnit class
 // If not separated from those files functions would be defined in multiple places
@@ -273,4 +274,37 @@ void RecomputeUnitUpgrades (Unit * un) {
 		}
 	}
 
+}
+
+void Enslave (Unit* parent, bool free) {
+  unsigned int i;
+  vector<Cargo> ToBeChanged;
+  unsigned int numcargo=parent->numCargo();
+  for (i=0;i<numcargo;++i) {
+    Cargo * carg= &parent->GetCargo(i);
+    if (free) {
+      if (carg->category.find("Passengers")!=string::npos&&carg->content!="Hitchhiker") {
+        ToBeChanged.push_back(*carg);
+        parent->RemoveCargo(i,carg->quantity,true);
+      }
+    }else {
+      if (carg->content.find("Slave")!=string::npos||carg->content=="Pilot") {
+        ToBeChanged.push_back(*carg);
+        parent->RemoveCargo(i,carg->quantity,true);
+      }
+    }
+  }
+  Cargo *newCarg  = UniverseUtil::GetMasterPartList()->GetCargo(free?"Hitchhiker":"Slaves",i);
+  if (newCarg) {
+    Cargo slave=*newCarg;
+    for (i=0;i<ToBeChanged.size();++i) {
+      slave.quantity=ToBeChanged[i].quantity;
+      while (parent->CanAddCargo(slave)==false&&(--slave.quantity)>0){
+        
+      }
+      if (parent->CanAddCargo(slave)) {
+        parent->AddCargo(slave,true);
+      }
+    }
+  }
 }

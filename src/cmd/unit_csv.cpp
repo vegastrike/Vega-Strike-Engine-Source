@@ -1154,5 +1154,15 @@ Unit * Unit::makeMasterPartList() {
     ret->GetImageInformation().cargo.push_back(carg);
   } 
   UpdateMasterPartList(ret);
+  
+  if (!ret->GetCargo("Pilot",i)) {//required items
+    ret->AddCargo(Cargo("Pilot","Contraband",800,1,.01,1,1.0,1.0),true);
+  }
+  if (!ret->GetCargo("Hitchhiker",i)) {
+    ret->AddCargo(Cargo("Hitchhiker","Passengers",6,1,.01,5.0,1.0,1.0),true);
+  }
+  if (!ret->GetCargo("Slaves",i)) {
+    ret->AddCargo(Cargo("Slaves","Contraband",800,1,.01,1,1,1),true);
+  }
   return ret;
 }

@@ -39,7 +39,7 @@ struct FIREKEYBOARDTYPE {
     eject=ejectcargo=ejectnonmissioncargo=firekey=missilekey=jfirekey=jtargetkey=jmissilekey=weapk=misk=rweapk=rmisk=cloakkey=
       neartargetkey=targetskey=targetukey=threattargetkey=picktargetkey=subtargetkey=targetkey=
       rneartargetkey=rtargetskey=rtargetukey=rthreattargetkey=rpicktargetkey=rtargetkey=
-      nearturrettargetkey =threatturrettargetkey= pickturrettargetkey=turrettargetkey=UP;
+      nearturrettargetkey =threatturrettargetkey= pickturrettargetkey=turrettargetkey=enslave=freeslave=UP;
       shieldpowerstate=1;
 #ifdef CAR_SIM
     blinkleftkey=blinkrightkey=headlightkey=sirenkey=UP;
@@ -95,6 +95,8 @@ struct FIREKEYBOARDTYPE {
  KBSTATE threatturrettargetkey;
  KBSTATE pickturrettargetkey;
  KBSTATE turrettargetkey;
+ KBSTATE enslave;
+ KBSTATE freeslave;
 };
 static std::vector <FIREKEYBOARDTYPE> vectorOfKeyboardInput;
 static FIREKEYBOARDTYPE &g() {
@@ -118,6 +120,7 @@ void FireKeyboard::SetShieldsOneThird(const KBData&,KBSTATE k) {
       g().shieldpowerstate=1;
   }
 }
+
 void FireKeyboard::SetShieldsTwoThird(const KBData&,KBSTATE k) {
   if (k==PRESS) {
     float pow=2./3;
@@ -346,6 +349,18 @@ void FireKeyboard::TurretAI (const KBData&,KBSTATE k) {
 void FireKeyboard::EjectCargoKey (const KBData&,KBSTATE k) {
     if (k==PRESS) {
       g().ejectcargo = k;      
+    }
+  
+}
+void FireKeyboard::EnslaveKey (const KBData&,KBSTATE k) {
+    if (k==PRESS) {
+      g().enslave = k;      
+    }
+  
+}
+void FireKeyboard::FreeSlaveKey (const KBData&,KBSTATE k) {
+    if (k==PRESS) {
+      g().freeslave = k;      
     }
   
 }
@@ -1023,7 +1038,7 @@ static bool UnDockNow (Unit* me, Unit * targ) {
 }
 //#include <cmd/music.h>
 //extern Music *muzak;
-
+void Enslave (Unit*, bool);
 void abletodock(int dock) {
 //	char dumb[2]={'\0'};
 //	dumb[0]=(dock+'0');
@@ -1711,6 +1726,9 @@ void FireKeyboard::Execute () {
     } else {
       _Universe->AccessCockpit()->communication_choices="\nNo Communication\nLink\nEstablished";
     }
+  }
+  if (f().enslave==PRESS||f().freeslave==PRESS) {
+    Enslave(parent,f().enslave==PRESS);
   }
   if (f().ejectcargo==PRESS||f().ejectnonmissioncargo==PRESS) {
     bool missiontoo=(f().ejectnonmissioncargo==PRESS);

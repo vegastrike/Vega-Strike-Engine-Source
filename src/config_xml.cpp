@@ -668,7 +668,8 @@ CommandMap initGlobalCommandMap() {
   commandMap["RestoreTarget10"]=FireKeyboard::RestoreTarget10Key ;
 
 
-
+  commandMap["FreeSlaves"]=FireKeyboard::FreeSlaveKey ;  
+  commandMap["Enslave"]=FireKeyboard::EnslaveKey ;  
   commandMap["EjectCargoKey"]=FireKeyboard::EjectCargoKey ;  
   commandMap["EjectNonMissionCargoKey"]=FireKeyboard::EjectNonMissionCargoKey ;  
   commandMap["EjectKey"]=FireKeyboard::EjectKey ;
