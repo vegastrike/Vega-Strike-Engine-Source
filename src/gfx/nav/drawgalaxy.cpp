@@ -434,7 +434,8 @@ void NavigationSystem::DrawGalaxy()
 		RecordMinAndMax(pos,min_x,max_x,min_y,max_y,min_z,max_z,themaxvalue);
 			
 		++systemIter;
-	} 
+	}
+	
 	//**********************************
 
 
@@ -444,8 +445,12 @@ void NavigationSystem::DrawGalaxy()
 	center_y = (min_y + max_y)/2;
 	center_z = (min_z + max_z)/2;
 	//**********************************
-
-
+/*	min_x = (min_x+center_x)/2;
+	min_y = (min_y+center_y)/2;
+	min_z = (min_z+center_z)/2;
+	max_x = (max_x+center_x)/2;
+	max_y = (max_y+center_y)/2;
+	max_z = (max_z+center_z)/2;*/
 	//Set Camera Distance
 	//**********************************
 
@@ -454,7 +459,7 @@ void NavigationSystem::DrawGalaxy()
 		float half_y=(0.5*(max_y - min_y));
 		float half_z=(0.5*(max_z - min_z));
 	
-		camera_z = sqrt( ( half_x * half_x ) + ( half_y * half_y ) + ( half_z * half_z ));
+		camera_z = sqrt( ( half_x * half_x ) + ( half_y * half_y ) + 0*( half_z * half_z ));
 	
 	}
 

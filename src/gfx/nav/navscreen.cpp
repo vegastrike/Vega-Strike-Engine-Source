@@ -1233,10 +1233,12 @@ void NavigationSystem::Adjust3dTransformation()
 	//	**********************************
 	if(	(mouse_previous_state[1] == 1) && TestIfInRange(screenskipby4[0], screenskipby4[1], screenskipby4[2], screenskipby4[3], (-1+float(mousex)/(.5*g_game.x_resolution)), (1+float(-1*mousey)/(.5*g_game.y_resolution))))
 	{
-		zoom = zoom * ( 1.0 + 8*( (1+float(-1*mousey)/(.5*g_game.y_resolution)) - mouse_y_previous) );
-		if(zoom < 1.0)
-			zoom = 1.0;
-
+		zoom = zoom + 10*( /*1.0 +*/ 8*( (1+float(-1*mousey)/(.5*g_game.y_resolution)) - mouse_y_previous) );
+//		if(zoom < 1.0)
+//			zoom = 1.0;
+		static float zoommax = XMLSupport::parse_float (vs_config->getVariable("graphics","nav_zoom_max","100"));
+		if (zoom<-zoommax*MAXZOOM)
+			zoom=-zoommax*MAXZOOM;
 		if(zoom > MAXZOOM)
 			zoom = MAXZOOM;
 	}
