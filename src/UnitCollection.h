@@ -5,6 +5,8 @@
 #ifndef _UNITCOLLECTION_H_
 #define _UNITCOLLECTION_H_
 
+#include "iterator.h"
+
 class Unit;
 
 class UnitCollection {
@@ -16,11 +18,11 @@ class UnitCollection {
     
     UnitList(Unit *unit) : unit(unit), next(NULL) { }
     UnitList(Unit *unit, UnitList *next) : unit(unit), next(next) { }
-    ~UnitList() { delete next; }
+    ~UnitList() { if(0!=next) delete next; }
     
     void insert(Unit *unit);
     void append(Unit *unit);
-    void delete(Unit *unit);
+    void remove(Unit *unit);
   }
   *units;
 
@@ -28,7 +30,7 @@ class UnitCollection {
   UnitCollection() : units(NULL) { }
   ~UnitCollection() { delete units; }
 
-  class UnitIterator {
+  class UnitIterator : public Iterator {
   private:
     UnitList *pos;
   public:
@@ -40,6 +42,6 @@ class UnitCollection {
   };
   
   UnitIterator *createIterator();
-}
+};
 
 #endif
