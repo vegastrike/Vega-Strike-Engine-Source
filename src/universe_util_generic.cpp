@@ -412,7 +412,7 @@ namespace UniverseUtil {
 						delayLoadMission (missionname);
 				}
 				void LoadMissionScript (string missionscript) {
-						delayLoadMission ("mission/nothing.mission",missionscript);
+						delayLoadMission ("nothing.mission",missionscript);
 				}
 
 				void SetAutoStatus (int global_auto, int player_auto) {

@@ -214,7 +214,7 @@ void LoadMission (const char * nission_name, const std::string &script, bool loa
 	using namespace VSFileSystem;
 	string mission_name(nission_name);
 	if (mission_name.empty()) {
-		static std::string mission_name_def=vs_config->getVariable("general","empty_mission","mission/internal.mission");
+		static std::string mission_name_def=vs_config->getVariable("general","empty_mission","internal.mission");
 		mission_name=mission_name_def;
 	}
   printf("%s",script.c_str());
