@@ -68,12 +68,15 @@ public:
     //int minx,miny,minz,maxx,maxy,maxz;
     //    hash_vec(Min,minx,miny,minz);
     //    hash_vec(Max,maxx,maxy,maxz);
+    float maxx= (ceil(Max.i*COLLIDETABLEACCURACY))/COLLIDETABLEACCURACY;
+    float maxy= (ceil(Max.j*COLLIDETABLEACCURACY))/COLLIDETABLEACCURACY;
+    float maxz= (ceil(Max.k*COLLIDETABLEACCURACY))/COLLIDETABLEACCURACY;
     int x,y,z;
-    for (float i=Min.i;i<Max.i+COLLIDETABLEACCURACY;i+=COLLIDETABLEACCURACY) {
+    for (float i=Min.i;i<maxx;i+=((float)1)/COLLIDETABLEACCURACY) {
       x = hash_int (i);
-      for (float j=Min.j;i<Max.j+COLLIDETABLEACCURACY;j+=COLLIDETABLEACCURACY) {   
+      for (float j=Min.j;j<maxy;j+=((float)1)/COLLIDETABLEACCURACY) {   
 	y = hash_int(j);
-	for (float k=Min.k;k<Max.k+COLLIDETABLEACCURACY;k+=COLLIDETABLEACCURACY) {
+	for (float k=Min.k;k<maxz;k+=((float)1)/COLLIDETABLEACCURACY) {
 	  z = hash_int(k);
 	  //	  table[i][j][k].push_back(target);
 	  for (unsigned int l=0;l<table[x][y][z].size();l++) {
@@ -90,16 +93,18 @@ public:
     //    hash_vec(target->Mini,minx,miny,minz);
     //    hash_vec(target->Maxi,maxx,maxy,maxz);
     int x,y,z;
-    for (float i=target->Mini.i;i<target->Maxi.i+COLLIDETABLEACCURACY;i+=COLLIDETABLEACCURACY) {
+    float maxx= (ceil(target->Maxi.i*COLLIDETABLEACCURACY))/COLLIDETABLEACCURACY;
+    float maxy= (ceil(target->Maxi.j*COLLIDETABLEACCURACY))/COLLIDETABLEACCURACY;
+    float maxz= (ceil(target->Maxi.k*COLLIDETABLEACCURACY))/COLLIDETABLEACCURACY;
+    for (float i=target->Mini.i;i<maxx;i+=((float)1)/COLLIDETABLEACCURACY) {
       x = hash_int(i);
       if (x<minaccessx) minaccessx=x;
       if (x>maxaccessx) maxaccessx=x;
-      for (float j=target->Mini.j;i<target->Maxi.j+COLLIDETABLEACCURACY;j+=COLLIDETABLEACCURACY) {    
+      for (float j=target->Mini.j;j<maxy;j+=((float)1)/COLLIDETABLEACCURACY) {    
 	y = hash_int(j);
 	if (y<minaccessy) minaccessy=y;
 	if (y>maxaccessy) maxaccessy=y;
-
-	for (float k=target->Mini.k;k<target->Maxi.k+COLLIDETABLEACCURACY;k+=COLLIDETABLEACCURACY) {
+	for (float k=target->Mini.k;k<maxz;k+=((float)1)/COLLIDETABLEACCURACY) {
 	  z = hash_int(j);
 	  if (z<minaccessz) minaccessz=z;
 	  if (z>maxaccessz) maxaccessz=z;
@@ -124,7 +129,7 @@ void ClearCollideQueue() {
 #ifdef _USE_COLLIDE_TABLE
   collidetable.Clear();//blah might take some time
 #endif
-  for (int i=0;i<collidequeue.size();i++) {
+  for (unsigned int i=0;i<collidequeue.size();i++) {
     delete collidequeue[i];
   }
   collidequeue = vector<LineCollide*>();
