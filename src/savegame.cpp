@@ -15,6 +15,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 using namespace std;
+
  std::string GetHelperPlayerSaveGame (int num) {
 
 if( Network==NULL)
@@ -242,7 +243,7 @@ string SaveGame::WriteNewsData () {
   return ret;
 }
 vector <string> parsePipedString(string s) {
-  int loc;
+  unsigned int loc;
   vector <string> ret;
   while ((loc = s.find("|"))!=string::npos) {
     ret.push_back( s.substr (0,loc));
@@ -339,18 +340,17 @@ std::vector<string> &SaveGame::getMissionStringData(const std::string &magic_num
 }
 template <class MContainerType> void RemoveEmpty (MContainerType &t) {
 	bool done=false;
-	while (!done) {
-		done=true;
-		typename MContainerType::iterator i;
-		for (i=t.begin();i!=t.end();++i) {
-			if ((*i).second.empty()) {
-				t.erase(i);
-				done=false;
-				break;
-			}
+	done=true;
+	typename MContainerType::iterator i;
+	for (i=t.begin();i!=t.end();) {
+		typename MContainerType::key_type k = (*i).first;
+		if ((*i).second.empty()) {
+			t.erase(i);
+			i = t.lower_bound(k);
+		}else {
+			i++;
 		}
 	}
-	
 }
 string SaveGame::WriteMissionData () {
   string ret(" ");
@@ -439,7 +439,8 @@ void SaveGame::ReadMissionStringData (char * &buf) {
   for( int i=0;i<mdsize;i++) {
     int md_i_size;
     string mag_num(AnyStringScanInString (buf2));
-    sscanf (buf2,"%d ",&md_i_size);
+    //sscanf (buf2,"%d ",&md_i_size);
+	md_i_size = strtol(buf2,(char **)NULL,10);
     // Put ptr to point after the number we just read
     buf2 +=hopto (buf2,' ','\n',0);
     missionstringdata->m[mag_num] = vector<string>();
@@ -451,18 +452,64 @@ void SaveGame::ReadMissionStringData (char * &buf) {
   buf = buf2;
 }
 
-string SaveGame::WriteMissionStringData () {
-  string ret(" ");
+
+
+void PushBackFloat(float f, vector <char> &ret) {
+	char c[128];
+    sprintf(c,"%f",f);
+	char * k=&c[0];
+	while (*k) {
+		ret.push_back(*k);
+	}
+}
+void PushBackUInt(unsigned int i, vector<char> & ret) {
+	if (!i)
+		ret.push_back('0');
+	else {
+		unsigned int start=ret.size();
+		while(i){
+			ret.push_back(i%10+'0');
+			i/=10;
+		}
+		unsigned int fin = ret.size();
+		unsigned int jend = (fin-start)/2;
+		for (unsigned int j=0;j<jend;++j) {
+			char tmp = ret[j+start];
+			ret[j+start]=ret[fin-j-1];
+			ret[fin-j-1]=tmp;
+		}
+	}
+}
+void PushBackInt(int i, vector<char> &ret) {
+	if (i<0)
+		ret.push_back('-');
+	PushBackUInt(i<0?-i:1,ret);
+}
+void PushBackChars(const char * c,vector<char> & ret) {
+	while (*c) {
+		ret.push_back(*c);
+		++c;
+	}
+}
+void PushBackString (string input,vector<char> &ret) {
+	PushBackUInt(input.length(),ret);
+	PushBackChars(" ",ret);
+	PushBackChars(input.c_str(),ret);
+}
+
+void SaveGame::WriteMissionStringData (vector <char> & ret) {
   RemoveEmpty<MissionStringDat::MSD> (missionstringdata->m);
-  ret+=XMLSupport::tostring ((int)missionstringdata->m.size());
+  PushBackUInt(missionstringdata->m.size(),ret);
   for( MissionStringDat::MSD::iterator i=missionstringdata->m.begin();i!=missionstringdata->m.end();i++) {
     unsigned int siz = (*i).second.size();
-    ret += string("\n")+ AnyStringWriteString((*i).first)+XMLSupport::tostring(siz)+" ";
+	PushBackChars("\n",ret);
+	PushBackString((*i).first,ret);
+	PushBackUInt(siz,ret);
+	PushBackChars(" ",ret);
     for (unsigned int j=0;j<siz;j++) {
-      ret += AnyStringWriteString((*i).second[j]);
+		PushBackString((*i).second[j],ret);
     }
   }
-  return ret;
 }
 
 void SaveGame::ReadStardate( char * &buf)
@@ -563,7 +610,10 @@ string SaveGame::WriteDynamicUniverse()
     memset( tmp, 0, MB);
     sprintf (tmp,"\n%d %s %s",0,"missionstring","data ");
     dyn_univ += string( tmp);
-    dyn_univ += WriteMissionStringData();
+	vector <char> missionstringdata1;
+	WriteMissionStringData(missionstringdata1);
+    dyn_univ +=string(&missionstringdata1[0],missionstringdata1.size());
+		
     if (!STATIC_VARS_DESTROYED)
       last_written_pickled_data=PickleAllMissions(); 
     tmp = tmprealloc(tmp,MB,last_written_pickled_data.length()+256/*4 floats*/);
