@@ -154,7 +154,7 @@ void Unit::Init()
   ycur = pcur = rcur = 0;
   */
   MomentOfInertia = 1.5;
-  AngularVelocity = Vector(0,0,0);
+  AngularVelocity = Vector(XMLSupport::parse_float (vs_config->getVariable ("general","pitch","0")),XMLSupport::parse_float (vs_config->getVariable ("general","yaw","0")),XMLSupport::parse_float (vs_config->getVariable ("general","roll","0")));
   Velocity = Vector(0,0,0);
   
   NetTorque =NetLocalTorque = Vector(0,0,0);

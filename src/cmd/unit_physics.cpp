@@ -309,6 +309,9 @@ void Unit::UpdatePhysics (const Transformation &trans, const Matrix transmat, co
       }
     }
   } 
+  if(AngularVelocity.i||AngularVelocity.j||AngularVelocity.k) {
+    Rotate (SIMULATION_ATOM*(AngularVelocity));
+  }
   curr_physical_state.position = curr_physical_state.position + QVector (Velocity*SIMULATION_ATOM);
 #ifdef DEPRECATEDPLANETSTUFF
   if (planet) {
@@ -407,9 +410,6 @@ void Unit::ResolveForces (const Transformation &trans, const Matrix transmat) {
   Vector temp = (InvTransformNormal(transmat,NetTorque)+NetLocalTorque.i*p+NetLocalTorque.j*q+NetLocalTorque.k *r)*SIMULATION_ATOM*(1.0/MomentOfInertia);
   if (FINITE(temp.i)&&FINITE (temp.j)&&FINITE(temp.k)) {
     AngularVelocity += temp;
-  }
-  if(AngularVelocity.i||AngularVelocity.j||AngularVelocity.k) {
-    Rotate (SIMULATION_ATOM*(AngularVelocity));
   }
   temp = ((InvTransformNormal(transmat,NetForce) + NetLocalForce.i*p + NetLocalForce.j*q + NetLocalForce.k*r ) * SIMULATION_ATOM)/mass; //acceleration
   if (FINITE(temp.i)&&FINITE (temp.j)&&FINITE(temp.k)) {	//FIXME
