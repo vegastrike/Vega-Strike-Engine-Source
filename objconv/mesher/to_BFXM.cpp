@@ -3,7 +3,7 @@
 
 
 //#define fprintf aprintf
-int aprintf(...) {
+int32bit aprintf(...) {
    return 0;
 }
 
@@ -149,8 +149,8 @@ enum BLENDFUNC parse_alpha (const char * tmp ) {
 bool shouldreflect (string r) {
     if (strtoupper(r)=="FALSE")
 		return false;
-	int i;
-	for (i=0;i<(int)r.length();++i) {
+	int32bit i;
+	for (i=0;i<(int32bit)r.length();++i) {
 		if (r[i]!='0'&&r[i]!='.'&&r[i]!='+'&&r[i]!='e')
 			return true; // Just about anything other than "FALSE" or 0.00 etc.
 	}
@@ -315,8 +315,8 @@ void beginElement(const string &name, const AttributeList &attributes, XML * xml
 		string detnametmp=(*iter).value.c_str();
 		xml->detailtexture.type=TEXTURE;
 		xml->detailtexture.index=0;
-		xml->detailtexture.name=vector<unsigned char>();
-		for(int detnamelen=0;detnamelen<detnametmp.size();detnamelen++){
+		xml->detailtexture.name=vector<char8bit>();
+		for(int32bit detnamelen=0;detnamelen<detnametmp.size();detnamelen++){
 			xml->detailtexture.name.push_back(detnametmp[detnamelen]);
 		}
 		  }
@@ -327,7 +327,7 @@ void beginElement(const string &name, const AttributeList &attributes, XML * xml
 	  case XML::UNKNOWN: //FIXME?
 		 {
           XML::Names whichtype = XML::UNKNOWN;
-          int strsize=0;
+          int32bit strsize=0;
           if (strtoupper(iter->name).find("ANIMATION")==0) {
               xml->texturetemp.type=ANIMATION;
 			  whichtype = XML::ANIMATEDTEXTURE;
@@ -344,15 +344,15 @@ void beginElement(const string &name, const AttributeList &attributes, XML * xml
               strsize= strlen ("ALPHAMAP");
           }
           if (whichtype!=XML::UNKNOWN) {
-              unsigned int texindex =0;
+              unsigned int32bit texindex =0;
               string ind(iter->name.substr (strsize));
               if (!ind.empty()){
 				texindex=atoi(ind.c_str());
 			  }
 			  xml->texturetemp.index=texindex;
-			  xml->texturetemp.name=vector<unsigned char>();
+			  xml->texturetemp.name=vector<char8bit>();
 			  string nomdujour=iter->value.c_str();
-			  for(int tni=0;tni<nomdujour.size();tni++){
+			  for(int32bit tni=0;tni<nomdujour.size();tni++){
 				xml->texturetemp.name.push_back(nomdujour[tni]);
 			  }
 			xml->textures.push_back(xml->texturetemp);
@@ -462,8 +462,8 @@ void beginElement(const string &name, const AttributeList &attributes, XML * xml
 	xml->striptemp.flatshade=0;
 	break;
   case XML::VERTEX:
-	unsigned int index;
-    float s,t;
+	unsigned int32bit index;
+    float32bit s,t;
 	s=0;
 	t=0;
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
@@ -522,8 +522,8 @@ void beginElement(const string &name, const AttributeList &attributes, XML * xml
 		  break;
 		case XML::LODFILE:
 		  string lodname = (*iter).value.c_str();
-		  xml->lodtemp.name=vector<unsigned char>();
-		  for(int index=0;index<lodname.size();index++){
+		  xml->lodtemp.name=vector<char8bit>();
+		  for(int32bit index=0;index<lodname.size();index++){
 			xml->lodtemp.name.push_back(lodname[index]);
 		  }
 		  break;
@@ -532,8 +532,8 @@ void beginElement(const string &name, const AttributeList &attributes, XML * xml
 	  xml->LODs.push_back(xml->lodtemp);
 	  break;
   case XML::LOGO: 
-	unsigned int typ;
-    float rot, siz,offset;
+	unsigned int32bit typ;
+    float32bit rot, siz,offset;
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(XML::attribute_map.lookup((*iter).name)) {
       case XML::UNKNOWN:
@@ -561,8 +561,8 @@ void beginElement(const string &name, const AttributeList &attributes, XML * xml
     break;
   case XML::REF: //FIXME
 	{
-	unsigned int ind=0;
-    float indweight=1;
+	unsigned int32bit ind=0;
+    float32bit indweight=1;
     bool foundindex=false;
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(XML::attribute_map.lookup((*iter).name)) {
@@ -590,8 +590,8 @@ void beginElement(const string &name, const AttributeList &attributes, XML * xml
 	    case XML::ANIMATIONNAME:
 		{
 		  string animname = (*iter).value.c_str();
-		  xml->animdeftemp.name=vector<unsigned char>();
-		  for(int index=0;index<animname.size();index++){
+		  xml->animdeftemp.name=vector<char8bit>();
+		  for(int32bit index=0;index<animname.size();index++){
 			xml->animdeftemp.name.push_back(animname[index]);
 		  }
 		}
@@ -617,8 +617,8 @@ void beginElement(const string &name, const AttributeList &attributes, XML * xml
       switch(XML::attribute_map.lookup((*iter).name)) {
 	    case XML::FRAMEMESHNAME:
 		  string framename = (*iter).value.c_str();
-		  xml->animframetemp.name=vector<unsigned char>();
-		  for(int index=0;index<framename.size();index++){
+		  xml->animframetemp.name=vector<char8bit>();
+		  for(int32bit index=0;index<framename.size();index++){
 			xml->animframetemp.name.push_back(framename[index]);
 		  }
 		  break;
@@ -634,7 +634,7 @@ void endElement(const string &name, XML * xml) {
   xml->state_stack.pop_back();
   XML::Names elem = (XML::Names)XML::element_map.lookup(name);
 
-  unsigned int i;
+  unsigned int32bit i;
   switch(elem) {
   case XML::UNKNOWN:
     fprintf (stderr,"Unknown element end tag '%s' detected\n",name.c_str());
@@ -704,8 +704,8 @@ void endElement(void *userData, const XML_Char *name) {
 }
 
 
-XML LoadXML(const char *filename, float unitscale) {
-  const int chunk_size = 16384;
+XML LoadXML(const char *filename, float32bit unitscale) {
+  const int32bit chunk_size = 16384;
   FILE* inFile = fopen (filename, "r");
   if(!inFile) {
     fprintf (stderr,"Cannot Open Mesh File %s\n",filename);
@@ -722,7 +722,7 @@ XML LoadXML(const char *filename, float unitscale) {
 	
   do {
     char buf[chunk_size];
-    int length;
+    int32bit length;
     
     length = fread(buf,1, chunk_size,inFile);
     XML_Parse (parser,buf,length,feof(inFile));
@@ -734,42 +734,42 @@ XML LoadXML(const char *filename, float unitscale) {
 }
 
 void xmeshToBFXM(XML memfile,FILE* Outputfile,char mode){//converts input file to BFXM creates new, or appends record based on mode
-  unsigned int intbuf;
-  float floatbuf;
-  unsigned char bytebuf;
+  unsigned int32bit intbuf;
+  float32bit floatbuf;
+  char8bit bytebuf;
   
   bool append=(mode=='a');
   
-  int runningbytenum=0;
+  int32bit runningbytenum=0;
   if(!append){
 	runningbytenum+=writesuperheader(memfile,Outputfile); // Write superheader
   }
   runningbytenum+=appendrecordfromxml(memfile,Outputfile); //Append one record
 
   rewind(Outputfile);
-  fseek(Outputfile,4+7*sizeof(int),SEEK_SET);
-  fread(&intbuf,sizeof(int),1,Outputfile);//Current number of records
+  fseek(Outputfile,4+7*sizeof(int32bit),SEEK_SET);
+  fread(&intbuf,sizeof(int32bit),1,Outputfile);//Current number of records
   intbuf=VSSwapHostIntToLittle(intbuf);
   ++intbuf;
   intbuf=VSSwapHostIntToLittle(intbuf);
-  fseek(Outputfile,4+7*sizeof(int),SEEK_SET);
-  fwrite(&intbuf,sizeof(int),1,Outputfile);//number of records++
+  fseek(Outputfile,4+7*sizeof(int32bit),SEEK_SET);
+  fwrite(&intbuf,sizeof(int32bit),1,Outputfile);//number of records++
 
-  fseek(Outputfile,4+sizeof(int),SEEK_SET);
-  fread(&intbuf,sizeof(int),1,Outputfile);//Current length of file
+  fseek(Outputfile,4+sizeof(int32bit),SEEK_SET);
+  fread(&intbuf,sizeof(int32bit),1,Outputfile);//Current length of file
   intbuf=VSSwapHostIntToLittle(intbuf);
   intbuf+=runningbytenum;
   intbuf=VSSwapHostIntToLittle(intbuf);
-  fseek(Outputfile,4+sizeof(int),SEEK_SET);
-  fwrite(&intbuf,sizeof(int),1,Outputfile);//Correct number of bytes for total file
+  fseek(Outputfile,4+sizeof(int32bit),SEEK_SET);
+  fwrite(&intbuf,sizeof(int32bit),1,Outputfile);//Correct number of bytes for total file
 }
  
-int writesuperheader(XML memfile, FILE* Outputfile){
-  unsigned int intbuf;
-  float floatbuf;
-  int versionnumber=VSSwapHostIntToLittle(10);
-  unsigned char bytebuf;
-  int runningbytenum=0;
+int32bit writesuperheader(XML memfile, FILE* Outputfile){
+  unsigned int32bit intbuf;
+  float32bit floatbuf;
+  int32bit versionnumber=VSSwapHostIntToLittle(10);
+  char8bit bytebuf;
+  int32bit runningbytenum=0;
   //SUPER HEADER
 
   bytebuf='B'; // "Magic Word"
@@ -780,42 +780,42 @@ int writesuperheader(XML memfile, FILE* Outputfile){
   runningbytenum+=fwrite(&bytebuf,1,1,Outputfile);
   bytebuf='M';
   runningbytenum+=fwrite(&bytebuf,1,1,Outputfile);
-  runningbytenum+=sizeof(int)*fwrite(&versionnumber,sizeof(int),1,Outputfile);// VERSION number for BinaryFormattedXMesh
+  runningbytenum+=sizeof(int32bit)*fwrite(&versionnumber,sizeof(int32bit),1,Outputfile);// VERSION number for BinaryFormattedXMesh
   intbuf=VSSwapHostIntToLittle(0);//Length of File Placeholder
-  runningbytenum+=sizeof(int)*fwrite(&intbuf,sizeof(int),1,Outputfile);// Number of bytes in file
+  runningbytenum+=sizeof(int32bit)*fwrite(&intbuf,sizeof(int32bit),1,Outputfile);// Number of bytes in file
   //Super-Header Meaty part
-  intbuf=VSSwapHostIntToLittle(4+(8*sizeof(int)));//Super-Header length in Bytes for version 0.10
-  runningbytenum+=sizeof(int)*fwrite(&intbuf,sizeof(int),1,Outputfile);// Number of bytes in Superheader
+  intbuf=VSSwapHostIntToLittle(4+(8*sizeof(int32bit)));//Super-Header length in Bytes for version 0.10
+  runningbytenum+=sizeof(int32bit)*fwrite(&intbuf,sizeof(int32bit),1,Outputfile);// Number of bytes in Superheader
   intbuf=VSSwapHostIntToLittle(8);//Number of fields per vertex
-  runningbytenum+=sizeof(int)*fwrite(&intbuf,sizeof(int),1,Outputfile);//
+  runningbytenum+=sizeof(int32bit)*fwrite(&intbuf,sizeof(int32bit),1,Outputfile);//
   intbuf=VSSwapHostIntToLittle(3);//Number of fields per polygon structure
-  runningbytenum+=sizeof(int)*fwrite(&intbuf,sizeof(int),1,Outputfile);// 
+  runningbytenum+=sizeof(int32bit)*fwrite(&intbuf,sizeof(int32bit),1,Outputfile);// 
   intbuf=VSSwapHostIntToLittle(3);//Number of fields per referenced vertex
-  runningbytenum+=sizeof(int)*fwrite(&intbuf,sizeof(int),1,Outputfile);// 
+  runningbytenum+=sizeof(int32bit)*fwrite(&intbuf,sizeof(int32bit),1,Outputfile);// 
   intbuf=VSSwapHostIntToLittle(1);//Number of fields per referenced animation
-  runningbytenum+=sizeof(int)*fwrite(&intbuf,sizeof(int),1,Outputfile);// 
+  runningbytenum+=sizeof(int32bit)*fwrite(&intbuf,sizeof(int32bit),1,Outputfile);// 
   intbuf=VSSwapHostIntToLittle(0);//Number of records - initially 0
-  runningbytenum+=sizeof(int)*fwrite(&intbuf,sizeof(int),1,Outputfile);// Number of records
+  runningbytenum+=sizeof(int32bit)*fwrite(&intbuf,sizeof(int32bit),1,Outputfile);// Number of records
 
   return runningbytenum;
 }
 
-int appendrecordfromxml(XML memfile, FILE* Outputfile){
-  unsigned int intbuf;
-  int runningbytenum=0;
+int32bit appendrecordfromxml(XML memfile, FILE* Outputfile){
+  unsigned int32bit intbuf;
+  int32bit runningbytenum=0;
   //Record Header
   intbuf=VSSwapHostIntToLittle(12);// Size of Record Header in bytes
-  runningbytenum+=sizeof(int)*fwrite(&intbuf,sizeof(int),1,Outputfile);// Number of bytes in record header
+  runningbytenum+=sizeof(int32bit)*fwrite(&intbuf,sizeof(int32bit),1,Outputfile);// Number of bytes in record header
   intbuf=VSSwapHostIntToLittle(0);//Size of Record in bytes
-  runningbytenum+=sizeof(int)*fwrite(&intbuf,sizeof(int),1,Outputfile);// Number of bytes in record
+  runningbytenum+=sizeof(int32bit)*fwrite(&intbuf,sizeof(int32bit),1,Outputfile);// Number of bytes in record
   intbuf=VSSwapHostIntToLittle(1+memfile.LODs.size()+memfile.animframes.size());//Number of meshes = 1 + numLODs + numAnims. 
-  runningbytenum+=sizeof(int)*fwrite(&intbuf,sizeof(int),1,Outputfile);// Number of meshes
+  runningbytenum+=sizeof(int32bit)*fwrite(&intbuf,sizeof(int32bit),1,Outputfile);// Number of meshes
   
   runningbytenum+=appendmeshfromxml(memfile,Outputfile); // write top level mesh
-  int mesh;
+  int32bit mesh;
   for(mesh=0;mesh<memfile.LODs.size();mesh++){ //write all LOD meshes
 	string LODname="";
-	for(int i=0;i<memfile.LODs[mesh].name.size();i++){
+	for(int32bit i=0;i<memfile.LODs[mesh].name.size();i++){
          LODname+=memfile.LODs[mesh].name[i];
 	}
 	XML submesh=LoadXML(LODname.c_str(),1);
@@ -823,7 +823,7 @@ int appendrecordfromxml(XML memfile, FILE* Outputfile){
   }
   for(mesh=0;mesh<memfile.animframes.size();mesh++){ //write all Animation Frames
 	string animname="";
-	for(int i=0;i<memfile.animframes[mesh].name.size();i++){
+	for(int32bit i=0;i<memfile.animframes[mesh].name.size();i++){
          animname+=memfile.animframes[mesh].name[i];
 	}
 	XML submesh=LoadXML(animname.c_str(),1);
@@ -833,131 +833,131 @@ int appendrecordfromxml(XML memfile, FILE* Outputfile){
   fseek(Outputfile,(-1*(runningbytenum))+4,SEEK_CUR);
   intbuf=runningbytenum;
   intbuf= VSSwapHostIntToLittle(intbuf);
-  fwrite(&intbuf,sizeof(int),1,Outputfile);//Correct number of bytes for total record
+  fwrite(&intbuf,sizeof(int32bit),1,Outputfile);//Correct number of bytes for total record
   fseek(Outputfile,0,SEEK_END);
   return runningbytenum;
 
 }
-int appendmeshfromxml(XML memfile, FILE* Outputfile){
-  unsigned int intbuf;
-  float floatbuf;
-  unsigned char bytebuf;
-  int runningbytenum=0;
+int32bit appendmeshfromxml(XML memfile, FILE* Outputfile){
+  unsigned int32bit intbuf;
+  float32bit floatbuf;
+  char8bit bytebuf;
+  int32bit runningbytenum=0;
   
   //Mesh Header
-  intbuf= VSSwapHostIntToLittle(11*sizeof(int)+19*sizeof(float));
-  runningbytenum+=sizeof(int)*fwrite(&intbuf,sizeof(int),1,Outputfile);//Size of Mesh header in Bytes
+  intbuf= VSSwapHostIntToLittle(11*sizeof(int32bit)+19*sizeof(float32bit));
+  runningbytenum+=sizeof(int32bit)*fwrite(&intbuf,sizeof(int32bit),1,Outputfile);//Size of Mesh header in Bytes
   intbuf= VSSwapHostIntToLittle(0);// Temp - rewind and fix.
-  runningbytenum+=sizeof(int)*fwrite(&intbuf,sizeof(int),1,Outputfile);//Size of this Mesh in Bytes
+  runningbytenum+=sizeof(int32bit)*fwrite(&intbuf,sizeof(int32bit),1,Outputfile);//Size of this Mesh in Bytes
   floatbuf = VSSwapHostFloatToLittle(memfile.scale);
-  runningbytenum+=sizeof(float)*fwrite(&floatbuf,sizeof(float),1,Outputfile);// Mesh Scale
+  runningbytenum+=sizeof(float32bit)*fwrite(&floatbuf,sizeof(float32bit),1,Outputfile);// Mesh Scale
   intbuf= VSSwapHostIntToLittle(memfile.reverse);
-  runningbytenum+=sizeof(int)*fwrite(&intbuf,sizeof(int),1,Outputfile);//reverse flag
+  runningbytenum+=sizeof(int32bit)*fwrite(&intbuf,sizeof(int32bit),1,Outputfile);//reverse flag
   intbuf= VSSwapHostIntToLittle(memfile.force_texture);
-  runningbytenum+=sizeof(int)*fwrite(&intbuf,sizeof(int),1,Outputfile);//Force texture flag
+  runningbytenum+=sizeof(int32bit)*fwrite(&intbuf,sizeof(int32bit),1,Outputfile);//Force texture flag
   intbuf= VSSwapHostIntToLittle(memfile.sharevert);
-  runningbytenum+=sizeof(int)*fwrite(&intbuf,sizeof(int),1,Outputfile);//Share vertex flag
+  runningbytenum+=sizeof(int32bit)*fwrite(&intbuf,sizeof(int32bit),1,Outputfile);//Share vertex flag
   floatbuf= VSSwapHostFloatToLittle(memfile.polygon_offset);
-  runningbytenum+=sizeof(float)*fwrite(&floatbuf,sizeof(float),1,Outputfile);//Polygon offset
+  runningbytenum+=sizeof(float32bit)*fwrite(&floatbuf,sizeof(float32bit),1,Outputfile);//Polygon offset
   intbuf= VSSwapHostIntToLittle(memfile.blend_src);
-  runningbytenum+=sizeof(int)*fwrite(&intbuf,sizeof(int),1,Outputfile);//Blend Source
+  runningbytenum+=sizeof(int32bit)*fwrite(&intbuf,sizeof(int32bit),1,Outputfile);//Blend Source
   intbuf= VSSwapHostIntToLittle(memfile.blend_dst);
-  runningbytenum+=sizeof(int)*fwrite(&intbuf,sizeof(int),1,Outputfile);//Blend Destination
+  runningbytenum+=sizeof(int32bit)*fwrite(&intbuf,sizeof(int32bit),1,Outputfile);//Blend Destination
   floatbuf= VSSwapHostFloatToLittle(memfile.material.power);
-  runningbytenum+=sizeof(float)*fwrite(&floatbuf,sizeof(float),1,Outputfile);//Material:Specular:Power
+  runningbytenum+=sizeof(float32bit)*fwrite(&floatbuf,sizeof(float32bit),1,Outputfile);//Material:Specular:Power
   floatbuf= VSSwapHostFloatToLittle(memfile.material.ar);
-  runningbytenum+=sizeof(float)*fwrite(&floatbuf,sizeof(float),1,Outputfile);//Material:Ambient:Red
+  runningbytenum+=sizeof(float32bit)*fwrite(&floatbuf,sizeof(float32bit),1,Outputfile);//Material:Ambient:Red
   floatbuf= VSSwapHostFloatToLittle(memfile.material.ag);
-  runningbytenum+=sizeof(float)*fwrite(&floatbuf,sizeof(float),1,Outputfile);//Material:Ambient:Green
+  runningbytenum+=sizeof(float32bit)*fwrite(&floatbuf,sizeof(float32bit),1,Outputfile);//Material:Ambient:Green
   floatbuf= VSSwapHostFloatToLittle(memfile.material.ab);
-  runningbytenum+=sizeof(float)*fwrite(&floatbuf,sizeof(float),1,Outputfile);//Material:Ambient:Blue
+  runningbytenum+=sizeof(float32bit)*fwrite(&floatbuf,sizeof(float32bit),1,Outputfile);//Material:Ambient:Blue
   floatbuf= VSSwapHostFloatToLittle(memfile.material.aa);
-  runningbytenum+=sizeof(float)*fwrite(&floatbuf,sizeof(float),1,Outputfile);//Material:Ambient:Alpha
+  runningbytenum+=sizeof(float32bit)*fwrite(&floatbuf,sizeof(float32bit),1,Outputfile);//Material:Ambient:Alpha
   floatbuf= VSSwapHostFloatToLittle(memfile.material.dr);
-  runningbytenum+=sizeof(float)*fwrite(&floatbuf,sizeof(float),1,Outputfile);//Material:Diffuse:Red
+  runningbytenum+=sizeof(float32bit)*fwrite(&floatbuf,sizeof(float32bit),1,Outputfile);//Material:Diffuse:Red
   floatbuf= VSSwapHostFloatToLittle(memfile.material.dg);
-  runningbytenum+=sizeof(float)*fwrite(&floatbuf,sizeof(float),1,Outputfile);//Material:Diffuse:Green
+  runningbytenum+=sizeof(float32bit)*fwrite(&floatbuf,sizeof(float32bit),1,Outputfile);//Material:Diffuse:Green
   floatbuf= VSSwapHostFloatToLittle(memfile.material.db);
-  runningbytenum+=sizeof(float)*fwrite(&floatbuf,sizeof(float),1,Outputfile);//Material:Diffuse:Blue
+  runningbytenum+=sizeof(float32bit)*fwrite(&floatbuf,sizeof(float32bit),1,Outputfile);//Material:Diffuse:Blue
   floatbuf= VSSwapHostFloatToLittle(memfile.material.da);
-  runningbytenum+=sizeof(float)*fwrite(&floatbuf,sizeof(float),1,Outputfile);//Material:Diffuse:Alpha
+  runningbytenum+=sizeof(float32bit)*fwrite(&floatbuf,sizeof(float32bit),1,Outputfile);//Material:Diffuse:Alpha
   floatbuf= VSSwapHostFloatToLittle(memfile.material.er);
-  runningbytenum+=sizeof(float)*fwrite(&floatbuf,sizeof(float),1,Outputfile);//Material:Emissive:Red
+  runningbytenum+=sizeof(float32bit)*fwrite(&floatbuf,sizeof(float32bit),1,Outputfile);//Material:Emissive:Red
   floatbuf= VSSwapHostFloatToLittle(memfile.material.eg);
-  runningbytenum+=sizeof(float)*fwrite(&floatbuf,sizeof(float),1,Outputfile);//Material:Emissive:Green
+  runningbytenum+=sizeof(float32bit)*fwrite(&floatbuf,sizeof(float32bit),1,Outputfile);//Material:Emissive:Green
   floatbuf= VSSwapHostFloatToLittle(memfile.material.eb);
-  runningbytenum+=sizeof(float)*fwrite(&floatbuf,sizeof(float),1,Outputfile);//Material:Emissive:Blue
+  runningbytenum+=sizeof(float32bit)*fwrite(&floatbuf,sizeof(float32bit),1,Outputfile);//Material:Emissive:Blue
   floatbuf= VSSwapHostFloatToLittle(memfile.material.ea);
-  runningbytenum+=sizeof(float)*fwrite(&floatbuf,sizeof(float),1,Outputfile);//Material:Emissive:Alpha
+  runningbytenum+=sizeof(float32bit)*fwrite(&floatbuf,sizeof(float32bit),1,Outputfile);//Material:Emissive:Alpha
   floatbuf= VSSwapHostFloatToLittle(memfile.material.sr);
-  runningbytenum+=sizeof(float)*fwrite(&floatbuf,sizeof(float),1,Outputfile);//Material:Specular:Red
+  runningbytenum+=sizeof(float32bit)*fwrite(&floatbuf,sizeof(float32bit),1,Outputfile);//Material:Specular:Red
   floatbuf= VSSwapHostFloatToLittle(memfile.material.sg);
-  runningbytenum+=sizeof(float)*fwrite(&floatbuf,sizeof(float),1,Outputfile);//Material:Specular:Green
+  runningbytenum+=sizeof(float32bit)*fwrite(&floatbuf,sizeof(float32bit),1,Outputfile);//Material:Specular:Green
   floatbuf= VSSwapHostFloatToLittle(memfile.material.sb);
-  runningbytenum+=sizeof(float)*fwrite(&floatbuf,sizeof(float),1,Outputfile);//Material:Specular:Blue
+  runningbytenum+=sizeof(float32bit)*fwrite(&floatbuf,sizeof(float32bit),1,Outputfile);//Material:Specular:Blue
   floatbuf= VSSwapHostFloatToLittle(memfile.material.sa);
-  runningbytenum+=sizeof(float)*fwrite(&floatbuf,sizeof(float),1,Outputfile);//Material:Specular:Alpha
+  runningbytenum+=sizeof(float32bit)*fwrite(&floatbuf,sizeof(float32bit),1,Outputfile);//Material:Specular:Alpha
   intbuf= VSSwapHostIntToLittle(memfile.cullface);
-  runningbytenum+=sizeof(int)*fwrite(&intbuf,sizeof(int),1,Outputfile);//Cullface
+  runningbytenum+=sizeof(int32bit)*fwrite(&intbuf,sizeof(int32bit),1,Outputfile);//Cullface
   intbuf= VSSwapHostIntToLittle(memfile.lighting);
-  runningbytenum+=sizeof(int)*fwrite(&intbuf,sizeof(int),1,Outputfile);//lighting
+  runningbytenum+=sizeof(int32bit)*fwrite(&intbuf,sizeof(int32bit),1,Outputfile);//lighting
   intbuf= VSSwapHostIntToLittle(memfile.reflect);
-  runningbytenum+=sizeof(int)*fwrite(&intbuf,sizeof(int),1,Outputfile);//reflect
+  runningbytenum+=sizeof(int32bit)*fwrite(&intbuf,sizeof(int32bit),1,Outputfile);//reflect
   intbuf= VSSwapHostIntToLittle(memfile.usenormals);
-  runningbytenum+=sizeof(int)*fwrite(&intbuf,sizeof(int),1,Outputfile);//usenormals
+  runningbytenum+=sizeof(int32bit)*fwrite(&intbuf,sizeof(int32bit),1,Outputfile);//usenormals
   //END HEADER
   //Begin Variable sized Attributes
-  int VSAstart=runningbytenum;
+  int32bit VSAstart=runningbytenum;
   intbuf= VSSwapHostIntToLittle(0); // Temp value will overwrite later
-  runningbytenum+=sizeof(int)*fwrite(&intbuf,sizeof(int),1,Outputfile);//Length of Variable sized attribute section in bytes
+  runningbytenum+=sizeof(int32bit)*fwrite(&intbuf,sizeof(int32bit),1,Outputfile);//Length of Variable sized attribute section in bytes
   //Detail texture
   { 
-	int namelen=memfile.detailtexture.name.size();
+	int32bit namelen=memfile.detailtexture.name.size();
 	intbuf= VSSwapHostIntToLittle(namelen);
-	runningbytenum+=sizeof(int)*fwrite(&intbuf,sizeof(int),1,Outputfile);//Length of name of detail texture
-        int nametmp;
+	runningbytenum+=sizeof(int32bit)*fwrite(&intbuf,sizeof(int32bit),1,Outputfile);//Length of name of detail texture
+        int32bit nametmp;
 	for(nametmp=0;nametmp<namelen;nametmp++){
 		bytebuf= memfile.detailtexture.name[nametmp];
-		runningbytenum+=fwrite(&bytebuf,sizeof(char),1,Outputfile);//char by char name of detail texture
+		runningbytenum+=fwrite(&bytebuf,sizeof(char8bit),1,Outputfile);//char by char name of detail texture
 	}
-	int padlength=(sizeof(int)-(namelen%sizeof(int)))%sizeof(int);
+	int32bit padlength=(sizeof(int32bit)-(namelen%sizeof(int32bit)))%sizeof(int32bit);
 	for(nametmp=0;nametmp<padlength;nametmp++){
 		bytebuf=0;
-		runningbytenum+=fwrite(&bytebuf,sizeof(char),1,Outputfile);//Padded so that next field is word aligned
+		runningbytenum+=fwrite(&bytebuf,sizeof(char8bit),1,Outputfile);//Padded so that next field is word aligned
 	}
   }
   //Detail Planes
   intbuf= VSSwapHostIntToLittle(memfile.detailplanes.size());
-  runningbytenum+=sizeof(int)*fwrite(&intbuf,sizeof(int),1,Outputfile);//Number of detail planes
-  for(int plane=0;plane<memfile.detailplanes.size();plane++){
+  runningbytenum+=sizeof(int32bit)*fwrite(&intbuf,sizeof(int32bit),1,Outputfile);//Number of detail planes
+  for(int32bit plane=0;plane<memfile.detailplanes.size();plane++){
 	floatbuf= VSSwapHostFloatToLittle(memfile.detailplanes[plane].x);
-	runningbytenum+=sizeof(float)*fwrite(&floatbuf,sizeof(float),1,Outputfile);//Detail Plane:X
+	runningbytenum+=sizeof(float32bit)*fwrite(&floatbuf,sizeof(float32bit),1,Outputfile);//Detail Plane:X
 	floatbuf= VSSwapHostFloatToLittle(memfile.detailplanes[plane].y);
-	runningbytenum+=sizeof(float)*fwrite(&floatbuf,sizeof(float),1,Outputfile);//Detail Plane:Y
+	runningbytenum+=sizeof(float32bit)*fwrite(&floatbuf,sizeof(float32bit),1,Outputfile);//Detail Plane:Y
 	floatbuf= VSSwapHostFloatToLittle(memfile.detailplanes[plane].z);
-	runningbytenum+=sizeof(float)*fwrite(&floatbuf,sizeof(float),1,Outputfile);//Detail Plane:Z
+	runningbytenum+=sizeof(float32bit)*fwrite(&floatbuf,sizeof(float32bit),1,Outputfile);//Detail Plane:Z
   }
   //Textures
   {
   intbuf= VSSwapHostIntToLittle(memfile.textures.size());
-  runningbytenum+=sizeof(int)*fwrite(&intbuf,sizeof(int),1,Outputfile);//Number of textures
-  for(int texnum=0;texnum<memfile.textures.size();texnum++){
+  runningbytenum+=sizeof(int32bit)*fwrite(&intbuf,sizeof(int32bit),1,Outputfile);//Number of textures
+  for(int32bit texnum=0;texnum<memfile.textures.size();texnum++){
 	intbuf= VSSwapHostIntToLittle(memfile.textures[texnum].type);
-	runningbytenum+=sizeof(int)*fwrite(&intbuf,sizeof(int),1,Outputfile);//texture # texnum: type
+	runningbytenum+=sizeof(int32bit)*fwrite(&intbuf,sizeof(int32bit),1,Outputfile);//texture # texnum: type
 	intbuf= VSSwapHostIntToLittle(memfile.textures[texnum].index);
-	runningbytenum+=sizeof(int)*fwrite(&intbuf,sizeof(int),1,Outputfile);//texture # texnum: index
-	int namelen=memfile.textures[texnum].name.size();
+	runningbytenum+=sizeof(int32bit)*fwrite(&intbuf,sizeof(int32bit),1,Outputfile);//texture # texnum: index
+	int32bit namelen=memfile.textures[texnum].name.size();
 	intbuf= VSSwapHostIntToLittle(namelen);
-	runningbytenum+=sizeof(int)*fwrite(&intbuf,sizeof(int),1,Outputfile);//Length of name of texture # texnum
-    int nametmp;
+	runningbytenum+=sizeof(int32bit)*fwrite(&intbuf,sizeof(int32bit),1,Outputfile);//Length of name of texture # texnum
+    int32bit nametmp;
 	for(nametmp=0;nametmp<namelen;nametmp++){
 		bytebuf= memfile.textures[texnum].name[nametmp];
-		runningbytenum+=fwrite(&bytebuf,sizeof(char),1,Outputfile);//Name of texture # texnum
+		runningbytenum+=fwrite(&bytebuf,sizeof(char8bit),1,Outputfile);//Name of texture # texnum
 	}
-	int padlength=(sizeof(int)-(namelen%sizeof(int)))%sizeof(int);
+	int32bit padlength=(sizeof(int32bit)-(namelen%sizeof(int32bit)))%sizeof(int32bit);
 	for(nametmp=0;nametmp<padlength;nametmp++){
 		bytebuf=0;
-		runningbytenum+=fwrite(&bytebuf,sizeof(char),1,Outputfile);//Padded so that next field is word aligned
+		runningbytenum+=fwrite(&bytebuf,sizeof(char8bit),1,Outputfile);//Padded so that next field is word aligned
 	}
   }
   }
@@ -965,195 +965,195 @@ int appendmeshfromxml(XML memfile, FILE* Outputfile){
   //Logos
   //FIXME?
   intbuf= VSSwapHostIntToLittle(memfile.logos.size());
-  runningbytenum+=sizeof(int)*fwrite(&intbuf,sizeof(int),1,Outputfile);//Number of logos
-  for(int logonum=0;logonum<memfile.logos.size();logonum++){
+  runningbytenum+=sizeof(int32bit)*fwrite(&intbuf,sizeof(int32bit),1,Outputfile);//Number of logos
+  for(int32bit logonum=0;logonum<memfile.logos.size();logonum++){
 	floatbuf= VSSwapHostFloatToLittle(memfile.logos[logonum].size);
-	runningbytenum+=sizeof(float)*fwrite(&floatbuf,sizeof(float),1,Outputfile);//logo # logonum: size
+	runningbytenum+=sizeof(float32bit)*fwrite(&floatbuf,sizeof(float32bit),1,Outputfile);//logo # logonum: size
 	floatbuf= VSSwapHostFloatToLittle(memfile.logos[logonum].offset);
-	runningbytenum+=sizeof(float)*fwrite(&floatbuf,sizeof(float),1,Outputfile);//logo # logonum: offset
+	runningbytenum+=sizeof(float32bit)*fwrite(&floatbuf,sizeof(float32bit),1,Outputfile);//logo # logonum: offset
 	floatbuf= VSSwapHostFloatToLittle(memfile.logos[logonum].rotate);
-	runningbytenum+=sizeof(float)*fwrite(&floatbuf,sizeof(float),1,Outputfile);//logo # logonum: rotation
+	runningbytenum+=sizeof(float32bit)*fwrite(&floatbuf,sizeof(float32bit),1,Outputfile);//logo # logonum: rotation
 	intbuf= VSSwapHostIntToLittle(memfile.logos[logonum].type);
-	runningbytenum+=sizeof(int)*fwrite(&intbuf,sizeof(int),1,Outputfile);//logo # logonum: type
-	int numrefs=memfile.logos[logonum].refpnt.size();
+	runningbytenum+=sizeof(int32bit)*fwrite(&intbuf,sizeof(int32bit),1,Outputfile);//logo # logonum: type
+	int32bit numrefs=memfile.logos[logonum].refpnt.size();
 	intbuf=VSSwapHostIntToLittle(numrefs);
-	runningbytenum+=sizeof(int)*fwrite(&intbuf,sizeof(int),1,Outputfile);//logo # logonum: number of references
-	for(int ref=0;ref<numrefs;ref++){
+	runningbytenum+=sizeof(int32bit)*fwrite(&intbuf,sizeof(int32bit),1,Outputfile);//logo # logonum: number of references
+	for(int32bit ref=0;ref<numrefs;ref++){
 	  intbuf=VSSwapHostIntToLittle(memfile.logos[logonum].refpnt[ref]);
-	  runningbytenum+=sizeof(int)*fwrite(&intbuf,sizeof(int),1,Outputfile);//logo # logonum: reference # ref
+	  runningbytenum+=sizeof(int32bit)*fwrite(&intbuf,sizeof(int32bit),1,Outputfile);//logo # logonum: reference # ref
 	  floatbuf= VSSwapHostFloatToLittle(memfile.logos[logonum].refweight[ref]);
-	  runningbytenum+=sizeof(float)*fwrite(&floatbuf,sizeof(float),1,Outputfile);//logo # logonum: reference # ref weight
+	  runningbytenum+=sizeof(float32bit)*fwrite(&floatbuf,sizeof(float32bit),1,Outputfile);//logo # logonum: reference # ref weight
 	}
   }
 
   //LODs + Animations
   //LODs
-  int submeshref=1;
+  int32bit submeshref=1;
   intbuf=VSSwapHostIntToLittle(memfile.LODs.size());
-  runningbytenum+=sizeof(int)*fwrite(&intbuf,sizeof(int),1,Outputfile);//Number of LODs
-  for(int lod=0;lod<memfile.LODs.size();lod++){
+  runningbytenum+=sizeof(int32bit)*fwrite(&intbuf,sizeof(int32bit),1,Outputfile);//Number of LODs
+  for(int32bit lod=0;lod<memfile.LODs.size();lod++){
 	floatbuf= VSSwapHostFloatToLittle(memfile.LODs[lod].size);
-	runningbytenum+=sizeof(float)*fwrite(&floatbuf,sizeof(float),1,Outputfile);//LOD # lod: size
+	runningbytenum+=sizeof(float32bit)*fwrite(&floatbuf,sizeof(float32bit),1,Outputfile);//LOD # lod: size
 	intbuf=submeshref;
 	intbuf=VSSwapHostIntToLittle(intbuf);
-	runningbytenum+=sizeof(int)*fwrite(&intbuf,sizeof(int),1,Outputfile);//LOD mesh offset
+	runningbytenum+=sizeof(int32bit)*fwrite(&intbuf,sizeof(int32bit),1,Outputfile);//LOD mesh offset
 	submeshref++;
   }
 
   //Current VS File format is not compatible with new animation specification - can't test until I fix old files (only 1 at present uses animations)
   
   	intbuf=VSSwapHostIntToLittle(memfile.animdefs.size());
-	runningbytenum+=sizeof(int)*fwrite(&intbuf,sizeof(int),1,Outputfile);//Number of animdefs
-	for(int anim=0;anim<memfile.animdefs.size();anim++){
-	  int namelen=memfile.animdefs[anim].name.size();
+	runningbytenum+=sizeof(int32bit)*fwrite(&intbuf,sizeof(int32bit),1,Outputfile);//Number of animdefs
+	for(int32bit anim=0;anim<memfile.animdefs.size();anim++){
+	  int32bit namelen=memfile.animdefs[anim].name.size();
 	  intbuf= VSSwapHostIntToLittle(namelen);
-	  runningbytenum+=sizeof(int)*fwrite(&intbuf,sizeof(int),1,Outputfile);//Length of name animation
-          int nametmp;
+	  runningbytenum+=sizeof(int32bit)*fwrite(&intbuf,sizeof(int32bit),1,Outputfile);//Length of name animation
+          int32bit nametmp;
 	  for(nametmp=0;nametmp<namelen;nametmp++){
 		bytebuf= memfile.animdefs[anim].name[nametmp];
-		runningbytenum+=fwrite(&bytebuf,sizeof(char),1,Outputfile);//char by char of above
+		runningbytenum+=fwrite(&bytebuf,sizeof(char8bit),1,Outputfile);//char by char of above
 	  }
-	  int padlength=(sizeof(int)-(namelen%sizeof(int)))%sizeof(int);
+	  int32bit padlength=(sizeof(int32bit)-(namelen%sizeof(int32bit)))%sizeof(int32bit);
 	  for(nametmp=0;nametmp<padlength;nametmp++){
 		bytebuf=0;
-		runningbytenum+=fwrite(&bytebuf,sizeof(char),1,Outputfile);//Padded so that next field is word aligned
+		runningbytenum+=fwrite(&bytebuf,sizeof(char8bit),1,Outputfile);//Padded so that next field is word aligned
 	  }
 	  floatbuf=VSSwapHostFloatToLittle(memfile.animdefs[anim].FPS);
-	  runningbytenum+=sizeof(float)*fwrite(&floatbuf,sizeof(float),1,Outputfile);//Animdef # anim: FPS
-	  for(int offset=0;offset<memfile.animdefs[anim].meshoffsets.size();offset++){
+	  runningbytenum+=sizeof(float32bit)*fwrite(&floatbuf,sizeof(float32bit),1,Outputfile);//Animdef # anim: FPS
+	  for(int32bit offset=0;offset<memfile.animdefs[anim].meshoffsets.size();offset++){
 		intbuf=submeshref+memfile.animdefs[anim].meshoffsets[offset];
 		intbuf=VSSwapHostIntToLittle(intbuf);
-		runningbytenum+=sizeof(int)*fwrite(&intbuf,sizeof(int),1,Outputfile);//animation mesh offset
+		runningbytenum+=sizeof(int32bit)*fwrite(&intbuf,sizeof(int32bit),1,Outputfile);//animation mesh offset
 	  }
 	}
 
   //End Variable sized Attributes
-  int VSAend=runningbytenum;
+  int32bit VSAend=runningbytenum;
   //GEOMETRY
   intbuf= VSSwapHostIntToLittle(memfile.vertices.size());
-  runningbytenum+=sizeof(int)*fwrite(&intbuf,sizeof(int),1,Outputfile);//Number of vertices
-  for(int verts=0;verts<memfile.vertices.size();verts++){
+  runningbytenum+=sizeof(int32bit)*fwrite(&intbuf,sizeof(int32bit),1,Outputfile);//Number of vertices
+  for(int32bit verts=0;verts<memfile.vertices.size();verts++){
 	  floatbuf=VSSwapHostFloatToLittle(memfile.vertices[verts].x);
-	  runningbytenum+=sizeof(float)*fwrite(&floatbuf,sizeof(float),1,Outputfile);//vertex #vert:x
+	  runningbytenum+=sizeof(float32bit)*fwrite(&floatbuf,sizeof(float32bit),1,Outputfile);//vertex #vert:x
 	  floatbuf=VSSwapHostFloatToLittle(memfile.vertices[verts].y);
-	  runningbytenum+=sizeof(float)*fwrite(&floatbuf,sizeof(float),1,Outputfile);//vertex #vert:y
+	  runningbytenum+=sizeof(float32bit)*fwrite(&floatbuf,sizeof(float32bit),1,Outputfile);//vertex #vert:y
 	  floatbuf=VSSwapHostFloatToLittle(memfile.vertices[verts].z);
-	  runningbytenum+=sizeof(float)*fwrite(&floatbuf,sizeof(float),1,Outputfile);//vertex #vert:z
+	  runningbytenum+=sizeof(float32bit)*fwrite(&floatbuf,sizeof(float32bit),1,Outputfile);//vertex #vert:z
 	  floatbuf=VSSwapHostFloatToLittle(memfile.vertices[verts].i);
-	  runningbytenum+=sizeof(float)*fwrite(&floatbuf,sizeof(float),1,Outputfile);//vertex #vert:i
+	  runningbytenum+=sizeof(float32bit)*fwrite(&floatbuf,sizeof(float32bit),1,Outputfile);//vertex #vert:i
 	  floatbuf=VSSwapHostFloatToLittle(memfile.vertices[verts].j);
-	  runningbytenum+=sizeof(float)*fwrite(&floatbuf,sizeof(float),1,Outputfile);//vertex #vert:j
+	  runningbytenum+=sizeof(float32bit)*fwrite(&floatbuf,sizeof(float32bit),1,Outputfile);//vertex #vert:j
 	  floatbuf=VSSwapHostFloatToLittle(memfile.vertices[verts].k);
-	  runningbytenum+=sizeof(float)*fwrite(&floatbuf,sizeof(float),1,Outputfile);//vertex #vert:k
+	  runningbytenum+=sizeof(float32bit)*fwrite(&floatbuf,sizeof(float32bit),1,Outputfile);//vertex #vert:k
 	  floatbuf=VSSwapHostFloatToLittle(memfile.vertices[verts].s);
-	  runningbytenum+=sizeof(float)*fwrite(&floatbuf,sizeof(float),1,Outputfile);//vertex #vert:s
+	  runningbytenum+=sizeof(float32bit)*fwrite(&floatbuf,sizeof(float32bit),1,Outputfile);//vertex #vert:s
 	  floatbuf=VSSwapHostFloatToLittle(memfile.vertices[verts].t);
-	  runningbytenum+=sizeof(float)*fwrite(&floatbuf,sizeof(float),1,Outputfile);//vertex #vert:t
+	  runningbytenum+=sizeof(float32bit)*fwrite(&floatbuf,sizeof(float32bit),1,Outputfile);//vertex #vert:t
   }
   intbuf= VSSwapHostIntToLittle(memfile.lines.size());
-  runningbytenum+=sizeof(int)*fwrite(&intbuf,sizeof(int),1,Outputfile);//Number of lines
-  for(int lines=0;lines<memfile.lines.size();lines++){
+  runningbytenum+=sizeof(int32bit)*fwrite(&intbuf,sizeof(int32bit),1,Outputfile);//Number of lines
+  for(int32bit lines=0;lines<memfile.lines.size();lines++){
 	intbuf= VSSwapHostIntToLittle(memfile.lines[lines].flatshade);
-	runningbytenum+=sizeof(int)*fwrite(&intbuf,sizeof(int),1,Outputfile);//Flatshade flag
-	for(int tmpcounter=0;tmpcounter<2;tmpcounter++){
+	runningbytenum+=sizeof(int32bit)*fwrite(&intbuf,sizeof(int32bit),1,Outputfile);//Flatshade flag
+	for(int32bit tmpcounter=0;tmpcounter<2;tmpcounter++){
 		intbuf= VSSwapHostIntToLittle(memfile.lines[lines].indexref[tmpcounter]);
-		runningbytenum+=sizeof(int)*fwrite(&intbuf,sizeof(int),1,Outputfile);//point index
+		runningbytenum+=sizeof(int32bit)*fwrite(&intbuf,sizeof(int32bit),1,Outputfile);//point index
 		floatbuf= VSSwapHostFloatToLittle(memfile.lines[lines].s[tmpcounter]);
-		runningbytenum+=sizeof(float)*fwrite(&floatbuf,sizeof(float),1,Outputfile);//s coord
+		runningbytenum+=sizeof(float32bit)*fwrite(&floatbuf,sizeof(float32bit),1,Outputfile);//s coord
 		floatbuf= VSSwapHostFloatToLittle(memfile.lines[lines].t[tmpcounter]);
-		runningbytenum+=sizeof(float)*fwrite(&floatbuf,sizeof(float),1,Outputfile);//t coord
+		runningbytenum+=sizeof(float32bit)*fwrite(&floatbuf,sizeof(float32bit),1,Outputfile);//t coord
 	}
   }
   intbuf= VSSwapHostIntToLittle(memfile.tris.size());
-  runningbytenum+=sizeof(int)*fwrite(&intbuf,sizeof(int),1,Outputfile);//Number of triangles
-  for(int tris=0;tris<memfile.tris.size();tris++){
+  runningbytenum+=sizeof(int32bit)*fwrite(&intbuf,sizeof(int32bit),1,Outputfile);//Number of triangles
+  for(int32bit tris=0;tris<memfile.tris.size();tris++){
 	intbuf= VSSwapHostIntToLittle(memfile.tris[tris].flatshade);
-	runningbytenum+=sizeof(int)*fwrite(&intbuf,sizeof(int),1,Outputfile);//Flatshade flag
-	for(int tmpcounter=0;tmpcounter<3;tmpcounter++){
+	runningbytenum+=sizeof(int32bit)*fwrite(&intbuf,sizeof(int32bit),1,Outputfile);//Flatshade flag
+	for(int32bit tmpcounter=0;tmpcounter<3;tmpcounter++){
 		intbuf= VSSwapHostIntToLittle(memfile.tris[tris].indexref[tmpcounter]);
-		runningbytenum+=sizeof(int)*fwrite(&intbuf,sizeof(int),1,Outputfile);//point index
+		runningbytenum+=sizeof(int32bit)*fwrite(&intbuf,sizeof(int32bit),1,Outputfile);//point index
 		floatbuf= VSSwapHostFloatToLittle(memfile.tris[tris].s[tmpcounter]);
-		runningbytenum+=sizeof(float)*fwrite(&floatbuf,sizeof(float),1,Outputfile);//s coord
+		runningbytenum+=sizeof(float32bit)*fwrite(&floatbuf,sizeof(float32bit),1,Outputfile);//s coord
 		floatbuf= VSSwapHostFloatToLittle(memfile.tris[tris].t[tmpcounter]);
-		runningbytenum+=sizeof(float)*fwrite(&floatbuf,sizeof(float),1,Outputfile);//t coord
+		runningbytenum+=sizeof(float32bit)*fwrite(&floatbuf,sizeof(float32bit),1,Outputfile);//t coord
 	}
   }
   intbuf= VSSwapHostIntToLittle(memfile.quads.size());
-  runningbytenum+=sizeof(int)*fwrite(&intbuf,sizeof(int),1,Outputfile);//Number of Quads
-  for(int quads=0;quads<memfile.quads.size();quads++){
+  runningbytenum+=sizeof(int32bit)*fwrite(&intbuf,sizeof(int32bit),1,Outputfile);//Number of Quads
+  for(int32bit quads=0;quads<memfile.quads.size();quads++){
 	intbuf= VSSwapHostIntToLittle(memfile.quads[quads].flatshade);
-	runningbytenum+=sizeof(int)*fwrite(&intbuf,sizeof(int),1,Outputfile);//Flatshade flag
-	for(int tmpcounter=0;tmpcounter<4;tmpcounter++){
+	runningbytenum+=sizeof(int32bit)*fwrite(&intbuf,sizeof(int32bit),1,Outputfile);//Flatshade flag
+	for(int32bit tmpcounter=0;tmpcounter<4;tmpcounter++){
 		intbuf= VSSwapHostIntToLittle(memfile.quads[quads].indexref[tmpcounter]);
-		runningbytenum+=sizeof(int)*fwrite(&intbuf,sizeof(int),1,Outputfile);//point index
+		runningbytenum+=sizeof(int32bit)*fwrite(&intbuf,sizeof(int32bit),1,Outputfile);//point index
 		floatbuf= VSSwapHostFloatToLittle(memfile.quads[quads].s[tmpcounter]);
-		runningbytenum+=sizeof(float)*fwrite(&floatbuf,sizeof(float),1,Outputfile);//s coord
+		runningbytenum+=sizeof(float32bit)*fwrite(&floatbuf,sizeof(float32bit),1,Outputfile);//s coord
 		floatbuf= VSSwapHostFloatToLittle(memfile.quads[quads].t[tmpcounter]);
-		runningbytenum+=sizeof(float)*fwrite(&floatbuf,sizeof(float),1,Outputfile);//t coord
+		runningbytenum+=sizeof(float32bit)*fwrite(&floatbuf,sizeof(float32bit),1,Outputfile);//t coord
 	}
   }
   intbuf= VSSwapHostIntToLittle(memfile.linestrips.size());
-  runningbytenum+=sizeof(int)*fwrite(&intbuf,sizeof(int),1,Outputfile);//Number of linestrips
-  for(int ls=0;ls<memfile.linestrips.size();ls++){
+  runningbytenum+=sizeof(int32bit)*fwrite(&intbuf,sizeof(int32bit),1,Outputfile);//Number of linestrips
+  for(int32bit ls=0;ls<memfile.linestrips.size();ls++){
 	intbuf= VSSwapHostIntToLittle(memfile.linestrips[ls].points.size());
-	runningbytenum+=sizeof(int)*fwrite(&intbuf,sizeof(int),1,Outputfile);//Number of elements in current linestrip
+	runningbytenum+=sizeof(int32bit)*fwrite(&intbuf,sizeof(int32bit),1,Outputfile);//Number of elements in current linestrip
 	intbuf= VSSwapHostIntToLittle(memfile.linestrips[ls].flatshade);
-	runningbytenum+=sizeof(int)*fwrite(&intbuf,sizeof(int),1,Outputfile);//Flatshade flag
-	for(int tmpcounter=0;tmpcounter<memfile.linestrips[ls].points.size();tmpcounter++){
+	runningbytenum+=sizeof(int32bit)*fwrite(&intbuf,sizeof(int32bit),1,Outputfile);//Flatshade flag
+	for(int32bit tmpcounter=0;tmpcounter<memfile.linestrips[ls].points.size();tmpcounter++){
 		intbuf= VSSwapHostIntToLittle(memfile.linestrips[ls].points[tmpcounter].indexref);
-		runningbytenum+=sizeof(int)*fwrite(&intbuf,sizeof(int),1,Outputfile);//point index
+		runningbytenum+=sizeof(int32bit)*fwrite(&intbuf,sizeof(int32bit),1,Outputfile);//point index
 		floatbuf= VSSwapHostFloatToLittle(memfile.linestrips[ls].points[tmpcounter].s);
-		runningbytenum+=sizeof(float)*fwrite(&floatbuf,sizeof(float),1,Outputfile);//s coord
+		runningbytenum+=sizeof(float32bit)*fwrite(&floatbuf,sizeof(float32bit),1,Outputfile);//s coord
 		floatbuf= VSSwapHostFloatToLittle(memfile.linestrips[ls].points[tmpcounter].t);
-		runningbytenum+=sizeof(float)*fwrite(&floatbuf,sizeof(float),1,Outputfile);//t coord
+		runningbytenum+=sizeof(float32bit)*fwrite(&floatbuf,sizeof(float32bit),1,Outputfile);//t coord
 	}
   }
   intbuf= VSSwapHostIntToLittle(memfile.linestrips.size());
-  runningbytenum+=sizeof(int)*fwrite(&intbuf,sizeof(int),1,Outputfile);//Number of tristrips
-  for(int ts=0;ts<memfile.linestrips.size();ts++){
+  runningbytenum+=sizeof(int32bit)*fwrite(&intbuf,sizeof(int32bit),1,Outputfile);//Number of tristrips
+  for(int32bit ts=0;ts<memfile.linestrips.size();ts++){
 	intbuf= VSSwapHostIntToLittle(memfile.linestrips[ts].points.size());
-	runningbytenum+=sizeof(int)*fwrite(&intbuf,sizeof(int),1,Outputfile);//Number of elements in current tristrip
+	runningbytenum+=sizeof(int32bit)*fwrite(&intbuf,sizeof(int32bit),1,Outputfile);//Number of elements in current tristrip
 	intbuf= VSSwapHostIntToLittle(memfile.linestrips[ts].flatshade);
-	runningbytenum+=sizeof(int)*fwrite(&intbuf,sizeof(int),1,Outputfile);//Flatshade flag
-	for(int tmpcounter=0;tmpcounter<memfile.linestrips[ts].points.size();tmpcounter++){
+	runningbytenum+=sizeof(int32bit)*fwrite(&intbuf,sizeof(int32bit),1,Outputfile);//Flatshade flag
+	for(int32bit tmpcounter=0;tmpcounter<memfile.linestrips[ts].points.size();tmpcounter++){
 		intbuf= VSSwapHostIntToLittle(memfile.linestrips[ts].points[tmpcounter].indexref);
-		runningbytenum+=sizeof(int)*fwrite(&intbuf,sizeof(int),1,Outputfile);//point index
+		runningbytenum+=sizeof(int32bit)*fwrite(&intbuf,sizeof(int32bit),1,Outputfile);//point index
 		floatbuf= VSSwapHostFloatToLittle(memfile.linestrips[ts].points[tmpcounter].s);
-		runningbytenum+=sizeof(float)*fwrite(&floatbuf,sizeof(float),1,Outputfile);//s coord
+		runningbytenum+=sizeof(float32bit)*fwrite(&floatbuf,sizeof(float32bit),1,Outputfile);//s coord
 		floatbuf= VSSwapHostFloatToLittle(memfile.linestrips[ts].points[tmpcounter].t);
-		runningbytenum+=sizeof(float)*fwrite(&floatbuf,sizeof(float),1,Outputfile);//t coord
+		runningbytenum+=sizeof(float32bit)*fwrite(&floatbuf,sizeof(float32bit),1,Outputfile);//t coord
 	}
   }
   intbuf= VSSwapHostIntToLittle(memfile.linestrips.size());
-  runningbytenum+=sizeof(int)*fwrite(&intbuf,sizeof(int),1,Outputfile);//Number of trifans
-  for(int tf=0;tf<memfile.linestrips.size();tf++){
+  runningbytenum+=sizeof(int32bit)*fwrite(&intbuf,sizeof(int32bit),1,Outputfile);//Number of trifans
+  for(int32bit tf=0;tf<memfile.linestrips.size();tf++){
 	intbuf= VSSwapHostIntToLittle(memfile.linestrips[tf].points.size());
-	runningbytenum+=sizeof(int)*fwrite(&intbuf,sizeof(int),1,Outputfile);//Number of elements in current trifan
+	runningbytenum+=sizeof(int32bit)*fwrite(&intbuf,sizeof(int32bit),1,Outputfile);//Number of elements in current trifan
 	intbuf= VSSwapHostIntToLittle(memfile.linestrips[tf].flatshade);
-	runningbytenum+=sizeof(int)*fwrite(&intbuf,sizeof(int),1,Outputfile);//Flatshade flag
-	for(int tmpcounter=0;tmpcounter<memfile.linestrips[tf].points.size();tmpcounter++){
+	runningbytenum+=sizeof(int32bit)*fwrite(&intbuf,sizeof(int32bit),1,Outputfile);//Flatshade flag
+	for(int32bit tmpcounter=0;tmpcounter<memfile.linestrips[tf].points.size();tmpcounter++){
 		intbuf= VSSwapHostIntToLittle(memfile.linestrips[tf].points[tmpcounter].indexref);
-		runningbytenum+=sizeof(int)*fwrite(&intbuf,sizeof(int),1,Outputfile);//point index
+		runningbytenum+=sizeof(int32bit)*fwrite(&intbuf,sizeof(int32bit),1,Outputfile);//point index
 		floatbuf= VSSwapHostFloatToLittle(memfile.linestrips[tf].points[tmpcounter].s);
-		runningbytenum+=sizeof(float)*fwrite(&floatbuf,sizeof(float),1,Outputfile);//s coord
+		runningbytenum+=sizeof(float32bit)*fwrite(&floatbuf,sizeof(float32bit),1,Outputfile);//s coord
 		floatbuf= VSSwapHostFloatToLittle(memfile.linestrips[tf].points[tmpcounter].t);
-		runningbytenum+=sizeof(float)*fwrite(&floatbuf,sizeof(float),1,Outputfile);//t coord
+		runningbytenum+=sizeof(float32bit)*fwrite(&floatbuf,sizeof(float32bit),1,Outputfile);//t coord
 	}
   }
   intbuf= VSSwapHostIntToLittle(memfile.linestrips.size());
-  runningbytenum+=sizeof(int)*fwrite(&intbuf,sizeof(int),1,Outputfile);//Number of quadstrips
-  for(int qs=0;qs<memfile.linestrips.size();qs++){
+  runningbytenum+=sizeof(int32bit)*fwrite(&intbuf,sizeof(int32bit),1,Outputfile);//Number of quadstrips
+  for(int32bit qs=0;qs<memfile.linestrips.size();qs++){
 	intbuf= VSSwapHostIntToLittle(memfile.linestrips[qs].points.size());
-	runningbytenum+=sizeof(int)*fwrite(&intbuf,sizeof(int),1,Outputfile);//Number of elements in current quadstrip
+	runningbytenum+=sizeof(int32bit)*fwrite(&intbuf,sizeof(int32bit),1,Outputfile);//Number of elements in current quadstrip
 	intbuf= VSSwapHostIntToLittle(memfile.linestrips[qs].flatshade);
-	runningbytenum+=sizeof(int)*fwrite(&intbuf,sizeof(int),1,Outputfile);//Flatshade flag
-	for(int tmpcounter=0;tmpcounter<memfile.linestrips[qs].points.size();tmpcounter++){
+	runningbytenum+=sizeof(int32bit)*fwrite(&intbuf,sizeof(int32bit),1,Outputfile);//Flatshade flag
+	for(int32bit tmpcounter=0;tmpcounter<memfile.linestrips[qs].points.size();tmpcounter++){
 		intbuf= VSSwapHostIntToLittle(memfile.linestrips[qs].points[tmpcounter].indexref);
-		runningbytenum+=sizeof(int)*fwrite(&intbuf,sizeof(int),1,Outputfile);//point index
+		runningbytenum+=sizeof(int32bit)*fwrite(&intbuf,sizeof(int32bit),1,Outputfile);//point index
 		floatbuf= VSSwapHostFloatToLittle(memfile.linestrips[qs].points[tmpcounter].s);
-		runningbytenum+=sizeof(float)*fwrite(&floatbuf,sizeof(float),1,Outputfile);//s coord
+		runningbytenum+=sizeof(float32bit)*fwrite(&floatbuf,sizeof(float32bit),1,Outputfile);//s coord
 		floatbuf= VSSwapHostFloatToLittle(memfile.linestrips[qs].points[tmpcounter].t);
-		runningbytenum+=sizeof(float)*fwrite(&floatbuf,sizeof(float),1,Outputfile);//t coord
+		runningbytenum+=sizeof(float32bit)*fwrite(&floatbuf,sizeof(float32bit),1,Outputfile);//t coord
 	}
   }
   //END GEOMETRY
@@ -1162,11 +1162,11 @@ int appendmeshfromxml(XML memfile, FILE* Outputfile){
   fseek(Outputfile,(-1*(runningbytenum))+4,SEEK_CUR);
   intbuf=runningbytenum;
   intbuf= VSSwapHostIntToLittle(intbuf);
-  fwrite(&intbuf,sizeof(int),1,Outputfile);//Correct number of bytes for total mesh
+  fwrite(&intbuf,sizeof(int32bit),1,Outputfile);//Correct number of bytes for total mesh
   fseek(Outputfile,(-1*(runningbytenum-VSAstart)),SEEK_END);
   intbuf=VSAend-VSAstart;
   intbuf= VSSwapHostIntToLittle(intbuf);
-  fwrite(&intbuf,sizeof(int),1,Outputfile);//Correct number of bytes for Variable Sized Attribute section
+  fwrite(&intbuf,sizeof(int32bit),1,Outputfile);//Correct number of bytes for Variable Sized Attribute section
   fseek(Outputfile,0,SEEK_END);
   return runningbytenum;
 }

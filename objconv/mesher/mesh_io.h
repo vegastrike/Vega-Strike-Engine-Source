@@ -1,3 +1,7 @@
+#define int32bit int
+#define float32bit float
+#define char8bit unsigned char
+
 enum BLENDFUNC{
     ZERO            = 1,
 	ONE             = 2, 
