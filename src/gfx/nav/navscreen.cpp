@@ -670,7 +670,7 @@ void NavigationSystem::DrawShip()
 	
 	TextPlane displayname;
 	displayname.col = GFXColor(.3,1,.3,1);
-	displayname.SetPos(originx+ (.1*deltax),   originy+(1*deltay));
+	displayname.SetPos(originx+ (.1*deltax),   originy/*+(1*deltay)*/);
 	displayname.SetText (writethis);
 	displayname.SetCharSize (1,1);
 	displayname.Draw();
