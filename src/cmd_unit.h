@@ -31,6 +31,7 @@
 
 using std::queue;
 #include "xml_support.h"
+class Beam;
 class Animation;
 using namespace XMLSupport;
 //#include "Gun.h"
@@ -84,10 +85,13 @@ protected:
   Unit **subunits; // the new children fun fun stuff
   //Gun **weapons; // the guns
   class Mount {
-    void *gun;
+    Beam *gun;//only beams are actually coming out of the gun at all times...bolts, balls, etc aren't
+    Transformation LocalPosition;
     weapon_info type;
   public:
     Mount():gun(NULL),type(weapon_info::BEAM){}
+    void SetMountPosition (const Transformation &t) {LocalPosition = t;}
+    void Fire (const Transformation &Cumulative, const float * mat, Unit *owner);
   } *mounts;
   int numsubunit;
   

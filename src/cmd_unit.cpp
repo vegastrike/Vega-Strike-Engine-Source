@@ -31,7 +31,7 @@
 #include "gfx_box.h"
 #include "gfx_animation.h"
 #include "gfx_lerp.h"
-
+#include "cmd_beam.h"
 //if the PQR of the unit may be variable...for radius size computation
 //#define VARIABLE_LENGTH_PQR
 
@@ -647,10 +647,40 @@ void Unit::EnqueueAI(AI *newAI) {
 void Unit::ExecuteAI() {
   if(aistate) aistate = aistate->Execute();
   for(int a=0; a<numsubunit; a++) {
-    subunits[a]->ExecuteAI();
+    subunits[a]->ExecuteAI();//like dubya
   }
 }
 
+void Unit::Mount::Fire (const Transformation &Cumulative, const float * m,  Unit * owner) {
+  if (type.type==weapon_info::BEAM) {
+    if (gun==NULL)
+      gun = new Beam (LocalPosition,type,owner);
+    else
+      if (gun->Dissolved())
+	gun->Init (LocalPosition,type,owner);
+      else 
+	return;//can't fire an active beam
+  }else { 
+    Transformation tmp = LocalPosition;
+    tmp.Compose (Cumulative,m);
+    switch (type.type) {
+    case weapon_info::BALL:
+      gun = NULL;
+      //new Ball (tmp, type, owner);
+      break;
+    case weapon_info::BOLT:
+      gun=NULL;
+      //new Bolt (tmp, type, owner);
+      break;
+    case weapon_info::MISSILE:
+      gun=NULL;
+      //new Missile (tmp, type, owner);
+      break;
+    default: 
+      break;
+    }
+  }
+}
 
 void Unit::Select() {
   selected = true;

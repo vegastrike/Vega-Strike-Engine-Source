@@ -41,14 +41,14 @@ private:
   //static vector <int> DecalRef;
   //static vector <vector <DrawContext> > drawqueue;
 public:
-  Beam (const Transformation & trans, const weapon_info & clne, void * own): Primitive(),Col(clne.r,clne.g,clne.b,clne.a) {vlist=NULL;Init(trans,clne,own);}
+  Beam (const Transformation & trans, const weapon_info & clne, void * own);
   void Init (const Transformation & trans, const weapon_info & clne, void * own);
   ~Beam();
   void UpdatePhysics(const Transformation & =identity_transformation, const Matrix = identity_matrix);
   void Draw(const Transformation & =identity_transformation, const float * = identity_matrix );
   void Destabilize () {impact=UNSTABLE;}
   bool Dissolved () {return curthick==0;} 
-  void Collide (Unit * target);
+  bool Collide (Unit * target);
   static void ProcessDrawQueue();
 
 };

@@ -2,7 +2,7 @@
 #include "physics.h"
 #include <vector>
 #include "cmd_beam.h"
-
+#include "cmd_unit.h"
 
 //using std::vector;
 
@@ -12,30 +12,8 @@ vector <int> DecalRef;
 vector <vector <DrawContext> > beamdrawqueue;
 
 extern double interpolation_blend_factor;
-void Beam::Init (const Transformation & trans, const weapon_info &cln , void * own)  {
-  //Matrix m;
-  if (vlist)
-    delete vlist;
-  local_transformation = trans;//location on ship
-  //  cumalative_transformation =trans; 
-  //  trans.to_matrix (cumalative_transformation_matrix);
-  speed = cln.Speed;
-  texturespeed = cln.PulseSpeed;
-  range = cln.Range;
-  radialspeed = cln.RadialSpeed;
-  thickness = cln.Radius;
-  stability = cln.Stability;
-  energy = cln.EnergyRate;
-  rangepenalty=cln.Longrange;
-  damagerate = cln.Damage;
-  Col.r = cln.r;
-  Col.g = cln.g;
-  Col.b = cln.b;
-  Col.a=cln.a;
-  impact= ALIVE;
-  owner = own;
-  numframes=0;
-  string texname (cln.file);
+Beam::Beam (const Transformation & trans, const weapon_info & clne, void * own): Primitive(),vlist(NULL), Col(clne.r,clne.g,clne.b,clne.a){
+  string texname (clne.file);
   Texture * tmpDecal = Texture::Exists(texname);
   if (tmpDecal) {
     unsigned int i;
@@ -59,6 +37,33 @@ void Beam::Init (const Transformation & trans, const weapon_info &cln , void * o
     beamdrawqueue.push_back (vector<DrawContext>());
     DecalRef.push_back (1);
   }
+  Init(trans,clne,own);
+}
+
+void Beam::Init (const Transformation & trans, const weapon_info &cln , void * own)  {
+  //Matrix m;
+  if (vlist)
+    delete vlist;
+  local_transformation = trans;//location on ship
+  //  cumalative_transformation =trans; 
+  //  trans.to_matrix (cumalative_transformation_matrix);
+  speed = cln.Speed;
+  texturespeed = cln.PulseSpeed;
+  range = cln.Range;
+  radialspeed = cln.RadialSpeed;
+  thickness = cln.Radius;
+  stability = cln.Stability;
+  energy = cln.EnergyRate;
+  rangepenalty=cln.Longrange;
+  damagerate = cln.Damage;
+  Col.r = cln.r;
+  Col.g = cln.g;
+  Col.b = cln.b;
+  Col.a=cln.a;
+  impact= ALIVE;
+  owner = own;
+  numframes=0;
+
   lastlength=0;
   curlength = SIMULATION_ATOM*speed;
   lastthick=0;
@@ -225,7 +230,23 @@ void Beam::UpdatePhysics(const Transformation &trans, const Matrix m) {
     curthick = thickness;
   if (curthick <0)
     curthick =0;//die die die
-  
+  center = cumulative_transformation.position;
+  direction = Transform (cumulative_transformation_matrix,Vector(0,0,1));
 
   //Check if collide...that'll change max beam length REAL quick
+}
+
+bool Beam::Collide (Unit * target) {
+  if (target==owner) 
+    return false;
+  float distance = target->querySphere (center,direction,0);
+  if (distance==0||distance>curlength) {
+    return false;
+  }
+  if (target->queryBoundingBox(center,direction,0)==0)
+    return false;
+  curlength = distance;
+  impact=IMPACT;
+  //deliver float tmp=(curlength/range)); (damagerate*SIMULATION_ATOM*curthick/thickness)*((1-tmp)+tmp*rangepenalty);
+  return true;
 }
