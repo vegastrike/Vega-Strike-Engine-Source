@@ -49,7 +49,7 @@ struct Texture{
 
 public:
 
-	Texture(char *,char *, int stage = 0, enum TEXTURE_TARGET target=TEXTURE2D, enum TEXTURE_IMAGE_TARGET imagetarget=TEXTURE_2D);
+	Texture(char *,char *, int stage = 0, enum TEXTURE_TARGET target=TEXTURE2D, enum TEXTURE_IMAGE_TARGET imagetarget=TEXTURE_2D, float alpha=1, int zeroval=0);
 	Texture(char * FileName, int stage = 0, enum TEXTURE_TARGET target=TEXTURE2D, enum TEXTURE_IMAGE_TARGET imagetarget=TEXTURE_2D);
 	~Texture()
 	{
@@ -73,13 +73,15 @@ public:
 	int Bind();
 	void Transfer();
 	void MakeActive(int stage = 0);
-
+        bool LoadSuccess () {
+          return (data!=NULL);
+        }
 	//void Filter();
 	//void NoFilter();
 };
-Texture * LoadAlphaMap (char *FileName);
+Texture * LoadAlphaMap (char *FileName, float alpha=1);
 Texture * LoadTexture (char * FileName);
-Texture * LoadRGBATexture (char * FileNameRGB, char *FileNameA);
+Texture * LoadRGBATexture (char * FileNameRGB, char *FileNameA, float alpha=1);
 
 void DelTexDat (Texture *); //note does not remove from OpenGL
 #endif

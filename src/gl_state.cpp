@@ -46,8 +46,10 @@ BOOL /*GFXDRVAPI*/ GFXEnable (STATE state)
 	case TEXTURE1:
 		bTex1 = TRUE;
 		break;
+	case CULLFACE:
+	  glEnable(GL_CULL_FACE);
+	  break;
 	}
-
 	return TRUE;
 	
 }
@@ -73,6 +75,9 @@ BOOL /*GFXDRVAPI*/ GFXDisable (STATE state)
 	case TEXTURE1:
 		bTex1 = FALSE;
 		break;
+	case CULLFACE:
+	  glDisable(GL_CULL_FACE);
+	  break;
 	}
 	return TRUE;
 }

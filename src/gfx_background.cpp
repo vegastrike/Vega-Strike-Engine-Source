@@ -27,12 +27,20 @@
 #include "gfx_background.h"
 #include "gfxlib.h"
 #include "vegastrike.h"
+	const float size = 10;
 Background::Background(char *file)
 {
 	char temp[80]; 
+	up = left = down = front=right=back=NULL;
 	
 	strcpy(temp, file);
 	up = new Texture(strcat(temp, "_up.bmp"), 0);
+	SphereBackground = NULL;
+	if (!up->LoadSuccess()) {
+	  delete up;
+	  up = NULL;
+	  SphereBackground = new SphereMesh (size,8,8,strcat (temp,"_sphere.bmp"),true,true);
+	}
 	//up->Clamp();
 	//up->Filter();
 
@@ -64,16 +72,28 @@ Background::Background(char *file)
 
 Background::~Background()
 {
-	delete up;
-	delete left;
-	delete front;
-	delete right;
-	delete back;
-	delete down;
+  if (up) 
+    delete up;
+  if (left) 
+    delete left;
+  if (front)
+    delete front;
+  if (right)
+    delete right;
+  if (back)
+    delete back;
+  if (down)
+    delete down;
+  if (SphereBackground)
+    delete SphereBackground;
 }
 
 void Background::Draw()
 {
+  if (!up) {
+    SphereBackground->Draw();
+    return;
+  }   
 	GFXDisable(LIGHTING);
 	GFXDisable(DEPTHWRITE);
 	GFXTextureAddressMode(CLAMP);
@@ -92,7 +112,7 @@ void Background::Draw()
 	
 	/*up*/
 	GFXColor4f(1.00F, 1.00F, 1.00F, 1.00F);
-	const float size = 10;
+
 	up->MakeActive();
 	GFXBegin(QUADS);
 	GFXTexCoord2f(0.998F, 0.002F);

@@ -181,7 +181,7 @@ void gluSphereMap (CubeCoord &Tex, Vector Normal, float Theta) {
   Tex.TexMap=0;
   float vert = Normal.j;
   Tex.t = vert*128+128;
-  Tex.s = Theta;//((int)((int)Theta+128)%256);
+  Tex.s = 256-Theta;//((int)((int)Theta+128)%256);
   /*  float horiz;
   if (Normal.i>0)
     horiz = 1- (Normal.k+1)*.5;
@@ -194,6 +194,9 @@ void gluSphereMap (CubeCoord &Tex, Vector Normal, float Theta) {
 void TexMap (CubeCoord & Tex, Vector Normal)
 {
 	float r[6];
+	Normal.i = Normal.i;
+	Normal.j = -Normal.j;
+	Normal.k = -Normal.k;
 	const float CubeSize = 128; //half of the length of any of the cube's sides
 		r[0] = CubeSize / Normal.k; // find what you need to multiply to get to the cube
 		r[1] = -r[0];
@@ -280,10 +283,11 @@ bool LoadTex(char * FileName, unsigned char scdata [256][256][3]){
 			int itimes3width= 3*i*sizeX;//speed speed speed (well if I really wanted speed Pos'd have wrote this function)
 			for (int j=0; j<sizeX;j++)
 			{
-				for (int k=2; k>=0;k--)
-				{
-					fread (data+k+3*j+itimes3width,sizeof (unsigned char),1,fp);
-				}
+				//for (int k=2; k>=0;k--)
+				//{
+			  fread (data+3*j+itimes3width,sizeof (unsigned char)*3,1,fp);
+				
+				//}
 				
 			}
 		}

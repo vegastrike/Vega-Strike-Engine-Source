@@ -18,7 +18,7 @@
 #include "UnitCollection.h"
 #include "star_system.h"
 #include "planet.h"
-
+#include "gfx_sphere.h"
 using namespace std;
 
 #define KEYDOWN(name,key) (name[key] & 0x80)
@@ -314,6 +314,7 @@ const int numf = 100;
 Unit *fighters[numf];
 //LocationSelect *locSel=NULL;
 Background * bg = NULL;
+SphereMesh *bg2=NULL;
 TextPlane *textplane = NULL;
 
 ClickList *shipList =NULL;
@@ -436,12 +437,13 @@ void createObjects() {
   fighter = new Unit("uosprey.dat");
   //Unit *fighter2 = new Unit("uosprey.dat");
   fighter2 = new Unit("uosprey.dat");
-  s = new Animation ("explosion_orange.ani");
+  s = new Animation ("explosion_orange.ani",true);
   s->SetPosition (0,0,5);
   greenexp = new Animation ("explosion_green.ani");
   greenexp->SetPosition (0,0,5);
   fihneCarriah = new Sprite ("carrier.spr");
   bg = new Background("cube");
+  bg2 = new SphereMesh (20.0,8,8,"sun.bmp",true,true);
   //HUDElement *t = new HUDElement("ucarrier.dat");
   /*************
 		locSel = new LocationSelect(Vector (0,-1,5),
@@ -523,6 +525,7 @@ void destroyObjects() {
   delete fighter2;
   delete fighter;
   delete bg;
+  delete bg2;
   delete s;
   delete greenexp;
   delete fihneCarriah;
@@ -546,7 +549,7 @@ void main_loop() {
   GFXDisable(DEPTHTEST);
   GFXEnable(TEXTURE0);
   GFXDisable(TEXTURE1);
-  bg->Draw();
+  bg2->Draw();
   
   GFXEnable(DEPTHWRITE);
   GFXEnable(DEPTHTEST);
@@ -566,8 +569,8 @@ void main_loop() {
 
 
   _GFX->activeStarSystem()->Draw();
-  //  s->Draw();
-  greenexp->Draw();
+  s->Draw();
+  //greenexp->Draw();
   fihneCarriah->Draw();
   _GFX->activeStarSystem()->Update();
   ProcessKB();

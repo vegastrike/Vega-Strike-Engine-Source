@@ -23,7 +23,7 @@
 
 //#include <gl/gl.h>
 #include "gfx_aux.h"
-
+#include "gfx_sphere.h"
 class Background{
 	Texture *up;
 	Texture *left;
@@ -31,7 +31,7 @@ class Background{
 	Texture *right;
 	Texture *back;
 	Texture *down;
-
+        SphereMesh * SphereBackground;
 public:
 	Background(char *file);
 	~Background();

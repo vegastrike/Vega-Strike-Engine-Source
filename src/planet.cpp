@@ -50,7 +50,7 @@ void Planet::InitPlanet(FILE *fp) {
   
   meshdata = new Mesh*[1];
   meshdata[0] = new SphereMesh(radius, 16, 16, texname);
-  meshdata[0]->setEnvMap(TRUE);
+  meshdata[0]->setEnvMap(FALSE);
   nummesh = 1;
   fpos = ftell(fp);
 }

@@ -35,17 +35,21 @@ Animation::Animation ():Primitive()
 	Decal = NULL;
 }
 
-Animation::Animation (char * FileName):Primitive()
-{
+Animation::Animation (char * FileName, bool Rep):Primitive()
+{	
+  repeat = Rep;
 	cumtime = 0;
 	char temp [256];
 	char tempalp [256];
+	float alp;
+	int zeroval;
 	FILE * fp = fopen (FileName, "r+b");
 	if (!fp)
 		; // do something 
 	fscanf (fp,"%d %f",&numframes,&timeperframe);
 	//	fread (&numframes, sizeof (short), 1, fp); 
 	Decal = new Texture* [numframes];
+	fscanf (fp,"%f %d",&alp,&zeroval);
 	//	fread (&timeperframe,sizeof (float),1,fp);
 	float tmp;
 	//fread (&tmp, sizeof (float),1,fp);
@@ -56,7 +60,7 @@ Animation::Animation (char * FileName):Primitive()
 	for (int i=0; i<numframes;i++) //load all textures
 	{
 	  fscanf (fp,"%s %s", temp, tempalp);
-	  Decal[i] = new Texture (temp,tempalp);
+	  Decal[i] = new Texture (temp,tempalp, 0,TEXTURE2D, TEXTURE_2D,alp,zeroval);
 	  /*int j;
 	    for (j=0; ;j++)
 	    {
@@ -96,14 +100,12 @@ void Animation:: SetDimensions(float wid, float hei) {
 void Animation:: Draw()
 {
   float eee;
-  if (cumtime==0&&GetElapsedTime()>=timeperframe)
-    cumtime +=timeperframe;
-  else
-    cumtime += GetElapsedTime();
 		int framenum = (int)(cumtime/timeperframe);
 		if (framenum<numframes)
 		{
 			GFXDisable (LIGHTING);
+			GFXEnable(TEXTURE0);
+			GFXDisable(TEXTURE1);
 			//glMatrixMode(GL_MODELVIEW);
 			Vector p1,q1,r1;
 			Vector camp,camq,camr;
@@ -149,7 +151,12 @@ void Animation:: Draw()
 			//glEnable(GL_TEXTURE_2D);
 			GFXEnable (LIGHTING);
 		}
-		else
-			framenum = 0;
 
+  if (cumtime==0&&GetElapsedTime()>=timeperframe)
+    cumtime +=timeperframe;
+  else
+    cumtime += GetElapsedTime();
+  if (repeat&&framenum>=numframes)
+    cumtime =0;
+  
 }

@@ -1,12 +1,15 @@
 #include "gfx_sphere.h"
+#include "vegastrike.h"
 #ifndef M_PI
 #define M_PI 3.1415926536F
 #endif
-SphereMesh::SphereMesh(float radius, int stacks, int slices, char *texture) : Mesh() {
+SphereMesh::SphereMesh(float radius, int stacks, int slices, char *texture, bool Insideout,bool centeredOnShip) : Mesh() {
   debugName = "Sphere";
+
+  insideout= Insideout;
   radialSize = radius;//MAKE SURE FRUSTUM CLIPPING IS DONE CORRECTLY!!!!!
-  minSizeX = minSizeY = minSizeZ = -radialSize;
-  maxSizeX = maxSizeY = maxSizeZ = radialSize;
+  minSizeX = minSizeY = minSizeZ = -radialSize*1.414;
+  maxSizeX = maxSizeY = maxSizeZ = radialSize*1.414;
   numlines = 0;
   numquads = 0;
   numtris =0;
@@ -15,8 +18,10 @@ SphereMesh::SphereMesh(float radius, int stacks, int slices, char *texture) : Me
    float x, y, z;
    float s, t, ds, dt;
    int i, j, imin, imax;
-  float nsign = 1.0;
-
+   centered = centeredOnShip; 
+  float nsign = Insideout?-1.0:1.0;
+  int fir=Insideout?1:0;
+  int sec=Insideout?0:1;
   vlist = new GFXVertexList();
   /* Code below adapted from gluSphere */
 
@@ -49,28 +54,28 @@ SphereMesh::SphereMesh(float radius, int stacks, int slices, char *texture) : Me
 	  y = cos(theta) * sin(rho);
 	  z = nsign * cos(rho);
 
-	  vertexlist[j*2].i = x * nsign;
-	  vertexlist[j*2].j = y * nsign;
-	  vertexlist[j*2].k = z * nsign;
-	  vertexlist[j*2].s = s;
-	  vertexlist[j*2].t = t;
-	  vertexlist[j*2].x = x * radius;
-	  vertexlist[j*2].y = y * radius;
-	  vertexlist[j*2].z = z * radius;
+	  vertexlist[j*2+fir].i = x * nsign;
+	  vertexlist[j*2+fir].j = y * nsign;
+	  vertexlist[j*2+fir].k = z * nsign;
+	  vertexlist[j*2+fir].s = s;
+	  vertexlist[j*2+fir].t = t;
+	  vertexlist[j*2+fir].x = x * radius;
+	  vertexlist[j*2+fir].y = y * radius;
+	  vertexlist[j*2+fir].z = z * radius;
 
 
 	  x = -sin(theta) * sin(rho + drho);
 	  y = cos(theta) * sin(rho + drho);
 	  z = nsign * cos(rho + drho);
 
-	  vertexlist[j*2+1].i = x * nsign;
-	  vertexlist[j*2+1].j = y * nsign;
-	  vertexlist[j*2+1].k = z * nsign;
-	  vertexlist[j*2+1].s = s;
-	  vertexlist[j*2+1].t = t - dt;
-	  vertexlist[j*2+1].x = x * radius;
-	  vertexlist[j*2+1].y = y * radius;
-	  vertexlist[j*2+1].z = z * radius;
+	  vertexlist[j*2+sec].i = x * nsign;
+	  vertexlist[j*2+sec].j = y * nsign;
+	  vertexlist[j*2+sec].k = z * nsign;
+	  vertexlist[j*2+sec].s = s;
+	  vertexlist[j*2+sec].t = t - dt;
+	  vertexlist[j*2+sec].x = x * radius;
+	  vertexlist[j*2+sec].y = y * radius;
+	  vertexlist[j*2+sec].z = z * radius;
 
 	  s += ds;
 	}
@@ -80,4 +85,42 @@ SphereMesh::SphereMesh(float radius, int stacks, int slices, char *texture) : Me
       }
       Decal = new Texture(texture, 0);
       envMap = FALSE;
+}
+void SphereMesh::Draw() {
+  if (insideout) 
+    GFXDisable (CULLFACE);
+  if (centered) {
+    GFXDisable(LIGHTING);
+    GFXLoadIdentity(MODEL);
+    SetPosition(_GFX->AccessCamera()->GetPosition());
+    GFXDisable(DEPTHWRITE);
+  }	
+  
+  Mesh::Draw();
+  if (insideout)
+    GFXEnable(CULLFACE);
+  if (centered) {
+    GFXEnable(LIGHTING);
+    GFXEnable(DEPTHWRITE);
+  }
+}
+void SphereMesh::Draw (const Vector &x, const Vector &y, const Vector &z, const Vector & pos) {
+  if (insideout) {
+    GFXDisable (CULLFACE);
+  }
+  if (centered) {
+    GFXLoadIdentity(MODEL);
+    SetPosition(_GFX->AccessCamera()->GetPosition());
+    GFXDisable(DEPTHWRITE);
+    GFXDisable(LIGHTING);
+  }	
+  Mesh::Draw(x,y,z,pos);
+  if (centered) {
+    GFXEnable(DEPTHWRITE);
+    GFXEnable(LIGHTING);
+  }
+  if (insideout) {
+    GFXEnable(CULLFACE);
+  }
+
 }

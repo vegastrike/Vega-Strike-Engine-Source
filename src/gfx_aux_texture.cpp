@@ -189,7 +189,7 @@ Texture::Texture(char * FileName, int stage, enum TEXTURE_TARGET target, enum TE
 	setold();
 }
 
-Texture::Texture (char * FileNameRGB, char *FileNameA, int stage, enum TEXTURE_TARGET target, enum TEXTURE_IMAGE_TARGET imagetarget)
+Texture::Texture (char * FileNameRGB, char *FileNameA, int stage, enum TEXTURE_TARGET target, enum TEXTURE_IMAGE_TARGET imagetarget, float alpha, int zeroval)
 {
 	refcount = 0;
 	this->stage = stage;
@@ -245,107 +245,114 @@ Texture::Texture (char * FileNameRGB, char *FileNameA, int stage, enum TEXTURE_T
 			}
 		}
 	}
-	if(info.biBitCount == 24)
-	{
-		mode = _24BITRGBA;
-		data = NULL;
-		data= new unsigned char [4*sizeY*sizeX];
-		if (!data)
-			return;
-		for (int i=sizeY-1; i>=0;i--)
+	if(info.biBitCount == 24) {
+	  mode = _24BITRGBA;
+	  data = NULL;
+	  data= new unsigned char [4*sizeY*sizeX];
+	  if (!data)
+	    return;
+	  for (int i=sizeY-1; i>=0;i--)
+	    {
+	      int itimes4width= 4*i*sizeX;//speed speed speed (well if I really wanted speed Pos'd have wrote this function)
+	      for (unsigned int j=0; j<sizeX;j++)
 		{
-			int itimes4width= 4*i*sizeX;//speed speed speed (well if I really wanted speed Pos'd have wrote this function)
-			for (unsigned int j=0; j<sizeX;j++)
-			{
-				for (int k=2; k>=0;k--)
-				{
-					fread (data+k+4*j+itimes4width,sizeof (unsigned char),1,fp);
-				}
-				if (FileNameA)
-				{
-					if (info1.biBitCount==24)
-						for (int k=2; k>=0;k--)
-						{
-							fread (data+3+4*j+itimes4width,sizeof (unsigned char),1,fp1);
-							//*(data+3+4*j+itimes4width) = 30;
-						}
-					else
-						fread (data+3+4*j+itimes4width,sizeof (unsigned char),1,fp1);
-				}
-				else
-				{
-					if (!data[4*j+itimes4width]&&!data[4*j+itimes4width+1]&&!data[4*j+itimes4width+2])
-						data[4*j+itimes4width+3] = 0;
-					else
-						data[4*j+itimes4width+3] = 255;
-				}
-					//*(data+3+4*j+itimes4width) = 30;
+		  for (int k=2; k>=0;k--) {
+		    fread (data+k+4*j+itimes4width,sizeof (unsigned char),1,fp);
+		  }
+		  if (FileNameA){
+		    if (info1.biBitCount==24)
+		      for (int k=2; k>=0;k--) {
+			fread (data+3+4*j+itimes4width,sizeof (unsigned char),1,fp1);
+			//*(data+3+4*j+itimes4width) = 30;
+		      } else {
+			fread (data+3+4*j+itimes4width,sizeof (unsigned char),1,fp1);
+		      }
+		  }
+		  else {
+		    if (!data[4*j+itimes4width]&&!data[4*j+itimes4width+1]&&!data[4*j+itimes4width+2])
+		      data[4*j+itimes4width+3] = 0;
+		    else
+		      data[4*j+itimes4width+3] = 255;
+		  }
+		  //*(data+3+4*j+itimes4width) = 30;
 				
 				
-			}
 		}
+	    }
 	}
-	else if(info.biBitCount == 8)
-	{
-		unsigned char index = 0;
-		mode = _24BITRGBA;
-		data = NULL;
-		data= new unsigned char [4*sizeY*sizeX];
-		unsigned char *paltemp = palette;
-		unsigned char ctemp;
-		for(int palcount = 0; palcount < 256; palcount++)
-		{
-			fread(paltemp, sizeof(RGBQUAD), 1, fp);
-			ctemp = paltemp[0];
-			paltemp[0] = paltemp[2];
-			paltemp[2] = ctemp;
-			paltemp+=4;
-		}
-		if (!data)
-			return;
+	else if(info.biBitCount == 8) {
+	  unsigned char index = 0;
+	  mode = _24BITRGBA;
+	  data = NULL;
+	  data= new unsigned char [4*sizeY*sizeX];
+	  unsigned char *paltemp = palette;
+	  unsigned char ctemp;
+	  for(int palcount = 0; palcount < 256; palcount++) {
+	    fread(paltemp, sizeof(RGBQUAD), 1, fp);
+	    ctemp = paltemp[0];
+	    paltemp[0] = paltemp[2];
+	    paltemp[2] = ctemp;
+	    paltemp+=4;
+	  }
+	  if (!data)
+	    return;
 		//FIXME VEGASTRIKE???		int k=0;
-		for (int i=sizeY-1; i>=0;i--)
+	  for (int i=sizeY-1; i>=0;i--) {
+	    for (unsigned int j=0; j<sizeX;j++)
+	      {
+		fread (&index,sizeof (unsigned char),1,fp);
+		data [4*(i*sizeX+j)] = palette[((short)index)*3];	
+		data [4*(i*sizeX+j)+1] = palette[((short)index)*3+1];
+		data [4*(i*sizeX+j)+2] = palette[((short)index)*3+2];
+	      }
+	  }
+	  if (FileNameA)
+	    {
+	      for (int i=sizeY-1; i>=0;i--)
 		{
-			for (unsigned int j=0; j<sizeX;j++)
-			{
-				fread (&index,sizeof (unsigned char),1,fp);
-				data [4*(i*sizeX+j)] = palette[((short)index)*3];	
-				data [4*(i*sizeX+j)+1] = palette[((short)index)*3+1];
-				data [4*(i*sizeX+j)+2] = palette[((short)index)*3+2];
-			}
+		  int itimes4width= 4*i*sizeX;//speed speed speed (well if I really wanted speed Pos'd have wrote this function)
+		  for (unsigned int j=0; j<sizeX;j++) {
+		    if (info1.biBitCount==24)
+		      for (int k=2; k>=0;k--) {
+			fread (data+3+4*j+itimes4width,sizeof (unsigned char),1,fp1);
+		      }
+		    else {
+		      fread (data+3+4*j+itimes4width,sizeof (unsigned char),1,fp1);
+		    }
+		  }
 		}
-		if (FileNameA)
-		{
-			for (int i=sizeY-1; i>=0;i--)
-			{
-				int itimes4width= 4*i*sizeX;//speed speed speed (well if I really wanted speed Pos'd have wrote this function)
-				for (unsigned int j=0; j<sizeX;j++)
-				{
-					if (info1.biBitCount==24)
-						for (int k=2; k>=0;k--)
-						{
-							fread (data+3+4*j+itimes4width,sizeof (unsigned char),1,fp1);
-						}
-					else
-						fread (data+3+4*j+itimes4width,sizeof (unsigned char),1,fp1);
-				}
-			}
+	    } else{
+	      for (unsigned int i=0; i<sizeY;i++) {
+		int itimes4width= 4*i*sizeX;//speed speed speed (well if I really wanted speed Pos'd have wrote this function)
+		for (unsigned int j=0; j<sizeX;j++){
+		  if (!data[4*j+itimes4width]&&!data[4*j+itimes4width+1]&&!data[4*j+itimes4width+2])
+		    data[4*j+itimes4width+3]=0;
+		  else
+		    data[4*j+itimes4width+3]=255;
 		}
-		else
-		{
-			for (unsigned int i=0; i<sizeY;i++)
-			{
-				int itimes4width= 4*i*sizeX;//speed speed speed (well if I really wanted speed Pos'd have wrote this function)
-				for (unsigned int j=0; j<sizeX;j++)
-				{
-					if (!data[4*j+itimes4width]&&!data[4*j+itimes4width+1]&&!data[4*j+itimes4width+2])
-						data[4*j+itimes4width+3]=0;
-					else
-						data[4*j+itimes4width+3]=255;
-				}
-			}
+	      }
+	      
+	    }
+	}
 
-		}
+	if (alpha!=1) {
+	  float tmpclamp;
+	  for (unsigned int i=0; i<sizeY;i++) {
+	    int itimes4width= 4*i*sizeX;//speed speed speed (well if I really wanted speed Pos'd have wrote this function)
+	    for (unsigned int j=0; j<sizeX;j++){
+	      tmpclamp = data[4*j+itimes4width+3];
+	      if (tmpclamp>zeroval) {
+		tmpclamp /=255.;
+		tmpclamp =pow (tmpclamp,alpha);
+		tmpclamp *=255;
+		if (tmpclamp>255)
+		  tmpclamp = 255;
+		data[4*j+itimes4width+3]= tmpclamp;
+			
+	      }
+	    }
+	  }
+	  
 	}
 	Bind();
 	fclose(fp);

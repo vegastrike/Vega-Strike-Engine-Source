@@ -32,12 +32,12 @@ class Animation:public Primitive
 	int texturename[2];
 	float height; //half the height so you can do fancy vector translatons to campspace
 	float width;
-
+  bool repeat;
 	void InitAnimation();
 
 public:
 	Animation();
-	Animation(char *);
+	Animation(char *, bool Rep=0);
 	~Animation();
   //  void SetPosition (float x,float y,float z);
   //  void SetPosition(const Vector &k);
