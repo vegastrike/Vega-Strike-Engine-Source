@@ -1097,6 +1097,11 @@ static void FaceTarget (Unit * un, const QVector &ourpos, Unit * target) {
 	float theta =p.Magnitude();
 	p*= (asin (theta)/theta);
 	un->Rotate(p);
+	un->GetOrientation (p,q,r);
+	if (r.Dot(methem)<0) {
+	  un->Rotate (p*(PI/theta));
+	}
+
       }
   }
   

@@ -1458,10 +1458,14 @@ bool Unit::AutoPilotTo (Unit * target, bool ignore_friendlies, int recursive_lev
       Vector p,q,r;
       GetOrientation(p,q,r);
       p=methem.Cross(r);
-      if (p.MagnitudeSquared()){
-	float theta =p.Magnitude();
+      float theta = p.Magnitude();
+      if (theta*theta>.00001){
 	p*= (asin (theta)/theta);
 	Rotate(p);
+	GetOrientation (p,q,r);
+	if (r.Dot(methem)<0) {
+	  Rotate (p*(PI/theta));
+	}
       }
     }
     static string insys_jump_ani = vs_config->getVariable ("graphics","insys_jump_animation","warp.ani");
