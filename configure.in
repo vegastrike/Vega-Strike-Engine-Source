@@ -37,8 +37,6 @@ AH_TEMPLATE(WIN32_POSIX, [Is this MingW, Cygwin, or a variant POSIX layer?])
 AH_TEMPLATE(LINUX, [Is this Linux?])
 AH_TEMPLATE(MACOSX, [Is this MacOS X?])
 
-
-
 case $target in
 *freebsd* | *netbsd* | *openbsd*)
 	AC_DEFINE(BSD, 1)
@@ -100,7 +98,6 @@ saved_CXXFLAGS="${CXXFLAGS}"
 CXXFLAGS="-pthread"
 AC_TRY_COMPILE(, , [bsdthread=yes], [bsdthread=no])
 CXXFLAGS="${saved_CXXFLAGS}"
-
 
 AC_PROG_INSTALL()
 AC_PROG_LN_S()
@@ -166,8 +163,9 @@ VS_LIBS=""
 
 if test "x${falign}" = "xyes"; then
 VS_ALIGN="-falign-loops=2 -falign-jumps=2 -falign-functions=2"
-else
+else if test "x${malign}" = "xyes"; then
 VS_ALIGN="-malign-loops=2 -malign-jumps=2 -malign-functions=2"
+else VS_ALIGN=""
 fi
 
 
@@ -203,7 +201,7 @@ CXXFLAGS="-gdwarf-2 -g3"
 AC_TRY_COMPILE(, , [gwarf2g3_supported=yes], [gwarf2g3_supported=no])
 CXXFLAGS="${saved_CXXFLAGS}"
 
-if test "x$gwarf2g3_supported" = "xyes" && test "x$MACOSX" = "x0"; then
+if test "x$gwarf2g3_supported" = "xyes" && test "x$MACOSX" != "x1"; then
 	DEBUG_FLAGS="-gdwarf-2 -g3"
 else
     saved_CXXFLAGS="${CXXFLAGS}"
