@@ -466,6 +466,7 @@ int VsnetTCPSocket::recvbuf( PacketMem& buffer, AddressIP* )
     {
         if( _connection_closed )
         {
+	    fd = -1;
             COUT << __PRETTY_FUNCTION__ << " connection is closed" << endl;
             return 0;
         }
@@ -482,6 +483,7 @@ void VsnetTCPSocket::disconnect( const char *s, bool fexit )
 #else
         close( fd );
 #endif
+        fd = -1;
     }
     cout << __FILE__ << ":" << __LINE__ << " "
          << s << " :\tWarning: disconnected" << strerror(errno) << endl;
