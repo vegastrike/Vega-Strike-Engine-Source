@@ -350,9 +350,12 @@ void FlyByKeyboard::Execute (bool resetangvelocity) {
     if (targ)
       MatchSpeed (targ->GetVelocity());
   }
+  static unsigned int counter=0;
+  counter++;
   if (SSCK.jumpkey) {
-    if (getNewTime()-last_jumped>3||last_jumped==0) {
-      last_jumped=getNewTime();
+    static float jump_key_delay=XMLSupport::parse_float(vs_config->getVariable("general","jump_key_delay","3"));
+    if (counter-last_jumped>(int)(jump_key_delay/SIMULATION_ATOM)||last_jumped==0) {
+      last_jumped=counter;
       parent->ActivateJumpDrive();
       if (parent->GetJumpStatus().drive>=0) {
         static soundContainer foobar;
