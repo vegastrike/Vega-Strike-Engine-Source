@@ -25,6 +25,7 @@ std::string sharedunits;
 std::string sharedsounds;
 std::string sharedmeshes;
 std::string datadir;
+std::string homedir;
 std::vector <std::string> curdir;//current dir starting from datadir
 std::vector <std::vector <std::string> > savedcurdir;//current dir starting from datadir
 void changehome(bool makehomedir) {
@@ -98,6 +99,10 @@ void initpaths () {
 
   //check if we have a config file in home dir
   changehome(true);
+  char myhomedir[8192];
+  getcwd (myhomedir,8191);
+  myhomedir[8191]='\0';
+  homedir = myhomedir;
   FILE *fp1= fopen (CONFIGFILE,"r");
   if (fp1) {
     //  we have a config file in home directory

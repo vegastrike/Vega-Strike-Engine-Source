@@ -1259,7 +1259,8 @@ Unit * Mission::call_unit_launch(CreateFlightgroup *fg, int type, const string &
      pox.k=fg->fg->pos.k+u*fg_radius*3;
 
      my_unit->SetPosAndCumPos(pox);
-
+     my_unit->LoadAIScript (fg->fg->ainame);
+#if 0
      if(fg->fg->ainame[0]!='_'){
        string ai_agg=fg->fg->ainame+".agg.xml";
        string ai_int=fg->fg->ainame+".int.xml";
@@ -1286,7 +1287,7 @@ Unit * Mission::call_unit_launch(CreateFlightgroup *fg, int type, const string &
 	      }
 	      //fighters[a]->SetAI( new AImissionScript(modulename));
      }
-
+#endif
      my_unit->SetTurretAI ();
 
      //     cout << fg->name << endl;

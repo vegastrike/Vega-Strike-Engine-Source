@@ -23,25 +23,14 @@ void PythonAI::Destruct() {
 void PythonAI::default_Execute (FireAt &self_) {
   (self_).FireAt::Execute();
 }
-
-PythonAI * PythonAI::Factory (const std::string &filename) {
-  PyCodeObject *CompiledProgram = CompilePython (filename);
-  PythonAI * myai=NULL;
-  if (CompiledProgram) {
-    PyObject *m, *d;
-    if ((m = PyImport_AddModule("__main__")) != NULL)
-    {
-    
-    if ((d = PyModule_GetDict(m)) != NULL)
-    {
-      PyObject * exe=PyEval_EvalCode(CompiledProgram, d, d);      
-      //unref exe?
-    }
-    }    
-  } 
-  myai=last_ai;
+PythonAI * PythonAI::LastAI() {
+  PythonAI * myai=last_ai;
   last_ai=NULL;
   return myai;
+}
+PythonAI * PythonAI::Factory (const std::string &filename) {
+  CompileRunPython (filename);  
+  return LastAI();
 }
 void PythonAI::Execute() {
   boost::python::callback <void>::call_method (self,"Execute");

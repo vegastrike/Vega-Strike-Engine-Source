@@ -670,6 +670,7 @@ public:
   void Deselect();
   ///Sets up a null queue for orders
   void PrimeOrders();
+  void PrimeOrders(Order * newAI);
   ///Sets the AI to be a specific order
   void SetAI(Order *newAI);
   ///Enqueues an order to the unit's order queue
@@ -677,7 +678,8 @@ public:
   ///EnqueuesAI first
   void EnqueueAIFirst (Order * newAI);
   ///num subunits
-
+  void LoadAIScript (const std::string &aiscript);
+  bool LoadLastPythonAIScript ();
   un_iter getSubUnits();
   un_kiter viewSubUnits() const;
   bool InsideCollideTree (Unit * smaller, QVector & bigpos, Vector & bigNormal, QVector & smallpos, Vector & smallNormal);

@@ -52,6 +52,9 @@
 #include "collide/rapcol.h"
 #include "savegame.h"
 #include "xml_serializer.h"
+#include "cmd/ai/pythonai.h"
+#include "cmd/ai/missionscript.h"
+#include "cmd/ai/aggressive.h"
 //if the PQR of the unit may be variable...for radius size computation
 //#define VARIABLE_LENGTH_PQR
 
@@ -60,6 +63,18 @@
 
 
 double interpolation_blend_factor;
+
+///Warning: The basic pointer class does NOTHING for the user.
+///NO Refcounts...if python holds onto this for longer than it can...
+///CRASH!!
+template <class T> class BasicPointer {
+  T * myitem;
+ public:
+  BasicPointer (T * myitem) {
+    this->myitem = myitem;
+  }
+  T& operator * () {return *myitem;}
+};
 
 
 #define PARANOIA .4
@@ -975,6 +990,47 @@ void Unit::Draw(const Transformation &parent, const Matrix &parentMatrix)
   if (On_Screen) {
     Vector Scale (1,1,GetVelocity().MagnitudeSquared()/(computer.max_ab_speed*computer.max_ab_speed));
     halos.Draw(*ctm,Scale,cloak,(_Universe->AccessCamera()->GetNebula()==nebula&&nebula!=NULL)?-1:0);
+  }
+}
+void Unit::LoadAIScript(const std::string & s) {
+  if (s.find ("py")!=string::npos) {
+    PythonAI * ai = PythonAI::Factory (s);
+    PrimeOrders (ai);
+    return;
+  }else {
+    if (s.length()>0) {
+      if (*s.begin()=='_') {
+	mission->addModule (s.substr (1));
+	PrimeOrders (new AImissionScript (s.substr(1)));
+      }else {
+	string ai_agg=s+".agg.xml";
+	string ai_int=s+".int.xml";
+	PrimeOrders( new Orders::AggressiveAI (ai_agg.c_str(), ai_int.c_str()));
+      }
+    }else {
+      PrimeOrders();
+    }
+  }
+}
+bool Unit::LoadLastPythonAIScript() {
+  PythonAI * pyai = PythonAI::LastAI();
+  if (pyai) {
+    PrimeOrders (pyai);
+  }else if (!aistate) {
+    PrimeOrders();
+    return false;
+  }
+  return true;
+}
+void Unit::PrimeOrders (Order * newAI) {
+  if (newAI) {
+    if (aistate) {
+      aistate->Destroy();
+    }
+    aistate = newAI;
+    newAI->SetParent (this);
+  }else {
+    PrimeOrders();
   }
 }
 void Unit::PrimeOrders () {

@@ -1,5 +1,6 @@
 
 INCLUDES = ${GTK_CFLAGS}
 bin_PROGRAMS=vslauncher
-vslauncher_LDADD = ${GTK_LIBS}
+commonLIB = ../src/common/libvscommon.a
+vslauncher_LDADD = ${commonLIB} ${GTK_LIBS} 
 vslauncher_SOURCES= saveinterface.cpp

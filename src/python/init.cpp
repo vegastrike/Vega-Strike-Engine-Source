@@ -235,21 +235,7 @@ PyObject* Py_CompileString(char *str, char *filename, int start)
 		fclose(fp1);
 	}
 #endif
-	PyCodeObject *codeobj; 
-	PyObject *m, *d;
-    codeobj= CompilePython ("simple_test.py");
-    if ((m = PyImport_AddModule("__main__")) != NULL)
-    {
-    
-    if ((d = PyModule_GetDict(m)) != NULL)
-    {
-    PyObject * exe=PyEval_EvalCode(codeobj, d, d);
-    if (PyCallable_Check (exe)) {
-      fprintf (stderr,"ahhh");
-    }
-    }
-    }
-    
+	CompileRunPython ("simple_test.py");
     //		PyObject * arglist = CreateTuple (vector <PythonBasicType> ());
     //		PyObject * res = PyEval_CallObject(po, arglist);
     //		Py_DECREF(arglist);
