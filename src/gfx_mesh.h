@@ -22,20 +22,48 @@
 #define _MESH_H_
 
 #include "gfx_primitive.h"
-#include "gfx_vertex.h"
-#include "gfx_bsp.h"
-#include "gfx_bounding_box.h"
-#include "gfxlib.h"
-/*TODO: Stick in local translation stuff and the restrictions, etc*/
 
-#include "gfx_aux_logo.h"
+//#include "gfx_vertex.h"
+//#include "gfx_bsp.h"
+//#include "gfx_bounding_box.h"
+//#include "gfxlib.h"
+//#include "gfx_aux_logo.h"
+
+#include <string>
+#include <vector>
+#include "xml_support.h"
+using namespace std;
 
 class Planet;
+class BSPTree;
+class GFXVertex;
+class GFXVertexList;
+class GFXQuadstrip;
+class GFXMaterial;
+class BoundingBox;
+
+using XMLSupport::EnumMap;
+using XMLSupport::AttributeList;
+
 class Mesh:public Primitive
 {
-protected:
-  char *debugName;
+private:
+  enum ElementNames {
+    UNKNOWN, MESH, POINTS, POINT, LOCATION, NORMAL, POLYGONS, TRI, QUAD, VERTEX
+  };
+  vector<ElementNames> xml_state;
+  static const EnumMap::Pair element_names[];
+  static const EnumMap element_map;
+
+  void LoadXML(char *filename);
+
+  static void beginElement(void *userData, const XML_Char *name, const XML_Char **atts);
+  static void endElement(void *userData, const XML_Char *name);
   
+  void beginElement(const string &name, const AttributeList &attributes);
+  void endElement(const string &name);
+
+protected:
 	int refcount;
 	float maxSizeX,maxSizeY,maxSizeZ,minSizeX,minSizeY,minSizeZ;
 	float radialSize;
@@ -86,7 +114,7 @@ protected:
 	Vector pp, pq, pr, ppos;
 public:
 	Mesh();
-	Mesh(char *);
+	Mesh(char *filename,  bool xml=false);
 	~Mesh();
 
 	virtual void Draw();

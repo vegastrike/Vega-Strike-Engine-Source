@@ -47,6 +47,10 @@ struct Texture{
         BOOL checkold(const string &s);
 	void setold();
 
+  void InitTexture() {
+    original = 0;
+    refcount = 0;
+  }
 public:
 
 	Texture(char *,char *, int stage = 0, enum TEXTURE_TARGET target=TEXTURE2D, enum TEXTURE_IMAGE_TARGET imagetarget=TEXTURE_2D, float alpha=1, int zeroval=0);

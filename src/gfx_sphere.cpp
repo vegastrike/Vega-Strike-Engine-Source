@@ -4,7 +4,7 @@
 #define M_PI 3.1415926536F
 #endif
 SphereMesh::SphereMesh(float radius, int stacks, int slices, char *texture, bool Insideout,bool centeredOnShip) : Mesh() {
-  debugName = "Sphere";
+  strcpy(name, "Sphere");
 
   insideout= Insideout;
   radialSize = radius;//MAKE SURE FRUSTUM CLIPPING IS DONE CORRECTLY!!!!!

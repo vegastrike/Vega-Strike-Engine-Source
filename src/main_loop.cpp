@@ -19,6 +19,8 @@
 #include "star_system.h"
 #include "planet.h"
 #include "gfx_sphere.h"
+
+#include "gfx_mesh.h"
 using namespace std;
 
 #define KEYDOWN(name,key) (name[key] & 0x80)
@@ -510,6 +512,8 @@ void createObjects() {
   shipList = _GFX->activeStarSystem()->getClickList();
     //BindKey (1,startselect);
     //BindKey (0,clickhandler);
+  //Mesh *foo = new Mesh("mid-20038.xml", true);
+  //exit(0);
 }
 
 void destroyObjects() {  

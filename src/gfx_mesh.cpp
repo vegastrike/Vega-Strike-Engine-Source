@@ -25,10 +25,12 @@
 #include "gfx_aux.h"
 #include "gfx_camera.h"
 #include "gfx_bounding_box.h"
+#include "gfx_bsp.h"
 
 #include <math.h>
 
 #include <string>
+#include <fstream>
 using namespace std;
 
 #include "gfxlib.h"
@@ -78,8 +80,6 @@ void Mesh::InitUnit()
 	refcount = 1;  //FIXME VEGASTRIKE  THIS _WAS_ zero...NOW ONE
 	orig = NULL;
 	
-	debugName = NULL;
-
 	envMap = TRUE;
 }
 
@@ -88,14 +88,8 @@ Mesh::Mesh():Primitive()
 	InitUnit();
 }
 
-Mesh:: Mesh(char * filename/*, Texture* ForceLog, Texture* SquadLog*/):Primitive()
+Mesh:: Mesh(char * filename, bool xml):Primitive()
 {
-	//awful stuff take this OUT
-	//if (!SquadLog)
-	//	SquadLog = new Texture ("TechSecRGB.bmp","TechSecA.bmp");
-
-	//end awful stuff
-
 	int TexNameLength;
 	char *TexName=NULL;
 	char * TexNameA=NULL;
@@ -115,10 +109,8 @@ Mesh:: Mesh(char * filename/*, Texture* ForceLog, Texture* SquadLog*/):Primitive
 
 	InitUnit();
 
-	debugName = strdup(filename);
-
 	Mesh *oldmesh;
-	if(oldmesh = meshHashTable.Get(string(filename)))//h4w h4s#t4bl3 1z 1337
+	if(0 != (oldmesh = meshHashTable.Get(string(filename))))//h4w h4s#t4bl3 1z 1337
 	{
 		*this = *oldmesh;
 		oldmesh->refcount++;
@@ -132,7 +124,10 @@ Mesh:: Mesh(char * filename/*, Texture* ForceLog, Texture* SquadLog*/):Primitive
 	}
 
 	strcpy(name, filename);
-
+	if(xml) {
+	  LoadXML(filename);
+	  return;
+	}
 
 	FILE* fp = NULL;
 	int jj;

@@ -1,13 +1,12 @@
 <Unit>
 <Mesh Texture="blah">
-<Vertices>
-<Vertex>
+<Points>
+<Point>
 <Location x=0 y=0 z=0/>
 <Normal i=0 j=0 k=0/>
-<Texcoord s=0 t=0/>
-</Vertex>
+</Point>
 ...
-</VertexData>
+</Points>
 
 <Polygons>
 <Poly vertices=3 v0=0 v1=1 v2=2/>

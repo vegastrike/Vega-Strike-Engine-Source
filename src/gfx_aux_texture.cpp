@@ -101,6 +101,7 @@ void Texture::setold()
 
 Texture::Texture(char * FileName, int stage, enum TEXTURE_TARGET target, enum TEXTURE_IMAGE_TARGET imagetarget)
 {
+  InitTexture();
   palette = NULL;
   texture_target =target;
   image_target=imagetarget;
@@ -195,6 +196,7 @@ Texture::Texture(char * FileName, int stage, enum TEXTURE_TARGET target, enum TE
 
 Texture::Texture (char * FileNameRGB, char *FileNameA, int stage, enum TEXTURE_TARGET target, enum TEXTURE_IMAGE_TARGET imagetarget, float alpha, int zeroval)
 {
+  InitTexture();
   palette = NULL;
 
 	refcount = 0;

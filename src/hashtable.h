@@ -19,6 +19,8 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
+#ifndef _HASHTABLE_H_
+#define _HASHTABLE_H_
 
 #include <math.h>
 #include <list>
@@ -38,7 +40,7 @@ template<class KEY, class VALUE> class Hashtable {
 	};
 	list<HashElement> table[hashsize];
 
-	int hash(const string &key) {
+	static int hash(const string &key) {
 		int k = 0;
 		char *start = (char*)key.c_str();
 		char *end = start + strlen(start);
@@ -56,10 +58,10 @@ public:
 		
 	}
 
-	VALUE *Get(const KEY &key)
+	VALUE *Get(const KEY &key) const
 	{
 		int hashval = hash(key);
-		list<HashElement>::iterator iter = table[hashval].begin(), end = table[hashval].end();
+		list<HashElement>::const_iterator iter = table[hashval].begin(), end = table[hashval].end();
 
 		for(;iter!=end;iter++)
 			if((*iter).key == key)
@@ -72,7 +74,7 @@ public:
 
 	void Put(const KEY &key, VALUE *value)
 	{
-		int hashval = hash(key);
+	        int hashval = hash(key);
 		table[hashval].push_front(HashElement(key, value));
 	}
 
@@ -97,3 +99,5 @@ public:
 	void Delete(const KEY &key);
 */
 };
+
+#endif

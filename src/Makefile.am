@@ -140,3 +140,6 @@ vegastrike_SOURCES =				\
 	sdl_init.c				\
 	joystick.c				\
 	joystick.h				\
+	gfx_mesh_xml.cpp 			\
+	xml_support.h  				\
+	xml_support.cpp

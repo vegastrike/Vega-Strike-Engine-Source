@@ -25,7 +25,7 @@
 #include "lin_time.h"
 #include "cmd_unitenum.h"
 #include "gfx_hud.h"
-
+#include "gfx_bounding_box.h"
 
 //if the PQR of the unit may be variable...for radius size computation
 //#define VARIABLE_LENGTH_PQR
@@ -69,7 +69,7 @@ Unit::Unit(char *filename):Mesh()
 {
 	Init();
 
-	debugName = strdup((filename + string(" - Unit")).c_str());
+	strcpy(name, (filename + string(" - Unit")).c_str());
 	/*Insert file loading stuff here*/
 	LoadFile(filename);
 
