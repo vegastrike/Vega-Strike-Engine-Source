@@ -1380,23 +1380,7 @@ void GameCockpit::Draw() {
       }
     }
   }
-  static bool mouseCursor = XMLSupport::parse_bool (vs_config->getVariable ("joystick","mouse_cursor","false"));
-  if (mouseCursor&&screenshotkey==false) {  
-    GFXBlendMode (SRCALPHA,INVSRCALPHA);
-    GFXColor4f (1,1,1,1);
-    GFXEnable(TEXTURE0);
-    //    GFXDisable (DEPTHTEST);
-    //    GFXDisable(TEXTURE1);
-    static int revspr = XMLSupport::parse_bool (vs_config->getVariable ("joystick","reverse_mouse_spr","true"))?1:-1;
-    static string blah = vs_config->getVariable("joystick","mouse_crosshair","crosshairs.spr");
-    static int num=printf ("CROSS %f\n",crossceny);
-    static VSSprite MouseVSSprite (blah.c_str(),BILINEAR,GFXTRUE);
-    MouseVSSprite.SetPosition ((-1+float(mousex)/(.5*g_game.x_resolution))*(1-fabs(crosscenx))+crosscenx,(-revspr+float(revspr*mousey)/(.5*g_game.y_resolution))*(1-fabs(crossceny))+crossceny);
-    
-    MouseVSSprite.Draw();
-    //    DrawGlutMouse(mousex,mousey,&MouseVSSprite);
-    //    DrawGlutMouse(mousex,mousey,&MouseVSSprite);
-  }
+
   RestoreViewPort();
   GFXBlendMode (ONE,ZERO);
   static float AlphaTestingCutoff =XMLSupport::parse_float(vs_config->getVariable("graphics","AlphaTestCutoff",".8"));
@@ -1552,6 +1536,23 @@ void GameCockpit::Draw() {
     }
   }
   GFXAlphaTest (ALWAYS,0);  
+  static bool mouseCursor = XMLSupport::parse_bool (vs_config->getVariable ("joystick","mouse_cursor","false"));
+  if (mouseCursor&&screenshotkey==false) {  
+    GFXBlendMode (SRCALPHA,INVSRCALPHA);
+    GFXColor4f (1,1,1,1);
+    GFXEnable(TEXTURE0);
+    //    GFXDisable (DEPTHTEST);
+    //    GFXDisable(TEXTURE1);
+    static int revspr = XMLSupport::parse_bool (vs_config->getVariable ("joystick","reverse_mouse_spr","true"))?1:-1;
+    static string blah = vs_config->getVariable("joystick","mouse_crosshair","crosshairs.spr");
+    static int num=printf ("CROSS %f\n",crossceny);
+    static VSSprite MouseVSSprite (blah.c_str(),BILINEAR,GFXTRUE);
+    MouseVSSprite.SetPosition ((-1+float(mousex)/(.5*g_game.x_resolution))*(1-fabs(crosscenx))+crosscenx,(-revspr+float(revspr*mousey)/(.5*g_game.y_resolution))*(1-fabs(crossceny))+crossceny);
+    
+    MouseVSSprite.Draw();
+    //    DrawGlutMouse(mousex,mousey,&MouseVSSprite);
+    //    DrawGlutMouse(mousex,mousey,&MouseVSSprite);
+  }
   GFXHudMode (false);
   DrawNavSystem();
 
