@@ -20,6 +20,7 @@ CCScript SheltonSlide;
 CCScript SkilledABSlide;
 CCScript Stop;
 CCScript TurnAway;
+CCScript AfterburnTurnAway;
 CCScript TurnTowardsITTS;
 CCScript TurnTowards;
 CCScript BarrelRoll;

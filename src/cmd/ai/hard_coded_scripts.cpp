@@ -346,7 +346,7 @@ void Stop (Order * aisc, Unit * un) {
   Order * ord = new Orders::MatchLinearVelocity(un->ClampVelocity(vec,false),true,false,false);
   AddOrd (aisc,un,ord);//<!-- should we fini? -->
 }
-void TurnAway(Order * aisc, Unit * un) {
+void AfterburnTurnAway(Order * aisc, Unit * un) {
   QVector v(un->Position());
   QVector u(v);
   Unit * targ =un->Target();
@@ -354,6 +354,19 @@ void TurnAway(Order * aisc, Unit * un) {
     u=targ->Position();
   }
   bool afterburn = useAfterburner();
+  Order * ord = new Orders::MatchLinearVelocity(un->ClampVelocity(200*(v-u).Cast(),afterburn),false,afterburn,false);
+  AddOrd (aisc,un,ord);
+  ord = new Orders::ChangeHeading ((200*(v-u)) + v,3);
+  AddOrd (aisc,un,ord);
+}
+void TurnAway(Order * aisc, Unit * un) {
+  QVector v(un->Position());
+  QVector u(v);
+  Unit * targ =un->Target();
+  if (targ) {
+    u=targ->Position();
+  }
+  bool afterburn = false;
   Order * ord = new Orders::MatchLinearVelocity(un->ClampVelocity(200*(v-u).Cast(),afterburn),false,afterburn,false);
   AddOrd (aisc,un,ord);
   ord = new Orders::ChangeHeading ((200*(v-u)) + v,3);

@@ -36,6 +36,7 @@ HardCodedMap MakeHardCodedScripts() {
   tmp.insert (MyPair ("afterburner slide",&AfterburnerSlide));        
   tmp.insert (MyPair ("stop",&Stop));      
   tmp.insert (MyPair ("turn away",&TurnAway));      
+  tmp.insert (MyPair ("afterburn turn away",&AfterburnTurnAway));      
   tmp.insert (MyPair ("turn towards",&TurnTowards));      
   tmp.insert (MyPair ("turn towards itts",&TurnTowardsITTS));      
   return tmp;
