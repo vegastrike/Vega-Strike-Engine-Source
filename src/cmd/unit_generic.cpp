@@ -805,7 +805,7 @@ static std::string csvUnit(std::string un) {
 void Unit::Init(const char *filename, bool SubU, int faction,std::string unitModifications, Flightgroup *flightgrp,int fg_subnumber, string * netxml)
 {
         static bool UNITTAB = XMLSupport::parse_bool(vs_config->getVariable("physics","UnitTable","false"));
-
+	CSVRow unitRow;
 	this->Unit::Init();
 	//if (!SubU)
 	//  _Universe->AccessCockpit()->savegame->AddUnitToSave(filename,UNITPTR,FactionUtil::GetFaction(faction),(long)this);
@@ -843,7 +843,7 @@ void Unit::Init(const char *filename, bool SubU, int faction,std::string unitMod
 		  if (filename[0]) {
                     taberr=unitTab.OpenReadOnly( filepath+".csv", UnitSaveFile);
                     if (taberr<=Ok) {
-                      unitTables.push_back(new CSVTable(unitTab));
+						unitTables.push_back(new CSVTable(unitTab,unitTables.back()->rootdir));
                       unitTab.Close();
                     }
                     if (!UNITTAB) 
@@ -852,6 +852,9 @@ void Unit::Init(const char *filename, bool SubU, int faction,std::string unitMod
                   }
 		}
 	}
+   if (netxml) {
+	unitTables.push_back(new CSVTable(*netxml,unitTables.back()->rootdir));
+   }
   // If save was not succesfull we try to open the unit file itself
   if( netxml==NULL)
   {
@@ -883,7 +886,7 @@ void Unit::Init(const char *filename, bool SubU, int faction,std::string unitMod
                 //end deprecated code
 	  }
   }
-  CSVRow unitRow;
+
   if (UNITTAB) {
     unitRow = GetUnitRow(filename,SubU,faction,true, foundFile);
   }else {
@@ -902,7 +905,7 @@ void Unit::Init(const char *filename, bool SubU, int faction,std::string unitMod
 	radial_size=1;
     //	    assert ("Unit Not Found"==NULL);
 	//assert(0);
-        if (taberr<=Ok&&taberr!=Unspecified) {
+	if ((taberr<=Ok&&taberr!=Unspecified)||netxml) {
           delete unitTables.back();
           unitTables.pop_back();
         }

@@ -13,6 +13,8 @@
 #include "save_util.h"
 #include "cmd/unit_util.h"
 #include "universe_util.h"
+#include "cmd/csv.h"
+
 //#include "universe_util_generic.h" //Use universe_util.h instead
 
 using namespace GalaxyXML;
@@ -305,4 +307,27 @@ int	Universe::StarSystemIndex( StarSystem * ss)
 			return i;
 	}
 	return -1;
+}
+
+void InitUnitTables () {
+	VSFile allUnits;
+
+	VSError err = allUnits.OpenReadOnly("units.csv",UnitFile);
+	if (err<=Ok) {
+		unitTables.push_back(new CSVTable(allUnits,allUnits.GetRoot()));
+		allUnits.Close();
+	}
+	static string unitdata= vs_config->getVariable("data","UnitCSV","modunits.csv");
+	while (unitdata.length()!=0) {
+		string::size_type  where=unitdata.find(" ");
+		if (where==string::npos)
+			where=unitdata.length();
+		string tmp = unitdata.substr(0,where);     
+		err = allUnits.OpenReadOnly(tmp,UnitFile);
+		if (err<=Ok) {
+			unitTables.push_back(new CSVTable(allUnits,allUnits.GetRoot()));
+			allUnits.Close();
+		}
+		unitdata=unitdata.substr(where,unitdata.length());
+	}
 }

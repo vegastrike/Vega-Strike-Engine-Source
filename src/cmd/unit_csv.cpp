@@ -1165,21 +1165,28 @@ Unit * Unit::makeMasterPartList() {
   static std::string mpl = vs_config->getVariable("data","master_part_list","master_part_list");
   Unit * ret = new Unit();
   ret->name="master_part_list";
-  CSVTable table(mpl);
-  unsigned int siz=table.rows.size();
+  VSFileSystem::VSFile mplf;
+  VSFileSystem::VSError err = mplf.OpenReadOnly(mpl,VSFileSystem::UnknownFile);
   unsigned int i;
-  for (i=0;i<siz;++i) {
-    CSVRow row(&table,i);
-    Cargo carg;
-    carg.content=row["file"];
-    carg.category=row["categoryname"];
-    carg.volume=stof(row["volume"],1);
-    carg.mass=stof(row["mass"],1);
-	carg.quantity=1;
-    carg.price=stoi(row["price"],1);
-    carg.description=row["description"];    
-    ret->GetImageInformation().cargo.push_back(carg);
-  } 
+  if (err<=VSFileSystem::Ok) {
+         CSVTable table(mplf,mplf.GetRoot());
+         mplf.Close();
+         unsigned int siz=table.rows.size();
+
+
+		 for (i=0;i<siz;++i) {
+			 CSVRow row(&table,i);
+			 Cargo carg;
+			 carg.content=row["file"];
+			 carg.category=row["categoryname"];
+			 carg.volume=stof(row["volume"],1);
+			 carg.mass=stof(row["mass"],1);
+			 carg.quantity=1;
+			 carg.price=stoi(row["price"],1);
+			 carg.description=row["description"];    
+			 ret->GetImageInformation().cargo.push_back(carg);
+		 }
+  }
   UpdateMasterPartList(ret);
   
   if (!ret->GetCargo("Pilot",i)) {//required items

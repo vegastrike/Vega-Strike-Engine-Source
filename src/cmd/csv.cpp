@@ -123,18 +123,25 @@ std::string writeCSV(const vector<string> &key, const vector<string> &table){
   }
   return ret;
 }
-void CSVTable::Init (VSFileSystem::VSFile&f) {
-   int len = f.Size();
-   this->rootdir = f.GetRoot();
-   char * buffer = (char*)malloc(sizeof(char)*(len+1));
-   buffer[len]=0;
-   f.ReadLine(buffer,len);
-   key = readCSV(buffer);
+void CSVTable::Init (std::string data) {
+   std::string::size_type where=data.find('\n');
+   if (where==string::npos) return;
+   std::string buffer = data.substr(0,where);
+   data=data.substr(where+1);
+   key = readCSV(buffer.c_str());
    for( unsigned int i=0;i<key.size();++i) {
       columns[key[i] ]=i;
    }
-   while (f.ReadLine(buffer,len)<=VSFileSystem::Ok) {
-      vector<string> strs = readCSV(buffer);
+   while (data.length()) {
+      where=data.find("\n");
+      if (where!=std::string::npos) {
+        buffer = data.substr(0,where);
+        data=data.substr(where+1);
+      }else {
+        buffer=data;
+        data="";
+      }
+      vector<string> strs = readCSV(buffer.c_str());
       unsigned int row = table.size()/key.size();
       while (strs.size()>key.size()) {
          fprintf (stderr,"error in csv, line %d: %s has no key",row+1,strs.back().c_str());
@@ -151,17 +158,22 @@ void CSVTable::Init (VSFileSystem::VSFile&f) {
          table.pop_back();
       }      
    }
-   free(buffer);
 }
-CSVTable::CSVTable(std::string filename) {
-   VSFileSystem::VSFile f;
-   VSFileSystem::VSError err = f.OpenReadOnly(filename,VSFileSystem::UnknownFile);
-   if (err<=VSFileSystem::Ok) {
-      Init(f);
-      f.Close();
-   }
+CSVTable::CSVTable(std::string data,std::string root) {
+	this->rootdir=root;
+	Init(data);
+//   VSFileSystem::VSFile f;
+//   VSFileSystem::VSError err = f.OpenReadOnly(filename,VSFileSystem::UnknownFile);
+//   if (err<=VSFileSystem::Ok) {
+//      Init(f);
+//      f.Close();
+//   }
 }
 
+CSVTable::CSVTable(VSFileSystem::VSFile & f,std::string root) {
+	this->rootdir = root;
+	Init(f.ReadFull());
+}
 CSVRow::CSVRow(CSVTable * parent, std::string key) {
    this->parent=parent;
    iter=parent->rows[key]*parent->key.size();

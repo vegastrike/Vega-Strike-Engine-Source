@@ -195,6 +195,7 @@ void bootstrap_first_loop();
 void nothinghappens (unsigned int, unsigned int, bool,int,int) {
 
 }
+extern void InitUnitTables();
 int main( int argc, char *argv[] ) 
 {
 #if defined(WITH_MACOSX_BUNDLE)||defined(_WIN32)
@@ -282,29 +283,7 @@ int main( int argc, char *argv[] )
 	  cerr<<"MISSION_NAME is empty using : "<<mission_name<<endl;
 	}
     //might overwrite the default mission with the command line
- {
-   VSFile allUnits;
-
-   VSError err = allUnits.OpenReadOnly("units.csv",UnitFile);
-   if (err<=Ok) {
-     unitTables.push_back(new CSVTable(allUnits));
-     allUnits.Close();
-   }
-   static string unitdata= vs_config->getVariable("data","UnitCSV","modunits.csv");
-   while (unitdata.length()!=0) {
-     string::size_type  where=unitdata.find(" ");
-     if (where==string::npos)
-       where=unitdata.length();
-     string tmp = unitdata.substr(0,where);     
-     err = allUnits.OpenReadOnly(tmp,UnitFile);
-     if (err<=Ok) {
-       unitTables.push_back(new CSVTable(allUnits));
-       allUnits.Close();
-     }
-     unitdata=unitdata.substr(where,unitdata.length());
-   }
- }
-
+	InitUnitTables();
 #ifdef HAVE_PYTHON
     Python::init();
 

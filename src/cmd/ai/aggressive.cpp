@@ -60,7 +60,7 @@ static map<string,string> getAITypes() {
   VSFileSystem::VSFile f;
   VSError err = f.OpenReadOnly( "VegaPersonalities.csv", AiFile);
   if (err<=Ok) {
-    CSVTable table(f);
+    CSVTable table(f,f.GetRoot());
     map<std::string,int>::iterator browser=table.rows.begin();
     for (;browser!=table.rows.end();++browser) {
       string rowname = (*browser).first;

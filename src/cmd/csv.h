@@ -11,18 +11,16 @@ std::string writeCSV(const std::vector<std::string> &key, const std::vector<std:
 class CSVTable {
   
  private:
-   void Init (VSFileSystem::VSFile &f);
+   void Init (std::string data);
  public:
   std::string rootdir;
    std::map<std::string,int> columns;
    std::map<std::string,int> rows;
    std::vector<std::string> key;
    std::vector<std::string > table;
-   CSVTable(std::string name);
+   CSVTable(std::string name,std::string saveroot);
    bool RowExists(std::string name, unsigned int&where);
-  CSVTable(VSFileSystem::VSFile &f){
-    Init(f);
-  }
+  CSVTable(VSFileSystem::VSFile &f,  std::string saveroot);
    
 };
 
