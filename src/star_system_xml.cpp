@@ -323,7 +323,7 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
   LIGHT_TARGET tmptarg= POSITION;
   xml->cursun.j=0;
   string citylights;
-  ObjSerial serial;
+  ObjSerial serial=0;
   float scaleatmos=10;
   char * nebfile;
   bool insideout=false;
