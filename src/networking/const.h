@@ -123,9 +123,13 @@ public: \
 #ifndef __PRETTY_FUNCTION
 #define __PRETTY_FUNCTION__ "<Unknown>"
 #endif
+
 #ifndef __FUNCTION
+#if (_MSC_VER < 1300)  // 1300 == VC++ 7.0
 #define __FUNCTION__ "<Unknown>"
 #endif
+#endif
+
 #define LOCALCONST_DECL(Type,Name,Value) static Type Name;
 #define LOCALCONST_DEF(Class,Type,Name,Value) Type Class::Name = Value;
 #endif
