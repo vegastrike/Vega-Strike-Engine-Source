@@ -185,12 +185,7 @@ starplanetmult={(70,0):{'Ice':8,
 					 'Overgrown':4,
 					 'Overgrown_Methane':4,
 					 'Uninhabitable_Gas_Giant':2},
-		(40,0):{'Arid':4,
-					 'Arid_Methane':4,
-					 'Volcanic':4,
-					 'Bio_Simple_Methane':6,
-					 'Bio_Simple':8,
-					 'Uninhabitable_Dwarf_Gas_Giant':2},
+		(40,0):{},#default
 		(40,1):{'Arid':8,
 					 'Arid_Methane':8,
 					 'Volcanic':8,
@@ -259,6 +254,22 @@ starplanetmult={(70,0):{'Ice':8,
 					 'Molten':32,
 					 'Uninhabitable_Gas_Giant':12}
 }
+
+giant_moon={'Rocky':1./2,
+		'Oceanic':1./4,
+		'Oceanic_Ammonia':1./8,
+		'Overgrown':1./8}
+normal_moon={'Rocky':3./4,
+		'Oceanic':1./16,
+		'Oceanic_Ammonia':1./16,
+		'Volcanic':1./8}
+cold_moon={'Rocky':1./4,
+		'Ice':1./2,
+		'Frozen_Ammonia':1./4}
+hot_moon={'Molten':1./2,
+		'Volcanic':1./4,
+		'Arid':1./4}
+
 	
 planetprob={'rlaan':{'Trantor_Class':1./1024,
 					 'Arid':1./128,
@@ -308,14 +319,6 @@ planetprob={'rlaan':{'Trantor_Class':1./1024,
 					 'Uninhabitable_Gas_Giant':1./16,
 					 'Uninhabitable_Medium_Gas_Giant':1./16,
 					 'Uninhabitable_Dwarf_Gas_Giant':1./16},
-			'moon': {'Rocky':1./4+1./8+1./32,
-					 'Molten':1./32,
-					 'Ice':1./16,
-					 'Frozen_Ammonia':1./8,
-					 'Volcanic':1./16,
-					 'Oceanic':1./8,
-					 'Oceanic_Ammonia':1./8,
-					 'Overgrown':1./8},
 			#FIXME use these probabilities
 			'Uncultivable' : {'Rocky':1./8,
 							  'Molten':1./8,
@@ -353,31 +356,31 @@ planetprob={'rlaan':{'Trantor_Class':1./1024,
 					 'Uninhabitable_Dwarf_Gas_Giant':1./16}
 			}
 					 
-moonprob={'Trantor_Class':(1./2,1./8),
-		  'Arid':(1./8,1./16),
-		  'Arid_Methane':(1./8,1./16),
-		  'Bio_Diverse':(1./2,1./8),
-		  'University':(1./2.,1./8),
-		  'Ice':(1./8,1./16),
-		  'Tropical':(1./2,1./8),
-		  'Oceanic':(1./8,1./16),
-		  'Oceanic_Ammonia':(1./8,1./16),
-		  'Aera_Trantor':(1./2,1./8),
-		  'Rlaan_Trantor':(1./2,1./8),
-		  'Aera_Ice':(1./8,1./16),
-		  'Bio_Simple':(1./4,1./12),
-		  'Frozen_Ammonia':(1./8,1./16),
-		  'Volcanic':(1./8,1./16),
-		  'Bio_Diverse_Methane':(1./2.,1./8),
-		  'Bio_Simple_Methane':(1./4.,1./16),
-		  'Rocky':(1./8,1./16),
-		  'Molten':(1./8,1./16),
-		  'Overgrown':(1./8,1./16),
-		  'Overgrown_Methane':(1./8,1./16),
-		  'Uninhabitable_Gas_Giant':(.96975,1./4),
-		  'Uninhabitable_Medium_Gas_Giant':(.75,1./4),
-		  'Uninhabitable_Dwarf_Gas_Giant':(.5,1./8),
-		  None:1./8}
+moonprob={'Trantor_Class':(1./2,1./8,giant_moon),
+		  'Arid':(1./8,1./16,hot_moon),
+		  'Arid_Methane':(1./8,1./16,normal_moon),
+		  'Bio_Diverse':(1./2,1./8,normal_moon),
+		  'University':(1./2.,1./8,normal_moon),
+		  'Ice':(1./8,1./16,cold_moon),
+		  'Tropical':(1./2,1./8,normal_moon),
+		  'Oceanic':(1./8,1./16,normal_moon),
+		  'Oceanic_Ammonia':(1./8,1./16,normal_moon),
+		  'Aera_Trantor':(1./2,1./8,giant_moon),
+		  'Rlaan_Trantor':(1./2,1./8,giant_moon),
+		  'Aera_Ice':(1./8,1./16,cold_moon),
+		  'Bio_Simple':(1./4,1./12,normal_moon),
+		  'Frozen_Ammonia':(1./8,1./16,cold_moon),
+		  'Volcanic':(1./8,1./16,normal_moon),
+		  'Bio_Diverse_Methane':(1./2.,1./8,normal_moon),
+		  'Bio_Simple_Methane':(1./4.,1./16,normal_moon),
+		  'Rocky':(1./8,1./16,normal_moon),
+		  'Molten':(1./8,1./16,hot_moon),
+		  'Overgrown':(1./8,1./16,normal_moon),
+		  'Overgrown_Methane':(1./8,1./16,normal_moon),
+		  'Uninhabitable_Gas_Giant':(.96975,1./4,giant_moon),
+		  'Uninhabitable_Medium_Gas_Giant':(.75,1./4,giant_moon),
+		  'Uninhabitable_Dwarf_Gas_Giant':(.5,1./8,giant_moon),
+		  None:(1./8,1./16,normal_moon)}
 
 ordering={'Trantor_Class':4,
 		  'Arid':2,
@@ -410,6 +413,14 @@ def planets_compare(x,y):
 	return ordering[x]-ordering[y];
 import random
 rak=random.Random(31337)
+def getBody(plist):
+	rfloat=rak.random()
+	for i in plist:
+		if (rfloat<plist[i]):
+			return i
+		rfloat-=plist[i]
+	return plist.items()[len(plist)-1][0]
+
 def getPlanet(fac,radpair=None):
 	global combined_planet_prob
 	if not fac in planetprob:
@@ -428,12 +439,7 @@ def getPlanet(fac,radpair=None):
 		#for i in plist:
 		#	tot+=plist[i];
 		#print "total: "+str(tot);
-	rfloat=rak.random()
-	for i in plist:
-		if (rfloat<plist[i]):
-			return i
-		rfloat-=plist[i]
-	return plist.items()[len(plist)-1][0]
+	return getBody(plist)
 def abbreviate(l,planets):
 	ret=[]
 	for longname in l:
@@ -467,7 +473,7 @@ def getPlanets(fac,planets, sun_radius):
 			iter=0
 			while (rak.random()<moonprob[plan][iter]):
 				iter=1
-				moons.append(getPlanet('moon'));
+				moons.append(getBody(moonprob[plan][2]));
 				mi.append(j);
 				j+=1;
 		moonindex.append(mi)

@@ -4,7 +4,7 @@ def numToSize(type,size):
 		rad=16000;
 		lifeprob= .25;
 		if (type<30):
-			rad=type*4000./32;
+			rad=(type+size)*4000./32;
 			lifeprob=.01;
 		elif (type < 40):
 			rad = 6000;
@@ -86,4 +86,4 @@ def sizeToNum(size):
 			if (numToSize(i,j)==size):
 				return (i,j)
 	print "Size "+str(size)+" failed"
-	return (51,0)
+	return (50,1)
