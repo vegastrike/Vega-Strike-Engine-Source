@@ -139,6 +139,11 @@ class NetServer
 		void	sendKill( ObjSerial serial, unsigned short zone);
 		void	sendJump( ObjSerial serial, bool ok);
 
+		// DOCKING STUFF
+		void	sendDockAuthorize( ObjSerial serial, ObjSerial utdwserial, int docknum, unsigned short zone);
+		void	sendDockDeny( ObjSerial serial, unsigned short zone);
+		void	sendUnDock( ObjSerial serial, ObjSerial utdwserial, unsigned short zone);
+
 		friend class ZoneMgr;
 
 private:

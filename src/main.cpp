@@ -113,7 +113,7 @@ VegaConfig * createVegaConfig( char * file)
 	return new GameVegaConfig( file);
 }
 
-extern void DockToSavedBases (int playernum);
+extern QVector DockToSavedBases (int playernum);
 
 std::string ParseCommandLine(int argc, char ** CmdLine);
 void cleanup(void)

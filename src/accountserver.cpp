@@ -24,6 +24,10 @@
 
 char SERVER = 2;
 float simulation_atom_var = (float)1.0/10.0;
+class NetClient
+{
+};
+NetClient * Network;
 
 int main( int argc, char **argv)
 {

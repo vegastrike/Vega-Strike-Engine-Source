@@ -26,11 +26,11 @@ Cockpit * Universe::createCockpit( std::string player)
 	return cp;
 }
 
-void DockToSavedBases (int playernum) {
+QVector DockToSavedBases (int playernum) {
 	string str="MiningBase";
 	Unit *plr=_Universe->AccessCockpit(playernum)->GetParent();
 	if (!plr) {
-		return;
+		return QVector( 0, 0, 0);
 	}
 	vector <string> strs=loadStringList(playernum,mission_key);
 	if (strs.size()) {
@@ -40,6 +40,7 @@ void DockToSavedBases (int playernum) {
 	Unit *closestUnit=NULL;
 	float lastdist=0;
 	float dist=0;
+	QVector dock_position( 0, 0, 0);
 	while (iter.current()) {
 		Unit *un=iter.current();
 		if (un->name==str) {
@@ -53,13 +54,14 @@ void DockToSavedBases (int playernum) {
 	}
 	if (closestUnit) {
 		if (UnitUtil::getSignificantDistance(plr,closestUnit)>0&&closestUnit->isUnit()!=PLANETPTR) {
-			plr->SetPosAndCumPos(UniverseUtil::SafeEntrancePoint(closestUnit->Position(),plr->rSize()));
+			dock_position = UniverseUtil::SafeEntrancePoint(closestUnit->Position(),plr->rSize());
+			plr->SetPosAndCumPos(dock_position);
 		}
 		vector <DockingPorts> dprt=closestUnit->image->dockingports;
 		int i;
 		for (i=0;;i++) {
 			if (i>=dprt.size()) {
-				return;
+				return QVector( 0, 0, 0);
 			}
 			if (!dprt[i].used) {
 				break;
@@ -68,6 +70,7 @@ void DockToSavedBases (int playernum) {
 		plr->ForceDock(closestUnit,i);
 		closestUnit->image->clearedunits.push_back(plr);
 	}
+	return dock_position;
 }
 
 using namespace std;

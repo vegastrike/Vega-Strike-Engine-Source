@@ -65,6 +65,7 @@ class ZoneMgr
 		void	removeClient( ClientPtr clt );
         void    broadcast( ClientWeakPtr clt, Packet * pckt );
         void    broadcast( int zone, ObjSerial serial, Packet * pckt );
+        void    broadcastNoSelf( int zone, ObjSerial serial, Packet * pckt );
         void    broadcastSample( int zone, ObjSerial serial, Packet * pckt, float frequency );
         void    broadcastText( int zone, ObjSerial serial, Packet * pckt, float frequency );
         void    broadcastSnapshots( bool update_planets=false);

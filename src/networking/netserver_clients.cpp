@@ -2,7 +2,10 @@
 #include "vsnet_debug.h"
 #include "netbuffer.h"
 #include "universe_util.h"
+#include "universe_generic.h"
 #include "savenet_util.h"
+
+extern QVector DockToSavedBases( int n);
 
 /**************************************************************/
 /**** Adds a new client                                    ****/
@@ -35,8 +38,9 @@ void	NetServer::addClient( ClientPtr clt, char flags )
 	StarSystem * sts;
 	StarSystem * st2;
 
-	QVector safevec;
-	Cockpit * cp = _Universe->isPlayerStarship( un);
+	QVector nullVec( 0, 0, 0);
+	int player = _Universe->whichPlayerStarship( un);
+	Cockpit * cp = _Universe->AccessCockpit(player);
 	string starsys = cp->savegame->GetStarSystem();
 
 	unsigned short zoneid;
@@ -48,7 +52,15 @@ void	NetServer::addClient( ClientPtr clt, char flags )
 	// On server side this is not done in Cockpit::SetParent()
 	cp->activeStarSystem = st2;
 	// Cannot use sts pointer since it may be NULL if the system was just created
-	safevec = UniverseUtil::SafeStarSystemEntrancePoint( st2, cp->savegame->GetPlayerLocation(), clt->game_unit.GetUnit()->radial_size);
+	// Try to see if the player is docked on start
+	QVector safevec( DockToSavedBases( player));
+	if( safevec == nullVec)
+	{
+		safevec = UniverseUtil::SafeStarSystemEntrancePoint( st2, cp->savegame->GetPlayerLocation(), clt->game_unit.GetUnit()->radial_size);
+		cerr<<"PLAYER NOT DOCKED - STARTING AT POSITION : x="<<safevec.i<<",y="<<safevec.j<<",z="<<safevec.k<<endl;
+	}
+	else
+		cerr<<"PLAYER DOCKED - STARTING DOCKED AT POSITION : x="<<safevec.i<<",y="<<safevec.j<<",z="<<safevec.k<<endl;
 	COUT<<"\tposition : x="<<safevec.i<<" y="<<safevec.j<<" z="<<safevec.k<<endl;
 	cp->savegame->SetPlayerLocation( safevec);
 	// UPDATE THE CLIENT Unit's state

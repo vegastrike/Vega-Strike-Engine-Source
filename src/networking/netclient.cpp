@@ -858,6 +858,24 @@ int NetClient::recvMsg( Packet* outpacket )
 			}
 #endif
 			break;
+			case CMD_DOCK :
+			{
+				ObjSerial utdw_serial = netbuf.getSerial();
+				int dockport = netbuf.getInt32();
+				cerr<<"RECEIVED A DOCK AUTHORIZATION for unit "<<p1.getSerial()<<" to unit "<<utdw_serial<<" at docking port #"<<dockport<<endl;
+				un = UniverseUtil::GetUnitFromSerial( utdw_serial);
+				Unit * un2 = UniverseUtil::GetUnitFromSerial( p1.getSerial());
+				un2->ForceDock( un, dockport);
+			}
+			break;
+			case CMD_UNDOCK :
+			{
+				ObjSerial utdw_serial = netbuf.getSerial();
+				cerr<<"RECEIVED A UNDOCK ORDER for unit "<<p1.getSerial()<<" to unit "<<utdw_serial<<endl;
+				un = UniverseUtil::GetUnitFromSerial( utdw_serial);
+				Unit * un2 = UniverseUtil::GetUnitFromSerial( p1.getSerial());
+				un2->UnDock( un);
+			}
             default :
                 COUT << ">>> " << local_serial << " >>> UNKNOWN COMMAND =( " << hex << cmd
                      << " )= --------------------------------------" << endl;

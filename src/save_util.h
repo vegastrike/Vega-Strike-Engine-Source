@@ -7,5 +7,5 @@ unsigned int getSaveDataLength (int whichcp, string key);
 void putSaveData (int whichcp, string key, unsigned int num, float val);
 vector <string> loadStringList (int playernum,string mykey);
 void saveStringList (int playernum,string mykey,vector<string> names);
-void DockToSavedBases(int playernum);
+QVector DockToSavedBases(int playernum);
 #endif

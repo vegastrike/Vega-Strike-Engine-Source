@@ -167,6 +167,10 @@ class	NetClient
 
 		bool	jumpRequest( string newsystem);
 
+		/********************* Docking stuff **********************/
+		void	dockRequest( ObjSerial utdw_serial);
+		void	undockRequest( ObjSerial utdw_serial);
+
 		/********************* Communication stuff **********************/
 	private:
 	public:

@@ -32,6 +32,7 @@
 #include "networking/netserver.h"
 #include "networking/netclient.h"
 #include "gfx/cockpit_generic.h"
+#include "universe_generic.h"
 
 #ifdef _WIN32
 #define strcasecmp stricmp
@@ -901,7 +902,9 @@ void Unit::Fire (unsigned int weapon_type_bitmask, bool listen_to_owner) {
 						{
 							// Request a fire order to the server telling him the serial of the unit and the mount index (nm)
 							char mis2 = mis;
-							Network->fireRequest( this->serial, nm, mis2);
+							int playernum = _Universe->whichPlayerStarship( this);
+							if( playernum>0)
+								Network[playernum].fireRequest( this->serial, nm, mis2);
 							// Mark the mount as fire requested
 							//(*i).processed = Mount::REQUESTED;
 						}
@@ -2818,9 +2821,8 @@ void Unit::Kill(bool erasefromsave, bool quitting) {
   //  _Universe->AccessCockpit()->savegame->RemoveUnitFromSave((long)this);
 
   // The server send a kill notification to all concerned clients but not if it is an upgrade
-  if( SERVER && this->faction!=FactionUtil::GetFaction("upgrades"))
-	if( !quitting)
-  		Server->sendKill( this->serial, this->zone);
+  if( SERVER && this->faction!=FactionUtil::GetFaction("upgrades") && !quitting)
+  	Server->sendKill( this->serial, this->zone);
   
   if (this->colTrees)
     this->colTrees->Dec();//might delete
@@ -3662,9 +3664,9 @@ void Unit::PerformDockingOperations () {
   }
 }
 
-bool Unit::ForceDock (Unit * utdw, int whichdockport) {
+int Unit::ForceDock (Unit * utdw, int whichdockport) {
 	if (utdw->image->dockingports.size()<=whichdockport)
-		return false;
+		return 0;
 		
       utdw->image->dockingports[whichdockport].used=true;
 	
@@ -3683,11 +3685,14 @@ bool Unit::ForceDock (Unit * utdw, int whichdockport) {
 		  this->RestoreGodliness();
 	//_Universe->AccessCockpit()->RestoreGodliness();
       }
-	  return true;
+	  return whichdockport+1;
 }
-bool Unit::Dock (Unit * utdw) {
+int Unit::Dock (Unit * utdw) {
+// Do only if non networking mode or if server (for both Network==NULL)
+if( Network==NULL)
+{
   if (docked&(DOCKED_INSIDE|DOCKED))
-    return false;
+    return 0;
   std::vector <Unit *>::iterator lookcleared;
   if ((lookcleared = std::find (utdw->image->clearedunits.begin(),
 				utdw->image->clearedunits.end(),this))!=utdw->image->clearedunits.end()) {
@@ -3697,7 +3702,15 @@ bool Unit::Dock (Unit * utdw) {
 		return ForceDock(utdw,whichdockport);      
     }
   }
-  return false;
+  return 0;
+}
+else
+{
+	// Send a dock request
+	int playernum = _Universe->whichPlayerStarship( this);
+	if( playernum>=0)
+		Network[playernum].dockRequest( utdw->serial);
+}
 }
 
 inline bool insideDock (const DockingPorts &dock, const Vector & pos, float radius) {
@@ -3773,6 +3786,12 @@ bool Unit::isDocked (Unit* d) {
 bool Unit::UnDock (Unit * utdw) {
   unsigned int i=0;
 
+  if( Network!=NULL && !SERVER)
+  {
+	int playernum = _Universe->whichPlayerStarship( this);
+	if( playernum>0)
+		Network[playernum].undockRequest( utdw->serial);
+  }
   for (i=0;i<utdw->image->dockedunits.size();i++) {
     if (utdw->image->dockedunits[i]->uc.GetUnit()==this) {
       utdw->FreeDockingPort (i);

@@ -681,7 +681,7 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
 			// target_serial is in fact the serial of the firing unit (client itself or turret)
 			target_serial = netbuf.getSerial();
 			mount_num = netbuf.getInt32();
-			zone = netbuf.getShort();
+			zone = clt->zone;
 			mis = netbuf.getChar();
 			// Find the unit
 			// Set the concerned mount as ACTIVE and others as INACTIVE
@@ -844,31 +844,41 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
 			zonemgr->broadcastText( clt->zone, packet_serial, &p2, clt->comm_freq);
 
 		}
-
-		/***************** NOT USED ANYMORE *******************/
-		// SHOULD WE HANDLE A BOLT SERIAL TO UPDATE POSITION ON CLIENT SIDE ???
-		// I THINK WE CAN LET THE BOLT GO ON ITS WAY ON CLIENT SIDE BUT THE SERVER WILL DECIDE
-		// IF SOMEONE HAS BEEN HIT
-		case CMD_BOLT :
-		case CMD_BALL :
-			  // HERE ONLY SET THE CORRESPONDING MOUNT,UNIT COUPLE TO "FIRE"
-			  //p2.bc_create( packet.getCommand(), packet.getSerial(), packet.getData(), packet.getDataLength(), SENDRELIABLE, &clt->cltadr, clt->sock, __FILE__, __LINE__);
-			  //zonemgr->broadcast( clt, &p2 ); // , &NetworkToClient );
-			break;
-		case CMD_PROJECTILE :
+		case CMD_DOCK :
 		{
-			// DO NOT GET INFO FROM NETWORK - WE HAVE ALL THE INFO ON SERVER SIDE !!!
-			// SO ONLY DO WHAT IS NEEDED SO THAT IN THE NEXT STARSYSTEM UPDATE THE PROJECTILE IS "FIRED"
-
-			  // THIS IS TO BE DONE IN MOUNT.CPP
-			  // Add the projectile in the client's zone
-			  //zonemgr->addUnit( temp, clt->zone);
-
-		  // Finally send an ack to the creation of the created projectile in order to create them on all the clients in
-		  // the same zone (send the projectile serial)
-		  // We can some day add a check to send only to clients that are in a given range to that projectile
-		  //p2.bc_create( packet.getCommand(), temp->GetSerial(), packet.getData(), packet.getDataLength(), SENDRELIABLE, &clt->cltadr, clt->sock, __FILE__, __LINE__);
-		  //zonemgr->broadcast( clt, &p2 ); // , &NetworkToClient );
+			Unit * docking_unit;
+			un = clt->game_unit.GetUnit();
+			ObjSerial utdwserial = netbuf.getShort();
+			unsigned short zonenum = clt->zone;
+			cerr<<"RECEIVED a DockRequest from unit "<<un->GetSerial()<<" to unit "<<utdwserial<<" in zone "<<zonenum<<endl;
+			docking_unit = zonemgr->getUnit( utdwserial, zonenum);
+			if( docking_unit)
+			{
+				// In Unit::ForceDocking() we increase dockingport bye one because it may be 0
+				int dockport = un->Dock( docking_unit) - 1;
+				if( dockport)
+					this->sendDockAuthorize( un->GetSerial(), utdwserial, dockport, zonenum);
+			}
+			else
+				cerr<<"!!! ERROR : cannot dock with unit serial="<<utdwserial<<endl;
+		}
+		break;
+		case CMD_UNDOCK :
+		{
+			Unit * docking_unit;
+			un = clt->game_unit.GetUnit();
+			ObjSerial utdwserial = netbuf.getShort();
+			unsigned short zonenum = clt->zone;
+			cerr<<"RECEIVED an UnDockRequest from unit "<<un->GetSerial()<<" to unit "<<utdwserial<<" in zone "<<zonenum<<endl;
+			docking_unit = zonemgr->getUnit( utdwserial, zonenum);
+			if( docking_unit)
+			{
+				int dockport = un->UnDock( docking_unit);
+				if( dockport)
+					this->sendUnDock( un->GetSerial(), utdwserial, zonenum);
+			}
+			else
+				cerr<<"!!! ERROR : cannot dock with unit serial="<<utdwserial<<endl;
 		}
 		break;
     	default:

@@ -1,6 +1,8 @@
 
 *** GENERAL ************************************************************
 
+- Remove time compression in networking
+- HOW the hell can we assign serials to bases, planets and stuff and having the same on client/server sides
 - Prediction : predict when receive ClientState on server and then one time again when received on other clients
                how can I compute positions between 2 updates with interpolation ?
 - Use crypto lib md5 class instead of the 2 md5 files I'm using now
@@ -21,6 +23,7 @@
 
 *** GAME SERVER ********************************************************
 
+- Check if when a client jumps into another system, other clients are warned about it
 - Handle docking with CMD_DOCK and CMD_UNDOCK and DockToSavedBase on server side
 - Fix ping computation
 - Depending on ping -> send the player its own info in order to update himself periodicaly (like 1 time per 2 or 3 seconds)

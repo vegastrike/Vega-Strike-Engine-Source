@@ -263,6 +263,29 @@ void	ZoneMgr::broadcast( int zone, ObjSerial serial, Packet * pckt )
 	}
 }
 
+// Broadcast a packet to a zone clients with its serial as argument but not to the originating client
+void	ZoneMgr::broadcastNoSelf( int zone, ObjSerial serial, Packet * pckt )
+{
+    // COUT<<"Sending update to "<<(zone_list[clt->zone]->size()-1)<<" clients"<<endl;
+    ClientWeakList* lst = zone_list[zone];
+    if( lst == NULL ) return;
+
+	for( CWLI i=lst->begin(); i!=lst->end(); i++)
+	{
+        if( (*i).expired() ) continue;
+
+        ClientPtr clt( *i );
+		// Broadcast to all clients including the one who did a request
+		if( clt->ingame && clt->game_unit.GetUnit()->GetSerial()!=serial )
+		{
+			COUT<<"Sending update to client n° "<< clt->game_unit.GetUnit()->GetSerial();
+			COUT<<endl;
+			pckt->setNetwork( &clt->cltadr, clt->sock);
+			pckt->bc_send( );
+		}
+	}
+}
+
 /************************************************************************************************/
 /**** broadcastSample : broadcast sound sample to players in the zone and on same frequency *****/
 /************************************************************************************************/

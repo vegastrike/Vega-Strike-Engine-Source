@@ -31,7 +31,7 @@ void	NetServer::BroadcastFire( ObjSerial serial, int weapon_index, ObjSerial mis
 	netbuf.addSerial( missile_serial);
 
 	p.bc_create( CMD_FIREREQUEST, serial, netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, NULL, acct_sock, __FILE__, PSEUDO__LINE__(1710) );
-	// WARNING : WE WILL SEND THE INFO BACK TO THE CLIENT THAT HAS FIRED
+	// WARNING : WE WILL SEND THE INFO BACK TO THE CLIENT THAT HAS FIRED -> SHOULD USE broadcastNoSelf instead if we dont want that
 	zonemgr->broadcast( zone, serial, &p );
 }
 
@@ -59,6 +59,7 @@ void	NetServer::sendKill( ObjSerial serial, unsigned short zone)
 	Packet p;
 	Unit * un;
 
+	cerr<<"SENDING A KILL for serial "<<serial<<" in zone "<<zone<<endl;
 	// Find the client in the udp & tcp client lists in order to set it out of the game (not delete it yet)
 	ClientPtr clt = this->getClientFromSerial( serial);
 	if( !clt )
@@ -105,5 +106,31 @@ void	NetServer::sendJump( ObjSerial serial, bool ok)
 	}
 	else if( !ok || clt->jumpfile=="error")
 		p2.send( CMD_JUMP, 0, netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, &clt->cltadr, clt->sock, __FILE__, PSEUDO__LINE__(1164) );
+}
+
+void	NetServer::sendDockAuthorize( ObjSerial serial, ObjSerial utdw_serial, int docknum, unsigned short zone)
+{
+	NetBuffer netbuf;
+	Packet p;
+	// Send a CMD_DOCK with serial, an ObjSerial = unit_to_dock_with_serial and an int = docking port num
+	netbuf.addSerial( utdw_serial);
+	netbuf.addInt32( docknum);
+	p.bc_create( CMD_DOCK, serial, netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, NULL, acct_sock, __FILE__, PSEUDO__LINE__(118) );
+	zonemgr->broadcast( zone, serial, &p );
+}
+
+void	NetServer::sendDockDeny( ObjSerial serial, unsigned short zone)
+{
+	// In fact do nothing
+}
+
+void	NetServer::sendUnDock( ObjSerial serial, ObjSerial utdwserial, unsigned short zone)
+{
+	// SEND A CMD_UNDOCK TO OTHER CLIENTS IN THE ZONE with utdw serial
+	NetBuffer netbuf;
+	Packet p;
+	netbuf.addSerial( utdwserial);
+	p.bc_create( CMD_UNDOCK, serial, netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, NULL, acct_sock, __FILE__, PSEUDO__LINE__(134) );
+	zonemgr->broadcastNoSelf( zone, serial, &p );
 }
 

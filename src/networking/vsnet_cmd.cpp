@@ -66,6 +66,8 @@ const char* displayCmd( Cmd cmd )
     CASE( CMD_SECMESSAGE   )
     CASE( CMD_STARTNETCOMM )
     CASE( CMD_STOPNETCOMM  )
+    CASE( CMD_DOCK         )
+    CASE( CMD_UNDOCK       )
 
     CASE( CMD_NEWSUBSCRIBE )
 

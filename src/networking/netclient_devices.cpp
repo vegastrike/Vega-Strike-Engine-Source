@@ -35,7 +35,6 @@ void	NetClient::fireRequest( ObjSerial serial, int mount_index, char mis)
 
 	netbuf.addSerial( serial);
 	netbuf.addInt32( mount_index);
-	netbuf.addShort( this->zone);
 	netbuf.addChar( mis);
 
 	p.send( CMD_FIREREQUEST, this->game_unit.GetUnit()->GetSerial(),
@@ -51,7 +50,6 @@ void	NetClient::unfireRequest( ObjSerial serial, int mount_index)
 
 	netbuf.addSerial( serial);
 	netbuf.addInt32( mount_index);
-	netbuf.addInt32( this->zone);
 
 	p.send( CMD_UNFIREREQUEST, this->game_unit.GetUnit()->GetSerial(),
             netbuf.getData(), netbuf.getDataLength(),
@@ -84,6 +82,34 @@ bool	NetClient::jumpRequest( string newsystem)
 	jumpok = false;
 
 	return ret;
+}
+
+void	NetClient::dockRequest( ObjSerial utdw_serial)
+{
+	// Send a packet with CMD_DOCK with serial and an ObjSerial = unit_to_dock_with_serial
+	Packet p;
+	NetBuffer netbuf;
+
+	cerr<<"SENDING A DOCK REQUEST FOR UNIT "<<utdw_serial<<endl;
+	netbuf.addSerial( utdw_serial);
+	p.send( CMD_DOCK, this->game_unit.GetUnit()->GetSerial(),
+            netbuf.getData(), netbuf.getDataLength(),
+            SENDRELIABLE, NULL, this->clt_sock,
+            __FILE__, PSEUDO__LINE__(97) );
+}
+
+void	NetClient::undockRequest( ObjSerial utdw_serial)
+{
+	// Send a packet with CMD_UNDOCK with serial and an ObjSerial = unit_to_undock_with_serial
+	Packet p;
+	NetBuffer netbuf;
+
+	cerr<<"SENDING A UNDOCK NOTIFICATION FOR UNIT "<<utdw_serial<<endl;
+	netbuf.addSerial( utdw_serial);
+	p.send( CMD_UNDOCK, this->game_unit.GetUnit()->GetSerial(),
+            netbuf.getData(), netbuf.getDataLength(),
+            SENDRELIABLE, NULL, this->clt_sock,
+            __FILE__, PSEUDO__LINE__(110) );
 }
 
 /******************************************************************************************/

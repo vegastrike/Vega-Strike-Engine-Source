@@ -48,25 +48,36 @@ double getNewTime() {
 #endif
 }
 
+class NetClient;
+extern NetClient * Network;
 int timecount;
 
 void inc_time_compression (int i, KBSTATE a) {
+if( Network==NULL)
+{
   if (a==PRESS) {
     timecompression*=1.5;
     timecount++;
   }
 }
+}
 void dec_time_compression (int i, KBSTATE a) {
+if( Network==NULL)
+{
   if (a==PRESS) {
     timecompression/=1.5;
     timecount--;
   }
 }
+}
 void reset_time_compression (int i, KBSTATE a) {
+if( Network==NULL)
+{
   if (a==PRESS) {
     timecompression=1;
     timecount=0;
   }
+}
 }
 void pause_key (int i, KBSTATE a) {
   static bool paused=false;

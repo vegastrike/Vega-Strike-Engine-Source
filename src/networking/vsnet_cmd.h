@@ -102,6 +102,9 @@ enum Cmd
 	CMD_SECMESSAGE   = 0xB0,		// This means a sound sample just arrived (from client to server and from server to concerned clients or from client to clients)
 	CMD_SECSNDSAMPLE = 0xB1,		// This means a sound sample just arrived (from client to server and from server to concerned clients or from client to clients)
 
+	CMD_DOCK         = 0xB2,		// Dock request or authorization from server
+	CMD_UNDOCK       = 0xB3,		// Undock request or authorization from server
+
 	// Account management commands
 	CMD_RESYNCACCOUNTS = 0xFA,		// When connection to account server was lost
                                     // and established again :

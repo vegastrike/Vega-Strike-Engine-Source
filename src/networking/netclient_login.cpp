@@ -1,4 +1,5 @@
 #include "vsnet_debug.h"
+#include "cmd/unit_generic.h"
 #include "vs_globals.h"
 #include "netclient.h"
 #include "savegame.h"

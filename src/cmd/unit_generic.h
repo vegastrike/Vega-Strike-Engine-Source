@@ -1081,7 +1081,7 @@ public:
   ///returns -1 if unit cannot dock, otherwise returns which dock it can dock at
   enum DOCKENUM {NOT_DOCKED=0x0, DOCKED_INSIDE=0x1, DOCKED=0x2, DOCKING_UNITS=0x4};
   int CanDockWithMe (Unit * dockingunit) ;
-  bool ForceDock (Unit * utdw, int whichdockport);
+  int ForceDock (Unit * utdw, int whichdockport);
   void PerformDockingOperations();
   void FreeDockingPort(unsigned int whichport);
   virtual const vector <struct DockingPorts> &DockingPortLocations() { return image->dockingports;}
@@ -1092,7 +1092,7 @@ public:
 // Use AI
   bool RequestClearance (Unit * dockingunit);
   bool EndRequestClearance (Unit * dockingunit);
-  bool Dock (Unit * unitToDockWith);
+  int  Dock (Unit * unitToDockWith);
   void RestoreGodliness() {
 	_Universe->AccessCockpit()->RestoreGodliness();
   }
