@@ -793,11 +793,13 @@ void Cockpit::SetupViewPort (bool clip) {
     r = -r;
     p = -p;
     _Universe->AccessCamera(CP_BACK)->SetOrientation(p,q,r);
+#ifdef IWANTTOPVIEW
     _Universe->AccessCamera(CP_FRONT)->GetOrientation(p,q,r);
     tmp=r;
     r = -q;
     q = tmp;
     _Universe->AccessCamera(CP_CHASE)->SetOrientation(p,q,r);
+#endif
     tgt = un->Target();
     if (tgt) {
       

@@ -1,5 +1,10 @@
 2002-03-04 Daniel Horn <hellcatv@hotmail.com>
 	* Added text over viewscreen
+	* Added default Jump, Planet and Sun HudImages
+	* Added Hud images for about 98% of objects (tons fo work)
+	* Added high_quality_sprite mode (for antialiasing them)
+	* Fixed Weapons info with sprite
+	* Fixed some ships being upside down (noticed when taking screenshot)
 	* Added text for weapon info
 	* Added docking bays to be drawn when you press SHIFT-C and have clearence
 	* Added manifest VDU screen
