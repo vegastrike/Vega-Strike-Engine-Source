@@ -86,9 +86,9 @@ libnet_a_SOURCES =	\
 	inet.h
 
 if NETCOMM_NOWEBCAM
-	cam_files =
+cam_files =
 else
-	cam_files = webcam_support.cpp	\
+cam_files = webcam_support.cpp	\
 				webcam_support.h
 endif
 

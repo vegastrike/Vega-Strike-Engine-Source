@@ -1134,7 +1134,8 @@ if test "$TESTNETCOMM" = "1" ; then
 	if test "$LINUX" = "1" ; then
 		CHECK_FOR_VFL_H
 		if test "x$have_vfl" = "xyes" ; then
-			TESTCOMM_NOWEBCAM="0"
+			echo "Webcam support enabled"
+			TESTNETCOMM_NOWEBCAM="0"
 		else
 	    	echo "*** Video For Linux headers not found : video communications disabled."
     		TR_CPPFLAGS="$TR_CPPFLAGS -DNETCOMM_NOWEBCAM"
@@ -1144,7 +1145,8 @@ if test "$TESTNETCOMM" = "1" ; then
 	if test "$is_macosx" = "yes" ; then
 		dnl SHOULD TEST FOR QUICKTIME FRAMEWORK HERE !!!!
 		dnl if quicktime_headers_present ; then
-			TESTCOMM_NOWEBCAM="0"
+			echo "Webcam support enabled"
+			TESTNETCOMM_NOWEBCAM="0"
    			LIBS="$LIBS -framework QuickTime -framework Carbon -lz"
 		dnl else
 	    dnl	echo "*** QuickTime Video headers not found : video communications disabled."

@@ -19,6 +19,11 @@ NetworkCommunication::NetworkCommunication()
 #endif
 #ifndef NETCOMM_NOWEBCAM
 	this->Webcam = NULL;
+	// Init the webcam part
+	// GET VALUES FROM CONFIG SOON !
+	Webcam = new WebcamSupport();
+	if( Webcam->Init() == -1)
+		delete Webcam;
 #endif
 }
 
@@ -41,17 +46,10 @@ int		NetworkCommunication::InitSession( float frequency)
 #endif
 
 #ifndef NETCOMM_NOWEBCAM
-	// Init the webcam part
-	int	ret = 0;
-	// GET VALUES FROM CONFIG SOON !
-	Webcam = new WebcamSupport();
-	if( (ret=Webcam->Init()) == -1)
-		delete Webcam;
-	else
-		this->Webcam->StartCapture();
+	this->Webcam->StartCapture();
 #endif
 
-	return ret;
+	return 0;
 }
 
 int		NetworkCommunication::DestroySession()
@@ -66,11 +64,7 @@ int		NetworkCommunication::DestroySession()
 #endif
 #ifndef NETCOMM_NOWEBCAM
 	if( this->Webcam)
-	{
 		this->Webcam->EndCapture();
-		this->Webcam->Shutdown();
-		delete this->Webcam;
-	}
 #endif
 
 	return 0;
@@ -88,7 +82,10 @@ NetworkCommunication::~NetworkCommunication()
 #endif
 #ifndef NETCOMM_NOWEBCAM
 	if( this->Webcam)
+	{
+		this->Webcam->Shutdown();
 		delete this->Webcam;
+	}
 #endif
 }
 

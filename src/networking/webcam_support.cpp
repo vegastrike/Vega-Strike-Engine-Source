@@ -160,6 +160,7 @@ WebcamSupport::WebcamSupport( int f, int w, int h)
 	this->width = w;
 	this->height = h;
 	this->fps = f;
+	this->Init();
 }
 
 /**************************************************************************************************/
@@ -532,6 +533,12 @@ if( grabbing)
 #endif
 #ifdef __APPLE__
 	// Just return the jpeg_bufer filled by the callback function
+	if( !jpeg_buffer)
+	{
+		cerr<<"!!! JPEG BUFFER EMPTY !!!"<<endl;
+		return string("");
+	}
+	cerr<<"--== JPEG BUFFER OK ==--"<<endl;
 	return string( jpeg_buffer);
 
 	/* BAD WAY TO TRY CAPTURE : ACCESSING DIRECTLY GWORLD BUFFER
