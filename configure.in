@@ -1,6 +1,6 @@
 dnl Process this file with autoconf to produce a configure script.
 AC_INIT(src/vegastrike.h)
-AM_INIT_AUTOMAKE(vegastrike, "0.2.9.2")
+AM_INIT_AUTOMAKE(vegastrike, "0.2.9.5")
 AM_CONFIG_HEADER(config.h)
 
 dnl AC_LANG_CPLUSPLUS
@@ -195,7 +195,7 @@ dnl Simple check for libpython2.2.so
 if test "x${FOUND_PYTHON}" = "xyes";
 then
     FOUND_LIBPYTHON_SO=no
-    PYTHON_libchk="/usr/lib /usr/local/lib /usr/lib/python${PYTHON_SHORT} /usr/lib/python${PYTHON_SHORT}/config /usr/local/lib/python${PYTHON_SHORT} /usr/local/lib/python${PYTHON_SHORT}/config"
+    PYTHON_libchk="/usr/lib /usr/local/lib /sw/lib/python${PYTHON_SHORT}/config /usr/lib/python${PYTHON_SHORT} /usr/lib/python${PYTHON_SHORT}/config /usr/local/lib/python${PYTHON_SHORT} /usr/local/lib/python${PYTHON_SHORT}/config"
     for i in ${PYTHON_libchk};
     do
 	
@@ -203,7 +203,11 @@ then
         then
 	    echo "$i/libpython${PYTHON_SHORT}.so yes"
 	    PYTHON_CFLAGS="-I${PYTHON_incdir}"
-	    PYTHON_LIBS="-lpython${PYTHON_SHORT} -Xlinker -export-dynamic"
+	    if test "x$is_macosx" = "xyes" ; then
+	    	    PYTHON_LIBS="-lpython${PYTHON_SHORT} --export-dynamic"
+	    else
+		    PYTHON_LIBS="-lpython${PYTHON_SHORT} -Xlinker -export-dynamic"
+	    fi
             FOUND_LIBPYTHON_SO=yes
             break
 	else
@@ -211,7 +215,11 @@ then
 	  then
             echo "$i/libpython${PYTHON_SHORT}.a yes"
     	    PYTHON_CFLAGS="-I${PYTHON_incdir}"
-	    PYTHON_LIBS="$i/libpython${PYTHON_SHORT}.a  -Xlinker -export-dynamic"
+	    if test "x$is_macosx" = "xyes" ; then
+	    	    PYTHON_LIBS="$i/libpython${PYTHON_SHORT}.a --export-dynamic"
+	    else
+	    	    PYTHON_LIBS="$i/libpython${PYTHON_SHORT}.a  -Xlinker -export-dynamic"
+	    fi
             FOUND_LIBPYTHON_SO=yes
 	    break
           else
@@ -316,7 +324,7 @@ dnl    fi
 
 dnl	Added a simple check to see if we can use libSDL_net
 	AC_CHECK_HEADER( SDL/SDL_net.h, have_SDL_net=yes, have_SDL_net=no)
-	if test "x$have_SDL_net" = "xyes" ; then
+	if test "x$have_SDL_net" = "xyesBLAH" ; then
 		NET_LIBS=" -lSDL_net"
 		TR_CPPFLAGS="$TR_CPPFLAGS -DHAVE_SDLnet"
 	else
@@ -924,11 +932,14 @@ TR_CPPFLAGS="$TR_CPPFLAGS $AL_CPPFLAGS"
 CPPFLAGS="$saved_CPPFLAGS" 
 
 
+USERGTKL="1"
+AC_ARG_ENABLE(nogtk,[  --enable-nogtk Use if you do not wish to have herlper apps],USERGTKL="0")
 
-dnl Check for Gtk+ define GTK_CFLAGS && GTK_LIBS
-AM_PATH_GTK(1.2.1,,
-    AC_MSG_ERROR([Cannot find GTK+ - gtk-config missing from path?]))
-
+if test "$USERGTKL" = "1" ; then
+   dnl Check for Gtk+ define GTK_CFLAGS && GTK_LIBS
+   AM_PATH_GTK(1.2.1,,
+	AC_MSG_ERROR([Cannot find GTK+ - gtk-config missing from path?]))
+fi
 	
 
 dnl --------------------------------------------------------------------------
