@@ -157,6 +157,11 @@ namespace UnitUtil {
 	  }
 	  return carg.quantity; 
 	}
+	int forceAddCargo (Unit *my_unit,Cargo carg) {
+	  if (!my_unit)return 0;
+          my_unit->AddCargo(carg);
+	  return carg.quantity; 
+	}
 	int hasCargo (Unit * my_unit, string mycarg) {
 	  if (!my_unit) return 0;
 		unsigned int i;

@@ -24,6 +24,7 @@ namespace UnitUtil {
         bool repair (Unit * my_unit);
 	float upgrade(Unit *my_unit, string file,int mountoffset,int subunitoffset, bool force,bool loop_through_mounts);
 	int addCargo (Unit *my_unit,Cargo carg);
+	int forceAddCargo (Unit *my_unit,Cargo carg);
 	bool incrementCargo(Unit *my_unit,float percentagechange,int quantity);
 	bool decrementCargo(Unit *my_unit,float percentagechange);
 	float getDistance(Unit *my_unit,Unit *un);

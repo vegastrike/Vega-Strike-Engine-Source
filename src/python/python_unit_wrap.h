@@ -135,6 +135,7 @@
 	EXPORT_UTIL3(int,removeCargo,string,s, int,quantity, bool, erasezero)
 	EXPORT_UTIL5(float,upgrade,string,file,int,mountoffset,int, subunitoffset, bool, force,bool, loop_through_mounts)
 	EXPORT_UTIL1(int, addCargo, Cargo, carg)
+	EXPORT_UTIL1(int, forceAddCargo, Cargo, carg)
 	EXPORT_UTIL2(bool, incrementCargo,float, percentagechange,int, quantity)
 	EXPORT_UTIL1(bool,decrementCargo,float, percentagechange)
 	EXPORT_UTIL1(float, getDistance,UnitWrapper, un)
