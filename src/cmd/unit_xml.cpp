@@ -747,7 +747,7 @@ using namespace UnitXML;
       }
     }    
     Unit *upgradee =UnitFactory::createUnit(filename.c_str(),true,FactionUtil::GetFaction("upgrades"));
-	Unit::Upgrade (upgradee,soffset,moffset,GetModeFromName (filename.c_str()),true,percent,NULL);
+	Unit::Upgrade (upgradee,moffset,soffset,GetModeFromName (filename.c_str()),true,percent,NULL);
     upgradee->Kill();
     }
     break;
