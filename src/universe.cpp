@@ -160,7 +160,7 @@ void Universe::StartDraw()
   _Universe->activeStarSystem()->Draw();
 
   UpdateTime();
-  for (int i=0;i<star_system.size();i++) {
+  for (unsigned int i=0;i<star_system.size();i++) {
     star_system[i]->Update();
   }
   StarSystem::ProcessPendingJumps();
@@ -169,15 +169,17 @@ void Universe::StartDraw()
   //remove systems not recently visited?
   static int sorttime=0;
   static int howoften = XMLSupport::parse_int(vs_config->getVariable ("general","garbagecollectfrequency","2001"));
-  if ((sorttime++)%howoften==1) {
-    SortStarSystems(star_system,active_star_system.back());
-    static int numrunningsystems = XMLSupport::parse_int(vs_config->getVariable ("general","numrunningsystems","6"));
-    if (star_system.size()>numrunningsystems) {
-      if (std::find (active_star_system.begin(),active_star_system.end(),star_system.back())==active_star_system.end()) {
-	delete star_system.back();
-	star_system.pop_back();
-      } else {
-	fprintf (stderr,"error with active star system list\n");
+  if (howoften!=0) {
+    if ((sorttime++)%howoften==1) {
+      SortStarSystems(star_system,active_star_system.back());
+      static unsigned int numrunningsystems = XMLSupport::parse_int(vs_config->getVariable ("general","numrunningsystems","6"));
+      if (star_system.size()>numrunningsystems) {
+	if (std::find (active_star_system.begin(),active_star_system.end(),star_system.back())==active_star_system.end()) {
+	  delete star_system.back();
+	  star_system.pop_back();
+	} else {
+	  fprintf (stderr,"error with active star system list\n");
+	}
       }
     }
   }

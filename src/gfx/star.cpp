@@ -69,7 +69,7 @@ void Stars::Draw() {
 }
 static void upd (float &a, float &b, float &c, float &d, float &e, float &f, float &g, float &h, float &i, const float cp, const float spread) {
   //  assert (a==b&&b==c&&c==d&&d==e&&e==f);	
-  if (a!=b||a!=c||a!=d||a!=e||a!=f||!finite (a)) {
+  if (a!=b||a!=c||a!=d||a!=e||a!=f||!FINITE (a)) {
     a=b=c=d=e=f=0;
   }
   while (a-cp > 1.5*spread) {
