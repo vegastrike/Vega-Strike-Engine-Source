@@ -51,7 +51,7 @@ Mesh::~Mesh()
 	}
 }
 
-void Mesh::Draw(float lod, const Matrix &m, float toofar, short cloak, float nebdist)
+void Mesh::Draw(float lod, const Matrix &m, float toofar, short cloak, float nebdist, unsigned char damage)
 {
 }
 void Mesh::DrawNow(float lod,  bool centered, const Matrix &m, short cloak, float nebdist) {

@@ -41,7 +41,8 @@ public:
 };
 
 typedef std::vector<OrigMeshContainer> OrigMeshVector;
-#define NUM_PASSES 3
+#define NUM_PASSES 4
+#define DAMAGE_PASS 3
 const int UNDRAWN_MESHES_SIZE= NUM_MESH_SEQUENCE*NUM_PASSES;
 OrigMeshVector undrawn_meshes[NUM_MESH_SEQUENCE][NUM_PASSES]; // lower priority means draw first
 
@@ -140,12 +141,13 @@ Mesh::~Mesh()
 	  }
 	}
 }
-void Mesh::Draw(float lod, const Matrix &m, float toofar, short cloak, float nebdist)
+void Mesh::Draw(float lod, const Matrix &m, float toofar, short cloak, float nebdist,unsigned char hulldamage)
 {
   //  Vector pos (local_pos.Transform(m));
   MeshDrawContext c(m);
   UpdateFX(GetElapsedTime());
   c.SpecialFX = &LocalFX;
+  c.damage=hulldamage;
   static float too_far_dist = XMLSupport::parse_float (vs_config->getVariable ("graphics","mesh_far_percent",".8"));
   //c.mesh_seq=((toofar+rSize()>too_far_dist*g_game.zfar)/*&&draw_sequence==0*/)?NUM_ZBUF_SEQ:draw_sequence;
   c.mesh_seq=((toofar+((MeshType()==1)?0:rSize())>too_far_dist*g_game.zfar)/*&&draw_sequence==0*/)?NUM_ZBUF_SEQ:draw_sequence;
@@ -344,7 +346,7 @@ void Mesh::SelectCullFace (int whichdrawqueue) {
   }
   
 }
-void SetupCloakState (char cloaked,const GFXColor & CloakFX, vector <int> &specialfxlight) {
+void SetupCloakState (char cloaked,const GFXColor & CloakFX, vector <int> &specialfxlight, unsigned char hulldamage) {
     if (cloaked&MeshDrawContext::CLOAK) {
         GFXPushBlendMode ();
         if (cloaked&MeshDrawContext::GLASSCLOAK) {
@@ -359,17 +361,27 @@ void SetupCloakState (char cloaked,const GFXColor & CloakFX, vector <int> &speci
             }
             GFXBlendMode (SRCALPHA, INVSRCALPHA);
             GFXColorMaterial (AMBIENT|DIFFUSE);
-            GFXColorf(CloakFX);
+			if (hulldamage) {
+				GFXColor4f(CloakFX.r,CloakFX.g,CloakFX.b,CloakFX.a*hulldamage/255);
+			}else
+				GFXColorf(CloakFX);
         }
-    }
+    }else if (hulldamage) {
+		//ok now we go in and do the dirtying
+		GFXColorMaterial (AMBIENT|DIFFUSE);
+		GFXColor4f(1,1,1,hulldamage/255.);
+	}
 }
-static void RestoreCloakState (char cloaked, bool envMap) {
+static void RestoreCloakState (char cloaked, bool envMap,unsigned char damage) {
     if (cloaked&MeshDrawContext::CLOAK) {
         GFXColorMaterial (0);
         if (envMap)
             GFXEnable (TEXTURE1);
         GFXPopBlendMode ();
     }
+	if (damage) {
+		GFXColorMaterial(0);
+	}
 }
 static void SetupFogState (char cloaked) {
     if (cloaked&MeshDrawContext::FOG) {
@@ -439,21 +451,35 @@ void SetupGlowMapThirdPass(Texture * decal,unsigned int mat,BLENDFUNC blendsrc, 
     GFXDisable(DEPTHWRITE);
 	GFXDisable(TEXTURE1);
 }
-void RestoreGlowMapState(bool write_to_depthmap) { 
+extern void GFXSelectMaterialAlpha(const unsigned int, float);
+void SetupDamageMapFourthPass(Texture * decal,unsigned int mat, float polygon_offset) {
+	GFXPushBlendMode();			
+    GFXBlendMode (SRCALPHA,INVSRCALPHA);
+    decal->MakeActive();
+    float a,b;
+    GFXGetPolygonOffset(&a,&b);
+    GFXPolygonOffset (a, b-DAMAGE_PASS-polygon_offset);
+    GFXDisable(DEPTHWRITE);
+	GFXDisable(TEXTURE1);
+}
+
+void RestoreGlowMapState(bool write_to_depthmap, float polygonoffset,float NOT_USED_BUT_BY_HELPER=2) { 
   float a,b;
     GFXGetPolygonOffset(&a,&b);
-    GFXPolygonOffset (a, b+2);
+    GFXPolygonOffset (a, b+polygonoffset+NOT_USED_BUT_BY_HELPER);
 	if (write_to_depthmap) {
 		GFXEnable(DEPTHWRITE);
 	}
 	GFXEnable(TEXTURE1);
 	GFXPopBlendMode();				
 }
-
-void RestoreSpecMapState(bool envMap, bool write_to_depthmap) { 
+void RestoreDamageMapState(bool write_to_depthmap, float polygonoffset) {
+	RestoreGlowMapState(write_to_depthmap,polygonoffset,DAMAGE_PASS);
+}
+void RestoreSpecMapState(bool envMap, bool write_to_depthmap, float polygonoffset) { 
   float a,b;
     GFXGetPolygonOffset(&a,&b);
-    GFXPolygonOffset (a, b+1);
+    GFXPolygonOffset (a, b+1+polygonoffset);
     if (envMap) {
       GFXActiveTexture(1);
       GFXTextureAddOrModulate(1,false); //restore modulate
@@ -478,6 +504,26 @@ void Mesh::ProcessDrawQueue(int whichpass,int whichdrawqueue) {
     fprintf (stderr,"cloaking queues issue! Report to hellcatv@hotmail.com\nn%d\n%s",whichdrawqueue,hash_name.c_str());
     return;
   }
+  bool damagepassabort=false;
+  bool last_pass = whichpass+1>=Decal.size();
+  vector<MeshDrawContext> tmp_draw_queue;
+  if (last_pass)
+	  tmp_draw_queue.reserve(draw_queue->size());
+  if (whichpass==DAMAGE_PASS) {
+	  damagepassabort=true;
+	  vector<MeshDrawContext>::iterator i = draw_queue->begin();
+	  for (;i!=draw_queue->end();++i) {
+		  if ((*i).mesh_seq!=whichdrawqueue) {
+			  tmp_draw_queue.push_back(*i);
+		  }else {
+			  if ((*i).damage!=0){
+				  damagepassabort=false;
+			  }
+		  }
+	  }
+  }
+  if (!damagepassabort) {
+	  tmp_draw_queue.clear();
   if (whichdrawqueue==NUM_ZBUF_SEQ) {
 	  for (unsigned int i=0;i<draw_queue->size();i++) {
 		MeshDrawContext * c = &((*draw_queue)[i]);
@@ -513,7 +559,7 @@ void Mesh::ProcessDrawQueue(int whichpass,int whichdrawqueue) {
     GFXDisable(TEXTURE1);
   }
   vlist->BeginDrawState();	
-  vector<MeshDrawContext> tmp_draw_queue;
+
   switch (whichpass) {
   case 0:
 	  SetupSpecMapFirstPass (Decal,myMatNum,getEnvMap(),polygon_offset);
@@ -525,22 +571,28 @@ void Mesh::ProcessDrawQueue(int whichpass,int whichdrawqueue) {
   case 2:
 	  SetupGlowMapThirdPass (Decal[whichpass],myMatNum,ONE,GFXColor(1,1,1,1),polygon_offset);
 	  break;
+  case DAMAGE_PASS:
+	  SetupDamageMapFourthPass(Decal[whichpass],myMatNum,polygon_offset);
+	  break;
   }
   for(unsigned int draw_queue_index=0;draw_queue_index<draw_queue->size();++draw_queue_index) {	  
     MeshDrawContext &c =(*draw_queue)[draw_queue_index];
     if (c.mesh_seq!=whichdrawqueue) {
-		if (whichpass+1>=Decal.size()) {
+		if (last_pass) {
 			tmp_draw_queue.push_back (c);
 		}
 		continue;
     }
+	if (c.damage==0&&whichpass==DAMAGE_PASS)
+		continue;
     if (whichdrawqueue!=MESH_SPECIAL_FX_ONLY) {
       GFXLoadIdentity(MODEL);
       GFXPickLights (Vector (c.mat.p.i,c.mat.p.j,c.mat.p.k),rSize());
     }
     vector <int> specialfxlight;
     GFXLoadMatrixModel ( c.mat);
-    SetupCloakState (c.cloaked,c.CloakFX,specialfxlight);
+	unsigned char damaged=((whichpass==DAMAGE_PASS)?c.damage:0);
+    SetupCloakState (c.cloaked,c.CloakFX,specialfxlight,damaged);
     unsigned int i;
     for ( i=0;i<c.SpecialFX->size();i++) {
       int ligh;
@@ -552,7 +604,7 @@ void Mesh::ProcessDrawQueue(int whichpass,int whichdrawqueue) {
     for ( i=0;i<specialfxlight.size();i++) {
       GFXDeleteLight (specialfxlight[i]);
     }
-    RestoreCloakState(c.cloaked,getEnvMap());
+    RestoreCloakState(c.cloaked,getEnvMap(),damaged);
     
     if(0!=forcelogos&&!(c.cloaked&MeshDrawContext::NEARINVIS)) {
       forcelogos->Draw(c.mat);
@@ -566,22 +618,27 @@ void Mesh::ProcessDrawQueue(int whichpass,int whichdrawqueue) {
 	case 0:
 		break;
 	case 1:
-		RestoreSpecMapState(getEnvMap(),write_to_depthmap);
+		RestoreSpecMapState(getEnvMap(),write_to_depthmap,polygon_offset);
 		break;
 	case 2:
-		RestoreGlowMapState(write_to_depthmap);
+		RestoreGlowMapState(write_to_depthmap,polygon_offset);
+		break;
+	case DAMAGE_PASS:
+		RestoreDamageMapState(write_to_depthmap,polygon_offset);//nothin
 		break;
 	}  
   if (!getLighting()) {
     GFXEnable(LIGHTING);
   }
-  if (whichpass+1>=Decal.size()) {
-	  *draw_queue=tmp_draw_queue;
-  }
   if (!write_to_depthmap) {
     GFXEnable(DEPTHWRITE);//risky--for instance logos might be fubar!
   }
   RestoreCullFace(whichdrawqueue);
+  
+  }
+  if (last_pass) {
+	  *draw_queue=tmp_draw_queue;
+  }
 }
 void Mesh::CreateLogos(int faction, Flightgroup * fg) {
   numforcelogo=numsquadlogo =0;

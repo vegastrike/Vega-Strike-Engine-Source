@@ -78,7 +78,8 @@ struct MeshDrawContext {
   enum CLK {NONE=0x0,CLOAK=0x1,FOG=0x2, NEARINVIS=0x4, GLASSCLOAK=0x8};
   char cloaked;
   char mesh_seq;
-  MeshDrawContext(const Matrix & m):mat(m),CloakFX(1,1,1,1) { }
+  unsigned char damage;//0 is perfect 255 is dead
+  MeshDrawContext(const Matrix & m):mat(m),CloakFX(1,1,1,1),cloaked(NONE),damage(0) { }
 };
 using XMLSupport::EnumMap;
 using XMLSupport::AttributeList;
@@ -357,7 +358,7 @@ public:
   ///Returns center of this mesh
   Vector &Position() {return local_pos;}
   ///Draws lod pixel wide mesh at Transformation LATER
-  void Draw(float lod, const Matrix &m = identity_matrix, float toofar=1, short cloak=-1, float nebdist=0);
+  void Draw(float lod, const Matrix &m = identity_matrix, float toofar=1, short cloak=-1, float nebdist=0, unsigned char damage=0);
   ///Draws lod pixels wide, mesh at Transformation NOW. If centered, then will center on camera and disable cull
   void DrawNow(float lod, bool centered, const Matrix &m= identity_matrix, short cloak=-1,float nebdist=0);
   ///Will draw all undrawn meshes of this type

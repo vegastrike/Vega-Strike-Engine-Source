@@ -52,6 +52,36 @@ GFXBOOL /*GFXDRVAPI*/ GFXGetMaterial(const unsigned int number, GFXMaterial &mat
   material = materialinfo[number];
   return GFXTRUE;
 }
+void /*GFXDRVAPI*/ GFXSelectMaterialAlpha (const unsigned int number, float alpha) {
+  selectedmaterial=-1;
+  float matvect[4];
+  matvect[0] = materialinfo[number].ar;
+  matvect[1] = materialinfo[number].ag;
+  matvect[2] = materialinfo[number].ab;
+  matvect[3] = materialinfo[number].aa*alpha;
+  glMaterialfv(GL_FRONT, GL_AMBIENT, matvect);
+
+  matvect[0] = materialinfo[number].dr;
+  matvect[1] = materialinfo[number].dg;
+  matvect[2] = materialinfo[number].db;
+  matvect[3] = materialinfo[number].da*alpha;
+  glMaterialfv(GL_FRONT, GL_DIFFUSE, matvect);
+
+  matvect[0] = materialinfo[number].sr;
+  matvect[1] = materialinfo[number].sg;
+  matvect[2] = materialinfo[number].sb;
+  matvect[3] = materialinfo[number].sa*alpha;
+  glMaterialfv(GL_FRONT, GL_SPECULAR, matvect);
+
+  matvect[0] = materialinfo[number].er;
+  matvect[1] = materialinfo[number].eg;
+  matvect[2] = materialinfo[number].eb;
+  matvect[3] = materialinfo[number].ea*alpha;
+  glMaterialfv(GL_FRONT, GL_EMISSION, matvect);
+
+	glMaterialfv(GL_FRONT, GL_SHININESS, &materialinfo[number].power);
+
+}
 const float zerovect[4]={0.0};
 void /*GFXDRVAPI*/ GFXSelectMaterialHighlights (const unsigned int number, const GFXColor &ambient, const GFXColor &diffuse, const GFXColor &specular, const GFXColor & emissive) {
   selectedmaterial=-1;

@@ -291,6 +291,8 @@ Unit::Unit (std::vector <Mesh *> & meshes, bool SubU, int fact) {
   image->cockpit_damage=NULL;
   SetAI (new Order());
   Init();
+  hull=1000;
+  maxhull=100000;
   this->faction = fact;
   SubUnit = SubU;
   meshdata = meshes;

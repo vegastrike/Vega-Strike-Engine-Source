@@ -495,7 +495,9 @@ void GameUnit<UnitType>::Draw(const Transformation &parent, const Matrix &parent
   if (hull <0) {
     Explode(true, GetElapsedTime());
   }
-  float damagelevel=hull/maxhull;  
+  float damagelevel=hull/maxhull;
+  unsigned char chardamage=(char)(damagelevel*255);
+  chardamage=255-chardamage;
   bool On_Screen=false;
   bool myparent = (this==_Universe->AccessCockpit()->GetParent());
   if ((!(invisible&INVISUNIT))&&((!(invisible&INVISCAMERA))||(!myparent))) {
@@ -534,7 +536,7 @@ void GameUnit<UnitType>::Draw(const Transformation &parent, const Matrix &parent
       if (d) {  //d can be used for level of detail shit
 	d = (TransformedPosition-_Universe->AccessCamera()->GetPosition().Cast()).Magnitude();
 	if ((lod =g_game.detaillevel*g_game.x_resolution*2*meshdata[i]->rSize()/GFXGetZPerspective((d-meshdata[i]->rSize()<g_game.znear)?g_game.znear:d-meshdata[i]->rSize()))>=g_game.detaillevel) {//if the radius is at least half a pixel (detaillevel is the scalar... so you gotta make sure it's above that
-	  meshdata[i]->Draw(lod,*ctm,d,cloak,(_Universe->AccessCamera()->GetNebula()==nebula&&nebula!=NULL)?-1:0);//cloakign and nebula
+	  meshdata[i]->Draw(lod,*ctm,d,cloak,(_Universe->AccessCamera()->GetNebula()==nebula&&nebula!=NULL)?-1:0,chardamage);//cloakign and nebula
 	  On_Screen=true;
 	} else {
 
