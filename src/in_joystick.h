@@ -85,7 +85,11 @@ class JoyStick {
 
     float joy_axis[MAX_AXES];
 
+#if defined(IRIX)	// could be POSIX type uchar_t?
+	uchar_t digital_hat[MAX_DIGITAL_HATSWITCHES];
+#else
     Uint8 digital_hat[MAX_DIGITAL_HATSWITCHES];
+#endif
 
     int joy_buttons;
     bool joy_available;
