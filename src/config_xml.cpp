@@ -245,6 +245,7 @@ void GameVegaConfig::initCommandMap(){
   command_map["PauseKey"]=pause_key;
   command_map["JumpKey"]=FlyByKeyboard::JumpKey;
   command_map["AutoKey"]=FlyByKeyboard::AutoKey;
+  command_map["SwitchCombatMode"]=FlyByKeyboard::SwitchCombatModeKey;
   command_map["StartKey"]=FlyByKeyboard::StartKey ;
   command_map["StopKey"]=FlyByKeyboard::StopKey ;
   command_map["UpKey"]=FlyByKeyboard::UpKey ;
