@@ -1,3 +1,10 @@
+2001-11-08 Daniel Horn <hellcatv@hotmail.com>
+	* made lights resolution even less so that the sun's melting light won't take up all space
+	* fixme lights should have more levels of grainulairty in the future
+	* added TargetNearest and TargetThreat commands
+	* fixed some problems near the end of the range of the zbuffer....
+	* fixed AI to target near starships and to change targets every now and then for inaccessible stuff (eg missiles)
+
 2001-11-07 Daniel Horn <hellcatv@hotmail.com>
 	
 	* made convex objects be allowed to be farther than zfar away
