@@ -890,7 +890,7 @@ void generateStarSystem (string datapath, int seed, string sector, string system
   static int meangas = XMLSupport::parse_int (vs_config->getVariable("galaxy","MeanGasGiants","1"));
   static int meanplanets = XMLSupport::parse_int (vs_config->getVariable("galaxy","MeanPlanets","5"));
   static int meanmoons = XMLSupport::parse_int (vs_config->getVariable("galaxy","MeanMoons","2"));
-  static int meannaturalphenomena = XMLSupport::parse_int (vs_config->getVariable("galaxy","MeanNaturalPhenomena","0"));
+  static int meannaturalphenomena = XMLSupport::parse_int (vs_config->getVariable("galaxy","MeanNaturalPhenomena","1"));
   static int meanbases = XMLSupport::parse_int (vs_config->getVariable("galaxy","MeanStarBases","2"));
   compactness = compac*compactness_scale;
   if (seed)
@@ -902,7 +902,8 @@ void generateStarSystem (string datapath, int seed, string sector, string system
   nument[1]=pushTowardsMean(meangas,numgasgiants);
   nument[2]=pushTowardsMean(meanplanets,numrockyplanets);
   nument[3]=pushTowardsMean(meanmoons,nummoons);
-  numun[0]=pushTowardsMean(meannaturalphenomena,numnaturalphenomena);
+  int nat = pushTowardsMean(meannaturalphenomena,numnaturalphenomena);
+  numun[0]= nat>numnaturalphenomena?nat:numnaturalphenomena;
   numun[1]=pushTowardsMean(meanbases,numstarbases);
   fprintf (stderr,"star %d gas %d plan %d moon %d, natural %d, bases %d",nument[0],nument[1],nument[2],nument[3],numun[0],numun[1]); 
   starradius.push_back (sunradius);
