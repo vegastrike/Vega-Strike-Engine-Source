@@ -55,6 +55,7 @@ static std::vector <Animation *>JumpAnimations;
 static std::vector <Animation *>VolatileJumpAnimations;
 static unsigned int AddJumpAnimation (const Vector & pos, const float size, bool mvolatile=false ) {
   std::vector <Animation *> *ja= mvolatile?&VolatileJumpAnimations:&JumpAnimations;
+  static Animation * cachedani=new Animation (vs_config->getVariable ("graphics","jumpgate","explosion_orange.ani").c_str(),true,.1,MIPMAP,false);
   Animation * ani=new Animation (vs_config->getVariable ("graphics","jumpgate","explosion_orange.ani").c_str(),true,.1,MIPMAP,false);
   unsigned int i;
   if (mvolatile||AnimationNulls.empty()){
@@ -165,7 +166,8 @@ void StarSystem::ProcessPendingJumps() {
     }
     Vector p,q,r;
     un->GetOrientation (p,q,r);
-    unsigned int myani = AddJumpAnimation (un->LocalPosition(),un->rSize()*10,true);
+      static float JumpStarSize = XMLSupport::parse_float (vs_config->getVariable ("graphics","jumpgatesize","1.75"));
+    unsigned int myani = AddJumpAnimation (un->LocalPosition(),un->rSize()*JumpStarSize,true);
     VolatileJumpAnimations[myani]->SetOrientation (p,q,r);
     delete pendingjump[kk];
     pendingjump.erase (pendingjump.begin()+kk);
