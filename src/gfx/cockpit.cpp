@@ -1490,7 +1490,10 @@ void GameCockpit::Draw() {
       univmap[_Universe->CurrentCockpit()].Draw();
     }
     // Draw the arrow to the target.
-    DrawArrowToTarget(parent.GetUnit(), parent.GetUnit()->Target());
+    static bool drawarrow = XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","draw_arrow_to_target","true"));
+    if (drawarrow) {
+      DrawArrowToTarget(parent.GetUnit(), parent.GetUnit()->Target());
+    }
   }
 
   if (die) {
