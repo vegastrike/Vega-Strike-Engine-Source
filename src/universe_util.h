@@ -75,6 +75,11 @@ namespace UniverseUtil {
 ///this plays an image (explosion or warp animation) at a location
 	void playAnimation(string aniName, QVector loc, float size);
 	void playAnimationGrow(string aniName, QVector loc, float size,float growpercent);
+	///tells the respective flightgroups in this system to start shooting at each other
+	void TargetEachOther (string fgname, string faction, string enfgname, string enfaction);
+	///tells the respective flightgroups in this system to stop killing each other urgently...they may still attack--just not warping and stuff
+	void StopTargettingEachOther(string fgname, string faction, string enfgname, string enfaction);
+	
 ///this ends the mission with either success or failure
 	void terminateMission(bool term);
 ///this gets the player belonging to this mission

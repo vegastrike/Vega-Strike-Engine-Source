@@ -17,6 +17,7 @@
 #include "load_mission.h"
 #include "configxml.h"
 #include "vs_globals.h"
+#include "cmd/unit_util.h"
 //extern class Music *muzak;
 //extern unsigned int AddAnimation (const QVector & pos, const float size, bool mvolatile, const std::string &name, float percentgrow );
 extern Unit&GetUnitMasterPartList();
@@ -113,6 +114,56 @@ namespace UniverseUtil {
 	string getSystemName() {
 		return activeSys->getName();
 	}
+	///tells the respective flightgroups in this system to start shooting at each other
+	void TargetEachOther (string fgname, string faction, string enfgname, string enfaction){
+		int fac = FactionUtil::GetFaction(faction.c_str());
+		int enfac = FactionUtil::GetFaction(enfaction.c_str());		
+		un_iter i=_Universe->activeStarSystem()->getUnitList().createIterator();
+		Unit * un=i.current();
+		Unit * en=NULL;
+		Unit * al=NULL;
+		while (un && ((NULL== en) || (NULL==al))){
+			if (un->faction==enfac && UnitUtil::getFlightgroupName(un)==enfgname) {
+				if ((NULL== en) || (rand()%3==0)){
+					en=un;
+				}
+			}
+			if (un->faction==fac && UnitUtil::getFlightgroupName(un)==fgname){
+				al=un;
+			}
+			un=i.next();
+		}
+		if (en && al) {
+			UnitUtil::setFlightgroupLeader(al,al);
+			al->Target(en);
+			UnitUtil::setFgDirective (al,"A."); //attack target, darent change target!
+			UnitUtil::setFlightgroupLeader(en,en);
+			en->Target(al);
+			UnitUtil::setFgDirective (en,"h");//help me out here!
+		}
+	}
+	///tells the respective flightgroups in this system to stop killing each other urgently...they may still attack--just not warping and stuff
+	void StopTargettingEachOther(string fgname, string faction, string enfgname, string enfaction){
+		int fac = FactionUtil::GetFaction(faction.c_str());
+		int enfac = FactionUtil::GetFaction(enfaction.c_str());	 		
+		un_iter i=_Universe->activeStarSystem()->getUnitList().createIterator();
+		Unit * un=i.current();
+		int clear = 0;
+		while (un&&clear!=3) {
+			if ((un->faction==enfac && UnitUtil::getFlightgroupName(un)==enfgname)) {
+				clear|=1;
+				UnitUtil::setFgDirective (un,"b");				
+			}else
+				if (un->faction==fac && UnitUtil::getFlightgroupName(un)==fgname) {
+					clear|=2;
+					UnitUtil::setFgDirective (un,"b");
+					//check to see that its' in this flightgroup or something :-)
+				}
+			un=i.next();
+		}
+	}
+	
+	
 	bool systemInMemory(string nam) {
 	  unsigned int nass = _Universe->getNumActiveStarSystem();
 	  for (unsigned int i=0;i<nass;i++) {

@@ -57,3 +57,6 @@ voidEXPORT_UTIL(playAnimationGrow)
 voidEXPORT_UTIL(micro_sleep)
 EXPORT_UTIL(getCurrentPlayer,0)
 voidEXPORT_UTIL(addParticle)
+voidEXPORT_UTIL(TargetEachOther)
+voidEXPORT_UTIL(StopTargettingEachOther)	
+	
