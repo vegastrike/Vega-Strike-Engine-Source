@@ -73,7 +73,8 @@ void PlanetaryOrbit::Execute() {
   //unuseddouble radius =  sqrt((x_offset - focus).MagnitudeSquared() + (y_offset - focus).MagnitudeSquared());
   theta+=velocity*SIMULATION_ATOM;
   parent->Velocity =parent->cumulative_velocity= ((origin - focus + x_offset+y_offset-parent->LocalPosition())*(1./SIMULATION_ATOM)).Cast();
-  const int Unreasonable_value=(int)(100000/SIMULATION_ATOM);
+  //const int Unreasonable_value=(int)(100000/SIMULATION_ATOM);
+  const float Unreasonable_value = XMLSupport::parse_float(vs_config->getVariable("physics","velocity_max","10000"));
   if (parent->Velocity.Dot (parent->Velocity)>Unreasonable_value*Unreasonable_value) {
     parent->Velocity.Set (0,0,0);
     parent->SetCurPosition (origin-focus+x_offset+y_offset);
@@ -374,7 +375,7 @@ static void beginPlanetElement (void *userDataVoid, const XML_Char *name, const 
 static void endPlanetElement (void *userData, const XML_Char *name) {
 }
 
-static std::map<std::string, std::string> readPlanetTypes(std::string filename) {
+std::map<std::string, std::string> readPlanetTypes(std::string filename) {
 	std::map<std::string, std::string> planetTypes;
 	VSFile f;
 	VSError err = f.OpenReadOnly( filename, UniverseFile);
