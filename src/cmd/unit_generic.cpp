@@ -20,6 +20,7 @@
 #include "gfx/cockpit_generic.h"
 #include <algorithm>
 #include "cmd/ai/ikarus.h"
+#include "role_bitmask.h"
 #include "unit_const_cache.h"
 #ifdef _WIN32
 #define strcasecmp stricmp
@@ -614,9 +615,43 @@ void Unit::Init()
   //static float lc =XMLSupport::parse_float (vs_config->getVariable ("physics","lock_cone",".8"));// DO NOT CHANGE see unit_customize.cpp
   //  Fire();
 }
-void Unit::Fire (unsigned int bitmask) {
-//FIXME FIRE
-	//FIXME MULTIPLAYE
+void Unit::Fire (unsigned int weapon_type_bitmask) {
+    if (cloaking>=0)
+        return;
+    vector<Mount *>::const_iterator i = mounts.begin();//note to self: if vector<Mount *> is ever changed to vector<Mount> remove the const_ from the const_iterator
+    for (;i!=mounts.end();++i) {
+        if ((*i)->type->type==weapon_info::BEAM) {
+            if ((*i)->type->EnergyRate*SIMULATION_ATOM>energy) {
+                (*i)->UnFire();
+                continue;
+            }
+        }else{
+            if ((*i)->type->EnergyRate>energy)
+                continue;
+        }
+        const bool mis = (*i)->type->type==weapon_info::PROJECTILE;
+        const bool locked_on = (*i)->time_to_lock<=0;
+        const bool lockable_weapon = (*i)->type->LockTime>0;
+        const bool autotracking_gun =(!mis)&&0!=((*i)->size&weapon_info::AUTOTRACKING)&&locked_on;
+        const bool fire_non_autotrackers = (0==(weapon_type_bitmask&ROLES::FIRE_ONLY_AUTOTRACKERS));
+        const bool locked_missile = (mis&&locked_on&&lockable_weapon);
+        const bool missile_and_want_to_fire_missiles = (mis&&(weapon_type_bitmask&ROLES::FIRE_MISSILES));
+        const bool gun_and_want_to_fire_guns =((!mis)&&(weapon_type_bitmask&ROLES::FIRE_GUNS));
+        
+        if (fire_non_autotrackers||autotracking_gun||locked_missile) {
+            if ((ROLES::EVERYTHING_ELSE&weapon_type_bitmask&(*i)->type->role_bits)
+                ||(*i)->type->role_bits==0) {
+                if ((locked_on&&missile_and_want_to_fire_missiles)
+                    ||gun_and_want_to_fire_guns) {
+                    if ((*i)->Fire(owner==NULL?this:owner,mis)) {
+                        energy -=apply_float_to_short((*i)->type->type==weapon_info::BEAM?(*i)->type->EnergyRate*SIMULATION_ATOM:(*i)->type->EnergyRate);
+                        if (mis) weapon_type_bitmask &= (~ROLES::FIRE_MISSILES);//fire only 1 missile at a time
+                    }
+                }
+            }
+        }
+    }
+
 }
 static bool CheckAccessory (Unit * tur) {
   bool accessory = tur->name.find ("accessory")!=string::npos;

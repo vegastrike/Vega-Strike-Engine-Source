@@ -16,30 +16,14 @@
 #include "gfx/cockpit.h"
 #include "config_xml.h"
 #include "force_feedback.h"
-
+#include "role_bitmask.h"
 extern unsigned short apply_float_to_short (float tmp);
 
 extern void AdjustMatrix (Matrix &mat, Unit * target, float speed, bool lead, float cone);
 
 template <class UnitType>
-void GameUnit<UnitType>::Fire (unsigned int Missile) {//FIXME FIRE
-  if (cloaking>=0)
-    return;
-  for (int i=0;i<GetNumMounts();i++) {
-    if (mounts[i]->type->type==weapon_info::BEAM) {
-      if (mounts[i]->type->EnergyRate*SIMULATION_ATOM>energy) {
-	mounts[i]->UnFire();
-	continue;
-      }
-    }else{ 
-      if (mounts[i]->type->EnergyRate>energy) 
-	continue;
-    }
-    
-    if (mounts[i]->Fire(owner==NULL?this:owner,Missile)) {
-      energy -=apply_float_to_short( mounts[i]->type->type==weapon_info::BEAM?mounts[i]->type->EnergyRate*SIMULATION_ATOM:mounts[i]->type->EnergyRate);
-    }
-  }
+void GameUnit<UnitType>::Fire (unsigned int weapon_type_bitmask) {//FIXME FIRE
+  UnitType::Fire(weapon_type_bitmask);
 }
 
 template <class UnitType>

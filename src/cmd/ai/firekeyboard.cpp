@@ -1034,10 +1034,10 @@ void FireKeyboard::Execute () {
     ChooseTargets(parent,TargAll,false);
     refresh_target=true;
   }
-  if (f().firekey==PRESS||f().jfirekey==PRESS||j().firekey==DOWN||j().jfirekey==DOWN) 
-    parent->Fire(false);
+  if (f().firekey==PRESS||f().jfirekey==PRESS||j().firekey==DOWN||j().jfirekey==DOWN)
+      parent->Fire(ROLES::EVERYTHING_ELSE|ROLES::FIRE_GUNS);
   if (f().missilekey==DOWN||f().missilekey==PRESS||j().jmissilekey==PRESS||j().jmissilekey==DOWN) {
-    parent->Fire(true);
+    parent->Fire(ROLES::FIRE_MISSILES|ROLES::EVERYTHING_ELSE);
     if (f().missilekey==PRESS)
       f().missilekey = DOWN;
     if (j().jmissilekey==PRESS)

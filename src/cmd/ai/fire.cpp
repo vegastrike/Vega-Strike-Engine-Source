@@ -6,6 +6,7 @@
 #include "vs_globals.h"
 #include "cmd/unit_util.h"
 #include "cmd/script/flightgroup.h"
+#include "cmd/role_bitmask.h"
 using Orders::FireAt;
 void FireAt::ReInit (float reaction_time, float aggressivitylevel) {
   static float missileprob = XMLSupport::parse_float (vs_config->getVariable ("AI","Firing","MissileProbability",".01"));
@@ -146,54 +147,24 @@ FireAt::~FireAt() {
 #endif
 
 }
-#if 0
-bool FireAt::DealWithMultipleTargets () {
-  UnitCollection::UnitIterator iter (targets->createIterator());    
-  if (!iter.current()) {
-    ChooseTargets(2);
-    iter = targets->createIterator();
-  }
-  Unit * targ;
-  while ((targ = iter.current())!=NULL) {
-    if (ShouldFire(targ))
-      return true;
-    iter.advance();
-  }
-  return false;
-}
-#endif
+
 void FireAt::FireWeapons(bool shouldfire, bool lockmissile) {
-  if (lockmissile) {
-    parent->Fire (true);
-    parent->ToggleWeapon(true);
-  }
-  int locked = parent->LockMissile();
-  
-	if (((float(rand())/((float)RAND_MAX))<missileprobability)/**SIMULATION_ATOM*/) {
-       if(locked==1){
-	 //		fprintf(stderr,"AI firing missile!\n");
-	  	parent->Fire(true);
-		parent->ToggleWeapon(true);//change missiles to only fire 1
-	  }
-	}
-  if (shouldfire) {
-    if (((float(rand())/((float)RAND_MAX))<missileprobability)/**SIMULATION_ATOM*/) {
-      
-      if (locked== -1) {
-		parent->Fire(true);
-		parent->ToggleWeapon(true);//change missiles to only fire 1
-      }
-	 
+    if (shouldfire&&delay<rxntime) {
+        delay+=SIMULATION_ATOM;
+        return;
+    }else if (!shouldfire) {
+        delay=0;
     }
-    if (delay>rxntime) {
-      parent->Fire(false);
-    } else {
-      delay +=SIMULATION_ATOM;
+    unsigned int firebitm = ROLES::EVERYTHING_ELSE;
+    Unit * un=parent->Target();
+    if (un) {
+        firebitm = ((1 << parent->combatRole()) |
+                    ROLES::FIRE_GUNS|
+                    (shouldfire?0:ROLES::FIRE_ONLY_AUTOTRACKERS)|
+                    (((float)rand())/
+                     ((float)RAND_MAX)<missileprobability)?ROLES::FIRE_MISSILES:0);
     }
-  } else {
-    delay =0;
-    parent->UnFire();
-  }
+    parent->Fire(firebitm);
 }
 
 bool FireAt::isJumpablePlanet(Unit * targ) {
