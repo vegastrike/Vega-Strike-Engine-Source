@@ -1301,7 +1301,7 @@ int appendmeshfromxml(XML memfile, FILE* Outputfile){
 		bytebuf= memfile.detailtexture.name[nametmp];
 		runningbytenum+=fwrite(&bytebuf,sizeof(char),1,Outputfile);//char by char name of detail texture
 	}
-	int padlength=(namelen%sizeof(int));
+	int padlength=(sizeof(int)-(namelen%sizeof(int)))%sizeof(int);
 	for(nametmp=0;nametmp<padlength;nametmp++){
 		bytebuf=0;
 		runningbytenum+=fwrite(&bytebuf,sizeof(char),1,Outputfile);//Padded so that next field is word aligned
@@ -1330,12 +1330,12 @@ int appendmeshfromxml(XML memfile, FILE* Outputfile){
 	int namelen=memfile.textures[texnum].name.size();
 	intbuf= VSSwapHostIntToLittle(namelen);
 	runningbytenum+=sizeof(int)*fwrite(&intbuf,sizeof(int),1,Outputfile);//Length of name of texture # texnum
-        int nametmp;
+    int nametmp;
 	for(nametmp=0;nametmp<namelen;nametmp++){
 		bytebuf= memfile.textures[texnum].name[nametmp];
 		runningbytenum+=fwrite(&bytebuf,sizeof(char),1,Outputfile);//Name of texture # texnum
 	}
-	int padlength=(namelen%sizeof(int));
+	int padlength=(sizeof(int)-(namelen%sizeof(int)))%sizeof(int);
 	for(nametmp=0;nametmp<padlength;nametmp++){
 		bytebuf=0;
 		runningbytenum+=fwrite(&bytebuf,sizeof(char),1,Outputfile);//Padded so that next field is word aligned
@@ -1394,7 +1394,7 @@ int appendmeshfromxml(XML memfile, FILE* Outputfile){
 		bytebuf= memfile.animdefs[anim].name[nametmp];
 		runningbytenum+=fwrite(&bytebuf,sizeof(char),1,Outputfile);//char by char of above
 	  }
-	  int padlength=(namelen%sizeof(int));
+	  int padlength=(sizeof(int)-(namelen%sizeof(int)))%sizeof(int);
 	  for(nametmp=0;nametmp<padlength;nametmp++){
 		bytebuf=0;
 		runningbytenum+=fwrite(&bytebuf,sizeof(char),1,Outputfile);//Padded so that next field is word aligned
