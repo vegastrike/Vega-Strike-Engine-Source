@@ -65,6 +65,7 @@ private:
    * In addition each has a list of other factions and the relationship to them
    */
   class Faction {
+
   public:
     /**
      * Faction_stuff holds the index and relationship of each and every
@@ -81,6 +82,7 @@ private:
       } stats;
       ///A value between 0 and 1 indicating my attitude towards index
       float relationship;
+      class FSM * conversation;//a conversation any two factions can have
     };		
   public:
     /**
@@ -130,6 +132,8 @@ private:
    * -1 is mad. <0 will attack
    */
   float GetRelation (const int myfaction, const int theirfaction);
+  //Returns a conversation that a myfaction might have with a theirfaction
+  FSM* GetConversation (const int myfaction, const int theirfaction);
   void activateLightMap();
   ///Returns force logo
   Texture * getForceLogo (int faction);

@@ -92,6 +92,8 @@ public:
   virtual void SetParent(Unit *parent1) {parent = parent1;};
   ///Sends a communication message from the Unit (encapulated in c) to this unit
   virtual void Communicate (const class CommunicationMessage &c);
+  ///responds (or does not) to certain messages in the message queue
+  virtual void ProcessCommunicationMessages();
   /// return pointer to order or NULL if not found
   Order *findOrder(Order *ord);
   /// erase that order from the list
