@@ -1,5 +1,14 @@
 2001-12-21 Alexander Rawass <alexannika@users.sourceforge.net>
 	
+	* modified Cockpit:
+	  - to draw a box around all units
+	    config var drawAllTargetBoxes controls that behaviour
+	  - to always draw the ITTS (var drawAlwaysITTS)
+	  - to use more colors on the radar/the target boxes
+	
+
+2001-12-21 Alexander Rawass <alexannika@users.sourceforge.net>
+	
 	* modified configure.in
 	  - added python1.5 to search for python libs
 	  - fixed setting of have_boost_lib

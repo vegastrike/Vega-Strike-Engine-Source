@@ -13,6 +13,8 @@
 #include "lin_time.h"//for fps
 #include "config_xml.h"
 #include "lin_time.h"
+#include "cmd/script/mission.h"
+#include "cmd/script/msgcenter.h"
 
 #include <assert.h>	// needed for assert() calls
 
@@ -25,18 +27,32 @@ static void LocalToRadar (const Vector & pos, float &s, float &t) {
   t = pos.j/t;
 }
 
-static GFXColor relationToColor (float relation) {
-  static GFXColor friendly=GFXColor(-1,-1,-1,-1);
-  static GFXColor enemy=GFXColor(-1,-1,-1,-1);
-  static GFXColor neutral=GFXColor(-1,-1,-1,-1);
-  if (friendly.r==-1) {///this won't be that be a speed hit, will it?
-    vs_config->getColor ("enemy",&enemy.r);
-    vs_config->getColor ("friend",&friendly.r);
-    vs_config->getColor ("neutral",&neutral.r);
-  }
-  if (relation>=0) {
+GFXColor Cockpit::unitToColor (Unit *un,Unit *target) {
+ 	if(target->isUnit()==PLANETPTR){
+	  // this is a planet
+	  return planet;
+	}
+	else if(target==un->Target()){
+	  // my target
+	  return targeted;
+	}
+	else if(target->Target()==un){
+	  // the other ships is targetting me
+	  return targetting;
+	}
+
+	// other spaceships
+	return relationToColor(_Universe->GetRelation(un->faction,target->faction));
+	
+}
+
+GFXColor Cockpit::relationToColor (float relation) {
+ if (relation>0) {
     return GFXColor (relation*friendly.r+(1-relation)*neutral.r,relation*friendly.g+(1-relation)*neutral.g,relation*friendly.b+(1-relation)*neutral.b,relation*friendly.a+(1-relation)*neutral.a);
-  } else { 
+  } 
+ else if(relation==0){
+   return GFXColor(neutral.r,neutral.g,neutral.b,neutral.a);
+}else { 
     return GFXColor (-relation*enemy.r+(1+relation)*neutral.r,-relation*enemy.g+(1+relation)*neutral.g,-relation*enemy.b+(1+relation)*neutral.b,-relation*enemy.a+(1+relation)*neutral.a);
   }
 }
@@ -67,6 +83,57 @@ void Cockpit::DrawNavigationSymbol (const Vector &Loc, const Vector & P, const V
 
   GFXEnd();
 }
+
+void Cockpit::DrawTargetBoxes(){
+  float speed,range;
+  
+  Unit * un = parent.GetUnit();
+  if (!un)
+    return;
+
+  StarSystem *ssystem=_Universe->activeStarSystem();
+  UnitCollection *unitlist=ssystem->getUnitList();
+  //UnitCollection::UnitIterator *uiter=unitlist->createIterator();
+  Iterator *uiter=unitlist->createIterator();
+  
+  Vector CamP,CamQ,CamR;
+  _Universe->AccessCamera()->GetPQR(CamP,CamQ,CamR);
+ 
+  GFXDisable (TEXTURE0);
+  GFXDisable (TEXTURE1);
+  GFXDisable (DEPTHTEST);
+  GFXDisable (DEPTHWRITE);
+  GFXBlendMode (SRCALPHA,INVSRCALPHA);
+  GFXDisable (LIGHTING);
+
+  Unit *target=uiter->current();
+  while(target!=NULL){
+    if(target!=un){
+        Vector Loc(target->Position());
+
+	GFXColor drawcolor=unitToColor(un,target);
+	GFXColorf(drawcolor);
+
+	if(target->isUnit()==UNITPTR){
+	  GFXBegin (GFXLINESTRIP); 
+	  GFXVertexf (Loc+(CamP+CamQ)*target->rSize());
+	  GFXVertexf (Loc+(CamP-CamQ)*target->rSize());
+	  GFXVertexf (Loc+(-CamP-CamQ)*target->rSize());
+	  GFXVertexf (Loc+(CamQ-CamP)*target->rSize());
+	  GFXVertexf (Loc+(CamP+CamQ)*target->rSize());
+	  GFXEnd();
+	}
+    }
+    target=uiter->advance();
+  }
+
+  GFXEnable (TEXTURE0);
+  GFXEnable (DEPTHTEST);
+  GFXEnable (DEPTHWRITE);
+
+}
+
+
 void Cockpit::DrawTargetBox () {
   float speed,range;
   
@@ -88,7 +155,25 @@ void Cockpit::DrawTargetBox () {
   GFXBlendMode (SRCALPHA,INVSRCALPHA);
   GFXDisable (LIGHTING);
   DrawNavigationSymbol (un->GetComputerData().NavPoint,CamP,CamQ, CamR.Dot(un->GetComputerData().NavPoint-un->Position()));
-  GFXColorf (un->GetComputerData().radar.color?relationToColor(_Universe->GetRelation(un->faction,target->faction)):GFXColor(1,1,1,1));
+  GFXColorf (un->GetComputerData().radar.color?unitToColor(un,target):GFXColor(1,1,1,1));
+
+#if 0
+  Vector my_loc(un->Position());
+  Unit *targets_target=target->Target();
+  if(targets_target!=NULL){
+    Vector ttLoc(targets_target->Position());
+    GFXBegin(GFXLINESTRIP);
+    GFXVertexf(Loc);
+    GFXVertexf(ttLoc);
+    GFXEnd();
+  }
+
+  GFXBegin (GFXLINESTRIP);
+  GFXVertexf(my_loc);
+  GFXVertexf(Loc);
+  GFXEnd();
+#endif
+
   GFXBegin (GFXLINESTRIP); 
   GFXVertexf (Loc+(CamP+CamQ)*target->rSize());
   GFXVertexf (Loc+(CamP-CamQ)*target->rSize());
@@ -96,17 +181,21 @@ void Cockpit::DrawTargetBox () {
   GFXVertexf (Loc+(CamQ-CamP)*target->rSize());
   GFXVertexf (Loc+(CamP+CamQ)*target->rSize());
   GFXEnd();
-  if (un->GetComputerData().itts) {
+  if (always_itts || un->GetComputerData().itts) {
     un->getAverageGunSpeed (speed,range);
     float err = un->GetComputerData().radar.error*(1+.01*(1-un->CloakVisible()));
-    Loc = target->PositionITTS (un->Position(),speed)+10*err*Vector (-.5*.25*un->rSize()+rand()*.25*un->rSize()/RAND_MAX,-.5*.25*un->rSize()+rand()*.25*un->rSize()/RAND_MAX,-.5*.25*un->rSize()+rand()*.25*un->rSize()/RAND_MAX);
+   Vector iLoc = target->PositionITTS (un->Position(),speed)+10*err*Vector (-.5*.25*un->rSize()+rand()*.25*un->rSize()/RAND_MAX,-.5*.25*un->rSize()+rand()*.25*un->rSize()/RAND_MAX,-.5*.25*un->rSize()+rand()*.25*un->rSize()/RAND_MAX);
     
     GFXBegin (GFXLINESTRIP);
-    GFXVertexf (Loc+(CamP)*.25*un->rSize());
-    GFXVertexf (Loc+(-CamQ)*.25*un->rSize());
-    GFXVertexf (Loc+(-CamP)*.25*un->rSize());
-    GFXVertexf (Loc+(CamQ)*.25*un->rSize());
-    GFXVertexf (Loc+(CamP)*.25*un->rSize());
+#if 0
+    GFXVertexf(Loc);
+    GFXVertexf(iLoc);
+#endif
+    GFXVertexf (iLoc+(CamP)*.25*un->rSize());
+    GFXVertexf (iLoc+(-CamQ)*.25*un->rSize());
+    GFXVertexf (iLoc+(-CamP)*.25*un->rSize());
+    GFXVertexf (iLoc+(CamQ)*.25*un->rSize());
+    GFXVertexf (iLoc+(CamP)*.25*un->rSize());
     GFXEnd();
   }
   GFXEnable (TEXTURE0);
@@ -141,7 +230,7 @@ void Cockpit::DrawBlips (Unit * un) {
 	continue;
       }
       LocalToRadar (localcoord,s,t);
-      GFXColor localcol (radarl->color?relationToColor (_Universe->GetRelation(un->faction,target->faction)):GFXColor(1,1,1,1));
+      GFXColor localcol (radarl->color?unitToColor (un,target):GFXColor(1,1,1,1));
       GFXColorf (localcol);
       if (target==makeBigger) {
 	GFXEnd();
@@ -307,11 +396,33 @@ Cockpit::Cockpit (const char * file, Unit * parent): parent (parent),textcol (1,
   for (int i=0;i<NUMGAUGES;i++) {
     gauges[i]=NULL;
   }
+
+  draw_all_boxes=XMLSupport::parse_bool(vs_config->getVariable("graphics","drawAllTargetBoxes","false"));
+  always_itts=XMLSupport::parse_bool(vs_config->getVariable("graphics","drawAlwaysITTS","false"));
+  friendly=GFXColor(-1,-1,-1,-1);
+  enemy=GFXColor(-1,-1,-1,-1);
+  neutral=GFXColor(-1,-1,-1,-1);
+  targeted=GFXColor(-1,-1,-1,-1);
+  targetting=GFXColor(-1,-1,-1,-1);
+  planet=GFXColor(-1,-1,-1,-1);
+  if (friendly.r==-1) {
+    vs_config->getColor ("enemy",&enemy.r);
+    vs_config->getColor ("friend",&friendly.r);
+    vs_config->getColor ("neutral",&neutral.r);
+    vs_config->getColor("target",&targeted.r);
+    vs_config->getColor("targetting_ship",&targetting.r);
+    vs_config->getColor("planet",&planet.r);
+  }
+ 
+
   Init (file);
 }
 void Cockpit::Draw() {
   GFXDisable (TEXTURE1);
   DrawTargetBox();
+  if(draw_all_boxes){
+    DrawTargetBoxes();
+  }
   GFXHudMode (true);
   GFXColor4f (1,1,1,1);
   GFXBlendMode (ONE,ONE);
@@ -365,6 +476,7 @@ void Cockpit::Draw() {
 			text->GetCharSize (x,y);
 			text->SetCharSize (x*4,y*4);
 			text->SetPos (0-(x*2*14),0-(y*2));
+			mission->msgcenter->add("game","all","You Have Died!");
 		}
 		text->Draw ("You Have Died!");
 	}

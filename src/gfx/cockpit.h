@@ -46,6 +46,13 @@ class Cockpit {
   void RestoreViewPort();
   ///style of current view (chase cam, inside)
   enum VIEWSTYLE view;
+  ///flag to decide whether to draw all target boxes
+  bool draw_all_boxes;
+  bool always_itts;
+  GFXColor friendly,enemy,neutral,targeted,targetting,planet;
+  GFXColor relationToColor (float relation);
+  GFXColor unitToColor (Unit *un,Unit *target);
+
   void LoadXML (const char *file);
   static void beginElement(void *userData, const XML_Char *name, const XML_Char **atts);
   static void endElement(void *userData, const XML_Char *name);
@@ -57,6 +64,8 @@ class Cockpit {
   void DrawNavigationSymbol (const Vector &loc, const Vector &p, const Vector &q, float size);
   ///draws the target box around targetted unit
   void DrawTargetBox ();
+  ///draws the target box around all units
+  void DrawTargetBoxes ();
   ///Draws all teh blips on the radar. No color info (yet)
   void DrawBlips(Unit * un);
   ///Draws gauges
