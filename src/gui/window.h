@@ -64,12 +64,20 @@ public:
     virtual Control* findControlById(const std::string& id);
 
     // The background color of the window.
-    virtual void setColor(const GFXColor& c) { m_color = c; };
     virtual GFXColor color(void) { return m_color; };
+    virtual void setColor(const GFXColor& c) { m_color = c; };
 
     // The background texture for the window.
-	virtual void setTexture(const std::string& textureName) { m_texture.read(textureName); };
     virtual GuiTexture& texture(void) { return m_texture; };
+	virtual void setTexture(const std::string& textureName) { m_texture.read(textureName); };
+
+    // The color of the outline around the window.
+    virtual GFXColor outlineColor(void) { return m_outlineColor; };
+    virtual void setOutlineColor(const GFXColor& c) { m_outlineColor = c; };
+
+    // The width of the outline around the window (in pixels).
+    virtual float outlineWidth(void) { return m_outlineWidth; };
+    virtual void setOutlineWidth(float width) { m_outlineWidth = width; };
 
     // Set up a controller object.
     virtual WindowController* controller(void) { return m_controller; };
@@ -107,6 +115,8 @@ protected:
 protected:
     Rect m_rect;                    // Rectangle representing window.
     GFXColor m_color;               // Background color of window.
+	GFXColor m_outlineColor;		// Color of outline around control.
+	float m_outlineWidth;			// Width of outline (in pixels).
 	GuiTexture m_texture;			// Background texture.
     GroupControl* m_controls;       // List of controls that are in this window.
     bool m_deleteOnClose;           // True = delete window object when closed.

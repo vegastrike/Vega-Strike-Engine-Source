@@ -38,7 +38,7 @@
 class ModalDialogCallback
 {
 public:
-    virtual bool modalDialogResult(
+    virtual void modalDialogResult(
         const std::string& id,
         int result,
         WindowController& controller
@@ -83,6 +83,8 @@ protected:
     int m_result;                       // A simple result for the dialog.
 };
 
+
+
 // Display a modal message to the user.  The message will be shown until the user
 //  hits the OK button.
 void showAlert(const std::string& title);
@@ -97,5 +99,47 @@ static const int NO_ANSWER = 0;
 // The result is supplied in the callback.
 void showListQuestion(const std::string& title, const std::vector<std::string>& options,
                       ModalDialogCallback* cb, const std::string& id);
+
+
+// This class is used to display predefined alerts and questions.
+// It creates a Window, loads controls, etc.
+class QuestionDialog : public ModalDialog
+{
+public:
+	// Load the controls for this dialog.
+	virtual void initControls(void) = 0;
+
+    // Set up the window and get everything ready.
+    virtual void init(const std::string& title);
+
+    // Start everything up.
+    virtual void run(void);
+
+    // CONSTRUCTION
+	QuestionDialog() : m_deleteWindow(true) {};
+    virtual ~QuestionDialog(void) { if(m_window != NULL && m_deleteWindow) delete m_window; };
+
+protected:
+	// VARIABLES
+	bool m_deleteWindow;		// True = Delete window when we are deleted.
+};
+
+// Class that supports showListQuestion().
+// Use this to customize behavior.
+
+// Class that will handle List Question dialog correctly.
+class ListQuestionDialog : public QuestionDialog
+{
+public:
+	// Load the controls for this dialog into the window.
+	virtual void initControls(void) { CreateControlsForListWindow(window()); };
+
+    // Process a command event from the window.
+    virtual bool processWindowCommand(const EventCommandId& command, Control* control);
+
+protected:
+	static void CreateControlsForListWindow(Window* w);
+};
+
 
 #endif   // __MODALDIALOG_H__

@@ -265,6 +265,9 @@ void Picker::scrollToCell(const PickerCell* cell, bool middle) {
 					m_scroller->setScrollPosition(i-visibleCells+1+SCROLL_EDGE_EXTRA);
 				}
 			}
+
+			// Found the cell.  Done with loop.
+			break;
 		}
     }
 }

@@ -71,6 +71,14 @@ static const int MIN_BUY_ALL_QUANTITY = 2;
 // Quantity of items that turns on "Buy 10" button.
 static const int MIN_BUY_10_QUANTITY = 11;			// "Buy All" works if there are exactly 10 items.
 
+// MOUNT ENTRY COLORS
+// Mount point that cannot be selected.
+static const GFXColor MOUNT_POINT_NO_SELECT = GFXColor(1,.7,.7);
+// Empty mount point.
+static const GFXColor MOUNT_POINT_EMPTY = GFXColor(.2,1,.2);
+// Mount point that contains weapon.
+static const GFXColor MOUNT_POINT_FULL = GFXColor(1,1,0);
+
 
 
 // Some mission declarations.
@@ -137,7 +145,7 @@ static const ModeInfo modeInfo[] = {
     ModeInfo ( "New Ships  ", "Ships", "ShipDealerMode", "ShipDealerGroup" ),
     ModeInfo ( "Missions BBS  ", "Missions", "MissionsMode", "MissionsGroup" ),
     ModeInfo ( "GNN News  ", "News", "NewsMode", "NewsGroup" ),
-    ModeInfo ( "Player Info  ", "Info", "PlayerInfoMode", "PlayerInfoGroup" )
+    ModeInfo ( "Info/Stats  ", "Info", "PlayerInfoMode", "PlayerInfoGroup" )
 };
 
 
@@ -196,20 +204,23 @@ bool BaseComputer::processWindowCommand(const EventCommandId& command, Control* 
 
 
 // Take underscores out of a string and capitalize letters after spaces.
-static string beautify(const string &input) {
-    string result = input;
-    string::iterator i = result.begin();
-    for (;i!=result.end();i++) {
-        if (i!=result.begin()) {
-            if ((*(i-1))==' ') {
-                // Capitalize words.  (First letter after a space).
-                *i = toupper(*i);
-            }
-        }
-        if (*i=='_') {
-            // Turn underscores into spaces.
-            *i=' ';
-        }
+static std::string beautify(const string &input) {
+	std::string result;
+
+	bool wordStart = true;
+    for(std::string::const_iterator i=input.begin(); i!=input.end(); i++) {
+		if(*i == '_') {
+			// Turn this into a space, and make sure next letter is capitalized.
+			result += ' ';
+			wordStart = true;
+		} else if(wordStart) {
+			// Start or a word.  Capitalize the character, and turn off start of word.
+			result += toupper(*i);
+			wordStart = false;
+		} else {
+			// Normal character in middle of word.
+			result += *i;
+		}
     }
     return result;
 }
@@ -376,11 +387,11 @@ void BaseComputer::constructControls(void) {
         sellpick->setColor( GFXColor(0,0,1,.1) );
 		sellpick->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY);
         sellpick->setTextColor(GUI_OPAQUE_WHITE);
-        sellpick->setFont( Font(.07) );
-        sellpick->setTextMargins(Size(0.02,0.01));
         sellpick->setSelectionColor(GFXColor(0,.6,0,.8));
         sellpick->setHighlightColor(GFXColor(0,.6,0,.35));
         sellpick->setHighlightTextColor(GUI_OPAQUE_WHITE);
+        sellpick->setFont( Font(.07) );
+        sellpick->setTextMargins(Size(0.02,0.01));
         sellpick->setId("BaseCargo");
         sellpick->setScroller(sellerScroller);
         cargoGroup->addChild(sellpick);
@@ -1077,7 +1088,8 @@ bool BaseComputer::scrollToItem(Picker* picker, const Cargo& item, bool select, 
 
     if(select) {
         picker->selectCell(cell, true);
-		return true;
+		// This may not be a selectable cell.
+		return (picker->selectedCell() != NULL);
 	} else {
 		// Make sure we scroll it into view.
 		// Since it's not selected, we assume it's in the "other" list and scroll
@@ -1343,7 +1355,7 @@ bool BaseComputer::pickerChangedSelection(const EventCommandId& command, Control
     return true;
 }
 
-// Return whether or not this 
+// Return whether or not the current item and quantity can be "transacted".
 bool BaseComputer::isTransactionOK(const Cargo& originalItem, TransactionType transType, int quantity) {
     // Make sure we have somewhere to put stuff.
     Unit* playerUnit = m_player.GetUnit();
@@ -2054,8 +2066,6 @@ protected:
 
     void commonInit(void);              // Initialization.
     void finish(void);                  // Finish up -- destruct the object.  MUST CALL THIS LAST.
-    void showMountPicker(void);         // Let the user pick a mount.
-    void showTurretPicker(void);        // Let the user pick a turret.
     bool endInit(void);                 // Finish initialization.  Returns true if successful.
     bool gotSelectedMount(int index);   // We have the mount number.  Returns true if the operation was completed.
     bool gotSelectedTurret(int index);  // We have the turret number.  Returns true if the operation was completed.
@@ -2064,8 +2074,10 @@ protected:
     // OVERRIDES FOR DERIVED CLASSES.
     virtual bool checkTransaction(void) = 0;    // Check, and verify user wants transaction.
     virtual void concludeTransaction(void) = 0; // Finish the transaction.
+    virtual void selectMount(void) = 0;			// Let the user pick a mount.
+    virtual void showTurretPicker(void);        // Let the user pick a turret.
 
-    virtual bool modalDialogResult( // Dispatch to correct function after some modal UI.
+    virtual void modalDialogResult( // Dispatch to correct function after some modal UI.
         const std::string& id,
         int result,
         WindowController& controller
@@ -2087,8 +2099,9 @@ public:
 
     BuyUpgradeOperation(BaseComputer& p) : UpgradeOperation(p),  m_theTemplate(NULL), m_addMultMode(0) {};
 protected:
-    virtual bool checkTransaction(void);    // Check, and verify user wants transaction.
+    virtual bool checkTransaction(void);		// Check, and verify user wants transaction.
     virtual void concludeTransaction(void);     // Finish the transaction.
+    virtual void selectMount(void);				// Let the user pick a mount.
 
     virtual ~BuyUpgradeOperation(void) {};
 
@@ -2106,6 +2119,7 @@ public:
 protected:
     virtual bool checkTransaction(void);        // Check, and verify user wants transaction.
     virtual void concludeTransaction(void);     // Finish the transaction.
+    virtual void selectMount(void);				// Let the user pick a mount.
 
     virtual ~SellUpgradeOperation(void) {};
 
@@ -2145,37 +2159,13 @@ bool BaseComputer::UpgradeOperation::endInit(void) {
     if(m_parent.m_player.GetUnit()) {
         m_newPart = getUnitFromUpgradeName(m_selectedItem.content, m_parent.m_player.GetUnit()->faction);
         if(m_newPart->name != LOAD_FAILED) {
-            if(m_newPart->GetNumMounts() > 0) {
-                showMountPicker();
-            } else {
-                gotSelectedMount(0);
-            }
+			selectMount();
         } else {
             return false;
         }
     }
 
     return true;
-}
-
-// Show the user a list of mounts to picker from.
-void BaseComputer::UpgradeOperation::showMountPicker(void) {
-    Unit* playerUnit = m_parent.m_player.GetUnit();
-    if(!playerUnit) {
-        finish();
-        return;
-    }
-
-    vector<string> mounts;
-    for(int i=0; i<playerUnit->GetNumMounts(); i++) {
-        if (playerUnit->mounts[i].status==Mount::ACTIVE || playerUnit->mounts[i].status==Mount::INACTIVE) {
-	    mounts.push_back(playerUnit->mounts[i].type->weapon_name);
-        } else {
-            mounts.push_back("Empty: " + lookupMountSize(playerUnit->mounts[i].size));
-        }
-    }
-
-    showListQuestion("Select mount for your item:", mounts, this, GOT_MOUNT_ID);
 }
 
 // Let the user pick a turret.
@@ -2196,13 +2186,14 @@ void BaseComputer::UpgradeOperation::showTurretPicker(void) {
 
 // Got the mount number.
 bool BaseComputer::UpgradeOperation::gotSelectedMount(int index) {
-    if(index < 0) {
+    Unit* playerUnit = m_parent.m_player.GetUnit();
+    if(index < 0 || !playerUnit) {
         // The user cancelled somehow.
         finish();
 		return false; // kill the window.
     } else {
         m_selectedMount = index;
-        if(m_newPart->viewSubUnits().current() != NULL) {
+        if(*playerUnit->getSubUnits() != NULL && m_newPart->viewSubUnits().current() != NULL) {
             // Need to get selected turret.
             showTurretPicker();
 			return false;
@@ -2226,16 +2217,14 @@ bool BaseComputer::UpgradeOperation::gotSelectedTurret(int index) {
 }
 
 // Dispatch to correct function after some modal UI.
-bool BaseComputer::UpgradeOperation::modalDialogResult(
+void BaseComputer::UpgradeOperation::modalDialogResult(
     const std::string& id, int result, WindowController& controller) {
     if(id == GOT_MOUNT_ID) {
         // Got the selected mount from the user.
         gotSelectedMount(result);
-		return false;
     } else if(id == GOT_TURRET_ID) {
         // Got the selected turret from the user.
 		gotSelectedTurret(result);
-		return false;
     } else if(id == CONFIRM_ID) {
         // User answered whether or not to conclude the transaction.
         if(result == YES_ANSWER) {
@@ -2246,7 +2235,6 @@ bool BaseComputer::UpgradeOperation::modalDialogResult(
             finish();
         }
     }
-	return false;
 }
 
 
@@ -2286,6 +2274,80 @@ void BaseComputer::BuyUpgradeOperation::start(void) {
     }
 
     // The object may be deleted now. Be careful here.
+}
+
+// Custom class that handles picking a mount point.
+class UpgradeOperationMountDialog : public ListQuestionDialog
+{
+public:
+    // Process a command event from the window.
+    virtual bool processWindowCommand(const EventCommandId& command, Control* control);
+};
+
+// Process a command from the window.
+bool UpgradeOperationMountDialog::processWindowCommand(const EventCommandId& command, Control* control) {
+    if(command == "Picker::NewSelection") {
+		assert(control != NULL);
+		Picker* picker = dynamic_cast<Picker*>(control);
+		PickerCell* cell = picker->selectedCell();
+		if(cell && cell->tag()==0) {
+			// An "unselectable" cell was selected.  Turn the selection back off.
+			picker->selectCell(NULL);
+		}
+		return true;
+    }
+
+	// Only thing we care about is the selection changing.
+	return ListQuestionDialog::processWindowCommand(command, control);
+}
+
+// Select the mount to use for selling.
+void BaseComputer::BuyUpgradeOperation::selectMount(void) {
+    if(m_newPart->GetNumMounts() <= 0) {
+		// Part doesn't need a mount point.
+        gotSelectedMount(0);
+		return;
+    }
+
+	Unit* playerUnit = m_parent.m_player.GetUnit();
+    if(!playerUnit) {
+        finish();
+        return;
+    }
+
+	// Create a custom list dialog to get the mount point.
+	UpgradeOperationMountDialog* dialog = new UpgradeOperationMountDialog;
+	dialog->init("Select mount for your item:");
+	dialog->setCallback(this, GOT_MOUNT_ID);
+
+    // Fill the dialog picker with the mount points.
+    SimplePicker* picker = dynamic_cast<SimplePicker*>( dialog->window()->findControlById("Picker") );
+    assert(picker != NULL);
+    for(int i=0; i<playerUnit->GetNumMounts(); i++) {
+		// Mount is selectable if we can upgrade with the new part using that mount.
+		double percent;         // Temp.  Not used.
+		const bool selectable = playerUnit->canUpgrade(m_newPart, i, m_selectedTurret, m_addMultMode, false, percent, m_theTemplate);
+        
+		// Figure color and label based on weapon that is in the slot.
+		GFXColor mountColor = MOUNT_POINT_NO_SELECT;
+		char mountName[256];
+		if(playerUnit->mounts[i].status==Mount::ACTIVE || playerUnit->mounts[i].status==Mount::INACTIVE) {
+			sprintf(mountName, "%2d. %s", i+1, playerUnit->mounts[i].type->weapon_name.c_str());
+			mountColor = MOUNT_POINT_FULL;
+        } else {
+			const std::string temp = lookupMountSize(playerUnit->mounts[i].size);
+			sprintf(mountName, "%2d. (Empty) %s", i+1, temp.c_str());
+			mountColor = MOUNT_POINT_EMPTY;
+        }
+
+		// If the mount point won't work with the weapon, don't let user select it.
+		if(!selectable) mountColor = MOUNT_POINT_NO_SELECT;
+
+		// Now we add the cell.  Note that "selectable" is stored in the tag property.
+		picker->addCell(SimplePickerCell(mountName, "", mountColor, (selectable?1:0)));
+    }
+
+	dialog->run();
 }
 
 // Check, and verify user wants Buy Upgrade transaction.  Returns true if more input is required.
@@ -2366,6 +2428,103 @@ void BaseComputer::SellUpgradeOperation::start(void) {
         finish();
     }
     // The object may be deleted now. Be careful here.
+}
+
+// Try to match a mounted waepon name with the cargo name.
+// Returns true if they are the same.
+static bool matchCargoToWeapon(const std::string& cargoName, const std::string& weaponName) {
+	// Weapon names have capitalized words, and no spaces between the words.
+	// Cargo names are lower-case, and have underscores between words.
+	// Also, anything in the Ammo category ends with "_ammo" in cargo, and not in weapon.
+	// We try to make a cargo name look like a weapon name, then match them.
+
+	std::string convertedCargoName;
+
+	// Take off "_ammo" if it's there.
+	int end = cargoName.size();
+	const int ammoOffset = cargoName.rfind("_ammo");
+	if(ammoOffset != std::string::npos) {
+		end = ammoOffset;
+	}
+
+	bool wordStart = true;		// Start of word.
+	for(int i=0; i<end; i++) {
+		const char c = cargoName[i];
+		if(c == '_') {
+			// Skip this, and make sure next letter is capitalized.
+			wordStart = true;
+		} else if(wordStart) {
+			// Start or a word.  Capitalize the character, and turn off start of word.
+			convertedCargoName += toupper(c);
+			wordStart = false;
+		} else {
+			// Normal character in middle of word.
+			convertedCargoName += c;
+		}
+    }
+
+	return (convertedCargoName == weaponName);
+}
+
+// Select the mount to use for selling.
+void BaseComputer::SellUpgradeOperation::selectMount(void) {
+    if(m_newPart->GetNumMounts() <= 0) {
+		// Part doesn't need a mount point.
+        gotSelectedMount(0);
+		return;
+    }
+
+	Unit* playerUnit = m_parent.m_player.GetUnit();
+    if(!playerUnit) {
+        finish();
+        return;
+    }
+
+	// Create a custom list dialog to get the mount point.
+	UpgradeOperationMountDialog* dialog = new UpgradeOperationMountDialog;
+	dialog->init("Select mount for your item:");
+	dialog->setCallback(this, GOT_MOUNT_ID);
+
+    // Fill the dialog picker with the mount points.
+    SimplePicker* picker = dynamic_cast<SimplePicker*>( dialog->window()->findControlById("Picker") );
+    assert(picker != NULL);
+	int mount = -1;			// The mount if there was only one.
+	int selectableCount = 0;
+    for(int i=0; i<playerUnit->GetNumMounts(); i++) {
+		// Whether or not the entry is selectable -- the same as the thing we are selling.
+		bool selectable = false;
+
+		// Get the name.
+		char mountName[256];
+		if(playerUnit->mounts[i].status==Mount::ACTIVE || playerUnit->mounts[i].status==Mount::INACTIVE) {
+			// Something is mounted here.
+			const std::string unitName = playerUnit->mounts[i].type->weapon_name;
+			sprintf(mountName, "%2d. %s", i+1, unitName.c_str());
+			if(matchCargoToWeapon(m_part.content, unitName)) {
+				selectable = true;
+				selectableCount++;
+				mount = i;
+			}
+        } else {
+			// Nothing at this mount point.
+			const std::string temp = lookupMountSize(playerUnit->mounts[i].size);
+			sprintf(mountName, "%2d. (Empty) %s", i+1, temp.c_str());
+        }
+
+		// Now we add the cell.  Note that "selectable" is stored in the tag property.
+		const GFXColor mountColor = (selectable? MOUNT_POINT_FULL:MOUNT_POINT_NO_SELECT);
+		picker->addCell(SimplePickerCell(mountName, "", mountColor, (selectable?1:0)));
+    }
+
+	assert(selectableCount > 0);		// We should have found at least one unit mounted.
+	if(selectableCount > 1) {
+		// Need to have the user choose.
+		dialog->run();
+	} else {
+		// Get rid of the dialog -- we only have one choice.
+		delete dialog;
+        gotSelectedMount(mount);
+	}
 }
 
 // Check, and verify user wants Sell Upgrade transaction.  Returns true if more input is required.
@@ -2803,49 +2962,64 @@ bool BaseComputer::showShipStats(const EventCommandId& command, Control* control
 // Create the controls for the Options Menu window.
 static void CreateOptionsMenuControls(Window* window) {
 
-    window->setSizeAndCenter(Size(.6,1));
-    window->setColor(GFXColor(.5,.8,.5));
+    window->setSizeAndCenter(Size(.6,.9));
+	window->setTexture("basecomputer.png");
+    window->setColor( GFXColor(0,1,0,.1) );
+    window->setOutlineColor( GFXColor(.7,.7,.7) );
+    window->setOutlineWidth(2.0);
 
     // Save button.
     NewButton* save = new NewButton;
-    save->setRect( Rect(-.20, .3, .40, .1) );
+    save->setRect( Rect(-.20, .25, .40, .1) );
     save->setLabel("Save");
     save->setCommand("Save");
-    save->setColor( GFXColor(.2,.4,.2) );
-    save->setTextColor(GUI_OPAQUE_WHITE);
+    save->setColor( GFXColor(0,1,0,.25) );
+    save->setTextColor( GUI_OPAQUE_WHITE );
+    save->setDownColor( GFXColor(0,1,0,.6) );
+    save->setDownTextColor( GUI_OPAQUE_BLACK );
+    save->setHighlightColor( GFXColor(0,1,0,.4) );
     save->setFont(Font(.08, BOLD_STROKE));
     // Put the button on the window.
     window->addControl(save);
 
     // Load button.
     NewButton* load = new NewButton;
-    load->setRect( Rect(-.20, .1, .40, .1) );
+    load->setRect( Rect(-.20, .05, .40, .1) );
     load->setLabel("Load");
     load->setCommand("Load");
-    load->setColor( GFXColor(.2,.4,.2) );
-    load->setTextColor(GUI_OPAQUE_WHITE);
+    load->setColor( GFXColor(0,1,0,.25) );
+    load->setTextColor( GUI_OPAQUE_WHITE );
+    load->setDownColor( GFXColor(0,1,0,.6) );
+    load->setDownTextColor( GUI_OPAQUE_BLACK );
+    load->setHighlightColor( GFXColor(0,1,0,.4) );
     load->setFont(Font(.08, BOLD_STROKE));
     // Put the button on the window.
     window->addControl(load);
 
     // Quit Game button.
     NewButton* quit = new NewButton;
-    quit->setRect( Rect(-.20, -.1, .40, .1) );
+    quit->setRect( Rect(-.20, -.15, .40, .1) );
     quit->setLabel("Quit Game");
     quit->setCommand("Quit");
-    quit->setColor( GFXColor(.2,.4,.2) );
-    quit->setTextColor(GUI_OPAQUE_WHITE);
+    quit->setColor( GFXColor(0,1,0,.25) );
+    quit->setTextColor( GUI_OPAQUE_WHITE );
+    quit->setDownColor( GFXColor(0,1,0,.6) );
+    quit->setDownTextColor( GUI_OPAQUE_BLACK );
+    quit->setHighlightColor( GFXColor(0,1,0,.4) );
     quit->setFont(Font(.08, BOLD_STROKE));
     // Put the button on the window.
     window->addControl(quit);
 
     // Resume Game button.
     NewButton* resume = new NewButton;
-    resume->setRect( Rect(-.20, -.3, .40, .1) );
+    resume->setRect( Rect(-.20, -.35, .40, .1) );
     resume->setLabel("Resume Game");
     resume->setCommand("Window::Close");
-    resume->setColor( GFXColor(.2,.4,.2) );
-    resume->setTextColor(GUI_OPAQUE_WHITE);
+    resume->setColor( GFXColor(0,1,0,.25) );
+    resume->setTextColor( GUI_OPAQUE_WHITE );
+    resume->setDownColor( GFXColor(0,1,0,.6) );
+    resume->setDownTextColor( GUI_OPAQUE_BLACK );
+    resume->setHighlightColor( GFXColor(0,1,0,.4) );
     resume->setFont(Font(.08, BOLD_STROKE));
     // Put the button on the window.
     window->addControl(resume);

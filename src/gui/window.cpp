@@ -54,7 +54,7 @@ void Window::open(void) {
 
 // Done with the window.
 void Window::close(void) {
-    sendCommand("Window::Close", NULL);
+    processCommand("Window::Close", NULL);
 }
 
 
@@ -90,6 +90,10 @@ void Window::drawBackground(void) {
     if(!isClear(m_color)) {
         drawRect(m_rect, m_color);
     }
+
+	if(!isClear(m_outlineColor)) {
+		drawRectOutline(m_rect, m_outlineColor, m_outlineWidth);
+	}
 }
 
 // Read window properties and controls from an XML file.
@@ -153,6 +157,8 @@ Window::Window(void)
 :
 m_rect(0.0,0.0,0.0,0.0),
 m_color(GUI_OPAQUE_BLACK),
+m_outlineColor(GUI_CLEAR),
+m_outlineWidth(1.0),
 m_deleteOnClose(true),
 m_controls(NULL),
 m_controller(NULL)
