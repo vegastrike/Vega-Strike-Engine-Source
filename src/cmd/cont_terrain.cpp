@@ -292,6 +292,8 @@ void ContinuousTerrain::Collide (Unit * un, Matrix t) {
       const csReversibleTransform smalltransform (un->GetTransformation());
 #endif
       if (md[i].collider) {
+	if (un->colTrees)
+        if (un->colTrees->colTree)
 	if (un->colTrees->colTree->Collide (*md[i].collider,
 					    &smalltransform,
 					    &bigtransform)) {
