@@ -285,6 +285,10 @@ void /*GFXDRVAPI*/ GFXSelectTexcoordSet(const int stage, const int texset);
 
 ///Turns on alpha testing mode (or turns if off if DEPTHFUNC is set to ALWAYS
 void /*GFXDRVALP*/ GFXAlphaTest (const enum DEPTHFUNC,const float ref);
+enum GFXTEXTUREWRAPMODES{
+  GFXREPEATTEXTURE,
+  GFXCLAMPTEXTURE //clamp to edge, not to border
+};
 enum GFXTEXTUREENVMODES{
 	GFXREPLACETEXTURE,
 	GFXADDTEXTURE,
@@ -292,6 +296,7 @@ enum GFXTEXTUREENVMODES{
 	GFXADDSIGNEDTEXTURE,
 	GFXINTERPOLATETEXTURE
 };
+void GFXTextureWrap(int stage, GFXTEXTUREWRAPMODES mode);
 void GFXTextureEnv(int stage,GFXTEXTUREENVMODES mode);
 bool GFXMultiTexAvailable();
 ///Sets Depth Offset for polgyons

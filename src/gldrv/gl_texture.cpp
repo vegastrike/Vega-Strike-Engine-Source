@@ -95,6 +95,7 @@ bool isPowerOfTwo (int num, int &which) {
   }
   return true;
 }
+
 GFXBOOL /*GFXDRVAPI*/ GFXCreateTexture(int width, int height, TEXTUREFORMAT textureformat, int *handle, char *palette , int texturestage, enum FILTER mipmap, enum TEXTURE_TARGET texture_target)
 {
   int dummy=0;
@@ -556,4 +557,25 @@ void GFXTextureEnv (int stage, GFXTEXTUREENVMODES mode) {
 		glTexEnvi(GL_TEXTURE_ENV,GL_COMBINE_RGB_ARB,type);
 		break;
 	}
+}
+
+
+#ifndef GL_CLAMP_TO_EDGE_EXT
+#define GL_CLAMP_TO_EDGE_EXT              0x812F
+#endif
+
+void GFXTextureWrap(int stage, GFXTEXTUREWRAPMODES mode) {
+  GFXActiveTexture(stage);
+  GLenum e=GL_REPEAT;
+  switch (mode) {
+  case GFXCLAMPTEXTURE:
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+    e=GL_CLAMP_TO_EDGE_EXT;
+    break;
+  default:
+    break;
+  }
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, e);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, e); 
 }

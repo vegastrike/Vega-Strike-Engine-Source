@@ -151,6 +151,8 @@ void VSSprite::Draw()
 {
   if (surface){//don't do anything if no surface
     surface->MakeActive();
+    GFXTextureWrap(0,GFXCLAMPTEXTURE);
+
     GFXDisable (CULLFACE);
     GFXBegin(GFXQUAD);
     Vector ll,lr,ur,ul;
@@ -164,6 +166,8 @@ void VSSprite::Draw()
     GFXTexCoord2f(maxs, maxt);
     GFXVertexf(ul);
     GFXEnd();
+
+    GFXTextureWrap(0,GFXREPEATTEXTURE);
     GFXEnable (CULLFACE);
   }
 }
