@@ -945,10 +945,11 @@ void NavigationSystem::DrawGalaxy()
 
 void NavigationSystem::updatePath()
 {
-        //Erase old path
+	int i;
+	//Erase old path
 	//*************************
-        for(unsigned i=0;i<path.size();++i) {
-	        systemIter[path[i]].part_of_path=false;
+	for(i=0;i<path.size();++i) {
+		systemIter[path[i]].part_of_path=false;
 	}
 	path.clear();
 
@@ -959,8 +960,8 @@ void NavigationSystem::updatePath()
  
 	//Inscribe new path
 	//*************************
-	for(unsigned i=0;i<path.size();++i) {
-	        systemIter[path[i]].part_of_path=true;
+	for(i=0;i<path.size();++i) {
+		systemIter[path[i]].part_of_path=true;
 	}
 }
 

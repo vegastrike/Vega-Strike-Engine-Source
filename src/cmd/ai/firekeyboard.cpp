@@ -1656,7 +1656,8 @@ void FireKeyboard::Execute () {
     }
     missound.playsound();
   }
-  for (unsigned int i=0;i<NUMSAVEDTARGETS;i++) {  
+  unsigned int i;
+  for (i=0;i<NUMSAVEDTARGETS;i++) {  
     if (f().saveTargetKeys[i]==PRESS) {
       f().saveTargetKeys[i]=RELEASE;
       savedTargets[i]=parent->Target();
@@ -1674,7 +1675,7 @@ void FireKeyboard::Execute () {
       }
     }
   }
-  for (unsigned int i=0;i<NUMCOMMKEYS;i++) {
+  for (i=0;i<NUMCOMMKEYS;i++) {
     if (f().commKeys[i]==PRESS) {
       f().commKeys[i]=RELEASE;
       Unit * targ=parent->Target();

@@ -124,6 +124,7 @@ bool _Slew = true;
 bool QuitAllow=false;
 extern bool cleanexit;
   static void SwitchVDUTo(VDU::VDU_MODE v) {
+    int i;
     static int whichvdu=1; 
     for (int j=0;j<3;++j) {
       if (v!=_Universe->AccessCockpit()->getVDUMode(whichvdu)||(v!=VDU::VIEW&&v!=VDU::WEAPON)){
@@ -137,13 +138,13 @@ extern bool cleanexit;
           _Universe->AccessCockpit()->VDUSwitch(whichvdu);//get different view mode
         return;
       }
-      for (int i=0;i<32;++i) {
+      for (i=0;i<32;++i) {
         _Universe->AccessCockpit()->VDUSwitch(whichvdu);
         if (v==_Universe->AccessCockpit()->getVDUMode(whichvdu)) {
           return;
         }
       }
-      for (int i=0;i<32;++i) {
+      for (i=0;i<32;++i) {
         _Universe->AccessCockpit()->VDUSwitch(whichvdu);
         if (curmode==_Universe->AccessCockpit()->getVDUMode(whichvdu))       
           break;
