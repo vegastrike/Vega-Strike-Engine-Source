@@ -240,7 +240,8 @@ public:
   bool OneWayCollide (Unit *target);
   bool Collide(Unit * target);
   void CollideAll();//checks for collisions with all beams and other units roughly
-  Vector Position(){return curr_physical_state.position;};
+  Vector Position(){return cumulative_transformation.position;};
+  Vector LocalPosition(){return curr_physical_state.position;};
   void SetPosition(const Vector &pos) {/*prev_physical_state.position = curr_physical_state.position;*/
   prev_physical_state.position = curr_physical_state.position = pos;}
   void SetPosition(float x, float y, float z) {/*prev_physical_state.position = curr_physical_state.position;*/
