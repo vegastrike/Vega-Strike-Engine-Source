@@ -135,7 +135,7 @@ void CommunicatingAI::UpdateContrabandSearch () {
 	Unit * u = contraband_searchee.GetUnit();
 	if (u) {
 		if (which_cargo_item<(int)u->numCargo()) {
-			if (u->getCargo(which).quantity>0) {
+			if (u->GetCargo(which_cargo_item).quantity>0) {
 				std::string item = u->GetManifest (which_cargo_item++,parent,SpeedAndCourse);
 				
 				static float speed_course_change = XMLSupport::parse_float (vs_config->getVariable ("AI","PercentageSpeedChangeToStopSearch","1"));
