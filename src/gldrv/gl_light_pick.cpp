@@ -76,21 +76,21 @@ void GFXPickLights (const Vector & center, const float radius) {
     tmpcollide.type=LineCollide::UNIT;
     swappicked();
     vector <LineCollideStar> *tmppickt[HUGEOBJECT+1];
-    if (radius < CTACC) {
+    //FIXMESPEEDHACK    if (radius < CTACC) {
 	lighttable.Get (center, tmppickt);
-    } else {
-	sizeget = lighttable.Get (&tmpcollide, tmppickt); 
-    }
+	//FIXMESPEEDHACK} else {
+	//FIXMESPEEDHACKsizeget = lighttable.Get (&tmpcollide, tmppickt); 
+	//FIXMESPEEDHACK}
     for (int j=0;j<sizeget;j++) {
       for (vector <LineCollideStar>::iterator i=tmppickt[j]->begin();i!=tmppickt[j]->end();i++){
 	//warning::duplicates may Exist
-	if (i->lc->lastchecked!=rndvar) {
-	  i->lc->lastchecked = rndvar;
+	//FIXMESPEEDHACKif (i->lc->lastchecked!=rndvar) {
+	//FIXMESPEEDHACKi->lc->lastchecked = rndvar;
 	  if (picklight (*i->lc,center,radius,lightsenabled)) {
 	    newpicked->push_back (i->GetIndex());
 	    lightsenabled++;
 	  }
-	}
+	  //FIXMESPEEDHACK}
       }
     }
     gfx_light::dopickenables ();  
