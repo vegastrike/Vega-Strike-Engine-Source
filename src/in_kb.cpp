@@ -23,6 +23,7 @@
 #include <list> 
 //#include "glob.h"
 #include "vegastrike.h"
+#include "vs_globals.h"
 #include "in_kb.h"
 #include "in_handler.h"
 #include "gldrv/winsys.h"

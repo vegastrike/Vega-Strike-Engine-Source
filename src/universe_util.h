@@ -5,6 +5,7 @@
 
 using std::string;
 
+class Cargo;
 class Unit;
 
 namespace UniverseUtil {
