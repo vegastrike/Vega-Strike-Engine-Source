@@ -157,7 +157,7 @@ namespace UniverseUtil {
 	}
 	Unit *getPlayerX(int which){
 		int j=0;
-		for (unsigned int i=0;i<_Universe->numPlayers();i++) {
+		for (int i=0;i<_Universe->numPlayers();i++) {
 			Unit * un;
 			if ((un=_Universe->AccessCockpit(i)->GetParent())) {
 				if (j==which) {
@@ -166,6 +166,7 @@ namespace UniverseUtil {
 				j++;
 			}
 		}
+		return NULL;
 	}
 }
 

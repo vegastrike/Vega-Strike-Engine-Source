@@ -91,7 +91,7 @@
   WRAPPED0(int,LockMissile,0)
   voidWRAPPED1(EjectCargo,int,index)
   WRAPPED1(float,PriceCargo,const std::string &,s,0)
-  WRAPPED1(Cargo &,GetCargo,int,i,Cargo())
+  WRAPPED1(Cargo,GetCargo,int,i,Cargo())
   WRAPPED0(int,numCargo,0)
   WRAPPED1(bool,IsCleared,UnitWrapper,dockingunit,false)
   voidWRAPPED5(ImportPartList,const std::string&,category, float, price, float, pricedev, float, quantity, float, quantdev)
