@@ -363,13 +363,13 @@ bool Beam::Collide (Unit * target) {
     if ((appldam<0&&phasdam>0)||(appldam>0&&phasdam<0)) {
       //tractor beam!
       target->ApplyForce (direction*appldam);
-      if ((center-target->Position()).Magnitude()<fabs(phasdam)) {
+      if ((center-target->Position()).Magnitude()<2*target->rSize()+fabs(phasdam)) {
 
 	un_iter ui= _Universe->activeStarSystem()->getUnitList().createIterator();
 	Unit *un;
 	for (;(un=*ui)!=NULL;++ui) {
 	  if (((void *)un)==owner) {
-	    static float nbig = .1;
+	    static float nbig = XMLSupport::parse_float(vs_config->getVariable("physics","percent_to_tractor",".1"));
 	    if (target->faction==FactionUtil::GetFaction("upgrades")||un->rSize()*nbig>target->rSize()) {
 	      //we have our man!
 	      //lets add our cargo to him
