@@ -579,7 +579,7 @@ CHECK_FOR_AL_H
 if test "x$have_al_h" = "xno" -a "x$AL_CPPFLAGS" = "x" ; then
     echo "*** Hmm, you don't seem to have OpenAL headers installed in the standard"
     echo "*** location (/usr/include).  I'll check in /usr/local/include, since"
-    echo "*** many distributions (incorrectly) put OpenAL headers there."
+    echo "*** many distributions put OpenAL headers there."
     AL_CPPFLAGS="-I/usr/local/include"
     CHECK_FOR_AL_H
 fi
@@ -591,19 +591,19 @@ else
         echo "Cannot find AL/al.h"
         echo "Error::Configuring without OpenAL support!"
     else
-        echo "Configuring with OpenAL support!"
-        TR_CPPFLAGS="$TR_CPPFLAGS -DHAVE_AL=1"    
-    fi
-fi
-dnl Check for alext.h 
-AC_CHECK_HEADERS( "AL/alext.h", have_alext_h=yes, have_alext_h=no )
+      dnl Check for alext.h 
+      AC_CHECK_HEADERS( "AL/alext.h", have_alext_h=yes, have_alext_h=no )
 
-if test "x$have_alext_h" = "xno" ; then
-    AC_MSG_ERROR([
-*****************************************************************
-You are missing the file alext.h.
-Place it in the directory /usr/include/AL.
-*****************************************************************])
+      if test "x$have_alext_h" = "xno" ; then
+      AC_MSG_ERROR([
+        *****************************************************************
+        You are missing the file alext.h.
+        Place it in the directory /usr/include/AL.
+        *****************************************************************])
+      fi
+      echo "Configuring with OpenAL support!"
+      TR_CPPFLAGS="$TR_CPPFLAGS -DHAVE_AL=1"    
+    fi
 fi
 
 
