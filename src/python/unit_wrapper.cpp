@@ -30,6 +30,9 @@ namespace UniverseUtil {
 	UnitWrapper newGetPlayer() {
 		return UniverseUtil::getPlayer();
 	}
+	void setOwner(int obj,UnitWrapper un) {
+		setOwnerII(obj,un.GetUnit());
+	}
 }
 PYTHON_INIT_INHERIT_GLOBALS(VS,FireAt);
 PYTHON_BEGIN_MODULE(VS)

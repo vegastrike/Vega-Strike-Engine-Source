@@ -265,7 +265,7 @@ namespace UniverseUtil {
 			return 0;
 		}
 	}
-	void setOwner(int which,Unit *owner) {
+	void setOwnerII(int which,Unit *owner) {
 		if (which<(int)mission->objectives.size()) {
 			mission->objectives[which].owner=owner;
 		}

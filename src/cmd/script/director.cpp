@@ -73,7 +73,7 @@
 extern bool have_yy_error;
 /* *********************************************************** */
 float getSaveData (int whichcp, string key, unsigned int num) {
-  if (whichcp < 0|| whichcp > _Universe->numPlayers()) {
+  if (whichcp < 0|| whichcp >= _Universe->numPlayers()) {
     return 0;
   }
   olist_t * ans =&(_Universe->AccessCockpit(whichcp)->savegame->getMissionData (key));
@@ -83,14 +83,14 @@ float getSaveData (int whichcp, string key, unsigned int num) {
   return (*ans)[num]->float_val;
 }
 unsigned int getSaveDataLength (int whichcp, string key) {
-  if (whichcp < 0|| whichcp > _Universe->numPlayers()) {
+  if (whichcp < 0|| whichcp >= _Universe->numPlayers()) {
     return 0;
   }
   olist_t * ans =&(_Universe->AccessCockpit(whichcp)->savegame->getMissionData (key));
   return ans->size();
 }
 unsigned int pushSaveData (int whichcp, string key, float val) {
-  if (whichcp < 0|| whichcp > _Universe->numPlayers()) {
+  if (whichcp < 0|| whichcp >= _Universe->numPlayers()) {
     return 0;
   }
   olist_t * ans =&((_Universe->AccessCockpit(whichcp)->savegame->getMissionData (key)));
@@ -102,7 +102,7 @@ unsigned int pushSaveData (int whichcp, string key, float val) {
 
 }
 void putSaveData (int whichcp, string key, unsigned int num, float val) {
-  if (whichcp < 0|| whichcp > _Universe->numPlayers()) {
+  if (whichcp < 0|| whichcp >= _Universe->numPlayers()) {
     return;
   }
   olist_t * ans =&((_Universe->AccessCockpit(whichcp)->savegame->getMissionData (key)));
