@@ -85,13 +85,13 @@ void Unit::Init()
   corner_max.Set (-FLT_MAX,-FLT_MAX,-FLT_MAX);
   
   shieldtight=0;//sphere mesh by default
-  energy=10000;
-  recharge = .01;
+  energy=maxenergy=10000;
+  recharge = 10;
   shield.recharge=shield.leak=0;
   shield.fb[0]=shield.fb[1]=shield.fb[2]=shield.fb[3]=armor.front=armor.back=armor.right=armor.left=0;
   hull=10;
   shield.number=2;
- 
+  
   explosion=NULL;
   timeexplode=0;
   killed=false;
@@ -104,8 +104,8 @@ void Unit::Init()
   cumulative_transformation = identity_transformation;
   curr_physical_state = prev_physical_state = identity_transformation;
   fpos = 0;
-  mass = 1;
-  fuel = 0;
+  mass = 1.5;
+  fuel = 2000;
 
   /*
   yprrestricted=0;
@@ -113,7 +113,7 @@ void Unit::Init()
   ymax = pmax = rmax = PI;
   ycur = pcur = rcur = 0;
   */
-  MomentOfInertia = 1;
+  MomentOfInertia = 1.5;
   AngularVelocity = Vector(0,0,0);
   Velocity = Vector(0,0,0);
   
@@ -128,19 +128,19 @@ void Unit::Init()
   limits.pitch = 25.5;
   limits.roll = 25.5;
 	
-  limits.lateral = 10;
-  limits.vertical = 10;
-  limits.forward = 10;
-  limits.afterburn=20;
-  limits.retro=1;
+  limits.lateral = 80;
+  limits.vertical = 80;
+  limits.forward = 200;
+  limits.afterburn=500;
+  limits.retro=200;
   Target(NULL);
   computer.threat.SetUnit (NULL);
   computer.set_speed=0;
-  computer.max_speed=10;
-  computer.max_ab_speed=30;
-  computer.max_yaw=4;
-  computer.max_pitch=4;
-  computer.max_roll=4;
+  computer.max_speed=15;
+  computer.max_ab_speed=40;
+  computer.max_yaw=100;
+  computer.max_pitch=100;
+  computer.max_roll=100;
   computer.NavPoint=Vector(0,0,0);
   //  Fire();
 }
