@@ -143,6 +143,12 @@ void Unit::TransferUnitToSystem (unsigned int kk, StarSystem * &savedStarSystem,
       UnitCollection::UnitIterator iter = pendingjump[kk]->orig->getUnitList().createIterator();
       Unit * unit;
       while((unit = iter.current())!=NULL) {
+	if (unit->Threat()==this) {
+	  unit->Threaten (NULL,0);
+	}
+	if (unit->VelocityReference()==this) {
+	  unit->VelocityReference(NULL);
+	}
 	if (unit->Target()==this) {
 	  unit->Target (pendingjump[kk]->jumppoint.GetUnit());
 	  unit->ActivateJumpDrive (0);

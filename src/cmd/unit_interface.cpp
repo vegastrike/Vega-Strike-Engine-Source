@@ -637,11 +637,43 @@ void UpgradingInfo::CommitItem (const char *inp_buf, int button, int state) {
   if (state==0&&(un=buyer.GetUnit())&&(base=this->base.GetUnit())) {
   
   switch (mode) {
+  case SHIPDEALERMODE:
+    {
+      Cargo *part = base->GetCargo (string(input_buffer), offset);
+      if (part) {
+	float usedprice = usedPrice (base->PriceCargo (_Universe->AccessCockpit()->GetUnitFileName()));
+	if (part->price<=usedprice+_Universe->AccessCockpit()->credits) {
+	  Unit * NewPart = UnitFactory::createUnit (input_buffer,false,base->faction);
+	  NewPart->SetFaction(un->faction);
+	  if (NewPart->name!=string("LOAD_FAILED")) {
+	    if (NewPart->nummesh>0) {
+	      _Universe->AccessCockpit()->credits-=part->price-usedprice;
+	      NewPart->curr_physical_state=un->curr_physical_state;
+	      NewPart->prev_physical_state=un->prev_physical_state;
+	      _Universe->activeStarSystem()->AddUnit (NewPart);
+	      
+	      _Universe->AccessCockpit()->SetParent(NewPart,input_buffer,_Universe->AccessCockpit()->GetUnitModifications().c_str(),un->curr_physical_state.position);//absolutely NO NO NO modifications...you got this baby clean off the slate
+	      SwitchUnits (NULL,NewPart);
+	      base->RequestClearance(NewPart);
+	      NewPart->Dock(base);
+	      buyer.SetUnit(NewPart);
+	      WriteSaveGame (_Universe->AccessCockpit(),true);
+	      NewPart=NULL;
+	      un->Kill();
+	      return;
+	    }
+	  }
+	  NewPart->Kill();
+	  NewPart=NULL;
+	}
+      }
+    }
+    break;
 
   case UPGRADEMODE:
   case ADDMODE:
   case DOWNGRADEMODE:    
-  case SHIPDEALERMODE:
+
     {
 
       char *unitdir =GetUnitDir(un->name.c_str());
@@ -685,27 +717,7 @@ void UpgradingInfo::CommitItem (const char *inp_buf, int button, int state) {
 	    NewPart = UnitFactory::createUnit (input_buffer,true,un->faction);
 	  }
 	  if (NewPart->name!=string("LOAD_FAILED")) {
-	    
-	    float usedprice = usedPrice (base->PriceCargo (_Universe->AccessCockpit()->GetUnitFileName()));
-	    if (mode==SHIPDEALERMODE&&part->price<=usedprice+_Universe->AccessCockpit()->credits) {
-	      if (NewPart->nummesh>0) {
-		_Universe->AccessCockpit()->credits-=part->price-usedprice;
-		NewPart->curr_physical_state=un->curr_physical_state;
-		NewPart->prev_physical_state=un->prev_physical_state;
-		_Universe->activeStarSystem()->AddUnit (NewPart);
-		
-		_Universe->AccessCockpit()->SetParent(NewPart,input_buffer,_Universe->AccessCockpit()->GetUnitModifications().c_str(),un->curr_physical_state.position);//absolutely NO NO NO modifications...you got this baby clean off the slate
-		SwitchUnits (NULL,NewPart);
-		base->RequestClearance(NewPart);
-		NewPart->Dock(base);
-		buyer.SetUnit(NewPart);
-		WriteSaveGame (_Universe->AccessCockpit(),true);
-		NewPart=NULL;
-		un->Kill();
-		return;
-	      }
-	    }
-	    if (mode!=SHIPDEALERMODE) {
+   	    if (mode!=SHIPDEALERMODE) {
 	      selectedmount=0;
 	      selectedturret=0;
 	      if (NewPart->nummounts) {
