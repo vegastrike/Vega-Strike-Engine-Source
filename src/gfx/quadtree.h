@@ -41,7 +41,7 @@ class QuadTree {
   void SetNeighbors (QuadTree * east, QuadTree * north, QuadTree *west, QuadTree * south);
   void Update(unsigned short numstages, unsigned short whichstage, updateparity *updateorder=identityparity);
   void SetTransformation (const Matrix transformation);
-  float GetHeight (Vector Location, Vector & normal);
+  float GetHeight (Vector Location, Vector & normal, float TotalTerrainSizeX=0, float TotalTerrainSizeZ=0);
   static void beginElement(void *userData, const XML_Char *name, const XML_Char **atts);
   static void endElement(void *userData, const XML_Char *name);
   void beginElement(const std::string &name, const XMLSupport::AttributeList &attributes);

@@ -30,6 +30,7 @@ ContinuousTerrain::ContinuousTerrain (char ** filenames, const int numwidth, con
     if (sizeX!=data[i]->getSizeX()||sizeZ!=data[i]->getSizeZ()) {
       fprintf (stderr,"Warning: Sizes of terrain do not match...expect gaps in continuous terrain\n");
     }
+    data[i]->SetTotalSize (sizeX*width,sizeZ*width);
   }
   for (i=0;i<width;i++) {
     for (int j=0;j<width;j++) {

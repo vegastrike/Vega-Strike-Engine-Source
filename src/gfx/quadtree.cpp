@@ -14,6 +14,7 @@ QuadTree::QuadTree (const char * filename, const Vector &Scales, const float rad
   neighbors[2]=NULL;
   neighbors[3]=NULL;
 
+
   detail =128;
   Identity (transformation);
   transformation[0]=Scales.i;
@@ -83,8 +84,22 @@ QuadTree::~QuadTree () {
   
 }
 
-float QuadTree::GetHeight (Vector Location, Vector & normal) {
+float QuadTree::GetHeight (Vector Location, Vector & normal, float TotalTerrainSizeX, float TotalTerrainSizeZ) {
   Location = nonlinear_transform->InvTransform (InvScaleTransform (transformation,Location));
+  if (TotalTerrainSizeX) {
+    //    float t1=Location.i; 
+    //    float t2=Location.k;
+    Location.i= fmod (Location.i,TotalTerrainSizeX);
+    Location.k= fmod (Location.k,TotalTerrainSizeZ);
+    //    if (t1!=Location.i|| t2!=Location.k) {
+    //      fprintf (stderr,"wired");
+    //    }
+
+    if (Location.i<0)
+      Location.i+=TotalTerrainSizeX;
+    if (Location.k<0)
+      Location.k+=TotalTerrainSizeZ;
+  }
   float tmp =  Location.j-root->GetHeight (RootCornerData,Location.i,Location.k,  normal);
   normal = Transform (transformation,nonlinear_transform->TransformNormal (Location, normal));
   normal.Normalize();

@@ -16,7 +16,8 @@ static std::vector <Terrain *> allterrains;
 
 
 
-Terrain::Terrain (const char * filename, const Vector & scales, const float mass, const float radius,updateparity *updatetransform):QuadTree (filename, scales,radius), mass(mass), whichstage (0){
+Terrain::Terrain (const char * filename, const Vector & scales, const float mass, const float radius,updateparity *updatetransform):QuadTree (filename, scales,radius),  TotalSizeX(0),TotalSizeZ(0), mass(mass), whichstage (0) {
+
   this->updatetransform = updatetransform;
   allterrains.push_back (this);
   draw=true;
@@ -44,7 +45,7 @@ void Terrain::ApplyForce (Unit * un, const Vector & normal, float dist) {
 
 void Terrain::Collide (Unit *un) {
   Vector norm;
-  float dist =GetHeight (un->Position(),norm)-un->rSize();
+  float dist =GetHeight (un->Position(),norm,TotalSizeX,TotalSizeZ)-un->rSize();
   if (dist < 0) {
     ApplyForce (un,norm,-dist);
   } 
