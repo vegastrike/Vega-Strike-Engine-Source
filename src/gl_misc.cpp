@@ -43,17 +43,14 @@ BOOL /*GFXDRVAPI*/ GFXEndScene()
 	
         glFlush();
 	glutSwapBuffers(); //swap the buffers
-	//char temp[128];
-	#ifdef STATS_QUEUE
-	sprintf(temp, "Frame stats for frame # %d: %d Tris, %d Quads, %d Points, %d total vertices drawn in %d milliseconds.\n",
+#ifdef STATS_QUEUE
+	cerr.form("Frame stats for frame # %d: %d Tris, %d Quads, %d Points, %d total vertices drawn.\n",
 		statsqueue.size(),
 		statsqueue.back().drawnTris,
 		statsqueue.back().drawnQuads,
 		statsqueue.back().drawnPoints,
-		statsqueue.back().total(),
-		statsqueue.back().elapsedTime());
-	printf(temp);  ///FIXME VEGASTRIKE
-	#endif
+		statsqueue.back().total());
+#endif
 	return TRUE;
 }
 
@@ -177,4 +174,18 @@ void GFXEndList() {
 
 void GFXCallList(int list) {
   glCallList(list);
+}
+
+void GFXSubwindow(int x, int y, int xsize, int ysize) {
+  glViewport(x,y,xsize,ysize);
+  glScissor(x,y,xsize,ysize);
+  if(x==0&&y==0&&xsize==g_game.x_resolution&&ysize==g_game.y_resolution) {
+    glDisable(GL_SCISSOR_TEST);
+  } else {
+    glEnable(GL_SCISSOR_TEST);
+  }
+}
+
+void GFXSubwindow(float x, float y, float xsize, float ysize) {
+  GFXSubwindow(int(x*g_game.x_resolution), int(y*g_game.y_resolution), int(xsize*g_game.x_resolution), int(ysize*g_game.y_resolution));
 }

@@ -312,7 +312,7 @@ static void Quit(int,KBSTATE newState) {
 Unit *carrier=NULL;
 Unit *fighter = NULL;
 Unit *fighter2=NULL;
-const int numf = 60;
+const int numf = 1;
 Unit *fighters[numf];
 //LocationSelect *locSel=NULL;
 Background * bg = NULL;
@@ -498,7 +498,7 @@ void createObjects() {
     //fighters[a] = new Unit("uosprey.dat");
     //fighters[a] = new Unit("Homeworld-HeavyCorvette.xml", true);
     //    switch(a%7) {
-    switch(0) {
+    switch(6) {
     case 0:
       //fighters[a] = new Unit("broadsword.xunit", true);
       fighters[a] = new Unit("midway.xunit", true);
@@ -526,7 +526,8 @@ void createObjects() {
     //fighters[a]->SetPosition((a%8)/8.0 - 2.0, (a/8)/8.0 - 2.0,5.0);
 
 
-     fighters[a]->SetPosition((a%5)/1.0 - 4.0F, (a/5)/1.0 - 4.0F,2.0F);
+    //fighters[a]->SetPosition((a%5)/0.5 - 4.0F, (a/5)/0.5 - 4.0F,2.0F);
+    fighters[a]->SetPosition(0, 0, -2.0F);
   
     //fighters[a]->Pitch(PI/2);
     //fighters[a]->Roll(PI/2);
@@ -600,10 +601,10 @@ void main_loop() {
 
   _GFX->activeStarSystem()->Draw();
   _GFX->activeStarSystem()->Update();
-  ProcessKB();
   
   GFXDisable(TEXTURE1);
   //textplane->Draw();
   _GFX->EndDraw();
+  ProcessInput();
 }
 

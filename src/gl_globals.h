@@ -97,4 +97,5 @@ extern int Stage1Texture;
 extern int Stage1TextureName;
 
 
-
+// Maximum number of things that can be returned in a pick operation
+#define MAX_PICK 2048

@@ -6,7 +6,11 @@
 #include "xml_support.h"
 
 namespace XMLSupport {
-  string int_to_string(int num) {
+  string tostring(int num) {
+    return string(((ostrstream*)&(ostrstream() << num << '\0'))->str());
+  }
+
+  string tostring(float num) {
     return string(((ostrstream*)&(ostrstream() << num << '\0'))->str());
   }
 
@@ -20,7 +24,7 @@ namespace XMLSupport {
   EnumMap::EnumMap(const Pair *data, unsigned int num) {
     for(unsigned int a=0; a<num; a++) {
       forward.Put(strtoupper(data[a].name), &data[a].val);
-      reverse.Put(int_to_string(data[a].val), &data[a].name);
+      reverse.Put(tostring(data[a].val), &data[a].name);
     }
   }
 
@@ -30,7 +34,7 @@ namespace XMLSupport {
     else return *forward.Get("UNKNOWN");
   }
   const string &EnumMap::lookup(int val) const {
-    const string *result = reverse.Get(int_to_string(val));
+    const string *result = reverse.Get(tostring(val));
     assert(0!=result);
     return *result;
   }

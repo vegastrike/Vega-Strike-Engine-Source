@@ -6,6 +6,12 @@
 #include "gfx_click_list.h"
 #include "gfx_hud.h"
 #include "cmd_input_dfa.h"
+
+#include "gfx_sphere.h"
+extern Vector mouseline;
+static SphereMesh *foo;
+static Unit *earth;
+
 StarSystem::StarSystem(Planet *primaries) : 
   primaries(primaries), 
   units(new UnitCollection()), 
@@ -18,13 +24,31 @@ StarSystem::StarSystem(Planet *primaries) :
   drawList->prepend(iter);
 
   delete iter;
+  iter = primaries->createIterator();
+  iter->advance();
+  earth=iter->current();
+  delete iter;
 
   tp->SetPosition(0.5,0.5,1);
 
   // Calculate movement arcs; set behavior of primaries to follow these arcs
   //Iterator *primary_iterator = primaries->createIterator(); 
   //primaries->SetPosition(0,0,5);
-  
+  foo = new SphereMesh(1,5,5,"moon.bmp");
+
+  cam[1].SetProjectionType(Camera::PARALLEL);
+  cam[1].SetZoom(10.0);
+  cam[1].SetPosition(Vector(0,5,0));
+  cam[1].LookAt(Vector(0,0,0), Vector(0,0,1));
+  //cam[1].SetPosition(Vector(0,5,-2.5));
+  cam[1].SetSubwindow(0,0,0.25,0.25);
+
+  cam[2].SetProjectionType(Camera::PARALLEL);
+  cam[2].SetZoom(10.0);
+  cam[2].SetPosition(Vector(5,0,0));
+  cam[2].LookAt(Vector(0,0,0), Vector(0,-1,0));
+  //cam[2].SetPosition(Vector(5,0,-2.5));
+  cam[2].SetSubwindow(0.25,0,0.25,0.25);
 }
 
 StarSystem::~StarSystem() {
@@ -52,6 +76,9 @@ void StarSystem::RemoveUnit(Unit *unit) {
 
 void StarSystem::Draw() {
   //primaries->Draw();
+  //    systemInputDFA->Draw(); return;
+  currentcamera=0;
+  SetViewport();
   Iterator *iter = drawList->createIterator();
   Unit *unit;
   while((unit = iter->current())!=NULL) {
@@ -59,26 +86,104 @@ void StarSystem::Draw() {
     iter->advance();
   }
   delete iter;
-  // slightly inefficient and stupid, but it's a quick hack to test caching effects
 
   Mesh::ProcessUndrawnMeshes();
   systemInputDFA->Draw();
 
+  Vector p,q,r,pos;
+  pos = cam[0].GetPosition();
+  cam[0].GetOrientation(p,q,r);
   /*
-  UnitCollection *col = systemInputDFA->getCollection();
-  string selected_units("");
-  if(0 != col) {
-    iter = col->createIterator();
-    Unit *u;
-    while(0!=(u = iter->current())) {
-      selected_units += string(", ") + u->get_name();
-      iter->advance();
-    }
-    tp->Draw();
-    delete iter;
-  }
-  tp->SetText(selected_units);
+  cam[1].SetPosition(q);
+  cam[1].LookAt(Vector(0,0,0), Vector(0,0,-1));
   */
+
+  currentcamera=1;
+  SetViewport();
+  GFXClear();
+  {
+  Iterator *iter = drawList->createIterator();
+  Unit *unit;
+  while((unit = iter->current())!=NULL) {
+    unit->TDraw();
+    iter->advance();
+  }
+  delete iter;
+  }
+  Mesh::ProcessUndrawnMeshes();
+
+  glActiveTextureARB(GL_TEXTURE0_ARB);
+  glDisable(GL_TEXTURE_2D);
+  glActiveTextureARB(GL_TEXTURE1_ARB);
+  glDisable(GL_TEXTURE_2D);
+
+  GFXBlendMode(ONE,ZERO);
+  GFXDisable(DEPTHTEST);
+  GFXDisable(CULLFACE);
+  GFXLoadIdentity(MODEL);
+  glBegin(GL_POINTS);
+  glColor4f(1,0,0,1);
+  glVertex3f(pos.i,pos.j,pos.k);
+  glVertex3f(pos.i+0.1,pos.j,pos.k);
+  glVertex3f(pos.i+0.1,pos.j,pos.k+0.1);
+  glVertex3f(pos.i,pos.j,pos.k+0.1);
+  glEnd();
+
+  glBegin(GL_LINES);
+  glColor4f(0,1,0,1);
+  glVertex3f(pos.i,pos.j,pos.k);
+  glVertex3f(pos.i+mouseline.i*10,pos.j+mouseline.j*10,pos.k+mouseline.k*10);
+  glEnd();
+
+  GFXEnable(DEPTHTEST);
+  GFXEnable(CULLFACE);
+
+  currentcamera=2;
+  SetViewport();
+  /*  cam[2].SetPosition(p);
+  cam[2].LookAt(Vector(0,0,0), Vector(0,0,-1));
+  */
+  GFXClear();
+  {
+  Iterator *iter = drawList->createIterator();
+  Unit *unit;
+  while((unit = iter->current())!=NULL) {
+    unit->TDraw();
+    iter->advance();
+  }
+  delete iter;
+  }
+
+  Mesh::ProcessUndrawnMeshes(); 
+
+  glActiveTextureARB(GL_TEXTURE0_ARB);
+  glDisable(GL_TEXTURE_2D);
+  glActiveTextureARB(GL_TEXTURE1_ARB);
+  glDisable(GL_TEXTURE_2D);
+
+  GFXBlendMode(ONE,ZERO);
+  GFXDisable(DEPTHTEST);
+  GFXDisable(CULLFACE);
+  GFXLoadIdentity(MODEL);
+  glBegin(GL_POINTS);
+  glColor4f(1,0,0,1);
+  glVertex3f(pos.i,pos.j,pos.k);
+  glVertex3f(pos.i,pos.j+0.1,pos.k);
+  glVertex3f(pos.i,pos.j+0.1,pos.k+0.1);
+  glVertex3f(pos.i,pos.j,pos.k+0.1);
+  glEnd();
+
+  glBegin(GL_LINES);
+  glColor4f(0,1,0,1);
+  glVertex3f(pos.i,pos.j,pos.k);
+  glVertex3f(pos.i+mouseline.i*10,pos.j+mouseline.j*10,pos.k+mouseline.k*10);
+  glEnd();
+
+  GFXEnable(DEPTHTEST);
+  GFXEnable(CULLFACE);
+
+  currentcamera=0;
+  SetViewport();
 }
 
 void StarSystem::Update() {

@@ -131,7 +131,7 @@ BOOL GFXInit (int argc, char ** argv){
     /* Ingore key-repeat messages */
     glutIgnoreKeyRepeat(1);
     glViewport (0, 0, g_game.x_resolution,g_game.y_resolution);
-    glClearColor ((float)1.0, (float)0, (float)0, (float)0);
+    glClearColor ((float)0.0, (float)0.0, (float)1.0, (float)0);
     glShadeModel (GL_SMOOTH);
     glEnable (GL_CULL_FACE);
 	//glDisable (GL_CULL_FACE);
@@ -200,8 +200,8 @@ BOOL GFXInit (int argc, char ** argv){
       glEnable(GL_TEXTURE_2D);
       glTexGenf(GL_S,GL_TEXTURE_GEN_MODE,GL_SPHERE_MAP);
       glTexGenf(GL_T,GL_TEXTURE_GEN_MODE,GL_SPHERE_MAP);
-      glEnable(GL_TEXTURE_GEN_S);
-      glEnable(GL_TEXTURE_GEN_T);
+      //glEnable(GL_TEXTURE_GEN_S);
+      //glEnable(GL_TEXTURE_GEN_T);
 #endif
     }
     glClearDepth(1);

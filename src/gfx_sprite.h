@@ -39,11 +39,13 @@ class Sprite:public Mesh {
 	//GFXVertexList *vlist;
 
 	//BOOL changed;
+	bool track_zoom;
 
 public:
-	Sprite(char *file);
+	Sprite(char *file, bool trackZoom = false);
 	~Sprite();
 
+	void UpdateMatrix();
 	void Draw();
 
 	void Rotate(const float &rad){Yaw(rad);};

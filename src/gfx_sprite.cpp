@@ -24,10 +24,11 @@
 #include "gfx_sprite.h"
 #include "gfx_transform.h"
 #include "gfxlib.h"
+#include "vegastrike.h"
 
 static float *mview = NULL;
 
-Sprite::Sprite(char *file):Mesh()
+Sprite::Sprite(char *file, bool trackzoom):Mesh(), track_zoom(trackzoom)
 {
   pos.i = 0;
   pos.j = 0;
@@ -63,12 +64,29 @@ Sprite::Sprite(char *file):Mesh()
     GFXVertex(Vector(0.00F, ysize, 1.00F), Vector(0.00F, 0.00F, 0.00F), 0.00F, 1.00F)};
     vlist = new GFXVertexList(4, vertices);
   */
+
 }	
 
 Sprite::~Sprite()
 {
 	if(surface!=NULL)
 		delete surface;
+}
+
+
+void Sprite::UpdateMatrix() {
+  if(track_zoom) {
+    float zoom = _GFX->AccessCamera()->GetZoom();
+
+    Translate(translation, pos*zoom);
+    MultMatrix(transformation, translation, orientation);
+    //glGetFloatv(GL_MODELVIEW_MATRIX, stackstate);
+    GFXGetMatrix(MODEL, stackstate);
+    changed = FALSE;
+    GFXMultMatrix(MODEL, transformation);
+  } else {
+    Mesh::UpdateMatrix();
+  }
 }
 
 void Sprite::Draw()

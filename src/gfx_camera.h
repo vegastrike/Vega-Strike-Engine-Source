@@ -30,22 +30,41 @@ class Camera{
 	Vector Coord;
 	Matrix view;
 	BOOL changed;
+	
+	float x, y, xsize, ysize;
+	float zoom;
+
+public:
+	enum ProjectionType {
+	  PARALLEL,
+	  PERSPECTIVE
+	};
+	
+private:
+	ProjectionType projectionType;
 
 public:
 	Vector P,Q,R;
 	PhysicsSystem myPhysics;
 
-	Camera();
+	Camera(ProjectionType proj = PERSPECTIVE);
         void GetView (Matrix);
 	void GetPQR (Vector &p1, Vector &q1, Vector &r1);
 	void UpdateGFX(bool updateFrustum=true);
 	void UpdateGLCenter();
 
-	void SetPosition(Vector &origin);
+	void SetPosition(const Vector &origin);
 	void GetPosition(Vector &vect);
 
+	void GetOrientation(Vector &p, Vector &q, Vector &r);
 	Vector &GetPosition();
-	void SetOrientation(Vector &p, Vector &q, Vector &r);
+
+	void LookAt(const Vector &loc, const Vector &up);
+	void SetOrientation(const Vector &p, const Vector &q, const Vector &r);
+	void SetSubwindow(float x, float y, float xsize, float ysize);
+	void SetProjectionType(ProjectionType t);
+	void SetZoom(float z);
+	float GetZoom();
 	void Yaw(float rad);
 	void Pitch(float rad);
 	void Roll(float rad);

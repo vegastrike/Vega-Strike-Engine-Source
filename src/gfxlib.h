@@ -29,11 +29,13 @@
 #endif
 */
 #include <GL/gl.h>
+#include <vector>
 typedef int BOOL;
 #define TRUE 1
 #define FALSE 0
 
 
+using std::vector;
 
 #include "gfx_transform_vector.h"
 
@@ -129,5 +131,15 @@ BOOL /*GFXDRVAPI*/ GFXEnd();
 int GFXCreateList();
 void GFXEndList();
 void GFXCallList(int list);
+
+//pick mode
+void GFXBeginPick(int x, int y, int xsize, int ysize);
+void GFXSetPickName(int name);
+//bool GFXCheckPicked();
+vector<PickData> *GFXEndPick();
+
+//Subwindow management
+void GFXSubwindow(int x, int y, int xsize, int ysize);
+void GFXSubwindow(float x, float y, float xsize, float ysize);
 
 #endif

@@ -248,7 +248,7 @@ void InputDFA::NoneSelect (KBSTATE k,int x, int y, int delx, int dely, int mod) 
   }
 }
 
-InputDFA::InputDFA (StarSystem * par) :MouseArrow ("mouse.spr"), SelectBox("selectbox.spr"){
+InputDFA::InputDFA (StarSystem * par) :MouseArrow ("mouse.spr", true), SelectBox("selectbox.spr", true){
   parentSystem= par;
   clickList = parentSystem->getClickList();
   state = NONE;

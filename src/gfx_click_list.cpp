@@ -2,18 +2,33 @@
 #include "gfx_click_list.h"
 #include "cmd_unit.h"
 
+extern Vector mouseline;
 
 bool ClickList::queryShip (int mouseX, int mouseY,Unit *ship) {   
+  float l, r, b, t , n, f;
+  
+  GFXGetFrustumVars (true,&l,&r,&b,&t,&n,&f);
 
-  Vector mousePoint (MouseCoordinate (mouseX,mouseY,1));
+  //Vector mousePoint (MouseCoordinate (mouseX,mouseY,1));
+  /*  cerr.form("%f, %f, %f, %f\n", l,r,b,t);
+  cerr << "top - bottom " <<  t-b << endl;
+  cerr << "right - left " <<  r-l << endl;
+  */
+  Vector mousePoint(l + (r-l) * float(mouseX)/g_game.x_resolution,
+		    b + (t-b) * float(mouseY)/g_game.y_resolution,
+		    n);
+  mouseline =mousePoint;
+  cerr << "Mousepoint: " << mousePoint << endl;
     //mousePoint.k= -mousePoint.k;
   Vector CamP,CamQ,CamR;
   _GFX->AccessCamera()->GetPQR(CamP,CamQ,CamR);
   mousePoint = Transform (CamP,CamQ,CamR,mousePoint);	
+  cerr << "Transformed Mousepoint: " << mousePoint << endl;
   _GFX->AccessCamera()->GetPosition(CamP);    
-  //if (ship->querySphere(CamP,mousePoint,0)){  FIXME  bounding spheres seem to be broken
-    if (ship->queryBoundingBox(CamP,mousePoint,0)) {
+  //  if (ship->querySphere(CamP,mousePoint,0)){  //FIXME  bounding spheres seem to be broken
+  if (ship->querySphere(CamP,mousePoint,0)){  //FIXME  bounding spheres seem to be broken
       return true;
+						//  if (ship->queryBoundingBox(CamP,mousePoint,0)) {
     }
     //}
   return false;

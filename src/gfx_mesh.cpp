@@ -42,6 +42,7 @@ using namespace std;
 
 Hashtable<string, Mesh> Mesh::meshHashTable;
 static list<Mesh*> undrawn_meshes;
+Vector mouseline;
 
 void Mesh::ProcessUndrawnMeshes() {
   while(undrawn_meshes.size()) {
@@ -798,7 +799,6 @@ void Mesh::UpdateMatrix()
 }
 
 void Mesh::UpdateHudMatrix() {
-
   Matrix tmatrix;
   Vector camp,camq,camr;
   _GFX->AccessCamera()->GetPQR(camp,camq,camr);

@@ -254,5 +254,13 @@ enum DEPTHFUNC{
 };
 
 
+//Pick data structures
+struct PickData {
+  int name;
+  int zmin;
+  int zmax;
+
+  PickData(int name, int zmin, int zmax) : name(name), zmin(zmin), zmax(zmax) { }
+};
 
 #endif

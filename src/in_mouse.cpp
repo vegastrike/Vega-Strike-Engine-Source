@@ -24,6 +24,7 @@
 //#include "dbg.h"
 #include "in_handler.h"
 #include "in_mouse.h"
+#include <deque.h>
 
 #define NUM_BUTTONS 3
 
@@ -36,11 +37,32 @@ static MouseHandler mouseBindings [NUM_BUTTONS+1];
 int mousex=0;
 int mousey=0;
 
-void mouseClick( int button, int state, int x, int y ) {
+struct MouseEvent {
+  enum EventType { CLICK, DRAG, MOTION } type;
+  int button;
+  int state;
+  int mod;
+  int x;
+  int y;
+  MouseEvent(EventType type, int button, int state, int mod, int x, int y) : type(type), button(button), state(state), mod(mod), x(x), y(y) { }
+};
+
+static deque<MouseEvent> eventQueue;
+void mouseClickQueue(int button, int state, int x, int y) {
+  int mod = glutGetModifiers();
+  eventQueue.push_back(MouseEvent(MouseEvent::CLICK, button, state, mod, x, y));
+}
+void mouseDragQueue(int x, int y) {
+  eventQueue.push_back(MouseEvent(MouseEvent::DRAG, -1, -1, -1, x, y));
+}
+void mouseMotionQueue(int x, int y) {
+  eventQueue.push_back(MouseEvent(MouseEvent::MOTION, -1, -1, -1, x, y));
+}
+
+void mouseClick( int button, int state, int mod, int x, int y ) {
   if(button>=NUM_BUTTONS) return;
   mousex = x;
   mousey = y;
-  int mod =glutGetModifiers();
   mouseBindings[button](state==GLUT_DOWN?PRESS:RELEASE,x,y,0,0,mod);
   MouseState[button]=(state==GLUT_DOWN)?DOWN:UP;
 }
@@ -92,14 +114,34 @@ void InitMouse(){
   for (int a=0;a<NUM_BUTTONS+1;a++) {
     UnbindMouse (a);
   }
+  /*
   glutMouseFunc(mouseClick);
   glutMotionFunc(mouseDrag);
   glutPassiveMotionFunc(mouseMotion);
+  */
+  glutMouseFunc(mouseClickQueue);
+  glutMotionFunc(mouseDragQueue);
+  glutPassiveMotionFunc(mouseMotionQueue);
 }				
 void ProcessMouse () {
+  while(eventQueue.size()) {
+    MouseEvent e = eventQueue.front();
+    switch(e.type) {
+    case MouseEvent::CLICK:
+      mouseClick(e.button, e.state, e.mod, e.x, e.y);
+      break;
+    case MouseEvent::DRAG:
+      mouseDrag(e.x, e.y);
+      break;
+    case MouseEvent::MOTION:
+      mouseMotion(e.x, e.y);
+      break;
+    }
+    eventQueue.pop_front();
+  }
+  /*
   for (int a=0;a<NUM_BUTTONS+1;a++) {
     mouseBindings[a](MouseState[a],mousex,mousey,0,0,0);
-  }
-
+    }*/
 }
 

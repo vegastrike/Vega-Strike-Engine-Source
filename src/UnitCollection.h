@@ -70,6 +70,16 @@ class UnitCollection {
       iter->advance();
     }
   }
+
+  Unit *item(unsigned i) {
+    UnitListNode *n = units->next;
+    while(n!=NULL) {
+      if(i==0) return n->unit;
+      n=n->next;
+      i--;
+    }
+    return NULL;
+  }
 };
 
 #endif

@@ -165,7 +165,7 @@ void WrapGFX::Loop(void main_loop()) {
 void WrapGFX::StartDraw()
 {
 	//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-  STARTTIMER();
+  RESETTIME();
 	GFXBeginScene();
 //	SetViewport();
 
@@ -180,7 +180,7 @@ void WrapGFX::StartDraw()
 void WrapGFX::EndDraw()
 {
 	GFXEndScene();
-	ENDTIMER();
+	//REPORTTIME("End of frame");
 	//glFinish();//finish all drawing commands
 	//SwapBuffers(_hDC); //swap the buffers
 }

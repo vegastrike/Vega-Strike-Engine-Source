@@ -103,6 +103,7 @@ protected:
   Vector corner_min, corner_max; // corners of object
   void calculate_extent();
 
+  void realDrawBoundingBox();
 public:
   //no default constructor; dymanically allocated arrays are evil, gotta do it java style to make it more sane
   Unit();
@@ -154,6 +155,11 @@ public:
    * to the center of a ship and compare with a sphere...pretty fast*/
   bool querySphere (int,int, float err, Camera *activeCam);
   bool querySphere (Matrix,int,int, float err,Camera *,Matrix);
+
+  void Select();
+  void Deselect();
+  void DrawBoundingBox();
+
   void PrimeOrders();
   void SetAI(AI *newAI);
   void EnqueueAI(AI *newAI);
@@ -189,9 +195,6 @@ public:
 
   inline bool queryCalculatePhysics() { return calculatePhysics; }
   void ExecuteAI();
-
-  void Select();
-  void Deselect();
 
   ostream &output(ostream& os) const;
 };

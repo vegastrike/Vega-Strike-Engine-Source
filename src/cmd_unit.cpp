@@ -31,6 +31,8 @@
 //if the PQR of the unit may be variable...for radius size computation
 //#define VARIABLE_LENGTH_PQR
 
+extern Vector mouseline;
+
 
 void Unit::calculate_extent() {  
   for(int a=0; a<nummesh; a++) {
@@ -537,6 +539,9 @@ Vector MouseCoordinate (int x, int y, float zplane) {
   //first get xyz in camera space
   xyz.i=zplane*(2.*x/g_game.x_resolution-1) /*  *g_game.MouseSensitivityX*/  *GFXGetXInvPerspective();
   xyz.j=zplane*(-2.*y/g_game.y_resolution+1) /*  *g_game.MouseSensitivityY*/  *GFXGetYInvPerspective();
+
+  mouseline = xyz;
+  cerr << "mouseline: " << mouseline << endl;
   return xyz;
 }
 
@@ -555,8 +560,9 @@ bool Unit::querySphere (int mouseX, int mouseY, float err, Camera * activeCam) {
 
   Vector CamP,CamQ,CamR;
   for (i=0;i<nummesh;i++) {
- 
+    cerr << "pretransform position: " << meshdata[i]->Position() << endl;
     TargetPoint = Transform(transformation,meshdata[i]->Position());
+    
     mousePoint = Transform (vw,TargetPoint);
     if (mousePoint.k>0) { //z coordinate reversed  -  is in front of camera
       continue;
@@ -604,6 +610,7 @@ bool Unit::querySphere (Matrix t,int mouseX, int mouseY, float err, Camera * act
 #endif
   Vector CamP,CamQ,CamR;
   for (i=0;i<nummesh;i++) {
+    cerr << "pretransform position: " << meshdata[i]->Position() << endl;
     TargetPoint = Transform (tmpo,meshdata[i]->Position());
     mousePoint = Transform (vw,TargetPoint);
     if (mousePoint.k>0)
@@ -685,96 +692,15 @@ void Unit::Draw()
 	}
 	if(selected) {
 	  GFXBlendMode(SRCALPHA,INVSRCALPHA);
-	  float radius = 1.5;
 	  //cerr << name << " selected\n";
 	  GFXDisable(TEXTURE0);
 	  GFXDisable(TEXTURE1);
 	  GFXDisable(LIGHTING);
 	  GFXDisable(CULLFACE);
-	  GFXDisable(DEPTHWRITE);
-	  GFXBegin(QUADS);
-	  /*
-	  GFXColor4f(0.0,1.0,0.0,0.2);
-
-	  GFXVertex3f(radius,-radius,radius);
-	  GFXVertex3f(radius,radius,radius);
-	  GFXVertex3f(-radius,radius,radius);
-	  GFXVertex3f(-radius,-radius,radius);
-
-	  GFXColor4f(0.0,0.0,1.0,0.2);
-	  GFXVertex3f(-radius,-radius,-radius);
-	  GFXVertex3f(-radius,radius,-radius);
-	  GFXVertex3f(radius,radius,-radius);
-	  GFXVertex3f(radius,-radius,-radius);
-
-	  GFXColor4f(1.0,0.0,0.0,0.2);
-
-	  GFXVertex3f(radius,-radius,radius);
-	  GFXVertex3f(-radius,-radius,radius);
-	  GFXVertex3f(-radius,-radius,-radius);
-	  GFXVertex3f(radius,-radius,-radius);
-
-	  GFXColor4f(1.0,1.0,0.0,0.2);
-	  GFXVertex3f(radius,radius,-radius);
-	  GFXVertex3f(-radius,radius,-radius);
-	  GFXVertex3f(-radius,radius,radius);
-	  GFXVertex3f(radius,radius,radius);
-
-	  GFXColor4f(1.0,0.0,1.0,0.2);
-	  GFXVertex3f(radius,radius,radius);
-	  GFXVertex3f(radius,-radius,radius);
-	  GFXVertex3f(radius,-radius,-radius);
-	  GFXVertex3f(radius,radius,-radius);
-
-	  GFXColor4f(0.0,1.0,1.0,0.2);
-	  GFXVertex3f(-radius,radius,-radius);
-	  GFXVertex3f(-radius,-radius,-radius);
-	  GFXVertex3f(-radius,-radius,radius);
-	  GFXVertex3f(-radius,radius,radius);
-	  */
-
-	  GFXColor4f(0.0,1.0,0.0,0.1);
-
-	  GFXVertex3f(corner_max.i,corner_min.j,corner_max.k);
-	  GFXVertex3f(corner_max.i,corner_max.j,corner_max.k);
-	  GFXVertex3f(corner_min.i,corner_max.j,corner_max.k);
-	  GFXVertex3f(corner_min.i,corner_min.j,corner_max.k);
-
-	  GFXColor4f(0.0,1.0,0.0,0.1);
-	  GFXVertex3f(corner_min.i,corner_min.j,corner_min.k);
-	  GFXVertex3f(corner_min.i,corner_max.j,corner_min.k);
-	  GFXVertex3f(corner_max.i,corner_max.j,corner_min.k);
-	  GFXVertex3f(corner_max.i,corner_min.j,corner_min.k);
-
-	  GFXColor4f(0.0,.70,0.0,0.1);
-
-	  GFXVertex3f(corner_max.i,corner_min.j,corner_max.k);
-	  GFXVertex3f(corner_min.i,corner_min.j,corner_max.k);
-	  GFXVertex3f(corner_min.i,corner_min.j,corner_min.k);
-	  GFXVertex3f(corner_max.i,corner_min.j,corner_min.k);
-
-	  GFXColor4f(0.0,.70,0.0,0.1);
-	  GFXVertex3f(corner_max.i,corner_max.j,corner_min.k);
-	  GFXVertex3f(corner_min.i,corner_max.j,corner_min.k);
-	  GFXVertex3f(corner_min.i,corner_max.j,corner_max.k);
-	  GFXVertex3f(corner_max.i,corner_max.j,corner_max.k);
-
-	  GFXColor4f(0.0,.90,.3,0.1);
-	  GFXVertex3f(corner_max.i,corner_max.j,corner_max.k);
-	  GFXVertex3f(corner_max.i,corner_min.j,corner_max.k);
-	  GFXVertex3f(corner_max.i,corner_min.j,corner_min.k);
-	  GFXVertex3f(corner_max.i,corner_max.j,corner_min.k);
-
-	  GFXColor4f(0.0,.90,.3,0.1);
-	  GFXVertex3f(corner_min.i,corner_max.j,corner_min.k);
-	  GFXVertex3f(corner_min.i,corner_min.j,corner_min.k);
-	  GFXVertex3f(corner_min.i,corner_min.j,corner_max.k);
-	  GFXVertex3f(corner_min.i,corner_max.j,corner_max.k);
-
-	  GFXEnd();
+	  realDrawBoundingBox();
 	  GFXEnable(LIGHTING);
 	  GFXEnable(CULLFACE);
-	  GFXEnable(DEPTHWRITE);
+	  //GFXEnable(DEPTHWRITE);
 	}
 }
 
@@ -875,4 +801,58 @@ ostream &Unit::output(ostream& os) const {
 
 ostream &operator<<(ostream &os, const Unit &u) {
   return u.output(os);
+}
+
+void Unit::DrawBoundingBox() {
+  Matrix view;
+  GFXGetMatrix(VIEW, view);
+  glMatrixMode(GL_MODELVIEW);
+  glLoadMatrixf(view);
+  glMultMatrixf(transformation);
+
+  cerr << "Bounding box eye coordinates for " << name << ": " << Vector(corner_max.i,corner_min.j,corner_max.k).Transform(transformation).Transform(view) << ", " << Vector(corner_min.i,corner_max.j,corner_max.k).Transform(transformation).Transform(view) << endl;
+  
+  realDrawBoundingBox();
+}
+
+void Unit::realDrawBoundingBox() {
+  GFXBegin(QUADS);
+  GFXColor4f(0.0,1.0,0.0,0.1);
+
+  GFXVertex3f(corner_max.i,corner_min.j,corner_max.k);
+  GFXVertex3f(corner_max.i,corner_max.j,corner_max.k);
+  GFXVertex3f(corner_min.i,corner_max.j,corner_max.k);
+  GFXVertex3f(corner_min.i,corner_min.j,corner_max.k);
+
+  GFXColor4f(0.0,1.0,0.0,0.1);
+  GFXVertex3f(corner_min.i,corner_min.j,corner_min.k);
+  GFXVertex3f(corner_min.i,corner_max.j,corner_min.k);
+  GFXVertex3f(corner_max.i,corner_max.j,corner_min.k);
+  GFXVertex3f(corner_max.i,corner_min.j,corner_min.k);
+
+  GFXColor4f(0.0,.70,0.0,0.1);
+
+  GFXVertex3f(corner_max.i,corner_min.j,corner_max.k);
+  GFXVertex3f(corner_min.i,corner_min.j,corner_max.k);
+  GFXVertex3f(corner_min.i,corner_min.j,corner_min.k);
+  GFXVertex3f(corner_max.i,corner_min.j,corner_min.k);
+
+  GFXColor4f(0.0,.70,0.0,0.1);
+  GFXVertex3f(corner_max.i,corner_max.j,corner_min.k);
+  GFXVertex3f(corner_min.i,corner_max.j,corner_min.k);
+  GFXVertex3f(corner_min.i,corner_max.j,corner_max.k);
+  GFXVertex3f(corner_max.i,corner_max.j,corner_max.k);
+
+  GFXColor4f(0.0,.90,.3,0.1);
+  GFXVertex3f(corner_max.i,corner_max.j,corner_max.k);
+  GFXVertex3f(corner_max.i,corner_min.j,corner_max.k);
+  GFXVertex3f(corner_max.i,corner_min.j,corner_min.k);
+  GFXVertex3f(corner_max.i,corner_max.j,corner_min.k);
+
+  GFXColor4f(0.0,.90,.3,0.1);
+  GFXVertex3f(corner_min.i,corner_max.j,corner_min.k);
+  GFXVertex3f(corner_min.i,corner_min.j,corner_min.k);
+  GFXVertex3f(corner_min.i,corner_min.j,corner_max.k);
+  GFXVertex3f(corner_min.i,corner_max.j,corner_max.k);
+  GFXEnd();
 }

@@ -33,9 +33,15 @@ int Stage0TextureName;
 int Stage1Texture= 0;
 int Stage1TextureName;
 
+namespace GFXMatrices {
+  Matrix model, view, projection, invprojection;
+  Matrix  rotview;
+}
+
 //PFNGLMULTITEXCOORD2FARBPROC glMultiTexCoord2fARB;
 //PFNGLCLIENTACTIVETEXTUREARBPROC glClientActiveTextureARB;
 //PFNGLCLIENTACTIVETEXTUREARBPROC glActiveTextureARB;
 #ifdef STATS_QUEUE
 queue<GFXStats> statsqueue;
+
 #endif

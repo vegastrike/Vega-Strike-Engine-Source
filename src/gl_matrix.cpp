@@ -24,6 +24,7 @@
 //typedef float GLdouble;
 #include <math.h>
 #include <string.h>
+#include "gl_matrix.h"
 //#include <GL/glu.h>
 const float PI=3.1415926536;
 inline void Zero(float matrix[])
@@ -152,8 +153,8 @@ inline void CopyMatrix(Matrix dest, const Matrix source)
   */
 }
 
-static Matrix model, view, projection, invprojection;
-static Matrix  rotview;
+using namespace GFXMatrices;
+
 float centerx,centery,centerz;
 void evaluateViews () {
   //Identity(transview);
@@ -305,13 +306,19 @@ BOOL /*GFXDRVAPI*/ GFXLoadIdentity(MATRIXMODE mode)
 
 BOOL /*GFXDRVAPI*/ GFXGetMatrix(MATRIXMODE mode, Matrix matrix)
 {
+  Matrix translation;
 	switch(mode)
 	{
 	case MODEL:
 		CopyMatrix(matrix, model);
 		break;
 	case VIEW:
-		CopyMatrix(matrix, view);
+	  Identity(translation);
+	  translation[12] = -centerx;
+	  translation[13] = -centery;
+	  translation[14] = -centerz;
+	  MultMatrix(matrix, rotview, translation);
+	  //CopyMatrix(matrix, view);
 		break;
 	case PROJECTION:
 		CopyMatrix(matrix, projection);
@@ -435,12 +442,25 @@ BOOL /*GFXDRVAPI*/ GFXPerspective(float fov, float aspect, float znear, float zf
 */
 }
 
-BOOL /*GFXDRVAPI*/ GFXParallel(float left, float right, float bottom, float top, float znear, float zfar)
+BOOL /*GFXDRVAPI*/ GFXParallel(float left, float right, float bottom, float top, float nearval, float farval)
 {
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	glOrtho(left, right, bottom, top, znear, zfar);
-	return TRUE;
+  float *m = projection, x,y,z,tx,ty,tz;
+   x = 2.0 / (right-left);
+   y = 2.0 / (top-bottom);
+   z = -2.0 / (farval-nearval);
+   tx = -(right+left) / (right-left);
+   ty = -(top+bottom) / (top-bottom);
+   tz = -(farval+nearval) / (farval-nearval);
+
+#define M(row,col)  m[col*4+row]
+   M(0,0) = x;     M(0,1) = 0.0F;  M(0,2) = 0.0F;  M(0,3) = tx;
+   M(1,0) = 0.0F;  M(1,1) = y;     M(1,2) = 0.0F;  M(1,3) = ty;
+   M(2,0) = 0.0F;  M(2,1) = 0.0F;  M(2,2) = z;     M(2,3) = tz;
+   M(3,0) = 0.0F;  M(3,1) = 0.0F;  M(3,2) = 0.0F;  M(3,3) = 1.0F;
+#undef M
+   GFXLoadMatrix(PROJECTION, projection);
+
+  GFXGetFrustumVars(false,&left,&right,&bottom,&top,&nearval,&farval);
 }
 
 
