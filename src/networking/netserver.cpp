@@ -168,7 +168,6 @@ void	NetServer::sendLoginAccept( Client * clt, AddressIP ipadr, int newacct)
 		char * save = buf + NAMELEN*2 + sizeof( unsigned int)*2 + xml_size;
 		unsigned int save_size = ntohl( *( (unsigned int *)(buf+ NAMELEN*2 + sizeof( unsigned int) + xml_size)));
 		cout<<"XML="<<xml_size<<" bytes - SAVE="<<save_size<<" bytes"<<endl;
-		/*
 		QVector tmpvec( 0, 0, 0);
 		float credits;
 		vector<string> savedships;
@@ -176,7 +175,6 @@ void	NetServer::sendLoginAccept( Client * clt, AddressIP ipadr, int newacct)
 		clt->save.ParseSaveGame( "", str, "", tmpvec, update, credits, savedships, clt->serial, save, false);
 		cout<<"Credits = "<<credits<<endl;
 		clt->game_unit->LoadXML( "", "", xml, xml_size);
-		*/
 
 		//string strname( name);
 		// Write temp XML file for unit
@@ -449,6 +447,23 @@ void	NetServer::start()
 			savetime += period;
 			cout<<"done."<<endl;
 		}
+
+		/****************************** VS STUFF TO DO ************************************/
+		// UPDATE STAR SYSTEM -> TO INTEGRATE WITH NETWORKING
+		// PROCESS JUMPS -> MAKE UNITS CHANGE THEIR STAR SYSTEM
+		  //unsigned int i;
+		  //StarSystem * lastStarSystem = NULL;
+		  //static float nonactivesystemtime = XMLSupport::parse_float (vs_config->getVariable ("physics","InactiveSystemTime",".3"));
+		  //static unsigned int numrunningsystems = XMLSupport::parse_int (vs_config->getVariable ("physics","NumRunningSystems","4"));
+		  //float systime=nonactivesystemtime;
+		  
+		  /*
+			for (i=0;i<star_system.size()&&i<numrunningsystems;i++) {
+			star_system[i]->Update((i==0)?1:systime/i,true);
+		  }
+		  StarSystem::ProcessPendingJumps();
+		  */
+		/****************************** VS STUFF TO DO ************************************/
 
 		micro_sleep(10000);
 	}

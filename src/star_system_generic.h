@@ -84,7 +84,7 @@ class StarSystem {
  public:
   virtual void AddMissileToQueue(class MissileEffect *);
   virtual void UpdateMissiles();
-  virtual void UpdateUnitPhysics(bool firstframe){}
+  void UpdateUnitPhysics(bool firstframe);
   virtual void activateLightMap() {}
   ///activates the light map texture
   virtual unsigned int numTerrain () {return 0;}
@@ -92,7 +92,7 @@ class StarSystem {
   ///Draws a frame of action, interpolating between physics frames
   virtual void Draw(bool DrawCockpit=true) {}
   /// update a simulation atom ExecuteDirector must be false if star system is just loaded before mission is loaded
-  virtual void Update(float priority, bool executeDirector) {} 
+  void Update(float priority, bool executeDirector);
   ///re-enables the included lights and terrains
   virtual void SwapIn () {}
   ///Disables included lights and terrains
@@ -104,7 +104,6 @@ class StarSystem {
 
   void ExecuteUnitAI();
   class CollideTable *collidetable;
-  int count_since_huge_active;
   class bolt_draw *bolts;
   virtual void LoadXML(const char*, const Vector & centroid, const float timeofyear) {}
   static void beginElement(void *userData, const XML_Char *name, const XML_Char **atts);

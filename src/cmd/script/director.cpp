@@ -248,23 +248,6 @@ void Mission::DirectorEnd(){
 
 }
 
-void Mission::DirectorBenchmark(){
-  double oldgametime=gametime;
-  gametime+=SIMULATION_ATOM;//elapsed;
-  if (getTimeCompression()>=.1) {
-    if (gametime<=oldgametime)
-      gametime=SIMULATION_ATOM;
-  }
-  total_nr_frames++;
-
-  //cout << "elapsed= " << elapsed << " fps= " << 1.0/elapsed << " average= " << ((double)total_nr_frames)/gametime << " in " << gametime << " seconds" << endl;
-
-  if(benchmark>0.0 && benchmark<gametime){
-    cout << "Game was running for " << gametime << " secs,   av. framerate " << ((double)total_nr_frames)/gametime << endl;
-    winsys_exit(0);
-  }
-}
-
 void Mission::DirectorShipDestroyed(Unit *unit){
   Flightgroup *fg=unit->getFlightgroup();
 
@@ -371,5 +354,22 @@ void Mission::BriefingEnd() {
 	//RunDirectorScript ("endbriefing");      
     delete briefing;
     briefing = NULL;
+  }
+}
+
+void Mission::DirectorBenchmark(){
+  double oldgametime=gametime;
+  gametime+=SIMULATION_ATOM;//elapsed;
+  if (getTimeCompression()>=.1) {
+    if (gametime<=oldgametime)
+      gametime=SIMULATION_ATOM;
+  }
+  total_nr_frames++;
+
+  //cout << "elapsed= " << elapsed << " fps= " << 1.0/elapsed << " average= " << ((double)total_nr_frames)/gametime << " in " << gametime << " seconds" << endl;
+
+  if(benchmark>0.0 && benchmark<gametime){
+    cout << "Game was running for " << gametime << " secs,   av. framerate " << ((double)total_nr_frames)/gametime << endl;
+    winsys_exit(0);
   }
 }

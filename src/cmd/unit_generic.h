@@ -265,7 +265,7 @@ protected:
   std::string getCockpit ()const;
 
   // Shouldn't do anything here - but needed by Python
-  virtual class Cockpit * GetVelocityDifficultyMult(float &) const { return NULL;}
+  class Cockpit * GetVelocityDifficultyMult(float &) const;
 
   StarSystem * activeStarSystem;//the star system I'm in
   ///Takes out of the collide table for this system.
@@ -430,7 +430,7 @@ protected:
   virtual float ExplosionRadius();
 public:
   virtual void SetPlanetHackTransformation (Transformation *&ct,Matrix *&ctm) {}
-  virtual bool AutoPilotTo(Unit * un, bool ignore_friendlies=false) {return false;}
+  bool AutoPilotTo(Unit * un, bool ignore_friendlies=false);
   ///The owner of this unit. This may not collide with owner or units owned by owner. Do not dereference (may be dead pointer)
   Unit *owner;
   ///The previous state in last physics frame to interpolate within
@@ -930,7 +930,7 @@ public:
   virtual void reactToCollision(Unit * smaller, const QVector & biglocation, const Vector & bignormal, const QVector & smalllocation, const Vector & smallnormal, float dist);
   ///returns true if jump possible even if not taken
 // Uses Universe thing
-  virtual bool jumpReactToCollision (Unit *smaller) {return false;}
+  bool jumpReactToCollision (Unit *smaller);
   ///Does a collision between this and another unit
   bool Collide(Unit * target);
   ///checks for collisions with all beams and other units roughly and then more carefully

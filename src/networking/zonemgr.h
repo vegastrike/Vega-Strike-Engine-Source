@@ -35,6 +35,7 @@ class NetUI;
 class ZoneMgr
 {
 		int nb_zones;
+		//vector<StarSystem *> starsystems;
 		list<Client *>		*zone_list;
 		int					*zone_clients;
 
@@ -47,7 +48,7 @@ class ZoneMgr
 		void	addClient( Client * clt, int zone);
 		void	removeClient( Client * clt);
         void    broadcast( Client * clt, Packet * pckt );
-        void    broadcastSnapshots(  );
+        void    broadcastSnapshots();
 		int		getZoneClients( Client * clt, char * bufzone);
 		double	isVisible( Quaternion orient, QVector src_pos, QVector tar_pos);
 };

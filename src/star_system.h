@@ -60,7 +60,7 @@ class GameStarSystem: public StarSystem {
  public:
   GameStarSystem::GameStarSystem(const char * filename, const Vector & centr=Vector(0,0,0),const float timeofyear=0);
   ~GameStarSystem();
-  void UpdateUnitPhysics(bool firstframe);
+  //void UpdateUnitPhysics(bool firstframe);
   //class CollideTable *collidetable;
   //class bolt_draw *bolts;
   Background* getBackground() {return bg;}

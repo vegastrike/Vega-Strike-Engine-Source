@@ -55,22 +55,8 @@ GameStarSystem::GameStarSystem(): StarSystem()
   collidetable = new CollideTable(this);
 }
 */
-extern bool GetStarSystemLoading();
-extern void SetStarSystemLoading(bool);
-extern void SetSplashScreen (Animation *);
-void bootstrap_draw (const std::string &message, float x, float y, Animation * newSplashScreen);
 GameStarSystem::GameStarSystem(const char * filename, const Vector & centr,const float timeofyear) {
-  bool bootstrapping = GetStarSystemLoading();
-  if (!bootstrapping) {
-    SetStarSystemLoading(true);
-    Animation a("vega_spash.ani",0);
-    string s("Jumping to ");
-    s+=filename;
-    bootstrap_draw(s.c_str(),-.135,0,&a);
-    bootstrap_draw(s.c_str(),-.135,0,&a);
-    SetSplashScreen(NULL);
-    SetStarSystemLoading(false);
-  }
+
   no_collision_time=0;//(int)(1+2.000/SIMULATION_ATOM);
   ///adds to jumping table;
   name = NULL;
@@ -164,10 +150,7 @@ GameStarSystem::GameStarSystem(const char * filename, const Vector & centr,const
 
   theAtmosphere = new Atmosphere(params);
   _Universe->popActiveStarSystem ();
-  //  if (!bootstrapping) {
-  //    bootstrap_draw(s.c_str(),-.135,0,NULL);
-  //    SetStarSystemLoading(false);
-  //  }
+
 }
 void GameStarSystem::activateLightMap() {
   GFXActiveTexture (1);
@@ -462,27 +445,33 @@ void GameStarSystem::Draw(bool DrawCockpit) {
   fflush (stderr);
 #endif
 }
-void GameStarSystem::UpdateUnitPhysics (bool firstframe) {
-  un_iter iter = this->getUnitList().createIterator();
-  Unit * unit=NULL;
-	while((unit = iter.current())!=NULL) {
-#ifdef OLD_AUTOPILOT
-	if (owner) 
-	  if (owner->getRelation(unit)<0) {
-	    static float neardist =XMLSupport::parse_float(vs_config->getVariable("physics","autodist","4000"));
-	    Vector diff (owner->Position()-unit->Position());
-	    if (diff.Dot(diff)<neardist*neardist) {
-	      if (getTimeCompression!=.0000001) {//if not paused
-		reset_time_compression(0,PRESS);
-	      }
+
+void	UpdateAnimatedTexture()
+{ AnimatedTexture::UpdateAllPhysics();}
+void	TerrainCollide()
+{ Terrain::CollideAll();}
+void	UpdateTerrain()
+{ Terrain::UpdateAll(64);}
+void	UpdateCameraSnds()
+{ _Universe->AccessCockpit(0)->AccessCamera()->UpdateCameraSounds();}
+void	NebulaUpdate( StarSystem * ss)
+{
+	if (_Universe->AccessCockpit()->activeStarSystem==ss){
+	  Nebula * neb;
+	  if ((neb=_Universe->AccessCamera()->GetNebula())) {
+	    if (neb->getFade()<=0) {
+	      _Universe->AccessCamera()->SetNebula(NULL);//Update physics should set this
 	    }
 	  }
-#endif
-	  unit->UpdatePhysics(identity_transformation,identity_matrix,Vector (0,0,0),firstframe,&this->gravitationalUnits());
-	  iter.advance();
 	}
 }
-
+extern Music *muzak;
+void	TestMusic()
+{
+	if (muzak)
+		  muzak->Listen();
+}
+/*
 extern float getTimeCompression();
 void GameStarSystem::Update(float priority , bool executeDirector) {
 
@@ -606,9 +595,6 @@ void GameStarSystem::Update(float priority , bool executeDirector) {
 	  }
 
 	}
-	if ((count_since_huge_active++%100)==0) {
-	  collidetable->c.SwapHugeAccum();
-	}
 	UpdateMissiles();//do explosions
 	current_stage=PHY_TERRAIN;
       } else if (current_stage==PHY_TERRAIN) {
@@ -685,5 +671,5 @@ void GameStarSystem::Update(float priority , bool executeDirector) {
   _Universe->popActiveStarSystem();
   //  fprintf (stderr,"bf:%lf",interpolation_blend_factor);
 }
-
+*/
 

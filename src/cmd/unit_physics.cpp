@@ -64,31 +64,6 @@ extern unsigned short apply_float_to_short (float tmp);
 //    float max_roll;
 
 template <class UnitType>
-void GameUnit<UnitType>::Thrust(const Vector &amt1,bool afterburn){
-  Vector amt = ClampThrust(amt1,afterburn);
-  ApplyLocalForce(amt);  
- if (_Universe->AccessCockpit(0)->GetParent()==this)
-  if (afterburn!=AUDIsPlaying (sound->engine)) {
-    if (afterburn)
-      AUDPlay (sound->engine,cumulative_transformation.position,cumulative_velocity,1);
-    else
-      //    if (Velocity.Magnitude()<computer.max_speed)
-      AUDStopPlaying (sound->engine);
-  }
-}
-
-template <class UnitType>
-Cockpit * GameUnit<UnitType>::GetVelocityDifficultyMult(float &difficulty) const{
-  difficulty=1;
-  Cockpit * player_cockpit=_Universe->isPlayerStarship(this);
-  if ((player_cockpit)==NULL) {
-    static float exp = XMLSupport::parse_float (vs_config->getVariable ("physics","difficulty_speed_exponent",".2"));
-    difficulty = pow(g_game.difficulty,exp);
-  }
-  return player_cockpit;
-}
-
-template <class UnitType>
 void GameUnit<UnitType>::UpdatePhysics (const Transformation &trans, const Matrix &transmat, const Vector & cum_vel,  bool lastframe, UnitCollection *uc) {
   static float VELOCITY_MAX=XMLSupport::parse_float(vs_config->getVariable ("physics","velocity_max","10000"));
 
@@ -300,7 +275,7 @@ void GameUnit<UnitType>::UpdatePhysics (const Transformation &trans, const Matri
     }
     if (mounts[i]->type->type==weapon_info::BEAM) {
       if (mounts[i]->ref.gun) {
-	mounts[i]->ref.gun->UpdatePhysics (cumulative_transformation, cumulative_transformation_matrix,((mounts[i]->size&weapon_info::AUTOTRACKING)&&(mounts[i]->time_to_lock<=0))?target:NULL ,computer.radar.trackingcone,target);
+	mounts[i]->ref.gun->UpdatePhysics (cumulative_transformation, cumulative_transformation_matrix,((mounts[i]->size&weapon_info::AUTOTRACKING)&&(mounts[i]->time_to_lock<=0))?target:NULL ,computer.radar.trackingcone, target);
       }
     } else {
       mounts[i]->ref.refire+=SIMULATION_ATOM;
@@ -354,6 +329,29 @@ void GameUnit<UnitType>::UpdatePhysics (const Transformation &trans, const Matri
   }
 }
 
+/****************************** ONLY SOUND/GFX STUFF LEFT IN THOSE FUNCTIONS *********************************/
+
+template <class UnitType>
+void GameUnit<UnitType>::Thrust(const Vector &amt1,bool afterburn){
+  Unit::Thrust( amt1, afterburn);
+ if (_Universe->AccessCockpit(0)->GetParent()==this)
+  if (afterburn!=AUDIsPlaying (sound->engine)) {
+    if (afterburn)
+      AUDPlay (sound->engine,cumulative_transformation.position,cumulative_velocity,1);
+    else
+      //    if (Velocity.Magnitude()<computer.max_speed)
+      AUDStopPlaying (sound->engine);
+  }
+}
+
+template <class UnitType>
+Vector GameUnit<UnitType>::ResolveForces (const Transformation &trans, const Matrix &transmat) {
+#ifndef PERFRAMESOUND
+  AUDAdjustSound (sound->engine,cumulative_transformation.position, cumulative_velocity); 
+#endif
+	return Unit::ResolveForces( trans, transmat);
+}
+
 template <class UnitType>
 void GameUnit<UnitType>::SetPlanetOrbitData (PlanetaryTransform *t) {
 #ifdef FIX_TERRAIN
@@ -381,112 +379,5 @@ if (planet==NULL)
 #else
   return NULL;
 #endif
-}
-
-template <class UnitType>
-bool GameUnit<UnitType>::jumpReactToCollision (Unit * smalle) {
-  if (!GetDestinations().empty()) {//only allow big with small
-    if ((smalle->GetJumpStatus().drive>=0||image->forcejump)) {
-      smalle->DeactivateJumpDrive();
-      GameUnit<UnitType> * jumppoint = this;
-      _Universe->activeStarSystem()->JumpTo (smalle, jumppoint, std::string(GetDestinations()[smalle->GetJumpStatus().drive%GetDestinations().size()]));
-      return true;
-    }
-    return true;
-  }
-  if (!smalle->GetDestinations().empty()) {
-    if ((GetJumpStatus().drive>=0||smalle->image->forcejump)) {
-      DeactivateJumpDrive();
-      Unit * jumppoint = smalle;
-      _Universe->activeStarSystem()->JumpTo (this, jumppoint, std::string(smalle->GetDestinations()[GetJumpStatus().drive%smalle->GetDestinations().size()]));
-      return true;
-    }
-    return true;
-  }
-  return false;
-}
-
-template <class UnitType>
-Vector GameUnit<UnitType>::ResolveForces (const Transformation &trans, const Matrix &transmat) {
-#ifndef PERFRAMESOUND
-  AUDAdjustSound (sound->engine,cumulative_transformation.position, cumulative_velocity); 
-#endif
-	return Unit::ResolveForces( trans, transmat);
-}
-
-extern signed char  ComputeAutoGuarantee ( Unit * un);
-extern float getAutoRSize (Unit * orig,Unit * un, bool ignore_friend=false);
-
-template <class UnitType>
-bool GameUnit<UnitType>::AutoPilotTo (Unit * target, bool ignore_friendlies) {
-  signed char Guaranteed = ComputeAutoGuarantee (this);
-  if (Guaranteed==Mission::AUTO_OFF) {
-    return false;
-  }
-  static float autopilot_term_distance = XMLSupport::parse_float (vs_config->getVariable ("physics","auto_pilot_termination_distance","6000"));
-//  static float autopilot_p_term_distance = XMLSupport::parse_float (vs_config->getVariable ("physics","auto_pilot_planet_termination_distance","60000"));
-  if (SubUnit) {
-    return false;//we can't auto here;
-  }
-  StarSystem * ss = activeStarSystem;
-  if (ss==NULL) {
-    ss = _Universe->activeStarSystem();
-  }
-
-  Unit * un=NULL;
-  QVector start (Position());
-  QVector end (target->LocalPosition());
-  float totallength = (start-end).Magnitude();
-  if (totallength>1) {
-    //    float apt = (target->isUnit()==PLANETPTR&&target->GetDestinations().empty())?autopilot_p_term_distance:autopilot_term_distance;
-	  float apt = (target->isUnit()==PLANETPTR)?(autopilot_term_distance+target->rSize()*UniverseUtil::getPlanetRadiusPercent()):autopilot_term_distance;
-    float percent = (getAutoRSize(this,this)+rSize()+target->rSize()+apt)/totallength;
-    if (percent>1) {
-      end=start;
-    }else {
-      end = start*percent+end*(1-percent);
-    }
-  }
-  bool ok=true;
-  if (Guaranteed==Mission::AUTO_NORMAL&&CloakVisible()>.5) {
-    for (un_iter i=ss->getUnitList().createIterator(); (un=*i)!=NULL; ++i) {
-      static bool canflythruplanets= XMLSupport::parse_bool(vs_config->getVariable("physics","can_auto_through_planets","true"));
-      if ((!(un->isUnit()==PLANETPTR&&canflythruplanets))&&un->isUnit()!=NEBULAPTR && (!UnitUtil::isSun(un))) {
-		if (un!=this&&un!=target) {
-    	  if ((start-un->Position()).Magnitude()-getAutoRSize (this,this,ignore_friendlies)-rSize()-un->rSize()-getAutoRSize(this,un,ignore_friendlies)<=0) {
-	    return false;
-	  }
-	  float intersection = un->querySphere (start,end,getAutoRSize (this,un,ignore_friendlies));
-	  if (intersection>0) {
-	    end = start+ (end-start)*intersection;
-	    ok=false;
-	  }
-	 }
-    }
-   }
-  }
-
-  if (this!=target) {
-    SetCurPosition(UniverseUtil::SafeEntrancePoint (end));
-    if (_Universe->isPlayerStarship (this)&&getFlightgroup()!=NULL) {
-      Unit * other=NULL;
-      for (un_iter ui=ss->getUnitList().createIterator(); NULL!=(other = *ui); ++ui) {
-    	Flightgroup * ff = other->getFlightgroup();
-		bool leadah=(ff==getFlightgroup());
-		if (ff) {
-			if (ff->leader.GetUnit()==this) {
-				leadah=true;
-		}
-	}
-	if (leadah) {
-	  if (NULL==_Universe->isPlayerStarship (other)) {
-	    //other->AutoPilotTo(this);
-	    other->SetPosition(UniverseUtil::SafeEntrancePoint (LocalPosition(),other->rSize()*1.5));
-	   }
-	}
-      }
-    }
-  }
-  return ok;
 }
 

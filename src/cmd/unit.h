@@ -207,18 +207,18 @@ public:
   bool querySphereClickList (int,int, float err, Camera *activeCam);
   //virtual void reactToCollision(Unit * smaller, const QVector & biglocation, const Vector & bignormal, const QVector & smalllocation, const Vector & smallnormal, float dist);
   ///returns true if jump possible even if not taken
-  bool jumpReactToCollision (Unit *smaller);
+  //bool jumpReactToCollision (Unit *smaller);
 
 /***************************************************************************************/
 /**** PHYSICS STUFF                                                                    */
 /***************************************************************************************/
 
   void SetPlanetHackTransformation (Transformation *&ct,Matrix *&ctm);
-  bool AutoPilotTo(Unit * un, bool ignore_friendlies=false);
+  //bool AutoPilotTo(Unit * un, bool ignore_friendlies=false);
 
   ///Updates physics given unit space transformations and if this is the last physics frame in the current gfx frame
   virtual void UpdatePhysics (const Transformation &trans, const Matrix &transmat, const Vector & CumulativeVelocity, bool ResolveLast, UnitCollection *uc=NULL);
-  class Cockpit * GetVelocityDifficultyMult(float &) const;
+  //class Cockpit * GetVelocityDifficultyMult(float &) const;
   ///executes a repair if the repair bot is up to it
   void Repair();
   ///Thrusts by ammt and clamps accordingly (afterburn or not)

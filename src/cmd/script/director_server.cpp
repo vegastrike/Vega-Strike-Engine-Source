@@ -42,6 +42,8 @@
 #include <boost/python/detail/extension_class.hpp>
 #endif
 
+#include "mission.h"
+
 void InitDirector() {
 	Python::reseterrors();
 	//PYTHON_INIT_MODULE(Director);
@@ -57,3 +59,7 @@ void InitBriefing() {
 	//PYTHON_INIT_MODULE(Briefing);
 	Python::reseterrors();
 }
+
+void Mission::DirectorLoop(){}
+void Mission::BriefingUpdate(){}
+void Mission::DirectorBenchmark(){}

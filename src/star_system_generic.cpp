@@ -1,18 +1,20 @@
 #include <assert.h>
 #include "star_system_generic.h"
 #include "gfx/vec.h"
-//#include "cmd/planet.h"
+#include "cmd/planet_generic.h"
 #include "cmd/unit_generic.h"
-//#include "cmd/unit_collide.h"
+#include "cmd/unit_collide.h"
 #include "cmd/collection.h"
+#include "gfx/cockpit_generic.h"
+#include "audiolib.h"
 //#include "cmd/click_list.h"
 //#include "cmd/ai/input_dfa.h"
-//#include "lin_time.h"
-//#include "cmd/beam.h"
+#include "lin_time.h"
+#include "cmd/beam.h"
 //#include "gfx/sphere.h"
 //#include "cmd/unit_collide.h"
 //#include "gfx/star.h"
-//#include "cmd/bolt.h"
+#include "cmd/bolt.h"
 #include <expat.h>
 //#include "cmd/music.h"
 #include "configxml.h"
@@ -22,7 +24,7 @@
 #include "universe_generic.h"
 //#include "cmd/atmosphere.h"
 #include "hashtable.h"
-//#include "cmd/nebula.h"
+#include "cmd/nebula_generic.h"
 #include "galaxy_gen.h"
 #include "cmd/script/mission.h"
 #include "in_kb.h"
@@ -51,7 +53,6 @@ float ScaleJumpRadius (float radius) {
 StarSystem::StarSystem() {
   stars = NULL;
   bolts = NULL;
-  count_since_huge_active=0;
   collidetable = NULL;
   no_collision_time=0;//(int)(1+2.000/SIMULATION_ATOM);
   ///adds to jumping table;
@@ -276,7 +277,7 @@ void StarSystem::ExecuteUnitAI () {
 	  iter.advance();
 	}
 }
-/*
+
 void StarSystem::UpdateUnitPhysics (bool firstframe) {
   un_iter iter = this->getUnitList().createIterator();
   Unit * unit=NULL;
@@ -297,9 +298,16 @@ void StarSystem::UpdateUnitPhysics (bool firstframe) {
 	  iter.advance();
 	}
 }
-*/
 
-/*
+extern void	UpdateTerrain();
+extern void	TerrainCollide();
+extern void UpdateAnimatedTexture();
+extern void UpdateCameraSnds();
+extern void NebulaUpdate( StarSystem * ss);
+extern void TestMusic();
+
+extern void reset_time_compression (int,KBSTATE);
+
 extern float getTimeCompression();
 void StarSystem::Update(float priority , bool executeDirector) {
 
@@ -350,12 +358,12 @@ void StarSystem::Update(float priority , bool executeDirector) {
   fprintf (stderr,"TerCol");
   fflush (stderr);
 #endif
-	Terrain::CollideAll();
+	TerrainCollide();
 #ifdef UPDATEDEBUG
   fprintf (stderr,"Ani");
   fflush (stderr);
 #endif
-	AnimatedTexture::UpdateAllPhysics();
+	UpdateAnimatedTexture();
 	///Do gravitation!
 	iter = units.createIterator();
 	  while((unit = iter.current())!=NULL) {
@@ -423,9 +431,6 @@ void StarSystem::Update(float priority , bool executeDirector) {
 	  }
 
 	}
-	if ((count_since_huge_active++%100)==0) {
-	  collidetable.c.SwapHugeAccum();
-	}
 	UpdateMissiles();//do explosions
 	current_stage=PHY_TERRAIN;
       } else if (current_stage==PHY_TERRAIN) {
@@ -433,7 +438,7 @@ void StarSystem::Update(float priority , bool executeDirector) {
   fprintf (stderr,"TerU");
   fflush (stderr);
 #endif
-	Terrain::UpdateAll(64);	
+	UpdateTerrain();
 	unsigned int i=_Universe->CurrentCockpit();
 	for (int j=0;j<_Universe->numPlayers();j++) {
 	  if (_Universe->AccessCockpit(j)->activeStarSystem==this) {
@@ -449,19 +454,10 @@ void StarSystem::Update(float priority , bool executeDirector) {
   fprintf (stderr,"muzak");
   fflush (stderr);
 #endif
-	if (this==_Universe->getActiveStarSystem(0)) {
-	  _Universe->AccessCockpit(0)->AccessCamera()->UpdateCameraSounds();
-	  if (muzak)
-		  muzak->Listen();
-	}
-	if (_Universe->AccessCockpit()->activeStarSystem==this){
-	  Nebula * neb;
-	  if ((neb=_Universe->AccessCamera()->GetNebula())) {
-	    if (neb->getFade()<=0) {
-	      _Universe->AccessCamera()->SetNebula(NULL);//Update physics should set this
-	    }
-	  }
-	}
+	if (this==_Universe->getActiveStarSystem(0))
+		UpdateCameraSnds();
+	TestMusic();
+	NebulaUpdate( this);
 #ifdef UPDATEDEBUG
   fprintf (stderr,"unphi");
   fflush (stderr);
@@ -502,7 +498,6 @@ void StarSystem::Update(float priority , bool executeDirector) {
   _Universe->popActiveStarSystem();
   //  fprintf (stderr,"bf:%lf",interpolation_blend_factor);
 }
-*/
 
 /***************************************************************************************/
 /*** STAR SYSTEM JUMP STUFF                                                          ***/

@@ -644,7 +644,7 @@ void Unit::Fire (unsigned int weapon_type_bitmask, bool listen_to_owner) {
             if ((ROLES::EVERYTHING_ELSE&weapon_type_bitmask&(*i)->type->role_bits)
                 ||(*i)->type->role_bits==0) {
                 if ((locked_on&&missile_and_want_to_fire_missiles)
-                    ||gun_and_want_to_fire_guns) { 
+                    ||gun_and_want_to_fire_guns) {
                     if ((*i)->Fire(owner==NULL?this:owner,mis,listen_to_owner)) {
                         energy -=apply_float_to_short((*i)->type->type==weapon_info::BEAM?(*i)->type->EnergyRate*SIMULATION_ATOM:(*i)->type->EnergyRate);
                         if (mis) weapon_type_bitmask &= (~ROLES::FIRE_MISSILES);//fire only 1 missile at a time
@@ -1092,6 +1092,112 @@ void Unit::DisableTurretAI () {
 /**** UNIT_PHYSICS STUFF                                                           */
 /***********************************************************************************/
 
+extern signed char  ComputeAutoGuarantee ( Unit * un);
+extern float getAutoRSize (Unit * orig,Unit * un, bool ignore_friend=false);
+
+bool Unit::AutoPilotTo (Unit * target, bool ignore_friendlies) {
+  signed char Guaranteed = ComputeAutoGuarantee (this);
+  if (Guaranteed==Mission::AUTO_OFF) {
+    return false;
+  }
+  static float autopilot_term_distance = XMLSupport::parse_float (vs_config->getVariable ("physics","auto_pilot_termination_distance","6000"));
+//  static float autopilot_p_term_distance = XMLSupport::parse_float (vs_config->getVariable ("physics","auto_pilot_planet_termination_distance","60000"));
+  if (SubUnit) {
+    return false;//we can't auto here;
+  }
+  StarSystem * ss = activeStarSystem;
+  if (ss==NULL) {
+    ss = _Universe->activeStarSystem();
+  }
+
+  Unit * un=NULL;
+  QVector start (Position());
+  QVector end (target->LocalPosition());
+  float totallength = (start-end).Magnitude();
+  if (totallength>1) {
+    //    float apt = (target->isUnit()==PLANETPTR&&target->GetDestinations().empty())?autopilot_p_term_distance:autopilot_term_distance;
+	  float apt = (target->isUnit()==PLANETPTR)?(autopilot_term_distance+target->rSize()*UniverseUtil::getPlanetRadiusPercent()):autopilot_term_distance;
+    float percent = (getAutoRSize(this,this)+rSize()+target->rSize()+apt)/totallength;
+    if (percent>1) {
+      end=start;
+    }else {
+      end = start*percent+end*(1-percent);
+    }
+  }
+  bool ok=true;
+  if (Guaranteed==Mission::AUTO_NORMAL&&CloakVisible()>.5) {
+    for (un_iter i=ss->getUnitList().createIterator(); (un=*i)!=NULL; ++i) {
+      static bool canflythruplanets= XMLSupport::parse_bool(vs_config->getVariable("physics","can_auto_through_planets","true"));
+      if ((!(un->isUnit()==PLANETPTR&&canflythruplanets))&&un->isUnit()!=NEBULAPTR && (!UnitUtil::isSun(un))) {
+		if (un!=this&&un!=target) {
+    	  if ((start-un->Position()).Magnitude()-getAutoRSize (this,this,ignore_friendlies)-rSize()-un->rSize()-getAutoRSize(this,un,ignore_friendlies)<=0) {
+	    return false;
+	  }
+	  float intersection = un->querySphere (start,end,getAutoRSize (this,un,ignore_friendlies));
+	  if (intersection>0) {
+	    end = start+ (end-start)*intersection;
+	    ok=false;
+	  }
+	 }
+    }
+   }
+  }
+
+  if (this!=target) {
+    SetCurPosition(UniverseUtil::SafeEntrancePoint (end));
+    if (_Universe->isPlayerStarship (this)&&getFlightgroup()!=NULL) {
+      Unit * other=NULL;
+      for (un_iter ui=ss->getUnitList().createIterator(); NULL!=(other = *ui); ++ui) {
+    	Flightgroup * ff = other->getFlightgroup();
+		bool leadah=(ff==getFlightgroup());
+		if (ff) {
+			if (ff->leader.GetUnit()==this) {
+				leadah=true;
+		}
+	}
+	if (leadah) {
+	  if (NULL==_Universe->isPlayerStarship (other)) {
+	    //other->AutoPilotTo(this);
+	    other->SetPosition(UniverseUtil::SafeEntrancePoint (LocalPosition(),other->rSize()*1.5));
+	   }
+	}
+      }
+    }
+  }
+  return ok;
+}
+
+bool Unit::jumpReactToCollision (Unit * smalle) {
+  if (!GetDestinations().empty()) {//only allow big with small
+    if ((smalle->GetJumpStatus().drive>=0||image->forcejump)) {
+      smalle->DeactivateJumpDrive();
+      Unit * jumppoint = this;
+      _Universe->activeStarSystem()->JumpTo (smalle, jumppoint, std::string(GetDestinations()[smalle->GetJumpStatus().drive%GetDestinations().size()]));
+      return true;
+    }
+    return true;
+  }
+  if (!smalle->GetDestinations().empty()) {
+    if ((GetJumpStatus().drive>=0||smalle->image->forcejump)) {
+      DeactivateJumpDrive();
+      Unit * jumppoint = smalle;
+      _Universe->activeStarSystem()->JumpTo (this, jumppoint, std::string(smalle->GetDestinations()[GetJumpStatus().drive%smalle->GetDestinations().size()]));
+      return true;
+    }
+    return true;
+  }
+  return false;
+}
+
+Cockpit * Unit::GetVelocityDifficultyMult(float &difficulty) const{
+  difficulty=1;
+  Cockpit * player_cockpit=_Universe->isPlayerStarship(this);
+  if ((player_cockpit)==NULL) {
+    static float exp = XMLSupport::parse_float (vs_config->getVariable ("physics","difficulty_speed_exponent",".2"));
+    difficulty = pow(g_game.difficulty,exp);
+  }
+  return player_cockpit;
+}
 
 void Unit::Rotate (const Vector &axis)
 {

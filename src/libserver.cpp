@@ -10,3 +10,14 @@ VegaConfig * createVegaConfig( char * file)
 {
 	return new VegaConfig( file);
 }
+
+class Music;
+class Unit;
+
+void	UpdateAnimatedTexture() {}
+void	TerrainCollide() {}
+void	UpdateTerrain() {}
+void	AUDRefreshSounds() {}
+void	UpdateCameraSnds() {}
+void	NebulaUpdate( StarSystem * ss) {}
+void	TestMusic() {}
