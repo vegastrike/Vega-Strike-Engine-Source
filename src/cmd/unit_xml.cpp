@@ -1161,11 +1161,11 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
       switch(attribute_map.lookup((*iter).name)) {
       case MAXSPEED:
 	computer.max_speed=game_speed*parse_float((*iter).value);
-	ADDELEM(accelStarHandler,XMLType(&computer.max_speed));
+	ADDELEM(speedStarHandler,XMLType(&computer.max_speed));
 	break;
       case AFTERBURNER:
 	computer.max_ab_speed=game_speed*parse_float((*iter).value);
-	ADDELEM(accelStarHandler,XMLType(&computer.max_ab_speed));
+	ADDELEM(speedStarHandler,XMLType(&computer.max_ab_speed));
 	break;
       case YAW:
 	computer.max_yaw=parse_float((*iter).value)*(VS_PI/180);
