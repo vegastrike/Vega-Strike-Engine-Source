@@ -422,13 +422,14 @@ void winsys_process_events()
   \date Modified: 2000-10-20 */
 void winsys_atexit( winsys_atexit_func_t func )
 {
-    static bool called = false;
+      static bool called = false;
 
-    if ( called != false)
-      fprintf (stderr,"winsys_atexit called twice" );
+  if ( called != false)
+     fprintf (stderr,"winsys_atexit called twice" );
 
-    called = true;
-    atexit_func = func;
+  called = true;
+  // atexit_func = func;
+  atexit (func);
 }
 
 
