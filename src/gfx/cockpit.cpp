@@ -465,6 +465,7 @@ void Cockpit::Delete () {
       vdu[j]=NULL;
     }
   }
+  vdu.clear();
   for (j=0;j<Panel.size();j++) {
     assert (Panel[j]);
     delete Panel[j];
