@@ -371,7 +371,11 @@ void Mesh::LoadXML(const char *filename, Mesh *oldmesh) {
   vertexlist = new GFXVertex[xml->tris.size()+xml->quads.size()];
   minSizeX = minSizeY = minSizeZ = FLT_MAX;
   maxSizeX = maxSizeY = maxSizeZ = -FLT_MAX;
-  radialSize = FLT_MAX;
+  if (xml->tris.size()==0&&xml->quads.size()==0) {
+    minSizeX = minSizeY = minSizeZ = 0;
+    maxSizeX = maxSizeY = maxSizeZ = 0;    
+  }
+  radialSize = 0;
   for(int a=0; a<xml->tris.size(); a++, index++) {
     minSizeX = min(vertexlist[index].x, minSizeX);
     maxSizeX = max(vertexlist[index].x, maxSizeX);
@@ -379,7 +383,7 @@ void Mesh::LoadXML(const char *filename, Mesh *oldmesh) {
     maxSizeY = max(vertexlist[index].y, maxSizeY);
     minSizeZ = min(vertexlist[index].z, minSizeZ);
     maxSizeZ = max(vertexlist[index].z, maxSizeZ);
-    radialSize = max (sqrtf (vertexlist[index].x*vertexlist[index].x+vertexlist[index].y*vertexlist[index].y+vertexlist[index].z*vertexlist[index].z),radialSize);
+
     vertexlist[index] = xml->tris[a];
   }
   for(int a=0; a<xml->quads.size(); a++, index++) {
@@ -389,19 +393,24 @@ void Mesh::LoadXML(const char *filename, Mesh *oldmesh) {
     maxSizeY = max(vertexlist[index].y, maxSizeY);
     minSizeZ = min(vertexlist[index].z, minSizeZ);
     maxSizeZ = max(vertexlist[index].z, maxSizeZ);
-    radialSize = max (sqrtf (vertexlist[index].x*vertexlist[index].x+vertexlist[index].y*vertexlist[index].y+vertexlist[index].z*vertexlist[index].z),radialSize);
     vertexlist[index] = xml->quads[a];
   }
+  radialSize = sqrtf ((maxSizeX-minSizeX)*(maxSizeX-minSizeX)+(maxSizeY-minSizeY)*(maxSizeY-minSizeY)+(maxSizeX-minSizeZ)*(maxSizeX-minSizeZ));
   vlist = new GFXVertexList(xml->tris.size() + xml->quads.size(),
 			    xml->tris.size()/3, xml->quads.size()/4,
 			    vertexlist);
-
+ 
   //TODO: add force handling
   this->orig = oldmesh;
   *oldmesh=*this;
   oldmesh->orig = NULL;
   oldmesh->refcount++;
 
+ fprintf (stderr, "Minx %f maxx %f, miny %f maxy %fminz %fmaxz %f, radsiz %f\n",minSizeX, maxSizeX,  minSizeY, maxSizeY,  minSizeZ, maxSizeZ,radialSize);  
+
+  if (radialSize==0) {
+    int i;
+  }
 
   // Calculate bounding sphere
 

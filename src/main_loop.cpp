@@ -499,7 +499,7 @@ void createObjects() {
     //fighters[a] = new Unit("Homeworld-HeavyCorvette.xml", true);
     switch(a%7) {
     case 0:
-      fighters[a] = new Unit("broadsword.xunit", true);
+      fighters[a] = new Unit("midway.xunit", true);
       break;
     case 1:
       fighters[a] = new Unit("Cloakedfighter.xunit", true);
@@ -575,7 +575,7 @@ void main_loop() {
   GFXEnable(TEXTURE0);
   GFXDisable(TEXTURE1);
   //bg2->Draw();
-  //bg->Draw();
+  bg->Draw();
   GFXEnable(DEPTHWRITE);
   GFXEnable(DEPTHTEST);
   GFXEnable(TEXTURE0);
