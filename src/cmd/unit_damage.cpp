@@ -225,9 +225,9 @@ unsigned short apply_float_to_short (float tmp) {
 
 float Unit::FShieldData() const{
   switch (shield.number) {
-  case 2: return shield.fb[0]/shield.fb[2];
-  case 4: return ((float)shield.fbrl.front)/shield.fbrl.frontmax;
-  case 6: return ((float)shield.fbrltb.v[0])/shield.fbrltb.fbmax;
+  case 2: { if( shield.fb[2]!=0) return shield.fb[0]/shield.fb[2];}
+  case 4: { if( shield.fbrl.frontmax!=0) return ((float)shield.fbrl.front)/shield.fbrl.frontmax;}
+  case 6: { if( shield.fbrltb.fbmax!=0) return ((float)shield.fbrltb.v[0])/shield.fbrltb.fbmax;}
   }
   return 0;
 }
@@ -251,25 +251,25 @@ float Unit::EnergyData() const{
 
 float Unit::BShieldData() const{
   switch (shield.number) {
-  case 2: return shield.fb[1]/shield.fb[3];
-  case 4: return ((float)shield.fbrl.back)/shield.fbrl.backmax;
-  case 6: return ((float)shield.fbrltb.v[1])/shield.fbrltb.fbmax;
+  case 2: { if( shield.fb[3]!=0) return shield.fb[1]/shield.fb[3];}
+  case 4: { if( shield.fbrl.backmax!=0) return ((float)shield.fbrl.back)/shield.fbrl.backmax;}
+  case 6: { if( shield.fbrltb.fbmax!=0) return ((float)shield.fbrltb.v[1])/shield.fbrltb.fbmax;}
   }
   return 0;
 }
 float Unit::LShieldData() const{
   switch (shield.number) {
   case 2: return 0;//no data, captain
-  case 4: return ((float)shield.fbrl.left)/shield.fbrl.leftmax;
-  case 6: return ((float)shield.fbrltb.v[3])/shield.fbrltb.rltbmax;
+  case 4: { if( shield.fbrl.leftmax!=0) return ((float)shield.fbrl.left)/shield.fbrl.leftmax;}
+  case 6: { if( shield.fbrltb.rltbmax!=0) return ((float)shield.fbrltb.v[3])/shield.fbrltb.rltbmax;}
   }
   return 0;
 }
 float Unit::RShieldData() const{
   switch (shield.number) {
   case 2: return 0;//don't react to stuff we have no data on
-  case 4: return ((float)shield.fbrl.right)/shield.fbrl.rightmax;
-  case 6: return ((float)shield.fbrltb.v[2])/shield.fbrltb.rltbmax;
+  case 4: { if( shield.fbrl.rightmax!=0) return ((float)shield.fbrl.right)/shield.fbrl.rightmax;}
+  case 6: { if( shield.fbrltb.rltbmax!=0) return ((float)shield.fbrltb.v[2])/shield.fbrltb.rltbmax;}
   }
   return 0;
 }
@@ -785,15 +785,6 @@ extern std::string getRandomCachedAniString() ;
 bool Unit::Explode (bool drawit, float timeit) {
 
   if (image->explosion==NULL&&image->timeexplode==0) {	//no explosion in unit data file && explosions haven't started yet
-  Unit *un=_Universe->AccessCockpit()->GetParent();
-  if (un) {
-    if (un->getRelation(this)>=0)
-      muzak->SkipRandSong(Music::LOSSLIST);
-    else
-      muzak->SkipRandSong(Music::VICTORYLIST);
-  } else {
-    muzak->SkipRandSong(Music::LOSSLIST);
-  }
 
   // notify the director that a ship got destroyed
   mission->DirectorShipDestroyed(this);
@@ -827,6 +818,21 @@ bool Unit::Explode (bool drawit, float timeit) {
 		}
 	    AUDPlay (sound->explode,exploc,Velocity,1);
 
+	  un=_Universe->AccessCockpit()->GetParent();
+	  if (isUnit()==UNITPTR) {
+		  if (un ) {
+			static float badrel=XMLSupport::parse_float(vs_config->getVariable("sound","loss_relationship","-.1"));
+			static float goodrel=XMLSupport::parse_float(vs_config->getVariable("sound","victory_relationship",".5"));
+			float rel=un->getRelation(this);
+			if (rel>goodrel) {
+			  muzak->SkipRandSong(Music::LOSSLIST);
+			} else if (rel < badrel) {
+			  muzak->SkipRandSong(Music::VICTORYLIST);
+			}
+		  } else {
+			muzak->SkipRandSong(Music::LOSSLIST);
+		  }
+	  }
 	}
   }
   if (image->explosion) {

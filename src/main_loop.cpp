@@ -97,9 +97,26 @@ public:
 
 const float timek = .001;
 bool _Slew = true;
+ void VolUp(int,KBSTATE newState) {
+   if(newState==PRESS){
+     float gain=AUDGetListenerGain();
+     if (gain<.9375) {
+       gain+=.0625;
+       AUDListenerGain (gain);
+     }
+   }
+ }
+ void VolDown(int,KBSTATE newState) {
+   if(newState==PRESS){
+     float gain=AUDGetListenerGain();
+     if (gain>.0625) {
+       gain-=.0625;
+       AUDListenerGain (gain);
+     }
+   }
+ }
 
 namespace CockpitKeys {
-
 
  void SkipMusicTrack(int,KBSTATE newState) {
    if(newState==PRESS){
@@ -199,6 +216,11 @@ bool cockpitfront=true;
     }
   static int tmp=(XMLSupport::parse_bool (vs_config->getVariable ("graphics","cockpit","true"))?1:0);
   if(newState==PRESS&&cockpitfront) {
+      YawLeft (0,RELEASE);
+      YawRight (0,RELEASE);
+      PitchUp(0,RELEASE);
+      PitchDown (0,RELEASE);
+
     if ((tmp)&&_Universe->AccessCockpit()->GetParent()) {
       _Universe->AccessCockpit()->Init (_Universe->AccessCockpit()->GetParent()->getCockpit().c_str());	    
     }else {
@@ -236,6 +258,11 @@ bool cockpitfront=true;
   void InsideLeft(int,KBSTATE newState) {
 
 	if(newState==PRESS||newState==DOWN) {
+      YawLeft (0,RELEASE);
+      YawRight (0,RELEASE);
+      PitchUp(0,RELEASE);
+      PitchDown (0,RELEASE);
+
 	  cockpitfront=false;
 	  _Universe->AccessCockpit()->SetView (CP_LEFT);
 	}
@@ -257,6 +284,11 @@ bool cockpitfront=true;
   void ViewTarget(int,KBSTATE newState) {
 
 	if(newState==PRESS||newState==DOWN) {
+      YawLeft (0,RELEASE);
+      YawRight (0,RELEASE);
+      PitchUp(0,RELEASE);
+      PitchDown (0,RELEASE);
+
 	    cockpitfront=false;
 	  _Universe->AccessCockpit()->SetView (CP_VIEWTARGET);
 	}
@@ -264,6 +296,11 @@ bool cockpitfront=true;
   void OutsideTarget(int,KBSTATE newState) {
 
 	if(newState==PRESS||newState==DOWN) {
+      YawLeft (0,RELEASE);
+      YawRight (0,RELEASE);
+      PitchUp(0,RELEASE);
+      PitchDown (0,RELEASE);
+
 	    cockpitfront=false;
 	  _Universe->AccessCockpit()->SetView (CP_TARGET);
 	}
@@ -273,6 +310,11 @@ bool cockpitfront=true;
   void InsideBack(int,KBSTATE newState) {
 
 	if(newState==PRESS||newState==DOWN) {
+      YawLeft (0,RELEASE);
+      YawRight (0,RELEASE);
+      PitchUp(0,RELEASE);
+      PitchDown (0,RELEASE);
+
 	    cockpitfront=false;
 	  _Universe->AccessCockpit()->SetView (CP_BACK);
 	}
@@ -318,6 +360,11 @@ bool cockpitfront=true;
   void Behind(int,KBSTATE newState) {
 
 	if(newState==PRESS||newState==DOWN) {
+      YawLeft (0,RELEASE);
+      YawRight (0,RELEASE);
+      PitchUp(0,RELEASE);
+      PitchDown (0,RELEASE);
+
 	  cockpitfront=false;
 	  _Universe->AccessCockpit()->SetView (CP_CHASE);
 	}
@@ -325,6 +372,11 @@ bool cockpitfront=true;
   void Pan(int,KBSTATE newState) {
 
 	if(newState==PRESS||newState==DOWN) {
+      YawLeft (0,RELEASE);
+      YawRight (0,RELEASE);
+      PitchUp(0,RELEASE);
+      PitchDown (0,RELEASE);
+
 	  cockpitfront=false;
 	  _Universe->AccessCockpit()->SetView (CP_PAN);
 	}

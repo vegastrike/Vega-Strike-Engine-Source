@@ -397,7 +397,7 @@ void QuadTree::LoadXML (const char *filename, const Vector & Scales, const float
       fclose (fp);
     }
 	  //LoadData();
-    unsigned int xsize;unsigned int zsize;
+    unsigned long xsize;unsigned long zsize;
     fp = fopen (xml->data[i].terrainfile.c_str(),"rb");
     if (fp) {
       hm.terrainmap = (unsigned char *)readImage (fp,

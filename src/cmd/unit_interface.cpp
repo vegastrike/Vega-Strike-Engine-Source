@@ -995,6 +995,8 @@ void UpgradingInfo::ProcessMouse(int type, int x, int y, int button, int state) 
 			}
 		}
 	}
+	if (upgr==NULL)
+		return;
 	for (int i=0;(Modes[i]!=0)&&(ours==0);i++) {
 	  ours = Modes[i]->DoMouse(type,cur_x,cur_y,button,state);
 	  drawovermouse=(ours==1);

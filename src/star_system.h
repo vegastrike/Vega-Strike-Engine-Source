@@ -79,6 +79,8 @@ class StarSystem {
  public:
   void AddMissileToQueue(class MissileEffect *);
   void UpdateMissiles();
+  void UpdateUnitPhysics(bool firstframe);
+  void ExecuteUnitAI();
   class CollideTable *collidetable;
   class bolt_draw *bolts;
   Background* getBackground() {return bg;}
@@ -100,6 +102,7 @@ class StarSystem {
   StarSystem(const char * filename, const Vector & centroid=Vector (0,0,0), const float timeofyear=0);
   ~StarSystem();
   UnitCollection& getUnitList() {return drawList;}
+  UnitCollection& gravitationalUnits() {return units;}
   /// returns xy sorted bounding spheres of all units in current view
   ClickList *getClickList(); 
   ///Adds to draw list

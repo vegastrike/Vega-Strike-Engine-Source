@@ -8,8 +8,8 @@
 #include "vs_path.h"
 #include "png_texture.h"
 #ifndef WIN32
-typedef unsigned long DWORD;
-typedef long  LONG;
+typedef unsigned int DWORD;
+typedef int LONG;
 typedef unsigned short WORD;
 typedef unsigned char BYTE;
 typedef struct {
@@ -281,7 +281,7 @@ static bool LoadTex(char * FileName, unsigned char scdata [lthei][ltwid][3]){
 	int bpp=8;
 	int format=0;
 	unsigned char * palette;
-	unsigned char * data = readImage (fp,bpp,format,*(unsigned int*)&sizeX,*(unsigned int*)&sizeY,palette,texTransform,true);
+	unsigned char * data = readImage (fp,bpp,format,*(unsigned long*)&sizeX,*(unsigned long*)&sizeY,palette,texTransform,true);
 	bpp/=8;
 	if (format&PNG_HAS_ALPHA) {
 	  bpp*=4;

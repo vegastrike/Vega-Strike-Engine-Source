@@ -146,6 +146,9 @@ bool AUDInit () {
   maxallowedsingle = XMLSupport::parse_int (vs_config->getVariable ("audio","MaxSingleSounds","8"));
   maxallowedtotal = XMLSupport::parse_int (vs_config->getVariable ("audio","MaxTotalSounds","20"));
   g_game.sound_enabled = XMLSupport::parse_bool (vs_config->getVariable ("audio","Sound","true"));
+  if (!g_game.sound_enabled) {
+    return false;
+  }
 	int attrlist[] = { ALC_FREQUENCY, g_game.audio_frequency_mode, 0 };
 #ifdef _WIN32
 	dev = alcOpenDevice ((ALubyte*)"DirectSound3D");

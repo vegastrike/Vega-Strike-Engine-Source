@@ -89,6 +89,8 @@ for i in `cat cmap` ; do echo "  command_map[\""$i"\"]=FlyByKeyboard::"$i ";" ; 
 #if 1
 const float volinc = 1;
 const float dopinc = .1;
+void incmusicvol (int i, KBSTATE a);
+void decmusicvol (int i, KBSTATE a);
 
 void incvol (int i, KBSTATE a) {
 #ifdef HAVE_AL
@@ -158,6 +160,8 @@ void VegaConfig::initKeyMap(){
   key_map["keypad-7"]=WSK_KP7;
   key_map["keypad-8"]=WSK_KP8;
   key_map["keypad-9"]=WSK_KP9;
+  key_map["less-than"]='<';
+  key_map["greater-than"]='>';
   key_map["keypad-numlock"]=WSK_NUMLOCK;
   key_map["keypad-period"]=WSK_KP_PERIOD;
   key_map["keypad-delete"]=WSK_KP_PERIOD;
@@ -206,6 +210,8 @@ extern void pause_key (int i, KBSTATE a);
 extern void dec_time_compression(int i, KBSTATE a);
 extern void reset_time_compression(int i, KBSTATE a);
 extern void MapKey(int i, KBSTATE a);
+extern void VolUp(int i, KBSTATE a);
+extern void VolDown(int i, KBSTATE a);
   using namespace CockpitKeys;
 
 void VegaConfig::initCommandMap(){
@@ -214,8 +220,10 @@ void VegaConfig::initCommandMap(){
   command_map["NoPositionalKey"]=mute;
   command_map["DopplerInc"]=incdop;
   command_map["DopplerDec"]=decdop;
-  command_map["VolumeInc"]=incvol;
-  command_map["VolumeDec"]=decvol;
+  command_map["VolumeInc"]=VolUp;
+  command_map["VolumeDec"]=VolDown;
+  command_map["MusicVolumeInc"]=incmusicvol;
+  command_map["MusicVolumeDec"]=decmusicvol;
 #endif
   command_map["SwitchControl"]=Cockpit::SwitchControl;
   command_map["Respawn"]=Cockpit::Respawn;

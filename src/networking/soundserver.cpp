@@ -1,4 +1,4 @@
-#define HAVE_SDL
+//#define HAVE_SDL
 #ifdef HAVE_SDL
 #include <SDL/SDL.h>
 #include <SDL/SDL_thread.h>
@@ -25,6 +25,7 @@ typedef int Mix_Music;
 #include <vector>
 #include "inet.h"
 int fadeout=0, fadein=0;
+float volume=0;
 int bits=0,done=0;
 
 
@@ -56,7 +57,7 @@ void cleanExit(char *str,...)
 
 /******************************************************************************/
 /* The main function                                                          */
-void changehome (bool to) {
+void changehome (bool to, bool linuxhome=true) {
 	static std::vector <std::string> paths;
   if (to) {
 	 char mycurpath[8192];
@@ -64,9 +65,11 @@ void changehome (bool to) {
 	 mycurpath[8191]='\0';
 	 paths.push_back (mycurpath);
 #ifndef _WIN32
-	struct passwd *pwent;
-	pwent = getpwuid (getuid());
-	chdir (pwent->pw_dir);
+	 if (linuxhome) {
+	   struct passwd *pwent;
+	   pwent = getpwuid (getuid());
+	   chdir (pwent->pw_dir);
+	 }
 #endif
 	chdir (".vegastrike");
   }else {
@@ -83,24 +86,25 @@ bool sende=true;
 std::string curmus;
 Mix_Music * PlayMusic (const char * file, Mix_Music *oldmusic) {
 #ifdef HAVE_SDL
-	Mix_Music *music;
-	if((music=Mix_LoadMUS(file))==NULL){
-		changehome (true);
-		if((music=Mix_LoadMUS(file))==NULL){
-			changehome(false);
-			return oldmusic;
-		}
-		changehome(false);
+	Mix_Music *music=Mix_LoadMUS(file);
+	if(music==NULL){
+	  changehome (true,false);
+	  music=Mix_LoadMUS(file);
+	  changehome (false);
+	  if(music==NULL){
+	    changehome (true,true);
+	    music=Mix_LoadMUS(file);
+	    changehome(false);
+	    if (music==NULL) {
+	      return oldmusic;
+	    }
+	  }
 	}
-
 	sende=false;
-	while(!Mix_FadeOutMusic(fadeout) /*&& Mix_PlayingMusic()*/) {
-	// wait for any fades to complete
-		if (!Mix_PlayingMusic()) {
-			break;
-		}		
-			SDL_Delay(100);
-
+	if (Mix_FadeOutMusic(fadeout)) {
+	}
+	while(Mix_PlayingMusic()) {
+		SDL_Delay(100);
 	}
 	if (oldmusic) {
 		Mix_FreeMusic(oldmusic);
@@ -113,8 +117,8 @@ Mix_Music * PlayMusic (const char * file, Mix_Music *oldmusic) {
 	}
 	
 	// well, there's no music, but most games don't break without music...
-//	int volume=SDL_MIX_MAXVOLUME;
-//	Mix_VolumeMusic(volume);
+	int newvolume=SDL_MIX_MAXVOLUME*volume;
+	Mix_VolumeMusic(newvolume);
 	return music;
 #else
 	return NULL;
@@ -174,6 +178,7 @@ int main(int argc, char **argv)
 		printf("%c",arg);
 		switch(arg) {
 		case 'p':
+		case 'P':
 			{
 				arg=INET_fgetc(mysocket);
 				while (arg!='\0'&&arg!='\n') {
@@ -202,6 +207,7 @@ int main(int argc, char **argv)
 			}
 			break;
 		case 'i':
+		case 'I':
 			{
 				arg=INET_fgetc(mysocket);
 				while (arg!='\0'&&arg!='\n') {
@@ -217,6 +223,7 @@ int main(int argc, char **argv)
 			}
 			break;
 		case 'o':
+		case 'O':
 			{
 				arg=INET_fgetc(mysocket);
 				while (arg!='\0'&&arg!='\n') {
@@ -231,7 +238,26 @@ int main(int argc, char **argv)
 				printf("\n[SETTING FADEOUT TO %d]\n",fadeout);
 			}
 			break;
+		case 'v':
+		case 'V':
+			{
+				arg=INET_fgetc(mysocket);
+				while (arg!='\0'&&arg!='\n') {
+					if (arg!='\r') {
+						ministr[0]=arg;
+						str+=ministr;
+					}
+					arg=INET_fgetc(mysocket);
+				}
+				printf("%s",str.c_str());
+				volume=atof(str.c_str());
+				printf("\n[SETTING VOLUME TO %f]\n",volume);
+				int newvolume=SDL_MIX_MAXVOLUME*volume;
+				Mix_VolumeMusic(newvolume);
+			}
+			break;
 		case 't':
+		case 'T':
 		case '\0':
 			INET_close (mysocket);
 			done=true;

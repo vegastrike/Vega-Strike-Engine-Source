@@ -42,8 +42,26 @@ Music::Music (Unit *parent):random(false), p(parent),song(-1) {
 	  socket=INET_ConnectTo("localhost",4364);
   if (socket==-1) {
 	  g_game.music_enabled=false;
+  } else {
+    string data=string("i")+vs_config->getVariable("audio","music_fadein","0")+"\n"
+		"o"+vs_config->getVariable("audio","music_fadeout","0")+"\n";
+    INET_Write(socket,data.size(),data.c_str());
+    this->vol=XMLSupport::parse_float(vs_config->getVariable("audio","music_volume",".5"));
+	ChangeVolume();
   }
   Skip();
+}
+
+void Music::ChangeVolume (float inc) {
+	this->vol+=inc;
+	if (this->vol>1) {
+		this->vol=1;
+	} else if (this->vol<0) {
+		this->vol=0;
+	}
+	char tempbuf [100];
+	sprintf(tempbuf,"v%f\n",this->vol);
+    INET_Write(socket,strlen(tempbuf),tempbuf);
 }
 
 void Music::LoadMusic (const char *file) {
@@ -199,4 +217,13 @@ Music::~Music() {
 	INET_close(socket);
 	INET_cleanup();
 }
-
+void incmusicvol (int i, KBSTATE a) {
+	if (a==PRESS) {
+		muzak->ChangeVolume (.0625);
+	}
+}
+void decmusicvol (int i, KBSTATE a) {
+	if (a==PRESS) {
+		muzak->ChangeVolume (-.0625);
+	}
+}

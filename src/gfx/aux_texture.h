@@ -43,7 +43,8 @@ struct Texture{
   ///the filter mode of this texture
   enum FILTER ismipmapped;
   ///the dimensions of this texture
-  unsigned int sizeX; unsigned int sizeY;
+  unsigned long sizeX;
+  unsigned long sizeY;
   ///The data of this texture (used in between functions, deleted)
   unsigned char *data;
   ///The bitmode of this texture

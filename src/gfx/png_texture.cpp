@@ -10,7 +10,7 @@
 int PNG_HAS_PALETTE =1;
 int PNG_HAS_COLOR=2;
 int PNG_HAS_ALPHA=4;
-unsigned char * texTransform (int &bpp, int &color_type, unsigned int &width, unsigned int &height, unsigned char ** rp){
+unsigned char * texTransform (int &bpp, int &color_type, unsigned long &width, unsigned long &height, unsigned char ** rp){
   unsigned char * data;
   unsigned int row_size;
   assert (bpp==8);
@@ -26,12 +26,12 @@ unsigned char * texTransform (int &bpp, int &color_type, unsigned int &width, un
   return data;
 }
 
-unsigned char * heightmapTransform (int &bpp, int &color_type, unsigned int &width, unsigned int &height, unsigned char ** row_pointers) {
+unsigned char * heightmapTransform (int &bpp, int &color_type, unsigned long &width, unsigned long &height, unsigned char ** row_pointers) {
   unsigned short * dat = (unsigned short *) malloc (sizeof (unsigned short)*width*height);
   if ((bpp==8&&color_type==PNG_COLOR_TYPE_RGB_ALPHA)||color_type==PNG_COLOR_TYPE_GRAY ||color_type==PNG_COLOR_TYPE_GRAY_ALPHA) {
     if (bpp==8&&color_type==PNG_COLOR_TYPE_GRAY) {
       for (unsigned int i=0;i<height;i++) {
-	unsigned int iwid = i*width;
+	unsigned long iwid = i*width;
 	for (unsigned int j=0;j<width;j++) {
 	  dat[iwid+j] = row_pointers[i][j];
 	}
@@ -44,7 +44,7 @@ unsigned char * heightmapTransform (int &bpp, int &color_type, unsigned int &wid
       } else {
 	//type is RGBA32 or GrayA32
 	for (unsigned int i=0;i<height;i++) {
-	  unsigned int iwid = i*width;
+	  unsigned long iwid = i*width;
 	  for (unsigned int j=0;j<width;j++) {
 	    dat[iwid+j]= (((unsigned short *)row_pointers[i])[j*2]);
 	  }
@@ -55,7 +55,7 @@ unsigned char * heightmapTransform (int &bpp, int &color_type, unsigned int &wid
     if (color_type==PNG_COLOR_TYPE_RGB) {
       unsigned int coloffset = (bpp==8)?3:6;
       for (unsigned int i=0;i<height;i++) {
-	unsigned int iwid = i*width;
+	unsigned long iwid = i*width;
 	for (unsigned int j=0;j<width;j++) {
 	  dat[iwid+j]= * ((unsigned short *)(&(row_pointers[i][j*coloffset])));
 	}
@@ -63,7 +63,7 @@ unsigned char * heightmapTransform (int &bpp, int &color_type, unsigned int &wid
       
     }else if (color_type== PNG_COLOR_TYPE_RGB_ALPHA) {///16 bit colors...take Red
       for (unsigned int i=0;i<height;i++) {
-	unsigned int iwid = i*width;
+	unsigned long iwid = i*width;
 	for (unsigned int j=0;j<width;j++) {
 	  dat[iwid+j]= (((unsigned short *)row_pointers[i])[j*4]);
 	}
@@ -76,7 +76,7 @@ unsigned char * heightmapTransform (int &bpp, int &color_type, unsigned int &wid
 }
 
 
-unsigned char * terrainTransform (int &bpp, int &color_type, unsigned int &width, unsigned int &height, unsigned char ** row_pointers) {
+unsigned char * terrainTransform (int &bpp, int &color_type, unsigned long &width, unsigned long &height, unsigned char ** row_pointers) {
   unsigned char * dat = (unsigned char *) malloc (sizeof (unsigned char)*width*height);
   if ((bpp==8&&color_type==PNG_COLOR_TYPE_RGB_ALPHA)||color_type==PNG_COLOR_TYPE_GRAY ||color_type==PNG_COLOR_TYPE_GRAY_ALPHA) {
     if (bpp==8&&color_type==PNG_COLOR_TYPE_GRAY) {
@@ -86,7 +86,7 @@ unsigned char * terrainTransform (int &bpp, int &color_type, unsigned int &width
     } else {
       if ((bpp==16&&color_type==PNG_COLOR_TYPE_GRAY)||(bpp==8&&color_type==PNG_COLOR_TYPE_GRAY_ALPHA)) {
 	for (unsigned int i=0;i<height;i++) {
-	  unsigned int iwid = i*width;
+	  unsigned long iwid = i*width;
 	  for (unsigned int j=0;j<width;j++) {
 	    dat[iwid+j] = (row_pointers[i])[j*2];
 	  }
@@ -94,7 +94,7 @@ unsigned char * terrainTransform (int &bpp, int &color_type, unsigned int &width
       } else {
 	//type is RGBA32 or GrayA32
 	for (unsigned int i=0;i<height;i++) {
-	  unsigned int iwid = i*width;
+	  unsigned long iwid = i*width;
 	  for (unsigned int j=0;j<width;j++) {
 	    dat[iwid+j]= ((row_pointers[i])[j*4]);
 	  }
@@ -105,7 +105,7 @@ unsigned char * terrainTransform (int &bpp, int &color_type, unsigned int &width
     if (color_type==PNG_COLOR_TYPE_RGB) {
       unsigned int coloffset = (bpp==8)?3:6;
       for (unsigned int i=0;i<height;i++) {
-	unsigned int iwid = i*width;
+	unsigned long iwid = i*width;
 	for (unsigned int j=0;j<width;j++) {
 	  dat[iwid+j]= * ((unsigned char *)(&(row_pointers[i][j*coloffset])));
 	}
@@ -113,7 +113,7 @@ unsigned char * terrainTransform (int &bpp, int &color_type, unsigned int &width
       
     }else if (color_type== PNG_COLOR_TYPE_RGB_ALPHA) {///16 bit colors...take Red
       for (unsigned int i=0;i<height;i++) {
-	unsigned int iwid = i*width;
+	unsigned long iwid = i*width;
 	for (unsigned int j=0;j<width;j++) {
 	  dat[iwid+j]= (((unsigned short *)row_pointers[i])[j*4])/256;
 	}
@@ -136,7 +136,7 @@ png_cexcept_error(png_structp png_ptr, png_const_charp msg)
 
 }
 
-unsigned char * readImage (FILE *fp, int & bpp, int &color_type, unsigned int &width, unsigned int &height, unsigned char * &palette, textureTransform * tt, bool strip_16) {
+unsigned char * readImage (FILE *fp, int & bpp, int &color_type, unsigned long &width, unsigned long &height, unsigned char * &palette, textureTransform * tt, bool strip_16) {
   palette = NULL;
   unsigned char sig[8];
   png_structp png_ptr;
@@ -171,7 +171,9 @@ unsigned char * readImage (FILE *fp, int & bpp, int &color_type, unsigned int &w
    fprintf (stderr,"Loading Done. Decompressing\n");
 #endif
    png_read_info(png_ptr, info_ptr);  /* read all PNG info up to image data */
+   printf( "width0: %d - height0: %d\n", info_ptr->width, info_ptr->height);
    png_get_IHDR(png_ptr, info_ptr, (png_uint_32 *)&width, (png_uint_32 *)&height, &bpp, &color_type, &interlace_type, NULL, NULL);
+   printf( "width1: %d - height1: %d\n", width, height);
 # if __BYTE_ORDER != __BIG_ENDIAN
    if (bpp==16)
      png_set_swap (png_ptr);
@@ -190,6 +192,7 @@ unsigned char * readImage (FILE *fp, int & bpp, int &color_type, unsigned int &w
    png_set_expand (png_ptr);
    png_read_update_info (png_ptr,info_ptr);
    png_get_IHDR(png_ptr, info_ptr, (png_uint_32 *)&width, (png_uint_32 *)&height, &bpp, &color_type, &interlace_type, NULL, NULL);
+   printf( "width1: %d - height1: %d\n", width, height);
    row_pointers = (unsigned char **)malloc (sizeof (unsigned char *) *height);
    int numchan=1;
    if (color_type&PNG_COLOR_MASK_COLOR)

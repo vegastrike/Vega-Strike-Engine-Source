@@ -18,6 +18,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
+#include "gl_globals.h"
 #include "gfxlib.h"
 #include "gfx/vec.h"
 #include <stdio.h>
@@ -25,8 +26,8 @@
 #include <math.h>
 #include <string.h>
 #include <assert.h>
-#include "vegastrike.h"
-
+//#include "vegastrike.h"
+#include "gfx/matrix.h"
 #include "vs_globals.h"
 #ifdef WIN32
 #include <windows.h>
@@ -35,7 +36,6 @@
 #endif
 #endif
 #include "gl_matrix.h"
-#include "gl_globals.h"
 #include "vs_globals.h"
 
 using namespace GFXMatrices;  //causes problems with g_game

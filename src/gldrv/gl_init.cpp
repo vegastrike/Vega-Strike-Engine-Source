@@ -28,6 +28,8 @@
 
 #ifndef WIN32
 #if !(defined(__APPLE__) || defined(MACOSX))
+
+#define GLX_GLXEXT_PROTOTYPES
     #   include <GL/glx.h>
 #endif
 #include <stdlib.h>

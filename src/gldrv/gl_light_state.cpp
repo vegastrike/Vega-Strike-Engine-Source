@@ -1,8 +1,8 @@
-#include "gl_light.h"
-#include "hashtable_3d.h"
 #include <assert.h>
-#include <vegastrike.h>
+//#include <vegastrike.h>
 #include "gl_globals.h"
+#include "hashtable_3d.h"
+#include "gl_light.h"
 #define GFX_HARDWARE_LIGHTING
 //table to store local lights, numerical pointers to _llights (eg indices)
 const float atten0scale = 1;

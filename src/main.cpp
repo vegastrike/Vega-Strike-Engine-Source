@@ -45,6 +45,7 @@
 #include "force_feedback.h"
 #include "gfx/hud.h"
 #include "gldrv/winsys.h"
+#include "universe_util.h"
 /*
  * Globals 
  */
@@ -121,6 +122,7 @@ int main( int argc, char *argv[] )
 //	*TEST_STUFF='0';//MAKE IT CRASH
 #if defined(WITH_MACOSX_BUNDLE)||defined(_WIN32)
     // We need to set the path back 2 to make everything ok.
+	{
     char *parentdir;
 	int pathlen=strlen(argv[0]);
 	parentdir=new char[pathlen+1];
@@ -139,6 +141,7 @@ int main( int argc, char *argv[] )
       chdir (parentdir);/* chdir to the binary app's parent */
     }
 	delete []parentdir;
+	}
 #if defined(WITH_MACOSX_BUNDLE)
     chdir ("../../../");/* chdir to the .app's parent */
 #endif
@@ -167,27 +170,23 @@ int main( int argc, char *argv[] )
 		
     initpaths();
     //can use the vegastrike config variable to read in the default mission
+
   g_game.music_enabled = XMLSupport::parse_bool (vs_config->getVariable ("audio","Music","true"));
+#ifndef _WIN32
   if (g_game.music_enabled) {
-#ifdef _WIN32
-    int pid=spawnl(P_NOWAIT,"./soundserver","./soundserver",NULL);
-    if (!pid) {
-      g_game.music_enabled=false;
-      fprintf(stderr,"Unable to spawn music player server\n");
-    }
-#else
     int pid=fork();
     if (!pid) {
+      pid=execlp("./soundserver","./soundserver",NULL);
       g_game.music_enabled=false;
       fprintf(stderr,"Unable to spawn music player server\n");
+      exit (0);
+    } else {
+      if (pid==-1) {
+	g_game.music_enabled=false;
+      }
     }
-    pid=execlp("./soundserver","./soundserver",NULL);
-    if (!pid) {
-      g_game.music_enabled=false;
-      fprintf(stderr,"Unable to spawn music player server\n");
-    }
-#endif
   }
+#endif
     if (mission_name[0]=='\0')
       strcpy(mission_name,vs_config->getVariable ("general","default_mission","test1.mission").c_str());
     //might overwrite the default mission with the command line
@@ -214,7 +213,7 @@ int main( int argc, char *argv[] )
 #endif
 
     AUDInit();
-
+    AUDListenerGain (XMLSupport::parse_float(vs_config->getVariable ("audio","sound_gain",".5")));   
     /* Set up a function to clean up when program exits */
     winsys_atexit( cleanup );
     /*
@@ -334,7 +333,16 @@ void bootstrap_main_loop () {
  
     SplashScreen = new Animation (mission->getVariable ("splashscreen",vs_config->getVariable ("graphics","splash_screen","vega_splash.ani")).c_str(),0);
     bootstrap_draw ("Vegastrike Loading...",-.135,0,SplashScreen);
-
+  if (g_game.music_enabled) {
+#ifdef _WIN32
+//    int pid=spawnl(P_NOWAIT,"./soundserver","./soundserver",NULL);
+	  int pid=(int)ShellExecute(NULL,"open","./soundserver.exe","","./",SW_MINIMIZE);
+    if (!pid) {
+      g_game.music_enabled=false;
+      fprintf(stderr,"Unable to spawn music player server\n");
+    }
+#endif
+  }
     QVector pos;
     string planetname;
 
@@ -410,6 +418,27 @@ void bootstrap_main_loop () {
     SplashScreen= NULL;
     SetStarSystemLoading (false);
     _Universe->LoadContrabandLists();
+	{
+		string str=vs_config->getVariable ("general","intro1","Welcome to Vega Strike! Use #8080FFTab#000000 to afterburn (#8080FF+,-#000000 cruise control), #8080FFarrows#000000 to steer.");
+		if (!str.empty()) {
+			UniverseUtil::IOmessage (0,"game","all",str);
+			str=vs_config->getVariable ("general","intro2","The #8080FFt#000000 key targets objects; #8080FFspace#000000 fires at them & #8080FFa#000000 auto pilots there. Time");
+			if (!str.empty()) {
+				UniverseUtil::IOmessage (4,"game","all",str);
+				str=vs_config->getVariable ("general","intro3","Compression: #8080FFF9; F10#000000 resets. Buy a jump drive & fly to a blue ball & press #8080FFj#000000");
+				if (!str.empty()) {
+					UniverseUtil::IOmessage (8,"game","all",str);
+					str = vs_config->getVariable ("general","intro4","to warp to a near star. Target a base or planet & press #8080FF0#000000 to request landing");
+					if (!str.empty()) {
+						UniverseUtil::IOmessage (12,"game","all",str);
+						str=vs_config->getVariable ("general","intro5","clearence. Inside the green box #8080FFd#000000 will land. When you launch, press #8080FFu#000000 to undock.");
+						if (!str.empty())
+							UniverseUtil::IOmessage (16,"game","all",str);
+					}
+				}
+			}
+		}
+	}
     _Universe->Loop(main_loop);
     ///return to idle func which now should call main_loop mohahahah
   }

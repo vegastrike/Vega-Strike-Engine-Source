@@ -40,13 +40,17 @@ PYTHON_BEGIN_MODULE(Base)
 	Base.def (&BaseUtil::GetCurRoom,"GetCurRoom");
 	Base.def (&BaseUtil::GetNumRoom,"GetNumRoom");
 	Base.def (&BaseUtil::Comp,"Comp");
+	Base.def (&BaseUtil::CompPython,"CompPython");
 	Base.def (&BaseUtil::Launch,"Launch");
+	Base.def (&BaseUtil::LaunchPython,"LaunchPython");
 	Base.def (&BaseUtil::Link,"Link");
+	Base.def (&BaseUtil::LinkPython,"LinkPython");
 	Base.def (&BaseUtil::Python,"Python");
 	Base.def (&BaseUtil::EraseLink,"EraseLink");
 	Base.def (&BaseUtil::Ship,"Ship");
 	Base.def (&BaseUtil::Texture,"Texture");
 	Base.def (&BaseUtil::Message,"Message");
+	Base.def (&BaseUtil::EnqueueMessage,"EnqueueMessage");
 	Base.def (&BaseUtil::EraseObj,"EraseObj");
 	Base.def (&GetRandomBarMessage,"GetRandomBarMessage");
 PYTHON_END_MODULE(Base)

@@ -12,6 +12,7 @@ class Music {
   UnitContainer p;
   int song;//currently playing song
   int lastlist;
+  float vol;
   int SelectTracks(int &i);
   void LoadMusic (const char *file);
   std::vector <std::vector <std::string> > playlist;
@@ -20,6 +21,7 @@ class Music {
   Music (Unit * parent);
   void Skip();
   int Addlist (std::string listfile);
+  void ChangeVolume(float inc=0);
   void GotoSong (int whichlist,int whichsong,bool skip);
   void GotoSong (std::string mus);
   void SkipRandSong(int whichlist);
@@ -27,6 +29,7 @@ class Music {
   void Listen();
   ~Music();
 };
+extern Music *muzak;
 
 
 #endif

@@ -400,7 +400,7 @@ void VDU::DrawMessages(Unit *target){
 		mymsg=string(timebuf)+": "+lastmsg->message;
 	}
 	int msglen=mymsg.size();
-	int rows_needed=msglen/cols;
+	int rows_needed=msglen/(1.6*cols);
 	fullstr=mymsg+"\n"+fullstr;
 	//fullstr=fullstr+mymsg+"\n";
 
@@ -743,7 +743,7 @@ void VDU::DrawVDUObjectives (Unit *parent) {
       vector<Mission::Objective>::iterator j=active_missions[i]->objectives.begin();
       for (;j!=active_missions[i]->objectives.end();++j) {
 	if (j->owner==NULL||j->owner==parent) {
-	  offset=DrawVDUObjective (j,offset);
+	  offset=DrawVDUObjective (&(*j),offset);
 	}
       }
     }
