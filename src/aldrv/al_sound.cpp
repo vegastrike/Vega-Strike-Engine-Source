@@ -173,7 +173,7 @@ static void ConvertFormat (vector<char>& ogg ) {
         converted.push_back('t');
         converted.push_back(' ');
 
-        converted.push_back(16);//size of header (16 bytes)
+        converted.push_back(18);//size of header (16 bytes)
         converted.push_back(0);
         converted.push_back(0);
         converted.push_back(0);
@@ -201,6 +201,8 @@ static void ConvertFormat (vector<char>& ogg ) {
         converted.push_back((char)((info->channels*samples/8)/256));        
         
         converted.push_back(samples);// 16 bit samples
+        converted.push_back(0);
+        converted.push_back(0);
         converted.push_back(0);
 
 
@@ -230,9 +232,9 @@ static void ConvertFormat (vector<char>& ogg ) {
         }
         converted.erase(converted.end()-segmentsize,converted.end());
         convertToLittle(converted.size()-8,&converted[4]);
-        convertToLittle(converted.size()-pcmsizestart-8,&converted[pcmsizestart-4]);
+        convertToLittle(converted.size()-pcmsizestart,&converted[pcmsizestart-4]);
 #if 0
-        FILE * tmp = fopen("/tmp/bleh","wb");
+		FILE * tmp = fopen("c:/temp/bleh","wb");
         fwrite(&converted[0],converted.size(),1,tmp);
         fclose(tmp);
 #endif
@@ -339,7 +341,6 @@ int AUDCreateSoundWAV (const std::string &s, const bool music, const bool LOOP){
 #else
 		  ALint format;
 	  	  // WIN32
-	  	  f.Read( &dat[0], f.Size());
                   alutLoadWAVMemory(&dat[0], (int*)&format, &wave, &size, &freq, &looping);
 #endif
 
