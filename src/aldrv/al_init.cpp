@@ -86,7 +86,7 @@ static void fixup_function_pointers(void) {
   */
 	return;
 }
-
+#endif
 void AUDChangeVolume (float volume) {
 #ifdef HAVE_AL
 	if (volume==0) {
@@ -123,7 +123,7 @@ float AUDGetDoppler () {
 #endif
 }
 
-
+#ifdef HAVE_AL
 ///I don't think we'll need to switch contexts or devices in vegastrike
 static ALCdevice *dev=NULL;
 
