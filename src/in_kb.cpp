@@ -34,7 +34,7 @@ extern list<InputListener*> listeners;
 
 extern InputListener* activelistener;
 */
-const int LAST_MODIFIER=3;
+
 static KBHandler keyBindings [LAST_MODIFIER][WSK_LAST];
 static unsigned int playerBindings [LAST_MODIFIER][WSK_LAST];
 KBSTATE keyState [LAST_MODIFIER][WSK_LAST];

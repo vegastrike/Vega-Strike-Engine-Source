@@ -29,6 +29,7 @@
 #include "gldrv/winsys.h"
 #include "in.h"
 const int KEYMAP_SIZE =WSK_LAST;
+const int LAST_MODIFIER=3;
 //#endif
 
 unsigned int getModifier(const char* mod_name);

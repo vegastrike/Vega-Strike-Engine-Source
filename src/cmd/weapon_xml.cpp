@@ -168,8 +168,8 @@ namespace BeamXML {
     VOLUME,
     DETONATIONRADIUS,
     LOCKTIME,
-	ROLE,
-	TEXTURESTRETCH
+    ROLE,ANTIROLE,
+    TEXTURESTRETCH
 	
     //YAW,
     //PITCH,
@@ -218,11 +218,12 @@ namespace BeamXML {
     EnumMap::Pair ("OffsetY",OFFSETY),
     EnumMap::Pair ("OffsetZ",OFFSETZ),
     EnumMap::Pair ("Volume", VOLUME),
-	EnumMap::Pair("Role",ROLE),
-	EnumMap::Pair ("TextureStretch",TEXTURESTRETCH)
+    EnumMap::Pair("Role",ROLE),
+    EnumMap::Pair("AntiRole",ANTIROLE),
+    EnumMap::Pair ("TextureStretch",TEXTURESTRETCH)
   };
   const EnumMap element_map(element_names, 10);
-  const EnumMap attribute_map(attribute_names, 31);
+  const EnumMap attribute_map(attribute_names, 32);
   Hashtable <string, weapon_info, 257> lookuptable;
   string curname;
   weapon_info tmpweapon(weapon_info::BEAM);
@@ -282,6 +283,10 @@ namespace BeamXML {
 	  break;
 	case ROLE:
   	  tmpweapon.role_bits = ROLES::readBitmask(iter->value);
+	  break;
+	case ANTIROLE:
+  	  tmpweapon.role_bits = ROLES::readBitmask(iter->value);
+          tmpweapon.role_bits = ~tmpweapon.role_bits;
 	  break;
 	case WEAPSIZE:
 	  tmpweapon.MntSize (lookupMountSize ((*iter).value.c_str()));
