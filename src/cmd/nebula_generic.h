@@ -33,8 +33,9 @@ protected:
 	    int fg_snumber=0 );
 
     friend class UnitFactory;
-
+	Nebula (std::vector <Mesh *> m,bool b,int i):Unit (m,b,i){}
 public:
+
 	virtual void UpdatePhysics (const Transformation &trans, const Matrix transmat, const Vector & CumulativeVelocity, bool ResolveLast, UnitCollection *uc=NULL);
 	virtual void SetFogState() {}
 

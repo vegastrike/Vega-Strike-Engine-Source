@@ -55,7 +55,7 @@ protected:
 	void InitPlanet(QVector x,QVector y,float vely,const Vector & rotvel, float pos,float gravity,float radius,const char * filename, vector<char *> dest, const QVector &orbitcent, Unit * parent, int faction,string fullname, bool inside_out, unsigned int lights_num);
 
     friend class UnitFactory;
-
+	Planet (std::vector <Mesh *> m,bool b,int i):Unit (m,b,i){}
 public:
   UnitCollection satellites;
   virtual ~Planet();
@@ -132,6 +132,7 @@ public:
   friend class PlanetaryOrbit;
 
 private:
+
     /// copy constructor forbidden
     Planet( const Planet& );
     /// assignment operator forbidden

@@ -21,11 +21,13 @@ protected:
   friend class UnitFactory;
 
  public:
+	
   virtual enum clsptr isUnit () const{return BUILDINGPTR;}
   virtual void UpdatePhysics (const Transformation &trans, const Matrix &transmat, const Vector & CumulativeVelocity, bool ResolveLast, UnitCollection *uc=NULL) {}
   bool ownz (void * parent) {return (this->parent.terrain == (Terrain *)parent);}
 
 protected:
+	Building (std::vector <Mesh *> m,bool b,int i):Unit (m,b,i){}
     /// default constructor forbidden
     Building( ) {}
     /// copy constructor forbidden

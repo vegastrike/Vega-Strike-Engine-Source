@@ -19,6 +19,7 @@ class MissileEffect {
 class Missile:public Unit {
  public:
  protected:
+	Missile (std::vector <Mesh *> m,bool b,int i):Unit (m,b,i){}
   virtual float ExplosionRadius();
   float time;
   float damage;
