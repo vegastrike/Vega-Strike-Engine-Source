@@ -154,7 +154,7 @@ string getCargoUnitName (const char * textname) {
 
 
 
-
+extern vector <char *> ParseDestinations (const string &value);
 Planet::Planet(Vector x,Vector y,float vely, const Vector & rotvel, float pos,float gravity,float radius,char * textname,char * alpha,vector <char *> dest, const Vector & orbitcent, Unit * parent, const GFXMaterial & ourmat, const std::vector <GFXLightLocal> &ligh, int faction,string fgid)
     : Unit( 0 )
     , atmosphere(NULL), terrain(NULL), radius(0.0f),  satellites(),shine(NULL)
@@ -267,7 +267,11 @@ Planet::Planet(Vector x,Vector y,float vely, const Vector & rotvel, float pos,fl
 			   glowradius*radius,
 			   glowradius*radius);
       }else {
-	shine = new Animation ("shine.ani",true,.1,MIPMAP,true,true,c);//GFXColor(ourmat.er,ourmat.eg,ourmat.eb,ourmat.ea));
+	static vector <char *> shines = ParseDestinations (vs_config->getVariable("graphics","star_shine","shine.ani"));
+	if (shines.empty()) {
+	  shines.push_back("shine.ani");
+	}
+	shine = new Animation (shines[rand()%shines.size()],true,.1,MIPMAP,true,true,c);//GFXColor(ourmat.er,ourmat.eg,ourmat.eb,ourmat.ea));
 	shine->SetDimensions ( glowradius*radius,glowradius*radius);
       }
       if (!drawstar) {
