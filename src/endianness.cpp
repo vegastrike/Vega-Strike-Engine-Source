@@ -1,3 +1,4 @@
+#include "endianness.h"
 union LILdubl {
   double d;
   unsigned int i[2];
