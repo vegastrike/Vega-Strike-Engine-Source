@@ -288,7 +288,7 @@ void Planet::reactToCollision(Unit * un, const Vector & biglocation, const Vecto
   }
   if (!destination.empty()&&un->GetJumpStatus().drive>=0) {
 #ifdef JUMP_DEBUG
-  fprintf (stderr,"Deactivating drive, jumping to %s",destination[un->getJumpStatus().drive%destination.size()]);
+  fprintf (stderr,"Deactivating drive, jumping to %s",destination[un->GetJumpStatus().drive%destination.size()]);
 #endif
 
     un->DeactivateJumpDrive();
