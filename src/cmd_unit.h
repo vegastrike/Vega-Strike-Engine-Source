@@ -286,6 +286,7 @@ public:
   void ResolveForces (const Transformation &, const Matrix,bool ResolveLast);
   //  void ResolveLast(const Transformation &, const Matrix); // used for lerp
   void GetOrientation(Vector &p, Vector &q, Vector &r) const;
+  Vector UpCoordinateLevel(const Vector &v) const;
   Vector ToLocalCoordinates(const Vector &v) const;
   Vector ToWorldCoordinates(const Vector &v) const;
   const Vector &GetAngularVelocity() const { return AngularVelocity; }

@@ -3,9 +3,9 @@
 AI * MatchLinearVelocity::Execute () {
   Vector desired (desired_velocity);
   if (!LocalVelocity) {
-    desired = parent->ToLocalCoordinates (desired);
+    desired = parent->UpCoordinateLevel (desired);
   }
-  Vector velocity (parent->ToLocalCoordinates (parent->GetVelocity()));
+  Vector velocity (parent->UpCoordinateLevel(parent->GetVelocity()));
   parent->Thrust ( /*parent->ClampThrust*/(parent->GetMass()*(desired-velocity)/SIMULATION_ATOM), desired.i>parent->GetComputerData().max_speed);//don't need to clamp thrust since the Thrust does it for you
                  //caution might change 
   return this;
@@ -14,7 +14,7 @@ AI * MatchLinearVelocity::Execute () {
 #define MATCHANGVELOCITYEXECUTE() Vector desired (desired_ang_velocity); \
   if (!LocalAng)\
     desired = parent->ToLocalCoordinates (desired);\
-  parent->ApplyLocalTorque (parent->GetMoment()*(desired-parent->ToLocalCoordinates(parent->GetAngularVelocity()))/SIMULATION_ATOM); 
+  parent->ApplyLocalTorque (parent->GetMoment()*(desired-parent->UpCoordinateLevel(parent->GetAngularVelocity()))/SIMULATION_ATOM); 
 
 
 AI * MatchAngularVelocity::Execute () {

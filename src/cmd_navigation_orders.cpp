@@ -8,25 +8,27 @@ AI* MoveTo::Execute(){
   
   heading.Normalize();
   //062201 FIXME do I need to be in local coords? i thinks o    Vector velocity = parent->GetVelocity();
-  Vector velocity = parent->ToLocalCoordinates(parent->GetVelocity());
-  Vector vel_normal = velocity;
   
   
   
   Vector p,q,r;
   parent->GetOrientation(p,q,r);
+
+  Vector velocity = parent->UpCoordinateLevel(parent->GetVelocity());
+  Vector vel_normal = velocity;
+
   //clog << "r: " << r << " target : " << local_location << " heading: " << heading << "\n";
   
 
 
   float speed = vel_normal.Magnitude();
-  float direction = vel_normal * heading;
+  //  float direction = vel_normal * heading;??
   
   vel_normal = vel_normal/speed;
   Vector orthogonal_velocity = velocity - vel_normal * (velocity * heading);
   float orthogonal_magnitude = orthogonal_velocity.Magnitude();
   
-  float max_accel = parent->MaxThrust(heading).Magnitude() / parent->GetMass();
+  //  float max_accel = parent->MaxThrust(heading).Magnitude() / parent->GetMass();??
   float max_retro_accel = -parent->MaxThrust(-heading).Magnitude() / parent->GetMass();
   
   float accel, det;
@@ -106,7 +108,6 @@ AI* MoveTo::Execute(){
       goto case3;
     }
     break;
-  case2:
   case 2:
     // Decelerate until we hit the target that we want (could also decelerate until stop on the precise position)
 #ifndef WIN32
@@ -157,25 +158,31 @@ AI* MoveTo::Execute(){
 }
 
 
+//the time we need to start slowing down from now calculation (if it's in this frame we'll only accelerate for partial
+// vslowdown - decel * t = 0               t = vslowdown/decel
+// finalx = .5 decel ( v/decel)^2 + v^2 / decel + slowdownx = 1.5 * v^2 / decel + slowdownx 
+// slowdownx =  .5 accel * t^2 + v0 * t + initx
+// finalx = (1.5*(accel * t + v0)^2)/decel + .5 accel * t^2 + v0*t + initx      ;       Length = finalx-initx
 
+// Length = (1.5*accel^2*t^2+3*accel*t*v0+ 1.5 *v0^2)/decel + .5 accel * t^2 + v0*t
+// Now we assume accel = decel.... for purposes of stupidity :-)
+// Length = 2 accel * t^2 + 4 * t*v0 + 1.5*v0^2/accel
 
+// t = ( -4*v0 (+/-) sqrtf (16*v0^2 - 8*(1.5*v0^2 - accel*Length) ) / (4*accel)) 
+// t = -v0/a + sqrtf (v0^2+ 2*Length*accel)/(2*accel);
 
-
-
-
-AI *ChangeHeading::Execute(){
-  if(done) return NULL;
-  Vector local_heading = parent->ToLocalCoordinates(final_heading);
-  Vector ang_vel = parent->ToLocalCoordinates(parent->GetAngularVelocity());
-  Vector torque(0,0,0);
+AI * ChangeHeading::Execute() {
+  if (done) return NULL;
+  Vector local_heading = parent->ToLocalCoordinates (final_heading);
+  Vector turning (local_heading.j,-local_heading.i,0);//Vector(0,0,1) X local_heading
+  Vector ang_vel = parent->UpCoordinateLevel(parent->GetAngularVelocity());
+  float angle = asin (sqrtf(local_heading.j*local_heading.j+local_heading.i*local_heading.i));//asin(turning.Magnitude());
+  if(local_heading.k < 0)  // sin alone is not capable of determining the spin
+    angle = angle<0?-PI-angle : PI-angle;
   
-  Vector p,q,r;
-  parent->GetOrientation(p,q,r);
-  
-  fprintf (stderr,"local heading:  (%f %f %f)\n",local_heading.i,local_heading.j,local_heading.k );
-  
-  Vector ang_vel_norm = ang_vel;
-  float ang_speed = ang_vel.Magnitude();
+  return this;
+}
+/*
   // Algorithm: at each step do a greedy course correction to:
   // 1. convert angular momentum into the r axis. This will cause
   // the spin to precess
@@ -183,35 +190,56 @@ AI *ChangeHeading::Execute(){
   // 2. apply impulse that will reorient r towards the destination
   // if this does not contradict #1, ie must thrust at less than 90
   // degrees off of the original direction
-  /*
-    if(ang_speed > THRESHOLD) {
-    ang_vel_norm = ang_vel_norm / ang_speed;
-    ang_vel = ang_vel - local_heading * (ang_vel * local_heading);
-    torque = parent->ClampTorque(-ang_vel * parent->GetMoment()/SIMULATION_ATOM);
-    
-    cerr << "Torque for converting to pure roll " << torque << endl;
-    }
-  */
-  Vector turning;
-  CrossProduct(local_heading, Vector(0,0,1), turning);
+
+AI *ChangeHeading::Execute(){
+
+  if(done) return NULL;
+  Vector local_heading = parent->ToLocalCoordinates(final_heading);
+  //float ang_speed = ang_vel.Magnitude();
+  Vector torque(0,0,0);
+  Vector turning (local_heading.j,-local_heading.i,0);//  CrossProduct(local_heading, Vector(0,0,1), turning);
+
   fprintf(stderr,"turning: (%f, %f, %f)\n", turning.i, turning.j, turning.k);
-  float angle = asin(turning.Magnitude());
-  
+  float angle = asin (sqrtf(local_heading.j*local_heading.j+local_heading.i*local_heading.i));//asin(turning.Magnitude());
+
+  if(fabs(parent->GetAngularVelocity().i) < THRESHOLD&&fabs(parent->GetAngularVelocity().j) < THRESHOLD&&fabs(parent->GetAngularVelocity().k) < THRESHOLD&& angle < THRESHOLD) {
+    done = true;
+    fprintf (stderr, "Done\n");
+    return NULL;
+  }
+
+//**FAULTY**the time we need to start slowing down from now calculation (if it's in this frame we'll only accelerate for partial
+// **FAULTY**finalx = .5 decel ( 2 v/decel)^2 + 2 v * v / decel + slowdownx = 4 v^2 / decel + slowdown x 
+// **FAULTY**slowdownx =  .5 accel * t^2 + v0 * t + initx
+// **FAULTY**finalx = (4*(accel * t + v0)^2)/decel + .5 accel * t^2 + v0*t + initx      ;       Length = finalx-initx
+
+// **FAULTY**Length = (4*accel^2*t^2+8*accel*t*v0+ 4 *v0^2)/decel + .5 accel * t^2 + v0*t
+// **FAULTY**Now we assume accel = decel.... for purposes of stupidity :-)
+// **FAULTY**Length = 4.5 accel * t^2 + 9 * t*v0 + 4*v0^2/accel
+
+// **FAULTY**t = ( -9*v0 (+/-) sqrtf (81*v0^2 - 18*(4*v0^2 - accel*Length) ) / (9*accel)) 
+
   if(fabs(angle) < THRESHOLD) { // handle case where we're really close to the target (or 180 degrees away)
     // for now, pick fastest pure axis
-    turning = Vector(parent->Limits().pitch,0,0);
-    float max = parent->Limits().pitch;
-    if(parent->Limits().yaw > max) {
-      turning = Vector(0,parent->Limits().yaw,0);
-      max = parent->Limits().yaw;
-    }
-    if(parent->Limits().roll > max) {
-      turning = Vector(0,0,parent->Limits().roll);
-      max = parent->Limits().roll;
+    if (local_heading.k<0) {
+      fprintf (stderr,"thresholding\n");
+      turning = Vector(parent->Limits().pitch,0,0);
+      float max = parent->Limits().pitch;
+      if(parent->Limits().yaw > max) {
+	turning = Vector(0,parent->Limits().yaw,0);
+	max = parent->Limits().yaw;
+      }
+      if(parent->Limits().roll > max) {
+	turning = Vector(0,0,parent->Limits().roll);
+	max = parent->Limits().roll;
+      }
+    } else {
+      //slow down;
+      //      braking=true;
     }
   }
   
-  if(local_heading * Vector(0,0,1) < 0) { // sin alone is not capable of determining the spin
+  if(local_heading.k < 0) { // sin alone is not capable of determining the spin
     if(angle >= 0) {
       angle = PI - angle;
     }
@@ -220,19 +248,14 @@ AI *ChangeHeading::Execute(){
     }
   }
   fprintf (stderr, "angle: %f", angle );
+  Vector angular_velocity = parent->UpCoordinateLevel(parent->GetAngularVelocity());
   if(fabs(angle) > THRESHOLD) {
-    Vector turning_norm = turning;
+    Vector turning_norm (turning);
     turning_norm.Normalize();
-    /*
-      Vector temp = NetTorque *SIMULATION_ATOM*(1.0/MomentOfInertia);
-      AngularVelocity += temp;
-    */
     
-    // should write some routines to factor out calculation of how
-    // much impulse is actually needed
+
     
-    Vector angular_velocity = parent->GetAngularVelocity();
-    angular_velocity = angular_velocity - torque / parent->GetMoment() * SIMULATION_ATOM;
+    //    angular_velocity = angular_velocity - (torque / parent->GetMoment()) * SIMULATION_ATOM;?????070901
     
     float angular_speed = angular_velocity * turning_norm;
     fprintf (stderr,"Current angular speed: %f\n", angular_speed );
@@ -240,31 +263,27 @@ AI *ChangeHeading::Execute(){
     angle = angle - angular_speed * SIMULATION_ATOM; // how much we want to try to conver in the next frame
     fprintf (stderr, "angle after adjustment: %f\n", angle) ;
     
-    float max_accel = parent->MaxTorque(turning_norm).Magnitude()/parent->GetMoment();
+    float max_accel = parent->MaxTorque(turning_norm).Magnitude()*SIMULATION_ATOM/parent->GetMoment();
     Vector max_retro_torque = parent->MaxTorque(-turning_norm);
     Vector max_positive_torque = parent->MaxTorque(turning_norm);
-    float max_accel_distance = max_positive_torque.Magnitude()/(parent->GetMoment());
+    float max_accel_distance = max_positive_torque.Magnitude()*SIMULATION_ATOM/(parent->GetMoment());
     float retro_torque = max_retro_torque.Magnitude();
     
     if(angle > 0) {
       // Figure out maximum torque in deceleration direction
       fprintf (stderr,"max accel distance: %f\n", max_accel_distance );
-      int n = fabs(floor(angular_speed / (retro_torque/parent->GetMoment()))); // n = # of turns needed to kill all speed
-      float braking_distance = fabs(max_accel_distance) * (((n+1)*(n)/2) );
+      int n = fabs(ceil(angular_speed / (SIMULATION_ATOM*retro_torque/parent->GetMoment()))); // n = # of turns needed to kill all speed
+      float braking_distance = .5* n*angular_speed;//fabs(max_accel_distance) * (((n+1)*(n)*.5) );
       fprintf (stderr,"Need %d turns to kill all speed, distance of %f\n",n ,braking_distance) ;
       // n*(n+1)/2
-      // figure out how far we can get while braking (discrete
-      // summation since everything is done with impulses
-      if(n<0) {
-	fprintf (stderr,"overbraked\n");
-	braking = false;
-      } else if(!braking && braking_distance > fabs(angle)) {
+      if(!braking && braking_distance > fabs(angle)) {
 	// start braking
 	braking = true;
 	fprintf (stderr, "Starting to brake\n");
       }
       else if(!braking && braking_distance > fabs(angle - max_accel_distance)) { // prevent this turn from doing the full acceleration
 	angle -= braking_distance;
+	fprintf (stderr, "P\nP\nP\nP\nPartial brake\n");
       }
     }
     if(braking && (angular_speed > THRESHOLD && fabs(angle) > max_accel_distance)) { // max brake if positive angle and braking flag is set and we are still moving
@@ -282,8 +301,8 @@ AI *ChangeHeading::Execute(){
     torque += more_torque;
   } else {
     // Kill angular momentum
-    Vector angular_velocity = parent->GetAngularVelocity();
-    Vector more_torque = Vector(-angular_velocity.i, -angular_velocity.j, 0);
+
+    Vector more_torque (-angular_velocity.i, -angular_velocity.j, 0);
     more_torque = more_torque * parent->GetMoment() / SIMULATION_ATOM;
     
     fprintf (stderr, "Killing angular momentum (%f,%f,%f)\n",more_torque.i,more_torque.j,more_torque.k);
@@ -295,8 +314,6 @@ AI *ChangeHeading::Execute(){
 
   parent->ApplyLocalTorque(torque);
   
-  if(ang_vel.Magnitude() < THRESHOLD && angle < THRESHOLD) {
-    done = true;
-    fprintf (stderr, "Done\n");
-  }
+  return this;
 }
+*/

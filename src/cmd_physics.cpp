@@ -267,6 +267,16 @@ void Unit::GetOrientation(Vector &p, Vector &q, Vector &r) const {
   r.k = m[10];
 }
 
+Vector Unit::UpCoordinateLevel (const Vector &v) const {
+  float m[16];
+  curr_physical_state.to_matrix(m);
+#define M(A,B) m[B*4+A]
+  return Vector(v.i*M(0,0)+v.j*M(1,0)+v.k*M(2,0),
+		v.i*M(0,1)+v.j*M(1,1)+v.k*M(2,1),
+		v.i*M(0,2)+v.j*M(1,2)+v.k*M(2,2));
+#undef M
+}
+
 Vector Unit::ToLocalCoordinates(const Vector &v) const {
   //Matrix m;
   //062201: not a cumulative transformation...in prev unit space  curr_physical_state.to_matrix(m);

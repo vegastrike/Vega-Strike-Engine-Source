@@ -30,7 +30,7 @@ class ChangeHeading : public Order {
   float optimal_speed;
   bool braking;
  public:
-  ChangeHeading(const Vector &final_heading, float limit) : state(0), final_heading(final_heading), optimal_speed(limit), braking(false) { type = 1;}
+  ChangeHeading(const Vector &final_heading, float limit) : Order(), final_heading(final_heading), state(0), optimal_speed(limit), braking(false) { type = 1;}
   AI *Execute();
 };
 }
