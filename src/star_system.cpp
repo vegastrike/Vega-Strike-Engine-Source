@@ -144,14 +144,9 @@ void StarSystem::Draw() {
     iter->advance();
   }
   delete iter;
-  SetViewport();//camera wielding unit is now drawn  Note: Background is one frame behind...big fat hairy deal
-  Mesh::ProcessUndrawnMeshes(true);
+  //  SetViewport();//camera wielding unit is now drawn  Note: Background is one frame behind...big fat hairy deal
+
   stars->Draw();
-  GFXPopGlobalEffects();
-  Halo::ProcessDrawQueue();
-  Beam::ProcessDrawQueue();
-  Animation::ProcessDrawQueue();
-  Bolt::Draw();
   //  systemInputDFA->Draw();
 
 }

@@ -13,6 +13,7 @@
 #include "physics.h"
 //#include "cmd_hud.h"
 #include "gfxlib.h"
+#include "cmd/bolt.h"
 #include "gfx/loc_select.h"
 #include <string>
 #include "cmd/ai/input_dfa.h"
@@ -278,12 +279,24 @@ void destroyObjects() {
 }
 
 void main_loop() {
-  cockpit->SetupViewPort();
+  
 
   fighters[0]->SetCameraToCockpit();
   _Universe->StartDraw();
 
   _Universe->activeStarSystem()->Draw();
+  cockpit->SetupViewPort();
+  //fighters[0]->UpdateHudMatrix();
+  //_Universe->activeStarSystem()->SetViewport();
+
+  Mesh::ProcessUndrawnMeshes(true);
+
+
+  GFXPopGlobalEffects();
+  Halo::ProcessDrawQueue();
+  Beam::ProcessDrawQueue();
+  Animation::ProcessDrawQueue();
+  Bolt::Draw();
   cockpit->Draw();
   _Universe->activeStarSystem()->Update();
 

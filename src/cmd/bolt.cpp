@@ -116,6 +116,7 @@ void Bolt::Draw () {
   GFXEnable (DEPTHTEST);
   GFXEnable(DEPTHWRITE);
   GFXEnable (TEXTURE0);
+  GFXColor4f(1,1,1,1);
 }
 
 using namespace bolt_draw;

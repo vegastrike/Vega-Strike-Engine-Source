@@ -569,7 +569,23 @@ void Unit::UpdateHudMatrix() {
 	CrossProduct(r,q, tmp);
     _Universe->AccessCamera()->SetOrientation(tmp,q ,r);
     _Universe->AccessCamera()->SetPosition (cumulative_transformation.position);
-
+    fprintf (stderr, "matrix %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f\n",
+	     cumulative_transformation_matrix[0],
+	     cumulative_transformation_matrix[1],
+	     cumulative_transformation_matrix[2],
+	     cumulative_transformation_matrix[3],
+	     cumulative_transformation_matrix[4],
+	     cumulative_transformation_matrix[5],
+	     cumulative_transformation_matrix[6],
+	     cumulative_transformation_matrix[7],
+	     cumulative_transformation_matrix[8],
+	     cumulative_transformation_matrix[9],
+	     cumulative_transformation_matrix[10],
+	     cumulative_transformation_matrix[11],
+	     cumulative_transformation_matrix[12],
+	     cumulative_transformation_matrix[13],
+	     cumulative_transformation_matrix[14],
+	     cumulative_transformation_matrix[15]);
   /*
   //FIXME
   Matrix tmatrix;
@@ -625,6 +641,7 @@ void Unit::Draw(const Transformation &parent, const Matrix parentMatrix)
       selectionBox->Draw(cumulative_transformation, cumulative_transformation_matrix);
     }
   } else {
+    //        UpdateHudMatrix();
     /***DEBUGGING cosAngleFromMountTo
     UnitCollection *dL = _Universe->activeStarSystem()->getUnitList();
     UnitCollection::UnitIterator *tmpiter = dL->createIterator();

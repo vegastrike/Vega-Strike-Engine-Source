@@ -35,14 +35,15 @@ Cockpit::~Cockpit () {
 }
 void Cockpit::RestoreViewPort() {
   GFXViewPort (0, 0, g_game.x_resolution,g_game.y_resolution);
-  Unit * un;
-  if (un = parent.GetUnit()) {
-    un->UpdateHudMatrix();
-  }
 }
 void Cockpit::SetupViewPort () {
     GFXViewPort (0,(int)(viewport_offset*g_game.y_resolution), g_game.x_resolution,g_game.y_resolution);
   _Universe->activeStarSystem()->AccessCamera()->setCockpitOffset (cockpit_offset);
+  Unit * un;
+  if (un = parent.GetUnit()) {
+    un->UpdateHudMatrix();
+    _Universe->activeStarSystem()->SetViewport();
+  }
  
   //  parent->UpdateHudMatrix();
 }
