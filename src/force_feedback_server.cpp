@@ -38,6 +38,7 @@ ForceFeedback::~ForceFeedback(){
 }
 
 bool ForceFeedback::haveFF(){
+	return false;
 }
 void ForceFeedback::updateForce(float angle,float strength){
 }
