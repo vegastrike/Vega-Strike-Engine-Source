@@ -198,7 +198,8 @@ namespace GameUnitXML {
       SLIDE_END,
       TRACKINGCONE,
       MISSIONCARGO,
-      MAXIMUM
+      MAXIMUM,
+      LIGHTTYPE
     };
 
   const EnumMap::Pair element_names[36]= {
@@ -240,7 +241,7 @@ namespace GameUnitXML {
     EnumMap::Pair ("Upgrade",UPGRADE      )
 
   };
-  const EnumMap::Pair attribute_names[93] = {
+  const EnumMap::Pair attribute_names[94] = {
     EnumMap::Pair ("UNKNOWN", UNKNOWN),
     EnumMap::Pair ("missing",MISSING),
     EnumMap::Pair ("file", XFILE), 
@@ -334,10 +335,11 @@ namespace GameUnitXML {
     EnumMap::Pair ("SlideStart",SLIDE_END),
     EnumMap::Pair ("MissionCargo",MISSIONCARGO),
     EnumMap::Pair ("Maximum",MAXIMUM),
+    EnumMap::Pair ("LightType",LIGHTTYPE)
   };
 
   const EnumMap element_map(element_names, 36);
-  const EnumMap attribute_map(attribute_names, 93);
+  const EnumMap attribute_map(attribute_names, 94);
 }
 
 using XMLSupport::EnumMap;
@@ -372,6 +374,7 @@ void GameUnit::beginElement(const string &name, const AttributeList &attributes)
   float halocolor[4];
   short ammo=-1;
   int mntsiz=weapon_info::NOWEAP;
+  string light_type;
   Names elem = (Names)element_map.lookup(name);
 #define ADDTAGNAME(a) image->unitwriter->AddTag (a)
 #define ADDTAG  image->unitwriter->AddTag (name)
@@ -641,6 +644,10 @@ void GameUnit::beginElement(const string &name, const AttributeList &attributes)
     pos=QVector(0,0,0);
     for (iter = attributes.begin();iter!=attributes.end();iter++) {
       switch(attribute_map.lookup((*iter).name)) {
+      case LIGHTTYPE:
+	ADDDEFAULT;
+	light_type = (*iter).value;
+	break;
       case X:
 	ADDDEFAULT;
 	pos.i=xml->unitscale*parse_float((*iter).value);
@@ -681,7 +688,7 @@ void GameUnit::beginElement(const string &name, const AttributeList &attributes)
 	break;
       }
     }
-    halos.AddHalo (filename.c_str(),pos,P.Cast(),GFXColor(halocolor[0],halocolor[1],halocolor[2],halocolor[3]));
+    halos.AddHalo (filename.c_str(),pos,P.Cast(),GFXColor(halocolor[0],halocolor[1],halocolor[2],halocolor[3]),light_type);
     //   xml->halos.push_back(new Halo(filename.c_str(),GFXColor(halocolor[0],halocolor[1],halocolor[2],halocolor[3]),pos,P.i,P.j));
     break;
   case MOUNT:

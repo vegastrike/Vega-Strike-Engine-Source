@@ -12,6 +12,7 @@
 #include "gfx/particle.h"
 #include "lin_time.h"
 #include "animation.h"
+
 static void DoParticles (QVector pos, float percent, const Vector & velocity, float radial_size,int faction) {
   percent = 1-percent;
   int i=rand();
@@ -58,16 +59,32 @@ MyIndHalo::MyIndHalo(const QVector & loc, const Vector & size) {
     this->loc = loc;
     this->size=size;
 }
-unsigned int HaloSystem::AddHalo (const char * filename, const QVector & loc, const Vector &size, const GFXColor & col) {
+namespace CAR {
+
+  const int  FORWARD_BLINKEN =1;
+  const int LEFT_BLINKEN =2;
+  const int RIGHT_BLINKEN =4;
+  const int SIREN_BLINKEN =8;
+  const int ON_NO_BLINKEN =16;
+
+
+  const EnumMap::Pair type_names[6] = {
+    EnumMap::Pair("HEADLIGHTS", HEADLIGHTS),
+    EnumMap::Pair("LEFTBLINK",LEFTBLINK),
+    EnumMap::Pair("RIGHTBLINK",RIGHTBLINK),
+    EnumMap::Pair("BRAKE",BRAKE),
+    EnumMap::Pair("REVERSE",REVERSE),
+    EnumMap::Pair("SIREN",SIREN)
+  };
+  const EnumMap type_map (type_names,6);
+}
+
+unsigned int HaloSystem::AddHalo (const char * filename, const QVector & loc, const Vector &size, const GFXColor & col, std::string type) {
 #ifdef CAR_SIM
-  /*  GFXColor col;
-  col = GFXColor(1,0,0,1);
-  if (loc.k>0) {
-    col = GFXColor (1,1,1,1);
-    }*/
   ani.push_back (new Animation ("flare6.ani",1,.1,MIPMAP,true,true,col));
   ani.back()->SetDimensions (size.i,size.j);
   ani.back()->SetPosition(loc);
+  halo_type.push_back (CAR::type_map.lookup(type));//should default to headlights
 #endif
   if (mesh==NULL) {
     mesh = new Mesh ((string (filename)+".xmesh").c_str(), 1,FactionUtil::GetFaction("neutral"),NULL);
@@ -92,41 +109,39 @@ void HaloSystem::SetPosition (unsigned int which, const QVector &loc) {
 #endif
 
 }
-#ifdef CAR_SIM
-#define NUM_BRAKE 3
-#define NUM_REVERSE 2
-#define NUM_LEFT 2
-#define NUM_RIGHT 2
-#define FORWARD_BLINKEN 1
-#define LEFT_BLINKEN 2
-#define RIGHT_BLINKEN 4
-#define ON_NO_BLINKEN 8
-#define HEADLIGHT_INDEX  (NUM_BRAKE+NUM_REVERSE+NUM_LEFT+NUM_RIGHT)
-#define RIGHT_BLINK_INDEX  (NUM_BRAKE+NUM_REVERSE+NUM_LEFT)
-#define LEFT_BLINK_INDEX  (NUM_BRAKE+NUM_REVERSE)
-
-#endif
 void HaloSystem::Draw(const Matrix & trans, const Vector &scale, short halo_alpha, float nebdist, float hullpercent, const Vector & velocity, int faction) {
 #ifdef CAR_SIM
     for (unsigned int i=0;i<ani.size();++i) {
       bool      drawnow=false;
       int bitwise = scale.j;
-      if ((i<NUM_BRAKE&&scale.k<.01&&scale.k>-.01)||(i>=NUM_BRAKE&&i<NUM_REVERSE&&scale.k<=-.01)) {
+      int typ = CAR::HEADLIGHTS;
+#ifdef CAR_SIM
+      typ = halo_type [i];
+#endif
+      if ((typ==CAR::BRAKE&&scale.k<.01&&scale.k>-.01)) {
 	drawnow=true;
       }
-      if (i>=HEADLIGHT_INDEX) {
+      if ((typ==REVERSE&&scale.k<=-.01)) {
+	drawnow=true;
+      }
+      if (typ==HEADLIGHTS) {
 	if (scale.j>=ON_NO_BLINKEN||(bitwise<8&&bitwise>0&&(bitwise&FORWARD_BLINKEN))) {
 	  drawnow = true;
 	}
       }
+      if (typ==SIREN) {
+	if ((bitwise>0)&&((bitwise>=ON_NO_BLINKEN)||(bitwise&SIREN_BLINKEN))) {
+	  drawnow=true;
+	}
+      }
       float blink_prob=.8;
-      if ((i>=RIGHT_BLINK_INDEX)&&(i-RIGHT_BLINK_INDEX<NUM_RIGHT)) {
+      if (typ==RIGHTBLINK) {
 	if ((bitwise>0)&&(bitwise<ON_NO_BLINKEN)&&(bitwise&RIGHT_BLINKEN)) {
 	  if (rand()<RAND_MAX*blink_prob) 
 	    drawnow=true;
 	}
       }
-      if (i>=LEFT_BLINK_INDEX&&i-LEFT_BLINK_INDEX<NUM_LEFT) {
+      if (typ==LEFTBLINK) {
 	if ((bitwise>0)&&(bitwise<ON_NO_BLINKEN)&&(bitwise&LEFT_BLINKEN)) {
 	  if (rand()<RAND_MAX*blink_prob) 
 	    drawnow=true;

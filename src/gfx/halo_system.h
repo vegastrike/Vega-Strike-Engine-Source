@@ -17,6 +17,7 @@ class HaloSystem {
   std::vector <MyIndHalo> halo;
 #ifdef CAR_SIM
   std::vector <class Animation *> ani;
+  std::vector <int> halo_type;
 #endif
   Mesh * mesh;
  public:
@@ -28,10 +29,12 @@ class HaloSystem {
   unsigned int numhalo () {
     return halo.size();
   }
-  unsigned int  AddHalo (const char * filename, const QVector &loc, const Vector &size, const GFXColor & col);
+  unsigned int  AddHalo (const char * filename, const QVector &loc, const Vector &size, const GFXColor & col, std::string halo_type/*when it grows*/);
   void Draw (const Matrix & trans, const Vector & scale, short halo_alpha, float nebdist, float hullpercentage, const Vector & velocity, int faction);//draws smoke and damage fx
   //  unsigned int size(); {return halo.size();}
   void SetPosition (unsigned int which, const QVector &loc);
   void SetSize (unsigned int which, const Vector &scale);
 };
 #endif
+
+
