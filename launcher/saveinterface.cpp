@@ -26,18 +26,17 @@ extern void my_sleep (int i);
 void LoadMissionDialog (char * Filename,int i);
 void LoadSaveDialog (char *, char *, int);
 void LoadAutoDialog (char *, char *, int);
-#define NUM_TITLES 9
-static const char * titles [NUM_TITLES] = {"Select Mission", "New Game","Load Saved Game","Recover From Autosave","Launch Last Savegame", "Launch No Savegame","Options","Help","Exit Launcher"};
+#define NUM_TITLES 8
+static const char * titles [NUM_TITLES] = {"Start New Pilot","Play Saved Pilot","Continue Last Game", "Game Settings", "Recover From Autosave","Change Scenerio", "Help","Exit Launcher"};
 std::string my_mission ("explore_universe.mission");
-#define NUM_HELPS 7
+#define NUM_HELPS 6
 static const char * helps [NUM_HELPS] = {
-  "|SELECT MISSION BUTTON|\nThis allows you to select which mission vegastrike\nwill start the next time you press one\nof the keys below it. Most missions do not involve\nsave games and will ignore those options,\nhowever the default, in the mission/exploration folder will\nindeed ustilize the save games you specify.\nIf you ignore this option you begin in the standard\ntrading/bounty hunting mission.",
-  "|START A NEW GAME BUTTON|\nStart a new game in the Vegastrike universe.\nYou start with a dinged up old wayfarer\nand head from the vega sector with the hope of finding\nprofit and adventure on the frontier.\nTo begin afresh you must choose a new saved game.",
-  "|LOAD GAME BUTTON|\nThis opens up a saved game you had finished playing before.\nTo save you must dock at the base and\nclick on the save/load button and choose the save option.",
+  "|START A NEW PILOT BUTTON|\nStart a new game in the Vegastrike universe.\nYou start with a dinged up old llama\nand head from the vega sector with the hope of finding\nprofit and adventure on the frontier.\nTo begin afresh you must choose a new saved game.",
+  "|LOAD SAVED PILOT BUTTON|\nThis opens up a saved game you had finished playing before.\nTo save you must dock at the base and\nclick on the save/load button and choose the save option.",
+  "|CONTINUE GAME|\nUse this button to launch Vegastrike with from a saved\ngame or mission. If you do not choose a mission, you\nwill start in the standard trading/bounty hunting mission.",
+  "|GAME SETTINGS BUTTON|\nThis button will start up the configurator to allow you to\nselect your preferred options.",
   "|RECOVER AUTOSAVE BUTTON|\nThis button allows a player to recover their most recently\nplayed game into the selected save game upon next run.\nIf the player quits or the player docks, and then dies,\nit will restore to the last saved position.",
-  "|LAUNCH LAST SAVEGAME BUTTON|\nUse this button to launch Vegastrike with from a saved\ngame or mission. If you do not choose a mission, you\nwill start in the standard trading/bounty hunting mission.",
-  "|LAUNCH NO SAVEGAME BUTTON|\nThis button allows you to launch the selected\nmission without using a saved game.",
-  "|OPTIONS BUTTON|\nThis button will start up the configurator to allow you to\nselect your preferred options."
+  "|CHANGE SCENERIO BUTTON|\nThis allows you to select which mission vegastrike\nwill start the next time you press one\nof the keys below it. Most missions do not involve\nsave games and will ignore those options,\nhowever the default, in the mission/exploration folder will\nindeed ustilize the save games you specify.\nIf you ignore this option you begin in the standard\ntrading/bounty hunting mission."
 };
 std::string HOMESUBDIR= ".vegastrike";
 
@@ -305,26 +304,22 @@ void hello( GtkWidget *widget, gpointer   data ) {
     int i=(int)data;
     int pid=0;
     switch (i) {
-    case 0:
+    case 5:
       LoadMissionDialog("Select Mission",i);
       break;
+    case 0:
+      LoadSaveDialog("New Game","Please type or select the name of the pilot that you wish to create.",i);
+      break;
     case 1:
-      LoadSaveDialog("New Game","Please type or select the name of the saved game that you wish to create.",i);
-      break;
-    case 2:
-      LoadSaveDialog("Open Game","Please type or select the name of the saved game that you wish to load.",i);
-      break;
-    case 3:
-      LoadAutoDialog("Open Autosave Game","Please type or select the name of the saved game that you wish to autorecover to.",i);
+      LoadSaveDialog("Open Game","Please type or select the name of the pilot that you wish to load.",i);
       break;
     case 4:
+      LoadAutoDialog("Open Autosave Game","Please type or select the name of the saved game that you wish to autorecover to.",i);
+      break;
+    case 2:
       launch_mission();
       break;
-    case 5:
-      save_stuff("");
-      launch_mission();
-      break;
-    case 6:
+    case 3:
 #ifdef _WIN32
 		{
 		char pwd [65535];
@@ -346,10 +341,10 @@ void hello( GtkWidget *widget, gpointer   data ) {
 		}
 #endif
       break;
-    case 7:
+    case 6:
       help_func(0,-1);
       break;
-    case 8:
+    case 7:
       gtk_main_quit();
       break;
     default:
@@ -443,6 +438,9 @@ char *makeasc(wchar_t *str) {
 	const int WCHAR_SIZE=4;//(sizeof(wchar_t)/sizeof(char));
 	int *ptr=(int*)str;
     char * cptr = (char*)str;
+	if ((cptr[0]!='\0'&&cptr[1]!='\0')||(cptr[2]!='\0'&&cptr[3]!='\0')) {
+		return cptr;
+	}
 	while (*ptr) {
 		*cptr = (char)*ptr;
 		if (*cptr=='\0')
@@ -555,9 +553,9 @@ void renfile ( GtkWidget        *w,
 		rename(newstr,newentstr);
 		gtk_file_selection_set_filename (fs,"\0\0\0\0\0\0\0\0");
 		// "U\0n\0i\0c\0o\0d\0e\0 \0\0\0\0\0"
-		delete []newstr;
+//		delete []newstr;
 		delete []remstr;
-		delete []newentstr;
+//		delete []newentstr;
 		delete []rementstr;
 	}
 	fileop_destroy_dumb(w,dmb);
@@ -671,10 +669,10 @@ void copyfile ( GtkWidget        *w,
 			}
 			fclose(f1);
 		}
-		delete []newstr;
+//		delete []newstr;
 		delete []remstr;
 		gtk_file_selection_set_filename (fs,"\0\0\0\0\0\0\0\0");
-		delete []newentstr;
+//		delete []newentstr;
 		gtk_widget_destroy(GTK_FILE_SELECTION(fs)->fileop_dialog);
 		GTK_FILE_SELECTION(fs)->fileop_dialog=0;
 	}
@@ -750,8 +748,8 @@ void copynormal ( GtkWidget        *w,
 			}
 		}
 		gtk_file_selection_set_filename (fs,"\0\0\0\0\0\0\0\0");
-		delete []newstr;
-		delete []newentstr;
+//		delete []newstr;
+//		delete []newentstr;
 	}
 	fileop_destroy_dumb(w,dmb);
 }
