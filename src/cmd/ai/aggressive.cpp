@@ -8,12 +8,14 @@
 #include "xml_support.h"
 #include "cmd/unit.h"
 #include "communication.h"
+#include "cmd/script/flightgroup.h"
 using namespace Orders;
 
 const EnumMap::Pair element_names[] = {
   EnumMap::Pair ("AggressiveAI" , AggressiveAI::AGGAI),
   EnumMap::Pair ("UNKNOWN", AggressiveAI::UNKNOWN),
   EnumMap::Pair ("Distance", AggressiveAI::DISTANCE),
+  EnumMap::Pair ("MeterDistance", AggressiveAI::METERDISTANCE),
   EnumMap::Pair ("Threat", AggressiveAI::THREAT),
   EnumMap::Pair ("FShield", AggressiveAI::FSHIELD),
   EnumMap::Pair ("LShield",AggressiveAI:: LSHIELD),
@@ -30,9 +32,7 @@ AggressiveAI::AggressiveAI (const char * filename, const char * interruptname, U
   if (aggressivity==2.01)
     aggressivity = XMLSupport::parse_float (vs_config->getVariable ("unit","aggressivity","2"));
   if (target !=NULL) {
-    UnitCollection tmp;
-    tmp.prepend (target);
-    AttachOrder (&tmp);
+    AttachOrder (target);
   }
   AIEvents::LoadAI (filename,logic);
   AIEvents::LoadAI (interruptname,interrupts);
@@ -56,6 +56,16 @@ bool AggressiveAI::ProcessLogicItem (const AIEvents::AIEvresult &item) {
   switch (abs(item.type)) {
   case DISTANCE:
     value = distance;
+    break;
+  case METERDISTANCE:
+    {
+      Unit * targ = parent->Target();
+      if (targ) {
+	value = (parent->Position()-targ->Position()).Magnitude()-parent->rSize()-targ->rSize();
+      }else {
+	value = 10000; 
+      }
+    }
     break;
   case THREAT:
     value = parent->GetComputerData().threatlevel;
@@ -107,111 +117,132 @@ bool AggressiveAI::ProcessLogic (AIEvents::ElemAttrMap & logi, bool inter) {
     if (trueit&&j==i->end()) {
       //do it
       if (inter) {
-#ifdef AGGDEBUG
-  fprintf (stderr,"procerr");
-  fflush (stderr);
-#endif
+
 	//parent->getAIState()->eraseType (Order::FACING);
 	//parent->getAIState()->eraseType (Order::MOVEMENT);
 	eraseType (Order::FACING);
 	eraseType (Order::MOVEMENT);
-#ifdef AGGDEBUG
-  fprintf (stderr,"endprocerr");
-  fflush (stderr);
-#endif
+
 
       }
-#ifdef AGGDEBUG
-  fprintf (stderr,"wn ");
-  fflush (stderr);
-#endif
       j = i->begin();
       while (j!=i->end()) {
 	if (ExecuteLogicItem (*j)) {
-#ifdef AGGDEBUG
-  fprintf (stderr,"f00x0r");
-  fflush (stderr);
-#endif
 	  AIEvents::AIEvresult tmp = *j;
 	  i->erase(j);
 	  retval=true;
 	  i->push_back (tmp);
-#ifdef AGGDEBUG
-  fprintf (stderr,"endf00x0r");
-  fflush (stderr);
-#endif
 	  break; 
 	}else {
 	  j++;
 	}
       }
-#ifdef AGGDEBUG
-  fprintf (stderr,"endwn ");
-  fflush (stderr);
-#endif
 
     }
   }
   return retval;
 }
 
-
+bool AggressiveAI::ProcessCurrentFgDirective(Flightgroup * fg) {
+  bool retval=false;
+  if (fg !=NULL) {
+    Unit * leader = fg->leader.GetUnit();
+    if (fg->directive!=last_directive) {
+      eraseType (Order::FACING);
+      eraseType (Order::MOVEMENT);
+      parent->Target(NULL);
+    }
+    if (fg->directive==string("a")) {
+      Unit * targ = fg->leader.GetUnit();
+      targ = targ!=NULL?targ->Target():NULL;
+      if (targ) {
+	Vector vec;
+	if (parent->InRange (targ,vec))
+	  parent->Target (targ);
+      }
+    }else if (fg->directive==string("f")) {
+      retval=true;
+      if (leader!=NULL) {
+	if (fg->directive!=last_directive) {
+	  float left= parent->getFgSubnumber()%2?1:-1;
+	  static float esc_percent= XMLSupport::parse_float(vs_config->getVariable ("AI",
+										    "Targetting",
+										    "EscortDistance",
+										    "1.4"));
+	  float dist=esc_percent*(1+parent->getFgSubnumber()/2)*left*(parent->rSize()+leader->rSize());
+	  Order * ord = new Orders::FormUp(Vector(dist,0,-fabs(dist)));
+	  ord->SetParent (parent);
+	  ReplaceOrder (ord);
+	  ord = new Orders::FaceDirection(dist*2);
+	  ord->SetParent (parent);
+	  ReplaceOrder (ord);
+	}
+      }
+      for (unsigned int i=0;i<suborders.size();i++) {
+	suborders[i]->AttachSelfOrder (leader);
+      }
+    }else if (fg->directive==string("h")) {
+      if (fg->directive!=last_directive&&leader) {
+	Unit * th;
+	if ((th=leader->Threat())) {
+	  Vector vec;
+	  if (parent->InRange(th,vec)) {
+	    parent->Target(th);
+	  }
+	}
+      }
+    } 
+    last_directive=fg->directive;
+  } 
+  return retval;
+}
+void AggressiveAI::ReCommandWing(Flightgroup * fg) {
+  static float time_to_recommand_wing = XMLSupport::parse_float(vs_config->getVariable ("AI",
+											"Targetting",
+											"TargetCommandierTime",
+											"100"));
+  if (fg!=NULL) {
+    Unit* lead;
+    if (NULL!=(lead=fg->leader.GetUnit())) {
+      if (lead->getFgSubnumber()>=parent->getFgSubnumber()) {
+	if (float(rand())/RAND_MAX<SIMULATION_ATOM/time_to_recommand_wing) {
+	  fg->leader.SetUnit(parent);
+	  fg->directive = (parent->FShieldData()<.2||parent->RShieldData()<.2)?string("h"):string("b");
+	}
+      }
+    }
+  }
+}
 void AggressiveAI::Execute () {  
-#ifdef AGRDEBUG
-  fprintf (stderr,"FirE x%x %x ",this,parent);
-  fflush (stderr);
-#endif
+  Flightgroup * fg=parent->getFlightgroup();
+  ReCommandWing(fg);
   FireAt::Execute();
-#ifdef AGRDEBUG
-  fprintf (stderr," Aggex");
-  fflush (stderr);
-#endif
+  if (!ProcessCurrentFgDirective (fg)) {
 
   if (
 #if 1
       curinter==INTRECOVER||//this makes it so only interrupts may not be interrupted
 #endif
       curinter==INTNORMAL) {
-
-#ifdef AGGDEBUG
-  fprintf (stderr," curint ");
-  fflush (stderr);
-#endif
-
     if ((curinter = (ProcessLogic (interrupts, true)?INTERR:curinter))==INTERR) {
-#ifdef AGGDEBUG
-  fprintf (stderr," proclogcomp%d ",curinter);
-  fflush (stderr);
-#endif
       logic.curtime=interrupts.maxtime;//set it to the time allotted
     }
   }
   //  if (parent->getAIState()->queryType (Order::FACING)==NULL&&parent->getAIState()->queryType (Order::MOVEMENT)==NULL) { 
   if (queryType (Order::FACING)==NULL&&queryType (Order::MOVEMENT)==NULL) { 
-#ifdef AGGDEBUG
-  fprintf (stderr,"nultype ");
-  fflush (stderr);
-#endif    
      ProcessLogic(logic);
      curinter=(curinter==INTERR)?INTRECOVER:INTNORMAL;
   } else {
     if ((--logic.curtime)==0) {
-#ifdef AGGDEBUG
-  fprintf (stderr,"erase ");
-  fflush (stderr);
-#endif    
       curinter=(curinter==INTERR)?INTRECOVER:INTNORMAL;
       //parent->getAIState()->eraseType (Order::FACING);
       //parent->getAIState()->eraseType (Order::MOVEMENT);
       eraseType (Order::FACING);
       eraseType (Order::MOVEMENT);
-#ifdef AGGDEBUG
-  fprintf (stderr,"erasproclog ");
-  fflush (stderr);
-#endif          
       ProcessLogic (logic);
       logic.curtime = logic.maxtime;      
     }
+  }
   }
 #ifdef AGGDEBUG
   fprintf (stderr,"endagg");

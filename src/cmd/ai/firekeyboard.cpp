@@ -10,6 +10,7 @@
 #include "audiolib.h"
 #include "config_xml.h"
 #include "cmd/images.h"
+#include "cmd/script/flightgroup.h"
 FireKeyboard::FireKeyboard (unsigned int whichplayer, unsigned int whichjoystick): Order (WEAPON,0){
   this->whichjoystick = whichjoystick;
   this->whichplayer=whichplayer;
@@ -200,6 +201,46 @@ void FireKeyboard::NearestTargetKey(int, KBSTATE k) {
   if (g().neartargetkey!=PRESS)
     g().neartargetkey = k;
 
+}
+void DoSpeech (Unit * un, const string &speech) {
+  string myname ("[Static]");
+  if (un) {
+    myname= un->name;
+  }
+  mission->msgcenter->add ("game","all",myname+string(": ")+speech);
+}
+static void LeadMe (string directive, string speech) {
+  Unit * un= _Universe->AccessCockpit()->GetParent();
+  if (un!=NULL) {
+    DoSpeech (un, speech);
+    Flightgroup * fg = un->getFlightgroup();
+    if (fg) {
+      if (fg->leader.GetUnit()!=un) {
+	fg->leader.SetUnit (un);
+      }
+      fg->directive = directive;
+    }
+  }
+}
+void FireKeyboard::AttackTarget (int, KBSTATE k) {
+  if (k==PRESS) {
+    LeadMe ("a","Attack my target!");
+  }
+}
+void FireKeyboard::HelpMeOut (int, KBSTATE k) {
+  if (k==PRESS) {
+    LeadMe ("h","Help me out!");
+  }
+}
+void FireKeyboard::FormUp (int, KBSTATE k) {
+  if (k==PRESS) {
+    LeadMe ("f","Form on my wing.");
+  }
+}
+void FireKeyboard::BreakFormation(int, KBSTATE k) {
+  if (k==PRESS) {
+    LeadMe ("b","Break formation and open fire!");
+  }
 }
 void FireKeyboard::ThreatTargetKey(int, KBSTATE k) {
   if (g().threattargetkey!=PRESS)
@@ -426,13 +467,13 @@ void FireKeyboard::ProcessCommMessage (class CommunicationMessage&c){
     }
     resp.push_back(c);
     AdjustRelationTo(un,c.getCurrentState()->messagedelta);
-    mission->msgcenter->add ("game","all",un->name+string(": ")+c.getCurrentState()->message);
+    DoSpeech (un,c.getCurrentState()->message);
     if (parent==_Universe->AccessCockpit()->GetParent()) {
       _Universe->AccessCockpit()->SetCommAnimation (c.ani);
     }
     refresh_target=true;
   }else {
-    mission->msgcenter->add ("game","all",string("[static]: ")+c.getCurrentState()->message);
+    DoSpeech (NULL,c.getCurrentState()->message);
     if (parent==_Universe->AccessCockpit()->GetParent()) {
       Animation Statuc ("static.ani");
       _Universe->AccessCockpit()->SetCommAnimation (&Statuc);
@@ -555,7 +596,7 @@ void FireKeyboard::Execute () {
 
 	if (mymsg==NULL) {
 	  CommunicationMessage c(parent,targ,i,NULL,sex);
-	  mission->msgcenter->add ("game","all",string("[Outgoing]")+string(": ")+c.getCurrentState()->message);
+	  DoSpeech (parent,c.getCurrentState()->message);
 	  if (!AUDIsPlaying (c.getCurrentState()->GetSound(c.sex))) {
 	    AUDStartPlaying(c.getCurrentState()->GetSound(c.sex));
 	  }
@@ -564,7 +605,7 @@ void FireKeyboard::Execute () {
 	  FSM::Node * n = mymsg->getCurrentState();
 	  if (i<n->edges.size()) {
 	    CommunicationMessage c(parent,targ,*mymsg,i,NULL,sex);
-	    mission->msgcenter->add ("game","all",string("[Outgoing]")+string(": ")+c.getCurrentState()->message);
+	    DoSpeech (parent,c.getCurrentState()->message);
 	    if (!AUDIsPlaying (c.getCurrentState()->GetSound(c.sex))) {
 	      AUDStartPlaying(c.getCurrentState()->GetSound(c.sex));
 	    }

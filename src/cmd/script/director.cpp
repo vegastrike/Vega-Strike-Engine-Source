@@ -58,7 +58,7 @@
 #ifdef HAVE_PYTHON
 #include "Python.h"
 #endif
-
+#include "flightgroup.h"
 //#include "vegastrike.h"
 
 extern bool have_yy_error;
@@ -349,7 +349,7 @@ void Mission::DirectorShipDestroyed(Unit *unit){
     printf("no ships left in fg %s\n",fg->name.c_str());
     if(fg->nr_waves_left>0){
       //      printf("relaunching wave %d of fg %s\n",fg->waves-fg->nr_waves_left,fg->name.c_str());
-      sprintf(buf,"Relaunching %s wave %d of %d",fg->name.c_str(),fg->waves-fg->nr_waves_left,fg->waves);
+      sprintf(buf,"Relaunching %s wave",fg->name.c_str());
       mission->msgcenter->add("game","all",buf);
 
       // launch new wave
@@ -362,8 +362,13 @@ void Mission::DirectorShipDestroyed(Unit *unit){
 	printf("found an orderlist\n");
 	fg->orderlist=order->getOrderList();
       }
+      CreateFlightgroup cf;
+      cf.fg = fg;
 
-      call_unit_launch(fg,UNITPTR,string(""));
+      cf.fg->pos=unit->Position();
+      cf.waves = fg->nr_waves_left;
+      //      cf.type = fg->type;
+      call_unit_launch(&cf,UNITPTR,string(""));
     }
     else{
       mission->msgcenter->add("game","all","Flightgroup "+fg->name+" destroyed");

@@ -17,6 +17,7 @@
 #include "images.h"
 #include "gfx/halo.h"
 #include "gfx/animation.h"
+#include "cmd/script/flightgroup.h"
 PlanetaryOrbit:: PlanetaryOrbit(Unit *p, double velocity, double initpos, const Vector &x_axis, const Vector &y_axis, const Vector & centre, Unit * targetunit) : Order(MOVEMENT,0), parent(p), velocity(velocity), theta(initpos), x_size(x_axis), y_size(y_axis) { 
   parent->SetResolveForces(false);
     double delta = x_size.Magnitude() - y_size.Magnitude();
@@ -29,10 +30,8 @@ PlanetaryOrbit:: PlanetaryOrbit(Unit *p, double velocity, double initpos, const 
       focus = y_size*(-delta/y_size.Magnitude());
     }
     if (targetunit) {
-      type = (MOVEMENT);subtype=( STARGET);
-      UnitCollection tmpcoll;
-      tmpcoll.prepend (targetunit);
-      AttachOrder (&tmpcoll);
+      type = (MOVEMENT);subtype=( SSELF);
+      AttachSelfOrder (targetunit);
     } else {
       type = (MOVEMENT);subtype =(SLOCATION);
       AttachOrder (centre);
@@ -47,16 +46,14 @@ void PlanetaryOrbit::Execute() {
   Vector x_offset = cos(theta) * x_size;
   Vector y_offset = sin(theta) * y_size;
   Vector origin (targetlocation);
-  if (subtype&STARGET) {
-    if (targets) {
-      UnitCollection::UnitIterator tmp = targets->createIterator();
-      if (tmp.current()) {
-	origin = tmp.current()->Position();
+  if (subtype&SSELF) {
+      Unit * tmp = group.GetUnit();
+      if (tmp) {
+	origin = tmp->Position();
       }else {
 	done = true;
 	return;
       }
-    }
   }
   //unuseddouble radius =  sqrt((x_offset - focus).MagnitudeSquared() + (y_offset - focus).MagnitudeSquared());
   theta+=velocity*SIMULATION_ATOM;
@@ -106,7 +103,7 @@ void Planet::beginElement(Vector x,Vector y,float vely, const Vector & rotvel, f
     if (isunit==true) {
       Unit *sat_unit=NULL;
       Flightgroup *fg = getStaticBaseFlightgroup(faction);
-      satellites.prepend(sat_unit=new Unit (filename, false, faction,"",fg,fg->ship_nr));
+      satellites.prepend(sat_unit=new Unit (filename, false, faction,"",fg,fg->nr_ships-1));
       sat_unit->setFullname(fullname);
       un_iter satiterator (satellites.createIterator());
       satiterator.current()->SetAI (new PlanetaryOrbit (satiterator.current(),vely,pos,x,y, Vector (0,0,0), this)) ;

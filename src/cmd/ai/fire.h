@@ -18,7 +18,7 @@ protected:
   float gunspeed;
   float gunrange;
   void FireWeapons (bool shouldfire);
-  bool DealWithMultipleTargets();
+  //  bool DealWithMultipleTargets();
   void ChooseTargets(int num, bool force=false);//chooses n targets and puts the best to attack in unit's target container
 public:
   FireAt (float reaction_time, float aggressivitylevel);//weapon prefs?

@@ -3,6 +3,8 @@ SUBDIRS = c_alike
 INCLUDES = -I../ -I../..
 
 libscript_a_SOURCES =				\
+	flightgroup.cpp				\
+	flightgroup.h				\
 	mission.cpp				\
 	mission.h				\
 	director.cpp				\

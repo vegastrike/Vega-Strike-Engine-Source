@@ -38,7 +38,7 @@
 #include "vegastrike.h"
 #include "vs_globals.h"
 #include "msgcenter.h"
-
+#include "cmd/container.h"
 class Unit;
 class Order;
 class MessageCenter;
@@ -64,37 +64,7 @@ class varInst;
 typedef vector<varInst *> olist_t;
 typedef map<string,varInst *> omap_t;
 std::string varToString (varInst * s);
-class Flightgroup {
- public:
-  Texture * squadLogo;//null if not there
-  string name; // flightgroup name
-  string faction;
-  string type; // unit type
-  string ainame; // .agg.xml and .int.xml get appended to this
-  int terrain_nr;// which terrain to use. -1 for normal unit -2 for mission ter
-  enum {UNIT,VEHICLE, BUILDING} unittype;
-  int waves,nr_ships; // number of waves, number of ships per wave
-  float pos[3];
-  float rot[3];
-
-  int flightgroup_nr; // running fg number
-  int ship_nr; // total ships nr
-
-  int nr_ships_left;
-  int nr_waves_left;
-
-  easyDomNode *domnode;
-
-  map<string,string> ordermap;
-  olist_t *orderlist;
-  Flightgroup ();
-  Flightgroup (Flightgroup & other) {
-    *this = other;
-  }
-  Flightgroup& operator =(Flightgroup &);
-  ~Flightgroup();
-};
-
+class Flightgroup;
 #ifndef VS_MIS_SEL
 
 /* *********************************************************** */
@@ -259,6 +229,10 @@ enum callback_module_unit_type {
     CMT_UNIT_getOrientationP ,
     CMT_UNIT_getOrder ,
     CMT_UNIT_removeFromGame ,
+    CMT_UNIT_getFgLeader,
+    CMT_UNIT_setFgLeader,
+    CMT_UNIT_getFgDirective,
+    CMT_UNIT_setFgDirective,
     CMT_UNIT_getFgID ,
     CMT_UNIT_getFgName ,
     CMT_UNIT_getFgSubnumber ,
@@ -277,6 +251,7 @@ enum callback_module_unit_type {
   CMT_UNIT_getFgId ,
   CMT_UNIT_communicateTo ,
   CMT_UNIT_commAnimation ,
+  CMT_UNIT_switchFg ,
   CMT_UNIT_toxml 
 };
 
@@ -427,6 +402,7 @@ class Mission {
   class Briefing * briefing;
  public:
   Mission(char *configfile);
+  void AddFlightgroup(Flightgroup * fg);
   void initMission();
   ///alex Please help me make this function...this is called between mission loops
   ~Mission();
@@ -436,7 +412,7 @@ class Mission {
 
   vector<Flightgroup *> flightgroups;
 
-  Flightgroup *findFlightgroup(string fg_name);
+  Flightgroup *findFlightgroup(const string &fg_name, const string &faction);
 
   string getVariable(string name,string defaultval);
 
@@ -546,8 +522,8 @@ void  deleteVarInst(varInst *vi,bool del_local=false);
   void doFlightgroups(easyDomNode *node);
   void doOrder(easyDomNode *node,Flightgroup *fg);
   void checkFlightgroup(easyDomNode *node);
-  bool doPosition(easyDomNode *node,float pos[3]);
-  bool doRotation(easyDomNode *node,float rot[3]);
+  bool doPosition(easyDomNode *node,float pos[3],class CreateFlightgroup *);
+  bool doRotation(easyDomNode *node,float rot[3],class CreateFlightgroup *);
   void doOrigin(easyDomNode *node);
   void doSettings(easyDomNode *node);
 
@@ -686,7 +662,8 @@ omap_t* getOMapObject(missionNode *node,int mode,varInst *ovi);
  Unit *getUnitObject(missionNode *node,int mode,varInst *ovi);
 
  // void call_unit_launch(missionNode *node,int mode,string name,string faction,string type,string ainame,int nr_ships,Vector &pos);
- Unit * call_unit_launch(Flightgroup *fg, int type/*clsptr type*/, const std::string &destinations);
+ Unit * call_unit_launch(class CreateFlightgroup *fg, int type/*clsptr type*/, const std::string &destinations);
+
  void call_unit_toxml(missionNode *node,int mode,varInst *ovi);
 
  varInst *call_string(missionNode *node,int mode);

@@ -74,6 +74,7 @@ FireAt::~FireAt() {
 #endif
 
 }
+#if 0
 bool FireAt::DealWithMultipleTargets () {
   UnitCollection::UnitIterator iter (targets->createIterator());    
   if (!iter.current()) {
@@ -88,6 +89,7 @@ bool FireAt::DealWithMultipleTargets () {
   }
   return false;
 }
+#endif
 void FireAt::FireWeapons(bool shouldfire) {
   if (shouldfire) {
     if ((float(rand())/RAND_MAX)<missileprobability*SIMULATION_ATOM) {
@@ -132,8 +134,8 @@ void FireAt::Execute () {
   }
 
   bool shouldfire=false;
-  if (targets) 
-    shouldfire |=DealWithMultipleTargets();
+  //  if (targets) 
+  //    shouldfire |=DealWithMultipleTargets();
 
   if ((targ = parent->Target())) {
     bool istargetjumpableplanet = targ->isUnit()==PLANETPTR;

@@ -52,9 +52,7 @@ protected:
   ///Whether or not this order is done
   bool done;
   ///If this order applies to a group of units (as in form up with this group)
-  UnitCollection *group;
-  ///If this order applies to a group of targets (somewhat deprecated, use parent->Target() now
-  UnitCollection *targets;
+  UnitContainer group;
   ///If this order applies to a physical location in world space
   Vector targetlocation;
   ///The queue of suborders that will be executed in parallel according to bit code
@@ -72,9 +70,9 @@ public:
   enum ORDERTYPES { MOVEMENT =1, FACING = 2, WEAPON = 4, CLOAKING=8, ALLTYPES=(1|2|4|8)};
   enum SUBORDERTYPES {SLOCATION=1, STARGET=2, SSELF=4};
   ///The default constructor setting everything to NULL and no dependency on order
-  Order (): targetlocation(0,0,0){parent = NULL;group =targets=NULL;type=0;subtype=0,done=false; actionstring=""; }
+  Order (): targetlocation(0,0,0){parent = NULL;type=0;subtype=0,done=false; actionstring=""; }
   ///The constructor that specifies what order dependencies this order has
-  Order(int ttype,int subtype): targetlocation(0,0,0){parent = NULL;group=targets=NULL;type = ttype;done=false; actionstring=""; }
+  Order(int ttype,int subtype): targetlocation(0,0,0){parent = NULL;type = ttype;done=false; actionstring=""; }
   ///The virutal destructor
   virtual ~Order ();
   ///The function that gets called and executes all queued suborders 
@@ -84,11 +82,11 @@ public:
   ///Erases all orders that bitwise OR with that type
   void eraseType (unsigned int type);
   ///Attaches a group of targets to this order (used for strategery-type games)
-  bool AttachOrder (UnitCollection *targets);
+  bool AttachOrder (Unit *targets);
   ///Attaches a navigation point to this order
   bool AttachOrder (Vector target);
   ///Attaches a group (form up) to this order
-  bool AttachSelfOrder (UnitCollection *targets=NULL);
+  bool AttachSelfOrder (Unit *targets);
   ///Enqueues another order that will be executed (in parallel perhaps) when next void Execute() is called
   Order* EnqueueOrder (Order * ord);
   ///Replaces the first order of that type in the order queue

@@ -47,7 +47,7 @@
 #include "cmd/ai/missionscript.h"
 #include "cmd/enhancement.h"
 #include "cmd/cont_terrain.h"
-
+#include "cmd/script/flightgroup.h"
 #include "force_feedback.h"
 
 using namespace std;
@@ -446,8 +446,8 @@ void createObjects(std::vector <std::string> &fighter0name, std::vector <StarSys
     Flightgroup *fg=*siter;
     string fg_name=fg->name;
     string fullname=fg->type;// + ".xunit";
-    int fg_terrain = fg->terrain_nr;
-    bool isvehicle = (fg->unittype==Flightgroup::VEHICLE);
+    //    int fg_terrain = fg->terrain_nr;
+    //    bool isvehicle = (fg->unittype==Flightgroup::VEHICLE);
     strcpy(fightername,fullname.c_str());
     string ainame=fg->ainame;
     float fg_radius=0.0;
@@ -456,9 +456,9 @@ void createObjects(std::vector <std::string> &fighter0name, std::vector <StarSys
       numf++;
       Vector pox (1000+150*a,100*a,100);
       
-      pox.i=fg->pos[0]+s*fg_radius*3;
-      pox.j=fg->pos[1]+s*fg_radius*3;
-      pox.k=fg->pos[2]+s*fg_radius*3;
+      pox.i=fg->pos.i+s*fg_radius*3;
+      pox.j=fg->pos.j+s*fg_radius*3;
+      pox.k=fg->pos.k+s*fg_radius*3;
       //	  cout << "loop pos " << fg_name << " " << pox.i << pox.j << pox.k << " a=" << a << endl;
       
       if (pox.i==pox.j&&pox.j==pox.k&&pox.k==0) {
@@ -470,7 +470,7 @@ void createObjects(std::vector <std::string> &fighter0name, std::vector <StarSys
       
       
       tmptarget[a]=_Universe->GetFaction(fg->faction.c_str()); // that should not be in xml?
-      
+      int fg_terrain=-1;
       //	  cout << "before unit" << endl;
       if (fg_terrain==-1||(fg_terrain==-2&&myterrain==NULL)) {
 	string modifications ("");
@@ -505,7 +505,9 @@ void createObjects(std::vector <std::string> &fighter0name, std::vector <StarSys
 	}
 
       }else {
+	  bool isvehicle=false;
 	if (fg_terrain==-2) {
+
 	  fighters[a]= new Building (myterrain,isvehicle,fightername,false,tmptarget[a],string(""),fg);
 	}else {
 	  

@@ -48,7 +48,7 @@
 #include "mission.h"
 #include "easydom.h"
 #include "msgcenter.h"
-
+#include "flightgroup.h"
 #include "vs_globals.h"
 #include "config_xml.h"
 #include "gfx/cockpit.h"
@@ -57,6 +57,7 @@
 #include "cmd/nebula.h"
 #include "hashtable.h"
 #include "gfx/animation.h"
+#include "flightgroup.h"
 //#include "vegastrike.h"
 extern vector <char *> ParseDestinations (const string &value);
 /* *********************************************************** */
@@ -197,11 +198,9 @@ varInst *Mission::call_unit(missionNode *node,int mode){
       }
     }
     missionNode *pos_node[3];
-    float pos[3];
-    for(int i=0;i<3;i++){
-      pos_node[i]=getArgument(node,mode,6+i);
-      pos[i]=checkFloatExpr(pos_node[i],mode);
-    }
+    Vector pos (getFloatArg (node,mode,6),
+		getFloatArg (node,mode,7),
+		getFloatArg (node,mode,8));
     if (node->subnodes.size()>9) {
       logo_tex=getStringArgument (node,mode,9);
       if (node->subnodes.size()>10) {
@@ -221,46 +220,40 @@ varInst *Mission::call_unit(missionNode *node,int mode){
       string faction_string=*((string *)faction_vi->object);
       string type_string=*((string *)type_vi->object);
       string ai_string=*((string *)ai_vi->object);
-     
-      Flightgroup *fg=new Flightgroup;
-      if (!logo_tex.empty()) {
-	
-	if (logo_alp.empty()) {
-	  fg->squadLogo=new Texture (logo_tex.c_str(),0,MIPMAP);
-	}else {
-	  fg->squadLogo=new Texture (logo_tex.c_str(),logo_alp.c_str(),0,MIPMAP);
-	}
-      }
-      fg->name=name_string;
-      fg->type=type_string;
-      fg->ainame=ai_string;
-      fg->faction=faction_string;
-      fg->unittype=Flightgroup::UNIT;
-      fg->terrain_nr=-1;
-      fg->waves=nr_of_waves;
-      fg->nr_ships=nr_of_ships;
-      fg->pos[0]=pos[0];
-      fg->pos[1]=pos[1];
-      fg->pos[2]=pos[2];
+      CreateFlightgroup cf;
+      cf.fg = Flightgroup::newFlightgroup (name_string,
+					   type_string,
+					   faction_string,
+					   ai_string,
+					   nr_of_ships,
+					   nr_of_waves,
+					   logo_tex,
+					   logo_alp,
+					   this);
+
+      //      cf.fg->ainame=ai_string;
+      cf.unittype=CreateFlightgroup::UNIT;
+      cf.terrain_nr=-1;
+      cf.waves=nr_of_waves;
+      cf.nr_ships=nr_of_ships;
+      cf.fg->pos=pos;
       for(int i=0;i<3;i++){
-	fg->rot[i]=0.0;
+	cf.rot[i]=0.0;
       }
-      fg->nr_ships_left=fg->nr_ships;
-      fg->nr_waves_left=fg->waves-1;
-      fg->orderlist=NULL;
 #ifdef ORDERDEBUG
   fprintf (stderr,"cunl%x",this);
   fflush (stderr);
 #endif
-	  Unit *tmp= call_unit_launch(fg,clstyp,destinations);
+	  Unit *tmp= call_unit_launch(&cf,clstyp,destinations);
+	  number_of_ships+=nr_of_ships;
 	  if (!my_unit) {
 		my_unit=tmp;
 	  }
 #ifdef ORDERDEBUG
-  fprintf (stderr,"ecun");
-  fflush (stderr);
+	  fprintf (stderr,"ecun");
+	  fflush (stderr);
 #endif
-
+	  
     }
 
     deleteVarInst(name_vi);
@@ -270,7 +263,7 @@ varInst *Mission::call_unit(missionNode *node,int mode){
     viret=newVarInst(VI_TEMP);
     viret->type=VAR_OBJECT;
     viret->objectname="unit";
-    
+
     viret->object=(void *)my_unit;
 
     debug(3,node,mode,"unit getUnit: ");
@@ -764,6 +757,47 @@ varInst *Mission::call_unit(missionNode *node,int mode){
 	viret->objectname="string";
       }
     }
+    else if(method_id==CMT_UNIT_getFgLeader){
+      Unit * ret_unit=NULL;
+      if(mode==SCRIPT_RUN){
+	ret_unit = (my_unit->getFlightgroup()!=NULL)?my_unit->getFlightgroup()->leader.GetUnit():my_unit;
+	if (ret_unit==NULL) {
+	  ret_unit=my_unit;
+	}
+      }
+      viret=newVarInst(VI_TEMP);
+      viret->type=VAR_OBJECT;
+      viret->objectname="unit";
+      viret->object=(void *)ret_unit;
+    }
+    else if(method_id==CMT_UNIT_setFgLeader){
+      Unit * un=getUnitArg (node,mode,1);
+      if(mode==SCRIPT_RUN){
+	if (my_unit->getFlightgroup()!=NULL) {
+	  my_unit->getFlightgroup()->leader.SetUnit(un);
+	}
+      }
+      viret=newVarInst(VI_TEMP);
+      viret->type=VAR_VOID;
+    }
+    else if(method_id==CMT_UNIT_getFgDirective){
+      string fgdir ("b");
+
+      if(mode==SCRIPT_RUN){
+	fgdir = (my_unit->getFlightgroup()!=NULL)?my_unit->getFlightgroup()->directive:string("b");
+      }
+      viret=call_string_new(node,mode,fgdir);
+    }
+    else if(method_id==CMT_UNIT_setFgDirective){
+      string inp = getStringArgument (node,mode,1);
+      if(mode==SCRIPT_RUN){
+	if (my_unit->getFlightgroup()!=NULL) {
+	  my_unit->getFlightgroup()->directive = inp;
+	}
+      }
+      viret=newVarInst(VI_TEMP);
+      viret->type=VAR_VOID;
+    }
     else if(method_id==CMT_UNIT_getFgSubnumber){
       int num=0;
       if(mode==SCRIPT_RUN){
@@ -998,6 +1032,27 @@ varInst *Mission::call_unit(missionNode *node,int mode){
       viret->type=VAR_VOID;
       //return viret;
     }
+    else if(method_id==CMT_UNIT_switchFg){
+      string arg = getStringArgument(node,mode,1);
+      if(mode==SCRIPT_RUN){
+	string type= my_unit->name;
+	int nr_waves_left=0;
+	int nr_ships=1;
+	string order("default");
+	Flightgroup *fg = my_unit->getFlightgroup();
+	if (fg) {
+	  type = fg->type;
+	  nr_waves_left = fg->nr_waves_left;
+	  nr_ships =1;
+	  fg->Decrement(my_unit);
+	  order = fg->ainame;
+	}
+	fg = Flightgroup::newFlightgroup (arg,type,_Universe->GetFaction(my_unit->faction),order,nr_ships,nr_waves_left,"","",this);
+	my_unit->SetFg (fg,fg->nr_ships_left-1);
+      }
+      viret =newVarInst(VI_TEMP);
+      viret->type=VAR_VOID;
+    }
     else if(method_id==CMT_UNIT_communicateTo){
       Unit *other_unit=getUnitArg(node,mode,1);
       float mood =getFloatArg(node,mode,2);
@@ -1078,9 +1133,9 @@ Unit *Mission::getUnitObject(missionNode *node,int mode,varInst *ovi){
 
 // void call_unit_launch(missionNode *node,int mode,string name,string faction,string type,string ainame,int nr_ships,Vector & pos){
 
-Unit * Mission::call_unit_launch(Flightgroup *fg, int type, const string &destinations){
+Unit * Mission::call_unit_launch(CreateFlightgroup *fg, int type, const string &destinations){
   //  fprintf (stderr,"calling unit launch with Mission 0x%x Flightgroup 0x%x" ,this, fg);
-   int faction_nr=_Universe->GetFaction(fg->faction.c_str());
+   int faction_nr=_Universe->GetFaction(fg->fg->faction.c_str());
    //   printf("faction nr: %d %s\n",faction_nr,fg->faction.c_str());
    Unit **units= new Unit *[fg->nr_ships];
    int u;
@@ -1088,20 +1143,20 @@ Unit * Mission::call_unit_launch(Flightgroup *fg, int type, const string &destin
      Unit * my_unit;
      if (type==PLANETPTR) {
        float radius;
-       char * blah = strdup (fg->type.c_str());
-       char * blooh = strdup (fg->type.c_str());
+       char * blah = strdup (fg->fg->type.c_str());
+       char * blooh = strdup (fg->fg->type.c_str());
        blooh[0]='\0';//have at least 1 char
        blah[0]='\0';
-       sscanf (fg->type.c_str(),"%f %s %s",&radius,blah,blooh);
+       sscanf (fg->fg->type.c_str(),"%f %s %s",&radius,blah,blooh);
        GFXMaterial mat;
        GFXGetMaterial (0,mat);
        my_unit = new Planet (Vector(0,0,0),Vector(0,0,0),0,Vector(0,0,0), 0,0,radius,blah,blooh, ParseDestinations(destinations),Vector(0,0,0),NULL,mat,vector<GFXLightLocal>(),faction_nr,blah);
        free (blah);
        free (blooh);
      }else if (type==NEBULAPTR) {
-       my_unit=new Nebula (fg->type.c_str(),false,faction_nr,fg,u);
+       my_unit=new Nebula (fg->fg->type.c_str(),false,faction_nr,fg->fg,u);
      } else {
-       my_unit=new Unit(fg->type.c_str(),false,faction_nr,string(""),fg,u);
+       my_unit=new Unit(fg->fg->type.c_str(),false,faction_nr,string(""),fg->fg,u);
      }
      units[u]=my_unit;
    }
@@ -1113,15 +1168,15 @@ Unit * Mission::call_unit_launch(Flightgroup *fg, int type, const string &destin
 
      Vector pox;
 
-     pox.i=fg->pos[0]+u*fg_radius*3;
-     pox.j=fg->pos[1]+u*fg_radius*3;
-     pox.k=fg->pos[2]+u*fg_radius*3;
+     pox.i=fg->fg->pos.i+u*fg_radius*3;
+     pox.j=fg->fg->pos.j+u*fg_radius*3;
+     pox.k=fg->fg->pos.k+u*fg_radius*3;
 
      my_unit->SetPosAndCumPos(pox);
 
-     if(fg->ainame[0]!='_'){
-       string ai_agg=fg->ainame+".agg.xml";
-       string ai_int=fg->ainame+".int.xml";
+     if(fg->fg->ainame[0]!='_'){
+       string ai_agg=fg->fg->ainame+".agg.xml";
+       string ai_int=fg->fg->ainame+".int.xml";
 
        char ai_agg_c[1024];
        char ai_int_c[1024];
@@ -1134,13 +1189,13 @@ Unit * Mission::call_unit_launch(Flightgroup *fg, int type, const string &destin
        my_unit->EnqueueAI( new Orders::AggressiveAI (ai_agg_c, ai_int_c));
      }
      else{
-	      string modulename=fg->ainame.substr(1);
+	      string modulename=fg->fg->ainame.substr(1);
 
-	      if(fg->orderlist==NULL){
+	      if(fg->fg->orderlist==NULL){
 		my_unit->EnqueueAI( new AImissionScript(modulename));
 	      }
 	      else{
-		my_unit->EnqueueAI( new AIOrderList(fg->orderlist));
+		my_unit->EnqueueAI( new AIOrderList(fg->fg->orderlist));
 		printf("LAUNCHING a new orderlist ai\n");
 	      }
 	      //fighters[a]->SetAI( new AImissionScript(modulename));
@@ -1156,8 +1211,9 @@ Unit * Mission::call_unit_launch(Flightgroup *fg, int type, const string &destin
      my_unit->Target(NULL);
    }
 
-   msgcenter->add("game","all",(fg->faction+string ("launched ")+fg->name+string(":")+fg->type+string("0-")+XMLSupport::tostring(fg->nr_ships)));
+   msgcenter->add("game","all",(fg->fg->faction+string ("launched ")+fg->fg->name+string(":")+fg->fg->type+string("0-")+XMLSupport::tostring(fg->fg->nr_ships)));
    my_unit= units[0];
+   fg->fg->leader.SetUnit(my_unit);
    delete [] units;
    return my_unit;
 }

@@ -1006,6 +1006,10 @@ void Mission::initCallbackMaps(){
     module_unit_map["getOrientationP"]=CMT_UNIT_getOrientationP ;
     module_unit_map["getOrder"]=CMT_UNIT_getOrder ;
     module_unit_map["removeFromGame"]=CMT_UNIT_removeFromGame ;
+    module_unit_map["getFgDirective"]=CMT_UNIT_getFgDirective ;
+    module_unit_map["setFgDirective"]=CMT_UNIT_setFgDirective ;
+    module_unit_map["getFgLeader"]=CMT_UNIT_getFgLeader ;
+    module_unit_map["setFgLeader"]=CMT_UNIT_setFgLeader ;
     module_unit_map["getFgID"]=CMT_UNIT_getFgId ;
     module_unit_map["getFgId"]=CMT_UNIT_getFgId ;
     module_unit_map["getFgName"]=CMT_UNIT_getFgName ;
@@ -1022,7 +1026,7 @@ void Mission::initCallbackMaps(){
     module_unit_map["getSaveData"]=CMT_UNIT_getSaveData ;
     module_unit_map["communicateTo"]=CMT_UNIT_communicateTo ;
     module_unit_map["commAnimation"]=CMT_UNIT_commAnimation ;
-
+    module_unit_map["switchFg"]=CMT_UNIT_switchFg ;
 
 
 

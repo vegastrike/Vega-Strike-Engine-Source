@@ -216,8 +216,16 @@ void Tab () {
 
 void readColorGrads (vector <string> &entity,const char * file) {
   FILE * fp = fopen (file,"r");
-  if (!fp)
+  if (!fp) {
+    printf ("Failed to load %s",file);
+    GradColor (g);
+    g.minrad=0;
+    g.r=g.g=g.b=.9;
+    g.variance=.1;
+    entity.push_back ("white_star.png");
+    colorGradiant.push_back (g);
     return;
+  }
   char input_buffer[1000];
   char output_buffer[1000];
   GradColor g;

@@ -422,6 +422,7 @@ public:
   float PriceCargo (const std::string &s);
   void SwapOutHalos();
   void SwapInHalos();
+  void SetFg (Flightgroup * fg, int fg_snumber);
   UnitImages &GetImageInformation();
   Cargo & GetCargo (unsigned int i);
   ///below function returns NULL if not found

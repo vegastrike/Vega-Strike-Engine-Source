@@ -7,6 +7,7 @@
 #include "cmd/unit.h"
 using namespace Orders;
 #include "lin_time.h"
+#include "cmd/script/flightgroup.h"
 /**
  * the time we need to start slowing down from now calculation (if it's in this frame we'll only accelerate for partial
  * vslowdown - decel * t = 0               t = vslowdown/decel
@@ -303,3 +304,68 @@ FaceTarget::~FaceTarget() {
   fflush (stderr);
 #endif
 }
+
+
+
+void FaceDirection::SetParent(Unit * un) {
+  if (un->getFlightgroup()) {
+    AttachSelfOrder (un->getFlightgroup()->leader.GetUnit());
+  }
+  ChangeHeading::SetParent(un);
+}
+FaceDirection::FaceDirection (float dist, bool fini, int accuracy):ChangeHeading(Vector(0,0,1),accuracy),finish(fini) {
+  type=FACING;
+  subtype|=SSELF;
+  this->dist=dist;
+}
+
+void FaceDirection::Execute() {
+  Unit * target = group.GetUnit();
+  if (target==NULL){
+    done = finish;
+    return;
+  }
+  Vector face (target->GetTransformation()[8],  target->GetTransformation()[9], target->GetTransformation()[10]);
+
+  if ((parent->Position()-target->Position()).Magnitude()>dist) {
+    SetDest (target->Position());
+  }else {
+    SetDest(parent->Position()+face);
+  }
+  ChangeHeading::Execute();
+  if (!finish) {
+    ResetDone();
+  } 
+}
+
+
+FaceDirection::~FaceDirection() {
+#ifdef ORDERDEBUG
+  fprintf (stderr,"ft%x",this);
+  fflush (stderr);
+#endif
+}
+
+
+void FormUp::SetParent(Unit * un) {
+  if (un->getFlightgroup()) {
+    AttachSelfOrder (un->getFlightgroup()->leader.GetUnit());
+  }
+  MoveTo::SetParent(un);
+}
+
+FormUp::FormUp (const Vector & pos):MoveTo (Vector(0,0,0),false,1000), Pos(pos) { 
+  subtype |= SSELF;
+}
+void FormUp::SetPos (const Vector &v) {
+  Pos=v;
+}
+void FormUp::Execute() {
+  Unit * targ = group.GetUnit();
+  if (targ) {
+    MoveTo::SetDest (Transform (targ->GetTransformation(),Pos));
+  }
+  MoveTo::Execute();
+}
+
+FormUp::~FormUp() {}

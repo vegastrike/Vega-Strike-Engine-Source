@@ -9,6 +9,7 @@
 #include "cmd/ai/aggressive.h"
 #include "cmd/ai/script.h"
 #include "cmd/ai/missionscript.h"
+#include "cmd/script/flightgroup.h"
 void LoadMission (const char * mission_name, bool loadFirstUnit) {
   char * tmp = strdup (mission_name);
   active_missions.push_back (new Mission(tmp));
@@ -23,8 +24,8 @@ void LoadMission (const char * mission_name, bool loadFirstUnit) {
     Flightgroup *fg=*siter;
     string fg_name=fg->name;
     string fullname=fg->type;
-    int fg_terrain = fg->terrain_nr;
-    bool isvehicle = (fg->unittype==Flightgroup::VEHICLE);
+    //    int fg_terrain = fg->terrain_nr;
+    //    bool isvehicle = (fg->unittype==Flightgroup::VEHICLE);
     strcpy(fightername,fullname.c_str());
     int a=0;
     int tmptarget=0;
@@ -35,9 +36,9 @@ void LoadMission (const char * mission_name, bool loadFirstUnit) {
 	  
 	  Vector pox;
 
-	  pox.i=fg->pos[0]+s*fg_radius*3;
-	  pox.j=fg->pos[1]+s*fg_radius*3;
-	  pox.k=fg->pos[2]+s*fg_radius*3;
+	  pox.i=fg->pos.i+s*fg_radius*3;
+	  pox.j=fg->pos.i+s*fg_radius*3;
+	  pox.k=fg->pos.i+s*fg_radius*3;
 	  if (pox.i==pox.j&&pox.j==pox.k&&pox.k==0) {
 	    pox.i=rand()*10000./RAND_MAX-5000;
 	    pox.j=rand()*10000./RAND_MAX-5000;

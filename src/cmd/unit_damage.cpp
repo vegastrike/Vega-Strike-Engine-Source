@@ -18,6 +18,7 @@
 #include "cmd/script/mission.h"
 #include "missile.h"
 #include "cmd/ai/communication.h"
+#include "cmd/script/flightgroup.h"
 //#define DESTRUCTDEBUG
 static list<Unit*> Unitdeletequeue;
 void Unit::UnRef() {
@@ -157,6 +158,11 @@ void Unit::Kill(bool erasefromsave) {
   }
   if (ucref==0) {
     Unitdeletequeue.push_back(this);
+  if (flightgroup) {
+    if (flightgroup->leader.GetUnit()==this) {
+      flightgroup->leader.SetUnit(NULL);
+    }
+  }
 
 #ifdef DESTRUCTDEBUG
     fprintf (stderr,"%s 0x%x - %d\n",name.c_str(),this,Unitdeletequeue.size());

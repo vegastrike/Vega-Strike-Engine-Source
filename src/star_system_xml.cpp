@@ -21,7 +21,7 @@
 #include "cmd/asteroid.h"
 #include "cmd/enhancement.h"
 #include "main_loop.h"
-
+#include "cmd/script/flightgroup.h"
 void StarSystem::beginElement(void *userData, const XML_Char *name, const XML_Char **atts) {
   ((StarSystem*)userData)->beginElement(name, AttributeList(atts));
 }
@@ -219,28 +219,22 @@ static void GetLights (const vector <GFXLight> &origlights, vector <GFXLightLoca
 void setStaticFlightgroup (vector<Flightgroup *> &fg, const std::string &nam,int faction) {
   while (faction>=(int)fg.size()) {
     fg.push_back(new Flightgroup());
-    fg.back()->ship_nr=0;
+    fg.back()->nr_ships=0;
   }
-  if (fg[faction]->ship_nr==0) {
-    fg[faction]->pos[0]=fg[faction]->pos[1]=fg[faction]->pos[2]=0;
-    fg[faction]->rot[0]=fg[faction]->rot[1]=fg[faction]->rot[2]=0;
-    fg[faction]->waves=1;
+  if (fg[faction]->nr_ships==0) {
+    fg[faction]->flightgroup_nr=faction;
+    fg[faction]->pos.i=fg[faction]->pos.j=fg[faction]->pos.k=0;
+    //    fg[faction]->rot[0]=fg[faction]->rot[1]=fg[faction]->rot[2]=0;
     fg[faction]->nr_ships=0;
-    fg[faction]->unittype=Flightgroup::UNIT;
-    fg[faction]->terrain_nr=-1;
     fg[faction]->ainame="default";
-    fg[faction]->faction=_Universe->GetFaction(faction);
+     fg[faction]->faction=_Universe->GetFaction(faction);
     fg[faction]->type="Base";
-    fg[faction]->ship_nr=0;
     fg[faction]->nr_waves_left=0;
     fg[faction]->nr_ships_left=0;
-    fg[faction]->domnode=NULL;
     fg[faction]->name=nam;
   }
   fg[faction]->nr_ships++;
-  fg[faction]->ship_nr++;
   fg[faction]->nr_ships_left++;
-  fg[faction]->flightgroup_nr++;
 }
 Flightgroup *getStaticBaseFlightgroup (int faction) {
   static vector <Flightgroup *> fg;//warning mem leak...not big O(num factions)
@@ -762,14 +756,14 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
 	  Planet * plan =xml->moons.back()->GetTopPlanet(xml->unitlevel-1);
 	  if (elem==UNIT) {
 	    Flightgroup *fg =getStaticBaseFlightgroup (faction);
-	    plan->AddSatellite(un=new Unit(filename,false,faction,"",fg,fg->ship_nr-1));
+	    plan->AddSatellite(un=new Unit(filename,false,faction,"",fg,fg->nr_ships-1));
 	    un->setFullname(fullname);
 	  } else if (elem==NEBULA) {
 	    Flightgroup *fg =getStaticNebulaFlightgroup (faction);
-	    plan->AddSatellite(un=new Nebula(filename,false,faction,fg,fg->ship_nr-1));			
+	    plan->AddSatellite(un=new Nebula(filename,false,faction,fg,fg->nr_ships-1));			
 	  } else if (elem==ASTEROID) {
 	    Flightgroup *fg =getStaticAsteroidFlightgroup (faction);
-	    plan->AddSatellite (un=new Asteroid (filename,faction,fg,fg->ship_nr-1,scalex));
+	    plan->AddSatellite (un=new Asteroid (filename,faction,fg,fg->nr_ships-1,scalex));
 	  } else if (elem==ENHANCEMENT) {
 	    plan->AddSatellite (un=new Enhancement (filename,faction,string("")));
 	  }
@@ -808,15 +802,15 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
       }else {
    	    if (elem==UNIT) {
 	      Flightgroup *fg =getStaticBaseFlightgroup (faction);
-	      Unit *moon_unit=new Unit(filename,false,faction,"",fg,fg->ship_nr-1);
+	      Unit *moon_unit=new Unit(filename,false,faction,"",fg,fg->nr_ships-1);
 	      moon_unit->setFullname(fullname);
 	      xml->moons.push_back((Planet *)moon_unit);
 	    }else if (elem==NEBULA){
 	      Flightgroup *fg =getStaticNebulaFlightgroup (faction);
-	      xml->moons.push_back ((Planet *)new Nebula (filename,false,faction,fg,fg->ship_nr-1));
+	      xml->moons.push_back ((Planet *)new Nebula (filename,false,faction,fg,fg->nr_ships-1));
 	    } else if (elem==ASTEROID){
 	    Flightgroup *fg =getStaticAsteroidFlightgroup (faction);
-	      xml->moons.push_back ((Planet *)new Asteroid (filename,faction,fg,fg->ship_nr-1,scalex));
+	      xml->moons.push_back ((Planet *)new Asteroid (filename,faction,fg,fg->nr_ships-1,scalex));
 	    } else if (elem==ENHANCEMENT) {
 	      xml->moons.push_back ((Planet *)new Enhancement (filename,faction,string("")));
 	    }

@@ -47,6 +47,7 @@
 ///for saving features
 #include "main_loop.h"
 #include "script/mission.h"
+#include "script/flightgroup.h"
 #include "collide/rapcol.h"
 #include "savegame.h"
 #include "xml_serializer.h"
@@ -311,6 +312,11 @@ Unit * _1800GetGod () {
   static Unit god ("god",true,_Universe->GetFaction("upgrades"),"",NULL,0);
   return &god;
 }
+
+void Unit::SetFg(Flightgroup * fg, int fg_subnumber) {
+  flightgroup=fg;
+  flightgroup_subnumber=fg_subnumber;
+}
 extern void update_ani_cache();
 Unit::Unit(const char *filename, bool SubU, int faction,std::string unitModifications, Flightgroup *flightgrp,int fg_subnumber) {
 
@@ -321,8 +327,7 @@ Unit::Unit(const char *filename, bool SubU, int faction,std::string unitModifica
 	  _Universe->AccessCockpit()->savegame->AddUnitToSave(filename,UNITPTR,_Universe->GetFaction(faction),(int)this);
 	SubUnit = SubU;
 	this->faction = faction;
-	flightgroup=flightgrp;
-	flightgroup_subnumber=fg_subnumber;
+	SetFg (flightgrp,fg_subnumber);
 	bool doubleup=false;
 	char * my_directory=GetUnitDir(filename);
 	vssetdir (GetSharedUnitPath().c_str());
@@ -898,6 +903,17 @@ void Unit::EnqueueAIFirst(Order *newAI) {
   }
 }
 void Unit::ExecuteAI() {
+  if (flightgroup) {
+      Unit * leader = flightgroup->leader.GetUnit();
+      if (leader?(flightgroup->leader_decision>-1)&&(leader->getFgSubnumber()>=getFgSubnumber()):true) {//no heirarchy in flight group
+	if (!leader) {
+	  flightgroup->leader_decision = flightgroup->nr_ships;
+	}
+	flightgroup->leader.SetUnit(this);
+      }
+      flightgroup->leader_decision--;
+  
+  }
   if(aistate) aistate->Execute();
   if (!SubUnits.empty()) {
     un_iter iter =getSubUnits();

@@ -9,6 +9,9 @@ namespace Orders {
   const float bleed_threshold = 0.0001;
   const float THRESHOLD = 0.01;
   const unsigned char ABURN = 1;
+
+  
+
   /**
    * The moveto order attempts to calculate the best way to apply thrust (within the computer bound limits) to get a starship to place B and stopped.
    * It uses an integral of acceleration and velocity over time to solve for 
@@ -33,7 +36,7 @@ public:
     done=false;
   }
   void SetDest (const Vector&);
-  void Execute();
+  virtual void Execute();
   virtual ~MoveTo();
   virtual string getOrderDescription() { return "moveto"; };
 };
@@ -62,7 +65,7 @@ protected:
   ///takes in the destination target, and the ammount of accuracy (how many times it should miss destination and come back) should be used
    ChangeHeading(const Vector &final_heading, int switchback, float turning_speed=1) : Order(FACING,SLOCATION), turningspeed(turning_speed), switchbacks(switchback),terminatingX(0),terminatingY(0),last_velocity(0,0,0),final_heading(final_heading), terminating(false) {}
   void SetDest (const Vector&);
-  void Execute();
+  virtual void Execute();
   virtual string getOrderDescription() { return "chhead"; };
   virtual ~ChangeHeading();
 };
@@ -74,7 +77,7 @@ class FaceTarget : public ChangeHeading {
   float finish;
 public:
   FaceTarget (bool fini=false, int accuracy =3);
-  void Execute ();
+  virtual void Execute ();
   virtual string getOrderDescription() { return "facet"; };
   virtual ~FaceTarget();
 };
@@ -90,10 +93,30 @@ class FaceTargetITTS : public ChangeHeading {
   float range;
 public:
   FaceTargetITTS (bool fini=false, int accuracy = 3);
-  void Execute();
-  virtual string getOrderDescription() { return "faceitts"; };
+  virtual void Execute();
+  virtual string getOrderDescription() { return "faceitts"; }
   virtual ~FaceTargetITTS();
 };
+ class FormUp : public MoveTo {
+   Vector Pos;
+ public:
+   FormUp(const Vector &Position);
+   void SetPos (const Vector &);
+  virtual void SetParent (Unit * parent1);
+   virtual void Execute();
+   virtual string getOrderDescription () {return "formup";}
+   virtual ~FormUp();
+ };
+ class FaceDirection: public ChangeHeading {
+  bool finish;
+  bool dist;
+public:
+  FaceDirection (float distToMatchFacing, bool fini=false, int accuracy = 3);
+  virtual void SetParent (Unit * parent1);
+  virtual void Execute();
+  virtual string getOrderDescription() { return "facedir"; }
+  virtual ~FaceDirection();
+ };
 
 }
 #endif

@@ -51,6 +51,10 @@ class FireKeyboard: public Order {
   static void MisSelKey (int, KBSTATE);
   static void CloakKey (int, KBSTATE);
   static void ECMKey (int,KBSTATE);
+  static void HelpMeOut (int,KBSTATE);
+  static void BreakFormation (int,KBSTATE);
+  static void FormUp (int,KBSTATE);
+  static void AttackTarget (int,KBSTATE);
 protected:
   float distance;
 

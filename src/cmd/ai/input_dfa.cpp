@@ -87,7 +87,12 @@ void InputDFA::TargetSelect (KBSTATE k,int x,int y, int delx, int dely, int mod)
       Unit * un;
       while ((un = tmp->current())) {
 	Order * nAI = CurDFA->orderfac->newOrder();
-	nAI->AttachOrder(CurDFA->targetted);
+	if (CurDFA->targetted) {
+	  un_iter ui = CurDFA->targetted->createIterator();
+	  if (*ui) {
+	    nAI->AttachOrder(*ui);
+	  }
+	}
 	if (CurDFA->queueOrder) {
 	  un->EnqueueAI(nAI);
 	} else {

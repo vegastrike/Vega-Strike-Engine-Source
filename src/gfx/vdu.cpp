@@ -4,6 +4,7 @@
 #include "vs_globals.h"
 #include "cockpit.h"
 #include "cmd/script/mission.h"
+#include "cmd/script/flightgroup.h"
 #include "cmd/script/msgcenter.h"
 #include "cmd/images.h"
 #include "cmd/planet.h"

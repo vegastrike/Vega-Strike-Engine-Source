@@ -102,7 +102,7 @@ Order* Order::EnqueueOrderFirst (Order *ord) {
 Order* Order::ReplaceOrder (Order *ord) {
   vector<Order*>::iterator ordd = suborders.begin();
   for (unsigned int i=0;i<suborders.size();i++) {
-    if (!(ord->getType()&(*ordd)->getType()&(ALLTYPES))){
+    if ((ord->getType()&(*ordd)->getType()&(ALLTYPES))){
       	delete (*ordd);
 	ordd =suborders.erase(ordd);
     } else {
@@ -114,38 +114,21 @@ Order* Order::ReplaceOrder (Order *ord) {
 
 }
 
-bool Order::AttachOrder (UnitCollection *targets1) {
+bool Order::AttachOrder (Unit *targets1) {
   if (!(subtype&STARGET)) {
     if (subtype&SSELF) {
       return AttachSelfOrder (targets1);//can use attach order to do shit
     }
     return false;
   }
-  if (targets) {
-    delete targets;
-  
-  }
-  targets = new UnitCollection();
-  UnitCollection::UnitIterator iter = targets1->createIterator();
-  targets->prepend (&iter);
+  parent->Target (targets1);
   return true;
 }
-bool Order::AttachSelfOrder (UnitCollection *targets1) {
+
+bool Order::AttachSelfOrder (Unit *targets1) {
   if (!(subtype&SSELF))
     return false;
-  if (group)
-    delete group;
-  if (targets1==NULL) {
-    group = NULL;
-  } else {
-    group = new UnitCollection();
-    UnitCollection::UnitIterator iter = targets1->createIterator();
-    Unit *u;
-    while(0!=(u = iter.current())) {
-      group->prepend (u);
-      iter.advance();
-    }
-  }
+  group.SetUnit(targets1);
   return true;
 }
 bool Order::AttachOrder (Vector targetv) {

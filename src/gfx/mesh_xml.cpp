@@ -16,6 +16,7 @@
 #include "config_xml.h"
 #include "vs_globals.h"
 #include "cmd/script/mission.h"
+#include "cmd/script/flightgroup.h"
 #ifdef max
 #undef max
 #endif
