@@ -464,7 +464,7 @@ void VDU::DrawMessages(Unit *target){
   whoNOT.push_back ("briefing");
   whoNOT.push_back ("news");
   whoNOT.push_back ("bar");
-  static float oldtime = XMLSupport::parse_float(vs_config->getVariable("graphics","last_message","5"));
+  static float oldtime = XMLSupport::parse_float(vs_config->getVariable("graphics","last_message_time","5"));
   static int num_messages=XMLSupport::parse_int(vs_config->getVariable("graphics","num_messages","2"));
   vector <std::string> message_people;//should be "all", parent's name
   gameMessage lastmsg;
