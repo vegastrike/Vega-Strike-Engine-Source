@@ -94,18 +94,25 @@ void Mesh::Fork (Mesh *&x, Mesh *&y, float a, float b, float c, float d) {
   y->forceCullFace(GFXFALSE);
   x->forcelogos = x->squadlogos = NULL;
   x->numforcelogo = x->numsquadlogo =0;
+  x->setLighting(getLighting());
+  x->setEnvMap(getEnvMap());
   while (x->Decal.size()<Decal.size())
     x->Decal.push_back (NULL);
   {for (unsigned int i=0;i<Decal.size();i++) {
-    x->Decal[i] = Decal[i]->Clone();
+    if (Decal[i])
+      x->Decal[i] = Decal[i]->Clone();
   }}
 
   y->squadlogos=y->forcelogos = NULL;
   y->numforcelogo = y->numsquadlogo = 0;
+  y->setLighting(getLighting());
+  y->setEnvMap(getEnvMap());
+
   while (y->Decal.size()<Decal.size())
     y->Decal.push_back (NULL);
   {for (unsigned int i=0;i<Decal.size();i++) {
-    y->Decal[i] = Decal[i]->Clone();
+    if (Decal[i])
+      y->Decal[i] = Decal[i]->Clone();
   }}
   if (numtqx[0]&&numtqx[1]) {
     x->vlist = new GFXVertexList (polytypes, numtqx[0]+numtqx[1], X, 2, numtqx, true); 
@@ -138,13 +145,9 @@ void Mesh::Fork (Mesh *&x, Mesh *&y, float a, float b, float c, float d) {
   y->mx = ymax;
   x->orig= new Mesh[1];
   x->forceCullFace(GFXFALSE);
-  x->setLighting(getLighting());
-  x->setEnvMap(getEnvMap());
 
   y->orig= new Mesh[1];
   y->forceCullFace(GFXFALSE);
-  y->setLighting(getLighting());
-  y->setEnvMap(getEnvMap());
   x->draw_queue = new vector<MeshDrawContext>;
   y->draw_queue = new vector<MeshDrawContext>;
   *y->orig = *y;
