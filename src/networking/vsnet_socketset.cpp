@@ -105,6 +105,7 @@ int SocketSet::select( timeval* timeout )
         ostr << ")";
 #endif
     }
+#ifdef VSNET_DEBUG
     else
     {
         if( timeout )
@@ -113,7 +114,6 @@ int SocketSet::select( timeval* timeout )
         else
             ostr << " t=NULL (blocking)";
     }
-#ifdef VSNET_DEBUG
     ostr << ends;
     COUT << ostr.str() << endl;
 #endif
