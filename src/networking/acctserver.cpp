@@ -1,12 +1,12 @@
-
-#include "client.h"
-#include "acctserver.h"
-#include "packet.h"
+#include "networking/client.h"
+#include "networking/acctserver.h"
+#include "networking/packet.h"
 #include "lin_time.h"
 #include "networking/vsnet_serversocket.h"
 #include "vs_path.h"
 #include "networking/netbuffer.h"
 #include "networking/vsnet_debug.h"
+#include "networking/fileutil.h"
 #include "posh.h"
 
 VegaConfig * vs_config;

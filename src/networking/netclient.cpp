@@ -54,7 +54,6 @@
 #include "networking/netbuffer.h"
 #include "networking/networkcomm.h"
 #include "posh.h"
-#include "md5.h"
 #include "prediction.h"
 
 #ifdef micro_sleep
@@ -418,12 +417,12 @@ int NetClient::recvMsg( Packet* outpacket )
 				FILE * fp;
 				string filename;
 				string file;
+				filename = netbuf.getString();
+				file = netbuf.getString();
 				// If packet serial == 0 then it means we have an up to date file
 				if( packet_serial==this->game_unit.GetUnit()->GetSerial())
 				{
 					// Receive the file and write it (trunc if exists)
-					filename = netbuf.getString();
-					file = netbuf.getString();
 					cerr<<"RECEIVING file : "<<filename<<endl;
 					fp = fopen( (datadir+filename).c_str(), "wb");
 					if (!fp)
@@ -440,7 +439,7 @@ int NetClient::recvMsg( Packet* outpacket )
 				else
 				{
 					// Something is wrong
-					displayError( packet_serial);
+					//displayError( packet_serial);
 				}
 			}
 			break;
@@ -694,10 +693,12 @@ int NetClient::recvMsg( Packet* outpacket )
 				Vector normal = netbuf.getVector();
 				GFXColor col = netbuf.getColor();
 				un = UniverseUtil::GetUnitFromSerial( p1.getSerial());
+				Shield sh = netbuf.getShield();
+				Armor ar = netbuf.getArmor();
 				if( un)
 				{
-					un->shield = netbuf.getShield();
-					un->armor = netbuf.getArmor();
+					un->shield = sh;
+					un->armor = ar();
 					// Apply the damage
 					un->ApplyNetDamage( pnt, normal, amt, ppercentage, spercentage, col);
 				}
@@ -790,12 +791,13 @@ int NetClient::recvMsg( Packet* outpacket )
 			{
 				float freq = netbuf.getFloat();
 				char  secured = netbuf.getChar();
+				char webc = netbuf.getChar();
+				char pa = netbuf.getChar();
+
 				if( freq == current_freq)
 				{
 					if( secured==NetComm->IsSecured())
 					{
-						char webc = netbuf.getChar();
-						char pa = netbuf.getChar();
 						ClientPtr clt;
 						// Check this is not us
 						if( packet_serial != this->serial)

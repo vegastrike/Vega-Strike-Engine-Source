@@ -35,6 +35,7 @@
 #define ACCT_PORT	6779
 #define VIDEO_PORT	6776
 
+#define HASHMETHOD	SHA
 #define DESKEY_SIZE	64
 #define MAXBUFFER	16384
 

@@ -1,15 +1,16 @@
-#include "vsnet_debug.h"
+#include "networking/vsnet_debug.h"
 #include "cmd/unit_generic.h"
 #include "vs_globals.h"
-#include "netclient.h"
+#include "networking/netclient.h"
 #include "savegame.h"
-#include "netbuffer.h"
-#include "packet.h"
+#include "networking/netbuffer.h"
+#include "networking/packet.h"
 #include "lin_time.h"
-#include "md5.h"
-#include "vsnet_notify.h"
-#include "vsnet_dloadmgr.h"
-#include "netui.h"
+#include "networking/vsnet_notify.h"
+#include "networking/vsnet_dloadmgr.h"
+#include "networking/netui.h"
+#include "networking/client.h"
+#include "networking/fileutil.h"
 
 vector<string> globalsaves;
 
@@ -204,10 +205,13 @@ void	NetClient::loginAccept( Packet & p1)
 	globalsaves.push_back( netbuf.getString());
 	// Get the galaxy file from buffer with relative path to datadir !
 	string univfile = netbuf.getString();
-	unsigned char * md5_digest = netbuf.getBuffer( MD5_DIGEST_SIZE);
-	cerr<<"Initial system = "<<univfile<<" - md5 = "<<md5_digest<<endl;
-	// Compare to local md5 and ask for the good file if we don't have it or bad version
-	if( 0 /* !md5CheckFile( univfile, md5_digest) */)
+	unsigned char * digest;
+#ifdef CRYPTO
+	digest = netbuf.getBuffer( FileUtil::Hash.DigestSize());
+	cerr<<"Initial system = "<<univfile<<" - File Hash = "<<digest<<endl;
+#endif
+	// Compare to local hash and ask for the good file if we don't have it or bad version
+	if( !FileUtil::HashCompare( univfile, digest))
 	{
 		VsnetDownload::Client::NoteFile f( this->clt_sock, univfile);
 		_downloadManagerClient->addItem( &f);
@@ -216,22 +220,15 @@ void	NetClient::loginAccept( Packet & p1)
 			checkMsg( NULL);
 			micro_sleep( 40000);
 		}
-		/*
-		netbuf.addString( univfile);
-		pckt.send( CMD_ASKFILE, packet_serial,
-				   netbuf.getData(), netbuf.getDataLength(),
-				   SENDRELIABLE, NULL, this->clt_sock,
-				   __FILE__, PSEUDO__LINE__(663) );
-		this->PacketLoop( CMD_ASKFILE);
-		*/
 	}
 
 	// Get the initial system file...
 	string sysfile = netbuf.getString();
-	md5_digest = netbuf.getBuffer( MD5_DIGEST_SIZE);
-	cerr<<"Initial system = "<<sysfile<<" - md5 = "<<md5_digest<<endl;
-	// THINK TO PUT THAT TEST BACK WHEN DOWNLOAD THREAD IS COMPLETE !!!!!!!
-	if( 0 /* !md5CheckFile( sysfile, md5_digest) */)
+#ifdef CRYPTO
+	digest = netbuf.getBuffer( FileUtil::Hash.DigestSize());
+	cerr<<"Initial system = "<<sysfile<<" - File Hash = "<<digest<<endl;
+#endif
+	if( !FileUtil::HashCompare( sysfile, digest))
 	{
 		VsnetDownload::Client::NoteFile f( this->clt_sock, sysfile);
 		_downloadManagerClient->addItem( &f);
@@ -240,22 +237,7 @@ void	NetClient::loginAccept( Packet & p1)
 			checkMsg( NULL);
 			micro_sleep( 40000);
 		}
-		/*
-		netbuf.addString( sysfile);
-		pckt.send( CMD_ASKFILE, packet_serial,
-				   netbuf.getData(), netbuf.getDataLength(),
-				   SENDRELIABLE, NULL, this->clt_sock,
-				   __FILE__, PSEUDO__LINE__(677) );
-		this->PacketLoop( CMD_ASKFILE);
-		*/
-		// Loop until the download is complete
 	}
-
-	/*
-	VsnetDownload::Client::TestItem* t;
-	t = new VsnetDownload::Client::TestItem( clt_sock, "TESTFILE" );
-	_downloadManagerClient->addItem( t );
-	*/
 }
 
 /*************************************************************/

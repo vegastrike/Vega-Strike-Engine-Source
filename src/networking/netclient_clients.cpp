@@ -1,13 +1,14 @@
-#include "vsnet_debug.h"
-#include "client.h"
-#include "netclient.h"
-#include "netbuffer.h"
-#include "packet.h"
-#include "vsnet_clientstate.h"
+#include "networking/vsnet_debug.h"
+#include "networking/client.h"
+#include "networking/netclient.h"
+#include "networking/netbuffer.h"
+#include "networking/packet.h"
+#include "networking/vsnet_clientstate.h"
 #include "cmd/unit_generic.h"
 #include "universe_util.h"
 #include "cmd/unit_factory.h"
-#include "prediction.h"
+#include "networking/prediction.h"
+#include "networking/fileutil.h"
 
 /*************************************************************/
 /**** Adds an entering client in the actual zone          ****/

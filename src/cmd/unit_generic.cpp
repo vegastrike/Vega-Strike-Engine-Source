@@ -40,6 +40,50 @@
 #include "config.h"
 using namespace Orders;
 
+bool verify_path (const vector<string> &path, bool allowmpl=false);
+void vschdirs (const vector<string> &path);
+void vscdups (const vector<string> &path);
+vector<vector <string> > lookforUnit( const char * filename, int faction, bool SubU);
+
+vector<vector <string> > lookforUnit( const char * filename, int faction, bool SubU)
+{
+	char * my_directory=GetUnitDir(filename);
+	vssetdir (GetSharedUnitPath().c_str());
+	vector<string>factionsubdir;
+	static string facsd = vs_config->getVariable("data","unitfactiondir","");
+	if (facsd.length()!=0) {
+		factionsubdir.push_back(facsd);
+	}
+	string facstr (FactionUtil::GetFaction(faction));
+	vector<vector <string> > path;
+	path.push_back (factionsubdir);
+	path.back().push_back("neutral");path.back().push_back(my_directory);path.back().push_back(filename);
+	{
+		path.push_back(vector<string>());		
+		path.back().push_back("weapons");path.back().push_back(my_directory);path.back().push_back(filename);
+		path.push_back(factionsubdir);		
+		path.back().insert(path.back().begin(),"weapons");path.back().push_back(facstr);path.back().push_back(my_directory);path.back().push_back(filename);
+	}
+	path.push_back(vector<string>());
+	path.back().push_back(my_directory);path.back().push_back(filename);	
+	path.push_back (factionsubdir);
+	path.back().push_back(facstr);path.back().push_back(my_directory);path.back().push_back(filename);
+	if (SubU) {
+		path.push_back(vector<string>());		
+		path.back().push_back("subunits");path.back().push_back(my_directory);path.back().push_back(filename);
+		path.push_back(factionsubdir);		
+		path.back().insert(path.back().begin(),"subunits");path.back().push_back(facstr);path.back().push_back(my_directory);path.back().push_back(filename);
+	}
+	free(my_directory);	
+	while(!path.empty()) {
+		if (verify_path(path.back(),true))
+			break;
+		path.pop_back();
+	}
+
+	return path;
+}
+
 void	Unit::BackupState()
 {
 	this->old_state.setPosition( this->curr_physical_state.position);
@@ -586,6 +630,7 @@ void Unit::Init()
   //  Fire();
 
 }
+
 std::string getMasterPartListUnitName();
 bool
 verify_path (const vector<string> &path, bool allowmpl=false) {
@@ -626,39 +671,9 @@ void Unit::Init(const char *filename, bool SubU, int faction,std::string unitMod
 	graphicOptions.RecurseIntoSubUnitsOnCollision=!isSubUnit();
 	this->faction = faction;
 	SetFg (flightgrp,fg_subnumber);
-	char * my_directory=GetUnitDir(filename);
-	vssetdir (GetSharedUnitPath().c_str());
-	vector<string>factionsubdir;
-	static string facsd = vs_config->getVariable("data","unitfactiondir","");
-	if (facsd.length()!=0) {
-		factionsubdir.push_back(facsd);
-	}
-	string facstr (FactionUtil::GetFaction(faction));
-	vector<vector <string> > path;
-	path.push_back (factionsubdir);
-	path.back().push_back("neutral");path.back().push_back(my_directory);path.back().push_back(filename);
-	{
-		path.push_back(vector<string>());		
-		path.back().push_back("weapons");path.back().push_back(my_directory);path.back().push_back(filename);
-		path.push_back(factionsubdir);		
-		path.back().insert(path.back().begin(),"weapons");path.back().push_back(facstr);path.back().push_back(my_directory);path.back().push_back(filename);
-	}
-	path.push_back(vector<string>());
-	path.back().push_back(my_directory);path.back().push_back(filename);	
-	path.push_back (factionsubdir);
-	path.back().push_back(facstr);path.back().push_back(my_directory);path.back().push_back(filename);
-	if (SubU) {
-		path.push_back(vector<string>());		
-		path.back().push_back("subunits");path.back().push_back(my_directory);path.back().push_back(filename);
-		path.push_back(factionsubdir);		
-		path.back().insert(path.back().begin(),"subunits");path.back().push_back(facstr);path.back().push_back(my_directory);path.back().push_back(filename);
-	}
-	free(my_directory);	
-	while(!path.empty()) {
-		if (verify_path(path.back(),true))
-			break;
-		path.pop_back();
-	}
+
+	vector<vector <string> > path = lookforUnit( filename, faction, SubU);
+
 	if (path.empty()) {
 	    fprintf (stderr,"Warning: Cannot locate %s\n",filename);	  
 	    meshdata.clear();

@@ -48,7 +48,9 @@ struct StarShipControlKeyboard {
   bool commchanged;
   bool switchwebcam;
   bool switchsecured;
-  void UnDirty() {sheltonpress=sheltonrelease=uppress=uprelease=downpress=downrelease=leftpress=leftrelease=rightpress=rightrelease=ABpress=ABrelease=accelpress=accelrelease=decelpress=decelrelease=rollrightpress=rollrightrelease=rollleftpress=rollleftrelease=0;jumpkey=startpress=stoppress=autopilot=dirty=switch_combat_mode=terminateauto=setunvel=switchmode=setnulvel=realauto=matchspeed=false;axial=vertical=horizontal=0;commchanged=startcomm=false;switchwebcam=false;switchsecured=false;}
+  bool freq_increase;
+  bool freq_decrease;
+  void UnDirty() {sheltonpress=sheltonrelease=uppress=uprelease=downpress=downrelease=leftpress=leftrelease=rightpress=rightrelease=ABpress=ABrelease=accelpress=accelrelease=decelpress=decelrelease=rollrightpress=rollrightrelease=rollleftpress=rollleftrelease=0;jumpkey=startpress=stoppress=autopilot=dirty=switch_combat_mode=terminateauto=setunvel=switchmode=setnulvel=realauto=matchspeed=false;axial=vertical=horizontal=0;commchanged=startcomm=false;switchwebcam=false;switchsecured=false;freq_increase=false;freq_decrease=false;}
   StarShipControlKeyboard() {UnDirty();}
 };
 static vector <StarShipControlKeyboard> starshipcontrolkeys;
@@ -163,6 +165,16 @@ void FlyByKeyboard::Execute (bool resetangvelocity) {
 	SSCK.commchanged=false;
   }
 #ifdef NETCOMM
+  if( Network!=NULL && SSCK.freq_increase)
+  {
+  	SSCK.freq_increase = false;
+	Network[whichplayer].increaseFrequency();
+  }
+  if( Network!=NULL && SSCK.freq_decrease)
+  {
+  	SSCK.freq_decrease = false;
+	Network[whichplayer].decreaseFrequency();
+  }
   if( Network!=NULL && SSCK.switchwebcam)
   {
     SSCK.switchwebcam=false;
@@ -361,7 +373,7 @@ if(Network!=NULL)
   if (g().dirty)g().UnDirty();
   switch (k) {
   case DOWN:
-	Network[0].decreaseFrequency();
+	g().freq_decrease = true;
   break;
   case UP:
   case PRESS:
@@ -378,7 +390,7 @@ if(Network!=NULL)
   if (g().dirty)g().UnDirty();
   switch (k) {
   case DOWN:
-	Network[0].increaseFrequency();
+	g().freq_increase = true;
   break;
   case UP:
   case PRESS:

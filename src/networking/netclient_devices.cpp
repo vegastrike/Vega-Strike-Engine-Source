@@ -1,11 +1,11 @@
-#include "vsnet_debug.h"
+#include "networking/vsnet_debug.h"
 #include "vs_path.h"
-#include "netclient.h"
+#include "networking/netclient.h"
 #include "cmd/unit_generic.h"
 #include "networking/netbuffer.h"
 #include "networking/networkcomm.h"
-#include "packet.h"
-#include "md5.h"
+#include "networking/packet.h"
+#include "networking/fileutil.h"
 
 /******************************************************************************************/
 /*** WEAPON STUFF                                                                      ****/
@@ -63,9 +63,11 @@ bool	NetClient::jumpRequest( string newsystem)
 	NetBuffer netbuf;
 
 	netbuf.addString( newsystem);
-	unsigned char * md5 = new unsigned char[MD5_DIGEST_SIZE];
-	md5Compute( datadir+"/"+newsystem+".system", md5);
-	netbuf.addBuffer( md5, MD5_DIGEST_SIZE);
+#ifdef CRYPTO
+	unsigned char * hash = new unsigned char[FileUtil::Hash.DigestSize()];
+	FileUtil::HashFileCompute( datadir+"/"+newsystem+".system", hash);
+	netbuf.addBuffer( hash, FileUtil::Hash.DigestSize());
+#endif
 
 	p.send( CMD_JUMP, this->game_unit.GetUnit()->GetSerial(),
             netbuf.getData(), netbuf.getDataLength(),

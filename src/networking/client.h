@@ -38,9 +38,6 @@ class Unit;
 class UnitContainer;
 
 extern VegaConfig *vs_config;
-int		md5SumFile( const char * filename, unsigned char * digest);
-int		md5CheckFile( string filename, unsigned char * md5digest);
-int		md5Compute( string filename, unsigned char * md5digest);
 
 void	displayError( ObjSerial error_code);
 
@@ -90,12 +87,5 @@ private:
 	Client( const Client& );
 	Client& operator=( const Client& );
 };
-
-namespace FileUtil
-{
-	// Returns 2 strings -> vector[0] = xml unit, vector[1] = player save
-	vector<string>	GetSaveFromBuffer( const char * buffer);
-	void			WriteSaveFiles( string savestr, string xmlstr, string path, string name);
-}
 
 #endif

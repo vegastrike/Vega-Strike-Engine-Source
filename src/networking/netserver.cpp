@@ -33,13 +33,13 @@
 #include "gfx/cockpit_generic.h"
 #include "universe_util.h"
 #include "cmd/unit_factory.h"
-#include "client.h"
-#include "packet.h"
+#include "networking/client.h"
+#include "networking/packet.h"
 #include "lin_time.h"
-#include "netserver.h"
-#include "vsnet_serversocket.h"
-#include "vsnet_debug.h"
-#include "savenet_util.h"
+#include "networking/netserver.h"
+#include "networking/vsnet_serversocket.h"
+#include "networking/vsnet_debug.h"
+#include "networking/savenet_util.h"
 #include "vs_path.h"
 #include "networking/netbuffer.h"
 #include "networking/vsnet_dloadmgr.h"
@@ -51,7 +51,7 @@
 #include "cmd/role_bitmask.h"
 #include "gfxlib_struct.h"
 #include "posh.h"
-#include "md5.h"
+#include "fileutil.h"
 
 double	clienttimeout;
 double	logintimeout;
@@ -709,8 +709,12 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
 		{
 			vector<string>	adjacent;
 			string newsystem = netbuf.getString();
-			unsigned char * client_md5;
-			unsigned char * md5 = new unsigned char[MD5_DIGEST_SIZE];
+			unsigned char * client_hash;
+			unsigned char * server_hash;
+#ifdef CRYPTO
+			server_hash = new unsigned char[FileUtil::Hash.DigestSize()];
+			client_hash = netbuf.getBuffer( FileUtil::Hash.DigestSize());
+#endif
 			bool found = false;
 			NetBuffer	netbuf2;
 
@@ -742,8 +746,7 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
 							zonemgr->addZone( newsystem+".system");
 						cp->savegame->SetStarSystem( newsystem);
 
-						client_md5 = netbuf.getBuffer( MD5_DIGEST_SIZE);
-						if( md5CheckFile( newsystem, client_md5) )
+						if( FileUtil::HashCompare( newsystem, client_hash) )
 							clt->jumpfile = "";
 						/*
 						{
@@ -769,7 +772,9 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
 						clt->jumpfile="error";
 					}
 			}	
-			delete md5;
+#ifdef CRYPTO
+			delete server_hash;
+#endif
 		}
 		break;
 		case CMD_SCAN :

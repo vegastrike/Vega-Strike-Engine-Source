@@ -97,10 +97,10 @@ void	NetServer::sendJump( ObjSerial serial, bool ok)
 	// Test whether the jump was accepted or not by server
 	if( ok)
 	{
-		// If jumpfile is empty the md5 was correct
+		// If jumpfile is empty the hash was correct
 		if( clt->jumpfile=="" )
 			p2.send( CMD_JUMP, serial, netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, &clt->cltadr, clt->sock, __FILE__, PSEUDO__LINE__(1164) );
-		// New system file MD5 is wrong tell the client with serial != player serial so he can ask for a new download
+		// New system file HASH is wrong tell the client with serial != player serial so he can ask for a new download
 		else
 			p2.send( CMD_JUMP, serial+1, netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, &clt->cltadr, clt->sock, __FILE__, PSEUDO__LINE__(1164) );
 	}

@@ -105,8 +105,6 @@ librootgeneric =				\
 	posh.h						\
 	stardate.cpp				\
 	stardate.h					\
-	md5.cpp						\
-	md5.h						\
 	star_system_generic.cpp 	\
 	star_system_generic.h 		\
 	universe_generic.cpp		\
@@ -174,8 +172,6 @@ accountserver_SOURCES =		\
 	vs_path.h				\
 	galaxy_gen.cpp			\
 	galaxy_gen.h			\
-	md5.cpp					\
-	md5.h					\
 	accountserver.cpp
 
 vegastrike_SOURCES =		\

@@ -120,7 +120,6 @@ class NetServer
 		void			sendLoginAlready( ClientPtr clt, AddressIP ipadr);
 		void			sendLoginAccept( ClientPtr clt, AddressIP ipadr, int acctnew);
 		void			sendLoginUnavailable( ClientPtr clt, AddressIP ipadr);
-		void			getMD5( string filename, unsigned char * md5digest);
 		ClientPtr       getClientFromSerial( ObjSerial serial);
 
 	public:

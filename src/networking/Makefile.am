@@ -30,54 +30,15 @@ bin_PROGRAMS = soundserver
 soundserver_LDADD = -L/usr/local/lib -lSDL -lSDL_mixer
 soundserver_SOURCES = inet.cpp inet.h soundserver.cpp
 
-libnetgeneric = \
+liblowlevel = \
+	GCPtr.h		\
 	vsnet_dloadmgr.cpp	\
 	vsnet_dloadmgr.h	\
 	vsnet_dloadenum.cpp	\
 	vsnet_dloadenum.h	\
 	vsnet_notify.cpp	\
 	vsnet_notify.h		\
-	accountsxml.cpp		\
-	accountsxml.h		\
-	acctserver.h		\
-	client.cpp		\
-	client.h		\
 	vsnet_clientstate.cpp		\
-	const.h		\
-	cubicsplines.cpp		\
-	cubicsplines.h		\
-	prediction.cpp		\
-	prediction.h		\
-	GCPtr.h		\
-	inet.cpp		\
-	inet.h		\
-	inet_file.cpp		\
-	inet_file.h		\
-	mangle.cpp		\
-	mangle.h		\
-	netbuffer.cpp		\
-	netbuffer.h		\
-	netclass.h		\
-	netclient_clients.cpp	\
-	netclient_login.cpp	\
-	netclient_devices.cpp \
-	netclient.cpp		\
-	netclient.h		\
-	netserver_acct.cpp \
-	netserver_clients.cpp \
-	netserver_devices.cpp \
-	netserver_net.cpp \
-	netserver_login.cpp \
-	netserver.cpp		\
-	netserver.h		\
-	netui.cpp		\
-	netui.h		\
-	packet.cpp		\
-	packet.h		\
-	packetmem.cpp		\
-	packetmem.h		\
-	savenet_util.cpp		\
-	savenet_util.h		\
 	vsnet_address.cpp		\
 	vsnet_address.h		\
 	vsnet_clientstate.h		\
@@ -101,6 +62,49 @@ libnetgeneric = \
 	vsnet_thread_non.cpp		\
 	vsnet_thread_p.cpp		\
 	vsnet_thread_sdl.cpp		\
+	netui.cpp		\
+	netui.h		\
+	packet.cpp		\
+	packet.h		\
+	packetmem.cpp		\
+	packetmem.h		\
+	netclass.h
+
+libacctserver = \
+	client.cpp		\
+	client.h		\
+	const.h		\
+	accountsxml.cpp		\
+	accountsxml.h		\
+	acctserver.h		\
+	savenet_util.cpp		\
+	savenet_util.h		\
+	fileutil.h			\
+	fileutil.cpp		\
+	netbuffer.cpp		\
+	netbuffer.h
+
+libnetgeneric = \
+	$(liblowlevel)   \
+	$(libacctserver) \
+	cubicsplines.cpp		\
+	cubicsplines.h		\
+	prediction.cpp		\
+	prediction.h		\
+	mangle.cpp		\
+	mangle.h		\
+	netclient_clients.cpp	\
+	netclient_login.cpp	\
+	netclient_devices.cpp \
+	netclient.cpp		\
+	netclient.h		\
+	netserver_acct.cpp \
+	netserver_clients.cpp \
+	netserver_devices.cpp \
+	netserver_net.cpp \
+	netserver_login.cpp \
+	netserver.cpp		\
+	netserver.h		\
 	zonemgr.cpp		\
 	zonemgr.h
 
@@ -126,7 +130,7 @@ libnetclient = $(libnetclientserver) \
 
 libnetclient_a_SOURCES = $(libnetclient)
 
-libnetacct_a_SOURCES = $(libnetgeneric) \
+libnetacct_a_SOURCES = $(libacctserver) $(liblowlevel) \
 	acctserver.cpp \
 	acctserver.h
 

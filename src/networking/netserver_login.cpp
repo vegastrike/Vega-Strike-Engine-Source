@@ -1,12 +1,16 @@
-#include "netserver.h"
-#include "clientptr.h"
-#include "vsnet_debug.h"
-#include "netbuffer.h"
-#include "md5.h"
+#include "networking/netserver.h"
+#include "networking/clientptr.h"
+#include "networking/vsnet_debug.h"
+#include "networking/netbuffer.h"
 #include "vs_path.h"
 #include "cmd/unit_factory.h"
+#include "networking/fileutil.h"
 
 extern string universe_file;
+extern bool verify_path (const vector<string> &path, bool allowmpl=false);
+extern void vschdirs (const vector<string> &path);
+extern void vscdups (const vector<string> &path);
+extern vector<vector <string> > lookforUnit( const char * filename, int faction, bool SubU);
 
 /**************************************************************/
 /**** Authenticate a connected client                      ****/
@@ -141,9 +145,19 @@ void	NetServer::sendLoginAccept( ClientPtr clt, AddressIP ipadr, int newacct)
 		// We may have to determine which is the current ship of the player if we handle several ships for one player
 		string PLAYER_SHIPNAME = savedships[0];
 		string PLAYER_FACTION_STRING = cp->savegame->GetPlayerFaction();
+
+        int saved_faction = FactionUtil::GetFaction( PLAYER_FACTION_STRING.c_str());
+		vector<vector <string> > path = lookforUnit( savedships[0].c_str(), saved_faction, false);
+		if( path.empty())
+		{
+			// We can't find the unit saved for player -> send a login error
+			this->sendLoginError( clt, ipadr);
+			return;
+		}
+
 		Unit * un = UnitFactory::createUnit( PLAYER_SHIPNAME.c_str(),
                              false,
-                             FactionUtil::GetFaction( PLAYER_FACTION_STRING.c_str()),
+							 saved_faction,
                              string(""),
                              Flightgroup::newFlightgroup (PLAYER_CALLSIGN,PLAYER_SHIPNAME,PLAYER_FACTION_STRING,"default",1,1,"","",mission),
                              0, &saves[1]);
@@ -159,22 +173,25 @@ void	NetServer::sendLoginAccept( ClientPtr clt, AddressIP ipadr, int newacct)
 		COUT<<"-> COCKPIT AFFECTED TO UNIT"<<endl;
 
         Packet packet2;
-		unsigned char * mdigest = new unsigned char[MD5_DIGEST_SIZE];
 		static string univ = vs_config->getVariable("data","universe_path","universe");
 		string reluniv = univ+"/"+universe_file;
-		md5Compute( reluniv, mdigest);
-		// Add the galaxy filename with relative path to datadir
 		netbuf.addString( reluniv);
-		netbuf.addBuffer( mdigest, MD5_DIGEST_SIZE);
+#ifdef CRYPTO
+		unsigned char * digest = new unsigned char[FileUtil::Hash.DigestSize()];
+		FileUtil::HashFileCompute( reluniv, digest);
+		// Add the galaxy filename with relative path to datadir
+		netbuf.addBuffer( digest, FileUtil::Hash.DigestSize());
+#endif
 
-		// Add the initial star system filename + md5 too
+		// Add the initial star system filename + hash if crypto++ support too
 		static string sys = vs_config->getVariable("data","sectors","sectors");
 		string relsys = sys+"/"+cp->savegame->GetStarSystem()+".system";
-		md5Compute( relsys, mdigest);
-		//cerr<<"SYSTEM MD5 = "<<mdigest<<endl;
 		netbuf.addString( relsys);
-		netbuf.addBuffer( mdigest, MD5_DIGEST_SIZE);
-		delete mdigest;
+#ifdef CRYPTO
+		FileUtil::HashFileCompute( relsys, digest);
+		netbuf.addBuffer( digest, FileUtil::Hash.DigestSize());
+		delete digest;
+#endif
 		/*
 		cerr<<endl<<"BEGIN FULL BUFFER -------------------------------------------"<<endl<<endl;
 		cerr<<netbuf.getData()<<endl;
@@ -210,6 +227,8 @@ void	NetServer::sendLoginUnavailable( ClientPtr clt, AddressIP ipadr )
 	COUT<<">>> SEND LOGIN UNAVAILABLE -----------------------------------------------------------------"<<endl;
 	packet2.send( LOGIN_UNAVAIL, 0, (char *)NULL, 0, SENDRELIABLE, &ipadr, sockclt, __FILE__, PSEUDO__LINE__(268) );
 	COUT<<"<<< SENT LOGIN UNAVAILABLE -----------------------------------------------------------------------"<<endl;
+
+	discList.push_back( clt);
 }
 
 void	NetServer::sendLoginAlready( ClientPtr clt, AddressIP ipadr)
@@ -225,5 +244,6 @@ void	NetServer::sendLoginAlready( ClientPtr clt, AddressIP ipadr)
 	COUT<<">>> SEND LOGIN ALREADY =( serial n°"<<packet.getSerial()<<" )= --------------------------------------"<<endl;
 	packet2.send( LOGIN_ALREADY, 0, (char *)NULL, 0, SENDRELIABLE, &ipadr, sockclt, __FILE__, PSEUDO__LINE__(283) );
 	COUT<<"<<< SENT LOGIN ALREADY -----------------------------------------------------------------------"<<endl;
+	discList.push_back( clt);
 }
 

@@ -860,9 +860,10 @@ void VDU::Draw (Unit * parent, const GFXColor & color) {
   {
   	if( Network!=NULL)
 	{
+		int playernum = _Universe->whichPlayerStarship( parent);
 		char buf[32];
-		string str( "Netlag: ");
-		unsigned int lag = Network[0].getLag();
+		string str( "Lag: ");
+		unsigned int lag = Network[playernum].getLag();
 		memset( buf, 0, 32);
 		sprintf( buf, "%.1Lf", (long double)lag);
 		if( lag<50)
@@ -871,18 +872,18 @@ void VDU::Draw (Unit * parent, const GFXColor & color) {
 			str += "#FFFF00";
 		else if( lag>0)
 			str += "#FF0000";
-		str += string( buf)+"#000000\n";
-		if( Network[0].IsNetcommSecured())
+		str += string( buf)+"#000000 ms\n";
+		if( Network[playernum].IsNetcommSecured())
 			str += "#DD0000";
 		memset( buf, 0, 32);
-		sprintf( buf, "%g", Network[0].getCurrentFrequency());
+		sprintf( buf, "%g", Network[playernum].getCurrentFrequency());
 		str += string( buf)+"/";
 		memset( buf, 0, 32);
-		sprintf( buf, "%g", Network[0].getSelectedFrequency());
+		sprintf( buf, "%g", Network[playernum].getSelectedFrequency());
 		str += string( buf)+" GHz";
-		if( Network[0].IsNetcommSecured())
+		if( Network[playernum].IsNetcommSecured())
 			str += "#000000";
-		if( Network[0].IsNetcommActive())
+		if( Network[playernum].IsNetcommActive())
 			str += " - #0000FFON";
 		else
 			str += " - #FF0000OFF";
