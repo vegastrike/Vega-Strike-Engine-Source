@@ -3,6 +3,7 @@
 #include <math.h>
 #include <stdio.h>
 #include "cmd/unit.h"
+#include "lin_time.h"
 #define VELTHRESHOLD .1
 using Orders::MatchLinearVelocity;
 using Orders::MatchVelocity;
@@ -94,15 +95,15 @@ void FlyByWire::Stop (float per) {
   parent->GetComputerData().set_speed =per*parent->GetComputerData().max_speed;
 }
 void FlyByWire::Right (float per) {
-  desired_ang_velocity += (-per*parent->GetComputerData().max_yaw)*Vector (0,1,0);
+  desired_ang_velocity += (-per*parent->GetComputerData().max_yaw/getTimeCompression())*Vector (0,1,0);
 }
 
 void FlyByWire::Up (float per) {
-  desired_ang_velocity += (-per*parent->GetComputerData().max_pitch)*Vector (1,0,0);
+  desired_ang_velocity += (-per*parent->GetComputerData().max_pitch/getTimeCompression())*Vector (1,0,0);
 }
 
 void FlyByWire::RollRight (float per) {
-  desired_ang_velocity += (-per*parent->GetComputerData().max_roll)*Vector (0,0,1);
+  desired_ang_velocity += (-per*parent->GetComputerData().max_roll/getTimeCompression())*Vector (0,0,1);
 }
 
 void FlyByWire::Afterburn (float per){
