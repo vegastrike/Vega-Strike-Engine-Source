@@ -33,7 +33,7 @@ struct BSPDiskNode {
 	bool hasFront;
 	bool hasBack;
 };
-
+class BSPDiskNodeArray;
 class BSPTree;
 
 class BSPNode {
@@ -47,7 +47,7 @@ class BSPNode {
 	}
 
 public:
-	BSPNode(BSPDiskNode **input);
+	BSPNode(BSPDiskNodeArray &input);
 	~BSPNode() {
 		if(front!=NULL)
 			delete front;
@@ -63,7 +63,7 @@ bool CheckBSP (const char *filename);
 class BSPTree {
 	BSPNode *root;
 public:
-	BSPTree(BSPDiskNode *input);
+	BSPTree(BSPDiskNodeArray &input);
 	BSPTree(const char *filename);
 	~BSPTree() {
 	  VSDESTRUCT2
