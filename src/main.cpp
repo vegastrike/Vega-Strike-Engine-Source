@@ -463,7 +463,7 @@ void bootstrap_main_loop () {
     mission->GetOrigin(pos,planetname);
     bool setplayerloc=false;
     string mysystem = mission->getVariable("system","sol.system");
-	string srvip = vs_config->getVariable("network","account_server_ip","");
+	string srvip = vs_config->getVariable("network","server_ip","");
 	int numplayers;
 	/*
 	string nbplayers = vs_config->getVariable("network","nbplayers","1");
@@ -519,7 +519,7 @@ void bootstrap_main_loop () {
 		// Initiate the network if in networking play mode for each local player
 		if( srvip != "")
 		{
-			string srvport = vs_config->getVariable("network","account_server_port", "6779");
+			string srvport = vs_config->getVariable("network","server_port", "6779");
 			// Get the number of local players
 			Network = new NetClient[_Universe->numPlayers()];
 
@@ -560,7 +560,15 @@ void bootstrap_main_loop () {
 		/************* NETWORK PART ***************/
 	  if( Network!=NULL)
 	  {
-		if( Network[k].init_acct( srvipadr, (unsigned short) port).valid() == false)
+		bool ret = false;
+		// Are we using the directly account server to identify us ?
+		string use_acctserver = vs_config->getVariable("network","use_account_server", "false");
+		if( use_acctserver=="true")
+			ret = Network[k].init_acct( srvipadr, (unsigned short) port).valid();
+		else
+		// Or are we going through a game server to do so ?
+			ret = Network[k].init( srvipadr, (unsigned short) port).valid();
+		if( ret==false)
 		{
 			// If network initialization fails, exit
 			cout<<"Network initialization error - exiting"<<endl;
@@ -569,42 +577,20 @@ void bootstrap_main_loop () {
 		}
 		//sleep( 3);
 		cout<<"Waiting for player "<<(k)<<" = "<<(*it)<<":"<<(*jt)<<"login response...";
-		int ret = 0;
-		if( (ret=Network[k].loginAcctLoop( (*it), (*jt)))<=0)
+		if( use_acctserver=="true")
+			savefiles.push_back( Network[k].loginAcctLoop( (*it), (*jt)));
+		else
+			savefiles.push_back( Network[k].loginLoop( (*it), (*jt)));
+		if( savefiles[k][0]=="")
 		{
-			if( ret == -1)
-			{
-				cout<<"Account specified does not exist !!!!"<<endl;
+				cout<<savefiles[k][1]<<endl;
+				cout<<"QUITTING"<<endl;
 				cleanexit=true;
 				winsys_exit(1);
-			}
-			else if( ret == -2)
-			{
-				cout<<"Account already in use !!!!"<<endl;
-				cleanexit=true;
-				winsys_exit(1);
-			}
-			else
-			{
-				cout<<"No account server response, cannot connect, exiting"<<endl;
-				cleanexit=true;
-				winsys_exit(1);
-			}
 		}
 		else
 		{
-			savefiles.push_back( Network[k].loginLoop( (*it), (*jt)));
-			if( savefiles[k].empty())
-			{
-				cout<<"No game server response, cannot connect, exiting"<<endl;
-				cleanexit=true;
-				winsys_exit(1);
-			}
-			else
-			{
-				cout<<" logged in !"<<endl;
-				//savegamefile = homedir+"/save/"+(*it)+".save";
-			}
+			cout<<" logged in !"<<endl;
 		}
 	  }
 		/************* NETWORK PART ***************/

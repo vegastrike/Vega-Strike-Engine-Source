@@ -178,11 +178,6 @@ void	AccountServer::recvMsg( SOCKETALT sock)
 						// We found the client in the account list
 						found = 1;
 						cout<<"Found player : "<<elem->callsign<<":"<<elem->passwd<<endl;
-						if( elem->isConnected())
-						{
-							// and he is connected
-							connected = 1;
-						}
 					}
 				}
 				if( !found)
@@ -193,7 +188,7 @@ void	AccountServer::recvMsg( SOCKETALT sock)
 				}
 				else
 				{
-					if( connected)
+					if( elem->isConnected())
 					{
 						cout<<"Login already connected !"<<endl;
 						this->sendAlreadyConnected( sock, elem);
@@ -203,7 +198,7 @@ void	AccountServer::recvMsg( SOCKETALT sock)
 						cout<<"Login accepted send server ip !"<<endl;
 						// Send a packet with server IP Address
 						this->sendServerData( sock, elem);
-						elem->setConnected( true);
+						//elem->setConnected( true);
 					}
 				}
 			break;
@@ -230,9 +225,9 @@ void	AccountServer::recvMsg( SOCKETALT sock)
 				}
 				else
 				{
-					if( !elem->isConnected())
+					if( elem->isConnected())
 					{
-						cout<<"Client didn't ask for its account data"<<endl;
+						cout<<"Client already connected"<<endl;
 						this->sendUnauthorized( sock, elem);
 					}
 					else
@@ -520,11 +515,7 @@ void	AccountServer::sendAuthorized( SOCKETALT sock, Account * acct)
 		netbuf.addString( string( xmlbuf));
 		cout<<"Save size = "<<readsize<<" - XML size = "<<readsize2<<endl;
 		cout<<"Loaded -= "<<acct->callsign<<" =- save files ("<<(readsize+readsize2)<<")"<<endl;
-		unsigned int total_size = readsize+readsize2+2*NAMELEN+2*sizeof( unsigned int);
 
-		// ??? memcpy( buf, packet.getData(), packet.getLength());
-
-		// Saves are still limited to maxsave bytes but this is a very high value
 		Packet	packet2;
 		if( packet2.send( LOGIN_ACCEPT, serial, netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE|COMPRESSED, NULL, sock, __FILE__, __LINE__ ) < 0 )
 		{

@@ -96,7 +96,7 @@ class	NetClient
 		int		authenticate();
 		bool	PacketLoop( Cmd command);
 		vector<string>	loginLoop( string str_callsign, string str_passwd); // Loops until receiving login response
-		int		loginAcctLoop( string str_callsign, string str_passwd);
+		vector<string>	loginAcctLoop( string str_callsign, string str_passwd);
 		SOCKETALT	init( char * addr, unsigned short port);
 		SOCKETALT	init_acct( char * addr, unsigned short port);
 		void	start( char * addr, unsigned short port);

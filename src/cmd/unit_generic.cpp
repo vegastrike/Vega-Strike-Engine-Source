@@ -2700,8 +2700,8 @@ void Unit::Kill(bool erasefromsave) {
   //if (erasefromsave)
   //  _Universe->AccessCockpit()->savegame->RemoveUnitFromSave((long)this);
 
-  // The server send a kill notification to all concerned clients
-  if( SERVER)
+  // The server send a kill notification to all concerned clients but not if it is an upgrade
+  if( SERVER && this->faction!=FactionUtil::GetFaction("upgrades"))
   	Server->sendKill( this->serial, this->zone);
   
   if (this->colTrees)

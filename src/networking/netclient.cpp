@@ -213,7 +213,7 @@ int		NetClient::checkAcctMsg( SocketSet & set)
 	int len=0;
 	AddressIP	ip2;
 	Packet packeta;
-	int ret = 1;
+	int ret=0;
 
 	// Watch account server socket
 	// Get the number of active clients
@@ -225,6 +225,7 @@ int		NetClient::checkAcctMsg( SocketSet & set)
 		PacketMem mem;
 		if( (len=acct_sock.recvbuf( mem, &ip2 ))>0 )
 		{
+			ret = 1;
 			Packet p( mem );
 			packeta = p;
 			NetBuffer netbuf( packeta.getData(), packeta.getDataLength());
@@ -241,26 +242,28 @@ int		NetClient::checkAcctMsg( SocketSet & set)
 				break;
 				case LOGIN_ERROR :
 					COUT<<">>> LOGIN ERROR =( DENIED )= --------------------------------------"<<endl;
-					ret = -1;
+					globalsaves.push_back( "");
+					globalsaves.push_back( "!!! ACCESS DENIED : Account does not exist !!!");
 				break;
 				case LOGIN_ALREADY :
 					COUT<<">>> LOGIN ERROR =( ALREADY LOGGED IN )= --------------------------------------"<<endl;
-					ret = -2;
+					globalsaves.push_back( "");
+					globalsaves.push_back( "!!! ACCESS DENIED : Account already logged in !!!");
 				break;
 				default:
 					COUT<<">>> UNKNOWN COMMAND =( "<<hex<<packeta.getSerial()<<" )= --------------------------------------"<<endl;
-					ret = -3;
+					globalsaves.push_back( "");
+					globalsaves.push_back( "!!! PROTOCOL ERROR : Unexpected command received !!!");
 			}
 		}
 		else
 		{
-			cerr<<"Connection to account server lost !!"<<endl;
+			globalsaves.push_back( "");
+			globalsaves.push_back( "!!! NETWORK ERROR : Connection to account server lost !!!");
 			acct_sock.disconnect( __PRETTY_FUNCTION__, false );
-			ret = -4;
 		}
 	}
-	else
-		ret = 0;
+
 	return ret;
 }
 
@@ -310,33 +313,25 @@ vector<string>	NetClient::loginLoop( string str_callsign, string str_passwd)
 		//COUT<<elapsed<<" seconds since login request"<<endl;
 		if( elapsed > login_to)
 		{
-			COUT<<"Timed out"<<endl;
+			globalsaves.push_back( "");
+			globalsaves.push_back( "!!! NETWORK ERROR : Connection to game server timed out !!!");
 			timeout = 1;
 		}
-		ret=this->checkMsg( NULL, &packet );
-		if( ret>0)
-		{
-			COUT<<"Got a response"<<endl;
-			recv = 1;
-		}
-		else if( ret<0)
-		{
-			cerr<<"Error, dead connection to server"<<endl;
-			recv=-1;
-		}
+		recv=this->checkMsg( NULL, &packet );
 
 		micro_sleep( 40000);
 	}
 	COUT<<"End of login loop"<<endl;
-	if( ret>0 && packet.getCommand()!=LOGIN_ERROR && packet.getCommand()!=LOGIN_ALREADY && packet.getCommand()!=LOGIN_UNAVAIL)
+	if( globalsaves.empty() || globalsaves[0]!="")
 	{
 		this->callsign = str_callsign;
-		//savefiles = globalsaves;
 	}
+	cout<<"GLOBALSAVES[0] : "<<globalsaves[0]<<endl;
+	cout<<"GLOBALSAVES[1] : "<<globalsaves[1]<<endl;
 	return globalsaves;
 }
 
-int		NetClient::loginAcctLoop( string str_callsign, string str_passwd)
+vector<string>	NetClient::loginAcctLoop( string str_callsign, string str_passwd)
 {
 	COUT << "enter " << "NetClient::loginAcctLoop" << endl;
 
@@ -384,28 +379,20 @@ int		NetClient::loginAcctLoop( string str_callsign, string str_passwd)
 		//COUT<<elapsed<<" seconds since login request"<<endl;
 		if( elapsed > login_to)
 		{
-			COUT<<"Timed out"<<endl;
+			globalsaves.push_back( "");
+			globalsaves.push_back( "!!! NETWORK ERROR : Connection to account server timed out !!!");
 			timeout = 1;
 		}
     	acct_sock.watch( set );
 		nb = set.select( NULL );
 		if( nb > 0 )
-			ret=this->checkAcctMsg( set);
-		if( ret!=0 && ret!=-4)
-		{
-			COUT<<"Got a response"<<endl;
-			recv = 1;
-		}
-		else if( ret == -4)
-		{
-			cerr<<"Error, dead connection to server"<<endl;
-			recv = 1;
-		}
+			recv=this->checkAcctMsg( set);
 
 		micro_sleep( 40000);
 	}
-	COUT<<"End of login loop"<<endl;
-	if( ret!=0 && ret!=-4 && packet.getCommand()!=LOGIN_ERROR && packet.getCommand()!=LOGIN_ALREADY)
+	COUT<<"End of loginAcct loop"<<endl;
+	// globalsaves should be empty otherwise we filled it with an empty string followed by the error message
+	if( globalsaves.empty() || globalsaves[0]!="")
 	{
 		//this->callsign = str_callsign;
 		//savefiles = globalsaves;
@@ -417,7 +404,7 @@ int		NetClient::loginAcctLoop( string str_callsign, string str_passwd)
 		this->init( server_ip, atoi( serverport.c_str()));
 		delete server_ip;
 	}
-	return ret;
+	return globalsaves;
 }
 
 /*************************************************************/
@@ -730,10 +717,14 @@ int NetClient::recvMsg( char* netbuffer, Packet* outpacket )
                 COUT<<">>> LOGIN ERROR =( DENIED )= ------------------------------------------------"<<endl;
                 //COUT<<"Received LOGIN_ERROR"<<endl;
                 this->disconnect();
+				globalsaves.push_back( "");
+				globalsaves.push_back( "!!! ACCESS DENIED : Account does not exist !!!");
                 return -1;
                 break;
 			case LOGIN_UNAVAIL :
 				COUT<<">>> ACCOUNT SERVER UNAVAILABLE ------------------------------------------------"<<endl;
+				globalsaves.push_back( "");
+				globalsaves.push_back( "!!! ACCESS DENIED : Account server unavailable !!!");
 				this->disconnect();
 				return -1;
 				break;

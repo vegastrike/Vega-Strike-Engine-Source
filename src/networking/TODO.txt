@@ -20,6 +20,7 @@
 
 *** GAME SERVER ********************************************************
 
+- Handle a timeout between the time the player logged in and the time he really enters the game
 - Turn mount_num into a char ?
 - Add options to server keyboard control : KILL A SERVER UNIT, KICK A PLAYER, SEND A PLAYER TO JAIL SYSTEM, SEND ADMIN MESSAGE TO PLAYERS...
 

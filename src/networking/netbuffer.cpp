@@ -38,6 +38,7 @@ NetBuffer::~NetBuffer()
 void	NetBuffer::Reset()
 		{
 			memset( buffer, 0, size);
+			offset=0;
 		}
 
 char *	NetBuffer::getData() { return buffer;}
