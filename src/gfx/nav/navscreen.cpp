@@ -111,9 +111,9 @@ void NavigationSystem::Setup()
 	path_view = PATH_ON;
         static bool start_sys_ortho=XMLSupport::parse_bool(vs_config->getVariable("graphics","system_map_ortho_view","false"));
         static bool start_sec_ortho=XMLSupport::parse_bool(vs_config->getVariable("graphics","sector_map_ortho_view","false"));
-	galaxy_view = start_sys_ortho?VIEW_ORTHO:VIEW_2D;
+	system_view = start_sys_ortho?VIEW_ORTHO:VIEW_2D;
         
-	system_view = start_sec_ortho?VIEW_ORTHO:VIEW_2D;
+	galaxy_view = start_sec_ortho?VIEW_ORTHO:VIEW_2D;
 	system_multi_dimensional = 1;
 	galaxy_multi_dimensional = 1;
 
