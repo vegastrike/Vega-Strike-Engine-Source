@@ -332,14 +332,16 @@ void StartGUIFrame(GFXBOOL clr) {
 void DrawGlutMouse(int mousex, int mousey, Sprite * spr) {
   GFXBlendMode (SRCALPHA,INVSRCALPHA);
   GFXColor4f (1,1,1,1);
-
+  GFXDisable(TEXTURE1);
   GFXEnable(TEXTURE0);
   GFXDisable (DEPTHTEST);
-  GFXDisable(TEXTURE1);
+  GFXDisable(LIGHTING);
   float sizex=0,sizey=0;
   spr->GetSize(sizex,sizey);
   spr->SetPosition(-1+.5*sizex+float(mousex)/(.5*g_game.x_resolution),1+.5*sizey-float(mousey)/(.5*g_game.y_resolution));
   spr->Draw();
+  GFXDisable(TEXTURE0);
+  GFXEnable(TEXTURE0);
 }
 extern void	ConditionalCursorDraw(bool);
 void EndGUIFrame(bool drawmouseover) {
