@@ -11,7 +11,8 @@ void FireAt::Execute () {
   UnitCollection::UnitIterator *iter = targets->createIterator();
   Unit * targ;
   while ((targ = iter->current())!=NULL) {
-    
+    float dist;
+    float angle = parent->cosAngleFromMountTo (targ, dist);
 
   }
   delete iter;

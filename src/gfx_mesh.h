@@ -242,7 +242,7 @@ public:
   Mesh();
   Mesh(const char *filename, bool xml=false);
   void Fork (Mesh * &one, Mesh * &two, float a, float b, float c, float d);
-  ~Mesh();
+  virtual ~Mesh();
   unsigned int numFX () {return LocalFX.size();}
   void EnableSpecialFX();
   void GetPolys(vector <bsp_polygon> &);

@@ -51,36 +51,39 @@ namespace AiXml {
       Y,
       Z,
       ACCURACY,
-	  UNKNOWN,
-	  EXECUTEFOR,
-	  TIME,
-	  AFTERBURN,
-	  CHANGEHEAD,
-	  MATCHLIN,
-	  MATCHANG,
-	  MATCHVEL,
-	  ANGULAR,
-	  LINEAR,
-	  LOCAL,
-	  TERMINATE,
-	  VALUE,
-	  ADD,
-	  NORMALIZE,
-	  SCALE,
-	  CROSS,
-	  DOT,
-	  MULTF,
-	  ADDF,
-	  FROMF,
-	  TOF,
-	  FACETARGET,
-	  TARGETPOS,
-	  YOURPOS,
-	  TARGETWORLD,
-	  TARGETLOCAL,
-	  YOURLOCAL,
-	  YOURWORLD,
-	  DEFAULT
+      UNKNOWN,
+      EXECUTEFOR,
+      TIME,
+      AFTERBURN,
+      CHANGEHEAD,
+      MATCHLIN,
+      MATCHANG,
+      MATCHVEL,
+      ANGULAR,
+      LINEAR,
+      LOCAL,
+      TERMINATE,
+      VALUE,
+      ADD,
+      NORMALIZE,
+      SCALE,
+      CROSS,
+      DOT,
+      MULTF,
+      ADDF,
+      FROMF,
+      TOF,
+      FACETARGET,
+      TARGETPOS,
+      THREATPOS,
+      YOURPOS,
+      TARGETWORLD,
+      THREATWORLD,
+      TARGETLOCAL,
+      THREATLOCAL,
+      YOURLOCAL,
+      YOURWORLD,
+      DEFAULT
     };
 
   const EnumMap::Pair element_names[] = {
@@ -112,7 +115,10 @@ namespace AiXml {
     EnumMap::Pair ("Addf", ADDF),
     EnumMap::Pair ("Fromf", FROMF),
     EnumMap::Pair ("Tof", TOF),
-    EnumMap::Pair ("Linear", LINEAR)
+    EnumMap::Pair ("Linear", LINEAR),
+    EnumMap::Pair ("Threatpos", THREATPOS),
+    EnumMap::Pair ("Threatworld", THREATWORLD),
+    EnumMap::Pair ("Threatlocal", THREATLOCAL)
   };
   const EnumMap::Pair attribute_names[] = {
     EnumMap::Pair ("UNKNOWN", UNKNOWN),
@@ -127,7 +133,7 @@ namespace AiXml {
 
 };
 
-  const EnumMap element_map(element_names, 29);
+  const EnumMap element_map(element_names, 31);
   const EnumMap attribute_map(attribute_names, 9);
 }
 
@@ -137,6 +143,7 @@ using XMLSupport::AttributeList;
 using namespace AiXml;
 
 void AIScript::beginElement(const string &name, const AttributeList &attributes) {
+  Unit * tmp;
   Names elem = (Names)element_map.lookup(name);
   AttributeList::const_iterator iter;
   switch(elem) {
@@ -220,12 +227,24 @@ void AIScript::beginElement(const string &name, const AttributeList &attributes)
 	  }
 	}
 	break;
-
+  case THREATPOS:
+	  assert(xml->unitlevel>=2);
+	  xml->unitlevel++;
+	  if((tmp = this->parent->Threat())) {
+	    xml->vectors.push(tmp->Position());
+	  } else {
+	    if ((tmp = this->parent->Target())) {
+	      xml->vectors.push (tmp->Position());
+	    } else {
+	      xml->vectors.push(xml->defaultvec);
+	    }
+	  }
+	  break;
   case TARGETPOS:
 	  assert(xml->unitlevel>=2);
 	  xml->unitlevel++;
-	  if(this->targets) {
-		  xml->vectors.push(this->parent->Target()->Position());
+	  if((tmp = this->parent->Target())) {
+		  xml->vectors.push(tmp->Position());
 	  } else {
 		  xml->vectors.push(xml->defaultvec);
 	  }
@@ -236,8 +255,15 @@ void AIScript::beginElement(const string &name, const AttributeList &attributes)
 	  xml->vectors.push(this->parent->Position());
 	  
 	  break;
-
+  case THREATWORLD:
+	  assert(xml->unitlevel>=2);
+	  xml->unitlevel++;
+	  break;
   case TARGETWORLD:
+	  assert(xml->unitlevel>=2);
+	  xml->unitlevel++;
+	  break;
+  case THREATLOCAL:
 	  assert(xml->unitlevel>=2);
 	  xml->unitlevel++;
 	  break;
@@ -319,7 +345,7 @@ void AIScript::beginElement(const string &name, const AttributeList &attributes)
 void AIScript::endElement(const string &name) {
   Vector temp (0,0,0);
   Names elem = (Names)element_map.lookup(name);
-
+  Unit * tmp;
   switch(elem) {
   case UNKNOWN:
 	  xml->unitlevel--;
@@ -327,11 +353,38 @@ void AIScript::endElement(const string &name) {
     break;
 
 // Vector 
+  case THREATWORLD:
+	  assert(xml->unitlevel>=3);
+	  xml->unitlevel++;
+	  if((tmp = parent->Threat())) {
+		  xml->vectors.push(tmp->ToWorldCoordinates (topv()));
+	  } else {
+	    if((tmp = parent->Target())) {
+	      xml->vectors.push(tmp->ToWorldCoordinates (topv()));
+	    } else {
+	      xml->vectors.push(xml->defaultvec);
+	    }
+	  }
+	  break;
+  case THREATLOCAL:
+	  assert(xml->unitlevel>=3);
+	  xml->unitlevel++;
+	  if((tmp = parent->Threat())) {
+	    xml->vectors.push(tmp->ToLocalCoordinates(topv()));
+	  } else {
+	    if((tmp = parent->Target())) {
+		  xml->vectors.push(tmp->ToLocalCoordinates (topv()));
+	    } else {
+		  xml->vectors.push(xml->defaultvec);
+	    }
+	  }
+	  break;
+
   case TARGETWORLD:
 	  assert(xml->unitlevel>=3);
 	  xml->unitlevel++;
-	  if(this->targets) {
-		  xml->vectors.push(parent->Target()->ToWorldCoordinates (topv()));
+	  if((tmp = parent->Target())) {
+		  xml->vectors.push(tmp->ToWorldCoordinates (topv()));
 	  } else {
 		  xml->vectors.push(xml->defaultvec);
 	  }
@@ -339,8 +392,8 @@ void AIScript::endElement(const string &name) {
   case TARGETLOCAL:
 	  assert(xml->unitlevel>=3);
 	  xml->unitlevel++;
-	  if(this->targets) {
-		  xml->vectors.push(parent->Target()->ToLocalCoordinates(topv()));
+	  if((tmp = parent->Target())) {
+		  xml->vectors.push(tmp->ToLocalCoordinates(topv()));
 	  } else {
 		  xml->vectors.push(xml->defaultvec);
 	  }
@@ -348,20 +401,12 @@ void AIScript::endElement(const string &name) {
   case YOURLOCAL:
 	  assert(xml->unitlevel>=3);
 	  xml->unitlevel++;
-	  if(this->targets) {
-		  xml->vectors.push(this->parent->ToLocalCoordinates(topv()));
-	  } else {
-		  xml->vectors.push(xml->defaultvec);
-	  }
+	  xml->vectors.push(this->parent->ToLocalCoordinates(topv()));
 	  break;
   case YOURWORLD:
 	  assert(xml->unitlevel>=3);
 	  xml->unitlevel++;
-	  if(this->targets) {
-		  xml->vectors.push(this->parent->ToWorldCoordinates(topv()));
-	  } else {
-		  xml->vectors.push(xml->defaultvec);
-	  }
+	  xml->vectors.push(this->parent->ToWorldCoordinates(topv()));
 	  break;
 
   case NORMALIZE:
@@ -519,7 +564,7 @@ void AIScript::LoadXML() {
     XML_ParseBuffer(parser, length, feof(inFile));
   } while(!feof(inFile));
   fclose (inFile);
-  for (int i=0;i<xml->orders.size();i++) {
+  for (unsigned int i=0;i<xml->orders.size();i++) {
 	xml->orders[i]->SetParent(parent);
 	EnqueueOrder (xml->orders[i]);
   }

@@ -397,16 +397,16 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(attribute_map.lookup((*iter).name)) {
       case FRONT:
-	armor.front = parse_float((*iter).value);
+	armor.front = CLAMP_SHORT(parse_float((*iter).value));
 	break;
       case BACK:
-	armor.back=parse_float((*iter).value);
+	armor.back= CLAMP_SHORT(parse_float((*iter).value));
 	break;
       case LEFT:
-	armor.left=parse_float((*iter).value);
+	armor.left= CLAMP_SHORT(parse_float((*iter).value));
 	break;
       case RIGHT:
-	armor.right=parse_float((*iter).value);
+	armor.right= CLAMP_SHORT(parse_float((*iter).value));
 	break;
       }
     }

@@ -84,7 +84,7 @@ Texture * Texture::Exists (string s) {
 }
 
 bool Texture::operator < (const Texture & b) {
-  return ( (original?original:this)<(b.original?b.original:&b));
+  return ( this?(&b?((original?original:this)<(b.original?b.original:&b)):false):true);
 }
 
 bool Texture::operator == (const Texture & b) {

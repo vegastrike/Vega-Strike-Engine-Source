@@ -209,18 +209,17 @@ static bsp_tree * buildbsp(bsp_tree * bsp,vector <bsp_polygon>&, vector <bsp_tre
 #ifndef PROPHECY
 void Unit::BuildBSPTree(const char *filename, bool vplane, Mesh * hull) {
   bsp_tree * bsp=NULL;
-  unsigned int i;
   bsp_tree temp_node;
   vector <bsp_polygon> tri;
   vector <bsp_tree> triplane;
   if (hull!=NULL) {
     hull->GetPolys (tri);
   } else {
-    for (i=0;i<nummesh;i++) {
-      meshdata[i]->GetPolys(tri);
+    for (int j=0;j<nummesh;j++) {
+      meshdata[j]->GetPolys(tri);
     }
   }	
-  for (i=0;i<tri.size();i++) {
+  for (unsigned int i=0;i<tri.size();i++) {
     if (!Cross (tri[i],temp_node)) {
       vector <bsp_polygon>::iterator ee = tri.begin();
       ee+=i;

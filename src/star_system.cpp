@@ -103,6 +103,10 @@ StarSystem::~StarSystem() {
   delete [] primaries;
 }
 
+UnitCollection * StarSystem::getUnitList () {
+  return drawList;
+}
+
 ClickList *StarSystem::getClickList() {
   return new ClickList (this, drawList);
 

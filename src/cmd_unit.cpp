@@ -122,6 +122,7 @@ void Unit::Init()
   limits.afterburn=20;
   limits.retro=1;
   Target(NULL);
+  Threaten (NULL);
   computer.set_speed=0;
   computer.max_speed=10;
   computer.max_ab_speed=30;
@@ -278,6 +279,7 @@ Unit::~Unit()
 
 float Unit::cosAngleFromMountTo (Unit * targ, float & dist) {
   float retval = -1;
+  dist = FLT_MAX;
   float tmpdist;
   float tmpcos;
   Matrix mat;
@@ -288,16 +290,12 @@ float Unit::cosAngleFromMountTo (Unit * targ, float & dist) {
     Vector totarget (targ->Position()-finaltrans.position);
     Vector Normal (mat[8],mat[9],mat[10]);
     tmpcos = Normal.Dot (totarget);
-    //*maybe unnecessary ********
-    Vector rSizeAdj = (totarget-Normal).Normalize();
-    totarget=totarget -rSizeAdj;
-    tmpcos = Normal.Dot (totarget);
-    //***************************
-    tmpdist = totarget.Magnitude();
-    tmpcos/=tmpdist;
+
+    tmpdist = totarget.Magnitude();    
+    tmpcos/=sqrtf(fabs(tmpdist*tmpdist-targ->rSize()*targ->rSize())) ;
     tmpdist /= mounts[i].type.Range;
-    if (tmpdist <dist) {
-      if (tmpcos > retval-tmpdist/2) {
+    if (tmpdist < 1||tmpdist<dist) {
+      if (tmpcos-tmpdist/2 > retval-dist/2) {
 	dist = tmpdist;
 	retval = tmpcos;
       }      
@@ -344,7 +342,6 @@ bool Unit::querySphere (const Vector &pnt, float err) {
 
 float Unit::querySphere (const Vector &start, const Vector &end) {
   int i;
-  float t=0;
   float tmp;
   Vector st,dir;
   for (i=0;i<nummesh;i++) {
@@ -434,7 +431,7 @@ float Unit::queryBSP (const Vector &start, const Vector & end, Vector & norm) {
   }
   if (!temp)
     return false;
-  if (tmp = bspTree->intersects (st,ed,norm)) {
+  if ((tmp = bspTree->intersects (st,ed,norm))!=0) {
     norm = ToWorldCoordinates (norm);
     return tmp;
   }
@@ -493,12 +490,6 @@ void Unit::Draw(const Transformation &parent, const Matrix parentMatrix)
   /*Transformation*/ cumulative_transformation = linear_interpolate(prev_physical_state, curr_physical_state, interpolation_blend_factor);
   cumulative_transformation.Compose(parent, parentMatrix);
   cumulative_transformation.to_matrix(cumulative_transformation_matrix);
-#ifdef VARIABLE_LENGTH_PQR
-        Vector MeshCenter (cumulative_transformation_matrix[0],cumulative_transformation_matrix[1],cumulative_transformation_matrix[2]); 
-        float SizeScaleFactor=sqrtf (MeshCenter.Dot(MeshCenter));
-#else
-        Vector MeshCenter;
-#endif
   int i;
   if (hull <0) {
     Explode();
@@ -537,7 +528,22 @@ void Unit::Draw(const Transformation &parent, const Matrix parentMatrix)
 	Vector tmp;
 	CrossProduct(r,q, tmp);
     _Universe->AccessCamera()->SetOrientation(tmp,q ,r);
-	_Universe->AccessCamera()->SetPosition (cumulative_transformation.position);
+    _Universe->AccessCamera()->SetPosition (cumulative_transformation.position);
+    /***DEBUGGING cosAngleFromMountTo
+    UnitCollection *dL = _Universe->activeStarSystem()->getUnitList();
+    UnitCollection::UnitIterator *tmpiter = dL->createIterator();
+    Unit * curun;
+    while (curun = tmpiter->current()) {
+      if (curun->selected) {
+	float tmpdis;
+	float tmpf = cosAngleFromMountTo (curun, tmpdis);
+        fprintf (stderr,"%s: <%f d: %f\n", curun->name.c_str(), tmpf, tmpdis);
+
+      }
+      tmpiter->advance();
+    }
+    delete tmpiter;
+    **/
   }
   for (i=0;i<nummounts;i++) {
     if (mounts[i].type.type==weapon_info::BEAM) {

@@ -36,7 +36,7 @@ void InputDFA::NewLocationSelect(){
   int cnt=0;
   Vector RunningTotal(0,0,0);
   UnitCollection::UnitIterator * ui = selected->createIterator();
-  while (un=ui->current()) {
+  while ((un=ui->current())) {
     RunningTotal+=un->Position();
     cnt++;
     ui->advance();
@@ -76,7 +76,7 @@ void InputDFA::TargetSelect (KBSTATE k,int x,int y, int delx, int dely, int mod)
     if (k==RELEASE&&CurDFA->targetted!=NULL) {
       UnitCollection::UnitIterator * tmp = CurDFA->selected->createIterator();
       Unit * un;
-      while (un = tmp->current()) {
+      while ((un = tmp->current())) {
 	Order * nAI = CurDFA->orderfac->newOrder();
 	nAI->AttachOrder(CurDFA->targetted);
 	if (CurDFA->queueOrder) {
@@ -105,7 +105,7 @@ void InputDFA::LocSelect (KBSTATE k, int x, int y, int delx, int dely, int mod) 
       UnitCollection::UnitIterator * tmp = CurDFA->selected->createIterator();
       Unit * un;
       Vector tmplocselvec = CurDFA->locsel->GetVector();
-      while (un = tmp->current()) {
+      while ((un = tmp->current())) {
 	Order * nAI = CurDFA->orderfac->newOrder();
 	nAI->AttachOrder(tmplocselvec);
 	if (CurDFA->queueOrder) {

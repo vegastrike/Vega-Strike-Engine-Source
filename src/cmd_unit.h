@@ -66,6 +66,7 @@ friend class PlanetaryOrbit;
   struct Computer {
     Vector NavPoint;
     UnitContainer target;//...and check it each frame    
+    UnitContainer threat;
     float set_speed;
     float max_speed;
     float max_ab_speed;
@@ -223,7 +224,9 @@ public:
   inline void Ref() {ucref++;}
   void UnRef();
   Unit *Target(){return computer.target.GetUnit();}
+  Unit *Threat(){return computer.threat.GetUnit();}
   void Target (Unit * targ) {computer.target.SetUnit(targ);}
+  void Threaten (Unit * targ) {computer.threat.SetUnit(targ);}
   void Fire();
   void UnFire();
   Computer & GetComputerData () {return computer;}

@@ -119,17 +119,17 @@ bool Unit::Collide (Unit * target) {
   }
   if (!bigger->OneWayCollide(smaller,normal,dist))
     return false;
-  float elast = .5*(smaller->GetElasticity()+bigger->GetElasticity());
-  //  float speedagainst = (normal.Dot (smaller->GetVelocity()-bigger->GetVelocity()));
-  //  smaller->ApplyForce (normal * fabs(elast*speedagainst)/SIMULATION_ATOM);
-  //  bigger->ApplyForce (normal * -fabs((elast+1)*speedagainst*smaller->GetMass()/bigger->GetMass())/SIMULATION_ATOM);
+  //UNUSED BUT GOOD  float elast = .5*(smaller->GetElasticity()+bigger->GetElasticity());
+  //BAD  float speedagainst = (normal.Dot (smaller->GetVelocity()-bigger->GetVelocity()));
+  //BADF  smaller->ApplyForce (normal * fabs(elast*speedagainst)/SIMULATION_ATOM);
+  //BAD  bigger->ApplyForce (normal * -fabs((elast+1)*speedagainst*smaller->GetMass()/bigger->GetMass())/SIMULATION_ATOM);
   //deal damage similarly to beam damage!!  Apply some sort of repel force
   if (normal.i==-1&&normal.j==-1) {
     normal = (smaller->Position()-bigger->Position());
     if (normal.i||normal.j||normal.k)
       normal.Normalize();
   }
-  Vector farce = normal*smaller->GetMass()*fabs(normal.Dot ((smaller->GetVelocity()-bigger->GetVelocity()/SIMULATION_ATOM))+fabs (dist)/(SIMULATION_ATOM*SIMULATION_ATOM));
+  //NOT USED BUT GOOD  Vector farce = normal*smaller->GetMass()*fabs(normal.Dot ((smaller->GetVelocity()-bigger->GetVelocity()/SIMULATION_ATOM))+fabs (dist)/(SIMULATION_ATOM*SIMULATION_ATOM));
   smaller->ApplyForce (normal*smaller->GetMass()*fabs(normal.Dot ((smaller->GetVelocity()-bigger->GetVelocity()/SIMULATION_ATOM))+fabs (dist)/(SIMULATION_ATOM*SIMULATION_ATOM)));
   bigger->ApplyForce (normal*(smaller->GetMass()*smaller->GetMass()/bigger->GetMass())*-fabs(normal.Dot ((smaller->GetVelocity()-bigger->GetVelocity()/SIMULATION_ATOM))+fabs (dist)/(SIMULATION_ATOM*SIMULATION_ATOM)));
   //each mesh with each mesh? naw that should be in one way collide
@@ -138,7 +138,7 @@ bool Unit::Collide (Unit * target) {
 
 void Beam::CollideHuge (const LineCollide & lc) {
   vector <const LineCollide *> tmp = collidetable.GetHuge();
-  for (int i=0;i<tmp.size();i++) {
+  for (unsigned int i=0;i<tmp.size();i++) {
     if (tmp[i]->type==LineCollide::UNIT) {
       if (lc.Mini.i< tmp[i]->Maxi.i&&
 	  lc.Mini.j< tmp[i]->Maxi.j&&
@@ -162,7 +162,7 @@ bool Beam::Collide (Unit * target) {
   
 
 
-  if (distance = target->queryBSP(center,end,normal)) { 
+  if ((distance = target->queryBSP(center,end,normal))) { 
 
     curlength = distance;
     impact|=IMPACT;
