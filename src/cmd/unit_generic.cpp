@@ -796,9 +796,19 @@ void Unit::Init(const char *filename, bool SubU, int faction,std::string unitMod
 		}
 	}
   // If save was not succesfull we try to open the unit file itself
-  if( netxml==NULL || err>Ok)
+  VSFile f2;
+  if( netxml==NULL)
+  {
       if (filename[0])
-		err = f.OpenReadOnly (filename, UnitFile);
+	  {
+	  	if( err>Ok)
+			// No save found loading default unit
+			err = f.OpenReadOnly (filename, UnitFile);
+		else
+			// Save found so just opening default unit to get its directory for further loading
+			err = f2.OpenReadOnly (filename, UnitFile);
+	  }
+  }
   if(err>Ok) {
 	cout << "Unit file " << filename << " not found" << endl;
 	fprintf (stderr,"Assertion failed unit_generic.cpp:711 Unit %s not found\n",filename);
@@ -826,6 +836,8 @@ void Unit::Init(const char *filename, bool SubU, int faction,std::string unitMod
 
 	if( err<=Ok)
 	  f.Close();
+	if( f2.Valid())
+		f2.Close();
 }
 
 vector <Mesh *> Unit::StealMeshes() {

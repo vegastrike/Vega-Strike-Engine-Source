@@ -903,6 +903,7 @@ namespace VSFileSystem
 		// ----- THE Directories vector contains the resource/volume files name without extension or the main directory to files
 		Directories[UnitFile] = sharedunits;
 		//SubDirectories[UnitFile].push_back( "factions");
+		// Have to put it in first place otherwise VS will find default unit file
 		SubDirectories[UnitFile].push_back( "subunits");
 		SubDirectories[UnitFile].push_back( "weapons");
 		SubDirectories[UnitFile].push_back( "");
@@ -913,6 +914,8 @@ namespace VSFileSystem
 		SubDirectories[UnitFile].push_back( "factions/confed");
 		SubDirectories[UnitFile].push_back( "factions/pirates");
 		SubDirectories[UnitFile].push_back( "factions/rlaan");
+
+		Directories[UnitSaveFile] = savedunitpath;
 
 		Directories[MeshFile] = sharedmeshes;
 		SubDirectories[MeshFile].push_back( "mounts");

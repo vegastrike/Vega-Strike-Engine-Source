@@ -95,7 +95,7 @@ AC_TRY_COMPILE(, , [malign=yes], [malign=no])
 CXXFLAGS="${saved_CXXFLAGS}"
 
 saved_CXXFLAGS="${CXXFLAGS}"
-CXXFLAGS="-Wall -pthread"
+CXXFLAGS="-Werror -pthread"
 AC_TRY_COMPILE(, , [bsdthread=yes], [bsdthread=no])
 CXXFLAGS="${saved_CXXFLAGS}"
 
@@ -198,7 +198,7 @@ fi
 fi
 
 saved_CXXFLAGS="${CXXFLAGS}"
-CXXFLAGS="-gdwarf-2 -g3"
+CXXFLAGS="-gdwarf-2 -g3 -Werror"
 AC_TRY_COMPILE(, , [gwarf2g3_supported=yes], [gwarf2g3_supported=no])
 CXXFLAGS="${saved_CXXFLAGS}"
 
@@ -349,7 +349,6 @@ do
         then
             FOUND_PYTHON=yes
             PYTHON_SHORT=`echo ${PYTHON_VERSION} | sed -e 's/\./ /g; s/[a-z|A-Z|+]/ /g' | awk '{print $1"."$2}'`
-            PYTHON_SHORT="2.2"
             PYTHON_incchk="/usr/include/python /usr/include/python${PYTHON_SHORT} /usr/local/include/python /usr/local/include/python${PYTHON_SHORT}"
         else
             FOUND_PYTHON=no

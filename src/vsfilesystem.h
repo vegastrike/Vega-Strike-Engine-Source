@@ -46,6 +46,7 @@ namespace VSFileSystem
 						SystemFile,		// Loaded from sectors subdir written in homedir/sectors/universename
 						CockpitFile,	// Loaded from cockpits subdir
 						UnitFile,		// Loaded from units subdir
+						UnitSaveFile,	// Saved unit file
 						TextureFile,	// Loaded from current path or from textures subdir
 						SoundFile,		// Loaded from current path or from sounds subdir
 						PythonFile,		// Loaded from bases subdir // not really used
