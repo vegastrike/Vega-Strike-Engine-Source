@@ -90,19 +90,23 @@ VegaConfig * createVegaConfig( char * file)
 void ParseCommandLine(int argc, char ** CmdLine);
 void cleanup(void)
 {
-	fprintf( stdout, "\n\nLoop average : %g\n\n", avg_loop);
-	fprintf( stderr, "\n\nLoop average : %g\n\n", avg_loop);
-	if( Network!=NULL)
-	{
+  fprintf( stdout, "\n\nLoop average : %g\n\n", avg_loop);
+  fprintf( stderr, "\n\nLoop average : %g\n\n", avg_loop);
+  STATIC_VARS_DESTROYED=true;
+  printf ("Thank you for playing!\n");
+
+  // In network mode, we may not do the save since it is useless
+  if( _Universe != NULL && Network!=NULL)
+	  _Universe->WriteSaveGame(true);
+
+  if( Network!=NULL)
+  {
+		cout<<"Number of players"<<_Universe->numPlayers()<<endl;
 		for( int i=0; i<_Universe->numPlayers(); i++)
 				Network[i].logout();
 		delete [] Network;
-	}
+  }
 
-  STATIC_VARS_DESTROYED=true;
-  printf ("Thank you for playing!\n");
-  if( _Universe != NULL)
-	  _Universe->WriteSaveGame(true);
   winsys_shutdown();
   //    write_config_file();
   AUDDestroy();
@@ -364,17 +368,20 @@ void bootstrap_main_loop () {
     bool setplayerloc=false;
     string mysystem = mission->getVariable("system","sol.system");
 	string srvip = vs_config->getVariable("network","server_ip","");
-	string nbplayers = vs_config->getVariable("network","nbplayers","1");
 	int numplayers;
-	/* Test if nb players if present in netwokr section */
+	/*
+	string nbplayers = vs_config->getVariable("network","nbplayers","1");
+	// Test if nb players if present in netwokr section
 	if( srvip != "" && nbplayers != "")
 	{
 		numplayers = atoi( nbplayers.c_str());
+		cout<<numplayers<<" Players in Networking Mode"<<endl;
 	}
 	else
 	{
+	*/
 		numplayers = XMLSupport::parse_int (mission->getVariable ("num_players","1"));
-	}
+	//}
     vector <std::string>playername;
     vector <std::string>playerpasswd;
 	string pname, ppasswd;
@@ -396,69 +403,47 @@ void bootstrap_main_loop () {
     }
     _Universe->SetupCockpits(playername);
 
-	/************************* NETWORK INIT ***************************/
-	cout<<"Number of local players = "<<_Universe->numPlayers()<<endl;
-	// Initiate the network if in networking play mode for each local player
-	if( srvip != "")
-	{
-		string srvport = vs_config->getVariable("network","server_port", "6777");
-		// Get the number of local players
-		Network = new NetClient[_Universe->numPlayers()];
-
-		cout<<endl<<"Server IP : "<<srvip<<" - port : "<<srvport<<endl<<endl;
-		char * srvipadr = new char[srvip.length()+1];
-		memcpy( srvipadr, srvip.c_str(), srvip.length());
-		srvipadr[srvip.length()] = '\0';
-		int port = atoi( srvport.c_str());
-		cout<<"Port : "<<port<<endl;
-		vector<std::string>::iterator i, j;
-		int nbii = 0;
-		for( i=playername.begin(), j=playerpasswd.begin(); i!=playername.end(); i++, j++, nbii++)
-		{
-			int nbok = 0;
-			if( Network[nbii].init( srvipadr, (unsigned short) port) == -1)
-			{
-				// If network initialization fails, exit
-				cleanup();
-				cout<<"Network initialization error - exiting"<<endl;
-				exit( 1);
-			}
-			//sleep( 3);
-			cout<<"Waiting for player "<<(nbii+1)<<" = "<<(*i)<<":"<<(*j)<<"login response...";
-			nbok = Network[nbii].loginLoop( (*i), (*j));
-			if( nbok==0)
-			{
-				cout<<"No server response, exiting"<<endl;
-				cleanup();
-				exit(1);
-			}
-			else if( nbok==-1)
-			{
-				cout<<"Cannot connect to server"<<endl;
-				cleanup();
-				exit(1);
-			}
-			else
-				cout<<" logged in !"<<endl;
-		}
-	}
-	else
-	{
-		Network = NULL;
-		cout<<"Non-networking mode"<<endl;
-	}
-	/************************* NETWORK INIT ***************************/
 
     float credits=XMLSupport::parse_float (mission->getVariable("credits","0"));
     g_game.difficulty=XMLSupport::parse_float (mission->getVariable("difficulty","1"));
-    string savegamefile = mission->getVariable ("savegame","");
+	string savegamefile = mission->getVariable ("savegame","");
     vector <SavedUnits> savedun;
     vector <string> playersaveunit;
 	vector <StarSystem *> ss;
 	vector <string> starsysname;
 	vector <QVector> playerNloc;
-    for (unsigned int k=0;k<(unsigned int)_Universe->numPlayers();k++) {
-      bool setplayerXloc=false;
+
+	/************************* NETWORK INIT ***************************/
+	char * srvipadr;
+	int port;
+	if ( srvip != "")
+	{
+		cout<<"Number of local players = "<<_Universe->numPlayers()<<endl;
+		// Initiate the network if in networking play mode for each local player
+		if( srvip != "")
+		{
+			string srvport = vs_config->getVariable("network","server_port", "6777");
+			// Get the number of local players
+			Network = new NetClient[_Universe->numPlayers()];
+
+			cout<<endl<<"Server IP : "<<srvip<<" - port : "<<srvport<<endl<<endl;
+			srvipadr = new char[srvip.length()+1];
+			memcpy( srvipadr, srvip.c_str(), srvip.length());
+			srvipadr[srvip.length()] = '\0';
+			port = atoi( srvport.c_str());
+			cout<<"Port : "<<port<<endl;
+		}
+		else
+		{
+			Network = NULL;
+			cout<<"Non-networking mode"<<endl;
+		}
+	}
+	vector<std::string>::iterator it, jt;
+	/************************* NETWORK INIT ***************************/
+	unsigned int k=0;
+    for (k=0, it=playername.begin(), jt=playerpasswd.begin();k<(unsigned int)_Universe->numPlayers();k++, it++, jt++) {
+	  bool setplayerXloc=false;
       std::string psu;
       if (k==0) {
 		QVector myVec;
@@ -470,7 +455,35 @@ void bootstrap_main_loop () {
 		  _Universe->AccessCockpit(0)->savegame->SetStarSystem(st);
 		}
       }
-      vector <SavedUnits> saved=_Universe->AccessCockpit(k)->savegame->ParseSaveGame (savegamefile,mysystem,mysystem,pos,setplayerXloc,credits,psu,k);
+	  vector <SavedUnits> saved;
+		/************* NETWORK PART ***************/
+	  if( Network!=NULL)
+	  {
+		char * savedata = 0;
+		if( Network[k].init( srvipadr, (unsigned short) port) == -1)
+		{
+			// If network initialization fails, exit
+			cleanup();
+			cout<<"Network initialization error - exiting"<<endl;
+			exit( 1);
+		}
+		//sleep( 3);
+		cout<<"Waiting for player "<<(k+1)<<" = "<<(*it)<<":"<<(*jt)<<"login response...";
+		savedata = Network[k].loginLoop( (*it), (*jt));
+		if( savedata==0)
+		{
+			cout<<"No server response, cannot connect, exiting"<<endl;
+			cleanup();
+			exit(1);
+		}
+		else
+		{
+			cout<<" logged in !"<<endl;
+			savegamefile = homedir+"/save/"+(*it)+".save";
+		}
+	  }
+		/************* NETWORK PART ***************/
+	  saved=_Universe->AccessCockpit(k)->savegame->ParseSaveGame (savegamefile,mysystem,mysystem,pos,setplayerXloc,credits,psu,k);
       playersaveunit.push_back(psu);
       _Universe->AccessCockpit(k)->credits=credits;
   	  ss.push_back (_Universe->Init (mysystem,Vector(0,0,0),planetname));

@@ -20,21 +20,8 @@
 #ifdef _WIN32
 #define strcasecmp stricmp
 #endif
-int GetModeFromName (const char * input_buffer) {
-      if (strlen (input_buffer)>3) {
-	if (input_buffer[0]=='a'&&
-	    input_buffer[1]=='d'&&
-	    input_buffer[2]=='d') {
-	  return 1;
-	}
-	if (input_buffer[0]=='m'&&
-	    input_buffer[1]=='u'&&
-	    input_buffer[2]=='l') {
-	  return 2;
-	}
-      }
-      return 0;
-}
+extern int GetModeFromName (const char *);
+
 using std::string;
 
 static string beautify (const std::string &input) {

@@ -281,6 +281,7 @@ protected:
   virtual void Split (int level){}
   //  void SwapOutHalos();
   //  void SwapInHalos();
+  virtual void addHalo( const char * filename, const QVector &loc, const Vector &size, const GFXColor & col, std::string halo_type) {}
 
 // Uses Mesh -> in NetUnit and Unit only
   virtual vector <Mesh *> StealMeshes() { vector <Mesh *> v; return v;}
@@ -392,11 +393,11 @@ public:
 /**** XML STUFF                                                                     ****/
 /***************************************************************************************/
 
- protected:
+ public:
   ///Unit XML Load information
-  struct XMLstring;
+  struct XML;
   ///Loading information
-  XMLstring *xml_str;
+  XML *xml;
 
   static void beginElement(void *userData, const XML_Char *name, const XML_Char **atts);
   static void endElement(void *userData, const XML_Char *name);
@@ -413,9 +414,9 @@ public:
 
 public:
   ///tries to warp as close to un as possible abiding by the distances of various enemy ships...it might not make it all the way
-  virtual void WriteUnit(const char * modificationname="") {}
+  void WriteUnit(const char * modificationname="");
   ///Loads a unit from an xml file into a complete datastructure
-  virtual void LoadXML(const char *filename, const char * unitModifications="", char * xmlbuffer=0, int buflength=0) {};
+  void LoadXML(const char *filename, const char * unitModifications="", char * xmlbuffer=0, int buflength=0);
 
 /***************************************************************************************/
 /**** PHYSICS STUFF                                                                 ****/
@@ -1019,13 +1020,17 @@ public:
 };
 
 ///Holds temporary values for inter-function XML communication Saves deprecated restr info
-struct Unit::XMLstring {
+struct Unit::XML {
   //  vector<Halo*> halos;
   vector<Mount *> mountz;
-  vector<string> meshes;
-  string shieldmesh;
-  string bspmesh;
-  string rapidmesh;
+  vector<Mesh*> meshes;
+  vector<string> meshes_str;
+  Mesh * shieldmesh;
+  Mesh * bspmesh;
+  Mesh * rapidmesh;
+  string shieldmesh_str;
+  string bspmesh_str;
+  string rapidmesh_str;
   void * data;
   vector<Unit*> units;
   int unitlevel;

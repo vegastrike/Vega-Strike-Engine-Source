@@ -1,45 +1,48 @@
 //#include "unit.h"
+#include "unit_xml.h"
 #include "unit_factory.h"
-
+#include "audiolib.h"
 #include "xml_support.h"
-#include "gfx/halo.h"
 //#include <iostream.h>
 #include <fstream>
 #include <expat.h>
 //#include <values.h>
 #include <float.h>
-#include "gfx/mesh.h"
-#include "gfx/sphere.h"
-#include "gfx/bsp.h"
-#include "gfx/sprite.h"
-#include "audiolib.h"
-#include "config_xml.h"
+#include "configxml.h"
 #include "vs_globals.h"
 #include "vegastrike.h"
 #include <assert.h>
 #include "images.h"
 #include "xml_serializer.h"
-#include "collide/rapcol.h"
-#include "unit_collide.h"
 #include "vs_path.h"
-#include "gfx/cockpit.h"
-#include "gfx/animation.h"
+#include "gfx/cockpit_generic.h"
 #define VS_PI 3.1415926536
-template<class UnitType>
-void GameUnit<UnitType>::beginElement(void *userData, const XML_Char *name, const XML_Char **atts) {
-  ((GameUnit<UnitType>*)userData)->beginElement(name, AttributeList(atts));
+
+int GetModeFromName (const char * input_buffer) {
+      if (strlen (input_buffer)>3) {
+	if (input_buffer[0]=='a'&&
+	    input_buffer[1]=='d'&&
+	    input_buffer[2]=='d') {
+	  return 1;
+	}
+	if (input_buffer[0]=='m'&&
+	    input_buffer[1]=='u'&&
+	    input_buffer[2]=='l') {
+	  return 2;
+	}
+      }
+      return 0;
 }
 
-extern void cache_ani (string s);
-extern void update_ani_cache ();
-extern std::string getRandomCachedAniString ();
-extern Animation* getRandomCachedAni ();
-
-template<class UnitType>
-void GameUnit<UnitType>::endElement(void *userData, const XML_Char *name) {
-  ((GameUnit<UnitType>*)userData)->endElement(name);
+void Unit::beginElement(void *userData, const XML_Char *name, const XML_Char **atts) {
+  ((Unit*)userData)->beginElement(name, AttributeList(atts));
 }
-namespace GameUnitXML {
+
+
+void Unit::endElement(void *userData, const XML_Char *name) {
+  ((Unit*)userData)->endElement(name);
+}
+namespace UnitXML {
     enum Names {
       UNKNOWN,
       UNIT,
@@ -315,9 +318,9 @@ extern int GetModeFromName (const char *);
 extern int parseMountSizes (const char * str);
 
 static short CLAMP_SHORT(float x) {return (short)(((x)>65536)?65536:((x)<0?0:(x)));}  
-template<class UnitType>
-void GameUnit<UnitType>::beginElement(const string &name, const AttributeList &attributes) {
-using namespace GameUnitXML;
+
+void Unit::beginElement(const string &name, const AttributeList &attributes) {
+using namespace UnitXML;
   static float game_speed = XMLSupport::parse_float (vs_config->getVariable ("physics","game_speed","1"));
   static float game_accel = XMLSupport::parse_float (vs_config->getVariable ("physics","game_accel","1"));
   Cargo carg;
@@ -352,7 +355,8 @@ using namespace GameUnitXML;
       switch(attribute_map.lookup((*iter).name)) {
       case XFILE:
 	ADDELEM(stringHandler,(*iter).value);
-	xml->shieldmesh =(new Mesh((*iter).value.c_str(), xml->unitscale, faction,flightgroup));
+	addShieldMesh( xml, (*iter).value.c_str(), xml->unitscale, faction,flightgroup);
+	//xml->shieldmesh = createMesh((*iter).value.c_str(), xml->unitscale, faction,flightgroup);
 	break;
       case SHIELDTIGHT: 
 	ADDDEFAULT;
@@ -370,7 +374,7 @@ using namespace GameUnitXML;
       switch(attribute_map.lookup((*iter).name)) {
       case XFILE:
 	ADDDEFAULT;
-	xml->rapidmesh =(new Mesh((*iter).value.c_str(), xml->unitscale, faction,NULL));
+	addRapidMesh( xml, (*iter).value.c_str(), xml->unitscale, faction,NULL);
 	xml->hasColTree = true;	
 	break;
       case RAPID:
@@ -389,7 +393,7 @@ using namespace GameUnitXML;
       switch(attribute_map.lookup((*iter).name)) {
       case XFILE:
 	ADDDEFAULT;
-	xml->bspmesh =(new Mesh((*iter).value.c_str(), xml->unitscale, faction,NULL));
+	addBSPMesh( xml, (*iter).value.c_str(), xml->unitscale, faction,NULL);
 	xml->hasBSP = true;	
 	break;
       case RAPID:
@@ -494,7 +498,8 @@ using namespace GameUnitXML;
       switch(attribute_map.lookup((*iter).name)) {
       case XFILE:
 	ADDDEFAULT;
-	xml->meshes.push_back(new Mesh((*iter).value.c_str(), xml->unitscale, faction,flightgroup));
+	pushMesh( xml, (*iter).value.c_str(), xml->unitscale, faction,flightgroup);
+	//xml->meshes.push_back(createMesh((*iter).value.c_str(), xml->unitscale, faction,flightgroup));
 	break;
       }
     }
@@ -648,8 +653,7 @@ using namespace GameUnitXML;
 	break;
       }
     }
-    halos.AddHalo (filename.c_str(),pos,P.Cast(),GFXColor(halocolor[0],halocolor[1],halocolor[2],halocolor[3]),light_type);
-    //   xml->halos.push_back(new Halo(filename.c_str(),GFXColor(halocolor[0],halocolor[1],halocolor[2],halocolor[3]),pos,P.i,P.j));
+	addHalo( filename.c_str(),pos,P.Cast(),GFXColor(halocolor[0],halocolor[1],halocolor[2],halocolor[3]),light_type);
     break;
   case MOUNT:
     ADDTAG;
@@ -718,7 +722,7 @@ using namespace GameUnitXML;
     Q.Normalize();
     //Transformation(Quaternion (from_vectors (P,Q,R),pos);
     indx = xml->mountz.size();
-    xml->mountz.push_back(new GameMount (filename.c_str(), ammo,volume));
+    xml->mountz.push_back(createMount (filename.c_str(), ammo,volume));
     xml->mountz[indx]->SetMountPosition(Transformation(Quaternion::from_vectors(P.Cast(),Q.Cast(),R.Cast()),pos));
     //xml->mountz[indx]->Activate();
     if (tempbool)
@@ -1271,7 +1275,7 @@ using namespace GameUnitXML;
 
   case YAW:
     ADDTAG;
-    xml->yprrestricted+=GameUnit<UnitType>::XML::YRESTR;
+    xml->yprrestricted+=Unit::XML::YRESTR;
     assert (xml->unitlevel==2);
     xml->unitlevel++;
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
@@ -1290,7 +1294,7 @@ using namespace GameUnitXML;
 
   case PITCH:
     ADDTAG;
-    xml->yprrestricted+=GameUnit<UnitType>::XML::PRESTR;
+    xml->yprrestricted+=Unit::XML::PRESTR;
     assert (xml->unitlevel==2);
     xml->unitlevel++;
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
@@ -1309,7 +1313,7 @@ using namespace GameUnitXML;
 
   case ROLL:
     ADDTAG;
-    xml->yprrestricted+=GameUnit<UnitType>::XML::RRESTR;
+    xml->yprrestricted+=Unit::XML::RRESTR;
     assert (xml->unitlevel==2);
     xml->unitlevel++;
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
@@ -1376,7 +1380,7 @@ using namespace GameUnitXML;
       switch(attribute_map.lookup((*iter).name)) {
       case HUDIMAGE:
 	if ((*iter).value.length()){
-	  image->hudImage = new Sprite ((*iter).value.c_str());
+	  image->hudImage = createSprite ((*iter).value.c_str());
 	  xml->hudimage=(*iter).value;
 	}
 	break;
@@ -1442,9 +1446,8 @@ using namespace GameUnitXML;
 #undef ADDELEM
 }
 
-template<class UnitType>
-void GameUnit<UnitType>::endElement(const string &name) {
-  using namespace GameUnitXML;
+void Unit::endElement(const string &name) {
+  using namespace UnitXML;
   image->unitwriter->EndTag (name);
   Names elem = (Names)element_map.lookup(name);
 
@@ -1460,8 +1463,7 @@ void GameUnit<UnitType>::endElement(const string &name) {
   }
 }
 
-template<class UnitType>
-void GameUnit<UnitType>::WriteUnit (const char * modifications) {
+void Unit::WriteUnit (const char * modifications) {
   if (image->unitwriter)
     image->unitwriter->Write(modifications);
   for (un_iter ui= getSubUnits();(*ui)!=NULL;++ui) {
@@ -1469,8 +1471,8 @@ void GameUnit<UnitType>::WriteUnit (const char * modifications) {
   } 
 }
 extern std::string GetReadPlayerSaveGame (int);
-template<class UnitType>
-void GameUnit<UnitType>::LoadXML(const char *filename, const char * modifications, char * xmlbuffer, int buflength)
+
+void Unit::LoadXML(const char *filename, const char * modifications, char * xmlbuffer, int buflength)
 {
   shield.number=0;
   const int chunk_size = 16384;
@@ -1612,7 +1614,7 @@ void GameUnit<UnitType>::LoadXML(const char *filename, const char * modification
 
   }
   image->CockpitCenter.Set (0,0,0);
-  xml = new XML;
+  xml = new XML();
   xml->damageiterator=0;
   xml->unitModifications = modifications;
   xml->shieldmesh = NULL;
@@ -1624,7 +1626,7 @@ void GameUnit<UnitType>::LoadXML(const char *filename, const char * modification
   xml->unitscale=1;
   XML_Parser parser = XML_ParserCreate(NULL);
   XML_SetUserData(parser, this);
-  XML_SetElementHandler(parser, &GameUnit<UnitType>::beginElement, &GameUnit<UnitType>::endElement);
+  XML_SetElementHandler(parser, &Unit::beginElement, &Unit::endElement);
   
   if( buflength!=0 && xmlbuffer!=NULL)
   {
@@ -1693,6 +1695,7 @@ void GameUnit<UnitType>::LoadXML(const char *filename, const char * modification
   }
   image->unitscale=xml->unitscale;
   string tmpname (filename);
+  /*
   vector <bsp_polygon> polies;
 
   this->colTrees = collideTrees::Get(collideTreeHash);
@@ -1771,5 +1774,6 @@ void GameUnit<UnitType>::LoadXML(const char *filename, const char * modification
   if (xml->rapidmesh) {
     delete xml->rapidmesh;
   }
+  */
   delete xml;
 }

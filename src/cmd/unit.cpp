@@ -263,7 +263,7 @@ GameUnit<UnitType>::GameUnit<UnitType>(const char *filename, bool SubU, int fact
 	if(1&&fp) {
 	  name = filename;
 
-	  LoadXML(filename,unitModifications.c_str());
+	  Unit::LoadXML(filename,unitModifications.c_str());
 	}
 	if (1) {
 	  calculate_extent(false);

@@ -52,24 +52,8 @@ struct CargoColor {
  * the aistate indicates how the unit will behave in the upcoming phys frame
  */
 template <class UnitType> class GameUnit: public UnitType
-{
- private:
-  ///Unit XML Load information
-  struct XML;
-  ///Loading information
-  XML *xml;
- 
-  static void beginElement(void *userData, const XML_Char *name, const XML_Char **atts);
-  static void endElement(void *userData, const XML_Char *name);
-
-  void beginElement(const std::string &name, const AttributeList &attributes);
-  void endElement(const std::string &name);
-
+{ 
 public:
-  ///tries to warp as close to un as possible abiding by the distances of various enemy ships...it might not make it all the way
-  virtual void WriteUnit(const char * modificationname="");
-  ///Loads a unit from an xml file into a complete datastructure
-  virtual void LoadXML(const char *filename, const char * unitModifications="", char * xmlbuffer=0, int buflength=0);
 
   UnitImages &GetImageInformation();
 
@@ -136,9 +120,10 @@ public:
 /**** GFX/MESHES STUFF                                                              ****/
 /***************************************************************************************/
 
+public:
+  HaloSystem halos;
 protected:
   int nummesh()const {return ((int)meshdata.size())-1;}
-  HaloSystem halos;
 
 public:
   vector <Mesh *> StealMeshes();
@@ -155,6 +140,10 @@ public:
   virtual void DrawNow(const Matrix &m = identity_matrix, float lod=1000000000);
   ///Deprecated
   //virtual void ProcessDrawQueue() {}
+  void addHalo( const char * filename, const QVector &loc, const Vector &size, const GFXColor & col, std::string halo_type)
+  {
+	 halos.AddHalo (filename,loc,size,col,halo_type);
+  }
 
 /***************************************************************************************/
 /**** STAR SYSTEM STUFF                                                             ****/
@@ -276,10 +265,11 @@ public:
 /********************************************/
 
   ///Holds temporary values for inter-function XML communication Saves deprecated restr info
+  /*
 	struct XML {
-	  //  vector<Halo*> halos;
 	  vector<Mount *> mountz;
 	  vector<Mesh*> meshes;
+	  vectorstring> meshes_str;
 	  Mesh * shieldmesh;
 	  Mesh * bspmesh;
 	  Mesh * rapidmesh;
@@ -299,7 +289,7 @@ public:
 	  std::string hudimage;
 	  int damageiterator;
 	};
-
+	*/
 };
 
 /****************************************************************************/
@@ -366,7 +356,7 @@ void GameUnit<UnitType>::BuildBSPTree(const char *filename, bool vplane, Mesh * 
 #include "unit_physics.cpp"
 #include "unit_repair.cpp"
 #include "unit_weapon.cpp"
-#include "unit_xml.cpp"
+//#include "unit_xml.cpp"
 
 // From star_system_jump.cpp
 extern Hashtable<std::string, StarSystem ,char [127]> star_system_table;
@@ -504,5 +494,11 @@ void GameUnit<UnitType>::TransferUnitToSystem (unsigned int kk, StarSystem * &sa
     fprintf (stderr,"Already jumped\n");
   }
 }
+
+// FROM unit_xml.cpp -> client only stuff
+extern void cache_ani (string s);
+extern void update_ani_cache ();
+extern std::string getRandomCachedAniString ();
+extern Animation* getRandomCachedAni ();
 
 #endif

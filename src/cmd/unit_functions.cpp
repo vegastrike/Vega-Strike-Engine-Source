@@ -1,4 +1,4 @@
-#include "unit_generic.h"
+#include "unit.h"
 #include "gfx/vec.h"
 #include "gfx/animation.h"
 #include "gfx/cockpit_generic.h"
@@ -6,11 +6,47 @@
 #include "savegame.h"
 #include "xml_support.h"
 #include "unit_factory.h"
+#include "gfx/halo.h"
+#include "gfx/mesh.h"
+#include "gfx/sphere.h"
+#include "gfx/bsp.h"
+#include "gfx/sprite.h"
 #include "audiolib.h"
+#include "collide/rapcol.h"
+#include "unit_collide.h"
+#include "mount.h"
 // Various functions that were used in .cpp files that are now included because of
 // the temple GameUnit class
 // If not separated from those files functions would be defined in multiple places
 // Those functions are client specific
+
+// Wrappers used in unit_xml.cpp
+void addShieldMesh( Unit::XML * xml, const char *filename, const float scale,int faction,class Flightgroup * fg)
+{
+	xml->shieldmesh = new Mesh(filename, scale, faction,fg);
+}
+void addRapidMesh( Unit::XML * xml, const char *filename, const float scale,int faction,class Flightgroup * fg)
+{
+	xml->rapidmesh = new Mesh(filename, scale, faction,fg);
+}
+void addBSPMesh( Unit::XML * xml, const char *filename, const float scale,int faction,class Flightgroup * fg)
+{
+	xml->bspmesh = new Mesh(filename, scale, faction,fg);
+}
+void pushMesh( Unit::XML * xml, const char *filename, const float scale,int faction,class Flightgroup * fg)
+{
+	xml->meshes.push_back(new Mesh(filename, scale, faction,fg));
+}
+
+Mount * createMount(const std::string& name, short int ammo=-1, short int volume=-1)
+{
+	return new GameMount (name.c_str(), ammo,volume);
+}
+
+Sprite * createSprite(const char *file)
+{
+	return new Sprite (file);
+}
 
 // From communication_xml.cpp
 int createSound( string file, bool val)
@@ -26,7 +62,6 @@ std::vector <Mesh *> MakeMesh(unsigned int mysize) {
   }
   return temp;
 }
-
 
 // From unit_xml.cpp
 using std::map;

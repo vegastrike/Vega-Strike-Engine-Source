@@ -453,7 +453,7 @@ void Unit::Init()
   static float capsize = XMLSupport::parse_float(vs_config->getVariable("physics","capship_size","500"));
   capship_size=capsize;
   activeStarSystem=NULL;
-  xml_str=NULL;
+  xml=NULL;
   docked=NOT_DOCKED;
   SubUnit =0;
 
