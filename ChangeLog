@@ -1,3 +1,14 @@
+2002-03-20 Daniel Horn <hellcatv@hotmail.com>
+	* Added intiial comm support
+	* Todo:
+	*  a) make it so that the communications load from an XML file
+	* b) make it so that Order::AdjustRelationTo () does SOMETHING (so that at 
+	     least they target you if you say something bad or the like...eventually it 
+	     needs to modify some local state about the relationship between your race and 
+	     theirs...or at least your ship and theirs)
+	* c) Alex this might be your job: make it so the other AI's respond to 
+	      messages...currently only AggressiveAI responds to messages
+	* d) someday we might want to color code messages
 2002-03-19 Alexander Rawass <alexannika@users.sourceforge.net>
 	
 	* modified src/Makefile.am (bindir was screwed up)
