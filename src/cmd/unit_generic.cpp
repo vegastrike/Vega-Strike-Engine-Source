@@ -4244,7 +4244,12 @@ int Unit::LockMissile() const{
 /***********************************************************************************/
 
 void Unit::Destroy() {
-  if (!killed)
+  if (!killed) {
+    for (int beamcount=0;beamcount<GetNumMounts();beamcount++) {
+      UnFire();
+      AUDStopPlaying(mounts[beamcount].sound); 
+      mounts[beamcount].status=Mount::DESTROYED;
+    }
     if (!Explode(false,SIMULATION_ATOM))
 	{
   		// The server send a kill notification to all concerned clients but not if it is an upgrade
@@ -4253,6 +4258,7 @@ void Unit::Destroy() {
   
         Kill();
  	}
+  }
 }
 
 void Unit::SetCollisionParent (Unit * name) {

@@ -357,6 +357,10 @@ VSSprite * getPlanetImage () {
   static VSSprite s("planet-hud.spr");
   return &s;
 }
+VSSprite * getNavImage () {
+  static VSSprite s("nav-hud.spr");
+  return &s;
+}
 
 void VDU::DrawTarget(Unit * parent, Unit * target) {
   float x,y,w,h;
@@ -371,7 +375,7 @@ void VDU::DrawTarget(Unit * parent, Unit * target) {
   DrawTargetSpr ((target->isUnit()!=PLANETPTR?target->getHudImage ():
 		  (target->GetDestinations().size()!=0? getJumpImage():
 		   (((Planet *)target)->hasLights()?getSunImage():
-		    getPlanetImage()))),.6,x,y,w,h);
+		    (target->getFullname().find("invisible")!=string::npos?getNavImage():getPlanetImage())))),.6,x,y,w,h);
   GFXDisable (TEXTURE0);    
   //sprintf (t,"\n%4.1f %4.1f",target->FShieldData()*100,target->RShieldData()*100);
   double mm=0;

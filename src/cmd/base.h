@@ -116,8 +116,7 @@ public:
 			virtual void EndXML(FILE *fp);
 #endif
 			virtual ~BaseVSSprite () {}
-			BaseVSSprite (const char *spritefile, std::string ind) 
-				: BaseObj(ind),spr(spritefile,BILINEAR,GFXTRUE) {}
+			BaseVSSprite (const char *spritefile, std::string ind);
 		};
 		class BaseTalk : public BaseObj {
 		public:

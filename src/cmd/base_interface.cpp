@@ -57,6 +57,13 @@ void BaseInterface::Room::BaseObj::Draw (BaseInterface *base) {
 //		Do nothing...
 }
 
+static FILTER BlurBases() {
+  static blur_bases = XMLSupport::parse_bool(vs_config->getVariable("graphics","blur_bases","true"));
+  return blur_bases?BILINEAR:NEAREST;
+}
+BaseVSSprite::BaseVSSprite (const char *spritefile, std::string ind) 
+				: BaseObj(ind),spr(spritefile,BluBases(),GFXTRUE) {}
+
 void BaseInterface::Room::BaseVSSprite::Draw (BaseInterface *base) {
 	GFXBlendMode(SRCALPHA,INVSRCALPHA);
 	GFXEnable(TEXTURE0);

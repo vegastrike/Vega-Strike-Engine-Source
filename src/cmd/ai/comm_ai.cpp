@@ -174,7 +174,7 @@ void CommunicatingAI::InitiateContrabandSearch (float playaprob, float targprob)
   if (u) {
     Unit * un =FactionUtil::GetContraband (parent->faction);
     if (un) {
-    if (un->numCargo()>0&&UnitUtil::getUnitSystemFile(un)==UnitUtil::getUnitSystemFile(parent)&&!isDockedAtAll(un)) {
+    if (un->numCargo()>0&&UnitUtil::getUnitSystemFile(un)==UnitUtil::getUnitSystemFile(parent)&&UnitUtil::getFlightgroupName(parent)!="Base"&&!isDockedAtAll(un)) {
     Unit * v;
     if ((v=contraband_searchee.GetUnit())) {
       if (v==u) {
@@ -250,7 +250,7 @@ Unit * CommunicatingAI::GetRandomUnit (float playaprob, float targprob) {
 void CommunicatingAI::RandomInitiateCommunication (float playaprob, float targprob) {
   Unit * target = GetRandomUnit(playaprob,targprob);
   if (target!=NULL) {
-    if (UnitUtil::getUnitSystemFile(target)==UnitUtil::getUnitSystemFile(parent)&&!isDockedAtAll(target)) {
+    if (UnitUtil::getUnitSystemFile(target)==UnitUtil::getUnitSystemFile(parent)&&UnitUtil::getFlightgroupName(parent)!="Base"&&!isDockedAtAll(target)) {
       for (std::list<CommunicationMessage *>::iterator i=messagequeue.begin();i!=messagequeue.end();i++) {   
         Unit * un=(*i)->sender.GetUnit();
         if (un==target) {
