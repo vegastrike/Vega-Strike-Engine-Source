@@ -489,7 +489,8 @@ void Unit::UpdateHudMatrix() {
 	Vector tmp;
 	CrossProduct(r,q, tmp);
     _Universe->AccessCamera()->SetOrientation(tmp,q ,r);
-    _Universe->AccessCamera()->SetPosition (cumulative_transformation.position);
+   
+    _Universe->AccessCamera()->SetPosition (Transform (cumulative_transformation_matrix,image->CockpitCenter));
 }
 
 void Unit::Draw(const Transformation &parent, const Matrix parentMatrix)

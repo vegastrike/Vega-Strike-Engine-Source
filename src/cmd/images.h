@@ -1,6 +1,7 @@
 
 struct UnitImages {
-	std::string cockpitImage;
+  std::string cockpitImage;
+  Vector CockpitCenter;
   Sprite * hudImage;
   ///The explosion starts at null, when activated time explode is incremented and ends at null  
   Animation *explosion; 

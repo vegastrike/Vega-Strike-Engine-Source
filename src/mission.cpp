@@ -203,7 +203,8 @@ void Mission::checkFlightgroup(easyDomNode *node){
   string ainame=node->attr_value("ainame");
   string waves=node->attr_value("waves");
   string nr_ships=node->attr_value("nr_ships");
-
+  string terrain_nr=node->attr_value("terrain_nr");
+  
   if(name.empty() || faction.empty() || type.empty() || ainame.empty() || waves.empty() || nr_ships.empty() ){
     cout << "no valid flightgroup decsription" << endl;
     return;
@@ -248,7 +249,16 @@ void Mission::checkFlightgroup(easyDomNode *node){
   cout << "   rot: " << rot[0] << " " << rot[1] << " " << rot[2] << " " << endl;
 #endif
 
-
+  if (terrain_nr.empty()) {
+    fg->terrain_nr=-1;
+  } else {
+    if (terrain_nr=="mission") {
+      fg->terrain_nr=-2;
+    } else {
+      fg->terrain_nr = atoi (terrain_nr.c_str());
+    }
+  }
+  
   fg->name=name;
   fg->faction=faction;
   fg->type=type;

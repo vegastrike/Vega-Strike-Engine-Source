@@ -145,6 +145,16 @@ void Planet::Draw(const Transformation & quat, const Matrix m) {
     GFXSetLight (lights[i], POSITION,GFXColor (cumulative_transformation.position));
   }
 }
+void Planet::EnableLights () {
+  for (unsigned int i=0;i<lights.size();i++) {
+    GFXEnableLight (lights[i]);
+  }  
+}
+void Planet::DisableLights () {
+  for (unsigned int i=0;i<lights.size();i++) {
+    GFXDisableLight (lights[i]);
+  }
+}
 Planet::~Planet() { 
 	unsigned int i;
 	if (bspTree)

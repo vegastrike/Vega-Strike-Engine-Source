@@ -24,5 +24,7 @@ class Terrain : public QuadTree {
   static void DeleteAll ();
   static void RenderAll ();
   static void UpdateAll (int resolution);
+  void DisableDraw();
+  void EnableDraw();
 };
 #endif

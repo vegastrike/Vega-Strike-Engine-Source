@@ -10,6 +10,7 @@
 #include <vector>
 #include "iterator.h"
 #include "collection.h"
+#include "building.h"
 static std::vector <Terrain *> allterrains;
 
 
@@ -39,18 +40,26 @@ void Terrain::SetTransformation(Matrix Mat ) {
 
 void Terrain::ApplyForce (Unit * un, const Vector & normal, float dist) {
   //  fprintf (stderr,"Unit %s has collided at <%f %f %f>", un->name.c_str(),vec.i,vec.j,vec.k);
-  un->ApplyForce (normal*.4*un->GetMass()*fabs(normal.Dot ((un->GetVelocity()/SIMULATION_ATOM))+fabs (dist)/(SIMULATION_ATOM*SIMULATION_ATOM)));
+  un->ApplyForce (normal*.4*un->GetMass()*fabs(normal.Dot ((un->GetVelocity()/SIMULATION_ATOM))+fabs (dist)/(SIMULATION_ATOM)));
   un->ApplyDamage (un->Position()-normal*un->rSize(),-normal,  .5*fabs(normal.Dot(un->GetVelocity()))*mass*SIMULATION_ATOM,GFXColor(1,1,1,1));
 }
 
 void Terrain::Collide (Unit *un) {
   Vector norm;
+  if (un->isUnit()==BUILDINGPTR) {
+    return;
+  }
   float dist =GetHeight (un->Position(),norm,TotalSizeX,TotalSizeZ)-un->rSize();
   if (dist < 0) {
     ApplyForce (un,norm,-dist);
   } 
 }
-
+void Terrain::DisableDraw() {
+  draw=false;
+}
+void Terrain::EnableDraw() {
+  draw=true;
+}
 void Terrain::Collide () {
   Iterator *iter;
   iter = _Universe->activeStarSystem()->getUnitList()->createIterator();

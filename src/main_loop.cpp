@@ -22,7 +22,7 @@
 #include "cmd/planet.h"
 #include "gfx/sphere.h"
 #include "gfx/coord_select.h"
-
+#include "cmd/building.h"
 #include "cmd/ai/fire.h"
 #include "cmd/ai/aggressive.h"
 #include "cmd/ai/navigation.h"
@@ -390,7 +390,7 @@ void createObjects() {
 
     string fg_name=fg->name;
     string fullname=fg->type;// + ".xunit";
-
+    int fg_terrain = fg->terrain_nr;
     //    cout << "loop " << fg_name << endl;
 
     strcpy(fightername,fullname.c_str());
@@ -440,8 +440,25 @@ void createObjects() {
 	tmptarget[a]=_Universe->GetFaction(fg->faction.c_str()); // that should not be in xml?
 
 	//	  cout << "before unit" << endl;
-	
+	if (fg_terrain==-1||(fg_terrain==-2&&myterrain==NULL)) {
 	  fighters[a] = new Unit(fightername, true, false,tmptarget[a],fg);
+	}else {
+	  if (fg_terrain==-2) {
+	    fighters[a]= new Building (myterrain,fightername,true,false,tmptarget[a],fg);
+	  }else {
+
+	    if (fg_terrain>=(int)_Universe->activeStarSystem()->numTerrain()) {
+	      ContinuousTerrain * t;
+	      assert (fg_terrain-_Universe->activeStarSystem()->numTerrain()<_Universe->activeStarSystem()->numContTerrain());
+	      t =_Universe->activeStarSystem()->getContTerrain(fg_terrain-_Universe->activeStarSystem()->numTerrain());
+	      fighters[a]= new Building (t,fightername,true,false,tmptarget[a],fg);
+	    }else {
+	      Terrain *t=_Universe->activeStarSystem()->getTerrain(fg_terrain);
+	      fighters[a]= new Building (t,fightername,true,false,tmptarget[a],fg);
+	    }
+
+	  }
+	}
 	  fighters[a]->SetPosAndCumPos (pox);
 	  
 	  fg_radius=fighters[a]->rSize();
@@ -543,7 +560,7 @@ void main_loop() {
   _Universe->StartDraw();
 
   if(myterrain){
-    myterrain->AdjustTerrain();
+    myterrain->AdjustTerrain(_Universe->activeStarSystem());
   }
 
   _Universe->activeStarSystem()->Draw();

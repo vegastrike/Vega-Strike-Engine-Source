@@ -50,6 +50,7 @@ class QuadTree {
   float getmaxX() {return minX+(float)maxX;}  float getmaxZ() {return minZ+(float)maxZ;}
   float getSizeX() {return maxX;} float getSizeZ () {return maxZ;}
   void StaticCullData(const float detail);
+  bool GetGroundPos (Vector &Location, Vector & norm, float TotalTerrainSizeX=0, float TotalTerrainSizeZ=0);
 };
 
 #endif

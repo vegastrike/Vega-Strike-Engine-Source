@@ -57,7 +57,8 @@ class UnitCollection;
  */
 enum clsptr {
 	UNITPTR,
-	PLANETPTR
+	PLANETPTR,
+	BUILDINGPTR
 };
 
 class VDU;
@@ -490,6 +491,7 @@ public:
   ///Sets the unit-space position
   void SetPosition(const Vector &pos) {prev_physical_state.position = curr_physical_state.position = pos;}
   ///Sets the cumulative transformation matrix's position...for setting up to be out in the middle of nowhere
+  void SetCurPosition (const Vector & pos) {curr_physical_state.position=pos;}
   void SetPosAndCumPos (const Vector &pos) {SetPosition (pos);cumulative_transformation_matrix[12]=pos.i;cumulative_transformation_matrix[13]=pos.j;cumulative_transformation_matrix[14]=pos.k;cumulative_transformation.position=pos;}
   ///Sets the unit-space position
   void SetPosition(float x, float y, float z) {SetPosition (Vector (x,y,z));}
@@ -550,7 +552,7 @@ public:
   ///Applies a roll of amt
   void RollTorque(float amt);
   ///Updates physics given unit space transformations and if this is the last physics frame in the current gfx frame
-  void UpdatePhysics (const Transformation &trans, const Matrix transmat, const Vector & CumulativeVelocity, bool ResolveLast, UnitCollection *uc=NULL);
+  virtual void UpdatePhysics (const Transformation &trans, const Matrix transmat, const Vector & CumulativeVelocity, bool ResolveLast, UnitCollection *uc=NULL);
   ///Resolves forces of given unit on a physics frame
   void ResolveForces (const Transformation &, const Matrix);
   ///Returns the pqr oritnattion of the unit in world space

@@ -143,7 +143,8 @@ namespace UnitXML {
     EnumMap::Pair ("Pitch", PITCH),
     EnumMap::Pair ("Roll", ROLL),
     EnumMap::Pair ("Mount", MOUNT),
-    EnumMap::Pair ("Radar", RADAR)
+    EnumMap::Pair ("Radar", RADAR),
+    EnumMap::Pair ("Cockpit", COCKPIT)
   };
   const EnumMap::Pair attribute_names[] = {
     EnumMap::Pair ("UNKNOWN", UNKNOWN),
@@ -210,11 +211,11 @@ namespace UnitXML {
     EnumMap::Pair ("CloakWav",CLOAKWAV),
     EnumMap::Pair ("Color",ISCOLOR),
     EnumMap::Pair ("Restricted", RESTRICTED),
-    EnumMap::Pair ("Cockpit", COCKPIT)
+
 };
 
-  const EnumMap element_map(element_names, 26);
-  const EnumMap attribute_map(attribute_names, 65);
+  const EnumMap element_map(element_names, 27);
+  const EnumMap attribute_map(attribute_names, 64);
 }
 
 using XMLSupport::EnumMap;
@@ -833,14 +834,35 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
 	xml->unitlevel++;
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(attribute_map.lookup((*iter).name)) {
-	  case COCKPIT:
-		  image->cockpitImage = (*iter).value;
       default:
+	break;
+      case COCKPIT:
+	fprintf (stderr,"Cockpit attrib deprecated use tag");
 	break;
       }
     }
     break;
+  case COCKPIT:
+    assert (xml->unitlevel==1);
+    xml->unitlevel++;
 
+    for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
+      switch(attribute_map.lookup((*iter).name)) {
+      case XFILE:
+	image->cockpitImage = (*iter).value;
+	break;
+      case X:
+	image->CockpitCenter.i =parse_float ((*iter).value);
+	break;
+      case Y:
+	image->CockpitCenter.j =parse_float ((*iter).value);
+	break;
+      case Z:
+	image->CockpitCenter.k =parse_float ((*iter).value);
+	break;
+      }
+    }
+    break;
   case DEFENSE:
     assert (xml->unitlevel==1);
     xml->unitlevel++;
@@ -901,7 +923,7 @@ void Unit::LoadXML(const char *filename)
     assert(0);
     return;
   }
-
+  image->CockpitCenter.Set (0,0,0);
   xml = new XML;
   xml->shieldmesh = NULL;
   xml->bspmesh = NULL;

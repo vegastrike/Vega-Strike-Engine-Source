@@ -89,13 +89,33 @@ ContinuousTerrain::~ContinuousTerrain() {
   if (data)
     delete []data;
 }
+
+Vector ContinuousTerrain::GetGroundPos (Vector ShipPos, Vector & norm) {
+  for (int i=0;i<numcontterr;i++) {
+    if (data[i]->GetGroundPos (ShipPos,norm,sizeX*width,sizeZ*width)) {
+      return ShipPos;
+    }
+  }
+  return ShipPos;
+}
+void ContinuousTerrain::DisableDraw () {
+  for (int i=0;i<numcontterr;i++) {
+    data[i]->DisableDraw();
+  }
+}
+void ContinuousTerrain::EnableDraw () {
+  for (int i=0;i<numcontterr;i++) {
+    data[i]->DisableDraw();
+  }
+}
+
 void ContinuousTerrain::SetTransformation(Matrix transformation) {
   CopyMatrix (this->transformation,transformation);
   ScaleMatrix (this->transformation, Scales);
   for (int i=0;i<numcontterr;i++) {
     dirty[i]=true;
   }
-  AdjustTerrain();
+  //  AdjustTerrain();
 }
 
 bool ContinuousTerrain::checkInvScale (float &pos, float campos, float size) {
@@ -115,10 +135,10 @@ bool ContinuousTerrain::checkInvScale (float &pos, float campos, float size) {
   }
   return retval;
 }
-void ContinuousTerrain::AdjustTerrain() {
+void ContinuousTerrain::AdjustTerrain(StarSystem * ss) {
   Matrix transform;
 
-  Vector campos =InvScaleTransform (transformation, _Universe->activeStarSystem()->AccessCamera()->GetPosition());
+  Vector campos =InvScaleTransform (transformation, ss->AccessCamera()->GetPosition());
   for (int i=0;i<numcontterr;i++) {
     dirty[i]|=checkInvScale (location[i].i,campos.i,sizeX);
     dirty[i]|=checkInvScale (location[i].k,campos.k,sizeZ);

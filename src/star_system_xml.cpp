@@ -10,10 +10,10 @@
 #include "vs_path.h"
 #include "config_xml.h"
 #include "vegastrike.h"
-
+#include "cmd/cont_terrain.h"
 #include <assert.h>	/// needed for assert() calls.
-
-
+#include "cmd/building.h"
+#include "cmd/ai/aggressive.h"
 void StarSystem::beginElement(void *userData, const XML_Char *name, const XML_Char **atts) {
   ((StarSystem*)userData)->beginElement(name, AttributeList(atts));
 }
@@ -54,6 +54,9 @@ namespace StarXML {
     SI,
     SJ,
     SK,
+    QI,
+    QJ,
+    QK,
     NAME,
     RADIUS,
     GRAVITY,
@@ -81,7 +84,11 @@ namespace StarXML {
     ATTEN,
     DIFF,
     SPEC,
-    AMB
+    AMB,
+    TERRAIN,
+    CONTTERRAIN,
+    MASS,
+    BUILDING
   };
 
   const EnumMap::Pair element_names[] = {
@@ -94,8 +101,10 @@ namespace StarXML {
     EnumMap::Pair ("Attenuated",ATTEN),
     EnumMap::Pair ("Diffuse",DIFF),
     EnumMap::Pair ("Specular",SPEC),
-    EnumMap::Pair ("Ambient",AMB)
-
+    EnumMap::Pair ("Ambient",AMB),
+    EnumMap::Pair ("Terrain",TERRAIN),
+    EnumMap::Pair ("ContinuousTerrain",CONTTERRAIN),
+    EnumMap::Pair ("Building",BUILDING)
   };
   const EnumMap::Pair attribute_names[] = {
     EnumMap::Pair ("UNKNOWN", UNKNOWN),
@@ -117,6 +126,9 @@ namespace StarXML {
     EnumMap::Pair ("si", SI),     
     EnumMap::Pair ("sj", SJ),     
     EnumMap::Pair ("sk", SK),
+    EnumMap::Pair ("qi", QI), 
+    EnumMap::Pair ("qj", QJ), 
+    EnumMap::Pair ("qk", QK), 
     EnumMap::Pair ("name", NAME),
     EnumMap::Pair ("radius", RADIUS),
     EnumMap::Pair ("gravity", GRAVITY),
@@ -127,11 +139,12 @@ namespace StarXML {
     EnumMap::Pair ("Blue", EMBLUE),
     EnumMap::Pair ("Alpha", EMALPHA),
     EnumMap::Pair ("faction", FACTION),
-    EnumMap::Pair ("Light", LIGHT)
+    EnumMap::Pair ("Light", LIGHT),
+    EnumMap::Pair ("Mass", MASS)
   };
 
-  const EnumMap element_map(element_names, 10);
-  const EnumMap attribute_map(attribute_names, 30);
+  const EnumMap element_map(element_names, 13);
+  const EnumMap attribute_map(attribute_names, 34);
 }
 
 using XMLSupport::EnumMap;
@@ -148,7 +161,7 @@ static void GetLights (const vector <GFXLight> &origlights, vector <GFXLightLoca
   char * st =tmp;
   int numel;
   while ((numel=sscanf (st,"%d%c",&tint,&isloc))>0) {
-    assert (tint<origlights.size());
+    assert (tint<(int)origlights.size());
     lloc.ligh = origlights[tint];
     lloc.islocal = (numel>1&&isloc=='l');
     curlights.push_back (lloc);
@@ -162,6 +175,7 @@ static void GetLights (const vector <GFXLight> &origlights, vector <GFXLightLoca
 } 
 
 void StarSystem::beginElement(const string &name, const AttributeList &attributes) {
+  std::string myfile;
   vector <GFXLightLocal> curlights;
   xml->cursun.i=0;
   GFXColor tmpcol(0,0,0,1);
@@ -234,6 +248,95 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
 
     }
 
+    break;
+  case TERRAIN:
+  case CONTTERRAIN:
+    S = Vector (0,1,0);
+    R = Vector (0,0,1);
+    pos = Vector (0,0,0);
+    radius=-1;
+    position=parse_float (vs_config->getVariable ("terrain","mass","100"));
+    gravity=0;
+
+    for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
+      switch(attribute_map.lookup((*iter).name)) {
+      case XFILE:
+	myfile = (*iter).value;
+	break;
+      case GRAVITY:
+	gravity=parse_float((*iter).value);
+	break;
+      case MASS:
+	position = parse_float ((*iter).value);
+	break;
+      case RADIUS:
+	radius = parse_float ((*iter).value);
+	break;
+      case X:
+	pos.i = parse_float ((*iter).value);
+	break;
+      case Y:
+	pos.j = parse_float ((*iter).value);
+	break;
+      case Z:
+	pos.k = parse_float ((*iter).value);
+	break;
+      case RI:
+	R.i=parse_float((*iter).value);
+	break;
+      case RJ:
+	R.j=parse_float((*iter).value);
+	break;
+      case RK:
+	R.k=parse_float((*iter).value);
+	break;
+      case QI:
+	S.i=parse_float((*iter).value);
+	break;
+      case QJ:
+	S.j=parse_float((*iter).value);
+	break;
+      case QK:
+	S.k=parse_float((*iter).value);
+	break;
+      }	
+    }
+    {
+      Vector TerrainScale (XMLSupport::parse_float (vs_config->getVariable ("terrain","xscale","1")),XMLSupport::parse_float (vs_config->getVariable ("terrain","yscale","1")),XMLSupport::parse_float (vs_config->getVariable ("terrain","zscale","1")));
+      Matrix t;
+      Identity(t);
+      float y =S.Magnitude();
+      Normalize(S);
+      float z =R.Magnitude();
+      Normalize(R);
+      TerrainScale.i*=z;
+      TerrainScale.k*=z;
+      TerrainScale.j*=y;      
+      t[4]=S.i*TerrainScale.j;
+      t[5]=S.j*TerrainScale.j;
+      t[6]=S.k*TerrainScale.j;
+      t[8]=R.i*TerrainScale.k;
+      t[9]=R.j*TerrainScale.k;
+      t[10]=R.k*TerrainScale.k;
+      S = S.Cross (R);
+      t[0]=S.i*TerrainScale.i;
+      t[1]=S.j*TerrainScale.i;
+      t[2]=S.k*TerrainScale.i;
+      t[12]=pos.i+xml->systemcentroid.i;
+      t[13]=pos.i+xml->systemcentroid.j;
+      t[14]=pos.i+xml->systemcentroid.k;
+      if (myfile.length()) {
+	if (elem==TERRAIN) {
+	  terrains.push_back (new Terrain (myfile.c_str(),TerrainScale,position,radius));
+	  xml->parentterrain = terrains.back();
+	  terrains.back()->SetTransformation(t);
+	}else {
+	  contterrains.push_back (new ContinuousTerrain (myfile.c_str(),TerrainScale,position));
+	  xml->ct =contterrains.back();;
+	  contterrains.back()->SetTransformation (t);
+	}
+      }
+    }
     break;
   case LIGHT: 
     assert (xml->unitlevel==1);
@@ -337,24 +440,15 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
 	S.k=parse_float((*iter).value);
 	break;
       case X:
- 	assert(xml->unitlevel==2);
-
  	xml->cursun.i=parse_float((*iter).value);
-
  	break;
 
       case Y:
- 	assert(xml->unitlevel==2);
-
  	xml->cursun.j=parse_float((*iter).value);
-
  	break;
 
       case Z:
- 	assert(xml->unitlevel==2);
-
  	xml->cursun.k=parse_float((*iter).value);
-
  	break;
 
       case RADIUS:
@@ -386,6 +480,7 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
     delete []filename;
     break;
   case UNIT:
+  case BUILDING:
     assert (xml->unitlevel>0);
     xml->unitlevel++;
     S = Vector (0,1,0);
@@ -448,13 +543,23 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
       }
 
     }  
-    if (xml->unitlevel>2) {
+    if (xml->unitlevel>((xml->parentterrain==NULL&&xml->ct==NULL)?2:3)) {
       assert(xml->moons.size()!=0);
       xml->moons[xml->moons.size()-1]->Planet::beginElement(R,S,velocity,position,gravity,radius,filename,NULL,vector <char *>(),xml->unitlevel-1,ourmat,curlights,true,faction);
     } else {
-      xml->moons.push_back((Planet *)new Unit(filename,true ,false,faction));
-      xml->moons[xml->moons.size()-1]->SetAI(new PlanetaryOrbit(xml->moons[xml->moons.size()-1],velocity,position,R,S,xml->cursun+xml->systemcentroid, NULL));
-      xml->moons[xml->moons.size()-1]->SetPosAndCumPos(R+S+xml->cursun+xml->systemcentroid);
+      if (xml->parentterrain!=NULL) {
+	xml->moons.push_back ((Planet *)new Building (xml->parentterrain,filename,true,false,faction));
+	xml->moons.back()->SetPosAndCumPos (xml->cursun+xml->systemcentroid);
+	xml->moons.back()->EnqueueAI( new Orders::AggressiveAI ("default.agg.xml", "default.int.xml"));
+      }else if (xml->ct!=NULL) {
+	xml->moons.push_back ((Planet *)new Building (xml->ct,filename,true,false,faction));
+	xml->moons.back()->SetPosAndCumPos (xml->cursun+xml->systemcentroid);
+	xml->moons.back()->EnqueueAI( new Orders::AggressiveAI ("default.agg.xml", "default.int.xml"));
+      }else {
+	xml->moons.push_back((Planet *)new Unit(filename,true ,false,faction));
+	xml->moons[xml->moons.size()-1]->SetAI(new PlanetaryOrbit(xml->moons[xml->moons.size()-1],velocity,position,R,S,xml->cursun+xml->systemcentroid, NULL));
+	xml->moons[xml->moons.size()-1]->SetPosAndCumPos(R+S+xml->cursun+xml->systemcentroid);
+      }
     }
     delete []filename;
     break;
@@ -472,6 +577,14 @@ void StarSystem::endElement(const string &name) {
   case UNKNOWN:
     xml->unitlevel--;
     //    cerr << "Unknown element end tag '" << name << "' detected " << endl;
+    break;
+  case CONTTERRAIN:
+    xml->unitlevel--;
+    xml->ct = NULL;
+    break;
+  case TERRAIN:
+    xml->parentterrain=NULL;
+    xml->unitlevel--;
     break;
   default:
     xml->unitlevel--;
@@ -500,6 +613,8 @@ void StarSystem::LoadXML(const char *filename, const Vector & centroid) {
   }
 
   xml = new StarXML;
+  xml->parentterrain=NULL;
+  xml->ct=NULL;
   xml->systemcentroid=centroid;
   xml->fade = (vs_config->getVariable ("graphics","starblend","true")==string("true"));
   xml->starsp = 150;

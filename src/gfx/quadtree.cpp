@@ -83,7 +83,23 @@ QuadTree::~QuadTree () {
   delete nonlinear_transform;
   
 }
-
+bool QuadTree::GetGroundPos (Vector &Location, Vector & norm, float TotalTerrainSizeX, float TotalTerrainSizeZ) {
+  Vector Loc = nonlinear_transform->InvTransform (InvScaleTransform (transformation,Location));
+  if (TotalTerrainSizeX) {
+    Loc.i= fmod (Loc.i,TotalTerrainSizeX);
+    Loc.k= fmod (Loc.k,TotalTerrainSizeZ);
+    if (Loc.i<0)
+      Loc.i+=TotalTerrainSizeX;
+    if (Loc.k<0)
+      Loc.k+=TotalTerrainSizeZ;
+  }
+  float tmp =  root->GetHeight (RootCornerData,Loc.i,Loc.k,  norm);
+  if (tmp>-FLT_MAX) {
+    Location = Transform (transformation,nonlinear_transform->Transform (Vector (Loc.i,tmp,Loc.k)));
+    return true;
+  }
+  return false;
+}
 float QuadTree::GetHeight (Vector Location, Vector & normal, float TotalTerrainSizeX, float TotalTerrainSizeZ) {
   Location = nonlinear_transform->InvTransform (InvScaleTransform (transformation,Location));
   if (TotalTerrainSizeX) {
@@ -101,7 +117,7 @@ float QuadTree::GetHeight (Vector Location, Vector & normal, float TotalTerrainS
       Location.k+=TotalTerrainSizeZ;
   }
   float tmp =  Location.j-root->GetHeight (RootCornerData,Location.i,Location.k,  normal);
-  normal = Transform (transformation,nonlinear_transform->TransformNormal (Location, normal));
+  normal = TransformNormal (transformation,nonlinear_transform->TransformNormal (Location, normal));
   normal.Normalize();
   return tmp;
 }

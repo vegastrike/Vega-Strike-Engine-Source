@@ -1,5 +1,5 @@
 #include "terrain.h"
-
+class StarSystem;
 const int numcontterr=4;
 class ContinuousTerrain {
   Vector Scales;
@@ -18,6 +18,9 @@ class ContinuousTerrain {
   /**
    *  Centers terrain around camera
    */
-  void AdjustTerrain();
+  void AdjustTerrain(StarSystem *);
   ~ContinuousTerrain();
+  void DisableDraw();
+  void EnableDraw();
+  Vector GetGroundPos(Vector ShipPos, Vector & norm);
 };

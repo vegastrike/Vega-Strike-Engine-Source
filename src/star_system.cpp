@@ -21,7 +21,7 @@
 #include "cmd/music.h"
 #include "config_xml.h"
 #include "vs_globals.h"
-#include "cmd/terrain.h"
+#include "cmd/cont_terrain.h"
 extern Music *muzak;
 extern Vector mouseline;
 
@@ -141,9 +141,49 @@ void StarSystem::AddUnit(Unit *unit) {
 void StarSystem::RemoveUnit(Unit *unit) {
   assert(0);
 }
+void StarSystem::SwapIn () {
+  Iterator *iter = drawList->createIterator();
+  Unit *unit;
+  while((unit = iter->current())!=NULL) {
+    if (unit->isUnit()==PLANETPTR) {
+      ((Planet *)unit)->EnableLights();
+    }
+    iter->advance();
+  }
+  delete iter;  
+  unsigned int i;
+  for (i=0;i<terrains.size();i++) {
+    terrains[i]->EnableDraw();
+  }
+  for (i=0;i<contterrains.size();i++) {
+    contterrains[i]->EnableDraw();
+  }
+}
 
+void StarSystem::SwapOut () {
+  Iterator *iter = drawList->createIterator();
+  Unit *unit;
+  while((unit = iter->current())!=NULL) {
+    if (unit->isUnit()==PLANETPTR) {
+      ((Planet *)unit)->DisableLights();
+    }
+    iter->advance();
+  }
+  delete iter;
+  unsigned int i;
+  for (i=0;i<terrains.size();i++) {
+    terrains[i]->DisableDraw();
+  }
+  for (i=0;i<contterrains.size();i++) {
+    contterrains[i]->DisableDraw();
+  }
+
+}
 void StarSystem::Draw() {
   AnimatedTexture::UpdateAllFrame();
+  for (unsigned int i=0;i<contterrains.size();i++) {
+    contterrains[i]->AdjustTerrain(this);
+  }
   GFXDisable (LIGHTING);
   bg->Draw();
 
@@ -151,8 +191,6 @@ void StarSystem::Draw() {
   Unit *unit;
   while((unit = iter->current())!=NULL) {
     unit->Draw();
-    Vector norm;
-    float t;
     iter->advance();
   }
   delete iter;

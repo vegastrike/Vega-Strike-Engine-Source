@@ -17,7 +17,8 @@ class InputDFA;
 using XMLSupport::AttributeList;
 struct Texture;
 class Background;
-
+class Terrain;
+class ContinuousTerrain;
 
 /**
  * Star System
@@ -32,8 +33,10 @@ class StarSystem {
   ///Stars, planets, etc. Orbital mechanics precalculated 
   int numprimaries; Unit **primaries; 
   ///Starsystem XML Struct For use with XML loading
-  struct StarXML { 
-  int unitlevel;
+  struct StarXML {
+    Terrain * parentterrain;
+    ContinuousTerrain * ct;
+    int unitlevel;
     std::vector <GFXLight> lights;
     std::vector <Planet *> moons;
     string backgroundname;
@@ -45,9 +48,11 @@ class StarSystem {
     bool fade;
     float starsp;
   } *xml;
+  std::vector <Terrain *> terrains;
+  std::vector <ContinuousTerrain *>contterrains;
   /// Everything to be drawn. Folded missiles in here oneday
   UnitCollection *drawList; 
-/// Objects subject to global gravitron physics (disabled)   
+  /// Objects subject to global gravitron physics (disabled)   
   UnitCollection *units;    
   /// no physics modelling, not searched through for clicks (deprecated)
   UnitCollection *missiles; 
@@ -70,6 +75,10 @@ class StarSystem {
   Background* getBackground() {return bg;}
   ///activates the light map texture
   void activateLightMap();
+  Terrain * getTerrain (unsigned int which) {return terrains[which];}
+  unsigned int numTerrain () {return terrains.size();}
+  ContinuousTerrain * getContTerrain (unsigned int which) {return contterrains[which];}
+  unsigned int numContTerrain () {return contterrains.size();}
   void LoadXML(const char*, const Vector & centroid);
   static void beginElement(void *userData, const XML_Char *name, const XML_Char **atts);
   static void endElement(void *userData, const XML_Char *name);
@@ -100,6 +109,11 @@ class StarSystem {
   void Draw();
   /// update a simulation atom
   void Update(); 
+  ///re-enables the included lights and terrains
+  void SwapIn ();
+  ///Disables included lights and terrains
+  void SwapOut ();
+
 };
 
 #endif
