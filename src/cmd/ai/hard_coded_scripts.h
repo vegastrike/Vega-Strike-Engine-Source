@@ -22,6 +22,10 @@ CCScript Stop;
 CCScript TurnAway;
 CCScript TurnTowardsITTS;
 CCScript TurnTowards;
+CCScript BarrelRoll;
+CCScript EvadeThrust;
+CCScript LoopAround;
+
 #endif
 
 

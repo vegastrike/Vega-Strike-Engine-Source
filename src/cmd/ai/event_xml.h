@@ -19,9 +19,11 @@ namespace AIEvents {
     int type;
     ///The maximum/minimum values that will cause this event
     float max, min;
+	float timetofinish;
+	float timetointerrupt;
     ///The string indicating what type of thing this event evaluates
     std::string script;
-    AIEvresult (int type, float const min, const float max, const std::string &aiscript);
+    AIEvresult (int type, float const min, const float max, float timetofinish,float timetointerrupt, const std::string &aiscript);
     bool Eval (const float eval) const {//return ((eval>=min)&&(eval<max)&&type>0)||(eval>=max&&eval<min&&type<0);
       if (eval>=min)
 	if (eval < max)

@@ -21,14 +21,14 @@ namespace Orders {
    * to figure out how many switchbacks it has made
    * , missing the target and coming back over it.
    */
-class MoveTo : public Order {
+
+class MoveToParent {
   unsigned char afterburnAndSwitchbacks;//don't need the lowest order bit
   unsigned char terminatingX;
   unsigned char terminatingY;
   unsigned char terminatingZ;
-  ///The last_velocity keeps track of the previous velocity so the script may determine if it has crossed over 0 this frame or not
   Vector last_velocity;
-  bool OptimizeSpeed (float v, float &a);
+  bool OptimizeSpeed (Unit * parent, float v, float &a);
   bool Done (const Vector &);
   bool selfterminating;
 public:
@@ -39,8 +39,18 @@ public:
       afterburnAndSwitchbacks&= (~1);
     }
   }
+	MoveToParent(bool aft, unsigned char numswitchbacks,bool terminating=true): afterburnAndSwitchbacks(aft+(numswitchbacks<<1)),terminatingX(0), terminatingY(0), terminatingZ(0), last_velocity(0,0,0), selfterminating(terminating) {}
+	bool Execute(Unit * parent, const QVector &targetlocation);
+};
+class MoveTo : public Order {
+	MoveToParent m;
+  ///The last_velocity keeps track of the previous velocity so the script may determine if it has crossed over 0 this frame or not
+public:
+	void SetAfterburn(bool tf) {
+		m.SetAfterburn(tf);
+	}
   ///takes in the destination target, whether afterburners should be applied, and the ammount of accuracy (how many times it shoudl miss destination and come back) should be used
-  MoveTo(const QVector &target, bool aft, unsigned char numswitchbacks, bool terminating=true) : Order(MOVEMENT,SLOCATION), afterburnAndSwitchbacks(aft+(numswitchbacks<<1)),terminatingX(0), terminatingY(0), terminatingZ(0), last_velocity(0,0,0), selfterminating(terminating) {
+  MoveTo(const QVector &target, bool aft, unsigned char numswitchbacks, bool terminating=true) : Order(MOVEMENT,SLOCATION), m(aft,numswitchbacks,terminating){
     targetlocation = target;
     done=false;
   }

@@ -89,9 +89,9 @@ static float CalculateBalancedDecelTime (float l, float v, float &F, float mass)
 void MoveTo::SetDest (const QVector &target) {
     targetlocation = target;
     done = false;
-  }
+}
 
-bool MoveTo::OptimizeSpeed (float v, float &a) {
+bool MoveToParent::OptimizeSpeed (Unit * parent, float v, float &a) {
   v += (a/parent->GetMass())*SIMULATION_ATOM;
   float max_speed = ((afterburnAndSwitchbacks&ABURN)?parent->GetComputerData().max_ab_speed():parent->GetComputerData().max_speed());
   if ((!max_speed)||fabs(v)<=max_speed) {
@@ -103,7 +103,7 @@ bool MoveTo::OptimizeSpeed (float v, float &a) {
 }
 
 float MOVETHRESHOLD=SIMULATION_ATOM/1.9;
-bool MoveTo::Done(const Vector & ang_vel) {
+bool MoveToParent::Done(const Vector & ang_vel) {
   if (fabs(ang_vel.i) < THRESHOLD&&
       fabs(ang_vel.j) < THRESHOLD&&
       fabs(ang_vel.k) < THRESHOLD) { //if velocity is lower than threshold
@@ -113,9 +113,13 @@ bool MoveTo::Done(const Vector & ang_vel) {
 }
 
 
-void MoveTo::Execute(){
-  //  cout << "MOVETO target =" << targetlocation << endl;
 
+void MoveTo::Execute(){
+	done = done||m.Execute(parent,targetlocation);
+}
+  //  cout << "MOVETO target =" << targetlocation << endl;
+bool MoveToParent::Execute(Unit * parent, const QVector& targetlocation) {
+  bool done=false;
   Vector local_vel (parent->UpCoordinateLevel(parent->GetVelocity()));
   //local location is ued for storing the last velocity;
   terminatingX += ((local_vel.i>0)!=(last_velocity.i>0)||(!local_vel.i));
@@ -125,7 +129,7 @@ void MoveTo::Execute(){
   last_velocity = local_vel;
   Vector heading = parent->ToLocalCoordinates((targetlocation-parent->Position()).Cast());
   Vector thrust (parent->Limits().lateral, parent->Limits().vertical,(afterburnAndSwitchbacks&ABURN)?parent->Limits().afterburn:parent->Limits().forward);
-  if (done) return;
+  if (done) return done;//unreachable
   unsigned char numswitchbacks = afterburnAndSwitchbacks>>1;
   if (terminatingX>numswitchbacks&&
       terminatingY>numswitchbacks&&
@@ -138,7 +142,7 @@ void MoveTo::Execute(){
 	terminatingY=0;
 	terminatingZ=0;
       }	
-      return;
+      return done;
     }
     thrust = (-parent->GetMass()/SIMULATION_ATOM)*last_velocity;
   }else {
@@ -152,7 +156,7 @@ void MoveTo::Execute(){
 	thrust.k+= (SIMULATION_ATOM-t)*(thrust.k>0?-parent->Limits().retro:((afterburnAndSwitchbacks&ABURN)?parent->Limits().afterburn:parent->Limits().forward))/SIMULATION_ATOM;
       }
     }
-    OptimizeSpeed (last_velocity.k,thrust.k);
+    OptimizeSpeed (parent,last_velocity.k,thrust.k);
     t = CalculateBalancedDecelTime(heading.i, last_velocity.i, thrust.i,parent->GetMass());
     if (t<THRESHOLD) {
       thrust.i = -thrust.i;
@@ -161,7 +165,7 @@ void MoveTo::Execute(){
 	thrust.i *= (t-(SIMULATION_ATOM-t))/SIMULATION_ATOM;
       }
     }
-    OptimizeSpeed (last_velocity.i,thrust.i);
+    OptimizeSpeed (parent,last_velocity.i,thrust.i);
     t = CalculateBalancedDecelTime(heading.j, last_velocity.j, thrust.j,parent->GetMass());
     if (t<THRESHOLD) {
       thrust.j = -thrust.j;
@@ -170,10 +174,10 @@ void MoveTo::Execute(){
 	thrust.j *= (t-(SIMULATION_ATOM-t))/SIMULATION_ATOM;
       }
     }
-    OptimizeSpeed (last_velocity.j,thrust.j);
+    OptimizeSpeed (parent,last_velocity.j,thrust.j);
   }
   parent->ApplyLocalForce (thrust);
-  return;
+  return done;
 }
 MoveTo::~MoveTo () {
 #ifdef ORDERDEBUG

@@ -5,7 +5,6 @@
 class Flightgroup;
 namespace Orders {
 class AggressiveAI: public FireAt {
-  enum INTERCUR {INTERR,INTNORMAL,INTRECOVER} curinter;
   bool obedient;//am I currently obedient
   bool last_time_insys;
   char jump_time_check;
@@ -15,9 +14,10 @@ protected:
   AIEvents::ElemAttrMap *logic;
   AIEvents::ElemAttrMap *interrupts;
   float logiccurtime;
+  float interruptcurtime;
   bool ProcessLogicItem (const AIEvents::AIEvresult & item);
   bool ExecuteLogicItem (const AIEvents::AIEvresult & item);
-  bool ProcessLogic(AIEvents::ElemAttrMap &logic, bool inter=false);//returns if found anything
+  bool ProcessLogic(AIEvents::ElemAttrMap &logic, bool inter);//returns if found anything
   string last_directive;
 
   void ReCommandWing(Flightgroup* fg);

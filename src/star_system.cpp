@@ -352,7 +352,10 @@ void GameStarSystem::Draw(bool DrawCockpit) {
   fprintf (stderr,"vp");
   fflush (stderr);
 #endif
-  if (!alreadysetviewport)
+
+  static bool always_make_smooth=XMLSupport::parse_bool(vs_config->getVariable("graphics","always_make_smooth_cam","false"));
+  bool whichview=  _Universe->AccessCockpit()->GetView()==CP_CHASE;//||_Universe->AccessCockpit()->GetView()==CP_VIEWTARGET;
+  if (always_make_smooth||whichview||!alreadysetviewport)
     _Universe->AccessCockpit()->SetupViewPort(true);///this is the final, smoothly calculated cam
   //  SetViewport();//camera wielding unit is now drawn  Note: Background is one frame behind...big fat hairy deal
   GFXColor tmpcol (0,0,0,1);

@@ -62,6 +62,14 @@ Order * Order::queryType (unsigned int type) {
   }
   return NULL;
 }
+Order * Order::queryAny (unsigned int type) {
+  for (unsigned int i=0;i<suborders.size();i++) {
+    if ((suborders[i]->type&type)!=0) {
+      return suborders[i];
+    }
+  }
+  return NULL;
+}
 
 
 void Order::eraseType (unsigned int type) {

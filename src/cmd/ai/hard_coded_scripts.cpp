@@ -97,6 +97,53 @@ void AfterburnTurnTowardsITTS (Order * aisc, Unit * un) {
   AddOrd (aisc,un,ord);    
 }
 
+void BarrelRoll (Order * aisc, Unit*un) {
+	FlyByWire * broll = new FlyByWire;
+	AddOrd(aisc,un,broll);
+	broll->RollRight(rand()>RAND_MAX/2?1:-1);
+	if (rand()<RAND_MAX/2) {
+		broll->Up(rand()>RAND_MAX/2?1:-1);
+	}else {
+		broll->Right(rand()>RAND_MAX/2?1:-1);
+	}
+	broll->MatchSpeed(Vector(0,0,un->GetComputerData().max_ab_speed()));
+	broll->Afterburn(1);
+}
+
+namespace Orders{
+class LoopAround: public Orders::FaceTargetITTS{
+	Orders::MoveToParent m;	
+public:
+	LoopAround():FaceTargetITTS(false,3),m(false,2,false) {
+		
+	}
+	void Execute(){
+		Unit * targ = parent->Target();
+		if (targ) {
+			Vector relloc = parent->Position()-targ->Position();
+			Vector r =targ->cumulative_transformation_matrix.getR();
+			if (r.Dot(relloc) <0) {
+				FaceTargetITTS::Execute();
+				m.SetAfterburn (true);
+				m.Execute(parent,targ->Position()-r.Scale(2*parent->rSize()+targ->rSize()));
+			}else {
+				done=false;
+				m.SetAfterburn (false);
+				Vector scala=targ->cumulative_transformation_matrix.getQ().Scale(2*parent->rSize()+targ->rSize());
+				QVector dest =targ->Position()+scala;
+				SetDest(dest);
+				ChangeHeading::Execute();
+				m.Execute(parent,dest+scala);
+			}
+		}
+	}
+};
+}
+void LoopAround(Order* aisc, Unit * un) {
+	Order* broll = new Orders::LoopAround;
+	AddOrd(aisc,un,broll);
+	
+}
 void Evade(Order * aisc, Unit * un) {
   QVector v(un->Position());
   QVector u(v);

@@ -285,7 +285,7 @@ namespace UnitXML {
     EnumMap::Pair ("Description",DESCRIPTION),
     
   };
-  const EnumMap::Pair attribute_names[105] = {
+  const EnumMap::Pair attribute_names[106] = {
     EnumMap::Pair ("UNKNOWN", UNKNOWN),
     EnumMap::Pair ("missing",MISSING),
     EnumMap::Pair ("file", XFILE), 
@@ -373,6 +373,7 @@ namespace UnitXML {
     EnumMap::Pair ("Volume",VOLUME),
     EnumMap::Pair ("Quantity",QUANTITY),
     EnumMap::Pair ("PriceStdDev",PRICESTDDEV),
+    EnumMap::Pair ("PriceStDev",PRICESTDDEV),	
     EnumMap::Pair ("QuantityStdDev",QUANTITYSTDDEV),
     EnumMap::Pair ("Damage",DAMAGE),
     EnumMap::Pair ("RepairDroid",REPAIRDROID),
@@ -395,7 +396,7 @@ namespace UnitXML {
   };
 
   const EnumMap element_map(element_names, 37);
-  const EnumMap attribute_map(attribute_names, 105);
+  const EnumMap attribute_map(attribute_names, 106);
 }
 
 // USED TO BE IN UNIT_FUNCTIONS*.CPP BUT NOW ON BOTH CLIENT AND SERVER SIDE

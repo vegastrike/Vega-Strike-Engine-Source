@@ -20,8 +20,9 @@ using XMLSupport::parse_float;
 using XMLSupport::parse_bool;
 using XMLSupport::parse_int;
 namespace AIEvents {
-  AIEvresult::AIEvresult (int type, float const min, const float max, const std::string &aiscript) {
-
+  AIEvresult::AIEvresult (int type, float const min, const float max, float timetofinish,float timeuntilinterrupts, const std::string &aiscript) {
+	 this->timetointerrupt=timeuntilinterrupts;
+	 this->timetofinish=timetofinish;
 	 this->type = type; 
 
 	 this->max = max; 
@@ -39,6 +40,7 @@ namespace AIEvents {
   const int AINOT=4;
   const int TIMEIT=5;
   const int OBEDIENCE=6;
+  const int TIMETOINTERRUPT=7;
   const XMLSupport::EnumMap::Pair AIattribute_names[] = {
     EnumMap::Pair ("UNKNOWN", AIUNKNOWN),
     EnumMap::Pair ("min", AIMIN), 
@@ -46,15 +48,18 @@ namespace AIEvents {
     EnumMap::Pair ("not", AINOT),
     EnumMap::Pair ("Script", AISCRIPT),
     EnumMap::Pair ("time", TIMEIT),
-    EnumMap::Pair ("obedience", OBEDIENCE)
+    EnumMap::Pair ("obedience", OBEDIENCE),
+    EnumMap::Pair ("timetointerrupt", TIMETOINTERRUPT)	
   };
-  const XMLSupport::EnumMap attr_map(AIattribute_names, 7);
+  const XMLSupport::EnumMap attr_map(AIattribute_names, 8);
 
   void GeneralAIEventBegin (void *userData, const XML_Char *name, const XML_Char **atts) {
     AttributeList attributes (atts);
     string aiscriptname ("");
     float min= -FLT_MAX; float max=FLT_MAX;
     ElemAttrMap * eam = ((ElemAttrMap *)userData);
+	float timetofinish = eam->maxtime;
+	float timetointerrupt = 0;
     int elem = eam->element_map.lookup(name);
     AttributeList::const_iterator iter;
     eam->level++;
@@ -62,7 +67,7 @@ namespace AIEvents {
       for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
 	switch(attr_map.lookup((*iter).name)) {
 	case TIMEIT:
-	  eam->maxtime=(short)(XMLSupport::parse_float((*iter).value));
+	  eam->maxtime=(short)XMLSupport::parse_float((*iter).value);
 	  break;
 	case OBEDIENCE:
 	  eam->obedience=(float)(XMLSupport::parse_float((*iter).value));
@@ -86,11 +91,18 @@ namespace AIEvents {
 	  break;
 	case AISCRIPT:
 	  aiscriptname = (*iter).value;
+	  break;
+	case TIMEIT:
+		timetofinish=XMLSupport::parse_float ((*iter).value);
+		break;
+	case TIMETOINTERRUPT:
+		timetointerrupt=XMLSupport::parse_float((*iter).value);
+		break;
 	default: 
 	  break;
 	}
       }
-      eam->result.back().push_back (AIEvresult(elem, min,max,aiscriptname));
+      eam->result.back().push_back (AIEvresult(elem, min,max,timetofinish,timetointerrupt,aiscriptname));
     }
   }  
 

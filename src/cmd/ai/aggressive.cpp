@@ -121,7 +121,7 @@ void LeadMe (Unit * un, string directive, string speech) {
 static float aggressivity=2.01;
 AggressiveAI::AggressiveAI (const char * filename, const char * interruptname, Unit * target):FireAt(), logic (getProperScript(NULL,NULL,false)), interrupts(getProperScript(NULL,NULL,true)) {
   last_jump_distance=FLT_MAX;
-  curinter=INTNORMAL;
+  interruptcurtime=0;
   jump_time_check=1;
   last_time_insys=true;
   logiccurtime=interrupts->maxtime;//set it to the time allotted
@@ -139,7 +139,7 @@ AggressiveAI::AggressiveAI (const char * filename, const char * interruptname, U
 }
 void AggressiveAI::SetParent (Unit * parent1) {
   FireAt::SetParent(parent1);
-  int which = last_directive.find("|");
+  unsigned int which = last_directive.find("|");
   string filename (string("default.agg.xml"));
   string interruptname (string("default.int.xml"));
   if (which!=string::npos) {
@@ -256,6 +256,8 @@ bool AggressiveAI::ProcessLogic (AIEvents::ElemAttrMap & logi, bool inter) {
       j = i->begin();
       while (j!=i->end()) {
 	if (ExecuteLogicItem (*j)) {
+		logiccurtime = (*j).timetofinish;
+		interruptcurtime = (*j).timetointerrupt;
 	  AIEvents::AIEvresult tmp = *j;
 	  i->erase(j);
 	  retval=true;
@@ -509,27 +511,20 @@ void AggressiveAI::Execute () {
     }
   }
   }
-  if (!isjumpable &&(
-#if 1
-      curinter==INTRECOVER||//this makes it so only interrupts may not be interrupted
-#endif
-      curinter==INTNORMAL)) {
-    if ((curinter = (ProcessLogic (*interrupts, true)?INTERR:curinter))==INTERR) {
-      logiccurtime=interrupts->maxtime;//set it to the time allotted
-    }
+  if (!isjumpable &&interruptcurtime<=0) {
+	  ProcessLogic (*interrupts, true);
   }
   //  if (parent->getAIState()->queryType (Order::FACING)==NULL&&parent->getAIState()->queryType (Order::MOVEMENT)==NULL) { 
   
 
 
-  if (queryType (Order::FACING)==NULL&&queryType (Order::MOVEMENT)==NULL) { 
+  if (queryAny (Order::FACING|Order::MOVEMENT)==NULL) { 
     if (isjumpable) {
       AfterburnerJumpTurnTowards (target);
     }else {
       last_jump_distance=FLT_MAX;
       if (target) {
-	ProcessLogic(*logic);
-	curinter=(curinter==INTERR)?INTRECOVER:INTNORMAL;
+		  ProcessLogic(*logic,false);
       }else {
 	FlyStraight(this,parent);
 	/*
@@ -543,19 +538,20 @@ void AggressiveAI::Execute () {
     if (target) {
     WarpToP(parent,target);
     logiccurtime-=SIMULATION_ATOM;
+    interruptcurtime-=SIMULATION_ATOM;	
     if (logiccurtime<=0) {
-      curinter=(curinter==INTERR)?INTRECOVER:INTNORMAL;
       //parent->getAIState()->eraseType (Order::FACING);
       //parent->getAIState()->eraseType (Order::MOVEMENT);
       eraseType (Order::FACING);
       eraseType (Order::MOVEMENT);
       if (isjumpable ) {
-	AfterburnerJumpTurnTowards (target);
+		  AfterburnerJumpTurnTowards (target);
+	      logiccurtime = logic->maxtime;      
       }else {
-	last_jump_distance=FLT_MAX;
-	ProcessLogic (*logic);
+		  last_jump_distance=FLT_MAX;
+		  ProcessLogic (*logic,false);
       }
-      logiccurtime = logic->maxtime;      
+
     }
     }
   }

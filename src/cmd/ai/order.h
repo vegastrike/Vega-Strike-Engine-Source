@@ -97,6 +97,8 @@ class Order {
   virtual void Execute();
   ///returns a pointer to the first order that may be bitwised ored with that type
   Order* queryType (unsigned int type);
+	///returns a pointer to the first order that may be bitwise ored with any type 
+	Order* queryAny(unsigned int type);
   ///Erases all orders that bitwise OR with that type
   void eraseType (unsigned int type);
   ///Attaches a group of targets to this order (used for strategery-type games)
