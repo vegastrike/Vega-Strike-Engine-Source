@@ -450,6 +450,8 @@ void InitializeInput() {
 	BindKey('s', FighterPitchUp);*/
 }
 void createObjects() {
+  Universe::Faction::LoadXML("factions.xml");
+
   LoadWeapons("weapon_list.xml");
   DABEAM= new Beam (identity_transformation, weapon_info(weapon_info::BEAM), NULL);
   //SetPriorityClass(GetCurrentProcess(), REALTIME_PRIORITY_CLASS);
@@ -533,7 +535,7 @@ void createObjects() {
     fighters[a]->EnqueueAI(new Orders::MoveTo(Vector (-5,-10,10),true));
     fighters[a]->EnqueueAI(new Orders::ChangeHeading(-v));
     fighters[a]->EnqueueAI(new MatchVelocity(Vector(0,0,-1),Vector (0,0,.4),true,true));
-    fighters[a]->EnqueueAI(new ExecuteFor(new FlyByKeyboard (),20));
+    fighters[a]->EnqueueAI(new ExecuteFor(new FlyByKeyboard (),7));
     fighters[a]->EnqueueAI(new Orders::ChangeHeading(Vector (.86,.86,0).Normalize()));
     fighters[a]->EnqueueAI(new FlyByKeyboard ());
     //fighters[a]->EnqueueAI(new Orders::ChangeHeading(Vector (.86,.86,0).Normalize(), 0.04));

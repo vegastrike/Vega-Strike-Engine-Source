@@ -72,6 +72,33 @@ protected:
         Texture *SquadLogo;
 	
 public:
+	class Faction {
+
+	private:
+		struct faction_stuff;
+		vector <faction_stuff> faction;
+		friend class Universe;
+		Texture * logo; //the logos
+		char * factionname; //char * of the name
+		static void ParseAllAllies();
+		void ParseAllies();
+	public:
+		struct faction_stuff {
+			union faction_name {
+				int index;
+				char * name;
+			} stats;
+			float relationship;
+		};		
+		static void LoadXML(const char * factionfile);  //load the xml
+		static void beginElement(void *userData, const XML_Char *name, const XML_Char **atts);
+		static void endElement(void *userData, const XML_Char *name);
+//		void beginElement(const string &name, const AttributeList &attributes);
+//		void endElement(const string &name);
+		Faction(); //constructor
+		~Faction(); //destructor
+	};
+
 	//move back to private!!!
 	Primitive *topobject; // the top object of the object list
   void activateLightMap();
@@ -120,7 +147,7 @@ public:
 		  }
 		  //		cam[currentcamera].UpdateGFX(); //sets the cam to the current matrix
 	}
-
+	vector <Faction *> factions; //the factions
 
 };
 

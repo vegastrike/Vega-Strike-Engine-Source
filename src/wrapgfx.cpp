@@ -82,7 +82,10 @@ Universe::~Universe()
 {
 	//if(topobject != NULL)
 	//	delete topobject;
-
+	int i;
+	for (i=0;i<this->factions.size();i++) {
+		delete factions[i];
+	}
 	delete ForceLogo;
 	delete SquadLogo;
 	GFXShutdown();

@@ -651,16 +651,16 @@ void Unit::Draw(const Transformation &parent, const Matrix parentMatrix)
       selectionBox->Draw(cumulative_transformation, cumulative_transformation_matrix);
     }
   } else {
-    _Universe->AccessCamera()->SetOrientation(Vector (cumulative_transformation_matrix[0],
-						    cumulative_transformation_matrix[1],
-						    cumulative_transformation_matrix[2]),
-					    Vector (cumulative_transformation_matrix[4],
-						    cumulative_transformation_matrix[5],
-						    cumulative_transformation_matrix[6]),
-					    Vector (cumulative_transformation_matrix[8],
-						    cumulative_transformation_matrix[9],
-						    cumulative_transformation_matrix[10]));
-  _Universe->AccessCamera()->SetPosition (cumulative_transformation.position);
+	Vector q (cumulative_transformation_matrix[4],
+			  cumulative_transformation_matrix[5],
+			  cumulative_transformation_matrix[6]);
+    Vector r (cumulative_transformation_matrix[8],
+			  cumulative_transformation_matrix[9],
+			  cumulative_transformation_matrix[10]);
+	Vector tmp;
+	CrossProduct(r,q, tmp);
+    _Universe->AccessCamera()->SetOrientation(tmp,q ,r);
+	_Universe->AccessCamera()->SetPosition (cumulative_transformation.position);
   }
   for (i=0;i<nummounts;i++) {
     if (mounts[i].type.type==weapon_info::BEAM) {
