@@ -108,8 +108,8 @@ static std::string MangleString (const char * in, float probability) {
   }
   char * tmp = (char *)malloc (sizeof (char)*str.size()+1);
   tmp[str.size()]='\0';
-  for (unsigned int i=0;i<str.size();i++) {
-    tmp[i]=str[i];
+  for (unsigned int kk=0;kk<str.size();kk++) {
+    tmp[kk]=str[kk];
   }
   std::string retval = string (tmp);
   free (tmp);
