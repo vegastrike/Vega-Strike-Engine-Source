@@ -86,8 +86,8 @@ class Unit {
   friend void VDU::DrawWeapon (Unit * parent);
   friend void VDU::DrawDamage (Unit * parent);
  public:
-  inline void SetNebula (Nebula *neb);
-  inline Nebula * GetNebula () {return nebula;}
+  void SetNebula (Nebula *neb);
+  inline Nebula * GetNebula () const{return nebula;}
   const std::vector <char *> &GetDestinations () const;
   void AddDestination (const char *);
   /**
