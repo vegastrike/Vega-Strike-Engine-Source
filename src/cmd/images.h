@@ -9,20 +9,20 @@ struct DockingPorts {
   Vector max;
   bool internal;
   bool used;
-  DockingPorts (const Vector &pos, float radius, bool internal=true) :
-    pos(pos), radius(radius),
-    min (pos-Vector (radius,radius,radius)),
-    max (pos+Vector (radius,radius,radius)),
-    internal(internal),
-    used (false)
-  {}
+  DockingPorts (const Vector &pos, float radius, bool internal=true){
+	this->pos=(pos); this->radius=(radius);
+    min=Vector(pos-Vector (radius,radius,radius));
+    max=Vector(pos+Vector (radius,radius,radius));
+    internal=(internal);
+    used=false;
+  }
   DockingPorts (const Vector &min, const Vector &max, bool internal=true) :
-    pos(.5*(min+max)), radius((max-min).Magnitude()*.5),
-    min (min),
-    max (max),
-    internal(internal),
-    used (false)
-  {}
+  pos(.5*(min+max)), radius((max-min).Magnitude()*.5) {
+    this->min =(min);
+    this->max =(max);
+    this->internal=(internal);
+    this->used= (false);
+  }
 };
 struct DockedUnits {
   UnitContainer uc;

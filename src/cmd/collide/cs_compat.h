@@ -6,10 +6,10 @@
 #define EPSILON .00001
 #define ABS(x) (x>=0?x:-x)
 #define __CS_CSSYSDEFS_H__
-#include "collide/csgeom/vector3.h"
-#include "collide/csgeom/matrix3.h"
+#include "cmd/collide/csgeom/vector3.h"
+#include "cmd/collide/csgeom/matrix3.h"
 typedef unsigned char uint8;
-#include "collide/csgeom/box.h"
+#include "cmd/collide/csgeom/box.h"
 
 
 #include <stdlib.h>

@@ -27,9 +27,9 @@ int vdu_lookup (char * &s) {
   }
   t[i]='\0';
 
-  for (unsigned int i=0;i<((sizeof (vdu_modes)/sizeof (std::string)));i++) {
-    if (0==strcasecmp (t,vdu_modes[i].c_str())) {
-      retval|=(1<<i);
+  for (unsigned int j=0;j<((sizeof (vdu_modes)/sizeof (std::string)));j++) {
+    if (0==strcasecmp (t,vdu_modes[j].c_str())) {
+      retval|=(1<<j);
     }
   }
   free(t);
