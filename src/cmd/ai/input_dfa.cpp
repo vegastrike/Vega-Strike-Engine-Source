@@ -62,7 +62,9 @@ void InputDFA::BindOrder (int key, OrderFactory *ofac){
     delete orderbindings[KEYMAP_SIZE];
   */
   orderbindings[key]= ofac;
+#ifdef USE_INPUT_DFA
   BindKey (key,0,InputDFA::OrderHandler);
+#endif
 }
 void InputDFA::SetOrder (OrderFactory *ofac) {
   if (orderfac) {
@@ -535,6 +537,7 @@ void InputDFA::ContextAcquire() {
     CurDFA->ContextSwitch();
   }
   CurDFA=this;
+#ifdef USE_INPUT_DFA
   switch (state) {
   case NONE:	BindKey (0,NoneSelect);
   break;
@@ -545,10 +548,12 @@ void InputDFA::ContextAcquire() {
   case TARGET_SELECT:BindKey (0,ClickSelect);
     break;
   }
+#endif
 }
 
 /** ContextSwitch unbinds the respective keys and appropriately to the given state*/
 void InputDFA::ContextSwitch (){
+#ifdef USE_INPUT_DFA
   switch (state) {
   case NONE:UnbindMouse(0);
       break;
@@ -559,5 +564,6 @@ void InputDFA::ContextSwitch (){
   case TARGET_SELECT:UnbindMouse(0);
     break;
   }
+#endif
 }
 
