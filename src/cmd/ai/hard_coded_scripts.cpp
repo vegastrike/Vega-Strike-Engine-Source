@@ -58,7 +58,7 @@ void FireAt::ChangeLocalDirection(Vector vec) {
 	lastOrder  = new Orders::ChangeHeading (((parent->Position().Cast())+parent->ToWorldCoordinates(vec)).Cast(),3);
 }
 void FireAt::MoveTo(QVector vec, bool afterburn) {
-	lastOrder  = new Orders::MoveTo(vec,false,3);
+	lastOrder  = new Orders::MoveTo(vec,afterburn,3);
 }
 void FireAt::MatchVelocity(bool terminate, Vector vec, Vector angvel, bool afterburn, bool local) {
 	lastOrder  = new Orders::MatchVelocity(parent->ClampVelocity(vec,afterburn),parent->ClampAngVel(angvel),terminate,afterburn,local);

@@ -84,6 +84,7 @@ public:
   UnitWrapper(Unit *un=0) : UnitContainer(un){}
   operator Unit* () {return unit;}
   bool isNull () {return GetUnit()==0;}
+  bool notNull () {return !isNull();}
   void setNull () {SetUnit(0);}
 };
 PYTHON_INIT_INHERIT_GLOBALS(VS,FireAt);
@@ -96,8 +97,9 @@ voidEXPORT_UTIL(pushSystem)
 voidEXPORT_UTIL(popSystem)
 EXPORT_UTIL(getFileName,"")
 EXPORT_UTIL(getName,"")
-EXPORT_UTIL(getUnitList,un_iter)
-EXPORT_UTIL(launchJumppoint,Unit)
+EXPORT_UTIL(getUnitList,un_iter())
+EXPORT_UTIL(getUnit,Unit())
+EXPORT_UTIL(launchJumppoint,Unit())
 EXPORT_UTIL(launch,Unit())
 EXPORT_UTIL(getRandCargo,Cargo())
 EXPORT_UTIL(GetFactionName,"")
@@ -118,8 +120,8 @@ voidEXPORT_UTIL(SetDifficulty)
 voidEXPORT_UTIL(playSound)
 voidEXPORT_UTIL(playAnimation)
 voidEXPORT_UTIL(terminateMission)
-EXPORT_UTIL(getPlayer,Unit)
-EXPORT_UTIL(getPlayerX,Unit)
+EXPORT_UTIL(getPlayer,Unit())
+EXPORT_UTIL(getPlayerX,Unit())
 #undef EXPORT_UTIL
 #undef voidEXPORT_UTIL
 PYTHON_BEGIN_CLASS(VS,UnitWrapper,"Unit")
@@ -179,6 +181,7 @@ PYTHON_END_CLASS(VS,Cargo)
   Class.def(boost::python::operators<boost::python::op_eq | boost::python::op_ne>(), boost::python::right_operand<UnitWrapper>());
   Class.def(&UnitWrapper::setNull,"setNull");
   Class.def(&UnitWrapper::isNull,"isNull");
+  Class.def(&UnitWrapper::notNull,"__nonzero__");
   Class.def(&UnitWrapper::Kill,"Kill");
   Class.def(&UnitWrapper::SetTarget,"SetTarget");
   Class.def(&UnitWrapper::GetTarget,"GetTarget");
@@ -276,8 +279,9 @@ voidEXPORT_UTIL(pushSystem)
 voidEXPORT_UTIL(popSystem)
 EXPORT_UTIL(getFileName,"")
 EXPORT_UTIL(getName,"")
-EXPORT_UTIL(getUnitList,un_iter)
-EXPORT_UTIL(launchJumppoint,Unit)
+EXPORT_UTIL(getUnitList,un_iter())
+EXPORT_UTIL(getUnit,Unit())
+EXPORT_UTIL(launchJumppoint,Unit())
 EXPORT_UTIL(launch,Unit())
 EXPORT_UTIL(getRandCargo,Cargo())
 EXPORT_UTIL(GetFactionName,"")
@@ -298,8 +302,8 @@ voidEXPORT_UTIL(SetDifficulty)
 voidEXPORT_UTIL(playSound)
 voidEXPORT_UTIL(playAnimation)
 voidEXPORT_UTIL(terminateMission)
-EXPORT_UTIL(getPlayer,Unit)
-EXPORT_UTIL(getPlayerX,Unit)
+EXPORT_UTIL(getPlayer,Unit())
+EXPORT_UTIL(getPlayerX,Unit())
 
 def string ():
   return ''
@@ -313,10 +317,11 @@ class Unit:
   WRAPPED1(bool,__ne__,UnitWrapper,oth,true);
   voidWRAPPED0(Kill);
   voidWRAPPED0(setNull);
+  voidWRAPPED0(__nonzero__);
   voidWRAPPED0(isNull);
   voidWRAPPED1(SetTarget,UnitWrapper,un);
-  WRAPPED0(UnitWrapper, GetTarget,UnitWrapper(0));
-  WRAPPED0(UnitWrapper, GetVelocityReference,UnitWrapper(0))
+  WRAPPED0(UnitWrapper, GetTarget,Unit());
+  WRAPPED0(UnitWrapper, GetVelocityReference,Unit())
   voidWRAPPED1(SetVelocityReference,UnitWrapper,un);
   WRAPPED0(Tuple,GetOrientation,((1,0,0),(0,1,0),(0,0,1)))
   WRAPPED2(Tuple,queryBSP,Vector,start,Vector,end,(un,(0,0,1),0))
@@ -325,12 +330,12 @@ class Unit:
   WRAPPED1(Tuple,cosAngleFromMountTo,UnitWrapper,un,(.93,10000)) 
   WRAPPED0(Tuple,getAverageGunSpeed,(200,10000))
   WRAPPED1(Tuple,InsideCollideTree,UnitWrapper,un,((0,0,0),(0,0,1),(0,0,0),(0,1,0)))
-  WRAPPED1(UnitWrapper,getSubUnit,int,which,UnitWrapper(0))
+  WRAPPED1(UnitWrapper,getSubUnit,int,which,Unit())
 
 class un_iter:
   def __init__(self):
     print 'un_iter constructor called with (self)'
-  WRAPPED0(Unit,current,Unit)
+  WRAPPED0(Unit,current,Unit())
   voidWRAPPED0(advance)
   voidWRAPPED0(remove)
   voidWRAPPED1(preinsert,Unit,un)
@@ -339,17 +344,17 @@ class Cargo:
   def __init__ (self,a,b,c,d,e,f):
     print 'Cargo constructor called with (self,%s,%s,%f,%d,%f,%f)' % (a,b,c,d,e,f)
   voidWRAPPED1(SetPrice,float,price)
-  WRAPPED0(float,GetPrice)
+  WRAPPED0(float,GetPrice,0)
   voidWRAPPED1(SetMass,float,mass)
-  WRAPPED0(float,GetMass)
+  WRAPPED0(float,GetMass,0)
   voidWRAPPED1(SetVolume,float,volume)
-  WRAPPED0(float,GetVolume)
+  WRAPPED0(float,GetVolume,0)
   voidWRAPPED1(SetQuantity,int,quantity)
-  WRAPPED0(int,GetQuantity)
+  WRAPPED0(int,GetQuantity,0)
   voidWRAPPED1(SetContent,string,content)
-  WRAPPED0(string,GetContent)
+  WRAPPED0(string,GetContent,"")
   voidWRAPPED1(SetCategory,string,category)
-  WRAPPED0(string,GetCategory)
+  WRAPPED0(string,GetCategory,"")
   WRAPPED0(string,GetDescription)
 
 class PythonAI:

@@ -30,6 +30,13 @@ namespace UniverseUtil {
 	un_iter getUnitList() {
 		return activeSys->getUnitList().createIterator();
 	}
+	Unit *getUnit(int index) {
+		iter=getUnitList();
+		for(int i=0;iter.current()&&i<index;i++) {
+			iter.advance();
+		}
+		return iter.current()
+	}
 	Unit *launchJumppoint(string name_string,
 			string faction_string,
 			string type_string,
