@@ -1,4 +1,7 @@
-#define HAVE_SDL
+//#define HAVE_SDL
+#if !defined (SDL_MIX_MAXVOLUME)
+#define SDL_MIX_MAXVOLUME 128
+#endif
 #ifdef HAVE_SDL
 #include <SDL/SDL.h>
 #include <SDL/SDL_thread.h>
@@ -252,8 +255,10 @@ int main(int argc, char **argv)
 				printf("%s",str.c_str());
 				volume=atof(str.c_str());
 				printf("\n[SETTING VOLUME TO %f]\n",volume);
+#ifdef HAVE_SDL
 				int newvolume=SDL_MIX_MAXVOLUME*volume;
 				Mix_VolumeMusic(newvolume);
+#endif
 			}
 			break;
 		case 't':
