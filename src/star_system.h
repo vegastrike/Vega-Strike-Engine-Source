@@ -42,6 +42,7 @@ class GameStarSystem: public StarSystem {
     bool fade;
     float starsp;
     float scale;
+	vector <AtmosphericFogMesh> fog;
   } *xml;
   void LoadXML(const char*, const Vector & centroid, const float timeofyear);
   void beginElement(const string &name, const AttributeList &attributes);

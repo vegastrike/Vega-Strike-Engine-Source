@@ -9,7 +9,7 @@ class ParticlePoint {
   QVector loc;
   Vector col;
   //draw and change color...if too dark kill
-  bool Draw (const Vector& delta, const double time);
+  bool Draw (const Vector& delta, const double time, const Vector &p, const Vector &q);
 };
 
 class ParticleTrail {

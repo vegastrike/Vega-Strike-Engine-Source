@@ -16,7 +16,19 @@ class Background;
 class Terrain;
 class ContinuousTerrain;
 //class TextPlane;
-
+struct AtmosphericFogMesh {
+	std::string meshname;
+	double scale;
+	float er;float eg; float eb; float ea;
+	float dr;float dg; float db; float da;	
+	double focus;
+	double concavity;
+	int tail_mode_start;
+	int tail_mode_end;
+	int min_alpha;
+	int max_alpha;
+	AtmosphericFogMesh ();
+};
 
 using XMLSupport::AttributeList;
 //class Atmosphere;
@@ -54,6 +66,7 @@ class StarSystem {
     bool fade;
     float starsp;
     float scale;
+	std::vector <AtmosphericFogMesh> fog;
   } *xml_string;
 
  protected:

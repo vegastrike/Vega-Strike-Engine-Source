@@ -26,7 +26,18 @@
 #include "universe_util.h"
 extern vector <char *> ParseDestinations (const string &value);
 
-	
+AtmosphericFogMesh::AtmosphericFogMesh() {
+	er=eg=eb=ea=.5;
+	dr=dg=db=da=.5;	
+	meshname="sphereatm.xmesh";
+	scale=1.05;
+	focus=.5;
+	concavity=0;
+	tail_mode_start=-1;
+	tail_mode_end=-1;
+	min_alpha=0;
+	max_alpha=255;
+};
 namespace StarXML {
   enum Names {
     UNKNOWN,
@@ -99,14 +110,20 @@ namespace StarXML {
     WRAPX,
     WRAPY,
 	FOG,
+	FOGELEMENT,
 	FOCUS,
 	CONCAVITY,
+	MINALPHA,
+	MAXALPHA,
+	DIRED,
+	DIGREEN,
+	DIBLUE,
+	DIALPHA,
 	TAILMODESTART,
 	TAILMODEEND
-	
   };
 
-  const EnumMap::Pair element_names[] = {
+  const EnumMap::Pair element_names[23] = {
     EnumMap::Pair ("UNKNOWN", UNKNOWN),
     EnumMap::Pair ("Planet", PLANET),
     EnumMap::Pair ("System", SYSTEM),
@@ -128,9 +145,10 @@ namespace StarXML {
     EnumMap::Pair ("RING",RING),
     EnumMap::Pair ("citylights",CITYLIGHTS),
     EnumMap::Pair ("SpaceElevator",SPACEELEVATOR),
-    EnumMap::Pair ("Fog",FOG)	
+    EnumMap::Pair ("Fog",FOG),
+    EnumMap::Pair ("FogElement",FOGELEMENT)		
   };
-  const EnumMap::Pair attribute_names[] = {
+  const EnumMap::Pair attribute_names[58] = {
     EnumMap::Pair ("UNKNOWN", UNKNOWN),
     EnumMap::Pair ("background", BACKGROUND), 
     EnumMap::Pair ("stars", STARS),
@@ -160,6 +178,12 @@ namespace StarXML {
     EnumMap::Pair ("year", YEAR),
     EnumMap::Pair ("day", DAY),
     EnumMap::Pair ("position", PPOSITION),
+    EnumMap::Pair ("MaxAlpha", MAXALPHA),
+    EnumMap::Pair ("MinAlpha", MINALPHA),		
+    EnumMap::Pair ("DRed", DIRED),
+    EnumMap::Pair ("DGreen", DIGREEN),
+    EnumMap::Pair ("DBlue", DIBLUE),
+    EnumMap::Pair ("DAlpha", DIALPHA),	
     EnumMap::Pair ("Red", EMRED),
     EnumMap::Pair ("Green", EMGREEN),
     EnumMap::Pair ("Blue", EMBLUE),
@@ -186,8 +210,8 @@ namespace StarXML {
     
   };
 
-  const EnumMap element_map(element_names, 22);
-  const EnumMap attribute_map(attribute_names, 52);
+  const EnumMap element_map(element_names, 23);
+  const EnumMap attribute_map(attribute_names, 58);
 }
 
 using XMLSupport::EnumMap;
@@ -485,57 +509,73 @@ void GameStarSystem::beginElement(const string &name, const AttributeList &attri
     }
 
   case FOG:
-  {
+  
      xml->unitlevel++;
-      std::string myfile("elevator");
+	 xml->fog.clear();
+	 break;
+  case FOGELEMENT:
+	  xml->unitlevel++;
 
-      blendSrc=SRCALPHA;
-      blendDst=INVSRCALPHA;
-      Unit  * p = (Unit *)xml->moons.back()->GetTopPlanet(xml->unitlevel-1);  
-      if (p!=NULL){
-		  if (p->isUnit()==PLANETPTR) {	  
 	  
-	  int tail_mode_start=-1;
-	  int tail_mode_end=-1;
-	  double concavity=0;
-	  double focus=.5;
-	  GFXColor col(1,1,1,1);
+	  xml->fog.push_back(AtmosphericFogMesh());
+	  xml->fog.back().scale=1.1-.075+.075*xml->fog.size();	  
 	  for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
 	    switch(attribute_map.lookup((*iter).name)) {
 		case EMRED:
-			col.r=XMLSupport::parse_float (iter->value);
+			xml->fog.back().er=XMLSupport::parse_float (iter->value);
 			break;
 		case EMGREEN:
-			col.g=XMLSupport::parse_float (iter->value);			
+			xml->fog.back().eg=XMLSupport::parse_float (iter->value);			
 			break;
 		case EMBLUE:
-			col.b=XMLSupport::parse_float (iter->value);			
+			xml->fog.back().eb=XMLSupport::parse_float (iter->value);			
 			break;
 		case EMALPHA:
-			col.a=XMLSupport::parse_float (iter->value);
+		case ALPHA:			
+			xml->fog.back().ea=XMLSupport::parse_float (iter->value);
+			break;
+		case DIRED:
+			xml->fog.back().dr=XMLSupport::parse_float (iter->value);
+			break;
+		case DIGREEN:
+			xml->fog.back().dg=XMLSupport::parse_float (iter->value);			
+			break;
+		case DIBLUE:
+			xml->fog.back().db=XMLSupport::parse_float (iter->value);			
+			break;
+		case DIALPHA:			
+			xml->fog.back().da=XMLSupport::parse_float (iter->value);
+			break;
+		case XFILE:
+			xml->fog.back().meshname=iter->value;
+			break;
+		case MINALPHA:
+			xml->fog.back().min_alpha=XMLSupport::parse_float(iter->value)*255;
+			break;
+		case MAXALPHA:
+			xml->fog.back().max_alpha=XMLSupport::parse_float(iter->value)*255;
 			break;
 		case CONCAVITY:
-			concavity=XMLSupport::parse_float(iter->value);
+			xml->fog.back().concavity=XMLSupport::parse_float(iter->value);
 			break;
 		case FOCUS:
-			focus=XMLSupport::parse_float(iter->value);			
+			xml->fog.back().focus=XMLSupport::parse_float(iter->value);			
 			break;
 		case TAILMODESTART:
-			tail_mode_start=XMLSupport::parse_float(iter->value);
+			xml->fog.back().tail_mode_start=XMLSupport::parse_float(iter->value);
 			break;
 		case TAILMODEEND:
-			tail_mode_end=XMLSupport::parse_float(iter->value);
+			xml->fog.back().tail_mode_end=XMLSupport::parse_float(iter->value);
+			break;
+		case SCALEATMOS:
+			xml->fog.back().scale=XMLSupport::parse_float (iter->value);
 			break;
 		default:
 			break;
 		}
 	  }
-	  ((Planet *)p)->AddFog(col,focus,concavity,tail_mode_start,tail_mode_end);
-		  }
-	  }
 	  
-  }
-  break;
+	  break;
   case CITYLIGHTS:
     {
       std::string myfile("planets/Dirt_light.png");
@@ -1114,6 +1154,19 @@ using namespace StarXML;
   Names elem = (Names)element_map.lookup(name);
 
   switch(elem) {
+  case FOG:
+  {
+	  xml->unitlevel--;
+      Unit  * p = (Unit *)xml->moons.back()->GetTopPlanet(xml->unitlevel);  
+      if (p!=NULL){
+		  if (p->isUnit()==PLANETPTR) {	  
+			  ((Planet *)p)->AddFog(xml->fog);
+		  }
+	  }
+	  
+  }
+  break;
+	  
   case UNKNOWN:
     xml->unitlevel--;
     //    cerr << "Unknown element end tag '" << name << "' detected " << endl;

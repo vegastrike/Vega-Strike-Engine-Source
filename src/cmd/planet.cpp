@@ -40,7 +40,7 @@ GamePlanet::GamePlanet()
 }
 class FogMesh : public Mesh {
 public:
-	void SetMaterialColor (const GFXColor &color) {
+	void SetMaterialColor (const GFXColor &color,const GFXColor & dcolor) {
 		GFXMaterial m;m.ar=m.ag=m.ab=m.aa=m.sr=m.sg=m.sb=m.sa=0;m.power=0;
 		static float emm=XMLSupport::parse_float (vs_config->getVariable("graphics","atmosphere_emmissive",".5"));
 		static float diff=XMLSupport::parse_float (vs_config->getVariable("graphics","atmosphere_diffuse",".5"));
@@ -48,18 +48,18 @@ public:
 		m.eg= emm*color.g;
 		m.eb= emm*color.b;
 		m.ea= emm*color.a;
-		m.dr= diff*color.r;
-		m.dg= diff*color.g;
-		m.db= diff*color.b;
-		m.da= diff*color.a;
+		m.dr= diff*dcolor.r;
+		m.dg= diff*dcolor.g;
+		m.db= diff*dcolor.b;
+		m.da= diff*dcolor.a;
 		this->SetMaterial(m);
 		
 	}
-	FogMesh (std::string filename,const GFXColor & color, float radius, double focus, double concavity, int tail_mode_start, int tail_mode_end):Mesh(filename.c_str(),Vector(radius,radius,radius),0,NULL,true) {
-		SetMaterialColor(color);
+	FogMesh (const AtmosphericFogMesh & f, float radius):Mesh(f.meshname.c_str(),Vector(f.scale*radius,f.scale*radius,f.scale*radius),0,NULL,true) {
+		SetMaterialColor(GFXColor (f.er,f.eg,f.eb,f.ea),GFXColor(f.dr,f.dg,f.db,f.da));
 		if (Decal.size()) {
 			if (Decal[0]) {
-				if (1 || concavity!=0 || focus!=.5 || tail_mode_start!=-1 || tail_mode_end!=-1) {
+				if (f.min_alpha!=0||f.max_alpha!=255||f.concavity!=0 || f.focus!=.5 || f.tail_mode_start!=-1 || f.tail_mode_end!=-1) {
 					changehome();
 					vschdir("backgrounds");
 					int rez=XMLSupport::parse_int (vs_config->getVariable("graphics","atmosphere_texture_resolution","512"));
@@ -68,11 +68,11 @@ public:
 						tex[i*4]=255;
 						tex[i*4+1]=255;
 						tex[i*4+2]=255;
-						tex[i*4+3]=get_alpha(i,rez,0,255,focus,concavity,tail_mode_start,tail_mode_end);
+						tex[i*4+3]=get_alpha(i,rez,f.min_alpha,f.max_alpha,f.focus,f.concavity,f.tail_mode_start,f.tail_mode_end);
 					}
 					static int count=0;
 					count++;
-					string nam = filename+XMLSupport::tostring(count);
+					string nam = f.meshname+XMLSupport::tostring(count)+".png";
 					png_write(nam.c_str(),&tex[0],rez,1,true,8);
 					delete Decal[0];
 					Decal[0]= new Texture(nam.c_str(),nam.c_str());
@@ -86,15 +86,16 @@ public:
 	}
 	virtual ~FogMesh (){}
 };
-void GamePlanet::AddFog (const GFXColor & colror, double focus, double concavity, int tail_mode_start, int tail_mode_end) {
+void GamePlanet::AddFog (const std::vector <AtmosphericFogMesh> & v) {
 	if(meshdata.empty()) meshdata.push_back(NULL);
 #ifdef MESHONLY
 	Mesh *shield = meshdata.back(); meshdata.pop_back();
 #endif
 	std::vector <Mesh * > fogs;
-	for (unsigned int i=1;i<=5;++i) {
-		Mesh *fog=new FogMesh (string("sphereatm")+XMLSupport::tostring(i)+".xmesh",colror,rSize(),focus,concavity,tail_mode_start,tail_mode_end);
+	for (unsigned int i=0;i<v.size();++i) {
+//		static float radiusmult = XMLSupport::parse_float (vs_config->getVariable("graphics","atmosphere_size","1.01"));
 		
+		Mesh *fog=new FogMesh (v[i],rSize());	
 		fogs.push_back(fog);
 	}
 	Unit* fawg=UnitFactory::createUnit(fogs,true,0);

@@ -43,7 +43,7 @@ protected:
 public:
   UnitCollection satellites;
   virtual ~GamePlanet();
-  virtual void AddFog (const struct GFXColor & color, double focus/*btw 0 and 1*/, double concavity, int tail_mode_start=-1, int tail_mode_end=-1);
+  virtual void AddFog (const std::vector <AtmosphericFogMesh> &);
   Vector AddSpaceElevator (const std::string &name, const std::string & faction, char direction);
   void AddAtmosphere (const std::string &texture, float radius, BLENDFUNC blendSrc, BLENDFUNC blendDst);
   void AddRing (const std::string &texture,float iradius,float oradius, const QVector &r,const QVector &s, int slices, int numwrapx, int numwrapy, BLENDFUNC blendSrc, BLENDFUNC blendDst);
