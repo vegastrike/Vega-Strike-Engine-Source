@@ -3214,14 +3214,35 @@ void showUnitStats(Unit * playerUnit,string &text,int subunitlevel) {
 	float Wconv= (1.0/0.12); // converts from reactor to warp energy scales
 	float totalWeaponEnergyUsage=0;
 	float totalWeaponDamage=0;
-    	text+="#c0:1:.5#"+prefix+"[GENERAL INFORMATION]#n##-c";
-    	text+= "#n#"+prefix+"Name: "+playerUnit->name;
-    	text+= " " + playerUnit->getFullname();
-    	Flightgroup *fg = playerUnit->getFlightgroup();
-    	if (fg && fg->name!="") {
-     		text+= " Designation " +fg->name+ " "+ XMLSupport::tostring (playerUnit->getFgSubnumber());
-    	}
-    	
+
+    text+="#c0:1:.5#"+prefix+"[GENERAL INFORMATION]#n##-c";
+	string nametemp="";
+	string model="";
+	int nameindex=0;
+	for(nameindex=0; (nameindex<playerUnit->name.size())&&playerUnit->name[nameindex]!='.';nameindex++){
+		nametemp+=playerUnit->name[nameindex];
+	}
+	for(nameindex=nameindex+1;nameindex<playerUnit->name.size();nameindex++){
+		model+=playerUnit->name[nameindex];
+	}
+
+	if(model=="blank"){
+		model="Stock";
+	}else if (model==""){
+		model="Military Spec.";
+	}else if (model=="begin"){
+		model="Stock(Refurbished)";
+	}
+
+    text+= "#n#"+prefix+"Class: "+nametemp+"  Model: "+model;
+    /*  Flightgroup name for unsold or player ships not very important
+
+	text+= " " + playerUnit->getFullname();
+    Flightgroup *fg = playerUnit->getFlightgroup();
+    if (fg && fg->name!="") {
+    	text+= " Designation: " +fg->name+ " "+ XMLSupport::tostring (playerUnit->getFgSubnumber());
+    }
+    */	
 	PRETTY_ADDU("Mass: ",playerUnit->mass,0,"metric tons");
 	// Irrelevant to player as is proportional to mass in our physics system.
 	// PRETTY_ADDU("Moment of inertia: ",playerUnit->GetMoment(),2,"tons.m²");
@@ -3301,17 +3322,18 @@ void showUnitStats(Unit * playerUnit,string &text,int subunitlevel) {
 
     	text+="#n##n##c0:1:.5#"+prefix+"[JUMP SUBSYSTEM]#n##-c";
 	const Unit::UnitJump uj = playerUnit->GetJumpStatus(); 
-	if (!uj.drive) {
-		text+="#c1:.3:.3#No jump drive present#-c"; //trouble here, seems to never happen
+	PRETTY_ADDU("Energy expenditure for insystem jump: ",uj.insysenergy*RSconverter*Wconv,0,"MJ");
+	if (uj.drive==-2) {
+		text+="#n##c1:.3:.3#No outsystem jump drive present#-c"; // fixed??
 	}
 	else {
-		PRETTY_ADDU("Insystem energy: ",uj.insysenergy*RSconverter*Wconv,0,"MJ");
-		PRETTY_ADDU("Outsystem energy: ",uj.energy*RSconverter*Wconv,0,"MJ");
+	
+		PRETTY_ADDU("Energy expenditure for jumpnode travel: ",uj.energy*RSconverter*Wconv,0,"MJ");
 		if (uj.delay) {
 			PRETTY_ADDU("Delay: ",uj.delay,0,"seconds");
 		}
-		if (uj.damage) {
-			PRETTY_ADDU("Damage: ",uj.damage*VSDM,0,"MJ");
+		if (uj.damage>0) {
+			PRETTY_ADDU("Damage to outsystem jump drive: ",uj.damage*VSDM,0,"MJ");
 		}
 	}
 	
@@ -3353,12 +3375,12 @@ void showUnitStats(Unit * playerUnit,string &text,int subunitlevel) {
 		PRETTY_ADDU("Cloaking device available, energy usage: ",playerUnit->image->cloakenergy*RSconverter*Wconv,0,"MJ/s");
 	}
 	text+="#n##n##c0:1:.5#"+prefix+"[TARGETTING SUBSYSTEM]#n##-c";
-	PRETTY_ADDU("Radar range: ",uc.radar.maxrange/1000,0,"km");
+	PRETTY_ADDU("Tracking range: ",uc.radar.maxrange/1000,0,"km");
 	if((acos(uc.radar.maxcone)*360/PI)<359){
 		PRETTY_ADDU("Tracking cone: ",acos(uc.radar.maxcone)*2,2,"Radians");
 		text+=" (planar angle: 2 pi means full space)";
 	} else {
-		text+="#n#"+prefix+"Tracking: OMNIDIRECTIONAL";
+		text+="#n#"+prefix+"Tracking cone: OMNIDIRECTIONAL";
 	}
 	PRETTY_ADDU("Assisted targeting cone: ",acos(uc.radar.trackingcone)*2,2,"Radians");
 	PRETTY_ADDU("Missile locking cone: ",acos(uc.radar.lockcone)*2,2,"Radians");
@@ -3398,11 +3420,10 @@ void showUnitStats(Unit * playerUnit,string &text,int subunitlevel) {
 			PRETTY_ADDU("   Weapon energy usage: ",wi->EnergyRate*RSconverter,0,wi->type==weapon_info::BEAM?"MJ/s":"MJ/shot");
 			
 			PRETTY_ADDU("   Weapon refire delay: ",wi->Refire,2,"seconds");
-			if (wi->PhaseDamage) {
+			if (wi->PhaseDamage>0) {
 				PRETTY_ADDU("   Phase damage: ",wi->PhaseDamage*VSDM,2,"MJ");
 			}
-			PRETTY_ADD("   Range attenuation factor: ",100000*(1.0 - wi->Longrange)/(wi->Range),2);
-			text+="% per km";
+			
 			
 			/*I don't see the point in displaying those
 			PRETTY_ADD("   Pulse speed: ",wi->PulseSpeed,2);
@@ -3413,17 +3434,33 @@ void showUnitStats(Unit * playerUnit,string &text,int subunitlevel) {
 
 			//display info specific to some weapons type			
 			switch ( wi->type) {
-				case weapon_info::BALL: //need ammo
+				case weapon_info::BALL: //may need ammo
 				case weapon_info::BOLT:
 					if (wi->Damage>0){
 						totalWeaponDamage+=(wi->Damage/wi->Refire); //damage per second
 					}
 					PRETTY_ADDU("   Exit velocity: ",wi->Speed,0,"meters/second");
-					PRETTY_ADD("   Rounds remaining: ",playerUnit->mounts[i].ammo,0);
+					if((100000*(1.0 - wi->Longrange)/(wi->Range))>0.00001){
+						PRETTY_ADD("   Range attenuation factor: ",100000*(1.0 - wi->Longrange)/(wi->Range),2);
+						text+="% per km";
+					}
+					if(playerUnit->mounts[i].ammo!=-1&&(lookupMountSize(wi->size)!="SPECIAL-MISSILE")){
+						PRETTY_ADD("   Rounds remaining: ",playerUnit->mounts[i].ammo,0);
+					} else {
+						if(lookupMountSize(wi->size)=="SPECIAL-MISSILE"){
+							PRETTY_ADD("   Rockets remaining: ",playerUnit->mounts[i].ammo,0);
+						}
+					}
 					totalWeaponEnergyUsage+=(wi->EnergyRate/wi->Refire);
 					break;
 				case weapon_info::PROJECTILE: //need ammo
-					PRETTY_ADDU("   'Fire and Forget' lock time: ",wi->LockTime,0,"seconds");
+					if(wi->LockTime > 0){
+						PRETTY_ADDU("   'Fire and Forget' lock time: ",wi->LockTime,0,"seconds");
+					} else {
+						text+="#n#";
+						text+=prefix;
+						text+="Missile Lock Type: None. Inertial Guidance Only";
+					}
 					PRETTY_ADD("   Missiles remaining: ",playerUnit->mounts[i].ammo,0);
 					totalWeaponEnergyUsage+=(wi->EnergyRate/wi->Refire);
 					break;
@@ -3431,6 +3468,10 @@ void showUnitStats(Unit * playerUnit,string &text,int subunitlevel) {
 					if (wi->Damage>0)
 						totalWeaponDamage+=wi->Damage;
 					PRETTY_ADDU("   Beam stability: ",wi->Stability,2,"seconds");
+					if((100000*(1.0 - wi->Longrange)/(wi->Range))>0.00001){
+						PRETTY_ADD("   Range attenuation factor: ",100000*(1.0 - wi->Longrange)/(wi->Range),2);
+						text+="% per km";
+					}
 					totalWeaponEnergyUsage+=wi->EnergyRate;
 					break;
 				default:
@@ -3504,38 +3545,43 @@ bool BaseComputer::showShipStats(const EventCommandId& command, Control* control
     	text.append("#n##n##c0:1:.5#[RAW DIAGNOSTIC OUTPUT]#n##-c");
 	bool inQuote = false;
 	bool newLine = false;
-    for(string::const_iterator i=rawText.begin(); i!=rawText.end(); i++) {
-        switch(*i) {
-            case '\n':
-                text.append("#n#");
-				if (!newLine) {
-					text.append("#c0:1:.5#");
-					newLine = true;
-				}
-                break;
-            case '"':
-				if (!inQuote) {
-					text.append("#c1:.3:.3#");
-					inQuote=true;
-				} else {
-					text.append("#-c");
-					inQuote=false;
-				}
-                // Delete these, so do nothing.
-                break;
-            case ' ':
-                if (newLine) {
-					newLine=false;
-					text.append("#-c");
-				}
-				text+=(*i);
-				break;
-            default:
-                text+=(*i);
-                break;
-        }
-    }
-
+	static bool showdiags = XMLSupport::parse_bool (vs_config->getVariable("debug","showdiagnostics","false"));
+	if(showdiags){
+		for(string::const_iterator i=rawText.begin(); i!=rawText.end(); i++) {
+			switch(*i) {
+				case '\n':
+					text.append("#n#");
+					if (!newLine) {
+						text.append("#c0:1:.5#");
+						newLine = true;
+					}
+					break;
+				case '"':
+					if (!inQuote) {
+						text.append("#c1:.3:.3#");
+						inQuote=true;
+					} else {
+						text.append("#-c");
+						inQuote=false;
+					}
+					// Delete these, so do nothing.
+					break;
+				case ' ':
+					if (newLine) {
+						newLine=false;
+						text.append("#-c");
+					}
+					text+=(*i);
+					break;
+				default:
+					text+=(*i);
+					break;
+			}
+		}
+	}
+	else{
+		text.append("#n# #c1:.1:.1#SUPPRESSED #n##-c");
+	}
     // Put this in the description.
     StaticDisplay* desc = dynamic_cast<StaticDisplay*>( window()->findControlById("Description") );
     assert(desc != NULL);
