@@ -256,6 +256,12 @@ void GameVegaConfig::initCommandMap(){
   command_map["CommAttackTarget"]=FireKeyboard::AttackTarget;
   command_map["CommHelpMeOut"]=FireKeyboard::HelpMeOut;
   command_map["CommFormUp"]=FireKeyboard::FormUp;
+
+  command_map["BlinkLeftKey"]=FireKeyboard::BlinkLeftKey;
+  command_map["BlinkRightKey"]=FireKeyboard::BlinkRightKey;
+  command_map["HeadlightKey"]=FireKeyboard::HeadlightKey;
+  command_map["SirenKey"]=FireKeyboard::SirenKey;
+
   command_map["CommBreakForm"]=FireKeyboard::BreakFormation;
   command_map["Comm1Key"]=FireKeyboard::PressComm1Key ;
   command_map["Comm2Key"]=FireKeyboard::PressComm2Key ;

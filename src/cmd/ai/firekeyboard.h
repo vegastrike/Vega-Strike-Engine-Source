@@ -19,6 +19,11 @@ class FireKeyboard: public Order {
   bool ShouldFire(Unit * targ);
   std::list <CommunicationMessage> resp;
  public:
+  static void BlinkLeftKey (int,KBSTATE);
+  static void BlinkRightKey (int,KBSTATE);
+  static void HeadlightKey (int,KBSTATE);
+  static void SirenKey (int,KBSTATE);
+
   static void PressComm1Key (int,KBSTATE);
   static void PressComm2Key (int,KBSTATE);
   static void PressComm3Key (int,KBSTATE);

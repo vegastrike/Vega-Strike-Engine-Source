@@ -17,6 +17,7 @@ libgfx_a_SOURCES =	\
 	background.h	\
 	bounding_box.cpp	\
 	bounding_box.h	\
+	car_assist.h 	\
 	vsbox.cpp		\
 	vsbox.h		\
 	bsp.cpp		\

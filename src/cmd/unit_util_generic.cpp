@@ -225,4 +225,15 @@ namespace UnitUtil {
                 }
                 return (cp - _Universe->AccessCockpit(0));
         }
+  void setECM (Unit * my_unit, short NewECM) {
+    if (!my_unit)
+      return;
+    my_unit->GetImageInformation().ecm = NewECM;
+  }
+  short getECM (Unit * my_unit) {
+    if (!my_unit)
+      return 0;
+    return my_unit->GetImageInformation().ecm;
+  }
+
 }

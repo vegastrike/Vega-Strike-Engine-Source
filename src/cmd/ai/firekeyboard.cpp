@@ -14,7 +14,8 @@
 #include "cmd/script/flightgroup.h"
 #include "cmd/script/mission.h"
 #include "vs_globals.h"
-
+#include "gfx/car_assist.h"
+#include "cmd/unit_util.h"
 FireKeyboard::FireKeyboard (unsigned int whichplayer, unsigned int whichjoystick): Order (WEAPON,0){
   this->cloaktoggle=true;
   this->whichjoystick = whichjoystick;
@@ -28,12 +29,19 @@ struct FIREKEYBOARDTYPE {
   FIREKEYBOARDTYPE() {
     lockkey=ECMkey=commKeys[0]=commKeys[1]=commKeys[2]=commKeys[3]=commKeys[4]=commKeys[5]=commKeys[6]=commKeys[7]=commKeys[8]=commKeys[9]=turretaikey = UP;
     eject=ejectcargo=firekey=missilekey=jfirekey=rtargetkey=jtargetkey=jmissilekey=weapk=misk=cloakkey=neartargetkey=threattargetkey=picktargetkey=targetkey=nearturrettargetkey =threatturrettargetkey= pickturrettargetkey=turrettargetkey=UP;
+
+    blinkleftkey=blinkrightkey=headlightkey=sirenkey=UP;
     doc=und=req=0;
   }
  KBSTATE firekey;
  bool doc;
  bool und;
  bool req;
+  KBSTATE blinkleftkey;
+  KBSTATE blinkrightkey;
+  KBSTATE headlightkey;
+  KBSTATE sirenkey;
+
  KBSTATE rtargetkey;
  KBSTATE missilekey;
  KBSTATE jfirekey;
@@ -223,6 +231,40 @@ void FireKeyboard::ReverseTargetKey(int, KBSTATE k) {
   if (k==RESET) {
     g().rtargetkey=PRESS;
   }
+}
+void FireKeyboard::BlinkLeftKey(int, KBSTATE k) {
+    if (k==PRESS) {
+      g().blinkleftkey = k;      
+    }
+    if (k==RELEASE) {
+      g().blinkleftkey = k;
+    }
+
+}
+void FireKeyboard::BlinkRightKey(int, KBSTATE k) {
+    if (k==PRESS) {
+      g().blinkrightkey = k;      
+    }
+    if (k==RELEASE) {
+      g().blinkrightkey = k;
+    }
+
+}
+void FireKeyboard::SirenKey(int, KBSTATE k) {
+    if (k==PRESS) {
+      g().sirenkey = k;      
+    }
+    if (k==RELEASE) {
+      g().sirenkey = k;
+    }
+}
+void FireKeyboard::HeadlightKey(int, KBSTATE k) {
+    if (k==PRESS) {
+      g().headlightkey = k;      
+    }
+    if (k==RELEASE) {
+      g().headlightkey = k;
+    }
 }
 void FireKeyboard::PickTargetKey(int, KBSTATE k) {
   if (g().picktargetkey!=PRESS)
@@ -748,6 +790,45 @@ void FireKeyboard::Execute () {
     parent->GetImageInformation().ecm=-parent->GetImageInformation().ecm;
     
   }
+#ifdef CAR_SIM
+  int origecm=UnitUtil::getECM(parent);
+  if (origecm>=CAR::ON_NO_BLINKEN)
+    origecm=CAR::FORWARD_BLINKEN;
+  if (origecm<0)
+    origecm=0;
+  if (f().blinkleftkey==PRESS) {
+    f().blinkleftkey=DOWN;
+    if ((origecm&CAR::LEFT_BLINKEN)) {
+      UnitUtil::setECM (parent,(origecm& (~CAR::LEFT_BLINKEN)));
+    }else {
+      UnitUtil::setECM (parent,origecm|CAR::LEFT_BLINKEN);
+    }
+  }
+  if (f().blinkrightkey==PRESS) {
+    f().blinkrightkey=DOWN;
+    if ((origecm&CAR::RIGHT_BLINKEN)) {
+      UnitUtil::setECM (parent,(origecm& (~CAR::RIGHT_BLINKEN)));
+    }else {
+      UnitUtil::setECM (parent,origecm|CAR::RIGHT_BLINKEN);
+    }
+  }
+  if (f().sirenkey==PRESS) {
+    f().sirenkey=DOWN;
+    if ((origecm&CAR::SIREN_BLINKEN)) {
+      UnitUtil::setECM (parent,(origecm& (~CAR::SIREN_BLINKEN)));
+    }else {
+      UnitUtil::setECM (parent,origecm|CAR::SIREN_BLINKEN);
+    }
+  }
+  if (f().headlightkey==PRESS) {
+    f().headlightkey=DOWN;
+    if ((origecm&CAR::FORWARD_BLINKEN)) {
+      UnitUtil::setECM (parent,(origecm& (~CAR::FORWARD_BLINKEN)));
+    }else {
+      UnitUtil::setECM (parent,origecm|CAR::FORWARD_BLINKEN);
+    }
+  }
+#endif
   if (f().targetkey==PRESS||j().jtargetkey==PRESS) {
     f().targetkey=DOWN;
     j().jtargetkey=DOWN;

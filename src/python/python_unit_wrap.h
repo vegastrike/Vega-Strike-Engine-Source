@@ -118,6 +118,8 @@
   EXPORT_UTIL(setFgDirective,false)
   EXPORT_UTIL(getFgSubnumber,-1)
   EXPORT_UTIL(isSignificant,false)
+  EXPORT_UTIL(getECM,0)
+  voidEXPORT_UTIL(setECM)
   EXPORT_UTIL(isSun,false)
   EXPORT_UTIL(communicateTo,0)
   EXPORT_UTIL(commAnimation,false)

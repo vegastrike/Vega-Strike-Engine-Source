@@ -14,7 +14,7 @@
 #include "gfx/particle.h"
 #include "lin_time.h"
 #include "animation.h"
-
+#include "car_assist.h"
 static void DoParticles (QVector pos, float percent, const Vector & velocity, float radial_size,int faction) {
   percent = 1-percent;
   int i=rand();
@@ -60,29 +60,6 @@ HaloSystem::HaloSystem() {
 MyIndHalo::MyIndHalo(const QVector & loc, const Vector & size) {
     this->loc = loc;
     this->size=size;
-}
-namespace CAR {
-
-  const int  FORWARD_BLINKEN =1;
-  const int LEFT_BLINKEN =2;
-  const int RIGHT_BLINKEN =4;
-  const int SIREN_BLINKEN =8;
-  const int ON_NO_BLINKEN =16;
-
-  enum ALL_TYPES {
-    RUNNINGLIGHTS,HEADLIGHTS,LEFTBLINK,RIGHTBLINK,BRAKE,REVERSE,SIREN
-  };
-  const EnumMap::Pair type_names[8] = {
-    EnumMap::Pair("UNKNOWN",RUNNINGLIGHTS),
-    EnumMap::Pair("RUNNINGLIGHTS",RUNNINGLIGHTS),
-    EnumMap::Pair("HEADLIGHTS", HEADLIGHTS),
-    EnumMap::Pair("LEFTBLINK",LEFTBLINK),
-    EnumMap::Pair("RIGHTBLINK",RIGHTBLINK),
-    EnumMap::Pair("BRAKE",BRAKE),
-    EnumMap::Pair("REVERSE",REVERSE),
-    EnumMap::Pair("SIREN",SIREN)
-  };
-  const EnumMap type_map (type_names,8);
 }
 
 unsigned int HaloSystem::AddHalo (const char * filename, const QVector & loc, const Vector &size, const GFXColor & col, std::string type) {

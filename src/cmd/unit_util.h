@@ -38,6 +38,8 @@ namespace UnitUtil {
 	bool commAnimation(Unit *my_unit,string anim);
 	bool JumpTo (Unit * unit, string system);
 	int isPlayerStarship (Unit * un);
+	void setECM (Unit * un, short NewECM);
+	short getECM (Unit * un);
 }
 
 #endif
