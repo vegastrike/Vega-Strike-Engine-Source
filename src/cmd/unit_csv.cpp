@@ -6,26 +6,46 @@
 #include "collide/cs_compat.h"
 #include "collide/rapcol.h"
 #include "gfx/bsp.h"
+#include "unit_factory.h"
 using namespace std;
+extern int GetModeFromName (const char * input_buffer);
 extern void pushMesh( Unit::XML * xml, const char *filename, const float scale,int faction,class Flightgroup * fg, int startframe, double texturestarttime);
 void addShieldMesh( Unit::XML * xml, const char *filename, const float scale,int faction,class Flightgroup * fg);
 void addRapidMesh( Unit::XML * xml, const char *filename, const float scale,int faction,class Flightgroup * fg);
 void addBSPMesh( Unit::XML * xml, const char *filename, const float scale,int faction,class Flightgroup * fg);
-
-void Unit::LoadRow(CSVRow &row,string modification, string * netxml) {
-  Unit::XML xml;
-  csvRow = row[0];
-  //
-  image->cargo_volume = atof(row["CargoVolume"].c_str());
-
-
-  //begin the geometry
-  xml.unitscale = atoi(row["Scale"].c_str());
-  if (!xml.unitscale) xml.unitscale=1;
-  image->unitscale=xml.unitscale;
-  string meshes = row["Mesh"];
-  string meshStartFrame = row["MeshStartFrame"];
-  string textureStartTime = row["MeshTextureStartTime"];
+static void UpgradeUnit (Unit * un, std::string upgrades) {
+  while (upgrades.length()) {
+    unsigned int where = upgrades.find(":");
+    unsigned int mountoffset=0;
+    unsigned int subunitoffset=0;
+    string upgrade = upgrades.substr(0,where);
+    unsigned int where1 = upgrade.find(";");
+    unsigned int where2 = upgrade.rfind(";");
+    if (where1!=string::npos) {
+      mountoffset=XMLSupport::parse_int(upgrade.substr(where1+1,where2!=where1?where2:upgrade.length()));      
+      if (where2!=where1&&where2!=string::npos) {
+        subunitoffset=XMLSupport::parse_int(upgrade.substr(where2+1));
+      }
+    }
+    upgrade = upgrade.substr(0,where1);
+    if (upgrade.length()==0) 
+      continue;
+    Unit *upgradee =UnitFactory::createUnit(upgrade.c_str(),
+                                            true,
+                                            FactionUtil::
+                                            GetFaction("upgrades"));
+    double percent=1.0;
+    un->Unit::Upgrade (upgradee,
+                       mountoffset,
+                       subunitoffset,
+                       GetModeFromName (upgrade.c_str()),true,percent,NULL);
+    upgradee->Kill();    
+    if (where!=string::npos) {
+      upgrades=upgrades.substr(where+1);
+    }else break;
+  }  
+}
+static void AddMeshes(Unit::XML& xml, std::string meshes,string meshStartFrame, string textureStartTime,int faction,Flightgroup *fg){
   unsigned int where,wheresf,wherest;
   while (meshes.length()) {
     where=meshes.find(":");
@@ -36,7 +56,7 @@ void Unit::LoadRow(CSVRow &row,string modification, string * netxml) {
     int startframe = startf=="RANDOM"?-1:(startf=="ASYNC"?-1:atoi(startf.c_str()));
     float starttime = startt=="RANDOM"?-1.0f:atof(startt.c_str());
     string mesh = meshes.substr(0,where);
-    pushMesh(&xml,mesh.c_str(),xml.unitscale,faction,getFlightgroup(),startframe,starttime);
+    pushMesh(&xml,mesh.c_str(),xml.unitscale,faction,fg,startframe,starttime);
     if (wheresf!=string::npos) 
       meshStartFrame.substr(wheresf+1);
     if (wherest!=string::npos) 
@@ -46,6 +66,21 @@ void Unit::LoadRow(CSVRow &row,string modification, string * netxml) {
     else
       break;
   }
+}
+
+void Unit::LoadRow(CSVRow &row,string modification, string * netxml) {
+  Unit::XML xml;
+  csvRow = row[0];
+  //
+  image->cargo_volume = atof(row["CargoVolume"].c_str());
+
+
+  //begin the geometry (and things that depend on stats)
+  UpgradeUnit(this,row["Upgrade"]);
+  xml.unitscale = atoi(row["Scale"].c_str());
+  if (!xml.unitscale) xml.unitscale=1;
+  image->unitscale=xml.unitscale;
+  AddMeshes(xml,row["Mesh"],row["MeshStartFrame"],row["MeshTextureStartFrame"],faction,getFlightgroup());
   meshdata= xml.meshes;
   meshdata.push_back(NULL);
   corner_min = Vector(FLT_MAX, FLT_MAX, FLT_MAX);
