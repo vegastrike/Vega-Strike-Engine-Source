@@ -305,6 +305,11 @@ void Mesh::beginElement(const string &name, const AttributeList &attributes) {
 	if (blendDst==blendSrc&&blendSrc==ZERO) {
 	  blendSrc=ONE;
 	}
+	if (blendDst!=ZERO) {
+	  draw_sequence++;
+	  if (blendDst!=ONE)
+	    draw_sequence++;
+	}
 	break;
       }
 
@@ -945,6 +950,7 @@ void Mesh::LoadXML(const char *filename, Mesh *oldmesh) {
   GFXGetMaterial (0, xml->material);//by default it's the default material;
   xml->load_stage = 0;
   xml->recalc_norm=false;
+  xml->scale=1;
   XML_Parser parser = XML_ParserCreate(NULL);
   XML_SetUserData(parser, this);
   XML_SetElementHandler(parser, &Mesh::beginElement, &Mesh::endElement);

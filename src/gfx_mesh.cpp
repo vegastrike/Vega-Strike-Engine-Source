@@ -29,10 +29,10 @@
 #include <assert.h>
 
 #include <math.h>
-
+#include <list>
 #include <string>
 #include <fstream>
-using namespace std;
+
 
 #include "gfxlib.h"
 
@@ -40,9 +40,23 @@ using namespace std;
 #include "vegastrike.h"
 
 #include <GL/gl.h>
-
+using std::list;
 Hashtable<string, Mesh, char [513]> Mesh::meshHashTable;
-list<Mesh*> undrawn_meshes[NUM_MESH_SEQUENCE]; // lower priority means draw first
+class OrigMeshContainer {
+public:
+  Mesh * orig;
+  OrigMeshContainer (Mesh * tmp) {
+    orig = tmp;
+  }
+  bool operator < (const OrigMeshContainer & b) {
+    return (orig->Decal < b.orig->Decal);
+  }
+  bool operator == (const OrigMeshContainer &b) {
+    return orig->Decal==b.orig->Decal;
+  }
+
+};
+list<OrigMeshContainer> undrawn_meshes[NUM_MESH_SEQUENCE]; // lower priority means draw first
 extern list<Logo*> undrawn_logos;
 Vector mouseline;
 
@@ -55,8 +69,9 @@ void Mesh::ProcessUndrawnMeshes() {
   GFXEnable(DEPTHWRITE);
   GFXEnable(DEPTHTEST);
   for(int a=0; a<NUM_MESH_SEQUENCE; a++) {
+    undrawn_meshes[a].sort();//sort by texture address
     while(undrawn_meshes[a].size()) {
-      Mesh *m = undrawn_meshes[a].back();
+      Mesh *m = undrawn_meshes[a].back().orig;
       undrawn_meshes[a].pop_back();
       m->ProcessDrawQueue();
       m->will_be_drawn = false;
@@ -98,7 +113,7 @@ void Mesh::InitUnit() {
 	envMap = GFXTRUE;
 	draw_queue = NULL;
 	will_be_drawn = false;
-	draw_sequence = 1;
+	draw_sequence = 0;
 }
 
 Mesh::Mesh()
@@ -171,7 +186,7 @@ void Mesh::Draw(const Transformation &trans, const Matrix m)
   orig->draw_queue->push_back(c);
   if(!orig->will_be_drawn) {
     orig->will_be_drawn = true;
-    undrawn_meshes[draw_sequence].push_back(orig);
+    undrawn_meshes[draw_sequence].push_back(OrigMeshContainer(orig));
   }
 }
 

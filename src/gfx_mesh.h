@@ -28,8 +28,8 @@
 #include "gfx_aux.h"
 #include "gfx_transform.h"
 #include "gfxlib_struct.h"
-using namespace std;
-
+using std::vector;
+using std::string;
 class Planet;
 class Unit;
 
@@ -220,6 +220,7 @@ protected:
   int draw_sequence;
   string hash_name;
   void InitUnit();
+  friend class OrigMeshContainer;
 public:
 
   Mesh();
