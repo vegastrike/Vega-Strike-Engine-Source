@@ -21,6 +21,10 @@ Vector IdentityTransform::Transform (const Vector & v) {
   return v;
 }
 
+Vector IdentityTransform::TransformNormal (const Vector & n) {
+  return n;
+}
+
 void IdentityTransform::TransformBox (Vector &min, Vector & max) {
   
 }
@@ -64,7 +68,7 @@ unsigned int quadsquare::SetVertices (GFXVertex * vertexs, const quadcornerdata 
 	for (unsigned int i=0;i<5;i++) {
 	  v[i].j = Vertex[i].Y;
 	  vertexs[Vertex[i].vertindex].SetTexCoord (nonlinear_trans->TransformS(v[i].i,(*textures)[Vertex[i].GetTex()].scales),nonlinear_trans->TransformT(v[i].k, (*textures)[Vertex[i].GetTex()].scalet));
-	  vertexs[Vertex[i].vertindex].SetVertex (nonlinear_trans->Transform(v[i]));
+	  vertexs[Vertex[i].vertindex].SetVertex (nonlinear_trans->TransformNormal(v[i]));
 	}
 	return half;  
 }

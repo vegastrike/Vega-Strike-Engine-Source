@@ -68,7 +68,7 @@ float QuadTree::GetHeight (Vector Location, Vector & normal) {
   InvTransform (transformation,Location);
   nonlinear_transform->InvTransform (Location);
   float tmp =  Location.j-root->GetHeight (RootCornerData,Location.i,Location.k,  normal);
-  nonlinear_transform->Transform (normal);
+  nonlinear_transform->TransformNormal (normal);
   Transform (transformation,normal);
   normal.Normalize();
   return tmp;

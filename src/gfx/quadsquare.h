@@ -65,8 +65,10 @@ struct TextureIndex {
  */
 class IdentityTransform {
  public:
-  ///Transforms in a possibly nonlinear way the vector to some new space
+  ///Transforms in a possibly nonlinear way the point to some new space
   virtual Vector Transform (const Vector &);
+  ///transforms a direction to some new space
+  virtual Vector TransformNormal (const Vector &);
   ///Transforms in reverse the vector into quadsquare space
   virtual Vector InvTransform (const Vector &);
   ///Transforms a min and a max vector and figures out what is bigger
