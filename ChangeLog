@@ -1,3 +1,17 @@
+2002-03-23 Daniel Horn <hellcatv@hotmail.com>
+	* Finished up comms
+	* Added comm animations
+	* Cockpit Huds == pretty
+	* Added Contraband Searches
+	* Addded contraband lists
+	* Added XML conversations (communication/neutral.xml or what you specify in factions.xml)
+	* Added "getting mad when you fire at me" (eventually can use for scorechart)
+	* Added random communication
+	* Brushed up some turret switching code
+	* Fixed loading screen
+	* Added comm screen
+	* Improved Request Clearence to be processed throgh communication channel
+	
 2002-03-22 Alexander Rawass <alexannika@users.sourceforge.net>
 	
 	* made the textplane of the slash screen a TextPlane *
