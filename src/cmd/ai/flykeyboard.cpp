@@ -46,7 +46,9 @@ struct StarShipControlKeyboard {
   bool realauto;
   bool startcomm;
   bool commchanged;
-  void UnDirty() {sheltonpress=sheltonrelease=uppress=uprelease=downpress=downrelease=leftpress=leftrelease=rightpress=rightrelease=ABpress=ABrelease=accelpress=accelrelease=decelpress=decelrelease=rollrightpress=rollrightrelease=rollleftpress=rollleftrelease=0;jumpkey=startpress=stoppress=autopilot=dirty=switch_combat_mode=terminateauto=setunvel=switchmode=setnulvel=realauto=matchspeed=false;axial=vertical=horizontal=0;commchanged=startcomm=false;}
+  bool switchwebcam;
+  bool switchsecured;
+  void UnDirty() {sheltonpress=sheltonrelease=uppress=uprelease=downpress=downrelease=leftpress=leftrelease=rightpress=rightrelease=ABpress=ABrelease=accelpress=accelrelease=decelpress=decelrelease=rollrightpress=rollrightrelease=rollleftpress=rollleftrelease=0;jumpkey=startpress=stoppress=autopilot=dirty=switch_combat_mode=terminateauto=setunvel=switchmode=setnulvel=realauto=matchspeed=false;axial=vertical=horizontal=0;commchanged=startcomm=false;switchwebcam=false;switchsecured=false;}
   StarShipControlKeyboard() {UnDirty();}
 };
 static vector <StarShipControlKeyboard> starshipcontrolkeys;
@@ -160,6 +162,18 @@ void FlyByKeyboard::Execute (bool resetangvelocity) {
 	Network[whichplayer].startCommunication();
 	SSCK.commchanged=false;
   }
+#ifdef NETCOMM
+  if( Network!=NULL && SSCK.switchwebcam)
+  {
+    SSCK.switchwebcam=false;
+	Network[whichplayer].switchWebcam();
+  }
+  if( Network!=NULL && SSCK.switchsecured)
+  {
+    SSCK.switchsecured=false;
+	Network[whichplayer].switchSecured();
+  }
+#endif
   if (SSCK.setunvel) {
     SSCK.setunvel=false;
     parent->VelocityReference (parent->Target());
@@ -390,6 +404,46 @@ if(Network!=NULL)
 	else
 		g().startcomm=true;
 	g().commchanged=true;
+  break;
+  case RELEASE:
+  case RESET:
+    break;
+  }
+}
+}
+
+void FlyByKeyboard::SwitchWebcam(int,KBSTATE k)
+{
+if(Network!=NULL)
+{
+  if (g().dirty)g().UnDirty();
+  switch (k) {
+  case DOWN:
+  case UP:
+  break;
+  case PRESS:
+	printf( "Pressed SWITCHWEBCAM key !!!\n");
+	g().switchwebcam=true;
+  break;
+  case RELEASE:
+  case RESET:
+    break;
+  }
+}
+}
+
+void FlyByKeyboard::SwitchSecured(int,KBSTATE k)
+{
+if(Network!=NULL)
+{
+  if (g().dirty)g().UnDirty();
+  switch (k) {
+  case DOWN:
+  case UP:
+  break;
+  case PRESS:
+	printf( "Pressed SWITCHSECURED key !!!\n");
+	g().switchsecured=true;
   break;
   case RELEASE:
   case RESET:

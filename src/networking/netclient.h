@@ -185,6 +185,8 @@ class	NetClient
 		void	decreaseFrequency();
 		float	getSelectedFrequency();
 		float	getCurrentFrequency();
+		void	switchSecured();
+		void	switchWebcam();
 
 		void	sendTextMessage( string message);
 

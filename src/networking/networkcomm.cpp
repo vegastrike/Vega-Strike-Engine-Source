@@ -19,6 +19,7 @@ extern bool cleanexit;
 #include "gldrv/winsys.h"
 #include "packet.h"
 #include <assert.h>
+#include "xml_support.h"
 
 #ifdef NETCOMM_JVOIP
 void	CheckVOIPError( int val)
@@ -115,6 +116,7 @@ NetworkCommunication::NetworkCommunication()
 	this->active = false;
 	this->max_messages = 25;
 	this->method = ClientBroadcast;
+	this->crypt_key = XMLSupport::parse_int( vs_config->getVariable( "network", "encryption_key", "0"));
 
 #ifdef NETCOMM_JVOIP
 
@@ -197,8 +199,13 @@ void	NetworkCommunication::AddToSession( ClientPtr clt)
 {
 	this->commClients.push_back( clt);
 	// If the client has a webcam enabled and we don't have one selected yet
-	if( !this->webcamClient && clt->webcam)
-		this->webcamClient = clt;
+	// FIND A FIX FOR THAT TEST
+	//if( this->webcamClient && clt->webcam)
+	{
+		CltPtrIterator cltit = commClients.end();
+		assert( (*cltit)==clt);
+		this->webcamClient = cltit;
+	}
 #ifdef NETCOMM_JVOIP
 	CheckVOIPError( this->session->AddDestination( ntohl( clt->cltadr.inaddr() ), VOIP_PORT));
 #endif /* NETCOMM_JVOIP */
@@ -240,7 +247,8 @@ void	NetworkCommunication::SendMessage( SOCKETALT & send_sock, ObjSerial serial,
 		CltPtrIterator it;
 		for( it = commClients.begin(); it!=commClients.end(); it++)
 		{
-			p.send( CMD_TXTMESSAGE, serial, msg, message.length(), SENDRELIABLE, NULL, (*it)->sock,
+			if( (*it)->secured==this->secured)
+				p.send( CMD_TXTMESSAGE, serial, msg, message.length(), SENDRELIABLE, NULL, (*it)->sock,
 						__FILE__, PSEUDO__LINE__(244) );
 		}
 	}
@@ -270,7 +278,7 @@ void	NetworkCommunication::SendSound( SOCKETALT & sock, ObjSerial serial)
 		CltPtrIterator it;
 		for( it = commClients.begin(); it!=commClients.end(); it++)
 		{
-			if( (*it)->portaudio)
+			if( (*it)->portaudio && (*it)->secured==this->secured)
 			{
 				p.send( CMD_SOUNDSAMPLE, serial, this->audio_inbuffer, this->audio_inlength, SENDANDFORGET, NULL, (*it)->sock,
 						__FILE__, PSEUDO__LINE__(244) );
@@ -437,5 +445,40 @@ char *	NetworkCommunication::GetWebcamCapture()
 #else
 	return NULL; // We have no choice :-/
 #endif
+}
+
+void	NetworkCommunication::SwitchWebcam()
+{
+	bool found = false;
+	CltPtrIterator it;
+	// Go through listClients from current client to the end in order to find the next webcam client
+	for( it=++webcamClient; it!=commClients.end() && !found; it++)
+	{
+		if( (*it)->webcam)
+			found = true;
+	}
+	// If a client with webcam support was not found before the end we go through listClients from te beginning
+	if( !found)
+	{
+		for( it=commClients.begin(), found=false; it!=webcamClient && !found; it++)
+		{
+			if( (*it)->webcam)
+				found = true;
+		}
+		// If we found another client supporting webcam
+		if( found)
+			webcamClient = it;
+	}
+}
+
+void	NetworkCommunication::SwitchSecured()
+{
+	if( secured)
+		secured=0;
+	else
+	{
+		if( crypt_key!=0)
+			secured = 1;
+	}
 }
 

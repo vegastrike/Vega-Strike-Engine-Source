@@ -43,13 +43,14 @@ class NetworkCommunication
 		// Text message
 		std::deque<std::string>	message_history;		// Text message history
 		unsigned short			max_messages;			// Maximum number of text messages recorded
-		list<ClientPtr>	commClients;					// List of client communicating on the same frequency
-		ClientPtr		webcamClient;					// The client we are watching the webcam
+		list<ClientPtr>			commClients;			// List of client communicating on the same frequency
+		CltPtrIterator			webcamClient;			// The client we are watching the webcam
 
-		// The current communication frequency
-		float	freq;
-		bool	active;
-		unsigned char	method;
+		unsigned int	crypt_key;		// Key used for encryption on secured channels
+		float			freq;			// Current communication frequency
+		bool			active;			// Tell wether the communication system is active
+		char			secured;		// Tell wether we are on a secured channel or not
+		unsigned char	method;			// Method used to spread comms
 #ifndef NETCOMM_NOWEBCAM
 		// Webcam support
 		WebcamSupport *		Webcam;
@@ -101,6 +102,10 @@ class NetworkCommunication
 
 		char	HasWebcam();
 		char	HasPortaudio();
+
+		char	IsSecured() { return secured;}
+		void	SwitchSecured();
+		void	SwitchWebcam();
 };
 
 #endif

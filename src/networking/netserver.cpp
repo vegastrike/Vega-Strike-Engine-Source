@@ -1318,6 +1318,7 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
 		{
 			float freq = netbuf.getFloat();
 			clt->comm_freq = freq;
+			clt->secured = netbuf.getChar();
 			clt->webcam = netbuf.getChar();
 			clt->portaudio = netbuf.getChar();
 			// Broadcast players with same frequency that there is a new one listening to it

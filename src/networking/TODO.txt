@@ -5,6 +5,8 @@
 - Wait for DloadMgr buffer to buffer download support and use it to transfer webcam captures
 - Complete jVoIP support
 - PortAudio : tune MAX_PA_CPU_LOAD when support is complete
+- Netcomm : Add support for secure channels (encrypt with a key every data send on those channels)
+  add encryption stuff
 - About NetworkCommunications : assign a different freq range for each faction ?
 - Interpolate orientation too ? (3 interpolations)
 - CUBIC SPLINES : interpolate time linearly with SPLINE_METHOD2
@@ -19,7 +21,7 @@
 *** GAME SERVER ********************************************************
 
 - In savegame : add stardate loading and saving stuff to dynamic universe
-- Handle a timeout between the time the player logged in and the time he really enters the game
+- Add a timeout between the time the player logged in and the time he really enters the game
 - Add options to server keyboard control : KILL A SERVER UNIT, KICK A PLAYER, SEND A PLAYER TO JAIL SYSTEM, SEND ADMIN MESSAGE TO PLAYERS...
 - Sometimes in the future : make admin server settings with :
 							- no AI wingmen for players
@@ -35,6 +37,8 @@ TO LOOK AT - When receiving a packet : look at timestamp and compare it to lates
 
 *** CLIENT SIDE *********************************************************
 
+- Add a VDU text in network VDU to show if current comm is secured or not
+- Take damages into account and put some interferences on webcam pictures
 - Should wait for CMD_ADDEDYOU just before entering in the main game loop
 - Interpolate(extrapolate) using delatime + the concerned client's current_state delay
 OR

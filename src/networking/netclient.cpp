@@ -1060,20 +1060,26 @@ int NetClient::recvMsg( Packet* outpacket )
 #ifdef NETCOMM
 			{
 				float freq = netbuf.getFloat();
+				char  secured = netbuf.getChar();
 				if( freq == current_freq)
 				{
-					char webc = netbuf.getChar();
-					char pa = netbuf.getChar();
-					ClientPtr clt;
-					// Check this is not us
-					if( packet_serial != this->serial)
+					if( secured==NetComm->IsSecured())
 					{
-						// Add the client to netcomm list in NetComm ?
-						clt = Clients.get(packet_serial);
-						clt->webcam = webc;
-						clt->portaudio = pa;
-						NetComm->AddToSession( clt);
+						char webc = netbuf.getChar();
+						char pa = netbuf.getChar();
+						ClientPtr clt;
+						// Check this is not us
+						if( packet_serial != this->serial)
+						{
+							// Add the client to netcomm list in NetComm ?
+							clt = Clients.get(packet_serial);
+							clt->webcam = webc;
+							clt->portaudio = pa;
+							NetComm->AddToSession( clt);
+						}
 					}
+					else
+						cerr<<"WARNING : Received a STARTCOMM from a channel not in the same mode"<<endl;
 				}
 				else
 					cerr<<"WARNING : Received a STARTCOMM from another frequency"<<endl;
@@ -1620,6 +1626,7 @@ void	NetClient::startCommunication()
 	selected_freq = current_freq;
 	NetBuffer netbuf;
 	netbuf.addFloat( selected_freq);
+	netbuf.addChar( NetComm->IsSecured());
 	netbuf.addChar( webcam_support);
 	netbuf.addChar( portaudio_support);
 	NetComm->InitSession( selected_freq);
@@ -1683,6 +1690,19 @@ bool NetClient::IsNetcommActive() const
     return ( this->NetComm==NULL ? false : this->NetComm->IsActive() );
 #else
     return false;
+#endif
+}
+
+void	NetClient::switchSecured()
+{
+#ifdef NETCOMM
+	NetComm->SwitchSecured();
+#endif
+}
+void	NetClient::switchWebcam()
+{
+#ifdef NETCOMM
+	NetComm->SwitchWebcam();
 #endif
 }
 

@@ -18,6 +18,8 @@ class FlyByKeyboard: public FlyByWire {
   float clamp_axis(float v);
   float reduce_axis (float v);
  public:
+  static void SwitchWebcam(int,KBSTATE);
+  static void SwitchSecured(int,KBSTATE);
   static void ChangeCommStatus (int,KBSTATE);
   static void DownFreq (int,KBSTATE);
   static void UpFreq (int,KBSTATE);

@@ -70,8 +70,9 @@ public:
 	/* In-game parameters */
 	unsigned short	zone;
 	bool			ingame;
-	bool			webcam;
-	bool			portaudio;
+	char			webcam;
+	char			portaudio;
+	char			secured;
 	string			jumpfile;
 	float			comm_freq;
 
@@ -87,8 +88,9 @@ public:
 		deltatime=0;
 		zone = 0;
 		ingame = false;
-		webcam = false;
-		portaudio = false;
+		webcam = 0;
+		portaudio = 0;
+		secured = 0;
 		jumpfile="";
         _disconnectReason = "none";
 		comm_freq = MIN_COMMFREQ;

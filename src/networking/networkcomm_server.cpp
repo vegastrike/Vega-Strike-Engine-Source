@@ -19,6 +19,8 @@ void	NetworkCommunication::RecvMessage( string message) {}
 char *	NetworkCommunication::GetWebcamCapture() { return NULL;}
 char	NetworkCommunication::HasWebcam() {}
 char	NetworkCommunication::HasPortaudio() {}
+void	NetworkCommunication::SwitchWebcam() {}
+void	NetworkCommunication::SwitchSecured() {}
 
 #endif
 
