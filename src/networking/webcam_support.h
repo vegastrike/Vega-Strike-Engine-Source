@@ -11,6 +11,44 @@
 //#include <afx.h>
 #else
 #include <dshow.h>
+#include <qedit.h>
+#ifdef DSHOW
+class WebcamSupport;
+
+// Global DShow variable
+extern AM_MEDIA_TYPE g_StillMediaType;
+// DirectShow works with a callback interface...
+class SampleGrabberCallback : public ISampleGrabberCB
+{
+public:
+	WebcamSupport * ws;
+	STDMETHODIMP_(ULONG) AddRef()	{ return 1; }
+	STDMETHODIMP_(ULONG) Release()	{ return 2; }
+
+	STDMETHODIMP QueryInterface( REFIID riid, void **ppvObject )
+	{
+		if( NULL == ppvObject ) return E_POINTER;
+		if( riid == __uuidof( IUnknown ) )
+		{
+			*ppvObject = static_cast<IUnknown*>( this );
+			return S_OK;
+		}
+		if( riid == __uuidof( ISampleGrabberCB ) )
+		{
+			*ppvObject = static_cast<ISampleGrabberCB*>( this );
+			return S_OK;
+		}
+		return E_NOTIMPL;
+	}
+
+	STDMETHODIMP SampleCB( double Time, IMediaSample *pSample )
+	{
+		return E_NOTIMPL;
+	}
+
+	STDMETHODIMP BufferCB( double Time, BYTE *pBuffer, long BufferLen );
+};
+#endif
 #endif
 #endif
 #ifdef __APPLE__
@@ -49,12 +87,14 @@ class	WebcamSupport
 		HWND			capvideo, hwndCap;
 		CAPTUREPARMS	capparam;
 #else
+		SampleGrabberCallback g_SampleCB;
 		IGraphBuilder *pGraph;
-		ICaptureGraphBuilder2 *pCaptureGraph = NULL;
-		ICreateDevEnum *pDevEnum = NULL;
-		IEnumMoniker *pEnum = NULL;
-		IMoniker *pMoniker = NULL;
-		IBaseFilter *pCap = NULL;
+		ICaptureGraphBuilder2 *pCaptureGraph;
+		ICreateDevEnum *pDevEnum;
+		IEnumMoniker *pEnum;
+		IMoniker *pMoniker;
+		IBaseFilter *pCap;
+		IBaseFilter *pNull;
 #endif
 #endif
 #ifdef __APPLE__
@@ -119,6 +159,7 @@ extern "C" {
 #include "jpeglib.h" 
 }
 
+char * JpegFromBmp( BITMAPFILEHEADER & bfh, LPBITMAPINFOHEADER & lpbi, BYTE * bmpbuffer, long BufferLen, int quality, std::string csJpeg);
 BOOL JpegFromDib(HANDLE     hDib,     //Handle to DIB
                  int        nQuality, //JPEG quality (0-100)
                  std::string    csJpeg,   //Pathname to target jpeg file
@@ -130,6 +171,7 @@ BOOL BuildSamps(HANDLE                      hDib,
                 JSAMPARRAY                  jsmpArray,
                 std::string*                    pcsMsg);
 
+BOOL DibToSamps2( BITMAPFILEHEADER & bfh, LPBITMAPINFOHEADER & pbBmHdr, BYTE * bmpbuffer, int nSampsPerRow, struct jpeg_compress_struct cinfo, JSAMPARRAY jsmpPixels);
 BOOL DibToSamps(HANDLE                      hDib,
                 int                         nSampsPerRow,
                 struct jpeg_compress_struct cinfo,
@@ -137,6 +179,10 @@ BOOL DibToSamps(HANDLE                      hDib,
                 std::string*                    pcsMsg);
 
 RGBQUAD QuadFromWord(WORD b16);
+#endif
+#ifdef DSHOW
+
+
 #endif
 
 #endif
