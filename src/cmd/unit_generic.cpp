@@ -2625,11 +2625,11 @@ double computeDowngradePercent (double old, double upgrade, double isnew) {
 }
 
 static int UpgradeFloat (double &result,double tobeupgraded, double upgrador, double templatelimit, double (*myadd) (double,double), bool (*betterthan) (double a, double b), double nothing,  double completeminimum, double (*computepercentage) (double oldvar, double upgrador, double newvar), double & percentage, bool forcedowngrade, bool usetemplate, double at_least_this,bool (*atLeastthiscompare)( double a, double b)=AGreaterB, bool clamp=false) {
-  if (clamp) {
-    if (tobeupgraded>upgrador)
-      upgrador=tobeupgraded;
-  }
   if (upgrador!=nothing) {//if upgrador is better than nothing
+    if (clamp) {
+      if (tobeupgraded>upgrador)
+	upgrador=tobeupgraded;
+    }
     float newsum = (*myadd)(tobeupgraded,upgrador);
     if (newsum < tobeupgraded&&at_least_this>=upgrador&&at_least_this>newsum&&at_least_this>=tobeupgraded){//if we're downgrading
         return newsum==upgrador?CAUSESDOWNGRADE:NOTTHERE;
