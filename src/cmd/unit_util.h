@@ -144,7 +144,6 @@ namespace UnitUtil {
 	}
 	int removeCargo(Unit *my_unit,string s, int quantity, bool erasezero){
 		if (!my_unit)return 0;
-		int numret=0;
 		unsigned int index;
 		if (my_unit->GetCargo(s,index)) {
 			quantity = my_unit->RemoveCargo (index,quantity,erasezero);

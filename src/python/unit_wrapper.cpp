@@ -7,8 +7,9 @@
 #include "cmd/unit_util.h"
 #include <boost/python/objects.hpp>
 #include "universe_util.h"
+#include "cmd/ai/fire.h"
 //makes to_python for both vector and qvector turn them into tuples :-)
-
+using Orders::FireAt;
 BOOST_PYTHON_BEGIN_CONVERSION_NAMESPACE
 PyObject *to_python (Vector vec) {
 	return to_python(boost::python::tuple((double)vec.i,(double)vec.j,(double)vec.k));
@@ -82,7 +83,7 @@ public:
   bool isNull () {return GetUnit()==0;}
   void setNull () {SetUnit(0);}
 };
-
+PYTHON_INIT_INHERIT_GLOBALS(VS,FireAt);
 PYTHON_BEGIN_MODULE(VS)
 #undef EXPORT_UTIL
 #undef voidEXPORT_UTIL
@@ -193,6 +194,11 @@ PYTHON_BEGIN_CLASS(VS,UnitCollection::UnitIterator,"un_iter")
   Class.def (&UnitCollection::UnitIterator::remove,"remove");
   Class.def (&UnitCollection::UnitIterator::preinsert,"preinsert");
 PYTHON_END_CLASS(VS,UnitCollection::UnitIterator)
+PYTHON_BEGIN_INHERIT_CLASS(VS,FireAt,"PythonAI")
+Class.def (&FireAt::GetParent,"GetParent");
+PYTHON_END_CLASS(VS,FireAt)
+
+
 PYTHON_END_MODULE(VS)
 TO_PYTHON_SMART_POINTER(UnitWrapper);
 TO_PYTHON_SMART_POINTER(Cargo);

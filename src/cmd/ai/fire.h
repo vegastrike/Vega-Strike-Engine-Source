@@ -23,6 +23,7 @@ protected:
   bool isJumpablePlanet(Unit *);
   void ReInit (float rxntime, float agglevel);
 public:
+  Unit * GetParent() {return CommunicatingAI::GetParent();}
   FireAt (float reaction_time, float aggressivitylevel);//weapon prefs?
   FireAt();
   virtual void Execute();
