@@ -739,7 +739,7 @@ const char * noslash (const char * in) {
   if (*tmp!='\0') {
     tmp++;
   } else {
-    return tmp;
+    return in;
   }
   const char * tmp2=tmp;
   tmp2=noslash (tmp2);

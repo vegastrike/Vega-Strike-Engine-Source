@@ -35,6 +35,7 @@ std::string Unit::cargoSerializer (const XMLType &input, void * mythis) {
       un->image->cargo[i].volume=tmpvolume;
       un->image->cargo[i].mass=tmpmass;
       un->image->cargo.erase(un->image->cargo.begin()+(i+1));//group up similar ones
+      i--;
     }
 
   }
@@ -96,9 +97,9 @@ bool Unit::SellCargo (unsigned int i, int quantity, float &creds, Cargo & carg, 
     quantity=image->cargo[i].quantity;
   carg = image->cargo[i];
   creds+=quantity*buyer->PriceCargo (image->cargo[i].content);
-  Cargo soldcargo(image->cargo[i]);
-  soldcargo.quantity=quantity;
-  buyer->AddCargo (image->cargo[i]);
+  carg =Cargo (image->cargo[i]);
+  carg.quantity=quantity;
+  buyer->AddCargo (carg);
   
   RemoveCargo (i,quantity);
   return true;
