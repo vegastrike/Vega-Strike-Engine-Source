@@ -2968,7 +2968,7 @@ string buildShipDescription(Cargo &item,std::string & texturedescription) {
                     string shipnoblank = item.content.substr(0,item.content.find("."));
                     string::size_type ship = hudimage.rfind(shipnoblank);
                     if (ship!=string::npos) {
-                       texturedescription="units/"+shipnoblank+"/"+shipname;
+                       texturedescription="../units/"+shipnoblank+"/"+shipname;
                     }else {
                        texturedescription=shipname;
                     }                    
