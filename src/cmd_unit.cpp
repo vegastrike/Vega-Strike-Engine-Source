@@ -484,8 +484,7 @@ bool Unit::Explode () {
 
 bool Unit::queryBSP (const Vector &pt, float err) {
   int i;
-  float tmp;
-  Vector st (ToLocalCoordinates(pt)-Position());
+  Vector st (InvTransform (cumulative_transformation_matrix,pt));
 
   for (i=0;i<nummesh;i++) {
     if ((meshdata[i]->intersects (st,err)))
@@ -501,8 +500,8 @@ bool Unit::queryBSP (const Vector &pt, float err) {
 float Unit::queryBSP (const Vector &start, const Vector & end) {
   int i;
   float tmp;
-  Vector st (ToLocalCoordinates(start)-Position());
-  Vector ed (ToLocalCoordinates(end)-Position());
+  Vector st (InvTransform (cumulative_transformation_matrix,start));
+  Vector ed (InvTransform (cumulative_transformation_matrix,start));
 
   for (i=0;i<nummesh;i++) {
     if ((tmp = meshdata[i]->intersects (st,ed)))

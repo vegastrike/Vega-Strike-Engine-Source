@@ -228,6 +228,17 @@ inline Vector Transform (const Matrix t, const Vector & v) {
 		 t[13]+v.i*t[1]+v.j*t[5]+v.k*t[9],
 		 t[14]+v.i*t[2]+v.j*t[6]+v.k*t[10]);
 }
+inline Vector InvTransformNormal (const Matrix t, const Vector & v) {
+
+#define M(A,B) t[B*4+A]
+  return Vector(v.i*M(0,0)+v.j*M(1,0)+v.k*M(2,0),
+		v.i*M(0,1)+v.j*M(1,1)+v.k*M(2,1),
+		v.i*M(0,2)+v.j*M(1,2)+v.k*M(2,2));
+#undef M
+}
+inline Vector InvTransform (const Matrix t, const Vector & v) {
+  return InvTransformNormal (t,  Vector (v.i-t[12], v.j-t[13], v.k-t[14]));
+}
 
 inline Vector Transform (const Matrix t, const float x, const float y, const float z) {
   //    Vector tLocation (t[12],t[13],t[14]);

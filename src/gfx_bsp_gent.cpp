@@ -90,7 +90,7 @@ struct bsp_tree {
 static bool Cross (const bsp_polygon &x, bsp_tree &result) {
   float size =0;
   
-  for (int i=2;(!size)&&i<x.v.size();i++) {
+  for (unsigned int i=2;(!size)&&i<x.v.size();i++) {
     Vector v1 (x.v[i].x-x.v[0].x,x.v[i].y-x.v[0].y,x.v[i].z-x.v[0].z);
     Vector v2 (x.v[1].x-x.v[0].x,x.v[1].y-x.v[0].y,x.v[1].z-x.v[0].z);
     result.a = v1.j * v2.k - v1.k * v2.j;
@@ -331,7 +331,7 @@ static int select_plane (const vector <bsp_polygon> &tri, const vector <bsp_tree
   int front = 0;
   int back = 0;
   unsigned int retval= 0;
-  float least_penalty = 10000000000000;
+  float least_penalty = 10000000000.;
   const float size_factor = .3333333;
   const float balance_factor = 1;
   const float  split_factor = .1;
