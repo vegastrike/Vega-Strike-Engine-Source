@@ -1286,7 +1286,9 @@ namespace VSFileSystem
 	#endif
 		if( found>=0)
 		{
-			if( type==SystemFile && Rootdir[i]==homedir)
+			bool thatlong = i<Rootdir.size();
+			if (thatlong)thatlong = Rootdir[i]==homedir;
+			if( type==SystemFile && thatlong)
 				shared = true;
 			f.SetDirectory( Directories[curtype]);
 			f.SetSubDirectory( subdir);
