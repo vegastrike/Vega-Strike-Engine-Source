@@ -82,7 +82,7 @@ unsigned int quadsquare::SetVertices (GFXVertex * vertexs, const quadcornerdata 
 // 3-0-1
 // | | |
 // +-4-+
-static void InterpolateTextures (VertInfo res[5], VertInfo  in[4]) {
+static void InterpolateTextures (VertInfo res[5], VertInfo  in[4], const quadcornerdata &cd) {
   float tmp;
   res[0].SetTex(0.25 * ((((float)in[0].Rem)+in[1].Rem+in[2].Rem+in[3].Rem)/256.+ in[0].Tex + in[1].Tex + in[2].Tex + in[3].Tex));
   res[1].SetTex(0.5 * ((((float)in[0].Rem)+in[3].Rem)/256.+ (in[3].Tex) + in[0].Tex));
@@ -92,8 +92,21 @@ static void InterpolateTextures (VertInfo res[5], VertInfo  in[4]) {
   res[3].SetTex(0.5 * ((((float)in[1].Rem)+in[2].Rem)/256.+ (in[1].Tex) + in[2].Tex));
 
   res[4].SetTex(0.5 * ((((float)in[2].Rem)+in[3].Rem)/256.+ (in[2].Tex) + in[3].Tex));
+  /*
+	float pos[5];
+	int half = 1<< cd.Level;
+	pos[0] = (cd.xorg + half+ cd.zorg + half);
+	pos[1] = (cd.xorg + half*2+ cd.zorg + half);
+	pos[2] = (cd.xorg + half+ cd.zorg);
+	pos[3] = (cd.xorg+ cd.zorg + half);
+	pos[4] = (cd.xorg + half+ cd.zorg + half*2);
+	
+	
+	for (int i = 0; i < 5; i++) {
 
-
+	  res[i].SetTex(((int)((pos[i])/5000))%10);
+	}
+  */
   res[0].Y = (unsigned short) (0.25 * (((float)in[0].Y) + in[1].Y + in[2].Y + in[3].Y));
   res[1].Y = (unsigned short) (0.5 * (((float)in[3].Y) + in[0].Y));
   res[2].Y = (unsigned short) (0.5 * (((float)in[0].Y) + in[1].Y));
@@ -124,7 +137,7 @@ quadsquare::quadsquare(quadcornerdata* pcd) {
 
 	// Set default vertex positions by interpolating from given corners.
 	// Just bilinear interpolation.
-	InterpolateTextures (Vertex,pcd->Verts);
+	InterpolateTextures (Vertex,pcd->Verts,*pcd);
 	for (i = 0; i < 2; i++) {
 		Error[i] = 0;
 	}
@@ -1215,10 +1228,17 @@ void	quadsquare::AddHeightMap(const quadcornerdata& cd, const HeightMapInfo& hm)
 	// Modify the vertex heights if necessary, and set the dirty
 	// flag if any modifications occur, so that we know we need to
 	// recompute error data later.
+	float pos[5];
+	pos[0] = (cd.xorg + half+ cd.zorg + half);
+	pos[1] = (cd.xorg + half*2+ cd.zorg + half);
+	pos[2] = (cd.xorg + half+ cd.zorg);
+	pos[3] = (cd.xorg+ cd.zorg + half);
+	pos[4] = (cd.xorg + half+ cd.zorg + half*2);
 	
 	
 	for (i = 0; i < 5; i++) {
-	  Vertex[i].SetTex(((cd.xorg+half+cd.zorg+half)/5000)%10);
+
+	  Vertex[i].SetTex(((int)((pos[i])/5000))%10);
 		if (s[i] != 0) {
 			Dirty = true;
 			Vertex[i].Y += s[i];
