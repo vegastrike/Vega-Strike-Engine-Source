@@ -812,16 +812,16 @@ void Unit::PrimeOrders () {
 void Unit::SwapOutHalos() {
   for (int i=0;i<numhalos;i++) {
     float x,y;
-    halos[i]->GetDimensions (x,y);
-    //    halos[i]->SetDimensions (x/(1024*rSize()),y/(1024*rSize()));
+    //halos[i]->GetDimensions (x,y);
+    //halos[i]->SetDimensions (x/(1024),y/(1024));
     halos[i]->Draw (cumulative_transformation,cumulative_transformation_matrix,0);
   }
 }
 void Unit::SwapInHalos() {
   for (int i=0;i<numhalos;i++) {
     float x,y;
-    halos[i]->GetDimensions (x,y);
-    //    halos[i]->SetDimensions (x*(1024*rSize()),y*(1024*rSize()));
+    //halos[i]->GetDimensions (x,y);
+    //halos[i]->SetDimensions (x*(1024),y*(1024));
   }
 }
 void Unit::SetTurretAI () {
