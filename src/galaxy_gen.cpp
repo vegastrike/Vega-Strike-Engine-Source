@@ -154,8 +154,10 @@ float difffunc (float inputdiffuse) {
   return sqrt(((inputdiffuse)));
 }
 void WriteLight (unsigned int i) {
+  static float ambientColorFactor= XMLSupport::parse_float (vs_config->getVariable("galaxy","AmbientLightFactor","0"));
   float ambient =(lights[i].r+lights[i].g+lights[i].b);
-  ambient/=12;
+  
+  ambient*=ambientColorFactor;
   fprintf (fp,"<Light>\n\t<ambient red=\"%f\" green=\"%f\" blue=\"%f\"/>\n\t<diffuse red=\"%f\" green=\"%f\" blue=\"%f\"/>\n\t<specular red=\"%f\" green=\"%f\" blue=\"%f\"/>\n</Light>\n",
 	   ambient,ambient,ambient,
 	   difffunc (lights[i].r),difffunc (lights[i].g),difffunc (lights[i].b),
