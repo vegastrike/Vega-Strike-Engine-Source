@@ -708,10 +708,10 @@ void AIScript::LoadXML() {
   
   HardCodedMap::const_iterator iter =  hard_coded_scripts.find (filename);
   if (iter!=hard_coded_scripts.end()) {
-    //    fprintf (stderr,"using hard coded script %s",filename);
+    //    fprintf (stderr,"hcscript %s\n",filename);
     CCScript * myscript = (*iter).second;
     (*myscript)(this, parent);
-    //    fprintf (stderr,"using hard coded script %s for %s\n",filename, parent->name.c_str());
+        fprintf (stderr,"using hard coded script %s for %s\n",filename, parent->name.c_str());
     return;
   }else {
     fprintf (stderr,"using soft coded script %s",filename);

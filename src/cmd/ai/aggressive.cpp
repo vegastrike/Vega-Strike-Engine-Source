@@ -189,6 +189,25 @@ bool AggressiveAI::ProcessCurrentFgDirective(Flightgroup * fg) {
 	  if (parent->InRange(th,vec)) {
 	    parent->Target(th);
 	  }
+	}else {
+	  bool targetted=false;
+	  float mindist;
+	  Unit * un;
+	  for (un_iter ui = _Universe->activeStarSystem()->getUnitList().createIterator();
+	       (un = *ui);
+	       ++ui) {
+	    float d = (un->Position()-leader->Position()).Magnitude();
+	    bool thistargetted = (un->Target()==leader);
+	    if (!th||(thistargetted&&!targetted)||((thistargetted||(!targetted))&&d<mindist)) {
+	      th = un;
+	      targetted=thistargetted;
+	      mindist = d;
+	    }
+	  }
+	  if (th) {
+	    parent->Target (th);
+	    fprintf (stderr,"Helping out kill: %s",th->name.c_str());
+	  }
 	}
       }
     } 
