@@ -460,8 +460,9 @@ void UpgradingInfo::CommitItem (const char *inp_buf, int button, int state) {
     LoadMission (input_buffer,false);
     if ((un=this->base.GetUnit())) {
       unsigned int index;
-      un->GetCargo(input_buffer,index);
-      un->RemoveCargo(index,1,true);
+      if (NULL!=un->GetCargo(input_buffer,index)) {
+	un->RemoveCargo(index,1,true);
+      }
     }
     break;
 
