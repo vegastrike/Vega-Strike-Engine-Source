@@ -1092,12 +1092,46 @@ TR_CPPFLAGS="$TR_CPPFLAGS $AL_CPPFLAGS"
 
 CPPFLAGS="$saved_CPPFLAGS" 
 
+dnl --------------------------------------------------------------------------
+dnl Check for crypto++ library
+dnl --------------------------------------------------------------------------
+
+CRYPTO="0"
+AC_ARG_ENABLE(crypto, AC_HELP_STRING([--enable-crypto], [Enable crypto++ library support]), [CRYPTO="1"])
+
+if test "$CRYPTO" = "1" ; then
+	dnl AC_DEFUN( CHECK_FOR_CRYPTOLIB_H, [
+	dnl	CPPFLAGS="$CPPFLAGS $CRYPTO_FLAGS"
+	dnl    dnl AC_MSG_CHECKING([for crypto++/cryptlib.h])
+    dnl    AC_CHECK_HEADERS(crypto++/cryptlib.h, have_crypto_h=yes, have_crypto_h=no )
+	    dnl AC_TRY_CPP( [ #include <crypto++/cryptlib.h> ], have_crypto_h=yes, have_crypto_h=no )
+	dnl    AC_MSG_RESULT([$have_crypto_h])
+	dnl ])
+
+	dnl CHECK_FOR_CRYPTOLIB_H
+	dnl if test "x$have_crypto_h" = "xyes" ; then
+	dnl	TR_CPPFLAGS="$TR_CPPFLAGS -DCRPYTO"
+	dnl else
+	dnl	echo "checking in /usr/local/include..."
+	dnl	CRYPTO_FLAGS="-I/usr/local/include"
+	dnl	CHECK_FOR_CRYPTOLIB_H
+	dnl	if test "x$have_crypto_h" = "xyes" ; then
+	dnl		TR_CPPFLAGS="$TR_CPPFLAGS -DCRPYTO"
+	dnl	else
+	dnl		echo "No cryptolib support"
+	dnl	fi
+	dnl fi
+
+	TR_CPPFLAGS="$TR_CPPFLAGS -DCRPYTO"
+	CPPFLAGS="$CPPFLAGS -I/usr/local/include"
+	echo "Crypto++ library support enabled"
+else
+	echo "No cryptolib support"
+fi
 
 dnl --------------------------------------------------------------------------
 dnl Check for network communication system
 dnl --------------------------------------------------------------------------
-
-dnl CHANGE JVOIP SUPPORT TO EXTERNAL LIB LINK (Compile lib separatly)
 
 TESTNETCOMM="0"
 TESTNETCOMM_NOSOUND="1"
