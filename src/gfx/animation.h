@@ -24,31 +24,25 @@
 #include "vec.h"
 
 #include "quaternion.h"
-
-class Animation {
+#include "ani_texture.h"
+class Animation: public AnimatedTexture {
   Matrix local_transformation;
-  Texture **Decal; 
   bool camup;
-  bool alphamaps;
-  int numframes;
-  float timeperframe;
-  double cumtime;
   float height; //half the height so you can do fancy vector translatons to campspace
   float width;
   bool repeat;
   void InitAnimation();
+  bool alphamaps;
 public:
   Animation();
   Animation(const char *, bool Rep=0, float priority=.1,enum FILTER ismipmapped=MIPMAP,bool camorient=false);
   ~Animation();
   void Draw(const Transformation & t=identity_transformation, const float *m=identity_matrix );
-  void UpdateTime (float time);
   void CalculateOrientation (Matrix &result);
   void DrawNow(const Matrix & final_orientation);
   void DrawNoTransform ();
   static void ProcessDrawQueue();
   void SetDimensions(float wid, float hei);
-  bool Done();
   Vector Position();
   void SetPosition (const float, const float, const float);
   void SetPosition (const Vector &);

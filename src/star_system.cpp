@@ -143,7 +143,7 @@ void StarSystem::RemoveUnit(Unit *unit) {
 }
 
 void StarSystem::Draw() {
-
+  AnimatedTexture::UpdateAllFrame();
   GFXDisable (LIGHTING);
   bg->Draw();
 
@@ -208,6 +208,7 @@ void StarSystem::Update() {
       } else if (current_stage==TERRAIN_BOLT_COLLIDE) {
 	Terrain::CollideAll();
 	current_stage=PHY_COLLIDE;
+	AnimatedTexture::UpdateAllPhysics();
       } else if (current_stage==PHY_COLLIDE) {
 	static int numframes=0;
 	numframes++;//don't resolve physics until 2 seconds

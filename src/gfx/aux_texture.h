@@ -81,23 +81,25 @@ public:
   ///Texture copy constructor that increases appropriate refcounts
   Texture (Texture *t);
   ///Destructor for texture
-  ~Texture();
+  virtual ~Texture();
+  ///Do not use! For inheritors only
+  Texture();
   ///Whether or not the string exists as a texture
   static Texture * Exists (std::string s);
   ///Whether or not the color and alpha data already exist
   static Texture * Exists (std::string s, std::string a);
   ///A way to sort the texture by the original address (to make sure like textures stick togehter
-  bool operator < (const Texture &b);
+  virtual bool operator < (const Texture &b);
   ///A way to test if the texture is equal to another based on original values
-  bool operator == (const Texture &b);
+  virtual bool operator == (const Texture &b);
   ///Binds the texture in the GFX library
-  void MakeActive();
+  virtual void MakeActive();
   ///If the texture has loaded properly returns true
-  bool LoadSuccess () {
+  virtual bool LoadSuccess () {
     return (name>=0);
   }
   ///Changes priority of texture
-  void Prioritize (float);
+  virtual void Prioritize (float);
 };
 
 #endif

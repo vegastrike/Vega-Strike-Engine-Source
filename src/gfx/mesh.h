@@ -157,7 +157,8 @@ private:
       ROTATE,
       WEIGHT,
       SIZE,
-      OFFSET
+      OFFSET,
+      ANIMATEDTEXTURE
 
     };
     ///Saves which attributes of vertex have been set in XML file
@@ -213,6 +214,7 @@ private:
     float scale;
     string decal_name;
     string alpha_name;
+    string animated_name;
     bool recalc_norm;
     int num_vertices;
     vector<GFXVertex> vertices;

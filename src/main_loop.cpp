@@ -514,6 +514,8 @@ void createObjects() {
 void destroyObjects() {  
   for(int a = 0; a < numf; a++)
   	delete fighters[a];
+  if (myterrain)
+    delete myterrain;
   Terrain::DeleteAll();
   delete tmpcockpittexture;
   delete muzak;
@@ -521,7 +523,6 @@ void destroyObjects() {
   delete [] fighters;
   delete locSel;
   delete explosion;
-
   explosion=NULL;
   //delete t;
   //delete s;
@@ -540,7 +541,8 @@ void main_loop() {
 
 
   _Universe->StartDraw();
-  myterrain->AdjustTerrain();
+  if (myterrain)
+    myterrain->AdjustTerrain();
   _Universe->activeStarSystem()->Draw();
   //fighters[0]->UpdateHudMatrix();
   //_Universe->activeStarSystem()->SetViewport();

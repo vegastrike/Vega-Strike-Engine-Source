@@ -3,6 +3,8 @@ noinst_LIBRARIES = libgfx.a
 INCLUDES = -I ../ 
 
 libgfx_a_SOURCES =	\
+	ani_texture.h	\
+	ani_texture.cpp	\
 	animation.cpp	\
 	animation.h	\
 	aux_logo.cpp	\

@@ -32,12 +32,8 @@ static stack<Animation *> animationdrawqueue;
 
 Animation::Animation ()
 {
-	cumtime = 0;
-	numframes = 0;
-	timeperframe = 0.001F;
 	height = 0.001F;
 	width = 0.001F;
-	Decal = NULL;
 }
 
 Animation::Animation (const char * FileName, bool Rep,  float priority,enum FILTER ismipmapped,  bool camorient)
@@ -45,65 +41,22 @@ Animation::Animation (const char * FileName, bool Rep,  float priority,enum FILT
   vschdir ("animations");
   vschdir (FileName);
   repeat = Rep;
-	cumtime = 0;
-	camup = camorient;
-	char temp [256];
-	char tempalp [256];
-	float alp;
-	int zeroval;
-	FILE * fp = fopen (FileName, "r");
-	if (!fp)
-		; // do something 
-	fscanf (fp,"%d %f",&numframes,&timeperframe);
-	//	fread (&numframes, sizeof (short), 1, fp); 
-	Decal = new Texture* [numframes];
-	fscanf (fp,"%f %d",&alp,&zeroval);
-	//	fread (&timeperframe,sizeof (float),1,fp);
-	float tmp;
-	//fread (&tmp, sizeof (float),1,fp);
-	fscanf (fp, "%f %f", &width, &height);
-	alphamaps = width>0;
-	width = fabs(width*0.5F);
-	//fread (&tmp, sizeof (float),1,fp);
-	height = height*0.5F;
-	for (int i=0; i<numframes;i++) //load all textures
-	{
-	  if (alphamaps) {
-	    fscanf (fp,"%s %s", temp, tempalp);
-	    Decal[i] = new Texture (temp,tempalp, 0,ismipmapped, TEXTURE2D, TEXTURE_2D,alp,zeroval);
-	  } else {
-	    fscanf (fp, "%s", temp);
-	    Decal[i] = new Texture (temp, 0,ismipmapped, TEXTURE2D, TEXTURE_2D);
-	  }
-	  Decal[i]->Prioritize (priority);//standard animation priority
-	  /*int j;
-	    for (j=0; ;j++)
-	    {
-	    fread (&temp[j],sizeof (char), 1, fp);
-	    if (!temp[j]) //ahh we have come upon a NULL
-	    {
-	    break;
-	    }
-	    }
-	    for (j=0; ;j++)
-	    {
-	    fread (&tempalp[j],sizeof (char), 1, fp);
-	    if (!tempalp[j]) //ahh we have come upon a NULL
-	    {
-	    Decal[i] = new Texture (temp,tempalp);
-	    break;
-	    }
-	    }*/
-	}
-	fclose (fp);
-	vscdup();
-	vscdup();
+  camup = camorient;
+  FILE * fp = fopen (FileName, "r");
+  if (!fp)
+    ; // do something 
+  else {
+    fscanf (fp, "%f %f", &width, &height);
+    alphamaps=(width>0);
+    width = fabs(width*0.5F);
+    height = height*0.5F;
+    Load (fp,0,ismipmapped);
+    fclose (fp);
+  }
+  vscdup();
+  vscdup();
 }
-Animation:: ~Animation ()
-{
-  for (int i=0; i< numframes; i++)
-    delete Decal[i];
-  delete [] Decal;
+Animation:: ~Animation () {
   
 }
 void Animation::SetPosition (const float x,const float y, const float z) {
@@ -111,17 +64,18 @@ void Animation::SetPosition (const float x,const float y, const float z) {
   local_transformation [13] = y;
   local_transformation [14] = z;
 }
+
 void Animation::SetPosition (const Vector &k) {
   local_transformation [12] = k.i;
   local_transformation [13] = k.j;
   local_transformation [14] = k.k;  
 }
+
 void Animation::SetOrientation(const Vector &p, const Vector &q, const Vector &r)
 {	
   VectorAndPositionToMatrix (local_transformation, p,q,r,Vector (local_transformation[12],local_transformation[13], local_transformation[14]));
 }
 
-//FIXME:: possibly not portable
 Vector Animation::Position()
 {
   return Vector(local_transformation[12], local_transformation[13], local_transformation[14]);
@@ -148,7 +102,7 @@ void Animation::ProcessDrawQueue () {
     }
     animationdrawqueue.top()->CalculateOrientation(result);
     animationdrawqueue.top()->DrawNow(result);
-    animationdrawqueue.top()->UpdateTime (GetElapsedTime());
+
     animationdrawqueue.pop();
   }
 }
@@ -176,10 +130,9 @@ void Animation::CalculateOrientation (Matrix & result) {
 
 void Animation::DrawNow(const Matrix &final_orientation) {
  
-  int framenum = (int)(cumtime/timeperframe);
   if (!Done()) {
     GFXLoadMatrix (MODEL, final_orientation);
-    Decal[framenum]->MakeActive();
+    MakeActive();
     GFXBegin (GFXQUAD);
     GFXTexCoord2f (0.00F,1.00F);
     GFXVertex3f (-width,-height,0.00F);  //lower left
@@ -194,9 +147,9 @@ void Animation::DrawNow(const Matrix &final_orientation) {
   }
 }
 void Animation::DrawNoTransform() {
- int framenum = (int)(cumtime/timeperframe);
+
   if (!Done()) {
-    Decal[framenum]->MakeActive();
+    MakeActive();
     GFXBegin (GFXQUAD);
     GFXTexCoord2f (0.00F,1.00F);
     GFXVertex3f (-width,-height,0.00F);  //lower left
@@ -229,22 +182,8 @@ void Animation::DrawNoTransform() {
    
   }
 }
-void Animation::UpdateTime( float elapsedtime)
-{  
-  int framenum = (int)(cumtime/timeperframe);
-  if (elapsedtime>=timeperframe)
-    cumtime +=timeperframe;
-  else
-    cumtime += elapsedtime;
-  if (repeat&&framenum>=numframes)
-    cumtime =0;
-}    
 
 void Animation:: Draw(const Transformation &, const float *) {
   animationdrawqueue.push (this);
 }
 
-bool Animation::Done () {
-  int framenum = (int)(cumtime/timeperframe);
-  return (framenum>=numframes);
-}

@@ -105,7 +105,7 @@ void Bolt::Draw () {
       GFXColorf ((*j)->col);
       cur->DrawNoTransform();
     }
-    cur->UpdateTime (GetElapsedTime());//update the time of the animation;
+    //    cur->UpdateTime (GetElapsedTime());//update the time of the animation;
   }
   if (boltmesh) {
     boltmesh->LoadDrawState();

@@ -7,7 +7,7 @@
 #include <expat.h>
 #include <float.h>
 #include <assert.h>
-
+#include "ani_texture.h"
 #ifdef WIN32
 #else
 #include <values.h>
@@ -102,13 +102,14 @@ const EnumMap::Pair Mesh::XML::attribute_names[] = {
   EnumMap::Pair("Weight", XML::WEIGHT),
   EnumMap::Pair("Size", XML::SIZE),
   EnumMap::Pair("Offset",XML::OFFSET),
-  EnumMap::Pair("meshfile",XML::LODFILE)
+  EnumMap::Pair("meshfile",XML::LODFILE),
+  EnumMap::Pair ("Animation",XML::ANIMATEDTEXTURE)
 };
 
 
 
 const EnumMap Mesh::XML::element_map(XML::element_names, 23);
-const EnumMap Mesh::XML::attribute_map(XML::attribute_names, 28);
+const EnumMap Mesh::XML::attribute_map(XML::attribute_names, 29);
 
 
 
@@ -323,6 +324,10 @@ void Mesh::beginElement(const string &name, const AttributeList &attributes) {
     char cdst[128];
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(XML::attribute_map.lookup((*iter).name)) {
+      case XML::ANIMATEDTEXTURE:
+	xml->animated_name = (*iter).value;
+	texture_found=true;
+	break;
       case XML::TEXTURE:
 	xml->decal_name = (*iter).value;
 	texture_found = true;
@@ -1206,10 +1211,12 @@ void Mesh::LoadXML(const char *filename, int faction) {
       }
     }
   }
-  if (xml->decal_name.c_str()[0]=='\0') {	
+  if (xml->animated_name.length()) {
+    Decal = new AnimatedTexture (xml->animated_name.c_str(),0,BILINEAR);
+  }else if (xml->decal_name.length()==0) {	
     Decal = NULL;
   } else {
-    if (xml->alpha_name.c_str()[0]=='\0') {
+    if (xml->alpha_name.length()==0) {
       Decal = new Texture(xml->decal_name.c_str(), 0);    
     }else {
       Decal = new Texture(xml->decal_name.c_str(), xml->alpha_name.c_str(),0);

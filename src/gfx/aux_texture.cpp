@@ -86,7 +86,7 @@ const int SIZEOF_BITMAPINFOHEADER= sizeof(DWORD)+sizeof(LONG)+sizeof(LONG)+2*siz
 ///defined for gcc which pads size of structs (not entirely necessary)
 const int SIZEOF_RGBQUAD=sizeof(BYTE)*4;
 ///holds all the textures in a huge hash table
-static Hashtable<string, Texture,char [127]> texHashTable;
+Hashtable<string, Texture,char [127]> texHashTable;
 ///returns if a texture exists
 Texture * Texture::Exists (string s, string a) {
   return Texture::Exists (s+a);
@@ -134,6 +134,14 @@ GFXBOOL Texture::checkold(string s, bool shared, string & hashname)
     return GFXFALSE;
   }
 }
+
+Texture::Texture () {
+  data=NULL;
+  InitTexture();
+  name=-1;
+  palette=NULL;
+}
+
 void Texture::setold()
 {
   //	*original = *this;//will be obsoleted in new C++ standard unpredictable results when using string() (and its strangeass copy constructor)
