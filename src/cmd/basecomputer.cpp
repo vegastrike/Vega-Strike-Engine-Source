@@ -1771,14 +1771,25 @@ void BaseComputer::updateTransactionControlsForSelection(TransactionList* tlist)
 				}
                 break;
             case BUY_SHIP:
-				if (item.description==""){
-					item.description=buildShipDescription(item,descriptiontexture);
-				}
+                if (item.category.find("My_Fleet")==string::npos) {
+                  UniverseUtil::StopAllSounds();
+                  if (item.price < _Universe->AccessCockpit()->credits) {
+                    std::string tmp = item.content.substr(0,item.content.find("."));
+                    UniverseUtil::playSound("sales/salespitch"+tmp+".wav",QVector(0,0,0),Vector(0,0,0));
+                  }else {
+                    UniverseUtil::playSound("sales/salespitchnotenoughmoney.wav",QVector(0,0,0),Vector(0,0,0));
+                  }
+                }
+                if (item.description==""){
+                  item.description=buildShipDescription(item,descriptiontexture);
+                  
+                }
                 if(item.category.find("My_Fleet") != string::npos) {
                     // This ship is in my fleet -- the price is just the transport cost to get it to
                     //  the current base.  "Buying" this ship makes it my current ship.
                     sprintf(tempString, "#b#Transport cost: %.2f#-b#n1.5#", item.price);
                 } else {
+                    
                     sprintf(tempString, "Price: #b#%.2f#-b#n#", baseUnit->PriceCargo(item.content));
                     descString += tempString;
                     sprintf(tempString, "Cargo volume: %.2f;  Mass: %.2f#n1.5#", item.volume, item.mass);
@@ -3700,6 +3711,8 @@ bool BaseComputer::buyShip(const EventCommandId& command, Control* control) {
                 CurrentSaveGameName="~"+CurrentSaveGameName;
             }
             WriteSaveGame(_Universe->AccessCockpit(), true);//oops saved game last time at wrong place
+            UniverseUtil::StopAllSounds();
+            UniverseUtil::playSound("sales/salespitch"+item->content.substr(0,item->content.find("."))+"accept.wav",QVector(0,0,0),Vector(0,0,0));
             Unit* newPart = 
                UnitFactory::createUnit(item->content.c_str(), 
                                        false, 
