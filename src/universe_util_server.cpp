@@ -26,7 +26,7 @@ namespace UniverseUtil {
 	}
 	void musicPlaySong(string str) {
 	}
-       	void AddParticle (QVector loc, Vector velocity, Vector color)
+       	void addParticle (QVector loc, Vector velocity, Vector color)
 	{}
 	void musicPlayList(int which) {
 	}
