@@ -123,11 +123,19 @@ SOURCE=\src\gfx_background.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=..\src\gfx_bounding_box.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=\src\gfx_bsp.cpp
 # End Source File
 # Begin Source File
 
 SOURCE=\src\gfx_camera.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\src\gfx_click_list.cpp
 # End Source File
 # Begin Source File
 
@@ -139,6 +147,10 @@ SOURCE=\src\gfx_light.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=..\src\gfx_location_select.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=\src\gfx_mesh.cpp
 # End Source File
 # Begin Source File
@@ -147,7 +159,15 @@ SOURCE=\src\gfx_primitive.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=..\src\gfx_sphere.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=\src\gfx_sprite.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\src\gfx_transform_matrix.cpp
 # End Source File
 # Begin Source File
 
@@ -176,6 +196,10 @@ SOURCE=\src\gl_matrix.cpp
 # Begin Source File
 
 SOURCE=\src\gl_misc.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\src\gl_quadstrip.cpp
 # End Source File
 # Begin Source File
 
@@ -227,7 +251,19 @@ SOURCE=\src\physics.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=..\src\planet.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=\src\quadgeom.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\src\star_system.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\src\UnitCollection.cpp
 # End Source File
 # Begin Source File
 

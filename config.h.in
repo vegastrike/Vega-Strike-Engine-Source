@@ -55,5 +55,5 @@
 #undef PACKAGE
 
 /* Version number of package */
-
+#undef VERSION
 

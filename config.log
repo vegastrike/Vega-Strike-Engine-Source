@@ -1,64 +1,67 @@
 This file contains any messages produced by compilers while
 running configure, to aid debugging if configure makes a mistake.
 
-configure:592: checking for a BSD compatible install
-configure:645: checking whether build environment is sane
-configure:702: checking whether make sets ${MAKE}
-configure:748: checking for working aclocal
-configure:761: checking for working autoconf
-configure:774: checking for working automake
-configure:787: checking for working autoheader
-configure:800: checking for working makeinfo
-configure:824: checking host system type
-configure:852: checking for gcc
-configure:965: checking whether the C compiler (gcc  ) works
-configure:981: gcc -o conftest    conftest.c  1>&5
-configure:1007: checking whether the C compiler (gcc  ) is a cross-compiler
-configure:1012: checking whether we are using GNU C
-configure:1040: checking whether gcc accepts -g
-configure:1081: checking for c++
-configure:1113: checking whether the C++ compiler (c++  ) works
-configure:1129: c++ -o conftest    conftest.C  1>&5
-configure:1155: checking whether the C++ compiler (c++  ) is a cross-compiler
-configure:1160: checking whether we are using GNU C++
-configure:1188: checking whether c++ accepts -g
-configure:1223: checking for ranlib
-configure:1252: checking how to run the C preprocessor
-configure:1332: checking for ANSI C header files
-configure:1439: checking for sys/time.h
-configure:1439: checking for unistd.h
-configure:1477: checking for working const
-configure:1552: checking whether time.h and sys/time.h may both be included
-configure:1590: checking for getcwd
-configure:1590: checking for gettimeofday
-configure:1590: checking for strdup
-configure:1646: checking for finite
-configure:1646: checking for isnan
-configure:1701: checking for _finite
-configure:1701: checking for _isnan
-configure:1757: checking for ieeefp.h
-configure:1827: checking for Win32 platform
-configure:1885: checking for tcl8.3 library
-configure:1895: gcc -o conftest    conftest.c    -ltcl8.3 1>&5
-configure:1996: checking for tcl.h
-configure:2003: gcc -E    conftest.c >/dev/null 2>conftest.out
-configure:2209: checking for sdl-config
-configure:2244: checking for SDL - version >= 1.0.1
-configure:2329: gcc -o conftest  -I/usr/include/SDL -D_REENTRANT   conftest.c  -L/usr/lib -Wl,-rpath,/usr/lib -lSDL -lpthread 1>&5
-configure:2419: checking for SDL_JoystickOpen
-configure:2479: checking for Mix_OpenAudio in -lSDL_mixer
-configure:2567: checking for GL library
-configure:2577: gcc -o conftest    conftest.c    -ltcl8.3 -L/usr/lib -Wl,-rpath,/usr/lib -lSDL -lpthread -lSDL_mixer  -lGL 1>&5
-configure:2850: checking for glXGetProcAddressARB
-configure:2931: checking for GLU library
-configure:2941: gcc -o conftest    conftest.c    -ltcl8.3 -L/usr/lib -Wl,-rpath,/usr/lib -lSDL -lpthread -lSDL_mixer  -lGL -lGLU 1>&5
-configure:3024: checking for GL/gl.h
-configure:3031: gcc -E     -DTCL_HEADER=\<tcl.h\> -DHAVE_SDL=1 -DHAVE_SDL_MIXER=1 conftest.c >/dev/null 2>conftest.out
-configure:3090: checking for GL/glx.h
-configure:3133: checking whether glx.h defines glXGetProcAddressARB
-configure:3142: gcc -c      -DTCL_HEADER=\<tcl.h\> -DHAVE_SDL=1 -DHAVE_SDL_MIXER=1 conftest.c 1>&5
-configure:3163: checking for GL/glext.h
-configure:3212: checking whether glext.h is recent enough
-configure:3271: checking for glut library
-configure:3281: gcc -o conftest    conftest.c    -ltcl8.3 -L/usr/lib -Wl,-rpath,/usr/lib -lSDL -lpthread -lSDL_mixer  -lGL -lGLU  -lglut 1>&5
-configure:3325: checking for GL/glut.h
+configure:596: checking for a BSD compatible install
+configure:649: checking whether build environment is sane
+configure:706: checking whether make sets ${MAKE}
+configure:752: checking for working aclocal
+configure:765: checking for working autoconf
+configure:778: checking for working automake
+configure:791: checking for working autoheader
+configure:804: checking for working makeinfo
+configure:828: checking host system type
+configure:856: checking for gcc
+configure:969: checking whether the C compiler (gcc  ) works
+configure:985: gcc -o conftest    conftest.c  1>&5
+configure:1011: checking whether the C compiler (gcc  ) is a cross-compiler
+configure:1016: checking whether we are using GNU C
+configure:1044: checking whether gcc accepts -g
+configure:1085: checking for c++
+configure:1117: checking whether the C++ compiler (c++  ) works
+configure:1133: c++ -o conftest    conftest.C  1>&5
+configure:1159: checking whether the C++ compiler (c++  ) is a cross-compiler
+configure:1164: checking whether we are using GNU C++
+configure:1192: checking whether c++ accepts -g
+configure:1227: checking for ranlib
+configure:1256: checking how to run the C preprocessor
+configure:1336: checking for ANSI C header files
+configure:1443: checking for sys/time.h
+configure:1443: checking for unistd.h
+configure:1481: checking for working const
+configure:1556: checking whether time.h and sys/time.h may both be included
+configure:1594: checking for getcwd
+configure:1594: checking for gettimeofday
+configure:1594: checking for strdup
+configure:1650: checking for finite
+configure:1650: checking for isnan
+configure:1705: checking for _finite
+configure:1705: checking for _isnan
+configure:1761: checking for ieeefp.h
+configure:1831: checking for Win32 platform
+configure:1889: checking for tcl8.3 library
+configure:1899: gcc -o conftest    conftest.c    -ltcl8.3 1>&5
+configure:2000: checking for tcl.h
+configure:2007: gcc -E    conftest.c >/dev/null 2>conftest.out
+configure:2213: checking for sdl-config
+configure:2248: checking for SDL - version >= 1.0.1
+configure:2333: gcc -o conftest  -I/usr/include/SDL -D_REENTRANT   conftest.c  -L/usr/lib -Wl,-rpath,/usr/lib -lSDL -lpthread 1>&5
+configure:2423: checking for SDL_JoystickOpen
+configure:2483: checking for Mix_OpenAudio in -lSDL_mixer
+configure:2571: checking for GL library
+configure:2581: gcc -o conftest    conftest.c    -ltcl8.3 -L/usr/lib -Wl,-rpath,/usr/lib -lSDL -lpthread -lSDL_mixer  -lGL 1>&5
+configure:2854: checking for glXGetProcAddressARB
+configure:2935: checking for GLU library
+configure:2945: gcc -o conftest    conftest.c    -ltcl8.3 -L/usr/lib -Wl,-rpath,/usr/lib -lSDL -lpthread -lSDL_mixer  -lGL -lGLU 1>&5
+configure:3028: checking for GL/gl.h
+configure:3035: gcc -E     -DTCL_HEADER=\<tcl.h\> -DHAVE_SDL=1 -DHAVE_SDL_MIXER=1 conftest.c >/dev/null 2>conftest.out
+configure:3094: checking for GL/glx.h
+configure:3137: checking whether glx.h defines glXGetProcAddressARB
+configure:3146: gcc -c      -DTCL_HEADER=\<tcl.h\> -DHAVE_SDL=1 -DHAVE_SDL_MIXER=1 conftest.c 1>&5
+configure:3167: checking for GL/glext.h
+configure:3216: checking whether glext.h is recent enough
+configure:3275: checking for glut library
+configure:3285: gcc -o conftest    conftest.c    -ltcl8.3 -L/usr/lib -Wl,-rpath,/usr/lib -lSDL -lpthread -lSDL_mixer  -lGL -lGLU  -lglut 1>&5
+configure:3329: checking for GL/glut.h
+configure:3392: checking for expat library
+configure:3402: gcc -o conftest    conftest.c  -lexpat 1>&5
+configure:3446: checking for expat.h

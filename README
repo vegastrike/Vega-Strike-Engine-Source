@@ -1,1 +1,21 @@
+Vega Strike 0.0.3
 
+Welcome to the latest build of Vegastrike!  This isn't a game --yet...
+but we have improved many features since 0.0.2
+
+Clicklists are built in... so you can click on ships and it will report so on console (same with selecting)
+There is a location selector built in, but with this build you cannot see it
+Utilizes SPHERE_MAP in OpenGL to produce fantastic spheremapped ships... shiny+fast
+Made it faster on software.... but backgrounds are still textured
+Physics works, but is disabled to allow viewing of sphere_map
+
+
+Key bindings are as follows:
++ forward 
+- backwards
+Arrow key move
+PgUp,PgDown
+/,* roll 
+q quit
+
+Pan around and view the planets orbiting the glittery sun...see the dozens of ships just sit there :-)....

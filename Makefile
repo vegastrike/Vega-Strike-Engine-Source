@@ -67,10 +67,11 @@ RANLIB = ranlib
 SDL_CFLAGS = -I/usr/include/SDL -D_REENTRANT
 SDL_CONFIG = /usr/bin/sdl-config
 SDL_LIBS = -L/usr/lib -Wl,-rpath,/usr/lib -lSDL -lpthread
-TR_CFLAGS = -O2 -Wall -fomit-frame-pointer -ffast-math -fexpensive-optimizations -malign-loops=2 -malign-jumps=2 -malign-functions=2 -I/usr/include/SDL -D_REENTRANT
-TR_CPPFLAGS =   -DTCL_HEADER=\<tcl.h\> -DHAVE_SDL=1 -DHAVE_SDL_MIXER=1  
-TR_CXXFLAGS = -O2 -Wall -fomit-frame-pointer -ffast-math -fexpensive-optimizations -malign-loops=2 -malign-jumps=2 -malign-functions=2 -I/usr/include/SDL -D_REENTRANT
-TR_LIBS =   -ltcl8.3 -L/usr/lib -Wl,-rpath,/usr/lib -lSDL -lpthread -lSDL_mixer  -lGL -lGLU  -lglut
+TR_CFLAGS = -g -Wall -I/usr/include/SDL -D_REENTRANT
+TR_CPPFLAGS =   -DTCL_HEADER=\<tcl.h\> -DHAVE_SDL=1 -DHAVE_SDL_MIXER=1   
+TR_CXXFLAGS = -g -Wall -I/usr/include/SDL -D_REENTRANT
+TR_LIBS =   -ltcl8.3 -L/usr/lib -Wl,-rpath,/usr/lib -lSDL -lpthread -lSDL_mixer  -lGL -lGLU  -lglut  -lexpat
+VERSION = 0.0.1
 
 SUBDIRS = src
 EXTRA_DIST =  	contrib/script-fu/README				contrib/script-fu/tuxracer-create-level.scm		contrib/script-fu/tuxracer-load-level-1.1.scm		contrib/script-fu/tuxracer-save-as-rgbs-1.0.scm		contrib/script-fu/tuxracer-save-as-rgbs-1.1.scm		html/purchase.html					html/index.html						html/game_info.html					html/manual.html					html/images/snow_line.gif				html/images/menu_side.jpg				html/images/fgw_top_pick.gif				html/images/menu_top_left.jpg				html/images/5rate_cows.gif				html/images/palette.rgb					html/images/ingame.jpg					html/images/menu_top.jpg				html/images/palette.png					html/images/manual/6.gif				html/images/manual/cup_menu.jpg				html/images/manual/main_menu.jpg			html/images/manual/7.gif				html/images/manual/d_key.jpg				html/images/manual/cup_screen.jpg			html/images/manual/practice_screen.jpg			html/images/manual/e_key.jpg				html/images/manual/racing.jpg				html/images/manual/movement_keys.gif			html/images/manual/5.gif				html/images/manual/welcome.jpg				html/images/manual/2.gif				html/images/manual/3.gif				html/images/manual/q_key.jpg				html/images/manual/r_key.jpg				html/images/manual/4.gif				html/images/manual/1.gif				html/images/5rate.gif					html/download.html					html/faq.html						html/support.html					html/screenshots.html					html/oldnews.html

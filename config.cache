@@ -25,6 +25,7 @@ ac_cv_func_strdup=${ac_cv_func_strdup=yes}
 ac_cv_header_GL_glext_h=${ac_cv_header_GL_glext_h=yes}
 ac_cv_header_GL_glut_h=${ac_cv_header_GL_glut_h=yes}
 ac_cv_header_GL_glx_h=${ac_cv_header_GL_glx_h=yes}
+ac_cv_header_expat_h=${ac_cv_header_expat_h=yes}
 ac_cv_header_ieeefp_h=${ac_cv_header_ieeefp_h=no}
 ac_cv_header_stdc=${ac_cv_header_stdc=yes}
 ac_cv_header_sys_time_h=${ac_cv_header_sys_time_h=yes}
