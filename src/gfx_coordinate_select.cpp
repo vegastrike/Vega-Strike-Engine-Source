@@ -32,20 +32,20 @@ void CoordinateSelect::UpdateMouse() {
     Vector CamPos, CamQ,CamR;
     _GFX->activeStarSystem()->AccessCamera()->GetPQR(CamPos,CamQ,CamR);
 
-    Vector mousePoint = MouseCoordinate(CoordinateSelectmousex,CoordinateSelectmousey);
-    float TMD = mousePoint.k;
+    Vector mousePoint ( MouseCoordinate(CoordinateSelectmousex,CoordinateSelectmousey));
+    float mouseDistance= mousePoint.k*mousePoint.k;
     mousePoint = Transform (CamPos,CamQ,CamR,mousePoint);
     
     _GFX->activeStarSystem()->AccessCamera()->GetPosition (CamPos);  
-    int mouseDistance = mousePoint.Dot (CamR); 
+    //float mouseDistance = mousePoint.Dot (CamR); 
     //distance out into z...straight line...
 
 
     float distance = CamR.Dot (LocalPosition-CamPos);//distance out into z...straight line...
     fprintf (stderr, "distance:%f\n",distance);
-    fprintf (stderr, "mdistance:%f %f\n",mouseDistance,TMD);
+    //fprintf (stderr, "mdistance:%f %f\n",mouseDistance,TMD);
     if (mouseDistance!=0) {
-      LocalPosition = mousePoint*sqrtf(distance/mouseDistance)+CamPos;
+      LocalPosition = mousePoint*(distance/mouseDistance)+CamPos;
     } else {
       LocalPosition = 2*CamR+CamPos;
     }
@@ -59,7 +59,7 @@ void CoordinateSelect::UpdateMouse() {
     LocalPosition = LocalPosition - CamPos;
     float distance = sqrt (CamR.Dot (LocalPosition));//distance out into z...straight line...
     //make it a ratio btw top and bottom.... for near and far;
-    float ratio = float(CoordinateSelectmousey)/g_game.y_resolution;
+    float ratio = float(g_game.y_resolution - CoordinateSelectmousey)/g_game.y_resolution;
     float  tmp, n, f;
     GFXGetFrustumVars (true,&tmp,&tmp,&tmp,&tmp,&n,&f);///unkind call :-D
     tmp = n+ratio*ratio*ratio*(f-n);//how far n^3 law
