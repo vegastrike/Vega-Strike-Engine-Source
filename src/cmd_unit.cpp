@@ -152,8 +152,18 @@ void Unit::SetCameraToCockpit() {
 Unit::Unit() {
 	Init();
 }
+
+Unit::Unit (Mesh ** meshes, int num) {
+  Init ();
+  meshdata = (Mesh **)malloc ((1+num)*sizeof (Mesh *));
+  memcpy (meshdata,meshes,(num)*sizeof (Mesh *));
+  nummesh = num;
+  meshdata[nummesh]=NULL;//turn off shield
+  calculate_extent();
+}
 Unit::Unit(const char *filename, bool xml) {
 	Init();
+
 
 	name = filename + string(" - Unit");
 	/*Insert file loading stuff here*/

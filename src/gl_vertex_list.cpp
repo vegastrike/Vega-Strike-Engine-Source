@@ -74,16 +74,19 @@ void GFXVertexList::Init (enum POLYTYPE *poly, int numVertices, const GFXVertex 
   
   this->numlists = numlists;
   this->numVertices = numVertices;
-  myVertices = (GFXVertex*)malloc (sizeof (GFXVertex)*numVertices);
-  memcpy(myVertices, vertices, sizeof(GFXVertex)*numVertices);
-  if (colors) {
-    myColors = (GFXColor*)malloc( sizeof (GFXColor)*numVertices);
-    memcpy (myColors, colors, sizeof (GFXColor)*numVertices);
-  }else {
-    myColors = NULL;
-  }
+  if (numVertices) {
+    myVertices = (GFXVertex*)malloc (sizeof (GFXVertex)*numVertices);
+    memcpy(myVertices, vertices, sizeof(GFXVertex)*numVertices);
+    if (colors) {
+      myColors = (GFXColor*)malloc( sizeof (GFXColor)*numVertices);
+      memcpy (myColors, colors, sizeof (GFXColor)*numVertices);
+    }else {
+      myColors = NULL;
+    }
+  }	
   this->offsets = new int [numlists];
   memcpy(this->offsets, offsets, sizeof(int)*numlists);
+  
   display_list = 0;
   this->tessellation = tess;
   if (Mutable)
@@ -388,8 +391,8 @@ void GFXVertexList::Draw()
 
       int totoffset=0;
       for (int i=0;i<numlists;i++) {
-	glDrawArrays(mode[i], totoffset, offsets[i]);
-	totoffset += offsets[i];
+	  glDrawArrays(mode[i], totoffset, offsets[i]);
+	  totoffset += offsets[i];
       }
     }
   if (myColors!=NULL) {

@@ -2,6 +2,7 @@
 #include "gfx_animation.h"
 #include "gfx_mesh.h"
 #include "gfx_halo.h"
+#include "gfx_bsp.h"
 static list<Unit*> Unitdeletequeue;
 void Unit::UnRef() {
   ucref--;
@@ -9,6 +10,63 @@ void Unit::UnRef() {
     Unitdeletequeue.push_back(this);//delete
   }
 }
+
+void Unit::Split (int level) {
+  int i;
+  int nm = nummesh;
+  Vector PlaneNorm;
+  Mesh ** old = meshdata;
+  for (int split=0;split<level;split++) {
+    Mesh ** nw= new Mesh *[nm*2+1];
+    nw[nm*2]=old[nm];//copy shield
+    for (i=0;i<nm;i++) {
+      PlaneNorm.Set (rand()-RAND_MAX/2,rand()-RAND_MAX/2,rand()-RAND_MAX/2+.5);
+      PlaneNorm.Normalize();  
+      old[i]->Fork (nw[i*2], nw[i*2+1],PlaneNorm.i,PlaneNorm.j,PlaneNorm.k,-PlaneNorm.Dot(old[i]->Position()));//splits somehow right down the middle.
+      if (nw[i*2]&&nw[i*2+1]) {
+	delete old[i];
+      }else {
+	nw[i*2+1]= NULL;
+	nw[i*2]=old[i];
+      }
+    }
+    nm*=2;
+    for (i=0;i<nm;i++) {
+      if (nw[i]==NULL) {
+	for (int j=i+1;j<nm;j++) {
+	  nw[j-1]=nw[j];
+	}
+	nm--;
+	nw[nm]=NULL;
+      }
+    }
+    delete [] old;
+    old = nw;
+  }
+  if (old[nm])
+    delete old[nm];
+  old[nm]=NULL;
+  if (subunits&&numsubunit) {
+    subunits = (Unit **)realloc (subunits, (numsubunit+nm)*sizeof (Unit *));
+  }else {
+    subunits = (Unit **)malloc (nm*sizeof (Unit *));
+  }
+  for (int i=0;i<nm;i++) {
+    subunits[i+numsubunit] = new Unit (old+i,1);
+    subunits[i+numsubunit]->mass = mass/level;
+  }
+  numsubunit = numsubunit+nm;
+  if (bspTree) {
+    delete bspTree;
+    bspTree=NULL;
+  }
+  delete [] old;
+  nummesh = 0;
+  meshdata = new Mesh *[1];
+  meshdata[0]=NULL;//the shield
+  //FIXME...how the heck can they go spinning out of control!
+}
+
 void Unit::Kill() {
   if (halos&&numhalos) {
     for (int hc=0;hc<numhalos;hc++) {
@@ -72,6 +130,7 @@ float Unit::DealDamageToHull (const Vector & pnt, float damage ) {
     hull -=damage;
   }
   if (hull <0) {
+    Split (rand()%3+1);
     Destroy();
   }
   if (!FINITE (percent))
@@ -207,14 +266,16 @@ bool Unit::Explode (bool drawit) {
       Translate (tmp,meshdata[i]->Position());
       MultMatrix (tmp2,cumulative_transformation_matrix,tmp);
       explosion[i]->SetPosition(tmp2[12],tmp2[13],tmp2[14]);
-      if (timeexplode>i*.5){
-	if (drawit) explosion[i]->Draw();
-      }
       if (explosion[i]->Done()) {
 	delete explosion[i];	
 	explosion[i]=NULL;
       }else {
 	alldone=true;
+      }
+      if (timeexplode>i*.5){
+	if (drawit&&explosion[i]) { 
+	  explosion[i]->Draw();//puts on draw queue... please don't delete
+	}
       }
     }
     if (!alldone){

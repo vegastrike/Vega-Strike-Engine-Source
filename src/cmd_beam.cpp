@@ -268,27 +268,29 @@ void Beam::UpdatePhysics(const Transformation &trans, const Matrix m) {
     curthick =0;//die die die
     if (CollideInfo.object!=NULL) {
       KillCollideTable (&CollideInfo);
+      CollideInfo.object = NULL;
     }
-   
+    
   } else {
     CollideHuge(CollideInfo);
-  }
-  center = cumulative_transformation.position;
-  direction = TransformNormal (cumulative_transformation_matrix,Vector(0,0,1));
-  Vector tmpvec (center + direction*curlength);
-  Vector tmpMini = center.Min(tmpvec);
-  tmpvec = center.Max (tmpvec);
-  if (TableLocationChanged (CollideInfo,tmpMini,tmpvec)||(curthick>0&&CollideInfo.object==NULL)) {
-    if (CollideInfo.object !=NULL) {
-      KillCollideTable (&CollideInfo);
+    
+    center = cumulative_transformation.position;
+    direction = TransformNormal (cumulative_transformation_matrix,Vector(0,0,1));
+    Vector tmpvec (center + direction*curlength);
+    Vector tmpMini = center.Min(tmpvec);
+    tmpvec = center.Max (tmpvec);
+    if (TableLocationChanged (CollideInfo,tmpMini,tmpvec)||(curthick>0&&CollideInfo.object==NULL)) {
+      if (CollideInfo.object !=NULL) {
+	KillCollideTable (&CollideInfo);
+      }
+      CollideInfo.object = this;
+      CollideInfo.Mini= tmpMini;
+      CollideInfo.Maxi= tmpvec;
+      AddCollideQueue (CollideInfo);
+    } else {
+      CollideInfo.Mini= tmpMini;
+      CollideInfo.Maxi= tmpvec;
     }
-    CollideInfo.object = this;
-    CollideInfo.Mini= tmpMini;
-    CollideInfo.Maxi= tmpvec;
-    AddCollideQueue (CollideInfo);
-  } else {
-    CollideInfo.Mini= tmpMini;
-    CollideInfo.Maxi= tmpvec;
   }
   //Check if collide...that'll change max beam length REAL quick
 }
