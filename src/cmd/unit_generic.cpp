@@ -623,6 +623,7 @@ void Unit::Init(const char *filename, bool SubU, int faction,std::string unitMod
 	    meshdata.push_back(NULL);
 		this->fullname=filename;
 	    this->name=string("LOAD_FAILED");
+		calculate_extent(false);		
 		radial_size=1;
 		
 	    //	    assert ("Unit Not Found"==NULL);
