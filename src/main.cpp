@@ -170,6 +170,7 @@ int main( int argc, char *argv[] )
 
   g_game.music_enabled = XMLSupport::parse_bool (vs_config->getVariable ("audio","Music","true"));
 #ifndef _WIN32
+  if (g_game.music_enabled) {
     int pid=fork();
     if (!pid) {
       pid=execlp("./soundserver","./soundserver",NULL);
