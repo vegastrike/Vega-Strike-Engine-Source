@@ -1433,7 +1433,7 @@ namespace VSFileSystem
 				if( !this->fp)
 				{
 					cerr<<"!!! SERIOUS ERROR : failed to open "<<filestr<<" - this should not happen"<<endl;
-					VSExit(1);
+					return FileNotFound; // fault!
 				}
 				this->valid = true;
 			}
@@ -1461,7 +1461,7 @@ namespace VSFileSystem
 					if( !this->fp)
 					{
 						cerr<<"!!! SERIOUS ERROR : failed to open "<<filestr<<" - this should not happen"<<endl;
-						VSExit(1);
+						return FileNotFound;//fault
 					}
 				}
 				this->valid = true;
@@ -2002,7 +2002,12 @@ namespace VSFileSystem
 
 	string	VSFile::GetFullPath()
 	{
-		return (this->rootname+"/"+this->directoryname+"/"+this->subdirectoryname+"/"+this->filename);
+		string tmp=(this->rootname+"/"+this->directoryname+"/"+this->subdirectoryname+"/"+this->filename);
+                string::size_type where;
+                while ((where=tmp.find("//"))!=string::npos) {
+                  tmp = tmp.substr(0,where)+tmp.substr(where+1);
+                }
+                return tmp;
 	}
 
 	void	VSFile::SetType( VSFileType type)
