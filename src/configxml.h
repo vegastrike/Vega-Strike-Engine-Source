@@ -67,7 +67,7 @@ class VegaConfig {
   int hatswitch_joystick[MAX_HATSWITCHES];
 
 
-  VegaConfig(char *configfile);
+  VegaConfig(const char *configfile);
   virtual ~VegaConfig();
 
   void getColor(configNode *node,string name, float color[4],bool have_color=false);

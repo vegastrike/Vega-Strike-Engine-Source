@@ -38,7 +38,7 @@
 
 /* *********************************************************** */
 
-VegaConfig::VegaConfig(char *configfile){
+VegaConfig::VegaConfig(const char *configfile){
 
   configNodeFactory *domf = new configNodeFactory();
 

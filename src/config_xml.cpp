@@ -46,7 +46,7 @@
 
 /* *********************************************************** */
 
-GameVegaConfig::GameVegaConfig(char *configfile): VegaConfig( configfile)
+GameVegaConfig::GameVegaConfig(const char *configfile): VegaConfig( configfile)
 {
 	/*
   configNodeFactory *domf = new configNodeFactory();

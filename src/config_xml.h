@@ -43,7 +43,7 @@ typedef map<string,int> KeyMap;
 
 class GameVegaConfig: public VegaConfig {
  public:
-  GameVegaConfig(char *configfile);
+  GameVegaConfig(const char *configfile);
 
 #define AXIS_X 0
 #define AXIS_Y 1
