@@ -1,7 +1,7 @@
 #include "fire.h"
 #include "flybywire.h"
 #include "navigation.h"
-#include "cmd/planet.h"
+#include "cmd/planet_generic.h"
 #include "config_xml.h"
 #include "vs_globals.h"
 #include "cmd/unit_util.h"
