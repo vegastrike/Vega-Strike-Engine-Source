@@ -35,8 +35,10 @@ QuadTree::~QuadTree () {
   delete nonlinear_transform;
   
 }
-float QuadTree::GetHeight (float x, float z) {
-  return root->GetHeight (RootCornerData,x,z);
+float QuadTree::GetHeight (Vector Location) {
+  InvTransform (transformation,Location);
+  nonlinear_transform->InvTransform (Location);
+  return Location.j-root->GetHeight (RootCornerData,Location.i,Location.k);
 }
 void QuadTree::Update () {
   //GetViewerPosition

@@ -23,7 +23,7 @@ class QuadTree {
   void Render();
   void Update();
   void SetTransformation (const Matrix transformation);
-  float GetHeight (float x,float z);
+  float GetHeight (Vector Location);
 };
 
 #endif
