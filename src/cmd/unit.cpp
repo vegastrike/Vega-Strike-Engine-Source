@@ -729,7 +729,7 @@ void Unit::Deselect() {
 bool Unit::InRange (Unit *target, Vector &localcoord) const {
   localcoord =Vector(ToLocalCoordinates(target->Position()-Position()));
   float mm= localcoord.Magnitude();
-  if (mm>computer.radar.maxrange||(localcoord.k/mm)<computer.radar.maxcone||target->CloakVisible()<.8) {
+  if ((mm>computer.radar.maxrange&&target->isUnit()!=PLANETPTR)||(localcoord.k/mm)<computer.radar.maxcone||target->CloakVisible()<.8) {
     return false;
   }
   return true;
