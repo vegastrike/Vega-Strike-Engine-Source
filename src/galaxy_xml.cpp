@@ -28,7 +28,7 @@
 
 #include "galaxy_xml.h"
 #include "galaxy_gen.h"
-
+#include "gfx/nav/navscreen.h"
 #include <float.h>
 using namespace XMLSupport;
 namespace GalaxyXML {
@@ -158,6 +158,55 @@ Galaxy::Galaxy (const Galaxy & g):data(g.data) {
 		subheirarchy = new SubHeirarchy (*g.subheirarchy);
 	}else
 		subheirarchy = NULL;
+}
+
+void Galaxy::processSystem(string sys,const QVector &coords){
+	string sector = getStarSystemSector(sys);
+	sys = getStarSystemName(sys).c_str();
+	char coord [65536];
+	sprintf(coord,"%lf %lf %lf",coords.i,coords.j,coords.k);
+	string ret = getVariable (sector,sys,"");
+	if (ret.length()==0) {
+		setVariable(sector,sys,"xyz",coord);
+	}
+}
+void Galaxy::processGalaxy(string sys) {
+	NavigationSystem::SystemIterator si(sys,256000);
+	while (!si.done()) {
+		string sys = *si;
+		processSystem(sys,si.Position());
+		++si;
+	}
+	
+}
+void dotabs (FILE* fp, unsigned int tabs) {
+	for (unsigned int i=0;i<tabs;++i) {
+		fprintf (fp,"\t");
+	}
+}
+void Galaxy::writeSector(FILE * fp, int tabs) {
+	for (StringMap::iterator dat = data.begin();dat!=data.end();++dat) {
+		dotabs(fp,tabs);
+		fprintf (fp,"<var name=\"%s\" value=\"%s\"/>\n",(*dat).first.c_str(),(*dat).second.c_str());
+	}
+	if (subheirarchy) {
+		for (SubHeirarchy::iterator it=  subheirarchy->begin();it!=subheirarchy->end();++it) {
+			dotabs(fp,tabs);
+			fprintf (fp,"<%s name=\"%s\">\n",tabs>1?"system":"sector",(*it).first.c_str());
+			(*it).second.writeSector(fp,tabs+1);
+			dotabs(fp,tabs);
+			fprintf (fp,"</%s>\n",tabs>1?"system":"sector");
+		}
+	}
+}
+void Galaxy::writeGalaxy(const char * filename) {
+	FILE * fp = fopen (filename,"w");
+	if (fp ) {
+		fprintf (fp,"<galaxy><systems>\n");
+		writeSector(fp,1);
+		fprintf (fp,"</systems></galaxy>\n");
+
+	}
 }
 Galaxy::Galaxy(const char *configfile){
   subheirarchy=NULL;

@@ -3,6 +3,7 @@
 
 #include <string>
 #include <map>
+#include "gfx/vec.h"
 namespace GalaxyXML {
 using std::string;
 class StringWrapper : public string {
@@ -13,13 +14,16 @@ public:
 class StringMap : public std::map<StringWrapper, StringWrapper> {};
 class SubHeirarchy;
 class Galaxy {
-  class SubHeirarchy * subheirarchy;
+	class SubHeirarchy * subheirarchy;
   StringMap data;
 	Galaxy & operator = (const Galaxy & a);
  public:
   Galaxy () {subheirarchy=NULL;}
   Galaxy(const char *configfile);
- 
+  void writeGalaxy(const char * filename);
+  void writeSector (FILE * fp, int tabs);
+  void processGalaxy(string sys);
+  void processSystem(string sys,const QVector &suggested_coordinates);
   Galaxy( const Galaxy & g);
   ~Galaxy();
   string getVariable(std::vector<string> section, string name, string default_value);

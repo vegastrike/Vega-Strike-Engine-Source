@@ -139,7 +139,9 @@ void Universe::Init( const char * gal)
 	}
 
 	script_system=NULL;
+
 }
+
 Universe::Universe(int argc, char** argv, const char * galaxy, bool server)
 {
 	this->Init( galaxy);
@@ -264,6 +266,7 @@ void Universe::Generate2( StarSystem * ss)
 }
 
 StarSystem * Universe::GenerateStarSystem (const char * file, const char * jumpback, Vector center) {
+
   StarSystem *tmpcache;
   if ((tmpcache =GetLoadedStarSystem(file))) {
     return tmpcache;
@@ -276,6 +279,7 @@ StarSystem * Universe::GenerateStarSystem (const char * file, const char * jumpb
 
 void Universe::Update()
 {
+
   int i;
   static float nonactivesystemtime = XMLSupport::parse_float (vs_config->getVariable ("physics","InactiveSystemTime",".3"));
   float systime=nonactivesystemtime;
