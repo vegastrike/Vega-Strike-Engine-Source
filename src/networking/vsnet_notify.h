@@ -234,6 +234,8 @@ public:
     NoteFile( SOCKETALT          sock,
               const std::string& filename,
               std::string        localbasepath );
+    NoteFile( SOCKETALT          sock,
+              const std::string& filename );
 
     virtual ~NoteFile( ) { }
 };

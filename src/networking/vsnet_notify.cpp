@@ -1,6 +1,7 @@
 #include <config.h>
 #include <fstream>
 
+#include "vs_path.h"
 #include "vsnet_dloadmgr.h"
 #include "vsnet_notify.h"
 #include "vsnet_debug.h"
@@ -182,6 +183,12 @@ NoteFile::NoteFile( SOCKETALT          sock,
                     const std::string& filename,
                     std::string        localbasepath )
     : File( sock, filename, localbasepath, NotifyPtr(this) )
+{
+}
+
+NoteFile::NoteFile( SOCKETALT          sock,
+                    const std::string& filename )
+    : File( sock, filename, datadir, NotifyPtr(this) )
 {
 }
 
