@@ -1468,7 +1468,7 @@ void GameCockpit::Draw() {
     if (un->GetHull()>=0)
       die = false;
     if (un->Threat()!=NULL) {
-      if (getTimeCompression()>1) {
+      if (0&&getTimeCompression()>1) {
 	reset_time_compression(0,PRESS);
       }
       un->Threaten (NULL,0);

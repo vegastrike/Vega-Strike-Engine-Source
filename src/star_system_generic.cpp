@@ -346,7 +346,7 @@ void StarSystem::UpdateUnitPhysics (bool firstframe) {
 	    static float neardist =XMLSupport::parse_float(vs_config->getVariable("physics","autodist","4000"));
 	    Vector diff (owner->Position()-unit->Position());
 	    if (diff.Dot(diff)<neardist*neardist) {
-	      if (getTimeCompression!=.0000001) {//if not paused
+	      if (0&&getTimeCompression!=.0000001) {//if not paused
 		reset_time_compression(0,PRESS);
 	      }
 	    }
@@ -648,7 +648,7 @@ void StarSystem::Update(float priority , bool executeDirector) {
       Unit * owner = _Universe->AccessCockpit()->GetParent();
       if (owner) {
 	if (owner->InCorrectStarSystem(this)) {
-	  if (getTimeCompression()>1) {//if not paused
+	  if (0&&getTimeCompression()>1) {//if not paused
 	    if (!owner->AutoPilotTo (owner,true)) {
 	      
 	      reset_time_compression(0,PRESS);
