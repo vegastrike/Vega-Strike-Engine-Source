@@ -6,7 +6,7 @@
 float& AIScript::topf(){
 	if (!xml->floats.size()) {
 		xml->floats.push(xml->defaultf);
-		fprintf(stderr,"\nERROR: Float stack is empty... Will return 0\n");
+		fprintf(stderr,"\nERROR: Float stack is empty... Will return %f\n",xml->defaultf);
 	}
 	return xml->floats.top();
 }
@@ -20,7 +20,7 @@ void AIScript::popf(){
 Vector& AIScript::topv(){
 	if (!xml->vectors.size()) {
 		xml->vectors.push(xml->defaultvec);
-		fprintf(stderr,"\nERROR: Vector stack is empty... Will return 0\n");
+		fprintf(stderr,"\nERROR: Vector stack is empty... Will return <%f, %f, %f>\n",xml->defaultvec.i,xml->defaultvec.j,xml->defaultvec.k);
 	}
 	return xml->vectors.top();
 }
@@ -375,7 +375,7 @@ void AIScript::endElement(const string &name) {
 	temp = topv();
 	popv();
 	topf() = DotProduct(topv(),temp);
-	popv();
+ 	popv();
 	break;
   case MULTF:
 	assert(xml->unitlevel>3);
