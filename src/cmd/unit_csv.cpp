@@ -112,12 +112,12 @@ static string nextElement (string&inp) {
   return ret;
 }
 static double stof(string inp, double def=0) {
-  if (inp.length()==0)
+  if (inp.length()!=0)
     return XMLSupport::parse_float(inp);
   return def;
 }
 static int stoi(string inp, int def=0) {
-  if (inp.length()==0)
+  if (inp.length()!=0)
     return XMLSupport::parse_int(inp);
   return def;
 }
@@ -182,36 +182,34 @@ static void AddMounts(Unit * thus, Unit::XML &xml, std::string mounts) {
       }else {
         xml.mountz[indx]->size = xml.mountz[indx]->type->size;
       }
-      if (xml.mountz.size())
-      {
-        // DO not destroy anymore, just affect address
-	  for( int a=0; a<xml.mountz.size(); a++)
-		thus->mounts.push_back( *xml.mountz[a]);
-          //mounts[a]=*xml.mountz[a];
-          //delete xml.mountz[a];			//do it stealthily... no cons/destructor
-      }
-      unsigned char parity=0;
-      for (int a=0;a<xml.mountz.size();a++) {
-        static bool half_sounds = XMLSupport::parse_bool(vs_config->getVariable ("audio","every_other_mount","false"));
-        if (a%2==parity) {
-          int b=a;
-          if(a % 4 == 2 && (int) a < (thus->GetNumMounts()-1)) 
-            if (thus->mounts[a].type->type != weapon_info::PROJECTILE&&thus->mounts[a+1].type->type != weapon_info::PROJECTILE)
-              b=a+1;
-          thus->mounts[b].sound = AUDCreateSound (thus->mounts[b].type->sound,thus->mounts[b].type->type!=weapon_info::PROJECTILE);
-        } else if ((!half_sounds)||thus->mounts[a].type->type == weapon_info::PROJECTILE) {
-          thus->mounts[a].sound = AUDCreateSound (thus->mounts[a].type->sound,thus->mounts[a].type->type!=weapon_info::PROJECTILE);    //lloping also flase in unit_customize  
-        }
-        if (a>0) {
-          if (thus->mounts[a].sound==thus->mounts[a-1].sound&&thus->mounts[a].sound!=-1) {
-            printf ("Sound error\n");
-          }
-        }
+    }
+  }
+  if (xml.mountz.size())
+  {
+    // DO not destroy anymore, just affect address
+    for( int a=0; a<xml.mountz.size(); a++)
+      thus->mounts.push_back( *xml.mountz[a]);
+    //mounts[a]=*xml.mountz[a];
+    //delete xml.mountz[a];			//do it stealthily... no cons/destructor
+  }
+  unsigned char parity=0;
+  for (int a=0;a<xml.mountz.size();a++) {
+    static bool half_sounds = XMLSupport::parse_bool(vs_config->getVariable ("audio","every_other_mount","false"));
+    if (a%2==parity) {
+      int b=a;
+      if(a % 4 == 2 && (int) a < (thus->GetNumMounts()-1)) 
+        if (thus->mounts[a].type->type != weapon_info::PROJECTILE&&thus->mounts[a+1].type->type != weapon_info::PROJECTILE)
+          b=a+1;
+      thus->mounts[b].sound = AUDCreateSound (thus->mounts[b].type->sound,thus->mounts[b].type->type!=weapon_info::PROJECTILE);
+    } else if ((!half_sounds)||thus->mounts[a].type->type == weapon_info::PROJECTILE) {
+      thus->mounts[a].sound = AUDCreateSound (thus->mounts[a].type->sound,thus->mounts[a].type->type!=weapon_info::PROJECTILE);    //lloping also flase in unit_customize  
+    }
+    if (a>0) {
+      if (thus->mounts[a].sound==thus->mounts[a-1].sound&&thus->mounts[a].sound!=-1) {
+        printf ("Sound error\n");
       }
     }
   }
-      
-    //->curr_physical_state=xml.units[indx]->prev_physical_state;
 }
 struct SubUnitStruct{
   string filename;
@@ -454,7 +452,7 @@ void Unit::LoadRow(CSVRow &row,string modification, string * netxml) {
 
 
   //begin the geometry (and things that depend on stats)
-  UpgradeUnit(this,row["Upgrade"]);
+
   fullname=row["Name"];
   //image->description=row["Description"];
   if ((tmpstr=row["Hud_image"]).length()!=0) {
@@ -595,7 +593,7 @@ void Unit::LoadRow(CSVRow &row,string modification, string * netxml) {
   image->SPECDriveFunctionalityMax=stof(row["Max_SPECDrive_Functionality"]);
   computer.slide_start=stoi(row["Slide_Start"]);
   computer.slide_end=stoi(row["Slide_End"]);
-
+  UpgradeUnit(this,row["Upgrade"]);
 
   this->image->explosion_type = row["Explosion"];
   if (image->explosion_type.length())
@@ -889,7 +887,7 @@ string Unit::WriteUnitString () {
         unit["Mass"]=tos(Mass);
         unit["Moment_Of_Inertia"]=tos(Momentofinertia);
         unit["FuelCapacity"]=tos(fuel/(Mass*getFuelConversion()));
-        unit["Hull"]=hull;
+        unit["Hull"]=tos(hull);
         row["Armor_Front_Top_Left"]=tos(armor.frontlefttop);
         row["Armor_Front_Top_Right"]=tos(armor.frontrighttop);
         row["Armor_Back_Top_Left"]=tos(armor.backlefttop);
@@ -943,8 +941,8 @@ string Unit::WriteUnitString () {
         unit["Wormhole"]=tos(image->forcejump!=0);
         unit["Outsystem_Jump_Cost"]=tos(jump.energy);
         unit["Warp_Usage_Cost"]=tos(jump.insysenergy);
-        unit["Afterburner_Usage_Cost"]=afterburnenergy>0?afterburnenergy:-afterburnenergy;
-        unit["Afterburner_Type"]=afterburnenergy>=0?0:1;
+        unit["Afterburner_Usage_Cost"]=tos(afterburnenergy>0?afterburnenergy:-afterburnenergy);
+        unit["Afterburner_Type"]=tos(afterburnenergy>=0?0:1);
         unit["Maneuver_Yaw"]=tos(limits.yaw*180/(VS_PI*Mass));
         unit["Maneuver_Pitch"]=tos(limits.pitch*180/(VS_PI*Mass));
         unit["Maneuver_Roll"]=tos(limits.roll*180/(VS_PI*Mass));
