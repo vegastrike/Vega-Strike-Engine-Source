@@ -23,6 +23,18 @@ using std::endl;
  * VsnetUDPSocket - definition
  ***********************************************************************/
  
+VsnetUDPSocket::VsnetUDPSocket( int sock, const AddressIP& remote_ip, SocketSet& set )
+    : VsnetSocket( sock, remote_ip, set )
+{
+    _negotiated_max_size = MAXBUFFER;
+    _recv_buf            = new char[MAXBUFFER];
+}
+
+VsnetUDPSocket::~VsnetUDPSocket( )
+{
+    delete [] _recv_buf;
+}
+
 int VsnetUDPSocket::sendbuf( PacketMem& packet, const AddressIP* to)
 {
     COUT << "enter " << __PRETTY_FUNCTION__ << endl;
@@ -43,61 +55,57 @@ int VsnetUDPSocket::sendbuf( PacketMem& packet, const AddressIP* to)
     return numsent;
 }
 
-void VsnetUDPSocket::ack( )
-{
-    /* as soon as windows have been introduced, these ACKs will get meaning again */
-}
-
-int VsnetUDPSocket::inner_recvbuf( void *buffer, unsigned int& len, AddressIP* from)
-{
-    COUT << " enter " << __PRETTY_FUNCTION__ << " with buffer " << buffer
-         << " len=" << len << endl;
-
-    int       ret = 0;
-
-    socklen_t len1;
-
-    AddressIP dummy;
-    if( from == NULL ) from = &dummy;
-
-    // In UDP mode, always receive data on sock
-    len1 = sizeof(sockaddr_in);
-    ret = recvfrom( _fd, (char *)buffer, len, 0, (sockaddr*)(sockaddr_in*)from, &len1 );
-    if( ret < 0 )
-    {
-        COUT << " fd=" << _fd << " error receiving: " << vsnetLastError() << endl;
-        ret = -1;
-    }
-    else if( ret == 0 )
-    {
-        COUT << " Received " << ret << " bytes : " << buffer << " (UDP socket closed, strange)" << endl;
-        ret = -1;
-    }
-    else
-    {
-        len = ret;
-	COUT << "NETUI : Recvd " << len << " bytes" << " <- " << *from << endl;
-    }
-    return ret;
-}
-
 int VsnetUDPSocket::recvbuf( PacketMem& buffer, AddressIP* from)
 {
-    char         buf[MAXBUFFER];
-    unsigned int len = MAXBUFFER;
-    int          ret = 0;
+    if( _cpq.empty() ) return -1;
 
-    ret = this->VsnetUDPSocket::inner_recvbuf( buf, len, from );
-    if( ret > 0 )
-    {
-        buffer.set( buf, len, PacketMem::LeaveOwnership );
-    }
-
-    return ret;
+    buffer = _cpq.front().mem;
+    if( from )
+        *from = _cpq.front().ip;
+    _cpq.pop();
+    return buffer.len();
 }
 
 void VsnetUDPSocket::dump( std::ostream& ostr ) const
 {
     ostr << "( s=" << _fd << " UDP r=" << _remote_ip << " )";
+}
+
+bool VsnetUDPSocket::needReadAlwaysTrue( ) const
+{
+    return ( !_cpq.empty() );
+}
+
+bool VsnetUDPSocket::isActive( )
+{
+    return ( _cpq.empty() == false );
+}
+
+void VsnetUDPSocket::lower_selected( )
+{
+    int       ret = 0;
+    socklen_t len1;
+    AddressIP from;
+
+    // In UDP mode, always receive data on sock
+    len1 = sizeof(sockaddr_in);
+    ret = recvfrom( _fd, _recv_buf, _negotiated_max_size,
+                    0, (sockaddr*)(sockaddr_in*)&from, &len1 );
+    if( ret < 0 )
+    {
+        COUT << " fd=" << _fd << " error receiving: "
+             << vsnetLastError() << endl;
+    }
+    else if( ret == 0 )
+    {
+        COUT << " Received " << ret << " bytes : " << _recv_buf
+             << " (UDP socket closed, strange)" << endl;
+    }
+    else
+    {
+	    COUT << "NETUI : Recvd " << ret << " bytes" << " <- " << from << endl;
+        Pending mem( _recv_buf, ret, from );
+        _cpq.push( mem );
+    }
 }
 

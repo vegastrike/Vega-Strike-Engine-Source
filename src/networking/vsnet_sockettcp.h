@@ -31,7 +31,7 @@ public:
 
     virtual int  sendbuf( PacketMem& packet, const AddressIP* to);
     virtual int  recvbuf( PacketMem& buffer, AddressIP *from);
-    virtual void ack( );
+    // virtual void ack( );
 
     virtual void dump( std::ostream& ostr ) const;
 

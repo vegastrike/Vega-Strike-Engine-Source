@@ -66,7 +66,7 @@ const char* displayCmd( Cmd cmd )
     CASE( CMD_ADDEDYOU     )
     CASE( CMD_DISCONNECT   )
 
-    CASE( CMD_ACK          )
+    // CASE( CMD_ACK          )
     default :
         return "CMD_UNKNOWN"; break;
     }

@@ -467,10 +467,10 @@ int Packet::send( )
     return ret;
 }
 
-void Packet::ack( )
-{
-    socket.ack( );
-}
+// void Packet::ack( )
+// {
+//     socket.ack( );
+// }
 
 char* Packet::getData()
 {

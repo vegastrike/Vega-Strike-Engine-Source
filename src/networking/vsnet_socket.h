@@ -19,10 +19,6 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-/*
-  netUI - Network Interface - written by Stephane Vaxelaire <svax@free.fr>
-*/
-
 #include <iostream>
 #include <errno.h>
 #include <assert.h>
@@ -112,14 +108,11 @@ public:
      */
     virtual int  recvbuf( PacketMem& buffer, AddressIP* from ) = 0;
 
-    // virtual int  recvbuf( void *buffer, unsigned int &len, AddressIP *from) = 0;
-
-    virtual void ack( ) = 0;
-
-
     friend std::ostream& operator<<( std::ostream& ostr, const VsnetSocket& s );
 
     virtual void dump( std::ostream& ostr ) const = 0;
+
+    // virtual void ack( ) = 0;
 
 private:
     VsnetSocket( );
@@ -168,12 +161,8 @@ public:
         return ( _sock.isNull() ? false : _sock->set_nonblock() );
     }
 
-    inline void ack( ) {
-        if( !_sock.isNull() ) _sock->ack( );
-    }
-
-//     inline int recvbuf( void *buffer, unsigned int &len, AddressIP *from) {
-//         return ( _sock.isNull() ? -1 : _sock->recvbuf( buffer, len, from ) );
+//     inline void ack( ) {
+//         if( !_sock.isNull() ) _sock->ack( );
 //     }
 
     inline int recvbuf( PacketMem& buffer, AddressIP *from) {

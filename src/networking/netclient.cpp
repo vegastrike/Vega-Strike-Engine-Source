@@ -196,7 +196,7 @@ bool	NetClient::PacketLoop( Cmd command)
 			timeout = true;
 			cleanup();
 		}
-		ret=this->checkMsg( NULL, &packet );
+		ret=this->checkMsg( &packet );
 		if( ret>0)
 		{
 			if( packet.getCommand() == command)
@@ -335,7 +335,7 @@ vector<string>	NetClient::loginLoop( string str_callsign, string str_passwd)
 			globalsaves.push_back( "!!! NETWORK ERROR : Connection to game server timed out !!!");
 			timeout = 1;
 		}
-		recv=this->checkMsg( NULL, &packet );
+		recv=this->checkMsg( &packet );
 
 		micro_sleep( 40000);
 	}
@@ -520,7 +520,7 @@ void	NetClient::start( char * addr, unsigned short port)
 	while( keeprun)
 	{
 		this->checkKey();
-		this->checkMsg( NULL, NULL );
+		this->checkMsg( NULL );
 		micro_sleep( 30000);
 	}
 
@@ -565,7 +565,7 @@ int		NetClient::isTime()
 /**** Check if server has sent something                   ****/
 /**************************************************************/
 
-int NetClient::checkMsg( char* netbuffer, Packet* packet )
+int NetClient::checkMsg( Packet* outpacket )
 {
     int ret=0;
 
@@ -573,7 +573,7 @@ int NetClient::checkMsg( char* netbuffer, Packet* packet )
     {
         if( clt_sock.isActive( ) )
         {
-            ret = recvMsg( netbuffer, packet );
+            ret = recvMsg( outpacket );
         }
     }
     return ret;
@@ -583,7 +583,7 @@ int NetClient::checkMsg( char* netbuffer, Packet* packet )
 /**** Receive a message from the server                    ****/
 /**************************************************************/
 
-int NetClient::recvMsg( char* netbuffer, Packet* outpacket )
+int NetClient::recvMsg( Packet* outpacket )
 {
     ObjSerial	packet_serial=0;
 
@@ -759,13 +759,13 @@ int NetClient::recvMsg( char* netbuffer, Packet* outpacket )
                      << packet_serial << " )= --------------------------------------" << endl;
                 exit(1);
                 break;
-            case CMD_ACK :
-                /*** RECEIVED AN ACK FOR A PACKET : comparison on packet timestamp and the client serial in it ***/
-                /*** We must make sure those 2 conditions are enough ***/
-                COUT << ">>> ACK =( " << current_timestamp
-                     << " )= ---------------------------------------------------" << endl;
-				p1.ack( );
-                break;
+//             case CMD_ACK :
+//                 /*** RECEIVED AN ACK FOR A PACKET : comparison on packet timestamp and the client serial in it ***/
+//                 /*** We must make sure those 2 conditions are enough ***/
+//                 COUT << ">>> ACK =( " << current_timestamp
+//                      << " )= ---------------------------------------------------" << endl;
+// 				p1.ack( );
+//                 break;
 			case CMD_FIREREQUEST :
 				// WE RECEIVED A FIRE NOTIFICATION SO FIRE THE WEAPON
 				mount_num = netbuf.getInt32();
@@ -969,8 +969,6 @@ int NetClient::recvMsg( char* netbuffer, Packet* outpacket )
 			case CMD_JUMP :
 			{
 				StarSystem * sts;
-				bool found = false;
-				int i=0;
 				string newsystem = netbuf.getString();
 				// Get the pointer to the new star system sent by server
 				if( !(sts=star_system_table.Get( newsystem)))

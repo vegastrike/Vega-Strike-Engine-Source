@@ -1129,12 +1129,12 @@ void	NetServer::processPacket( Client * clt, unsigned char cmd, const AddressIP&
 			logoutList.push_back( clt);
 			COUT<<"<<< LOGOUT REQUEST -----------------------------------------------------------------"<<endl;
 			break;
-		case CMD_ACK :
-			/*** RECEIVED AN ACK FOR A PACKET : comparison on packet timestamp and the client serial in it ***/
-			/*** We must make sure those 2 conditions are enough ***/
-			COUT<<">>> ACK =( "<<packet.getTimestamp()<<" )= ---------------------------------------------------"<<endl;
-			packet.ack( );
-			break;
+// 		case CMD_ACK :
+// 			/*** RECEIVED AN ACK FOR A PACKET : comparison on packet timestamp and the client serial in it ***/
+// 			/*** We must make sure those 2 conditions are enough ***/
+// 			COUT<<">>> ACK =( "<<packet.getTimestamp()<<" )= ---------------------------------------------------"<<endl;
+// 			// packet.ack( );
+// 			break;
 
 		case CMD_ASKFILE :
 		{
@@ -1486,9 +1486,8 @@ void	NetServer::disconnect( Client * clt, const char* debug_from_file, int debug
         }
         else
         {
-	        //COUT << "User " << clt->callsign << " with serial "<<un->GetSerial()<<" disconnected" << endl;
 			COUT<<"!!! ERROR : UNIT==NULL !!!"<<endl;
-			exit(1);
+			// exit(1);
         }
 	    COUT << "There were " << allClients.size() << " clients - ";
 	    allClients.remove( clt);
@@ -1508,7 +1507,7 @@ void	NetServer::disconnect( Client * clt, const char* debug_from_file, int debug
         else
         {
             COUT << "Could not get Unit for " << clt->callsign << endl;
-			exit(1);
+			// exit(1);
         }
 	}
 	delete clt;
@@ -1696,7 +1695,6 @@ void	NetServer::sendDamages( ObjSerial serial, unsigned short zone, Unit::Shield
 void	NetServer::sendKill( ObjSerial serial, unsigned short zone)
 {
 	Packet p;
-	bool found = false;
 	Client * clt;
 	Unit * un;
 

@@ -49,16 +49,16 @@ PacketMem::PacketMem( const void* buffer, size_t size )
     if( buffer != NULL )
     {
         _buffer  = new char[size];
-	_len     = size;
+        _len     = size;
         _cnt     = new size_t;
-	*_cnt    = 1;
+        *_cnt    = 1;
 
-	memcpy( _buffer, buffer, size );
+        memcpy( _buffer, buffer, size );
     }
     else
     {
         _buffer  = NULL;
-	_len     = 0;
+        _len     = 0;
         _cnt     = NULL;
     }
 }

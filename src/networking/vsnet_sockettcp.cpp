@@ -94,10 +94,10 @@ int VsnetTCPSocket::sendbuf( PacketMem& packet, const AddressIP* to)
     return numsent;
 }
 
-void VsnetTCPSocket::ack( )
-{
-    /* meaningless, TCP is reliable */
-}
+// void VsnetTCPSocket::ack( )
+// {
+//     /* meaningless, TCP is reliable */
+// }
 
 int VsnetTCPSocket::recvbuf( PacketMem& buffer, AddressIP* )
 {
@@ -105,6 +105,7 @@ int VsnetTCPSocket::recvbuf( PacketMem& buffer, AddressIP* )
     {
         buffer = _cpq.front();
         _cpq.pop();
+        return buffer.len();
     }
     else if( _connection_closed )
     {

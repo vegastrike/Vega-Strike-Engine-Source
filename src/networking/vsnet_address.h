@@ -53,11 +53,11 @@ struct AddressIP : public sockaddr_in
     }
     AddressIP& operator=( const AddressIP& orig ) {
         memcpy( this, &orig, sizeof(AddressIP) );
-	return *this;
+        return *this;
     }
     AddressIP& operator=( const sockaddr_in& orig ) {
         memcpy( this, &orig, sizeof(AddressIP) );
-	return *this;
+        return *this;
     }
 
     /// print ip:port to stdout

@@ -74,7 +74,7 @@ class	NetClient
 		void	receiveData();
 		void	readDatafiles();
 		void	createChar();
-		int		recvMsg( char* netbuffer, Packet* outpacket );
+		int		recvMsg( Packet* outpacket );
 		void	disconnect();
 		int		checkAcctMsg( );
 
@@ -99,7 +99,7 @@ class	NetClient
 		// Warn the server we are leaving the game
 		void	logout();
 		// Check if there are info incoming over the network
-		int		checkMsg( char* netbuffer, Packet* packet );
+		int		checkMsg( Packet* outpacket );
 		// Send a position update
 		void	sendPosition( const ClientState* cs );
 		// Send a PING-like packet to say we are still alive (UDP)

@@ -72,7 +72,7 @@ extern double DAMAGE_ATOM;
 #undef VSNET_DEBUG
 #endif
 
-#undef VSNET_DEBUG
+#define VSNET_DEBUG
 
 #define FIND_WIN_NBIO
 

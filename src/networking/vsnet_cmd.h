@@ -85,7 +85,7 @@ enum Cmd
 
     CMD_DISCONNECT   = 0xF4,		// UDP : after a problem (not clean exit) to make the client exit if still alive
 
-    CMD_ACK          = 0xFF			// A packet to acknoledge the reception of a packet that was previously sent
+    // CMD_ACK          = 0xFF			// A packet to acknoledge the reception of a packet that was previously sent
 };
 
 std::ostream& operator<<( std::ostream& ostr, Cmd cmd );

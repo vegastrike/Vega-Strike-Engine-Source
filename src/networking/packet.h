@@ -123,7 +123,7 @@ class Packet
         inline void            setFlags( unsigned short fl ) { h.flags = fl; }
         void                   setNetwork( const AddressIP * dst, SOCKETALT sock);
 
-        void            ack( );
+        // void            ack( );
 
         char*       getData();
         const char* getData() const;
@@ -143,42 +143,6 @@ private:
 				       size_t               sz,
 				       Header&              header );
 };
-
-#if 0
-typedef list<Packet>::iterator PaI;
-extern char nbpackets;
-extern int  char_size;
-
-// A class that manage packet with priority
-class PacketQueue
-{
-    private:
-        list<Packet>        packets;
-    public:
-        /*** Adds a packet to the list (in order to be sent later) ***/
-        void add( Packet p);
-        /*** Sends or resends the packets and removes those that are
-         *   ACKED or never were ***/
-        void send( NetUI * net);
-
-        /*** Returns the front element from the list and remove it ***/
-        Packet getNextPacket();
-        /*** Tells us if the packet list is empty ***/
-        bool empty()
-        { return packets.empty();}
-        /*** Mark a packet as ACKED for removal from the list ***/
-        void ack( Packet p);
-
-    private:
-        /*** Receive all the packets in the network buffer and adds them to the list ***/
-        /*** Also sends back an ack in UDP mode ***/
-        /*** From the server, the ACK packet will have serial=0 ***/
-        int receive( NetUI * net, SOCKETALT & sock, AddressIP & ipaddr, ObjSerial ser);
-};
-
-extern PacketQueue sendQueue;
-extern PacketQueue recvQueue;
-#endif
 
 #endif
 
