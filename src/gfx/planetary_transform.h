@@ -5,16 +5,19 @@
 inline Vector SwizzleIt (const Vector &v) {return Vector(-v.i,-v.j,v.k);}//return Vector (v.i,v.k,v.j);}
 
 class PlanetaryTransform: public SphericalTransform{
+  float scaleheight;
   ///make sure ~Planet destructors alloc memory for this one so it survives planet
   float *xform;
  public:
-  Vector ReverseX (const Vector & v) const {return v;return Vector (v.i,v.j,v.k);}
+  Vector ReverseReverseX (const Vector & v) const {return Vector (v.i,scaleheight*v.j,v.k);}
+  Vector ReverseX (const Vector & v) const {return Vector (v.i,v.j/scaleheight,v.k);}
   PlanetaryTransform (float radius, float xsize, float ysize, int ratio): SphericalTransform (xsize*ratio,radius,ysize*ratio) {
+    scaleheight=.1;
     xform=NULL;
   }
   void SetTransformation (float * t) {xform = t;}
   virtual ~PlanetaryTransform () {while (1);}
-  Vector Transform (const Vector & v) const {return ::Transform (xform,SwizzleIt (SphericalTransform::Transform(ReverseX(v))));}
+  Vector Transform (const Vector & v) const {return ::Transform (xform,SwizzleIt (SphericalTransform::Transform(ReverseReverseX(v))));}
   Vector TransformNormal (const Vector &p, const Vector & n) const {
     return this->Transform (p+n)-this->Transform (p);
   }
@@ -36,16 +39,11 @@ class PlanetaryTransform: public SphericalTransform{
     RotateAxisAngle (yaw,Vector (0,1,0), -atan2 (coord.i,coord.k));//will figure out how far to get to the z axis
     RotateAxisAngle (basis,Vector (1,0,0),-atan2 (sqrtf (coord.i*coord.i+coord.k*coord.k),coord.j));//deals with pitch to get it literally "on the top of the world"
     MultMatrix (pitchandyaw,basis,yaw);
-    fprintf (stderr,"BeforeYaw");
-    fprintf (stderr,"P <%f,%f,%f>\n",p.i,p.j,p.k);
-    fprintf (stderr,"Q <%f,%f,%f>\n",q.i,q.j,q.k);
-    fprintf (stderr,"R <%f,%f,%f>\n",r.i,r.j,r.k);
-    fprintf (stderr,"AfterYaw");
     VectorAndPositionToMatrix (basis,
 			       ::TransformNormal (pitchandyaw,p),
 			       ::TransformNormal (pitchandyaw,q),
 			       ::TransformNormal (pitchandyaw,r),
-			       SphericalTransform::InvTransform(SwizzleIt(coord)));
+			       ReverseX(SphericalTransform::InvTransform(SwizzleIt(coord))));
   }
   void GrabPerpendicularOrigin (const Vector &m, Matrix trans) const{
     static int counter=0;

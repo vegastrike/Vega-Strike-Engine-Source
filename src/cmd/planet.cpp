@@ -303,7 +303,7 @@ void Planet::setTerrain (ContinuousTerrain * t) {
   terrain->DisableDraw();
   float x,z;
   t->GetTotalSize (x,z);
-  terraintrans = new PlanetaryTransform (.43*corner_max.i,x*2,z,4);
+  terraintrans = new PlanetaryTransform (.8*corner_max.i,x*2,z,4);
   terraintrans->SetTransformation (cumulative_transformation_matrix);
 }
 void Planet::setAtmosphere (Atmosphere *t) {
