@@ -15,12 +15,13 @@
  *                                                                         *
  **************************************************************************/
 
-// Version 2.33
+// Version 2.34
 
 // Feb 20, 2002: Imported changes made by Daniel Horn & ace123 for (Vega Strike). Replaces the glob() with portable calls
 //               This adds isdir() and FindPath() and changes FindFiles() and FindDirs() to wrappers to FindPath()
 // Mar 05, 2002: StripExtension() now returns the extension that was stripped
 // Mar 05, 2002: Fixed the FindFiles() so it now checks sub directories
+// Mar 05, 2002: Fixed FindFiles() again
 
 #ifndef GENERAL_H
 #define GENERAL_H

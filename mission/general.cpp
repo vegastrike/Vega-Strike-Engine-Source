@@ -448,7 +448,7 @@ glob_t *FindPath(char *path, int type) {
 		if (dir == 0) { continue; }
 		entry = 0;
 		while ((entry = readdir(dir)) != NULL) {
-			newpath = strdup((string(thispath)+SEPERATOR+mypath+SEPERATOR+entry->d_name).c_str());
+			newpath = strdup((string(curpath)+SEPERATOR+entry->d_name).c_str());
 			if (isdir(newpath) == 1) {
 				pathlist.push_back(newpath);
 				if (type == 1) { result.push_back(newpath); }
