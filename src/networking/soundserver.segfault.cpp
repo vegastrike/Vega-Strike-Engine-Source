@@ -112,7 +112,7 @@ struct Music {
   }
     void SetVolume(float vol) {
         if (m) {
-            printf ("Setting %d to %d\n", this->channel, (int)(vol*GetMaxVolume()));
+	  //            printf ("Setting %d to %d\n", this->channel, (int)(vol*GetMaxVolume()));
             F_API FSOUND_SetVolume(this->channel,(int)(vol*GetMaxVolume()));
         }
     }    
