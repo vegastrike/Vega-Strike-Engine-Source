@@ -123,7 +123,7 @@ png_cexcept_error(png_structp png_ptr, png_const_charp msg)
 unsigned char * readImage (const char * name, int & bpp, int &color_type, unsigned int &width, unsigned int &height, unsigned char * &palette, textureTransform * tt) {
   palette = NULL;
   unsigned char sig[8];
-
+  fprintf (stderr,"Loading %s",name);
   png_structp png_ptr;
   png_bytepp row_pointers;
   png_infop info_ptr;
@@ -135,7 +135,8 @@ unsigned char * readImage (const char * name, int & bpp, int &color_type, unsign
   if (!png_check_sig(sig, 8))
        return NULL;   /* bad signature */
     png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL,
-      (png_error_ptr)png_cexcept_error, (png_error_ptr)NULL);
+      (png_error_ptr)png_cexcept_error, 
+	  (png_error_ptr)NULL);
 	if (png_ptr == NULL)
    {
       fclose(fp);
@@ -157,6 +158,7 @@ unsigned char * readImage (const char * name, int & bpp, int &color_type, unsign
    }
    png_init_io(png_ptr, fp);
    png_set_sig_bytes(png_ptr, 8);
+   fprintf (stderr,"Loading Done. Decompressing\n");
    png_read_info(png_ptr, info_ptr);  /* read all PNG info up to image data */
    png_get_IHDR(png_ptr, info_ptr, (png_uint_32 *)&width, (png_uint_32 *)&height, &bpp, &color_type, &interlace_type, NULL, NULL);
 # if __BYTE_ORDER != __BIG_ENDIAN
@@ -191,6 +193,7 @@ unsigned char * readImage (const char * name, int & bpp, int &color_type, unsign
    png_infop end_info;
    png_read_end(png_ptr, info_ptr);
    png_destroy_read_struct(&png_ptr, &info_ptr, NULL);
+   fprintf (stderr,"Decompressing Done.\n");
 
    /* close the file */
    fclose(fp);

@@ -496,33 +496,37 @@ float	HeightMapInfo::Sample(int x, int z, float &texture) const
 
 	int	rx = (x - XOrigin) & mask;
 	int	rz = (z - ZOrigin) & mask;
-
+	int ixpp=ix+1;
+	int izpp=iz+1;
 	if (ix < 0 ){
-	  ix =0;
+		ix=0;
+		ixpp=0;
 	}
 	if (ix >= XSize-1) {
-	  ix = XSize-1;
+		ix=XSize-1;
+		ixpp=XSize-1;
 	}
 	if (iz < 0) {
-	  iz=0;
+		iz=0;
+		izpp=0;
 	}
 	if (iz >= ZSize-1) {
-	  iz = ZSize-1;
-	  //	  texture=0;
-	  //	  return 0;	// Outside the grid.
+		iz=ZSize-1;
+		izpp=ZSize-1;
 	}
+
 	float	fx = float(rx) / (mask + 1);
 	float	fz = float(rz) / (mask + 1);
 
 	float	s00 = Data[ix + iz * RowWidth];
-	float	s01 = Data[(ix+1) + iz * RowWidth];
-	float	s10 = Data[ix + (iz+1) * RowWidth];
-	float	s11 = Data[(ix+1) + (iz+1) * RowWidth];
+	float	s01 = Data[(ixpp) + iz * RowWidth];
+	float	s10 = Data[ix + (izpp) * RowWidth];
+	float	s11 = Data[(ixpp) + (izpp) * RowWidth];
 
 	float	t00 = texturelookup[terrainmap[ix + iz * RowWidth]];
-	float	t01=  texturelookup[terrainmap[(ix+1) + iz * RowWidth]];
-	float	t10 = texturelookup[terrainmap[ix + (iz+1) * RowWidth]];
-	float	t11 = texturelookup[terrainmap[(ix+1) + (iz+1) * RowWidth]];
+	float	t01=  texturelookup[terrainmap[(ixpp) + iz * RowWidth]];
+	float	t10 = texturelookup[terrainmap[ix + (izpp) * RowWidth]];
+	float	t11 = texturelookup[terrainmap[(ixpp) + (izpp) * RowWidth]];
 	texture = (t00 * (1-fx) + t01 * fx) * (1-fz) +
 	  (t10 * (1-fx) + t11 * fx) * fz;
 	

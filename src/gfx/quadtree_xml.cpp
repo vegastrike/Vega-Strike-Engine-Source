@@ -396,8 +396,8 @@ void QuadTree::LoadXML (const char *filename, const Vector & Scales, const float
 	}
 	//only happens the first time!
 	GFXVertex *v = vertices.BeginMutate(0)->vertices;
-	float xmax=(hm.XOrigin+hm.XSize<<hm.Scale);
-	float zmax=(hm.ZOrigin+hm.ZSize<<hm.Scale);
+	float xmax=(hm.XOrigin+(hm.XSize<<hm.Scale));
+	float zmax=(hm.ZOrigin+(hm.ZSize<<hm.Scale));
 	v[0].SetVertex (nonlinear_transform->Transform (Vector (xmax,0,hm.ZOrigin)));
 	v[0].SetTexCoord  (nonlinear_transform->TransformS (xmax,xml->scales),nonlinear_transform->TransformT(hm.ZOrigin,xml->scalet));
 	Vector Norm0 (nonlinear_transform->TransformNormal (v[0].GetConstVertex(),Vector (0,1,0)));
@@ -430,7 +430,7 @@ void QuadTree::LoadXML (const char *filename, const Vector & Scales, const float
   if (biggest){
     quadsquare::SetCurrentTerrain (&VertexAllocated, &VertexCount, &vertices, &unusedvertices, nonlinear_transform, &textures,Vector (1.0F/Scales.i,1.0F/Scales.j,1.0F/Scales.k),neighbors);
     root = new quadsquare (&RootCornerData);
-  }
+  } 
   // root->StaticCullData (RootCornerData,xml->detail);
   delete xml;
 }
