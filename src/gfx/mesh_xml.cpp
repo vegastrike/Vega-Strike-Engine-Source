@@ -1044,6 +1044,7 @@ void Mesh::LoadXML(const char *filename, float scale, int faction, Flightgroup *
 
   if(xml->load_stage!=5) {
     fprintf (stderr,"Warning: mesh load possibly failed\n");
+    exit(-1);
   }
   //begin vertex normal calculations if necessary
   if (USE_RECALC_NORM||xml->recalc_norm) {//fixme!
