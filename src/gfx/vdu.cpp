@@ -34,7 +34,7 @@ string getUnitNameAndFgNoBase (Unit * target) {
       return fg->name+":"+target->name;
     }
   }
-  if (string("neutral")!=_Universe->GetFaction(target->faction)) {
+  if (string("neutral")!=FactionUtil::GetFaction(target->faction)) {
     return /*string(_Universe->GetFaction(target->faction))+" "+*/target->name;
   }
   return target->name;
@@ -326,10 +326,10 @@ void VDU::DrawTarget(Unit * parent, Unit * target) {
   string unitandfg=getUnitNameAndFgNoBase(target).c_str();
   bool inrange=parent->InRange(target,mm,true,false,false);
   if (inrange) {
-    static int neut= _Universe->GetFaction("neutral");
-    static int upgr= _Universe->GetFaction("upgrades");
+	  static int neut= FactionUtil::GetFaction("neutral");
+    static int upgr= FactionUtil::GetFaction("upgrades");
     if (target->faction != neut&&target->faction!=upgr) {
-      unitandfg+=std::string("\n")+_Universe->GetFaction(target->faction);
+      unitandfg+=std::string("\n")+FactionUtil::GetFaction(target->faction);
     }
     
   }

@@ -153,9 +153,9 @@ static void GenerateLightMap ()
 			Normal.j = CosPhi * sin (Theta);
 			Normal.k = SinPhi;
 			Lighting (Col, Normal);//find what the lighting is
-			LightMap[lmwid*bytepp*t+bytepp*s] = 255*Col.r;
-			LightMap[lmwid*bytepp*t+bytepp*s+1] = 255*Col.g;
-			LightMap[lmwid*bytepp*t+bytepp*s+2] = 255*Col.b;
+			LightMap[lmwid*bytepp*t+bytepp*s] = (unsigned char) 255*Col.r;
+			LightMap[lmwid*bytepp*t+bytepp*s+1] = (unsigned char) 255*Col.g;
+			LightMap[lmwid*bytepp*t+bytepp*s+2] = (unsigned char) 255*Col.b;
 			LightMap[lmwid*bytepp*t+bytepp*s+3] = 255;
 		}
 	}
@@ -308,7 +308,7 @@ static bool LoadTex(char * FileName, unsigned char scdata [lthei][ltwid][3]){
 	  }
 	}else {
 	  fseek (fp,SIZEOF_BITMAPFILEHEADER,SEEK_SET);
-	  long temp;
+	  //long temp;
 	  BITMAPINFOHEADER info;
 	  fread(&info, SIZEOF_BITMAPINFOHEADER,1,fp);
 	  sizeX = le32_to_cpu(info.biWidth);
@@ -353,7 +353,7 @@ static bool LoadTex(char * FileName, unsigned char scdata [lthei][ltwid][3]){
 		  }
 		if (!data)
 		  return false;
-		int k=0;
+		//int k=0;
 		for (int i=sizeY-1; i>=0;i--)
 		  {
 			for (int j=0; j<sizeX;j++)
@@ -371,7 +371,7 @@ static bool LoadTex(char * FileName, unsigned char scdata [lthei][ltwid][3]){
 	    {
 	      for (int s=0; s<256;s++)
 		{
-		  int index = (scaledconstX*3*s)+(scaledconstY*3*t*sizeX);
+		  int index = (int) (scaledconstX*3*s)+(scaledconstY*3*t*sizeX);
 		  
 		  
 		  scdata[t][s][0] = data[index];
@@ -409,7 +409,7 @@ static void Spherize (CubeCoord Tex [256][256],CubeCoord gluSph [256][256],unsig
 	}
 	free (tmp);
 	tmp=NULL;
-	int NumPix;
+	//int NumPix;
 	float sleft,sright,tdown,tup;
 	for (int t=0; t<256;t++)
 	{
@@ -505,12 +505,12 @@ static void Spherize (CubeCoord Tex [256][256],CubeCoord gluSph [256][256],unsig
 			if (/*NumPixs&&NumPixt*/0)
 			{
 				float oonps = 1/(sright-sleft);
-				float oonpt = 1/(tdown-tup);
+				//float oonpt = 1/(tdown-tup);
 				
 				int stemp;
-				for (stemp = ceil (sleft);stemp <floor (sright); stemp ++)
+				for (stemp = (int) ceil (sleft);stemp <floor (sright); stemp ++)
 				{
-					for (int ttemp = ceil (tup);ttemp <floor (tdown); ttemp ++)
+					for (int ttemp = (int)ceil (tup);ttemp <floor (tdown); ttemp ++)
 					{
 						r += oonps * Data[Tex[t][s].TexMap].D[ttemp][stemp][0];
 						g += oonps * Data[Tex[t][s].TexMap].D[ttemp][stemp][1];
@@ -522,8 +522,8 @@ static void Spherize (CubeCoord Tex [256][256],CubeCoord gluSph [256][256],unsig
 				float srightavcoef = abso (sright-floor(sright));
 				float sleftavcoef = abso (ceil (sleft) - sleft);
 				//do upper border
-				int ttemp = floor (tup);
-				for (stemp = ceil (sleft);stemp <floor (sright); stemp ++)
+				int ttemp = (int)floor (tup);
+				for (stemp = (int)ceil (sleft);stemp <floor (sright); stemp ++)
 				{
 						r += oonps * Data[Tex[t][s].TexMap].D[ttemp][stemp][0]*tupavcoef;
 						g += oonps * Data[Tex[t][s].TexMap].D[ttemp][stemp][1]*tupavcoef;
@@ -652,11 +652,11 @@ static void Spherize (CubeCoord Tex [256][256],CubeCoord gluSph [256][256],unsig
 }
 static void GenerateSphereMap()
 {
-	float SinPhi;
-	float CosPhi;
-	float Theta;
+	//float SinPhi;
+	//float CosPhi;
+	//float Theta;
 	Vector Normal;
-	RGBColor Col;
+	//RGBColor Col;
 	static CubeCoord TexCoord [256][256];
 	static CubeCoord gluSphereCoord [256][256];
 	unsigned char *LightMap =(unsigned char *)malloc (lmwid*lmhei*4);
@@ -705,9 +705,6 @@ static void GenerateSphereMap()
 	info.biYPelsPerMeter=2834;
 	info.biClrUsed=0;
 	info.biClrImportant=0;
-	FILE *fp;
-	 
-
 
 	/** used to determine the consts
 	FILE * fp = fopen ("blank.bmp", "rb");
@@ -748,7 +745,7 @@ static void GenerateTexMap ()
 	float CosPhi;
 	float Theta;
 	Vector Normal;
-	RGBColor Col;
+	//RGBColor Col;
 	static CubeCoord TexCoord [256][256];
 	static CubeCoord gluSphereCoord[256][256];
 	unsigned char LightMap [65536*3];
@@ -831,7 +828,7 @@ void EnvironmentMapGeneratorMain(const char * inpt, const char *outpt, float a, 
     FILE * fp = fopen (strcat (tmp,"_sphere.bmp"),"rb");
     if (!fp)
       fp = fopen (strcat (tmp,"_up.bmp"),"rb");
-    bool share = false;
+    //bool share = false;
     std::string s;
     if (!fp) {
       s = GetSharedTexturePath (std::string (inpt));

@@ -304,7 +304,7 @@ void Mesh::LoadBinary (const char * filename, int faction) {
 		offset [ii] = readf (fp);
 		
 	}
-	forcelogos = new Logo(numforcelogo,center,PolyNormal,sizes ,rotations, 0.01F, _Universe->getForceLogo(faction),Ref);
+	forcelogos = new Logo(numforcelogo,center,PolyNormal,sizes ,rotations, 0.01F, FactionUtil::getForceLogo(faction),Ref);
 	delete [] Ref;
 	delete []PolyNormal;
 	delete []center;
@@ -430,7 +430,7 @@ void Mesh::LoadBinary (const char * filename, int faction) {
 	}
 	
 
-	squadlogos = new Logo(numsquadlogo,center,PolyNormal,sizes ,rotations, (float)0.01, _Universe->getSquadLogo(faction), Ref);
+	squadlogos = new Logo(numsquadlogo,center,PolyNormal,sizes ,rotations, (float)0.01, FactionUtil::getSquadLogo(faction), Ref);
 	delete [] Ref;
 	//fprintf (stderr, "Ri:%f Rj: %f Rk %f",vertexlist[0].i,vertexlist[0].j,vertexlist[0].k);
 	int vert_offset[2];
