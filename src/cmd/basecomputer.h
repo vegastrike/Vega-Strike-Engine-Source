@@ -128,6 +128,8 @@ protected:
     bool buyUpgrade(const EventCommandId& command, Control* control);
     // Sell an upgrade on your ship.
     bool sellUpgrade(const EventCommandId& command, Control* control);
+    // Fix an upgrade on your ship.
+    bool fixUpgrade(const EventCommandId& command, Control* control);
     // Buy ship from the base.
     bool buyShip(const EventCommandId& command, Control* control);
     // Sell ship from your stock
@@ -192,6 +194,9 @@ protected:
 
     // Update the commit controls in the Cargo screen, since we have three of them.
     void configureCargoCommitControls(const Cargo& item, TransactionType trans);
+
+    // Update the commit controls in the Cargo screen, since we have three of them.
+    void configureUpgradeCommitControls(const Cargo& item, TransactionType trans);
 
     // Make sure the info in the transaction lists is gone.
     void resetTransactionLists(void);

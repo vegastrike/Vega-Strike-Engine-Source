@@ -15,7 +15,7 @@
 
 // From unit.cpp
 double interpolation_blend_factor;
-
+extern const char * DamagedCategory;
 int cloakVal (int cloak, int cloakmin, int cloakrate, bool cloakglass) { // Short fix ?
     if (cloak<0&&cloakrate<0) {
       cloak=-2147483647-1;//intended warning should be max neg :-) leave it be
@@ -246,7 +246,7 @@ void RecomputeUnitUpgrades (Unit * un) {
 	unsigned int i;
 	for (i=0;i<un->numCargo();++i) {
 		Cargo * c = &un->GetCargo(i);
-		if (c->category.find("upgrades")==0) {
+		if (c->category.find("upgrades")==0&&c->category.find(DamagedCategory)!=0) {
 			if (c->content.find("mult_")!=0 &&
 				c->content.find("add_")!=0 ) {
 				un->Upgrade(c->content,0,0,true,false);
@@ -255,7 +255,7 @@ void RecomputeUnitUpgrades (Unit * un) {
 	}
 	for (i=0;i<un->numCargo();++i) {
 		Cargo * c = &un->GetCargo(i);
-		if (c->category.find("upgrades")==0) {
+		if (c->category.find("upgrades")==0&&c->category.find(DamagedCategory)!=0) {
 			if (c->content.find("add_")==0 ) {
 				for (int j=0;j<c->quantity;++j) {
 					un->Upgrade(c->content,0,0,true,false);
@@ -265,7 +265,7 @@ void RecomputeUnitUpgrades (Unit * un) {
 	}
 	for (i=0;i<un->numCargo();++i) {
 		Cargo * c = &un->GetCargo(i);
-		if (c->category.find("upgrades")==0) {
+		if (c->category.find("upgrades")==0&&c->category.find(DamagedCategory)!=0) {
 			if (c->content.find("mult_")==0) {
 				for (int j=0;j<c->quantity;++j) {
 					un->Upgrade(c->content,0,0,true,false);

@@ -3666,7 +3666,7 @@ bool DestroyPlayerSystem (float hull, float maxhull, float numhits) {
 	}
 	return ret;
 }
-static const char * DamagedCategory="upgrades/Damaged/";
+const char * DamagedCategory="upgrades/Damaged/";
 float Unit::DealDamageToHullReturnArmor (const Vector & pnt, float damage, float * &targ) { //short fix
   float percent;
 #ifndef ISUCK

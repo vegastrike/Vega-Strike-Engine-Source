@@ -112,7 +112,14 @@ int parse_vdu_type (const char * x) {
   return retval;
 }
 
+char tohexdigit(int x) {
+  if (x<=9&&x>=0) {
+    return (char)(x+'0');
+  }else {
+    return (char)(x+'A');    
+  }
 
+}
 
 
 VDU::VDU (const char * file, TextPlane *textp, unsigned short modes, short rwws, short clls, float *ma, float *mh) :VSSprite (file),tp(textp),posmodes(modes), rows(rwws), cols(clls),scrolloffset(0){
@@ -574,7 +581,7 @@ void VDU::DrawComm () {
   }
 }
 
-void VDU::DrawManifest (Unit * parent, Unit * target) {
+void VDU::DrawManifest (Unit * parent, Unit * target) {	//	zadeVDUmanifest
   string retval ("Manifest\n");
   if (target!=parent) {
     retval+=string ("Tgt: ")+reformatName(target->name)+string("\n");
@@ -666,7 +673,8 @@ static void DrawGun (Vector  pos, float w, float h, weapon_info::MOUNT_SIZE sz) 
   }
   
 }
-void VDU::DrawDamage(Unit * parent) {
+extern float PercentOperational(Unit*,string,string);
+void VDU::DrawDamage(Unit * parent) {	//	VDUdamage
   float x,y,w,h;
   float th;
   char st[1024];
@@ -719,6 +727,65 @@ void VDU::DrawDamage(Unit * parent) {
   tp->Draw (MangleString (st+k,_Universe->AccessCamera()->GetNebula()!=NULL?.5:0),0,true);  
   GFXColor4f (1,1,1,1);
   
+
+/*
+
+  Cargo & GetCargo (unsigned int i);
+  void GetCargoCat (const std::string &category, vector <Cargo> &cat);
+  ///below function returns NULL if not found
+  Cargo * GetCargo (const std::string &s, unsigned int &i);
+
+*/
+
+
+    //*******************************************************zade
+    string retval ("\n\n");
+    unsigned int numCargo =parent->numCargo();
+    double percent_working = 0.88;
+    for (unsigned int i=0;i<numCargo;i++) {
+      
+      percent_working = 0.88;// cargo.damage
+      Cargo& the_cargo = parent->GetCargo(i);
+      if(the_cargo.GetCategory().find("upgrades/")==0){
+        percent_working = PercentOperational(parent,the_cargo.content,the_cargo.category);
+	//	retval+=parent->GetManifest (i,parent,parent->GetVelocity())+string (" (")+tostring (int(percent_working*100))+string ("%)" +the_cargo.GetCategory()+"\n");
+        GFXColor final_color ((1.0*percent_working)+(1.0*(1.0-percent_working)),
+                              (1.0*percent_working)+(0.0*(1.0-percent_working)),
+                              (0.0*percent_working)+(0.0*(1.0-percent_working)),
+                              (1.0*percent_working)+(1.0*(1.0-percent_working)));
+        if(percent_working == 0.0){final_color = GFXColor(0.2,0.2,0.2);}	//	dead = grey
+        std::string trailer;
+        if (final_color.r<.99||final_color.g<.99||final_color.b<.99) {
+          int r = (int)(final_color.r*255);
+          if (r>255)r=255;
+          int rl = r%16;
+          int rh = r/16;
+          
+          int g = (int)(final_color.g*255);
+          if (g>255)g=255;
+          int gl = g%16;
+          int gh = g/16;
+          int b = (int)(final_color.b*255);
+          if (b>255)b=255;
+          int bl = b%16;
+          int bh = b/16;
+          retval+='#';
+          retval+=tohexdigit(rh);
+          retval+=tohexdigit(rl);
+          retval+=tohexdigit(gh);
+          retval+=tohexdigit(gl);
+          retval+=tohexdigit(bh);
+          retval+=tohexdigit(bl);
+          
+          trailer="#FFFFFF";
+        }
+        retval+=parent->GetManifest (i,parent,parent->GetVelocity())+string (" (")+tostring (int(percent_working*100))+string ("%)")+trailer+std::string("\n");
+        
+        
+      }
+    }
+    tp->Draw (MangleString (retval.c_str(),_Universe->AccessCamera()->GetNebula()!=NULL?.4:0),scrolloffset,true);     
+    //*******************************************************
 }
 void VDU::SetViewingStyle(VIEWSTYLE vs) {
   viewStyle = vs;

@@ -66,6 +66,8 @@ struct dirent { char d_name[1]; };
 #endif
 #include <sys/stat.h>
 //end for directory thing
+extern const char * DamagedCategory;
+
 static GFXColor UnsaturatedColor(float r, float g, float b, float a=1.0f) {
   GFXColor ret(r,g,b,a);
   return ret;
@@ -200,8 +202,6 @@ static GFXColor MOUNT_POINT_FULL() {
     return GFXColor(1,1,0);
 }
 
-
-
 // Some mission declarations.
 // These should probably be in a header file somewhere.
 static const char* const MISSION_SCRIPTS_LABEL = "mission_scripts";
@@ -308,6 +308,7 @@ const BaseComputer::WctlTableEntry BaseComputer::WctlCommandTable[] = {
     BaseComputer::WctlTableEntry ( "SellAllCargo", "", &BaseComputer::sellAllCargo ),
     BaseComputer::WctlTableEntry ( "BuyUpgrade", "", &BaseComputer::buyUpgrade ),
     BaseComputer::WctlTableEntry ( "SellUpgrade", "", &BaseComputer::sellUpgrade ),
+    BaseComputer::WctlTableEntry ( "FixUpgrade", "", &BaseComputer::fixUpgrade ),
     BaseComputer::WctlTableEntry ( "BuyShip", "", &BaseComputer::buyShip ),
     BaseComputer::WctlTableEntry ( "SellShip", "", &BaseComputer::sellShip ),
     BaseComputer::WctlTableEntry ( "AcceptMission", "", &BaseComputer::acceptMission ),
@@ -370,6 +371,47 @@ static std::string beautify(const string &input) {
 // The "used" value of an item.
 static double usedValue(double originalValue) {
   return .5*originalValue;
+}
+
+static float RepairPrice(float operational, float price) {
+  return .75*price*(1-operational);
+}
+static float SellPrice(float operational, float price) {
+  return usedValue(price)-RepairPrice(operational,price);
+}
+extern const Unit * makeTemplateUpgrade (string name, int faction);
+
+// Ported from old code.  Not sure what it does.
+const Unit* getUnitFromUpgradeName(const string& upgradeName, int myUnitFaction = 0) {
+    const char* name = upgradeName.c_str();
+    const Unit* partUnit = UnitConstCache::getCachedConst(StringIntKey(name, FactionUtil::GetFaction("upgrades")));
+    if (!partUnit) {
+        partUnit = UnitConstCache::setCachedConst(StringIntKey(name,
+	    FactionUtil::GetFaction("upgrades")),
+	    UnitFactory::createUnit(name, true, FactionUtil::GetFaction("upgrades")));
+    }
+    if (partUnit->name == LOAD_FAILED) {
+	partUnit = UnitConstCache::getCachedConst(StringIntKey(name, myUnitFaction));
+	if (!partUnit) {
+        partUnit = UnitConstCache::setCachedConst(StringIntKey(name, myUnitFaction),
+	    UnitFactory::createUnit(name, true, myUnitFaction));
+	}
+    }
+    return partUnit;
+
+}
+
+float PercentOperational (Unit * un, std::string name, std::string category="upgrades/") {
+  if (category.find(DamagedCategory)==0) {
+    return 0.0f;
+  }else {
+    const Unit * upgrade=getUnitFromUpgradeName(name,un->faction);    
+    double percent=0;
+    if (un->canUpgrade(upgrade,-1,-1,0,true,percent,makeTemplateUpgrade(un->name,un->faction),false)) {
+      return 1.0-percent;
+    }
+  }
+  return 1.0;
 }
 
 // Lowerifies a string.
@@ -791,6 +833,23 @@ void BaseComputer::constructControls(void) {
         buy->setFont(Font(.1, BOLD_STROKE));
         buy->setId("Commit");
         upgradeGroup->addChild(buy);
+
+
+        // Fix button.
+        NewButton* fix = new NewButton;
+        fix->setRect( Rect(-.11, .0, .22, .12) );
+        fix->setColor( GFXColor(0,1,1,.1) );
+        fix->setTextColor(GUI_OPAQUE_WHITE());
+		fix->setDownColor( GFXColor(0,1,1,.4) );
+		fix->setDownTextColor( GFXColor(.2,.2,.2) );
+		fix->setVariableBorderCycleTime(1.0);
+		fix->setBorderColor( GFXColor(.2,.2,.2) );
+		fix->setEndBorderColor( GFXColor(.4,.4,.4) );
+		fix->setShadowWidth(2.0);
+        fix->setFont(Font(.1, BOLD_STROKE));
+        fix->setId("CommitFix");
+        upgradeGroup->addChild(fix);
+
 
         // Scroller for description.
         Scroller* descScroller = new Scroller;
@@ -1536,6 +1595,9 @@ void BaseComputer::hideCommitControls(void) {
     NewButton* commitAllButton = static_cast<NewButton*>( window()->findControlById("CommitAll") );
     if(commitAllButton != NULL) commitAllButton->setHidden(true);
 
+    NewButton* commitFixButton = static_cast<NewButton*>( window()->findControlById("CommitFix") );
+    if(commitFixButton != NULL) commitFixButton->setHidden(true);
+
 	// The price and "max" displays.
     StaticDisplay* totalPrice = static_cast<StaticDisplay*>( window()->findControlById("TotalPrice") );
 	if(totalPrice != NULL) totalPrice->setText("");
@@ -1626,6 +1688,50 @@ void BaseComputer::configureCargoCommitControls(const Cargo& item, TransactionTy
 		maxForPlayer->setText("");
 	}
 }
+
+// Update the commit controls in the Cargo screen, since we have three of them.
+void BaseComputer::configureUpgradeCommitControls(const Cargo& item, TransactionType trans) {
+	if(trans == BUY_UPGRADE)	//	base inventory
+	{
+		NewButton* commitButton = static_cast<NewButton*>( window()->findControlById("Commit") );
+		assert(commitButton != NULL);
+		commitButton->setHidden(false);
+		commitButton->setLabel("Buy");
+		commitButton->setCommand("BuyUpgrade");
+
+		NewButton* commitFixButton = static_cast<NewButton*>( window()->findControlById("CommitFix") );
+		assert(commitButton != NULL);
+		commitFixButton->setHidden(true);
+		commitFixButton->setLabel("Fix");
+		commitFixButton->setCommand("FixUpgrade");
+	}
+	else	//	Sell Upgrade - Local Inventory
+	{
+		NewButton* commitButton = static_cast<NewButton*>( window()->findControlById("Commit") );
+		assert(commitButton != NULL);
+		commitButton->setHidden(false);
+		commitButton->setLabel("Sell");
+		commitButton->setCommand("SellUpgrade");
+
+                if (m_player.GetUnit()&&PercentOperational(m_player.GetUnit(), item.content,item.category)<1) {
+                    NewButton* commitFixButton = static_cast<NewButton*>( window()->findControlById("CommitFix") );
+                    if (m_base.GetUnit()) {
+                      if (RepairPrice(PercentOperational(m_player.GetUnit(),
+                                                         item.content, item.category),
+                                      m_base.GetUnit()->PriceCargo(item.content))
+                          <= _Universe->AccessCockpit()->credits) {
+                                                         
+                        assert(commitButton != NULL);
+                        commitFixButton->setHidden(false);
+                        commitFixButton->setLabel("Fix");
+                        commitFixButton->setCommand("FixUpgrade");
+                      }
+                    }
+                
+                }
+	}
+}
+
 
 /*
 // Update the commit controls in the Upgrade screen, since we (will) have three of them.
@@ -1722,8 +1828,9 @@ void BaseComputer::updateTransactionControlsForSelection(TransactionList* tlist)
 				configureCargoCommitControls(item, BUY_CARGO);
                 break;
             case BUY_UPGRADE:
-                commitButton->setLabel("Buy");
-                commitButton->setCommand("BuyUpgrade");
+                //commitButton->setLabel("Buy");
+                //commitButton->setCommand("BuyUpgrade");
+				configureUpgradeCommitControls(item, BUY_UPGRADE);
                 break;
             case BUY_SHIP:
                 commitButton->setLabel("Buy");
@@ -1742,8 +1849,9 @@ void BaseComputer::updateTransactionControlsForSelection(TransactionList* tlist)
 				configureCargoCommitControls(item, SELL_CARGO);
                 break;
             case SELL_UPGRADE:
-                commitButton->setLabel("Sell");
-                commitButton->setCommand("SellUpgrade");
+                //commitButton->setLabel("Sell");
+                //commitButton->setCommand("SellUpgrade");
+				configureUpgradeCommitControls(item, SELL_UPGRADE);
                 break;
              case ACCEPT_MISSION:
                if (item.category.find("Active_Missions")!=string::npos) {
@@ -1843,13 +1951,34 @@ void BaseComputer::updateTransactionControlsForSelection(TransactionList* tlist)
               descString += tempString;
               break;
             case SELL_UPGRADE:
-                sprintf(tempString, "Used value: #b#%.2f#-b, purchased for %.2f#n1.5#",
-                    usedValue(baseUnit->PriceCargo(item.content)), item.price);
+
+
+//********************************************************************************************
+              {
+              double percent_working=m_player.GetUnit()?PercentOperational(m_player.GetUnit(),item.content,item.category):0.0;
+              if(percent_working<1)	//	IF DAMAGED
+              {
+                sprintf(tempString, "Damaged and Used value: #b#%.2f#-b, purchased for %.2f#n1.5#",
+                        SellPrice(percent_working,baseUnit->PriceCargo(item.content)), item.price);
                 descString += tempString;
-				if(item.description==""||item.description[0]!='#'){
-					item.description=buildUpgradeDescription(item);
-				}
-                break;
+                
+                sprintf(tempString, "Percent Working: #b#%.2f#-b, Repair Cost: %.2f#n1.5#",
+                        percent_working*100, RepairPrice(percent_working,baseUnit->PriceCargo(item.content)));
+                descString += tempString;
+              }
+              else	
+              {
+                sprintf(tempString, "Used value: #b#%.2f#-b, purchased for %.2f#n1.5#",
+                        usedValue(baseUnit->PriceCargo(item.content)), item.price);
+                descString += tempString;
+              }
+//********************************************************************************************
+                
+                if(item.description==""||item.description[0]!='#'){
+                  item.description=buildUpgradeDescription(item);
+                }
+              }
+              break;
             default:
                 assert(false);      // Missed transaction enum in switch statement.
                 break;
@@ -2080,6 +2209,8 @@ void BaseComputer::loadListPicker(TransactionList& tlist, SimplePicker& picker, 
 	for(int i=0; i<tlist.masterList.size(); i++) {
         Cargo& item = tlist.masterList[i].cargo;
         std::string icategory = getDisplayCategory(item);
+
+
 	    if(icategory != currentCategory) {
             // Create new cell(s) for the new category.
             parentCell = createCategoryCell(*static_cast<SimplePickerCells*>(picker.cells()), icategory, skipFirstCategory);
@@ -2090,6 +2221,8 @@ void BaseComputer::loadListPicker(TransactionList& tlist, SimplePicker& picker, 
         const bool transOK = isTransactionOK(item, transType);
 		
 		string itemName = beautify(UniverseUtil::LookupUnitStat(item.content,"upgrades","Name"));
+		string originalName = itemName;
+		
 		if(itemName==""){
 		  itemName=beautify(item.content); 
 		}
@@ -2099,9 +2232,49 @@ void BaseComputer::loadListPicker(TransactionList& tlist, SimplePicker& picker, 
 	      itemName += " (" + tostring(item.quantity) + ")";
 		  }
 	
-        // Clear color means use the text color in the picker.
-        SimplePickerCell cell(itemName, item.content, (transOK? (item.mission?MISSION_COLOR():GUI_CLEAR) : NO_MONEY_COLOR()), i);
 
+//*******************************************************************************
+        // Clear color means use the text color in the picker.
+		GFXColor base_color = (transOK? (item.mission?MISSION_COLOR():GUI_CLEAR) : NO_MONEY_COLOR());
+		GFXColor final_color;
+
+		if(transType == SELL_UPGRADE&&m_player.GetUnit())
+		{
+			//Adjust the base color if the item is 'damaged'
+			double percent_working = PercentOperational(m_player.GetUnit(),item.content,item.category);;
+
+			//Unit* playerUnit = m_player.GetUnit();
+			//Unit* upgradeUnit = getUnitFromUpgradeName(originalName, playerUnit->faction);
+			//playerUnit->canUpgrade(upgradeUnit,0,0,0,false,percent_working,NULL,false);
+
+			//UnitConstCache::getCachedConst(StringIntKey(itemName, FactionUtil::GetFaction("upgrades")))
+
+			//Unit* playerUnit = m_parent.m_player.GetUnit();
+			//if(!playerUnit) {percent_working = 1.0;}
+			//else
+			//{
+			//	playerUnit->canUpgrade(m_newPart, m_selectedMount, m_selectedTurret, m_addMultMode, false, percent_working, m_theTemplate);
+			//}
+
+			final_color = GFXColor(
+				(1.0*percent_working)+(1.0*(1.0-percent_working)),
+				(1.0*percent_working)+(0.0*(1.0-percent_working)),
+				(0.0*percent_working)+(0.0*(1.0-percent_working)),
+				(1.0*percent_working)+(1.0*(1.0-percent_working))
+				);
+
+			if(percent_working == 1.0){final_color = base_color;}	//	working = normal color
+			if(percent_working == 0.0){final_color = GFXColor(0.2,0.2,0.2);}	//	dead = grey
+		}
+		else
+			final_color = base_color;
+
+        //SimplePickerCell cell(itemName, item.content, (transOK? (item.mission?MISSION_COLOR():GUI_CLEAR) : NO_MONEY_COLOR()), i);
+        SimplePickerCell cell(itemName, item.content, final_color, i);
+
+	//	cell.textColor(
+	//		GFXColor(1,0,0)
+//*******************************************************************************
         // Add the cell.
         if(parentCell) {
             parentCell->addChild(cell);
@@ -2797,7 +2970,7 @@ void BaseComputer::loadSellUpgradeControls(void) {
     }
 
 	std::vector<std::string> invplayerfiltervec=weapfiltervec;
-	invplayerfiltervec.push_back("Damaged");
+	//invplayerfiltervec.push_back("Damaged");
 	std::vector<string> playerfiltervec;
 	playerfiltervec.push_back("upgrades");
 	loadMasterList(playerUnit, playerfiltervec, invplayerfiltervec, false, tlist); // Get upgrades, but not weapons.
@@ -2824,25 +2997,6 @@ bool BaseComputer::changeToUpgradeMode(const EventCommandId& command, Control* c
         updateTransactionControlsForSelection(NULL);
     }
     return true;
-}
-
-// Ported from old code.  Not sure what it does.
-const Unit* getUnitFromUpgradeName(const string& upgradeName, int myUnitFaction = 0) {
-    const char* name = upgradeName.c_str();
-    const Unit* partUnit = UnitConstCache::getCachedConst(StringIntKey(name, FactionUtil::GetFaction("upgrades")));
-    if (!partUnit) {
-        partUnit = UnitConstCache::setCachedConst(StringIntKey(name,
-	    FactionUtil::GetFaction("upgrades")),
-	    UnitFactory::createUnit(name, true, FactionUtil::GetFaction("upgrades")));
-    }
-    if (partUnit->name == LOAD_FAILED) {
-	partUnit = UnitConstCache::getCachedConst(StringIntKey(name, myUnitFaction));
-	if (!partUnit) {
-        partUnit = UnitConstCache::setCachedConst(StringIntKey(name, myUnitFaction),
-	    UnitFactory::createUnit(name, true, myUnitFaction));
-	}
-    }
-    return partUnit;
 }
 
 // Actually do a repair operation.
@@ -2941,7 +3095,6 @@ static const string GOT_MOUNT_ID = "GotMount";
 static const string GOT_TURRET_ID = "GotTurret";
 static const string CONFIRM_ID = "Confirm";
 
-
 // Some common initialization.
 bool BaseComputer::UpgradeOperation::commonInit(void) {
     Cargo* selectedItem = m_parent.selectedItem();
@@ -3014,7 +3167,7 @@ bool BaseComputer::UpgradeOperation::gotSelectedMount(int index) {
 			} else {
 				// Ship can't take turrets.
 				finish();
-				showAlert("Your ship hasn't got the capability to add turrets.");
+				showAlert("Your ship does not support turrets.");
 				return false; // kill the window.
 			}
 		}
@@ -3493,6 +3646,47 @@ bool BaseComputer::sellUpgrade(const EventCommandId& command, Control* control) 
     return true;
 }
 
+
+
+// Sell an upgrade on your ship.
+bool BaseComputer::fixUpgrade(const EventCommandId& command, Control* control) {
+	Cargo* item = selectedItem();
+	if (item) {
+		if (!isWeapon(item->category)) {
+			Cargo sold;
+			const int quantity=1;
+			Unit * playerUnit = m_player.GetUnit();
+			Unit * baseUnit = m_base.GetUnit();
+			if (baseUnit&&playerUnit) {
+				Cargo itemCopy = *item;     // Copy this because we reload master list before we need it.
+                                
+				//playerUnit->SellCargo(item->content, quantity, _Universe->AccessCockpit()->credits, sold, baseUnit);
+				//RecomputeUnitUpgrades(playerUnit);
+                                const Unit * un=  getUnitFromUpgradeName(item->content,playerUnit->faction);
+                                if (un) {
+                                  double percentage = PercentOperational(playerUnit,item->content,item->category);
+                                  double price = RepairPrice(percentage,baseUnit->PriceCargo(item->content));
+                                  if (price<=_Universe->AccessCockpit()->credits) {
+                                    _Universe->AccessCockpit()->credits-=price;                                    
+                                    playerUnit->Upgrade(un,0,0,0,true,percentage,makeTemplateUpgrade(playerUnit->name,playerUnit->faction));
+                                    if (item->category.find(DamagedCategory)==0) {
+                                      unsigned int where;
+                                      Cargo * c=playerUnit->GetCargo(item->content,where);
+                                      if (c) c->category="upgrades/"+c->category.substr(strlen(DamagedCategory));
+                                      
+                                    }
+                                  }
+                                  
+                                  loadUpgradeControls();
+                                  updateTransactionControls(itemCopy, true);				
+                                }
+			}
+			return true;
+		}
+	}
+
+    return true;
+}
 
 // Change controls to SHIP_DEALER mode.
 bool BaseComputer::changeToShipDealerMode(const EventCommandId& command, Control* control) {
