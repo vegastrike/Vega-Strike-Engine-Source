@@ -413,7 +413,7 @@ void	AccountServer::sendAuthorized( SOCKETALT sock, Account * acct)
 
 		// For now saves are really limited to maxsave bytes
 		Packet	packet2;
-		if( packet2.send( LOGIN_ACCEPT, serial, buf, total_size, SENDRELIABLE, NULL, sock, __FILE__, __LINE__ ) < 0 )
+		if( packet2.send( LOGIN_ACCEPT, serial, buf, total_size, SENDANDFORGET|COMPRESSED, NULL, sock, __FILE__, __LINE__ ) < 0 )
 		{
 			cout<<"ERROR sending authorization"<<endl;
 			exit( 1);

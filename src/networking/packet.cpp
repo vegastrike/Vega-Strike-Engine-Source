@@ -246,7 +246,7 @@ void    Packet::setNetwork( const AddressIP * dst, SOCKETALT sock)
 }
 
 int Packet::send( Cmd cmd, ObjSerial nserial, char * buf, unsigned int length,
-                  enum PCKTFLAGS prio, const AddressIP* dst,
+                  int prio, const AddressIP* dst,
 		  const SOCKETALT& sock, const char* caller_file,
 		  int caller_line )
 {
@@ -255,7 +255,7 @@ int Packet::send( Cmd cmd, ObjSerial nserial, char * buf, unsigned int length,
 }
 
 void Packet::create( Cmd cmd, ObjSerial nserial, char * buf,
-                     unsigned int length, enum PCKTFLAGS prio,
+                     unsigned int length, int prio,
 		     const AddressIP* dst, const SOCKETALT& sock,
 		     const char* caller_file, int caller_line )
 {
@@ -308,7 +308,9 @@ void Packet::create( Cmd cmd, ObjSerial nserial, char * buf,
 	        h.data_length = (unsigned short)clen_l + sizeof(unsigned short);
                 h.hton( c );
 
-                COUT << "Created a packet of length "
+		_packet.trunc( h.data_length+header_length );
+
+                COUT << "Created a compressed packet of length "
 	             << h.data_length+header_length << " for sending" << endl;
                 //_packet.dump( cout, 0 );
 	        packet_filled = true;

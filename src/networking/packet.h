@@ -83,19 +83,21 @@ class Packet
             return false;
         }
 
+	/// flags is a bitwise OR of PCKTFLAGS
         int send( Cmd cmd, ObjSerial nserial,
                   char * buf, unsigned int length,
-                  enum PCKTFLAGS prio,
+                  int flags,
                   const AddressIP* dst, const SOCKETALT& sock,
                   const char* caller_file, int caller_line );
 
+	/// flags is a bitwise OR of PCKTFLAGS
         inline void bc_create( Cmd cmd, ObjSerial nserial,
                                char * buf, unsigned int length,
-                               enum PCKTFLAGS prio,
+                               int flags,
                                const AddressIP* dst, const SOCKETALT& sock,
                                const char* caller_file, int caller_line )
         {
-            create( cmd, nserial, buf, length, prio, dst, sock, caller_file, caller_line );
+            create( cmd, nserial, buf, length, flags, dst, sock, caller_file, caller_line );
         }
 
         inline int bc_send( )
@@ -131,7 +133,7 @@ class Packet
 private:
         void    create( Cmd cmd, ObjSerial nserial,
                         char * buf, unsigned int length,
-                        enum PCKTFLAGS prio,
+                        int flags,
                         const AddressIP* dst, const SOCKETALT& sock,
                         const char* caller_file, int caller_line );
         int     send( );

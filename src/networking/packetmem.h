@@ -37,6 +37,14 @@ public:
     size_t      len() const;
     char*       getVarBuf( );
     const char* getConstBuf( ) const;
+
+    /** Performs if(len<_len) _len=len;
+     *  Dangerous, use with care.
+     *  This function does not touch the buffer itself, but it fakes a shorter
+     *  buffer than actually present. Existing copies will not share the fake
+     *  length value but new copies will.
+     */
+    void trunc( size_t len );
     
     /** Dump the content of this buffer onto the given ostream, identing
      *  every line by indent_depth spaces.

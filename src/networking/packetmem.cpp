@@ -177,6 +177,11 @@ size_t PacketMem::len() const
     return _len;
 }
 
+void PacketMem::trunc( size_t len )
+{
+    if( len >= 0 && len < _len ) _len = len;
+}
+
 const char* PacketMem::getConstBuf() const
 {
     return _buffer;
