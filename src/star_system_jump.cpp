@@ -47,15 +47,18 @@ struct unorigdest {
   unsigned int animation;
   unorigdest (Unit * un, Planet * jumppoint, StarSystem * orig, StarSystem * dest, float delay,  unsigned int ani):un(un),jumppoint(jumppoint),orig(orig),dest(dest), delay(delay), animation(ani){}
 };
-
-
+void CacheJumpStar (bool destroy) {
+  static Animation * cachedani=new Animation (vs_config->getVariable ("graphics","jumpgate","explosion_orange.ani").c_str(),true,.1,MIPMAP,false);
+  if (destroy)
+    delete cachedani;
+}
 static std::vector <unorigdest *> pendingjump;
 static std::vector <unsigned int> AnimationNulls;
 static std::vector <Animation *>JumpAnimations;
 static std::vector <Animation *>VolatileJumpAnimations;
 static unsigned int AddJumpAnimation (const Vector & pos, const float size, bool mvolatile=false ) {
   std::vector <Animation *> *ja= mvolatile?&VolatileJumpAnimations:&JumpAnimations;
-  static Animation * cachedani=new Animation (vs_config->getVariable ("graphics","jumpgate","explosion_orange.ani").c_str(),true,.1,MIPMAP,false);
+
   Animation * ani=new Animation (vs_config->getVariable ("graphics","jumpgate","explosion_orange.ani").c_str(),true,.1,MIPMAP,false);
   unsigned int i;
   if (mvolatile||AnimationNulls.empty()){

@@ -31,10 +31,12 @@
 //#include "mission.h"
 //#include "vs_globals.h"
 
+///Decides whether to toast the jump star from the cache
+extern void CacheJumpStar (bool);
 Universe::Universe(int argc, char** argv)
 {
 	//Select drivers
-	
+
 
 	GFXInit(argc,argv);
 
@@ -42,6 +44,7 @@ Universe::Universe(int argc, char** argv)
 	InitInput();
 
 	hud_camera = Camera();
+	CacheJumpStar(false);
 	cockpit = new Cockpit ("",NULL);
 	LoadWeapons("weapon_list.xml");
 	LoadFactionXML("factions.xml");	
@@ -63,6 +66,7 @@ void Universe::Init (string systemfile, const Vector & centr,const string planet
 }
 Universe::~Universe()
 {
+  CacheJumpStar(true);
   DeInitInput();
   unsigned int i;
   for (i=0;i<this->factions.size();i++) {
