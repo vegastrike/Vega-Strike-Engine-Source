@@ -163,7 +163,7 @@ void Missile::UpdatePhysics2 (const Transformation &trans, const Transformation 
     this->time-=SIMULATION_ATOM;
     if (NULL!=targ) {
 		float checker = targ->querySphere (Position()-(SIMULATION_ATOM*GetVelocity()),Position(),rSize());
-		if (checker||((Position()-targ->Position()).Magnitude()-targ->rSize()-rSize()<detonation_radius)) {
+		if ((checker&&detonation_radius>=0)||((Position()-targ->Position()).Magnitude()-targ->rSize()-rSize()<detonation_radius)) {
 			Discharge();
 			time=-1;
 	//Vector norm;

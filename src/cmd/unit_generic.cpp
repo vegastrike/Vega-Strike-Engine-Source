@@ -2107,6 +2107,25 @@ static int applyto (unsigned short &shield, const unsigned short max, const floa
   return (shield>=max)?1:0;
 }
 
+float totalShieldVal (const Unit::Shield & shield) {
+	float maxshield=0;
+	switch (shield.number)  {
+  case 2:
+    maxshield = shield.fb[2]+shield.fb[3];
+    break;
+  case 4:
+    maxshield = (float)(shield.fbrl.frontmax)+(float)shield.fbrl.backmax+(float)shield.fbrl.leftmax+(float)shield.fbrl.rightmax;
+    break;
+  case 6:
+    maxshield = 2*(float)(shield.fbrltb.fbmax)+4*(float)shield.fbrltb.rltbmax;
+    break;
+	}
+	return maxshield;
+}
+float totalShieldEnergyCapacitance (const Unit::Shield & shield) {
+	static float shieldenergycap = XMLSupport::parse_float(vs_config->getVariable ("physics","shield_energy_capacitance",".2"));
+	return shieldenergycap * totalShieldVal(shield);
+}
 float Unit::MaxShieldVal() const{
   float maxshield=0;
   switch (shield.number) {
@@ -2143,7 +2162,7 @@ void Unit::RechargeEnergy() {
 }
 void Unit::RegenShields () {
   int rechargesh=1;
-  float maxshield=MaxShieldVal();
+  float maxshield=totalShieldEnergyCapacitance(shield);
   static bool energy_before_shield=XMLSupport::parse_bool(vs_config->getVariable ("physics","engine_energy_priority","true"));
   if (!energy_before_shield) {
     RechargeEnergy();
@@ -2848,10 +2867,10 @@ float Unit::WarpEnergyData() const {
     return ((float)warpenergy)/((float)jump.energy);
 }
 float Unit::EnergyData() const{
-  if (maxenergy<=MaxShieldVal()) {
+  if (maxenergy<=totalShieldEnergyCapacitance(shield)) {
     return 0;
   }
-  return ((float)energy)/(maxenergy-MaxShieldVal());
+  return ((float)energy)/(maxenergy-totalShieldEnergyCapacitance(shield));
 }
 
 float Unit::FShieldData() const{
@@ -4391,6 +4410,8 @@ bool Unit::RepairUpgrade () {
     }
 	bool ret = success && pct>0;
 	if (ret) {
+		const Unit * maxrecharge= makeTemplateUpgrade(name+".template",faction);
+
 		Unit * mpl = UnitFactory::getMasterPartList();
 		for (unsigned int i=0;i<mpl->numCargo();++i) {
 			if (mpl->GetCargo(i).category.find("upgrades")==0) {
@@ -4398,10 +4419,15 @@ bool Unit::RepairUpgrade () {
 				//now we analyzify up!
 				if (up->MaxShieldVal()==MaxShieldVal()&&up->shield.recharge>shield.recharge) {
 					shield.recharge = up->shield.recharge;
-					
+					if (maxrecharge)
+						if (shield.recharge>maxrecharge->shield.recharge)
+							shield.recharge=maxrecharge->shield.recharge;
 				}
 				if (up->maxenergy==maxenergy&&up->recharge>recharge){
 					recharge = up->recharge;
+					if (recharge>maxrecharge->recharge)
+						recharge= maxrecharge->recharge;
+
 				}
 			}
 		}

@@ -62,7 +62,7 @@ public:
     this->time-=SIMULATION_ATOM;
     if (NULL!=targ) {
 	  float checker = targ->querySphere (Position()-(SIMULATION_ATOM*GetVelocity()),Position(),rSize());
-      if (checker||((Position()-targ->Position()).Magnitude()-targ->rSize()-rSize()<detonation_radius)) {
+      if ((checker&&detonation_radius>=0)||((Position()-targ->Position()).Magnitude()-targ->rSize()-rSize()<detonation_radius)) {
 	//Vector norm;
 	//float dist;
 	//if ((targ)->queryBoundingBox (Position(),detonation_radius+rSize())) {
