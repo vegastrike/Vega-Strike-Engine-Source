@@ -296,7 +296,7 @@ namespace UnitUtil {
 	}
 	Unit *owner (Unit *un) {
 		Unit *found=NULL;
-		for (un_iter uniter=UniverseUtil::getUnitList();uniter.current();uniter.advance()) {
+		for (UniverseUtil::PythonUnitIter uniter=UniverseUtil::getUnitList();uniter.current();uniter.advance()) {
 			if (uniter.current()==un||ishere(uniter.current(),un)) {
 				found=uniter.current();
 				break;

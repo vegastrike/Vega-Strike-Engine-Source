@@ -53,7 +53,7 @@
 //	**********************************
 void NavigationSystem::DrawSystem()
 {
-	un_iter bleh = UniverseUtil::getUnitList(); 
+	UniverseUtil::PythonUnitIter bleh = UniverseUtil::getUnitList(); 
 	if(!(*bleh))
 		return;
 
