@@ -25,6 +25,8 @@
 #include "file_main.h"
 #include "gfx/aux_texture.h"
 #include "vs_globals.h"
+#include "config_xml.h"
+#include "xml_support.h"
 //#include "glut.h"
 
 TextPlane::TextPlane(const char *filename) {
@@ -58,15 +60,21 @@ void TextPlane::Draw (int offset) {
   Draw (myText,offset);
 }
 
-void TextPlane::Draw(const string & newText, int offset)
+void TextPlane::Draw(const string & newText, int offset,bool force_highquality)
 {
 	// some stuff to draw the text stuff
   string::const_iterator text_it = newText.begin();
+  static bool use_bit = force_highquality||XMLSupport::parse_bool(vs_config->getVariable ("graphics","high_quality_font","true"));
   void * fnt = g_game.x_resolution>=800?GLUT_BITMAP_HELVETICA_12:GLUT_BITMAP_HELVETICA_10;
+  myFontMetrics.i=(g_game.x_resolution>=800?14:12)*glutStrokeWidth (GLUT_STROKE_ROMAN,'W')/(119.05+33.33);
+  myFontMetrics.j=g_game.x_resolution>=800?14:12;
+  myFontMetrics.i/=2.*g_game.x_resolution;
+  myFontMetrics.j/=2.*g_game.y_resolution;
   float tmp,row, col;
   GetPos (row,col);
   GFXPushBlendMode();
-  GFXBlendMode (ONE,ZERO);
+  GFXBlendMode (SRCALPHA,INVSRCALPHA);
+  glEnable(GL_LINE_SMOOTH);
   GFXDisable (DEPTHTEST);
   GFXDisable (CULLFACE);
   GFXDisable (LIGHTING);
@@ -80,13 +88,23 @@ void TextPlane::Draw(const string & newText, int offset)
   glTranslatef(col,row,0);  
   //  glRasterPos2f (g_game.x_resolution*(1-(col+1)/2),g_game.y_resolution*(row+1)/2);
   glRasterPos2f (0,0);
+  float scalex=1;
+  float scaley=1;
+  
+  if (!use_bit) {
+    scalex=myFontMetrics.i/glutStrokeWidth (GLUT_STROKE_ROMAN,'W');
+    scaley=myFontMetrics.j/(119.05+33.33);
+  }
+  glScalef (scalex,scaley,1);
   while(text_it != newText.end() && row>myDims.j) {
     if(*text_it>=32) {//always true
       GlyphPosition g = myGlyphPos[*text_it-32];
       //glutStrokeCharacter (GLUT_STROKE_ROMAN,*text_it);
-      glutBitmapCharacter (fnt,*text_it);
-      
-    }
+      if (use_bit)
+	glutBitmapCharacter (fnt,*text_it);
+      else
+	glutStrokeCharacter (GLUT_STROKE_ROMAN,*text_it);
+    }  
     
     if(*text_it=='\t') {
       col+=glutBitmapWidth (fnt,' ')*5./(2*g_game.x_resolution);;
@@ -96,19 +114,24 @@ void TextPlane::Draw(const string & newText, int offset)
       glutBitmapCharacter (fnt,' ');
       glutBitmapCharacter (fnt,' ');
     } else {
-      col+=myFontMetrics.i;
-      col+=glutBitmapWidth (fnt,*text_it)/(float)(2*g_game.x_resolution);;
+      if (use_bit) {
+	col+=glutBitmapWidth (fnt,*text_it)/(float)(2*g_game.x_resolution);;
+      }else {
+	col+=myFontMetrics.i*glutStrokeWidth(GLUT_STROKE_ROMAN,*text_it)/glutStrokeWidth(GLUT_STROKE_ROMAN,'W');
+      }
     }
-    if(col+((text_it+1!=newText.end())?(glutBitmapWidth(fnt,*text_it)/(float)(2*g_game.x_resolution)):0)>=myDims.i||*text_it == '\n') {
+    if(col+((text_it+1!=newText.end())?(use_bit?(glutBitmapWidth(fnt,*text_it)/(float)(2*g_game.x_resolution)):myFontMetrics.i):0)>=myDims.i||*text_it == '\n') {
       GetPos (tmp,col);
-      row -= (fnt==GLUT_BITMAP_HELVETICA_12)?(26./g_game.y_resolution):(22./g_game.y_resolution);
+      row -= (use_bit)?((fnt==GLUT_BITMAP_HELVETICA_12)?(26./g_game.y_resolution):(22./g_game.y_resolution)):(myFontMetrics.j);
       glPopMatrix();
       glPushMatrix ();
       glTranslatef (col,row,0);
+      glScalef(scalex,scaley,1);
       glRasterPos2f(0,0);
     }
     text_it++;
   }
+  glDisable(GL_LINE_SMOOTH);
   glPopMatrix();
   GFXPopBlendMode();
 }
