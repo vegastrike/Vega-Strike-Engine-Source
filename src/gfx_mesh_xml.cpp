@@ -468,9 +468,9 @@ void Mesh::beginElement(const string &name, const AttributeList &attributes) {
 	xml->recalc_norm=true;
       }
     }
-    //    xml->vertex.x*=scale;
-    //    xml->vertex.y*=scale;
-    //    xml->vertex.z*=scale;
+    //        xml->vertex.x*=scale;
+    //        xml->vertex.y*=scale;
+    //        xml->vertex.z*=scale;//FIXME
     xml->vertex.s = s;
     xml->vertex.t = t;
     xml->active_list->push_back(xml->vertex);
@@ -1013,17 +1013,18 @@ void Mesh::LoadXML(const char *filename, Mesh *oldmesh) {
     o_index++;
   }
 
-  float x_center = (minSizeX + maxSizeX)/2.0,
-    y_center = (minSizeY + maxSizeY)/2.0,
-    z_center = (minSizeZ + maxSizeZ)/2.0;
+  float x_center = (minSizeX + maxSizeX)*scale/2.0,
+    y_center = (minSizeY + maxSizeY)*scale/2.0,
+    z_center = (minSizeZ + maxSizeZ)*scale/2.0;
   SetPosition(x_center, y_center, z_center);
   for(a=0; a<totalvertexsize; a++) {
+    vertexlist[a].x*=scale;//FIXME
+    vertexlist[a].y*=scale;
+    vertexlist[a].z*=scale;
+
     vertexlist[a].x -= x_center;
     vertexlist[a].y -= y_center;
     vertexlist[a].z -= z_center;
-    vertexlist[a].x*=scale;
-    vertexlist[a].y*=scale;
-    vertexlist[a].z*=scale;
 
   }
 
@@ -1130,12 +1131,12 @@ void Mesh::CreateLogos(float x_center, float y_center, float z_center) {
 	  Cent.j/=weight;
 	  Cent.k/=weight;
 	}
-	Cent.i-=x_center;
-	Cent.j-=y_center;
-	Cent.k-=z_center;
+	//Cent.i-=x_center;
+	//Cent.j-=y_center;
+	//Cent.k-=z_center;
 	Ref[ri]=norm1;
 	PolyNormal[ri]=norm;
-	center[ri] = Cent*scale;
+	center[ri] = Cent*scale-Vector (x_center,y_center,z_center);;
 	sizes[ri]=xml->logos[ind].size*scale;
 	rotations[ri]=xml->logos[ind].rotate;
 	offset[ri]=xml->logos[ind].offset;
