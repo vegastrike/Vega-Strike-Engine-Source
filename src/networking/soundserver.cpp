@@ -1,3 +1,4 @@
+#define HAVE_SDL
 #ifdef HAVE_SDL
 #include <SDL/SDL.h>
 #include <SDL/SDL_thread.h>

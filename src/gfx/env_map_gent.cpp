@@ -278,8 +278,8 @@ static bool LoadTex(char * FileName, unsigned char scdata [lthei][ltwid][3]){
 	{
 		return false;
 	}
-	int bpp;
-	int format;
+	int bpp=8;
+	int format=0;
 	unsigned char * palette;
 	unsigned char * data = readImage (fp,bpp,format,*(unsigned int*)&sizeX,*(unsigned int*)&sizeY,palette,texTransform,true);
 	bpp/=8;

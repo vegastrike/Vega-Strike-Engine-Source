@@ -15,7 +15,7 @@ struct DockingPorts {
 	this->pos=(pos); this->radius=(radius);
     min=Vector(pos-Vector (radius,radius,radius));
     max=Vector(pos+Vector (radius,radius,radius));
-    internal=(internal);
+    this->internal=(internal);
     used=false;
   }
   DockingPorts (const Vector &min, const Vector &max, bool internal=true):radius((max-min).Magnitude()*.5) {

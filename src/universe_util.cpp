@@ -266,8 +266,11 @@ namespace UniverseUtil {
 	    mission->player_autopilot = Mission::AUTO_NORMAL;
 	  }
         }
-  QVector SafeEntrancePoint (QVector pos) {
+  QVector SafeEntrancePoint (QVector pos, float radial_size) {
     static double def_un_size = XMLSupport::parse_float (vs_config->getVariable ("physics","respawn_unit_size","400"));
+    if (radial_size<0)
+      radial_size = def_un_size;
+    
     for (unsigned int k=0;k<10;k++) {
       Unit * un;
       bool collision=false;

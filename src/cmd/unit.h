@@ -425,7 +425,7 @@ public:
   int LockMissile() const;//-1 is no lock necessary 1 is locked
   void LockTarget(bool myboo){computer.radar.locked=myboo;}
   bool TargetLocked()const {return computer.radar.locked;}
-
+  char DockedOrDocking()const {return docked;}
   float TrackingGuns(bool &missileLock);
 
   void EjectCargo (unsigned int index);

@@ -35,6 +35,7 @@ namespace UnitUtil {
 	float getSignificantDistance (Unit *un, Unit *sig);
 	int isPlayerStarship (Unit * un);
 	int hasCargo (Unit * my_unit, std::string mycarg);
+	Cargo GetCargoIndex (Unit * my_unit, int index);
 	Cargo GetCargo (Unit *my_unit, std::string cargname);
 	string getUnitSystemFile (Unit * my_unit);
 }

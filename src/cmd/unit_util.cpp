@@ -233,6 +233,20 @@ namespace UnitUtil {
 		}
 		return false;
 	}
+
+
+  
+	Cargo GetCargoIndex (Unit *my_unit, int index) {
+	  if (my_unit) {
+	    if (index>=0&&index<my_unit->numCargo()) {
+	      return my_unit->GetCargo(index);
+	    }
+	  }
+	  Cargo ret;
+	  ret.quantity=0;
+	  return ret;
+	}
+
 	Cargo GetCargo (Unit *my_unit, std::string cargname) {
 		if (my_unit) {
 			unsigned int indx=0;

@@ -624,6 +624,8 @@ Unit::~Unit()
 }
 void Unit::getAverageGunSpeed(float & speed, float &range) const {
    if (nummounts) {
+     range=0;
+     speed=0;
      int nummt = nummounts;
      for (int i=0;i<nummounts;i++) {
        if (mounts[i].type->type!=weapon_info::PROJECTILE) {
