@@ -2,7 +2,7 @@
 bin_PROGRAMS = vegastrike vegaserver accountserver
 
 SUBDIRS = \
-    cmd gfx gldrv aldrv python gui networking boost common boost129 boost131
+    cmd gfx gldrv aldrv python gui networking boost common boost129
 
 vegastrike_LDADD =  				\
 networking/netserver_devices.o		\

@@ -2,6 +2,7 @@
 #include <string>
 #include "vec.h"
 #include "matrix.h"
+#include "cmd/unit_generic.h"
 #include "halo_system.h"
 #include "universe.h"
 #include <stdlib.h>

@@ -1,3 +1,4 @@
+#include "cmd/unit_generic.h"
 #include "networking/lowlevel/vsnet_headers.h"
 #include "fileutil.h"
 #include "vs_globals.h"
@@ -6,6 +7,12 @@
 //#ifdef _WIN32
 //#include <winsock.h> // for ntohl
 //#endif
+#ifndef PASCAL
+#define PASCAL
+#endif
+#ifdef FAR
+#define FAR
+#endif
 extern u_long PASCAL FAR ntohl( u_long netlong);
 
 #ifdef CRYPTO

@@ -35,6 +35,7 @@
 #endif
 
 #include <expat.h>
+#include "cmd/unit_generic.h"
 #include "xml_support.h"
 
 #include "vegastrike.h"

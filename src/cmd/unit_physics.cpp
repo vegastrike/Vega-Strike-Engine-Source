@@ -84,10 +84,10 @@ void GameUnit<UnitType>::UpdatePhysics2 (const Transformation &trans, const Tran
 
 		  //curr_physical_state.position = curr_physical_state.position +  (Velocity*SIMULATION_ATOM*difficulty).Cast();
 		  // If we want to inter(extra)polate sent position, DO IT HERE
-		  if( !(old_physical_state.position == curr_physical_state.position && old_physical_state.orientation == curr_physical_state.orientation))
+		  if( !(old_physical_state.position == this->curr_physical_state.position && old_physical_state.orientation == this->curr_physical_state.orientation))
 				// We moved so update
 		  {
-				ClientState cstmp( this->serial, curr_physical_state, Velocity, accel, 0);
+				ClientState cstmp( this->serial, this->curr_physical_state, this->Velocity, accel, 0);
 				Network[player].sendPosition( &cstmp);
 		  }
 		  else
@@ -102,33 +102,33 @@ void GameUnit<UnitType>::UpdatePhysics2 (const Transformation &trans, const Tran
 		  // This may be be a bot or a unit controlled by the server
 		  if( !this->networked)
 			// Case it is a local unit
- 			AddVelocity(difficulty);
+ 			this->AddVelocity(difficulty);
 		  else
 		  {
 		  	// Networked unit so interpolate its position
-			curr_physical_state = Network[0].Interpolate( this, GetElapsedTime());
+			this->curr_physical_state = Network[0].Interpolate( this, GetElapsedTime());
 		  }
 	  }
   }
   else
   {
-     AddVelocity(difficulty);
+     this->AddVelocity(difficulty);
   }
 
 #ifdef DEPRECATEDPLANETSTUFF
   if (planet) {
     Matrix basis;
-    curr_physical_state.to_matrix (cumulative_transformation_matrix);
+    curr_physical_state.to_matrix (this->cumulative_transformation_matrix);
     Vector p,q,r,c;
-    MatrixToVectors (cumulative_transformation_matrix,p,q,r,c);
-    planet->trans->InvTransformBasis (cumulative_transformation_matrix,p,q,r,c);
-    planet->cps=Transformation::from_matrix (cumulative_transformation_matrix);
+    MatrixToVectors (this->cumulative_transformation_matrix,p,q,r,c);
+    planet->trans->InvTransformBasis (this->cumulative_transformation_matrix,p,q,r,c);
+    planet->cps=Transformation::from_matrix (this->cumulative_transformation_matrix);
   }
 #endif
-  cumulative_transformation = curr_physical_state;
-  cumulative_transformation.Compose (trans,transmat);
-  cumulative_transformation.to_matrix (cumulative_transformation_matrix);
-  cumulative_velocity = TransformNormal (transmat,Velocity)+cum_vel;
+  this->cumulative_transformation = this->curr_physical_state;
+  this->cumulative_transformation.Compose (trans,transmat);
+  this->cumulative_transformation.to_matrix (this->cumulative_transformation_matrix);
+  this->cumulative_velocity = TransformNormal (transmat,this->Velocity)+cum_vel;
 
   Transformation * ct;
   Matrix * ctm=NULL;
@@ -136,16 +136,16 @@ void GameUnit<UnitType>::UpdatePhysics2 (const Transformation &trans, const Tran
   unsigned int i;
   if (lastframe) {
     char tmp=0;
-    for (i=0;i<meshdata.size();i++) {
-      if (!meshdata[i])
+    for (i=0;i<this->meshdata.size();i++) {
+      if (!this->meshdata[i])
 		continue;
-      tmp |=meshdata[i]->HasBeenDrawn();
-      if (!meshdata[i]->HasBeenDrawn()) {
-		meshdata[i]->UpdateFX(SIMULATION_ATOM);
+      tmp |=this->meshdata[i]->HasBeenDrawn();
+      if (!this->meshdata[i]->HasBeenDrawn()) {
+		this->meshdata[i]->UpdateFX(SIMULATION_ATOM);
       }
-      meshdata[i]->UnDraw();
+      this->meshdata[i]->UnDraw();
     }
-    if (!tmp&&hull<0) {
+    if (!tmp&&this->hull<0) {
       Explode(false,SIMULATION_ATOM);
 	
     }
@@ -159,19 +159,19 @@ template <class UnitType>
 void GameUnit<UnitType>::Thrust(const Vector &amt1,bool afterburn){
   Unit::Thrust( amt1, afterburn);
  if (_Universe->AccessCockpit(0)->GetParent()==this)
-  if (afterburn!=AUDIsPlaying (sound->engine)) {
+  if (afterburn!=AUDIsPlaying (this->sound->engine)) {
     if (afterburn)
-      AUDPlay (sound->engine,cumulative_transformation.position,cumulative_velocity,1);
+      AUDPlay (this->sound->engine,this->cumulative_transformation.position,this->cumulative_velocity,1);
     else
       //    if (Velocity.Magnitude()<computer.max_speed)
-      AUDStopPlaying (sound->engine);
+      AUDStopPlaying (this->sound->engine);
   }
 }
 
 template <class UnitType>
 Vector GameUnit<UnitType>::ResolveForces (const Transformation &trans, const Matrix &transmat) {
 #ifndef PERFRAMESOUND
-  AUDAdjustSound (sound->engine,cumulative_transformation.position, cumulative_velocity); 
+  AUDAdjustSound (this->sound->engine,this->cumulative_transformation.position, this->cumulative_velocity); 
 #endif
 	return Unit::ResolveForces( trans, transmat);
 }

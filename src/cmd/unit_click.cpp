@@ -23,7 +23,7 @@ bool GameUnit<UnitType>::querySphereClickList (int mouseX, int mouseY, float err
   Vector CamP,CamQ,CamR;
   for (i=0;i<nummesh();i++) {
     //cerr << "pretransform position: " << meshdata[i]->Position() << endl;
-    TargetPoint = Transform(cumulative_transformation_matrix,meshdata[i]->Position());
+    TargetPoint = Transform(this->cumulative_transformation_matrix,this->meshdata[i]->Position());
     
     mousePoint = Transform (vw,TargetPoint);
     if (mousePoint.k>0) { //z coordinate reversed  -  is in front of camera
@@ -41,7 +41,7 @@ bool GameUnit<UnitType>::querySphereClickList (int mouseX, int mouseY, float err
     TargetPoint =TargetPoint-mousePoint;
     if (TargetPoint.Dot (TargetPoint)< 
 	err*err+
-	meshdata[i]->rSize()*meshdata[i]->rSize()
+	this->meshdata[i]->rSize()*this->meshdata[i]->rSize()
 #ifdef VARIABLE_LENGTH_PQR
 	*SizeScaleFactor*SizeScaleFactor
 #endif
@@ -49,11 +49,11 @@ bool GameUnit<UnitType>::querySphereClickList (int mouseX, int mouseY, float err
 #ifdef VARIABLE_LENGTH_PQR
 	SizeScaleFactor*
 #endif
-	2*err*meshdata[i]->rSize()
+	2*err*this->meshdata[i]->rSize()
 	)
       return true;
   }
-  UnitCollection::UnitIterator ui = getSubUnits();
+  UnitCollection::UnitIterator ui = this->getSubUnits();
   Unit * su;
   while ((su=ui.current())) {
     if ((su)->querySphereClickList (mouseX,mouseY,err,activeCam)) {

@@ -1,3 +1,4 @@
+#include "cmd/unit_generic.h"
 #include "xml_support.h"
 #include "event_xml.h"
 #include <string>

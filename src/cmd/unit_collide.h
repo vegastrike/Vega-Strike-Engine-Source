@@ -97,9 +97,9 @@ public:
     if (!hugeobjects.empty()) {
       hugeobjects.clear();
     }
-    if (!active_huge.empty())
+    if (this->active_huge.size())
       ha.clear();
-    if (!accum_huge.empty())
+    if (this->accum_huge.size())
       hb.clear();
     acc_huge.clear();
     act_huge.clear();

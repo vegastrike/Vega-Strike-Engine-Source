@@ -337,7 +337,7 @@ namespace VSFileSystem
 						strcat( newformat, "%n");
 						ret = sscanf( this->pk3_extracted_file+offset, newformat, a, &readbytes);
 						delete []newformat;
-						cerr<<"FSCANF : sscanf read "<<readbytes<<" bytes - OFFSET="<<offset<<" VALUES : a="<<(*a)<<endl;
+						std::cerr<<"FSCANF : sscanf read "<<readbytes<<" bytes - OFFSET="<<offset<<" VALUES : a="<<(*a)<<std::endl;
 						this->offset += readbytes;
 						this->GoAfterEOL();
 					}
@@ -367,7 +367,7 @@ namespace VSFileSystem
 						strcat( newformat, "%n");
 						ret = sscanf( this->pk3_extracted_file+offset, newformat, a, b, &readbytes);
 						delete []newformat;
-						cerr<<"FSCANF : sscanf read "<<readbytes<<" bytes - OFFSET="<<offset<<" VALUES : a="<<(*a)<<", b="<<(*b)<<endl;
+						std::cerr<<"FSCANF : sscanf read "<<readbytes<<" bytes - OFFSET="<<offset<<" VALUES : a="<<(*a)<<", b="<<(*b)<<std::endl;
 						this->offset += readbytes;
 						this->GoAfterEOL();
 					}
@@ -397,7 +397,7 @@ namespace VSFileSystem
 						strcat( newformat, "%n");
 						ret = sscanf( this->pk3_extracted_file+offset, newformat, a, b, c, &readbytes);
 						delete []newformat;
-						cerr<<"FSCANF : sscanf read "<<readbytes<<" bytes - OFFSET="<<offset<<" VALUES : a="<<(*a)<<", b="<<(*b)<<", c="<<(*c)<<endl;
+						std::cerr<<"FSCANF : sscanf read "<<readbytes<<" bytes - OFFSET="<<offset<<" VALUES : a="<<(*a)<<", b="<<(*b)<<", c="<<(*c)<<std::endl;
 						this->offset += readbytes;
 						this->GoAfterEOL();
 					}

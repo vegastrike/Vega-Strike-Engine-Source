@@ -19,6 +19,7 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
+#include "cmd/unit_generic.h"
 #include "animation.h"
 #include "aux_texture.h"
 #include "camera.h"

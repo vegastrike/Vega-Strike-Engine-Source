@@ -43,6 +43,9 @@ template <class Typ,class Key> class ClassCache {
     unit_cache.clear();
   }
 };
+#if (defined(__GNUC__)&& ((__GNUC__ == 3 && __GNUC_MINOR__ >= 4)|| __GNUC__>3))
+template <class Typ,class Key> std::map<Key,Typ*> ClassCache<Typ,Key>::unit_cache;
+#endif
 typedef ClassCache<Unit,StringIntKey> UnitConstCache;
 typedef ClassCache<Mesh,std::string> WeaponMeshCache;
 

@@ -33,6 +33,7 @@
 // this file isn't available on my system (all win32 machines?) i dun even know what it has or if we need it as I can compile without it
 #include <unistd.h>
 #endif
+#include "cmd/unit_generic.h"
 #include "cmd/unit_factory.h"
 #include <expat.h>
 #include "xml_support.h"

@@ -19,6 +19,7 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 #include "gfx/vec.h"
+#include "cmd/unit_generic.h"
 #include "vertex.h"
 #include "aux_logo.h"
 #include "aux_texture.h"

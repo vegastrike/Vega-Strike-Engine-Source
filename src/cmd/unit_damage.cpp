@@ -34,19 +34,19 @@ void GameUnit<UnitType>::Split (int level) {
   Vector PlaneNorm;
   int i;
   for (i=0;i<nummesh();) {
-	  if (meshdata[i]){
-		  if (meshdata[i]->getBlendDst()==ONE){
-			  delete meshdata[i];
-			  meshdata.erase(meshdata.begin()+i);
+	  if (this->meshdata[i]){
+		  if (this->meshdata[i]->getBlendDst()==ONE){
+			  delete this->meshdata[i];
+			  this->meshdata.erase(this->meshdata.begin()+i);
 		  }else{i++;}
-	  }else{meshdata.erase(meshdata.begin()+i);}
+	  }else{this->meshdata.erase(this->meshdata.begin()+i);}
   }
-  int nm = nummesh();
+  int nm = this->nummesh();
   if (nm<=0) {
     return;
   }
   
-  std::vector <Mesh *> old = meshdata;
+  std::vector <Mesh *> old = this->meshdata;
 
   for (int split=0;split<level;split++) {
     std::vector<Mesh *> nw= MakeMesh(nm*2+1);
@@ -82,9 +82,9 @@ void GameUnit<UnitType>::Split (int level) {
     Unit * splitsub;
     std::vector<Mesh *> tempmeshes;
     tempmeshes.push_back (old[i]);
-    SubUnits.prepend(splitsub = UnitFactory::createUnit (tempmeshes,true,faction));
+    this->SubUnits.prepend(splitsub = UnitFactory::createUnit (tempmeshes,true,this->faction));
     splitsub->hull = 1000;
-    splitsub->mass = debrismassmult*mass/level;
+    splitsub->mass = debrismassmult*this->mass/level;
     splitsub->image->timeexplode=.1;
     if (splitsub->meshdata[0]) {
       Vector loc = splitsub->meshdata[0]->Position();
@@ -96,13 +96,13 @@ void GameUnit<UnitType>::Split (int level) {
       loc.Set (rand(),rand(),rand()+.1);
       loc.Normalize();
       static float explosion_torque = XMLSupport::parse_float (vs_config->getVariable ("graphics","explosiontorque",".001"));//10 seconds for auto to kick in;
-      splitsub->ApplyLocalTorque(loc*splitsub->GetMoment()*explosion_torque*(1+rand()%(int)(1+rSize())));
+      splitsub->ApplyLocalTorque(loc*splitsub->GetMoment()*explosion_torque*(1+rand()%(int)(1+this->rSize())));
     }
   }
   old.clear();
-  meshdata.clear();
-  meshdata.push_back(NULL);//the shield
-  mass*=debrismassmult;
+  this->meshdata.clear();
+  this->meshdata.push_back(NULL);//the shield
+  this->mass*=debrismassmult;
 }
 
 extern Music *muzak;
@@ -112,28 +112,28 @@ extern float rand01 ();
 template <class UnitType>
 void GameUnit<UnitType>::ArmorDamageSound( const Vector &pnt)
 {
-	if (!AUDIsPlaying (sound->armor))
-      AUDPlay (sound->armor,ToWorldCoordinates(pnt).Cast()+cumulative_transformation.position,Velocity,1);
+	if (!AUDIsPlaying (this->sound->armor))
+      AUDPlay (this->sound->armor,this->ToWorldCoordinates(pnt).Cast()+this->cumulative_transformation.position,this->Velocity,1);
     else
-      AUDAdjustSound (sound->armor,ToWorldCoordinates(pnt).Cast()+cumulative_transformation.position,Velocity);
+      AUDAdjustSound (this->sound->armor,this->ToWorldCoordinates(pnt).Cast()+this->cumulative_transformation.position,this->Velocity);
 }
 
 template <class UnitType>
 void GameUnit<UnitType>::HullDamageSound( const Vector &pnt)
 {
-   if (!AUDIsPlaying (sound->hull))
-     AUDPlay (sound->hull,ToWorldCoordinates(pnt).Cast()+cumulative_transformation.position,Velocity,1);
+   if (!AUDIsPlaying (this->sound->hull))
+     AUDPlay (this->sound->hull,this->ToWorldCoordinates(pnt).Cast()+this->cumulative_transformation.position,this->Velocity,1);
    else
-     AUDAdjustSound (sound->hull,ToWorldCoordinates(pnt).Cast()+cumulative_transformation.position,Velocity);
+     AUDAdjustSound (this->sound->hull,this->ToWorldCoordinates(pnt).Cast()+this->cumulative_transformation.position,this->Velocity);
 }
 
 template <class UnitType>
 float GameUnit<UnitType>::DealDamageToShield (const Vector &pnt, float &damage) {
   float percent = UnitType::DealDamageToShield( pnt, damage);
-  if (percent&&!AUDIsPlaying (sound->shield))
-	AUDPlay (sound->shield,ToWorldCoordinates(pnt).Cast()+cumulative_transformation.position,Velocity,1);
+  if (percent&&!AUDIsPlaying (this->sound->shield))
+	AUDPlay (this->sound->shield,this->ToWorldCoordinates(pnt).Cast()+this->cumulative_transformation.position,this->Velocity,1);
   else
-	AUDAdjustSound (sound->shield,ToWorldCoordinates(pnt).Cast()+cumulative_transformation.position,Velocity);
+	AUDAdjustSound (this->sound->shield,this->ToWorldCoordinates(pnt).Cast()+this->cumulative_transformation.position,this->Velocity);
 
   return percent;
 }
@@ -195,17 +195,17 @@ extern void disableSubUnits(Unit * un);
 template <class UnitType>
 bool GameUnit<UnitType>::Explode (bool drawit, float timeit) {
 
-  if (image->explosion==NULL&&image->timeexplode==0) {	//no explosion in unit data file && explosions haven't started yet
+  if (this->image->explosion==NULL&&this->image->timeexplode==0) {	//no explosion in unit data file && explosions haven't started yet
 
   // notify the director that a ship got destroyed
     mission->DirectorShipDestroyed(this);
     disableSubUnits(this);
-    image->timeexplode=0;
+    this->image->timeexplode=0;
     static std::string expani = vs_config->getVariable ("graphics","explosion_animation","explosion_orange.ani");
 
-    string bleh=image->explosion_type;
+    string bleh=this->image->explosion_type;
     if (bleh.empty()) {
-      FactionUtil::getRandAnimation(faction,bleh);
+      FactionUtil::getRandAnimation(this->faction,bleh);
     }
     if (bleh.empty()) {
       static Animation cache(expani.c_str(),false,.1,BILINEAR,false);
@@ -214,36 +214,36 @@ bool GameUnit<UnitType>::Explode (bool drawit, float timeit) {
 	bleh = expani;
       }
     }
-    image->explosion= new Animation (bleh.c_str(),false,.1,BILINEAR,false);
-    image->explosion->SetDimensions(ExplosionRadius(),ExplosionRadius());
-    if (isUnit()!=MISSILEPTR) {
+    this->image->explosion= new Animation (bleh.c_str(),false,.1,BILINEAR,false);
+    this->image->explosion->SetDimensions(this->ExplosionRadius(),this->ExplosionRadius());
+    if (this->isUnit()!=MISSILEPTR) {
       static float expdamagecenter=XMLSupport::parse_float(vs_config->getVariable ("physics","explosion_damage_center","1"));
       static float damageedge=XMLSupport::parse_float(vs_config->getVariable ("graphics","explosion_damage_edge",".125"));
-      _Universe->activeStarSystem()->AddMissileToQueue (new MissileEffect (Position().Cast(),MaxShieldVal(),0,ExplosionRadius()*expdamagecenter,ExplosionRadius()*expdamagecenter*damageedge));
+      _Universe->activeStarSystem()->AddMissileToQueue (new MissileEffect (this->Position().Cast(),this->MaxShieldVal(),0,this->ExplosionRadius()*expdamagecenter,this->ExplosionRadius()*expdamagecenter*damageedge));
     }
-	if (!isSubUnit()){
-		QVector exploc = cumulative_transformation.position;
+	if (!this->isSubUnit()){
+		QVector exploc = this->cumulative_transformation.position;
 		Unit * un;
 		if (NULL!=(un=_Universe->AccessCockpit(0)->GetParent())) {
 			exploc = un->Position();						
 		}
-	    AUDPlay (sound->explode,exploc,Velocity,1);
+	    AUDPlay (this->sound->explode,exploc,this->Velocity,1);
 
 	  un=_Universe->AccessCockpit()->GetParent();
-	  if (isUnit()==UNITPTR) {
+	  if (this->isUnit()==UNITPTR) {
 	    static float percentage_shock=XMLSupport::parse_float(vs_config->getVariable ("graphics","percent_shockwave",".5"));
-	    if (rand () < RAND_MAX*percentage_shock&&(!isSubUnit())) {
+	    if (rand () < RAND_MAX*percentage_shock&&(!this->isSubUnit())) {
 	      static float shockwavegrowth=XMLSupport::parse_float(vs_config->getVariable ("graphics","shockwave_growth","1.05"));
 	      static string shockani (vs_config->getVariable ("graphics","shockwave_animation","explosion_wave.ani"));
 	      
 	      static Animation * __shock__ani = new Animation (shockani.c_str(),true,.1,MIPMAP,false);
 	      __shock__ani->SetFaceCam(false);
-	      unsigned int which = AddAnimation (Position(),ExplosionRadius(),true,shockani,shockwavegrowth);
+	      unsigned int which = AddAnimation (this->Position(),this->ExplosionRadius(),true,shockani,shockwavegrowth);
 	      Animation * ani = GetVolatileAni (which);
 	      if (ani) {
 		ani->SetFaceCam(false);
 		Vector p,q,r;
-		GetOrientation(p,q,r);
+		this->GetOrientation(p,q,r);
 		int tmp = rand();
 
 		if (tmp < RAND_MAX/24) {
@@ -282,27 +282,27 @@ bool GameUnit<UnitType>::Explode (bool drawit, float timeit) {
 	}
   }
   static float timebeforeexplodedone = XMLSupport::parse_float (vs_config->getVariable ("physics","debris_time","500"));
-  bool timealldone =(image->timeexplode>timebeforeexplodedone||isUnit()==MISSILEPTR||_Universe->AccessCockpit()->GetParent()==this||this->SubUnits.empty());
-  if (image->explosion) {
-      image->timeexplode+=timeit;
+  bool timealldone =(this->image->timeexplode>timebeforeexplodedone||this->isUnit()==MISSILEPTR||_Universe->AccessCockpit()->GetParent()==this||this->SubUnits.empty());
+  if (this->image->explosion) {
+      this->image->timeexplode+=timeit;
       //Translate (tmp,meshdata[i]->Position());
       //MultMatrix (tmp2,cumulative_transformation_matrix,tmp);
-      image->explosion->SetPosition(Position());
+      this->image->explosion->SetPosition(this->Position());
       Vector p,q,r;
-      GetOrientation (p,q,r);
-      image->explosion->SetOrientation(p,q,r);
-      if (image->explosion->Done()&&timealldone) {
-	delete image->explosion;	
-	image->explosion=NULL;
+      this->GetOrientation (p,q,r);
+      this->image->explosion->SetOrientation(p,q,r);
+      if (this->image->explosion->Done()&&timealldone) {
+	delete this->image->explosion;	
+	this->image->explosion=NULL;
       }
-      if (drawit&&image->explosion) { 
-	image->explosion->Draw();//puts on draw queue... please don't delete
+      if (drawit&&this->image->explosion) { 
+	this->image->explosion->Draw();//puts on draw queue... please don't delete
       }
       
   }
-  bool alldone = image->explosion?!image->explosion->Done():false;
-  if (!SubUnits.empty()) {
-    UnitCollection::UnitIterator ui = getSubUnits();
+  bool alldone = this->image->explosion?!this->image->explosion->Done():false;
+  if (!this->SubUnits.empty()) {
+    UnitCollection::UnitIterator ui = this->getSubUnits();
     Unit * su;
     while ((su=ui.current())) {
       bool temp = su->Explode(drawit,timeit);

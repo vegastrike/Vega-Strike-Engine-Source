@@ -3791,7 +3791,7 @@ public:
 		WeaponGroup allWeaponsNoSpecial;
 		WeaponGroupSet myset;
 		unsigned int i;
-		WeaponGroupSet::const_iterator iter;
+		typename WeaponGroupSet::const_iterator iter;
 		printf("ToggleWeaponSet: %s\n", FORWARD?"true":"false");
 		for (i=0;i<un->mounts.size();i++) {
 			if (checkmount(un,i,missile)) {
@@ -3813,7 +3813,8 @@ public:
 		const WeaponGroupSet mypairset (myset);
 		for (iter=mypairset.begin();iter!=mypairset.end();++iter) {
 			if ((*iter).size()&&notSpecial(un->mounts[(*((*iter).begin()))])) {
-				for (WeaponGroupSet::const_iterator iter2=mypairset.begin();iter2!=mypairset.end();++iter2) {
+				typename WeaponGroupSet::const_iterator iter2;
+				for (iter2=mypairset.begin();iter2!=mypairset.end();++iter2) {
 					if ((*iter2).size()&&notSpecial(un->mounts[(*((*iter2).begin()))])) {
 						WeaponGroup myGroup;
 						set_union((*iter).begin(), (*iter).end(), (*iter2).begin(), (*iter2).end(),
@@ -5271,6 +5272,8 @@ Unit * makeBlankUpgrade (string templnam, int faction) {
   bl->mass=0;
   return bl;
 }
+
+
 const Unit * makeFinalBlankUpgrade (string name, int faction) {
   char * unitdir = GetUnitDir(name.c_str());
   string limiternam = name;

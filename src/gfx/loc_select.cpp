@@ -1,3 +1,4 @@
+#include "cmd/unit_generic.h"
 #include "loc_select.h"
 #include "gfxlib.h"
 #include "in_kb.h"

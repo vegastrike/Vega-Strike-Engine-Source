@@ -46,7 +46,7 @@
 #include "config_xml.h"
 
 #include "msgcenter.h"
-
+#include "cmd/unit_generic.h"
 //#include "vegastrike.h"
 
 

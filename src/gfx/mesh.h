@@ -29,6 +29,7 @@
 #include "gfxlib.h"
 #include "gfxlib_struct.h"
 #include "vsfilesystem.h"
+#include "cmd/unit_generic.h"
 using std::vector;
 using std::string;
 class Planet;

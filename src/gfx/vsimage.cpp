@@ -1,3 +1,4 @@
+#include "cmd/unit_generic.h"
 #include "vsimage.h"
 #include "vsfilesystem.h"
 #include "vs_globals.h"

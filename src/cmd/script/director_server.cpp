@@ -42,6 +42,7 @@
 #include <boost/python/detail/extension_class.hpp>
 #endif
 
+#include "cmd/unit_generic.h"
 #include "mission.h"
 
 void InitBase() {

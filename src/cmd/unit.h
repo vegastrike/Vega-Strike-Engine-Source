@@ -93,7 +93,7 @@ public:
 public:
   HaloSystem halos;
 protected:
-  int nummesh()const {return ((int)meshdata.size())-1;}
+  int nummesh()const {return ((int)this->meshdata.size())-1;}
 
 public:
 
@@ -222,12 +222,12 @@ public:
 		static float cutoff =XMLSupport::parse_float (vs_config->getVariable( "graphics","warp_stretch_cutoff","500000"))*XMLSupport::parse_float(vs_config->getVariable("physics","game_speed","1"));
 		static float cutoffcutoff=  cutoff*cutoff;
 		
-		if (GetWarpVelocity().MagnitudeSquared() < cutoffcutoff) {
+		if (this->GetWarpVelocity().MagnitudeSquared() < cutoffcutoff) {
 			return ctm;
 		}else {
 			Matrix k(ctm);
 			
-			float speed = GetWarpVelocity().Magnitude();
+			float speed = this->GetWarpVelocity().Magnitude();
 			//Matrix scalar=identity_matrix;
 			
 			static float maxstretch = XMLSupport::parse_float (vs_config->getVariable("graphics","warp_stretch_max","4"));

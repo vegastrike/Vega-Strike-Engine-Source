@@ -1,3 +1,4 @@
+#include "cmd/unit_generic.h"
 #include "ani_texture.h"
 
 #include <vector>

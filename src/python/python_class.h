@@ -99,11 +99,11 @@ BOOST_PYTHON_BEGIN_CONVERSION_NAMESPACE \
 
 //non_null_from_python
 #ifdef FROM_PYTHON_ERRORS
-#define PYTHON_INIT_INHERIT_GLOBALS(name,SuperClass) PythonClass <SuperClass> *PythonClass< SuperClass >::last_instance = NULL; \
+#define PYTHON_INIT_INHERIT_GLOBALS(name,SuperClass) template <> PythonClass <SuperClass> *PythonClass< SuperClass >::last_instance = NULL; \
 	ADD_FROM_PYTHON_FUNCTION(SuperClass)
 #define PYTHON_INIT_GLOBALS(name,Class) ADD_FROM_PYTHON_FUNCTION(Class)
 #else
-#define PYTHON_INIT_INHERIT_GLOBALS(name,SuperClass) PythonClass <SuperClass> *PythonClass< SuperClass >::last_instance = NULL;
+#define PYTHON_INIT_INHERIT_GLOBALS(name,SuperClass) template <> PythonClass <SuperClass> *PythonClass< SuperClass >::last_instance = NULL;
 #define PYTHON_INIT_GLOBALS(name,Class)
 #endif
 //These two functions purposely have opening/closing braces that don't match up
@@ -199,24 +199,24 @@ public:
   }
   virtual void Execute () {
 #ifndef USE_BOOST_128
-    boost::python::call_method<void> (self,"Execute");
+    boost::python::call_method<void> (this->self,"Execute");
 #else
-    boost::python::callback <void>::call_method (self,"Execute");
+    boost::python::callback <void>::call_method (this->self,"Execute");
 #endif
   }
   virtual void ChooseTarget () {
 #ifndef USE_BOOST_128
-    boost::python::call_method<void> (self,"ChooseTarget");
+    boost::python::call_method<void> (this->self,"ChooseTarget");
 #else
-    boost::python::callback <void>::call_method (self,"ChooseTarget");
+    boost::python::callback <void>::call_method (this->self,"ChooseTarget");
 #endif
   }
   virtual void SetParent (Unit * parent) {
     SuperClass::SetParent (parent);
 #ifndef USE_BOOST_128
-    boost::python::call_method<void> (self,"init",parent);
+    boost::python::call_method<void> (this->self,"init",parent);
 #else
-    boost::python::callback<void>::call_method (self,"init",parent);
+    boost::python::callback<void>::call_method (this->self,"init",parent);
 #endif
   }
   static void default_Execute(SuperClass & self_) {

@@ -294,7 +294,7 @@ void endElement(const string &name){
   doTextBuffer();
   domNodeType *stacktop=nodestack.top();
   if(stacktop->Name()!=name){
-    cout << "error: expected " << stacktop->Name() << " , got " << name << endl;
+    std::cout << "error: expected " << stacktop->Name() << " , got " << name << std::endl;
     exit(1);
   }
   else{

@@ -1,3 +1,4 @@
+#include "cmd/unit_generic.h"
 #include "cmd/ai/order.h"
 
 #include "configxml.h"

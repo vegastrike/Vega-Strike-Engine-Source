@@ -39,6 +39,7 @@
 
 //#include "vegastrike.h"
 #include <assert.h>
+#include "cmd/unit_generic.h"
 #include "mission.h"
 #include "flightgroup.h"
 //#include "gldrv/winsys.h"

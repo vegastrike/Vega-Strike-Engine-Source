@@ -2,6 +2,7 @@
 #include "gfxlib.h"
 #include "lin_time.h"
 #include "vs_globals.h"
+#include "cmd/unit_generic.h"
 #include "config_xml.h"
 #include "camera.h"
 #include "aux_texture.h"

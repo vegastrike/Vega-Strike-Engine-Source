@@ -1537,35 +1537,25 @@ AC_SUBST(PYTHON_CPPFLAGS)
 AC_SUBST(CG_CPPFLAGS)
 AC_SUBST(CG_LIBS)
 
-BOOST_CPPFLAGS="-DUSE_BOOST_128=1"' -I$(top_srcdir)/src/boost128'
+BOOST_CPPFLAGS="-DUSE_BOOST_128=1"' -I$(top_srcdir)/src/boost'
 BOOST_LIBS="../src/boost/libpython_boost.a"
-TESTUSEBOOST129="1"
+TESTUSEBOOST131="1"
 TESTUSEBOOST128="0"
-AC_ARG_ENABLE(boost-128, AC_HELP_STRING([--enable-boost-128], [Use if your compiler has trouble with boost-129]),TESTUSEBOOST129="0")
+AC_ARG_ENABLE(boost-128, AC_HELP_STRING([--enable-boost-128], [Use if your compiler has trouble with boost-131 (such as gcc 2.9x)]),TESTUSEBOOST131="0")
 
-if test "$TESTUSEBOOST129" = "1" ; then
-   BOOST_CPPFLAGS="-DUSE_BOOST_129=1 "'-I$(top_srcdir)/src/boost129'
+if test "$TESTUSEBOOST131" = "1" ; then
+   BOOST_CPPFLAGS="-DUSE_BOOST_131=1 "'-I$(top_srcdir)/src/boost129'
    BOOST_LIBS="../src/boost129/libpython_boost.a"
 fi
 
-TESTUSEBOOST131="0"
-AC_ARG_ENABLE(boost-131, AC_HELP_STRING([--enable-boost-131], [Use if your compiler has trouble with boost-129]),TESTUSEBOOST131="1")
-
-if test "$TESTUSEBOOST131" = "1" ; then
-   BOOST_CPPFLAGS="-DUSE_BOOST_131=1"' -I$(top_srcdir)/src/boost131'
-   BOOST_LIBS="../src/boost131/libpython_boost.a"
-fi
-TESTUSEBOOST128="0"
-if test "$TESTUSEBOOST129" = "0" ; then
 if test "$TESTUSEBOOST131" = "0" ; then
 TESTUSEBOOST128="1"
 fi
-fi
+
 AC_SUBST([BOOST_LIBS])
 AC_SUBST([BOOST_CPPFLAGS])
 AM_CONDITIONAL(USEBOOST128, test "$TESTUSEBOOST128" = "1")
 AM_CONDITIONAL(USEBOOST131, test "$TESTUSEBOOST131" = "1")
-AM_CONDITIONAL(USEBOOST129, test "$TESTUSEBOOST129" = "1")
 AM_CONDITIONAL(WIN32, test "${WIN32}" = "1")
 AM_CONDITIONAL(LINUX, test "$LINUX" = "1")
 AM_CONDITIONAL(MACOSX, test "x$is_macosx" = "xyes")
