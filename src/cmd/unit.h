@@ -36,9 +36,10 @@ struct GFXColor;
 #include "collection.h"
 #include "gfx/cockpit.h"
 #include "gfx/halo_system.h"
+#include "script/flightgroup.h"
 using std::string;
 
-class Flightgroup;
+
 class Nebula;
 extern float capship_size;
 //#include "mission.h"
@@ -551,8 +552,8 @@ public:
       mm = (target->Position()-Position()).Magnitude();
     }
     if (this==target||((mm-rSize()-target->rSize())>computer.radar.maxrange&&target->isUnit()!=PLANETPTR)||target->CloakVisible()<.8||target->rSize()<computer.radar.mintargetsize) {//owner==target?!
-		if (target->rSize()<capship_size||(!cap)||this==target) 
-			return false;
+      if ((target->rSize()<capship_size||(!cap)||this==target)&&(flightgroup==NULL?true:flightgroup->name!="Base")) 
+	return false;
     }
     return true;
   }

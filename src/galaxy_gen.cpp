@@ -30,7 +30,7 @@ static unsigned int ssrand()
         return starsysrandom;
 }
 
-
+string getStarSystemName (string in);
 namespace StarSystemGent {
 
 float mmax (float a, float b) {
@@ -588,9 +588,14 @@ void MakePlanet(float radius, int entitytype, bool forceRS, Vector R, Vector S, 
   string thisname;
   if (entitytype!=JUMP) {
     thisname=getRandName(names);
+  }else {
+    thisname = string("JumpTo")+getStarSystemName(s);
+    if (thisname.length()>6) {
+      *(thisname.begin()+6)=toupper(*(thisname.begin()+6));
+    }
   }
   Tab();
-  fprintf (fp,"<Planet name=\"%s\" file=\"%s\" ",entitytype==JUMP?s.c_str():thisname.c_str(),entitytype==JUMP?"jump.png":s.c_str());
+  fprintf (fp,"<Planet name=\"%s\" file=\"%s\" ",thisname.c_str(),entitytype==JUMP?"jump.png":s.c_str());
   fprintf (fp,"ri=\"%f\" rj=\"%f\" rk=\"%f\" si=\"%f\" sj=\"%f\" sk=\"%f\" ",r.i,r.j,r.k,SS.i,SS.j,SS.k);
   fprintf (fp,"radius=\"%f\" ",radius);
   fprintf (fp,"x=\"%f\" y=\"%f\" z=\"%f\" ",center.i,center.j,center.k);

@@ -3,6 +3,7 @@
 #include "cmd/container.h"
 #include <string>
 #include <vector>
+#include <map>
 struct Texture;
 
 
@@ -34,7 +35,7 @@ class Flightgroup {
 					int num_waves,
 					const std::string &texname,
 					const std::string &alphname,
-					Mission * mis);
+					class Mission * mis);
   Flightgroup ();
   Flightgroup (Flightgroup & other) {
     *this = other;
@@ -49,7 +50,7 @@ class CreateFlightgroup {
   enum {UNIT,VEHICLE, BUILDING} unittype;
   int waves,nr_ships; // number of waves, number of ships per wave
   float rot[3];
-  easyDomNode * domnode;
+  class easyDomNode * domnode;
 };
 
 #endif
