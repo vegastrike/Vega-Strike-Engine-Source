@@ -29,6 +29,7 @@ HUDElement::HUDElement(char *filename):Unit(filename) {
 	static Matrix view;
 	//myMesh = mesh;
 	if(mview==NULL) {
+	  //	  fprintf (stderr,"I am very l337");
 		mview = view;
 		GFXLoadIdentity(VIEW);
 		GFXLookAt(Vector(0,0,0), Vector(0,0,1), Vector(0,-1,0)); // optimization: cache this friggin' matrix

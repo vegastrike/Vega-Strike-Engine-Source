@@ -25,6 +25,7 @@
 #include "gfx_aux.h"
 #include "gfx_camera.h"
 #include "gfx_bounding_box.h"
+
 #include <math.h>
 
 #include <string>
@@ -198,17 +199,21 @@ Mesh:: Mesh(char * filename/*, Texture* ForceLog, Texture* SquadLog*/):Primitive
 	}
 	//below, the square fo teh radial size, because sqrtf will be useless l8r
 	radialSize = sqrtf(max(fabs(minSizeX),fabs(maxSizeX))*max(fabs(minSizeX),fabs(maxSizeX))+max(fabs(minSizeY),fabs(maxSizeY))*max(fabs(minSizeY),fabs(maxSizeY))+max(fabs(minSizeZ),fabs(maxSizeZ))*max(fabs(minSizeZ),fabs(maxSizeZ)));
-	
+
 	NumTris = readi (fp);
 
 	Tris = new int* [NumTris];
+	///between here
 
 	for (ii=0; ii< NumTris; ii++)
 		Tris[ii] = new int [3];
+
+//and here	
 	for (ii=0; ii< NumTris;ii++)
 		for (int jj=0; jj<3; jj++)
 			Tris[ii][jj] = readi(fp);
-	NumQuads = readi (fp);
+	
+NumQuads = readi (fp);
 	Quads = new int* [NumQuads];
 	for (ii=0; ii< NumQuads; ii++)
 		Quads[ii] = new int [4];
@@ -216,6 +221,7 @@ Mesh:: Mesh(char * filename/*, Texture* ForceLog, Texture* SquadLog*/):Primitive
 		for (int jj=0; jj<4; jj++)
 			Quads[ii][jj] = readi(fp);
 
+	
 	int numtrivertex = NumTris*3;
 	int numquadvertex = NumQuads*4;
 	numvertex = NumTris*3+NumQuads*4;
@@ -285,6 +291,7 @@ Mesh:: Mesh(char * filename/*, Texture* ForceLog, Texture* SquadLog*/):Primitive
 		jj++;
 
 	}
+
 	if (objtex)
 	{
 
@@ -701,7 +708,8 @@ void Mesh::Draw()
 	vlist->Draw();
 	if(quadstrips!=NULL) {
 	  for(int a=0; a<numQuadstrips; a++)
-	    quadstrips[a]->Draw();
+	    quadstrips[a]->Draw()
+	    ;
 	}
 	if(0!=forcelogos) {
 	  forcelogos->Draw();

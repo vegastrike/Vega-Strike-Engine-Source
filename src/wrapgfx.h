@@ -21,13 +21,15 @@
 #ifndef _WrapGFX_H
 #define _WrapGFX_H
 
-#define NUM_CAM		10
+
 #define NUM_LIGHT	8
 #define NUM_FORCES	64
 
 #include "gfx_camera.h"
 #include "gfx_primitive.h"
 #include "in_main.h"
+#include "star_system.h"
+
 
 struct Light{
 	Vector direction;
@@ -50,6 +52,8 @@ struct Light{
 	}
 };
 
+
+//extern StarSystem star_system;
 class WrapGFX {
 protected:
 
@@ -77,12 +81,12 @@ protected:
 	
 	//Matrix view;
 	//Matrix modelview[16];
-	Camera cam[NUM_CAM];
-	int currentcamera;
+  //	Camera cam[NUM_CAM];
+  //	int currentcamera;
 
 	BOOL StartGL();
 	BOOL active;
-	
+        StarSystem * star_system;
 	Light lights[NUM_LIGHT];
 	int numlights;
 	//Mouse *mouse;
@@ -104,28 +108,40 @@ public:
 	void StartDraw();
 	void EndDraw();
         void Loop(void main_loop());
+  StarSystem* activeStarSystem() {
+    return star_system;
+  }
 	void SelectCamera(int cam)
 	{
-		if(cam<NUM_CAM&&cam>=0)
-			currentcamera = cam;
+	  if (star_system!=NULL) {
+	    star_system->SelectCamera(cam);
+	  }
+	  //if(cam<NUM_CAM&&cam>=0)
+	  //	currentcamera = cam;
 	}
 
 	Camera *AccessCamera(int num)
 	{
-		if(num<NUM_CAM&&num>=0)
-			return &cam[num];
-		else
-			return NULL;
+	  if (star_system!=NULL) {
+	    return star_system->AccessCamera();
+	  } else
+	    return NULL;
 	}
 
 	Camera *AccessCamera()
 	{
-		return &cam[currentcamera];
+	  if (star_system!=NULL) {
+		return star_system->AccessCamera();
+	  } else
+	    return NULL;
 	}
 
 	void SetViewport()
 	{
-		cam[currentcamera].UpdateGFX(); //sets the cam to the current matrix
+	  	  if (star_system!=NULL) {
+		    star_system->SetViewport();
+		  }
+		  //		cam[currentcamera].UpdateGFX(); //sets the cam to the current matrix
 	}
 
 	void Continue()

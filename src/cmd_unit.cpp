@@ -24,9 +24,7 @@
 #include "gfx_sprite.h"
 #include "lin_time.h"
 #include "cmd_unitenum.h"
-
 #include "gfx_hud.h"
-
 
 
 //if the PQR of the unit may be variable...for radius size computation
@@ -75,6 +73,7 @@ Unit::Unit(char *filename):Mesh()
 
 	ReadInt(nummesh);
 	meshdata = new Mesh*[nummesh];
+
 	for(int meshcount = 0; meshcount < nummesh; meshcount++)
 	{
 		int meshtype;
@@ -82,10 +81,12 @@ Unit::Unit(char *filename):Mesh()
 		char meshfilename[64];
 		float x,y,z;
 		ReadMesh(meshfilename, x,y,z);
+
 		if(meshtype == 0)
 			meshdata[meshcount] = new Mesh(meshfilename);
 		else
 			meshdata[meshcount] = new Sprite(meshfilename);
+
 		meshdata[meshcount]->SetPosition(x,y,z);
 	}
 
@@ -116,6 +117,7 @@ Unit::Unit(char *filename):Mesh()
 		}
 		subunits[unitcount]->SetPosition(x,y,z);
 	}
+
 	int restricted;
 	float min, max;
 	ReadInt(restricted); //turrets and weapons
@@ -141,7 +143,6 @@ Unit::Unit(char *filename):Mesh()
 	fpos = ::GetPosition();
 
 	CloseFile();
-
 }
 
 Unit::~Unit()
@@ -407,7 +408,7 @@ Vector MouseCoordinate (int x, int y, float zplane) {
   return xyz;
 }
 
-bool Unit::querySphere (int mouseX, int mouseY, float err) {
+bool Unit::querySphere (int mouseX, int mouseY, float err, Camera * activeCam) {
   UpdateMatrix();
   int i;
   Matrix vw;
@@ -430,9 +431,9 @@ bool Unit::querySphere (int mouseX, int mouseY, float err) {
     }
     mousePoint = MouseCoordinate (mouseX,mouseY,-mousePoint.k);
     
-    _GFX->AccessCamera()->GetPQR(CamP,CamQ,CamR);
+    activeCam->GetPQR(CamP,CamQ,CamR);
     mousePoint = Transform (CamP,CamQ,CamR,mousePoint);	
-    _GFX->AccessCamera()->GetPosition(CamP);    
+    activeCam->GetPosition(CamP);    
     mousePoint +=CamP; 
     
     
@@ -453,13 +454,13 @@ bool Unit::querySphere (int mouseX, int mouseY, float err) {
       return true;
   }
   for (int i=0;i<numsubunit;i++) {
-    if (querySphere (transformation,mouseX,mouseY,err,vw))
+    if (querySphere (transformation,mouseX,mouseY,err,activeCam,vw))
       return true;
   }
   return false;
 }
 
-bool Unit::querySphere (Matrix t,int mouseX, int mouseY, float err, Matrix vw) {
+bool Unit::querySphere (Matrix t,int mouseX, int mouseY, float err, Camera * activeCam, Matrix vw) {
   UpdateMatrix();
   int i;
   Matrix tmpo;
@@ -476,9 +477,9 @@ bool Unit::querySphere (Matrix t,int mouseX, int mouseY, float err, Matrix vw) {
     if (mousePoint.k>0)
       continue;
     mousePoint = MouseCoordinate (mouseX,mouseY,-mousePoint.k);
-    _GFX->AccessCamera()->GetPQR(CamP,CamQ,CamR);
+    activeCam->GetPQR(CamP,CamQ,CamR);
     mousePoint = Transform (CamP,CamQ,CamR,mousePoint);	
-    _GFX->AccessCamera()->GetPosition(CamP);    
+    activeCam->GetPosition(CamP);    
     mousePoint +=CamP; 
 
     TargetPoint = TargetPoint-mousePoint;
@@ -495,7 +496,7 @@ bool Unit::querySphere (Matrix t,int mouseX, int mouseY, float err, Matrix vw) {
       return true;
   }
   for (int i=0;i<numsubunit;i++) {
-    if (querySphere (tmpo,mouseX,mouseY,err,vw))
+    if (querySphere (tmpo,mouseX,mouseY,err,activeCam,vw))
       return true;
   }
   return false;

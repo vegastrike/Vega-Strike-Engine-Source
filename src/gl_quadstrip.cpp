@@ -71,6 +71,9 @@ BOOL GFXQuadstrip::SwapTransformed()
 
 BOOL GFXQuadstrip::Draw()
 {
+
+
+
 #ifdef STATS_QUEUE
   statsqueue.back() += GFXStats(0, (numVertices-2)/2, 0);
 #endif
@@ -97,13 +100,13 @@ BOOL GFXQuadstrip::Draw()
 	if (g_game.Multitexture)
 	{
 	  //GLenum err;
-		/*texcoords = new float[numVertices*4];
-		for(int a=0; a<numVertices; a++) {
-			texcoords[4*a] = myVertices[a].s;
-			texcoords[4*a+1] = myVertices[a].t;
-			texcoords[4*a+2] = myVertices[a].u;
-			texcoords[4*a+3] = myVertices[a].v;
-		}*/
+		//texcoords = new float[numVertices*4];
+		//for(int a=0; a<numVertices; a++) {
+		//	texcoords[4*a] = myVertices[a].s;
+		//	texcoords[4*a+1] = myVertices[a].t;
+		//	texcoords[4*a+2] = myVertices[a].u;
+		//	texcoords[4*a+3] = myVertices[a].v;
+		//}
 
 		glVertexPointer(3, GL_FLOAT, sizeof(GFXVertex), &myVertices[0].x);
 		glNormalPointer(GL_FLOAT, sizeof(GFXVertex), &myVertices[0].i);
@@ -123,7 +126,7 @@ BOOL GFXQuadstrip::Draw()
 	}
 	else
 	{ 
-		/*transfer vertex, texture coords, and normal pointer*/
+		//transfer vertex, texture coords, and normal pointer
 	  //GLenum err;
 		glVertexPointer(3, GL_FLOAT, sizeof(GFXVertex), &myVertices[0].x);
 		glTexCoordPointer(2, GL_FLOAT, sizeof(GFXVertex), &myVertices[0].s+GFXStage0*2);
@@ -159,5 +162,6 @@ BOOL GFXQuadstrip::Draw()
 		}
 
 	}
+
 	return TRUE;
 }

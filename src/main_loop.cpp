@@ -316,7 +316,6 @@ LocationSelect *locSel=NULL;
 Background * bg = NULL;
 TextPlane *textplane = NULL;
 
-StarSystem *star_system = NULL;
 ClickList *shipList =NULL;
 
 int oldx =0;
@@ -428,7 +427,9 @@ void createObjects() {
 
   //SetPriorityClass(GetCurrentProcess(), REALTIME_PRIORITY_CLASS);
   //SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_IDLE);
+
   carrier = new Unit("ucarrier.dat");
+  //star_system = new StarSystem(new Planet("test_system.dat"));  
   //Unit *fighter = new Unit("uosprey.dat");
   fighter = new Unit("uosprey.dat");
   //Unit *fighter2 = new Unit("uosprey.dat");
@@ -492,10 +493,10 @@ void createObjects() {
     //fighters[a]->Pitch(PI/2);
   //}
 
-  star_system = new StarSystem(new Planet("test_system.dat"));
-  star_system->AddUnit(fighter);
-  star_system->AddUnit(carrier);
-  shipList = star_system->getClickList();
+
+  _GFX->activeStarSystem()->AddUnit(fighter);
+  _GFX->activeStarSystem()->AddUnit(carrier);
+  shipList = _GFX->activeStarSystem()->getClickList();
   BindKey (1,startselect);
   BindKey (0,clickhandler);
 }
@@ -550,8 +551,8 @@ void main_loop() {
   mat.eb = 1.0;
   GFXSetMaterial(0, mat);
   GFXSelectMaterial(0);
-  star_system->Draw();
-  star_system->Update();
+  _GFX->activeStarSystem()->Draw();
+  _GFX->activeStarSystem()->Update();
   
   //for(a = 0; a < numf; a++) {
   //fighters[a]->TDraw();

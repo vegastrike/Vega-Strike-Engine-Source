@@ -129,8 +129,8 @@ public:
 	int queryBoundingBox(Matrix,const Vector &, const Vector &pnt, float err);
   /**Queries the bounding sphere with a duo of mouse coordinates that project
    * to the center of a ship and compare with a sphere...pretty fast*/
-	bool querySphere (int,int, float err);
-	bool querySphere (Matrix,int,int, float err,Matrix);
+	bool querySphere (int,int, float err, Camera *activeCam);
+	bool querySphere (Matrix,int,int, float err,Camera *,Matrix);
 
 	void SetAI(AI *newAI);
 	Vector &Position(){return pos;};

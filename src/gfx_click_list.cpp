@@ -4,7 +4,7 @@
 
 
 bool ClickList::queryShip (int mouseX, int mouseY,Unit *ship) {   
-  if (ship->querySphere(mouseX,mouseY,0)){
+  if (ship->querySphere(mouseX,mouseY,0,_GFX->AccessCamera())){
     //fprintf (stderr,"bingo A");
     //find some nice mouseX,mouseY translations:
     Vector mousePoint (MouseCoordinate (mouseX,mouseY,1));
@@ -21,7 +21,8 @@ bool ClickList::queryShip (int mouseX, int mouseY,Unit *ship) {
   return false;
 }
 
-ClickList::ClickList (UnitCollection *parIter) {
+ClickList::ClickList ( StarSystem *parSystem, UnitCollection *parIter) {
+    parentSystem = parSystem;
     parentIter = parIter;
 }
 
@@ -41,12 +42,17 @@ UnitCollection * ClickList::requestIterator (int minX,int minY, int maxX, int ma
     GFXGetMatrix (VIEW,view);
     float frustum [6][4];
     GFXCalculateFrustum(frustum,view,frustmat);
-    while (myParent->advance()) {
-      if (myParent->current()->queryFrustum(frustum)) {
-	UAye->insert (myParent->current());
+    Unit * un;
+    while (un=myParent->current()) {
+      if (un->queryFrustum(frustum)) {
+	UAye->insert (un);
       }
+      myParent->advance(); 
     }
+    delete myParent;
+    delete UAye;
     return uc;
+    
 }
 
 UnitCollection * ClickList::requestIterator (int mouseX, int mouseY) {
@@ -54,9 +60,13 @@ UnitCollection * ClickList::requestIterator (int mouseX, int mouseY) {
     UnitCollection * uc = new UnitCollection;
     UnitCollection::UnitIterator * UAye = uc->createIterator();
     UnitCollection::UnitIterator * myParent = parentIter->createIterator();
-    while (myParent->advance()) {
-      if (queryShip(mouseX,mouseY,myParent->current()))
-	UAye->insert (myParent->current());
+    Unit * un;
+    while (un = myParent->current()) {
+	if (queryShip(mouseX,mouseY,un))
+	  UAye->insert (un);
+	myParent->advance();
     }
+    delete myParent;
+    delete UAye;
     return uc;
 }

@@ -35,9 +35,8 @@ extern BOOL bTex0;
 extern BOOL bTex1;
 
 
-GFXVertexList::GFXVertexList()
+GFXVertexList::GFXVertexList():myVertices(NULL),numQuads(0),numTriangles(0),numVertices(0)
 {
-	myVertices = NULL;
 }
 
 GFXVertexList::GFXVertexList(int numVertices,int numTriangle, int numQuad, GFXVertex *vertices) // TODO: Add in features to accept flags for what's

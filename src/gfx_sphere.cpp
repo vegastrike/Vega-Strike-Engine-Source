@@ -3,6 +3,9 @@
 SphereMesh::SphereMesh(float radius, int stacks, int slices, char *texture) : Mesh() {
   debugName = "Sphere";
   radialSize = radius;//MAKE SURE FRUSTUM CLIPPING IS DONE CORRECTLY!!!!!
+  minSizeX = minSizeY = minSizeZ = -radialSize;
+  maxSizeX = maxSizeY = maxSizeZ = radialSize;
+  
    float rho, drho, theta, dtheta;
    float x, y, z;
    float s, t, ds, dt;
@@ -21,10 +24,12 @@ SphereMesh::SphereMesh(float radius, int stacks, int slices, char *texture) : Me
 
       imin = 0;
       imax = stacks;
-
+      
       numQuadstrips = stacks;
+      //      numQuadstrips = 0;
+
       quadstrips = new GFXQuadstrip*[numQuadstrips];
-      /* draw intermediate stacks as quad strips */
+      // draw intermediate stacks as quad strips 
       vertexlist = new GFXVertex[stacks * (slices+1)*2];
       GFXVertex *vl = vertexlist;
 
@@ -68,6 +73,6 @@ SphereMesh::SphereMesh(float radius, int stacks, int slices, char *texture) : Me
 	t -= dt;
 	quadstrips[i] = new GFXQuadstrip((slices+1) * 2, vertexlist);
       }
-
+      
       Decal = new Texture(texture, 0);
 }

@@ -7,7 +7,7 @@
 #ifndef _SYSTEM_H_
 #define _SYSTEM_H_
 
-#define NUM_CAM 10
+
 
 #include "gfx_camera.h"
 
@@ -15,6 +15,7 @@ class Planet;
 class UnitCollection;
 class ClickList;
 class Unit;
+#define NUM_CAM		12
 
 class StarSystem {
  private:
@@ -24,14 +25,21 @@ class StarSystem {
   UnitCollection *units;    // Objects subject to global physics
   UnitCollection *missiles; // no physics modelling, not searched
                             // through for clicks
-
+  
   Camera cam[NUM_CAM];
-  int active_camera;
+  int currentcamera;
 
   void modelGravity();
  public:
+  Camera *AccessCamera() {return &cam[currentcamera];}
+  Camera *AccessCamera(int);
+  void SelectCamera(int);
+  void SetViewport() {
+    cam[currentcamera].UpdateGFX();
+  }
   StarSystem(Planet *primaries);
-
+  ~StarSystem();
+  UnitCollection * getUnitList();
   ClickList *getClickList(); // returns xy sorted bounding spheres of 
                              // all units in current view
 

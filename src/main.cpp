@@ -104,7 +104,7 @@ int main( int argc, char **argv )
 
     _GFX= new WrapGFX(argc,argv);    
     //    glutSetCursor(GLUT_CURSOR_NONE); 
-    InitInput();
+    
     createObjects();
 
     InitializeInput();

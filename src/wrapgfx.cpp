@@ -26,7 +26,7 @@
 #include "gfxlib.h"
 #include "wrapgfx.h"
 #include "lin_time.h"
-
+#include "planet.h"
 //#include "cmd.h"
 //#include "glob.h"
 
@@ -50,7 +50,7 @@ Unit *unit;
 
 WrapGFX::WrapGFX(int argc, char** argv)
 {
-	currentcamera = 0;
+  //currentcamera = 0;
 	numlights = NUM_LIGHT; 
 	topobject = NULL;
 	active = FALSE;
@@ -65,7 +65,12 @@ WrapGFX::WrapGFX(int argc, char** argv)
 	LightMap = new Texture("light.bmp", 1);
 	//else
 	//	LightMap = new Texture("light.bmp", 0);
+
 	StartGFX();
+	InitInput();
+	star_system = new StarSystem(new Planet("test_system.dat"));
+	//	delete star_system;
+	
 }
 
 WrapGFX::~WrapGFX()
@@ -84,7 +89,7 @@ WrapGFX::~WrapGFX()
 
 BOOL WrapGFX::StartGFX()
 {
-	SetViewport();
+  //	SetViewport();
 	GFXBeginScene();
 	GFXMaterial mat;
 	GFXGetMaterial(0, mat);
@@ -110,7 +115,10 @@ BOOL WrapGFX::StartGFX()
 
 	GFXSetMaterial(0, mat);
 	GFXSelectMaterial(0);
-	GFXEndScene();
+	
+	//GFXLoadIdentity(VIEW);
+	//GFXLookAt(Vector(0,0,0), Vector(0,0,1), Vector(0,-1,0)); // optimization: cache this friggin' matrix
+      	GFXEndScene();
 	return TRUE;
 }
 

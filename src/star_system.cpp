@@ -8,14 +8,22 @@ StarSystem::StarSystem(Planet *primaries) :
   primaries(primaries), 
   units(new UnitCollection()), 
   missiles(new UnitCollection()) {
+  currentcamera = 0;	
   // Calculate movement arcs; set behavior of primaries to follow these arcs
   //Iterator *primary_iterator = primaries->createIterator(); 
-  primaries->SetPosition(0,0,5);
+  //primaries->SetPosition(0,0,5);
   
 }
 
+StarSystem::~StarSystem() {
+  delete primaries;
+
+
+
+
+}
 ClickList *StarSystem::getClickList() {
-  return new ClickList (units);
+  return new ClickList (this, units);
 
 }
 
@@ -51,9 +59,21 @@ void StarSystem::Update() {
   Iterator *iter = units->createIterator();
   Unit *unit;
   while((unit = iter->current())!=NULL) {
-      unit->ResolveForces();
+    //unit->ResolveForces();
     // Do something with AI state here eventually
     iter->advance();
   }
   delete iter;
 }
+
+
+void StarSystem::SelectCamera(int cam){
+    if(cam<NUM_CAM&&cam>=0)
+      currentcamera = cam;
+}
+Camera* StarSystem::AccessCamera(int num){
+  if(num<NUM_CAM&&num>=0)
+    return &cam[num];
+  else
+    return NULL;
+}		
