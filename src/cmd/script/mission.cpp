@@ -50,6 +50,7 @@
 /* *********************************************************** */
 Mission::~Mission() {
   fprintf (stderr,"Mission Cleanup Not Yet Implemented");
+  //do not delete msgcenter...could be vital
 }
 Mission::Mission(char *configfile){
   number_of_flightgroups=0;
@@ -91,7 +92,13 @@ Mission::Mission(char *configfile){
 void Mission::initMission(){
   if (!top)
     return;
-  msgcenter=new MessageCenter();
+  static bool begin=true;
+  if (begin) {
+    msgcenter=new MessageCenter();
+    begin=false;
+  }else {
+    msgcenter=mission->msgcenter;
+  }
   msgcenter->add("game","all","Welcome to Vegastrike");
 
   checkMission(top);
