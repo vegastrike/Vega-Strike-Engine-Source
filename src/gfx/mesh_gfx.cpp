@@ -357,7 +357,11 @@ bool SetupSpecMapFirstPass (vector <Texture *> &decal, unsigned int mat, bool en
     if (decal.size()>1) {
         if (decal[1]) {
 	  
-            GFXSelectMaterialHighlights(mat,GFXColor(1,1,1,1),GFXColor(1,1,1,1),GFXColor(0,0,0,0),GFXColor(1,1,1,1));
+            GFXSelectMaterialHighlights(mat,
+                                        GFXColor(1,1,1,1),
+                                        GFXColor(1,1,1,1),
+                                        GFXColor(0,0,0,0),
+                                        GFXColor(1,1,1,1));
             retval=true;
             if (envMap)
                 GFXDisable(TEXTURE1);
@@ -367,26 +371,35 @@ bool SetupSpecMapFirstPass (vector <Texture *> &decal, unsigned int mat, bool en
     }
     return retval;
 }
+extern bool GFXMultiTexAvailable();
 void SetupSpecMapSecondPass(Texture * decal,unsigned int mat,BLENDFUNC blendsrc, bool envMap, const GFXColor &cloakFX) {
-    GFXSelectMaterialHighlights(mat,GFXColor(0,0,0,0),GFXColor(0,0,0,0),cloakFX,GFXColor(0,0,0,0));
+    GFXSelectMaterialHighlights(mat,
+                                GFXColor(0,0,0,0),
+                                GFXColor(0,0,0,0),
+                                cloakFX,
+                                (envMap&&GFXMultiTexAvailable())?GFXColor (1,1,1,1):GFXColor(0,0,0,0));
     GFXBlendMode (blendsrc,ONE);
     decal->MakeActive();
     float a,b;
     GFXGetPolygonOffset(&a,&b);
-    GFXPolygonOffset (a, b+1);
+    GFXPolygonOffset (a, b-1);
+    GFXDisable(DEPTHWRITE);
     if (envMap){
       GFXActiveTexture(1);
       GFXTextureAddOrModulate(true); 
       GFXEnable(TEXTURE1);
     }
 }
-void RestoreSpecMapState(bool envMap) { 
+void RestoreSpecMapState(bool envMap, bool write_to_depthmap) { 
   float a,b;
     GFXGetPolygonOffset(&a,&b);
-    GFXPolygonOffset (a, b-1);
+    GFXPolygonOffset (a, b+1);
     if (envMap) {
       GFXActiveTexture(1);
       GFXTextureAddOrModulate(false); //restore modulate
+    }
+    if (write_to_depthmap) {
+        GFXEnable(DEPTHWRITE);
     }
 }
 void Mesh::ProcessDrawQueue(int whichdrawqueue) {
@@ -413,8 +426,8 @@ void Mesh::ProcessDrawQueue(int whichdrawqueue) {
     GFXDisable (LIGHTING);
     GFXColor4f(1,1,1,1);
   }
-  if (blendDst!=ZERO&&whichdrawqueue!=NUM_ZBUF_SEQ) {
-    //    
+  bool write_to_depthmap=!(blendDst!=ZERO&&whichdrawqueue!=NUM_ZBUF_SEQ);
+  if (!write_to_depthmap) {
     GFXDisable(DEPTHWRITE);
   }
   SelectCullFace(whichdrawqueue);
@@ -459,7 +472,7 @@ void Mesh::ProcessDrawQueue(int whichdrawqueue) {
       GFXPushBlendMode();
         SetupSpecMapSecondPass(Decal[1],myMatNum,blendSrc,getEnvMap(), c.CloakFX);
         vlist->Draw();
-        RestoreSpecMapState(getEnvMap());
+        RestoreSpecMapState(getEnvMap(),write_to_depthmap);
 	GFXPopBlendMode();
     }
     for ( i=0;i<specialfxlight.size();i++) {
@@ -482,8 +495,7 @@ void Mesh::ProcessDrawQueue(int whichdrawqueue) {
     draw_queue->push_back (tmp_draw_queue.back());
     tmp_draw_queue.pop_back();
   }
-  if (blendDst!=ZERO &&whichdrawqueue!=NUM_ZBUF_SEQ) {
-    
+  if (!write_to_depthmap) {
     GFXEnable(DEPTHWRITE);//risky--for instance logos might be fubar!
   }
   RestoreCullFace(whichdrawqueue);

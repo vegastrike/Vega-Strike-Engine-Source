@@ -29,7 +29,9 @@
 extern GFXBOOL bTex0;
 extern GFXBOOL bTex1;
 
-
+bool GFXMultiTexAvailable() {
+    return gl_options.Multitexture!=0;
+}
 void GFXCircle (float x, float y, float wid, float hei) {
 	static float aaccuracy=XMLSupport::parse_float(vs_config->getVariable("graphics","circle_accuracy","100"));
 	int accuracy = aaccuracy*(wid>hei?wid:hei);
