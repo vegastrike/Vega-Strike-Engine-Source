@@ -98,8 +98,8 @@ namespace CockpitXML {
     EnumMap::Pair ("Auto", UnitImages::AUTOPILOT),
     EnumMap::Pair ("FPS", UnitImages::COCKPIT_FPS),
     EnumMap::Pair ("LAG", UnitImages::COCKPIT_LAG),
-    EnumMap::Pair ("STARDATE", UnitImages::STARDATE),
-    EnumMap::Pair ("COMMFREQ", UnitImages::COMMFREQ)
+    EnumMap::Pair ("StarDate", UnitImages::STARDATE),
+    EnumMap::Pair ("CommFreq", UnitImages::COMMFREQ)
   };
   const EnumMap::Pair attribute_names[] = {
     EnumMap::Pair ("UNKNOWN", UNKNOWN),
@@ -128,11 +128,11 @@ namespace CockpitXML {
     EnumMap::Pair ("r", RED),
     EnumMap::Pair ("g", GREEN),
     EnumMap::Pair ("b", BLUE),
-    EnumMap::Pair ("type", VDUTYPE),
+    EnumMap::Pair ("type", VDUTYPE)
   };
 
   const EnumMap element_map(element_names, 29);
-  const EnumMap attribute_map(attribute_names, 28);
+  const EnumMap attribute_map(attribute_names, 27);
 }
 
 using XMLSupport::EnumMap;
