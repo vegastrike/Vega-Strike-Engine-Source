@@ -53,7 +53,7 @@ protected:
   ///If this order applies to a physical location in world space
   Vector targetlocation;
   ///The queue of suborders that will be executed in parallel according to bit code
-  vector<Order*> suborders;
+  std::vector<Order*> suborders;
 public:
   ///The varieties of order types  MOVEMENT,FACING, and WEAPON orders may not be mutually executed (lest one engine goes left, the other right)
   enum ORDERTYPES { MOVEMENT =1, FACING = 2, WEAPON = 4, LOCATION = 8, TARGET = 16, SELF = 32 }; 
