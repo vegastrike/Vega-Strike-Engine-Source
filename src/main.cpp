@@ -29,7 +29,7 @@
 #include "cmd/script/mission.h"
 #include "audiolib.h"
 #include "vs_path.h"
-
+#include "gfx/animation.h"
 
 
 #include "python/init.h"
@@ -62,8 +62,6 @@ void setup_game_data ( ){ //pass in config file l8r??
 void ParseCommandLine(int argc, char ** CmdLine);
 void cleanup(void)
 {
-  fprintf( stderr, "\n"
-	     "Graceful exit\n" );
   printf ("Thank you for playing!\n");
 
   //    write_config_file();
@@ -79,6 +77,7 @@ double benchmark=-1.0;
 
 char mission_name[1024];
 
+void bootstrap_main_loop();
 int main( int argc, char *argv[] ) 
 {
 
@@ -88,7 +87,7 @@ int main( int argc, char *argv[] )
 	     "See http://www.gnu.org/copyleft/gpl.html for license details.\n\n" );
     /* Seed the random number generator */
 
-    strcpy(mission_name,"mission/test/test1.mission");
+    strcpy(mission_name,"test1.mission");
 
     ParseCommandLine(argc,argv);
 
@@ -112,26 +111,6 @@ int main( int argc, char *argv[] )
     //	Python::init();
 
 #endif
-
-    mission=new Mission(mission_name);
-
-    float col[4];
-    vs_config->gethColor("default","testcolor",col,0xff00ff00);
-    printf("hexcol: %f %f %f %f\n",col[0],col[1],col[2],col[3]);
-
-    string olds=vs_config->getVariable("general","testvar","def-value");
-    vs_config->setVariable("general","testvar","foobar");
-    string news=vs_config->getVariable("general","testvar","new-def-value");
-
-    cout << "old " << olds << " new " << news << endl;
-
-
-    string varstr=vs_config->getVariable("graphics","mesh","testvar","1024");
-    cout << "testvar: " << varstr << endl;
-    //            exit(0);
-
-    //read_vs_config_file();
-    //init_debug("");
 
 #if defined(HAVE_SDL)
     // && defined(HAVE_SDL_MIXER)
@@ -163,25 +142,62 @@ int main( int argc, char *argv[] )
     */
     _Universe= new Universe(argc,argv);   
 
+    _Universe->Loop(bootstrap_main_loop);
+    return 0;
+}
+void bootstrap_draw (Animation * SplashScreen) {
+  UpdateTime();
+  if (SplashScreen) {
+    Matrix tmp;
+    Identity (tmp);
+    GFXDisable(LIGHTING);
+    GFXDisable(DEPTHTEST);
+    GFXBlendMode (ONE,ZERO);
+    GFXEnable (TEXTURE0);
+    GFXColor4f (1,1,1,1);
+    ScaleMatrix (tmp,Vector (7,7,0));
+    SplashScreen->UpdateAllFrame();
+    GFXClear (GFXTRUE);
+    GFXLoadIdentity (PROJECTION);
+    GFXLoadIdentityView();
+    GFXLoadMatrix (MODEL,tmp);
+    GFXBeginScene();
+    SplashScreen->DrawNow(tmp);
+    GFXEndScene();
+  }
+}
+void bootstrap_main_loop () {
+  static bool LoadMission=true;
+  InitTime();
+  static Animation * SplashScreen = new Animation (vs_config->getVariable ("graphics","splash_screen","vega_splash.ani").c_str(),0);
+  bootstrap_draw (SplashScreen);
+  bootstrap_draw (SplashScreen);
+  if (LoadMission) {
+    LoadMission=false;
+    mission=new Mission(mission_name);
+    bootstrap_draw (SplashScreen);
     Vector pos;
     string planetname;
-  
-    mission->GetOrigin(pos,planetname);
 
+    mission->GetOrigin(pos,planetname);
+    bootstrap_draw (SplashScreen);
     _Universe->Init (mission->getVariable("system","sol.system"),pos,planetname);
+    bootstrap_draw (SplashScreen);
     createObjects();
 
-       InitializeInput();
+    InitializeInput();
 
-       vs_config->bindKeys();
+    vs_config->bindKeys();
 
-       InitTime();
-       UpdateTime();
 
+    UpdateTime();
+    delete SplashScreen;
+    SplashScreen= NULL;
     _Universe->Loop(main_loop);
-
-    // never makes it here
-    return 0;
+    ///return to idle func which now should call main_loop mohahahah
+  }
+  ///Draw Texture
+  
 } 
 
 

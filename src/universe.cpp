@@ -44,7 +44,6 @@ Universe::Universe(int argc, char** argv)
 	InitInput();
 
 	hud_camera = Camera();
-	CacheJumpStar(false);
 	cockpit = new Cockpit ("",NULL);
 	LoadWeapons("weapon_list.xml");
 	LoadFactionXML("factions.xml");	
@@ -58,7 +57,7 @@ void Universe::UnloadStarSystem (StarSystem * s) {
   //not sure what to do here? serialize?
 }
 void Universe::Init (string systemfile, const Vector & centr,const string planetname) {
-
+  CacheJumpStar(false);
   string fullname=systemfile+".system";
   StarSystem * ss;
   LoadStarSystem(ss=new StarSystem((char *)fullname.c_str(),centr));

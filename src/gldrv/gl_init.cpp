@@ -368,7 +368,12 @@ void visible(int vis) {
 void GFXLoop(void (*main_loop)(void)) {
 	glutDisplayFunc(main_loop);
 	glutVisibilityFunc(visible);
-	glutMainLoop(); /*NOTREACHED*/
+	static bool are_we_looping=false;
+	///so we can call this function multiple times
+	if (!are_we_looping) {
+	  are_we_looping=true;
+	  glutMainLoop();
+	}
 }
 #else
 
@@ -378,7 +383,12 @@ void GFXLoop(void main_loop()) {
 #ifdef _WIN32
   DestroyWindow(hWnd);
 #endif
-  glutMainLoop();
+  static bool are_we_looping=false;
+  /// so we can call this function multiple times to change the display and idle functions
+  if (!are_we_looping) {
+    are_we_looping=true;
+    glutMainLoop();
+  }
   //never make it here;
 
 }
