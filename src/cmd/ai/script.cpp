@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include <vector>
 #include <stack>
-
+#include "vs_path.h"
 struct AIScriptXML {
   int unitlevel;
   int acc;
@@ -625,8 +625,12 @@ void AIScript::endElement(const string &name) {
 
 
 void AIScript::LoadXML() {
+  vschdir ("ai");
+  vschdir ("script");
   const int chunk_size = 16384;
   FILE * inFile = fopen (filename, "r");
+  vscdup();
+  vscdup();
   if(!inFile) {
     return;
   }

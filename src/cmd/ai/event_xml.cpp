@@ -6,6 +6,7 @@
 #include <float.h>
 #include <assert.h>
 #include "vegastrike.h"
+#include "vs_path.h"
 //serves to run through a XML file that nests things for "and". 
 
 
@@ -89,7 +90,11 @@ namespace AIEvents {
   void LoadAI(const char * filename, ElemAttrMap &result) {
     const int chunk_size = 16384;
     result.curtime=result.maxtime=10/SIMULATION_ATOM;
+    vschdir ("ai");
+    vschdir ("events");
     FILE * inFile = fopen (filename, "r");
+    vscdup();
+    vscdup();
     if(!inFile) {
       assert(0);
       return;
