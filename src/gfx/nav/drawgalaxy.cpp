@@ -1020,9 +1020,11 @@ void NavigationSystem::DrawGalaxy()
 
 	//	Clear the lists
 	//	**********************************
+	{
 	for (systemdrawlist::iterator it = mouselist.begin();it!=mouselist.end();++it) {
 		(*it).draw();
 		
+	}
 	}
 	
 	mouselist.clear();	//	whipe mouse over'd list
