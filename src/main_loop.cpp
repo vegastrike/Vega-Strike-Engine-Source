@@ -44,9 +44,8 @@
 #include "cmd/script/mission.h"
 #include "xml_support.h"
 #include "config_xml.h"
-
 #include "cmd/ai/missionscript.h"
-
+#include "cmd/enhancement.h"
 #include "cmd/cont_terrain.h"
 using namespace std;
 
@@ -598,7 +597,25 @@ void createObjects() {
 
   mission->DirectorInitgame();
 }
+void AddUnitToSystem (const SavedUnits *su) {
+  Unit * un=NULL;
+  switch (su->type) {
+  case ENHANCEMENTPTR:
+    un = new Enhancement (su->filename.c_str(),_Universe->GetFaction (su->faction.c_str()));
+    un->SetPosition(0,0,0);
+    break;
+  case UNITPTR:
+  default:
+    un = new Unit (su->filename.c_str(),true,false,_Universe->GetFaction (su->faction.c_str()));
+    un->EnqueueAI (new Orders::AggressiveAI ("default.agg.xml", "default.int.xml"));
+    un->SetTurretAI ();
+    un->SetPosition (Vector(rand()*10000./RAND_MAX-5000,rand()*10000./RAND_MAX-5000,rand()*10000./RAND_MAX-5000));
 
+    break;
+  }
+  _Universe->activeStarSystem()->AddUnit(un);
+
+}
 void destroyObjects() {  
   if (myterrain)
     delete myterrain;

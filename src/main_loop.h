@@ -1,6 +1,6 @@
 #ifndef _MAIN_LOOP_H_
 #define _MAIN_LOOP_H_
-
+#include "cmd/unit.h"
 namespace CockpitKeys {
   void SkipMusicTrack(int,KBSTATE newState);
    void  PitchDown(int,KBSTATE newState) ;
@@ -33,16 +33,12 @@ namespace CockpitKeys {
 
 
 
-
-
+struct SavedUnits;
+void AddUnitToSystem (const SavedUnits * su);
 void createObjects();
 void destroyObjects();
 void InitializeInput();
 void main_loop();
-void WriteSaveGame (const char * systemname, const class Vector &Pos);
-
-
-
 
 
 

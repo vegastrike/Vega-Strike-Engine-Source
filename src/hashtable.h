@@ -25,9 +25,9 @@
 #include <math.h>
 #include <list>
 #include <string>
+#include <vector>
 
 using namespace std;
-
 //const int hashsize = 1001;
 
 //Hashtable doesn't grow
@@ -39,10 +39,10 @@ template<class KEY, class VALUE, class SIZ> class Hashtable {
 		HashElement(KEY k, VALUE *v) {key = k; value = v;}
 	};
 	list<HashElement> table[sizeof (SIZ)];
-  static int hash(const int key) {
-    return key%sizeof(SIZ);
-  }
-	static int hash(const string &key) {
+	static int hash(const int key) {
+	  return key%sizeof(SIZ);
+	}
+	static int hash(const std::string &key) {
 		int k = 0;
 		char *start = (char*)key.c_str();
 		char *end = start + strlen(start);
@@ -58,7 +58,17 @@ public:
 	Hashtable()
 	{
 	}
-
+	std::vector <VALUE *> GetAll() const
+	{
+	  vector <VALUE *> retval;
+	  for (unsigned int hashval=0;hashval<sizeof(SIZ);hashval++) {
+	    list<HashElement>::const_iterator iter = table[hashval].begin(), end = table[hashval].end();
+	    for(;iter!=end;iter++) {
+	      retval.push_back ((*iter).value);
+	    }
+	  }
+	  return retval;
+	}
 	VALUE *Get(const KEY &key) const
 	{
 		int hashval = hash(key);

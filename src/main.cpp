@@ -33,6 +33,7 @@
 #include "cmd/unit.h"
 #include "gfx/cockpit.h"
 #include "python/init.h"
+#include "savegame.h"
 /*
  * Globals 
  */
@@ -82,51 +83,6 @@ Mission *mission;
 double benchmark=-1.0;
 
 char mission_name[1024];
-static std::string ForceStarSystem("") ;
-static Vector PlayerLocation (FLT_MAX,FLT_MAX,FLT_MAX);
-static std::string outputsavegame;
-static std::string originalsystem;
-void WriteSaveGame (const char *systemname, const Vector &FP) {
-  if (outputsavegame.length()!=0) {
-    printf ("Writing Save Game %s",outputsavegame.c_str());
-    changehome();
-    vschdir ("save");
-    FILE * fp = fopen (outputsavegame.c_str(),"w");
-    vscdup();
-    returnfromhome();
-    Vector FighterPos= PlayerLocation-FP;
-    if (originalsystem!=systemname) {
-      FighterPos=-FP;
-    }
-    fprintf (fp,"%s %f %f %f",systemname,FighterPos.i,FighterPos.j,FighterPos.k);
-    fclose (fp);
-  }
-}
-bool ParseSaveGame (const string filename, string &ForceStarSystem, string originalstarsystem, Vector &Pos, bool reallyread) {
-  outputsavegame=filename;
-  originalsystem = originalstarsystem;
-  PlayerLocation=Pos;
-  if (reallyread) {
-    changehome();
-    vschdir ("save");
-    FILE * fp = fopen (filename.c_str(),"r");
-    vscdup();
-    returnfromhome();
-    if (fp) {
-      char tmp[10000];
-      if (4==fscanf (fp,"%s %f %f %f\n",tmp,&Pos.i,&Pos.j,&Pos.k)) {
-	ForceStarSystem=string(tmp);
-	originalsystem = ForceStarSystem;
-	PlayerLocation=Pos;
-	fclose (fp);
-	return true;
-      }
-      fclose (fp);
-    }
-  }
-  return false;  
-  
-}
 
 void bootstrap_main_loop();
 
@@ -238,21 +194,12 @@ void bootstrap_main_loop () {
 
     mission->GetOrigin(pos,planetname);
     bool setplayerloc;
-    string mysystem = (ForceStarSystem.length()==0)?mission->getVariable("system","sol.system"):ForceStarSystem;
-    if (PlayerLocation.i!=FLT_MAX&&PlayerLocation.j!=FLT_MAX&&PlayerLocation.k!=FLT_MAX) {
-      pos = PlayerLocation;
-      setplayerloc=true;
-    }
-    string savegamefile = mission->getVariable ("savegame","");
-    if (savegamefile.length()) {
-      if (ParseSaveGame (savegamefile,ForceStarSystem,mysystem,pos,ForceStarSystem.length()==0)) {
-	setplayerloc=true;
-      }
-    }
-    PlayerLocation=pos;
+    string mysystem = mission->getVariable("system","sol.system");
 
+    string savegamefile = mission->getVariable ("savegame","");
+    vector <SavedUnits> savedun=ParseSaveGame (savegamefile,mysystem,mysystem,pos);
+   
     bootstrap_draw (SplashScreen);
-    mysystem = (ForceStarSystem.length()==0)?mission->getVariable("system","sol.system"):ForceStarSystem;
     _Universe->Init (mysystem,pos,planetname);
     bootstrap_draw (SplashScreen);
     createObjects();
@@ -260,6 +207,10 @@ void bootstrap_main_loop () {
       if (fighters[0]) {
 	fighters[0]->SetPosition (Vector (0,0,0));
       }
+    }
+    while (!savedun.empty()) {
+      AddUnitToSystem (&savedun.back());
+      savedun.pop_back();
     }
     InitializeInput();
 
@@ -282,6 +233,7 @@ void bootstrap_main_loop () {
 
 
 void ParseCommandLine(int argc, char ** lpCmdLine) {
+  Vector PlayerLocation;
   for (int i=1;i<argc;i++) {
     if(lpCmdLine[i][0]=='-') {
       switch(lpCmdLine[i][1]){
@@ -302,10 +254,11 @@ void ParseCommandLine(int argc, char ** lpCmdLine) {
       case 'P':
       case 'p':
 	sscanf (lpCmdLine[i]+2,"%f,%f,%f",&PlayerLocation.i,&PlayerLocation.j,&PlayerLocation.k);
+	SetPlayerLocation (PlayerLocation);
 	break;
       case 'L':
       case 'l'://low rez
-	ForceStarSystem = string ((lpCmdLine[i])+2);
+	SetStarSystem ( string ((lpCmdLine[i])+2));
 	break;
       case 'A'://average rez
       case 'a': 

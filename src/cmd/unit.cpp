@@ -42,9 +42,11 @@
 #include "config_xml.h"
 #include "images.h"
 #include "gfx/planetary_transform.h"
-
+///for saving features
+#include "main_loop.h"
 #include "script/mission.h"
 #include "collide/rapcol.h"
+#include "savegame.h"
 //if the PQR of the unit may be variable...for radius size computation
 //#define VARIABLE_LENGTH_PQR
 
@@ -272,6 +274,8 @@ Unit::Unit (Mesh ** meshes, int num, bool SubU, int faction) {
 }
 Unit::Unit(const char *filename, bool xml, bool SubU, int faction,Flightgroup *flightgrp,int fg_subnumber) {
 	Init();
+	if (!SubU)
+	  AddUnitToSave(filename,UNITPTR,_Universe->GetFaction(faction),(int)this);
 	SubUnit = SubU;
 	this->faction = faction;
 	flightgroup=flightgrp;

@@ -36,6 +36,8 @@ vegastrike_SOURCES =				\
 	main.cpp				\
 	main_loop.h				\
 	main_loop.cpp				\
+	savegame.cpp				\
+	savegame.h				\
 	physics.h				\
 	physics.cpp				\
 	resizable.h				\

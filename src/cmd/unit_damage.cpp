@@ -13,6 +13,7 @@
 #include "config_xml.h"
 #include "vs_globals.h"
 #include "xml_support.h"
+#include "savegame.h"
 //#define DESTRUCTDEBUG
 static list<Unit*> Unitdeletequeue;
 void Unit::UnRef() {
@@ -171,6 +172,7 @@ void Unit::Split (int level) {
 }
 
 void Unit::Kill() {
+  RemoveUnitFromSave((int)this);
   if (halos&&numhalos) {
     for (int hc=0;hc<numhalos;hc++) {
       delete halos[hc];
