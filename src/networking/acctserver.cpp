@@ -149,15 +149,18 @@ void	AccountServer::recvMsg( SOCKETALT sock)
 	unsigned char	cmd;
 	Account *		elem = NULL;
 	int 			found=0, connected=0;
-	char buffer[MAXBUFFER];
+	//char buffer[MAXBUFFER];
 
 	// Receive data from sock
 	//cout<<"Receiving on socket "<<sock.fd<<endl;
-	len = MAXBUFFER;
-	if( (recvcount = sock.recvbuf( buffer, len, &ipadr))>0)
+	//len = MAXBUFFER;
+	PacketMem mem;
+	//if( (recvcount = sock.recvbuf( buffer, len, &ipadr))>0)
+	if( (recvcount = sock.recvbuf( mem, &ipadr))>0)
 	{
 		cout<<"Socket : "<<endl<<sock<<endl;
-		Packet p( buffer, recvcount );
+		//Packet p( buffer, recvcount );
+		Packet p( mem);
 
 		packet = p;
 		// Check the command of the packet
@@ -391,7 +394,7 @@ void	AccountServer::sendAuthorized( SOCKETALT sock, Account * acct)
 	{
 		// Send a command to make the client create a new character/ship
 		Packet	packet2;
-		if( packet2.send( LOGIN_NEW, serial, packet.getData(), packet.getDataLength(), SENDANDFORGET, NULL, sock, __FILE__, __LINE__ ) < 0 )
+		if( packet2.send( LOGIN_NEW, serial, packet.getData(), packet.getDataLength(), SENDRELIABLE, NULL, sock, __FILE__, __LINE__ ) < 0 )
 		{
 			cout<<"ERROR sending authorization"<<endl;
 			exit( 1);
@@ -487,13 +490,12 @@ void	AccountServer::sendAuthorized( SOCKETALT sock, Account * acct)
 		cout<<"Save size = "<<readsize<<" - XML size = "<<readsize2<<endl;
 		cout<<"Loaded -= "<<acct->name<<" =- save files ("<<(readsize+readsize2)<<")"<<endl;
 		unsigned int total_size = readsize+readsize2+2*NAMELEN+2*sizeof( unsigned int);
-		assert( total_size <= MAXBUFFER );
 
 		// ??? memcpy( buf, packet.getData(), packet.getLength());
 
-		// For now saves are really limited to maxsave bytes
+		// Saves are still limited to maxsave bytes but this is a very high value
 		Packet	packet2;
-		if( packet2.send( LOGIN_ACCEPT, serial, buf, total_size, SENDANDFORGET|COMPRESSED, NULL, sock, __FILE__, __LINE__ ) < 0 )
+		if( packet2.send( LOGIN_ACCEPT, serial, buf, total_size, SENDRELIABLE|COMPRESSED, NULL, sock, __FILE__, __LINE__ ) < 0 )
 		{
 			cout<<"ERROR sending authorization"<<endl;
 			exit( 1);

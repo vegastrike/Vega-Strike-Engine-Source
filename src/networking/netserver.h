@@ -43,7 +43,7 @@ typedef vector<Account *>::iterator VI;
 
 struct ServerSocket;
 
-/** Class Netserver : runs the server */
+/** Class Netserver : runs the "game server" */
 class NetServer
 {
         ServerSocket*   tcpNetwork;
@@ -51,6 +51,7 @@ class NetServer
 		Packet			packet;					// Network data packet
 		Packet			packeta;				// Network data packet for account server
 
+		SaveGame*		globalsave;				// Savegame class used to save dynamic universe
 		ZoneMgr			*zonemgr;				// Zones/star systems Manager
 		int				nbclients;				// Active client connections number
 		int				nbaccts;				// Number of registered accounts

@@ -8,7 +8,10 @@ using std::string;
 void	SaveNetUtil::GetSaveStrings( Client * clt, string & savestr, string & xmlstr)
 {
 	Cockpit * cp = _Universe->isPlayerStarship( clt->game_unit.GetUnit());
-	savestr = cp->savegame->WriteSaveGame( cp->savegame->GetStarSystem().c_str(), clt->current_state.getPosition(), cp->credits, cp->unitfilename, 0, false);
+	//savestr = cp->savegame->WriteSaveGame( cp->savegame->GetStarSystem().c_str(), clt->current_state.getPosition(), cp->credits, cp->unitfilename, 0, false);
+	// Only get the player data, the dynamic universe part is separated
+	const QVector POS(clt->current_state.getPosition());
+	savestr = cp->savegame->WritePlayerData ( POS, cp->unitfilename, cp->savegame->GetStarSystem().c_str(), cp->credits);
 	xmlstr = clt->game_unit.GetUnit()->WriteUnitString();
 }
 
@@ -19,7 +22,10 @@ void	SaveNetUtil::GetSaveStrings( int numplayer, string & savestr, string & xmls
 	cp = _Universe->AccessCockpit( numplayer);
 	un = cp->GetParent();
 	xmlstr = un->WriteUnitString();
-	savestr = cp->savegame->WriteSaveGame (cp->activeStarSystem->getFileName().c_str(),un->LocalPosition(),cp->credits,cp->unitfilename,0, false);
+	//savestr = cp->savegame->WriteSaveGame (cp->activeStarSystem->getFileName().c_str(),un->LocalPosition(),cp->credits,cp->unitfilename,0, false);
+	// Only get the player data, the dynamic universe part is separated
+	const QVector POS(un->LocalPosition());
+	savestr = cp->savegame->WritePlayerData ( POS, cp->unitfilename, cp->activeStarSystem->getFileName().c_str(), cp->credits);
 }
 
 void	SaveNetUtil::GetSaveBuffer( string savestr, string xmlstr, char * buffer)

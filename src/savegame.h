@@ -36,8 +36,6 @@ class SaveGame {
   void ReadMissionData (char * &buf);
   void ReadMissionStringData (char * &buf);
   void ReadSavedPackets (char * &buf);
-  std::string WritePlayerData( const QVector &FP, std::vector<std::string> unitname, const char * systemname, float credits);
-  std::string WriteDynamicUniverse();
   MissionStringDat *missionstringdata;
   MissionFloatDat *missiondata;
   std::string playerfaction;
@@ -59,6 +57,8 @@ class SaveGame {
   void	 SetPlayerFaction( std::string faction) { playerfaction = faction;}
   std::string WriteSavedUnit (SavedUnits *su);
   std::string WriteSaveGame (const char * systemname, const class QVector &Pos,float credits, std::vector <std::string> unitname, int player_num, bool write=true);
+  std::string WritePlayerData( const QVector &FP, std::vector<std::string> unitname, const char * systemname, float credits);
+  std::string WriteDynamicUniverse();
   ///cast address to long (for 64 bits compatibility)
   void AddUnitToSave (const char * unitname, int type, const char * faction, long address);
   void RemoveUnitFromSave (long address);//cast it to a long

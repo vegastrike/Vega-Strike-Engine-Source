@@ -60,11 +60,13 @@ NetServer::NetServer()
 	srand( (unsigned int) getNewTime());
 	// Here 500 could be something else between 1 and 0xFFFF
 	serial_seed = (ObjSerial) (rand()*(500./(((double)(RAND_MAX))+1)));
+	globalsave = new SaveGame("");
 }
 
 NetServer::~NetServer()
 {
 	delete zonemgr;
+	delete globalsave;
 }
 
 /**************************************************************/
@@ -579,12 +581,9 @@ void	NetServer::start(int argc, char **argv)
 /**************************************************************/
 
 
-/* Remake with SDL as well */
-
 void	NetServer::checkKey()
 {
 /*
-#ifndef HAVE_SDL
 	fd_set	fd_keyb;
 	int		s;
 	char	c;
@@ -604,7 +603,6 @@ void	NetServer::checkKey()
 				keeprun = 0;
 		}
 	}
-#endif
 */
 }
 
@@ -1045,12 +1043,6 @@ void	NetServer::addClient( Client * clt)
 		zonemgr->sendZoneClients( clt);
 	}
 
-	// char * cltsbuf = new char[MAXBUFFER];
-	// int cltsbufsize;
-	// Send an accepted entering command and current zone's clients infos
-	// So the packet buffer should contain info about other ships (desciptions) present in the zone
-	// cltsbufsize = zonemgr->getZoneClients( clt, cltsbuf);
-	//packet2.send( CMD_ADDEDYOU, clt->serial, cltsbuf, cltsbufsize, SENDRELIABLE, &clt->cltadr, clt->sock, __FILE__, __LINE__ );
 	cout<<"ADDED client n "<<clt->serial<<" in ZONE "<<clt->zone<<endl;
 	//delete cltsbuf;
 	//cout<<"<<< SENT ADDED YOU -----------------------------------------------------------------------"<<endl;
@@ -1242,12 +1234,34 @@ void	NetServer::save()
 	string xmlstr, savestr;
 	//unsigned int xmllen, savelen, nxmllen, nsavelen;
 	char * buffer;
+
+	// Save the Dynamic Universe in the data dir for now
+	string dynuniv_path = datadir+"dynaverse.dat";
+	fp = fopen( dynuniv_path.c_str(), "w+");
+	if( !fp)
+	{
+		cout<<"Error opening dynamic universe file"<<endl;
+		cleanup();
+	}
+	else
+	{
+		string dyn_univ = globalsave->WriteDynamicUniverse();
+		int wlen = fwrite( dyn_univ.c_str(), sizeof( char), dyn_univ.length(), fp);
+		if( wlen != dyn_univ.length())
+		{
+			cout<<"Error writing dynamic universe file"<<endl;
+			cleanup();
+		}
+		fclose( fp);
+		fp = NULL;
+	}
+
 	// Loop through all cockpits and write save files
 	for( int i=0; i<_Universe->numPlayers(); i++)
 	{
 		SaveNetUtil::GetSaveStrings( i, savestr, xmlstr);
 		// Write the save and xml unit
-		FileUtil::WriteSaveFiles( savestr, xmlstr, "./serversaves", cp->savegame->GetCallsign());
+		FileUtil::WriteSaveFiles( savestr, xmlstr, datadir+"/serversaves", cp->savegame->GetCallsign());
 		// SEND THE BUFFERS TO ACCOUNT SERVER
 		if( acctserver && acct_con)
 		{

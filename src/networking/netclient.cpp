@@ -47,6 +47,7 @@ using std::endl;
 using std::cin;
 
 double NETWORK_ATOM;
+vector<string> globalsaves;
 
 /*************************************************************/
 /**** Tool funcitons                                      ****/
@@ -158,7 +159,7 @@ vector<string>	NetClient::loginLoop( string str_name, string str_passwd)
 	int tmplen = NAMELEN*2;
 	char *	buffer = new char[tmplen+1];
 	// HAVE TO DELETE netbuf after return in calling function
-	char *	netbuf = new char[MAXBUFFER];
+	//char *	netbuf = new char[MAXBUFFER];
 	char	name[NAMELEN], passwd[NAMELEN];
 	vector<string> savefiles;
 
@@ -197,7 +198,7 @@ vector<string>	NetClient::loginLoop( string str_name, string str_passwd)
 	int login_to = atoi( login_tostr.c_str());
 	while( !timeout && !recv)
 	{
-		// If we have no response in 10 seconds -> fails
+		// If we have no response in "login_to" seconds -> fails
 		UpdateTime();
 		newtime = getNewTime();
 		elapsed = newtime-initial;
@@ -207,7 +208,7 @@ vector<string>	NetClient::loginLoop( string str_name, string str_passwd)
 			cout<<"Timed out"<<endl;
 			timeout = 1;
 		}
-		ret=this->checkMsg( netbuf, &packet );
+		ret=this->checkMsg( NULL, &packet );
 		if( ret>0)
 		{
 			cout<<"Got a response"<<endl;
@@ -225,10 +226,9 @@ vector<string>	NetClient::loginLoop( string str_name, string str_passwd)
 	if( ret>0 && packet.getCommand()!=LOGIN_ERROR && packet.getCommand()!=LOGIN_UNAVAIL)
 	{
 		this->callsign = str_name;
-		const char * tmpbuf = netbuf + 2*NAMELEN;
-		savefiles = FileUtil::GetSaveFromBuffer( tmpbuf);
+		savefiles = globalsaves;
 	}
-	delete netbuf;
+	//delete netbuf;
 	return savefiles;
 }
 
@@ -422,9 +422,10 @@ int NetClient::recvMsg( char* netbuffer, Packet* outpacket )
 
     // Receive data
     AddressIP sender_adr;
-    char      buffer[MAXBUFFER];
-    unsigned int    len = MAXBUFFER;
-    int recvbytes = clt_sock.recvbuf( buffer, len, &sender_adr );
+    //char      buffer[MAXBUFFER];
+    //unsigned int    len = MAXBUFFER;
+	PacketMem mem;
+    int recvbytes = clt_sock.recvbuf( mem, &sender_adr );
 
     if( recvbytes <= 0)
     {
@@ -434,7 +435,8 @@ int NetClient::recvMsg( char* netbuffer, Packet* outpacket )
     }
     else
     {
-        Packet p1( buffer, len );
+        //Packet p1( buffer, len );
+        Packet p1( mem );
 	    p1.setNetwork( &sender_adr, clt_sock );
 	    if( outpacket )
 	    {
@@ -456,10 +458,13 @@ int NetClient::recvMsg( char* netbuffer, Packet* outpacket )
                 // Should receive player's data (savegame) from server if there is a save
                 this->serial = packet_serial;
                 localSerials.push_back( this->serial);
+				globalsaves = FileUtil::GetSaveFromBuffer( p1.getData()+2*NAMELEN);
+				/* USELESS NOW : directly get the save strings
 		        if( netbuffer != NULL )
 				{
 		            memcpy( netbuffer, p1.getData(), p1.getDataLength());
 				}
+				*/
                 // Set current timestamp
                 break;
             // Login failed
