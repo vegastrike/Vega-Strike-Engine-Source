@@ -520,21 +520,21 @@ bool	NetServer::updateTimestamps( ClientPtr cltp, Packet & p )
 		cerr<<"GOT TIMESTAMP="<<int_ts<<" latest is="<<clt->latest_timestamp<<endl;
 		double curtime = getNewTime();
 		// Check for late packet : compare received timestamp to the latest we have
-		if( int_ts < clt->latest_timestamp)
+		assert( int_ts >= clt->getLatestTimestamp());
+		if( int_ts < clt->getLatestTimestamp())
 		{
 			// If ts > 0xFFFFFFF0 (15 seconds before the maxin an u_int) 
 			// This is not really a reliable test -> we may still have late packet in that range of timestamps
-			/*
-			if( (clt->isTcp() && ts > 0xFFFFFFF0) || (clt->isUdp() && ts > 0xFFFFFFF0 && !(p.getFlags() & SENDANDFORGET)) )
-				clt->deltatime = 0xFFFFFFFF - clt->latest_timestamp + ts;
-			else if( clt->isUdp() && p.getFlags() & SENDANDFORGET)
-			*/
 			// Only check for late packets when sent non reliable because we need others
 			if( clt->isUdp() && (p.getFlags() & SENDANDFORGET))
+			{
 				ret = false;
+			}
 			else if( clt->isTcp())
 			{
-				cerr<<"!!!ERROR : Late packet in TCP mode : this should not happen !!!"<<endl;
+				COUT << "!!!ERROR : Late packet in TCP mode : this should not happen !!!" << endl
+                     << "   Previous client timestamp: " << clt->getLatestTimestamp() << "ms" << endl
+                     << "   Current  client timtstamp: " << int_ts << "ms" << endl;
 				VSExit(1);
 			}
 		}
@@ -551,11 +551,7 @@ bool	NetServer::updateTimestamps( ClientPtr cltp, Packet & p )
 			if( p.getCommand()==CMD_SNAPSHOT || p.getCommand()==CMD_PING)
 			{
 				// Set old_timestamp to the old latest_timestamp and the latest_timestamp to the received one
-				clt->old_timestamp = clt->latest_timestamp;
-				clt->latest_timestamp = int_ts;
-				// Compute the deltatime in seconds that is time between packet_timestamp in ms and the old_timestamp in ms
-				clt->deltatime = ((double)(int_ts - clt->old_timestamp))/1000.;
-				cerr<<"DELTATIME = "<<(clt->deltatime*1000)<<" ms --------------------"<<endl;
+				clt->setLatestTimestamp( int_ts );
 			}
 		}
 

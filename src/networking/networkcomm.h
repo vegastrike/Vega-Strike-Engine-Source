@@ -127,6 +127,9 @@ class NetworkCommunication
 		char	IsSecured() { return secured;}
 		void	SwitchSecured();
 		void	SwitchWebcam();
+
+    private:
+        private_init( );
 };
 
 #endif

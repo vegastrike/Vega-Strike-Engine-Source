@@ -3423,7 +3423,7 @@ void showUnitStats(Unit * playerUnit,string &text,int subunitlevel) {
 					totalWeaponEnergyUsage+=(wi->EnergyRate/wi->Refire);
 					break;
 				case weapon_info::PROJECTILE: //need ammo
-					PRETTY_ADD("   'Fire and Forget' lock time: ",wi->LockTime,0,"seconds");
+					PRETTY_ADDU("   'Fire and Forget' lock time: ",wi->LockTime,0,"seconds");
 					PRETTY_ADD("   Missiles remaining: ",playerUnit->mounts[i].ammo,0);
 					totalWeaponEnergyUsage+=(wi->EnergyRate/wi->Refire);
 					break;

@@ -55,11 +55,7 @@ public:
 	// those vals are server times
 	double		old_timeout;
 	double		latest_timeout;
-	// 2 timestamps vals from client time to check receiving old packet after newer ones (UDP only)
-	unsigned int	old_timestamp;
-	unsigned int	latest_timestamp;
 	//unsigned int	deltatime;
-	double			deltatime;
 	string			callsign;
 	string			name;
 	string			passwd;
@@ -78,13 +74,26 @@ public:
 	Client( SOCKETALT& s, bool tcp );
 	~Client();
 
+    void         setLatestTimestamp( unsigned int ts );
+    void         clearLatestTimestamp( );
+    unsigned int getLatestTimestamp( ) const;
+    double       getDeltatime( ) const;
+
 	inline bool isTcp( ) const { return is_tcp; }
 	inline bool isUdp( ) const { return !is_tcp; }
 	friend std::ostream& operator<<( std::ostream& ostr, const Client& c );
 
 private:
+	// 2 timestamps vals from client time to check receiving old packet after
+    // newer ones (allowed in case of UDP only)
+	unsigned int	_old_timestamp;
+	unsigned int	_latest_timestamp;
+	double			_deltatime;
+
+private:
 	Client( const Client& );
 	Client& operator=( const Client& );
+
 	void Init();
 };
 

@@ -76,6 +76,7 @@ namespace VSFileSystem
 
 	extern vector <std::string> curdir;//current dir starting from datadir
 	extern vector <std::string> savedpwd;
+	extern vector<string>       Rootdir;
 	extern string sharedtextures;
 	extern string sharedsounds;
 	extern string sharedmeshes;
@@ -519,6 +520,9 @@ namespace VSFileSystem
 			bool	UseVolume();
 
 			friend class VSImage;
+
+        private:
+            void    private_init( );
 	};
 };
 

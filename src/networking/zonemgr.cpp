@@ -404,7 +404,7 @@ void	ZoneMgr::broadcastSnapshots( bool update_planets)
 					Unit * unit;
 
 					// Add the client we send snapshot to its own deltatime (semi-ping)
-					netbuf.addFloat( cltk->deltatime);
+					netbuf.addFloat( cltk->getDeltatime() );
 					// Clients not ingame are removed from the drawList so it is ok not to test that
 					while( (unit=iter.current()) != NULL)
 					{
@@ -417,10 +417,10 @@ void	ZoneMgr::broadcastSnapshots( bool update_planets)
 							//ClientPtr cltl;
 							//if( (cltl = Server->getClientFromSerial( unit->GetSerial())))
 							//{
-								//cs.setDelay( cltl->deltatime);
+								//cs.setDelay( cltl->getDeltatime() );
 								// This should be moved out of the 'if' when download manager is working
 							//}
-							double delay = cltk->deltatime;
+							double delay = cltk->getDeltatime();
 							this->addPosition( netbuf, unit, cltk->game_unit.GetUnit(), cs);
 							nbunits++;
 						}
@@ -445,7 +445,7 @@ void	ZoneMgr::broadcastSnapshots( bool update_planets)
 							// Create a client state with a delta time
 							ClientState cs( un);
 							// HAVE TO VERIFY WHICH DELTATIME IS TO BE SENT
-							cs.setDelay( cltl->deltatime);
+							cs.setDelay( cltl->getDeltatime());
 							this->addPosition( netbuf, un, cltk->game_unit.GetUnit(), cs);
 						}
 						// Else : always send back to clients their own info or just ignore ?

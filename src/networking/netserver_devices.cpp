@@ -118,7 +118,7 @@ void	NetServer::sendDockAuthorize( ObjSerial serial, ObjSerial utdw_serial, int 
 	ClientPtr clt = this->getClientFromSerial( serial);
 	clt->ingame = false;
 	// Set timestamps to 0 so we won't have prediction problem when undocking
-	clt->old_timestamp = clt->latest_timestamp = 0;
+	clt->clearLatestTimestamp();
 	StarSystem * currentsys = clt->game_unit.GetUnit()->activeStarSystem;
 	// Remove the unit from the system list
 	currentsys->RemoveUnit( clt->game_unit.GetUnit());

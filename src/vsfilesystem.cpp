@@ -1354,7 +1354,7 @@ namespace VSFileSystem
 	// SHOULD BE HANDLED IN VOLUMES MIGHT BE FOUND IN THE CURRENT DIRECTORY OF A TYPE THAT IS NOT HANDLED IN
 	// VOLUMES -> SO WE HAVE TO USE THE ALT_TYPE IN MOST OF THE TEST TO USE THE CORRECT FILE OPERATIONS
 
-	VSFile::VSFile()
+	void VSFile::private_init()
 	{
 		fp = NULL;
 		size = -1;
@@ -1367,9 +1367,14 @@ namespace VSFileSystem
 		volume_type = None;
 	}
 
+	VSFile::VSFile()
+    {
+        private_init( );
+    }
+
 	VSFile::VSFile( const char * filename, VSFileType type, VSFileMode mode)
 	{
-		VSFile::VSFile();
+        private_init( );
 		if( mode == ReadOnly)
 			this->OpenReadOnly( filename, type);
 		else if (mode == ReadWrite)

@@ -1,3 +1,4 @@
+#include <assert.h>
 #include <iostream>
 #include <vector>
 #include "stardate.h"
@@ -19,6 +20,8 @@ StarDate::StarDate()
 
 void	StarDate::Init( double time)
 {
+	assert( initial_star_time == NULL );
+
 	initial_time = getNewTime();
 	initial_star_time = new double[factions.size()];
 	for( unsigned int i=0; i<factions.size(); i++)
@@ -28,10 +31,14 @@ void	StarDate::Init( double time)
 // Get the current StarDate time in seconds
 double	StarDate::GetCurrentStarTime( int faction)
 {
-	// Get the number of seconds elapsed since the server start
-	double time_since_server_started = getNewTime() - initial_time;
-	// Add them to the current date
-	return (initial_star_time[faction] + time_since_server_started);
+    // Get the number of seconds elapsed since the server start
+    double time_since_server_started = getNewTime() - initial_time;
+
+    // Add them to the current date
+    if( initial_star_time == NULL )
+        return time_since_server_started;
+    else
+        return (initial_star_time[faction] + time_since_server_started);
 }
 
 /**********************************************************************************/
@@ -40,6 +47,8 @@ double	StarDate::GetCurrentStarTime( int faction)
 
 void	StarDate::InitTrek( string date)
 {
+	assert( initial_star_time == NULL );
+
 	initial_star_time = 0;
 	initial_time = getNewTime();
 	initial_star_time = new double[factions.size()];

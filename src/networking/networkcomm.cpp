@@ -135,7 +135,7 @@ int	Pa_PlayCallback( void * inputBuffer, void * outputBuffer, unsigned long fram
 
 #endif /* NETCOMM_PORTAUDIO */
 
-NetworkCommunication::NetworkCommunication()
+void NetworkCommunication::private_init()
 {
 	this->active = false;
 	this->max_messages = 25;
@@ -230,6 +230,11 @@ NetworkCommunication::NetworkCommunication()
 #endif
 }
 
+NetworkCommunication::NetworkCommunication()
+{
+    private_init( );
+}
+
 char	NetworkCommunication::HasWebcam()
 {
 #ifndef NETCOMM_NOWEBCAM
@@ -252,7 +257,7 @@ char	NetworkCommunication::HasPortaudio()
 
 NetworkCommunication::NetworkCommunication( int nb)
 {
-	NetworkCommunication::NetworkCommunication();
+    private_init( );
 	assert( nb<65536);
 	this->max_messages = nb;
 }

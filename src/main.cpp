@@ -53,6 +53,7 @@
 #include "gfx/masks.h"
 #include "cmd/music.h"
 #include <time.h>
+#include <sys/signal.h>
 #if defined (_MSC_VER) && defined(_DEBUG)
 #include <crtdbg.h>
 #endif
@@ -267,6 +268,7 @@ int main( int argc, char *argv[] )
         VSFileSystem::vs_fprintf(stderr, "Couldn't initialize SDL: %s\n", SDL_GetError());
         winsys_exit(1);
     }
+    // signal( SIGSEGV, SIG_DFL );
 #endif
 #endif
 #if 0
@@ -561,22 +563,28 @@ void bootstrap_main_loop () {
 			winsys_exit(1);
 		}
 		//sleep( 3);
-		cout<<"Waiting for player "<<(k)<<" = "<<(*it)<<":"<<(*jt)<<"login response...";
-		if( use_acctserver=="true")
-			savefiles.push_back( Network[k].loginAcctLoop( (*it), (*jt)));
-		else
-			savefiles.push_back( Network[k].loginLoop( (*it), (*jt)));
-		if( savefiles[k][0]=="")
-		{
-				cout<<savefiles[k][1]<<endl;
-				cout<<"QUITTING"<<endl;
-				cleanexit=true;
-				winsys_exit(1);
-		}
-		else
-		{
-			cout<<" logged in !"<<endl;
-		}
+        cout<<"Waiting for player "<<(k)<<" = "<<(*it)<<":"<<(*jt)<<"login response...";
+        vector<string> loginResp;
+        if( use_acctserver=="true")
+            loginResp = Network[k].loginAcctLoop( (*it), (*jt));
+        else
+            loginResp = Network[k].loginLoop( (*it), (*jt));
+        savefiles.push_back( loginResp );
+
+        if( savefiles[k].empty() || savefiles[k][0]=="")
+        {
+            if( savefiles[k].empty() )
+                cout << "Server must have closed connection without warning" << endl;
+            else
+                cout<<savefiles[k][1]<<endl;
+            cout<<"QUITTING"<<endl;
+            cleanexit=true;
+            winsys_exit(1);
+        }
+        else
+        {
+            cout<<" logged in !"<<endl;
+        }
 	  }
 		/************* NETWORK PART ***************/
 	  if( Network!=NULL)
