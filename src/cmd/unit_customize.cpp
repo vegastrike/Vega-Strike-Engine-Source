@@ -117,75 +117,108 @@ bool Unit::UpgradeMounts (Unit *up, int mountoffset, bool touchme, bool downgrad
     if (up->mounts[i].status==Mount::ACTIVE||up->mounts[i].status==Mount::INACTIVE) {//only mess with this if the upgrador has active mounts
       int jmod=j%nummounts;//make sure since we're offsetting the starting we don't overrun the mounts
       if (!downgrade) {//if we wish to add guns instead of remove
-	if (up->mounts[i].type.size==(up->mounts[i].type.size&mounts[jmod].size)) {//only look at this mount if it can fit in the rack
-	  if (up->mounts[i].type.weapon_name!=mounts[jmod].type.weapon_name) {
-	    numave++;//ok now we can compute percentage of used parts
-	    if (templ) {
-	      if (templ->nummounts>jmod) {
-		int maxammo = templ->mounts[jmod].ammo;
-		if ((up->mounts[i].ammo>maxammo||up->mounts[i].ammo==-1)&&maxammo!=-1) {
-		  up->mounts[i].ammo = maxammo;
-		}
-		if (templ->mounts[jmod].volume!=-1) {
-		  if (up->mounts[i].ammo*up->mounts[i].type.volume>templ->mounts[jmod].volume) {
-		    up->mounts[i].ammo = (templ->mounts[jmod].volume+1)/up->mounts[i].type.volume;
-		  }
-		}
-	      }
-	    }
-	    percentage+=mounts[jmod].Percentage(up->mounts[i]);//compute here
-	    if (touchme) {//if we wish to modify the mounts
-	      mounts[jmod].SwapMounts (up->mounts[i]);//switch this mount with the upgrador mount
-	    }
-	  }else {
-	    int tmpammo = mounts[jmod].ammo;
-	    if (mounts[jmod].ammo!=-1&&up->mounts[i].ammo!=-1) {
-	      tmpammo+=up->mounts[i].ammo;
+	if (up->mounts[i].type.weapon_name!="MOUNT_UPGRADE") {
+
+
+	  if (up->mounts[i].type.size==(up->mounts[i].type.size&mounts[jmod].size)) {//only look at this mount if it can fit in the rack
+	    if (up->mounts[i].type.weapon_name!=mounts[jmod].type.weapon_name) {
+	      numave++;//ok now we can compute percentage of used parts
 	      if (templ) {
 		if (templ->nummounts>jmod) {
-		  if (templ->mounts[jmod].ammo!=-1) {
-		    if (templ->mounts[jmod].ammo>tmpammo) {
-		      tmpammo=templ->mounts[jmod].ammo;
-		    }
+		  int maxammo = templ->mounts[jmod].ammo;
+		  if ((up->mounts[i].ammo>maxammo||up->mounts[i].ammo==-1)&&maxammo!=-1) {
+		    up->mounts[i].ammo = maxammo;
 		  }
 		  if (templ->mounts[jmod].volume!=-1) {
-		    if (templ->mounts[jmod].volume>mounts[jmod].type.volume*tmpammo) {
-		      tmpammo=(templ->mounts[jmod].volume+1)/mounts[jmod].type.volume;
+		    if (up->mounts[i].ammo*up->mounts[i].type.volume>templ->mounts[jmod].volume) {
+		      up->mounts[i].ammo = (templ->mounts[jmod].volume+1)/up->mounts[i].type.volume;
 		    }
 		  }
-		  
 		}
-	      } 
-	      if (tmpammo*mounts[jmod].type.volume>mounts[jmod].volume) {
-		tmpammo = (1+mounts[jmod].volume)/mounts[jmod].type.volume;
 	      }
-	      if (tmpammo>mounts[jmod].ammo) {
-		cancompletefully=true;
-		if (touchme)
-		  mounts[jmod].ammo = tmpammo;
-	      }else {
-		cancompletefully=false;
+	      percentage+=mounts[jmod].Percentage(up->mounts[i]);//compute here
+	      if (touchme) {//if we wish to modify the mounts
+		mounts[jmod].SwapMounts (up->mounts[i]);//switch this mount with the upgrador mount
 	      }
+	    }else {
+	      int tmpammo = mounts[jmod].ammo;
+	      if (mounts[jmod].ammo!=-1&&up->mounts[i].ammo!=-1) {
+		tmpammo+=up->mounts[i].ammo;
+		if (templ) {
+		  if (templ->nummounts>jmod) {
+		    if (templ->mounts[jmod].ammo!=-1) {
+		      if (templ->mounts[jmod].ammo>tmpammo) {
+			tmpammo=templ->mounts[jmod].ammo;
+		      }
+		    }
+		    if (templ->mounts[jmod].volume!=-1) {
+		      if (templ->mounts[jmod].volume>mounts[jmod].type.volume*tmpammo) {
+			tmpammo=(templ->mounts[jmod].volume+1)/mounts[jmod].type.volume;
+		      }
+		    }
+		    
+		  }
+		} 
+		if (tmpammo*mounts[jmod].type.volume>mounts[jmod].volume) {
+		  tmpammo = (1+mounts[jmod].volume)/mounts[jmod].type.volume;
+		}
+		if (tmpammo>mounts[jmod].ammo) {
+		  cancompletefully=true;
+		  if (touchme)
+		    mounts[jmod].ammo = tmpammo;
+		}else {
+		  cancompletefully=false;
+		}
+	      }
+	      
 	    }
-	    
+	  } else {
+	    cancompletefully=false;//since we cannot fit the mount in the slot we cannot complete fully
 	  }
-	} else {
-	  cancompletefully=false;//since we cannot fit the mount in the slot we cannot complete fully
+	}else {
+	  if ((up->mounts[i].size&mounts[jmod].size)!=(mounts[i].size)) {
+	    if (touchme) {
+	      mounts[jmod].size|=up->mounts[i].size;
+	    }
+	    numave++;
+	    percentage++;
+
+	  }else {
+	    cancompletefully=false;
+	  }
+	  //we need to |= the mount type
 	}
       } else {
-	bool found=false;//we haven't found a matching gun to remove
-	for (unsigned int k=0;k<(unsigned int)nummounts;k++) {///go through all guns
-	  int jkmod = (jmod+k)%nummounts;//we want to start with bias
-	  if (strcasecmp(mounts[jkmod].type.weapon_name.c_str(),up->mounts[i].type.weapon_name.c_str())==0) {///search for right mount to remove starting from j. this is the right name
-	    found=true;//we got one
-	    percentage+=mounts[jkmod].Percentage(up->mounts[i]);///calculate scrap value (if damaged)
-	    if (touchme) //if we modify
-	      mounts[jkmod].status=Mount::UNCHOSEN;///deactivate weapon
-	    break;
+	if (up->mounts[i].type.weapon_name!="MOUNT_UPGRADE") {
+	  bool found=false;//we haven't found a matching gun to remove
+	  for (unsigned int k=0;k<(unsigned int)nummounts;k++) {///go through all guns
+	    int jkmod = (jmod+k)%nummounts;//we want to start with bias
+	    if (strcasecmp(mounts[jkmod].type.weapon_name.c_str(),up->mounts[i].type.weapon_name.c_str())==0) {///search for right mount to remove starting from j. this is the right name
+	      found=true;//we got one
+	      percentage+=mounts[jkmod].Percentage(up->mounts[i]);///calculate scrap value (if damaged)
+	      if (touchme) //if we modify
+		mounts[jkmod].status=Mount::UNCHOSEN;///deactivate weapon
+	      break;
+	    }
 	  }
+	  if (!found)
+	    cancompletefully=false;//we did not find a matching weapon to remove
+	}else {
+	  bool found=false;
+	  for (unsigned int k=0;k<(unsigned int)nummounts;k++) {///go through all guns
+	    int jkmod = (jmod+k)%nummounts;//we want to start with bias
+	    if ((up->mounts[i].size&mounts[jkmod].size)==(up->mounts[i].size)) {
+	      if (touchme) {
+		mounts[jkmod].size&=(~up->mounts[i].size);
+	      }
+	      percentage++;
+	      numave++;
+	      found=true;
+	    }
+	  }
+	  if (!found)
+	    cancompletefully=false;
 	}
-	if (!found)
-	  cancompletefully=false;//we did not find a matching weapon to remove
       }
     }
   }

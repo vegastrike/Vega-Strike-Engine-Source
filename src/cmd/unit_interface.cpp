@@ -641,9 +641,11 @@ void UpgradingInfo::CommitItem (const char *inp_buf, int button, int state) {
 	    NewPart=NULL;
 	  }
 	} else {
-	  if (NewPart->name==string("LOAD_FAILED")) {
-	    NewPart->Kill();
-	    NewPart=NULL;
+	  if (NewPart) {
+	    if (NewPart->name==string("LOAD_FAILED")) {
+	      NewPart->Kill();
+	      NewPart=NULL;
+	    }
 	  }
 	}
       }
