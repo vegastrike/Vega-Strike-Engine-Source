@@ -33,8 +33,8 @@ public:
 #include "python_unit_wrap.h"
 ///////////////////////////////MANUAL WRAP//////
   void Kill () {{CHECKME;}unit->Kill(true);}
-  UnitWrapper GetTarget () {{CHECKME(0);}return unit->GetTarget();}
-  void SetTarget (UnitWrapper targ) {{CHECKME;}unit->SetTarget(targ);}
+  UnitWrapper GetTarget () {{CHECKME(0);}return unit->Target();}
+  void SetTarget (UnitWrapper targ) {{CHECKME;}unit->Target(targ);}
   voidWRAPPED1( SetTarget ,UnitWrapper, targ)
   boost::python::tuple GetOrientation() {{CHECKME (boost::python::tuple());}Vector p,q,r; unit->GetOrientation(p,q,r); return boost::python::tuple(p,q,r);}
   boost::python::tuple queryBSP (bool ShieldBSP) {{CHECKME (boost::python::tuple());}float dist; UnitWrapper un; QVector st,en; Vector nml; un=unit->queryBSP(st,en,nml,dist,ShieldBSP); boost::python::tuple ret (un,st,en,nml); ret.set_item(4,dist); return ret;}
