@@ -574,36 +574,45 @@ Mesh::~Mesh()
 {
 	if(!orig)
 	{
-		if(vlist!=NULL)
+	  if(vlist!=NULL) {
 			delete vlist;
-		if(quadstrips!=NULL) {
-		  for(int a=0; a<numQuadstrips; a++) delete quadstrips[a];
-		  delete [] quadstrips;
-		}
+			vlist = NULL;
+	  }
+	  if(quadstrips!=NULL) {
+	    for(int a=0; a<numQuadstrips; a++) delete quadstrips[a];
+	    delete [] quadstrips;
+	    quadstrips = NULL;
+	  }
 		//if(vertexlist != NULL)
 		//	delete [] vertexlist;
-		if(stcoords != NULL)
+	  if(stcoords != NULL) {
 			delete [] stcoords;
+			stcoords = NULL;
+	  }
 		//if(alphalist != NULL)
 		//	delete [] alphalist;
-		if(Decal != NULL)
-		{
-			delete Decal;
-		}
-		if (squadlogos!=NULL)
-			delete squadlogos;
-		if (forcelogos!=NULL)
-			delete forcelogos;
-		if(bspTree!=NULL)
-		  delete bspTree;
-	}
-	else
-	{
-
-		orig->refcount--;
-		//printf ("orig refcount: %d",refcount);
-		if(orig->refcount == 0)
-			delete orig;
+	  if(Decal != NULL) {
+	    delete Decal;
+	    Decal = NULL;
+	  }
+	  if (squadlogos!=NULL) {
+	    delete squadlogos;
+	    squadlogos= NULL;
+	  }
+	  if (forcelogos!=NULL) {
+	    delete forcelogos;
+	    forcelogos = NULL;
+	  }
+	  if(bspTree!=NULL) {
+	    
+	    delete bspTree;
+	    bspTree= NULL;
+	  }
+	} else {
+	  orig->refcount--;
+	  //printf ("orig refcount: %d",refcount);
+	  if(orig->refcount == 0)
+	    delete orig;
 	}
 }
 float const ooPI = 1.00F/3.1415926535F;

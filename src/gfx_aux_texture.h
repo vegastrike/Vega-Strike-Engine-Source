@@ -35,8 +35,8 @@ struct Texture{
 	unsigned int sizeY;
 	unsigned char *data;
 	enum {_8BIT, _24BIT, _24BITRGBA} mode;
-	unsigned char palette[256*4+1];
-
+  //unsigned char palette[256*4+1];
+  unsigned char * palette;  ///if we statically allocate it, then gl_texture will kill it when destructor is called...and if we delete this texture we be ph00ked
 	int name;
 	int stage;
 
@@ -58,8 +58,13 @@ public:
 			if(data != NULL)
 			{
 				delete [] data;
+				data = NULL;
 				GFXDeleteTexture(name);
 				//glDeleteTextures(1, &name);
+			}
+			if (palette !=NULL) {
+			  delete []palette;
+			  palette = NULL;
 			}
 		}
 		else
@@ -79,9 +84,9 @@ public:
 	//void Filter();
 	//void NoFilter();
 };
-Texture * LoadAlphaMap (char *FileName, float alpha=1);
-Texture * LoadTexture (char * FileName);
-Texture * LoadRGBATexture (char * FileNameRGB, char *FileNameA, float alpha=1);
+//Texture * LoadAlphaMap (char *FileName, float alpha=1);
+//Texture * LoadTexture (char * FileName);
+//Texture * LoadRGBATexture (char * FileNameRGB, char *FileNameA, float alpha=1);
 
-void DelTexDat (Texture *); //note does not remove from OpenGL
+//void DelTexDat (Texture *); //note does not remove from OpenGL
 #endif

@@ -43,8 +43,10 @@ struct GLTexture{
 	}
 	~GLTexture()
 	{
-		if (palette)
+	  if (palette) {
 			delete [] palette;
+			palette = NULL;
+	  }
 	}
 };
 //static GLTexture *textures=NULL;
@@ -242,8 +244,10 @@ BOOL /*GFXDRVAPI*/ GFXDeleteTexture (int handle)
 		textures[handle].texture = NULL;
 		glDeleteTextures(1, &textures[handle].name);
 	}
-	if (textures[handle].palette)
+	if (textures[handle].palette) {
 		delete [] textures[handle].palette;
+		textures[handle].palette=0;
+	}
 	textures[handle].alive = FALSE;
 	return TRUE;
 }

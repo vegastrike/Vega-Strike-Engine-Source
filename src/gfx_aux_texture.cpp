@@ -99,6 +99,7 @@ void Texture::setold()
 
 Texture::Texture(char * FileName, int stage, enum TEXTURE_TARGET target, enum TEXTURE_IMAGE_TARGET imagetarget)
 {
+  palette = NULL;
   texture_target =target;
   image_target=imagetarget;
 	refcount = 0;
@@ -164,6 +165,7 @@ Texture::Texture(char * FileName, int stage, enum TEXTURE_TARGET target, enum TE
 		mode = _8BIT;
 		data = NULL;
 		data= new unsigned char [sizeY*sizeX];
+		palette = new unsigned char [256*4+1];
 		unsigned char *paltemp = palette;
 		unsigned char ctemp;
 		for(int palcount = 0; palcount < 256; palcount++)
@@ -191,6 +193,8 @@ Texture::Texture(char * FileName, int stage, enum TEXTURE_TARGET target, enum TE
 
 Texture::Texture (char * FileNameRGB, char *FileNameA, int stage, enum TEXTURE_TARGET target, enum TEXTURE_IMAGE_TARGET imagetarget, float alpha, int zeroval)
 {
+  palette = NULL;
+
 	refcount = 0;
 	this->stage = stage;
 	texture_target=target;
@@ -285,6 +289,7 @@ Texture::Texture (char * FileNameRGB, char *FileNameA, int stage, enum TEXTURE_T
 	  mode = _24BITRGBA;
 	  data = NULL;
 	  data= new unsigned char [4*sizeY*sizeX];
+	  palette = new unsigned char [256*4+1];
 	  unsigned char *paltemp = palette;
 	  unsigned char ctemp;
 	  for(int palcount = 0; palcount < 256; palcount++) {
