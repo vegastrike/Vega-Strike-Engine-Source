@@ -59,7 +59,9 @@ void ProcessJoystick (int whichplayer) {
   float x,y,z;
   int buttons;
 #ifdef HAVE_SDL
+#ifndef NO_SDL_JOYSTICK
   SDL_JoystickUpdate();//FIXME isn't this supposed to be called already by SDL?
+#endif
 #endif
   for (int i=whichplayer;i<whichplayer+1&&i<MAX_JOYSTICKS;i++) {
     buttons=0;
@@ -81,6 +83,7 @@ void ProcessJoystick (int whichplayer) {
 	for(int dir_index=0;dir_index<MAX_DIGITAL_VALUES;dir_index++){
 	  bool press=false;
 #ifdef HAVE_SDL
+#ifndef NO_SDL_JOYSTICK
 	  if(dir_index==VS_HAT_CENTERED && (hsw & SDL_HAT_CENTERED)){
 	    cout << "center" << endl;
 	    press=true;
@@ -110,7 +113,7 @@ void ProcessJoystick (int whichplayer) {
 	    press=true;
 	  }
 #endif
-
+#endif
 	  if(press==true){
 	    if(DigHatswitchState[i][h][dir_index]==UP){
 	      (*DigHatswitchBindings[i][h][dir_index])(0,PRESS);

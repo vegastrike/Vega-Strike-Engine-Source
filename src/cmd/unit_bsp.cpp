@@ -748,7 +748,6 @@ printf ("}\n");
 
 }
 
-#if defined(IRIX)
 static void wrtf(float f) {
 	union { float fval; unsigned int ival; } t;
 	t.fval = f; t.ival = le32_to_cpu(t.ival);
@@ -756,10 +755,6 @@ static void wrtf(float f) {
 }
 static void wrtb(const bool b) { (void) fwrite (&b, sizeof(bool), 1, o); }
 
-#else
-static void wrtf (float f) {f = le32_to_cpu(f); fwrite (&f,sizeof (float),1,o);}
-static void wrtb (const bool b) {fwrite (&b,sizeof (bool),1,o);}
-#endif
 
 static void write_bsp_tree (bsp_tree *tree,int level)//assume open file
 {

@@ -65,18 +65,22 @@ void InitJoystick(){
 
 
 #ifdef HAVE_SDL
+#ifndef NO_SDL_JOYSTICK
   int num_joysticks=SDL_NumJoysticks() ;
   printf("%i joysticks were found.\n\n", num_joysticks);
   printf("The names of the joysticks are:\n");
 #endif
+#endif
 
   for(i=0; i < MAX_JOYSTICKS; i++ )  {
 #ifdef HAVE_SDL
+#ifndef NO_SDL_JOYSTICK
     if (i<num_joysticks){
       //      SDL_EventState (SDL_JOYBUTTONDOWN,SDL_ENABLE);
       //      SDL_EventState (SDL_JOYBUTTONUP,SDL_ENABLE);
       printf("    %s\n", SDL_JoystickName(i));
     }
+#endif
 #endif
     joystick[i]=new JoyStick(i); // SDL_Init is done in main.cpp
     
@@ -106,7 +110,7 @@ JoyStick::JoyStick(int which): mouse(which==MOUSE_JOYSTICK) {
   if (which==MOUSE_JOYSTICK) {
     InitMouse(which);
   }
-#if !defined(HAVE_SDL)
+#if !defined(HAVE_SDL) || defined (NO_SDL_JOYSTICK)
   return;
 #else
   int num_joysticks=SDL_NumJoysticks() ;
@@ -188,7 +192,7 @@ void JoyStick::GetJoyStick(float &x,float &y, float &z, int &buttons)
       GetMouse (x,y,z,buttons);
       return;
     }
-#if defined(HAVE_SDL)
+#if defined(HAVE_SDL) && !defined(NO_SDL_JOYSTICK)
 
     int numaxes = SDL_JoystickNumAxes (joy);
 

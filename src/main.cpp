@@ -147,7 +147,8 @@ int main( int argc, char *argv[] )
 	delete []parentdir;
 	}
 #if defined(WITH_MACOSX_BUNDLE)
-    chdir ("../../../");/* chdir to the .app's parent */
+	
+	//chdir ("../../../");/* chdir to the .app's parent */
 #endif
 #endif
     /* Print copyright notice */
@@ -204,12 +205,13 @@ int main( int argc, char *argv[] )
     
 
 #if defined(HAVE_SDL)
+#ifndef NO_SDL_JOYSTICK
     // && defined(HAVE_SDL_MIXER)
   if (  SDL_InitSubSystem( SDL_INIT_JOYSTICK )) {
         fprintf(stderr, "Couldn't initialize SDL: %s\n", SDL_GetError());
         winsys_exit(1);
     }
-
+#endif
 #endif
 #if 0
     InitTime();
