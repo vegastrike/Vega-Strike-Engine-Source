@@ -9,9 +9,9 @@
 
 #include <iostream>
 #include "cg_global.h"
-#include <shared/data_path.h>
 
 #if defined(CG_SUPPORT)
+#include <shared/data_path.h>
 
 using namespace std;
 
