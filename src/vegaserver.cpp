@@ -37,6 +37,6 @@ int main( int argc, char **argv)
 
 	Server->start( argc, argv);
 
-	delete Network;
+	delete Server;
 	return 0;
 }
