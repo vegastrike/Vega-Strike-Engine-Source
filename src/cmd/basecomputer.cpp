@@ -66,11 +66,6 @@ static const float MODE_BUTTON_SPACE = 0.03;
 // Default color in CargoColor.
 static const GFXColor DEFAULT_UPGRADE_COLOR = GFXColor(1,1,1,1);
 
-// Quantity of items that turns on "Buy All" button.
-static const int MIN_BUY_ALL_QUANTITY = 1;
-// Quantity of items that turns on "Buy 10" button.
-static const int MIN_BUY_10_QUANTITY = 11;			// "Buy All" works if there are exactly 10 items.
-
 // MOUNT ENTRY COLORS
 // Mount point that cannot be selected.
 static const GFXColor MOUNT_POINT_NO_SELECT = GFXColor(1,.7,.7);
@@ -325,16 +320,26 @@ GFXColor BaseComputer::getColorForGroup(std::string id) {
 // Hack that constructs controls in code.
 void BaseComputer::constructControls(void) {
 
-    // Title text display.
-    StaticDisplay* title = new StaticDisplay;
-    title->setRect( Rect(-.95, .7, 1.9, .08) );
-    title->setText("ERROR");
-    title->setTextColor(GFXColor(.4,1,.4));
-    title->setColor(GUI_CLEAR);
-    title->setFont( Font(.07, BLACK_STROKE) );
-    title->setId("Title");
+    // Base info title.
+    StaticDisplay* baseTitle = new StaticDisplay;
+    baseTitle->setRect( Rect(-.96, .76, 1.9, .08) );
+    baseTitle->setText("ERROR");
+    baseTitle->setTextColor(GFXColor(.4,1,.4));
+    baseTitle->setColor(GUI_CLEAR);
+    baseTitle->setFont( Font(.07, BLACK_STROKE) );
+    baseTitle->setId("BaseInfoTitle");
     // Put it on the window.
-    window()->addControl(title);
+    window()->addControl(baseTitle);
+
+    // Player info title.
+    StaticDisplay* playerTitle = new StaticDisplay;
+    playerTitle->setRect( Rect(-.96, .69, 1.9, .07) );
+    playerTitle->setTextColor(GFXColor(.7,1,.7));
+    playerTitle->setColor(GUI_CLEAR);
+    playerTitle->setFont( Font(.06, BLACK_STROKE) );
+    playerTitle->setId("PlayerInfoTitle");
+    // Put it on the window.
+    window()->addControl(playerTitle);
 
     // Options button.
     NewButton* options = new NewButton;
@@ -386,7 +391,7 @@ void BaseComputer::constructControls(void) {
 
         // Seller text display.
         StaticDisplay* sellLabel = new StaticDisplay;
-        sellLabel->setRect( Rect(-.96, .6, .81, .1) );
+        sellLabel->setRect( Rect(-.96, .56, .81, .1) );
         sellLabel->setText("Seller");
         sellLabel->setTextColor(GUI_OPAQUE_WHITE);
         sellLabel->setColor(GUI_CLEAR);
@@ -397,13 +402,33 @@ void BaseComputer::constructControls(void) {
         // Player inventory text display.
         StaticDisplay* inv = new StaticDisplay;
         *inv = *sellLabel;
-        inv->setRect( Rect(.15, .6, .81, .1) );
+        inv->setRect( Rect(.15, .56, .81, .1) );
         inv->setText("Inventory");
         cargoGroup->addChild(inv);
 
+        // Total price text display.
+        StaticDisplay* totalPrice = new StaticDisplay;
+        totalPrice->setRect( Rect(-.2, .56, .4, .07) );
+        totalPrice->setTextColor(GUI_OPAQUE_WHITE);
+        totalPrice->setColor(GUI_CLEAR);
+        totalPrice->setFont( Font(.06) );
+        totalPrice->setJustification(CENTER_JUSTIFY);
+        totalPrice->setId("TotalPrice");
+        cargoGroup->addChild(totalPrice);
+
+        // "Max" text display.
+        StaticDisplay* maxForPlayer = new StaticDisplay;
+        maxForPlayer->setRect( Rect(-.14, .49, .28, .07) );
+        maxForPlayer->setTextColor(GUI_OPAQUE_WHITE);
+        maxForPlayer->setColor(GUI_CLEAR);
+        maxForPlayer->setFont( Font(.06) );
+        maxForPlayer->setJustification(CENTER_JUSTIFY);
+        maxForPlayer->setId("MaxQuantity");
+        cargoGroup->addChild(maxForPlayer);
+
         // Scroller for seller.
         Scroller* sellerScroller = new Scroller;
-        sellerScroller->setRect( Rect(-.20, -.4, .05, 1) );
+        sellerScroller->setRect( Rect(-.20, -.4, .05, .95) );
         sellerScroller->setColor( GFXColor(color.r,color.g,color.b,.1) );
         sellerScroller->setThumbColor( GFXColor(color.r*.4,color.g*.4,color.b*.4), GUI_OPAQUE_WHITE );
         sellerScroller->setButtonColor( GFXColor(color.r*.4,color.g*.4,color.b*.4) );
@@ -412,7 +437,7 @@ void BaseComputer::constructControls(void) {
 
         // Seller picker.
         SimplePicker* sellpick = new SimplePicker;
-        sellpick->setRect( Rect(-.96, -.4, .76, 1) );
+        sellpick->setRect( Rect(-.96, -.4, .76, .95) );
         sellpick->setColor( GFXColor(color.r,color.g,color.b,.1) );
 		sellpick->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY);
         sellpick->setTextColor(GUI_OPAQUE_WHITE);
@@ -429,7 +454,7 @@ void BaseComputer::constructControls(void) {
 
         // Scroller for inventory.
         Scroller* invScroller = new Scroller;
-        invScroller->setRect( Rect(.91, -.4, .05, 1) );
+        invScroller->setRect( Rect(.91, -.4, .05, .95) );
         invScroller->setColor( GFXColor(color.r,color.g,color.b,.1) );
         invScroller->setThumbColor( GFXColor(color.r*.4,color.g*.4,color.b*.4), GUI_OPAQUE_WHITE );
         invScroller->setButtonColor( GFXColor(color.r*.4,color.g*.4,color.b*.4) );
@@ -438,7 +463,7 @@ void BaseComputer::constructControls(void) {
 
         // Inventory picker.
         SimplePicker* ipick = new SimplePicker;
-        ipick->setRect( Rect(.15, -.4, .76, 1) );
+        ipick->setRect( Rect(.15, -.4, .76, .95) );
         ipick->setColor( GFXColor(color.r,color.g,color.b,.1) );
 		ipick->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY);
         ipick->setTextColor(GUI_OPAQUE_WHITE);
@@ -465,29 +490,12 @@ void BaseComputer::constructControls(void) {
 		buy->setEndBorderColor( GFXColor(.4,.4,.4) );
 		buy->setShadowWidth(2.0);
         buy->setFont(Font(.1, BLACK_STROKE));
-        buy->setId("Commit");
+        buy->setId("CommitAll");
         cargoGroup->addChild(buy);
-
-        // "Buy All" button.
-        NewButton* buyAll = new NewButton;
-		buyAll->setLabel("Buy All");
-        buyAll->setRect( Rect(-.11, .1, .22, .1) );
-        buyAll->setColor( GFXColor(0,1,1,.1) );
-        buyAll->setTextColor(GUI_OPAQUE_WHITE);
-		buyAll->setDownColor( GFXColor(0,1,1,.4) );
-		buyAll->setDownTextColor( GFXColor(.2,.2,.2) );
-		buyAll->setVariableBorderCycleTime(1.0);
-		buyAll->setBorderColor( GFXColor(.1,.1,.1) );
-		buyAll->setEndBorderColor( GFXColor(.4,.4,.4) );
-		buyAll->setShadowWidth(2.0);
-        buyAll->setFont(Font(.08, BLACK_STROKE));
-        buyAll->setId("CommitAll");
-        cargoGroup->addChild(buyAll);
 
         // "Buy 10" button.
         NewButton* buy10 = new NewButton;
-		buy10->setLabel("Buy 10");
-        buy10->setRect( Rect(-.11, -.1, .22, .1) );
+        buy10->setRect( Rect(-.11, .1, .22, .1) );
         buy10->setColor( GFXColor(0,1,1,.1) );
         buy10->setTextColor(GUI_OPAQUE_WHITE);
 		buy10->setDownColor( GFXColor(0,1,1,.4) );
@@ -499,6 +507,21 @@ void BaseComputer::constructControls(void) {
         buy10->setFont(Font(.08, BLACK_STROKE));
         buy10->setId("Commit10");
         cargoGroup->addChild(buy10);
+
+        // "Buy 1" button.
+        NewButton* buy1 = new NewButton;
+        buy1->setRect( Rect(-.11, -.1, .22, .1) );
+        buy1->setColor( GFXColor(0,1,1,.1) );
+        buy1->setTextColor(GUI_OPAQUE_WHITE);
+		buy1->setDownColor( GFXColor(0,1,1,.4) );
+		buy1->setDownTextColor( GFXColor(.2,.2,.2) );
+		buy1->setVariableBorderCycleTime(1.0);
+		buy1->setBorderColor( GFXColor(.1,.1,.1) );
+		buy1->setEndBorderColor( GFXColor(.4,.4,.4) );
+		buy1->setShadowWidth(2.0);
+        buy1->setFont(Font(.08, BLACK_STROKE));
+        buy1->setId("Commit");
+        cargoGroup->addChild(buy1);
 
         // Scroller for description.
         Scroller* descScroller = new Scroller;
@@ -534,7 +557,7 @@ void BaseComputer::constructControls(void) {
 
         // Seller text display.
         StaticDisplay* sellLabel = new StaticDisplay;
-        sellLabel->setRect( Rect(-.96, .6, .81, .1) );
+        sellLabel->setRect( Rect(-.96, .55, .81, .1) );
         sellLabel->setText("Available Upgrades");
         sellLabel->setTextColor(GUI_OPAQUE_WHITE);
         sellLabel->setColor(GUI_CLEAR);
@@ -545,13 +568,13 @@ void BaseComputer::constructControls(void) {
         // Player inventory text display.
         StaticDisplay* inv = new StaticDisplay;
         *inv = *sellLabel;
-        inv->setRect( Rect(.15, .6, .81, .1) );
+        inv->setRect( Rect(.15, .55, .81, .1) );
         inv->setText("Improvements To Sell");
         upgradeGroup->addChild(inv);
 
         // Scroller for seller.
         Scroller* sellerScroller = new Scroller;
-        sellerScroller->setRect( Rect(-.20, -.4, .05, 1) );
+        sellerScroller->setRect( Rect(-.20, -.4, .05, .95) );
         sellerScroller->setColor( GFXColor(color.r,color.g,color.b,.1) );
         sellerScroller->setThumbColor( GFXColor(color.r*.4,color.g*.4,color.b*.4), GUI_OPAQUE_WHITE );
         sellerScroller->setButtonColor( GFXColor(color.r*.4,color.g*.4,color.b*.4) );
@@ -560,7 +583,7 @@ void BaseComputer::constructControls(void) {
 
         // Seller picker.
         SimplePicker* sellpick = new SimplePicker;
-        sellpick->setRect( Rect(-.96, -.4, .76, 1) );
+        sellpick->setRect( Rect(-.96, -.4, .76, .95) );
         sellpick->setColor( GFXColor(color.r,color.g,color.b,.1) );
 		sellpick->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY);
         sellpick->setTextColor(GUI_OPAQUE_WHITE);
@@ -577,7 +600,7 @@ void BaseComputer::constructControls(void) {
 
         // Scroller for inventory.
         Scroller* invScroller = new Scroller;
-        invScroller->setRect( Rect(.91, -.4, .05, 1) );
+        invScroller->setRect( Rect(.91, -.4, .05, .95) );
         invScroller->setColor( GFXColor(color.r,color.g,color.b,.1) );
         invScroller->setThumbColor( GFXColor(color.r*.4,color.g*.4,color.b*.4), GUI_OPAQUE_WHITE );
         invScroller->setButtonColor( GFXColor(color.r*.4,color.g*.4,color.b*.4) );
@@ -586,7 +609,7 @@ void BaseComputer::constructControls(void) {
 
         // Inventory picker.
         SimplePicker* ipick = new SimplePicker;
-        ipick->setRect( Rect(.15, -.4, .76, 1) );
+        ipick->setRect( Rect(.15, -.4, .76, .95) );
         ipick->setColor( GFXColor(color.r,color.g,color.b,.1) );
 		ipick->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY);
         ipick->setTextColor(GUI_OPAQUE_WHITE);
@@ -1011,10 +1034,10 @@ void BaseComputer::run(void) {
     WindowController::run();
 }
 
-// Redo the title string for the display.
+// Redo the title strings for the display.
 void BaseComputer::recalcTitle() {
-    // Generic title for the display.
-    string title = modeInfo[m_currentDisplay].title;
+    // Generic base title for the display.
+    string baseTitle = modeInfo[m_currentDisplay].title;
 
     // Base name.
     Unit* baseUnit = m_base.GetUnit();
@@ -1027,24 +1050,53 @@ void BaseComputer::recalcTitle() {
 			baseName = baseUnit->name;
         }
     }
-    title += baseName + " ";
+    baseTitle += baseName;
 
-    if(m_currentDisplay == MISSIONS) {
-        // The first entry in the active_missions list should be invisible to the user.
-        int count = active_missions.size() - 1;
-        count = max(count, 0);
-        title += "(Missions: " + tostring(count) + ") ";
-    }
+	// Faction name for base.
+	string baseFaction = FactionUtil::GetFactionName(baseUnit->faction);
+	if(!baseFaction.empty()) {
+		baseTitle += " [" + baseFaction + ']';
+	}
+
+    // Set the string in the base title control.
+    StaticDisplay* baseTitleDisplay = dynamic_cast<StaticDisplay*>( window()->findControlById("BaseInfoTitle") );
+    assert(baseTitleDisplay != NULL);
+    baseTitleDisplay->setText(baseTitle);
+
+	// Generic player title for display
+	char playerTitle[256];
+	playerTitle[0] = '\0';		// Start with an empty string.
 
     // Credits the player has.
-    char floatPrice [100];
-    sprintf(floatPrice,"%.2f",_Universe->AccessCockpit()->credits);
-    title += string("Credits: ") + floatPrice;
+	const float playerCredits = _Universe->AccessCockpit()->credits;
 
-    // Set the string in the title control.
-    StaticDisplay* titleDisplay = dynamic_cast<StaticDisplay*>( window()->findControlById("Title") );
-    assert(titleDisplay != NULL);
-    titleDisplay->setText(title);
+	switch(m_currentDisplay) {
+		default:
+			sprintf(playerTitle, "Credits: %.2f", playerCredits);
+			break;
+		case MISSIONS:
+			{
+				const int count = guiMax(0, active_missions.size() - 1);
+				sprintf(playerTitle, "Credits: %.2f,  Active missions: %d", playerCredits, count);
+			}
+			break;
+		case CARGO:
+			{
+				Unit* playerUnit = m_player.GetUnit();
+				if(playerUnit) {
+					const float emptyVolume = playerUnit->EmptyCargoVolume();
+					const float volumeLeft = emptyVolume - playerUnit->CargoVolume();
+					sprintf(playerTitle, "Credits: %.2f,  Cargo space left: %.6g of %.6g",
+						playerCredits, volumeLeft, emptyVolume);
+				}
+			}
+			break;
+	}
+
+    // Set the string in the player title control.
+    StaticDisplay* playerTitleDisplay = dynamic_cast<StaticDisplay*>( window()->findControlById("PlayerInfoTitle") );
+    assert(playerTitleDisplay != NULL);
+    playerTitleDisplay->setText(playerTitle);
 }
 
 // Scroll to a specific item in a picker, and optionally select it.
@@ -1137,46 +1189,67 @@ bool BaseComputer::scrollToItem(Picker* picker, const Cargo& item, bool select, 
     return false;
 }
 
-// Hide the button(s) that commit transactions.
-void BaseComputer::hideCommitButtons(void) {
+// Hide the controls that commit transactions.
+void BaseComputer::hideCommitControls(void) {
+	// The three buy/sell buttons.
     NewButton* commitButton = dynamic_cast<NewButton*>( window()->findControlById("Commit") );
     commitButton->setHidden(true);
     NewButton* commit10Button = dynamic_cast<NewButton*>( window()->findControlById("Commit10") );
     if(commit10Button != NULL) commit10Button->setHidden(true);
     NewButton* commitAllButton = dynamic_cast<NewButton*>( window()->findControlById("CommitAll") );
     if(commitAllButton != NULL) commitAllButton->setHidden(true);
+
+	// The price and "max" displays.
+    StaticDisplay* totalPrice = dynamic_cast<StaticDisplay*>( window()->findControlById("TotalPrice") );
+	totalPrice->setText("");
+    StaticDisplay* maxForPlayer = dynamic_cast<StaticDisplay*>( window()->findControlById("MaxQuantity") );
+	maxForPlayer->setText("");
 }
 
-// Update the commit buttons in the Cargo screen, since we have three of them.
-void BaseComputer::configureCargoCommitButtons(const Cargo& item, TransactionType trans) {
+// Update the commit controls in the Cargo screen, since we have three of them.
+void BaseComputer::configureCargoCommitControls(const Cargo& item, TransactionType trans) {
 	if(trans == BUY_CARGO) {
-		// "Buy" button.
+		// "Buy 1" button.
 		NewButton* commitButton = dynamic_cast<NewButton*>( window()->findControlById("Commit") );
 		assert(commitButton != NULL);
 		commitButton->setHidden(false);
-		commitButton->setLabel("Buy");
+		commitButton->setLabel("Buy 1");
 		commitButton->setCommand("BuyCargo");
 
 		// "Buy 10" button.
 		NewButton* commit10Button = dynamic_cast<NewButton*>( window()->findControlById("Commit10") );
 		assert(commit10Button != NULL);
-		if(item.quantity >= MIN_BUY_10_QUANTITY && isTransactionOK(item, trans, 10)) {
-			commit10Button->setHidden(false);
-			commit10Button->setLabel("Buy 10");
-			commit10Button->setCommand("Buy10Cargo");
-		} else {
-			commit10Button->setHidden(true);
-		}
+		commit10Button->setHidden(false);
+		commit10Button->setLabel("Buy 10");
+		commit10Button->setCommand("Buy10Cargo");
 
 		// "Buy All" button.
 		NewButton* commitAllButton = dynamic_cast<NewButton*>( window()->findControlById("CommitAll") );
 		assert(commitAllButton != NULL);
-		if(item.quantity >= MIN_BUY_ALL_QUANTITY && isTransactionOK(item, trans, item.quantity)) {
-			commitAllButton->setHidden(false);
-			commitAllButton->setLabel("Buy All");
-			commitAllButton->setCommand("BuyAllCargo");
+		commitAllButton->setHidden(false);
+		commitAllButton->setLabel("Buy");
+		commitAllButton->setCommand("BuyAllCargo");
+
+		const int maxQuantity = maxQuantityForPlayer(item, item.quantity);
+
+		// Total price display.
+		const double totalPrice = item.price * maxQuantity;
+		char tempString[100];
+		sprintf(tempString, "Total: #b4#%.2f#-b", totalPrice);
+		StaticDisplay* totalDisplay = dynamic_cast<StaticDisplay*>( window()->findControlById("TotalPrice") );
+		assert(totalDisplay != NULL);
+		totalDisplay->setText(tempString);
+
+		// Limit if we have one.
+		StaticDisplay* maxForPlayer = dynamic_cast<StaticDisplay*>( window()->findControlById("MaxQuantity") );
+		assert(maxForPlayer != NULL);
+		if(maxQuantity >= item.quantity) {
+			// No limits, so let's not mention anything.
+			maxForPlayer->setText("");
 		} else {
-			commitAllButton->setHidden(true);
+			char maxString[100];
+			sprintf(maxString, "Max: #b4#%d#-b", maxQuantity);
+			maxForPlayer->setText(maxString);
 		}
 	} else {
 		assert(trans == SELL_CARGO);
@@ -1185,31 +1258,35 @@ void BaseComputer::configureCargoCommitButtons(const Cargo& item, TransactionTyp
 		NewButton* commitButton = dynamic_cast<NewButton*>( window()->findControlById("Commit") );
 		assert(commitButton != NULL);
 		commitButton->setHidden(false);
-		commitButton->setLabel("Sell");
+		commitButton->setLabel("Sell 1");
 		commitButton->setCommand("SellCargo");
 
 		// "Sell 10" button.
 		NewButton* commit10Button = dynamic_cast<NewButton*>( window()->findControlById("Commit10") );
 		assert(commit10Button != NULL);
-		if(item.quantity >= MIN_BUY_10_QUANTITY && isTransactionOK(item, trans, 10)) {
-			commit10Button->setHidden(false);
-			commit10Button->setLabel("Sell 10");
-			commit10Button->setCommand("Sell10Cargo");
-		} else {
-			commit10Button->setHidden(true);
-		}
+		commit10Button->setHidden(false);
+		commit10Button->setLabel("Sell 10");
+		commit10Button->setCommand("Sell10Cargo");
 
 		// "Sell All" button.
 		NewButton* commitAllButton = dynamic_cast<NewButton*>( window()->findControlById("CommitAll") );
 		assert(commitAllButton != NULL);
-		if(item.quantity >= MIN_BUY_ALL_QUANTITY && isTransactionOK(item, trans, item.quantity)) {
-			commitAllButton->setHidden(false);
-			commitAllButton->setLabel("Sell All");
-			commitAllButton->setCommand("SellAllCargo");
-		} else {
-			commitAllButton->setHidden(true);
-		}
+		commitAllButton->setHidden(false);
+		commitAllButton->setLabel("Sell");
+		commitAllButton->setCommand("SellAllCargo");
 
+		// Total price display.
+		const double totalPrice = item.price * item.quantity;
+		char tempString[100];
+		sprintf(tempString, "Total: #b4#%.2f#-b", totalPrice);
+		StaticDisplay* totalDisplay = dynamic_cast<StaticDisplay*>( window()->findControlById("TotalPrice") );
+		assert(totalDisplay != NULL);
+		totalDisplay->setText(tempString);
+
+		// No limit.
+		StaticDisplay* maxForPlayer = dynamic_cast<StaticDisplay*>( window()->findControlById("MaxQuantity") );
+		assert(maxForPlayer != NULL);
+		maxForPlayer->setText("");
 	}
 }
 
@@ -1224,7 +1301,7 @@ void BaseComputer::updateTransactionControlsForSelection(TransactionList* tlist)
     if(!tlist) {
         // We have no selection.  Turn off UI that commits a transaction.
         m_selectedList = NULL;
-		hideCommitButtons();
+		hideCommitControls();
         desc->setText("");
         // Make sure there is no selection.
         if(m_transList1.picker) m_transList1.picker->selectCell(NULL);
@@ -1250,13 +1327,13 @@ void BaseComputer::updateTransactionControlsForSelection(TransactionList* tlist)
     if(!isTransactionOK(item, tlist->transaction)) {
         // We can't do the transaction. so hide the transaction button.
         // This is an odd state.  We have a selection, but no transaction is possible.
-        hideCommitButtons();
+        hideCommitControls();
     } else {
         // We can do the transaction.
         commitButton->setHidden(false);
         switch(tlist->transaction) {
             case BUY_CARGO:
-				configureCargoCommitButtons(item, BUY_CARGO);
+				configureCargoCommitControls(item, BUY_CARGO);
                 break;
             case BUY_UPGRADE:
                 commitButton->setLabel("Buy");
@@ -1267,7 +1344,7 @@ void BaseComputer::updateTransactionControlsForSelection(TransactionList* tlist)
                 commitButton->setCommand("BuyShip");
                 break;
             case SELL_CARGO:
-				configureCargoCommitButtons(item, SELL_CARGO);
+				configureCargoCommitControls(item, SELL_CARGO);
                 break;
             case SELL_UPGRADE:
                 commitButton->setLabel("Sell");
@@ -1627,6 +1704,24 @@ void BaseComputer::updateTransactionControls(const Cargo& item, bool skipFirstCa
     }
 }
 
+// The max number of a particular item this player can buy.  Limits by price, cargo space, etc.
+int BaseComputer::maxQuantityForPlayer(const Cargo& item, int suggestedQuantity) {
+	int result = 0;
+
+    Unit* playerUnit = m_player.GetUnit();
+	if(playerUnit) {
+		// Limit by cargo capacity.
+		const float volumeLeft = playerUnit->EmptyCargoVolume() - playerUnit->CargoVolume();
+		result = guiMin(suggestedQuantity, volumeLeft/item.volume);
+
+		// Limit by price.
+		const double credits = _Universe->AccessCockpit()->credits;
+		result = guiMin(result, credits / item.price);
+	}
+
+	return result;
+}
+
 // Buy some items from the Cargo list.  Use -1 for quantity to buy all of the item.
 bool BaseComputer::buySelectedCargo(int requestedQuantity) {
     Unit* playerUnit = m_player.GetUnit();
@@ -1638,7 +1733,8 @@ bool BaseComputer::buySelectedCargo(int requestedQuantity) {
     Cargo* item = selectedItem();
     if(item) {
         Cargo itemCopy = *item;     // Copy this because we reload master list before we need it.
-		const int quantity = (requestedQuantity <= 0? item->quantity : requestedQuantity);
+		int quantity = (requestedQuantity <= 0? item->quantity : requestedQuantity);
+		quantity = maxQuantityForPlayer(*item, quantity);
         playerUnit->BuyCargo(item->content, quantity, baseUnit, _Universe->AccessCockpit()->credits);
         // Reload the UI -- inventory has changed.  Because we reload the UI, we need to 
         //  find, select, and scroll to the thing we bought.  The item might be gone from the

@@ -960,6 +960,8 @@ public:
   bool BuyCargo (unsigned int i, unsigned int quantity, Unit * buyer, float &creds);
   bool BuyCargo (const std::string &cargo,unsigned int quantity, Unit * buyer, float & creds);
   void EjectCargo (unsigned int index);
+  float EmptyCargoVolume(void) const;
+  float CargoVolume(void) const;
 
 /***************************************************************************************/
 /**** AI STUFF                                                                      ****/

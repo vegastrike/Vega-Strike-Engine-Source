@@ -154,11 +154,11 @@ protected:
     // Update the controls when the selection for a transaction changes.
     void updateTransactionControlsForSelection(TransactionList* list);
 
-	// Hide the button(s) that commit transactions.
-	void hideCommitButtons(void);
+	// Hide the controls that commit transactions.
+	void hideCommitControls(void);
 
-	// Update the commit buttons in the Cargo screen, since we have three of them.
-	void configureCargoCommitButtons(const Cargo& item, TransactionType trans);
+	// Update the commit controls in the Cargo screen, since we have three of them.
+	void configureCargoCommitControls(const Cargo& item, TransactionType trans);
 
     // Make sure the info in the transaction lists is gone.
     void resetTransactionLists(void);
@@ -168,6 +168,9 @@ protected:
 
 	// Buy some items from the Cargo list.  Use -1 for quantity to buy all of the item.
 	bool buySelectedCargo(int requestedQuantity);
+
+	// The max number of a particular item this player can buy.  Limits by price, cargo space, etc.
+	int maxQuantityForPlayer(const Cargo& item, int suggestedQuantity);
 
 	// Sell some items from the Cargo list.  Use -1 for quantity to buy all of the item.
 	bool sellSelectedCargo(int requestedQuantity);

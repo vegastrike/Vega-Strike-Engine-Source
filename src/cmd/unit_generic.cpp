@@ -5040,11 +5040,7 @@ void Unit::AddCargo (const Cargo &carg, bool sort) {
 }
 
 bool Unit::CanAddCargo (const Cargo &carg)const {
-  float total_volume=carg.quantity*carg.volume;
-  unsigned int j;
-  for (j=0;j<image->cargo.size();j++) {
-    total_volume+=image->cargo[j].quantity*image->cargo[j].volume;
-  }
+  float total_volume=carg.quantity*carg.volume + CargoVolume();
   if  (total_volume<=image->cargo_volume)
     return true;
   const Unit * un;
@@ -5054,6 +5050,20 @@ bool Unit::CanAddCargo (const Cargo &carg)const {
     }
   }
   return false;
+}
+
+// The cargo volume of this ship when empty.  Max cargo volume.
+float Unit::EmptyCargoVolume(void) const {
+	return image->cargo_volume;
+}
+
+float Unit::CargoVolume(void) const {
+	float result = 0.0;
+	for(int i=0; i<image->cargo.size(); i++) {
+		result += image->cargo[i].quantity*image->cargo[i].volume;
+	}
+
+	return result;
 }
 
 
