@@ -140,8 +140,36 @@ void help_func( GtkWidget *w, int i)
 #endif
 
 }
+
+#ifdef _WIN32
+#include <windows.h>
+bool progress=true;
+struct stupod {
+  char * my_mission;
+  char * num;
+  stupod (char * a, char *b) {
+    my_mission=a;
+    num=b;
+  }
+};
+DWORD WINAPI DrawStartupDialog(LPVOID lpParameter) {
+	stupod *s= (stupod*)lpParameter;
+        progress=false;
+        Help ("Please wait while vegastrike loads...","Please wait while vegastrike loads...");
+        spawnl (P_WAIT,"./vegastrike","./vegastrike",s->num?s->num:s->my_mission,s->num?s->my_mission:NULL,NULL); 
+        if (s->num)
+          free (s->num);
+        free (s->my_mission);
+        delete (s);
+        progress=true;
+	return 0;
+}
+#endif
 void launch_mission () {
-  Help("Loading...","\n      Vegastrike is loading... Please wait while it starts up.      \n");
+#ifdef _WIN32
+  if (!progress)
+    return;
+#endif
   GoToParentDir();
   int player = my_mission.find ("player");
   if (player>0&&player!=std::string::npos) {
@@ -151,7 +179,8 @@ void launch_mission () {
 #ifndef _WIN32
    execlp ("./vegastrike","./vegastrike",num,my_mission.c_str(),NULL);   
 #else
-   spawnl (P_NOWAIT,"./vegastrike","./vegastrike",num,my_mission.c_str(),NULL);   
+   DWORD id;
+   HANDLE hThr=CreateThread(NULL,0,DrawStartupDialog,(void *)new stupod (strdup (my_mission.c_str()),strdup (num)),0,&id);
 #endif
   } else {
    printf ("./vegastrike %s",my_mission.c_str());
@@ -159,7 +188,8 @@ void launch_mission () {
 #ifndef _WIN32
    execlp ("./vegastrike","./vegastrike",my_mission.c_str(),NULL);   
 #else
-   spawnl (P_NOWAIT,"./vegastrike","./vegastrike",my_mission.c_str(),NULL);   
+   DWORD id;
+   HANDLE hThr=CreateThread(NULL,0,DrawStartupDialog,(void *)new stupod (strdup (my_mission.c_str()),NULL),0,&id);
 #endif
   }
 }
