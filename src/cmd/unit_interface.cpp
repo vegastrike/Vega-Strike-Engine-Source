@@ -145,7 +145,7 @@ UpgradingInfo::UpgradingInfo(Unit * un, Unit * base, vector<BaseMode> modes):bas
 	CargoInfo->AddTextItem("description", "");
 	OK = new Button(-0.94, -0.85, 0.15, 0.1, "Done");
 	COMMIT = new Button(-0.75, -0.85, 0.25, 0.1, "Buy");
-	const char  MyButtonModes[][128] = {"Merchant's Inventory","My Inventory","Mission BBS","Briefings","GNN News", "Ship Dealer","Upgrade Ship","Unimplemented","Downgrade Ship","Save/Load"};
+	const char  MyButtonModes[][128] = {"Merchant's Inventory","My Inventory","Mission BBS","My Ship Stats","GNN News", "Ship Dealer","Upgrade Ship","Unimplemented","Downgrade Ship","Save/Load"};
 	float beginx = -.4;
 	float lastx = beginx;
 	float sizeb;
@@ -229,6 +229,7 @@ void UpgradingInfo::Render() {
     bool render=true;
 
     TextPlane * tp=NULL;
+#ifdef USE_BRIEFINGS
     if (mode==BRIEFINGMODE&&submode==STOP_MODE) {
       for (unsigned int i=0;i<active_missions.size();i++) {
 	if (active_missions[i]==briefingMission) {
@@ -242,7 +243,14 @@ void UpgradingInfo::Render() {
 	}
       }
     }
-    StartGUIFrame(mode==BRIEFINGMODE?GFXFALSE:GFXTRUE);
+#endif
+    StartGUIFrame(
+#ifdef USE_BRIEFINGS
+		mode==BRIEFINGMODE?GFXFALSE:GFXTRUE
+#else
+		GFXTRUE
+#endif
+		);
     if (render) {
       // Black background
       ShowColor(-1,-1,2,2, 0,0,0,1);
@@ -295,8 +303,13 @@ void UpgradingInfo::SetMode (enum BaseMode mod, enum SubMode smod) {
       ButtonText="";
       break;
     case BRIEFINGMODE: 
+#ifdef USE_BRIEFINGS
       title="Briefings   ";
       ButtonText="End";
+#else
+	  title="View Ship Stats ";
+	  ButtonText="";
+#endif
       break;
     case NEWSMODE:
       title="GNN News  ";
@@ -399,10 +412,12 @@ void UpgradingInfo::SetupCargoList () {
     CurrentList = &GetCargoList();
     //    std::sort (CurrentList->begin(),CurrentList->end());
     CargoList->ClearList();
+#ifdef USE_BRIEFINGS
 	if (mode==BRIEFINGMODE) {
 		title="Briefings not implemented.";
 		return;
 	}
+#endif
     if (submode==NORMAL) {
       if (mode==SAVEMODE) {
         CargoList->AddTextItem ("Save","Save");
@@ -425,7 +440,11 @@ void UpgradingInfo::SetupCargoList () {
 	    title=title.substr(0,pos);
 	  }
 	  if (mode==BRIEFINGMODE) {
+#ifdef USE_BRIEFINGS
 	    curcategory.push_back("briefings");
+#else
+		curcategory.push_back("mystats");
+#endif
 	  }
 	}
 	if (!curcategory.empty()) {
@@ -442,7 +461,13 @@ void UpgradingInfo::SetupCargoList () {
 
 	  for (unsigned int i=0;i<CurrentList->size();i++) {
 	    if (match(curcategory.begin(),curcategory.end(),(*CurrentList)[i].cargo.category.begin(),(*CurrentList)[i].cargo.category.end(),true)) {
-	      if (mode!=UPGRADEMODE&&mode!=DOWNGRADEMODE) (*CurrentList)[i].color=GFXColor(1,1,1,1);
+		if (mode!=UPGRADEMODE&&mode!=DOWNGRADEMODE
+#ifdef USE_BRIEFINGS
+		  &&mode!=BRIEFINGMODE
+#endif
+		  ) {
+		    (*CurrentList)[i].color=GFXColor(1,1,1,1);
+		}
 		  Unit *un=buyer.GetUnit();
 		  Cockpit *cpt=NULL;
 		  static bool gottencolor=false;
@@ -643,6 +668,7 @@ extern void RespawnNow (Cockpit * cp);
 bool UpgradingInfo::SelectItem (const char *item, int button, int buttonstate) {
 	char floatprice [640];
   switch (mode) {
+#ifdef USE_BRIEFINGS
   case BRIEFINGMODE:
     switch (submode) {
     case NORMAL:
@@ -659,6 +685,7 @@ bool UpgradingInfo::SelectItem (const char *item, int button, int buttonstate) {
       }
     }
     break;
+#endif
   case SAVEMODE:
     
     if (item) {
@@ -682,15 +709,16 @@ bool UpgradingInfo::SelectItem (const char *item, int button, int buttonstate) {
     }
     }
     break;
+#ifndef USE_BREFINGS
+  case BRIEFINGMODE:
+#endif
   case BUYMODE:
   case SELLMODE:
   case UPGRADEMODE:
   case ADDMODE:
   case DOWNGRADEMODE:    
   case SHIPDEALERMODE:
-    switch (submode) {
-    case NORMAL:
-      {
+    if (submode==NORMAL) {
         Unit * bas = this->base.GetUnit();
         if (bas) {
 	int cargonumber;
@@ -719,13 +747,9 @@ bool UpgradingInfo::SelectItem (const char *item, int button, int buttonstate) {
 	CargoInfo->ChangeTextItem ("volume",floatprice);
 	CargoInfo->ChangeTextItem ("description",(*CurrentList)[cargonumber].cargo.description.c_str(),true);
       }
-	  }
-      break;
-    default:
+	} else {
       CommitItem (item,0,buttonstate);
-      break;
     }
-    break;
   case NEWSMODE:
     {
 	int cargonumber;
@@ -1273,13 +1297,17 @@ void UpgradingInfo::ProcessMouse(int type, int x, int y, int button, int state) 
 	}
 }
 
+std::string GetShipStats(Unit *un) {
+	return "Stat name=\"Value\"\nStta2 namerawrerqqds=\"hoho\"\n";
+}
 
-
-
-
+std::string GetNumKills(Unit *un) {
+	return "You don't have any kills!\nMua ha ha ha ha ha ha\nJust kidding :-)";
+}
 
 vector <CargoColor>&UpgradingInfo::MakeActiveMissionCargo() {
   TempCargo.clear();
+#ifdef USE_BRIEFINGS
   for (unsigned int i=0;i<active_missions.size();i++) {
     CargoColor c;
     c.cargo.quantity=1;
@@ -1289,6 +1317,27 @@ vector <CargoColor>&UpgradingInfo::MakeActiveMissionCargo() {
     c.cargo.category=string("briefings");
     TempCargo.push_back (c);
   }
+#else
+  CargoColor c;
+  c.cargo.quantity=1;
+  c.cargo.volume=1;
+  c.cargo.price=0;
+  c.cargo.description=GetShipStats(buyer.GetUnit());
+  c.cargo.category="mystats";
+  c.cargo.content="Ship_Stats";
+  c.color=GFXColor(.6,0,1,1);
+  TempCargo.push_back(c);
+  c.cargo.description=GetNumKills(buyer.GetUnit());
+  c.cargo.content="Factions_And_Kills";
+  c.color=GFXColor(1,.8,0,1);
+  TempCargo.push_back(c);
+/*
+  c.cargo.description="Unimplemented";
+  c.color=GFXColor(1,0,0,1);
+  c.cargo.content="Factions";
+  TempCargo.push_back(c);
+*/
+#endif
   return TempCargo;
 }
 
@@ -1314,6 +1363,7 @@ vector <CargoColor>&UpgradingInfo::MakeMissionsFromSavegame(Unit *base) {
   int len=getSaveStringLength(playernum,miss_script);
   assert(len==getSaveStringLength(playernum,miss_name)&&len==getSaveStringLength(playernum,miss_desc));
   unsigned int i=0;
+
   for (i=0;i<len;i++) {
 	  string m = getSaveString(playernum,miss_name,i);
 	  int count=1;
@@ -1457,9 +1507,14 @@ vector <CargoColor>&UpgradingInfo::GetCargoList () {
       break;
     case SHIPDEALERMODE:
     case MISSIONMODE://gotta transform the missions into cargo
+#ifdef USE_BRIEFINGS
     case BRIEFINGMODE:
+#endif
       relevant = base.GetUnit();
       break;
+#ifndef USE_BRIEFINGS
+    case BRIEFINGMODE:
+#endif
     case SELLMODE:
 
       relevant = buyer.GetUnit();
