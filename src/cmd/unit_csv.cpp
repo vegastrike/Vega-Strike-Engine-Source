@@ -597,7 +597,7 @@ void Unit::LoadRow(CSVRow &row,string modification, string * netxml) {
   image->SPECDriveFunctionalityMax=stof(row["Max_SPECDrive_Functionality"]);
   computer.slide_start=stoi(row["Slide_Start"]);
   computer.slide_end=stoi(row["Slide_End"]);
-  UpgradeUnit(this,row["Upgrade"]);
+  UpgradeUnit(this,row["Upgrades"]);
   
   this->image->explosion_type = row["Explosion"];
   if (image->explosion_type.length())
