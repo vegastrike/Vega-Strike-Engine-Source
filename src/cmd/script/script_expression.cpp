@@ -331,6 +331,9 @@ bool Mission::doTest(missionNode *node,int mode){
     else if(teststr=="eq"){
       node->script.tester=TEST_EQ;
     }
+    else if(teststr=="ne"){
+      node->script.tester=TEST_NE;
+    }
     else if(teststr=="ge"){
       node->script.tester=TEST_GE;
     }
@@ -385,6 +388,9 @@ bool Mission::doTest(missionNode *node,int mode){
 	break;
       case TEST_EQ:
 	res=(arg1==arg2);
+	break;
+      case TEST_NE:
+	res=(arg1!=arg2);
 	break;
       case TEST_GE:
 	res=(arg1>=arg2);

@@ -4,7 +4,9 @@ all:
 
 	gcc -c -o c_alike.o c_alike.tab.cpp
 	gcc -c -o lex.yy.o lex.yy.cpp
-	g++ -o test c_alike.o lex.yy.o
+	rm *.o
+
+#	g++ -o test c_alike.o lex.yy.o
 
 
 

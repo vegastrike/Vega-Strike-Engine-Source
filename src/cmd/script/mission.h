@@ -85,7 +85,7 @@ enum tag_type {
 
 enum var_type { VAR_FAILURE,VAR_BOOL,VAR_FLOAT,VAR_VECTOR,VAR_OBJECT,VAR_STRING,VAR_VOID };
 
-enum tester_type { TEST_GT,TEST_LT,TEST_EQ,TEST_GE,TEST_LE };
+enum tester_type { TEST_GT,TEST_LT,TEST_EQ,TEST_NE,TEST_GE,TEST_LE };
 
 /* *********************************************************** */
 
@@ -199,6 +199,7 @@ class Mission {
     int thread_nr;
     missionThread *cur_thread;
     map<string,missionNode *> global_variables;
+    //    vector<const void *()> callbacks;
   } runtime;
 
   // used only for parsing

@@ -1,3 +1,8 @@
+2001-12-10 Alexander Rawass <alexannika@users.sourceforge.net>
+	
+	* imported vegastrike/src/cmd/script/c_alike
+	* modified Makefile.am's and configure.in
+
 2001-12-07 Alexander Rawass <alexannika@users.sourceforge.net>
 
 	* digital hatswitch code can be turned off/on with
@@ -70,7 +75,7 @@
 	  - ships_confed1,ships_ares1
 	  - testd_random1
 
-	
+
 2001-11-27 Alexander Rawass <alexannika@users.sourceforge.net>
 	
 	* modified main_loop/main to have benchmarking mode

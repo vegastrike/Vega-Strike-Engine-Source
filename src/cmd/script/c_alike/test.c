@@ -1,16 +1,29 @@
-module
+module test {
+
+globals {
+  int g1;
+  float g3;
+  object g4;
+};
 
 import a1;
 
 int m1;
 
+bool blah=true;
+
   int m1;
   float m2;
 
-  script { };
+  int first() { 
+    three(a,b,c,d,);
+
+    return a;
+    blubb=four(a,);
+  };
 
 
-  script {
+  float second(int a1;float d3;) {
     int hallo;
     float fasel;
 
@@ -22,6 +35,7 @@ int m1;
 		b34=(sowhat==nover);
 
 		if(nowhat+never==323.4){
+		  return;
 		}
 		else{
 		};
@@ -37,3 +51,4 @@ int m1;
 
   };
 
+}

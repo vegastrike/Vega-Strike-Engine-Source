@@ -1,5 +1,5 @@
 noinst_LIBRARIES = libscript.a
-SUBDIRS = 
+SUBDIRS = c_alike
 INCLUDES = -I../ -I../..
 
 libscript_a_SOURCES =				\

@@ -49,27 +49,33 @@
 varInst *Mission::doCall(missionNode *node,int mode){
   if(mode==SCRIPT_PARSE){
     string name=node->attr_value("name");
-    if(name.empty()){
-      fatalError(node,mode,"you have to give a callback name");
+    string module=node->attr_value("module");
+    if(name.empty() || module.empty()){
+      fatalError(node,mode,"you have to give a callback module and name");
       assert(0);
     }
     node->script.name=name;
   }
 
+  string module=node->attr_value("module");
   varInst *vi=NULL;
 
-  if(node->script.name=="PrintFloats"){
-    vi=callPrintFloats(node,mode);
+  if(module=="_io"){
+    if(node->script.name=="PrintFloats"){
+      vi=callPrintFloats(node,mode);
+    }
   }
-  else if(node->script.name=="Rnd"){
-    vi=callRnd(node,mode);
+  else if(module=="_std"){
+    if(node->script.name=="Rnd"){
+      vi=callRnd(node,mode);
+    }
   }
-  else if(node->script.name=="olist"){
+  else if(module=="_olist"){
     vi=call_olist(node,mode);
   }
 
   if(vi==NULL){
-    fatalError(node,mode,"no such callback routine named "+node->script.name);
+    fatalError(node,mode,"no such callback named "+module+"."+node->script.name);
     assert(0);
   }
 
@@ -127,7 +133,7 @@ varInst *Mission::call_olist(missionNode *node,int mode){
 
   varInst *viret=new varInst;
 
-  string cmd=node->attr_value("cmd");
+  string cmd=node->attr_value("name");
 
   if(cmd=="new"){
     olist_t *my_object=new olist_t;

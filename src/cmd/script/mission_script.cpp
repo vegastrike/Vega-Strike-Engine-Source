@@ -78,12 +78,21 @@ void Mission::DirectorStart(missionNode *node){
       debug(3,node,SCRIPT_PARSE,"loading module "+import->script.name);
 
       string filename="modules/"+import->script.name+".module";
-
       missionNode *import_top=importf->LoadXML(filename.c_str());
 
       if(import_top==NULL){
-	fatalError(node,SCRIPT_PARSE,"could not load module file "+filename);
-	assert(0);
+	debug(0,node,SCRIPT_PARSE,"could not load "+filename);
+
+	//	fatalError(node,SCRIPT_PARSE,"could not load module file "+filename);
+	//assert(0);
+	string f2name="modules/"+import->script.name+".c";
+        import_top=importf->LoadCalike(f2name.c_str());
+
+	if(import_top==NULL){
+	  debug(0,node,SCRIPT_PARSE,"could not load "+f2name);
+	  fatalError(node,SCRIPT_PARSE,"could not load module "+import->script.name);
+	  assert(0);
+	}
       }
 
       import_top->Tag(&tagmap);
