@@ -1108,7 +1108,9 @@ static bool NoDockWithClear() {
 	return nodockwithclear;
 }
 static bool SuperDock(Unit * parent, Unit* target) {
-  if (UnitUtil::getSignificantDistance(parent,target)<parent->rSize()) {
+  float dis=target->isUnit()==PLANETPTR?UnitUtil::getSignificantDistance(parent,target):UnitUtil::getDistance(parent,target);
+  
+  if (dis<parent->rSize()) {
     if (UnitUtil::isDockableUnit(target)) {
       for (unsigned int i=0;i<target->GetImageInformation().dockingports.size();++i) {
         if (target->GetImageInformation().dockingports[i].used==false) {
