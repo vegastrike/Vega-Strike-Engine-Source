@@ -2,12 +2,12 @@
 #include "atmosphere.h"
 #include "vegastrike.h"
 #include "star_system.h"
-#include "gfx/sphere.h"
+
 #include "gfx/matrix.h"
 #include "cmd/unit.h"
 #include "cmd/planet.h"
 #include "gfxlib.h"
-
+#include "gfx/sphere.h"
 int divisions = 64;
 int l0,l1,l2;
 

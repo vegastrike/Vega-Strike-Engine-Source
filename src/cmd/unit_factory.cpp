@@ -106,15 +106,17 @@ Planet* UnitFactory::createPlanet( QVector x,
 				   float pos,
 				   float gravity,
 				   float radius,
-				   char * filename,
-				   char *alpha,
+				   const char * filename,
+				   const char *alpha,
+				   BLENDFUNC sr, BLENDFUNC ds,
 				   vector<char *> dest,
 				   const QVector &orbitcent,
 				   Unit * parent,
 				   const GFXMaterial & ourmat,
 				   const std::vector <GFXLightLocal> & ligh,
 				   int faction,
-				   string fullname )
+				   string fullname ,
+				   bool inside_out)
 {
     return new Planet( x,
                        y,
@@ -125,13 +127,15 @@ Planet* UnitFactory::createPlanet( QVector x,
                        radius,
                        filename,
                        alpha,
+		       sr,ds,
                        dest,
                        orbitcent,
                        parent,
                        ourmat,
                        ligh,
                        faction,
-                       fullname );
+                       fullname , 
+		       inside_out);
 }
 
 Enhancement* UnitFactory::createEnhancement( const char * filename,

@@ -80,15 +80,18 @@ public:
 				 float pos,
 				 float gravity,
 				 float radius,
-				 char * filename,
-				 char *alpha,
+				 const char * filename,
+				 const char *citylights,
+				 BLENDFUNC blendsrc,
+				 BLENDFUNC blenddst,
 				 vector<char *> dest,
 				 const QVector &orbitcent,
 				 Unit * parent,
 				 const GFXMaterial & ourmat,
 				 const std::vector <GFXLightLocal> & ligh,
 				 int faction,
-				 string fullname );
+				 string fullname ,
+				 bool inside_out=false);
 
     static Enhancement* createEnhancement( const char * filename,
                                            int faction,

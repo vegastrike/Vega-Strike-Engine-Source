@@ -127,7 +127,7 @@ void Mesh::endElement(void *userData, const XML_Char *name) {
 
 
 
-enum BLENDFUNC parse_alpha (char * tmp ) {
+enum BLENDFUNC parse_alpha (const char * tmp ) {
   if (strcmp (tmp,"ZERO")==0) {
     return ZERO;
   }
@@ -324,8 +324,6 @@ void Mesh::beginElement(const string &name, const AttributeList &attributes) {
     // Read in texture attribute
     xml->decal_name = string("\0");
     xml->alpha_name = string("\0");
-    char csrc[128];
-    char cdst[128];
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(XML::attribute_map.lookup((*iter).name)) {
       case XML::ANIMATEDTEXTURE:
@@ -350,8 +348,14 @@ void Mesh::beginElement(const string &name, const AttributeList &attributes) {
 	xml->sharevert = (XMLSupport::parse_bool ((*iter).value)&&XMLSupport::parse_bool (vs_config->getVariable ("graphics","SharedVertexArrays","true")));
 	break;
       case XML::BLENDMODE:
-	sscanf (((*iter).value).c_str(),"%s %s",csrc,cdst);
-	SetBlendMode (parse_alpha (csrc),parse_alpha (cdst));
+	{
+	  char *csrc=strdup ((*iter).value.c_str());
+	  char *cdst=strdup((*iter).value.c_str());
+	  sscanf (((*iter).value).c_str(),"%s %s",csrc,cdst);
+	  SetBlendMode (parse_alpha (csrc),parse_alpha (cdst));
+	  free (csrc);
+	  free (cdst);
+	}
 	break;
       }
     }

@@ -1195,6 +1195,7 @@ Unit *Mission::getUnitObject(missionNode *node,int mode,varInst *ovi){
 }
 
 // void call_unit_launch(missionNode *node,int mode,string name,string faction,string type,string ainame,int nr_ships,Vector & pos){
+extern BLENDFUNC parse_alpha (const char *);
 
 Unit * Mission::call_unit_launch(CreateFlightgroup *fg, int type, const string &destinations){
   //  fprintf (stderr,"calling unit launch with Mission 0x%x Flightgroup 0x%x" ,this, fg);
@@ -1206,16 +1207,30 @@ Unit * Mission::call_unit_launch(CreateFlightgroup *fg, int type, const string &
      Unit * my_unit;
      if (type==PLANETPTR) {
        float radius;
-       char * blah = strdup (fg->fg->type.c_str());
-       char * blooh = strdup (fg->fg->type.c_str());
-       blooh[0]='\0';//have at least 1 char
-       blah[0]='\0';
-       sscanf (fg->fg->type.c_str(),"%f %s %s",&radius,blah,blooh);
+       char * tex = strdup (fg->fg->type.c_str());
+       char * bsrc = strdup (fg->fg->type.c_str());
+       char * bdst = strdup (fg->fg->type.c_str());
+       char * citylights = strdup (fg->fg->type.c_str());
+       tex[0]='\0';
+       bsrc[0]='\0';//have at least 1 char
+       bdst[0]='\0';
+       citylights[0]='\0';
+       int ret =sscanf (fg->fg->type.c_str(),"%f %s %s %s %s",&radius,tex,bsrc,bdst, citylights);
        GFXMaterial mat;
        GFXGetMaterial (0,mat);
-       my_unit = UnitFactory::createPlanet (QVector(0,0,0),QVector(0,0,0),0,Vector(0,0,0), 0,0,radius,blah,blooh, ParseDestinations(destinations),QVector(0,0,0),NULL,mat,vector<GFXLightLocal>(),faction_nr,blah);
-       free (blah);
-       free (blooh);
+      
+       BLENDFUNC s = ONE;
+       BLENDFUNC d = ZERO;
+       if (bdst[0]!='\0') 
+	 d=parse_alpha (bdst);
+       if (bsrc[0]!='\0') 
+	 s=parse_alpha (bsrc);
+       my_unit = UnitFactory::createPlanet (QVector(0,0,0),QVector(0,0,0),0,Vector(0,0,0), 0,0,radius,tex,citylights,s,d, ParseDestinations(destinations),QVector(0,0,0),NULL,mat,vector<GFXLightLocal>(),faction_nr,tex);
+
+       free (bsrc);
+       free (bdst);
+       free (tex);
+       free (citylights);
      }else if (type==NEBULAPTR) {
        my_unit=UnitFactory::createNebula (fg->fg->type.c_str(),false,faction_nr,fg->fg,u);
      } else {
