@@ -198,7 +198,8 @@ AC_EGREP_CPP(yes,
 AC_MSG_RESULT([$is_macosx])
 
 if test "x$is_macosx" = "xyes" ; then
-    CFLAGS="$CFLAGS -Wno-long-double -I/System/Library/Frameworks/Carbon.framework/Libraries/CIncludes"
+    CFLAGS="$CFLAGS -I/System/Library/Frameworks/Carbon.framework/Libraries/CIncludes"
+	CPP_FLAGS="$CPP_FLAGS -Wno-long-double"
     dnl GL_CPPFLAGS="$GL_CPPFLAGS -framework OpenGL"
     dnl GLUT_CPPFLAGS="$GLUT_CPPFLAGS -framework GLUT"
 	TR_LIBS="$TR_LIBS -framework OpenGL -framework GLUT"
@@ -1256,7 +1257,6 @@ if test "$TESTNETCOMM" = "1" ; then
 
 	dnl Check for QuickTime headers under MacOS X
 	dnl saved_CPPFLAGS="$CPPFLAGS"
-	CPPFLAGS="$CPPFLAGS -I/System/Library/Frameworks/QuickTime.framework/Versions/A/Headers"
 	AC_DEFUN( CHECK_FOR_QT_H, [
 	    AC_MSG_CHECKING([for QuickTimeComponents.h])
 	    AC_TRY_CPP( [ #include <QuickTimeComponents.h> ], have_qt_h=yes, have_qt_h=no )
@@ -1264,6 +1264,7 @@ if test "$TESTNETCOMM" = "1" ; then
 	])
 
 	if test "$is_macosx" = "yes" ; then
+		CPPFLAGS="$CPPFLAGS -I/System/Library/Frameworks/QuickTime.framework/Versions/A/Headers"
 		CHECK_FOR_QT_H
 		if test "x$have_qt_h" = "xyes" ; then
 			TESTNETCOMM_NOWEBCAM="0"
