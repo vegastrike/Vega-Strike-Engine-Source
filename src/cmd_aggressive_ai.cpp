@@ -19,7 +19,7 @@ const EnumMap::Pair element_names[] = {
   EnumMap::Pair ("Facing", AggressiveAI::FACING),
   EnumMap::Pair ("Movement", AggressiveAI::MOVEMENT)
 };
-const EnumMap AggressiveAIel_map(element_names, 15);
+const EnumMap AggressiveAIel_map(element_names, 11);
 
 AggressiveAI::AggressiveAI (const char * filename, Unit * target=NULL):FireAt(.2,6,false), logic (AggressiveAIel_map), count (rand()%10) {
   
