@@ -45,24 +45,28 @@ PFNGLMULTITEXCOORD2FARBPROC glMultiTexCoord2fARB = 0;
 //PFNGLMTEXCOORDPOINTERSGISPROC glMTexCoordPointerSGIS ;
 #endif
 typedef void (*(*get_gl_proc_fptr_t)(const GLubyte *))(); 
-
+#ifdef WIN32
+    typedef char * GET_GL_PTR_TYP;
+#define GET_GL_PROC wglGetProcAddress
+    //    get_gl_proc = (get_gl_proc_fptr_t) wglGetProcAddress;
+#else
+    typedef GLubyte * GET_GL_PTR_TYP;
+#define GET_GL_PROC glXGetProcAddressARB
+    //    get_gl_proc = (get_gl_proc_fptr_t) glXGetProcAddressARB;
+#endif
 void init_opengl_extensions()
 {
-    get_gl_proc_fptr_t get_gl_proc;
-#ifdef WIN32
-    get_gl_proc = (get_gl_proc_fptr_t) wglGetProcAddress;
-#else
-    get_gl_proc = (get_gl_proc_fptr_t) glXGetProcAddressARB;
-#endif
+  //    get_gl_proc_fptr_t get_gl_proc;
+
 
     if ( glutExtensionSupported( "GL_EXT_compiled_vertex_array" ) ) {
 
 	printf( "GL_EXT_compiled_vertex_array extension "
 		     "supported" );
 	glLockArraysEXT_p = (PFNGLLOCKARRAYSEXTPROC) 
-	    get_gl_proc( (GLubyte*) "glLockArraysEXT" );
+	    GET_GL_PROC( (GET_GL_PTR_TYP) "glLockArraysEXT" );
 	glUnlockArraysEXT_p = (PFNGLUNLOCKARRAYSEXTPROC) 
-	    get_gl_proc( (GLubyte*) "glUnlockArraysEXT" );
+	    GET_GL_PROC( (GET_GL_PTR_TYP) "glUnlockArraysEXT" );
     } else {
 	printf(  "GL_EXT_compiled_vertex_array extension "
 		     "NOT supported" );
@@ -79,10 +83,10 @@ void init_opengl_extensions()
       g_game.Multitexture = 0;
     }
 #ifdef WIN32
-    glColorTable = (PFNGLCOLORTABLEEXTPROC ) get_gl_proc((GLubyte*)"glColorTableEXT");
-    glMultiTexCoord2fARB = (PFNGLMULTITEXCOORD2FARBPROC) get_gl_proc((GLubyte*)"glMultiTexCoord2fARB");
-    glClientActiveTextureARB = (PFNGLCLIENTACTIVETEXTUREARBPROC) get_gl_proc((GLubyte*)"glClientActiveTextureARB");
-    glActiveTextureARB = (PFNGLACTIVETEXTUREARBPROC) get_gl_proc((GLubyte*)"glActiveTextureARB");
+    glColorTable = (PFNGLCOLORTABLEEXTPROC ) GET_GL_PROC((GET_GL_PTR_TYP)"glColorTableEXT");
+    glMultiTexCoord2fARB = (PFNGLMULTITEXCOORD2FARBPROC) GET_GL_PROC((GET_GL_PTR_TYP)"glMultiTexCoord2fARB");
+    glClientActiveTextureARB = (PFNGLCLIENTACTIVETEXTUREARBPROC) GET_GL_PROC((GET_GL_PTR_TYP)"glClientActiveTextureARB");
+    glActiveTextureARB = (PFNGLACTIVETEXTUREARBPROC) GET_GL_PROC((GET_GL_PTR_TYP)"glActiveTextureARB");
 #endif
     if (glMultiTexCoord2fARB!=0) {
       g_game.Multitexture = 1;
@@ -91,7 +95,6 @@ void init_opengl_extensions()
       g_game.Multitexture =0;
 	  printf ("Multitexture unsupported");
     }
-    g_game.Multitexture=1;
 }
 BOOL GFXInit (int argc, char ** argv){
     glutInit( &argc, argv );
