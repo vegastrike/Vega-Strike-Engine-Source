@@ -15,7 +15,8 @@ AC_MSG_ERROR([No compiler found, specify one with the environment variable CXX.]
 fi
 
 AC_PROG_CXX(${CXX})
-AC_PROG_CXXCPP()
+AC_PROG_CXXCPP
+AC_PROG_CPP
 
 AC_MSG_NOTICE([Using compiler: ${CXX}.])
 dnl Check system type
@@ -56,7 +57,7 @@ case $target in
 *win32*)
 	AC_DEFINE(WIN32, 1)
 ;;
-*Darwin*)
+*Darwin* | *darwin*)
 	AC_DEFINE(MACOSX, 1)
 	AC_DEFINE(POSIX, 1)
 	AC_DEFINE(BSD, 1)
@@ -94,10 +95,17 @@ CXXFLAGS="-malign-loops=4"
 AC_TRY_COMPILE(, , [malign=yes], [malign=no])
 CXXFLAGS="${saved_CXXFLAGS}"
 
-saved_CXXFLAGS="${CXXFLAGS}"
-CXXFLAGS="-Werror -pthread"
-AC_TRY_COMPILE(, , [bsdthread=yes], [bsdthread=no])
-CXXFLAGS="${saved_CXXFLAGS}"
+case $target in
+  *Darwin* | *darwin*)
+    bsdthread=no
+    ;;
+  *)
+    saved_CXXFLAGS="${CXXFLAGS}"
+    CXXFLAGS="-Werror -pthread"
+    AC_TRY_COMPILE(, , [bsdthread=yes], [bsdthread=no])
+    CXXFLAGS="${saved_CXXFLAGS}"
+    ;;
+esac
 
 AC_PROG_INSTALL()
 AC_PROG_LN_S()
@@ -198,11 +206,19 @@ fi
 fi
 
 saved_CXXFLAGS="${CXXFLAGS}"
-CXXFLAGS="-gdwarf-2 -g3 -Werror"
-AC_TRY_COMPILE(, , [gwarf2g3_supported=yes], [gwarf2g3_supported=no])
+case $target in
+  *freebsd* | *netbsd* | *openbsd* | *linux*)
+    CXXFLAGS="-gdwarf-2 -g3 -Werror"
+    AC_TRY_COMPILE(, , [gwarf2g3_supported=yes], [gwarf2g3_supported=no])
+    ;;
+  *)
+    CXXFLAGS="-g3 -Werror"
+    gwarf2g3_supported=no
+    ;;
+esac
 CXXFLAGS="${saved_CXXFLAGS}"
 
-if test "x$gwarf2g3_supported" = "xyes" && test "x$MACOSX" != "x1"; then
+if test "x$gwarf2g3_supported" = "xyes"; then
 	DEBUG_FLAGS="-gdwarf-2 -g3"
 else
     saved_CXXFLAGS="${CXXFLAGS}"
@@ -211,7 +227,7 @@ else
     CXXFLAGS="${saved_CXXFLAGS}"
 
     if test "x$g3_supported" = "xyes"; then
-	    DEBUG_FLAGS="-g3"
+	    DEBUG_FLAGS="-ggdb3"
     else
 	    DEBUG_FLAGS="-g"
     fi
@@ -349,12 +365,29 @@ do
         then
             FOUND_PYTHON=yes
             PYTHON_SHORT=`echo ${PYTHON_VERSION} | sed -e 's/\./ /g; s/[a-z|A-Z|+]/ /g' | awk '{print $1"."$2}'`
-            PYTHON_incchk="/usr/include/python /usr/include/python${PYTHON_SHORT} /usr/local/include/python /usr/local/include/python${PYTHON_SHORT}"
+            PYTHON_incchk="/usr/include/python /usr/include/python${PYTHON_SHORT} /usr/local/include/python /usr/local/include/python${PYTHON_SHORT} /sw/include/python /sw/include/python${PYTHON_SHORT}"
+
+	    PYTHON_incdir=""
+	    if test "x${FOUND_PYTHON}" = "xyes";
+	    then
+    	        for i in ${PYTHON_incchk};
+    	        do
+                    if test -f "$i/Python.h";
+	            then
+            	        PYTHON_incdir=$i
+            	        break
+                    fi
+    	        done
+	    fi
+
+	    if test "x${PYTHON_incdir}" = "x";
+	    then
+    	        FOUND_PYTHON=no
+	    fi
         else
             FOUND_PYTHON=no
         fi
     fi
-
 
     dnl
     dnl Reset autoconf quote characters to brackets.
@@ -367,24 +400,6 @@ do
         break
     fi
 done
-
-PYTHON_incdir=""
-if test "x${FOUND_PYTHON}" = "xyes";
-then
-    for i in ${PYTHON_incchk};
-    do
-        if test -f "$i/Python.h";
-	then
-            PYTHON_incdir=$i
-            break
-        fi
-    done
-fi
-
-if test "x${PYTHON_incdir}" = "x";
-then
-    FOUND_PYTHON=no
-fi
 
 if test "x${FOUND_PYTHON}" = "xno";
 then
@@ -499,8 +514,7 @@ dnl Check for SDL_mixer
                   have_SDL_mixer=yes, have_SDL_mixer=no )
 
     if test "x$have_SDL_mixer" = "xyes" ; then 
-	VS_CPPFLAGS="${VS_CPPFLAGS} -DHAVE_SDL_MIXER=1" 
-        VS_LIBS="$VS_LIBS -lSDL_mixer"
+        AC_DEFINE(HAVE_SDL_MIXER,1,[Can we use the SDL mixer])
 	SDL_MIXER_LIBS="-lSDL_mixer"
     else
         echo "*** SDL_mixer not found.  Configuring without audio support."

@@ -39,6 +39,8 @@ AC_ARG_ENABLE(sdltest, [  --disable-sdltest       Do not try to compile and run 
   if test "$SDL_CONFIG" = "no" ; then
     no_sdl=yes
   else
+    AC_LANG_SAVE
+    AC_LANG_C
     SDL_CFLAGS=`$SDL_CONFIG $sdlconf_args --cflags`
     SDL_LIBS=`$SDL_CONFIG $sdlconf_args --libs`
 
@@ -62,7 +64,7 @@ dnl
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <SDL/SDL.h>
+#include <SDL.h>
 
 char*
 my_strdup (char *str)
@@ -161,6 +163,7 @@ int main (int argc, char *argv[])
      SDL_CFLAGS=""
      SDL_LIBS=""
      ifelse([$3], , :, [$3])
+     AC_LANG_RESTORE
   fi
   AC_SUBST(SDL_CFLAGS)
   AC_SUBST(SDL_LIBS)
