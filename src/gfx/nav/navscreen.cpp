@@ -114,7 +114,8 @@ void NavigationSystem::Setup()
 
 
 
-	for( int p=0; p < FactionUtil::GetNumFactions(); p++)
+	int p;
+	for( p=0; p < FactionUtil::GetNumFactions(); p++)
 	{
 		factioncolours[p].r = 1;
 		factioncolours[p].g = 1;
