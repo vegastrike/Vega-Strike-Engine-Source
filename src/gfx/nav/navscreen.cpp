@@ -655,13 +655,19 @@ void NavigationSystem::DrawMission()
 
 	TextPlane displayname;
 	displayname.col = GFXColor(1,1,1,1);
-	displayname.SetSize (.65,-.8);
-	displayname.SetPos(originx+ (.1*deltax)+.4,   originy/*+(1*deltay)*/);
-	displayname.SetText ("*******Testing Release*********\nWelcome to #00FFFFVega Strike#000000\nUse #8080FFTab#000000 to afterburn\n#8080FF+,-#000000 act as cruise controll\nYour ship undocks stopped;\nhit #8080FF+ or /#000000 to go to full speed,\n#8080FFarrows#000000 steer your ship.\nThe #8080FFt#000000 key targets objects; #8080FFspace#000000 fires at them\nThe #8080FFA or a#000000 key activates insystem warp\n to cross immense distances to your target.\nTime Compression: #8080FFF9; F10#000000 resets.\nBuy a jump drive for 10000\nand then fly to a blue ball and press #8080FFj#000000 to warp\nto a near star.\nTarget a base or planet.\nWhen you get close a green box will appear.\nInside the box, #8080FFd#000000 will land.\nBe sure to click save/load at the base,\nand select the Save option.\n\nIf Vega Strike halts or acts oddly,\nimmediately send the stderr.txt and stdout.txt files\nto hellcatv@hotmail.com or\nhttp://vegastrike.sourceforge.net/forums\nbefore you restart Vega Strike.\nThis is a testing release so we expect users to actually report any bugs they find; otherwise, they will not be fixed for 0.4.0.\n\nTo exit this help menu press #8080FFshift-M#000000\n#8080FFShift-M#000000 will bring up this help menu\nany time.\nThe buttons to the right are used to access\nThe galaxy map and system map\nwhen you re-enter this help screen.");
+	displayname.SetSize (.6,-.8);
+	displayname.SetPos(originx+ (.1*deltax)+.37,   originy/*+(1*deltay)*/);
+	displayname.SetText ("*******#FF0000Testing Release#000000*********\nWelcome to #00FFFFVega Strike#000000\nUse #8080FFTab#000000 to afterburn\n#8080FF+,-#000000 act as cruise controll\nYour ship undocks stopped;\nhit #8080FF+ or /#000000 to go to full speed,\n#8080FFarrows#000000 steer your ship. The #8080FFt#000000 key\ntargets objects; #8080FFspace#000000 fires at them\nThe #8080FFa#000000 key activates insystem warp\nto cross vast distances to your target.\nTime Compression: #8080FFF9; F10#000000 resets.\nBuy a jump drive for 10000\nand then fly to a blue ball and press #8080FFj#000000\nto warp to a system. Target a base.\nWhen you get close a green box shows.\nInside the box, #8080FFd#000000 will land.\nBe sure to click save/load at the base,\nand select the Save option.\n#FF0000If Vega Strike halts or acts oddly,#000000\n#FFFF00immediately#000000 post stderr.txt & stdout.txt\nto http://vegastrike.sourceforge.net/forums\nbefore you restart Vega Strike.\nWe expect you to report all bugs found;\notherwise, they will not be fixed for 4.0");
 	displayname.SetCharSize (1,1);
 	displayname.Draw();
 
+	string exitinfo("To exit help press #8080FFshift-M#000000\n#8080FFShift-M#000000 will bring up this\nhelp menu any time.\nThe right buttons access the galaxy and system maps");
 
+	displayname.SetSize (.6,-.8);
+	displayname.SetPos(originx-.02,   originy-1.2);
+	displayname.SetText (exitinfo);
+	displayname.SetCharSize (1,1);
+	displayname.Draw();
 	GFXEnable(TEXTURE0);
 }
 //	**********************************
@@ -697,7 +703,7 @@ void NavigationSystem::DrawShip()
 	TextPlane displayname;
 	displayname.col = GFXColor(.3,1,.3,1);
 	displayname.SetSize (.65,-.8);
-	displayname.SetPos(originx+ (.1*deltax),   originy/*+(1*deltay)*/);
+	displayname.SetPos(originx- (.1*deltax),   originy/*+(1*deltay)*/);
 	displayname.SetText (writethis);
 	displayname.SetCharSize (1,1);
 	displayname.Draw();

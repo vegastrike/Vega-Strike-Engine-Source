@@ -24,6 +24,14 @@
 #include "role_bitmask.h"
 #include "cmd/collide/rapcol.h"
 #define VS_PI 3.1415926536
+
+string KillQuadZeros(string inp) {
+	int text = 0;
+	while ((text = inp.find (".000000",text))!=string::npos) {
+		inp = inp.substr(0,text)+inp.substr(text+7);
+	}
+	return inp;
+}
 string MakeUnitXMLPretty (string str, Unit * un) {
 	string writestr;
 		
@@ -40,15 +48,15 @@ string MakeUnitXMLPretty (string str, Unit * un) {
 	if (lookfor.empty()) {
 		lookfor.insert ("Shie");
 		lookfor.insert ("Armo");
-		lookfor.insert ("Hull");
+//		lookfor.insert ("Hull");
 		lookfor.insert ("Reac");
 		lookfor.insert ("Moun");
 		lookfor.insert ("Comp");
-		lookfor.insert ("Desc");
+//		lookfor.insert ("Desc");
 		lookfor.insert ("Engi");
 		lookfor.insert ("Mane");
 		lookfor.insert ("Jump");
-		lookfor.insert ("Defe");
+//		lookfor.insert ("Defe");
 		lookfor.insert ("Stat");
 		lookfor.insert ("Engi");
 		lookfor.insert ("Hold");
@@ -66,7 +74,7 @@ string MakeUnitXMLPretty (string str, Unit * un) {
 					if (newline>0)
 						if (str[newline-1]=='/')
 							newline-=1;
-					writestr+=str.substr (0,newline)+"\n";
+					writestr+=KillQuadZeros(str.substr (0,newline)+"\n");
 				}
 			}
 		}

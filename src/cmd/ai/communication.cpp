@@ -16,7 +16,7 @@ FSM::FSM (const char * filename) {
     nodes.push_back (Node("I hate you!",-.1));
 
     nodes.push_back (Node("Docking operation complete.",0));
-    nodes.push_back (Node("Please move to a white docking box and press d.",0));
+    nodes.push_back (Node("Please move into a green docking box and press d.",0));
     nodes.push_back (Node("Docking operation begun.",0));
     nodes.push_back (Node("Clearance denied.",0));
     nodes.push_back (Node("Clearance granted.",0));
