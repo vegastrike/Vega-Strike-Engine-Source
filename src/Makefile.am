@@ -54,6 +54,8 @@ vegastrike_SOURCES =				\
 	in_joystick.h				\
 	faction.h					\
 	faction.cpp					\
+	faction_generic.h			\
+	faction_generic.cpp			\
 	faction_util.cpp			\
 	force_feedback.cpp			\
 	force_feedback.h			\
@@ -77,20 +79,28 @@ vegastrike_SOURCES =				\
 	physics.h				\
 	physics.cpp				\
 	resizable.h				\
-	star_system.cpp 			\
 	star_system_jump.cpp			\
 	star_system_xml.cpp			\
+	star_system.cpp 			\
 	star_system.h 				\
+	star_system_generic.cpp 			\
+	star_system_generic.h 				\
 	universe.cpp				\
 	universe.h				\
+	universe_generic.cpp				\
+	universe_generic.h				\
 	universe_util.h				\
 	universe_util.cpp				\
+	universe_util_generic.h				\
+	universe_util_generic.cpp				\
 	xml_support.h  				\
 	xml_support.cpp				\
 	xml_serializer.cpp			\
 	xml_serializer.h			\
 	config_xml.cpp				\
 	config_xml.h				\
+	configxml.cpp				\
+	configxml.h				\
 	easydom.cpp				\
 	easydom.h				\
 	profile.h 				\
@@ -100,7 +110,7 @@ vegastrike_SOURCES =				\
 	vs_path.cpp				\
 	vs_path.h				\
 	audiolib.h				\
-        macosx_math.cpp				\
-        macosx_math.h
+    macosx_math.cpp				\
+    macosx_math.h
 
 

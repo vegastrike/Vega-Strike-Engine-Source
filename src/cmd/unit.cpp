@@ -159,159 +159,30 @@ void GameUnit::calculate_extent(bool update_collide_queue) {
 extern void UncheckUnit (Unit * un);
 void GameUnit::Init()
 {
-	this->player=0;
-	this->networked=0;
-#ifdef CONTAINER_DEBUG
-  UncheckUnit (this);
-#endif
-  static float capsize = XMLSupport::parse_float(vs_config->getVariable("physics","capship_size","500"));
-  capship_size=capsize;
-  activeStarSystem=NULL;
-  xml=NULL;
-  docked=NOT_DOCKED;
-  SubUnit =0;
-
-  jump.energy = 100;
-  jump.delay=5;
-  jump.damage=0;
-  jump.drive=-2;// disabled
-  afterburnenergy=0;
-  planet=NULL;
-  nebula=NULL;
-  image = new UnitImages;
- int numg= 1+MAXVDUS+Cockpit::NUMGAUGES;
+  this->Unit::Init();
+  int numg= 1+MAXVDUS+Cockpit::NUMGAUGES;
   image->cockpit_damage=(float*)malloc((numg)*sizeof(float));
   for (unsigned int damageiterator=0;damageiterator<numg;damageiterator++) {
 	image->cockpit_damage[damageiterator]=1;
   }
-  sound = new UnitSounds;
-  limits.structurelimits=Vector(0,0,1);
-  limits.limitmin=-1;
-  cloaking=-1;
-  image->repair_droid=0;
-  image->ecm=0;
-  image->cloakglass=false;
-  image->cargo_volume=0;
-  image->unitwriter=NULL;
-  cloakmin=image->cloakglass?1:0;
-  image->cloakrate=100;
-  image->cloakenergy=0;
-  image->forcejump=false;
-  sound->engine=-1;  sound->armor=-1;  sound->shield=-1;  sound->hull=-1; sound->explode=-1;
-  sound->cloak=-1;
-  image->hudImage=NULL;
-  owner = NULL;
-  faction =0;
-  resolveforces=true;
   CollideInfo.object.u = NULL;
   CollideInfo.type = LineCollide::UNIT;
   CollideInfo.Mini.Set (0,0,0);
   CollideInfo.Maxi.Set (0,0,0);
-  colTrees=NULL;
-  invisible=false;
-  //origin.Set(0,0,0);
-  corner_min.Set (FLT_MAX,FLT_MAX,FLT_MAX);
-  corner_max.Set (-FLT_MAX,-FLT_MAX,-FLT_MAX);
-  
-  shieldtight=0;//sphere mesh by default
-  energy=maxenergy=1;
-  recharge = 1;
-  shield.recharge=shield.leak=0;
-  shield.fb[0]=shield.fb[1]=shield.fb[2]=shield.fb[3]=armor.front=armor.back=armor.right=armor.left=0;
-  hull=10;
-  maxhull=10;
-  shield.number=2;
-  
-  image->explosion=NULL;
-  image->timeexplode=0;
-  killed=false;
-  ucref=0;
-  //mounts = NULL;
-  aistate = NULL;
   SetAI (new Order());
-  Identity(cumulative_transformation_matrix);
-  cumulative_transformation = identity_transformation;
-  curr_physical_state = prev_physical_state = identity_transformation;
-  mass = .01;
-  fuel = 000;
-
   /*
   yprrestricted=0;
   ymin = pmin = rmin = -PI;
   ymax = pmax = rmax = PI;
   ycur = pcur = rcur = 0;
   */
-  MomentOfInertia = .01;
   static Vector myang(XMLSupport::parse_float (vs_config->getVariable ("general","pitch","0")),XMLSupport::parse_float (vs_config->getVariable ("general","yaw","0")),XMLSupport::parse_float (vs_config->getVariable ("general","roll","0")));
-  AngularVelocity = myang;
-  cumulative_velocity=Velocity = Vector(0,0,0);
-  
-  NetTorque =NetLocalTorque = Vector(0,0,0);
-  NetForce = Vector(0,0,0);
-  NetLocalForce=Vector(0,0,0);
-
-  selected = false;
-  image->selectionBox = NULL;
-
-  limits.yaw = 2.55;
-  limits.pitch = 2.55;
-  limits.roll = 2.55;
-	
-  limits.lateral = 2;
-  limits.vertical = 8;
-  limits.forward = 2;
-  limits.afterburn=5;
-  limits.retro=2;
-  Target(NULL);
-  VelocityReference(NULL);
-  computer.threat.SetUnit (NULL);
-  computer.threatlevel=0;
-  computer.slide_start=computer.slide_end=0;
-  computer.set_speed=0;
-  computer.max_speed=1;
-  computer.max_ab_speed=1;
-  computer.max_yaw=1;
-  computer.max_pitch=1;
-  computer.max_roll=1;
-  computer.NavPoint=Vector(0,0,0);
-  computer.itts = false;
   static float rr = XMLSupport::parse_float (vs_config->getVariable ("graphics","hud","radarRange","20000"));
-  computer.radar.maxrange=rr;
-  computer.radar.locked=false;
-  computer.radar.maxcone=-1;
   static float minTrackingNum = XMLSupport::parse_float (vs_config->getVariable("physics",
 										  "autotracking",
 										".93"));// DO NOT CHANGE see unit_customize.cpp
-    
-  computer.radar.trackingcone = minTrackingNum;
   static float lc =XMLSupport::parse_float (vs_config->getVariable ("physics","lock_cone",".8"));// DO NOT CHANGE see unit_customize.cpp
-  computer.radar.lockcone=lc;
-  computer.radar.mintargetsize=0;
-  computer.radar.color=true;
   //  Fire();
-
-  flightgroup=NULL;
-  flightgroup_subnumber=0;
-
-  scanner.last_scantime=0.0;
-	//Unit::Init();
-	/*
-	xml = NULL;
-  activeStarSystem=NULL;
- int numg= 1+MAXVDUS+Cockpit::NUMGAUGES;
-  image->cockpit_damage=(float*)malloc((numg)*sizeof(float));
-  for (unsigned int damageiterator=0;damageiterator<numg;damageiterator++) {
-	image->cockpit_damage[damageiterator]=1;
-  }
-  sound = new UnitSounds;
-  CollideInfo.object.u = NULL;
-  CollideInfo.type = LineCollide::UNIT;
-  CollideInfo.Mini.Set (0,0,0);
-  CollideInfo.Maxi.Set (0,0,0);
-  SetAI (new Order());
-  //  Fire();
-  Target(NULL);
-  */
 }
 
 Sprite * GameUnit::getHudImage () const{
@@ -344,8 +215,8 @@ extern void update_ani_cache();
 GameUnit::GameUnit(const char *filename, bool SubU, int faction,std::string unitModifications, Flightgroup *flightgrp,int fg_subnumber) {
 	Init();
 	update_ani_cache();
-	if (!SubU)
-	  _Universe->AccessCockpit()->savegame->AddUnitToSave(filename,UNITPTR,FactionUtil::GetFaction(faction),(long)this);
+	//if (!SubU)
+	//  _Universe.AccessCockpit()->savegame->AddUnitToSave(filename,UNITPTR,FactionUtil::GetFaction(faction),(long)this);
 	SubUnit = SubU;
 	this->faction = faction;
 	SetFg (flightgrp,fg_subnumber);
@@ -521,13 +392,13 @@ StarSystem * GameUnit::getStarSystem () {
   if (activeStarSystem) {
     return activeStarSystem;
   }else {
-    Cockpit * cp=_Universe->isPlayerStarship(this);
+    Cockpit * cp=_Universe.isPlayerStarship(this);
     if (cp) {
       if (cp->activeStarSystem)
 	return cp->activeStarSystem;
     }
   }
-  return _Universe->activeStarSystem();
+  return _Universe.activeStarSystem();
 }
 
 
@@ -576,22 +447,22 @@ void GameUnit::UpdateHudMatrix(int whichcam) {
   Vector r (ctm.getR());
   Vector tmp;
   CrossProduct(r,q, tmp);
-  _Universe->AccessCamera(whichcam)->SetOrientation(tmp,q ,r);
+  _Universe.AccessCamera(whichcam)->SetOrientation(tmp,q ,r);
   
-  _Universe->AccessCamera(whichcam)->SetPosition (Transform (ctm,image->CockpitCenter.Cast()));
+  _Universe.AccessCamera(whichcam)->SetPosition (Transform (ctm,image->CockpitCenter.Cast()));
 }
    
 void GameUnit::SetPlanetHackTransformation (Transformation *&ct,Matrix *&ctm) {
   static Transformation planet_temp_transformation;
   static Matrix planet_temp_matrix;
   if (planet) {
-    if (planet->trans==_Universe->AccessCamera()->GetPlanetaryTransform()&&planet->trans!=NULL) {
+    if (planet->trans==_Universe.AccessCamera()->GetPlanetaryTransform()&&planet->trans!=NULL) {
       Matrix tmp;
       Vector p,q,r;
       QVector c;
       MatrixToVectors (cumulative_transformation_matrix,p,q,r,c);
       planet->trans->InvTransformBasis(tmp,p,q,r,c);
-      MultMatrix (planet_temp_matrix,*_Universe->AccessCamera()->GetPlanetGFX(),tmp);
+      MultMatrix (planet_temp_matrix,*_Universe.AccessCamera()->GetPlanetGFX(),tmp);
       planet_temp_transformation = Transformation::from_matrix (planet_temp_matrix);
       ct = &planet_temp_transformation;
       *ctm = planet_temp_matrix;
@@ -680,7 +551,7 @@ void GameUnit::Draw(const Transformation &parent, const Matrix &parentMatrix)
     Explode(true, GetElapsedTime());
   }
   bool On_Screen=false;
-  if (!invisible||(this!=_Universe->AccessCockpit()->GetParent())) {
+  if (!invisible||(this!=_Universe.AccessCockpit()->GetParent())) {
     for (i=0;i<meshdata.size();i++) {//NOTE LESS THAN OR EQUALS...to cover shield mesh
       if (meshdata[i]==NULL) 
 		continue;
@@ -706,9 +577,9 @@ void GameUnit::Draw(const Transformation &parent, const Matrix &parentMatrix)
       float lod;
       //      fprintf (stderr,"\n");
       if (d) {  //d can be used for level of detail shit
-	d = (TransformedPosition-_Universe->AccessCamera()->GetPosition().Cast()).Magnitude();
+	d = (TransformedPosition-_Universe.AccessCamera()->GetPosition().Cast()).Magnitude();
 	if ((lod =g_game.detaillevel*g_game.x_resolution*2*meshdata[i]->rSize()/GFXGetZPerspective((d-meshdata[i]->rSize()<g_game.znear)?g_game.znear:d-meshdata[i]->rSize()))>=g_game.detaillevel) {//if the radius is at least half a pixel (detaillevel is the scalar... so you gotta make sure it's above that
-	  meshdata[i]->Draw(lod,*ctm,d,cloak,(_Universe->AccessCamera()->GetNebula()==nebula&&nebula!=NULL)?-1:0);//cloakign and nebula
+	  meshdata[i]->Draw(lod,*ctm,d,cloak,(_Universe.AccessCamera()->GetNebula()==nebula&&nebula!=NULL)?-1:0);//cloakign and nebula
 	  On_Screen=true;
 	} else {
 
@@ -729,10 +600,10 @@ void GameUnit::Draw(const Transformation &parent, const Matrix &parentMatrix)
       //	image->selectionBox->Draw(g_game.x_resolution,*ctm);
     }
   } else {
-	  _Universe->AccessCockpit()->SetupViewPort();///this is the final, smoothly calculated cam
+	  _Universe.AccessCockpit()->SetupViewPort();///this is the final, smoothly calculated cam
     //        UpdateHudMatrix();
     /***DEBUGGING cosAngleFromMountTo
-    UnitCollection *dL = _Universe->activeStarSystem()->getUnitList();
+    UnitCollection *dL = _Universe.activeStarSystem()->getUnitList();
     UnitCollection::UnitIterator *tmpiter = dL->createIterator();
     GameUnit * curun;
     while (curun = tmpiter->current()) {
@@ -762,12 +633,12 @@ void GameUnit::Draw(const Transformation &parent, const Matrix &parentMatrix)
 	if( computer.max_ab_speed!= 0)
 	{
 	    Vector Scale (1,1,GetVelocity().MagnitudeSquared()/(computer.max_ab_speed*computer.max_ab_speed));
-	    halos.Draw(*ctm,Scale,cloak,(_Universe->AccessCamera()->GetNebula()==nebula&&nebula!=NULL)?-1:0,GetHullPercent(),GetVelocity(),faction);
+	    halos.Draw(*ctm,Scale,cloak,(_Universe.AccessCamera()->GetNebula()==nebula&&nebula!=NULL)?-1:0,GetHullPercent(),GetVelocity(),faction);
 	}
 	else
 	{
 	    Vector Scale (1,1,0);
-	    halos.Draw(*ctm,Scale,cloak,(_Universe->AccessCamera()->GetNebula()==nebula&&nebula!=NULL)?-1:0,GetHullPercent(),GetVelocity(),faction);
+	    halos.Draw(*ctm,Scale,cloak,(_Universe.AccessCamera()->GetNebula()==nebula&&nebula!=NULL)?-1:0,GetHullPercent(),GetVelocity(),faction);
 	}
   }
 }
@@ -979,7 +850,7 @@ void GameUnit::setTargetFg(string primary,string secondary,string tertiary){
 
 void GameUnit::ReTargetFg(int which_target){
 #if 0
-      StarSystem *ssystem=_Universe->activeStarSystem();
+      StarSystem *ssystem=_Universe.activeStarSystem();
       UnitCollection *unitlist=ssystem->getUnitList();
       Iterator uiter=unitlist->createIterator();
 
@@ -1025,7 +896,7 @@ void GameUnit::scanSystem(){
     return;
   }
 
-    StarSystem *ssystem=_Universe->activeStarSystem();
+    StarSystem *ssystem=_Universe.activeStarSystem();
     un_iter uiter(ssystem->getUnitList().createIterator());
     
     float min_enemy_dist=9999999.0;

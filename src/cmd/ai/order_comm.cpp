@@ -86,7 +86,7 @@ void Order::ProcessCommunicationMessages(float AICommresponseTime, bool RemoveMe
 }
 std::vector <Animation *>* Order::getCommFaces (unsigned char &sex) {
   std::vector <Animation *>* ani = NULL;
-  //   return _Universe->GetRandAnimation(parent->faction,sex);
+  //   return _Universe.GetRandAnimation(parent->faction,sex);
   for (unsigned int i=0;i<suborders.size();i++) {
     ani = suborders[i]->getCommFaces(sex);
     if (ani!=NULL) {
@@ -99,7 +99,7 @@ extern float myroundclamp(float i);
 Animation * Order::getCommFace(float mood, unsigned char & sex) {
   vector <Animation *> *ani = getCommFaces (sex);
   if (ani==NULL) {
-    ani = FactionUtil::GetRandAnimation(parent->faction,sex);
+    ani = GameFactionUtil::GetRandAnimation(parent->faction,sex);
     if (ani==NULL) {
       return NULL;
     }

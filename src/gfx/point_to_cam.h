@@ -18,9 +18,9 @@
 
 inline bool CalculateOrientation (QVector & Pos, Vector & p, Vector & q, Vector & r, float &wid, float & hei, float OffsetByThisPercent,bool moveiftoofar, Matrix * local_transformation=NULL) {
   const float kkkk=3;//this seems to work for no good reason
-  _Universe->AccessCamera()->GetPQR (p,q,r);
+  _Universe.AccessCamera()->GetPQR (p,q,r);
   QVector OLDR(r.i,r.j,r.k);
-  QVector offset (_Universe->AccessCamera()->GetPosition()-Pos);
+  QVector offset (_Universe.AccessCamera()->GetPosition()-Pos);
   double offz = -OLDR.Dot (offset);
   if (OffsetByThisPercent!=0) {
     double offmag = offset.Magnitude();
@@ -43,7 +43,7 @@ inline bool CalculateOrientation (QVector & Pos, Vector & p, Vector & q, Vector 
     Vector q1 (local_transformation->r[1],local_transformation->r[4],local_transformation->r[7]);
     Vector p1 ((q1.Dot(q))*q);
     q = (q1.Dot(p))*p+p1;			
-    QVector posit= _Universe->AccessCamera()->GetPosition();
+    QVector posit= _Universe.AccessCamera()->GetPosition();
 
 
     posit=posit-local_transformation->p;

@@ -33,7 +33,7 @@
 // this file isn't available on my system (all win32 machines?) i dun even know what it has or if we need it as I can compile without it
 #include <unistd.h>
 #endif
-#include "gfx/aux_texture.h"
+//#include "gfx/aux_texture.h"
 //#include <expat.h>
 //#include "xml_support.h"
 
@@ -41,7 +41,7 @@
 #include <assert.h>
 #include "mission.h"
 #include "flightgroup.h"
-#include "gldrv/winsys.h"
+//#include "gldrv/winsys.h"
 #ifdef HAVE_PYTHON
 #include "Python.h"
 #endif
@@ -75,7 +75,7 @@ Mission::Mission(const char *configfile, bool loadscripts){
  static bool dontpanic=false;
   if(top==NULL&&!dontpanic){
     cout << "Panic exit - mission file " << configfile << " not found" << endl;
-    winsys_exit(0);
+    exit(0);
   } else {
     dontpanic=true;
   }
@@ -298,7 +298,7 @@ void Mission::checkFlightgroup(easyDomNode *node){
 
   rot[0]=rot[1]=rot[2]=0.0;
   CreateFlightgroup cf;
-  cf.fg = Flightgroup::newFlightgroup(name,type,faction,ainame,nr_ships_i,waves_i,texture,texture_alpha,this);
+  cf.fg = GameFlightgroup::newGameFlightgroup(name,type,faction,ainame,nr_ships_i,waves_i,texture,texture_alpha,this);
   vector<easyDomNode *>::const_iterator siter;
 
   for(siter= node->subnodes.begin() ; siter!=node->subnodes.end() ; siter++){

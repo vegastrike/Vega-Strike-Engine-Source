@@ -31,7 +31,7 @@ namespace UnitUtil {
 		if (!my_unit)return 0;
 		Cockpit * tmp;
 		float viret=0;
-		if ((tmp=_Universe->isPlayerStarship (my_unit))) {
+		if ((tmp=_Universe.isPlayerStarship (my_unit))) {
 			viret=tmp->credits;
 		}
 		return viret;
@@ -39,7 +39,7 @@ namespace UnitUtil {
 	void addCredits(Unit *my_unit,float credits) {
 		if (!my_unit)return;
 		Cockpit * tmp;
-		if ((tmp=_Universe->isPlayerStarship (my_unit))) {
+		if ((tmp=_Universe.isPlayerStarship (my_unit))) {
 			tmp->credits+=credits;
 		}
 	}
@@ -119,14 +119,14 @@ namespace UnitUtil {
 			fg->Decrement(my_unit);
 			order = fg->ainame;
 		}
-		fg = Flightgroup::newFlightgroup (arg,type,FactionUtil::GetFaction(my_unit->faction),order,nr_ships,nr_waves_left,"","",mission);
+		fg = GameFlightgroup::newGameFlightgroup (arg,type,FactionUtil::GetFaction(my_unit->faction),order,nr_ships,nr_waves_left,"","",mission);
 		my_unit->SetFg (fg,fg->nr_ships_left-1);
 	}
 	int communicateTo(Unit *my_unit,Unit *other_unit,float mood){
 		if (!my_unit)return 0;
 		unsigned char sex=0;
 		Cockpit * tmp;
-		if ((tmp=_Universe->isPlayerStarship (my_unit))) {
+		if ((tmp=_Universe.isPlayerStarship (my_unit))) {
 			Order * ord=other_unit->getAIState();
 			if (ord) {
 				Animation * ani= ord->getCommFace (mood,sex);
@@ -140,7 +140,7 @@ namespace UnitUtil {
 	bool commAnimation(Unit *my_unit,string anim){
 		if (!my_unit)return false;
 		Cockpit * tmp;
-		if ((tmp=_Universe->isPlayerStarship (my_unit))) {
+		if ((tmp=_Universe.isPlayerStarship (my_unit))) {
 			Hashtable <std::string, Animation, char [63]> AniHashTable;
 			Animation * ani= AniHashTable.Get(anim);
 			if (NULL==ani) {
@@ -202,7 +202,7 @@ namespace UnitUtil {
 	}
         string getUnitSystemFile (Unit * un) {
 	  if (!un) {
-	    return _Universe->activeStarSystem()->getFileName();
+	    return _Universe.activeStarSystem()->getFileName();
 	  }
 	  StarSystem * ss = un->getStarSystem();
 	  return ss->getFileName();
@@ -283,11 +283,11 @@ namespace UnitUtil {
 		return dist;
 	}
         int isPlayerStarship (Unit * un) {
-                Cockpit * cp = _Universe->isPlayerStarship (un);
+                Cockpit * cp = _Universe.isPlayerStarship (un);
                 if (cp==NULL) {
                         return -1;
                 }
-                return (cp - _Universe->AccessCockpit(0));
+                return (cp - _Universe.AccessCockpit(0));
         }
 }
 

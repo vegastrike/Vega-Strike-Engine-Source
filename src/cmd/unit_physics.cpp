@@ -65,6 +65,7 @@
 #include "unit_util.h"
 
 #include "universe_util.h"
+#include "universe_util_generic.h"
 
 #include "cmd/script/mission.h"
 
@@ -126,7 +127,7 @@ void GameUnit::Thrust(const Vector &amt1,bool afterburn){
 
   ApplyLocalForce(amt);  
 
-if (_Universe->AccessCockpit(0)->GetParent()==this)
+if (_Universe.AccessCockpit(0)->GetParent()==this)
 
   if (afterburn!=AUDIsPlaying (sound->engine)) {
 
@@ -150,7 +151,7 @@ Cockpit * GameUnit::GetVelocityDifficultyMult(float &difficulty) const{
 
   difficulty=1;
 
-  Cockpit * player_cockpit=_Universe->isPlayerStarship(this);
+  Cockpit * player_cockpit=_Universe.isPlayerStarship(this);
 
   if ((player_cockpit)==NULL) {
 
@@ -318,7 +319,7 @@ void GameUnit::UpdatePhysics (const Transformation &trans, const Matrix &transma
 
 		// Check if this is a player, because in network mode we should only send updates of our moves
 
-	  if( _Universe->isPlayerStarship( this) /* && this->networked */ )
+	  if( _Universe.isPlayerStarship( this) /* && this->networked */ )
 
 	  {
 
@@ -728,7 +729,7 @@ bool GameUnit::jumpReactToCollision (Unit * smalle) {
 
       GameUnit * jumppoint = this;
 
-      _Universe->activeStarSystem()->JumpTo (smalle, jumppoint, std::string(GetDestinations()[smalle->GetJumpStatus().drive%GetDestinations().size()]));
+      _Universe.activeStarSystem()->JumpTo (smalle, jumppoint, std::string(GetDestinations()[smalle->GetJumpStatus().drive%GetDestinations().size()]));
 
       return true;
 
@@ -746,7 +747,7 @@ bool GameUnit::jumpReactToCollision (Unit * smalle) {
 
       Unit * jumppoint = smalle;
 
-      _Universe->activeStarSystem()->JumpTo (this, jumppoint, std::string(smalle->GetDestinations()[GetJumpStatus().drive%smalle->GetDestinations().size()]));
+      _Universe.activeStarSystem()->JumpTo (this, jumppoint, std::string(smalle->GetDestinations()[GetJumpStatus().drive%smalle->GetDestinations().size()]));
 
       return true;
 
@@ -792,34 +793,19 @@ void GameUnit::reactToCollision(Unit * smalle, const QVector & biglocation, cons
 
     this->ApplyForce (smallnormal*.4*bouncepercent*GetMass()*fabs(smallnormal.Dot ((smalle->GetVelocity()-this->GetVelocity()/SIMULATION_ATOM))+fabs (dist)/(SIMULATION_ATOM*SIMULATION_ATOM)));
 
-
     float m1=smalle->GetMass(),m2=GetMass();
-
     Vector Elastic_dvl = (m1-m2)/(m1+m2)*smalle->GetVelocity() + smalle->GetVelocity()*2*m2/(m1+m2);
-
     Vector Elastic_dvs = (m2-m1)/(m1+m2)*smalle->GetVelocity() + smalle->GetVelocity()*2*m1/(m1+m2);
-
     Vector Inelastic_vf = (m1/(m1+m2))*smalle->GetVelocity() + (m2/(m1+m2))*GetVelocity();
-
     float LargeKE = (0.5)*m2*GetVelocity().MagnitudeSquared();
-
     float SmallKE = (0.5)*m1*smalle->GetVelocity().MagnitudeSquared();
-
     float FinalInelasticKE = Inelastic_vf.MagnitudeSquared()*(0.5)*(m1+m2);
-
 	float InelasticDeltaKE = LargeKE +SmallKE - FinalInelasticKE;
-
-
     static float kilojoules_per_damage = XMLSupport::parse_float (vs_config->getVariable ("physics","kilojoules_per_unit_damage","5400"));
-
     static float inelastic_scale = XMLSupport::parse_float (vs_config->getVariable ("physics","inelastic_scale","1"));
-
 	float large_damage=inelastic_scale*(InelasticDeltaKE *(1.0/4.0 + (0.5*m2/(m1+m2))) )/kilojoules_per_damage;
-
     float small_damage=inelastic_scale*(InelasticDeltaKE *(1.0/4.0 + (0.5*m1/(m1+m2))) )/kilojoules_per_damage;
-
     smalle->ApplyDamage (biglocation.Cast(),bignormal,small_damage,smalle,GFXColor(1,1,1,2),NULL);
-
     this->ApplyDamage (smalllocation.Cast(),smallnormal,large_damage,this,GFXColor(1,1,1,2),NULL);
 
 
@@ -841,14 +827,6 @@ void GameUnit::reactToCollision(Unit * smalle, const QVector & biglocation, cons
   }
 
 }
-
-
-
-
-
-
-
-
 
 Vector GameUnit::ResolveForces (const Transformation &trans, const Matrix &transmat) {
 
@@ -922,9 +900,9 @@ static signed char  ComputeAutoGuarantee (GameUnit * un) {
 
   int cpnum=-1;
 
-  if ((cp =_Universe->isPlayerStarship (un))) {
+  if ((cp =_Universe.isPlayerStarship (un))) {
 
-    cpnum = cp-_Universe->AccessCockpit(0);
+    cpnum = cp-_Universe.AccessCockpit(0);
 
   }else {
 
@@ -984,7 +962,7 @@ bool GameUnit::AutoPilotTo (Unit * target, bool ignore_friendlies) {
 
   if (ss==NULL) {
 
-    ss = _Universe->activeStarSystem();
+    ss = _Universe.activeStarSystem();
 
   }
 
@@ -1060,7 +1038,7 @@ bool GameUnit::AutoPilotTo (Unit * target, bool ignore_friendlies) {
 
     SetCurPosition(end);
 
-    if (_Universe->isPlayerStarship (this)&&getFlightgroup()!=NULL) {
+    if (_Universe.isPlayerStarship (this)&&getFlightgroup()!=NULL) {
 
       Unit * other=NULL;
 
@@ -1086,7 +1064,7 @@ bool GameUnit::AutoPilotTo (Unit * target, bool ignore_friendlies) {
 
 	if (leadah) {
 
-	  if (NULL==_Universe->isPlayerStarship (other)) {
+	  if (NULL==_Universe.isPlayerStarship (other)) {
 
 	    //other->AutoPilotTo(this);
 
@@ -1105,4 +1083,3 @@ bool GameUnit::AutoPilotTo (Unit * target, bool ignore_friendlies) {
   return ok;
 
 }
-

@@ -47,15 +47,24 @@
 using namespace std;
 ///Decides whether to toast the jump star from the cache
 extern void CacheJumpStar (bool);
-Universe::Universe(int argc, char** argv, const char * galaxy)
+extern void SortStarSystems (std::vector <StarSystem *> &ss, StarSystem * drawn);
+StarSystem * GameUniverse::Init (string systemfile, const Vector & centr,const string planetname) {
+  static bool js = true;
+  if (js) {
+	js=false;
+	CacheJumpStar(false);
+  }
+  return this->Universe::Init( systemfile, centr, planetname);
+}
+void GameUniverse::Init( int argc, char** argv, const char * galaxy)
 {
 	current_cockpit=0;
+	//Select drivers
 #if defined(WITH_MACOSX_BUNDLE)
     // get the current working directory so when glut trashes it we can restore.
     char pwd[MAXPATHLEN];
     getcwd (pwd,MAXPATHLEN);
 #endif
-	//Select drivers
 	GFXInit(argc,argv);
 #if defined(WITH_MACOSX_BUNDLE)
     // Restore it
@@ -66,60 +75,35 @@ Universe::Universe(int argc, char** argv, const char * galaxy)
 
 	hud_camera = Camera();
 	LoadWeapons("weapon_list.xml");
-	LoadFactionXML("factions.xml");	
+	this->Universe::Init();
 	this->galaxy = new GalaxyXML::Galaxy (galaxy);
-
-	script_system=NULL;
 }
-void Universe::SetupCockpits(vector  <string> playerNames) {
+void GameUniverse::SetupCockpits(vector  <string> playerNames) {
 	for (unsigned int i=0;i<playerNames.size();i++) {
 	  cockpit.push_back( new Cockpit ("",NULL,playerNames[i]));
 	}
 }
-static void SortStarSystems (std::vector <StarSystem *> &ss, StarSystem * drawn);
-void Universe::LoadStarSystem(StarSystem * s) {
-  star_system.push_back (s);
-  SortStarSystems(star_system,s);//dont' want instadie
-}
-bool Universe::StillExists (StarSystem * s) {
-  return std::find (star_system.begin(),star_system.end(),s)!=star_system.end();
-}
-
-void Universe::UnloadStarSystem (StarSystem * s) {
-  //not sure what to do here? serialize?
-}
-StarSystem * Universe::Init (string systemfile, const Vector & centr,const string planetname) {
-  static bool js = true;
-  if (js) {
-	js=false;
-	CacheJumpStar(false);
-  }
-  string fullname=systemfile+".system";
-  return GenerateStarSystem((char *)fullname.c_str(),"",centr);
-}
-Universe::~Universe()
+GameUniverse::GameUniverse(int argc, char** argv, const char * galaxy)
 {
+	this->Init( argc, argv, galaxy);
+}
+GameUniverse::GameUniverse():Universe()
+{
+}
+GameUniverse::~GameUniverse()
+{
+  int i;
   CacheJumpStar(true);
   DeInitInput();
-  unsigned int i;
-  for (i=0;i<factions.size();i++) {
-    delete factions[i];
-  }
-  for (i=0;i<cockpit.size();i++) {
-    delete cockpit[i];
-  }
-  cockpit.clear();
   GFXShutdown();
-  _Universe=NULL;
-	//delete mouse;
 }
 //sets up all the stuff... in this case the ships to be rendered
 
-void Universe::activateLightMap() {
+void GameUniverse::activateLightMap() {
 	getActiveStarSystem(0)->activateLightMap();
 }
 
-void Universe::StartGFX()
+void GameUniverse::StartGFX()
 {
 
 	GFXBeginScene();
@@ -161,7 +145,7 @@ void Universe::StartGFX()
 	*/
       	GFXEndScene();
 }
-void Universe::SetActiveCockpit (int i) {
+void GameUniverse::SetActiveCockpit (int i) {
 #ifdef VS_DEBUG
   if (i<0||i>=cockpit.size()) {
     fprintf (stderr,"ouch invalid cockpit %d",i);
@@ -169,7 +153,7 @@ void Universe::SetActiveCockpit (int i) {
 #endif 
   current_cockpit=i;
 }
-void Universe::SetActiveCockpit (Cockpit * cp) {
+void GameUniverse::SetActiveCockpit (Cockpit * cp) {
   for (unsigned int i=0;i<cockpit.size();i++) {
     if (cockpit[i]==cp) {
       SetActiveCockpit (i);
@@ -178,7 +162,7 @@ void Universe::SetActiveCockpit (Cockpit * cp) {
   }
 }
 
-Cockpit * Universe::isPlayerStarship(const Unit * doNotDereference) {
+Cockpit * GameUniverse::isPlayerStarship(const Unit * doNotDereference) {
   if (!doNotDereference)
     return NULL;
   for (unsigned int i=0;i<cockpit.size();i++) {
@@ -187,28 +171,9 @@ Cockpit * Universe::isPlayerStarship(const Unit * doNotDereference) {
   }
   return NULL;
 }
-void Universe::Loop(void main_loop()) {
+void GameUniverse::Loop(void main_loop()) {
   GFXLoop(main_loop);
 }
-extern void micro_sleep (unsigned int howmuch);
-extern int getmicrosleep ();
-static void SortStarSystems (std::vector <StarSystem *> &ss, StarSystem * drawn) {
-  if ((*ss.begin())==drawn) {
-    return;
-  }
-  vector<StarSystem*>::iterator drw = std::find (ss.begin(),ss.end(),drawn);
-  if (drw!=ss.end()) {
-    StarSystem * tmp=drawn;
-    vector<StarSystem*>::iterator i=ss.begin();
-    while (i<=drw) {
-      StarSystem * t=*i;
-      *i=tmp;
-      tmp = t;
-      i++;
-    }
-  }
-}
-
 void CalculateCoords (unsigned int i,unsigned int size, float &x,float &y,float &w,float &h){
   if (size<=1) {
     x=y=0;
@@ -235,7 +200,7 @@ void CalculateCoords (unsigned int i,unsigned int size, float &x,float &y,float 
 }
 extern bool RefreshGUI();
 extern float rand01();
-void Universe::StartDraw()
+void GameUniverse::StartDraw()
 {
 #ifndef WIN32
   RESETTIME();
@@ -260,13 +225,13 @@ void Universe::StartDraw()
     if (!RefreshGUI()) {
       activeStarSystem()->Draw();
     }
-    AccessCamera()->SetSubwindow (0,0,1,1);      
+    AccessCamera()->SetSubwindow (0,0,1,1);
   }
   UpdateTime();
   static float nonactivesystemtime = XMLSupport::parse_float (vs_config->getVariable ("physics","InactiveSystemTime",".3"));
   static unsigned int numrunningsystems = XMLSupport::parse_int (vs_config->getVariable ("physics","NumRunningSystems","4"));
   float systime=nonactivesystemtime;
-  _Universe->SetActiveCockpit (((int)(rand01()*cockpit.size()))%cockpit.size());
+  _Universe.SetActiveCockpit (((int)(rand01()*cockpit.size()))%cockpit.size());
   
   for (i=0;i<star_system.size()&&i<numrunningsystems;i++) {
     star_system[i]->Update((i==0)?1:systime/i,true);
@@ -302,7 +267,7 @@ void Universe::StartDraw()
 
 }
 
-void Universe::WriteSaveGame (bool auto_save) 
+void GameUniverse::WriteSaveGame (bool auto_save) 
 {
   for (unsigned int i=0;i<cockpit.size();i++) {
     if (AccessCockpit(i)) {
@@ -318,22 +283,6 @@ void Universe::WriteSaveGame (bool auto_save)
     }
   }
 }
-
-
-StarSystem *Universe::getStarSystem(string name){
-
-  vector<StarSystem*>::iterator iter;
-
-  for(iter = star_system.begin();iter!=star_system.end();iter++){
-    StarSystem *ss=*iter;
-    if(ss->getName()==name){
-      return ss;
-    }
-  }
-
-  return NULL;
-}
-
 
 /************************************************************************
 extern char *viddrv;

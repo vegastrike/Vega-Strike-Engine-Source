@@ -194,7 +194,7 @@ void SphereMesh::Draw(float lod,  bool centered, const Matrix &m) {
     Matrix m1(m);
     //float m1[16];
     //memcpy (m1,m,sizeof (float)*16);
-    m1.p = QVector(_Universe->AccessCamera()->GetPosition().Transform(m1));
+    m1.p = QVector(_Universe.AccessCamera()->GetPosition().Transform(m1));
     Mesh::Draw (lod,m1);
   } else {	
     Mesh::Draw(lod,m);

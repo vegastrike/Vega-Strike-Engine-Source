@@ -222,15 +222,16 @@ void	AccountServer::recvMsg( TCPSOCKET sock)
 					elem = *j;
 					if( !elem->compareName( name) && !elem->comparePass( passwd))
 					{
+						found = 1;
 						if( elem->isConnected())
 							connected = 1;
 						else
-							found = 1;
+							connected = 0;
 					}
 				}
 				if( !found)
 				{
-					cout<<"ERROR LOGOUT -> didn't find player to disconnect : "<<name<<endl;
+					cout<<"ERROR LOGOUT -> didn't find player to disconnect = <"<<name<<">:<"<<passwd<<">"<<endl;
 				}
 				else
 				{

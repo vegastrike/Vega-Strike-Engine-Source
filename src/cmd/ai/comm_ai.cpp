@@ -37,7 +37,7 @@ vector <Animation *> *CommunicatingAI::getCommFaces(unsigned char &sex) {
 
 void CommunicatingAI::SetParent (Unit * par) {
   Order::SetParent(par);
-  comm_face = FactionUtil::GetRandAnimation(par->faction,sex);
+  comm_face = GameFactionUtil::GetRandAnimation(par->faction,sex);
 }
 int CommunicatingAI::selectCommunicationMessageMood (CommunicationMessage &c, float mood) {
 
@@ -64,7 +64,7 @@ float CommunicatingAI::GetEffectiveRelationship (const Unit * target)const {
 static void AllUnitsCloseAndEngage(Unit * un, int faction) {
 	Unit * ally;
 	static float contraband_assist_range = XMLSupport::parse_float (vs_config->getVariable("physics","contraband_assist_range","50000"));
-	for (un_iter i=_Universe->activeStarSystem()->getUnitList().createIterator();
+	for (un_iter i=_Universe.activeStarSystem()->getUnitList().createIterator();
 		(ally = *i)!=NULL;
 		++i) {
 		Vector loc;
@@ -202,8 +202,8 @@ void CommunicatingAI::AdjustRelationTo (Unit * un, float factor) {
 Unit * CommunicatingAI::GetRandomUnit (float playaprob, float targprob) {
   float a =rand ();
   Unit * target=NULL;
-  if (a<RAND_MAX*playaprob&&_Universe->AccessCockpit()->GetParent()!=parent) {
-    target = _Universe->AccessCockpit()->GetParent();
+  if (a<RAND_MAX*playaprob&&_Universe.AccessCockpit()->GetParent()!=parent) {
+    target = _Universe.AccessCockpit()->GetParent();
   }
   if (a>RAND_MAX*(1-targprob)) {
     target = parent->Target();
@@ -214,7 +214,7 @@ Unit * CommunicatingAI::GetRandomUnit (float playaprob, float targprob) {
   }
   }
   if (target==NULL) {
-    for (un_iter ui=_Universe->activeStarSystem()->getUnitList().createIterator();
+    for (un_iter ui=_Universe.activeStarSystem()->getUnitList().createIterator();
 	 (*ui)!=NULL; ++ui) {
       if (parent->InRange ((*ui))) {
 	target = *ui;

@@ -406,11 +406,11 @@ void	NetClient::getZoneData()
 			memcpy( &Clients[nser]->current_state, &cs, state_size);
 			memcpy( &Clients[nser]->current_desc, &cd, desc_size);
 			// Launch the unit in the game
-			Clients[nser]->game_unit = UniverseUtil::launch (string(""),"avenger",string(""),string( "unit"), string("default"),1,0, cs.getPosition(), string(""));
+			Clients[nser]->game_unit = GameUniverseUtil::launch (string(""),"avenger",string(""),string( "unit"), string("default"),1,0, cs.getPosition(), string(""));
 			/*
 			Clients[nser]->game_unit = UnitFactory::createUnit( "avenger",false,0,string(""),NULL,0);
 			Clients[nser]->game_unit->SetTurretAI();
-  			_Universe->activeStarSystem()->AddUnit(Clients[nser]->game_unit);
+  			_Universe.activeStarSystem()->AddUnit(Clients[nser]->game_unit);
 			*/
 			Clients[nser]->game_unit->PrimeOrders();
 			Clients[nser]->game_unit->SetNetworkMode( true);
@@ -462,10 +462,10 @@ void	NetClient::addClient()
 	/*
 	Clients[cltserial]->game_unit = UnitFactory::createUnit( "avenger",false,0,string(""),NULL,0);
     Clients[cltserial]->game_unit->SetTurretAI();
-    _Universe->activeStarSystem()->AddUnit(Clients[cltserial]->game_unit);
+    _Universe.activeStarSystem()->AddUnit(Clients[cltserial]->game_unit);
 	*/
 	// Or :
-	Clients[cltserial]->game_unit = UniverseUtil::launch (string(""),"avenger",string(""),string( "unit"), string("default"),1,0, cs.getPosition(), string(""));
+	Clients[cltserial]->game_unit = GameUniverseUtil::launch (string(""),"avenger",string(""),string( "unit"), string("default"),1,0, cs.getPosition(), string(""));
 	Clients[cltserial]->game_unit->PrimeOrders();
 	Clients[cltserial]->game_unit->SetNetworkMode( true);
 	//cout<<"Addclient 4"<<endl;
@@ -492,7 +492,7 @@ void	NetClient::removeClient()
 	}
 
 	// Removes the unit from starsystem, destroys it and delete client
-	_Universe->activeStarSystem()->RemoveUnit(Clients[cltserial]->game_unit);
+	_Universe.activeStarSystem()->RemoveUnit(Clients[cltserial]->game_unit);
 	nbclients--;
 	delete Clients[cltserial];
 	cout<<"Leaving client n°"<<cltserial<<" - now "<<nbclients<<" clients in system"<<endl;
@@ -563,7 +563,7 @@ void	NetClient::receivePosition()
 			sernum = cs.getSerial();
 			// Test if this is a local player
 			// Is it is, ignore position update
-			if( Clients[sernum]!=NULL && !_Universe->isPlayerStarship( Clients[sernum]->game_unit))
+			if( Clients[sernum]!=NULL && !_Universe.isPlayerStarship( Clients[sernum]->game_unit))
 			{
 				// Backup old state
 				memcpy( &(Clients[sernum]->old_state), &(Clients[sernum]->current_state), sizeof( ClientState));

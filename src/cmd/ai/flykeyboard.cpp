@@ -41,10 +41,10 @@ struct StarShipControlKeyboard {
 };
 static vector <StarShipControlKeyboard> starshipcontrolkeys;
 static StarShipControlKeyboard &g() {
-  while (starshipcontrolkeys.size()<=(unsigned int)_Universe->CurrentCockpit()) {
+  while (starshipcontrolkeys.size()<=(unsigned int)_Universe.CurrentCockpit()) {
     starshipcontrolkeys.push_back(StarShipControlKeyboard());
   }
-  return starshipcontrolkeys [_Universe->CurrentCockpit()];
+  return starshipcontrolkeys [_Universe.CurrentCockpit()];
 }
 
 
@@ -148,7 +148,7 @@ void FlyByKeyboard::Execute (bool resetangvelocity) {
     parent->VelocityReference( NULL);
   }
   if (SSCK.realauto) {
-    Cockpit * cp = _Universe->isPlayerStarship(parent);
+    Cockpit * cp = _Universe.isPlayerStarship(parent);
     if (cp) {
       cp->Autopilot (parent->Target());
     }

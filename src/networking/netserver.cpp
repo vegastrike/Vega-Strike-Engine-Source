@@ -476,7 +476,7 @@ void	NetServer::checkKey()
 void	NetServer::checkAcctMsg()
 {
 	unsigned int len, len2;
-	AddressIP	ipadr;
+	AddressIP	ipadr, ip2;
 	Client *	clt = NULL;
 	unsigned char cmd=0;
 
@@ -489,7 +489,7 @@ void	NetServer::checkAcctMsg()
 		//cout<<"Net activity !"<<endl;
 		// Receive packet and process according to command
 
-		if( (len=NetAcct->recvbuf( acct_sock, (char *)&packeta, len2, &ipadr))>0)
+		if( (len=NetAcct->recvbuf( acct_sock, (char *)&packeta, len2, &ip2))>0)
 		{
 			// Maybe copy that in a "else" condition too if when it fails we have to disconnect a client
 
@@ -505,6 +505,8 @@ void	NetServer::checkAcctMsg()
 			clt = waitList.front();
 			#else
 			ipadr = waitList.front();
+			cout<<"Got response for client IP : ";
+			Network->getIPof( ipadr);
 			#endif
 			waitList.pop();
 
@@ -765,6 +767,8 @@ void	NetServer::processPacket( Client * clt, unsigned char cmd, AddressIP ipadr)
 					this->waitList.push( clt);
 				#else
 					this->waitList.push( ipadr);
+					cout<<"Waiting authorization for client IP : ";
+					Network->getIPof( ipadr);
 				#endif
 					// Redirect the login request packet to account server
 					cout<<"Redirecting login request to account server on socket "<<acct_sock<<endl;

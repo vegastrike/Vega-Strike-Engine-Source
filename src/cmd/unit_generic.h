@@ -35,6 +35,8 @@ void UncheckUnit (class Unit * un);
 #include "vs_globals.h"
 
 #include <string>
+#include "gfx/matrix.h"
+#include "gfx/quaternion.h"
 #include "weapon_xml.h"
 #include "linecollide.h"
 //#include "gfx/vdu.h"
@@ -83,6 +85,7 @@ class VDU;
 struct UnitImages;
 struct UnitSounds;
 struct Cargo;
+class Mesh;
 
 /// used to scan the system - faster than c_alike code
 
@@ -383,7 +386,7 @@ public:
 /**** XML STUFF                                                                     ****/
 /***************************************************************************************/
 
- private:
+ protected:
   ///Unit XML Load information
   struct XMLstring;
   ///Loading information

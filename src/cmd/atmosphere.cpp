@@ -51,7 +51,7 @@ void Atmosphere::Update(const QVector &position, const Matrix &tmatrix)
 {
 	int a;
 	Planet *currPlanet;
-	StarSystem *system = _Universe->activeStarSystem();
+	StarSystem *system = _Universe.activeStarSystem();
 
 	for(a=0; a<(int)sunboxes.size(); a++) {
 		delete sunboxes[a];

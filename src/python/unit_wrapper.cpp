@@ -7,12 +7,18 @@
 #include "python_class.h"
 
 #include <boost/python/objects.hpp>
+#ifndef _SERVER
 #include "universe_util.h"
+#endif
+#include "universe_util_generic.h"
 #include "cmd/unit_util.h"
 #include "faction.h"
 #include "cmd/ai/fire.h"
 //makes to_python for both vector and qvector turn them into tuples :-)
 using namespace UnitUtil;
+#ifndef _SERVER
+using namespace GameUniverseUtil;
+#endif
 using namespace UniverseUtil;
 using Orders::FireAt;
 /*BOOST_PYTHON_BEGIN_CONVERSION_NAMESPACE
@@ -109,34 +115,15 @@ EXPORT_UTIL(getSystemName,"")
 EXPORT_UTIL(getUnitList,un_iter())
 EXPORT_UTIL(getUnit,Unit())
 EXPORT_UTIL(getNumUnits,0)
-EXPORT_UTIL(launchJumppoint,Unit())
-EXPORT_UTIL(launch,Unit())
-EXPORT_UTIL(getRandCargo,Cargo())
 EXPORT_FACTION(GetFactionName,"")
 EXPORT_FACTION(GetFactionIndex,-1)
 EXPORT_FACTION(GetRelation,0)
 voidEXPORT_FACTION(AdjustRelation)
 EXPORT_FACTION(GetNumFactions,0)
-EXPORT_UTIL(GetGameTime,0)
-voidEXPORT_UTIL(SetTimeCompression)
 EXPORT_UTIL(GetAdjacentSystem,"")
 EXPORT_UTIL(GetGalaxyProperty,"")
 EXPORT_UTIL(GetNumAdjacentSystems,0)
-EXPORT_UTIL(musicAddList,0)
-voidEXPORT_UTIL(musicPlaySong)
-voidEXPORT_UTIL(musicPlayList)
-voidEXPORT_UTIL(musicLoopList)
-EXPORT_UTIL(GetDifficulty,1)
-voidEXPORT_UTIL(SetDifficulty)
-voidEXPORT_UTIL(playSound)
-voidEXPORT_UTIL(cacheAnimation)
-voidEXPORT_UTIL(playAnimation)
-voidEXPORT_UTIL(playAnimationGrow)
 voidEXPORT_UTIL(terminateMission)
-EXPORT_UTIL(getPlayer,Unit())
-EXPORT_UTIL(getPlayerX,Unit())
-EXPORT_UTIL(getCurrentPlayer,0)
-EXPORT_UTIL(getNumPlayers,1)
 EXPORT_UTIL(addObjective,0)
 voidEXPORT_UTIL(setObjective)
 voidEXPORT_UTIL(setCompleteness)
@@ -144,15 +131,47 @@ EXPORT_UTIL(getCompleteness,0)
 voidEXPORT_UTIL(setOwner)
 EXPORT_UTIL(getOwner,0)
 voidEXPORT_UTIL(IOmessage)
-EXPORT_UTIL(GetMasterPartList,Unit())
 EXPORT_UTIL(GetContrabandList,Unit())
 EXPORT_UTIL(numActiveMissions,1)
 voidEXPORT_UTIL(SetAutoStatus)
 voidEXPORT_UTIL(LoadMission)
 voidEXPORT_UTIL(setMissionOwner)
 EXPORT_UTIL(getMissionOwner,1)
+EXPORT_UTIL(GetDifficulty,1)
+voidEXPORT_UTIL(SetDifficulty)
 #undef EXPORT_UTIL
 #undef voidEXPORT_UTIL
+#undef EXPORT_FACTION
+#undef voidEXPORT_FACTION
+
+// Do not include that in servers
+#ifndef _SERVER
+#undef EXPORT_GAMEUTIL
+#undef voidEXPORT_GAMEUTIL
+#define EXPORT_GAMEUTIL(name,aff) VS.def(&GameUniverseUtil::name,#name);
+#define voidEXPORT_GAMEUTIL(name) EXPORT_GAMEUTIL(name,0)
+EXPORT_GAMEUTIL(GetGameTime,0)
+voidEXPORT_GAMEUTIL(SetTimeCompression)
+EXPORT_GAMEUTIL(launchJumppoint,Unit())
+EXPORT_GAMEUTIL(launch,Unit())
+EXPORT_GAMEUTIL(getRandCargo,Cargo())
+EXPORT_GAMEUTIL(musicAddList,0)
+voidEXPORT_GAMEUTIL(musicPlaySong)
+voidEXPORT_GAMEUTIL(musicPlayList)
+voidEXPORT_GAMEUTIL(musicLoopList)
+voidEXPORT_GAMEUTIL(playSound)
+voidEXPORT_GAMEUTIL(cacheAnimation)
+voidEXPORT_GAMEUTIL(playAnimation)
+voidEXPORT_GAMEUTIL(playAnimationGrow)
+EXPORT_GAMEUTIL(getPlayer,Unit())
+EXPORT_GAMEUTIL(getPlayerX,Unit())
+EXPORT_GAMEUTIL(getCurrentPlayer,0)
+EXPORT_GAMEUTIL(getNumPlayers,1)
+EXPORT_GAMEUTIL(GetMasterPartList,Unit())
+#undef EXPORT_GAMEUTIL
+#undef voidEXPORT_GAMEUTIL
+#endif
+
 PYTHON_BEGIN_CLASS(VS,UnitWrapper,"Unit")
 PYTHON_BASE_BEGIN_CLASS(VS,Cargo,"Cargo")
 Class.def(boost::python::constructor<std::string,std::string,float,int,float,float>());

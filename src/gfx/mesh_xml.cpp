@@ -1488,8 +1488,8 @@ void Mesh::CreateLogos(int faction, Flightgroup * fg) {
       numsquadlogo++;
   }
   unsigned int nfl=numforcelogo;
-  Logo ** tmplogo;
-  Texture * Dec;
+  Logo ** tmplogo=NULL;
+  Texture * Dec=NULL;
   for (index=0,nfl=numforcelogo,tmplogo=&forcelogos,Dec=FactionUtil::getForceLogo(faction);index<2;index++,nfl=numsquadlogo,tmplogo=&squadlogos,Dec=(fg==NULL?FactionUtil::getSquadLogo(faction):fg->squadLogo)) {
     if (Dec==NULL) {
       Dec = FactionUtil::getSquadLogo(faction);

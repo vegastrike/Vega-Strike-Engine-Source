@@ -116,7 +116,7 @@ int Music::SelectTracks(int &whichlist) {
     }
   }
   static float hostile_autodist =  XMLSupport::parse_float (vs_config->getVariable ("physics","hostile_auto_radius","8000"));
-  Unit * un=_Universe->AccessCockpit()->GetParent();
+  Unit * un=_Universe.AccessCockpit()->GetParent();
   if (un==NULL) {
     whichlist=PEACELIST;
     if (playlist[PEACELIST].empty())
@@ -124,7 +124,7 @@ int Music::SelectTracks(int &whichlist) {
     return randInt((playlist[PEACELIST].size()));
   }
   bool perfect=true;
-  un_iter iter = _Universe->activeStarSystem()->getUnitList().createIterator();
+  un_iter iter = _Universe.activeStarSystem()->getUnitList().createIterator();
   Unit *target;
   while ((target = iter.current())!=NULL) {
     float ftmp;

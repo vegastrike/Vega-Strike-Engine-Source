@@ -69,7 +69,7 @@ inline void BlendTrans (Matrix & drawmat, const QVector & cur_position, const QV
 
 
 void Bolt::Draw () {
-  bolt_draw *q = _Universe->activeStarSystem()->bolts;
+  bolt_draw *q = _Universe.activeStarSystem()->bolts;
   GFXDisable (LIGHTING);
   GFXDisable (CULLFACE);
 
@@ -91,7 +91,7 @@ void Bolt::Draw () {
   for (i=q->balls.begin();i!=q->balls.end();i++,k++) {
     Animation * cur= *k;
     //Matrix result;
-    //FIXME::MuST USE DRAWNOTRANSFORMNOW    cur->CalculateOrientation (result);
+    //FIXME::MuST USE DRAWNOTRANSFORMNOW cur->CalculateOrientation (result);
     for (j=i->begin();j!=i->end();j++) {//don't update time more than once
       BlendTrans ((*j)->drawmat,(*j)->cur_position,(*j)->prev_position);
       //result[12]=(*j)->drawmat[12];
@@ -142,7 +142,7 @@ void Bolt::Draw () {
 
 Bolt::Bolt (const weapon_info & typ, const Matrix &orientationpos,  const Vector & shipspeed, Unit * owner): col (typ.r,typ.g,typ.b,typ.a), cur_position (orientationpos.p), ShipSpeed (shipspeed) {
   VSCONSTRUCT2('t')
-  bolt_draw *q= _Universe->activeStarSystem()->bolts;
+  bolt_draw *q= _Universe.activeStarSystem()->bolts;
   prev_position= cur_position;
   this->owner = owner;
   type = typ.type;
@@ -278,7 +278,7 @@ bool Bolt::Collide (Unit * target) {
 
 Bolt::~Bolt () {
   VSDESTRUCT2
-  bolt_draw *q = _Universe->activeStarSystem()->bolts;
+  bolt_draw *q = _Universe.activeStarSystem()->bolts;
   vector <vector <Bolt *> > *target;
   if (type==weapon_info::BOLT) { 
     target = &q->bolts;

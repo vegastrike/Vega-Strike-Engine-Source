@@ -263,13 +263,13 @@ void Beam::RemoveFromSystem(bool eradicate) {
 #else
     ;
 #endif
-    for (unsigned int i=0;i<_Universe->star_system.size();i++) {
-      _Universe->pushActiveStarSystem(_Universe->star_system[i]);
+    for (unsigned int i=0;i<_Universe.star_system.size();i++) {
+      _Universe.pushActiveStarSystem(_Universe.star_system[i]);
     
     if (EradicateCollideTable (&CollideInfo)) {
       fprintf (stderr,"VERY BAD ERROR FATAL! 0x%x",this);
     }
-    _Universe->popActiveStarSystem();
+    _Universe.popActiveStarSystem();
     }
     CollideInfo.object.b = NULL;
 
@@ -394,7 +394,7 @@ bool Beam::Collide (Unit * target) {
       target->ApplyForce (direction*appldam);
       if ((center-target->Position()).Magnitude()<fabs(phasdam)) {
 
-	un_iter ui= _Universe->activeStarSystem()->getUnitList().createIterator();
+	un_iter ui= _Universe.activeStarSystem()->getUnitList().createIterator();
 	Unit *un;
 	for (;(un=*ui)!=NULL;++ui) {
 	  if (((void *)un)==owner) {

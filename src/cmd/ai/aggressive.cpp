@@ -155,7 +155,7 @@ Unit * GetThreat (Unit * parent, Unit * leader) {
   Unit * un=NULL;
   bool targetted=false;
   float mindist= FLT_MAX;
-	  for (un_iter ui = _Universe->activeStarSystem()->getUnitList().createIterator();
+	  for (un_iter ui = _Universe.activeStarSystem()->getUnitList().createIterator();
 	       (un = *ui);
 	       ++ui) {
 	    if (parent->getRelation (un)<0) {
@@ -201,7 +201,7 @@ bool AggressiveAI::ProcessCurrentFgDirective(Flightgroup * fg) {
 	Unit * targ = fg->leader.GetUnit();
 	targ = targ!=NULL?targ->Target():NULL;
 	if (targ) {
-	  if (targ->InCorrectStarSystem(_Universe->activeStarSystem())) {
+	  if (targ->InCorrectStarSystem(_Universe.activeStarSystem())) {
 	    CommunicationMessage c(parent,leader,NULL,0);
 	    if (parent->InRange (targ,true,false)) {
 	      parent->Target (targ);
@@ -217,7 +217,7 @@ bool AggressiveAI::ProcessCurrentFgDirective(Flightgroup * fg) {
 	}
       }else if (fg->directive==string("f")||fg->directive==string("F")) {
 	if (leader!=NULL) {
-	  if (leader->InCorrectStarSystem(_Universe->activeStarSystem())) {
+	  if (leader->InCorrectStarSystem(_Universe.activeStarSystem())) {
 	    retval=true;
 	    if (fg->directive!=last_directive||(!last_time_insys)) {
 	      last_time_insys=true;
@@ -255,7 +255,7 @@ bool AggressiveAI::ProcessCurrentFgDirective(Flightgroup * fg) {
       }else if (fg->directive==string("h")||fg->directive==string("H")) {
 	//	fprintf (stderr,"he wnats to help out");
 	if (fg->directive!=last_directive&&leader) {
-	  if (leader->InCorrectStarSystem(_Universe->activeStarSystem())) {
+	  if (leader->InCorrectStarSystem(_Universe.activeStarSystem())) {
 	    //fprintf (stderr,"%s he wnats to help out and hasn't died\n", parent->name.c_str());
 	    Unit * th=NULL;
 	    if ((th=leader->Threat())) {

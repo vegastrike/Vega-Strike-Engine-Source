@@ -56,6 +56,16 @@ VegaConfig::VegaConfig(char *configfile){
   checkConfig(top);
 }
 
+VegaConfig::~VegaConfig()
+{
+	if( variables!=NULL)
+		delete variables;
+	if( colors!=NULL)
+		delete colors;
+	if( bindings!=NULL)
+		delete bindings;
+}
+
 /* *********************************************************** */
 
 bool VegaConfig::checkConfig(configNode *node){

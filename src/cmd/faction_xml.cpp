@@ -145,7 +145,7 @@ void Faction::beginElement(void *userData, const XML_Char *names, const XML_Char
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(attribute_map.lookup((*iter).name)) {
       case NAME:
-	factions.back()->explosion.push_back (FactionUtil::createAnimation((*iter).value.c_str()));
+	factions.back()->explosion.push_back (GameFactionUtil::createAnimation((*iter).value.c_str()));
 	factions.back()->explosion_name.push_back ((*iter).value);
 	break;
       }
@@ -170,7 +170,7 @@ void Faction::beginElement(void *userData, const XML_Char *names, const XML_Char
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(attribute_map.lookup((*iter).name)) {
       case NAME:
-	factions.back()->comm_faces.back().push_back(FactionUtil::createAnimation ((*iter).value.c_str()));
+		  factions.back()->comm_faces.back().push_back(GameFactionUtil::createAnimation ((*iter).value.c_str()));
 	break;
       }
     }
@@ -178,7 +178,7 @@ void Faction::beginElement(void *userData, const XML_Char *names, const XML_Char
   case FACTION:
     assert (unitlevel==1);
     unitlevel++;
-    factions.push_back(new Faction ());
+    factions.push_back(new GameFaction ());
     assert(factions.size()>0);
     contrabandlists.push_back ("");
     //	factions[factions.size()-1];
@@ -213,7 +213,7 @@ void Faction::beginElement(void *userData, const XML_Char *names, const XML_Char
 			strcpy(tmpstr,(*iter).value.c_str());
 		} else {
 			RGBfirst =3;
-			factions[factions.size()-1]->logo=FactionUtil::createTexture((*iter).value.c_str(),tmpstr);
+			factions[factions.size()-1]->logo=GameFactionUtil::createTexture((*iter).value.c_str(),tmpstr);
 		}
 		break;
 	  case LOGOA:
@@ -223,7 +223,7 @@ void Faction::beginElement(void *userData, const XML_Char *names, const XML_Char
 			strcpy(tmpstr,(*iter).value.c_str());
 		} else {
 			RGBfirst =3;
-			factions[factions.size()-1]->logo=FactionUtil::createTexture(tmpstr,(*iter).value.c_str());
+			factions[factions.size()-1]->logo=GameFactionUtil::createTexture(tmpstr,(*iter).value.c_str());
 		}
 		break;
       case SECLOGORGB:
@@ -240,18 +240,18 @@ void Faction::beginElement(void *userData, const XML_Char *names, const XML_Char
     factions[factions.size()-1]->secondaryLogo=NULL;
     if (!secString.empty()) {
       if (secStringAlph.empty()) {
-	factions[factions.size()-1]->secondaryLogo=FactionUtil::createTexture(secString.c_str(),true);
+	factions[factions.size()-1]->secondaryLogo=GameFactionUtil::createTexture(secString.c_str(),true);
       }else {
-	factions[factions.size()-1]->secondaryLogo=FactionUtil::createTexture(secString.c_str(),secStringAlph.c_str(),true);
+	factions[factions.size()-1]->secondaryLogo=GameFactionUtil::createTexture(secString.c_str(),secStringAlph.c_str(),true);
       }
 
     }
 	assert (RGBfirst!=0);
 	if (RGBfirst==1) {
-			factions[factions.size()-1]->logo=FactionUtil::createTexture(tmpstr,true);
+			factions[factions.size()-1]->logo=GameFactionUtil::createTexture(tmpstr,true);
 	}
 	if (RGBfirst==2) {
-			factions[factions.size()-1]->logo=FactionUtil::createTexture(tmpstr,tmpstr,true);
+			factions[factions.size()-1]->logo=GameFactionUtil::createTexture(tmpstr,tmpstr,true);
 	}
 	if (tmpstr!=NULL) {
 		delete []tmpstr; 
@@ -308,75 +308,7 @@ void Faction::endElement(void *userData, const XML_Char *name) {
   }
 }
 
-FSM* FactionUtil::GetConversation(int Myfaction, int TheirFaction) {
-  assert (factions[Myfaction]->faction[TheirFaction].stats.index == TheirFaction);
-  return factions[Myfaction]->faction[TheirFaction].conversation;
-}
 
-void Faction::ParseAllAllies() {
-
-	// MSVC has a bug where it won't let you reuse variables intitliezed in the paramater list of the for loop
-	// the work around is A.) make the scope of the variable in the function level or not to re-define it in subsequent loops
-	unsigned int i = 0;
-	for (i=0;i<factions.size();i++) {
-		factions[i]->ParseAllies( i);
-		
-	}
-	for (i=0;i<factions.size();i++) {
-	 factions[i]->faction[i].relationship=1;
-	}
-}
-void Faction::ParseAllies (unsigned int thisfaction) {
-	unsigned int i,j;
-	vector <faction_stuff> tempvec;
-	for (i=0;i<faction.size();i++) {
-		for (j=0; j<factions.size();j++) {
-			if (strcmp (faction[i].stats.name,factions[j]->factionname)==0) {
-				delete [] faction[i].stats.name;
-				faction[i].stats.index = j;
-				break;
-			}
-		}
-	}
-	for (i=0;i<factions.size();i++) {
-		tempvec.push_back (faction_stuff());
-		tempvec[i].stats.index=i;
-		
-		tempvec[i].relationship =((i==thisfaction)?1:0);
-	}
-	for (i=0;i<faction.size();i++) {
-		tempvec[faction[i].stats.index].relationship = faction[i].relationship;
-	}
-	faction = tempvec;
-	/*
-	while (faction.size()<factions.size()) {
-		faction.push_back (faction_stuff());
-		faction[faction.size()-1].stats.index=-1;
-	}
-	faction_stuff tmp;
-	tmp.stats.index ==0;
-	for (i=0;i<faction.size();i++) {
-		if (tmp.stats.index == i) {
-			faction[i].relationship= tmp.relationship;
-			faction[i].stats.index = faction[i].stats.index;
-		} else {
-			tmp.relationship = faction[i].relationship;
-			tmp.stats.index = faction[i].stats.index;
-			if (faction[i].stats.index!=i) {
-				faction[i].relationship = 0;
-
-			}
-		}
-		for (j=0;j<faction.size();j++) {
-			if (faction[j].stats.index==i) {
-				faction[i].relationship= faction[j].relationship;
-				faction[i].stats.index = faction[j].stats.index;
-			}
-		}
-		faction[i].stats.index=i;
-	}
-	*/
-}
 void Faction::LoadXML(const char * filename, char * xmlbuffer, int buflength) {
   unitlevel=0;
   FILE * inFile;
@@ -427,7 +359,7 @@ void Faction::LoadXML(const char * filename, char * xmlbuffer, int buflength) {
     }
   }
 }
-void FactionUtil::LoadContrabandLists() {
+void GameFactionUtil::LoadContrabandLists() {
   for (unsigned int i=0;i<factions.size()&&i<contrabandlists.size();i++) {
     if (contrabandlists[i].length()>0) {
       factions[i]->contraband = UnitFactory::createUnit (contrabandlists[i].c_str(),true,i);
@@ -435,11 +367,11 @@ void FactionUtil::LoadContrabandLists() {
   }
   contrabandlists.clear();
 }
-std::vector <Animation *>* FactionUtil::GetAnimation (int faction, int n, unsigned char &sex) {
+std::vector <Animation *>* GameFactionUtil::GetAnimation (int faction, int n, unsigned char &sex) {
   sex = factions[faction]->comm_face_sex[n];
   return &factions[faction]->comm_faces[n];
 }
-std::vector <Animation *>* FactionUtil::GetRandAnimation(int faction, unsigned char &sex) {
+std::vector <Animation *>* GameFactionUtil::GetRandAnimation(int faction, unsigned char &sex) {
   if (factions[faction]->comm_faces.size()>0) {
     return GetAnimation ( faction,rand()%factions[faction]->comm_faces.size(),sex);
   }else {
@@ -447,7 +379,7 @@ std::vector <Animation *>* FactionUtil::GetRandAnimation(int faction, unsigned c
     return NULL;
   }
 }
-Animation * FactionUtil::getRandAnimation (int whichfaction, std::string &which) {
+Animation * GameFactionUtil::getRandAnimation (int whichfaction, std::string &which) {
   if (whichfaction<factions.size()) {
     if (factions[whichfaction]->explosion_name.size()) {
       int whichexp = rand()%factions[whichfaction]->explosion_name.size();

@@ -8,22 +8,7 @@ using std::string;
 class Cargo;
 class Unit;
 
-namespace UniverseUtil {
-///this function sets the "current" system to be "name"  where name may be something like "sol_sector/sol"  or "vega_sector/vega"   this function may take some time if the system has not been loaded before
-
-	void pushSystem (string name);
-
-///this function restores the active system.... there must be an equal number of pushSystems ans popSystems or else Vega Strike may behave unpredictably
-	void popSystem ();
-///This function gets the current system's official name
-	string getSystemFile();
-///this function gets the current system's nickname (not useful)
-	string getSystemName();
-///this function gets an iterator into the units in the current system... do NOT keep an iterator across a frame--it may get deleted!
-	un_iter getUnitList();
-///This function gets a unit given a number (how many iterations to go down in the iterator)
-	Unit *getUnit(int index);
-	int getNumUnits();
+namespace GameUniverseUtil {
 	void cacheAnimation (string anim);
 ///this function launches a wormhole or ajump point.
 	Unit *launchJumppoint(string name_string,
@@ -44,12 +29,6 @@ namespace UniverseUtil {
 	float GetGameTime ();
 ///this sets the time compresison value to zero
 	void SetTimeCompression ();
-///this gets a string which has in it a space delimited list of neighmoring systems
-	string GetAdjacentSystem (string str, int which);
-///this gets a specific property of this system as found in universe/milky_way.xml
-	string GetGalaxyProperty (string sys, string prop);
-///this gets the number of systems adjacent to the sysname
-	int GetNumAdjacentSystems (string sysname);
 ///this adds a playlist to the music and may be triggered with an int
 	int musicAddList(string str);
 ///this plays a specific song
@@ -58,17 +37,11 @@ namespace UniverseUtil {
 	void musicPlayList(int which);
 ///this plays msuci from a given list (where the int is what was returned by musicAddList)
 	void musicLoopList(int numloops);
-///this gets the difficutly of the game... ranges between 0 and 1... many missions depend on it never going past .99 unless it's always at one.
-	float GetDifficulty ();
-///this sets the difficulty
-	void SetDifficulty (float diff);
 ///this plays a sound at a location...if the sound has dual channels it will play in the center
 	void playSound(string soundName, QVector loc, Vector speed);
 ///this plays an image (explosion or warp animation) at a location
 	void playAnimation(string aniName, QVector loc, float size);
 	void playAnimationGrow(string aniName, QVector loc, float size,float growpercent);
-///this ends the mission with either success or failure
-	void terminateMission(bool term);
 ///this gets the player belonging to this mission
 	Unit *getPlayer();
 ///this gets a player number (if in splitscreen mode)
@@ -76,35 +49,8 @@ namespace UniverseUtil {
 	unsigned int getCurrentPlayer();
 ///this gets the number of active players
 	int getNumPlayers ();
-///this adds an objective for the cockpit to view ("go here and do this)
-	int addObjective(string objective);
-///this sets the objective's completeness (the int was returned by add objective)
-	void setObjective(int which, string newobjective);
-///this sets the completeness of a particular objective... chanigng the color onscreen
-	void setCompleteness(int which, float completeNess);
-///this gets that completeness
-	float getCompleteness(int which);
-///this sets the owner of a completeness
-	void setOwner(int which,Unit *owner);
-///this gets an owner of a completeness (NULL means all players can see this objective)
-	Unit* getOwner(int which);
-	//gets the owner of this mission
-	int getMissionOwner();
-	//sets the owner of this mission to be a particular cockpit
-	void setMissionOwner(int);
-	///returns number missions running to tweak difficulty
-	int numActiveMissions();
-///this sends an IO message... I'm not sure if delay currently works, but from, to and message do :-) ... if you want to send to the bar do "bar" as the to string... if you want to make news for the news room specify "news"
-    void IOmessage(int delay,string from,string to,string message);
 ///this gets a unit with 1 of each cargo type in it
 	Unit *GetMasterPartList ();
-///this gets a unit with a faction's contraband list... may be null (check with isNull)
-	Unit *GetContrabandList (string faction);
-///this sets whether or not a player may autopilot.  Normally they are both 0 and the autopiloting is allowed based on if enemies are near... if you pass in 1 then autopilot will be allowed no matter who is near... if you set -1 then autopilot is never allowed.  global affects all players... player just affects the player who accepted the mission.
-	void SetAutoStatus (int global_auto, int player_auto);
-	void LoadMission (string missionname);
-	QVector SafeEntrancePoint (QVector,float radial_size=-1);
-
 }
 
 #undef activeSys

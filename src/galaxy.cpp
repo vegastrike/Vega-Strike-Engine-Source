@@ -293,7 +293,7 @@ StarSystem * Universe::GenerateStarSystem (const char * file, const char * jumpb
     count++;
   }
 
-  StarSystem * ss = new StarSystem (file,center);
+  StarSystem * ss = new GameStarSystem (file,center);
 
   LoadStarSystem (ss);
 

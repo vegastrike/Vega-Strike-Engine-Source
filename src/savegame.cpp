@@ -193,7 +193,7 @@ void SaveGame::WriteNewsData (FILE * fp) {
   }
 }
 void WriteSaveGame (Cockpit * cp,bool auto_save) {
-  int player_num= cp-_Universe->AccessCockpit(0);
+  int player_num= cp-_Universe.AccessCockpit(0);
   Unit * un = cp->GetSaveParent();
   if (!un) {
     return;
@@ -202,7 +202,7 @@ void WriteSaveGame (Cockpit * cp,bool auto_save) {
     cp->savegame->WriteSaveGame (cp->activeStarSystem->getFileName().c_str(),un->LocalPosition(),cp->credits,cp->GetUnitFileName().c_str(),auto_save?-1:player_num);
     un->WriteUnit(cp->GetUnitModifications().c_str());
     if (GetWritePlayerSaveGame(player_num).length()&&!auto_save) {
-      cp->savegame->SetSavedCredits (_Universe->AccessCockpit()->credits);
+      cp->savegame->SetSavedCredits (_Universe.AccessCockpit()->credits);
       cp->savegame->SetStarSystem(cp->activeStarSystem->getFileName());
       un->WriteUnit(GetWritePlayerSaveGame(player_num).c_str());
       cp->savegame->SetPlayerLocation(un->LocalPosition());    

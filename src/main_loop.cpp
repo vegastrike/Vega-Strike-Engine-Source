@@ -52,6 +52,7 @@
 #include "cmd/script/flightgroup.h"
 #include "force_feedback.h"
 #include "universe_util.h"
+#include "universe_util_generic.h"
 #include "networking/netclient.h"
 using namespace std;
 
@@ -124,7 +125,7 @@ static bool QuitAllow=false;
 namespace CockpitKeys {
   void QuitNow () {
     {
-      _Universe->WriteSaveGame(true);//gotta do important stuff first
+      _Universe.WriteSaveGame(true);//gotta do important stuff first
       for (unsigned int i=0;i<active_missions.size();i++) {
 	if (active_missions[i]) {
 	  active_missions[i]->DirectorEnd();
@@ -150,13 +151,13 @@ namespace CockpitKeys {
 	  if (QuitAllow) {
 	    QuitNow();
 	  }
-		Q = _Universe->AccessCockpit()->AccessCamera(i)->Q;
-		R = _Universe->AccessCockpit()->AccessCamera(i)->R;
-		_Universe->AccessCockpit()->AccessCamera(i)->myPhysics.ApplyBalancedLocalTorque(-Q, R,timek);
+		Q = _Universe.AccessCockpit()->AccessCamera(i)->Q;
+		R = _Universe.AccessCockpit()->AccessCamera(i)->R;
+		_Universe.AccessCockpit()->AccessCamera(i)->myPhysics.ApplyBalancedLocalTorque(-Q, R,timek);
 		//a =1;
 	}
 	if (_Slew&&newState==RELEASE) {
-	  _Universe->AccessCockpit()->AccessCamera(i)->myPhysics.SetAngularVelocity(Vector(0,0,0));
+	  _Universe.AccessCockpit()->AccessCamera(i)->myPhysics.SetAngularVelocity(Vector(0,0,0));
 	}//a=0;
 	}	
 }
@@ -171,13 +172,13 @@ namespace CockpitKeys {
 	    QuitNow();
 	  }
 
-		Q = _Universe->AccessCockpit()->AccessCamera(i)->Q;
-		R = _Universe->AccessCockpit()->AccessCamera(i)->R;
-		_Universe->AccessCockpit()->AccessCamera(i)->myPhysics.ApplyBalancedLocalTorque(Q, R,timek);
+		Q = _Universe.AccessCockpit()->AccessCamera(i)->Q;
+		R = _Universe.AccessCockpit()->AccessCamera(i)->R;
+		_Universe.AccessCockpit()->AccessCamera(i)->myPhysics.ApplyBalancedLocalTorque(Q, R,timek);
 		
 	}
 	if (_Slew&&newState==RELEASE) {
-	  _Universe->AccessCockpit()->AccessCamera(i)->myPhysics.SetAngularVelocity(Vector(0,0,0));
+	  _Universe.AccessCockpit()->AccessCamera(i)->myPhysics.SetAngularVelocity(Vector(0,0,0));
 	}
 	}}
 
@@ -191,13 +192,13 @@ namespace CockpitKeys {
 	    QuitNow();
 	  }
 
-		P = _Universe->AccessCockpit()->AccessCamera(i)->P;
-		R = _Universe->AccessCockpit()->AccessCamera(i)->R;
-		_Universe->AccessCockpit()->AccessCamera(i)->myPhysics.ApplyBalancedLocalTorque(-P, R,timek);
+		P = _Universe.AccessCockpit()->AccessCamera(i)->P;
+		R = _Universe.AccessCockpit()->AccessCamera(i)->R;
+		_Universe.AccessCockpit()->AccessCamera(i)->myPhysics.ApplyBalancedLocalTorque(-P, R,timek);
 		
 	}
 	if (_Slew&&newState==RELEASE) {
-	  _Universe->AccessCockpit()->AccessCamera(i)->myPhysics.SetAngularVelocity(Vector(0,0,0));
+	  _Universe.AccessCockpit()->AccessCamera(i)->myPhysics.SetAngularVelocity(Vector(0,0,0));
 	}
 	}
 }
@@ -210,13 +211,13 @@ namespace CockpitKeys {
 	  if (QuitAllow) {
 	    QuitNow();
 	  }
-		P = _Universe->AccessCockpit()->AccessCamera(i)->P;
-		R = _Universe->AccessCockpit()->AccessCamera(i)->R;
-		_Universe->AccessCockpit()->AccessCamera(i)->myPhysics.ApplyBalancedLocalTorque(P, R,timek);
+		P = _Universe.AccessCockpit()->AccessCamera(i)->P;
+		R = _Universe.AccessCockpit()->AccessCamera(i)->R;
+		_Universe.AccessCockpit()->AccessCamera(i)->myPhysics.ApplyBalancedLocalTorque(P, R,timek);
 	
 	}
 	if (_Slew&&newState==RELEASE) {
-	  _Universe->AccessCockpit()->AccessCamera(i)->myPhysics.SetAngularVelocity(Vector(0,0,0));
+	  _Universe.AccessCockpit()->AccessCamera(i)->myPhysics.SetAngularVelocity(Vector(0,0,0));
 	}
 		}
 }
@@ -250,7 +251,7 @@ bool cockpitfront=true;
   void Inside(int,KBSTATE newState) {
     {
       static bool back= XMLSupport::parse_bool (vs_config->getVariable ("graphics","background","true"));
-      _Universe->activeStarSystem()->getBackground()->EnableBG(back);
+      _Universe.activeStarSystem()->getBackground()->EnableBG(back);
     }
   static int tmp=(XMLSupport::parse_bool (vs_config->getVariable ("graphics","cockpit","true"))?1:0);
   if(newState==PRESS&&cockpitfront) {
@@ -259,38 +260,38 @@ bool cockpitfront=true;
       PitchUp(0,RELEASE);
       PitchDown (0,RELEASE);
 
-    if ((tmp)&&_Universe->AccessCockpit()->GetParent()) {
-      _Universe->AccessCockpit()->Init (_Universe->AccessCockpit()->GetParent()->getCockpit().c_str());	    
+    if ((tmp)&&_Universe.AccessCockpit()->GetParent()) {
+      _Universe.AccessCockpit()->Init (_Universe.AccessCockpit()->GetParent()->getCockpit().c_str());	    
     }else {
-      _Universe->AccessCockpit()->Init ("disabled-cockpit.cpt");
+      _Universe.AccessCockpit()->Init ("disabled-cockpit.cpt");
     }
     tmp=(tmp+1)%2;
   }
   if(newState==PRESS||newState==DOWN) {
     cockpitfront=true;
-    _Universe->AccessCockpit()->SetView (CP_FRONT);
+    _Universe.AccessCockpit()->SetView (CP_FRONT);
   }
 }
   void ZoomOut (int, KBSTATE newState) {
   if(newState==PRESS||newState==DOWN) 
-  _Universe->AccessCockpit()->zoomfactor+=GetElapsedTime()/getTimeCompression();  
+  _Universe.AccessCockpit()->zoomfactor+=GetElapsedTime()/getTimeCompression();  
 }
   void ScrollUp (int, KBSTATE newState) {
 
     if(newState==PRESS/*||newState==DOWN*/){
-     _Universe->AccessCockpit()->ScrollAllVDU (-1);
+     _Universe.AccessCockpit()->ScrollAllVDU (-1);
    }    
   }
   void ScrollDown (int, KBSTATE newState) {
 
    if(newState==PRESS/*||newState==DOWN*/){
-     _Universe->AccessCockpit()->ScrollAllVDU (1);
+     _Universe.AccessCockpit()->ScrollAllVDU (1);
    }    
 
   }
   void ZoomIn (int, KBSTATE newState) {
   if(newState==PRESS||newState==DOWN) 
-  _Universe->AccessCockpit()->zoomfactor-=GetElapsedTime()/getTimeCompression();  
+  _Universe.AccessCockpit()->zoomfactor-=GetElapsedTime()/getTimeCompression();  
 }
 
   void InsideLeft(int,KBSTATE newState) {
@@ -302,21 +303,21 @@ bool cockpitfront=true;
       PitchDown (0,RELEASE);
 
 	  cockpitfront=false;
-	  _Universe->AccessCockpit()->SetView (CP_LEFT);
+	  _Universe.AccessCockpit()->SetView (CP_LEFT);
 	}
 }
   void InsideRight(int,KBSTATE newState) {
 
 	if(newState==PRESS||newState==DOWN) {
 	    cockpitfront=false;
-	  _Universe->AccessCockpit()->SetView (CP_RIGHT);
+	  _Universe.AccessCockpit()->SetView (CP_RIGHT);
 	}
 }
   void PanTarget(int,KBSTATE newState) {
 
 	if(newState==PRESS||newState==DOWN) {
 	    cockpitfront=false;
-	  _Universe->AccessCockpit()->SetView (CP_PANTARGET);
+	  _Universe.AccessCockpit()->SetView (CP_PANTARGET);
 	}
   }
   void ViewTarget(int,KBSTATE newState) {
@@ -328,7 +329,7 @@ bool cockpitfront=true;
       PitchDown (0,RELEASE);
 
 	    cockpitfront=false;
-	  _Universe->AccessCockpit()->SetView (CP_VIEWTARGET);
+	  _Universe.AccessCockpit()->SetView (CP_VIEWTARGET);
 	}
   }
   void OutsideTarget(int,KBSTATE newState) {
@@ -340,7 +341,7 @@ bool cockpitfront=true;
       PitchDown (0,RELEASE);
 
 	    cockpitfront=false;
-	  _Universe->AccessCockpit()->SetView (CP_TARGET);
+	  _Universe.AccessCockpit()->SetView (CP_TARGET);
 	}
   }
 
@@ -354,44 +355,44 @@ bool cockpitfront=true;
       PitchDown (0,RELEASE);
 
 	    cockpitfront=false;
-	  _Universe->AccessCockpit()->SetView (CP_BACK);
+	  _Universe.AccessCockpit()->SetView (CP_BACK);
 	}
 }
 
   void SwitchLVDU(int,KBSTATE newState) {
 
 	if(newState==PRESS) {
-	  _Universe->AccessCockpit()->VDUSwitch (0);
+	  _Universe.AccessCockpit()->VDUSwitch (0);
 	}
   }
   void SwitchRVDU(int,KBSTATE newState) {
 
 	if(newState==PRESS) {
-	  _Universe->AccessCockpit()->VDUSwitch (1);
+	  _Universe.AccessCockpit()->VDUSwitch (1);
 	}
   }
   void SwitchMVDU(int,KBSTATE newState) {
 
 	if(newState==PRESS) {
-	  _Universe->AccessCockpit()->VDUSwitch (2);
+	  _Universe.AccessCockpit()->VDUSwitch (2);
 	}
   }
   void SwitchULVDU(int,KBSTATE newState) {
 
 	if(newState==PRESS) {
-	  _Universe->AccessCockpit()->VDUSwitch (3);
+	  _Universe.AccessCockpit()->VDUSwitch (3);
 	}
   }
   void SwitchURVDU(int,KBSTATE newState) {
 
 	if(newState==PRESS) {
-	  _Universe->AccessCockpit()->VDUSwitch (4);
+	  _Universe.AccessCockpit()->VDUSwitch (4);
 	}
   }
   void SwitchUMVDU(int,KBSTATE newState) {
 
 	if(newState==PRESS) {
-	  _Universe->AccessCockpit()->VDUSwitch (5);
+	  _Universe.AccessCockpit()->VDUSwitch (5);
 	}
   }
 
@@ -404,7 +405,7 @@ bool cockpitfront=true;
       PitchDown (0,RELEASE);
 
 	  cockpitfront=false;
-	  _Universe->AccessCockpit()->SetView (CP_CHASE);
+	  _Universe.AccessCockpit()->SetView (CP_CHASE);
 	}
 }
   void Pan(int,KBSTATE newState) {
@@ -416,7 +417,7 @@ bool cockpitfront=true;
       PitchDown (0,RELEASE);
 
 	  cockpitfront=false;
-	  _Universe->AccessCockpit()->SetView (CP_PAN);
+	  _Universe.AccessCockpit()->SetView (CP_PAN);
 	}
 }
 
@@ -568,7 +569,7 @@ void createObjects(std::vector <std::string> &fighter0name, std::vector <StarSys
       if (fg_terrain==-1||(fg_terrain==-2&&myterrain==NULL)) {
 	string modifications ("");
 	if (s==0&&squadnum<(int)fighter0name.size()) {
-	  _Universe->AccessCockpit(squadnum)->activeStarSystem=ssys[squadnum];
+	  _Universe.AccessCockpit(squadnum)->activeStarSystem=ssys[squadnum];
   	  fighter0indices.push_back(a);
 	  if (fighter0name[squadnum].length()==0)
 	    fighter0name[squadnum]=string(fightername);
@@ -583,24 +584,24 @@ void createObjects(std::vector <std::string> &fighter0name, std::vector <StarSys
 	    fighter0mods.push_back("");
 	  }
 	}
-        Cockpit * backupcp = _Universe->AccessCockpit();
+        Cockpit * backupcp = _Universe.AccessCockpit();
 
         if (squadnum<(int)fighter0name.size()) {
-		_Universe->pushActiveStarSystem (_Universe->AccessCockpit(squadnum)->activeStarSystem);
-                _Universe->SetActiveCockpit(_Universe->AccessCockpit(squadnum));
+		_Universe.pushActiveStarSystem (_Universe.AccessCockpit(squadnum)->activeStarSystem);
+                _Universe.SetActiveCockpit(_Universe.AccessCockpit(squadnum));
 
         }
   	fighters[a] = UnitFactory::createUnit(fightername, false,tmptarget[a],modifications,fg,s);
-    _Universe->activeStarSystem()->AddUnit(fighters[a]);
+    _Universe.activeStarSystem()->AddUnit(fighters[a]);
 	if (s==0&&squadnum<(int)fighter0name.size()) {
-		_Universe->AccessCockpit(squadnum)->Init (fighters[a]->getCockpit().c_str());
-	    _Universe->AccessCockpit(squadnum)->SetParent(fighters[a],fighter0name[squadnum].c_str(),fighter0mods[squadnum].c_str(),pox);
-	    _Universe->AccessCockpit(squadnum)->GetParent()->SetPlayer();
+		_Universe.AccessCockpit(squadnum)->Init (fighters[a]->getCockpit().c_str());
+	    _Universe.AccessCockpit(squadnum)->SetParent(fighters[a],fighter0name[squadnum].c_str(),fighter0mods[squadnum].c_str(),pox);
+	    _Universe.AccessCockpit(squadnum)->GetParent()->SetPlayer();
 	}
         
     if (squadnum<(int)fighter0name.size()) {
-		_Universe->popActiveStarSystem ();
-                _Universe->SetActiveCockpit(backupcp);
+		_Universe.popActiveStarSystem ();
+                _Universe.SetActiveCockpit(backupcp);
 	}
 
       }else {
@@ -610,18 +611,18 @@ void createObjects(std::vector <std::string> &fighter0name, std::vector <StarSys
 	  fighters[a]= UnitFactory::createBuilding (myterrain,isvehicle,fightername,false,tmptarget[a],string(""),fg);
 	}else {
 	  
-	  if (fg_terrain>=(int)_Universe->activeStarSystem()->numTerrain()) {
+	  if (fg_terrain>=(int)_Universe.activeStarSystem()->numTerrain()) {
 	    ContinuousTerrain * t;
-	    assert (fg_terrain-_Universe->activeStarSystem()->numTerrain()<_Universe->activeStarSystem()->numContTerrain());
-	    t =_Universe->activeStarSystem()->getContTerrain(fg_terrain-_Universe->activeStarSystem()->numTerrain());
+	    assert (fg_terrain-_Universe.activeStarSystem()->numTerrain()<_Universe.activeStarSystem()->numContTerrain());
+	    t =_Universe.activeStarSystem()->getContTerrain(fg_terrain-_Universe.activeStarSystem()->numTerrain());
 	    fighters[a]= UnitFactory::createBuilding (t,isvehicle,fightername,false,tmptarget[a],string(""),fg);
 	  }else {
-	    Terrain *t=_Universe->activeStarSystem()->getTerrain(fg_terrain);
+	    Terrain *t=_Universe.activeStarSystem()->getTerrain(fg_terrain);
 	    fighters[a]= UnitFactory::createBuilding (t,isvehicle,fightername,false,tmptarget[a],string(""),fg);
 	  }
 	  
 	}
-      _Universe->activeStarSystem()->AddUnit(fighters[a]);
+      _Universe.activeStarSystem()->AddUnit(fighters[a]);
 
       }
       fighters[a]->SetPosAndCumPos (pox);
@@ -654,7 +655,7 @@ void createObjects(std::vector <std::string> &fighter0name, std::vector <StarSys
 
   delete [] tmptarget;
   muzak = new Music (fighters[0]);
-  FactionUtil::LoadFactionPlaylists();
+  GameFactionUtil::LoadFactionPlaylists();
   AUDListenerSize (fighters[0]->rSize()*4);
   for (unsigned int cnum=0;cnum<fighter0indices.size();cnum++) {
     if(benchmark==-1){
@@ -664,10 +665,10 @@ void createObjects(std::vector <std::string> &fighter0name, std::vector <StarSys
     fighters[fighter0indices[cnum]]->SetTurretAI ();
   }
 
-  shipList = _Universe->activeStarSystem()->getClickList();
+  shipList = _Universe.activeStarSystem()->getClickList();
   locSel = new CoordinateSelect (QVector (0,0,5));
   UpdateTime();
-//  _Universe->activeStarSystem()->AddUnit(UnitFactory::createNebula ("mynebula.xml","nebula",false,0,NULL,0));
+//  _Universe.activeStarSystem()->AddUnit(UnitFactory::createNebula ("mynebula.xml","nebula",false,0,NULL,0));
 
   mission->DirectorInitgame();
 }
@@ -683,12 +684,12 @@ void AddUnitToSystem (const SavedUnits *su) {
     un = UnitFactory::createUnit (su->filename.c_str(),false,FactionUtil::GetFaction (su->faction.c_str()));
     un->EnqueueAI (new Orders::AggressiveAI ("default.agg.xml", "default.int.xml"));
     un->SetTurretAI ();
-    if (_Universe->AccessCockpit()->GetParent()) {
-      un->SetPosition (_Universe->AccessCockpit()->GetParent()->Position()+QVector(rand()*10000./RAND_MAX-5000,rand()*10000./RAND_MAX-5000,rand()*10000./RAND_MAX-5000));
+    if (_Universe.AccessCockpit()->GetParent()) {
+      un->SetPosition (_Universe.AccessCockpit()->GetParent()->Position()+QVector(rand()*10000./RAND_MAX-5000,rand()*10000./RAND_MAX-5000,rand()*10000./RAND_MAX-5000));
     }
     break;
   }
-  _Universe->activeStarSystem()->AddUnit(un);
+  _Universe.activeStarSystem()->AddUnit(un);
 
 }
 void destroyObjects() {  
@@ -725,13 +726,13 @@ void main_loop() {
   i++;
   if (i>1000)
   i=0;*/
-  _Universe->StartDraw();
+  _Universe.StartDraw();
   if(myterrain){ 
-    myterrain->AdjustTerrain(_Universe->activeStarSystem());
+    myterrain->AdjustTerrain(_Universe.activeStarSystem());
   }
 
   if( Network!=NULL) {
-	for( int jj=0; jj<_Universe->numPlayers(); jj++)
+	for( int jj=0; jj<_Universe.numPlayers(); jj++)
 	  Network[jj].checkMsg();
   }
 }

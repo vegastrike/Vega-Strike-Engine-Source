@@ -51,8 +51,8 @@ void Base::Room::BaseShip::Draw (Base *base) {
 		GFXEnable (DEPTHTEST);
 		GFXEnable (DEPTHWRITE);
 		Vector p,q,r;
-		_Universe->AccessCamera()->GetOrientation (p,q,r);
-		QVector pos =  _Universe->AccessCamera ()->GetPosition();
+		_Universe.AccessCamera()->GetOrientation (p,q,r);
+		QVector pos =  _Universe.AccessCamera ()->GetPosition();
 		Matrix cam (p.i,p.j,p.k,q.i,q.j,q.k,r.i,r.j,r.k,pos);
 		Matrix final;
 		Matrix newmat = mat;
@@ -143,9 +143,9 @@ bool Base::CallComp=false;
 
 bool RefreshGUI(void) {
 	bool retval=false;
-	if (_Universe->AccessCockpit()) {
+	if (_Universe.AccessCockpit()) {
 		if (Base::CurrentBase) {
-			if (_Universe->AccessCockpit()->GetParent()==Base::CurrentBase->caller.GetUnit()){
+			if (_Universe.AccessCockpit()->GetParent()==Base::CurrentBase->caller.GetUnit()){
 				if (Base::CallComp) {
 					return RefreshInterface ();	
 				} else {
@@ -405,7 +405,7 @@ double compute_light_dot (Unit * base,Unit *un) {
   Unit * st;
   Unit * base_owner=NULL;
   if (ss) {
-    _Universe->pushActiveStarSystem (ss);
+    _Universe.pushActiveStarSystem (ss);
     un_iter ui = ss->getUnitList().createIterator();
     for (;(st = *ui);++ui) {
       if (st->isPlanet()) {
@@ -428,7 +428,7 @@ double compute_light_dot (Unit * base,Unit *un) {
 	}
       }
     }
-    _Universe->popActiveStarSystem();
+    _Universe.popActiveStarSystem();
   }else return 1;
   if (base_owner==NULL||base->isUnit()==PLANETPTR) {
     return ret;
@@ -542,7 +542,7 @@ void Base::Room::Talk::Click (Base *base,float x, float y, int button, int state
 				if (sound==-1) {
 					fprintf(stderr,"\nCan't find the sound file %s\n",soundfiles[sayindex].c_str());
 				} else {
-//					AUDAdjustSound (sound,_Universe->AccessCamera ()->GetPosition(),Vector(0,0,0));
+//					AUDAdjustSound (sound,_Universe.AccessCamera ()->GetPosition(),Vector(0,0,0));
 					AUDStartPlaying (sound);
 					AUDDeleteSound(sound);//won't actually toast it until it stops
 				}

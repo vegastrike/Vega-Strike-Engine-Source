@@ -137,7 +137,7 @@ Unit::Unit(const char *filename, bool SubU, int faction,std::string unitModifica
 	Init();
 	//update_ani_cache();
 	//if (!SubU)
-	//  _Universe->AccessCockpit()->savegame->AddUnitToSave(filename,UNITPTR,GetFaction(faction),(long)this);
+	//  _Universe.AccessCockpit()->savegame->AddUnitToSave(filename,UNITPTR,GetFaction(faction),(long)this);
 	this->player = false;
 	SubUnit = SubU;
 	this->faction = faction;
@@ -358,12 +358,6 @@ void Unit::Init()
   planet=NULL;
   nebula=NULL;
   image = new UnitImages;
-  // No cockpit reference here
- //int numg= 1+MAXVDUS+Cockpit::NUMGAUGES;
-  //image->cockpit_damage=(float*)malloc((numg)*sizeof(float));
-  //for (unsigned int damageiterator=0;damageiterator<numg;damageiterator++) {
-//	image->cockpit_damage[damageiterator]=1;
-//  }
   sound = new UnitSounds;
   limits.structurelimits=Vector(0,0,1);
   limits.limitmin=-1;
@@ -383,13 +377,6 @@ void Unit::Init()
   owner = NULL;
   faction =0;
   resolveforces=true;
-  // No CollideInfo yet
-  /*
-  CollideInfo.object.u = NULL;
-  CollideInfo.type = LineCollide::UNIT;
-  CollideInfo.Mini.Set (0,0,0);
-  CollideInfo.Maxi.Set (0,0,0);
-  */
   colTrees=NULL;
   invisible=false;
   //origin.Set(0,0,0);
@@ -410,8 +397,6 @@ void Unit::Init()
   killed=false;
   ucref=0;
   aistate = NULL;
-  // No AI here
-  //SetAI (new Order());
   Identity(cumulative_transformation_matrix);
   cumulative_transformation = identity_transformation;
   curr_physical_state = prev_physical_state = identity_transformation;
@@ -426,15 +411,7 @@ void Unit::Init()
     
   static float lc =XMLSupport::parse_float (vs_config->getVariable ("physics","lock_cone",".8"));// DO NOT CHANGE see unit_customize.cpp
 
-  /*
-  yprrestricted=0;
-  ymin = pmin = rmin = -PI;
-  ymax = pmax = rmax = PI;
-  ycur = pcur = rcur = 0;
-  */
   MomentOfInertia = .01;
-  // Not needed here
-  //static Vector myang(XMLSupport::parse_float (vs_config->getVariable ("general","pitch","0")),XMLSupport::parse_float (vs_config->getVariable ("general","yaw","0")),XMLSupport::parse_float (vs_config->getVariable ("general","roll","0")));
   AngularVelocity = myang;
   cumulative_velocity=Velocity = Vector(0,0,0);
   
@@ -466,29 +443,52 @@ void Unit::Init()
   computer.max_roll=1;
   computer.NavPoint=Vector(0,0,0);
   computer.itts = false;
-  // Not needed here
-  //static float rr = XMLSupport::parse_float (vs_config->getVariable ("graphics","hud","radarRange","20000"));
   computer.radar.maxrange=rr;
   computer.radar.locked=false;
   computer.radar.maxcone=-1;
+  computer.radar.trackingcone = minTrackingNum;
+  computer.radar.lockcone=lc;
+  computer.radar.mintargetsize=0;
+  computer.radar.color=true;
+
+  flightgroup=NULL;
+  flightgroup_subnumber=0;
+
+  scanner.last_scantime=0.0;
+  // No cockpit reference here
+ //int numg= 1+MAXVDUS+Cockpit::NUMGAUGES;
+  //image->cockpit_damage=(float*)malloc((numg)*sizeof(float));
+  //for (unsigned int damageiterator=0;damageiterator<numg;damageiterator++) {
+//	image->cockpit_damage[damageiterator]=1;
+//  }
+  // No CollideInfo yet
+  /*
+  CollideInfo.object.u = NULL;
+  CollideInfo.type = LineCollide::UNIT;
+  CollideInfo.Mini.Set (0,0,0);
+  CollideInfo.Maxi.Set (0,0,0);
+  */
+  // No AI here
+  //SetAI (new Order());
+  /*
+  yprrestricted=0;
+  ymin = pmin = rmin = -PI;
+  ymax = pmax = rmax = PI;
+  ycur = pcur = rcur = 0;
+  */
+  // Not needed here
+  //static Vector myang(XMLSupport::parse_float (vs_config->getVariable ("general","pitch","0")),XMLSupport::parse_float (vs_config->getVariable ("general","yaw","0")),XMLSupport::parse_float (vs_config->getVariable ("general","roll","0")));
+  // Not needed here
+  //static float rr = XMLSupport::parse_float (vs_config->getVariable ("graphics","hud","radarRange","20000"));
   // Not needed here
   /*
   static float minTrackingNum = XMLSupport::parse_float (vs_config->getVariable("physics",
 										  "autotracking",
 										".93"));// DO NOT CHANGE see unit_customize.cpp
   */
-  computer.radar.trackingcone = minTrackingNum;
   // Not needed here
   //static float lc =XMLSupport::parse_float (vs_config->getVariable ("physics","lock_cone",".8"));// DO NOT CHANGE see unit_customize.cpp
-  computer.radar.lockcone=lc;
-  computer.radar.mintargetsize=0;
-  computer.radar.color=true;
   //  Fire();
-
-  flightgroup=NULL;
-  flightgroup_subnumber=0;
-
-  scanner.last_scantime=0.0;
 }
 
 
@@ -1569,7 +1569,7 @@ inline bool insideDock (const DockingPorts &dock, const Vector & pos, float radi
 }
 
 int Unit::CanDockWithMe(Unit * un) {
-  //  if (_Universe->GetRelation(faction,un->faction)>=0) {//already clearneed
+  //  if (_Universe.GetRelation(faction,un->faction)>=0) {//already clearneed
     for (unsigned int i=0;i<image->dockingports.size();i++) {
       if (un->image->dockingports.size()) {
 	for (unsigned int j=0;j<un->image->dockingports.size();j++) {
@@ -2648,3 +2648,22 @@ float Unit::CourseDeviation (const Vector &OriginalCourse, const Vector &FinalCo
   else
     return (FinalCourse-OriginalCourse).Magnitude();
 }
+
+/***************************************************************************************/
+/*** STAR SYSTEM JUMP STUFF                                                          ***/
+/***************************************************************************************/
+
+bool GameUnit::TransferUnitToSystem (StarSystem * Current) {
+  if (activeStarSystem->RemoveUnit (this)) {
+    this->RemoveFromSystem();  
+    this->Target(NULL);
+    Current->AddUnit (this);    
+
+    activeStarSystem = Current;
+    return true;
+  }else {
+    fprintf (stderr,"Fatal Error: cannot remove starship from critical system");
+  }
+  return false;
+}
+

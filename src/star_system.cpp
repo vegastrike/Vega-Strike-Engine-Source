@@ -46,19 +46,21 @@ extern void reset_time_compression (int,KBSTATE);
 Atmosphere *theAtmosphere;
 
 extern string RemoveDotSystem (const char *input);
-string StarSystem::getFileName() {
-  return getStarSystemSector (filename)+string("/")+RemoveDotSystem(getStarSystemName (filename).c_str());
+/*
+GameStarSystem::GameStarSystem(): StarSystem()
+{
+  _Universe.pushActiveStarSystem (this);
+  GFXCreateLightContext (lightcontext);
+  bolts = new bolt_draw;
+  collidetable = new CollideTable(this);
 }
-string StarSystem::getName () {
-  return string(name);
-}
-
-StarSystem::StarSystem(const char * filename, const Vector & centr,const float timeofyear) {
+*/
+GameStarSystem::GameStarSystem(const char * filename, const Vector & centr,const float timeofyear) {
 
   no_collision_time=0;//(int)(1+2.000/SIMULATION_ATOM);
   ///adds to jumping table;
   name = NULL;
-  _Universe->pushActiveStarSystem (this);
+  _Universe.pushActiveStarSystem (this);
   GFXCreateLightContext (lightcontext);
   bolts = new bolt_draw;
   collidetable = new CollideTable(this);
@@ -147,10 +149,10 @@ StarSystem::StarSystem(const char * filename, const Vector & centr,const float t
   params.scattering = 5;
 
   theAtmosphere = new Atmosphere(params);
-  _Universe->popActiveStarSystem ();
+  _Universe.popActiveStarSystem ();
 
 }
-void StarSystem::activateLightMap() {
+void GameStarSystem::activateLightMap() {
   GFXActiveTexture (1);
 #ifdef NV_CUBE_MAP
   LightMap[0]->MakeActive();
@@ -166,10 +168,10 @@ void StarSystem::activateLightMap() {
   GFXActiveTexture (0);
 }
 
-StarSystem::~StarSystem() {
-  _Universe->activeStarSystem()->SwapOut();
-  _Universe->pushActiveStarSystem(this);
-  _Universe->activeStarSystem()->SwapIn();  
+GameStarSystem::~GameStarSystem() {
+  _Universe.activeStarSystem()->SwapOut();
+  //_Universe.pushActiveStarSystem(this);
+  _Universe.activeStarSystem()->SwapIn();  
 #ifdef NV_CUBE_MAP
 
   delete LightMap[0];
@@ -183,7 +185,7 @@ StarSystem::~StarSystem() {
 #endif
   delete bg;
   delete stars;
-  delete [] name;
+  //delete [] name;
   delete systemInputDFA;
   /* //FIXME  after doign so much debugging I think you shouldn't delete this
   for (int i=0;i<numprimaries;i++) {
@@ -196,69 +198,37 @@ StarSystem::~StarSystem() {
   delete bolts;
 
 
+  /*
   UnitCollection::UnitIterator iter = drawList.createIterator();
   Unit *unit;
-  //  fprintf (stderr,"|t%f i%lf|",GetElapsedTime(),interpolation_blend_factor);
   while((unit = iter.current())!=NULL) {
     unit->Kill(false);
     iter.advance();
   }
+  */
   delete collidetable;
-  _Universe->activeStarSystem()->SwapOut();
+  _Universe.activeStarSystem()->SwapOut();
   //  GFXDeleteLightContext (lightcontext);
-  _Universe->popActiveStarSystem();
-  _Universe->activeStarSystem()->SwapIn();  
+  //_Universe.popActiveStarSystem();
+  _Universe.activeStarSystem()->SwapIn();  
   RemoveStarsystemFromUniverse();
   
 }
 
 
-ClickList *StarSystem::getClickList() {
+ClickList *GameStarSystem::getClickList() {
   return new ClickList (this, &drawList);
 
 }
 /**OBSOLETE!
-void StarSystem::modelGravity(bool lastframe) {
+void GameStarSystem::modelGravity(bool lastframe) {
   for (int i=0;i<numprimaries;i++) {
     primaries[i]->UpdatePhysics (identity_transformation,identity_matrix,lastframe,units)
   }
 }	
 */
-void StarSystem::AddUnit(Unit *unit) {
-  units.prepend(unit);
-  drawList.prepend(unit);
-}
 
-bool StarSystem::RemoveUnit(Unit *un) {
-  bool removed2=false;
-  UnitCollection::UnitIterator iter = units.createIterator();
-  Unit *unit;
-  while((unit = iter.current())!=NULL) {
-    if (unit==un) {
-      iter.remove();
-      removed2 =true;
-      break;
-    } else {
-      iter.advance();
-    }
-  }
-  bool removed =false;
-  if (removed2) {
-    UnitCollection::UnitIterator iter = drawList.createIterator();
-    Unit *unit;
-    while((unit = iter.current())!=NULL) {
-      if (unit==un) {
-	iter.remove();
-	removed =true;
-	break;
-      }else {
-	iter.advance();
-      }
-    }
-  }
-  return removed;
-}
-void StarSystem::SwapIn () {
+void GameStarSystem::SwapIn () {
   GFXSetLightContext (lightcontext);
 
   /*
@@ -288,7 +258,7 @@ void StarSystem::SwapIn () {
   }
 }
 
-void StarSystem::SwapOut () {
+void GameStarSystem::SwapOut () {
 
   /*
   for (un_iter un_i=drawList.createIterator();NULL!= (un=*un_i);++un_i) {
@@ -320,7 +290,7 @@ void StarSystem::SwapOut () {
 
 extern double interpolation_blend_factor;
 //#define UPDATEDEBUG  //for hard to track down bugs
-void StarSystem::Draw(bool DrawCockpit) {
+void GameStarSystem::Draw(bool DrawCockpit) {
   GFXEnable (DEPTHTEST);
   GFXEnable (DEPTHWRITE);
 
@@ -355,12 +325,12 @@ void StarSystem::Draw(bool DrawCockpit) {
   fprintf (stderr,"cp");
   fflush (stderr);
 #endif
-  if (_Universe->AccessCockpit()->GetParent()==NULL) {
+  if (_Universe.AccessCockpit()->GetParent()==NULL) {
 #ifdef UPDATEDEBUG
   fprintf (stderr,"cpu");
   fflush (stderr);
 #endif
-    _Universe->AccessCamera()->UpdateGFX (GFXTRUE);
+    _Universe.AccessCamera()->UpdateGFX (GFXTRUE);
   }
 #ifdef UPDATEDEBUG
   fprintf (stderr,">un<");
@@ -381,7 +351,7 @@ void StarSystem::Draw(bool DrawCockpit) {
   fprintf (stderr,"vp");
   fflush (stderr);
 #endif
-  _Universe->AccessCockpit()->SetupViewPort(true);///this is the final, smoothly calculated cam
+  _Universe.AccessCockpit()->SetupViewPort(true);///this is the final, smoothly calculated cam
   //  SetViewport();//camera wielding unit is now drawn  Note: Background is one frame behind...big fat hairy deal
   GFXColor tmpcol (0,0,0,1);
   GFXGetLightContextAmbient(tmpcol);
@@ -432,7 +402,7 @@ void StarSystem::Draw(bool DrawCockpit) {
   fflush (stderr);
 #endif
 
-  if ((neb = _Universe->AccessCamera()->GetNebula())) {
+  if ((neb = _Universe.AccessCamera()->GetNebula())) {
     neb->SetFogState();
   }
   Beam::ProcessDrawQueue();
@@ -451,13 +421,13 @@ void StarSystem::Draw(bool DrawCockpit) {
   fprintf (stderr,"star");
   fflush (stderr);
 #endif
-  //  if (_Universe->AccessCamera()->GetNebula()!=NULL)
+  //  if (_Universe.AccessCamera()->GetNebula()!=NULL)
   GFXFogMode (FOG_OFF);
   Animation::ProcessDrawQueue();
   Halo::ProcessDrawQueue();
   particleTrail.DrawAndUpdate();
   stars->Draw();
-  StarSystem::DrawJumpStars();
+  GameStarSystem::DrawJumpStars();
 
   //  static bool doInputDFA = XMLSupport::parse_bool (vs_config->getVariable ("graphics","MouseCursor","false"));
 #ifdef UPDATEDEBUG
@@ -465,7 +435,7 @@ void StarSystem::Draw(bool DrawCockpit) {
   fflush (stderr);
 #endif
   if (DrawCockpit) {
-    _Universe->AccessCockpit()->Draw();
+    _Universe.AccessCockpit()->Draw();
     //    if (doInputDFA) {
     //      GFXHudMode (true);
     //      systemInputDFA->Draw();
@@ -477,16 +447,7 @@ void StarSystem::Draw(bool DrawCockpit) {
   fflush (stderr);
 #endif
 }
-void StarSystem::ExecuteUnitAI () {
-  un_iter iter = this->getUnitList().createIterator();
-  Unit * unit=NULL;
-	while((unit = iter.current())!=NULL) {
-	  unit->ExecuteAI(); 
-	  unit->ResetThreatLevel();
-	  iter.advance();
-	}
-}
-void StarSystem::UpdateUnitPhysics (bool firstframe) {
+void GameStarSystem::UpdateUnitPhysics (bool firstframe) {
   un_iter iter = this->getUnitList().createIterator();
   Unit * unit=NULL;
 	while((unit = iter.current())!=NULL) {
@@ -508,7 +469,7 @@ void StarSystem::UpdateUnitPhysics (bool firstframe) {
 }
 
 extern float getTimeCompression();
-void StarSystem::Update(float priority , bool executeDirector) {
+void GameStarSystem::Update(float priority , bool executeDirector) {
 
   Unit *unit;
 #ifdef UPDATEDEBUG
@@ -518,8 +479,8 @@ void StarSystem::Update(float priority , bool executeDirector) {
   bool firstframe = true;
 
   ///this makes it so systems without players may be simulated less accurately
-  for (int k=0;k<_Universe->numPlayers();k++) {
-    if (_Universe->AccessCockpit(k)->activeStarSystem==this) {
+  for (int k=0;k<_Universe.numPlayers();k++) {
+    if (_Universe.AccessCockpit(k)->activeStarSystem==this) {
       priority=1;
     }
   }
@@ -528,7 +489,7 @@ void StarSystem::Update(float priority , bool executeDirector) {
   ///just be sure to restore this at the end
 
   time += GetElapsedTime();
-  _Universe->pushActiveStarSystem(this);
+  _Universe.pushActiveStarSystem(this);
   //WARNING PERFORMANCE HACK!!!!!
     if (time>2*SIMULATION_ATOM) {
       time = 2*SIMULATION_ATOM;
@@ -538,7 +499,7 @@ void StarSystem::Update(float priority , bool executeDirector) {
       UnitCollection::UnitIterator iter;
       if (current_stage==PHY_AI) {
 	if (firstframe&&rand()%2) {
-	  if (this==_Universe->getActiveStarSystem(0)) {
+	  if (this==_Universe.getActiveStarSystem(0)) {
 #ifdef UPDATEDEBUG
   fprintf (stderr,"Snd");
   fflush (stderr);
@@ -579,22 +540,22 @@ void StarSystem::Update(float priority , bool executeDirector) {
       }else if (current_stage==MISSION_SIMULATION) {
 #define RUN_ONLY_FOR_PLAYER_STARSYSTEM
 #ifdef RUN_ONLY_FOR_PLAYER_STARSYSTEM
-	if (_Universe->getActiveStarSystem(0)==this) {
+	if (_Universe.getActiveStarSystem(0)==this) {
 #endif
 	  if (executeDirector) {
-	    unsigned int curcockpit= _Universe->CurrentCockpit();
+	    unsigned int curcockpit= _Universe.CurrentCockpit();
 	    for (unsigned int i=0;i<active_missions.size();i++) {
 	      if (active_missions[i]) {
-			  _Universe->SetActiveCockpit(active_missions[i]->player_num);
-			   StarSystem * ss=_Universe->AccessCockpit()->activeStarSystem;
-			  if (ss) _Universe->pushActiveStarSystem(ss);
+			  _Universe.SetActiveCockpit(active_missions[i]->player_num);
+			   StarSystem * ss=_Universe.AccessCockpit()->activeStarSystem;
+			  if (ss) _Universe.pushActiveStarSystem(ss);
 			  mission=active_missions[i];
 			  active_missions[i]->DirectorLoop();
 			  active_missions[i]->DirectorBenchmark();
-			  if (ss)_Universe->popActiveStarSystem();
+			  if (ss)_Universe.popActiveStarSystem();
 	      }
 	    }
-		_Universe->SetActiveCockpit(curcockpit);
+		_Universe.SetActiveCockpit(curcockpit);
 		mission=active_missions[0];
 		processDelayedMissions();
 	  }
@@ -638,14 +599,14 @@ void StarSystem::Update(float priority , bool executeDirector) {
   fflush (stderr);
 #endif
 	Terrain::UpdateAll(64);	
-	unsigned int i=_Universe->CurrentCockpit();
-	for (int j=0;j<_Universe->numPlayers();j++) {
-	  if (_Universe->AccessCockpit(j)->activeStarSystem==this) {
-	    _Universe->SetActiveCockpit(j);
-	    _Universe->AccessCockpit(j)->Update();
+	unsigned int i=_Universe.CurrentCockpit();
+	for (int j=0;j<_Universe.numPlayers();j++) {
+	  if (_Universe.AccessCockpit(j)->activeStarSystem==this) {
+	    _Universe.SetActiveCockpit(j);
+	    _Universe.AccessCockpit(j)->Update();
 	  }
 	}
-	_Universe->SetActiveCockpit(i);
+	_Universe.SetActiveCockpit(i);
 	current_stage=PHY_RESOLV;
       } else if (current_stage==PHY_RESOLV) {
 	iter = drawList.createIterator();
@@ -653,16 +614,16 @@ void StarSystem::Update(float priority , bool executeDirector) {
   fprintf (stderr,"muzak");
   fflush (stderr);
 #endif
-	if (this==_Universe->getActiveStarSystem(0)) {
-	  _Universe->AccessCockpit(0)->AccessCamera()->UpdateCameraSounds();
+	if (this==_Universe.getActiveStarSystem(0)) {
+	  _Universe.AccessCockpit(0)->AccessCamera()->UpdateCameraSounds();
 	  if (muzak)
 		  muzak->Listen();
 	}
-	if (_Universe->AccessCockpit()->activeStarSystem==this){
+	if (_Universe.AccessCockpit()->activeStarSystem==this){
 	  Nebula * neb;
-	  if ((neb=_Universe->AccessCamera()->GetNebula())) {
+	  if ((neb=_Universe.AccessCamera()->GetNebula())) {
 	    if (neb->getFade()<=0) {
-	      _Universe->AccessCamera()->SetNebula(NULL);//Update physics should set this
+	      _Universe.AccessCamera()->SetNebula(NULL);//Update physics should set this
 	    }
 	  }
 	}
@@ -670,7 +631,7 @@ void StarSystem::Update(float priority , bool executeDirector) {
   fprintf (stderr,"unphi");
   fflush (stderr);
 #endif
-      Unit * owner = _Universe->AccessCockpit()->GetParent();
+      Unit * owner = _Universe.AccessCockpit()->GetParent();
       if (owner) {
 	if (owner->InCorrectStarSystem(this)) {
 	  if (getTimeCompression()>1) {//if not paused
@@ -703,7 +664,7 @@ void StarSystem::Update(float priority , bool executeDirector) {
   UnitCollection::FreeUnusedNodes();
   collidetable->Update();
   SIMULATION_ATOM =  normal_simulation_atom;
-  _Universe->popActiveStarSystem();
+  _Universe.popActiveStarSystem();
   //  fprintf (stderr,"bf:%lf",interpolation_blend_factor);
 }
 

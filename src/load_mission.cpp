@@ -51,25 +51,25 @@ struct delayed_mission {
   unsigned int player;
   delayed_mission (std::string str) {
     this->str= str;
-    player = _Universe->CurrentCockpit();
+    player = _Universe.CurrentCockpit();
   }
 };
 vector <delayed_mission> delayed_missions;
 
 void processDelayedMissions() {
   while (!delayed_missions.empty()) {
-    if (delayed_missions.back().player<(unsigned int)_Universe->numPlayers()) {
-      int i = _Universe->CurrentCockpit();
-      _Universe->SetActiveCockpit(delayed_missions.back().player);
-      StarSystem * ss =_Universe->AccessCockpit()->activeStarSystem;
+    if (delayed_missions.back().player<(unsigned int)_Universe.numPlayers()) {
+      int i = _Universe.CurrentCockpit();
+      _Universe.SetActiveCockpit(delayed_missions.back().player);
+      StarSystem * ss =_Universe.AccessCockpit()->activeStarSystem;
       if (ss==NULL) {
-	ss = _Universe->activeStarSystem();
+	ss = _Universe.activeStarSystem();
       }
-      _Universe->pushActiveStarSystem (ss);
+      _Universe.pushActiveStarSystem (ss);
       LoadMission (delayed_missions.back().str.c_str(),false);
       delayed_missions.pop_back();
-      _Universe->popActiveStarSystem();
-      _Universe->SetActiveCockpit(i);
+      _Universe.popActiveStarSystem();
+      _Universe.SetActiveCockpit(i);
     }
   }
 }
@@ -78,7 +78,7 @@ void delayLoadMission (std::string str) {
 }
 void SaveGame::ReloadPickledData () {
   std::string lpd = last_pickled_data;
-  if (_Universe->numPlayers()==1) {
+  if (_Universe.numPlayers()==1) {
     if (!lpd.empty()) {
       unsigned int nummis= ReadIntSpace(lpd);
       for (unsigned int i=0;i<nummis;i++) {
@@ -201,8 +201,8 @@ void LoadMission (const char * mission_name, bool loadFirstUnit) {
 	    pox.k=rand()*10000./RAND_MAX-5000;
 
 	  }
-	  if (_Universe->AccessCockpit()->GetParent()) {
-	    QVector fposs =_Universe->AccessCockpit()->GetParent()->Position();
+	  if (_Universe.AccessCockpit()->GetParent()) {
+	    QVector fposs =_Universe.AccessCockpit()->GetParent()->Position();
 	    pox = pox+fposs;//adds our own position onto this
 	  }
 	  tmptarget=FactionUtil::GetFaction(fg->faction.c_str()); // that should not be in xml?
@@ -238,7 +238,7 @@ void LoadMission (const char * mission_name, bool loadFirstUnit) {
 	    }
 	    fighter->SetTurretAI ();
 	  }
-	  _Universe->activeStarSystem()->AddUnit(fighter);
+	  _Universe.activeStarSystem()->AddUnit(fighter);
 	  a++;
 	} // for nr_ships
   } // end of for flightgroups

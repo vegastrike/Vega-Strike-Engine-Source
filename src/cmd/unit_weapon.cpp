@@ -91,11 +91,11 @@ bool GameUnit::GameMount::PhysicsAlignedFire(const Transformation &Cumulative, c
       temp->Velocity = velocity;
       temp->curr_physical_state = temp->prev_physical_state= temp->cumulative_transformation = tmp;
       CopyMatrix (temp->cumulative_transformation_matrix,m);
-      _Universe->activeStarSystem()->AddUnit(temp);
+      _Universe.activeStarSystem()->AddUnit(temp);
       break;
     }
     static bool use_separate_sound=XMLSupport::parse_bool (vs_config->getVariable ("audio","high_quality_weapon","true"));
-    if ((((!use_separate_sound)||type->type==weapon_info::BEAM)||(!_Universe->isPlayerStarship(owner)))&&(type->type!=weapon_info::PROJECTILE)) {
+    if ((((!use_separate_sound)||type->type==weapon_info::BEAM)||(!_Universe.isPlayerStarship(owner)))&&(type->type!=weapon_info::PROJECTILE)) {
     if (!AUDIsPlaying (sound)) {
       AUDPlay (sound,tmp.position,velocity,1);
     }else {
@@ -162,7 +162,7 @@ bool GameUnit::GameMount::Fire (Unit * owner, bool Missile) {
 	ammo--;
       processed=FIRED;	
 
-      if(owner==_Universe->AccessCockpit()->GetParent()){
+      if(owner==_Universe.AccessCockpit()->GetParent()){
 	//printf("player has fired a bolt\n");
 	forcefeedback->playLaser();
       };
@@ -214,7 +214,7 @@ void GameUnit::Target (Unit *targ) {
   if (targ==this) {
     return;
   }
-  if (!(activeStarSystem==NULL||activeStarSystem==_Universe->activeStarSystem())) {
+  if (!(activeStarSystem==NULL||activeStarSystem==_Universe.activeStarSystem())) {
     computer.target.SetUnit(NULL);
     return;
     fprintf (stderr,"bad target system");
@@ -222,7 +222,7 @@ void GameUnit::Target (Unit *targ) {
     assert (BADTARGETSYSTEM);
   }
   if (targ) {
-    if (targ->activeStarSystem==_Universe->activeStarSystem()||targ->activeStarSystem==NULL) {
+    if (targ->activeStarSystem==_Universe.activeStarSystem()||targ->activeStarSystem==NULL) {
 		if (targ!=Unit::Target()) {
         for (int i=0;i<GetNumMounts();i++){ 
   	  mounts[i]->time_to_lock = mounts[i]->type->LockTime;
@@ -232,7 +232,7 @@ void GameUnit::Target (Unit *targ) {
       }
     }else {
       if (jump.drive!=-1) {
-	un_iter i= _Universe->activeStarSystem()->getUnitList().createIterator();
+	un_iter i= _Universe.activeStarSystem()->getUnitList().createIterator();
 	Unit * u;
 	for (;(u=*i)!=NULL;i++) {
 	  if (!u->GetDestinations().empty()) {

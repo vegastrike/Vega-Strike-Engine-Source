@@ -23,14 +23,6 @@
 #include "cmd/enhancement.h"
 #include "main_loop.h"
 #include "cmd/script/flightgroup.h"
-void StarSystem::beginElement(void *userData, const XML_Char *name, const XML_Char **atts) {
-  ((StarSystem*)userData)->beginElement(name, AttributeList(atts));
-}
-
-void StarSystem::endElement(void *userData, const XML_Char *name) {
-  ((StarSystem*)userData)->endElement(name);
-}
-
 vector <char *> ParseDestinations (const string &value) {
   vector <char *> tmp;
   int i;
@@ -309,7 +301,7 @@ void parse_dual_alpha (const char * alpha, BLENDFUNC & blendSrc, BLENDFUNC &blen
 }
 
 
-void StarSystem::beginElement(const string &name, const AttributeList &attributes) {
+void GameStarSystem::beginElement(const string &name, const AttributeList &attributes) {
   static int neutralfaction=FactionUtil::GetFaction("neutral");
   static float asteroiddiff = XMLSupport::parse_float (vs_config->getVariable ("physics","AsteroidDifficulty",".4"));
   std::string myfile;
@@ -1033,7 +1025,7 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
   }
 }
 
-void StarSystem::endElement(const string &name) {
+void GameStarSystem::endElement(const string &name) {
   Names elem = (Names)element_map.lookup(name);
 
   switch(elem) {
@@ -1059,7 +1051,7 @@ void StarSystem::endElement(const string &name) {
 }
 
 
-void StarSystem::LoadXML(const char *filename, const Vector & centroid, const float timeofyear) {
+void GameStarSystem::LoadXML(const char *filename, const Vector & centroid, const float timeofyear) {
   //  shield.number=0;
   const int chunk_size = 16384;
   // rrestricted=yrestricted=prestricted=false;

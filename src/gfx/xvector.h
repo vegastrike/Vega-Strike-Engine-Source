@@ -130,9 +130,12 @@ inline void ScaledCrossProduct(const XVector &a, const XVector &b, XVector &r) {
     	r.j = a.k*b.i-a.i*b.k;
     	r.k = a.i*b.j-a.j*b.i;
 	QFLOAT size = XSQRT(r.i*r.i+r.j*r.j+r.k*r.k);
-	r.i /= size;
-	r.j /= size;
-	r.k /= size;
+	if( size != 0)
+	{
+		r.i /= size;
+		r.j /= size;
+		r.k /= size;
+	}
 }
 
 

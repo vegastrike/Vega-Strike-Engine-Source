@@ -123,7 +123,7 @@ void Background::Draw()
       GFXCenterCamera(true);
       GFXLoadMatrixModel (identity_matrix);
       //GFXLoadIdentity(MODEL);
-	  //	  GFXTranslate (MODEL,_Universe->AccessCamera()->GetPosition()); 
+	  //	  GFXTranslate (MODEL,_Universe.AccessCamera()->GetPosition()); 
 
       GFXTextureAddressMode(CLAMP);
       //glMatrixMode(GL_MODELVIEW);
@@ -135,7 +135,7 @@ void Background::Draw()
 			      //glPushMatrix();
 			      //gluPerspective (90,1.33,0.01,1500); //set perspective to 78 degree FOV
       ********************************/
-      //_Universe->AccessCamera()->UpdateGLCenter();
+      //_Universe.AccessCamera()->UpdateGLCenter();
       
       
       /*up*/
@@ -242,7 +242,7 @@ void Background::Draw()
     }
   }
   //  GFXLoadIdentity(MODEL);
-  //GFXTranslate (MODEL,_Universe->AccessCamera()->GetPosition()); 
+  //GFXTranslate (MODEL,_Universe.AccessCamera()->GetPosition()); 
   GFXCenterCamera (true);
   GFXEnable(DEPTHWRITE);
   GFXDisable (TEXTURE0);
@@ -253,7 +253,7 @@ void Background::Draw()
   stars->DrawOnce();
   GFXEnable (DEPTHTEST);
   GFXCenterCamera(false);
-  //  _Universe->AccessCamera()->UpdateGFX(false);
+  //  _Universe.AccessCamera()->UpdateGFX(false);
 
 }
 

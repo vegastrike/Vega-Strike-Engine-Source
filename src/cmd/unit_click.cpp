@@ -186,7 +186,7 @@ int GameUnit::queryBoundingBox (const QVector &origin, const Vector &direction, 
 bool GameUnit::querySphereClickList (int mouseX, int mouseY, float err, Camera * activeCam) {
   int i;
   Matrix vw;
-  _Universe->AccessCamera()->GetView (vw);
+  _Universe.AccessCamera()->GetView (vw);
   Vector mousePoint;
 #ifdef VARIABLE_LENGTH_PQR
   Vector TargetPoint (cumulative_transformation_matrix[0],cumulative_transformation_matrix[1],cumulative_transformation_matrix[2]);

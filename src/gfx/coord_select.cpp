@@ -31,13 +31,13 @@ void CoordinateSelect::UpdateMouse() {
   if (CoordinateSelectChange==1) {
     Vector CamPos;
     Vector CamQ,CamR;
-    _Universe->AccessCamera()->GetPQR(CamPos,CamQ,CamR);
+    _Universe.AccessCamera()->GetPQR(CamPos,CamQ,CamR);
 
     Vector mousePoint ( MouseCoordinate(CoordinateSelectmousex,CoordinateSelectmousey));
     float mouseDistance= mousePoint.k*mousePoint.k;
     mousePoint = Transform (CamPos,CamQ,CamR,mousePoint);
     //    QVector cp;
-    CamPos=_Universe->AccessCamera()->GetPosition ();  
+    CamPos=_Universe.AccessCamera()->GetPosition ();  
     //float mouseDistance = mousePoint.Dot (CamR); 
     //distance out into z...straight line...
 
@@ -54,8 +54,8 @@ void CoordinateSelect::UpdateMouse() {
   }
   if (CoordinateSelectChange ==2) {
     Vector CamPos, CamQ,CamR;
-    _Universe->AccessCamera()->GetPQR(CamPos,CamQ,CamR);
-    CamPos=_Universe->AccessCamera()->GetPosition ();
+    _Universe.AccessCamera()->GetPQR(CamPos,CamQ,CamR);
+    CamPos=_Universe.AccessCamera()->GetPosition ();
 
     LocalPosition = LocalPosition - CamPos;
     float distance = sqrt (CamR.Dot (LocalPosition));//distance out into z...straight line...

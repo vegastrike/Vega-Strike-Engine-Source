@@ -54,7 +54,21 @@ class configNodeFactory : public easyDomFactory<configNode> {
 
 class VegaConfig {
  public:
+
+#define MAX_AXIS 4
+  int axis_axis[MAX_AXIS];
+  int axis_joy[MAX_AXIS];
+  bool axis_inverse[MAX_AXIS];
+#define MAX_HATSWITCHES 4
+#define MAX_VALUES 12
+  float hatswitch[MAX_HATSWITCHES][MAX_VALUES];
+  float hatswitch_margin[MAX_HATSWITCHES];
+  int hatswitch_axis[MAX_HATSWITCHES];
+  int hatswitch_joystick[MAX_HATSWITCHES];
+
+
   VegaConfig(char *configfile);
+  virtual ~VegaConfig();
 
   void getColor(configNode *node,string name, float color[4],bool have_color=false);
   void getColor(string section, string name, float color[4],bool have_color=false);
@@ -72,8 +86,9 @@ class VegaConfig {
   bool setVariable(string section,string subsection,string name,string value);
 
   easyDomNode *Variables() { return variables; };
+  virtual void bindKeys() {}
 
- private:
+ protected:
   string getVariable(configNode *section,string name,string defaultval);
 
   configNode *variables;
@@ -92,6 +107,11 @@ class VegaConfig {
   void doVar(configNode *node);
   void doColors(configNode *node);
   bool checkColor(configNode *node);
+
+  virtual void doBindings(configNode *node) {}
+  virtual void checkBind(configNode *node) {}
+  virtual void doAxis(configNode *node) {}
+  virtual void checkHatswitch(int nr,configNode *node) {}
 };
 
 #endif // _VEGACONFIG_H_

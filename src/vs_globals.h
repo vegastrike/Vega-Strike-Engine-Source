@@ -3,6 +3,14 @@
 
 #include <vector>
 
+#ifdef _SERVER
+	#include "universe_generic.h"
+	extern Universe _Universe;
+#else
+	#include "universe.h"
+	extern GameUniverse _Universe;
+#endif
+
 /* All global data is stored in a variable of this type */
 typedef struct {
   char use_textures;
@@ -59,9 +67,6 @@ class ForceFeedback;
 extern ForceFeedback *forcefeedback;
 
 extern double benchmark;
-
-#include "universe.h"
-extern Universe * _Universe;
 
 #endif
 

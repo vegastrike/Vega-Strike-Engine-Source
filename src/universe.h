@@ -21,18 +21,13 @@
 #ifndef _WrapGFX_H
 #define _WrapGFX_H
 
-
-#define NUM_LIGHT	8
-#define NUM_FORCES	64
-
+#include "universe_generic.h"
 #include "gfx/camera.h"
 #include "star_system.h"
 #include "gfx/cockpit.h"
-#include "faction.h"
-class Cockpit;
 
 /**
- * Class Universe Deals with universal constants. It is a global, 
+ * Class GameUniverse Deals with universal constants. It is a global, 
  * accessed from anywhere as _Universe. Universe may be queried for 
  * Relationships, the current star system rendering is taking place in
  * etc.  It acts as a wrapper to the active Star System.
@@ -40,58 +35,32 @@ class Cockpit;
  * And starting and ending graphics. (incl the task of wiping temp lights)
  * Deprecated: loaded dynamic gldrv module
  */
-namespace GalaxyXML {
-  class Galaxy;
-
-}
-class Universe {
+class GameUniverse: public Universe {
 protected:
-  class GalaxyXML::Galaxy * galaxy;
   ///The users cockpit
-  unsigned int current_cockpit;
-  std::vector <Cockpit *> cockpit;
+  //unsigned int current_cockpit;
+  //std::vector <Cockpit *> cockpit;
   ///a generic camera facing the HUD
   Camera hud_camera;
   ///init proc
   void StartGL();
-  ///currently only 1 star system is stored
-  std::vector <StarSystem *> active_star_system;
-
-  // the system currently used by the scripting
-  StarSystem *script_system;
 
 private:
-  ///Many C++ implementations count classes within as friends. (not all)
-  friend class Faction;
   friend void bootstrap_main_loop();//so it can get all cockpits
   ///A list of all factions 
   
  public:
   Cockpit * isPlayerStarship (const Unit* fighter);
-  vector <std::string> getAdjacentStarSystems(const std::string &ss);
-  std::string getGalaxyProperty (const std::string &sys, const std::string & prop);
-  bool StillExists(StarSystem * ss);
-  void setActiveStarSystem(StarSystem * ss) {active_star_system.back()=ss;}
-  void pushActiveStarSystem(StarSystem * ss) {active_star_system.push_back (ss);}
-  void popActiveStarSystem() {active_star_system.pop_back();}
   void SetActiveCockpit (int whichcockpit);
   void SetActiveCockpit (Cockpit * which);
-  StarSystem * getActiveStarSystem (unsigned int size) {return active_star_system[size];}
-  unsigned int getNumActiveStarSystem() {return active_star_system.size();}
-  void LoadStarSystem(StarSystem * ss);
-  void UnloadStarSystem(StarSystem * ss);
-  StarSystem * GenerateStarSystem (const char * file, const char * jumpback, Vector origin);
-  ///Loads and parses factions
-  void LoadFactionXML (const char * factfile) {
-    Faction::LoadXML (factfile);
-  }
-  void SetupCockpits (std::vector <std::string> players);
   void WriteSaveGame(bool auto_save);
+  void SetupCockpits (std::vector <std::string> players);
   void activateLightMap();
   ///inits graphics with args
-  Universe(int argc, char **argv, const char * galaxy);
-  
-  ~Universe();
+  GameUniverse(int argc, char **argv, const char * galaxy);
+  GameUniverse();
+  void Init(int argc, char** argv, const char * galaxy);
+  ~GameUniverse();
   ///Loads Defaults in Graphics Drivers
   void StartGFX();
   ///Should load the Universe data file. Now just inits system with test.xml
@@ -100,17 +69,15 @@ private:
   void StartDraw();
   ///Runs the main loop
   void Loop(void main_loop());
-  ///returns active star system
-  StarSystem* activeStarSystem() {return active_star_system.back();}
   ///Wrapper function for Star System
   void SelectCamera(int cam) {
     AccessCockpit()->SelectCamera(cam);
   }
   ///Accessor to cockpit
-  unsigned int CurrentCockpit(){return current_cockpit;}
-  Cockpit *AccessCockpit() {return cockpit[current_cockpit];}
+  //unsigned int CurrentCockpit(){return current_cockpit;}
+  //Cockpit *AccessCockpit() {return cockpit[current_cockpit];}
   int numPlayers () {return cockpit.size();}
-  Cockpit *AccessCockpit (int i) {return cockpit[i];}
+  //Cockpit *AccessCockpit (int i) {return cockpit[i];}
   ///Wrapper function for Star System
   Camera *AccessCamera(int num) {
     return AccessCockpit()->AccessCamera(num);
@@ -125,26 +92,6 @@ private:
   void SetViewport() {
     AccessCockpit()->SetViewport();
   }
-
-  StarSystem *getStarSystem(string name);
-  StarSystem *scriptStarSystem() {
-    if(script_system!=NULL){ return script_system; }
-    else { return activeStarSystem(); };
-  }
-  bool setScriptSystem(string name){
-    if(name=="-active-"){
-      script_system=NULL;
-      return true;
-    }
-    StarSystem *ss=getStarSystem(name);
-    if(script_system!=NULL){
-      script_system=ss;
-      return true;
-    }
-    return false;
-  }
- public:
-  std::vector <StarSystem *> star_system;
 };
 
 #endif

@@ -1,10 +1,6 @@
 #include "vegastrike.h"
 #include "vs_path.h"
-#ifdef _SERVER
-	#include "configxml.h"
-#else
-	#include "config_xml.h"
-#endif
+#include "config_xml.h"
 #include "vs_globals.h"
 #include "xml_support.h"
 
@@ -114,7 +110,7 @@ void initpaths () {
   if (fp1) {
     //  we have a config file in home directory
     fclose (fp1);
-    vs_config=new VegaConfig(CONFIGFILE); // move config to global or some other struct
+    vs_config=new GameVegaConfig(CONFIGFILE); // move config to global or some other struct
     cout << "using config file in home dir" << endl;
   }else if (fp) {
     // we don't have a config file in home dir
@@ -124,7 +120,7 @@ void initpaths () {
     fclose (fp);
     fp =NULL;
     returnfromhome();
-    vs_config = new VegaConfig (CONFIGFILE);
+    vs_config = new GameVegaConfig (CONFIGFILE);
     cout << "using config file in data dir " << datadir << endl;
     changehome();
   } else {

@@ -103,11 +103,11 @@ UpgradingInfo::UpgradingInfo(Unit * un, Unit * base, vector<BaseMode> modes):bas
 	CargoInfo = new TextArea(0, 0.9, 1, 1.7, 0);
 	Modes=new Button * [modes.size()+2];//save mode and null mode
 	CargoInfo->DoMultiline(1);
-	Cockpit * cp = _Universe->isPlayerStarship(un);
+	Cockpit * cp = _Universe.isPlayerStarship(un);
 	briefingMission=NULL;
-	Cockpit * tmpcockpit = _Universe->AccessCockpit();
+	Cockpit * tmpcockpit = _Universe.AccessCockpit();
 	if (cp) {
-	  _Universe->SetActiveCockpit(cp);
+	  _Universe.SetActiveCockpit(cp);
 	  WriteSaveGame(cp,true);
 	}
 	NewPart=NULL;//no ship to upgrade
@@ -172,7 +172,7 @@ UpgradingInfo::UpgradingInfo(Unit * un, Unit * base, vector<BaseMode> modes):bas
 		CargoList->RenderText();
 		CargoInfo->RenderText();	
 		SetMode (modes[0],NORMAL);
-		_Universe->SetActiveCockpit(tmpcockpit);
+		_Universe.SetActiveCockpit(tmpcockpit);
 	}
 }
 UpgradingInfo::~UpgradingInfo() {
@@ -197,9 +197,9 @@ void UpgradingInfo::Render() {
     //    GFXSubwindow (0,0,g_game.x_resolution,g_game.y_resolution);
     Unit * un = buyer.GetUnit(); 
     if (un) {
-      Cockpit * cp = _Universe->isPlayerStarship(un);
+      Cockpit * cp = _Universe.isPlayerStarship(un);
       if (cp)
-	_Universe->SetActiveCockpit(cp);
+	_Universe.SetActiveCockpit(cp);
     }
     bool render=true;
 
@@ -223,7 +223,7 @@ void UpgradingInfo::Render() {
       ShowColor(-1,-1,2,2, 0,0,0,1);
       ShowColor(0,0,0,0, 1,1,1,1);
       char floatprice [100];
-      sprintf(floatprice,"%.2f",_Universe->AccessCockpit()->credits);
+      sprintf(floatprice,"%.2f",_Universe.AccessCockpit()->credits);
       Unit * baseunit = this->base.GetUnit();
       string basename;
       if (baseunit) {
@@ -432,7 +432,7 @@ unsigned int player_upgrading;
 
 bool RefreshInterface(void) {
   bool retval=false;
-  if (player_upgrading==_Universe->CurrentCockpit()){
+  if (player_upgrading==_Universe.CurrentCockpit()){
     retval=true;
     upgr->Render();
   }
@@ -441,26 +441,26 @@ bool RefreshInterface(void) {
 
 static void ProcessMouseClick(int button, int state, int x, int y) {
   SetSoftwareMousePosition (x,y);
-  int cur = _Universe->CurrentCockpit();
-  _Universe->SetActiveCockpit (_Universe->AccessCockpit(player_upgrading));
+  int cur = _Universe.CurrentCockpit();
+  _Universe.SetActiveCockpit (_Universe.AccessCockpit(player_upgrading));
   upgr->ProcessMouse(1, x, y, button, state);
-  _Universe->SetActiveCockpit(_Universe->AccessCockpit(cur));
+  _Universe.SetActiveCockpit(_Universe.AccessCockpit(cur));
 }
 
 static void ProcessMouseActive(int x, int y) {
   SetSoftwareMousePosition (x,y);
-  int cur = _Universe->CurrentCockpit();
-  _Universe->SetActiveCockpit (_Universe->AccessCockpit(player_upgrading));
+  int cur = _Universe.CurrentCockpit();
+  _Universe.SetActiveCockpit (_Universe.AccessCockpit(player_upgrading));
   upgr->ProcessMouse(2, x, y, 0, 0);
-  _Universe->SetActiveCockpit(_Universe->AccessCockpit(cur));
+  _Universe.SetActiveCockpit(_Universe.AccessCockpit(cur));
 }
 
 static void ProcessMousePassive(int x, int y) {
   SetSoftwareMousePosition(x,y);
-  int cur = _Universe->CurrentCockpit();
-  _Universe->SetActiveCockpit (_Universe->AccessCockpit(player_upgrading));
+  int cur = _Universe.CurrentCockpit();
+  _Universe.SetActiveCockpit (_Universe.AccessCockpit(player_upgrading));
   upgr->ProcessMouse(3, x, y, 0, 0);
-  _Universe->SetActiveCockpit(_Universe->AccessCockpit(cur));
+  _Universe.SetActiveCockpit(_Universe.AccessCockpit(cur));
 }
 void UpgradeCompInterface(Unit *un,Unit * base, vector <UpgradingInfo::BaseMode> modes) {
   if (upgr) {
@@ -474,7 +474,7 @@ void UpgradeCompInterface(Unit *un,Unit * base, vector <UpgradingInfo::BaseMode>
   winsys_set_passive_motion_func(ProcessMousePassive);
   //(x, y, width, height, with scrollbar)
   upgr=( new UpgradingInfo (un,base,modes));
-  player_upgrading=(_Universe->CurrentCockpit());
+  player_upgrading=(_Universe.CurrentCockpit());
   
 }
 
@@ -517,7 +517,7 @@ bool UpgradingInfo::SelectItem (const char *item, int button, int buttonstate) {
      Unit * buy = buyer.GetUnit();
      if (buy!=NULL) {
 
-      Cockpit * cp = _Universe->isPlayerStarship(buy);
+      Cockpit * cp = _Universe.isPlayerStarship(buy);
       if (cp) {
        if (item[0]=='S') {
 	 title="Game Saved Successfully. ";
@@ -643,8 +643,8 @@ void UpgradingInfo::CommitItem (const char *inp_buf, int button, int state) {
     {
       Cargo *part = base->GetCargo (string(input_buffer), offset);
       if (part) {
-	float usedprice = usedPrice (base->PriceCargo (_Universe->AccessCockpit()->GetUnitFileName()));
-	if (part->price<=usedprice+_Universe->AccessCockpit()->credits) {
+	float usedprice = usedPrice (base->PriceCargo (_Universe.AccessCockpit()->GetUnitFileName()));
+	if (part->price<=usedprice+_Universe.AccessCockpit()->credits) {
 	  Flightgroup * fg = un->getFlightgroup();
 	  int fgsnumber=0;
 	  if (fg!=NULL) {
@@ -657,19 +657,19 @@ void UpgradingInfo::CommitItem (const char *inp_buf, int button, int state) {
 	  NewPart->SetFaction(un->faction);
 	  if (NewPart->name!=string("LOAD_FAILED")) {
 	    if (NewPart->nummesh()>0) {
-	      _Universe->AccessCockpit()->credits-=part->price-usedprice;
+	      _Universe.AccessCockpit()->credits-=part->price-usedprice;
 	      NewPart->curr_physical_state=un->curr_physical_state;
 	      NewPart->prev_physical_state=un->prev_physical_state;
-	      _Universe->activeStarSystem()->AddUnit (NewPart);
+	      _Universe.activeStarSystem()->AddUnit (NewPart);
 	      
-	      _Universe->AccessCockpit()->SetParent(NewPart,input_buffer,_Universe->AccessCockpit()->GetUnitModifications().c_str(),un->curr_physical_state.position);//absolutely NO NO NO modifications...you got this baby clean off the slate
+	      _Universe.AccessCockpit()->SetParent(NewPart,input_buffer,_Universe.AccessCockpit()->GetUnitModifications().c_str(),un->curr_physical_state.position);//absolutely NO NO NO modifications...you got this baby clean off the slate
 
 	      SwitchUnits (NULL,NewPart);
 	      un->UnDock (base);
 	      base->RequestClearance(NewPart);
 	      buyer.SetUnit (NewPart);
 	      NewPart->Dock(base);
-	      WriteSaveGame (_Universe->AccessCockpit(),true);
+	      WriteSaveGame (_Universe.AccessCockpit(),true);
 	      NewPart=NULL;
 	      un->Kill();
 	      DoDone();
@@ -773,7 +773,7 @@ void UpgradingInfo::CommitItem (const char *inp_buf, int button, int state) {
   case BUYMODE:
     if ((un=this->buyer.GetUnit())) {
       if ((base=this->base.GetUnit())) {
-	un->BuyCargo (input_buffer,quantity,base,_Universe->AccessCockpit()->credits);
+	un->BuyCargo (input_buffer,quantity,base,_Universe.AccessCockpit()->credits);
       }
       SetMode (mode,submode);
       SelectLastSelected();
@@ -783,7 +783,7 @@ void UpgradingInfo::CommitItem (const char *inp_buf, int button, int state) {
     if ((un=this->buyer.GetUnit())) {
       if ((base=this->base.GetUnit())) {
 	Cargo sold;
-	un->SellCargo (input_buffer,quantity,_Universe->AccessCockpit()->credits,sold,base);
+	un->SellCargo (input_buffer,quantity,_Universe.AccessCockpit()->credits,sold,base);
       }
       SetMode (mode,submode);
       SelectLastSelected();
@@ -892,8 +892,8 @@ void UpgradingInfo::CompleteTransactionConfirm () {
       
       canupgrade =un->canUpgrade (NewPart,mountoffset,subunitoffset,addmultmode,true,percentage,templ);
       price =(float)(part.price*(1-usedPrice(percentage)));
-      if ((_Universe->AccessCockpit()->credits>price)) {
-	_Universe->AccessCockpit()->credits-=price;
+      if ((_Universe.AccessCockpit()->credits>price)) {
+	_Universe.AccessCockpit()->credits-=price;
 
 	un->Upgrade (NewPart,mountoffset,subunitoffset,addmultmode,true,percentage,templ);
 	unsigned int removalindex;
@@ -912,7 +912,7 @@ void UpgradingInfo::CompleteTransactionConfirm () {
       //        part.price/=3;
       //      }
       price =part.price*usedPrice(percentage);
-      _Universe->AccessCockpit()->credits+=price;
+      _Universe.AccessCockpit()->credits+=price;
       if (un->Downgrade (NewPart,mountoffset,subunitoffset,percentage)) {
       if ((bas=base.GetUnit())) {
 	part.quantity=1;

@@ -3,6 +3,12 @@
 
 using namespace FactionUtil;
 
+FSM* FactionUtil::GetConversation(int Myfaction, int TheirFaction) {
+  assert (factions[Myfaction]->faction[TheirFaction].stats.index == TheirFaction);
+  return factions[Myfaction]->faction[TheirFaction].conversation;
+}
+
+
 Texture * FactionUtil::getForceLogo (int faction) {
   return factions[faction]->logo;
 }

@@ -295,7 +295,7 @@ void Mesh::DrawNow(float lod,  bool centered, const Matrix &m, short cloak, floa
   Mesh *o = getLOD (lod);
   //fixme: cloaking not delt with.... not needed for backgroudn anyway
   if (nebdist<0) {
-    Nebula * t=_Universe->AccessCamera()->GetNebula();
+    Nebula * t=_Universe.AccessCamera()->GetNebula();
     if (t) {
       t->SetFogState();
     }
@@ -304,7 +304,7 @@ void Mesh::DrawNow(float lod,  bool centered, const Matrix &m, short cloak, floa
   }
   if (centered) {
     //    Matrix m1 (m);
-    //Vector pos(_Universe->AccessCamera()->GetPosition().Transform(m1));
+    //Vector pos(_Universe.AccessCamera()->GetPosition().Transform(m1));
     //m1[12]=pos.i;
     //m1[13]=pos.j;
     //m1[14]=pos.k;
@@ -374,7 +374,7 @@ public:
 void Mesh::ProcessZFarMeshes () {
   static GFXColor meshcolor (getMeshColor());
   GFXLightContextAmbient(meshcolor);
-  _Universe->AccessCamera()->UpdateGFX (GFXFALSE, GFXFALSE);
+  _Universe.AccessCamera()->UpdateGFX (GFXFALSE, GFXFALSE);
   GFXEnable(LIGHTING);
   GFXEnable(CULLFACE);
   GFXDisable (DEPTHTEST);
@@ -389,7 +389,7 @@ void Mesh::ProcessZFarMeshes () {
   undrawn_meshes[NUM_ZBUF_SEQ].clear();
   GFXFogMode(FOG_OFF);
   Animation::ProcessFarDrawQueue(-FLT_MAX);
-  _Universe->AccessCamera()->UpdateGFX (GFXTRUE, GFXFALSE);
+  _Universe.AccessCamera()->UpdateGFX (GFXTRUE, GFXFALSE);
   GFXEnable (DEPTHTEST);
   GFXEnable (DEPTHWRITE);
 }
@@ -446,7 +446,7 @@ void Mesh::ProcessDrawQueue(int whichdrawqueue) {
 	  for (unsigned int i=0;i<draw_queue->size();i++) {
 		MeshDrawContext * c = &((*draw_queue)[i]);
 	    if (c->mesh_seq==whichdrawqueue) {
-	      Animation::ProcessFarDrawQueue ((_Universe->AccessCamera()->GetPosition()-c->mat.p).Magnitude()/*+this->radialSize*/);		
+	      Animation::ProcessFarDrawQueue ((_Universe.AccessCamera()->GetPosition()-c->mat.p).Magnitude()/*+this->radialSize*/);		
 		}
 	  }
       GFXEnable(LIGHTING);
@@ -473,7 +473,7 @@ void Mesh::ProcessDrawQueue(int whichdrawqueue) {
   GFXSelectTexcoordSet(0, 0);
   if(getEnvMap()) {
     GFXEnable(TEXTURE1);
-    _Universe->activateLightMap();
+    _Universe.activateLightMap();
     GFXSelectTexcoordSet(1, 1);
   } else {
     GFXDisable(TEXTURE1);
@@ -526,7 +526,7 @@ void Mesh::ProcessDrawQueue(int whichdrawqueue) {
       specialfxlight.push_back(ligh);
     }
     if (c.cloaked&MeshDrawContext::FOG) {
-      Nebula *t=_Universe->AccessCamera()->GetNebula();
+      Nebula *t=_Universe.AccessCamera()->GetNebula();
       if (t) {
 	t->SetFogState();
       }

@@ -46,13 +46,14 @@
 #include "gfx/hud.h"
 #include "gldrv/winsys.h"
 #include "universe_util.h"
+#include "universe_util_generic.h"
 #include "networking/netclient.h"
 
 /*
  * Globals 
  */
 ForceFeedback *forcefeedback;
-
+GameUniverse _Universe;
 TextPlane *bs_tp=NULL;
 
 /* 
@@ -86,20 +87,20 @@ void cleanup(void)
 {
 	if( Network!=NULL)
 	{
-		for( int i=0; i<_Universe->numPlayers(); i++)
+		for( int i=0; i<_Universe.numPlayers(); i++)
 			Network[i].logout();
 		delete [] Network;
 	}
 
   STATIC_VARS_DESTROYED=true;
   printf ("Thank you for playing!\n");
-  _Universe->WriteSaveGame(true);
+  _Universe.WriteSaveGame(true);
   winsys_shutdown();
   //    write_config_file();
   AUDDestroy();
   //destroyObjects();
   //Unit::ProcessDeleteQueue();
-  delete _Universe;
+  //delete _Universe;
     delete [] CONFIGFILE;
 
   
@@ -172,7 +173,7 @@ int main( int argc, char *argv[] )
 		CONFIGFILE=new char[42];
 		sprintf(CONFIGFILE,"vegastrike.config");
 	}
-		
+
     initpaths();
     //can use the vegastrike config variable to read in the default mission
 
@@ -231,8 +232,9 @@ int main( int argc, char *argv[] )
 
 #endif
     */
-    _Universe= new Universe(argc,argv,vs_config->getVariable ("general","galaxy","milky_way.xml").c_str());   
-    _Universe->Loop(bootstrap_main_loop);
+    //_Universe= new GameUniverse(argc,argv,vs_config->getVariable ("general","galaxy","milky_way.xml").c_str());
+	_Universe.Init(argc, argv, vs_config->getVariable ("general","galaxy","milky_way.xml").c_str());
+    _Universe.Loop(bootstrap_main_loop);
     return 0;
 }
   static Animation * SplashScreen = NULL;
@@ -398,6 +400,11 @@ void bootstrap_main_loop () {
 				cout<<"No server response, exiting"<<endl;
 				exit(1);
 			}
+			else if( nbok==-1)
+			{
+				cout<<"Cannot connect to server"<<endl;
+				exit(1);
+			}
 			else
 				cout<<" logged in !"<<endl;
 		}
@@ -409,7 +416,7 @@ void bootstrap_main_loop () {
 	}
 	/************************* NETWORK INIT ***************************/
 
-    _Universe->SetupCockpits(playername);
+    _Universe.SetupCockpits(playername);
     float credits=XMLSupport::parse_float (mission->getVariable("credits","0"));
     g_game.difficulty=XMLSupport::parse_float (mission->getVariable("difficulty","1"));
     string savegamefile = mission->getVariable ("savegame","");
@@ -418,23 +425,23 @@ void bootstrap_main_loop () {
 	vector <StarSystem *> ss;
 	vector <string> starsysname;
 	vector <QVector> playerNloc;
-    for (unsigned int k=0;k<_Universe->cockpit.size();k++) {
+    for (unsigned int k=0;k<_Universe.numPlayers();k++) {
       bool setplayerXloc=false;
       std::string psu;
       if (k==0) {
 		QVector myVec;
 		if (SetPlayerLoc (myVec,false)) {
-		  _Universe->cockpit[0]->savegame->SetPlayerLocation(myVec);
+		  _Universe.AccessCockpit(0)->savegame->SetPlayerLocation(myVec);
 		}
 		std::string st;
 		if (SetPlayerSystem (st,false)) {
-		  _Universe->cockpit[0]->savegame->SetStarSystem(st);
+		  _Universe.AccessCockpit(0)->savegame->SetStarSystem(st);
 		}
       }
-      vector <SavedUnits> saved=_Universe->cockpit[k]->savegame->ParseSaveGame (savegamefile,mysystem,mysystem,pos,setplayerXloc,credits,psu,k);
+      vector <SavedUnits> saved=_Universe.AccessCockpit(k)->savegame->ParseSaveGame (savegamefile,mysystem,mysystem,pos,setplayerXloc,credits,psu,k);
       playersaveunit.push_back(psu);
-      _Universe->cockpit[k]->credits=credits;
-  	  ss.push_back (_Universe->Init (mysystem,Vector(0,0,0),planetname));
+      _Universe.AccessCockpit(k)->credits=credits;
+  	  ss.push_back (_Universe.Init (mysystem,Vector(0,0,0),planetname));
 	  if (setplayerXloc) {
 	   	  playerNloc.push_back(pos);
 	  }else {
@@ -472,7 +479,7 @@ void bootstrap_main_loop () {
     delete SplashScreen;
     SplashScreen= NULL;
     SetStarSystemLoading (false);
-    FactionUtil::LoadContrabandLists();
+    GameFactionUtil::LoadContrabandLists();
 	{
 		string str=vs_config->getVariable ("general","intro1","Welcome to Vega Strike! Use #8080FFTab#000000 to afterburn (#8080FF+,-#000000 cruise control), #8080FFarrows#000000 to steer.");
 		if (!str.empty()) {
@@ -502,7 +509,7 @@ void bootstrap_main_loop () {
 			Network[l].inGame();
 	}
 
-    _Universe->Loop(main_loop);
+    _Universe.Loop(main_loop);
     ///return to idle func which now should call main_loop mohahahah
   }
   ///Draw Texture

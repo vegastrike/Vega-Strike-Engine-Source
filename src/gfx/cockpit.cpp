@@ -27,6 +27,7 @@
 #include "animation.h"
 #include "mesh.h"
 #include "universe_util.h"
+#include "universe_util_generic.h"
 #include "in_mouse.h"
 #include "gui/glut_support.h"
 #include "networking/netclient.h"
@@ -314,11 +315,11 @@ inline void DrawDockingBoxes(Unit * un,Unit *target, const Vector & CamP, const 
       GFXDisable (DEPTHTEST);
       GFXDisable (DEPTHWRITE);
       GFXColorf (dockboxstop);
-      DrawOneTargetBox (Transform (target->GetTransformation(),d[i].pos.Cast())-_Universe->AccessCamera()->GetPosition(),rad ,CamP, CamQ, CamR,1,true,true);
+      DrawOneTargetBox (Transform (target->GetTransformation(),d[i].pos.Cast())-_Universe.AccessCamera()->GetPosition(),rad ,CamP, CamQ, CamR,1,true,true);
       GFXEnable (DEPTHTEST);
       GFXEnable (DEPTHWRITE);
       GFXColorf (dockboxgo);
-      DrawOneTargetBox (Transform (target->GetTransformation(),d[i].pos.Cast())-_Universe->AccessCamera()->GetPosition(),rad ,CamP, CamQ, CamR,1,true,true);
+      DrawOneTargetBox (Transform (target->GetTransformation(),d[i].pos.Cast())-_Universe.AccessCamera()->GetPosition(),rad ,CamP, CamQ, CamR,1,true,true);
 
     }
     GFXDisable (DEPTHTEST);
@@ -336,13 +337,13 @@ void Cockpit::DrawTargetBoxes(){
   if (un->GetNebula()!=NULL)
     return;
 
-  StarSystem *ssystem=_Universe->activeStarSystem();
+  StarSystem *ssystem=_Universe.activeStarSystem();
   UnitCollection *unitlist=&ssystem->getUnitList();
   //UnitCollection::UnitIterator *uiter=unitlist->createIterator();
   un_iter uiter=unitlist->createIterator();
   
   Vector CamP,CamQ,CamR;
-  _Universe->AccessCamera()->GetPQR(CamP,CamQ,CamR);
+  _Universe.AccessCamera()->GetPQR(CamP,CamQ,CamR);
  
   GFXDisable (TEXTURE0);
   GFXDisable (TEXTURE1);
@@ -389,20 +390,20 @@ void Cockpit::DrawTargetBox () {
   if (!target)
     return;
   Vector CamP,CamQ,CamR;
-  _Universe->AccessCamera()->GetPQR(CamP,CamQ,CamR);
+  _Universe.AccessCamera()->GetPQR(CamP,CamQ,CamR);
   //Vector Loc (un->ToLocalCoordinates(target->Position()-un->Position()));
-  QVector Loc(target->Position()-_Universe->AccessCamera()->GetPosition());
+  QVector Loc(target->Position()-_Universe.AccessCamera()->GetPosition());
   GFXDisable (TEXTURE0);
   GFXDisable (TEXTURE1);
   GFXDisable (DEPTHTEST);
   GFXDisable (DEPTHWRITE);
   GFXBlendMode (SRCALPHA,INVSRCALPHA);
   GFXDisable (LIGHTING);
-  DrawNavigationSymbol (un->GetComputerData().NavPoint,CamP,CamQ, CamR.Cast().Dot((un->GetComputerData().NavPoint).Cast()-_Universe->AccessCamera()->GetPosition()));
+  DrawNavigationSymbol (un->GetComputerData().NavPoint,CamP,CamQ, CamR.Cast().Dot((un->GetComputerData().NavPoint).Cast()-_Universe.AccessCamera()->GetPosition()));
   GFXColorf (un->GetComputerData().radar.color?unitToColor(un,target):black_and_white);
 
   if(draw_line_to_target){
-    QVector my_loc(_Universe->AccessCamera()->GetPosition());
+    QVector my_loc(_Universe.AccessCamera()->GetPosition());
     GFXBegin(GFXLINESTRIP);
     GFXVertexf(my_loc);
     GFXVertexf(Loc);
@@ -419,7 +420,7 @@ void Cockpit::DrawTargetBox () {
   if (always_itts || un->GetComputerData().itts) {
     un->getAverageGunSpeed (speed,range);
     float err = (.01*(1-un->CloakVisible()));
-   QVector iLoc = target->PositionITTS (un->Position(),speed)-_Universe->AccessCamera()->GetPosition()+10*err*QVector (-.5*.25*un->rSize()+rand()*.25*un->rSize()/RAND_MAX,-.5*.25*un->rSize()+rand()*.25*un->rSize()/RAND_MAX,-.5*.25*un->rSize()+rand()*.25*un->rSize()/RAND_MAX);
+   QVector iLoc = target->PositionITTS (un->Position(),speed)-_Universe.AccessCamera()->GetPosition()+10*err*QVector (-.5*.25*un->rSize()+rand()*.25*un->rSize()/RAND_MAX,-.5*.25*un->rSize()+rand()*.25*un->rSize()/RAND_MAX,-.5*.25*un->rSize()+rand()*.25*un->rSize()/RAND_MAX);
     
     GFXBegin (GFXLINESTRIP);
     if(draw_line_to_itts){
@@ -446,7 +447,7 @@ void Cockpit::DrawBlips (Unit * un) {
   static GFXColor black_and_white=DockBoxColor ("black_and_white"); 
 
   Unit::Computer::RADARLIM * radarl = &un->GetComputerData().radar;
-  UnitCollection * drawlist = &_Universe->activeStarSystem()->getUnitList();
+  UnitCollection * drawlist = &_Universe.activeStarSystem()->getUnitList();
   un_iter iter = drawlist->createIterator();
   Unit * target;
   Unit * makeBigger = un->Target();
@@ -505,7 +506,7 @@ void Cockpit::DrawBlips (Unit * un) {
 void Cockpit::DrawEliteBlips (Unit * un) {
   static GFXColor black_and_white=DockBoxColor ("black_and_white"); 
   Unit::Computer::RADARLIM * radarl = &un->GetComputerData().radar;
-  UnitCollection * drawlist = &_Universe->activeStarSystem()->getUnitList();
+  UnitCollection * drawlist = &_Universe.activeStarSystem()->getUnitList();
   un_iter iter = drawlist->createIterator();
   Unit * target;
   Unit * makeBigger = un->Target();
@@ -725,7 +726,7 @@ void Cockpit::SetParent (Unit * unit, const char * filename, const char * unitmo
   if (unit->getFlightgroup()!=NULL) {
     fg = unit->getFlightgroup();
   }
-  activeStarSystem= _Universe->activeStarSystem();//cannot switch to units in other star systems.
+  activeStarSystem= _Universe.activeStarSystem();//cannot switch to units in other star systems.
   parent.SetUnit (unit);
   savegame->SetPlayerLocation(pos);
   if (filename[0]!='\0') {
@@ -857,27 +858,27 @@ static vector <int> switchunit;
 static vector <int> turretcontrol;
 static vector <int> suicide;
 void RespawnNow (Cockpit * cp) {
-  while (respawnunit.size()<=_Universe->numPlayers())
+  while (respawnunit.size()<=_Universe.numPlayers())
     respawnunit.push_back(0);
-  for (unsigned int i=0;i<_Universe->numPlayers();i++) {
-    if (_Universe->AccessCockpit(i)==cp) {
+  for (unsigned int i=0;i<_Universe.numPlayers();i++) {
+    if (_Universe.AccessCockpit(i)==cp) {
       respawnunit[i]=2;
     }
   }
 }
 void Cockpit::SwitchControl (int,KBSTATE k) {
   if (k==PRESS) {
-    while (switchunit.size()<=_Universe->CurrentCockpit())
+    while (switchunit.size()<=_Universe.CurrentCockpit())
       switchunit.push_back(0);
-    switchunit[_Universe->CurrentCockpit()]=1;
+    switchunit[_Universe.CurrentCockpit()]=1;
   }
 
 }
 void SuicideKey (int, KBSTATE k) {
   if (k==PRESS) {
-    while (suicide.size()<=_Universe->CurrentCockpit())
+    while (suicide.size()<=_Universe.CurrentCockpit())
       suicide.push_back(0);
-    suicide[_Universe->CurrentCockpit()]=1;
+    suicide[_Universe.CurrentCockpit()]=1;
   }
   
 }
@@ -921,12 +922,12 @@ void MapKey (int, KBSTATE k) {
     static Sprite ur("upper-right-map.spr");
     static Sprite ll("lower-left-map.spr");
     static Sprite lr("lower-right-map.spr");
-    while (univmap.size()<=_Universe->CurrentCockpit())
+    while (univmap.size()<=_Universe.CurrentCockpit())
       univmap.push_back(UnivMap(NULL,NULL,NULL,NULL));
-    if (univmap[_Universe->CurrentCockpit()].isNull()) {
-      univmap[_Universe->CurrentCockpit()]=UnivMap (&ul,&ur,&ll,&lr);
+    if (univmap[_Universe.CurrentCockpit()].isNull()) {
+      univmap[_Universe.CurrentCockpit()]=UnivMap (&ul,&ur,&ll,&lr);
     }else {
-      univmap[_Universe->CurrentCockpit()]=UnivMap(NULL,NULL,NULL,NULL);
+      univmap[_Universe.CurrentCockpit()]=UnivMap(NULL,NULL,NULL,NULL);
     } 
   } 
 }
@@ -934,17 +935,17 @@ void MapKey (int, KBSTATE k) {
 
 void Cockpit::TurretControl (int,KBSTATE k) {
   if (k==PRESS) {
-    while (turretcontrol.size()<=_Universe->CurrentCockpit())
+    while (turretcontrol.size()<=_Universe.CurrentCockpit())
       turretcontrol.push_back(0);
-    turretcontrol[_Universe->CurrentCockpit()]=1;
+    turretcontrol[_Universe.CurrentCockpit()]=1;
   }
 
 }
 void Cockpit::Respawn (int,KBSTATE k) {
   if (k==PRESS) {
-    while (respawnunit.size()<=_Universe->CurrentCockpit())
+    while (respawnunit.size()<=_Universe.CurrentCockpit())
       respawnunit.push_back(0);
-    respawnunit[_Universe->CurrentCockpit()]=1;
+    respawnunit[_Universe.CurrentCockpit()]=1;
   }
 
 }
@@ -978,8 +979,8 @@ void Cockpit::Autopilot (Unit * target) {
 	static float autospeed = XMLSupport::parse_float (vs_config->getVariable ("physics","autospeed",".020"));//10 seconds for auto to kick in;
 	numave++;
 	AccessCamera(CP_PAN)->myPhysics.SetAngularVelocity(Vector(0,0,0));
-	AccessCamera(CP_PAN)->myPhysics.ApplyBalancedLocalTorque(_Universe->AccessCamera()->P,
-							      _Universe->AccessCamera()->R,
+	AccessCamera(CP_PAN)->myPhysics.ApplyBalancedLocalTorque(_Universe.AccessCamera()->P,
+							      _Universe.AccessCamera()->R,
 							      averagetime*autospeed/(numave));
 	zoomfactor=1.5;
 	static float autotime = XMLSupport::parse_float (vs_config->getVariable ("physics","autotime","10"));//10 seconds for auto to kick in;
@@ -994,11 +995,11 @@ void SwitchUnits (Unit * ol, Unit * nw) {
   bool pointingtool=false;
   bool pointingtonw=false;
 
-  for (int i=0;i<_Universe->numPlayers();i++) {
-    if (i!=(int)_Universe->CurrentCockpit()) {
-      if (_Universe->AccessCockpit(i)->GetParent()==ol)
+  for (int i=0;i<_Universe.numPlayers();i++) {
+    if (i!=(int)_Universe.CurrentCockpit()) {
+      if (_Universe.AccessCockpit(i)->GetParent()==ol)
 	pointingtool=true;
-      if (_Universe->AccessCockpit(i)->GetParent()==nw)
+      if (_Universe.AccessCockpit(i)->GetParent()==nw)
 	pointingtonw=true;
     }
   }
@@ -1016,15 +1017,15 @@ void SwitchUnits (Unit * ol, Unit * nw) {
   }
   if (nw) {
     nw->PrimeOrders();
-    nw->EnqueueAI (new FireKeyboard (_Universe->CurrentCockpit(),_Universe->CurrentCockpit()));
-    nw->EnqueueAI (new FlyByJoystick (_Universe->CurrentCockpit()));
+    nw->EnqueueAI (new FireKeyboard (_Universe.CurrentCockpit(),_Universe.CurrentCockpit()));
+    nw->EnqueueAI (new FlyByJoystick (_Universe.CurrentCockpit()));
     static bool LoadNewCockpit = XMLSupport::parse_bool (vs_config->getVariable("graphics","UnitSwitchCockpitChange","false"));
     if (nw->getCockpit().length()>0&&LoadNewCockpit) {
-      _Universe->AccessCockpit()->Init (nw->getCockpit().c_str());
+      _Universe.AccessCockpit()->Init (nw->getCockpit().c_str());
     }else {
       static bool DisCockpit = XMLSupport::parse_bool (vs_config->getVariable("graphics","SwitchCockpitToDefaultOnUnitSwitch","false"));
       if (DisCockpit) {
-	_Universe->AccessCockpit()->Init ("disabled-cockpit.cpt");
+	_Universe.AccessCockpit()->Init ("disabled-cockpit.cpt");
       }
     }
   }
@@ -1081,7 +1082,7 @@ void Cockpit::Draw() {
   cockpit_time+=GetElapsedTime();
   if (cockpit_time>=100000)
     InitStatic();
-  _Universe->AccessCamera()->UpdateGFX (GFXFALSE,GFXFALSE,GFXTRUE);
+  _Universe.AccessCamera()->UpdateGFX (GFXFALSE,GFXFALSE,GFXTRUE);
   GFXDisable (TEXTURE1);
   GFXLoadIdentity(MODEL);
   GFXDisable(LIGHTING);
@@ -1256,8 +1257,8 @@ void Cockpit::Draw() {
       }
       un->Threaten (NULL,0);
     }
-    if (_Universe->CurrentCockpit()<univmap.size()) {
-      univmap[_Universe->CurrentCockpit()].Draw();
+    if (_Universe.CurrentCockpit()<univmap.size()) {
+      univmap[_Universe.CurrentCockpit()].Draw();
     }
   }
   if (die) {
@@ -1273,9 +1274,9 @@ void Cockpit::Draw() {
 		text->SetSize(1,-1);
 		float x; float y;
 		if (dietime==0) {
-		  if (respawnunit.size()>_Universe->CurrentCockpit()) 
-		    if (respawnunit[_Universe->CurrentCockpit()]==1) {
-		      respawnunit[_Universe->CurrentCockpit()]=0;
+		  if (respawnunit.size()>_Universe.CurrentCockpit()) 
+		    if (respawnunit[_Universe.CurrentCockpit()]==1) {
+		      respawnunit[_Universe.CurrentCockpit()]=0;
 		    }
 			text->GetCharSize (x,y);
 			text->SetCharSize (x*4,y*4);
@@ -1339,29 +1340,29 @@ void Cockpit::Update () {
   }
   Unit * par=GetParent();
   if (!par) {
-    if (respawnunit.size()>_Universe->CurrentCockpit())
-      if (respawnunit[_Universe->CurrentCockpit()]){
+    if (respawnunit.size()>_Universe.CurrentCockpit())
+      if (respawnunit[_Universe.CurrentCockpit()]){
 	parentturret.SetUnit(NULL);
 	zoomfactor=1.5;
-	respawnunit[_Universe->CurrentCockpit()]=0;
+	respawnunit[_Universe.CurrentCockpit()]=0;
 	string newsystem = savegame->GetStarSystem()+".system";
-	StarSystem * ss = _Universe->GenerateStarSystem (newsystem.c_str(),"",Vector(0,0,0));
-	_Universe->getActiveStarSystem(0)->SwapOut();
+	StarSystem * ss = _Universe.GenerateStarSystem (newsystem.c_str(),"",Vector(0,0,0));
+	_Universe.getActiveStarSystem(0)->SwapOut();
 	this->activeStarSystem=ss;
-	_Universe->pushActiveStarSystem(ss);
+	_Universe.pushActiveStarSystem(ss);
 
 
 	vector <StarSystem *> saved;
-	while (_Universe->getNumActiveStarSystem()) {
-	  saved.push_back (_Universe->activeStarSystem());
-	  _Universe->popActiveStarSystem();
+	while (_Universe.getNumActiveStarSystem()) {
+	  saved.push_back (_Universe.activeStarSystem());
+	  _Universe.popActiveStarSystem();
 	}
 	if (!saved.empty()) {
 	  saved.back()=ss;
 	}
 	unsigned int mysize = saved.size();
 	for (unsigned int i=0;i<mysize;i++) {
-	  _Universe->pushActiveStarSystem (saved.back());
+	  _Universe.pushActiveStarSystem (saved.back());
 	  saved.pop_back();
 	}
 	ss->SwapIn();
@@ -1382,12 +1383,12 @@ void Cockpit::Update () {
 	CockpitKeys::Pan(0,PRESS);
 	CockpitKeys::Inside(0,PRESS);
 	savegame->ReloadPickledData();
-	_Universe->popActiveStarSystem();
+	_Universe.popActiveStarSystem();
       }
   }
-  if (turretcontrol.size()>_Universe->CurrentCockpit())
-  if (turretcontrol[_Universe->CurrentCockpit()]) {
-    turretcontrol[_Universe->CurrentCockpit()]=0;
+  if (turretcontrol.size()>_Universe.CurrentCockpit())
+  if (turretcontrol[_Universe.CurrentCockpit()]) {
+    turretcontrol[_Universe.CurrentCockpit()]=0;
     Unit * par = GetParent();
     if (par) {
       static int index=0;
@@ -1397,7 +1398,7 @@ void Cockpit::Update () {
 	un_iter ui= par->getSubUnits();
 	Unit * un;
 	while ((un=ui.current())) {
-		if (_Universe->isPlayerStarship(un)){
+		if (_Universe.isPlayerStarship(un)){
 			++ui;
 			continue;
 		}
@@ -1419,7 +1420,7 @@ void Cockpit::Update () {
       if (tmp==false) {
 	if (tmpgot) index=0;
 	Unit * un = parentturret.GetUnit();
-	if (un&&(!_Universe->isPlayerStarship(un))) {
+	if (un&&(!_Universe.isPlayerStarship(un))) {
 	  
 	  SetParent (un,unitfilename.c_str(),this->unitmodname.c_str(),savegame->GetPlayerLocation());
 	  SwitchUnits (NULL,un);
@@ -1429,21 +1430,21 @@ void Cockpit::Update () {
       }
     }
   }
-  if (switchunit.size()>_Universe->CurrentCockpit())
-  if (switchunit[_Universe->CurrentCockpit()]) {
+  if (switchunit.size()>_Universe.CurrentCockpit())
+  if (switchunit[_Universe.CurrentCockpit()]) {
     parentturret.SetUnit(NULL);
 
     zoomfactor=1.5;
     static int index=0;
-    switchunit[_Universe->CurrentCockpit()]=0;
-    un_iter ui= _Universe->activeStarSystem()->getUnitList().createIterator();
+    switchunit[_Universe.CurrentCockpit()]=0;
+    un_iter ui= _Universe.activeStarSystem()->getUnitList().createIterator();
     Unit * un;
     bool found=false;
     int i=0;
     while ((un=ui.current())) {
       if (un->faction==this->unitfaction) {
 	
-	if ((i++)>=index&&(!_Universe->isPlayerStarship(un))) {
+	if ((i++)>=index&&(!_Universe.isPlayerStarship(un))) {
 	  found=true;
 	  index++;
 	  Unit * k=GetParent(); 
@@ -1465,15 +1466,15 @@ void Cockpit::Update () {
       un->EjectCargo((unsigned int)-1);
     }
   }else {
-  if (suicide.size()>_Universe->CurrentCockpit()) {
-    if (suicide[_Universe->CurrentCockpit()]) {
+  if (suicide.size()>_Universe.CurrentCockpit()) {
+    if (suicide[_Universe.CurrentCockpit()]) {
       Unit * un=NULL;
       if ((un = parent.GetUnit())) {
 	unsigned short armor[4];
 	un->ArmorData(armor);
 	un->DealDamageToHull(Vector(0,0,.1),un->GetHull()+2+armor[0]);
       }
-      suicide[_Universe->CurrentCockpit()]=0;
+      suicide[_Universe.CurrentCockpit()]=0;
     }
 
   }
@@ -1517,17 +1518,17 @@ void Cockpit::SetCommAnimation (Animation * ani) {
   }
 }
 void Cockpit::RestoreViewPort() {
-  _Universe->AccessCamera()->RestoreViewPort(0,0);
+  _Universe.AccessCamera()->RestoreViewPort(0,0);
 }
 
 static void ShoveCamBehindUnit (int cam, Unit * un, float zoomfactor) {
   QVector unpos = un->GetPlanetOrbit()?un->LocalPosition():un->Position();
-  _Universe->AccessCamera(cam)->SetPosition(unpos-_Universe->AccessCamera()->GetR().Cast()*un->rSize()*zoomfactor);
+  _Universe.AccessCamera(cam)->SetPosition(unpos-_Universe.AccessCamera()->GetR().Cast()*un->rSize()*zoomfactor);
 }
 void Cockpit::SetupViewPort (bool clip) {
-  _Universe->AccessCamera()->RestoreViewPort (0,(view==CP_FRONT?viewport_offset:0));
+  _Universe.AccessCamera()->RestoreViewPort (0,(view==CP_FRONT?viewport_offset:0));
    GFXViewPort (0,(int)((view==CP_FRONT?viewport_offset:0)*g_game.y_resolution), g_game.x_resolution,g_game.y_resolution);
-  _Universe->AccessCamera()->setCockpitOffset (view<CP_CHASE?cockpit_offset:0);
+  _Universe.AccessCamera()->setCockpitOffset (view<CP_CHASE?cockpit_offset:0);
   Unit * un, *tgt;
   if ((un = parent.GetUnit())) {
     un->UpdateHudMatrix (CP_FRONT);
@@ -1537,26 +1538,26 @@ void Cockpit::SetupViewPort (bool clip) {
     un->UpdateHudMatrix (CP_CHASE);
     
     Vector p,q,r;
-    _Universe->AccessCamera(CP_FRONT)->GetOrientation(p,q,r);
+    _Universe.AccessCamera(CP_FRONT)->GetOrientation(p,q,r);
     Vector tmp = r;
     r = -p;
     p = tmp;
-    _Universe->AccessCamera(CP_LEFT)->SetOrientation(p,q,r);
-    _Universe->AccessCamera(CP_FRONT)->GetOrientation(p,q,r);
+    _Universe.AccessCamera(CP_LEFT)->SetOrientation(p,q,r);
+    _Universe.AccessCamera(CP_FRONT)->GetOrientation(p,q,r);
     tmp = r;
     r = p;
     p = -tmp;
-    _Universe->AccessCamera(CP_RIGHT)->SetOrientation(p,q,r);
-    _Universe->AccessCamera(CP_FRONT)->GetOrientation(p,q,r);
+    _Universe.AccessCamera(CP_RIGHT)->SetOrientation(p,q,r);
+    _Universe.AccessCamera(CP_FRONT)->GetOrientation(p,q,r);
     r = -r;
     p = -p;
-    _Universe->AccessCamera(CP_BACK)->SetOrientation(p,q,r);
+    _Universe.AccessCamera(CP_BACK)->SetOrientation(p,q,r);
 #ifdef IWANTTOPVIEW
-    _Universe->AccessCamera(CP_FRONT)->GetOrientation(p,q,r);
+    _Universe.AccessCamera(CP_FRONT)->GetOrientation(p,q,r);
     tmp=r;
     r = -q;
     q = tmp;
-    _Universe->AccessCamera(CP_CHASE)->SetOrientation(p,q,r);
+    _Universe.AccessCamera(CP_CHASE)->SetOrientation(p,q,r);
 #endif
     tgt = un->Target();
     if (tgt) {
@@ -1567,9 +1568,9 @@ void Cockpit::SetupViewPort (bool clip) {
       r.Normalize();
       CrossProduct (r,q,tmp);
       CrossProduct (tmp,r,q);
-      _Universe->AccessCamera(CP_VIEWTARGET)->SetOrientation(tmp,q,r);
-      _Universe->AccessCamera(CP_TARGET)->SetOrientation(tmp,q,r);
-      //      _Universe->AccessCamera(CP_PANTARGET)->SetOrientation(tmp,q,r);
+      _Universe.AccessCamera(CP_VIEWTARGET)->SetOrientation(tmp,q,r);
+      _Universe.AccessCamera(CP_TARGET)->SetOrientation(tmp,q,r);
+      //      _Universe.AccessCamera(CP_PANTARGET)->SetOrientation(tmp,q,r);
       ShoveCamBehindUnit (CP_TARGET,tgt,zoomfactor);
       ShoveCamBehindUnit (CP_PANTARGET,tgt,zoomfactor);
     }else {
@@ -1587,7 +1588,7 @@ void Cockpit::SetupViewPort (bool clip) {
     un->SetVisible(view>=CP_CHASE);
 
   }
-  _Universe ->AccessCamera()->UpdateGFX(clip?GFXTRUE:GFXFALSE);
+  _Universe.AccessCamera()->UpdateGFX(clip?GFXTRUE:GFXFALSE);
     
   //  parent->UpdateHudMatrix();
 }

@@ -101,8 +101,8 @@ void GameUnit::Kill(bool erasefromsave) {
   if (colTrees)
     colTrees->Dec();//might delete
   colTrees=NULL;
-  if (erasefromsave)
-    _Universe->AccessCockpit()->savegame->RemoveUnitFromSave((long)this);
+  //if (erasefromsave)
+  //  _Universe.AccessCockpit()->savegame->RemoveUnitFromSave((long)this);
   
   if (docked&(DOCKING_UNITS)) {
     vector <Unit *> dockedun;
@@ -381,12 +381,12 @@ float GameUnit::DealDamageToHull (const Vector & pnt, float damage ) {
       AUDAdjustSound (sound->hull,ToWorldCoordinates(pnt).Cast()+cumulative_transformation.position,Velocity);
     damage -= ((float)*targ);
     *targ= 0;
-    if (_Universe->AccessCockpit()->GetParent()!=this||_Universe->AccessCockpit()->godliness<=0||hull>damage) {
+    if (_Universe.AccessCockpit()->GetParent()!=this||_Universe.AccessCockpit()->godliness<=0||hull>damage) {
       static float system_failure=XMLSupport::parse_float(vs_config->getVariable ("physics","indiscriminate_system_destruction",".25"));
       DamageRandSys(system_failure*rand01()+(1-system_failure)*(1-(damage/hull)),pnt);
       hull -=damage;
     }else {
-      _Universe->AccessCockpit()->godliness-=damage;
+      _Universe.AccessCockpit()->godliness-=damage;
       DamageRandSys(rand01()*.5+.2,pnt);//get system damage...but live!
     }
 
@@ -442,7 +442,7 @@ void GameUnit::ApplyLocalDamage (const Vector & pnt, const Vector & normal, floa
   static float nebshields=XMLSupport::parse_float(vs_config->getVariable ("physics","nebula_shield_recharge",".5"));
   //  #ifdef REALLY_EASY
   Cockpit * cpt;
-  if ((cpt=_Universe->isPlayerStarship(this))!=NULL) {
+  if ((cpt=_Universe.isPlayerStarship(this))!=NULL) {
     if (color.a!=2) {
       //    ApplyDamage (amt);
       phasedamage*= (g_game.difficulty);
@@ -508,7 +508,7 @@ void ScoreKill (Cockpit * cp, Unit * un, int faction) {
 
 
 void GameUnit::ApplyDamage (const Vector & pnt, const Vector & normal, float amt, Unit * affectedUnit, const GFXColor & color, Unit * ownerDoNotDereference, float phasedamage) {
-  Cockpit * cp = _Universe->isPlayerStarship (ownerDoNotDereference);
+  Cockpit * cp = _Universe.isPlayerStarship (ownerDoNotDereference);
 
   if (cp) {
       //now we can dereference it because we checked it against the parent
@@ -546,7 +546,7 @@ bool GameUnit::Explode (bool drawit, float timeit) {
 
     string bleh=image->explosion_type;
     if (bleh.empty()) {
-      FactionUtil::getRandAnimation(faction,bleh);
+      GameFactionUtil::getRandAnimation(faction,bleh);
     }
     if (bleh.empty()) {
       static Animation cache(expani.c_str(),false,.1,BILINEAR,false);
@@ -560,17 +560,17 @@ bool GameUnit::Explode (bool drawit, float timeit) {
     if (isUnit()!=MISSILEPTR) {
       static float expdamagecenter=XMLSupport::parse_float(vs_config->getVariable ("physics","explosion_damage_center","1"));
       static float damageedge=XMLSupport::parse_float(vs_config->getVariable ("graphics","explosion_damage_edge",".125"));
-      _Universe->activeStarSystem()->AddMissileToQueue (new MissileEffect (Position().Cast(),MaxShieldVal(),0,ExplosionRadius()*expdamagecenter,ExplosionRadius()*expdamagecenter*damageedge));
+      _Universe.activeStarSystem()->AddMissileToQueue (new MissileEffect (Position().Cast(),MaxShieldVal(),0,ExplosionRadius()*expdamagecenter,ExplosionRadius()*expdamagecenter*damageedge));
     }
 	if (!SubUnit){
 		QVector exploc = cumulative_transformation.position;
 		Unit * un;
-		if (NULL!=(un=_Universe->AccessCockpit(0)->GetParent())) {
+		if (NULL!=(un=_Universe.AccessCockpit(0)->GetParent())) {
 			exploc = un->Position();						
 		}
 	    AUDPlay (sound->explode,exploc,Velocity,1);
 
-	  un=_Universe->AccessCockpit()->GetParent();
+	  un=_Universe.AccessCockpit()->GetParent();
 	  if (isUnit()==UNITPTR) {
 	    static float percentage_shock=XMLSupport::parse_float(vs_config->getVariable ("graphics","percent_shockwave",".5"));
 	    if (rand () < RAND_MAX*percentage_shock&&(!SubUnit)) {

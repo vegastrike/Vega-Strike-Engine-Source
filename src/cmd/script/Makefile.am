@@ -5,6 +5,8 @@ INCLUDES = -I../ -I../.. -I../../boost/
 libscript_a_SOURCES =				\
 	flightgroup.cpp				\
 	flightgroup.h				\
+	flightgroup_generic.cpp				\
+	flightgroup_generic.h				\
 	mission.cpp				\
 	mission.h				\
 	director.cpp				\
