@@ -33,7 +33,7 @@ HardCodedMap MakeHardCodedScripts() {
   tmp.insert (MyPair ("kick stop",&Kickstop));      
   tmp.insert (MyPair ("move to",&MoveTo));      
   tmp.insert (MyPair ("shelton slide",&SheltonSlide));      
-  tmp.insert (MyPair ("skilled afterbuner slide",&SkilledABSlide));
+  tmp.insert (MyPair ("skilled afterburner slide",&SkilledABSlide));
   tmp.insert (MyPair ("afterburner slide",&AfterburnerSlide));        
   tmp.insert (MyPair ("stop",&Stop));      
   tmp.insert (MyPair ("turn away",&TurnAway));      

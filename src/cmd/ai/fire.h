@@ -12,6 +12,7 @@ class FireAt: public CommunicatingAI {
 protected:
   bool ShouldFire(Unit * targ,bool &missilelock);
   float missileprobability;
+  float lastmissiletime;
   float rxntime;
   float delay;
   float agg;

@@ -8,6 +8,7 @@
 #include "cmd/script/flightgroup.h"
 #include "cmd/role_bitmask.h"
 #include "cmd/ai/communication.h"
+#include "universe_util.h"
 #include <algorithm>
 static bool NoDockWithClear() {
 	static bool nodockwithclear = XMLSupport::parse_bool (vs_config->getVariable ("physics","dock_with_clear_planets","true"));
@@ -90,6 +91,7 @@ bool CanFaceTarget (Unit * su, Unit *targ,const Matrix & matrix) {
 
 void FireAt::ReInit (float reaction_time, float aggressivitylevel) {
   static float missileprob = XMLSupport::parse_float (vs_config->getVariable ("AI","Firing","MissileProbability",".01"));
+  lastmissiletime=UniverseUtil::GetGameTime()-65536.;
   missileprobability = missileprob;  
   gunspeed=float(.0001);
   gunrange=float(.0001);
@@ -355,7 +357,8 @@ bool FireAt::ShouldFire(Unit * targ, bool &missilelock) {
     distance = dist;
   }
   static float firewhen = XMLSupport::parse_float (vs_config->getVariable ("AI","Firing","InWeaponRange","1.2"));
-  return (dist<agg&&angle>1/agg)||(parent->TrackingGuns(missilelock)&&dist<firewhen&&angle>0);
+  bool temp=parent->TrackingGuns(missilelock);
+  return (dist<agg&&angle>1/agg)||(temp&&dist<firewhen&&angle>0);
 }
 
 FireAt::~FireAt() {
@@ -365,7 +368,7 @@ FireAt::~FireAt() {
 #endif
 
 }
-unsigned int FireBitmask (Unit * parent,bool shouldfire, float missileprobability) {
+unsigned int FireBitmask (Unit * parent,bool shouldfire, bool firemissile) {
    unsigned int firebitm = ROLES::EVERYTHING_ELSE;
     Unit * un=parent->Target();
     if (un) {
@@ -373,19 +376,28 @@ unsigned int FireBitmask (Unit * parent,bool shouldfire, float missileprobabilit
       firebitm |= ROLES::FIRE_GUNS;
       if (!shouldfire) 
 	firebitm |= ROLES::FIRE_ONLY_AUTOTRACKERS;
-      if (((float)rand())/((float)RAND_MAX)<missileprobability) 
-	firebitm |=ROLES::FIRE_MISSILES;
+      if (firemissile) 
+	firebitm = ROLES::FIRE_MISSILES;// stops guns
     }
     return firebitm;
 }
 void FireAt::FireWeapons(bool shouldfire, bool lockmissile) {
-    if (shouldfire&&delay<rxntime) {
-        delay+=SIMULATION_ATOM;
-        return;
-    }else if (!shouldfire) {
-        delay=0;
-    }
-     parent->Fire(FireBitmask(parent,shouldfire,  missileprobability),true);
+  static float missiledelay =XMLSupport::parse_float(vs_config->getVariable("AI","MissileGunDelay","4"));
+  static float missiledelayprob =XMLSupport::parse_float(vs_config->getVariable("AI","MissileGunDelayProbability",".25"));
+  bool fire_missile=lockmissile&&rand()<RAND_MAX*missileprobability*SIMULATION_ATOM;
+
+  if (shouldfire&&delay<rxntime) {
+    delay+=SIMULATION_ATOM;
+    return;
+  }else if (!shouldfire) {
+    delay=0;
+  }
+  if (fire_missile) {
+    lastmissiletime=UniverseUtil::GetGameTime();
+  }else if (UniverseUtil::GetGameTime()-lastmissiletime<missiledelay&&!fire_missile) {
+    return;
+  }
+  parent->Fire(FireBitmask(parent,shouldfire,fire_missile),true);
 }
 
 bool FireAt::isJumpablePlanet(Unit * targ) {

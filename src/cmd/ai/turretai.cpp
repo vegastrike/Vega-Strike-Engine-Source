@@ -11,7 +11,7 @@ TurretAI::TurretAI ():FaceTargetITTS (false) {
 void TurretAI::getAverageGunSpeed (float &speed, float & range, float &mrange) const {
   speed=this->speed;range=this->range;mrange=this->mrange;
 }
-extern unsigned int FireBitmask (Unit * parent, bool shouldfire, float missileprob);
+extern unsigned int FireBitmask (Unit * parent, bool shouldfire, bool firemissile);
 void TurretAI::Execute () {
   Unit * targ = parent->Target();
   if (range==-1) {
@@ -47,7 +47,7 @@ void TurretAI::Execute () {
       float dot = R.Dot (Pos.Cast());
       static int neu=FactionUtil::GetFaction("neutral");
       bool shouldfire = ((mag-targ->rSize()-parent->rSize()<range&&dot>dot_cutoff)&&(GetEffectiveRelationship(targ)<0||targ->getRelation(parent)<0)&&targ->faction!=neu);
-      parent->Fire(FireBitmask(parent,shouldfire,missile_prob),true);
+      parent->Fire(FireBitmask(parent,shouldfire,rand()<missile_prob*RAND_MAX*SIMULATION_ATOM),true);
       if (!shouldfire)
 	parent->UnFire();
       
