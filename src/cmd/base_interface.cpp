@@ -373,20 +373,22 @@ BaseInterface::Room::Talk::Talk (std::string ind,std::string pythonfile)
 		: BaseInterface::Room::Link(ind,pythonfile) {
 	index=-1;
 #ifndef BASE_MAKER
-	gameMessage * last;
+	gameMessage last;
 	int i=0;
 	vector <std::string> who;
 	string newmsg;
 	string newsound;
 	who.push_back ("bar");
-	while ((last= mission->msgcenter->last(i++,who))!=NULL) {
-		newmsg=last->message;
+	while (( mission->msgcenter->last(i++,last,who))) {
+		newmsg=last.message;
 		newsound="";
 		int first=newmsg.find_first_of("[");
-		int last=newmsg.find_first_of("]");
-		if (first!=string::npos&&(first+1)<newmsg.size()) {
-			newsound=newmsg.substr(first+1,last-first-1);
-			newmsg=newmsg.substr(0,first);
+		{
+			int last=newmsg.find_first_of("]");
+			if (first!=string::npos&&(first+1)<newmsg.size()) {
+				newsound=newmsg.substr(first+1,last-first-1);
+				newmsg=newmsg.substr(0,first);
+			}
 		}
 		this->say.push_back(newmsg);
 		this->soundfiles.push_back(newsound);

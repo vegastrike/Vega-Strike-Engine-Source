@@ -218,13 +218,12 @@ class TextPlane * Mission::BriefingRender() {
     vector <std::string> who;
     who.push_back ("briefing");
     string str1;
-    gameMessage * g1 = msgcenter->last(0,who);
-    gameMessage * g2=msgcenter->last(1,who);
-    if (g1) {
-      str1 = g1->message;
-    }
-    if (g2) {
-      str1 = str1 + string("\n")+g2->message;
+    gameMessage g1,g2;
+	if (msgcenter->last(0,g1,who)) {
+		str1= g1.message;
+	}
+    if (msgcenter->last(1,g2,who)) {
+		str1 = str1 + string("\n")+g2.message;
     }
     briefing->tp.SetText (str1);
     briefing->Render();

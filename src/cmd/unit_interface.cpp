@@ -409,12 +409,12 @@ void UpgradingInfo::SetupCargoList () {
         CargoList->AddTextItem ("Load","Load");
       }else
       if (mode==NEWSMODE) {
-	gameMessage * last;
+	gameMessage last;
 	int i=0;
 	vector <std::string> who;
 	who.push_back ("news");
-	while ((last= mission->msgcenter->last(i++,who))!=NULL) {
-	  CargoList->AddTextItem ((tostring(i-1)+" "+last->message).c_str(),last->message.c_str());
+	while ((mission->msgcenter->last(i++,last,who))) {
+		CargoList->AddTextItem ((tostring(i-1)+" "+last.message).c_str(),last.message.c_str());
 	}
 
       }else {
@@ -730,12 +730,12 @@ bool UpgradingInfo::SelectItem (const char *item, int button, int buttonstate) {
     {
 	int cargonumber;
 	sscanf (item,"%d",&cargonumber);
-     	gameMessage * last;
+     	gameMessage last;
 	vector <std::string> who;
 	CargoInfo->ChangeTextItem ("name","");
 	who.push_back ("news");
-	if ((last= mission->msgcenter->last(cargonumber,who))!=NULL) {
-	  CargoInfo->ChangeTextItem ("description",last->message.c_str(),true);
+	if ((mission->msgcenter->last(cargonumber,last,who))) {
+	  CargoInfo->ChangeTextItem ("description",last.message.c_str(),true);
 	  static string newssong=vs_config->getVariable("audio","newssong","../music/news1.ogg");
 	  muzak->GotoSong(newssong);
 	  readnews=true;

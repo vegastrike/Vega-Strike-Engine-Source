@@ -209,17 +209,17 @@ void SaveGame::RemoveUnitFromSave (long address) {
 }
 string SaveGame::WriteNewsData () {
   string ret("");
-  gameMessage * last;
-  vector <gameMessage *> tmp;
+  gameMessage last;
+  vector <gameMessage> tmp;
   int i=0;
   vector <string> newsvec;
   newsvec.push_back ("news");
-  while (NULL!=(last=mission->msgcenter->last(i++,newsvec))) {
+  while ((mission->msgcenter->last(i++,last,newsvec))) {
     tmp.push_back (last);
   }
   ret += XMLSupport::tostring(i)+"\n";
   for (int j=tmp.size()-1;j>=0;j--) {
-    char * msg = strdup (tmp[j]->message.c_str());
+    char * msg = strdup (tmp[j].message.c_str());
     int k=0;
     while (msg[k]) {
       if (msg[k]=='\r')
@@ -286,6 +286,10 @@ int hopto (char *buf,char endln, char endln2,int readlen) {
 void SaveGame::ReadNewsData (char * &buf) {
   int numnews;
   int i=0;
+  vector <string> n00s;
+  n00s.push_back ("news");
+  vector<string> nada;
+  mission->msgcenter->clear (n00s,nada);  
   int offset=hopto (buf,'\n','\n',0);
   if (offset>0) {
     //fgets (news,1023,fp);

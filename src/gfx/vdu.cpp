@@ -391,32 +391,29 @@ void VDU::DrawMessages(Unit *target){
   whoNOT.push_back ("bar");
 
   vector <std::string> message_people;//should be "all", parent's name
-  gameMessage *lastmsg=mc->last(0,message_people,whoNOT);
-  for(int i=scrolloffset<0?-scrolloffset:0;rows_used<rows && lastmsg!=NULL;i++){
-    lastmsg=mc->last(i,message_people,whoNOT);
-    if(lastmsg!=NULL){
+  gameMessage lastmsg;
+  for(int i=scrolloffset<0?-scrolloffset:0;rows_used<rows && mc->last(i,lastmsg,message_people,whoNOT);i++){
       char timebuf[100];
-      double sendtime=lastmsg->time;
+      double sendtime=lastmsg.time;
       if(sendtime<=nowtime){
-	int sendtime_mins=(int)(sendtime/60.0);
-	int sendtime_secs=(int)(sendtime - sendtime_mins*60);
-
-	sprintf(timebuf,"%d.%02d",sendtime_mins,sendtime_secs);
-	string mymsg;
- 	if (lastmsg->from!="game") {
-		mymsg=lastmsg->from+" ("+timebuf+"): "+lastmsg->message;
-	} else {
-		mymsg=string(timebuf)+": "+lastmsg->message;
-	}
-	int msglen=mymsg.size();
-	int rows_needed=(int)(msglen/(1.6*cols));
-	fullstr=mymsg+"\n"+fullstr;
-	//fullstr=fullstr+mymsg+"\n";
-
-	rows_used+=rows_needed+1;
-	//      cout << "nav  " << mymsg << " rows " << rows_needed << endl;
+		  int sendtime_mins=(int)(sendtime/60.0);
+		  int sendtime_secs=(int)(sendtime - sendtime_mins*60);
+		  
+		  sprintf(timebuf,"%d.%02d",sendtime_mins,sendtime_secs);
+		  string mymsg;
+		  if (lastmsg.from!="game") {
+			  mymsg=lastmsg.from+" ("+timebuf+"): "+lastmsg.message;
+		  } else {
+			  mymsg=string(timebuf)+": "+lastmsg.message;
+		  }
+		  int msglen=mymsg.size();
+		  int rows_needed=(int)(msglen/(1.6*cols));
+		  fullstr=mymsg+"\n"+fullstr;
+		  //fullstr=fullstr+mymsg+"\n";
+		  
+		  rows_used+=rows_needed+1;
+		  //      cout << "nav  " << mymsg << " rows " << rows_needed << endl;
       }
-    }
   }
 
   fullstr=targetstr+fullstr;

@@ -58,11 +58,11 @@ class gameMessage {
 
 class MessageCenter {
  public:
-  gameMessage *last(unsigned int n, const std::vector <std::string> &who=std::vector<std::string>(), const std::vector <std::string> & whoNOT=std::vector<std::string>());
+  bool last(unsigned int n, gameMessage & m,const std::vector <std::string> &who=std::vector<std::string>(), const std::vector <std::string> & whoNOT=std::vector<std::string>());
   void add(string from,string to,string message,double delay=0.0);
-
- private:
-  vector<gameMessage *> messages;
+  void clear (const std::vector <std::string> &who=std::vector<std::string>(), const std::vector <std::string> & whoNOT=std::vector<std::string>());
+  vector<gameMessage> messages;
+   
 };
 
 #endif // _MSGCENTER_H_

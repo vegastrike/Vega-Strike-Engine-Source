@@ -469,13 +469,11 @@ varInst *Mission::call_io_printmsglist(missionNode *node,int mode){
   int i=0;
 
   if(mode==SCRIPT_RUN){
-    gameMessage *msg=msgcenter->last(i,std::vector <std::string>());
-  
-    while(msg!=NULL && i<7.0){
-      cout << "MESSAGE" << msg->message << endl;
-      i++;
-      msg=msgcenter->last(i,std::vector<std::string>());
-    }
+	  gameMessage msg;
+	  while(msgcenter->last(i,msg,std::vector <std::string>()) && i<7.0){
+		  cout << "MESSAGE" << msg.message << endl;
+		  i++;
+	  }
   }
 
   varInst *viret=newVarInst(VI_TEMP);

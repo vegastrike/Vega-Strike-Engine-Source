@@ -406,7 +406,7 @@ void	AccountServer::sendAuthorized( SOCKETALT sock, Account * acct)
 	{
 		unsigned int readsize=0, readsize2=0, xmlsize=0, savesize=0;
 		// Put maxsave value to a high value that will be always bigger than simple player saves
-		int maxsave = 9999999999;
+		int maxsave = 0x7fffffff;
 
 	// Try to save xml file
 		string acctfile = acctdir+acct->name+".save";
