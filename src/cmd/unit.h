@@ -138,7 +138,7 @@ class Unit {
   XML *xml;
 
   ///Loads a unit from an xml file into a complete datastructure
-  void LoadXML(const char *filename);
+  void LoadXML(const char *filename, const char * unitModifications="");
 
   static void beginElement(void *userData, const XML_Char *name, const XML_Char **atts);
   static void endElement(void *userData, const XML_Char *name);
@@ -182,8 +182,7 @@ class Unit {
    * Contains information about a particular Mount on a unit.
    * And the weapons it has, where it is, where it's aimed, 
    * The ammo and the weapon type. As well as the possible weapons it may fit
-   * Warning: Mounts may be memcpy 'd all over the place, so don't put any strings or classes with 
-   * copy constructors here.
+   * Warning: type has a string inside... cannot be memcpy'd
    */
   class Mount {
     ///Where is it
@@ -280,11 +279,11 @@ class Unit {
   unsigned short afterburnenergy;
   ///-1 means it is off. -2 means it doesn't exist. otherwise it's engaged to destination (positive number)
   struct UnitJump {
+    short energy;
     char drive;
     unsigned char delay;
     unsigned char damage;
     //negative means fuel
-    char energy;
   } jump;
   ///Moment of intertia of this unit
   float MomentOfInertia;
@@ -392,8 +391,8 @@ public:
   Unit();
   ///Creates aa mesh with meshes as submeshes (number of them) as either as subunit with faction faction)
   Unit (Mesh ** meshes  , int num, bool Subunit, int faction);
-  ///Creates a mesh from an XML file
-  Unit(const char *filename, bool xml, bool SubUnit, int faction, Flightgroup *flightgroup=NULL,int fg_subnumber=0);
+  ///Creates a mesh from an XML file If it is a customizedUnit, it will check in that directory in teh home dir for the unit
+  Unit(const char *filename, bool SubUnit, int faction, std::string customizedUnit=string(""), Flightgroup *flightgroup=NULL,int fg_subnumber=0);
   virtual ~Unit();
   ///Changes currently selected weapon
   void ToggleWeapon (bool Missile);
@@ -639,11 +638,13 @@ public:
   string target_fgid[3];
 
  protected:
-  static std::string mountSerializer(const union XMLType &input, void*mythis);
-  static std::string subunitSerializer(const union XMLType &input, void*mythis);
+  static std::string mountSerializer(const struct XMLType &input, void*mythis);
+  static std::string shieldSerializer(const struct XMLType &input, void*mythis);
+  static std::string subunitSerializer(const struct XMLType &input, void*mythis);
   ///if the unit is a planet, this contains the long-name 'mars-station'
   string fullname;
  public:
+  void WriteUnit(const char * modificationname="");
   void SetTurretAI ();
   ///get the flightgroup description
   Flightgroup *getFlightgroup() const { return flightgroup; };
@@ -676,7 +677,7 @@ struct Unit::XML {
   bool hasBSP;
   bool hasColTree;
   enum restr {YRESTR=1, PRESTR=2, RRESTR=4};
-
+  const char * unitModifications;
   char yprrestricted;
 
   float ymin, ymax, ycur;

@@ -13,7 +13,7 @@ void Asteroid::reactToCollision(Unit * smaller, const Vector & biglocation, cons
     break;
   }
 }
-Asteroid::Asteroid(const char * filename, int faction, Flightgroup* fg, int fg_snumber, float difficulty):Unit (filename,true, false, faction,fg,fg_snumber) {
+Asteroid::Asteroid(const char * filename, int faction, Flightgroup* fg, int fg_snumber, float difficulty):Unit (filename,false, faction,string(""),fg,fg_snumber) {
   UnitCollection::UnitIterator iter = getSubUnits();
   Unit *unit;
   while((unit = iter.current())!=NULL) {

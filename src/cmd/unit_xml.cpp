@@ -17,7 +17,9 @@
 #include "vegastrike.h"
 #include <assert.h>
 #include "images.h"
+#include "xml_serializer.h"
 #include "collide/rapcol.h"
+#include "vs_path.h"
 #define VS_PI 3.1415926536
 void Unit::beginElement(void *userData, const XML_Char *name, const XML_Char **atts) {
   ((Unit*)userData)->beginElement(name, AttributeList(atts));
@@ -126,7 +128,8 @@ namespace UnitXML {
       WORMHOLE,
       RAPID,
       USEBSP,
-      AFTERBURNENERGY
+      AFTERBURNENERGY,
+      MISSING
     };
 
   const EnumMap::Pair element_names[] = {
@@ -162,6 +165,7 @@ namespace UnitXML {
   };
   const EnumMap::Pair attribute_names[] = {
     EnumMap::Pair ("UNKNOWN", UNKNOWN),
+    EnumMap::Pair ("missing",MISSING),
     EnumMap::Pair ("file", XFILE), 
     EnumMap::Pair ("x", X), 
     EnumMap::Pair ("y", Y), 
@@ -205,7 +209,7 @@ namespace UnitXML {
     EnumMap::Pair ("itts",ITTS),
     EnumMap::Pair ("ammo", AMMO),
     EnumMap::Pair ("HudImage",HUDIMAGE),
-    EnumMap::Pair ("Engine",MAXCONE),
+    EnumMap::Pair ("MaxCone",MAXCONE),
     EnumMap::Pair ("MinTargetSize",MINTARGETSIZE),
     EnumMap::Pair ("Range",RANGE),
     EnumMap::Pair ("EngineMp3",ENGINEMP3),
@@ -237,7 +241,7 @@ namespace UnitXML {
 };
 
   const EnumMap element_map(element_names, 29);
-  const EnumMap attribute_map(attribute_names, 73);
+  const EnumMap attribute_map(attribute_names, 74);
 }
 
 using XMLSupport::EnumMap;
@@ -256,54 +260,62 @@ int parseMountSizes (const char * str) {
 }
 static short CLAMP_SHORT(float x) {return (short)(((x)>65536)?65536:((x)<0?0:(x)));}  
 void Unit::beginElement(const string &name, const AttributeList &attributes) {
-    string filename;
-    Vector P;
-    int indx;
-    short ammo=-1;
-    Vector Q;
-    Vector R;
-    Vector pos;
-    bool tempbool;
-    float fbrltb[6];
-    Names elem = (Names)element_map.lookup(name);
-    int mntsiz=weapon_info::NOWEAP;
-    AttributeList::const_iterator iter;
-    float halocolor[4];
-
+  string filename;
+  Vector P;
+  int indx;
+  Vector Q;
+  Vector R;
+  Vector pos;
+  bool tempbool;
+  float fbrltb[6];
+  AttributeList::const_iterator iter;
+  float halocolor[4];
+  short ammo=-1;
+  int mntsiz=weapon_info::NOWEAP;
+  Names elem = (Names)element_map.lookup(name);
+#define ADDTAGNAME(a) image->unitwriter->AddTag (a)
+#define ADDTAG  image->unitwriter->AddTag (name)
+#define ADDELEMNAME(a,b,c) image->unitwriter->AddElement(a,b,c)
+#define ADDELEM(b,c) image->unitwriter->AddElement((*iter).name,b,c)
+#define ADDDEFAULT image->unitwriter->AddElement((*iter).name,stringHandler,XMLType((*iter).value))
+#define ADDELEMI(b) ADDELEM(intStarHandler,XMLType(&b))
+#define ADDELEMF(b) ADDELEM(floatStarHandler,XMLType(&b))
   switch(elem) {
-  case UNKNOWN:
-	xml->unitlevel++;
-
-//    cerr << "Unknown element start tag '" << name << "' detected " << endl;
-    break;
- case SHIELDMESH:
+  case SHIELDMESH:
+    ADDTAG;
     assert (xml->unitlevel==1);
     xml->unitlevel++;
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(attribute_map.lookup((*iter).name)) {
       case XFILE:
+	ADDELEM(stringHandler,(*iter).value);
 	xml->shieldmesh =(new Mesh((*iter).value.c_str(), true, faction));
 	break;
       case SHIELDTIGHT: 
+	ADDDEFAULT;
 	shieldtight = parse_float ((*iter).value);
 	break;
       }
     }
     break;
   case BSPMESH:
+    ADDTAG;
     assert (xml->unitlevel==1);
     xml->unitlevel++;
     xml->hasBSP = false;
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(attribute_map.lookup((*iter).name)) {
       case XFILE:
+	ADDDEFAULT;
 	xml->bspmesh =(new Mesh((*iter).value.c_str(), true, faction));
 	xml->hasBSP = true;	
 	break;
       case RAPID:
+	ADDDEFAULT;
 	xml->hasColTree=parse_bool ((*iter).value);
 	break;
       case USEBSP:
+	ADDDEFAULT;
 	xml->hasBSP=parse_bool ((*iter).value);
 	break;
       }
@@ -311,17 +323,20 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
     break;
 
   case MESHFILE:
+    ADDTAG;
     assert (xml->unitlevel==1);
     xml->unitlevel++;
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(attribute_map.lookup((*iter).name)) {
       case XFILE:
+	ADDDEFAULT;
 	xml->meshes.push_back(new Mesh((*iter).value.c_str(), true, faction));
 	break;
       }
     }
     break;
   case DOCK:
+    ADDTAG;
     tempbool=false;
     assert (xml->unitlevel==1);
     xml->unitlevel++;
@@ -329,40 +344,51 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
     P=Vector (1,1,1);
     Q=Vector (FLT_MAX,FLT_MAX,FLT_MAX);
     R=Vector (FLT_MAX,FLT_MAX,FLT_MAX);
-    
+
     for (iter = attributes.begin();iter!=attributes.end();iter++) {
       switch(attribute_map.lookup((*iter).name)) {
       case DOCKINTERNAL:
+	ADDDEFAULT;
 	tempbool=parse_bool ((*iter).value);
 	break;
       case X:
+	ADDDEFAULT;
 	pos.i=parse_float((*iter).value);
 	break;
       case Y:
+	ADDDEFAULT;
 	pos.j=parse_float((*iter).value);
 	break;
       case Z:
+	ADDDEFAULT;
 	pos.k=parse_float((*iter).value);
 	break;
       case TOP:
+	ADDDEFAULT;
 	R.j=parse_float((*iter).value);
 	break;
       case BOTTOM:
+	ADDDEFAULT;
 	Q.j=parse_float((*iter).value);
 	break;
       case LEFT:
+	ADDDEFAULT;
 	Q.i=parse_float((*iter).value);
 	break;
       case RIGHT:
+	ADDDEFAULT;
 	R.i=parse_float((*iter).value);
 	break;
       case BACK:
+	ADDDEFAULT;
 	Q.k=parse_float((*iter).value);
 	break;
       case FRONT:
+	ADDDEFAULT;
 	R.k=parse_float((*iter).value);
 	break;
       case MOUNTSIZE:
+	ADDDEFAULT;
 	P.i=parse_float((*iter).value);
 	P.j=parse_float((*iter).value);
 	break;
@@ -377,6 +403,7 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
     }
     break;
   case MESHLIGHT:
+    ADDTAG;
     vs_config->gethColor ("unit","engine",halocolor,0xffffffff);
     assert (xml->unitlevel==1);
     xml->unitlevel++;
@@ -386,30 +413,39 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
     for (iter = attributes.begin();iter!=attributes.end();iter++) {
       switch(attribute_map.lookup((*iter).name)) {
       case X:
+	ADDDEFAULT;
 	pos.i=parse_float((*iter).value);
 	break;
       case Y:
+	ADDDEFAULT;
 	pos.j=parse_float((*iter).value);
 	break;
       case Z:
+	ADDDEFAULT;
 	pos.k=parse_float((*iter).value);
 	break;
       case RED:
+	ADDDEFAULT;
 	halocolor[0]=parse_float((*iter).value);
 	break;
       case GREEN:
+	ADDDEFAULT;
        	halocolor[1]=parse_float((*iter).value);
 	break;
       case BLUE:
+	ADDDEFAULT;
 	halocolor[2]=parse_float((*iter).value);
 	break;
       case ALPHA:
+	ADDDEFAULT;
 	halocolor[3]=parse_float((*iter).value);
 	break;
       case XFILE:
+	ADDDEFAULT;
 	filename = (*iter).value;
 	break;
       case MOUNTSIZE:
+	ADDDEFAULT;
 	P.i=parse_float((*iter).value);
 	P.j=parse_float((*iter).value);
 	break;
@@ -418,12 +454,14 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
    xml->halos.push_back(new Halo(filename.c_str(),GFXColor(halocolor[0],halocolor[1],halocolor[2],halocolor[3]),pos,P.i,P.j));
     break;
   case MOUNT:
-	assert (xml->unitlevel==1);
-	xml->unitlevel++;
+    ADDTAG;
+    assert (xml->unitlevel==1);
+    xml->unitlevel++;
     Q = Vector (0,1,0);
     R = Vector (0,0,1);
     pos = Vector (0,0,0);
     tempbool=false;
+    ADDELEMNAME("size",Unit::mountSerializer,XMLType((int)xml->mountz.size()));
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(attribute_map.lookup((*iter).name)) {
       case WEAPON:
@@ -491,7 +529,9 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
     break;
 
   case SUBUNIT:
+    ADDTAG;
     assert (xml->unitlevel==1);
+    ADDELEMNAME("file",Unit::subunitSerializer,XMLType((int)xml->units.size()));
     xml->unitlevel++;
     Q = Vector (0,1,0);
     R = Vector (0,0,1);
@@ -503,33 +543,43 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
 	filename = (*iter).value;
 	break;
       case X:
+	ADDDEFAULT;
 	pos.i=parse_float((*iter).value);
 	break;
       case Y:
+	ADDDEFAULT;
 	pos.j=parse_float((*iter).value);
 	break;
       case Z:
+	ADDDEFAULT;
 	pos.k=parse_float((*iter).value);
 	break;
       case RI:
+	ADDDEFAULT;
 	R.i=parse_float((*iter).value);
 	break;
       case RJ:
+	ADDDEFAULT;
 	R.j=parse_float((*iter).value);
 	break;
       case RK:
+	ADDDEFAULT;
 	R.k=parse_float((*iter).value);
 	break;
       case QI:
+	ADDDEFAULT;
 	Q.i=parse_float((*iter).value);
 	break;
       case QJ:
+	ADDDEFAULT;
 	Q.j=parse_float((*iter).value);
 	break;
       case QK:
+	ADDDEFAULT;
 	Q.k=parse_float((*iter).value);
 	break;
       case RESTRICTED:
+	ADDDEFAULT;
 	fbrltb[0]=parse_float ((*iter).value);//minimum dot turret can have with "fore" vector 
 	break;
       }
@@ -540,7 +590,7 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
     
     CrossProduct (Q,R,P);
     indx = xml->units.size();
-    xml->units.push_back(new Unit (filename.c_str(), true,true,faction,NULL)); // I set here the fg arg to NULL
+    xml->units.push_back(new Unit (filename.c_str(),true,faction,xml->unitModifications,NULL)); // I set here the fg arg to NULL
     xml->units.back()->SetOwner (this);
     xml->units[indx]->prev_physical_state= Transformation(Quaternion::from_vectors(P,Q,R),pos);
     xml->units[indx]->curr_physical_state=xml->units[indx]->prev_physical_state;
@@ -549,21 +599,31 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
     
     break;
   case JUMP:
+    //serialization covered in LoadXML
     assert (xml->unitlevel==1);
     xml->unitlevel++;
     jump.drive = -1;//activate the jump unit
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(attribute_map.lookup((*iter).name)) {
+      case MISSING:
+	//serialization covered in LoadXML
+	if (parse_bool((*iter).value))
+	  jump.drive=-2;
+	break;
       case JUMPENERGY:
-	jump.energy = parse_int ((*iter).value);
+	//serialization covered in LoadXML
+	jump.energy = CLAMP_SHORT(parse_float((*iter).value));
 	break;
       case DELAY:
+	//serialization covered in LoadXML
 	jump.delay = parse_int ((*iter).value);
 	break;
       case FUEL:
-	jump.energy = -parse_int ((*iter).value);
+	//serialization covered in LoadXML
+	jump.energy = -CLAMP_SHORT (parse_float((*iter).value));
 	break;
       case WORMHOLE:
+	//serialization covered in LoadXML
 	image->forcejump=parse_bool ((*iter).value);
 	if (image->forcejump)
 	  jump.drive=-2;
@@ -572,47 +632,61 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
     }
     break;
   case SOUND:
+    ADDTAG;
     assert (xml->unitlevel==1);
     xml->unitlevel++;
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(attribute_map.lookup((*iter).name)) {
       case CLOAKWAV:
+	ADDDEFAULT;
 	sound->cloak = AUDCreateSoundWAV ((*iter).value,false);
 	break;
       case JUMPWAV:
+	ADDDEFAULT;
 	sound->jump = AUDCreateSoundWAV ((*iter).value,false);
 	break;
       case CLOAKMP3:
+	ADDDEFAULT;
 	sound->cloak = AUDCreateSoundMP3 ((*iter).value,false);
 	break;
       case ENGINEWAV:
+	ADDDEFAULT;
 	sound->engine = AUDCreateSoundWAV ((*iter).value,true);
 	break;
       case ENGINEMP3:
+	ADDDEFAULT;
 	sound->engine = AUDCreateSoundMP3((*iter).value,true); 
 	break;
       case SHIELDMP3:
+	ADDDEFAULT;
 	sound->shield = AUDCreateSoundMP3((*iter).value,false); 
 	break;
       case SHIELDWAV:
+	ADDDEFAULT;
 	sound->shield = AUDCreateSoundWAV((*iter).value,false); 
 	break;
       case EXPLODEMP3:
+	ADDDEFAULT;
 	sound->explode = AUDCreateSoundMP3((*iter).value,false); 
 	break;
       case EXPLODEWAV:
+	ADDDEFAULT;
 	sound->explode = AUDCreateSoundWAV((*iter).value,false); 
 	break;
       case ARMORMP3:
+	ADDDEFAULT;
 	sound->armor = AUDCreateSoundMP3((*iter).value,false); 
 	break;
       case ARMORWAV:
+	ADDDEFAULT;
 	sound->armor = AUDCreateSoundWAV((*iter).value,false); 
 	break;
       case HULLWAV:
+	ADDDEFAULT;
 	sound->hull = AUDCreateSoundWAV((*iter).value,false); 
 	break;
       case HULLMP3:
+	ADDDEFAULT;
 	sound->hull = AUDCreateSoundMP3((*iter).value,false); 
 	break;
       }
@@ -638,24 +712,34 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
       
     break;    
   case CLOAK:
+    //serialization covered elsewhere
     assert (xml->unitlevel==2);
     xml->unitlevel++;
-    image->cloakrate=.2*32767*SIMULATION_ATOM;
+    image->cloakrate=(short int)(.2*32767);
     cloakmin=1;
     image->cloakenergy=0;
     cloaking = (short) 32768;//lowest negative number
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(attribute_map.lookup((*iter).name)) {
+      case MISSING:
+	//serialization covered in LoadXML
+	if (parse_bool((*iter).value))
+	  cloaking=(short)-1;
+	break;
       case CLOAKMIN:
-	cloakmin = 32767*parse_float ((*iter).value);
+	//serialization covered in LoadXML
+	cloakmin = (short int)(32767*parse_float ((*iter).value));
 	break;
       case CLOAKGLASS:
+	//serialization covered in LoadXML
 	image->cloakglass=parse_bool ((*iter).value);
 	break;
       case CLOAKRATE:
-	image->cloakrate = 32767*parse_float ((*iter).value)*SIMULATION_ATOM;
+	//serialization covered in LoadXML
+	image->cloakrate = (short int)(32767*parse_float ((*iter).value));
 	break;
       case CLOAKENERGY:
+	//serialization covered in LoadXML
 	image->cloakenergy = parse_float ((*iter).value);
 	break;
       }
@@ -673,15 +757,19 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(attribute_map.lookup((*iter).name)) {
       case FRONT:
+	//serialization covered in LoadXML
 	armor.front = CLAMP_SHORT(parse_float((*iter).value));
 	break;
       case BACK:
+	//serialization covered in LoadXML
 	armor.back= CLAMP_SHORT(parse_float((*iter).value));
 	break;
       case LEFT:
+	//serialization covered in LoadXML
 	armor.left= CLAMP_SHORT(parse_float((*iter).value));
 	break;
       case RIGHT:
+	//serialization covered in LoadXML
 	armor.right= CLAMP_SHORT(parse_float((*iter).value));
 	break;
       }
@@ -690,38 +778,47 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
  
     break;
   case SHIELDS:
+	//serialization covered in LoadXML
     assert (xml->unitlevel==2);
     xml->unitlevel++;
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(attribute_map.lookup((*iter).name)) {
       case FRONT:
+	//serialization covered in LoadXML
 	fbrltb[0] = parse_float((*iter).value);
 	shield.number++;
 	break;
       case BACK:
+	//serialization covered in LoadXML
 	fbrltb[1]=parse_float((*iter).value);
 	shield.number++;
 	break;
       case LEFT:
+	//serialization covered in LoadXML
 	fbrltb[3]=parse_float((*iter).value);
 	shield.number++;
 	break;
       case RIGHT:
+	//serialization covered in LoadXML
 	fbrltb[2]=parse_float((*iter).value);
 	shield.number++;
 	break;
       case TOP:
+	//serialization covered in LoadXML
 	fbrltb[4]=parse_float((*iter).value);
 	shield.number++;
 	break;
       case BOTTOM:
+	//serialization covered in LoadXML
 	fbrltb[5]=parse_float((*iter).value);
 	shield.number++;
 	break;
       case RECHARGE:
+	//serialization covered in LoadXML
 	shield.recharge=parse_float((*iter).value);
 	break;
       case LEAK:
+	//serialization covered in LoadXML
 	shield.leak = parse_int ((*iter).value);
 	break;
       }
@@ -755,6 +852,7 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
 
     break;
   case HULL:
+
 	assert (xml->unitlevel==2);
 	xml->unitlevel++;
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
@@ -839,29 +937,43 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
     break;
 
   case COMPUTER:  
+    ADDTAG;
     assert (xml->unitlevel==1);
     xml->unitlevel++;
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(attribute_map.lookup((*iter).name)) {
       case MAXSPEED:
 	computer.max_speed=parse_float((*iter).value);
+	ADDELEMF (computer.max_speed);
 	break;
       case AFTERBURNER:
 	computer.max_ab_speed=parse_float((*iter).value);
+	ADDELEMF (computer.max_ab_speed);
 	break;
       case YAW:
 	computer.max_yaw=parse_float((*iter).value)*(VS_PI/180);
+	ADDELEM (angleStarHandler, XMLType(&computer.max_yaw));
 	break;
       case PITCH:
 	computer.max_pitch=parse_float((*iter).value)*(VS_PI/180);
+	ADDELEM (angleStarHandler,XMLType(&computer.max_pitch));
 	break;
       case ROLL:
 	computer.max_roll=parse_float((*iter).value)*(VS_PI/180);
+	ADDELEM (angleStarHandler,XMLType(&computer.max_roll));
 	break;
       }
     }
+    image->unitwriter->AddTag ("Radar");    
+    ADDELEMNAME("itts",charStarHandler,XMLType(&computer.itts));    
+    ADDELEMNAME("color",charStarHandler,XMLType(&computer.radar.color));    
+    ADDELEMNAME("mintargetsize",charStarHandler,XMLType(&computer.radar.mintargetsize));    
+    ADDELEMNAME("range",floatStarHandler,XMLType(&computer.radar.maxrange));    
+    ADDELEMNAME("maxcone",floatStarHandler,XMLType(&computer.radar.maxcone));    
+    image->unitwriter->EndTag ("Radar");    
     break;
   case RADAR:
+    //handled above
     assert (xml->unitlevel==2);
     xml->unitlevel++;
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
@@ -885,14 +997,17 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
     }
     break;
   case REACTOR:
-	assert (xml->unitlevel==2);
-	xml->unitlevel++;
+    ADDTAG;
+    assert (xml->unitlevel==2);
+    xml->unitlevel++;
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(attribute_map.lookup((*iter).name)) {
       case RECHARGE:
+	ADDELEMF(recharge);
 	recharge=parse_float((*iter).value);
 	break;
       case LIMIT:
+	ADDELEM(ushortStarHandler,&maxenergy);
 	maxenergy=energy=CLAMP_SHORT(parse_float((*iter).value));
 	break;
     }
@@ -900,15 +1015,18 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
     break;
 
   case YAW:
+    ADDTAG;
     xml->yprrestricted+=Unit::XML::YRESTR;
     assert (xml->unitlevel==2);
     xml->unitlevel++;
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(attribute_map.lookup((*iter).name)) {
       case MAX:
+	ADDDEFAULT;
 	xml->ymax=parse_float((*iter).value)*(VS_PI/180);
 	break;
       case MIN:
+	ADDDEFAULT;
 	xml->ymin=parse_float((*iter).value)*(VS_PI/180);
 	break;
     }
@@ -916,15 +1034,18 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
     break;
 
   case PITCH:
+    ADDTAG;
     xml->yprrestricted+=Unit::XML::PRESTR;
     assert (xml->unitlevel==2);
     xml->unitlevel++;
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(attribute_map.lookup((*iter).name)) {
       case MAX:
+	ADDDEFAULT;
 	xml->pmax=parse_float((*iter).value)*(VS_PI/180);
 	break;
       case MIN:
+	ADDDEFAULT;
 	xml->pmin=parse_float((*iter).value)*(VS_PI/180);
 	break;
       }
@@ -932,15 +1053,18 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
     break;
 
   case ROLL:
+    ADDTAG;
     xml->yprrestricted+=Unit::XML::RRESTR;
     assert (xml->unitlevel==2);
     xml->unitlevel++;
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(attribute_map.lookup((*iter).name)) {
       case MAX:
+	ADDDEFAULT;
 	xml->rmax=parse_float((*iter).value)*(VS_PI/180);
 	break;
       case MIN:
+	ADDDEFAULT;
 	xml->rmin=parse_float((*iter).value)*(VS_PI/180);
 	break;
       }
@@ -948,8 +1072,9 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
     break;
 
   case UNIT:
-	assert (xml->unitlevel==0);
-	xml->unitlevel++;
+
+    assert (xml->unitlevel==0);
+    xml->unitlevel++;
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(attribute_map.lookup((*iter).name)) {
       default:
@@ -961,6 +1086,7 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
     }
     break;
   case COCKPIT:
+    ADDTAG;
     assert (xml->unitlevel==1);
     xml->unitlevel++;
 
@@ -968,15 +1094,19 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
       switch(attribute_map.lookup((*iter).name)) {
       case XFILE:
 	image->cockpitImage = (*iter).value;
+	ADDELEM(stringStarHandler,XMLType (&image->cockpitImage));
 	break;
       case X:
 	image->CockpitCenter.i =parse_float ((*iter).value);
+	ADDELEMF(image->CockpitCenter.i);
 	break;
       case Y:
 	image->CockpitCenter.j =parse_float ((*iter).value);
+	ADDELEMF(image->CockpitCenter.j);
 	break;
       case Z:
 	image->CockpitCenter.k =parse_float ((*iter).value);
+	ADDELEMF(image->CockpitCenter.k);
 	break;
       }
     }
@@ -987,7 +1117,8 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(attribute_map.lookup((*iter).name)) {
       case HUDIMAGE:
-	image->hudImage = new Sprite ((*iter).value.c_str());
+	if ((*iter).value.length())
+	  image->hudImage = new Sprite ((*iter).value.c_str());
 	break;
       default:
 	break;
@@ -1002,12 +1133,14 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
     break;
 
   case ENERGY:
+    ADDTAG;
     assert (xml->unitlevel==1);
     xml->unitlevel++;
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(attribute_map.lookup((*iter).name)) {
       case AFTERBURNENERGY:
 	afterburnenergy =CLAMP_SHORT(parse_float((*iter).value)); 
+	ADDELEM(ushortStarHandler,&afterburnenergy);
 	break;
       default:
 	break;
@@ -1017,21 +1150,30 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
     break;
 
   case RESTRICTED:
+    ADDTAG;
     assert (xml->unitlevel==1);
     xml->unitlevel++;
     break;
 	
+  case UNKNOWN:
+    ADDTAG;
   default:
-	
+    for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
+      ADDDEFAULT;
+    }
+    xml->unitlevel++;
     break;
   }
+#undef ADDELEM
 }
 
 void Unit::endElement(const string &name) {
+  image->unitwriter->EndTag (name);
   Names elem = (Names)element_map.lookup(name);
 
   switch(elem) {
   case UNKNOWN:
+
 	  xml->unitlevel--;
 //    cerr << "Unknown element end tag '" << name << "' detected " << endl;
     break;
@@ -1040,19 +1182,172 @@ void Unit::endElement(const string &name) {
     break;
   }
 }
-void Unit::LoadXML(const char *filename)
+
+std::string Unit::shieldSerializer (const XMLType &input, void * mythis) {
+  Unit * un=(Unit *)mythis;
+  switch (un->shield.number) {
+  case 2:
+    return tostring(un->shield.fb[2])+string("\" back=\"")+tostring(un->shield.fb[3]);
+  case 6:
+    return tostring(un->shield.fbrltb.fbmax)+string("\" back=\"")+tostring(un->shield.fbrltb.fbmax)+string("\" left=\"")+tostring(un->shield.fbrltb.rltbmax)+string("\" right=\"")+tostring(un->shield.fbrltb.rltbmax)+string("\" top=\"")+tostring(un->shield.fbrltb.rltbmax)+string("\" bottom=\"")+tostring(un->shield.fbrltb.rltbmax);
+  case 4:
+  default:
+    return tostring(un->shield.fbrl.frontmax)+string("\" back=\"")+tostring(un->shield.fbrl.backmax)+string("\" left=\"")+tostring(un->shield.fbrl.leftmax)+string("\" right=\"")+tostring(un->shield.fbrl.rightmax);
+  }
+  return string("");
+}
+std::string Unit::mountSerializer (const XMLType &input, void * mythis) {
+  Unit * un=(Unit *)mythis;
+  int i=input.w.hardint;
+  if (un->nummounts>i) {
+    string result(lookupMountSize(un->mounts[i].size));
+    if (un->mounts[i].status==Mount::INACTIVE||un->mounts[i].status==Mount::ACTIVE)
+      result+=string("\" weapon=\"")+(un->mounts[i].type.weapon_name);
+    if (un->mounts[i].ammo!=-1)
+      result+=string("\" ammo=\"")+XMLSupport::tostring(un->mounts[i].ammo);
+    
+    Matrix m;
+    un->mounts[i].GetMountLocation().to_matrix(m);
+    result+=string ("\" x=\"")+tostring(m[12]);
+    result+=string ("\" y=\"")+tostring(m[13]);
+    result+=string ("\" z=\"")+tostring(m[14]);
+
+    result+=string ("\" qi=\"")+tostring(m[4]);
+    result+=string ("\" qj=\"")+tostring(m[5]);
+    result+=string ("\" qk=\"")+tostring(m[6]);
+     
+    result+=string ("\" ri=\"")+tostring(m[8]);    
+    result+=string ("\" rj=\"")+tostring(m[9]);    
+    result+=string ("\" rk=\"")+tostring(m[10]);    
+    return result;
+  }else {
+    return string("");
+  }
+}
+std::string Unit::subunitSerializer (const XMLType &input, void * mythis) {
+  Unit * un=(Unit *)mythis;
+  int index=input.w.hardint;
+  Unit *su;
+  int i=0;
+  for (un_iter ui=un->getSubUnits();NULL!= (su=ui.current());++ui,++i) {
+    if (i==index) {
+      if (su->image->unitwriter) {
+	return su->image->unitwriter->getName();
+      }
+      return su->name;
+    }
+  }
+  return string("destroyed_turret");
+}
+
+void Unit::WriteUnit (const char * modifications) {
+  if (image->unitwriter)
+    image->unitwriter->Write(modifications);
+  for (un_iter ui= getSubUnits();(*ui)!=NULL;++ui) {
+    (*ui)->WriteUnit(modifications);
+  }
+}
+void Unit::LoadXML(const char *filename, const char * modifications)
 {
   shield.number=0;
   const int chunk_size = 16384;
  // rrestricted=yrestricted=prestricted=false;
-  FILE * inFile = fopen (filename, "r");
+  FILE * inFile=NULL;
+  if (modifications) {
+    if (strlen(modifications)!=0) {
+      changehome();
+      static std::string savedunitpath=vs_config->getVariable ("data","serialized_xml","serialized_xml");
+      vschdir (savedunitpath.c_str());
+      vschdir (modifications);
+      inFile = fopen (filename,"r");
+      vscdup();
+      vscdup();
+      returnfromhome();
+    }
+  }
+  if (inFile==NULL)
+    inFile = fopen (filename, "r");
   if(!inFile) {
     cout << "Unit file " << filename << " not found" << endl;
     assert(0);
     return;
   }
+  image->unitwriter=new XMLSerializer (filename,modifications,this);
+  image->unitwriter->AddTag ("Unit");
+  {
+    image->unitwriter->AddTag ("Jump");
+    image->unitwriter->AddElement("missing",lessNeg1Handler,XMLType(&jump.drive));
+    image->unitwriter->AddElement("jumpenergy",shortStarHandler,XMLType(&jump.energy));
+    image->unitwriter->AddElement("delay",ucharStarHandler,XMLType(&jump.delay));
+    image->unitwriter->AddElement("damage",ucharStarHandler,XMLType(&jump.damage));
+    image->unitwriter->AddElement("wormhole",ucharStarHandler,XMLType(&image->forcejump));
+    image->unitwriter->EndTag ("Jump");
+  }
+  {
+    image->unitwriter->AddTag("Defense");
+    {
+      image->unitwriter->AddTag ("Cloak");
+      image->unitwriter->AddElement("missing",cloakHandler,XMLType(&cloaking));
+      image->unitwriter->AddElement("cloakmin",shortToFloatHandler,XMLType(&cloakmin));
+      image->unitwriter->AddElement("cloakglass",ucharStarHandler,XMLType(&image->cloakglass));
+      image->unitwriter->AddElement("cloakrate",shortToFloatHandler,XMLType(&image->cloakrate));
+      image->unitwriter->AddElement("cloakenergy",floatStarHandler,XMLType(&image->cloakenergy));
+      image->unitwriter->EndTag ("Cloak");
+    }
+    {
+      image->unitwriter->AddTag ("Armor");
+      image->unitwriter->AddElement("front",ushortStarHandler,XMLType(&armor.front));
+      image->unitwriter->AddElement("back",ushortStarHandler,XMLType(&armor.back));
+      image->unitwriter->AddElement("left",ushortStarHandler,XMLType(&armor.left));
+      image->unitwriter->AddElement("right",ushortStarHandler,XMLType(&armor.right));
+      image->unitwriter->EndTag ("Armor");
+    }    
+    {
+      image->unitwriter->AddTag ("Shields");
+      image->unitwriter->AddElement("front",shieldSerializer,XMLType((void *)&shield));
+      image->unitwriter->AddElement("recharge",floatStarHandler,XMLType(&shield.recharge));
+      image->unitwriter->AddElement("leak",charStarHandler,XMLType(&shield.leak));
+      image->unitwriter->EndTag ("Shields");      
+    }
+    {
+      image->unitwriter->AddTag ("Hull");
+      image->unitwriter->AddElement("strength",floatStarHandler,XMLType(&hull));
+      image->unitwriter->EndTag ("Hull");
+    }
+
+    image->unitwriter->EndTag("Defense");
+  }
+  {
+    image->unitwriter->AddTag ("Stats");    
+    image->unitwriter->AddElement("mass",floatStarHandler,XMLType(&mass));
+    image->unitwriter->AddElement("momentofinertia",floatStarHandler,XMLType(&MomentOfInertia));
+    image->unitwriter->AddElement("fuel",floatStarHandler,XMLType(&fuel));
+    image->unitwriter->EndTag ("Stats");    
+    image->unitwriter->AddTag ("Thrust");    
+    {
+      image->unitwriter->AddTag ("Maneuver");    
+      image->unitwriter->AddElement("yaw",angleStarHandler,XMLType(&limits.yaw));      
+      image->unitwriter->AddElement("pitch",angleStarHandler,XMLType(&limits.pitch));      
+      image->unitwriter->AddElement("roll",angleStarHandler,XMLType(&limits.roll));      
+      image->unitwriter->EndTag ("Maneuver");    
+    }
+    {
+      image->unitwriter->AddTag ("Engine");    
+      image->unitwriter->AddElement("forward",floatStarHandler,XMLType(&limits.forward));      
+      image->unitwriter->AddElement("retro",floatStarHandler,XMLType(&limits.retro));      
+      image->unitwriter->AddElement("left",floatStarHandler,XMLType(&limits.lateral));     
+      image->unitwriter->AddElement("right",floatStarHandler,XMLType(&limits.lateral));      
+      image->unitwriter->AddElement("top",floatStarHandler,XMLType(&limits.vertical));      
+      image->unitwriter->AddElement("bottom",floatStarHandler,XMLType(&limits.vertical));      
+      image->unitwriter->AddElement("afterburner",floatStarHandler,XMLType(&limits.afterburn));      
+      image->unitwriter->EndTag ("Engine");    
+    }
+    image->unitwriter->EndTag ("Thrust");    
+
+  }
   image->CockpitCenter.Set (0,0,0);
   xml = new XML;
+  xml->unitModifications = modifications;
   xml->shieldmesh = NULL;
   xml->bspmesh = NULL;
   xml->hasBSP = true;
@@ -1080,6 +1375,7 @@ void Unit::LoadXML(const char *filename)
   fclose (inFile);
   XML_ParserFree (parser);
   // Load meshes into subunit
+  image->unitwriter->EndTag ("Unit");
   nummesh = xml->meshes.size();
   corner_min = Vector(FLT_MAX, FLT_MAX, FLT_MAX);
   corner_max = Vector(-FLT_MAX, -FLT_MAX, -FLT_MAX);
@@ -1123,7 +1419,7 @@ void Unit::LoadXML(const char *filename)
     }
 #endif
   }
-  for( a=0; a<xml->units.size(); a++) {
+  for( a=0; a<(int)xml->units.size(); a++) {
     SubUnits.prepend(xml->units[a]);
   }
   if (!SubUnit) {

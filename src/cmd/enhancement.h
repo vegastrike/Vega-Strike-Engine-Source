@@ -6,7 +6,7 @@ class Enhancement : public Unit {
   std::string filename;
   virtual enum clsptr isUnit() {return ENHANCEMENTPTR;}
  public:
-  Enhancement::Enhancement (const char * filename, int faction, Flightgroup * flightgrp=NULL, int fg_subnumber=0):Unit (filename,true,false,faction,flightgrp,fg_subnumber),filename(filename) {
+  Enhancement::Enhancement (const char * filename, int faction, const string &modifications,Flightgroup * flightgrp=NULL, int fg_subnumber=0):Unit (filename,false,faction,modifications,flightgrp,fg_subnumber),filename(filename) {
   }
   virtual void reactToCollision (Unit * smaller, const Vector & biglocation, const Vector & bignormal, const Vector & smalllocation, const Vector & smallnormal, float dist) {
     if (smaller->isUnit()!=ASTEROIDPTR) {

@@ -532,7 +532,7 @@ void Mission::call_unit_launch(Flightgroup *fg){
    Unit *units[20];
    int u;
    for(u=0;u<fg->nr_ships;u++){
-     Unit *my_unit=new Unit(fg->type.c_str(),true,false,faction_nr,fg,u);
+     Unit *my_unit=new Unit(fg->type.c_str(),false,faction_nr,string(""),fg,u);
      units[u]=my_unit;
    }
 

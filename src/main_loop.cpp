@@ -500,20 +500,20 @@ void createObjects() {
 	if (fg_terrain==-1||(fg_terrain==-2&&myterrain==NULL)) {
 	  if (a==0)
 	    fighter0name=string(fightername);
-	  fighters[a] = new Unit(fightername, true, false,tmptarget[a],fg,s);
+	  fighters[a] = new Unit(fightername, false,tmptarget[a],string(""),fg,s);
 	}else {
 	  if (fg_terrain==-2) {
-	    fighters[a]= new Building (myterrain,isvehicle,fightername,true,false,tmptarget[a],fg);
+	    fighters[a]= new Building (myterrain,isvehicle,fightername,false,tmptarget[a],string(""),fg);
 	  }else {
 
 	    if (fg_terrain>=(int)_Universe->activeStarSystem()->numTerrain()) {
 	      ContinuousTerrain * t;
 	      assert (fg_terrain-_Universe->activeStarSystem()->numTerrain()<_Universe->activeStarSystem()->numContTerrain());
 	      t =_Universe->activeStarSystem()->getContTerrain(fg_terrain-_Universe->activeStarSystem()->numTerrain());
-	      fighters[a]= new Building (t,isvehicle,fightername,true,false,tmptarget[a],fg);
+	      fighters[a]= new Building (t,isvehicle,fightername,false,tmptarget[a],string(""),fg);
 	    }else {
 	      Terrain *t=_Universe->activeStarSystem()->getTerrain(fg_terrain);
-	      fighters[a]= new Building (t,isvehicle,fightername,true,false,tmptarget[a],fg);
+	      fighters[a]= new Building (t,isvehicle,fightername,false,tmptarget[a],string(""),fg);
 	    }
 
 	  }
@@ -603,12 +603,12 @@ void AddUnitToSystem (const SavedUnits *su) {
   Unit * un=NULL;
   switch (su->type) {
   case ENHANCEMENTPTR:
-    un = new Enhancement (su->filename.c_str(),_Universe->GetFaction (su->faction.c_str()));
+    un = new Enhancement (su->filename.c_str(),_Universe->GetFaction (su->faction.c_str()),string(""));
     un->SetPosition(0,0,0);
     break;
   case UNITPTR:
   default:
-    un = new Unit (su->filename.c_str(),true,false,_Universe->GetFaction (su->faction.c_str()));
+    un = new Unit (su->filename.c_str(),false,_Universe->GetFaction (su->faction.c_str()));
     un->EnqueueAI (new Orders::AggressiveAI ("default.agg.xml", "default.int.xml"));
     un->SetTurretAI ();
     un->SetPosition (Vector(rand()*10000./RAND_MAX-5000,rand()*10000./RAND_MAX-5000,rand()*10000./RAND_MAX-5000));

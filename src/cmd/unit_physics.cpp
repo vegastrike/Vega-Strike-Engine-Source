@@ -305,7 +305,7 @@ void Unit::UpdatePhysics (const Transformation &trans, const Matrix transmat, co
 	if ((cloaking==32767&&image->cloakrate>0)||(cloaking==cloakmin+1&&image->cloakrate<0)) {
 	  AUDStartPlaying (sound->cloak);
 	}
-	cloaking-=image->cloakrate;
+	cloaking-=image->cloakrate*SIMULATION_ATOM;
 	if (cloaking<=cloakmin&&image->cloakrate>0) {
 	  //AUDStopPlaying (sound->cloak);
 	  cloaking=cloakmin;

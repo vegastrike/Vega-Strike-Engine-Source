@@ -1,58 +1,128 @@
 #include "xml_serializer.h"
 #include "cmd/unit.h"
+#include "cmd/images.h"
+#include "vs_path.h"
+#include "config_xml.h"
+#include "vs_globals.h"
+#include "vegastrike.h"
 ///Assumes that the tag is  <Mount type=\"  and that it will finish with " ></Mount>
 using namespace XMLSupport;
-std::string Unit::mountSerializer (const XMLType &input, void * mythis) {
-  Unit * un=(Unit *)mythis;
-  int i=input.hardint;
-  if (un->nummounts>i) {
-    string result(lookupMountSize(un->mounts[i].size));
-    if (un->mounts[i].status==Mount::INACTIVE||un->mounts[i].status==Mount::ACTIVE)
-      result+=string("\" type=\"")+(un->mounts[i].type.weapon_name);
-    if (un->mounts[i].ammo!=-1)
-      result+=string("\" ammo=\"")+XMLSupport::tostring(un->mounts[i].ammo);
-    
-    Matrix m;
-    un->mounts[i].GetMountLocation().to_matrix(m);
-    result+=string ("\" x=\"")+tostring(m[12]);
-    result+=string ("\" y=\"")+tostring(m[13]);
-    result+=string ("\" z=\"")+tostring(m[14]);
 
-    result+=string ("\" qi=\"")+tostring(m[4]);
-    result+=string ("\" qj=\"")+tostring(m[5]);
-    result+=string ("\" qk=\"")+tostring(m[6]);
-     
-    result+=string ("\" ri=\"")+tostring(m[8]);    
-    result+=string ("\" rj=\"")+tostring(m[9]);    
-    result+=string ("\" rk=\"")+tostring(m[10]);    
-    return result;
-  }else {
-    return string("");
+std::string intStarHandler (const XMLType &input,void *mythis) {
+  return XMLSupport::tostring(*input.w.i);
+}
+std::string floatStarHandler (const XMLType &input,void *mythis) {
+  return XMLSupport::tostring(*input.w.f);
+}
+
+std::string angleStarHandler (const XMLType &input,void *mythis) {
+  return XMLSupport::tostring((float((*input.w.f)*180/3.1415926536)));
+}
+std::string charStarHandler (const XMLType &input, void*mythis) {
+  return XMLSupport::tostring(*input.w.c);
+}
+std::string ucharStarHandler (const XMLType &input, void*mythis) {
+  return XMLSupport::tostring(*input.w.uc);
+}
+std::string shortStarHandler (const XMLType &input, void*mythis) {
+  return XMLSupport::tostring(*input.w.s);
+}
+std::string ushortStarHandler (const XMLType &input, void*mythis) {
+  return XMLSupport::tostring(*input.w.us);
+}
+std::string negationCharStarHandler (const XMLType &input, void*mythis) {
+  return XMLSupport::tostring(-(*input.w.c));
+}
+std::string negationIntStarHandler (const XMLType &input,void *mythis) {
+  return XMLSupport::tostring(-(*input.w.i));
+}
+std::string negationFloatStarHandler (const XMLType &input,void *mythis) {
+  return XMLSupport::tostring(-(*input.w.f));
+}
+std::string stringStarHandler (const XMLType &input,void *mythis) {
+  if (!input.w.p) {
+    return string ("");
+  }
+  return * ((string *)(input.w.p));
+}
+std::string stringHandler (const XMLType &input,void *mythis) {
+  return input.str;
+}
+std::string intHandler (const XMLType &input,void *mythis) {
+  return XMLSupport::tostring(input.w.hardint);
+}
+std::string floatHandler (const XMLType &input,void *mythis) {
+  return XMLSupport::tostring(input.w.hardfloat);
+}
+std::string lessNeg1Handler (const XMLType &input, void *mythis) {
+  return XMLSupport::tostring (((*input.w.c)<-1)?1:0);
+}
+
+std::string cloakHandler(const XMLType &input, void *mythis) { 
+  return XMLSupport::tostring (((*input.w.s)==-1)?1:0);
+}
+std::string shortToFloatHandler(const XMLType &input, void *mythis) { 
+  return XMLSupport::tostring ((float)(((float)(*input.w.s))/32767.));
+}
+
+void XMLElement::Write (FILE * fp, void * mythis) {
+  fprintf (fp," %s=\"%s\"",elem.c_str(),((*handler)(value,mythis)).c_str());
+}
+static void Tab (FILE * fp) {
+  fprintf (fp,"\t");
+}
+static void Tab (FILE * fp, int level) {
+  for (int i=0;i<level;i++) {
+    Tab (fp);
   }
 }
-std::string Unit::subunitSerializer (const XMLType &input, void * mythis) {
-  Unit * un=(Unit *)mythis;
-  int index=input.hardint;
-  Unit *su;
-  int i=0;
-  for (un_iter ui=un->getSubUnits();NULL!= (su=ui.current());++ui,++i) {
-    if (i==index) {
-      return su->name;
+void XMLnode::Write (FILE* fp, void *mythis, int level) {
+  Tab(fp,level);fprintf (fp,"<%s",val.c_str());
+  for (unsigned int i=0;i<elements.size();i++) {
+    elements[i].Write (fp,mythis);
+  }
+  if (subnodes.empty()) {
+    fprintf (fp,"/>\n");    
+  } else {
+    fprintf (fp,">\n");
+    for (unsigned int i=0;i<subnodes.size();i++) {
+      subnodes[i].Write (fp,mythis,level+1);
     }
+    Tab(fp,level);fprintf (fp,"</%s>\n",val.c_str());
   }
-  return string("destroyed_turret");
 }
-XMLSerializer::XMLSerializer (const char * filename):filename(filename) {
+void XMLSerializer::Write (const char * modificationname) {
+  if (modificationname)
+    if (strlen(modificationname)!=0) 
+      savedir=modificationname;
+
+  static std::string savedunitpath=vs_config->getVariable ("data","serialized_xml","serialized_xml");
   
+  MakeSharedStarSysPath (savedunitpath);
+  string retdir =MakeSharedPath (savedunitpath+string("/")+savedir);
+  FILE * fp =fopen ((retdir+string("/")+filename).c_str(),"w");
+  if (!fp) {
+    return;
+  }
+  for (unsigned int i=0;i<topnode.subnodes.size();i++) {
+    topnode.subnodes[i].Write (fp,mythis,0);
+  }
+  fclose (fp);
+}
+XMLSerializer::XMLSerializer (const char * filename, const char *modificationname, void *mythis):filename(filename), savedir(modificationname), mythis(mythis) {
+  curnode=&topnode;
 }
 void XMLSerializer::AddTag (const std::string &tag) {
   curnode->subnodes.push_back (XMLnode(tag,curnode));
+  curnode = &curnode->subnodes.back();
 }
 
-void XMLSerializer::AddElement (const std::string &element, XMLHandler handler, const XMLType &input) {
+void XMLSerializer::AddElement (const std::string &element, XMLHandler *handler, const XMLType &input) {
   curnode->elements.push_back (XMLElement (element,input,handler));
 }
 
-void XMLSerializer::EndTag () {
-  curnode = curnode->up;
+void XMLSerializer::EndTag (const std::string endname) {
+  if (curnode)
+    if (endname==curnode->val) 
+      curnode = curnode->up;
 }

@@ -102,7 +102,7 @@ void Planet::beginElement(Vector x,Vector y,float vely, const Vector & rotvel, f
   } else {
     if (isunit==true) {
       Unit *sat_unit=NULL;
-      satellites.prepend(sat_unit=new Unit (filename, true, false, faction));
+      satellites.prepend(sat_unit=new Unit (filename, false, faction));
       sat_unit->setFullname(fullname);
       un_iter satiterator (satellites.createIterator());
       satiterator.current()->SetAI (new PlanetaryOrbit (satiterator.current(),vely,pos,x,y, Vector (0,0,0), this)) ;

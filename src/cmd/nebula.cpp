@@ -181,7 +181,7 @@ void Nebula::SetFogState () {
   
 }
 Nebula::Nebula(const char * unitfile, bool SubU, int faction, Flightgroup* fg, int fg_snumber):
-  Unit (unitfile,true,SubU,faction,fg,fg_snumber) {
+  Unit (unitfile,SubU,faction,string(""),fg,fg_snumber) {
 
   vssetdir (GetSharedUnitPath().c_str());
   vschdir (unitfile);

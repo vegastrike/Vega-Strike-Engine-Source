@@ -9,6 +9,7 @@ struct DockingPorts {
   Vector max;
   bool internal;
   bool used;
+  DockingPorts(){}
   DockingPorts (const Vector &pos, float radius, bool internal=true){
 	this->pos=(pos); this->radius=(radius);
     min=Vector(pos-Vector (radius,radius,radius));
@@ -53,6 +54,7 @@ struct UnitImages {
   std::vector <Unit *> clearedunits;
   std::vector <DockedUnits *> dockedunits;
   UnitContainer DockedTo;
+  class XMLSerializer *unitwriter;
 };
 
 struct UnitSounds {

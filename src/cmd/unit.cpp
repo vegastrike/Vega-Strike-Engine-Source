@@ -47,6 +47,7 @@
 #include "script/mission.h"
 #include "collide/rapcol.h"
 #include "savegame.h"
+#include "xml_serializer.h"
 //if the PQR of the unit may be variable...for radius size computation
 //#define VARIABLE_LENGTH_PQR
 
@@ -143,6 +144,7 @@ void Unit::SetNebula (Nebula * neb) {
 }
 void Unit::Init()
 {
+  xml=NULL;
   docked=NOT_DOCKED;
   SubUnit =0;
   jump.energy = 100;
@@ -158,6 +160,7 @@ void Unit::Init()
   limits.limitmin=-1;
   cloaking=-1;
   image->cloakglass=false;
+  image->unitwriter=NULL;
   cloakmin=image->cloakglass?1:0;
   image->cloakrate=100;
   image->cloakenergy=0;
@@ -275,8 +278,10 @@ Unit::Unit (Mesh ** meshes, int num, bool SubU, int faction) {
   meshdata[nummesh]=NULL;//turn off shield
   calculate_extent();
 }
-Unit::Unit(const char *filename, bool xml, bool SubU, int faction,Flightgroup *flightgrp,int fg_subnumber) {
-	Init();
+Unit::Unit(const char *filename, bool SubU, int faction,std::string unitModifications, Flightgroup *flightgrp,int fg_subnumber) {
+
+  Init();
+
 	if (!SubU)
 	  AddUnitToSave(filename,UNITPTR,_Universe->GetFaction(faction),(int)this);
 	SubUnit = SubU;
@@ -320,10 +325,10 @@ Unit::Unit(const char *filename, bool xml, bool SubU, int faction,Flightgroup *f
 	}
 	name = filename;
 	/*Insert file loading stuff here*/
-	if(xml&&fp) {
-	  LoadXML(filename);
+	if(1&&fp) {
+	  LoadXML(filename,unitModifications.c_str());
 	}
-	if (xml) {
+	if (1) {
 	  calculate_extent();
 	  ToggleWeapon(true);//change missiles to only fire 1
        	  vscdup();
@@ -360,7 +365,7 @@ Unit::Unit(const char *filename, bool xml, bool SubU, int faction,Flightgroup *f
 		switch(type)
 		{
 		default:
-		  SubUnits.prepend (un=new Unit (unitfilename,false,true,faction,flightgroup,flightgroup_subnumber));
+		  SubUnits.prepend (un=new Unit (unitfilename,true,faction,unitModifications,flightgroup,flightgroup_subnumber));
 
 		}
 		un->SetPosition(Vector(x,y,z));
@@ -448,6 +453,8 @@ Unit::~Unit()
 #endif
   if (image->hudImage )
     delete image->hudImage;
+  if (image->unitwriter)
+    delete image->unitwriter;
   unsigned int i;
   for (i=0;i<image->destination.size();i++) {
     delete [] image->destination[i];
@@ -683,7 +690,7 @@ void Unit::Draw(const Transformation &parent, const Matrix parentMatrix)
 #endif
   short cloak=cloaking;
   if (cloaking>cloakmin) {
-    cloak = (short)(cloaking-interpolation_blend_factor*image->cloakrate);
+    cloak = (short)(cloaking-interpolation_blend_factor*image->cloakrate*SIMULATION_ATOM);
     if (cloak<0&&image->cloakrate<0) {
       cloak=(unsigned short)32768;//intended warning should be -32768 :-) leave it be
     }

@@ -40,6 +40,7 @@ void changehome(bool makehomedir) {
     }else {
       chdir (pwent->pw_dir);
     }
+
     if (chdir (HOMESUBDIR "/save")==-1) {
       mkdir (HOMESUBDIR "/save", 0xFFFFFFFF);
       //system ("mkdir " HOMESUBDIR "/generatedbsp");
@@ -163,13 +164,9 @@ std::string GetSharedSoundHashName (const std::string &name) {
   return (string ("#ssnd#")+name);
 }
 
-
-
-std::string MakeSharedStarSysPath (const std::string &s){
+std::string MakeSharedPathReturnHome (const std::string &newpath) {
   changehome();
   getcwd (pwd,8191);
-
-  string newpath =getStarSystemSector (s);
  
   if (chdir (newpath.c_str())==-1) {
 #ifdef _WIN32
@@ -184,13 +181,16 @@ std::string MakeSharedStarSysPath (const std::string &s){
   returnfromhome();
   return 
 #ifndef _WIN32
-	  string(pwd)+string("/")+
+    string(pwd)+string("/");
+#else
+    string ("./");
 #endif	  
-	  
-	  s;
-
-
-
+}
+std::string MakeSharedPath (const std::string &s) {
+  return MakeSharedPathReturnHome (s)+s;
+}
+std::string MakeSharedStarSysPath (const std::string &s){
+  return MakeSharedPathReturnHome (getStarSystemSector (s))+s;
 }
 std::string GetCorrectStarSysPath (const std::string &name) {
   if (name.length()==0) {

@@ -630,7 +630,7 @@ void Cockpit::Draw() {
 	if (respawnunit){
    	  zoomfactor=1;
 	  respawnunit=0;
-	  Unit * un = new Unit (unitfilename.c_str(),true,false,this->unitfaction,NULL,0);
+	  Unit * un = new Unit (unitfilename.c_str(),false,this->unitfaction);
 	  un->SetCurPosition (unitlocation);
 	  _Universe->activeStarSystem()->AddUnit (un);
 	  this->SetParent(un,unitfilename.c_str(),unitlocation);

@@ -68,6 +68,7 @@ void cleanup(void)
     if (_Universe->AccessCockpit()->GetParent()) {
       if(_Universe->AccessCockpit()->GetParent()->GetHull()>0) {
 	WriteSaveGame (_Universe->getActiveStarSystem(0)->getFileName().c_str(),_Universe->AccessCockpit()->GetParent()->Position());
+	_Universe->AccessCockpit()->GetParent()->WriteUnit("cooltest");
       } 
     }
   }

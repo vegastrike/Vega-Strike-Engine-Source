@@ -699,14 +699,14 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
 	  Unit * un;
 	  Planet * plan =xml->moons.back()->GetTopPlanet(xml->unitlevel-1);
 	  if (elem==UNIT) {
-		  plan->AddSatellite(un=new Unit(filename,true,false,faction));
+		  plan->AddSatellite(un=new Unit(filename,false,faction));
 		  un->setFullname(fullname);
 	  } else if (elem==NEBULA) {
 		  plan->AddSatellite(un=new Nebula(filename,false,faction));			
 	  } else if (elem==ASTEROID) {
 	    plan->AddSatellite (un=new Asteroid (filename,faction,NULL,0,scalex));
 	  } else if (elem==ENHANCEMENT) {
-	    plan->AddSatellite (un=new Enhancement (filename,faction));
+	    plan->AddSatellite (un=new Enhancement (filename,faction,string("")));
 	  }
 	  while (!dest.empty()) {
 	    un->AddDestination (dest.back());
@@ -719,7 +719,7 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
 	  un->SetAngularVelocity (ComputeRotVel (rotvel,R,S));
     } else {
       if ((elem==BUILDING||elem==VEHICLE)&&xml->ct==NULL&&xml->parentterrain!=NULL) {
-	Unit * b = new Building (xml->parentterrain,elem==VEHICLE,filename,true,false,faction);
+	Unit * b = new Building (xml->parentterrain,elem==VEHICLE,filename,false,faction,string(""));
 	b->SetPosAndCumPos (xml->cursun+xml->systemcentroid);
 	b->EnqueueAI( new Orders::AggressiveAI ("default.agg.xml", "default.int.xml"));
 	AddUnit (b);
@@ -729,7 +729,7 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
 	  }
 
       }else if ((elem==BUILDING||elem==VEHICLE)&&xml->ct!=NULL) {
-	Unit * b=new Building (xml->ct,elem==VEHICLE,filename,true,false,faction);
+	Unit * b=new Building (xml->ct,elem==VEHICLE,filename,false,faction);
 	b->SetPlanetOrbitData ((PlanetaryTransform *)xml->parentterrain);
 	b->SetPosAndCumPos (xml->cursun+xml->systemcentroid);
 	b->EnqueueAI( new Orders::AggressiveAI ("default.agg.xml", "default.int.xml"));
@@ -742,7 +742,7 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
 	  }
       }else {
    	    if (elem==UNIT) {
-	      Unit *moon_unit=new Unit(filename,true ,false,faction);
+	      Unit *moon_unit=new Unit(filename,false,faction);
 	      moon_unit->setFullname(fullname);
 	      xml->moons.push_back((Planet *)moon_unit);
 	    }else if (elem==NEBULA){
@@ -750,7 +750,7 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
 	    } else if (elem==ASTEROID){
 	      xml->moons.push_back ((Planet *)new Asteroid (filename,faction,NULL,0,scalex));
 	    } else if (elem==ENHANCEMENT) {
-	      xml->moons.push_back ((Planet *)new Enhancement (filename,faction));
+	      xml->moons.push_back ((Planet *)new Enhancement (filename,faction,string("")));
 	    }
 	    while (!dest.empty()) {
 	      xml->moons.back()->AddDestination (dest.back());
