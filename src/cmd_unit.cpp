@@ -486,32 +486,32 @@ bool Unit::Explode () {
   return alldone;
 }
 
-bool Unit::queryBSP (const Vector &pt, float err) {
+bool Unit::queryBSP (const Vector &pt, float err, Vector & norm) {
   int i;
   Vector st (InvTransform (cumulative_transformation_matrix,pt));
   if (!bspTree)
       return true;
-  if (bspTree->intersects (st,err))
+  if (bspTree->intersects (st,err,norm))
       return true;
   for (i=0;i<numsubunit;i++) {
-    if ((subunits[i]->queryBSP(pt,err)))
+    if ((subunits[i]->queryBSP(pt,err, norm)))
       return true;
   }
   return false;
 }
 
-float Unit::queryBSP (const Vector &start, const Vector & end) {
+float Unit::queryBSP (const Vector &start, const Vector & end, Vector & norm) {
   int i;
   float tmp;
   if (!bspTree)
       return true;
   Vector st (InvTransform (cumulative_transformation_matrix,start));
   Vector ed (InvTransform (cumulative_transformation_matrix,end));
-  if (tmp = bspTree->intersects (st,ed))
+  if (tmp = bspTree->intersects (st,ed,norm))
       return tmp;
 
   for (i=0;i<numsubunit;i++) {
-    if (tmp = subunits[i]->queryBSP(start,end))
+    if (tmp = subunits[i]->queryBSP(start,end,norm))
       return tmp;
   }
   return 0;

@@ -51,24 +51,25 @@ BSPNode::BSPNode(BSPDiskNode **input) {
 }
 #define LITTLEVALUE .0000001
 
-float BSPNode::intersects(const Vector &start, const Vector &end) const {
+float BSPNode::intersects(const Vector &start, const Vector &end, Vector & norm) const {
 	float peq1 = plane_eqn(start);
 	float peq2 = plane_eqn(end);
 
 	// n = normal, u = origin, v = direction vector
 	if(peq1==0 && peq2==0) { // on the plane; shouldn't collide unless the plane is a virtual plane
 	    return 
-	      ((front!=NULL)?front->intersects(start, end):0)||
-	      ((back!=NULL)?back->intersects(start, end):LITTLEVALUE);		
+	      ((front!=NULL)?front->intersects(start, end,norm):0)||
+	      ((back!=NULL)?back->intersects(start, end,norm):LITTLEVALUE);		
 	}
 
 	if(peq1<=0 && peq2<=0) {
-		return (back!=NULL)?back->intersects(start, end):(start-end).Magnitude()+LITTLEVALUE; // if lies completely within a back leaf, then its inside the object
+		return (back!=NULL)?back->intersects(start, end, norm):(start-end).Magnitude()+LITTLEVALUE; // if lies completely within a back leaf, then its inside the object
 	}
 	else if(peq1>=0 && peq2>=0) {
-		return (front!=NULL)?front->intersects(start, end):false; // if lies completely on the outside of a front leaf, then outside object
+		return (front!=NULL)?front->intersects(start, end, norm):false; // if lies completely on the outside of a front leaf, then outside object
 	}
 	else {
+	  norm = n;
 	  float temp;
 	  Vector u = start;
 	  Vector v = end - start;
@@ -76,13 +77,13 @@ float BSPNode::intersects(const Vector &start, const Vector &end) const {
 	  u = t*v;
 	  Vector intersection = start + u;
 	  if (peq1>0) {
-	    if (temp = (back!=NULL)?back->intersects(intersection, end):LITTLEVALUE)
+	    if (temp = (back!=NULL)?back->intersects(intersection, end, norm):LITTLEVALUE)//pass in 'v' for the value of the normal, cus this one would intersect farther off.
 	      return u.Magnitude()+temp;
-	    return ((front!=NULL)?front->intersects(start, intersection):false);
+	    return ((front!=NULL)?front->intersects(start, intersection,norm):false);
 	  } else {
-	    if (temp = (back!=NULL)?back->intersects(start,intersection):LITTLEVALUE)
+	    if (temp = (back!=NULL)?back->intersects(start,intersection,norm):LITTLEVALUE)
 	      return temp;
-	    if (temp = ((front!=NULL)?front->intersects(intersection,end):false))
+	    if (temp = ((front!=NULL)?front->intersects(intersection,end,norm):false))
 	      return temp + u.Magnitude();
 	    return 0;
 	  }
@@ -90,18 +91,18 @@ float BSPNode::intersects(const Vector &start, const Vector &end) const {
 	return 0;
 }
 
-bool BSPNode::intersects(const Vector &pt, const float err) const {
+bool BSPNode::intersects(const Vector &pt, const float err, Vector &norm) const {
   float peq = plane_eqn(pt);
   if(peq>=err) { 
-    return (front!=NULL)?front->intersects(pt,err):false;
+    return (front!=NULL)?front->intersects(pt,err,norm):false;
   }
   else if(peq>-err&&peq<err) { // if on the plane and not virtual, then its not in the object
-    return ((back!=NULL)?back->intersects(pt,err):true)
-      || ((front!=NULL)?front->intersects(pt,err):false);
+    return ((back!=NULL)?back->intersects(pt,err,norm):true)
+      || ((front!=NULL)?front->intersects(pt,err,norm):false);
     
   }
   else {
-    return (back!=NULL)?back->intersects(pt,err):true; // if behind and no back children, then there are no more subdivisions and thus this thing is in
+    return (back!=NULL)?back->intersects(pt,err,norm):true; // if behind and no back children, then there are no more subdivisions and thus this thing is in
   }
 }
 
@@ -109,12 +110,12 @@ bool BSPNode::intersects(const BSPTree *t1) const {
 	return false;
 }
 
-float BSPTree::intersects(const Vector &start, const Vector &end) const {
-	return root->intersects(start, end);;
+float BSPTree::intersects(const Vector &start, const Vector &end, Vector & norm) const {
+	return root->intersects(start, end,norm);
 }
 
-bool BSPTree::intersects(const Vector &pt, const float err) const {
-	return root->intersects(pt,err);
+bool BSPTree::intersects(const Vector &pt, const float err, Vector & norm) const {
+	return root->intersects(pt,err, norm);
 }
 
 bool BSPTree::intersects(const BSPTree *t1) const {

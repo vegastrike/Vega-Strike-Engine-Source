@@ -230,8 +230,8 @@ public:
   float getMinDis(const Vector &pnt);
   bool querySphere (const Vector &pnt, float err);
   float querySphere (const Vector &st, const Vector &end, float err);
-  float queryBSP (const Vector &st, const Vector & end);
-  bool queryBSP (const Vector &pnt, float err);
+  float queryBSP (const Vector &st, const Vector & end, Vector & normal);
+  bool queryBSP (const Vector &pnt, float err, Vector & normal);
   bool queryFrustum (float frustum[6][4]);
 
   /**Queries the bounding box with a ray.  1 if ray hits in front... -1 if ray

@@ -216,7 +216,8 @@ bool Unit::OneWayCollide (Unit * target) {//do each of these bubbled subunits co
   for (i=0;i<nummesh;i++) {
   //query-sphery
   }
-  if (queryBSP(target->Position(), target->rSize()))
+  Vector normal;
+  if (queryBSP(target->Position(), target->rSize(), normal))
       return true;
   for (i=0;i<numsubunit;i++) {
     if (subunits[i]->OneWayCollide(target))
@@ -259,7 +260,8 @@ bool Beam::Collide (Unit * target) {
   }
   //  if (target->queryBoundingBox(center,direction,0)==0)
   //    return false;
-  if (distance = target->queryBSP(center,center+direction*curlength)) { 
+  Vector normal;//apply shields
+  if (distance = target->queryBSP(center,center+direction*curlength,normal)) { 
 
     curlength = distance;
     impact|=IMPACT;
