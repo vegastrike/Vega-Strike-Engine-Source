@@ -94,7 +94,7 @@ AC_EGREP_CPP(yes,
 #if defined(__APPLE__) || defined(MACOSX)
   yes
 #endif
-], is_macosx=yes, is_macosx =no )
+], [is_macosx=yes], [is_macosx=no] )
 AC_MSG_RESULT([$is_macosx])
 
 if test "x$is_macosx" = "xyes" ; then
