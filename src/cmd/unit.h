@@ -340,7 +340,9 @@ class Unit {
   bool killed;
   ///Should not be drawn
   bool invisible;
-  enum {NOT_DOCKED, DOCKED_INSIDE, DOCKED} docked;
+  
+  enum {NOT_DOCKED=0x0, DOCKED_INSIDE=0x1, DOCKED=0x2, DOCKING_UNITS=0x4} DOCKENUM;
+  char docked;
   ///How many lists are referencing us
   int ucref;
   ///How big is this unit
@@ -367,7 +369,8 @@ class Unit {
   void BuildBSPTree (const char *filename, bool vplane=false, Mesh * hull=NULL);//if hull==NULL, then use meshdata **
   ///returns -1 if unit cannot dock, otherwise returns which dock it can dock at
   int CanDockWithMe (Unit * dockingunit) ;
-  void PerformDockingOptions (Unit * dockedUnit);
+  void PerformDockingOperations ();
+  void FreeDockingPort(unsigned int whichport);
 public:
   bool RequestClearance (Unit * dockingunit);
   bool Dock (Unit * unitToDockWith);
@@ -400,6 +403,7 @@ public:
   static void ProcessDeleteQueue();
   ///Split this mesh with into 2^level submeshes at arbitrary planes
   void Split (int level);
+  void TransferUnitToSystem (unsigned int whichJumpQueue, class StarSystem *&previouslyActiveStarSystem, bool DoSightAndSound);
   ///Initialize many of the defaults inherant to the constructor
   void Init();
   void ActivateJumpDrive (int destination=0);

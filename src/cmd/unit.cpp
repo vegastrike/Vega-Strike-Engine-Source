@@ -118,7 +118,8 @@ void Unit::SetResolveForces (bool ys) {
 
 void Unit::ActivateJumpDrive (int destination) {
   const int jumpfuelratio=1;
-  if (jump.drive!=-2&&(energy>jump.energy&&(jump.energy>=0||fuel>-jump.energy))) {
+
+  if (((docked&(DOCKED|DOCKED_INSIDE))==0)&&jump.drive!=-2&&(energy>jump.energy&&(jump.energy>=0||fuel>-jump.energy))) {
     jump.drive = destination;
     if (jump.energy>0)
       energy-=jump.energy;
@@ -142,6 +143,7 @@ void Unit::SetNebula (Nebula * neb) {
 }
 void Unit::Init()
 {
+  docked=NOT_DOCKED;
   SubUnit =0;
   jump.energy = 100;
   jump.delay=5;

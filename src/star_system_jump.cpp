@@ -11,7 +11,7 @@
 #include <assert.h>
 #include "gfx/cockpit.h"
 #include "audiolib.h"
-
+#include "cmd/images.h"
 static Hashtable<std::string, StarSystem ,char [127]> star_system_table;
 
 void StarSystem::AddStarsystemToUniverse(const string &mname) {
@@ -110,6 +110,72 @@ static void VolitalizeJumpAnimation (const int ani) {
     AnimationNulls.push_back (ani);
   }
 } 
+void Unit::TransferUnitToSystem (unsigned int kk, StarSystem * &savedStarSystem, bool dosightandsound) {
+    if (pendingjump[kk]->orig->RemoveUnit (this)) {
+#ifdef JUMP_DEBUG
+      fprintf (stderr,"Unit removed from star system\n");
+#endif
+
+      ///eradicating from system, leaving no trace
+      this->RemoveFromSystem();
+      pendingjump[kk]->dest->AddUnit (this);
+      this->Target(NULL);
+      UnitCollection::UnitIterator iter = pendingjump[kk]->orig->getUnitList()->createIterator();
+      Unit * unit;
+      while((unit = iter.current())!=NULL) {
+	if (unit->Target()==this) {
+	  unit->Target (pendingjump[kk]->jumppoint.GetUnit());
+	  unit->ActivateJumpDrive (0);
+	}
+	iter.advance();
+      }
+      if (this==_Universe->AccessCockpit()->GetParent()) {//originally fighters[0] not sure if hti sis the right solution
+#ifdef JUMP_DEBUG
+      fprintf (stderr,"Unit is a player character...changing scene graph\n");
+#endif
+	savedStarSystem->SwapOut();
+	savedStarSystem = pendingjump[kk]->dest;
+	pendingjump[kk]->dest->SwapIn();
+      }
+      _Universe->setActiveStarSystem(pendingjump[kk]->dest);
+      vector <Unit *> possibilities;
+      for (float tume=0;tume<=4*SIMULATION_ATOM;tume+=GetElapsedTime()) {
+	pendingjump[kk]->dest->Update(1);
+      }
+      iter = pendingjump[kk]->dest->getUnitList()->createIterator();
+      Unit * primary;
+      while ((primary = iter.current())!=NULL) {
+	vector <Unit *> tmp;
+	tmp = ComparePrimaries (primary,pendingjump[kk]->orig);
+	if (!tmp.empty()) {
+	  possibilities.insert (possibilities.end(),tmp.begin(), tmp.end());
+	}
+	iter.advance();
+      }
+      if (!possibilities.empty()) {
+	static int jumpdest=235034;
+	this->SetCurPosition(possibilities[jumpdest%possibilities.size()]->Position());
+	jumpdest+=23231;
+      }
+      DealPossibleJumpDamage (this);
+      static int jumparrive=AUDCreateSound(vs_config->getVariable ("unitaudio","jumparrive", "sfx43.wav"),false);
+      if (dosightandsound)
+	AUDPlay (jumparrive,this->LocalPosition(),this->GetVelocity(),1);
+    } else {
+#ifdef JUMP_DEBUG
+      fprintf (stderr,"Unit FAILED remove from star system\n");
+#endif
+    }
+    if (docked&DOCKING_UNITS) {
+      for (unsigned int i=0;i<image->dockedunits.size();i++) {
+	Unit * unut;
+	if (NULL!=(unut=image->dockedunits[i]->uc.GetUnit())) {
+	  unut->TransferUnitToSystem (kk,savedStarSystem,dosightandsound);
+	}
+      }
+    }
+}
+
 void StarSystem::DrawJumpStars() {
   for (unsigned int kk=0;kk<pendingjump.size();kk++) { 
     int k=pendingjump[kk]->animation;
@@ -147,6 +213,7 @@ void StarSystem::DrawJumpStars() {
   }
 }
 
+
 void StarSystem::ProcessPendingJumps() {
   for (unsigned int kk=0;kk<pendingjump.size();kk++) {
     if (pendingjump[kk]->delay>=0) {
@@ -175,61 +242,7 @@ void StarSystem::ProcessPendingJumps() {
     StarSystem * savedStarSystem = _Universe->activeStarSystem();
     bool dosightandsound = ((pendingjump[kk]->dest==savedStarSystem)||un==_Universe->AccessCockpit()->GetParent());
     _Universe->setActiveStarSystem (pendingjump[kk]->orig);
-    if (pendingjump[kk]->orig->RemoveUnit (un)) {
-#ifdef JUMP_DEBUG
-      fprintf (stderr,"Unit removed from star system\n");
-#endif
-
-      ///eradicating from system, leaving no trace
-      un->RemoveFromSystem();
-      pendingjump[kk]->dest->AddUnit (un);
-      un->Target(NULL);
-      UnitCollection::UnitIterator iter = pendingjump[kk]->orig->drawList->createIterator();
-      Unit * unit;
-      while((unit = iter.current())!=NULL) {
-	if (unit->Target()==un) {
-	  unit->Target (pendingjump[kk]->jumppoint.GetUnit());
-	  unit->ActivateJumpDrive (0);
-	}
-	iter.advance();
-      }
-      if (un==_Universe->AccessCockpit()->GetParent()) {//originally fighters[0] not sure if hti sis the right solution
-#ifdef JUMP_DEBUG
-      fprintf (stderr,"Unit is a player character...changing scene graph\n");
-#endif
-	savedStarSystem->SwapOut();
-	savedStarSystem = pendingjump[kk]->dest;
-	pendingjump[kk]->dest->SwapIn();
-      }
-      _Universe->setActiveStarSystem(pendingjump[kk]->dest);
-      vector <Unit *> possibilities;
-      for (float tume=0;tume<=4*SIMULATION_ATOM;tume+=GetElapsedTime()) {
-	pendingjump[kk]->dest->Update(1);
-      }
-      iter = pendingjump[kk]->dest->drawList->createIterator();
-      Unit * primary;
-      while ((primary = iter.current())!=NULL) {
-	vector <Unit *> tmp;
-	tmp = ComparePrimaries (primary,pendingjump[kk]->orig);
-	if (!tmp.empty()) {
-	  possibilities.insert (possibilities.end(),tmp.begin(), tmp.end());
-	}
-	iter.advance();
-      }
-      if (!possibilities.empty()) {
-	static int jumpdest=235034;
-	un->SetCurPosition(possibilities[jumpdest%possibilities.size()]->Position());
-	jumpdest+=23231;
-      }
-      DealPossibleJumpDamage (un);
-      static int jumparrive=AUDCreateSound(vs_config->getVariable ("unitaudio","jumparrive", "sfx43.wav"),false);
-      if (dosightandsound)
-	AUDPlay (jumparrive,un->LocalPosition(),un->GetVelocity(),1);
-    } else {
-#ifdef JUMP_DEBUG
-      fprintf (stderr,"Unit FAILED remove from star system\n");
-#endif
-    }
+    un->TransferUnitToSystem (kk, savedStarSystem,dosightandsound);
     static float JumpStarSize = XMLSupport::parse_float (vs_config->getVariable ("graphics","jumpgatesize","1.75"));
     if (dosightandsound) {
       Vector p,q,r;

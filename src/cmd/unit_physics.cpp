@@ -30,6 +30,7 @@
 #include "vs_globals.h"
 //#ifdef WIN32
 #include "gfx/planetary_transform.h"
+#include "gfx/cockpit.h"
 float copysign (float x, float y) {
 	if (y>0)
 			return x;
@@ -285,7 +286,27 @@ void Unit::RollTorque(float amt) {
 }
 
 const float VELOCITY_MAX=1000;
+int req=0;
+int doc=0;
+int und=0;
 void Unit::UpdatePhysics (const Transformation &trans, const Matrix transmat, const Vector & cum_vel,  bool lastframe, UnitCollection *uc) {
+  Unit * docker;
+  if (docker=_Universe->AccessCockpit()->GetParent()) {
+    if (req) {
+      fprintf (stderr,"request %d", RequestClearance (docker));
+      req=false;
+    }
+    if (doc) {
+      fprintf (stderr,"dock %d", docker->Dock(this));
+      doc=false;
+    }
+    if (und) {
+      fprintf (stderr,"udock %d", docker->UnDock(this));
+      und=false;
+    }
+    
+
+  }
   if (fuel<0)
     fuel=0;
   if (cloaking>=cloakmin) {
@@ -358,6 +379,11 @@ void Unit::UpdatePhysics (const Transformation &trans, const Matrix transmat, co
   cumulative_transformation.Compose (trans,transmat);
   cumulative_transformation.to_matrix (cumulative_transformation_matrix);
   cumulative_velocity = TransformNormal (transmat,Velocity)+cum_vel;
+
+  if (docked&DOCKING_UNITS) {
+    PerformDockingOperations();
+  }
+
   Transformation * ct;
   float * ctm;
   SetPlanetHackTransformation (ct,ctm);
@@ -418,7 +444,7 @@ void Unit::UpdatePhysics (const Transformation &trans, const Matrix transmat, co
     if (dead)
       Kill();
   }
-  if ((!SubUnit)&&(!killed)&&(docked!=DOCKED_INSIDE)) {
+  if ((!SubUnit)&&(!killed)&&(!(docked&DOCKED_INSIDE))) {
     UpdateCollideQueue();
   }
 }

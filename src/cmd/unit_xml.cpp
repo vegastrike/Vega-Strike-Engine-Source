@@ -322,7 +322,7 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
     }
     break;
   case DOCK:
-    tempbool=true;
+    tempbool=false;
     assert (xml->unitlevel==1);
     xml->unitlevel++;
     pos=Vector(0,0,0);
