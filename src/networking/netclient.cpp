@@ -70,7 +70,7 @@ string serverport;
 typedef vector<Client *>::iterator VC;
 
 /*************************************************************/
-/**** Tool funcitons                                      ****/
+/**** Tool functions                                      ****/
 /*************************************************************/
 
 typedef vector<ObjSerial>::iterator ObjI;
@@ -114,6 +114,8 @@ NetClient::NetClient()
     for( int i=0; i<MAXCLIENTS; i++)
         Clients[i] = NULL;
 	ingame = false;
+	current_freq = MIN_COMMFREQ;
+	selected_freq = MIN_COMMFREQ;
 #ifdef NETCOMM
 	NetComm = new NetworkCommunication();
 #endif
@@ -1578,12 +1580,13 @@ bool	NetClient::jumpRequest( string newsystem)
 /*** COMMUNICATION STUFF                                                               ****/
 /******************************************************************************************/
 
-void	NetClient::startCommunication( float freq)
+void	NetClient::startCommunication()
 {
 #ifdef NETCOMM
+	selected_freq = current_freq;
 	NetBuffer netbuf;
-	netbuf.addFloat( freq);
-	NetComm->InitSession( freq);
+	netbuf.addFloat( selected_freq);
+	NetComm->InitSession( selected_freq);
 	//cerr<<"Session started."<<endl;
 	//cerr<<"Grabbing an image"<<endl;
 	Packet p;
@@ -1594,11 +1597,11 @@ void	NetClient::startCommunication( float freq)
 #endif
 }
 
-void	NetClient::stopCommunication( float freq)
+void	NetClient::stopCommunication()
 {
 #ifdef NETCOMM
 	NetBuffer netbuf;
-	netbuf.addFloat( freq);
+	netbuf.addFloat( selected_freq);
 	Packet p;
 	p.send( CMD_STOPNETCOMM, serial, netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, NULL, this->clt_sock,
             __FILE__, PSEUDO__LINE__(1578) );
@@ -1606,4 +1609,26 @@ void	NetClient::stopCommunication( float freq)
 	cerr<<"Stopped communication session"<<endl;
 #endif
 }
+
+void	NetClient::decreaseFrequency()
+{
+	if( current_freq == MIN_COMMFREQ)
+		current_freq = MAX_COMMFREQ;
+	else
+		current_freq -= .1;
+}
+
+void	NetClient::increaseFrequency()
+{
+	if( current_freq == MAX_COMMFREQ)
+		current_freq = MIN_COMMFREQ;
+	else
+		current_freq += .1;
+}
+
+float	NetClient::getSelectedFrequency()
+{ return this->selected_freq;}
+
+float	NetClient::getCurrentFrequency()
+{ return this->current_freq;}
 

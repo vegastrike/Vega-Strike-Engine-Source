@@ -1,6 +1,7 @@
 
 *** GENERAL ************************************************************
 
+- NOTE : network communication system is only working when 1 local player
 - Implement a download manager -> Carsten is on that one
 - Use and "hand-shake" protocol between server and client
 - Interpolate orientation too ? (3 interpolations)

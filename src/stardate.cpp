@@ -87,3 +87,13 @@ string	StarDate::GetCurrentDate()
 	return ConvertDate( this->GetCurrentTime());
 }
 
+//Convert the string xxxx.y date format into a float representing the same data xxxx.y
+float	StarDate::GetFloatFromDate()
+{
+	float float_date;
+	string cur_date = this->GetFullCurrentDate();
+	sscanf( cur_date.c_str(), "%f", &float_date);
+
+	return float_date;
+}
+

@@ -47,9 +47,7 @@ struct StarShipControlKeyboard {
   bool startcomm;
   bool commchanged;
   bool killcomm;
-  float comm_freq;
-  float selected_freq;
-  void UnDirty() {sheltonpress=sheltonrelease=uppress=uprelease=downpress=downrelease=leftpress=leftrelease=rightpress=rightrelease=ABpress=ABrelease=accelpress=accelrelease=decelpress=decelrelease=rollrightpress=rollrightrelease=rollleftpress=rollleftrelease=0;jumpkey=startpress=stoppress=autopilot=dirty=switch_combat_mode=terminateauto=setunvel=switchmode=setnulvel=realauto=matchspeed=false;axial=vertical=horizontal=0;commchanged=startcomm=killcomm=false;selected_freq=comm_freq=MIN_COMMFREQ;}
+  void UnDirty() {sheltonpress=sheltonrelease=uppress=uprelease=downpress=downrelease=leftpress=leftrelease=rightpress=rightrelease=ABpress=ABrelease=accelpress=accelrelease=decelpress=decelrelease=rollrightpress=rollrightrelease=rollleftpress=rollleftrelease=0;jumpkey=startpress=stoppress=autopilot=dirty=switch_combat_mode=terminateauto=setunvel=switchmode=setnulvel=realauto=matchspeed=false;axial=vertical=horizontal=0;commchanged=startcomm=killcomm=false;}
   StarShipControlKeyboard() {UnDirty();}
 };
 static vector <StarShipControlKeyboard> starshipcontrolkeys;
@@ -155,14 +153,14 @@ void FlyByKeyboard::Execute () {
 
 void FlyByKeyboard::Execute (bool resetangvelocity) {
 #define SSCK starshipcontrolkeys[whichplayer]
-  if(Network!=NULL && SSCK.killcomm) {
+  if(Network!=NULL && SSCK.killcomm && whichplayer==0) {
 	printf( "Stopping a NETCOMM\n");
-	Network[whichplayer].stopCommunication(SSCK.selected_freq);
+	Network[whichplayer].stopCommunication();
 	SSCK.killcomm=false;
   }
-  if(Network!=NULL && SSCK.startcomm && SSCK.commchanged) {
+  if(Network!=NULL && SSCK.startcomm && SSCK.commchanged && whichplayer==0) {
 	printf( "Starting a NETCOMM\n");
-	Network[whichplayer].startCommunication(SSCK.selected_freq);
+	Network[whichplayer].startCommunication();
 	SSCK.commchanged=false;
   }
   if (SSCK.setunvel) {
@@ -351,8 +349,9 @@ if(Network!=NULL)
 {
   if (g().dirty)g().UnDirty();
   switch (k) {
-  case DOWN: if( g().comm_freq==MIN_COMMFREQ) g().comm_freq=MAX_COMMFREQ; else g().comm_freq -= .1;
-    break;
+  case DOWN:
+	Network[0].decreaseFrequency();
+  break;
   case UP:
   case PRESS:
   case RELEASE:
@@ -367,8 +366,9 @@ if(Network!=NULL)
 {
   if (g().dirty)g().UnDirty();
   switch (k) {
-  case DOWN: if( g().comm_freq==MAX_COMMFREQ) g().comm_freq=MIN_COMMFREQ; else g().comm_freq += .1;
-    break;
+  case DOWN:
+	Network[0].increaseFrequency();
+  break;
   case UP:
   case PRESS:
   case RELEASE:
@@ -384,6 +384,8 @@ if(Network!=NULL)
   if (g().dirty)g().UnDirty();
   switch (k) {
   case DOWN:
+  case UP:
+  case PRESS:
 	printf( "Pressed NETCOMM key !!!\n");
 	if(g().startcomm==true)
 	{
@@ -393,13 +395,10 @@ if(Network!=NULL)
 	else
 	{
 		// If starting a comm we set the selected_freq to the current one
-		g().selected_freq = g().comm_freq;
 		g().startcomm=true;
 	}
 	g().commchanged=true;
-    break;
-  case UP:
-  case PRESS:
+  break;
   case RELEASE:
   case RESET:
     break;

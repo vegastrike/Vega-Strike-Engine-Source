@@ -78,6 +78,8 @@ class	NetClient
 		unsigned int		deltatime;
 		bool				jumpok;
 		bool				ingame;
+		float				current_freq;
+		float				selected_freq;
 
 		void	receiveData();
 		void	readDatafiles();
@@ -148,9 +150,13 @@ class	NetClient
 		/********************* Communication stuff **********************/
 	private:
 	public:
-		void	startCommunication( float freq);
-		void	stopCommunication( float freq);
+		void	startCommunication();
+		void	stopCommunication();
 		void	sendWebcamPicture();
+		void	increaseFrequency();
+		void	decreaseFrequency();
+		float	getSelectedFrequency();
+		float	getCurrentFrequency();
 };
 
 #endif

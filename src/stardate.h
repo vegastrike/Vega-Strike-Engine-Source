@@ -28,6 +28,8 @@ class StarDate
 		double	GetCurrentTime();
 		string	GetCurrentDate();
 		string	GetFullCurrentDate();
+
+		float	GetFloatFromDate();
 };
 
 #endif

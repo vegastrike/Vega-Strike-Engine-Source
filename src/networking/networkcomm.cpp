@@ -9,8 +9,6 @@
 #endif
 
 #include "networkcomm.h"
-#include "netbuffer.h"
-#include "packet.h"
 
 NetworkCommunication::NetworkCommunication()
 {
@@ -40,10 +38,7 @@ string	NetworkCommunication::GrabImage()
 		//cerr<<"--- Trying to grab an image..."<<endl;
 		//cerr<<"\t";
 		jpeg_str = Webcam->CaptureImage();
-		NetBuffer netbuf;
-		netbuf.addString( jpeg_str);
 		//cerr<<"--- grabbing finished"<<endl;
-		// We send this capture to server which will redirect it to concerned clients
 	}
 #endif
 	return jpeg_str;
