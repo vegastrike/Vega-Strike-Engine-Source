@@ -50,7 +50,7 @@ AnimatedTexture::AnimatedTexture (const char *file,int stage, enum FILTER imm,bo
   VSFile f;
   VSError err = f.OpenReadOnly( file, AnimFile);
   //bool setdir=false;
-  if (err==Shared) {
+  if (err<=Ok) {
     float width,height;
     f.Fscanf("%f %f", &width, &height);//it's actually an animation in global animation shares
     //setdir=true;
