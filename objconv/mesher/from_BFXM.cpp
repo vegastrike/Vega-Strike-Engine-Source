@@ -426,7 +426,7 @@ void BFXMToXmesh(FILE* Inputfile, FILE* Outputfile, FILE * OutputObj, FILE * mtl
                           texind3=texcount-2;
                           texind4=texcount-1;
                         }
-                        fprintf (OutputObj,"f %d/%d/%d %d/%d/%d %d/%d/%d\n",
+                        fprintf (OutputObj,"f %d/%d/%d %d/%d/%d %d/%d/%d %d/%d/%d\n",
                                  ind1+indoffset,texind1,ind1+normoffset,
                                  ind2+indoffset,texind2,ind2+normoffset,
                                  ind3+indoffset,texind3,ind3+normoffset,
