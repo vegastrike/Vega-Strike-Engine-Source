@@ -40,7 +40,7 @@ int main (int argc,char *argv[]) {
     boost::python::class_builder <SuperClass,PythonClass< SuperClass > > BaseClass (name,myclass); \
     BaseClass.def (boost::python::constructor<>()); \
     BaseClass.def (&SuperClass::Execute,"Execute",PythonClass< SuperClass >::default_Execute); \
-    BaseClass.def (&PythonClass<SuperClass>::IncRef,"IncRef"); \
+    BaseClass.def (&SuperClass::IncRef,"IncRef"); \
 }
 //    boost::python::class_builder <SuperClass> TempClass (name,"SuperClass"); 
 
@@ -57,8 +57,9 @@ template <class SuperClass> class PythonClass:public SuperClass {
     self = self_;
     last_instance=this;
   }
-  void IncRef() {
+  virtual void IncRef() {
     Py_XINCREF(self);
+    boost::python::callback<void>::call_method(self, "IncRef");
   }
   virtual void Execute () {
     boost::python::callback <void>::call_method (self,"Execute");
