@@ -96,49 +96,39 @@ void GFXOptimizeList (GFXVertex * old, int numV, GFXVertex ** nw, int * nnewV, u
   free (ijk);  
 }
 
+static GLenum PolyLookup (POLYTYPE poly) {
+    switch (poly) {
+    case GFXTRI:
+      return GL_TRIANGLES;
+    case GFXQUAD:
+      return GL_QUADS;
+    case GFXTRISTRIP:
+      return GL_TRIANGLE_STRIP;
+    case GFXQUADSTRIP:
+      return GL_QUAD_STRIP;
+    case GFXTRIFAN:
+      return GL_TRIANGLE_FAN;
+    case GFXPOLY:
+      return GL_POLYGON;
+    case GFXLINE:
+      return GL_LINES;
+    case GFXLINESTRIP:
+      return GL_LINE_STRIP;
+    case GFXPOINT:
+      return GL_POINTS;
+    default:
+      return GL_TRIANGLES;
+    }
+}
 
 void GFXVertexList::Init (enum POLYTYPE *poly, int numVertices, const GFXVertex *vertices, const GFXColorVertex * colors, int numlists, int *offsets, bool Mutable, unsigned int * indices) {
   int stride=0;
   changed = HAS_COLOR*((colors!=NULL)?1:0);
   mode = new GLenum [numlists];
   for (int pol=0;pol<numlists;pol++) {
-    switch (poly[pol]) {
-    case GFXTRI:
-      mode[pol] = GL_TRIANGLES;
-      break;
-    case GFXQUAD:
-      mode[pol] = GL_QUADS;
-      break;
-    case GFXTRISTRIP:
-      mode[pol] = GL_TRIANGLE_STRIP;
-      break;
-    case GFXQUADSTRIP:
-      mode[pol] = GL_QUAD_STRIP;
-      break;
-    case GFXTRIFAN:
-      mode[pol] = GL_TRIANGLE_FAN;
-      break;
-    case GFXPOLY:
-      mode[pol] = GL_POLYGON;
-      break;
-    case GFXLINE:
-      mode[pol] = GL_LINES;
-      break;
-    case GFXLINESTRIP:
-      mode[pol] = GL_LINE_STRIP;
-      break;
-    case GFXPOINT:
-      mode[pol]=GL_POINTS;
-      break;
-    }
+    mode[pol]=PolyLookup (poly[pol]);
+
   }
-  /* //Deprecated with the onset of indexed vlists
-  if (numlists==1) {
-    offsets = new int[1];
-    offsets[0]= numVertices;
-  }
-  assert (offsets!=NULL);
-  */  
   this->numlists = numlists;
   this->numVertices = numVertices;
   if (numVertices) {
@@ -478,8 +468,36 @@ void GFXVertexList::EndDrawState(GFXBOOL lock) {
     GFXColor4f(1,1,1,1);
   }
 }
+void GFXVertexList::Draw (enum POLYTYPE poly, int numV, unsigned char *index) {
+  char tmpchanged = changed;
+  changed = sizeof (unsigned char) | ((~HAS_INDEX)&changed);
+  GLenum myenum = PolyLookup (poly);
+  INDEX tmp; tmp.b =(index);
+  Draw (&myenum,tmp,1,&numV);
+  changed = tmpchanged;
+}
+void GFXVertexList::Draw (enum POLYTYPE poly, int numV, unsigned short *index) {
+  char tmpchanged = changed;
+  changed = sizeof (unsigned short) | ((~HAS_INDEX)&changed);
+  GLenum myenum = PolyLookup (poly);
+  INDEX tmp; tmp.s =(index);
+  Draw (&myenum,tmp,1,&numV);
+  changed = tmpchanged;
+}
+void GFXVertexList::Draw (enum POLYTYPE poly, int numV, unsigned int *index) {
+  char tmpchanged = changed;
+  changed = sizeof (unsigned int) | ((~HAS_INDEX)&changed);
+  GLenum myenum = PolyLookup (poly);
+  INDEX tmp;tmp.i= (index);
+  Draw (&myenum,tmp,1,&numV);
+  changed = tmpchanged;
+}
+
 void GFXVertexList::Draw()
 {
+  Draw (mode,index,numlists,offsets);
+}
+void GFXVertexList::Draw (GLenum *mode,const INDEX index, const int numlists, const int *offsets) {
 #ifdef USE_DISPLAY_LISTS
   if(display_list!=0) {
     GFXCallList(display_list);

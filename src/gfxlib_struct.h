@@ -262,6 +262,7 @@ class /*GFXDRVAPI*/ GFXVertexList {
   void Init (enum POLYTYPE *poly, int numVertices, const GFXVertex * vert, const GFXColorVertex *colors, int numlists, int *offsets, bool Mutable,unsigned int * indices);
   ///Propagates modifications to the display list
   void RefreshDisplayList();
+  void Draw (GLenum *poly, const INDEX index, const int numLists, const int *offsets);
 public:
   ///creates a vertex list with 1 polytype and a given number of vertices
   inline GFXVertexList(enum POLYTYPE poly, int numVertices, const GFXVertex *vertices,int numindices, bool Mutable=false, unsigned int * index=NULL){Init (&poly, numVertices, vertices,NULL, 1,&numindices, Mutable,index);}
@@ -287,6 +288,9 @@ public:
   void BeginDrawState(GFXBOOL lock=GFXTRUE);
   ///Draws a single copy of the mass-loaded vlist
   void Draw();
+  void Draw(enum POLYTYPE poly, int numV, unsigned char * index);
+  void Draw(enum POLYTYPE poly, int numV, unsigned short *index);
+  void Draw(enum POLYTYPE poly, int numV, unsigned int *index);
   ///Loads draw state and prepares to draw only once
   void DrawOnce (){LoadDrawState();BeginDrawState(GFXFALSE);Draw();EndDrawState(GFXFALSE);}
   void EndDrawState(GFXBOOL lock=GFXTRUE);
@@ -373,6 +377,13 @@ enum STATE {
 	TEXTURE0,
 	TEXTURE1,
 	CULLFACE
+};
+
+enum CLIPSTATE {
+  GFX_NOT_VISIBLE,
+  GFX_PARTIALLY_VISIBLE,
+  GFX_TOTALLY_VISIBLE
+
 };
 
 /**

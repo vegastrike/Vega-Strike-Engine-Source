@@ -5,6 +5,7 @@ INCLUDES = -I ../
 
 
 libgldrv_a_SOURCES =				\
+	gl_clip.cpp				\
 	gl_globals.cpp				\
 	gl_globals.h				\
 	gl_init.cpp				\

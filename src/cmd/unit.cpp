@@ -442,6 +442,7 @@ bool Unit::queryFrustum(float frustum [6][4]) {
 #endif
   for (i=0;i<nummesh;i++) {
         TargetPoint = Transform(cumulative_transformation_matrix,meshdata[i]->Position());
+	
 	if (GFXSphereInFrustum (frustum, 
 				TargetPoint,
 				meshdata[i]->rSize()
@@ -506,6 +507,15 @@ void Unit::Draw(const Transformation &parent, const Matrix parentMatrix)
 		continue;
       Vector TransformedPosition = Transform (cumulative_transformation_matrix,
 					      meshdata[i]->Position());
+#if 0
+      //This is a test of the box in frustum setup to be used with terrain
+      GFXBoxInFrustumModel (cumulative_transformation_matrix);
+      int tmp = GFXBoxInFrustum (meshdata[i]->corner_min(),meshdata[i]->corner_max());
+      if ((d==0)!=(tmp==0)) {
+	fprintf (stderr,"Mismatch for %s with Box being %d", name.c_str(),tmp);
+      }
+#endif
+
       float d = GFXSphereInFrustum(TransformedPosition,
 				   meshdata[i]->rSize()
 #ifdef VARIABLE_LENGTH_PQR
