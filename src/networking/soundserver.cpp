@@ -165,6 +165,7 @@ int main(int argc, char **argv) {
 	char origpath[65535];
 	getcwd (origpath,65534);
 	origpath[65534]=0;
+        fprintf(STD_OUT,"Current Path %s\n",origpath);
 #ifdef _WIN32
         int i;
 	for (i=strlen(argv[0]);argv[0][i]!='\\'&&argv[0][i]!='/'&&i>=0;i--) {
@@ -177,7 +178,10 @@ int main(int argc, char **argv) {
 		//vegastrike.config not found.  Let's check ../
 		chdir (".."); //gotta check outside bin dir
 	}
+        getcwd(origpath,65534);
+        fprintf(STD_OUT,"Final Path %s\n",origpath);
 	}
+
 	Mix_Music *music=NULL;
 	int audio_rate,audio_channels,
  		// set this to any of 512,1024,2048,4096
@@ -247,9 +251,12 @@ int main(int argc, char **argv) {
 						fprintf(STD_OUT, "\n[PLAYING %s WITH %d FADEIN AND %d FADEOUT]\n",str.c_str(),fadein,fadeout);
 						curmus=str;
 					} else {
-						fprintf(STD_OUT, "\n[UNABLE TO PLAY %s WITH %d FADEIN AND %d FADEOUT]\n",str.c_str(),fadein,fadeout);
+                                          char mycurpath[8192];
+                                          getcwd(mycurpath,8191);
+                                          mycurpath[8191]='\0';
+                                          fprintf(STD_OUT, "\n[UNABLE TO PLAY %s IN %s WITH %d FADEIN AND %d FADEOUT]\n",str.c_str(),mycurpath,fadein,fadeout);
 					}
-				} else {
+				} else { 
 					fprintf(STD_OUT, "\n[%s WITH %d FADEIN AND %d FADEOUT IS ALREADY PLAYING]\n",str.c_str(),fadein,fadeout);
 				}
 				fflush(STD_OUT);
