@@ -5,9 +5,13 @@
 #include "bgrab.h"
 #endif
 #if defined( _WIN32) && !defined( __CYGWIN__)
+#ifndef DSHOW
 #include <windows.h>
 #include <vfw.h>
 //#include <afx.h>
+#else
+#include <dshow.h>
+#endif
 #endif
 #ifdef __APPLE__
 #include <QuickTimeComponents.h>
@@ -39,10 +43,19 @@ class	WebcamSupport
 		char	channeltext[128];
 #endif
 #if defined(_WIN32) && !defined(__CYGWIN__)
+#ifndef DSHOW
 		CAPSTATUS		gCapStatus ;
 		CAPDRIVERCAPS	gCapDriverCaps ;
 		HWND			capvideo, hwndCap;
 		CAPTUREPARMS	capparam;
+#else
+		IGraphBuilder *pGraph;
+		ICaptureGraphBuilder2 *pCaptureGraph = NULL;
+		ICreateDevEnum *pDevEnum = NULL;
+		IEnumMoniker *pEnum = NULL;
+		IMoniker *pMoniker = NULL;
+		IBaseFilter *pCap = NULL;
+#endif
 #endif
 #ifdef __APPLE__
 		typedef struct
@@ -87,6 +100,21 @@ class	WebcamSupport
 
 // Windows specific stuff to convert images formats
 #if defined( _WIN32) && !defined( __CYGWIN__)
+#ifndef HAVE_BOOLEAN
+#define HAVE_BOOLEAN
+#define FALSE 0
+#define TRUE 1
+typedef unsigned char boolean;
+#endif
+#ifndef XMD_H
+#define XMD_H
+typedef int INT32;
+#endif
+#ifdef _WIN32
+#include <windows.h>
+#endif
+#include <string>
+
 extern "C" { 
 #include "jpeglib.h" 
 }

@@ -1,16 +1,3 @@
-#ifndef HAVE_BOOLEAN
-#define HAVE_BOOLEAN
-#define FALSE 0
-#define TRUE 1
-typedef unsigned char boolean;
-#endif
-#ifndef XMD_H
-#define XMD_H
-typedef int INT32;
-#endif
-#ifdef _WIN32
-#include <windows.h>
-#endif
 #include <iostream>
 #include "webcam_support.h"
 #include "lin_time.h"
@@ -27,6 +14,11 @@ extern bool cleanexit;
 //#include <Quickdraw.h>
 //#include <ApplicationServices/ApplicationServices.h>
 //#include <Carbon.h>
+#include <FixMath.h>
+#include <ImageCompression.h>
+#include <Movies.h>
+#include <QuickTimeComponents.h>
+#include <StandardFile.h>
 OSErr	ExhaustiveError(void)
 {
 	OSErr iErr;
@@ -132,15 +124,103 @@ int		WebcamSupport::Init()
 	}
 #endif
 #if defined(_WIN32) && !defined(__CYGWIN__)
-	capCaptureGetSetup(capvideo, &capparam, sizeof(CAPTUREPARMS));
+#ifndef DSHOW
+	//capCaptureGetSetup(capvideo, &capparam, sizeof(CAPTUREPARMS));
 
 	// Should put the params in gCapParams here
 
-	if( !capDriverConnect(capvideo, DEFAULT_CAPTURE_DRIVER))
-		exit(-1);
-    capDriverGetCaps(hwndCap, &gCapDriverCaps, sizeof(CAPDRIVERCAPS));
-    capGetStatus(hwndCap, &gCapStatus , sizeof(gCapStatus));
+	//GetDesktopWindow()->GetSafeHwnd()
+	HWND hWnd=capCreateCaptureWindow( "WebCam_Hidden_Window",
+        							WS_CHILD|WS_CLIPSIBLINGS, 0, 0, this->width, this->height, 
+									GetDesktopWindow(), 0xffff);
+	if(!hWnd)
+		DoError( -1, " creating capture window");
 
+	if( !capDriverConnect(hWnd, DEFAULT_CAPTURE_DRIVER))
+		DoError( -1, " connecting to capture device");
+    //capDriverGetCaps(hwndCap, &gCapDriverCaps, sizeof(CAPDRIVERCAPS));
+    //capGetStatus(hwndCap, &gCapStatus , sizeof(gCapStatus));
+#else
+	HRESULT hr = CoInitialize( NULL );
+
+	if( FAILED( hr ) )
+	{
+		cout << "Failed to initialise COM\n";
+		return 1;
+	}
+
+	// Create the filter graph
+	IGraphBuilder *pGraph;
+	hr = CoCreateInstance( CLSID_FilterGraph, NULL, CLSCTX_INPROC_SERVER,
+		IID_IGraphBuilder, (void **)&pGraph );
+
+	if( FAILED( hr ) )
+	{
+		cout << "Failed to create filter graph\n";
+		return 1;
+	}
+
+	// Create the capture graph
+	ICaptureGraphBuilder2 *pCaptureGraph = NULL;
+	hr = CoCreateInstance( CLSID_CaptureGraphBuilder2, NULL, CLSCTX_INPROC_SERVER,
+		IID_ICaptureGraphBuilder2, (void**)&pCaptureGraph );
+
+	if( FAILED( hr ) )
+	{
+		cout << "Couldn't create capture graph\n";
+		return 0;
+	}
+
+	pCaptureGraph->SetFiltergraph( pGraph );
+
+	if( FAILED( hr ) )
+	{
+		cout << "Couldn't set filter graph\n";
+		CoUninitialize();
+		return 0;
+	}
+
+	// Select a capture device
+	ICreateDevEnum *pDevEnum = NULL;
+	IEnumMoniker *pEnum = NULL;
+	IMoniker *pMoniker = NULL;
+	IBaseFilter *pCap = NULL;
+
+	hr = CoCreateInstance( CLSID_SystemDeviceEnum, NULL, CLSCTX_INPROC_SERVER,
+		IID_ICreateDevEnum, reinterpret_cast<void **>( &pDevEnum ) );
+
+	hr = pDevEnum->CreateClassEnumerator( CLSID_VideoInputDeviceCategory, &pEnum, 0 );
+
+	hr = pEnum->Next( 1, &pMoniker, NULL );
+	hr = pMoniker->BindToObject( 0, 0, IID_IBaseFilter, (void **)&pCap );
+
+	// Add input filter to graph
+	hr = pGraph->AddFilter( pCap, L"Capture Filter" );
+
+	// Add sample grabber filter to graph
+	IBaseFilter *pSampleGrabberF;
+	ISampleGrabber *pSampleGrabber;
+	hr = CoCreateInstance( CLSID_SampleGrabber, NULL, CLSCTX_INPROC_SERVER,
+		IID_IBaseFilter, (void **)&pSampleGrabberF );
+	hr = pGraph->AddFilter( pSampleGrabberF, L"Sample grabber" );
+	pSampleGrabberF->QueryInterface( IID_ISampleGrabber, (void **)&pSampleGrabber );
+
+	// Set some sample grabber variables
+	AM_MEDIA_TYPE mt;
+	ZeroMemory( &mt, sizeof( AM_MEDIA_TYPE ) );
+	mt.majortype = MEDIATYPE_Video;
+	mt.subtype = MEDIASUBTYPE_RGB24;
+	hr = pSampleGrabber->SetMediaType( &mt );
+	hr = pSampleGrabber->SetOneShot( false );
+	hr = pSampleGrabber->SetBufferSamples( true );
+	hr = pSampleGrabber->SetCallback( &g_SampleCB, 1 );
+
+	// Add Null renderer
+	IBaseFilter *pNull;
+	hr = CoCreateInstance( CLSID_NullRenderer, NULL, CLSCTX_INPROC_SERVER,
+		IID_IBaseFilter, (void **)&pNull );
+	hr = pGraph->AddFilter( pNull, L"Null renderer" );
+#endif
 	return 0;
 #endif
 #ifdef __APPLE__
@@ -249,6 +329,7 @@ void	WebcamSupport::StartCapture()
 	fg_set_fps_interval(&fg,this->fps);
 #endif
 #if defined(_WIN32) && !defined(__CYGWIN__)
+#ifndef DSHOW
 	capCaptureGetSetup(capvideo,&capparam,sizeof(capparam));
 	int period = (int) (1000000 / fps);
 	capparam.dwRequestMicroSecPerFrame = period;
@@ -257,6 +338,8 @@ void	WebcamSupport::StartCapture()
 	//int (*fcallback) ();
 	//fcallback = CopyImage();
 	//capSetCallbackOnVideoStream(capvideo, CopyImage());
+#else
+#endif
 #endif
 }
 
@@ -278,7 +361,10 @@ void	WebcamSupport::EndCapture()
 		exit(-1);
 #endif
 #if defined(_WIN32) && !defined(__CYGWIN__)
+#ifndef DSHOW
     capDriverDisconnect (capvideo);
+#else
+#endif
 #endif
 #ifdef __APPLE__
 	CloseComponent( video->sg_component);
@@ -298,6 +384,7 @@ char *	WebcamSupport::CaptureImage()
 	return NULL;
 #endif
 #if defined(_WIN32) && !defined(__CYGWIN__)
+#ifndef DSHOW
 	// Open and empty the clipboard
 	if ( !OpenClipboard(NULL) )
 		DoError( 0, "!!! ERROR opening windows clipboard !!!");
@@ -346,7 +433,8 @@ char *	WebcamSupport::CaptureImage()
 
 	// Close the clipboard
 	CloseClipboard();
-
+#else
+#endif
 	return 0;
 #endif
 #ifdef __APPLE__
@@ -426,6 +514,18 @@ void	WebcamSupport::Shutdown()
 	if (fg_close_device (&fg)!=0)
 		exit(-1);
 #endif
+#if defined(_WIN32) && !defined(__CYGWIN__)
+#ifndef DSHOW
+#else
+	pDevEnum->Release();
+	pEnum->Release();
+	pMoniker->Release();
+	pCap->Release();
+	pCaptureGraph->Release();
+	pGraph->Release();
+	CoUninitialize();
+#endif
+#endif
 #ifdef __APPLE__
 	delete video;
 #endif
@@ -433,7 +533,7 @@ void	WebcamSupport::Shutdown()
 
 /***********************************************************************************/
 /**** END OF WEBCAMSUPPORT CLASS                                                ****/
-/**** OS SPECIFIC STUFF HERE                                                    ****/
+/**** JPEG OS SPECIFIC STUFF HERE                                               ****/
 /***********************************************************************************/
 
 // Windows specific stuff used to convert image formats

@@ -9,6 +9,12 @@
 
 NetworkCommunication::NetworkCommunication()
 {
+#ifndef NETCOMM_NOSOUND
+	this->session = NULL;
+	this->params = NULL;
+	this->rtpparams = NULL;
+#endif
+	this->Webcam = NULL;
 }
 
 int		NetworkCommunication::GrabImage()
