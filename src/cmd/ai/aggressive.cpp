@@ -312,7 +312,10 @@ bool AggressiveAI::ProcessCurrentFgDirective(Flightgroup * fg) {
 	eraseType (Order::MOVEMENT);
 	Unit * targ = parent->Target();
 	if (targ) {
-	  if (!isJumpablePlanet (targ)) {
+          bool attacking=fg->directive.length()>0;
+          if (attacking)
+            attacking=tolower(fg->directive[0])=='a';
+	  if ((!isJumpablePlanet (targ))&&attacking==false) {
 	    parent->Target(NULL);
 	  }
 	}
@@ -325,7 +328,7 @@ bool AggressiveAI::ProcessCurrentFgDirective(Flightgroup * fg) {
       }
     }
     if (obedient) {
-      if (fg->directive==string("a")||fg->directive==string("A")) {
+      if (fg->directive.find("a")!=string::npos||fg->directive.find("A")!=string::npos) {
 	Unit * targ = fg->leader.GetUnit();
 	targ = targ!=NULL?targ->Target():NULL;
 	if (targ) {
@@ -345,7 +348,7 @@ bool AggressiveAI::ProcessCurrentFgDirective(Flightgroup * fg) {
 	    }
 	  }
 	}
-      }else if (fg->directive==string("f")||fg->directive==string("F")) {
+      }else if (fg->directive.find("f")!=string::npos||fg->directive.find("F")!=string::npos) {
 	if (leader!=NULL) {
 	  if (leader->InCorrectStarSystem(_Universe->activeStarSystem())) {
 	    retval=true;
@@ -399,7 +402,7 @@ bool AggressiveAI::ProcessCurrentFgDirective(Flightgroup * fg) {
 	    suborders[i]->AttachSelfOrder (leader);
 	  }
 	}
-      }else if (fg->directive==string("h")||fg->directive==string("H")) {
+      }else if (fg->directive.find("h")!=string::npos||fg->directive.find("H")!=string::npos) {
 	//	VSFileSystem::vs_fprintf (stderr,"he wnats to help out");
 	if (fg->directive!=last_directive&&leader) {
 	  if (leader->InCorrectStarSystem(_Universe->activeStarSystem())) {
