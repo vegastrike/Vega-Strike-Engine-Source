@@ -184,9 +184,9 @@ int main( int argc, char *argv[] )
       strcpy(mission_name,vs_config->getVariable ("general","default_mission","test1.mission").c_str());
     //might overwrite the default mission with the command line
 
-#ifdef HAVE_BOOST
+#ifdef HAVE_PYTHON
 
-    //	Python::init();
+    Python::init();
 
 #endif
 
