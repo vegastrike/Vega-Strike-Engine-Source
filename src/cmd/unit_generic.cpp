@@ -1812,7 +1812,7 @@ void Unit::UpdatePhysics (const Transformation &trans, const Matrix &transmat, c
   }
 }
 void Unit::AddVelocity(float difficulty) {
-   static float warpramptime=XMLSupport::parse_float (vs_config->getVariable ("physics","warpramptime","3"));     
+   static float warpramptime=XMLSupport::parse_float (vs_config->getVariable ("physics","warpramptime","1.5"));     
    Vector v=Velocity;
    if(graphicOptions.WarpRamping){ // Warp Turning off/on
 	  graphicOptions.RampCounter=warpramptime;
@@ -1857,7 +1857,7 @@ void Unit::AddVelocity(float difficulty) {
 	     if(graphicOptions.RampCounter<=0){
 	       graphicOptions.RampCounter=0;
 		 }
-	     rampmult=(graphicOptions.InWarp)?1.0-(graphicOptions.RampCounter/warpramptime):(graphicOptions.RampCounter/warpramptime);
+	     rampmult=(graphicOptions.InWarp)?1.0-((graphicOptions.RampCounter/warpramptime)*(graphicOptions.RampCounter/warpramptime)):(graphicOptions.RampCounter/warpramptime)*(graphicOptions.RampCounter/warpramptime);
 	   }
 	   minmultiplier*=rampmult;
 	   if(minmultiplier<PI*PI) {
