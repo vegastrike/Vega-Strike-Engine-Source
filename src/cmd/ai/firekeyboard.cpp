@@ -3,7 +3,7 @@
 #include "flybywire.h"
 #include "navigation.h"
 #include "in_joystick.h"
-
+#include "cmd/unit.h"
 
 FireKeyboard::FireKeyboard (int whichjoystick, const char *): Order (WEAPON){
   gunspeed = gunrange = .0001;

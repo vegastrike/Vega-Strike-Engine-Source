@@ -24,7 +24,7 @@
 #ifndef _CMD_ORDER_H
 #define _CMD_ORDER_H
 
-#include "cmd/unit.h"
+#include "gfx/vec.h"
 #include "cmd/collection.h"
 #include <vector>
 /**

@@ -1,6 +1,6 @@
 #include "in_joystick.h"
 #include "flykeyboard.h"
-
+#include "cmd/unit.h"
 struct StarShipControlKeyboard {
   bool matchspeed;
   bool jumpkey;

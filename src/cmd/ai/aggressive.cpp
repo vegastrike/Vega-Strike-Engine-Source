@@ -6,6 +6,7 @@
 #include "vs_globals.h"
 #include "config_xml.h"
 #include "xml_support.h"
+#include "cmd/unit.h"
 using namespace Orders;
 
 const EnumMap::Pair element_names[] = {

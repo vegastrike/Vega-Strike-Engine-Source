@@ -2,6 +2,7 @@
 #include "vegastrike.h"
 #include <math.h>
 #include <stdio.h>
+#include "cmd/unit.h"
 #define VELTHRESHOLD .1
 using Orders::MatchLinearVelocity;
 using Orders::MatchVelocity;

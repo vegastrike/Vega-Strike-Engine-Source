@@ -3,6 +3,7 @@
 #ifndef _WIN32
 #include <assert.h>
 #endif
+#include "cmd/unit.h"
 using namespace Orders;
 /**
  * the time we need to start slowing down from now calculation (if it's in this frame we'll only accelerate for partial

@@ -7,6 +7,7 @@
 #include <stack>
 #include "vs_path.h"
 #include "tactics.h"
+#include "cmd/unit.h"
 struct AIScriptXML {
   int unitlevel;
   int acc;
