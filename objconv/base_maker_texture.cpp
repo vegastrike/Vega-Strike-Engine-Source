@@ -115,12 +115,15 @@ static inline bool readPng (FILE *fp, Texture::FileData *data, Texture::TextureT
 		data->color_type=Texture::COLOR_TYPE_UNKNOWN;
 		break;
 	}
-	if (tt) {
+/*	if (tt) {
 		(*tt) (data,row_pointers);
 		free (image);
 	}else {
+*/
 		data->data = image;
+		/*
 	}
+		*/
 	free (row_pointers);
 	//   png_infop end_info;
 	png_read_end(png_ptr, info_ptr);

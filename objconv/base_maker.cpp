@@ -1081,16 +1081,22 @@ bool AddRoomSprite(std::string input, void *dat1, void *dat2, const void *dat3, 
 		objs->push_back(new Base::Room::BaseShip(-1,0,0,0,0,-1,0,1,0,QVector((x+tmp_xy.x)/2,(tmp_xy.y+y)/2,(tmp_xy.x-x)<0?(x-tmp_xy.x):(tmp_xy.x-x)),"my_ship"));
 		// FIXME: orientation cannot be changed from editor.
 	} else {
+		FILE *fp=fopen(("sprites/bases/"+Base::CurrentBase->basefile+"/"+input+(Base::CurrentBase->time_of_day?"_day":"")+".spr").c_str(),"rt");
+		string startdir;
+		if (fp) {
+			fclose(fp);
+			startdir="sprites/bases/"+Base::CurrentBase->basefile+"/";
+		}
 		bool time=false;
 		string extension="png";
 		if (Base::CurrentBase->time_of_day) {
-			FILE *fp=fopen((input+"_day.png").c_str(),"rb");
+			FILE *fp=fopen((startdir+input+"_day.png").c_str(),"rb");
 			if (fp) {
 				fclose(fp);
 				time=true;
 			} else {
 				extension="jpg";
-				fp=fopen((input+"_day.jpg").c_str(),"rb");
+				fp=fopen((startdir+input+"_day.jpg").c_str(),"rb");
 				if (fp) {
 					fclose(fp);
 					time=true;
@@ -1099,12 +1105,12 @@ bool AddRoomSprite(std::string input, void *dat1, void *dat2, const void *dat3, 
 		}
 		if (!time) {
 			extension="png";
-			FILE *fp=fopen((input+".png").c_str(),"rb");
+			FILE *fp=fopen((startdir+input+".png").c_str(),"rb");
 			if (fp) {
 				fclose(fp);
 			} else {
 				extension="jpg";
-				fp=fopen((input+".jpg").c_str(),"rb");
+				fp=fopen((startdir+input+".jpg").c_str(),"rb");
 				if (fp) {
 					fclose(fp);
 				} else {
@@ -1113,21 +1119,23 @@ bool AddRoomSprite(std::string input, void *dat1, void *dat2, const void *dat3, 
 				}
 			}
 		}
-//		if (time==false) {
-//			return;
-//		}
-		float wid=tmp_xy.x-x;
-		float hei=tmp_xy.y-y;
-		if (wid<0)wid=-wid;
-		if (hei<0)hei=-hei;
-		const char * thetimes[4]={"_day","_sunset","_night",""};
-		for (int i=time?0:3;i<4;++i) {
-			FILE *fp=fopen(("sprites/bases/"+Base::CurrentBase->basefile+"/"+input+std::string(thetimes[i])+".spr").c_str(),"wt");
-			std::string curfilename=input+thetimes[i]+"."+extension;
-			std::string filename=std::string("bases/")+Base::CurrentBase->basefile+"/"+curfilename;
-			fprintf(fp,"%s true\n%g %g\n0,0",filename.c_str(),wid,hei);
-			fclose(fp);
-			rename(curfilename.c_str(),filename.c_str());
+		if (startdir.empty()) {
+//			if (time==false) {
+//				return;
+//			}
+			float wid=tmp_xy.x-x;
+			float hei=tmp_xy.y-y;
+			if (wid<0)wid=-wid;
+			if (hei<0)hei=-hei;
+			const char * thetimes[4]={"_day","_sunset","_night",""};
+			for (int i=time?0:3;i<4;++i) {
+				FILE *fp=fopen(("sprites/bases/"+Base::CurrentBase->basefile+"/"+input+std::string(thetimes[i])+".spr").c_str(),"wt");
+				std::string curfilename=input+thetimes[i]+"."+extension;
+				std::string filename=std::string("bases/")+Base::CurrentBase->basefile+"/"+curfilename;
+				fprintf(fp,"%s true\n%g %g\n0,0",filename.c_str(),wid,hei);
+				fclose(fp);
+				rename(curfilename.c_str(),("sprites/"+filename).c_str());
+			}
 		}
 		Base::Room::BaseVSSprite *tmp=new Base::Room::BaseVSSprite(("bases/"+Base::CurrentBase->basefile+"/"+input+".spr").c_str(),string((char*)dat3));
 		if (tmp->spr.LoadSuccess()&&tmp->spr.getTexture()->LoadSuccess()) {
