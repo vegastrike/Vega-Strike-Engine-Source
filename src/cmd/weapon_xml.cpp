@@ -398,7 +398,7 @@ weapon_info* getTemplate(const string &key) {
       FILE * fp = fopen (meshname.c_str(),"rb");
       if (fp) {
 	fclose (fp);
-	WeaponMeshCache::setCachedMutable (wi->weapon_name,new Mesh (meshname.c_str(),Vector(1,1,1),0,NULL));
+	WeaponMeshCache::setCachedMutable (wi->weapon_name,wi->gun=new Mesh (meshname.c_str(),Vector(1,1,1),0,NULL));
       }
     }
   }

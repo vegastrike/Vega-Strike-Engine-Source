@@ -356,7 +356,22 @@ using namespace FactionXML;
   for (unsigned int i=0;i<factions.size();i++) {
     for (unsigned int j=0;j<factions[i]->faction.size();j++) {
       if (factions[i]->faction[j].conversation==NULL){
-	factions[i]->faction[j].conversation=getFSM ("communications/neutral.xml");
+		  string fname;
+		  
+		  //if (factions[i]->faction[j].stats.index != 0)	  {
+		  if (0) {//we just want OUR faction to use that file when communicating with ANYONE  -- if we want certain factions to have *special* comm info for each other, then we can specify the conversation flag
+			  fname = factions[factions[i]->faction[j].stats.index]->factionname;
+		  }else {
+			  fname = factions[i]->factionname;
+		  }
+		  string f="communications/"+fname+".xml";
+		  FILE * fp = fopen (f.c_str(),"rb");
+		  if (!fp) {
+			  fname="neutral";
+		  }else {
+			  fclose (fp);
+		  }
+		  factions[i]->faction[j].conversation=getFSM ("communications/" + fname + ".xml");
       }
     }
   }

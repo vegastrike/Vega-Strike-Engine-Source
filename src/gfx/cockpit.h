@@ -78,6 +78,7 @@ private:
   GFXColor relationToColor (float relation);
   // gets the color by looking closer at the unit
   GFXColor unitToColor (Unit *un,Unit *target);
+  void drawUnToTarget(Unit* a,Unit * b, float xcent, float ycent, float xsize, float ysize);
   // the style of the radar (WC|Elite)
   string radar_type;
   void LocalToEliteRadar (const Vector & pos, float &s, float &t,float &h);

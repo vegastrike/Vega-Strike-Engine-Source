@@ -468,7 +468,6 @@ void GameCockpit::DrawTurretTargetBoxes () {
   UnitCollection::UnitIterator iter = parun->getSubUnits();
   Unit * un;
   while (NULL!=(un=iter.current())) {
-	float speed,range;
 	if (!un)
       return;
 	if (un->GetNebula()!=NULL)
@@ -519,11 +518,44 @@ void GameCockpit::DrawTurretTargetBoxes () {
 
 }
 
+
+void GameCockpit::drawUnToTarget ( Unit * un, Unit* target,float xcent,float ycent, float xsize, float ysize){
+  static GFXColor black_and_white=DockBoxColor ("black_and_white"); 
+      Vector localcoord (un->LocalCoordinates(target));
+	  float s,t;
+      this->LocalToRadar (localcoord,s,t);
+      GFXColor localcol (un->GetComputerData().radar.color?this->unitToColor (un,target):black_and_white);
+      
+      GFXColorf (localcol);
+      
+      float rerror = ((un->GetNebula()!=NULL)?.03:0)+(target->GetNebula()!=NULL?.06:0);
+      Vector v(xcent+xsize*(s-.5*rerror+(rerror*rand())/RAND_MAX),ycent+ysize*(t+-.5*rerror+(rerror*rand())/RAND_MAX),0);
+      GFXVertexf(v);
+      if (target==un->Target()) {
+	//	GFXEnd();
+	//	GFXBegin(GFXLINE);
+	GFXVertexf(v);
+	GFXVertex3f((float)(v.i+(7.8)/g_game.x_resolution),v.j,v.k); //I need to tell it to use floats...
+	GFXVertex3f((float)(v.i-(7.5)/g_game.x_resolution),v.j,v.k); //otherwise, it gives an error about
+	GFXVertex3f(v.i,(float)(v.j-(7.5)/g_game.y_resolution),v.k); //not knowning whether to use floats
+	GFXVertex3f(v.i,(float)(v.j+(7.8)/g_game.y_resolution),v.k); //or doubles.
+
+	GFXVertex3f((float)(v.i+(3.9)/g_game.x_resolution),v.j,v.k); //I need to tell it to use floats...
+	GFXVertex3f((float)(v.i-(3.75)/g_game.x_resolution),v.j,v.k); //otherwise, it gives an error about
+	GFXVertex3f(v.i,(float)(v.j-(3.75)/g_game.y_resolution),v.k); //not knowning whether to use floats
+	GFXVertex3f(v.i,(float)(v.j+(3.9)/g_game.y_resolution),v.k); //or doubles.
+
+	//	GFXEnd();
+	//	GFXBegin (GFXPOINT);
+	
+      }   
+}
+
 void GameCockpit::Eject() {
   ejecting=true;
 }
 void GameCockpit::DrawBlips (Unit * un) {
-  static GFXColor black_and_white=DockBoxColor ("black_and_white"); 
+
 
   Unit::Computer::RADARLIM * radarl = &un->GetComputerData().radar;
   UnitCollection * drawlist = &_Universe->activeStarSystem()->getUnitList();
@@ -553,33 +585,13 @@ void GameCockpit::DrawBlips (Unit * un) {
 	iter.advance();	
 	continue;
       }
-      Vector localcoord (un->LocalCoordinates(target));
-      LocalToRadar (localcoord,s,t);
-      GFXColor localcol (radarl->color?unitToColor (un,target):black_and_white);
-      
-      GFXColorf (localcol);
-      
-      float rerror = ((un->GetNebula()!=NULL)?.03:0)+(target->GetNebula()!=NULL?.06:0);
-      Vector v(xcent+xsize*(s-.5*rerror+(rerror*rand())/RAND_MAX),ycent+ysize*(t+-.5*rerror+(rerror*rand())/RAND_MAX),0);
-      GFXVertexf(v);
-      if (target==makeBigger) {
-	//	GFXEnd();
-	//	GFXBegin(GFXLINE);
-	GFXVertexf(v);
-	GFXVertex3f((float)(v.i+(7.8)/g_game.x_resolution),v.j,v.k); //I need to tell it to use floats...
-	GFXVertex3f((float)(v.i-(7.5)/g_game.x_resolution),v.j,v.k); //otherwise, it gives an error about
-	GFXVertex3f(v.i,(float)(v.j-(7.5)/g_game.y_resolution),v.k); //not knowning whether to use floats
-	GFXVertex3f(v.i,(float)(v.j+(7.8)/g_game.y_resolution),v.k); //or doubles.
-
-	GFXVertex3f((float)(v.i+(3.9)/g_game.x_resolution),v.j,v.k); //I need to tell it to use floats...
-	GFXVertex3f((float)(v.i-(3.75)/g_game.x_resolution),v.j,v.k); //otherwise, it gives an error about
-	GFXVertex3f(v.i,(float)(v.j-(3.75)/g_game.y_resolution),v.k); //not knowning whether to use floats
-	GFXVertex3f(v.i,(float)(v.j+(3.9)/g_game.y_resolution),v.k); //or doubles.
-
-	//	GFXEnd();
-	//	GFXBegin (GFXPOINT);
-	
-      }      
+	  drawUnToTarget (un,target,xcent,ycent,xsize,ysize);
+	  if (target->isPlanet()==PLANETPTR) {
+		  Unit * sub=NULL;
+		  for (un_iter i=target->getSubUnits();(sub=*i)!=NULL;++i) {
+			  drawUnToTarget(un,sub,xcent,ycent, xsize,ysize);
+		  }
+	  }
     }
     iter.advance();
   }

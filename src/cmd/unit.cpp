@@ -580,7 +580,8 @@ void GameUnit<UnitType>::Draw(const Transformation &parent, const Matrix &parent
     static bool draw_mounts = XMLSupport::parse_bool (vs_config->getVariable ("graphics","draw_weapons","false"));
 
     if (draw_mounts&&On_Screen) {
-      Mesh * gun = WeaponMeshCache::getCachedMutable (mounts[i]->type->weapon_name);
+//      Mesh * gun = WeaponMeshCache::getCachedMutable (mounts[i]->type->weapon_name);
+      Mesh * gun = mounts[i]->type->gun;	  
       if (gun) {
 	Transformation mountLocation=mounts[i]->GetMountLocation();
 	mountLocation.Compose (*ct,*ctm);
