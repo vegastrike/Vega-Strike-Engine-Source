@@ -85,6 +85,8 @@ std::string unpretty (std::string s) {
 		if (isspace(*i)) {
 			*i = '_';
 		}
+		if (*i=='\"' || *i ==  '\'')
+			*i = '_';
 	}
 	return s;
 	
@@ -166,7 +168,7 @@ void writesystems(FILE * fp, vector<System> s) {
 	int iter=0;
 	for (vector<System>::iterator i = s.begin();i!=s.end();++i) {
 		if ((*i).sector != cursector) {
-			//start sectortag;
+ 			//start sectortag;
 			if (cursector!="")
 					fprintf(fp,"\t</sector>\n");
 			fprintf (fp, "\t<sector name=\"%s\">\n",(*i).sector.c_str());
@@ -177,8 +179,9 @@ void writesystems(FILE * fp, vector<System> s) {
 			fprintf (fp, "\t\t\t<var name=\"%s\" value=\"%s\"/>\n");			
 		}
 		fprintf (fp,"\t\t\t<var name=\"xyz\" value=\"%lf %lf %lf\"/>\n",(*i).xyz.x,(*i).xyz.y,(*i).xyz.z);
+		fprintf (fp,"\t\t\t<var name=\"faction\" value=\"confed\"/>\n");
 		if (iter>4 && iter+4<s.size()) {
-			fprintf (fp,"\t\t\t<var name=\"jumps\" value=\"%s %s %s %s %s %s %s\"/>\n",s[iter-1].name.c_str(),s[iter-2].name.c_str(),s[iter-3].name.c_str(),s[iter-4].name.c_str(),s[iter+1].name.c_str(),s[iter+2].name.c_str(),s[iter+3].name.c_str());
+			fprintf (fp,"\t\t\t<var name=\"jumps\" value=\"nowhereland/%s nowhereland/%s nowhereland/%s nowhereland/%s nowhereland/%s nowhereland/%s nowhereland/%s\"/>\n",s[iter-1].name.c_str(),s[iter-2].name.c_str(),s[iter-3].name.c_str(),s[iter-4].name.c_str(),s[iter+1].name.c_str(),s[iter+2].name.c_str(),s[iter+3].name.c_str());
 		}
 		fprintf(fp,"\t\t</sector>\n");
 		iter++;
