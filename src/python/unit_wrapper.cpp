@@ -274,7 +274,7 @@ void InitVS() {
 #define voidWRAPPED3(name,atype,a,btype,b,ctype,c) def name(self,a,b,c): ~    MYPRINT(name)
 #define voidWRAPPED4(name,atype,a,btype,b,ctype,c,dtype,d) def name(self,a,b,c,d): ~    MYPRINT(name)
 #define voidWRAPPED5(name,atype,a,btype,b,ctype,c,dtype,d,etype,e) def name(self,a,b,c,d,e): ~    MYPRINT(name)
-#define voidEXPORT_UTIL(name) def name(self,a=None,b=None,c=None,d=None,e=None,f=None,g=None,h=None,i=None,j=None): ~    MYPRINT(name)
+#define voidEXPORT_UTIL(name) def name(a=None,b=None,c=None,d=None,e=None,f=None,g=None,h=None,i=None,j=None): ~    MYPRINT(name)
 #define EXPORT_UTIL(name,aff) voidEXPORT_UTIL(name) ~    return aff
 voidEXPORT_UTIL(pushSystem)
 voidEXPORT_UTIL(popSystem)
