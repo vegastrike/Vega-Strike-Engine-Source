@@ -27,7 +27,9 @@ string getUnitNameAndFgNoBase (Unit * target) {
   if (string("neutral")!=_Universe->GetFaction(target->faction)) {
     return string(_Universe->GetFaction(target->faction))+" "+target->name;
   }
-
+  if (target->isUnit()==PLANETPTR) {
+    return (((Planet *)target)->getHumanReadablePlanetType())+string(":")+target->name;
+  }
   return target->name;
 }
 

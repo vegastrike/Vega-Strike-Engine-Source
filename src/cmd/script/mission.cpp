@@ -102,7 +102,7 @@ void Mission::initMission(bool loadscripts){
   }else {
     msgcenter=active_missions[0]->msgcenter;
   }
-  msgcenter->add("game","all","Welcome to Vegastrike");
+  //  msgcenter->add("game","all","Welcome to Vegastrike");
   /*
   msgcenter->add("game","news","A hero is born");
   msgcenter->add("game","news","2 hero is born");

@@ -445,7 +445,22 @@ void Planet::reactToCollision(Unit * un, const QVector & biglocation, const Vect
   //nothing happens...you fail to do anythign :-)
   //maybe air reisstance here? or swithc dynamics to atmos mode
 }
+string Planet::getHumanReadablePlanetType () const{
 
+  	  string temp =getCargoUnitName();
+	  if (temp=="m_class") {
+	    temp = "Agricultural";
+	  }else if (temp=="Dirt") {
+	    temp = "Industrial";
+	  }else if (temp=="university") {
+	    temp = "University";
+	  }else if (temp=="Snow") {
+	    temp = "Ice Colony";
+	  }else if (temp=="carribean") {
+	    temp="Pleasure";
+	  }
+	  return temp;
+}
 void Planet::EnableLights () {
   for (unsigned int i=0;i<lights.size();i++) {
     GFXEnableLight (lights[i]);

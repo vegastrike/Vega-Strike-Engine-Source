@@ -80,7 +80,8 @@ public:
   void EnableLights();
   void AddSatellite (Unit * orbiter);
   void endElement();
-  string getCargoUnitName () {return cargounitname;}
+  string getCargoUnitName () const {return cargounitname;}
+  string getHumanReadablePlanetType () const ;
   void beginElement(QVector x,QVector y,float vely,const Vector & rotvel, float pos,float gravity,float radius,const char * filename,const char * citylights,BLENDFUNC blendsrc, BLENDFUNC blenddst, vector<char *>dest,int level, const GFXMaterial &ourmat, const std::vector <GFXLightLocal> &ligh, bool isunit, int faction,string fullname, bool inside_out);
   Planet * GetTopPlanet (int level);
   virtual enum clsptr isUnit() {return PLANETPTR;}

@@ -293,11 +293,16 @@ varInst *Mission::call_unit(missionNode *node,int mode){
 		    ret = mpl->GetCargo(cat[rand()%cat.size()].content,i);
 		  }
                 }else {
-                  if (mpl->numCargo()) {
-    		    ret = &mpl->GetCargo(rand()%max);  
+		  if (mpl->numCargo()) {
+		    for (unsigned int i=0;i<500;i++) {
+		      ret = &mpl->GetCargo(rand()%max);  
+		      if (ret->content.find("mission")==string::npos) {
+			break;
+		      }
+		    }
 		  }else {
 		    ret = new Cargo();//mem leak--won't happen
-		  }
+		  }		  
                 }
                 
 		if (ret) {

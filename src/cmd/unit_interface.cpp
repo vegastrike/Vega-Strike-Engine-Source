@@ -410,18 +410,7 @@ public:
 	basename = "";
 	if (baseunit->isUnit()==PLANETPTR) {
 	  
-	  string temp =((Planet *)baseunit)->getCargoUnitName();
-	  if (temp=="m_class") {
-	    temp = "Agricultural World";
-	  }else if (temp=="Dirt") {
-	    temp = "Industrial World";
-	  }else if (temp=="university") {
-	    temp = "University Planet";
-	  }else if (temp=="Snow") {
-	    temp = "Ice Colony"
-	  }else if (temp=="carribean") {
-	    temp="Pleasure Planet";
-	  }
+	  string temp = ((Planet *)baseunit)->getHumanReadablePlanetType()+" Planet";
 	  basename +=temp;
 	}else {
 	  basename+= baseunit->name;
@@ -554,11 +543,13 @@ void UpgradingInfo::SelectItem (const char *item, int button, int buttonstate) {
       Cockpit * cp = _Universe->isPlayerStarship(buy);
       if (cp) {
        if (item[0]=='S') {
-           WriteSaveGame(cp,false);
+	 title="Game Saved Successfully";
+	 WriteSaveGame(cp,false);
        }else if (item[0]=='L') {
         buy->Kill();
         RespawnNow(cp);
         DoDone();
+	title="Game Loaded. Click Done to Return to ship";
       }
      }
     }
