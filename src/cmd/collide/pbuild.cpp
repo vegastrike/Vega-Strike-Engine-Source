@@ -99,7 +99,7 @@ bool csCdModel::BuildHierarchy ()
 
   // Allocate the boxes and set the box list globals.
   m_NumBoxesAlloced = m_NumTriangles * 2;
-  m_pBoxes = new csCdBBox [m_NumBoxesAlloced];
+  m_pBoxes = new csCdBBox [m_NumBoxesAlloced+2];
   if (!m_pBoxes) return false;
   
   // Determine initial orientation, mean point, and splitting axis.
