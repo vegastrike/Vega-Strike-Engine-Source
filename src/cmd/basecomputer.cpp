@@ -4408,14 +4408,14 @@ void showUnitStats(Unit * playerUnit,string &text,int subunitlevel, int mode, Ca
 			break;
 		case 8:
 			if(!mode||playerUnit->shield.shield8.frontrightbottommax!=blankUnit->shield.shield8.frontrightbottommax){
-				PRETTY_ADDU(statcolor+"  Fore-starboard-high - #-c",(mode&&replacement_mode==2)?100.0*(playerUnit->shield.shield8.frontrighttop-1):playerUnit->shield.shield8.frontrighttop*VSDM,0,"MJ");
-		PRETTY_ADDU(statcolor+"  Aft-starboard-high - #-c",(mode&&replacement_mode==2)?100.0*(playerUnit->shield.shield8.backrighttop-1):playerUnit->shield.shield8.backrighttop*VSDM,0,"MJ"); 
-		PRETTY_ADDU(statcolor+"  Fore-port-high - #-c",(mode&&replacement_mode==2)?100.0*(playerUnit->shield.shield8.frontlefttop-1):playerUnit->shield.shield8.frontlefttop*VSDM,0,"MJ");
-		PRETTY_ADDU(statcolor+"  Aft-port-high - #-c",(mode&&replacement_mode==2)?100.0*(playerUnit->shield.shield8.backlefttop-1):playerUnit->shield.shield8.backlefttop*VSDM,0,"MJ");
-		PRETTY_ADDU(statcolor+"  Fore-starboard-low - #-c",(mode&&replacement_mode==2)?100.0*(playerUnit->shield.shield8.frontrighttop-1):playerUnit->shield.shield8.frontrightbottom*VSDM,0,"MJ");
-		PRETTY_ADDU(statcolor+"  Aft-starboard-low - #-c",(mode&&replacement_mode==2)?100.0*(playerUnit->shield.shield8.backrighttop-1):playerUnit->shield.shield8.backrightbottom*VSDM,0,"MJ"); 
-		PRETTY_ADDU(statcolor+"  Fore-port-low - #-c",(mode&&replacement_mode==2)?100.0*(playerUnit->shield.shield8.frontlefttop-1):playerUnit->shield.shield8.frontleftbottom*VSDM,0,"MJ");
-		PRETTY_ADDU(statcolor+"  Aft-port-low - #-c",(mode&&replacement_mode==2)?100.0*(playerUnit->shield.shield8.backlefttop-1):playerUnit->shield.shield8.backleftbottom*VSDM,0,"MJ");
+				PRETTY_ADDU(statcolor+"  Fore-starboard-high - #-c",(mode&&replacement_mode==2)?100.0*(playerUnit->shield.shield8.frontrighttopmax-1):playerUnit->shield.shield8.frontrighttopmax*VSDM,0,"MJ");
+		PRETTY_ADDU(statcolor+"  Aft-starboard-high - #-c",(mode&&replacement_mode==2)?100.0*(playerUnit->shield.shield8.backrighttopmax-1):playerUnit->shield.shield8.backrighttopmax*VSDM,0,"MJ"); 
+		PRETTY_ADDU(statcolor+"  Fore-port-high - #-c",(mode&&replacement_mode==2)?100.0*(playerUnit->shield.shield8.frontlefttopmax-1):playerUnit->shield.shield8.frontlefttopmax*VSDM,0,"MJ");
+		PRETTY_ADDU(statcolor+"  Aft-port-high - #-c",(mode&&replacement_mode==2)?100.0*(playerUnit->shield.shield8.backlefttopmax-1):playerUnit->shield.shield8.backlefttopmax*VSDM,0,"MJ");
+		PRETTY_ADDU(statcolor+"  Fore-starboard-low - #-c",(mode&&replacement_mode==2)?100.0*(playerUnit->shield.shield8.frontrighttopmax-1):playerUnit->shield.shield8.frontrightbottommax*VSDM,0,"MJ");
+		PRETTY_ADDU(statcolor+"  Aft-starboard-low - #-c",(mode&&replacement_mode==2)?100.0*(playerUnit->shield.shield8.backrighttopmax-1):playerUnit->shield.shield8.backrightbottommax*VSDM,0,"MJ"); 
+		PRETTY_ADDU(statcolor+"  Fore-port-low - #-c",(mode&&replacement_mode==2)?100.0*(playerUnit->shield.shield8.frontlefttopmax-1):playerUnit->shield.shield8.frontleftbottommax*VSDM,0,"MJ");
+		PRETTY_ADDU(statcolor+"  Aft-port-low - #-c",(mode&&replacement_mode==2)?100.0*(playerUnit->shield.shield8.backlefttopmax-1):playerUnit->shield.shield8.backleftbottommax*VSDM,0,"MJ");
 			}
 			break;
 		default:

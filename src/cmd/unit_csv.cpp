@@ -564,14 +564,14 @@ void Unit::LoadRow(CSVRow &row,string modification, string * netxml) {
   four.shield4fbrl.rightmax=four.shield4fbrl.right;
   four.shield4fbrl.leftmax=four.shield4fbrl.left;
 
-  eight.shield8.frontlefttopmax=eight.shield8.frontlefttopmax;
-  eight.shield8.frontrighttopmax=eight.shield8.frontrighttopmax;
-  eight.shield8.backrighttopmax=eight.shield8.backrighttopmax;
-  eight.shield8.backlefttopmax=eight.shield8.backlefttopmax;
-  eight.shield8.frontleftbottommax=eight.shield8.frontleftbottommax;
-  eight.shield8.frontrightbottommax=eight.shield8.frontrightbottommax;
-  eight.shield8.backrightbottommax=eight.shield8.backrightbottommax;
-  eight.shield8.backleftbottommax=eight.shield8.backleftbottommax;
+  eight.shield8.frontlefttopmax=eight.shield8.frontlefttop;
+  eight.shield8.frontrighttopmax=eight.shield8.frontrighttop;
+  eight.shield8.backrighttopmax=eight.shield8.backrighttop;
+  eight.shield8.backlefttopmax=eight.shield8.backlefttop;
+  eight.shield8.frontleftbottommax=eight.shield8.frontleftbottom;
+  eight.shield8.frontrightbottommax=eight.shield8.frontrightbottom;
+  eight.shield8.backrightbottommax=eight.shield8.backrightbottom;
+  eight.shield8.backleftbottommax=eight.shield8.backleftbottom;
   
   if (shieldcount==8) {
     shield=eight;
