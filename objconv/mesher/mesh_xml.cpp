@@ -90,22 +90,38 @@ struct stripelement{
 struct strip{
 	bool flatshade;
 	vector <stripelement> points;
+	strip(){
+	  flatshade=false;
+	  points=vector<stripelement>();
+	}
 };
 
 
 struct LODholder{ // Holds 1 LOD entry
 	float size;
 	vector<unsigned char> name;
+	LODholder(){
+	  name= vector<unsigned char>();
+	  size=0;
+	}
 };
 
 struct animframe{ // Holds one animation frame
 	vector<unsigned char> name;
+	animframe(){
+	  name= vector<unsigned char>();
+	}
 };
 
 struct animdef{ // Holds animation definition
 	vector<unsigned char> name;
 	float FPS;
 	vector<int> meshoffsets;
+	animdef(){
+	  name= vector<unsigned char>();
+	  FPS=0;
+	  meshoffsets=vector<int>();
+	}
 };
 
 
@@ -113,6 +129,9 @@ struct textureholder{ // Holds 1 texture entry
 	int type;
 	int index;
 	vector<unsigned char> name;
+	textureholder(){
+	  name= vector<unsigned char>();
+	}
 };
 
 enum textype{
@@ -241,6 +260,14 @@ struct XML {
       vector <int> refpnt;
       ///the weight of the points in weighted average of refpnts
       vector <float> refweight;
+	  ZeLogo(){
+		  refpnt=vector<int>();
+		  refweight=vector<float>();
+		  size=0;
+		  offset=0;
+		  rotate=0;
+		  type=0;
+	  }
     };
 	struct ZeTexture {
         string decal_name;
@@ -633,6 +660,7 @@ void beginElement(const string &name, const AttributeList &attributes, XML * xml
 		string detnametmp=(*iter).value.c_str();
 		xml->detailtexture.type=TEXTURE;
 		xml->detailtexture.index=0;
+		xml->detailtexture.name=vector<unsigned char>();
 		for(int detnamelen=0;detnamelen<detnametmp.size();detnamelen++){
 			xml->detailtexture.name.push_back(detnametmp[detnamelen]);
 		}
@@ -667,6 +695,7 @@ void beginElement(const string &name, const AttributeList &attributes, XML * xml
 				texindex=atoi(ind.c_str());
 			  }
 			  xml->texturetemp.index=texindex;
+			  xml->texturetemp.name=vector<unsigned char>();
 			  string nomdujour=iter->value.c_str();
 			  for(int tni=0;tni<nomdujour.size();tni++){
 				xml->texturetemp.name.push_back(nomdujour[tni]);
@@ -758,22 +787,22 @@ void beginElement(const string &name, const AttributeList &attributes, XML * xml
 	}
     break;
   case XML::LINESTRIP: //FIXME?
-	memset(&xml->striptemp, 0, sizeof(xml->striptemp));
+	xml->striptemp=strip();
 	xml->curpolytype=LINESTRIP;
 	xml->striptemp.flatshade=0;
 	break;
   case XML::TRISTRIP: //FIXME?
-    memset(&xml->striptemp, 0, sizeof(xml->striptemp));
+    xml->striptemp=strip();
 	xml->curpolytype=TRISTRIP;
 	xml->striptemp.flatshade=0;
 	break;
   case XML::TRIFAN: //FIXME?
-    memset(&xml->striptemp, 0, sizeof(xml->striptemp));
+    xml->striptemp=strip();
 	xml->curpolytype=TRIFAN;
 	xml->striptemp.flatshade=0;
 	break;
   case XML::QUADSTRIP: //FIXME?
-    memset(&xml->striptemp, 0, sizeof(xml->striptemp));
+    xml->striptemp=strip();
 	xml->curpolytype=QUADSTRIP;
 	xml->striptemp.flatshade=0;
 	break;
@@ -838,6 +867,7 @@ void beginElement(const string &name, const AttributeList &attributes, XML * xml
 		  break;
 		case XML::LODFILE:
 		  string lodname = (*iter).value.c_str();
+		  xml->lodtemp.name=vector<unsigned char>();
 		  for(int index=0;index<lodname.size();index++){
 			xml->lodtemp.name.push_back(lodname[index]);
 		  }
@@ -905,6 +935,7 @@ void beginElement(const string &name, const AttributeList &attributes, XML * xml
 	    case XML::ANIMATIONNAME:
 		{
 		  string animname = (*iter).value.c_str();
+		  xml->animdeftemp.name=vector<unsigned char>();
 		  for(int index=0;index<animname.size();index++){
 			xml->animdeftemp.name.push_back(animname[index]);
 		  }
@@ -931,6 +962,7 @@ void beginElement(const string &name, const AttributeList &attributes, XML * xml
       switch(XML::attribute_map.lookup((*iter).name)) {
 	    case XML::FRAMEMESHNAME:
 		  string framename = (*iter).value.c_str();
+		  xml->animframetemp.name=vector<unsigned char>();
 		  for(int index=0;index<framename.size();index++){
 			xml->animframetemp.name.push_back(framename[index]);
 		  }
@@ -1621,7 +1653,7 @@ void ReverseToFile(FILE* Inputfile, FILE* Outputfile){
 		  int detailtexturenamelen=VSSwapHostIntToLittle(inmemfile[word32index].i32val);//detailtexture name length
 		  word32index+=1;
 		  int stringindex=0;
-		  int namebound=(detailtexturenamelen/4)+((detailtexturenamelen%4)%1);
+		  int namebound=((detailtexturenamelen+(detailtexturenamelen%4))/4);
 		  for(stringindex=0;stringindex<namebound;stringindex++){
 			for(int bytenum=0;bytenum<4;bytenum++){ // Extract chars
 				if(inmemfile[word32index].c8val[bytenum]){ //If not padding
@@ -1655,7 +1687,7 @@ void ReverseToFile(FILE* Inputfile, FILE* Outputfile){
 			int texnamelen=VSSwapHostIntToLittle(inmemfile[word32index+2].i32val);//texture name length
 			word32index+=3;
 			string texname="";
-			int namebound=(texnamelen/4)+((texnamelen%4)%1);
+			int namebound=((texnamelen+(texnamelen%4))/4);
 			for(stringindex=0;stringindex<namebound;stringindex++){
 			  for(int bytenum=0;bytenum<4;bytenum++){ // Extract chars
 				if(inmemfile[word32index].c8val[bytenum]){ //If not padding
@@ -1729,7 +1761,7 @@ void ReverseToFile(FILE* Inputfile, FILE* Outputfile){
 			int animnamelen=VSSwapHostIntToLittle(inmemfile[word32index].i32val);//length of name
 			word32index+=1;
 			string animname="";
-			int namebound=(animnamelen/4)+((animnamelen%4)%1);
+			int namebound=((animnamelen+(animnamelen%4))/4);
 			for(stringindex=0;stringindex<namebound;stringindex++){
 			  for(int bytenum=0;bytenum<4;bytenum++){ // Extract chars
 				if(inmemfile[word32index].c8val[bytenum]){ //If not padding
