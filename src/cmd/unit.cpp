@@ -113,6 +113,7 @@ void Unit::DeactivateJumpDrive () {
 }
 void Unit::Init()
 {
+  SubUnit =0;
   jump.energy = 100;
   jump.delay=5;
   jump.damage=0;
