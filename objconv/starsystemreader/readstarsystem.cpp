@@ -15,6 +15,29 @@ using std::vector;
 using std::map;
 using std::string;
 using std::pair;
+
+std::string readfiledata(const char * name) {
+	FILE * fp = fopen (name,"r");
+	if (!fp) {
+		printf("unable to open %s\n",name);
+		return "";
+	}
+	int len;
+	struct stat st;
+	if (fstat(fileno(fp), &st)==0) {
+		len=st.st_size;
+	} else {
+		// fstat B0rken.
+		fseek (fp,0,SEEK_END);
+		len = ftell (fp);
+		fseek (fp,0,SEEK_SET);
+	}
+	char * line = (char *)malloc (len+1);
+	line[len]=0;
+	fread(line,sizeof(char),len,fp);
+	return std::string(line,line+len);
+}
+
 std::string itostr(int i) {
 	char test[256];
 	sprintf (test,"%d",i);
@@ -31,15 +54,24 @@ public:
 	double x,y,z;
 	vec3 () {}
 	vec3 (double x, double  y, double z):x(x),y(y),z(z){}
-	vec3 max (const vec3 &in) {
+	vec3 max (const vec3 &in) const{
 		return vec3(in.x>x?in.x:x,
 					in.y>y?in.y:y,
 					in.z>z?in.z:z);
 	}
-	vec3 min (const vec3 &in) {
+	vec3 min (const vec3 &in) const{
 		return vec3(in.x<x?in.x:x,
 					in.y<y?in.y:y,
 					in.z<z?in.z:z);
+	}
+	bool operator< (const vec3 &oth) const {
+		return x<oth.x&&y<oth.y&&z<oth.z;
+	}
+	bool operator> (const vec3 &oth) const {
+		return x>oth.x&&y>oth.y&&z>oth.z;
+	}
+	bool operator== (const vec3 &oth) const {
+		return x==oth.x&&y==oth.y&&z==oth.z;
 	}
 };
 
@@ -240,16 +272,9 @@ public:
 		return a.alphaonlyname<b.alphaonlyname;
 	}
 };
+
 std::vector<string> readMilkyWayNames( ) {
-	FILE * fp = fopen (milky_way,"r");
-	fseek (fp,0,SEEK_END);
-	long siz = ftell (fp);
-	char * buf = (char *)malloc (siz+1);
-	buf[siz]=0;
-	fseek(fp,0,SEEK_SET);
-	fread(buf,siz,1,fp);
-	string s = buf;
-	free(buf);
+	string s=readfiledata(milky_way);
 	vector<string> retval;
 	unsigned int where=string::npos;
 	do{
@@ -287,31 +312,19 @@ string recomputeName(){
 	which++;
 	return genericnames[(which)%genericnames.size()]+dodad(which/genericnames.size());
 }
+
 vector<System> readfile (const char * name) {
 	vector<System>systems;
-	FILE * fp = fopen (name,"r");
-	if (!fp) {
-		printf("unable to open %s\n",name);
+	std::string line=readfiledata(name);
+	if (line.empty()){
 		return systems;
 	}
-	int len;
-	struct stat st;
-	if (fstat(fileno(fp), &st)==0) {
-		len=st.st_size;
-	} else {
-		// fstat B0rken.
-		fseek (fp,0,SEEK_END);
-		len = ftell (fp);
-		fseek (fp,0,SEEK_SET);
-	}
-	char * line = (char *)malloc (len+1);
-	line[len]=0;
-	fgets(line,len,fp);
+	int len=line.size();
 	std::vector<string> keys = readCSV(line);
 	for (std::vector<string>::iterator i =keys.begin();i!=keys.end();++i) {
 		*i = strtoupper(*i);
 	}
-	while(fgets (line,len,fp)) {
+	while(true) {
 		System in;
 		std::vector <string> content = readCSV(line);
 		for (int i = 0;i<content.size();++i) {
@@ -351,9 +364,15 @@ vector<System> readfile (const char * name) {
 		in.computeXYZ();
 		systems.push_back(in);
 		
+		int r=line.find("\r");
+		int n=line.find("\n");
+		if (r==std::string::npos&&n==std::string::npos) {
+			break;
+		}
+		line=line.substr(r>n?r+1:n+1);
+		
 	}
 	std::sort (systems.begin(),systems.end(),AlphaOnlySort());
-	free(line);
 	int hc=0,bc=0;
 	int ic=0,uc=0;
 	int ec=0;
@@ -440,8 +459,101 @@ void writesystems(FILE * fp, std::vector<System> s) {
 	fprintf(fp,"\t</sector>\n</systems></galaxy>\n");
 	
 }
-string getSector(const System &s, vec3 min, vec3 max) {
+
+class SectorInfo {
+private:
+	std::string nam;
+	vec3 min;
+	vec3 max;
+public:
+	SectorInfo (std::string nam, vec3 min, vec3 max)
+			: nam(nam), min(min), max(max) {
+	}
+	vec3 &minimum () {
+		return min;
+	}
+	vec3 &maximum () {
+		return max;
+	}
+	std::string &name () {
+		return nam;
+	}
+};
+
+void stripwhitespace(std::string &str) {
+	// Strip whitespace from a string.
+	for (int i=str.size()-1;i>=0;i--) {
+		if (isspace(str[i])) {
+			str.erase(i);
+		} else {
+			break;
+		}
+	}
+	for (int i=0;i<str.size();i++) {
+		if (isspace(str[i])) {
+			str.erase(i);
+		} else {
+			break;
+		}
+	}
+}
+
+void computeCoord (vec3 &lo, vec3 &hi, int wid, int hei, int x, int y) {
+	vec3 min (lo);
+	vec3 max (hi);
+	lo.z=min.z;
+	hi.z=max.z;
+	lo.x=(((max.x-min.x)/wid)*x);
+	lo.y=(((max.y-min.y)/hei)*y);
+	hi.x=(((max.x-min.x)/wid)*(x+1));
+	lo.y=(((max.y-min.y)/hei)*(y+1));
+}
+
+std::vector<SectorInfo> readSectors(vec3 min, vec3 max) {
+	printf("\n\n--MINIMUM-- <%f,%f,%f>\n--MAXIMUM-- <%f,%f,%f>\n\n",min.x,min.y,min.z,max.x,max.y,max.z);
+	std::vector<SectorInfo> ret;
+	std::string file = readfiledata("sectors.txt");
+	std::vector<std::vector<std::string> >vec;
+	int width=0;
+	while (true) {
+		vec.push_back(readCSV(file));
+		int r=file.find("\r");
+		int n=file.find("\n");
+		if (r==std::string::npos&&n==std::string::npos) {
+			break;
+		}
+		file=file.substr(r>n?r+1:n+1);
+		width=width<vec.back().size()?width:vec.back().size();
+	}
+	for (int i=0;i<vec.size();++i) {
+		for (int j=0;j<vec[i].size();++j) {
+			stripwhitespace(vec[i][j]);
+			vec3 lo (min);
+			vec3 hi (max);
+			computeCoord(lo,hi,width,vec.size(),j,i);
+			ret.push_back(SectorInfo(vec[i][j], lo, hi));
+		}
+	}
+	return ret;
+}
+
+std::string getSector(const System &s, vec3 min, vec3 max) {
 	return "nowhereland";
+#if ____THIS_IS_GIVING_ERRORS_RIGHT_NOW_____
+	static std::vector<SectorInfo> sectors (readSectors(min,max));
+	for (int i=0;i<sectors.size();i++) {
+		if (s.xyz>sectors[i].minimum()&&s.xyz<sectors[i].maximum()) {
+			return s.name;
+		}
+	}
+	{
+		char error[65535];
+		sprintf(error,"<error:_system_<%f,%f,%f>_(%s)_not_found>",s.xyz.x,s.xyz.y,s.xyz.z,s.name.c_str());
+		fputs(error,stderr);
+		fputc('\n',stderr);
+		return error;
+	}
+#endif
 }
 double sqr (double x){
 	return x*x;
@@ -528,7 +640,7 @@ void processsystems (std::vector <System> & s){
 }
 int main (int argc, char ** argv) {
 	if (argc<3) {
-		printf ("not enough args. Usage ./a.out <input> <output>\n");
+		printf ("not enough args. Usage %s <input> <output>\n",argv[0]);
 		return 1;
 	}
 	if (argc>3) {
