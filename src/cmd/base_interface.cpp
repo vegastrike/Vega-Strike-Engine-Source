@@ -17,6 +17,7 @@
 #include "gfx/ani_texture.h"
 #include "music.h"
 #include "lin_time.h"
+#include "load_mission.h"
 #ifdef RENDER_FROM_TEXTURE
 #include "gfx/stream_texture.h"
 #endif
@@ -732,6 +733,7 @@ void BaseInterface::Room::Link::Click (BaseInterface *base,float x, float y, int
 				PyRun_SimpleFile(fp,newfile);
 				::Python::reseterrors();
 				fclose(fp);
+                                processDelayedMissions();
 			} else {
 				fprintf(stderr,"Warning:python link file '%s' not found\n",filnam);
 			}
