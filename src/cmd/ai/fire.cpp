@@ -23,7 +23,7 @@ FireAt::FireAt (float reaction_time, float aggressivitylevel): CommunicatingAI (
 FireAt::FireAt (): CommunicatingAI (WEAPON,STARGET) {
   static float reaction = XMLSupport::parse_float (vs_config->getVariable ("AI","Firing","ReactionTime",".2"));
   static float aggr = XMLSupport::parse_float (vs_config->getVariable ("AI","Firing","Aggressivity","15"));
-  ReInit (aggr,reaction);
+  ReInit (reaction,aggr);
 }
 //temporary way of choosing
 void FireAt::ChooseTargets (int numtargs, bool force) {
