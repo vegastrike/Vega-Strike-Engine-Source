@@ -343,7 +343,7 @@ void Mesh::ProcessDrawQueue(int whichdrawqueue) {
     //    
     GFXDisable(DEPTHWRITE);
   }
-  SelectCullFace(whichdrawqueue)
+  SelectCullFace(whichdrawqueue);
   GFXBlendMode(blendSrc, blendDst);
   GFXEnable(TEXTURE0);
   if(Decal[0])
