@@ -178,17 +178,21 @@ int TextPlane::Draw(const string & newText, int offset,bool startlower, bool for
       text_it++;
       continue;
     }else if(*text_it>=32) {//always true
+		unsigned char myc = *text_it;
+		if (myc=='_') {
+			myc = ' ';
+		}
       //glutStrokeCharacter (GLUT_STROKE_ROMAN,*text_it);
       retval+=potentialincrease;
       potentialincrease=0;
-      int lists = display_lists[*text_it];
+      int lists = display_lists[myc];
       if (lists) {
 	GFXCallList(lists);
       }else{
 	if (use_bit)
-	  glutBitmapCharacter (fnt,*text_it);
+	  glutBitmapCharacter (fnt,myc);
 	else
-	  glutStrokeCharacter (GLUT_STROKE_ROMAN,*text_it);
+	  glutStrokeCharacter (GLUT_STROKE_ROMAN,myc);
       }
     }
     if(*text_it=='\t') {
