@@ -34,7 +34,9 @@ QuadTree::~QuadTree () {
   
   
 }
-
+float QuadTree::GetHeight (float x, float z) {
+  return root->GetHeight (RootCornerData,x,z);
+}
 void QuadTree::Update () {
   //GetViewerPosition
   root->Update (RootCornerData,InvTransform (transformation,_Universe->AccessCamera()->GetPosition()),140);
