@@ -53,7 +53,58 @@ namespace ROLES {
 		}
 		return 0;
 	}
-
+	vector < vector <string > > buildscripts() {
+	  vector<vector <string> > scripts;
+	  getAllRolePriorities ();
+	  
+	  FILE * fp = fopen("ai/VegaEvents.csv","rb");
+	  if (fp) {
+			fseek (fp,0,SEEK_END);
+			int len = ftell (fp);
+			char *temp = (char *)malloc (len+1);
+			memset (temp,0,len+1);
+			fseek (fp,0,SEEK_SET);
+			fgets(temp,len,fp);
+			vector <string> vec=readCSV(temp);
+			if (vec.size()) vec.erase (vec.begin());
+			unsigned int i=0;
+			for (i=0;i<maxRoleValue();i++) {
+			  scripts.push_back (vector<string>());
+			  for (int j=0;j<maxRoleValue();j++) {
+			    scripts[i].push_back("default");
+			  }
+			}
+			for (i=0;i<vec.size();i++) {
+			  fseek (fp,0,SEEK_SET);
+			  fgets(temp,len,fp);
+			  vector <string> strs=readCSV(temp);
+			  if (strs.size()) {
+			    string front = strs.front();
+			    strs.erase(strs.begin());
+			    unsigned int scriptind = getRole(front);
+			    for (unsigned int j=0;j<strs.size();j++) {
+			      int index=  getRole(vec[j]);
+			      scripts[scriptind][index]=strs[j]; 
+			    }
+			  }
+			 
+			}
+	  }
+	  return scripts;
+	}
+        const std::string &getRoleEvents (unsigned char ourrole, unsigned char theirs) {
+	  static vector < vector <string> > script = buildscripts();
+	  const static string def="default";
+	  if (ourrole>=script.size()) {
+	    fprintf (stderr,"bad error with getRoleEvetnts (no event specified)");
+	    return def;
+	  }
+	  if (theirs>=script[ourrole].size()) {
+	    fprintf (stderr,"bad error || with getRoleEvetnts (no event specified)");
+	    return def;
+	  }
+	  return script[ourrole][theirs];
+	}
 	vector < vector <char > > buildroles() {
 		vector <vector <char> >rolePriorities;
 		int count=0;
