@@ -34,6 +34,7 @@ class Cockpit {
   ///Video Display Units (may need more than 2 in future)
   std::vector <VDU *> vdu;
   std::string unitfilename;
+  std::string unitmodname;
   Vector unitlocation;
   ///Color of cockpit default text
   GFXColor textcol;
@@ -98,7 +99,7 @@ class Cockpit {
   ///Loads cockpit info...just as constructor
   void Init (const char * file);
   ///Sets owner of this cockpit
-  void SetParent(Unit * unit, const char * filename, const Vector &startloc);
+  void SetParent(Unit * unit, const char * filename, const char * unitmodname,const Vector &startloc);
   Unit * GetParent () {return parent.GetUnit();}
   ///Draws Cockpit then restores viewport
   void Draw();

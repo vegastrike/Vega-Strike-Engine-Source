@@ -20,7 +20,7 @@
 #include "cmd/ai/firekeyboard.h"
 #include "cmd/ai/aggressive.h"
 #include <assert.h>	// needed for assert() calls
-
+#include "savegame.h"
 
 
  void Cockpit::LocalToRadar (const Vector & pos, float &s, float &t) {
@@ -447,10 +447,11 @@ void Cockpit::Init (const char * file) {
   }
 }
 
-void Cockpit::SetParent (Unit * unit, const char * filename, const Vector & pos) {
+void Cockpit::SetParent (Unit * unit, const char * filename, const char * unitmodname, const Vector & pos) {
   parent.SetUnit (unit);
   unitlocation=pos;
   this->unitfilename=std::string(filename);
+  this->unitmodname=std::string(unitmodname);
   if (unit) {
     this->unitfaction = unit->faction;
     unit->ArmorData (StartArmor);
@@ -653,12 +654,13 @@ void Cockpit::Draw() {
 	if (respawnunit){
    	  zoomfactor=1;
 	  respawnunit=0;
-	  Unit * un = new Unit (unitfilename.c_str(),false,this->unitfaction);
+	  Unit * un = new Unit (unitfilename.c_str(),false,this->unitfaction,unitmodname);
 	  un->SetCurPosition (unitlocation);
 	  _Universe->activeStarSystem()->AddUnit (un);
-	  this->SetParent(un,unitfilename.c_str(),unitlocation);
+	  this->SetParent(un,unitfilename.c_str(),unitmodname.c_str(),unitlocation);
 	  //un->SetAI(new FireKeyboard ())
 	  SwitchUnits (NULL,un);
+	  credits = GetSavedCredits();
 	}
   }
   if (turretcontrol) {
@@ -682,7 +684,7 @@ void Cockpit::Draw() {
 	    Unit * tur;
 	    while ((tur=uj.current())) {
 	      SwitchUnits (NULL,tur);
-	      this->SetParent(tur,this->unitfilename.c_str(),unitlocation);
+	      this->SetParent(tur,this->unitfilename.c_str(),this->unitmodname.c_str(),unitlocation);
 	      ++uj;
 	    }
 	    break;
@@ -695,7 +697,7 @@ void Cockpit::Draw() {
 	Unit * un = parentturret.GetUnit();
 	if (un) {
 	  
-	  SetParent (un,unitfilename.c_str(),unitlocation);
+	  SetParent (un,unitfilename.c_str(),this->unitmodname.c_str(),unitlocation);
 	  SwitchUnits (NULL,un);
 	  parentturret.SetUnit(NULL);
 	  un->SetTurretAI();
@@ -718,7 +720,7 @@ void Cockpit::Draw() {
 	  found=true;
 	  Unit * k=GetParent(); 
 	  SwitchUnits (k,un);
-	  this->SetParent(un,this->unitfilename.c_str(),unitlocation);
+	  this->SetParent(un,this->unitfilename.c_str(),this->unitmodname.c_str(),unitlocation);
 	  //un->SetAI(new FireKeyboard ())
 	  break;
 	}

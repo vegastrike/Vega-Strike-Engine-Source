@@ -1,3 +1,5 @@
+float GetSavedCredits();
+void SetSavedCredits (float);
 void SetPlayerLocation (const Vector &playerloc);
 Vector GetPlayerLocation ();
 void SetStarSystem (string sys);

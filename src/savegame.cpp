@@ -75,7 +75,15 @@ void WriteSaveGame (const char *systemname, const Vector &FP, float credits) {
     fclose (fp);
   }
 }
+static float savedcredits=0;
+float GetSavedCredits () {
+  return savedcredits;
+}
+void SetSavedCredits (float c) {
+  savedcredits = c;
+}
 vector<SavedUnits> ParseSaveGame (const string filename, string &FSS, string originalstarsystem, Vector &PP, bool & shouldupdatepos,float &credits) {
+
   vector <SavedUnits> mysav;
   shouldupdatepos=!(PlayerLocation.i==FLT_MAX||PlayerLocation.j==FLT_MAX||PlayerLocation.k==FLT_MAX);
   outputsavegame=filename;
@@ -121,6 +129,7 @@ vector<SavedUnits> ParseSaveGame (const string filename, string &FSS, string ori
     originalsystem = ForceStarSystem;
     FSS = ForceStarSystem;
   }
+  savedcredits =credits;
   return mysav;
 }
 

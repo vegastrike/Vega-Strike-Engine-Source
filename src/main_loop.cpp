@@ -432,6 +432,7 @@ void createObjects() {
 
   map<string,int> targetmap;
   std::string fighter0name;
+  std::string fighter0mods;
   char fightername [1024]="hornet.xunit";
   int a=0;
 
@@ -502,7 +503,7 @@ void createObjects() {
 	  if (a==0) {
 	    fighter0name=string(fightername);
 	    if (mission->getVariable ("savegame","").length()>0) 
-	      modifications =vs_config->getVariable ("player","callsign","Hellcat");
+	      fighter0mods=modifications =vs_config->getVariable ("player","callsign","Hellcat");
 	  }
 	  fighters[a] = new Unit(fightername, false,tmptarget[a],modifications,fg,s);
 	}else {
@@ -587,9 +588,9 @@ void createObjects() {
   Inside(0,PRESS);//set up hornet cockpti
   //  _Universe->AccessCockpit()->Init ("hornet-cockpit.cpt");
 #ifdef IPILOTTURRET
-  _Universe->AccessCockpit()->SetParent(fighters[0]->getSubUnit(0),fighter0name.c_str(),fighters[0]->LocalPosition());
+  _Universe->AccessCockpit()->SetParent(fighters[0]->getSubUnit(0),fighter0name.c_str(),fighter0mods.c_str(),fighters[0]->LocalPosition());
 #else
-  _Universe->AccessCockpit()->SetParent(fighters[0],fighter0name.c_str(),fighters[0]->LocalPosition());
+  _Universe->AccessCockpit()->SetParent(fighters[0],fighter0name.c_str(),fighter0mods.c_str(),fighters[0]->LocalPosition());
   fighters[0]->SetTurretAI ();
 #endif
 

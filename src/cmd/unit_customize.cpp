@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "gfx/cockpit.h"
+#include "savegame.h"
 #define UPGRADEOK 1
 #define NOTTHERE 0
 #define CAUSESDOWNGRADE -1
@@ -477,10 +478,11 @@ void Unit::UpgradeInterface (Unit * base) {
 	      NewPart->curr_physical_state=curr_physical_state;
 	      NewPart->prev_physical_state=prev_physical_state;
 	      _Universe->activeStarSystem()->AddUnit (NewPart);
-	      _Universe->AccessCockpit()->SetParent(NewPart,input_buffer,curr_physical_state.position);
+	      _Universe->AccessCockpit()->SetParent(NewPart,input_buffer,"",curr_physical_state.position);//absolutely NO NO NO modifications...you got this baby clean off the slate
 	      SwitchUnits (NULL,NewPart);
 	      base->RequestClearance(NewPart);
 	      NewPart->Dock(base);
+	      SetSavedCredits (_Universe->AccessCockpit()->credits);
 	      NewPart->Kill();
 	      return;
 	    }

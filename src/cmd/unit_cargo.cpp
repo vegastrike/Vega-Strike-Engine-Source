@@ -136,6 +136,13 @@ unsigned int Unit::numCargo ()const {
 Cargo& Unit::GetCargo (unsigned int i) {
   return image->cargo[i];
 }
+
+std::string Unit::GetManifest (unsigned int i, Unit * scanningUnit) const{
+  ///FIXME somehow mangle string
+  return image->cargo[i].content;
+}
+
+
 Cargo* Unit::GetCargo (const std::string &s, unsigned int &i) {
   Cargo searchfor;
   searchfor.content=s;

@@ -1,3 +1,13 @@
+2002-02-28 Daniel Horn <hellcatv@hotmail.com>
+	* Added docking bays to be drawn when you press SHIFT-C and have clearence
+	* Added manifest VDU screen
+	* Fixed known problems with upgrades and tradings
+	* Added credits into the picture (get saved as starsystem^credits
+	* When you respawn you get loaded into a saved unit.
+	* Saved units (with upgrades) are loaded if a mission has a saved game
+	* Fixed many font issues
+	* Fixed calculation in navigation.cpp to calculate proper velocity with fixed time intervals of SIMULATION_ATOM instead of continuous time
+
 2002-04-01 Corey O'Connor <oconnorc@dogheadbone.com>
         * Additions and fixes to make a double clickable app.
           - The big problem was the os x glut was setting the working dir to Resources in the bundle. Ack.

@@ -5,9 +5,9 @@
 #include "cockpit.h"
 #include "cmd/script/mission.h"
 #include "cmd/script/msgcenter.h"
-
+#include "cmd/images.h"
 ///ALERT to change must change enum in class
-const std::string vdu_modes [] = {"Target","Nav","Weapon","Damage","Shield","View","Message"};
+const std::string vdu_modes [] = {"Target","Nav","Weapon","Damage","Shield", "Manifest", "TargetManifest","View","Message"};
 
 int vdu_lookup (char * &s) {
 #ifdef _WIN32
@@ -49,7 +49,7 @@ int parse_vdu_type (const char * x) {
 
 
 
-VDU::VDU (const char * file, TextPlane *textp, unsigned char modes, short rwws, short clls, unsigned short *ma, float *mh) :Sprite (file),scrolloffset(0),tp(textp),posmodes(modes),thismode(MSG), rows(rwws), cols(clls){
+VDU::VDU (const char * file, TextPlane *textp, unsigned short modes, short rwws, short clls, unsigned short *ma, float *mh) :Sprite (file),scrolloffset(0),tp(textp),posmodes(modes),thismode(MSG), rows(rwws), cols(clls){
   viewStyle = CP_TARGET;
   StartArmor = ma;
   maxhull = mh;
@@ -341,6 +341,20 @@ void VDU::DrawNav (const Vector & nav) {
   delete [] navdata;
 
 }
+
+void VDU::DrawManifest (Unit * parent, Unit * target) {
+  string retval ("\nManifest\n");
+  if (target!=parent) {
+    retval+=string ("Tgt: ")+target->name+string("\n");
+  }else {
+    retval+=string ("--------\n");
+  }
+  unsigned int numCargo =target->numCargo();
+  for (unsigned int i=0;i<numCargo;i++) {
+    retval+=target->GetManifest (i,parent)+string (" (")+tostring (target->GetCargo(i).quantity)+string (")\n");
+  }
+  tp->Draw (MangleString (retval.c_str(),_Universe->AccessCamera()->GetNebula()!=NULL?.4:0),scrolloffset);  
+}
 static void DrawGun (Vector  pos, float w, float h, weapon_info::MOUNT_SIZE sz) {
   w=fabs (w);
   h=fabs(h);
@@ -523,8 +537,8 @@ void VDU::Draw (Unit * parent) {
   //tp->SetCharSize (fabs(w/cols),fabs(h/rows));
   float csx,csy;
   tp->GetCharSize(csx,csy);
-  cols=abs(ceil(w/csx));
-  rows=abs(ceil(h/csy));
+  cols=abs((int)ceil(w/csx));
+  rows=abs((int)ceil(h/csy));
 
   Unit * targ;
   h=fabs(h/2);  w=fabs (w/2);
@@ -535,6 +549,13 @@ void VDU::Draw (Unit * parent) {
   case TARGET:
     if (targ)
       DrawTarget(parent,targ);
+    break;
+  case MANIFEST:
+    DrawManifest (parent,parent);
+    break;
+  case TARGETMANIFEST:
+    if (targ)
+      DrawManifest(parent,targ);
     break;
   case VIEW:
     GetPosition (x,y);
@@ -588,6 +609,8 @@ void UpdateViewstyle (VIEWSTYLE &vs) {
   }
 }
 void VDU::SwitchMode() {
+  if (!posmodes)
+    return;
   if (thismode==VIEW&&viewStyle!=CP_BACK&&(thismode&posmodes)) {
     UpdateViewstyle (viewStyle);
   }else {
