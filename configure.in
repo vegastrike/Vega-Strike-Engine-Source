@@ -444,7 +444,7 @@ AC_DEFUN( CHECK_FOR_GLUT_LIB, [
     if test "x$is_macosx" = "xyes" ; then
         LIBS="$saved_LIBS $TR_LIBS $GLUT_LDOPTS -framework GLUT"
     else
-        LIBS="$saved_LIBS $TR_LIBS $GLUT_LDOPTS -l$GLUT_LIB_NAME"
+        LIBS="$saved_LIBS $TR_LIBS $GLUT_LDOPTS -l$GLUT_LIB_NAME" -lXi -lXmu
     fi
     AC_TRY_LINK( , , have_glut_lib=yes, have_glut_lib=no )
     AC_MSG_RESULT([$have_glut_lib])
