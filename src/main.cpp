@@ -258,8 +258,8 @@ void ParseCommandLine(int argc, char ** lpCmdLine) {
 	sscanf (lpCmdLine[i]+2,"%f,%f,%f",&PlayerLocation.i,&PlayerLocation.j,&PlayerLocation.k);
 	SetPlayerLocation (PlayerLocation);
 	break;
-      case 'L':
-      case 'l'://low rez
+      case 'J':
+      case 'j'://low rez
 	SetStarSystem ( string ((lpCmdLine[i])+2));
 	break;
       case 'A'://average rez
