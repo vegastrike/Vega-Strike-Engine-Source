@@ -430,9 +430,11 @@ void	AccountServer::sendAuthorized( SOCKETALT sock, Account * acct)
 		char * buf;
 		if( fp!=NULL && fp2!=NULL)
 		{
-			savesize = fseek( fp, 0, SEEK_END);
+			fseek( fp, 0, SEEK_END);
+			savesize = ftell( fp);
 			fseek( fp, 0, SEEK_SET);
-			xmlsize = fseek( fp2, 0, SEEK_END);
+			fseek( fp2, 0, SEEK_END);
+			xmlsize = ftell( fp2);
 			fseek( fp2, 0, SEEK_SET);
 			buf = new char[savesize+xmlsize];
 		}
