@@ -91,7 +91,6 @@
   WRAPPED0(int,LockMissile,0)
   voidWRAPPED1(EjectCargo,int,index)
   WRAPPED1(float,PriceCargo,std::string,s,0)
-  WRAPPED1(Cargo,GetCargo,int,i,Cargo())
   WRAPPED0(int,numCargo,0)
   WRAPPED1(bool,IsCleared,UnitWrapper,dockingunit,false)
   voidWRAPPED5(ImportPartList,std::string,category, float, price, float, pricedev, float, quantity, float, quantdev)
@@ -129,4 +128,5 @@
   EXPORT_UTIL(getSignificantDistance,0)
   EXPORT_UTIL(isPlayerStarship,-1)
   EXPORT_UTIL(hasCargo,0)
+  EXPORT_UTIL(GetCargo,Cargo("","",1,1,1,1))
 

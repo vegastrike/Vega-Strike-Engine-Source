@@ -132,6 +132,8 @@ EXPORT_UTIL(getCompleteness,0)
 voidEXPORT_UTIL(setOwner)
 EXPORT_UTIL(getOwner,0)
 voidEXPORT_UTIL(IOmessage)
+EXPORT_UTIL(GetMasterPartList,Unit())
+EXPORT_UTIL(GetContrabandList,Unit())
 #undef EXPORT_UTIL
 #undef voidEXPORT_UTIL
 PYTHON_BEGIN_CLASS(VS,UnitWrapper,"Unit")
@@ -335,6 +337,8 @@ voidEXPORT_UTIL(setOwner)
 EXPORT_UTIL(getOwner,Unit())
 def IOmessage(time,fr,to,message):
    sys.stderr.write("IOmessage [printed in %f seconds; from %s to %s: '%s']\n" % (time,fr,to,message))
+EXPORT_UTIL(GetMasterPartList,Unit())
+EXPORT_UTIL(GetContrabandList,Unit())
 
 def string ():
   return ''

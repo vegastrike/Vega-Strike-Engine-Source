@@ -54,6 +54,8 @@ namespace UniverseUtil {
 	void setOwner(int which,Unit *owner);
 	Unit* getOwner(int which);
     void IOmessage(int delay,string from,string to,string message);
+	Unit *GetMasterPartList ();
+	Unit *GetContrabandList (string faction);
 }
 
 #undef activeSys

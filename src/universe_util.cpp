@@ -2,6 +2,7 @@
 #include "universe.h"
 #include "cmd/unit.h"
 #include "cmd/unit_interface.h"
+#include "cmd/unit_factory.h" //for UnitFactory::getMasterPartList()
 #include "cmd/collection.h"
 #include "star_system.h"
 #include <string>
@@ -212,6 +213,12 @@ namespace UniverseUtil {
 	}
     void IOmessage(int delay,string from,string to,string message){
 		mission->msgcenter->add(from,to,message,delay);
+	}
+	Unit *GetMasterPartList () {
+		return UnitFactory::getMasterPartList();
+	}
+	Unit *GetContrabandList (string faction) {
+		return _Universe->GetContraband(_Universe->GetFaction(faction.c_str()));
 	}
 }
 

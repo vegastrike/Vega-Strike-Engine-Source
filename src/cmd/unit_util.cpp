@@ -226,6 +226,18 @@ namespace UnitUtil {
 		}
 		return false;
 	}
+	Cargo GetCargo (Unit *my_unit, std::string cargname) {
+		if (my_unit) {
+			unsigned int indx=0;
+			Cargo *cargptr=my_unit->GetCargo(cargname,indx);
+			if (cargptr&&indx>=0) {
+				return *cargptr;
+			}
+		}
+		Cargo ret;
+		ret.quantity=0;
+		return ret;
+	}
 	float getDistance(Unit *my_unit,Unit *un){
 		return (my_unit->Position()-un->Position()).Magnitude()-my_unit->rSize()-un->rSize();
 	}
