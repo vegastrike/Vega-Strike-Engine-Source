@@ -174,7 +174,7 @@ void dividePlane (const bsp_polygon & tri, const bsp_tree &unificator, bsp_polyg
 	    front.v.push_back (tri.v[i]);
 	    back.v.push_back (tri.v[i]);
 	} else {
-	    if (oldflag!=BSPG_INTERSECT&&i!=0&&flag!=oldflag) {
+	    if (i!=0&&oldflag!=BSPG_INTERSECT&&flag!=oldflag) {
 		//need to add the intersection point in!
 	      if (intersectionPoint (unificator, tri.v[i-1], tri.v[i], int_point)){
 		front.v.push_back (int_point);
