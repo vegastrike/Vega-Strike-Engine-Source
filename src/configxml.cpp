@@ -340,6 +340,12 @@ void VegaConfig::gethColor(string section, string name, float color[4],int hexco
 void VegaConfig::getColor(string section, string name, float color[4],bool have_color){
    vector<easyDomNode *>::const_iterator siter;
   
+  if( colors == NULL )
+  {
+      cout << "WARNING: no colors defined in vegatrike config file" << endl;
+      return;
+  }
+
   for(siter= colors->subnodes.begin() ; siter!=colors->subnodes.end() ; siter++){
     configNode *cnode=(configNode *)(*siter);
     string scan_name=(cnode)->attr_value("name");
