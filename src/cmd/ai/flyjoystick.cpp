@@ -4,7 +4,7 @@
 #include "firekeyboard.h"
 #include "flykeyboard.h"
 static bool ab;
-static bool shelton;
+static bool shelt;
 FlyByJoystick::FlyByJoystick(int whichjoystick, const char * configfile): FlyByKeyboard (configfile), which_joystick(whichjoystick) {
   //remember keybindings from config file?  
   if (whichjoystick>=MAX_JOYSTICKS)
@@ -16,15 +16,15 @@ FlyByJoystick::FlyByJoystick(int whichjoystick, const char * configfile): FlyByK
   BindButton(1,FireKeyboard::MissileKey);
 #endif
   BindJoyKey(whichjoystick,2,FlyByJoystick::JAB);
-  BindJoyKey(whichjoystick,3,FlyByJoystick::JSHELT);
+  BindJoyKey(whichjoystick,3,FlyByJoystick::JShelt);
   
 }
 void FlyByJoystick::JShelt (KBSTATE k, float, float, int) {
   if (k==PRESS) {
-    shelton=true;
+    shelt=true;
   }
   if (k==RELEASE)
-    shelton=false;
+    shelt=false;
 
 }
 void FlyByJoystick::JAB (KBSTATE k, float, float, int) {
