@@ -136,7 +136,7 @@ Vector Unit::ClampTorque(const Vector &amt1) {
 extern unsigned short apply_float_to_short (float tmp);
 Vector Unit::ClampTorque (const Vector &amt1) {
   Vector Res=amt1;
-  static float staticfuelclamp = XMLSupport::parse_float (vs_config->getVariable ("physics","NoFuelThrust",".4"));
+  static float staticfuelclamp = XMLSupport::parse_float (vs_config->getVariable ("physics","NoFuelThrust",".9"));
   float fuelclamp=(fuel<=0)?staticfuelclamp:1;
   if (fabs(amt1.i)>fuelclamp*limits.pitch)
     Res.i=copysign(fuelclamp*limits.pitch,amt1.i);
@@ -154,8 +154,8 @@ Vector Unit::ClampTorque (const Vector &amt1) {
 //    float max_roll;
 
 Vector Unit::ClampVelocity (const Vector & velocity, const bool afterburn) {
-  static float staticfuelclamp = XMLSupport::parse_float (vs_config->getVariable ("physics","NoFuelThrust",".4"));
-  static float staticabfuelclamp = XMLSupport::parse_float (vs_config->getVariable ("physics","NoFuelAfterburn","0"));
+  static float staticfuelclamp = XMLSupport::parse_float (vs_config->getVariable ("physics","NoFuelThrust",".9"));
+  static float staticabfuelclamp = XMLSupport::parse_float (vs_config->getVariable ("physics","NoFuelAfterburn",".1"));
   float fuelclamp=(fuel<=0)?staticfuelclamp:1;
   float abfuelclamp= (fuel<=0)?staticabfuelclamp:1;
   float limit = afterburn?(abfuelclamp*(computer.max_ab_speed-computer.max_speed)+(fuelclamp*computer.max_speed)):fuelclamp*computer.max_speed;
