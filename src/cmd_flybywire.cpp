@@ -1,6 +1,6 @@
 #include "cmd_flybywire.h"
 #include "physics.h"
-AI * MatchVelocity::Execute () {
+AI * MatchLinearVelocity::Execute () {
   Vector desired (desired_velocity);
   if (!LocalVelocity) {
     desired = parent->ToLocalCoordinates (desired);
@@ -13,7 +13,7 @@ AI * MatchVelocity::Execute () {
 
 AI * MatchAngularVelocity::Execute () {
   Vector desired (desired_ang_velocity);
-  if (!LocalVelocity)
+  if (!LocalAng)
     desired = parent->ToLocalCoordinates (desired);
   //parent->GetAngularVelocity();//local coords
   parent->ApplyLocalTorque (parent->GetMoment()*(desired-parent->GetAngularVelocity())/SIMULATION_ATOM);
@@ -21,6 +21,16 @@ AI * MatchAngularVelocity::Execute () {
   return this;
 }
 
+AI * MatchVelocity::Execute () {
+  MatchLinearVelocity::Execute();
+  Vector desired (desired_ang_velocity);
+  if (!LocalAng)
+    desired = parent->ToLocalCoordinates (desired);
+  //parent->GetAngularVelocity();//local coords
+  parent->ApplyLocalTorque (parent->GetMoment()*(desired-parent->GetAngularVelocity())/SIMULATION_ATOM);
+  
+  return this;
+}
 
 
 
@@ -53,8 +63,8 @@ struct StarShipControlKeyboard {
   StarShipControlKeyboard() {UnDirty();refcount=0;}
 } starshipcontrolkeys;
 
-FlyByWire::FlyByWire (float max_ab_spd,float max_spd,float maxyaw,float maxpitch,float maxroll): Order(), max_speed(max_spd), max_ab_speed(max_ab_spd), max_yaw(maxyaw),max_pitch(maxpitch),max_roll(maxroll) {
-  type = TARGET;
+FlyByWire::FlyByWire (float max_ab_spd,float max_spd,float maxyaw,float maxpitch,float maxroll): MatchVelocity(Vector(0,0,0),Vector(0,0,0),true), max_speed(max_spd), max_ab_speed(max_ab_spd), max_yaw(maxyaw),max_pitch(maxpitch),max_roll(maxroll) {
+  type = LOCATION;
   done = false;
   //FIXME:: change hard coded keybindings
   if (starshipcontrolkeys.refcount==0) {

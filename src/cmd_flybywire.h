@@ -1,23 +1,37 @@
 #include "cmd_order.h"
 #include "in_kb.h"
 #include <GL/glut.h>
-class MatchVelocity : public Order {
+class MatchLinearVelocity : public Order {
+ protected:
   Vector desired_velocity;//werld space... generally r*speed;
   bool LocalVelocity;//specified in Local or World coordinates
-  MatchVelocity (const Vector &desired, bool Local):desired_velocity(desired),LocalVelocity(Local) {}
+ public:
+  MatchLinearVelocity (const Vector &desired, bool Local):desired_velocity(desired),LocalVelocity(Local) {}
   AI * Execute ();
   void SetDesiredVelocity (const Vector &desired, bool Local) {desired_velocity=desired;LocalVelocity=Local;}
 };
 class MatchAngularVelocity : public Order {
+ protected:
   Vector desired_ang_velocity;//werld space... generally r*speed;
-  bool LocalVelocity;//specified in Local or World coordinates
-  MatchAngularVelocity (const Vector &desired, bool Local):desired_ang_velocity(desired),LocalVelocity(Local) {}
+  bool LocalAng;//specified in Local or World coordinates
+ public:
+  MatchAngularVelocity (const Vector &desired, bool Local):desired_ang_velocity(desired),LocalAng(Local) {}
   AI * Execute ();
-  void SetDesiredAngularVelocity (const Vector &desired, bool Local) {desired_ang_velocity=desired;LocalVelocity=Local;}
+  void SetDesiredAngularVelocity (const Vector &desired, bool Local) {desired_ang_velocity=desired;LocalAng=Local;}
 };
 
-class FlyByWire : public Order {
-  Vector desired_ang_velocity;
+class MatchVelocity : public MatchLinearVelocity {
+ protected:
+  Vector desired_ang_velocity;//werld space... generally r*speed;
+  bool LocalAng;
+ public:
+  MatchVelocity (const Vector &desired,const Vector &desired_ang, bool Local):MatchLinearVelocity (desired,Local),desired_ang_velocity(desired_ang), LocalAng(Local) {}
+  AI * Execute ();
+  void SetDesiredAngularVelocity (const Vector &desired, bool Local) {desired_ang_velocity=desired;LocalAng=Local;}
+};
+
+class FlyByWire : public MatchVelocity {
+
   float set_speed;
   float dream_speed;
   float max_speed;
