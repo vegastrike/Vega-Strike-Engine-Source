@@ -109,7 +109,7 @@ bool computeStarColor (float &r, float &g, float &b, Vector luminmax, float dist
 	b*=lum;
 	static float starcolorcutoff = XMLSupport::parse_float(vs_config->getVariable("graphics","starcolorcutoff",".1"));
 	if (lum>starcolorcutoff){
-		printf ("lum %f",lum);
+		//printf ("lum %f",lum);
 	}
 	return lum>starcolorcutoff;
 }
@@ -126,21 +126,6 @@ StarVlist::StarVlist (int num ,float spread,const std::string &sysnam) {
 	this->spread=spread;
 	static float staroverlap = XMLSupport::parse_float(vs_config->getVariable("graphics","star_overlap","1"));
 	float xyzspread = spread*2*staroverlap;
-	if (!our_system_name.empty())
-		num =NumStarsInGalaxy();
-	
-	GFXColorVertex * tmpvertex = new GFXColorVertex[num*2];
-	memset (tmpvertex,0,sizeof(GFXVertex)*num*2);
-	StarIter si;
-	int starcount=0;
-	int j=0;
-	float xcent=0;
-	float ycent=0;
-	float zcent=0;
-	Vector starmin(0,0,0);
-	Vector starmax(0,0,0);
-	float minlumin=1;
-	float maxlumin=1;
 	static string allowedSectors = vs_config->getVariable("graphics","star_allowable_sectors","Vega Sol");
 	if (our_system_name.size()>0) {
 		string lumi=_Universe->getGalaxyProperty(our_system_name,"luminosity");;
@@ -158,6 +143,22 @@ StarVlist::StarVlist (int num ,float spread,const std::string &sysnam) {
 		}
 		}
 	}
+	
+	if (!our_system_name.empty())
+		num =NumStarsInGalaxy();
+	
+	GFXColorVertex * tmpvertex = new GFXColorVertex[num*2];
+	memset (tmpvertex,0,sizeof(GFXVertex)*num*2);
+	StarIter si;
+	int starcount=0;
+	int j=0;
+	float xcent=0;
+	float ycent=0;
+	float zcent=0;
+	Vector starmin(0,0,0);
+	Vector starmax(0,0,0);
+	float minlumin=1;
+	float maxlumin=1;
 	if (our_system_name.size()>0) {
 		sscanf (_Universe->getGalaxyProperty(our_system_name,"xyz").c_str(),
 				"%f %f %f",
@@ -269,7 +270,7 @@ StarVlist::StarVlist (int num ,float spread,const std::string &sysnam) {
 		tmpvertex[j].g=0;
 		tmpvertex[j].b=0;
 		if (incj) {
-			printf ("%f %f %f\n",tmpvertex[j+1].r,tmpvertex[j+1].g,tmpvertex[j+1].b);
+			//printf ("%f %f %f\n",tmpvertex[j+1].r,tmpvertex[j+1].g,tmpvertex[j+1].b);
 		}
 		j+=incj;
 	}
