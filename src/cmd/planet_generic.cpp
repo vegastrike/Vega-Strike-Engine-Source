@@ -71,8 +71,10 @@ void PlanetaryOrbit::Execute() {
       }
   }
   //unuseddouble radius =  sqrt((x_offset - focus).MagnitudeSquared() + (y_offset - focus).MagnitudeSquared());
-  theta+=velocity*SIMULATION_ATOM;
-  parent->Velocity =parent->cumulative_velocity= ((origin - focus + x_offset+y_offset-parent->LocalPosition())*(1./SIMULATION_ATOM)).Cast();
+  const double div2pi = (1.0/(2.0*PI));
+  theta+=velocity*SIMULATION_ATOM*div2pi;
+  
+  parent->Velocity =parent->cumulative_velocity= (((origin - focus + x_offset+y_offset-parent->LocalPosition())*div2pi*(1./SIMULATION_ATOM)).Cast());
   //const int Unreasonable_value=(int)(100000/SIMULATION_ATOM);
   const float Unreasonable_value = XMLSupport::parse_float(vs_config->getVariable("physics","velocity_max","10000"));
   if (parent->Velocity.Dot (parent->Velocity)>Unreasonable_value*Unreasonable_value) {
