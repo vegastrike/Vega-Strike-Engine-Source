@@ -82,6 +82,7 @@ unsigned int quadsquare::SetVertices (GFXVertex * vertexs, const quadcornerdata 
 // | | |
 // +-4-+
 static void InterpolateTextures (VertInfo res[5], VertInfo  in[4], const quadcornerdata &cd) {
+  //  const float epsilon;
   float tmp;
   res[0].SetTex(0.25 * ((((float)in[0].Rem)+in[1].Rem+in[2].Rem+in[3].Rem)/256.+ in[0].Tex + in[1].Tex + in[2].Tex + in[3].Tex));
   res[1].SetTex(0.5 * ((((float)in[0].Rem)+in[3].Rem)/256.+ (in[3].Tex) + in[0].Tex));
@@ -840,10 +841,25 @@ unsigned char	VertList[24];
 
 static void TerrainMakeActive (const TerrainTexture &text) {
   if (text.tex.t) {
+    GFXEnable (TEXTURE0);
     text.tex.t->MakeActive();
+  } else {
+    GFXDisable (TEXTURE0);
   }
-
+  GFXBlendMode (text.blendSrc, text.blendDst);
+  if (text.reflect) {
+    GFXEnable (TEXTURE1);
+  }else {
+    GFXDisable (TEXTURE1);
+  }
+  GFXSelectMaterial (text.material);
 }
+static void TerrainMakeClearActive (const TerrainTexture &text) {
+  TerrainMakeActive(text);
+  GFXBlendMode (text.blendDst!=ZERO?text.blendSrc:SRCALPHA,INVSRCALPHA);
+  
+}
+
 static void TerrainMakeDeactive (const TerrainTexture text) {
   if (text.tex.t){ 
 
@@ -879,10 +895,7 @@ int	quadsquare::Render(const quadcornerdata& cd)
   int j=0;
   for (k=textures->begin();k!=textures->end();i++,j++,k++) {
     if (i->c.size()>2) {
-
-      GFXPushBlendMode();
-      GFXBlendMode (SRCALPHA,INVSRCALPHA);
-      TerrainMakeActive(*k);
+      TerrainMakeClearActive(*k);
       GFXPolygonOffset (0,-j);
       GFXColorMaterial (AMBIENT|DIFFUSE);
       GFXColorVertex ** cv = (&blendVertices->BeginMutate(0)->colors);
@@ -898,14 +911,25 @@ int	quadsquare::Render(const quadcornerdata& cd)
       GFXColorMaterial (0);
       GFXPolygonOffset (0,0);
       TerrainMakeDeactive(*k);
-      GFXPopBlendMode();
     }
     i->Clear();
   }
 
   return totsize;
 }
+//#define DONOTDRAWBLENDEDQUADS
 void quadsquare::tri(unsigned int aa,unsigned short ta,unsigned int bb,unsigned short tb,unsigned int cc,unsigned short tc) {
+
+#ifdef DONOTDRAWBLENDEDQUADS
+  if (ta==tb&&tb==tc) {
+    indices[ta].q.push_back (aa);
+    indices[ta].q.push_back (bb);
+    indices[ta].q.push_back (cc);
+    return;
+  } else {
+    return;
+  }
+#endif
   indices[ta].q.push_back (aa);
   indices[ta].q.push_back (bb);
   indices[ta].q.push_back (cc);
@@ -1143,10 +1167,15 @@ void	quadsquare::SetupCornerData(quadcornerdata* q, const quadcornerdata& cd, in
 void VertInfo::SetTex (float t) {
   Tex = t;
   Rem = (t-Tex)*256;
+
+  /*
+  if (Rem==127||Rem==126||Rem==125)
+    Rem = 128;
+  */
   assert (t-Tex<1);
 }
 unsigned short VertInfo::GetTex () const {
-  return (Rem>127)?(Tex+1):Tex;
+  return ((Rem>127)?(Tex+1):Tex);
   //  return Tex/texmultiply + (((Tex%texmultiply)>texmultiply/2)?1:0);
 }
 
@@ -1210,14 +1239,16 @@ void	quadsquare::AddHeightMap(const quadcornerdata& cd, const HeightMapInfo& hm)
 	}
 	//don't want to bother changing things if the sample won't change things :-)
 	int s[5];
-	s[0] = (int)hm.Sample(cd.xorg + half, cd.zorg + half);
-	s[1] = (int)hm.Sample(cd.xorg + half*2, cd.zorg + half);
-	s[2] = (int)hm.Sample(cd.xorg + half, cd.zorg);
-	s[3] = (int)hm.Sample(cd.xorg, cd.zorg + half);
-	s[4] = (int)hm.Sample(cd.xorg + half, cd.zorg + half*2);
+	float texture[5];
+	s[0] = (int)hm.Sample(cd.xorg + half, cd.zorg + half, texture[0]);
+	s[1] = (int)hm.Sample(cd.xorg + half*2, cd.zorg + half, texture[1]);
+	s[2] = (int)hm.Sample(cd.xorg + half, cd.zorg,texture[2]);
+	s[3] = (int)hm.Sample(cd.xorg, cd.zorg + half,texture[3]);
+	s[4] = (int)hm.Sample(cd.xorg + half, cd.zorg + half*2, texture[4]);
 	// Modify the vertex heights if necessary, and set the dirty
 	// flag if any modifications occur, so that we know we need to
 	// recompute error data later.
+	/*
 	float pos[5];
 	pos[0] = (cd.xorg + half+ cd.zorg + half);
 	pos[1] = (cd.xorg + half*2+ cd.zorg + half);
@@ -1225,10 +1256,11 @@ void	quadsquare::AddHeightMap(const quadcornerdata& cd, const HeightMapInfo& hm)
 	pos[3] = (cd.xorg+ cd.zorg + half);
 	pos[4] = (cd.xorg + half+ cd.zorg + half*2);
 	
-	
+	*/
 	for (i = 0; i < 5; i++) {
 
-	  Vertex[i].SetTex(((int)((pos[i])/5000))%10);
+	  //Vertex[i].SetTex(((int)((pos[i])/5000))%10);
+	  Vertex[i].SetTex(texture[i]);
 		if (s[i] != 0) {
 			Dirty = true;
 			Vertex[i].Y += s[i];
@@ -1263,7 +1295,7 @@ void	quadsquare::AddHeightMap(const quadcornerdata& cd, const HeightMapInfo& hm)
 //
 
 
-float	HeightMapInfo::Sample(int x, int z) const
+float	HeightMapInfo::Sample(int x, int z, float &texture) const
 // Returns the height (y-value) of a point in this heightmap.  The given (x,z) are in
 // world coordinates.  Heights outside this heightmap are considered to be 0.  Heights
 // between sample points are bilinearly interpolated from surrounding points.
@@ -1279,8 +1311,10 @@ float	HeightMapInfo::Sample(int x, int z) const
 	int	rx = (x - XOrigin) & mask;
 	int	rz = (z - ZOrigin) & mask;
 
-	if (ix < 0 || ix >= XSize-1 || iz < 0 || iz >= ZSize-1) return 0;	// Outside the grid.
-
+	if (ix < 0 || ix >= XSize-1 || iz < 0 || iz >= ZSize-1) {
+	  texture=0;
+	  return 0;	// Outside the grid.
+	}
 	float	fx = float(rx) / (mask + 1);
 	float	fz = float(rz) / (mask + 1);
 
@@ -1289,6 +1323,13 @@ float	HeightMapInfo::Sample(int x, int z) const
 	float	s10 = Data[ix + (iz+1) * RowWidth];
 	float	s11 = Data[(ix+1) + (iz+1) * RowWidth];
 
+	float	t00 = terrainmap[ix + iz * RowWidth];
+	float	t01=  terrainmap[(ix+1) + iz * RowWidth];
+	float	t10 = terrainmap[ix + (iz+1) * RowWidth];
+	float	t11 = terrainmap[(ix+1) + (iz+1) * RowWidth];
+	texture = (t00 * (1-fx) + t01 * fx) * (1-fz) +
+	  (t10 * (1-fx) + t11 * fx) * fz;
+	
 	return (s00 * (1-fx) + s01 * fx) * (1-fz) +
 		(s10 * (1-fx) + s11 * fx) * fz;
 }

@@ -40,13 +40,14 @@ struct TerrainTexture {
 };
 
 struct HeightMapInfo {
-	short*	Data;
-	int	XOrigin, ZOrigin;
-	unsigned int	XSize, ZSize;
-	unsigned int	RowWidth;
-	int	Scale;
-
-	float	Sample(int x, int z) const;
+  short* Data;
+  unsigned char * terrainmap;
+  int	XOrigin, ZOrigin;
+  unsigned int	XSize, ZSize;
+  unsigned int	RowWidth;
+  int	Scale;
+  
+  float	Sample(int x, int z, float &texture) const;
 };
 /**
  * This has 4 lists of indices, one for "numbers of corners" a triangle may be filled 

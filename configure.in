@@ -498,6 +498,74 @@ fi
 CPPFLAGS="$saved_CPPFLAGS"
 TR_CPPFLAGS="$TR_CPPFLAGS $EXPAT_CPPFLAGS"
 
+
+
+dnl --------------------------------------------------------------------------
+dnl Check for png library
+dnl --------------------------------------------------------------------------
+AC_ARG_WITH(png-libs,[  --with-png-libs=DIR    Location of png library])
+
+if test "x$with_png_libs" = "x" ; then
+    PNG_LDOPTS=""
+else
+    PNG_LDOPTS="-L$with_png_libs"
+fi
+
+AC_DEFUN( CHECK_FOR_PNG_LIB, [
+    AC_MSG_CHECKING([for $PNG_LIB_NAME library])
+    LIBS="$PNG_LDOPTS -l$PNG_LIB_NAME"
+    AC_TRY_LINK( , , have_png_lib=yes, have_png_lib=no )
+    AC_MSG_RESULT([$have_png_lib])
+]) 
+
+saved_LIBS="$LIBS"
+
+PNG_LIB_LIST="png"
+
+for PNG_LIB_NAME in $PNG_LIB_LIST ; do
+    CHECK_FOR_PNG_LIB
+
+    if test "x$have_png_lib" = "xyes" ; then
+        break;
+    fi
+done
+
+if test "x$have_png_lib" = "xno" ; then
+    AC_MSG_ERROR([Png library not found])
+fi
+
+LIBS="$saved_LIBS"
+TR_LIBS="$TR_LIBS $PNG_LDOPTS -l$PNG_LIB_NAME"
+
+
+dnl --------------------------------------------------------------------------
+dnl Check for png.h
+dnl --------------------------------------------------------------------------
+
+AC_ARG_WITH(png-inc, [  --with-png-inc=DIR     Specify png header file location])
+
+if test "x$with_png_inc" = "x" ; then
+    PNG_CPPFLAGS=""
+else
+    PNG_CPPFLAGS="-I$with_png_inc"
+fi
+
+saved_CPPFLAGS="$CPPFLAGS"
+CPPFLAGS="$saved_CPPFLAGS $TR_CPPFLAGS $PNG_CPPFLAGS "
+AC_CHECK_HEADER([png.h], have_png_h=yes, have_png_h=no )
+
+if test "x$have_png_h" = "xno" ; then
+    AC_MSG_ERROR([Cannot find png.h])
+fi
+
+CPPFLAGS="$saved_CPPFLAGS"
+TR_CPPFLAGS="$TR_CPPFLAGS $PNG_CPPFLAGS"
+
+
+
+
+
+
 dnl --------------------------------------------------------------------------
 dnl Check for openal library
 dnl --------------------------------------------------------------------------

@@ -9,10 +9,11 @@ extern enum BLENDFUNC parse_alpha (char * tmp );
 
 
 struct TerrainData {
-	int scale;
-	float OriginX;
-	float OriginY;
-	std::string file;
+  int scale;
+  float OriginX;
+  float OriginY;
+  std::string file;
+  std::string terrainfile;
 };
 struct TerraXML {
 	float detail;
@@ -40,6 +41,7 @@ namespace TerrainXML {
 		LEVEL,
 		BLEND,
 		FFILE,
+		TERRAINFILE,
 		DETAIL,
 		STATICDETAIL,
 		REFLECT,
@@ -77,6 +79,7 @@ namespace TerrainXML {
 		EnumMap::Pair ("Level", LEVEL),
 		EnumMap::Pair ("Blend", BLEND),
 		EnumMap::Pair ("File", FFILE),
+		EnumMap::Pair ("TerrainFile", TERRAINFILE),
 		EnumMap::Pair ("Reflect", REFLECT),
 		EnumMap::Pair ("Color", COLOR),
 		EnumMap::Pair ("Scale", SCALE),
@@ -91,7 +94,7 @@ namespace TerrainXML {
 		EnumMap::Pair ("power", POWER)
 	};
 	const EnumMap element_map(element_names,9);
-	const EnumMap attribute_map(attribute_names,18);
+	const EnumMap attribute_map(attribute_names,19);
 }
 using XMLSupport::EnumMap;
 using XMLSupport::Attribute;
@@ -240,17 +243,20 @@ void QuadTree::beginElement(const string &name, const AttributeList &attributes)
 		for (iter = attributes.begin();iter!=attributes.end();iter++) {
 			switch(attribute_map.lookup((*iter).name)) {
 			case SCALE:
-				xml->data.back().scale=parse_int((*iter).value);
-				break;
+			  xml->data.back().scale=parse_int((*iter).value);
+			  break;
 			case ORIGINX:
-				xml->data.back().OriginX=parse_float((*iter).value);
-				break;
+			  xml->data.back().OriginX=parse_float((*iter).value);
+			  break;
 			case ORIGINY:
-				xml->data.back().OriginY=parse_float((*iter).value);
-				break;
+			  xml->data.back().OriginY=parse_float((*iter).value);
+			  break;
 			case FFILE:
-				xml->data.back().file=(*iter).value;
-				break;
+			  xml->data.back().file=(*iter).value;
+			  break;
+			case TERRAINFILE:
+			  xml->data.back().terrainfile= (*iter).value;
+			  break;
 			}
 		}
 		break;
@@ -308,14 +314,25 @@ void QuadTree::LoadXML (const char *filename) {
     int format;int bpp; unsigned char * palette;
     hm.Data = (short *) readImage (xml->data[i].file.c_str(),bpp, format, hm.XSize,hm.ZSize, palette, &heightmapTransform);
 	  //LoadData();
+    unsigned int xsize;unsigned int zsize;
+    hm.terrainmap = (unsigned char *)readImage (xml->data[i].terrainfile.c_str(),
+						bpp,
+						format,
+						xsize,
+						zsize,
+						palette,
+						&terrainTransform);
 
-    if (hm.Data) {
+    
+    if (hm.Data&&hm.terrainmap) {
+      assert (xsize==hm.XSize&&zsize==hm.ZSize);
       hm.RowWidth = hm.XSize;
       root->AddHeightMap (RootCornerData,hm);
       free (hm.Data);
+      free (hm.terrainmap);
     }
   }
   
- // root->StaticCullData (RootCornerData,xml->detail);
+ root->StaticCullData (RootCornerData,xml->detail);
   delete xml;
 }
