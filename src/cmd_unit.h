@@ -118,6 +118,12 @@ public:
 	virtual bool querySphere (Matrix,const Vector &pnt, float err);
 	virtual bool queryBoundingBox(const Vector &pnt, float err);
 	virtual bool queryBoundingBox(Matrix,const Vector &, float);
+
+	virtual bool querySphere (int,int, float err);
+	virtual bool querySphere (Matrix,int,int, float err,Matrix);
+	virtual bool queryBoundingBox(int,int, float err);
+	virtual bool queryBoundingBox(Matrix,int,int, float,Matrix);
+
 	void SetAI(AI *newAI);
 	Vector &Position(){return pos;};
         Vector &Nose(){return pr;};

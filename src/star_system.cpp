@@ -3,7 +3,7 @@
 #include "planet.h"
 #include "cmd_unit.h"
 #include "UnitCollection.h"
-
+#include "gfx_click_list.h"
 StarSystem::StarSystem(Planet *primaries) : 
   primaries(primaries), 
   units(new UnitCollection()), 
@@ -15,6 +15,8 @@ StarSystem::StarSystem(Planet *primaries) :
 }
 
 ClickList *StarSystem::getClickList() {
+  return new ClickList (units);
+
 }
 
 void StarSystem::modelGravity() {

@@ -239,6 +239,119 @@ bool Unit::queryBoundingBox (Matrix t,const Vector &pnt, float err) {
   return false;
 
 }
+Vector MouseCoordinate (int x, int y, float zplane) {
+
+  Vector xyz = Vector (0,0,zplane);
+  //first get xyz in camera space
+  xyz.i=zplane*(2*x/g_game.x_resolution-1)*g_game.MouseSensitivityX*GFXGetXInvPerspective();
+  xyz.j=zplane*(2*y/g_game.y_resolution-1)*g_game.MouseSensitivityY*GFXGetYInvPerspective();
+  return xyz;
+}
+
+bool Unit::querySphere (int mouseX, int mouseY, float err) {
+  UpdateMatrix();
+  int i;
+  Matrix vw;
+  GFXGetMatrix (VIEW,vw);
+  Vector mousePoint;
+  Vector TargetPoint;
+  for (i=0;i<nummesh;i++) {
+ 
+    TargetPoint = Transform(transformation,meshdata[i]->Position());
+    mousePoint = Transform (vw,TargetPoint);
+    mousePoint = MouseCoordinate (mouseX,mouseY,mousePoint.k);
+    TargetPoint =TargetPoint-mousePoint;
+    if (sqrtf (TargetPoint.Dot (TargetPoint))< err+meshdata[i]->rSize())
+      return true;
+  }
+  for (int i=0;i<numsubunit;i++) {
+    if (querySphere (transformation,mouseX,mouseY,err,vw))
+      return true;
+  }
+  return false;
+}
+
+bool Unit::querySphere (Matrix t,int mouseX, int mouseY, float err, Matrix vw) {
+  UpdateMatrix();
+  int i;
+  Matrix tmpo;
+  MultMatrix (tmpo,t,transformation);
+  Vector mousePoint;
+  Vector TargetPoint;
+  for (i=0;i<nummesh;i++) {
+    TargetPoint = Transform (tmpo,meshdata[i]->Position());
+    mousePoint = Transform (vw,TargetPoint);
+    mousePoint = MouseCoordinate (mouseX,mouseY,mousePoint.k);
+    TargetPoint = TargetPoint-mousePoint;
+    if (sqrtf (TargetPoint.Dot (TargetPoint))< err+meshdata[i]->rSize())
+      return true;
+  }
+  for (int i=0;i<numsubunit;i++) {
+    if (querySphere (tmpo,mouseX,mouseY,err,vw))
+      return true;
+  }
+  return false;
+}
+
+bool Unit::queryBoundingBox (int mouseX,int mouseY, float err) {
+  UpdateMatrix();
+  Matrix vw;
+  GFXGetMatrix (VIEW,vw);
+  int i;
+  Vector mousePoint;
+  BoundingBox * bbox=NULL;
+  for (i=0;i<nummesh;i++) {
+    bbox = meshdata[i]->getBoundingBox();
+    bbox->Transform (transformation);
+    mousePoint = Transform (vw,bbox->Center());
+    mousePoint = MouseCoordinate (mouseX,mouseY,mousePoint.k);
+
+    if (bbox->Within(mousePoint,err)) {
+      delete bbox;
+      return true;
+    }
+    delete bbox;
+  }
+  for (i=0;i<numsubunit;i++) {
+    if (subunits[i]->queryBoundingBox (transformation,mouseX,mouseY,err,vw)) 
+      return true;
+  }
+  return false;
+}
+
+bool Unit::queryBoundingBox (Matrix t,int mouseX,int mouseY, float err,Matrix vw) {
+  int i;
+  Matrix tmpo;
+  MultMatrix (tmpo,t, transformation);
+  BoundingBox *bbox=0;
+  Vector mousePoint;
+  for (i=0;i<nummesh;i++) {
+    
+    bbox = meshdata[i]->getBoundingBox();
+
+    bbox->Transform (tmpo);
+    mousePoint = Transform(vw,bbox->Center());
+    mousePoint = MouseCoordinate (mouseX,mouseY,mousePoint.k);
+    if (bbox->Within(mousePoint,err)){
+      delete bbox;
+      return true;
+    }
+    delete bbox;
+  }
+  if (numsubunit>0) {
+    for (i=0;i<numsubunit;i++) {
+      if (subunits[i]->queryBoundingBox (tmpo,mouseX,mouseY,err,vw))
+	return true;
+    }
+  }
+  return false;
+
+}
+
+
+
+
+
 
 void Unit::Draw()
 {
