@@ -452,7 +452,7 @@ PlanetaryTransform * Unit::GetPlanetOrbit () const {
 
 bool Unit::jumpReactToCollision (Unit * smalle) {
   if (!GetDestinations().empty()) {//only allow big with small
-    if ((smalle->GetJumpStatus().drive>=0||image->forcejump)&&(!GetDestinations().empty())) {
+    if ((smalle->GetJumpStatus().drive>=0||image->forcejump)) {
       smalle->DeactivateJumpDrive();
       Unit * jumppoint = this;
       _Universe->activeStarSystem()->JumpTo (smalle, jumppoint, std::string(GetDestinations()[smalle->GetJumpStatus().drive%GetDestinations().size()]));
@@ -460,6 +460,16 @@ bool Unit::jumpReactToCollision (Unit * smalle) {
     }
     return true;
   }
+  if (!smalle->GetDestinations().empty()) {
+    if ((GetJumpStatus().drive>=0||smalle->image->forcejump)) {
+      DeactivateJumpDrive();
+      Unit * jumppoint = smalle;
+      _Universe->activeStarSystem()->JumpTo (this, jumppoint, std::string(smalle->GetDestinations()[GetJumpStatus().drive%smalle->GetDestinations().size()]));
+      return true;
+    }
+    return true;
+  }
+
   return false;
 }
 void Unit::reactToCollision(Unit * smalle, const Vector & biglocation, const Vector & bignormal, const Vector & smalllocation, const Vector & smallnormal,  float dist) {
