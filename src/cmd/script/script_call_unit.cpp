@@ -417,14 +417,17 @@ varInst *Mission::call_unit(missionNode *node,int mode){
       viret->object=res_unit;
     }
     else if(method_id==CMT_UNIT_getName){
-      string *res_unit=NULL;
       if(mode==SCRIPT_RUN){
-	res_unit=&my_unit->name;
+	string unit_name;
+	unit_name=my_unit->name;
+
+	viret=call_string_new(node,mode,unit_name);
       }
-      viret=newVarInst(VI_TEMP);
-      viret->type=VAR_OBJECT;
-      viret->objectname="string";
-      viret->object=(void*)res_unit;
+      else{
+	viret=newVarInst(VI_TEMP);
+	viret->type=VAR_OBJECT;
+	viret->objectname="string";
+      }
     }
     else if(method_id==CMT_UNIT_setName){
       string s = getStringArgument (node,mode,1);
