@@ -274,7 +274,7 @@ void ContinuousTerrain::Collide (Unit * un, Matrix t) {
       diff.k = fmod (diff.k,sizeZ*width);
       if (diff.k<0)
 	diff.k+=sizeZ*width;
-      fprintf (stderr,"unit in out sapce %f %f %f\n",diff.i,diff.j,diff.k);
+      //      fprintf (stderr,"unit in out sapce %f %f %f\n",diff.i,diff.j,diff.k);
       diff = Transform (t,diff);
       const csReversibleTransform bigtransform (transform);
       Matrix smallmat;
