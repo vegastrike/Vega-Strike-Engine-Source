@@ -1055,7 +1055,8 @@ int main (int argc, char** argv) {
   fprintf(stderr,"number of vertices: %d\nnumber of lines: %d\nnumber of triangles: %d\nnumber of quads: %d\n",memfile.vertices.size(),memfile.lines.size(),memfile.tris.size(),memfile.quads.size());
   FILE * Outputfile;
   if(append){
-	Outputfile=fopen(argv[2],"ab+"); //append
+	Outputfile=fopen(argv[2],"rb+"); //append to end, but not append, which doesn't do what you want it to.
+	fseek(Outputfile, 0, SEEK_END);
   }else{
 	Outputfile=fopen(argv[2],"wb+"); //create
   }
@@ -1078,7 +1079,6 @@ int main (int argc, char** argv) {
   intbuf=VSSwapHostIntToLittle(intbuf);
   fseek(Outputfile,4+7*sizeof(int),SEEK_SET);
   fwrite(&intbuf,sizeof(int),1,Outputfile);//number of records++
-  fseek(Outputfile,0,SEEK_END);
 
   fseek(Outputfile,4+sizeof(int),SEEK_SET);
   fread(&intbuf,sizeof(int),1,Outputfile);//Current length of file
@@ -1087,7 +1087,6 @@ int main (int argc, char** argv) {
   intbuf=VSSwapHostIntToLittle(intbuf);
   fseek(Outputfile,4+sizeof(int),SEEK_SET);
   fwrite(&intbuf,sizeof(int),1,Outputfile);//Correct number of bytes for total file
-  fseek(Outputfile,0,SEEK_END);
 
   return 0;
 }
