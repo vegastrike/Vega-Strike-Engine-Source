@@ -881,8 +881,11 @@ string Unit::WriteUnitString () {
             Transformation tr(mounts[j].GetMountOrientation(),
                               mounts[j].GetMountLocation().Cast());
             tr.to_matrix(m);
-            
-            mountstr+="{"+mounts[j].type->weapon_name+";"+XMLSupport::tostring(mounts[j].ammo)+";"+XMLSupport::tostring(mounts[j].volume)+";"+lookupMountSize(mounts[j].size);
+            string printedname=mounts[j].type->weapon_name;
+            if (mounts[j].status==Mount::DESTROYED||mounts[j].status==Mount::UNCHOSEN) {
+              printedname="";
+            }
+            mountstr+="{"+printedname+";"+XMLSupport::tostring(mounts[j].ammo)+";"+XMLSupport::tostring(mounts[j].volume)+";"+lookupMountSize(mounts[j].size);
             sprintf(mnt,";%lf;%lf;%lf;%lf;%lf;%lf;%lf;%lf;%lf;%lf;%lf}",
                     m.p.i/unitScale,
                     m.p.j/unitScale,
