@@ -800,6 +800,8 @@ float GameCockpit::LookupTargetStat (int stat, Unit *target) {
   }
   case UnitImages::ECM:
 	  return target->GetImageInformation().ecm>0?1:0;
+  case UnitImages::WARPFIELDSTRENGTH:
+          return target->graphicOptions.WarpFieldStrength;
   case UnitImages::JUMP:
 	  return jumpok?1:0;
   case UnitImages::KPS:
