@@ -266,7 +266,7 @@ class Unit {
      * should it fire
      */ 
     void PhysicsAlignedUnfire();
-    bool PhysicsAlignedFire (const Transformation &Cumulative, const float * mat, const Vector & Velocity, Unit *owner,  Unit *target);
+    bool PhysicsAlignedFire (const Transformation &Cumulative, const float * mat, const Vector & Velocity, Unit *owner,  Unit *target, bool autotrack);
     bool Fire (Unit *owner, bool Missile=false);
   } *mounts;
   ///Mount may access unit

@@ -494,7 +494,7 @@ void Unit::UpdatePhysics (const Transformation &trans, const Matrix transmat, co
       t1=prev_physical_state;//a hack that will not work on turrets
       t1.Compose (trans,transmat);
       t1.to_matrix (m1);
-      mounts[i].PhysicsAlignedFire (t1,m1,cumulative_velocity,owner==NULL?this:owner,Target());
+      mounts[i].PhysicsAlignedFire (t1,m1,cumulative_velocity,owner==NULL?this:owner,Target(),0!=(mounts[i].size&weapon_info::AUTOTRACKING));
     }else if (mounts[i].processed==Mount::UNFIRED) {
       mounts[i].PhysicsAlignedUnfire();
     }

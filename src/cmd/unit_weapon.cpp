@@ -13,7 +13,7 @@
 #include "missile.h"
 #include "cmd/ai/fire.h"
 #include "gfx/cockpit.h"
-
+#include "config_xml.h"
 #include "force_feedback.h"
 
 void Unit::UnFire () {
@@ -160,7 +160,27 @@ void Unit::Mount::UnFire () {
   //  AUDStopPlaying (sound);
   ref.gun->Destabilize();
 }
-bool Unit::Mount::PhysicsAlignedFire(const Transformation &Cumulative, const float * m, const Vector & velocity, Unit * owner, Unit *target) {
+static void AdjustMatrix (Matrix mat, Unit * target, float speed) {
+  if (target) {
+    static float minTrackingNum = XMLSupport::parse_float (vs_config->getVariable("physics",
+										  "autotracking",
+										  ".5"));
+    
+    Vector pos (mat[12],mat[13],mat[14]);
+    Vector R (mat[8],mat[9],mat[10]);
+    Vector targpos (target->PositionITTS (pos,speed));
+    Vector dir = targpos-pos;
+    dir.Normalize();
+    if (dir.Dot (R)>=minTrackingNum) {
+      Vector Q(mat[4],mat[5],mat[6]);
+      Vector P;
+      ScaledCrossProduct (Q,dir,P);
+      ScaledCrossProduct (dir,P,Q);
+      VectorAndPositionToMatrix (mat,P,Q,dir,pos);
+    }
+  }
+}
+bool Unit::Mount::PhysicsAlignedFire(const Transformation &Cumulative, const float * m, const Vector & velocity, Unit * owner, Unit *target, bool autotrack) {
   if (processed==FIRED) {
     processed = PROCESSED;
     Unit * temp;
@@ -168,6 +188,9 @@ bool Unit::Mount::PhysicsAlignedFire(const Transformation &Cumulative, const flo
     tmp.Compose (Cumulative,m);
     Matrix mat;
     tmp.to_matrix (mat);
+    if (autotrack&&NULL!=target) {
+      AdjustMatrix (mat,target,type.Speed);
+    }
     switch (type.type) {
     case weapon_info::BEAM:
       break;

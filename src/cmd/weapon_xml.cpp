@@ -431,6 +431,9 @@ std::string lookupMountSize (int s) {
   if (s&weapon_info::SPECIALMISSILE) {
     result+="SPECIAL-MISSILE ";
   }
+  if (s&weapon_info::AUTOTRACKING) {
+    result+="AUTOTRACKING ";
+  }
   return result;
 
 
@@ -466,5 +469,7 @@ enum weapon_info::MOUNT_SIZE lookupMountSize (const char * str) {
     return weapon_info::CAPSHIPHEAVYMISSILE;
   if (strcmp ("SPECIAL-MISSILE",tmp)==0)
     return weapon_info::SPECIALMISSILE;
+  if (strcmp ("AUTOTRACKING",tmp)==0)
+    return weapon_info::AUTOTRACKING;
   return weapon_info::NOWEAP;
 }
