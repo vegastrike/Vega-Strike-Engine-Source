@@ -1059,6 +1059,7 @@ int main (int argc, char ** argv)
 	Tab();Tag("Energy");
 	Tab(2);fprintf (fp,"<Reactor recharge=\"%d\" limit=\"%d\"/>\n",10,100);
 	Tab();ETag("Energy");
+	Tab();fprintf (fp,"<Jump delay=\"%d\" jumpenergy=\"%d\"/>\n",1,80);
 	ETag ("Unit");
 	fclose (fp);
 
