@@ -4,19 +4,19 @@
 #include "flybywire.h"
 #include "navigation.h"
 #include "tactics.h"
-void AddOrd (AIScript *aisc, Unit * un, Order * ord) {
+void AddOrd (Order *aisc, Unit * un, Order * ord) {
   ord->SetParent (un);
   aisc->EnqueueOrder (ord);
 }
 
-void AfterburnTurnTowards (AIScript * aisc, Unit * un) {
+void AfterburnTurnTowards (Order * aisc, Unit * un) {
   Vector vec (0,0,10000);
   Order * ord = new Orders::MatchLinearVelocity(un->ClampVelocity(vec,true),true,true,false);
   AddOrd (aisc,un,ord);
   ord =       (new Orders::FaceTarget(false, 3));
   AddOrd (aisc,un,ord);    
 }
-void AfterburnTurnTowardsITTS (AIScript * aisc, Unit * un) {
+void AfterburnTurnTowardsITTS (Order * aisc, Unit * un) {
   Vector vec (0,0,10000);
   Order * ord = new Orders::MatchLinearVelocity(un->ClampVelocity(vec,true),true,true,false);
   AddOrd (aisc,un,ord);
@@ -24,7 +24,7 @@ void AfterburnTurnTowardsITTS (AIScript * aisc, Unit * un) {
   AddOrd (aisc,un,ord);    
 }
 
-void Evade(AIScript * aisc, Unit * un) {
+void Evade(Order * aisc, Unit * un) {
   Order * ord = new Orders::ChangeHeading (un->Position()+QVector(1,0,1),2);
   AddOrd (aisc,un,ord);
   ord = new Orders::MatchLinearVelocity(un->ClampVelocity(Vector (-10000,0,10000),true),false,true,true);
@@ -34,7 +34,7 @@ void Evade(AIScript * aisc, Unit * un) {
   ord = new Orders::MatchLinearVelocity(un->ClampVelocity(Vector (10000,0,10000),true),false, true,true);  
   AddOrd (aisc,un,ord);
 }
-void MoveTo(AIScript * aisc, Unit * un) {
+void MoveTo(Order * aisc, Unit * un) {
   QVector Targ (un->Position());
   Unit * untarg = un->Target();
   if (untarg) {
@@ -43,7 +43,7 @@ void MoveTo(AIScript * aisc, Unit * un) {
   Order * ord = new Orders::MoveTo(Targ,false,3);
   AddOrd (aisc,un,ord);
 }
-void Kickstop(AIScript * aisc, Unit * un) {
+void Kickstop(Order * aisc, Unit * un) {
   Vector vec (0,0,-4);
   Order * ord = new Orders::MatchLinearVelocity(un->ClampVelocity(vec,false),true,false,true);
   AddOrd (aisc,un,ord);
@@ -59,7 +59,7 @@ static void SetupVAndTargetV (QVector & targetv, QVector &targetpos, Unit* un) {
   }  
 }
 
-void SheltonSlide(AIScript * aisc, Unit * un) {
+void SheltonSlide(Order * aisc, Unit * un) {
   QVector def (un->Position()+QVector(1,0,0));
   QVector targetv(def);
   QVector targetpos(def);
@@ -75,7 +75,7 @@ void SheltonSlide(AIScript * aisc, Unit * un) {
   AddOrd (aisc,un,ord);
 }
 
-void AfterburnerSlide(AIScript * aisc, Unit * un) {
+void AfterburnerSlide(Order * aisc, Unit * un) {
   QVector def = un->Position()+QVector(1,0,0);
   QVector targetv (def);
   QVector targetpos(def);
@@ -93,7 +93,7 @@ void AfterburnerSlide(AIScript * aisc, Unit * un) {
   ord =       (new Orders::FaceTarget(false, 3));
   AddOrd (aisc,un,ord);
 }
-void SkilledABSlide (AIScript * aisc, Unit * un) {
+void SkilledABSlide (Order * aisc, Unit * un) {
   QVector def = un->Position()+QVector(1,0,0);
   QVector targetv (def);
   QVector targetpos (def);
@@ -116,12 +116,12 @@ void SkilledABSlide (AIScript * aisc, Unit * un) {
   AddOrd (aisc,un,ord);
   
 }
-void Stop (AIScript * aisc, Unit * un) {
+void Stop (Order * aisc, Unit * un) {
   Vector vec (0,0,0000);
   Order * ord = new Orders::MatchLinearVelocity(un->ClampVelocity(vec,false),true,false,false);
   AddOrd (aisc,un,ord);//<!-- should we fini? -->
 }
-void TurnAway(AIScript * aisc, Unit * un) {
+void TurnAway(Order * aisc, Unit * un) {
   QVector v(un->Position());
   QVector u(v);
   Unit * targ =un->Target();
@@ -133,7 +133,7 @@ void TurnAway(AIScript * aisc, Unit * un) {
   ord = new Orders::ChangeHeading ((200*(v-u)) + v,3);
   AddOrd (aisc,un,ord);
 }
-void TurnTowards(AIScript * aisc, Unit * un) {
+void TurnTowards(Order * aisc, Unit * un) {
   Vector vec (0,0,10000);
   Order * ord = new Orders::MatchLinearVelocity(un->ClampVelocity(vec,false),true,false,false);
   AddOrd (aisc,un,ord);
@@ -141,7 +141,17 @@ void TurnTowards(AIScript * aisc, Unit * un) {
   ord = new Orders::FaceTarget(0, 3);
     AddOrd (aisc,un,ord);
 }
-void CloakForScript(AIScript * aisc, Unit * un) {
+void FlyStraight(Order * aisc, Unit * un) {
+  Vector vec (0,0,10000);
+  Order * ord = new Orders::MatchVelocity(un->ClampVelocity(vec,false),Vector(0,0,0),true,false,false);
+  AddOrd (aisc,un,ord);
+}
+void FlyStraightAfterburner(Order * aisc, Unit * un) {
+  Vector vec (0,0,10000);
+  Order * ord = new Orders::MatchVelocity(un->ClampVelocity(vec,false),Vector(0,0,0),true,true,false);
+  AddOrd (aisc,un,ord);
+}
+void CloakForScript(Order * aisc, Unit * un) {
   Vector vec (0,0,10000);
   Order * ord = new Orders::MatchLinearVelocity(un->ClampVelocity(vec,false),true,false,false);
   AddOrd (aisc,un,ord);
@@ -150,7 +160,7 @@ void CloakForScript(AIScript * aisc, Unit * un) {
   ord=new ExecuteFor(new CloakFor(1,8),32);
   AddOrd(aisc,un,ord);
 }
-void TurnTowardsITTS(AIScript * aisc, Unit * un) {
+void TurnTowardsITTS(Order * aisc, Unit * un) {
   Vector vec (0,0,10000);
   Order * ord = new Orders::MatchLinearVelocity(un->ClampVelocity(vec,false),true,false,false);
   AddOrd (aisc,un,ord);

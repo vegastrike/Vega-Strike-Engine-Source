@@ -17,6 +17,8 @@ HardCodedMap MakeHardCodedScripts() {
   HardCodedMap tmp;
   typedef pair<string, CCScript *> MyPair;
   tmp.insert (MyPair ("++afterburnerslide.xml",&AfterburnerSlide));
+  tmp.insert (MyPair ("++flystraight.xml",&FlyStraight));
+  tmp.insert (MyPair ("++flystraightafterburner.xml",&FlyStraightAfterburner));
   tmp.insert (MyPair ("++afterburn-turntowards.xml",&AfterburnTurnTowards));  
   tmp.insert (MyPair ("++afterburn-turntowards-itts.xml",&AfterburnTurnTowardsITTS));  
   tmp.insert (MyPair ("++cloak.xml",&CloakForScript));  

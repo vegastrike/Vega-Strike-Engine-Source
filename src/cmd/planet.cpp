@@ -118,7 +118,7 @@ void Planet::beginElement(QVector x,QVector y,float vely, const Vector & rotvel,
 }
 
 const float densityOfRock = .01; // 1 cm of durasteel equiv per cubic meter
-const float densityOfJumpPoint = 100;
+const float densityOfJumpPoint = 100000;
 Planet::Planet()
     : Unit( 0 )
     ,  atmosphere (NULL), terrain (NULL), radius(0.0f), satellites()

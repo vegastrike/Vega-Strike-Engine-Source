@@ -10,6 +10,7 @@
 #include "communication.h"
 #include "cmd/script/flightgroup.h"
 #include "flybywire.h"
+#include "hard_coded_scripts.h"
 using namespace Orders;
 
 const EnumMap::Pair element_names[] = {
@@ -328,34 +329,49 @@ void AggressiveAI::Execute () {
   ReCommandWing(fg);
   FireAt::Execute();
   if (!ProcessCurrentFgDirective (fg)) {
-
-  if (
+  Unit * target = parent->Target();
+  bool isjumpable = target?((!target->GetDestinations().empty())&&parent->GetJumpStatus().drive>=0):false;
+  if (!isjumpable &&(
 #if 1
       curinter==INTRECOVER||//this makes it so only interrupts may not be interrupted
 #endif
-      curinter==INTNORMAL) {
+      curinter==INTNORMAL)) {
     if ((curinter = (ProcessLogic (interrupts, true)?INTERR:curinter))==INTERR) {
       logic.curtime=interrupts.maxtime;//set it to the time allotted
     }
   }
   //  if (parent->getAIState()->queryType (Order::FACING)==NULL&&parent->getAIState()->queryType (Order::MOVEMENT)==NULL) { 
+  
+
+
   if (queryType (Order::FACING)==NULL&&queryType (Order::MOVEMENT)==NULL) { 
-    if (parent->Target()) {
-      ProcessLogic(logic);
-      curinter=(curinter==INTERR)?INTRECOVER:INTNORMAL;
+    if (isjumpable) {
+      AfterburnTurnTowards(this,parent);
     }else {
-      Order * ord = new Orders::MatchLinearVelocity (parent->ClampVelocity(Vector (0,0,10000),false),true,true,false);
-      ord->SetParent(parent);
-      EnqueueOrder (ord);
+      if (target) {
+	ProcessLogic(logic);
+	curinter=(curinter==INTERR)?INTRECOVER:INTNORMAL;
+      }else {
+	FlyStraight(this,parent);
+	/*
+	Order * ord = new Orders::MatchLinearVelocity (parent->ClampVelocity(Vector (0,0,10000),false),true,true,false);
+	ord->SetParent(parent);
+	EnqueueOrder (ord);
+	*/
+      }
     }
   } else {
-    if ((--logic.curtime)==0&&parent->Target()) {
+    if ((--logic.curtime)==0&&target) {
       curinter=(curinter==INTERR)?INTRECOVER:INTNORMAL;
       //parent->getAIState()->eraseType (Order::FACING);
       //parent->getAIState()->eraseType (Order::MOVEMENT);
       eraseType (Order::FACING);
       eraseType (Order::MOVEMENT);
-      ProcessLogic (logic);
+      if (isjumpable ) {
+	AfterburnTurnTowards(this,parent);
+      }else {
+	ProcessLogic (logic);
+      }
       logic.curtime = logic.maxtime;      
     }
   }

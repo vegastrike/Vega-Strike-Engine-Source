@@ -652,12 +652,14 @@ bool Unit::UpAndDownGrade (Unit * up, Unit * templ, int mountoffset, int subunit
 }
 extern char * GetUnitDir (const char *);
 double Unit::Upgrade (const std::string &file, int mountoffset, int subunitoffset, bool force, bool loop_through_mounts) {
+#if 0
   if (shield.number==2) {
     printf ("shields before %s %f %f",file.c_str(),shield.fb[2],shield.fb[3]);
   }else {
     printf ("shields before %s %d %d",file.c_str(),shield.fbrl.frontmax,shield.fbrl.backmax);    
 
   }
+#endif
 	Unit * up = UnitFactory::createUnit (file.c_str(),true,_Universe->GetFaction("upgrades"));
 	static Unit * last_template=NULL;
 	char * unitdir  = GetUnitDir(name.c_str());
@@ -666,7 +668,9 @@ double Unit::Upgrade (const std::string &file, int mountoffset, int subunitoffse
 	if (last_template!=NULL) {
 	  if (last_template->name==(string (unitdir)+".template")) {
 	    templ = last_template;
+#if 0
 	    printf ("cache hit");
+#endif
 	  }else {
 	    last_template->Kill();
 	    last_template=NULL;
@@ -690,12 +694,14 @@ double Unit::Upgrade (const std::string &file, int mountoffset, int subunitoffse
 	  }
 	}
 	up->Kill();
+#if 0
   if (shield.number==2) {
     printf ("shields before %s %f %f",file.c_str(),shield.fb[2],shield.fb[3]);
   }else {
     printf ("shields before %s %d %d",file.c_str(),shield.fbrl.frontmax,shield.fbrl.backmax);    
 
   }
+#endif
 
 	return percentage;
 }
