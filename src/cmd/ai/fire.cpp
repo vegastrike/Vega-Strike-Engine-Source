@@ -7,13 +7,23 @@
 #include "vs_globals.h"
 #include "cmd/script/flightgroup.h"
 using Orders::FireAt;
-
-FireAt::FireAt (float reaction_time, float aggressivitylevel): CommunicatingAI (WEAPON,STARGET),  rxntime (reaction_time), delay(0), agg (aggressivitylevel), distance(1){
+void FireAt::ReInit (float reaction_time, float aggressivitylevel) {
+  static float missileprob = XMLSupport::parse_float (vs_config->getVariable ("AI","Firing","MissileProbability",".01"));
+  missileprobability = missileprob;  
   gunspeed=float(.0001);
   gunrange=float(.0001);
-  static float missileprob = XMLSupport::parse_float (vs_config->getVariable ("AI","Firing","MissileProbability",".01"));
-  missileprobability = missileprob;
-  
+  delay=0;
+  agg = aggressivitylevel;
+  rxntime = reaction_time;
+  distance=1;
+}
+FireAt::FireAt (float reaction_time, float aggressivitylevel): CommunicatingAI (WEAPON,STARGET){
+  ReInit (reaction_time,aggressivitylevel);
+}
+FireAt::FireAt (): CommunicatingAI (WEAPON,STARGET) {
+  static float reaction = XMLSupport::parse_float (vs_config->getVariable ("AI","Firing","ReactionTime",".2"));
+  static float aggr = XMLSupport::parse_float (vs_config->getVariable ("AI","Firing","Aggressivity","15"));
+  ReInit (aggr,reaction);
 }
 //temporary way of choosing
 void FireAt::ChooseTargets (int numtargs, bool force) {

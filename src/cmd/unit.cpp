@@ -52,7 +52,7 @@
 #include "collide/rapcol.h"
 #include "savegame.h"
 #include "xml_serializer.h"
-#include "cmd/ai/pythonai.h"
+#include "python/python_class.h"
 #include "cmd/ai/missionscript.h"
 #include "cmd/ai/aggressive.h"
 //if the PQR of the unit may be variable...for radius size computation
@@ -63,19 +63,6 @@
 
 
 double interpolation_blend_factor;
-
-///Warning: The basic pointer class does NOTHING for the user.
-///NO Refcounts...if python holds onto this for longer than it can...
-///CRASH!!
-template <class T> class BasicPointer {
-  T * myitem;
- public:
-  BasicPointer (T * myitem) {
-    this->myitem = myitem;
-  }
-  T& operator * () {return *myitem;}
-};
-
 
 #define PARANOIA .4
 void Unit::Threaten (Unit * targ, float danger) {
@@ -992,9 +979,13 @@ void Unit::Draw(const Transformation &parent, const Matrix &parentMatrix)
     halos.Draw(*ctm,Scale,cloak,(_Universe->AccessCamera()->GetNebula()==nebula&&nebula!=NULL)?-1:0);
   }
 }
+
+INIT_PYTHON_CLASS(Orders::FireAt,"AI","PythonAI");
+
 void Unit::LoadAIScript(const std::string & s) {
+
   if (s.find ("py")!=string::npos) {
-    PythonAI * ai = PythonAI::Factory (s);
+    Order * ai = PythonClass <Orders::FireAt>::Factory (s);
     PrimeOrders (ai);
     return;
   }else {
@@ -1013,7 +1004,7 @@ void Unit::LoadAIScript(const std::string & s) {
   }
 }
 bool Unit::LoadLastPythonAIScript() {
-  PythonAI * pyai = PythonAI::LastAI();
+  Order * pyai = PythonClass <Orders::FireAt>::LastPythonClass();
   if (pyai) {
     PrimeOrders (pyai);
   }else if (!aistate) {

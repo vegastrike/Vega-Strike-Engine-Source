@@ -1,3 +1,5 @@
+#ifndef _PYTHON_COMPILE_H_
+#define _PYTHON_COMPILE_H_
 #include "hashtable.h"
 #include <Python.h>
 #include <string>
@@ -49,3 +51,4 @@ template <class T> class BasicPointer {
   }
   T& operator * () {return *myitem;}
 };
+#endif

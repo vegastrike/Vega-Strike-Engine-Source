@@ -30,7 +30,7 @@ const EnumMap::Pair element_names[] = {
 };
 const EnumMap AggressiveAIel_map(element_names, 12);
 static float aggressivity=2.01;
-AggressiveAI::AggressiveAI (const char * filename, const char * interruptname, Unit * target):FireAt(.2,2), logic (AggressiveAIel_map), interrupts (AggressiveAIel_map) {
+AggressiveAI::AggressiveAI (const char * filename, const char * interruptname, Unit * target):FireAt(), logic (AggressiveAIel_map), interrupts (AggressiveAIel_map) {
   last_time_insys=true;
   obedient = true;
   if (aggressivity==2.01) {

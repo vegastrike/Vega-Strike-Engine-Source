@@ -186,6 +186,8 @@ int main( int argc, char *argv[] )
 
 #ifdef HAVE_PYTHON
     Python::init();
+    Python::initpaths();
+    Python::test();
 #endif
 
     

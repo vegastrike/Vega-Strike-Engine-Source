@@ -156,12 +156,12 @@ BOOST_PYTHON_MODULE_INIT(Vegastrike)
 */
 /*    boost::python::class_builder<PythonVarConfig>
         Var(vs, "Var");
-	/* Define a constructor. To define a constructor with multiple arguments,
-	do <classbuilder_type>.def(boost::python::constructor<type1,type2,...>() *-/
+	//Define a constructor. To define a constructor with multiple arguments,
+	//do <classbuilder_type>.def(boost::python::constructor<type1,type2,...>() 
 	Var.def(boost::python::constructor<>());
 	
-	/* Override __getattr__ and __setattr__ so that assignments to unbound variables in 
-	a Var will be redirected to the config assignment functions *-/
+	// Override __getattr__ and __setattr__ so that assignments to unbound variables in 
+	//a Var will be redirected to the config assignment functions 
 	Var.def(PythonVarConfig::getVariable,"__getattr__");
 	Var.def(PythonVarConfig::setVariable,"__setattr__");
 
@@ -178,19 +178,31 @@ BOOST_PYTHON_MODULE_INIT(Vegastrike)
 	IO.def(PythonIOString::write,"write");
 }
 //boost::python::detail::extension_instance::wrapped_objects
+void Python::initpaths(){
+  char pwd[2048];
+  getcwd (pwd,2047);
+  pwd[2047]='\0';
+  std::string changepath ("import sys\nsys.path=sys.path + ['"+std::string(pwd)+DELIMSTR+"modules']\n");
+  char * temppython = strdup(changepath.c_str());
+  PyRun_SimpleString(temppython);	
+  free (temppython);
+}
+
 void Python::init() {
-	/* initialize python library */
-	Py_Initialize();
-	char pwd[2048];
-	getcwd (pwd,2047);
-	pwd[2047]='\0';
-	std::string changepath ("import sys\nsys.path=sys.path + ['"+std::string(pwd)+DELIMSTR+"modules']\n");
-	char * temppython = strdup(changepath.c_str());
-	PyRun_SimpleString(temppython);	
-	free (temppython);
+  static bool isinit=false;
+  if (isinit) {
+    return;
+  }
+  isinit=true;
+  /* initialize python library */
+  Py_Initialize();
+  initVegastrike();
+}
+void Python::test() {
+
 	/* initialize vegastrike module so that 
 	'import VS' works in python */
-	initVegastrike();
+
 	/* There should be a python script automatically executed right after 
 	   initVegastrike to rebind some of the objects into a better hierarchy,
 	   and to install wrappers for class methods, etc.

@@ -1,6 +1,6 @@
 noinst_LIBRARIES = libcmd.a
 SUBDIRS = ai script collide
-INCLUDES = -I ../
+INCLUDES = -I ../ -I../boost/
 
 libcmd_a_SOURCES =				\
 	atmosphere.h			\

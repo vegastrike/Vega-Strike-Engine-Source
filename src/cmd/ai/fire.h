@@ -21,8 +21,10 @@ protected:
   //  bool DealWithMultipleTargets();
   void ChooseTargets(int num, bool force=false);//chooses n targets and puts the best to attack in unit's target container
   bool isJumpablePlanet(Unit *);
+  void ReInit (float rxntime, float agglevel);
 public:
   FireAt (float reaction_time, float aggressivitylevel);//weapon prefs?
+  FireAt();
   virtual void Execute();
   virtual ~FireAt();
 };

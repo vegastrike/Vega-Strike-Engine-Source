@@ -6,6 +6,8 @@
 class Python {
 public:
 	static void init();
+	static void initpaths();
+	static void test();
 };
 #endif
 
