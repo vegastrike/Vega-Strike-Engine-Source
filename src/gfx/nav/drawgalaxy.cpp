@@ -78,7 +78,7 @@ public:
 	std::vector<std::string> *dest; //let's just hope that the iterator doesn't get killed during the frame, which shouldn't happen.
 	bool moused;
 	char color;
-s	navscreenoccupied * screenoccupation;
+	navscreenoccupied * screenoccupation;
 	systemdrawnode(int type,float size,float x, float y, std::string source,navscreenoccupied * so, bool moused, std::vector<std::string> *dest):type(type),size(size),x(x),y(y),source(source),dest(dest) {
 		screenoccupation = so;
 		this->moused=moused;
