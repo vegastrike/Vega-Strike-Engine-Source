@@ -17,6 +17,9 @@ using std::string;
 #ifndef WIN32
 using std::ostrstream;
 #endif
+
+string strtoupper(const string &foo);
+
 namespace XMLSupport {
 
   struct Attribute {
@@ -39,7 +42,7 @@ namespace XMLSupport {
     Hashtable<string,const int,char [1001]> forward;
     Hashtable<string,const string, char [1001]> reverse;
   public:
-    static inline string strtoupper(const string &foo);
+
     struct Pair {
       string name;
       int val;

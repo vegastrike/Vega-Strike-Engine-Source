@@ -5,6 +5,13 @@
 #include <assert.h>
 #include "xml_support.h"
 
+
+string strtoupper(const string &foo) {
+  string rval;
+  string::const_iterator src = foo.begin();
+  while(src!=foo.end()) rval += toupper(*src++);
+  return rval;
+}
 namespace XMLSupport {
   /*
   string tostring(int num) {
@@ -15,12 +22,6 @@ namespace XMLSupport {
     return string(((ostrstream*)&(ostrstream() << num << '\0'))->str());
   }
   */
-  string EnumMap::strtoupper(const string &foo) {
-    string rval;
-    string::const_iterator src = foo.begin();
-    while(src!=foo.end()) rval += toupper(*src++);
-    return rval;
-  }
 
   EnumMap::EnumMap(const Pair *data, unsigned int num) {
     for(unsigned int a=0; a<num; a++) {

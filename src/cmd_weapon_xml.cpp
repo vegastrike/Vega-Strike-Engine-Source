@@ -297,7 +297,7 @@ namespace BeamXML {
     case PROJECTILE:
       assert (level==1);
       level--;
-      lookuptable.Put (EnumMap::strtoupper(curname),new weapon_info (tmpweapon));
+      lookuptable.Put (strtoupper(curname),new weapon_info (tmpweapon));
       tmpweapon.init();
       break;
     case ENERGY:
@@ -317,7 +317,7 @@ namespace BeamXML {
 using namespace BeamXML;
 
 weapon_info* getTemplate(const string &key) {
-  return lookuptable.Get(EnumMap::strtoupper(key));
+  return lookuptable.Get(strtoupper(key));
 }
 
 void LoadWeapons(const char *filename) {
