@@ -183,13 +183,13 @@ void /*GFXDRVAPI*/ GFXViewPort (int minx, int miny, int maxx, int maxy);
 void /*GFXDRVAPI*/ GFXLookAt(Vector eye, QVector center, Vector up);
 
 ///Gets the 6 clip planes of the current Projection matrix
-void /*GFXDRVAPI*/ GFXGetFrustum (float f[6][4]);
+void /*GFXDRVAPI*/ GFXGetFrustum (double f[6][4]);
 
 ///Calculates frustum matrix (internal use)
 void /*GFXDRVAPI*/ GFXCalculateFrustum();
 
 ///Calculates the planes for a given frustum in 3space given a matrix and a projection.
-void /*GFXDRVAPI*/ GFXCalculateFrustum(float frustum[6][4],const Matrix &modlmatrix, const float *projection);
+void /*GFXDRVAPI*/ GFXCalculateFrustum(double frustum[6][4],const Matrix &modlmatrix, const float *projection);
 
 ///Saves and restores last used left,right,bot,top,near,far vals (internal use)
 void /*GFXDRVAPI*/ GFXGetFrustumVars (bool, float *l,float *r, float *b, float *t, float *n, float *f);
@@ -198,17 +198,17 @@ void /*GFXDRVAPI*/ GFXGetFrustumVars (bool, float *l,float *r, float *b, float *
 float /*GFXDRVAPI*/ GFXSphereInFrustum(const QVector &Center, float Radius);
 
 ///Checks if a sphere is in the given frustum calculated by GFXCalculateFrustum. Used in Unit clipping
-float /*GFXDRVAPI*/ GFXSphereInFrustum(float f[6][4],const QVector &Center, float Radius);
+float /*GFXDRVAPI*/ GFXSphereInFrustum(double f[6][4],const QVector &Center, float Radius);
 
 void /*GFXDRVAPI*/ GFXBoxInFrustumModel (const Matrix &model);
 
 CLIPSTATE /*GFXDRVAPI*/ GFXBoxInFrustum (const Vector & min, const Vector & max);
 
-CLIPSTATE /*GFXDRVAPI*/ GFXBoxInFrustum (float f[6][4], const Vector &min, const Vector & max);
+CLIPSTATE /*GFXDRVAPI*/ GFXBoxInFrustum (double f[6][4], const Vector &min, const Vector & max);
 CLIPSTATE /*GFXDRVAPI*/ GFXTransformedBoxInFrustum (const Vector &min, const Vector & max);
 CLIPSTATE /*GFXDRVAPI*/ GFXSpherePartiallyInFrustum (const Vector & cent, const float r);
 CLIPSTATE /*GFXDRVAPI*/ GFXTransformedSpherePartiallyInFrustum (const Vector & cent, const float r);
-CLIPSTATE /*GFXDRVAPI*/ GFXSpherePartiallyInFrustum (float f[6][4],const Vector & cent, const float r);
+CLIPSTATE /*GFXDRVAPI*/ GFXSpherePartiallyInFrustum (double f[6][4],const Vector & cent, const float r);
 
 
 ///Given matrices, calculates the matrix and inverse matrix of a projection matrix to go from screen to 3-space coordinates

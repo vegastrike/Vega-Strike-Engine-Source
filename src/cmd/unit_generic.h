@@ -904,7 +904,7 @@ public:
   virtual float querySphereClickList (const QVector &st, const QVector &dir, float err) const {return 1;}//for click list
   ///Queries if this unit is within a given frustum
 // Uses GFX -> defined only Unit class
-  virtual bool queryFrustum (float frustum[6][4]) const {return false;}
+  virtual bool queryFrustum (double frustum[6][4]) const {return false;}
 
   /**
    *Queries bounding box with a point, radius err

@@ -400,7 +400,7 @@ StarSystem * GameUnit<UnitType>::getStarSystem () {
 
 
 template <class UnitType>
-bool GameUnit<UnitType>::queryFrustum(float frustum [6][4]) const{
+bool GameUnit<UnitType>::queryFrustum(double frustum [6][4]) const{
   int i;
 #ifdef VARIABLE_LENGTH_PQR
   Vector TargetPoint (cumulative_transformation_matrix[0],cumulative_transformation_matrix[1],cumulative_transformation_matrix[2]);

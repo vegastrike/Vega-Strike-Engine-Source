@@ -197,7 +197,7 @@ public:
   ///queries the BSP with a world space pnt, radius err.  Returns the normal and distance of the plane to the shield. If Unit returned not NULL, that subunit hit
   Unit * queryBSP (const QVector &pnt, float err, Vector & normal, float &dist,  bool ShieldBSP);
   ///Queries if this unit is within a given frustum
-  bool queryFrustum (float frustum[6][4]) const;
+  bool queryFrustum (double frustum[6][4]) const;
 
   /**
    *Queries bounding box with a point, radius err

@@ -4,8 +4,8 @@
 #include "lin_time.h"
 #include <stdio.h>
 using namespace GFXMatrices;  //causes problems with g_game
-float BoxFrust [6][4];
-float frust [6][4];
+double BoxFrust [6][4];
+double frust [6][4];
 
 float /*GFXDRVAPI*/ GFXSphereInFrustum (const QVector &Cnt, float radius) {
   return GFXSphereInFrustum (frust,Cnt,radius);
@@ -24,7 +24,7 @@ CLIPSTATE /*GFXDRVAPI*/ GFXTransformedSpherePartiallyInFrustum (const Vector &Cn
   return GFXSpherePartiallyInFrustum(frust,Cnt,radius);
 }
 
-CLIPSTATE /*GFXDRVAPI*/ GFXSpherePartiallyInFrustum (float f [6][4],const Vector &Cnt, const float radius) {
+CLIPSTATE /*GFXDRVAPI*/ GFXSpherePartiallyInFrustum (double f [6][4],const Vector &Cnt, const float radius) {
    int p;
    float d;
    CLIPSTATE retval=GFX_TOTALLY_VISIBLE;;
@@ -41,7 +41,7 @@ CLIPSTATE /*GFXDRVAPI*/ GFXSpherePartiallyInFrustum (float f [6][4],const Vector
 }
 
 
-CLIPSTATE GFXBoxInFrustum (float f [6][4], const Vector &min, const Vector &max) {
+CLIPSTATE GFXBoxInFrustum (double f [6][4], const Vector &min, const Vector &max) {
   	// Doesn't do a perfect test for NOT_VISIBLE.  Just checks to
 	// see if all box vertices are outside at least one frustum
 	// plane.  Some pathological boxes could return SOME_CLIP even
@@ -87,7 +87,7 @@ CLIPSTATE GFXBoxInFrustum (float f [6][4], const Vector &min, const Vector &max)
 	}
 }
 
-void DrawFrustum (float f[6][4]) {
+void DrawFrustum (double f[6][4]) {
   GFXColor cols[6]={GFXColor(0,0,1),GFXColor(0,1,0), GFXColor (1,0,0), GFXColor (1,1,0), GFXColor (1,0,1), GFXColor (0,1,1)};
   for (unsigned int i=0;i<4;i++) {
     Vector n (f[i][0],f[i][1],f[i][2]);
@@ -123,7 +123,7 @@ void DrawFrustum (float f[6][4]) {
   }
 }
 
-float /*GFXDRVAPI*/ GFXSphereInFrustum (float f [6][4],const QVector &Cnt, float radius) {
+float /*GFXDRVAPI*/ GFXSphereInFrustum (double f [6][4],const QVector &Cnt, float radius) {
   /*
   static float lasttime = GetElapsedTime();
   if (lasttime!=GetElapsedTime()) {
@@ -165,7 +165,7 @@ void GFXGetFrustumVars (bool retr, float *l, float *r, float *b, float *t, float
 
 }
 
-void /*GFXDRVAPI*/ GFXGetFrustum(float f[6][4]) {
+void /*GFXDRVAPI*/ GFXGetFrustum(double f[6][4]) {
   f = frust;
 }
 void /*GFXDRVAPI*/ GFXBoxInFrustumModel (const Matrix &model) {
@@ -176,7 +176,7 @@ void /*GFXDRVAPI*/ GFXBoxInFrustumModel (const Matrix &model) {
 void /*GFXDRVAPI*/ GFXCalculateFrustum() {
   GFXCalculateFrustum (frust,view,projection);
 }
-void WackyMultFloatMatrix(float dest[], const float m1[], const Matrix &m2)
+void WackyMultFloatMatrix(double dest[], const float m1[], const Matrix &m2)
 {
   QVector p (InvTransformNormal (m2,m2.p));
   p=(TransformNormal (m2,-m2.p));
@@ -203,8 +203,8 @@ void WackyMultFloatMatrix(float dest[], const float m1[], const Matrix &m2)
 
 }
 
-void /*GFXDRVAPI*/ GFXCalculateFrustum (float frustum[6][4], const Matrix &modl,const float *proj){
-   float   clip[16];
+void /*GFXDRVAPI*/ GFXCalculateFrustum (double frustum[6][4], const Matrix &modl,const float *proj){
+   double   clip[16];
    WackyMultFloatMatrix (clip,proj,modl);
    float  t;
    /* Extract the numbers for the RIGHT plane */
@@ -214,7 +214,7 @@ void /*GFXDRVAPI*/ GFXCalculateFrustum (float frustum[6][4], const Matrix &modl,
    frustum[0][3] = clip[15] - clip[12];
 
    /* Normalize the result */
-   t = sqrtf( frustum[0][0] * frustum[0][0] + frustum[0][1] * frustum[0][1] + frustum[0][2] * frustum[0][2] );
+   t = sqrt( frustum[0][0] * frustum[0][0] + frustum[0][1] * frustum[0][1] + frustum[0][2] * frustum[0][2] );
    frustum[0][0] /= t;
    frustum[0][1] /= t;
    frustum[0][2] /= t;
@@ -227,7 +227,7 @@ void /*GFXDRVAPI*/ GFXCalculateFrustum (float frustum[6][4], const Matrix &modl,
    frustum[1][3] = clip[15] + clip[12];
 
    /* Normalize the result */
-   t = sqrtf( frustum[1][0] * frustum[1][0] + frustum[1][1] * frustum[1][1] + frustum[1][2] * frustum[1][2] );
+   t = sqrt( frustum[1][0] * frustum[1][0] + frustum[1][1] * frustum[1][1] + frustum[1][2] * frustum[1][2] );
    frustum[1][0] /= t;
    frustum[1][1] /= t;
    frustum[1][2] /= t;
@@ -240,7 +240,7 @@ void /*GFXDRVAPI*/ GFXCalculateFrustum (float frustum[6][4], const Matrix &modl,
    frustum[2][3] = clip[15] + clip[13];
 
    /* Normalize the result */
-   t = sqrtf( frustum[2][0] * frustum[2][0] + frustum[2][1] * frustum[2][1] + frustum[2][2] * frustum[2][2] );
+   t = sqrt( frustum[2][0] * frustum[2][0] + frustum[2][1] * frustum[2][1] + frustum[2][2] * frustum[2][2] );
    frustum[2][0] /= t;
    frustum[2][1] /= t;
    frustum[2][2] /= t;
@@ -253,7 +253,7 @@ void /*GFXDRVAPI*/ GFXCalculateFrustum (float frustum[6][4], const Matrix &modl,
    frustum[3][3] = clip[15] - clip[13];
 
    /* Normalize the result */
-   t = sqrtf( frustum[3][0] * frustum[3][0] + frustum[3][1] * frustum[3][1] + frustum[3][2] * frustum[3][2] );
+   t = sqrt( frustum[3][0] * frustum[3][0] + frustum[3][1] * frustum[3][1] + frustum[3][2] * frustum[3][2] );
    frustum[3][0] /= t;
    frustum[3][1] /= t;
    frustum[3][2] /= t;
@@ -266,7 +266,7 @@ void /*GFXDRVAPI*/ GFXCalculateFrustum (float frustum[6][4], const Matrix &modl,
    frustum[5][3] = clip[15] - clip[14];
 
    /* Normalize the result */
-   t = sqrtf( frustum[5][0] * frustum[5][0] + frustum[5][1] * frustum[5][1] + frustum[5][2] * frustum[5][2] );
+   t = sqrt( frustum[5][0] * frustum[5][0] + frustum[5][1] * frustum[5][1] + frustum[5][2] * frustum[5][2] );
    frustum[5][0] /= t;
    frustum[5][1] /= t;
    frustum[5][2] /= t;
@@ -279,7 +279,7 @@ void /*GFXDRVAPI*/ GFXCalculateFrustum (float frustum[6][4], const Matrix &modl,
    frustum[4][3] = clip[15] + clip[14];
 
    /* Normalize the result */
-   t = sqrtf( frustum[4][0] * frustum[4][0] + frustum[4][1] * frustum[4][1] + frustum[4][2] * frustum[4][2] );
+   t = sqrt( frustum[4][0] * frustum[4][0] + frustum[4][1] * frustum[4][1] + frustum[4][2] * frustum[4][2] );
    frustum[4][0] /= t;
    frustum[4][1] /= t;
    frustum[4][2] /= t;
@@ -329,7 +329,7 @@ PROJECTION DOESNt FIT INTO REDUCED MAT
    frustum[0][3] = /*clip[15]*/1 - clip.p.i;
 
    /* Normalize the result */
-   t = sqrtf( frustum[0][0] * frustum[0][0] + frustum[0][1] * frustum[0][1] + frustum[0][2] * frustum[0][2] );
+   t = sqrt( frustum[0][0] * frustum[0][0] + frustum[0][1] * frustum[0][1] + frustum[0][2] * frustum[0][2] );
    frustum[0][0] /= t;
    frustum[0][1] /= t;
    frustum[0][2] /= t;
@@ -342,7 +342,7 @@ PROJECTION DOESNt FIT INTO REDUCED MAT
    frustum[1][3] = /*clip[15]*/1 + clip.p.i;
 
    /* Normalize the result */
-   t = sqrtf( frustum[1][0] * frustum[1][0] + frustum[1][1] * frustum[1][1] + frustum[1][2] * frustum[1][2] );
+   t = sqrt( frustum[1][0] * frustum[1][0] + frustum[1][1] * frustum[1][1] + frustum[1][2] * frustum[1][2] );
    frustum[1][0] /= t;
    frustum[1][1] /= t;
    frustum[1][2] /= t;
@@ -355,7 +355,7 @@ PROJECTION DOESNt FIT INTO REDUCED MAT
    frustum[2][3] = /*clip[15]*/1 + clip.p.j;
 
    /* Normalize the result */
-   t = sqrtf( frustum[2][0] * frustum[2][0] + frustum[2][1] * frustum[2][1] + frustum[2][2] * frustum[2][2] );
+   t = sqrt( frustum[2][0] * frustum[2][0] + frustum[2][1] * frustum[2][1] + frustum[2][2] * frustum[2][2] );
    frustum[2][0] /= t;
    frustum[2][1] /= t;
    frustum[2][2] /= t;
@@ -368,7 +368,7 @@ PROJECTION DOESNt FIT INTO REDUCED MAT
    frustum[2][3] = /*clip[15]*/1 - clip.p.j;
 
    /* Normalize the result */
-   t = sqrtf( frustum[3][0] * frustum[3][0] + frustum[3][1] * frustum[3][1] + frustum[3][2] * frustum[3][2] );
+   t = sqrt( frustum[3][0] * frustum[3][0] + frustum[3][1] * frustum[3][1] + frustum[3][2] * frustum[3][2] );
    frustum[3][0] /= t;
    frustum[3][1] /= t;
    frustum[3][2] /= t;
@@ -381,7 +381,7 @@ PROJECTION DOESNt FIT INTO REDUCED MAT
    frustum[5][3] = /*clip[15]*/1 - clip.p.k;
 
    /* Normalize the result */
-   t = sqrtf( frustum[5][0] * frustum[5][0] + frustum[5][1] * frustum[5][1] + frustum[5][2] * frustum[5][2] );
+   t = sqrt( frustum[5][0] * frustum[5][0] + frustum[5][1] * frustum[5][1] + frustum[5][2] * frustum[5][2] );
    frustum[5][0] /= t;
    frustum[5][1] /= t;
    frustum[5][2] /= t;
@@ -394,7 +394,7 @@ PROJECTION DOESNt FIT INTO REDUCED MAT
    frustum[4][3] = /*clip[15]*/1 + clip.p.k;
 
    /* Normalize the result */
-   t = sqrtf( frustum[4][0] * frustum[4][0] + frustum[4][1] * frustum[4][1] + frustum[4][2] * frustum[4][2] );
+   t = sqrt( frustum[4][0] * frustum[4][0] + frustum[4][1] * frustum[4][1] + frustum[4][2] * frustum[4][2] );
    frustum[4][0] /= t;
    frustum[4][1] /= t;
    frustum[4][2] /= t;
