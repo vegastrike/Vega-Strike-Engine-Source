@@ -157,7 +157,18 @@ void	ZoneMgr::removeClient( Client * clt)
 // Broadcast a packet to a client's zone clients
 void	ZoneMgr::broadcast( Client * clt, Packet * pckt )
 {
-	//cout<<"Sending update to "<<(zone_list[clt->zone].size()-1)<<" clients"<<endl;
+    if( clt == NULL )
+    {
+        cout<<"Trying to send update without client" << endl;
+        return;
+    }
+    if( clt->zone < 0 || clt->zone > zone_list.size() )
+    {
+        cout<<"Trying to send update to nonexistant zone " << clt->zone << endl;
+        return;
+    }
+
+    // cout<<"Sending update to "<<(zone_list[clt->zone].size()-1)<<" clients"<<endl;
 	for( LI i=zone_list[clt->zone].begin(); i!=zone_list[clt->zone].end(); i++)
 	{
 		// Broadcast to other clients

@@ -554,10 +554,10 @@ bool VsnetTCPSocket::isActive( SocketSet& set )
             return true;
         }
         else
-    {
-        COUT << "leave " << "isActive" << endl;
-        return false;
-    }
+        {
+            COUT << "leave " << "isActive" << endl;
+            return false;
+        }
     }
 
     bool endless   = true;
@@ -663,6 +663,12 @@ bool VsnetTCPSocket::isActive( SocketSet& set )
 #endif
 
 		_incomplete_packet = 0;
+#if !defined(_WIN32) || defined(__CYGWIN__)
+                // either endless is false, or we exit with EWOULDBLOCK
+#else
+		// test not possible in VC++, exit always
+                return gotpacket;
+#endif
 	    }
         }
     }

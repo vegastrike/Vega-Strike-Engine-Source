@@ -42,10 +42,12 @@ typedef unsigned int InstSerial;
 
 extern double NETWORK_ATOM;
 
+#ifndef COUT
 #if defined(_WIN32) && defined(_MSC_VER) && defined(USE_BOOST_129) //wierd error in MSVC
 #define COUT std::cout << __FILE__ << ":"
 #else
 #define COUT std::cout << __FILE__ << ":" << __LINE__ << " "
+#endif
 #endif
 
 #if defined(_WIN32) && !defined(__CYGWIN__) || defined(__APPLE__)
