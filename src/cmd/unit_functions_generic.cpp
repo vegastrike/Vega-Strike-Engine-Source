@@ -6,6 +6,7 @@
 #include "savegame.h"
 #include "xml_support.h"
 #include "unit_factory.h"
+#include "unit_util.h"
 // Various functions that were used in .cpp files that are now included because of
 // the temple GameUnit class
 // If not separated from those files functions would be defined in multiple places
