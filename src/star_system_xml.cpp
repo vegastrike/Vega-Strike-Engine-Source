@@ -577,7 +577,7 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
       case NAME:
 	fullname=(*iter).value;
 	//	cout << "\nFOUND planet/unit name " << fullname << endl;
-	bootstrap_draw("loading "+fullname);
+	bootstrap_draw("Loading "+fullname);
 	break;
       case XFILE:
 	delete []filename;

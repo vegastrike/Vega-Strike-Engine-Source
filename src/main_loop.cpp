@@ -493,18 +493,23 @@ void createObjects(std::vector <std::string> &fighter0name, std::vector <StarSys
 	    fighter0mods.push_back("");
 	  }
 	}
-    if (squadnum<(int)fighter0name.size()) {
+        Cockpit * backupcp = _Universe->AccessCockpit();
+
+        if (squadnum<(int)fighter0name.size()) {
 		_Universe->pushActiveStarSystem (_Universe->AccessCockpit(squadnum)->activeStarSystem);
-	}
+                _Universe->SetActiveCockpit(_Universe->AccessCockpit(squadnum));
+
+        }
   	fighters[a] = UnitFactory::createUnit(fightername, false,tmptarget[a],modifications,fg,s);
     _Universe->activeStarSystem()->AddUnit(fighters[a]);
 	if (s==0&&squadnum<(int)fighter0name.size()) {
 		_Universe->AccessCockpit(squadnum)->Init (fighters[a]->getCockpit().c_str());
 	    _Universe->AccessCockpit(squadnum)->SetParent(fighters[a],fighter0name[squadnum].c_str(),fighter0mods[squadnum].c_str(),pox);
 	}
-
+        
     if (squadnum<(int)fighter0name.size()) {
 		_Universe->popActiveStarSystem ();
+                _Universe->SetActiveCockpit(backupcp);
 	}
 
       }else {

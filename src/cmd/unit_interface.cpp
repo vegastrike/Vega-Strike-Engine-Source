@@ -462,9 +462,11 @@ bool RefreshGUI(void) {
 
 static void ProcessMouseClick(int button, int state, int x, int y) {
   SetSoftwareMousePosition (x,y);
-  for (unsigned int i=0;i<upgr.size();i++) { 
-    if (player_upgrading[i]==_Universe->CurrentCockpit())
-      upgr[i]->ProcessMouse(1, x, y, button, state);
+  for (unsigned int i=0;i<upgr.size();i++) {
+    int cur = _Universe->CurrentCockpit();
+    _Universe->SetActiveCockpit (_Universe->AccessCockpit(player_upgrading[i]));
+    upgr[i]->ProcessMouse(1, x, y, button, state);
+    _Universe->SetActiveCockpit(_Universe->AccessCockpit(cur));
   }
 
 
@@ -473,17 +475,22 @@ static void ProcessMouseClick(int button, int state, int x, int y) {
 static void ProcessMouseActive(int x, int y) {
   SetSoftwareMousePosition (x,y);
   for (unsigned int i=0;i<upgr.size();i++) { 
-    if (player_upgrading[i]==_Universe->CurrentCockpit())
-      upgr[i]->ProcessMouse(2, x, y, 0, 0);
+    int cur = _Universe->CurrentCockpit();
+    _Universe->SetActiveCockpit (_Universe->AccessCockpit(player_upgrading[i]));
+    upgr[i]->ProcessMouse(2, x, y, 0, 0);
+    _Universe->SetActiveCockpit(_Universe->AccessCockpit(cur));
   }
 
 }
 
 static void ProcessMousePassive(int x, int y) {
   SetSoftwareMousePosition(x,y);
-  for (unsigned int i=0;i<upgr.size();i++) { 
-    if (player_upgrading[i]==_Universe->CurrentCockpit())
-      upgr[i]->ProcessMouse(3, x, y, 0, 0);
+  for (unsigned int i=0;i<upgr.size();i++) {
+    int cur = _Universe->CurrentCockpit();
+    _Universe->SetActiveCockpit (_Universe->AccessCockpit(player_upgrading[i]));
+    upgr[i]->ProcessMouse(3, x, y, 0, 0);
+    _Universe->SetActiveCockpit(_Universe->AccessCockpit(cur));
+
   }
 }
 void Unit::UpgradeInterface(Unit * base) {
@@ -540,6 +547,7 @@ void UpgradingInfo::SelectItem (const char *item, int button, int buttonstate) {
     if (item) {
      Unit * buy = buyer.GetUnit();
      if (buy!=NULL) {
+
       Cockpit * cp = _Universe->isPlayerStarship(buy);
       if (cp) {
        if (item[0]=='S') {
