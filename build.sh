@@ -1,5 +1,5 @@
 #!/bin/sh
-make $*
+#make $*
 c++  -ggdb3 -Wall -I/usr/include/SDL -D_REENTRANT -pipe  -L/usr/X11R6/lib -L/usr/X11R6/lib  -o vegastrike \
 \
 ../vegastrike/src/faction_util.o		\
@@ -403,7 +403,7 @@ c++  -ggdb3 -Wall -I/usr/include/SDL -D_REENTRANT -pipe  -L/usr/X11R6/lib -L/usr
 \
 \
 \
-\
+../vegastrike/src/gui/guitexture.o \
 ../vegastrike/src/gui/button.o		\
 \
 ../vegastrike/src/gui/control.o		\
@@ -448,6 +448,8 @@ c++  -ggdb3 -Wall -I/usr/include/SDL -D_REENTRANT -pipe  -L/usr/X11R6/lib -L/usr
 \
 \
 ../vegastrike/src/networking/accountsxml.o		\
+../vegastrike/src/networking/vsnet_dloadenum.o		\
+../vegastrike/src/networking/vsnet_notify.o		\
 \
 \
 \
@@ -502,8 +504,6 @@ c++  -ggdb3 -Wall -I/usr/include/SDL -D_REENTRANT -pipe  -L/usr/X11R6/lib -L/usr
 ../vegastrike/src/networking/vsnet_thread_non.o		\
 ../vegastrike/src/networking/vsnet_thread_p.o		\
 ../vegastrike/src/networking/vsnet_thread_sdl.o		\
-../vegastrike/src/networking/webcam_support.o		\
-\
 ../vegastrike/src/networking/zonemgr.o		\
 \
 \
@@ -658,6 +658,6 @@ c++  -ggdb3 -Wall -I/usr/include/SDL -D_REENTRANT -pipe  -L/usr/X11R6/lib -L/usr
 \
 ../vegastrike/src/common/common.o		\
 \
- src/jthread/libjthread.a -lpthread  -lutil -L/usr/lib -lSDL -lpthread -lSDL_mixer -lbgrab -lGL  -lGLU  -lglut  -lXi -lXmu  -lexpat  -lpng  -ljpeg  -lopenal -lpython2.2 -Xlinker -export-dynamic
+ src/jthread/libjthread.a -lpthread  -lutil -L/usr/lib -lSDL -lpthread -lSDL_mixer  -lGL  -lGLU  -lglut  -lXi -lXmu  -lexpat  -lpng  -ljpeg  -lopenal -lpython2.2 -Xlinker -export-dynamic
 
 
