@@ -345,6 +345,18 @@ varInst *Mission::call_unit(missionNode *node,int mode){
       viret->objectname="order";
       viret->object=(void *)my_order;
     }
+    else if(cmd=="removeFromGame"){
+
+      if(mode==SCRIPT_RUN){
+	StarSystem *ssystem=_Universe->activeStarSystem();
+
+	ssystem->RemoveUnit(my_unit);
+	delete my_unit;
+      }
+
+      viret=newVarInst(VI_TEMP);
+      viret->type=VAR_VOID;
+    }
     else if(cmd=="getFgId" || cmd=="getFgID"){
       if(mode==SCRIPT_RUN){
 	

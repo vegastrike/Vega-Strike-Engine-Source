@@ -51,7 +51,7 @@ AImissionScript::AImissionScript (string modname){
 
 AImissionScript::~AImissionScript () {
   //  mission->runScript(modulename,"quitai",classid);
-  cout << "ai quitting" << endl;
+  //  cout << "ai quitting" << endl;
 }
 
 void AImissionScript::Execute () {

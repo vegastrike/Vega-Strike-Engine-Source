@@ -91,9 +91,27 @@ varInst *Mission::call_string(missionNode *node,int mode){
       viret=newVarInst(VI_TEMP);
       viret->type=VAR_BOOL;
       viret->bool_val=res;
+    }
+     else if(cmd=="begins"){
+       // test if s1 begins with s2
+      missionNode *other_node=getArgument(node,mode,1);
+      varInst *other_vi=checkObjectExpr(other_node,mode);
 
-      //return viret;
+      bool res=false;
+      if(mode==SCRIPT_RUN){
+	string s1=call_string_getstring(node,mode,ovi);
+	string s2=call_string_getstring(node,mode,other_vi);
 
+	//	if((int)s1.compare(0,s2.size(),s2)==0){
+	if(s1.find(s2,0)==0){
+	  res=true;
+	}
+      }
+
+      deleteVarInst(other_vi);
+      viret=newVarInst(VI_TEMP);
+      viret->type=VAR_BOOL;
+      viret->bool_val=res;
     }
     else{
       fatalError(node,mode,"unknown command "+cmd+" for callback string");

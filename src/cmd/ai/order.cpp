@@ -191,7 +191,7 @@ void Order::eraseOrder(Order *ord){
       vector <Order *>::iterator j= suborders.begin()+i;
       suborders.erase(j);
       found=true;
-      printf("erased order\n");
+      //      printf("erased order\n");
     }
   }
 
