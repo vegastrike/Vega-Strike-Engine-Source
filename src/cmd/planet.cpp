@@ -13,7 +13,7 @@
 #include <assert.h>
 #include "cont_terrain.h"
 #include "atmosphere.h"
-#include "gfx/planetary_transform.h"
+//#include "gfx/planetary_transform.h"
 #include "collide/rapcol.h"
 #include "images.h"
 #include "gfx/halo.h"
@@ -433,6 +433,7 @@ void Planet::reactToCollision(Unit * un, const QVector & biglocation, const Vect
 #ifdef JUMP_DEBUG
   fprintf (stderr,"%s reacting to collision with %s drive %d", name.c_str(),un->name.c_str(), un->GetJumpStatus().drive);
 #endif
+#ifdef FIX_TERRAIN
   if (terrain&&un->isUnit()!=PLANETPTR) {
     un->SetPlanetOrbitData (terraintrans);
     Matrix top;
@@ -465,6 +466,7 @@ void Planet::reactToCollision(Unit * un, const QVector & biglocation, const Vect
 #endif
     terrain->Collide (un,top);      
   }
+#endif
   jumpReactToCollision(un);
   //screws with earth having an atmosphere... blahrgh
   if (!terrain&&GetDestinations().empty()&&!atmospheric) {//no place to go and acts like a ship
@@ -523,6 +525,7 @@ Planet::~Planet() {
   if (atmosphere){
      delete atmosphere;
   }
+#ifdef FIX_TERRAIN
 	if (terraintrans) {
 	  Matrix *tmp = new Matrix ();
 	  *tmp=cumulative_transformation_matrix;
@@ -530,6 +533,7 @@ Planet::~Planet() {
 	  //FIXME
 	  //We're losing memory here...but alas alas... planets don't die that often
 	}
+#endif
 }
 
 PlanetaryTransform *Planet::setTerrain (ContinuousTerrain * t, float ratiox, int numwraps,float scaleatmos) {
@@ -537,9 +541,13 @@ PlanetaryTransform *Planet::setTerrain (ContinuousTerrain * t, float ratiox, int
   terrain->DisableDraw();
   float x,z;
   t->GetTotalSize (x,z);
+#ifdef FIX_TERRAIN
   terraintrans = new PlanetaryTransform (.8*corner_max.i,x*ratiox,z,numwraps,scaleatmos);
   terraintrans->SetTransformation (&cumulative_transformation_matrix);
+
   return terraintrans;
+#endif
+  return NULL;
 }
 void Planet::setAtmosphere (Atmosphere *t) {
   atmosphere = t;
