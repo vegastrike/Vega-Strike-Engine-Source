@@ -235,7 +235,7 @@ then
     echo
     AC_MSG_WARN([*** Python shared library not found!])
 else
-    PYTHON_CPPFLAGS="$PYTHON_CPPFLAGS $PYTHON_CFLAGS -DHAVE_PYTHON=1 -DHAVE_BOOST=1"
+    PYTHON_CPPFLAGS="$PYTHON_CPPFLAGS $PYTHON_CFLAGS -DHAVE_PYTHON=1 "
 fi
 AC_SUBST(PYTHON_LIBS)
 
@@ -917,6 +917,6 @@ CFLAGS="$CFLAGS $TR_CFLAGS"
 CXXFLAGS="$CXXFLAGS $TR_CXXFLAGS"
 LIBS="$LIBS $TR_LIBS $PYTHON_LIBS"
 
-AC_OUTPUT(Makefile src/Makefile src/gldrv/Makefile src/aldrv/Makefile src/gfx/Makefile src/cmd/Makefile src/cmd/ai/Makefile src/cmd/collide/Makefile src/cmd/script/Makefile src/cmd/script/c_alike/Makefile src/cmd/collide/csgeom/Makefile src/python/Makefile launcher/Makefile src/networking/Makefile \
+AC_OUTPUT(Makefile src/Makefile src/gldrv/Makefile src/aldrv/Makefile src/gfx/Makefile src/cmd/Makefile src/cmd/ai/Makefile src/cmd/collide/Makefile src/cmd/script/Makefile src/cmd/script/c_alike/Makefile src/cmd/collide/csgeom/Makefile src/python/Makefile launcher/Makefile src/networking/Makefile src/boost/Makefile \
 	objconv/Makefile src/gui/Makefile )
 
