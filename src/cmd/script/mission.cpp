@@ -73,6 +73,7 @@ Mission::Mission(char *configfile){
   total_nr_frames=0;
 
   initTagMap();
+  initCallbackMaps();
 
   top->Tag(&tagmap);
 

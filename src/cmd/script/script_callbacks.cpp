@@ -60,7 +60,9 @@ void Mission::doCall_toxml(string module,varInst *ovi){
 varInst *Mission::doCall(missionNode *node,int mode,string module,string method){
   varInst *vi=NULL;
 
-  if(module=="_io"){
+  callback_module_type module_id=node->script.callback_module_id;
+
+  if(module_id==CMT_IO){
     if(method=="PrintFloats"){
       vi=callPrintFloats(node,mode);
     }
@@ -77,54 +79,59 @@ varInst *Mission::doCall(missionNode *node,int mode,string module,string method)
       vi=call_io_printmsglist(node,mode);
     }
   }
-  else if(module=="_std"){
-    if(method=="Rnd"){
+  else if(module_id==CMT_STD){
+    if(mode==SCRIPT_PARSE){
+      node->script.method_id=module_std_map[method];
+    }
+   callback_module_std_type method_id=(callback_module_std_type) node->script.method_id;
+
+    if(method_id==CMT_STD_Rnd){
       vi=callRnd(node,mode);
     }
-    else if(method=="getGameTime"){
+    else if(method_id==CMT_STD_getGameTime){
       vi=callGetGameTime(node,mode);
     }
-    else if(method=="ResetTimeCompression"){
+    else if(method_id==CMT_STD_ResetTimeCompression){
       vi=callResetTimeCompression(node,mode);
     }
-    else if(method=="getSystemName" || method=="GetSystemName"){
+    else if(method_id==CMT_STD_getSystemName){
       vi=callGetSystemName(node,mode);
     }
-    else if(method=="getCurrentAIUnit"){
+    else if(method_id==CMT_STD_getCurrentAIUnit){
       vi=callGetCurrentAIUnit(node,mode);
     }
-    else if(method=="getCurrentAIOrder"){
+    else if(method_id==CMT_STD_getCurrentAIOrder){
       vi=callGetCurrentAIOrder(node,mode);
     }
-    else if(method=="isNull"){
+    else if(method_id==CMT_STD_isNull){
       vi=call_isNull(node,mode);
     }
-    else if(method=="setNull"){
+    else if(method_id==CMT_STD_setNull){
       vi=call_setNull(node,mode);
     }
-    else if(method=="equal"){
+    else if(method_id==CMT_STD_equal){
       vi=call_isequal(node,mode);
     }
-    else if(method=="Float"){
+    else if(method_id==CMT_STD_Float){
       vi=call_float_cast(node,mode);
     }
-    else if(method=="Int"){
+    else if(method_id==CMT_STD_Int){
       vi=call_int_cast(node,mode);
     }
   }
-  else if(module=="_olist"){
+  else if(module_id==CMT_OLIST){
     vi=call_olist(node,mode);
   }
-  else if(module=="_omap"){
+  else if(module_id==CMT_OMAP){
     vi=call_omap(node,mode);
   }
-  else if(module=="_order"){
+  else if(module_id==CMT_ORDER){
     vi=call_order(node,mode);
   }
-  else if(module=="_unit"){
+  else if(module_id==CMT_UNIT){
     vi=call_unit(node,mode);
   }
-  else if(module=="_string"){
+  else if(module_id==CMT_STRING){
     vi=call_string(node,mode);
   }
 
@@ -146,6 +153,8 @@ varInst *Mission::doCall(missionNode *node,int mode){
       assert(0);
     }
     node->script.name=name;
+    callback_module_type module_id=module_map[module];
+    node->script.callback_module_id=module_id;
   }
 
   // RUNTIME && PARSE
@@ -719,4 +728,29 @@ missionNode *Mission::getArgument(missionNode *node,int mode,int arg_nr){
       missionNode *snode=(missionNode *)node->subnodes[arg_nr];
 
       return snode;
+}
+
+void Mission::initCallbackMaps(){
+  module_map["_io"]=CMT_IO;
+  module_map["_std"]=CMT_STD;
+  module_map["_string"]=CMT_STRING;
+  module_map["_olist"]=CMT_OLIST;
+  module_map["_omap"]=CMT_OMAP;
+  module_map["_order"]=CMT_ORDER;
+  module_map["_unit"]=CMT_UNIT;
+
+
+  module_std_map["Rnd"]=CMT_STD_Rnd;
+  module_std_map["getGameTime"]=CMT_STD_getGameTime;
+  module_std_map["ResetTimeCompression"]=CMT_STD_ResetTimeCompression;
+  module_std_map["GetSystemName"]=CMT_STD_getSystemName;
+  module_std_map["getSystemName"]=CMT_STD_getSystemName;
+  module_std_map["getCurrentAIUnit"]=CMT_STD_getCurrentAIUnit;
+  module_std_map["getCurrentAIOrder"]=CMT_STD_getCurrentAIOrder;
+  module_std_map["isNull"]=CMT_STD_isNull;
+  module_std_map["setNull"]=CMT_STD_setNull;
+  module_std_map["equal"]=CMT_STD_equal;
+  module_std_map["Int"]=CMT_STD_Int;
+  module_std_map["Float"]=CMT_STD_Float;
+
 }

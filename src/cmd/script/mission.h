@@ -98,6 +98,24 @@ class Flightgroup {
 
 enum parsemode_type { PARSE_FULL,PARSE_DECL };
 
+enum callback_module_type {
+  CMT_IO,CMT_STD,CMT_STRING,CMT_OLIST,CMT_OMAP,CMT_ORDER,CMT_UNIT 
+};
+
+enum callback_module_std_type {
+  CMT_STD_Rnd ,
+  CMT_STD_getGameTime ,
+  CMT_STD_ResetTimeCompression ,
+  CMT_STD_getSystemName ,
+  CMT_STD_getCurrentAIUnit ,
+  CMT_STD_getCurrentAIOrder ,
+  CMT_STD_isNull ,
+  CMT_STD_setNull ,
+  CMT_STD_equal ,
+  CMT_STD_Int ,
+  CMT_STD_Float
+};
+
 enum tag_type { 
   DTAG_UNKNOWN,
   DTAG_MISSION,
@@ -222,6 +240,8 @@ class missionNode : public tagDomNode {
     unsigned int classinst_counter;
     int context_id;
     int varId;
+    callback_module_type callback_module_id;
+    int method_id;
   } script;
 };
 
@@ -319,8 +339,13 @@ void  deleteVarInst(varInst *vi,bool del_local=false);
 
   vector<string> import_stack;
 
+  map<string,callback_module_std_type> module_std_map;
+  map<string,callback_module_type> module_map;
+
   void saveVariables(const ostream& out);
   void initTagMap();
+
+  void initCallbackMaps();
 #endif // VS_MIS_SEL
 
   bool checkMission(easyDomNode *node);

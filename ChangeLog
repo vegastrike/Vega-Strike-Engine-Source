@@ -1,3 +1,10 @@
+2002-03-10 Alexander Rawass <alexannika@users.sourceforge.net>
+	
+	* Interpreter:
+	  - faster callback module lookup
+	  - faster lookup of callback module std (others will follow)
+
+
 2002-03-09 Daniel Horn <hellcatv@hotmail.com>
 	* Fixed disappearing first unit bug with low quality sprites
 	* Fixed cockpit cycle complaint
