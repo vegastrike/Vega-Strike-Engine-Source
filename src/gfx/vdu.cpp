@@ -36,6 +36,8 @@ void VDU::DrawTarget(Unit * parent, Unit * target) {
   char st[256];
   sprintf (st,"\n%s",target->name.c_str());
   int k = strlen (st);
+  if (k>cols)
+    k=cols;
   for (int i=0;i<rows-1&&i+k<128;i++) {
     st[i+k]='\n';
     st[i+k+1]='\0';
@@ -196,6 +198,8 @@ void VDU::DrawDamage(Unit * parent) {
   sprintf (st,"\nHull: %.3f",parent->GetHull());
   if (thr) {
     int k=strlen(st);
+    if (k>cols)
+      k=cols;
     for (int i=0;i<rows-2&&i+k<128;i++) {
       st[i+k]='\n';
       st[i+k+1]='\0';
