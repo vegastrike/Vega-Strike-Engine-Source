@@ -610,7 +610,7 @@ void NavigationSystem::DrawMission()
 	while(i < numfactions)
 	{
 		factionname = FactionUtil::GetFactionName(i);
-		relation = 	FactionUtil::GetIntRelation( ( UniverseUtil::getPlayerX(UniverseUtil::getCurrentPlayer()) )->faction ,i);
+		relation = 	FactionUtil::GetIntRelation(i, ( UniverseUtil::getPlayerX(UniverseUtil::getCurrentPlayer()) )->faction );
 
 		//	draw faction name
 		factionlist.drawdescription(FactionUtil::GetFactionName(i), (originx + (0.1*deltax)),(originy - (0.1*deltay)), 1, 1, 0, factioncolours[i]);
