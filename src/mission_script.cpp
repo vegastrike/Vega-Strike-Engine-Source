@@ -367,8 +367,7 @@ void Mission::doSetVar(missionNode *node,int mode){
       varInst *var_inst=doVariable(node,mode); // lookup variable instance
 
       if(var_expr->type != var_inst->type){
-	runtimeFatal("variable "+node->script.name+" is not of the correct type
-");
+	runtimeFatal("variable "+node->script.name+" is not of the correct type\n");
 	assert(0);
       }
 
@@ -429,5 +428,5 @@ varInst *Mission::checkExpression(missionNode *node,int mode){
   default:
     break;
   }
-
+  return ret;
 }

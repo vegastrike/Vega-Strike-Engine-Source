@@ -12,7 +12,7 @@
 #include "vdu.h"
 #include "lin_time.h"//for fps
 #include "config_xml.h"
-
+#include "lin_time.h"
 
 #include <assert.h>	// needed for assert() calls
 
@@ -328,7 +328,7 @@ void Cockpit::Draw() {
   }
   GFXAlphaTest (ALWAYS,0);
   GFXBlendMode (SRCALPHA,INVSRCALPHA);
-
+	bool die=true;
   if ((un = parent.GetUnit())) {
     if (view==CP_FRONT) {//only draw crosshairs for front view
       if (vdu[0]) {
@@ -350,7 +350,25 @@ void Cockpit::Draw() {
 	Panel[j]->Draw();
       }
     }
-
+	if (un->GetHull()>0)
+		die = false;
+  }
+  if (die) {
+	static float dietime = 0;
+	if (text) {
+		GFXColor4f (1,1,1,1);
+		text->SetSize(1,-1);
+		float x; float y;
+		if (dietime==0) {
+			text->GetCharSize (x,y);
+			text->SetCharSize (x*4,y*4);
+			text->SetPos (0-(x*2*14),0-(y*2));
+		}
+		text->Draw ("You Have Died!");
+	}
+	dietime +=GetElapsedTime();
+	SetView (CP_PAN);
+	zoomfactor=dietime*10;
   }
   GFXHudMode (false);
 
