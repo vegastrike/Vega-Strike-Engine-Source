@@ -557,7 +557,20 @@ bool FireKeyboard::ShouldFire(Unit * targ) {
   }
   return (dist<.8*agg&&angle>1/agg);
 }
-
+static bool UnDockNow (Unit* me, Unit * targ) {
+  bool ret=false;
+  Unit * un;
+  for (un_iter i=_Universe->activeStarSystem()->getUnitList().createIterator();
+       (un = *i)!=NULL;
+       ++i) {
+    if (un->isDocked (me)) {
+      if (me->UnDock (un)) {
+	ret=true;
+      }
+    }
+  }
+  return ret;
+}
 static void DoDockingOps (Unit * parent, Unit * targ,unsigned char playa, unsigned char sex) {
     if (vectorOfKeyboardInput[playa].req) {
       if (targ->isUnit()==PLANETPTR) {
@@ -580,7 +593,7 @@ static void DoDockingOps (Unit * parent, Unit * targ,unsigned char playa, unsign
       if (hasDock) {
 	  c.SetCurrentState (c.fsm->GetDockNode(),NULL,0);
       }else {
-        if (parent->UnDock(targ)) {
+        if (UnDockNow(parent,targ)) {
 	  c.SetCurrentState (c.fsm->GetUnDockNode(),NULL,0);
         }else {
           //docking is unsuccess
@@ -591,9 +604,12 @@ static void DoDockingOps (Unit * parent, Unit * targ,unsigned char playa, unsign
       vectorOfKeyboardInput[playa].doc=false;
     }
     if (vectorOfKeyboardInput[playa].und) {
-      parent->UnDock(targ);
       CommunicationMessage c(targ,parent,NULL,0);
-      c.SetCurrentState (c.fsm->GetUnDockNode(),NULL,0);
+      if (UnDockNow(parent,targ)) {
+	c.SetCurrentState (c.fsm->GetUnDockNode(),NULL,0);
+      }else {
+	c.SetCurrentState (c.fsm->GetFailDockNode(),NULL,0);
+      }
       parent->getAIState()->Communicate (c);
       vectorOfKeyboardInput[playa].und=0;
     }

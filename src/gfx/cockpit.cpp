@@ -828,9 +828,9 @@ void Cockpit::Autopilot (Unit * target) {
 	if (face_target_on_auto) {
 	  FaceTarget(un);
 	}	  
-	static double averagetime = GetElapsedTime();
+	static double averagetime = GetElapsedTime()/getTimeCompression();
 	static double numave = 1.0;
-	averagetime+=GetElapsedTime();
+	averagetime+=GetElapsedTime()/getTimeCompression();
 	static float autospeed = XMLSupport::parse_float (vs_config->getVariable ("physics","autospeed",".020"));//10 seconds for auto to kick in;
 	numave++;
 	AccessCamera(CP_PAN)->myPhysics.SetAngularVelocity(Vector(0,0,0));
