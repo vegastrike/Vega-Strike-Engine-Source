@@ -61,7 +61,7 @@ void GameUnit<UnitType>::Target (Unit *targ) {
     if (targ->activeStarSystem==_Universe->activeStarSystem()||targ->activeStarSystem==NULL) {
 		if (targ!=Unit::Target()) {
         for (int i=0;i<GetNumMounts();i++){ 
-  	  mounts[i]->time_to_lock = mounts[i]->type->LockTime;
+  	  mounts[i].time_to_lock = mounts[i].type->LockTime;
         }
         computer.target.SetUnit(targ);
 	LockTarget(false);

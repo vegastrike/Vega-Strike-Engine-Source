@@ -82,7 +82,75 @@ enum clsptr {
 	MISSILEPTR
 };
 
-class Mount;
+class Mount {
+  protected:
+    ///Where is it
+	Vector pos;
+    Quaternion orient;
+	void ReplaceSound();
+  public:
+	float xyscale;float zscale;//for guns!	
+    void SwapMounts (Mount * other);
+    void ReplaceMounts (const Mount * other);
+	double Percentage (const Mount *newammo) const;
+// Gotta look at that, if we can make Beam a string in AcctUnit and a Beam elsewhere
+    union REF{
+      ///only beams are actually coming out of the gun at all times...bolts, balls, etc aren't
+      Beam *gun;
+      ///Other weapons must track refire times
+      float refire;
+    } ref;
+    ///the size that this mount can hold. May be any bitwise combination of weapon_info::MOUNT_SIZE
+
+    short size;
+    ///-1 is infinite
+    short ammo;
+    short volume;//-1 is infinite
+    ///The data behind this weapon. May be accordingly damaged as time goes on
+    enum MOUNTSTATUS{PROCESSED,UNFIRED,FIRED} processed;
+    ///Status of the selection of this weapon. Does it fire when we hit space
+    enum {ACTIVE, INACTIVE, DESTROYED, UNCHOSEN} status;
+    ///The sound this mount makes when fired
+    const weapon_info *type;
+    int sound;
+    float time_to_lock;
+    Mount();
+    Mount(const std::string& name, short int ammo, short int volume, float xyscale=0, float zscale=0);
+
+	void Activate (bool Missile) {
+	  if ((type->type==weapon_info::PROJECTILE)==Missile) {
+		if (status==INACTIVE)
+		  status = ACTIVE;
+	  }
+	}
+	///Sets this gun to inactive, unless unchosen or destroyed
+	void DeActive (bool Missile) {
+	  if ((type->type==weapon_info::PROJECTILE)==Missile) {
+		if (status==ACTIVE)
+		  status = INACTIVE;
+	  }
+	}
+
+    ///Sets this gun's position on the mesh
+    void SetMountPosition (const Vector & v) {pos=v;}
+	void SetMountOrientation(const Quaternion &t) {orient = t;}
+    ///Gets the mount's position and transform
+    const Vector &GetMountLocation ()const{return pos;}
+    const Quaternion &GetMountOrientation ()const{return orient;}	
+    ///Turns off a firing beam (upon key release for example)
+	void UnFire();
+    /**
+     *  Fires a beam when the firing unit is at the Cumulative location/transformation 
+     * owner (won't crash into)  as owner and target as missile target. bool Missile indicates if it is a missile
+     * should it fire
+     */ 
+	// Uses Sound Forcefeedback and other stuff
+	void PhysicsAlignedUnfire();
+	bool PhysicsAlignedFire (const Transformation &Cumulative, const Matrix & mat, const Vector & Velocity, Unit *owner,  Unit *target, signed char autotrack, float trackingcone);
+	bool Fire (Unit *owner, bool Missile=false, bool collide_only_with_target=false);
+};
+
+
 class VDU;
 struct UnitImages;
 struct UnitSounds;
@@ -205,7 +273,8 @@ public:
   un_iter getSubUnits();
   un_kiter viewSubUnits() const;
 public:
-  vector <Mount *> mounts;
+#define NO_MOUNT_STAR
+  vector <Mount> mounts;
 protected:
   ///Mount may access unit
   friend class Mount;
@@ -534,6 +603,8 @@ public:
   ///returns the current ammt of armor left
   float FuelData() const;
   ///Returns the current ammt of energy left
+  float EnergyRechargeData() const{return recharge;}
+  float ShieldRechargeData() const{return shield.recharge;}
   float EnergyData() const;
   float WarpEnergyData() const;
   unsigned short GetWarpEnergy() {return warpenergy;}
@@ -1075,79 +1146,11 @@ struct Unit::XML {
   bool calculated_role;
 };
 
-class Mount {
-  protected:
-    ///Where is it
-	Vector pos;
-    Quaternion orient;
-	void ReplaceSound();
-  public:
-	float xyscale;float zscale;//for guns!	
-    void SwapMounts (Mount * other);
-    void ReplaceMounts (const Mount * other);
-	double Percentage (const Mount *newammo) const;
-// Gotta look at that, if we can make Beam a string in AcctUnit and a Beam elsewhere
-    union REF{
-      ///only beams are actually coming out of the gun at all times...bolts, balls, etc aren't
-      Beam *gun;
-      ///Other weapons must track refire times
-      float refire;
-    } ref;
-    ///the size that this mount can hold. May be any bitwise combination of weapon_info::MOUNT_SIZE
-
-    short size;
-    ///-1 is infinite
-    short ammo;
-    short volume;//-1 is infinite
-    ///The data behind this weapon. May be accordingly damaged as time goes on
-    enum MOUNTSTATUS{PROCESSED,UNFIRED,FIRED} processed;
-    ///Status of the selection of this weapon. Does it fire when we hit space
-    enum {ACTIVE, INACTIVE, DESTROYED, UNCHOSEN} status;
-    ///The sound this mount makes when fired
-    const weapon_info *type;
-    int sound;
-    float time_to_lock;
-    Mount();
-    Mount(const std::string& name, short int ammo, short int volume, float xyscale=0, float zscale=0);
-
-	void Activate (bool Missile) {
-	  if ((type->type==weapon_info::PROJECTILE)==Missile) {
-		if (status==INACTIVE)
-		  status = ACTIVE;
-	  }
-	}
-	///Sets this gun to inactive, unless unchosen or destroyed
-	void DeActive (bool Missile) {
-	  if ((type->type==weapon_info::PROJECTILE)==Missile) {
-		if (status==ACTIVE)
-		  status = INACTIVE;
-	  }
-	}
-
-    ///Sets this gun's position on the mesh
-    void SetMountPosition (const Vector & v) {pos=v;}
-	void SetMountOrientation(const Quaternion &t) {orient = t;}
-    ///Gets the mount's position and transform
-    const Vector &GetMountLocation ()const{return pos;}
-    const Quaternion &GetMountOrientation ()const{return orient;}	
-    ///Turns off a firing beam (upon key release for example)
-	void UnFire();
-    /**
-     *  Fires a beam when the firing unit is at the Cumulative location/transformation 
-     * owner (won't crash into)  as owner and target as missile target. bool Missile indicates if it is a missile
-     * should it fire
-     */ 
-	// Uses Sound Forcefeedback and other stuff
-	void PhysicsAlignedUnfire();
-	bool PhysicsAlignedFire (const Transformation &Cumulative, const Matrix & mat, const Vector & Velocity, Unit *owner,  Unit *target, signed char autotrack, float trackingcone);
-	bool Fire (Unit *owner, bool Missile=false, bool collide_only_with_target=false);
-};
-
 inline void UnitCollection::UnitIterator::GetNextValidUnit () {
   while (pos->next->unit?pos->next->unit->Killed():false) {
     remove();
   }
-}
+};
 
 inline Unit * UnitContainer::GetUnit() {
   if (unit==NULL)

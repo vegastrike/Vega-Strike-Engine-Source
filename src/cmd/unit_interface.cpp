@@ -36,6 +36,7 @@ static const char *miss_desc="mission_descriptions";
 using std::string;
 extern const Unit * makeFinalBlankUpgrade (string name, int faction);
 extern const Unit * makeTemplateUpgrade (string name, int faction);
+extern const Unit * loadUnitByCache(std::string name,int faction);
 
 static string beautify (const std::string &input) {
   string ret = input;
@@ -531,10 +532,10 @@ void UpgradingInfo::SetupCargoList () {
 	switch (submode) {
 	case MOUNT_MODE:
 	  for (;i<un->GetNumMounts();i++) {
-	    if (un->mounts[i]->status==Mount::ACTIVE||un->mounts[i]->status==Mount::INACTIVE)
-	      CargoList->AddTextItem ((tostring(i)+un->mounts[i]->type->weapon_name).c_str(),un->mounts[i]->type->weapon_name.c_str());
+	    if (un->mounts[i].status==Mount::ACTIVE||un->mounts[i].status==Mount::INACTIVE)
+	      CargoList->AddTextItem ((tostring(i)+un->mounts[i].type->weapon_name).c_str(),un->mounts[i].type->weapon_name.c_str());
 	    else 
-	      CargoList->AddTextItem ((tostring(i)+" [Empty]").c_str(),(std::string("[")+lookupMountSize(un->mounts[i]->size)+std::string("]")).c_str());
+	      CargoList->AddTextItem ((tostring(i)+" [Empty]").c_str(),(std::string("[")+lookupMountSize(un->mounts[i].size)+std::string("]")).c_str());
 	  }
 	  break;
 	case SUBUNIT_MODE:

@@ -1,4 +1,4 @@
-
+#include <set>
 #include "firekeyboard.h"
 #include "flybywire.h"
 #include "navigation.h"
@@ -18,6 +18,7 @@
 #include "cmd/unit_util.h"
 #include <algorithm>
 #include "fire.h"
+#include "docking.h"
 //for getatmospheric
 #include "cmd/role_bitmask.h"
 FireKeyboard::FireKeyboard (unsigned int whichplayer, unsigned int whichjoystick): Order (WEAPON,0){
@@ -991,9 +992,66 @@ static CommunicationMessage * GetTargetMessageQueue (Unit * targ,std::list <Comm
       }
       return mymsg;
 }
+extern std::set <Unit *> arrested_list_do_not_dereference;
 
+void Arrested (Unit * parent) {
+	std::string fac = UniverseUtil::GetGalaxyFaction ( UniverseUtil::getSystemFile());
+	int own=FactionUtil::GetFactionIndex(fac);
+	bool attack = FactionUtil::GetIntRelation(own,parent->faction)<0;
+	if (!attack) {
+		Unit * contra =FactionUtil::GetContraband(own);
+		if (contra) {
+			for (unsigned int i=0;(!attack)&&i<parent->numCargo();++i) {
+				Cargo * ci =&parent->GetCargo(i);
+					
+				for (unsigned int j=0;j<contra->numCargo();++j) {
+					Cargo * cj =&contra->GetCargo(j);
+					if (ci->content==cj->content) {
+						attack=true;
+						break;
+					}
+				}
+			}
+		}
+	}
+	if (attack) {
+	static std::string prison_system = vs_config->getVariable ("galaxy","PrisonSystem","enigma_sector/prison");
+	std::string psys = prison_system+"_"+fac;
+	if (UnitUtil::getUnitSystemFile(parent)!=psys) {
+		UnitUtil::JumpTo(parent,psys);
+	}else {
+		Unit * un;
+		Unit * owner=NULL;
+		Unit * base=NULL;
+		for (un_iter i = _Universe->activeStarSystem()->getUnitList().createIterator();(un = *i)!=NULL;++i) {
+			if (owner==NULL &&un->getFlightgroup() && un->faction==own)
+				if (UnitUtil::isSignificant(un)&&(!un->isJumppoint())) {
+					owner = un;
+				}
+			if (UnitUtil::isSignificant(un)&&(!un->isJumppoint())) {
+				base=un;
+			}
+		}
+		
+		
+		if (owner ==NULL)
+			owner = base;
+		if (owner) {
+			Order * tmp =parent->aistate;
+			parent->aistate=NULL;
+			parent->PrimeOrders(new Orders::DockingOps (owner,tmp));
+			arrested_list_do_not_dereference.insert (parent);
+			for (int i = parent->numCargo()-1;i>=0;--i) {
+				parent->RemoveCargo (i,parent->GetCargo((unsigned int)i).quantity,true);
+			}
+			FactionUtil::AdjustIntRelation(own,parent->faction,-FactionUtil::GetIntRelation(own,parent->faction),1);
+		}
+	}
+	}
+}
 
 void FireKeyboard::Execute () {
+	
   while (vectorOfKeyboardInput.size()<=whichplayer||vectorOfKeyboardInput.size()<=whichjoystick) {
     vectorOfKeyboardInput.push_back(FIREKEYBOARDTYPE());
   }
@@ -1269,5 +1327,8 @@ void FireKeyboard::Execute () {
     if ((cp=_Universe->isPlayerStarship (parent))) {
       cp->Eject();
     }
+  }
+  if (parent->EnergyRechargeData()==0) {
+	  Arrested(parent);
   }
 }

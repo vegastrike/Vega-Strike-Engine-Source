@@ -36,10 +36,10 @@ void GameUnit<UnitType>::Kill(bool eraseFromSave)
     this->colTrees->Dec();//might delete
   this->colTrees=NULL;
   for (int beamcount=0;beamcount<GetNumMounts();beamcount++) {
-    AUDStopPlaying(mounts[beamcount]->sound);
-    AUDDeleteSound(mounts[beamcount]->sound);
-    if (mounts[beamcount]->ref.gun&&mounts[beamcount]->type->type==weapon_info::BEAM)
-      delete mounts[beamcount]->ref.gun;//hope we're not killin' em twice...they don't go in gunqueue
+    AUDStopPlaying(mounts[beamcount].sound);
+    AUDDeleteSound(mounts[beamcount].sound);
+    if (mounts[beamcount].ref.gun&&mounts[beamcount].type->type==weapon_info::BEAM)
+      delete mounts[beamcount].ref.gun;//hope we're not killin' em twice...they don't go in gunqueue
   }
   UnitType::Kill(eraseFromSave);
 }
@@ -157,23 +157,25 @@ template <class UnitType>
 float GameUnit<UnitType>::ApplyLocalDamage (const Vector & pnt, const Vector & normal, float amt, Unit * affectedUnit,const GFXColor &color, float phasedamage) {
   static float nebshields=XMLSupport::parse_float(vs_config->getVariable ("physics","nebula_shield_recharge",".5"));
   //  #ifdef REALLY_EASY
+  float absamt= amt>=0?amt:-amt;
   Cockpit * cpt;
   if ((cpt=_Universe->isPlayerStarship(this))!=NULL) {
     if (color.a!=2) {
       //    ApplyDamage (amt);
       phasedamage*= (g_game.difficulty);
       amt*=(g_game.difficulty);
-      cpt->Shake (amt);
+      cpt->Shake (absamt);
     }
   }
   //  #endif
   float percentage=0;
-  percentage = UnitType::ApplyLocalDamage( pnt, normal, amt, affectedUnit, color, phasedamage);
+  percentage = UnitType::ApplyLocalDamage( pnt, normal,amt, affectedUnit, color, phasedamage);
   float leakamt = phasedamage+amt*.01*shield.leak;
   if( percentage==-1)
 	return -1;
   if (GetNebula()==NULL||(nebshields>0)) {
-    percentage = DealDamageToShield (pnt,amt);
+    percentage = DealDamageToShield (pnt,absamt);
+	amt = amt>=0?absamt:-absamt;
     if (meshdata.back()&&percentage>0&&amt==0) {//shields are up
       /*      meshdata[nummesh]->LocalFX.push_back (GFXLight (true,
 	      GFXColor(pnt.i+normal.i,pnt.j+normal.j,pnt.k+normal.k),
@@ -184,7 +186,7 @@ float GameUnit<UnitType>::ApplyLocalDamage (const Vector & pnt, const Vector & n
 	meshdata.back()->AddDamageFX(pnt,shieldtight?shieldtight*normal:Vector(0,0,0),percentage,color);
     }
   }
-  if (shield.leak>0||!meshdata.back()||percentage==0||amt>0||phasedamage) {
+  if (shield.leak>0||!meshdata.back()||percentage==0||absamt>0||phasedamage) {
     percentage = DealDamageToHull (pnt, leakamt+amt);
     if (percentage!=-1) {//returns -1 on death--could delete
       for (int i=0;i<nummesh();i++) {
@@ -226,14 +228,15 @@ extern unsigned int AddAnimation (const QVector &, const float, bool, const std:
 
 extern Animation * getRandomCachedAni() ;
 extern std::string getRandomCachedAniString() ;
+extern void disableSubUnits(Unit * un);
 template <class UnitType>
 bool GameUnit<UnitType>::Explode (bool drawit, float timeit) {
 
   if (image->explosion==NULL&&image->timeexplode==0) {	//no explosion in unit data file && explosions haven't started yet
 
   // notify the director that a ship got destroyed
-  mission->DirectorShipDestroyed(this);
-
+    mission->DirectorShipDestroyed(this);
+    disableSubUnits(this);
     image->timeexplode=0;
     static std::string expani = vs_config->getVariable ("graphics","explosion_animation","explosion_orange.ani");
 

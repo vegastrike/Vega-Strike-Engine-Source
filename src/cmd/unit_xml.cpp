@@ -1537,7 +1537,7 @@ unsigned char Unit::RecomputeRole() {
 	//combat_role = 0;
 	unsigned int mount_bitmask;
 	for (unsigned int i=0;i<mounts.size();i++) {
-		mount_bitmask |=mounts[i]->type->role_bits;
+		mount_bitmask |=mounts[i].type->role_bits;
 	}
 
 	return combatRole();
@@ -1780,7 +1780,7 @@ void Unit::LoadXML(const char *filename, const char * modifications, char * xmlb
   {
 	  // DO not destroy anymore, just affect address
 	  for( a=0; a<xml->mountz.size(); a++)
-		mounts.push_back( xml->mountz[a]);
+		mounts.push_back( *xml->mountz[a]);
     //mounts[a]=*xml->mountz[a];
     //delete xml->mountz[a];			//do it stealthily... no cons/destructor
   }
@@ -1790,14 +1790,14 @@ void Unit::LoadXML(const char *filename, const char * modifications, char * xmlb
     if (a%2==parity) {
       int b=a;
       if(a % 4 == 2 && (int) a < (GetNumMounts()-1)) 
-	if (mounts[a]->type->type != weapon_info::PROJECTILE&&mounts[a+1]->type->type != weapon_info::PROJECTILE)
+	if (mounts[a].type->type != weapon_info::PROJECTILE&&mounts[a+1].type->type != weapon_info::PROJECTILE)
 	  b=a+1;
-      mounts[b]->sound = AUDCreateSound (mounts[b]->type->sound,mounts[b]->type->type!=weapon_info::PROJECTILE);
-    } else if ((!half_sounds)||mounts[a]->type->type == weapon_info::PROJECTILE) {
-      mounts[a]->sound = AUDCreateSound (mounts[a]->type->sound,mounts[a]->type->type!=weapon_info::PROJECTILE);    //lloping also flase in unit_customize  
+      mounts[b].sound = AUDCreateSound (mounts[b].type->sound,mounts[b].type->type!=weapon_info::PROJECTILE);
+    } else if ((!half_sounds)||mounts[a].type->type == weapon_info::PROJECTILE) {
+      mounts[a].sound = AUDCreateSound (mounts[a].type->sound,mounts[a].type->type!=weapon_info::PROJECTILE);    //lloping also flase in unit_customize  
     }
     if (a>0) {
-      if (mounts[a]->sound==mounts[a-1]->sound&&mounts[a]->sound!=-1) {
+      if (mounts[a].sound==mounts[a-1].sound&&mounts[a].sound!=-1) {
 	printf ("error");
       }
     }

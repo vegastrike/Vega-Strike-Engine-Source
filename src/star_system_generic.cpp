@@ -458,6 +458,23 @@ void StarSystem::Update( float priority)
   _Universe->popActiveStarSystem();
   //  fprintf (stderr,"bf:%lf",interpolation_blend_factor);
 }
+void ExecuteDirector () {
+	    unsigned int curcockpit= _Universe->CurrentCockpit();
+	    for (unsigned int i=0;i<active_missions.size();i++) {
+			if (active_missions[i]) {
+				_Universe->SetActiveCockpit(active_missions[i]->player_num);
+				StarSystem * ss=_Universe->AccessCockpit()->activeStarSystem;
+				if (ss) _Universe->pushActiveStarSystem(ss);
+				mission=active_missions[i];
+				active_missions[i]->DirectorLoop();
+				active_missions[i]->DirectorBenchmark();
+				if (ss)_Universe->popActiveStarSystem();
+			}
+	    }
+		_Universe->SetActiveCockpit(curcockpit);
+		mission=active_missions[0];
+		processDelayedMissions();
+}
 void StarSystem::Update(float priority , bool executeDirector) {
 
   Unit *unit;
@@ -532,21 +549,7 @@ void StarSystem::Update(float priority , bool executeDirector) {
 	if (_Universe->getActiveStarSystem(0)==this) {
 #endif
 	  if (executeDirector) {
-	    unsigned int curcockpit= _Universe->CurrentCockpit();
-	    for (unsigned int i=0;i<active_missions.size();i++) {
-	      if (active_missions[i]) {
-			  _Universe->SetActiveCockpit(active_missions[i]->player_num);
-			   StarSystem * ss=_Universe->AccessCockpit()->activeStarSystem;
-			  if (ss) _Universe->pushActiveStarSystem(ss);
-			  mission=active_missions[i];
-			  active_missions[i]->DirectorLoop();
-			  active_missions[i]->DirectorBenchmark();
-			  if (ss)_Universe->popActiveStarSystem();
-	      }
-	    }
-		_Universe->SetActiveCockpit(curcockpit);
-		mission=active_missions[0];
-		processDelayedMissions();
+		  ExecuteDirector();
 	  }
 #ifdef RUN_ONLY_FOR_PLAYER_STARSYSTEM
 	}

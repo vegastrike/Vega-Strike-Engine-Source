@@ -339,10 +339,10 @@ GameUnit<UnitType>::~GameUnit<UnitType>()
     AUDDeleteSound (sound->cloak);
   }
   for (int beamcount=0;beamcount<GetNumMounts();beamcount++) {
-    AUDStopPlaying(mounts[beamcount]->sound);
-    AUDDeleteSound(mounts[beamcount]->sound);
-    if (mounts[beamcount]->ref.gun&&mounts[beamcount]->type->type==weapon_info::BEAM)
-      delete mounts[beamcount]->ref.gun;//hope we're not killin' em twice...they don't go in gunqueue
+    AUDStopPlaying(mounts[beamcount].sound);
+    AUDDeleteSound(mounts[beamcount].sound);
+    if (mounts[beamcount].ref.gun&&mounts[beamcount].type->type==weapon_info::BEAM)
+      delete mounts[beamcount].ref.gun;//hope we're not killin' em twice...they don't go in gunqueue
   }
   for(unsigned int meshcount = 0; meshcount < meshdata.size(); meshcount++)
     if (meshdata[meshcount])
@@ -598,7 +598,7 @@ void GameUnit<UnitType>::Draw(const Transformation &parent, const Matrix &parent
   int nummounts= GetNumMounts();
   for (i=0;(int)i<nummounts;i++) {
     static bool draw_mounts = XMLSupport::parse_bool (vs_config->getVariable ("graphics","draw_weapons","false"));
-	Mount * mahnt = mounts[i];
+	Mount * mahnt = &mounts[i];
     if (draw_mounts&&On_Screen) {
 		
 //      Mesh * gun = WeaponMeshCache::getCachedMutable (mounts[i]->type->weapon_name);
@@ -616,9 +616,9 @@ void GameUnit<UnitType>::Draw(const Transformation &parent, const Matrix &parent
       }
 	 }
 	}
-    if (mounts[i]->type->type==weapon_info::BEAM) {
-      if (mounts[i]->ref.gun) {
-	mounts[i]->ref.gun->Draw(*ct,*ctm,((mounts[i]->size&weapon_info::AUTOTRACKING)&&mounts[i]->time_to_lock<=0)? Unit::Target():NULL,computer.radar.trackingcone);
+    if (mounts[i].type->type==weapon_info::BEAM) {
+      if (mounts[i].ref.gun) {
+	mounts[i].ref.gun->Draw(*ct,*ctm,((mounts[i].size&weapon_info::AUTOTRACKING)&&mounts[i].time_to_lock<=0)? Unit::Target():NULL,computer.radar.trackingcone);
       }
     }
   }

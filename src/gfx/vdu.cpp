@@ -680,19 +680,19 @@ void VDU::DrawWeapon (Unit * parent) {
   GFXDisable (TEXTURE0);
   GFXDisable(LIGHTING);
   for (int i=0;i<parent->GetNumMounts();i++) {
-    Vector pos (parent->mounts[i]->GetMountLocation());
+    Vector pos (parent->mounts[i].GetMountLocation());
     pos.i=-
 pos.i*fabs(w)/parent->rSize()*percent+x;
     pos.j=pos.k*fabs(h)/parent->rSize()*percent+y;
     pos.k=0;
-    string ammo =(parent->mounts[i]->ammo>=0)?string("(")+tostring(parent->mounts[i]->ammo)+string(")"):string("");
-    switch (parent->mounts[i]->ammo!=0?parent->mounts[i]->status:127) {
+    string ammo =(parent->mounts[i].ammo>=0)?string("(")+tostring(parent->mounts[i].ammo)+string(")"):string("");
+    switch (parent->mounts[i].ammo!=0?parent->mounts[i].status:127) {
     case Mount::ACTIVE:
       GFXColor4f (0,1,.2,1);
-      if (parent->mounts[i]->type->size<weapon_info::LIGHTMISSILE) 
-	buf+=((buf.length()==(unsigned int)len)?string(""):string(","))+((count++%2==0)?"\n":"")+parent->mounts[i]->type->weapon_name+ammo;
+      if (parent->mounts[i].type->size<weapon_info::LIGHTMISSILE) 
+	buf+=((buf.length()==(unsigned int)len)?string(""):string(","))+((count++%2==0)?"\n":"")+parent->mounts[i].type->weapon_name+ammo;
       else
-	mbuf+=((mbuf.length()==(unsigned int)mlen)?string(""):string(","))+((mcount++%4==0)?"\n":"")+parent->mounts[i]->type->weapon_name+ammo;;
+	mbuf+=((mbuf.length()==(unsigned int)mlen)?string(""):string(","))+((mcount++%4==0)?"\n":"")+parent->mounts[i].type->weapon_name+ammo;;
       break;
     case Mount::INACTIVE:
       GFXColor4f (0,.5,0,1);
@@ -707,7 +707,7 @@ pos.i*fabs(w)/parent->rSize()*percent+x;
       GFXColor4f (0,.2,0,1);
       break;
     }
-    DrawGun (pos,w,h,parent->mounts[i]->type->size);
+    DrawGun (pos,w,h,parent->mounts[i].type->size);
   }
   GFXColor4f(0,1,.2,1);
   if (mbuf.length()!=(unsigned int)mlen) {

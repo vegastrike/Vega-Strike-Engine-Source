@@ -82,11 +82,11 @@ bool Bolt::Collide (Unit * target) {
     if (coltmp.b>1)coltmp.b=1;*/
     float appldam = ((float(255-percentphase)/255)*damage);;
     float phasdam =((float(percentphase)/255)*damage);
-    if (damage>0) {
+    //if (damage>0) { This was needed back in the "I don't share code" ApplyDamage days
       target->ApplyDamage ((prev_position+tmp).Cast(),normal, appldam* ((1-distance)+distance*longrange),affectedSubUnit,coltmp,(Unit*)owner, phasdam* ((1-distance)+distance*longrange));
-    }else if (damage<0) {
-      target->leach (1,phasdam<0?-phasdam:1,appldam<0?-appldam:1);      
-    }
+	  //}else if (damage<0) {
+      //target->leach (1,phasdam<0?-phasdam:1,appldam<0?-appldam:1);      
+	  //}
     return true;
   }
   return false;

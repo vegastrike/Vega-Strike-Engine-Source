@@ -395,11 +395,11 @@ bool Beam::Collide (Unit * target) {
 	}
       }
     }else {
-      if (appldam>0||phasdam>0) {
+//      if (appldam>0==phasdam>0||applydam==0||phasedam==0) {
 	target->ApplyDamage (center.Cast()+direction*curlength,normal,appldam,colidee,coltmp,(Unit *)owner,phasdam);
-      }else if (damagerate<0||phasedamage<0) {
-	target->leach (1,phasedamage<0?-phasedamage*SIMULATION_ATOM:1,damagerate<0?-damagerate*SIMULATION_ATOM:1);
-      }
+	//}else if (damagerate<0||phasedamage<0) {
+	  //target->leach (1,phasedamage<0?-phasedamage*SIMULATION_ATOM:1,damagerate<0?-damagerate*SIMULATION_ATOM:1);
+      //}
     }
     return true;
     

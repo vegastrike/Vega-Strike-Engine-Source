@@ -358,7 +358,7 @@ Unit::~Unit()
   fflush (stderr);
 #endif
 #ifdef DESTRUCTDEBUG
-  fprintf (stderr,"%d %x", 6,mounts);
+  fprintf (stderr,"%d %x", 6,&mounts);
   fflush (stderr);
 #endif
 
@@ -367,15 +367,17 @@ Unit::~Unit()
   fflush (stderr);
 #endif
 #ifdef DESTRUCTDEBUG
-  fprintf (stderr,"%d %x ", 1,mounts);
+  fprintf (stderr,"%d %x ", 1,&mounts);
   fflush (stderr);
 #endif
+#ifndef NO_MOUNT_STAR
 	for( vector<Mount *>::iterator jj=mounts.begin(); jj!=mounts.end(); jj++)
 	{
 		// Free all mounts elements
 		if( (*jj)!=NULL)
 			delete (*jj);
 	}
+#endif
 	mounts.clear();
 #ifdef DESTRUCTDEBUG
   fprintf (stderr,"%d", 0);
@@ -695,21 +697,22 @@ void Unit::calculate_extent(bool update_collide_queue) {
 void Unit::Fire (unsigned int weapon_type_bitmask, bool listen_to_owner) {
     if (cloaking>=0)
         return;
-    vector<Mount *>::const_iterator i = mounts.begin();//note to self: if vector<Mount *> is ever changed to vector<Mount> remove the const_ from the const_iterator
+	vector <Mount>
+		::iterator i = mounts.begin();//note to self: if vector<Mount *> is ever changed to vector<Mount> remove the const_ from the const_iterator
     for (;i!=mounts.end();++i) {
-        if ((*i)->type->type==weapon_info::BEAM) {
-            if ((*i)->type->EnergyRate*SIMULATION_ATOM>energy) {
-                (*i)->UnFire();
+        if ((*i).type->type==weapon_info::BEAM) {
+            if ((*i).type->EnergyRate*SIMULATION_ATOM>energy) {
+                (*i).UnFire();
                 continue;
             }
         }else{
-            if ((*i)->type->EnergyRate>energy)
+            if ((*i).type->EnergyRate>energy)
                 continue;
         }
-        const bool mis = (*i)->type->type==weapon_info::PROJECTILE;
-        const bool locked_on = (*i)->time_to_lock<=0;
-        const bool lockable_weapon = (*i)->type->LockTime>0;
-        const bool autotracking_gun =(!mis)&&0!=((*i)->size&weapon_info::AUTOTRACKING)&&locked_on;
+        const bool mis = (*i).type->type==weapon_info::PROJECTILE;
+        const bool locked_on = (*i).time_to_lock<=0;
+        const bool lockable_weapon = (*i).type->LockTime>0;
+        const bool autotracking_gun =(!mis)&&0!=((*i).size&weapon_info::AUTOTRACKING)&&locked_on;
         const bool fire_non_autotrackers = (0==(weapon_type_bitmask&ROLES::FIRE_ONLY_AUTOTRACKERS));
         const bool locked_missile = (mis&&locked_on&&lockable_weapon);
         const bool missile_and_want_to_fire_missiles = (mis&&(weapon_type_bitmask&ROLES::FIRE_MISSILES));
@@ -718,12 +721,12 @@ void Unit::Fire (unsigned int weapon_type_bitmask, bool listen_to_owner) {
 			fprintf (stderr,"\n about to fire locked missile \n");
 		}
         if (fire_non_autotrackers||autotracking_gun||locked_missile) {
-            if ((ROLES::EVERYTHING_ELSE&weapon_type_bitmask&(*i)->type->role_bits)
-                ||(*i)->type->role_bits==0) {
+            if ((ROLES::EVERYTHING_ELSE&weapon_type_bitmask&(*i).type->role_bits)
+                ||(*i).type->role_bits==0) {
                 if ((locked_on&&missile_and_want_to_fire_missiles)
                     ||gun_and_want_to_fire_guns) {
-                    if ((*i)->Fire(owner==NULL?this:owner,mis,listen_to_owner)) {
-                        energy -=apply_float_to_short((*i)->type->type==weapon_info::BEAM?(*i)->type->EnergyRate*SIMULATION_ATOM:(*i)->type->EnergyRate);
+                    if ((*i).Fire(owner==NULL?this:owner,mis,listen_to_owner)) {
+                        energy -=apply_float_to_short((*i).type->type==weapon_info::BEAM?(*i).type->EnergyRate*SIMULATION_ATOM:(*i).type->EnergyRate);
                         if (mis) weapon_type_bitmask &= (~ROLES::FIRE_MISSILES);//fire only 1 missile at a time
                     }
                 }
@@ -787,10 +790,10 @@ float Unit::TrackingGuns(bool &missilelock) {
   float trackingcone = 0;
   missilelock=false;
   for (int i=0;i<GetNumMounts();i++) {
-	  if (mounts[i]->status==Mount::ACTIVE&&(mounts[i]->size&weapon_info::AUTOTRACKING)) {
+	  if (mounts[i].status==Mount::ACTIVE&&(mounts[i].size&weapon_info::AUTOTRACKING)) {
       trackingcone= computer.radar.trackingcone;
     }
-    if (mounts[i]->status==Mount::ACTIVE&&mounts[i]->type->LockTime>0&&mounts[i]->time_to_lock<=0) {
+    if (mounts[i].status==Mount::ACTIVE&&mounts[i].type->LockTime>0&&mounts[i].time_to_lock<=0) {
       missilelock=true;
     }
   }
@@ -808,14 +811,14 @@ void Unit::getAverageGunSpeed(float & speed, float &grange, float &mrange) const
 	int nummt = GetNumMounts();
 	// this breaks the name, but... it _is_ more useful.
     for (int i=0;i<GetNumMounts();i++) {
-      if (mounts[i]->type->type!=weapon_info::PROJECTILE) {
-	    if (mounts[i]->type->Range > grange) {
-	      grange=mounts[i]->type->Range;
+      if (mounts[i].type->type!=weapon_info::PROJECTILE) {
+	    if (mounts[i].type->Range > grange) {
+	      grange=mounts[i].type->Range;
 		}
-	    speed+=mounts[i]->type->Speed;
-      } else if(mounts[i]->type->type==weapon_info::PROJECTILE){
-		if(mounts[i]->type->Range > mrange) {
-	      mrange=mounts[i]->type->Range;
+	    speed+=mounts[i].type->Speed;
+      } else if(mounts[i].type->type==weapon_info::PROJECTILE){
+		if(mounts[i].type->Range > mrange) {
+	      mrange=mounts[i].type->Range;
 		}
 	    nummt--;
       }
@@ -872,12 +875,12 @@ float Unit::cosAngleFromMountTo (Unit * targ, float & dist) const{
   Matrix mat;
   for (int i=0;i<GetNumMounts();i++) {
     float tmpdist = .001;
-    Transformation finaltrans (mounts[i]->GetMountOrientation(),mounts[i]->GetMountLocation().Cast());
+    Transformation finaltrans (mounts[i].GetMountOrientation(),mounts[i].GetMountLocation().Cast());
     finaltrans.Compose (cumulative_transformation, cumulative_transformation_matrix);
     finaltrans.to_matrix (mat);
     Vector Normal (mat.getR());
     
-    QVector totarget (targ->PositionITTS(finaltrans.position, mounts[i]->type->Speed));
+    QVector totarget (targ->PositionITTS(finaltrans.position, mounts[i].type->Speed));
     
     tmpcos = Normal.Dot (totarget.Cast());
     tmpdist = totarget.Magnitude();
@@ -887,7 +890,7 @@ float Unit::cosAngleFromMountTo (Unit * targ, float & dist) const{
     } else {
       tmpcos /= tmpdist;
     }
-    tmpdist /= mounts[i]->type->Range;//UNLIKELY DIV/0
+    tmpdist /= mounts[i].type->Range;//UNLIKELY DIV/0
     if (tmpdist < 1||tmpdist<dist) {
       if (tmpcos-tmpdist/2 > retval-dist/2) {
 	dist = tmpdist;
@@ -921,7 +924,16 @@ void Unit::Select() {
 void Unit::Deselect() {
   selected = false;
 }
-
+void disableSubUnits (Unit * uhn) {
+	Unit * un;
+	for (un_iter i = uhn->getSubUnits();(un=*i)!=NULL;++i) {
+		disableSubUnits(un);
+		for (unsigned int j=0;j<uhn->mounts.size();++j) {
+			uhn->mounts[j].status=Mount::DESTROYED;
+		}
+		
+	}
+}
 un_iter Unit::getSubUnits () {
   return SubUnits.createIterator();
 }
@@ -1287,32 +1299,32 @@ void Unit::UpdatePhysics (const Transformation &trans, const Matrix &transmat, c
 
   for (int i=0;(int)i<GetNumMounts();i++) {
 //    if (increase_locking&&cloaking<0) {
-//      mounts[i]->time_to_lock-=SIMULATION_ATOM;
+//      mounts[i].time_to_lock-=SIMULATION_ATOM;
 //    }
-    if (mounts[i]->status==Mount::ACTIVE&&cloaking<0&&mounts[i]->ammo!=0) {
+    if (mounts[i].status==Mount::ACTIVE&&cloaking<0&&mounts[i].ammo!=0) {
       if (player_cockpit) {
 	  touched=true;
       }
-      if (increase_locking&&(dist_sqr_to_target<mounts[i]->type->Range*mounts[i]->type->Range)) {
-		mounts[i]->time_to_lock-=SIMULATION_ATOM;
+      if (increase_locking&&(dist_sqr_to_target<mounts[i].type->Range*mounts[i].type->Range)) {
+		mounts[i].time_to_lock-=SIMULATION_ATOM;
 		static bool ai_lock_cheat=XMLSupport::parse_bool(vs_config->getVariable ("physics","ai_lock_cheat","true"));	
 		if (!player_cockpit) {
 		  if (ai_lock_cheat) {
-			mounts[i]->time_to_lock=-1;
+			mounts[i].time_to_lock=-1;
 		  }
 		}else {
 
-		  if (mounts[i]->type->LockTime>0) {
+		  if (mounts[i].type->LockTime>0) {
 			static string LockedSoundName= vs_config->getVariable ("unitaudio","locked","locked.wav");
 			static int LockedSound = AUDCreateSoundWAV (LockedSoundName,false);
 
-			if (mounts[i]->time_to_lock>-SIMULATION_ATOM&&mounts[i]->time_to_lock<=0) {
+			if (mounts[i].time_to_lock>-SIMULATION_ATOM&&mounts[i].time_to_lock<=0) {
 			  if (!AUDIsPlaying(LockedSound)) {
 			AUDStartPlaying(LockedSound);
 			AUDStopPlaying(LockingSound);	      
 			  }
 			  AUDAdjustSound (LockedSound,Position(),GetVelocity()); 
-			}else if (mounts[i]->time_to_lock>0)  {
+			}else if (mounts[i].time_to_lock>0)  {
 			  locking=true;
 			  if (!AUDIsPlaying(LockingSound)) {
 			AUDStartPlaying(LockingSound);	      
@@ -1322,38 +1334,38 @@ void Unit::UpdatePhysics (const Transformation &trans, const Matrix &transmat, c
 		  }
 		}
       }else {
-        if (mounts[i]->ammo!=0) {
-	  mounts[i]->time_to_lock=mounts[i]->type->LockTime;
+        if (mounts[i].ammo!=0) {
+	  mounts[i].time_to_lock=mounts[i].type->LockTime;
         }
       }
     } else {
-      if (mounts[i]->ammo!=0) {
-        mounts[i]->time_to_lock=mounts[i]->type->LockTime;
+      if (mounts[i].ammo!=0) {
+        mounts[i].time_to_lock=mounts[i].type->LockTime;
       }
     }
-    if (mounts[i]->type->type==weapon_info::BEAM) {
-      if (mounts[i]->ref.gun) {
-		mounts[i]->ref.gun->UpdatePhysics (cumulative_transformation, cumulative_transformation_matrix,((mounts[i]->size&weapon_info::AUTOTRACKING)&&(mounts[i]->time_to_lock<=0))?target:NULL ,computer.radar.trackingcone, target);
+    if (mounts[i].type->type==weapon_info::BEAM) {
+      if (mounts[i].ref.gun) {
+		mounts[i].ref.gun->UpdatePhysics (cumulative_transformation, cumulative_transformation_matrix,((mounts[i].size&weapon_info::AUTOTRACKING)&&(mounts[i].time_to_lock<=0))?target:NULL ,computer.radar.trackingcone, target);
       }
     } else {
-      mounts[i]->ref.refire+=SIMULATION_ATOM;
+      mounts[i].ref.refire+=SIMULATION_ATOM;
     }
-    if (mounts[i]->processed==Mount::FIRED) {
+    if (mounts[i].processed==Mount::FIRED) {
       Transformation t1;
       Matrix m1;
       t1=prev_physical_state;//a hack that will not work on turrets
       t1.Compose (trans,transmat);
       t1.to_matrix (m1);
       int autotrack=0;
-      if ((0!=(mounts[i]->size&weapon_info::AUTOTRACKING))) {
+      if ((0!=(mounts[i].size&weapon_info::AUTOTRACKING))) {
 		autotrack = computer.itts?2:1;
       }
-      mounts[i]->PhysicsAlignedFire (t1,m1,cumulative_velocity,(!SubUnit||owner==NULL)?this:owner,target,autotrack, computer.radar.trackingcone);
-      if (mounts[i]->ammo==0&&mounts[i]->type->type==weapon_info::PROJECTILE) {
+      mounts[i].PhysicsAlignedFire (t1,m1,cumulative_velocity,(!SubUnit||owner==NULL)?this:owner,target,autotrack, computer.radar.trackingcone);
+      if (mounts[i].ammo==0&&mounts[i].type->type==weapon_info::PROJECTILE) {
 		ToggleWeapon (true);
       }
-    }else if (mounts[i]->processed==Mount::UNFIRED) {
-      mounts[i]->PhysicsAlignedUnfire();
+    }else if (mounts[i].processed==Mount::UNFIRED) {
+      mounts[i].PhysicsAlignedUnfire();
     }
   }
   if (locking==false&&touched==true) {
@@ -2221,13 +2233,13 @@ void Unit::DamageRandSys(float dam, const Vector &vec) {
 		} else if (GetNumMounts()) {
 			unsigned int whichmount=rand()%GetNumMounts();
 			if (randnum>=.9) {
-				mounts[whichmount]->status=Mount::DESTROYED;
-			}else if (mounts[whichmount]->ammo>0&&randnum>=.4) {
-			  mounts[whichmount]->ammo*=dam;
+				mounts[whichmount].status=Mount::DESTROYED;
+			}else if (mounts[whichmount].ammo>0&&randnum>=.4) {
+			  mounts[whichmount].ammo*=dam;
 			} else if (randnum>=.1) {
-				mounts[whichmount]->time_to_lock+=(100-(100*dam));
+				mounts[whichmount].time_to_lock+=(100-(100*dam));
 			} else {
-				mounts[whichmount]->size&=(~weapon_info::AUTOTRACKING);
+				mounts[whichmount].size&=(~weapon_info::AUTOTRACKING);
 			}
 		}
 		return;
@@ -2371,12 +2383,15 @@ void Unit::Kill(bool erasefromsave) {
       dockedun.pop_back();
     }
   }
+
+  #ifndef NO_MOUNT_STAR
 	for( vector<Mount *>::iterator jj=mounts.begin(); jj!=mounts.end(); jj++)
 	{
 		// Free all mounts elements
 		if( (*jj)!=NULL)
 			delete (*jj);
 	}
+	#endif
     mounts.clear();
   //eraticate everything. naturally (see previous line) we won't erraticate beams erraticated above
   if (!SubUnit) 
@@ -2556,23 +2571,34 @@ float Unit::DealDamageToHullReturnArmor (const Vector & pnt, float damage, unsig
     }
   }
   short biggerthan=*targ;
-  percent = damage/(*targ+hull);
+  float absdamage = damage>=0?damage:-damage;
+  percent = absdamage/(*targ+hull);
 
   if( percent == -1)
 	  return -1;
-  if (damage<((float)*targ)) {
+  if (absdamage<((float)*targ)) {
 	ArmorDamageSound( pnt);
-    *targ -= apply_float_to_short (damage);
+    *targ -= apply_float_to_short (absdamage);
   }else {
 	HullDamageSound( pnt);
-    damage -= ((float)*targ);
+    absdamage -= ((float)*targ);
+	damage= damage>=0?absdamage:-absdamage;
     *targ= 0;
-    if (_Universe->AccessCockpit()->GetParent()!=this||_Universe->AccessCockpit()->godliness<=0||hull>damage) {
+    if (_Universe->AccessCockpit()->GetParent()!=this||_Universe->AccessCockpit()->godliness<=0||hull>damage) {//hull > damage is similar to hull>absdamage|| damage<0
       static float system_failure=XMLSupport::parse_float(vs_config->getVariable ("physics","indiscriminate_system_destruction",".25"));
-      DamageRandSys(system_failure*rand01()+(1-system_failure)*(1-(damage/hull)),pnt);
-      hull -=damage;
+      DamageRandSys(system_failure*rand01()+(1-system_failure)*(1-(absdamage/hull)),pnt);
+	  if (damage>0) {
+		  hull -=damage;//FIXME
+	  }else {
+		  recharge+=damage;
+		  shield.recharge+=damage;
+		  if (recharge<0)
+			  recharge=0;
+		  if (shield.recharge<0)
+			  shield.recharge=0;
+	  }
     }else {
-      _Universe->AccessCockpit()->godliness-=damage;
+      _Universe->AccessCockpit()->godliness-=absdamage;
       DamageRandSys(rand01()*.5+.2,pnt);//get system damage...but live!
     }
   }
@@ -2775,13 +2801,13 @@ void Unit::Cloak (bool loak) {
 
 void Unit::SelectAllWeapon (bool Missile) {
   for (int i=0;i<GetNumMounts();i++) {
-    mounts[i]->Activate (Missile);
+    mounts[i].Activate (Missile);
   }
 }
 
 void Unit::UnFire () {
   for (int i=0;i<GetNumMounts();i++) {
-    mounts[i]->UnFire();//turns off beams;
+    mounts[i].UnFire();//turns off beams;
   }
 }
 
@@ -2789,11 +2815,11 @@ void Unit::UnFire () {
 void Unit::ActivateGuns (const weapon_info * sz, bool ms) {
   for (int j=0;j<2;j++) {
     for (int i=0;i<GetNumMounts();i++) {
-      if (mounts[i]->type==sz) {
-	if (mounts[i]->status<Mount::DESTROYED&&(mounts[i]->type->type==weapon_info::PROJECTILE)==ms) {
-	  mounts[i]->Activate(ms);
+      if (mounts[i].type==sz) {
+	if (mounts[i].status<Mount::DESTROYED&&(mounts[i].type->type==weapon_info::PROJECTILE)==ms) {
+	  mounts[i].Activate(ms);
 	}else {
-	  sz = mounts[(i+1)%GetNumMounts()]->type;
+	  sz = mounts[(i+1)%GetNumMounts()].type;
 	}
       }
     }
@@ -2809,32 +2835,32 @@ void Unit::ToggleWeapon (bool Missile) {
   const weapon_info * sz=NULL;
   if (GetNumMounts()<1)
     return;
-  sz = mounts[0]->type;
+  sz = mounts[0].type;
   for (int i=0;i<GetNumMounts();i++) {
-    if ((mounts[i]->type->type==weapon_info::PROJECTILE)==Missile&&!Missile&&mounts[i]->status<Mount::DESTROYED) {
+    if ((mounts[i].type->type==weapon_info::PROJECTILE)==Missile&&!Missile&&mounts[i].status<Mount::DESTROYED) {
       totalcount++;
       lasttotal=false;
-      if (mounts[i]->status==Mount::ACTIVE) {
+      if (mounts[i].status==Mount::ACTIVE) {
 	activecount++;
 	lasttotal=true;
-	mounts[i]->DeActive (Missile);
+	mounts[i].DeActive (Missile);
 	if (i==GetNumMounts()-1) {
-	  sz=mounts[0]->type;
+	  sz=mounts[0].type;
 	}else {
-	  sz =mounts[i+1]->type;
+	  sz =mounts[i+1].type;
 	}
       }
     }
-    if ((mounts[i]->type->type==weapon_info::PROJECTILE)==Missile&&Missile&&mounts[i]->status<Mount::DESTROYED) {
-      if (mounts[i]->status==Mount::ACTIVE) {
+    if ((mounts[i].type->type==weapon_info::PROJECTILE)==Missile&&Missile&&mounts[i].status<Mount::DESTROYED) {
+      if (mounts[i].status==Mount::ACTIVE) {
 	activecount++;//totalcount=0;
-	mounts[i]->DeActive (Missile);
+	mounts[i].DeActive (Missile);
 	if (lasttotal) {
 	  totalcount=(i+1)%GetNumMounts();
 	  if (i==GetNumMounts()-1) {
-	    sz = mounts[0]->type;
+	    sz = mounts[0].type;
 	  }else {
-	    sz =mounts[i+1]->type;
+	    sz =mounts[i+1].type;
 	  }
 	}
 	lasttotal=false;
@@ -2845,12 +2871,12 @@ void Unit::ToggleWeapon (bool Missile) {
     int i=totalcount;
     for (int j=0;j<2;j++) {
       for (;i<GetNumMounts();i++) {
-	if (mounts[i]->type==sz) {
-	  if ((mounts[i]->type->type==weapon_info::PROJECTILE)) {
-	    mounts[i]->Activate(true);
+	if (mounts[i].type==sz) {
+	  if ((mounts[i].type->type==weapon_info::PROJECTILE)) {
+	    mounts[i].Activate(true);
 	    return;
 	  }else {
-	    sz = mounts[(i+1)%GetNumMounts()]->type;
+	    sz = mounts[(i+1)%GetNumMounts()].type;
 	  }
 	}
       }
@@ -2858,7 +2884,7 @@ void Unit::ToggleWeapon (bool Missile) {
     }
   }
   if (totalcount==activecount) {
-    ActivateGuns (mounts[0]->type,Missile);
+    ActivateGuns (mounts[0].type,Missile);
   } else {
     if (lasttotal) {
       SelectAllWeapon(Missile);
@@ -2885,10 +2911,10 @@ int Unit::LockMissile() const{
   bool missilelock=false;
   bool dumblock=false;
   for (int i=0;i<GetNumMounts();i++) {
-    if (mounts[i]->status==Mount::ACTIVE&&mounts[i]->type->LockTime>0&&mounts[i]->time_to_lock<=0&&mounts[i]->type->type==weapon_info::PROJECTILE) {
+    if (mounts[i].status==Mount::ACTIVE&&mounts[i].type->LockTime>0&&mounts[i].time_to_lock<=0&&mounts[i].type->type==weapon_info::PROJECTILE) {
       missilelock=true;
     }else {
-      if (mounts[i]->status==Mount::ACTIVE&&mounts[i]->type->LockTime==0&&mounts[i]->type->type==weapon_info::PROJECTILE&&mounts[i]->time_to_lock<=0) {
+      if (mounts[i].status==Mount::ACTIVE&&mounts[i].type->LockTime==0&&mounts[i].type->type==weapon_info::PROJECTILE&&mounts[i].time_to_lock<=0) {
 	dumblock=true;
       }
     }    
@@ -2974,6 +3000,8 @@ static Transformation HoldPositionWithRespectTo (Transformation holder, const Tr
   }
   return holder;
 }
+extern void ExecuteDirector();
+std::set <Unit *> arrested_list_do_not_dereference;
 void Unit::PerformDockingOperations () {
   for (unsigned int i=0;i<image->dockedunits.size();i++) {
     Unit * un;
@@ -2995,6 +3023,17 @@ void Unit::PerformDockingOperations () {
 	_Universe->AccessCockpit(cockpit)->credits-=docking_fee;
       }
     }
+	std::set<Unit *>::iterator arrested=arrested_list_do_not_dereference.find(this);
+	if (arrested!=arrested_list_do_not_dereference.end()) {
+		arrested_list_do_not_dereference.erase (arrested);
+		//do this for jail time
+		for (unsigned int j=0;j<100000;++j) {
+			for (unsigned int i=0;i<active_missions.size();++i) {
+				
+				ExecuteDirector();
+			}
+		}
+	}
     un->prev_physical_state=un->curr_physical_state;
     un->curr_physical_state =HoldPositionWithRespectTo (un->curr_physical_state,prev_physical_state,curr_physical_state);
     un->NetForce=Vector(0,0,0);
@@ -3327,58 +3366,61 @@ bool Unit::UpgradeMounts (const Unit *up, int mountoffset, bool touchme, bool do
   int i;
   bool cancompletefully=true;
   for (i=0,j=mountoffset;i<up->GetNumMounts()&&i<GetNumMounts()/*i should be GetNumMounts(), s'ok*/;i++,j++) {
-    if (up->mounts[i]->status==Mount::ACTIVE||up->mounts[i]->status==Mount::INACTIVE) {//only mess with this if the upgrador has active mounts
+    if (up->mounts[i].status==Mount::ACTIVE||up->mounts[i].status==Mount::INACTIVE) {//only mess with this if the upgrador has active mounts
       int jmod=j%GetNumMounts();//make sure since we're offsetting the starting we don't overrun the mounts
       if (!downgrade) {//if we wish to add guns instead of remove
-	if (up->mounts[i]->type->weapon_name!="MOUNT_UPGRADE") {
+	if (up->mounts[i].type->weapon_name!="MOUNT_UPGRADE") {
 
 
-	  if (up->mounts[i]->type->size==(up->mounts[i]->type->size&mounts[jmod]->size)) {//only look at this mount if it can fit in the rack
-	    if (up->mounts[i]->type->weapon_name!=mounts[jmod]->type->weapon_name || mounts[jmod]->status==Mount::DESTROYED || mounts[jmod]->status==Mount::UNCHOSEN) {
+	  if (up->mounts[i].type->size==(up->mounts[i].type->size&mounts[jmod].size)) {//only look at this mount if it can fit in the rack
+	    if (up->mounts[i].type->weapon_name!=mounts[jmod].type->weapon_name || mounts[jmod].status==Mount::DESTROYED || mounts[jmod].status==Mount::UNCHOSEN) {
 	      numave++;//ok now we can compute percentage of used parts
+		  Mount upmount(up->mounts[i]);
+		  
 	      if (templ) {
 		if (templ->GetNumMounts()>jmod) {
-		  int maxammo = templ->mounts[jmod]->ammo;
-		  if ((up->mounts[i]->ammo>maxammo||up->mounts[i]->ammo==-1)&&maxammo!=-1) {
-		    up->mounts[i]->ammo = maxammo;
+			
+		  int maxammo = templ->mounts[jmod].ammo;
+		  if ((upmount.ammo>maxammo||upmount.ammo==-1)&&maxammo!=-1) {
+		    upmount.ammo = maxammo;
 		  }
-		  if (templ->mounts[jmod]->volume!=-1) {
-		    if (up->mounts[i]->ammo*up->mounts[i]->type->volume>templ->mounts[jmod]->volume) {
-		      up->mounts[i]->ammo = (templ->mounts[jmod]->volume+1)/up->mounts[i]->type->volume;
+		  if (templ->mounts[jmod].volume!=-1) {
+		    if (upmount.ammo*upmount.type->volume>templ->mounts[jmod].volume) {
+		      upmount.ammo = (templ->mounts[jmod].volume+1)/upmount.type->volume;
 		    }
 		  }
 		}
 	      }
-	      percentage+=mounts[jmod]->Percentage(up->mounts[i]);//compute here
+	      percentage+=mounts[jmod].Percentage(&upmount);//compute here
 	      if (touchme) {//if we wish to modify the mounts
-		mounts[jmod]->ReplaceMounts (up->mounts[i]);//switch this mount with the upgrador mount
+		mounts[jmod].ReplaceMounts (&upmount);//switch this mount with the upgrador mount
 	      }
 	    }else {
-	      int tmpammo = mounts[jmod]->ammo;
-	      if (mounts[jmod]->ammo!=-1&&up->mounts[i]->ammo!=-1) {
-		tmpammo+=up->mounts[i]->ammo;
+	      int tmpammo = mounts[jmod].ammo;
+	      if (mounts[jmod].ammo!=-1&&up->mounts[i].ammo!=-1) {
+		tmpammo+=up->mounts[i].ammo;
 		if (templ) {
 		  if (templ->GetNumMounts()>jmod) {
-		    if (templ->mounts[jmod]->ammo!=-1) {
-		      if (templ->mounts[jmod]->ammo>tmpammo) {
-			tmpammo=templ->mounts[jmod]->ammo;
+		    if (templ->mounts[jmod].ammo!=-1) {
+		      if (templ->mounts[jmod].ammo>tmpammo) {
+			tmpammo=templ->mounts[jmod].ammo;
 		      }
 		    }
-		    if (templ->mounts[jmod]->volume!=-1) {
-		      if (templ->mounts[jmod]->volume>mounts[jmod]->type->volume*tmpammo) {
-			tmpammo=(templ->mounts[jmod]->volume+1)/mounts[jmod]->type->volume;
+		    if (templ->mounts[jmod].volume!=-1) {
+		      if (templ->mounts[jmod].volume>mounts[jmod].type->volume*tmpammo) {
+			tmpammo=(templ->mounts[jmod].volume+1)/mounts[jmod].type->volume;
 		      }
 		    }
 		    
 		  }
 		} 
-		if (tmpammo*mounts[jmod]->type->volume>mounts[jmod]->volume) {
-		  tmpammo = (1+mounts[jmod]->volume)/mounts[jmod]->type->volume;
+		if (tmpammo*mounts[jmod].type->volume>mounts[jmod].volume) {
+		  tmpammo = (1+mounts[jmod].volume)/mounts[jmod].type->volume;
 		}
-		if (tmpammo>mounts[jmod]->ammo) {
+		if (tmpammo>mounts[jmod].ammo) {
 		  cancompletefully=true;
 		  if (touchme)
-		    mounts[jmod]->ammo = tmpammo;
+		    mounts[jmod].ammo = tmpammo;
 		}else {
 		  cancompletefully=false;
 		}
@@ -3393,12 +3435,12 @@ bool Unit::UpgradeMounts (const Unit *up, int mountoffset, bool touchme, bool do
 	  siz = ~siz;
 	  if (templ) {
 	    if (templ->GetNumMounts()>jmod) {
-	      siz = templ->mounts[jmod]->size;
+	      siz = templ->mounts[jmod].size;
 	    }
 	  }
-	  if (((siz&up->mounts[i]->size)|mounts[jmod]->size)!=mounts[jmod]->size) {
+	  if (((siz&up->mounts[i].size)|mounts[jmod].size)!=mounts[jmod].size) {
 	    if (touchme) {
-	      mounts[jmod]->size|=up->mounts[i]->size;
+	      mounts[jmod].size|=up->mounts[i].size;
 	    }
 	    numave++;
 	    percentage++;
@@ -3409,16 +3451,16 @@ bool Unit::UpgradeMounts (const Unit *up, int mountoffset, bool touchme, bool do
 	  //we need to |= the mount type
 	}
       } else {
-	if (up->mounts[i]->type->weapon_name!="MOUNT_UPGRADE") {
+	if (up->mounts[i].type->weapon_name!="MOUNT_UPGRADE") {
 	  bool found=false;//we haven't found a matching gun to remove
 
 		for (unsigned int k=0;k<(unsigned int)GetNumMounts();k++) {///go through all guns
 	      int jkmod = (jmod+k)%GetNumMounts();//we want to start with bias
-	      if (strcasecmp(mounts[jkmod]->type->weapon_name.c_str(),up->mounts[i]->type->weapon_name.c_str())==0) {///search for right mount to remove starting from j. this is the right name
+	      if (strcasecmp(mounts[jkmod].type->weapon_name.c_str(),up->mounts[i].type->weapon_name.c_str())==0) {///search for right mount to remove starting from j. this is the right name
 		found=true;//we got one
-		percentage+=mounts[jkmod]->Percentage(up->mounts[i]);///calculate scrap value (if damaged)
+		percentage+=mounts[jkmod].Percentage(&up->mounts[i]);///calculate scrap value (if damaged)
 		if (touchme) //if we modify
-		  mounts[jkmod]->status=Mount::UNCHOSEN;///deactivate weapon
+		  mounts[jkmod].status=Mount::UNCHOSEN;///deactivate weapon
 		break;
 	      }
 	    }
@@ -3432,9 +3474,9 @@ bool Unit::UpgradeMounts (const Unit *up, int mountoffset, bool touchme, bool do
 
 	  for (unsigned int k=0;k<(unsigned int)GetNumMounts();k++) {///go through all guns
 	    int jkmod = (jmod+k)%GetNumMounts();//we want to start with bias
-	    if ((up->mounts[i]->size&mounts[jkmod]->size)==(up->mounts[i]->size)) {
+	    if ((up->mounts[i].size&mounts[jkmod].size)==(up->mounts[i].size)) {
 	      if (touchme) {
-		mounts[jkmod]->size&=(~up->mounts[i]->size);
+		mounts[jkmod].size&=(~up->mounts[i].size);
 	      }
 	      percentage++;
 	      numave++;
@@ -4180,17 +4222,17 @@ std::string Unit::mountSerializer (const XMLType &input, void * mythis) {
   Unit * un=(Unit *)mythis;
   int i=input.w.hardint;
   if (un->GetNumMounts()>i) {
-    string result(lookupMountSize(un->mounts[i]->size));
-    if (un->mounts[i]->status==Mount::INACTIVE||un->mounts[i]->status==Mount::ACTIVE)
-      result+=string("\" weapon=\"")+(un->mounts[i]->type->weapon_name);
-    if (un->mounts[i]->ammo!=-1)
-      result+=string("\" ammo=\"")+XMLSupport::tostring(un->mounts[i]->ammo);
-    if (un->mounts[i]->volume!=-1) {
-      result+=string("\" volume=\"")+XMLSupport::tostring(un->mounts[i]->volume);
+    string result(lookupMountSize(un->mounts[i].size));
+    if (un->mounts[i].status==Mount::INACTIVE||un->mounts[i].status==Mount::ACTIVE)
+      result+=string("\" weapon=\"")+(un->mounts[i].type->weapon_name);
+    if (un->mounts[i].ammo!=-1)
+      result+=string("\" ammo=\"")+XMLSupport::tostring(un->mounts[i].ammo);
+    if (un->mounts[i].volume!=-1) {
+      result+=string("\" volume=\"")+XMLSupport::tostring(un->mounts[i].volume);
     }
-	result+=string("\" xyscale=\"")+XMLSupport::tostring(un->mounts[i]->xyscale)+string("\" zscale=\"")+XMLSupport::tostring(un->mounts[i]->zscale);
+	result+=string("\" xyscale=\"")+XMLSupport::tostring(un->mounts[i].xyscale)+string("\" zscale=\"")+XMLSupport::tostring(un->mounts[i].zscale);
     Matrix m;
-    Transformation(un->mounts[i]->GetMountOrientation(),un->mounts[i]->GetMountLocation().Cast()).to_matrix(m);
+    Transformation(un->mounts[i].GetMountOrientation(),un->mounts[i].GetMountLocation().Cast()).to_matrix(m);
     result+=string ("\" x=\"")+tostring((float)(m.p.i/parse_float(input.str)));
     result+=string ("\" y=\"")+tostring((float)(m.p.j/parse_float(input.str)));
     result+=string ("\" z=\"")+tostring((float)(m.p.k/parse_float(input.str)));
@@ -4318,12 +4360,12 @@ void Unit::Repair() {
     if (GetNumMounts()) {
       if (rand01()<workunit) {
 	int whichmount = rand()%GetNumMounts();
-	mounts[whichmount]->size |=(1>>(rand()%(8*sizeof(short))));
+	mounts[whichmount].size |=(1>>(rand()%(8*sizeof(short))));
       }
       if (rand01()<workunit) {
 	int whichmount= rand()%GetNumMounts();
-	if (mounts[whichmount]->ammo>0) {
-	  mounts[whichmount]->volume++;
+	if (mounts[whichmount].ammo>0) {
+	  mounts[whichmount].volume++;
 	}
       }
     }
@@ -4355,8 +4397,8 @@ void Unit::Repair() {
     if (GetNumMounts()) {    //    RepairWeapon();
       if (rand01()<workunit) {
 	unsigned int i=rand()%GetNumMounts();
-	if (mounts[i]->status==Mount::DESTROYED) {
-	  mounts[i]->status=Mount::INACTIVE;
+	if (mounts[i].status==Mount::DESTROYED) {
+	  mounts[i].status=Mount::INACTIVE;
 	}
       }
     }//nobreak
