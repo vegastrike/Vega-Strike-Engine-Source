@@ -232,7 +232,7 @@ void Mesh::beginElement(const string &name, const AttributeList &attributes) {
 		      xml->material.power=XMLSupport::parse_float((*iter).value);
 		      break;
 		    case XML::REFLECT:
-		      setEnvMap ( XMLSupport::parse_bool((*iter).value));
+		      setEnvMap ( (*iter).value!="false"&&(*iter).value!="0");
 		      break;
 		    case XML::LIGHTINGON:
 		      setLighting (XMLSupport::parse_bool (vs_config->getVariable ("graphics","ForceLighting","true"))||XMLSupport::parse_bool((*iter).value)); 
