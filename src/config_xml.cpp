@@ -147,6 +147,31 @@ void VegaConfig::initKeyMap(){
   key_map["function-11"]=WSK_F11;
   key_map["function-12"]=WSK_F12;
 
+  key_map["keypad-1"]=WSK_KP1;
+  key_map["keypad-2"]=WSK_KP2;
+  key_map["keypad-3"]=WSK_KP3;
+  key_map["keypad-4"]=WSK_KP4;
+  key_map["keypad-5"]=WSK_KP5;
+  key_map["keypad-6"]=WSK_KP6;
+  key_map["keypad-7"]=WSK_KP7;
+  key_map["keypad-8"]=WSK_KP8;
+  key_map["keypad-9"]=WSK_KP9;
+
+  key_map["keypad-period"]=WSK_KP_PERIOD;
+  key_map["keypad-divide"]=WSK_KP_DIVIDE;
+  key_map["keypad-multiply"]=WSK_KP_MULTIPLY;
+  key_map["keypad-minus"]=WSK_KP_MINUS;
+  key_map["keypad-plus"]=WSK_KP_PLUS;
+  key_map["keypad-enter"]=WSK_KP_ENTER;
+  key_map["keypad-equals"]=WSK_KP_EQUALS;
+  key_map["scrollock"]=WSK_SCROLLOCK;
+  key_map["right-ctrl"]=WSK_RCTRL;
+  key_map["left-ctrl"]=WSK_LCTRL;
+  key_map["right-alt"]=WSK_RALT;
+  key_map["left-alt"]=WSK_LALT;
+  key_map["right-meta"]=WSK_RMETA;
+  key_map["left-meta"]=WSK_LMETA;
+
   key_map["cursor-left"]=WSK_LEFT;
   key_map["cursor-up"]=WSK_UP;
   key_map["cursor-right"]=WSK_RIGHT;
