@@ -1653,7 +1653,7 @@ void ReverseToFile(FILE* Inputfile, FILE* Outputfile){
 		  int detailtexturenamelen=VSSwapHostIntToLittle(inmemfile[word32index].i32val);//detailtexture name length
 		  word32index+=1;
 		  int stringindex=0;
-		  int namebound=((detailtexturenamelen+(detailtexturenamelen%4))/4);
+		  int namebound=(detailtexturenamelen+3)/4;
 		  for(stringindex=0;stringindex<namebound;stringindex++){
 			for(int bytenum=0;bytenum<4;bytenum++){ // Extract chars
 				if(inmemfile[word32index].c8val[bytenum]){ //If not padding
@@ -1687,7 +1687,7 @@ void ReverseToFile(FILE* Inputfile, FILE* Outputfile){
 			int texnamelen=VSSwapHostIntToLittle(inmemfile[word32index+2].i32val);//texture name length
 			word32index+=3;
 			string texname="";
-			int namebound=((texnamelen+(texnamelen%4))/4);
+			int namebound=(texnamelen+3)/4;
 			for(stringindex=0;stringindex<namebound;stringindex++){
 			  for(int bytenum=0;bytenum<4;bytenum++){ // Extract chars
 				if(inmemfile[word32index].c8val[bytenum]){ //If not padding
@@ -1761,7 +1761,7 @@ void ReverseToFile(FILE* Inputfile, FILE* Outputfile){
 			int animnamelen=VSSwapHostIntToLittle(inmemfile[word32index].i32val);//length of name
 			word32index+=1;
 			string animname="";
-			int namebound=((animnamelen+(animnamelen%4))/4);
+			int namebound=(animnamelen+3)/4;
 			for(stringindex=0;stringindex<namebound;stringindex++){
 			  for(int bytenum=0;bytenum<4;bytenum++){ // Extract chars
 				if(inmemfile[word32index].c8val[bytenum]){ //If not padding
