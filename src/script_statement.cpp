@@ -57,11 +57,19 @@ void Mission::checkStatement(missionNode *node,int mode){
     else if(node->tag==DTAG_SETVAR){
       doSetVar(node,mode);
     }
+    else if(node->tag==DTAG_DEFVAR){
+      doDefVar(node,mode);
+    }
     else if(node->tag==DTAG_EXEC){
       doExec(node,mode);
     }
     else if(node->tag==DTAG_CALL){
-      doCall(node,mode);
+      varInst *vi=doCall(node,mode);
+      if(vi->type!=VAR_VOID){
+	fatalError(node,mode,"expected void as return from call, got different");
+	assert(0);
+      }
+      delete vi;
     }
     else if(node->tag==DTAG_WHILE){
       doWhile(node,mode);
@@ -72,15 +80,33 @@ void Mission::doIf(missionNode *node,int mode){
   if(mode==SCRIPT_PARSE){
     vector<easyDomNode *>::const_iterator siter;
   
+    int nr_subnodes=node->subnodes.size();
+    if(nr_subnodes!=3){
+      fatalError(node,mode,"an if-statement needs exact three subnodes, not "+nr_subnodes);
+      printf("nr_of_subnodes: %d\n",nr_subnodes);
+     
+      assert(0);
+    }
+
+#if 0
     int i=0;
     for(siter= node->subnodes.begin() ; siter!=node->subnodes.end() && i<3; siter++){
       missionNode *snode=(missionNode *)*siter;
       node->script.if_block[i]=snode;
     }
-    if(i<3){
-      fatalError("an if-statement needs exact three subnodes");
-    }
+#endif
+
+  node->script.if_block[0]=(missionNode *)node->subnodes[0];
+  debug(node->script.if_block[0],mode,"if-node");
+
+  node->script.if_block[1]=(missionNode *)node->subnodes[1];
+  debug(node->script.if_block[1],mode,"if-node");
+
+  node->script.if_block[2]=(missionNode *)node->subnodes[2];
+  debug(node->script.if_block[2],mode,"if-node");
+
   }
+
 
   bool ok=checkBoolExpr(node->script.if_block[0],mode);
 
@@ -110,7 +136,7 @@ void Mission::doWhile(missionNode *node,int mode){
     }
 
     if(i<2){
-      fatalError("a while-expr needs exact two subnodes");
+      fatalError(node,mode,"a while-expr needs exact two subnodes");
       assert(0);
     }
 

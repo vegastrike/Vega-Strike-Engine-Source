@@ -33,7 +33,9 @@ struct GFXColor;
 
 #include "xml_support.h"
 
-#include "mission.h"
+class Flightgroup;
+
+//#include "mission.h"
 class Beam;
 class Animation;
 using namespace XMLSupport;

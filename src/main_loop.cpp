@@ -331,6 +331,7 @@ void createObjects() {
   LoadWeapons("weapon_list.xml");
   Vector TerrainScale (XMLSupport::parse_float (vs_config->getVariable ("terrain","xscale","1")),XMLSupport::parse_float (vs_config->getVariable ("terrain","yscale","1")),XMLSupport::parse_float (vs_config->getVariable ("terrain","zscale","1")));
 
+  myterrain=NULL;
   std::string stdstr= mission->getVariable("terrain","");
   if (stdstr.length()>0) {
     char *happy[9];
@@ -541,8 +542,11 @@ void main_loop() {
 
 
   _Universe->StartDraw();
-  if (myterrain)
+
+  if(myterrain){
     myterrain->AdjustTerrain();
+  }
+
   _Universe->activeStarSystem()->Draw();
   //fighters[0]->UpdateHudMatrix();
   //_Universe->activeStarSystem()->SetViewport();

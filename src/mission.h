@@ -70,7 +70,8 @@ enum tag_type {
   DTAG_SETVAR, DTAG_EXEC, DTAG_CALL, DTAG_WHILE,
   DTAG_AND_EXPR,DTAG_OR_EXPR,DTAG_NOT_EXPR,DTAG_TEST_EXPR,
   DTAG_FMATH,DTAG_VMATH,
-  DTAG_VAR_EXPR, DTAG_DEFVAR
+  DTAG_VAR_EXPR, DTAG_DEFVAR,
+  DTAG_CONST
 };
 
 enum var_type { VAR_BOOL,VAR_FLOAT,VAR_VECTOR,VAR_OBJECT,VAR_STRING,VAR_VOID };
@@ -78,6 +79,8 @@ enum var_type { VAR_BOOL,VAR_FLOAT,VAR_VECTOR,VAR_OBJECT,VAR_STRING,VAR_VOID };
 enum tester_type { TEST_GT,TEST_LT,TEST_EQ,TEST_GE,TEST_LE };
 
 /* *********************************************************** */
+
+class missionNode;
 
 class varInst {
  public:
@@ -88,6 +91,9 @@ class varInst {
   bool   bool_val;
   vector<varInst> vector_val;
   string string_val;
+
+  missionNode *defvar_node;
+  missionNode *block_node;
 };
 
 /* *********************************************************** */
@@ -100,6 +106,7 @@ class varInstMap : public map<string,varInst *> {
 class scriptContext {
  public:
   varInstMap *varinsts;
+  missionNode *block_node;
 };
 
 /* *********************************************************** */
@@ -115,8 +122,8 @@ class missionNode;
 
 class missionThread {
  public:
-  stack<contextStack *> exec_stack;
-  stack<missionNode *> module_stack;
+  vector<contextStack *> exec_stack;
+  vector<missionNode *> module_stack;
 };
 
 /* *********************************************************** */
@@ -125,8 +132,8 @@ class missionNode : public tagDomNode {
  public:
   struct script_t {
     string name; // script,defvar,module
-    vector<missionNode *> variables; // script,module
-    varInst *varinst; // defvar
+    varInstMap variables; // script,module
+    varInst *varinst; // defvar,const
     missionNode *if_block[3]; // if
     missionNode *while_arg[2]; // while
     int tester; // test
@@ -158,7 +165,7 @@ class Mission {
   easyDomNode *variables;
   easyDomNode *origin_node;
 
-  tagDomNode *director;
+  missionNode *director;
 
   tagMap tagmap;
 
@@ -171,7 +178,7 @@ class Mission {
   } runtime;
 
   // used only for parsing
-  stack<missionNode *> scope_stack;
+  vector<missionNode *> scope_stack;
 
   void initTagMap();
   void DirectorStart(missionNode *node);
@@ -191,8 +198,12 @@ class Mission {
 
 
 void  doModule(missionNode *node,int mode);
+
  scriptContext * addContext(missionNode *node);
   void  removeContext();
+  void removeContextStack();
+  void addContextStack(missionNode *node);
+
 void  doScript(missionNode *node,int mode);
 void  doBlock(missionNode *node,int mode);
 bool  doBooleanVar(missionNode *node,int mode);
@@ -210,8 +221,9 @@ bool  doNot(missionNode *node,int mode);
 bool  doTest(missionNode *node,int mode);
  void doDefVar(missionNode *node,int mode);
  void doSetVar(missionNode *node,int mode);
- void doCall(missionNode *node,int mode);
+ varInst * doCall(missionNode *node,int mode);
  void doExec(missionNode *node,int mode);
+ varInst *doConst(missionNode *node,int mode);
 
  varInst *checkExpression(missionNode *node,int mode);
 
@@ -221,18 +233,24 @@ scriptContext *makeContext(missionNode *node);
  bool checkVarType(varInst *var,enum var_type check_type);
 
  float checkFloatExpr(missionNode *node,int mode);
+ float doFloatVar(missionNode *node,int mode);
+ float doFMath(missionNode *node,int mode);
 
- void fatalError(string message);
+ void fatalError(missionNode *node,int mode,string message);
  void runtimeFatal(string message);
  void warning(string message);
+ void debug(missionNode *node,int mode,string message);
 
+void printNode(missionNode *node,int mode);
 
+ void printRuntime();
+ void printThread(missionThread *thread);
+ void printVarmap(const varInstMap & vmap);
 
+ varInst *searchScopestack(string name);
 
-
-
-
-
+ varInst * callRnd(missionNode *node,int mode);
+ varInst * callPrintFloats(missionNode *node,int mode);
 };
 
 #endif // _MISSION_H_

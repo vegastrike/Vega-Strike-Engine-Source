@@ -92,8 +92,23 @@ int main( int argc, char *argv[] )
   fprintf( stderr, "Vega Strike "  " \n"
 	     "See http://www.gnu.org/copyleft/gpl.html for license details.\n\n" );
     /* Seed the random number generator */
-    srand( time(NULL) );
+
+    strcpy(mission_name,"test1.mission");
+
+    ParseCommandLine(argc,argv);
+
+    if(benchmark<0.0){
+      srand( time(NULL) );
+    }
+    else{
+      // in benchmark mode, always use the same seed
+      srand(171070);
+    }
+
     setup_game_data(); 
+
+    mission=new Mission(mission_name);
+
 
     // loads the configuration file .vegastrikerc from home dir if such exists
     initpaths();
@@ -134,11 +149,6 @@ int main( int argc, char *argv[] )
     InitTime();
     UpdateTime();
 #endif
-    strcpy(mission_name,"test1.mission");
-
-    ParseCommandLine(argc,argv);
-
-    mission=new Mission(mission_name);
 
     AUDInit();
 

@@ -1,3 +1,13 @@
+2001-12-01 Alexander Rawass <alexannika@users.sourceforge.net>
+	
+	* same seed when in benchmark mode
+	* worked on the script interpreter:
+	  - added script_callbacks.cpp to Makefile.am
+	* added test missions:
+	  - ships_confed1,ships_ares1
+	  - testd_random1
+
+	
 2001-11-27 Alexander Rawass <alexannika@users.sourceforge.net>
 	
 	* modified main_loop/main to have benchmarking mode

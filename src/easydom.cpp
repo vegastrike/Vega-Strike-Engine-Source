@@ -97,7 +97,9 @@ void easyDomNode::printNode(ostream& out,int recurse_level,int level){
     }
   }
 
-  out << "</" << name << ">" << endl;
+  if(!(recurse_level==0 && level==0)){
+    out << "</" << name << ">" << endl;
+  }
 }
 
 #if 0

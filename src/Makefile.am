@@ -48,6 +48,7 @@ vegastrike_SOURCES =				\
 	mission_script.cpp			\
 	script_statement.cpp			\
 	script_expression.cpp			\
+	script_callbacks.cpp			\
 	easydom.cpp				\
 	easydom.h				\
 	profile.h 				\

@@ -45,9 +45,76 @@
 //#include "vs_globals.h"
 //#include "vegastrike.h"
 
+float Mission::doFMath(missionNode *node,int mode){
+  //  if(mode==SCRIPT_PARSE){
+    string mathname=node->attr_value("math");
+
+    int len=node->subnodes.size();
+    if(len<2){
+      fatalError(node,mode,"fmath needs at least 2 arguments");
+      assert(0);
+    }
+
+    float res=checkFloatExpr((missionNode *)node->subnodes[0],mode);
+
+    for(int i=1;i<len;i++){
+      float res2=checkFloatExpr((missionNode *)node->subnodes[0],mode);
+      if(mode==SCRIPT_RUN){
+	if(mathname=="+"){
+	  res=res+res2;
+	}
+	else if(mathname=="-"){
+	  res=res-res2;
+	}
+	else if(mathname=="*"){
+	  res=res*res2;
+	}
+	else if(mathname=="/"){
+	  res=res/res2;
+	}
+	else{
+	  fatalError(node,mode,"no such fmath expression");
+	  assert(0);
+	}
+      }
+    }
+}
+
 float Mission::checkFloatExpr(missionNode *node,int mode){
-  // dummy
-  return 0.0;
+  float res=0.0;
+
+    if(node->tag==DTAG_VAR_EXPR){
+      res=doFloatVar(node,mode);
+    }
+    else if(node->tag==DTAG_FMATH){
+      res=doFMath(node,mode);
+    }
+    else if(node->tag==DTAG_CONST){
+      varInst *vi=doConst(node,mode);
+      if(vi->type==VAR_FLOAT){
+	res=vi->float_val;
+      }
+      else{
+	fatalError(node,mode,"expected a float const, got a different one");
+	assert(0);
+      }
+    }
+    else if(node->tag==DTAG_CALL){
+      varInst *vi=doCall(node,mode);
+      if(vi->type==VAR_FLOAT){
+	res=vi->float_val;
+      }
+      else{
+	fatalError(node,mode,"expected a float call, got a different one");
+	assert(0);
+      }
+    }
+    else{
+      fatalError(node,mode,"no such float expression tag");
+      assert(0);
+    }
+
+    return res;
 }
 
 bool Mission::checkBoolExpr(missionNode *node,int mode){
@@ -70,8 +137,18 @@ bool Mission::checkBoolExpr(missionNode *node,int mode){
     else if(node->tag==DTAG_VAR_EXPR){
       ok=doBooleanVar(node,mode);
     }
+    else if(node->tag==DTAG_CONST){
+      varInst *vi=doConst(node,mode);
+      if(vi->type==VAR_BOOL){
+	ok=vi->bool_val;
+      }
+      else{
+	fatalError(node,mode,"expected a bool const, got a different one");
+	assert(0);
+      }
+    }
     else{
-      fatalError("no such expression tag");
+      fatalError(node,mode,"no such boolean expression tag");
       assert(0);
     }
 
@@ -127,7 +204,7 @@ bool Mission::doNot(missionNode *node,int mode){
     return !ok;
   }
   else{
-    fatalError("no subnode in not");
+    fatalError(node,mode,"no subnode in not");
     assert(0);
     return false; // we'll never get here
   }
@@ -137,7 +214,7 @@ bool Mission::doTest(missionNode *node,int mode){
   if(mode==SCRIPT_PARSE){
     string teststr=node->attr_value("test");
     if(teststr.empty()){
-      fatalError("you have to give test an argument what to test");
+      fatalError(node,mode,"you have to give test an argument what to test");
       assert(0);
     }
 
@@ -162,21 +239,31 @@ bool Mission::doTest(missionNode *node,int mode){
     }
 #endif
     else {
-      fatalError("unknown test argument for test");
+      fatalError(node,mode,"unknown test argument for test");
       assert(0);
     }
 
     vector<easyDomNode *>::const_iterator siter;
-
+#if 0
     int i=0;
     for(siter= node->subnodes.begin() ; siter!=node->subnodes.end() && i<2; siter++){
       missionNode *snode=(missionNode *)*siter;
       (node->script.test_arg)[i]=snode;
     }
     if(i<2){
-      fatalError("a test-expr needs exact two subnodes");
+      fatalError(node,mode,"a test-expr needs exact two subnodes");
       assert(0);
     }
+#endif
+
+    int len=node->subnodes.size();
+    if(len!=2){
+      fatalError(node,mode,"a test-expr needs exact two subnodes");
+      assert(0);
+    }
+    
+    node->script.test_arg[0]=(missionNode *)node->subnodes[0];
+    node->script.test_arg[1]=(missionNode *)node->subnodes[1];
 
   } // end of parse
 
@@ -202,7 +289,7 @@ bool Mission::doTest(missionNode *node,int mode){
 	res=(arg1<=arg2);
 	break;
       default:
-	fatalError("no valid tester");
+	fatalError(node,mode,"no valid tester");
 	assert(0);
       }
     }

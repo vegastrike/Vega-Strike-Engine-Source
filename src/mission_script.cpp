@@ -48,21 +48,31 @@
 
 void Mission::DirectorStart(missionNode *node){
 
+  cout << "DIRECTOR START" << endl;
+
   missionThread *main_thread=new missionThread;
   runtime.thread_nr=0;
   runtime.threads.push_back(main_thread);
+  runtime.cur_thread=main_thread;
 
   doModule(node,SCRIPT_PARSE);
+
+  while(true){
+    DirectorLoop();
+  }
 }
 
 void Mission::DirectorLoop(){
+  cout << "DIRECTOR LOOP" << endl;
+    doModule(director,SCRIPT_RUN);
 }
 
 
 /* *********************************************************** */
 
-void Mission::fatalError(string message){
-  cout << "fatalError: " << message << endl;
+void Mission::fatalError(missionNode *node,int mode,string message){
+  cout << "fatalError: " << message << " : ";
+  printNode(node,mode);
 }
 
 void Mission::runtimeFatal(string message){
@@ -73,6 +83,17 @@ void Mission::warning(string message){
   cout << "warning: " << message << endl;
 }
 
+void Mission::debug(missionNode *node,int mode,string message){
+
+  cout << "debug: " << message << " : " ;
+  printNode(node,mode);
+  //  cout << endl;
+}
+
+void Mission::printNode(missionNode *node,int mode){
+  node->printNode(cout,0,0);
+}
+
 /* *********************************************************** */
 
 void Mission::doModule(missionNode *node,int mode){
@@ -80,12 +101,12 @@ void Mission::doModule(missionNode *node,int mode){
     string name=node->attr_value("name");
   
     if(name.empty()){
-      fatalError("you have to give a module name");
+      fatalError(node,mode,"you have to give a module name");
       assert(0);
     }
 
     if(runtime.modules[name]!=NULL){
-      fatalError("there can only be one module with name "+name);
+      fatalError(node,mode,"there can only be one module with name "+name);
       assert(0);
     }
 
@@ -97,7 +118,9 @@ void Mission::doModule(missionNode *node,int mode){
 
     runtime.modules[name]=node; // add this module to the list of known modules
 
-    scope_stack.push(node);
+    scope_stack.push_back(node);
+
+    debug(node,mode,"added module "+name+" to list of known modules");
   }
 
   vector<easyDomNode *>::const_iterator siter;
@@ -107,22 +130,51 @@ void Mission::doModule(missionNode *node,int mode){
     if(snode->tag==DTAG_SCRIPT){
       doScript(snode,mode);
     }
+    else if(snode->tag==DTAG_DEFVAR){
+      doDefVar(snode,mode);
+    }
+    else{
+      fatalError(node,mode,"unkown node type");
+    }
+
+  }
+
+  if(mode==SCRIPT_PARSE){
+    scope_stack.pop_back();
   }
 }
 
 /* *********************************************************** */
 
 scriptContext *Mission::makeContext(missionNode *node){
-  return NULL;
+  scriptContext *context=new scriptContext;
+
+  context->varinsts=new varInstMap;
+
+  return context;
 }
 
 /* *********************************************************** */
 
+void Mission::removeContextStack(){
+  runtime.cur_thread->exec_stack.pop_back();
+}
+
+void Mission::addContextStack(missionNode *node){
+  contextStack *cstack=new contextStack;
+
+  runtime.cur_thread->exec_stack.push_back(cstack);
+}
+
 scriptContext *Mission::addContext(missionNode *node)
 {
+  printRuntime();
+
   scriptContext *context=makeContext(node);
-  contextStack *stack=runtime.cur_thread->exec_stack.top();
+  contextStack *stack=runtime.cur_thread->exec_stack.back();
   stack->contexts.push_back(context);
+
+  debug(node,0,"added context for this node");
 
   return context;
 }
@@ -131,13 +183,14 @@ scriptContext *Mission::addContext(missionNode *node)
 
 void Mission::removeContext()
 {
-  contextStack *stack=runtime.cur_thread->exec_stack.top();
+  contextStack *stack=runtime.cur_thread->exec_stack.back();
 
   int lastelem=stack->contexts.size()-1;
 
   scriptContext *old=stack->contexts[lastelem];
   stack->contexts.pop_back();
 
+ 
   delete old;
 }
 
@@ -148,11 +201,15 @@ void Mission::doScript(missionNode *node,int mode){
     node->script.name=node->attr_value("name");
 
     if(node->script.name.empty()){
-      fatalError("you have to give a script name");
+      fatalError(node,mode,"you have to give a script name");
     }
-    scope_stack.push(node);
+    scope_stack.push_back(node);
   }
+
+  debug(node,mode,"executing script name="+node->script.name);
+
   if(mode==SCRIPT_RUN){
+    addContextStack(node);
     addContext(node);
   }
 
@@ -165,9 +222,10 @@ void Mission::doScript(missionNode *node,int mode){
 
   if(mode==SCRIPT_RUN){
     removeContext();
+    removeContextStack();
   }
   else{
-    scope_stack.pop();
+    scope_stack.pop_back();
   }
 }
 
@@ -175,11 +233,11 @@ void Mission::doScript(missionNode *node,int mode){
 
 void Mission::doBlock(missionNode *node,int mode){
   if(mode==SCRIPT_PARSE){
-    scope_stack.push(node);
+    scope_stack.push_back(node);
   }
   if(mode==SCRIPT_RUN){
     addContext(node);
-  }
+ }
 
     vector<easyDomNode *>::const_iterator siter;
   
@@ -190,6 +248,9 @@ void Mission::doBlock(missionNode *node,int mode){
   if(mode==SCRIPT_RUN){
     removeContext();
   }
+    if(mode==SCRIPT_PARSE){
+      scope_stack.pop_back();
+    }
 }
 
 /* *********************************************************** */
@@ -215,11 +276,25 @@ bool Mission::doBooleanVar(missionNode *node,int mode){
 
   return var->bool_val;
 }
+/* *********************************************************** */
+
+float Mission::doFloatVar(missionNode *node,int mode){
+  varInst *var=doVariable(node,mode);
+
+  bool ok=checkVarType(var,VAR_FLOAT);
+
+  if(!ok){
+    runtimeFatal("expected a float variable - got a different type");
+    assert(0);
+  }
+
+  return var->float_val;
+}
 
 /* *********************************************************** */
 
 varInst *Mission::lookupLocalVariable(missionNode *asknode){
-  contextStack *cstack=runtime.cur_thread->exec_stack.top();
+  contextStack *cstack=runtime.cur_thread->exec_stack.back();
   varInst *defnode=NULL;
 
   for(unsigned int i=0;i<cstack->contexts.size() && defnode==NULL;i++){
@@ -261,7 +336,7 @@ varInst *Mission::lookupModuleVariable(string mname,missionNode *asknode){
 
 varInst *Mission::lookupModuleVariable(missionNode *asknode){
   // only when runtime
-  missionNode *module=runtime.cur_thread->module_stack.top();
+  missionNode *module=runtime.cur_thread->module_stack.back();
 
   string mname=module->script.name;
 
@@ -307,30 +382,46 @@ varInst *Mission::doVariable(missionNode *node,int mode){
     // SCRIPT_PARSE
     node->script.name=node->attr_value("name");
     if(node->script.name.empty()){
-      fatalError("you have to give a variable name");
+      fatalError(node,mode,"you have to give a variable name");
       assert(0);
     }
-    return NULL;
+
+    varInst *vi=searchScopestack(node->script.name);
+
+    if(vi==NULL){
+      fatalError(node,mode,"no variable "+node->script.name+" found on the scopestack");
+      assert(0);
+    }
+
+    return vi;
+
+
   }
 }
 
 /* *********************************************************** */
 
 void Mission::doDefVar(missionNode *node,int mode){
-  if(SCRIPT_RUN){
+  if(mode==SCRIPT_RUN){
     return;
   }
 
+
   node->script.name=node->attr_value("name");
     if(node->script.name.empty()){
-      fatalError("you have to give a variable name");
+      fatalError(node,mode,"you have to give a variable name");
     }
+
+    debug(node,mode,"defining variable "+node->script.name);
 
     string type=node->attr_value("type");
     //    node->initval=node->attr_value("init");
 
     if(type=="float"){
       node->script.vartype=VAR_FLOAT;
+    }
+    else if(type=="bool"){
+      node->script.vartype=VAR_BOOL;
     }
     else if(type=="string"){
       node->script.vartype=VAR_STRING;
@@ -342,30 +433,71 @@ void Mission::doDefVar(missionNode *node,int mode){
       node->script.vartype=VAR_OBJECT;
     }
     else{
-      fatalError("unknown variable type");
+      fatalError(node,mode,"unknown variable type");
       assert(0);
     }
 
-    missionNode *scope=scope_stack.top();
+    missionNode *scope=scope_stack.back();
     
-    scope->script.variables.push_back(node);
+  varInst *vi=new varInst;
+  vi->defvar_node=node;
+  vi->block_node=scope;
+  vi->type=node->script.vartype;
+
+  //  if(scope->tag==DTAG_MODULE){
+    // we have to add the variable to module scope
+  scope->script.variables[node->script.name]=vi;
+  node->script.varinst=vi;//FIXME
+    //}
+    //else
+  //    scope->script.variables.push_back(node);
+
+    debug(scope,mode,"defined variable in that scope");
 }
 
 
 void Mission::doSetVar(missionNode *node,int mode){
 
-  if(SCRIPT_PARSE){
+  if(mode==SCRIPT_PARSE){
     node->script.name=node->attr_value("name");
     if(node->script.name.empty()){
-      fatalError("you have to give a variable name");
+      fatalError(node,mode,"you have to give a variable name");
     }
   }
 
-    varInst *var_expr=checkExpression((missionNode *)node->subnodes[0],mode);
+  debug(node,mode,"trying to set variable "+node->script.name);
 
-    if(SCRIPT_RUN){
+  //    varInst *var_expr=checkExpression((missionNode *)node->subnodes[0],mode);
+  missionNode *expr=(missionNode *)node->subnodes[0];
+
+  if(mode==SCRIPT_PARSE){
+    varInst *vi=searchScopestack(node->script.name);
+
+    if(vi==NULL){
+      fatalError(node,mode,"no variable "+node->script.name+" found on the scopestack");
+      assert(0);
+    }
+
+    if(vi->type==VAR_BOOL){
+      bool res=checkBoolExpr(expr,mode);
+    }
+    else if(vi->type==VAR_FLOAT){
+      float res=checkFloatExpr(expr,mode);
+    }
+  }
+
+    if(mode==SCRIPT_RUN){
       varInst *var_inst=doVariable(node,mode); // lookup variable instance
 
+    if(var_inst->type==VAR_BOOL){
+      bool res=checkBoolExpr(expr,mode);
+      var_inst->bool_val=res;
+    }
+    else if(var_inst->type==VAR_FLOAT){
+      float res=checkFloatExpr(expr,mode);
+      var_inst->float_val=res;
+    }
+#if 0
       if(var_expr->type != var_inst->type){
 	runtimeFatal("variable "+node->script.name+" is not of the correct type\n");
 	assert(0);
@@ -374,14 +506,96 @@ void Mission::doSetVar(missionNode *node,int mode){
       assignVariable(var_inst,var_expr);
       
       delete var_expr; // only temporary
+#endif
     }
   
+}
+
+varInst *Mission::doConst(missionNode *node,int mode){
+  if(mode==SCRIPT_PARSE){
+    //string name=node->attr_value("name");
+    string typestr=node->attr_value("type");
+    string valuestr=node->attr_value("value");
+
+    if(typestr.empty() || valuestr.empty()){
+      fatalError(node,mode,"no valid const declaration");
+      assert(0);
+    }
+    
+    debug(node,mode,"parsed const value "+valuestr);
+
+    varInst *vi=new varInst;
+    if(typestr=="float"){
+      node->script.vartype=VAR_FLOAT;
+      vi->float_val=atof(valuestr.c_str());
+    }
+    else if(typestr=="bool"){
+      node->script.vartype=VAR_BOOL;
+      if(valuestr=="true"){
+	vi->bool_val=true;
+      }
+      else if(valuestr=="false"){
+	vi->bool_val=false;
+      }
+      else{
+	fatalError(node,mode,"wrong bool value");
+	assert(0);
+      }
+    }
+    else if(typestr=="string"){
+      node->script.vartype=VAR_STRING;
+    }
+    else if(typestr=="vector"){
+      node->script.vartype=VAR_VECTOR;
+    }
+    else if(typestr=="object"){
+      node->script.vartype=VAR_OBJECT;
+    }
+    else{
+      fatalError(node,mode,"unknown variable type");
+      assert(0);
+    }
+
+    vi->type=node->script.vartype;
+
+    node->script.varinst=vi;
+    
+  }
+
+  return node->script.varinst;
+    
+
 }
 
 void Mission::doExec(missionNode *node,int mode){
 }
 
-void Mission::doCall(missionNode *node,int mode){
+varInst *Mission::doCall(missionNode *node,int mode){
+  if(mode==SCRIPT_PARSE){
+    string name=node->attr_value("name");
+    if(name.empty()){
+      fatalError(node,mode,"you have to give a callback name");
+      assert(0);
+    }
+    node->script.name=name;
+  }
+
+  varInst *vi=NULL;
+
+  if(node->script.name=="PrintFloats"){
+    vi=callPrintFloats(node,mode);
+  }
+  else if(node->script.name=="Rnd"){
+    vi=callRnd(node,mode);
+  }
+
+  if(vi==NULL){
+    fatalError(node,mode,"no such callback routine named "+node->script.name);
+    assert(0);
+  }
+
+  return vi;
+
 }
 
 void Mission::initTagMap(){
@@ -401,6 +615,7 @@ void Mission::initTagMap(){
   tagmap["vmath"]=DTAG_VMATH;
   tagmap["var"]=DTAG_VAR_EXPR;
   tagmap["defvar"]=DTAG_DEFVAR;
+  tagmap["const"]=DTAG_CONST;
 
 }
 
@@ -412,6 +627,8 @@ void Mission::assignVariable(varInst *v1,varInst *v2){
 varInst *Mission::checkExpression(missionNode *node,int mode){
 
   varInst *ret=NULL;
+  debug(node,mode,"checking expression");
+  printRuntime();
 
   switch(node->tag){
   case DTAG_AND_EXPR:
@@ -423,10 +640,97 @@ varInst *Mission::checkExpression(missionNode *node,int mode){
 
   case DTAG_VAR_EXPR:
     ret=doVariable(node,mode);
+    break;
   case DTAG_FMATH:
-    
+    break;
   default:
+    fatalError(node,mode,"no such expression");
+    assert(0);
     break;
   }
   return ret;
+}
+
+void Mission::printVarmap(const varInstMap & vmap){
+  map<string,varInst *>::const_iterator iter;
+
+  for(iter=vmap.begin();iter!=vmap.end();iter++){
+    cout << "variable " << (*iter).first ;
+    varInst *vi=(*iter).second;
+    char buffer[100];
+    if(vi==NULL){
+      sprintf(buffer," NULL");
+    }
+    else{
+      if(vi->type==VAR_BOOL){
+	sprintf(buffer," bool  %d",vi->bool_val);
+      }
+      else if(vi->type==VAR_FLOAT){
+	sprintf(buffer," float %f",vi->float_val);
+      }
+    }
+    cout << buffer << endl;
+  }
+}
+
+void Mission::printRuntime(){
+  
+  cout << "RUNTIME" << endl;
+  cout << "MODULES:" << endl;
+
+  map<string,missionNode *>::iterator iter;
+  //=runtime.modules.begin()
+
+  for(iter=runtime.modules.begin();iter!=runtime.modules.end();iter++){
+    cout << "  module " << (*iter).first ;
+    printNode((*iter).second,0);
+  }
+
+
+  cout << "CURRENT THREAD:" << endl;
+
+  printThread(runtime.cur_thread);
+}
+
+void Mission::printThread(missionThread *thread){
+      vector<contextStack *>::const_iterator siter;
+
+    for(siter= thread->exec_stack.begin() ; siter!=thread->exec_stack.end() ; siter++){
+      contextStack *stack= *siter;
+      
+      vector<scriptContext *>::const_iterator iter2;
+
+      cout << "SCRIPT CONTEXTS" << endl;
+
+      for(iter2=stack->contexts.begin(); iter2!=stack->contexts.end() ; iter2++){
+	scriptContext *context= *iter2;
+
+	cout << "VARMAP " << endl;
+	printVarmap(*(context->varinsts));
+      }
+    }
+}
+
+varInst *Mission::searchScopestack(string name){
+
+  int elem=scope_stack.size()-1;
+  varInst *vi=NULL;
+
+  while(vi==NULL && elem>=0){
+    missionNode *scope=scope_stack[elem];
+
+    vi=scope->script.variables[name];
+
+    if(vi==NULL){
+      debug(scope,0,"variable "+name+" not found in that scope");
+      printVarmap(scope->script.variables);
+    }
+    else{
+      debug(scope,0,"variable "+name+" FOUND in that scope");
+      printVarmap(scope->script.variables);
+    }
+    elem--;
+  };
+  
+  return vi;
 }
