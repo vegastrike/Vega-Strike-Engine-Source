@@ -62,6 +62,7 @@ void Order::ProcessCommunicationMessages(float AICommresponseTime, bool RemoveMe
     bool cleared=false;
 	if (messagequeue.back()->curstate==messagequeue.back()->fsm->GetRequestLandNode()) {
 	  cleared=true;
+          RemoveMessageProcessed=true;
 	  Unit * un=messagequeue.back()->sender.GetUnit();
 	  if (un) {
             CommunicationMessage c(parent,un,NULL,0);
@@ -81,7 +82,7 @@ void Order::ProcessCommunicationMessages(float AICommresponseTime, bool RemoveMe
 	  
 	  FSM::Node *n;
 	  if ((n=messagequeue.back()->getCurrentState())) {
-	    ProcessCommMessage(*messagequeue.back());
+            ProcessCommMessage(*messagequeue.back());
 	  }
 	  if (RemoveMessageProcessed) {
 	    delete messagequeue.back();

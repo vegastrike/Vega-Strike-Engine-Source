@@ -48,6 +48,7 @@ int CommunicatingAI::selectCommunicationMessageMood (CommunicationMessage &c, fl
     relationship= GetEffectiveRelationship(targ);
     mood+=(1-randomresponse)*relationship;
   }
+  //breaks stuff
   if (!(c.curstate<c.fsm->GetUnDockNode())) {
     c.curstate = c.fsm->getDefaultState(relationship);//hijack the current state
   }
@@ -269,6 +270,8 @@ int CommunicatingAI::selectCommunicationMessage (CommunicationMessage &c,Unit * 
 }
 
 void CommunicatingAI::ProcessCommMessage (CommunicationMessage &c) {
+  if (messagequeue.back()->curstate<messagequeue.back()->fsm->GetUnDockNode()) {
+
   Order::ProcessCommMessage(c);
   FSM *tmpfsm = c.fsm;
   Unit * targ = c.sender.GetUnit();
@@ -287,6 +290,7 @@ void CommunicatingAI::ProcessCommMessage (CommunicationMessage &c) {
       }
     }
     c.fsm=tmpfsm;    
+  }
   }
 }
 CommunicatingAI::~CommunicatingAI() {

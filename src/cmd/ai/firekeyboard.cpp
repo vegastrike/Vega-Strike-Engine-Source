@@ -979,26 +979,37 @@ static void DoDockingOps (Unit * parent, Unit * targ,unsigned char playa, unsign
     }
 }
 using std::list;
-
+void FireKeyboard::DoSpeechAndAni(Unit * un, Unit* parent, class CommunicationMessage&c) {
+  this->AdjustRelationTo(un,c.getCurrentState()->messagedelta);
+  DoSpeech (un,parent,*c.getCurrentState());
+  if (parent==_Universe->AccessCockpit()->GetParent()) {
+    _Universe->AccessCockpit()->SetCommAnimation (c.ani);
+  }
+  this->refresh_target=true;
+}
 void FireKeyboard::ProcessCommMessage (class CommunicationMessage&c){
 
   Unit * un = c.sender.GetUnit();
   if (!AUDIsPlaying (c.getCurrentState()->GetSound(c.sex))) {
     AUDStartPlaying(c.getCurrentState()->GetSound(c.sex));
   }
+  bool foundValidMessage=false;
   if (un) {
     for (list<CommunicationMessage>::iterator i=resp.begin();i!=resp.end();i++) {
       if ((*i).sender.GetUnit()==un) {
+#if 0
+        //caused the docking clearence nodes to be duplicated
+        if ((*i).curstate>=(*i).fsm->GetUnDockNode()&&(*i).curstate<(*i).fsm->nodes.size()) {
+          DoSpeechAndAni(un,parent,(*i));
+          foundValidMessage=true;
+        }        
+#endif
 	i = resp.erase (i);
       }
     }
     resp.push_back(c);
-    AdjustRelationTo(un,c.getCurrentState()->messagedelta);
-    DoSpeech (un,parent,*c.getCurrentState());
-    if (parent==_Universe->AccessCockpit()->GetParent()) {
-      _Universe->AccessCockpit()->SetCommAnimation (c.ani);
-    }
-    refresh_target=true;
+    if (!foundValidMessage)
+      DoSpeechAndAni(un,parent,c);
   }else {
     DoSpeech (NULL,NULL,*c.getCurrentState());
     if (parent==_Universe->AccessCockpit()->GetParent()) {

@@ -93,6 +93,7 @@ protected:
   unsigned int whichjoystick;
   struct FIREKEYBOARDTYPE &f();
   struct FIREKEYBOARDTYPE &j();
+  void DoSpeechAndAni(Unit * un, Unit * parent, class CommunicationMessage&c);
 public:
   virtual void ProcessCommMessage (class CommunicationMessage&c);
   FireKeyboard (unsigned int whichjoystick, unsigned int whichplayer);//weapon prefs?
