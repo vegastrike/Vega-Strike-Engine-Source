@@ -3794,7 +3794,7 @@ float Unit::DealDamageToHullReturnArmor (const Vector & pnt, float damage, float
 			if (numCargo()>0) {
 				if (DestroySystem(hull,maxhull,numCargo())) {
 					int which = rand()%numCargo();
-					if (GetCargo(which).category.find("upgrades/")==0&& GetCargo(which).category.find(DamagedCategory)!=0) {
+					if (GetCargo(which).category.find("upgrades/")==0&& GetCargo(which).category.find(DamagedCategory)!=0 &&GetCargo(which).content.find("add_")!=0&&GetCargo(which).content.find("mult_")!=0) {
 						int lenupgrades = strlen("upgrades/");
 						GetCargo(which).category = string(DamagedCategory)+GetCargo(which).category.substr(lenupgrades);
                                                 static bool NotActuallyDowngrade=XMLSupport::parse_bool(vs_config->getVariable("physics","separate_system_flakiness_component","false"));
