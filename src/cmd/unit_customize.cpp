@@ -407,7 +407,7 @@ void Unit::UpgradeInterface (Unit * base) {
     bool purchase=false;
     bool buycommod=false;
     bool sellcommod=false;
-    while (!(upgrade||downgrade||purchase)) {
+    while (!(upgrade||downgrade||purchase||buycommod|sellcommod)) {
       printf ("\nDo you wish to upgrade add or remove a part? Do you wish to trade-in a ship? Do you wish to buy or sell comodities? Type exit to quit.\n");
       fflush(stdout);
       fgets (input_buffer,4095,stdin);
@@ -544,6 +544,8 @@ void Unit::UpgradeInterface (Unit * base) {
 	      printf ("This sale earned you %f credits.",sellprice);	  
 	      _Universe->AccessCockpit()->credits+=sellprice;
 	      Downgrade (NewPart,mountoffset,subunitoffset,percentage);
+	      base->AddCargo (*part);
+	      
 	    }
 	  }
 	} else {
