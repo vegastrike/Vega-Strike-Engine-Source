@@ -363,7 +363,7 @@ namespace VSFileSystem
 		return 0;
 	}
 
-#if HAVE_VFSCANF
+#if 0
 	int		vs_fscanf( FILE * fp, const char * format, ...)
 	{
 		if( !use_volumes)
