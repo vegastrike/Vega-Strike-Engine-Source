@@ -1,0 +1,109 @@
+#!/usr/bin/perl -w
+
+$float = "-?\\d*\\.\\d*"; 
+$scale = 1;
+
+@point_list = ();
+@normal_list = ();
+@texcoord_list = ();
+%encountered_points = (); # hashmap associating textures with their vertices
+%point_output = ();
+%face_output = ();
+
+if(@ARGV < 2) {
+print STDERR "Usage: obj2xml <objfile> <wcpfile>\n";
+exit;
+}
+
+$inputfile = $ARGV[0];
+$texturefile = $ARGV[1];
+$scale = $ARGV[2] if (@ARGV > 2);
+$inputfile =~ /(.*)\.obj/ or die "Bad extension on $inputfile";
+$unitoutfile = ($basename = $1) . ".xml";
+open(INPUT, "<$inputfile") or die "Could not open $inputfile";
+open(TEXTUREINPUT, "<$texturefile") or die "Could not open $texturefile";
+open(UNITOUTPUT, ">$unitoutfile") or die "Could not create $unitoutfile";
+
+binmode(TEXTUREINPUT);
+
+print UNITOUTPUT << 'HEAD' 
+<Unit>
+HEAD
+;
+
+while($line = <INPUT>) {
+	$line =~ s/#.*$//;
+	if($line =~ /v +($float) +($float) +($float)/i) {
+		push @point_list, [$1*$scale, $2*$scale, $3*$scale];
+	} elsif($line =~ /vn +($float) +($float) +($float)/i) {
+		push @normal_list, [$1, $2, $3];
+	} elsif($line =~ /vt +($float) +($float)/i) {
+		push @texcoord_list, [-$2, -$1];
+	} elsif($line =~ m/f/i) {
+		chomp $line;
+		@vertices = split /[ \r\n]/, $line;
+		shift @vertices; # dump out the 'f'
+		@output_vertices = ();
+		@output_texcoords = ();
+
+		# read in texture name
+		read TEXTUREINPUT, $packedinfo, 7*4;
+		$texture = (unpack("V7", $packedinfo))[2];
+		while(@vertices) {
+			($point, $texcoord, $normal) = split m|/|, shift(@vertices);
+			$point--; $texcoord--; $normal--;
+			$point = << "POINT"
+	<Point>
+		<Location x="$point_list[$point][0]" y="$point_list[$point][1]" z="$point_list[$point][2]"/>
+		<Normal i="$normal_list[$normal][0]" j="$normal_list[$normal][1]" k="$normal_list[$normal][2]"/>
+	</Point>
+POINT
+;
+			unless(exists $encountered_points{$texture}) {
+				$encountered_points{$texture} = {};
+				$point_output{$texture} = "<Points>\n";
+				$face_output{$texture} = "<Polygons>\n";
+			}
+			unless(defined $encountered_points{$texture}->{$point}) {
+				$encountered_points{$texture}->{$point} = keys %{$encountered_points{$texture}};
+				$point_output{$texture} .= $point;
+			}
+			push @output_vertices, $encountered_points{$texture}->{$point};
+			push @output_texcoords, $texcoord;
+		}
+
+		if(@output_vertices==3) {
+			$face_output{$texture} .= "<Tri>\n"
+		} elsif (@output_vertices==4) {
+			$face_output{$texture} .= "<Quad>\n"
+		} else {
+			die "Invalid number of vertices in face: $line";
+		}
+		for($v=0;$v<@output_vertices;$v++) {
+			$face_output{$texture} .= "	<Vertex point=\"$output_vertices[$v]\" s=\"$texcoord_list[$output_texcoords[$v]][0]\" t=\"$texcoord_list[$output_texcoords[$v]][1]\"/>\n"
+		}
+		if(@output_vertices==3) {
+			$face_output{$texture} .= "</Tri>\n"
+		} elsif (@output_vertices==4) {
+			$face_output{$texture} .= "</Quad>\n"
+		}
+	}
+}
+
+for(keys %encountered_points) {
+	$texture = $_;
+	$meshfilename = "$basename-$texture.xml";
+	open(MESHOUTPUT, ">$meshfilename");
+	print MESHOUTPUT "<Mesh texture=\"000$texture.bmp\">\n";
+	print MESHOUTPUT $point_output{$texture};
+	print MESHOUTPUT "</Points>\n\n";
+	print MESHOUTPUT $face_output{$texture};
+	print MESHOUTPUT "</Polygons>\n\n";
+	print MESHOUTPUT "</Mesh>\n";
+	print UNITOUTPUT "<Meshfile file=\"$meshfilename\"/>\n";
+}
+print UNITOUTPUT << "FOOT"
+</Unit>
+FOOT
+;
+

@@ -1,6 +1,9 @@
 #!/usr/bin/perl -w
 
-$float = "-?\\d*\\.\\d*"; 
+#obj2xml - 3d explorer variant
+
+#$float = "-?\\d*\\.?\\d*"; 
+$float = '\S+'; 
 $scale = 1;
 
 @point_list = ();
@@ -10,18 +13,16 @@ $scale = 1;
 %point_output = ();
 %face_output = ();
 
-if(@ARGV < 2) {
-print STDERR "Usage: obj2xml <objfile> <wcpfile>\n";
+if(@ARGV < 1) {
+print STDERR "Usage: obj2xml <objfile>\n";
 exit;
 }
 
 $inputfile = $ARGV[0];
-$texturefile = $ARGV[1];
-$scale = $ARGV[2] if (@ARGV > 2);
+$scale = $ARGV[1] if (@ARGV > 1);
 $inputfile =~ /(.*)\.obj/ or die "Bad extension on $inputfile";
 $unitoutfile = ($basename = $1) . ".xml";
 open(INPUT, "<$inputfile") or die "Could not open $inputfile";
-open(TEXTUREINPUT, "<$texturefile") or die "Could not open $texturefile";
 open(UNITOUTPUT, ">$unitoutfile") or die "Could not create $unitoutfile";
 
 binmode(TEXTUREINPUT);
@@ -31,24 +32,48 @@ print UNITOUTPUT << 'HEAD'
 HEAD
 ;
 
+$objname = $basename;
+$texture = $default_texture = "$basename-default";
 while($line = <INPUT>) {
 	$line =~ s/#.*$//;
-	if($line =~ /v +($float) +($float) +($float)/i) {
+	if ($line =~ /mtllib +(\S+)/) {
+		open(MTL, "<$1") or die "could not open materials file $1";
+		while($linea = <MTL>) {
+			if($linea =~ /newmtl +(\S+)/) {
+				$material = $1;
+				$materials{$1} = $default_texture;
+			} elsif ($linea =~ /map_Kd +(\S+)/) {
+				warn "Material not defined" unless defined $material;
+				$filename = $1;
+				if($filename =~ /(.+)\.[^.]+$/) {
+					$filename = $1;
+				}
+				$materials{$material} = $filename;
+			}
+		}
+		# should do more stuff
+	} elsif ($line =~ /g +(\S+)/) {
+		$objname = $1;
+	} elsif($line =~ /v +($float) +($float) +($float)/i) {
 		push @point_list, [$1*$scale, $2*$scale, $3*$scale];
 	} elsif($line =~ /vn +($float) +($float) +($float)/i) {
 		push @normal_list, [$1, $2, $3];
 	} elsif($line =~ /vt +($float) +($float)/i) {
-		push @texcoord_list, [$1, $2];
-	} elsif($line =~ m/f/i) {
+		push @texcoord_list, [-$2, -$1];
+	} elsif($line =~ / *usemtl +(\S+)/) {
+		if(defined $materials{$1}) {
+			$texture = $materials{$1};
+		} else {
+			warn "Material $1 not defined";
+			$texture = $default_texture;
+		}
+	} elsif($line =~ / *f/i) {
 		chomp $line;
-		@vertices = split /[ \r\n]/, $line;
+		@vertices = split /\s/, $line;
 		shift @vertices; # dump out the 'f'
 		@output_vertices = ();
 		@output_texcoords = ();
 
-		# read in texture name
-		read TEXTUREINPUT, $packedinfo, 7*4;
-		$texture = (unpack("V7", $packedinfo))[2];
 		while(@vertices) {
 			($point, $texcoord, $normal) = split m|/|, shift(@vertices);
 			$point--; $texcoord--; $normal--;
@@ -59,48 +84,56 @@ while($line = <INPUT>) {
 	</Point>
 POINT
 ;
-			unless(exists $encountered_points{$texture}) {
-				$encountered_points{$texture} = {};
-				$point_output{$texture} = "<Points>\n";
-				$face_output{$texture} = "<Polygons>\n";
+			unless(exists $encountered_points{$objname}{$texture}) {
+				$encountered_points{$objname}{$texture} = {};
+				$point_output{$objname}{$texture} = "<Points>\n";
+				$face_output{$objname}{$texture} = "<Polygons>\n";
 			}
-			unless(defined $encountered_points{$texture}->{$point}) {
-				$encountered_points{$texture}->{$point} = keys %{$encountered_points{$texture}};
-				$point_output{$texture} .= $point;
+			unless(defined $encountered_points{$objname}{$texture}{$point}) {
+				$encountered_points{$objname}{$texture}{$point} = keys %{$encountered_points{$objname}{$texture}};
+				$point_output{$objname}{$texture} .= $point;
 			}
-			push @output_vertices, $encountered_points{$texture}->{$point};
+			push @output_vertices, $encountered_points{$objname}{$texture}{$point};
 			push @output_texcoords, $texcoord;
 		}
 
 		if(@output_vertices==3) {
-			$face_output{$texture} .= "<Tri>\n"
+			$face_output{$objname}{$texture} .= "<Tri>\n"
 		} elsif (@output_vertices==4) {
-			$face_output{$texture} .= "<Quad>\n"
+			$face_output{$objname}{$texture} .= "<Quad>\n"
 		} else {
+			print "Invalid number of vertices in face: $line";
 			die "Invalid number of vertices in face: $line";
 		}
 		for($v=0;$v<@output_vertices;$v++) {
-			$face_output{$texture} .= "	<Vertex point=\"$output_vertices[$v]\" s=\"$texcoord_list[$output_texcoords[$v]][1]\" t=\"$texcoord_list[$output_texcoords[$v]][0]\"/>\n"
+			$face_output{$objname}{$texture} .= "	<Vertex point=\"$output_vertices[$v]\" s=\"$texcoord_list[$output_texcoords[$v]][0]\" t=\"$texcoord_list[$output_texcoords[$v]][1]\"/>\n"
 		}
 		if(@output_vertices==3) {
-			$face_output{$texture} .= "</Tri>\n"
+			$face_output{$objname}{$texture} .= "</Tri>\n"
 		} elsif (@output_vertices==4) {
-			$face_output{$texture} .= "</Quad>\n"
+			$face_output{$objname}{$texture} .= "</Quad>\n"
 		}
 	}
 }
 
-for(keys %encountered_points) {
-	$texture = $_;
-	$meshfilename = "$basename-$texture.xml";
-	open(MESHOUTPUT, ">$meshfilename");
-	print MESHOUTPUT "<Mesh texture=\"000$texture.bmp\">\n";
-	print MESHOUTPUT $point_output{$texture};
-	print MESHOUTPUT "</Points>\n\n";
-	print MESHOUTPUT $face_output{$texture};
-	print MESHOUTPUT "</Polygons>\n\n";
-	print MESHOUTPUT "</Mesh>\n";
-	print UNITOUTPUT "<Meshfile file=\"$meshfilename\"/>\n";
+for $objname (keys %encountered_points) {
+	print "$objname\n";
+	$subfile = "$objname.xml";
+	open(SUBUNITOUTPUT, ">$subfile");
+	print SUBUNITOUTPUT "<Unit>\n";
+	for $texture (keys %{$encountered_points{$objname}}) {
+		$meshfilename = "$objname-$texture.xml";
+		open(MESHOUTPUT, ">$meshfilename");
+		print MESHOUTPUT "<Mesh texture=\"$texture.bmp\">\n";
+		print MESHOUTPUT $point_output{$objname}{$texture};
+		print MESHOUTPUT "</Points>\n\n";
+		print MESHOUTPUT $face_output{$objname}{$texture};
+		print MESHOUTPUT "</Polygons>\n\n";
+		print MESHOUTPUT "</Mesh>\n";
+		print SUBUNITOUTPUT "<Meshfile file=\"$meshfilename\"/>\n";
+	}
+	print SUBUNITOUTPUT "</Unit>\n";
+	print UNITOUTPUT "<SubUnit file=\"$subfile\"/>\n";
 }
 print UNITOUTPUT << "FOOT"
 </Unit>
