@@ -106,11 +106,11 @@ GFXBOOL /*GFXDRVAPI*/ GFXCreateTexture(int width, int height, TEXTUREFORMAT text
 {
   if (!isPowerOfTwo (width)) {
     fprintf (stderr,"Width %d not a power of two",width);
-    assert (false);
+    //    assert (false);
   }
   if (!isPowerOfTwo (height)) {
     fprintf (stderr,"Height %d not a power of two",height);
-    assert (false);
+    //    assert (false);
     
   }
   GFXActiveTexture(texturestage);
@@ -309,6 +309,18 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferSubTexture (unsigned char * buffer, int handle,
 
 GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture (unsigned char *buffer, int handle,  TEXTUREFORMAT internformat, enum TEXTURE_IMAGE_TARGET imagetarget,int maxdimension)
 {	
+  if (handle<0)
+    return GFXFALSE;
+  if (!isPowerOfTwo (textures[handle].width)|| !isPowerOfTwo (textures[handle].height)) {
+    static unsigned char NONPOWEROFTWO[1024]={255,127,127,255,
+					    255,255,0,255,
+					    255,255,0,255,
+					    255,127,127,255};
+    buffer=NONPOWEROFTWO;
+    textures[handle].width=2;
+    textures[handle].height=2;
+    //    assert (false);
+  }
   if (maxdimension==65536) {
     maxdimension = gl_options.max_texture_dimension;
   }
