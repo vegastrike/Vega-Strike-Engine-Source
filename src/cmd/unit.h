@@ -535,7 +535,7 @@ public:
     float mm= localcoord.Magnitude();
     if (owner==target||this==target||((mm-rSize()-target->rSize())>computer.radar.maxrange&&target->isUnit()!=PLANETPTR)||((localcoord.k/mm)<computer.radar.maxcone&&cone)||target->CloakVisible()<.8||target->rSize()<computer.radar.mintargetsize) {
 		
-		if (target->rSize()<capship_size) 
+		if (target->rSize()<capship_size||this==target) 
 			return false;
     }
     return true;

@@ -298,6 +298,9 @@ void Unit::TargetTurret (Unit * targ) {
   }
 }
 void Unit::Target (Unit *targ) {
+  if (targ==this) {
+    return;
+  }
   if (!(activeStarSystem==NULL||activeStarSystem==_Universe->activeStarSystem())) {
     computer.target.SetUnit(NULL);
     return;
