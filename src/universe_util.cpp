@@ -220,6 +220,23 @@ namespace UniverseUtil {
 	Unit *GetContrabandList (string faction) {
 		return _Universe->GetContraband(_Universe->GetFaction(faction.c_str()));
 	}
+        void SetAutoStatus (int global_auto, int player_auto) {
+	  if (global_auto==1) {
+	    mission->global_autopilot = Mission::AUTO_ON;
+	  }else if (global_auto==-1) {
+	    mission->global_autopilot = Mission::AUTO_OFF;
+	  }else {
+	    mission->global_autopilot = Mission::AUTO_NORMAL;
+	  }
+
+	  if (player_auto==1) {
+	    mission->player_autopilot = Mission::AUTO_ON;	    
+	  }else if (player_auto==-1) {
+	    mission->player_autopilot = Mission::AUTO_OFF;
+	  }else {
+	    mission->player_autopilot = Mission::AUTO_NORMAL;
+	  }
+        }
 }
 
 #undef activeSys

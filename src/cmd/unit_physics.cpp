@@ -31,6 +31,7 @@
 #include "gfx/planetary_transform.h"
 #include "gfx/cockpit.h"
 #include "unit_util.h"
+#include "cmd/script/mission.h"
 float copysign (float x, float y) {
 	if (y>0)
 			return x;
@@ -772,7 +773,30 @@ static float getAutoRSize (Unit * orig,Unit * un, bool ignore_friend=false) {
 	  return ignore_friend?-FLT_MAX:neutral_autodist;
   }
 }
+static signed char  ComputeAutoGuarantee (Unit * un) {
+  Cockpit * cp;
+  int cpnum=-1;
+  if (cp =_Universe->isPlayerStarship (un)) {
+    cpnum = cp-_Universe->AccessCockpit(0);
+  }
+  unsigned int i;
+  for (i=0;i<active_missions.size();i++) {
+    if(active_missions[i]->player_num==cpnum&&active_missions[i]->player_autopilot!=Mission::AUTO_NORMAL) {
+      return active_missions[i]->player_autopilot;
+    }
+  }
+  for (i=0;i<active_missions.size();i++) {
+    if(active_missions[i]->global_autopilot!=Mission::AUTO_NORMAL) {
+      return active_missions[i]->global_autopilot;
+    }
+  }
+  return Mission::AUTO_NORMAL;
+}
 bool Unit::AutoPilotTo (Unit * target, bool ignore_friendlies) {
+  signed char Guaranteed = ComputeAutoGuarantee (this);
+  if (Guaranteed==Mission::AUTO_OFF) {
+    return false;
+  }
   static float autopilot_term_distance = XMLSupport::parse_float (vs_config->getVariable ("physics","auto_pilot_termination_distance","6000"));
 //  static float autopilot_p_term_distance = XMLSupport::parse_float (vs_config->getVariable ("physics","auto_pilot_planet_termination_distance","60000"));
   if (SubUnit) {
@@ -797,21 +821,23 @@ bool Unit::AutoPilotTo (Unit * target, bool ignore_friendlies) {
     }
   }
   bool ok=true;
-  for (un_iter i=ss->getUnitList().createIterator();
-       (un=*i)!=NULL; 
-       ++i) {
-    if (un->isUnit()!=NEBULAPTR) {
-     
-    if (un!=this&&un!=target) {
-      if ((start-un->Position()).Magnitude()-getAutoRSize (this,this,ignore_friendlies)-rSize()-un->rSize()-getAutoRSize(this,un,ignore_friendlies)<=0) {
-	return false;
+  if (Guaranteed==Mission::AUTO_NORMAL) {
+    for (un_iter i=ss->getUnitList().createIterator();
+	 (un=*i)!=NULL; 
+	 ++i) {
+      if (un->isUnit()!=NEBULAPTR) {
+	
+	if (un!=this&&un!=target) {
+	  if ((start-un->Position()).Magnitude()-getAutoRSize (this,this,ignore_friendlies)-rSize()-un->rSize()-getAutoRSize(this,un,ignore_friendlies)<=0) {
+	    return false;
+	  }
+	  float intersection = un->querySphere (start,end,getAutoRSize (this,un,ignore_friendlies));
+	  if (intersection>0) {
+	    end = start+ (end-start)*intersection;
+	    ok=false;
+	  }
+	}
       }
-      float intersection = un->querySphere (start,end,getAutoRSize (this,un,ignore_friendlies));
-      if (intersection>0) {
-	end = start+ (end-start)*intersection;
-	ok=false;
-      }
-    }
     }
   }
   if (this!=target) {

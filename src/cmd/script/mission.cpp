@@ -59,6 +59,7 @@ Mission::~Mission() {
   //do not delete msgcenter...could be vital
 }
 Mission::Mission(const char *configfile, bool loadscripts){
+  player_autopilot=global_autopilot=AUTO_NORMAL;
   briefing=NULL;
   number_of_flightgroups=0;
   number_of_ships=0;

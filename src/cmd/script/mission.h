@@ -416,7 +416,10 @@ class PythonMissionBaseClass;
 
 class Mission {
  public:
+  enum MISSION_AUTO {AUTO_OFF=-1,AUTO_NORMAL=0, AUTO_ON=1};
   unsigned int player_num;
+  MISSION_AUTO player_autopilot;
+  MISSION_AUTO global_autopilot;
   struct Objective {
     float completeness;
 	std::string objective;
