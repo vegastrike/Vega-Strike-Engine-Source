@@ -1,5 +1,6 @@
 #include "cmd_navigation_orders.h"
 #include "vegastrike.h"
+#include <math.h>
 #ifndef _WIN32
 #include <assert.h>
 #endif
@@ -60,7 +61,7 @@ void MoveTo::SetDest (const Vector &target) {
 
 bool MoveTo::OptimizeSpeed (float v, float &a) {
   v += (a/parent->GetMass())*SIMULATION_ATOM;
-  float max_speed = (afterburn?parent->GetComputerData().max_ab_speed:parent->GetComputerData().max_speed);
+  float max_speed = ((afterburnAndSwitchbacks&ABURN)?parent->GetComputerData().max_ab_speed:parent->GetComputerData().max_speed);
   if ((!max_speed)||fabs(v)<=max_speed) {
     return true;
   }
@@ -70,53 +71,50 @@ bool MoveTo::OptimizeSpeed (float v, float &a) {
 }
 
 float MOVETHRESHOLD=SIMULATION_ATOM/1.9;
-bool MoveTo::Done(const Vector & local_heading, const Vector & ang_vel) {
-  if (fabs(local_heading.i) < MOVETHRESHOLD&&//and local heading is close to the front
-      fabs(local_heading.j) < MOVETHRESHOLD&&
-      fabs(local_heading.k) < MOVETHRESHOLD) {
-    terminating = true;
-  }else {
-    if (terminating&& (
-	fabs(local_heading.k) > 2*MOVETHRESHOLD||
-	fabs(local_heading.i) > 2*MOVETHRESHOLD||//and local heading is close to the front
-	fabs(local_heading.j) > 2*MOVETHRESHOLD)) 
-      terminating=false;
-  }
-  if (terminating&&
-      fabs(ang_vel.i) < THRESHOLD&&
+bool MoveTo::Done(const Vector & ang_vel) {
+  if (fabs(ang_vel.i) < THRESHOLD&&
       fabs(ang_vel.j) < THRESHOLD&&
       fabs(ang_vel.k) < THRESHOLD) { //if velocity is lower than threshold
       return true;
   }
-
   return false;
 }
 
 
 AI* MoveTo::Execute(){
-  Vector local_location = targetlocation - parent->Position();
+  Vector local_location (parent->UpCoordinateLevel(parent->GetVelocity()));
+  //local location is ued for storing the last velocity;
+  terminatingX += (copysign(1.0,local_location.i)!=copysign(1.0,last_velocity.i)||(!local_location.i));
+  terminatingY += (copysign(1.0,local_location.j)!=copysign(1.0,last_velocity.j)||(!local_location.j));
+  terminatingZ += (copysign(1.0,local_location.k)!=copysign(1.0,last_velocity.k)||(!local_location.k));
+
+  last_velocity = local_location;
+  local_location = targetlocation - parent->Position();
   Vector heading = parent->ToLocalCoordinates(local_location);
-  Vector velocity = parent->UpCoordinateLevel(parent->GetVelocity());
-  Vector thrust (parent->Limits().lateral, parent->Limits().vertical,afterburn?parent->Limits().afterburn:parent->Limits().forward);
-  if (Done(heading,velocity)) {
-    done = true;
-  }
+  Vector thrust (parent->Limits().lateral, parent->Limits().vertical,(afterburnAndSwitchbacks&ABURN)?parent->Limits().afterburn:parent->Limits().forward);
   if (done) return NULL;
-  if (terminating) {
-    thrust = (-parent->GetMass()/SIMULATION_ATOM)*velocity;
+  unsigned char numswitchbacks = afterburnAndSwitchbacks>>1;
+  if (terminatingX>numswitchbacks&&
+      terminatingY>numswitchbacks&&
+      terminatingZ>numswitchbacks) {
+    if (Done(last_velocity)) {
+      done = true;
+      return NULL;
+    }
+    thrust = (-parent->GetMass()/SIMULATION_ATOM)*last_velocity;
   }else {
     //start with Forward/Reverse:
-    float t = CalculateDecelTime(heading.k, velocity.k, thrust.k, parent->Limits().retro, parent->GetMass());
+    float t = CalculateDecelTime(heading.k, last_velocity.k, thrust.k, parent->Limits().retro, parent->GetMass());
     if (t<THRESHOLD) {
-      thrust.k = (thrust.k>0?-parent->Limits().retro:(afterburn?parent->Limits().afterburn:parent->Limits().forward));
+      thrust.k = (thrust.k>0?-parent->Limits().retro:((afterburnAndSwitchbacks&ABURN)?parent->Limits().afterburn:parent->Limits().forward));
     }else {
       if (t<SIMULATION_ATOM) {
 	thrust.k*=t/SIMULATION_ATOM;
-	thrust.k+= (SIMULATION_ATOM-t)*(thrust.k>0?-parent->Limits().retro:(afterburn?parent->Limits().afterburn:parent->Limits().forward))/SIMULATION_ATOM;
+	thrust.k+= (SIMULATION_ATOM-t)*(thrust.k>0?-parent->Limits().retro:((afterburnAndSwitchbacks&ABURN)?parent->Limits().afterburn:parent->Limits().forward))/SIMULATION_ATOM;
       }
     }
-    OptimizeSpeed (velocity.k,thrust.k);
-    t = CalculateBalancedDecelTime(heading.i, velocity.i, thrust.i,parent->GetMass());
+    OptimizeSpeed (last_velocity.k,thrust.k);
+    t = CalculateBalancedDecelTime(heading.i, last_velocity.i, thrust.i,parent->GetMass());
     if (t<THRESHOLD) {
       thrust.i = -thrust.i;
     }else {
@@ -124,8 +122,8 @@ AI* MoveTo::Execute(){
 	thrust.i *= (t-(SIMULATION_ATOM-t))/SIMULATION_ATOM;
       }
     }
-    OptimizeSpeed (velocity.i,thrust.i);
-    t = CalculateBalancedDecelTime(heading.j, velocity.j, thrust.j,parent->GetMass());
+    OptimizeSpeed (last_velocity.i,thrust.i);
+    t = CalculateBalancedDecelTime(heading.j, last_velocity.j, thrust.j,parent->GetMass());
     if (t<THRESHOLD) {
       thrust.j = -thrust.j;
     }else {
@@ -133,7 +131,7 @@ AI* MoveTo::Execute(){
 	thrust.j *= (t-(SIMULATION_ATOM-t))/SIMULATION_ATOM;
       }
     }
-    OptimizeSpeed (velocity.j,thrust.j);
+    OptimizeSpeed (last_velocity.j,thrust.j);
   }
   parent->ApplyLocalForce (thrust);
   return this;
@@ -170,43 +168,36 @@ void ChangeHeading::SetDest (const Vector &target) {
   done = false;
 }
 float TURNTHRESHOLD=SIMULATION_ATOM/1.9;
-bool ChangeHeading::Done(const Vector & local_heading, const Vector & ang_vel) {
-  if (fabs(local_heading.i) < TURNTHRESHOLD&&//and local heading is close to the front
-      fabs(local_heading.j) < TURNTHRESHOLD&&
-      local_heading.k>0) {
-    terminating = true;
-  }else {
-    if (terminating&&(
-	fabs(local_heading.i) > 2*TURNTHRESHOLD||//and local heading is close to the front
-	fabs(local_heading.j) > 2*TURNTHRESHOLD||
-	local_heading.k<0)) 
-      terminating=false;
-  }
-    if (terminating&&
-	fabs(ang_vel.i) < THRESHOLD&&
+bool ChangeHeading::Done(const Vector & ang_vel) {
+    if (fabs(ang_vel.i) < THRESHOLD&&
 	fabs(ang_vel.j) < THRESHOLD&&
 	fabs(ang_vel.k) < THRESHOLD) { //if velocity is lower than threshold
       return true;
     }
-
   return false;
 }
 AI * ChangeHeading::Execute() {
-  Vector local_heading = parent->ToLocalCoordinates (final_heading);
-  Vector ang_vel = parent->UpCoordinateLevel(parent->GetAngularVelocity());
-  done =  Done (local_heading,ang_vel);
+  Vector local_heading (parent->UpCoordinateLevel(parent->GetAngularVelocity()));
+  terminatingX += (copysign(1.0,local_heading.i)!=copysign(1.0,last_velocity.i)||(!local_heading.i));
+  terminatingY += (copysign(1.0,local_heading.j)!=copysign(1.0,last_velocity.j)||(!local_heading.j));
+  last_velocity = local_heading;
+  local_heading = parent->ToLocalCoordinates (final_heading);
   if (done) return NULL;
   Vector torque (parent->Limits().pitch, parent->Limits().yaw,0);//set torque to max accel in any direction
-  if (terminating) {
-    torque= (-parent->GetMoment()/SIMULATION_ATOM)*ang_vel;
+  if (terminatingX>switchbacks&&terminatingY>switchbacks) {
+    if (Done (last_velocity)) {
+      done = true;
+      return NULL;
+    }
+    torque= (-parent->GetMoment()/SIMULATION_ATOM)*last_velocity;
   } else {
-    TurnToward (atan2(local_heading.j, local_heading.k),ang_vel.i,torque.i);// find angle away from axis 0,0,1 in yz plane
-    OptimizeAngSpeed(parent->GetComputerData().max_pitch,ang_vel.i,torque.i);
+    TurnToward (atan2(local_heading.j, local_heading.k),last_velocity.i,torque.i);// find angle away from axis 0,0,1 in yz plane
+    OptimizeAngSpeed(parent->GetComputerData().max_pitch,last_velocity.i,torque.i);
     
-    TurnToward (atan2 (local_heading.i, local_heading.k), -ang_vel.j, torque.j);
+    TurnToward (atan2 (local_heading.i, local_heading.k), -last_velocity.j, torque.j);
     torque.j=-torque.j;
-    OptimizeAngSpeed(parent->GetComputerData().max_yaw,ang_vel.j,torque.j);
-    torque.k  =-parent->GetMoment()*ang_vel.k/SIMULATION_ATOM;//try to counteract roll;
+    OptimizeAngSpeed(parent->GetComputerData().max_yaw,last_velocity.j,torque.j);
+    torque.k  =-parent->GetMoment()*last_velocity.k/SIMULATION_ATOM;//try to counteract roll;
   }
   parent->ApplyLocalTorque (torque);
   return this;
