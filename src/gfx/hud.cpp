@@ -137,7 +137,7 @@ int TextPlane::Draw(const string & newText, int offset,bool startlower, bool for
   glLoadIdentity();
   if (drawbg) {
 	GFXColorf(this->bgcol);
-	DrawSquare(col,this->myDims.i,row,row+rowheight);
+	DrawSquare(col,this->myDims.i,row-rowheight*.25,row+rowheight);
   }
   GFXColorf(this->col);
 
@@ -213,7 +213,7 @@ int TextPlane::Draw(const string & newText, int offset,bool startlower, bool for
       glLoadIdentity();
 	  if (drawbg) {
 		GFXColorf(this->bgcol);
-		DrawSquare(col,this->myDims.i,row,row+rowheight);
+		DrawSquare(col,this->myDims.i,row-rowheight*.25,row+rowheight);
 		GFXColorf(this->col);
 	  }
       if (*text_it=='\n') {

@@ -410,7 +410,7 @@ const char * compute_time_of_day (Unit * base,Unit *un) {
   return "sunset";
 }
 Base::Base (const char *basefile, Unit *base, Unit*un)
-		: curtext(GFXColor(0,1,0,1),GFXColor(0,0,0,1)) , othtext(GFXColor(0,.5,1,1),GFXColor(0,0,0,1)) {
+		: curtext(GFXColor(0,1,0,1),GFXColor(0,0,0,1)) , othtext(GFXColor(1,1,.5,1),GFXColor(0,0,0,1)) {
 	CurrentBase=this;
 	caller=un;
 	curlinkindex=0;
@@ -418,9 +418,10 @@ Base::Base (const char *basefile, Unit *base, Unit*un)
 	float x,y;
 	curtext.GetCharSize(x,y);
 	curtext.SetCharSize(x*2,y*2);
+	curtext.SetSize(2-(x*4 ),-2);
 	othtext.GetCharSize(x,y);
 	othtext.SetCharSize(x*2,y*2);
-	othtext.SetSize(.75,-.75);
+	othtext.SetSize(2-(x*4),-.75);
 	Load(basefile, compute_time_of_day(base,un));
 	if (!rooms.size()) {
 		fprintf(stderr,"ERROR: there are no rooms in basefile \"%s%s%s\" ...\n",basefile,compute_time_of_day(base,un),BASE_EXTENSION);
@@ -525,13 +526,13 @@ void Base::Draw () {
 	rooms[curroom]->Draw(this);
 	float x,y;
 	curtext.GetCharSize(x,y);
-	curtext.SetPos(-1+(1.5*x),-1+(1.5*y));
+	curtext.SetPos(-1+x,-1+(y*1.5));
 //	if (!drawlinkcursor)
 //		GFXColor4f(0,1,0,1);
 //	else
 //		GFXColor4f(1,.333333,0,1);
 	curtext.Draw();
-	othtext.SetPos(-1+(1.5*x),1);
+	othtext.SetPos(-1+x,1);
 //	GFXColor4f(0,.5,1,1);
 	othtext.Draw();
 	EndGUIFrame (drawlinkcursor);
