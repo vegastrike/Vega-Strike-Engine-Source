@@ -4590,7 +4590,7 @@ int Unit::RepairUpgrade () {
 		}
 		
 	}
-    return ret;
+    return success;
 }
 /***********************************************************************************/
 /**** UNIT_CARGO STUFF                                                            */
