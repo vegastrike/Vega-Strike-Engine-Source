@@ -41,6 +41,9 @@ def writeList(lis,delim=','):
 			s+=l
 		if (i!=len(lis)-1):
 			s+=delim
+		else:
+			if (l==''):
+				s+='""'
 	s+='\n'
 	return s
 def commaSeparatedList(s,delim=','):
