@@ -231,6 +231,11 @@ namespace UnitUtil {
 		ret.quantity=0;
 		return ret;
 	}
+	bool isDockableUnit(Unit *my_unit) {
+		if (!my_unit) return false;
+		std::string unit_fgid = getFlightgroupName(my_unit);
+		return ((((my_unit->isPlanet ())&&(!isSun(my_unit))&&isSignificant(my_unit)&&(!my_unit->isJumppoint()))||unit_fgid=="Base")&&my_unit->DockingPortLocations().size()>0);
+	}
 	float getDistance(Unit *my_unit,Unit *un){
 	  if (my_unit==NULL||un==NULL)
 	    return FLT_MAX;

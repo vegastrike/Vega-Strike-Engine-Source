@@ -236,6 +236,20 @@ string NavigationSystem::SystemIterator::operator * () {
 NavigationSystem::SystemIterator & NavigationSystem::SystemIterator::next () {
 	return ++(*this);
 }
+
+bool checkedVisited(const std::string &n) {
+	static bool dontbothervisiting = !XMLSupport::parse_bool (vs_config->getVariable ("graphics","explore_for_map","false"));
+	if (dontbothervisiting) {
+		return true;
+	} else {
+		string key (string("visited_")+n);
+		vector <float> * v = &_Universe->AccessCockpit()->savegame->getMissionData(key);
+		if (v->size()>0) {
+			return true;
+		}
+		return false;
+	}
+}
 NavigationSystem::SystemIterator & NavigationSystem::SystemIterator::operator ++ () {
 	which +=1;
 	if (which>=vstack.size()) {
@@ -245,12 +259,9 @@ NavigationSystem::SystemIterator & NavigationSystem::SystemIterator::operator ++
 			for (int j=0;j<nas;++j) {
 				string n = UniverseUtil::GetAdjacentSystem(vstack[i],j);
 				if (!testandset(visited[n],true)) {
-					string key (string("visited_")+n);
-					static bool dontbothervisiting = !XMLSupport::parse_bool (vs_config->getVariable ("graphics","explore_for_map","false"));
-					vector <float> * v = &_Universe->AccessCockpit()->savegame->getMissionData(key);
-					if (dontbothervisiting||v->size()>0) {
+//					if (checkedVisited(n)) {
 						newsys.push_back(n);
-					}
+//					}
 				}
 				
 			}
@@ -358,6 +369,10 @@ const string &NavigationSystem::CachedSystemIterator::SystemInfo::GetName () con
 	return name;
 }
 
+bool NavigationSystem::CachedSystemIterator::SystemInfo::isDrawable () const{
+	return checkedVisited(GetName());
+}
+
 QVector &NavigationSystem::CachedSystemIterator::SystemInfo::Position () {
 	return position;
 }
@@ -387,7 +402,7 @@ NavigationSystem::CachedSystemIterator& NavigationSystem::CachedSystemIterator::
 }
 NavigationSystem::CachedSystemIterator NavigationSystem::CachedSystemIterator::operator ++ (int) {
 	NavigationSystem::CachedSystemIterator iter(*this);
-	++currentPosition;
+	++(*this);
 	return iter;
 }
 
@@ -626,28 +641,30 @@ void NavigationSystem::DrawGalaxy()
 		
 		//IGNORE OFF SCREEN
 		//**********************************
-		if((col.a<.05)||(!TestIfInRange(screenskipby4[0], screenskipby4[1], screenskipby4[2], screenskipby4[3], the_x, the_y)))
+		if((col.a<.05)||(!systemIter->isDrawable())||(!TestIfInRange(screenskipby4[0], screenskipby4[1], screenskipby4[2], screenskipby4[3], the_x, the_y)))
 		{
 			unsigned destsize=systemIter->GetDestinationSize();
 			if (destsize!=0) {
 				GFXBegin(GFXLINE);
 				for (unsigned i=0;i<destsize;++i) {
 					CachedSystemIterator::SystemInfo &oth=systemIter[systemIter->GetDestinationIndex(i)];
-					QVector posoth=oth.Position();
-					ReplaceAxes(posoth);
-					Vector oldposoth=posoth;
-					float the_new_x, the_new_y, new_system_item_scale_temp, the_new_x_flat, the_new_y_flat, the_clipped_x=the_x,the_clipped_y=the_y;
-					// WARNING: SOME VARIABLES FOR ORIGINAL SYSTEM MAY BE MODIFIED HERE!!!
-					TranslateCoordinates(posoth, pos_flat, center_nav_x, center_nav_y, themaxvalue, zscale, zdistance, the_new_x, the_new_y,the_new_x_flat,the_new_y_flat, new_system_item_scale_temp, 0);
-					GFXColor othcol = oth.GetColor();
-					othcol.a=(new_system_item_scale_temp-minimumitemscaledown)/(maximumitemscaleup-minimumitemscaledown)+alphaadd;
-					//GetAlpha(oldposoth,center_x,center_y,center_z,zdistance);
-					if (TestIfInRange(screenskipby4[0], screenskipby4[1], screenskipby4[2], screenskipby4[3], the_new_x, the_new_y)) {
-						IntersectBorder(the_clipped_x,the_clipped_y,the_new_x,the_new_y);
-						GFXColorf (col);
-						GFXVertex3f(the_clipped_x,the_clipped_y,0);
-						GFXColorf (othcol);
-						GFXVertex3f(the_new_x,the_new_y,0);
+					if (oth.isDrawable()) {
+						QVector posoth=oth.Position();
+						ReplaceAxes(posoth);
+						Vector oldposoth=posoth;
+						float the_new_x, the_new_y, new_system_item_scale_temp, the_new_x_flat, the_new_y_flat, the_clipped_x=the_x,the_clipped_y=the_y;
+						// WARNING: SOME VARIABLES FOR ORIGINAL SYSTEM MAY BE MODIFIED HERE!!!
+						TranslateCoordinates(posoth, pos_flat, center_nav_x, center_nav_y, themaxvalue, zscale, zdistance, the_new_x, the_new_y,the_new_x_flat,the_new_y_flat, new_system_item_scale_temp, 0);
+						GFXColor othcol = oth.GetColor();
+						othcol.a=(new_system_item_scale_temp-minimumitemscaledown)/(maximumitemscaleup-minimumitemscaledown)+alphaadd;
+						//GetAlpha(oldposoth,center_x,center_y,center_z,zdistance);
+						if (TestIfInRange(screenskipby4[0], screenskipby4[1], screenskipby4[2], screenskipby4[3], the_new_x, the_new_y)) {
+							IntersectBorder(the_clipped_x,the_clipped_y,the_new_x,the_new_y);
+							GFXColorf (col);
+							GFXVertex3f(the_clipped_x,the_clipped_y,0);
+							GFXColorf (othcol);
+							GFXVertex3f(the_new_x,the_new_y,0);
+						}
 					}
 				}
 				GFXEnd();
@@ -701,20 +718,22 @@ void NavigationSystem::DrawGalaxy()
 			GFXBegin(GFXLINE);
 			for (unsigned i=0;i<destsize;++i) {
 				CachedSystemIterator::SystemInfo &oth=systemIter[systemIter->GetDestinationIndex(i)];
-				QVector posoth=oth.Position();
-				ReplaceAxes(posoth);
-				Vector oldposoth=posoth;
-				float the_new_x, the_new_y, new_system_item_scale_temp, the_new_x_flat, the_new_y_flat;
-				// WARNING: SOME VARIABLES FOR ORIGINAL SYSTEM MAY BE MODIFIED HERE!!!
-				TranslateCoordinates(posoth, pos_flat, center_nav_x, center_nav_y, themaxvalue, zscale, zdistance, the_new_x, the_new_y,the_new_x_flat,the_new_y_flat, new_system_item_scale_temp, 0);
-				GFXColor othcol = oth.GetColor();
-				othcol.a=(new_system_item_scale_temp-minimumitemscaledown)/(maximumitemscaleup-minimumitemscaledown)+alphaadd;
-				//GetAlpha(oldposoth,center_x,center_y,center_z,zdistance);
-				IntersectBorder(the_new_x,the_new_y,the_x,the_y);
-				GFXColorf (col);
-				GFXVertex3f(the_x,the_y,0);
-				GFXColorf (othcol);
-				GFXVertex3f(the_new_x,the_new_y,0);
+				if (oth.isDrawable()) {
+					QVector posoth=oth.Position();
+					ReplaceAxes(posoth);
+					Vector oldposoth=posoth;
+					float the_new_x, the_new_y, new_system_item_scale_temp, the_new_x_flat, the_new_y_flat;
+					// WARNING: SOME VARIABLES FOR ORIGINAL SYSTEM MAY BE MODIFIED HERE!!!
+					TranslateCoordinates(posoth, pos_flat, center_nav_x, center_nav_y, themaxvalue, zscale, zdistance, the_new_x, the_new_y,the_new_x_flat,the_new_y_flat, new_system_item_scale_temp, 0);
+					GFXColor othcol = oth.GetColor();
+					othcol.a=(new_system_item_scale_temp-minimumitemscaledown)/(maximumitemscaleup-minimumitemscaledown)+alphaadd;
+					//GetAlpha(oldposoth,center_x,center_y,center_z,zdistance);
+					IntersectBorder(the_new_x,the_new_y,the_x,the_y);
+					GFXColorf (col);
+					GFXVertex3f(the_x,the_y,0);
+					GFXColorf (othcol);
+					GFXVertex3f(the_new_x,the_new_y,0);
+				}
 			}
 			GFXEnd();
 		}

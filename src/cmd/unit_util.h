@@ -35,6 +35,7 @@ namespace UnitUtil {
 	float getCredits(Unit *my_unit);
 	void addCredits(Unit *my_unit,float credits);
 	bool isSignificant(Unit *my_unit);
+	bool isDockableUnit(Unit *my_unit);
 	bool isSun(Unit *my_unit);
 	void switchFg(Unit *my_unit,string arg);
 	int communicateTo(Unit *my_unit,Unit *other_unit,float mood);

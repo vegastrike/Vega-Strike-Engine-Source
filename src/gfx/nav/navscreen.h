@@ -47,6 +47,7 @@ public:
 			const float * col;
 			string &GetName();
 			const string &GetName() const;
+			bool isDrawable() const;
 			QVector &Position ();
 			const QVector &Position () const;
 			unsigned GetDestinationIndex (unsigned index) const;

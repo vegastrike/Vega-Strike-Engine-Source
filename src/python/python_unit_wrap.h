@@ -147,6 +147,7 @@
 	EXPORT_UTIL0(float,getCredits)
 	voidEXPORT_UTIL1(addCredits,float,credits)
 	EXPORT_UTIL0(bool,isSignificant)
+	EXPORT_UTIL0(bool,isDockableUnit)
 	EXPORT_UTIL0(bool,isSun)
 	voidEXPORT_UTIL1(switchFg,string,arg)
 	EXPORT_UTIL2(int,communicateTo,UnitWrapper,other_unit,float,mood)
