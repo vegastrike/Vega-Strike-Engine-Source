@@ -980,9 +980,9 @@ void Unit::Draw(const Transformation &parent, const Matrix &parentMatrix)
   }
 }
 using Orders::FireAt;
-PYTHON_INIT_GLOBALS(AI,FireAt);
+PYTHON_INIT_INHERIT_GLOBALS(AI,FireAt);
 PYTHON_BEGIN_MODULE(AI)
-PYTHON_BEGIN_CLASS(AI,FireAt,"PythonAI")
+PYTHON_BEGIN_INHERIT_CLASS(AI,FireAt,"PythonAI")
 PYTHON_END_CLASS(AI,FireAt)
 PYTHON_END_MODULE(AI)
  
@@ -1014,6 +1014,11 @@ void Unit::LoadAIScript(const std::string & s) {
     }
   }
 }
+void Unit::eraseOrderType (unsigned int type) {
+	if (aistate) {
+		aistate->eraseType(type);
+	}
+}
 bool Unit::LoadLastPythonAIScript() {
   Order * pyai = PythonClass <Orders::FireAt>::LastPythonClass();
   if (pyai) {
@@ -1024,6 +1029,17 @@ bool Unit::LoadLastPythonAIScript() {
   }
   return true;
 }
+bool Unit::EnqueueLastPythonAIScript() {
+  Order * pyai = PythonClass <Orders::FireAt>::LastPythonClass();
+  if (pyai) {
+    EnqueueAI (pyai);
+  }else if (!aistate) {
+    return false;
+  }
+  return true;
+}
+
+
 void Unit::PrimeOrders (Order * newAI) {
   if (newAI) {
     if (aistate) {

@@ -591,10 +591,10 @@ public:
   ///won't collide with owner
   void SetOwner(Unit *target);
   bool InCorrectStarSystem (StarSystem *active) {return active==activeStarSystem;}
-  Unit *Target() {return computer.target.GetUnit(); }
+  Unit *GetTarget() {return computer.target.GetUnit(); }
   Unit *VelocityReference() {return computer.velocity_ref.GetUnit(); }
   Unit *Threat() {return computer.threat.GetUnit(); }
-  void Target (Unit * targ);
+  void SetTarget (Unit * targ);
   void VelocityReference (Unit *targ);
   void TargetTurret (Unit * targ);
   ///Threatens this unit with "targ" as aggressor. Danger should be cos angle to target
@@ -680,6 +680,7 @@ public:
   ///num subunits
   void LoadAIScript (const std::string &aiscript);
   bool LoadLastPythonAIScript ();
+  bool EnqueueLastPythonAIScript ();
   un_iter getSubUnits();
   un_kiter viewSubUnits() const;
   bool InsideCollideTree (Unit * smaller, QVector & bigpos, Vector & bigNormal, QVector & smallpos, Vector & smallNormal);
@@ -784,7 +785,8 @@ public:
   class Cockpit * GetVelocityDifficultyMult(float &) const;
   void SetVelocity (const Vector & v) {Velocity = v;}
   void SetAngularVelocity (const Vector & v) {AngularVelocity = v;}
-  
+   ///Erases all orders that bitwise OR with that type
+  void eraseOrderType (unsigned int type);
   float GetMoment() const { return MomentOfInertia; }
   float GetMass() const { return mass; }
   ///returns the ammt of elasticity of collisions with this unit

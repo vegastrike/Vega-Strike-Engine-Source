@@ -192,7 +192,7 @@ varInst *Mission::call_unit(missionNode *node,int mode){
     string destinations;
     string logo_tex;
     string logo_alp;
-    if (method_id==CMT_UNIT_launchJumppoint) {
+    if (method_id==CMT_UNIT_launchJumppoint) {//<>
       missionNode *destination_node=getArgument(node,mode,6);
       destination_vi=checkObjectExpr(faction_node,mode);
       if (mode==SCRIPT_RUN) {
@@ -215,7 +215,7 @@ varInst *Mission::call_unit(missionNode *node,int mode){
       clsptr clstyp=UNITPTR;
       if (method_id==CMT_UNIT_launchJumppoint||method_id==CMT_UNIT_launchPlanet) {
 	clstyp=PLANETPTR;
-      }else if (method_id==CMT_UNIT_launchNebula){
+      }else if (method_id==CMT_UNIT_launchNebula){//<>
 	clstyp=NEBULAPTR;
       }
       string name_string=*((string *)name_vi->object);
@@ -272,7 +272,7 @@ varInst *Mission::call_unit(missionNode *node,int mode){
 
     return viret;
   }   
-  else if(method_id==CMT_UNIT_getRandCargo){
+  else if(method_id==CMT_UNIT_getRandCargo){//<>
     int quantity=getIntArg(node,mode,0);
     string category;
     if (node->subnodes.size()>1) {
@@ -391,7 +391,7 @@ varInst *Mission::call_unit(missionNode *node,int mode){
 	call_vector_into_olist(viret,pos);
       }
     }
-    else if(method_id==CMT_UNIT_getFaction){
+    else if(method_id==CMT_UNIT_getFaction){//<>
       if(mode==SCRIPT_RUN){
 	//changed 042202
 	//    varInst *ovi=getObjectArg(node,mode);
@@ -461,7 +461,7 @@ varInst *Mission::call_unit(missionNode *node,int mode){
       viret->objectname="unit";
       viret->object=res_unit;
     }
-    else if(method_id==CMT_UNIT_getName){
+    else if(method_id==CMT_UNIT_getName){//<>
       if(mode==SCRIPT_RUN){
 	string unit_name;
 	unit_name=my_unit->name;
@@ -493,7 +493,7 @@ varInst *Mission::call_unit(missionNode *node,int mode){
       viret->objectname="unit";
       viret->object=res_unit;
     }
-    else if(method_id==CMT_UNIT_setTarget){
+    else if(method_id==CMT_UNIT_setTarget){//<>
       Unit *other_unit=getUnitArg(node,mode,1);
       if(mode==SCRIPT_RUN){
 	my_unit->Target(other_unit);
@@ -501,7 +501,7 @@ varInst *Mission::call_unit(missionNode *node,int mode){
       viret=newVarInst(VI_TEMP);
       viret->type=VAR_VOID;
     }
-    else if(method_id==CMT_UNIT_equal){
+    else if(method_id==CMT_UNIT_equal){//<>
       Unit *other_unit=getUnitArg(node,mode,1);
       viret=newVarInst(VI_TEMP);
       viret->type=VAR_BOOL;
@@ -650,7 +650,7 @@ varInst *Mission::call_unit(missionNode *node,int mode){
       viret->type=VAR_BOOL;
       viret->bool_val=res;
     }
-    else if(method_id==CMT_UNIT_isSignificant){
+    else if(method_id==CMT_UNIT_isSignificant){//<>
       bool res=false;
       if(mode==SCRIPT_RUN){
 	clsptr typ = my_unit->isUnit();
@@ -694,7 +694,7 @@ varInst *Mission::call_unit(missionNode *node,int mode){
       viret->type=VAR_FLOAT;
       viret->float_val=res;
     }
-    else if (method_id==CMT_UNIT_getCredits) {
+    else if (method_id==CMT_UNIT_getCredits) {//<>
      viret=newVarInst(VI_TEMP);
      viret->type=VAR_FLOAT;
      viret->float_val=0;
@@ -707,7 +707,7 @@ varInst *Mission::call_unit(missionNode *node,int mode){
      return viret;
 
    }
-  else if (method_id==CMT_UNIT_addCredits) {
+  else if (method_id==CMT_UNIT_addCredits) {//<>
      missionNode *nr_node=getArgument(node,mode,1);
      float credits=doFloatVar(nr_node,mode);
      if (mode==SCRIPT_RUN) {
@@ -771,7 +771,7 @@ varInst *Mission::call_unit(missionNode *node,int mode){
       viret=newVarInst(VI_TEMP);
       viret->type=VAR_VOID;
     }
-    else if(method_id==CMT_UNIT_getFgName){
+    else if(method_id==CMT_UNIT_getFgName){//<>
       if(mode==SCRIPT_RUN){
 	string fgname;
 	Flightgroup *fg=my_unit->getFlightgroup();
@@ -791,7 +791,7 @@ varInst *Mission::call_unit(missionNode *node,int mode){
 	viret->objectname="string";
       }
     }
-    else if(method_id==CMT_UNIT_getFgLeader){
+    else if(method_id==CMT_UNIT_getFgLeader){//<>
       Unit * ret_unit=NULL;
       if(mode==SCRIPT_RUN){
 	ret_unit = (my_unit->getFlightgroup()!=NULL)?my_unit->getFlightgroup()->leader.GetUnit():my_unit;
@@ -804,7 +804,7 @@ varInst *Mission::call_unit(missionNode *node,int mode){
       viret->objectname="unit";
       viret->object=(void *)ret_unit;
     }
-    else if(method_id==CMT_UNIT_setFgLeader){
+    else if(method_id==CMT_UNIT_setFgLeader){//<>
       Unit * un=getUnitArg (node,mode,1);
       if(mode==SCRIPT_RUN){
 	if (my_unit->getFlightgroup()!=NULL) {
@@ -814,7 +814,7 @@ varInst *Mission::call_unit(missionNode *node,int mode){
       viret=newVarInst(VI_TEMP);
       viret->type=VAR_VOID;
     }
-    else if(method_id==CMT_UNIT_getFgDirective){
+    else if(method_id==CMT_UNIT_getFgDirective){//<>
       string fgdir ("b");
 
       if(mode==SCRIPT_RUN){
@@ -822,7 +822,7 @@ varInst *Mission::call_unit(missionNode *node,int mode){
       }
       viret=call_string_new(node,mode,fgdir);
     }
-    else if(method_id==CMT_UNIT_setFgDirective){
+    else if(method_id==CMT_UNIT_setFgDirective){//<>
       string inp = getStringArgument (node,mode,1);
       if(mode==SCRIPT_RUN){
 	if (my_unit->getFlightgroup()!=NULL) {
@@ -832,7 +832,7 @@ varInst *Mission::call_unit(missionNode *node,int mode){
       viret=newVarInst(VI_TEMP);
       viret->type=VAR_VOID;
     }
-    else if(method_id==CMT_UNIT_getFgSubnumber){
+    else if(method_id==CMT_UNIT_getFgSubnumber){//<>
       int num=0;
       if(mode==SCRIPT_RUN){
 	num=my_unit->getFgSubnumber();
@@ -957,7 +957,7 @@ varInst *Mission::call_unit(missionNode *node,int mode){
 	//return vi;
       }
     }
-    else if(method_id==CMT_UNIT_removeCargo){
+    else if(method_id==CMT_UNIT_removeCargo){//<>
       
       string s = getStringArgument (node,mode,1);
 
@@ -976,7 +976,7 @@ varInst *Mission::call_unit(missionNode *node,int mode){
       viret->type=VAR_INT;
       viret->int_val = quantity;
     }
-    else if(method_id==CMT_UNIT_addCargo){
+    else if(method_id==CMT_UNIT_addCargo){//<>
       Cargo carg;
       carg.content = getStringArgument (node,mode,1);
       carg.category = getStringArgument (node,mode,2);
@@ -1010,7 +1010,7 @@ varInst *Mission::call_unit(missionNode *node,int mode){
       viret=newVarInst(VI_TEMP);
       viret->type=VAR_VOID;
     }
-    else if (method_id==CMT_UNIT_upgrade) {
+    else if (method_id==CMT_UNIT_upgrade) {//<>
       string file = getStringArgument (node,mode,1);
       double percentage=0;
       bool force=true;
@@ -1036,7 +1036,7 @@ varInst *Mission::call_unit(missionNode *node,int mode){
       viret->float_val=percentage;
       
     }
-    else if(method_id==CMT_UNIT_incrementCargo){
+    else if(method_id==CMT_UNIT_incrementCargo){//<>
       float percentagechange= getFloatArg(node,mode,1);
       int quantity= getIntArg(node,mode,2);
       if(mode==SCRIPT_RUN){
@@ -1054,7 +1054,7 @@ varInst *Mission::call_unit(missionNode *node,int mode){
       viret=newVarInst(VI_TEMP);
       viret->type=VAR_VOID;
     }
-    else if(method_id==CMT_UNIT_decrementCargo){
+    else if(method_id==CMT_UNIT_decrementCargo){//<>
       float percentagechange;
       percentagechange= getFloatArg(node,mode,1);
       if(mode==SCRIPT_RUN){
@@ -1069,7 +1069,7 @@ varInst *Mission::call_unit(missionNode *node,int mode){
       viret=newVarInst(VI_TEMP);
       viret->type=VAR_VOID;
     }
-    else if(method_id==CMT_UNIT_getSaveData){
+    else if(method_id==CMT_UNIT_getSaveData){//<>
       std::string magic_num;
       void * my_obj=NULL;
       magic_num= getStringArgument(node,mode,1);
@@ -1092,7 +1092,7 @@ varInst *Mission::call_unit(missionNode *node,int mode){
       viret->type=VAR_VOID;
       //return viret;
     }
-    else if(method_id==CMT_UNIT_switchFg){
+    else if(method_id==CMT_UNIT_switchFg){//<>
       string arg = getStringArgument(node,mode,1);
       if(mode==SCRIPT_RUN){
 	string type= my_unit->name;
@@ -1121,7 +1121,7 @@ varInst *Mission::call_unit(missionNode *node,int mode){
       viret = newVarInst (VI_TEMP);
       viret->type=VAR_VOID;
     }
-    else if(method_id==CMT_UNIT_communicateTo){
+    else if(method_id==CMT_UNIT_communicateTo){//<>
       Unit *other_unit=getUnitArg(node,mode,1);
       float mood =getFloatArg(node,mode,2);
       unsigned char sex=0;
@@ -1142,7 +1142,7 @@ varInst *Mission::call_unit(missionNode *node,int mode){
       viret->int_val = sex;
     }
 
-    else if(method_id==CMT_UNIT_commAnimation){
+    else if(method_id==CMT_UNIT_commAnimation){//<>
       string anim =getStringArgument (node,mode,1);
       if(mode==SCRIPT_RUN){
 	Cockpit * tmp;

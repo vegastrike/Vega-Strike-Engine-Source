@@ -4,13 +4,13 @@
 class Unit;
 
 class UnitContainer {
- private:
+ protected:
   Unit * unit;
  public:
   UnitContainer ();
   UnitContainer (Unit *);
   UnitContainer (const UnitContainer &un) {
-    unit =NULL;
+    unit =0;
     SetUnit (un.unit);
   }
   const UnitContainer & operator = (const UnitContainer &a) {
