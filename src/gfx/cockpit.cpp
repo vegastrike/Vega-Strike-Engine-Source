@@ -729,7 +729,7 @@ static void SwitchUnitsTurret (Unit *ol, Unit *nw) {
 extern void reset_time_compression(int i, KBSTATE a);
 void Cockpit::Shake (float amt) {
   static float shak= XMLSupport::parse_float(vs_config->getVariable("graphics","cockpit_shake",".05"));
-  shakin=shak;
+  shakin+=shak;
 }
 
 static void DrawCrosshairs (float x, float y, float wid, float hei, const GFXColor &col) {
