@@ -75,9 +75,9 @@ struct GFXStats{
 #endif
 #if defined(__APPLE__) || defined(MACOSX)
     #include <GLUT/glut.h>
-#if defined( GL_INIT_CPP) || defined( GL_MISC_CPP) || defined( GL_STATE_CPP)
+//#if defined( GL_INIT_CPP) || defined( GL_MISC_CPP) || defined( GL_STATE_CPP)
 #define GL_GLEXT_PROTOTYPES
-#endif
+//#endif
     #include <OpenGL/glext.h>
 #else
 #define __glext_h_
