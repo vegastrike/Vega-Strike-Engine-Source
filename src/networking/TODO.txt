@@ -31,7 +31,8 @@ TO LOOK AT - When receiving a packet : look at timestamp and compare it to lates
 
 *** CLIENT SIDE *********************************************************
 
-- Make webcam capture size part of config file (and later part of server config, not client anymore)
+- Add the detection ov Video For Linux or Quicktime in configure.in -> if no present disable webcam (add a NETCOMM_NOCAM const)
+MAYBE NOT - Make webcam capture size part of config file (and later part of server config, not client anymore)
 - Check if we received position info about us -> ignore
 - Find the jump call and make it only send a jump request to server
 - Should wait for CMD_ADDEDYOU just before entering in the main game loop

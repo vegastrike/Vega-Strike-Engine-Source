@@ -11,7 +11,7 @@ extern bool cleanexit;
 
 #ifdef DSHOW
 /**************************************************************************************************/
-/**** SampleGrabberCallback for DirectShow                                                     ****/
+/**** DirectShow Callback : SampleGrabberCallback                                              ****/
 /**************************************************************************************************/
 AM_MEDIA_TYPE g_StillMediaType;
 STDMETHODIMP SampleGrabberCallback::BufferCB( double Time, BYTE *pBuffer, long BufferLen )
@@ -42,14 +42,56 @@ STDMETHODIMP SampleGrabberCallback::BufferCB( double Time, BYTE *pBuffer, long B
 			// - bfh : bitmap file header
 			// - HEADER(pVideoHeader) : bitmap info header
 			// - pBuffer (length BufferLen) : picture data
-			int jpegbuf_length;
-			ws->jpeg_buffer = JpegFromBmp( bfh, lpbi, pBuffer, BufferLen, &jpegbuf_length, 70, "c:\test.jpg");
-			ws->jpeg_size = jpegbuf_length;
+			// Copy the actual jpeg in the old buffer before getting the new one
+			if( ws->old_buffer)
+				delete ws->old_buffer;
+			ws->old_size = ws->jpeg_size;
+			ws->old_buffer = ws_jpeg_buffer;
+			// JpegFromBmp should allocate the needed buffer;
+			ws->jpeg_buffer = JpegFromBmp( bfh, lpbi, pBuffer, BufferLen, &ws->jpeg_size, 40, "c:\test.jpg");
 		}
 
 		return S_OK;
 	}
 #endif
+#ifdef __APPLE__
+/**************************************************************************************************/
+/**** QuickTime Callback : Process data written to the video channel                           ****/
+/**************************************************************************************************/
+pascal OSErr processFrame( SGChannel c, Ptr p, long len, long * offset, long chRefCon, TimeValue time, short writeType, long refCon)
+{
+	// HERE SHOULD ONLY COPY THE IMAGE INTO THE JPEG BUFFER
+	WebcamSupport * ws = (WebcamSupport *) refCon;
+	if( ws->old_buffer)
+		delete ws->old_buffer;
+	ws->old_buffer = ws->jpeg_buffer;
+	ws->old_size = ws->jpeg_size;
+	ws->jpeg_buffer = new char[len];
+	memcpy( ws->jpeg_buffer, p, len);
+	ws->jpeg_size = len;
+	if( ws && ws->isReady())
+	{
+		// Write p to a file for testing
+		string path = datadir+"testcam.jpg";
+		FILE * fp;
+		fp = fopen( path.c_str(), "w");
+		if( !fp)
+		{
+			cerr<<"opening jpeg file failed"<<endl;
+			exit(1);
+		}
+		if( fwrite( p, 1, len, fp)!=len)
+		{
+			cerr<<"writing jpeg description to file"<<endl;
+			exit(1);
+		}
+		fclose( fp);
+	}
+
+	return noErr;
+}
+#endif
+
 
 /**************************************************************************************************/
 /**** DoError : Close webcam stuff and exits with given code                                   ****/
@@ -80,8 +122,8 @@ WebcamSupport::WebcamSupport()
 	// Get the period between 2 captured images
 	period = 1000000./(double)this->fps;
 
-	jpeg_buffer = NULL;
-	jpeg_size = 0;
+	this->jpeg_buffer = NULL;
+	this->jpeg_size = 0;
 
 #ifdef __APPLE__
 	OSErr				iErr = noErr;
@@ -272,6 +314,10 @@ int		WebcamSupport::Init()
 	component_error = SGSetGWorld(video -> sg_component, video -> sg_world, NULL);
 	DoError(component_error, "SGSetGWorld failed");
 	
+	//  set destination data reference
+	component_error = SGSetDataRef( video->sg_component, 0, 0, seqGrabDontMakeMovie);
+	DoError( component_error, "SGSetDataRef failed");
+
 	//	set output settings
 	component_error = SGSetDataOutput( video->sg_component, NULL, seqGrabToMemory | seqGrabDontMakeMovie);
 	DoError(component_error, "SGSetDataOutput failed");
@@ -321,6 +367,16 @@ bool	WebcamSupport::isReady()
 	}
 	else
 		ret = false;
+
+	// Each time we call this function we'll give a little time to the grabbing mecanism
+#ifdef __APPLE__
+	ComponentResult		component_error = noErr;
+	// Update the offscreen GWorld
+	component_error = SGIdle(video -> sg_channel);
+	if (component_error)
+		DoError(component_error, "SGIdle failed");
+#endif
+
 	return ret;
 }
 
@@ -358,7 +414,7 @@ void	WebcamSupport::StartCapture()
 	OSErr	iErr;
 
 	// Set the callback
-	//iErr = SGSetDataProc( video->sg_component, NewSGDataUPP( processFrame), (long)this->video);
+	iErr = SGSetDataProc( video->sg_component, NewSGDataUPP( processFrame), (long)this->video);
 	// Prepare for recording
 	component_error = SGPrepare( video->sg_component, false, true);
 	DoError( component_error, "SGPrepare failed");
@@ -368,34 +424,6 @@ void	WebcamSupport::StartCapture()
 	DoError( component_error, "SGStartRecord failed");
 #endif
 }
-
-#ifdef __APPLE__
-/**************************************************************************************************/
-/**** Process data written to the video channel                                                ****/
-/**************************************************************************************************/
-pascal OSErr processFrame( SGChannel c, Ptr p, long len, long * offset, long chRefCon, TimeValue time, short writeType, long refCon)
-{
-	WebcamSupport * ws = (WebcamSupport *) refCon;
-	if( ws && ws->isReady())
-	{
-		// Write p to a file
-		string path = datadir+"testcam.jpg";
-		FILE * fp;
-		fp = fopen( path.c_str(), "w");
-		if( !fp)
-		{
-			cerr<<"opening jpeg file failed"<<endl;
-			exit(1);
-		}
-		if( fwrite( p, 1, len, fp)!=len)
-		{
-			cerr<<"writing jpeg description to file"<<endl;
-			exit(1);
-		}
-		fclose( fp);
-	}
-}
-#endif
 
 /**************************************************************************************************/
 /**** Copy an image... not used for now                                                        ****/
@@ -437,13 +465,14 @@ void	WebcamSupport::EndCapture()
 /**************************************************************************************************/
 /**** Get the latest grabbed image                                                             ****/
 /**************************************************************************************************/
-char *	WebcamSupport::CaptureImage()
+std::string	WebcamSupport::CaptureImage()
 {
 if( grabbing)
 {
 #ifdef linux // Does not work under Cygwin
 	// Returns the image buffer
-	return (char *) fg_get_next_image(&fg);
+	char * strptr = (char *) fg_get_next_image(&fg);
+	return string( strptr);
 #endif
 #if defined(_WIN32) && !defined(__CYGWIN__)
 #ifndef DSHOW
@@ -498,12 +527,16 @@ if( grabbing)
 #else
 	// DirectShow uses a callback interface so there is nothing to do here
 	// We just return the allocated buffer for jpeg file
-	return jpeg_buffer;
+	return string( jpeg_buffer);
 #endif
 #endif
 #ifdef __APPLE__
-	ComponentResult		component_error = noErr;
+	// Just return the jpeg_bufer filled by the callback function
+	return string( jpeg_buffer);
+
+	/* BAD WAY TO TRY CAPTURE : ACCESSING DIRECTLY GWORLD BUFFER
 	OSErr iErr;
+	ComponentResult		component_error = noErr;
 	// Update the offscreen GWorld
 	component_error = SGIdle(video -> sg_channel);
 	if (component_error)
@@ -552,6 +585,7 @@ if( grabbing)
 	if( fwrite( jpeg_data, 1, maxCompressionSize, fp)!=maxCompressionSize)
 		DoError( -1, "writing jpeg description to file");
 	fclose( fp);
+	*/
 #endif
 }
 else
@@ -578,10 +612,12 @@ int		WebcamSupport::GetCapturedSize()
 }
 
 /**************************************************************************************************/
-/**** Close devices, free momory correctly (well soon :))                                      ****/
+/**** Close devices, free memory correctly (well soon :))                                      ****/
 /**************************************************************************************************/
 void	WebcamSupport::Shutdown()
 {
+	if( grabbing)
+		this->EndCapture();
 #ifdef linux
 	if (fg_close_device (&fg)!=0)
 		exit(-1);
@@ -594,8 +630,18 @@ void	WebcamSupport::Shutdown()
 #endif
 #endif
 #ifdef __APPLE__
+	SGDisposeChannel( video->sg_component, video->sg_channel);
+	CloseComponent( video->sg_component);
 	delete video;
 #endif
+	if( old_buffer)
+		delete old_buffer;
+	old_buffer = NULL;
+	old_size = 0;
+	if( jpeg_buffer)
+		delete jpeg_buffer;
+	jpeg_buffer = NULL;
+	jpeg_size = 0;
 }
 
 /***********************************************************************************/

@@ -85,12 +85,17 @@ libnet_a_SOURCES =	\
 	inet.cpp		\
 	inet.h
 
+if NETCOMM_NOWEBCAM
+	cam_files =
+else
+	cam_files = webcam_support.cpp	\
+				webcam_support.h
+endif
+
 if NETCOMM
-libnetclient = $(libnetclientserver) \
+libnetclient = $(libnetclientserver) $(cam_files) \
 	networkcomm.cpp		\
-	networkcomm.h		\
-	webcam_support.cpp	\
-	webcam_support.h
+	networkcomm.h
 else
 libnetclient = $(libnetclientserver)
 endif

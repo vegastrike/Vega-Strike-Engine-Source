@@ -1,6 +1,7 @@
 #ifndef __WEBCAM_SUPPORT_H
 #define __WEBCAM_SUPPORT_H
 
+#include <string>
 #ifdef linux
 #include "bgrab.h"
 #endif
@@ -113,10 +114,6 @@ class	WebcamSupport
 		videoRec *			video;
 #endif
 
-		// Buffer containing current jpeg image capture
-		char*	jpeg_buffer;
-		int		jpeg_size;
-
 		int		width;
 		int		height;
 		int		depth;
@@ -125,9 +122,13 @@ class	WebcamSupport
 		double	period;
 		bool	grabbing;
 
-		char *	image_buffer;
-
 	public:
+		// Buffer containing current jpeg image capture
+		char *	old_buffer;
+		int		old_size;
+		char *	jpeg_buffer;
+		int		jpeg_size;
+
 		WebcamSupport();
 		WebcamSupport( int f, int w, int h);
 
@@ -137,10 +138,10 @@ class	WebcamSupport
 		int		GetFps() { return this->fps;}
 		bool	isReady();
 
-		void	StartCapture();
-		void	EndCapture();
-		char *	CaptureImage();
-		int		GetCapturedSize();
+		void		StartCapture();
+		void		EndCapture();
+		std::string	CaptureImage();
+		int			GetCapturedSize();
 
 		int		CopyImage();
 		void	DoError( long code, char * msg);
