@@ -21,7 +21,6 @@
 #endif
 using std::string;
 #include "common.h"
-#include "vsfilesystem.h"
 
 
 #ifndef _WIN32
@@ -52,9 +51,9 @@ string getdatadir()
     unsigned int i = 0;
     for(; i < (sizeof(datadirs) / sizeof(datadirs[0])); i++) {
         chdir(datadirs[i]);
-        FILE *tfp = VSFileSystem::vs_open("vegastrike.config", "r");
+        FILE *tfp = fopen("vegastrike.config", "r");
         if(tfp) {
-            VSFileSystem::vs_close(tfp);
+            fclose(tfp);
             // We have found the data directory
             break;
         }

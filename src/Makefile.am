@@ -14,7 +14,6 @@ SUBDIRS = \
 vegastrike_LDADD =  				\
 networking/netserver_devices.o		\
 aldrv/libaldrv.a 					\
-common/libvscommon.a 				\
 networking/libnetclient.a 			\
 networking/lowlevel/libnetlowlevel.a \
 cmd/script/script_call_briefing.o 	\
@@ -41,7 +40,6 @@ cmd/script/director_server.o 	\
 cmd/unit_util_generic.o 		\
 cmd/unit_util_server.o 			\
 networking/netclient.o 			\
-common/libvscommon.a 			\
 networking/libnetserver.a 		\
 networking/lowlevel/libnetlowlevel.a \
 cmd/libcmdserver.a 				\
