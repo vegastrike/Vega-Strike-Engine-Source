@@ -82,7 +82,7 @@ void Box::ProcessDrawQueue() {
   GFXDisable(LIGHTING);
   GFXDisable (TEXTURE0);
   GFXDisable(TEXTURE1);
-
+  GFXDisable (DEPTHWRITE);
   GFXDisable(CULLFACE);
   //GFXBlendMode(ONE, ONE);
 
@@ -143,4 +143,5 @@ void Box::ProcessDrawQueue() {
   */
 
   }
+  GFXEnable (DEPTHWRITE);
 }

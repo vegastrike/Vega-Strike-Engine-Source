@@ -1,6 +1,6 @@
 #include "cmd_flybywire.h"
 #include "physics.h"
-#define VELTHRESHOLD .05
+#define VELTHRESHOLD .1
 AI * MatchLinearVelocity::Execute () {
   Vector desired (desired_velocity);
   if (!LocalVelocity) {
