@@ -503,6 +503,7 @@ public:
   virtual void TransferUnitToSystem (unsigned int whichJumpQueue, class StarSystem *&previouslyActiveStarSystem, bool DoSightAndSound) {}
   StarSystem * getStarSystem();
     struct UnitJump {
+    float warpDriveRating;
     short energy;
     short insysenergy;
     signed char drive;

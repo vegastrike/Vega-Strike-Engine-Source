@@ -142,6 +142,7 @@ namespace UnitXML {
       WEAPON,
       DEFENSE,
       ARMOR,
+      WARPDRIVERATING,
       FORWARD,
       RETRO,
       FRONT,
@@ -298,7 +299,7 @@ namespace UnitXML {
     EnumMap::Pair ("Description",DESCRIPTION),
     
   };
-  const EnumMap::Pair attribute_names[111] = {
+  const EnumMap::Pair attribute_names[112] = {
     EnumMap::Pair ("UNKNOWN", UNKNOWN),
     EnumMap::Pair ("missing",MISSING),
     EnumMap::Pair ("file", XFILE), 
@@ -407,14 +408,15 @@ namespace UnitXML {
     EnumMap::Pair ("CombatRole",COMBATROLE),
     EnumMap::Pair ("RecurseSubunitCollision",RECURSESUBUNITCOLLISION),
     EnumMap::Pair ("FaceCamera",FACECAMERA),
-	EnumMap::Pair ("NumAnimationStages",NUMANIMATIONSTAGES),
-	EnumMap::Pair("StartFrame",STARTFRAME),
-	EnumMap::Pair("TextureStartTime",TEXTURESTARTTIME)
+    EnumMap::Pair ("NumAnimationStages",NUMANIMATIONSTAGES),
+    EnumMap::Pair("StartFrame",STARTFRAME),
+    EnumMap::Pair("TextureStartTime",TEXTURESTARTTIME),
+    EnumMap::Pair("WarpDriveRating",WARPDRIVERATING)
 
   };
 
   const EnumMap element_map(element_names, 38);
-  const EnumMap attribute_map(attribute_names, 111);
+  const EnumMap attribute_map(attribute_names, 112);
 }
 std::string delayucharStarHandler (const XMLType &input,void *mythis) {
 	static int jumpdelaymult =XMLSupport::parse_int(vs_config->getVariable("physics","jump_delay_multiplier","5"));
@@ -1094,6 +1096,9 @@ using namespace UnitXML;
 	jump.insysenergy = CLAMP_SHORT(parse_float((*iter).value));
 	foundinsysenergy=true;
 	break;
+      case WARPDRIVERATING:
+        jump.warpDriveRating=parse_float((*iter).value);
+        break;
   case DAMAGE:
 	  jump.damage=CLAMP_SHORT (parse_float((*iter).value));
 	  break;
@@ -1798,6 +1803,7 @@ void Unit::LoadXML(VSFileSystem::VSFile & f, const char * modifications, string 
   {
     image->unitwriter->AddTag ("Jump");
     image->unitwriter->AddElement("missing",lessNeg1Handler,XMLType(&jump.drive));
+    image->unitwriter->AddElement("warpDriveRating",floatStarHandler,XMLType(&jump.warpDriveRating));
     image->unitwriter->AddElement("jumpenergy",shortStarHandler,XMLType(&jump.energy));
     image->unitwriter->AddElement("insysenergy",shortStarHandler,XMLType(&jump.insysenergy));
     image->unitwriter->AddElement("delay",delayucharStarHandler,XMLType(&jump.delay));

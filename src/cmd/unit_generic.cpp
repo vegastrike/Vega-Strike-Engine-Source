@@ -615,6 +615,7 @@ void Unit::Init()
   jump.insysenergy=insys_jump_cost*jump.energy;
   jump.delay=5;
   jump.damage=0;
+  jump.warpDriveRating=0;
   graphicOptions.FaceCamera=false;
   jump.drive=-2;// disabled
   afterburnenergy=0;
@@ -5071,6 +5072,7 @@ bool Unit::UpAndDownGrade (const Unit * up, const Unit * templ, int mountoffset,
   STDUPGRADE(image->ecm,abs(up->image->ecm),abs(templ->image->ecm),0);
   STDUPGRADE(maxenergy,up->maxenergy,templ->maxenergy,0);
   STDUPGRADE(maxwarpenergy,up->maxwarpenergy,templ->maxwarpenergy,0);
+  STDUPGRADE(jump.warpDriveRating,up->jump.warpDriveRating,templ->jump.warpDriveRating,0);
   STDUPGRADE(limits.yaw,tlimits_yaw,templ->limits.yaw,0);
   STDUPGRADE(limits.pitch,tlimits_pitch,templ->limits.pitch,0);
   STDUPGRADE(limits.roll,tlimits_roll,templ->limits.roll,0);

@@ -202,6 +202,32 @@ enum BLENDFUNC parse_alpha (const char * tmp ) {
 
 
 
+#if 0
+std::string parse_alpha (enum BLENDMODE tmp ) {
+  switch (tmp) {
+  case ZERO: return "ZERO";
+  case ONE: return "ONE";
+  case SRCCOLOR: return "SRCCOLOR";
+  case INVSRCCOLOR: return "INVSRCCOLOR";
+  case SRCALPHA: return "SRCALPHA";
+  case INVSRCALPHA: return "INVSRCALPHA";
+  case DESTALPHA: return "DESTALPHA";
+  case INVDESTALPHA: return "INVDESTALPHA";
+  case DESTCOLOR: return "DESTCOLOR";
+  case INVDESTCOLOR: return "INVDESTCOLOR";
+  case SRCALPHASAT: return "SRCALPHASAT";
+  case CONSTALPHA: return "CONSTALPHA";
+  case INVCONSTALPHA: return "INVCONSTALPHA";
+  case CONSTCOLOR: return "CONSTCOLOR";
+  case INVCONSTCOLOR: return "INVCONSTCOLOR";
+  }
+  return ZERO;
+}
+#endif
+
+
+
+
 /* Load stages:
 
 0 - no tags seen
