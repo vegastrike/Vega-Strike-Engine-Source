@@ -40,7 +40,7 @@ using std::ostream;
 
 using XMLSupport::AttributeList;
 
-  extern string parseCalike(const char *);
+extern string parseCalike(char const *filename);
 
 class easyDomNode {
  public:

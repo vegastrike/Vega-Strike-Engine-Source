@@ -89,6 +89,7 @@ class VegaConfig {
 
   int axis_axis[MAX_AXIS];
   int axis_joy[MAX_AXIS];
+  bool axis_inverse[MAX_AXIS];
 
 #define MAX_HATSWITCHES 4
 #define MAX_VALUES 12

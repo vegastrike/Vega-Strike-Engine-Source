@@ -462,6 +462,7 @@ void VegaConfig::doAxis(configNode *node){
   string name=node->attr_value("name");
   string joystick=node->attr_value("joystick");
   string axis=node->attr_value("axis");
+  string invertstr=node->attr_value("inverse");
 
   if(name.empty() || joystick.empty() || axis.empty()){
     cout << "no correct axis desription given " << endl;
@@ -473,21 +474,30 @@ void VegaConfig::doAxis(configNode *node){
 
   // no checks for correct number yet 
 
+  bool inverse=false;
+  if(!invertstr.empty()){
+    inverse=XMLSupport::parse_bool(invertstr);
+  }
+
   if(name=="x"){
     axis_axis[0]=axis_nr;
     axis_joy[0]=joy_nr;
+    axis_inverse[0]=inverse;
   }
   else if(name=="y"){
     axis_axis[1]=axis_nr;
     axis_joy[1]=joy_nr;
+    axis_inverse[1]=inverse;
   }
   else if(name=="z"){
     axis_axis[2]=axis_nr;
     axis_joy[2]=joy_nr;
+    axis_inverse[2]=inverse;
   }
   else if(name=="throttle"){
     axis_axis[3]=axis_nr;
     axis_joy[3]=joy_nr;
+    axis_inverse[3]=inverse;
   }
   else if(name=="hatswitch"){
     string nr_str=node->attr_value("nr");

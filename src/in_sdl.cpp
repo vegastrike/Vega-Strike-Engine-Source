@@ -111,11 +111,14 @@ void ProcessJoystick () {
       if(joystick[i]->debug_digital_hatswitch){
       for(int h=0;h<joystick[i]->nr_of_hats;h++){
 	Uint8 hsw=joystick[i]->digital_hat[h];
-	cout << "hsw: " << hsw << endl;
+	char buf[100];
+	sprintf(buf,"hsw: %d",hsw);
+	cout << buf << endl;
 
 	for(int dir_index=0;dir_index<MAX_DIGITAL_VALUES;dir_index++){
 	  bool press=false;
 	  if(dir_index==VS_HAT_CENTERED && (hsw & SDL_HAT_CENTERED)){
+	    cout << "center" << endl;
 	    press=true;
 	  }
 	  if(dir_index==VS_HAT_LEFT && (hsw & SDL_HAT_LEFT)){

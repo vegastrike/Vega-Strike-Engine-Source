@@ -25,25 +25,7 @@
 */
 
 
-#include <stdio.h>
-#include <malloc.h>
-
-#include <vector>
-#include <string>
-
-#define YYERROR_VERBOSE
-
-#define q(x)	("\""+x+"\"")
-
-extern string parseCalike(char const *filename);
-extern int yyerror(char *);
-extern int yywrap();
-extern int yylex();
-
-#define YYDEBUG 0
-
-  typedef char* str;
-#define YYSTYPE string
+#include "c_alike.h"
 
 string module_string;
 

@@ -77,22 +77,42 @@ void FlyByJoystick::Execute() {
 
     joy_nr=vs_config->axis_joy[AXIS_Y];
     if( joy_nr!= -1 && joystick[joy_nr]->isAvailable()){
-      Up(- joystick[joy_nr]->joy_axis[vs_config->axis_axis[AXIS_Y]] );
+      int config_axis=vs_config->axis_axis[AXIS_Y];
+      bool inverse=vs_config->axis_inverse[AXIS_Y];
+      float axis_value=- joystick[joy_nr]->joy_axis[config_axis];
+      if(inverse) { axis_value= - axis_value; }
+
+      Up( axis_value);
     }
 
     joy_nr=vs_config->axis_joy[AXIS_X];
     if( joy_nr != -1 && joystick[joy_nr]->isAvailable() ){
-      Right(- joystick[joy_nr]->joy_axis[vs_config->axis_axis[AXIS_X]] );
+      int config_axis=vs_config->axis_axis[AXIS_X];
+      bool inverse=vs_config->axis_inverse[AXIS_X];
+      float axis_value=- joystick[joy_nr]->joy_axis[config_axis];
+      if(inverse) { axis_value= - axis_value; }
+
+      Right( axis_value);
     }
 
     joy_nr=vs_config->axis_joy[AXIS_Z];
     if( joy_nr!= -1 && joystick[joy_nr]->isAvailable()){
-      RollRight(- joystick[joy_nr]->joy_axis[vs_config->axis_axis[AXIS_Z]] );
+      int config_axis=vs_config->axis_axis[AXIS_Z];
+      bool inverse=vs_config->axis_inverse[AXIS_Z];
+      float axis_value=- joystick[joy_nr]->joy_axis[config_axis];
+      if(inverse) { axis_value= - axis_value; }
+
+      RollRight( axis_value );
     }
 
     joy_nr=vs_config->axis_joy[AXIS_THROTTLE];
     if( joy_nr != -1 &&  joystick[joy_nr]->isAvailable()){
-      Accel(- joystick[joy_nr]->joy_axis[vs_config->axis_axis[AXIS_THROTTLE]] );
+      int config_axis=vs_config->axis_axis[AXIS_THROTTLE];
+      bool inverse=vs_config->axis_inverse[AXIS_THROTTLE];
+      float axis_value=- joystick[joy_nr]->joy_axis[config_axis];
+      if(inverse) { axis_value= - axis_value; }
+
+      Accel( axis_value );
     }
   }
   

@@ -26,23 +26,7 @@
 */
 
 
-#include <stdio.h>
-#include <malloc.h>
-
-#include <vector>
-#include <string>
-
-  typedef char* str;
-#define YYSTYPE string
-#define YY_SKIP_YYWRAP
-
-#include "c_alike.tab.cpp.h"
-#include "stdio.h"
-#include "string.h"
-
-    extern int yywrap();
-
-  //  extern char *yylval;
+#include "c_alike.h"
 
 %}
 
