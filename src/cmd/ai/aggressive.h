@@ -3,6 +3,7 @@
 namespace Orders {
 class AggressiveAI: public FireAt {
   enum INTERCUR {INTERR,INTNORMAL,INTRECOVER} curinter;
+  bool obedient;//am I currently obedient
 protected:
   AIEvents::ElemAttrMap logic;
   AIEvents::ElemAttrMap interrupts;

@@ -7,6 +7,8 @@
 #include <assert.h>
 #include "vegastrike.h"
 #include "vs_path.h"
+#include "vs_globals.h"
+#include "config_xml.h"
 //serves to run through a XML file that nests things for "and". 
 
 
@@ -36,6 +38,7 @@ namespace AIEvents {
   const int AISCRIPT =3;
   const int AINOT=4;
   const int TIMEIT=5;
+  const int OBEDIENCE=6;
   const XMLSupport::EnumMap::Pair AIattribute_names[] = {
     EnumMap::Pair ("UNKNOWN", AIUNKNOWN),
     EnumMap::Pair ("min", AIMIN), 
@@ -43,8 +46,9 @@ namespace AIEvents {
     EnumMap::Pair ("not", AINOT),
     EnumMap::Pair ("Script", AISCRIPT),
     EnumMap::Pair ("time", TIMEIT),
+    EnumMap::Pair ("obedience", OBEDIENCE)
   };
-  const XMLSupport::EnumMap attr_map(AIattribute_names, 6);
+  const XMLSupport::EnumMap attr_map(AIattribute_names, 7);
 
   void GeneralAIEventBegin (void *userData, const XML_Char *name, const XML_Char **atts) {
     AttributeList attributes (atts);
@@ -60,6 +64,8 @@ namespace AIEvents {
 	case TIMEIT:
 	  eam->curtime=eam->maxtime=(short)(XMLSupport::parse_float((*iter).value)/SIMULATION_ATOM);
 	  break;
+	case OBEDIENCE:
+	  eam->obedience=(float)(XMLSupport::parse_float((*iter).value));
 	}
       }
     }else {
@@ -92,8 +98,12 @@ namespace AIEvents {
     ((ElemAttrMap *)userData)->level--;    
     
   }  
-  void LoadAI(const char * filename, ElemAttrMap &result) {
+  void LoadAI(const char * filename, ElemAttrMap &result) {//returns obedience
     const int chunk_size = 16384;
+    result.obedience=XMLSupport::parse_float (vs_config->getVariable ("AI",
+								      "Targetting",
+								      "obedience",
+								      ".99"));
     result.curtime=result.maxtime=10/SIMULATION_ATOM;
     vschdir ("ai");
     vschdir ("events");
