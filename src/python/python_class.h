@@ -26,10 +26,12 @@ int main (int argc,char *argv[]) {
 
 #ifdef _WIN32
 //These two functions purposely have opening/closing braces that don't match up
-#define PYTHON_INIT_GLOBALS(name,SuperClass) PythonClass <SuperClass> *PythonClass< SuperClass >::last_instance = NULL; \
+#define ADD_FROM_PYTHON_FUNCTION(SuperClass) \
 	SuperClass & from_python(PyObject *p,boost::python::type<SuperClass &>) { \
 		return from_python(p,boost::python::type<SuperClass &>()); \
 	}
+#define PYTHON_INIT_GLOBALS(name,SuperClass) PythonClass <SuperClass> *PythonClass< SuperClass >::last_instance = NULL; \
+	ADD_FROM_PYTHON_FUNCTION(SuperClass)
 #else
 #define PYTHON_INIT_GLOBALS(name,SuperClass) PythonClass <SuperClass> *PythonClass< SuperClass >::last_instance = NULL; 
 #endif
@@ -41,6 +43,7 @@ int main (int argc,char *argv[]) {
     BaseClass.def (boost::python::constructor<>()); \
     BaseClass.def (&SuperClass::Execute,"Execute",PythonClass< SuperClass >::default_Execute); \
 }
+//    BaseClass.def (&PythonClass<SuperClass>::IncRef,"IncRef"); \
 //    boost::python::class_builder <SuperClass> TempClass (name,"SuperClass"); 
 
 
