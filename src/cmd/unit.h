@@ -416,7 +416,7 @@ public:
   void EjectCargo (unsigned int index);
   void FixGauges();
   bool CanAddCargo (const Cargo &carg) const;
-  void AddCargo (const Cargo &carg);
+  void AddCargo (const Cargo &carg,bool sort=true);
   int RemoveCargo (unsigned int i, int quantity, bool eraseZero=true);
   float PriceCargo (const std::string &s);
   void SwapOutHalos();

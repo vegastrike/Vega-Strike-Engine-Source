@@ -64,7 +64,7 @@ struct UpgradingInfo {
   vector <Cargo>&GetCargoList ();
   void SetupCargoList() {
     CurrentList = &GetCargoList();
-    std::sort (CurrentList->begin(),CurrentList->end());
+    //    std::sort (CurrentList->begin(),CurrentList->end());
     CargoList->ClearList();
     if (submode==NORMAL) {
       if (curcategory.length()!=0) {
@@ -352,7 +352,7 @@ void UpgradingInfo::SelectItem (const char *item, int button, int buttonstate) {
   }
 
 }
-
+extern char * GetUnitDir (const char *);
 void UpgradingInfo::CommitItem (const char *inp_buf, int button, int state) {
   Unit * un;
   Unit * base;
@@ -373,7 +373,10 @@ void UpgradingInfo::CommitItem (const char *inp_buf, int button, int state) {
   case DOWNGRADEMODE:    
   case SHIPDEALERMODE:
     {
-      Unit * temprate= new Unit ((un->name+string(".template")).c_str(),true,un->faction);
+      char * unitdir = GetUnitDir(un->name.c_str());
+      
+      Unit * temprate= new Unit ((string(unitdir)+string(".template")).c_str(),true,un->faction);
+      free(unitdir);
       if (temprate->name!=string("LOAD_FAILED")) {
 	templ=temprate;
       }else {

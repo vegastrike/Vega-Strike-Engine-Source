@@ -430,7 +430,7 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
       }
     }
     if (carg.mass!=0)
-      AddCargo (carg);
+      AddCargo (carg,false);
     break;
   case MESHFILE:
     ADDTAG;

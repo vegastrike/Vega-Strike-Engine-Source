@@ -29,7 +29,7 @@ void Unit::ImportPartList (const std::string& category, float price, float price
       if (c.price <.01)
 	c.price+=.01;
       c.quantity=abs (c.quantity);
-      AddCargo(c);
+      AddCargo(c,false);
     }
   }
 
@@ -145,10 +145,11 @@ bool Unit::CanAddCargo (const Cargo &carg)const {
   return (total_volume<=image->cargo_volume);
 }
 
-void Unit::AddCargo (const Cargo &carg) {
+void Unit::AddCargo (const Cargo &carg, bool sort) {
   mass+=carg.quantity*carg.mass;
   image->cargo.push_back (carg);
-  SortCargo();
+  if (sort)
+    SortCargo();
 }
 int Unit::RemoveCargo (unsigned int i, int quantity,bool eraseZero) {
   assert (i<image->cargo.size());
