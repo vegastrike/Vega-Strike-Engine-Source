@@ -530,6 +530,7 @@ void StarSystem::Update(float priority ) {
 	  Unit::ProcessDeleteQueue();
 	  current_stage=MISSION_SIMULATION;
       }else if (current_stage==MISSION_SIMULATION) {
+#define RUN_ONLY_FOR_PLAYER_STARSYSTEM
 #ifdef RUN_ONLY_FOR_PLAYER_STARSYSTEM
 	if (_Universe->getActiveStarSystem(0)==this) {
 #endif
