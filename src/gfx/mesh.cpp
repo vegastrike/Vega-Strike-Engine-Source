@@ -246,7 +246,7 @@ void Mesh::Draw(float lod, const Transformation &trans, const Matrix m, short cl
 }
 void Mesh::DrawNow(float lod,  bool centered, const Transformation &transform /*= identity_transformation*/, const Matrix m, short cloak, float nebdist) {
   Mesh *o = getLOD (lod);
-
+  //fixme: cloaking not delt with.... not needed for backgroudn anyway
   if (centered) {
     float m1[16];
     memcpy (m1,m,sizeof (float)*16);
@@ -276,13 +276,6 @@ void Mesh::DrawNow(float lod,  bool centered, const Transformation &transform /*
   if (blendSrc!=SRCALPHA&&blendDst!=ZERO) 
     GFXDisable(DEPTHWRITE);
   GFXBlendMode(blendSrc, blendDst);
-  if (cloak>=0) {
-    int ligh;
-    float tmp = ((float)cloak)/32767;
-    GFXColor CloakNebFX(tmp,tmp,tmp,tmp);
-    GFXBlendColor (CloakNebFX);
-    GFXBlendMode(CONSTALPHA,INVCONSTALPHA);
-  }
 
   if (o->Decal)
     o->Decal->MakeActive();
@@ -400,7 +393,9 @@ void Mesh::ProcessDrawQueue(int whichdrawqueue) {
       GFXDeleteLight (specialfxlight[i]);
     }
     if (c.cloaked&MeshDrawContext::CLOAK) {
+#if 0
       GFXBlendColor (GFXColor(1,1,1,1));
+#endif
       if (envMap)
       	GFXEnable (TEXTURE1);
       GFXPopBlendMode ();
