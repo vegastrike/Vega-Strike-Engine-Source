@@ -50,11 +50,11 @@ void setup_game_data ( ){ //pass in config file l8r??
   g_game.music_volume=1;
   g_game.warning_level=20;
   g_game.capture_mouse=False;
-  g_game.fullscreen = 0;
+  g_game.fullscreen = 1;
   g_game.color_depth = 16;
-  g_game.y_resolution = 480;
-  g_game.x_resolution = 640;
-  g_game.fov=60;
+  g_game.y_resolution = 1200;
+  g_game.x_resolution = 1600;
+  g_game.fov=78;
   g_game.PaletteExt=1;
   g_game.cubemap=0;
 }

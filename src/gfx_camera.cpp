@@ -19,6 +19,9 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 #include "gfx_camera.h"
+
+
+
 const float PI=3.1415926536;
 Camera::Camera() : myPhysics(0.1,0.075,&Coord,&P,&Q,&R)
 {
@@ -45,7 +48,7 @@ void Camera::UpdateGFX()
 		GFXLoadIdentity(PROJECTION);
 		GFXLoadIdentity(VIEW);
 		//glLoadIdentity();
-		GFXPerspective (78.0F,1.33F,1.00F,100.00F); //set perspective to 78 degree FOV
+		GFXPerspective (78,1.33F,1.00F,100.00F); //set perspective to 78 degree FOV
 		GFXLookAt (Coord, Coord+R, Q);
 		//changed = FALSE;
 	}
@@ -61,7 +64,7 @@ void Camera::UpdateGLCenter()
 	{
 		GFXLoadIdentity(PROJECTION);
 		GFXLoadIdentity(VIEW);
-		GFXPerspective (78.0F,1.33F,1.00F,100.00F); //set perspective to 78 degree FOV
+		GFXPerspective (78,1.33F,1.00F,100.00F); //set perspective to 78 degree FOV
 		GFXLookAt (Vector(0,0,0), R, Q);
 		//changed = FALSE;
 	}

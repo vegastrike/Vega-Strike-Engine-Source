@@ -21,8 +21,8 @@ void MouseMoveHandle (KBSTATE,int x, int y, int delx, int dely, int mod) {
   } else {
     if (delx||dely) {
       changed=true;
-      DeltaPosition.i=delx;
-      DeltaPosition.j=dely;
+      DeltaPosition.i=x;
+      DeltaPosition.j=y;
     }
   }
 }
@@ -77,7 +77,7 @@ void LocationSelect:: Draw () {
     LocalPosition.k+=.5*DeltaPosition.k;
     DeltaPosition.k=0;
   }
-  if (changed&&fabs (DeltaPosition.i<10)&&fabs(DeltaPosition.j<10)) {
+  if (changed) {
     float t[16];
     float m[16];
     float v[16];
@@ -86,16 +86,24 @@ void LocationSelect:: Draw () {
     GFXGetMatrix (MODEL,m);
     MultMatrix(t,v,m);
 
+    //following translates 'z'...not sure it's necessary
+    //    Translate (v,0,0,LocalPosition.k);
+    //    MultMatrix (m,t,v);
+
     //the location in camera coordinates of the beginning of the location select
     Vector tLocation (t[12],t[13],t[14]);
     Vector tP (t[0],t[1],t[2]);//the p vector of the plane being selected on
     Vector tQ (t[4],t[5],t[6]);//the q vector of the plane being selected on
+    Vector tR (t[8],t[9],t[10]);//the q vector of the plane being selected on
 
+
+    //when you let go of the 'z' button, the object SKIPS so that your cursor is 'under' the value...if you don't like that ...comment out the next line for now
+    tLocation+=LocalPosition.k*tR;//scale the R vector of the plane so zval is computed for the raised object instead of just the plane projection
     //the approximate distance away that the cursor is
     float zvalueXY = tLocation.k+LocalPosition.i*tP.k+LocalPosition.j*tQ.k;
     
-    LocalPosition.i+= fabs(zvalueXY)*.01*((DeltaPosition.i/tP.i)+(-DeltaPosition.j/tP.j));
-    LocalPosition.j+= fabs(zvalueXY)*.01*((DeltaPosition.i/tQ.i)+(-DeltaPosition.j/tQ.j));
+    LocalPosition.i= fabs(zvalueXY)*(((2*DeltaPosition.i/g_game.x_resolution - 1)/tP.i)+(-(2*DeltaPosition.j/g_game.y_resolution - 1)/tP.j));
+    LocalPosition.j= fabs(zvalueXY)*(((2*DeltaPosition.i/g_game.x_resolution - 1)/tQ.i)+(-(2*DeltaPosition.j/g_game.y_resolution - 1)/tQ.j));
     
     DeltaPosition= Vector(0,0,0);
     //    Vector TransPQR (t[0]*i+t[4]*LocalPosition.j+t[8]*LocalPosition.k+t[12],t[1]*LocalPosition.i+t[5]*LocalPosition.j+t[9]*LocalPosition.k+t[13],t[2]*LocalPosition.i+t[6]*LocalPosition.j+t[10]*LocalPosition.k+t[14]);
