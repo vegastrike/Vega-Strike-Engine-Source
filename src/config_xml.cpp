@@ -127,7 +127,6 @@ void decdop (int i, KBSTATE a) {
 #endif
 }
 #endif
-
 /* *********************************************************** */
 
 void VegaConfig::initKeyMap(){
@@ -170,6 +169,9 @@ void VegaConfig::initKeyMap(){
 #endif
 
 /* *********************************************************** */
+extern void  inc_time_compression (int i, KBSTATE a);
+extern void dec_time_compression(int i, KBSTATE a);
+extern void reset_time_compression(int i, KBSTATE a);
 
   using namespace CockpitKeys;
 
@@ -182,7 +184,9 @@ void VegaConfig::initCommandMap(){
   command_map["VolumeInc"]=incvol;
   command_map["VolumeDec"]=decvol;
 #endif
-
+  command_map["TimeInc"]=inc_time_compression;
+  command_map["TimeDec"]=dec_time_compression;
+  command_map["TimeReset"]=reset_time_compression;
   // mapping from command string to keyboard handler
   command_map["SheltonKey"]=FlyByKeyboard::SheltonKey ;
   command_map["MatchSpeedKey"]=FlyByKeyboard::MatchSpeedKey ;

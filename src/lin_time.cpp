@@ -21,7 +21,7 @@
 
 
 #include "vegastrike.h"
-
+#include "in_kb.h"
 #ifdef WIN32
 #include <windows.h>
 static LONGLONG ttime;
@@ -37,9 +37,26 @@ static double lasttime;
 #include <sys/types.h>
 #endif
 static double elapsedtime;
+static double timecompression=1;
+void inc_time_compression (int i, KBSTATE a) {
+  if (a==DOWN) {
+    timecompression+=elapsedtime;
+  }
+}
+void dec_time_compression (int i, KBSTATE a) {
+  if (a==DOWN) {
+    timecompression-=elapsedtime;
+  }
+}
+void reset_time_compression (int i, KBSTATE a) {
+  if (a==PRESS) {
+    timecompression=1;
+  }
+}
 
 #ifdef _WIN32
 #include <windows.h>
+
 
 void micro_sleep(unsigned int n) {
 	Sleep(n / 1000);
@@ -114,4 +131,5 @@ void UpdateTime() {
 #else
 # error "We have no way to determine the time on this system."
 #endif
+  elapsedtime *=timecompression;
 }
