@@ -1,0 +1,44 @@
+-----------------------------
+VegaStrike for SGI 0.1.0 Beta
+-----------------------------
+
+Welcome to VegaStrike for SGI!
+
+This version of VegaStrike has been tested successfully on an O2 and an
+Octane, both running IRIX 6.5. There are still some quirks on the SGI
+version not yet identified as bugs:
+
+	* The shield seems to work (sometimes) but is not visible?
+	* If destroyed, the ship still seems to be intact. After
+	  some time, the cockpit controls disappear and you're
+	  lost in space. Most controls are gone. Sometimes, views
+	  can be changed (<F1> through <F6>), but then there are
+	  situations where even those keys don't work anymore.
+	  I suppose it has to do with the key press/release
+	  state the program was in when the ship was destroyed.
+
+--------------------------------------------------------------------------
+This are the major changes in the SGI version:
+
+	* First, I couldn't get configure to work properly on my platform.
+	  It does too much tests which just fail. I prefer the simple way
+	  of doing things and have create an appropriate Makefile.irix.
+
+	* The GLUT idle loop has been modified to not render the scene, but
+	  rather initiate rendering by posting an event to GLUT which in
+	  turn calls the main loop handler. The idle loop is also disabled
+	  if the window isn't visible.
+
+	* The Linux OpenGL extensions which are not available on the SGI
+	  have been disabled. I'm sure that there is something similar
+	  we could use instead, but for now I've just uncommented them
+	  to get the whole thing running.
+
+	* All changes are ifdef'ed(IRIX), except for fixes which caused
+	  serious warnings or even errors with my MIPSPro 7.3 compiler.
+
+--------------------------------------------------------------------------
+
+	  © 2001-2002 Daniel Horn, Patrick Horn, & James Carthew
+	       SGI port by Stefan Stapelberg of RENT-A-GURU®
+
