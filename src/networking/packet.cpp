@@ -1,6 +1,8 @@
 //#include <sys/time.h>
 #include <config.h>
+#if !defined(_WIN32)
 #include <unistd.h>
+#endif
 #include <math.h>
 
 #ifdef HAVE_ZLIB

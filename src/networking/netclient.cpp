@@ -23,7 +23,9 @@
 
 #include <iostream>
 #include <stdio.h>
+#if !defined(WIN32)
 #include <unistd.h>
+#endif
 #include "vs_globals.h"
 #include "endianness.h"
 #include "cmd/unit_generic.h"

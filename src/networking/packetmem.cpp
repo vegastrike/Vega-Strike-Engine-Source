@@ -2,7 +2,9 @@
 #include <assert.h>
 #include <ctype.h>
 #include <stdio.h>
+#if !defined(WIN32)
 #include <unistd.h>
+#endif
 #include <string.h>
 #include <iomanip>
 
