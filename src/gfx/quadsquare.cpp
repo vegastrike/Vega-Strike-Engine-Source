@@ -1110,7 +1110,7 @@ void	quadsquare::AddHeightMap(const quadcornerdata& cd, const HeightMapInfo& hm)
 	
 	
 	for (i = 0; i < 5; i++) {
-	  Vertex[i].Tex = ((cd.xorg+half+cd.zorg+half)/1000)%10;
+	  Vertex[i].Tex = ((cd.xorg+half+cd.zorg+half)/5000)%10;
 		if (s[i] != 0) {
 			Dirty = true;
 			Vertex[i].Y += s[i];
