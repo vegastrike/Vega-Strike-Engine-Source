@@ -1,3 +1,12 @@
+2002-03-14 Alexander Rawass <alexannika@users.sourceforge.net>
+
+	* very basic force feedback support
+	  - added files src/force_feedback.cpp/h
+	  - modified src/Makefile.am
+	  - config vars: joystick/force_feedback, joystick/ff_device
+	  - to compile use -DHAVE_FORCE_FEEDBACK
+
+	
 2002-03-12 Daniel Horn <hellcatv@hotmail.com>
 	* Added option for swithcing cockpits when units change
 	* Added option for AI to not pilot ship you turret

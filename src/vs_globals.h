@@ -28,6 +28,9 @@ extern VegaConfig *vs_config;
 class Mission;
 extern Mission *mission;
 
+class ForceFeedback;
+extern ForceFeedback *forcefeedback;
+
 extern double benchmark;
 
 #endif

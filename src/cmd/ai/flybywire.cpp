@@ -4,6 +4,10 @@
 #include <stdio.h>
 #include "cmd/unit.h"
 #include "lin_time.h"
+
+#include "gfx/cockpit.h"
+#include "force_feedback.h"
+
 #define VELTHRESHOLD .1
 using Orders::MatchLinearVelocity;
 using Orders::MatchVelocity;
@@ -110,6 +114,11 @@ void FlyByWire::Afterburn (float per){
   Unit::Computer * cpu = &parent->GetComputerData();
   afterburn=(per>.1);
   desired_velocity=Vector (0,0,cpu->set_speed+per*(cpu->max_ab_speed-cpu->set_speed));
+
+  if(parent==_Universe->AccessCockpit()->GetParent()){
+    //printf("afterburn is %d\n",afterburn);
+    forcefeedback->playDurationEffect(2,afterburn);
+  }
 }
 void FlyByWire::SheltonSlide (bool onoff) {
   sheltonslide=onoff;

@@ -12,6 +12,9 @@
 #include "images.h"
 #include "missile.h"
 
+#include "gfx/cockpit.h"
+
+#include "force_feedback.h"
 
 void Unit::UnFire () {
   for (int i=0;i<nummounts;i++) {
@@ -224,6 +227,12 @@ bool Unit::Mount::Fire (Unit * owner, bool Missile) {
       if (ammo>0)
 	ammo--;
       processed=FIRED;	
+
+      if(owner==_Universe->AccessCockpit()->GetParent()){
+	//printf("player has fired a bolt\n");
+	forcefeedback->playShortEffect(0);
+      };
+
       return true;
     }
   }

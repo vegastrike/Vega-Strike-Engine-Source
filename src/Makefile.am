@@ -22,6 +22,8 @@ vegastrike_SOURCES =				\
 	in.h					\
 	in_joystick.cpp				\
 	in_joystick.h				\
+	force_feedback.cpp			\
+	force_feedback.h			\
 	in_kb.cpp				\
 	in_kb.h					\
 	in_sdl.cpp				\

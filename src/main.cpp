@@ -39,6 +39,8 @@
 #include "gfx/cockpit.h"
 #include "python/init.h"
 #include "savegame.h"
+#include "force_feedback.h"
+
 /*
  * Globals 
  */
@@ -46,6 +48,9 @@ game_data_t g_game;
 
 Universe *_Universe;
 FILE * fpread=NULL;
+
+ForceFeedback *forcefeedback;
+
 /* 
  * Function definitions
  */
@@ -243,6 +248,7 @@ void bootstrap_main_loop () {
 
     vs_config->bindKeys();
 
+    forcefeedback=new ForceFeedback();
 
     UpdateTime();
     delete SplashScreen;

@@ -15,8 +15,8 @@ Index</a></font></h1>
 <hr WIDTH="100%">
 <p>Force Feedback support for Vegastrike is currently being developed for
 Linux.
-<p>It is my task to write/help write a high-level force-feedback library,
-based on the <a href="http://www.docs.uu.se/~johannd/projects/ff/">kernel
+<p>It is my task to write/help write a <a href="http://sourceforge.net/projects/libff/">high-level
+force-feedback library</a>, based on the <a href="http://www.docs.uu.se/~johannd/projects/ff/">kernel
 low-level drivers</a> by Johann Deneux.
 <p>Force Feedback for Linux only works with I-Force2.0 compliant devices,
 see the <a href="http://www.docs.uu.se/~johannd/projects/ff/">Linux and
@@ -24,10 +24,46 @@ I-Force</a> page.
 <p>Current status of development:
 <ul>
 <li>
-force feedback works for me on linux<br>
-using kernel 2.4.17, Johann's latest patch, the joystick connected via
-RS232<br>
-Johann's testing programs work</li>
+force feedback works for me on linux</li>
+
+<br>using kernel 2.4.17, Johann's latest patch, the joystick connected
+via RS232
+<br>Johann's testing programs work
+<li>
+I added a very basic force feedback support to Vegastrike<br>
+currently, the following very basic effects are played:</li>
+
+<ul>
+<li>
+when player fires a bolt : vibrate along y-axis</li>
+
+<li>
+when player uses afterburner : make steering harder</li>
+</ul>
+
+<li>
+to use FF support, you have to</li>
+
+<ul>
+<li>
+compile Vegastrike-CVS with -DHAVE_FORCE_FEEDBACK</li>
+
+<li>
+set the config var "force_feedback" to "true" (section "joystick")</li>
+
+<li>
+set the config var "ff_device" to the nr of your device</li>
+</ul>
+
+<li>
+the current support is only very basic, experimental and for learning purposes</li>
+
+<li>
+the currently played effects are rather 'bad' - they're just for demonstration</li>
+
+<li>
+proper FF support will be done by writing <a href="http://sourceforge.net/projects/libff/">libff</a>,
+and then using libff in Vegastrike later</li>
 </ul>
 
 <p><br>Many *thanks* to <a href="http://www.avbusa.com/">AVB</a> for providing
