@@ -239,8 +239,21 @@ void AssignTBin (Unit * su, vector <TurretBin> & tbin) {
     float gspeed, grange, mrange;
     grange=FLT_MAX;
 	Order * o = su->getAIState();
-	if (o) 
-		o->getAverageGunSpeed (gspeed,grange,mrange);
+	if (o) {
+          o->getAverageGunSpeed (gspeed,grange,mrange);
+        }
+        {
+          float ggspeed,ggrange,mmrange;
+          Unit * ssu;
+          for (un_iter i=su->getSubUnits();(ssu=*i)!=NULL;++i) {
+            if (ssu->getAIState()) {
+              ssu->getAIState()->getAverageGunSpeed(ggspeed,ggrange,mmrange);
+              if (ggspeed>gspeed)gspeed=ggspeed;
+              if (ggrange>grange)grange=ggrange;
+              if (mmrange>mrange)mrange=mmrange;
+            }
+          }
+        }
     if (tbin [bnum].maxrange<grange) {
       tbin [bnum].maxrange=grange;
     }
