@@ -243,8 +243,10 @@ void winsys_init( int *argc, char **argv, char *window_title,
 #if 1
 	{
 	SDL_Surface *tempsurf=SDL_LoadBMP(icon_title);
-	int ret=SDL_SetColorKey(tempsurf,SDL_SRCCOLORKEY,((Uint32*)(tempsurf->pixels))[0]);
-	SDL_WM_SetIcon(tempsurf,0);
+	if (tempsurf) {
+		int ret=SDL_SetColorKey(tempsurf,SDL_SRCCOLORKEY,((Uint32*)(tempsurf->pixels))[0]);
+		SDL_WM_SetIcon(tempsurf,0);
+	}
 	}
 #endif
     /* 

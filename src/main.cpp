@@ -52,6 +52,9 @@
 #include "save_util.h"
 #include "gfx/masks.h"
 #include "cmd/music.h"
+#if defined (_MSC_VER) && defined(_DEBUG)
+#include <crtdbg.h>
+#endif
 
 #if defined(CG_SUPPORT)
 #include "cg_global.h"
@@ -119,8 +122,17 @@ void cleanup(void)
   // In network mode, we may not do the save since it is useless
   if( _Universe != NULL && Network==NULL)
 	  _Universe->WriteSaveGame(true);
+#ifdef _WIN32
+#if defined (_MSC_VER) && defined(_DEBUG)
+  if (!cleanexit) {
+    _RPT0(_CRT_ERROR, "WARNING: Vega Strike exit not clean\n");
+  }
+  return;
+#endif
+#else
   while (!cleanexit) 
     int i=1;
+#endif
   if( Network!=NULL)
   {
 		cout<<"Number of players"<<_Universe->numPlayers()<<endl;
