@@ -50,7 +50,8 @@ varInst * Mission::call_briefing (missionNode * node, int mode) {
       if (mode==SCRIPT_RUN) {
 	pos = briefing->GetPosition(whichship);
       }
-      delete viret;
+      viret->type=VAR_OBJECT;
+      viret->objectname="olist";
       call_vector_into_olist(viret,pos);
     }else if (method_id==CMT_BRIEFING_setShipPosition) {
       int whichship = (int)getIntArg(node,mode,0);

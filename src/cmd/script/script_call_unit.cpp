@@ -366,16 +366,13 @@ varInst *Mission::call_unit(missionNode *node,int mode){
 	viret->type=VAR_VOID;
       }
     else if(method_id==CMT_UNIT_getPosition){
+      viret=newVarInst(VI_TEMP);
+      viret->type=VAR_OBJECT;
+      viret->objectname="olist";
       if(mode==SCRIPT_RUN){
-
 	Vector pos=my_unit->Position();
 
 	call_vector_into_olist(viret,pos);
-      }
-      else{
-	viret=newVarInst(VI_TEMP);
-	viret->type=VAR_OBJECT;
-	viret->objectname="olist";
       }
     }
     else if(method_id==CMT_UNIT_getFaction){
