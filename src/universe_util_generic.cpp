@@ -378,7 +378,11 @@ namespace UniverseUtil {
         return active_missions.size();
     }
     void IOmessage(int delay,string from,string to,string message){
-		mission->msgcenter->add(from,to,message,delay);
+		static bool news_from_cargolist=XMLSupport::parse_bool(vs_config->getVariable("cargo","news_from_cargolist","false"));
+		if (to=="news"&&(!news_from_cargolist))
+			_Universe->AccessCockpit(0)->savegame->getMissionStringData("dynamic_news").push_back(message);
+		else
+			mission->msgcenter->add(from,to,message,delay);
 	}
 	Unit *GetContrabandList (string faction) {
 		return FactionUtil::GetContraband(FactionUtil::GetFaction(faction.c_str()));
