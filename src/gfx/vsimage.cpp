@@ -555,7 +555,7 @@ void	VSImage::AllocatePalette()
 	  }
 }
 
-VSError	VSImage::WriteImage( char * filename, unsigned char * data, VSImageType type, unsigned int width, unsigned int height, bool alpha, char bpp, VSFileType ft)
+VSError	VSImage::WriteImage( char * filename, unsigned char * data, VSImageType type, unsigned int width, unsigned int height, bool alpha, char bpp, VSFileType ft, bool flip)
 {
 	this->img_type = type;
 	VSFile f;
@@ -566,12 +566,12 @@ VSError	VSImage::WriteImage( char * filename, unsigned char * data, VSImageType 
 		VSExit(1);
 	}
 
-	VSError ret = this->WriteImage( &f, data, type, width, height, alpha, bpp);
+	VSError ret = this->WriteImage( &f, data, type, width, height, alpha, bpp,flip);
 	f.Close();
 	return ret;
 }
 
-VSError	VSImage::WriteImage( VSFile * pf, unsigned char * data, VSImageType type, unsigned int width, unsigned int height, bool alpha, char bpp)
+VSError	VSImage::WriteImage( VSFile * pf, unsigned char * data, VSImageType type, unsigned int width, unsigned int height, bool alpha, char bpp, bool flip)
 {
 	VSError ret = BadFormat;
 
@@ -580,7 +580,7 @@ VSError	VSImage::WriteImage( VSFile * pf, unsigned char * data, VSImageType type
 	this->sizeX = width;
 	this->sizeY = height;
 	this->img_alpha = alpha;
-
+        this->flip=flip;
 	switch( type)
 	{
 		case PngImage :
@@ -652,8 +652,14 @@ VSError	VSImage::WritePNG( unsigned char * data)
 #endif
   int stride = (this->img_depth/8)*(this->img_alpha?4:3);
   png_byte **row_pointers = new png_byte*[this->sizeY];
-  for (unsigned int i=0;i<this->sizeY;i++) {
-    row_pointers[i]= (png_byte *)&data[stride*i*sizeX];
+  if (this->flip) {
+    for (int i=this->sizeY-1,j=0;i>=0;i--,++j) {
+      row_pointers[j]= (png_byte *)&data[stride*i*sizeX];
+    }
+  }else {
+    for (unsigned int i=0;i<this->sizeY;i++) {
+      row_pointers[i]= (png_byte *)&data[stride*i*sizeX];
+    }
   }
   png_write_image (png_ptr,row_pointers);
   png_write_end(png_ptr, info_ptr);

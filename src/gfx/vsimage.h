@@ -81,6 +81,7 @@ class VSImage
 		int					img_color_type;
 		bool				img_alpha;
 		bool				strip_16;
+                bool flip;
 	public:
 		///if we statically allocate it, then gl_texture will kill it when destructor is called...and if we delete this texture we be messed
 		unsigned char *		palette;
@@ -128,9 +129,9 @@ class VSImage
 		// f2 is needed for bmp loading
 		unsigned char*	ReadImage( VSFile * f, textureTransform * t=NULL, bool strip=false, VSFile * f2 = NULL);
 		VSError	WriteImage( char * filename, unsigned char * data, VSImageType type, unsigned int width, unsigned int height,
-							bool alpha=1, char bpp=16, VSFileType ft=::VSFileSystem::UnknownFile);
+							bool alpha=1, char bpp=16, VSFileType ft=::VSFileSystem::UnknownFile, bool flip=false);
 		VSError	WriteImage( VSFile * pf, unsigned char * data, VSImageType type, unsigned int width, unsigned int height,
-							bool alpha=1, char bpp=16);
+							bool alpha=1, char bpp=16, bool flip=false);
 
 		int		Depth() { return this->img_depth; }
 		int		Format() { return this->img_color_type; }
