@@ -281,10 +281,10 @@ float capship_size=500;
 unsigned int apply_float_to_unsigned_int (float tmp) {
   static unsigned long int seed = 2531011;
   seed +=214013;
-  seed %=4294967296;
+  seed %=4294967295;
   unsigned  int ans = (unsigned int) tmp;
   tmp -=ans;//now we have decimal;
-  if (seed<(unsigned long int)(4294967296*tmp))
+  if (seed<(unsigned long int)(4294967295*tmp))
     ans +=1;
   return ans;
 }

@@ -2,6 +2,7 @@
 #define _ENDIANNESS_H
 double DONTUSE__NXSwapBigDoubleToLittleEndian(double x);
 
+#include "config.h"
 
 double VSSwapHostDoubleToLittle (double x);
 float VSSwapHostFloatToLittle (float x);
@@ -14,7 +15,7 @@ unsigned short VSSwapHostShortToLittle (unsigned short x);
     #if defined(IRIX)
     # include <sys/endian.h>
     
-    #elif !defined(_WIN32) && !defined(__CYGWIN__)
+    #elif !defined(_WIN32) && !defined(__CYGWIN__) && !defined(SOLARIS)
     # include <endian.h>
     #else
     # define __BIG_ENDIAN 1

@@ -37,6 +37,8 @@ AH_TEMPLATE(WIN32_POSIX, [Is this MingW, Cygwin, or a variant POSIX layer?])
 
 AH_TEMPLATE(LINUX, [Is this Linux?])
 AH_TEMPLATE(MACOSX, [Is this MacOS X?])
+AH_TEMPLATE(SOLARIS, [Is this Solaris?])
+AH_TEMPLATE(BSD_COMP, [Use BSD compatibility])
 
 case $target in
 *freebsd* | *netbsd* | *openbsd*)
@@ -61,6 +63,11 @@ case $target in
 	AC_DEFINE(MACOSX, 1)
 	AC_DEFINE(POSIX, 1)
 	AC_DEFINE(BSD, 199999)
+;;
+*solaris*)
+	SOLARIS="1"
+	AC_DEFINE(SOLARIS, 1)
+	AC_DEFINE(BSD_COMP, 1)
 ;;
 *)
 	slabcheck=no;
@@ -103,6 +110,9 @@ case $target in
     bsdthread=no
     ;;
   *mingw*)
+    bsdthread=no
+    ;;
+  *solaris*)
     bsdthread=no
     ;;
   *)
@@ -369,6 +379,18 @@ if test "x$is_macosx" = "xyes" ; then
     VS_LIBS="$VS_LIBS -lobjc"
 fi
 
+dnl --------------------------------------------------------------------------
+dnl Check if compiling for Solaris x86
+dnl --------------------------------------------------------------------------
+
+if test "$SOLARIS" = "1" ; then
+	LIBS="-L/opt/csw/lib $LIBS -L/usr/lib -lX11 -lCrun"
+    with_gl_libs=/opt/csw/lib
+    with_gl_inc=/opt/csw/include
+    with_include_dir=/opt/csw/include
+fi
+
+dnl
 dnl
 dnl check for Python
 dnl
@@ -405,7 +427,7 @@ do
         then
             FOUND_PYTHON=yes
             PYTHON_SHORT=`echo ${PYTHON_VERSION} | sed -e 's/\./ /g; s/[a-z|A-Z|+]/ /g' | awk '{print $1"."$2}'`
-            PYTHON_incchk="/usr/include/python /usr/include/python${PYTHON_SHORT} /usr/local/include/python /usr/local/include/python${PYTHON_SHORT} /sw/include/python /sw/include/python${PYTHON_SHORT}"
+            PYTHON_incchk="/usr/include/python /usr/include/python${PYTHON_SHORT} /usr/local/include/python /usr/local/include/python${PYTHON_SHORT} /sw/include/python /sw/include/python${PYTHON_SHORT} /opt/csw/include/python${PYTHON_SHORT}"
 
 	    PYTHON_incdir=""
 	    if test "x${FOUND_PYTHON}" = "xyes";
@@ -451,7 +473,7 @@ dnl Simple check for libpython2.2.so
 if test "x${FOUND_PYTHON}" = "xyes";
 then
     FOUND_LIBPYTHON_SO=no
-    PYTHON_libchk="/usr/lib /usr/local/lib /sw/lib/python${PYTHON_SHORT}/config /usr/lib/python${PYTHON_SHORT} /usr/lib/python${PYTHON_SHORT}/config /usr/local/lib/python${PYTHON_SHORT} /usr/local/lib/python${PYTHON_SHORT}/config /lib/python2.2/config"
+    PYTHON_libchk="/usr/lib /usr/local/lib /sw/lib/python${PYTHON_SHORT}/config /usr/lib/python${PYTHON_SHORT} /usr/lib/python${PYTHON_SHORT}/config /usr/local/lib/python${PYTHON_SHORT} /usr/local/lib/python${PYTHON_SHORT}/config /lib/python2.2/config /opt/csw/lib/python${PYTHON_SHORT}/config"
     for i in ${PYTHON_libchk};
     do
 	
@@ -1263,14 +1285,13 @@ if test "$CRYPTO" = "1" ; then
 	dnl	fi
 	dnl fi
 
+	saved_LIBS="$LIBS"
     AC_DEFUN( CHECK_FOR_CRYPTO_LIB, [
         AC_MSG_CHECKING([for crypto++ library with $CRYPTO_LIB])
-		VS_LIBS="$VS_LIBS $CRYPTO_LIB"
-		LIBS="$VS_LIBS"
+		LIBS="$saved_LIBS $CRYPTO_LIB"
         AC_TRY_LINK( , , have_crypto_lib=yes, have_crypto_lib=no )
         AC_MSG_RESULT([$have_crypto_lib])
     ]) 
-	saved_VSLIBS="$VS_LIBS"
 	CRYPTO_LIB="-lcrypto++"
 	CHECK_FOR_CRYPTO_LIB
 	if test "x$have_crypto_lib" = "xno" ; then
@@ -1278,30 +1299,24 @@ if test "$CRYPTO" = "1" ; then
 		CHECK_FOR_CRYPTO_LIB
 		dnl Test for debian
 		if test "x$have_crypto_lib" = "xno" ; then
-			VS_LIBS="$saved_VSLIBS"
 			CRYPTO_LIB="-lcrypto++5.1"
 			CHECK_FOR_CRYPTO_LIB
 			if test "x$have_crypto_lib" = "xno" ; then
-				VS_LIBS="$saved_VSLIBS"
 				CRYPTO_LIB="-lcryptopp"
 				CHECK_FOR_CRYPTO_LIB
 				if test "x$have_crypto_lib" = "xno" ; then
-					VS_LIBS="$saved_VSLIBS"
 					CRYPTO_LIB="-L/usr/local/lib -lcryptopp"
 					CHECK_FOR_CRYPTO_LIB
-					if test "x$have_crypto_lib" = "xno" ; then
-						VS_LIBS="$saved_VSLIBS"
-					fi
 				fi
 			fi
 		fi
 	fi
-	LIBS="$VSLIBS"
 	if test "x$have_crypto_lib" = "xyes" ; then
 		VS_CPPFLAGS="$VS_CPPFLAGS -DCRYPTO=$CRYPTO_VERSION"
 		CPPFLAGS="$CPPFLAGS -I/usr/local/include"
 		echo "Crypto++ library support enabled"
 	else
+		LIBS="$saved_LIBS"
 		echo "No Crypto++ support"
 	fi
 else

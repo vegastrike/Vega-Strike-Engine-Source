@@ -25,6 +25,7 @@
 
 #include <vector>
 #include <list>
+// WARNING : using std::queue gives conflicts under Solaris so we must use std::queue explicitly each time we need to
 #include <queue>
 #include <string.h>
 #include <stdlib.h>
@@ -89,7 +90,7 @@ class NetServer
 		    AddressIP u; // Client addresses waiting for login response
 	    };
 
-        queue<WaitListEntry> waitList;
+        std::queue<WaitListEntry> waitList;
 
         boost::shared_ptr<VsnetDownload::Server::Manager> _downloadManagerServer;
         static const char*                                _downloadSearchDirs[];

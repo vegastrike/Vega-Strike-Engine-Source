@@ -1,3 +1,4 @@
+#include "config.h"
 #if defined(_WIN32)
 #define in_addr_t unsigned long
 #include <windows.h>
@@ -5,7 +6,7 @@
 #define SOCKET_ERROR -1
 #include <sys/time.h>
 #include <sys/types.h>
-#if !defined(__APPLE__) && !defined(__CYGWIN__) && !defined(BSD) && !defined(__FreeBSD__)
+#if !defined(__APPLE__) && !defined(__CYGWIN__) && !defined(BSD) && !defined(__FreeBSD__) && !defined(SOLARIS)
 #include <error.h>
 #endif
 #include <netdb.h>
