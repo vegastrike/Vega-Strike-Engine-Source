@@ -20,8 +20,6 @@
 
 #ifdef __cplusplus
 #include <assert.h>
-extern "C"
-{
 #endif
 
 #ifndef _VEGASTRIKE_H_
@@ -99,7 +97,6 @@ extern float simulation_atom_var;
 #endif
 
 #ifdef __cplusplus
-} /* extern "C" */
 
 #endif
 
