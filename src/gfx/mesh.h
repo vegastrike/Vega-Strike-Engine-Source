@@ -135,6 +135,7 @@ private:
       LIGHTINGON,
       FLATSHADE,
       TEXTURE,
+      FORCETEXTURE,
       ALPHAMAP,
       SHAREVERT,
       ALPHA,
@@ -207,6 +208,7 @@ private:
     vector<Names> state_stack;
     bool sharevert;
     bool reverse;
+    bool force_texture;
     int load_stage;
     int point_state;
     int vertex_state;

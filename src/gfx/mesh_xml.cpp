@@ -105,7 +105,8 @@ const EnumMap::Pair Mesh::XML::attribute_names[] = {
   EnumMap::Pair("meshfile",XML::LODFILE),
   EnumMap::Pair ("Animation",XML::ANIMATEDTEXTURE),
   EnumMap::Pair ("Reverse",XML::REVERSE),
-  EnumMap::Pair ("LightingOn",XML::LIGHTINGON)
+  EnumMap::Pair ("LightingOn",XML::LIGHTINGON),
+  EnumMap::Pair ("ForceTexture",XML::FORCETEXTURE)
 };
 
 
@@ -332,6 +333,9 @@ void Mesh::beginElement(const string &name, const AttributeList &attributes) {
 	break;
       case XML::REVERSE:
 	xml->reverse = XMLSupport::parse_bool((*iter).value);
+	break;
+      case XML::FORCETEXTURE:
+	xml->force_texture=XMLSupport::parse_bool ((*iter).value);
 	break;
       case XML::TEXTURE:
 	xml->decal_name = (*iter).value;
@@ -1030,6 +1034,7 @@ void Mesh::LoadXML(const char *filename, float scale, int faction, Flightgroup *
 
   xml = new XML;
   xml->fg = fg;
+  xml->force_texture=false;
   xml->reverse=false;
   xml->sharevert=false;
   xml->faction = faction;
@@ -1252,9 +1257,9 @@ void Mesh::LoadXML(const char *filename, float scale, int faction, Flightgroup *
     //printf("tex\n");
 
     if (xml->alpha_name.length()==0) {
-      Decal = new Texture(xml->decal_name.c_str(),0,MIPMAP,TEXTURE2D,TEXTURE_2D,g_game.use_ship_textures?GFXTRUE:GFXFALSE);    
+      Decal = new Texture(xml->decal_name.c_str(),0,MIPMAP,TEXTURE2D,TEXTURE_2D,(g_game.use_ship_textures||xml->force_texture)?GFXTRUE:GFXFALSE);    
     }else {
-      Decal = new Texture(xml->decal_name.c_str(), xml->alpha_name.c_str(),0,MIPMAP,TEXTURE2D,TEXTURE_2D,1,0,g_game.use_ship_textures?GFXTRUE:GFXFALSE);
+      Decal = new Texture(xml->decal_name.c_str(), xml->alpha_name.c_str(),0,MIPMAP,TEXTURE2D,TEXTURE_2D,1,0,(g_game.use_ship_textures||xml->force_texture)?GFXTRUE:GFXFALSE);
      
     }
   }
