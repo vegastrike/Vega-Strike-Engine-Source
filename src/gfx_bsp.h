@@ -38,12 +38,12 @@ class BSPTree;
 
 class BSPNode {
 	Vector n;
-	float d;//daniel modified it to be the distance IN the direction of Vector n.  (used to be against)
+	float d;// distance AGAINST the direction of Vector n. 
 	bool isVirtual;
 	BSPNode *front;
 	BSPNode *back;
 	float plane_eqn(const Vector &vect) const {
-		return n.i*vect.i+n.j*vect.j+n.k*vect.k-d;
+		return n.i*vect.i+n.j*vect.j+n.k*vect.k+d;
 	}
 
 public:
