@@ -1892,21 +1892,30 @@ void Unit::UpdatePhysics (const Transformation &trans, const Matrix &transmat, c
   }
 }
 void Unit::AddVelocity(float difficulty) {
-   static float warpramptime=XMLSupport::parse_float (vs_config->getVariable ("physics","warpramptime","0.5"));     
+   static float warprampuptime=XMLSupport::parse_float (vs_config->getVariable ("physics","warprampuptime","5")); // for the heck of it.    
+   static float warprampdowntime=XMLSupport::parse_float (vs_config->getVariable ("physics","warprampdowntime","0.5"));     
    Vector v=Velocity;
-   if(graphicOptions.WarpRamping){ // Warp Turning off/on
-	  graphicOptions.RampCounter=warpramptime;
+   if(graphicOptions.WarpRamping){ // Warp Turning on/off
+	  if(graphicOptions.InWarp==1){ // Warp Turning on
+		graphicOptions.RampCounter=warprampuptime;
+	  } else { //Warp Turning off
+		graphicOptions.RampCounter=warprampdowntime;
+	  }
 	  graphicOptions.WarpRamping=0;
    }
+	 
    if(graphicOptions.InWarp==1||graphicOptions.RampCounter!=0){
-	   static float fmultiplier=XMLSupport::parse_float(vs_config->getVariable("physics","hyperspace_multiplier","3141592"));
 	   static float autopilot_term_distance = XMLSupport::parse_float (vs_config->getVariable ("physics","auto_pilot_termination_distance","6000"));     
-	   static float smallwarphack = XMLSupport::parse_float (vs_config->getVariable ("physics","minwarpeffectsize","1000"));     
-       //    float speed = v.Magnitude();
-       //    if (speed>.01)
-       //      if (speed>(computer.max_combat_speed))
-       //      v*=computer.max_combat_speed/speed;
-	   float minmultiplier=fmultiplier;
+	   static float smallwarphack = XMLSupport::parse_float (vs_config->getVariable ("physics","minwarpeffectsize","100"));     
+	   static float warpMultiplierMin=XMLSupport::parse_float(vs_config->getVariable("physics","warpMultiplierMin","9.86960440109")); // Pi^2
+       static float warpMultiplierMax=XMLSupport::parse_float(vs_config->getVariable("physics","warpMultiplierMax","300000000")); // C
+       static float warpMaxEfVel=XMLSupport::parse_float(vs_config->getVariable("physics","warpMaxEfVel","2960881320")); // Pi^2 * C
+	   static double warpregion1=XMLSupport::parse_float(vs_config->getVariable("physics","warpregion1","5000000")); // Boundary between multiplier regions 1&2. 2 is "high" mult
+	   static double warpregion0=XMLSupport::parse_float(vs_config->getVariable("physics","warpregion0","5000")); // Boundary between multiplier regions 0&1 0 is mult=1
+	   static double warpcruisemult=XMLSupport::parse_float(vs_config->getVariable("physics","warpcruisemult","5000")); // Mult at 1-2 boundary
+	   static double curvedegree=XMLSupport::parse_float(vs_config->getVariable("physics","warpcurvedegree","1.5")); // degree of curve
+       static double upcurvek=warpcruisemult/pow((warpregion1-warpregion0),curvedegree); // coefficient so as to agree with above
+	   float minmultiplier=warpMultiplierMax;
 	   Unit * planet;
 	   for (un_iter iter = _Universe->activeStarSystem()->gravitationalUnits().createIterator();(planet=*iter);++iter) {
 		   if (planet==this) {
@@ -1915,18 +1924,20 @@ void Unit::AddVelocity(float difficulty) {
 		 float multipliertemp=1;
 		 float minsizeeffect = (planet->rSize()>smallwarphack)?planet->rSize():smallwarphack;
 		 float effectiverad = autopilot_term_distance+minsizeeffect*(1.0f+UniverseUtil::getPlanetRadiusPercent())+getAutoRSize(this,this)+rSize();
-		 double onethird=1.0/3.0;
-		 double Nthoudist=9000000;
-		 double Nthoudistalt=minsizeeffect*450;
-		 Nthoudist=(Nthoudist<Nthoudistalt)?(Nthoudist):(Nthoudistalt);
-		 double Nthouslow=9000/pow(Nthoudist,onethird);
+		 //double Nthoudist=warpregion1;
+		 //double Nthoudistalt=minsizeeffect*450;
+		 //Nthoudist=(Nthoudist<Nthoudistalt)?(Nthoudist):(Nthoudistalt);
+		 //double onethird=1.0/3.0;
+		 //double Nthouslow=9000/pow(Nthoudist,onethird);
 		 double dist=(Position()-planet->Position()).Magnitude();
-		 double cuberoot=pow((dist-(effectiverad)-Nthoudist),onethird);
-		 if(dist>(effectiverad+Nthoudist)) {
-			 multipliertemp=9000+(314*cuberoot);
-		 } else if (dist>effectiverad){
-			multipliertemp=9000-(Nthouslow*pow(-(dist-(effectiverad)-Nthoudist),onethird));
+		 //double cuberoot=pow((dist-(effectiverad)-Nthoudist),onethird);
+		 //if(dist>(effectiverad+Nthoudist)) {
+		//	 multipliertemp=warpcruisemult+(upcurvek*pow(dist-effectiverad-Nthoudist,2));
+		/* } else */
+		 if (dist>effectiverad+warpregion0){
+			multipliertemp=pow((dist-effectiverad-warpregion0),curvedegree)*upcurvek;
 		 }else{
+		    multipliertemp=1;
 			minmultiplier=1;
 		 }
 		 minmultiplier=(multipliertemp<minmultiplier)?multipliertemp:minmultiplier;
@@ -1937,31 +1948,20 @@ void Unit::AddVelocity(float difficulty) {
 	     if(graphicOptions.RampCounter<=0){
 	       graphicOptions.RampCounter=0;
 		 }
-	     rampmult=(graphicOptions.InWarp)?1.0-((graphicOptions.RampCounter/warpramptime)*(graphicOptions.RampCounter/warpramptime)):(graphicOptions.RampCounter/warpramptime)*(graphicOptions.RampCounter/warpramptime);
+	     rampmult=(graphicOptions.InWarp)?1.0-((graphicOptions.RampCounter/warprampuptime)*(graphicOptions.RampCounter/warprampuptime)):(graphicOptions.RampCounter/warprampdowntime)*(graphicOptions.RampCounter/warprampdowntime);
 	   }
-           static float warpMultiplier=XMLSupport::parse_float(vs_config->getVariable("physics","warpMultiplier","0"));
-           static float warpMultiplierMax=XMLSupport::parse_float(vs_config->getVariable("physics","warpMultiplierMax","300000000"));
-           if (warpMultiplier==0) {
-             warpMultiplier=PI*PI*PI;
-           }
+	   if(minmultiplier<warpMultiplierMin) {
+		 minmultiplier=warpMultiplierMin;
+	   }
+	   
+	   if(minmultiplier>warpMultiplierMax) {
+		   minmultiplier=warpMultiplierMax; //SOFT LIMIT
+	   }
 	   minmultiplier*=rampmult;
-	   if(minmultiplier<warpMultiplier) {
-		 if(graphicOptions.InWarp==1) {
-		   minmultiplier=warpMultiplier*(1-graphicOptions.RampCounter);
-//		   printf("RAMP: %f\n",graphicOptions.RampCounter);
-		 } else if (graphicOptions.RampCounter!=0) {
-		   minmultiplier=warpMultiplier*graphicOptions.RampCounter;
-		 } else {
-		   minmultiplier=1;
-		 }
-	   }
-	   if(minmultiplier>fmultiplier) {
-		   minmultiplier=fmultiplier; //SOFT LIMIT
-	   }
 	   v*=minmultiplier;
 	   float vmag=sqrt(v.i*v.i+v.j*v.j+v.k*v.k);
-	   if(vmag>warpMultiplier*warpMultiplierMax){
-		   v*=warpMultiplier*warpMultiplierMax/vmag; // HARD LIMIT
+	   if(vmag>warpMaxEfVel){
+		   v*=warpMaxEfVel/vmag; // HARD LIMIT
 	   }
 	   graphicOptions.WarpFieldStrength=minmultiplier;
    } else {
