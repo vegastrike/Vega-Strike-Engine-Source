@@ -185,7 +185,7 @@ GamePlanet::GamePlanet(QVector x,QVector y,float vely, const Vector & rotvel, fl
   if (wormhole ) {
 	  static std::string wormhole_unit = vs_config->getVariable ("graphics","wormhole","wormhole");
 	  string stab (".stable");
-	  if (rand()<RAND_MAX*.99)
+	  if (rand()>RAND_MAX*.99)
 		  stab = ".unstable";
 	  string wormholename = wormhole_unit+stab;
 	  
