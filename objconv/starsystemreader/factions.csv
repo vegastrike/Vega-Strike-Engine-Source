@@ -8,7 +8,7 @@ andolian,0.05,120,0,Magellan
 shaper,0.02,120,1,Beckett
 highborn,0.0005,20,0,Vega
 mechanist,0.002,15,0,Torkelsen
-unadorned,0.00003,35,0,Torkelsen
+unadorned,0.00003,25,0,Torkelsen
 LIHW,0.002,100,2,Rhubarb
 merchant,0,2,0,Sol
 klkk,0.002,15,1,Crucible
@@ -17,10 +17,12 @@ forsaken,0.00002,20,0,Diaspora
 andolian,0.001,10,0,Crucible
 andolian,0.001,5,0,Redemption
 unadorned,0.00003,10,0,Solace
-rlaan,0.1,50,0,Eebzpt
-rlaan,0.1,50,0,Bzzeen
-rlaan,0.4,50,0,Ahbzeentk
+rlaan,0.9,50,0,Eebzpt
+rlaan,0.9,50,0,Bzzeen
+rlaan,0.9,50,0,Ahbzeentk
 LIHW,0.1,20,0,Rust
 rlaan,0.1,50,0,Bztutpt
 rlaan,0.1,50,0,Bzzahbtktk
 LIHW,0.1,20,0,Thanatos
+rlaan,0.2,10,0,Tutbzzaz
+rlaan,0.2,10,0,Izzptipt
