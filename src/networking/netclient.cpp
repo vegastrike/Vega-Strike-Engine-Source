@@ -66,15 +66,15 @@ typedef vector<ObjSerial>::iterator ObjI;
 vector<ObjSerial>	localSerials;
 bool isLocalSerial( ObjSerial sernum)
 {
-	cout<<"Looking for serial : "<<sernum<<" in ";
+	COUT<<"Looking for serial : "<<sernum<<" in ";
 	bool ret=false;
 	for( ObjI i=localSerials.begin(); !ret && i!=localSerials.end(); i++)
 	{
-		cout<<(*i)<<", ";
+		COUT<<(*i)<<", ";
 		if( sernum==(*i))
 			ret = true;
 	}
-	cout<<endl;
+	COUT<<endl;
 
 	return ret;
 }
@@ -138,7 +138,7 @@ int		NetClient::authenticate()
 	}
 	else
 	{
-		cout<<"Callsign and/or password not specified in vegastrike.config, please check this."<<endl<<endl;
+		cerr<<"Callsign and/or password not specified in vegastrike.config, please check this."<<endl<<endl;
 		return -1;
 	}
 
@@ -155,7 +155,7 @@ bool	NetClient::PacketLoop( Cmd command)
 	bool timeout = false;
 	bool recv = false;
 
-	cout<<"Enter NetClient::PacketLoop"<<endl;
+	COUT<<"Enter NetClient::PacketLoop"<<endl;
 
 	string packet_tostr = vs_config->getVariable( "network", "packettimeout", "10" );
 	int packet_to = atoi( packet_tostr.c_str());
@@ -170,10 +170,10 @@ bool	NetClient::PacketLoop( Cmd command)
 		UpdateTime();
 		newtime = getNewTime();
 		elapsed = newtime-initial;
-		//cout<<elapsed<<" seconds since login request"<<endl;
+		//COUT<<elapsed<<" seconds since login request"<<endl;
 		if( elapsed > packet_to)
 		{
-			cout<<"Timed out"<<endl;
+			COUT<<"Timed out"<<endl;
 			timeout = true;
 			cleanup();
 		}
@@ -181,19 +181,19 @@ bool	NetClient::PacketLoop( Cmd command)
 		if( ret>0)
 		{
 			if( packet.getCommand() == command)
-				cout<<"Got a response with corresponding command"<<endl;
+				COUT<<"Got a response with corresponding command"<<endl;
 			else
 			{
-				cout<<"Got a response with unexpected command : ";
+				COUT<<"Got a response with unexpected command : ";
 				displayCmd( packet.getCommand());
-				cout<<endl<<"!!! PROTOCOL ERROR -> EXIT !!!"<<endl;
+				COUT<<endl<<"!!! PROTOCOL ERROR -> EXIT !!!"<<endl;
 				cleanup();
 			}
 			recv = true;
 		}
 		else if( ret<0)
 		{
-			cout<<"!!! Error, dead connection to server -> EXIT !!!"<<endl;
+			COUT<<"!!! Error, dead connection to server -> EXIT !!!"<<endl;
 			cleanup();
 		}
 
@@ -220,7 +220,7 @@ vector<string>	NetClient::loginLoop( string str_callsign, string str_passwd)
 
 	COUT << "Buffering to send with CMD_LOGIN: " << endl;
 	PacketMem m( netbuf.getData(), netbuf.getDataLength(), PacketMem::LeaveOwnership );
-	m.dump( cout, 3 );
+	m.dump( cerr, 3 );
 
 	packet2.send( CMD_LOGIN, 0, netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, NULL, this->clt_sock, __FILE__, 
 #ifndef _WIN32
@@ -250,27 +250,27 @@ vector<string>	NetClient::loginLoop( string str_callsign, string str_passwd)
 		UpdateTime();
 		newtime = getNewTime();
 		elapsed = newtime-initial;
-		//cout<<elapsed<<" seconds since login request"<<endl;
+		//COUT<<elapsed<<" seconds since login request"<<endl;
 		if( elapsed > login_to)
 		{
-			cout<<"Timed out"<<endl;
+			COUT<<"Timed out"<<endl;
 			timeout = 1;
 		}
 		ret=this->checkMsg( NULL, &packet );
 		if( ret>0)
 		{
-			cout<<"Got a response"<<endl;
+			COUT<<"Got a response"<<endl;
 			recv = 1;
 		}
 		else if( ret<0)
 		{
-			cout<<"Error, dead connection to server"<<endl;
+			cerr<<"Error, dead connection to server"<<endl;
 			recv=-1;
 		}
 
 		micro_sleep( 40000);
 	}
-	cout<<"End of login loop"<<endl;
+	COUT<<"End of login loop"<<endl;
 	if( ret>0 && packet.getCommand()!=LOGIN_ERROR && packet.getCommand()!=LOGIN_UNAVAIL)
 	{
 		this->callsign = str_callsign;
@@ -415,7 +415,7 @@ int		NetClient::isTime()
 {
 	int ret=0;
 	cur_time += GetElapsedTime();
-	//cout<<"cur_time="<<cur_time<<" - elapsed="<<GetElapsedTime()<<endl;
+	//COUT<<"cur_time="<<cur_time<<" - elapsed="<<GetElapsedTime()<<endl;
 	if( cur_time > NETWORK_ATOM)
 	{
 		cur_time = 0;
@@ -501,9 +501,7 @@ int NetClient::recvMsg( char* netbuffer, Packet* outpacket )
             case LOGIN_ACCEPT :
 			{
 				Packet pckt;
-                cout << ">>> " << this->serial << " >>> LOGIN ACCEPTED =( serial n°"
-                     << packet_serial << " )= --------------------------------------"
-					 << endl;
+                COUT << ">>> " << this->serial << " >>> LOGIN ACCEPTED =( serial n°" << packet_serial << " )= --------------------------------------" << endl;
                 // Should receive player's data (savegame) from server if there is a save
                 this->serial = packet_serial;
                 localSerials.push_back( this->serial);
@@ -572,48 +570,48 @@ int NetClient::recvMsg( char* netbuffer, Packet* outpacket )
 			break;
             // Login failed
             case LOGIN_ERROR :
-                cout<<">>> LOGIN ERROR =( DENIED )= ------------------------------------------------"<<endl;
-                //cout<<"Received LOGIN_ERROR"<<endl;
+                COUT<<">>> LOGIN ERROR =( DENIED )= ------------------------------------------------"<<endl;
+                //COUT<<"Received LOGIN_ERROR"<<endl;
                 this->disconnect();
                 return -1;
                 break;
 			case LOGIN_UNAVAIL :
-				cout<<">>> ACCOUNT SERVER UNAVAILABLE ------------------------------------------------"<<endl;
+				COUT<<">>> ACCOUNT SERVER UNAVAILABLE ------------------------------------------------"<<endl;
 				this->disconnect();
 				return -1;
 				break;
             // Create a character
             case CMD_CREATECHAR :
-				cout << endl;
+				COUT << endl;
                 // Should begin character/ship creation process
                 //this->createChar();
                 break;
             // Receive start locations
             case CMD_LOCATIONS :
-				cout << endl;
+				COUT << endl;
                 // Should receive possible starting locations list
                 this->receiveLocations( &p1 );
                 break;
             case CMD_SNAPSHOT :
                 // Should update another client's position
-                //cout<<"Received a SNAPSHOT from server"<<endl;
+                //COUT<<"Received a SNAPSHOT from server"<<endl;
 				// We don't want to consider a late snapshot
 				if( old_timestamp > current_timestamp)
 					break;
                 this->receivePosition( &p1 );
                 break;
             case CMD_ENTERCLIENT :
-                cout << ">>> " << this->serial << " >>> ENTERING CLIENT =( serial n°"
+                COUT << ">>> " << this->serial << " >>> ENTERING CLIENT =( serial n°"
                      << packet_serial << " )= --------------------------------------" << endl;
                 this->addClient( &p1 );
                 break;
             case CMD_EXITCLIENT :
-                cout << ">>> " << this->serial << " >>> EXITING CLIENT =( serial n°"
+                COUT << ">>> " << this->serial << " >>> EXITING CLIENT =( serial n°"
                      << packet_serial << " )= --------------------------------------" << endl;
                 this->removeClient( &p1 );
                 break;
             case CMD_ADDEDYOU :
-                cout << ">>> " << this->serial << " >>> ADDED IN GAME =( serial n°"
+                COUT << ">>> " << this->serial << " >>> ADDED IN GAME =( serial n°"
                      << packet_serial << " )= --------------------------------------" << endl;
 				// Get the zone id in the packet
 				this->zone = netbuf.getShort();
@@ -621,14 +619,14 @@ int NetClient::recvMsg( char* netbuffer, Packet* outpacket )
                 break;
             case CMD_DISCONNECT :
                 /*** TO REDO IN A CLEAN WAY ***/
-                cout << ">>> " << this->serial << " >>> DISCONNECTED -> Client killed =( serial n°"
+                COUT << ">>> " << this->serial << " >>> DISCONNECTED -> Client killed =( serial n°"
                      << packet_serial << " )= --------------------------------------" << endl;
                 exit(1);
                 break;
             case CMD_ACK :
                 /*** RECEIVED AN ACK FOR A PACKET : comparison on packet timestamp and the client serial in it ***/
                 /*** We must make sure those 2 conditions are enough ***/
-                cout << ">>> ACK =( " << current_timestamp
+                COUT << ">>> ACK =( " << current_timestamp
                      << " )= ---------------------------------------------------" << endl;
 				p1.ack( );
                 break;
@@ -660,7 +658,7 @@ int NetClient::recvMsg( char* netbuffer, Packet* outpacket )
 						un->Fire(ROLES::EVERYTHING_ELSE|ROLES::FIRE_GUNS,false);
 				}
 				else
-					cout<<"!!! Problem -> CANNOT FIRE UNIT NOT FOUND !!!"<<endl;
+					COUT<<"!!! Problem -> CANNOT FIRE UNIT NOT FOUND !!!"<<endl;
 
 			break;
 			case CMD_UNFIREREQUEST :
@@ -686,7 +684,7 @@ int NetClient::recvMsg( char* netbuffer, Packet* outpacket )
 						un->Fire(ROLES::EVERYTHING_ELSE|ROLES::FIRE_GUNS,false);
 				}
 				else
-					cout<<"!!! Problem -> CANNOT UNFIRE UNIT NOT FOUND !!!"<<endl;
+					COUT<<"!!! Problem -> CANNOT UNFIRE UNIT NOT FOUND !!!"<<endl;
 
 			break;
 			case CMD_SCAN :
@@ -808,7 +806,7 @@ int NetClient::recvMsg( char* netbuffer, Packet* outpacket )
 					un->ApplyNetDamage( pnt, normal, amt, ppercentage, spercentage, col);
 				}
 				else
-					cout<<"!!! Problem -> CANNOT APPLY DAMAGE UNIT NOT FOUND !!!"<<endl;
+					COUT<<"!!! Problem -> CANNOT APPLY DAMAGE UNIT NOT FOUND !!!"<<endl;
 			}
 			break;
 			case CMD_DAMAGE1 :
@@ -830,7 +828,7 @@ int NetClient::recvMsg( char* netbuffer, Packet* outpacket )
 				if( un)
 					un->Kill();
 				else
-					cout<<"!!! Problem -> CANNOT KILL UNIT NOT FOUND !!!"<<endl;
+					COUT<<"!!! Problem -> CANNOT KILL UNIT NOT FOUND !!!"<<endl;
 			break;
 			// CMD_JUMP IS NOT USED ANYMORE !!!!
 			case CMD_JUMP :
@@ -843,7 +841,7 @@ int NetClient::recvMsg( char* netbuffer, Packet* outpacket )
 				// Get the pointer to the new star system
 				if( !(sts=star_system_table.Get( newsystem)))
 				{
-					cout<<"!!! ERROR : Couldn't find destination Star system !!!"<<endl;
+					cerr<<"!!! ERROR : Couldn't find destination Star system !!!"<<endl;
 					exit(1);
 				}
 				for( i=0; !found && i<pendingjump.size(); i++)
@@ -854,7 +852,7 @@ int NetClient::recvMsg( char* netbuffer, Packet* outpacket )
 				}
 				if( !found)
 				{
-					cout<<"!!! ERROR : Jump with destination "<<newsystem<<" not found !!!"<<endl;
+					cerr<<"!!! ERROR : Jump with destination "<<newsystem<<" not found !!!"<<endl;
 					exit(1);
 				}
 				else
@@ -866,7 +864,7 @@ int NetClient::recvMsg( char* netbuffer, Packet* outpacket )
 			}
 			break;
             default :
-                cout << ">>> " << this->serial << " >>> UNKNOWN COMMAND =( " << hex << cmd
+                COUT << ">>> " << this->serial << " >>> UNKNOWN COMMAND =( " << hex << cmd
                      << " )= --------------------------------------" << endl;
                 keeprun = 0;
                 this->disconnect();
@@ -897,7 +895,7 @@ void	NetClient::addClient( const Packet* packet )
 	if( cltserial==this->serial)
 	{
 		// Maybe just ignore here
-		cout<<"FATAL ERROR : RECEIVED INFO ABOUT ME !"<<endl;
+		COUT<<"FATAL ERROR : RECEIVED INFO ABOUT ME !"<<endl;
 		exit(1);
 	}
 	*/
@@ -905,7 +903,7 @@ void	NetClient::addClient( const Packet* packet )
 	clt = Clients[cltserial];
 	if( clt != NULL)
 	{
-		cout<<"Error, client exists !!"<<endl;
+		cerr<<"Error, client exists !!"<<endl;
 		exit( 1);
 	}
 
@@ -914,8 +912,8 @@ void	NetClient::addClient( const Packet* packet )
 	// Copy the client state in its structure
 	//Unit * un = clt->game_unit.GetUnit();
 
-	cout<<"New client n°"<<cltserial<<" - now "<<nbclients<<" clients in system"<<endl;
-	cout<<"At : ";
+	COUT<<"New client n°"<<cltserial<<" - now "<<nbclients<<" clients in system"<<endl;
+	COUT<<"At : ";
 
 	//Packet ptmp = packet;
 	NetBuffer netbuf( packet->getData(), packet->getDataLength());
@@ -929,7 +927,7 @@ void	NetClient::addClient( const Packet* packet )
 		saves.push_back( netbuf.getString());
 		saves.push_back( netbuf.getString());
 		//saves = FileUtil::GetSaveFromBuffer( packet->getData()+sizeof( ClientState));
-		cout<<"SAVE="<<saves[0].length()<<" bytes - XML="<<saves[1].length()<<" bytes"<<endl;
+		COUT<<"SAVE="<<saves[0].length()<<" bytes - XML="<<saves[1].length()<<" bytes"<<endl;
 
 		// We will ignore - starsys as if a client enters he is in the same system
 		//                - pos since we received a ClientState
@@ -962,7 +960,7 @@ void	NetClient::addClient( const Packet* packet )
 			(*i).status=Mount::INACTIVE;
 		un->SetNetworkMode( true);
 		un->SetSerial( cltserial);
-		//cout<<"Addclient 4"<<endl;
+		//COUT<<"Addclient 4"<<endl;
 
 		// Assign new coordinates to client
 		un->SetPosition( save.GetPlayerLocation());
@@ -987,10 +985,10 @@ void	NetClient::removeClient( const Packet* packet )
 {
 	ObjSerial	cltserial = packet->getSerial();
 
-	cout<<" & HTONS(Serial) = "<<cltserial<<endl;
+	COUT<<" & HTONS(Serial) = "<<cltserial<<endl;
 	if( Clients[cltserial] == NULL)
 	{
-		cout<<"Error, client does not exists !!"<<endl;
+		cerr<<"Error, client does not exists !!"<<endl;
 		exit( 1);
 	}
 
@@ -998,7 +996,7 @@ void	NetClient::removeClient( const Packet* packet )
 	_Universe->activeStarSystem()->RemoveUnit(Clients[cltserial]->game_unit.GetUnit());
 	nbclients--;
 	delete Clients[cltserial];
-	cout<<"Leaving client n°"<<cltserial<<" - now "<<nbclients<<" clients in system"<<endl;
+	COUT<<"Leaving client n°"<<cltserial<<" - now "<<nbclients<<" clients in system"<<endl;
 
 	Clients[cltserial] = NULL;
 }
@@ -1014,7 +1012,7 @@ void	NetClient::sendPosition( const ClientState* cs )
 	NetBuffer netbuf;
 
 	// Send the client state
-	cout<<"Sending ClientState == ";
+	COUT<<"Sending ClientState == ";
 	(*cs).display();
 	netbuf.addClientState( (*cs));
 	pckt.send( CMD_POSUPDATE, this->serial, netbuf.getData(), netbuf.getDataLength(), SENDANDFORGET, NULL, this->clt_sock, __FILE__, 
@@ -1060,7 +1058,7 @@ void	NetClient::receivePosition( const Packet* packet )
 		{
 			cs = netbuf.getClientState();
 			// Do what needed with update
-			cout<<"Received FULLSTATE ";
+			COUT<<"Received FULLSTATE ";
 			// Tell we received the ClientState so we can convert byte order from network to host
 			//cs.display();
 			sernum = cs.getSerial();
@@ -1091,7 +1089,7 @@ void	NetClient::receivePosition( const Packet* packet )
 			//sernum = ntohs( sernum);
 			sernum = netbuf.getShort();
 			clt = Clients[sernum];
-			cout<<"Received POSUPDATE for serial "<<sernum<<" -> ";
+			COUT<<"Received POSUPDATE for serial "<<sernum<<" -> ";
 			//offset += sizeof( ObjSerial);
 			if( clt!=NULL && !_Universe->isPlayerStarship( clt->game_unit.GetUnit()))
 			{
@@ -1109,7 +1107,7 @@ void	NetClient::receivePosition( const Packet* packet )
 			else
 			{
 				QVector tmppos = netbuf.getVector();
-				cout<<"ME OR LOCAL PLAYER = IGNORING"<<endl;
+				COUT<<"ME OR LOCAL PLAYER = IGNORING"<<endl;
 			}
 			//offset += sizeof( QVector);
 			j++;
@@ -1136,7 +1134,7 @@ void	NetClient::inGame()
 			906
 #endif
 			);
-	cout<<"Sending ingame with serial n°"<<this->serial<<endl;
+	COUT<<"Sending ingame with serial n°"<<this->serial<<endl;
 }
 
 /*************************************************************/
@@ -1178,7 +1176,7 @@ void	NetClient::receiveLocations( const Packet* )
 	unsigned char	cmd;
 
 #ifdef __DEBUG__
-	cout<<"Nb start locations : "<<nblocs<<endl;
+	COUT<<"Nb start locations : "<<nblocs<<endl;
 #endif
 	// Choose starting location here
 

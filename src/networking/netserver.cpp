@@ -168,13 +168,12 @@ void	NetServer::sendLoginAccept( Client * clt, AddressIP ipadr, int newacct)
 	else
 	{
 		COUT << ">>> SEND LOGIN ACCEPT =( serial n°" << cltserial << " )= --------------------------------------" << endl;
-		//cout<<"Login recv packet size = "<<packeta.getLength()<<endl;
 		// Get the save parts in a string array
 		vector<string> saves;
 		saves.push_back( netbuf.getString());
 		saves.push_back( netbuf.getString());
 		// Put the save parts in buffers in order to load them properly
-		cout<<"SAVE="<<saves[0].length()<<" bytes - XML="<<saves[1].length()<<" bytes"<<endl;
+		COUT<<"SAVE="<<saves[0].length()<<" bytes - XML="<<saves[1].length()<<" bytes"<<endl;
 		netbuf.Reset();
 		netbuf.addString( saves[0]);
 		netbuf.addString( saves[1]);
@@ -188,16 +187,16 @@ void	NetServer::sendLoginAccept( Client * clt, AddressIP ipadr, int newacct)
 		// Create a cockpit for the player and parse its savegame
 		Cockpit * cp = _Universe->createCockpit( PLAYER_CALLSIGN);
 		cp->Init ("");
-		cout<<"-> LOADING SAVE FROM NETWORK"<<endl;
+		COUT<<"-> LOADING SAVE FROM NETWORK"<<endl;
 		cp->savegame->ParseSaveGame( "", str, "", tmpvec, update, credits, savedships, cltserial, saves[0], false);
 		// Generate the system we enter in if needed and add the client in it
 
-		cout<<"\tcredits = "<<credits<<endl;
-		cout<<"\tfaction = "<<cp->savegame->GetPlayerFaction()<<endl;
-		cout<<"-> SAVE LOADED"<<endl;
+		COUT<<"\tcredits = "<<credits<<endl;
+		COUT<<"\tfaction = "<<cp->savegame->GetPlayerFaction()<<endl;
+		COUT<<"-> SAVE LOADED"<<endl;
 
 		// WARNING : WE DON'T SAVE FACTION NOR FLIGHTGROUP YET
-		cout<<"-> UNIT FACTORY WITH XML"<<endl;
+		COUT<<"-> UNIT FACTORY WITH XML"<<endl;
 		// We may have to determine which is the current ship of the player if we handle several ships for one player
 		string PLAYER_SHIPNAME = savedships[0];
 		string PLAYER_FACTION_STRING = cp->savegame->GetPlayerFaction();
@@ -207,16 +206,16 @@ void	NetServer::sendLoginAccept( Client * clt, AddressIP ipadr, int newacct)
                              string(""),
                              Flightgroup::newFlightgroup (PLAYER_CALLSIGN,PLAYER_SHIPNAME,PLAYER_FACTION_STRING,"default",1,1,"","",mission),
                              0, saves[1]);
-		cout<<"\tAFTER UNIT FACTORY WITH XML"<<endl;
+		COUT<<"\tAFTER UNIT FACTORY WITH XML"<<endl;
 		clt->game_unit.SetUnit( un);
 		// Assign its serial to client*
 		un->SetSerial( cltserial);
 
 		// Affect the created unit to the cockpit
-		cout<<"-> UNIT LOADED"<<endl;
+		COUT<<"-> UNIT LOADED"<<endl;
 
 		cp->SetParent( un,"","",tmpvec);
-		cout<<"-> COCKPIT AFFECTED TO UNIT"<<endl;
+		COUT<<"-> COCKPIT AFFECTED TO UNIT"<<endl;
 
         Packet packet2;
 		unsigned char * mdigest = new unsigned char[MD5_DIGEST_SIZE];
@@ -242,7 +241,7 @@ void	NetServer::sendLoginAccept( Client * clt, AddressIP ipadr, int newacct)
 			213
 #endif
 			);
-		cout<<"<<< SENT LOGIN ACCEPT -----------------------------------------------------------------------"<<endl;
+		COUT<<"<<< SENT LOGIN ACCEPT -----------------------------------------------------------------------"<<endl;
 	}
 }
 
@@ -253,8 +252,8 @@ void	NetServer::sendLoginError( Client * clt, AddressIP ipadr)
 	SOCKETALT	sockclt;
 	if( clt!=NULL)
 		sockclt = clt->sock;
-	//cout<<"Creating packet... ";
-	cout<<">>> SEND LOGIN ERROR -----------------------------------------------------------------"<<endl;
+	//COUT<<"Creating packet... ";
+	COUT<<">>> SEND LOGIN ERROR -----------------------------------------------------------------"<<endl;
 	packet2.send( LOGIN_ERROR, 0, NULL, 0, SENDRELIABLE, &ipadr, sockclt, __FILE__, 
 #ifndef _WIN32
 			__LINE__
@@ -262,7 +261,7 @@ void	NetServer::sendLoginError( Client * clt, AddressIP ipadr)
 			233
 #endif 
 			);
-	cout<<"<<< SENT LOGIN ERROR -----------------------------------------------------------------------"<<endl;
+	COUT<<"<<< SENT LOGIN ERROR -----------------------------------------------------------------------"<<endl;
 }
 
 void	NetServer::sendLoginUnavailable( Client * clt, AddressIP ipadr)
@@ -272,8 +271,8 @@ void	NetServer::sendLoginUnavailable( Client * clt, AddressIP ipadr)
 	SOCKETALT	sockclt;
 	if( clt!=NULL)
 		sockclt = clt->sock;
-	//cout<<"Creating packet... ";
-	cout<<">>> SEND LOGIN UNAVAILABLE -----------------------------------------------------------------"<<endl;
+	//COUT<<"Creating packet... ";
+	COUT<<">>> SEND LOGIN UNAVAILABLE -----------------------------------------------------------------"<<endl;
 	packet2.send( LOGIN_UNAVAIL, 0, NULL, 0, SENDRELIABLE, &ipadr, sockclt, __FILE__, 
 #ifndef _WIN32
 			__LINE__
@@ -281,7 +280,7 @@ void	NetServer::sendLoginUnavailable( Client * clt, AddressIP ipadr)
 			252
 #endif
 			);
-	cout<<"<<< SENT LOGIN UNAVAILABLE -----------------------------------------------------------------------"<<endl;
+	COUT<<"<<< SENT LOGIN UNAVAILABLE -----------------------------------------------------------------------"<<endl;
 }
 
 void	NetServer::sendLoginAlready( Client * clt, AddressIP ipadr)
@@ -293,8 +292,8 @@ void	NetServer::sendLoginAlready( Client * clt, AddressIP ipadr)
 	SOCKETALT	sockclt;
 	if( clt!=NULL)
 		sockclt = clt->sock;
-	//cout<<"Creating packet... ";
-	cout<<">>> SEND LOGIN ALREADY =( serial n°"<<packet.getSerial()<<" )= --------------------------------------"<<endl;
+	//COUT<<"Creating packet... ";
+	COUT<<">>> SEND LOGIN ALREADY =( serial n°"<<packet.getSerial()<<" )= --------------------------------------"<<endl;
 	packet2.send( LOGIN_ALREADY, 0, NULL, 0, SENDRELIABLE, &ipadr, sockclt, __FILE__,
 #ifndef _WIN32
 			__LINE__
@@ -302,7 +301,7 @@ void	NetServer::sendLoginAlready( Client * clt, AddressIP ipadr)
 			273
 #endif
 			);
-	cout<<"<<< SENT LOGIN ALREADY -----------------------------------------------------------------------"<<endl;
+	COUT<<"<<< SENT LOGIN ALREADY -----------------------------------------------------------------------"<<endl;
 }
 
 /**************************************************************/
@@ -368,7 +367,7 @@ Client* NetServer::addNewClient( SOCKETALT sock, bool is_tcp )
 	else
         udpClients.push_back( newclt);
     //COUT << "Added client with socket n°" << sock;
-      cout << " - Actual number of clients : "
+      COUT << " - Actual number of clients : "
          << tcpClients.size() + udpClients.size() << endl;
 
     return newclt;
@@ -457,7 +456,7 @@ void	NetServer::start(int argc, char **argv)
 		acct_sock = NetUITCP::createSocket( srvip, tmpport );
 		if( !acct_sock.valid())
 		{
-			cout<<"Cannot connect to account server... quitting"<<endl;
+			cerr<<"Cannot connect to account server... quitting"<<endl;
 			cleanup();
 		}
 		COUT <<"accountserver on socket "<<acct_sock<<" done."<<endl;
@@ -547,13 +546,13 @@ void	NetServer::start(int argc, char **argv)
 					) < 0 )
 				{
 					perror( "ERROR sending redirected login request to ACCOUNT SERVER : ");
-					cout<<"SOCKET was : "<<acct_sock<<endl;
+					COUT<<"SOCKET was : "<<acct_sock<<endl;
 					cleanup();
 				}
 				delete buflist;
 			}
 			else
-				cout<<">>> Reconnection to account server failed."<<endl;
+				cerr<<">>> Reconnection to account server failed."<<endl;
 		}
 
 		// See if we have some timed out clients and disconnect them
@@ -584,7 +583,7 @@ void	NetServer::start(int argc, char **argv)
 		planettime += GetElapsedTime();
 		if( snapchanged && snaptime>NETWORK_ATOM)
 		{
-			//cout<<"SENDING SNAPSHOT ----------"<<end;
+			//COUT<<"SENDING SNAPSHOT ----------"<<end;
 			// If planet time we send planet and nebula info
 			if( planettime>PLANET_ATOM)
 			{
@@ -658,7 +657,7 @@ void	NetServer::checkKey( SocketSet & set)
 	if( set.is_set( 0))
 	{
 		if( read( 0, &c, 1)==-1)
-			cout<<"Error reading char on std input "<<endl;
+			cerr<<"Error reading char on std input "<<endl;
 		if( c != 0x0a)
 		{
 			input_buffer[nbchars] = c;
@@ -730,7 +729,7 @@ void	NetServer::checkAcctMsg( SocketSet& set )
 	// Get the number of active clients
 	if( acct_sock.isActive( set ))
 	{
-		//cout<<"Net activity !"<<endl;
+		//COUT<<"Net activity !"<<endl;
 		// Receive packet and process according to command
 
 		PacketMem mem;
@@ -743,7 +742,7 @@ void	NetServer::checkAcctMsg( SocketSet& set )
 			// should be ok and we can use a "queue" for waiting clients
 			if( waitList.size()==0)
 			{
-				cout<<"Error : trying to remove client on empty waitList"<<" - len="<<len<<endl;
+				cerr<<"Error : trying to remove client on empty waitList"<<" - len="<<len<<endl;
 				exit( 1);
 			}
             WaitListEntry entry( waitList.front() );
@@ -776,24 +775,24 @@ void	NetServer::checkAcctMsg( SocketSet& set )
 					COUT<<"<<< LOGIN ACCEPTED -----------------------------------------------------------"<<endl;
 				break;
 				case LOGIN_ERROR :
-					cout<<">>> LOGIN ERROR =( DENIED )= --------------------------------------"<<endl;
+					COUT<<">>> LOGIN ERROR =( DENIED )= --------------------------------------"<<endl;
 					// Login error -> disconnect
 					this->sendLoginError( clt, ipadr);
-					cout<<"<<< LOGIN ERROR ---------------------------------------------------"<<endl;
+					COUT<<"<<< LOGIN ERROR ---------------------------------------------------"<<endl;
 				break;
 				case LOGIN_ALREADY :
-					cout<<">>> LOGIN ERROR =( ALREADY LOGGED IN -> serial n°"<<packet.getSerial()<<" )= --------------------------------------"<<endl;
+					COUT<<">>> LOGIN ERROR =( ALREADY LOGGED IN -> serial n°"<<packet.getSerial()<<" )= --------------------------------------"<<endl;
 					// Client already logged in -> disconnect
 					this->sendLoginAlready( clt, ipadr);
-					cout<<"<<< LOGIN ERROR --------------------------------------------------------------"<<endl;
+					COUT<<"<<< LOGIN ERROR --------------------------------------------------------------"<<endl;
 				break;
 				default:
-					cout<<">>> UNKNOWN COMMAND =( "<<hex<<cmd<<" )= --------------------------------------"<<endl;
+					COUT<<">>> UNKNOWN COMMAND =( "<<hex<<cmd<<" )= --------------------------------------"<<endl;
 			}
 		}
 		else
 		{
-			cout<<"Connection to account server lost !!"<<endl;
+			cerr<<"Connection to account server lost !!"<<endl;
 			acct_sock.disconnect( __PRETTY_FUNCTION__, false );
 			acct_con = 0;
 		}
@@ -844,17 +843,17 @@ void	NetServer::checkTimedoutClients_udp()
 		deltatmp = (fabs(curtime - (*i)->latest_timeout));
 		if( (*i)->latest_timeout!=0)
 		{
-			//cout<<"DELTATMP = "<<deltatmp<<" - clienttimeout = "<<clienttimeout<<endl;
+			//COUT<<"DELTATMP = "<<deltatmp<<" - clienttimeout = "<<clienttimeout<<endl;
 			// Here considering a delta > 0xFFFFFFFX where X should be at least something like 0.9
 			// This allows a packet not to be considered as "old" if timestamp has been "recycled" on client
 			// side -> when timestamp has grown enough to became bigger than what an u_int can store
 			if( (*i)->ingame && deltatmp > clienttimeout && deltatmp < (0xFFFFFFFF*0.9) )
 			{
 				un = (*i)->game_unit.GetUnit();
-				cout<<"ACTIVITY TIMEOUT for client number "<<un->GetSerial()<<endl;
-				cout<<"\t\tCurrent time : "<<curtime<<endl;
-				cout<<"\t\tLatest timeout : "<<((*i)->latest_timeout)<<endl;
-				cout<<"t\tDifference : "<<deltatmp<<endl;
+				cerr<<"ACTIVITY TIMEOUT for client number "<<un->GetSerial()<<endl;
+				COUT<<"\t\tCurrent time : "<<curtime<<endl;
+				COUT<<"\t\tLatest timeout : "<<((*i)->latest_timeout)<<endl;
+				COUT<<"t\tDifference : "<<deltatmp<<endl;
 				discList.push_back( *i);
 			}
 		}
@@ -881,7 +880,7 @@ void	NetServer::recvMsg_tcp( Client * clt)
     if( recvbytes <= 0 )
     {
 	//COUT << "received " << recvbytes << " bytes from " << sockclt;
-	  cout << ", disconnecting" << endl;
+	  cerr << ", disconnecting" << endl;
         discList.push_back( clt);
     }
     else
@@ -894,7 +893,7 @@ void	NetServer::recvMsg_tcp( Client * clt)
 
 #ifdef VSNET_DEBUG
 		COUT << "Created a packet with command " << displayCmd(Cmd(command)) << endl;
-	    mem.dump( cout, 3 );
+	    mem.dump( cerr, 3 );
 #endif
 
 		// In TCP we always process
@@ -1020,7 +1019,7 @@ void	NetServer::processPacket( Client * clt, unsigned char cmd, const AddressIP&
     {
 		case CMD_LOGIN:
         {
-            cout<<">>> LOGIN REQUEST --------------------------------------"<<endl;
+            COUT<<">>> LOGIN REQUEST --------------------------------------"<<endl;
             // Authenticate client
             // Need to give the IP address of incoming message in UDP mode to store it
             // in the Client struct
@@ -1067,11 +1066,11 @@ void	NetServer::processPacket( Client * clt, unsigned char cmd, const AddressIP&
 					) < 0 )
 				{
 					perror( "ERROR sending redirected login request to ACCOUNT SERVER : ");
-					cout<<"SOCKET was : "<<acct_sock<<endl;
+					COUT<<"SOCKET was : "<<acct_sock<<endl;
 					cleanup();
 				}
             }
-            cout<<"<<< LOGIN REQUEST --------------------------------------"<<endl;
+            COUT<<"<<< LOGIN REQUEST --------------------------------------"<<endl;
         }
         break;
 		case CMD_INITIATE:
@@ -1079,10 +1078,10 @@ void	NetServer::processPacket( Client * clt, unsigned char cmd, const AddressIP&
 			break;
 		case CMD_ADDCLIENT:
 			// Add the client to the game
-			cout<<">>> ADD REQUEST =( serial n°"<<packet.getSerial()<<" )= --------------------------------------"<<endl;
-			//cout<<"Received ADDCLIENT request"<<endl;
+			COUT<<">>> ADD REQUEST =( serial n°"<<packet.getSerial()<<" )= --------------------------------------"<<endl;
+			//COUT<<"Received ADDCLIENT request"<<endl;
 			this->addClient( clt);
-			cout<<"<<< ADD REQUEST --------------------------------------------------------------"<<endl;
+			COUT<<"<<< ADD REQUEST --------------------------------------------------------------"<<endl;
 			break;
 		case CMD_POSUPDATE:
 			// Received a position update from a client
@@ -1101,18 +1100,18 @@ void	NetServer::processPacket( Client * clt, unsigned char cmd, const AddressIP&
 			break;
 		case CMD_PING:
 			// Nothing to do here, just receiving the packet is enough
-			//cout<<"Got PING from serial "<<packet.getSerial()<<endl;
+			//COUT<<"Got PING from serial "<<packet.getSerial()<<endl;
 			break;
 		case CMD_LOGOUT:
-			cout<<">>> LOGOUT REQUEST =( serial n°"<<packet.getSerial()<<" )= --------------------------------------"<<endl;
+			COUT<<">>> LOGOUT REQUEST =( serial n°"<<packet.getSerial()<<" )= --------------------------------------"<<endl;
 			// Client wants to quit the game
 			logoutList.push_back( clt);
-			cout<<"<<< LOGOUT REQUEST -----------------------------------------------------------------"<<endl;
+			COUT<<"<<< LOGOUT REQUEST -----------------------------------------------------------------"<<endl;
 			break;
 		case CMD_ACK :
 			/*** RECEIVED AN ACK FOR A PACKET : comparison on packet timestamp and the client serial in it ***/
 			/*** We must make sure those 2 conditions are enough ***/
-			cout<<">>> ACK =( "<<packet.getTimestamp()<<" )= ---------------------------------------------------"<<endl;
+			COUT<<">>> ACK =( "<<packet.getTimestamp()<<" )= ---------------------------------------------------"<<endl;
 			packet.ack( );
 			break;
 
@@ -1140,7 +1139,7 @@ void	NetServer::processPacket( Client * clt, unsigned char cmd, const AddressIP&
 			// Set the concerned mount as ACTIVE and others as INACTIVE
 			un = zonemgr->getUnit( target_serial, zone);
 			if( un==NULL)
-				cout<<"ERROR --> Received a fire order for non-existing UNIT"<<endl;
+				COUT<<"ERROR --> Received a fire order for non-existing UNIT"<<endl;
 			else
 			{
 				vector <Mount>
@@ -1169,7 +1168,7 @@ void	NetServer::processPacket( Client * clt, unsigned char cmd, const AddressIP&
 			un = clt->game_unit.GetUnit();
 			cp = _Universe->isPlayerStarship( un);
 			if( un==NULL)
-				cout<<"ERROR --> Received a jump request for non-existing UNIT"<<endl;
+				COUT<<"ERROR --> Received a jump request for non-existing UNIT"<<endl;
 			else
 			{
 					// Verify if there really is a jump point to the new starsystem
@@ -1322,7 +1321,7 @@ void	NetServer::checkSystem( Client * clt)
 void	NetServer::addClient( Client * clt)
 {
 	Unit * un = clt->game_unit.GetUnit();
-	cout<<">>> SEND ENTERCLIENT =( serial n°"<<un->GetSerial()<<" )= --------------------------------------"<<endl;
+	COUT<<">>> SEND ENTERCLIENT =( serial n°"<<un->GetSerial()<<" )= --------------------------------------"<<endl;
 	Packet packet2;
 	string savestr, xmlstr;
 	NetBuffer netbuf;
@@ -1343,7 +1342,7 @@ void	NetServer::addClient( Client * clt)
 	cp->activeStarSystem = st2;
 	// Cannot use sts pointer since it may be NULL if the system was just created
 	safevec = UniverseUtil::SafeStarSystemEntrancePoint( st2, cp->savegame->GetPlayerLocation(), clt->game_unit.GetUnit()->radial_size);
-	cout<<"\tposition : x="<<safevec.i<<" y="<<safevec.j<<" z="<<safevec.k<<endl;
+	COUT<<"\tposition : x="<<safevec.i<<" y="<<safevec.j<<" z="<<safevec.k<<endl;
 	cp->savegame->SetPlayerLocation( safevec);
 	// UPDATE THE CLIENT Unit's state
 	un->SetPosition( safevec);
@@ -1363,14 +1362,14 @@ void	NetServer::addClient( Client * clt)
 			1171
 #endif
 			);
-		cout<<"<<< SEND ENTERCLIENT TO OTHER CLIENT IN THE ZONE------------------------------------------"<<endl;
+		COUT<<"<<< SEND ENTERCLIENT TO OTHER CLIENT IN THE ZONE------------------------------------------"<<endl;
 		zonemgr->broadcast( clt, &packet2 ); // , &NetworkToClient );
-		cout<<"Serial : "<<un->GetSerial()<<endl;
+		COUT<<"Serial : "<<un->GetSerial()<<endl;
 		// Send info about other ships in the system to "clt"
 		zonemgr->sendZoneClients( clt);
 	}
 	// In all case set the zone and send the client the zone which it is in
-	cout<<">>> SEND ADDED YOU =( serial n°"<<un->GetSerial()<<" )= --------------------------------------"<<endl;
+	COUT<<">>> SEND ADDED YOU =( serial n°"<<un->GetSerial()<<" )= --------------------------------------"<<endl;
 	un->SetZone( zoneid);
 	clt->ingame = true;
 	Packet pp;
@@ -1384,9 +1383,9 @@ void	NetServer::addClient( Client * clt)
 #endif
 		);
 
-	cout<<"ADDED client n "<<un->GetSerial()<<" in ZONE "<<clt->zone<<endl;
+	COUT<<"ADDED client n "<<un->GetSerial()<<" in ZONE "<<clt->zone<<endl;
 	//delete cltsbuf;
-	//cout<<"<<< SENT ADDED YOU -----------------------------------------------------------------------"<<endl;
+	//COUT<<"<<< SENT ADDED YOU -----------------------------------------------------------------------"<<endl;
 }
 
 /***************************************************************/
@@ -1457,7 +1456,7 @@ void	NetServer::disconnect( Client * clt, const char* debug_from_file, int debug
 #endif					 
 					 ) < 0 )
         {
-			cout<<"ERROR sending LOGOUT to account server"<<endl;
+			COUT<<"ERROR sending LOGOUT to account server"<<endl;
 		}
 		//p2.display( "", 0);
 	}
@@ -1522,7 +1521,7 @@ void	NetServer::logout( Client * clt)
 		// Send a disconnection info to account server
 		netbuf.addString( clt->callsign);
 		netbuf.addString( clt->passwd);
-		cout<<"Loggin out "<<clt->name<<":"<<clt->passwd<<endl;
+		COUT<<"Loggin out "<<clt->name<<":"<<clt->passwd<<endl;
 		Packet p2;
 		if( p2.send( CMD_LOGOUT, un->GetSerial(), netbuf.getData(), netbuf.getDataLength(),
 		             SENDRELIABLE, NULL, acct_sock, __FILE__,
@@ -1533,7 +1532,7 @@ void	NetServer::logout( Client * clt)
 #endif
 			) < 0 )
         {
-			cout<<"ERROR sending LOGOUT to account server"<<endl;
+			COUT<<"ERROR sending LOGOUT to account server"<<endl;
 		}
 	}
 
@@ -1609,7 +1608,7 @@ void	NetServer::save()
 	fp = fopen( dynuniv_path.c_str(), "w+");
 	if( !fp)
 	{
-		cout<<"Error opening dynamic universe file"<<endl;
+		cerr<<"Error opening dynamic universe file"<<endl;
 		cleanup();
 	}
 	else
@@ -1618,7 +1617,7 @@ void	NetServer::save()
 		int wlen = fwrite( dyn_univ.c_str(), sizeof( char), dyn_univ.length(), fp);
 		if( wlen != dyn_univ.length())
 		{
-			cout<<"Error writing dynamic universe file"<<endl;
+			cerr<<"Error writing dynamic universe file"<<endl;
 			cleanup();
 		}
 		fclose( fp);
@@ -1653,7 +1652,7 @@ void	NetServer::save()
 			}
 			if (!found)
 			{
-				cout<<"Error client not found in save process !!!!"<<endl;
+				cerr<<"Error client not found in save process !!!!"<<endl;
 				exit(1);
 			}
 			netbuf.addString( savestr);
@@ -1667,7 +1666,7 @@ void	NetServer::save()
 			1434
 #endif
 			) < 0 )
-				cout<<"ERROR sending SAVE to account server"<<endl;
+				COUT<<"ERROR sending SAVE to account server"<<endl;
 		}
 	}
 }
@@ -1770,10 +1769,10 @@ void	NetServer::sendKill( ObjSerial serial, unsigned short zone)
 		}
 	}
 	if( !found)
-		cout<<"Killed a non client Unit = "<<serial<<endl;
+		COUT<<"Killed a non client Unit = "<<serial<<endl;
 	else
 	{
-		cout<<"Killed client serial = "<<serial<<endl;
+		COUT<<"Killed client serial = "<<serial<<endl;
 		clt->ingame = false;
 	}
 
