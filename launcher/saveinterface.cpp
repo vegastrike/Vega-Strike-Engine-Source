@@ -187,15 +187,18 @@ void launch_mission () {
    printf ("vegastrike %s %s",num,my_mission.c_str());
    fflush (stdout);
 #ifndef _WIN32
+   chdir ("/usr/games/vegastrike/data");
    execlp ("vegastrike","/usr/local/bin/vegastrike",num,my_mission.c_str(),NULL);   
 #else
    DWORD id;
    HANDLE hThr=CreateThread(NULL,0,DrawStartupDialog,(void *)new stupod (strdup (my_mission.c_str()),strdup (num)),0,&id);
 #endif
   } else {
+
    printf ("vegastrike %s",my_mission.c_str());
    fflush (stdout);
 #ifndef _WIN32
+   chdir ("/usr/games/vegastrike/data");
    execlp ("vegastrike","/usr/local/bin/vegastrike",my_mission.c_str(),NULL);   
 #else
    DWORD id;
