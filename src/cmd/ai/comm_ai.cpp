@@ -5,6 +5,7 @@
 #include "cmd/images.h"
 #include "config_xml.h"
 #include "vs_globals.h"
+#include "cmd/script/flightgroup.h"
 CommunicatingAI::CommunicatingAI (int ttype, int stype,  float rank, float mood, float anger,float appeas,  float moodswingyness, float randomresp) :Order (ttype,stype),anger(anger), appease(appeas), moodswingyness(moodswingyness),randomresponse (randomresp),mood(mood),rank(rank) {
   comm_face=NULL;
   if (rank==666) {
@@ -55,7 +56,25 @@ float CommunicatingAI::GetEffectiveRelationship (const Unit * target)const {
   }
   return Order::GetEffectiveRelationship (target)+rel;
 }
+static void AllUnitsCloseAndEngage(Unit * un, int faction) {
+  Unit * ally;
+  for (un_iter i=_Universe->activeStarSystem()->getUnitList().createIterator();
+       (ally = *i)!=NULL;
+       ++i) {
+    if (ally->faction==faction) {
+      Flightgroup * fg = ally->getFlightgroup();
+      if (fg) {
+	if (fg->directive.empty()?true:toupper(*fg->directive.begin())!=*fg->directive.begin()) {
+	  ally->Target (un);
+	  fg->directive=string("a");//attack my target (of leader)
+	}
+      }else {
+	ally->Target (un);
+      }
+    }
+  }
 
+}
 void CommunicatingAI::TerminateContrabandSearch(bool contraband_detected) {
   //reports success or failure
   Unit * un;
@@ -65,6 +84,8 @@ void CommunicatingAI::TerminateContrabandSearch(bool contraband_detected) {
       c.SetCurrentState(c.fsm->GetContrabandDetectedNode(),comm_face,sex);
       static int numHitsPerContrabandFail=3;
       GetMadAt (un,numHitsPerContrabandFail);
+      AllUnitsCloseAndEngage(un,parent->faction);
+
     }else {
       c.SetCurrentState(c.fsm->GetContrabandUnDetectedNode(),comm_face,sex);      
     }
