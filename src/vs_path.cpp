@@ -1,3 +1,4 @@
+#include "vegastrike.h"
 #include "vs_path.h"
 #include "config_xml.h"
 #include "vs_globals.h"
@@ -10,6 +11,8 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #endif
+
+float simulation_atom_var=(float)(1.0/10.0);
 
 #define CONFIGFILE "vegastrike.config"
 #define HOMESUBDIR ".vegastrike"
@@ -74,6 +77,11 @@ void initpaths () {
   if (fp)
     fclose (fp);
   returnfromhome();
+
+  simulation_atom_var=atof(vs_config->getVariable("general","simulation_atom","0.1").c_str());
+
+  cout << "SIMULATION_ATOM: " << SIMULATION_ATOM << endl;
+
   datadir = vs_config->getVariable ("data","directory",sharedsounds);
   chdir (datadir.c_str());
   chdir (vs_config->getVariable ("data","sharedtextures","textures").c_str());

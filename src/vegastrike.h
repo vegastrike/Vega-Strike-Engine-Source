@@ -28,7 +28,15 @@ extern "C"
 
 #ifndef _VEGASTRIKE_H_
 #define _VEGASTRIKE_H_
+
+#if 0
 static const float SIMULATION_ATOM = (float)(1.0/10.0);
+  extern float simulation_atom_var; // not used, just dummy to compile
+#else
+extern float simulation_atom_var;
+#define SIMULATION_ATOM (simulation_atom_var)
+#endif
+
 #ifdef HAVE_CONFIG_H
 #   include <config.h>
 #endif
