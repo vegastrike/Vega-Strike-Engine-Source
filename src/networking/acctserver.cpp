@@ -534,7 +534,7 @@ void    AccountServer::sendAuthorized( SOCKETALT sock, Account * acct)
     // Read the XML file
         if( err2<=Ok)
         {
-			xmlbuf = f.ReadFull();
+			xmlbuf = f2.ReadFull();
 			f2.Close();
         }
         else
