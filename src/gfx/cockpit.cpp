@@ -8,7 +8,7 @@
 #include "cmd/iterator.h"
 #include "cmd/collection.h"
 void LocalToRadar (const Vector & pos, float &s, float &t) {
-  s = pos.k+1;
+  s = (pos.k>0?pos.k:0)+1;
   t = 2*sqrtf(pos.i*pos.i + pos.j*pos.j + s*s);
   s = -pos.i/t;
   t = pos.j/t;
@@ -47,12 +47,6 @@ void Cockpit::DrawBlips (Unit * un) {
 	GFXBegin (GFXPOINT);
       }
       GFXVertex3f (xcent+xsize*s,ycent+ysize*t,0);
-	/*
-	      GFXVertex3f (xcent+4./g_game.x_resolution+xsize*s,ycent+ysize*t,0);
-	      GFXVertex3f (xcent-4./g_game.x_resolution+xsize*s,ycent+ysize*t,0);
-	      GFXVertex3f (xcent+xsize*s,ycent+4./g_game.y_resolution+ysize*t,0);
-	      GFXVertex3f (xcent+xsize*s,ycent-4./g_game.y_resolution+ysize*t,0);
-	*/
       if (target==makeBigger) {
 	GFXEnd();
 	GFXPointSize (2);
