@@ -321,12 +321,14 @@ bool Beam::Collide (Unit * target) {
     impact|=IMPACT;
     
     GFXColor coltmp (Col);
+    /*
     coltmp.r+=.5;
     coltmp.g+=.5;
     coltmp.b+=.5;
     if (coltmp.r>1)coltmp.r=1;
     if (coltmp.g>1)coltmp.g=1;
     if (coltmp.b>1)coltmp.b=1;
+    */
     float tmp=(curlength/range); 
     target->ApplyDamage (center+direction*curlength,normal,(damagerate*SIMULATION_ATOM*curthick/thickness)*((1-tmp)+tmp*rangepenalty),coltmp);
     return true;
