@@ -21,6 +21,8 @@
 
 *** GAME SERVER ********************************************************
 
+- Fix ping computation
+- Depending on ping -> send the player its own info in order to update himself periodicaly (like 1 time per 2 or 3 seconds)
 - In savegame : add stardate loading and saving stuff to dynamic universe
 - Add a timeout between the time the player logged in and the time he really enters the game
 - Add options to server keyboard control : KILL A SERVER UNIT, KICK A PLAYER, SEND A PLAYER TO JAIL SYSTEM, SEND ADMIN MESSAGE TO PLAYERS...

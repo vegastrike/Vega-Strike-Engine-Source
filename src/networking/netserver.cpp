@@ -1503,7 +1503,13 @@ void	NetServer::posUpdate( ClientPtr clt)
 {
 	NetBuffer netbuf( packet.getData(), packet.getDataLength());
 	Unit * un = clt->game_unit.GetUnit();
+	ObjSerial clt_serial = netbuf.getSerial();
 
+	if( clt_serial != un->GetSerial())
+	{
+		cerr<<"!!! ERROR : Received an update from a serial that differs with the client we found !!!"<<endl;
+		exit(1);
+	}
 	ClientState cs;
 	// Set old position
 	un->prev_physical_state = un->curr_physical_state;

@@ -80,8 +80,6 @@ void	NetBuffer::checkBuffer( int len, const char * fun)
 
 void	NetBuffer::addClientState( ClientState cs)
 		{
-			int tmpsize = sizeof( cs);
-			resizeBuffer( offset+tmpsize);
 			this->addUInt32( cs.delay);
 			this->addSerial( cs.client_serial);
 			this->addTransformation( cs.pos);
@@ -91,7 +89,6 @@ void	NetBuffer::addClientState( ClientState cs)
 ClientState NetBuffer::getClientState()
 		{
 			ClientState cs;
-			checkBuffer( sizeof( cs), "getClientState");
 			cs.delay = this->getUInt32();
 			cs.client_serial = this->getSerial();
 			cs.pos = this->getTransformation();
@@ -103,8 +100,6 @@ ClientState NetBuffer::getClientState()
 
 void	NetBuffer::addVector( Vector v)
 		{
-			int tmpsize = sizeof( v);
-			resizeBuffer( offset+tmpsize);
 			this->addFloat( v.i);
 			this->addFloat( v.j);
 			this->addFloat( v.k);
@@ -112,7 +107,6 @@ void	NetBuffer::addVector( Vector v)
 Vector	NetBuffer::getVector()
 		{
 			Vector v;
-			checkBuffer( sizeof( v), "getVector");
 			v.i = this->getFloat();
 			v.j = this->getFloat();
 			v.k = this->getFloat();
@@ -121,8 +115,6 @@ Vector	NetBuffer::getVector()
 		}
 void	NetBuffer::addQVector( QVector v)
 		{
-			int tmpsize = sizeof( v);
-			resizeBuffer( offset+tmpsize);
 			this->addDouble( v.i);
 			this->addDouble( v.j);
 			this->addDouble( v.k);
@@ -130,7 +122,6 @@ void	NetBuffer::addQVector( QVector v)
 QVector	NetBuffer::getQVector()
 		{
 			Vector v;
-			checkBuffer( sizeof( v), "getQVector");
 			v.i = this->getDouble();
 			v.j = this->getDouble();
 			v.k = this->getDouble();
@@ -139,8 +130,6 @@ QVector	NetBuffer::getQVector()
 		}
 void	NetBuffer::addColor( GFXColor col)
 		{
-			int tmpsize = sizeof( col);
-			resizeBuffer( offset+tmpsize);
 			this->addFloat( col.r);
 			this->addFloat( col.g);
 			this->addFloat( col.b);
@@ -149,7 +138,6 @@ void	NetBuffer::addColor( GFXColor col)
 GFXColor NetBuffer::getColor()
 		{
 			GFXColor col;
-			checkBuffer( sizeof( col), "getColor");
 			col.r = this->getFloat();
 			col.g = this->getFloat();
 			col.b = this->getFloat();
@@ -159,8 +147,6 @@ GFXColor NetBuffer::getColor()
 		}
 void	NetBuffer::addMatrix( Matrix m)
 		{
-			int tmpsize = sizeof( m);
-			resizeBuffer( offset+tmpsize);
 			for( int i=0; i<9; i++)
 				this->addFloat( m.r[i]);
 			this->addQVector( m.p);
@@ -168,7 +154,6 @@ void	NetBuffer::addMatrix( Matrix m)
 Matrix	NetBuffer::getMatrix()
 		{
 			Matrix m;
-			checkBuffer( sizeof( m), "getMatrix");
 			for( int i=0; i<9; i++)
 				m.r[i] = this->getFloat();
 			m.p = this->getQVector();
@@ -177,15 +162,13 @@ Matrix	NetBuffer::getMatrix()
 		}
 void	NetBuffer::addQuaternion( Quaternion quat)
 		{
-			int tmpsize = sizeof( quat);
-			resizeBuffer( offset+tmpsize);
 			this->addFloat( quat.s);
 			this->addVector( quat.v);
 		}
 Quaternion	NetBuffer::getQuaternion()
 		{
 			Quaternion q;
-			checkBuffer( sizeof( q), "getQuaternion");
+
 			q.s = this->getFloat();
 			q.v = this->getVector();
 
@@ -193,15 +176,12 @@ Quaternion	NetBuffer::getQuaternion()
 		}
 void	NetBuffer::addTransformation( Transformation trans)
 		{
-			int tmpsize = sizeof( trans);
-			resizeBuffer( offset+tmpsize);
 			this->addQuaternion( trans.orientation);
 			this->addQVector( trans.position);
 		}
 Transformation	NetBuffer::getTransformation()
 		{
 			Transformation t;
-			checkBuffer( sizeof( t), "getTransformation");
 			t.orientation = this->getQuaternion();
 			t.position = this->getQVector();
 
@@ -246,7 +226,6 @@ void	NetBuffer::addShield( Shield shield)
 Shield	NetBuffer::getShield()
 {
 	Shield shield;
-	checkBuffer( sizeof( shield), "getShield");
 	shield.number = this->getChar();
 	shield.leak = this->getChar();
 	shield.recharge = this->getFloat();
@@ -292,7 +271,6 @@ void		NetBuffer::addArmor( Armor armor)
 Armor	NetBuffer::getArmor()
 {
 	Armor armor;
-	checkBuffer( sizeof( armor), "getArmor");
 	armor.front = this->getShort();
 	armor.back = this->getShort();
 	armor.right = this->getShort();
