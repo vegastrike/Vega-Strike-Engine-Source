@@ -198,7 +198,7 @@ void Unit::EjectCargo (unsigned int index) {
     int pilotnum = _Universe->CurrentCockpit();
     name = "Pilot";
     if (NULL!=(cp = _Universe->isPlayerStarship (this))) {
-      string playernum =string("player")+((pilotnum==0)?string(""):tostring(pilotnum));
+      string playernum =string("player")+((pilotnum==0)?string(""):XMLSupport::tostring(pilotnum));
       name = vs_config->getVariable(playernum,"callsign","TigerShark");
     }
     ejectedPilot.content="eject";
