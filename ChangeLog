@@ -1,4 +1,9 @@
 2001-10-31 Alexander Rawass <alexannika@users.sourceforge.net>
+	* happy halloween!
+	* added ship_ambient and planet_ambient into the picture
+	* of course I set them both to 0 :-)
+
+2001-10-31 Alexander Rawass <alexannika@users.sourceforge.net>
 
 	* modified doxygenConfig to show comments in source
 	* modified TODO
