@@ -129,6 +129,7 @@ void Background::Draw()
 	  //	  GFXTranslate (MODEL,_Universe->AccessCamera()->GetPosition()); 
 
       GFXTextureAddressMode(CLAMP);
+      GFXTextureWrap(0,GFXCLAMPTEXTURE);
       //glMatrixMode(GL_MODELVIEW);
       
       GFXSelectTexcoordSet(0, 0);
@@ -241,6 +242,7 @@ void Background::Draw()
       GFXVertex3f(-size, -size, -size);
       
       GFXEnd();//*/
+      GFXTextureWrap(0,GFXREPEATTEXTURE);
       GFXCenterCamera(false);
     }
   }
