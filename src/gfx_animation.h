@@ -26,27 +26,26 @@
 
 #include "quaternion.h"
 
-class Animation:public Primitive
-{
-	Texture **Decal; 
-   bool camup;
-	short numframes;
-	float timeperframe;
-	scalar_t cumtime;
-	int texturename[2];
-	float height; //half the height so you can do fancy vector translatons to campspace
-	float width;
+class Animation:public Primitive {	
+  Texture **Decal; 
+  bool camup;
+  short numframes;
+  float timeperframe;
+  scalar_t cumtime;
+  int texturename[2];
+  float height; //half the height so you can do fancy vector translatons to campspace
+  float width;
   bool repeat;
-	void InitAnimation();
-
+  void InitAnimation();
 public:
-	Animation();
-	 Animation(char *, bool Rep=0, float priority=.1,bool ismipmapped=true,bool camorient=false);
-	~Animation();
+  Animation();
+  Animation(char *, bool Rep=0, float priority=.1,bool ismipmapped=true,bool camorient=false);
+  ~Animation();
   //  void SetPosition (float x,float y,float z);
   //  void SetPosition(const Vector &k);
-	void Draw(const Transformation &quat = identity_transformation, const Matrix m = identity_matrix);
-        void SetDimensions(float wid, float hei);
+  void Draw(const Transformation &quat = identity_transformation, const Matrix m = identity_matrix);
+  void SetDimensions(float wid, float hei);
+  bool Done();
 };
 
 #endif

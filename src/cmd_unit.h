@@ -31,7 +31,7 @@
 
 using std::queue;
 #include "xml_support.h"
-
+class Animation;
 using namespace XMLSupport;
 //#include "Gun.h"
 //#include "Warhead.h"
@@ -79,6 +79,8 @@ protected:
   Matrix cumulative_transformation_matrix;
 
   int nummesh;
+  Animation **explosion;
+  int timeexplode;  
   Mesh **meshdata;
   Unit **subunits; // the new children fun fun stuff
   //Gun **weapons; // the guns
@@ -139,7 +141,9 @@ public:
   virtual ~Unit();
   static void ProcessDeleteQueue();
   void Init();
-  void Destroy();
+  bool Explode();
+  void Destroy();//explodes then deletes
+  void Kill();//deletes
   inline bool Killed() {return killed;}
   inline void Ref() {ucref++;}
   void UnRef();

@@ -612,11 +612,11 @@ void main_loop() {
     ss->SetPosition (fighters[0]->GetPosition()+Vector (1,.24,.25));
     sss->SetPosition (fighters[0]->GetPosition()+Vector (-1,0,-.3));    
 
-    s->Draw();
+    //    s->Draw();
     if (time>.25)
-      ss->Draw();
+      ;//ss->Draw();
     if (time > .125)
-      sss->Draw();
+      ;//sss->Draw();
     if (time > .5)
       fighters[0]->Destroy();
   }

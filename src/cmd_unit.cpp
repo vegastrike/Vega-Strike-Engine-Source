@@ -29,7 +29,7 @@
 #include "cmd_ai.h"
 #include "cmd_order.h"
 #include "gfx_box.h"
-
+#include "gfx_animation.h"
 #include "gfx_lerp.h"
 
 //if the PQR of the unit may be variable...for radius size computation
@@ -59,6 +59,8 @@ void Unit::calculate_extent() {
 
 void Unit::Init()
 {
+  explosion=NULL;
+  timeexplode=0;
   killed=false;
   ucref=0;
   meshdata = NULL;
@@ -105,7 +107,7 @@ void Unit::UnRef() {
     Unitdeletequeue.push_back(this);//delete
   }
 }
-void Unit::Destroy() {
+void Unit::Kill() {
   killed = true;
   if (ucref==0)
     Unitdeletequeue.push_back(this);
@@ -359,9 +361,53 @@ int Unit::querySphere (const Vector &st, const Vector &dir, float err) {
   return retval;
 }
 
+void Unit::Destroy() {
+  if (!killed)
+    if (!Explode())
+      Kill();
+}
 
-
-
+bool Unit::Explode () {
+  int i;
+  if (explosion==NULL&&timeexplode==0&&nummesh) {	//no explosion in unit data file && explosions haven't started yet
+    explosion = new Animation * [nummesh];
+    timeexplode=0;
+    for (i=0;i<nummesh;i++){
+      explosion[i]= new Animation ("explosion_orange.ani",false,.1,false,false);
+    }    
+  }
+  float tmp[16];
+  
+  float tmp2[16];
+  bool alldone =false;
+  if (explosion) {
+    for (i=0;i<nummesh;i++) {
+      if (!explosion[i])
+	continue;
+      timeexplode+=GetElapsedTime();
+      Translate (tmp,meshdata[i]->Position());
+      MultMatrix (tmp2,cumulative_transformation_matrix,tmp);
+      explosion[i]->SetPosition(tmp2[12],tmp2[13],tmp2[14]);
+      //if (timeexplode>i*.5){
+	explosion[i]->Draw();
+	//}
+      if (explosion[i]->Done()) {
+	delete explosion[i];	
+	explosion[i]=NULL;
+      }else {
+	alldone=true;
+      }
+    }
+    if (!alldone){
+      delete [] explosion;
+      explosion = NULL;
+    }
+  }
+  for (i=0;i<numsubunit;i++) {
+    alldone |=subunits[i]->Explode();
+  }
+  return alldone;
+}
 
 bool Unit::queryBoundingBox (const Vector &pnt, float err) {
   int i;
@@ -376,7 +422,7 @@ bool Unit::queryBoundingBox (const Vector &pnt, float err) {
     delete bbox;
   }
   for (i=0;i<numsubunit;i++) {
-    if (subunits[i]->subunits[i]->queryBoundingBox (pnt,err)) 
+    if (subunits[i]->queryBoundingBox (pnt,err)) 
       return true;
   }
   return false;
