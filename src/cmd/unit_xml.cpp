@@ -1344,13 +1344,13 @@ using namespace UnitXML;
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(attribute_map.lookup((*iter).name)) {
       case YAW:
-	limits.yaw = game_speed*game_accel*parse_float((*iter).value)*(VS_PI/180);
+	limits.yaw = parse_float((*iter).value)*(VS_PI/180);
 	break;
       case PITCH:
-	limits.pitch=game_speed*game_accel*parse_float((*iter).value)*(VS_PI/180);
+	limits.pitch=parse_float((*iter).value)*(VS_PI/180);
 	break;
       case ROLL:
-	limits.roll=game_speed*game_accel*parse_float((*iter).value)*(VS_PI/180);
+	limits.roll=parse_float((*iter).value)*(VS_PI/180);
 	break;
       }
     }
