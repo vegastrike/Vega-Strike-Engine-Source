@@ -2390,12 +2390,12 @@ Vector Unit::MaxTorque(const Vector &torque) {
 }
 
 float GetFuelUsage (bool afterburner) {
-  static float total_accel=XMLSupport::parse_float (vs_config->getVariable ("physics","game_speed",".9"))*XMLSupport::parse_float (vs_config->getVariable("physics","game_accel","1"));
+//  static float total_accel=XMLSupport::parse_float (vs_config->getVariable ("physics","game_speed",".9"))*XMLSupport::parse_float (vs_config->getVariable("physics","game_accel","1"));
   static float normalfuelusage = XMLSupport::parse_float (vs_config->getVariable ("physics","FuelUsage","1"));
   static float abfuelusage = XMLSupport::parse_float (vs_config->getVariable ("physics","AfterburnerFuelUsage","4"));
   if (afterburner) 
-    return abfuelusage/total_accel;
-  return normalfuelusage/total_accel;
+    return abfuelusage;
+  return normalfuelusage;
 }
 Vector Unit::ClampTorque (const Vector &amt1) {
   Vector Res=amt1;
@@ -2408,8 +2408,11 @@ Vector Unit::ClampTorque (const Vector &amt1) {
     Res.j=copysign(fuelclamp*limits.yaw,amt1.j);
   if (fabs(amt1.k)>fuelclamp*limits.roll)
     Res.k=copysign(fuelclamp*limits.roll,amt1.k);
-  static float fuelenergytomassconversionconstant = XMLSupport::parse_float(vs_config->getVariable ("physics","FuelEnergyDensity","343596000000000.0")); // note that we have KiloJoules, so it's to the 14th
-  fuel-=GetFuelUsage(false)*SIMULATION_ATOM*Res.Magnitude()*.00000004;//HACK this forces the reaction to be deut-deut fusion with efficiency governed by the getFuelUsage function
+  //static float fuelenergytomassconversionconstant = XMLSupport::parse_float(vs_config->getVariable ("physics","FuelEnergyDensity","343596000000000.0")); // note that we have KiloJoules, so it's to the 14th
+  static float Deuteriumconstant = XMLSupport::parse_float(vs_config->getVariable ("physics","DeuteriumRelativeEfficiency_Deuterium","1"));
+  static float Antimatterconstant = XMLSupport::parse_float(vs_config->getVariable ("physics","DeuteriumRelativeEfficiency_Antimatter","250"));
+  static float Lithium6constant = XMLSupport::parse_float(vs_config->getVariable ("physics","DeuteriumRelativeEfficiency_Lithium",".6"));
+  fuel-=GetFuelUsage(false)*SIMULATION_ATOM*Res.Magnitude()*.00000004/Lithium6constant;//HACK this forces the reaction to be Li-6+Li-6 fusion with efficiency governed by the getFuelUsage function
   return Res;
 }
 float Unit::Computer::max_speed() const {
@@ -2499,7 +2502,7 @@ Vector Unit::ClampThrust (const Vector &amt1, bool afterburn) {
     afterburn=false;
   }
   if (afterburn) {
-    energy -= afterburnenergy*SIMULATION_ATOM;
+		energy -= afterburnenergy*SIMULATION_ATOM;
   }
 
   static float staticfuelclamp = XMLSupport::parse_float (vs_config->getVariable ("physics","NoFuelThrust",".4"));
@@ -2520,8 +2523,10 @@ Vector Unit::ClampThrust (const Vector &amt1, bool afterburn) {
   if (amt1.k<-limits.retro)
     Res.k =-limits.retro;
   //energy = 1/2t^2*Force^2/mass
-  static float fuelenergytomassconversionconstant = XMLSupport::parse_float(vs_config->getVariable ("physics","FuelEnergyDensity","343596000000000.0")); // note that we have KiloJoules, so it's to the 14th
-  fuel-=GetFuelUsage(afterburn)*SIMULATION_ATOM*Res.Magnitude()*.00000004;//HACK this forces the reaction to be deut-deut fusion with efficiency governed by the getFuelUsage function
+  static float Deuteriumconstant = XMLSupport::parse_float(vs_config->getVariable ("physics","DeuteriumRelativeEfficiency_Deuterium","1"));
+  static float Antimatterconstant = XMLSupport::parse_float(vs_config->getVariable ("physics","DeuteriumRelativeEfficiency_Antimatter","250"));
+  static float Lithium6constant = XMLSupport::parse_float(vs_config->getVariable ("physics","DeuteriumRelativeEfficiency_Lithium",".6"));
+  fuel-=GetFuelUsage(afterburn)*SIMULATION_ATOM*Res.Magnitude()*.00000004/Lithium6constant;//HACK this forces the reaction to be Li-6+Li-6 fusion with efficiency governed by the getFuelUsage function
   return Res;
 }
 
