@@ -6,7 +6,7 @@ typedef void CCScript (AIScript * script, Unit * un);
 CCScript AfterburnerSlide;
 CCScript AfterburnTurnTowards;
 CCScript AfterburnTurnTowardsITTS;
-
+CCScript CloakForScript;
 CCScript Evade;
 CCScript MoveTo;
 CCScript Kickstop;

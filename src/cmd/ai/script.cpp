@@ -19,6 +19,7 @@ HardCodedMap MakeHardCodedScripts() {
   tmp.insert (MyPair ("++afterburnerslide.xml",AfterburnerSlide));
   tmp.insert (MyPair ("++afterburn-turntowards-itts.xml",AfterburnTurnTowards));  
   tmp.insert (MyPair ("++afterburn-turntowards.xml",AfterburnTurnTowardsITTS));  
+  tmp.insert (MyPair ("++cloak.xml",CloakForScript));  
   tmp.insert (MyPair ("++evade.xml",Evade));    
   tmp.insert (MyPair ("++kickstop.xml",Kickstop));      
   tmp.insert (MyPair ("++moveto.xml",MoveTo));      
