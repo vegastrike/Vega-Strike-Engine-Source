@@ -3215,8 +3215,8 @@ void showUnitStats(Unit * playerUnit,string &text,int subunitlevel) {
 	float Wconv= (1.0/0.12); // converts from reactor to warp energy scales
 	float totalWeaponEnergyUsage=0;
 	float totalWeaponDamage=0;
+	string MPLdesc="";
 	string statcolor="#c.75:.9:1#";
-    text+="#c0:1:.5#"+prefix+"[GENERAL INFORMATION]#n##-c";
 	string nametemp="";
 	string model="";
 	int nameindex=0;
@@ -3234,7 +3234,21 @@ void showUnitStats(Unit * playerUnit,string &text,int subunitlevel) {
 	}else if (model=="begin"){
 		model="Stock(Refurbished)";
 	}
-
+	Cargo * fullname = GetMasterPartList(playerUnit->name.c_str());
+	Cargo * milname = GetMasterPartList(nametemp.c_str());
+	Cargo * blankname = GetMasterPartList((nametemp+".blank").c_str());
+	if(!subunitlevel && (fullname || milname || blankname)){
+		text+="#c0:1:.5#"+prefix+"[NOTES]#n##n##-c";
+		if(fullname){
+			text+=fullname->GetDescription();
+		}else if(blankname){
+			text+=blankname->GetDescription();
+		}else if(milname){
+			text+=milname->GetDescription();
+		}
+		text+="#n#";
+	}
+    text+="#n##c0:1:.5#"+prefix+"[GENERAL INFORMATION]#n##-c";
     text+= "#n#"+prefix+statcolor+"Class: #-c"+nametemp+statcolor+"  Model: #-c"+model;
     /*  Flightgroup name for unsold or player ships not very important
 
