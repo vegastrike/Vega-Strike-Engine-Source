@@ -1,6 +1,8 @@
 #include "planet_generic.h"
 #include "unit_factory.h"
 #include "gfx/mesh.h"
+#include <sys/types.h>
+#include <sys/stat.h>
 
 
 char * getnoslash (char * inp) {
@@ -332,37 +334,76 @@ Planet::Planet(QVector x,QVector y,float vely,const Vector & rotvel, float pos,f
   }
 }
 
-string Planet::getHumanReadablePlanetType () const{
+static void beginPlanetElement (void *userDataVoid, const XML_Char *name, const XML_Char **attr) {
+	std::map<std::string, std::string> *userData = (std::map<std::string, std::string> *)userDataVoid;
+	std::string namestr((const char*)name);
+	for (int i=0;i<namestr.size();i++) {
+		namestr[i]=tolower(namestr[i]);
+	}
+	if (namestr.size()>=6&&memcmp(namestr.c_str(),"planet",6)==0) {
+		if (namestr.size()==6) {
+			if ((*userData)["\n"]!="\n") {
+				fprintf(stderr, "Warning: No surrounding planet tag specified.  This will probably result in missing data.\n");
+			}
+			std::string planetname;
+			std::string planettype;
+			// Name is "Planet"
+			for (int i=0; attr[i]!=NULL; i+=2) {
+				if (strcmp(attr[i], "type")==0) {
+					planettype=attr[i+1];
+				}
+				if (strcmp(attr[i], "name")==0) {
+					planetname=attr[i+1];
+				}
+			}
+			if (planettype.size()&&planetname.size()) {
+				(*userData)[planettype]=planetname;
+			} else {
+				fprintf(stderr, "Warning: \"type\" or \"name\" atributes missing... Ignoring planet type...\n");
+			}
+		} else {
+			(*userData)["\n"]="\n";
+		}
+	} else {
+		fprintf(stderr, "Warning: XML tag in planet types not valid: %s\n", name);
+	}
+}
+static void endPlanetElement (void *userData, const XML_Char *name) {
+}
 
+static std::map<std::string, std::string> readPlanetTypes(std::string filename) {
+	std::map<std::string, std::string> planetTypes;
+	FILE *fp=fopen(filename.c_str(),"r");
+	if (!fp) {
+		return planetTypes;
+	}
+	int len;
+	{
+		struct stat st;
+		if (fstat(fileno(fp), &st)!=0) {
+			return planetTypes;
+		} else {
+			len=st.st_size;
+		}
+	}
+	XML_Parser parser=XML_ParserCreate(NULL);
+	void *buff = XML_GetBuffer(parser, len);
+	if (buff == NULL) {
+		fprintf(stderr, "Fatal error: out of memory for planet name file\n");
+		return planetTypes;
+	}
+	len=fread(buff, 1, len, fp);
+	XML_SetElementHandler(parser, &beginPlanetElement, &endPlanetElement);
+	XML_SetUserData(parser, &planetTypes);
+	XML_ParseBuffer(parser, len, 1);
+	XML_ParserFree(parser);
+	return planetTypes;
+}
+
+string Planet::getHumanReadablePlanetType () const{
+	  static std::map<std::string, std::string> planetTypes (readPlanetTypes("universe/planet_types.xml"));
   	  string temp =getCargoUnitName();
-	  if (temp=="m_class") {
-	    temp = "Agricultural";
-	  }else if (temp=="Dirt"||temp=="newdetroit"||temp=="earth") {
-	    temp = "Industrial";
-	  }else if (temp=="university") {
-	    temp = "University";
-	  }else if (temp=="Snow") {
-	    temp = "Ice Colony";
-	  }else if (temp=="carribean") {
-	    temp="Pleasure";
-	  }else if (temp=="ocean") {
-	    temp = "Oceanic";
-	  }else if (temp=="tundra") {
-	    temp = "Rlaan_Ice_Agriculture";
-	  }else if (temp=="n_class") {
-	    temp = "Aera_Industrial";
-	  }else if (temp=="j_class") {
-	    temp = "Aera_Ice_Colony";
-	  }else if (temp=="k_class") {
-	    temp = "Aera_Agriculture";
-	  }else if (temp=="n_class") {
-	    temp = "Aera_Industrial";
-	  }else if (temp=="Lava") {
-	    temp = "Rlaan_Industrial";
-	  }else{
-	    temp="";
-	  }
-	  return temp;
+	  return planetTypes[temp];
 }
 Planet::~Planet() { 
 	if (terraintrans) {
