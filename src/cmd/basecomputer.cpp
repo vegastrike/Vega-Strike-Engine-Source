@@ -67,8 +67,23 @@ struct dirent { char d_name[1]; };
 #include <sys/stat.h>
 //end for directory thing
 extern std::string CurrentSaveGameName;
+std::vector<std::string> getWeapFilterVec() {
+	std::vector<std::string> weapfiltervec;
+	///// FIXME: the following may change in the future if we ever redo the master part list.
+	weapfiltervec.push_back("upgrades/Weapon");
+	weapfiltervec.push_back("SubUnits");
+	weapfiltervec.push_back("upgrades/Ammunition");
+        return weapfiltervec;
+}
 
-
+std::vector<std::string>weapfiltervec=getWeapFilterVec();
+bool upgradeNotAddedToCargo(std::string category) {
+  for (unsigned int i=0;i<weapfiltervec.size();++i) {
+    if (weapfiltervec[i].find(category)==0)
+      return true;
+  }
+  return false;
+}
 extern vector<unsigned int > base_keyboard_queue;
 
 class TextInputDisplay: public StaticDisplay{
@@ -1845,7 +1860,21 @@ bool BaseComputer::pickerChangedSelection(const EventCommandId& command, Control
 
     return true;
 }
-
+bool UpgradeAllowed (const Cargo& item, Unit * playerUnit) {
+  std::string prohibited_upgrades=UniverseUtil::LookupUnitStat(playerUnit->name,FactionUtil::GetFactionName(playerUnit->faction),"Prohibited_Upgrades");
+  while (prohibited_upgrades.length()) {
+    std::string::size_type where=prohibited_upgrades.find(";");
+    std::string prohibited_upgrade=prohibited_upgrades;
+    if (where!=string::npos) {
+      prohibited_upgrade=prohibited_upgrades.substr(0,where);
+      prohibited_upgrades=prohibited_upgrades.substr(where+1);
+    }else prohibited_upgrades="";
+    if (prohibited_upgrade==item.content||prohibited_upgrade==item.category) {
+      return false;
+    }
+  }
+  return true;
+}
 // Return whether or not the current item and quantity can be "transacted".
 bool BaseComputer::isTransactionOK(const Cargo& originalItem, TransactionType transType, int quantity) {
     if(originalItem.mission&&transType!=SELL_CARGO)
@@ -1896,7 +1925,7 @@ bool BaseComputer::isTransactionOK(const Cargo& originalItem, TransactionType tr
             }
         case BUY_UPGRADE:
             // cargo.mission == true means you can't do the transaction.
-            if(item.price*quantity <= cockpit->credits && playerUnit->CanAddCargo(item)&&!item.mission) {
+            if(item.price*quantity <= cockpit->credits && (playerUnit->CanAddCargo(item)||upgradeNotAddedToCargo(item.category))&&UpgradeAllowed(item,playerUnit)&&!item.mission) {
                 return true;
             }
             break;
@@ -2632,11 +2661,6 @@ void BaseComputer::loadSellUpgradeControls(void) {
     // Get a list of upgrades on our ship we could sell.
     Unit* partListUnit = &GetUnitMasterPartList();
 
-	std::vector<std::string> weapfiltervec;
-	///// FIXME: the following may change in the future if we ever redo the master part list.
-	weapfiltervec.push_back("upgrades/Weapon");
-	weapfiltervec.push_back("SubUnits");
-	weapfiltervec.push_back("upgrades/Ammunition");
 
     loadMasterList(partListUnit, weapfiltervec, std::vector<std::string>(), false, tlist);
     ClearDowngradeMap();
