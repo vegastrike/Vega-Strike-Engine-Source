@@ -2982,6 +2982,8 @@ string buildShipDescription(Cargo &item,std::string & texturedescription) {
         std::string str;
 	showUnitStats(newPart,str,0,0,item);
 	delete newPart;
+        if (texturedescription!="")
+           str+="@"+texturedescription+"@";
 	return str;	
 }
 
