@@ -14,19 +14,14 @@
 
 *** GAME SERVER ********************************************************
 
-- Check the detlatime we have to send in clientstate (broadcastSnapshot)
-- Transfer system description when a player enter in a system (planets, bases, ...)
 - Turn mount_num into a char ?
 - Put back a control with keyboard to be able to SAVE, SEE MEMORY USED...
-
-DONE - Add position stuff transmission for other units than clients (ai, missiles)
-- Make the difference between ships/ai and planets/bases that move really slowly so updates are not required that often
-- Add position stuff transmission for planets (with high update period) and for bases if needed
 
 - When a request to jump -> check if the destination is reachable by origin system with UniverseUtil::GetAdjacentSystems()
 - Think about transfering config data such as difficulty, physics...
 - Find all the used vars in Unit stuff and integrate them in the serverconfig
 
+TO TEST - Check the detlatime we have to send in clientstate (broadcastSnapshot)
 TO TEST - try to reconnect to account server periodicaly if connection lost
 TO LOOK AT - When receiving a packet : look at timestamp and compare it to latest receive timestamp for that client
 
@@ -82,6 +77,8 @@ DONE - add a timeout test if !ingame with a second timeout much bigger
 
 === GAME SERVER =========================================================
 
+DONE - Add position stuff transmission for other units than clients (ai, missiles)
+DONE - Make the difference between ships/ai and planets/bases that move really slowly so updates are not required that often
 DONE - In UpdatePhysics : do not modify physical_state for a client ! only for server side units (SHOULD BE OK IN UpdatePhysics2)
 DONE AUTOMATICALLY - When another player is targeted, get his data (damage level, shield, weapons if we have the appropriate sensors)
 DONE - Each time a ship is hit => send to all clients in the same zone a damage notification

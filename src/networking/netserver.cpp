@@ -53,6 +53,10 @@ double  DAMAGE_ATOM;
 double	PLANET_ATOM;
 double	SAVE_ATOM;
 
+#define MAXINPUT 1024
+char	input_buffer[MAXINPUT];
+int		nbchars;
+
 /**************************************************************/
 /**** Constructor / Destructor                             ****/
 /**************************************************************/
@@ -360,6 +364,8 @@ void	NetServer::start(int argc, char **argv)
 	double	planettime=0;
 	double	damagetime=0;
 	acct_con = 1;
+	nbchars = 0;
+	memset( input_buffer, 0, MAXINPUT);
 	Packet p2;
 
 	startMsg();
@@ -452,7 +458,8 @@ void	NetServer::start(int argc, char **argv)
 
 		UpdateTime();
 		// Check a key press
-		// this->checkKey();
+		set.setRead( 0);
+		this->checkKey( set);
 		// Handle new connections in TCP mode
 		tcpNetwork->watchForNewConn( set, 0 );
 
@@ -614,29 +621,65 @@ void	NetServer::start(int argc, char **argv)
 /**************************************************************/
 
 
-void	NetServer::checkKey()
+void	NetServer::checkKey( SocketSet & set)
 {
-/*
-	fd_set	fd_keyb;
+	int		memory_use=0;
+	int		memvars=0, memsock=0, mempack=0;
 	int		s;
 	char	c;
 
-	FD_ZERO( &fd_keyb);
-	FD_SET( 0, &fd_keyb);
-
-	if( (s = select( 1, &fd_keyb, NULL, NULL, &srvtimeout))<0)
-		perror( "Error readding standard input ");
-	if( s>0)
+	if( set.is_set( 0))
 	{
 		if( read( 0, &c, 1)==-1)
 			cout<<"Error reading char on std input "<<endl;
 		if( c != 0x0a)
 		{
-			if( c == 'Q' || c == 'q')
-				keeprun = 0;
+			input_buffer[nbchars] = c;
+			nbchars++;
+		}
+		else
+		{
+			if( !strncmp( input_buffer, "quit", 4) || !strncmp( input_buffer, "QUIT", 4))
+			{
+				cleanup;
+			}
+			else if( !strncmp( input_buffer, "stats", 4) || !strncmp( input_buffer, "STATS", 4))
+			{
+				// Display server stats
+				cout<<endl;
+				cout<<"-----------------------------------------------"<<endl;
+				cout<<"| Server stats                                |"<<endl;
+				cout<<"-----------------------------------------------"<<endl<<endl;
+				cout<<"\tNumber of loaded and active star systems :\t"<<_Universe->star_system.size()<<endl;
+				cout<<"\tNumber of players in all star systems :\t\t"<<(tcpClients.size()+udpClients.size())<<endl;
+				cout<<"\t\tTCP clients : "<<tcpClients.size()<<endl;
+				cout<<"\t\tUDP clients : "<<udpClients.size()<<endl;
+				cout<<"\tNumber of clients waiting for authorization :\t"<<waitList.size()<<endl<<endl;;
+				zonemgr->displayStats();
+				cout<<"-----------------------------------------------"<<endl;
+				cout<<"| End stats                                   |"<<endl;
+				cout<<"-----------------------------------------------"<<endl<<endl;
+			}
+			else if( !strncmp( input_buffer, "mem", 3) || !strncmp( input_buffer, "MEM", 3) || input_buffer[0]=='m' && nbchars==1)
+			{
+				// Display memory usage
+				cout<<endl;
+				cout<<"-----------------------------------------------"<<endl;
+				cout<<"| Server memory usage                         |"<<endl;
+				cout<<"-----------------------------------------------"<<endl<<endl;
+				memory_use = sizeof( ServerSocket)*2 + sizeof( class Packet)*2 + sizeof( class SaveGame) + sizeof( class ZoneMgr);
+				memory_use += sizeof( int)*5 + sizeof( SOCKETALT) + sizeof( struct timeval);
+				// List of clients
+				memory_use += sizeof( Client *)*tcpClients.size() + sizeof( Client *)*udpClients.size() + discList.size()*sizeof( Client *) + waitList.size()*sizeof( struct WaitListEntry);
+				cout<<"\tSize of NetServer variables :\t"<<(memory_use/1024)<<" KB ("<<memory_use<<" bytes)"<<endl;
+				memory_use += zonemgr->displayMemory();
+				cout<<"\t========== TOTAL MEMORY USAGE = "<<(memory_use/1024)<<" KB ("<<memory_use<<" bytes) ==========="<<endl<<endl;
+			}
+
+			nbchars = 0;
+			memset( input_buffer, 0, MAXINPUT);
 		}
 	}
-*/
 }
 
 

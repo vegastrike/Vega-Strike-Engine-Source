@@ -70,6 +70,9 @@ class ZoneMgr
 		int		getZoneClients( Client * clt, char * bufzone);
 		double	isVisible( Quaternion orient, QVector src_pos, QVector tar_pos);
 		void	sendZoneClients( Client * clt);
+
+		void	displayStats();
+		int		displayMemory();
 };
 
 #endif

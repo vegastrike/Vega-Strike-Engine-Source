@@ -91,7 +91,7 @@ class NetServer
 		void			checkAcctMsg( SocketSet& set );			// Check for account server message to receive
 		void			prepareCheckMsg( SocketSet& set );		// Check for network message to receive
 		void			checkMsg( SocketSet& set );				// Check for network message to receive
-		void			checkKey();						// Check for keyboard input
+		void			checkKey( SocketSet& set);						// Check for keyboard input
 		void			recvMsg_tcp( Client * clt);		// Receive network messages
 		void			recvMsg_udp( );					// Receive network messages
 		void			processPacket( Client * clt, unsigned char cmd, const AddressIP& ipadr, Packet& packet ); // Process received packet info

@@ -581,6 +581,49 @@ double	ZoneMgr::isVisible( Quaternion orient, QVector src_pos, QVector tar_pos)
 	return dotp;
 }
 
+/************************************************************************************************/
+/****  displayStats                                                                         *****/
+/************************************************************************************************/
+
+void	ZoneMgr::displayStats()
+{
+	int i;
+	cout<<"\tStar system stats"<<endl;
+	cout<<"\t-----------------"<<endl;
+	for( i=0; i<zone_list.size(); i++)
+	{
+		cout<<"\t\tStar system "<<i<<" = \"<<_Universe->star_system[i]->getName()"<<"\""<<endl;
+		cout<<"\t\t\tNumber of clients :\t"<<zone_clients[i]<<endl;
+		cout<<"\t\t\tNumber of units :\t"<<zone_units[i]<<endl;
+	}
+}
+
+/************************************************************************************************/
+/****  displayMemory                                                                        *****/
+/************************************************************************************************/
+
+int		ZoneMgr::displayMemory()
+{
+	int i;
+	int memory_use=0;
+	int memclient=0, memunit=0, memvars=0;
+	cout<<"\tStar system memory usage (do not count struct pointed by pointer)"<<endl;
+	cout<<"\t-----------------------------------------------------------------"<<endl;
+	for( i=0; i<zone_list.size(); i++)
+	{
+		
+		cout<<"\t\tStar system "<<i<<" = \"<<_Universe->star_system[i]->getName()"<<"\""<<endl;
+		memclient = zone_clients[i]*sizeof( struct Client);
+		memunit = zone_units[i]*sizeof( class Unit);
+		memvars = zone_clients[i]*sizeof( int)*2;
+		cout<<"\t\t\tMemory for clients :\t"<<(memclient/1024)<<" KB ("<<memclient<<" bytes)"<<endl;
+		cout<<"\t\t\tMemory for units :\t"<<(memunit/1024)<<" KB ("<<memunit<<" bytes)"<<endl;
+		cout<<"\t\t\tMemory for variables :\t"<<(memvars/1024)<<" KB ("<<memvars<<" bytes)"<<endl;
+		memory_use += (memclient+memunit+memvars);
+	}
+	return memory_use;
+}
+
 /*** This is a copy of GFXSphereInFrustum from gl_matrix_hack.cpp avoiding
  * linking with a LOT of unecessary stuff
  */
