@@ -2,6 +2,8 @@
 #ifdef HAVE_PYTHON
 #include <stdio.h>
 #include <Python.h>
+#include <compile.h>
+#include <eval.h>
 #include <boost/python/class_builder.hpp>
 #include <boost/python/detail/extension_class.hpp>
 #include "config_xml.h"
@@ -224,11 +226,30 @@ PyObject* Py_CompileString(char *str, char *filename, int start)
 		fclose(fp1);
 	}
 #endif
-	//	PyObject * po= CompilePython ("simple_test.py");
-	//	PyObject * arglist = CreateTuple (vector <PythonBasicType> ());
-	//	PyObject * res = PyEval_CallObject(po, arglist);
-	//	Py_DECREF(arglist);
-	//	Py_XDECREF(res);
+	PyCodeObject *codeobj; 
+	PyObject *m, *d;
+    codeobj= CompilePython ("simple_test.py");
+    if ((m = PyImport_AddModule("__main__")) != NULL)
+    {
+    
+    if ((d = PyModule_GetDict(m)) != NULL)
+    {
+      PyRun_SimpleString(
+			 "import aitest.py\n"
+			 "hi2= MyAI()\n"
+			 "hi1 = VS.CommAI()\n"
+			 "print hi1.Execute()\n"
+			 "print hi2.Execute()\n");
+    printf("now we will use pyeval_evalcode\n");
+    PyEval_EvalCode(codeobj, d, d);
+    printf("and all went ok, did it?\n");
+    }
+    }
+    
+    //		PyObject * arglist = CreateTuple (vector <PythonBasicType> ());
+    //		PyObject * res = PyEval_CallObject(po, arglist);
+    //		Py_DECREF(arglist);
+		//		Py_XDECREF(res);
 
 
 	/*	PyRun_SimpleString(

@@ -23,7 +23,7 @@ void PythonAI::default_Execute (FireAt &self_) {
 }
 
 Order * PythonAI::Factory (const std::string &filename) {
-  PyObject *CompiledProgram = CompilePython (filename);
+  PyCodeObject *CompiledProgram = CompilePython (filename);
   Order * myai=NULL;
   if (CompiledProgram) {
     
