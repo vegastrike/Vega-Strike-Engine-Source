@@ -1,3 +1,13 @@
+2002-02-27 Alexander Rawass <alexannika@users.sourceforge.net>
+
+	* modified Universe
+	  - can set 'scripting system' from scripting
+	  - scripting gets notified if a new system is loaded:
+	    initstarsystem is called
+	* added faction 'pirates' to factions.xml
+	* added re-launching of waves (nr. of waves now gets respected)
+	
+
 2002-02-27 Daniel Horn <hellcatv@hotmail.com>
 	* Added Purchasing ability. once you are docked hold down SHIFT-C again and it will bring you to a TEXT BASED menu...from there you can upgrade your unit or add stuff to it... or buy a new starship alltogether.  Or you can remove weapons or armor you have purchased.
 	* Percent means a couple of things (calculated the same for all)
@@ -11,7 +21,6 @@
 	* Fixed Star System jumping bug that would skip the star system ahead a few seconds on jump.
 	
 
-	
 2002-02-26 Alexander Rawass <alexannika@users.sourceforge.net>
 
 	* wrote ai_flyto_jumppoint, ai_explorer, ai_flyto_waypoint_defend

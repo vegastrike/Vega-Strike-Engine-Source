@@ -44,6 +44,7 @@
 #include "vegastrike.h"
 #include "vs_path.h"
 #include "lin_time.h"
+#include "cmd/unit.h"
 
 #include "mission.h"
 #include "easydom.h"
@@ -391,4 +392,66 @@ void Mission::DirectorBenchmark(){
 
 double Mission::getGametime(){
   return gametime;
+}
+
+void Mission::DirectorShipDestroyed(Unit *unit){
+  Flightgroup *fg=unit->getFlightgroup();
+
+  if(fg==NULL){
+    printf("ship destroyed-no flightgroup\n");
+    return;
+  }
+  if(fg->nr_ships_left<=0 && fg->nr_waves_left>0){
+    printf("WARNING: nr_ships_left<=0\n");
+    return;
+  }
+  
+  fg->nr_ships_left-=1;
+
+  char buf[200];
+  sprintf(buf,"Ship destroyed: %s:%s:%s-%d",fg->faction.c_str(),fg->type.c_str(),fg->name.c_str(),unit->getFgSubnumber());
+  
+  
+  msgcenter->add("game","all",buf);
+
+  if(fg->nr_ships_left==0){
+    printf("no ships left in fg %s\n",fg->name.c_str());
+    if(fg->nr_waves_left>0){
+      //      printf("relaunching wave %d of fg %s\n",fg->waves-fg->nr_waves_left,fg->name.c_str());
+      sprintf(buf,"Relaunching %s wave %d of %d",fg->name.c_str(),fg->waves-fg->nr_waves_left,fg->waves);
+      mission->msgcenter->add("game","all",buf);
+
+      // launch new wave
+      fg->nr_waves_left-=1;
+      fg->nr_ships_left=fg->nr_ships;
+
+      call_unit_launch(fg);
+    }
+    else{
+      mission->msgcenter->add("game","all","Flightgroup "+fg->name+" destroyed");
+    }
+  }
+}
+
+void Mission::DirectorStartStarSystem(StarSystem *ss){
+  if(director==NULL){
+    return;
+  }
+
+  missionNode *iss=director->script.scripts["initstarsystem"];
+
+  if(iss==NULL){
+    warning("no initstarsystems");
+    return;
+  }
+
+    runtime.cur_thread->module_stack.push_back(director);
+    runtime.cur_thread->classid_stack.push_back(0);
+
+    varInst *vi=doScript(iss,SCRIPT_RUN);
+    deleteVarInst(vi);
+
+    runtime.cur_thread->module_stack.pop_back();
+    runtime.cur_thread->classid_stack.pop_back();
+
 }

@@ -55,6 +55,8 @@ protected:
   ///currently only 1 star system is stored
   std::vector <StarSystem *> active_star_system;
   std::vector <StarSystem *> star_system;
+  // the system currently used by the scripting
+  StarSystem *script_system;
 
 private:
   /**
@@ -166,6 +168,24 @@ private:
   ///Wrapper function for star system
   void SetViewport() {
     activeStarSystem()->SetViewport();
+  }
+
+  StarSystem *getStarSystem(string name);
+  StarSystem *scriptStarSystem() {
+    if(script_system!=NULL){ return script_system; }
+    else { return activeStarSystem(); };
+  }
+  bool setScriptSystem(string name){
+    if(name=="-active-"){
+      script_system=NULL;
+      return true;
+    }
+    StarSystem *ss=getStarSystem(name);
+    if(script_system!=NULL){
+      script_system=ss;
+      return true;
+    }
+    return false;
   }
 
 };

@@ -74,6 +74,9 @@ class Flightgroup {
   int flightgroup_nr; // running fg number
   int ship_nr; // total ships nr
 
+  int nr_ships_left;
+  int nr_waves_left;
+
   easyDomNode *domnode;
 
   map<string,string> ordermap;
@@ -224,9 +227,12 @@ class Mission {
 
   void DirectorLoop();
   void DirectorStart(missionNode *node);
+  void DirectorStartStarSystem(StarSystem *ss);
   void DirectorInitgame();
   void DirectorEnd();
   void DirectorBenchmark();
+  void DirectorShipDestroyed(Unit *unit);
+
   double getGametime();
 
   void  loadMissionModules();

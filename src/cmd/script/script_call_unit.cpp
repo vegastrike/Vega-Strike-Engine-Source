@@ -75,7 +75,7 @@ varInst *Mission::call_unit(missionNode *node,int mode){
     Unit *my_unit=NULL;
 
     if(mode==SCRIPT_RUN){
-      StarSystem *ssystem=_Universe->activeStarSystem();
+      StarSystem *ssystem=_Universe->scriptStarSystem();
       UnitCollection *unitlist=ssystem->getUnitList();
       //UnitCollection::UnitIterator *uiter=unitlist->createIterator();
       un_iter uiter=unitlist->createIterator();
@@ -141,10 +141,13 @@ varInst *Mission::call_unit(missionNode *node,int mode){
     missionNode *nr_node=getArgument(node,mode,4);
     int nr_of_ships=checkIntExpr(nr_node,mode);
 
+    missionNode *nrw_node=getArgument(node,mode,5);
+    int nr_of_waves=checkIntExpr(nrw_node,mode);
+
     missionNode *pos_node[3];
     float pos[3];
     for(int i=0;i<3;i++){
-      pos_node[i]=getArgument(node,mode,5+i);
+      pos_node[i]=getArgument(node,mode,6+i);
       pos[i]=checkFloatExpr(pos_node[i],mode);
     }
 
@@ -163,7 +166,7 @@ varInst *Mission::call_unit(missionNode *node,int mode){
       fg->faction=faction_string;
       fg->unittype=Flightgroup::UNIT;
       fg->terrain_nr=-1;
-      fg->waves=1; // not yet
+      fg->waves=nr_of_waves;
       fg->nr_ships=nr_of_ships;
       fg->pos[0]=pos[0];
       fg->pos[1]=pos[1];
@@ -171,6 +174,9 @@ varInst *Mission::call_unit(missionNode *node,int mode){
       for(int i=0;i<3;i++){
 	fg->rot[i]=0.0;
       }
+      fg->nr_ships_left=fg->nr_ships;
+      fg->nr_waves_left=fg->waves-1;
+
 #ifdef ORDERDEBUG
   fprintf (stderr,"cunl%x",this);
   fflush (stderr);
@@ -460,12 +466,6 @@ varInst *Mission::call_unit(missionNode *node,int mode){
     else if(cmd=="removeFromGame"){
 
       if(mode==SCRIPT_RUN){
-#if 0
-	StarSystem *ssystem=_Universe->activeStarSystem();
-
-	ssystem->RemoveUnit(my_unit);
-	delete my_unit;
-#endif
 	my_unit->Kill();
       }
 
@@ -591,7 +591,7 @@ void Mission::call_unit_launch(Flightgroup *fg){
 
      //     cout << fg->name << endl;
 
-     _Universe->activeStarSystem()->AddUnit(my_unit);
+     _Universe->scriptStarSystem()->AddUnit(my_unit);
 
      //findNextEnemyTarget(my_unit);
      my_unit->Target(NULL);
@@ -603,7 +603,7 @@ void Mission::call_unit_launch(Flightgroup *fg){
 }
 
 void Mission::findNextEnemyTarget(Unit *my_unit){
-      StarSystem *ssystem=_Universe->activeStarSystem();
+      StarSystem *ssystem=_Universe->scriptStarSystem();
       UnitCollection *unitlist=ssystem->getUnitList();
       //UnitCollection::UnitIterator *uiter=unitlist->createIterator();
       un_iter uiter(unitlist->createIterator());

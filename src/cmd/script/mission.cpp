@@ -296,6 +296,9 @@ void Mission::checkFlightgroup(easyDomNode *node){
     fg->rot[i]=rot[i];
   }
 
+  fg->nr_waves_left=fg->waves-1;
+  fg->nr_ships_left=fg->nr_ships;
+
   if(ainame[0]=='_'){
 #ifndef VS_MIS_SEL
     addModule(ainame.substr(1));

@@ -288,7 +288,7 @@ varInst *Mission::callGetSystemName(missionNode *node,int mode){
 
   if(mode==SCRIPT_RUN){
     deleteVarInst(vi);
-    StarSystem *ssystem=_Universe->activeStarSystem();
+    StarSystem *ssystem=_Universe->scriptStarSystem();
     string sysname=ssystem->getName();
     vi=call_string_new(node,mode,sysname);
   }

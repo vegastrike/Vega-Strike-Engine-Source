@@ -15,6 +15,9 @@
 #include "xml_support.h"
 #include "savegame.h"
 #include "gfx/cockpit.h"
+
+#include "cmd/script/mission.h"
+
 //#define DESTRUCTDEBUG
 static list<Unit*> Unitdeletequeue;
 void Unit::UnRef() {
@@ -499,7 +502,13 @@ void Unit::ApplyDamage (const Vector & pnt, const Vector & normal, float amt, Un
 
 
 bool Unit::Explode (bool drawit, float timeit) {
+
+
   if (image->explosion==NULL&&image->timeexplode==0) {	//no explosion in unit data file && explosions haven't started yet
+
+  // notify the director that a ship got destroyed
+  mission->DirectorShipDestroyed(this);
+
     image->timeexplode=0;
 	static std::string expani = vs_config->getVariable ("graphics","explosion_animation","explosion_orange.ani");
     image->explosion= new Animation (expani.c_str(),false,.1,BILINEAR,false);

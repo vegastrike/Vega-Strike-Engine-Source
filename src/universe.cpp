@@ -34,6 +34,9 @@
 #include "config_xml.h"
 #include "vs_globals.h"
 #include "xml_support.h"
+
+#include "cmd/script/mission.h"
+
 using namespace std;
 ///Decides whether to toast the jump star from the cache
 extern void CacheJumpStar (bool);
@@ -53,11 +56,21 @@ Universe::Universe(int argc, char** argv, const char * galaxy)
 	LoadWeapons("weapon_list.xml");
 	LoadFactionXML("factions.xml");	
 	this->galaxy = new GalaxyXML::Galaxy (galaxy);
+
+	script_system=NULL;
 }
 
 
 void Universe::LoadStarSystem(StarSystem * s) {
   star_system.push_back (s);
+  
+  // notify the director that a new system is loaded
+  StarSystem *old_script_system=script_system;
+
+  script_system=s;
+  mission->DirectorStartStarSystem(s);
+
+  script_system=old_script_system;
 }
 bool Universe::StillExists (StarSystem * s) {
   return std::find (star_system.begin(),star_system.end(),s)!=star_system.end();
@@ -193,6 +206,21 @@ void Universe::StartDraw()
   }
   
 
+}
+
+
+StarSystem *Universe::getStarSystem(string name){
+
+  vector<StarSystem*>::iterator iter;
+
+  for(iter = star_system.begin();iter!=star_system.end();iter++){
+    StarSystem *ss=*iter;
+    if(ss->getName()==name){
+      return ss;
+    }
+  }
+
+  return NULL;
 }
 
 
