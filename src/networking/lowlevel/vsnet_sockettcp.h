@@ -25,9 +25,10 @@ typedef unsigned int u_int32_t;
  
 class VsnetTCPSocket : public VsnetSocket
 {
+public:
+	// Needs to be public to get around a VC++ 6 bug that doesn't allow you to define functions that return private types in that class.
     typedef boost::shared_ptr<Packet> PacketPtr;
 
-public:
     VsnetTCPSocket( int sock, const AddressIP& remote_ip, SocketSet& set );
 
     virtual ~VsnetTCPSocket( );

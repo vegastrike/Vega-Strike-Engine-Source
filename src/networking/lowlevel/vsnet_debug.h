@@ -2,7 +2,9 @@
 #define VSNET_DEBUG_H
 
 #include <config.h>
+#ifdef USE_PTHREAD
 #include <pthread.h>
+#endif
 #include <iostream>
 
 #ifndef NDEBUG
@@ -26,8 +28,11 @@
             static cout_time COUTTIME;
 
             std::ostream& operator<<( std::ostream& ostr, const cout_time& c );
-
+#ifdef USE_PTHREAD
 	        #define COUT std::clog << pthread_self() << " " << COUTTIME << " " << __FILE__ << ":" << __LINE__ << " "
+#else
+	        #define COUT std::clog << " " << COUTTIME << " " << __FILE__ << ":" << __LINE__ << " "
+#endif
         #else
 	        #define COUT std::clog << " " << __FILE__ << ":" << __LINE__ << " "
         #endif
@@ -41,6 +46,13 @@
  *  debugging. The idea is to increase the likelyhood that uninitialized
  *  and re-initialized memory areas are captured as well as possible.
  */
+
+#ifdef USE_PTHREAD
+#define PTHREAD_SELF_OR_NONE pthread_self()
+#else
+#define PTHREAD_SELF_OR_NONE 0
+#endif
+
 #ifndef NDEBUG
 
   #include <assert.h>
@@ -53,7 +65,7 @@
   public: \
       void validate( const char* file, int line ) const { \
 	  if( !_valid || _invalid ) { \
-	      fprintf( stderr, "object invalid in %s:%d:%d\n", file, line, pthread_self() ); \
+	      fprintf( stderr, "object invalid in %s:%d:%d\n", file, line, PTHREAD_SELF_OR_NONE ); \
 	  } \
           assert( _valid ); \
           assert( !_invalid ); \

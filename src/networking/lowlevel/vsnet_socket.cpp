@@ -60,7 +60,7 @@ bool SOCKETALT::valid() const
 
 bool SOCKETALT::isTcp( ) const
 {
-    (!_sock ? false : _sock->isTcp());
+    return (!_sock ? false : _sock->isTcp());
 }
 
 int SOCKETALT::queueLen( int pri )
