@@ -1,7 +1,7 @@
 #ifndef _UNIVERSE_UTILGENERIC_H__
 #define _UNIVERSE_UTILGENERIC_H__
 #include "cmd/collection.h"
-#include "cmd/images.h"
+#include "gfx/vec.h"
 #include "networking/const.h"
 
 #include <string>
@@ -10,6 +10,7 @@ using std::string;
 
 class Unit;
 class StarSystem;
+class Cargo;
 
 namespace UniverseUtil {
 	Unit * GetUnitFromSerial( ObjSerial serial);

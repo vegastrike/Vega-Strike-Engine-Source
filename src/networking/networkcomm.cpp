@@ -4,6 +4,7 @@
 
 #include <config.h>
 
+#include "universe_util.h"
 #include "vsnet_dloadmgr.h"
 #ifndef NETCOMM_NOWEBCAM
 #include "networking/webcam_support.h"
@@ -20,7 +21,6 @@ extern bool cleanexit;
 #include "packet.h"
 #include <assert.h>
 #include "xml_support.h"
-#include "universe_util.h"
 
 #ifdef NETCOMM_JVOIP
 void	CheckVOIPError( int val)
