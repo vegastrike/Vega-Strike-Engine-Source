@@ -273,8 +273,6 @@ public:
   void		SetSerial( ObjSerial ser) { this->serial = ser;}
   unsigned short	GetZone() { return this->zone;}
   void		SetZone( unsigned short zn) { this->zone = zn;}
-  void		StartNetworkComm( float commfreq);
-  void		StopNetworkComm( float commfreq);
 
 /***************************************************************************************/
 /**** UPGRADE/CUSTOMIZE STUFF                                                       ****/

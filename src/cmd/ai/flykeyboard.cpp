@@ -6,6 +6,7 @@
 #include "xml_support.h"
 #include "vs_globals.h"
 #include "gfx/cockpit_generic.h" 
+#include "networking/netclient.h"
 
 struct StarShipControlKeyboard {
   bool switchmode;
@@ -153,23 +154,16 @@ void FlyByKeyboard::Execute () {
 
 void FlyByKeyboard::Execute (bool resetangvelocity) {
 #define SSCK starshipcontrolkeys[whichplayer]
-  if(SSCK.killcomm) {
+  if(Network!=NULL && SSCK.killcomm) {
 	printf( "Stopping a NETCOMM\n\n");
-    parent->StopNetworkComm( g().comm_freq);
+	Network[whichplayer].stopCommunication(SSCK.comm_freq);
 	SSCK.killcomm=false;
   }
-  if(SSCK.startcomm && SSCK.commchanged) {
+  if(Network!=NULL && SSCK.startcomm && SSCK.commchanged) {
 	printf( "Starting a NETCOMM\n\n");
-    parent->StartNetworkComm( g().comm_freq);
+	Network[whichplayer].startCommunication(SSCK.comm_freq);
 	SSCK.commchanged=false;
   }
-  /*
-  if(!SSCK.startcomm && SSCK.commchanged) {
-	printf( "Stopping a NETCOMM\n\n");
-    parent->StopNetworkComm( g().comm_freq);
-	SSCK.commchanged=false;
-  }
-  */
   if (SSCK.setunvel) {
     SSCK.setunvel=false;
     parent->VelocityReference (parent->Target());

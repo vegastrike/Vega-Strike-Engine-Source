@@ -95,6 +95,8 @@ class	WebcamSupport
 		IMoniker *pMoniker;
 		IBaseFilter *pCap;
 		IBaseFilter *pNull;
+
+		friend class SampleGrabberCallback;
 #endif
 #endif
 #ifdef __APPLE__
@@ -109,6 +111,10 @@ class	WebcamSupport
 		// Sequence Grabber info
 		videoRec *			video;
 #endif
+
+		// Buffer containing current jpeg image capture
+		char*	jpeg_buffer;
+		int		jpeg_size;
 
 		int		width;
 		int		height;
@@ -136,9 +142,10 @@ class	WebcamSupport
 		int		GetCapturedSize();
 
 		int		CopyImage();
+		void	DoError( long code, char * msg);
 };
 
-// Windows specific stuff to convert images formats
+// Windows specific stuff to convert BMP to JPEG
 #if defined( _WIN32) && !defined( __CYGWIN__)
 #ifndef HAVE_BOOLEAN
 #define HAVE_BOOLEAN
@@ -159,17 +166,11 @@ extern "C" {
 #include "jpeglib.h" 
 }
 
-char * JpegFromBmp( BITMAPFILEHEADER & bfh, LPBITMAPINFOHEADER & lpbi, BYTE * bmpbuffer, long BufferLen, int quality, std::string csJpeg);
+char * JpegFromBmp( BITMAPFILEHEADER & bfh, LPBITMAPINFOHEADER & lpbi, BYTE * bmpbuffer, long BufferLen, int * jpglength, int quality, std::string csJpeg);
 BOOL JpegFromDib(HANDLE     hDib,     //Handle to DIB
                  int        nQuality, //JPEG quality (0-100)
                  std::string    csJpeg,   //Pathname to target jpeg file
                  std::string*   pcsMsg);  //Error msg to return
-
-BOOL BuildSamps(HANDLE                      hDib,
-                int                         nSampsPerRow,
-                struct jpeg_compress_struct cinfo,
-                JSAMPARRAY                  jsmpArray,
-                std::string*                    pcsMsg);
 
 BOOL DibToSamps2( BITMAPFILEHEADER & bfh, LPBITMAPINFOHEADER & pbBmHdr, BYTE * bmpbuffer, int nSampsPerRow, struct jpeg_compress_struct cinfo, JSAMPARRAY jsmpPixels);
 BOOL DibToSamps(HANDLE                      hDib,

@@ -2,27 +2,13 @@
 #include "webcam_support.h"
 #include "lin_time.h"
 #include "vs_path.h"
+#include "gldrv/winsys.h"
 
 using std::cerr;
 using std::endl;
 using std::hex;
-
 extern bool cleanexit;
-#include "gldrv/winsys.h"
 
-#ifdef __APPLE__
-#include <QuickTimeComponents.h>
-OSErr	ExhaustiveError(void)
-{
-	OSErr iErr;
-	iErr = ResError();
-	if( !iErr)
-		iErr = MemError();
-	else
-		iErr = -1;
-	return iErr;
-}
-#endif
 #ifdef DSHOW
 AM_MEDIA_TYPE g_StillMediaType;
 STDMETHODIMP SampleGrabberCallback::BufferCB( double Time, BYTE *pBuffer, long BufferLen )
@@ -53,17 +39,20 @@ STDMETHODIMP SampleGrabberCallback::BufferCB( double Time, BYTE *pBuffer, long B
 			// - bfh : bitmap file header
 			// - HEADER(pVideoHeader) : bitmap info header
 			// - pBuffer (length BufferLen) : picture data
-			char * jpgbuf = JpegFromBmp( bfh, lpbi, pBuffer, BufferLen, 70, "c:\test.jpg");
+			int jpegbuf_length;
+			ws->jpeg_buffer = JpegFromBmp( bfh, lpbi, pBuffer, BufferLen, &jpegbuf_length, 70, "c:\test.jpg");
+			ws->jpeg_size = jpegbuf_length;
 		}
 
 		return S_OK;
 	}
 #endif
-void	DoError( long error, char * message)
+void	WebcamSupport::DoError( long error, char * message)
 {
 	if( error)
 	{
 		cerr<<"!!! ERROR : "<<message<<" - code : "<<error<<endl;
+		this->Shutdown();
 		cleanexit = true;
 		winsys_exit(1);
 	}
@@ -80,6 +69,9 @@ WebcamSupport::WebcamSupport()
 	this->last_time = 0;
 	// Get the period between 2 captured images
 	period = 1000000./(double)this->fps;
+
+	jpeg_buffer = NULL;
+	jpeg_size = 0;
 
 #ifdef __APPLE__
 	OSErr				iErr = noErr;
@@ -109,33 +101,10 @@ WebcamSupport::WebcamSupport()
 
 WebcamSupport::WebcamSupport( int f, int w, int h)
 {
+	WebcamSupport::WebcamSupport();
 	this->width = w;
 	this->height = h;
 	this->fps = f;
-	this->grabbing = false;
-	this->depth = 16;
-
-	this->last_time = 0;
-	// Get the period between 2 captured images
-	period = 1000000./(double)this->fps;
-
-#ifdef __APPLE__
-	OSErr				iErr = noErr;
-	GDHandle			saveDevice;
-	CGrafPtr			savePort;
-	long				qtVers;
-
-	GetGWorld( &savePort, &saveDevice);
-	
-	iErr = Gestalt( gestaltQuickTime, &qtVers);
-	DoError( iErr, "initialising Quicktime");
-	iErr = EnterMovies();
-	DoError( iErr, "initialising Quicktime part 2");
-	SetGWorld( savePort, saveDevice);
-
-	this->gQuicktimeInitialized = true;
-	this->video = NULL;
-#endif
 }
 
 int		WebcamSupport::Init()
@@ -148,16 +117,12 @@ int		WebcamSupport::Init()
 		return -1; 	
 
 	if (fg_set_channel (&fg, CHANNEL_TUNER, VIDEOMODE_NTSC)!=0)
-	{
-		this->Shutdown();
-		return -1;
-	}
+		DoError( -1, "fg_set_channel failed");
 	region=REGION_NTSC_CABLE;
 	if (fg_set_frequency (&fg, region, channel)!=0)
-	{
-		this->Shutdown();
-		return -1;
-	}
+		DoError( -1, "fg_set_frequency failed");
+
+	fg_set_fps_interval(&fg,this->fps);
 #endif
 #if defined(_WIN32) && !defined(__CYGWIN__)
 #ifndef DSHOW
@@ -176,6 +141,11 @@ int		WebcamSupport::Init()
 		DoError( -1, " connecting to capture device");
     //capDriverGetCaps(hwndCap, &gCapDriverCaps, sizeof(CAPDRIVERCAPS));
     //capGetStatus(hwndCap, &gCapStatus , sizeof(gCapStatus));
+
+	capCaptureGetSetup(capvideo,&capparam,sizeof(capparam));
+	int period = (int) (1000000 / fps);
+	capparam.dwRequestMicroSecPerFrame = period;
+	capCaptureSetSetup(capvideo,&capparam,sizeof(capparam)) ;
 #else
 	HRESULT hr = CoInitialize( NULL );
 	if( FAILED( hr ) )
@@ -347,22 +317,24 @@ void	WebcamSupport::StartCapture()
 	grabbing = true;
 #ifdef linux
 	if (fg_start_grab_image(&fg, this->width, this->height, FORMAT_RGB565)!=0)
-		exit(-1);
-
-	fg_set_fps_interval(&fg,this->fps);
+		DoError( -1, "starting grabbing image failed");
 #endif
 #if defined(_WIN32) && !defined(__CYGWIN__)
 #ifndef DSHOW
-	capCaptureGetSetup(capvideo,&capparam,sizeof(capparam));
-	int period = (int) (1000000 / fps);
-	capparam.dwRequestMicroSecPerFrame = period;
-	capCaptureSetSetup(capvideo,&capparam,sizeof(capparam)) ;
 	capCaptureSequenceNoFile(capvideo) ;
 	//int (*fcallback) ();
 	//fcallback = CopyImage();
 	//capSetCallbackOnVideoStream(capvideo, CopyImage());
 #else
 #endif
+#endif
+#ifdef __APPLE__
+	ComponentResult		component_error = noErr;
+	component_error = SGPrepare( video->sg_component, false, true);
+	DoError( component_error, "SGPrepare failed");
+
+	component_error = SGStartRecord( video->sg_component);
+	DoError( component_error, "SGStartRecord failed");
 #endif
 }
 
@@ -390,21 +362,20 @@ void	WebcamSupport::EndCapture()
 #endif
 #endif
 #ifdef __APPLE__
+	ComponentResult		component_error = noErr;
+	component_error = SGStop( video->sg_component);
+	DoError( component_error, "stopping video capture");
 	CloseComponent( video->sg_component);
 #endif
 }
 
 char *	WebcamSupport::CaptureImage()
 {
+if( grabbing)
+{
 #ifdef linux // Does not work under Cygwin
 	// Returns the image buffer
-	if( grabbing)
-	{
-	 	return (char *) fg_get_next_image(&fg);
-	}
-	else
-		cerr<<"!!! WARNING Webcam not in grabbing mode !!!"<<endl;
-	return NULL;
+	return (char *) fg_get_next_image(&fg);
 #endif
 #if defined(_WIN32) && !defined(__CYGWIN__)
 #ifndef DSHOW
@@ -457,83 +428,67 @@ char *	WebcamSupport::CaptureImage()
 	// Close the clipboard
 	CloseClipboard();
 #else
+	// DirectShow uses a callback interface so there is nothing to do here
+	// We just return the allocated buffer for jpeg file
+	return jpeg_buffer;
 #endif
-	return 0;
 #endif
 #ifdef __APPLE__
-	// Get Buffer Info and see...
 	ComponentResult		component_error = noErr;
 	OSErr iErr;
+	// Update the offscreen GWorld
 	component_error = SGIdle(video -> sg_channel);
 	if (component_error)
 		DoError(component_error, "SGIdle failed");
+	iErr = SGUpdate( video->sg_component, 0);
+	if( iErr)
+		DoError( iErr, "updating sg_component failed.");
+	// Get the pixmap associated with the GWorld
 	PixMapHandle pix = GetGWorldPixMap( video->sg_world);
 	if( pix==NULL || pix==nil)
 		DoError( -1, "PixMap is NULL");
+	// Get the base address of the pixel array
 	Ptr pixmap_base = GetPixBaseAddr( pix);
 	if( pixmap_base==NULL || pixmap_base==nil)
-		DoError( -1, "PixMap is NULL");
+		DoError( -1, "PixMapBaseAddress is NULL");
 	// Writes the image to a test jpeg file
 	Rect r = (**pix).bounds;
+	cerr<<"Captured image : "<<r.right<<"x"<<r.bottom<<endl;
 
+	// Get the size of the compressed file
 	long	maxCompressionSize;
 	iErr = GetMaxCompressionSize( pix, &r, 0, codecNormalQuality, kJPEGCodecType, (CodecComponent) anyCodec, &maxCompressionSize);
 		DoError( iErr, "GetMaxCompressionSize failed.");
-	Handle	jpeg_handle = NewHandle(maxCompressionSize);
-	Ptr		jpeg_data;
+	// Compress the image and get the its description
 	ImageDescriptionHandle desc = (ImageDescriptionHandle) NewHandle(4);
+	Handle	jpeg_handle = NewHandle(maxCompressionSize);
+	Ptr jpeg_data = *jpeg_handle;
 	MoveHHi( jpeg_handle);
 	HLock( jpeg_handle);
-	jpeg_data = *jpeg_handle;
 	iErr = CompressImage( GetGWorldPixMap( video->sg_world), &r, codecNormalQuality, kJPEGCodecType, desc, jpeg_data);
 	if (iErr!=noErr)
 		DoError( iErr, "CompressImage failed.");
-	FSSpec spec;
-	FInfo finfo;
-	string dir = datadir.substr( 0, datadir.length()-2);
-	string path = dir+"testcam";
-	cerr<<"File path : "<<path<<endl;
-	unsigned char cpath[256];
-	memset( cpath, 0, 256);
-	memcpy( cpath, path.c_str(), path.length());
-	cerr<<"Trying to open file : "<<cpath<<endl;
-	FSMakeFSSpec( 0, 0, cpath, &spec);
-	short fp;
-	long nbwritten;
-	// Create file if doesn't exist
-	if( (iErr = FSpGetFInfo( &spec, &finfo)) != noErr)
-	{
-		// If file was not found we create it
-		if( iErr == fnfErr)
-		{
-			iErr = FSpCreate( &spec, 'JPEG', 'JPEG', smSystemScript);
-			if( iErr)
-				DoError( iErr, "FSpCreate failed.");
-		}
-		else
-			DoError( iErr, "FSpGetFInfo failed.");
-	}
-	// Open for writing
-	iErr = FSpOpenDF( &spec, fsWrPerm, &fp);
-	if (iErr)
-		DoError( iErr, "FSpOpenDF failed.");
-	iErr = FSpOpenRF( &spec, fsWrPerm, &fp);
-	if (iErr)
-		DoError( iErr, "FSpOpenRF failed.");
-	// Write the jpeg data
-	iErr = FSWrite( fp, &nbwritten, jpeg_data);
-	if (iErr)
-		DoError( iErr, "FSWrite failed.");
-	// Close the file
-	FSClose( fp);
-	/*
-	int x = GetGWorldPixMap( video->sg_world)->bounds.right;
-	int y = GetGWorldPixMap( video->sg_world)->bounds.bottom;
-	int rowb = GetGWorldPixMap( video->sg_world)->rowBytes;
-	cerr<<"\t\tCaptured "<<x<<"x"<<y<<" size with "<<hex<<rowb<<" row bytes"<<endl;
-	*/
-	return NULL;
+	// Associate the current image capture buffer with what we just compressed into a jpeg buffer
+	this->jpeg_buffer = (char *) jpeg_data;
+	this->jpeg_size = maxCompressionSize;
+
+	// THE FOLLOWING PART IS FOR TESTING PURPOSE ONLY
+	// Write the jpeg_data into a file
+	int jpeg_length = maxCompressionSize;
+	cerr<<"MaxCompressionSize = "<<maxCompressionSize<<endl;
+	string path = datadir+"testcam.jpg";
+	FILE * fp;
+	fp = fopen( path.c_str(), "w");
+	if( !fp)
+		DoError( -1, "opening jpeg file failed");
+	if( fwrite( jpeg_data, 1, maxCompressionSize, fp)!=maxCompressionSize)
+		DoError( -1, "writing jpeg description to file");
+	fclose( fp);
 #endif
+}
+else
+	cerr<<"!!! WARNING Webcam not in grabbing mode !!!"<<endl;
+return NULL;
 }
 
 int		WebcamSupport::GetCapturedSize()
@@ -599,7 +554,7 @@ struct ima_error_mgr
 //
 //The function assumes 3 color components per pixel.
 /////////////////////////////////////////////////////////////////////////////
-char * JpegFromBmp( BITMAPFILEHEADER & bfh, LPBITMAPINFOHEADER & lpbi, BYTE * bmpbuffer, long BufferLen, int quality, std::string csJpeg)
+char * JpegFromBmp( BITMAPFILEHEADER & bfh, LPBITMAPINFOHEADER & lpbi, BYTE * bmpbuffer, long BufferLen, int * jpglength, int quality, std::string csJpeg)
 {
     if (quality < 0 || quality > 100 || bmpbuffer == NULL || (!csJpeg.size()) )
 		DoError( -1, "Bad parameters");
