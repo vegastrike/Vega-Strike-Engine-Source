@@ -60,17 +60,15 @@ void MoveTo::SetDest (const Vector &target) {
 
 bool MoveTo::OptimizeSpeed (float v, float &a) {
   v += (a/parent->GetMass())*SIMULATION_ATOM;
-  if (!max_speed||fabs(v)<=max_speed) {
+  float max_speed = (afterburn?parent->GetComputerData().max_ab_speed:parent->GetComputerData().max_speed);
+  if ((!max_speed)||fabs(v)<=max_speed) {
     return true;
   }
   float deltaa = parent->GetMass()*(fabs(v)-max_speed)/SIMULATION_ATOM;//clamping should take care of it
   a += (v>0) ? -deltaa : deltaa;
   return false;
 }
-void MoveToward (float dis, float vel, float &force) {
-  
 
-}
 AI* MoveTo::Execute(){
   Vector local_location = targetlocation - parent->GetPosition();
   Vector heading = parent->ToLocalCoordinates(local_location);
@@ -108,7 +106,7 @@ AI* MoveTo::Execute(){
   parent->ApplyLocalForce (thrust);
   return this;
 }
-bool ChangeHeading::OptimizeAngSpeed (float v, float &a) {
+bool ChangeHeading::OptimizeAngSpeed (float optimal_speed,float v, float &a) {
   v += (a/parent->GetMoment())*SIMULATION_ATOM;
   if (!optimal_speed||fabs(v)<=optimal_speed) {
     return true;
@@ -157,11 +155,11 @@ AI * ChangeHeading::Execute() {
   Vector torque (parent->Limits().pitch, parent->Limits().yaw,0);//set torque to max accel in any direction
 
   TurnToward (atan2(local_heading.j, local_heading.k),ang_vel.i,torque.i);// find angle away from axis 0,0,1 in yz plane
-  OptimizeAngSpeed(ang_vel.i,torque.i);
+  OptimizeAngSpeed(parent->GetComputerData().max_pitch,ang_vel.i,torque.i);
 
   TurnToward (atan2 (local_heading.i, local_heading.k), -ang_vel.j, torque.j);
   torque.j=-torque.j;
-  OptimizeAngSpeed(ang_vel.j,torque.j);
+  OptimizeAngSpeed(parent->GetComputerData().max_yaw,ang_vel.j,torque.j);
   torque.k  =-parent->GetMoment()*ang_vel.k/SIMULATION_ATOM;//try to counteract roll;
 
   parent->ApplyLocalTorque (torque);

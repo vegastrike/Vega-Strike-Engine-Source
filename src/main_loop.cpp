@@ -69,7 +69,7 @@ public:
 		count ++;
 		if(30 == count)
 		{
-			Unit *parent = this->parent;
+		  //			Unit *parent = this->parent;
 			//delete this;
 			//return new Line(parent);
 			return this;
@@ -534,7 +534,7 @@ void createObjects() {
     v.Normalize();
     fighters[a]->SetAI(new Order());
     ////fighters[a]->EnqueueAI(new Orders::ChangeHeading(v, 0.04));
-    fighters[a]->EnqueueAI(new Orders::MoveTo(Vector (-20,30,10), true, .05));
+    fighters[a]->EnqueueAI(new Orders::MoveTo(Vector (-20,30,10), true));
     //fighters[a]->EnqueueAI(new FlyByKeyboard ());
     //fighters[a]->EnqueueAI(new Orders::ChangeHeading(Vector (0,0,-1).Normalize(), 0.04));
     //fighters[a]->SetPosition(0, 0, -2.0F);
@@ -583,8 +583,6 @@ void destroyObjects() {
 }
 
 void main_loop() {
-  static int state = 0;
-  static bool midcachunk=false;
   _GFX->StartDraw();
   
   //bg2->Draw();
@@ -597,7 +595,6 @@ void main_loop() {
     GFXDisable(TEXTURE1);
   //  GFXBlendMode(ONE,ONE);
     locSel->Draw();
-  static float time=0;
   //  DABEAM->Draw(identity_transformation,identity_matrix);
   DABEAM->Draw (identity_transformation,identity_matrix);
   Halo::ProcessDrawQueue();

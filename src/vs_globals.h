@@ -28,3 +28,4 @@ typedef struct {
 
 extern game_data_t g_game;
 #endif
+
