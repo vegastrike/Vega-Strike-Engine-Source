@@ -129,15 +129,13 @@ float Cockpit::LookupTargetStat (int stat, Unit *target) {
   }
   return 1;
 }
-void Cockpit::DrawGauges() {
-  Unit * un = parent.GetUnit();
-  if (un) {
-    for (int i=0;i<NUMGAUGES;i++) {
-      if (gauges[i]) {
-	gauges[i]->Draw(LookupTargetStat (i,un));
-      }
+void Cockpit::DrawGauges(Unit * un) {
+  for (int i=0;i<NUMGAUGES;i++) {
+    if (gauges[i]) {
+      gauges[i]->Draw(LookupTargetStat (i,un));
     }
   }
+  
 }
 void Cockpit::Init (const char * file) {
   Delete();
@@ -207,11 +205,6 @@ void Cockpit::Draw() {
     }
   }
   RestoreViewPort();
-  if (view==CP_FRONT) {
-    for (unsigned int j=1;j<Panel.size();j++) {
-      Panel[j]->Draw();
-    }
-  }
   GFXBlendMode (ONE,ZERO);
   GFXAlphaTest (GREATER,.1);
   if (view<CP_CHASE) {
@@ -226,6 +219,7 @@ void Cockpit::Draw() {
 	VDU[0]->Draw();
 	//process VDU 0:targetting VDU
       }
+      DrawGauges(un);
       if (VDU[1]) {
       VDU[1]->Draw();
       //process VDU, damage VDU, targetting VDU
@@ -235,6 +229,12 @@ void Cockpit::Draw() {
 	DrawBlips(un);
       }
     }
+    if (view==CP_FRONT) {
+      for (unsigned int j=1;j<Panel.size();j++) {
+	Panel[j]->Draw();
+      }
+    }
+
   }
   GFXHudMode (false);
 

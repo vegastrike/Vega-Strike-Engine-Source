@@ -30,12 +30,12 @@ class Cockpit {
   void Delete();
   void DrawTargetBox ();
   void DrawBlips(Unit * un);
+  void DrawGauges(Unit * un);
  public:
   float zoomfactor;
   Cockpit (const char * file, Unit * parent);
   ~Cockpit();
   float LookupTargetStat (int stat, Unit *target);
-  void DrawGauges();
   void Init (const char * file);
   void SetParent(Unit * unit);
   void Draw();//restores viewport

@@ -172,7 +172,7 @@ void Cockpit::beginElement(const string &name, const AttributeList &attributes) 
 	break;
       }
     }
-    gauges[elem-KARMORF] = new Gauge ((*iter).value.c_str(), tmpdir);
+    gauges[elem-KARMORF] = new Gauge (gaugename.c_str(), tmpdir);
     if (xsize!=-1) {
       gauges[elem-KARMORF]->SetSize (xsize,ysize);
     }
