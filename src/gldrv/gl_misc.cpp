@@ -175,7 +175,12 @@ GFXBOOL GFXEndList() {
 }
 
 void GFXCallList(int list) {
+//	fprintf (stderr,"CallListStart");///causes crash with GF2 privaledge instruction on Win2k in certain instances
+//	fflush (stderr);
   glCallList(list);
+//	fprintf (stderr,"CallListEnd");
+//	fflush (stderr);
+  
 }
 
 void GFXDeleteList (int list) {

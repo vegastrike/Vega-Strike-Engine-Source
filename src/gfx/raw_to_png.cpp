@@ -11,27 +11,28 @@ int coloffset=0;
 
 unsigned short * Rread (const char * myfile) {
   unsigned short *tm = (unsigned short *)malloc (512*512*sizeof (unsigned short));
-  FILE * fp = fopen (myfile,"rb");
+   int i;
+ FILE * fp = fopen (myfile,"rb");
   if (!fp)
     return tm;
   fread (tm,sizeof (unsigned short), 512*512,fp);
   fclose (fp);
   unsigned short *smaller = (unsigned short *)malloc (256*256*sizeof (unsigned short));
-  for (int i=0;i<256;i++) {
+  for (i=0;i<256;i++) {
     memcpy (smaller+(i*256),tm+rowoffset+((i+coloffset)*512),sizeof (unsigned short)*256);
   }
   if (rowoffset) {
-    for (int i=0;i<256;i++) {
+    for (i=0;i<256;i++) {
       smaller[i*256]=tm[rowoffset+-1+((i+coloffset)*512)];
     }
   }
-  for (int i=0;i<64*256;i++) {
+  for (i=0;i<64*256;i++) {
     int count=0;
     int j;
     smaller[i]=256;
   }
 
-  for (int i=0;i<256;i++) {
+  for (i=0;i<256;i++) {
     for (int j=0;j<64;j++) {
       smaller[i*256+j]=256;
     }
@@ -116,6 +117,7 @@ void Wwrite (const char * myfile, unsigned short * data) {
 
   fclose (fp);
   free (data);
+
   delete [] row_pointers;
 }
 

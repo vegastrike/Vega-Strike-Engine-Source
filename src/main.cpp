@@ -197,7 +197,8 @@ void bootstrap_main_loop () {
     string mysystem = mission->getVariable("system","sol.system");
 
     string savegamefile = mission->getVariable ("savegame","");
-    vector <SavedUnits> savedun=ParseSaveGame (savegamefile,mysystem,mysystem,pos,setplayerloc);
+    vector <SavedUnits> savedun;
+    savedun=ParseSaveGame (savegamefile,mysystem,mysystem,pos,setplayerloc);
    
     _Universe->Init (mysystem,pos,planetname);
     createObjects();

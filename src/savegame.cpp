@@ -81,7 +81,9 @@ vector<SavedUnits> ParseSaveGame (const string filename, string &FSS, string ori
   outputsavegame=filename;
   changehome();
   vschdir ("save");
-  FILE * fp = fopen (filename.c_str(),"r");
+  FILE * fp = NULL;
+  if (filename.length())
+	  fp = fopen (filename.c_str(),"r");
   vscdup();
   returnfromhome();
   if (fp) {

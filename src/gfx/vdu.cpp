@@ -332,11 +332,14 @@ void VDU::DrawMessages(Unit *target){
 }
 
 void VDU::DrawNav (const Vector & nav) {
+  char nothing[]="none";
+  Unit * you = _Universe->AccessCockpit()->GetParent();
+  Unit * targ = you!=NULL?you->Target():NULL;
+  char *navdata=new char [1024+(_Universe->activeStarSystem()->getName().length()+(targ?targ->name.length():0))];
 
-  char navdata[256];
-  sprintf (navdata,"\nNavigation\n----------\n%s\nRelativeLocation\nx: %.4f\ny:%.4f\nz:%.4f\nDistance:\n%f",_Universe->activeStarSystem()->getName().c_str(),nav.i,nav.j,nav.k,10*nav.Magnitude());
+  sprintf (navdata,"\nNavigation\n----------\n%s\nTarget:\n  %s\nRelativeLocation\nx: %.4f\ny:%.4f\nz:%.4f\nDistance:\n%f",_Universe->activeStarSystem()->getName().c_str(),targ?targ->name.c_str():nothing,nav.i,nav.j,nav.k,10*nav.Magnitude());
   tp->Draw (MangleString (navdata,_Universe->AccessCamera()->GetNebula()!=NULL?.4:0),scrolloffset);  
-
+  delete [] navdata;
 
 }
 static void DrawGun (Vector  pos, float w, float h, weapon_info::MOUNT_SIZE sz) {
