@@ -5,14 +5,19 @@ AI * MatchVelocity::Execute () {
   if (!LocalVelocity) {
     desired = parent->ToLocalCoordinates (desired);
   }
-  Vector velocity = parent->ToLocalCoordinates (parent->GetVelocity());
-  parent->Thrust ( /*parent->ClampThrust*/(parent->GetMass()*desired-velocity/SIMULATION_ATOM));//don't need to clamp thrust since the Thrust does it for you
+  Vector velocity (parent->ToLocalCoordinates (parent->GetVelocity()));
+  parent->Thrust ( /*parent->ClampThrust*/(parent->GetMass()*(desired-velocity)/SIMULATION_ATOM));//don't need to clamp thrust since the Thrust does it for you
                  //caution might change 
   return this;
 }
 
 AI * MatchAngularVelocity::Execute () {
-
+  Vector desired (desired_ang_velocity);
+  if (!LocalVelocity)
+    desired = parent->ToLocalCoordinates (desired);
+  //parent->GetAngularVelocity();//local coords
+  parent->ApplyLocalTorque (parent->GetMoment()*(desired-parent->GetAngularVelocity())/SIMULATION_ATOM);
+  
   return this;
 }
 

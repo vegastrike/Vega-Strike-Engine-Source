@@ -99,6 +99,7 @@ Vector Unit::MaxTorque(const Vector &torque) {
 			  copysign(limits.roll, torque.k)) * torque);
 }
 
+/** MISNOMER...not really clamping... more like renomalizing  slow too
 Vector Unit::ClampTorque(const Vector &amt1) {
   Vector norm = amt1;
   norm.Normalize();
@@ -108,6 +109,19 @@ Vector Unit::ClampTorque(const Vector &amt1) {
     return amt1;
   else 
     return max;
+}
+*/
+
+//FIXME 062201
+Vector Unit::ClampTorque (const Vector &amt1) {
+  Vector Res=amt1;
+  if (Res.i>fabs(limits.yaw))
+    Res.i=amt1.i>0?fabs(limits.yaw):-fabs(limits.yaw);
+  if (amt1.j>fabs(limits.pitch))
+    Res.j=amt1.j>0?fabs(limits.pitch):-fabs(limits.pitch);
+  if (amt1.j>fabs(limits.roll))
+    Res.k=amt1.k>0?fabs(limits.roll):-fabs(limits.roll);
+  return Res;
 }
 
 Vector Unit::MaxThrust(const Vector &amt1) {
