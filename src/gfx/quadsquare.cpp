@@ -47,6 +47,7 @@ std::vector <TextureIndex> quadsquare::indices;
 std::vector <unsigned int> *quadsquare::unusedvertices;
 IdentityTransform *quadsquare::nonlinear_trans;
 std::vector <TerrainTexture> *quadsquare::textures;
+Vector quadsquare::normalscale;
 
 
 unsigned int quadsquare::SetVertices (GFXVertex * vertexs, const quadcornerdata &pcd) {
@@ -338,7 +339,8 @@ void VertInfo::SetTex (float t) {
   assert (t-Tex<1);
 }
 
-void quadsquare::SetCurrentTerrain (unsigned int *VertexAllocated, unsigned int *VertexCount, GFXVertexList *vertices, std::vector <unsigned int> *unvert, IdentityTransform * nlt, std::vector <TerrainTexture> *tex ) {
+void quadsquare::SetCurrentTerrain (unsigned int *VertexAllocated, unsigned int *VertexCount, GFXVertexList *vertices, std::vector <unsigned int> *unvert, IdentityTransform * nlt, std::vector <TerrainTexture> *tex, const Vector & NormScale ) {
+  normalscale= NormScale;
   if (quadsquare::blendVertices==NULL) {
     GFXColorVertex tmp[3];
     blendVertices = new GFXVertexList (GFXTRI,3,tmp,3,true);

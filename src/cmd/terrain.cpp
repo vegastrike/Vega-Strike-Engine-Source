@@ -12,9 +12,9 @@
 #include "collection.h"
 static std::vector <Terrain *> allterrains;
 
-Terrain::Terrain (const char * filename):QuadTree (filename), whichstage (0){
+Terrain::Terrain (const char * filename, const Vector & scales):QuadTree (filename, scales), whichstage (0){
   allterrains.push_back (this);
-  mass =  XMLSupport::parse_float (vs_config->getVariable ("physics","terrainmass","1000"));
+  mass =  XMLSupport::parse_float (vs_config->getVariable ("terrain","mass","1000"));
 }
 
 Terrain::~Terrain() {

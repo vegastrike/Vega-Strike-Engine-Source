@@ -135,7 +135,7 @@ class quadsquare {
 
 	float	GetHeight(const quadcornerdata& cd, float x, float z, Vector & normal);
 	static Vector MakeLightness (float xslope, float zslope);
-  static void SetCurrentTerrain (unsigned int * VertexAllocated, unsigned int * VertexCount, GFXVertexList *vertices, std::vector <unsigned int> *unusedvertices, IdentityTransform * transform, std::vector <TerrainTexture> *texturelist );
+  static void SetCurrentTerrain (unsigned int * VertexAllocated, unsigned int * VertexCount, GFXVertexList *vertices, std::vector <unsigned int> *unusedvertices, IdentityTransform * transform, std::vector <TerrainTexture> *texturelist, const Vector & NormalScale );
 	
 private:
   static void tri (unsigned int Aind, unsigned short Atex, unsigned int Bind, unsigned short Btex, unsigned int Cind, unsigned short Ctex);
@@ -164,6 +164,7 @@ private:
 	static std::vector <unsigned int> *unusedvertices;
 	static std::vector <TerrainTexture> *textures;
 	static std::vector <TextureIndex> indices;
+	static Vector normalscale;
 };
 
 

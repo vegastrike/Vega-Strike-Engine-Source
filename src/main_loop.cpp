@@ -328,7 +328,13 @@ static void SetTurretAI (Unit * fighter) {
 void createObjects() {
   explosion= new Animation ("explosion_orange.ani",false,.1,BILINEAR,false);
   LoadWeapons("weapon_list.xml");
-  new Terrain ("terrain.xml");
+  Vector TerrainScale (XMLSupport::parse_float (vs_config->getVariable ("terrain","xscale","1")),XMLSupport::parse_float (vs_config->getVariable ("terrain","yscale","1")),XMLSupport::parse_float (vs_config->getVariable ("terrain","zscale","1")));
+  Terrain * terr = new Terrain ("terrain.xml", TerrainScale);
+  Matrix tmp;
+  Identity (tmp);
+  tmp[0]=TerrainScale.i;tmp[5]=TerrainScale.j;tmp[10]=TerrainScale.k;
+  
+  terr->SetTransformation (tmp);
   //  qt = new QuadTree("terrain.xml");
   /****** 
   locSel = new LocationSelect(Vector (0,-2,2),

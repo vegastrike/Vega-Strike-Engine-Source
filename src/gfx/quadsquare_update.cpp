@@ -323,8 +323,14 @@ void	quadsquare::UpdateAux(const quadcornerdata& cd, const Vector & ViewerLocati
 	}
 }
 
+
+inline Vector Normalise (const Vector & vec, const float scale) {
+  return vec*(scale/vec.Magnitude());
+}
 Vector	quadsquare::MakeLightness(float xslope, float zslope) {
-  return nonlinear_trans->Transform ((Vector(xslope, 1, zslope)).Normalize());
+  Vector tmp (xslope, 1, zslope);
+  tmp.Normalize();
+  return (nonlinear_trans->Transform (Vector (tmp.i*normalscale.i,tmp.j*normalscale.j,tmp.k*normalscale.k)));
 }
 
 
