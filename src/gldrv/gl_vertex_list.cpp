@@ -227,13 +227,16 @@ union GFXVertexList::VDAT * GFXVertexList::BeginMutate (int offset) {
   return &data;
 }
 ///Ends mutation and refreshes display list
-void GFXVertexList::EndMutate () {
+void GFXVertexList::EndMutate (int newvertexsize) {
   if (!(changed&CHANGE_MUTABLE)) {
     changed |= CHANGE_CHANGE;
   }
   RefreshDisplayList();
   if (changed&CHANGE_CHANGE) {
     changed&=(~CHANGE_CHANGE);
+  }
+  if (newvertexsize) {
+    numVertex = newvertexsize;
   }
 }
 

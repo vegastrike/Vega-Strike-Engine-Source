@@ -282,7 +282,7 @@ public:
   ///Returns the array of vertices to be mutated
   VDAT * BeginMutate (int offset);
   ///Ends mutation and refreshes display list
-  void EndMutate ();
+  void EndMutate (int newsize=0);
   ///Loads the draw state (what is active) of a given vlist for mass drawing
   void LoadDrawState();
   ///Specifies array pointers and loads the draw state of a given vlist for mass drawing
