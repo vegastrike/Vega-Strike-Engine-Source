@@ -903,7 +903,7 @@ void generateStarSystem (string datapath, int seed, string sector, string system
   nument[2]=pushTowardsMean(meanplanets,numrockyplanets);
   nument[3]=pushTowardsMean(meanmoons,nummoons);
   int nat = pushTowardsMean(meannaturalphenomena,numnaturalphenomena);
-  numun[0]= nat>numnaturalphenomena?nat:numnaturalphenomena;
+  numun[0]= nat>numnaturalphenomena?numnaturalphenomena:nat;
   numun[1]=pushTowardsMean(meanbases,numstarbases);
   fprintf (stderr,"star %d gas %d plan %d moon %d, natural %d, bases %d",nument[0],nument[1],nument[2],nument[3],numun[0],numun[1]); 
   starradius.push_back (sunradius);
