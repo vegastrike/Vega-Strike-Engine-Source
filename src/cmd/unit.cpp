@@ -70,6 +70,9 @@ void Unit::Threaten (Unit * targ, float danger) {
 
 void Unit::calculate_extent() {  
   int a;
+  corner_min=Vector (FLT_MAX,FLT_MAX,FLT_MAX);
+  corner_max=Vector (-FLT_MAX,-FLT_MAX,-FLT_MAX);
+
   for(a=0; a<nummesh; a++) {
     corner_min = corner_min.Min(meshdata[a]->corner_min());
     corner_max = corner_max.Max(meshdata[a]->corner_max());
@@ -81,8 +84,8 @@ void Unit::calculate_extent() {
     corner_max = corner_max.Max(un->LocalPosition()+un->corner_max);
     iter.advance();
   }
-  image->selectionBox = new Box(corner_min, corner_max);
-  if (corner_min.i==-FLT_MAX||corner_max.i==FLT_MAX) {
+
+  if (corner_min.i==FLT_MAX||corner_max.i==-FLT_MAX||!FINITE (corner_min.i)||!FINITE(corner_max.i)) {
     radial_size=0;
     corner_min.Set (0,0,0);
     corner_max.Set (0,0,0);
@@ -90,6 +93,7 @@ void Unit::calculate_extent() {
     float tmp1 = corner_min.Magnitude();
     float tmp2 = corner_max.Magnitude();
     radial_size = tmp1>tmp2?tmp1:tmp2;
+    image->selectionBox = new Box(corner_min, corner_max);
   }
   if (!SubUnit) {
     UpdateCollideQueue();
@@ -298,9 +302,11 @@ Unit::Unit(const char *filename, bool xml, bool SubU, int faction,Flightgroup *f
 	  fp = fopen (filename,"r");
 	  if (fp) fclose (fp); 
 	  else {
-	    fprintf (stderr,"Warning: Cannot locate %s",filename);	  meshdata = new Mesh * [1];
+	    fprintf (stderr,"Warning: Cannot locate %s",filename);	  
+	    meshdata = new Mesh * [1];
 	    meshdata[0]=NULL;
-	    assert ("Unit Not Found"==NULL);
+	    nummesh=0;
+	    //	    assert ("Unit Not Found"==NULL);
 	  }
 	}else {
 	  fclose (fp);

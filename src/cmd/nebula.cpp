@@ -2,6 +2,9 @@
 #include "vegastrike.h"
 #include "vs_path.h"
 #include <assert.h>
+#include "config_xml.h"
+#include "vs_globals.h"
+
 #include "xml_support.h"
 #include "gfx/mesh.h"
 namespace NebulaXML {
@@ -136,8 +139,13 @@ void Nebula::beginElem(const std::string& name, const AttributeList& atts) {
 void Nebula::LoadXML(const char * filename) {
 	const int chunk_size = 16384;
 	FILE * inFile = fopen (filename, "r");
-	if(!inFile) {
-		fprintf(stderr,"\nUnit file %s not found\n",filename);
+	static bool usefog= XMLSupport::parse_bool (vs_config->getVariable ("graphics","fog","true"));
+        if(!inFile||!usefog) {
+		if (inFile) {
+		  fclose (inFile);
+		}else {
+		  fprintf(stderr,"\nUnit file %s not found\n",filename);
+		}
 		fogmode=FOG_OFF;
 		return;
 	}
@@ -225,8 +233,9 @@ void Nebula::UpdatePhysics (const Transformation &trans, const Matrix transmat, 
       _Universe->AccessCamera(i)->SetNebula (this);
     }
   }
-  i = rand()%nummesh;
-  {
+
+  if (nummesh) {
+    i = rand()%nummesh;
     Vector randexpl (rand()%2*rSize()-rSize(),rand()%2*rSize()-rSize(),rand()%2*rSize()-rSize());
     if (((int)(explosiontime/SIMULATION_ATOM))!=0) 
       if (!(rand()%((int)(explosiontime/SIMULATION_ATOM)))) 

@@ -188,8 +188,12 @@ void Camera::UpdateGLCenter()
 
 void Camera::SetPosition(const Vector &origin)
 {
+  if (FINITE (origin.i)&&FINITE(origin.j)&&FINITE (origin.k)) {
 	Coord = origin;
 	changed= GFXTRUE;
+  }else {
+    fprintf (stderr,"fatal error in camera");
+  }
 }
 
 void Camera::GetPosition(Vector &vect)
