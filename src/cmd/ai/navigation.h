@@ -4,6 +4,7 @@
 
 #include "order.h"
 #include "vegastrike.h"
+#include "vs_globals.h"
 
 namespace Orders {
   const float bleed_threshold = 0.0001;

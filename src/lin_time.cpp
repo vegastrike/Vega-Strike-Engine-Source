@@ -19,7 +19,6 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-
 #include "vegastrike.h"
 #include "in_kb.h"
 #ifdef WIN32
@@ -137,7 +136,10 @@ void UpdateTime() {
   QueryPerformanceCounter((LARGE_INTEGER*)&newtime);
   elapsedtime = ((double)(newtime-ttime))/freq;
   ttime = newtime;
-  newtime = newtime/freq;
+  if( freq==0)
+	  newtime = 0;
+  else
+	  newtime = newtime/freq;
 
 #elif defined(HAVE_GETTIMEOFDAY)
   struct timeval tv;

@@ -173,6 +173,7 @@ float capship_size=500;
 extern void UncheckUnit (Unit * un);
 void Unit::Init()
 {
+	this->networked=0;
 #ifdef CONTAINER_DEBUG
   UncheckUnit (this);
 #endif

@@ -23,8 +23,6 @@
 #define _LIN_TIME_H_
 #include "vegastrike.h"
 
-
-
 void InitTime();
 double GetElapsedTime();
 void UpdateTime();

@@ -1,6 +1,7 @@
 #ifndef _CMD_FLYBYWIRE_H_
 #define _CMD_FLYBYWIRE_H_
 #include "order.h"
+#include "vs_globals.h"
 namespace Orders {
   /**
    * This class attempts to match a given

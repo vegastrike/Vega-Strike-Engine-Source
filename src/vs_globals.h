@@ -34,6 +34,8 @@ extern game_data_t g_game;
 
 class VegaConfig;
 extern VegaConfig *vs_config;
+class NetClient;
+extern NetClient *Network;
 
 class Mission;
 extern Mission *mission;
@@ -56,6 +58,9 @@ class ForceFeedback;
 extern ForceFeedback *forcefeedback;
 
 extern double benchmark;
+
+#include "universe.h"
+extern Universe * _Universe;
 
 #endif
 

@@ -3,6 +3,7 @@
 #include "aux_texture.h"
 #include "universe.h"
 #include "vegastrike.h"
+#include "vs_globals.h"
 const GFXVertex InitialVertices [4]= { GFXVertex (Vector(0,0,0),Vector (0,1,0), 0,0),
 				       GFXVertex (Vector(0,0,0),Vector (0,1,0), 0,0),
 				       GFXVertex (Vector(0,0,0),Vector (0,1,0), 0,0),

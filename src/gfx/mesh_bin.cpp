@@ -3,6 +3,7 @@
 #include "aux_texture.h"
 #include <stdio.h>
 #include "vegastrike.h"
+#include "vs_globals.h"
 #include "file_main.h"
 #include "gldrv/winsys.h"
 void Mesh::LoadBinary (const char * filename, int faction) {

@@ -33,6 +33,7 @@
 #include "unit_util.h"
 #include "universe_util.h"
 #include "cmd/script/mission.h"
+#include "networking/netclient.h"
 float copysign (float x, float y) {
 	if (y>0)
 			return x;
@@ -390,6 +391,7 @@ Cockpit * Unit::GetVelocityDifficultyMult(float &difficulty) const{
 }
 void Unit::UpdatePhysics (const Transformation &trans, const Matrix &transmat, const Vector & cum_vel,  bool lastframe, UnitCollection *uc) {
   static float VELOCITY_MAX=XMLSupport::parse_float(vs_config->getVariable ("physics","velocity_max","10000"));
+	Transformation old_physical_state = curr_physical_state;
   if (docked&DOCKING_UNITS) {
     PerformDockingOperations();
   }
@@ -455,7 +457,35 @@ void Unit::UpdatePhysics (const Transformation &trans, const Matrix &transmat, c
   float difficulty;
   Cockpit * player_cockpit=GetVelocityDifficultyMult (difficulty);
 
-  curr_physical_state.position = curr_physical_state.position +  (Velocity*SIMULATION_ATOM*difficulty).Cast();
+  // Here send (new position + direction = curr_physical_state.position and .orientation)
+  // + speed to server (which velocity is to consider ?)
+  // + maybe Angular velocity to anticipate rotations in the other network clients
+  if( Network->isEnabled() && Network->isTime())
+  {
+	  //cout<<"SEND UPDATE"<<endl;
+	  this->networked=1;
+		// Check if this is a player, because in network mode we should only send updates of our moves
+	  if( _Universe->isPlayerStarship( this) /* && this->networked */ )
+	  {
+		  // (NetForce + Transform (ship_matrix,NetLocalForce) )/mass = GLOBAL ACCELERATION
+		  curr_physical_state.position = curr_physical_state.position +  (Velocity*SIMULATION_ATOM*difficulty).Cast();
+		  // If we want to inter(extra)polate sent position, DO IT HERE
+		  if( !(old_physical_state.position == curr_physical_state.position && old_physical_state.orientation == curr_physical_state.orientation))
+				// We moved so update
+				 Network->sendPosition( ClientState( Network->getSerial(), curr_physical_state, Velocity, this->ResolveForces( trans, transmat), 0));
+		    else
+			  // Say we are still alive
+			  Network->sendAlive();
+	  }
+	  else
+		  // Not the player so update the unit's position and stuff with the last received snapshot from the server
+			;
+  }
+  else
+  {
+	  this->networked++;
+ 	 curr_physical_state.position = curr_physical_state.position +  (Velocity*SIMULATION_ATOM*difficulty).Cast();
+  }
 #ifdef DEPRECATEDPLANETSTUFF
   if (planet) {
     Matrix basis;
@@ -613,6 +643,7 @@ void Unit::UpdatePhysics (const Transformation &trans, const Matrix &transmat, c
   if ((!SubUnit)&&(!killed)&&(!(docked&DOCKED_INSIDE))) {
     UpdateCollideQueue();
   }
+
 }
 void Unit::SetPlanetOrbitData (PlanetaryTransform *t) {
   if (isUnit()!=BUILDINGPTR)
@@ -682,14 +713,16 @@ void Unit::reactToCollision(Unit * smalle, const QVector & biglocation, const Ve
 
 
 
-void Unit::ResolveForces (const Transformation &trans, const Matrix &transmat) {
+Vector Unit::ResolveForces (const Transformation &trans, const Matrix &transmat) {
   Vector p, q, r;
   GetOrientation(p,q,r);
-  Vector temp = (InvTransformNormal(transmat,NetTorque)+NetLocalTorque.i*p+NetLocalTorque.j*q+NetLocalTorque.k *r)*SIMULATION_ATOM*(1.0/MomentOfInertia);
+  Vector temp1 = (InvTransformNormal(transmat,NetTorque)+NetLocalTorque.i*p+NetLocalTorque.j*q+NetLocalTorque.k *r)*(1.0/MomentOfInertia);
+  Vector temp = temp1*SIMULATION_ATOM;
   if (FINITE(temp.i)&&FINITE (temp.j)&&FINITE(temp.k)) {
     AngularVelocity += temp;
   }
-  temp = ((InvTransformNormal(transmat,NetForce) + NetLocalForce.i*p + NetLocalForce.j*q + NetLocalForce.k*r ) * SIMULATION_ATOM)/mass; //acceleration
+  Vector temp2 = ((InvTransformNormal(transmat,NetForce) + NetLocalForce.i*p + NetLocalForce.j*q + NetLocalForce.k*r ))/mass; //acceleration
+  temp = temp2*SIMULATION_ATOM;
   if (FINITE(temp.i)&&FINITE (temp.j)&&FINITE(temp.k)) {	//FIXME
     Velocity += temp;
   } 
@@ -703,6 +736,8 @@ void Unit::ResolveForces (const Transformation &trans, const Matrix &transmat) {
     float magvel = Velocity.Magnitude(); float y = (1-magvel*magvel*oocc);
     temp = temp * powf (y,1.5);
     }*/
+
+	return temp2;
 }
 void Unit::SetOrientation (QVector q, QVector r) {
   q.Normalize();
@@ -711,6 +746,9 @@ void Unit::SetOrientation (QVector q, QVector r) {
   CrossProduct (q,r,p);
   CrossProduct (r,p,q);
   curr_physical_state = Transformation (Quaternion::from_vectors (p.Cast(),q.Cast(),r.Cast()),Position());
+}
+void Unit::SetOrientation(Quaternion Q) {
+	curr_physical_state = Transformation ( Q, Position());
 }
 void Unit::GetOrientation(Vector &p, Vector &q, Vector &r) const {
   Matrix m;

@@ -26,6 +26,7 @@ void CheckUnit(class Unit *);
 #endif
 struct GFXColor;
 #include "vegastrike.h"
+#include "vs_globals.h"
 
 #include "gfx/matrix.h"
 #include "gfx/quaternion.h"
@@ -396,7 +397,7 @@ class Unit
   ///Should not be drawn
   bool invisible;
   // Tell if networked unit
-  bool networked;
+  char networked;
   
 
   unsigned char docked;
@@ -787,9 +788,10 @@ public:
   ///Updates physics given unit space transformations and if this is the last physics frame in the current gfx frame
   virtual void UpdatePhysics (const Transformation &trans, const Matrix &transmat, const Vector & CumulativeVelocity, bool ResolveLast, UnitCollection *uc=NULL);
   ///Resolves forces of given unit on a physics frame
-  void ResolveForces (const Transformation &, const Matrix&);
+  Vector ResolveForces (const Transformation &, const Matrix&);
   ///Returns the pqr oritnattion of the unit in world space
   void SetOrientation (QVector q, QVector r);
+  void SetOrientation (Quaternion Q);
   void GetOrientation(Vector &p, Vector &q, Vector &r) const;
   ///Transforms a orientation vector Up a coordinate level. Does not take position into account
   Vector UpCoordinateLevel(const Vector &v) const;

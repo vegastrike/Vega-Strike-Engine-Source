@@ -1,6 +1,7 @@
 #include "star.h"
 #include <assert.h>
 #include "vegastrike.h"
+#include "vs_globals.h"
 #if defined(__APPLE__) || defined(MACOSX)
     #include <OpenGL/gl.h>
 #else
