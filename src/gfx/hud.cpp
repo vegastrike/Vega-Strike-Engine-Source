@@ -37,8 +37,8 @@ TextPlane::TextPlane(const GFXColor & c) {
 }
 TextPlane::~TextPlane () {
 }
-void TextPlane::Draw (int offset) {
-  Draw (myText,offset,true);
+int TextPlane::Draw (int offset) {
+  return Draw (myText,offset,true);
 }
 
 static char * CreateLists() {
@@ -77,8 +77,9 @@ static unsigned char TwoCharToByte (char a, char b) {
 static float TwoCharToFloat(char a, char b) {
   return (TwoCharToByte(a,b)/255.);
 }
-void TextPlane::Draw(const string & newText, int offset,bool startlower, bool force_highquality)
+int TextPlane::Draw(const string & newText, int offset,bool startlower, bool force_highquality)
 {
+  int retval=1;
   GFXColorf(this->col);
   static char * display_lists=CreateLists ();
 	// some stuff to draw the text stuff
@@ -128,7 +129,7 @@ void TextPlane::Draw(const string & newText, int offset,bool startlower, bool fo
   glRasterPos2f (0,0);
   float scalex=1;
   float scaley=1;
-  
+  int potentialincrease=0;
   if (!use_bit) {
     scalex=(_Universe->numPlayers()>3?_Universe->numPlayers()/2:_Universe->numPlayers())*myFontMetrics.i/glutStrokeWidth (GLUT_STROKE_ROMAN,'W');
     scaley=myFontMetrics.j/(119.05+33.33);
@@ -155,6 +156,8 @@ void TextPlane::Draw(const string & newText, int offset,bool startlower, bool fo
       continue;
     }else if(*text_it>=32) {//always true
       //glutStrokeCharacter (GLUT_STROKE_ROMAN,*text_it);
+      retval+=potentialincrease;
+      potentialincrease=0;
       int lists = display_lists[*text_it];
       if (lists) {
 	GFXCallList(lists);
@@ -191,6 +194,7 @@ void TextPlane::Draw(const string & newText, int offset,bool startlower, bool fo
       glTranslatef (col,row,0);
       glScalef(scalex,scaley,1);
       glRasterPos2f(0,0);
+      potentialincrease++;
     }
     text_it++;
   }
@@ -200,6 +204,7 @@ void TextPlane::Draw(const string & newText, int offset,bool startlower, bool fo
   
   GFXPopBlendMode();
   GFXColorf(this->col);
+  return retval;
 }
 
 

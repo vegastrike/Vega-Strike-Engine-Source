@@ -205,6 +205,7 @@ void Mission::DirectorInitgame(){
 void Mission::DirectorLoop(){
   if (runtime.pymissions)
     runtime.pymissions->Execute();
+  BriefingLoop();
   if(director==NULL){
     return;
   }
@@ -230,7 +231,7 @@ void Mission::DirectorLoop(){
   }
   old_string_counter=string_counter;
   RunDirectorScript("gameloop");
-  BriefingLoop();
+
 }
 void Mission::DirectorEnd(){
   if(director==NULL){
@@ -471,7 +472,7 @@ void Mission::BriefingStart() {
   briefing = new Briefing();
   if (runtime.pymissions)
 	runtime.pymissions->callFunction("initbriefing");
-  RunDirectorScript ("initbriefing");
+  //RunDirectorScript ("initbriefing");
 }
 void Mission::BriefingUpdate() {
   if (briefing){
@@ -481,9 +482,9 @@ void Mission::BriefingUpdate() {
 
 void Mission::BriefingLoop() {
   if (briefing) {
-    RunDirectorScript ("loopbriefing");
-	if (runtime.pymissions)
-		runtime.pymissions->callFunction("loopbriefing");
+    if (runtime.pymissions)
+      runtime.pymissions->callFunction("loopbriefing");
+    //RunDirectorScript ("loopbriefing");
   }
 }
 class TextPlane * Mission::BriefingRender() {
@@ -510,7 +511,7 @@ void Mission::BriefingEnd() {
   if (briefing) {
 	if (runtime.pymissions)
 		runtime.pymissions->callFunction("endbriefing");
-    RunDirectorScript ("endbriefing");      
+	//RunDirectorScript ("endbriefing");      
     delete briefing;
     briefing = NULL;
   }

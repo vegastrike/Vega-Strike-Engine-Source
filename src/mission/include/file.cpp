@@ -86,7 +86,7 @@ std::string PrintArg (easyDomNode *node) {
     def="''";
   }
   if (retval.empty()) {
-	printf("\n[WARNING: attr_value with type \"%s\" is empty... Using default:\"%s\"\n",type,def);
+	printf("\n[WARNING: attr_value with type \"%s\" is empty... Using default:\"%s\"\n",type.c_str(),def.c_str());
     retval = def;
   }
   return retval;
@@ -118,6 +118,7 @@ void LoadPythonModule(string fn,string pythn) {
 	if (!fp) {return;}
     string tofind ("module");
     if ((where =wholefile.find (tofind))!=string::npos) {
+      *(wholefile.begin()+where+1)='a';//madule
       for (;where>0&&wholefile[where]!='<';where--) {
 	  }
       fwrite (wholefile.c_str(),where,1,fp);
@@ -141,13 +142,14 @@ void PrintPython (easyDomNode * node,string filename) {
     string pythontxt;
     string module = node->attr_value ("module");
     string classname = module;//ClassName (module);
+    string myname =node->attr_value ("name");
     if (module.length()) {
       pythontxt=string("import ")+module
-            +"\nnewmission = "+module+"."+classname+" (";
+            +"\nnewmission = "+module+"."+((myname=="init"||myname=="")?classname:myname)+" (";
     }else {
       pythontxt="newmission = "+classname+" (";
     }
-    string myname =node->attr_value ("name");
+
     if (node->subnodes.size()>0) {
       PrintArgs (pythontxt,node);
     }

@@ -59,8 +59,8 @@ public:
 	  myDims.i = x;
 	  myDims.j = y;
 	}
-	void Draw(int offset=0);
-	void Draw (const std::string &text, int offset=0, bool start_one_line_lower=false, bool force_highquality=false);
+	int Draw(int offset=0);//returns number of lines
+	int Draw (const std::string &text, int offset=0, bool start_one_line_lower=false, bool force_highquality=false);
 	void SetText(const std::string &newText) {
 		myText = newText;
 	}

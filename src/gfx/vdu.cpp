@@ -700,7 +700,7 @@ static GFXColor GetColorFromSuccess (float suc){
   suc/=2.;
   return GFXColor(1-suc,suc,0);    
 }
-void VDU::DrawVDUObjective (void * obj, int offset) {
+int VDU::DrawVDUObjective (void * obj, int offset) {
 
   if (offset>=0) {
     Mission::Objective * mo = (Mission::Objective *)obj;
@@ -710,8 +710,9 @@ void VDU::DrawVDUObjective (void * obj, int offset) {
       rez+="\n";
     }
     rez+=mo->objective;
-    tp->Draw (rez,0,true);  
+    return tp->Draw (rez,0,true);  
   }
+  return 0;
 }
 void VDU::DrawVDUObjectives (Unit *parent) {
   GFXColor col (tp->col);
@@ -729,15 +730,16 @@ void VDU::DrawVDUObjectives (Unit *parent) {
 	}else {
 	  rez+=active_missions[i]->mission_name+"\n";
 	}
-	tp->Draw (rez,0,true);  	
+	offset=tp->Draw (rez,0,true);  	
+      }else {
+	offset++;
       }
-      offset++;
+
       
       vector<Mission::Objective>::iterator j=active_missions[i]->objectives.begin();
       for (;j!=active_missions[i]->objectives.end();++j) {
 	if (j->owner==NULL||j->owner==parent) {
-	  DrawVDUObjective (j,offset);
-	  offset++;
+	  offset=DrawVDUObjective (j,offset);
 	}
       }
     }
