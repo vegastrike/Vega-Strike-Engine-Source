@@ -33,6 +33,8 @@ float DotProduct(const Vector &,const Vector &);
 
 void CrossProduct(const Vector &, const Vector &, Vector &);
 
+
+
 void ScaledCrossProduct(const Vector &, const Vector &, Vector &); 
 
 inline Vector operator* (const Vector &lval, const float obj);
@@ -170,7 +172,13 @@ inline Vector Transform(const Vector &p, const Vector &q, const Vector &r, const
 		p.j * v.i + q.j * v.j + r.j * v.k, 
 		p.k * v.i + q.k * v.j + r.k * v.k);
 }
-
+inline Vector CrossProduct(const Vector& v1, const Vector& v2) {
+	Vector result;
+    result.i = v1.j * v2.k - v1.k * v2.j;
+    result.j = v1.k * v2.i - v1.i * v2.k;
+    result.k = v1.i * v2.j  - v1.j * v2.i;     
+	return result;
+}
 void Yaw (float rad, Vector &p,Vector &q, Vector &r);
 void Pitch (float rad,Vector &p, Vector &q, Vector &r);
 void Roll (float rad,Vector &p, Vector &q, Vector &r);
@@ -179,3 +187,4 @@ void MakeRVector (Vector &p, Vector &q, Vector &r);
 void Orthogonize(Vector &p, Vector &q, Vector &r);
 #endif
 #endif
+
