@@ -300,6 +300,7 @@ int main (int argc, char ** argv) {
 
   char filename[16384];
   int numroids;
+  int randomseed=0;
   if (argc>=9) {
     sscanf (argv[1],"%s",filename);
     sscanf (argv[2],"%f",&cube_sides.i);
@@ -312,6 +313,9 @@ int main (int argc, char ** argv) {
     sscanf (argv[8],"%d",&poly_max);
     if (argc>=10) {
       sscanf (argv[9],"%f",&safety_zone);
+      if (argc>=11) {
+	sscanf (argv[10],"%d",&randomseed);
+      }
     }
   }else {
     printf ("Enter Ouput File: ");
@@ -330,7 +334,14 @@ int main (int argc, char ** argv) {
     scanf ("%d %d",&poly_min,&poly_max);
     printf ("Enter size of safety zone (0 to disable)\n");  
     scanf ("%f",&safety_zone);
+    printf ("Enter random seed (0 to use clock\n");
+    scanf ("%f",&randomseed);
    
+  }
+  if (randomseed!=0) {
+    srand (randomseed);
+  }else {
+    srand (time(NULL));
   }
   for (int i=0;i<numroids;i++) {
     field.push_back (asteroid());
