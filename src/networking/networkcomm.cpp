@@ -66,7 +66,7 @@ int		NetworkCommunication::InitSession( float frequency)
 	this->params = new JVOIPSessionParams;
 	this->rtpparams = new JVOIPRTPTransmissionParams;
 
-	this->session.Create( this->params);
+	this->session->Create( *(this->params));
 #endif
 
 #ifndef NETCOMM_NOWEBCAM
@@ -81,7 +81,7 @@ int		NetworkCommunication::InitSession( float frequency)
 int		NetworkCommunication::DestroySession()
 {
 #ifndef NETCOMM_NOSOUND
-	this->session.Destroy();
+	this->session->Destroy();
 
 	if( this->session)
 		delete this->session;
