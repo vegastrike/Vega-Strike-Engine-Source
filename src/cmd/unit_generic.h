@@ -625,9 +625,13 @@ public:
   inline bool Killed() const {return killed;}
   ///returns the current ammt of armor left
   unsigned short AfterburnData() const{ return afterburnenergy;}
+  void			 SetAfterBurn( unsigned short aft) { afterburnenergy = aft;}
   float FuelData() const;
+  void  SetFuel( float f) { fuel = f;}
   ///Returns the current ammt of energy left
   float EnergyRechargeData() const{return recharge;}
+  void  SetEnergyRecharge( float enrech) { recharge = enrech;}
+  void  SetMaxEnergy( float maxen) { maxenergy = maxen;}
   unsigned short MaxEnergyData() const{return maxenergy;}
   float ShieldRechargeData() const{return shield.recharge;}
   float EnergyData() const;

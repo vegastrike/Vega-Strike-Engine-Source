@@ -421,7 +421,7 @@ void	ZoneMgr::addDamage( NetBuffer & netbuf, Unit * un)
 		{
 			netbuf.addShield( un->shield);
 		}
-		if( damages & Unit::SHIELD_DAMAGED)
+		if( damages & Unit::ARMOR_DAMAGED)
 		{
 			netbuf.addArmor( un->armor);
 		}

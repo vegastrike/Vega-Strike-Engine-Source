@@ -641,6 +641,89 @@ int NetClient::recvMsg( char* netbuffer, Packet* outpacket )
 				// but the server computes the damage itself
 
 				// SHOULD READ THE DAMAGE SNAPSHOT HERE !
+				int nbupdates = packet_serial;
+				ObjSerial serial;
+				int it=0;
+				unsigned short damages;
+				for( int i=0; i<nbupdates; i++)
+				{
+					damages = netbuf.getShort();
+					serial = netbuf.getSerial();
+					un = UniverseUtil::GetUnitFromSerial( serial);
+
+					if( damages & Unit::SHIELD_DAMAGED)
+					{
+						un->shield = netbuf.getShield();
+					}
+					if( damages & Unit::ARMOR_DAMAGED)
+					{
+						un->armor = netbuf.getArmor();
+					}
+					if( damages & Unit::COMPUTER_DAMAGED)
+					{
+						un->computer.itts = netbuf.getChar();
+						un->computer.radar.color = netbuf.getChar();
+						un->limits.retro = netbuf.getFloat();
+						un->computer.radar.maxcone = netbuf.getFloat();
+						un->computer.radar.lockcone = netbuf.getFloat();
+						un->computer.radar.trackingcone = netbuf.getFloat();
+						un->computer.radar.maxrange = netbuf.getFloat();
+						for( it = 0; it<1+UnitImages::NUMGAUGES+MAXVDUS; it++)
+							un->image->cockpit_damage[it] = netbuf.getFloat();
+					}
+					if( damages & Unit::MOUNT_DAMAGED)
+					{
+						un->image->ecm = netbuf.getShort();
+						for( it=0; it<un->mounts.size(); it++)
+						{
+							if( sizeof( Mount::STATUS) == sizeof( char))
+								un->mounts[it].status = ( Mount::STATUS) netbuf.getChar();
+							else if( sizeof( Mount::STATUS) == sizeof( unsigned short))
+								un->mounts[it].status = ( Mount::STATUS) netbuf.getShort();
+							else if( sizeof( Mount::STATUS) == sizeof( unsigned int))
+								un->mounts[it].status = ( Mount::STATUS) netbuf.getInt32();
+
+							un->mounts[it].ammo = netbuf.getShort();
+							un->mounts[it].time_to_lock = netbuf.getFloat();
+							un->mounts[it].size = netbuf.getShort();
+						}
+					}
+					if( damages & Unit::CARGOFUEL_DAMAGED)
+					{
+						un->SetFuel( netbuf.getFloat());
+						un->SetAfterBurn(netbuf.getShort());
+						un->image->cargo_volume = netbuf.getFloat();
+						for( it=0; it<un->image->cargo.size(); it++)
+							un->image->cargo[it].quantity = netbuf.getInt32();
+					}
+					if( damages & Unit::JUMP_DAMAGED)
+					{
+						un->shield.leak = netbuf.getChar();
+						un->shield.recharge = netbuf.getFloat();
+						un->SetEnergyRecharge( netbuf.getFloat());
+						un->SetMaxEnergy( netbuf.getShort());
+						un->jump.energy = netbuf.getShort();
+						un->jump.damage = netbuf.getChar();
+						un->image->repair_droid = netbuf.getChar();
+					}
+					if( damages & Unit::CLOAK_DAMAGED)
+					{
+						un->cloaking = netbuf.getShort();
+						un->image->cloakenergy = netbuf.getFloat();
+						un->cloakmin = netbuf.getShort();
+						un->shield = netbuf.getShield();
+					}
+					if( damages & Unit::LIMITS_DAMAGED)
+					{
+						un->computer.max_pitch = netbuf.getFloat( );
+						un->computer.max_yaw = netbuf.getFloat( );
+						un->computer.max_roll = netbuf.getFloat( );
+						un->limits.roll = netbuf.getFloat( );
+						un->limits.yaw = netbuf.getFloat( );
+						un->limits.pitch = netbuf.getFloat( );
+						un->limits.lateral = netbuf.getFloat( );
+					}
+				}
 			}
 			break;
 #ifdef NET_SHIELD_SYSTEM_1
