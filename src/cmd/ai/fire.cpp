@@ -266,7 +266,7 @@ bool FireAt::isJumpablePlanet(Unit * targ) {
     if (istargetjumpableplanet) {
       istargetjumpableplanet=(!((Planet*)targ)->GetDestinations().empty())&&(parent->GetJumpStatus().drive>=0);
       if (!istargetjumpableplanet) {
-	ChooseTarget();
+	//	ChooseTarget(); //WTF this will cause endless loopdiloop
       }
     }
     return istargetjumpableplanet;
