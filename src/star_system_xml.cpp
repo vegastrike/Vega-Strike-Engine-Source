@@ -333,7 +333,7 @@ void StarSystem::endElement(const string &name) {
 	if (xml->unitlevel==0) {
 		numprimaries = xml->moons.size();
 		this->primaries=new Unit * [xml->moons.size()];
-		for(int i=0;i<xml->moons.size();i++) {
+		for(unsigned int i=0;i<xml->moons.size();i++) {
 			
 			primaries[i]=xml->moons[i];
 		}

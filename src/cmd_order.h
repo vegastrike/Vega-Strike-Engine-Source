@@ -44,7 +44,7 @@ protected:
   vector<Order*> suborders;
 public:
   Order (): targetlocation(0,0,0){parent = NULL;group =targets=NULL;type=0;done=false;}
-  Order(int ttype): targetlocation(0,0,0){parent = NULL;targets=NULL;type = ttype;done=false;}
+  Order(int ttype): targetlocation(0,0,0){parent = NULL;group=targets=NULL;type = ttype;done=false;}
   virtual ~Order () {}
   virtual void Execute();
   bool AttachOrder (UnitCollection *targets);

@@ -14,6 +14,7 @@
 #include "gfxlib.h"
 #include "gfx_location_select.h"
 #include <string>
+#include "cmd_target_ai.h"
 #include "cmd_input_dfa.h"
 #include "UnitCollection.h"
 #include "star_system.h"
@@ -21,6 +22,7 @@
 #include "gfx_sphere.h"
 #include "gfx_coordinate_select.h"
 #include "gfx_mesh.h"
+#include "cmd_target_ai.h"
 #include "cmd_navigation_orders.h"
 #include "cmd_beam.h"
 #include  "gfx_halo.h"
@@ -498,6 +500,10 @@ void createObjects() {
     v = Vector(0,.2,-1);
     v.Normalize();
     fighters[a]->SetAI(new Order());
+    if (a!=0) {
+      fighters[a]->EnqueueAI( new Orders::AggressiveAI ());
+      fighters[a]->Target (fighters[0]);
+    }
     //fighters[a]->EnqueueAI(new Orders::ChangeHeading(v,6));
     //fighters[a]->EnqueueAI(new Orders::MoveTo(Vector (-5,-10,10),true,10));
     //fighters[a]->EnqueueAI(new Orders::ChangeHeading(-v,10));
@@ -514,7 +520,8 @@ void createObjects() {
   }
   fighters[0]->EnqueueAI(new AIScript("aitest.xml"));
   fighters[0]->EnqueueAI(new FlyByKeyboard ());
-
+  fighters[1]->EnqueueAI(new Orders::FireAt (0,1.2));
+  fighters[1]->Target (fighters[0]);
 
   //_Universe->activeStarSystem()->AddUnit(fighter);
   //_Universe->activeStarSystem()->AddUnit(carrier);

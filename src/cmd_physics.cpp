@@ -234,6 +234,7 @@ void Unit::UpdatePhysics (const Transformation &trans, const Matrix transmat, bo
   for (i=0;i<numsubunit;i++) {
     subunits[i]->UpdatePhysics(cumulative_transformation,cumulative_transformation_matrix,lastframe,uc);
     if (hull<0) {
+      UnFire();//don't want to go off shooting while your body's splitting everywhere
       subunits[i]->timeexplode+=.1*SIMULATION_ATOM;//urge slowly on
       subunits[i]->hull-=SIMULATION_ATOM;
     }

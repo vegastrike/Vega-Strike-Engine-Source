@@ -1189,7 +1189,7 @@ void Mesh::LoadXML(const char *filename, Mesh *oldmesh) {
 
   for (a=0;a<xml->tristrips.size();a++) {
 
-    for (int m=0;m<xml->tristrips[a].size();m++,index++) {
+    for (unsigned int m=0;m<xml->tristrips[a].size();m++,index++) {
       vertexlist[index] = xml->tristrips[a][m];
     updateMax (mn,mx,vertexlist[index]);
     }
@@ -1198,7 +1198,7 @@ void Mesh::LoadXML(const char *filename, Mesh *oldmesh) {
     o_index++;
   }
   for (a=0;a<xml->trifans.size();a++) {
-    for (int m=0;m<xml->trifans[a].size();m++,index++) {
+    for (unsigned int m=0;m<xml->trifans[a].size();m++,index++) {
       vertexlist[index] = xml->trifans[a][m];
     updateMax (mn,mx,vertexlist[index]);
     }
@@ -1208,7 +1208,7 @@ void Mesh::LoadXML(const char *filename, Mesh *oldmesh) {
     o_index++;
   }
   for (a=0;a<xml->quadstrips.size();a++) {
-    for (int m=0;m<xml->quadstrips[a].size();m++,index++) {
+    for (unsigned int m=0;m<xml->quadstrips[a].size();m++,index++) {
       vertexlist[index] = xml->quadstrips[a][m];
     updateMax (mn,mx,vertexlist[index]);
     }
@@ -1218,7 +1218,7 @@ void Mesh::LoadXML(const char *filename, Mesh *oldmesh) {
   }
   for (a=0;a<xml->linestrips.size();a++) {
 
-    for (int m=0;m<xml->linestrips[a].size();m++,index++) {
+    for (unsigned int m=0;m<xml->linestrips[a].size();m++,index++) {
       vertexlist[index] = xml->linestrips[a][m];
       updateMax (mn,mx,vertexlist[index]);
     }

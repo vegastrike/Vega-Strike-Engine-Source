@@ -142,7 +142,7 @@ private:
       V_REF=0x10
     };
     struct ZeLogo {
-      int type;
+      unsigned int type;
       float rotate;
       float size;
       float offset;

@@ -43,8 +43,12 @@
 double interpolation_blend_factor;
 
 
-
-
+#define PARANOIA .8
+void Unit::Threaten (Unit * targ, float danger) {
+  if (danger>PARANOIA) {
+    computer.threat.SetUnit(targ);
+  }
+}
 void Unit::calculate_extent() {  
   int a;
   for(a=0; a<nummesh; a++) {
@@ -122,7 +126,7 @@ void Unit::Init()
   limits.afterburn=20;
   limits.retro=1;
   Target(NULL);
-  Threaten (NULL);
+  computer.threat.SetUnit (NULL);
   computer.set_speed=0;
   computer.max_speed=10;
   computer.max_ab_speed=30;
@@ -289,10 +293,19 @@ float Unit::cosAngleFromMountTo (Unit * targ, float & dist) {
     finaltrans.to_matrix (mat);
     Vector totarget (targ->Position()-finaltrans.position);
     Vector Normal (mat[8],mat[9],mat[10]);
-    tmpcos = Normal.Dot (totarget);
 
     tmpdist = totarget.Magnitude();    
-    tmpcos/=sqrtf(fabs(tmpdist*tmpdist-targ->rSize()*targ->rSize())) ;
+    //do approx ITTS calculation:
+    //    fprintf (stderr, "old tt %f %f %f\n", totarget.i, totarget.j, totarget.k);
+    //ITTSBORKENtotarget = totarget + targ->GetVelocity()*(tmpdist/mounts[i].type.Speed);//warning subunit not safe
+    //    fprintf (stderr, "new tt %f %f %f\n", totarget.i, totarget.j, totarget.k);
+    tmpcos = Normal.Dot (totarget);
+    if (tmpcos>0) {
+      tmpcos = tmpdist*tmpdist - tmpcos*tmpcos;
+      tmpcos = targ->rSize()/tmpcos;//one over distance perpendicular away from straight ahead times the size...high is good
+    } else {
+      tmpcos /= tmpdist;
+    }
     tmpdist /= mounts[i].type.Range;
     if (tmpdist < 1||tmpdist<dist) {
       if (tmpcos-tmpdist/2 > retval-dist/2) {

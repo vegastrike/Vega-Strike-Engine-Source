@@ -38,6 +38,9 @@ class ChangeHeading : public Order {
   bool OptimizeAngSpeed(float limit, float v, float &a);
   bool Done (const Vector &);
   void TurnToward (float angle, float ang_vel, float &torque);
+protected:
+  void ResetDone () {done = false; terminatingX=terminatingY=0;}
+ 
  public:
    ChangeHeading(const Vector &final_heading, int switchback) : Order(), switchbacks(switchback),terminatingX(0),terminatingY(0),last_velocity(0,0,0),final_heading(final_heading), terminating(false) { type = FACING|LOCATION;}
   void SetDest (const Vector&);

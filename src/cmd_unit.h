@@ -226,7 +226,7 @@ public:
   Unit *Target(){return computer.target.GetUnit();}
   Unit *Threat(){return computer.threat.GetUnit();}
   void Target (Unit * targ) {computer.target.SetUnit(targ);}
-  void Threaten (Unit * targ) {computer.threat.SetUnit(targ);}
+  void Threaten (Unit * targ, float danger);
   void Fire();
   void UnFire();
   Computer & GetComputerData () {return computer;}

@@ -50,6 +50,8 @@ void Order::Execute () {
       } else {
 	ord++;
       }
+    } else {
+      ord++;
     }
   }
   

@@ -41,7 +41,7 @@ void UnitCollection::prepend(Unit *unit) {
 void UnitCollection::prepend(Iterator *iter) {
   UnitListNode *n = units;
   Unit * tmp;
-  while(tmp=iter->current()) {//iter->current checks for killed()
+  while((tmp=iter->current())) {//iter->current checks for killed()
     n->next = new UnitListNode(tmp, n->next);
     iter->advance();
   }
@@ -50,7 +50,7 @@ void UnitCollection::append(Iterator *iter) {
   UnitListNode *n = units;
   while(n->next!=NULL) n = n->next;
   Unit * tmp;
-  while(tmp=iter->current()) {
+  while((tmp=iter->current())) {
     n->next = new UnitListNode(tmp, NULL);
     n = n->next;
     iter->advance();

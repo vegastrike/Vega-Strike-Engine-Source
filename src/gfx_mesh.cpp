@@ -233,7 +233,7 @@ void Mesh::ProcessDrawQueue() {
     }
     GFXLoadMatrix(MODEL, c.mat);
     vector <int> specialfxlight;
-		int i;
+    unsigned int i;
     for ( i=0;i<c.SpecialFX->size();i++) {
       int ligh;
       GFXCreateLight (ligh,(*c.SpecialFX)[i],true);

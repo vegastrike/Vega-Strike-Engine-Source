@@ -54,7 +54,7 @@ static float CalculateDecelTime (float l, float v, float &F, float D,  float mas
 } 
 
 void MoveTo::SetDest (const Vector &target) {
-    type = LOCATION;
+    type = LOCATION|MOVEMENT;
     targetlocation = target;
     done = false;
   }
@@ -165,7 +165,7 @@ void ChangeHeading::TurnToward (float atancalc, float ang_veli, float &torquei) 
 }
 void ChangeHeading::SetDest (const Vector &target) {
   final_heading = target;
-  done = false;
+  ResetDone();
 }
 float TURNTHRESHOLD=SIMULATION_ATOM/1.9;
 bool ChangeHeading::Done(const Vector & ang_vel) {
@@ -181,7 +181,7 @@ void ChangeHeading::Execute() {
   terminatingX += (copysign(1.0,local_heading.i)!=copysign(1.0,last_velocity.i)||(!local_heading.i));
   terminatingY += (copysign(1.0,local_heading.j)!=copysign(1.0,last_velocity.j)||(!local_heading.j));
   last_velocity = local_heading;
-  local_heading = parent->ToLocalCoordinates (final_heading);
+  local_heading = parent->ToLocalCoordinates (final_heading-parent->Position());
   if (done) return ;
   Vector torque (parent->Limits().pitch, parent->Limits().yaw,0);//set torque to max accel in any direction
   if (terminatingX>switchbacks&&terminatingY>switchbacks) {
@@ -211,6 +211,6 @@ void FaceTarget::Execute() {
   SetDest(target->Position());
   ChangeHeading::Execute();
   if (!finish) {
-    done=GFXFALSE;
+    ResetDone();
   } 
 }
