@@ -22,7 +22,7 @@
 #include "gfxlib.h"
 #include "vegastrike.h"
 #include <list>
-
+#include <queue>
 #define GFX_DIFFUSE 1
 #define GFX_SPECULAR 2
 #define GFX_AMBIENT 4
@@ -56,7 +56,7 @@ struct gfx_light_data {
   gfx_light_data() {
     diffuse[0]=diffuse[1]=diffuse[2]=0;
     specular[0]=specular[1]=specular[2]=0;
-    options = ambient[0]=ambient[1]=ambient[2]=0;
+    ambient[0]=ambient[1]=ambient[2]=options=0;
     spot[0]=spot[1]=spot[2]=0;
     exp =diffuse[3]=specular[3]=ambient[3]=1;
     enabled=false;
@@ -84,6 +84,52 @@ vector <gfx_light_loc> * _glights_loc=NULL;
 vector <gfx_light_data> * _glights_dat=NULL;
 vector <gfx_light_loc> * _llights_loc=NULL;
 vector <gfx_light_data> * _llights_dat=NULL;
+
+
+
+
+
+struct light_key {
+  int number;
+  float intensity_key;
+
+  light_key (int num, float inte) {
+    number = num;
+    intensity_key = inte;
+  }
+};
+static bool operator < (light_key tmp1,light_key tmp2) {return tmp1.intensity_key<tmp2.intensity_key;}
+bool GlobalCompare (light_key x, light_key y) {
+  return x.intensity_key < y.intensity_key;
+}
+
+priority_queue <light_key> lightQ;
+inline void SetLocalCompare (Vector x) {
+  float dis, dissqr;
+  unsigned int i;
+  for (i=0;i<_llights_loc->size();i++) {
+    if ((*_llights_loc)[i].intensity>0) {
+      dissqr = 
+	((*_llights_loc)[i].vect[0]-x.i)*((*_llights_loc)[i].vect[0]-x.i)+
+	((*_llights_loc)[i].vect[1]-x.j)*((*_llights_loc)[i].vect[1]-x.j)+
+	((*_llights_loc)[i].vect[2]-x.k)*((*_llights_loc)[i].vect[2]-x.k);
+      dis = sqrtf (dissqr);//should use fast sqrt by nvidia
+      lightQ.push (light_key(-1-i,
+			     (*_llights_loc)[i].intensity/(
+							   (*_llights_loc)[i].attenuate[0] +
+							   (*_llights_loc)[i].attenuate[1]*dis +
+							   (*_llights_loc)[i].attenuate[2]*dissqr)
+			     )
+		   );
+    }
+  }
+  for (i=0;i<_glights_loc->size();i++) {
+    if ((*_glights_loc)[i].intensity>0) {
+      lightQ.push (light_key(i,(*_glights_loc)[i].intensity));
+    }
+  }
+}
+
 BOOL GFXCreateLightContext (int & con_number) {
   con_number = _global_lights_loc.size();
   _global_lights_loc.push_back (vector <gfx_light_loc>());
