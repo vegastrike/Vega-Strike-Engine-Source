@@ -60,9 +60,11 @@ void TextPlane::Draw(const string & newText, int offset,bool startlower, bool fo
       row -= (use_bit)?((fnt==GLUT_BITMAP_HELVETICA_12)?(26./g_game.y_resolution):(22./g_game.y_resolution)):(myFontMetrics.j);
   }
   GFXPushBlendMode();
+  glLineWidth (1);
   if (!use_bit&&font_antialias) {
     GFXBlendMode (SRCALPHA,INVSRCALPHA);
     glEnable(GL_LINE_SMOOTH);
+
   }else {
     GFXBlendMode (ONE,ZERO);
     glDisable (GL_LINE_SMOOTH);

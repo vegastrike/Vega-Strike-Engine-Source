@@ -91,16 +91,12 @@ Mission::Mission(char *configfile, bool loadscripts){
 #endif
 
 }
-
+MessageCenter * Mission::msgcenter=NULL;
 void Mission::initMission(bool loadscripts){
   if (!top)
     return;
-  static bool begin=true;
-  if (begin) {
+  if (msgcenter==NULL) {
     msgcenter=new MessageCenter();
-    begin=false;
-  }else {
-    msgcenter=active_missions[0]->msgcenter;
   }
   //  msgcenter->add("game","all","Welcome to Vegastrike");
   /*

@@ -76,9 +76,10 @@ void Universe::SetupCockpits(vector  <string> playerNames) {
 	  cockpit.push_back( new Cockpit ("",NULL,playerNames[i]));
 	}
 }
+static void SortStarSystems (std::vector <StarSystem *> &ss, StarSystem * drawn);
 void Universe::LoadStarSystem(StarSystem * s) {
   star_system.push_back (s);
-  
+  SortStarSystems(star_system,s);//dont' want instadie
 }
 bool Universe::StillExists (StarSystem * s) {
   return std::find (star_system.begin(),star_system.end(),s)!=star_system.end();
@@ -185,7 +186,7 @@ void Universe::Loop(void main_loop()) {
 }
 extern void micro_sleep (unsigned int howmuch);
 extern int getmicrosleep ();
-void SortStarSystems (std::vector <StarSystem *> &ss, StarSystem * drawn) {
+static void SortStarSystems (std::vector <StarSystem *> &ss, StarSystem * drawn) {
   if ((*ss.begin())==drawn) {
     return;
   }

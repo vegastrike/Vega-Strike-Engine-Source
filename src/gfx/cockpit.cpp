@@ -1164,15 +1164,37 @@ void Cockpit::Update () {
 	parentturret.SetUnit(NULL);
 	zoomfactor=1.5;
 	respawnunit[_Universe->CurrentCockpit()]=0;
+	string newsystem = savegame->GetStarSystem()+".system";
+	StarSystem * ss = _Universe->GenerateStarSystem (newsystem.c_str(),"",Vector(0,0,0));
+	_Universe->getActiveStarSystem(0)->SwapOut();
+	this->activeStarSystem=ss;
+	_Universe->pushActiveStarSystem(ss);
+
+
+	vector <StarSystem *> saved;
+	while (_Universe->getNumActiveStarSystem()) {
+	  saved.push_back (_Universe->activeStarSystem());
+	  _Universe->popActiveStarSystem();
+	}
+	if (!saved.empty()) {
+	  saved.back()=ss;
+	}
+	unsigned int mysize = saved.size();
+	for (unsigned int i=0;i<mysize;i++) {
+	  _Universe->pushActiveStarSystem (saved.back());
+	  saved.pop_back();
+	}
+	ss->SwapIn();
 	Unit * un = UnitFactory::createUnit (unitfilename.c_str(),false,this->unitfaction,unitmodname);
 	un->SetCurPosition (LaunchUnitNear (savegame->GetPlayerLocation()));
-	_Universe->activeStarSystem()->AddUnit (un);
+	ss->AddUnit (un);
 	this->SetParent(un,unitfilename.c_str(),unitmodname.c_str(),savegame->GetPlayerLocation());
 	//un->SetAI(new FireKeyboard ())
 	SwitchUnits (NULL,un);
 	credits = savegame->GetSavedCredits();
 	CockpitKeys::Pan(0,PRESS);
 	CockpitKeys::Inside(0,PRESS);
+	_Universe->popActiveStarSystem();
       }
   }
   if (turretcontrol.size()>_Universe->CurrentCockpit())

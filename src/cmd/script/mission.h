@@ -452,7 +452,7 @@ unsigned int  createClassInstance(string modulename);
 varInst* lookupClassVariable(string modulename,string varname,unsigned int classid);
 void destroyClassInstance(string modulename,unsigned int classid);
 
-  MessageCenter *msgcenter;
+  static MessageCenter *msgcenter;
 
 void call_vector_into_olist(varInst *vec_vi,QVector vec3);
 void  deleteVarInst(varInst *vi,bool del_local=false);
