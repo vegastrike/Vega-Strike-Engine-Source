@@ -499,7 +499,7 @@ void createObjects() {
     //fighters[a] = new Unit("Homeworld-HeavyCorvette.xml", true);
     switch(a%7) {
     case 0:
-      fighters[a] = new Unit("hornet.xunit", true);
+      fighters[a] = new Unit("broadsword.xunit", true);
       break;
     case 1:
       fighters[a] = new Unit("Cloakedfighter.xunit", true);
