@@ -1015,7 +1015,7 @@ string Unit::WriteUnitString () {
         unit["Left_Accel"]=unit["Right_Accel"]=tos(limits.lateral/(game_accel*game_speed));
         unit["Bottom_Accel"]=unit["Top_Accel"]=tos(limits.vertical/(game_accel*game_speed));
         unit["Default_Speed_Governor"]=tos(computer.max_combat_speed/game_speed);
-        unit["Default_Speed_Governor"]=tos(computer.max_combat_ab_speed/game_speed);
+        unit["Afterburner_Speed_Governor"]=tos(computer.max_combat_ab_speed/game_speed);
         unit["ITTS"]=tos(computer.itts);
         unit["Radar_Color"]=tos(computer.radar.color);
         unit["Radar_Range"]=tos(computer.radar.maxrange);
