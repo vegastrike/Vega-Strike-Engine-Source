@@ -75,6 +75,7 @@ void AddDelta (int dx, int dy) {
   delx+=dx;
   dely+=dy;
 }
+int warpallowage=2;
 void DealWithWarp (int x, int y) {
   static bool warp_pointer = XMLSupport::parse_bool(vs_config->getVariable ("joystick","warp_mouse","false"));
   static int mouse_warp_zone = XMLSupport::parse_int(vs_config->getVariable ("joystick","warp_mouse_zone","100"));
@@ -92,8 +93,9 @@ void DealWithWarp (int x, int y) {
 	i->x+=delx;
 	i->y+=dely;
       }
-
-      winsys_warp_pointer(g_game.x_resolution/2,g_game.y_resolution/2);
+      if (warpallowage-->=0) {
+	winsys_warp_pointer(g_game.x_resolution/2,g_game.y_resolution/2);
+      }
     }
    }
   }
@@ -215,6 +217,7 @@ void InitMouse(){
 }
 				
 void ProcessMouse () {
+  warpallowage=2;
   while(eventQueue.size()) {
     MouseEvent e = eventQueue.front();
     switch(e.type) {
