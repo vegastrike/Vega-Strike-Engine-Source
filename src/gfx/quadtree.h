@@ -1,6 +1,12 @@
 #ifndef QUADTREE_H_
 #define QUADTREE_H_
 #include "quadsquare.h"
+
+/** 
+ * This class is a wrapper class for quadsquare
+ * It takes care of activating textures, having possession of the vlist
+ * and having posession of the static vars that get set
+ */
 class QuadTree {
   Matrix transformation;
   quadcornerdata RootCornerData;
