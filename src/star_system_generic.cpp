@@ -37,16 +37,27 @@
 #include "cmd/unit_collide.h"
 #include "savegame.h"
 #include "networking/netclient.h"
+
 #ifndef USE_BOOST_128
+
 #if defined (_MSC_VER) && _MSC_VER<=1200
+
 #define Vector Vactor
+
 #endif
+
 #include <boost/python.hpp>
+
 #if defined (_MSC_VER) && _MSC_VER<=1200
+
 #undef Vector
+
 #endif
+
 #else
+
 #include <boost/python/detail/extension_class.hpp>
+
 #endif
 vector<Vector> perplines;
 //static SphereMesh *foo;
@@ -494,7 +505,7 @@ void StarSystem::Update( float priority)
 }
 void ExecuteDirector () {
 	    unsigned int curcockpit= _Universe->CurrentCockpit();
-	    for (unsigned int i=0;i<active_missions.size();i++) {
+		{for (unsigned int i=0;i<active_missions.size();i++) {
 			if (active_missions[i]) {
 				_Universe->SetActiveCockpit(active_missions[i]->player_num);
 				StarSystem * ss=_Universe->AccessCockpit()->activeStarSystem;
@@ -504,11 +515,11 @@ void ExecuteDirector () {
 				active_missions[i]->DirectorBenchmark();
 				if (ss)_Universe->popActiveStarSystem();
 			}
-	    }
+		}}
 		_Universe->SetActiveCockpit(curcockpit);
 		mission=active_missions[0];
 		processDelayedMissions();
-	    for (unsigned int i=1;i<active_missions.size();) {
+		{for (unsigned int i=1;i<active_missions.size();) {
               if (active_missions[i]) {
                 if(active_missions[i]->runtime.pymissions) {
                   i++;
@@ -524,7 +535,7 @@ void ExecuteDirector () {
                 active_missions.Get()->erase(active_missions.Get()->begin()+i);
                 
               }
-            }
+        }}
 
 }
 void StarSystem::Update(float priority , bool executeDirector) {
