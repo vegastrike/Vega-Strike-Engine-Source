@@ -704,7 +704,7 @@ void MakePlanet(float radius, int entitytype, bool forceRS, Vector R, Vector S, 
       static float innerRingRadMin = XMLSupport::parse_float (vs_config->getVariable ("galaxy","InnerRingRadius","1.5"));
       static float outerRingRadMin = XMLSupport::parse_float (vs_config->getVariable ("galaxy","OuterRingRadius","2.5"));
       double inner_rad= (innerRingRadMin*(1+grand()*.5))*radius;
-      double outer_rad = (inner_rad+outerRingRadMin*grand())*radius;
+      double outer_rad = inner_rad+(outerRingRadMin*grand())*radius;
       int wrapx=1;
       int wrapy=1;
       ringname = GetWrapXY(ringname,wrapx,wrapy);
