@@ -2751,17 +2751,19 @@ float Unit::ApplyLocalDamage (const Vector & pnt, const Vector & normal, float a
   if (GetNebula()==NULL||(nebshields>0)) {
 	// Compute spercentage even in networking because doesn't apply damage on client side
 	//if( Network==NULL || SERVER)
-		spercentage = DealDamageToShield (pnt,absamt);
+    float origabsamt=absamt;
+    spercentage = DealDamageToShield (pnt,absamt);
+    
     //percentage = DealDamageToShield (pnt,absamt);
-	amt = amt>=0?absamt:-absamt;
-    if (meshdata.back()&&spercentage>0&&amt==0) {//shields are up
+    amt = amt>=0?absamt:-absamt;
+    if (meshdata.back()&&spercentage>0&&(origabsamt-absamt>shield.recharge||amt==0)){//shields are up
       /*      meshdata[nummesh]->LocalFX.push_back (GFXLight (true,
 	      GFXColor(pnt.i+normal.i,pnt.j+normal.j,pnt.k+normal.k),
 	      GFXColor (.3,.3,.3), GFXColor (0,0,0,1), 
 	      GFXColor (.5,.5,.5),GFXColor (1,0,.01)));*/
       //calculate percentage
       if (GetNebula()==NULL) 
-		meshdata.back()->AddDamageFX(pnt,shieldtight?shieldtight*normal:Vector(0,0,0),spercentage,color);
+		meshdata.back()->AddDamageFX(pnt,shieldtight?shieldtight*normal:Vector(0,0,0),spercentage>1?1:spercentage,color);
     }
   }
   // If shields failing or... => WE COMPUTE DAMAGE TO HULL
