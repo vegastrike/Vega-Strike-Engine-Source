@@ -67,9 +67,9 @@ RANLIB = ranlib
 SDL_CFLAGS = -I/usr/include/SDL -D_REENTRANT
 SDL_CONFIG = /usr/bin/sdl-config
 SDL_LIBS = -L/usr/lib -Wl,-rpath,/usr/lib -lSDL -lpthread
-TR_CFLAGS = -g -Wall -I/usr/include/SDL -D_REENTRANT
+TR_CFLAGS = -O2 -Wall -fomit-frame-pointer -ffast-math -fexpensive-optimizations -malign-loops=2 -malign-jumps=2 -malign-functions=2 -I/usr/include/SDL -D_REENTRANT
 TR_CPPFLAGS =  -DHAVE_SDL=1 -DHAVE_SDL_MIXER=1   
-TR_CXXFLAGS = -g -Wall -I/usr/include/SDL -D_REENTRANT
+TR_CXXFLAGS = -O2 -Wall -fomit-frame-pointer -ffast-math -fexpensive-optimizations -malign-loops=2 -malign-jumps=2 -malign-functions=2 -I/usr/include/SDL -D_REENTRANT
 TR_LIBS =  -L/usr/lib -Wl,-rpath,/usr/lib -lSDL -lpthread -lSDL_mixer  -lGL -lGLU  -lglut  -lexpat
 VERSION = 0.0.9
 
@@ -93,11 +93,11 @@ libai_a_LIBADD =
 libai_a_OBJECTS =  event_xml.o navigation.o flykeyboard.o fire.o order.o \
 aggressive.o input_dfa.o flybywire.o script.o
 AR = ar
-CXXFLAGS =  -g -Wall -I/usr/include/SDL -D_REENTRANT
+CXXFLAGS =  -O2 -Wall -fomit-frame-pointer -ffast-math -fexpensive-optimizations -malign-loops=2 -malign-jumps=2 -malign-functions=2 -I/usr/include/SDL -D_REENTRANT
 CXXCOMPILE = $(CXX) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
 CXXLD = $(CXX)
 CXXLINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) $(LDFLAGS) -o $@
-CFLAGS =  -g -Wall -I/usr/include/SDL -D_REENTRANT
+CFLAGS =  -O2 -Wall -fomit-frame-pointer -ffast-math -fexpensive-optimizations -malign-loops=2 -malign-jumps=2 -malign-functions=2 -I/usr/include/SDL -D_REENTRANT
 COMPILE = $(CC) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 CCLD = $(CC)
 LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(LDFLAGS) -o $@
