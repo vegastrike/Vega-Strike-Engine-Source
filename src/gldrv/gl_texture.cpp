@@ -77,6 +77,7 @@ struct GLTexture{
   enum FILTER mipmapped;
   GLTexture() {
 	palette=NULL;
+	alive=GFXFALSE;
 	name=-1;
 	width=height=1;
   }
