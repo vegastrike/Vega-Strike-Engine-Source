@@ -22,7 +22,8 @@
 #include "gfxlib.h"
 
 #include "gl_light.h"
-
+#include <stack>
+using std::stack;
 
 int GFX_MAX_LIGHTS=8;
 int GFX_OPTIMAL_LIGHTS=4;
@@ -35,7 +36,30 @@ vector <gfx_light> * _llights=NULL;
 
 //currently stored GL lights!
 OpenGLLights* GLLights=NULL;//{-1,-1,-1,-1,-1,-1,-1,-1};
+static stack <bool *> GlobalEffects;
 
+void /*GFXDRVAPI*/ GFXPushGlobalEffects() {
+  bool * tmp = new bool [GFX_MAX_LIGHTS];
+  unpicklights();//costly but necessary to get rid of pesky local enables that shoudln't be tagged to get reenabled
+  for (int i=0;i<GFX_MAX_LIGHTS;i++) {
+    tmp[i]=  (0!=(GLLights[i].options&OpenGLLights::GL_ENABLED));
+    if (GLLights[i].options&OpenGLLights::GL_ENABLED) {
+      glDisable (GL_LIGHT0+i);
+    }      
+  }
+  GlobalEffects.push (tmp);
+}
+GFXBOOL /*GFXDRVAPI*/ GFXPopGlobalEffects() {
+  if (GlobalEffects.empty())
+    return false;
+  for (int i=0;i<GFX_MAX_LIGHTS;i++) {
+    if (GlobalEffects.top()[i]) {
+      glEnable (GL_LIGHT0+i);
+    }
+  }
+  GlobalEffects.pop();
+  return true;
+}	
 
 GFXLight::GFXLight (const bool enabled,const GFXColor &vect, const GFXColor &diffuse, const GFXColor &specular, const GFXColor &ambient, const GFXColor &attenuate) {
   target = -1;

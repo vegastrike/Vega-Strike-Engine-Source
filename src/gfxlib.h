@@ -75,7 +75,8 @@ GFXBOOL /*GFXDRVAPI*/ GFXEnableLight(const int light);
 GFXBOOL /*GFXDRVAPI*/ GFXDisableLight(const int light);
 
 GFXBOOL /*GFXDRVAPI*/ GFXSetLight(int light, enum LIGHT_TARGET, const GFXColor &color);
-
+void /*GFXDRVAPI*/ GFXPushGlobalEffects ();
+GFXBOOL /*GFXDRVAPI*/ GFXPopGlobalEffects();
 
 
 

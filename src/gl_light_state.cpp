@@ -287,6 +287,7 @@ LineCollide gfx_light::CalculateBounds (bool &error) {
   return retval;
 }
 void light_rekey_frame() {
+  unpicklights();//picks doubtless changed position
     for (int i=0;i<GFX_MAX_LIGHTS;i++) {
 	if (GLLights[i].options & OpenGLLights::GL_ENABLED) {
 	    if (GLLights[i].index>=0) {

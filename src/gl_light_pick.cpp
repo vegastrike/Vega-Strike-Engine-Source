@@ -5,7 +5,7 @@ using std::priority_queue;
 #include "hashtable_3d.h"
 #include "cmd_collide.h"
 using std::list;
-const float TINYOBJECT = .1;
+
  //optimization globals
 float intensity_cutoff=.05;//something that would normally round down
 float optintense=.2;
@@ -45,7 +45,24 @@ static void swappicked () {
     newpicked->clear();
 }
 
+void unpicklights () {
+  for (list <int>::iterator i=newpicked->begin();i!=newpicked->end();i++) {
+    assert (GLLights[*i].index!=-1);
+    assert (GLLights[(*_llights)[*i].Target()].index==*i);
+    int targ =(*_llights)[*i].Target(); 
+    if (GLLights[targ].options&OpenGLLights::GL_ENABLED) {
+      glDisable (GL_LIGHT0+targ);
+      GLLights[targ].options=OpenGLLights::GLL_LOCAL;
+      GLLights[targ].index=-1;
+      (*_llights)[*i].Target() =-1;//unref
+    }
+
+  }
+  newpicked->clear();
+}
+
 static inline bool picklight (const LineCollide& light, const Vector & center, const float rad, const int lightsenabled);
+
 void GFXPickLights (const Vector & center, const float radius) {
     Vector tmp;
     int lightsenabled = _GLLightsEnabled;
