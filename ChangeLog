@@ -3,7 +3,9 @@
 	* Made it so that all AI classes who wish to "talk back" inherit from
 	       CommunicatingAI
 	* If you wish to select responses not randomly, override the virtual selectCommunicationMessage
-
+	* Added mood swinging... and they get mad if you shoot at them
+	* Added Request Clearence to land
+	
 2002-03-20 Alexander Rawass <alexannika@users.sourceforge.net>
 	
 	* moved the static var SplashScreen from main.cpp:bootstrap_main_loop
