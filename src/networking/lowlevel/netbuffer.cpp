@@ -399,28 +399,55 @@ unsigned char *	NetBuffer::getBuffer( int offt)
 		}
 		// Add and get a string with its length before the char * buffer part
 void	NetBuffer::addString( const string& str)
-		{
-			assert( str.length()<0xFFFF);
-			unsigned short length = str.length();
-			this->addShort( length);
-			resizeBuffer( offset+length);
-			VsnetOSS::memcpy( buffer+offset, str.c_str(), length);
-			offset += length;
-		}
-string	NetBuffer::getString()
-		{
-			unsigned short s;
-			s = this->getShort();
-			checkBuffer( s, "getString");
-			//cerr<<"getString :: offset="<<offset<<" - length="<<s<<endl;
-			char c = buffer[offset+s];
-			buffer[offset+s]=0;
-			string str( buffer+offset);
-			buffer[offset+s]=c;
-			offset += s;
+{
+	unsigned int len = str.length();
+    if( len < 0xffff )
+	{
+        unsigned short length = len;
+        this->addShort( length );
+        resizeBuffer( offset+length );
+        VsnetOSS::memcpy( buffer+offset, str.c_str(), length );
+        offset += length;
+	}
+	else
+	{
+		assert( len < 0xffffffff );
+        this->addShort( 0xffff );
+		this->addInt32( len );
+        resizeBuffer( offset+len );
+        VsnetOSS::memcpy( buffer+offset, str.c_str(), len );
+        offset += len;
+	}
+}
 
-			return str;
-		}
+string	NetBuffer::getString()
+{
+	unsigned short s;
+	s = this->getShort();
+	if( s != 0xffff )
+	{
+		checkBuffer( s, "getString");
+		char c = buffer[offset+s];
+		buffer[offset+s]=0;
+	    string str( buffer+offset);
+	    buffer[offset+s]=c;
+	    offset += s;
+
+	    return str;
+	}
+	else
+	{
+		unsigned int len = this->getInt32();
+		checkBuffer( len, "getString");
+		char c = buffer[offset+len];
+		buffer[offset+len]=0;
+	    string str( buffer+offset);
+	    buffer[offset+len]=c;
+	    offset += len;
+
+	    return str;
+	}
+}
 
 GFXMaterial		NetBuffer::getGFXMaterial()
 {

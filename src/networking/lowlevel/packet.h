@@ -27,7 +27,7 @@ class Packet
             ObjSerial       serial;
             unsigned int    timestamp;
             //unsigned int  delay;
-            unsigned short  data_length;
+            unsigned int    data_length;
             unsigned short  flags;
 
             void hton( char* c );
@@ -87,7 +87,7 @@ class Packet
         void    display( const char* file, int line );
         void    displayHex();
 
-        inline unsigned short getDataLength() const { return h.data_length; }
+        inline unsigned int getDataLength() const { return h.data_length; }
 
         static unsigned short   getHeaderLength()
         {

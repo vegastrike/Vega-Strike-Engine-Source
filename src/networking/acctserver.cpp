@@ -480,7 +480,12 @@ void    AccountServer::sendAuthorized( SOCKETALT sock, Account * acct)
             cerr<<"Account save file does not exists... sending default one to game server"<<endl;
 			acctfile = "default.save";
             cerr<<"Trying to open : "<<acctfile<<endl;
-            f.OpenReadOnly( "default.save", AccountFile);
+            err = f.OpenReadOnly( "default.save", AccountFile);
+			if( err > Ok )
+			{
+            	cout<<"Error, default save not found"<<endl;
+				VSExit(1);
+			}
         }
         else
             cout<<"... done !"<<endl;

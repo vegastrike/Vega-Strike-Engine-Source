@@ -220,6 +220,7 @@ int SocketSet::private_select( timeval* timeout )
     else if( ret == 0 )
     {
 #ifdef VSNET_DEBUG
+#if 0
 	std::ostringstream s1;
 	std::ostringstream s2;
 	if( enter_timeout ) s1 << *enter_timeout << ends;
@@ -229,6 +230,7 @@ int SocketSet::private_select( timeval* timeout )
         COUT << "Timeout:" << endl
              << "   *** SocketSet::select called with " << s1.str() << endl
              << "   ***          ::select called with " << s2.str() << endl;
+#endif
 #endif
     }
     else

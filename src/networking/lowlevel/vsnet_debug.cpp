@@ -41,7 +41,7 @@ ostream& vsnetDbgOut( const char* file, int line )
 #ifdef VSNET_DEBUG
     clog << PTHREAD_SELF_OR_NONE << " "
          << time_trigger
-         << " " << printme << ":" << line << " "
+         << " " << printme << ":" << line << " ";
 #else /* !VSNET_DEBUG */
     clog << printme << ":" << line << " ";
 #endif /* VSNET_DEBUG */

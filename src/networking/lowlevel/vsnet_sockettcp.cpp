@@ -241,7 +241,9 @@ int VsnetTCPSocket::lower_sendbuf( )
         //
         {
             COUT << "sent buffer with len " << packet.len() << ": " << endl;
+#if 0
             packet.dump( cout, 0 );
+#endif
         }
 #endif
         return numsent;
@@ -453,7 +455,9 @@ void VsnetTCPSocket::lower_selected( )
                         Blob* b = _incomplete_packet;
                         COUT << "received buffer with len " << b->present_len << ": " << endl;
 		                PacketMem m( b->buf, b->present_len, PacketMem::LeaveOwnership );
+#if 0
 		                m.dump( cout, 3 );
+#endif
                     }
 #endif
 

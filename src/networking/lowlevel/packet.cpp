@@ -206,8 +206,8 @@ void Packet::create( Cmd cmd, ObjSerial nserial,
 
         char*          c      = new char[sz];
         unsigned long  clen_l = length;
-        unsigned short ulen_s;
-        unsigned char* dest   = (unsigned char*)&c[header_length+sizeof(unsigned short)];
+        unsigned int   ulen_i;
+        unsigned char* dest   = (unsigned char*)&c[header_length+sizeof(ulen_i)];
         int            zlib_errcode;
 
         zlib_errcode = ::compress2( dest, &clen_l, (unsigned char*)buf, length, 9 );
@@ -216,10 +216,10 @@ void Packet::create( Cmd cmd, ObjSerial nserial,
         {
             if( clen_l < length + 2 )
             {
-                ulen_s = htons( (unsigned short)length );
-                VsnetOSS::memcpy( &c[header_length], &ulen_s, sizeof(unsigned short) );
+                ulen_i = htonl( (unsigned int)length );
+                VsnetOSS::memcpy( &c[header_length], &ulen_i, sizeof(ulen_i) );
 
-                h.data_length = (unsigned short)clen_l + sizeof(unsigned short);
+                h.data_length = clen_l + sizeof(ulen_i);
                 h.hton( c );
 
 #ifdef VSNET_DEBUG
@@ -293,7 +293,7 @@ void Packet::Header::ntoh( const void* buf )
     command         = h->command;
     serial          = ntohs( h->serial );
     timestamp       = ntohl( h->timestamp );
-    data_length     = ntohs( h->data_length );
+    data_length     = ntohl( h->data_length );
     flags           = ntohs( h->flags );
 }
 
@@ -304,7 +304,7 @@ void Packet::Header::hton( char* buf )
     h->command     = command;
     h->serial      = htons( serial );
     h->timestamp   = htonl( timestamp );
-    h->data_length = htons( data_length );
+    h->data_length = htonl( data_length );
     h->flags       = htons( flags );
 }
 
@@ -334,8 +334,10 @@ int Packet::send( SOCKETALT dst_s, const AddressIP* dst_a )
 	    COUT << "After successful sendbuf" << endl;
         h.ntoh( _packet.getConstBuf() );
 
+#if 0
 	    PacketMem m( _packet.getVarBuf(), _packet.len(), PacketMem::LeaveOwnership );
 	    m.dump( cout, 3 );
+#endif
 #endif
     }
     return ret;
@@ -365,39 +367,40 @@ int Packet::getSendBufferLength() const
 bool Packet::packet_uncompress( PacketMem& outpacket, const unsigned char* src, size_t sz, Header& header )
 {
     unsigned char* dest;
-    unsigned short ulen_s;
+    unsigned int   ulen_i;
     unsigned long  ulen_l;
     int            zlib_errcode;
 
     src    += header_length;
-    ulen_s = ntohs( *(unsigned short*)src );
-    src    += sizeof(unsigned short);
-    sz     -= sizeof(unsigned short);
+    ulen_i = ntohl( *(unsigned int*)src );
+    src    += sizeof(ulen_i);
+    sz     -= sizeof(ulen_i);
 
-    PacketMem mem( ulen_s + header_length );
+    PacketMem mem( ulen_i + header_length );
 
     dest   = (unsigned char*)mem.getVarBuf();
     dest   += header_length;
-    ulen_l = ulen_s;
+    ulen_l = ulen_i;
 
     zlib_errcode = ::uncompress( dest, &ulen_l, src, sz );
     if( zlib_errcode != Z_OK )
     {
         COUT << "Compressed packet not correctly received, "
-             << "decompression failed" << endl;
+             << "decompression failed with zlib errcode "
+	     << zlib_errcode << endl;
         return false;
     }
-    else if( ulen_l != ulen_s )
+    else if( ulen_l != ulen_i )
     {
         COUT << "Compressed packet not correctly received, "
-             << "expected len " << ulen_s << ", "
+             << "expected len " << ulen_i << ", "
              << "received len " << ulen_l << endl;
         return false;
     }
     else
     {
 	    outpacket = mem;
-	    header.data_length = ulen_s;
+	    header.data_length = ulen_i;
 
 #ifdef VSNET_DEBUG
 	    COUT << "Parsed a compressed packet with"
