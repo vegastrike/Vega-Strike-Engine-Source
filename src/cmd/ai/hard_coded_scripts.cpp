@@ -7,6 +7,7 @@
 #include "fire.h"
 #include "order.h"
 #include "python/python_class.h"
+#include "vs_random.h"
 using Orders::FireAt;
 
 BOOST_PYTHON_BEGIN_CONVERSION_NAMESPACE
@@ -133,26 +134,34 @@ namespace Orders{
 class LoopAround: public Orders::FaceTargetITTS{
 	Orders::MoveToParent m;
 	float qq;
-	float rr;
+	float pp;
+	Vector rr;// place to go for @ end
 	bool aggressive;
 public:
-	LoopAround(bool aggressive):FaceTargetITTS(false,3),m(false,2,false) {
+	LoopAround(bool aggressive, int seed):FaceTargetITTS(false,3),m(false,2,false) {
+		VSRandom vsr(seed);
+		
 		this->aggressive=aggressive;
 		static float loopdis=XMLSupport::parse_float (vs_config->getVariable("AI","loop_around_distance","1"));
-		qq=rr=0;
-		
+		qq=pp=0;
+		static float loopdisd=XMLSupport::parse_float (vs_config->getVariable("AI","loop_around_destination_distance","10.0"));
+		static float loopdisv=XMLSupport::parse_float (vs_config->getVariable("AI","loop_around_destination_vertical","4.0"));
+		static float loopdisl=XMLSupport::parse_float (vs_config->getVariable("AI","loop_around_destination_lateral","4.0"));
+		rr.Set(loopdisl*vsr.uniformInc(-1,1),loopdisv*vsr.uniformInc(-1,1),1.0+loopdisd*vsr.uniformInc(0,1));
 		if (rand()<RAND_MAX/2) {
-			qq = (2.0*rand())/RAND_MAX-1;			
+			qq = vsr.uniformInc(-1,1);
+			rr.j=qq;
 			if (qq>0)
 				qq+=loopdis;
 			if (qq<0)
 				qq-=loopdis;
 		}else {
-			rr = (2.0*rand())/RAND_MAX-1;
-			if (rr>0)
-				rr+=loopdis;
-			if (rr<0)
-				rr-=loopdis;
+			pp = vsr.uniformInc(-1,1);
+			rr.i=pp;
+			if (pp>0)
+				pp+=loopdis;
+			if (pp<0)
+				pp-=loopdis;
 		}
 	}
 	void Execute(){
@@ -164,14 +173,14 @@ public:
 			if (r.Dot(relloc) <0) {
 				FaceTargetITTS::Execute();
 				m.SetAfterburn (afterburn);
-				m.Execute(parent,targ->Position()-r.Scale(2*parent->rSize()+targ->rSize()));
+				m.Execute(parent,targ->Position()-r.Scale(rr.k*parent->rSize()+targ->rSize())+targ->cumulative_transformation_matrix.getP()*(rr.i*parent->rSize())+targ->cumulative_transformation_matrix.getQ()*(rr.j*parent->rSize()));
 			}else {
 				done=false;
 				if (afterburn)
 					m.SetAfterburn (targ->GetVelocity().MagnitudeSquared()>parent->GetComputerData().max_speed());
 				else
 					m.SetAfterburn(0);
-				Vector scala=targ->cumulative_transformation_matrix.getQ().Scale(qq*(parent->rSize()+targ->rSize()))+targ->cumulative_transformation_matrix.getP().Scale(rr*(parent->rSize()+targ->rSize()));								
+				Vector scala=targ->cumulative_transformation_matrix.getQ().Scale(qq*(parent->rSize()+targ->rSize()))+targ->cumulative_transformation_matrix.getP().Scale(pp*(parent->rSize()+targ->rSize()));								
 				QVector dest =targ->Position()+scala;
 				if (aggressive){
 					FaceTargetITTS::Execute();
@@ -186,12 +195,12 @@ public:
 };
 }
 void LoopAround(Order* aisc, Unit * un) {
-	Order* broll = new Orders::LoopAround(false);
+	Order* broll = new Orders::LoopAround(false,(int)un);
 	AddOrd(aisc,un,broll);
 	
 }
 void AggressiveLoopAround(Order* aisc, Unit * un) {
-	Order* broll = new Orders::LoopAround(true);
+	Order* broll = new Orders::LoopAround(true,(int)un);
 	AddOrd(aisc,un,broll);
 	
 }

@@ -1,5 +1,6 @@
 #include "vs_globals.h"
-
+#include "vs_random.h"
+#include <time.h>
 /*
  * Globals 
  */
@@ -27,3 +28,4 @@ double avg_loop=0;
 int nb_checks=1;
 double last_check=1;
 double cur_check=1;
+VSRandom vsrandom(time(NULL));
