@@ -100,7 +100,9 @@ void Unit::PerformDockingOperations () {
       i--;
       continue;
     }
-    un->curr_physical_state =HoldPositionWithRespectTo (un->prev_physical_state,prev_physical_state,curr_physical_state);
+    Transformation t = un->prev_physical_state;
+    un->prev_physical_state=un->curr_physical_state;
+    un->curr_physical_state =HoldPositionWithRespectTo (un->curr_physical_state,prev_physical_state,curr_physical_state);
     un->NetForce=Vector(0,0,0);
     un->NetLocalForce=Vector(0,0,0);
     un->NetTorque=Vector(0,0,0);

@@ -287,6 +287,9 @@ void Unit::RollTorque(float amt) {
 
 const float VELOCITY_MAX=1000;
 void Unit::UpdatePhysics (const Transformation &trans, const Matrix transmat, const Vector & cum_vel,  bool lastframe, UnitCollection *uc) {
+  if (docked&DOCKING_UNITS) {
+    PerformDockingOperations();
+  }
 
   if (fuel<0)
     fuel=0;
@@ -317,7 +320,8 @@ void Unit::UpdatePhysics (const Transformation &trans, const Matrix transmat, co
 
   RegenShields();
   if (lastframe) {
-    prev_physical_state = curr_physical_state;//the AIscript should take care
+    if (!(docked&(DOCKED|DOCKED_INSIDE))) 
+      prev_physical_state = curr_physical_state;//the AIscript should take care
     if (planet) {
       if (!planet->dirty) {
 	SetPlanetOrbitData (NULL);
@@ -361,9 +365,6 @@ void Unit::UpdatePhysics (const Transformation &trans, const Matrix transmat, co
   cumulative_transformation.to_matrix (cumulative_transformation_matrix);
   cumulative_velocity = TransformNormal (transmat,Velocity)+cum_vel;
 
-  if (docked&DOCKING_UNITS) {
-    PerformDockingOperations();
-  }
 
   Transformation * ct;
   float * ctm;
