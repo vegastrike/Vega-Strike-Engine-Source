@@ -2,7 +2,7 @@ Goals for 0.4.2 release:
 * Bugfixes:
 ** Upgrades::Repair on a milspec ship ruins your weapon loadout! FIX
 ** Are missiles currently effective? (data side issue perhaps - or AI?)
-
+** Fog atmospheres->BFXM
 * Warp:
 ** Rename warp to ... think of something cool
 ** Warp energy use
