@@ -219,7 +219,9 @@ void UncheckUnit (Unit * un) {
     deletedUn.Delete ((long)un);
   }  
 }
-
+string GetUnitDir(string filename) {
+	return filename.substr(0,filename.find("."));
+}
 char * GetUnitDir (const char * filename) {
   char * retval=strdup (filename);
   if (retval[0]=='\0')

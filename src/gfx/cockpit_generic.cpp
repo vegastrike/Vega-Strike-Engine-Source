@@ -481,12 +481,16 @@ void Cockpit::Update () {
 	if (targ) {
 		static float autopilot_term_distance = XMLSupport::parse_float (vs_config->getVariable ("physics","auto_pilot_termination_distance","6000"));
 		float doubled=dockingdistance(targ,par);
-    if ((doubled<autopilot_term_distance||(UnitUtil::getSignificantDistance(targ,par)<=0))&&(!(par->IsCleared(targ)||targ->IsCleared(par)||par->isDocked(targ)||targ->isDocked(par)))&&(par->getRelation(targ)>=0)&&(targ->getRelation(par)>=0)) {
-		
-      RequestClearence(par,targ,0);//sex is always 0... don't know how to get it.
-    } else if (((par->IsCleared(targ)||targ->IsCleared(par)&&(!(par->isDocked(targ)||targ->isDocked(par)))))&&(UnitUtil::getSignificantDistance(par,targ)>(targ->rSize()+par->rSize()))&&(doubled>=autopilot_term_distance)) {
-      par->EndRequestClearance(targ);
-      targ->EndRequestClearance(par);
+    if (((targ->isUnit()!=PLANETPTR&&doubled<autopilot_term_distance)||(UnitUtil::getSignificantDistance(targ,par)<=0))&&(!(par->IsCleared(targ)||targ->IsCleared(par)||par->isDocked(targ)||targ->isDocked(par)))&&(par->getRelation(targ)>=0)&&(targ->getRelation(par)>=0)) {
+		if (targ->isUnit()!=PLANETPTR||targ->GetDestinations().empty()) {
+			RequestClearence(par,targ,0);//sex is always 0... don't know how to	 get it.
+		}
+    } else if (((par->IsCleared(targ)||targ->IsCleared(par)&&(!(par->isDocked(targ)||targ->isDocked(par)))))&&
+			   ((targ->isUnit()==PLANETPTR&&UnitUtil::getSignificantDistance(par,targ)>0)||(targ->isUnit()!=PLANETPTR&&UnitUtil::getSignificantDistance(par,targ)>(targ->rSize()+par->rSize()))&&(doubled>=autopilot_term_distance))) {
+		if (targ->isUnit()!=PLANETPTR||targ->GetDestinations().empty()) {
+			par->EndRequestClearance(targ);
+			targ->EndRequestClearance(par);
+		}
 	}
 	}
   }

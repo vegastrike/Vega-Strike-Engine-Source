@@ -13,28 +13,33 @@
 #include "gfx/animation.h"
 ///ALERT to change must change enum in class
 const std::string vdu_modes [] = {"Target","Nav","Objectives","Comm","Weapon","Damage","Shield", "Manifest", "TargetManifest","View","Message"};
-
+string reformatName (string nam) {
+	nam = nam.substr(0,nam.find("."));
+	if (nam.length())
+		nam[0]=toupper(nam[0]);
+	return nam;
+}
 string getUnitNameAndFgNoBase (Unit * target) {
   Flightgroup* fg = target->getFlightgroup();
   if (target->isUnit()==PLANETPTR) {
     string hr = ((Planet *)target)->getHumanReadablePlanetType();
     if (!hr.empty()) {
-      return hr+string(":")+target->name;
+      return hr+string(":")+reformatName(target->name);
     }
   }else if (target->isUnit()==UNITPTR){
     if (!target->getFullname().empty()) {
-      return target->getFullname()+string(":")+target->name;
+      return target->getFullname()+string(":")+reformatName(target->name);
     }
   }
   if (fg) {
     if (fg->name!="Base"&&fg->name!="Asteroid"&&fg->name!="Nebula") {
-      return fg->name+":"+target->name;
+		return fg->name+":"+reformatName(target->name);
     }
   }
   if (string("neutral")!=FactionUtil::GetFaction(target->faction)) {
-    return /*string(_Universe->GetFaction(target->faction))+" "+*/target->name;
+    return /*string(_Universe->GetFaction(target->faction))+" "+*/reformatName(target->name);
   }
-  return target->name;
+  return reformatName(target->name);
 }
 
 
@@ -460,13 +465,15 @@ bool VDU::SetCommAnimation (Animation * ani) {
   return false;
 }
 void VDU::DrawNav (const Vector & nav) {
-  char nothing[]="none";
   Unit * you = _Universe->AccessCockpit()->GetParent();
   Unit * targ = you!=NULL?you->Target():NULL;
   char *navdata=new char [1024+(_Universe->activeStarSystem()->getName().length()+(targ?targ->name.length():0))];
   static float game_speed = XMLSupport::parse_float (vs_config->getVariable("physics","game_speed","1"));
   static bool lie=XMLSupport::parse_bool (vs_config->getVariable("physics","game_speed_lying","true"));
-  sprintf (navdata,"Navigation\n----------\n%s\nTarget:\n  %s\nRelativeLocation\nx: %.4f\ny:%.4f\nz:%.4f\nDistance:\n%f",_Universe->activeStarSystem()->getName().c_str(),targ?targ->name.c_str():nothing,nav.i,nav.j,nav.k,lie?(10*nav.Magnitude()/game_speed):nav.Magnitude());
+  string nam="none";
+  if (targ)
+	  nam= reformatName(targ->name);
+  sprintf (navdata,"Navigation\n----------\n%s\nTarget:\n  %s\nRelativeLocation\nx: %.4f\ny:%.4f\nz:%.4f\nDistance:\n%f",_Universe->activeStarSystem()->getName().c_str(),nam.c_str(),nav.i,nav.j,nav.k,lie?(10*nav.Magnitude()/game_speed):nav.Magnitude());
   tp->Draw (MangleString (navdata,_Universe->AccessCamera()->GetNebula()!=NULL?.4:0),scrolloffset,true,true);  
   delete [] navdata;
 
@@ -501,7 +508,7 @@ void VDU::DrawComm () {
 void VDU::DrawManifest (Unit * parent, Unit * target) {
   string retval ("Manifest\n");
   if (target!=parent) {
-    retval+=string ("Tgt: ")+target->name+string("\n");
+    retval+=string ("Tgt: ")+reformatName(target->name)+string("\n");
   }else {
     retval+=string ("--------\nCredits: ")+tostring((int)_Universe->AccessCockpit()->credits)+/*string(".")+tostring (((int)(_Universe->AccessCockpit()->credits*100))%100) +*/string("\n");
   }
@@ -631,7 +638,8 @@ void VDU::DrawDamage(Unit * parent) {
   char qr[256];
   if (thr) {
     GFXColor4f (1,0,0,1);
-    sprintf (qr, "%s\n%6s\nThreat:%4.4f",ecmstatus,thr->name.c_str(),thr->cosAngleTo (parent,th,100000000,10000000));
+	string nam =reformatName(thr->name);
+    sprintf (qr, "%s\n%6s\nThreat:%4.4f",ecmstatus,nam.c_str(),thr->cosAngleTo (parent,th,100000000,10000000));
     strncat (st,qr,128);
   }else {
     if (parent->GetImageInformation().ecm!=0) {
