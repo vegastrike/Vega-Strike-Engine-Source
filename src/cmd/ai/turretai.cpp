@@ -16,6 +16,18 @@ void TurretAI::Execute () {
   Unit * targ = parent->Target();
   if (range==-1) {
     parent->getAverageGunSpeed (speed, range);
+    float tspeed, trange;
+    Unit * gun;
+    if (parent->GetNumMounts()==0){
+      speed=1;range=1;//not much
+    }
+    for (un_iter i=parent->getSubUnits();(gun=*i)!=NULL;++i) {
+      (*i)->getAverageGunSpeed(tspeed,trange);
+      if (trange>range) {
+	speed=tspeed;
+	range=trange;
+      }
+    }
   }
   if (targ) {
     static float dot_cutoff = XMLSupport::parse_float (vs_config->getVariable ("AI","Firing","TurretDotCutoff",".4"));
