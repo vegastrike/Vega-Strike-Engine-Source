@@ -44,9 +44,9 @@ void StarVlist::BeginDrawState (const QVector &center, const Vector & velocity) 
 	Vector newcamr = _Universe->AccessCamera()->GetR();
     Vector camr_delta(newcamr-camr);
 	camr = newcamr;
-	static float velstreakscale= XMLSupport::parse_float (vs_config->getVariable ("graphics","velocity_star_streak_scale","1"));
+	static float velstreakscale= XMLSupport::parse_float (vs_config->getVariable ("graphics","velocity_star_streak_scale","100"));
 
-	Vector vel (velocity*velstreakscale);
+	Vector vel (-velocity*velstreakscale);
    	
 	GFXColorMaterial(AMBIENT|DIFFUSE);
 	GFXColorVertex * v = vlist->BeginMutate(0)->colors;

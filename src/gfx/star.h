@@ -32,5 +32,6 @@ public:
   Stars (int num, float spread);
   void SetBlend(bool blendit, bool fadeit);
   void Draw();
+  ~Stars() {}
 };
 #endif
