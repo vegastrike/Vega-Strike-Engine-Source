@@ -82,7 +82,7 @@ class NetServer
 		//void			loadConfig();					// Loads configuration from server.xml
 		void			authenticate( Client * clt, AddressIP sernum, Packet& packet );	// Authenticate a connected client
 		void			posUpdate( Client * clt);		// Update a client position
-		void			addClient( Client * clt, string starsys);		// Add the client in the game
+		void			addClient( Client * clt);		// Add the client in the game
 		Client *		newConnection_udp( const AddressIP& ipadr);
 		Client *		newConnection_tcp( SocketSet& set );
 		void			prepareCheckAcctMsg( SocketSet& set );	// Check for account server message to receive

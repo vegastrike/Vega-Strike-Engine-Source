@@ -180,7 +180,7 @@ void	NetServer::sendLoginAccept( Client * clt, AddressIP ipadr, int newacct)
 		cout<<"SAVE="<<saves[0].length()<<" bytes - XML="<<saves[1].length()<<" bytes"<<endl;
 
 		string PLAYER_CALLSIGN( clt->name);
-		QVector tmpvec( 0, 0, 0), safevec;
+		QVector tmpvec( 0, 0, 0);
 		bool update = true;
 		float credits;
 		vector<string> savedships;
@@ -191,12 +191,9 @@ void	NetServer::sendLoginAccept( Client * clt, AddressIP ipadr, int newacct)
 		cout<<"-> LOADING SAVE FROM NETWORK"<<endl;
 		cp->savegame->ParseSaveGame( "", str, "", tmpvec, update, credits, savedships, clt->serial, saves[0], false);
 		// Generate the system we enter in if needed and add the client in it
-		this->addClient( clt, cp->savegame->GetStarSystem());
 
-		safevec = UniverseUtil::SafeEntrancePoint( tmpvec);
 		cout<<"\tcredits = "<<credits<<endl;
 		cout<<"\tcredits = "<<credits<<endl;
-		cout<<"\tposition : x="<<safevec.i<<" y="<<safevec.j<<" z="<<safevec.k<<endl;
 		cout<<"-> SAVE LOADED"<<endl;
 
 		// WARNING : WE DON'T SAVE FACTION NOR FLIGHTGROUP YET
@@ -213,16 +210,12 @@ void	NetServer::sendLoginAccept( Client * clt, AddressIP ipadr, int newacct)
                              0, saves[1]);
 		cout<<"\tAFTER UNIT FACTORY WITH XML"<<endl;
 		clt->game_unit.SetUnit( un);
-		// Setup the clientstates
-		clt->old_state.setPosition( cp->savegame->GetPlayerLocation());
-		clt->old_state.setSerial( clt->serial);
-		clt->current_state.setPosition( cp->savegame->GetPlayerLocation());
-		clt->current_state.setSerial( clt->serial);
+
 		// Affect the created unit to the cockpit
 		cout<<"-> UNIT LOADED"<<endl;
-		cp->SetParent( un,"","",safevec);
+
+		cp->SetParent( un,"","",tmpvec);
 		cout<<"-> COCKPIT AFFECTED TO UNIT"<<endl;
-		// The Unit will be added in the addClient function
 
         Packet packet2;
 		packet2.send( LOGIN_ACCEPT, clt->serial, packeta.getData(), packeta.getDataLength(), SENDRELIABLE, &clt->cltadr, clt->sock, __FILE__, __LINE__ );
@@ -971,7 +964,7 @@ void	NetServer::processPacket( Client * clt, unsigned char cmd, const AddressIP&
         // Add the client to the game
         cout<<">>> ADD REQUEST =( serial n°"<<packet.getSerial()<<" )= --------------------------------------"<<endl;
         //cout<<"Received ADDCLIENT request"<<endl;
-        //this->addClient( clt);
+        this->addClient( clt);
         cout<<"<<< ADD REQUEST --------------------------------------------------------------"<<endl;
         break;
     case CMD_POSUPDATE:
@@ -1041,12 +1034,26 @@ void	NetServer::processPacket( Client * clt, unsigned char cmd, const AddressIP&
 /**** Add a client in the game                             ****/
 /**************************************************************/
 
-void	NetServer::addClient( Client * clt, string starsys)
+void	NetServer::addClient( Client * clt)
 {
 	cout<<">>> SEND ENTERCLIENT =( serial n°"<<clt->serial<<" )= --------------------------------------"<<endl;
 	Packet packet2;
 	string savestr, xmlstr;
 	NetBuffer netbuf;
+
+	QVector safevec;
+	Cockpit * cp = _Universe->isPlayerStarship( clt->game_unit.GetUnit());
+	string starsys = cp->savegame->GetStarSystem();
+
+	// NOW : I AM NOT SURE WHICH STAR SYSTEM IS THE ACTIVE ONE HERE !!!
+	safevec = UniverseUtil::SafeEntrancePoint( cp->savegame->GetPlayerLocation(), clt->game_unit.GetUnit()->radial_size);
+	cout<<"\tposition : x="<<safevec.i<<" y="<<safevec.j<<" z="<<safevec.k<<endl;
+	cp->savegame->SetPlayerLocation( safevec);
+	// Setup the clientstates
+	clt->old_state.setPosition( cp->savegame->GetPlayerLocation());
+	clt->old_state.setSerial( clt->serial);
+	clt->current_state.setPosition( cp->savegame->GetPlayerLocation());
+	clt->current_state.setSerial( clt->serial);
 
 	if( zonemgr->addClient( clt, starsys))
 	{

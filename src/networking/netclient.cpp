@@ -428,8 +428,8 @@ int NetClient::recvMsg( char* netbuffer, Packet* outpacket )
 				// Go forward to go after the 2 strings (name, passwd)
 				netbuf.getString();
 				netbuf.getString();
-				globalsaves[0] = netbuf.getString();
-				globalsaves[1] = netbuf.getString();
+				globalsaves.push_back( netbuf.getString());
+				globalsaves.push_back( netbuf.getString());
 				//globalsaves = FileUtil::GetSaveFromBuffer( p1.getData()+2*NAMELEN);
                 break;
             // Login failed
