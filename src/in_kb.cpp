@@ -53,17 +53,22 @@ static void kbGetInput(int key, bool release, int x, int y){
 
  void glut_keyboard_cb( unsigned int  ch,unsigned int mod, bool release, int x, int y ) 
 {
+  bool shifton=false;
   //  fprintf (stderr,"keyboard  %d",ch);
   if ((WSK_MOD_LSHIFT==(mod&WSK_MOD_LSHIFT))||(WSK_MOD_RSHIFT==(mod&WSK_MOD_RSHIFT))) {
     ch = toupper(ch);
+    shifton=true;
   }
   kbGetInput( ch, release, x, y );
   if (release) {
-    if (((unsigned int)tolower (ch))!=ch&&keyState[tolower(ch)]==DOWN) {
-      kbGetInput (tolower(ch),release,x,y);
-    }
-    if (((unsigned int)toupper (ch))!=ch&&keyState[toupper(ch)]==DOWN) {
-      kbGetInput (toupper(ch),release,x,y);
+    if (shifton) {
+      if (((unsigned int)tolower (ch))!=ch&&keyState[tolower(ch)]==DOWN) {
+	kbGetInput (tolower(ch),release,x,y);
+      }
+    }else {
+      if (((unsigned int)toupper (ch))!=ch&&keyState[toupper(ch)]==DOWN) {
+	kbGetInput (toupper(ch),release,x,y);
+      }
     }
   }
 }
