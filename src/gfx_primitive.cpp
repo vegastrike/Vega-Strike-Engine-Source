@@ -26,8 +26,6 @@ int texcnt = 1;
 
 void Primitive::InitPrimitive()
 {
-	forcelogos = NULL;
-	squadlogos = NULL;
 }
 
 Primitive:: Primitive ()

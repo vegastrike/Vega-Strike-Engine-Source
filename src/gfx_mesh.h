@@ -184,6 +184,12 @@ protected:
   float maxSizeX,maxSizeY,maxSizeZ,minSizeX,minSizeY,minSizeZ;
   float radialSize;
   Mesh *orig;
+
+  Logo *forcelogos;
+  int numforcelogo;
+
+  Logo *squadlogos;
+  int numsquadlogo;
   
   int numvertex;
   //GFXVertex *vertexlist;
@@ -211,13 +217,13 @@ protected:
   string *hash_name;
   // Support for reorganized rendering
   bool will_be_drawn;
-  struct DrawContext {
+  struct MeshDrawContext {
     //Transformation transformation;
     //DrawContext(const Transformation &trans) : transformation(trans) { }
     Matrix mat;
-    DrawContext(Matrix m) { memcpy(mat, m, sizeof(Matrix)); }
+    MeshDrawContext(Matrix m) { memcpy(mat, m, sizeof(Matrix)); }
   };
-  vector<DrawContext> *draw_queue;
+  vector<MeshDrawContext> *draw_queue;
   int draw_sequence;
 public:
   Mesh();

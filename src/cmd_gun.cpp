@@ -25,16 +25,8 @@
 #ifdef WIN32
 #include <windows.h>
 #endif
-Missile::Missile(char *filename):Unit(filename)
+Projectile::Projectile()
 {
-	//FILE *fp = fopen(filename, "r");
-	//fclose(fp);
-	
-
-	// might want to put in code to self-destruct if filename is bad
-
-	aistate = new FlyStraight(0.1, 6);
-	aistate->SetParent(this);
 }
 
 Gun::Gun(char *filename)
@@ -49,14 +41,18 @@ Gun::Gun(char *filename)
 	fclose(fp);
 	*/
 }
+Gun::~Gun(){
+  for(unsigned int proj_index = 0; proj_index<projectiles.size(); proj_index++)
+    if(projectiles[proj_index])
+      delete projectiles[proj_index];
+}	
 
 void Gun::Draw()
 {
-	Unit::Draw();
 	unsigned int proj_index;
 	for(proj_index = 0; proj_index < projectiles.size(); proj_index++)
 	{
-		Missile* currproj = projectiles[proj_index];
+		Projectile* currproj = projectiles[proj_index];
 		if(currproj)
 		{
 			currproj->Draw();

@@ -61,7 +61,7 @@ void Unit::Init()
 {
   explosion=NULL;
   timeexplode=0;
-  killed=false;
+ killed=false;
   ucref=0;
   meshdata = NULL;
   subunits = NULL;
@@ -170,9 +170,6 @@ Unit::Unit(const char *filename, bool xml) {
 														//perhaps use a switch statement? that would get rather big, although it would be straightforward
 														//maybe have a behavior variable in each turret that specifies its stats, but that sucks too
 														//or, make a special exception to the copy constructor rule... *frumple* this sucks
-			break;
-		case GUN:
-			subunits[unitcount] = new Gun(unitfilename);
 			break;
 		default:
 		  printf ("unit type not supported");
@@ -303,9 +300,9 @@ bool Unit::querySphere (const Vector &pnt, float err) {
 
 
 // dir must be normalized
-int Unit::querySphere (const Vector &st, const Vector &dir, float err) {
+float Unit::querySphere (const Vector &st, const Vector &dir, float err) {
   int i;
-  int retval=0;
+  float retval=0;
   float * tmpo = cumulative_transformation_matrix;
 
   Vector TargetPoint (tmpo[0],tmpo[1],tmpo[2]);
@@ -345,18 +342,27 @@ int Unit::querySphere (const Vector &st, const Vector &dir, float err) {
 	2*err*meshdata[i]->rSize()
 	)
       {
-	if (k<-(err*err)) {
-	  retval = -1;
-	  continue;
-	} else 
-	  return 1;
+	if (retval==0) {
+	  retval = k;
+	}else {
+	  if (retval>0&&k<retval)
+	    retval = k;
+	  if (retval<0&&k>retval)
+	    retval = k;
+	}
     }
   }
   for (i=0;i<numsubunit;i++) {
-    int tmp = (subunits[i]->querySphere (st,dir,err));
-    if (tmp==1) return 1;
-    if (tmp ==-1) retval=-1;
-    
+    float tmp = (subunits[i]->querySphere (st,dir,err));
+    if (tmp==0) continue;
+    if (retval==0) {
+      retval = tmp;
+    }else{
+	  if (retval>0&&tmp<retval)
+	    retval = tmp;
+	  if (retval<0&&tmp>retval)
+	    retval = tmp;
+    }
   }
   return retval;
 }
@@ -373,7 +379,7 @@ bool Unit::Explode () {
     explosion = new Animation * [nummesh];
     timeexplode=0;
     for (i=0;i<nummesh;i++){
-      explosion[i]= new Animation ("explosion_orange.ani",false,.1,false,false);
+      explosion[i]= new Animation ("explosion_orange.ani",false,.1,BILINEAR,false);
     }    
   }
   float tmp[16];
@@ -388,9 +394,9 @@ bool Unit::Explode () {
       Translate (tmp,meshdata[i]->Position());
       MultMatrix (tmp2,cumulative_transformation_matrix,tmp);
       explosion[i]->SetPosition(tmp2[12],tmp2[13],tmp2[14]);
-      //if (timeexplode>i*.5){
+      if (timeexplode>i*.5){
 	explosion[i]->Draw();
-	//}
+      }
       if (explosion[i]->Done()) {
 	delete explosion[i];	
 	explosion[i]=NULL;

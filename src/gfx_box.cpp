@@ -71,7 +71,7 @@ Box::Box(const Vector &corner1, const Vector &corner2) : corner_min(corner1), co
   meshHashTable.Put(hash_key, this);
   orig = this;
   refcount++;
-  draw_queue = new vector<DrawContext>;
+  draw_queue = new vector<MeshDrawContext>;
 #undef VERTEX
 }
 
@@ -86,7 +86,7 @@ void Box::ProcessDrawQueue() {
   //GFXBlendMode(ONE, ONE);
 
   while(draw_queue->size()) {
-    DrawContext c = draw_queue->back();
+    MeshDrawContext c = draw_queue->back();
     draw_queue->pop_back();
     GFXLoadMatrix(MODEL, c.mat);
 

@@ -30,26 +30,23 @@ inline short reads (FILE *fp) {short temp;	fread (&temp,sizeof(short),1,fp);retu
 inline int readi (FILE * fp) {int i; fread (&i,sizeof(int),1,fp); return i;}
 inline unsigned char readc (FILE *fp) {unsigned char temp;	fread (&temp,sizeof(char),1,fp);return temp;}
 
+
+
+
 class Primitive {
 protected:
 	//Texture *force;
 	//Texture *squad;
   
   Transformation local_transformation;
-  Transformation cumulative_transformation;
-  Matrix cumulative_transformation_matrix;
+  //Transformation cumulative_transformation;
+  //Matrix cumulative_transformation_matrix;
   //  scalar_t prevtime;
   //	LONGLONG prevtime;
 
   void InitPrimitive();
 
   char name[64];
-
-  Logo *forcelogos;
-  int numforcelogo;
-
-  Logo *squadlogos;
-  int numsquadlogo;
   enum BLENDFUNC blendSrc;
   enum BLENDFUNC blendDst;
 	//void UpdateGL();

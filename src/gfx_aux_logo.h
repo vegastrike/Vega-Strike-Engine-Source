@@ -24,7 +24,7 @@
 #include "gfxlib.h"
 #include "hashtable.h"
 #include <vector>
-
+#include "gfx_primitive.h"
 //struct glVertex;
 class Mesh;
 struct Texture;
@@ -41,12 +41,6 @@ class Logo{
  protected:
 	friend class Mesh;
 
-	struct DrawContext {
-	  Matrix m;
-	  GFXVertexList *vlist;
-	  DrawContext() { }
-	  DrawContext(Matrix a, GFXVertexList *vl) { memcpy(m, a, sizeof(Matrix)); vlist = vl;}
-	};
 
 	int refcount; //number of references to draw_queue
 	Logo *owner_of_draw_queue; // owner of the draw_queue

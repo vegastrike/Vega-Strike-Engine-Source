@@ -35,7 +35,7 @@ Animation::Animation ():Primitive()
 	Decal = NULL;
 }
 
-Animation::Animation (char * FileName, bool Rep,  float priority,bool ismipmapped,  bool camorient):Primitive()
+Animation::Animation (char * FileName, bool Rep,  float priority,enum FILTER ismipmapped,  bool camorient):Primitive()
 {	
   repeat = Rep;
 	cumtime = 0;
@@ -105,8 +105,8 @@ void Animation:: Draw(const Transformation &dtrans, const Matrix m)
   Matrix orientation;
   Vector pos = local_transformation.position;
 
-  cumulative_transformation = local_transformation;
-  cumulative_transformation.Compose(dtrans, m);
+  //  cumulative_transformation = local_transformation;
+  //  cumulative_transformation.Compose(dtrans, m);
 
   local_transformation.orientation.to_matrix(orientation);
   int framenum = (int)(cumtime/timeperframe);

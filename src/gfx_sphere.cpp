@@ -112,7 +112,7 @@ SphereMesh::SphereMesh(float radius, int stacks, int slices, char *texture, bool
    meshHashTable.Put(hash_key, this);
    orig = this;
    refcount++;
-   draw_queue = new vector<DrawContext>;
+   draw_queue = new vector<MeshDrawContext>;
 }
 void SphereMesh::Draw(const Transformation &transform /*= identity_transformation*/) {
   if (centered) {
@@ -153,7 +153,7 @@ void SphereMesh::ProcessDrawQueue() {
   }	
   static float theta=0;
   while(draw_queue->size()) {
-    DrawContext c = draw_queue->back();
+    MeshDrawContext c = draw_queue->back();
     draw_queue->pop_back();
     Matrix tmp;	
     Matrix tmp2;

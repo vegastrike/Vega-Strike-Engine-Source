@@ -19,14 +19,14 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 #include "cmd_unit.h"
-
-class Missile:public Unit{
+#include "gfx_primitive.h"
+class Projectile: public Primitive {
 public:
-	Missile(char *filename);
+	Projectile();
 };
 
-class Gun:public Unit{
-  vector <Missile *> projectiles;  //every gun keeps track of its bullets like so
+class Gun{
+  vector <Projectile *> projectiles;  //every gun keeps track of its bullets like so
   string side;
   enum MOUNT {
     LIGHT =1, 
@@ -48,14 +48,9 @@ class Gun:public Unit{
   };
   Gun::Stats *type;
 public:
-	Gun(char *filename);
-	~Gun()
-	{
-	  for(unsigned int proj_index = 0; proj_index<projectiles.size(); proj_index++)
-	    if(projectiles[proj_index])
-	      delete projectiles[proj_index];
-	}	
+  Gun(char *filename);
+  ~Gun();
 
-	void Draw();
-	void Fire();
+  void Draw();
+  void Fire();
 };

@@ -33,11 +33,11 @@ struct GFXVertex // Vertex, Normal, Texture, and Environment
 	//DWORD diffuse;
 	//DWORD specular;
 	float s,t;
-	float u,v;
+  //	float u,v;
 
 	GFXVertex()
 	{
-	};
+	}
 	GFXVertex(const Vector &vert, const Vector &norm, float s, float t)
 	{
 		SetVertex(vert);
@@ -47,6 +47,32 @@ struct GFXVertex // Vertex, Normal, Texture, and Environment
 	GFXVertex &SetTexCoord(float s, float t) {this->s = s; this->t = t; return *this;}
 	GFXVertex &SetNormal(const Vector &norm) {i = norm.i; j = norm.j; k = norm.k; return *this;}
 	GFXVertex &SetVertex(const Vector &vert) {x = vert.i; y = vert.j; z = vert.k; return *this;}
+};
+struct GFXColor
+{
+	float r;
+	float g;
+	float b;
+	float a;
+  GFXColor (const Vector &v, float a=1.0) {
+    this->r = v.i;
+    this->g = v.j;
+    this->b = v.k;
+    this->a = a;
+  }
+  GFXColor(float r, float g, float b) {
+    this->r = r;
+    this->g = g;
+    this->b = b;
+    this->a = 1.0;
+  }
+
+  GFXColor(float r, float g, float b, float a) {
+    this->r = r;
+    this->g = g;
+    this->b = b;
+    this->a = a;
+  }
 };
 
 struct GFXTVertex // transformed vertex
@@ -84,22 +110,28 @@ class /*GFXDRVAPI*/ GFXVertexList {
   //	int numQuads;
   int numVertices;
   GFXVertex *myVertices;
+  GFXColor *myColors;
   GFXVertexList * tesslist;
   GLenum *mode;
   int display_list;
   int numlists;
   int *offsets;
   int tessellation;
-  bool changed;
-  void Init (enum POLYTYPE *poly, int numVertices, GFXVertex *vertices, int numlists, int *offsets, int tess);
+  int changed;
+  void Init (enum POLYTYPE *poly, int numVertices, GFXVertex *vertices, GFXColor *colors, int numlists, int *offsets, bool Mutable,int tess);
   void RefreshDisplayList();
 public:
   GFXVertexList();
   void Tess (int );
-  inline GFXVertexList(enum POLYTYPE poly, int numVertices, GFXVertex *vertices,int tess =0){Init (&poly, numVertices, vertices, 1, &numVertices,tess);}
-  inline GFXVertexList(enum POLYTYPE *poly, int numVertices, GFXVertex *vertices, int numlists, int *offsets, int tess =0) {
-    Init(poly,numVertices,vertices,numlists,offsets,tess);
+  inline GFXVertexList(enum POLYTYPE poly, int numVertices, GFXVertex *vertices,bool Mutable=false, int tess =0){Init (&poly, numVertices, vertices, NULL, 1, &numVertices,Mutable,tess);}
+  inline GFXVertexList(enum POLYTYPE *poly, int numVertices, GFXVertex *vertices, int numlists, int *offsets, bool Mutable=false, int tess =0) {
+    Init(poly,numVertices,vertices,NULL,numlists,offsets,Mutable, tess);
   }
+  inline GFXVertexList(enum POLYTYPE poly, int numVertices, GFXVertex *vertices,GFXColor *colors, bool Mutable=false, int tess =0){Init (&poly, numVertices, vertices, colors, 1, &numVertices,Mutable,tess);}
+  inline GFXVertexList(enum POLYTYPE *poly, int numVertices, GFXVertex *vertices, GFXColor *colors, int numlists, int *offsets, bool Mutable=false, int tess =0) {
+    Init(poly,numVertices,vertices,colors, numlists,offsets,Mutable, tess);
+  }
+
   ~GFXVertexList();
   
   GFXTVertex *LockTransformed(); // Stuff to support environment mapping
@@ -108,10 +140,17 @@ public:
   void UnlockUntransformed();
   
   BOOL SetNext(GFXVertexList *vlist);
-  
+  BOOL Mutate (int offset,  const GFXVertex *vlist,int number, const GFXColor *color=NULL);
   BOOL Draw();
   BOOL SwapUntransformed();
   BOOL SwapTransformed();
+};
+
+struct DrawContext {
+  float m[16];
+  GFXVertexList *vlist;
+  DrawContext() { }
+  DrawContext(float  a[16], GFXVertexList *vl) { memcpy(m, a, sizeof(float[16])); vlist = vl;}
 };
 
 struct GFXMaterial
@@ -139,32 +178,6 @@ struct GFXMaterial
 	float power; // specular power
 };
 
-struct GFXColor
-{
-	float r;
-	float g;
-	float b;
-	float a;
-  GFXColor (const Vector &v, float a=1.0) {
-    this->r = v.i;
-    this->g = v.j;
-    this->b = v.k;
-    this->a = a;
-  }
-  GFXColor(float r, float g, float b) {
-    this->r = r;
-    this->g = g;
-    this->b = b;
-    this->a = 1.0;
-  }
-
-  GFXColor(float r, float g, float b, float a) {
-    this->r = r;
-    this->g = g;
-    this->b = b;
-    this->a = a;
-  }
-};
 
 enum LIGHT_TARGET {
   DIFFUSE=1,
@@ -248,7 +261,12 @@ enum BLENDFUNC{
     CONSTCOLOR = 14,
     INVCONSTCOLOR = 15
 };
-
+enum FILTER {
+  NEAREST=0x0,
+  BILINEAR=0x1,
+  MIPMAP=0x2,
+  TRILINEAR=0x4
+};
 enum DEPTHFUNC{
 	NEVER,LESS,EQUAL, LEQUAL, GREATER, NEQUAL, GEQUAL, ALWAYS
 };

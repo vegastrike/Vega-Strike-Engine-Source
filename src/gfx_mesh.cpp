@@ -78,6 +78,9 @@ void DrawVector(const Vector &start, const Vector &vect)
 
 void Mesh::InitUnit()
 {
+	forcelogos = NULL;
+	squadlogos = NULL;
+
 	local_transformation = identity_transformation;
 	blendSrc=ONE;
 	blendDst=ZERO;
@@ -152,7 +155,7 @@ Mesh:: Mesh(const char * filename, bool xml):Primitive()
 	  oldmesh = new Mesh();
 	  meshHashTable.Put(string(filename), oldmesh);
 	  hash_name = new string(filename);
-	  draw_queue = new vector<DrawContext>;
+	  draw_queue = new vector<MeshDrawContext>;
 	}
 
 	strcpy(name, filename);
@@ -656,11 +659,11 @@ void Mesh::Reflect()
 
 void Mesh::Draw(const Transformation &trans, const Matrix m)
 {
-  //Matrix cumulative_transformation_matrix;
-  cumulative_transformation = local_transformation;
+  Matrix cumulative_transformation_matrix;
+  Transformation cumulative_transformation = local_transformation;
   cumulative_transformation.Compose(trans, m);
   cumulative_transformation.to_matrix(cumulative_transformation_matrix);
-  DrawContext c(cumulative_transformation_matrix);
+  MeshDrawContext c(cumulative_transformation_matrix);
   orig->draw_queue->push_back(c);
   if(!orig->will_be_drawn) {
     orig->will_be_drawn = true;
@@ -695,7 +698,7 @@ void Mesh::ProcessDrawQueue() {
 	  }
 	GFXBlendMode(blendSrc, blendDst);
   while(draw_queue->size()) {
-    DrawContext c = draw_queue->back();
+    MeshDrawContext c = draw_queue->back();
     draw_queue->pop_back();
     //GFXLoadIdentity (MODEL);
 
@@ -729,18 +732,19 @@ BoundingBox * Mesh::getBoundingBox() {
   return tbox;
 }
 
-bool Mesh::intersects(const Vector &pt) {
+bool Mesh::intersects(const Vector &pt/*, Transformation cumulative_transformation*/) {
+
+  /*
   Transformation tmp = cumulative_transformation;
   tmp.Invert();
   Matrix t;
   tmp.to_matrix(t);
-
+//UNIT SHOULD HANDLE THIS...it knows about the cumulative_transformation based on last physics round
 
   Vector a = pt;
   a = a.Transform(t);
-  //if (pt.i < maxSizeX||pt.i <minSizeX||pt.j>maxSizeY||pt.j<minSizeY||pt.k>maxSizeZ||pt.k<minSizeZ)
-  //  return false;
-  return bspTree->intersects(a);
+  */
+  return bspTree->intersects(/*a*/pt);
 }
 
 bool Mesh::intersects(Mesh *mesh) {

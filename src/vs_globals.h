@@ -10,7 +10,7 @@ typedef struct {
   int fullscreen;
   int Multitexture;
   int PaletteExt;
-  int mipmap;
+  int mipmap;//0 = nearest 1 = linear 2 = mipmap
   int color_depth;
   int y_resolution;
   int x_resolution;  

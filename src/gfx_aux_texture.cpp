@@ -25,8 +25,9 @@
 #include <assert.h>
 #include "gfxlib.h"
 #include <string>
-using namespace std;
+
 #include "hashtable.h"
+using std::string;
 #ifndef WIN32
 typedef unsigned long DWORD;
 typedef long  LONG;
@@ -72,6 +73,10 @@ const int SIZEOF_RGBQUAD=sizeof(BYTE)*4;
 
 static Hashtable<string, Texture> texHashTable;
 
+Texture * Texture::Exists (string s) {
+    return texHashTable.Get(s);
+}
+
 int Texture::checkold(const string &s)
 {
 	Texture *oldtex;
@@ -100,7 +105,7 @@ void Texture::setold()
 	original->refcount++;
 }
 
-Texture::Texture(const char * FileName, int stage, bool mipmap, enum TEXTURE_TARGET target, enum TEXTURE_IMAGE_TARGET imagetarget)
+Texture::Texture(const char * FileName, int stage, enum FILTER mipmap, enum TEXTURE_TARGET target, enum TEXTURE_IMAGE_TARGET imagetarget)
 {
   ismipmapped  = mipmap;
   InitTexture();
@@ -138,7 +143,7 @@ Texture::Texture(const char * FileName, int stage, bool mipmap, enum TEXTURE_TAR
 	string texfilename = string(FileName);
 	
 	if(fp2) {
-		texfilename += string(t);
+	  //texfilename += string(t);
 	}
 	//	this->texfilename = texfilename;
 	//strcpy (filename,texfilename.c_str());
@@ -204,7 +209,7 @@ Texture::Texture(const char * FileName, int stage, bool mipmap, enum TEXTURE_TAR
 	setold();
 }
 
-Texture::Texture (const char * FileNameRGB, const char *FileNameA, int stage, bool mipmap, enum TEXTURE_TARGET target, enum TEXTURE_IMAGE_TARGET imagetarget, float alpha, int zeroval)
+Texture::Texture (const char * FileNameRGB, const char *FileNameA, int stage, enum FILTER  mipmap, enum TEXTURE_TARGET target, enum TEXTURE_IMAGE_TARGET imagetarget, float alpha, int zeroval)
 {
   ismipmapped  = mipmap;
   InitTexture();

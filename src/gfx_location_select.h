@@ -16,7 +16,7 @@ public:
   LocationSelect (Vector,Vector,Vector/*, Scene*   */);
   LocationSelect (Vector,Vector,Vector,Vector/*, Scene*   */);
   ~LocationSelect();
-  inline Vector GetVector (){return Transform (cumulative_transformation_matrix,LocalPosition);}
+  inline Vector GetVector (){return /*Transform (cumulative_transformation_matrix,*/LocalPosition/*)*/;}
   void MoveLocation (Vector pos,Vector p ,Vector q);
   void MoveLocation (Vector pos, Vector p, Vector q, Vector r); //requires normalized Vector triplet pqr
   void Draw();

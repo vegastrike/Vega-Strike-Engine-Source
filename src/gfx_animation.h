@@ -39,7 +39,7 @@ class Animation:public Primitive {
   void InitAnimation();
 public:
   Animation();
-  Animation(char *, bool Rep=0, float priority=.1,bool ismipmapped=true,bool camorient=false);
+  Animation(char *, bool Rep=0, float priority=.1,enum FILTER ismipmapped=MIPMAP,bool camorient=false);
   ~Animation();
   //  void SetPosition (float x,float y,float z);
   //  void SetPosition(const Vector &k);

@@ -21,14 +21,17 @@ vegastrike_SOURCES =				\
 	alglib.h				\
 	cmd.h					\
 	cmd_ai.h				\
+	cmd_beam.h				\
+	cmd_beam.cpp				\
+	cmd_gun.cpp				\
+	cmd_gun.h				\
 	cmd_input_dfa.h				\
 	cmd_input_dfa.cpp			\
 	cmd_order.cpp				\
 	cmd_order.h				\
 	cmd_unit.h				\
 	cmd_unit.cpp				\
-	cmd_gun.cpp				\
-	cmd_gun.h				\
+	cmd_unit_xml.cpp  			\
 	cmd_node.h				\
 	cmd_physics.cpp				\
 	cmd_physics.h				\
@@ -54,16 +57,25 @@ vegastrike_SOURCES =				\
 	gfx_background.h			\
 	gfx_bounding_box.cpp			\
 	gfx_bounding_box.h			\
+	gfx_box.h 				\
+	gfx_box.cpp 				\
 	gfx_bsp.cpp				\
 	gfx_bsp.h				\
 	gfx_camera.cpp				\
 	gfx_camera.h				\
+	gfx_click_list.h			\
+	gfx_click_list.cpp			\
+	gfx_coordinate_select.cpp		\
+	gfx_coordinate_select.h			\
 	gfx_hud.cpp				\
 	gfx_hud.h				\
+	gfx_lerp.cpp 				\
+	gfx_lerp.h 				\
 	gfx_location_select.cpp			\
 	gfx_location_select.h			\
 	gfx_mesh.cpp				\
 	gfx_mesh.h				\
+	gfx_mesh_xml.cpp 			\
 	gfx_primitive.cpp			\
 	gfx_primitive.h				\
 	gfx_sprite.cpp				\
@@ -82,6 +94,7 @@ vegastrike_SOURCES =				\
 	gl_init.cpp				\
 	gl_init.h				\
 	gl_light.cpp				\
+	gl_matrix.h 				\
 	gl_matrix.cpp				\
 	gl_material.cpp				\
 	gl_misc.cpp				\
@@ -112,26 +125,25 @@ vegastrike_SOURCES =				\
         nmrcl.h					\
 	pic.c					\
 	pic.h					\
+	planet.h 				\
+	planet.cpp 				\
 	physics.h				\
 	physics.cpp				\
+	quaternion.h 				\
+	quaternion.cpp				\
 	screenshot.c				\
 	screenshot.h				\
 	string_util.c				\
 	string_util.h				\
 	tex_font_metrics.c			\
 	tex_font_metrics.h			\
-	wrapgfx.cpp				\
-	wrapgfx.h				\
-	vegastrike.h				\
 	star_system.cpp 			\
 	star_system.h 				\
-	planet.h 				\
-	planet.cpp 				\
 	iterator.h				\
 	UnitCollection.h			\
 	UnitCollection.cpp			\
-	gfx_click_list.h			\
-	gfx_click_list.cpp			\
+	wrapgfx.cpp				\
+	wrapgfx.h				\
 	sdl_audio.c				\
 	sdl_audio.h				\
 	sdl_audio_data.c			\
@@ -140,19 +152,9 @@ vegastrike_SOURCES =				\
 	sdl_init.c				\
 	joystick.c				\
 	joystick.h				\
-	gfx_mesh_xml.cpp 			\
 	xml_support.h  				\
 	xml_support.cpp				\
-	cmd_unit_xml.cpp  \
-	profile.h \
-	gfx_coordinate_select.cpp		\
-	gfx_coordinate_select.h			\
-	gl_matrix.h \
-	vs_globals.h \
-	gfx_box.h \
-	gfx_box.cpp \
-	gfx_lerp.cpp \
-	gfx_lerp.h \
-	quaternion.h \
-	quaternion.cpp
+	profile.h 				\
+	vegastrike.h				\
+	vs_globals.h 				
 

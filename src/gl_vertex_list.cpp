@@ -34,7 +34,8 @@ GFXVertexList *next;
 extern BOOL bTex0;
 extern BOOL bTex1;
 
-
+#define CHANGE_MUTABLE 1
+#define CHANGE_CHANGE 2
 #define USE_DISPLAY_LISTS
 GFXVertexList::GFXVertexList():numVertices(0),myVertices(NULL),display_list(0), numlists(0) { }
 /*
@@ -46,7 +47,7 @@ GFXVertexList::GFXVertexList(enum POLYTYPE *poly, int numVertices, GFXVertex *ve
   Init (poly,numVertices, vertices, numlists, offsets);
 }
 */
-void GFXVertexList::Init (enum POLYTYPE *poly, int numVertices, GFXVertex *vertices, int numlists, int *offsets, int tess) {
+void GFXVertexList::Init (enum POLYTYPE *poly, int numVertices, GFXVertex *vertices, GFXColor * colors, int numlists, int *offsets, bool Mutable, int tess) {
   mode = new GLenum [numlists];
   for (int pol=0;pol<numlists;pol++) {
     switch (poly[pol]) {
@@ -84,21 +85,32 @@ void GFXVertexList::Init (enum POLYTYPE *poly, int numVertices, GFXVertex *verti
   
   this->numlists = numlists;
   this->numVertices = numVertices;
-  myVertices = new GFXVertex[numVertices];
+  myVertices = (GFXVertex*)malloc (sizeof (GFXVertex)*numVertices);
   memcpy(myVertices, vertices, sizeof(GFXVertex)*numVertices);
+  if (colors) {
+    myColors = (GFXColor*)malloc( sizeof (GFXColor)*numVertices);
+    memcpy (myColors, colors, sizeof (GFXColor)*numVertices);
+  }else {
+    myColors = NULL;
+  }
   this->offsets = new int [numlists];
   memcpy(this->offsets, offsets, sizeof(int)*numlists);
   display_list = 0;
   this->tessellation = tess;
-  changed = true;
+  if (Mutable)
+    changed = CHANGE_MUTABLE;
+  else
+    changed = CHANGE_CHANGE;
   if (tess) 
     Tess (tess);
   else {
     tesslist = NULL;
     RefreshDisplayList();
   }
-  changed = false;//for display lists
-
+  if (Mutable)
+    changed = CHANGE_MUTABLE;//for display lists
+  else
+    changed = 0;
 
 }
 void GFXVertexList::Tess (int tess) {
@@ -122,8 +134,8 @@ void GFXVertexList::Tess (int tess) {
 }
 void GFXVertexList::RefreshDisplayList () {
 #ifdef USE_DISPLAY_LISTS
-  if (display_list&&!changed) {
-      return;
+  if ((display_list&&!(changed&CHANGE_CHANGE))||(changed&CHANGE_MUTABLE)) {
+    return;//don't used lists if they're mutable
   }
   /*
 	display_list = GFXCreateList();
@@ -144,17 +156,30 @@ void GFXVertexList::RefreshDisplayList () {
   */
 	int a;
 	int offset =0;
-	for (int i=0;i<numlists;i++) {
-	  glBegin(mode[i]);
-	  for(a=0; a<offsets[i]; a++) {
-	    glNormal3fv(&myVertices[offset+a].i);
-	    glTexCoord2fv(&myVertices[offset+a].s);
-	    glVertex3fv(&myVertices[offset+a].x);
+	if (myColors !=NULL) {
+	  for (int i=0;i<numlists;i++) {
+	    glBegin(mode[i]);
+	    for(a=0; a<offsets[i]; a++) {
+	      glColor3fv (&myColors[offset+a].r);
+	      glNormal3fv(&myVertices[offset+a].i);
+	      glTexCoord2fv(&myVertices[offset+a].s);
+	      glVertex3fv(&myVertices[offset+a].x);
+	    }
+	    offset +=offsets[i];
+	    glEnd();
 	  }
-	  offset +=offsets[i];
-	  glEnd();
+	}else {
+	  for (int i=0;i<numlists;i++) {
+	    glBegin(mode[i]);
+	    for(a=0; a<offsets[i]; a++) {
+	      glNormal3fv(&myVertices[offset+a].i);
+	      glTexCoord2fv(&myVertices[offset+a].s);
+	      glVertex3fv(&myVertices[offset+a].x);
+	    }
+	    offset +=offsets[i];
+	    glEnd();
+	  }
 	}
-
 	glEndList();
 	/*
 	glDisableClientState(GL_VERTEX_ARRAY);
@@ -174,7 +199,9 @@ GFXVertexList::~GFXVertexList()
   if (offsets)
     delete [] offsets;
   if(myVertices)
-    delete [] myVertices;
+    free (myVertices);
+  if (myColors) 
+    free (myColors);
 }
 
 GFXTVertex *GFXVertexList::LockTransformed()
@@ -204,11 +231,6 @@ void GFXVertexList::UnlockUntransformed()
     tesslist->UnlockUntransformed();
 }
 
-BOOL GFXVertexList::SetNext(GFXVertexList *vlist)
-{
-  
-	return FALSE;
-}
 
 BOOL GFXVertexList::SwapUntransformed()
 {
@@ -225,6 +247,19 @@ BOOL GFXVertexList::SwapTransformed()
 
 	return FALSE;
 }
+
+BOOL GFXVertexList::Mutate (int offset, const GFXVertex *vlist, int number, const GFXColor *color){  
+  if (offset+number>numVertices)
+    return FALSE;
+  memcpy (&myVertices[offset].x, vlist, number*sizeof(GFXVertex));
+  if (myColors&&color) {
+    memcpy (&myColors[offset].r,color,number*sizeof(GFXColor));
+  }
+  RefreshDisplayList();
+  return TRUE;
+} 
+
+
 BOOL GFXVertexList::Draw()
 {
   if (tessellation&&tesslist) {
@@ -287,6 +322,12 @@ BOOL GFXVertexList::Draw()
 	texcoords[4*a+2] = myVertices[a].u;
 	texcoords[4*a+3] = myVertices[a].v;
 	}*/ 
+      if (myColors!=NULL) {
+	glEnableClientState(GL_COLOR_ARRAY);
+	glColorPointer (4,GL_FLOAT, sizeof (GFXColor), &myColors[0].r);
+      }else {
+	glDisableClientState (GL_COLOR_ARRAY);
+      }
       glVertexPointer(3, GL_FLOAT, sizeof(GFXVertex), &myVertices[0].x);
       glNormalPointer(GL_FLOAT, sizeof(GFXVertex), &myVertices[0].i);
       glEnableClientState(GL_VERTEX_ARRAY);
@@ -311,6 +352,12 @@ BOOL GFXVertexList::Draw()
     }else{ 
       /*transfer vertex, texture coords, and normal pointer*/
       //GLenum err;
+      if (myColors!=NULL) {
+	glEnableClientState(GL_COLOR_ARRAY);
+	glColorPointer (4,GL_FLOAT, sizeof (GFXColor), &myColors[0]);
+      }else {
+	glDisableClientState (GL_COLOR_ARRAY);
+      }
       glVertexPointer(3, GL_FLOAT, sizeof(GFXVertex), &myVertices[0].x);
       glTexCoordPointer(2, GL_FLOAT, sizeof(GFXVertex), &myVertices[0].s+GFXStage0*2);
       glNormalPointer(GL_FLOAT, sizeof(GFXVertex), &myVertices[0].i);

@@ -3,12 +3,12 @@
 #include "in.h"
 #include "vegastrike.h"
 #include <stdio.h>
-LocationSelect::LocationSelect (Vector start, Vector Plane1, Vector Plane2/*, System * par */): Primitive(),LocSelAni ("locationselect.ani",true,.5,true,true),LocSelUpAni("locationselect_up.ani",true,.5,true,false) {
+LocationSelect::LocationSelect (Vector start, Vector Plane1, Vector Plane2/*, System * par */): Primitive(),LocSelAni ("locationselect.ani",true,.5,MIPMAP,true),LocSelUpAni("locationselect_up.ani",true,.5,MIPMAP,false) {
   //  parentScene = par;
   CrosshairSize=2;
   MoveLocation (start,Plane1,Plane2);
 }
-LocationSelect::LocationSelect (Vector start,Vector Plane1, Vector Plane2, Vector Plane3/*, Scene* par */): Primitive(),LocSelAni ("locationselect.ani",true,.5,true,true),LocSelUpAni("locationselect_up.ani",true,.5,true,false) {
+LocationSelect::LocationSelect (Vector start,Vector Plane1, Vector Plane2, Vector Plane3/*, Scene* par */): Primitive(),LocSelAni ("locationselect.ani",true,.5,MIPMAP,true),LocSelUpAni("locationselect_up.ani",true,.5,MIPMAP,false) {
   //  parentScene=par;
   CrosshairSize=2;
   MoveLocation (start,Plane1,Plane2,Plane3);

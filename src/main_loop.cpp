@@ -22,7 +22,8 @@
 #include "gfx_coordinate_select.h"
 #include "gfx_mesh.h"
 #include "cmd_navigation_orders.h"
-
+#include "cmd_beam.h"
+#include "gfx_transform_matrix.h"
 using namespace std;
 
 #define KEYDOWN(name,key) (name[key] & 0x80)
@@ -326,7 +327,7 @@ CoordinateSelect *locSel=NULL;
 Background * bg = NULL;
 SphereMesh *bg2=NULL;
 TextPlane *textplane = NULL;
-
+Beam * DABEAM;
 ClickList *shipList =NULL;
 Unit *midway = NULL;
 /*
@@ -439,8 +440,9 @@ Animation *ss=NULL;
 Animation *sss=NULL;
 Animation *Preload = NULL;
 void createObjects() {
-    ss = new Animation ("explosion_sml_orange.ani",false,.1,false,false);
-    Preload = new Animation ("explosion_orange.ani",false,.1,false,false);
+  DABEAM = new Beam (identity_transformation);
+    ss = new Animation ("explosion_sml_orange.ani",false,.1,BILINEAR,false);
+    Preload = new Animation ("explosion_orange.ani",false,.1,BILINEAR,false);
     //delete s;
     s = NULL;
   fprintf(stderr,"Unit size: %d\nMesh size: %d\n", sizeof(Unit), sizeof(Mesh));
@@ -558,6 +560,7 @@ void createObjects() {
 }
 
 void destroyObjects() {  
+  delete DABEAM;
   for(int a = 0; a < numf; a++)
   	delete fighters[a];
   delete Preload;
@@ -580,9 +583,9 @@ void main_loop() {
   static bool midcachunk=false;
   if ((rand()%1000)==299) {
     midcachunk = true;
-    s = new Animation ("explosion_orange.ani",false,.1,false,false);
+    s = new Animation ("explosion_orange.ani",false,.1,BILINEAR,false);
 
-    sss = new Animation ("explosion_sml_orange.ani",false,.1,false,false);
+    sss = new Animation ("explosion_sml_orange.ani",false,.1,BILINEAR,false);
 
     ss->SetDimensions (3,3);
     s->SetDimensions (8,8);
@@ -596,7 +599,6 @@ void main_loop() {
   //bg2->Draw();
   GFXBlendMode (ONE,ZERO);
   bg->Draw();
-
   //GFXDisable(TEXTURE1);
   _GFX->activeStarSystem()->Draw();
   _GFX->activeStarSystem()->Update();
@@ -620,6 +622,8 @@ void main_loop() {
     if (time > .5)
       fighters[0]->Destroy();
   }
+  DABEAM->Draw(identity_transformation,identity_matrix);
+  Beam::ProcessDrawQueue();
 
   //textplane->Draw();
   _GFX->EndDraw();

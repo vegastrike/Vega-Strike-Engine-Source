@@ -23,6 +23,7 @@
 #include "gl_globals.h"
 
 const int  MAX_TEXTURES = 256;
+
 struct GLTexture{
   unsigned char *texture;
   GLubyte * palette;
@@ -33,7 +34,7 @@ struct GLTexture{
   BOOL alive;
   TEXTUREFORMAT textureformat;
   GLenum targets;
-  bool mipmapped;
+  enum FILTER mipmapped;
   bool shared_palette;
   
 	GLTexture ()
@@ -58,7 +59,7 @@ struct GLTexture{
 //static GLEnum * targets=NULL;
 
 static GLTexture textures[MAX_TEXTURES];
-
+static int activetexture[4]={-1,-1};
 static void ConvertPalette(unsigned char *dest, unsigned char *src)
 {
   for(int a=0; a<256; a++, dest+=4, src+=4) {
@@ -68,7 +69,7 @@ static void ConvertPalette(unsigned char *dest, unsigned char *src)
 
 }
 
-BOOL /*GFXDRVAPI*/ GFXCreateTexture(int width, int height, TEXTUREFORMAT textureformat, int *handle, char *palette , int texturestage, bool mipmap, enum TEXTURE_TARGET texture_target)
+BOOL /*GFXDRVAPI*/ GFXCreateTexture(int width, int height, TEXTUREFORMAT textureformat, int *handle, char *palette , int texturestage, enum FILTER mipmap, enum TEXTURE_TARGET texture_target)
 {
   //  if (!textures) {
   //    textures = new GLTexture [MAX_TEXTURES]; //if the dynamically allocated array is not made... make it
@@ -117,11 +118,25 @@ BOOL /*GFXDRVAPI*/ GFXCreateTexture(int width, int height, TEXTUREFORMAT texture
 	
 	glTexParameteri(textures[*handle].targets, GL_TEXTURE_WRAP_S, WrapMode);
 	glTexParameteri(textures[*handle].targets, GL_TEXTURE_WRAP_T, WrapMode);
-	glTexParameteri (textures[*handle].targets, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	if (textures[*handle].mipmapped&&g_game.mipmap)
-	  glTexParameteri (textures[*handle].targets, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
-	else
-	  glTexParameteri (textures[*handle].targets, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
+	
+
+	if (textures[*handle].mipmapped&(TRILINEAR|MIPMAP)&&g_game.mipmap>=2) {
+	  glTexParameteri (textures[*handle].targets, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	  if (textures[*handle].mipmapped&TRILINEAR) {
+	    glTexParameteri (textures[*handle].targets, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	  }else {
+	    glTexParameteri (textures[*handle].targets, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
+	  }
+	} else {
+	  if (textures[*handle].mipmapped==NEAREST||g_game.mipmap==0) {
+	    glTexParameteri (textures[*handle].targets, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	    glTexParameteri (textures[*handle].targets, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	  } else {
+	    glTexParameteri (textures[*handle].targets, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	    glTexParameteri (textures[*handle].targets, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	  }
+	}
 	glTexParameterf (textures[*handle].targets,GL_TEXTURE_PRIORITY,.5);
 	textures[*handle].width = width;
 	textures[*handle].height = height;
@@ -182,11 +197,23 @@ BOOL /*GFXDRVAPI*/ GFXTransferTexture (unsigned char *buffer, int handle,  enum 
 	glBindTexture(textures[handle].targets, textures[handle].name);
 	//	glTexParameteri(textures[handle].targets, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	//	glTexParameteri(textures[handle].targets, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	glTexParameteri (textures[handle].targets, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	if (textures[handle].mipmapped&&g_game.mipmap)
-	  glTexParameteri (textures[handle].targets, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
-	else
-	  glTexParameteri (textures[handle].targets, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
+	if ((textures[handle].mipmapped&(TRILINEAR|MIPMAP))&&g_game.mipmap>=2) {
+	  glTexParameteri (textures[handle].targets, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	  if (textures[handle].mipmapped&TRILINEAR) {
+	    glTexParameteri (textures[handle].targets, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	  }else {
+	    glTexParameteri (textures[handle].targets, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
+	  }
+	} else {
+	  if (textures[handle].mipmapped==NEAREST||g_game.mipmap==0) {
+	    glTexParameteri (textures[handle].targets, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	    glTexParameteri (textures[handle].targets, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	  } else {
+	    glTexParameteri (textures[handle].targets, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	    glTexParameteri (textures[handle].targets, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	  }
+	}
 	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 	int error;
 	textures[handle].texture = buffer;
@@ -299,27 +326,46 @@ BOOL /*GFXDRVAPI*/ GFXDeleteTexture (int handle)
 
 BOOL /*GFXDRVAPI*/ GFXSelectTexture(int handle, int stage)
 {
+  //FIXME? is this legit?
+  if (activetexture[stage]==handle)
+    return TRUE;
+  else
+    activetexture[stage] = handle;
+
 	if (g_game.Multitexture)
 	{
 		switch(textures[handle].texturestage)
 		{
 		case 0:
-			glActiveTextureARB(GL_TEXTURE0_ARB);	
-			break;
+		  glActiveTextureARB(GL_TEXTURE0_ARB);	
+		  break;
 		case 1:
-			glActiveTextureARB(GL_TEXTURE1_ARB);			
-			break;
+		  glActiveTextureARB(GL_TEXTURE1_ARB);			
+		  break;
 		default:
 			glActiveTextureARB(GL_TEXTURE0_ARB);			
 			break;
 		}
 
 		glBindTexture(textures[handle].targets, textures[handle].name);
-		if (textures[handle].mipmapped&&g_game.mipmap)
-		  glTexParameteri (textures[handle].targets, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
-		else
-		  glTexParameteri (textures[handle].targets, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		
+
+		if ((textures[handle].mipmapped&(TRILINEAR|MIPMAP))&&g_game.mipmap>=2) {
+		  glTexParameteri (textures[handle].targets, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		  if (textures[handle].mipmapped&TRILINEAR) {
+		    glTexParameteri (textures[handle].targets, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+		  }else {
+		    glTexParameteri (textures[handle].targets, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
+		  }
+		} else {
+		  if (textures[handle].mipmapped==NEAREST||g_game.mipmap==0) {
+		    glTexParameteri (textures[handle].targets, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		    glTexParameteri (textures[handle].targets, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		  } else {
+		    glTexParameteri (textures[handle].targets, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		    glTexParameteri (textures[handle].targets, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		  }
+		}
+
 		if(g_game.PaletteExt&&textures[handle].textureformat == PALETTE8) {
 		  //memset(textures[handle].palette, 255, 1024);
 		}
@@ -362,11 +408,22 @@ BOOL /*GFXDRVAPI*/ GFXSelectTexture(int handle, int stage)
 			glBindTexture(textures[handle].targets, textures[handle].name);
 			Stage0TextureName = textures[handle].name;
 		}
-		if (textures[handle].mipmapped&&g_game.mipmap)
-		  glTexParameteri (textures[handle].targets, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
-		else
-		  glTexParameteri (textures[handle].targets, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-
+		if (textures[handle].mipmapped&(TRILINEAR|MIPMAP)&&g_game.mipmap>=2) {
+		  glTexParameteri (textures[handle].targets, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		  if (textures[handle].mipmapped&TRILINEAR) {
+		    glTexParameteri (textures[handle].targets, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+		  }else {
+		    glTexParameteri (textures[handle].targets, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
+		  }
+		} else {
+		  if (textures[handle].mipmapped==NEAREST||g_game.mipmap==0) {
+		    glTexParameteri (textures[handle].targets, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		    glTexParameteri (textures[handle].targets, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		  } else {
+		    glTexParameteri (textures[handle].targets, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		    glTexParameteri (textures[handle].targets, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		  }
+		}
 		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 		float ccolor[4] = {1.0,1.0,1.0,1.0};
 		//FIXME VEGASTRIKE//REMOVED BY DANNYglTexEnvfv(GL_TEXTURE_ENV, GL_TEXTURE_ENV_COLOR, ccolor);

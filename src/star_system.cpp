@@ -7,7 +7,7 @@
 #include "gfx_hud.h"
 #include "cmd_input_dfa.h"
 #include "lin_time.h"
-
+#include "cmd_beam.h"
 #include "gfx_sphere.h"
 extern Vector mouseline;
 vector<Vector> perplines;
@@ -198,8 +198,9 @@ void StarSystem::Draw() {
   SetViewport();
 */
 }
-
+extern Beam *DABEAM;
 extern double interpolation_blend_factor;
+
 
 void StarSystem::Update() {
   Unit *unit;
@@ -210,7 +211,7 @@ void StarSystem::Update() {
   if(time/SIMULATION_ATOM>=1.0) {
     while(time/SIMULATION_ATOM >= 1.0) { // Chew up all SIMULATION_ATOMs that have elapsed since last update
       modelGravity();
-
+      DABEAM->UpdatePhysics(identity_transformation);
       Iterator *iter = units->createIterator();
       while((unit = iter->current())!=NULL) {
 	// Do something with AI state here eventually

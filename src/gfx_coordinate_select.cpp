@@ -21,7 +21,7 @@ void CoordinateSelect::MouseMoveHandle (KBSTATE,int x,int y,int,int,int) {
 
 
 
-CoordinateSelect::CoordinateSelect (Vector start):LocSelAni ("locationselect.ani",true,.5,true,true), LocalPosition(start) {
+CoordinateSelect::CoordinateSelect (Vector start):LocSelAni ("locationselect.ani",true,.5,MIPMAP,true), LocalPosition(start) {
   CrosshairSize=2;
   CoordinateSelectmousex = g_game.x_resolution/2;
   CoordinateSelectmousey = g_game.y_resolution/2;

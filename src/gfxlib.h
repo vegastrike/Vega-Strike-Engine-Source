@@ -105,7 +105,7 @@ BOOL /*GFXDRVAPI*/ GFXFrustum (float * mat, float *inv, float left,float right, 
 
 //Textures
 
-BOOL /*GFXDRVAPI*/ GFXCreateTexture(int width, int height, TEXTUREFORMAT textureformat, int *handle, char *palette = 0, int texturestage = 0, bool mipmap = true, enum TEXTURE_TARGET texture_target = TEXTURE2D);
+BOOL /*GFXDRVAPI*/ GFXCreateTexture(int width, int height, TEXTUREFORMAT textureformat, int *handle, char *palette = 0, int texturestage = 0, enum FILTER mipmap = MIPMAP, enum TEXTURE_TARGET texture_target = TEXTURE2D);
 BOOL /*GFXDRVAPI*/ GFXPrioritizeTexture (unsigned int handle, float priority);
 BOOL /*GFXDRVAPI*/ GFXAttachPalette(unsigned char *palette, int handle);
 BOOL /*GFXDRVAPI*/ GFXTransferTexture(unsigned char *buffer, int handle, enum TEXTURE_IMAGE_TARGET image2D=TEXTURE_2D);
