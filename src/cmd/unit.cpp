@@ -232,6 +232,7 @@ void Unit::Init()
   shield.recharge=shield.leak=0;
   shield.fb[0]=shield.fb[1]=shield.fb[2]=shield.fb[3]=armor.front=armor.back=armor.right=armor.left=0;
   hull=10;
+  maxhull=10;
   shield.number=2;
   
   image->explosion=NULL;

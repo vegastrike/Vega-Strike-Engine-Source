@@ -318,6 +318,8 @@ class Unit
   void RegenShields();
   ///The structual integ of the current unit
   float hull;
+  ///Original hull
+  float maxhull;
   ///The radar limits (range, cone range, etc) 
   ///the current order
   Order *aistate;
@@ -640,6 +642,8 @@ public:
   float EnergyData() const;
   ///Gets the current status of the hull
   float GetHull() const{return hull;}
+  float GetHullPercent() const{return maxhull!=0?hull/maxhull:hull;}
+
   ///Sets the camera to be within this unit.
   void UpdateHudMatrix(int whichcam);
   ///Returns the current AI state of the current unit for modification

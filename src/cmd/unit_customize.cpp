@@ -507,6 +507,10 @@ bool Unit::UpAndDownGrade (Unit * up, Unit * templ, int mountoffset, int subunit
   STDUPGRADE(armor.left,up->armor.left,templ->armor.left,0);
   STDUPGRADE(shield.recharge,up->shield.recharge,templ->shield.recharge,0);
   STDUPGRADE(hull,up->hull,templ->hull,0);
+  if (maxhull<hull) {
+    if (hull!=0) 
+      maxhull=hull;
+  }
   STDUPGRADE(recharge,up->recharge,templ->recharge,0);
   STDUPGRADE(image->repair_droid,up->image->repair_droid,templ->image->repair_droid,0);
   STDUPGRADE(image->cargo_volume,up->image->cargo_volume,templ->image->cargo_volume,0);

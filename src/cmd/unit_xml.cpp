@@ -196,7 +196,8 @@ namespace UnitXML {
       SLIDE_START,
       SLIDE_END,
       TRACKINGCONE,
-      MISSIONCARGO
+      MISSIONCARGO,
+      MAXIMUM
     };
 
   const EnumMap::Pair element_names[35]= {
@@ -237,7 +238,7 @@ namespace UnitXML {
     EnumMap::Pair ("Upgrade",UPGRADE      )
 
   };
-  const EnumMap::Pair attribute_names[92] = {
+  const EnumMap::Pair attribute_names[93] = {
     EnumMap::Pair ("UNKNOWN", UNKNOWN),
     EnumMap::Pair ("missing",MISSING),
     EnumMap::Pair ("file", XFILE), 
@@ -329,11 +330,12 @@ namespace UnitXML {
     EnumMap::Pair ("SubunitOffset",SUBUNITOFFSET),
     EnumMap::Pair ("SlideEnd",SLIDE_START),
     EnumMap::Pair ("SlideStart",SLIDE_END),
-    EnumMap::Pair ("MissionCargo",MISSIONCARGO)
+    EnumMap::Pair ("MissionCargo",MISSIONCARGO),
+    EnumMap::Pair ("Maximum",MAXIMUM),
   };
 
   const EnumMap element_map(element_names, 35);
-  const EnumMap attribute_map(attribute_names, 92);
+  const EnumMap attribute_map(attribute_names, 93);
 }
 
 using XMLSupport::EnumMap;
@@ -1104,14 +1106,23 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
 
 	assert (xml->unitlevel==2);
 	xml->unitlevel++;
+	maxhull=0;
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(attribute_map.lookup((*iter).name)) {
       case STRENGTH:
 	hull = parse_float((*iter).value);
 	break;
+      case MAXIMUM:
+	maxhull=parse_float ((*iter).value);
+	break;
       }
     }
-   
+    if (maxhull==0) {
+      maxhull = hull;
+      if (maxhull==0) {
+	maxhull = 1;
+      }
+    }
     break;
   case STATS:
 	assert (xml->unitlevel==1);
@@ -1621,6 +1632,7 @@ void Unit::LoadXML(const char *filename, const char * modifications)
     {
       image->unitwriter->AddTag ("Hull");
       image->unitwriter->AddElement("strength",floatStarHandler,XMLType(&hull));
+      image->unitwriter->AddElement("maximum",floatStarHandler,XMLType(&maxhull));
       image->unitwriter->EndTag ("Hull");
     }
 
