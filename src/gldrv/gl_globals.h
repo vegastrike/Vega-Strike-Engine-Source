@@ -22,6 +22,14 @@
 #define _GL_GLOBALS_H_
 #include <queue>
 
+/* Hack for multitexture on Mac, here and in gl_init, ifdefined - griff */
+#undef __APPLE_PANTHER_GCC33_CLI__
+#if defined(__GNUC__) && defined(__APPLE__)
+    #if ( __GNUC__==3 && __GNUC_MINOR__>2 ) || ( __GNUC__>3 )
+        #define __APPLE_PANTHER_GCC33_CLI__
+    #endif
+#endif
+
 using namespace std;
 
 #ifndef GFXSTAT
@@ -66,6 +74,9 @@ struct GFXStats{
 #ifdef GL_INIT_CPP
 #define GL_GLEXT_PROTOTYPES
 #endif
+#ifdef __APPLE_PANTHER_GCC33_CLI__
+    #define GL_EXT_texture_env_combine 1
+#endif /* __APPLE_PANTHER_GCC33_CLI__ */
     #include <OpenGL/glext.h>
 #else
 #define __glext_h_
@@ -100,12 +111,21 @@ struct GFXStats{
 #define GL_MAX_CUBE_MAP_TEXTURE_SIZE_EXT  0x851C
 #endif
 
+#ifdef __APPLE_PANTHER_GCC33_CLI__
+#define glMultiTexCoord2fARB_p glMultiTexCoord2fARB
+#define glClientActiveTextureARB_p glClientActiveTextureARB
+#define glActiveTextureARB_p glActiveTextureARB
+#define glColorTable_p glColorTable
+#define glLockArraysEXT_p glLockArraysEXT
+#define glUnlockArraysEXT_p glUnlockArraysEXT
+#else
 extern PFNGLMULTITEXCOORD2FARBPROC glMultiTexCoord2fARB_p;
 extern PFNGLCLIENTACTIVETEXTUREARBPROC glClientActiveTextureARB_p;
 extern PFNGLCLIENTACTIVETEXTUREARBPROC glActiveTextureARB_p;
 extern PFNGLCOLORTABLEEXTPROC glColorTable_p;
 extern PFNGLLOCKARRAYSEXTPROC glLockArraysEXT_p;
 extern PFNGLUNLOCKARRAYSEXTPROC glUnlockArraysEXT_p;
+#endif /* __APPLE_PANTHER_GCC33_CLI__ */
 
 //extern int sharedcolortable;
 extern GLenum GFXStage0;
