@@ -2435,6 +2435,8 @@ bool Unit::IsCleared (Unit * DockingUnit) {
 }
 
 bool Unit::isDocked (Unit* d) {
+  if (!d)
+	  return false;
   if (!(d->docked&DOCKED_INSIDE|DOCKED)) {
     return false;
   }

@@ -672,9 +672,6 @@ bool TargSig (Unit *me,Unit *target) {
 bool TargAll (Unit *me,Unit *target) {
 	return TargUn(me,target)||TargSig(me,target);
 }
-bool TargNear (Unit *me,Unit *target) {
-	return me->getRelation(target)<0&&TargAll(me,target);
-}
 bool TargFront (Unit *me,Unit *target) {
 	/*
 	float dist;
@@ -701,6 +698,9 @@ bool TargThreat (Unit *me,Unit *target) {
 		return true;
 	}
 	return false;
+}
+bool TargNear (Unit *me,Unit *target) {
+	return (me->getRelation(target)<0||TargThreat(me,target)||target->getRelation(me)<0)&&TargAll(me,target);
 }
 
 void ChooseTargets(Unit * me, bool (*typeofunit)(Unit *,Unit *), bool reverse) {
