@@ -507,11 +507,11 @@ weapon_info* getTemplate(const string &kkey) {
 		static string sharedmountdir = vs_config->getVariable("data","mountlocation","weapons");
 
 		//string meshshell=VSFileSystem::sharedmeshes+"/"+sharedmountdir+string ("/") + key;
-		string meshname=key+".xmesh";
+		string meshname=key+".bfxm";
 		if (LookForFile( meshname, MeshFile)<=Ok) {
-			WeaponMeshCache::setCachedMutable (wi->weapon_name,wi->gun=new Mesh (meshname.c_str(),Vector(1,1,1),0,NULL));
+			WeaponMeshCache::setCachedMutable (wi->weapon_name,wi->gun= Mesh::LoadMesh (meshname.c_str(),Vector(1,1,1),0,NULL));
 			if (LookForFile( meshname, MeshFile)<=Ok) {
-				WeaponMeshCache::setCachedMutable (wi->weapon_name+"_flare",wi->gun1=new Mesh (meshname.c_str(),Vector(1,1,1),0,NULL));
+				WeaponMeshCache::setCachedMutable (wi->weapon_name+"_flare",wi->gun1=Mesh::LoadMesh (meshname.c_str(),Vector(1,1,1),0,NULL));
 			}
 		}
     }

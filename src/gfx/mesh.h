@@ -190,8 +190,10 @@ public:
   BLENDFUNC getBlendSrc() {return blendSrc;}
   BLENDFUNC getBlendDst() {return blendDst;}		
   ///Loading a mesh from an XML file.  faction specifies the logos.  Orig is for internal (LOD) use only!
-  Mesh( const char *filename, const Vector & scalex,int faction,class Flightgroup * fg, bool orig=false);
-  static Mesh* LoadMesh(const char * filename, const Vector & scalex, int faction, class Flightgroup * fg);
+//private:  
+	Mesh( const char *filename, const Vector & scalex,int faction,class Flightgroup * fg, bool orig=false);
+//public:
+	static Mesh* LoadMesh(const char * filename, const Vector & scalex, int faction, class Flightgroup * fg);
   static vector<Mesh*> LoadMeshes(const char * filename, const Vector & scalex, int faction, class Flightgroup * fg);
   static vector<Mesh*> LoadMeshes(VSFileSystem::VSFile & f, const Vector & scalex, int faction, class Flightgroup * fg);
 

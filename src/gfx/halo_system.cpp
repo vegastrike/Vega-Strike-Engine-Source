@@ -87,7 +87,7 @@ unsigned int HaloSystem::AddHalo (const char * filename, const QVector & loc, co
   halo_type.push_back (CAR::type_map.lookup(type));//should default to headlights
 #endif
   if (mesh==NULL) {
-    mesh = new Mesh ((string (filename)+".xmesh").c_str(), Vector(1,1,1),FactionUtil::GetFaction("neutral"),NULL);
+	  mesh = Mesh::LoadMesh ((string (filename)).c_str(), Vector(1,1,1),FactionUtil::GetFaction("neutral"),NULL);
     float gs =XMLSupport::parse_float (vs_config->getVariable("physics","game_speed","1"));
     activation=activation_speed*activation_speed*gs*gs;
   }

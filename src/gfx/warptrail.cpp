@@ -95,15 +95,15 @@ Mesh * GetWarpMesh (int faction, warptrails * w) {
     w->factions.push_back(NULL);
   }
   string fac = FactionUtil::GetFaction (faction);
-  fac+="_warp.xmesh";
+  fac+="_warp.bfxm";
   VSError err;
   if( (err=LookForFile( fac, MeshFile))>Ok)
   {
-	fac = "neutral_warp.xmesh";
+	fac = "neutral_warp.bfxm";
 	if( (err=LookForFile( fac, MeshFile))>Ok)
 		return NULL;
   }
   if (!w->factions[faction])
-    w->factions[faction] = new Mesh (fac.c_str(),Vector(1,1,1),faction,NULL,false);
+	  w->factions[faction] = Mesh::LoadMesh (fac.c_str(),Vector(1,1,1),faction,NULL);
   return w->factions[faction];
 }

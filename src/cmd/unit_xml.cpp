@@ -672,7 +672,7 @@ using namespace UnitXML;
     break;
   case MESHFILE:
   {
-	  std::string file="box.xmesh";
+	  std::string file="box.bfxm";
 	  int startframe=0;
 	  double texturestarttime=0;
 	  ADDTAG;

@@ -6,7 +6,7 @@
 #include "camera.h"
 #include "aux_texture.h"
 using namespace std;
-#define USE_POINTS
+//#define USE_POINTS
 ParticleTrail particleTrail(1000);
 void ParticleTrail::ChangeMax (unsigned int max ) {
   this->maxparticles = max;

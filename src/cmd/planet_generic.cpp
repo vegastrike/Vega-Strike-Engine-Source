@@ -86,7 +86,7 @@ string GetElMeshName (string name, string faction,char direction)
 {
 	using namespace VSFileSystem;
 		char strdir[2]={direction,0};
-		string elxmesh=string(strdir)+"_elevator.xmesh";
+		string elxmesh=string(strdir)+"_elevator.bfxm";
 		string elevator_mesh =name+"_"+faction+elxmesh;
 		VSFile f;
 		VSError err = f.OpenReadOnly( elevator_mesh, MeshFile);
@@ -130,7 +130,7 @@ Vector Planet::AddSpaceElevator (const std::string &name, const std::string & fa
 	if (meshdata.empty()) meshdata.push_back(NULL);
 	Mesh * shield = meshdata.back();
 	string elevator_mesh=GetElMeshName(name,faction,direction);//filename	
-	Mesh * tmp = meshdata.back()=new Mesh (elevator_mesh.c_str(),
+	Mesh * tmp = meshdata.back()=Mesh::LoadMesh (elevator_mesh.c_str(),
 										   scale,
 										   FactionUtil::
 										   GetFaction(faction.c_str()),
