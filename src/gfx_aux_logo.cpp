@@ -98,7 +98,9 @@ void Logo::SetDecal(Texture *decal)
     owner_of_draw_queue = l;
     l->refcount++;
   } else {
-    decalHash.Put(string(decal->filename), l=new Logo(*this));
+    l = (Logo*)malloc (sizeof (Logo));
+    memcpy (l,this,sizeof(Logo));
+    decalHash.Put(string(decal->filename), l);
     draw_queue = l->draw_queue = new vector<DrawContext>();
     owner_of_draw_queue = l->owner_of_draw_queue = l;
     l->refcount = 1;
@@ -153,12 +155,14 @@ void Logo::ProcessDrawQueue() {
 
 Logo::~Logo ()
 {
-	delete [] vlist;
+  if (owner_of_draw_queue!=this)
+    delete vlist;
 	
 	//if(LogoCorner!=NULL)
 	//	delete [] LogoCorner;
 	if(owner_of_draw_queue!=NULL) {
-	  owner_of_draw_queue->refcount--;
+	  if (owner_of_draw_queue!=this)
+	    owner_of_draw_queue->refcount--;
 	  if(owner_of_draw_queue->refcount==0 && owner_of_draw_queue!=this) 
 	    delete owner_of_draw_queue;
 	}

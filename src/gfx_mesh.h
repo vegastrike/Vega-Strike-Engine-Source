@@ -166,7 +166,7 @@ private:
   } *xml;
 
   void LoadXML(const char *filename, Mesh *oldmesh);
-
+  void CreateLogos(float x_center,float y_center, float z_center);
   static void beginElement(void *userData, const XML_Char *name, const XML_Char **atts);
   static void endElement(void *userData, const XML_Char *name);
   

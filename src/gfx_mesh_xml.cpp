@@ -1062,8 +1062,24 @@ void Mesh::LoadXML(const char *filename, Mesh *oldmesh) {
   
   //TODO: add force handling
   //Add Logos in:
+  CreateLogos(x_center,y_center,z_center);
+  // Calculate bounding sphere
+  
+  this->orig = oldmesh;
+  *oldmesh=*this;
+  oldmesh->orig = NULL;
+  oldmesh->refcount++;
+  if (minSizeX==FLT_MAX) {
+    minSizeX = minSizeY = minSizeZ = 0;
+    maxSizeX = maxSizeY = maxSizeZ = 0;
+  }
+  delete [] vertexlist;
+  delete []poly_offsets;
+  delete xml;
+}
+void Mesh::CreateLogos(float x_center, float y_center, float z_center) {
   numforcelogo=numsquadlogo =0;
-
+  int index;
   for (index=0;index<xml->logos.size();index++) {
     if (xml->logos[index].type==0)
       numforcelogo++;
@@ -1132,18 +1148,4 @@ void Mesh::LoadXML(const char *filename, Mesh *oldmesh) {
     delete [] rotations;
     delete [] offset;
   }
-
-  // Calculate bounding sphere
-  
-  this->orig = oldmesh;
-  *oldmesh=*this;
-  oldmesh->orig = NULL;
-  oldmesh->refcount++;
-  if (minSizeX==FLT_MAX) {
-    minSizeX = minSizeY = minSizeZ = 0;
-    maxSizeX = maxSizeY = maxSizeZ = 0;
-  }
-  delete [] vertexlist;
-  delete []poly_offsets;
-  delete xml;
 }
