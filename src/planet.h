@@ -17,14 +17,16 @@ class Texture;
 class Planet;
 typedef float Matrix[16];
 
+//Do not use this on anything other than a Planet
 class PlanetaryOrbit : public AI {
  protected:
+  Planet *parent;
   double radius;
   double angular_delta;
   double theta;
 
  public:
-  PlanetaryOrbit(double radius, double velocity, double initpos) : radius(radius), angular_delta(velocity/radius * SIMULATION_ATOM), theta(initpos) { }
+  PlanetaryOrbit(Planet *p, double radius, double velocity, double initpos) : parent(p), radius(radius), angular_delta(velocity/radius * SIMULATION_ATOM), theta(initpos) { }
   AI *Execute();
 
   friend Planet;
@@ -47,11 +49,11 @@ class Planet : public Unit {
 
   void InitPlanet(FILE *fp);
 
-  virtual void Draw();
+  /*  virtual void Draw();
   virtual void DrawStreak(const Vector &v);
   virtual void Draw(Matrix tmatrix);
   virtual void Draw(Matrix tmatrix, const Vector &pp, const Vector &pq, const Vector &pr, const Vector &ppos);
-
+  */
   void gravitate(UnitCollection *units, Matrix t);
   void gravitate(UnitCollection *units);
 
@@ -90,9 +92,10 @@ class Planet : public Unit {
       return pos->advance();
     }
   };
-  friend Planet::PlanetIterator;
-  
   Iterator *createIterator() { return new PlanetIterator(this);}
+
+  friend Planet::PlanetIterator;
+  friend PlanetaryOrbit;
 };
 
 #endif

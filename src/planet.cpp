@@ -8,7 +8,7 @@
 
 AI *PlanetaryOrbit::Execute() {
   theta += angular_delta;
-  parent->SetPosition(radius * cos(theta), radius * sin(theta), 0);
+  parent->SetPosition(parent->origin + Vector(radius * cos(theta), radius * sin(theta), 0));
   return this;
 }
 
@@ -26,7 +26,7 @@ void Planet::InitPlanet(FILE *fp) {
   fscanf(fp, "%f\n", &radius);
   fscanf(fp, "%f\n", &gravity);
   fscanf(fp, "%lf %lf %lf\n", &orbital_radius, &orbital_velocity, &orbital_position);
-  SetAI(new PlanetaryOrbit(orbital_radius, orbital_velocity, orbital_position));
+  SetAI(new PlanetaryOrbit(this, orbital_radius, orbital_velocity, orbital_position));
 
   fscanf(fp, "%d\n", &numSatellites);
   satellites = new Planet*[numSatellites];
@@ -84,23 +84,21 @@ void Planet::gravitate(UnitCollection *uc, Matrix matrix) {
   }
   delete iterator;
 
+  // fake gravity
   for(int a=0; a<numSatellites; a++) {
     satellites[a]->gravitate(uc, t);
     satellites[a]->origin = origin + pos;
   }
 }
 
-void Planet::Draw() {
-  Matrix tmat;
-  Translate(tmat, origin);
-
+/*void Planet::Draw() {
   GFXMultMatrix(MODEL, tmat);
   Unit::Draw();
 }
-
 void Planet::Draw(Matrix tmatrix) {abort();}
 void Planet::DrawStreak(const Vector &v) {abort();}
 void Planet::Draw(Matrix tmatrix, const Vector &pp, const Vector &pq, const Vector &pr, const Vector &ppos) {abort();}
+*/
 
 void Planet::gravitate(UnitCollection *uc) {
   Matrix t;
