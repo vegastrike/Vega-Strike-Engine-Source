@@ -3,6 +3,8 @@ noinst_LIBRARIES = libai.a
 INCLUDES = -I ../../
 
 libai_a_SOURCES =	\
+	comm_ai.h	\
+	comm_ai.cpp	\
 	communication.h	\
 	communication.cpp \
 	event_xml.cpp	\

@@ -1,11 +1,11 @@
 #ifndef _CMD_TARGET_AI_H_
 #define _CMD_TARGET_AI_H_
-#include "order.h"
+#include "comm_ai.h"
 #include "event_xml.h"
 //all unified AI's should inherit from FireAt, so they can choose targets together.
 namespace Orders {
 
-class FireAt: public Order {
+class FireAt: public CommunicatingAI {
 
 
   bool ShouldFire(Unit * targ);
