@@ -259,8 +259,8 @@ void ChangeHeading::Execute() {
   char yswitch = ((local_heading.j>0)!=(last_velocity.j>0)||(!local_heading.j))&&last_velocity.j!=0?1:0;
   static bool AICheat = XMLSupport::parse_bool(vs_config->getVariable ("AI","turn_cheat","true"));
   bool cheater=false;
-  static float min_for_no_oversteer=XMLSupport::parse_float(vs_config->getVariable("AI","min_angular_accel_cheat","30"));
-  if (AICheat&&((parent->Limits().yaw+parent->Limits().pitch)*180/(PI*parent->Mass)>min_for_no_oversteer)&&!parent->isSubUnit()) {
+  static float min_for_no_oversteer=XMLSupport::parse_float(vs_config->getVariable("AI","min_angular_accel_cheat","50"));
+  if (AICheat&&((parent->Limits().yaw+parent->Limits().pitch)*180/(PI*parent->GetMass())>min_for_no_oversteer)&&!parent->isSubUnit()) {
     if (xswitch||yswitch) {   
       Vector P,Q,R;
       parent->GetOrientation(P,Q,R);
