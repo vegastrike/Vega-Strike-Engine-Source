@@ -1050,6 +1050,10 @@ void UpgradingInfo::CommitItem (const char *inp_buf, int button, int state) {
 		  }
 		}
 		LoadMission ("",myscript,false);
+		unsigned int leng= active_missions.size();
+		if (leng>0) {
+			active_missions[leng-1]->mission_name = input_buffer;
+		}
 	    } else if (NULL!=un->GetCargo(input_buffer,index)) {
 		if (1==un->RemoveCargo(index,1,true)) {
 		  LoadMission (input_buffer,false);
