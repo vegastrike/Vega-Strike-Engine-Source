@@ -381,7 +381,9 @@ void StarSystem::Update() {
       if (current_stage==PHY_AI) {
 	iter = drawList->createIterator();
 	if (firstframe&&rand()%2) {
-	  AUDRefreshSounds();
+	  if (this==_Universe->getActiveStarSystem(0)) {
+	    AUDRefreshSounds();
+	  }
 	}
 	while((unit = iter->current())!=NULL) {
 	  unit->ExecuteAI(); 
@@ -401,10 +403,8 @@ void StarSystem::Update() {
 	    iter->advance();
 	  }
 	  delete iter;	
-	  if (firstframe) {
-	    //FIXME somehow only works if called once per frame
-	    Unit::ProcessDeleteQueue();
-	  }
+	  //FIXME somehow only works if called once per frame
+	  Unit::ProcessDeleteQueue();
       } else if (current_stage==PHY_COLLIDE) {
 	static int numframes=0;
 	numframes++;//don't resolve physics until 2 seconds
@@ -428,8 +428,10 @@ void StarSystem::Update() {
 	current_stage=PHY_RESOLV;
       } else if (current_stage==PHY_RESOLV) {
 	iter = drawList->createIterator();
-	AccessCamera()->UpdateCameraSounds();
-	muzak->Listen();
+	if (this==_Universe->getActiveStarSystem(0)) {
+	  AccessCamera()->UpdateCameraSounds();
+	  muzak->Listen();
+	}
 	AccessCamera()->SetNebula(NULL);//Update physics should set this
 	while((unit = iter->current())!=NULL) {
 	  unit->UpdatePhysics(identity_transformation,identity_matrix,Vector (0,0,0),firstframe,units);

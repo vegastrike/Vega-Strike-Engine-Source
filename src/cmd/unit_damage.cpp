@@ -15,6 +15,7 @@ void Unit::UnRef() {
   ucref--;
   if (killed&&ucref==0) {
     Unitdeletequeue.push_back(this);//delete
+    fprintf (stderr,"0x%x - %d\n",this,Unitdeletequeue.size());
   }
 }
 
@@ -111,7 +112,8 @@ void Unit::Kill() {
     mounts = NULL;
   }
   //eraticate everything. naturally (see previous line) we won't erraticate beams erraticated above
-  RemoveFromSystem();
+  if (!SubUnit) 
+    RemoveFromSystem();
   killed = true;
   computer.target.SetUnit (NULL);
 
@@ -120,12 +122,15 @@ void Unit::Kill() {
   if(aistate)
     delete aistate;
   aistate=NULL;
-  if (ucref==0)
+  if (ucref==0&&!SubUnit) {
     Unitdeletequeue.push_back(this);
+    fprintf (stderr,"0x%x - %d\n",this,Unitdeletequeue.size());
+  }
 }
 void Unit::ProcessDeleteQueue() {
 #ifndef DISABLE_DELETE
   if (!Unitdeletequeue.empty()) {
+    fprintf (stderr,"Eliminatin' 0x%x - %d\n",Unitdeletequeue.back(),Unitdeletequeue.size());
     if (Unitdeletequeue.back()->SubUnit) {
       fprintf (stderr,"Double deleting (related to double dipping)");
     }else {
