@@ -78,28 +78,37 @@ public:
 };
 //bool shouldwedraw
 static void saturate(float &r, float &g, float &b) {
-	r = pow(r,.33333);
-	g = pow(g,.33333);
-	b = pow(b,.33333);	
-	
+	static float conemin = XMLSupport::parse_float(vs_config->getVariable("graphics","starmincolorval",".3"));
+	static float colorpower = XMLSupport::parse_float(vs_config->getVariable("graphics","starcolorpower",".25"));
+	if (r<conemin)
+		r+=conemin;
+	if (g<conemin)
+		g+=conemin;
+	if (b<conemin)
+		b+=conemin;
+	r = pow(r,colorpower);
+	g = pow(g,colorpower);
+	b = pow(b,colorpower);	
 }
 bool computeStarColor (float &r, float &g, float &b, Vector luminmax, float distance, float maxdistance){
 	saturate(r,g,b);
+	static float luminscale = XMLSupport::parse_float(vs_config->getVariable("graphics","starluminscale",".001"));
+	static float starcoloraverage = XMLSupport::parse_float(vs_config->getVariable("graphics","starcoloraverage",".6"));
+	static float starcolorincrement= XMLSupport::parse_float(vs_config->getVariable("graphics","starcolorincrement","100"));
 	float dissqr = distance*distance/(maxdistance*maxdistance);
 	float lum = 100*luminmax.i/(luminmax.k*dissqr);
-	lum = log((double)luminmax.i*10./(double)luminmax.j)*.001/dissqr;
-	fprintf (stderr,"luminmax %f lumnow %f\n",luminmax.i/(luminmax.k*dissqr),lum);
+	lum = log((double)luminmax.i*10./(double)luminmax.j)*luminscale/dissqr;
+//	fprintf (stderr,"luminmax %f lumnow %f\n",luminmax.i/(luminmax.k*dissqr),lum);
+	float clamp=starcoloraverage+lum/starcolorincrement;
+	if (clamp>1)
+		clamp=1;
+	if (lum>clamp)
+		lum=clamp;
 	r*=lum;
 	g*=lum;
 	b*=lum;
-	if (r>1)
-		r=1;
-	if (g>1)
-		g=1;
-	if (b>1)
-		b=1;
-	
-	return lum>.05;
+	static float starcolorcutoff = XMLSupport::parse_float(vs_config->getVariable("graphics","starcolorcutoff",".1"));
+	return lum>starcolorcutoff;
 }
 namespace StarSystemGent {
 extern GFXColor getStarColorFromRadius(float radius);
