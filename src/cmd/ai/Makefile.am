@@ -7,6 +7,7 @@ libai_a_SOURCES =	\
 	comm_ai.cpp	\
 	communication.h	\
 	communication.cpp \
+	communication_xml.cpp	\
 	event_xml.cpp	\
 	flybywire.h	\
 	navigation.cpp	\

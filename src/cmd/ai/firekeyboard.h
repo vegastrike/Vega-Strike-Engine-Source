@@ -8,12 +8,14 @@
 
 class FireKeyboard: public Order {
   bool itts;
+  bool refresh_target;
   float gunspeed;
   float gunrange;
   float rxntime;
   float delay;
   float agg;
   bool ShouldFire(Unit * targ);
+  std::list <CommunicationMessage> resp;
  public:
   static void PressComm1Key (int,KBSTATE);
   static void PressComm2Key (int,KBSTATE);

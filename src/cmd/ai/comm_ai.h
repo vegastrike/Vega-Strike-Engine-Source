@@ -23,7 +23,7 @@ class CommunicatingAI:public Order{
   void TerminateContrabandSearch(bool foundcontraband);
   void InitiateContrabandSearch(float PlayerProbability, float TargetProbability);
   void UpdateContrabandSearch();
-   CommunicatingAI (int ttype, float anger=-.5, float moodswingyness=.2, float randomnessresponse=.8,float mood=0);
+  CommunicatingAI (int ttype, float mood=0, float anger=-666/*-.5*/, float moodswingyness=666/*.2*/, float randomnessresponse=666/*.8*/);
    virtual void ProcessCommMessage (class CommunicationMessage &c); 
    virtual void AdjustRelationTo (Unit * un, float factor);
    virtual ~CommunicatingAI ();

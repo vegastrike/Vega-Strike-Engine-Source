@@ -17,13 +17,11 @@ void Order::Communicate (const CommunicationMessage &c) {
   }
   
   Unit * un;
-  for (i=0;i<messagequeue.size();i++) {
-
-    un=messagequeue[i]->sender.GetUnit();
+  for (list<CommunicationMessage *>::iterator ii=messagequeue.begin();ii!=messagequeue.end();ii++) {
+    un=(*ii)->sender.GetUnit();
     if (un==NULL||un==newC->sender.GetUnit()) {
-      delete messagequeue[i];
-      messagequeue.erase (messagequeue.begin()+i);
-      i--;
+      delete (*ii);
+      ii=messagequeue.erase (ii);
     }
   }
   if ((un=newC->sender.GetUnit())) {
@@ -36,7 +34,7 @@ void Order::ProcessCommMessage(CommunicationMessage & c) {
   
 }
 
-void Order::ProcessCommunicationMessages(float AICommresponseTime) {
+void Order::ProcessCommunicationMessages(float AICommresponseTime, bool RemoveMessageProcessed) {
   float time = AICommresponseTime/SIMULATION_ATOM;
   if (time<=.001)
     time+=.001;
@@ -53,8 +51,13 @@ void Order::ProcessCommunicationMessages(float AICommresponseTime) {
 	  ProcessCommMessage(*messagequeue.back());
 	}
       }
-      delete messagequeue.back();
-      messagequeue.pop_back();
+      if (RemoveMessageProcessed) {
+	delete messagequeue.back();
+	messagequeue.pop_back();
+      }else {
+	messagequeue.push_front (messagequeue.back());
+	messagequeue.pop_back();
+      }
     }
   }
 }

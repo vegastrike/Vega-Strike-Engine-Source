@@ -72,14 +72,18 @@ void CommunicationMessage::Init (Unit * send, Unit * recv) {
 }
 void CommunicationMessage::SetAnimation (std::vector <Animation *>*ani) {
   if (ani){ 
+    if (ani->size()>0) {
 	float mood= fsm->getDeltaRelation(this->prevstate,this->curstate);
-    mood+=1;
-    mood*=ani->size()/2.;
-    unsigned int index=(unsigned int)mood;
-    if (index>=ani->size()) {
-      index=ani->size()-1;
+	mood+=1;
+	mood*=ani->size()/2.;
+	unsigned int index=(unsigned int)mood;
+	if (index>=ani->size()) {
+	  index=ani->size()-1;
 	}
-    this->ani=(*ani)[index];
+	this->ani=(*ani)[index];
+    } else {
+      this->ani=NULL;
+    }
   }else {
     this->ani=NULL;
   }

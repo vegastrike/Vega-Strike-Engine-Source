@@ -28,7 +28,7 @@
 //#define ORDERDEBUG
 void Order::Execute () {
   static float airesptime=XMLSupport::parse_float(vs_config->getVariable ("AI","CommResponseTime","3"));
-  ProcessCommunicationMessages(airesptime);
+  ProcessCommunicationMessages(airesptime,true);
   int completed=0;
   unsigned int i=0;
 
@@ -196,9 +196,9 @@ Order::~Order () {
       delete suborders[i];
     }
   }
-  for (i=0;i<messagequeue.size();i++) {
-    delete messagequeue[i];
-  }
+  {for (list<CommunicationMessage *>::iterator i=messagequeue.begin();i!=messagequeue.end();i++) {
+    delete (*i);
+  }}
   messagequeue.clear();
   suborders.clear();
 }
@@ -207,9 +207,9 @@ void Order::ClearMessages() {
   for (i=0;i<suborders.size();i++) {
     suborders[i]->ClearMessages();
   }
-  for (i=0;i<messagequeue.size();i++) {
-    delete messagequeue[i];
-  }
+  {for (list<CommunicationMessage *>::iterator i=messagequeue.begin();i!=messagequeue.end();i++) {
+    delete (*i);
+  }}
   messagequeue.clear();
 }
 void Order::eraseOrder(Order *ord){

@@ -9,7 +9,7 @@
 #include "gfx/animation.h"
 FireKeyboard::FireKeyboard (int whichjoystick, const char *): Order (WEAPON){
   gunspeed = gunrange = .0001;
-
+  refresh_target=true;
 }
 static KBSTATE firekey=UP;
 static bool doc=0;
@@ -358,18 +358,24 @@ static void DoDockingOps (Unit * parent, Unit * targ) {
       und=false;
     }
 }
-
+using std::list;
 
 void FireKeyboard::ProcessCommMessage (class CommunicationMessage&c){
 
   Unit * un = c.sender.GetUnit();
   if (un) {
+    for (list<CommunicationMessage>::iterator i=resp.begin();i!=resp.end();i++) {
+      if ((*i).sender.GetUnit()==un) {
+	i = resp.erase (i);
+      }
+    }
+    resp.push_back(c);
     AdjustRelationTo(un,c.getCurrentState()->messagedelta);
     mission->msgcenter->add ("game","all",un->name+string(": ")+c.getCurrentState()->message);
     if (parent==_Universe->AccessCockpit()->GetParent()) {
       _Universe->AccessCockpit()->SetCommAnimation (c.ani);
     }
-
+    refresh_target=true;
   }else {
     mission->msgcenter->add ("game","all",string("[static]: ")+c.getCurrentState()->message);
     if (parent==_Universe->AccessCockpit()->GetParent()) {
@@ -379,13 +385,13 @@ void FireKeyboard::ProcessCommMessage (class CommunicationMessage&c){
 
   }
 }
+using std::list;
 
-
-static CommunicationMessage * GetTargetMessageQueue (Unit * targ,vector <CommunicationMessage *> messagequeue) {
+static CommunicationMessage * GetTargetMessageQueue (Unit * targ,std::list <CommunicationMessage> &messagequeue) {
       CommunicationMessage * mymsg=NULL;
-      for (unsigned int i=0;i<messagequeue.size();i++) {
-	if (messagequeue[i]->sender.GetUnit()==targ) {
-	  mymsg = messagequeue[i];
+      for (list<CommunicationMessage>::iterator i=messagequeue.begin();i!=messagequeue.end();i++) {
+	if ((*i).sender.GetUnit()==targ) {
+	  mymsg = &(*i);
 	  break;
 	}
       }
@@ -394,9 +400,8 @@ static CommunicationMessage * GetTargetMessageQueue (Unit * targ,vector <Communi
 
 
 void FireKeyboard::Execute () {
-  ProcessCommunicationMessages(SIMULATION_ATOM);
+  ProcessCommunicationMessages(SIMULATION_ATOM,true);
   Unit * targ;
-  bool refresh_target=false;
   if ((targ = parent->Target())) {
     ShouldFire (targ);
     DoDockingOps(parent,targ);
@@ -484,7 +489,7 @@ void FireKeyboard::Execute () {
       commKeys[i]=RELEASE;
       Unit * targ=parent->Target();
       if (targ) {
-	CommunicationMessage * mymsg = GetTargetMessageQueue(targ,messagequeue);       
+	CommunicationMessage * mymsg = GetTargetMessageQueue(targ,resp);       
 	if (mymsg==NULL) {
 	  CommunicationMessage c(parent,targ,i,NULL);
 	  mission->msgcenter->add ("game","all",string("[Outgoing]")+string(": ")+c.getCurrentState()->message);
@@ -503,7 +508,7 @@ void FireKeyboard::Execute () {
   if (refresh_target) {
     Unit * targ;
     if ((targ =parent->Target())) {
-      CommunicationMessage *mymsg = GetTargetMessageQueue(targ,messagequeue);
+      CommunicationMessage *mymsg = GetTargetMessageQueue(targ,resp);
       if (mymsg==NULL) {
 	FSM *fsm =_Universe->GetConversation (parent->faction,targ->faction);
 	_Universe->AccessCockpit()->communication_choices=fsm->GetEdgesString(fsm->getDefaultState(_Universe->GetRelation(parent->faction,targ->faction)));

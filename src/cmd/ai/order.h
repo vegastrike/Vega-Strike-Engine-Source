@@ -26,7 +26,7 @@
 
 #include "gfx/vec.h"
 #include "cmd/collection.h"
-#include <vector>
+#include <list>
 
 #include <cmd/script/mission.h>
 
@@ -58,7 +58,7 @@ protected:
   ///The queue of suborders that will be executed in parallel according to bit code
   std::vector<Order*> suborders;
   ///a bunch of communications that have not been answered CommunicationMessages are actually containing reference to a nice Finite State Machine that can allow a player to have a reasonable conversation with an AI
-  std::vector<class CommunicationMessage *>messagequeue;
+  std::list<class CommunicationMessage *>messagequeue;
   ///changes the local relation of this unit to another...may inform superiors about "good" or bad! behavior depending on the AI
   virtual void AdjustRelationTo (Unit * un, float factor);
 public:
@@ -97,7 +97,7 @@ public:
   ///processes a single message...generally called by the Messages() func
   virtual void ProcessCommMessage(class CommunicationMessage &c);
   ///responds (or does not) to certain messages in the message queue
-  virtual void ProcessCommunicationMessages(float CommRepsonseTime);
+  virtual void ProcessCommunicationMessages(float CommRepsonseTime, bool RemoveMessageProcessed);
   /// return pointer to order or NULL if not found
   Order *findOrder(Order *ord);
   /// erase that order from the list
