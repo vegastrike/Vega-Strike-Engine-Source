@@ -1065,6 +1065,61 @@ Vector Unit::ToWorldCoordinates(const Vector &v) const {
 /**** UNIT_DAMAGE STUFF                                                            */
 /***********************************************************************************/
 
+void Unit::Kill(bool erasefromsave) {
+  if (docked&(DOCKING_UNITS)) {
+    vector <Unit *> dockedun;
+    unsigned int i;
+    for (i=0;i<image->dockedunits.size();i++) {
+      Unit * un;
+      if (NULL!=(un=image->dockedunits[i]->uc.GetUnit())) 
+	dockedun.push_back (un);
+    }
+    while (!dockedun.empty()) {
+      dockedun.back()->UnDock(this);
+      dockedun.pop_back();
+    }
+  }
+	for( vector<Mount *>::iterator jj=mounts.begin(); jj!=mounts.end(); jj++)
+	{
+		// Free all mounts elements
+		if( (*jj)!=NULL)
+			delete (*jj);
+	}
+    mounts.clear();
+  //eraticate everything. naturally (see previous line) we won't erraticate beams erraticated above
+  if (!SubUnit) 
+    RemoveFromSystem();
+  killed = true;
+  computer.target.SetUnit (NULL);
+
+  //God I can't believe this next line cost me 1 GIG of memory until I added it
+  computer.threat.SetUnit (NULL);
+  computer.velocity_ref.SetUnit(NULL);
+  if(aistate) {
+    aistate->ClearMessages();
+    aistate->Destroy();
+  }
+  aistate=NULL;
+  UnitCollection::UnitIterator iter = getSubUnits();
+  Unit *un;
+  while ((un=iter.current())) {
+    un->Kill();
+    iter.advance();
+  }
+  if (ucref==0) {
+    Unitdeletequeue.push_back(this);
+  if (flightgroup) {
+    if (flightgroup->leader.GetUnit()==this) {
+      flightgroup->leader.SetUnit(NULL);
+    }
+  }
+
+#ifdef DESTRUCTDEBUG
+    fprintf (stderr,"%s 0x%x - %d\n",name.c_str(),this,Unitdeletequeue.size());
+#endif
+  }
+}
+
 void Unit::leach (float damShield, float damShieldRecharge, float damEnRecharge) {
   recharge*=damEnRecharge;
   shield.recharge*=damShieldRecharge;
@@ -1180,6 +1235,30 @@ void Unit::ProcessDeleteQueue() {
 #endif
 
   }
+}
+
+float Unit::DealDamageToHull (const Vector & pnt, float damage, unsigned short * targ) {
+  float percent;
+#ifndef ISUCK
+  if (hull<0) {
+    return -1;
+  }
+#endif
+  if (fabs  (pnt.k)>fabs(pnt.i)) {
+    if (pnt.k>0) {
+      targ = &armor.front;
+    }else {
+      targ = &armor.back;
+    }
+  }else {
+    if (pnt.i>0) {
+      targ = &armor.left;
+    }else {
+      targ = &armor.right;
+    }
+  }
+  percent = damage/(*targ+hull);
+  return percent;
 }
 
 float Unit::DealDamageToShield (const Vector &pnt, float &damage) {

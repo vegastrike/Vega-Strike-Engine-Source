@@ -45,6 +45,7 @@ void UncheckUnit (class Unit * un);
 #include "collection.h"
 #include "script/flightgroup.h"
 #include "faction.h"
+#include "star_system_generic.h"
 using std::string;
 
 extern char * GetUnitDir (const char * filename);
@@ -183,7 +184,7 @@ public:
 // Uses mmm... stuff not desired here ?
   virtual bool UpgradeSubUnits (Unit * up, int subunitoffset, bool touchme, bool downgrade, int &numave, double &percentage);
   bool UpgradeMounts (const Unit * up, int subunitoffset, bool touchme, bool downgrade, int &numave, Unit * templ, double &percentage);
-  virtual bool Dock (Unit * unitToDockWith){return false;};
+  virtual bool Dock (Unit * unitToDockWith){return false;}
   /// the turrets and spinning parts fun fun stuff
   UnitCollection SubUnits; 
 
@@ -213,7 +214,6 @@ public:
   ///Loads a user interface for the user to upgrade his ship
 // Uses base stuff -> only in Unit
   virtual void UpgradeInterface (Unit * base) {}
-  ///
 
   bool canUpgrade (Unit * upgrador, int mountoffset,  int subunitoffset, int additive, bool force,  double & percentage, Unit * templ=NULL);
   bool Upgrade (Unit * upgrador, int mountoffset,  int subunitoffset, int additive, bool force,  double & percentage, Unit * templ=NULL);
@@ -259,19 +259,15 @@ protected:
   // Shouldn't do anything here - but needed by Python
   virtual class Cockpit * GetVelocityDifficultyMult(float &) const { return NULL;}
 
-// Make it a string in class AcctUnit and in class NetUnit and a StarSystem * in Unit class
   StarSystem * activeStarSystem;//the star system I'm in
   ///Takes out of the collide table for this system.
-// Uses StarSystem and other stuff : only in NetUnit and Unit
+// SHOULD COME BACK HERE
   virtual void RemoveFromSystem (){}
-// Uses starsystem stuff so only in Unit class and maybe in
   virtual bool InCorrectStarSystem (StarSystem *active) {return false;}
-// Make it an array of string in AcctUnit and NetUnit and a Mesh * in Unit
  std::vector <string> meshdata_string;
-//Use that only in sub classes not in GenericUnit
   virtual int nummesh()const {return ((int)meshdata_string.size())-1;}
 //void FixGauges();
-// Uses planet stuff to put in NetUnit
+// Uses planet stuff
   virtual void SetPlanetOrbitData (PlanetaryTransform *trans) {}
   virtual PlanetaryTransform *GetPlanetOrbit () const {return NULL;}
   ///Updates the collide Queue with any possible change in sectors
@@ -297,7 +293,7 @@ protected:
   ///Gets the minimum distance away from the point in 3space
 
   ///Sets the camera to be within this unit.
-// Uses Universe so not needed here -> only in Unit class
+// Uses Universe & GFX so not needed here -> only in Unit class
   virtual void UpdateHudMatrix(int whichcam) {}
   ///What's the HudImage of this unit
 // Uses GFX stuff so only in Unit class
@@ -356,7 +352,7 @@ public:
     bool itts;
   };
   Computer computer;
-// Only in Unit because of StarSystem
+// SHOULD TRY TO COME BACK HERE
   virtual bool TransferUnitToSystem (StarSystem *NewSystem) {return false;}
   virtual void TransferUnitToSystem (unsigned int whichJumpQueue, class StarSystem *&previouslyActiveStarSystem, bool DoSightAndSound) {}
   virtual StarSystem * getStarSystem() {return NULL;}
@@ -503,7 +499,7 @@ public:
   ///cloaks or decloaks the starship depending on the bool
   void Cloak (bool cloak);
   ///deletes
-  virtual void Kill(bool eraseFromSave=true) {}
+  virtual void Kill(bool eraseFromSave=true);
   ///Is dead yet?
   inline bool Killed() const {return killed;}
   ///returns the current ammt of armor left
@@ -556,7 +552,7 @@ public:
   ///Applies damage to the pre-transformed area of the ship
   virtual void ApplyDamage (const Vector & pnt, const Vector & normal, float amt, Unit * affectedSubUnit, const GFXColor &,  Unit *ownerDoNotDereference, float phasedamage=0 ) {}
   ///Deals remaining damage to the hull at point and applies lighting effects
-  virtual float DealDamageToHull (const Vector &pnt, float Damage) {return 1;}
+  virtual float DealDamageToHull (const Vector &pnt, float Damage, unsigned short * targ=NULL);
 
   ///Clamps thrust to the limits struct
   Vector ClampThrust(const Vector &thrust, bool afterburn);

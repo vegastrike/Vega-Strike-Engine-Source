@@ -557,7 +557,7 @@ void GameUnit::Draw(const Transformation &parent, const Matrix &parentMatrix)
 		continue;
 	  if (i==nummesh()&&(meshdata[i]->numFX()==0||hull<0)) 
 		continue;
-      Vector TransformedPosition = Transform (*ctm,
+	  Vector TransformedPosition = Transform (*ctm,
 					      meshdata[i]->Position());
 #if 0
       //This is a test of the box in frustum setup to be used with terrain

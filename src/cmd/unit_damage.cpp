@@ -346,28 +346,11 @@ void GameUnit::DamageRandSys(float dam, const Vector &vec) {
 	}
 }
 
-float GameUnit::DealDamageToHull (const Vector & pnt, float damage ) {
+float GameUnit::DealDamageToHull (const Vector & pnt, float damage, unsigned short * t ) {
   float percent;
   unsigned short * targ;
-#ifndef ISUCK
-  if (hull<0) {
-    return -1;
-  }
-#endif
-  if (fabs  (pnt.k)>fabs(pnt.i)) {
-    if (pnt.k>0) {
-      targ = &armor.front;
-    }else {
-      targ = &armor.back;
-    }
-  }else {
-    if (pnt.i>0) {
-      targ = &armor.left;
-    }else {
-      targ = &armor.right;
-    }
-  }
-  percent = damage/(*targ+hull);
+  // Now damage is changed to targ in Unit::function
+  percent = Unit::DealDamageToHull( pnt, damage, targ);
   if (damage<*targ) {
     if (!AUDIsPlaying (sound->armor))
       AUDPlay (sound->armor,ToWorldCoordinates(pnt).Cast()+cumulative_transformation.position,Velocity,1);
@@ -391,6 +374,7 @@ float GameUnit::DealDamageToHull (const Vector & pnt, float damage ) {
     }
 
   }
+  ////////////////// MOVE IN UNIT::DEALDAMAGETOHULL //////////////////////
   if (hull <0) {
       static float hulldamtoeject = XMLSupport::parse_float(vs_config->getVariable ("physics","hull_damage_to_eject","100"));
     if (!SubUnit&&hull>-hulldamtoeject) {
@@ -418,6 +402,7 @@ float GameUnit::DealDamageToHull (const Vector & pnt, float damage ) {
     return -1;
 #endif
   }
+  /////////////////////////////
   if (!FINITE (percent))
     percent = 0;
   return percent;

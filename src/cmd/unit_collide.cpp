@@ -572,21 +572,30 @@ float GameUnit::querySphereNoRecurse (const QVector & start, const QVector & end
   int i;
   float tmp;
   QVector st,dir;
+  //if( min_radius<0.00001)
+  // min_radius = 0;
   for (i=0;i<nummesh();i++) {
     float a, b,c;
     st = start - Transform (cumulative_transformation_matrix,meshdata[i]->Position()).Cast();	
     dir = end-start;//now start and end are based on mesh's position
     // v.Dot(v) = r*r; //equation for sphere
     // (x0 + (x1 - x0) *t) * (x0 + (x1 - x0) *t) = r*r
-    c = st.Dot (st) - (min_radius+meshdata[i]->rSize())*(meshdata[i]->rSize()+min_radius)
+    c = st.Dot (st);
+	float temp1 = (min_radius+meshdata[i]->rSize());
+	if( min_radius!=-FLT_MAX)
+		c = c - temp1*temp1;
+	else
+		c = temp1;
 #ifdef VARIABLE_LENGTH_PQR
-      *SizeScaleFactor*SizeScaleFactor
+    c *= SizeScaleFactor*SizeScaleFactor;
 #endif
-      ;
     b = 2 * (dir.Dot (st));
     a = dir.Dot(dir);
     //b^2-4ac
-    c = b*b - 4*a*c;
+	if( min_radius!=-FLT_MAX)
+  	  c = b*b - 4*a*c;
+	else
+      c = FLT_MAX;
     if (c<0||a==0)
       continue;
     a *=2;
