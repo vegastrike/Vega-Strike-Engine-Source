@@ -1,6 +1,6 @@
 #include <string>
 #include <stdio.h>
-#include <client.h>
+#include "client.h"
 #include "vsnet_clientstate.h"
 #include "cmd/unit_generic.h"
 

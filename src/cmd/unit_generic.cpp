@@ -633,7 +633,7 @@ void Unit::Init()
 
 std::string getMasterPartListUnitName();
 bool
-verify_path (const vector<string> &path, bool allowmpl=false) {
+verify_path (const vector<string> &path, bool allowmpl) {
 	string realpath;
 	for (unsigned int i=0;i<path.size();++i) {
 		if (i!=0)
