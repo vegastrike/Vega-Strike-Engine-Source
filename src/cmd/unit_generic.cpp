@@ -4553,14 +4553,23 @@ void Unit::PerformDockingOperations () {
     tmp=un->maxwarpenergy;
     if (tmp<un->jump.energy)
       tmp=un->jump.energy;
+    int cockpit=UnitUtil::isPlayerStarship(un);
     if (tmp>un->warpenergy){
       un->warpenergy=tmp;
-      int cockpit=UnitUtil::isPlayerStarship(un);
       if (cockpit>=0&&cockpit<_Universe->numPlayers()) {
-	static float docking_fee = XMLSupport::parse_float (vs_config->getVariable("general","docking_fee","0"));
+	static float docking_fee = XMLSupport::parse_float (vs_config->getVariable("general","fuel_docking_fee","0"));
 	_Universe->AccessCockpit(cockpit)->credits-=docking_fee;
       }
     }
+    if (cockpit>=0&&cockpit<_Universe->numPlayers()) {
+      static float docking_fee = XMLSupport::parse_float (vs_config->getVariable("general","docking_fee","0"));
+      if (_Universe->AccessCockpit(cockpit)->credits>=docking_fee) {
+        _Universe->AccessCockpit(cockpit)->credits-=docking_fee;
+      }else if (_Universe->AccessCockpit(cockpit)->credits>=0) {
+        _Universe->AccessCockpit(cockpit)->credits=0;
+      }
+    }
+
 	std::set<Unit *>::iterator arrested=arrested_list_do_not_dereference.find(this);
 	if (arrested!=arrested_list_do_not_dereference.end()) {
 		arrested_list_do_not_dereference.erase (arrested);
