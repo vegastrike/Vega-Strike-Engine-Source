@@ -14,6 +14,7 @@
 #include "gldrv/winsys.h"
 #include "base.h"
 #include "unit_const_cache.h"
+#include "configxml.h"
 #ifdef _WIN32
 #define strcasecmp stricmp
 #endif
@@ -384,17 +385,30 @@ void UpgradingInfo::SetupCargoList () {
 	      if (mode!=UPGRADEMODE&&mode!=DOWNGRADEMODE) (*CurrentList)[i].color=GFXColor(1,1,1,1);
 		  Unit *un=buyer.GetUnit();
 		  Cockpit *cpt=NULL;
+		  static bool gottencolor=false;
+		  static GFXColor nomoney (0,0,0,-1);
+		  if (nomoney.a<0) {
+			  float color [4]={1,0,0,1};
+			  vs_config->getColor(std::string("default"),"no_money",color,true);
+			  nomoney=GFXColor(color[0],color[1],color[2],color[3]);
+			  if (nomoney.a<0) nomoney.a=0;
+		  }
 		  if (un&&(cpt=_Universe->isPlayerStarship(un))) {
 			  int tmpquan=(*CurrentList)[i].cargo.quantity;
 			  (*CurrentList)[i].cargo.quantity=1;
-			  if (mode==UPGRADEMODE||mode==BUYMODE||mode==SHIPDEALERMODE) {
+			  Unit *bas;
+			  if (mode==UPGRADEMODE||mode==BUYMODE) {
 				  if (((*CurrentList)[i].cargo.price>cpt->credits)||(!(un->CanAddCargo((*CurrentList)[i].cargo)))) {
-					  (*CurrentList)[i].color=GFXColor(.8,0,0,.8);
+					  (*CurrentList)[i].color=nomoney;
+				  }
+			  } else if (mode==SHIPDEALERMODE&&(bas=base.GetUnit())) {
+				  if ((((*CurrentList)[i].cargo.price-(usedPrice(bas->PriceCargo (un->name))))>cpt->credits)) {
+					  (*CurrentList)[i].color=nomoney;
 				  }
 			  }
 			  (*CurrentList)[i].cargo.quantity=tmpquan;
 		  } else {
-			  (*CurrentList)[i].color=GFXColor(.8,0,0,.8);
+			  (*CurrentList)[i].color=nomoney;
 		  }
 			  CargoList->AddTextItem ((tostring((int)i)+ string(" ")+(*CurrentList)[i].cargo.content).c_str() ,(beautify((*CurrentList)[i].cargo.content)+"("+tostring((*CurrentList)[i].cargo.quantity)+")").c_str(),NULL,(*CurrentList)[i].color);
 	    }
