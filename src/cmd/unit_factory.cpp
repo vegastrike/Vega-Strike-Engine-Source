@@ -29,12 +29,12 @@
 #include "asteroid.h"
 #include "building.h"
 
-Unit* GameUnitFactory::createUnit( )
+Unit* UnitFactory::createUnit( )
 {
     return new GameUnit( 0 );
 }
 
-GameUnit* GameUnitFactory::createUnit( const char *filename,
+Unit* UnitFactory::createUnit( const char *filename,
 		               bool        SubUnit,
 		               int         faction,
 		               std::string customizedUnit,
@@ -49,7 +49,7 @@ GameUnit* GameUnitFactory::createUnit( const char *filename,
                      fg_subnumber );
 }
 
-GameUnit* GameUnitFactory::createUnit( vector <Mesh*> & meshes,
+Unit* UnitFactory::createUnit( vector <Mesh*> & meshes,
 		               bool Subunit,
 		               int faction )
 {
@@ -58,7 +58,7 @@ GameUnit* GameUnitFactory::createUnit( vector <Mesh*> & meshes,
                      faction );
 }
 
-Nebula* GameUnitFactory::createNebula( const char * unitfile, 
+Nebula* UnitFactory::createNebula( const char * unitfile, 
                                    bool SubU, 
                                    int faction, 
                                    Flightgroup* fg,
@@ -71,7 +71,7 @@ Nebula* GameUnitFactory::createNebula( const char * unitfile,
                        fg_snumber );
 }
 
-Missile* GameUnitFactory::createMissile( const char * filename,
+Missile* UnitFactory::createMissile( const char * filename,
                                      int faction,
                                      const string &modifications,
                                      const float damage,
@@ -92,12 +92,12 @@ Missile* GameUnitFactory::createMissile( const char * filename,
                         detonation_radius );
 }
 
-Planet* GameUnitFactory::createPlanet( )
+Planet* UnitFactory::createPlanet( )
 {
     return new Planet;
 }
 
-Planet* GameUnitFactory::createPlanet( QVector x,
+Planet* UnitFactory::createPlanet( QVector x,
                                    QVector y,
 				   float vely,
 				   const Vector & rotvel,
@@ -134,7 +134,7 @@ Planet* GameUnitFactory::createPlanet( QVector x,
 		       inside_out);
 }
 
-Enhancement* GameUnitFactory::createEnhancement( const char * filename,
+Enhancement* UnitFactory::createEnhancement( const char * filename,
                                              int faction,
 					     const string &modifications,
 					     Flightgroup * flightgrp,
@@ -147,7 +147,7 @@ Enhancement* GameUnitFactory::createEnhancement( const char * filename,
                             fg_subnumber );
 }
 
-Building* GameUnitFactory::createBuilding( ContinuousTerrain * parent,
+Building* UnitFactory::createBuilding( ContinuousTerrain * parent,
                                        bool vehicle,
 				       const char * filename,
 				       bool SubUnit,
@@ -164,7 +164,7 @@ Building* GameUnitFactory::createBuilding( ContinuousTerrain * parent,
 			 fg );
 }
 
-Building* GameUnitFactory::createBuilding( Terrain * parent,
+Building* UnitFactory::createBuilding( Terrain * parent,
                                        bool vehicle,
                                        const char *filename,
                                        bool SubUnit,
@@ -181,7 +181,7 @@ Building* GameUnitFactory::createBuilding( Terrain * parent,
                          fg );
 }
 
-Asteroid* GameUnitFactory::createAsteroid( const char * filename,
+Asteroid* UnitFactory::createAsteroid( const char * filename,
                                        int faction,
                                        Flightgroup* fg,
                                        int fg_snumber,

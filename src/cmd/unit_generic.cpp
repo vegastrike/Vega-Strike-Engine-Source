@@ -139,6 +139,16 @@ Unit::Unit() {
 	Init();
 }
 
+Unit::Unit (std::vector <Mesh *> & meshes, bool SubU, int fact) {
+  Init();
+  this->faction = fact;
+  SubUnit = SubU;
+  meshdata = meshes;
+  meshes.clear();
+  meshdata_string.push_back(NULL);
+  calculate_extent(false);
+}
+
 Unit::Unit (std::vector <string> & meshes, bool SubU, int fact) {
   Init();
   this->faction = fact;
@@ -154,7 +164,6 @@ Unit::Unit(const char *filename, bool SubU, int faction,std::string unitModifica
 	//update_ani_cache();
 	//if (!SubU)
 	//  _Universe->AccessCockpit()->savegame->AddUnitToSave(filename,UNITPTR,GetFaction(faction),(long)this);
-	this->player = false;
 	SubUnit = SubU;
 	this->faction = faction;
 	SetFg (flightgrp,fg_subnumber);
@@ -247,7 +256,7 @@ Unit::Unit(const char *filename, bool SubU, int faction,std::string unitModifica
 		switch(type)
 		{
 		default:
-		  SubUnits.prepend (un=UnitFactory::createGenericUnit (unitfilename,true,faction,unitModifications,flightgroup,flightgroup_subnumber));
+		  SubUnits.prepend (un=UnitFactory::createUnit (unitfilename,true,faction,unitModifications,flightgroup,flightgroup_subnumber));
 
 		}
 		un->SetPosition(QVector(x,y,z));
@@ -354,7 +363,6 @@ Unit::~Unit()
 }
 void Unit::Init()
 {
-	this->player=0;
 	this->networked=0;
 #ifdef CONTAINER_DEBUG
   UncheckUnit (this);
@@ -1181,7 +1189,7 @@ void Unit::RegenShields () {
     RechargeEnergy();
   }
   float rec = shield.recharge*SIMULATION_ATOM>energy?energy:shield.recharge*SIMULATION_ATOM;
-  if (!this->isPlayer()) {
+  if (!_Universe->isPlayerStarship(this)) {
     rec*=g_game.difficulty;
   }else {
     rec*=g_game.difficulty;//sqrtf(g_game.difficulty);
@@ -2658,7 +2666,7 @@ bool Unit::UpgradeSubUnits (Unit * up, int subunitoffset, bool touchme, bool dow
 	} else {
 	  Unit * un;//make garbage unit
 	  // NOT 100% SURE A GENERIC UNIT CAN FIT (WAS GAME UNIT CREATION)
-	  ui.preinsert (un=UnitFactory::createGenericUnit("blank",true,faction));//give a default do-nothing unit
+	  ui.preinsert (un=UnitFactory::createUnit("blank",true,faction));//give a default do-nothing unit
 	  ui.preinsert (un=new Unit(0));//give a default do-nothing unit
 	  un->limits.yaw=0;
 	  un->limits.pitch=0;

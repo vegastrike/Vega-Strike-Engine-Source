@@ -14,7 +14,7 @@ protected:
   Building (ContinuousTerrain * parent, bool vehicle, const char * filename, bool SubUnit, int faction, const std::string &unitModifications=std::string(""),Flightgroup * fg=NULL);
   Building (Terrain * parent, bool vehicle, const char *filename, bool SubUnit, int faction, const std::string &unitModifications=std::string(""),Flightgroup * fg=NULL);
 
-  friend class GameUnitFactory;
+  friend class UnitFactory;
 
  public:
   virtual enum clsptr isUnit () {return BUILDINGPTR;}

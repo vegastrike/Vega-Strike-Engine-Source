@@ -31,7 +31,7 @@ protected:
 	    Flightgroup* fg=NULL,
 	    int fg_snumber=0 );
 
-    friend class GameUnitFactory;
+    friend class UnitFactory;
 
 public:
 	virtual void UpdatePhysics (const Transformation &trans, const Matrix transmat, const Vector & CumulativeVelocity, bool ResolveLast, UnitCollection *uc=NULL);

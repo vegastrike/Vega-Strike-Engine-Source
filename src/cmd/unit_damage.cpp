@@ -73,10 +73,10 @@ void GameUnit::Split (int level) {
     delete old[nm];
   old[nm]=NULL;
   for (i=0;i<nm;i++) {
-    GameUnit * splitsub;
+    Unit * splitsub;
     std::vector<Mesh *> tempmeshes;
     tempmeshes.push_back (old[i]);
-    SubUnits.prepend(splitsub = GameUnitFactory::createUnit (tempmeshes,true,faction));
+    SubUnits.prepend(splitsub = UnitFactory::createUnit (tempmeshes,true,faction));
     splitsub->mass = mass/level;
     splitsub->image->timeexplode=.1;
     if (splitsub->meshdata[0]) {

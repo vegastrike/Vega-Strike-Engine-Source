@@ -100,7 +100,6 @@ protected:
   ~GameUnit();
 
   friend class UnitFactory;
-  friend class GameUnitFactory;
 
 public:
   ///Initialize many of the defaults inherant to the constructor
@@ -129,8 +128,6 @@ public:
 /***************************************************************************************/
 
 protected:
-  ///number of meshes (each with separate texture) this unit has
-  std::vector <Mesh *> meshdata;
   int nummesh()const {return ((int)meshdata.size())-1;}
   HaloSystem halos;
 
@@ -299,7 +296,7 @@ struct GameUnit::XML {
   Mesh * bspmesh;
   Mesh * rapidmesh;
   void * data;
-  vector<GameUnit*> units;
+  vector<Unit*> units;
   int unitlevel;
   bool hasBSP;
   bool hasColTree;

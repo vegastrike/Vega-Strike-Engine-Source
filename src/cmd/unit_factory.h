@@ -24,9 +24,8 @@
 #endif
 #include <string>
 
-#include "gfxlib.h"   // for GFXMaterial
-#include "planet.h"   // for GFXLightLocal
-#include "unit_factory_generic.h"
+#include "cmd/planet.h"
+
 class GameUnit;
 class Mesh;
 class Flightgroup;
@@ -38,19 +37,23 @@ class Asteroid;
 class Terrain;
 class ContinuousTerrain;
 
-class GameUnitFactory: public UnitFactory
+class UnitFactory
 {
+protected:
+    static Unit* _masterPartList;
 public:
-    static Unit* createUnit( );
+    static Unit* getMasterPartList( );
 
-    static GameUnit* createUnit( const char *filename,
+	static Unit* createUnit( );
+
+    static Unit* createUnit( const char *filename,
                              bool        SubUnit,
                              int         faction,
                              std::string customizedUnit=string(""),
                              Flightgroup *flightgroup=NULL,
                              int         fg_subnumber=0 );
 
-    static GameUnit* createUnit( std::vector<Mesh*> &meshes,
+    static Unit* createUnit( std::vector<Mesh*> &meshes,
 			     bool Subunit,
 			     int faction);
 

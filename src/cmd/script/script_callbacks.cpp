@@ -315,13 +315,6 @@ varInst *Mission::call_setNull(missionNode *node,int mode){
   deleteVarInst(ovi);
   return viret;
 }
-static std::vector <Mission *> Mission_delqueue;
-void Mission::wipeDeletedMissions() {
-  while (!Mission_delqueue.empty()) {
-    delete Mission_delqueue.back();
-    Mission_delqueue.pop_back();
-  }
-}
 varInst *Mission::call_terminateMission(missionNode *node,int mode){
   //  varInst *ovi=getObjectArg(node,mode);
   getBoolArg(node,mode,0);
@@ -332,20 +325,6 @@ varInst *Mission::call_terminateMission(missionNode *node,int mode){
   viret->type=VAR_VOID;
   return viret;
 }
-void Mission::terminateMission(){
-	vector<Mission *> *active_missions = ::active_missions.Get();
-	vector<Mission *>::iterator f = std::find (active_missions->begin(),active_missions->end(),this);
-	if (f!=active_missions->end()) {
-		active_missions->erase (f);
-	}
-	if (this!=(*active_missions)[0]) {
-		Mission_delqueue.push_back(this);//only delete if we arent' the base mission
-	}
-	if (runtime.pymissions)
-		runtime.pymissions->Destroy();
-	runtime.pymissions=NULL;
-}
-
 varInst *Mission::call_float_cast(missionNode *node,int mode){
   missionNode *snode=getArgument(node,mode,0);
   int intval=checkIntExpr(snode,mode);

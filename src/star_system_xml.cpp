@@ -23,25 +23,9 @@
 #include "cmd/enhancement.h"
 #include "main_loop.h"
 #include "cmd/script/flightgroup.h"
-vector <char *> ParseDestinations (const string &value) {
-  vector <char *> tmp;
-  int i;
-  int j;
-  int k;
-  for (j=0;value[j]!=0;){
-    for (i=0;value[j]!=' '&&value[j]!='\0';i++,j++) {
-    }
-    tmp.push_back(new char [i+1]);
-    for (k=0;k<i;k++) {
-      tmp[tmp.size()-1][k]=value[k+j-i];
-    }
-    tmp[tmp.size()-1][i]='\0';
-    if (value[j]!=0)
-      j++;
-  }
-  return tmp;
-}
+extern vector <char *> ParseDestinations (const string &value);
 
+	
 namespace StarXML {
   enum Names {
     UNKNOWN,
@@ -837,7 +821,7 @@ void GameStarSystem::beginElement(const string &name, const AttributeList &attri
     } else {
 
       
-      xml->moons.push_back(GameUnitFactory::createPlanet(R,S,velocity,ComputeRotVel (rotvel,R,S), position,gravity,radius,filename,blendSrc,blendDst,dest, xml->cursun.Cast()+xml->systemcentroid.Cast(), NULL, ourmat,curlights,faction,fullname,insideout));
+      xml->moons.push_back(UnitFactory::createPlanet(R,S,velocity,ComputeRotVel (rotvel,R,S), position,gravity,radius,filename,blendSrc,blendDst,dest, xml->cursun.Cast()+xml->systemcentroid.Cast(), NULL, ourmat,curlights,faction,fullname,insideout));
 
       xml->moons[xml->moons.size()-1]->SetPosAndCumPos(R+S+xml->cursun.Cast()+xml->systemcentroid.Cast());
       xml->moons.back()->SetOwner (getTopLevelOwner());
@@ -938,16 +922,16 @@ void GameStarSystem::beginElement(const string &name, const AttributeList &attri
 	  Planet * plan =xml->moons.back()->GetTopPlanet(xml->unitlevel-1);
 	  if (elem==UNIT) {
 	    Flightgroup *fg =getStaticBaseFlightgroup (faction);
-	    plan->AddSatellite(un=GameUnitFactory::createUnit(filename,false,faction,"",fg,fg->nr_ships-1));
+	    plan->AddSatellite(un=UnitFactory::createUnit(filename,false,faction,"",fg,fg->nr_ships-1));
 	    un->setFullname(fullname);
 	  } else if (elem==NEBULA) {
 	    Flightgroup *fg =getStaticNebulaFlightgroup (faction);
-		    plan->AddSatellite(un=GameUnitFactory::createNebula(filename,false,faction,fg,fg->nr_ships-1));			
+		    plan->AddSatellite(un=UnitFactory::createNebula(filename,false,faction,fg,fg->nr_ships-1));			
 	  } else if (elem==ASTEROID) {
 	    Flightgroup *fg =getStaticAsteroidFlightgroup (faction);
-	    plan->AddSatellite (un=GameUnitFactory::createAsteroid (filename,faction,fg,fg->nr_ships-1,scalex));
+	    plan->AddSatellite (un=UnitFactory::createAsteroid (filename,faction,fg,fg->nr_ships-1,scalex));
 	  } else if (elem==ENHANCEMENT) {
-	    plan->AddSatellite (un=GameUnitFactory::createEnhancement (filename,faction,string("")));
+	    plan->AddSatellite (un=UnitFactory::createEnhancement (filename,faction,string("")));
 	  }
 	  while (!dest.empty()) {
 	    un->AddDestination (dest.back());
@@ -964,7 +948,7 @@ void GameStarSystem::beginElement(const string &name, const AttributeList &attri
 	  un->SetAngularVelocity (ComputeRotVel (rotvel,R,S));
     } else {
       if ((elem==BUILDING||elem==VEHICLE)&&xml->ct==NULL&&xml->parentterrain!=NULL) {
-	Unit * b = GameUnitFactory::createBuilding (xml->parentterrain,elem==VEHICLE,filename,false,faction,string(""));
+	Unit * b = UnitFactory::createBuilding (xml->parentterrain,elem==VEHICLE,filename,false,faction,string(""));
 	b->SetPosAndCumPos (xml->cursun.Cast()+xml->systemcentroid.Cast());
 	b->EnqueueAI( new Orders::AggressiveAI ("default.agg.xml", "default.int.xml"));
 	AddUnit (b);
@@ -974,7 +958,7 @@ void GameStarSystem::beginElement(const string &name, const AttributeList &attri
 	  }
 
       }else if ((elem==BUILDING||elem==VEHICLE)&&xml->ct!=NULL) {
-	Unit * b=GameUnitFactory::createBuilding (xml->ct,elem==VEHICLE,filename,false,faction);
+	Unit * b=UnitFactory::createBuilding (xml->ct,elem==VEHICLE,filename,false,faction);
 	b->SetPlanetOrbitData ((PlanetaryTransform *)xml->parentterrain);
 	b->SetPosAndCumPos (xml->cursun.Cast()+xml->systemcentroid.Cast());
 	b->EnqueueAI( new Orders::AggressiveAI ("default.agg.xml", "default.int.xml"));
@@ -988,17 +972,17 @@ void GameStarSystem::beginElement(const string &name, const AttributeList &attri
       }else {
    	    if (elem==UNIT) {
 	      Flightgroup *fg =getStaticBaseFlightgroup (faction);
-	      Unit *moon_unit=GameUnitFactory::createUnit(filename,false,faction,"",fg,fg->nr_ships-1);
+	      Unit *moon_unit=UnitFactory::createUnit(filename,false,faction,"",fg,fg->nr_ships-1);
 	      moon_unit->setFullname(fullname);
 	      xml->moons.push_back((Planet *)moon_unit);
 	    }else if (elem==NEBULA){
 	      Flightgroup *fg =getStaticNebulaFlightgroup (faction);
-	      xml->moons.push_back ((Planet *)GameUnitFactory::createNebula (filename,false,faction,fg,fg->nr_ships-1));
+	      xml->moons.push_back ((Planet *)UnitFactory::createNebula (filename,false,faction,fg,fg->nr_ships-1));
 	    } else if (elem==ASTEROID){
 	    Flightgroup *fg =getStaticAsteroidFlightgroup (faction);
-	      xml->moons.push_back ((Planet *)GameUnitFactory::createAsteroid (filename,faction,fg,fg->nr_ships-1,scalex));
+	      xml->moons.push_back ((Planet *)UnitFactory::createAsteroid (filename,faction,fg,fg->nr_ships-1,scalex));
 	    } else if (elem==ENHANCEMENT) {
-	      xml->moons.push_back ((Planet *)GameUnitFactory::createEnhancement (filename,faction,string("")));
+	      xml->moons.push_back ((Planet *)UnitFactory::createEnhancement (filename,faction,string("")));
 	    }
 	    while (!dest.empty()) {
 	      xml->moons.back()->AddDestination (dest.back());

@@ -12,6 +12,8 @@ FILE * fpread=NULL;
 float simulation_atom_var=(float)(1.0/10.0);
 Mission *mission=NULL;
 
+double benchmark=-1.0;
+
 /* for speed test */
 int loop_count=0;
 double avg_loop=0;

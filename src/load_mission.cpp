@@ -2,16 +2,16 @@
 #include "cmd/script/mission.h"
 #include "cmd/script/pythonmission.h"
 #include "vs_globals.h"
-#include "gfxlib.h"
-#include "star_system.h"
+//#include "gfxlib.h"
+#include "star_system_generic.h"
 #include "vs_globals.h"
 #include "cmd/unit.h"
 #include "cmd/unit_factory.h"
-#include "gfx/cockpit.h"
+#include "gfx/cockpit_generic.h"
 #include "cmd/ai/aggressive.h"
 #include "cmd/ai/script.h"
 #include "cmd/ai/missionscript.h"
-#include "cmd/script/flightgroup.h"
+#include "cmd/script/flightgroup_generic.h"
 #include "python/python_class.h"
 #include "savegame.h"
 #include "load_mission.h"
@@ -208,7 +208,7 @@ void LoadMission (const char * mission_name, bool loadFirstUnit) {
 	  tmptarget=FactionUtil::GetFaction(fg->faction.c_str()); // that should not be in xml?
 	  string modifications ("");
 	  if (a!=0||loadFirstUnit) {
-	    fighter = GameUnitFactory::createUnit(fightername, false,tmptarget,modifications,fg,s);
+	    fighter = UnitFactory::createUnit(fightername, false,tmptarget,modifications,fg,s);
 	  }else {
 	    continue;
 	  }

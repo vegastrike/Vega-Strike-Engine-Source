@@ -23,9 +23,10 @@
 #include "vs_globals.h"
 #include "networking/netserver.h"
 
-Universe _Universe;
+Universe * _Universe;
+LeakVector<Mission *> active_missions;
 
-int main( int argc, char **argv)
+int main( int argc, char *argv[])
 {
 	NetServer *Server = new NetServer;
 

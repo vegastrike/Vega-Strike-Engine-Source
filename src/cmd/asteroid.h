@@ -12,7 +12,7 @@ protected:
      */
     Asteroid(const char * filename, int faction, Flightgroup* fg=NULL, int fg_snumber=0, float difficulty=.01);
 
-    friend class GameUnitFactory;
+    friend class UnitFactory;
 
 private:
     /// default constructor forbidden

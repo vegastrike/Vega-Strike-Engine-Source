@@ -309,7 +309,7 @@ void Faction::endElement(void *userData, const XML_Char *name) {
 }
 
 
-void Faction::LoadXML(const char * filename, char * xmlbuffer, int buflength) {
+void GameFaction::LoadXML(const char * filename, char * xmlbuffer, int buflength) {
   unitlevel=0;
   FILE * inFile;
   const int chunk_size = 16384;
@@ -362,7 +362,7 @@ void Faction::LoadXML(const char * filename, char * xmlbuffer, int buflength) {
 void GameFactionUtil::LoadContrabandLists() {
   for (unsigned int i=0;i<factions.size()&&i<contrabandlists.size();i++) {
     if (contrabandlists[i].length()>0) {
-      factions[i]->contraband = GameUnitFactory::createUnit (contrabandlists[i].c_str(),true,i);
+      factions[i]->contraband = UnitFactory::createUnit (contrabandlists[i].c_str(),true,i);
     }
   }
   contrabandlists.clear();

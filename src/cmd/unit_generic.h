@@ -147,6 +147,7 @@ public:
    *  of them) as either as subunit with faction faction
    */
   Unit (std::vector <string> &meshes  , bool Subunit, int faction);
+  Unit (std::vector <Mesh *> &meshes  , bool Subunit, int faction);
 
   /** Constructor that creates a mesh from an XML file If it is a
    *  customizedUnit, it will check in that directory in the home dir for
@@ -171,11 +172,8 @@ public:
 protected:
   // Tell if networked unit
   char networked;
-  bool player;
 public:
   void SetNetworkMode( bool mode) {networked = true;}
-  void SetPlayer( bool p=true) { player = p;}
-  bool isPlayer() { return player;}
 
 /***************************************************************************************/
 /**** UPGRADE/CUSTOMIZE STUFF                                                       ****/
@@ -224,6 +222,9 @@ public:
 /**** GFX/PLANET STUFF                                                              ****/
 /***************************************************************************************/
 
+public:
+  ///number of meshes (each with separate texture) this unit has
+  std::vector <Mesh *> meshdata;
 protected:
   Nebula * nebula;
   PlanetaryOrbitData * planet;
@@ -451,6 +452,7 @@ protected:
   ///-1 means it is off. -2 means it doesn't exist. otherwise it's engaged to destination (positive number)
  ///Moment of intertia of this unit
   float MomentOfInertia;
+public:
   struct Limits {
     ///max ypr--both pos/neg are symmetrical
     float yaw; float pitch; float roll;

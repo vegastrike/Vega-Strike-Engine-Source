@@ -54,7 +54,7 @@ protected:
         , retarget (-1)
     {maxhull*=10; }
 
-  friend class GameUnitFactory;
+  friend class UnitFactory;
 
 public:
   virtual void Kill (bool eraseFromSave=true);

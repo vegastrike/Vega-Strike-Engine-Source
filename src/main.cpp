@@ -111,7 +111,6 @@ void cleanup(void)
 VegaConfig *vs_config;
 //Mission *mission;
 LeakVector<Mission *> active_missions;
-double benchmark=-1.0;
 
 char mission_name[1024];
 

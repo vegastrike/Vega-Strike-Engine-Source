@@ -171,6 +171,29 @@ bool Mission::checkMission(easyDomNode *node, bool loadscripts){
   return true;
 }
 
+static std::vector <Mission *> Mission_delqueue;
+void Mission::wipeDeletedMissions() {
+  while (!Mission_delqueue.empty()) {
+    delete Mission_delqueue.back();
+    Mission_delqueue.pop_back();
+  }
+}
+
+void Mission::terminateMission(){
+	vector<Mission *> *active_missions = ::active_missions.Get();
+	vector<Mission *>::iterator f = std::find (active_missions->begin(),active_missions->end(),this);
+	if (f!=active_missions->end()) {
+		active_missions->erase (f);
+	}
+	if (this!=(*active_missions)[0]) {
+		Mission_delqueue.push_back(this);//only delete if we arent' the base mission
+	}
+	if (runtime.pymissions)
+		runtime.pymissions->Destroy();
+	runtime.pymissions=NULL;
+}
+
+
 /* *********************************************************** */
 
 void Mission::doOrigin(easyDomNode *node){

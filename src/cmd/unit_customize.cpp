@@ -38,11 +38,11 @@ double GameUnit::Upgrade (const std::string &file, int mountoffset, int subunito
 
   }
 #endif
-	GameUnit * up = GameUnitFactory::createUnit (file.c_str(),true,FactionUtil::GetFaction("upgrades"));
-	static GameUnit * last_template=NULL;
+	Unit * up = UnitFactory::createUnit (file.c_str(),true,FactionUtil::GetFaction("upgrades"));
+	static Unit * last_template=NULL;
 	char * unitdir  = GetUnitDir(name.c_str());
 	
-	GameUnit * templ = NULL;
+	Unit * templ = NULL;
 	if (last_template!=NULL) {
 	  if (last_template->name==(string (unitdir)+".template")) {
 	    templ = last_template;
@@ -55,7 +55,7 @@ double GameUnit::Upgrade (const std::string &file, int mountoffset, int subunito
 	  }
 	}
 	if (templ==NULL) {
-	  templ = GameUnitFactory::createUnit ((string (unitdir)+".template").c_str(),true,this->faction);
+	  templ = UnitFactory::createUnit ((string (unitdir)+".template").c_str(),true,this->faction);
 	  last_template=templ;
 	}
 	free (unitdir);

@@ -195,7 +195,25 @@ SystemInfo AvgSystems (SystemInfo a, SystemInfo b) {
   si.force = a.force||b.force;
   return si;
 }
-extern vector <char *> ParseDestinations (const string &value);
+vector <char *> ParseDestinations (const string &value) {
+  vector <char *> tmp;
+  int i;
+  int j;
+  int k;
+  for (j=0;value[j]!=0;){
+    for (i=0;value[j]!=' '&&value[j]!='\0';i++,j++) {
+    }
+    tmp.push_back(new char [i+1]);
+    for (k=0;k<i;k++) {
+      tmp[tmp.size()-1][k]=value[k+j-i];
+    }
+    tmp[tmp.size()-1][i]='\0';
+    if (value[j]!=0)
+      j++;
+  }
+  return tmp;
+}
+
 
 vector <string> ParseStringyDestinations (vector <char *> v) {
   vector <string> retval;
