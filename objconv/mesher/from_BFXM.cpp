@@ -200,6 +200,11 @@ void BFXMToXmesh(FILE* Inputfile, FILE* Outputfile){
 		  //AnimationDefinitions
 		  int32bit numanimdefs=VSSwapHostIntToLittle(inmemfile[word32index].i32val);//number of animation definitions
 		  word32index+=1;
+		  if(meshindex==0){
+			  for(int framecount=numLODs+1;framecount<nummeshes;framecount++){
+				  fprintf(Outputfile,"<Frame FrameMeshName=\"%d_%d.xmesh\"/>\n",recordindex,framecount);
+			  }
+		  }
 		  for(int32bit anim=0;anim<numanimdefs;anim++){
 			int32bit animnamelen=VSSwapHostIntToLittle(inmemfile[word32index].i32val);//length of name
 			word32index+=1;
