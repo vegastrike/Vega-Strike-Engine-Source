@@ -15,6 +15,8 @@
 #include "unit_util.h"
 #include "gfx/cockpit.h"
 #include "gfx/ani_texture.h"
+#include "music.h"
+#include "lin_time.h"
 #ifdef RENDER_FROM_TEXTURE
 #include "gfx/stream_texture.h"
 #endif
@@ -35,7 +37,7 @@ using namespace VSFileSystem;
 #include "basecomputer.h"
 #include "../gui/eventmanager.h"
 #endif
-
+std::vector<unsigned int>base_keyboard_queue;
 static void CalculateRealXAndY (int xbeforecalc, int ybeforecalc, float *x, float *y) {
 	(*x)=(((float)(xbeforecalc*2))/g_game.x_resolution)-1;
 	(*y)=-(((float)(ybeforecalc*2))/g_game.y_resolution)+1;
@@ -181,8 +183,8 @@ int BaseInterface::Room::MouseOver (BaseInterface *base,float x, float y) {
 	return -1;
 }
 
-BaseInterface *BaseInterface::CurrentBase=0;
-
+BaseInterface *BaseInterface::CurrentBase=NULL;
+static BaseInterface *lastBaseDoNotDereference=NULL;
 bool RefreshGUI(void) {
 	bool retval=false;
 	if (_Universe->AccessCockpit()) {
@@ -204,6 +206,27 @@ bool RefreshGUI(void) {
 	}
 	return retval;
 }
+
+
+void base_main_loop() {
+	UpdateTime();
+	muzak->Listen();
+	GFXBeginScene();
+	if (lastBaseDoNotDereference!=BaseInterface::CurrentBase) {
+		static int i=0;
+		if (i++%4==3) {
+			lastBaseDoNotDereference=BaseInterface::CurrentBase;
+		}
+		AUDStopAllSounds();
+	}
+	if (!RefreshGUI()) {
+		restore_main_loop();
+	}else {
+		GFXEndScene();
+	}
+}
+
+
 
 void BaseInterface::Room::Click (BaseInterface* base,float x, float y, int button, int state) {
 	if (button==WS_LEFT_BUTTON) {
@@ -441,14 +464,19 @@ BaseInterface::~BaseInterface () {
 		delete rooms[i];
 	}
 }
-
+void base_main_loop();
+static void base_keyboard_cb( unsigned int  ch,unsigned int mod, bool release, int x, int y ) {
+	base_keyboard_queue.push_back (ch);
+}
 void BaseInterface::InitCallbacks () {
+	winsys_set_keyboard_func(base_keyboard_cb);	
 	winsys_set_mouse_func(ClickWin);
 	winsys_set_motion_func(ActiveMouseOverWin);
 	winsys_set_passive_motion_func(PassiveMouseOverWin);
 	CurrentBase=this;
 //	UpgradeCompInterface(caller,baseun);
 	CallComp=false;
+	GFXLoop(base_main_loop);		
 }
 
 BaseInterface::Room::Talk::Talk (std::string ind,std::string pythonfile)

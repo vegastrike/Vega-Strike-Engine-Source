@@ -792,6 +792,7 @@ void restore_main_loop() {
   GFXLoop (main_loop);
 
 }
+
 void main_loop() {
   // Evaluate number of loops per second each XX loops
   if( loop_count==500)

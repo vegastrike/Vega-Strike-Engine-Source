@@ -20,6 +20,7 @@
 #include "base.h"
 #include "networking/inet.h"
 #include "python/python_compile.h"
+
 Music::Music (Unit *parent):random(false), p(parent),song(-1) {
   loopsleft=0;
   if (!g_game.music_enabled)
