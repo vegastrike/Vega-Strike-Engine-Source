@@ -287,7 +287,9 @@ void CommunicatingAI::RandomInitiateCommunication (float playaprob, float targpr
         }
       }
       //ok we're good to put a default msg in the queue as a fake message;
-      messagequeue.push_back (new CommunicationMessage (target,this->parent,comm_face,sex));
+      FSM * fsm = FactionUtil::GetConversation(target->faction,this->parent->faction);
+      int state =fsm->getDefaultState(parent->getRelation(target));
+      messagequeue.push_back (new CommunicationMessage (target,this->parent,state,state,comm_face,sex));
     }
   }
 }
