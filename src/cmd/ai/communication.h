@@ -11,6 +11,10 @@ class FSM {
   };
   vector <Node> nodes;
   FSM (const char * filename);
+  void LoadXML(const char * factionfile);  
+  void beginElement(const string &name, const AttributeList attributes);
+  static void beginElement(void *userData, const XML_Char *name, const XML_Char **atts);
+  static void endElement(void *userData, const XML_Char *name);
   std::string GetEdgesString (int curstate);
   float getDeltaRelation (int prevstate, int curstate) const;
   int getDefaultState (float relationship) const;

@@ -21,6 +21,9 @@
 
 #ifndef _HASHTABLE_H_
 #define _HASHTABLE_H_
+#ifdef _WIN32
+#pragma warning(disable: 4786)
+#endif
 
 #include <math.h>
 #include <list>
@@ -102,3 +105,4 @@ public:
 };
 
 #endif
+

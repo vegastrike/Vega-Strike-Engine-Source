@@ -2,31 +2,33 @@
 
 FSM::FSM (const char * filename) {
     //loads a conversation finite state machine with deltaRelation weight transition from an XML?
-  nodes.push_back (Node("welcome to cachunkcachunk.com",0));
-  nodes.push_back (Node("I love you!",.1));
-  nodes.push_back (Node("J00 0wnz m3",.08));
-  nodes.push_back (Node("You are cool!",.06));
-  nodes.push_back (Node("You are nice!",.05));
-  nodes.push_back (Node("Ya you're naled! NALED PAL!",-.02));
-  nodes.push_back (Node("i 0wnz j00",-.08));
-  nodes.push_back (Node("I hate you!",-.1));
+  if (strlen(filename)==0) {
+    nodes.push_back (Node("welcome to cachunkcachunk.com",0));
+    nodes.push_back (Node("I love you!",.1));
+    nodes.push_back (Node("J00 0wnz m3",.08));
+    nodes.push_back (Node("You are cool!",.06));
+    nodes.push_back (Node("You are nice!",.05));
+    nodes.push_back (Node("Ya you're naled! NALED PAL!",-.02));
+    nodes.push_back (Node("i 0wnz j00",-.08));
+    nodes.push_back (Node("I hate you!",-.1));
 
-
-  nodes.push_back (Node("Prepare To Be Searched. Maintain Speed and Course.",0));
-  nodes.push_back (Node("No contraband detected: You may proceed.",0));
-  nodes.push_back (Node("Contraband detected! All units close and engage!",0));
-  nodes.push_back (Node("Your Course is deviating! Maintain Course!",0));
-  nodes.push_back (Node("Request Clearence To Land.",0));
-  nodes.push_back (Node("*hit*",-.2));
-  vector <unsigned int> edges;
-  unsigned int i;
-  for (i=0;i<nodes.size()-6;i++) {
-    edges.push_back (i);
+    nodes.push_back (Node("Prepare To Be Searched. Maintain Speed and Course.",0));
+    nodes.push_back (Node("No contraband detected: You may proceed.",0));
+    nodes.push_back (Node("Contraband detected! All units close and engage!",0));
+    nodes.push_back (Node("Your Course is deviating! Maintain Course!",0));
+    nodes.push_back (Node("Request Clearence To Land.",0));
+    nodes.push_back (Node("*hit*",-.2));
+    vector <unsigned int> edges;
+    unsigned int i;
+    for (i=0;i<nodes.size()-6;i++) {
+      edges.push_back (i);
+    }
+    for (i=0;i<nodes.size();i++) {
+      nodes[i].edges = edges;
+    }
+  } else {
+    LoadXML(filename);
   }
-  for (i=0;i<nodes.size();i++) {
-    nodes[i].edges = edges;
-  }
-  
 }
 int FSM::GetContrabandInitiateNode() {
   return nodes.size()-6;

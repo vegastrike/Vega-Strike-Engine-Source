@@ -46,14 +46,14 @@ int main(int argc, char *argv[]) {
         getcwd(macosxExecutablePath, MAXPATHLEN);
         chdir ("../../../");/* chdir where the data dir is */
 #else
-	int i = 0;
-	for (i=strlen(argv[0]);argv[0][i]!='\\'&&argv[0][i]!='/';i--) {
-	}
-	argv[0][i+1]='\0';
-	chdir(argv[0]);
+//	int i = 0;
+//	for (i=strlen(argv[0]);argv[0][i]!='\\'&&argv[0][i]!='/';i--) {
+//	}
+//	argv[0][i+1]='\0';
+//	chdir(argv[0]);
 #endif
 #ifdef _WIN32
-	FreeConsole();
+//	FreeConsole();
 #endif
 #if defined(WITH_MACOSX_BUNDLE)
         // get the current working directory so when glut trashes it we can restore.
