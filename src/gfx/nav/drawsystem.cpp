@@ -257,8 +257,10 @@ void NavigationSystem::DrawSystem()
 		pos = (*blah)->Position();
 		ReplaceAxes(pos);
 			
-		float the_x, the_y, system_item_scale_temp;
-		TranslateAndDisplay(pos, pos_flat, center_nav_x, center_nav_y, themaxvalue, zscale, zdistance, the_x, the_y, system_item_scale_temp, 1);
+		float the_x, the_y, the_x_flat, the_y_flat, system_item_scale_temp;
+
+		TranslateCoordinates(pos, pos_flat, center_nav_x, center_nav_y, themaxvalue, zscale, zdistance, the_x, the_y, the_x_flat, the_y_flat, system_item_scale_temp, 1);
+
 
 		//IGNORE OFF SCREEN
 		//**********************************
@@ -361,7 +363,7 @@ void NavigationSystem::DrawSystem()
 
 		else if((*blah)->isUnit()==ASTEROIDPTR)
 		{
-			//	a missile
+			//	an asteroid
 			insert_type = navasteroid;
 			insert_size = navasteroidsize;
 		}
@@ -369,7 +371,7 @@ void NavigationSystem::DrawSystem()
 
 		else if((*blah)->isUnit()==NEBULAPTR)
 		{
-			//	a missile
+			//	a nebula
 			insert_type = navnebula;
 			insert_size = navnebulasize;
 		}
@@ -412,7 +414,7 @@ void NavigationSystem::DrawSystem()
 		Unit * myunit=(*blah);
 		
 		++blah;
-		
+		DisplayOrientationLines(the_x, the_y, the_x_flat, the_y_flat, 1);
 		if(tests_in_range)
 			mouselist.insert(insert_type, insert_size, the_x, the_y, myunit);
 		else
