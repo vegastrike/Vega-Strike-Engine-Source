@@ -239,8 +239,12 @@ void bolt_draw::UpdatePhysics () {
 
 bool Bolt::Collide (Unit * target) {
   enum clsptr type = target->isUnit();
-  if (target==owner||type==NEBULAPTR||type==ASTEROIDPTR)
-    return false;
+  if (target==owner||type==NEBULAPTR||type==ASTEROIDPTR) {
+    static bool collideroids = XMLSupport::parse_bool(vs_config->getVariable("physics","AsteroidWeaponCollision","false"));
+    if (type!=ASTEROIDPTR||(!collideroids)) {
+      return false;
+    }
+  }
   Vector normal;
   float distance;
   Unit * affectedSubUnit;

@@ -360,8 +360,12 @@ bool Beam::Collide (Unit * target) {
   Vector normal;//apply shields
   QVector end (center+direction.Cast().Scale(curlength));
   enum clsptr type = target->isUnit();
-  if (target==owner||type==NEBULAPTR||type==ASTEROIDPTR) 
-    return false;
+  if (target==owner||type==NEBULAPTR||type==ASTEROIDPTR) {
+    static bool collideroids = XMLSupport::parse_bool(vs_config->getVariable("physics","AsteroidWeaponCollision","false"));
+      if (type!=ASTEROIDPTR||(!collideroids)) {
+	return false;
+      }
+  }
   
 
   Unit * colidee;
