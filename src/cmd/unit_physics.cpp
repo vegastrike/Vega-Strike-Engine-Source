@@ -45,6 +45,13 @@ void Unit:: Rotate (const Vector &axis)
 	  rot = identity_quaternion;
 	}
 	curr_physical_state.orientation *= rot;
+	if (limits.limitmin>-1) {
+	  Matrix mat;
+	  curr_physical_state.orientation.to_matrix (mat);
+	  if (limits.structurelimits.Dot (Vector (mat[8],mat[9],mat[10]))<limits.limitmin) {
+	    curr_physical_state.orientation=prev_physical_state.orientation;
+	  }
+	}
 }
 
 void Unit:: FireEngines (const Vector &Direction/*unit vector... might default to "r"*/,
@@ -290,7 +297,6 @@ void Unit::UpdatePhysics (const Transformation &trans, const Matrix transmat, bo
       }
     }
   } 
-  
   curr_physical_state.position += Velocity*SIMULATION_ATOM;
   cumulative_transformation = curr_physical_state;
   cumulative_transformation.Compose (trans,transmat);
@@ -327,7 +333,7 @@ void Unit::UpdatePhysics (const Transformation &trans, const Matrix transmat, bo
       t1=prev_physical_state;//a hack that will not work on turrets
       t1.Compose (trans,transmat);
       t1.to_matrix (m1);
-      mounts[i].PhysicsAlignedFire (t1,m1,Velocity,this,Target());//FIXME will not work for turrets (cumulative velocity) maybe need to add to physics frame!
+      mounts[i].PhysicsAlignedFire (t1,m1,Velocity,owner==NULL?this:owner,Target());//FIXME will not work for turrets (cumulative velocity) maybe need to add to physics frame!
     }else if (mounts[i].processed==Mount::UNFIRED) {
       mounts[i].PhysicsAlignedUnfire();
     }

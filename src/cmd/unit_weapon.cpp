@@ -29,7 +29,8 @@ void Unit::Fire (bool Missile) {
       if (mounts[i].type.EnergyRate>energy) 
 	continue;
     }
-    if (mounts[i].Fire(this,Missile)) {
+    
+    if (mounts[i].Fire(owner==NULL?this:owner,Missile)) {
       energy -=apply_float_to_short( mounts[i].type.type==weapon_info::BEAM?mounts[i].type.EnergyRate*SIMULATION_ATOM:mounts[i].type.EnergyRate);
     }
   }
@@ -227,6 +228,13 @@ Unit::Mount::Mount(const string& filename, short ammo): size(weapon_info::NOWEAP
   }else {
     type = *temp;
     status=ACTIVE;
+  }
+}
+
+void Unit::Target (Unit *targ) {
+  computer.target.SetUnit(targ);
+  for (int i=0;i<numsubunit;i++) {
+    subunits[i]->Target (targ);
   }
 }
 

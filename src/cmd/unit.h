@@ -297,6 +297,10 @@ class Unit {
     float retro;
     ///after burner acceleration max
     float afterburn;
+    ///the vector denoting the "front" of the turret cone!
+    Vector structurelimits;
+    ///the minimum dot that the current heading can have with the structurelimit
+    float limitmin;
   } limits;
   Computer computer;
   ///no collision table presence.
@@ -394,7 +398,7 @@ public:
   void SetOwner(Unit *target) {owner=target;}
   Unit *Target(){return computer.target.GetUnit();}
   Unit *Threat(){return computer.threat.GetUnit();}
-  void Target (Unit * targ) {computer.target.SetUnit(targ);}
+  void Target (Unit * targ);
   ///Threatens this unit with "targ" as aggressor. Danger should be cos angle to target
   void Threaten (Unit * targ, float danger);
   ///Rekeys the threat level to zero for another turn of impending danger
@@ -464,6 +468,15 @@ public:
   void SetAI(Order *newAI);
   ///Enqueues an order to the unit's order queue
   void EnqueueAI(Order *newAI);
+  ///num subunits
+  int getNumSubUnits () {return numsubunit;}
+  Unit *getSubUnit(int i) {return subunits[i];}
+  ///Sets up a null queue for orders
+  void PrimeOrders(int subun);
+  ///Sets the AI to be a specific order
+  void SetAI(Order *newAI, int subun);
+  ///Enqueues an order to the unit's order queue
+  void EnqueueAI(Order *newAI, int subun); 
   ///Does a one way collision between smaller target and this
   bool OneWayCollide (Unit *target, Vector & normal, float &dist);
   ///Does a collision between this and another unit

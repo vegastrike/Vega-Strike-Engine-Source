@@ -204,11 +204,12 @@ namespace UnitXML {
     EnumMap::Pair ("CloakMin",CLOAKMIN),
     EnumMap::Pair ("CloakMp3",CLOAKMP3),
     EnumMap::Pair ("CloakWav",CLOAKWAV),
-    EnumMap::Pair ("Color",ISCOLOR)
+    EnumMap::Pair ("Color",ISCOLOR),
+    EnumMap::Pair ("Restricted", RESTRICTED)
 };
 
   const EnumMap element_map(element_names, 26);
-  const EnumMap attribute_map(attribute_names, 63);
+  const EnumMap attribute_map(attribute_names, 64);
 }
 
 using XMLSupport::EnumMap;
@@ -398,11 +399,12 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
     break;
 
   case SUBUNIT:
-	assert (xml->unitlevel==1);
-	xml->unitlevel++;
+    assert (xml->unitlevel==1);
+    xml->unitlevel++;
     Q = Vector (0,1,0);
     R = Vector (0,0,1);
     pos = Vector (0,0,0);
+    fbrltb[0] =-1;
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(attribute_map.lookup((*iter).name)) {
       case XFILE:
@@ -435,6 +437,9 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
       case QK:
 	Q.k=parse_float((*iter).value);
 	break;
+      case RESTRICTED:
+	fbrltb[0]=parse_float ((*iter).value);//minimum dot turret can have with "fore" vector 
+	break;
       }
 
     }
@@ -446,6 +451,8 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
     xml->units.push_back(new Unit (filename.c_str(), true,true,faction));
     xml->units[indx]->prev_physical_state= Transformation(Quaternion::from_vectors(P,Q,R),pos);
     xml->units[indx]->curr_physical_state=xml->units[indx]->prev_physical_state;
+    xml->units[indx]->limits.structurelimits=R;
+    xml->units[indx]->limits.limitmin=fbrltb[0];
     
     break;
   case SOUND:
@@ -951,6 +958,7 @@ void Unit::LoadXML(const char *filename) {
     subunits=NULL;
   for( a=0; a<numsubunit; a++) {
     subunits[a] = xml->units[a];
+    subunits[a]->SetOwner (this);
   }
   if (!SubUnit) {
     calculate_extent();

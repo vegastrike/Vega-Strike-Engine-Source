@@ -376,7 +376,10 @@ void createObjects() {
       //      printf("1 - %s  2 - %s\n",ai_agg_c,ai_int_c);
 
       fighters[a]->EnqueueAI( new Orders::AggressiveAI (ai_agg_c, ai_int_c));
-
+      for (int kk=0;kk<fighters[a]->getNumSubUnits();kk++) {
+	fighters[a]->EnqueueAI (new Orders::FireAt(.2,15),kk);
+	fighters[a]->EnqueueAI (new Orders::FaceTarget (false,3),kk);
+      }
     }
     _Universe->activeStarSystem()->AddUnit(fighters[a]);
   } // end of for flightgroups
@@ -387,10 +390,19 @@ void createObjects() {
   delete [] tmptarget;
 
  
-  fighters[0]->EnqueueAI(new AIScript("aitest.xml"));
+#ifdef IPILOTTURRET
+  fighters[0]->EnqueueAI (new Orders::AggressiveAI ("default.agg.xml", "default.int.xml"));
+  fighters[0]->getSubUnit (0)->EnqueueAI(new FlyByJoystick (0,"player1.kbconf"));
+  fighters[0]->getSubUnit (0)->EnqueueAI(new FireKeyboard (0,""));
+#else
   fighters[0]->EnqueueAI(new FlyByJoystick (0,"player1.kbconf"));
   fighters[0]->EnqueueAI(new FireKeyboard (0,""));
 
+  for (int kk=0;kk<fighters[0]->getNumSubUnits();kk++) {
+    fighters[0]->EnqueueAI (new Orders::FireAt(.2,15),kk);
+    fighters[0]->EnqueueAI (new Orders::FaceTarget (false,3),kk);
+  }
+#endif
   vschdir ("hornet-cockpit.cpt");
   tmpcockpittexture = new Texture ("hornet-cockpit.bmp","hornet-cockpitalp.bmp",0,NEAREST);
   vscdup();
@@ -398,7 +410,11 @@ void createObjects() {
   muzak = new Music (fighters[0]);
   AUDListenerSize (fighters[0]->rSize()*4);
   _Universe->AccessCockpit()->Init ("hornet-cockpit.cpt");
+#ifdef IPILOTTURRET
+  _Universe->AccessCockpit()->SetParent(fighters[0]->getSubUnit(0));
+#else
   _Universe->AccessCockpit()->SetParent(fighters[0]);
+#endif
   shipList = _Universe->activeStarSystem()->getClickList();
   locSel = new CoordinateSelect (Vector (0,0,5));
   UpdateTime();

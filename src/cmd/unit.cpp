@@ -89,6 +89,8 @@ void Unit::SetResolveForces (bool ys) {
 
 void Unit::Init()
 {
+  limits.structurelimits=Vector(0,0,1);
+  limits.limitmin=-1;
   cloaking=-1;
   cloakmin=0;
   cloakrate=100;
@@ -568,6 +570,15 @@ void Unit::ProcessDrawQueue() {
   }
 }
 */
+void Unit::PrimeOrders (int i) {
+  subunits[i]->PrimeOrders();
+}
+void Unit::SetAI (Order *newAI, int i) {
+  subunits[i]->SetAI (newAI);
+}
+void Unit::EnqueueAI(Order *newAI, int i) { 
+  subunits[i]->EnqueueAI(newAI);
+}
 void Unit::PrimeOrders () {
   if (aistate) {
     aistate->ReplaceOrder (new Order);
