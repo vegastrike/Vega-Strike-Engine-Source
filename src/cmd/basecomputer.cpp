@@ -393,7 +393,7 @@ float PercentOperational (Unit * un, std::string name, std::string category="upg
       if (percent)
         return percent;
       else return .5;
-    }else return percent;
+    }else if (percent>0) return percent;
   }
   return 1.0;
 }

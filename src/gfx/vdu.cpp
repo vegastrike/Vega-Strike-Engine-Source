@@ -755,7 +755,7 @@ void VDU::DrawDamage(Unit * parent) {	//	VDUdamage
                               (1.0*percent_working)+(1.0*(1.0-percent_working)));
         if(percent_working == 0.0){final_color = GFXColor(0.2,0.2,0.2);}	//	dead = grey
         std::string trailer;
-        if (final_color.r<.99||final_color.g<.99||final_color.b<.99) {
+        if (percent_working<1.0) {
           int r = (int)(final_color.r*255);
           if (r>255)r=255;
           int rl = r%16;
