@@ -31,7 +31,8 @@
 using namespace std;
 
 struct Texture{
-  char filename[64];
+  string texfilename;
+  //  char filename[64];
   bool ismipmapped;
 	unsigned int sizeX;
 	unsigned int sizeY;
@@ -48,7 +49,7 @@ struct Texture{
         enum TEXTURE_IMAGE_TARGET image_target;
         BOOL checkold(const string &s);
 	void setold();
-
+  //char  texfilename;
   void InitTexture() {
     original = 0;
     refcount = 0;
@@ -58,29 +59,7 @@ public:
 
 	Texture(const char *,const char *, int stage = 0, bool mipmap= true, enum TEXTURE_TARGET target=TEXTURE2D, enum TEXTURE_IMAGE_TARGET imagetarget=TEXTURE_2D, float alpha=1, int zeroval=0);
 	Texture(const char * FileName, int stage = 0, bool mipmap = true, enum TEXTURE_TARGET target=TEXTURE2D, enum TEXTURE_IMAGE_TARGET imagetarget=TEXTURE_2D);
-	~Texture()
-	{
-		if(original == NULL)
-		{
-			if(data != NULL)
-			{
-				delete [] data;
-				data = NULL;
-				GFXDeleteTexture(name);
-				//glDeleteTextures(1, &name);
-			}
-			if (palette !=NULL) {
-			  delete []palette;
-			  palette = NULL;
-			}
-		}
-		else
-		{
-			original->refcount--;
-			if(original->refcount == 0)
-				delete original;
-		}
-	}
+  ~Texture();
 
 	int Bind();
 	void Transfer();

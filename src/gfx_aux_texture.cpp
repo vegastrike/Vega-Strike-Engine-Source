@@ -76,12 +76,13 @@ int Texture::checkold(const string &s)
 {
 	Texture *oldtex;
 	//FIX'D
-	if(oldtex = texHashTable.Get(s))//NOT problem???  not == last time
+	if(oldtex = texHashTable.Get(s))
 	{
-		*this = *oldtex;
-		original = oldtex;
-		original->refcount++;
-		return TRUE;
+	  //*this = *oldtex;//will be obsoleted--unpredictable results with string()
+	  memcpy (this, oldtex, sizeof (Texture));
+	  original = oldtex;
+	  original->refcount++;
+	  return TRUE;
 	}
 	else
 	{
@@ -93,7 +94,8 @@ int Texture::checkold(const string &s)
 }
 void Texture::setold()
 {
-	*original = *this;
+  //	*original = *this;//will be obsoleted in new C++ standard unpredictable results when using string() (and its strangeass copy constructor)
+  memcpy (original, this, sizeof (Texture));
 	original->original = NULL;
 	original->refcount++;
 }
@@ -116,7 +118,7 @@ Texture::Texture(const char * FileName, int stage, bool mipmap, enum TEXTURE_TAR
 		data = NULL;
 		return;
 	}
-	strcpy(filename, FileName);
+	//	strcpy(filename, FileName);
 	fseek (fp,SIZEOF_BITMAPFILEHEADER,SEEK_SET);
 	//long temp;
 	BITMAPINFOHEADER info;
@@ -134,9 +136,13 @@ Texture::Texture(const char * FileName, int stage, bool mipmap, enum TEXTURE_TAR
 	FILE *fp2 = fopen(t, "r+b");
 
 	string texfilename = string(FileName);
+	
 	if(fp2) {
 		texfilename += string(t);
 	}
+	//	this->texfilename = texfilename;
+	//strcpy (filename,texfilename.c_str());
+	this->texfilename = texfilename;
 	if(checkold(texfilename))
 		return;
 
@@ -224,6 +230,9 @@ Texture::Texture (const char * FileNameRGB, const char *FileNameA, int stage, bo
 	FILE *fp1 = NULL;
 
 	string texfilename = string(FileNameRGB) + string(FileNameA);
+	//this->texfilename = texfilename;
+	//strcpy (filename,texfilename.c_str());
+	this->texfilename = texfilename;
 	if(checkold(texfilename))
 		return;
 
@@ -373,6 +382,33 @@ Texture::Texture (const char * FileNameRGB, const char *FileNameA, int stage, bo
 	setold();
 
 }
+Texture::~Texture()
+	{
+		if(original == NULL)
+		{
+			if(data != NULL)
+			{
+				delete [] data;
+				data = NULL;
+				texHashTable.Delete (texfilename);
+				GFXDeleteTexture(name);
+				
+				//glDeleteTextures(1, &name);
+			}
+			if (palette !=NULL) {
+			  delete []palette;
+			  palette = NULL;
+			}
+		}
+		else
+		{
+			original->refcount--;
+			if(original->refcount == 0)
+				delete original;
+		}
+	}
+
+
 void Texture::Transfer ()
 {
 	//Implement this in D3D

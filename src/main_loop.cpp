@@ -434,10 +434,13 @@ void InitializeInput() {
 	BindKey('w', FighterPitchDown);
 	BindKey('s', FighterPitchUp);*/
 }
-Animation * s;
+Animation * s=NULL;
 
 void createObjects() {
 
+    s = new Animation ("explosion_orange.ani",false,.1,false,false);
+    delete s;
+    s = NULL;
   fprintf(stderr,"Unit size: %d\nMesh size: %d\n", sizeof(Unit), sizeof(Mesh));
   //SetPriorityClass(GetCurrentProcess(), REALTIME_PRIORITY_CLASS);
   //SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_IDLE);
@@ -448,8 +451,6 @@ void createObjects() {
   fighter = new Unit("uosprey.dat");
   //Unit *fighter2 = new Unit("uosprey.dat");
   fighter2 = new Unit("uosprey.dat");
-  s = new Animation ("explosion_orange.ani",true,.1,false,false);
-  s->SetPosition (0,0,5);
   bg = new Background("cube");
   //bg2 = new SphereMesh (20.0,8,8,"sun.bmp",true,true);
   //HUDElement *t = new HUDElement("ucarrier.dat");
@@ -473,7 +474,7 @@ void createObjects() {
   textplane->SetPosition(Vector(0.0F, 0.0F, 2.000F));
   GFXEnable(TEXTURE0);
   GFXEnable(TEXTURE1);
-
+    
 
   //  
   //  
@@ -566,13 +567,18 @@ void destroyObjects() {
   delete fighter;
   delete bg;
   //  delete bg2;  if you delete a sphere wiht paletted texture and its refcount you'll get a malloc problem
-  delete s;
+  if (s) delete s;
 }
 
 void main_loop() {
   static int state = 0;
-  if ((rand()%10000)==2999)
-    fighters[0]->Destroy();
+  static bool midcachunk=false;
+  if ((rand()%1000)==299) {
+    midcachunk = true;
+    s = new Animation ("explosion_orange.ani",false,.1,false,false);
+    s->SetPosition (fighters[0]->GetPosition());
+    s->SetDimensions (10,10);
+  }
   _GFX->StartDraw();
   
   //bg2->Draw();
@@ -586,9 +592,18 @@ void main_loop() {
     GFXDisable(TEXTURE1);
   //  GFXBlendMode(ONE,ONE);
     locSel->Draw();
+  static float time=0;
+  if (midcachunk) {
+
+    time += GetElapsedTime();
+    s->Draw();
+    if (time > 1.5)
+      fighters[0]->Destroy();
+  }
 
   //textplane->Draw();
   _GFX->EndDraw();
+      
   ProcessInput();
 }
 
