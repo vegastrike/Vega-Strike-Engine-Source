@@ -37,19 +37,36 @@ GamePlanet::GamePlanet()
   terraintrans = NULL;
   SetAI(new Order()); // no behavior
 }
-void GamePlanet::AddCity (const std::string &texture,float radius,int numwrapx, int numwrapy, BLENDFUNC blendSrc, BLENDFUNC blendDst, bool inside_out){
+class FogMesh : public Mesh {
+public:
+	FogMesh (std::string filename,const GFXColor & color, float radius, double focus, double concavity, int tail_mode_start, int tail_mode_end):Mesh(filename.c_str(),Vector(radius,radius,radius),0,NULL,true) {
+		
+	}
+	virtual ~FogMesh (){}
+};
+void GamePlanet::AddFog (const GFXColor & colror, double focus, double concavity, int tail_mode_start, int tail_mode_end) {
+	if(meshdata.empty()) meshdata.push_back(NULL);
+	Mesh *shield = meshdata.back(); meshdata.pop_back();
+	for (unsigned int i=1;i<=5;++i) {
+		Mesh *fog=new FogMesh (string("sphereatm")+XMLSupport::tostring(i)+".xmesh",colror,rSize(),focus,concavity,tail_mode_start,tail_mode_end);
+		meshdata.push_back(fog);
+	}
+	meshdata.push_back(shield);
+	
+}
+void GamePlanet::AddCity (const std::string &texture,float radius,int numwrapx, int numwrapy, BLENDFUNC blendSrc, BLENDFUNC blendDst, bool inside_out, bool reverse_normals){
   if (meshdata.empty()) {
     meshdata.push_back(NULL);
   }
   Mesh * shield = meshdata.back();
   meshdata.pop_back();
   GFXMaterial m;
-  m.ar=m.ag=m.ab=m.aa=1.0;
-  m.dr=m.dg=m.db=m.da=0.0;
+  m.ar=m.ag=m.ab=m.aa=0.0;
+  m.dr=m.dg=m.db=m.da=1.0;
   m.sr=m.sg=m.sb=m.sa=0.0;
   m.er=m.eg=m.eb=m.ea=m.power=0.0;
   static int stacks=XMLSupport::parse_int(vs_config->getVariable ("graphics","planet_detail","24"));
-  meshdata.push_back(new CityLights (radius,stacks,stacks, texture.c_str(), numwrapx, numwrapy, inside_out,ONE, ONE));
+  meshdata.push_back(new CityLights (radius,stacks,stacks, texture.c_str(), numwrapx, numwrapy, inside_out,ONE, ONE,reverse_normals));
   meshdata.back()->setEnvMap (GFXFALSE);
   meshdata.back()->SetMaterial (m);
 

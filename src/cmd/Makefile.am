@@ -31,6 +31,8 @@ libcmdgeneric =			\
 	container.cpp	\
 	unit_const_cache.cpp \
 	unit_const_cache.h	\
+	alphacurve.cpp	\
+	alphacurve.h	\
 	unit_collide.h				\
 	unit_collide.cpp			\
 	collide.h		\
