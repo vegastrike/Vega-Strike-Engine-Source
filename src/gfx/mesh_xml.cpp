@@ -1402,7 +1402,8 @@ void Mesh::LoadXML(const char *filename, float scale, int faction, Flightgroup *
   minSizeZ -= z_center;
   maxSizeZ -= z_center;
   ***/
-  radialSize = .5*(mx-mn).Magnitude();
+  if( o_index || index)
+ 	 radialSize = .5*(mx-mn).Magnitude();
 
   if (xml->sharevert) {
     GFXVertex * myvert = new GFXVertex[xml->vertices.size()];
