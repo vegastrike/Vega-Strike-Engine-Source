@@ -203,8 +203,6 @@ struct XML {
     bool force_texture;
 	bool recalc_norm;
 	bool shouldreflect;
-    
-	
 	vec3f detailplane;
 	bool reflect;
 	bool lighting;
@@ -224,6 +222,25 @@ struct XML {
 	quad quadtemp;
 	GFXMaterial material;
     float scale;
+	XML(){ //FIXME make defaults appear here.
+		scale=1.0;
+		sharevert=0;
+		usenormals=0;
+		reverse=0;
+		force_texture=0;
+		recalc_norm=0;
+		shouldreflect=0;
+		detailplane.x=0;
+		detailplane.y=0;
+		detailplane.z=0;
+		reflect=0;
+		lighting=0;
+		cullface=0;
+		polygon_offset=0;
+		blend_src=0;
+		blend_dst=0;
+		point_state=0;
+	}
   };
 
 using XMLSupport::EnumMap;
@@ -792,17 +809,111 @@ int main (int argc, char** argv) {
 		exit(-1);
 	}
 
-  XML memfile =(LoadXML(argv[1],1));
+  XML memfile=(LoadXML(argv[1],1));
   fprintf(stderr,"number of vertices: %d\nnumber of lines: %d\nnumber of triangles: %d\nnumber of quads: %d\n",memfile.vertices.size(),memfile.lines.size(),memfile.tris.size(),memfile.quads.size());
   FILE * Outputfile=fopen(argv[2],"w"); 
   int intbuf;
   float floatbuf;
   float versionnumber=(1.0)/(16.0);
+  //HEADER
   fwrite(&versionnumber,sizeof(float),1,Outputfile);// VERSION number for BinaryFormattedXMesh
   floatbuf = memfile.scale;
   fwrite(&floatbuf,sizeof(float),1,Outputfile);// Mesh Scale
+  intbuf= memfile.reverse;
+  fwrite(&intbuf,sizeof(int),1,Outputfile);//reverse flag
+  intbuf= memfile.force_texture;
+  fwrite(&intbuf,sizeof(int),1,Outputfile);//Force texture flag
+  intbuf= memfile.sharevert;
+  fwrite(&intbuf,sizeof(int),1,Outputfile);//Share vertex flag
+  floatbuf= memfile.polygon_offset;
+  fwrite(&floatbuf,sizeof(float),1,Outputfile);//Polygon offset
+  intbuf= memfile.blend_src;
+  fwrite(&intbuf,sizeof(int),1,Outputfile);//Blend Source
+  intbuf= memfile.blend_dst;
+  fwrite(&intbuf,sizeof(int),1,Outputfile);//Blend Destination
+  floatbuf= memfile.material.power;
+  fwrite(&floatbuf,sizeof(float),1,Outputfile);//Material:Specular:Power
+  floatbuf= memfile.material.ar;
+  fwrite(&floatbuf,sizeof(float),1,Outputfile);//Material:Ambient:Red
+  floatbuf= memfile.material.ag;
+  fwrite(&floatbuf,sizeof(float),1,Outputfile);//Material:Ambient:Green
+  floatbuf= memfile.material.ab;
+  fwrite(&floatbuf,sizeof(float),1,Outputfile);//Material:Ambient:Blue
+  floatbuf= memfile.material.aa;
+  fwrite(&floatbuf,sizeof(float),1,Outputfile);//Material:Ambient:Alpha
+  floatbuf= memfile.material.dr;
+  fwrite(&floatbuf,sizeof(float),1,Outputfile);//Material:Diffuse:Red
+  floatbuf= memfile.material.dg;
+  fwrite(&floatbuf,sizeof(float),1,Outputfile);//Material:Diffuse:Green
+  floatbuf= memfile.material.db;
+  fwrite(&floatbuf,sizeof(float),1,Outputfile);//Material:Diffuse:Blue
+  floatbuf= memfile.material.da;
+  fwrite(&floatbuf,sizeof(float),1,Outputfile);//Material:Diffuse:Alpha
+  floatbuf= memfile.material.er;
+  fwrite(&floatbuf,sizeof(float),1,Outputfile);//Material:Emissive:Red
+  floatbuf= memfile.material.eg;
+  fwrite(&floatbuf,sizeof(float),1,Outputfile);//Material:Emissive:Green
+  floatbuf= memfile.material.eb;
+  fwrite(&floatbuf,sizeof(float),1,Outputfile);//Material:Emissive:Blue
+  floatbuf= memfile.material.ea;
+  fwrite(&floatbuf,sizeof(float),1,Outputfile);//Material:Emissive:Alpha
+  floatbuf= memfile.material.sr;
+  fwrite(&floatbuf,sizeof(float),1,Outputfile);//Material:Specular:Red
+  floatbuf= memfile.material.sg;
+  fwrite(&floatbuf,sizeof(float),1,Outputfile);//Material:Specular:Green
+  floatbuf= memfile.material.sb;
+  fwrite(&floatbuf,sizeof(float),1,Outputfile);//Material:Specular:Blue
+  floatbuf= memfile.material.sa;
+  fwrite(&floatbuf,sizeof(float),1,Outputfile);//Material:Specular:Alpha
+  floatbuf= memfile.detailplane.x;
+  fwrite(&floatbuf,sizeof(float),1,Outputfile);//Detail Plane:X
+  floatbuf= memfile.detailplane.y;
+  fwrite(&floatbuf,sizeof(float),1,Outputfile);//Detail Plane:Y
+  floatbuf= memfile.detailplane.z;
+  fwrite(&floatbuf,sizeof(float),1,Outputfile);//Detail Plane:Z
+  //END HEADER
+  //GEOMETRY
   intbuf= memfile.vertices.size();
   fwrite(&intbuf,sizeof(int),1,Outputfile);//Number of vertices
+//  intbuf=-1;
+//  for(int j=0;j<3;j++){
+//		fwrite(&intbuf,sizeof(int),1,Outputfile);//termination block for debug only
+//  }
+  for(int verts=0;verts<memfile.vertices.size();verts++){
+	  //intbuf=-1;
+	  floatbuf=memfile.vertices[verts].x;
+	  fwrite(&floatbuf,4,1,Outputfile);//vertex #vert:x
+	  //fwrite(&intbuf,sizeof(int),1,Outputfile);//termination block for debug only
+	  floatbuf=memfile.vertices[verts].y;
+	  fwrite(&floatbuf,4,1,Outputfile);//vertex #vert:y
+	  //fwrite(&intbuf,sizeof(int),1,Outputfile);//termination block for debug only
+	  floatbuf=memfile.vertices[verts].z;
+	  fwrite(&floatbuf,4,1,Outputfile);//vertex #vert:z
+	  //fwrite(&intbuf,sizeof(int),1,Outputfile);//termination block for debug only
+	  floatbuf=memfile.vertices[verts].i;
+	  fwrite(&floatbuf,4,1,Outputfile);//vertex #vert:i
+	  //fwrite(&intbuf,sizeof(int),1,Outputfile);//termination block for debug only
+	  floatbuf=memfile.vertices[verts].j;
+	  fwrite(&floatbuf,4,1,Outputfile);//vertex #vert:j
+	  //fwrite(&intbuf,sizeof(int),1,Outputfile);//termination block for debug only
+	  floatbuf=memfile.vertices[verts].k;
+	  fwrite(&floatbuf,4,1,Outputfile);//vertex #vert:k
+	  //fwrite(&intbuf,sizeof(int),1,Outputfile);//termination block for debug only
+	  floatbuf=memfile.vertices[verts].s;
+	  fwrite(&floatbuf,4,1,Outputfile);//vertex #vert:s
+	  //fwrite(&intbuf,sizeof(int),1,Outputfile);//termination block for debug only
+	  floatbuf=memfile.vertices[verts].t;
+	  fwrite(&floatbuf,4,1,Outputfile);//vertex #vert:t
+	  //fwrite(&intbuf,sizeof(int),1,Outputfile);//termination block for debug only
+	  //for(int i=0;i<4;i++){
+	//	fwrite(&intbuf,sizeof(int),1,Outputfile);//termination block for debug only
+	 // }
+  }
+  //END GEOMETRY
+	//intbuf=-1;
+	//for(int i=0;i<4;i++){
+//		fwrite(&intbuf,sizeof(int),1,Outputfile);//termination block for debug only
+//	}
   return 0;
 }
 
