@@ -180,6 +180,7 @@ void	AccountServer::recvMsg( SOCKETALT sock)
 					{
 						// We found the client in the account list
 						found = 1;
+						cout<<"Found player : "<<elem->callsign<<":"<<elem->passwd<<endl;
 						if( elem->isConnected())
 						{
 							// and he is connected

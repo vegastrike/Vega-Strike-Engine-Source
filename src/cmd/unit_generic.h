@@ -631,7 +631,7 @@ public:
   ///Returns the current ammt of energy left
   float EnergyRechargeData() const{return recharge;}
   void  SetEnergyRecharge( float enrech) { recharge = enrech;}
-  void  SetMaxEnergy( float maxen) { maxenergy = maxen;}
+  void  SetMaxEnergy( unsigned short maxen) { maxenergy = maxen;}
   unsigned short MaxEnergyData() const{return maxenergy;}
   float ShieldRechargeData() const{return shield.recharge;}
   float EnergyData() const;
@@ -744,7 +744,13 @@ public:
   Vector GetAcceleration() {
     Vector p, q, r;
     GetOrientation(p,q,r);
-  	return Vector (NetLocalForce.i*p + NetLocalForce.j*q + NetLocalForce.k*r );
+	Vector res(NetLocalForce.i*p + NetLocalForce.j*q + NetLocalForce.k*r );
+    if (NetForce.i||NetForce.j||NetForce.k) {
+      res+=InvTransformNormal(identity_matrix,NetForce);
+    }
+    res=res/mass;
+
+  	return res;
   } //acceleration
   ///Transforms a orientation vector Up a coordinate level. Does not take position into account
   Vector UpCoordinateLevel(const Vector &v) const;

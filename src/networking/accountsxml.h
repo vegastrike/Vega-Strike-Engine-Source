@@ -86,14 +86,14 @@ class Account
 		}
 
 		int		compareName( char *str)
-		{ return callsign==string( str); }
+		{ return callsign!=string( str); }
 		int		comparePass( char *str)
-		{ return passwd==string( str); }
+		{ return passwd!=string( str); }
 
 		int		compareName( string str)
-		{ return callsign==str; }
+		{ return callsign!=str; }
 		int		comparePass( string str)
-		{ return passwd==str; }
+		{ return passwd!=str; }
 
 		int		isConnected()
 		{

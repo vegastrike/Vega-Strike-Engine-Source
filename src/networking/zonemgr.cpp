@@ -235,7 +235,7 @@ void	ZoneMgr::broadcast( int zone, ObjSerial serial, Packet * pckt )
 /************************************************************************************************/
 
 // Broadcast all positions
-void	ZoneMgr::broadcastSnapshots( )
+void	ZoneMgr::broadcastSnapshots( bool update_planets)
 {
 	int i=0;
 	LI k, l;
@@ -281,11 +281,15 @@ void	ZoneMgr::broadcastSnapshots( )
 				//netbuf.Reset();
 				for( m=zone_unitlist[i].begin(); m!=zone_unitlist[i].end(); m++)
 				{
-					// Create a client state with a delta time too ?? WHICH ONE ???
-					ClientState cs( (*m));
-					this->addPosition( netbuf, (*m), (*k)->game_unit.GetUnit(), cs);
-					// Else : always send back to clients their own info or just ignore ?
-					// Ignore for now
+					// Only send planets and nebulas update when PLANET_ATOM is reached
+					if( ((*m)->isUnit()!=PLANETPTR && (*m)->isUnit()!=NEBULAPTR) || update_planets )
+					{
+						// Create a client state with a delta time too ?? WHICH ONE ???
+						ClientState cs( (*m));
+						this->addPosition( netbuf, (*m), (*k)->game_unit.GetUnit(), cs);
+						// Else : always send back to clients their own info or just ignore ?
+						// Ignore for now
+					}
 				}
 			/************************* END UNITS BROADCAST ***************************/
 				// Send snapshot to client k

@@ -234,7 +234,7 @@ string SaveGame::WriteNewsData () {
   return ret;
 }
 vector <string> parsePipedString(string s) {
-  unsigned int loc;
+  int loc;
   vector <string> ret;
   while ((loc = s.find("|"))!=string::npos) {
     ret.push_back( s.substr (0,loc));
@@ -479,6 +479,7 @@ void SaveGame::ReadSavedPackets (char * &buf) {
       //su.push_back (SavedUnits (unitname,(clsptr)a,factname));
     }
   }
+ cout<<"\tExiting ReadSavedPackets"<<endl;
 }
 string SaveGame::WriteSavedUnit (SavedUnits* su) {
   return string("\n")+XMLSupport::tostring(su->type)+string(" ")+su->filename+" "+su->faction;
@@ -636,6 +637,7 @@ void SaveGame::ParseSaveGame (string filename, string &FSS, string originalstars
 		char *tmp2= (char *)malloc(savestring.length()+2);
 		char * freetmp2 = tmp2;
 		char * factionname = new char[1024];
+		memset( factionname, 0, 1024);
 		QVector tmppos;
 		int res = sscanf (buf,"%s %lf %lf %lf %s\n",tmp2,&tmppos.i,&tmppos.j,&tmppos.k, factionname);
 		if (res==4 || res==5) {
@@ -655,14 +657,21 @@ void SaveGame::ParseSaveGame (string filename, string &FSS, string originalstars
 				}
 				break;
 			}
-			// In networking save we include the faction at the end of the first line
-			if( res==5)
-				playerfaction = string( factionname);
-			else
-				// If no faction -> default to privateer
-				playerfaction = string( "privateer");
-			delete factionname;
 		  }
+		  // In networking save we include the faction at the end of the first line
+		  if( res==5)
+		  {
+		  	playerfaction = string( factionname);
+			cout<<"Found faction in save file : "<<playerfaction<<endl;
+		  }
+		  else
+		  {
+		    // If no faction -> default to privateer
+		  	playerfaction = string( "privateer");
+			cout<<"Faction not found assigning default one : privateer !!!"<<endl;
+		  }
+		  delete factionname;
+
 		  if (ForceStarSystem.length()==0)
 			ForceStarSystem=string(tmp2);
 		  if (PlayerLocation.i==FLT_MAX||PlayerLocation.j==FLT_MAX||PlayerLocation.k==FLT_MAX) {

@@ -65,7 +65,7 @@ class ZoneMgr
 		void	removeClient( Client * clt);
         void    broadcast( Client * clt, Packet * pckt );
         void    broadcast( int zone, ObjSerial serial, Packet * pckt );
-        void    broadcastSnapshots();
+        void    broadcastSnapshots( bool update_planets=false);
 		void	broadcastDamage();
 		int		getZoneClients( Client * clt, char * bufzone);
 		double	isVisible( Quaternion orient, QVector src_pos, QVector tar_pos);

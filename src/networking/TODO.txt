@@ -15,9 +15,7 @@
 
 *** GAME SERVER ********************************************************
 
-- In UpdatePhysics : do not modify physical_state for a client ! only for server side units (SHOULD BE OK IN UpdatePhysics2)
 - Check the detlatime we have to send in clientstate (broadcastSnapshot)
-- Load whole system description when generating a system (if not already done)
 - Transfer system description when a player enter in a system (planets, bases, ...)
 - Turn mount_num into a char ?
 - Put back a control with keyboard to be able to SAVE, SEE MEMORY USED...
@@ -70,6 +68,7 @@ NO BECAUSE DEFAULT TO ZLIB - Put some negociation stage to check that client sup
 
 === ACCOUNT SERVER ======================================================
 
+DONE - Load whole system description when generating a system (if not already done)
 DONE - Compress the save files before sending them to game server
 DONE - Then transfert unit description with login acceptance
 DONE - Fix the bug when transmitting name for disconnection ??
@@ -81,6 +80,7 @@ DONE - add a timeout test if !ingame with a second timeout much bigger
 
 === GAME SERVER =========================================================
 
+DONE - In UpdatePhysics : do not modify physical_state for a client ! only for server side units (SHOULD BE OK IN UpdatePhysics2)
 DONE AUTOMATICALLY - When another player is targeted, get his data (damage level, shield, weapons if we have the appropriate sensors)
 DONE - Each time a ship is hit => send to all clients in the same zone a damage notification
 DONE - when server savetime comes, send unit xml to account server for each client

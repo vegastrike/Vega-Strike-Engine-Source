@@ -49,8 +49,9 @@
 double	clienttimeout;
 double	logintimeout;
 int		acct_con;
-string	tmpdir;
 double  DAMAGE_ATOM;
+double	PLANET_ATOM;
+double	SAVE_ATOM;
 
 /**************************************************************/
 /**** Constructor / Destructor                             ****/
@@ -359,6 +360,7 @@ void	NetServer::start(int argc, char **argv)
 	double  reconnect_time = 0;
 	double	curtime=0;
 	double	snaptime=0;
+	double	planettime=0;
 	double	damagetime=0;
 	acct_con = 1;
 	Packet p2;
@@ -373,13 +375,11 @@ void	NetServer::start(int argc, char **argv)
 	run_only_player_starsystem=false;
 	//vs_config = new VegaConfig( SERVERCONFIGFILE);
 	cout<<" config loaded"<<endl;
+	// Save period in seconds
 	strperiod = vs_config->getVariable( "server", "saveperiod", "7200");
-	period = atoi( strperiod.c_str());
+	SAVE_ATOM = atoi( strperiod.c_str());
 	string strperiodrecon = vs_config->getVariable( "server", "reconnectperiod", "60");
 	periodrecon = atoi( strperiodrecon.c_str());
-	tmpdir = datadir + vs_config->getVariable( "server", "tmpdir", "");
-	if( strperiod=="")
-		tmpdir = datadir + "/tmp/";
 	strtimeout = vs_config->getVariable( "server", "clienttimeout", "20");
 	clienttimeout = atoi( strtimeout.c_str());
 	strlogintimeout = vs_config->getVariable( "server", "logintimeout", "60");
@@ -389,6 +389,8 @@ void	NetServer::start(int argc, char **argv)
 	NETWORK_ATOM = (double) atoi( strnetatom.c_str());
 	strnetatom = vs_config->getVariable( "network", "damage_atom", "1");
 	DAMAGE_ATOM = (double) atoi( strnetatom.c_str());
+	strnetatom = vs_config->getVariable( "network", "planet_atom", "10");
+	PLANET_ATOM = (double) atoi( strnetatom.c_str());
 
 	InitTime();
 	UpdateTime();
@@ -440,7 +442,7 @@ void	NetServer::start(int argc, char **argv)
 	COUT << "done." << endl;
 
 	// Create the _Universe telling it we are on server side
-	_Universe = new Universe(argc,argv,vs_config->getVariable ("general","galaxy","milky_way.xml").c_str(), true);
+	_Universe = new Universe(argc,argv,vs_config->getVariable ("server","galaxy","milky_way.xml").c_str(), true);
 	string strmission = vs_config->getVariable( "server", "missionfile", "networking.mission");
 	mission = new Mission( strmission.c_str());
 	mission->initMission( false);
@@ -548,15 +550,25 @@ void	NetServer::start(int argc, char **argv)
 		logoutList.clear();
 
 		snaptime += GetElapsedTime();
+		planettime += GetElapsedTime();
 		if( snapchanged && snaptime>NETWORK_ATOM)
 		{
 			//cout<<"SENDING SNAPSHOT ----------"<<end;
-			zonemgr->broadcastSnapshots( ); // &NetworkToClient );
+			// If planet time we send planet and nebula info
+			if( planettime>PLANET_ATOM)
+			{
+				zonemgr->broadcastSnapshots( true);
+				planettime = 0;
+			}
+			// Otherwise we just send ships/bases... info
+			else
+				zonemgr->broadcastSnapshots( false);
 			snapchanged = 0;
 			snaptime = 0;
 		}
 #ifndef NET_SHIELD_SYSTEM_1
 		damagetime += GetElapsedTime();
+		// Time to send shield and damage info
 		if( damagetime>DAMAGE_ATOM)
 		{
 			zonemgr->broadcastDamage();
@@ -567,12 +579,14 @@ void	NetServer::start(int argc, char **argv)
 		// Check for automatic server status save time (in seconds)
 		//curtime = getNewTime();
 		// period * 60 because in minutes in the config file
-		if( curtime - savetime > period*60)
+		savetime += GetElapsedTime();
+		//if( curtime - savetime > period*60)
+		if( savetime>SAVE_ATOM)
 		{
 			// Not implemented
 			cout<<">>> Saving server status... ";
 			this->save();
-			savetime += period;
+			savetime = 0;
 			cout<<"done."<<endl;
 		}
 
