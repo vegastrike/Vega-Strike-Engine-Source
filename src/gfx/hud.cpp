@@ -24,7 +24,8 @@
 #include "lin_time.h"
 #include "file_main.h"
 #include "gfx/aux_texture.h"
-
+#include "vs_globals.h"
+//#include "glut.h"
 
 TextPlane::TextPlane(const char *filename) {
   myDims.i = 2;  myDims.j=-2;
@@ -61,46 +62,54 @@ void TextPlane::Draw(const string & newText, int offset)
 {
 	// some stuff to draw the text stuff
   string::const_iterator text_it = newText.begin();
+  void * fnt = GLUT_BITMAP_HELVETICA_12;//g_game.x_resolution>800?GLUT_BITMAP_HELVETICA_12:GLUT_BITMAP_HELVETICA_10;
   float tmp,row, col;
   GetPos (row,col);
-  myFont->MakeActive();
   GFXPushBlendMode();
-  GFXBlendMode (ONE,ONE);
+  GFXBlendMode (ONE,ZERO);
   GFXDisable (DEPTHTEST);
   GFXDisable (CULLFACE);
   GFXDisable (LIGHTING);
-  GFXEnable(TEXTURE0);
-  GFXBegin(GFXQUAD);
+  GFXDisable (TEXTURE0);
+  glPushMatrix();
+
   int entercount=0;
   for (;entercount<offset&&text_it!=newText.end();text_it++) {
     if (*text_it=='\n')
       entercount++;
   }
+  glTranslatef(col,row,0);  
+  //  glRasterPos2f (g_game.x_resolution*(1-(col+1)/2),g_game.y_resolution*(row+1)/2);
+  glRasterPos2f (0,0);
   while(text_it != newText.end() && row>myDims.j) {
-    if(*text_it>=32 && *text_it<=127) {//always true
+    if(*text_it>=32) {//always true
       GlyphPosition g = myGlyphPos[*text_it-32];
+      //glutStrokeCharacter (GLUT_STROKE_ROMAN,*text_it);
+      glutBitmapCharacter (fnt,*text_it);
       
-      GFXTexCoord2f(g.right,g.bottom);
-      GFXVertex3f((col+myFontMetrics.i), row, 0.0);
-      GFXTexCoord2f(g.right,g.top);
-      GFXVertex3f((col+myFontMetrics.i), row+myFontMetrics.j, 0.0);
-      GFXTexCoord2f(g.left,g.top);
-      GFXVertex3f(col, row+myFontMetrics.j, 0.0);
-      GFXTexCoord2f(g.left,g.bottom);
-      GFXVertex3f(col, row, 0.0);
     }
     
-    if(*text_it=='\t')
-      col+=myFontMetrics.i*5;
-    else
+    if(*text_it=='\t') {
+      col+=glutBitmapWidth (fnt,' ')*5;
+      glutBitmapCharacter (fnt,' ');
+      glutBitmapCharacter (fnt,' ');
+      glutBitmapCharacter (fnt,' ');
+      glutBitmapCharacter (fnt,' ');
+      glutBitmapCharacter (fnt,' ');
+    } else {
       col+=myFontMetrics.i;
-    if(col+myFontMetrics.i/10>=myDims.i||*text_it == '\n') {
+      col+=glutBitmapWidth (fnt,*text_it)*5;
+    }
+    if(col+(text_it+1!=newText.end())?glutBitmapWidth(fnt,*text_it):0/10>=myDims.i||*text_it == '\n') {
       GetPos (tmp,col);
       row -= myFontMetrics.j;
+      glPopMatrix();
+      glPushMatrix ();
+      glTranslatef (col,row,0);
     }
     text_it++;
   }
-  GFXEnd();
+  glPopMatrix();
   GFXPopBlendMode();
 }
 
