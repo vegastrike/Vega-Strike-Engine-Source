@@ -364,7 +364,7 @@ GamePlanet::GamePlanet(QVector x,QVector y,float vely, const Vector & rotvel, fl
       if (shines.empty()) {
 	shines.push_back("shine.ani");
       }
-      shine = new Animation (shines[rand()%shines.size()],false,.1,BILINEAR,false,true,c);//GFXColor(ourmat.er,ourmat.eg,ourmat.eb,ourmat.ea));
+      shine = new Animation (shines[rand()%shines.size()],true,.1,BILINEAR,false,true,c);//GFXColor(ourmat.er,ourmat.eg,ourmat.eb,ourmat.ea));
       shine->SetDimensions ( glowradius*radius,glowradius*radius);
     
       if (!drawstar) {
