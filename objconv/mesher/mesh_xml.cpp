@@ -1078,11 +1078,16 @@ XML LoadXML(const char *filename, float unitscale) {
   return xml;
 }
 
+void xmeshToBFXM(XML memfile,FILE* Outputfile,char mode); //converts input file to BFXM creates new, or appends record based on mode
 int writesuperheader(XML memfile, FILE* Outputfile); //Writes superheader to file Outputfile
 int appendrecordfromxml(XML memfile, FILE* Outputfile); // Append a record specified in memfile to the output file and return number of bytes written. Assumes Outputfile is appropriately positioned at the end of the file.
 int appendmeshfromxml(XML memfile, FILE* Outputfile); // Append a mesh specified in memfile to the output file and return number of bytes written. Assumes Outputfile is appropriately positioned at the end of the file.
-void ReverseToFile(FILE* Inputfile,FILE* Outputfile); //Translate BFXM file Inputfile to text file Outputfile
+void BFXMToXmesh(FILE* Inputfile,FILE* Outputfile); //Translate BFXM file Inputfile to text file Outputfile
 
+void usage();
+void usage(){
+	fprintf(stderr,"usage:\n\tmesher <inputfile> <outputfile> <command>\n\nWhere command is a 3 letter sequence of:\n\tInputfiletype:\n\t\tb:BFXM\n\t\to:OBJ\n\t\tx:xmesh\n\tOutputfiletype:\n\t\tb:BFXM\n\t\to:OBJ\n\t\tx:xmesh\n\tCommandflag:\n\t\ta: append to Outputfile\n\t\tc: create Outputfile\n");
+}
 
 int main (int argc, char** argv) {
 	if (argc!=4){
@@ -1090,35 +1095,55 @@ int main (int argc, char** argv) {
 		for(int i = 0; i<argc;i++){
 			fprintf(stderr,"%d : %s\n",i,argv[i]);
 		}
+		usage();
+		exit(-1);
+	}
+	if(strlen(argv[3])!=3){
+		fprintf(stderr,"Invalid command %s, aborting\n",argv[3]);
+		usage();
 		exit(-1);
 	}
 
-  bool append=(argv[3][0]=='a');
-  bool create=(argv[3][0]=='c');
-  bool reverse=(argv[3][0]=='r');
-//  fprintf(stderr,"number of vertices: %d\nnumber of lines: %d\nnumber of triangles: %d\nnumber of quads: %d\n",memfile.vertices.size(),memfile.lines.size(),memfile.tris.size(),memfile.quads.size());
+  bool appendxmeshtobfxm=(argv[3][0]=='x'&&argv[3][1]=='b'&&argv[3][2]=='a');
+  bool createBFXMfromxmesh=(argv[3][0]=='x'&&argv[3][1]=='b'&&argv[3][2]=='c');
+  bool createxmeshesfromBFXM=(argv[3][0]=='b'&&argv[3][1]=='x'&&argv[3][2]=='c');
+  bool createOBJfromBFXM=(argv[3][0]=='b'&&argv[3][1]=='o'&&argv[3][2]=='c');
+  bool createOBJfromxmesh=(argv[3][0]=='x'&&argv[3][1]=='o'&&argv[3][2]=='c');
+  bool createBFXMfromOBJ=(argv[3][0]=='o'&&argv[3][1]=='b'&&argv[3][2]=='c');
+  bool createxmeshesfromOBJ=(argv[3][0]=='o'&&argv[3][1]=='x'&&argv[3][2]=='c');
+
   FILE * Outputfile;
-  if(append){
+  if(appendxmeshtobfxm){
 	Outputfile=fopen(argv[2],"rb+"); //append to end, but not append, which doesn't do what you want it to.
 	fseek(Outputfile, 0, SEEK_END);
-  }else if(create){
+	XML memfile=(LoadXML(argv[1],1));
+    xmeshToBFXM(memfile,Outputfile,'a');
+  }else if(createBFXMfromxmesh){
 	Outputfile=fopen(argv[2],"wb+"); //create file for BFXM output
-  } else if(reverse){
+	XML memfile=(LoadXML(argv[1],1));
+    xmeshToBFXM(memfile,Outputfile,'c');
+  } else if(createxmeshesfromBFXM){
 	FILE* Inputfile=fopen(argv[1],"rb");
 	Outputfile=fopen(argv[2],"w+"); //create file for text output
-	ReverseToFile(Inputfile,Outputfile);
-	exit(0);
+	BFXMToXmesh(Inputfile,Outputfile);
+  } else if(createOBJfromBFXM||createOBJfromxmesh||createBFXMfromOBJ||createxmeshesfromOBJ){
+	fprintf(stderr,"OBJ functions not yet supported: - aborting\n");
+	exit(-1);
   } else {
-	  fprintf(stderr,"Invalid flag: %c - aborting",argv[3][0]);
+	  fprintf(stderr,"Invalid command: %s - aborting",argv[3]);
+	  usage();
 	  exit(-1);
   }
-  
+  return 0;
+}
 
-  XML memfile=(LoadXML(argv[1],1));
+void xmeshToBFXM(XML memfile,FILE* Outputfile,char mode){//converts input file to BFXM creates new, or appends record based on mode
   unsigned int intbuf;
   float floatbuf;
   unsigned char bytebuf;
-
+  
+  bool append=(mode=='a');
+  
   int runningbytenum=0;
   if(!append){
 	runningbytenum+=writesuperheader(memfile,Outputfile); // Write superheader
@@ -1141,8 +1166,6 @@ int main (int argc, char** argv) {
   intbuf=VSSwapHostIntToLittle(intbuf);
   fseek(Outputfile,4+sizeof(int),SEEK_SET);
   fwrite(&intbuf,sizeof(int),1,Outputfile);//Correct number of bytes for total file
-
-  return 0;
 }
  
 int writesuperheader(XML memfile, FILE* Outputfile){
@@ -1553,7 +1576,7 @@ int appendmeshfromxml(XML memfile, FILE* Outputfile){
 }
 
 
-void ReverseToFile(FILE* Inputfile, FILE* Outputfile){
+void BFXMToXmesh(FILE* Inputfile, FILE* Outputfile){
   unsigned int intbuf;
   float floatbuf;
   unsigned char bytebuf;
