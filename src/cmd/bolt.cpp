@@ -245,6 +245,10 @@ bool Bolt::Collide (Unit * target) {
   float distance;
   Unit * affectedSubUnit;
   if ((affectedSubUnit =target->queryBSP (prev_position,cur_position,normal,distance))) {//ignore return
+  //  QVector pos;
+  //  double dis=distance;
+  //  if ((affectedSubUnit = target->BeamInsideCollideTree(prev_position,cur_position,pos,normal,dis))) { 
+  //    distance=dis;
     QVector tmp = (cur_position-prev_position).Normalize();
     tmp = tmp.Scale(distance);
     distance = curdist/range;

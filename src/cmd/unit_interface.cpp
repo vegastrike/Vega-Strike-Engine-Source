@@ -879,19 +879,21 @@ void UpgradingInfo::CompleteTransactionConfirm () {
   float price;
   Unit * un;
   Unit * bas;
+  int addmultmode = 0;
   if ((un=buyer.GetUnit())) {
     switch (mode) {
     case UPGRADEMODE:
     case ADDMODE:
-      canupgrade =un->canUpgrade (NewPart,mountoffset,subunitoffset,mode==ADDMODE,true,percentage,templ);
+
+      if (mode==ADDMODE)
+	addmultmode=1;
+      if (multiplicitive==true)
+	addmultmode=2;
+      
+      canupgrade =un->canUpgrade (NewPart,mountoffset,subunitoffset,addmultmode,true,percentage,templ);
       price =(float)(part.price*(1-usedPrice(percentage)));
       if ((_Universe->AccessCockpit()->credits>price)) {
 	_Universe->AccessCockpit()->credits-=price;
-	int addmultmode = 0;
-	if (mode==ADDMODE)
-	  addmultmode=1;
-	if (multiplicitive==true)
-	  addmultmode=2;
 
 	un->Upgrade (NewPart,mountoffset,subunitoffset,addmultmode,true,percentage,templ);
 	unsigned int removalindex;

@@ -365,7 +365,10 @@ bool Beam::Collide (Unit * target) {
 
   Unit * colidee;
   if ((colidee = target->queryBSP(center,end,normal,distance))) { 
-    
+  //  QVector pos;
+  //  double dis=distance;
+  //  if ((colidee = target->BeamInsideCollideTree(center,end,pos,normal,dis))) { 
+  //    distance=dis;
     curlength = distance;
     impact|=IMPACT;
     

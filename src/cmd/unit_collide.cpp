@@ -262,6 +262,122 @@ bool Unit::InsideCollideTree (Unit * smaller, QVector & bigpos, Vector &bigNorma
     //doesn't check all i*j options of subunits vs subunits
     return false;
 }
+
+
+
+
+
+
+Unit * Unit::BeamInsideCollideTree (const QVector & start,const QVector & end, QVector & pos, Vector &norm, double &distance) {
+  QVector r (end-start);
+  double mag = r.Magnitude();
+  if (mag>0) {
+    r = r*(1./mag);
+  }
+  {
+    bool temp=true;
+    if (colTrees==NULL) {
+      temp=true;
+    }else if (colTrees->colTree==NULL) {
+      temp=true;
+    }
+    if (temp) {
+      float dis=distance;
+      Unit * ret= queryBSP(start,end,norm,dis);
+      distance=dis;
+      pos=start+r*distance;
+      return ret;
+    }
+  }
+  QVector p(-r.k,r.i,-r.j);
+  QVector q;
+  ScaledCrossProduct(r,p,q);
+  ScaledCrossProduct(q,r,p);
+  csRapidCollider::CollideReset();
+  //    printf ("Col %s %s\n",name.c_str(),smaller->name.c_str());
+  const csReversibleTransform bigtransform (cumulative_transformation_matrix);
+  Matrix smallerMat(p.Cast(),q.Cast(),r.Cast());
+  smallerMat.p = start;
+  const csReversibleTransform smalltransform (smallerMat);
+  bsp_polygon tri;
+  tri.v.push_back(Vector(-mag/1024,0,0));
+  tri.v.push_back(Vector(-mag/1024,0,mag));
+  tri.v.push_back(Vector(mag/1024,0,mag));
+  tri.v.push_back(Vector(mag/1024,0,0));
+  vector <bsp_polygon> mesh;
+  mesh.push_back(tri);
+  csRapidCollider smallColTree(mesh);
+  if (smallColTree.Collide (*colTrees->colTree,
+				  &smalltransform,
+				  &bigtransform)) {
+      static int crashcount=0;
+    
+            fprintf (stderr,"%s Beam Crashez %d\n", name.c_str(),crashcount++);
+      csCollisionPair * mycollide = csRapidCollider::GetCollisions();
+      int numHits = csRapidCollider::numHits;
+      if (numHits) {
+	printf ("num hits %d",numHits);
+	/*
+	pos.Set((mycollide[0].a1.x+mycollide[0].b1.x+mycollide[0].c1.x)/3,  
+		     (mycollide[0].a1.y+mycollide[0].b1.y+mycollide[0].c1.y)/3,  
+		     (mycollide[0].a1.z+mycollide[0].b1.z+mycollide[0].c1.z)/3);
+	pos = Transform (smaller->cumulative_transformation_matrix,smallpos);
+	*/
+	pos.Set((mycollide[0].a2.x+mycollide[0].b2.x+mycollide[0].c2.x)/3,  
+		   (mycollide[0].a2.y+mycollide[0].b2.y+mycollide[0].c2.y)/3,  
+		   (mycollide[0].a2.z+mycollide[0].b2.z+mycollide[0].c2.z)/3);
+	pos = Transform (cumulative_transformation_matrix,pos);
+	csVector3 sn, bn;
+	sn.Cross (mycollide[0].b1-mycollide[0].a1,mycollide[0].c1-mycollide[0].a1);
+	bn.Cross (mycollide[0].b2-mycollide[0].a2,mycollide[0].c2-mycollide[0].a2);
+	sn.Normalize();
+	bn.Normalize();
+	//	smallNormal.Set (sn.x,sn.y,sn.z);
+	norm.Set (bn.x,bn.y,bn.z);
+	//smallNormal = TransformNormal (smaller->cumulative_transformation_matrix,smallNormal);
+	norm = TransformNormal (cumulative_transformation_matrix,norm);
+	distance = (pos-start).Magnitude();
+	return this;
+      }
+    }
+#if 0
+    UnitCollection::UnitIterator i;
+    static float rsizelim = XMLSupport::parse_float (vs_config->getVariable ("physics","smallest_subunit_to_collide",".2"));
+    if (!bigger->SubUnits.empty()) {
+      i=bigger->getSubUnits();
+      for (Unit * un;(un=i.current())!=NULL;i.advance()) {
+	if ((bigger->isUnit()!=ASTEROIDPTR)&&(un->rSize()/bigger->rSize()<rsizelim)) {
+	  break;
+	}else {
+	  //	  printf ("s:%f",un->rSize()/bigger->rSize());
+	}
+	if ((un->InsideCollideTree(smaller,bigpos, bigNormal,smallpos,smallNormal))) {
+	  return true;
+	}
+      }
+    }
+    if (!smaller->SubUnits.empty()) {
+      i=smaller->getSubUnits();
+      for (Unit * un;(un=i.current())!=NULL;i.advance()) {
+	if ((smaller->isUnit()!=ASTEROIDPTR)&&(un->rSize()/smaller->rSize()<rsizelim)) {
+	  //	  printf ("s:%f",un->rSize()/smaller->rSize());
+	  break;
+
+	}
+	if ((bigger->InsideCollideTree(un,bigpos, bigNormal,smallpos,smallNormal))) {
+	  return true;
+	}
+      }
+    }
+#endif
+
+    //FIXME
+    //doesn't check all i*j options of subunits vs subunits
+    return false;
+}
+
+
+
 bool Unit::Collide (Unit * target) {
   if (target==this||((target->isUnit()!=NEBULAPTR&&isUnit()!=NEBULAPTR)&&(owner==target||target->owner==this||(owner!=NULL&&target->owner==owner))))
     return false;
@@ -359,6 +475,9 @@ Unit * Unit::queryBSP (const QVector &pt, float err, Vector & norm, float &dist,
 }
 
 Unit * Unit::queryBSP (const QVector &start, const QVector & end, Vector & norm, float &distance, bool ShieldBSP) {
+
+
+
   int i;
   Unit * tmp;
   if (!SubUnits.empty()) {
