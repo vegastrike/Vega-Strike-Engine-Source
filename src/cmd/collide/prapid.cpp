@@ -175,7 +175,8 @@ bool csRapidCollider::Collide (csRapidCollider &otherCollider,
                                const csReversibleTransform *pTransform2)
 {
   csRapidCollider *pRAPIDCollider2 = (csRapidCollider *)&otherCollider;
-#warning is comparing against self collide tree b4d??
+// VC does not understand that preprocessor command
+//#warning is comparing against self collide tree b4d??
 #if 0
   if (pRAPIDCollider2 == this) return false;
 #endif
