@@ -224,8 +224,7 @@ void Mesh::beginElement(const string &name, const AttributeList &attributes) {
 		      xml->material.power=parse_float((*iter).value);
 		      break;
 		    case XML::REFLECT:
-		      if (strcmp((*iter).value.c_str(),"0")==0||strcmp((*iter).value.c_str(),"FALSE")==0)
-			envMap=GFXFALSE;
+		      envMap= parse_bool((*iter).value.c_str());
 		      break;
 		    }
 		  }
