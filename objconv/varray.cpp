@@ -42,7 +42,9 @@ static GLfloat  vertexArray[] = {
 };
 static GLuint	indices[] = { 2, 3, 4, 0, 1 };
 #define shapesize 5
-
+static bool isPowTwo(unsigned int n) {
+  return ((n&(n-1))==0);
+}
 template <class T> vector<T> GetIndices (T size, size_t * memsize) {
   vector<T> index(size);
   *memsize=sizeof(T);
@@ -93,22 +95,29 @@ public:
       if (s<256) {
         GLubyte LSize=s;
         vector<GLubyte> indices=GetIndices(LSize,&memsize);
+        //WARNING, GL DRIVER READS PAST THE BOUNDS!
+        //HACK HACK HACK!!
+        
+        while ((indices.size()&(indices.size()-1))!=0) {
+          indices.push_back(0);
+        }
         (*glBufferDataARB_p)(GL_ELEMENT_ARRAY_BUFFER_ARB,
-                             size*sizeof(memsize),
+                             s*memsize,
                              &indices[0],
                              (mutate)?GL_DYNAMIC_DRAW_ARB:GL_STATIC_DRAW_ARB);
       }else if (s<65536){
         GLushort LSize=s;
         vector<GLushort> indices=GetIndices(LSize,&memsize);
+
         (*glBufferDataARB_p)(GL_ELEMENT_ARRAY_BUFFER_ARB,
-                             size*sizeof(memsize),
+                             s*memsize,
                              &indices[0],
                              (mutate)?GL_DYNAMIC_DRAW_ARB:GL_STATIC_DRAW_ARB);
       }else {
         GLuint LSize=s;
         vector<GLuint> indices=GetIndices(LSize,&memsize);
         (*glBufferDataARB_p)(GL_ELEMENT_ARRAY_BUFFER_ARB,
-                             size*sizeof(memsize),
+                             s*memsize,
                              &indices[0],
                              (mutate)?GL_DYNAMIC_DRAW_ARB:GL_STATIC_DRAW_ARB);        
       }
@@ -174,7 +183,7 @@ public:
     }
   }
 };
-vector<vbo*>varrays;
+vector<vbo*>varrays(5);
 static void 
 keyboard( unsigned char key, int x, int y )
 {
@@ -193,9 +202,14 @@ typedef void (*(*get_gl_proc_fptr_t)(const GLubyte *))();
 #define GET_GL_PROC glXGetProcAddress
 #endif
 
+unsigned int myrandmax=1880881;
 
-
-
+unsigned int myrand() {
+  static unsigned int seed=31337;
+  seed+=345676543;
+  seed%=myrandmax;
+  return seed;
+}
 int
 main( int argc, char *argv[] )
 {
@@ -232,10 +246,13 @@ main( int argc, char *argv[] )
 void
 DrawArrays()
 {
-	
-  static  vbo v(5,false,false);
-  v.Draw();
-
+  for (size_t i=0;i<varrays.size();++i) {
+    if (varrays[i]!=NULL) {
+      fprintf (stderr,"Drawing %d\n",i);
+      varrays[i]->Draw();
+      fprintf (stderr,"done\n",i);
+    }
+  }
 }
 
 void DrawScene()
@@ -244,7 +261,63 @@ void DrawScene()
 
 	/* draw lower left polygon without vertex arrays */
 	DrawArrays();
+        for (int LC=0;LC<myrand()%47;++LC) {
+          size_t i=myrand()%varrays.size();
+          vbo * v=  varrays[i];
+          bool didsomething=false;
+          switch (myrand()%5) {//CHANGE 5 to 3 if you wish for simpler behavior (takes longer to crash, like 30 sec)
+          case 0:
+            if (v) {
+              fprintf (stderr,"Drawing %d\n",i);
+              v->Draw();
+              didsomething=true;
+            }
+            break;
+          case 1:
+            if(v) {
+              fprintf (stderr,"Deleting %d\n",i);
+              delete v;
+              varrays[i]=NULL;
+              didsomething=true;
+            }
+            break;
+          case 2:
+            if (!v) {
 
+              size_t size=myrand()%256;
+              if (myrand()<myrandmax/3)
+                size=myrand()%65536;
+              else if (myrand()<myrandmax/4) {
+                size=myrand()%65536+65536;
+              }
+              bool useindex=myrand()<myrandmax/2?true:false;//still happens (takes about 3 minutes) if useindex is false
+              bool muticle=myrand()<myrandmax/2?true:false;
+              fprintf (stderr,"Allocating %d with size %d using index %d using mutable %d \n",i,size,(int)useindex,(int)muticle);
+              varrays[i]=new vbo(size,
+                                 useindex,
+                                 muticle);
+              didsomething=true;
+            }
+            break;
+          case 3:
+            if (v) {
+              fprintf (stderr,"Writing %d\n",i);
+
+              v->Write();
+              didsomething=true;
+            }
+            break;
+          case 4:
+            if (v) {
+              fprintf (stderr,"Reading %d\n",i);
+              v->Read();
+              didsomething=true;
+            }
+            break;
+          }
+          if (didsomething)
+            fprintf (stderr,"Done\n");
+        }
 
 	glFlush();
 }
