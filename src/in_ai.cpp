@@ -65,7 +65,7 @@ FlyByKeyboard::~FlyByKeyboard() {
 
 #define FBWABS(m) (m>=0?m:-m)
 
-AI * FlyByKeyboard::Execute () {
+void FlyByKeyboard::Execute () {
   desired_ang_velocity=Vector(0,0,0);
 #define SSCK starshipcontrolkeys
   if (SSCK.dirty) {
@@ -161,7 +161,6 @@ AI * FlyByKeyboard::Execute () {
   SSCK.dirty=true;
 #undef SSCK
   FlyByWire::Execute();
-  return this;
 }
 
 

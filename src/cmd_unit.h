@@ -44,8 +44,8 @@ using namespace XMLSupport;
  * Damager: the active weapon after launch/firing
  */
 class Gun;
+class Order;
 class Warhead;
-class AI;
 class Box;
 class Mesh;
 class Camera;
@@ -159,7 +159,7 @@ friend class PlanetaryOrbit;
   
   //Vector pp, pq, pr, ppos;
   void BuildBSPTree (const char *filename, bool vplane=false, Mesh * hull=NULL);//if hull==NULL, then use meshdata **
-  AI *aistate;
+  Order *aistate;
   float accel;
   float recharge;
   float energy;
@@ -202,7 +202,6 @@ friend class PlanetaryOrbit;
   void SetCollisionParent (Unit *name);
 public:
   void UpdateCollideQueue();
-  Vector origin;
   string name;
   float rSize () {return radial_size;}
   //no default constructor; dymanically allocated arrays are evil, gotta do it java style to make it more sane
@@ -271,31 +270,17 @@ public:
   void Deselect();
   
   void PrimeOrders();
-  void SetAI(AI *newAI);
-  void EnqueueAI(AI *newAI);
+  void SetAI(Order *newAI);
+  void EnqueueAI(Order *newAI);
   bool OneWayCollide (Unit *target, Vector & normal, float &dist);
   bool Collide(Unit * target);
   void CollideAll();//checks for collisions with all beams and other units roughly
   Vector Position(){return cumulative_transformation.position;};
   Vector LocalPosition(){return curr_physical_state.position;};
-  void SetPosition(const Vector &pos) {/*prev_physical_state.position = curr_physical_state.position;*/
-  prev_physical_state.position = curr_physical_state.position = pos;}
-  void SetPosition(float x, float y, float z) {/*prev_physical_state.position = curr_physical_state.position;*/
-  prev_physical_state.position = curr_physical_state.position = Vector(x,y,z);}
-  void SetOrigin(const Vector &pos) {SetPosition(pos);origin=pos;}
+  void SetPosition(const Vector &pos) {prev_physical_state.position = curr_physical_state.position = pos;}
+  void SetPosition(float x, float y, float z) {SetPosition (Vector (x,y,z));}
   void SetCameraToCockpit();
-  //  void Destroy(){active = false;};
-  /*
-  Unit *Update() {
-    if(active) {
-      return this;
-    }
-    else {
-      delete this;
-      return NULL;
-    }
-  }
-  */
+
   void Rotate(const Vector &axis);
   void FireEngines (const Vector &Direction, /*unit vector... might default to "r"*/
 					float FuelSpeed,

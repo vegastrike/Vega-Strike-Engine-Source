@@ -3,17 +3,54 @@
 #include "planet.h"
 #include "gfxlib.h"
 #include "gfx_sphere.h"
-#include "cmd_ai.h"
 #include "UnitCollection.h"
 #include "gfx_bsp.h"
 #include "cmd_order.h"
-AI *PlanetaryOrbit::Execute() {
+
+PlanetaryOrbit:: PlanetaryOrbit(Unit *p, double velocity, double initpos, const Vector &x_axis, const Vector &y_axis, const Vector & centre, Unit * targetunit) : Order(MOVEMENT), parent(p), velocity(velocity), theta(initpos), x_size(x_axis), y_size(y_axis) { 
+   
+    double delta = x_size.Magnitude() - y_size.Magnitude();
+    if(delta == 0) {
+      focus = Vector(0,0,0);
+    }
+    else if(delta>0) {
+      focus = x_size*(delta/x_size.Magnitude());
+    } else {
+      focus = y_size*(-delta/y_size.Magnitude());
+    }
+    if (targetunit) {
+      type = (MOVEMENT | TARGET);
+      UnitCollection tmpcoll;
+      tmpcoll.prepend (targetunit);
+      AttachOrder (&tmpcoll);
+    } else {
+      type = (MOVEMENT | LOCATION);
+      AttachOrder (centre);
+    }
+}
+
+void PlanetaryOrbit::Execute() {
+  if (done) 
+    return;
   Vector x_offset = cos(theta) * x_size;
   Vector y_offset = sin(theta) * y_size;
+  Vector origin (targetlocation);
+  if (type&TARGET) {
+    if (targets) {
+      UnitCollection::UnitIterator * tmp = targets->createIterator();
+      if (tmp->current()) {
+	origin = tmp->current()->Position();
+	delete tmp;
+      }else {
+	delete tmp;
+	done = true;
+	return;
+      }
+    }
+  }
   double radius =  sqrt((x_offset - focus).MagnitudeSquared() + (y_offset - focus).MagnitudeSquared());
   theta+=velocity/(radius?radius:1) *SIMULATION_ATOM;
-  parent->Velocity = (parent->origin - focus + x_offset+y_offset-parent->curr_physical_state.position)/SIMULATION_ATOM;
-  return this;
+  parent->Velocity = (origin - focus + x_offset+y_offset-parent->curr_physical_state.position)/SIMULATION_ATOM;
 }
 
 
@@ -34,9 +71,9 @@ void Planet::beginElement(Vector x,Vector y,float vely,float pos,float gravity,f
     if (isunit==true) {
       satellites.prepend(new Unit (filename, true));
       satiterator = satellites.createIterator();
-      satiterator->current()->SetAI (new PlanetaryOrbit (satiterator->current(),vely,pos,x,y)) ;
+      satiterator->current()->SetAI (new PlanetaryOrbit (satiterator->current(),vely,pos,x,y, Vector (0,0,0), this)) ;
     }else {
-      satellites.prepend(new Planet(x,y,vely,pos,gravity,radius,filename,alpha,dest));
+      satellites.prepend(new Planet(x,y,vely,pos,gravity,radius,filename,alpha,dest, Vector (0,0,0), this));
     }
   }
   delete satiterator;
@@ -44,10 +81,10 @@ void Planet::beginElement(Vector x,Vector y,float vely,float pos,float gravity,f
 
 Planet::Planet()  : Unit(), radius(0.0f), satellites() {
   Init();
-  SetAI(new AI()); // no behavior
+  SetAI(new Order()); // no behavior
 }
 
-Planet::Planet(Vector x,Vector y,float vely, float pos,float gravity,float radius,char * textname,char * alpha,vector <char *> dest) : Unit(), radius(0.0f),  satellites() {
+Planet::Planet(Vector x,Vector y,float vely, float pos,float gravity,float radius,char * textname,char * alpha,vector <char *> dest, const Vector & orbitcent, Unit * parent) : Unit(), radius(0.0f),  satellites() {
   calculatePhysics=false;
   destination=dest;
   Init();
@@ -57,7 +94,7 @@ Planet::Planet(Vector x,Vector y,float vely, float pos,float gravity,float radiu
   this->radius=radius;
   this->gravity=gravity;
 
-  SetAI(new PlanetaryOrbit(this, vely, pos, x, y)); // behavior
+  SetAI(new PlanetaryOrbit(this, vely, pos, x, y, orbitcent, parent)); // behavior
 
   meshdata = new Mesh*[2];
   meshdata[0] = new SphereMesh(radius, 16, 16, textname, alpha);
@@ -139,7 +176,6 @@ void Planet::gravitate(UnitCollection *uc) {
   for (iter = satellites.createIterator();
        iter->current()!=NULL;
        iter->advance()) {
-    iter->current()->origin =  curr_physical_state.position;
 	if (iter->current()->isUnit()==PLANETPTR) 
 	    ((Planet *)iter->current())->gravitate(uc);//FIXME 071201
 	else { //FIXME...[causes flickering for crashing orbiting units

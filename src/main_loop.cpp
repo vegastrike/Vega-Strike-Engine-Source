@@ -41,21 +41,8 @@ GFXBOOL quit = GFXFALSE;
 /*11-7-98
  *Cool shit happened when a position rotation matrix from a unit was used for the drawing of the background... not very useful though
  */
-class Orbit;
 
-class Line:public AI
-{
-	float count;
-public:
-	Line(Unit *parent1):AI(parent1){count = 0;};
-		
-	Line():AI()
-	{
-		count = 0;
-	}
-	AI *Execute();
-};
-
+/*
 class Orbit:public AI{
 	float count;
 public:
@@ -81,28 +68,7 @@ public:
 			return this;
 	}
 };
-
-AI *Line::Execute()
-{
-	//parent->Position(); // query the position
-  //parent->ZSlide(0.100F);
-	count ++;
-	/*
-	if(parent->Position().i > 0.75 ||
-		parent->Position().i < 0.25 ||
-		parent->Position().j > 0.75 ||
-		parent->Position().j < 0.25)
-		count = 10;
-	*/
-	if(10 == count)
-	{
-		Unit *parent = this->parent;
-		delete this;
-		return new Orbit(parent);
-	}
-	else
-		return this;
-}
+*/
 
 const float timek = .005;
 bool _Slew = true;

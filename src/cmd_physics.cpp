@@ -233,6 +233,10 @@ void Unit::UpdatePhysics (const Transformation &trans, const Matrix transmat, bo
   bool dead=true;
   for (i=0;i<numsubunit;i++) {
     subunits[i]->UpdatePhysics(cumulative_transformation,cumulative_transformation_matrix,lastframe,uc);
+    if (hull<0) {
+      subunits[i]->timeexplode+=.1*SIMULATION_ATOM;//urge slowly on
+      subunits[i]->hull-=SIMULATION_ATOM;
+    }
     dead &=subunits[i]->Killed();
   }
   UpdateCollideQueue();

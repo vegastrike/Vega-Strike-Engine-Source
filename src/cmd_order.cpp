@@ -22,11 +22,11 @@
 #include "cmd_order.h"
 #include "UnitCollection.h"
 #include "physics.h"
-AI * Order::Execute () {
+void Order::Execute () {
   //  int completed=0;
 //	fprintf (stderr,"size: %d done %d", suborders.size(), (*suborders.begin())->Done());
   if(suborders.size()) {
-    vector<AI*>::iterator ord = suborders.begin();
+    vector<Order*>::iterator ord = suborders.begin();
     (*ord)->Execute();
     if((*ord)->Done()){
       delete (*ord);
@@ -56,16 +56,16 @@ AI * Order::Execute () {
   } else{
     done = false;
   }
-  return this;
+  return;
 }
 
-AI* Order::EnqueueOrder (AI *ord) {
+Order* Order::EnqueueOrder (Order *ord) {
   suborders.push_back (ord);
   return this;
 }
-AI* Order::ReplaceOrder (AI *ord) {
+Order* Order::ReplaceOrder (Order *ord) {
   int completed=0;
-  vector<AI*>::iterator ordd = suborders.begin();
+  vector<Order*>::iterator ordd = suborders.begin();
   for (unsigned int i=0;i<suborders.size();i++) {
     if (!(ord->getType()&(*ordd)->getType())){
       	delete (*ordd);
@@ -125,33 +125,18 @@ bool Order::AttachOrder (Vector targetv) {
   return true;
 }
 
-AI * ExecuteFor::Execute() {
+void ExecuteFor::Execute() {
   if (child) {
     child->SetParent(parent);
     type = child->getType();
   }
   if (time>maxtime) {
     done = true;
-    return NULL;
+
+    return;
   }
   time +=SIMULATION_ATOM;
   if (child)
-    child = child->Execute();
-  return this;
-}
-
-
-//Doesn't work anymore (as if it ever did)
-AI* FlyStraight::Execute() {
-  //if(GetElapsedTime() > time)
-		{
-			parent->Destroy();
-			delete this;
-			return NULL;
-		}
-		//		else
-		{
-		  //parent->YSlide(speed);
-			return this;
-		}
+    child->Execute();
+  return;
 }

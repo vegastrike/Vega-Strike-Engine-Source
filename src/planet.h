@@ -8,7 +8,7 @@ ok *
 #include <stdio.h>
 
 #include "cmd_unit.h"
-#include "cmd_ai.h"
+#include "cmd_order.h"
 #include "physics.h"
 #include "UnitCollection.h"
 #include "iterator.h"
@@ -19,7 +19,7 @@ struct Texture;
 class Planet;
 typedef float Matrix[16];
 
-class PlanetaryOrbit : public AI {
+class PlanetaryOrbit : public Order {
  private:
   Unit *parent;
   double velocity;
@@ -30,18 +30,9 @@ class PlanetaryOrbit : public AI {
   Vector focus;
 
  public:
-  PlanetaryOrbit(Unit *p, double velocity, double initpos, const Vector &x_axis, const Vector &y_axis) : parent(p), velocity(velocity), theta(initpos), x_size(x_axis), y_size(y_axis) { 
-    double delta = x_size.Magnitude() - y_size.Magnitude();
-    if(delta == 0) {
-      focus = Vector(0,0,0);
-    }
-    else if(delta>0) {
-      focus = x_size*(delta/x_size.Magnitude());
-    } else {
-      focus = y_size*(-delta/y_size.Magnitude());
-    }
-  }
-  AI *Execute();
+
+  PlanetaryOrbit(Unit *p, double velocity, double initpos, const Vector &x_axis, const Vector &y_axis, const Vector &Centre, Unit * target=NULL); 
+  void Execute();
 
   friend class Unit;
 };
@@ -57,7 +48,7 @@ class Planet : public Unit {
   Planet();
   void endElement();
   void beginElement(Vector x,Vector y,float vely,float velx,float gravity,float radius,char * filename,char * alpha,vector<char *>dest,int level,bool isunit=false);
-  Planet(Vector x,Vector y,float vely,float velx,float gravity,float radius,char * filename,char *alpha,vector<char *> dest);
+  Planet(Vector x,Vector y,float vely,float velx,float gravity,float radius,char * filename,char *alpha,vector<char *> dest, const Vector &orbitcent, Unit * parent);
   ~Planet();
   virtual enum clsptr isUnit() {return PLANETPTR;}
 

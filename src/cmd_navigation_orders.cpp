@@ -81,7 +81,7 @@ bool MoveTo::Done(const Vector & ang_vel) {
 }
 
 
-AI* MoveTo::Execute(){
+void MoveTo::Execute(){
   Vector local_location (parent->UpCoordinateLevel(parent->GetVelocity()));
   //local location is ued for storing the last velocity;
   terminatingX += (copysign(1.0,local_location.i)!=copysign(1.0,last_velocity.i)||(!local_location.i));
@@ -92,14 +92,14 @@ AI* MoveTo::Execute(){
   local_location = targetlocation - parent->Position();
   Vector heading = parent->ToLocalCoordinates(local_location);
   Vector thrust (parent->Limits().lateral, parent->Limits().vertical,(afterburnAndSwitchbacks&ABURN)?parent->Limits().afterburn:parent->Limits().forward);
-  if (done) return NULL;
+  if (done) return;
   unsigned char numswitchbacks = afterburnAndSwitchbacks>>1;
   if (terminatingX>numswitchbacks&&
       terminatingY>numswitchbacks&&
       terminatingZ>numswitchbacks) {
     if (Done(last_velocity)) {
       done = true;
-      return NULL;
+      return;
     }
     thrust = (-parent->GetMass()/SIMULATION_ATOM)*last_velocity;
   }else {
@@ -134,7 +134,7 @@ AI* MoveTo::Execute(){
     OptimizeSpeed (last_velocity.j,thrust.j);
   }
   parent->ApplyLocalForce (thrust);
-  return this;
+  return;
 }
 bool ChangeHeading::OptimizeAngSpeed (float optimal_speed,float v, float &a) {
   v += (a/parent->GetMoment())*SIMULATION_ATOM;
@@ -176,18 +176,18 @@ bool ChangeHeading::Done(const Vector & ang_vel) {
     }
   return false;
 }
-AI * ChangeHeading::Execute() {
+void ChangeHeading::Execute() {
   Vector local_heading (parent->UpCoordinateLevel(parent->GetAngularVelocity()));
   terminatingX += (copysign(1.0,local_heading.i)!=copysign(1.0,last_velocity.i)||(!local_heading.i));
   terminatingY += (copysign(1.0,local_heading.j)!=copysign(1.0,last_velocity.j)||(!local_heading.j));
   last_velocity = local_heading;
   local_heading = parent->ToLocalCoordinates (final_heading);
-  if (done) return NULL;
+  if (done) return ;
   Vector torque (parent->Limits().pitch, parent->Limits().yaw,0);//set torque to max accel in any direction
   if (terminatingX>switchbacks&&terminatingY>switchbacks) {
     if (Done (last_velocity)) {
       done = true;
-      return NULL;
+      return;
     }
     torque= (-parent->GetMoment()/SIMULATION_ATOM)*last_velocity;
   } else {
@@ -200,21 +200,17 @@ AI * ChangeHeading::Execute() {
     torque.k  =-parent->GetMoment()*last_velocity.k/SIMULATION_ATOM;//try to counteract roll;
   }
   parent->ApplyLocalTorque (torque);
-  return this;
 }
 
-AI * FaceTarget::Execute() {
+void FaceTarget::Execute() {
   Unit * target = parent->Target();
   if (target==NULL){
     done = GFXTRUE;
-    return NULL;
+    return;
   }
   SetDest(target->Position());
   ChangeHeading::Execute();
   if (!finish) {
     done=GFXFALSE;
-    return this;
-  } else{ 
-    return done?NULL:this;
-  }
+  } 
 }

@@ -19,12 +19,12 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 #include <ctype.h>
-#include "cmd_ai.h"
 #include "gfxlib.h"
 #include "gfx_hud.h"
 #include "lin_time.h"
 #include "file.h"
 #include "gfx_mesh.h"
+#include "cmd_order.h"
 float *mview = NULL;
 
 HUDElement::HUDElement(char *filename):Unit(filename) {
@@ -175,6 +175,6 @@ void TextPlane::Draw()
 	  //UpdateHudMatrix();
 	}
 	if(aistate)
-		aistate = aistate->Execute();
+		aistate->Execute();
 }
 

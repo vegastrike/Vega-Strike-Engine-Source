@@ -19,70 +19,59 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-/* This should REALLY be "basic behavior"... oh well */
+
 
 #ifndef _CMD_ORDER_H
 #define _CMD_ORDER_H
 
-#include "cmd_ai.h"
-
+#include "cmd_unit.h"
 #include "UnitCollection.h"
 #include <vector>
-const int LOCATION =1;
-const int TARGET = 2;
-const int SELF = 4; //the order types are orthogonal...you can form up while attacking and moving to a location
-class Order:public AI {
+const int MOVEMENT =1;
+const int FACING = 2;
+const int WEAPON = 4;
+const int LOCATION = 8;
+const int TARGET = 16;
+const int SELF = 32; 
+class Order {
 protected:
+  Unit * parent;
   int type; 
   bool done;
   UnitCollection *group;
   UnitCollection *targets;
   Vector targetlocation;
-  vector<AI*> suborders;
+  vector<Order*> suborders;
 public:
-  Order (): AI(), targetlocation(0,0,0){group =targets=NULL;type=0;done=false;}
-  Order(int ttype):AI(), targetlocation(0,0,0){targets=NULL;type = ttype;done=false;}
+  Order (): targetlocation(0,0,0){parent = NULL;group =targets=NULL;type=0;done=false;}
+  Order(int ttype): targetlocation(0,0,0){parent = NULL;targets=NULL;type = ttype;done=false;}
   virtual ~Order () {}
-  virtual AI *Execute();
+  virtual void Execute();
   bool AttachOrder (UnitCollection *targets);
   bool AttachOrder (Vector target);
   bool AttachSelfOrder (UnitCollection *targets=NULL);
-  AI* EnqueueOrder (AI * ord);
-  AI* ReplaceOrder (AI * ord);
+  Order* EnqueueOrder (Order * ord);
+  Order* ReplaceOrder (Order * ord);
   bool Done() {return done;}
   int getType() {return type;}
+  void SetParent(Unit *parent1) {parent = parent1;};
 };
 
-class OrderFactory: public AIFactory {
+class OrderFactory {
 public:
   virtual int type () {return 0;}
-  OrderFactory():AIFactory(){}
-  virtual AI * newAI () {return new Order;}
+  OrderFactory(){}
   virtual Order * newOrder() {return new Order;}
 };
 
 class ExecuteFor:  public Order {
-  AI * child;
+  Order * child;
   float time;
   float maxtime;
  public:
-  ExecuteFor (AI * chld, float seconds): Order(),child(chld),time(0),maxtime(seconds) {}
-  AI * Execute ();
+  ExecuteFor (Order * chld, float seconds): Order(),child(chld),time(0),maxtime(seconds) {}
+  void Execute ();
   ~ExecuteFor () {delete child;}
 };
 
-
-class FlyStraight:public AI{
-	float speed;
-	float time;
-
-public:
-	FlyStraight(float speed1, float time1) {parent = NULL; speed = speed1; time = time1;};
-	
-	AI *Execute();
-	bool Done() {return false;}
-	int getType() {return 0;}
-        bool AppendOrder (Order * tmp) {return false;}
-
-};
 #endif

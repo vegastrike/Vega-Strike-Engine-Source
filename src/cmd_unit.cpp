@@ -22,12 +22,12 @@
 #include "gfx_halo.h"
 #include "cmd_beam.h"
 #include "cmd_unit.h"
-#include "cmd_gun.h"
+
 #include "gfx_sprite.h"
 #include "lin_time.h"
 #include "gfx_hud.h"
 
-#include "cmd_ai.h"
+
 #include "cmd_order.h"
 #include "gfx_box.h"
 
@@ -67,7 +67,7 @@ void Unit::Init()
   CollideInfo.type = LineCollide::UNIT;
   bspTree = NULL;
   invisible=false;
-  origin.Set(0,0,0);
+  //origin.Set(0,0,0);
   corner_min.Set (FLT_MAX,FLT_MAX,FLT_MAX);
   corner_max.Set (-FLT_MAX,-FLT_MAX,-FLT_MAX);
   
@@ -536,30 +536,30 @@ void Unit::ProcessDrawQueue() {
 
 void Unit::PrimeOrders () {
   if (aistate) {
-    aistate = aistate->ReplaceOrder (new Order);
+    aistate->ReplaceOrder (new Order);
   } else {
     aistate = new Order; //get 'er ready for enqueueing
   }
 }
-void Unit::SetAI(AI *newAI)
+void Unit::SetAI(Order *newAI)
 {
   newAI->SetParent(this);
   if (aistate) {
-    aistate = aistate->ReplaceOrder (newAI);
+    aistate->ReplaceOrder (newAI);
   }else {
     aistate = newAI;
   }
 }
-void Unit::EnqueueAI(AI *newAI) {
+void Unit::EnqueueAI(Order *newAI) {
   newAI->SetParent(this);
   if (aistate) {
-    aistate = aistate->EnqueueOrder (newAI);
+    aistate->EnqueueOrder (newAI);
   }else {
     aistate = newAI;
   }
 }
 void Unit::ExecuteAI() {
-  if(aistate) aistate = aistate->Execute();
+  if(aistate) aistate->Execute();
   for(int a=0; a<numsubunit; a++) {
     subunits[a]->ExecuteAI();//like dubya
   }

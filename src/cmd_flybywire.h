@@ -9,7 +9,7 @@ class MatchLinearVelocity : public Order {
   bool willfinish;
  public:
   MatchLinearVelocity (const Vector &desired, bool Local, bool fini=true):desired_velocity(desired),LocalVelocity(Local),willfinish(fini) {type = LOCATION;done = false;}
-  AI * Execute ();
+  void Execute ();
   void SetDesiredVelocity (const Vector &desired, bool Local) {desired_velocity=desired;LocalVelocity=Local;}
 };
 class MatchAngularVelocity : public Order {
@@ -19,7 +19,7 @@ class MatchAngularVelocity : public Order {
   bool willfinish;
  public:
   MatchAngularVelocity (const Vector &desired, bool Local, bool fini=true):desired_ang_velocity(desired),LocalAng(Local), willfinish(fini) {type = LOCATION;done = false;}
-  AI * Execute ();
+  void Execute ();
   void SetDesiredAngularVelocity (const Vector &desired, bool Local) {desired_ang_velocity=desired;LocalAng=Local;}
 };
 
@@ -29,7 +29,7 @@ class MatchVelocity : public MatchLinearVelocity {
   bool LocalAng;
  public:
   MatchVelocity (const Vector &desired,const Vector &desired_ang, bool Local, bool fini=true):MatchLinearVelocity (desired,Local,fini),desired_ang_velocity(desired_ang), LocalAng(Local) {}
-  AI * Execute ();
+  void Execute ();
   void SetDesiredAngularVelocity (const Vector &desired, bool Local) {desired_ang_velocity=desired;LocalAng=Local;}
 };
 
@@ -43,6 +43,6 @@ class FlyByWire : public MatchVelocity {
   void RollRight (float percentage);
   void Afterburn (float percentage);
   void Accel (float percentage);//negative is decel... 0 = nothing
-  AI * Execute();
+  void Execute();
 };
 #endif

@@ -25,7 +25,7 @@ public:
     done=false;
   }
   void SetDest (const Vector&);
-  AI *Execute();
+  void Execute();
 };
 
 class ChangeHeading : public Order {
@@ -41,12 +41,12 @@ class ChangeHeading : public Order {
  public:
    ChangeHeading(const Vector &final_heading, int switchback) : Order(), switchbacks(switchback),terminatingX(0),terminatingY(0),last_velocity(0,0,0),final_heading(final_heading), terminating(false) { type = 1;}
   void SetDest (const Vector&);
-  AI *Execute();
+  void Execute();
 };
 class FaceTarget : public ChangeHeading {
   float finish;
   FaceTarget (bool fini, int accuracy = 3):ChangeHeading(Vector(0,0,1),accuracy),finish(fini=false) {}
-  AI * Execute();
+  void Execute();
 };
 
 }

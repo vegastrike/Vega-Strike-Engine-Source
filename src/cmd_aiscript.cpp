@@ -519,7 +519,7 @@ AIScript::~AIScript () {
 	}
 }
 
-AI * AIScript::Execute () {
+void AIScript::Execute () {
 	if (filename) {
 		LoadXML ();
 		delete [] filename;

@@ -30,6 +30,6 @@ class AIScript : public Order {
 public:
   AIScript(const char * scriptname);
   ~AIScript();
-  AI *Execute();
+  void Execute();
 };
 #endif

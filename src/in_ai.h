@@ -21,7 +21,7 @@ class FlyByKeyboard: public FlyByWire {
   static void RollRightKey (int,KBSTATE);
   FlyByKeyboard ();
   virtual ~FlyByKeyboard();
-  AI * Execute();
+  void Execute();
 };
 
 #endif
