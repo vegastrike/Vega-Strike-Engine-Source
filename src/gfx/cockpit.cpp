@@ -194,8 +194,6 @@ void Cockpit::DrawTargetBoxes(){
   }
 
   GFXEnable (TEXTURE0);
-  GFXEnable (DEPTHTEST);
-  GFXEnable (DEPTHWRITE);
 
 }
 
@@ -758,6 +756,9 @@ void Cockpit::Draw() {
   GFXHudMode (true);
   GFXColor4f (1,1,1,1);
   GFXBlendMode (ONE,ONE);
+  GFXDisable (DEPTHTEST);
+  GFXDisable (DEPTHWRITE);
+
   Unit * un;
   if (view==CP_FRONT) {
     if (Panel.size()>0) {

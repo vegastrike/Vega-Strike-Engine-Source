@@ -376,6 +376,8 @@ void StarSystem::Draw(bool DrawCockpit) {
   fprintf (stderr,"terr");
   fflush (stderr);
 #endif
+  GFXEnable (DEPTHTEST);
+  GFXEnable (DEPTHWRITE);
   //need to wait for lights to finish
   Planet::ProcessTerrains();
   Terrain::RenderAll();

@@ -600,7 +600,8 @@ void VDU::SetViewingStyle(VIEWSTYLE vs) {
 }
 void VDU::DrawStarSystemAgain (float x,float y,float w,float h, VIEWSTYLE viewStyle,Unit *parent,Unit *target, const GFXColor &c) {
 
-
+  GFXEnable (DEPTHTEST);
+  GFXEnable (DEPTHWRITE);
   VIEWSTYLE which=viewStyle;
   _Universe->AccessCamera(which)->SetSubwindow (x,y,w,h);
   _Universe->SelectCamera(which);
@@ -621,6 +622,7 @@ void VDU::DrawStarSystemAgain (float x,float y,float w,float h, VIEWSTYLE viewSt
   GFXDisable(TEXTURE1);
   GFXDisable(TEXTURE0);
   GFXDisable(DEPTHTEST);   
+  GFXDisable(DEPTHWRITE);   
 
   char buf[1024];
   GFXColorf(c);
@@ -631,7 +633,6 @@ void VDU::DrawStarSystemAgain (float x,float y,float w,float h, VIEWSTYLE viewSt
   }
   tp->Draw(buf,0,true);
   // _Universe->AccessCockpit()->RestoreViewPort();
-  GFXEnable(DEPTHTEST);   
 }
 
 
