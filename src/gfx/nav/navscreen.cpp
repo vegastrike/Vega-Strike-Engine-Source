@@ -41,12 +41,19 @@
 #include "navgetxmldata.h"
 #include "navitemstodraw.h"
 #include "navparse.h"
-
-
+#include "navcomputer.h"
+#include "navpath.h"
 
 //	This sets up the items in the navscreen
 
 //	**********************************
+
+NavigationSystem::NavigationSystem() {
+        draw = -1;
+	whattodraw=(1|2);
+	pathman = new PathManager();
+	navcomp = new NavComputer(this);
+}
 
 NavigationSystem::~NavigationSystem() {
 
@@ -148,7 +155,8 @@ void NavigationSystem::Setup()
 	systemselectionindex=0;
 	sectorselectionindex=0;
 	destinationsystemindex=0;
-	setCurrentSystemIndex(0);
+	currentsystemindex=0;
+	setFocusedSystemIndex(0);
 
 
 	buttonstates = 0;
@@ -384,6 +392,8 @@ void NavigationSystem::Setup()
 	float tempcol4[4]={1, 0.3, 0.3, 1.0};
 	vs_config->getColor("nav", "path_system", tempcol4 , true);
 	pathcol=GFXColor(tempcol4[0],tempcol4[1],tempcol4[2],tempcol4[3]);
+
+	navcomp->init();
 }
 
 //	**********************************
@@ -404,6 +414,8 @@ void visitSystemHelp (Cockpit * cp, string systemname,float num) {
 	vector<float> *v = &_Universe->AccessCockpit()->savegame->getMissionData(key);
 	if (v->empty()){
 		v->push_back (num);
+		if(_Universe->AccessCockpit()->AccessNavSystem())
+		        _Universe->AccessCockpit()->AccessNavSystem()->pathman->updatePaths();
 	} else if ((*v)[0]!=1.0&&num==1) {
 		(*v)[0]=num;
 	}
@@ -415,8 +427,10 @@ void visitSystem (Cockpit * cp , string systemname ) {
 	for (int i=0;i<adj;++i) {
 		visitSystemHelp (cp,UniverseUtil::GetAdjacentSystem(systemname,i),0.0);
 	}
-
+	if(_Universe->AccessCockpit()->AccessNavSystem())
+	  _Universe->AccessCockpit()->AccessNavSystem()->setCurrentSystem(systemname);		
 }
+
 //	This is the main draw loop for the nav screen
 //	**********************************
 void NavigationSystem::Draw()
@@ -428,7 +442,6 @@ void NavigationSystem::Draw()
 	return;
 	//	DRAW THE SCREEN MODEL
 	//	**********************************
-  visitSystem (_Universe->AccessCockpit(),_Universe->activeStarSystem()->getFileName());
 	Vector p,q,r;
 	_Universe->AccessCamera()->GetOrientation(p,q,r);  
  
@@ -950,14 +963,14 @@ void NavigationSystem::DrawSectorList()
 			        systemselectionindex=index;
 				
 				if(systemselectionindex==oldselection) {
-			                setCurrentSystemIndex(systemselectionindex);
+			                setFocusedSystemIndex(systemselectionindex);
 				}
 			}
 		}
 
 	        if(index==destinationsystemindex)
 		        color=destinationcol;
-	        else if(index==currentsystemindex)
+	        else if(index==focusedsystemindex)
 		        color=currentcol;
 	        else if(index==systemselectionindex)
 		        color=selectcol;
@@ -1169,22 +1182,31 @@ void NavigationSystem::setCurrentSystem(string newSystem) {
 	}
 }
 
-void NavigationSystem::setCurrentSystemIndex(unsigned newSystemIndex) {
-	currentsystemindex = newSystemIndex;
+void NavigationSystem::setFocusedSystemIndex(unsigned newSystemIndex) {
+	focusedsystemindex = newSystemIndex;
 	themaxvalue=0;
 	if (galaxy_view!=VIEW_3D) {
 		// This resets the panning position when not in 3d view.
-		// Otehrwise, the current system may end up off screen which will cause a lot of confusion.
+		// Otehrwise, the focused system may end up off screen which will cause a lot of confusion.
 		rx = -0.5;		//	galaxy mode settings
 		ry = 0.5;
 		rz = 0.0;
 	}
 	camera_z=0; // calculate camera distance again... it may have changed.
-	updatePath();
+}
+
+void NavigationSystem::setCurrentSystemIndex(unsigned newSystemIndex) {
+  currentsystemindex = newSystemIndex;
+  pathman->updatePaths(PathManager::CURRENT);
+}
+
+void NavigationSystem::setDestinationSystemIndex(unsigned newSystemIndex) {
+  destinationsystemindex = newSystemIndex;
+  pathman->updatePaths(PathManager::TARGET);
 }
 
 std::string NavigationSystem::getCurrentSystem() {
-        return systemIter[currentsystemindex].GetName();
+  return systemIter[currentsystemindex].GetName();
 }
 
 
@@ -1223,10 +1245,6 @@ void NavigationSystem::DrawButton(float &x1, float &x2, float &y1, float &y2, in
 	{
 	        label = "Target Selected";
 	}
-	else if(button_number == 6)
-	{
-	        label = "Axis Swap";
-	}
 	else if(button_number == 7)
 	{
 	        label = "2D/Ortho/3D";
@@ -1245,6 +1263,10 @@ void NavigationSystem::DrawButton(float &x1, float &x2, float &y1, float &y2, in
 		{
 		        label = "Down";
 		}
+		else if(button_number == 6)
+		{
+		        label = "Axis Swap";
+		}
 	}
 	else
 	{
@@ -1256,9 +1278,13 @@ void NavigationSystem::DrawButton(float &x1, float &x2, float &y1, float &y2, in
 		{
 		        label = "Ship";
 		}
-		else if(button_number == 5)
+	        else if(button_number == 5)
 		{
 		        label = "Mission";
+		}
+		else if(button_number == 6)
+		{
+		        label = "Nav Comp";
 		}
 	}
 	
@@ -1353,8 +1379,7 @@ void NavigationSystem::DrawButton(float &x1, float &x2, float &y1, float &y2, in
 		        if(((checkbit(whattodraw, 1)) && (checkbit(whattodraw, 2))) ||       //Nav-Galaxy Mode
 			   ((!checkbit(whattodraw, 1)) && (checkbit(whattodraw, 3))))        //Mission-Sector Mode
 			{
-			        destinationsystemindex=systemselectionindex;
-				updatePath();
+			        setDestinationSystemIndex(systemselectionindex);
 			}
 		}
 		//******************************************************
@@ -1371,7 +1396,7 @@ void NavigationSystem::DrawButton(float &x1, float &x2, float &y1, float &y2, in
 			if(checkbit(whattodraw, 1)) // if in nav system NOT mission
 			{
 				dosetbit(whattodraw, 2);	//	draw galaxy
-				setCurrentSystem(UniverseUtil::getSystemFile());
+				setFocusedSystemIndex(currentsystemindex);
 				systemselectionindex=currentsystemindex;
 				
 			}
@@ -1399,7 +1424,7 @@ void NavigationSystem::DrawButton(float &x1, float &x2, float &y1, float &y2, in
 			else	//	if in mission mode
 			{
 			        unsetbit(whattodraw, 3);
-				unsetbit(whattodraw, 2);	//	draw system
+				unsetbit(whattodraw, 2);	//	draw mission
 			}
 		}
 		//******************************************************
@@ -1412,13 +1437,20 @@ void NavigationSystem::DrawButton(float &x1, float &x2, float &y1, float &y2, in
 		//******************************************************
 		if(button_number == 6)	//	releasing #1, toggle the draw (nav / mission)
 		{
-			zoom = 1.8;
-			zoom_s = 1.8;
-
-			axis = axis - 1;
-			if(axis == 0)
-				axis = 3;
-			camera_z=0;
+		        if(checkbit(whattodraw, 1)) // if in nav system NOT mission
+			{
+			        zoom = 1.8;
+				zoom_s = 1.8;
+				
+				axis = axis - 1;
+				if(axis == 0)
+				        axis = 3;
+				camera_z=0;
+			}
+			else    //      if in mission mode
+			{
+				navcomp->run();
+			}
 		}
 		//******************************************************
 

@@ -346,7 +346,7 @@ void showListQuestion(const std::string& title, const std::vector<std::string>& 
     SimplePicker* picker = static_cast<SimplePicker*>( dialog->window()->findControlById("Picker") );
     assert(picker != NULL);
     for(int i=0; i<options.size(); i++) {
-        picker->addCell(SimplePickerCell(options[i]));
+        picker->addCell(new SimplePickerCell(options[i]));
     }
 
 	dialog->run();

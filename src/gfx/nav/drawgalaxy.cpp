@@ -642,7 +642,7 @@ void NavigationSystem::DrawGalaxy()
 
 		{
 			{
-			        systemIter.seek(currentsystemindex);
+			        systemIter.seek(focusedsystemindex);
 				pos=systemIter->Position();
 				ReplaceAxes(pos);
 //				if(galaxy_view==VIEW_3D){pos = dxyz(pos, 0, ry, 0);pos = dxyz(pos, rx, 0, 0);}
@@ -828,15 +828,24 @@ void NavigationSystem::DrawGalaxy()
 		
 //		systemdrawnode it (insert_type, insert_size, the_x, the_y, (*systemIter).GetName(),systemIter.getIndex(),screenoccupation,moused,col);
 
-                if((path_view != PATH_OFF) && systemIter->part_of_path) {
+		bool isPath=false;
+		if(path_view != PATH_OFF) {
+		  if(systemIter->part_of_path) {
+		    for(std::set<NavPath *>::iterator paths=systemIter->paths.begin(); paths!=systemIter->paths.end(); ++paths) {
+		      if((*paths)->getVisible()) {
+			isPath=true;
 		        DrawNode(insert_type, insert_size, the_x, the_y, (*systemIter).GetName(),screenoccupation,moused,pathcol);
 			DisplayOrientationLines(the_x, the_y, the_x_flat, the_y_flat, 0);
+			break;
+		      }
+		    }
+		  }
+		}
+		if(!isPath && path_view != PATH_ONLY) {
+		  DrawNode(insert_type, insert_size, the_x, the_y, (*systemIter).GetName(),screenoccupation,moused,col);
+		  DisplayOrientationLines(the_x, the_y, the_x_flat, the_y_flat, 0);
+		}
 
-		}
-                else if(path_view != PATH_ONLY) {
-		        DrawNode(insert_type, insert_size, the_x, the_y, (*systemIter).GetName(),screenoccupation,moused,col);
-			DisplayOrientationLines(the_x, the_y, the_x_flat, the_y_flat, 0);
-		}
 		unsigned destsize=systemIter->GetDestinationSize();
 		if (destsize!=0) {
 			GFXBegin(GFXLINE);
@@ -854,16 +863,26 @@ void NavigationSystem::DrawGalaxy()
 					//GetAlpha(oldposoth,center_x,center_y,center_z,zdistance);
 					IntersectBorder(the_new_x,the_new_y,the_x,the_y);
                                         
-                                        if((path_view != PATH_OFF) && systemIter->part_of_path && oth.part_of_path)
-                                        {
-                                                GFXColorf (pathcol);
-						GFXVertex3f(the_x,the_y,0);
-						GFXColorf (pathcol);
-						GFXVertex3f(the_new_x,the_new_y,0);
+					bool isConnectionPath=false;
+                                        if(path_view != PATH_OFF) {
+					  if(systemIter->part_of_path && oth.part_of_path) {
+					    for(std::set<NavPath *>::iterator paths=systemIter->paths.begin(); paths!=systemIter->paths.end(); ++paths) {
+					      if((*paths)->getVisible()) {
+						if((*paths)->isNeighborPath(temp, systemIter->GetDestinationIndex(i))) {
+						  isConnectionPath=true;
+						  GFXColorf (pathcol);
+						  GFXVertex3f(the_x,the_y,0);
+						  GFXColorf (pathcol);
+						  GFXVertex3f(the_new_x,the_new_y,0);
+						  break;
+						}
+					      }
+					    }
+					  }
 					}
-					else if(path_view != PATH_ONLY)
+
+					if(!isConnectionPath && path_view != PATH_ONLY)
 					{
- 
 					        GFXColorf (col);
 						GFXVertex3f(the_x,the_y,0);
 						GFXColorf (othcol);
@@ -921,7 +940,7 @@ void NavigationSystem::DrawGalaxy()
 			  
 			  // JUST FOR NOW, target == current selection. later it'll be used for other shit, that will then set target.
 			  if(systemselectionindex==oldselection) {
-			          setCurrentSystemIndex(systemselectionindex);
+			          setFocusedSystemIndex(systemselectionindex);
 			  }
 		  }
 	}
@@ -941,163 +960,3 @@ void NavigationSystem::DrawGalaxy()
 	mouselist.clear();	//	whipe mouse over'd list
 	//	**********************************
 }
-//	**********************************
-
-void NavigationSystem::updatePath()
-{
-	int i;
-	//Erase old path
-	//*************************
-	for(i=0;i<path.size();++i) {
-		systemIter[path[i]].part_of_path=false;
-	}
-	path.clear();
-
-
-	//Calculate new path
-	//*************************
-	DoubleRootedBFS(currentsystemindex, destinationsystemindex);
- 
-	//Inscribe new path
-	//*************************
-	for(i=0;i<path.size();++i) {
-		systemIter[path[i]].part_of_path=true;
-	}
-}
-
-bool NavigationSystem::BFS(unsigned originIndex, unsigned destIndex) {
-        vector<unsigned> prev(systemIter.size());
-        vector<bool> visited(systemIter.size(),false);
-        deque<unsigned> frontier;
-	bool found=false;
-
-	frontier.push_back(originIndex);
-	visited[originIndex]=true;
-
-	do {
-	        unsigned index=frontier.front();
-		frontier.pop_front();
-
-
-		for(unsigned adjs=0; adjs<systemIter[index].GetDestinationSize(); ++adjs) {
-		        unsigned adjIndex=systemIter[index].GetDestinationIndex(adjs);
-			if(!visited[adjIndex] && systemIter[adjIndex].isDrawable()) {
-			        visited[adjIndex]=true;
-				prev[adjIndex]=index;
-				frontier.push_back(adjIndex);
-
-				if(adjIndex==destIndex) {
-				        found = true;
-					break;
-				}
-
-			}
-		}
-	}
-	while(!frontier.empty() && !found);
-
-	if(found) {
-		unsigned index=destIndex;
-		while(index != originIndex) {
-		        path.push_back(index);
-			index=prev[index];
-		}
-		path.push_back(originIndex);		
-	}
-	return found;
-}
-
-bool NavigationSystem::DoubleRootedBFS(unsigned originIndex, unsigned destIndex) {
-        if(originIndex==destIndex) {
-	        path.push_back(originIndex);
-		return true;
-	}
-
-        vector<unsigned> prev(systemIter.size());
-        vector<unsigned> visited(systemIter.size(), 0);
-        deque<unsigned> oriFront, destFront;
-	bool found=false;
-	unsigned midNode;
-	unsigned midNodePrevOri;
-	unsigned midNodePrevDest;
-
-	bool oriTurn=true;
-	deque<unsigned> * front;
-	unsigned visitMark;
-
-	oriFront.push_back(originIndex);
-	visited[originIndex]=1;
-	destFront.push_back(destIndex);
-	visited[destIndex]=2;
-
-	while(!oriFront.empty() && !destFront.empty() && !found)
-	{
-	        if(oriTurn) {
-		        front=&oriFront;
-			visitMark=1;
-		}
-		else {
-		        front=&destFront;
-			visitMark=2;
-		}
-
-	        unsigned index=front->front();
-		front->pop_front();
-
-		for(unsigned adjs=0; adjs<systemIter[index].GetDestinationSize(); ++adjs) {
-		        unsigned adjIndex=systemIter[index].GetDestinationIndex(adjs);
-			if(systemIter[adjIndex].isDrawable()) {
-			        if(visited[adjIndex]==0) {
-			                visited[adjIndex]=visitMark;
-					prev[adjIndex]=index;
-					front->push_back(adjIndex);
-				}
-				else if(visited[adjIndex]!=visitMark) {
-				        midNode=adjIndex;
-					if(oriTurn) {
-					        midNodePrevDest=prev[adjIndex];
-						midNodePrevOri=index;
-					}
-					else {
-					        midNodePrevOri=prev[adjIndex];
-						midNodePrevDest=index;
-					}				
-					found = true;
-					break;
-				}
-			}
-		}
-		oriTurn=!oriTurn;
-	}
-
-	if(found) {
-	        list<unsigned> tempPath;
-		unsigned index=midNodePrevOri;
-		while(index != originIndex) {
-		        tempPath.push_front(index);
-			index=prev[index];
-		}
-		tempPath.push_front(originIndex);
-		
-		if(destIndex==midNode) {
-		        tempPath.push_back(destIndex);
-		}
-		else {
-		        tempPath.push_back(midNode);
-			
-			unsigned index=midNodePrevDest;
-			while(index != destIndex) {
-			        tempPath.push_back(index);
-				index=prev[index];
-			}
-			tempPath.push_back(destIndex);
-		}
-
-		while(!tempPath.empty()) {
-		        path.push_back(tempPath.back());
-			tempPath.pop_back();
-		}
-	}
-	return found;
-}
-

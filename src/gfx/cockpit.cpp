@@ -1078,9 +1078,6 @@ void GameCockpit::NavScreen (const KBData&,KBSTATE k) // scheherazade
 	 winsys_set_mouse_func(BaseInterface::ClickWin);
 	 winsys_set_motion_func(BaseInterface::ActiveMouseOverWin);
 	 winsys_set_passive_motion_func(BaseInterface::PassiveMouseOverWin);
-
-
-//	 _Universe->AccessCockpit()->ThisNav.currentsystem=_Universe->AccessCockpit()->ThisNav.selectedsystem=UniverseUtil::getSystemFile();
     }
   }
 }

@@ -43,6 +43,7 @@
 // FIXME mbyron -- Hack instead of reading XML.
 #include "gui/newbutton.h"
 #include "gui/staticdisplay.h"
+#include "gui/textinputdisplay.h"
 #include "gui/simplepicker.h"
 #include "gui/groupcontrol.h"
 #include "gui/scroller.h"
@@ -100,59 +101,7 @@ std::string getDisplayCategory(const Cargo &cargo) {
     return category.substr(0,where);   
   }
   return cargo.category;
-}
-class TextInputDisplay: public StaticDisplay{
-	std::vector <unsigned int> local_keyboard_queue;
-	std::vector <unsigned int> *keyboard_queue;
-	const char * disallowed;
-public:
-	TextInputDisplay(std::vector <unsigned int> *keyboard_input_queue, const char * disallowed) {
-		if (keyboard_input_queue) {
-			this->keyboard_queue=keyboard_input_queue;
-		}else {
-			this->keyboard_queue=&local_keyboard_queue;
-		}
-		keyboard_input_queue->clear();
-		this->disallowed=disallowed;
-	}
-	virtual void draw() {
-		std::string text = this->text();
-		bool reset=false;
-		size_t LN=keyboard_queue->size();
-		for (size_t i=0;i<LN;++i) {
-			unsigned int c=(*keyboard_queue)[i];
-			if (c==8||c==127) {
-				text=text.substr(0,text.length()-1);
-				reset=true;
-			}else if (c!='\0'&&c<256) {
-				bool allowed=true;
-				for (int j=0;disallowed[j];++j) {
-					if (c==disallowed[j])
-						allowed=false;
-				}
-				if (allowed ) {
-					char tmp[2]={0,0};
-					tmp[0]=(char)c;
-					text+=tmp;
-					reset=true;
-				}				
-			}
-		}
-		keyboard_queue->clear();
-		{
-                  unsigned int x= (unsigned int)getNewTime();
-                  string text1=text;
-                  if (x%2) {
-                    text1+="|";
-                  }
-                  this->setText(text1);
-                }
-		this->StaticDisplay::draw();
-                this->setText(text);
-	}
-};
-
-	
+}	
 
 using namespace std;
 
@@ -2202,7 +2151,7 @@ SimplePickerCell* BaseComputer::createCategoryCell(SimplePickerCells& cells, con
         // Re-use the category we have.
     } else {
         // Need to make a new cell for this.
-        cells.addCell(SimplePickerCell(beautify(currentCategory), currentCategory, CATEGORY_TEXT_COLOR(), CATEGORY_TAG));
+        cells.addCell(new SimplePickerCell(beautify(currentCategory), currentCategory, CATEGORY_TEXT_COLOR(), CATEGORY_TAG));
     }
 
     SimplePickerCell* parentCell = static_cast<SimplePickerCell*>(cells.cellAt(cells.count()-1));   // Last cell in list.
@@ -2302,7 +2251,7 @@ void BaseComputer::loadListPicker(TransactionList& tlist, SimplePicker& picker, 
 			final_color = base_color;
 
         //SimplePickerCell cell(itemName, item.content, (transOK? (item.mission?MISSION_COLOR():GUI_CLEAR) : NO_MONEY_COLOR()), i);
-        SimplePickerCell cell(itemName, item.content, final_color, i);
+        SimplePickerCell *cell = new SimplePickerCell(itemName, item.content, final_color, i);
 
 	//	cell.textColor(
 	//		GFXColor(1,0,0)
@@ -2662,7 +2611,7 @@ void BaseComputer::loadNewsControls(void) {
         vector<std::string> who;
         who.push_back("news");
         while((mission->msgcenter->last(i++, last, who))) {
-            picker->addCell(SimplePickerCell(last.message));
+            picker->addCell(new SimplePickerCell(last.message));
         }
     } else {
         // Get news from save game.
@@ -2671,7 +2620,7 @@ void BaseComputer::loadNewsControls(void) {
             const int playerNum=UnitUtil::isPlayerStarship(playerUnit);
             int len = getSaveStringLength(playerNum, NEWS_NAME_LABEL);
             for (int i=len-1; i>=0; i--) {
-                picker->addCell(SimplePickerCell(getSaveString(playerNum, NEWS_NAME_LABEL, i)));
+                picker->addCell(new SimplePickerCell(getSaveString(playerNum, NEWS_NAME_LABEL, i)));
             }
         }
     }
@@ -2722,7 +2671,7 @@ void BaseComputer::loadLoadSaveControls(void) {
 		std::string savedir = VSFileSystem::homedir+"/save/";
 		int ret = scandir (savedir.c_str(),&dirlist,nodirs,0);
 		while( ret-->0) {
-			picker->addCell(SimplePickerCell(dirlist[ret]->d_name));
+			picker->addCell(new SimplePickerCell(dirlist[ret]->d_name));
 		}		
 	}
 
@@ -3348,7 +3297,7 @@ void BaseComputer::BuyUpgradeOperation::selectMount(void) {
 		if(!selectable) mountColor = MOUNT_POINT_NO_SELECT();
 
 		// Now we add the cell.  Note that "selectable" is stored in the tag property.
-		picker->addCell(SimplePickerCell(mountName, "", mountColor, (selectable?1:0)));
+		picker->addCell(new SimplePickerCell(mountName, "", mountColor, (selectable?1:0)));
     }
 
 	dialog->run();
@@ -3549,7 +3498,7 @@ void BaseComputer::SellUpgradeOperation::selectMount(void) {
 
 		// Now we add the cell.  Note that "selectable" is stored in the tag property.
 		const GFXColor mountColor = (selectable? MOUNT_POINT_FULL():MOUNT_POINT_NO_SELECT());
-		picker->addCell(SimplePickerCell(mountName, "", mountColor, (selectable?1:0)));
+		picker->addCell(new SimplePickerCell(mountName, "", mountColor, (selectable?1:0)));
     }
 
 	assert(selectableCount > 0);		// We should have found at least one unit mounted.

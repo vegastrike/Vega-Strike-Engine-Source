@@ -10,6 +10,7 @@ class TextPlane;
 class VSSprite;
 class Gauge;
 class Unit;
+class NavigationSystem;
 #include "vdu.h"
 #include "camera.h"
 #include "nav/navscreen.h"
@@ -149,6 +150,8 @@ private:
   void SetSoundFile (std::string sound);
   int GetSoundFile () {return soundfile;}
   void SetCommAnimation (Animation * ani);
+  ///Accesses the current navigationsystem
+  NavigationSystem *AccessNavSystem() {return &ThisNav;}
   ///Accesses the current camera
   Camera *AccessCamera() {return &cam[currentcamera];}
   ///Returns the passed in cam

@@ -48,7 +48,7 @@ public:
     virtual void setTextColor(const GFXColor& c) { m_textColor = c; };
 
     // Add a child to the list of children of this cell.
-    void addChild(const SimplePickerCell& c);
+    void addChild(SimplePickerCell *c);
     // Make sure there is an empty list for children.
     SimplePickerCells* createEmptyChildList(void);
 
@@ -75,20 +75,20 @@ public:
     // Number of cells in this list.
     virtual int count(void) const { return m_cells.size(); };
     // Get a particular cell.
-    virtual PickerCell* cellAt(int index) { return &m_cells[index]; };
+    virtual PickerCell* cellAt(int index) { return m_cells[index]; };
 
     // Add a new cell to this list.
-    void addCell(const PickerCell& c) { m_cells.push_back(*(static_cast<const SimplePickerCell*>(&c))); };
+    virtual void addCell(PickerCell* c) { m_cells.push_back(c); };
 
     // Clear out all the cells.
-    void clear(void) { m_cells.clear(); };
+    virtual void clear(void);
 
     // CONSTRUCTION
     SimplePickerCells(void);
-    virtual ~SimplePickerCells(void) {};
+    virtual ~SimplePickerCells(void) {clear();};
 
 protected:
-    std::vector<SimplePickerCell> m_cells;
+    std::vector<PickerCell*> m_cells;
 };
 
 // The Picker class supports a list of items that can be
@@ -99,22 +99,40 @@ class SimplePicker : public Picker
 {
 public:
     // Add a new cell to this control.
-    void addCell(const SimplePickerCell& c) { m_realCells.addCell(c); };
+    void addCell(SimplePickerCell *c) { static_cast<SimplePickerCells*>(m_cells)->addCell(c); };
 
     // Clear out all the cells.
     void clear(void);
 
-    // Get cell collection.
-    PickerCells* cells(void) { return &m_realCells; };
-
-    // CONSTRUCTION
-public:
     SimplePicker(void);
     virtual ~SimplePicker(void);
+};
 
-    // VARIABLES
+
+// This is a picker cell that can hold any type of data
+// by using templates.
+template <class T>
+class ValuedPickerCell : public SimplePickerCell
+{
+public:
+  // CONSTRUCTION
+  ValuedPickerCell(T value, const std::string text, const std::string& id = "", const GFXColor& c = GUI_CLEAR, int newTag = 0)
+    :
+    SimplePickerCell(text, id, c, newTag),
+    m_value(value) {}
+  
+  virtual ~ValuedPickerCell(void) {}
+  
+  // The type associated with the cell.
+  T value(void) const { return m_value; }
+  
+  ValuedPickerCell(const ValuedPickerCell& cell)
+    :
+    SimplePickerCell(cell),
+    m_value(cell.m_value) {}
+  
 protected:
-    SimplePickerCells m_realCells;
+  T m_value;
 };
 
 #endif   // __SIMPLEPICKER_H__

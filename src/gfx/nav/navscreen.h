@@ -6,8 +6,8 @@
 #include "drawlist.h"
 #include "navitemtypes.h"
 #include "gfx/masks.h"
-
-
+#include "navcomputer.h"
+#include "navpath.h"
 
 #define NAVTOTALMESHCOUNT 8	//	same as the button count, 1 mesh for screen and 1 per button(1+7)
 #define MAXZOOM 10
@@ -15,7 +15,6 @@
 
 void visitSystem (class Cockpit * cp, std::string systemname) ;
 void Beautify (string systemfile, string & sector, string & system);
-
 class NavigationSystem
 {
 public:
@@ -47,6 +46,7 @@ public:
 			std::vector<unsigned> lowerdestinations;
 			GFXColor col;
 		        bool part_of_path;
+		        std::set<NavPath *> paths;
 			void UpdateColor();
 			string &GetName();
 			const string &GetName() const;
@@ -129,7 +129,19 @@ public:
 
 
 private:
+friend class NavComputer;
+friend class CurrentPathNode;
+friend class TargetPathNode;
+friend class AbsolutePathNode;
+friend class CriteriaContains;
+friend class CriteriaOwnedBy;
+friend class CriteriaSector;
+friend class NavPath;
+friend void visitSystemHelp (Cockpit * cp, string systemname,float num);
+NavComputer * navcomp;
+PathManager * pathman;
 unsigned currentsystemindex;
+unsigned focusedsystemindex;
 unsigned destinationsystemindex;
 unsigned systemselectionindex;
 unsigned sectorselectionindex;
@@ -247,6 +259,8 @@ void DisplayOrientationLines (float the_x, float the_y, float the_x_flat, float 
 
 bool CheckForSelectionQuery();
 void setCurrentSystemIndex(unsigned newSystemIndex);
+void setFocusedSystemIndex(unsigned newSystemIndex);
+void setDestinationSystemIndex(unsigned newSystemIndex);
 
 bool BFS(unsigned originIndex, unsigned destIndex);
 bool DoubleRootedBFS(unsigned originIndex, unsigned destIndex);
@@ -259,8 +273,8 @@ bool DoubleRootedBFS(unsigned originIndex, unsigned destIndex);
 
 
 public:
-NavigationSystem() {draw = -1; whattodraw=(1|2);}
- ~NavigationSystem();
+NavigationSystem();
+~NavigationSystem();
 static void DrawCircle(float x, float y, float size, const GFXColor &col );
 static void DrawHalfCircleTop(float x, float y, float size, const GFXColor &col );
 static void DrawHalfCircleBottom(float x, float y, float size, const GFXColor &col );

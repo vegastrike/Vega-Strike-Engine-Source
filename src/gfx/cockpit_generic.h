@@ -15,6 +15,7 @@ enum VIEWSTYLE {CP_FRONT,  CP_BACK,CP_LEFT, CP_RIGHT, CP_VIEWTARGET, CP_CHASE, C
 class Unit;
 class Camera;
 class Animation;
+class NavigationSystem;
 #include "in.h"
 #include "cmd/images.h"
 /**
@@ -140,6 +141,8 @@ protected:
   static void TurretControl (const KBData&,KBSTATE) {}
   virtual void SetCommAnimation (Animation * ani) {}
   class SaveGame * savegame;
+  ///Accesses the current navigationsystem
+  virtual NavigationSystem *AccessNavSystem() {return NULL;}
   ///Accesses the current camera
   virtual Camera *AccessCamera() {return NULL;}
   ///Returns the passed in cam
