@@ -1373,11 +1373,11 @@ void Unit::UpdatePhysics (const Transformation &trans, const Matrix &transmat, c
   if (fuel<0)
     fuel=0;
   if (cloaking>=cloakmin) {
-    if (image->cloakenergy*SIMULATION_ATOM>energy) {
+    if (image->cloakenergy*SIMULATION_ATOM>warpenergy) {
       Cloak(false);//Decloak
     } else {
       if (image->cloakrate>0||cloaking==cloakmin) {
-		energy-=apply_float_to_short(SIMULATION_ATOM*image->cloakenergy);
+		warpenergy-=apply_float_to_short(SIMULATION_ATOM*image->cloakenergy);
       }
       if (cloaking>cloakmin) {
 		AUDAdjustSound (sound->cloak, cumulative_transformation.position,cumulative_velocity);
@@ -3225,7 +3225,7 @@ void Unit::SetOwner(Unit *target) {
 
 void Unit::Cloak (bool loak) {
   if (loak) {
-    if (image->cloakenergy<energy) {
+    if (image->cloakenergy<warpenergy) {
       image->cloakrate =(image->cloakrate>=0)?image->cloakrate:-image->cloakrate; 
       if (cloaking==(short)32768) {
 	cloaking=32767;
