@@ -86,6 +86,30 @@ public:
 	}
 	virtual ~FogMesh (){}
 };
+
+class AtmosphereHalo:public GameUnit<Unit> {
+public:
+	float planetRadius;
+	AtmosphereHalo (float radiusOfPlanet,vector<Mesh*> & meshes, int faction):
+			GameUnit<Unit>(meshes,true,faction){
+		planetRadius= radiusOfPlanet;
+	}
+	virtual void Draw(const Transformation & quat=identity_transformation, const Matrix & m = identity_matrix) {
+		QVector dirtocam = _Universe->AccessCamera()->GetPosition()-m.p;
+		Transformation qua=quat;
+		Matrix mat = m;
+		float distance = dirtocam.Magnitude();
+
+		float distanceToMovCam=planetRadius/distance;
+		float zscale;
+		float xyscale = zscale =sqrt(1-distanceToMovCam*distanceToMovCam);
+		dirtocam.Normalize();
+		mat.p+=distanceToMovCam*planetRadius*dirtocam;
+		ScaleMatrix(mat,Vector(xyscale,xyscale,zscale));
+		qua.position=mat.p;
+		GameUnit<Unit>::Draw(qua,mat);
+	}
+};
 void GamePlanet::AddFog (const std::vector <AtmosphericFogMesh> & v) {
 	if(meshdata.empty()) meshdata.push_back(NULL);
 #ifdef MESHONLY
@@ -98,7 +122,8 @@ void GamePlanet::AddFog (const std::vector <AtmosphericFogMesh> & v) {
 		Mesh *fog=new FogMesh (v[i],rSize());	
 		fogs.push_back(fog);
 	}
-	Unit* fawg=UnitFactory::createUnit(fogs,true,0);
+	Unit* fawg=//UnitFactory::createUnit(fogs,true,0);
+		new AtmosphereHalo(this->rSize(),fogs,0);
 	fawg->setFaceCamera();
 	getSubUnits().preinsert (fawg);
 	fawg->hull/=fawg->GetHullPercent();

@@ -477,8 +477,11 @@ void GameUnit<UnitType>::Draw(const Transformation &parent, const Matrix &parent
 	  Vector p,q,r;
 	  QVector pos (ctm->p);
 	  float wid,hei;
+	  float magr = parentMatrix.getR().Magnitude();
+	  float magp = parentMatrix.getP().Magnitude();
+	  float magq = parentMatrix.getQ().Magnitude();
 	  CalculateOrientation(pos,p,q,r,wid,hei,0,false,ctm);
-	  VectorAndPositionToMatrix(invview,p,q,r,ctm->p);
+	  VectorAndPositionToMatrix(invview,p*magp,q*magq,r*magr,ctm->p);
 //	  _Universe->AccessCamera()->GetView(invview);
 
 	  ctm = &invview;	  
