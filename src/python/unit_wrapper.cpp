@@ -344,18 +344,18 @@ class Cargo:
   def __init__ (self,a,b,c,d,e,f):
     print 'Cargo constructor called with (self,%s,%s,%f,%d,%f,%f)' % (a,b,c,d,e,f)
   voidWRAPPED1(SetPrice,float,price)
-  WRAPPED0(float,GetPrice,0)
+  WRAPPED0(float,GetPrice,1)
   voidWRAPPED1(SetMass,float,mass)
-  WRAPPED0(float,GetMass,0)
+  WRAPPED0(float,GetMass,1)
   voidWRAPPED1(SetVolume,float,volume)
-  WRAPPED0(float,GetVolume,0)
+  WRAPPED0(float,GetVolume,1)
   voidWRAPPED1(SetQuantity,int,quantity)
-  WRAPPED0(int,GetQuantity,0)
+  WRAPPED0(int,GetQuantity,1)
   voidWRAPPED1(SetContent,string,content)
-  WRAPPED0(string,GetContent,"")
+  WRAPPED0(string,GetContent,"weapons")
   voidWRAPPED1(SetCategory,string,category)
-  WRAPPED0(string,GetCategory,"")
-  WRAPPED0(string,GetDescription)
+  WRAPPED0(string,GetCategory,"contraband")
+  WRAPPED0(string,GetDescription,"")
 
 class PythonAI:
   def __init__(self):
@@ -368,12 +368,12 @@ class PythonAI:
   voidWRAPPED3(MatchAngularVelocity,bool, terminate, Vector, vec, bool, local)
   voidWRAPPED1(ChangeHeading,QVector, vec)
   voidWRAPPED1(ChangeLocalDirection,Vector, vec)
-  voidWRAPPED1(MoveTo,Unit *,Targ, bool, afterburn)
+  voidWRAPPED2(MoveTo,Unit *,Targ, bool, afterburn)
   voidWRAPPED5(MatchVelocity,bool, terminate, Vector, vec, Vector, angvel, bool, afterburn, bool, local)
   voidWRAPPED2(Cloak,bool, enable,float, seconds)
   voidWRAPPED1(FormUp,QVector, pos)
   voidWRAPPED2(FaceDirection ,float, distToMatchFacing, bool, finish)
-  voidWRAPPED1(XMLScript (string, script)
+  voidWRAPPED1(XMLScript,string, script)
   voidWRAPPED0(LastPythonScript)
 
 #endif

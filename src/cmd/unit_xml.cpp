@@ -1584,6 +1584,9 @@ void Unit::LoadXML(const char *filename, const char * modifications)
   {
     image->unitwriter->AddTag("Defense");
     image->unitwriter->AddElement("HudImage",stringStarHandler,XMLType (myhudim));
+    if (image->explosion_type.length()){
+      image->unitwriter->AddElement("ExplosionAni",stringStarHandler,XMLType(&image->explosion_type));
+    }
     image->unitwriter->AddElement("RepairDroid",ucharStarHandler,XMLType(&image->repair_droid));
     image->unitwriter->AddElement("ECM",shortToFloatHandler,XMLType(&image->ecm));
     {

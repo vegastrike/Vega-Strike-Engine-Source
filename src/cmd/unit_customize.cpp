@@ -613,7 +613,7 @@ bool Unit::UpAndDownGrade (Unit * up, Unit * templ, int mountoffset, int subunit
       percentage++;
     }
   
-    if (afterburnenergy<32767&&up->afterburnenergy!=0) {
+    if (afterburnenergy<32767&&afterburnenergy<=up->afterburnenergy&&up->afterburnenergy!=0) {
       if (touchme) afterburnenergy=32767;
       numave++;
       percentage++;
