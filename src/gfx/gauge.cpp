@@ -41,13 +41,13 @@ void Gauge::Draw (float percentage) {
   case GAUGE_LEFT:
     SetST (percentage,1);
     SetSize (sx*percentage,sy);
-    SetPosition (px-sx*(1-percentage)*.5,py);
+    SetPosition (px+sx*(1-percentage)*.5,py);
     break;
   case GAUGE_DOWN:
   case GAUGE_UP:
     SetST (1,percentage);
     SetSize (sx,sy*percentage);
-    SetPosition (px,py-sy*(1-percentage)*.5);
+    SetPosition (px,py+sy*(1-percentage)*.5);
     break;
   }
   Sprite::Draw();
