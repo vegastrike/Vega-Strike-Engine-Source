@@ -22,10 +22,14 @@
 #include "cmd/ai/communication.h"
 #include "cmd/script/flightgroup.h"
 #include "music.h"
+#include "faction_generic.h"
+#include "universe_util.h"
+#include "csv.h"
+#include "unit_csv.h"
 //#define DESTRUCTDEBUG
 #include "base.h"
 extern unsigned int apply_float_to_unsigned_int (float tmp);  //Short fix
-
+extern void AddMeshes(std::vector<Mesh*>&xmeshes, float&randomstartframe, float&randomstartseconds, float unitscale, std::string meshes,int faction,Flightgroup *fg);
 extern std::vector <Mesh *> MakeMesh(unsigned int mysize);
 
 template<class UnitType>
@@ -49,11 +53,35 @@ void GameUnit<UnitType>::Split (int level) {
   std::vector <Mesh *> old = this->meshdata;
   Mesh * shield=old.back();
   old.pop_back();
-  for (int split=0;split<level;split++) {
-    std::vector<Mesh *> nw;
-    size_t oldsize=old.size();
-    for (i=0;i<oldsize;i++) {
-      PlaneNorm.Set (rand()-RAND_MAX/2,rand()-RAND_MAX/2,rand()-RAND_MAX/2+.5);
+  std::string fac = FactionUtil::GetFaction(this->faction);
+  CSVRow unit_stats(LookupUnitRow(name,fac));
+  unsigned int num_chunks = unit_stats.success()?atoi(unit_stats["Num_Chunks"].c_str()):0;
+  if (num_chunks&&unit_stats.success()) {
+    size_t i;
+    for (i=0;i<old.size();++i) {
+      delete old[i];
+    }
+    old.clear();
+    unsigned int which_chunk = rand()%num_chunks;
+    std::string chunkname = UniverseUtil::LookupUnitStat(name,fac,"Chunk_"+XMLSupport::tostring(which_chunk));
+    std::string dir = UniverseUtil::LookupUnitStat(name,fac,"Directory");
+    VSFileSystem::current_path.push_back(unit_stats.getRoot());
+    VSFileSystem::current_subdirectory.push_back("/"+dir);
+    VSFileSystem::current_type.push_back(UnitFile);
+    float randomstartframe=0;float randomstartseconds=0;
+    std::string scalestr=UniverseUtil::LookupUnitStat(name,fac,"Unit_Scale");
+    int scale=atoi(scalestr.c_str());
+    if (scale==0) scale=1;
+    AddMeshes(old,randomstartframe,randomstartseconds,scale,chunkname,faction,this->getFlightgroup());
+    VSFileSystem::current_type.pop_back();
+    VSFileSystem::current_subdirectory.pop_back();    
+    VSFileSystem::current_path.pop_back();
+  }else {
+    for (int split=0;split<level;split++) {
+      std::vector<Mesh *> nw;
+      size_t oldsize=old.size();
+      for (i=0;i<oldsize;i++) {
+        PlaneNorm.Set (rand()-RAND_MAX/2,rand()-RAND_MAX/2,rand()-RAND_MAX/2+.5);
       PlaneNorm.Normalize();  
       nw.push_back(NULL);
       nw.push_back(NULL);
@@ -66,8 +94,9 @@ void GameUnit<UnitType>::Split (int level) {
       }
       if (nw.back()==NULL)
         nw.pop_back();
+      }
+      old = nw;
     }
-    old = nw;
   }
   old.push_back(NULL);//push back shield
   if (shield)

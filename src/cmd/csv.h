@@ -40,7 +40,9 @@ public:
   std::vector<std::string>::iterator begin();
   std::vector<std::string>::iterator end();
   std::string getKey(unsigned int which);      
-  
+  bool success()const {
+    return parent!=NULL;
+  }
 };
 
 extern std::vector<CSVTable*> unitTables;

@@ -53,7 +53,7 @@
 #include "save_util.h"
 #include "gfx/masks.h"
 #include "cmd/music.h"
-#include "cmd/csv.h"
+
 #include <time.h>
 #ifndef _WIN32
 #include <sys/signal.h>

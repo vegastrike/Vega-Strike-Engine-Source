@@ -12,12 +12,25 @@
 #include "unit_xml.h"
 #include "gfx/quaternion.h"
 #include "role_bitmask.h"
+#include "unit_csv.h"
 #include <algorithm>
 #define VS_PI 3.1415926535897931
-
+CSVRow LookupUnitRow(string unitname,string faction) {
+  string hashname=unitname+"__"+faction;
+  unsigned int where; //gets munged
+  for (vector<CSVTable*>::reverse_iterator i=unitTables.rbegin();i!=unitTables.rend();++i) {
+    unsigned int where;
+    if ((*i)->RowExists(hashname,where)) {
+      return CSVRow((*i),where); 
+    }else if ((*i)->RowExists(unitname,where)) {
+      return CSVRow((*i),where);
+    }
+  } 
+  return CSVRow();
+}
 using namespace std;
 extern int GetModeFromName (const char * input_buffer);
-extern void pushMesh( Unit::XML * xml, const char *filename, const float scale,int faction,class Flightgroup * fg, int startframe, double texturestarttime);
+extern void pushMesh( std::vector<Mesh*> &mesh, float &randomstartframe, float &randomstartseconds,  const char *filename, const float scale,int faction,class Flightgroup * fg, int startframe, double texturestarttime);
 void addShieldMesh( Unit::XML * xml, const char *filename, const float scale,int faction,class Flightgroup * fg);
 void addRapidMesh( Unit::XML * xml, const char *filename, const float scale,int faction,class Flightgroup * fg);
 void addBSPMesh( Unit::XML * xml, const char *filename, const float scale,int faction,class Flightgroup * fg);
@@ -77,7 +90,7 @@ static void UpgradeUnit (Unit * un, std::string upgrades) {
 }
 
 
-static void AddMeshes(Unit::XML& xml, std::string meshes,int faction,Flightgroup *fg){
+void AddMeshes(std::vector<Mesh*>&xmeshes, float&randomstartframe, float&randomstartseconds, float unitscale, std::string meshes,int faction,Flightgroup *fg){
   string::size_type where,wheresf,wherest;
   while ((where=meshes.find("{"))!=string::npos) {
     meshes=meshes.substr(where+1);
@@ -99,7 +112,7 @@ static void AddMeshes(Unit::XML& xml, std::string meshes,int faction,Flightgroup
     int startframe = startf=="RANDOM"?-1:(startf=="ASYNC"?-1:atoi(startf.c_str()));
     float starttime = startt=="RANDOM"?-1.0f:atof(startt.c_str());
     
-    pushMesh(&xml,mesh.c_str(),xml.unitscale,faction,fg,startframe,starttime);
+    pushMesh(xmeshes,randomstartframe,randomstartseconds,mesh.c_str(),unitscale,faction,fg,startframe,starttime);
   }
 }
 static string nextElement (string&inp) {
@@ -522,7 +535,7 @@ void Unit::LoadRow(CSVRow &row,string modification, string * netxml) {
   xml.unitscale = stof(row["Unit_Scale"],1);
   if (!xml.unitscale) xml.unitscale=1;
   image->unitscale=xml.unitscale;
-  AddMeshes(xml,row["Mesh"],faction,getFlightgroup());
+  AddMeshes(xml.meshes,xml.randomstartframe,xml.randomstartseconds,xml.unitscale,row["Mesh"],faction,getFlightgroup());
   AddDocks(this,xml,row["Dock"]);
   AddSubUnits(this,xml,row["Sub_Units"],faction,modification);
   meshdata= xml.meshes;

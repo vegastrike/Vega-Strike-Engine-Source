@@ -463,28 +463,28 @@ void addBSPMesh( Unit::XML * xml, const char *filename, const float scale,int fa
 {
   xml->bspmesh = Mesh::LoadMesh(filename,Vector(scale,scale,scale),faction,fg);	
 }
-void pushMesh( Unit::XML * xml, const char *filename, const float scale,int faction,class Flightgroup * fg, int startframe, double texturestarttime)
+void pushMesh( std::vector<Mesh*>&meshes, float &randomstartframe, float &randomstartseconds, const char *filename, const float scale,int faction,class Flightgroup * fg, int startframe, double texturestarttime)
 {
   vector<Mesh*> m = Mesh::LoadMeshes(filename, Vector(scale,scale,scale), faction,fg);
   for (unsigned int i=0;i<m.size();++i) {
-        xml->meshes.push_back(m[i]);
+        meshes.push_back(m[i]);
 	if (startframe>=0) {
-		xml->meshes.back()->setCurrentFrame(startframe);
+		meshes.back()->setCurrentFrame(startframe);
 	}else if (startframe==-2){
 		float r = ((float)rand())/RAND_MAX;
-		xml->meshes.back()->setCurrentFrame(r*xml->meshes.back()->getFramesPerSecond());
+		meshes.back()->setCurrentFrame(r*meshes.back()->getFramesPerSecond());
 	}else if (startframe==-1) {
-		if (xml->randomstartseconds==0) {
-			xml->randomstartseconds=xml->randomstartframe*xml->meshes.back()->getNumLOD()/xml->meshes.back()->getFramesPerSecond();
+		if (randomstartseconds==0) {
+			randomstartseconds=randomstartframe*meshes.back()->getNumLOD()/meshes.back()->getFramesPerSecond();
 		}
-		xml->meshes.back()->setCurrentFrame(xml->randomstartseconds*xml->meshes.back()->getFramesPerSecond());
+		meshes.back()->setCurrentFrame(randomstartseconds*meshes.back()->getFramesPerSecond());
 	}
 	if (texturestarttime>0) {
-		xml->meshes.back()->setTextureCumulativeTime(texturestarttime);
+		meshes.back()->setTextureCumulativeTime(texturestarttime);
 	}else {
-		float fps =xml->meshes.back()->getTextureFramesPerSecond();
-		int frames = xml->meshes.back()->getNumTextureFrames();
-		double ran = xml->randomstartframe;
+		float fps =meshes.back()->getTextureFramesPerSecond();
+		int frames = meshes.back()->getNumTextureFrames();
+		double ran = randomstartframe;
 		if (fps>0&&frames>1) {
 			ran *= frames/fps;
 		}else {
@@ -493,7 +493,7 @@ void pushMesh( Unit::XML * xml, const char *filename, const float scale,int fact
 			
 			
 		}
-		xml->meshes.back()->setTextureCumulativeTime(ran);
+		meshes.back()->setTextureCumulativeTime(ran);
 
 	}
   }
@@ -721,7 +721,7 @@ using namespace UnitXML;
 	  }
 	  switch(current_unit_load_mode){
 	  case NO_MESH: break;
-	  default: pushMesh( xml, file.c_str(), xml->unitscale, faction,flightgroup,startframe,texturestarttime);
+	  default: pushMesh( xml->meshes, xml->randomstartframe, xml->randomstartseconds, file.c_str(), xml->unitscale, faction,flightgroup,startframe,texturestarttime);
 	  }
   }
   break;

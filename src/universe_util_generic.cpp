@@ -10,6 +10,7 @@
 #include "star_system_generic.h"
 #include <string>
 #include "savegame.h"
+#include "cmd/unit_csv.h"
 //#include "audiolib.h"
 //#include "gfx/animation.h"
 #include "gfx/cockpit_generic.h"
@@ -550,20 +551,13 @@ namespace UniverseUtil {
 						return launchJumppoint(name_string,faction_string,type_string,unittype,ai_string,nr_of_ships,nr_of_waves,pos,sqadlogo,"");
 				}
 
-	string LookupUnitStat(string unitname, string faction, string statname){
-		string hashname=unitname+"__"+faction;
-		unsigned int where; //gets munged
-		for (vector<CSVTable*>::reverse_iterator i=unitTables.rbegin();i!=unitTables.rend();++i) {
-			unsigned int where;
-			if ((*i)->RowExists(hashname,where)) {
-				return CSVRow((*i),where)[statname]; 
-			}else if ((*i)->RowExists(unitname,where)) {
-				return CSVRow((*i),where)[statname];
-			}
-		} 
-		return "";
-	}
 
+	string LookupUnitStat(string unitname, string faction, string statname){
+          CSVRow tmp(LookupUnitRow(unitname,faction));
+          if (tmp.success())
+            return tmp[statname];
+          return "";          
+        }
 
 	
                                 static std::vector <Unit *> cachedUnits;
