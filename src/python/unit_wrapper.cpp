@@ -6,7 +6,7 @@
 #include <boost/python/objects.hpp>
 
 //makes to_python for both vector and qvector turn them into tuples :-)
-
+#ifndef PYTHON_STUB
 BOOST_PYTHON_BEGIN_CONVERSION_NAMESPACE
 PyObject *to_python (Vector vec) {
 	return to_python(boost::python::tuple((double)vec.i,(double)vec.j,(double)vec.k));
@@ -28,7 +28,8 @@ BOOST_PYTHON_END_CONVERSION_NAMESPACE
 
 using std::string;
 //WARNING: Macro City ahead.  Please skip this section if you don't like macros.
-#define CHECKME }Unit * me=GetUnit();if (!me){fprintf(stderr,"\nERROR: NULL Unit used in Python script; returning default value..."); return 
+const char* error="\nERROR: NULL Unit used in Python script; returning default value...";
+#define CHECKME }Unit * me=GetUnit();if (!me){fprintf(stderr,error); return 
 #define WRAPPED0(type,name,def) type name (){{CHECKME def;} return me -> name ();}  
 #define WRAPPED1(type,name,atype,a,def) type name ( atype a ){{CHECKME def;} return me -> name ( a );}  
 #define WRAPPED2(type,name,atype,a,btype,b,def) type name ( atype a, btype b ){{CHECKME def;} return me -> name ( a , b );}  
@@ -47,12 +48,12 @@ public:
   UnitWrapper GetVelocityReference() {{CHECKME 0;}return unit->VelocityReference();}
   void SetVelocityReference(UnitWrapper targ) {{CHECKME;}unit->VelocityReference(targ);}
   void SetTarget (UnitWrapper targ) {{CHECKME;}unit->Target(targ);}
-  boost::python::tuple GetOrientation() {{CHECKME boost::python::tuple();}Vector p,q,r; unit->GetOrientation(p,q,r); return boost::python::tuple(p,q,r);}
-  boost::python::tuple queryBSP (bool ShieldBSP) {{CHECKME boost::python::tuple();}float dist; UnitWrapper un; QVector st,en; Vector nml; un=unit->queryBSP(st,en,nml,dist,ShieldBSP); boost::python::tuple ret (un,st,en,nml); ret.set_item(4,dist); return ret;}
-  boost::python::tuple cosAngleTo (UnitWrapper target, float speed, float range) {{CHECKME boost::python::tuple();}float dist; float ret=unit->cosAngleTo(target,dist,speed,range);return boost::python::tuple (ret,dist);}
-  boost::python::tuple cosAngleFromMountTo (UnitWrapper target) {{CHECKME boost::python::tuple();}float dist; float ret=unit->cosAngleFromMountTo(target,dist);return boost::python::tuple (ret,dist);}
-  boost::python::tuple getAverageGunSpeed () {{CHECKME boost::python::tuple();}float speed, range;unit->getAverageGunSpeed(speed,range);return boost::python::tuple(speed,range);}
-  boost::python::tuple InsideCollideTree (UnitWrapper smaller) {{CHECKME boost::python::tuple();}QVector bigpos, smallpos; Vector bigNormal, smallNormal; bool ret=unit->InsideCollideTree(smaller,bigpos,bigNormal,smallpos,smallNormal); boost::python::tuple tup (bigpos,bigNormal,smallpos,smallNormal); tup.set_item(4,ret); return tup;}
+  boost::python::tuple GetOrientation() {{CHECKME boost::python::tuple(Vector(0,0,0),Vector(0,0,0),Vector(0,0,0));}Vector p,q,r; unit->GetOrientation(p,q,r); return boost::python::tuple(p,q,r);}
+  boost::python::tuple queryBSP (QVector st, QVector en, bool ShieldBSP) {{CHECKME boost::python::tuple(0,Vector(0,0,1),0);}float dist; UnitWrapper un; Vector nml; un=unit->queryBSP(st,en,nml,dist,ShieldBSP); boost::python::tuple ret (un,nml,dist); return ret;}
+  boost::python::tuple cosAngleTo (UnitWrapper target, float speed, float range) {{CHECKME boost::python::tuple(0,0);}float dist; float ret=unit->cosAngleTo(target,dist,speed,range);return boost::python::tuple (ret,dist);}
+  boost::python::tuple cosAngleFromMountTo (UnitWrapper target) {{CHECKME boost::python::tuple(0,0);}float dist; float ret=unit->cosAngleFromMountTo(target,dist);return boost::python::tuple (ret,dist);}
+  boost::python::tuple getAverageGunSpeed () {{CHECKME boost::python::tuple(0,0);}float speed, range;unit->getAverageGunSpeed(speed,range);return boost::python::tuple(speed,range);}
+  boost::python::tuple InsideCollideTree (UnitWrapper smaller) {{CHECKME boost::python::tuple(QVector(0,0,0),Vector(0,0,0),QVector(0,0,0),Vector(0,0,0));}QVector bigpos, smallpos; Vector bigNormal, smallNormal; bool ret=unit->InsideCollideTree(smaller,bigpos,bigNormal,smallpos,smallNormal); boost::python::tuple tup (bigpos,bigNormal,smallpos,smallNormal); return tup;}
   UnitWrapper getSubUnit(int which) {{CHECKME 0;}un_iter it=unit->getSubUnits(); for (int i=0;i<which;i++) {it.advance();}return it.current();}
   UnitWrapper getFlightgroupLeader () {{CHECKME 0;}Flightgroup *group=unit->getFlightgroup();if (group) return group->leader; else return 0;}
   float GetVelocityDifficultyMult() {{CHECKME 0;}float diff=1;unit->GetVelocityDifficultyMult(diff);return diff;}
@@ -73,8 +74,8 @@ public:
   UnitWrapper(Unit *un=0) : UnitContainer(un){}
   operator Unit* () {return unit;}
 };
-PYTHON_BEGIN_MODULE(Unit)
-PYTHON_BEGIN_CLASS(Unit,UnitWrapper,"Unit")
+PYTHON_BEGIN_MODULE(VS)
+PYTHON_BEGIN_CLASS(VS,UnitWrapper,"Unit")
 //WARNING: Macro City 2 ahead.  Please skip this section, also if you don't like macros.
 #undef CHECKME
 #undef WRAPPED0
@@ -119,6 +120,18 @@ PYTHON_BEGIN_CLASS(Unit,UnitWrapper,"Unit")
   Class.def(&UnitWrapper::GetVelocityDifficultyMult,"GetVelocityDifficultyMult");
   Class.def(&UnitWrapper::GetJumpStatus,"GetJumpStatus");
   Class.def(&UnitWrapper::ApplyDamage,"ApplyDamage");
-PYTHON_END_CLASS(Unit,UnitWrapper)
-PYTHON_END_MODULE(Unit)
+PYTHON_END_CLASS(VS,UnitWrapper)
+PYTHON_END_MODULE(VS)
 TO_PYTHON_SMART_POINTER(UnitWrapper);
+#else
+#define WRAPPED0(type,name,def) 
+#define WRAPPED1(type,name,atype,a,def) 
+#define WRAPPED2(type,name,atype,a,btype,b,def) 
+#define WRAPPED3(type,name,atype,a,btype,b,ctype,c,def) 
+#define voidWRAPPED0(name) 
+#define voidWRAPPED1(name,atype,a) 
+#define voidWRAPPED2(name,atype,a,btype,b) 
+#define voidWRAPPED3(name,atype,a,btype,b,ctype,c) 
+
+
+#endif

@@ -34,7 +34,8 @@ struct DockedUnits {
 };
 
 
-struct Cargo {
+class Cargo {
+public:
   int quantity;
   std::string content;
   std::string category;
@@ -43,6 +44,15 @@ struct Cargo {
   float volume;
   char * description;//mem leak... for the master part list (global var, no prob)
   Cargo () {mass=0; volume=0;price=0;quantity=1;description=NULL;}
+  Cargo (std::string name, std::string cc, float pp,int qq, float mm, float vv) {
+	quantity=qq;
+	content=name;
+	category=cc;
+	price=pp;
+	mass = mm;
+	volume=vv;
+	description=NULL;
+  }
   bool operator == (const Cargo & other) const {
     return content==other.content;
   }

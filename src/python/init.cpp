@@ -208,7 +208,7 @@ void Python::reseterrors() {
     PyErr_Clear();
   }
 }
-
+/*
 //PYTHON_INIT_GLOBALS(VS,UnitContainer);
 PYTHON_INIT_GLOBALS(VS,Unit);
 PYTHON_BEGIN_MODULE(VS)
@@ -224,7 +224,7 @@ Class.def(boost::python::constructor<int>());
 PYTHON_END_CLASS(VS,Unit)
 PYTHON_END_MODULE(VS)
 TO_PYTHON_SMART_POINTER(Unit) 
-
+*/
 void Python::init() {
 
   static bool isinit=false;
@@ -232,9 +232,8 @@ void Python::init() {
     return;
   }
   isinit=true;
-  /* initialize python library */
+// initialize python library
   Py_Initialize();
-  PYTHON_INIT_MODULE(VS);
 //  initVegastrike();
 }
 void Python::test() {

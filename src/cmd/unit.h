@@ -839,7 +839,6 @@ public:
   ///not used yet
   void ReTargetFg(int which_target=0);
   ///not used yet
-  int getNumAttackers();
 
   bool isStarShip(){ if(isUnit()==UNITPTR){ return true;} return false; };
   bool isPlanet(){ if(isUnit()==PLANETPTR){ return true;} return false; };
