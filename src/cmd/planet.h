@@ -136,7 +136,7 @@ public:
   };
   Iterator *createIterator() { return new PlanetIterator(this);}
   bool isAtmospheric  () {
-    return atmospheric;
+    return hasLights()||atmospheric;
   }
 
   bool hasLights() { return !lights.empty(); }
