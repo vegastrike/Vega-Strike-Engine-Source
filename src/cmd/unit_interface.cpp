@@ -365,7 +365,7 @@ public:
 	if (active_missions[i]==briefingMission) {
 	  if (briefingMission->BriefingInProgress()) {
 	    render=false;
-	    GFXClear (GFXTRUE);
+
 	    tp = briefingMission->BriefingRender();
 	  }else {
 	    SetMode(BRIEFINGMODE,NORMAL);

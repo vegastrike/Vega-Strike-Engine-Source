@@ -54,6 +54,12 @@ void Briefing::Render() {
   for (unsigned int i=0;i<starships.size();i++) {
     starships[i]->Render(identity_matrix,interpolation_blend_factor);
   }
+  GFXEnable(DEPTHTEST);
+  GFXEnable (DEPTHWRITE);
+  GFXBlendMode (ONE,ZERO);
+  GFXDisable(CULLFACE);
+  // 
+  GFXClear(GFXTRUE);
   Mesh::ProcessUndrawnMeshes();
   _Universe->AccessCamera()->UpdateGFX(GFXTRUE,GFXFALSE);
   //  glClearColor(0,0,0,0);
