@@ -15,13 +15,10 @@ class Beam {
 private:
   Transformation local_transformation;
   unsigned int decal;
-  ///Assumption that QuadLists will only be Added/Removed in groups of 8 and thus willb e in seq
-  int vlist[8];
-  //  GFXVertexList *vlist;
+  GFXVertexList *vlist;
   LineCollide CollideInfo;
   unsigned int numframes;
-  ///lite speed
-  float speed;
+  float speed;//lite speed
   float texturespeed;
   float curlength;
   float range;
@@ -47,7 +44,7 @@ private:
   Vector center;//in world coordinates as of last physics frame...
   Vector direction;
   
-  void RecalculateVertices(Matrix transform);
+  void RecalculateVertices();
   void CollideHuge(const LineCollide &);
 public:
   
