@@ -447,8 +447,7 @@ void bootstrap_main_loop () {
 		  if( pname=="")
 		  {
 			  cout<<"Missing or incomlpete section for player "<<p<<endl;
-		      	  QuitNow();
-			  exit(1);
+			  winsys_exit(1);
 		  }
 	  }
       playername.push_back( pname);
@@ -516,7 +515,7 @@ void bootstrap_main_loop () {
 		if( Network[k].init( srvipadr, (unsigned short) port).valid() == false)
 		{
 			// If network initialization fails, exit
-			QuitNow();
+			winsys_exit(1);
 			cout<<"Network initialization error - exiting"<<endl;
 		}
 		//sleep( 3);
@@ -525,7 +524,7 @@ void bootstrap_main_loop () {
 		if( savefiles[k].empty())
 		{
 			cout<<"No server response, cannot connect, exiting"<<endl;
-			QuitNow();
+			winsys_exit(1);
 		}
 		else
 		{

@@ -302,8 +302,7 @@ void	NetClient::start( char * addr, unsigned short port)
 	if( this->authenticate() == -1)
 	{
 		perror( "Error login in ");
-		QuitNow();
-		//cleanup();
+		winsys_exit(1);
 	}
 
 	cout<<"Initiating client loop"<<endl;
