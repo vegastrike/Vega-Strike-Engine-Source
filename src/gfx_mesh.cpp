@@ -27,7 +27,7 @@
 #include "gfx_bounding_box.h"
 #include "gfx_bsp.h"
 #include <assert.h>
-
+#include "lin_time.h"
 #include <math.h>
 #include <list>
 #include <string>
@@ -181,6 +181,51 @@ Mesh::~Mesh()
 	}
 }
 float const ooPI = 1.00F/3.1415926535F;
+static void AvLights (float target[4], const float  other[4]) {
+  target[0] = .5*(target[0] + other[0]);
+  target[1] = .5*(target[1] + other[1]);
+  target[2] = .5*(target[2] + other[2]);
+  target[3] = .5*(target[3] + other[3]);
+}
+void MeshFX::MergeLights (const MeshFX & other) {
+  TTL = (TTL>other.TTL)
+    ?
+    (.666667*TTL+.33333*other.TTL)
+    :
+    (.666667*other.TTL+.333333*TTL);
+  TTD = .5*(TTD+other.TTD);
+  Vector vec (vect[0],vect[1],vect[2]);
+  vec*=.5;
+  Vector othervec (other.vect[0],other.vect[1],other.vect[2]);
+  othervec*=.5;
+  float distsqr = ((vec-othervec)).Dot ((vec-othervec));
+  options |= other.options;
+  vec = vec+othervec;
+  vect[0]=vec.i;
+  vect[1]=vec.j;
+  vect[2]=vec.k;
+  AvLights (diffuse,other.diffuse);
+  AvLights (specular,other.specular);
+  AvLights (ambient,other.ambient);
+  attenuate[2]=1./attenuate[2];
+  attenuate[2]+=1./other.attenuate[2]+distsqr;
+  attenuate[2]= 1./attenuate[2];
+
+  attenuate[1]=1./attenuate[1];
+  attenuate[1]+=1./other.attenuate[1]+sqrtf(distsqr);
+  attenuate[1]= 1./attenuate[1];
+
+}
+bool MeshFX::Update() {
+  TTL -= GetElapsedTime();
+  if (TTL <0) {
+    TTL = 0;
+    TTD -= GetElapsedTime();
+  }
+  
+
+  return TTD>0;
+}
 void Mesh::AddDamageFX(const Vector &, const Vector &, const float, const GFXColor &) {
   
 }
@@ -245,7 +290,7 @@ void Mesh::ProcessDrawQueue() {
     vector <int> specialfxlight;
     for (int i=0;i<c.SpecialFX->size();i++) {
       int ligh;
-      GFXCreateLight (ligh,(*c.SpecialFX)[i].effect,true);
+      GFXCreateLight (ligh,(*c.SpecialFX)[i],true);
       specialfxlight.push_back(ligh);
     }
     vlist->Draw();

@@ -45,11 +45,15 @@ struct bsp_polygon {
     vector <bsp_vector> v;
 };
 
-struct MeshFX {
-  GFXLight effect;
+class MeshFX : public GFXLight {
+public:
   float TTL;
+  float TTD;
+  MeshFX ():GFXLight(){TTL=0;}
+  MeshFX (const float TTL, const bool enabled, const GFXColor &vect, const GFXColor &diffuse= GFXColor (0,0,0,1), const GFXColor &specular=GFXColor (0,0,0,1), const GFXColor &ambient=GFXColor(0,0,0,1), const GFXColor&attenuate=GFXColor(1,0,0)): GFXLight(enabled,vect,diffuse,specular,ambient,attenuate){this->TTL = TTL; this->TTD = .4*this->TTL;}
+  void MergeLights (const MeshFX & other);
+  bool Update ();//if false::dead
 };
-struct MeshFX;
 struct MeshDrawContext {
   float mat[16];
   vector <MeshFX> *SpecialFX;
