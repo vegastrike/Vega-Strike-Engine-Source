@@ -42,7 +42,7 @@ using std::string;
 extern vector<ObjSerial>	localSerials;
 extern bool isLocalSerial( ObjSerial sernum);
 
-//typedef vector<Client *>::iterator VI;
+typedef vector<Client *>::iterator VI;
 
 class	NetClient
 {
@@ -54,7 +54,7 @@ class	NetClient
 		int					nbclients;		// Number of clients in the zone
 		char				keeprun;		// Bool to test client stop
 		string				callsign;		// Callsign of the networked player
-		Client *			Clients[MAXCLIENTS];		// Clients in the same zone
+		vector<Client *>	Clients;		// Clients or other Units in the same zone
 		// a vector because always accessed by their IDs
 
 		int					enabled;		// Bool to say network is enabled
@@ -131,8 +131,8 @@ class	NetClient
 
 		/********************* Weapon stuff **********************/
 		void	FireBeam();
-		void	FireBolt( weapon_info wi, const Matrix & mat, const Vector & velocity);
-		void	FireProjectile( weapon_info wi);
+		void	FireBolt( weapon_info wi, Matrix mat, Vector velocity);
+		void	FireProjectile( weapon_info wi, Unit * target, Matrix mat, Vector velocity, Transformation t);
 
     private:
 		void	receiveSave( const Packet* packet );

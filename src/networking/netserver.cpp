@@ -23,6 +23,8 @@
 #include <math.h>
 
 #include "cmd/unit_generic.h"
+#include "cmd/weapon_xml.h"
+#include "cmd/bolt.h"
 #include "gfx/cockpit_generic.h"
 #include "universe_util.h"
 //#include "universe_util_generic.h" //Use universe_util_generic.h instead
@@ -34,6 +36,12 @@
 #include "vsnet_serversocket.h"
 #include "savenet_util.h"
 #include "vs_path.h"
+#include "networking/netbuffer.h"
+#include "cmd/ai/script.h"
+#include "cmd/ai/order.h"
+#include "cmd/ai/fire.h"
+#include "cmd/ai/fireall.h"
+#include "cmd/ai/flybywire.h"
 
 VegaConfig * vs_config;
 double	clienttimeout;
@@ -903,6 +911,12 @@ void	NetServer::processPacket( Client * clt, unsigned char cmd, const AddressIP&
     packet = p;
 
     Packet p2;
+	NetBuffer netbuf( packet.getData(), packet.getDataLength());
+	char * buf = packet.getData();
+
+	weapon_info wi( weapon_info::BALL);
+	Matrix m; Vector vel;
+
     switch( cmd)
     {
 		case CMD_LOGIN:
@@ -996,12 +1010,62 @@ void	NetServer::processPacket( Client * clt, unsigned char cmd, const AddressIP&
         cout<<">>> ACK =( "<<packet.getTimestamp()<<" )= ---------------------------------------------------"<<endl;
         packet.ack( );
         break;
+
+	// SHOULD WE HANDLE A BOLT SERIAL TO UPDATE POSITION ON CLIENT SIDE ???
+	// I THINK WE CAN LET THE BOLT GO ON ITS WAY ON CLIENT SIDE BUT THE SERVER WILL DECIDE
+	// IF SOMEONE HAS BEEN HIT
 	case CMD_BOLT :
-		// Receive a bolt fire request
-		// Must think to get the Unit * corresponding to that serial (normally just clt->game_unit.GetUnit())
+		wi.type = weapon_info::BOLT;
+	case CMD_BALL :
+		// Get the info from the buffer
+		m = netbuf.getMatrix();
+		vel = netbuf.getVector();
+		wi = netbuf.getWeaponInfo();
+		new Bolt ( wi, m, vel, clt->game_unit.GetUnit());
+		  // Send the bolt info to all clients in the same zone as the one who fired
+		  p2.bc_create( packet.getCommand(), packet.getSerial(), packet.getData(), packet.getDataLength(), SENDRELIABLE, &clt->cltadr, clt->sock, __FILE__, __LINE__);
+		  zonemgr->broadcast( clt, &p2 ); // , &NetworkToClient );
 		break;
 	case CMD_PROJECTILE :
-		break;
+	{
+		ObjSerial target_id = netbuf.getSerial();
+		m = netbuf.getMatrix();
+		vel = netbuf.getVector();
+		Transformation tmp = netbuf.getTransformation();
+		weapon_info type = netbuf.getWeaponInfo();
+
+		Unit * owner = clt->game_unit.GetUnit();
+		// Get the target Unit from the zone in which the client (the one that has fired) is
+		Unit * target = zonemgr->getUnit( target_id, clt->zone);
+
+		Unit * temp = UnitFactory::createMissile (type.file.c_str(),owner->faction,"",type.Damage,type.PhaseDamage,type.Range/type.Speed,type.Radius,type.RadialSpeed,type.PulseSpeed/*detonation_radius*/);
+		// Associate a unique serial with the created projectile
+		temp->SetSerial( getUniqueSerial());
+		// Set the AI for the projectile
+		if (target&&target!=owner) {
+			temp->Target (target);
+			temp->EnqueueAI (new AIScript( (type.file+".xai").c_str() ) );
+			temp->EnqueueAI (new Orders::FireAllYouGot);
+		  } else {
+			temp->EnqueueAI (new Orders::MatchLinearVelocity(Vector (0,0,100000),true,false));
+			temp->EnqueueAI (new Orders::FireAllYouGot);
+		  }
+		  temp->SetOwner (owner);
+		  temp->Velocity = vel;
+		  temp->curr_physical_state = temp->prev_physical_state= temp->cumulative_transformation = tmp;
+		  CopyMatrix (temp->cumulative_transformation_matrix,m);
+		  // Add the projectile in the universe
+		  _Universe->activeStarSystem()->AddUnit(temp);
+		  // Add the projectile in the client's zone
+		  zonemgr->addUnit( temp, clt->zone);
+
+		  // Finally send an ack to the creation of the created projectile in order to create them on all the clients in
+		  // the same zone (send the projectile serial)
+		  // We can some day add a check to send only to clients that are in a given range to that projectile
+		  p2.bc_create( packet.getCommand(), temp->GetSerial(), packet.getData(), packet.getDataLength(), SENDRELIABLE, &clt->cltadr, clt->sock, __FILE__, __LINE__);
+		  zonemgr->broadcast( clt, &p2 ); // , &NetworkToClient );
+	}
+	break;
     default:
         COUT << "Unknown command " << Cmd(cmd) << " ! "
              << "from client " << clt->serial << endl;

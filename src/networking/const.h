@@ -22,6 +22,7 @@
 #define __CONST_H
 
 #include "config.h"
+#include "endianness.h"
 #include <assert.h>
 #include <stdio.h>
 
@@ -33,7 +34,8 @@
 #define MAXBUFFER	16384
 
 #define MAXSERIAL 0xFFFF
-#define TONET() htons()
+#define OBJSERIAL_TONET VSSwapHostShortToLittle
+#define INSTSERIAL_TONET VSSwapHostIntToLittle
 typedef unsigned short ObjSerial;
 typedef unsigned int InstSerial;
 

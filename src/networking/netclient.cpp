@@ -41,6 +41,7 @@
 #include "vsnet_clientstate.h"
 #include "vegastrike.h"
 #include "client.h"
+#include "networking/netbuffer.h"
 
 using std::cout;
 using std::endl;
@@ -660,6 +661,7 @@ void	NetClient::addClient( const Packet* packet )
 		Clients[cltserial]->game_unit.SetUnit( un);
 		//Clients[cltserial]->game_unit.GetUnit()->PrimeOrders();
 		Clients[cltserial]->game_unit.GetUnit()->SetNetworkMode( true);
+		Clients[cltserial]->game_unit.GetUnit()->SetSerial( cltserial);
 		//cout<<"Addclient 4"<<endl;
 
 		// Assign new coordinates to client
@@ -998,51 +1000,34 @@ void	NetClient::FireBeam()
 {
 }
 
-void	NetClient::FireBolt( weapon_info wi, const Matrix & mat, const Vector & velocity)
+void	NetClient::FireBolt( weapon_info wi, Matrix mat, Vector velocity)
 {
-	// Convert all the vars into network byte order
-	Matrix netmat;
-	CopyMatrix( netmat, mat);
-	netmat.netswap();
-	Vector vel = velocity;
-	vel.netswap();
-	weapon_info netwi = wi;
-	netwi.netswap();
+	NetBuffer netbuf;
 
-	// Extract the file name and weapon name because they are strings
-	int total_len = 0;
-	int file_len = wi.file.length();
-	int weap_len = wi.weapon_name.length();
-	char * file = new char[file_len+1];
-	char * weapon_name = new char[weap_len+1];
-	memcpy( file, wi.file.c_str(), file_len);
-	file[file_len] = 0;
-	memcpy( weapon_name, wi.weapon_name.c_str(), weap_len);
-	weapon_name[weap_len] = 0;
-
-	// Make the network buffer
-	total_len = sizeof( netmat)+sizeof( vel)+sizeof( netwi)+file_len+weap_len;
-	char * netbuf = new char[total_len];
-	int offset = 0;
-	memcpy( netbuf, &netmat, sizeof( netmat));
-	offset += sizeof( netmat);
-	memcpy( netbuf+offset, &vel, sizeof( vel));
-	offset += sizeof( vel);
-	memcpy( netbuf+offset, &netwi, sizeof( netwi));
-	offset += sizeof( netwi);
-	memcpy( netbuf+offset, file, file_len);
-	offset += file_len;
-	memcpy( netbuf+offset, weapon_name, weap_len);
+	netbuf.addMatrix( mat);
+	netbuf.addVector( velocity);
+	netbuf.addWeaponInfo( wi);
 
 	Packet p;
-	p.send( CMD_BOLT, this->serial, netbuf, total_len, SENDRELIABLE, NULL, this->clt_sock, __FILE__, __LINE__);
-
-	delete netbuf;
+	p.send( CMD_BOLT, this->serial, netbuf.getBuffer(), netbuf.getDataSize(), SENDRELIABLE, NULL, this->clt_sock, __FILE__, __LINE__);
 }
 
-void	NetClient::FireProjectile( weapon_info wi)
+void	NetClient::FireProjectile( weapon_info wi, Unit * target, Matrix mat, Vector velocity, Transformation t)
 {
+	NetBuffer netbuf;
+
+	netbuf.addSerial( target->GetSerial());
+	netbuf.addMatrix( mat);
+	netbuf.addVector( velocity);
+	netbuf.addTransformation( t);
+	netbuf.addWeaponInfo( wi);
+
+	// Get the weapon info in a buffer
+	//char * wi_buffer=NULL; // Allocated in setWeaponInfo function
+	//int wi_size = 0;
+	//setWeaponInfo( netwi, wi_buffer, wi_size);
+	
 	Packet p;
-	p.send( CMD_PROJECTILE, this->serial, NULL, 0, SENDRELIABLE, NULL, this->clt_sock, __FILE__, __LINE__);
+	p.send( CMD_PROJECTILE, this->serial, netbuf.getBuffer(), netbuf.getDataSize(), SENDRELIABLE, NULL, this->clt_sock, __FILE__, __LINE__);
 }
 

@@ -55,6 +55,37 @@ void	ZoneMgr::addClient( Client * clt, int zone)
 }
 */
 
+void	ZoneMgr::addUnit( Unit * un, int zone)
+{
+	zone_unitlist[zone].push_back( un);
+	zone_units[zone]++;
+}
+
+void	ZoneMgr::removeUnit( Unit * un, int zone)
+{
+	if( zone_unitlist[zone].empty())
+	{
+		cout<<"Trying to remove on an empty list !!"<<endl;
+		exit( 1);
+	}
+	zone_unitlist[zone].remove( un);
+	zone_units[zone]--;
+}
+
+// Returns NULL if no corresponding Unit was found
+Unit *	ZoneMgr::getUnit( ObjSerial unserial, int zone)
+{
+	LUI i;
+	Unit * un = NULL;
+	for( i=zone_unitlist[zone].begin(); i!=zone_unitlist[zone].end(); i++)
+	{
+		if( (*i)->GetSerial()==unserial)
+			un = (*i);
+	}
+
+	return un;
+}
+
 bool	ZoneMgr::addClient( Client * clt)
 {
 	// Remove the client from old starsystem if needed and add it in the new one
@@ -118,7 +149,8 @@ void	ZoneMgr::removeClient( Client * clt)
 	zone_clients[clt->zone]--;
 	sts = _Universe->star_system[clt->zone];
 	sts->RemoveUnit( un);
-	un->Kill();
+	// SHIP MAY NOT HAVE BEEN KILLED BUT JUST CHANGED TO ANOTHER STAR SYSTEM -> NO KILL
+	//un->Kill();
 }
 
 // Broadcast a packet to a client's zone clients

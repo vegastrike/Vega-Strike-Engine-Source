@@ -24,20 +24,26 @@
 #include <list>
 #include <iostream>
 #include "gfx/quaternion.h"
+#include "cmd/unit_generic.h"
 #include "client.h"
 #include "packet.h"
 
 using std::list;
 typedef list<Client *>::iterator LI;
 typedef vector<list<Client *> >::iterator VLI;
+typedef list<Unit *>::iterator LUI;
 
 class NetUI;
 
 class ZoneMgr
 {
 		//vector<StarSystem *> starsystems;
+		// List of clients in zones
 		vector<list<Client *> >	zone_list;
 		vector<int>				zone_clients;
+		// List of units in zones (but not Clients)
+		vector<list<Unit *> >	zone_unitlist;
+		vector<int>				zone_units;
 
 	public:
 		ZoneMgr();
@@ -47,6 +53,10 @@ class ZoneMgr
 		StarSystem *	addZone( string starsys);
 		list<Client *>	GetZone( int serial);
 		//void	addClient( Client * clt, int zone);
+		void	addUnit( Unit * un, int zone);
+		void	removeUnit( Unit *un, int zone);
+		Unit *	getUnit( ObjSerial unserial, int zone);
+
 		bool	addClient( Client * clt);
 		void	removeClient( Client * clt);
         void    broadcast( Client * clt, Packet * pckt );
