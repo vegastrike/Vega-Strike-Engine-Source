@@ -24,16 +24,16 @@ class JVOIPRTPTransmissionParams;
 // (MAX_PA_CPU_LOAD*100)% CPU LOAD
 #endif
 
+typedef list<ClientPtr>::iterator CltPtrIterator;
+
 class NetworkCommunication
 {
 	private:
 		// Text message
 		std::deque<std::string>	message_history;		// Text message history
 		int				max_messages;					// Maximum number of text messages recorded
-		list<ClientPtr>	commClients;					// List of clients communicating on our frequency
-		list<ClientPtr>	webcamClients;					// List of client that are webcam enabled
+		list<ClientPtr>	commClients;					// List of client communicating on the same frequency
 		ClientPtr		webcamClient;					// The client we are watching the webcam
-		list<ClientPtr>	paClients;						// List of client PortAudio enabled
 
 		// The current communication frequency
 		float	freq;
@@ -56,6 +56,7 @@ class NetworkCommunication
 		PortAudioStream *	outstream;
 
 		double				sample_rate;
+		int					audio_inlength;
 		unsigned short		audio_inbuffer[MAXBUFFER];
 		unsigned short		audio_outbuffer[MAXBUFFER];
 
@@ -64,6 +65,8 @@ class NetworkCommunication
 #endif
 
 	public:
+		enum	ComminucationMethod { ClientBroadcast, ServerUnicast };
+
 		NetworkCommunication();
 		NetworkCommunication( int nb);
 		~NetworkCommunication();
@@ -74,7 +77,7 @@ class NetworkCommunication
 		void	SendMessage( SOCKETALT & send_sock, string message);
 		int		DestroySession();
 
-		void	AddToSession( ClientPtr clt, bool webcam=false, bool pa=false);
+		void	AddToSession( ClientPtr clt);
 		void	RemoveFromSession( ClientPtr clt);
 
 		bool	IsActive()	{ return active;}

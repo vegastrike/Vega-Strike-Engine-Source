@@ -59,7 +59,7 @@ public:
 	// those vals are server times
 	double		old_timeout;
 	double		latest_timeout;
-	// 2 timestamps vals from client time to check receiving old packet after newer ones
+	// 2 timestamps vals from client time to check receiving old packet after newer ones (UDP only)
 	unsigned int	old_timestamp;
 	unsigned int	latest_timestamp;
 	unsigned int	deltatime;
@@ -67,11 +67,11 @@ public:
 	string			name;
 	string			passwd;
 	//ClientState		old_state;
-	//ClientState		current_state;
 	/* In-game parameters */
 	unsigned short	zone;
-	//char			localplayer;
 	bool			ingame;
+	bool			webcam;
+	bool			portaudio;
 	string			jumpfile;
 	float			comm_freq;
 
@@ -80,7 +80,6 @@ public:
 	Client()
 	{
 		//memset( &old_state, 0, sizeof( ClientState));
-		//memset( &current_state, 0, sizeof( ClientState));
 		latest_timestamp=0;
 		old_timestamp=0;
 		latest_timeout=0;
@@ -88,6 +87,8 @@ public:
 		deltatime=0;
 		zone = 0;
 		ingame = false;
+		webcam = false;
+		portaudio = false;
 		jumpfile="";
         _disconnectReason = "none";
 		comm_freq = MIN_COMMFREQ;
@@ -97,18 +98,7 @@ public:
 	    : is_tcp(tcp)
 	    , sock(s)
 	{
-		//memset( &old_state, 0, sizeof( ClientState));
-		//memset( &current_state, 0, sizeof( ClientState));
-		latest_timestamp=0;
-		old_timestamp=0;
-		latest_timeout=0;
-		old_timeout=0;
-		deltatime=0;
-		zone = 0;
-		ingame = false;
-		jumpfile="";
-        _disconnectReason = "none";
-		comm_freq = MIN_COMMFREQ;
+		Client::Client();
 	}
 
 	inline bool isTcp( ) const {

@@ -60,6 +60,7 @@ const char* displayCmd( Cmd cmd )
     CASE( CMD_ASKFILE      )
     CASE( CMD_DOWNLOAD     )
     CASE( CMD_CAMSHOT      )
+    CASE( CMD_SOUNDSAMPLE  )
     CASE( CMD_STARTNETCOMM )
     CASE( CMD_STOPNETCOMM  )
 

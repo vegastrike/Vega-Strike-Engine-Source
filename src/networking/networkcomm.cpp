@@ -82,8 +82,11 @@ int	Pa_RecordCallback( void * inputBuffer, void * outputBuffer, unsigned long fr
 	// Only act if PA CPU Load is low enough and if we have data in the input buffer
 	if( Pa_GetCPULoad(netcomm->instream)<MAX_PA_CPU_LOAD && in)
 	{
+		netcomm->audio_inlength = sizeof( unsigned short)*framesPerBuffer;
+		cerr<<"Input BUFFER SIZE = "<<netcomm->audio_inlength<<endl;
 		memset( netcomm->audio_inbuffer, 0, MAXBUFFER);
-		memcpy( netcomm->audio_inbuffer, in, framesPerBuffer*sizeof(unsigned short));
+		// Maybe put ushort by ushort in the buffer and prepare them for network (htons)
+		memcpy( netcomm->audio_inbuffer, in, netcomm->audio_inlength);
 	}
 
 	return 0;
@@ -107,7 +110,7 @@ NetworkCommunication::NetworkCommunication()
 {
 	this->active = false;
 	this->max_messages = 25;
-	this->method = 1;
+	this->method = ClientBroadcast;
 
 #ifdef NETCOMM_JVOIP
 
@@ -133,6 +136,7 @@ NetworkCommunication::NetworkCommunication()
 	this->indev = Pa_GetDefaultInputDeviceID();
 	this->outdev = Pa_GetDefaultOutputDeviceID();
 	this->sample_rate = 11025;
+	this->audio_inlength = 0;
 
 #endif /* NETCOMM_PORTAUDIO */
 #ifndef NETCOMM_NOWEBCAM
@@ -144,6 +148,7 @@ NetworkCommunication::NetworkCommunication()
 	{
 		Webcam = new WebcamSupport();
 		if( Webcam->Init() == -1)
+		// Maybe put ushort by ushort in the buffer and prepare them for network (htons)
 		{
 			delete Webcam;
 			this->Webcam = NULL;
@@ -159,18 +164,12 @@ NetworkCommunication::NetworkCommunication( int nb)
 	this->max_messages = nb;
 }
 
-void	NetworkCommunication::AddToSession( ClientPtr clt, bool webcam, bool pa)
+void	NetworkCommunication::AddToSession( ClientPtr clt)
 {
 	this->commClients.push_back( clt);
-	// If the client has a webcam enabled
-	if( webcam)
-		this->webcamClients.push_back( clt);
-	// Affect 1st client to webcam view
-	if( this->webcamClients.size()==1)
+	// If the client has a webcam enabled and we don't have one selected yet
+	if( !this->webcamClient && clt->webcam)
 		this->webcamClient = clt;
-	// If the client has a PortAudio support
-	if( pa)
-		this->paClients.push_back( clt);
 #ifdef NETCOMM_JVOIP
 	CheckVOIPError( this->session->AddDestination( ntohl( clt->cltadr.inaddr() ), VOIP_PORT));
 #endif /* NETCOMM_JVOIP */
@@ -196,11 +195,11 @@ void	NetworkCommunication::SendMessage( SOCKETALT & send_sock, string message)
 	this->message_history.push_back( message);
 
 	// Send the text message according to the chosen method
-	if( method==1)
+	if( method==ServerUnicast)
 	{
 		// SEND STRNIG PARAMETER TO SERVER SO THAT HE BROADCASTS IT TO CONCERNED PLAYERS
 	}
-	else if( method==2)
+	else if( method==ClientBroadcast)
 	{
 		// SEND STRING PARAMETER TO EACH PLAYER COMMUNICATING ON THAT FREQUENCY
 	}
@@ -213,13 +212,32 @@ void	NetworkCommunication::SendMessage( SOCKETALT & send_sock, string message)
 void	NetworkCommunication::SendSound( SOCKETALT & send_sock)
 {
 #ifdef USE_PORTAUDIO
-	if( method==1)
+	if( method==ServerUnicast)
 	{
 		// SEND INPUT AUDIO BUFFER TO SERVER SO THAT HE BROADCASTS IT TO CONCERNED PLAYERS
+
+		Packet p;
+		// We don't need that to be reliable in UDP mode
+		// Serial is not necessary since it is just sound to be played... or it could at least be used to test that the serial
+		// is known on the other side someday...
+		Netbuffer netbuf( this->audio_inbuffer, this->audio_inlength);
+		p.send( CMD_SOUNDSAMPLE, 0 /*clt->serial*/, netbuf.getData(), netbuf.getDataLength(), SENDANDFORGET, NULL, send_sock,
+    	        __FILE__, PSEUDO__LINE__(229) );
 	}
-	else if( method==2)
+	else if( method==ClientBroadcast)
 	{
 		// SEND INPUT AUDIO BUFFER TO EACH PLAYER COMMUNICATING ON THAT FREQUENCY
+		CltPtrIterator it;
+		for( it = commClients.begin(); it!=commClients.end(); it++)
+		{
+			if( (*it)->portaudio)
+			{
+				Packet p;
+				Netbuffer netbuf( this->audio_inbuffer, this->audio_inlength);
+				p.send( CMD_SOUNDSAMPLE, 0 /*clt->serial*/, netbuf.getData(), netbuf.getDataLength(), SENDANDFORGET, NULL, (*it)->sock,
+						__FILE__, PSEUDO__LINE__(244) );
+			}
+		}
 	}
 	memset( audio_inbuffer, 0, MAXBUFFER);
 #endif /* USE_PORTAUDIO */
@@ -241,21 +259,14 @@ void	NetworkCommunication::SendImage( SOCKETALT & send_sock)
 		jpeg_str = Webcam->CaptureImage();
 		//cerr<<"--- grabbing finished"<<endl;
 	}
-	if( method==1)
+	if( method==ServerUnicast)
 	{
 		// SEND GRABBED IMAGE TO SERVER SO THAT HE BROADCASTS IT TO CONCERNED PLAYERS
 	}
-	else if( method==2)
+	else if( method==ClientBroadcast)
 	{
 		// SEND GRABBED IMAGE TO EACH PLAYER COMMUNICATING ON THAT FREQUENCY
 	}
-
-	/* MAYBE USE A VSDOWNLOADSERVER AND CLIENT
-	Packet p;
-	// We don't need that to be reliable in UDP mode
-	p.send( CMD_CAMSHOT, clt->serial, netbuf.getData(), netbuf.getDataLength(), SENDANDFORGET, NULL, clt->clt_sock,
-                     __FILE__, PSEUDO__LINE__(49) );
-	*/
 #endif /* NETCOMM_NOWEBCAM */
 }
 

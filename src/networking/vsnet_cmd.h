@@ -95,6 +95,7 @@ enum Cmd
                                     // files and string containing the file names)
 	CMD_DOWNLOAD     = 0x84,		// May be identical to CMD_ASKFILE in the end
 	CMD_CAMSHOT      = 0x85,		// This means a webcam-shot just arrived (from client to server and from server to concerned clients)
+	CMD_SOUNDSAMPLE  = 0x88,		// This means a sound sample just arrived (from client to server and from server to concerned clients or from client to clients)
 	CMD_STARTNETCOMM = 0x86,		// A client tells the server he starts a netcomm session
 	CMD_STOPNETCOMM  = 0x87,		// A client tells the server he stops a netcomm session
 
