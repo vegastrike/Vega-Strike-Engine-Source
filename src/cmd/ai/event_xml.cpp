@@ -140,7 +140,10 @@ namespace AIEvents {
     } while(!feof(inFile));
     fclose (inFile);
     XML_ParserFree (parser);
-    assert (result.level==0);
+//    assert (result.level==0);
+	if (result.level!=0) {
+		fprintf (stderr,"Error loading AI script %s for faction %s. Final count not zero.\n",filename,faction.c_str());
+	}
     result.level =0;
       
   }
