@@ -1720,7 +1720,9 @@ void BaseComputer::configureUpgradeCommitControls(const Cargo& item, Transaction
                     if (c->category.find("upgrades/")==0&&!isWeapon(c->category)) {
                       float po=PercentOperational(player,c->content,c->category);
                       if (po>.02&&po<.98) {
-                        CanDoSell=(emergency_downgrade_mode.length()!=0);
+                        static bool must_fix_first = XMLSupport::parse_bool(vs_config->getVariable("physics","must_repair_to_sell","true"));
+                        
+                        CanDoSell=(emergency_downgrade_mode.length()!=0||must_fix_first==false);
                       }
                     }
                   }
