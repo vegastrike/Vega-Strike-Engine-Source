@@ -31,12 +31,18 @@ namespace BaseUtil {
 		newroom->objs.push_back(new BaseInterface::Room::BaseShip(P.i,P.j,P.k,Q.i,Q.j,Q.k,R.i,R.j,R.k,pos,index));
 //		return BaseInterface::CurrentBase->rooms[BaseInterface::CurrentBase->curroom]->links.size()-1;
 	}
-	static void BaseLink (BaseInterface::Room *room,float x, float y, float wid, float hei, std::string text) {
-		room->links.back()->x=x;
-		room->links.back()->y=y;
-		room->links.back()->wid=wid;
-		room->links.back()->hei=hei;
-		room->links.back()->text=text;
+	static void BaseLink (BaseInterface::Room *room,float x, float y, float wid, float hei, std::string text,bool reverse=false) {
+		BaseInterface::Room::Link *lnk;
+		if (reverse) {
+			lnk=room->links.front();
+		} else {
+			lnk=room->links.back();
+		}
+		lnk->x=x;
+		lnk->y=y;
+		lnk->wid=wid;
+		lnk->hei=hei;
+		lnk->text=text;
 	}
 	void Link (int room, std::string index, float x, float y, float wid, float hei, std::string text, int to) {
 		LinkPython (room, index, "",x, y,wid, hei, text, to);
@@ -105,12 +111,17 @@ namespace BaseUtil {
 		}
 		delete [] curmode;
 	}
-	void Python(int room, std::string index, float x, float y, float wid, float hei, std::string text, std::string pythonfile) {
+	void Python(int room, std::string index, float x, float y, float wid, float hei, std::string text, std::string pythonfile,bool front) {
 		//instead of "Talk"/"Say" tags
 		BaseInterface::Room *newroom=CheckRoom(room);
 		if (!newroom) return;
-		newroom->links.push_back(new BaseInterface::Room::Python (index,pythonfile));
-		BaseLink(newroom,x,y,wid,hei,text);
+		BaseInterface::Room::Python * tmp = new BaseInterface::Room::Python (index,pythonfile);
+		if (front) {
+			newroom->links.insert(newroom->links.begin(),tmp);
+		} else {
+			newroom->links.push_back(tmp);
+		}
+		BaseLink(newroom,x,y,wid,hei,text,front);
 	}
 	void Message(std::string text) {
 		if (!BaseInterface::CurrentBase) return;
@@ -127,7 +138,7 @@ namespace BaseUtil {
 			if (newroom->links[i]) {
 				if (newroom->links[i]->index==index) {
 					newroom->links.erase(newroom->links.begin()+i);
-					break;
+//					break;
 				}
 			}
 		}
@@ -139,7 +150,7 @@ namespace BaseUtil {
 			if (newroom->objs[i]) {
 				if (newroom->objs[i]->index==index) {
 					newroom->objs.erase(newroom->objs.begin()+i);
-					break;
+//					break;
 				}
 			}
 		}
