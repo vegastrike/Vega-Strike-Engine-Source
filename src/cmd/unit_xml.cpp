@@ -243,6 +243,8 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
     Names elem = (Names)element_map.lookup(name);
     int mntsiz=weapon_info::NOWEAP;
     AttributeList::const_iterator iter;
+    float halocolor[4];
+
   switch(elem) {
   case UNKNOWN:
 	xml->unitlevel++;
@@ -289,6 +291,7 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
     }
     break;
   case MESHLIGHT:
+    vs_config->getColor ("unit","engine",halocolor,0xffffffff);
     assert (xml->unitlevel==1);
     xml->unitlevel++;
     P=Vector (1,1,1);
@@ -306,16 +309,16 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
 	pos.k=parse_float((*iter).value);
 	break;
       case RED:
-	Q.i=parse_float((*iter).value);
+	halocolor[0]=parse_float((*iter).value);
 	break;
       case GREEN:
-       	Q.j=parse_float((*iter).value);
+       	halocolor[1]=parse_float((*iter).value);
 	break;
       case BLUE:
-	Q.k=parse_float((*iter).value);
+	halocolor[2]=parse_float((*iter).value);
 	break;
       case ALPHA:
-	P.k=parse_float((*iter).value);
+	halocolor[3]=parse_float((*iter).value);
 	break;
       case XFILE:
 	filename = (*iter).value;
@@ -326,7 +329,7 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
 	break;
       }
     }
-   xml->halos.push_back(new Halo(filename.c_str(),GFXColor(Q.i,Q.j,Q.k,P.k),pos,P.i,P.j));
+   xml->halos.push_back(new Halo(filename.c_str(),GFXColor(halocolor[0],halocolor[1],halocolor[2],halocolor[3]),pos,P.i,P.j));
     break;
   case MOUNT:
 	assert (xml->unitlevel==1);

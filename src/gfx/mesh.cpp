@@ -292,7 +292,7 @@ void Mesh::DrawNow(float lod,  bool centered, const Transformation &transform /*
 
 static GFXColor getMeshColor () {
   float color[4];
-  vs_config->getColor ("ship_ambient",color);
+  vs_config->getColor ("unit", "ship_ambient",color);
   GFXColor tmp (color[0],color[1],color[2],color[3]);
   return tmp;
 }
