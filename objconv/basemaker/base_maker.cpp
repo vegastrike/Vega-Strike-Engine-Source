@@ -559,6 +559,14 @@ public:
 			virtual void EndXML(FILE *fp);
 #endif
 		};
+		class Commodity : public Link {
+		public:
+			virtual ~Commodity () {}
+			explicit Commodity (unsigned int parind, std::string ind, std::string pythonfile) : Link(parind, ind,pythonfile) {}
+#ifdef BASE_MAKER
+			virtual void EndXML(FILE *fp);
+#endif
+		};
 		class Merchant : public Link {
 		public:
 			virtual ~Merchant () {}
@@ -788,6 +796,14 @@ void Base::Room::Bar::EndXML (FILE *fp) {
 	fprintf(fp,"Base.Link (");
 	Link::EndXML(fp);
 	fprintf(fp,", bar)\n");
+}
+void Base::Room::Commodity::EndXML (FILE *fp) {
+	Indent(fp);fprintf(fp,"import commodity_lib\n");
+	Indent(fp);fprintf(fp,"commodity = commodity_lib.MakeCommodity (room%d,time_of_day)\n",parentindex);
+	Indent(fp);
+	fprintf(fp,"Base.Link (");
+	Link::EndXML(fp);
+	fprintf(fp,", commodity)\n");
 }
 void Base::Room::Merchant::EndXML (FILE *fp) {
 	Indent(fp);fprintf(fp,"import merchant_guild\n");
@@ -1386,6 +1402,9 @@ bool LinkStage2(std::string input, unsigned int inputroomindex, void *dat1, void
 	} else if (input=="bar") {
 		links->push_back(new Base::Room::Bar(inputroomindex,"bar","bar"));
 		ret=true;
+	} else if (input=="commodity") {
+		links->push_back(new Base::Room::Commodity(inputroomindex,"commodity","commodity"));
+		ret=true;
 	} else if (input=="merchant") {
 		links->push_back(new Base::Room::Merchant(inputroomindex,"merchant","merchant"));
 		ret=true;
@@ -1425,7 +1444,7 @@ bool LinkStage2(std::string input, unsigned int inputroomindex, void *dat1, void
 }
 
 bool LinkStage1(std::string input, unsigned int inputroomindex, void *dat1, void *dat2, const void *dat3, float x, float y) {
-	Input("What link type [comp,link,launch,bar,weapon,mercenary,merchant]? ",&LinkStage2, false, inputroomindex,dat1, strdup(input.c_str()), NULL, x, y);
+	Input("What link type [comp,link,launch,bar,weapon,mercenary,merchant,commodity]? ",&LinkStage2, false, inputroomindex,dat1, strdup(input.c_str()), NULL, x, y);
 	return false;
 }
 
