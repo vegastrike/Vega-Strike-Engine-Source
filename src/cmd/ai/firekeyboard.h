@@ -31,6 +31,8 @@ class FireKeyboard: public Order {
   static void PressComm10Key (int,KBSTATE);
   static void RequestClearenceKey(int, KBSTATE);
   static void UnDockKey(int, KBSTATE);
+  static void EjectKey(int, KBSTATE);
+  static void EjectCargoKey(int, KBSTATE);
   static void DockKey(int, KBSTATE);
   static void FireKey(int, KBSTATE);
   static void MissileKey(int, KBSTATE);

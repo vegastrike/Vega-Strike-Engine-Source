@@ -57,7 +57,7 @@ public:
 	  myDims.j = y;
 	}
 	void Draw(int offset=0);
-	void Draw (const std::string &text, int offset=0, bool force_highquality=false);
+	void Draw (const std::string &text, int offset=0, bool start_one_line_lower=false, bool force_highquality=false);
 	void SetText(const std::string &newText) {
 		myText = newText;
 	}

@@ -21,7 +21,7 @@ const unsigned int NUMCOMMKEYS=10;
 struct FIREKEYBOARDTYPE {
   FIREKEYBOARDTYPE() {
     commKeys[0]=commKeys[1]=commKeys[2]=commKeys[3]=commKeys[4]=commKeys[5]=commKeys[6]=commKeys[7]=commKeys[8]=commKeys[9]=UP;
-    firekey=missilekey=jfirekey=jtargetkey=jmissilekey=weapk=misk=cloakkey=neartargetkey=threattargetkey=picktargetkey=targetkey=nearturrettargetkey =threatturrettargetkey= pickturrettargetkey=turrettargetkey=UP;
+    eject=ejectcargo=firekey=missilekey=jfirekey=jtargetkey=jmissilekey=weapk=misk=cloakkey=neartargetkey=threattargetkey=picktargetkey=targetkey=nearturrettargetkey =threatturrettargetkey= pickturrettargetkey=turrettargetkey=UP;
     doc=und=req=0;
   }
  KBSTATE firekey;
@@ -34,6 +34,8 @@ struct FIREKEYBOARDTYPE {
  KBSTATE jmissilekey;
  KBSTATE weapk;
  KBSTATE misk;
+ KBSTATE eject;
+ KBSTATE ejectcargo;
  KBSTATE cloakkey;
  KBSTATE ECMkey;
  KBSTATE neartargetkey;
@@ -139,7 +141,18 @@ void FireKeyboard::UnDockKey(int, KBSTATE k) {
       g().und=false;      
     }
 }
+void FireKeyboard::EjectKey (int, KBSTATE k) {
+  if (k==PRESS) {
+    g().eject= k;
+  }
+}
 
+void FireKeyboard::EjectCargoKey (int, KBSTATE k) {
+    if (k==PRESS) {
+      g().ejectcargo = k;      
+    }
+  
+}
 void FireKeyboard::CloakKey(int, KBSTATE k) {
 
     if (k==PRESS) {
@@ -467,6 +480,20 @@ void FireKeyboard::Execute () {
     f().firekey=UP;
     j().jfirekey=UP;
     parent->UnFire();
+  }
+  if (f().eject==PRESS) {
+    parent->EjectCargo((unsigned int )-1);
+    f().eject=DOWN;
+  }
+  if (f().ejectcargo==PRESS) {
+    int offset = _Universe->AccessCockpit()->getScrollOffset (VDU::MANIFEST);
+    if (offset<2) {
+      offset=0;
+    }else {
+      offset-=2;
+    }
+    parent->EjectCargo(offset);
+    f().eject=DOWN;
   }
   if (f().cloakkey==PRESS) {
     static bool toggle=true;

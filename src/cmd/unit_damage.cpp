@@ -531,6 +531,10 @@ float Unit::DealDamageToHull (const Vector & pnt, float damage ) {
 
   }
   if (hull <0) {
+    static float autoejectpercent = XMLSupport::parse_float(vs_config->getVariable ("physics","autoeject_percent",".5"));
+    if (rand()<(RAND_MAX*autoejectpercent)) {
+      EjectCargo ((unsigned int)-1);
+    }
     Destroy();
     SetAI (new Order());
     Split (rand()%3+1);

@@ -19,7 +19,6 @@ class VDU: public Sprite {
  private:
   class Animation * comm_ani;
   VIEWSTYLE viewStyle;
-  int scrolloffset;
   unsigned short * StartArmor;
   float *maxhull;
   ///Holds a pointer to the font used to render text in the vdu
@@ -52,6 +51,8 @@ class VDU: public Sprite {
   ///draws the target camera
 void  DrawStarSystemAgain (float x,float y,float w,float h, VIEWSTYLE viewStyle,Unit *parent,Unit *target, const GFXColor & c);
 public:
+ unsigned int getMode() {return thismode.back();}
+  int scrolloffset;
   ///Alert! To add a mode must change const array on the bottom. VIEW must remain LAST
   enum VDU_MODE {TARGET=0x1,NAV=0x2,COMM=0x4, WEAPON=0x8, DAMAGE=0x10, SHIELD=0x20,  MANIFEST=0x40, TARGETMANIFEST=0x80, VIEW=0x100, MSG=0x200};
   VDU(const char *file, TextPlane *textp,unsigned short modes, short rows, short cols, unsigned short *MaxArmor, float * maxhull);

@@ -60,7 +60,7 @@ void TextPlane::Draw (int offset) {
   Draw (myText,offset);
 }
 
-void TextPlane::Draw(const string & newText, int offset,bool force_highquality)
+void TextPlane::Draw(const string & newText, int offset,bool startlower, bool force_highquality)
 {
 	// some stuff to draw the text stuff
   string::const_iterator text_it = newText.begin();
@@ -74,6 +74,9 @@ void TextPlane::Draw(const string & newText, int offset,bool force_highquality)
   myFontMetrics.j/=.5*g_game.y_resolution;
   float tmp,row, col;
   GetPos (row,col);
+  if (startlower) {
+      row -= (use_bit)?((fnt==GLUT_BITMAP_HELVETICA_12)?(26./g_game.y_resolution):(22./g_game.y_resolution)):(myFontMetrics.j);
+  }
   GFXPushBlendMode();
   if (!use_bit&&font_antialias) {
     GFXBlendMode (SRCALPHA,INVSRCALPHA);

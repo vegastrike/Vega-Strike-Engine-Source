@@ -223,8 +223,8 @@ void VegaConfig::initCommandMap(){
   command_map["Comm8Key"]=FireKeyboard::PressComm8Key ;
   command_map["Comm9Key"]=FireKeyboard::PressComm9Key ;
   command_map["Comm10Key"]=FireKeyboard::PressComm10Key ;
-  
-
+  command_map["EjectCargoKey"]=FireKeyboard::EjectCargoKey ;  
+  command_map["EjectKey"]=FireKeyboard::EjectKey ;
   command_map["DockKey"]=FireKeyboard::DockKey ;
   command_map["UnDockKey"]=FireKeyboard::UnDockKey ;
   command_map["RequestClearenceKey"]=FireKeyboard::RequestClearenceKey ;

@@ -400,6 +400,7 @@ class Unit {
   void SetRecursiveOwner(Unit *target);
   bool UpAndDownGrade (Unit * up, Unit * templ, int mountoffset, int subunitoffset, bool touchme, bool downgrade, bool additive, bool forcetransaction, double &percentage);
 public:
+  void EjectCargo (unsigned int index);
   void FixGauges();
   bool CanAddCargo (const Cargo &carg) const;
   void AddCargo (const Cargo &carg);

@@ -315,10 +315,10 @@ void VDU::DrawTarget(Unit * parent, Unit * target, const GFXColor &c) {
 
   
   GFXColorf (c);
-  tp->Draw (MangleString ((string("\n")+getUnitNameAndFgNoBase(target)).c_str(),_Universe->AccessCamera()->GetNebula()!=NULL?.4:0),0);  
+  tp->Draw (MangleString (getUnitNameAndFgNoBase(target).c_str(),_Universe->AccessCamera()->GetNebula()!=NULL?.4:0),0,true);  
   int i=0;
   char st[1024];
-  for (i=0;i<rows&&i<128;i++) {
+  for (i=0;i<rows-1&&i<128;i++) {
     st[i]='\n';
 
   }
@@ -326,7 +326,7 @@ void VDU::DrawTarget(Unit * parent, Unit * target, const GFXColor &c) {
   char qr[256];
   sprintf (qr,"Dis %.4f",(parent->Position()-target->Position()).Magnitude()-((target->isUnit()==PLANETPTR)?target->rSize():0));
   strcat (st,qr);
-  tp->Draw (MangleString (st,_Universe->AccessCamera()->GetNebula()!=NULL?.4:0),0);  
+  tp->Draw (MangleString (st,_Universe->AccessCamera()->GetNebula()!=NULL?.4:0),0,true);  
   GFXColor4f (.4,.4,1,1);
   DrawShield (fs,rs,ls,bs,x,y,w,h);
   GFXColor4f (1,1,1,1);
@@ -349,7 +349,7 @@ void VDU::DrawMessages(Unit *target, const GFXColor & c){
 
     int nowtime_mins=(int)(nowtime/60.0);
     int nowtime_secs=(int)(nowtime - nowtime_mins*60);
-    sprintf (st,"\n%s:%s:%2d.%02d",getUnitNameAndFgNoBase(target).c_str(),ainame.c_str(),nowtime_mins,nowtime_secs);
+    sprintf (st,"%s:%s:%2d.%02d",getUnitNameAndFgNoBase(target).c_str(),ainame.c_str(),nowtime_mins,nowtime_secs);
   }
   else{
     sprintf(st,"no target");
@@ -389,7 +389,7 @@ void VDU::DrawMessages(Unit *target, const GFXColor & c){
 
   fullstr=targetstr+fullstr;
   GFXColorf (c);
-  tp->Draw(MangleString (fullstr.c_str(),_Universe->AccessCamera()->GetNebula()!=NULL?.4:0),0);
+  tp->Draw(MangleString (fullstr.c_str(),_Universe->AccessCamera()->GetNebula()!=NULL?.4:0),0,true);
 }
 bool VDU::SetCommAnimation (Animation * ani) {
   if (comm_ani==NULL) {
@@ -410,9 +410,9 @@ void VDU::DrawNav (const Vector & nav, const GFXColor & c) {
   Unit * targ = you!=NULL?you->Target():NULL;
   char *navdata=new char [1024+(_Universe->activeStarSystem()->getName().length()+(targ?targ->name.length():0))];
 
-  sprintf (navdata,"\nNavigation\n----------\n%s\nTarget:\n  %s\nRelativeLocation\nx: %.4f\ny:%.4f\nz:%.4f\nDistance:\n%f",_Universe->activeStarSystem()->getName().c_str(),targ?targ->name.c_str():nothing,nav.i,nav.j,nav.k,10*nav.Magnitude());
+  sprintf (navdata,"Navigation\n----------\n%s\nTarget:\n  %s\nRelativeLocation\nx: %.4f\ny:%.4f\nz:%.4f\nDistance:\n%f",_Universe->activeStarSystem()->getName().c_str(),targ?targ->name.c_str():nothing,nav.i,nav.j,nav.k,10*nav.Magnitude());
   GFXColorf (c);
-  tp->Draw (MangleString (navdata,_Universe->AccessCamera()->GetNebula()!=NULL?.4:0),scrolloffset);  
+  tp->Draw (MangleString (navdata,_Universe->AccessCamera()->GetNebula()!=NULL?.4:0),scrolloffset,true,true);  
   delete [] navdata;
 
 }
@@ -440,12 +440,12 @@ void VDU::DrawComm (const GFXColor & c) {
 
   }else {
     GFXColorf (c);
-    tp->Draw (MangleString (_Universe->AccessCockpit()->communication_choices.c_str(),_Universe->AccessCamera()->GetNebula()!=NULL?.4:0),scrolloffset);  
+    tp->Draw (MangleString (_Universe->AccessCockpit()->communication_choices.c_str(),_Universe->AccessCamera()->GetNebula()!=NULL?.4:0),scrolloffset,true);  
   }
 }
 
 void VDU::DrawManifest (Unit * parent, Unit * target, const GFXColor &c) {
-  string retval ("\nManifest\n");
+  string retval ("Manifest\n");
   if (target!=parent) {
     retval+=string ("Tgt: ")+target->name+string("\n");
   }else {
@@ -456,7 +456,7 @@ void VDU::DrawManifest (Unit * parent, Unit * target, const GFXColor &c) {
     retval+=target->GetManifest (i,parent,parent->GetVelocity())+string (" (")+tostring (target->GetCargo(i).quantity)+string (")\n");
   }
   GFXColorf (c);
-  tp->Draw (MangleString (retval.c_str(),_Universe->AccessCamera()->GetNebula()!=NULL?.4:0),scrolloffset);  
+  tp->Draw (MangleString (retval.c_str(),_Universe->AccessCamera()->GetNebula()!=NULL?.4:0),scrolloffset,true);  
 }
 static void DrawGun (Vector  pos, float w, float h, weapon_info::MOUNT_SIZE sz) {
   w=fabs (w);
@@ -547,8 +547,8 @@ void VDU::DrawDamage(Unit * parent, const GFXColor &c) {
   GFXDisable(TEXTURE0);
   Unit * thr = parent->Threat();
   GFXColorf (c);
-  sprintf (st,"\n%s\nHull: %.3f",getUnitNameAndFgNoBase(parent).c_str(),parent->GetHull());
-  tp->Draw (MangleString (st,_Universe->AccessCamera()->GetNebula()!=NULL?.5:0),0);  
+  sprintf (st,"%s\nHull: %.3f",getUnitNameAndFgNoBase(parent).c_str(),parent->GetHull());
+  tp->Draw (MangleString (st,_Universe->AccessCamera()->GetNebula()!=NULL?.5:0),0,true);  
   int k=strlen(st);
   if (k>cols)
     k=cols;
@@ -578,15 +578,15 @@ void VDU::DrawDamage(Unit * parent, const GFXColor &c) {
   char qr[256];
   if (thr) {
     GFXColor4f (1,0,0,1);
-    sprintf (qr, "\n%s\n%6s\nThreat:%4.4lf",ecmstatus,thr->name.c_str(),thr->cosAngleTo (parent,th,100000000,10000000));
+    sprintf (qr, "%s\n%6s\nThreat:%4.4lf",ecmstatus,thr->name.c_str(),thr->cosAngleTo (parent,th,100000000,10000000));
     strncat (st,qr,128);
   }else {
     if (parent->GetImageInformation().ecm!=0) {
-      sprintf (qr, "\n%s\n",ecmstatus);
+      sprintf (qr, "%s\n",ecmstatus);
       strncat (st,qr,128);
     }
   }
-  tp->Draw (MangleString (st+k,_Universe->AccessCamera()->GetNebula()!=NULL?.5:0),0);  
+  tp->Draw (MangleString (st+k,_Universe->AccessCamera()->GetNebula()!=NULL?.5:0),0,true);  
   GFXColor4f (1,1,1,1);
   
 }
@@ -620,11 +620,11 @@ void VDU::DrawStarSystemAgain (float x,float y,float w,float h, VIEWSTYLE viewSt
   char buf[1024];
   GFXColorf(c);
   if (target) {
-    sprintf(buf,"\n%s\n",getUnitNameAndFgNoBase(target).c_str());
+    sprintf(buf,"%s\n",getUnitNameAndFgNoBase(target).c_str());
   } else {
-    sprintf (buf,"\nThis is a test of the emergencyBroadcastSystem\n");
+    sprintf (buf,"This is a test of the emergencyBroadcastSystem\n");
   }
-  tp->Draw(buf);
+  tp->Draw(buf,0,true);
   // _Universe->AccessCockpit()->RestoreViewPort();
   GFXEnable(DEPTHTEST);   
 }
@@ -634,7 +634,7 @@ void VDU::DrawWeapon (Unit * parent, const GFXColor& c) {
     
   float x,y,w,h;
   const float percent = .6;
-  string buf("\nG: ");
+  string buf("G: ");
   int len= buf.length();
   string mbuf("\nM: ");
   int mlen = mbuf.length();
@@ -655,7 +655,7 @@ pos.i*fabs(w)/parent->rSize()*percent+x;
     case Unit::Mount::ACTIVE:
       GFXColor4f (0,1,.2,1);
       if (parent->mounts[i].type.size<weapon_info::LIGHTMISSILE) 
-	buf+=((buf.length()==len)?string(""):string(","))+((count++%4==0)?"\n":"")+parent->mounts[i].type.weapon_name+ammo;
+	buf+=((buf.length()==len)?string(""):string(","))+((count++%2==0)?"\n":"")+parent->mounts[i].type.weapon_name+ammo;
       else
 	mbuf+=((mbuf.length()==mlen)?string(""):string(","))+((mcount++%4==0)?"\n":"")+parent->mounts[i].type.weapon_name+ammo;;
       break;
@@ -679,7 +679,7 @@ pos.i*fabs(w)/parent->rSize()*percent+x;
     buf+=mbuf;
   }
   GFXColorf(c);
-  tp->Draw (buf);
+  tp->Draw (buf,0,true);
 }
 
 void VDU::Draw (Unit * parent, const GFXColor & color) {

@@ -187,6 +187,64 @@ bool Unit::SellCargo (unsigned int i, int quantity, float &creds, Cargo & carg, 
   RemoveCargo (i,quantity);
   return true;
 }
+extern void SwitchUnits (Unit *,Unit*);
+void Unit::EjectCargo (unsigned int index) {
+  Cargo * tmp=NULL;
+  Cargo ejectedPilot;
+  string name;
+
+  Cockpit * cp = NULL;
+  if (index==((unsigned int)-1)) {
+    int pilotnum = _Universe->CurrentCockpit();
+    name = "Pilot";
+    if (NULL!=(cp = _Universe->isPlayerStarship (this))) {
+      string playernum =string("player")+((pilotnum==0)?string(""):tostring(pilotnum));
+      name = vs_config->getVariable(playernum,"callsign","TigerShark");
+    }
+    ejectedPilot.content="eject";
+    ejectedPilot.mass=.1;
+    ejectedPilot.volume=1;
+    tmp = &ejectedPilot;
+  }
+  if (index<numCargo()) {
+    tmp = &GetCargo (index);
+  }
+  if (tmp) {
+    if (tmp->quantity>0) {
+      Unit * cargo = new Unit (tmp->content.c_str(),false,_Universe->GetFaction("upgrades"));
+      if (cargo->name=="LOAD_FAILED") {
+	cargo->Kill();
+	cargo = new Unit ("generic_cargo",false,_Universe->GetFaction("upgrades"));
+      }
+      if (cargo->rSize()>=rSize()) {
+	cargo->Kill();
+      }else {
+	cargo->SetPosAndCumPos (Position());
+	cargo->SetOwner (this);
+	cargo->SetVelocity(Velocity);
+	cargo->mass = tmp->mass;
+	if (name.length()>0) {
+	  cargo->name=name;
+	}
+	if (cp) {
+	  PrimeOrders();
+	  cargo->SetTurretAI();
+	  cargo->faction=faction;
+	  cp->SetParent (cargo,"eject","",Position());
+	  SwitchUnits (NULL,cargo);
+	}
+	_Universe->activeStarSystem()->AddUnit(cargo);
+	if ((unsigned int) index!=((unsigned int)-1)) {
+	  if (index<image->cargo.size()) {
+	    RemoveCargo (index,1,true);
+	  }
+	}
+      }
+    }
+
+  }
+}
+
 bool Unit::SellCargo (const std::string &s, int quantity, float & creds, Cargo &carg, Unit *buyer){
   Cargo tmp;
   tmp.content=s;

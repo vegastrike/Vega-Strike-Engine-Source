@@ -880,6 +880,14 @@ void Cockpit::Draw() {
   GFXAlphaTest (ALWAYS,0);  
   GFXHudMode (false);
 }
+int Cockpit::getScrollOffset (unsigned int whichtype) {
+  for (unsigned int i=0;i<vdu.size();i++) {
+    if (vdu[i]->getMode()&whichtype) {
+      return vdu[i]->scrolloffset;
+    }
+  }
+  return 0;
+}
 void Cockpit::Update () {
   if (autopilot_time!=0) {
     autopilot_time-=SIMULATION_ATOM;

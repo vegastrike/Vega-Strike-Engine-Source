@@ -132,6 +132,7 @@ private:
   void VDUSwitch (int vdunum);
   void ScrollVDU (int vdunum, int howmuch);
   void ScrollAllVDU (int howmuch);
+  int getScrollOffset (unsigned int whichtype);
   void SelectProperCamera ();
   static void Respawn (int,KBSTATE);
   static void SwitchControl (int,KBSTATE);
