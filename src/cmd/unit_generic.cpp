@@ -600,6 +600,8 @@ void Unit::Init()
 	damages = NO_DAMAGE;
 
 	graphicOptions.RecurseIntoSubUnitsOnCollision=false;
+        graphicOptions.WarpFieldStrength=1;
+        
 	this->combat_role=ROLES::getRole("INERT");
 	this->computer.combat_mode=true;
 #ifdef CONTAINER_DEBUG

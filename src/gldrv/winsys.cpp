@@ -203,7 +203,19 @@ static void setup_sdl_video_mode()
     }
 
     bpp = gl_options.color_depth;
-
+    if (bpp==16) {
+      SDL_GL_SetAttribute( SDL_GL_RED_SIZE, 5 );
+      SDL_GL_SetAttribute( SDL_GL_GREEN_SIZE, 5 );
+      SDL_GL_SetAttribute( SDL_GL_BLUE_SIZE, 5 );
+      SDL_GL_SetAttribute( SDL_GL_DEPTH_SIZE, 24 );
+      SDL_GL_SetAttribute( SDL_GL_DOUBLEBUFFER, 1 );
+    }else {
+      SDL_GL_SetAttribute( SDL_GL_RED_SIZE, 8 );
+      SDL_GL_SetAttribute( SDL_GL_GREEN_SIZE, 8 );
+      SDL_GL_SetAttribute( SDL_GL_BLUE_SIZE, 8 );
+      SDL_GL_SetAttribute( SDL_GL_DEPTH_SIZE, 24 );
+      SDL_GL_SetAttribute( SDL_GL_DOUBLEBUFFER, 1 );      
+    }
     width = g_game.x_resolution;
     height =g_game.y_resolution  ;
 
@@ -212,8 +224,16 @@ static void setup_sdl_video_mode()
     {
 	VSFileSystem::vs_fprintf( stderr, "Couldn't initialize video: %s", 
 		 SDL_GetError() );
-	exit(1);
+        SDL_GL_SetAttribute( SDL_GL_DEPTH_SIZE, 16 );      
+        if ( ( screen = SDL_SetVideoMode( width, height, bpp, video_flags|SDL_ANYFORMAT ) ) == 
+             NULL )
+        {          
+          VSFileSystem::vs_fprintf( stderr, "Couldn't initialize video: %s", 
+                                    SDL_GetError() );
+          exit(1);
+        }
     }
+    printf ("Setting Screen to w %d h %d and pitch of %d and %d bpp %d bytes per pix mode\n",screen->w,screen->h,screen->pitch, screen->format->BitsPerPixel, screen->format->BytesPerPixel);
 }
 
 
