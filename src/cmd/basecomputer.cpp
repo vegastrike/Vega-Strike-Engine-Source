@@ -115,13 +115,16 @@ extern float totalShieldEnergyCapacitance (const Shield & shield);
 extern void RespawnNow(Cockpit* cockpit);
 
 
-//headers for fonciton used internaly
+//headers for functions used internally
 //add to text a nicely-formated description of the unit and its subunits
 void showUnitStats(Unit * playerUnit,string &text,int subunitlevel);
 //build the previous description from a cargo item
 string buildShipDescription(Cargo &item);
 //put in buffer a pretty prepresentation of the POSITIVE float f (ie 4,732.17)
 void prettyPrintFloat(char * buffer,float f, int digitsBefore, int digitsAfter);
+void showUpgradeStats(Unit * playerUnit,string &text,int mode, Cargo & item);
+string buildUpgradeDescription(Cargo &item);
+
 
 // "Basic Repair" item that is added to Buy UPGRADE mode.
 const string BASIC_REPAIR_NAME = "Basic Repair";
@@ -1408,6 +1411,9 @@ void BaseComputer::updateTransactionControlsForSelection(TransactionList* tlist)
                     sprintf(tempString, "Price: #b#%.2f#-b#n1.5#", baseUnit->PriceCargo(item.content));
                 }
                 descString += tempString;
+				if(item.description==""||item.description[0]!='#'){
+					item.description=buildUpgradeDescription(item);
+				}
                 break;
             case BUY_SHIP:
 		if (item.description=="") item.description=buildShipDescription(item);
@@ -2910,6 +2916,22 @@ string buildShipDescription(Cargo &item) {
 	return str;	
 }
 
+//FIXME FIXME FIXME NOT IMPLEMENTED YET
+string buildUpgradeDescription(Cargo &item) {
+	//load the Unit
+    string blnk; //modifications to an upgrade item???
+    Flightgroup* flightGroup=new Flightgroup();//sigh
+    int fgsNumber=0;
+	current_unit_load_mode=NO_MESH;
+    Unit* newPart = UnitFactory::createUnit(item.content.c_str(), false, 0,blnk,flightGroup,fgsNumber);
+	current_unit_load_mode=DEFAULT;
+	string str="";
+	str+=item.description;
+	showUpgradeStats(newPart,str,GetModeFromName(item.GetContent().c_str()),item);
+	delete newPart;
+	return str;	
+}
+
 
 // Load the controls for the SHIP_DEALER display.
 void BaseComputer::loadShipDealerControls(void) {
@@ -3202,6 +3224,7 @@ static const char *WeaponTypeStrings[]= {
 	"BOLT",
 	"PROJECTILE"
 	};
+
 void showUnitStats(Unit * playerUnit,string &text,int subunitlevel) {
 
 	static float game_speed = XMLSupport::parse_float (vs_config->getVariable("physics","game_speed","1"));
@@ -3562,6 +3585,303 @@ void showUnitStats(Unit * playerUnit,string &text,int subunitlevel) {
 	}}
 
 }
+
+//FIXME FIXME FIXME NOT IMPLEMENTED YET
+void showUpgradeStats(Unit * cargoUnit,string &text,int mode, Cargo & item) {
+	
+	static float game_speed = XMLSupport::parse_float (vs_config->getVariable("physics","game_speed","1"));
+	static float game_accel = XMLSupport::parse_float (vs_config->getVariable("physics","game_accel","1"));
+	char conversionBuffer[30];
+	string prefix="";
+	//get conversion factor for damage -> MJ; note that shield and reactor stats use a different constant.
+	float VSDM = XMLSupport::parse_float (vs_config->getVariable ("physics","kilojoules_per_unit_damage","5400"))/1000.0;
+	float RSconverter = 100; // 100MJ per reactor or shield recharge energy unit
+	float Wconv= (1.0/0.12); // converts from reactor to warp energy scales
+	float totalWeaponEnergyUsage=0;
+	float totalWeaponDamage=0;
+	string MPLdesc="";
+	MPLdesc+=text;
+	text="";
+	string statcolor="#c.75:.9:1#";
+	string nametemp="";
+	string model="";
+	int nameindex=0;
+	for(nameindex=0; (nameindex<cargoUnit->name.size())&&cargoUnit->name[nameindex]!='.';nameindex++){
+		nametemp+=cargoUnit->name[nameindex];
+	}
+	nametemp=beautify(nametemp);
+	text+=statcolor+"Selected Part: #-c"+nametemp;
+	if(item.mass==1){
+		PRETTY_ADDU(statcolor+"Mass: #-c",item.mass,0,"Metric ton.");
+	} else {
+		PRETTY_ADDU(statcolor+"Mass: #-c",item.mass,1,"Metric tons.");
+	} 
+	if(item.volume==1){
+		PRETTY_ADDN(statcolor+"  Space Required: #-c",item.volume,0);
+		text+=" Cubic Meter.#n##n##c0:1:.5#"+prefix+"[DESCRIPTION]#n##-c";
+	}else{
+		PRETTY_ADDN(statcolor+"  Space Required: #-c",item.volume,1);
+		text+=" Cubic Meters.#n##n##c0:1:.5#"+prefix+"[DESCRIPTION]#n##-c";
+	}
+	text+=MPLdesc;
+	text+="#n#";
+	text+="#n##c0:1:.5#[STATS]#n##-c";
+
+	return;
+    
+	
+	
+	PRETTY_ADDU(statcolor+"Hold volume: #-c",cargoUnit->EmptyCargoVolume(),0,"cubic meters");
+	//following line somewhat borken
+	//	PRETTY_ADDU(statcolor+"Fuel Capacity: #-c",cargoUnit->FuelData()/1000.0f,0,"Standard Fuel Units");
+	
+	const Unit::Computer uc=cargoUnit->ViewComputerData();
+    	text+="#n##n#"+prefix+"#c0:1:.5#[FLIGHT CHARACTERISTICS]#n##-c";
+    	text+="#n#"+prefix+statcolor+"Turning Response: #-c";	
+    	if (cargoUnit->limits.yaw==cargoUnit->limits.pitch &&cargoUnit->limits.yaw==cargoUnit->limits.roll) {
+		prettyPrintFloat(conversionBuffer,cargoUnit->limits.yaw/cargoUnit->GetMoment(),0,2);
+		//printf("**%f\n",cargoUnit->limits.yaw);
+    		text+=conversionBuffer;
+			text+=" radians/second^2 "+statcolor+"(yaw, pitch, roll)#-c";
+	    }
+	else {
+		PRETTY_ADDN(statcolor+" yaw #-c",cargoUnit->limits.yaw/(cargoUnit->GetMoment()),2);
+		PRETTY_ADDN(statcolor+"  pitch #-c",cargoUnit->limits.pitch/(cargoUnit->GetMoment()),2);
+		PRETTY_ADDN(statcolor+"  roll #-c",cargoUnit->limits.roll/(cargoUnit->GetMoment()),2);
+		text+=" radians/second^2";
+	}
+	
+	PRETTY_ADDU(statcolor+"Fore acceleration: #-c",cargoUnit->limits.forward/(10*cargoUnit->mass),2,"gravities");
+	PRETTY_ADDU(statcolor+"Aft acceleration: #-c",cargoUnit->limits.retro/(10*cargoUnit->mass),2,"gravities")
+	if (cargoUnit->limits.lateral==cargoUnit->limits.vertical) {
+		PRETTY_ADDU(statcolor+"Orthogonal acceleration: #-c",cargoUnit->limits.vertical/(10*cargoUnit->mass),2,"gravities");
+    		text+=statcolor+" (vertical and lateral axes)#-c";
+    	}		
+    	else {
+		PRETTY_ADDN(statcolor+" Lateral acceleration #-c",cargoUnit->limits.lateral/(10*cargoUnit->mass),2);
+		PRETTY_ADDN(statcolor+" Vertical acceleration #-c",cargoUnit->limits.vertical/(10*cargoUnit->mass),2);
+		text+=" gravities";
+    	}
+	PRETTY_ADDU(statcolor+"Forward acceleration with Afterburner: #-c",cargoUnit->limits.afterburn/(10*cargoUnit->mass),2,"gravities");
+    	text.append("#n##n##c0:1:.5#"+prefix+"[GOVERNOR SETTINGS]#n##-c");
+	static float non_combat_mode_mult = XMLSupport::parse_float (vs_config->getVariable ("physics","combat_speed_boost","100"));
+	
+	PRETTY_ADDU(statcolor+"Max combat speed: #-c",uc.max_speed()*3.6,0,"km/h");
+	PRETTY_ADDU(statcolor+"Max afterburner combat speed: #-c",uc.max_ab_speed()*3.6,0,"km/h");
+	PRETTY_ADDU(statcolor+"Max non-combat speed: #-c",uc.max_speed()*3.6*non_combat_mode_mult,0,"km/h");
+	
+	if (uc.max_yaw==uc.max_pitch &&uc.max_yaw==uc.max_roll) {
+		PRETTY_ADD(statcolor+"Max turn rate: #-c",uc.max_yaw,2);
+		text+=" Radians/second "+statcolor+"(yaw, pitch, roll)#-c";
+	    }
+	else {
+		text+=("#n#"+prefix+"Max turn rates: ");
+		PRETTY_ADDN(statcolor+"  yaw #-c",uc.max_yaw,2);
+		PRETTY_ADDN(statcolor+"  pitch #-c",uc.max_pitch,2);
+		PRETTY_ADDN(statcolor+"  roll #-c",uc.max_roll,2);
+		text+=" Radians/second";
+	}
+
+	text+="#n##n##c0:1:.5#"+prefix+"[TARGETTING SUBSYSTEM]#n##-c";
+	PRETTY_ADDU(statcolor+"Tracking range: #-c",uc.radar.maxrange/1000,0,"km");
+	if((acos(uc.radar.maxcone)*360/PI)<359){
+		PRETTY_ADDU(statcolor+"Tracking cone: #-c",acos(uc.radar.maxcone)*2,2,"Radians");
+		text+=statcolor+" (planar angle: 2 pi means full space)#-c";
+	} else {
+		text+="#n#"+prefix+statcolor+"Tracking cone: #-cOMNIDIRECTIONAL";
+	}
+	PRETTY_ADDU(statcolor+"Assisted targeting cone: #-c",acos(uc.radar.trackingcone)*2,2,"Radians");
+	PRETTY_ADDU(statcolor+"Missile locking cone: #-c",acos(uc.radar.lockcone)*2,2,"Radians");
+	
+	
+	text+="#n#"+prefix+statcolor+"ITTS (Intelligent Target Tracking System) support: #-c";
+	if (uc.itts) text+="yes"; else text+="no";
+	text+="#n#"+prefix+statcolor+"AFHH (Advanced Flag & Hostility Heuristics) support: #-c";
+	if (uc.radar.color) text+="yes"; else text+="no";
+	
+
+	text.append("#n##n##c0:1:.5#"+prefix+"[ENERGY SUBSYSTEM]#n##-c");
+	float shieldsum=0;
+		switch (cargoUnit->shield.number) {
+		case 2:
+			shieldsum+=cargoUnit->shield.fb[2]*RSconverter;
+			shieldsum+=cargoUnit->shield.fb[3]*RSconverter;
+			break;
+		case 4:
+			shieldsum+=cargoUnit->shield.fbrl.frontmax*RSconverter;
+			shieldsum+=cargoUnit->shield.fbrl.backmax*RSconverter;
+			shieldsum+=cargoUnit->shield.fbrl.leftmax*RSconverter;
+			shieldsum+=cargoUnit->shield.fbrl.rightmax*RSconverter;
+			break;
+		case 6:
+			shieldsum+=2*cargoUnit->shield.fbrltb.fbmax*RSconverter;
+			shieldsum+=4*cargoUnit->shield.fbrltb.rltbmax*RSconverter;
+			break;
+		default:
+			break;
+	}
+
+	PRETTY_ADDU(statcolor+"Recharge: #-c",cargoUnit->EnergyRechargeData()*RSconverter,0,"MJ/s");
+	PRETTY_ADDU(statcolor+"Weapon capacitor bank storage: #-c",(cargoUnit->MaxEnergyData()*RSconverter)-(shieldsum/5),0,"MJ");
+	//note: I found no function to get max warp energy, but since we're docked they are the same
+	
+	PRETTY_ADDU(statcolor+"Warp capacitor bank storage: #-c",cargoUnit->GetWarpEnergy()*RSconverter*Wconv,0,"MJ");
+
+    	text+="#n##n##c0:1:.5#"+prefix+"[JUMP SUBSYSTEM]#n##-c";
+	const Unit::UnitJump uj = cargoUnit->GetJumpStatus(); 
+	PRETTY_ADDU(statcolor+"Energy cost for insystem jump: #-c",uj.insysenergy*RSconverter*Wconv,0,"MJ");
+	if (uj.drive==-2) {
+		text+="#n##c1:.3:.3#No outsystem jump drive present#-c"; // fixed??
+	}
+	else {
+	
+		PRETTY_ADDU(statcolor+"Energy cost for jumpnode travel: #-c",uj.energy*RSconverter*Wconv,0,"MJ");
+		if (uj.delay) {
+			PRETTY_ADDU(statcolor+"Delay: #-c",uj.delay,0,"seconds");
+		}
+		if (uj.damage>0) {
+			PRETTY_ADDU(statcolor+"Damage to outsystem jump drive: #-c",uj.damage*VSDM,0,"MJ");
+		}
+	}
+	
+	text+="#n##n##c0:1:.5#"+prefix+"[DURABILITY STATISTICS]#n##-c";
+	text+="#n#"+prefix+statcolor+"Armor damage resistance:#-c";
+	PRETTY_ADDU(statcolor+"  fore - #-c",cargoUnit->armor.front*VSDM,0,"MJ");
+	PRETTY_ADDU(statcolor+"  aft - #-c",cargoUnit->armor.back*VSDM,0,"MJ"); 
+	PRETTY_ADDU(statcolor+"  port - #-c",cargoUnit->armor.left*VSDM,0,"MJ");
+	PRETTY_ADDU(statcolor+"  starboard - #-c",cargoUnit->armor.right*VSDM,0,"MJ");
+	PRETTY_ADDU(statcolor+"Sustainable Hull Damage: #-c",cargoUnit->GetHull()/(cargoUnit->GetHullPercent())*VSDM,0,"MJ");
+	if (1!=cargoUnit->GetHullPercent()) {
+		PRETTY_ADD("  Current condition: ",cargoUnit->GetHullPercent()*100,2);
+		text+="% of normal";
+	}	
+	PRETTY_ADD(statcolor+"Number of shield emitter facings: #-c",cargoUnit->shield.number,0);
+	text+="#n#"+prefix+statcolor+"Shield protection rating:#-c";
+	switch (cargoUnit->shield.number) {
+		case 2:
+			PRETTY_ADDU(statcolor+"  fore - #-c",cargoUnit->shield.fb[2]*VSDM,0, "MJ");
+			PRETTY_ADDU(statcolor+"  aft - #-c",cargoUnit->shield.fb[3]*VSDM,0, "MJ");
+			break;
+		case 4:
+			PRETTY_ADDU(statcolor+"  fore - #-c",cargoUnit->shield.fbrl.frontmax*VSDM,0,"MJ");
+			PRETTY_ADDU(statcolor+"  aft - #-c",cargoUnit->shield.fbrl.backmax*VSDM,0,"MJ");
+			PRETTY_ADDU(statcolor+"  port - #-c",cargoUnit->shield.fbrl.leftmax*VSDM,0,"MJ");
+			PRETTY_ADDU(statcolor+"  starboard - #-c",cargoUnit->shield.fbrl.rightmax*VSDM,0,"MJ");
+			break;
+		case 6:
+			PRETTY_ADDU(statcolor+"  fore and aft - #-c",cargoUnit->shield.fbrltb.fbmax*VSDM,0,"MJ");
+			PRETTY_ADDU(statcolor+"  port, starboard, top, bottom - #-c",cargoUnit->shield.fbrltb.rltbmax*VSDM,0,"MJ");
+			break;
+		default:
+			text+="#c1:.3:.3#Shield model unrecognized#-c";
+			break;
+	}
+	PRETTY_ADDU(statcolor+"Shield protection recharge speed: #-c",cargoUnit->shield.recharge*VSDM,0,"MJ/s"); 
+	//cloaking device? If we don't have one, no need to mention it ever exists, right?
+	if( cargoUnit->cloaking!=-1) {
+		PRETTY_ADDU(statcolor+"Cloaking device available, energy usage: #-c",cargoUnit->image->cloakenergy*RSconverter*Wconv,0,"MJ/s");
+	}
+
+	text+="#n##n##c0:1:.5#"+prefix+"[ARMAMENT]#n##-c";
+	//let's go through all mountpoints
+	bool anyweapons=false;
+	text+=prefix+"MOUNTPOINT RATINGS:";
+	{	for(int i=0;i<cargoUnit->GetNumMounts();i++){
+			PRETTY_ADD(" #c0:1:.3#<#-c",i+1,0);
+			text+="#c0:1:.3#>#-c #c0:1:1#"+lookupMountSize(cargoUnit->mounts[i].size)+"#-c";
+			const weapon_info * wi=cargoUnit->mounts[i].type;
+			if(wi&&wi->weapon_name!=""){
+				anyweapons=true;
+			}
+		}
+	}
+	{text+="#n#"+prefix+"MOUNTED:"; // need brace for namespace issues on VC++
+	 if(anyweapons){
+		for (int i=0;i<cargoUnit->GetNumMounts();i++) {
+		const weapon_info * wi=cargoUnit->mounts[i].type;
+		if ( (!wi) ||  (wi->weapon_name=="") ) {
+			continue;
+		} else {
+			//let's display some weapon information
+		//	int s=1; //??
+		//	int off=0;//??
+			PRETTY_ADD("  #c0:1:.3#<#-c",i+1,0);
+			text+="#c0:1:.3#>#-c";
+			text+=" "+wi->weapon_name+": #c0:1:1#"+lookupMountSize(wi->size)+"#-c#c.9:.9:.5#"+WeaponTypeStrings[wi->type]+"#-c";
+			if (wi->Damage<0) text+="#n#"+prefix+statcolor+"   Damage:#-c special";
+			else {
+				PRETTY_ADDU(statcolor+"   Damage: #-c",wi->Damage*VSDM,0,"MJ");
+			}
+			PRETTY_ADDU(statcolor+"   Range: #-c",wi->Range,0,"meters");
+			PRETTY_ADDU(statcolor+"   Energy usage: #-c",wi->EnergyRate*RSconverter,0,wi->type==weapon_info::BEAM?"MJ/s":"MJ/shot");
+			
+			PRETTY_ADDU(statcolor+"   Refire delay: #-c",wi->Refire,2,"seconds");
+			if (wi->PhaseDamage>0) {
+				PRETTY_ADDU(statcolor+"   Phase damage: #-c",wi->PhaseDamage*VSDM,2,"MJ");
+			}
+			
+			
+			/*I don't see the point in displaying those
+			PRETTY_ADD("   Pulse speed: ",wi->PulseSpeed,2);
+			PRETTY_ADD("   Radial speed: ",wi->RadialSpeed,2);
+			PRETTY_ADD("   Radius: ",wi->Radius,2);
+			PRETTY_ADD("   Length: ",wi->Length,2);			
+			*/
+
+			//display info specific to some weapons type			
+			switch ( wi->type) {
+				case weapon_info::BALL: //may need ammo
+				case weapon_info::BOLT:
+					if (wi->Damage>0){
+						totalWeaponDamage+=(wi->Damage/wi->Refire); //damage per second
+					}
+					PRETTY_ADDU(statcolor+"   Exit velocity: #-c",wi->Speed,0,"meters/second");
+					if((100000*(1.0 - wi->Longrange)/(wi->Range))>0.00001){
+						PRETTY_ADD(statcolor+"   Range attenuation factor: #-c",100000*(1.0 - wi->Longrange)/(wi->Range),2);
+						text+="% per km";
+					}
+					if(cargoUnit->mounts[i].ammo!=-1&&(lookupMountSize(wi->size)!="SPECIAL-MISSILE")){
+						PRETTY_ADD(statcolor+"   Rounds remaining: #-c",cargoUnit->mounts[i].ammo,0);
+					} else {
+						if(lookupMountSize(wi->size)=="SPECIAL-MISSILE"){
+							PRETTY_ADD(statcolor+"   Rockets remaining: #-c",cargoUnit->mounts[i].ammo,0);
+						}
+					}
+					totalWeaponEnergyUsage+=(wi->EnergyRate/wi->Refire);
+					break;
+				case weapon_info::PROJECTILE: //need ammo
+					if(wi->LockTime > 0){
+						PRETTY_ADDU(statcolor+"   'Fire and Forget' lock time: #-c",wi->LockTime,0,"seconds");
+					} else {
+						text+="#n#";
+						text+=prefix;
+						text+=statcolor+"   Missile Lock Type: #-c#c1:.3:.3#None.#-c Inertial Guidance Only";
+					}
+					PRETTY_ADD(statcolor+"   Missiles remaining: #-c",cargoUnit->mounts[i].ammo,0);
+					totalWeaponEnergyUsage+=(wi->EnergyRate/wi->Refire);
+					break;
+				case weapon_info::BEAM:
+					if (wi->Damage>0)
+						totalWeaponDamage+=wi->Damage;
+					PRETTY_ADDU(statcolor+"   Beam stability: #-c",wi->Stability,2,"seconds");
+					if((100000*(1.0 - wi->Longrange)/(wi->Range))>0.00001){
+						PRETTY_ADD(statcolor+"   Range attenuation factor: #-c",100000*(1.0 - wi->Longrange)/(wi->Range),2);
+						text+="% per km";
+					}
+					totalWeaponEnergyUsage+=wi->EnergyRate;
+					break;
+				default:
+					break;
+			}
+		}
+			
+	}}else{ 		//end mountpoint list
+		text+="#n##c1:.3:.3#"+prefix+"  NO MOUNTED WEAPONS#n##-c";
+	}
+	}
+	
+}
+
 // Show the stats on the player's current ship.
 bool BaseComputer::showShipStats(const EventCommandId& command, Control* control) {
 	current_unit_load_mode=NO_MESH;
