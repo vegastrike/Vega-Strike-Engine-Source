@@ -35,7 +35,7 @@
   WRAPPED0 (float,CloakVisible,false)
   voidWRAPPED1 (Cloak,bool,cloak)
   voidWRAPPED0(RemoveFromSystem)
-  WRAPPED3(QVector, PositionITTS ,QVector, local_posit, Vector, local_velocity, float, speed,QVector(0,0,0))
+  WRAPPED4(QVector, PositionITTS ,QVector, local_posit, Vector, local_velocity, float, speed,bool,steadyITTS,QVector(0,0,0))
   WRAPPED0(QVector,Position,QVector(0,0,0))
   WRAPPED0(QVector, LocalPosition,QVector(0,0,0))
 
@@ -107,8 +107,11 @@
   WRAPPED1(bool,RequestClearance,UnitWrapper,dockingunit,false)
   WRAPPED1(bool,isDocked,UnitWrapper,dockingUnit,false)
   WRAPPED1(bool,Dock,UnitWrapper,unitToDockWith,false)
+
   voidWRAPPED1(setCombatRole,string,role)
+
   WRAPPED0(string,getCombatRole,"INERT")
+
 
   WRAPPED1(bool,UnDock,UnitWrapper,unitToDockWith,false)
   WRAPPED0(int,DockedOrDocking,0)
