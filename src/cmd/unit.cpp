@@ -341,10 +341,8 @@ Unit::Unit(const char *filename, bool SubU, int faction,std::string unitModifica
 	bool doubleup=false;
 	char * my_directory=GetUnitDir(filename);
 	vssetdir (GetSharedUnitPath().c_str());
-	vschdir (my_directory);
-	FILE *fp = fopen (filename,"r");
+	FILE * fp=NULL;
 	if (!fp) {
-	  vscdup();
 	  const char *c;
 	  if ((c=_Universe->GetFaction(faction)))
 	    vschdir (c);
@@ -357,6 +355,17 @@ Unit::Unit(const char *filename, bool SubU, int faction,std::string unitModifica
 	}
 	fp = fopen (filename,"r");
 	if (!fp) {
+	  vscdup();
+	  vscdup();
+	  doubleup=false;
+	  vschdir (my_directory);
+	  fp = fopen (filename,"r");
+	}
+
+	if (!fp) {
+	  if (doubleup) {
+	    vscdup();
+	  }
 	  vscdup();
 	  vschdir ("neutral");
 	  faction=_Universe->GetFaction("neutral");//set it to neutral
