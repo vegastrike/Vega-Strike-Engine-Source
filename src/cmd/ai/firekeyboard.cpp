@@ -995,6 +995,10 @@ void FireKeyboard::Execute () {
   if ((targ = parent->Target())) {
     ShouldFire (targ);
     DoDockingOps(parent,targ,whichplayer,sex);
+    if (targ->GetHull()<0) {
+      ChooseTargets(parent,TargAll,false);
+      refresh_target=true;
+    }
   } else {
     ChooseTargets(parent,TargAll,false);
     refresh_target=true;

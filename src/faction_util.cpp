@@ -165,8 +165,7 @@ void FactionUtil::LoadSerializedFaction(char * &buf) {
   }
   for (unsigned int i=0;i<factions.size();i++) {
     if (numnums(buf)==0) {
-      i--;
-      continue;
+      return;
     }
     for (unsigned int j=0;j<factions[i]->faction.size();j++) {
       sscanf (buf,"%f ",&factions[i]->faction[j].relationship);
