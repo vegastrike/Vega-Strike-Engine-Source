@@ -9,7 +9,7 @@ FireKeyboard::FireKeyboard (int whichjoystick, const char *): Order (WEAPON){
   gunspeed = gunrange = .0001;
   BindJoyKey (whichjoystick,0,FireKeyboard::JFireKey);
   BindJoyKey (whichjoystick,1,FireKeyboard::JMissileKey);
-  //  BindJoyKey (whichjoystick,2,FireKeyboard::UnbindJoyKey);
+  BindJoyKey (whichjoystick,5,FireKeyboard::JTargetKey);
 
   BindKey(' ',FireKeyboard::FireKey);
   BindKey(';',FireKeyboard::MissileKey);
@@ -88,15 +88,16 @@ void FireKeyboard::Execute () {
   } else {
     ChooseTargets();
   }
-  if (firekey==DOWN) 
+  if (firekey==DOWN||jfirekey==DOWN) 
     parent->Fire(false);
-  if (missilekey==DOWN)
+  if (missilekey==DOWN||jmissilekey==DOWN)
     parent->Fire(true);
-  else if (firekey==UP) {
+  else if (firekey==UP&&jfirekey==UP) {
     parent->UnFire();
   }
-  if (targetkey==PRESS) {
+  if (targetkey==PRESS||jtargetkey==PRESS) {
     targetkey=DOWN;
+    jtargetkey=DOWN;
     ChooseTargets();
   }
 }
