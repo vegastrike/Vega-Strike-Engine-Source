@@ -73,9 +73,9 @@ namespace XMLSupport {
 	sprintf (tmp,"%ld",num);
 	return string(tmp);
   }
-  string inline tostring (float num) {
+  string inline tostring (double num) {
 	char tmp[256];
-	sprintf (tmp,"%f",num);
+	sprintf (tmp,"%lf",num);
 	return string(tmp);
   }
 /*#else

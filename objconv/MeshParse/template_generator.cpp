@@ -695,12 +695,27 @@ void UnitBeginElement(const string &name, const AttributeList &attributes, XML *
           fprintf(xml->tfp," itts=\"true\" error=\"0\" range=\"600000000\" maxcone=\"-1\" color=\"true\" ");
 		  fprintf(xml->bfp," itts=\"false\" error=\"0\" range=\"30000000\" maxcone=\"-1\" color=\"false\"");
           
-      }else
+      }else{
+		  bool ecm=false;
+		  bool repair=false;
+		  float ecmval = 1;
+		  int repairval=6;
+				  
 	for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
             string tnam = (*iter).name;
             string bnam = (*iter).name;
             string tval = (*iter).value;
             string bval = (*iter).value;
+			if (xeq(tnam,"ECM")) {
+				tval = xts (ecmval);
+				bval = "0";
+				ecm=true;
+			}
+			if (xeq(tnam,"RepairDroid")) {
+				repair=true;
+				tval = xts (repairval);
+				bval = "0";
+			}
             if (shields) {
                 if (strcasecmp ("front",tnam.c_str())==0||
                     strcasecmp ("back",tnam.c_str())==0||
@@ -716,7 +731,7 @@ void UnitBeginElement(const string &name, const AttributeList &attributes, XML *
             }
             if (xeq (name,"hold")) {
                 if (xeq (iter->name,"volume")) {
-                    tval = xts((float)(XMLSupport::parse_float (iter->value)*1.2));
+                    tval = xts((XMLSupport::parse_float (iter->value)*1.2));
                 }
             }
 			if (xeq (name,"subunit")) {
@@ -736,7 +751,21 @@ void UnitBeginElement(const string &name, const AttributeList &attributes, XML *
             fprintf (xml->bfp," %s =\"%s\"",bnam.c_str(),bval.c_str());
 	
 	}
+	  
+	if (xeq(name,"defense")) {
+		if (!ecm) {
+			fprintf (xml->tfp," ECM =\"%f\"",ecmval);
+			fprintf (xml->bfp," ECM =\"0\"");		  
+		}
+		if (!repair) {
+			fprintf (xml->tfp," RepairDroid =\"%d\"",repairval);		  
+			fprintf (xml->bfp," RepairDroid =\"0\"");		  
+		}
+	}
+	  }
+	  
   }
+
   fprintf (xml->tfp,">\n");
   fprintf (xml->bfp,">\n");
 
