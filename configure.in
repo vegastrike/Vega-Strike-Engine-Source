@@ -111,6 +111,137 @@ if test "x$is_macosx" = "xyes" ; then
     TR_LIBS="$TR_LIBS -lobjc"
 fi
 
+dnl
+dnl check for Python
+dnl
+dnl for now support automake versions < 1.5 for 2 reasons:
+dnl  - it is not available on some distros (SuSE, RedHat, ...)
+dnl  - it can not find python 2.2 in many other cases (debian, ...)
+dnl 
+dnl AM_PATH_PYTHON(2.2)
+dnl
+AC_MSG_CHECKING([for python])
+
+FOUND_PYTHON=no
+PYTHON_CFLAGS=""
+PYTHON_LIBS=""
+
+PYTHON_binchk="python python2 python2.2 python2.3"
+for i in ${PYTHON_binchk};
+do
+    PYTHON_check=`$i -V 2>/dev/null; echo $?`
+    if test ${PYTHON_check} -eq 0;
+    then
+        FOUND_PYTHON=yes
+    fi
+
+    dnl
+    dnl Change autoconf quote characters temporarily.
+    dnl
+    changequote(<<, >>)dnl
+
+    if test "x${FOUND_PYTHON}" = "xyes";
+    then
+        PYTHON_VERSION=`$i -V 2>&1 | awk '{print $NF}'`
+        if test `echo ${PYTHON_VERSION} | sed -e 's/\./ /g; s/[a-z|A-Z]/ /g' | awk '{print $1$2}'` -ge 22;
+        then
+            FOUND_PYTHON=yes
+            PYTHON_SHORT=`echo ${PYTHON_VERSION} | sed -e 's/\./ /g; s/[a-z|A-Z]/ /g' | awk '{print $1"."$2}'`
+            PYTHON_incchk="/usr/include/python /usr/include/python${PYTHON_SHORT} /usr/local/include/python /usr/local/include/python${PYTHON_SHORT}"
+        else
+            FOUND_PYTHON=no
+        fi
+    fi
+
+
+    dnl
+    dnl Reset autoconf quote characters to brackets.
+    dnl
+    changequote([, ])dnl
+
+    if test "x${FOUND_PYTHON}" = "xyes";
+    then
+        PYTHON=$i
+        break
+    fi
+done
+
+PYTHON_incdir=""
+if test "x${FOUND_PYTHON}" = "xyes";
+then
+    for i in ${PYTHON_incchk};
+    do
+        if test -f "$i/Python.h";
+	then
+            PYTHON_incdir=$i
+            break
+        fi
+    done
+fi
+
+if test "x${PYTHON_incdir}" = "x";
+then
+    FOUND_PYTHON=no
+fi
+
+if test "x${FOUND_PYTHON}" = "xno";
+then
+    AC_MSG_ERROR([*** Python version 2.2 or later not found!])
+fi
+AC_MSG_RESULT([python ${PYTHON_VERSION}])
+
+dnl Simple check for libpython2.2.so
+if test "x${FOUND_PYTHON}" = "xyes";
+then
+    FOUND_LIBPYTHON_SO=no
+    PYTHON_libchk="/usr/lib /usr/local/lib /usr/lib/python${PYTHON_SHORT} /usr/lib/python${PYTHON_SHORT}/config /usr/local/lib/python${PYTHON_SHORT} /usr/local/lib/python${PYTHON_SHORT}/config"
+    for i in ${PYTHON_libchk};
+    do
+	
+        if test -f $i/libpython${PYTHON_SHORT}.so;
+        then
+	    echo "$i/libpython${PYTHON_SHORT}.so yes"
+	    PYTHON_CFLAGS="-I${PYTHON_incdir}"
+	    PYTHON_LIBS="-lpython${PYTHON_SHORT}"
+            FOUND_LIBPYTHON_SO=yes
+            break
+	else
+          if test -f $i/libpython${PYTHON_SHORT}.a;	   
+	  then
+            echo "$i/libpython${PYTHON_SHORT}.a yes"
+    	    PYTHON_CFLAGS="-I${PYTHON_incdir}"
+	    PYTHON_LIBS="$i/libpython${PYTHON_SHORT}.a"
+            FOUND_LIBPYTHON_SO=yes
+	    break
+          else
+            echo "$i/libpython${PYTHON_SHORT}.so no"
+	  fi
+        fi
+    done
+fi
+
+dnl if test "x${FOUND_LIBPYTHON_SO}" = "xyes";
+dnl then
+dnl    PYTHON_CFLAGS="-I${PYTHON_incdir}"
+dnl    PYTHON_LIBS="-lpython${PYTHON_SHORT}"
+dnl fi
+
+if test "x${FOUND_LIBPYTHON_SO}" = "xno";
+then
+    echo
+    echo "Missing {python-prefix}/lib/libpython${PYTHON_SHORT}.so"
+    echo "Try to create the shared library using (root priviledge required):"
+    echo "    su -c 'sh ./build_libpython_so.sh'"
+    echo
+    AC_MSG_WARN([*** Python shared library not found!])
+else
+    PYTHON_CPPFLAGS="$PYTHON_CPPFLAGS $PYTHON_CFLAGS -DHAVE_PYTHON=1 -DHAVE_BOOST=1"
+fi
+AC_SUBST(PYTHON_LIBS)
+
+
+
+
 dnl --------------------------------------------------------------------------
 dnl Check for SDL
 dnl --------------------------------------------------------------------------
@@ -747,167 +878,11 @@ fi
 CPPFLAGS="$saved_CPPFLAGS" 
 TR_CPPFLAGS="$TR_CPPFLAGS $AL_CPPFLAGS"
 
-dnl --------------------------------------------------------------------------
-dnl Check for python 2.1+ library, and then boost
-dnl --------------------------------------------------------------------------
-AC_ARG_WITH(python-libs,[  --with-python-libs=DIR    Location of python library])
 
-if test "x$with_python_libs" = "x" ; then
-    PYTHON_LDOPTS="$PYTHON_LDOPTS"
-else
-    PYTHON_LDOPTS="-L$with_python_libs"
-fi
 
-AC_DEFUN( CHECK_FOR_PYTHON_LIB, [
-    AC_MSG_CHECKING([for $PYTHON_LIB_NAME library])
-    LIBS="$PYTHON_LDOPTS -l$PYTHON_LIB_NAME"
-    AC_TRY_LINK( , , have_python_lib=yes, have_python_lib=no )
-    AC_MSG_RESULT([$have_python_lib])
-]) 
 
-saved_LIBS="$RRLIBS"
 
-PYTHON_LIB_LIST="python1.5 python2.1 python2.2"
 
-for PYTHON_LIB_NAME in $PYTHON_LIB_LIST ; do
-    CHECK_FOR_PYTHON_LIB
-
-    if test "x$have_python_lib" = "xyes" ; then
-	LIBS="$saved_LIBS"
-	TR_LIBS="$TR_LIBS $PYTHON_LDOPTS -l$PYTHON_LIB_NAME"
-        break;
-    else
-	LIBS=""
-	saved_LIBS=""
-    fi
-done
-
-AC_ARG_WITH(boost-libs,[  --with-boost-libs=DIR    Location of Boost library])
-
-if test "x$with_boost_libs" != "x" ; then
-    PYTHON_LDOPTS="$PYTHON_LDOPTS -L$with_boost_libs"
-fi
-
-if test "x$have_python_lib" = "xyes" ; then
-AC_DEFUN( CHECK_FOR_BOOST_LIB, [
-    AC_MSG_CHECKING([for $BOOST_LIB_NAME library])
-    LIBS="$PYTHON_LDOPTS -l$BOOST_LIB_NAME -l$PYTHON_LIB_NAME"
-    AC_TRY_LINK( , , have_boost_lib=yes, have_boost_lib=no )
-    AC_MSG_RESULT([$have_boost_lib])
-]) 
-
-saved_LIBS="$RRLIBS"
-
-BOOST_LIB_LIST="boost_python"
-
-for BOOST_LIB_NAME in $BOOST_LIB_LIST ; do
-    CHECK_FOR_BOOST_LIB
-
-    if test "x$have_boost_lib" = "xyes" ; then
-	LIBS="$saved_LIBS"
-	TR_LIBS="$TR_LIBS $PYTHON_LDOPTS -l$BOOST_LIB_NAME"
-        break;
-    else
-	LIBS=""
-	saved_LIBS=""
-    fi
-done
-fi
-
-dnl --------------------------------------------------------------------------
-dnl Check for Python & boost headers
-dnl --------------------------------------------------------------------------
-
-AC_ARG_WITH(python-inc,   [  --with-python-inc=DIR       Python header file location])
-
-if test "x$with_python_inc" = "x" ; then
-    PYTHON_CPPFLAGS=""
-else 
-    PYTHON_CPPFLAGS="-I$with_python_inc"
-fi
-
-dnl check for al.h
-saved_CPPFLAGS="$CPPFLAGS"
-
-AC_DEFUN( CHECK_FOR_PYTHON_H, [
-    CPPFLAGS="$saved_CPPFLAGS $PYTHON_CPPFLAGS"
-    if test "x$is_macosx" = "xno" ; then
-        CPPFLAGS="$CPPFLAGS $TR_CPPFLAGS"
-    fi
-
-    have_python_h=no
-    AC_MSG_CHECKING([for Python.h])
-    AC_TRY_CPP( [ #include <Python.h> ], 
-    AC_TRY_CPP( [ #include <Python.h>
-   #if PY_MAJOR_VERSION <= 2 && PY_MINOR_VERSION <1
-     #error "Vegastrike needs Python version >= 2.1"
-   #endif
-    ], [have_python_h=yes
-AC_MSG_RESULT([yes])] ,[ AC_MSG_RESULT([Need version >= 2.1])]))
-])
-
-CHECK_FOR_PYTHON_H
-
-CPPFLAGS="$saved_CPPFLAGS" 
-TR_CPPFLAGS="$TR_CPPFLAGS $PYTHON_CPPFLAGS"
-
-AC_LANG_SAVE
-AC_LANG_CPLUSPLUS
-AC_ARG_WITH(boost-inc,   [  --with-boost-inc=DIR       Boost header file location])
-
-if test "x$have_python_h" != "x" ; then
-if test "x$with_boost_inc" != "x" ; then
-    BOOST_CPPFLAGS="-I$with_boost_inc"
-fi
-
-    CPPFLAGS="$saved_CPPFLAGS $PYTHON_CPPFLAGS $BOOST_CPPFLAGS"
-    if test "x$is_macosx" = "xno" ; then
-        CPPFLAGS="CPPFLAGS $TR_CPPFLAGS"
-    fi
-
-    AC_MSG_CHECKING([for <boost/python/module_builder.hpp>])
-AC_LANG_CPLUSPLUS
-    AC_TRY_CPP( [ #include <boost/python/module_builder.hpp> ], 
-    [have_boost_h=yes], [have_boost_h=no])
-    AC_MSG_RESULT([$have_boost_h])
-fi
-AC_LANG_RESTORE
-
-if test "x$have_python_lib" = "xno" ; then
-    AC_MSG_WARN([
-**************
-Python libraries not found
-**************
-])
-else
-    if test "x$have_python_h" = "xno" ; then
-    AC_MSG_WARN([
-**************
-Python headers not found
-**************
-])
-    else
-    PYTHON_CPPFLAGS="$PYTHON_CPPFLAGS -DHAVE_PYTHON=1"
-    fi
-fi
-
-if test "x$have_boost_lib" = "xno" ; then
-    AC_MSG_WARN([
-**************
-Boost libraries not found
-**************
-])
-else
-    if test "x$have_boost_h" = "xno" ; then
-    AC_MSG_WARN([
-**************
-Boost headers not found
-**************
-])
-    else
-    BOOST_CPPFLAGS="$BOOST_CPPFLAGS -DHAVE_BOOST=1"
-    fi
-fi
 
 CPPFLAGS="$saved_CPPFLAGS" 
 
@@ -937,10 +912,10 @@ AC_SUBST(TR_LIBS)
 AC_SUBST(PYTHON_CPPFLAGS)
 AC_SUBST(BOOST_CPPFLAGS)
 
-CPPFLAGS="$CPPFLAGS $TR_CPPFLAGS $PYTHON_CPPFLAGS $BOOST_CPPFLAGS"
+CPPFLAGS="$CPPFLAGS $TR_CPPFLAGS $PYTHON_CPPFLAGS $BOOST_CPPFLAGS "
 CFLAGS="$CFLAGS $TR_CFLAGS"
 CXXFLAGS="$CXXFLAGS $TR_CXXFLAGS"
-LIBS="$LIBS $TR_LIBS"
+LIBS="$LIBS $TR_LIBS $PYTHON_LIBS"
 
 AC_OUTPUT(Makefile src/Makefile src/gldrv/Makefile src/aldrv/Makefile src/gfx/Makefile src/cmd/Makefile src/cmd/ai/Makefile src/cmd/collide/Makefile src/cmd/script/Makefile src/cmd/script/c_alike/Makefile src/cmd/collide/csgeom/Makefile src/python/Makefile launcher/Makefile src/networking/Makefile \
 	objconv/Makefile src/gui/Makefile )
