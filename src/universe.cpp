@@ -293,8 +293,9 @@ void GameUniverse::StartDraw()
     ProcessInput(i);//input neesd to be taken care of;
     popActiveStarSystem();
   }
-  micro_sleep (getmicrosleep());//so we don't starve the audio thread  
   GFXEndScene();
+  micro_sleep (getmicrosleep());//so we don't starve the audio thread  
+
   //remove systems not recently visited?
   static int sorttime=0;
   static int howoften = XMLSupport::parse_int(vs_config->getVariable ("general","garbagecollectfrequency","20"));

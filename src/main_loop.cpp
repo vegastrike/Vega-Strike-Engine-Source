@@ -763,7 +763,7 @@ void destroyObjects() {
 
 
 int getmicrosleep () {
-  static int microsleep = XMLSupport::parse_int (vs_config->getVariable ("audio","threadtime","5000"));
+  static int microsleep = XMLSupport::parse_int (vs_config->getVariable ("audio","threadtime","1"));
   return microsleep;
 }
 

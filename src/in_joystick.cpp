@@ -22,7 +22,8 @@
 /*
   Joystick support written by Alexander Rawass <alexannika@users.sourceforge.net>
 */
-
+#include <list>
+#include <lin_time.h>
 #include "vegastrike.h"
 #include "vs_globals.h"
 
@@ -229,6 +230,13 @@ void JoyStick::InitMouse (int which) {
 bool JoyStick::isAvailable(){
   return joy_available;
 }
+struct mouseData{
+  int dx;
+  int dy;
+  float time;
+  mouseData() {dx=dy=0;time=0;}
+  mouseData(int ddx,int ddy, float ttime) {dx=ddx;dy=ddy;time=ttime;}
+};
 extern void GetMouseXY(int &mousex,int &mousey);
 void JoyStick::GetMouse (float &x, float &y, float &z, int &buttons) {
   static int savex = g_game.x_resolution/2;
@@ -238,18 +246,45 @@ void JoyStick::GetMouse (float &x, float &y, float &z, int &buttons) {
  static float mouse_sensitivity = XMLSupport::parse_float(vs_config->getVariable ("joystick","mouse_sensitivity","50"));
   static float mouse_exp = XMLSupport::parse_float(vs_config->getVariable ("joystick","mouse_exponent","3"));
   int _dx, _dy;
+  float fdx,fdy;
   int _mx,_my;
   GetMouseXY (_mx,_my);
   GetMouseDelta (_dx,_dy);
   if (0&&(_dx||_dy))
     printf ("x:%d y:%d\n",_dx,_dy);
   if (warp_pointer==false) {
-    _dx = _mx-g_game.x_resolution/2;
+    fdx=(float)(_dx = _mx-g_game.x_resolution/2);
     def_mouse_sens=25;
-    _dy = _my-g_game.y_resolution/2;
+    fdy=(float)(_dy = _my-g_game.y_resolution/2);
+  }else {
+    static float joystickblur=XMLSupport::parse_float(vs_config->getVariable("physics","mouse_blur",".1"));
+    static std::list <mouseData> md;
+    std::list<mouseData>::iterator i=md.begin();
+    float ttime=getNewTime();
+    float lasttime=ttime-joystickblur;
+    int avg=1;
+    float valx=_dx;
+    float valy=_dy;
+    for(;i!=md.end();) {
+      if ((*i).time>=lasttime) {
+        valx+=(*i).dx;
+        valy+=(*i).dy;
+        avg++;
+        ++i;
+      } else {
+        i=md.erase(i);
+      } 
+    }
+    if (_dx||_dy)
+      md.push_back(mouseData(_dx,_dy,ttime));
+    _dx=valx/avg;
+    _dy=valy/avg;
+    fdx=float(valx)/joystickblur;
+    fdy=float(valy)/joystickblur;
+    //printf (" x:%.2f y:%.2f %d ",fdx,fdy,avg);
   }
-  joy_axis[0]=x = float(_dx)/(g_game.x_resolution*def_mouse_sens/mouse_sensitivity);
-  joy_axis[1]=y = float(_dy)/(g_game.y_resolution*def_mouse_sens/mouse_sensitivity);
+  joy_axis[0]=x = fdx/(g_game.x_resolution*def_mouse_sens/mouse_sensitivity);
+  joy_axis[1]=y = fdy/(g_game.y_resolution*def_mouse_sens/mouse_sensitivity);
 
   joy_axis[0]*=mouse_exp;
   joy_axis[1]*=mouse_exp;
