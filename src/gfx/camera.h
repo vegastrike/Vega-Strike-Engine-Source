@@ -56,7 +56,7 @@ public:
 
 	void SetPosition(const Vector &origin);
 	void GetPosition(Vector &vect);
-
+	Vector GetVelocity ();
 	void GetOrientation(Vector &p, Vector &q, Vector &r);
 	const Vector &GetPosition();
 
@@ -75,3 +75,4 @@ public:
 };
 
 #endif
+

@@ -90,7 +90,7 @@ int Music::SelectTracks(int &whichlist) {
   //  fprintf (stderr,"Choosing Song %f",goodness);
   int tmp=0;
   if (!playlist[0].empty()) {
-    tmp=(rand()%(playlist[0].size()/4));
+    tmp=(rand()%((playlist[0].size()+3)/4));
   }
   goodness+=tmp;
   //fprintf (stderr,"Choosing Song With Randomness %f\n",goodness);
@@ -113,6 +113,8 @@ void Music::Listen() {
       AUDStartPlaying (song);
     }
     
+  } else {
+	AUDAdjustSound (song,_Universe->AccessCamera()->GetPosition(),_Universe->AccessCamera()->GetVelocity());
   }
 }
 
@@ -120,7 +122,6 @@ void Music::Skip() {
   AUDStopPlaying (song);
 }
 Music::~Music() {
-  AUDStopPlaying (song);
   AUDDeleteSound (song,true);//delete buffer too;
 }
 

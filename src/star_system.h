@@ -102,3 +102,4 @@ class StarSystem {
 };
 
 #endif
+

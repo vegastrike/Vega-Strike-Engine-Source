@@ -88,10 +88,12 @@ void Camera::UpdateGFX(GFXBOOL updateFrustum)
 #endif
 	}
 }
-
+Vector Camera::GetVelocity() {
+	return (Coord-lastpos)/SIMULATION_ATOM;
+}
 void Camera::UpdateCameraSounds() {
 #ifndef PERFRAMESOUND
-  AUDListener (Coord,(Coord-lastpos)/SIMULATION_ATOM);
+  AUDListener (Coord,GetVelocity());
   AUDListenerOrientation (P,Q,R);
 #endif
 }
