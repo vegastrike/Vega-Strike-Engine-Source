@@ -1,11 +1,9 @@
-Readme for VegaStrike version 0.0.9 Alpha
------------------------------------------------------------------------------------------------------------------------------
-This is the release of vegastrike where objects can actually interact instead of flying through each other like ghosts in the wind.
-Starships can shoot each other, and more importantly ram into each other.  Turn left by 90 degrees and fly towards some of the hornets.
-
-Smash into a few--go in with guns blazing and watch their shields light up!
-The shield effects look state-of-the-art and they  are all accelerated by OpenGL's T&L model! 
-Even planets can be hit!
+----------------------------------------------
+Readme for VegaStrike version 0.0.9 Pre-Beta
+----------------------------------------------
+Vegastrike has finally reached playability!  Now you can dual against an arbitrary number of ships in deadly combat!
+Ships have been taken directly out of vegastrike classic and put here for your entertainment! They intelligently combat
+I have attempted to recreate original Wing COmmander statistics so boost your enjoyment of the scenerio where you and Jazz fly against a number of kilrathi ships. But will Jazz remain loyal?
 
 Mail me any comments or suggestions to hellcatv@hotmail.com
 I would welcome any changes or additions to shield.bmp that would make the shield look more realistic!   
@@ -13,7 +11,12 @@ I would welcome any changes or additions to shield.bmp that would make the shiel
 -----------
  Features:
 -----------
+-Intelligent, Programmable AI
+-Varied weapons on different starships
+-Explosions that literally tear a starship into pieces
 -Shields That Glow upon hit (in the location hit)
+-Customizable missions
+-Stars that fly past as you explore the system
 -BSP Trees that allow one to fly close to a starship, and in the runway of (well formed) models...unlike the victory from WC3. 
 -the Normal Force which bounces starships off of each other
 -The rings of saturn--a feature oft-missed in previous versions... now added for all to enjoy... just don't fire at 'em ;-)
@@ -27,6 +30,84 @@ space Guns
 TAB Afterburners
 * Spin Right
 / Spin Left
+q (hold down, engage shelton slide)
+
+--------------------------------------
+Editing Missions  (By Darkmage)
+--------------------------------------
+How to make Vegastrike Missions
+An example mission(this is stored in the testmission.txt file)
+
+3
+rapier.xunit 6000 0 0 0
+venture.xunit 6000 6000 200 0
+dralthi.xunit 6000 6000 -200 0
+
+the three at the top indicates the number of ships in the mission
+to add a ship give it some X Y Z coordinatesas shown above. to make the ships fight against you leve the number on the right end as 0 to make them fly against themselves change that value to 1, or 2, etc.  If the number is equal to or greater than the number at the beginning, vegastrike will not be happy.
+You can add as many ships as you like. Make sure to edit the very top number appropriately
+While factions have been finished, currently all ships are nonaligned and equally hostile. (expect a fix soon)
+
+
+---------------------------------------
+Editing AI
+---------------------------------------
+
+The AI is completely scriptable, and I have not spent all that long perfecting it.  There are included instructions about editing the AI scripts yourself.
+Currently there is only 1 AI personality.  In the future there will be a method to assign different personalities to different starships.
+it's the "default" personality.
+2 files are responsible for the control of the "default" personality
+default.agg.xml
+and 
+default.int.xml
+
+default.agg.xml means the "aggressive" AI.  it controls what it does to aggressively bring its vengence upon its target.
+When editing this file in notepad, you'll notice some tags and various numbers.
+The first tag, AggressiveAI has a parameter time="4"
+that's how often the AI checks if it should change its strategy.  This time can be any integer value... it can revise its plan more often or less often. 4 has been good because most maneuvers can mostly complete in 4 seconds and it's a good time to revise plans
+underneath the beginning tag exist a list of tags that describes the logic the AI uses to figure out its next strategy.
+there are a number of tags you can specify for the aggressive AI: distance, threat, hull, fshield lshield rshield bshield rand
+Each tag asserts if one of the tag-values above is between min and max.
+The AI needs to make a CHOICE about what it does next, so it takes a look at the list of tags and determines if any of the assertions is true.
+Nested statements mean that BOTH must be true. so you can say "if the distance is at most .5 and the hull is between .25 and .75 by writing:
+<distance max=".5">
+  <hull min=".25" max=".75" script="afterburnerslide.xml">
+  </hull>
+</distance>
+
+this means "if the distance is at most half the range of my guns and the hull is between 1/4 and 3/4 of its capacity, then perform an afterburner slide.
+It goes down the list of such assertions and chooses the appropriate AI script to run.
+The facing and movement tags fill in the gaps where NONE of the list of the assertions are true and the ship is not either turning or moving anywhere:
+<facing script="turntowards.xml">
+</facing>
+
+at the very bottom the </AggressiveAI> must show up to indicate that the AIscript has terminated.
+
+The aggressive.int.xml is written out exactly the same as the aggressive.agg.xml
+the difference is that scripts listed here INTERRUPT the current action!
+An example from the game is:
+<AggressiveAI close=".05">
+  <hull max = ".5" script="evade.xml">
+   <threat min=".4" script="afterburnerslide.xml">
+   </threat>
+  </hull>
+
+  <distance max=".03" script="turnaway.xml">
+  <!-- distance less than .1-->
+  </distance>
+  
+</AggressiveAI>
+
+this says:
+If the hull is at most half and someone is threatening me with a 40% chance to hit... then evade and then afterburner slide
+OR
+if someone is at most .03 of my max range away from me TURN AWAY!
+
+this will interrupt the current progress of any scripts
+
+So that's how to use AI scripts.
+If you want to know more about writing actual maneuvers (like turnaway.xml  which as you can see is in the directory) please contact me at hellcatv@hotmail.com
+you need to have a heavy background in vector math.
 
 © 2001 Daniel Horn, Patrick Horn, & James Carthew
 Wing Commander TM is a trademark of origin systems and Electronic Arts no threat to their status is intended.
