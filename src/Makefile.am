@@ -35,6 +35,8 @@ vegastrike_SOURCES =				\
 	cmd_node.h				\
 	cmd_physics.cpp				\
 	cmd_physics.h				\
+	cmd_weapon_xml.cpp			\
+	cmd_weapon_xml.h			\
 	debug.c					\
 	debug.h					\
 	error_util.c				\

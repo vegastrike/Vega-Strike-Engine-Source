@@ -20,7 +20,7 @@
  */
 #include "hashtable.h"
 /*
-template<class KEY, class VALUE> VALUE *Hashtable<KEY, VALUE>::Get(const KEY &key)
+template<class KEY, class VALUE, class SIZ> VALUE *Hashtable<KEY, VALUE, SIZ>::Get(const KEY &key)
 {
 	int hashval = hash(key);
 	list<HashElement>::iterator iter = table[hashval].begin(), end = table[hashval].end();
@@ -34,13 +34,13 @@ template<class KEY, class VALUE> VALUE *Hashtable<KEY, VALUE>::Get(const KEY &ke
 		return (*iter).value;
 }
 
-template<class KEY, class VALUE> void Hashtable<KEY, VALUE>::Put(const KEY &key, VALUE *value)
+template<class KEY, class VALUE, class SIZ> void Hashtable<KEY, VALUE, SIZ>::Put(const KEY &key, VALUE *value)
 {
 	int hashval = hash(key);
 	table[hashval].push_front(HashElement(key, value));
 }
 
-template<class KEY, class VALUE> void Hashtable<KEY, VALUE>::Delete(const KEY &key)
+template<class KEY, class VALUE, class SIZ> void Hashtable<KEY, VALUE, SIZ>::Delete(const KEY &key)
 {
 	int hashval = hash(key);
 	list<HashElement>::iterator iter = table[hashval].begin(), end = table[hashval].end();

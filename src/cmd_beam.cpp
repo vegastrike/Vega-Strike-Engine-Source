@@ -1,10 +1,10 @@
-#include "cmd_beam.h"
+
 #include "physics.h"
 #include <vector>
+#include "cmd_beam.h"
 
 
-
-using std::vector;
+//using std::vector;
 
 
 vector <Texture *> BeamDecal;
@@ -12,20 +12,30 @@ vector <int> DecalRef;
 vector <vector <DrawContext> > beamdrawqueue;
 
 extern double interpolation_blend_factor;
-Beam::Beam (const Transformation & trans) : Primitive(), Col (0,1,0,.7) {
+void Beam::Init (const Transformation & trans, const weapon_info &cln , void * own)  {
   //Matrix m;
+  if (vlist)
+    delete vlist;
   local_transformation = trans;//location on ship
   //  cumalative_transformation =trans; 
   //  trans.to_matrix (cumalative_transformation_matrix);
-  speed = 2;
-  texturespeed = 3;
-  range = 400;
-  radialspeed = .03;
-  thickness = 1;
-  impact= false;
-  owner = NULL;
+  speed = cln.Speed;
+  texturespeed = cln.PulseSpeed;
+  range = cln.Range;
+  radialspeed = cln.RadialSpeed;
+  thickness = cln.Radius;
+  stability = cln.Stability;
+  energy = cln.EnergyRate;
+  rangepenalty=cln.Longrange;
+  damagerate = cln.Damage;
+  Col.r = cln.r;
+  Col.g = cln.g;
+  Col.b = cln.b;
+  Col.a=cln.a;
+  impact= ALIVE;
+  owner = own;
   numframes=0;
-  string texname ("beamtexture.bmp");
+  string texname (cln.file);
   Texture * tmpDecal = Texture::Exists(texname);
   if (tmpDecal) {
     unsigned int i;
@@ -103,8 +113,8 @@ void Beam::RecalculateVertices() {
   
   float leftex = -texturespeed*(numframes*SIMULATION_ATOM+interpolation_blend_factor*SIMULATION_ATOM);
   float righttex = leftex+curlength/curthick;//how long compared to how wide!
-  float len = (!impact)?(curlength!=range?curlength - speed*SIMULATION_ATOM*(1-interpolation_blend_factor):range):curlength+thickness;
-  float fadelen = !impact?len*.85:(range*.85>curlength?curlength:range*.85);
+  float len = (impact==ALIVE)?(curlength!=range?curlength - speed*SIMULATION_ATOM*(1-interpolation_blend_factor):range):curlength+thickness;
+  float fadelen = (impact==ALIVE)?len*.85:(range*.85>curlength?curlength:range*.85);
   float fadetex = leftex + (righttex-leftex)*.85;
   float thick = curthick!=thickness?curthick-radialspeed*SIMULATION_ATOM*(1-interpolation_blend_factor):thickness;
   int a=0;
@@ -202,12 +212,13 @@ void Beam::UpdatePhysics(const Transformation &trans, const Matrix m) {
   cumulative_transformation.to_matrix(cumulative_transformation_matrix);
   //to help check for crashing.
   
-
+  if (stability&&numframes*SIMULATION_ATOM>stability)
+    impact=UNSTABLE;
   curlength += SIMULATION_ATOM*speed;
   if (curlength > range)
     curlength=range;
-
-  curthick+=radialspeed*SIMULATION_ATOM;
+  
+  curthick+=(impact==UNSTABLE)?-radialspeed*SIMULATION_ATOM:radialspeed*SIMULATION_ATOM;
   if (curthick > thickness)
     curthick = thickness;
   if (curthick <0)
@@ -215,8 +226,4 @@ void Beam::UpdatePhysics(const Transformation &trans, const Matrix m) {
   
 
   //Check if collide...that'll change max beam length REAL quick
-
-
-
-
 }

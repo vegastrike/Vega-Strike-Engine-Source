@@ -27,14 +27,16 @@ namespace XMLSupport {
   public:
     AttributeList(const XML_Char **atts);
   };
+  double parse_float(const string &str);
+  int parse_int(const string &str);
 
   class EnumMap {
     static inline string strtoupper(const string &foo);
-
-    Hashtable<string,const int> forward;
-    Hashtable<string,const string> reverse;
+    //    static inline double parse_float (const string &str) {return ::parse_float (str)};
+    Hashtable<string,const int,char [1001]> forward;
+    Hashtable<string,const string, char [1001]> reverse;
   public:
- 	struct Pair {
+    struct Pair {
       string name;
       int val;
 	  Pair (const string c, int v) {
@@ -50,8 +52,6 @@ namespace XMLSupport {
     const string &lookup(int val) const;
   };
 
-  double parse_float(const string &str);
-  int parse_int(const string &str);
   /*
     string tostring(int num);
     string tostring(float num);

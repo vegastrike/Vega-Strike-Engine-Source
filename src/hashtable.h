@@ -28,19 +28,19 @@
 
 using namespace std;
 
-const int hashsize = 1001;
+//const int hashsize = 1001;
 
 //Hashtable doesn't grow
-template<class KEY, class VALUE> class Hashtable {
+template<class KEY, class VALUE, class SIZ> class Hashtable {
 	class HashElement {
 	public:
 		KEY key;
 		VALUE *value;
 		HashElement(KEY k, VALUE *v) {key = k; value = v;}
 	};
-	list<HashElement> table[hashsize];
+	list<HashElement> table[sizeof (SIZ)];
   static int hash(const int key) {
-    return key%hashsize;
+    return key%sizeof(SIZ);
   }
 	static int hash(const string &key) {
 		int k = 0;
@@ -50,14 +50,13 @@ template<class KEY, class VALUE> class Hashtable {
 		for(;start!=end; start++) {
 			k += (k << 3) + *start;
 		}
-		k %= hashsize;
+		k %= sizeof(SIZ);
 		return abs(k);
 	}
 public:
 
 	Hashtable()
 	{
-		
 	}
 
 	VALUE *Get(const KEY &key) const

@@ -440,11 +440,13 @@ Animation *ss=NULL;
 Animation *sss=NULL;
 Animation *Preload = NULL;
 void createObjects() {
-  DABEAM = new Beam (identity_transformation);
-    ss = new Animation ("explosion_sml_orange.ani",false,.1,BILINEAR,false);
-    Preload = new Animation ("explosion_orange.ani",false,.1,BILINEAR,false);
-    //delete s;
-    s = NULL;
+  DABEAM = new Beam (identity_transformation,
+		     weapon_info(),
+		     NULL);
+  ss = new Animation ("explosion_sml_orange.ani",false,.1,BILINEAR,false);
+  Preload = new Animation ("explosion_orange.ani",false,.1,BILINEAR,false);
+  //delete s;
+  s = NULL;
   fprintf(stderr,"Unit size: %d\nMesh size: %d\n", sizeof(Unit), sizeof(Mesh));
   //SetPriorityClass(GetCurrentProcess(), REALTIME_PRIORITY_CLASS);
   //SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_IDLE);

@@ -41,7 +41,7 @@ using namespace std;
 
 #include <GL/gl.h>
 
-Hashtable<string, Mesh> Mesh::meshHashTable;
+Hashtable<string, Mesh, char [513]> Mesh::meshHashTable;
 list<Mesh*> undrawn_meshes[NUM_MESH_SEQUENCE]; // lower priority means draw first
 extern list<Logo*> undrawn_logos;
 Vector mouseline;

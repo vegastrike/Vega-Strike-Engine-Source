@@ -179,7 +179,7 @@ private:
   virtual void endElement(const string &name);
 
 protected:
-  static Hashtable<string, Mesh> meshHashTable;
+  static Hashtable<string, Mesh,char[513]> meshHashTable;
   int refcount;
   float maxSizeX,maxSizeY,maxSizeZ,minSizeX,minSizeY,minSizeZ;
   float radialSize;

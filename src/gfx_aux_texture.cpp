@@ -71,7 +71,7 @@ const int SIZEOF_BITMAPFILEHEADER=sizeof(WORD)+sizeof(DWORD)+sizeof(WORD)+sizeof
 const int SIZEOF_BITMAPINFOHEADER= sizeof(DWORD)+sizeof(LONG)+sizeof(LONG)+2*sizeof(WORD)+2*sizeof(DWORD)+2*sizeof(LONG)+2*sizeof(DWORD);
 const int SIZEOF_RGBQUAD=sizeof(BYTE)*4;
 
-static Hashtable<string, Texture> texHashTable;
+static Hashtable<string, Texture,char [1001]> texHashTable;
 
 Texture * Texture::Exists (string s) {
     return texHashTable.Get(s);
