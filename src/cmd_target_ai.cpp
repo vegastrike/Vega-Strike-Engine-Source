@@ -69,7 +69,7 @@ void FireAt::Execute () {
 }
 
 const EnumMap::Pair element_names[] = {
-  EnumMap::Pair ("UNKNOWN", UNKNOWN),
+  EnumMap::Pair ("UNKNOWN", AggressiveAI::UNKNOWN),
   EnumMap::Pair ("Distance", AggressiveAI::DISTANCE),
   EnumMap::Pair ("Threat", AggressiveAI::THREAT),
   EnumMap::Pair ("FShield", AggressiveAI::FSHIELD),
