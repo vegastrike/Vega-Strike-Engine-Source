@@ -60,6 +60,10 @@ Mission::~Mission() {
 }
 Mission::Mission(const char *configfile, bool loadscripts){
   briefing=NULL;
+  objectives.push_back(Mission::Objective(.5,"hehe"));
+  objectives.push_back(Mission::Objective(0,"haha"));
+  objectives.push_back(Mission::Objective(1,"i win"));
+  objectives.push_back(Mission::Objective(-1,"hoho"));
   number_of_flightgroups=0;
   number_of_ships=0;
   runtime.pymissions=NULL;
@@ -112,6 +116,7 @@ void Mission::initMission(bool loadscripts){
   msgcenter->add("game","news","4 hero is born.                That day, in teh news hero was born without even boring the born of bachunkuphe threw his last baseball throw he chewed his last hay the man was a hero a heayrinagia sf of a hero...who knw that ith all things iblicatedly obfusictaroed he arced his bunko bunka\nbachunk!jtkgjdfljg fdlg fdj glkdf jglkdfj glkdf jgjfd lkgj dflkg jlfkdjg ldjg  j");
   */
   checkMission(top,loadscripts);
+  mission_name = getVariable("mission_name","");
 }
 
 /* *********************************************************** */

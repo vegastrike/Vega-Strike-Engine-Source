@@ -53,8 +53,6 @@
 class gameMessage {
  public:
   string from,to,message;
-  Unit *ufrom;
-  Unit *uto;
   double time;
 };
 

@@ -9,6 +9,8 @@ libscript_a_SOURCES =				\
 	mission.h				\
 	director.cpp				\
 	mission_script.cpp			\
+	pythonmission.cpp			\
+	pythonmission.h				\
 	script_variables.cpp			\
 	script_util.cpp				\
 	script_statement.cpp			\

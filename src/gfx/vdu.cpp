@@ -12,7 +12,7 @@
 #include "xml_support.h"
 #include "gfx/animation.h"
 ///ALERT to change must change enum in class
-const std::string vdu_modes [] = {"Target","Nav","Comm","Weapon","Damage","Shield", "Manifest", "TargetManifest","View","Message"};
+const std::string vdu_modes [] = {"Target","Nav","Objectives","Comm","Weapon","Damage","Shield", "Manifest", "TargetManifest","View","Message"};
 
 
 
@@ -705,7 +705,53 @@ pos.i*fabs(w)/parent->rSize()*percent+x;
   GFXColorf(c);
   tp->Draw (buf,0,true);
 }
-
+using std::vector;
+static GFXColor GetColorFromSuccess (float suc){ 
+  suc +=1.;
+  suc/=2.;
+  return GFXColor(1-suc,suc,0);    
+}
+void VDU::DrawVDUObjective (void * obj, int offset) {
+  if (offset>=0) {
+    Mission::Objective * mo = (Mission::Objective *)obj;
+    GFXColorf(GetColorFromSuccess(mo->completeness));
+    std::string rez;
+    for (int i=0;i<offset;i++) {
+      rez+="\n";
+    }
+    rez+=mo->objective;
+    tp->Draw (rez,0,true);  
+  }
+}
+void VDU::DrawVDUObjectives (Unit *parent) {
+  int offset = scrolloffset;
+  for (unsigned int i=0;i<active_missions.size();++i){
+    if (!active_missions[i]->objectives.empty()) {
+      if (offset>=0) {
+	GFXColor4f(1,1,1,1);
+	std::string rez;
+	for (int k=0;k<offset;k++) {
+	  rez+="\n";
+	}
+	if (active_missions[i]->mission_name.empty()) {
+	  rez+="Mission "+XMLSupport::tostring((int)i)+"\n";
+	}else {
+	  rez+=active_missions[i]->mission_name+"\n";
+	}
+	tp->Draw (rez,0,true);  	
+      }
+      offset++;
+      
+      vector<Mission::Objective>::iterator j=active_missions[i]->objectives.begin();
+      for (;j!=active_missions[i]->objectives.end();++j) {
+	if (j->owner==NULL||j->owner==parent) {
+	  DrawVDUObjective (j,offset);
+	  offset++;
+	}
+      }
+    }
+  }
+}
 void VDU::Draw (Unit * parent, const GFXColor & color) {
   GFXDisable(LIGHTING);
   Sprite::Draw();
@@ -762,6 +808,9 @@ void VDU::Draw (Unit * parent, const GFXColor & color) {
     break;
   case SHIELD:
     DrawVDUShield (parent,color);
+    break;
+  case OBJECTIVES:
+    DrawVDUObjectives (parent);
     break;
   }
 

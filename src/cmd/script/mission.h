@@ -429,7 +429,7 @@ class Mission {
   }
   class Briefing * briefing;
   double gametime;
-
+  string mission_name;
   void terminateMission();
  Unit * call_unit_launch(class CreateFlightgroup *fg, int type/*clsptr type*/, const std::string &destinations);
   Mission(const char *configfile, bool loadscripts=true);
