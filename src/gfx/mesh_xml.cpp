@@ -1160,13 +1160,17 @@ void updateMax (Vector &mn, Vector & mx, const GFXVertex &ver) {
 
 using namespace VSFileSystem;
 void LaunchConverter(const char * input, const char * output, const char* args="obc") {
+  string intmp = string("\"")+input+string("\"");
+  string outtmp = string("\"")+output+string("\"");
 #ifndef _WIN32
     int pid=fork();
     if (!pid) {
       string soundserver_path = VSFileSystem::datadir+"/bin/mesher";
-      pid=execlp(soundserver_path.c_str() , soundserver_path.c_str(),input,output,args,NULL);
+	  string firstarg = string("\"")+soundserver_path+string("\"");
+      pid=execlp(soundserver_path.c_str() , firstarg.c_str(),intmp.c_str(),outtmp.c_str(),args,NULL);
       soundserver_path = VSFileSystem::datadir+"/mesher";
-      pid=execlp(soundserver_path.c_str() , soundserver_path.c_str(),input,output,args,NULL);
+      firstarg = string("\"")+soundserver_path+string("\"");
+      pid=execlp(soundserver_path.c_str() , firstarg.c_str(),intmp.c_str(),outtmp.c_str(),args,NULL);
       VSFileSystem::vs_fprintf(stderr,"Unable to spawn converter\n");
       exit (-1);
     } else {
@@ -1179,12 +1183,11 @@ void LaunchConverter(const char * input, const char * output, const char* args="
     }
 #else
   string ss_path = VSFileSystem::datadir+"\\bin\\mesher.exe";
-  string intmp = string("\"")+input+string("\"");
-  string outtmp = string("\"")+output+string("\"");
   string firstarg = string("\"")+ss_path+string("\"");
   int pid=spawnl(P_WAIT,ss_path.c_str(),firstarg.c_str(),intmp.c_str(),outtmp.c_str(),args,NULL);
   if (pid==-1) {
     ss_path = VSFileSystem::datadir+"\\mesher.exe";
+    firstarg = string("\"")+ss_path+string("\"");
     int pid=spawnl(P_WAIT,ss_path.c_str(),firstarg.c_str(),intmp.c_str(),outtmp.c_str(),args,NULL);
     if (pid==-1) {
       VSFileSystem::vs_fprintf(stderr,"Unable to spawn obj converter Error (%d)\n",pid);
