@@ -17,7 +17,7 @@ class StarVlist {
 public:
 	StarVlist (int num, float spread);
 	~StarVlist();
-	void BeginDrawState(const QVector &center, const Vector & vel,bool rotate);
+	void BeginDrawState(const QVector &center, const Vector & vel,bool rotate, bool yawpitch);
 	void Draw();
 	void EndDrawState();
 	void UpdateGraphics();

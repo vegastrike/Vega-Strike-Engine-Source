@@ -55,7 +55,7 @@ void StarVlist::UpdateGraphics() {
 		lasttime=time;
 	}
 }
-void StarVlist::BeginDrawState (const QVector &center, const Vector & velocity, bool roll) {
+void StarVlist::BeginDrawState (const QVector &center, const Vector & velocity, bool roll, bool yawpitch) {
 	UpdateGraphics();
   	Vector camq_delta(newcamq-camq);
     Vector camr_delta(newcamr-camr);
@@ -90,9 +90,12 @@ void StarVlist::BeginDrawState (const QVector &center, const Vector & velocity, 
 	static float torquestreakscale= XMLSupport::parse_float (vs_config->getVariable ("graphics","torque_star_streak_scale","1"));
 	for (int i=0;i<numvertices-1;i+=2) {
 		Vector vpoint (v[i+1].x,v[i+1].y,v[i+1].z);
+		float scale=0;
 		Vector recenter =(vpoint-center.Cast());
-		float scale= recenter.Magnitude();
-   		scale*=-torquestreakscale;
+		if (yawpitch) {
+			scale= recenter.Magnitude();
+			scale*=-torquestreakscale;
+		}
 		if (roll) {
 			vpoint = Transform(rollMatrix,recenter)+center.Cast();
 		}
@@ -147,7 +150,7 @@ void Stars::Draw() {
     GFXDisable (LIGHTING);
   }
   
-  vlist.BeginDrawState(_Universe->AccessCamera()->GetR().Scale(-spread).Cast(),_Universe->AccessCamera()->GetVelocity(),false);
+  vlist.BeginDrawState(_Universe->AccessCamera()->GetR().Scale(-spread).Cast(),_Universe->AccessCamera()->GetVelocity(),false,false);
   _Universe->AccessCamera()->UpdateGFX(GFXFALSE,GFXFALSE,GFXFALSE);
 	
   for (int i=0;i<STARnumvlist;i++) {
