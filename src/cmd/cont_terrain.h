@@ -5,12 +5,15 @@ class ContinuousTerrain {
   Vector Scales;
   float sizeX;
   float sizeZ;
-  Terrain *data[numcontterr];
+  int width;
+  int numcontterr;
+  Terrain **data;
   Matrix transformation;
-  Vector location[numcontterr];
-  bool dirty[numcontterr];
+  Vector *location;
+  bool *dirty;
+  bool checkInvScale(float &pos, float campos, float size);
  public:
-  ContinuousTerrain (const char* filenameUL, const char * filenameUR, const char * filenameLL, const char *filenameLR,  const Vector & Scales, const float mass);
+  ContinuousTerrain (char** filenameUL, const int numwidth,  const Vector & Scales, const float mass);
   void SetTransform (Matrix transformation);
   /**
    *  Centers terrain around camera

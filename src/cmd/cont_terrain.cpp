@@ -3,21 +3,29 @@
 #include "star_system.h"
 #include "gfx/matrix.h"
 #include "vegastrike.h"
-ContinuousTerrain::ContinuousTerrain (const char* filenameUL, const char * filenameUR, const char * filenameLL, const char *filenameLR,  const Vector & Scales, const float mass): Scales(Scales) {
-  for (int i=0;i<numcontterr;i++) {
-    data[i] = new Terrain (*(&filenameUL+i),Scales,mass,0);
+ContinuousTerrain::ContinuousTerrain (char ** filenames, const int numwidth, const Vector & Scales, const float mass): Scales(Scales), width(numwidth) {
+  numcontterr= numwidth*numwidth;
+  int i;
+  data = new Terrain *[numcontterr];
+  for (i=0;i<numcontterr;i++) {
+    data[i] = new Terrain (filenames[i],Scales,mass,0);
   }
+  location = new Vector [numcontterr];
+  dirty = new bool [numcontterr];
 
+  
   sizeX = data[0]->getSizeX();  sizeZ = data[0]->getSizeZ();
-  for (int i=0;i<numcontterr;i++) {
+  for (i=0;i<numcontterr;i++) {
     if (sizeX!=data[i]->getSizeX()||sizeZ!=data[i]->getSizeZ()) {
       fprintf (stderr,"Warning: Sizes of terrain do not match...expect gaps in continuous terrain\n");
     }
   }
-  location[0].Set (0,0,0);
-  location[1].Set (sizeX,0,0);
-  location[2].Set (0,0,-sizeZ);
-  location[3].Set (sizeX,0,-sizeZ);
+  for (i=0;i<width;i++) {
+    for (int j=0;j<width;j++) {
+      location[j+width*i].Set (0+sizeX*j,0,0-sizeZ*i);
+
+    }
+  }
   Matrix tmpmat;
   Identity (tmpmat);
   SetTransform (tmpmat);
@@ -27,6 +35,9 @@ ContinuousTerrain::~ContinuousTerrain() {
   for (int i=0;i<numcontterr;i++) {
     delete data[i];
   }
+  delete []dirty;
+  delete []location;
+  delete []data;
 }
 void ContinuousTerrain::SetTransform(Matrix transformation) {
   CopyMatrix (this->transformation,transformation);
@@ -37,9 +48,9 @@ void ContinuousTerrain::SetTransform(Matrix transformation) {
   AdjustTerrain();
 }
 
-inline bool checkInvScale (float &pos, float campos, float size) {
+bool ContinuousTerrain::checkInvScale (float &pos, float campos, float size) {
   bool retval=false;
-  size*=2;
+  size*=width;
   float tmp = pos-campos;
   while (fabs (tmp-size)<fabs (tmp)) {
     tmp -=size;
