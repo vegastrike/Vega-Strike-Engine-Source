@@ -102,6 +102,127 @@ varInst *Mission::checkObjectExpr(missionNode *node,int mode){
 
 /* *********************************************************** */
 
+varInst * Mission::doMath(missionNode *node,int mode){
+  //  if(mode==SCRIPT_PARSE){
+    string mathname=node->attr_value("math");
+
+    int len=node->subnodes.size();
+    if(len<2){
+      fatalError(node,mode,"math needs at least 2 arguments");
+      assert(0);
+    }
+
+    varInst *res_vi=new varInst;
+
+    varInst* res1_vi=checkExpression((missionNode *)node->subnodes[0],mode);
+
+    if(res1_vi->type!=VAR_INT && res1_vi->type!=VAR_FLOAT){
+      fatalError(node,mode,"only int or float expr allowed for math");
+      assert(0);
+    }
+    res_vi->type=res1_vi->type;
+    assignVariable(res_vi,res1_vi);
+
+    //    char buffer[200];
+    //sprintf(buffer,"fmath: 1st expr returns %f",res);
+    //debug(4,node,mode,buffer);
+
+    for(int i=1;i<len;i++){
+      varInst * res2_vi=checkExpression((missionNode *)node->subnodes[i],mode);
+      var_type res2_type=res2_vi->type;
+
+      if(res2_type==VAR_INT && res_vi->type==VAR_FLOAT){
+	res2_type=VAR_FLOAT;
+	if(mode==SCRIPT_RUN){
+	  float res2=(float)res2_vi->int_val;
+	  float res=floatMath(mathname,res_vi->float_val,res2);
+	  res_vi->float_val=res;
+	}
+      }
+     else if(res2_type==VAR_FLOAT && res_vi->type==VAR_INT){
+       res_vi->type=VAR_FLOAT;
+       if(mode==SCRIPT_RUN){
+	 res_vi->float_val=(float)res_vi->int_val;
+	 float res2=res2_vi->float_val;
+	 float res=floatMath(mathname,res_vi->float_val,res2);
+	 res_vi->float_val=res;
+       }
+     }
+      else{
+	if(res_vi->type!=res2_type){
+	  fatalError(node,mode,"can't do math on such types");
+	  assert(0);
+	}
+	if(mode==SCRIPT_RUN){
+	  if(res_vi->type==VAR_INT){
+	    int res=intMath(mathname,res_vi->int_val,res2_vi->int_val);
+	    res_vi->int_val=res;
+	  }
+	  else if(res_vi->type==VAR_FLOAT){
+	    float res=floatMath(mathname,res_vi->float_val,res2_vi->float_val);
+	    res_vi->float_val=res;
+	  }
+	  else{
+	    if(res_vi->type!=res2_type){
+	      fatalError(node,mode,"can't do math on such types");
+	      assert(0);
+	    }
+	  }
+	} // of SCRIPT_RUN
+      } // else
+    } // for arguments
+
+    return res_vi;
+}
+
+
+int Mission::intMath(string mathname,int res1,int res2){
+int res=res1;
+
+	if(mathname=="+"){
+	  res=res+res2;
+	}
+	else if(mathname=="-"){
+	  res=res-res2;
+	}
+	else if(mathname=="*"){
+	  res=res*res2;
+	}
+	else if(mathname=="/"){
+	  res=res/res2;
+	}
+	else{
+	  fatalError(NULL,SCRIPT_RUN,"no such intmath expression");
+	  assert(0);
+	}
+	return res;
+}
+
+/* *********************************************************** */
+float Mission::floatMath(string mathname,float res1,float res2){
+float res=res1;
+
+	if(mathname=="+"){
+	  res=res+res2;
+	}
+	else if(mathname=="-"){
+	  res=res-res2;
+	}
+	else if(mathname=="*"){
+	  res=res*res2;
+	}
+	else if(mathname=="/"){
+	  res=res/res2;
+	}
+	else{
+	  fatalError(NULL,SCRIPT_RUN,"no such floatmath expression");
+	  assert(0);
+	}
+	return res;
+}
+
+/* *********************************************************** */
+
 float Mission::doFMath(missionNode *node,int mode){
   //  if(mode==SCRIPT_PARSE){
     string mathname=node->attr_value("math");
@@ -144,6 +265,52 @@ float Mission::doFMath(missionNode *node,int mode){
       return res;
     }
     return 0.0;
+}
+
+/* *********************************************************** */
+
+int Mission::doIMath(missionNode *node,int mode){
+  //  if(mode==SCRIPT_PARSE){
+    string mathname=node->attr_value("math");
+
+    int len=node->subnodes.size();
+    if(len<2){
+      fatalError(node,mode,"imath needs at least 2 arguments");
+      assert(0);
+    }
+
+    int res=checkIntExpr((missionNode *)node->subnodes[0],mode);
+
+    char buffer[200];
+    sprintf(buffer,"imath: 1st expr returns %d",res);
+    debug(4,node,mode,buffer);
+
+    for(int i=1;i<len;i++){
+      int res2=checkIntExpr((missionNode *)node->subnodes[i],mode);
+      if(mode==SCRIPT_RUN){
+	if(mathname=="+"){
+	  res=res+res2;
+	}
+	else if(mathname=="-"){
+	  res=res-res2;
+	}
+	else if(mathname=="*"){
+	  res=res*res2;
+	}
+	else if(mathname=="/"){
+	  res=res/res2;
+	}
+	else{
+	  fatalError(node,mode,"no such imath expression");
+	  assert(0);
+	}
+      }
+    }
+
+    if(mode==SCRIPT_RUN){
+      return res;
+    }
+    return 0;
 }
 
 /* *********************************************************** */
@@ -196,6 +363,61 @@ float Mission::checkFloatExpr(missionNode *node,int mode){
     }
     else{
       fatalError(node,mode,"no such float expression tag");
+      assert(0);
+    }
+
+    return res;
+}
+/* *********************************************************** */
+
+int Mission::checkIntExpr(missionNode *node,int mode){
+  int res=0;
+
+    if(node->tag==DTAG_VAR_EXPR){
+      res=doIntVar(node,mode);
+    }
+    else if(node->tag==DTAG_FMATH){
+      res=doIMath(node,mode);
+    }
+    else if(node->tag==DTAG_CONST){
+      varInst *vi=doConst(node,mode);
+      if(vi && vi->type==VAR_INT){
+	res=vi->int_val;
+      }
+      else{
+	fatalError(node,mode,"expected a float const, got a different one");
+	assert(0);
+      }
+    }
+    else if(node->tag==DTAG_CALL){
+      varInst *vi=doCall(node,mode);
+      if(vi->type==VAR_INT){ 
+	res=vi->int_val;
+      }
+      else if(vi->type==VAR_ANY && mode==SCRIPT_PARSE){
+	res=vi->int_val;
+      }
+      else{
+	fatalError(node,mode,"expected a int call, got a different one");
+	assert(0);
+      }
+    }
+    else if(node->tag==DTAG_EXEC){
+      varInst *vi=doExec(node,mode);
+      if(vi==NULL){
+	fatalError(node,mode,"doExec returned NULL");
+	assert(0);
+      }
+      else if(node->script.vartype==VAR_INT){
+	res=vi->int_val;
+      }
+      else{
+	fatalError(node,mode,"expected a int exec, got a different one");
+	assert(0);
+      }
+    }
+    else{
+      fatalError(node,mode,"no such int expression tag");
       assert(0);
     }
 
@@ -394,32 +616,74 @@ bool Mission::doTest(missionNode *node,int mode){
 
   } // end of parse
 
-    float arg1=checkFloatExpr(node->script.test_arg[0],mode);
-    float arg2=checkFloatExpr(node->script.test_arg[1],mode);
+    varInst * arg1_vi=checkExpression(node->script.test_arg[0],mode);
+    varInst * arg2_vi=checkExpression(node->script.test_arg[1],mode);
     bool res=false;
 
+      if(arg1_vi->type!=arg1_vi->type){
+	fatalError(node,mode,"test is getting not the same types");
+	assert(0);
+      }
+      
     if(SCRIPT_RUN){
-      switch(node->script.tester){
-      case TEST_GT:
-	res=(arg1>arg2);
-	break;
-      case TEST_LT:
-	res=(arg1<arg2);
-	break;
-      case TEST_EQ:
-	res=(arg1==arg2);
-	break;
-      case TEST_NE:
-	res=(arg1!=arg2);
-	break;
-      case TEST_GE:
-	res=(arg1>=arg2);
-	break;
-      case TEST_LE:
-	res=(arg1<=arg2);
-	break;
-      default:
-	fatalError(node,mode,"no valid tester");
+      if(arg1_vi->type==VAR_FLOAT){
+	float arg1=arg1_vi->float_val;
+	float arg2=arg2_vi->float_val;
+
+	switch(node->script.tester){
+	case TEST_GT:
+	  res=(arg1>arg2);
+	  break;
+	case TEST_LT:
+	  res=(arg1<arg2);
+	  break;
+	case TEST_EQ:
+	  res=(arg1==arg2);
+	  break;
+	case TEST_NE:
+	  res=(arg1!=arg2);
+	  break;
+	case TEST_GE:
+	  res=(arg1>=arg2);
+	  break;
+	case TEST_LE:
+	  res=(arg1<=arg2);
+	  break;
+	default:
+	  fatalError(node,mode,"no valid tester");
+	  assert(0);
+	}
+    }
+    else if(arg1_vi->type==VAR_INT){
+	int arg1=arg1_vi->int_val;
+	int arg2=arg2_vi->int_val;
+
+	switch(node->script.tester){
+	case TEST_GT:
+	  res=(arg1>arg2);
+	  break;
+	case TEST_LT:
+	  res=(arg1<arg2);
+	  break;
+	case TEST_EQ:
+	  res=(arg1==arg2);
+	  break;
+	case TEST_NE:
+	  res=(arg1!=arg2);
+	  break;
+	case TEST_GE:
+	  res=(arg1>=arg2);
+	  break;
+	case TEST_LE:
+	  res=(arg1<=arg2);
+	  break;
+	default:
+	  fatalError(node,mode,"no valid tester");
+	  assert(0);
+	}
+    }
+      else{
+	fatalError(node,mode,"no such type allowed for test");
 	assert(0);
       }
     }
@@ -452,16 +716,22 @@ varInst *Mission::checkExpression(missionNode *node,int mode){
     }
     break;
   case DTAG_CONST:
+    {
     ret=doConst(node,mode);
     return ret;
+    }
     break;
   case DTAG_VAR_EXPR:
+    {
     ret=doVariable(node,mode);
     return ret;
+    }
     break;
   case DTAG_FMATH:
-    fatalError(node,mode,"no fmath here yet");
-    assert(0);
+    {
+    ret=doMath(node,mode);
+    return ret;
+    }
     break;
   default:
     fatalError(node,mode,"no such expression");

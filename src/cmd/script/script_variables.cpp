@@ -89,6 +89,21 @@ float Mission::doFloatVar(missionNode *node,int mode){
 
 /* *********************************************************** */
 
+int Mission::doIntVar(missionNode *node,int mode){
+  varInst *var=doVariable(node,mode);
+
+  bool ok=checkVarType(var,VAR_INT);
+
+  if(!ok){
+    fatalError(node,mode,"expected a int variable - got a different type");
+    assert(0);
+  }
+
+  return var->int_val;
+}
+
+/* *********************************************************** */
+
 varInst * Mission::doObjectVar(missionNode *node,int mode){
   varInst *var=doVariable(node,mode);
 
@@ -319,6 +334,9 @@ void Mission::doDefVar(missionNode *node,int mode,bool global_var){
       if(vi->type==VAR_FLOAT){
 	vi->float_val=atof(value.c_str());
       }
+      else if(vi->type==VAR_INT){
+	vi->int_val=atoi(value.c_str());
+      }
       else if(vi->type==VAR_BOOL){
 	if(value=="true"){
 	vi->bool_val=true;
@@ -403,6 +421,9 @@ void Mission::doSetVar(missionNode *node,int mode){
     else if(vi->type==VAR_FLOAT){
       float res=checkFloatExpr(expr,mode);
     }
+    else if(vi->type==VAR_INT){
+      float res=checkIntExpr(expr,mode);
+    }
     else if(vi->type==VAR_OBJECT){
       debug(3,node,mode,"setvar object");
       varInst *ovi=checkObjectExpr(expr,mode);
@@ -428,6 +449,10 @@ void Mission::doSetVar(missionNode *node,int mode){
     else if(var_inst->type==VAR_FLOAT){
       float res=checkFloatExpr(expr,mode);
       var_inst->float_val=res;
+    }
+    else if(var_inst->type==VAR_INT){
+      int res=checkIntExpr(expr,mode);
+      var_inst->int_val=res;
     }
     else if(var_inst->type==VAR_OBJECT){
       debug(3,node,mode,"setvar object (before)");
@@ -475,6 +500,10 @@ varInst *Mission::doConst(missionNode *node,int mode){
     if(typestr=="float"){
       node->script.vartype=VAR_FLOAT;
       vi->float_val=atof(valuestr.c_str());
+    }
+    else if(typestr=="int"){
+      node->script.vartype=VAR_INT;
+      vi->int_val=atoi(valuestr.c_str());
     }
     else if(typestr=="bool"){
       node->script.vartype=VAR_BOOL;
@@ -542,6 +571,7 @@ void Mission::assignVariable(varInst *v1,varInst *v2){
     v1->type=v2->type;
   }
   v1->float_val=v2->float_val;
+  v1->int_val=v2->int_val;
   v1->bool_val=v2->bool_val;
   v1->objectname=v2->objectname;
   v1->object=v2->object;
@@ -558,14 +588,9 @@ var_type Mission::vartypeFromString(string type){
     else if(type=="bool"){
       vartype=VAR_BOOL;
     }
-#if 0
-    else if(type=="string"){
-      vartype=VAR_STRING;
+    else if(type=="int"){
+      vartype=VAR_INT;
     }
-    else if(type=="vector"){
-      vartype=VAR_VECTOR;
-    }
-#endif
     else if(type=="object"){
       vartype=VAR_OBJECT;
     }
@@ -653,6 +678,10 @@ void Mission::saveVarInst(varInst *vi,ostream& aa_out){
       }
       else if(vi->type==VAR_FLOAT){
 	sprintf(buffer,"type=\"float\"  value=\"%f\" ",vi->float_val);
+	var_out  << buffer << endl;
+      }
+      else if(vi->type==VAR_INT){
+	sprintf(buffer,"type=\"int\"  value=\"%d\" ",vi->int_val);
 	var_out  << buffer << endl;
       }
       else if(vi->type==VAR_OBJECT){

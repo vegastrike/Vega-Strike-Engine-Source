@@ -394,6 +394,10 @@ void Mission::doReturn(missionNode *node,int mode){
       float res=checkFloatExpr(expr,mode);
       vi->float_val=res;
     }
+    else if(script->script.vartype==VAR_INT){
+      int res=checkIntExpr(expr,mode);
+      vi->int_val=res;
+    }
     else if(script->script.vartype==VAR_OBJECT){
       varInst *vi2=checkObjectExpr(expr,mode);
       vi->type=VAR_OBJECT;
@@ -518,6 +522,11 @@ varInst *Mission::doExec(missionNode *node,int mode){
       debug(4,node,mode,"doExec checking floatExpr");
       float res=checkFloatExpr(callnode,mode);
       vi->float_val=res;
+    }
+    else if(defnode->script.vartype==VAR_INT){
+      debug(4,node,mode,"doExec checking intExpr");
+      int res=checkIntExpr(callnode,mode);
+      vi->int_val=res;
     }
     else if(defnode->script.vartype==VAR_BOOL){
       debug(4,node,mode,"doExec checking boolExpr");

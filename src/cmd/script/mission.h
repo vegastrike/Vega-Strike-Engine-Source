@@ -91,7 +91,7 @@ enum tag_type {
   DTAG_IMPORT
 };
 
-enum var_type { VAR_FAILURE,VAR_BOOL,VAR_FLOAT,VAR_VECTOR,VAR_OBJECT,VAR_STRING,VAR_VOID,VAR_ANY };
+enum var_type { VAR_FAILURE,VAR_BOOL,VAR_FLOAT,VAR_INT,VAR_OBJECT,VAR_VOID,VAR_ANY };
 
 enum tester_type { TEST_GT,TEST_LT,TEST_EQ,TEST_NE,TEST_GE,TEST_LE };
 
@@ -106,7 +106,7 @@ class varInst {
 
   float  float_val;
   bool   bool_val;
-  vector<varInst> vector_val;
+  int    int_val;
   string string_val;
   
   string objectname;
@@ -271,6 +271,12 @@ bool  doTest(missionNode *node,int mode);
  varInst* doExec(missionNode *node,int mode);
  varInst *doConst(missionNode *node,int mode);
 
+int doIntVar(missionNode *node,int mode);
+int checkIntExpr(missionNode *node,int mode);
+int  doIMath(missionNode *node,int mode);
+varInst * doMath(missionNode *node,int mode);
+int intMath(string mathname,int res1,int res2);
+float floatMath(string mathname,float res1,float res2);
  varInst *checkExpression(missionNode *node,int mode);
 
  void assignVariable(varInst *v1,varInst *v2);

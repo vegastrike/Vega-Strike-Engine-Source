@@ -50,6 +50,10 @@
 
 #include "msgcenter.h"
 
+#ifdef HAVE_PYTHON
+#include "Python.h"
+#endif
+
 //#include "vegastrike.h"
 
 extern bool have_yy_error;
@@ -140,11 +144,16 @@ void Mission::DirectorStart(missionNode *node){
     }
   }
 
-
   if(director==NULL){
     return;
   }
 
+
+#ifdef HAVE_PYTHON
+  Py_Initialize();
+  PyRun_SimpleString("import test1");
+  //  PyRun_SimpleString("director=VSdirector()");
+#endif
 
   missionNode *initgame=director->script.scripts["initgame"];
 
@@ -177,6 +186,10 @@ void Mission::DirectorLoop(){
   if(director==NULL){
     return;
   }
+
+#ifdef HAVE_PYTHON
+  PyRun_SimpleString("test1.director.gameloop()");
+#endif
 
   //  cout << "DIRECTOR LOOP" << endl;
 
