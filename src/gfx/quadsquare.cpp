@@ -710,7 +710,6 @@ void	quadsquare::Update(const quadcornerdata& cd, const Vector & ViewerLocation,
 // in areas which need to be interpolated.
 {
 	DetailThreshold = Detail * VERTICAL_SCALE;
-	
 	UpdateAux(cd, nonlinear_trans->InvTransform(ViewerLocation), 0);
 }
 
