@@ -34,15 +34,17 @@ struct FIREKEYBOARDTYPE {
   FIREKEYBOARDTYPE() {
     togglewarpdrive=toggleglow=toggleanimation=lockkey=ECMkey=commKeys[0]=commKeys[1]=commKeys[2]=commKeys[3]=commKeys[4]=commKeys[5]=commKeys[6]=commKeys[7]=commKeys[8]=commKeys[9]=turretaikey = UP;
     eject=ejectcargo=firekey=missilekey=jfirekey=jtargetkey=jmissilekey=weapk=misk=rweapk=rmisk=cloakkey=
-		neartargetkey=targetskey=targetukey=threattargetkey=picktargetkey=subtargetkey=targetkey=
-		rneartargetkey=rtargetskey=rtargetukey=rthreattargetkey=rpicktargetkey=rtargetkey=
-		nearturrettargetkey =threatturrettargetkey= pickturrettargetkey=turrettargetkey=UP;
+      neartargetkey=targetskey=targetukey=threattargetkey=picktargetkey=subtargetkey=targetkey=
+      rneartargetkey=rtargetskey=rtargetukey=rthreattargetkey=rpicktargetkey=rtargetkey=
+      nearturrettargetkey =threatturrettargetkey= pickturrettargetkey=turrettargetkey=UP;
+      shieldpowerstate=1;
 #ifdef CAR_SIM
     blinkleftkey=blinkrightkey=headlightkey=sirenkey=UP;
 #endif
     doc=und=req=0;
   }
  KBSTATE firekey;
+ float shieldpowerstate;
  bool doc;
  bool und;
  bool req;
@@ -100,6 +102,16 @@ FIREKEYBOARDTYPE &FireKeyboard::f() {
 }
 FIREKEYBOARDTYPE &FireKeyboard::j() {
   return vectorOfKeyboardInput[whichjoystick];
+}
+void FireKeyboard::SetShieldsOneThird(int,KBSTATE k) {
+  if (k==DOWN) {
+    g().shieldpowerstate=1./3;
+  }
+}
+void FireKeyboard::SetShieldsTwoThird(int,KBSTATE k) {
+  if (k==DOWN) {
+    g().shieldpowerstate=2./3;
+  }
 }
 void FireKeyboard::ToggleGlow (int,KBSTATE k) {
 	if (k==PRESS) {
@@ -1110,7 +1122,49 @@ void Arrested (Unit * parent) {
 	}
 	}
 }
+static void PowerDownShield(Shield *shield, float howmuch){
+  switch (shield->number) {
+  case 2:
+    if (shield->shield2fb.front/howmuch>shield->shield2fb.frontmax)
+      shield->shield2fb.front=shield->shield2fb.frontmax*howmuch;
+    if (shield->shield2fb.back/howmuch>shield->shield2fb.backmax)
+      shield->shield2fb.back=shield->shield2fb.backmax*howmuch;
+    break;
+  case 4:
+    if (shield->shield4fbrl.front/howmuch>shield->shield4fbrl.frontmax)
+      shield->shield4fbrl.front=shield->shield4fbrl.frontmax*howmuch;
+    if (shield->shield4fbrl.right/howmuch>shield->shield4fbrl.rightmax)
+      shield->shield4fbrl.right=shield->shield4fbrl.rightmax*howmuch;
+    if (shield->shield4fbrl.left/howmuch>shield->shield4fbrl.leftmax)
+      shield->shield4fbrl.left=shield->shield4fbrl.leftmax*howmuch;
+    if (shield->shield4fbrl.back/howmuch>shield->shield4fbrl.backmax)
+      shield->shield4fbrl.back=shield->shield4fbrl.backmax*howmuch;
+    break;
+  case 8:
+    if (shield->shield8.frontlefttop/howmuch>shield->shield8.frontlefttopmax)
+      shield->shield8.frontlefttop=shield->shield8.frontlefttopmax*howmuch;
+    if (shield->shield8.frontleftbottom/howmuch>shield->shield8.frontleftbottommax)
+      shield->shield8.frontleftbottom=shield->shield8.frontleftbottommax*howmuch;
+    if (shield->shield8.frontrighttop/howmuch>shield->shield8.frontrighttopmax)
+      shield->shield8.frontrighttop=shield->shield8.frontrighttopmax*howmuch;
+    if (shield->shield8.frontrightbottom/howmuch>shield->shield8.frontrightbottommax)
+      shield->shield8.frontrightbottom=shield->shield8.frontrightbottommax*howmuch;
 
+    if (shield->shield8.backlefttop/howmuch>shield->shield8.backlefttopmax)
+      shield->shield8.backlefttop=shield->shield8.backlefttopmax*howmuch;
+    if (shield->shield8.backleftbottom/howmuch>shield->shield8.backleftbottommax)
+      shield->shield8.backleftbottom=shield->shield8.backleftbottommax*howmuch;
+    if (shield->shield8.backrighttop/howmuch>shield->shield8.backrighttopmax)
+      shield->shield8.backrighttop=shield->shield8.backrighttopmax*howmuch;
+    if (shield->shield8.backrightbottom/howmuch>shield->shield8.backrightbottommax)
+      shield->shield8.backrightbottom=shield->shield8.backrightbottommax*howmuch;
+
+    break;
+  default:
+    break;
+  }
+
+}
 void FireKeyboard::Execute () {
 	
   while (vectorOfKeyboardInput.size()<=whichplayer||vectorOfKeyboardInput.size()<=whichjoystick) {
@@ -1128,6 +1182,11 @@ void FireKeyboard::Execute () {
   } else {
     ChooseTargets(parent,TargAll,false);
     refresh_target=true;
+  }
+  if (f().shieldpowerstate!=1) {
+    Shield  * shield = &parent->shield;
+    PowerDownShield(shield,f().shieldpowerstate);
+    f().shieldpowerstate=1;
   }
   if (f().firekey==PRESS||f().jfirekey==PRESS||j().firekey==DOWN||j().jfirekey==DOWN){
     if (!_Universe->AccessCockpit()->CanDrawNavSystem())
