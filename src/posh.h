@@ -1031,9 +1031,6 @@ POSH_COMPILE_TIME_ASSERT(posh_i32_t, sizeof(posh_i32_t) == 4);
 ** to enforce their export if your own library is only using them internally.
 ** ----------------------------------------------------------------------------
 */
-#ifdef __cplusplus
-extern "C" {
-#endif
 
 /** @defgroup PoshFunctions Utility Functions
     @{
@@ -1256,6 +1253,3 @@ extern posh_s64_t  POSH_ReadS64FromBig( const void *src );
 
 /** @} */
 
-#ifdef __cplusplus
-}
-#endif
