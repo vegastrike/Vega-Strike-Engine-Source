@@ -85,6 +85,7 @@ public:
         bool LoadSuccess () {
           return (data!=NULL);
         }
+        void Prioritize (float);
 	//void Filter();
 	//void NoFilter();
 };

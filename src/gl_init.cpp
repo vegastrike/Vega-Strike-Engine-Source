@@ -246,8 +246,8 @@ BOOL GFXInit (int argc, char ** argv){
     //FIXME VEGASTRIKE //GFXLoadIdentity(PROJECTION);
 
 
-    //        glutSetCursor(GLUT_CURSOR_NONE );
-    glutSetCursor(GLUT_CURSOR_INHERIT );
+    glutSetCursor(GLUT_CURSOR_NONE );
+    //glutSetCursor(GLUT_CURSOR_INHERIT );
     //GFXPerspective(78,1.33,0.5,20);
     return TRUE;
 }

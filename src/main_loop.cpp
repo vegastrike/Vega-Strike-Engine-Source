@@ -427,7 +427,6 @@ void InitializeInput() {
 }
 Animation * s;
 
-Sprite *fihneCarriah;
 void createObjects() {
 
   //SetPriorityClass(GetCurrentProcess(), REALTIME_PRIORITY_CLASS);
@@ -439,9 +438,8 @@ void createObjects() {
   fighter = new Unit("uosprey.dat");
   //Unit *fighter2 = new Unit("uosprey.dat");
   fighter2 = new Unit("uosprey.dat");
-  s = new Animation ("explosion_orange.ani",true,false);
+  s = new Animation ("explosion_orange.ani",true,.1,false);
   s->SetPosition (0,0,5);
-  fihneCarriah = new Sprite ("mouse.spr");
   bg = new Background("cube");
   //bg2 = new SphereMesh (20.0,8,8,"sun.bmp",true,true);
   //HUDElement *t = new HUDElement("ucarrier.dat");
@@ -481,7 +479,6 @@ void createObjects() {
   GFXSelectMaterial(0);
   
   //  s = new Sprite("carrier.spr");
-  fihneCarriah->SetPosition (1,1);
   
   textplane = new TextPlane("9x12.fon");
   textplane->SetText(string("This is a test of the emergency broadcast system"));
@@ -529,7 +526,6 @@ void destroyObjects() {
   delete bg;
   //  delete bg2;  if you delete a sphere wiht paletted texture and its refcount you'll get a malloc problem
   delete s;
-  delete fihneCarriah;
 }
 
 void main_loop() {
@@ -579,7 +575,6 @@ void main_loop() {
   GFXDisable(TEXTURE1);
   //  _GFX->AccessHudCamera()->UpdateGFX(false);
   textplane->Draw();
-  fihneCarriah->Draw();
   //  _GFX->AccessCamera()->UpdateGFX(false);
 
   //for(a = 0; a < numf; a++) {

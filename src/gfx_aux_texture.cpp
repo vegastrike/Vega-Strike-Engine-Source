@@ -91,7 +91,6 @@ int Texture::checkold(const string &s)
 	  return FALSE;
 	}
 }
-
 void Texture::setold()
 {
 	*original = *this;
@@ -412,6 +411,9 @@ int Texture::Bind()
 
 	return name;
 
+}
+void Texture::Prioritize (float priority) {
+  GFXPrioritizeTexture (name, priority);
 }
 
 void Texture::MakeActive(int stage)

@@ -38,7 +38,7 @@ class Animation:public Primitive
 
 public:
 	Animation();
-	 Animation(char *, bool Rep=0, bool camorient=false);
+	 Animation(char *, bool Rep=0, float priority=.1,bool camorient=false);
 	~Animation();
   //  void SetPosition (float x,float y,float z);
   //  void SetPosition(const Vector &k);

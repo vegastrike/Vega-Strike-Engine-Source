@@ -117,6 +117,7 @@ BOOL /*GFXDRVAPI*/ GFXCreateTexture(int width, int height, TEXTUREFORMAT texture
 	glTexParameteri(targets[*handle], GL_TEXTURE_WRAP_T, WrapMode);
 	glTexParameteri (targets[*handle], GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri (targets[*handle], GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameterf (targets[*handle],GL_TEXTURE_PRIORITY,.5);
 	textures[*handle].width = width;
 	textures[*handle].height = height;
 	if (palette&&textureformat == PALETTE8)
@@ -129,7 +130,11 @@ BOOL /*GFXDRVAPI*/ GFXCreateTexture(int width, int height, TEXTUREFORMAT texture
 
 	return TRUE;
 }
-
+BOOL GFXPrioritizeTexture (unsigned int handle, float priority) {
+  if (priority<0||priority>1)
+    return FALSE;
+  glPrioritizeTextures (1,&handle,&priority); 
+}
 BOOL /*GFXDRVAPI*/ GFXAttachPalette (unsigned char *palette, int handle)
 {
 	ConvertPalette(textures[handle].palette, palette);
