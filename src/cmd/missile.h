@@ -58,13 +58,14 @@ public:
     GameUnit<Missile>::UpdatePhysics (trans, transmat, CumulativeVelocity, ResolveLast, uc);
     this->time-=SIMULATION_ATOM;
     if (NULL!=targ) {
-      if ((Position()-targ->Position()).Magnitude()-targ->rSize()-rSize()<detonation_radius) {
+	  float checker = targ->querySphere (Position()-(SIMULATION_ATOM*GetVelocity()),Position(),rSize());
+      if (checker||((Position()-targ->Position()).Magnitude()-targ->rSize()-rSize()<detonation_radius)) {
 	//Vector norm;
 	//float dist;
-	if ((targ)->queryBoundingBox (Position(),detonation_radius+rSize())) {
+	//if ((targ)->queryBoundingBox (Position(),detonation_radius+rSize())) {
 	  Discharge();
 	  time=-1;
-	}
+	//}
       }
     }
     if (time<0) {

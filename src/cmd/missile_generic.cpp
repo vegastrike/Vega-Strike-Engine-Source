@@ -1,3 +1,4 @@
+#include "universe_util.h"
 #include "missile_generic.h"
 #include "unit_generic.h"
 #include "vegastrike.h"
@@ -21,15 +22,23 @@ void StarSystem::UpdateMissiles() {
 }
 void MissileEffect::ApplyDamage (Unit * smaller) {
   float rad =(smaller->Position().Cast()-pos).Magnitude()-smaller->rSize();
+  float orig = rad;
+  if(rad==0) rad =0.001;
   rad=rad*rad;
   if (smaller->isUnit()!=MISSILEPTR&&rad<radius*radius) {
-    //    fprintf (stderr,"exploding %s %d at radius %f with dist %f %f\n",smaller->name.c_str(),smaller,radius,sqrtf(rad),(smaller->Position()-pos).Magnitude());
-    rad/=(radialmultiplier*radialmultiplier);
-    if (rad<1)
-      rad=1;
-    if( (damage>0)) {
+	if(rad<(radialmultiplier*radialmultiplier)){
+	  rad = (radialmultiplier*radialmultiplier*radialmultiplier*radialmultiplier/((2*radialmultiplier*radialmultiplier)-(orig*orig))); 
+	  /*
+	  contrived formula to create paraboloid falloff rather than quadratic peaking at 2x damage at origin
+	  rad = radmul^4/(2radmul^2-orig^2)
+	  */
+	}
+    rad=rad/(radialmultiplier*radialmultiplier); // where radialmultiplier is radius of point with 0 falloff
+	
+	if( (damage>0)) {
       Vector norm (pos-smaller->Position().Cast());
       norm.Normalize();
+	  UniverseUtil::IOmessage(0,"game","all",string("dealt ")+XMLSupport::tostring(damage/rad)+string(" damage from ")+XMLSupport::tostring(orig)+string(" meters ")+XMLSupport::tostring(damage)+string(" damage and "+XMLSupport::tostring(radialmultiplier)+string(" rad mult"))); 
       //divide effects by r^2
       smaller->ApplyDamage (pos,norm,damage/rad,smaller,GFXColor(1,1,1,1),NULL,phasedamage>0?phasedamage/rad:0);
     }
@@ -66,6 +75,7 @@ void Missile::reactToCollision (Unit * smaller, const QVector & biglocation, con
     DealDamageToHull (smalllocation.Cast(),hull+1);//should kill, applying addmissile effect
   
 }
+
 Unit * getNearestTarget (Unit *me) {
   QVector pos (me->Position());
   Unit * un=NULL;
@@ -110,8 +120,11 @@ void Missile::UpdatePhysics (const Transformation &trans, const Matrix &transmat
     }
     Unit::UpdatePhysics (trans, transmat, CumulativeVelocity, ResolveLast, uc);
     this->time-=SIMULATION_ATOM;
+	float checker = targ->querySphere (Position()-(SIMULATION_ATOM*GetVelocity()),Position(),rSize());
     if (NULL!=targ) {
-      if ((Position()-targ->Position()).Magnitude()-targ->rSize()-rSize()<detonation_radius) {
+      if (checker||((Position()-targ->Position()).Magnitude()-targ->rSize()-rSize()<detonation_radius)) {
+		  Discharge();
+		  time=-1;
 	//Vector norm;
 	//float dist;
 	/*** WARNING COLLISION STUFF... TO FIX FOR SERVER SIDE SOMEDAY ***

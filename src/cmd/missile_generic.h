@@ -57,8 +57,14 @@ protected:
   void InitMissile( float ptime, const float pdamage, float pphasedamage, float pradial_effect,
 					float pradial_multiplier, float pdetonation_radius, bool pdischarged, signed char pretarget)
   {
-	  time=ptime; damage=pdamage; phasedamage=pphasedamage; radial_effect=pradial_effect;
-	  detonation_radius=pdetonation_radius; discharged=pdischarged; retarget=pretarget;
+	  time=ptime;
+	  damage=pdamage;
+	  phasedamage=pphasedamage;
+	  radial_effect=pradial_effect;
+	  radial_multiplier=pradial_multiplier;
+	  detonation_radius=pdetonation_radius;
+	  discharged=pdischarged;
+	  retarget=pretarget;
   }
   friend class UnitFactory;
 
