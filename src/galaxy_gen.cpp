@@ -219,6 +219,8 @@ string faction;
 vector <GradColor> colorGradiant;
   float compactness=2;
   void ResetGlobalVariables () {
+    lights.clear();
+    gradtex.clear();
     numun[0]=numun[1]=nument[STAR]=nument[GAS]=nument[PLANET]=nument[MOON]=nument[JUMP]=0;
     units[0].clear();
     units[1].clear();
@@ -228,11 +230,14 @@ vector <GradColor> colorGradiant;
     entities[JUMP].clear();
     background.clear();
     names.clear();
+    rings.clear();
     systemname=string ("");
     starradius.clear();
     faction=string ("");
     colorGradiant.clear();
     compactness=2;
+    radii.clear();
+
   }
 
 void Tab () {
@@ -324,13 +329,19 @@ void CreateLight(unsigned int i) {
   if (h<lights.back().g) h=lights.back().g;
   if (h<lights.back().b) h=lights.back().b;
   float norm = (.5+.5/nument[0]);
-  lights.back().nr=lights.back().r/h;
-  lights.back().ng=lights.back().g/h;
-  lights.back().nb=lights.back().b/h;
-
-  lights.back().r*=norm/h;
-  lights.back().g*=norm/h;
-  lights.back().b*=norm/h;
+  if (h>.001) {
+    lights.back().nr=lights.back().r/h;
+    lights.back().ng=lights.back().g/h;
+    lights.back().nb=lights.back().b/h;
+  
+    lights.back().r*=norm/h;
+    lights.back().g*=norm/h;
+    lights.back().b*=norm/h;
+  }else {
+    lights.back().nr=0;
+    lights.back().ng=0;
+    lights.back().nb=0;
+  }
   WriteLight (i);
 }
 

@@ -776,8 +776,10 @@ static float getAutoRSize (Unit * orig,Unit * un, bool ignore_friend=false) {
 static signed char  ComputeAutoGuarantee (Unit * un) {
   Cockpit * cp;
   int cpnum=-1;
-  if (cp =_Universe->isPlayerStarship (un)) {
+  if ((cp =_Universe->isPlayerStarship (un))) {
     cpnum = cp-_Universe->AccessCockpit(0);
+  }else {
+    return Mission::AUTO_ON;
   }
   unsigned int i;
   for (i=0;i<active_missions.size();i++) {
