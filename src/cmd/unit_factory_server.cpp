@@ -26,9 +26,9 @@ std::string getMasterPartListUnitName() {
 Unit* UnitFactory::getMasterPartList( )
 { 
 	
-char tmp[2048];
-tmp[2047]=0;
-getcwd (tmp,2046);
+// char tmp[2048];
+// tmp[2047]=0;
+// getcwd (tmp,2046);
 
     if( _masterPartList == NULL )
     {
