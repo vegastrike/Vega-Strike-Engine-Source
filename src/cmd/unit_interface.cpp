@@ -205,7 +205,7 @@ struct UpgradingInfo {
 	// Black background
 	ShowColor(-1,-1,2,2, 0,0,0,1);
 	ShowColor(0,0,0,0, 1,1,1,1);
-	ShowText(-0.98, 0.93, 1, 4, (title+ string(" Credits: ")+tostring (_Universe->AccessCockpit()->credits)).c_str(), 0);
+	ShowText(-0.98, 0.93, 2, 4, (title+ string(" Credits: ")+tostring (_Universe->AccessCockpit()->credits)).c_str(), 0);
 	CargoList->Refresh();
 	CargoInfo->Refresh();
 	OK->Refresh();

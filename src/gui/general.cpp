@@ -22,7 +22,7 @@
 #include <string>
 #include <vector>
 #ifdef _WIN32
-#include <glib.h>
+//#include <glib.h>
 #endif
 using std::vector;
 using std::string;
@@ -440,7 +440,7 @@ int isdir(const char *file) {
 		return 1;
 	}
 }
-
+#if 0
 // type = 0: file
 // type = 1: dirs
 glob_t *FindPath(char *path, int type) {
@@ -499,7 +499,7 @@ glob_t *FindPath(char *path, int type) {
 }
 glob_t *FindFiles(char *path, char *extension) { return FindPath(path, 0); }
 glob_t *FindDirs(char *path) { return FindPath(path, 1); }
-
+#endif
 /*
 glob_t *FindDirs(char *path) {
 	glob_t *DIRS;

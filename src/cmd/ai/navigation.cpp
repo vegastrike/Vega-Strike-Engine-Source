@@ -6,7 +6,7 @@
 #endif
 #include "cmd/unit.h"
 using namespace Orders;
-
+#include "lin_time.h"
 /**
  * the time we need to start slowing down from now calculation (if it's in this frame we'll only accelerate for partial
  * vslowdown - decel * t = 0               t = vslowdown/decel
@@ -226,11 +226,11 @@ void ChangeHeading::Execute() {
     torque= (-parent->GetMoment()/SIMULATION_ATOM)*last_velocity;
   } else {
     TurnToward (atan2(local_heading.j, local_heading.k),last_velocity.i,torque.i);// find angle away from axis 0,0,1 in yz plane
-    OptimizeAngSpeed(turningspeed*parent->GetComputerData().max_pitch,last_velocity.i,torque.i);
+    OptimizeAngSpeed(turningspeed*parent->GetComputerData().max_pitch/*/getTimeCompression()*/,last_velocity.i,torque.i);
     
     TurnToward (atan2 (local_heading.i, local_heading.k), -last_velocity.j, torque.j);
     torque.j=-torque.j;
-    OptimizeAngSpeed(turningspeed*parent->GetComputerData().max_yaw,last_velocity.j,torque.j);
+    OptimizeAngSpeed(turningspeed*parent->GetComputerData().max_yaw/*/getTimeCompression()*/,last_velocity.j,torque.j);
     torque.k  =-parent->GetMoment()*last_velocity.k/SIMULATION_ATOM;//try to counteract roll;
   }
   parent->ApplyLocalTorque (torque);
