@@ -125,8 +125,6 @@ void	NetworkCommunication::SendImage( SOCKETALT & send_sock)
                       __FILE__, PSEUDO__LINE__(49) );
 		*/
 #endif /* NETCOMM_NOWEBCAM */
-	
-	return jpeg_str;
 }
 
 int		NetworkCommunication::InitSession( float frequency)
