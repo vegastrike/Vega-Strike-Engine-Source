@@ -2965,10 +2965,10 @@ void Unit::SetOrientation (QVector q, QVector r) {
   QVector p;
   CrossProduct (q,r,p);
   CrossProduct (r,p,q);
-  curr_physical_state = Transformation (Quaternion::from_vectors (p.Cast(),q.Cast(),r.Cast()),Position());
+  curr_physical_state.orientation = Quaternion::from_vectors (p.Cast(),q.Cast(),r.Cast());
 }
 void Unit::SetOrientation(Quaternion Q) {
-	curr_physical_state = Transformation ( Q, Position());
+  curr_physical_state.orientation=Q;
 }
 
 Vector Unit::UpCoordinateLevel (const Vector &v) const {
