@@ -268,6 +268,7 @@ private:
 
 protected:
   ///Loads a mesh that has been found in the hash table into this mesh (copying original data)
+  bool LoadExistant (Mesh *mesh);
   bool LoadExistant (const char * filehash, float scale);
   ///the position of the center of this mesh for collision detection
   Vector local_pos; 
@@ -316,6 +317,7 @@ protected:
   Mesh *getLOD (float lod);
 public:
   Mesh();
+  Mesh(const Mesh &m);
   ///Loading a mesh from an XML file.  faction specifies the logos.  Orig is for internal (LOD) use only!
   Mesh( const char *filename, const float scale,int faction,class Flightgroup * fg, bool orig=false);
   ///Forks the mesh across the plane a,b,c,d into two separate meshes...upon which this may be deleted

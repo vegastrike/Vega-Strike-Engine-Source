@@ -10,7 +10,7 @@
 #include "savegame.h"
 #include <algorithm>
 using namespace std;
- std::string GetPlayerSaveGame (int num) {
+ std::string GetHelperPlayerSaveGame (int num) {
   static string *res=NULL;
   if (res==NULL) {
     res = new std::string;
@@ -44,6 +44,27 @@ using namespace std;
   }
   return (*res)+XMLSupport::tostring(num);
 }
+
+std::string GetWritePlayerSaveGame(int num) {
+  string ret = GetHelperPlayerSaveGame(num);
+  if (!ret.empty()) {
+    if (*ret.begin()=='~') {
+      return ret.substr (1,ret.length());
+    }
+  }
+  return ret;
+}
+
+std::string GetReadPlayerSaveGame(int num) {
+  string ret = GetHelperPlayerSaveGame(num);
+  if (!ret.empty()) {
+    if (*ret.begin()=='~') {
+      return "";
+    }
+  }
+  return ret;
+}
+
 void FileCopy (const char * src, const char * dst) {
   if (dst[0]!='\0'&&src[0]!='\0') {
 
@@ -162,15 +183,15 @@ void WriteSaveGame (Cockpit * cp,bool auto_save) {
   if (!un) {
     return;
   }
-  cp->savegame->SetSavedCredits (_Universe->AccessCockpit()->credits);
-  cp->savegame->SetStarSystem(cp->activeStarSystem->getFileName());
   if (un->GetHull()>0) {
     cp->savegame->WriteSaveGame (cp->activeStarSystem->getFileName().c_str(),un->LocalPosition(),cp->credits,cp->GetUnitFileName().c_str(),auto_save?-1:player_num);
     un->WriteUnit(cp->GetUnitModifications().c_str());
-    if (GetPlayerSaveGame(player_num).length()&&!auto_save) {
-      un->WriteUnit(GetPlayerSaveGame(player_num).c_str());
+    if (GetWritePlayerSaveGame(player_num).length()&&!auto_save) {
+      cp->savegame->SetSavedCredits (_Universe->AccessCockpit()->credits);
+      cp->savegame->SetStarSystem(cp->activeStarSystem->getFileName());
+      un->WriteUnit(GetWritePlayerSaveGame(player_num).c_str());
+      cp->savegame->SetPlayerLocation(un->LocalPosition());    
     }
-    cp->savegame->SetPlayerLocation(un->LocalPosition());    
   }
 
 }
@@ -291,7 +312,7 @@ void SaveGame::WriteSaveGame (const char *systemname, const QVector &FP, float c
     _Universe->SerializeFaction(fp);
     fclose (fp);
     if (player_num!=-1) {
-      FileCopy (outputsavegame.c_str(),GetPlayerSaveGame(player_num).c_str());
+      FileCopy (outputsavegame.c_str(),GetWritePlayerSaveGame(player_num).c_str());
     }
     vscdup();
     returnfromhome();
@@ -317,8 +338,8 @@ vector<SavedUnits> SaveGame::ParseSaveGame (string filename, string &FSS, string
   vschdir ("save");
   FILE * fp = NULL;
   if (filename.length()>0) {
-    if (GetPlayerSaveGame(player_num).length()) {
-          fp = fopen (GetPlayerSaveGame(player_num).c_str(),"r");
+    if (GetReadPlayerSaveGame(player_num).length()) {
+          fp = fopen (GetReadPlayerSaveGame(player_num).c_str(),"r");
     }else {
 	  fp = fopen (filename.c_str(),"r");
     }

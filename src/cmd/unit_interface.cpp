@@ -263,7 +263,7 @@ public:
       }
       break;
     case MISSIONMODE:
-      if (title.find ("Mission BBS")==title.length()) {
+      if (title.find ("Mission BBS")==string::npos) {
 	title = "Mission BBS          ";
       }
       ButtonText="Accept";

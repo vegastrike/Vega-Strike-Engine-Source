@@ -281,19 +281,19 @@ void Tokenize(const string& str,
     }
 }
 std::string CheckBasicSizes (const std::string tokens) {
-  if (tokens.find ("small")<tokens.length()) {
+  if (tokens.find ("small")!=string::npos) {
     return "small";
   }
-  if (tokens.find ("medium")<tokens.length()) {
+  if (tokens.find ("medium")!=string::npos) {
     return "medium";
   }
-  if (tokens.find ("large")<tokens.length()) {
+  if (tokens.find ("large")!=string::npos) {
     return "large";
   }
-  if (tokens.find ("cargo")<tokens.length()) {
+  if (tokens.find ("cargo")!=string::npos) {
     return "cargo";
   }
-  if (tokens.find ("LR")<tokens.length()||tokens.find ("massive")<tokens.length()) {
+  if (tokens.find ("LR")!=string::npos||tokens.find ("massive")!=string::npos) {
     return "massive";
   }
   return "";
@@ -302,7 +302,7 @@ std::string getTurretSize (const std::string &size) {
   vector <string> tokens;
   Tokenize (size,tokens,"_");
   for (unsigned int i=0;i<tokens.size();i++) {
-    if (tokens[i].find ("turret")<tokens[i].length()) {
+    if (tokens[i].find ("turret")!=string::npos) {
       string temp = CheckBasicSizes (tokens[i]);
       if (!temp.empty()) {
 	return temp;

@@ -111,20 +111,35 @@ Mesh::Mesh()
 {
 	InitUnit();
 }
-bool Mesh::LoadExistant (const char * filehash, float scale) {
-  Mesh * oldmesh;
-  oldmesh = meshHashTable.Get(GetHashName(filehash,scale));
-  if (oldmesh==0) {
-    oldmesh = meshHashTable.Get(GetSharedMeshHashName(filehash,scale));  
-  }
-  if(0 != oldmesh) {
+bool Mesh::LoadExistant (Mesh * oldmesh) {
     *this = *oldmesh;
     oldmesh->refcount++;
     orig = oldmesh;
     return true;
+}
+bool Mesh::LoadExistant (const char * filehash, float scale) {
+  Mesh * oldmesh;
+  hash_name = GetHashName (filehash,scale);
+  oldmesh = meshHashTable.Get(hash_name);
+
+  if (oldmesh==0) {
+    hash_name =GetSharedMeshHashName(filehash,scale);
+    oldmesh = meshHashTable.Get(hash_name);  
+  }
+  if(0 != oldmesh) {
+    return LoadExistant(oldmesh);
   }
   //  fprintf (stderr,"cannot cache %s",GetSharedMeshHashName(filehash,scale).c_str());
   return false;
+}
+Mesh::Mesh (const Mesh & m) {
+  this->orig=NULL;
+  this->hash_name = m.hash_name;
+  InitUnit();
+  Mesh * oldmesh = meshHashTable.Get (hash_name);
+  if (LoadExistant (oldmesh->orig!=NULL?oldmesh->orig:oldmesh)) {
+    return;
+  }
 }
 Mesh:: Mesh(const char * filename,const float scale, int faction, Flightgroup *fg, bool orig):hash_name(filename)
 {
