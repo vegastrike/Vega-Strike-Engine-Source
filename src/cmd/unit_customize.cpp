@@ -294,7 +294,7 @@ bool Unit::UpAndDownGrade (Unit * up, Unit * templ, int mountoffset, int subunit
   STDUPGRADE(computer.max_pitch,up->computer.max_pitch,templ->computer.max_pitch,0);
   STDUPGRADE(computer.max_roll,up->computer.max_roll,templ->computer.max_roll,0);
   STDUPGRADE(fuel,up->fuel,templ->fuel,0);
-  STDUPGRADE(image->cargo_volume,templ->image->cargo_volume,templ->image->cargo_volume,0);
+  STDUPGRADE(image->cargo_volume,up->image->cargo_volume,templ->image->cargo_volume,0);
   if (shield.number==up->shield.number) {
     switch (shield.number) {
     case 2:
