@@ -81,12 +81,14 @@ char pwd[65536];
 void initpaths () {
   char tmppwd[65536];
   getcwd (tmppwd,32768);
-#ifdef DATADIR
-  datadir = string(DATADIR);
+#ifdef DATA_DIR
+  datadir = string(DATA_DIR);
+  chdir(DATA_DIR);
 #else
   datadir= string (tmppwd);  
 #endif
   sharedsounds = datadir;
+  cerr << "Data directory is " << datadir << endl;
   FILE *fp= fopen (CONFIGFILE,"r");
   changehome(true);
   FILE *fp1= fopen (CONFIGFILE,"r");
@@ -94,7 +96,11 @@ void initpaths () {
     fclose (fp1);
     vs_config=new VegaConfig(CONFIGFILE); // move config to global or some other struct
   }else if (fp) {
+#ifdef DATA_DIR
+    chdir(DATA_DIR);
+#else
     chdir (tmppwd);
+#endif
     fclose (fp);
     fp =NULL;
     vs_config = new VegaConfig (CONFIGFILE);
