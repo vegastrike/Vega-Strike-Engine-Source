@@ -76,13 +76,13 @@ struct bsp_tree
         };
 
 typedef struct bsp_tree BSP_TREE;
-
+/*
 struct bsp_vector
         {
         float x,y,z;
         struct bsp_vector * next;
         };
-
+*/
 typedef struct bsp_vector VECTOR;
 
 struct polygon3

@@ -74,7 +74,7 @@ float BSPNode::intersects(const Vector &start, const Vector &end, Vector & norm)
 	  Vector u = start;
 	  Vector v = end - start;
 	  float t = ((-d - n.Dot(u))/n.Dot(v)); // cannot be parallel except in exceptionally messed up roundoff errors
-	  u = t*v;
+	  u = t*v;//watch out for t==0,1
 	  Vector intersection = start + u;
 	  if (peq1>0) {
 	    if (temp = (back!=NULL)?back->intersects(intersection, end, norm):LITTLEVALUE)//pass in 'v' for the value of the normal, cus this one would intersect farther off.
@@ -97,10 +97,10 @@ bool BSPNode::intersects(const Vector &pt, const float err, Vector &norm, float 
     dist = peq;
     norm = n;
   }
-  if(peq>=err) { 
+  if(peq>err) { 
     return (front!=NULL)?front->intersects(pt,err,norm,dist):false;
   }
-  else if(peq>-err&&peq<err) { // if on the plane and not virtual, then its not in the object
+  else if(peq>=-err&&peq<=err) { // if on the plane and not virtual, then its not in the object
     return ((back!=NULL)?back->intersects(pt,err,norm,dist):true)
       || ((front!=NULL)?front->intersects(pt,err,norm,dist):false);
     

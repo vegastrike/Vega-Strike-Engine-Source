@@ -136,9 +136,6 @@ bool intersectionPoint (const bsp_tree &n, const bsp_vector & A, const bsp_vecto
       return false;
     k = (inter + n.d ) / k; 
     //assume magnitude (n.a,n.b,n.c) == 1
-    if (k<BSPG_THRESHOLD||k>1-BSPG_THRESHOLD) {//lies outside the segment
-	return false;
-    }
     res.x = A.x + k*(B.x - A.x);
     res.y = A.y + k*(B.y - A.y);
     res.z = A.z + k*(B.z - A.z);
@@ -147,9 +144,9 @@ bool intersectionPoint (const bsp_tree &n, const bsp_vector & A, const bsp_vecto
 
 enum INTERSECT_TYPE whereIs (const VECTOR & v, const bsp_tree & temp_node) {
      float tmp = ((temp_node.a)*(v.x))+((temp_node.b)*(v.y))+((temp_node.c)*(v.z))+(temp_node.d);
-     if (tmp < -BSPG_THRESHOLD) {
+     if (tmp < 0) {
 	 return BSPG_BACK;
-     }else if (tmp >BSPG_THRESHOLD) {
+     }else if (tmp >0) {
 	 return BSPG_FRONT;
      }else return BSPG_INTERSECT;
 }
@@ -174,9 +171,10 @@ void dividePlane (const bsp_polygon & tri, const bsp_tree &unificator, bsp_polyg
 	} else {
 	    if (oldflag!=BSPG_INTERSECT&&i!=0&&flag!=oldflag) {
 		//need to add the intersection point in!
-		intersectionPoint (unificator, tri.v[i-1], tri.v[i], int_point);
+	      if (intersectionPoint (unificator, tri.v[i-1], tri.v[i], int_point)){
 		front.v.push_back (int_point);
 		back.v.push_back (int_point);
+	      }
 	    }
 	    if (flag==BSPG_FRONT) {
 		front.v.push_back (tri.v[i]);
@@ -189,9 +187,10 @@ void dividePlane (const bsp_polygon & tri, const bsp_tree &unificator, bsp_polyg
     flag = whereIs (tri.v[0],unificator);//check the corner case if the intersection point was between last and first points (2/3 the time in triangles)
     if (oldflag!=BSPG_INTERSECT&&flag!=BSPG_INTERSECT&&flag!=oldflag) {
 	//need to add the intersection point in!
-	intersectionPoint (unificator, tri.v[tri.v.size()-1], tri.v[0], int_point);
+      if (intersectionPoint (unificator, tri.v[tri.v.size()-1], tri.v[0], int_point)){
 	front.v.push_back (int_point);
 	back.v.push_back (int_point);
+      }
     }
 }
 
@@ -424,6 +423,12 @@ static bsp_tree * buildbsp(bsp_tree * bsp,vector <bsp_polygon> &tri, vector <bsp
   if (select >=tri.size()) {
       fprintf (stderr,"Error Selecting tri for splittage");
       return NULL;
+  }
+  if (triplane[select].b==-1&&triplane[select].d<-93&&triplane[select].d>-94) {
+    fprintf (stderr,"ahh help me");
+  }
+  if (triplane[select].b==1&&triplane[select].d>65&&triplane[select].d<66) {
+    fprintf (stderr,"I gotcha");
   }
   temp = (bsp_tree *) malloc (sizeof (bsp_tree));
   temp->a=triplane[select].a;
