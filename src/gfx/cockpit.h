@@ -10,8 +10,8 @@ class TextPlane;
 class Sprite;
 class Gauge;
 class Unit;
+#include "in.h"
 #include "vdu.h"
-#include "in_kb.h"
 #include "camera.h"
 #define MAXVDUS 10
 #define NUM_CAM		12
@@ -38,11 +38,8 @@ private:
   UnitContainer parentturret; 
   int unitfaction;
   ///4 views f/r/l/b
-  struct MyMat {
-    float m[16];
-  };
   float shakin;
-  std::list <MyMat> headtrans;
+  std::list <Matrix> headtrans;
   class Mesh * mesh;
   Sprite *Pit [4];
   Sprite *Radar;
@@ -50,7 +47,6 @@ private:
   std::vector <VDU *> vdu;
   std::string unitfilename;
   std::string unitmodname;
-  Vector unitlocation;
   ///Color of cockpit default text
   GFXColor textcol;
   ///The font that the entire cockpit will use. Currently without color
@@ -94,6 +90,7 @@ private:
   ///draws the navigation symbol around targetted location
   void DrawNavigationSymbol (const Vector &loc, const Vector &p, const Vector &q, float size);
   ///draws the target box around targetted unit
+  float computeLockingSymbol(Unit * par);
   void DrawTargetBox ();
   ///draws the target box around all units
   void DrawTargetBoxes ();
@@ -106,6 +103,7 @@ private:
   float cockpit_time;
   bool ejecting;
  public:
+  void InitStatic ();
   void Shake (float amt);
   float godliness;
   void Autopilot (Unit * target);
@@ -127,8 +125,9 @@ private:
   ///Sets owner of this cockpit
   //  unsigned int whichcockpit;//0 is the first player, 1 is the second and so forth
   class StarSystem* activeStarSystem;//used for context switch in Universe
-  void SetParent(Unit * unit, const char * filename, const char * unitmodname,const Vector &startloc);
+  void SetParent(Unit * unit, const char * filename, const char * unitmodname,const QVector &startloc);
   Unit * GetParent () {return parent.GetUnit();}
+  Unit * GetSaveParent ();
   ///Draws Cockpit then restores viewport
   void Draw();
   void Update();//respawns and the like.

@@ -4,6 +4,7 @@ namespace Orders {
 class AggressiveAI: public FireAt {
   enum INTERCUR {INTERR,INTNORMAL,INTRECOVER} curinter;
   bool obedient;//am I currently obedient
+  bool last_time_insys;
 protected:
   AIEvents::ElemAttrMap logic;
   AIEvents::ElemAttrMap interrupts;
@@ -11,6 +12,7 @@ protected:
   bool ExecuteLogicItem (const AIEvents::AIEvresult & item);
   bool ProcessLogic(AIEvents::ElemAttrMap &logic, bool inter=false);//returns if found anything
   string last_directive;
+
   void ReCommandWing(Flightgroup* fg);
   bool ProcessCurrentFgDirective(Flightgroup *fg);
 public:

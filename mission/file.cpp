@@ -40,6 +40,7 @@ int LoadMission(char *filename) {
 	SetString(&DATA.description, "A standard mission");
 	SetString(&DATA.briefing, "Destroy all hostiles");
 	SetString(&DATA.path,filename);
+	SetString(&DATA.numplayers, "1");
 
 	free(file);
 
@@ -92,6 +93,9 @@ void CheckVar(string parent, string current, string name, string value) {
 			}
 		}
 		SetString(&DATA.briefing, param);
+	}
+	if (name == "num_players") {
+		SetString(&DATA.numplayers, param);
 	}
 	free(param);
 }

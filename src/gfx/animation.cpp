@@ -31,8 +31,9 @@
 #include "xml_support.h"
 #include "sprite.h"
 using std::stack;
-static stack<Animation *> far_animationdrawqueue;
-static stack<Animation *> animationdrawqueue;
+static vector<Animation *> far_animationdrawqueue;
+static vector
+<Animation *> animationdrawqueue;
 const unsigned char ani_up=1;
 const unsigned char ani_close=2;
 const unsigned char ani_alpha=4;
@@ -75,23 +76,16 @@ Animation::Animation (const char * FileName, bool Rep,  float priority,enum FILT
 Animation:: ~Animation () {
   
 }
-void Animation::SetPosition (const float x,const float y, const float z) {
-  local_transformation [12] = x;
-  local_transformation [13] = y;
-  local_transformation [14] = z;
-}
-void Animation::SetPosition (const Vector &k) {
-  local_transformation [12] = k.i;
-  local_transformation [13] = k.j;
-  local_transformation [14] = k.k;  
+void Animation::SetPosition (const QVector &p) {
+  local_transformation.p = p;
 }
 void Animation::SetOrientation(const Vector &p, const Vector &q, const Vector &r)
 {	
-  VectorAndPositionToMatrix (local_transformation, p,q,r,Vector (local_transformation[12],local_transformation[13], local_transformation[14]));
+  VectorAndPositionToMatrix (local_transformation, p,q,r,local_transformation.p);
 }
-Vector Animation::Position()
+QVector Animation::Position()
 {
-  return Vector(local_transformation[12], local_transformation[13], local_transformation[14]);
+  return local_transformation.p;
 }
 void Animation:: SetDimensions(float wid, float hei) {
   width = wid;
@@ -103,38 +97,50 @@ void Animation:: GetDimensions(float &wid, float &hei) {
 }
 
 void Animation::ProcessDrawQueue () {
-  ProcessDrawQueue (animationdrawqueue);
-}
-void Animation::ProcessFarDrawQueue () {
-  //set farshit
-  ProcessDrawQueue (far_animationdrawqueue);
-}
-void Animation::ProcessDrawQueue (std::stack <Animation *> &animationdrawqueue) {
-  unsigned char alphamaps=ani_alpha;
   GFXBlendMode (SRCALPHA,INVSRCALPHA);
   GFXDisable (LIGHTING);
   GFXEnable(TEXTURE0);
   GFXDisable(TEXTURE1);
-  GFXDisable (DEPTHWRITE);
-  while (!animationdrawqueue.empty()) {
-    GFXColorf (animationdrawqueue.top()->mycolor);//fixme, should we need this? we get som egreenie explosions
+  GFXDisable (DEPTHWRITE);	
+  ProcessDrawQueue (animationdrawqueue,-FLT_MAX);
+}
+void Animation::ProcessFarDrawQueue (float farval) {
+  //set farshit
+  GFXBlendMode (SRCALPHA,INVSRCALPHA);
+  GFXDisable (LIGHTING);
+  GFXEnable(TEXTURE0);
+  GFXDisable(TEXTURE1);
+
+  GFXDisable (DEPTHWRITE);	
+  GFXDisable (DEPTHTEST);	
+
+  ProcessDrawQueue (far_animationdrawqueue, farval);
+}
+void Animation::ProcessDrawQueue (std::vector <Animation *> &animationdrawqueue,float limit) {
+  unsigned char alphamaps=ani_alpha;
+	int i;//NOT UNSIGNED
+	for (i=animationdrawqueue.size()-1;i>=0;i--) {
+    GFXColorf (animationdrawqueue[i]->mycolor);//fixme, should we need this? we get som egreenie explosions
     Matrix result;
-    if (alphamaps!=(animationdrawqueue.top()->options&ani_alpha)) {
-      alphamaps = (animationdrawqueue.top()->options&ani_alpha);
+    if (alphamaps!=(animationdrawqueue[i]->options&ani_alpha)) {
+      alphamaps = (animationdrawqueue[i]->options&ani_alpha);
       GFXBlendMode ((alphamaps!=0)?SRCALPHA:ONE,(alphamaps!=0)?INVSRCALPHA:ONE);
     }
-    animationdrawqueue.top()->CalculateOrientation(result);
-    animationdrawqueue.top()->DrawNow(result);
-    animationdrawqueue.pop();
+	if ((animationdrawqueue[i]->Position()-_Universe->AccessCamera()->GetPosition()).Magnitude()-animationdrawqueue[i]->height>limit) {
+  	  GFXFogMode(FOG_OFF);
+  	  animationdrawqueue[i]->CalculateOrientation(result);
+      animationdrawqueue[i]->DrawNow(result);
+      animationdrawqueue.erase (animationdrawqueue.begin()+i);
+	}
   }
 }
 void Animation::CalculateOrientation (Matrix & result) {
   Vector camp,camq,camr;
-  Vector pos (Position());
+  QVector pos (Position());
   float hei=height;
   float wid=width;
   static float HaloOffset = XMLSupport::parse_float(vs_config->getVariable ("graphics","HaloOffset",".1"));
-  ::CalculateOrientation (pos,camp,camq,camr,wid,hei,(options&ani_close)?HaloOffset:0,false,(options&ani_up)?NULL:local_transformation);
+  ::CalculateOrientation (pos,camp,camq,camr,wid,hei,(options&ani_close)?HaloOffset:0,false,(options&ani_up)?NULL:&local_transformation);
   
   /*
   Camera* TempCam = _Universe->AccessCamera();
@@ -159,7 +165,7 @@ void Animation::CalculateOrientation (Matrix & result) {
 void Animation::DrawNow(const Matrix &final_orientation) {
  
   if (!Done()||(options&ani_repeat)) {
-    GFXLoadMatrix (MODEL, final_orientation);
+    GFXLoadMatrixModel (final_orientation);
     MakeActive();
     GFXBegin (GFXQUAD);
     GFXTexCoord2f (0.00F,1.00F);
@@ -175,7 +181,7 @@ void Animation::DrawNow(const Matrix &final_orientation) {
   }
 }
 void Animation::DrawAsSprite (Sprite * spr) {
-  unsigned char alphamaps=ani_alpha;
+  //  unsigned char alphamaps=ani_alpha;
   GFXPushBlendMode();
   if (options&ani_alpha)
     GFXBlendMode (SRCALPHA,INVSRCALPHA);
@@ -233,10 +239,12 @@ void Animation::DrawNoTransform() {
 }
 void Animation:: Draw() {
   static float HaloOffset = XMLSupport::parse_float(vs_config->getVariable ("graphics","HaloOffset",".1"));
-  if ((_Universe->AccessCamera()->GetR().Dot (Position()-_Universe->AccessCamera()->GetPosition())-HaloOffset*(height>width?height:width))<.8*g_game.zfar   ) {
-    animationdrawqueue.push (this);
+  QVector R (_Universe->AccessCamera()->GetR().i,_Universe->AccessCamera()->GetR().j,_Universe->AccessCamera()->GetR().k);
+  static float too_far_dist = XMLSupport::parse_float (vs_config->getVariable ("graphics","anim_far_percent",".8"));
+  if ((R.Dot (Position()-_Universe->AccessCamera()->GetPosition())-HaloOffset*(height>width?height:width))<too_far_dist*g_game.zfar   ) {
+    animationdrawqueue.push_back (this);
   }else {
-    far_animationdrawqueue.push(this);
+    far_animationdrawqueue.push_back(this);
   }
 }
 

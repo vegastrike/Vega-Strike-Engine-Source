@@ -131,7 +131,7 @@ bool Order::AttachSelfOrder (Unit *targets1) {
   group.SetUnit(targets1);
   return true;
 }
-bool Order::AttachOrder (Vector targetv) {
+bool Order::AttachOrder (QVector targetv) {
   if (!(subtype&SLOCATION)) {
     return false;
   }

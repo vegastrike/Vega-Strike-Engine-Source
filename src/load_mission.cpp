@@ -5,6 +5,7 @@
 #include "star_system.h"
 #include "vs_globals.h"
 #include "cmd/unit.h"
+#include "cmd/unit_factory.h"
 #include "gfx/cockpit.h"
 #include "cmd/ai/aggressive.h"
 #include "cmd/ai/script.h"
@@ -34,7 +35,7 @@ void LoadMission (const char * mission_name, bool loadFirstUnit) {
 	for(int s=0;s < fg->nr_ships;s++){
 
 	  
-	  Vector pox;
+	  QVector pox;
 
 	  pox.i=fg->pos.i+s*fg_radius*3;
 	  pox.j=fg->pos.i+s*fg_radius*3;
@@ -46,13 +47,13 @@ void LoadMission (const char * mission_name, bool loadFirstUnit) {
 
 	  }
 	  if (_Universe->AccessCockpit()->GetParent()) {
-	    Vector fposs =_Universe->AccessCockpit()->GetParent()->Position();
+	    QVector fposs =_Universe->AccessCockpit()->GetParent()->Position();
 	    pox = pox+fposs;//adds our own position onto this
 	  }
 	  tmptarget=_Universe->GetFaction(fg->faction.c_str()); // that should not be in xml?
 	  string modifications ("");
 	  if (a!=0||loadFirstUnit) {
-	    fighter = new Unit(fightername, false,tmptarget,modifications,fg,s);
+	    fighter = UnitFactory::createUnit(fightername, false,tmptarget,modifications,fg,s);
 	  }else {
 	    continue;
 	  }

@@ -74,8 +74,10 @@ void TextPlane::Draw(const string & newText, int offset,bool startlower, bool fo
   GFXDisable (LIGHTING);
 
   GFXDisable (TEXTURE0);
+  GFXDisable (TEXTURE1);
 
   glPushMatrix();
+  glLoadIdentity();
   glRasterPos2f(0,0);
   int entercount=0;
   for (;entercount<offset&&text_it!=newText.end();text_it++) {
@@ -121,6 +123,7 @@ void TextPlane::Draw(const string & newText, int offset,bool startlower, bool fo
       row -= (use_bit)?((fnt==GLUT_BITMAP_HELVETICA_12)?(26./g_game.y_resolution):(22./g_game.y_resolution)):(myFontMetrics.j);
       glPopMatrix();
       glPushMatrix ();
+      glLoadIdentity();
       glTranslatef (col,row,0);
       glScalef(scalex,scaley,1);
       glRasterPos2f(0,0);
@@ -134,4 +137,5 @@ void TextPlane::Draw(const string & newText, int offset,bool startlower, bool fo
   GFXPopBlendMode();
 
 }
+
 

@@ -19,6 +19,16 @@ const std::string vdu_modes [] = {"Target","Nav","Comm","Weapon","Damage","Shiel
 
 string getUnitNameAndFgNoBase (Unit * target) {
   Flightgroup* fg = target->getFlightgroup();
+  if (target->isUnit()==PLANETPTR) {
+    string hr = ((Planet *)target)->getHumanReadablePlanetType();
+    if (!hr.empty()) {
+      return hr+string(":")+target->name;
+    }
+  }else if (target->isUnit()==UNITPTR){
+    if (!target->getFullname().empty()) {
+      return target->getFullname()+string(":")+target->name;
+    }
+  }
   if (fg) {
     if (fg->name!="Base"&&fg->name!="Asteroid"&&fg->name!="Nebula") {
       return fg->name+":"+target->name;
@@ -27,7 +37,6 @@ string getUnitNameAndFgNoBase (Unit * target) {
   if (string("neutral")!=_Universe->GetFaction(target->faction)) {
     return string(_Universe->GetFaction(target->faction))+" "+target->name;
   }
-
   return target->name;
 }
 
@@ -73,7 +82,7 @@ int parse_vdu_type (const char * x) {
 
 
 
-VDU::VDU (const char * file, TextPlane *textp, unsigned short modes, short rwws, short clls, unsigned short *ma, float *mh) :Sprite (file),tp(textp),scrolloffset(0),posmodes(modes), rows(rwws), cols(clls){
+VDU::VDU (const char * file, TextPlane *textp, unsigned short modes, short rwws, short clls, unsigned short *ma, float *mh) :Sprite (file),tp(textp),posmodes(modes), rows(rwws), cols(clls),scrolloffset(0){
   thismode.push_back(MSG);
   if (_Universe->numPlayers()>1) {
     posmodes&=(~VIEW);
@@ -161,100 +170,100 @@ static std::string MangleString (const char * in, float probability) {
 static void DrawShield (float fs, float rs, float ls, float bs, float x, float y, float w, float h) { //FIXME why is this static?
   GFXBegin (GFXLINE);
   if (fs>.2) {
-    GFXVertex3f (x-w/8,y+h/2,0);
-    GFXVertex3f (x-w/3,y+.9*h/2,0);
-    GFXVertex3f (x+w/8,y+h/2,0);
-    GFXVertex3f (x+w/3,y+.9*h/2,0);
-    GFXVertex3f (x+w/8,y+h/2,0);
-    GFXVertex3f (x-w/8,y+h/2,0);
+    GFXVertex3d ((double)x-w/8,y+h/2,0.);
+    GFXVertex3d ((double)x-w/3,y+.9*h/2,0.);
+    GFXVertex3d ((double)x+w/8,y+h/2,0.);
+    GFXVertex3d ((double)x+w/3,y+.9*h/2,0.);
+    GFXVertex3d ((double)x+w/8,y+h/2,0.);
+    GFXVertex3d ((double)x-w/8,y+h/2,0.);
   }
   if (fs>.5) {
-    GFXVertex3f (x-w/8,y+1.1*h/2,0);
-    GFXVertex3f (x+w/8,y+1.1*h/2,0);
-    GFXVertex3f (x-w/8,y+1.1*h/2,0);
-    GFXVertex3f (x-w/3,y+h/2,0);
-    GFXVertex3f (x+w/8,y+1.1*h/2,0);
-    GFXVertex3f (x+w/3,y+h/2,0);
+    GFXVertex3d ((double)x-w/8,y+1.1*h/2,0.);
+    GFXVertex3d ((double)x+w/8,y+1.1*h/2,0.);
+    GFXVertex3d ((double)x-w/8,y+1.1*h/2,0.);
+    GFXVertex3d ((double)x-w/3,y+h/2,0.);
+    GFXVertex3d ((double)x+w/8,y+1.1*h/2,0.);
+    GFXVertex3d ((double)x+w/3,y+h/2,0.);
   }
   if (fs>.75) {
-    GFXVertex3f (x-w/8,y+1.2*h/2,0);
-    GFXVertex3f (x+w/8,y+1.2*h/2,0);
-    GFXVertex3f (x-w/8,y+1.2*h/2,0);
-    GFXVertex3f (x-w/3,y+1.1*h/2,0);
-    GFXVertex3f (x+w/8,y+1.2*h/2,0);
-    GFXVertex3f (x+w/3,y+1.1*h/2,0);
+    GFXVertex3d ((double)x-w/8,y+1.2*h/2,0.);
+    GFXVertex3d ((double)x+w/8,y+1.2*h/2,0.);
+    GFXVertex3d ((double)x-w/8,y+1.2*h/2,0.);
+    GFXVertex3d ((double)x-w/3,y+1.1*h/2,0.);
+    GFXVertex3d ((double)x+w/8,y+1.2*h/2,0.);
+    GFXVertex3d ((double)x+w/3,y+1.1*h/2,0.);
   }
   if (rs>.2) {
-    GFXVertex3f (x+1*w/2,y-h/8,0);
-    GFXVertex3f (x+.9*w/2,y-h/3,0);
-    GFXVertex3f (x+1*w/2,y+h/8,0);
-    GFXVertex3f (x+1*w/2,y-h/8,0);
-    GFXVertex3f (x+.9*w/2,y+h/3,0);
-    GFXVertex3f (x+1*w/2,y+h/8,0);
+    GFXVertex3d ((double)x+1*w/2,y-h/8,0.);
+    GFXVertex3d ((double)x+.9*w/2,y-h/3,0.);
+    GFXVertex3d ((double)x+1*w/2,y+h/8,0.);
+    GFXVertex3d ((double)x+1*w/2,y-h/8,0.);
+    GFXVertex3d ((double)x+.9*w/2,y+h/3,0.);
+    GFXVertex3d ((double)x+1*w/2,y+h/8,0.);
   }
   if (rs>.5) {
-    GFXVertex3f (x+1.1*w/2,y-h/8,0);
-    GFXVertex3f (x+1*w/2,y-h/3,0);
-    GFXVertex3f (x+1.1*w/2,y+h/8,0);
-    GFXVertex3f (x+1.1*w/2,y-h/8,0);
-    GFXVertex3f (x+1*w/2,y+h/3,0);
-    GFXVertex3f (x+1.1*w/2,y+h/8,0);
+    GFXVertex3d ((double)x+1.1*w/2,y-h/8,0.);
+    GFXVertex3d ((double)x+1*w/2,y-h/3,0.);
+    GFXVertex3d ((double)x+1.1*w/2,y+h/8,0.);
+    GFXVertex3d ((double)x+1.1*w/2,y-h/8,0.);
+    GFXVertex3d ((double)x+1*w/2,y+h/3,0.);
+    GFXVertex3d ((double)x+1.1*w/2,y+h/8,0.);
   }
   if (rs>.7) {
-    GFXVertex3f (x+1.2*w/2,y-h/8,0);
-    GFXVertex3f (x+1.1*w/2,y-h/3,0);
-    GFXVertex3f (x+1.2*w/2,y+h/8,0);
-    GFXVertex3f (x+1.2*w/2,y-h/8,0);
-    GFXVertex3f (x+1.1*w/2,y+h/3,0);
-    GFXVertex3f (x+1.2*w/2,y+h/8,0);
+    GFXVertex3d ((double)x+1.2*w/2,y-h/8,0.);
+    GFXVertex3d ((double)x+1.1*w/2,y-h/3,0.);
+    GFXVertex3d ((double)x+1.2*w/2,y+h/8,0.);
+    GFXVertex3d ((double)x+1.2*w/2,y-h/8,0.);
+    GFXVertex3d ((double)x+1.1*w/2,y+h/3,0.);
+    GFXVertex3d ((double)x+1.2*w/2,y+h/8,0.);
   }
   if (ls>.2) {
-    GFXVertex3f (x-1*w/2,y-h/8,0);
-    GFXVertex3f (x-.9*w/2,y-h/3,0);
-    GFXVertex3f (x-1*w/2,y+h/8,0);
-    GFXVertex3f (x-1*w/2,y-h/8,0);
-    GFXVertex3f (x-.9*w/2,y+h/3,0);
-    GFXVertex3f (x-1*w/2,y+h/8,0);
+    GFXVertex3d ((double)x-1*w/2,y-h/8,0.);
+    GFXVertex3d ((double)x-.9*w/2,y-h/3,0.);
+    GFXVertex3d ((double)x-1*w/2,y+h/8,0.);
+    GFXVertex3d ((double)x-1*w/2,y-h/8,0.);
+    GFXVertex3d ((double)x-.9*w/2,y+h/3,0.);
+    GFXVertex3d ((double)x-1*w/2,y+h/8,0.);
   }
   if (ls>.5) {
-    GFXVertex3f (x-1.1*w/2,y-h/8,0);
-    GFXVertex3f (x-1*w/2,y-h/3,0);
-    GFXVertex3f (x-1.1*w/2,y+h/8,0);
-    GFXVertex3f (x-1.1*w/2,y-h/8,0);
-    GFXVertex3f (x-1*w/2,y+h/3,0);
-    GFXVertex3f (x-1.1*w/2,y+h/8,0);
+    GFXVertex3d ((double)x-1.1*w/2,y-h/8,0.);
+    GFXVertex3d ((double)x-1*w/2,y-h/3,0.);
+    GFXVertex3d ((double)x-1.1*w/2,y+h/8,0.);
+    GFXVertex3d ((double)x-1.1*w/2,y-h/8,0.);
+    GFXVertex3d ((double)x-1*w/2,y+h/3,0.);
+    GFXVertex3d ((double)x-1.1*w/2,y+h/8,0.);
   }
   if (ls>.7) {
-    GFXVertex3f (x-1.2*w/2,y-h/8,0);
-    GFXVertex3f (x-1.1*w/2,y-h/3,0);
-    GFXVertex3f (x-1.2*w/2,y+h/8,0);
-    GFXVertex3f (x-1.2*w/2,y-h/8,0);
-    GFXVertex3f (x-1.1*w/2,y+h/3,0);
-    GFXVertex3f (x-1.2*w/2,y+h/8,0);
+    GFXVertex3d ((double)x-1.2*w/2,y-h/8,0.);
+    GFXVertex3d ((double)x-1.1*w/2,y-h/3,0.);
+    GFXVertex3d ((double)x-1.2*w/2,y+h/8,0.);
+    GFXVertex3d ((double)x-1.2*w/2,y-h/8,0.);
+    GFXVertex3d ((double)x-1.1*w/2,y+h/3,0.);
+    GFXVertex3d ((double)x-1.2*w/2,y+h/8,0.);
   }
   if (bs>.2) {
-    GFXVertex3f (x-w/8,y-h/2,0);
-    GFXVertex3f (x-w/3,y-.9*h/2,0);
-    GFXVertex3f (x+w/8,y-h/2,0);
-    GFXVertex3f (x+w/3,y-.9*h/2,0);
-    GFXVertex3f (x+w/8,y-h/2,0);
-    GFXVertex3f (x-w/8,y-h/2,0);
+    GFXVertex3d ((double)x-w/8,y-h/2,0.);
+    GFXVertex3d ((double)x-w/3,y-.9*h/2,0.);
+    GFXVertex3d ((double)x+w/8,y-h/2,0.);
+    GFXVertex3d ((double)x+w/3,y-.9*h/2,0.);
+    GFXVertex3d ((double)x+w/8,y-h/2,0.);
+    GFXVertex3d ((double)x-w/8,y-h/2,0.);
   }
   if (bs>.5) {
-    GFXVertex3f (x-w/8,y-1.1*h/2,0);
-    GFXVertex3f (x+w/8,y-1.1*h/2,0);
-    GFXVertex3f (x-w/8,y-1.1*h/2,0);
-    GFXVertex3f (x-w/3,y-h/2,0);
-    GFXVertex3f (x+w/8,y-1.1*h/2,0);
-    GFXVertex3f (x+w/3,y-h/2,0);
+    GFXVertex3d ((double)x-w/8,y-1.1*h/2,0.);
+    GFXVertex3d ((double)x+w/8,y-1.1*h/2,0.);
+    GFXVertex3d ((double)x-w/8,y-1.1*h/2,0.);
+    GFXVertex3d ((double)x-w/3,y-h/2,0.);
+    GFXVertex3d ((double)x+w/8,y-1.1*h/2,0.);
+    GFXVertex3d ((double)x+w/3,y-h/2,0.);
   }
   if (bs>.75) {
-    GFXVertex3f (x-w/8,y-1.2*h/2,0);
-    GFXVertex3f (x+w/8,y-1.2*h/2,0);
-    GFXVertex3f (x-w/8,y-1.2*h/2,0);
-    GFXVertex3f (x-w/3,y-1.1*h/2,0);
-    GFXVertex3f (x+w/8,y-1.2*h/2,0);
-    GFXVertex3f (x+w/3,y-1.1*h/2,0);
+    GFXVertex3d ((double)x-w/8,y-1.2*h/2,0.);
+    GFXVertex3d ((double)x+w/8,y-1.2*h/2,0.);
+    GFXVertex3d ((double)x-w/8,y-1.2*h/2,0.);
+    GFXVertex3d ((double)x-w/3,y-1.1*h/2,0.);
+    GFXVertex3d ((double)x+w/8,y-1.2*h/2,0.);
+    GFXVertex3d ((double)x+w/3,y-1.1*h/2,0.);
   }
 
   GFXEnd();
@@ -477,42 +486,42 @@ static void DrawGun (Vector  pos, float w, float h, weapon_info::MOUNT_SIZE sz) 
     GFXPointSize (1);
   } else if (sz<weapon_info::SPECIAL) {
     GFXBegin (GFXLINE);
-    GFXVertex3f (pos.i+oox,pos.j,0);
-    GFXVertex3f (pos.i+oox,pos.j-h/15,0);
-    GFXVertex3f (pos.i-oox,pos.j,0);
-    GFXVertex3f (pos.i-oox,pos.j-h/15,0);
-    GFXVertex3f (pos.i+oox,pos.j-h/15,0);
-    GFXVertex3f (pos.i-oox,pos.j-h/15,0);
+    GFXVertex3d (pos.i+oox,pos.j,0);
+    GFXVertex3d (pos.i+oox,pos.j-h/15,0);
+    GFXVertex3d (pos.i-oox,pos.j,0);
+    GFXVertex3d (pos.i-oox,pos.j-h/15,0);
+    GFXVertex3d (pos.i+oox,pos.j-h/15,0);
+    GFXVertex3d (pos.i-oox,pos.j-h/15,0);
     if (sz==weapon_info::LIGHT) {
-      GFXVertex3f (pos.i,pos.j,0);
-      GFXVertex3f (pos.i,pos.j+h/4,0);
-      GFXVertex3f (pos.i,pos.j+h/4+ooy*2,0);
-      GFXVertex3f (pos.i,pos.j+h/4+ooy*5,0);
+      GFXVertex3d (pos.i,pos.j,0);
+      GFXVertex3d (pos.i,pos.j+h/4,0);
+      GFXVertex3d (pos.i,pos.j+h/4+ooy*2,0);
+      GFXVertex3d (pos.i,pos.j+h/4+ooy*5,0);
     }else if (sz==weapon_info::MEDIUM) {
-      GFXVertex3f (pos.i,pos.j,0);
-      GFXVertex3f (pos.i,pos.j+h/5,0);
-      GFXVertex3f (pos.i,pos.j+h/5+ooy*4,0);
-      GFXVertex3f (pos.i,pos.j+h/5+ooy*5,0);
-      GFXVertex3f (pos.i+oox,pos.j+h/5+ooy*2,0);      
-      GFXVertex3f (pos.i-oox,pos.j+h/5+ooy*2,0);      
+      GFXVertex3d (pos.i,pos.j,0);
+      GFXVertex3d (pos.i,pos.j+h/5,0);
+      GFXVertex3d (pos.i,pos.j+h/5+ooy*4,0);
+      GFXVertex3d (pos.i,pos.j+h/5+ooy*5,0);
+      GFXVertex3d (pos.i+oox,pos.j+h/5+ooy*2,0);      
+      GFXVertex3d (pos.i-oox,pos.j+h/5+ooy*2,0);      
     }else if (sz==weapon_info::HEAVY) {
-      GFXVertex3f (pos.i,pos.j,0);
-      GFXVertex3f (pos.i,pos.j+h/5,0);
-      GFXVertex3f (pos.i,pos.j+h/5+ooy*4,0);
-      GFXVertex3f (pos.i,pos.j+h/5+ooy*5,0);
-      GFXVertex3f (pos.i+2*oox,pos.j+h/5+ooy*3,0);      
-      GFXVertex3f (pos.i,pos.j+h/5+ooy*2,0);      
-      GFXVertex3f (pos.i-2*oox,pos.j+h/5+ooy*3,0);      
-      GFXVertex3f (pos.i,pos.j+h/5+ooy*2,0);      
+      GFXVertex3d (pos.i,pos.j,0);
+      GFXVertex3d (pos.i,pos.j+h/5,0);
+      GFXVertex3d (pos.i,pos.j+h/5+ooy*4,0);
+      GFXVertex3d (pos.i,pos.j+h/5+ooy*5,0);
+      GFXVertex3d (pos.i+2*oox,pos.j+h/5+ooy*3,0);      
+      GFXVertex3d (pos.i,pos.j+h/5+ooy*2,0);      
+      GFXVertex3d (pos.i-2*oox,pos.j+h/5+ooy*3,0);      
+      GFXVertex3d (pos.i,pos.j+h/5+ooy*2,0);      
     }else {//capship gun
-      GFXVertex3f (pos.i,pos.j,0);
-      GFXVertex3f (pos.i,pos.j+h/6,0);
-      GFXVertex3f (pos.i,pos.j+h/6+ooy*6,0);
-      GFXVertex3f (pos.i,pos.j+h/6+ooy*7,0);
-      GFXVertex3f (pos.i-oox,pos.j+h/6+ooy*2,0);
-      GFXVertex3f (pos.i+oox,pos.j+h/6+ooy*2,0);
-      GFXVertex3f (pos.i-2*oox,pos.j+h/6+ooy*4,0);
-      GFXVertex3f (pos.i+2*oox,pos.j+h/6+ooy*4,0);
+      GFXVertex3d (pos.i,pos.j,0);
+      GFXVertex3d (pos.i,pos.j+h/6,0);
+      GFXVertex3d (pos.i,pos.j+h/6+ooy*6,0);
+      GFXVertex3d (pos.i,pos.j+h/6+ooy*7,0);
+      GFXVertex3d (pos.i-oox,pos.j+h/6+ooy*2,0);
+      GFXVertex3d (pos.i+oox,pos.j+h/6+ooy*2,0);
+      GFXVertex3d (pos.i-2*oox,pos.j+h/6+ooy*4,0);
+      GFXVertex3d (pos.i+2*oox,pos.j+h/6+ooy*4,0);
     }  
     GFXEnd ();
   }else if (sz==weapon_info::SPECIAL||sz==weapon_info::SPECIALMISSILE) {
@@ -523,21 +532,21 @@ static void DrawGun (Vector  pos, float w, float h, weapon_info::MOUNT_SIZE sz) 
     GFXPointSize (1);//classified...  FIXME    
   }else if (sz<weapon_info::HEAVYMISSILE) {
     GFXBegin (GFXLINE);
-    GFXVertex3f (pos.i,pos.j-h/8,0);
-    GFXVertex3f (pos.i,pos.j+h/8,0);
-    GFXVertex3f (pos.i+2*oox,pos.j-h/8+2*ooy,0);
-    GFXVertex3f (pos.i-2*oox,pos.j-h/8+2*ooy,0);
+    GFXVertex3d (pos.i,pos.j-h/8,0);
+    GFXVertex3d (pos.i,pos.j+h/8,0);
+    GFXVertex3d (pos.i+2*oox,pos.j-h/8+2*ooy,0);
+    GFXVertex3d (pos.i-2*oox,pos.j-h/8+2*ooy,0);
     GFXEnd();
   }else if (sz<=weapon_info::CAPSHIPHEAVYMISSILE) {
     GFXBegin (GFXLINE);
-    GFXVertex3f (pos.i,pos.j-h/6,0);
-    GFXVertex3f (pos.i,pos.j+h/6,0);
-    GFXVertex3f (pos.i+3*oox,pos.j-h/6+2*ooy,0);
-    GFXVertex3f (pos.i-3*oox,pos.j-h/6+2*ooy,0);
-    GFXVertex3f (pos.i+oox,pos.j-h/6,0);
-    GFXVertex3f (pos.i+oox,pos.j+h/9,0);
-    GFXVertex3f (pos.i-oox,pos.j-h/6,0);
-    GFXVertex3f (pos.i-oox,pos.j+h/9,0);
+    GFXVertex3d (pos.i,pos.j-h/6,0);
+    GFXVertex3d (pos.i,pos.j+h/6,0);
+    GFXVertex3d (pos.i+3*oox,pos.j-h/6+2*ooy,0);
+    GFXVertex3d (pos.i-3*oox,pos.j-h/6+2*ooy,0);
+    GFXVertex3d (pos.i+oox,pos.j-h/6,0);
+    GFXVertex3d (pos.i+oox,pos.j+h/9,0);
+    GFXVertex3d (pos.i-oox,pos.j-h/6,0);
+    GFXVertex3d (pos.i-oox,pos.j+h/9,0);
     GFXEnd();
   }
   
@@ -651,7 +660,7 @@ void VDU::DrawWeapon (Unit * parent, const GFXColor& c) {
   GFXDisable (TEXTURE0);
   GFXDisable(LIGHTING);
   for (int i=0;i<parent->nummounts;i++) {
-    Vector pos (parent->mounts[i].GetMountLocation().position);
+    Vector pos (parent->mounts[i].GetMountLocation().position.Cast());
     pos.i=-
 pos.i*fabs(w)/parent->rSize()*percent+x;
     pos.j=pos.k*fabs(h)/parent->rSize()*percent+y;
@@ -660,10 +669,10 @@ pos.i*fabs(w)/parent->rSize()*percent+x;
     switch (parent->mounts[i].ammo!=0?parent->mounts[i].status:127) {
     case Unit::Mount::ACTIVE:
       GFXColor4f (0,1,.2,1);
-      if (parent->mounts[i].type.size<weapon_info::LIGHTMISSILE) 
-	buf+=((buf.length()==len)?string(""):string(","))+((count++%2==0)?"\n":"")+parent->mounts[i].type.weapon_name+ammo;
+      if (parent->mounts[i].type->size<weapon_info::LIGHTMISSILE) 
+	buf+=((buf.length()==len)?string(""):string(","))+((count++%2==0)?"\n":"")+parent->mounts[i].type->weapon_name+ammo;
       else
-	mbuf+=((mbuf.length()==mlen)?string(""):string(","))+((mcount++%4==0)?"\n":"")+parent->mounts[i].type.weapon_name+ammo;;
+	mbuf+=((mbuf.length()==mlen)?string(""):string(","))+((mcount++%4==0)?"\n":"")+parent->mounts[i].type->weapon_name+ammo;;
       break;
     case Unit::Mount::INACTIVE:
       GFXColor4f (0,.5,0,1);
@@ -678,7 +687,7 @@ pos.i*fabs(w)/parent->rSize()*percent+x;
       GFXColor4f (0,.2,0,1);
       break;
     }
-    DrawGun (pos,w,h,parent->mounts[i].type.size);
+    DrawGun (pos,w,h,parent->mounts[i].type->size);
   }
   GFXColor4f(0,1,.2,1);
   if (mbuf.length()!=mlen) {
@@ -728,7 +737,7 @@ void VDU::Draw (Unit * parent, const GFXColor & color) {
     DrawStarSystemAgain (.5*(x-fabs(w/2)+1),.5*((y-fabs(h/2))+1),fabs(w/2),fabs(h/2),viewStyle,parent,targ,color);
     break;
   case NAV:
-    DrawNav(parent->ToLocalCoordinates (parent->GetComputerData().NavPoint-parent->Position()),color);
+    DrawNav(parent->ToLocalCoordinates (parent->GetComputerData().NavPoint-parent->Position().Cast()),color);
     break;
   case MSG:
     DrawMessages(targ,color);
@@ -763,13 +772,13 @@ void UpdateViewstyle (VIEWSTYLE &vs) {
     vs=CP_LEFT;
     break;
   case CP_CHASE:
-    vs = CP_RIGHT;
+    vs = CP_TARGET;
     break;
   case CP_PAN:
     vs = CP_CHASE;
     break;
   case CP_PANTARGET:
-    vs=CP_PAN;
+    vs=CP_CHASE;
     break;
   case CP_TARGET:
     vs=CP_PANTARGET;
@@ -779,7 +788,7 @@ void UpdateViewstyle (VIEWSTYLE &vs) {
 void VDU::SwitchMode() {
   if (!posmodes)
     return;
-  if (thismode.back()==VIEW&&viewStyle!=CP_BACK&&(thismode.back()&posmodes)) {
+  if (thismode.back()==VIEW&&viewStyle!=CP_CHASE&&(thismode.back()&posmodes)) {
     UpdateViewstyle (viewStyle);
   }else {
     viewStyle = CP_TARGET;

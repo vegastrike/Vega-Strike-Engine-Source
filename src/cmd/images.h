@@ -18,8 +18,9 @@ struct DockingPorts {
     internal=(internal);
     used=false;
   }
-  DockingPorts (const Vector &min, const Vector &max, bool internal=true) :
-  pos(.5*(min+max)), radius((max-min).Magnitude()*.5) {
+  DockingPorts (const Vector &min, const Vector &max, bool internal=true):radius((max-min).Magnitude()*.5) {
+	pos = ((float).5)*(min+max);
+	
     this->min =(min);
     this->max =(max);
     this->internal=(internal);
@@ -81,6 +82,7 @@ struct UnitImages {
   std::vector <Unit *> clearedunits;
   std::vector <DockedUnits *> dockedunits;
   UnitContainer DockedTo;
+  float unitscale;//for output
   class XMLSerializer *unitwriter;
 };
 

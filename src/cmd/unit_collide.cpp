@@ -11,6 +11,8 @@
 #include "collide/collider.h"
 #include "hashtable.h"
 #include <string>
+#include "vs_globals.h"
+#include "config_xml.h"
 static Hashtable <std::string,collideTrees,char[127]> unitColliders;
 collideTrees::collideTrees (const std::string &hk, BSPTree *bT, BSPTree *bS, csRapidCollider *cT, csRapidCollider *cS): hash_key(hk),bspTree(bT), colTree(cT), bspShield(bS), colShield(cS) {
   refcount=1;
@@ -36,12 +38,12 @@ void collideTrees::Dec() {
   }
 }
 
-bool TableLocationChanged (const Vector & Mini,const Vector & minz) { 
+bool TableLocationChanged (const QVector & Mini,const QVector & minz) { 
   return (_Universe->activeStarSystem()->collidetable->c.hash_int (Mini.i)!=_Universe->activeStarSystem()->collidetable->c.hash_int (minz.i) ||
 	  _Universe->activeStarSystem()->collidetable->c.hash_int (Mini.j)!=_Universe->activeStarSystem()->collidetable->c.hash_int (minz.j) ||
 	  _Universe->activeStarSystem()->collidetable->c.hash_int (Mini.k)!=_Universe->activeStarSystem()->collidetable->c.hash_int (minz.k));
 }
-bool TableLocationChanged (const LineCollide &lc, const Vector &minx, const Vector & maxx) {
+bool TableLocationChanged (const LineCollide &lc, const QVector &minx, const QVector & maxx) {
   return TableLocationChanged (lc.Mini,minx) || TableLocationChanged (lc.Maxi,maxx);
 }
 void KillCollideTable (LineCollide * lc,StarSystem * ss) {
@@ -110,7 +112,7 @@ void Unit::RemoveFromSystem() {
   CollideInfo.object.u=NULL;
   int j;
   for (j=0;j<nummounts;j++) {
-    if (mounts[j].type.type==weapon_info::BEAM) {
+    if (mounts[j].type->type==weapon_info::BEAM) {
       if (mounts[j].ref.gun) {
 	mounts[j].ref.gun->RemoveFromSystem(true);
       }
@@ -126,8 +128,8 @@ void Unit::UpdateCollideQueue () {
     assert (activeStarSystem==_Universe->activeStarSystem());
   }
   CollideInfo.lastchecked =NULL;//reset who checked it last in case only one thing keeps crashing with it;
-  Vector Puffmin (Position().i-radial_size,Position().j-radial_size,Position().k-radial_size);
-  Vector Puffmax (Position().i+radial_size,Position().j+radial_size,Position().k+radial_size);
+  QVector Puffmin (Position().i-radial_size,Position().j-radial_size,Position().k-radial_size);
+  QVector Puffmax (Position().i+radial_size,Position().j+radial_size,Position().k+radial_size);
   if (CollideInfo.object.u == NULL||TableLocationChanged(CollideInfo,Puffmin,Puffmax)) {//assume not mutable
     if (CollideInfo.object.u!=NULL) {
       KillCollideTable(&CollideInfo,activeStarSystem);
@@ -172,7 +174,7 @@ void Unit::CollideAll() {
   }
 }
 
-bool Unit::Inside (const Vector &target, const float radius, Vector & normal, float &dist) {//do each of these bubbled subunits collide with the other unit?
+bool Unit::Inside (const QVector &target, const float radius, Vector & normal, float &dist) {//do each of these bubbled subunits collide with the other unit?
   if (!querySphere(target,radius)) {
     return false;;
   }
@@ -189,13 +191,14 @@ bool Unit::Inside (const Vector &target, const float radius, Vector & normal, fl
 
   return false;
 }
-bool Unit::InsideCollideTree (Unit * smaller, Vector & bigpos, Vector &bigNormal, Vector & smallpos, Vector & smallNormal) {
+bool Unit::InsideCollideTree (Unit * smaller, QVector & bigpos, Vector &bigNormal, QVector & smallpos, Vector & smallNormal) {
   if (smaller->colTrees==NULL||colTrees==NULL)
     return false;
   if (smaller->colTrees->colTree==NULL||colTrees->colTree==NULL)
     return false;
 
     csRapidCollider::CollideReset();
+    //    printf ("Col %s %s\n",name.c_str(),smaller->name.c_str());
     Unit * bigger =this;
     const csReversibleTransform bigtransform (bigger->cumulative_transformation_matrix);
     const csReversibleTransform smalltransform (smaller->cumulative_transformation_matrix);
@@ -228,9 +231,15 @@ bool Unit::InsideCollideTree (Unit * smaller, Vector & bigpos, Vector &bigNormal
       }
     }
     UnitCollection::UnitIterator i;
+    static float rsizelim = XMLSupport::parse_float (vs_config->getVariable ("physics","smallest_subunit_to_collide",".2"));
     if (!bigger->SubUnits.empty()) {
       i=bigger->getSubUnits();
       for (Unit * un;(un=i.current())!=NULL;i.advance()) {
+	if ((bigger->isUnit()!=ASTEROIDPTR)&&(un->rSize()/bigger->rSize()<rsizelim)) {
+	  break;
+	}else {
+	  //	  printf ("s:%f",un->rSize()/bigger->rSize());
+	}
 	if ((un->InsideCollideTree(smaller,bigpos, bigNormal,smallpos,smallNormal))) {
 	  return true;
 	}
@@ -239,6 +248,11 @@ bool Unit::InsideCollideTree (Unit * smaller, Vector & bigpos, Vector &bigNormal
     if (!smaller->SubUnits.empty()) {
       i=smaller->getSubUnits();
       for (Unit * un;(un=i.current())!=NULL;i.advance()) {
+	if ((smaller->isUnit()!=ASTEROIDPTR)&&(un->rSize()/smaller->rSize()<rsizelim)) {
+	  //	  printf ("s:%f",un->rSize()/smaller->rSize());
+	  break;
+
+	}
 	if ((bigger->InsideCollideTree(un,bigpos, bigNormal,smallpos,smallNormal))) {
 	  return true;
 	}
@@ -272,19 +286,23 @@ bool Unit::Collide (Unit * target) {
     ?colTrees->colTree&&target->colTrees->colTree
     : false;
   if (usecoltree) {
-    Vector bigpos,smallpos,bigNormal,smallNormal;
+    QVector bigpos,smallpos;
+    Vector bigNormal,smallNormal;
     if (bigger->InsideCollideTree (smaller,bigpos,bigNormal,smallpos,smallNormal)) {
-      bigger->reactToCollision (smaller,bigpos, bigNormal,smallpos,smallNormal, 10   );	
-    }
+      if (!bigger->isDocked(smaller)&&!smaller->isDocked(bigger)) {
+	bigger->reactToCollision (smaller,bigpos, bigNormal,smallpos,smallNormal, 10   ); 
+      } else return false;
+    } else return false;
   } else {
     if (bigger->Inside(smaller->Position(),smaller->rSize(),normal,dist)) {
       if (normal.i==-1&&normal.j==-1) {
-	normal = (smaller->Position()-bigger->Position());
+	normal = (smaller->Position()-bigger->Position()).Cast();
 	if (normal.i||normal.j||normal.k)
 	  normal.Normalize();
       }
-
-      bigger->reactToCollision (smaller,bigger->Position(), normal,smaller->Position(), -normal, dist);
+      if (!bigger->isDocked(smaller)&&!smaller->isDocked(bigger)) {
+	bigger->reactToCollision (smaller,bigger->Position(), normal,smaller->Position(), -normal, dist);
+      }else return false;
     }else {
       return false;      
     }
@@ -301,7 +319,7 @@ bool Unit::Collide (Unit * target) {
 
 
 
-Unit * Unit::queryBSP (const Vector &pt, float err, Vector & norm, float &dist, bool ShieldBSP) {
+Unit * Unit::queryBSP (const QVector &pt, float err, Vector & norm, float &dist, bool ShieldBSP) {
   int i;
   if (!SubUnits.empty()) {
     un_fiter i = SubUnits.fastIterator();
@@ -312,7 +330,7 @@ Unit * Unit::queryBSP (const Vector &pt, float err, Vector & norm, float &dist, 
       }
     }
   }
-  Vector st (InvTransform (cumulative_transformation_matrix,pt));
+  QVector st (InvTransform (cumulative_transformation_matrix,pt));
   bool temp=false;
   for (i=0;i<nummesh&&!temp;i++) {
     temp|=meshdata[i]->queryBoundingBox (st,err);
@@ -323,7 +341,7 @@ Unit * Unit::queryBSP (const Vector &pt, float err, Vector & norm, float &dist, 
   BSPTree *const* tmpBsp;
   BSPTree *myNull=NULL;
   if (colTrees) {
-    tmpBsp = ShieldUp(st)?&colTrees->bspShield:&colTrees->bspTree;
+    tmpBsp = ShieldUp(st.Cast())?&colTrees->bspShield:&colTrees->bspTree;
     if (colTrees->bspTree&&!ShieldBSP) {
       tmpBsp= &colTrees->bspTree;
     }
@@ -331,17 +349,17 @@ Unit * Unit::queryBSP (const Vector &pt, float err, Vector & norm, float &dist, 
     tmpBsp=&myNull;
   }
   if (!(*tmpBsp)) {
-    dist = (st - meshdata[i-1]->Position()).Magnitude()-err-meshdata[i-1]->rSize();
+    dist = (st - meshdata[i-1]->Position().Cast()).Magnitude()-err-meshdata[i-1]->rSize();
     return this;
   }
-  if ((*tmpBsp)->intersects (st,err,norm,dist)) {
+  if ((*tmpBsp)->intersects (st.Cast(),err,norm,dist)) {
     norm = ToWorldCoordinates (norm);
     return this;
   }
   return NULL;
 }
 
-Unit * Unit::queryBSP (const Vector &start, const Vector & end, Vector & norm, float &distance, bool ShieldBSP) {
+Unit * Unit::queryBSP (const QVector &start, const QVector & end, Vector & norm, float &distance, bool ShieldBSP) {
   int i;
   Unit * tmp;
   if (!SubUnits.empty()) {
@@ -353,27 +371,27 @@ Unit * Unit::queryBSP (const Vector &start, const Vector & end, Vector & norm, f
     }
   }
   BSPTree *myNull=NULL;
-  Vector st (InvTransform (cumulative_transformation_matrix,start));
+  QVector st (InvTransform (cumulative_transformation_matrix,start));
   BSPTree *const* tmpBsp = &myNull;
   if (colTrees) {
-    tmpBsp=ShieldUp(st)?&colTrees->bspShield:&colTrees->bspTree;
+    tmpBsp=ShieldUp(st.Cast())?&colTrees->bspShield:&colTrees->bspTree;
     if (colTrees->bspTree&&!ShieldBSP) {
       tmpBsp= &colTrees->bspTree;
     }
   }
-  for (;tmpBsp!=NULL;tmpBsp=((ShieldUp(st)&&(tmpBsp!=((colTrees?&colTrees->bspTree:&myNull))))?((colTrees?&colTrees->bspTree:&myNull)):NULL)) {
+  for (;tmpBsp!=NULL;tmpBsp=((ShieldUp(st.Cast())&&(tmpBsp!=((colTrees?&colTrees->bspTree:&myNull))))?((colTrees?&colTrees->bspTree:&myNull)):NULL)) {
     if (!(*tmpBsp)) {
       distance = querySphereNoRecurse (start,end);
-      norm = (distance * (start-end));
+      norm = (distance * (start-end)).Cast();
       distance = norm.Magnitude();
-      norm +=start;
+      norm= (norm.Cast()+start).Cast();
       norm.Normalize();//normal points out from center
       if (distance)
 	return this;
       else
 	continue;
     }
-    Vector ed (InvTransform (cumulative_transformation_matrix,end));
+    QVector ed (InvTransform (cumulative_transformation_matrix,end));
     bool temp=false;
     for (i=0;i<nummesh&&!temp;i++) {
       temp = (1==meshdata[i]->queryBoundingBox (st,ed,0));
@@ -381,7 +399,7 @@ Unit * Unit::queryBSP (const Vector &start, const Vector & end, Vector & norm, f
     if (!temp) {
       continue;
     }
-    if ((distance = (*tmpBsp)->intersects (st,ed,norm))!=0) {
+    if ((distance = (*tmpBsp)->intersects (st.Cast(),ed.Cast(),norm))!=0) {
       norm = ToWorldCoordinates (norm);
       return this;
     }
@@ -390,16 +408,16 @@ Unit * Unit::queryBSP (const Vector &start, const Vector & end, Vector & norm, f
 }
 
 
-bool Unit::querySphere (const Vector &pnt, float err) const{
+bool Unit::querySphere (const QVector &pnt, float err) const{
   int i;
-  const float * tmpo = cumulative_transformation_matrix;
+  const Matrix * tmpo = &cumulative_transformation_matrix;
   
-  Vector TargetPoint (tmpo[0],tmpo[1],tmpo[2]);
+  Vector TargetPoint (tmpo->getP());
 #ifdef VARIABLE_LENGTH_PQR
   float SizeScaleFactor = sqrtf(TargetPoint.Dot(TargetPoint));//adjust the ship radius by the scale of local coordinates
 #endif
   for (i=0;i<nummesh;i++) {
-    TargetPoint = Transform (tmpo,meshdata[i]->Position())-pnt;
+    TargetPoint = (Transform (*tmpo,meshdata[i]->Position()).Cast()-pnt).Cast();
     if (TargetPoint.Dot (TargetPoint)< 
 	err*err+
 	meshdata[i]->rSize()*meshdata[i]->rSize()
@@ -427,7 +445,7 @@ bool Unit::querySphere (const Vector &pnt, float err) const{
 
 
 
-float Unit::querySphere (const Vector &start, const Vector &end, float min_radius) const{
+float Unit::querySphere (const QVector &start, const QVector &end, float min_radius) const{
   if (!SubUnits.empty()) {
     un_fkiter i=SubUnits.constFastIterator();
     for (const Unit * un;(un=i.current())!=NULL;i.advance()) {
@@ -441,13 +459,13 @@ float Unit::querySphere (const Vector &start, const Vector &end, float min_radiu
   return querySphereNoRecurse (start,end,min_radius);
 }
 
-float Unit::querySphereNoRecurse (const Vector & start, const Vector & end, float min_radius) const {
+float Unit::querySphereNoRecurse (const QVector & start, const QVector & end, float min_radius) const {
   int i;
   float tmp;
-  Vector st,dir;
+  QVector st,dir;
   for (i=0;i<nummesh;i++) {
     float a, b,c;
-    st = start - Transform (cumulative_transformation_matrix,meshdata[i]->Position());	
+    st = start - Transform (cumulative_transformation_matrix,meshdata[i]->Position()).Cast();	
     dir = end-start;//now start and end are based on mesh's position
     // v.Dot(v) = r*r; //equation for sphere
     // (x0 + (x1 - x0) *t) * (x0 + (x1 - x0) *t) = r*r

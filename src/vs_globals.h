@@ -1,5 +1,8 @@
 #ifndef __VS_GLOBALS_H_
 #define __VS_GLOBALS_H_
+
+#include <vector>
+
 /* All global data is stored in a variable of this type */
 typedef struct {
   int audio_frequency_mode; //0==11025/8 1==22050/8 2==44100/8  3==11025/16 4==22050/16 5==44100/16  

@@ -29,6 +29,7 @@
 #include "vegastrike.h"
 #include <assert.h>
 
+
 #include "config_xml.h"
 #include "easydom.h"
 #include "cmd/ai/flykeyboard.h"
@@ -133,34 +134,64 @@ void VegaConfig::initKeyMap(){
   // mapping from special key string to glut key
   key_map["space"]=' ';
   key_map["return"]=13;
-  key_map["function-1"]=KEY_SPECIAL_OFFSET+GLUT_KEY_F1;
-  key_map["function-2"]=KEY_SPECIAL_OFFSET+GLUT_KEY_F2;
-  key_map["function-3"]=KEY_SPECIAL_OFFSET+GLUT_KEY_F3;
-  key_map["function-4"]=KEY_SPECIAL_OFFSET+GLUT_KEY_F4;
-  key_map["function-5"]=KEY_SPECIAL_OFFSET+GLUT_KEY_F5;
-  key_map["function-6"]=KEY_SPECIAL_OFFSET+GLUT_KEY_F6;
-  key_map["function-7"]=KEY_SPECIAL_OFFSET+GLUT_KEY_F7;
-  key_map["function-8"]=KEY_SPECIAL_OFFSET+GLUT_KEY_F8;
-  key_map["function-9"]=KEY_SPECIAL_OFFSET+GLUT_KEY_F9;
-  key_map["function-10"]=KEY_SPECIAL_OFFSET+GLUT_KEY_F10;
-  key_map["function-11"]=KEY_SPECIAL_OFFSET+GLUT_KEY_F11;
-  key_map["function-12"]=KEY_SPECIAL_OFFSET+GLUT_KEY_F12;
+  key_map["enter"]=WSK_KP_ENTER;
+  key_map["function-1"]=WSK_F1;
+  key_map["function-2"]=WSK_F2;
+  key_map["function-3"]=WSK_F3;
+  key_map["function-4"]=WSK_F4;
+  key_map["function-5"]=WSK_F5;
+  key_map["function-6"]=WSK_F6;
+  key_map["function-7"]=WSK_F7;
+  key_map["function-8"]=WSK_F8;
+  key_map["function-9"]=WSK_F9;
+  key_map["function-10"]=WSK_F10;
+  key_map["function-11"]=WSK_F11;
+  key_map["function-12"]=WSK_F12;
+  key_map["keypad-insert"]=WSK_KP0;
+  key_map["keypad-0"]=WSK_KP0;
+  key_map["keypad-1"]=WSK_KP1;
+  key_map["keypad-2"]=WSK_KP2;
+  key_map["keypad-3"]=WSK_KP3;
+  key_map["keypad-4"]=WSK_KP4;
+  key_map["keypad-5"]=WSK_KP5;
+  key_map["keypad-6"]=WSK_KP6;
+  key_map["keypad-7"]=WSK_KP7;
+  key_map["keypad-8"]=WSK_KP8;
+  key_map["keypad-9"]=WSK_KP9;
+  key_map["keypad-numlock"]=WSK_NUMLOCK;
+  key_map["keypad-period"]=WSK_KP_PERIOD;
+  key_map["keypad-delete"]=WSK_KP_PERIOD;
+  key_map["keypad-divide"]=WSK_KP_DIVIDE;
+  key_map["keypad-multiply"]=WSK_KP_MULTIPLY;
+  key_map["keypad-minus"]=WSK_KP_MINUS;
+  key_map["keypad-plus"]=WSK_KP_PLUS;
+  key_map["keypad-enter"]=WSK_KP_ENTER;
+  key_map["keypad-equals"]=WSK_KP_EQUALS;
+  key_map["scrollock"]=WSK_SCROLLOCK;
+  key_map["right-ctrl"]=WSK_RCTRL;
+  key_map["left-ctrl"]=WSK_LCTRL;
+  key_map["right-alt"]=WSK_RALT;
+  key_map["left-alt"]=WSK_LALT;
+  key_map["right-meta"]=WSK_RMETA;
+  key_map["left-meta"]=WSK_LMETA;
 
-  key_map["cursor-left"]=KEY_SPECIAL_OFFSET+GLUT_KEY_LEFT;
-  key_map["cursor-up"]=KEY_SPECIAL_OFFSET+GLUT_KEY_UP;
-  key_map["cursor-right"]=KEY_SPECIAL_OFFSET+GLUT_KEY_RIGHT;
-  key_map["cursor-down"]=KEY_SPECIAL_OFFSET+GLUT_KEY_DOWN;
+  key_map["cursor-left"]=WSK_LEFT;
+  key_map["cursor-up"]=WSK_UP;
+  key_map["cursor-right"]=WSK_RIGHT;
+  key_map["cursor-down"]=WSK_DOWN;
 
-  key_map["cursor-pageup"]=KEY_SPECIAL_OFFSET+GLUT_KEY_PAGE_UP;
-  key_map["cursor-pagedown"]=KEY_SPECIAL_OFFSET+GLUT_KEY_PAGE_DOWN;
-  key_map["cursor-home"]=KEY_SPECIAL_OFFSET+GLUT_KEY_HOME;
-  key_map["cursor-end"]=KEY_SPECIAL_OFFSET+GLUT_KEY_END;
-  key_map["cursor-insert"]=KEY_SPECIAL_OFFSET+GLUT_KEY_INSERT;
+  key_map["cursor-pageup"]=WSK_PAGEUP;
+  key_map["cursor-pagedown"]=WSK_PAGEDOWN;
+  key_map["cursor-home"]=WSK_HOME;
+  key_map["cursor-end"]=WSK_END;
+  key_map["cursor-insert"]=WSK_INSERT;
   key_map["backspace"]=8;
-  key_map["capslock"]=96;
+  key_map["capslock"]=WSK_CAPSLOCK;
   key_map["cursor-delete"]=127;
   key_map["tab"]='\t';
   key_map["esc"]=27;
+  key_map["break"]=WSK_BREAK;
+  key_map["pause"]=WSK_BREAK;
 
 }
 
@@ -170,6 +201,7 @@ void VegaConfig::initKeyMap(){
 
 /* *********************************************************** */
 extern void  inc_time_compression (int i, KBSTATE a);
+extern void  SuicideKey (int i, KBSTATE a);
 extern void pause_key (int i, KBSTATE a);
 extern void dec_time_compression(int i, KBSTATE a);
 extern void reset_time_compression(int i, KBSTATE a);
@@ -231,12 +263,15 @@ void VegaConfig::initCommandMap(){
   command_map["Comm10Key"]=FireKeyboard::PressComm10Key ;
   command_map["EjectCargoKey"]=FireKeyboard::EjectCargoKey ;  
   command_map["EjectKey"]=FireKeyboard::EjectKey ;
+  command_map["SuicideKey"]=SuicideKey ;
+  command_map["TurretAIKey"]=FireKeyboard::TurretAI ;
   command_map["DockKey"]=FireKeyboard::DockKey ;
   command_map["UnDockKey"]=FireKeyboard::UnDockKey ;
   command_map["RequestClearenceKey"]=FireKeyboard::RequestClearenceKey ;
   command_map["FireKey"]=FireKeyboard::FireKey ;
   command_map["MissileKey"]=FireKeyboard::MissileKey ;
   command_map["TargetKey"]=FireKeyboard::TargetKey ;
+  command_map["ReverseTargetKey"]=FireKeyboard::ReverseTargetKey ;
   command_map["PickTargetKey"]=FireKeyboard::PickTargetKey ;
   command_map["NearestTargetKey"]=FireKeyboard::NearestTargetKey ;
   command_map["ThreatTargetKey"]=FireKeyboard::ThreatTargetKey ;
@@ -936,19 +971,36 @@ bool VegaConfig::setVariable(string section,string name,string value){
   return false;
 }
 
+
 bool VegaConfig::setVariable(string section,string subsection,string name,string value){
+
   configNode *sectionnode=findSection(section,variables);
+
   if(sectionnode!=NULL){
+
     configNode *subnode=findSection(name,sectionnode);
 
+
+
 	if(subnode!=NULL) {
+
 		configNode *varnode=findEntry(name,subnode);
+
 		if(varnode!=NULL){
+
 			// now set the thing
+
 			setVariable(varnode,value);
+
 			return true;
+
 		}
+
 	}
+
   }
+
   return false;
+
 }
+

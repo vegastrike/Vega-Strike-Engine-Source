@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include "lin_time.h"
 #include "cmd/unit.h"
+#include "cmd/unit_factory.h"
 #include "vegastrike.h"
 #include "vs_globals.h"
 #include "in.h"
@@ -94,7 +95,7 @@ public:
 };
 */
 
-const float timek = .005;
+const float timek = .001;
 bool _Slew = true;
 
 namespace CockpitKeys {
@@ -110,62 +111,66 @@ namespace CockpitKeys {
  void PitchDown(int,KBSTATE newState) {
 	static Vector Q;
 	static Vector R;
+	for (int i=0;i<NUM_CAM;i++) {
 	if(newState==PRESS) {
-		Q = _Universe->AccessCamera()->Q;
-		R = _Universe->AccessCamera()->R;
-		_Universe->AccessCamera()->myPhysics.ApplyBalancedLocalTorque(-Q, R,timek);
+		Q = _Universe->AccessCockpit()->AccessCamera(i)->Q;
+		R = _Universe->AccessCockpit()->AccessCamera(i)->R;
+		_Universe->AccessCockpit()->AccessCamera(i)->myPhysics.ApplyBalancedLocalTorque(-Q, R,timek);
 		//a =1;
 	}
 	if (_Slew&&newState==RELEASE) {
-	  _Universe->AccessCamera()->myPhysics.SetAngularVelocity(Vector(0,0,0));
+	  _Universe->AccessCockpit()->AccessCamera(i)->myPhysics.SetAngularVelocity(Vector(0,0,0));
 	}//a=0;
-	
+	}	
 }
 
  void PitchUp(int,KBSTATE newState) {
 	
 	static Vector Q;
 	static Vector R;
-
+	for (int i=0;i<NUM_CAM;i++) {
 	if(newState==PRESS) {
-		Q = _Universe->AccessCamera()->Q;
-		R = _Universe->AccessCamera()->R;
-		_Universe->AccessCamera()->myPhysics.ApplyBalancedLocalTorque(Q, R,timek);
+		Q = _Universe->AccessCockpit()->AccessCamera(i)->Q;
+		R = _Universe->AccessCockpit()->AccessCamera(i)->R;
+		_Universe->AccessCockpit()->AccessCamera(i)->myPhysics.ApplyBalancedLocalTorque(Q, R,timek);
 		
 	}
 	if (_Slew&&newState==RELEASE) {
-	  _Universe->AccessCamera()->myPhysics.SetAngularVelocity(Vector(0,0,0));
+	  _Universe->AccessCockpit()->AccessCamera(i)->myPhysics.SetAngularVelocity(Vector(0,0,0));
 	}
-}
+	}}
 
   void YawLeft(int,KBSTATE newState) {
 	
 	static Vector P;
 	static Vector R;
+	for (int i=0;i<NUM_CAM;i++) {
 	if(newState==PRESS) {
-		P = _Universe->AccessCamera()->P;
-		R = _Universe->AccessCamera()->R;
-		_Universe->AccessCamera()->myPhysics.ApplyBalancedLocalTorque(-P, R,timek);
+		P = _Universe->AccessCockpit()->AccessCamera(i)->P;
+		R = _Universe->AccessCockpit()->AccessCamera(i)->R;
+		_Universe->AccessCockpit()->AccessCamera(i)->myPhysics.ApplyBalancedLocalTorque(-P, R,timek);
 		
 	}
 	if (_Slew&&newState==RELEASE) {
-	  _Universe->AccessCamera()->myPhysics.SetAngularVelocity(Vector(0,0,0));
+	  _Universe->AccessCockpit()->AccessCamera(i)->myPhysics.SetAngularVelocity(Vector(0,0,0));
+	}
 	}
 }
 
   void YawRight(int,KBSTATE newState) {
-	
+		for (int i=0;i<NUM_CAM;i++) {
 	static Vector P;
 	static Vector R;
 	if(newState==PRESS) {
-		P = _Universe->AccessCamera()->P;
-		R = _Universe->AccessCamera()->R;
-		_Universe->AccessCamera()->myPhysics.ApplyBalancedLocalTorque(P, R,timek);
+		P = _Universe->AccessCockpit()->AccessCamera(i)->P;
+		R = _Universe->AccessCockpit()->AccessCamera(i)->R;
+		_Universe->AccessCockpit()->AccessCamera(i)->myPhysics.ApplyBalancedLocalTorque(P, R,timek);
 	
 	}
 	if (_Slew&&newState==RELEASE) {
-	  _Universe->AccessCamera()->myPhysics.SetAngularVelocity(Vector(0,0,0));
+	  _Universe->AccessCockpit()->AccessCamera(i)->myPhysics.SetAngularVelocity(Vector(0,0,0));
 	}
+		}
 }
 
   void Quit(int,KBSTATE newState) {
@@ -175,34 +180,31 @@ namespace CockpitKeys {
     }
     */
 	if(newState==PRESS||newState==DOWN) {
+	  _Universe->WriteSaveGame(true);//gotta do important stuff first
 	  for (unsigned int i=0;i<active_missions.size();i++) {
 	    if (active_missions[i]) {
 	      active_missions[i]->DirectorEnd();
 	    }
 	  }
 	  delete forcefeedback;
-	  exit(0);
+	  winsys_exit(0);
 	}
    
   }
 bool cockpitfront=true;
   void Inside(int,KBSTATE newState) {
-  const int cockpiton=1;
-  const int backgroundoff=2;
-  const int max = 4;
-  static int tmp=(XMLSupport::parse_bool (vs_config->getVariable ("graphics","cockpit","true"))?1:0)+((!XMLSupport::parse_bool (vs_config->getVariable ("graphics","background","true")))?2:0);
+    {
+      static bool back= XMLSupport::parse_bool (vs_config->getVariable ("graphics","background","true"));
+      _Universe->activeStarSystem()->getBackground()->EnableBG(back);
+    }
+  static int tmp=(XMLSupport::parse_bool (vs_config->getVariable ("graphics","cockpit","true"))?1:0);
   if(newState==PRESS&&cockpitfront) {
-    if ((tmp&cockpiton)&&_Universe->AccessCockpit()->GetParent()) {
+    if ((tmp)&&_Universe->AccessCockpit()->GetParent()) {
       _Universe->AccessCockpit()->Init (_Universe->AccessCockpit()->GetParent()->getCockpit().c_str());	    
     }else {
       _Universe->AccessCockpit()->Init ("disabled-cockpit.cpt");
     }
-	static int i=1;
-	if (i--==1){
-	  //  _Universe->activeStarSystem()->getBackground()->EnableBG(!(tmp&backgroundoff));
-	}
-    tmp--;
-    if (tmp<0) tmp=max-1;
+    tmp=(tmp+1)%2;
   }
   if(newState==PRESS||newState==DOWN) {
     cockpitfront=true;
@@ -383,7 +385,7 @@ void InitializeInput() {
 
 //Cockpit *cockpit;
 static Texture *tmpcockpittexture;
-void createObjects(std::vector <std::string> &fighter0name, std::vector <StarSystem *> &ssys, std::vector <Vector>& savedloc ) {
+void createObjects(std::vector <std::string> &fighter0name, std::vector <StarSystem *> &ssys, std::vector <QVector>& savedloc ) {
   vector <std::string> fighter0mods;
   vector <int> fighter0indices;
   //  GFXFogMode (FOG_OFF);
@@ -396,11 +398,11 @@ void createObjects(std::vector <std::string> &fighter0name, std::vector <StarSys
   if (stdstr.length()>0) {
     Terrain * terr = new Terrain (stdstr.c_str(), TerrainScale,XMLSupport::parse_float (vs_config->getVariable ("terrain","mass","100")), XMLSupport::parse_float (vs_config->getVariable ("terrain", "radius", "10000")));
     Matrix tmp;
-    Identity (tmp);
-    tmp[0]=TerrainScale.i;tmp[5]=TerrainScale.j;tmp[10]=TerrainScale.k;
-    Vector pos;
+    ScaleMatrix (tmp,TerrainScale);
+    //    tmp.r[0]=TerrainScale.i;tmp[5]=TerrainScale.j;tmp[10]=TerrainScale.k;
+    QVector pos;
     mission->GetOrigin (pos,stdstr);
-    tmp[12]=-pos.i;tmp[13]=-pos.j;tmp[14]=-pos.k;
+    tmp.p = -pos;
     terr->SetTransformation (tmp);
 
   }
@@ -409,9 +411,9 @@ void createObjects(std::vector <std::string> &fighter0name, std::vector <StarSys
     myterrain=new ContinuousTerrain (stdstr.c_str(),TerrainScale,XMLSupport::parse_float (vs_config->getVariable ("terrain","mass","100")));
     Matrix tmp;
     Identity (tmp);
-    Vector pos;
+    QVector pos;
     mission->GetOrigin (pos,stdstr);
-    tmp[12]=-pos.i;tmp[13]=-pos.j;tmp[14]=-pos.k;
+    tmp.p=-pos;
     myterrain->SetTransformation (tmp);
   }
   //  qt = new QuadTree("terrain.xml");
@@ -455,7 +457,7 @@ void createObjects(std::vector <std::string> &fighter0name, std::vector <StarSys
 
     for(int s=0;s < fg->nr_ships;s++){
       numf++;
-      Vector pox (1000+150*a,100*a,100);
+      QVector pox (1000+150*a,100*a,100);
       
       pox.i=fg->pos.i+s*fg_radius*3;
       pox.j=fg->pos.j+s*fg_radius*3;
@@ -484,42 +486,47 @@ void createObjects(std::vector <std::string> &fighter0name, std::vector <StarSys
 	    strcpy(fightername,fighter0name[squadnum].c_str());
 	  if (mission->getVariable ("savegame","").length()>0) {
 		  if (savedloc[squadnum].i!=FLT_MAX) {
-			pox = savedloc[squadnum];
+			pox = LaunchUnitNear(savedloc[squadnum]);
 		  }
 	    fighter0mods.push_back(modifications =vs_config->getVariable (string("player")+((squadnum>0)?tostring(squadnum+1):string("")),"callsign","")+mission->getVariable("savegame",""));
 	  }else {
 	    fighter0mods.push_back("");
 	  }
 	}
-    if (squadnum<(int)fighter0name.size()) {
+        Cockpit * backupcp = _Universe->AccessCockpit();
+
+        if (squadnum<(int)fighter0name.size()) {
 		_Universe->pushActiveStarSystem (_Universe->AccessCockpit(squadnum)->activeStarSystem);
-	}
-  	fighters[a] = new Unit(fightername, false,tmptarget[a],modifications,fg,s);
+                _Universe->SetActiveCockpit(_Universe->AccessCockpit(squadnum));
+
+        }
+  	fighters[a] = UnitFactory::createUnit(fightername, false,tmptarget[a],modifications,fg,s);
     _Universe->activeStarSystem()->AddUnit(fighters[a]);
 	if (s==0&&squadnum<(int)fighter0name.size()) {
 		_Universe->AccessCockpit(squadnum)->Init (fighters[a]->getCockpit().c_str());
 	    _Universe->AccessCockpit(squadnum)->SetParent(fighters[a],fighter0name[squadnum].c_str(),fighter0mods[squadnum].c_str(),pox);
 	}
-
+        
     if (squadnum<(int)fighter0name.size()) {
 		_Universe->popActiveStarSystem ();
+                _Universe->SetActiveCockpit(backupcp);
 	}
 
       }else {
 	  bool isvehicle=false;
 	if (fg_terrain==-2) {
 
-	  fighters[a]= new Building (myterrain,isvehicle,fightername,false,tmptarget[a],string(""),fg);
+	  fighters[a]= UnitFactory::createBuilding (myterrain,isvehicle,fightername,false,tmptarget[a],string(""),fg);
 	}else {
 	  
 	  if (fg_terrain>=(int)_Universe->activeStarSystem()->numTerrain()) {
 	    ContinuousTerrain * t;
 	    assert (fg_terrain-_Universe->activeStarSystem()->numTerrain()<_Universe->activeStarSystem()->numContTerrain());
 	    t =_Universe->activeStarSystem()->getContTerrain(fg_terrain-_Universe->activeStarSystem()->numTerrain());
-	    fighters[a]= new Building (t,isvehicle,fightername,false,tmptarget[a],string(""),fg);
+	    fighters[a]= UnitFactory::createBuilding (t,isvehicle,fightername,false,tmptarget[a],string(""),fg);
 	  }else {
 	    Terrain *t=_Universe->activeStarSystem()->getTerrain(fg_terrain);
-	    fighters[a]= new Building (t,isvehicle,fightername,false,tmptarget[a],string(""),fg);
+	    fighters[a]= UnitFactory::createBuilding (t,isvehicle,fightername,false,tmptarget[a],string(""),fg);
 	  }
 	  
 	}
@@ -583,9 +590,9 @@ void createObjects(std::vector <std::string> &fighter0name, std::vector <StarSys
   }
 
   shipList = _Universe->activeStarSystem()->getClickList();
-  locSel = new CoordinateSelect (Vector (0,0,5));
+  locSel = new CoordinateSelect (QVector (0,0,5));
   UpdateTime();
-//  _Universe->activeStarSystem()->AddUnit(new Nebula ("mynebula.xml","nebula",false,0,NULL,0));
+//  _Universe->activeStarSystem()->AddUnit(UnitFactory::createNebula ("mynebula.xml","nebula",false,0,NULL,0));
 
   mission->DirectorInitgame();
 }
@@ -593,15 +600,15 @@ void AddUnitToSystem (const SavedUnits *su) {
   Unit * un=NULL;
   switch (su->type) {
   case ENHANCEMENTPTR:
-    un = new Enhancement (su->filename.c_str(),_Universe->GetFaction (su->faction.c_str()),string(""));
-    un->SetPosition(0,0,0);
+    un = UnitFactory::createEnhancement (su->filename.c_str(),_Universe->GetFaction (su->faction.c_str()),string(""));
+    un->SetPosition(QVector(0,0,0));
     break;
   case UNITPTR:
   default:
-    un = new Unit (su->filename.c_str(),false,_Universe->GetFaction (su->faction.c_str()));
+    un = UnitFactory::createUnit (su->filename.c_str(),false,_Universe->GetFaction (su->faction.c_str()));
     un->EnqueueAI (new Orders::AggressiveAI ("default.agg.xml", "default.int.xml"));
     un->SetTurretAI ();
-    un->SetPosition (Vector(rand()*10000./RAND_MAX-5000,rand()*10000./RAND_MAX-5000,rand()*10000./RAND_MAX-5000));
+    un->SetPosition (QVector(rand()*10000./RAND_MAX-5000,rand()*10000./RAND_MAX-5000,rand()*10000./RAND_MAX-5000));
 
     break;
   }
@@ -628,17 +635,16 @@ int getmicrosleep () {
 
 void restore_main_loop() {
   RestoreKB();
-  glutSetCursor(GLUT_CURSOR_NONE);
+  //  winsys_show_cursor(false);
   RestoreMouse();
   GFXLoop (main_loop);
 
 }
 void main_loop() {
   _Universe->StartDraw();
-  if(myterrain){
+  if(myterrain){ 
     myterrain->AdjustTerrain(_Universe->activeStarSystem());
   }
-
 
 
 }

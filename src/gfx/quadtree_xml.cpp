@@ -5,7 +5,7 @@
 #include <assert.h>
 #include "png_texture.h"
 
-extern enum BLENDFUNC parse_alpha (char * tmp );
+extern enum BLENDFUNC parse_alpha (const char * tmp );
 
 
 struct TerrainData {

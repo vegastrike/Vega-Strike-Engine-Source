@@ -11,8 +11,8 @@ class Unit;
 class Bolt {
   GFXColor col;
   Matrix drawmat;
-  Vector cur_position;
-  Vector prev_position;//beams don't change heading.
+  QVector cur_position;
+  QVector prev_position;//beams don't change heading.
   weapon_info::WEAPON_TYPE type;//beam or bolt;
   unsigned char percentphase;//0 is 0% is phased damage, 255 is 100%
   int decal;//which image it uses
@@ -22,7 +22,7 @@ class Bolt {
   Vector ShipSpeed;
   bool Collide (Unit * target);
  public:
-  Bolt(const weapon_info &type, const Matrix orientationpos, const Vector & ShipSpeed, Unit *owner);//makes a bolt
+  Bolt(const weapon_info &type, const Matrix &orientationpos, const Vector & ShipSpeed, Unit *owner);//makes a bolt
   ~Bolt();
   static void Draw();
   bool Update();///www.cachunkcachunk.com

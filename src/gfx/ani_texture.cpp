@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include "lin_time.h"
 #include "vegastrike.h"
+#include "vs_path.h"
 //extern Hashtable<string, Texture,char [127]> texHashTable;
 
 static vector <AnimatedTexture *> myvec;
@@ -12,7 +13,7 @@ static vector <AnimatedTexture *> myvec;
 
 void AnimatedTexture::MakeActive () {
   if (Decal) {
-    Decal[active]->MakeActive();
+    Decal[active%numframes]->MakeActive();
   }
 }
 void AnimatedTexture::UpdateAllPhysics() {
@@ -24,7 +25,7 @@ void AnimatedTexture::UpdateAllFrame() {
   for (unsigned int i=0;i<myvec.size();i++) {
     myvec[i]->cumtime+=GetElapsedTime();
     if (myvec[i]->timeperframe) {
-      myvec[i]->active = ((int)(myvec[i]->cumtime/myvec[i]->timeperframe))%myvec[i]->numframes;
+      myvec[i]->active = ((unsigned int)(myvec[i]->cumtime/myvec[i]->timeperframe))%myvec[i]->numframes;
     }
   }
 }
@@ -35,10 +36,24 @@ bool AnimatedTexture::Done() {
 AnimatedTexture::AnimatedTexture (const char *file,int stage, enum FILTER imm){
   Decal=NULL;
   FILE * fp = fopen (file,"r");
+  bool setdir=false;
+  if (!fp) {
+    vssetdir ((datadir+DELIM+string("animations")+DELIM+string(file)+DELIM).c_str());
+    fp = fopen (file, "r");
+    float width,height;
+    if (fp) {
+      fscanf (fp, "%f %f", &width, &height);//it's actually an animation in global animation shares
+    }
+    setdir=true;
+    
+}
   if (fp){
     Load (fp,stage,imm);
+    fclose (fp);
   }
-  fclose (fp);
+if (setdir) {
+    vsresetdir();
+}
 }
 
 AnimatedTexture::AnimatedTexture (FILE * fp, int stage, enum FILTER imm){

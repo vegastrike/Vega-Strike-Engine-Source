@@ -12,6 +12,7 @@
 #include "gfx/cockpit.h"
 #include "audiolib.h"
 #include "cmd/images.h"
+#include "cmd/script/flightgroup.h"
 static Hashtable<std::string, StarSystem ,char [127]> star_system_table;
 
 void StarSystem::AddStarsystemToUniverse(const string &mname) {
@@ -69,10 +70,10 @@ static std::vector <unorigdest *> pendingjump;
 static std::vector <unsigned int> AnimationNulls;
 static std::vector <Animation *>JumpAnimations;
 static std::vector <Animation *>VolatileJumpAnimations;
-static unsigned int AddJumpAnimation (const Vector & pos, const float size, bool mvolatile=false ) {
+unsigned int AddAnimation (const QVector & pos, const float size, bool mvolatile, const std::string &name ) {
   std::vector <Animation *> *ja= mvolatile?&VolatileJumpAnimations:&JumpAnimations;
 
-  Animation * ani=new Animation (vs_config->getVariable ("graphics","jumpgate","explosion_orange.ani").c_str(),true,.1,MIPMAP,false);
+  Animation * ani=new Animation (name.c_str(),true,.1,MIPMAP,false);
   unsigned int i;
   if (mvolatile||AnimationNulls.empty()){
     i = ja->size();
@@ -87,20 +88,24 @@ static unsigned int AddJumpAnimation (const Vector & pos, const float size, bool
   (*ja)[i]->SetPosition (pos);
   return i;
 }
+static unsigned int AddJumpAnimation (const QVector & pos, const float size, bool mvolatile=false) {
+  return AddAnimation (pos,size,mvolatile,vs_config->getVariable("graphics","jumpgate","warp.ani"));
+}
+
 void DealPossibleJumpDamage (Unit *un) {
   float speed = un->GetVelocity().Magnitude();
   float damage = un->GetJumpStatus().damage+(rand()%100<1)?(rand()%20):0;
   float dam =speed*(damage/10);
   if (dam>100) dam=100;
   if (dam>1) {
-    un->ApplyDamage (un->Position()+un->GetVelocity(),
+    un->ApplyDamage ((un->Position()+un->GetVelocity().Cast()).Cast(),
 		     un->GetVelocity(), 
 		     dam,
 		     un,
 		     GFXColor (((float)(rand()%100))/100,
 			       ((float)(rand()%100))/100,
 			       ((float)(rand()%100))/100),NULL);
-    un->SetCurPosition (un->LocalPosition()+(((float)rand())/RAND_MAX)*dam*un->GetVelocity());
+    un->SetCurPosition (un->LocalPosition()+(((float)rand())/RAND_MAX)*dam*un->GetVelocity().Cast());
   }
 }
 
@@ -138,9 +143,22 @@ void Unit::TransferUnitToSystem (unsigned int kk, StarSystem * &savedStarSystem,
       UnitCollection::UnitIterator iter = pendingjump[kk]->orig->getUnitList().createIterator();
       Unit * unit;
       while((unit = iter.current())!=NULL) {
+	if (unit->Threat()==this) {
+	  unit->Threaten (NULL,0);
+	}
+	if (unit->VelocityReference()==this) {
+	  unit->VelocityReference(NULL);
+	}
 	if (unit->Target()==this) {
 	  unit->Target (pendingjump[kk]->jumppoint.GetUnit());
 	  unit->ActivateJumpDrive (0);
+	}else {
+	  if (unit->getFlightgroup()!=NULL&&unit->getFlightgroup()==getFlightgroup()) {
+	    if (unit->getFlightgroup()->leader.GetUnit()==this&&(unit->getFlightgroup()->directive=="f"||unit->getFlightgroup()->directive=="F")) {
+	      unit->Target (pendingjump[kk]->jumppoint.GetUnit());
+	      unit->ActivateJumpDrive (0);
+	    }
+	  }
 	}
 	iter.advance();
       }
@@ -202,7 +220,7 @@ void StarSystem::DrawJumpStars() {
       if (un) {
 	Vector p,q,r;
 	un->GetOrientation (p,q,r);
-	JumpAnimations[k]->SetPosition (un->Position()+r*un->rSize()*(pendingjump[kk]->delay+.25));
+	JumpAnimations[k]->SetPosition (un->Position()+r.Cast()*un->rSize()*(pendingjump[kk]->delay+.25));
 	JumpAnimations[k]->SetOrientation (p,q,r);
 	static float JumpStarSize = XMLSupport::parse_float (vs_config->getVariable ("graphics","jumpgatesize","1.75"));
 	float dd = un->rSize()*JumpStarSize*(un->GetJumpStatus().delay-pendingjump[kk]->delay)/(float)un->GetJumpStatus().delay;
@@ -306,7 +324,7 @@ bool StarSystem::JumpTo (Unit * un, Unit * jumppoint, const std::string &system)
     bool dosightandsound = ((this==_Universe->getActiveStarSystem (0))||un==_Universe->AccessCockpit()->GetParent());
     int ani =-1;
     if (dosightandsound) {
-      ani = AddJumpAnimation (un->Position()+r*un->rSize()*(un->GetJumpStatus().delay+.25), 10*un->rSize());
+      ani = AddJumpAnimation (un->Position()+r.Cast()*un->rSize()*(un->GetJumpStatus().delay+.25), 10*un->rSize());
       static int jumpleave=AUDCreateSound(vs_config->getVariable ("unitaudio","jumpleave", "sfx43.wav"),false);
       AUDPlay (jumpleave,un->LocalPosition(),un->GetVelocity(),1);
     }

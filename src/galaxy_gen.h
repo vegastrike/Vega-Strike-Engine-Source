@@ -10,6 +10,6 @@ std::string getStarSystemName (std::string in);
 std::string getStarSystemSector (std::string in);
 string getUniversePath ();
 void readnames (vector <string> &entity, const char *filename);
-void generateStarSystem (std::string datapath, int seed, std::string sector, std::string system, std::string outputfile, float sunradius, float compactness, int numstars, int numgasgiants, int numrockyplanets, int nummoons, bool nebulae, bool asteroids, int numnaturalphenomena, int numstarbases, std::string factions,const std::vector <std::string> &jumplocations, std::string namelist, std::string starlist, std::string planetlist, std::string gasgiantlist, std::string moonlist, std::string smallunitlist, std::string nebulaelist, std::string asteroidlist, std::string backgroundlist );
+void generateStarSystem (std::string datapath, int seed, std::string sector, std::string system, std::string outputfile, float sunradius, float compactness, int numstars, int numgasgiants, int numrockyplanets, int nummoons, bool nebulae, bool asteroids, int numnaturalphenomena, int numstarbases, std::string factions,const std::vector <std::string> &jumplocations, std::string namelist, std::string starlist, std::string planetlist, std::string gasgiantlist, std::string moonlist, std::string smallunitlist, std::string nebulaelist, std::string asteroidlist, std::string backgroundlist, bool force );
 
 #endif

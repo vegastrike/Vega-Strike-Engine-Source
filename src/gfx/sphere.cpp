@@ -1,5 +1,5 @@
 #include "sphere.h"
-#include "aux_texture.h"
+#include "ani_texture.h"
 #include "vegastrike.h"
 #include "config_xml.h"
 #include "vs_globals.h"
@@ -11,7 +11,21 @@
 
 using XMLSupport::tostring;
 const int pixelscalesize=30;
-SphereMesh::SphereMesh(float radius, int stacks, int slices, char *texture, char *alpha,bool Insideout,  const BLENDFUNC a, const BLENDFUNC b, bool envMapping, float rho_min, float rho_max, float theta_min, float theta_max) : Mesh() {
+float SphereMesh::GetT (float rho, float rho_min, float rho_max) {
+ return 1-(rho-rho_min)/ (rho_max-rho_min);  
+}
+float SphereMesh::GetS (float theta, float theta_min, float theta_max) {
+  return 1-(theta-theta_min)/ (theta_max-theta_min);
+}
+float CityLights::GetT (float rho, float rho_min, float rho_max) {
+  return wrapy*SphereMesh::GetT(rho,rho_min,rho_max);
+}
+
+float CityLights::GetS (float theta, float theta_min, float theta_max) {
+  
+  return wrapx * SphereMesh::GetS(theta,theta_min,theta_max);
+}
+void SphereMesh::InitSphere(float radius, int stacks, int slices, const char *texture, const char *alpha,bool Insideout,  const BLENDFUNC a, const BLENDFUNC b, bool envMapping, float rho_min, float rho_max, float theta_min, float theta_max, FILTER mipmap){
   int numspheres = (stacks+slices)/8;
   if (numspheres<1)
     numspheres =1;
@@ -21,12 +35,12 @@ SphereMesh::SphereMesh(float radius, int stacks, int slices, char *texture, char
   ab[1]=b+'0';
   ab[0]=a+'0';
   hash_name = string("@@Sphere") + "#" + texture + "#" + XMLSupport::tostring(stacks) + "#" + XMLSupport::tostring(slices) +  ab + "#" + XMLSupport::tostring(rho_min) + "#" + XMLSupport::tostring(rho_max);
-  if (LoadExistant (hash_name.c_str(),radius)) {
+  if (LoadExistant (hash_name,radius)) {
     return;
   } else {
 
   }
-  oldmesh = new SphereMesh[numspheres];//FIXME::RISKY::MIGHT HAVE DIFFERENT SIZES!! DON"T YOU DARE ADD XTRA VARS TO SphereMesh calsshave to!
+  oldmesh = AllocNewMeshesEachInSizeofMeshSpace(numspheres);//FIXME::RISKY::MIGHT HAVE DIFFERENT SIZES!! DON"T YOU DARE ADD XTRA VARS TO SphereMesh calsshave to!
   numlods=numspheres;
   
   meshHashTable.Put (hash_name=GetSharedMeshHashName(hash_name,radius), oldmesh);
@@ -90,16 +104,16 @@ SphereMesh::SphereMesh(float radius, int stacks, int slices, char *texture, char
 	
 	s = 0.0;
 	for (j = 0; j <= slices; j++) {
-	  theta = (j == slices) ? theta_min * 2 * M_PI : j * dtheta;
+	  theta = j*dtheta;//(j == slices) ? theta_min * 2 * M_PI : j * dtheta;
 	  x = -sin(theta) * sin(rho);
 	  y = cos(theta) * sin(rho);
 	  z = nsign * cos(rho);
 	
-	  vertexlist[j*2+fir].i = x * nsign;
-	  vertexlist[j*2+fir].k = -y * nsign;
-	  vertexlist[j*2+fir].j = z * nsign;
-	  vertexlist[j*2+fir].s = 1-s;//insideout?1-s:s;
-	  vertexlist[j*2+fir].t = t;
+	  vertexlist[j*2+fir].i = x ;
+	  vertexlist[j*2+fir].k = -y;
+	  vertexlist[j*2+fir].j = z;
+	  vertexlist[j*2+fir].s = GetS(theta,theta_min,theta_max);//1-s;//insideout?1-s:s;
+	  vertexlist[j*2+fir].t = GetT(rho,rho_min,rho_max);//t;
 	  vertexlist[j*2+fir].x = x * radius;
 	  vertexlist[j*2+fir].z = -y * radius;
 	  vertexlist[j*2+fir].y = z * radius;
@@ -109,11 +123,11 @@ SphereMesh::SphereMesh(float radius, int stacks, int slices, char *texture, char
 	  y = cos(theta) * sin(rho + drho);
 	  z = nsign * cos(rho + drho);
 
-	  vertexlist[j*2+sec].i = x * nsign;
-	  vertexlist[j*2+sec].k = -y * nsign;
-	  vertexlist[j*2+sec].j = z * nsign;
-	  vertexlist[j*2+sec].s = 1-s;//insideout?1-s:s;
-	  vertexlist[j*2+sec].t = t - dt;
+	  vertexlist[j*2+sec].i = x ;
+	  vertexlist[j*2+sec].k = -y;
+	  vertexlist[j*2+sec].j = z;//double negative 
+	  vertexlist[j*2+sec].s = GetS (theta,theta_min,theta_max);//1-s;//insideout?1-s:s;
+	  vertexlist[j*2+sec].t = GetT(rho+drho,rho_min,rho_max);//t - dt;
 	  vertexlist[j*2+sec].x = x * radius;
 	  vertexlist[j*2+sec].z = -y * radius;
 	  vertexlist[j*2+sec].y = z * radius;
@@ -131,13 +145,24 @@ SphereMesh::SphereMesh(float radius, int stacks, int slices, char *texture, char
       delete [] modes;
       delete [] QSOffsets;
       SetBlendMode (a,b);
-      if (alpha) {
-	Decal = new Texture(texture, alpha);
-	
-      }else {
-	Decal = new Texture (texture);
+      int texlen = strlen (texture);
+      bool found_texture=false;
+      if (texlen>3) {
+	if (texture[texlen-1]=='i'&&texture[texlen-2]=='n'&&
+	    texture[texlen-3]=='a'&&texture[texlen-4]=='.') {
+	  found_texture = true;
+	  Decal = new AnimatedTexture (texture,0,mipmap);
+	}
+
       }
-      
+      if (!found_texture) {
+	if (alpha) {
+	  Decal = new Texture(texture, alpha,0,mipmap);
+	  
+	}else {
+	  Decal = new Texture (texture,0,mipmap);
+	}
+      }
       Insideout?setEnvMap(GFXFALSE):setEnvMap(envMapping);
       
       if(Insideout) {
@@ -164,14 +189,12 @@ SphereMesh::SphereMesh(float radius, int stacks, int slices, char *texture, char
   }
   draw_queue = odq;
 }
-void SphereMesh::Draw(float lod,  bool centered, const Matrix m) {
+void SphereMesh::Draw(float lod,  bool centered, const Matrix &m) {
   if (centered) {
-    float m1[16];
-    memcpy (m1,m,sizeof (float)*16);
-    Vector pos(_Universe->AccessCamera()->GetPosition().Transform(m1));
-    m1[12]=pos.i;
-    m1[13]=pos.j;
-    m1[14]=pos.k;
+    Matrix m1(m);
+    //float m1[16];
+    //memcpy (m1,m,sizeof (float)*16);
+    m1.p = QVector(_Universe->AccessCamera()->GetPosition().Transform(m1));
     Mesh::Draw (lod,m1);
   } else {	
     Mesh::Draw(lod,m);
@@ -185,11 +208,49 @@ static GFXColor getSphereColor () {
 }
 void SphereMesh::ProcessDrawQueue(int whichdrawqueue) {
   static GFXColor spherecol (getSphereColor ());
+  if (blendSrc!=ONE||blendDst!=ZERO) {
+    GFXPolygonOffset (0,-2);
+  }
   GFXColor tmpcol (0,0,0,1);
   GFXGetLightContextAmbient(tmpcol);
   GFXLightContextAmbient(spherecol);
   Mesh::ProcessDrawQueue (whichdrawqueue);
   GFXLightContextAmbient(tmpcol);
+  GFXPolygonOffset (0,0);
+    
+
 }
 
+void CityLights::ProcessDrawQueue(int whichdrawqueue) {
+  GFXPolygonOffset (0,-1);
+  const GFXColor citycol (1,1,1,1);
+  GFXColor tmpcol (0,0,0,1);
+  GFXGetLightContextAmbient(tmpcol);
+  GFXLightContextAmbient(citycol);
+  Mesh::ProcessDrawQueue (whichdrawqueue);
+  GFXLightContextAmbient(tmpcol);
+  GFXPolygonOffset (0,0);
+}
+float CityLights::wrapx=1;
+float CityLights::wrapy=1;
 
+CityLights::CityLights (float radius, int stacks, int slices, const char *texture, const char *alpha, bool insideout, const BLENDFUNC a, const BLENDFUNC b, bool envMap, float rho_min, float rho_max, float theta_min, float theta_max):SphereMesh() { 
+    wrapx=wrapy=1;
+    if (texture!=NULL) {
+      string wrap = string(texture);
+      int pos =wrap.find ("wrapx");
+      if (pos!=string::npos) {
+	string Wrapx = wrap.substr (pos+5,wrap.length());
+	float numwraps=1;
+	sscanf(Wrapx.c_str(),"%f",&wrapx);
+	pos = Wrapx.find ("wrapy");
+	if (pos!=string::npos) {
+	  string Wrapy = Wrapx.substr (pos+5,Wrapx.length());
+	  sscanf (Wrapy.c_str(),"%f",&wrapy);
+	}
+      }
+    }
+    FILTER filter = (FILTER)XMLSupport::parse_int(vs_config->getVariable ("graphics","CityLightFilter",XMLSupport::tostring(((int)TRILINEAR))));    
+    InitSphere(radius,stacks,slices,texture,alpha,insideout,a,b,envMap,rho_min,rho_max,theta_min,theta_max,filter);
+
+}

@@ -21,6 +21,7 @@
 #include "general.h"
 #include <string>
 #include <vector>
+#include "gldrv/winsys.h"
 #ifdef _WIN32
 //#include <glib.h>
 #endif
@@ -378,7 +379,7 @@ void ShowError(char *error_msg, char *error_code, int is_fatal) {
 		fprintf(stderr, "Program will now exit\n");
 #endif    // _G_ERROR
 #ifdef EXIT_ON_FATAL
-		exit(EXIT_ON_FATAL);
+		winsys_exit(EXIT_ON_FATAL);
 #endif    // EXIT_ON_FATAL
 	}
         return;

@@ -103,9 +103,9 @@ void AUDRefreshSounds () {
   }
 #endif
 }
-void AUDListener (const Vector & pos, const Vector & vel) {
+void AUDListener (const QVector & pos, const Vector & vel) {
 #ifdef HAVE_AL
-  mylistener.pos = pos;
+  mylistener.pos = pos.Cast();
   mylistener.vel = vel;
   if (usepositional)
 	alListener3f (AL_POSITION, scalepos*pos.i,scalepos*pos.j,scalepos*pos.k);

@@ -1,4 +1,5 @@
 #include "unit.h"
+#include "unit_factory.h"
 
 #include "xml_support.h"
 #include "gfx/halo.h"
@@ -141,6 +142,7 @@ namespace UnitXML {
       SOUND,
       MINTARGETSIZE,
       MAXCONE,
+      LOCKCONE,
       RANGE,
       ISCOLOR,
       RADAR,
@@ -190,7 +192,10 @@ namespace UnitXML {
       DESCRIPTION,
       UPGRADE,
       MOUNTOFFSET,
-      SUBUNITOFFSET
+      SUBUNITOFFSET,
+      SLIDE_START,
+      SLIDE_END,
+      TRACKINGCONE
     };
 
   const EnumMap::Pair element_names[35]= {
@@ -231,7 +236,7 @@ namespace UnitXML {
     EnumMap::Pair ("Upgrade",UPGRADE      )
 
   };
-  const EnumMap::Pair attribute_names[87] = {
+  const EnumMap::Pair attribute_names[91] = {
     EnumMap::Pair ("UNKNOWN", UNKNOWN),
     EnumMap::Pair ("missing",MISSING),
     EnumMap::Pair ("file", XFILE), 
@@ -279,6 +284,8 @@ namespace UnitXML {
     EnumMap::Pair ("HudImage",HUDIMAGE),
     EnumMap::Pair ("ExplosionAni",EXPLOSIONANI),
     EnumMap::Pair ("MaxCone",MAXCONE),
+    EnumMap::Pair ("TrackingCone",TRACKINGCONE),
+    EnumMap::Pair ("LockCone",LOCKCONE),
     EnumMap::Pair ("MinTargetSize",MINTARGETSIZE),
     EnumMap::Pair ("Range",RANGE),
     EnumMap::Pair ("EngineMp3",ENGINEMP3),
@@ -318,11 +325,13 @@ namespace UnitXML {
     EnumMap::Pair ("ECM",ECM),
     EnumMap::Pair ("Description",DESCRIPTION),
     EnumMap::Pair ("MountOffset",MOUNTOFFSET),
-    EnumMap::Pair ("SubunitOffset",SUBUNITOFFSET)
+    EnumMap::Pair ("SubunitOffset",SUBUNITOFFSET),
+    EnumMap::Pair ("SlideEnd",SLIDE_START),
+    EnumMap::Pair ("SlideStart",SLIDE_END)
   };
 
   const EnumMap element_map(element_names, 35);
-  const EnumMap attribute_map(attribute_names, 87);
+  const EnumMap attribute_map(attribute_names, 91);
 }
 
 using XMLSupport::EnumMap;
@@ -355,11 +364,11 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
   Cargo carg;
   short volume=-1;
   string filename;
-  Vector P;
+  QVector P;
   int indx;
-  Vector Q;
-  Vector R;
-  Vector pos;
+  QVector Q;
+  QVector R;
+  QVector pos;
   bool tempbool;
   float fbrltb[6];
   AttributeList::const_iterator iter;
@@ -531,7 +540,7 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
 	break;
       }
     }    
-    Unit *upgradee =new Unit(filename.c_str(),true,_Universe->GetFaction("upgrades"));
+    Unit *upgradee =UnitFactory::createUnit(filename.c_str(),true,_Universe->GetFaction("upgrades"));
     Upgrade (upgradee,soffset,moffset,GetModeFromName (filename.c_str()),true,percent,NULL);
     upgradee->Kill();
     }
@@ -541,10 +550,10 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
     tempbool=false;
     assert (xml->unitlevel==1);
     xml->unitlevel++;
-    pos=Vector(0,0,0);
-    P=Vector (1,1,1);
-    Q=Vector (FLT_MAX,FLT_MAX,FLT_MAX);
-    R=Vector (FLT_MAX,FLT_MAX,FLT_MAX);
+    pos=QVector(0,0,0);
+    P=QVector (1,1,1);
+    Q=QVector (FLT_MAX,FLT_MAX,FLT_MAX);
+    R=QVector (FLT_MAX,FLT_MAX,FLT_MAX);
 
     for (iter = attributes.begin();iter!=attributes.end();iter++) {
       switch(attribute_map.lookup((*iter).name)) {
@@ -596,11 +605,11 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
       }
     }
     if (Q.i==FLT_MAX||Q.j==FLT_MAX||Q.k==FLT_MAX||R.i==FLT_MAX||R.j==FLT_MAX||R.k==FLT_MAX) {
-      image->dockingports.push_back (DockingPorts(pos,P.i,tempbool));
+      image->dockingports.push_back (DockingPorts(pos.Cast(),P.i,tempbool));
     }else {
-      Vector tQ = Q.Min (R);
-      Vector tR = R.Max (Q);
-      image->dockingports.push_back (DockingPorts (tQ,tR,tempbool));
+      QVector tQ = Q.Min (R);
+      QVector tR = R.Max (Q);
+      image->dockingports.push_back (DockingPorts (tQ.Cast(),tR.Cast(),tempbool));
     }
     break;
   case MESHLIGHT:
@@ -608,9 +617,9 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
     vs_config->gethColor ("unit","engine",halocolor,0xffffffff);
     assert (xml->unitlevel==1);
     xml->unitlevel++;
-    P=Vector (1,1,1);
-    Q=Vector (1,1,1);
-    pos=Vector(0,0,0);
+    P=QVector (1,1,1);
+    Q=QVector (1,1,1);
+    pos=QVector(0,0,0);
     for (iter = attributes.begin();iter!=attributes.end();iter++) {
       switch(attribute_map.lookup((*iter).name)) {
       case X:
@@ -649,18 +658,20 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
 	ADDDEFAULT;
 	P.i=xml->unitscale*parse_float((*iter).value);
 	P.j=xml->unitscale*parse_float((*iter).value);
+	P.k=xml->unitscale*parse_float((*iter).value);
 	break;
       }
     }
-   xml->halos.push_back(new Halo(filename.c_str(),GFXColor(halocolor[0],halocolor[1],halocolor[2],halocolor[3]),pos,P.i,P.j));
+    halos.AddHalo (filename.c_str(),pos,P.Cast(),GFXColor(halocolor[0],halocolor[1],halocolor[2],halocolor[3]));
+    //   xml->halos.push_back(new Halo(filename.c_str(),GFXColor(halocolor[0],halocolor[1],halocolor[2],halocolor[3]),pos,P.i,P.j));
     break;
   case MOUNT:
     ADDTAG;
     assert (xml->unitlevel==1);
     xml->unitlevel++;
-    Q = Vector (0,1,0);
-    R = Vector (0,0,1);
-    pos = Vector (0,0,0);
+    Q = QVector (0,1,0);
+    R = QVector (0,0,1);
+    pos = QVector (0,0,0);
     tempbool=false;
     ADDELEMNAME("size",Unit::mountSerializer,XMLType(XMLSupport::tostring(xml->unitscale),(int)xml->mountz.size()));
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
@@ -722,12 +733,12 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
     //Transformation(Quaternion (from_vectors (P,Q,R),pos);
     indx = xml->mountz.size();
     xml->mountz.push_back(new Mount (filename.c_str(), ammo,volume));
-    xml->mountz[indx]->SetMountPosition(Transformation(Quaternion::from_vectors(P,Q,R),pos));
+    xml->mountz[indx]->SetMountPosition(Transformation(Quaternion::from_vectors(P.Cast(),Q.Cast(),R.Cast()),pos));
     //xml->mountz[indx]->Activate();
     if (tempbool)
       xml->mountz[indx]->size=mntsiz;
     else
-      xml->mountz[indx]->size = xml->mountz[indx]->type.size;
+      xml->mountz[indx]->size = xml->mountz[indx]->type->size;
     //->curr_physical_state=xml->units[indx]->prev_physical_state;
 
     break;
@@ -737,9 +748,9 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
     assert (xml->unitlevel==1);
     ADDELEMNAME("file",Unit::subunitSerializer,XMLType((int)xml->units.size()));
     xml->unitlevel++;
-    Q = Vector (0,1,0);
-    R = Vector (0,0,1);
-    pos = Vector (0,0,0);
+    Q = QVector (0,1,0);
+    R = QVector (0,0,1);
+    pos = QVector (0,0,0);
     fbrltb[0] =-1;
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(attribute_map.lookup((*iter).name)) {
@@ -789,17 +800,33 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
       }
 
     }
-    Q.Normalize();
-    R.Normalize();
+    //    Q.Normalize();
+    //    R.Normalize();
     
-    CrossProduct (Q,R,P);
+    //    CrossProduct (Q,R,P);
     indx = xml->units.size();
-    xml->units.push_back(new Unit (filename.c_str(),true,faction,xml->unitModifications,NULL)); // I set here the fg arg to NULL
+    xml->units.push_back(UnitFactory::createUnit (filename.c_str(),true,faction,xml->unitModifications,NULL)); // I set here the fg arg to NULL
+    if (xml->units.back()->name=="LOAD_FAILED") {
+	  xml->units.back()->limits.yaw=0;
+	  xml->units.back()->limits.pitch=0;
+	  xml->units.back()->limits.roll=0;
+	  xml->units.back()->limits.lateral = xml->units.back()->limits.retro = xml->units.back()->limits.forward = xml->units.back()->limits.afterburn=0.0;
+
+    }
+
     xml->units.back()->SetRecursiveOwner (this);
-    xml->units[indx]->prev_physical_state= Transformation(Quaternion::from_vectors(P,Q,R),pos);
-    xml->units[indx]->curr_physical_state=xml->units[indx]->prev_physical_state;
-    xml->units[indx]->limits.structurelimits=R;
+    xml->units[indx]->SetOrientation (Q,R);
+    R.Normalize();
+    xml->units[indx]->prev_physical_state = xml->units[indx]->curr_physical_state;
+    xml->units[indx]->SetPosition(pos);
+    //    xml->units[indx]->prev_physical_state= Transformation(Quaternion::from_vectors(P,Q,R),pos);
+    //    xml->units[indx]->curr_physical_state=xml->units[indx]->prev_physical_state;
+    xml->units[indx]->limits.structurelimits=R.Cast();
     xml->units[indx]->limits.limitmin=fbrltb[0];
+    xml->units[indx]->name = filename;
+    if (xml->units[indx]->image->unitwriter!=NULL) {
+      xml->units[indx]->image->unitwriter->setName (filename);
+    }
     
     break;
   case COCKPITDAMAGE:
@@ -1179,6 +1206,14 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
 	computer.max_roll=parse_float((*iter).value)*(VS_PI/180);
 	ADDELEM (angleStarHandler,XMLType(&computer.max_roll));
 	break;
+      case SLIDE_START:
+	computer.slide_start = parse_int ((*iter).value);
+	ADDELEM (ucharStarHandler,XMLType(&computer.slide_start));
+	break;
+      case SLIDE_END:
+	computer.slide_end = parse_int ((*iter).value);
+	ADDELEM (ucharStarHandler,XMLType(&computer.slide_end));
+	break;
       }
     }
     image->unitwriter->AddTag ("Radar");    
@@ -1186,7 +1221,9 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
    ADDELEMNAME("color",charStarHandler,XMLType(&computer.radar.color));    
     ADDELEMNAME("mintargetsize",charStarHandler,XMLType(&computer.radar.mintargetsize));    
     ADDELEMNAME("range",floatStarHandler,XMLType(&computer.radar.maxrange));    
-    ADDELEMNAME("maxcone",floatStarHandler,XMLType(&computer.radar.maxcone));    
+    ADDELEMNAME("maxcone",floatStarHandler,XMLType(&computer.radar.maxcone));   
+    ADDELEMNAME("TrackingCone",floatStarHandler,XMLType(&computer.radar.trackingcone));    
+    ADDELEMNAME("lockcone",floatStarHandler,XMLType(&computer.radar.lockcone));    
     image->unitwriter->EndTag ("Radar");    
     break;
   case RADAR:
@@ -1204,6 +1241,12 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
       case MAXCONE:
 	computer.radar.maxcone = parse_float ((*iter).value);
 	break;
+      case LOCKCONE:
+	computer.radar.lockcone = parse_float ((*iter).value);
+	break;
+      case TRACKINGCONE:
+	computer.radar.trackingcone = parse_float ((*iter).value);
+	break;
       case RANGE:
 	computer.radar.maxrange = parse_float ((*iter).value);
 	break;
@@ -1214,17 +1257,14 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
     }
     break;
   case REACTOR:
-    ADDTAG;
     assert (xml->unitlevel==2);
     xml->unitlevel++;
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(attribute_map.lookup((*iter).name)) {
       case RECHARGE:
-	ADDELEMF(recharge);
 	recharge=parse_float((*iter).value);
 	break;
       case LIMIT:
-	ADDELEM(ushortStarHandler,&maxenergy);
 	maxenergy=energy=CLAMP_SHORT(parse_float((*iter).value));
 	break;
     }
@@ -1372,14 +1412,12 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
     break;
 
   case ENERGY:
-    ADDTAG;
     assert (xml->unitlevel==1);
     xml->unitlevel++;
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(attribute_map.lookup((*iter).name)) {
       case AFTERBURNENERGY:
 	afterburnenergy =CLAMP_SHORT(parse_float((*iter).value)); 
-	ADDELEM(ushortStarHandler,&afterburnenergy);
 	break;
       default:
 	break;
@@ -1442,7 +1480,7 @@ std::string Unit::mountSerializer (const XMLType &input, void * mythis) {
   if (un->nummounts>i) {
     string result(lookupMountSize(un->mounts[i].size));
     if (un->mounts[i].status==Mount::INACTIVE||un->mounts[i].status==Mount::ACTIVE)
-      result+=string("\" weapon=\"")+(un->mounts[i].type.weapon_name);
+      result+=string("\" weapon=\"")+(un->mounts[i].type->weapon_name);
     if (un->mounts[i].ammo!=-1)
       result+=string("\" ammo=\"")+XMLSupport::tostring(un->mounts[i].ammo);
     if (un->mounts[i].volume!=-1) {
@@ -1450,17 +1488,17 @@ std::string Unit::mountSerializer (const XMLType &input, void * mythis) {
     }
     Matrix m;
     un->mounts[i].GetMountLocation().to_matrix(m);
-    result+=string ("\" x=\"")+tostring((float)(m[12]/parse_float(input.str)));
-    result+=string ("\" y=\"")+tostring((float)(m[13]/parse_float(input.str)));
-    result+=string ("\" z=\"")+tostring((float)(m[14]/parse_float(input.str)));
+    result+=string ("\" x=\"")+tostring((float)(m.p.i/parse_float(input.str)));
+    result+=string ("\" y=\"")+tostring((float)(m.p.j/parse_float(input.str)));
+    result+=string ("\" z=\"")+tostring((float)(m.p.k/parse_float(input.str)));
 
-    result+=string ("\" qi=\"")+tostring(m[4]);
-    result+=string ("\" qj=\"")+tostring(m[5]);
-    result+=string ("\" qk=\"")+tostring(m[6]);
+    result+=string ("\" qi=\"")+tostring(m.getQ().i);
+    result+=string ("\" qj=\"")+tostring(m.getQ().j);
+    result+=string ("\" qk=\"")+tostring(m.getQ().k);
      
-    result+=string ("\" ri=\"")+tostring(m[8]);    
-    result+=string ("\" rj=\"")+tostring(m[9]);    
-    result+=string ("\" rk=\"")+tostring(m[10]);    
+    result+=string ("\" ri=\"")+tostring(m.getR().i);    
+    result+=string ("\" rj=\"")+tostring(m.getR().j);    
+    result+=string ("\" rk=\"")+tostring(m.getR().k);    
     return result;
   }else {
     return string("");
@@ -1489,7 +1527,7 @@ void Unit::WriteUnit (const char * modifications) {
     (*ui)->WriteUnit(modifications);
   } 
 }
-
+extern std::string GetReadPlayerSaveGame (int);
 void Unit::LoadXML(const char *filename, const char * modifications)
 {
   shield.number=0;
@@ -1502,7 +1540,12 @@ void Unit::LoadXML(const char *filename, const char * modifications)
       changehome();
       static std::string savedunitpath=vs_config->getVariable ("data","serialized_xml","serialized_xml");
       vschdir (savedunitpath.c_str());
-      vschdir (modifications);
+      string nonautosave=GetReadPlayerSaveGame(_Universe->AccessCockpit()-_Universe->AccessCockpit(0));
+      if (nonautosave.empty()) {
+        vschdir (modifications);
+      }else {
+        vschdir (nonautosave.c_str());
+      }
       inFile = fopen (filename,"r");
       vscdup();
       vscdup();
@@ -1519,7 +1562,7 @@ void Unit::LoadXML(const char *filename, const char * modifications)
   image->unitwriter=new XMLSerializer (filename,modifications,this);
   image->unitwriter->AddTag ("Unit");
   string * myhudim = new string("");
-  float * myscale=new float;//memory leak!
+  float * myscale=&image->unitscale;
   image->unitwriter->AddElement("scale",floatStarHandler,XMLType(myscale));
   {
     image->unitwriter->AddTag ("Jump");
@@ -1575,6 +1618,18 @@ void Unit::LoadXML(const char *filename, const char * modifications)
 
     image->unitwriter->EndTag("Defense");
   }
+  {
+    image->unitwriter->AddTag ("Energy");
+    image->unitwriter->AddElement("afterburnenergy",ushortStarHandler,XMLType(&afterburnenergy));
+    image->unitwriter->AddTag ("Reactor");
+    image->unitwriter->AddElement ("recharge",floatStarHandler, XMLType (&recharge) );
+    image->unitwriter->AddElement ("limit",ushortStarHandler, XMLType (&maxenergy) );
+    image->unitwriter->EndTag ("Reactor");
+    
+    image->unitwriter->EndTag ("Energy");      
+    
+  }
+
   {
     image->unitwriter->AddTag ("Stats");    
     image->unitwriter->AddElement("mass",massSerializer,XMLType(&mass));
@@ -1645,6 +1700,7 @@ void Unit::LoadXML(const char *filename, const char * modifications)
   for(a=0; a < nummesh; a++) {
     meshdata[a] = xml->meshes[a];
   }
+#if 0
   numhalos = xml->halos.size();
   if(numhalos)
     halos = new Halo*[numhalos];
@@ -1653,6 +1709,7 @@ void Unit::LoadXML(const char *filename, const char * modifications)
   for(a=0; a < numhalos; a++) {
     halos[a]=xml->halos[a];
   }
+#endif
   nummounts = xml->mountz.size();
   if (nummounts)
     mounts = new Mount [nummounts];
@@ -1668,11 +1725,11 @@ void Unit::LoadXML(const char *filename, const char * modifications)
     if (a%2==parity) {
       int b=a;
       if(a % 4 == 2 && a < (nummounts-1)) 
-	if (mounts[a].type.type != weapon_info::PROJECTILE&&mounts[a+1].type.type != weapon_info::PROJECTILE)
+	if (mounts[a].type->type != weapon_info::PROJECTILE&&mounts[a+1].type->type != weapon_info::PROJECTILE)
 	  b=a+1;
-      mounts[b].sound = AUDCreateSound (mounts[b].type.sound,mounts[b].type.type!=weapon_info::PROJECTILE);
-    } else if ((!half_sounds)||mounts[a].type.type == weapon_info::PROJECTILE) {
-      mounts[a].sound = AUDCreateSound (mounts[a].type.sound,false);      
+      mounts[b].sound = AUDCreateSound (mounts[b].type->sound,mounts[b].type->type!=weapon_info::PROJECTILE);
+    } else if ((!half_sounds)||mounts[a].type->type == weapon_info::PROJECTILE) {
+      mounts[a].sound = AUDCreateSound (mounts[a].type->sound,false);      
     }
   }
   for( a=0; a<(int)xml->units.size(); a++) {
@@ -1682,7 +1739,7 @@ void Unit::LoadXML(const char *filename, const char * modifications)
   if (!SubUnit) {
     //UpdateCollideQueue();
   }
-  *myscale=xml->unitscale;
+  image->unitscale=xml->unitscale;
   string tmpname (filename);
   vector <bsp_polygon> polies;
 
@@ -1713,7 +1770,7 @@ void Unit::LoadXML(const char *filename, const char * modifications)
     SphereMesh * tmp = NULL;
     if (!colTrees) {
 #if 0
-      tmp= new SphereMesh (rSize(),8,8,"shield.bmp", NULL, false,ONE, ONE);///shield not used right now for collisions
+      tmp= new SphereMesh (rSize(),8,8,vs_config->getVariable("graphics","shield_texture","shield.bmp").c_str(), NULL, false,ONE, ONE);///shield not used right now for collisions
       tmp->GetPolys (polies);
       if (xml->hasColTree)
 	colShield = new csRapidCollider (polies);
@@ -1722,7 +1779,7 @@ void Unit::LoadXML(const char *filename, const char * modifications)
 	colShield=NULL;
     }
     static int shieldstacks = XMLSupport::parse_int (vs_config->getVariable ("graphics","shield_detail","16"));
-    tmp = new SphereMesh (rSize(),shieldstacks,shieldstacks,"shield.bmp", NULL, false,ONE, ONE);
+    tmp = new SphereMesh (rSize(),shieldstacks,shieldstacks,vs_config->getVariable("graphics","shield_texture","shield.bmp").c_str(), NULL, false,ONE, ONE);
     
     meshdata[nummesh] = tmp;
     bspShield=NULL;

@@ -16,7 +16,7 @@
  ***************************************************************************/
 
 #include "button.h"
-
+#include "gldrv/winsys.h"
 //Button::Button(float x, float y, float wid, float hei, char *name) { ; }
 Button::Button(float x, float y, float wid, float hei, const char *name) {
 
@@ -51,7 +51,7 @@ void Button::Refresh(void) {
 
 int Button::MouseClick(int button, int state, float x, float y) {
 	if (Inside(x,y) == 0) { return 0; }
-	if (state != GLUT_UP) { return 0; }
+	if (state != WS_MOUSE_UP) { return 0; }
 	// Returning the 1 says it's been clicked
 	return 1;
 }

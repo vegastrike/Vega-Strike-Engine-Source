@@ -1,4 +1,5 @@
 #include "unit.h"
+#include "unit_factory.h"
 #include "ai/order.h"
 #include "gfx/animation.h"
 #include "gfx/mesh.h"
@@ -38,14 +39,6 @@ void Unit::Split (int level) {
   int nm = nummesh;
   Vector PlaneNorm;
   Mesh ** old = meshdata;
-  if (halos) {//this looks ridiculous
-    for (int hc=0;hc<numhalos;hc++) {
-      delete halos[hc];
-    }
-    delete [] halos;
-    halos=NULL;
-    numhalos=0;
-  }
 
   for (int split=0;split<level;split++) {
     Mesh ** nw= new Mesh *[nm*2+1];
@@ -79,7 +72,7 @@ void Unit::Split (int level) {
   old[nm]=NULL;
   for (i=0;i<nm;i++) {
     Unit * splitsub;
-    SubUnits.prepend(splitsub = new Unit (old+i,1,true,faction));
+    SubUnits.prepend(splitsub = UnitFactory::createUnit (old+i,1,true,faction));
     splitsub->mass = mass/level;
     splitsub->image->timeexplode=.1;
     if (splitsub->meshdata[0]) {
@@ -87,7 +80,8 @@ void Unit::Split (int level) {
       splitsub->ApplyForce(splitsub->meshdata[0]->rSize()*10*mass*loc/loc.Magnitude());
       loc.Set (rand(),rand(),rand());
       loc.Normalize();
-      splitsub->ApplyLocalTorque(loc*mass*rSize()*(1+rand()%(int)(1+rSize())));
+      static float explosion_torque = XMLSupport::parse_float (vs_config->getVariable ("graphics","explosiontorque",".002"));//10 seconds for auto to kick in;
+      splitsub->ApplyLocalTorque(loc*mass*explosion_torque*rSize()*(1+rand()%(int)(1+rSize())));
     }
   }
   delete [] old;
@@ -104,14 +98,6 @@ void Unit::Kill(bool erasefromsave) {
   if (erasefromsave)
     _Universe->AccessCockpit()->savegame->RemoveUnitFromSave((int)this);
   
-  if (halos&&numhalos) {
-    for (int hc=0;hc<numhalos;hc++) {
-      delete halos[hc];
-    }
-    delete [] halos;
-    halos=NULL;
-    numhalos=0;
-  }
   if (docked&(DOCKING_UNITS)) {
     vector <Unit *> dockedun;
     unsigned int i;
@@ -128,7 +114,7 @@ void Unit::Kill(bool erasefromsave) {
   for (int beamcount=0;beamcount<nummounts;beamcount++) {
     AUDStopPlaying(mounts[beamcount].sound);
     AUDDeleteSound(mounts[beamcount].sound);
-    if (mounts[beamcount].ref.gun&&mounts[beamcount].type.type==weapon_info::BEAM)
+    if (mounts[beamcount].ref.gun&&mounts[beamcount].type->type==weapon_info::BEAM)
       delete mounts[beamcount].ref.gun;//hope we're not killin' em twice...they don't go in gunqueue
   }
   if (mounts) {
@@ -299,14 +285,18 @@ void Unit::DamageRandSys(float dam, const Vector &vec) {
 			computer.target=NULL; //set the target to NULL
 		} else if (randnum>=.4) {
 			limits.retro*=dam;
-		} else if (randnum>=.325) {
+		} else if (randnum>=.3275) {
 			computer.radar.maxcone+=(1-dam);
-			if (computer.radar.maxcone>.99)
-				computer.radar.maxcone=.99;
+			if (computer.radar.maxcone>.9)
+				computer.radar.maxcone=.9;
+		}else if (randnum>=.325) {
+			computer.radar.lockcone+=(1-dam);
+			if (computer.radar.lockcone>.95)
+				computer.radar.lockcone=.95;
 		} else if (randnum>=.25) {
-			computer.radar.mintargetsize+=(rSize()/2);
-			if (computer.radar.mintargetsize>rSize())
-				computer.radar.mintargetsize=rSize();
+			computer.radar.trackingcone+=(1-dam);
+			if (computer.radar.trackingcone>.98)
+				computer.radar.trackingcone=.98;
 		} else if (randnum>=.175) {
 			computer.radar.maxrange*=dam;
 		} else {
@@ -320,14 +310,18 @@ void Unit::DamageRandSys(float dam, const Vector &vec) {
 	}
 	if (degrees>=20&&degrees<35) {
 		//DAMAGE MOUNT
-		if (nummounts) {
+		if (randnum>=.65&&randnum<.9) {
+			image->ecm*=dam;
+		} else if (nummounts) {
 			unsigned int whichmount=rand()%nummounts;
 			if (randnum>=.9) {
 				mounts[whichmount].status=Unit::Mount::DESTROYED;
-			} else if (randnum>=.6) {
-			  image->ecm*=dam;
-			}else if (mounts[whichmount].ammo>0) {
+			}else if (mounts[whichmount].ammo>0&&randnum>=.4) {
 			  mounts[whichmount].ammo*=dam;
+			} else if (randnum>=.1) {
+				mounts[whichmount].time_to_lock+=(100-(100*dam));
+			} else {
+				mounts[whichmount].size&=(~weapon_info::AUTOTRACKING);
 			}
 		}
 		return;
@@ -467,15 +461,15 @@ float Unit::DealDamageToHull (const Vector & pnt, float damage ) {
   percent = damage/(*targ+hull);
   if (damage<*targ) {
     if (!AUDIsPlaying (sound->armor))
-      AUDPlay (sound->armor,ToWorldCoordinates(pnt)+cumulative_transformation.position,Velocity,1);
+      AUDPlay (sound->armor,ToWorldCoordinates(pnt).Cast()+cumulative_transformation.position,Velocity,1);
     else
-      AUDAdjustSound (sound->armor,ToWorldCoordinates(pnt)+cumulative_transformation.position,Velocity);
+      AUDAdjustSound (sound->armor,ToWorldCoordinates(pnt).Cast()+cumulative_transformation.position,Velocity);
     *targ -= apply_float_to_short (damage);
   }else {
     if (!AUDIsPlaying (sound->hull))
-      AUDPlay (sound->hull,ToWorldCoordinates(pnt)+cumulative_transformation.position,Velocity,1);
+      AUDPlay (sound->hull,ToWorldCoordinates(pnt).Cast()+cumulative_transformation.position,Velocity,1);
     else
-      AUDAdjustSound (sound->hull,ToWorldCoordinates(pnt)+cumulative_transformation.position,Velocity);
+      AUDAdjustSound (sound->hull,ToWorldCoordinates(pnt).Cast()+cumulative_transformation.position,Velocity);
     damage -= ((float)*targ);
     *targ= 0;
     if (_Universe->AccessCockpit()->GetParent()!=this||_Universe->AccessCockpit()->godliness<=0||hull>damage) {
@@ -484,7 +478,7 @@ float Unit::DealDamageToHull (const Vector & pnt, float damage ) {
       hull -=damage;
     }else {
       _Universe->AccessCockpit()->godliness-=damage;
-      DamageRandSys(rand01(),pnt);//get system damage...but live!
+      DamageRandSys(rand01()*.5+.2,pnt);//get system damage...but live!
     }
 
   }
@@ -638,9 +632,9 @@ float Unit::DealDamageToShield (const Vector &pnt, float &damage) {
   if (!FINITE (percent))
     percent = 0;
   if (percent&&!AUDIsPlaying (sound->shield))
-	AUDPlay (sound->shield,ToWorldCoordinates(pnt)+cumulative_transformation.position,Velocity,1);
+	AUDPlay (sound->shield,ToWorldCoordinates(pnt).Cast()+cumulative_transformation.position,Velocity,1);
   else
-	AUDAdjustSound (sound->shield,ToWorldCoordinates(pnt)+cumulative_transformation.position,Velocity);
+	AUDAdjustSound (sound->shield,ToWorldCoordinates(pnt).Cast()+cumulative_transformation.position,Velocity);
 
   return percent;
 }
@@ -649,10 +643,12 @@ void Unit::ApplyLocalDamage (const Vector & pnt, const Vector & normal, float am
   //  #ifdef REALLY_EASY
   Cockpit * cpt;
   if ((cpt=_Universe->isPlayerStarship(this))!=NULL) {
-    //    ApplyDamage (amt);
-    phasedamage*= (g_game.difficulty);
-    amt*=(g_game.difficulty);
-    cpt->Shake (amt);
+    if (color.a!=2) {
+      //    ApplyDamage (amt);
+      phasedamage*= (g_game.difficulty);
+      amt*=(g_game.difficulty);
+      cpt->Shake (amt);
+    }
   }
   //  #endif
   if (affectedUnit!=this) {
@@ -683,19 +679,52 @@ void Unit::ApplyLocalDamage (const Vector & pnt, const Vector & normal, float am
   }
 }
 
+//un scored a faction kill
+void ScoreKill (Cockpit * cp, Unit * un, int faction) {
+  static float KILL_FACTOR=-XMLSupport::parse_float(vs_config->getVariable("AI","kill_factor",".2"));
+  _Universe->AdjustRelation(faction,un->faction,KILL_FACTOR,1);
+  static float FRIEND_FACTOR=-XMLSupport::parse_float(vs_config->getVariable("AI","friend_factor",".1"));
+  for (unsigned int i=0;i<_Universe->GetNumFactions();i++) {
+    float relation;
+    if (faction!=i&&un->faction!=i) {
+      relation=_Universe->GetRelation(i,faction);
+      if (relation)
+        _Universe->AdjustRelation(i,un->faction,FRIEND_FACTOR*relation,1);
+    }
+  }
+  olist_t * killlist = &cp->savegame->getMissionData (string("kills"));
+  while (killlist->size()<=_Universe->GetNumFactions()) {
+    killlist->push_back (new varInst (VI_IN_OBJECT));
+    killlist->back()->type=VAR_FLOAT;
+    killlist->back()->float_val=0;
+  }
+  if (killlist->size()>faction) {
+    (*killlist)[faction]->float_val++;
+  }
+  killlist->back()->float_val++;
+}
+
 
 void Unit::ApplyDamage (const Vector & pnt, const Vector & normal, float amt, Unit * affectedUnit, const GFXColor & color, Unit * ownerDoNotDereference, float phasedamage) {
-  if (ownerDoNotDereference==_Universe->AccessCockpit()->GetParent()) {
-    if (ownerDoNotDereference) {
+  Cockpit * cp = _Universe->isPlayerStarship (ownerDoNotDereference);
+
+  if (cp) {
       //now we can dereference it because we checked it against the parent
       CommunicationMessage c(ownerDoNotDereference,this,NULL,0);
       c.SetCurrentState(c.fsm->GetHitNode(),NULL,0);
       this->getAIState()->Communicate (c);      
-    }
+      Threaten (ownerDoNotDereference,10);//the dark danger is real!
   }
+  bool mykilled = hull<0;
   Vector localpnt (InvTransform(cumulative_transformation_matrix,pnt));
   Vector localnorm (ToLocalCoordinates (normal));
   ApplyLocalDamage(localpnt, localnorm, amt,affectedUnit,color,phasedamage);
+  if (hull<0&&(!mykilled)) {
+    if (cp) {
+      ScoreKill (cp,ownerDoNotDereference,faction);
+      
+    }
+  }
 }
 
 
@@ -732,10 +761,10 @@ bool Unit::Explode (bool drawit, float timeit) {
     if (isUnit()!=MISSILEPTR) {
       static float expdamagecenter=XMLSupport::parse_float(vs_config->getVariable ("physics","explosion_damage_center","1"));
       static float damageedge=XMLSupport::parse_float(vs_config->getVariable ("graphics","explosion_damage_edge",".125"));
-      _Universe->activeStarSystem()->AddMissileToQueue (new MissileEffect (Position(),MaxShieldVal(),0,ExplosionRadius()*expdamagecenter,ExplosionRadius()*expdamagecenter*damageedge));
+      _Universe->activeStarSystem()->AddMissileToQueue (new MissileEffect (Position().Cast(),MaxShieldVal(),0,ExplosionRadius()*expdamagecenter,ExplosionRadius()*expdamagecenter*damageedge));
     }
 	if (!SubUnit){
-		Vector exploc = cumulative_transformation.position;
+		QVector exploc = cumulative_transformation.position;
 		Unit * un;
 		if (NULL!=(un=_Universe->AccessCockpit(0)->GetParent())) {
 			exploc = un->Position();						
@@ -748,7 +777,7 @@ bool Unit::Explode (bool drawit, float timeit) {
       image->timeexplode+=timeit;
       //Translate (tmp,meshdata[i]->Position());
       //MultMatrix (tmp2,cumulative_transformation_matrix,tmp);
-      image->explosion->SetPosition(cumulative_transformation_matrix[12],cumulative_transformation_matrix[13],cumulative_transformation_matrix[14]);
+      image->explosion->SetPosition(Position());
       Vector p,q,r;
       GetOrientation (p,q,r);
       image->explosion->SetOrientation(p,q,r);

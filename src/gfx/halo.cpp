@@ -10,13 +10,13 @@
 static DecalQueue halodecal;
 static vector <GFXQuadList *> halodrawqueue;
 
-Halo::  Halo (const char * texture, const GFXColor &col, const Vector & pos, float sizx, float sizy ){
+Halo::  Halo (const char * texture, const GFXColor &col, const QVector & pos, float sizx, float sizy ){
   string texname (texture);
   position = pos;
   sizex = sizx;
   sizey = sizy;
   decal = halodecal.AddTexture (texture,MIPMAP);
-  if (decal>=halodrawqueue.size()) {
+  if (((unsigned int)decal)>=halodrawqueue.size()) {
     halodrawqueue.push_back (new GFXQuadList(GFXTRUE));
   }
   GFXColorVertex coltmp [4];
@@ -36,8 +36,9 @@ Halo::~Halo () {
   }
 }
 float kkkk=3;
-void Halo::Draw (const Transformation &quat, const Matrix m, float alpha) {
-  Vector pos,p,q,r;
+void Halo::Draw (const Transformation &quat, const Matrix &m, float alpha) {
+  Vector p,q,r;
+  QVector pos;
   static float HaloOffset = XMLSupport::parse_float(vs_config->getVariable ("graphics","HaloOffset",".1"));
   pos=  position.Transform(m);
   float wid=sizex;
@@ -48,10 +49,10 @@ void Halo::Draw (const Transformation &quat, const Matrix m, float alpha) {
   r =-r;
   q=q*hei;
   //  offset = r*(sizex>sizey?sizex:sizey); //screws up cus of perspective
-  GFXVertex tmp[4] = {GFXVertex(pos-p-q,r,0,1),
-		       GFXVertex(pos+p-q,r,1,1),
-		       GFXVertex(pos+p+q,r,1,0),
-		       GFXVertex(pos-p+q,r,0,0)};
+  GFXVertex tmp[4] = {GFXVertex(pos-(p+q).Cast(),r,0,1),
+		       GFXVertex(pos+(p-q).Cast(),r,1,1),
+		       GFXVertex(pos+(p+q).Cast(),r,1,0),
+		       GFXVertex(pos-(p-q).Cast(),r,0,0)};
   halodrawqueue[decal]->ModQuad(quadnum,tmp,alpha);
 }
 void Halo::SetColor (const GFXColor &col){

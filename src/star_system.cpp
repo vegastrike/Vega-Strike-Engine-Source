@@ -165,6 +165,9 @@ void StarSystem::activateLightMap() {
 }
 
 StarSystem::~StarSystem() {
+  _Universe->activeStarSystem()->SwapOut();
+  _Universe->pushActiveStarSystem(this);
+  _Universe->activeStarSystem()->SwapIn();  
 #ifdef NV_CUBE_MAP
 
   delete LightMap[0];
@@ -189,8 +192,8 @@ StarSystem::~StarSystem() {
   */
 
   delete bolts;
-  delete collidetable;
-  GFXDeleteLightContext (lightcontext);
+
+
   UnitCollection::UnitIterator iter = drawList.createIterator();
   Unit *unit;
   //  fprintf (stderr,"|t%f i%lf|",GetElapsedTime(),interpolation_blend_factor);
@@ -198,7 +201,13 @@ StarSystem::~StarSystem() {
     unit->Kill(false);
     iter.advance();
   }
+  delete collidetable;
+  _Universe->activeStarSystem()->SwapOut();
+  //  GFXDeleteLightContext (lightcontext);
+  _Universe->popActiveStarSystem();
+  _Universe->activeStarSystem()->SwapIn();  
   RemoveStarsystemFromUniverse();
+  
 }
 
 
@@ -250,10 +259,12 @@ bool StarSystem::RemoveUnit(Unit *un) {
 void StarSystem::SwapIn () {
   GFXSetLightContext (lightcontext);
   Unit * un;
+  /*
   for (un_iter un_i=drawList.createIterator();NULL!= (un=*un_i);++un_i) {
     un->SwapInHalos();
 
   }
+  */
   /*
   Iterator *iter = drawList->createIterator();
   Unit *unit;
@@ -277,11 +288,13 @@ void StarSystem::SwapIn () {
 
 void StarSystem::SwapOut () {
   Unit * un;
+  /*
   for (un_iter un_i=drawList.createIterator();NULL!= (un=*un_i);++un_i) {
     un->SwapOutHalos();
     Halo::ProcessDrawQueue();
 
   }
+  */
   /*
   Iterator *iter = drawList->createIterator();
   Unit *unit;
@@ -436,8 +449,8 @@ void StarSystem::Draw(bool DrawCockpit) {
   fprintf (stderr,"star");
   fflush (stderr);
 #endif
-  if (_Universe->AccessCamera()->GetNebula()!=NULL)
-    GFXFogMode (FOG_OFF);
+  //  if (_Universe->AccessCamera()->GetNebula()!=NULL)
+  GFXFogMode (FOG_OFF);
   Animation::ProcessDrawQueue();
   Halo::ProcessDrawQueue();
   stars->Draw();
@@ -609,18 +622,26 @@ void StarSystem::Update(float priority , bool executeDirector) {
 	  if (muzak)
 	    muzak->Listen();
 	}
-	if (_Universe->AccessCockpit()->activeStarSystem==this)
-		_Universe->AccessCamera()->SetNebula(NULL);//Update physics should set this
+	if (_Universe->AccessCockpit()->activeStarSystem==this){
+	  Nebula * neb;
+	  if ((neb=_Universe->AccessCamera()->GetNebula())) {
+	    if (neb->getFade()<=0) {
+	      _Universe->AccessCamera()->SetNebula(NULL);//Update physics should set this
+	    }
+	  }
+	}
 #ifdef UPDATEDEBUG
   fprintf (stderr,"unphi");
   fflush (stderr);
 #endif
       Unit * owner = _Universe->AccessCockpit()->GetParent();
       if (owner) {
-	if (getTimeCompression()>1) {//if not paused
-	  if (!owner->AutoPilotTo (owner)) {
-	    
-	    reset_time_compression(0,PRESS);
+	if (owner->InCorrectStarSystem(this)) {
+	  if (getTimeCompression()>1) {//if not paused
+	    if (!owner->AutoPilotTo (owner,true)) {
+	      
+	      reset_time_compression(0,PRESS);
+	    }
 	  }
 	}
       }

@@ -24,8 +24,9 @@
 #if defined(WITH_MACOSX_BUNDLE)
 #import <sys/param.h>
 #endif
-
-
+#ifdef _WIN32
+#include <direct.h>
+#endif
 #include "gfxlib.h"
 #include "in_kb.h"
 #include "lin_time.h"
@@ -42,6 +43,7 @@
 #include "savegame.h"
 #include "force_feedback.h"
 #include "gfx/hud.h"
+#include "gldrv/winsys.h"
 /*
  * Globals 
  */
@@ -77,12 +79,15 @@ void ParseCommandLine(int argc, char ** CmdLine);
 void cleanup(void)
 {
   printf ("Thank you for playing!\n");
-  _Universe->WriteSaveGame();
+  _Universe->WriteSaveGame(true);
+  winsys_shutdown();
   //    write_config_file();
   AUDDestroy();
   //destroyObjects();
-  Unit::ProcessDeleteQueue();
-//  delete _Universe;
+  //Unit::ProcessDeleteQueue();
+  delete _Universe;
+    delete [] CONFIGFILE;
+
   
 }
 
@@ -99,26 +104,35 @@ void bootstrap_main_loop();
  #undef main
 #endif
 
-
 int main( int argc, char *argv[] ) 
 {
-#if defined(WITH_MACOSX_BUNDLE)
+	CONFIGFILE=0;
+	mission_name[0]='\0';
+//	char *TEST_STUFF=NULL;
+//	*TEST_STUFF='0';//MAKE IT CRASH
+#if defined(WITH_MACOSX_BUNDLE)||defined(_WIN32)
     // We need to set the path back 2 to make everything ok.
-    char parentdir[MAXPATHLEN];
+    char *parentdir;
+	int pathlen=strlen(argv[0]);
+	parentdir=new char[pathlen+1];
     char *c;
-    strncpy ( parentdir, argv[0], sizeof(parentdir) );
+    strncpy ( parentdir, argv[0], pathlen+1 );
     c = (char*) parentdir;
 
     while (*c != '\0')     /* go to end */
         c++;
     
-    while (*c != '/')      /* back up to parent */
+    while ((*c != '/')&&(*c != '\\')&&c>parentdir)      /* back up to parent */
         c--;
     
     *c++ = '\0';             /* cut off last part (binary name) */
-  
-    chdir (parentdir);/* chdir to the binary app's parent */
+    if (strlen (parentdir)>0) {  
+      chdir (parentdir);/* chdir to the binary app's parent */
+    }
+	delete []parentdir;
+#if defined(WITH_MACOSX_BUNDLE)
     chdir ("../../../");/* chdir to the .app's parent */
+#endif
 #endif
     /* Print copyright notice */
   fprintf( stderr, "Vega Strike "  " \n"
@@ -136,11 +150,17 @@ int main( int argc, char *argv[] )
     //this sets up the vegastrike config variable
     setup_game_data(); 
     // loads the configuration file .vegastrikerc from home dir if such exists
+    ParseCommandLine(argc,argv);
+	if (CONFIGFILE==0) {
+		CONFIGFILE=new char[42];
+		sprintf(CONFIGFILE,"vegastrike.config");
+	}
+		
     initpaths();
     //can use the vegastrike config variable to read in the default mission
-    strcpy(mission_name,vs_config->getVariable ("general","default_mission","test1.mission").c_str());
+    if (mission_name[0]=='\0')
+      strcpy(mission_name,vs_config->getVariable ("general","default_mission","test1.mission").c_str());
     //might overwrite the default mission with the command line
-    ParseCommandLine(argc,argv);
 
 #ifdef HAVE_BOOST
 
@@ -152,7 +172,7 @@ int main( int argc, char *argv[] )
     // && defined(HAVE_SDL_MIXER)
   if (  SDL_InitSubSystem( SDL_INIT_JOYSTICK )) {
         fprintf(stderr, "Couldn't initialize SDL: %s\n", SDL_GetError());
-        exit(1);
+        winsys_exit(1);
     }
 
 #endif
@@ -164,9 +184,7 @@ int main( int argc, char *argv[] )
     AUDInit();
 
     /* Set up a function to clean up when program exits */
-    if ( atexit( cleanup ) != 0 ) {
-	perror( "atexit" );
-    }
+    winsys_atexit( cleanup );
     /*
 #if defined(HAVE_SDL) && defined(HAVE_SDL_MIXER)
 
@@ -218,13 +236,13 @@ void bootstrap_draw (const std::string &message, float x, float y, Animation * n
   GFXColor4f (1,1,1,1);
   GFXClear (GFXTRUE);
   GFXLoadIdentity (PROJECTION);
-  GFXLoadIdentityView();
-  GFXLoadMatrix (MODEL,tmp);
+  GFXLoadIdentity(VIEW);
+  GFXLoadMatrixModel (tmp);
   GFXBeginScene();
   bs_tp->SetPos (x,y);
   bs_tp->SetCharSize (.4,.8);
   ScaleMatrix (tmp,Vector (7,7,0));
-  GFXLoadMatrix (MODEL,tmp);
+  GFXLoadMatrixModel (tmp);
   if (ani) {
     ani->UpdateAllFrame();
     ani->DrawNow(tmp);
@@ -236,8 +254,8 @@ void bootstrap_draw (const std::string &message, float x, float y, Animation * n
 extern Unit **fighters;
 
 
-bool SetPlayerLoc (Vector &sys, bool set) {
-  static Vector mysys;
+bool SetPlayerLoc (QVector &sys, bool set) {
+  static QVector mysys;
   static bool isset=false;
   if (set) {
     isset = true;
@@ -282,7 +300,7 @@ void bootstrap_main_loop () {
     SplashScreen = new Animation (mission->getVariable ("splashscreen",vs_config->getVariable ("graphics","splash_screen","vega_splash.ani")).c_str(),0);
     bootstrap_draw ("Vegastrike Loading...",-.135,0,SplashScreen);
 
-    Vector pos;
+    QVector pos;
     string planetname;
 
     mission->GetOrigin(pos,planetname);
@@ -301,12 +319,12 @@ void bootstrap_main_loop () {
     vector <string> playersaveunit;
 	vector <StarSystem *> ss;
 	vector <string> starsysname;
-	vector <Vector> playerNloc;
+	vector <QVector> playerNloc;
     for (unsigned int k=0;k<_Universe->cockpit.size();k++) {
       bool setplayerXloc=false;
       std::string psu;
       if (k==0) {
-		Vector myVec;
+		QVector myVec;
 		if (SetPlayerLoc (myVec,false)) {
 		  _Universe->cockpit[0]->savegame->SetPlayerLocation(myVec);
 		}
@@ -315,14 +333,14 @@ void bootstrap_main_loop () {
 		  _Universe->cockpit[0]->savegame->SetStarSystem(st);
 		}
       }
-      vector <SavedUnits> saved=_Universe->cockpit[k]->savegame->ParseSaveGame (savegamefile,mysystem,mysystem,pos,setplayerXloc,credits,psu);
+      vector <SavedUnits> saved=_Universe->cockpit[k]->savegame->ParseSaveGame (savegamefile,mysystem,mysystem,pos,setplayerXloc,credits,psu,k);
       playersaveunit.push_back(psu);
       _Universe->cockpit[k]->credits=credits;
   	  ss.push_back (_Universe->Init (mysystem,Vector(0,0,0),planetname));
 	  if (setplayerXloc) {
 	   	  playerNloc.push_back(pos);
 	  }else {
-		  playerNloc.push_back(Vector(FLT_MAX,FLT_MAX,FLT_MAX));
+		  playerNloc.push_back(QVector(FLT_MAX,FLT_MAX,FLT_MAX));
 	  }
 	  setplayerloc=setplayerXloc;//FIX ME will only set first player where he was
 
@@ -369,7 +387,7 @@ void bootstrap_main_loop () {
 
 void ParseCommandLine(int argc, char ** lpCmdLine) {
   std::string st;
-  Vector PlayerLocation;
+  QVector PlayerLocation;
   for (int i=1;i<argc;i++) {
     if(lpCmdLine[i][0]=='-') {
       switch(lpCmdLine[i][1]){
@@ -378,7 +396,10 @@ void ParseCommandLine(int argc, char ** lpCmdLine) {
 	break;
       case 'M':
       case 'm':
-	g_game.music_enabled=1;
+		  if (!(lpCmdLine[i][2]=='1'&&lpCmdLine[i][3]=='\0')) {
+	  		CONFIGFILE=new char[40+strlen(lpCmdLine[i])+1];
+			sprintf(CONFIGFILE,"vegastrike.config.%splayer",lpCmdLine[i]+2);
+		  }
 	break;
       case 'S':
       case 's':
@@ -389,7 +410,7 @@ void ParseCommandLine(int argc, char ** lpCmdLine) {
 	break;
       case 'P':
       case 'p':
-	sscanf (lpCmdLine[i]+2,"%f,%f,%f",&PlayerLocation.i,&PlayerLocation.j,&PlayerLocation.k);
+	sscanf (lpCmdLine[i]+2,"%lf,%lf,%lf",&PlayerLocation.i,&PlayerLocation.j,&PlayerLocation.k);
 	SetPlayerLoc (PlayerLocation,true);
 	break;
       case 'J':

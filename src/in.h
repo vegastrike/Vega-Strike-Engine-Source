@@ -1,10 +1,16 @@
 #ifndef IN_H
 #define IN_H
+enum KBSTATE {
+	UP,
+	DOWN,
+	PRESS,
+	RELEASE,
+	RESET
+};
 
-#include "in_kb.h"
-//#include "in_handler.h"
-#include "in_main.h"
-#include "in_mouse.h"
+typedef void (*KBHandler)(int, KBSTATE);
+
+typedef void (*MouseHandler)(KBSTATE,int x, int y, int delx, int dely, int mod);
 
 #endif
 

@@ -6,6 +6,8 @@ void Order::AdjustRelationTo (Unit * un, float factor) {
 }
 
 void Order::Communicate (const CommunicationMessage &c) {
+  if (this==NULL)
+    return;
   int completed=0;
   unsigned int i=0;
   CommunicationMessage * newC = new CommunicationMessage (c);
@@ -25,8 +27,10 @@ void Order::Communicate (const CommunicationMessage &c) {
     }
   }
   if ((un=newC->sender.GetUnit())) {
-    AdjustRelationTo (un,newC->getDeltaRelation());
-    messagequeue.push_back (newC);
+	  if (un!=parent) {
+		AdjustRelationTo (un,newC->getDeltaRelation());
+		messagequeue.push_back (newC);
+	  }
   }
 }
 
@@ -46,9 +50,15 @@ void Order::ProcessCommunicationMessages(float AICommresponseTime, bool RemoveMe
 	  cleared=true;
 	  Unit * un=messagequeue.back()->sender.GetUnit();
 	  if (un) {
-	    if (GetEffectiveRelationship(un)>=0) {
+            CommunicationMessage c(parent,un,NULL,0);
+            
+            if (GetEffectiveRelationship(un)>=0) {
 	      parent->RequestClearance (un);
-	    }
+	      c.SetCurrentState (c.fsm->GetAbleToDockNode(),NULL,0);
+            }else {
+	      c.SetCurrentState (c.fsm->GetUnAbleToDockNode(),NULL,0);
+            }
+	    un->getAIState()->Communicate (c);
 	  }  
 	}
 	if (cleared||(((float)rand())/RAND_MAX)<(1/time)) {

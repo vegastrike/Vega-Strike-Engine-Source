@@ -230,12 +230,12 @@ void AUDDeleteSound (int sound, bool music){
   }
 #endif
 }
-void AUDAdjustSound (const int sound, const Vector &pos, const Vector &vel){
+void AUDAdjustSound (const int sound, const QVector &pos, const Vector &vel){
 #ifdef HAVE_AL
   if (sound>=0&&sound<(int)sounds.size()) {
     float p []= {scalepos*pos.i,scalepos*pos.j,scalepos*pos.k};
     float v []= {scalevel*vel.i,scalevel*vel.j,scalevel*vel.k};
-    sounds[sound].pos = pos;
+    sounds[sound].pos = pos.Cast();
 	if (usepositional)
 	    alSourcefv(sounds[sound].source,AL_POSITION,p);
   if (usedoppler)
@@ -302,7 +302,7 @@ void AUDStartPlaying (const int sound){
 #endif
 }
 
-void AUDPlay (const int sound, const Vector &pos, const Vector & vel, const float gain) {
+void AUDPlay (const int sound, const QVector &pos, const Vector & vel, const float gain) {
 #ifdef HAVE_AL
   char tmp;
   if (sound<0)
@@ -310,13 +310,13 @@ void AUDPlay (const int sound, const Vector &pos, const Vector & vel, const floa
   if (sounds[sound].buffer==0) {
 	return;
   }
-  if ((tmp=AUDQueryAudability (sound,pos,vel,gain))!=0) {
+  if ((tmp=AUDQueryAudability (sound,pos.Cast(),vel,gain))!=0) {
     if (AUDReclaimSource (sound)) {
       ALfloat p [3] = {pos.i,pos.j,pos.k};
       AUDAdjustSound (sound,pos,vel);
       alSourcef(sounds[sound].source,AL_GAIN,gain);    
       if (tmp!=2){
-		AUDAddWatchedPlayed (sound,pos);
+		AUDAddWatchedPlayed (sound,pos.Cast());
 		alSourcePlay( sounds[sound].source );
       }
 

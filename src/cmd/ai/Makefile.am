@@ -36,5 +36,7 @@ libai_a_SOURCES =	\
 	tactics.cpp	\
 	script.cpp	\
 	missionscript.cpp	\
-	missionscript.h
+	missionscript.h \
+	turretai.cpp \
+	turretai.h
 

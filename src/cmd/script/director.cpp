@@ -59,6 +59,7 @@
 #include "Python.h"
 #endif
 #include "flightgroup.h"
+#include "gldrv/winsys.h"
 //#include "vegastrike.h"
 
 extern bool have_yy_error;
@@ -168,6 +169,7 @@ void Mission::DirectorEnd(){
     return;
   }
   RunDirectorScript ("endgame");
+
 #ifdef WIN32
   var_out.open("c:\\tmp\\default-player.variables");
 #else
@@ -308,7 +310,6 @@ bool Mission::runScript(missionNode *module_node,const string &scriptname,unsign
 
 
 void Mission::DirectorBenchmark(){
-  double elapsed=GetElapsedTime();
 
   gametime+=SIMULATION_ATOM;//elapsed;
   total_nr_frames++;
@@ -317,7 +318,7 @@ void Mission::DirectorBenchmark(){
 
   if(benchmark>0.0 && benchmark<gametime){
     cout << "Game was running for " << gametime << " secs,   av. framerate " << ((double)total_nr_frames)/gametime << endl;
-    exit(0);
+    winsys_exit(0);
   }
 }
 
@@ -356,7 +357,8 @@ void Mission::DirectorShipDestroyed(Unit *unit){
       fg->nr_waves_left-=1;
       fg->nr_ships_left=fg->nr_ships;
 
-      Order *order=unit->getAIState()->findOrderList();
+      Order *order=NULL;
+      order= unit->getAIState()?unit->getAIState()->findOrderList():NULL;
       fg->orderlist=NULL;
       if(order){
 	printf("found an orderlist\n");

@@ -79,6 +79,7 @@ struct mission_data {
 	char *description;
 	char *briefing;
 	char *path;
+	char *numplayers;
 };
 
 extern glob_t *MISSIONS;

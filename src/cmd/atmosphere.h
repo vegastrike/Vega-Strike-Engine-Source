@@ -33,7 +33,7 @@ private:
 	Mesh *stack; /* horizon to zenith */
 	std::vector <SunBox *> sunboxes; /* box around the sun (single star for now) */
 	Matrix tmatrix;
-	Vector position;
+	QVector position;
 	/* lighting contexts for the above 3 */
 public:
 
@@ -47,10 +47,10 @@ public:
 	*/
 
 	/* ugh, make update just change the lighting state */
-	void Update(const Vector &position, const Matrix tmatrix);
+	void Update(const QVector &position, const Matrix &tmatrix);
 	void Draw();
 	static void ProcessDrawQueue();
-	void SetMatricesAndDraw (const Vector &position, const Matrix tmatrix); /* inherit the orientation of 
+	void SetMatricesAndDraw (const QVector &position, const Matrix tmatrix); /* inherit the orientation of 
 	                                    the transformation matrix  */
 	static void DrawAtmospheres();
 };

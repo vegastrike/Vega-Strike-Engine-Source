@@ -20,7 +20,7 @@
 #ifdef max
 #undef max
 #endif
-
+#include "gldrv/winsys.h"
 static inline float max(float x, float y) {
 
   if(x>y) return x;
@@ -104,13 +104,14 @@ const EnumMap::Pair Mesh::XML::attribute_names[] = {
   EnumMap::Pair("Offset",XML::OFFSET),
   EnumMap::Pair("meshfile",XML::LODFILE),
   EnumMap::Pair ("Animation",XML::ANIMATEDTEXTURE),
+  EnumMap::Pair ("Reverse",XML::REVERSE),
   EnumMap::Pair ("LightingOn",XML::LIGHTINGON)
 };
 
 
 
 const EnumMap Mesh::XML::element_map(XML::element_names, 23);
-const EnumMap Mesh::XML::attribute_map(XML::attribute_names, 30);
+const EnumMap Mesh::XML::attribute_map(XML::attribute_names, 31);
 
 
 
@@ -126,7 +127,7 @@ void Mesh::endElement(void *userData, const XML_Char *name) {
 
 
 
-enum BLENDFUNC parse_alpha (char * tmp ) {
+enum BLENDFUNC parse_alpha (const char * tmp ) {
   if (strcmp (tmp,"ZERO")==0) {
     return ZERO;
   }
@@ -323,13 +324,14 @@ void Mesh::beginElement(const string &name, const AttributeList &attributes) {
     // Read in texture attribute
     xml->decal_name = string("\0");
     xml->alpha_name = string("\0");
-    char csrc[128];
-    char cdst[128];
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(XML::attribute_map.lookup((*iter).name)) {
       case XML::ANIMATEDTEXTURE:
 	xml->animated_name = (*iter).value;
 	texture_found=true;
+	break;
+      case XML::REVERSE:
+	xml->reverse = XMLSupport::parse_bool((*iter).value);
 	break;
       case XML::TEXTURE:
 	xml->decal_name = (*iter).value;
@@ -346,8 +348,14 @@ void Mesh::beginElement(const string &name, const AttributeList &attributes) {
 	xml->sharevert = (XMLSupport::parse_bool ((*iter).value)&&XMLSupport::parse_bool (vs_config->getVariable ("graphics","SharedVertexArrays","true")));
 	break;
       case XML::BLENDMODE:
-	sscanf (((*iter).value).c_str(),"%s %s",csrc,cdst);
-	SetBlendMode (parse_alpha (csrc),parse_alpha (cdst));
+	{
+	  char *csrc=strdup ((*iter).value.c_str());
+	  char *cdst=strdup((*iter).value.c_str());
+	  sscanf (((*iter).value).c_str(),"%s %s",csrc,cdst);
+	  SetBlendMode (parse_alpha (csrc),parse_alpha (cdst));
+	  free (csrc);
+	  free (cdst);
+	}
 	break;
       }
     }
@@ -644,7 +652,7 @@ void Mesh::beginElement(const string &name, const AttributeList &attributes) {
       case XML::UNKNOWN:
 	break;
       case XML::LODFILE:
-	xml->lod.push_back(new Mesh ((*iter).value.c_str(),true,xml->faction,xml->fg,true));//make orig mesh
+	xml->lod.push_back(new Mesh ((*iter).value.c_str(),xml->lodscale,xml->faction,xml->fg,true));//make orig mesh
 	break;
       case XML::SIZE:
 	flotsize = XMLSupport::parse_float ((*iter).value);
@@ -710,6 +718,17 @@ void Mesh::beginElement(const string &name, const AttributeList &attributes) {
     xml->vertex.t = t;
     xml->active_list->push_back(xml->vertex);
     xml->active_ind->push_back(index);
+    if (xml->reverse) {
+	  unsigned int i;
+      for (i=xml->active_ind->size()-1;i>0;i--) {
+	(*xml->active_ind)[i]=(*xml->active_ind)[i-1];
+      }
+      (*xml->active_ind)[0]=index;
+      for ( i=xml->active_list->size()-1;i>0;i--) {
+	(*xml->active_list)[i]=(*xml->active_list)[i-1];
+      }
+      (*xml->active_list)[0]=xml->vertex;
+    }
     xml->num_vertices--;
     break;
   case XML::LOGO: 
@@ -1004,18 +1023,21 @@ void Mesh::LoadXML(const char *filename, float scale, int faction, Flightgroup *
   std::vector <unsigned int> ind;  
   FILE* inFile = fopen (filename, "r");
   if(!inFile) {
-    assert(0);
+    fprintf (stderr,"Cannot Open Mesh File %s\n",filename);
+    winsys_exit(0);
     return;
   }
 
   xml = new XML;
   xml->fg = fg;
+  xml->reverse=false;
   xml->sharevert=false;
   xml->faction = faction;
   GFXGetMaterial (0, xml->material);//by default it's the default material;
   xml->load_stage = 0;
   xml->recalc_norm=false;
   xml->scale=scale;
+  xml->lodscale=scale;
   XML_Parser parser = XML_ParserCreate(NULL);
   XML_SetUserData(parser, this);
   XML_SetElementHandler(parser, &Mesh::beginElement, &Mesh::endElement);
@@ -1042,6 +1064,7 @@ void Mesh::LoadXML(const char *filename, float scale, int faction, Flightgroup *
 
   if(xml->load_stage!=5) {
     fprintf (stderr,"Warning: mesh load possibly failed\n");
+    exit(-1);
   }
   //begin vertex normal calculations if necessary
   if (USE_RECALC_NORM||xml->recalc_norm) {//fixme!

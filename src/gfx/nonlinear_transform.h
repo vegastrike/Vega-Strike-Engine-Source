@@ -12,11 +12,11 @@
 class IdentityTransform {
  public:
   ///Transforms in a possibly nonlinear way the point to some new space
-  virtual Vector Transform (const Vector &v) const {return v;} 
+  virtual QVector Transform (const QVector &v) const {return v;} 
   ///transforms a direction to some new space
-  virtual Vector TransformNormal (const Vector & v, const Vector &n) const {return n;}
+  virtual QVector TransformNormal (const QVector & v, const QVector &n) const {return n;}
   ///Transforms in reverse the vector into quadsquare space
-  virtual Vector InvTransform (const Vector &v) const {return v;}
+  virtual QVector InvTransform (const QVector &v) const {return v;}
   ///Transforms a min and a max vector and figures out what is bigger
   virtual CLIPSTATE BoxInFrustum (Vector &min, Vector &max,const Vector & campos) const {return GFXBoxInFrustum(min,max);}
   float TransformS (float x, float scale) const {return x*scale;}
@@ -34,19 +34,19 @@ class SphericalTransform:public IdentityTransform {
   float GetR() const {return r;}
   float GetX () const {return 2*M_PI/scalex;}
   float GetZ () const {return M_PI/scalez;} 
-  Vector Transform (const Vector &v) const {
+  QVector Transform (const QVector &v) const {
     Vector T (v.i*scalex, r+v.j,v.k *scalez-.5*M_PI);
     float cosphi = cos (T.k);
-    return Vector (T.j*cosphi*cos (T.i),T.j*sin (T.k),T.j*cosphi*sin(T.i));
+    return QVector (T.j*cosphi*cos (T.i),T.j*sin (T.k),T.j*cosphi*sin(T.i));
   }
-  Vector TransformNormal (const Vector &point, const Vector & n) const {
+  QVector TransformNormal (const QVector &point, const QVector & n) const {
     return SphericalTransform::Transform (n+point)-Transform (point);
     
   }
-  Vector InvTransform (const Vector &v) const {
+  QVector InvTransform (const QVector &v) const {
     float rplusy = v.Magnitude();
     //    float lengthxypln = sqrtf (rplusy*rplusy-v.j*v.j);//pythagorus
-    return Vector ((atan2 (-v.k,-v.i)+M_PI)/scalex,rplusy-r,(asin(v.j/rplusy)+M_PI*.5)/scalez);
+    return QVector ((atan2 (-v.k,-v.i)+M_PI)/scalex,rplusy-r,(asin(v.j/rplusy)+M_PI*.5)/scalez);
   }
   CLIPSTATE BoxInFrustum (Vector &min, Vector &max, const Vector & campos) const {
     const float rendermin=3;

@@ -159,7 +159,16 @@ void Galaxy::checkVar(configNode *node){
 }
 
 /* *********************************************************** */
-
+string Galaxy::getRandSystem (string sect, string def) {
+  configNode *secnodes=findSection(sect,variables);  
+  if (secnodes!=NULL) {
+    unsigned int size = secnodes->subnodes.size();
+    if (size>0) {
+      return secnodes->subnodes[rand()%size]->attr_value("name");
+    }
+  }
+  return def;
+}
 string Galaxy::getVariable(string section,string subsection,string name,string defaultvalue){
   configNode *secnode=findSection(section,variables);
   if(secnode!=NULL){

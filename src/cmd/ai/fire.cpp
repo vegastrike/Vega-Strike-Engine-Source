@@ -5,6 +5,7 @@
 #include "cmd/planet.h"
 #include "config_xml.h"
 #include "vs_globals.h"
+#include "cmd/script/flightgroup.h"
 using Orders::FireAt;
 
 FireAt::FireAt (float reaction_time, float aggressivitylevel): CommunicatingAI (WEAPON,STARGET),  rxntime (reaction_time), delay(0), agg (aggressivitylevel), distance(1){
@@ -23,24 +24,45 @@ void FireAt::ChooseTargets (int numtargs, bool force) {
     }
   }
   UnitCollection::UnitIterator iter (_Universe->activeStarSystem()->getUnitList().createIterator());
-  Unit * un ;
+  Unit * un =NULL;
   float relation=1;
   float range=0;
   float worstrelation=0;
+  un_iter subun = parent->getSubUnits();
+  Unit * su=NULL;
+  double dist;
   while ((un = iter.current())) {
     //how to choose a target?? "if looks particularly juicy... :-) tmp.prepend (un);
     relation = GetEffectiveRelationship (un);
-    Vector t;
-    bool tmp = parent->InRange (un,t);
-    if (tmp&&((relation<worstrelation||(relation==worstrelation&&t.Dot(t)<range)))) {
+    bool tmp = parent->InRange (un,dist,false,false);
+    if (tmp&&((relation<worstrelation||(relation==worstrelation&&dist<range)))) {
       worstrelation = relation;
-      range = t.Dot(t);
+      range = dist;
       parent->Target (un);
+      su = *subun;
+      if (su) {
+	//	while (su->InRange (un,t,false,false)) {
+	  su->Target (un);
+	  su->TargetTurret(un);
+	  ++subun;
+	  //	  if (!(su=*subun))
+	  //    break;
+	  //}
+      }
     }
     iter.advance();
   }
   if (worstrelation>0) {
     parent->Target (NULL);
+  }else {
+    for (;(su=*subun)!=NULL;++subun) {
+      un=parent->Target();
+      su->Target (un);
+      su->TargetTurret(un);
+      if (un) {
+	//	fprintf (stderr,"turret %s targetting %s",parent->name.c_str(),un->name.c_str());
+      }
+    }
   }
 }
 /* Proper choosing of targets
@@ -57,14 +79,15 @@ void FireAt::ChooseTargets (int num) {
 }
 
 */
-bool FireAt::ShouldFire(Unit * targ) {
+bool FireAt::ShouldFire(Unit * targ, bool &missilelock) {
   float dist;
   float angle = parent->cosAngleTo (targ, dist,parent->GetComputerData().itts?gunspeed:FLT_MAX,gunrange);
+  missilelock=false;
   targ->Threaten (parent,angle/(dist<.8?.8:dist));
   if (targ==parent->Target()) {
     distance = dist;
   }
-  return (dist<agg&&angle>1/agg);
+  return (dist<agg&&angle>1/agg)||(parent->TrackingGuns(missilelock)&&dist<agg&&angle>0);
 }
 
 FireAt::~FireAt() {
@@ -90,11 +113,18 @@ bool FireAt::DealWithMultipleTargets () {
   return false;
 }
 #endif
-void FireAt::FireWeapons(bool shouldfire) {
+void FireAt::FireWeapons(bool shouldfire, bool lockmissile) {
+  if (lockmissile) {
+    parent->Fire (true);
+    parent->ToggleWeapon(true);
+  }
   if (shouldfire) {
     if ((float(rand())/RAND_MAX)<missileprobability*SIMULATION_ATOM) {
-      parent->Fire(true);
-      parent->ToggleWeapon(true);//change missiles to only fire 1
+      int locked = parent->LockMissile();
+      if (locked==-1) {
+	parent->Fire(true);
+	parent->ToggleWeapon(true);//change missiles to only fire 1
+      }
     }
     if (delay>rxntime) {
       parent->Fire(false);
@@ -107,6 +137,7 @@ void FireAt::FireWeapons(bool shouldfire) {
   }
 }
 void FireAt::Execute () {
+  bool missilelock=false;
   bool tmp = done;
   Order::Execute();	
   if (gunspeed==float(.0001)) {
@@ -146,18 +177,33 @@ void FireAt::Execute () {
       }
     }
     if (targ->CloakVisible()>.8&&targ->GetHull()>=0) {
-      if (!istargetjumpableplanet)
-	shouldfire |= ShouldFire (targ);
+      if (parent->GetNumMounts()>0) {
+	if (!istargetjumpableplanet)
+	  shouldfire |= ShouldFire (targ,missilelock);
+      }
     }else {
       ChooseTargets(1,true);
     }
     static float targetswitchprobability = XMLSupport::parse_float (vs_config->getVariable ("AI","Targetting","TargetSwitchProbability",".01"));
     if ((!istargetjumpableplanet)&&(float(rand())/RAND_MAX)<targetswitchprobability*SIMULATION_ATOM) {
-      ChooseTargets(1,true);
+      bool switcht=true;
+      Flightgroup * fg = parent->getFlightgroup();;
+      if (fg) {
+	if (!fg->directive.empty()) {
+	  if ((*fg->directive.begin())==toupper (*fg->directive.begin())) {
+	    switcht=false;
+	  }
+	}
+      }
+      if (switcht) {
+	ChooseTargets(1,true);
+      }
     }
   } else {
     ChooseTargets(1,false);
   }
-  FireWeapons (shouldfire);
+  if (parent->GetNumMounts ()>0) {
+    FireWeapons (shouldfire,missilelock);
+  }
 }
 

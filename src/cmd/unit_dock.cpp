@@ -46,7 +46,7 @@ bool Unit::RequestClearance (Unit * dockingunit) {
 }
 
 int Unit::CanDockWithMe(Unit * un) {
-  if (_Universe->GetRelation(faction,un->faction)>=0) {
+  //  if (_Universe->GetRelation(faction,un->faction)>=0) {//already clearneed
     for (unsigned int i=0;i<image->dockingports.size();i++) {
       if (un->image->dockingports.size()) {
 	for (unsigned int j=0;j<un->image->dockingports.size();j++) {
@@ -57,12 +57,12 @@ int Unit::CanDockWithMe(Unit * un) {
 	  }
 	}  
       }else {
-	if (insideDock (image->dockingports[i],InvTransform (cumulative_transformation_matrix,un->Position()),un->rSize())) {
+	if (insideDock (image->dockingports[i],InvTransform (cumulative_transformation_matrix,un->Position().Cast()),un->rSize())) {
 	  return i;
 	}
       }
     }
-  }
+    //  }
   return -1;
 }
 void Unit::FreeDockingPort (unsigned int i) {
@@ -127,7 +127,20 @@ void Unit::PerformDockingOperations () {
     ///force him in a box...err where he is
   }
 }
-
+bool Unit::isDocked (Unit* d) {
+  if (!(d->docked&DOCKED_INSIDE|DOCKED)) {
+    return false;
+  }
+  for (unsigned int i=0;i<image->dockedunits.size();i++) {
+    Unit * un;
+    if ((un=image->dockedunits[i]->uc.GetUnit())!=NULL) {
+      if (un==d) {
+	return true;
+      }
+    }
+  }
+  return false;
+}
 bool Unit::Dock (Unit * utdw) {
   if (docked&(DOCKED_INSIDE|DOCKED))
     return false;
@@ -148,10 +161,11 @@ bool Unit::Dock (Unit * utdw) {
 	docked|= DOCKED;
       }
       image->DockedTo.SetUnit (utdw);
+      computer.set_speed=0;
       if (this==_Universe->AccessCockpit()->GetParent()) {
 	_Universe->AccessCockpit()->RestoreGodliness();
       }
-
+      
       return true;
     }
   }

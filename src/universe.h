@@ -123,6 +123,7 @@ private:
   Animation * getRandAnimation (int whichfaction,std::string&which);
   Cockpit * isPlayerStarship (const Unit* fighter);
   vector <std::string> getAdjacentStarSystems(const std::string &ss);
+  std::string getGalaxyProperty (const std::string &sys, const std::string & prop);
   bool StillExists(StarSystem * ss);
   void setActiveStarSystem(StarSystem * ss) {active_star_system.back()=ss;}
   void pushActiveStarSystem(StarSystem * ss) {active_star_system.push_back (ss);}
@@ -139,7 +140,7 @@ private:
     Faction::LoadXML (factfile,this);
   }
   void SetupCockpits (std::vector <std::string> players);
-  void WriteSaveGame();
+  void WriteSaveGame(bool auto_save);
   ///returns the index of the faction with that name
   int GetFaction (const char *factionname);
   int GetNumAnimation(int faction);

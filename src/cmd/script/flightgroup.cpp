@@ -33,6 +33,7 @@ Flightgroup * Flightgroup::newFlightgroup (const std::string &name,
     new_fg=true;
     fg =new Flightgroup;
     fg->name=name;
+    fg->directive="b";
     fg->faction= faction;
   }else {
     new_fg = (fg->nr_waves_left==0&&fg->nr_ships_left==0);

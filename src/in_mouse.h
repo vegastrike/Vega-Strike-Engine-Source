@@ -21,18 +21,17 @@
 
 #ifndef _MOUSE_H_
 #define _MOUSE_H_
-#include "in_kb.h"
+#include "in.h"
 
 extern int mousex, mousey;
 int getMouseButtonStatus ();//returns button status that are bitwise anded (i.e. 1,3 down  the number looks like 0x1|(0x1<<2)
-void warpMousePointer (int x,int y);
 void InitMouse();
 void RestoreMouse();
 void ProcessMouse();
-typedef void (*MouseHandler)(KBSTATE,int x, int y, int delx, int dely, int mod);
 void BindKey(int key,MouseHandler handler);
 void UnbindMouse (int key);
 int getMouseDrawFunc();
+void GetMouseDelta (int &dx, int &dy);
 #endif
 
 

@@ -1,6 +1,7 @@
 #include "gl_light.h"
 #include <queue>
 #include <list>
+
 #include <vector>
 using std::priority_queue;
 #include "hashtable_3d.h"
@@ -67,14 +68,14 @@ void unpicklights () {
 static inline bool picklight (const LineCollide& light, const Vector & center, const float rad, const int lightsenabled);
 typedef vector <LineCollideStar> veclinecol;
 void GFXPickLights (const Vector & center, const float radius) {
-    Vector tmp;
+    QVector tmp;
     void * rndvar = (void *)rand();
     const int sizeget=2;
     int lightsenabled = _GLLightsEnabled;
     LineCollide tmpcollide;
-    tmp = Vector(radius,radius,radius);
-    tmpcollide.Mini = center-tmp;
-    tmpcollide.Maxi = center+tmp;
+    tmp = QVector(radius,radius,radius);
+    tmpcollide.Mini = center.Cast()-tmp;
+    tmpcollide.Maxi = center.Cast()+tmp;
     tmpcollide.hhuge=false;//fixme!! may well be hhuge...don't have enough room in tmppickt
     tmpcollide.object.i=0;//FIXME, should this be -1?
     tmpcollide.type=LineCollide::UNIT;
@@ -82,11 +83,12 @@ void GFXPickLights (const Vector & center, const float radius) {
     //FIXMESPEEDHACK    veclinecol *tmppickt[lighthuge+1];
     //FIXMESPEEDHACK    if (radius < CTACC) {
     veclinecol *tmppickt[sizeget];
-    lighttable.Get (center, tmppickt);
+    lighttable.Get (center.Cast(), tmppickt);
 	//FIXMESPEEDHACK} else {
 	//FIXMESPEEDHACKsizeget = lighttable.Get (&tmpcollide, tmppickt); 
 	//FIXMESPEEDHACK}
     for (int j=0;j<sizeget;j++) {
+
 	  veclinecol::iterator i;
 	  //fprintf (stderr,"pixked size %d",tmppickt[j]->size());
       for (i=tmppickt[j]->begin();i!=tmppickt[j]->end();i++){

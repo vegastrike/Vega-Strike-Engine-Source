@@ -43,7 +43,7 @@ private:
   };//is it right now blowing the enemy to smitheri
   unsigned char impact;
   void * owner;//may be a dead pointer...never dereferenced
-  Vector center;//in world coordinates as of last physics frame...
+  QVector center;//in world coordinates as of last physics frame...
   Vector direction;
   
   void RecalculateVertices();
@@ -54,12 +54,11 @@ public:
   void Init (const Transformation & trans, const weapon_info & clne, void * own);
   ~Beam();
   void RemoveFromSystem(bool eradicate);
-  Vector GetPosition();
-  void SetPosition (float, float, float);
-  void SetPosition (const Vector &);
+  QVector GetPosition() const {return local_transformation.position;}
+  void SetPosition (const QVector &);
   void SetOrientation(const Vector &p, const Vector &q, const Vector &r);
-  void UpdatePhysics(const Transformation & =identity_transformation, const Matrix = identity_matrix);
-  void Draw(const Transformation & =identity_transformation, const float [] = identity_matrix );
+  void UpdatePhysics(const Transformation & =identity_transformation, const Matrix & = identity_matrix);
+  void Draw(const Transformation & =identity_transformation, const Matrix & = identity_matrix );
   void Destabilize () {impact=UNSTABLE;}
   bool Dissolved () {return curthick==0;} 
   bool Ready () {return curthick==0&&refiretime>refire;}

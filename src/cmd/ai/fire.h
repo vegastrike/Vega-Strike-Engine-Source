@@ -8,7 +8,7 @@ namespace Orders {
 class FireAt: public CommunicatingAI {
 
 
-  bool ShouldFire(Unit * targ);
+  bool ShouldFire(Unit * targ,bool &missilelock);
 protected:
   float missileprobability;
   float rxntime;
@@ -17,7 +17,7 @@ protected:
   float distance;
   float gunspeed;
   float gunrange;
-  void FireWeapons (bool shouldfire);
+  void FireWeapons (bool shouldfire,bool lockmissile);
   //  bool DealWithMultipleTargets();
   void ChooseTargets(int num, bool force=false);//chooses n targets and puts the best to attack in unit's target container
 public:

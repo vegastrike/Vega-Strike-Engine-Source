@@ -33,7 +33,7 @@
 // this file isn't available on my system (all win32 machines?) i dun even know what it has or if we need it as I can compile without it
 #include <unistd.h>
 #endif
-
+#include "cmd/unit_factory.h"
 #include <expat.h>
 #include "xml_support.h"
 
@@ -58,8 +58,10 @@
 #include "hashtable.h"
 #include "gfx/animation.h"
 #include "flightgroup.h"
+#include "cmd/unit_factory.h"
 //#include "vegastrike.h"
 extern vector <char *> ParseDestinations (const string &value);
+
 /* *********************************************************** */
 
 extern Unit& GetUnitMasterPartList ();
@@ -198,7 +200,7 @@ varInst *Mission::call_unit(missionNode *node,int mode){
       }
     }
     missionNode *pos_node[3];
-    Vector pos (getFloatArg (node,mode,6),
+    QVector pos (getFloatArg (node,mode,6),
 		getFloatArg (node,mode,7),
 		getFloatArg (node,mode,8));
     if (node->subnodes.size()>9) {
@@ -271,8 +273,11 @@ varInst *Mission::call_unit(missionNode *node,int mode){
     return viret;
   }   
   else if(method_id==CMT_UNIT_getRandCargo){
-    missionNode *nr_node=getArgument(node,mode,0);
-    int quantity=doIntVar(nr_node,mode);
+    int quantity=getIntArg(node,mode,0);
+    string category;
+    if (node->subnodes.size()>1) {
+      category = getStringArgument(node,mode,1);
+    }
     Unit *my_unit=NULL;
     varInst *vireturn=NULL;
     vireturn=call_olist_new(node,mode);
@@ -280,39 +285,57 @@ varInst *Mission::call_unit(missionNode *node,int mode){
 		Cargo *ret=NULL;
 		Unit *mpl = &GetUnitMasterPartList();
 		unsigned int max=mpl->numCargo();
-		if (max>0) {
-		  ret = &mpl->GetCargo(rand()%max);
-		}else {
-		  ret = new Cargo();//mem leak--won't happen
-		}
-		ret->quantity=quantity;
+		if (!category.empty()) {
+		  vector <Cargo> cat;
+		  mpl->GetCargoCat (category,cat);
+		  if (!cat.empty()) {
+		    unsigned int i;
+		    ret = mpl->GetCargo(cat[rand()%cat.size()].content,i);
+		  }
+                }else {
+		  if (mpl->numCargo()) {
+		    for (unsigned int i=0;i<500;i++) {
+		      ret = &mpl->GetCargo(rand()%max);  
+		      if (ret->content.find("mission")==string::npos) {
+			break;
+		      }
+		    }
+		  }else {
+		    ret = new Cargo();//mem leak--won't happen
+		  }		  
+                }
+                
+		if (ret) {
+		  ret->quantity=quantity;
 		
-		viret=newVarInst(VI_IN_OBJECT);
-		viret->type=VAR_OBJECT;
-		viret->objectname="string";
-		viret->object=&ret->content;
- 		((olist_t *)vireturn->object)->push_back(viret);
-		viret=newVarInst(VI_IN_OBJECT);
-		viret->type=VAR_OBJECT;
-		viret->objectname="string";
-		viret->object=&ret->category;
-		((olist_t *)vireturn->object)->push_back(viret);
-		viret=newVarInst(VI_IN_OBJECT);
-		viret->type=VAR_FLOAT;
-		viret->float_val=ret->price;
-		((olist_t *)vireturn->object)->push_back(viret);
-		viret=newVarInst(VI_IN_OBJECT);
-		viret->type=VAR_INT;
-		viret->int_val=quantity;
-		((olist_t *)vireturn->object)->push_back(viret);
-		viret=newVarInst(VI_IN_OBJECT);
-		viret->type=VAR_FLOAT;
-		viret->float_val=ret->mass;
-		((olist_t *)vireturn->object)->push_back(viret);
-		viret=newVarInst(VI_IN_OBJECT);
-		viret->type=VAR_FLOAT;
-		viret->float_val=ret->volume;
-		((olist_t *)vireturn->object)->push_back(viret);				
+		  viret=newVarInst(VI_IN_OBJECT);
+		  viret->type=VAR_OBJECT;
+		  viret->objectname="string";
+		  viret->object=&ret->content;
+ 		  ((olist_t *)vireturn->object)->push_back(viret);
+		  viret=newVarInst(VI_IN_OBJECT);
+		  viret->type=VAR_OBJECT;
+		  viret->objectname="string";
+		  viret->object=&ret->category;
+		  ((olist_t *)vireturn->object)->push_back(viret);
+		  viret=newVarInst(VI_IN_OBJECT);
+		  viret->type=VAR_FLOAT;
+		  viret->float_val=ret->price;
+		  ((olist_t *)vireturn->object)->push_back(viret);
+		  viret=newVarInst(VI_IN_OBJECT);
+		  viret->type=VAR_INT;
+		  viret->int_val=quantity;
+		  ((olist_t *)vireturn->object)->push_back(viret);
+		  viret=newVarInst(VI_IN_OBJECT);
+		  viret->type=VAR_FLOAT;
+		  viret->float_val=ret->mass;
+		  ((olist_t *)vireturn->object)->push_back(viret);
+		  viret=newVarInst(VI_IN_OBJECT);
+		  viret->type=VAR_FLOAT;
+		  viret->float_val=ret->volume;
+		  ((olist_t *)vireturn->object)->push_back(viret);				
+		  
+		}
     }
     debug(3,node,mode,"unit getRandCargo: ");
     printVarInst(3,vireturn);
@@ -363,7 +386,7 @@ varInst *Mission::call_unit(missionNode *node,int mode){
       viret->type=VAR_OBJECT;
       viret->objectname="olist";
       if(mode==SCRIPT_RUN){
-	Vector pos=my_unit->Position();
+	QVector pos=my_unit->Position();
 
 	call_vector_into_olist(viret,pos);
       }
@@ -496,9 +519,9 @@ varInst *Mission::call_unit(missionNode *node,int mode){
       viret->float_val=dist;
     }
     else if(method_id==CMT_UNIT_getMinDis){
-      Vector vec3=getVec3Arg(node,mode,1);
+      QVector vec3=getVec3Arg(node,mode,1);
 
-	float dist=0.0;
+	double dist=0.0;
 	if(mode==SCRIPT_RUN){
 	  dist = (my_unit->Position()-vec3).Magnitude()-my_unit->rSize();
 	  //	  dist=my_unit->getMinDis(vec3);
@@ -514,10 +537,10 @@ varInst *Mission::call_unit(missionNode *node,int mode){
 	float dist=0.0;
 	if(mode==SCRIPT_RUN){
 	  Vector p,q,r;
-	  Vector vectothem=Vector(other_unit->Position() - my_unit->Position()).Normalize();
+	  QVector vectothem=QVector(other_unit->Position() - my_unit->Position()).Normalize();
 	  my_unit->GetOrientation(p,q,r);
 	  //angle=my_unit->cosAngleTo(other_unit,dist);
-	  angle=acos( vectothem.Dot(r) );
+	  angle=acos( vectothem.Dot(r.Cast()) );
 	  angle=(angle/PI)*180.0;
 	  //printf("angle: %f\n",angle);
 	}
@@ -526,16 +549,16 @@ varInst *Mission::call_unit(missionNode *node,int mode){
 	viret->float_val=angle;
     }
     else if(method_id==CMT_UNIT_getAngleToPos){
-      Vector other_pos=getVec3Arg(node,mode,1);
+      QVector other_pos=getVec3Arg(node,mode,1);
 
-	float angle=0.0;
-	float dist=0.0;
+	double angle=0.0;
+	double dist=0.0;
 	if(mode==SCRIPT_RUN){
 	  Vector p,q,r;
-	  Vector vectothem=Vector(other_pos - my_unit->Position()).Normalize();
+	  QVector vectothem=QVector(other_pos - my_unit->Position()).Normalize();
 	  my_unit->GetOrientation(p,q,r);
 	  //angle=my_unit->cosAngleTo(other_unit,dist);
-	  angle=acos( vectothem.Dot(r) );
+	  angle=acos( vectothem.Dot(r.Cast()) );
 	  angle=(angle/PI)*180.0;
 	  //printf("angle: %f\n",angle);
 	}
@@ -727,6 +750,17 @@ varInst *Mission::call_unit(missionNode *node,int mode){
       viret->type=VAR_OBJECT;
       viret->objectname="order";
       viret->object=(void *)my_order;
+    }
+    else if(method_id==CMT_UNIT_correctStarSystem){
+      bool ret=false;
+      if(mode==SCRIPT_RUN){
+	ret = my_unit->InCorrectStarSystem(_Universe->activeStarSystem());
+	
+      }
+      viret=newVarInst(VI_TEMP);
+      viret->type=VAR_BOOL;
+      viret->bool_val=ret;
+
     }
     else if(method_id==CMT_UNIT_removeFromGame){
 
@@ -967,14 +1001,40 @@ varInst *Mission::call_unit(missionNode *node,int mode){
       viret->int_val = carg.quantity;
     }
     else if(method_id==CMT_UNIT_setPosition){
-      float x= getFloatArg(node,mode,1);
-      float y= getFloatArg(node,mode,2);
-      float z= getFloatArg(node,mode,3);
+      double x= getFloatArg(node,mode,1);
+      double y= getFloatArg(node,mode,2);
+      double z= getFloatArg(node,mode,3);
       if(mode==SCRIPT_RUN){
-	my_unit->SetCurPosition(Vector(x,y,z));
+	my_unit->SetCurPosition(QVector(x,y,z));
       }
       viret=newVarInst(VI_TEMP);
       viret->type=VAR_VOID;
+    }
+    else if (method_id==CMT_UNIT_upgrade) {
+      string file = getStringArgument (node,mode,1);
+      double percentage=0;
+      bool force=true;
+      bool loop_through_mounts=false;
+      int mountoffset = getIntArg(node,mode,2);      
+      int subunitoffset = getIntArg(node,mode,3);      
+      unsigned int siz = node->subnodes.size();
+      if (siz>4) {
+        force = getBoolArg(node,mode,4);
+	if (siz>5) {
+	  loop_through_mounts =getBoolArg (node,mode,5);
+	}
+      }
+      if (mode==SCRIPT_RUN) {
+	printf ("upgrading %s %s %d %d %c\n",my_unit->name.c_str(),file.c_str(),mountoffset, subunitoffset,loop_through_mounts);
+        fflush (stdout);
+	percentage=my_unit->Upgrade (file,mountoffset,subunitoffset,force,loop_through_mounts);
+	my_unit->SetTurretAI();
+      }
+
+      viret=newVarInst(VI_TEMP);
+      viret->type=VAR_FLOAT;
+      viret->float_val=percentage;
+      
     }
     else if(method_id==CMT_UNIT_incrementCargo){
       float percentagechange= getFloatArg(node,mode,1);
@@ -1010,9 +1070,9 @@ varInst *Mission::call_unit(missionNode *node,int mode){
       viret->type=VAR_VOID;
     }
     else if(method_id==CMT_UNIT_getSaveData){
-      float magic_num;
+      std::string magic_num;
       void * my_obj=NULL;
-      magic_num= getFloatArg(node,mode,1);
+      magic_num= getStringArgument(node,mode,1);
       if(mode==SCRIPT_RUN){
 	Cockpit * tmp;
 	if ((tmp=_Universe->isPlayerStarship (my_unit))) {
@@ -1053,6 +1113,14 @@ varInst *Mission::call_unit(missionNode *node,int mode){
       viret =newVarInst(VI_TEMP);
       viret->type=VAR_VOID;
     }
+    else if(method_id==CMT_UNIT_frameOfReference){
+      Unit * other_unit = getUnitArg (node,mode,1);
+      if (mode==SCRIPT_RUN) {
+	my_unit->VelocityReference (other_unit);
+      }
+      viret = newVarInst (VI_TEMP);
+      viret->type=VAR_VOID;
+    }
     else if(method_id==CMT_UNIT_communicateTo){
       Unit *other_unit=getUnitArg(node,mode,1);
       float mood =getFloatArg(node,mode,2);
@@ -1060,9 +1128,12 @@ varInst *Mission::call_unit(missionNode *node,int mode){
       if(mode==SCRIPT_RUN){
 	Cockpit * tmp;
 	if ((tmp=_Universe->isPlayerStarship (my_unit))) {
-	  Animation * ani= other_unit->getAIState()->getCommFace (mood,sex);
-	  if (NULL!=ani) {
-	    tmp->SetCommAnimation (ani);
+	  Order * ord=other_unit->getAIState();
+	  if (ord) {
+	    Animation * ani= ord->getCommFace (mood,sex);
+	    if (NULL!=ani) {
+	      tmp->SetCommAnimation (ani);
+	    }
 	  }
 	}
       }
@@ -1132,6 +1203,7 @@ Unit *Mission::getUnitObject(missionNode *node,int mode,varInst *ovi){
 }
 
 // void call_unit_launch(missionNode *node,int mode,string name,string faction,string type,string ainame,int nr_ships,Vector & pos){
+extern BLENDFUNC parse_alpha (const char *);
 
 Unit * Mission::call_unit_launch(CreateFlightgroup *fg, int type, const string &destinations){
   //  fprintf (stderr,"calling unit launch with Mission 0x%x Flightgroup 0x%x" ,this, fg);
@@ -1143,20 +1215,34 @@ Unit * Mission::call_unit_launch(CreateFlightgroup *fg, int type, const string &
      Unit * my_unit;
      if (type==PLANETPTR) {
        float radius;
-       char * blah = strdup (fg->fg->type.c_str());
-       char * blooh = strdup (fg->fg->type.c_str());
-       blooh[0]='\0';//have at least 1 char
-       blah[0]='\0';
-       sscanf (fg->fg->type.c_str(),"%f %s %s",&radius,blah,blooh);
+       char * tex = strdup (fg->fg->type.c_str());
+       char * bsrc = strdup (fg->fg->type.c_str());
+       char * bdst = strdup (fg->fg->type.c_str());
+       char * citylights = strdup (fg->fg->type.c_str());
+       tex[0]='\0';
+       bsrc[0]='\0';//have at least 1 char
+       bdst[0]='\0';
+       citylights[0]='\0';
+       int ret =sscanf (fg->fg->type.c_str(),"%f %s %s %s %s",&radius,tex,bsrc,bdst, citylights);
        GFXMaterial mat;
        GFXGetMaterial (0,mat);
-       my_unit = new Planet (Vector(0,0,0),Vector(0,0,0),0,Vector(0,0,0), 0,0,radius,blah,blooh, ParseDestinations(destinations),Vector(0,0,0),NULL,mat,vector<GFXLightLocal>(),faction_nr,blah);
-       free (blah);
-       free (blooh);
+      
+       BLENDFUNC s = ONE;
+       BLENDFUNC d = ZERO;
+       if (bdst[0]!='\0') 
+	 d=parse_alpha (bdst);
+       if (bsrc[0]!='\0') 
+	 s=parse_alpha (bsrc);
+       my_unit = UnitFactory::createPlanet (QVector(0,0,0),QVector(0,0,0),0,Vector(0,0,0), 0,0,radius,tex,citylights,s,d, ParseDestinations(destinations),QVector(0,0,0),NULL,mat,vector<GFXLightLocal>(),faction_nr,tex);
+
+       free (bsrc);
+       free (bdst);
+       free (tex);
+       free (citylights);
      }else if (type==NEBULAPTR) {
-       my_unit=new Nebula (fg->fg->type.c_str(),false,faction_nr,fg->fg,u);
+       my_unit=UnitFactory::createNebula (fg->fg->type.c_str(),false,faction_nr,fg->fg,u);
      } else {
-       my_unit=new Unit(fg->fg->type.c_str(),false,faction_nr,string(""),fg->fg,u);
+       my_unit=UnitFactory::createUnit(fg->fg->type.c_str(),false,faction_nr,string(""),fg->fg,u);
      }
      units[u]=my_unit;
    }
@@ -1166,7 +1252,7 @@ Unit * Mission::call_unit_launch(CreateFlightgroup *fg, int type, const string &
    for(u=0;u<fg->nr_ships;u++){
      my_unit=units[u];
 
-     Vector pox;
+     QVector pox;
 
      pox.i=fg->fg->pos.i+u*fg_radius*3;
      pox.j=fg->fg->pos.j+u*fg_radius*3;
@@ -1211,7 +1297,7 @@ Unit * Mission::call_unit_launch(CreateFlightgroup *fg, int type, const string &
      my_unit->Target(NULL);
    }
 
-   msgcenter->add("game","all",(fg->fg->faction+string ("launched ")+fg->fg->name+string(":")+fg->fg->type+string("0-")+XMLSupport::tostring(fg->fg->nr_ships)));
+   printf ("%s",(fg->fg->faction+string ("launched ")+fg->fg->name+string(":")+fg->fg->type+string("0-")+XMLSupport::tostring(fg->fg->nr_ships)).c_str());
    my_unit= units[0];
    fg->fg->leader.SetUnit(my_unit);
    delete [] units;
@@ -1276,7 +1362,6 @@ void Mission::call_unit_toxml(missionNode *node,int mode,varInst *ovi){
    string fgid=my_object->getFgID();
    Flightgroup *fg=my_object->getFlightgroup();
 
-   Vector pos=my_object->Position();
   
    var_out << "<unit fgid=" << qu(fgid) << "/>\n";
   }

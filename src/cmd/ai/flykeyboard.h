@@ -10,6 +10,13 @@
 
 class FlyByKeyboard: public FlyByWire {
   Order * autopilot;
+  Vector axis_key;
+ protected:
+  void KeyboardUp (float val);
+  void KeyboardRight (float val);
+  void KeyboardRollRight (float val);
+  float clamp_axis(float v);
+  float reduce_axis (float v);
  public:
   static void SheltonKey (int,KBSTATE);
   static void StartKey (int,KBSTATE);

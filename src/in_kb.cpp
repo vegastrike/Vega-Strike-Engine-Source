@@ -25,6 +25,7 @@
 #include "vegastrike.h"
 #include "in_kb.h"
 #include "in_handler.h"
+#include "gldrv/winsys.h"
 //#include "cmd_unit.h"
 /*
 extern queue<InputListener*> activationreqqueue;
@@ -33,13 +34,15 @@ extern list<InputListener*> listeners;
 extern InputListener* activelistener;
 */
 
-static KBHandler keyBindings [KEYMAP_SIZE];
-static unsigned int playerBindings [KEYMAP_SIZE];
-KBSTATE keyState [KEYMAP_SIZE];
+static KBHandler keyBindings [WSK_LAST];
+static unsigned int playerBindings [WSK_LAST];
+KBSTATE keyState [WSK_LAST];
 
-static void kbGetInput(int key, int special, int release, int x, int y){
+static void kbGetInput(int key, bool release, int x, int y){
   int i=_Universe->CurrentCockpit();
   _Universe->SetActiveCockpit(playerBindings[key]);
+
+
   if ((keyState[key]==RESET||keyState[key]==UP)&&!release)
     keyBindings[key](key,PRESS);
   if ((keyState[key]==DOWN||keyState[key]==RESET)&&release)
@@ -47,13 +50,118 @@ static void kbGetInput(int key, int special, int release, int x, int y){
   keyState[key] = release?UP:DOWN;
   _Universe->SetActiveCockpit(i);
 }
-
- void glut_keyboard_cb( unsigned char ch, int x, int y ) 
-{
-  //  fprintf (stderr,"keyboard  %d",ch);
-    kbGetInput( ch, 0, 0, x, y );
+int shiftup (int ch) {
+  switch (ch) {
+  case '1':
+    return '!';
+  case '2':
+    return '@';
+  case '3':
+    return '#';
+  case '4':
+    return '$';
+  case '5':
+    return '%';
+  case '6':
+    return '^';
+  case '7':
+    return '&';
+  case '8':
+    return '*';
+  case '9':
+    return '(';
+  case '0':
+    return ')';
+  case '-':
+    return '_';
+  case '=':
+    return '+';
+  case '\\':
+    return '|';
+  case '\'':
+    return '"';
+  case ';':
+    return ':';
+  case '/':
+    return '?';
+  case '.':
+    return '>';
+  case ',':
+    return '<';
+  case '`':
+    return '~';
+  }
+  return toupper(ch);
 }
 
+int shiftdown (int ch) {
+  switch (ch){
+  case '!':
+    return '1';
+  case '@':
+    return '2';
+  case '#':
+    return '3';
+  case '$':
+    return '4'; 
+  case '%':
+    return '5';
+  case '^':
+    return '6';
+  case '&':
+    return '7';
+  case '*':
+    return '8';
+  case '(':
+    return '9';
+  case ')':
+    return '0';
+  case '_':
+    return '-';
+  case '+':
+    return '=';
+  case '|':
+    return '\\';
+  case '"':
+    return '\'';
+  case ';':
+    return ':';
+  case '?':
+    return '/';
+  case '>':
+    return '.';
+  case '<':
+    return ',';
+  case '~':
+    return '`';
+  }
+  return tolower(ch);
+}
+
+
+
+ void glut_keyboard_cb( unsigned int  ch,unsigned int mod, bool release, int x, int y ) 
+{
+  bool shifton=false;
+  //  fprintf (stderr,"keyboard  %d",ch);
+  if ((WSK_MOD_LSHIFT==(mod&WSK_MOD_LSHIFT))||(WSK_MOD_RSHIFT==(mod&WSK_MOD_RSHIFT))) {
+    ch = shiftup(ch);
+    shifton=true;
+  }
+  kbGetInput( ch, release, x, y );
+  if (release) {
+    if (shifton) {
+      if (((unsigned int)shiftdown (ch))!=ch&&keyState[shiftdown(ch)]==DOWN) {
+	kbGetInput (shiftdown(ch),release,x,y);
+      }
+    }else {
+      if (((unsigned int)shiftup (ch))!=ch&&keyState[shiftup(ch)]==DOWN) {
+	kbGetInput (shiftup(ch),release,x,y);
+      }
+    }
+  }
+}
+/*
 static void glut_special_cb( int key, int x, int y ) 
 {
   //  fprintf (stderr,"keyboard s %d",key);
@@ -71,12 +179,9 @@ static void glut_special_up_cb( int key, int x, int y )
   //  fprintf (stderr,"keyboard s up %d",key);
     kbGetInput( 128+key, 1, 1, x, y );
 }
+*/
 void RestoreKB() {
-  glutKeyboardFunc( glut_keyboard_cb );
-
-  glutKeyboardUpFunc( glut_keyboard_up_cb );
-  glutSpecialFunc( glut_special_cb );
-  glutSpecialUpFunc( glut_special_up_cb );
+  winsys_set_keyboard_func( glut_keyboard_cb );
 }
 
 void InitKB()

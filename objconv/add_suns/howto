@@ -1,0 +1,6 @@
+(00:42:09) Alan C Shieh: /tmp/gemini/*.pl
+(00:42:11) Alan C Shieh: driver loop
+(00:42:35) Alan C Shieh: 
+
+find . -name "*.system" -exec ./filter.pl \{\} ./convert0.pl \;  
+find . -name "*.system" -exec ./filter.pl \{\} ./convert1.pl \;  

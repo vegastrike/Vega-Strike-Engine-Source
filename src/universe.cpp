@@ -38,6 +38,8 @@
 
 #include "cmd/script/mission.h"
 #include "cmd/unit.h"
+#include "in_kb.h"
+#include "in_main.h"
 #if defined(WITH_MACOSX_BUNDLE)
 #import <sys/param.h>
 #endif
@@ -168,11 +170,12 @@ void Universe::SetActiveCockpit (Cockpit * cp) {
     }
   }
 }
-Cockpit * Universe::isPlayerStarship(const Unit * un) {
-  if (!un)
+
+Cockpit * Universe::isPlayerStarship(const Unit * doNotDereference) {
+  if (!doNotDereference)
     return NULL;
   for (unsigned int i=0;i<cockpit.size();i++) {
-    if (un==cockpit[i]->GetParent())
+    if (doNotDereference==cockpit[i]->GetParent())
       return cockpit[i];
   }
   return NULL;
@@ -291,16 +294,20 @@ void Universe::StartDraw()
   
 
 }
-void Universe::WriteSaveGame () 
+
+void Universe::WriteSaveGame (bool auto_save) 
 {
   for (unsigned int i=0;i<cockpit.size();i++) {
     if (AccessCockpit(i)) {
+     ::WriteSaveGame (AccessCockpit(i),auto_save);
+#if 0
       if (AccessCockpit(i)->GetParent()) {
 	if(AccessCockpit(i)->GetParent()->GetHull()>0) {  
 	  AccessCockpit(i)->savegame->WriteSaveGame (AccessCockpit(i)->activeStarSystem->getFileName().c_str(),AccessCockpit(i)->GetParent()->Position(),AccessCockpit(i)->credits,AccessCockpit(i)->GetUnitFileName());
 	  AccessCockpit(i)->GetParent()->WriteUnit(AccessCockpit(i)->GetUnitModifications().c_str());
 	} 
       }
+#endif
     }
   }
 }

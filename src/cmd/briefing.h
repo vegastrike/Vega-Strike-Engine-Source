@@ -29,7 +29,7 @@ class Briefing{
     void SetPosition (const Vector& pos) {this->pos =pos;}//mat[12]=pos.i;mat[13]=pos.j;mat[14]=pos.k;}
     float cloak;//btw 0 and 1
     Ship (const char * filename, int faction, const Vector & position);
-    void Render(const Matrix cam, double interpol);
+    void Render(const Matrix &cam, double interpol);
     void Update();
     void OverrideOrder (const Vector &destination, float time);
     void EnqueueOrder (const Vector &destination, float time);

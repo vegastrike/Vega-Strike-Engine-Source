@@ -89,10 +89,10 @@ void Box::ProcessDrawQueue(int) {
   //GFXBlendMode(ONE, ONE);
 
   while(draw_queue->size()) {
-    MeshDrawContext c = draw_queue->back();
-    draw_queue->pop_back();
-    GFXLoadMatrix(MODEL, c.mat);
 
+
+    GFXLoadMatrixModel( draw_queue->back().mat);
+    draw_queue->pop_back();
 
   GFXBegin(GFXQUAD);
   GFXColor4f(0.0,1.0,0.0,0.2);

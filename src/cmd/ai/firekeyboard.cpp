@@ -10,6 +10,7 @@
 #include "audiolib.h"
 #include "config_xml.h"
 #include "cmd/images.h"
+#include "cmd/planet.h"
 #include "cmd/script/flightgroup.h"
 FireKeyboard::FireKeyboard (unsigned int whichplayer, unsigned int whichjoystick): Order (WEAPON,0){
   this->whichjoystick = whichjoystick;
@@ -21,14 +22,15 @@ FireKeyboard::FireKeyboard (unsigned int whichplayer, unsigned int whichjoystick
 const unsigned int NUMCOMMKEYS=10;
 struct FIREKEYBOARDTYPE {
   FIREKEYBOARDTYPE() {
-    commKeys[0]=commKeys[1]=commKeys[2]=commKeys[3]=commKeys[4]=commKeys[5]=commKeys[6]=commKeys[7]=commKeys[8]=commKeys[9]=UP;
-    eject=ejectcargo=firekey=missilekey=jfirekey=jtargetkey=jmissilekey=weapk=misk=cloakkey=neartargetkey=threattargetkey=picktargetkey=targetkey=nearturrettargetkey =threatturrettargetkey= pickturrettargetkey=turrettargetkey=UP;
+    commKeys[0]=commKeys[1]=commKeys[2]=commKeys[3]=commKeys[4]=commKeys[5]=commKeys[6]=commKeys[7]=commKeys[8]=commKeys[9]=turretaikey = UP;
+    eject=ejectcargo=firekey=missilekey=jfirekey=rtargetkey=jtargetkey=jmissilekey=weapk=misk=cloakkey=neartargetkey=threattargetkey=picktargetkey=targetkey=nearturrettargetkey =threatturrettargetkey= pickturrettargetkey=turrettargetkey=UP;
     doc=und=req=0;
   }
  KBSTATE firekey;
  bool doc;
  bool und;
  bool req;
+ KBSTATE rtargetkey;
  KBSTATE missilekey;
  KBSTATE jfirekey;
  KBSTATE jtargetkey;
@@ -43,6 +45,7 @@ struct FIREKEYBOARDTYPE {
  KBSTATE threattargetkey;
  KBSTATE picktargetkey;
  KBSTATE targetkey;
+ KBSTATE turretaikey;
 
   KBSTATE commKeys[NUMCOMMKEYS];
  KBSTATE nearturrettargetkey;
@@ -148,6 +151,20 @@ void FireKeyboard::EjectKey (int, KBSTATE k) {
   }
 }
 
+
+void FireKeyboard::TurretAI (int, KBSTATE k) {
+  if (k==PRESS) {
+    if (g().turretaikey==UP) {
+
+      g().turretaikey=PRESS;
+    }else {
+
+      g().turretaikey=RELEASE;
+    }
+  }
+}
+
+
 void FireKeyboard::EjectCargoKey (int, KBSTATE k) {
     if (k==PRESS) {
       g().ejectcargo = k;      
@@ -187,6 +204,13 @@ void FireKeyboard::TargetKey(int, KBSTATE k) {
     g().targetkey = k;
   if (k==RESET) {
     g().targetkey=PRESS;
+  }
+}
+void FireKeyboard::ReverseTargetKey(int, KBSTATE k) {
+  if (g().rtargetkey!=PRESS)
+    g().rtargetkey = k;
+  if (k==RESET) {
+    g().rtargetkey=PRESS;
   }
 }
 void FireKeyboard::PickTargetKey(int, KBSTATE k) {
@@ -365,7 +389,8 @@ void FireKeyboard::ChooseNearTargets(bool turret) {
   float range=FLT_MAX;
   while ((un = iter.current())) {
     Vector t;
-    bool tmp = parent->InRange (un,t);
+    bool tmp = parent->InRange (un);
+    t = parent->LocalCoordinates (un);
     if (tmp&&t.Dot(t)<range&&t.k>0&&_Universe->GetRelation(parent->faction,un->faction)<0) {
       range = t.Dot(t);
       if (turret)
@@ -402,12 +427,11 @@ void FireKeyboard::PickTargets(bool Turrets){
   Unit *found_unit=NULL;
 
   while(other){
-    Vector t;
-    if(other!=parent && parent->InRange(other,t)){
+    if(other!=parent && parent->InRange(other)){
       Vector p,q,r;
-      Vector vectothem=Vector(other->Position() - parent->Position()).Normalize();
+      QVector vectothem=QVector(other->Position() - parent->Position()).Normalize();
       parent->GetOrientation(p,q,r);
-      float angle=acos( vectothem.Dot(r) );
+      double angle=acos( vectothem.Dot(r.Cast()) );
       
       if(angle<smallest_angle){
 	found_unit=other;
@@ -421,6 +445,36 @@ void FireKeyboard::PickTargets(bool Turrets){
     parent->TargetTurret(found_unit);
   parent->Target(found_unit);
 
+}
+void FireKeyboard::ChooseRTargets (bool turret) {
+  Unit * targ =parent->Target();
+  Unit * oldun=NULL;
+  Unit * un=NULL;
+  un_iter i;
+  for (i=_Universe->activeStarSystem()->getUnitList().createIterator();
+       (un=*i)!=NULL;
+       ++i) {
+    if (un==targ) {
+      break;
+    }else {
+      if (un!=parent) {
+	oldun=un;
+      }
+    }
+  }
+  if (oldun==NULL) {//get us the last
+    for (i=_Universe->activeStarSystem()->getUnitList().createIterator();
+	 (un=*i)!=NULL;
+	 ++i) {
+      if (un!=parent) {
+	oldun=un;
+      }
+    }
+  }
+  parent->Target (oldun);
+  if (turret) {
+	parent->TargetTurret (un);
+  }
 }
 
 void FireKeyboard::ChooseTargets (bool turret) {
@@ -437,7 +491,7 @@ void FireKeyboard::ChooseTargets (bool turret) {
       found=true;
       continue;
     }
-    if (!parent->InRange(un,t)) {
+    if (!parent->InRange(un)) {
       iter.advance();
       continue;
     }
@@ -473,7 +527,7 @@ void FireKeyboard::ChooseTargets (bool turret) {
 	iter.advance();
 	continue;
       }
-      if (!parent->InRange(un,t)) {
+      if (!parent->InRange(un)) {
 	iter.advance();
 	continue;
       }
@@ -506,6 +560,13 @@ bool FireKeyboard::ShouldFire(Unit * targ) {
 
 static void DoDockingOps (Unit * parent, Unit * targ,unsigned char playa, unsigned char sex) {
     if (vectorOfKeyboardInput[playa].req) {
+      if (targ->isUnit()==PLANETPTR) {
+	static bool nodockwithclear = XMLSupport::parse_bool (vs_config->getVariable ("physics","dock_with_clear_planets","true"));
+	if (((Planet * )targ)->isAtmospheric()&&nodockwithclear) {
+	  mission->msgcenter->add("game","all","[Computer] Cannot dock with insubstantial object, target another object and retry.");
+	  return;
+	}
+      }
       //      fprintf (stderr,"request %d", targ->RequestClearance (parent));
       CommunicationMessage c(parent,targ,NULL,sex);
       c.SetCurrentState(c.fsm->GetRequestLandNode(),NULL,sex);
@@ -513,12 +574,27 @@ static void DoDockingOps (Unit * parent, Unit * targ,unsigned char playa, unsign
       vectorOfKeyboardInput[playa].req=false;
     }
     if (vectorOfKeyboardInput[playa].doc) {
-      if (!parent->Dock(targ))
-	parent->UnDock(targ);
+      CommunicationMessage c(targ,parent,NULL,0);
+
+      bool hasDock = parent->Dock(targ);
+      if (hasDock) {
+	  c.SetCurrentState (c.fsm->GetDockNode(),NULL,0);
+      }else {
+        if (parent->UnDock(targ)) {
+	  c.SetCurrentState (c.fsm->GetUnDockNode(),NULL,0);
+        }else {
+          //docking is unsuccess
+	  c.SetCurrentState (c.fsm->GetFailDockNode(),NULL,0);
+        }
+      }
+      parent->getAIState()->Communicate (c);
       vectorOfKeyboardInput[playa].doc=false;
     }
     if (vectorOfKeyboardInput[playa].und) {
-      fprintf (stderr,"udock %d", parent->UnDock(targ));
+      parent->UnDock(targ);
+      CommunicationMessage c(targ,parent,NULL,0);
+      c.SetCurrentState (c.fsm->GetUnDockNode(),NULL,0);
+      parent->getAIState()->Communicate (c);
       vectorOfKeyboardInput[playa].und=0;
     }
 }
@@ -546,7 +622,7 @@ void FireKeyboard::ProcessCommMessage (class CommunicationMessage&c){
   }else {
     DoSpeech (NULL,c.getCurrentState()->message);
     if (parent==_Universe->AccessCockpit()->GetParent()) {
-      Animation Statuc ("static.ani");
+      static Animation Statuc ("static.ani");
       _Universe->AccessCockpit()->SetCommAnimation (&Statuc);
     }
 
@@ -609,6 +685,11 @@ void FireKeyboard::Execute () {
     ChooseTargets(false);
     refresh_target=true;
   }
+  if (f().rtargetkey==PRESS) {
+    f().rtargetkey=DOWN;
+    ChooseRTargets(false);
+    refresh_target=true;
+  }
   if(f().picktargetkey==PRESS){
     f().picktargetkey=DOWN;
     PickTargets(false);
@@ -625,25 +706,33 @@ void FireKeyboard::Execute () {
     refresh_target=true;
   }
 
-
-
+  if (f().turretaikey == PRESS) {
+      parent->DisableTurretAI();
+      f().turretaikey = DOWN;
+  }
+  if (f().turretaikey==RELEASE) {
+    f().turretaikey = UP;
+    parent->SetTurretAI();
+    parent->TargetTurret(parent->Target());
+  }
   if (f().turrettargetkey==PRESS) {
     f().turrettargetkey=DOWN;
-    ChooseTargets(true);
+    //    ChooseTargets(true);
+    parent->TargetTurret(parent->Target());
     refresh_target=true;
   }
   if(f().pickturrettargetkey==PRESS){
     f().pickturrettargetkey=DOWN;
-    PickTargets(true);
+    parent->TargetTurret(parent->Target());
     refresh_target=true;
   }
   if (f().nearturrettargetkey==PRESS) {
-    ChooseNearTargets (true);
+    parent->TargetTurret(parent->Target());
     f().nearturrettargetkey=DOWN;
     refresh_target=true;
   }
   if (f().threatturrettargetkey==PRESS) {
-    ChooseThreatTargets (true);
+    parent->TargetTurret(parent->Target());
     f().threatturrettargetkey=DOWN;
     refresh_target=true;
   }

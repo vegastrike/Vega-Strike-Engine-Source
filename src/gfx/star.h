@@ -5,12 +5,12 @@ class Stars {
 private:
 
   GFXVertexList * vlist;
-  Vector pos[STARnumvlist];
+  QVector pos[STARnumvlist];
   float spread;
   bool blend;
   bool fade;
-  void ResetPosition(const Vector & cent);
-  void UpdatePosition(const Vector & cp);
+  void ResetPosition(const QVector & cent);
+  void UpdatePosition(const QVector & cp);
 public:
   Stars (int num, float spread);
   void SetBlend(bool blendit, bool fadeit);

@@ -180,6 +180,18 @@ Texture *Texture::Clone () {
   //assert (!original->original);
   
 }
+void Texture::FileNotFound(const string &texfilename) {
+	  texHashTable.Delete (texfilename);
+	  name=-1;
+	  data = NULL;
+	  original->name=-1;
+	  free(original);
+	  original=NULL;
+	  palette=NULL;
+	  
+	  return;
+
+}
 Texture::Texture(const char * FileName, int stage, enum FILTER mipmap, enum TEXTURE_TARGET target, enum TEXTURE_IMAGE_TARGET imagetarget)
 {
 
@@ -229,17 +241,12 @@ Texture::Texture(const char * FileName, int stage, enum FILTER mipmap, enum TEXT
 	free ( t);
 	if (!fp)
 	{
-      	  fprintf (stderr, "%s, not found",FileName);
-
-	  texHashTable.Delete (texfilename);
-	  name=-1;
-	  data = NULL;
-	  free(original);
-	  original=NULL;
-	  if (fp2) {
-	    fclose (fp2);
-	  }
-	  return;
+		FileNotFound(texfilename);
+      	fprintf (stderr, "%s, not found",FileName);
+		if (fp2) {
+			fclose (fp2);
+		}
+		return;
 	}
 	//	strcpy(filename, FileName);
 	int bpp;
@@ -270,6 +277,19 @@ Texture::Texture(const char * FileName, int stage, enum FILTER mipmap, enum TEXT
 	    }
 	  }
 	}else {
+	  char head1;
+	  char head2;
+	  fseek (fp,0,SEEK_SET);
+	  fread (&head1,1,1,fp);
+	  fread (&head2,1,1,fp);
+	  if (toupper(head1)!='B'||toupper (head2)!='M') {
+		FileNotFound(texfilename);
+		fclose (fp);
+		if (fp2) {
+			fclose(fp2);
+		}
+		return;
+	  }
 	  //seek back to beginning
 	  fseek (fp,SIZEOF_BITMAPFILEHEADER,SEEK_SET);
 	  //long temp;
@@ -378,13 +398,7 @@ Texture::Texture (const char * FileNameRGB, const char *FileNameA, int stage, en
 	}
 	if (!fp)
 	{
-	  texHashTable.Delete (texfilename);
-	  palette = NULL;
-	  data = NULL;
-	  name=-1;
-	  original->name=-1;
-	  free (original);
-	  original=NULL;
+	  FileNotFound(texfilename);
 	  return;
 	}
 	int bpp;
@@ -416,6 +430,19 @@ Texture::Texture (const char * FileNameRGB, const char *FileNameA, int stage, en
 	    }
 	  }
 	}else {
+	  char head1;
+	  char head2;
+	  fseek (fp,0,SEEK_SET);
+	  fread (&head1,1,1,fp);
+	  fread (&head2,1,1,fp);
+	  if (toupper(head1)!='B'||toupper (head2)!='M') {
+		FileNotFound(texfilename);
+		fclose (fp);
+		if (fp1) {
+			fclose(fp1);
+		}
+		return;
+	  }
 	  ///seek back to the beginning
 	  fseek (fp,SIZEOF_BITMAPFILEHEADER,SEEK_SET);
 	  //long temp;

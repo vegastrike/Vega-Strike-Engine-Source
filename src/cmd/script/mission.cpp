@@ -40,6 +40,7 @@
 #include <assert.h>
 #include "mission.h"
 #include "flightgroup.h"
+#include "gldrv/winsys.h"
 //#include "easydom.h"
 
 //#include "msgcenter.h"
@@ -52,7 +53,7 @@ Mission::~Mission() {
   fprintf (stderr,"Mission Cleanup Not Yet Implemented");
   //do not delete msgcenter...could be vital
 }
-Mission::Mission(char *configfile){
+Mission::Mission(char *configfile, bool loadscripts){
   briefing=NULL;
   number_of_flightgroups=0;
   number_of_ships=0;
@@ -63,7 +64,7 @@ Mission::Mission(char *configfile){
  static bool dontpanic=false;
   if(top==NULL&&!dontpanic){
     cout << "Panic exit - mission file " << configfile << " not found" << endl;
-    exit(0);
+    winsys_exit(0);
   } else {
     dontpanic=true;
   }
@@ -80,17 +81,18 @@ Mission::Mission(char *configfile){
 
   gametime=0.0;
   total_nr_frames=0;
+  if (loadscripts) {
+    initTagMap();
+    initCallbackMaps();
 
-  initTagMap();
-  initCallbackMaps();
-
-  top->Tag(&tagmap);
+    top->Tag(&tagmap);
+  }
 
 #endif
 
 }
 
-void Mission::initMission(){
+void Mission::initMission(bool loadscripts){
   if (!top)
     return;
   static bool begin=true;
@@ -100,19 +102,19 @@ void Mission::initMission(){
   }else {
     msgcenter=active_missions[0]->msgcenter;
   }
-  msgcenter->add("game","all","Welcome to Vegastrike");
+  //  msgcenter->add("game","all","Welcome to Vegastrike");
   /*
   msgcenter->add("game","news","A hero is born");
   msgcenter->add("game","news","2 hero is born");
   msgcenter->add("game","news","3 hero is born");
   msgcenter->add("game","news","4 hero is born.                That day, in teh news hero was born without even boring the born of bachunkuphe threw his last baseball throw he chewed his last hay the man was a hero a heayrinagia sf of a hero...who knw that ith all things iblicatedly obfusictaroed he arced his bunko bunka\nbachunk!jtkgjdfljg fdlg fdj glkdf jglkdfj glkdf jgjfd lkgj dflkg jlfkdjg ldjg  j");
   */
-  checkMission(top);
+  checkMission(top,loadscripts);
 }
 
 /* *********************************************************** */
 
-bool Mission::checkMission(easyDomNode *node){
+bool Mission::checkMission(easyDomNode *node, bool loadscripts){
   if(node->Name()!="mission"){
     cout << "this is no Vegastrike mission file" << endl;
     return false;
@@ -132,9 +134,9 @@ bool Mission::checkMission(easyDomNode *node){
     }
     else if(((*siter)->Name()=="module")){
       //      doModule(*siter);
-#ifndef VS_MIS_SEL
-      DirectorStart((missionNode *)*siter);
-#endif
+      if (loadscripts) {
+	DirectorStart((missionNode *)*siter);
+      }
     }
     else{
       cout << "warning: Unknown tag: " << (*siter)->Name() << endl;
@@ -152,7 +154,7 @@ void Mission::doOrigin(easyDomNode *node){
 /* *********************************************************** */
 
 #ifndef VS_MIS_SEL
-void Mission::GetOrigin(Vector &pos,string &planetname){
+void Mission::GetOrigin(QVector &pos,string &planetname){
   //  float pos[3];
 
   if(origin_node==NULL){
@@ -265,7 +267,7 @@ void Mission::checkFlightgroup(easyDomNode *node){
   bool have_pos=false;
   bool have_rot=false;
 
-  float pos[3];
+  double pos[3];
   float rot[3];
 
   rot[0]=rot[1]=rot[2]=0.0;
@@ -325,7 +327,7 @@ void Mission::checkFlightgroup(easyDomNode *node){
 
 /* *********************************************************** */
 
-bool Mission::doPosition(easyDomNode *node,float pos[3], CreateFlightgroup * cf){
+bool Mission::doPosition(easyDomNode *node,double pos[3], CreateFlightgroup * cf){
   string x=node->attr_value("x");
   string y=node->attr_value("y");
   string z=node->attr_value("z");
@@ -338,9 +340,9 @@ bool Mission::doPosition(easyDomNode *node,float pos[3], CreateFlightgroup * cf)
     return false;
   }
 
-  pos[0]=atof(x.c_str());
-  pos[1]=atof(y.c_str());
-  pos[2]=atof(z.c_str());
+  pos[0]=strtod(x.c_str(),NULL);
+  pos[1]=strtod(y.c_str(),NULL);
+  pos[2]=strtod(z.c_str(),NULL);
 
   if(cf!=NULL){
     pos[0]+=cf->fg->pos.i;

@@ -39,6 +39,7 @@ class FireKeyboard: public Order {
   static void NearestTargetKey (int, KBSTATE);
   static void ThreatTargetKey (int, KBSTATE);
   static void TargetKey(int, KBSTATE);
+  static void ReverseTargetKey(int, KBSTATE);
   static void PickTargetKey(int, KBSTATE);
   static void NearestTargetTurretKey (int, KBSTATE);
   static void ThreatTargetTurretKey (int, KBSTATE);
@@ -59,10 +60,12 @@ class FireKeyboard: public Order {
   static void BreakFormation (int,KBSTATE);
   static void FormUp (int,KBSTATE);
   static void AttackTarget (int,KBSTATE);
+  static void TurretAI (int,KBSTATE);
 protected:
   float distance;
 
   void ChooseTargets(bool targetturrets);//chooses n targets and puts the best to attack in unit's target container
+  void ChooseRTargets(bool targetturrets);//chooses n targets and puts the best to attack in unit's target container
   void ChooseNearTargets(bool targetturrets);//chooses n targets and puts the best to attack in unit's target container
   void ChooseThreatTargets(bool targetturrets);//chooses n targets and puts the best to attack in unit's target container
   void PickTargets(bool targetturrets); // chooses the target which is nearest to the center of the screen

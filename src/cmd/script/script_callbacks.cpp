@@ -51,7 +51,7 @@
 string varToString (varInst * vi) {
   switch (vi->type) {
   case VAR_FLOAT:
-    return XMLSupport::tostring (vi->float_val);
+    return XMLSupport::tostring ((float)vi->float_val);
   case VAR_INT:
     return XMLSupport::tostring(vi->int_val);
   case VAR_BOOL:
@@ -66,7 +66,7 @@ string varToString (varInst * vi) {
   }
 }
 
-
+extern unsigned int AddAnimation (const QVector & pos, const float size, bool mvolatile, const std::string &name );
 void Mission::doCall_toxml(string module,varInst *ovi){
   if(module=="_olist"){
     call_olist_toxml(NULL,SCRIPT_RUN,ovi);
@@ -97,17 +97,11 @@ varInst *Mission::doCall(missionNode *node,int mode,string module,string method)
     else if(method_id==CMT_STD_ResetTimeCompression){
       vi=callResetTimeCompression(node,mode);
     }
-    else if(method_id==CMT_STD_getSystemName){
+    else if(0) {
       vi=callGetSystemName(node,mode);
     }
     else if(method_id==CMT_STD_getSystemFile){
       vi=callGetSystemFile(node,mode);
-    }
-    else if(method_id==CMT_STD_getNumAdjacentSystems){
-      vi=callGetNumAdjacentSystems(node,mode);
-    }
-    else if(method_id==CMT_STD_getAdjacentSystem){
-      vi=callGetAdjacentSystem(node,mode);
     }
     else if(method_id==CMT_STD_getCurrentAIUnit){
       vi=callGetCurrentAIUnit(node,mode);
@@ -130,6 +124,9 @@ varInst *Mission::doCall(missionNode *node,int mode,string module,string method)
     else if(method_id==CMT_STD_Int){
       vi=call_int_cast(node,mode);
     }
+    else if(method_id==CMT_STD_getGalaxyProperty){
+      vi=callGetGalaxyProperty(node,mode);
+    }
     else if (method_id==CMT_STD_getDifficulty) {
       vi = newVarInst (VI_TEMP);
       vi->type=VAR_FLOAT;
@@ -143,12 +140,18 @@ varInst *Mission::doCall(missionNode *node,int mode,string module,string method)
       vi = newVarInst (VI_TEMP);
       vi->type=VAR_VOID;
     }
+    else if(method_id==CMT_STD_getNumAdjacentSystems){
+      vi=callGetNumAdjacentSystems(node,mode);
+    }
+    else if(method_id==CMT_STD_getAdjacentSystem){
+      vi=callGetAdjacentSystem(node,mode);
+    }
     else if(method_id==CMT_STD_terminateMission){
       vi=terminateMission(node,mode);
     }
     else if (method_id==CMT_STD_playSound) {
       std::string soundName= getStringArgument(node,mode,0);     
-      Vector loc;
+      QVector loc;
       loc.i= getFloatArg(node,mode,1);     
       loc.j= getFloatArg(node,mode,2);     
       loc.k= getFloatArg(node,mode,3);     
@@ -163,6 +166,18 @@ varInst *Mission::doCall(missionNode *node,int mode,string module,string method)
 	AUDAdjustSound (sound,loc,speed);
 	AUDStartPlaying (sound);
 	AUDDeleteSound(sound);//won't actually toast it until it stops
+      }
+      vi = newVarInst (VI_TEMP);
+      vi->type=VAR_VOID;
+    }else if (method_id==CMT_STD_playAnimation) {
+      std::string aniName= getStringArgument(node,mode,0);     
+      QVector loc(0,0,0);
+      loc.i= getFloatArg(node,mode,1);     
+      loc.j= getFloatArg(node,mode,2);     
+      loc.k= getFloatArg(node,mode,3);     
+      float size = getFloatArg(node,mode,4);
+      if (mode==SCRIPT_RUN) {
+	AddAnimation(loc,size,true,aniName);
       }
       vi = newVarInst (VI_TEMP);
       vi->type=VAR_VOID;
@@ -396,15 +411,17 @@ varInst *Mission::callGetSystemName(missionNode *node,int mode){
   }
   return vi;
 }
-varInst *Mission::callGetSystemFile (missionNode *node,int mode) {
+varInst *Mission::callGetSystemFile (missionNode *node,int mode, StarSystem * ss) {
   varInst *vi=newVarInst(VI_TEMP);
   vi->type=VAR_OBJECT;
   vi->objectname="string";
 
   if(mode==SCRIPT_RUN){
     deleteVarInst(vi);
-    StarSystem *ssystem=_Universe->activeStarSystem();
-    string sysname=ssystem->getFileName();
+    if (ss==NULL) {
+      ss=_Universe->activeStarSystem();
+    }
+    string sysname=ss->getFileName();
     vi=call_string_new(node,mode,sysname);
   }
   return vi;
@@ -422,10 +439,24 @@ varInst *Mission::callGetAdjacentSystem (missionNode *node,int mode) {
   }
   return vi;
 }
+
+varInst *Mission::callGetGalaxyProperty (missionNode *node,int mode) {
+  varInst *vi=newVarInst(VI_TEMP);
+  vi->type=VAR_OBJECT;
+  vi->objectname="string";
+  string sys = getStringArgument (node,mode,0);
+  string prop = getStringArgument(node,mode,1);
+  if(mode==SCRIPT_RUN){
+    deleteVarInst(vi);
+    string sysname=_Universe->getGalaxyProperty(sys,prop);
+    vi=call_string_new(node,mode,sysname);
+  }
+  return vi;
+}
 varInst *Mission::callGetNumAdjacentSystems (missionNode *node,int mode) {
 
   string sysname = getStringArgument (node,mode,0);
-  int ret;
+  int ret=0;
   if(mode==SCRIPT_RUN){
     ret=_Universe->getAdjacentStarSystems(sysname).size();
   }
@@ -806,12 +837,11 @@ bool Mission::getBoolArg(missionNode *node,int mode,int arg_nr){
   bool res=checkBoolExpr(val_node,mode);
   return res;
 }
-float Mission::getFloatArg(missionNode *node,int mode,int arg_nr){
+double Mission::getFloatArg(missionNode *node,int mode,int arg_nr){
   missionNode *val_node=getArgument(node,mode,arg_nr);
-  float res=checkFloatExpr(val_node,mode);
-  return res;
+  return checkFloatExpr(val_node,mode);
 }
-float Mission::getIntArg(missionNode *node,int mode,int arg_nr){
+int Mission::getIntArg(missionNode *node,int mode,int arg_nr){
   missionNode *val_node=getArgument(node,mode,arg_nr);
   int res=checkIntExpr(val_node,mode);
   return res;
@@ -834,12 +864,12 @@ Unit* Mission::getUnitArg(missionNode *node,int mode,int arg_nr){
   deleteVarInst(unit_vi);
   return ret;
 }
-Vector Mission::getVec3Arg(missionNode *node,int mode,int arg_nr){
+QVector Mission::getVec3Arg(missionNode *node,int mode,int arg_nr){
   missionNode *pos_node=getArgument(node,mode,arg_nr);
   varInst *pos_vi=checkObjectExpr(pos_node,mode);
   //  olist_t *pos_olist=getOListObject(pos_node,mode,pos_vi);
 
-  Vector vec3;
+  QVector vec3;
   if(mode==SCRIPT_RUN){
     vec3=call_olist_tovector(pos_node,mode,pos_vi);
   }
@@ -884,9 +914,9 @@ void Mission::initCallbackMaps(){
   module_std_map["Rnd"]=CMT_STD_Rnd;
   module_std_map["getGameTime"]=CMT_STD_getGameTime;
   module_std_map["ResetTimeCompression"]=CMT_STD_ResetTimeCompression;
-  module_std_map["GetSystemName"]=CMT_STD_getSystemName;
-  module_std_map["getSystemName"]=CMT_STD_getSystemName;
+  module_std_map["GetSystemName"]=CMT_STD_getSystemFile;
   module_std_map["getNumAdjacentSystems"]=CMT_STD_getNumAdjacentSystems;
+  module_std_map["getGalaxyProperty"]=CMT_STD_getGalaxyProperty;
   module_std_map["getAdjacentSystem"]=CMT_STD_getAdjacentSystem;
   module_std_map["GetSystemFile"]=CMT_STD_getSystemFile;
   module_std_map["getSystemFile"]=CMT_STD_getSystemFile;
@@ -901,6 +931,7 @@ void Mission::initCallbackMaps(){
   module_std_map["setDifficulty"]=CMT_STD_setDifficulty;
   module_std_map["playSound"]=CMT_STD_playSound;
   module_std_map["terminateMission"]=CMT_STD_terminateMission;
+  module_std_map["playAnimation"]=CMT_STD_playAnimation ;
 
   module_order_map["newAggressiveAI"]=CMT_ORDER_newAggressiveAI ;
   module_order_map["newMoveTo"]=CMT_ORDER_newMoveTo ;
@@ -1024,8 +1055,11 @@ void Mission::initCallbackMaps(){
     module_unit_map["scannerNearestShipDist"]=CMT_UNIT_scannerNearestShipDist ;
     module_unit_map["toxml"]=CMT_UNIT_toxml ;
     module_unit_map["getSaveData"]=CMT_UNIT_getSaveData ;
+    module_unit_map["upgrade"]=CMT_UNIT_upgrade ;
+    module_unit_map["frameOfReference"]=CMT_UNIT_frameOfReference ;
     module_unit_map["communicateTo"]=CMT_UNIT_communicateTo ;
     module_unit_map["commAnimation"]=CMT_UNIT_commAnimation ;
+    module_unit_map["correctStarSystem"]=  CMT_UNIT_correctStarSystem ;//useful when comparing _jumps_
     module_unit_map["switchFg"]=CMT_UNIT_switchFg ;
 
 

@@ -327,8 +327,8 @@ LineCollide gfx_light::CalculateBounds (bool &error) {
     error=true;
   ffastmathreallysucksd /=ffastmathreallysucksq;
 
-  Vector st (vect[0]-ffastmathreallysucksd,vect[1]-ffastmathreallysucksd,vect[2]-ffastmathreallysucksd);
-  Vector end (vect[0]+ffastmathreallysucksd,vect[1]+ffastmathreallysucksd,vect[2]+ffastmathreallysucksd);
+  QVector st (vect[0]-ffastmathreallysucksd,vect[1]-ffastmathreallysucksd,vect[2]-ffastmathreallysucksd);
+  QVector end (vect[0]+ffastmathreallysucksd,vect[1]+ffastmathreallysucksd,vect[2]+ffastmathreallysucksd);
   LineCollide retval(NULL,LineCollide::UNIT,st,end);
   *((int *)(&retval.object)) = lightNum();//put in a lightNum
   return retval;

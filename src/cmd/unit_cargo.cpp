@@ -4,11 +4,11 @@
 #include <algorithm>
 #include "vs_globals.h"
 #include "config_xml.h"
+#include "unit_factory.h"
 #include <assert.h>
 #include "cmd/ai/aggressive.h"
 Unit& GetUnitMasterPartList () {
-  static Unit MasterPartList ("master_part_list",true,_Universe->GetFaction("upgrades"));
-  return MasterPartList;
+  return *UnitFactory::getMasterPartList( );
 }
 
 Cargo * GetMasterPartList(const char *input_buffer){
@@ -24,11 +24,14 @@ void Unit::ImportPartList (const std::string& category, float price, float price
       c.quantity=quantity-quantdev;
       c.price*=price-pricedev;
       //stupid way
-      c.quantity+=quantdev*2*((float)rand())/RAND_MAX;
+      c.quantity+=(quantdev*2+1)*((double)rand())/(((double)RAND_MAX)+1);
       c.price+=pricedev*2*((float)rand())/RAND_MAX;
       c.price=fabs(c.price);
+      if (c.quantity<0) {
+	c.quantity=0;
+      }
       if (c.price <.01)
-	c.price+=.01;
+	c.price=.01;
       c.quantity=abs (c.quantity);
       AddCargo(c,false);
     }
@@ -36,17 +39,18 @@ void Unit::ImportPartList (const std::string& category, float price, float price
 
 }
 extern int GetModeFromName (const char *);
-vector <Cargo>& Unit::FilterDowngradeList (vector <Cargo> & mylist) {
+vector <Cargo>& Unit::FilterDowngradeList (vector <Cargo> & mylist)
+{
   static bool staticrem =XMLSupport::parse_bool (vs_config->getVariable ("general","remove_impossible_downgrades","true"));
   static float MyPercentMin = XMLSupport::parse_float (vs_config->getVariable("general","remove_downgrades_less_than_percent",".9"));
   for (unsigned int i=0;i<mylist.size();i++) {
     bool removethis=staticrem;
     if (GetModeFromName(mylist[i].content.c_str())!=2) {
-      Unit * NewPart = new Unit (mylist[i].content.c_str(),false,_Universe->GetFaction("upgrades"));
+      Unit * NewPart = UnitFactory::createUnit(mylist[i].content.c_str(),false,_Universe->GetFaction("upgrades"));
       NewPart->SetFaction(faction);
       if (NewPart->name==string("LOAD_FAILED")) {
 	NewPart->Kill();
-	NewPart = new Unit (mylist[i].content.c_str(),false,faction);
+	NewPart = UnitFactory::createUnit (mylist[i].content.c_str(),false,faction);
       }
       if (NewPart->name!=string("LOAD_FAILED")) {
 	int maxmountcheck = NewPart->nummounts?nummounts:1;
@@ -80,7 +84,9 @@ vector <Cargo>& Unit::FilterDowngradeList (vector <Cargo> & mylist) {
 }
 
 vector <Cargo>& Unit::FilterUpgradeList (vector <Cargo> & mylist) {
-  Cockpit * cp = _Universe->isPlayerStarship (this);
+	static bool filtercargoprice = XMLSupport::parse_bool (vs_config->getVariable ("physics","filter_expensive_cargo","false"));
+	if (filtercargoprice) {
+	Cockpit * cp = _Universe->isPlayerStarship (this);
   if (cp) {
     for (unsigned int i=0;i<mylist.size();i++) {
       if (mylist[i].price>cp->credits) {
@@ -89,6 +95,7 @@ vector <Cargo>& Unit::FilterUpgradeList (vector <Cargo> & mylist) {
       }
     }
   }
+	}
   return mylist;
 }
 
@@ -156,15 +163,24 @@ std::string Unit::cargoSerializer (const XMLType &input, void * mythis) {
 
 bool Unit::CanAddCargo (const Cargo &carg)const {
   float total_volume=carg.quantity*carg.volume;
-  for (unsigned int i=0;i<image->cargo.size();i++) {
-    total_volume+=image->cargo[i].quantity*image->cargo[i].volume;
+  unsigned int j;
+  for (j=0;j<image->cargo.size();j++) {
+    total_volume+=image->cargo[j].quantity*image->cargo[j].volume;
   }
-  return (total_volume<=image->cargo_volume);
+  if  (total_volume<=image->cargo_volume)
+    return true;
+  const Unit * un;
+  for (un_kiter i=viewSubUnits();(un = *i)!=NULL;i++) {
+    if (un->CanAddCargo (carg)) {
+      return true;
+    }
+  }
+  return false;
 }
 
 void Unit::AddCargo (const Cargo &carg, bool sort) {
   mass+=carg.quantity*carg.mass;
-  image->cargo.push_back (carg);
+  image->cargo.push_back (carg);   
   if (sort)
     SortCargo();
 }
@@ -203,8 +219,8 @@ bool Unit::SellCargo (unsigned int i, int quantity, float &creds, Cargo & carg, 
   if (quantity>image->cargo[i].quantity)
     quantity=image->cargo[i].quantity;
   carg = image->cargo[i];
-  creds+=quantity*buyer->PriceCargo (image->cargo[i].content);
-  carg =Cargo (image->cargo[i]);
+  carg.price=buyer->PriceCargo (image->cargo[i].content);
+  creds+=quantity*carg.price;
   carg.quantity=quantity;
   buyer->AddCargo (carg);
   
@@ -220,10 +236,10 @@ void Unit::EjectCargo (unsigned int index) {
   Cockpit * cp = NULL;
   if (index==((unsigned int)-1)) {
     int pilotnum = _Universe->CurrentCockpit();
-    name = "eject";
+    name = "Pilot";
     if (NULL!=(cp = _Universe->isPlayerStarship (this))) {
       string playernum =string("player")+((pilotnum==0)?string(""):XMLSupport::tostring(pilotnum));
-      name = vs_config->getVariable(playernum,"callsign","TigerShark");
+      //name = vs_config->getVariable(playernum,"callsign","TigerShark");
     }
     ejectedPilot.content="eject";
     ejectedPilot.mass=.1;
@@ -239,7 +255,7 @@ void Unit::EjectCargo (unsigned int index) {
       Unit * cargo = NULL;
       if (tmp->category.length()>=sslen) {
 	if (memcmp (tmp->category.c_str(),"starships",sslen)==0) {
-	  cargo = new Unit (tmp->content.c_str(),false,faction);
+	  cargo = UnitFactory::createUnit (tmp->content.c_str(),false,faction);
 	  cargo->PrimeOrders();
 	  cargo->SetAI (new Orders::AggressiveAI ("default.agg.xml","default.int.xml"));
 	  cargo->SetTurretAI();	  
@@ -247,11 +263,11 @@ void Unit::EjectCargo (unsigned int index) {
 	}
       }
       if (!cargo) {
-	cargo = new Unit (tmp->content.c_str(),false,_Universe->GetFaction("upgrades"));
+	cargo = UnitFactory::createUnit (tmp->content.c_str(),false,_Universe->GetFaction("upgrades"));
       }
       if (cargo->name=="LOAD_FAILED") {
 	cargo->Kill();
-	cargo = new Unit ("generic_cargo",false,_Universe->GetFaction("upgrades"));
+	cargo = UnitFactory::createUnit ("generic_cargo",false,_Universe->GetFaction("upgrades"));
       }
       if (cargo->rSize()>=rSize()) {
 	cargo->Kill();
@@ -267,7 +283,7 @@ void Unit::EjectCargo (unsigned int index) {
 	    cargo->name=tmp->content;
 	  }
 	}
-	if (cp) {
+	if (cp&&_Universe->numPlayers()==1) {
 	  cargo->SetOwner(NULL);
 	  PrimeOrders();
 	  cargo->SetTurretAI();

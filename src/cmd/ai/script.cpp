@@ -17,6 +17,8 @@ HardCodedMap MakeHardCodedScripts() {
   HardCodedMap tmp;
   typedef pair<string, CCScript *> MyPair;
   tmp.insert (MyPair ("++afterburnerslide.xml",&AfterburnerSlide));
+  tmp.insert (MyPair ("++flystraight.xml",&FlyStraight));
+  tmp.insert (MyPair ("++flystraightafterburner.xml",&FlyStraightAfterburner));
   tmp.insert (MyPair ("++afterburn-turntowards.xml",&AfterburnTurnTowards));  
   tmp.insert (MyPair ("++afterburn-turntowards-itts.xml",&AfterburnTurnTowardsITTS));  
   tmp.insert (MyPair ("++cloak.xml",&CloakForScript));  
@@ -42,9 +44,9 @@ struct AIScriptXML {
   bool afterburn;
   bool terminate;
   char lin;
-  Vector defaultvec;
+  QVector defaultvec;
   float defaultf;
-  std::stack <Vector> vectors;
+  std::stack <QVector> vectors;
   std::stack <float> floats;
   std::vector <Order *> orders;
 };
@@ -62,7 +64,7 @@ void AIScript::popf(){
   }
   xml->floats.pop();
 }
-Vector& AIScript::topv(){
+QVector& AIScript::topv(){
   if (!xml->vectors.size()) {
     xml->vectors.push(xml->defaultvec);
     fprintf(stderr,"\nERROR: Vector stack is empty... Will return <%f, %f, %f>\n",xml->defaultvec.i,xml->defaultvec.j,xml->defaultvec.k);
@@ -236,7 +238,7 @@ void AIScript::beginElement(const string &name, const AttributeList &attributes)
   case ANGULAR:
   case VECTOR:
     xml->unitlevel++;
-    xml->vectors.push(Vector(0,0,0));
+    xml->vectors.push(QVector(0,0,0));
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(attribute_map.lookup((*iter).name)) {
       case X:
@@ -502,7 +504,7 @@ void AIScript::beginElement(const string &name, const AttributeList &attributes)
 }
 
 void AIScript::endElement(const string &name) {
-  Vector temp (0,0,0);
+  QVector temp (0,0,0);
   Names elem = (Names)element_map.lookup(name);
   Unit * tmp;
   switch(elem) {
@@ -605,7 +607,7 @@ void AIScript::endElement(const string &name) {
     popf();
     temp.j = topf();
     popf();
-    xml->vectors.push(Vector(temp.i,temp.j,topf()));
+    xml->vectors.push(QVector(temp.i,temp.j,topf()));
     popf();
     break;
   case TOF:  
@@ -711,7 +713,7 @@ void AIScript::LoadXML() {
     //    fprintf (stderr,"hcscript %s\n",filename);
     CCScript * myscript = (*iter).second;
     (*myscript)(this, parent);
-        fprintf (stderr,"using hard coded script %s for %s\n",filename, parent->name.c_str());
+    //        fprintf (stderr,"using hard coded script %s for %s\n",filename, parent->name.c_str());
     return;
   }else {
     fprintf (stderr,"using soft coded script %s",filename);
@@ -751,7 +753,7 @@ void AIScript::LoadXML() {
   xml->afterburn=true;
 
   xml->acc=2;
-  xml->defaultvec=Vector(0,0,0);
+  xml->defaultvec=QVector(0,0,0);
   xml->defaultf=0;
 #ifdef BIDBG
   fprintf (stderr,"parscrea");

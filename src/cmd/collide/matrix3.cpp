@@ -111,15 +111,15 @@ float csMatrix3::Determinant () const
 
 void csMatrix3::Set (const Quaternion &quat)
 {
-  QFLOAT s;
-  QFLOAT xs, ys, zs;
-  QFLOAT wx, wy, wz;
-  QFLOAT xx, xy, xz;
-  QFLOAT yy, yz, zz;
-  QFLOAT x = quat.v.i;
-  QFLOAT y = quat.v.j;
-  QFLOAT z = quat.v.k;
-  QFLOAT w = quat.s;
+  float s;
+  float xs, ys, zs;
+  float wx, wy, wz;
+  float xx, xy, xz;
+  float yy, yz, zz;
+  float x = quat.v.i;
+  float y = quat.v.j;
+  float z = quat.v.k;
+  float w = quat.s;
 
   // For unit Quat, just set s = 2 or set xs = x + x, etc.
   s = 2 / (x * x + y * y + z * z + w * w );

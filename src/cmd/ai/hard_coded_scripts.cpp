@@ -4,19 +4,19 @@
 #include "flybywire.h"
 #include "navigation.h"
 #include "tactics.h"
-void AddOrd (AIScript *aisc, Unit * un, Order * ord) {
+void AddOrd (Order *aisc, Unit * un, Order * ord) {
   ord->SetParent (un);
   aisc->EnqueueOrder (ord);
 }
 
-void AfterburnTurnTowards (AIScript * aisc, Unit * un) {
+void AfterburnTurnTowards (Order * aisc, Unit * un) {
   Vector vec (0,0,10000);
   Order * ord = new Orders::MatchLinearVelocity(un->ClampVelocity(vec,true),true,true,false);
   AddOrd (aisc,un,ord);
   ord =       (new Orders::FaceTarget(false, 3));
   AddOrd (aisc,un,ord);    
 }
-void AfterburnTurnTowardsITTS (AIScript * aisc, Unit * un) {
+void AfterburnTurnTowardsITTS (Order * aisc, Unit * un) {
   Vector vec (0,0,10000);
   Order * ord = new Orders::MatchLinearVelocity(un->ClampVelocity(vec,true),true,true,false);
   AddOrd (aisc,un,ord);
@@ -24,18 +24,18 @@ void AfterburnTurnTowardsITTS (AIScript * aisc, Unit * un) {
   AddOrd (aisc,un,ord);    
 }
 
-void Evade(AIScript * aisc, Unit * un) {
-  Order * ord = new Orders::ChangeHeading (un->Position()+Vector(1,0,1),2);
+void Evade(Order * aisc, Unit * un) {
+  Order * ord = new Orders::ChangeHeading (un->Position()+QVector(1,0,1),2);
   AddOrd (aisc,un,ord);
   ord = new Orders::MatchLinearVelocity(un->ClampVelocity(Vector (-10000,0,10000),true),false,true,true);
   AddOrd (aisc,un,ord);
-  ord = new Orders::ChangeHeading (un->Position()+Vector(-1,0,1),2);
+  ord = new Orders::ChangeHeading (un->Position()+QVector(-1,0,1),2);
   AddOrd (aisc,un,ord);
   ord = new Orders::MatchLinearVelocity(un->ClampVelocity(Vector (10000,0,10000),true),false, true,true);  
   AddOrd (aisc,un,ord);
 }
-void MoveTo(AIScript * aisc, Unit * un) {
-  Vector Targ (un->Position());
+void MoveTo(Order * aisc, Unit * un) {
+  QVector Targ (un->Position());
   Unit * untarg = un->Target();
   if (untarg) {
     Targ = untarg->Position();
@@ -43,7 +43,7 @@ void MoveTo(AIScript * aisc, Unit * un) {
   Order * ord = new Orders::MoveTo(Targ,false,3);
   AddOrd (aisc,un,ord);
 }
-void Kickstop(AIScript * aisc, Unit * un) {
+void Kickstop(Order * aisc, Unit * un) {
   Vector vec (0,0,-4);
   Order * ord = new Orders::MatchLinearVelocity(un->ClampVelocity(vec,false),true,false,true);
   AddOrd (aisc,un,ord);
@@ -51,64 +51,64 @@ void Kickstop(AIScript * aisc, Unit * un) {
   AddOrd (aisc,un,ord);  
 }
 
-static void SetupVAndTargetV (Vector & targetv, Vector &targetpos, Unit* un) {
+static void SetupVAndTargetV (QVector & targetv, QVector &targetpos, Unit* un) {
   Unit *targ;
   if ((targ = un->Target())) {
-    targetv = targ->GetVelocity();
+    targetv = targ->GetVelocity().Cast();
     targetpos = targ->Position();
   }  
 }
 
-void SheltonSlide(AIScript * aisc, Unit * un) {
-  Vector def (un->Position()+Vector(1,0,0));
-  Vector targetv(def);
-  Vector targetpos(def);
+void SheltonSlide(Order * aisc, Unit * un) {
+  QVector def (un->Position()+QVector(1,0,0));
+  QVector targetv(def);
+  QVector targetpos(def);
   SetupVAndTargetV(targetpos,targetv,un);
-  Vector difference = targetpos-un->Position();
-  Vector perp = targetv.Cross (-difference);
+  QVector difference = targetpos-un->Position();
+  QVector perp = targetv.Cross (-difference);
   perp.Normalize();
   perp=perp*(targetv.Dot(difference*-1./(difference.Magnitude())));
-  perp =(perp+difference)*10000;
-  Order * ord = new Orders::MatchLinearVelocity(un->ClampVelocity(perp,true),false,true,true);  
+  perp =(perp+difference)*10000.;
+  Order * ord = new Orders::MatchLinearVelocity(un->ClampVelocity(perp.Cast(),true),false,true,true);  
   AddOrd (aisc,un,ord);
   ord =       (new Orders::FaceTarget(false, 3));
   AddOrd (aisc,un,ord);
 }
 
-void AfterburnerSlide(AIScript * aisc, Unit * un) {
-  Vector def = un->Position()+Vector(1,0,0);
-  Vector targetv (def);
-  Vector targetpos(def);
+void AfterburnerSlide(Order * aisc, Unit * un) {
+  QVector def = un->Position()+QVector(1,0,0);
+  QVector targetv (def);
+  QVector targetpos(def);
   SetupVAndTargetV(targetpos,targetv,un);
 
-  Vector difference = targetpos-un->Position();
-  Vector perp = targetv.Cross (-difference);
+  QVector difference = targetpos-un->Position();
+  QVector perp = targetv.Cross (-difference);
   perp.Normalize();
   perp=perp*(targetv.Dot(difference*-1./(difference.Magnitude())));
   perp =(perp+difference)*1000;
-  Order * ord = new Orders::MatchLinearVelocity(un->ClampVelocity(perp,true),false,true,true);  
+  Order * ord = new Orders::MatchLinearVelocity(un->ClampVelocity(perp.Cast(),true),false,true,true);  
   AddOrd (aisc,un,ord);
   ord = new ExecuteFor (new Orders::ChangeHeading (perp+un->Position(),3),1.5);
   AddOrd (aisc,un,ord);
   ord =       (new Orders::FaceTarget(false, 3));
   AddOrd (aisc,un,ord);
 }
-void SkilledABSlide (AIScript * aisc, Unit * un) {
-  Vector def = un->Position()+Vector(1,0,0);
-  Vector targetv (def);
-  Vector targetpos (def);
+void SkilledABSlide (Order * aisc, Unit * un) {
+  QVector def = un->Position()+QVector(1,0,0);
+  QVector targetv (def);
+  QVector targetpos (def);
   SetupVAndTargetV(targetpos,targetv,un);
 
-  Vector difference = targetpos-un->Position();
-  Vector ndifference = difference;ndifference.Normalize();
-  Vector Perp;
+  QVector difference = targetpos-un->Position();
+  QVector ndifference = difference;ndifference.Normalize();
+  QVector Perp;
   ScaledCrossProduct (ndifference,targetv,Perp);
   Perp = Perp+.5*ndifference;
   Perp = Perp *10000;
 
 
 
-  Order * ord = new Orders::MatchLinearVelocity(un->ClampVelocity(Perp,true),false,true,true);  
+  Order * ord = new Orders::MatchLinearVelocity(un->ClampVelocity(Perp.Cast(),true),false,true,true);  
   AddOrd (aisc,un,ord);
   ord = new ExecuteFor (new Orders::ChangeHeading (Perp+un->Position(),3),.5);
   AddOrd (aisc,un,ord);
@@ -116,24 +116,24 @@ void SkilledABSlide (AIScript * aisc, Unit * un) {
   AddOrd (aisc,un,ord);
   
 }
-void Stop (AIScript * aisc, Unit * un) {
+void Stop (Order * aisc, Unit * un) {
   Vector vec (0,0,0000);
   Order * ord = new Orders::MatchLinearVelocity(un->ClampVelocity(vec,false),true,false,false);
   AddOrd (aisc,un,ord);//<!-- should we fini? -->
 }
-void TurnAway(AIScript * aisc, Unit * un) {
-  Vector v(un->Position());
-  Vector u(v);
+void TurnAway(Order * aisc, Unit * un) {
+  QVector v(un->Position());
+  QVector u(v);
   Unit * targ =un->Target();
   if (targ) {
     u=targ->Position();
   }
-  Order * ord = new Orders::MatchLinearVelocity(un->ClampVelocity(200*(v-u),true),false,true,false);
+  Order * ord = new Orders::MatchLinearVelocity(un->ClampVelocity(200*(v-u).Cast(),true),false,true,false);
   AddOrd (aisc,un,ord);
-  ord = new ExecuteFor (new Orders::ChangeHeading ((200*(v-u)) + v,3), 2);
+  ord = new Orders::ChangeHeading ((200*(v-u)) + v,3);
   AddOrd (aisc,un,ord);
 }
-void TurnTowards(AIScript * aisc, Unit * un) {
+void TurnTowards(Order * aisc, Unit * un) {
   Vector vec (0,0,10000);
   Order * ord = new Orders::MatchLinearVelocity(un->ClampVelocity(vec,false),true,false,false);
   AddOrd (aisc,un,ord);
@@ -141,7 +141,17 @@ void TurnTowards(AIScript * aisc, Unit * un) {
   ord = new Orders::FaceTarget(0, 3);
     AddOrd (aisc,un,ord);
 }
-void CloakForScript(AIScript * aisc, Unit * un) {
+void FlyStraight(Order * aisc, Unit * un) {
+  Vector vec (0,0,10000);
+  Order * ord = new Orders::MatchVelocity(un->ClampVelocity(vec,false),Vector(0,0,0),true,false,false);
+  AddOrd (aisc,un,ord);
+}
+void FlyStraightAfterburner(Order * aisc, Unit * un) {
+  Vector vec (0,0,10000);
+  Order * ord = new Orders::MatchVelocity(un->ClampVelocity(vec,false),Vector(0,0,0),true,true,false);
+  AddOrd (aisc,un,ord);
+}
+void CloakForScript(Order * aisc, Unit * un) {
   Vector vec (0,0,10000);
   Order * ord = new Orders::MatchLinearVelocity(un->ClampVelocity(vec,false),true,false,false);
   AddOrd (aisc,un,ord);
@@ -150,7 +160,7 @@ void CloakForScript(AIScript * aisc, Unit * un) {
   ord=new ExecuteFor(new CloakFor(1,8),32);
   AddOrd(aisc,un,ord);
 }
-void TurnTowardsITTS(AIScript * aisc, Unit * un) {
+void TurnTowardsITTS(Order * aisc, Unit * un) {
   Vector vec (0,0,10000);
   Order * ord = new Orders::MatchLinearVelocity(un->ClampVelocity(vec,false),true,false,false);
   AddOrd (aisc,un,ord);

@@ -26,11 +26,12 @@
 #include "gfx/halo.h"
 
 #include "unit.h"
+#include "unit_factory.h"
 
 #include "gfx/sprite.h"
 #include "lin_time.h"
 
-
+#include "ai/turretai.h"
 #include "ai/navigation.h"
 #include "ai/fire.h"
 #include "ai/script.h"
@@ -86,8 +87,8 @@ void Unit::calculate_extent(bool update_collide_queue) {
   un_kiter iter =SubUnits.constIterator();
   const Unit * un;
   while ((un = iter.current())) {
-    corner_min = corner_min.Min(un->LocalPosition()+un->corner_min);
-    corner_max = corner_max.Max(un->LocalPosition()+un->corner_max);
+    corner_min = corner_min.Min(un->LocalPosition().Cast()+un->corner_min);
+    corner_max = corner_max.Max(un->LocalPosition().Cast()+un->corner_max);
     iter.advance();
   }
 
@@ -120,16 +121,38 @@ void Unit::SetResolveForces (bool ys) {
   */
 }
 
-
+static Unit * getFuelUpgrade () {
+  return UnitFactory::createUnit("add_fuel",true,_Universe->GetFaction("upgrades"));
+}
+static float getFuelAmt () {
+  Unit * un = getFuelUpgrade();
+  float ret = un->FuelData();
+  un->Kill();
+  return ret;
+}
+static float GetJumpFuelQuantity() {
+  static float f= getFuelAmt();
+  return f;
+}
 void Unit::ActivateJumpDrive (int destination) {
   const int jumpfuelratio=1;
-
-  if (((docked&(DOCKED|DOCKED_INSIDE))==0)&&jump.drive!=-2&&(energy>jump.energy&&(jump.energy>=0||fuel>-jump.energy))) {
+  if (((docked&(DOCKED|DOCKED_INSIDE))==0)&&jump.drive!=-2) {
+  if ((energy>jump.energy&&(jump.energy>=0||fuel>(-jump.energy*GetJumpFuelQuantity()/100.)))) {
     jump.drive = destination;
+    float fuel_used=0;
     if (jump.energy>0)
       energy-=jump.energy;
     else
-      fuel += jump.energy*mass*jumpfuelratio;
+      fuel -= jump.energy*GetJumpFuelQuantity()/100.;
+  }else {
+    if (abs(jump.energy)<32000) {
+      static float jfuel = XMLSupport::parse_float(vs_config->getVariable("physics","jump_fuel_cost",".5"));
+      if (fuel>jfuel*GetJumpFuelQuantity()) {
+       fuel-=jfuel*GetJumpFuelQuantity();
+       jump.drive=destination;
+     }
+    }
+  }
   }
 }
 void Unit::DeactivateJumpDrive () {
@@ -137,8 +160,11 @@ void Unit::DeactivateJumpDrive () {
     jump.drive=-1;
   }
 }
+float capship_size=500;
 void Unit::Init()
 {
+  static float capsize = XMLSupport::parse_float(vs_config->getVariable("physics","capship_size","500"));
+  capship_size=capsize;
   activeStarSystem=NULL;
   xml=NULL;
   docked=NOT_DOCKED;
@@ -197,8 +223,8 @@ void Unit::Init()
   image->timeexplode=0;
   killed=false;
   ucref=0;
-  numhalos = nummounts= nummesh=0;
-  halos = NULL; mounts = NULL;meshdata = NULL;
+  nummounts= nummesh=0;
+  mounts = NULL;meshdata = NULL;
   aistate = NULL;
   SetAI (new Order());
   Identity(cumulative_transformation_matrix);
@@ -237,6 +263,7 @@ void Unit::Init()
   Target(NULL);
   VelocityReference(NULL);
   computer.threat.SetUnit (NULL);
+  computer.slide_start=computer.slide_end=0;
   computer.set_speed=0;
   computer.max_speed=1;
   computer.max_ab_speed=1;
@@ -245,8 +272,16 @@ void Unit::Init()
   computer.max_roll=1;
   computer.NavPoint=Vector(0,0,0);
   computer.itts = false;
-  computer.radar.maxrange=XMLSupport::parse_float (vs_config->getVariable ("graphics","hud","radarRange","20000"));
+  static float rr = XMLSupport::parse_float (vs_config->getVariable ("graphics","hud","radarRange","20000"));
+  computer.radar.maxrange=rr;
   computer.radar.maxcone=-1;
+  static float minTrackingNum = XMLSupport::parse_float (vs_config->getVariable("physics",
+										  "autotracking",
+										".93"));// DO NOT CHANGE see unit_customize.cpp
+    
+  computer.radar.trackingcone = minTrackingNum;
+  static float lc =XMLSupport::parse_float (vs_config->getVariable ("physics","lock_cone",".8"));// DO NOT CHANGE see unit_customize.cpp
+  computer.radar.lockcone=lc;
   computer.radar.mintargetsize=0;
   computer.radar.color=true;
   //  Fire();
@@ -261,6 +296,9 @@ void Unit::SetVisible(bool invis) {
   invisible=!invis;
 }
 
+Unit::Unit( int /*dummy*/ ) {
+	Init();
+}
 Unit::Unit() {
 	Init();
 }
@@ -296,6 +334,14 @@ char * GetUnitDir (const char * filename) {
   }
   return retval;
 }
+void Unit::GetCargoCat (const std::string &cat, vector <Cargo> &cats) {
+  unsigned int max = numCargo();
+  for (unsigned int i=0;i<max;i++) {
+    if (GetCargo(i).category.find(cat)==0) {
+      cats.push_back (GetCargo(i));
+    }
+  }
+}
 vector <Mesh *> Unit::StealMeshes() {
   vector <Mesh *>ret;
   Mesh * shield = meshdata[nummesh];
@@ -308,10 +354,11 @@ vector <Mesh *> Unit::StealMeshes() {
   nummesh=0;
   return ret;
 }
+#if 0
 Unit * _1800GetGod () {
-  static Unit god ("god",true,_Universe->GetFaction("upgrades"),"",NULL,0);
-  return &god;
+  return UnitFactory::get_static_1800God( );
 }
+#endif
 
 void Unit::SetFg(Flightgroup * fg, int fg_subnumber) {
   flightgroup=fg;
@@ -331,10 +378,8 @@ Unit::Unit(const char *filename, bool SubU, int faction,std::string unitModifica
 	bool doubleup=false;
 	char * my_directory=GetUnitDir(filename);
 	vssetdir (GetSharedUnitPath().c_str());
-	vschdir (my_directory);
-	FILE *fp = fopen (filename,"r");
+	FILE * fp=NULL;
 	if (!fp) {
-	  vscdup();
 	  const char *c;
 	  if ((c=_Universe->GetFaction(faction)))
 	    vschdir (c);
@@ -347,6 +392,17 @@ Unit::Unit(const char *filename, bool SubU, int faction,std::string unitModifica
 	}
 	fp = fopen (filename,"r");
 	if (!fp) {
+	  vscdup();
+	  vscdup();
+	  doubleup=false;
+	  vschdir (my_directory);
+	  fp = fopen (filename,"r");
+	}
+
+	if (!fp) {
+	  if (doubleup) {
+	    vscdup();
+	  }
 	  vscdup();
 	  vschdir ("neutral");
 	  faction=_Universe->GetFaction("neutral");//set it to neutral
@@ -409,10 +465,10 @@ Unit::Unit(const char *filename, bool SubU, int faction,std::string unitModifica
 		switch(type)
 		{
 		default:
-		  SubUnits.prepend (un=new Unit (unitfilename,true,faction,unitModifications,flightgroup,flightgroup_subnumber));
+		  SubUnits.prepend (un=UnitFactory::createUnit (unitfilename,true,faction,unitModifications,flightgroup,flightgroup_subnumber));
 
 		}
-		un->SetPosition(Vector(x,y,z));
+		un->SetPosition(QVector(x,y,z));
 	}
 
 	int restricted;
@@ -532,7 +588,7 @@ Unit::~Unit()
   for (int beamcount=0;beamcount<nummounts;beamcount++) {
     AUDStopPlaying(mounts[beamcount].sound);
     AUDDeleteSound(mounts[beamcount].sound);
-    if (mounts[beamcount].ref.gun&&mounts[beamcount].type.type==weapon_info::BEAM)
+    if (mounts[beamcount].ref.gun&&mounts[beamcount].type->type==weapon_info::BEAM)
       delete mounts[beamcount].ref.gun;//hope we're not killin' em twice...they don't go in gunqueue
   }
 #ifdef DESTRUCTDEBUG
@@ -549,12 +605,6 @@ Unit::~Unit()
   fprintf (stderr,"%d %x ", 9, halos);
   fflush (stderr);
 #endif
-  if (halos) {
-    for (int hc=0;hc<numhalos;hc++) {
-      delete halos[hc];
-    }
-    delete [] halos;
-  }
 #ifdef DESTRUCTDEBUG
   fprintf (stderr,"%d %x ", 1,mounts);
   fflush (stderr);
@@ -571,9 +621,9 @@ void Unit::getAverageGunSpeed(float & speed, float &range) const {
    if (nummounts) {
      int nummt = nummounts;
      for (int i=0;i<nummounts;i++) {
-       if (mounts[i].type.type!=weapon_info::PROJECTILE) {
-	 range+=mounts[i].type.Range;
-	 speed+=mounts[i].type.Speed;
+       if (mounts[i].type->type!=weapon_info::PROJECTILE) {
+	 range+=mounts[i].type->Range;
+	 speed+=mounts[i].type->Speed;
        } else {
 	 nummt--;
        }
@@ -585,20 +635,48 @@ void Unit::getAverageGunSpeed(float & speed, float &range) const {
    }
   
 }
-Vector Unit::PositionITTS (const Vector & posit, float speed) const{
-  Vector retval = Position()-posit;
+
+float Unit::TrackingGuns(bool &missilelock) {
+  float trackingcone = 0;
+  missilelock=false;
+  for (int i=0;i<nummounts;i++) {
+    if (mounts[i].status==Mount::ACTIVE&&(mounts[i].size&weapon_info::AUTOTRACKING)) {
+      trackingcone= computer.radar.trackingcone;
+    }
+    if (mounts[i].status==Mount::ACTIVE&&mounts[i].type->LockTime>0&&mounts[i].time_to_lock<=0) {
+      missilelock=true;
+    }
+  }
+  return trackingcone;
+}
+int Unit::LockMissile() {
+  bool missilelock=false;
+  bool dumblock=false;
+  for (int i=0;i<nummounts;i++) {
+    if (mounts[i].status==Mount::ACTIVE&&mounts[i].type->LockTime>0&&mounts[i].time_to_lock<=0&&mounts[i].type->type==weapon_info::PROJECTILE) {
+      missilelock=true;
+    }else {
+      if (mounts[i].status==Mount::ACTIVE&&mounts[i].type->LockTime==0&&mounts[i].type->type==weapon_info::PROJECTILE&&mounts[i].time_to_lock<=0) {
+	dumblock=true;
+      }
+    }    
+  }
+  return (missilelock?1:(dumblock?-1:0));
+}
+QVector Unit::PositionITTS (const QVector & posit, float speed) const{
+  QVector retval = Position()-posit;
   speed = retval.Magnitude()/speed;//FIXME DIV/0 POSSIBLE
-  retval = Position()+Velocity*speed;
+  retval = Position()+GetVelocity().Cast().Scale(speed);
   return retval;
 }
 float Unit::cosAngleTo (Unit * targ, float &dist, float speed, float range) const{
-   Vector Normal (cumulative_transformation_matrix[8],cumulative_transformation_matrix[9],cumulative_transformation_matrix[10]);
+  Vector Normal (cumulative_transformation_matrix.getR());
    //   if (range!=FLT_MAX) {
    //     getAverageGunSpeed(speed,range);
    //   }
-   Vector totarget (targ->PositionITTS(cumulative_transformation.position, speed+((targ->Position()-Position()).Normalize().Dot (Velocity))));
+   QVector totarget (targ->PositionITTS(cumulative_transformation.position, speed+((targ->Position()-Position()).Normalize().Dot (GetVelocity().Cast()))));
    totarget = totarget-cumulative_transformation.position;
-   float tmpcos = Normal.Dot (totarget);
+   double tmpcos = Normal.Cast().Dot (totarget);
    dist = totarget.Magnitude();
    if (tmpcos>0) {
       tmpcos = dist*dist - tmpcos*tmpcos;
@@ -626,11 +704,11 @@ float Unit::cosAngleFromMountTo (Unit * targ, float & dist) const{
     Transformation finaltrans (mounts[i].GetMountLocation());
     finaltrans.Compose (cumulative_transformation, cumulative_transformation_matrix);
     finaltrans.to_matrix (mat);
-    Vector Normal (mat[8],mat[9],mat[10]);
+    Vector Normal (mat.getR());
     
-    Vector totarget (targ->PositionITTS(finaltrans.position, mounts[i].type.Speed));
+    QVector totarget (targ->PositionITTS(finaltrans.position, mounts[i].type->Speed));
     
-    tmpcos = Normal.Dot (totarget);
+    tmpcos = Normal.Dot (totarget.Cast());
     tmpdist = totarget.Magnitude();
     if (tmpcos>0) {
       tmpcos = tmpdist*tmpdist - tmpcos*tmpcos;
@@ -638,7 +716,7 @@ float Unit::cosAngleFromMountTo (Unit * targ, float & dist) const{
     } else {
       tmpcos /= tmpdist;
     }
-    tmpdist /= mounts[i].type.Range;//UNLIKELY DIV/0
+    tmpdist /= mounts[i].type->Range;//UNLIKELY DIV/0
     if (tmpdist < 1||tmpdist<dist) {
       if (tmpcos-tmpdist/2 > retval-dist/2) {
 	dist = tmpdist;
@@ -689,19 +767,19 @@ bool Unit::queryFrustum(float frustum [6][4]) const{
 float Unit::GetElasticity() {return .5;}
 void Unit::UpdateHudMatrix(int whichcam) {
   Matrix m;
-  float * ctm=cumulative_transformation_matrix;
+  Matrix ctm=cumulative_transformation_matrix;
   if (planet) {
     Transformation ct (linear_interpolate(prev_physical_state, curr_physical_state, interpolation_blend_factor));  
     ct.to_matrix (m);
     ctm=m;
   }
-  Vector q (ctm[4],	    ctm[5],	    ctm[6]);
-  Vector r (ctm[8],	    ctm[9],	    ctm[10]);
+  Vector q (ctm.getQ());
+  Vector r (ctm.getR());
   Vector tmp;
   CrossProduct(r,q, tmp);
   _Universe->AccessCamera(whichcam)->SetOrientation(tmp,q ,r);
   
-  _Universe->AccessCamera(whichcam)->SetPosition (Transform (ctm,image->CockpitCenter));
+  _Universe->AccessCamera(whichcam)->SetPosition (Transform (ctm,image->CockpitCenter.Cast()));
 }
    
 void Unit::SetFaction (int faction) {
@@ -710,39 +788,40 @@ void Unit::SetFaction (int faction) {
     (*ui)->SetFaction(faction);
   }
 }
-void Unit::SetPlanetHackTransformation (Transformation *&ct,float *&ctm) {
+void Unit::SetPlanetHackTransformation (Transformation *&ct,Matrix *&ctm) {
   static Transformation planet_temp_transformation;
   static Matrix planet_temp_matrix;
   if (planet) {
     if (planet->trans==_Universe->AccessCamera()->GetPlanetaryTransform()&&planet->trans!=NULL) {
       Matrix tmp;
-      Vector p,q,r,c;
+      Vector p,q,r;
+      QVector c;
       MatrixToVectors (cumulative_transformation_matrix,p,q,r,c);
       planet->trans->InvTransformBasis(tmp,p,q,r,c);
-      MultMatrix (planet_temp_matrix,_Universe->AccessCamera()->GetPlanetGFX(),tmp);
+      MultMatrix (planet_temp_matrix,*_Universe->AccessCamera()->GetPlanetGFX(),tmp);
       planet_temp_transformation = Transformation::from_matrix (planet_temp_matrix);
       ct = &planet_temp_transformation;
-      ctm = planet_temp_matrix;
+      *ctm = planet_temp_matrix;
       ///warning: hack FIXME
       cumulative_transformation=*ct;
-      CopyMatrix (cumulative_transformation_matrix,ctm);
+      CopyMatrix (cumulative_transformation_matrix,*ctm);
     }
   }  
 }
-void Unit::Draw(const Transformation &parent, const Matrix parentMatrix)
+void Unit::Draw(const Transformation &parent, const Matrix &parentMatrix)
 {
 
   cumulative_transformation = linear_interpolate(prev_physical_state, curr_physical_state, interpolation_blend_factor);
-  float * ctm;
+  Matrix *ctm;
   Transformation * ct;
   cumulative_transformation.Compose(parent, parentMatrix);
-  ctm =cumulative_transformation_matrix;
+  ctm =&cumulative_transformation_matrix;
   ct = &cumulative_transformation;
   cumulative_transformation.to_matrix(cumulative_transformation_matrix);
   SetPlanetHackTransformation (ct,ctm);
 
 #ifdef PERFRAMESOUND
-  AUDAdjustSound (sound.engine,cumulative_transformation.position,Velocity);
+  AUDAdjustSound (sound.engine,cumulative_transformation.position,GetVelocity());
 #endif
   short cloak=cloaking;
   if (cloaking>cloakmin) {
@@ -766,13 +845,14 @@ void Unit::Draw(const Transformation &parent, const Matrix parentMatrix)
   if (hull <0) {
     Explode(true, GetElapsedTime());
   }
+  bool On_Screen=false;
   if (!invisible||(this!=_Universe->AccessCockpit()->GetParent())) {
     for (i=0;i<=nummesh;i++) {//NOTE LESS THAN OR EQUALS...to cover shield mesh
       if (meshdata[i]==NULL) 
 		continue;
 	  if (i==nummesh&&(meshdata[i]->numFX()==0||hull<0)) 
 		continue;
-      Vector TransformedPosition = Transform (ctm,
+      Vector TransformedPosition = Transform (*ctm,
 					      meshdata[i]->Position());
 #if 0
       //This is a test of the box in frustum setup to be used with terrain
@@ -790,25 +870,29 @@ void Unit::Draw(const Transformation &parent, const Matrix parentMatrix)
 #endif 
 				   );
       float lod;
+
       if (d) {  //d can be used for level of detail shit
+	d = (TransformedPosition-_Universe->AccessCamera()->GetPosition().Cast()).Magnitude();
 	if ((lod =g_game.detaillevel*g_game.x_resolution*2*meshdata[i]->rSize()/GFXGetZPerspective((d-meshdata[i]->rSize()<g_game.znear)?g_game.znear:d-meshdata[i]->rSize()))>=g_game.detaillevel) {//if the radius is at least half a pixel (detaillevel is the scalar... so you gotta make sure it's above that
-	  meshdata[i]->Draw(lod,ctm,d,cloak,(_Universe->AccessCamera()->GetNebula()==nebula&&nebula!=NULL)?-1:0);//cloakign and nebula
+	  meshdata[i]->Draw(lod,*ctm,d,cloak,(_Universe->AccessCamera()->GetNebula()==nebula&&nebula!=NULL)?-1:0);//cloakign and nebula
+	  On_Screen=true;
 	} else {
 
 	}
       }
     }
+    
     un_fiter iter =SubUnits.fastIterator();
     Unit * un;
     while ((un = iter.current())) {
-      un->Draw (*ct,ctm);
+      un->Draw (*ct,*ctm);
       iter.advance();
     }
   
     if(selected) {
       static bool doInputDFA=XMLSupport::parse_bool (vs_config->getVariable ("graphics","MouseCursor","false"));
       if (doInputDFA)
-	image->selectionBox->Draw(g_game.x_resolution,ctm);
+	image->selectionBox->Draw(g_game.x_resolution,*ctm);
     }
   } else {
 	  _Universe->AccessCockpit()->SetupViewPort();///this is the final, smoothly calculated cam
@@ -830,9 +914,9 @@ void Unit::Draw(const Transformation &parent, const Matrix parentMatrix)
     **/
   }
   for (i=0;i<nummounts;i++) {
-    if (mounts[i].type.type==weapon_info::BEAM) {
+    if (mounts[i].type->type==weapon_info::BEAM) {
       if (mounts[i].ref.gun) {
-	mounts[i].ref.gun->Draw(*ct,ctm);
+	mounts[i].ref.gun->Draw(*ct,*ctm);
       }
     }
   }
@@ -840,8 +924,9 @@ void Unit::Draw(const Transformation &parent, const Matrix parentMatrix)
   if (cloak>=0) {
     haloalpha=((float)cloak)/32767;
   }
-  for (i=0;i<numhalos;i++) {
-    halos[i]->Draw(*ct,ctm,haloalpha);
+  if (On_Screen) {
+    Vector Scale (1,1,GetVelocity().MagnitudeSquared()/(computer.max_ab_speed*computer.max_ab_speed));
+    halos.Draw(*ctm,Scale,cloak,(_Universe->AccessCamera()->GetNebula()==nebula&&nebula!=NULL)?-1:0);
   }
 }
 void Unit::PrimeOrders () {
@@ -851,9 +936,10 @@ void Unit::PrimeOrders () {
   aistate = new Order; //get 'er ready for enqueueing
   aistate->SetParent (this);
 }
+#if 0
 void Unit::SwapOutHalos() {
   for (int i=0;i<numhalos;i++) {
-    float x,y;
+    // float x,y;
     //halos[i]->GetDimensions (x,y);
     //halos[i]->SetDimensions (x/(1024),y/(1024));
     halos[i]->Draw (cumulative_transformation,cumulative_transformation_matrix,0);
@@ -861,18 +947,47 @@ void Unit::SwapOutHalos() {
 }
 void Unit::SwapInHalos() {
   for (int i=0;i<numhalos;i++) {
-    float x,y;
+    // float x,y;
     //halos[i]->GetDimensions (x,y);
     //halos[i]->SetDimensions (x*(1024),y*(1024));
   }
 }
+#endif
 void Unit::SetTurretAI () {
+  static bool talkinturrets = XMLSupport::parse_bool(vs_config->getVariable("AI","independent_turrets","false"));
+  if (talkinturrets) {
+    UnitCollection::UnitIterator iter = getSubUnits();
+    Unit * un;
+    while (NULL!=(un=iter.current())) {
+      un->EnqueueAIFirst (new Orders::FireAt(.2,15));
+      un->EnqueueAIFirst (new Orders::FaceTarget (false,3));
+      un->SetTurretAI ();
+      iter.advance();
+    }
+  }else {
+    UnitCollection::UnitIterator iter = getSubUnits();
+    Unit * un;
+    while (NULL!=(un=iter.current())) {
+      if (un->aistate) {
+	delete un->aistate;
+      }
+      un->aistate = (new Orders::TurretAI());
+      un->aistate->SetParent (un);
+      un->SetTurretAI ();
+      iter.advance();
+    }    
+  }
+}
+void Unit::DisableTurretAI () {
   UnitCollection::UnitIterator iter = getSubUnits();
   Unit * un;
   while (NULL!=(un=iter.current())) {
-    un->EnqueueAIFirst (new Orders::FireAt(.2,15));
-    un->EnqueueAIFirst (new Orders::FaceTarget (false,3));
-    un->SetTurretAI ();
+    if (un->aistate) {
+      delete un->aistate;
+    }
+    un->aistate = new Order; //get 'er ready for enqueueing
+    un->aistate->SetParent (un);
+    un->DisableTurretAI ();
     iter.advance();
   }
 }
@@ -950,7 +1065,11 @@ const string Unit::getFgID()  {
 };
 
 string Unit::getFullAIDescription(){
-  return getFgID()+":"+getAIState()->createFullOrderDescription(0).c_str();
+  if (getAIState()) {
+    return getFgID()+":"+getAIState()->createFullOrderDescription(0).c_str();
+  }else {
+    return "no order";
+  }
 }
 
 void Unit::setTargetFg(string primary,string secondary,string tertiary){
@@ -1029,8 +1148,8 @@ void Unit::scanSystem(){
       if(this!=unit){
 	// won;t scan ourselves
 	
-	Vector unit_pos=unit->Position();
-	float dist=getMinDis(unit_pos);
+	QVector unit_pos=unit->Position();
+	double dist=getMinDis(unit_pos);
 	float relation=getRelation(unit);
 	
 	if(relation<0.0){

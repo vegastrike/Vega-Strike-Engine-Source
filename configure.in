@@ -45,8 +45,8 @@ dnl --------------------------------------------------------------------------
 dnl General options
 dnl --------------------------------------------------------------------------
 TR_CPPFLAGS=""
-TR_CFLAGS="-O3 -Wall -fomit-frame-pointer -ffast-math -fexpensive-optimizations"
-TR_CXXFLAGS="-O3 -Wall -fomit-frame-pointer  -ffast-math -fexpensive-optimizations"
+TR_CFLAGS="-O2 -g -Wall -ffast-math -fexpensive-optimizations"
+TR_CXXFLAGS="-O2 -g -Wall  -ffast-math -fexpensive-optimizations"
 TR_LIBS=""
 
 case "$host" in
@@ -56,7 +56,7 @@ esac
 
 AC_ARG_ENABLE(debug,     [  --enable-debug          Produce an executable with debugging symbols], [TR_CFLAGS="-g -Wall "; TR_CXXFLAGS="-g -Wall"])
 
-AC_ARG_ENABLE(debug-rel,     [  --enable-debug-rel          Produce an executable with debugging symbols], [TR_CFLAGS="-g -Wall -ffast-math -fexpensive-optimizations -malign-loops=2 -malign-functions=2"; TR_CXXFLAGS="-g -Wall -ffast-math -fexpensive-optimizations -malign-loops=2 -malign-functions=2"])
+AC_ARG_ENABLE(debug-rel,     [  --enable-debug-rel          Produce an executable with debugging symbols], [TR_CFLAGS="-g -O3 -Wall -ffast-math -fexpensive-optimizations -malign-loops=2 -malign-functions=2"; TR_CXXFLAGS="-g -Wall -O3 -ffast-math -fexpensive-optimizations -malign-loops=2 -malign-functions=2"])
 
 AC_ARG_ENABLE(profile,[  --enable-profile      Produce a profiled executable],  [TR_CFLAGS="-g -pg"; TR_CXXFLAGS="-g  -pg"])
 
@@ -138,7 +138,14 @@ if test "x$have_SDL" = "xyes" ; then
         echo "*** This version of SDL doesn't have joystick support."
         echo "*** Configuring without joystick support."
     fi
-
+USERSDL="1"
+AC_ARG_ENABLE(nosdl,[  --enable-nosdl Use if you do not wish to use SDL to manage mouse],USERSDL="0")
+	if test "$USERSDL" = "1" ; then
+		TR_CPPFLAGS="$TR_CPPFLAGS -DSDL_WINDOWING=1" 
+		echo "Using SDL Windowing System"
+	else
+		echo "Using GLUT Windowing System"
+	fi
     dnl Check for SDL_mixer
 dnl    AC_CHECK_LIB( SDL_mixer, Mix_OpenAudio, 
 dnl                  have_SDL_mixer=yes, have_SDL_mixer=no )
@@ -417,7 +424,7 @@ Place it in the directory /usr/include/GL.
 *****************************************************************])
 fi
 
-CPPFLAGS="$saved_CPPFLAGS" 
+CPPFLAGS="$saved_CPPFLAGS"
 TR_CPPFLAGS="$TR_CPPFLAGS $GL_CPPFLAGS"
 
 
@@ -437,12 +444,14 @@ AC_DEFUN( CHECK_FOR_GLUT_LIB, [
     if test "x$is_macosx" = "xyes" ; then
         LIBS="$saved_LIBS $TR_LIBS $GLUT_LDOPTS -framework GLUT"
     else
-        LIBS="$saved_LIBS $TR_LIBS $GLUT_LDOPTS -l$GLUT_LIB_NAME"
+	saved_LDFLAGS=$LDFLAGS
+	LDFLAGS="-L/usr/X11R6/lib $saved_LDFLAGS"
+        LIBS="$saved_LIBS $TR_LIBS $GLUT_LDOPTS -l$GLUT_LIB_NAME -lXi -lXmu"
     fi
     AC_TRY_LINK( , , have_glut_lib=yes, have_glut_lib=no )
     AC_MSG_RESULT([$have_glut_lib])
-]) 
-
+])
+LDFLAGS="$saved_LDFLAGS"
 saved_LIBS="$LIBS"
 
 GLUT_LIB_LIST="glut glut32"
@@ -459,11 +468,11 @@ if test "x$have_glut_lib" = "xno" ; then
     AC_MSG_ERROR([GLUT library not found or too old version. 3.7 (beta) or later required.])
 fi
 
-LIBS="$saved_LIBS"
+LIBS="$saved_LIBS -lXi -lXmu"
 if test "x$is_macosx" = "xyes" ; then
     TR_LIBS="$TR_LIBS $GLUT_LDOPTS -framework GLUT"
 else
-    TR_LIBS="$TR_LIBS $GLUT_LDOPTS -l$GLUT_LIB_NAME"
+    TR_LIBS="$TR_LIBS $GLUT_LDOPTS -l$GLUT_LIB_NAME  -lXi -lXmu"
 fi
 
 

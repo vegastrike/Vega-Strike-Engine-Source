@@ -133,6 +133,8 @@ void Nebula::beginElem(const std::string& name, const AttributeList& atts) {
 			}
 		}
 		break;
+	default :
+	    break;
 	}
 }
 
@@ -172,14 +174,29 @@ void Nebula::LoadXML(const char * filename) {
 	fclose (inFile);
 	XML_ParserFree (parser);
 }
+extern double interpolation_blend_factor;
 void Nebula::SetFogState () {
+  float thisfadein = (lastfadein*(1-interpolation_blend_factor)+ (fadeinvalue)*interpolation_blend_factor);
   GFXFogMode (fogmode);
-  GFXFogDensity (Density);
-  GFXFogLimits (fognear,fogfar);
+  GFXFogDensity (Density*thisfadein);
+  GFXFogLimits (fognear,fogfar*thisfadein);
   GFXFogColor (GFXColor (color.i,color.j,color.k,1));
   GFXFogIndex (index);
   
 }
+
+void Nebula::PutInsideCam(int i) {
+  static float nebdelta= XMLSupport::parse_float (vs_config->getVariable ("graphics","fog_time",".01"));
+  static float fadeinrate= XMLSupport::parse_float (vs_config->getVariable ("graphics","fog_fade_in_percent","0.5"));
+  if (_Universe->AccessCamera()==_Universe->AccessCamera(i)) {
+    fadeinvalue+=(1+fadeinrate)*nebdelta*SIMULATION_ATOM;
+    if (fadeinvalue>1) {
+      fadeinvalue=1;
+    }
+  }
+  _Universe->AccessCamera(i)->SetNebula (this);
+}
+
 Nebula::Nebula(const char * unitfile, bool SubU, int faction, Flightgroup* fg, int fg_snumber):
   Unit (unitfile,SubU,faction,string(""),fg,fg_snumber) {
 
@@ -217,13 +234,19 @@ Nebula::Nebula(const char * unitfile, bool SubU, int faction, Flightgroup* fg, i
     vscdup();
   vsresetdir();
 }
-void Nebula::reactToCollision(Unit * smaller, const Vector & biglocation, const Vector & bignormal, const Vector & smalllocation, const Vector & smallnormal, float dist){
+void Nebula::reactToCollision(Unit * smaller, const QVector & biglocation, const Vector & bignormal, const QVector & smalllocation, const Vector & smallnormal, float dist){
   if (fogme)
     SetNebula(this);
   smaller->SetNebula(this);
 }
 
 void Nebula::UpdatePhysics (const Transformation &trans, const Matrix transmat, const Vector & CumulativeVelocity, bool ResolveLast, UnitCollection *uc) {
+  static float nebdelta= XMLSupport::parse_float (vs_config->getVariable ("graphics","fog_time",".01"));
+  lastfadein = fadeinvalue;
+  fadeinvalue-=nebdelta*SIMULATION_ATOM;
+  if (fadeinvalue<0) {
+    fadeinvalue=0;
+  }
   Unit::UpdatePhysics (trans,transmat,CumulativeVelocity,ResolveLast,uc);
   Vector t1;
   float dis;
@@ -231,7 +254,8 @@ void Nebula::UpdatePhysics (const Transformation &trans, const Matrix transmat, 
   if (_Universe->activeStarSystem()==_Universe->AccessCockpit()->activeStarSystem) {
   for (i=0;i<NUM_CAM;i++) {
     if (Inside (_Universe->AccessCamera(i)->GetPosition(),0,t1,dis)) {
-      _Universe->AccessCamera(i)->SetNebula (this);
+      PutInsideCam(i);
+
     }
   }
   }

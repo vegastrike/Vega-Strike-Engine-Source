@@ -5,6 +5,7 @@
 #include "gfx/env_map_gent.h"
 #include "gfx/aux_texture.h"
 #include "cmd/planet.h"
+#include "cmd/unit_factory.h"
 #include "gfx/star.h"
 #include "vs_globals.h"
 #include "vs_path.h"
@@ -108,7 +109,10 @@ namespace StarXML {
     DIFFICULTY,
     REFLECTNOLIGHT,
     ENHANCEMENT,
-    SCALEATMOS
+    SCALEATMOS,
+    SCALESYSTEM,
+    CITYLIGHTS,
+    INSIDEOUT
   };
 
   const EnumMap::Pair element_names[] = {
@@ -141,6 +145,7 @@ namespace StarXML {
     EnumMap::Pair ("reflectivity", REFLECTIVITY), 
     EnumMap::Pair ("file", XFILE),
     EnumMap::Pair ("alpha", ALPHA),
+    EnumMap::Pair ("citylights",CITYLIGHTS),
     EnumMap::Pair ("destination", DESTINATION), 
     EnumMap::Pair ("x", X), 
     EnumMap::Pair ("y", Y), 
@@ -171,11 +176,13 @@ namespace StarXML {
     EnumMap::Pair ("ScaleX", SCALEX),
     EnumMap::Pair ("NumWraps", NUMWRAPS),
     EnumMap::Pair ("Difficulty", DIFFICULTY),
-    EnumMap::Pair ("ScaleAtmosphereHeight", SCALEATMOS)
+    EnumMap::Pair ("ScaleAtmosphereHeight", SCALEATMOS),
+    EnumMap::Pair ("ScaleSystem",SCALESYSTEM),
+    EnumMap::Pair ("InsideOut",INSIDEOUT)
   };
 
   const EnumMap element_map(element_names, 18);
-  const EnumMap attribute_map(attribute_names, 40);
+  const EnumMap attribute_map(attribute_names, 43);
 }
 
 using XMLSupport::EnumMap;
@@ -183,12 +190,12 @@ using XMLSupport::Attribute;
 using XMLSupport::AttributeList;
 using namespace StarXML;
 
-static Vector ComputeRotVel (float rotvel, const Vector &r, const Vector & s) {
+static Vector ComputeRotVel (float rotvel, const QVector &r, const QVector & s) {
   if ((r.i||r.j||r.k)&&(s.i||s.j||s.k)) {
-    Vector retval = r.Cross (s);
+    QVector retval = r.Cross (s);
     retval.Normalize();
     retval= retval * rotvel;
-    return retval;
+    return retval.Cast();
   }else {
     return Vector (0,rotvel,0);
   }
@@ -262,9 +269,13 @@ Flightgroup *getStaticUnknownFlightgroup (int faction) {
   setStaticFlightgroup (fg,"Unknown",faction);
   return fg[faction];
 }
-
-
+//sorry boyz...I'm just a tourist with a frag nav console--could you tell me where I am?
+static Unit * getTopLevelOwner( ) {//returns terrible memory--don't dereference...ever...not even aligned
+  return (Unit *)0x31337;
+}
+extern BLENDFUNC parse_alpha (const char *);
 void StarSystem::beginElement(const string &name, const AttributeList &attributes) {
+  static int neutralfaction=_Universe->GetFaction("neutral");
   static float asteroiddiff = XMLSupport::parse_float (vs_config->getVariable ("physics","AsteroidDifficulty",".4"));
   std::string myfile;
   vector <GFXLightLocal> curlights;
@@ -272,9 +283,14 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
   GFXColor tmpcol(0,0,0,1);
   LIGHT_TARGET tmptarg= POSITION;
   xml->cursun.j=0;
+  string citylights;
   float scaleatmos=10;
   char * nebfile;
+  bool insideout=false;
   int faction=0;
+  BLENDFUNC blendSrc=ONE;
+  BLENDFUNC blendDst=ZERO;
+  bool isdest=false;
   xml->cursun.k=0;	
   static float yearscale = XMLSupport::parse_float (vs_config->getVariable ("physics","YearScale","10"));
   static float dayscale = yearscale;//XMLSupport::parse_float (vs_config->getVariable ("physics","DayScale","10"));
@@ -294,7 +310,8 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
   float velocity=0;
   float position=0;
   float rotvel=0;
-  Vector S(0,0,0), pos(0,0,0), R(0,0,0);
+  QVector S(0,0,0), R(0,0,0);
+  QVector  pos(0,0,0);
   Names elem = (Names)element_map.lookup(name);
   float radius=1;
   AttributeList::const_iterator iter;
@@ -308,9 +325,12 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
   case SYSTEM:
     assert (xml->unitlevel==0);
     xml->unitlevel++;
-    pos = Vector (0,0,0);
+    pos = QVector (0,0,0);
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(attribute_map.lookup((*iter).name)) {
+      case SCALESYSTEM:
+	xml->scale = parse_float ((*iter).value);
+	break;
       case REFLECTIVITY:
 	xml->reflectivity=parse_float ((*iter).value);
 	break;
@@ -399,9 +419,9 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
   case TERRAIN:
   case CONTTERRAIN:
     xml->unitlevel++;
-    S = Vector (0,1,0);
-    R = Vector (0,0,1);
-    pos = Vector (0,0,0);
+    S = QVector (1,0,0);
+    R = QVector (0,0,1);
+    pos = QVector (0,0,0);
     radius=-1;
     position=parse_float (vs_config->getVariable ("terrain","mass","100"));
     gravity=0;
@@ -430,13 +450,13 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
 	radius = parse_float ((*iter).value);
 	break;
       case X:
-	pos.i = parse_float ((*iter).value);
+	pos.i = parse_float ((*iter).value)*xml->scale;
 	break;
       case Y:
-	pos.j = parse_float ((*iter).value);
+	pos.j = parse_float ((*iter).value)*xml->scale;
 	break;
       case Z:
-	pos.k = parse_float ((*iter).value);
+	pos.k = parse_float ((*iter).value)*xml->scale;
 	break;
       case RI:
 	R.i=parse_float((*iter).value);
@@ -469,19 +489,17 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
       TerrainScale.i*=z;
       TerrainScale.k*=z;
       TerrainScale.j*=y;      
-      t[4]=S.i*TerrainScale.j;
-      t[5]=S.j*TerrainScale.j;
-      t[6]=S.k*TerrainScale.j;
-      t[8]=R.i*TerrainScale.k;
-      t[9]=R.j*TerrainScale.k;
-      t[10]=R.k*TerrainScale.k;
+      t.r[3]=S.i*TerrainScale.j;
+      t.r[4]=S.j*TerrainScale.j;
+      t.r[5]=S.k*TerrainScale.j;
+      t.r[6]=R.i*TerrainScale.k;
+      t.r[7]=R.j*TerrainScale.k;
+      t.r[8]=R.k*TerrainScale.k;
       S = S.Cross (R);
-      t[0]=S.i*TerrainScale.i;
-      t[1]=S.j*TerrainScale.i;
-      t[2]=S.k*TerrainScale.i;
-      t[12]=pos.i+xml->systemcentroid.i;
-      t[13]=pos.i+xml->systemcentroid.j;
-      t[14]=pos.i+xml->systemcentroid.k;
+      t.r[0]=S.i*TerrainScale.i;
+      t.r[1]=S.j*TerrainScale.i;
+      t.r[2]=S.k*TerrainScale.i;
+      t.p=pos+xml->systemcentroid.Cast();
       if (myfile.length()) {
 	if (elem==TERRAIN) {
 	  terrains.push_back (new Terrain (myfile.c_str(),TerrainScale,position,radius));
@@ -548,18 +566,19 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
   case PLANET:
     assert (xml->unitlevel>0);
     xml->unitlevel++;
-    S = Vector (0,1,0);
-    R = Vector (0,0,1);
+    S = QVector (1,0,0);
+    R = QVector (0,0,1);
     filename = new char [1];
     filename[0]='\0';
     alpha=new char[1];
+    citylights=string("");
     alpha[0]='\0';
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(attribute_map.lookup((*iter).name)) {
       case NAME:
 	fullname=(*iter).value;
 	//	cout << "\nFOUND planet/unit name " << fullname << endl;
-	bootstrap_draw("loading "+fullname);
+	bootstrap_draw("Loading "+fullname);
 	break;
       case XFILE:
 	delete []filename;
@@ -568,11 +587,18 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
 	break;
       case DESTINATION:
 	dest=ParseDestinations((*iter).value);
+	isdest=true;
 	break;
       case ALPHA:
 	delete []alpha;
 	alpha = new char [strlen((*iter).value.c_str())+1];
 	strcpy(alpha,(*iter).value.c_str());
+	break;
+      case CITYLIGHTS:
+	citylights = (*iter).value;
+	break;
+      case INSIDEOUT:
+	insideout=XMLSupport::parse_bool ((*iter).value);
 	break;
       case LIGHT:
 	GetLights (xml->lights,curlights,(*iter).value.c_str());
@@ -593,38 +619,39 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
 	break;
       case EMALPHA:
 	ourmat.ea = parse_float((*iter).value);
+	break;
       case REFLECTNOLIGHT:
 	ourmat.sr=ourmat.sg=ourmat.sb=ourmat.dr=ourmat.dg=ourmat.db=
 	  ourmat.ar=ourmat.ag=ourmat.ab=0;
 	break;
       case RI:
-	R.i=parse_float((*iter).value);
+	R.i=parse_float((*iter).value)*xml->scale;
 	break;
       case RJ:
-	R.j=parse_float((*iter).value);
+	R.j=parse_float((*iter).value)*xml->scale;
 	break;
       case RK:
-	R.k=parse_float((*iter).value);
+	R.k=parse_float((*iter).value)*xml->scale;
 	break;
       case SI:
-	S.i=parse_float((*iter).value);
+	S.i=parse_float((*iter).value)*xml->scale;
 	break;
       case SJ:
-	S.j=parse_float((*iter).value);
+	S.j=parse_float((*iter).value)*xml->scale;
 	break;
       case SK:
-	S.k=parse_float((*iter).value);
+	S.k=parse_float((*iter).value)*xml->scale;
 	break;
       case X:
- 	xml->cursun.i=parse_float((*iter).value);
+ 	xml->cursun.i=parse_float((*iter).value)*xml->scale;
  	break;
 
       case Y:
- 	xml->cursun.j=parse_float((*iter).value);
+ 	xml->cursun.j=parse_float((*iter).value)*xml->scale;
  	break;
 
       case Z:
- 	xml->cursun.k=parse_float((*iter).value);
+ 	xml->cursun.k=parse_float((*iter).value)*xml->scale;
  	break;
 
       case RADIUS:
@@ -649,16 +676,46 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
       }
 
     }
+    if (isdest==false) {
+      radius*=xml->scale;
+    }
     if (alpha[0]==0) {
       delete [] alpha;
       alpha=NULL;
+      blendSrc=ONE;
+      blendDst=ZERO;
+    }else {
+      char *s=strdup (alpha);
+      char *d=strdup (alpha);
+      if (2==sscanf (alpha,"%s %s",s,d)) {
+	if (strcmp(s,"true")==0) {
+	  blendSrc=SRCALPHA;
+	  blendDst=INVSRCALPHA;
+	}else {
+	  blendSrc = parse_alpha (s);
+
+	  blendDst = parse_alpha (d);
+	}
+      }else {
+	blendSrc=SRCALPHA;
+	blendDst=INVSRCALPHA;
+      }
+      free (s);
+      free (d);
     }
     if (xml->unitlevel>2) {
       assert(xml->moons.size()!=0);
-      xml->moons[xml->moons.size()-1]->beginElement(R,S,velocity,ComputeRotVel (rotvel,R,S),position,gravity,radius,filename,alpha,dest,xml->unitlevel-1, ourmat,curlights,false,faction,fullname);
+      Unit * un =xml->moons[xml->moons.size()-1]->beginElement(R,S,velocity,ComputeRotVel (rotvel,R,S),position,gravity,radius,filename,citylights.c_str(),blendSrc,blendDst,dest,xml->unitlevel-1, ourmat,curlights,false,faction,fullname,insideout);
+      if (un) {
+	un->SetOwner (getTopLevelOwner());
+      }
     } else {
-      xml->moons.push_back(new Planet(R,S,velocity,ComputeRotVel (rotvel,R,S), position,gravity,radius,filename,alpha,dest, xml->cursun+xml->systemcentroid, NULL, ourmat,curlights,faction,fullname));
-      xml->moons[xml->moons.size()-1]->SetPosAndCumPos(R+S+xml->cursun+xml->systemcentroid);
+
+      
+      xml->moons.push_back(UnitFactory::createPlanet(R,S,velocity,ComputeRotVel (rotvel,R,S), position,gravity,radius,filename,citylights.c_str(),blendSrc,blendDst,dest, xml->cursun.Cast()+xml->systemcentroid.Cast(), NULL, ourmat,curlights,faction,fullname,insideout));
+
+      xml->moons[xml->moons.size()-1]->SetPosAndCumPos(R+S+xml->cursun.Cast()+xml->systemcentroid.Cast());
+      xml->moons.back()->SetOwner (getTopLevelOwner());
     }
     delete []filename;
     break;
@@ -670,8 +727,8 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
   case ENHANCEMENT:
     assert (xml->unitlevel>0);
     xml->unitlevel++;
-    S = Vector (0,1,0);
-    R = Vector (0,0,1);
+    S = QVector (0,1,0);
+    R = QVector (0,0,1);
     nebfile = new char [1];
     nebfile[0]='\0';
     filename = new char [1];
@@ -704,33 +761,33 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
 	faction = _Universe->GetFaction ((*iter).value.c_str());
 	break;
       case RI:
-	R.i=parse_float((*iter).value);
+	R.i=parse_float((*iter).value)*xml->scale;
 	break;
       case RJ:
-	R.j=parse_float((*iter).value);
+	R.j=parse_float((*iter).value)*xml->scale;
 	break;
       case RK:
-	R.k=parse_float((*iter).value);
+	R.k=parse_float((*iter).value)*xml->scale;
 	break;
       case SI:
-	S.i=parse_float((*iter).value);
+	S.i=parse_float((*iter).value)*xml->scale;
 	break;
       case SJ:
-	S.j=parse_float((*iter).value);
+	S.j=parse_float((*iter).value)*xml->scale;
 	break;
       case SK:
-	S.k=parse_float((*iter).value);
+	S.k=parse_float((*iter).value)*xml->scale;
 	break;
       case X:
- 	xml->cursun.i=parse_float((*iter).value);
+ 	xml->cursun.i=parse_float((*iter).value)*xml->scale;
 
  	break;
       case Y:
- 	xml->cursun.j=parse_float((*iter).value);
+ 	xml->cursun.j=parse_float((*iter).value)*xml->scale;
 
  	break;
       case Z:
- 	xml->cursun.k=parse_float((*iter).value);
+ 	xml->cursun.k=parse_float((*iter).value)*xml->scale;
 
  	break;
 
@@ -756,30 +813,34 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
 	  Planet * plan =xml->moons.back()->GetTopPlanet(xml->unitlevel-1);
 	  if (elem==UNIT) {
 	    Flightgroup *fg =getStaticBaseFlightgroup (faction);
-	    plan->AddSatellite(un=new Unit(filename,false,faction,"",fg,fg->nr_ships-1));
+	    plan->AddSatellite(un=UnitFactory::createUnit(filename,false,faction,"",fg,fg->nr_ships-1));
 	    un->setFullname(fullname);
 	  } else if (elem==NEBULA) {
 	    Flightgroup *fg =getStaticNebulaFlightgroup (faction);
-	    plan->AddSatellite(un=new Nebula(filename,false,faction,fg,fg->nr_ships-1));			
+		    plan->AddSatellite(un=UnitFactory::createNebula(filename,false,faction,fg,fg->nr_ships-1));			
 	  } else if (elem==ASTEROID) {
 	    Flightgroup *fg =getStaticAsteroidFlightgroup (faction);
-	    plan->AddSatellite (un=new Asteroid (filename,faction,fg,fg->nr_ships-1,scalex));
+	    plan->AddSatellite (un=UnitFactory::createAsteroid (filename,faction,fg,fg->nr_ships-1,scalex));
 	  } else if (elem==ENHANCEMENT) {
-	    plan->AddSatellite (un=new Enhancement (filename,faction,string("")));
+	    plan->AddSatellite (un=UnitFactory::createEnhancement (filename,faction,string("")));
 	  }
 	  while (!dest.empty()) {
 	    un->AddDestination (dest.back());
 	    dest.pop_back();
 	  }
-	  un->SetAI(new PlanetaryOrbit (un,velocity,position,R,S, Vector (0,0,0), plan));
+	  un->SetAI(new PlanetaryOrbit (un,velocity,position,R,S, QVector (0,0,0), plan));
 
 	  //     xml->moons[xml->moons.size()-1]->Planet::beginElement(R,S,velocity,position,gravity,radius,filename,NULL,vector <char *>(),xml->unitlevel-((xml->parentterrain==NULL&&xml->ct==NULL)?1:2),ourmat,curlights,true,faction);
-	  un->SetTurretAI ();
+	  if (elem==UNIT&&un->faction!=neutralfaction) {
+	    un->SetTurretAI ();
+	    un->EnqueueAI(new Orders::FireAt (.2,15));
+	  }
+	  un->SetOwner (getTopLevelOwner());//cheating so nothing collides at top lev
 	  un->SetAngularVelocity (ComputeRotVel (rotvel,R,S));
     } else {
       if ((elem==BUILDING||elem==VEHICLE)&&xml->ct==NULL&&xml->parentterrain!=NULL) {
-	Unit * b = new Building (xml->parentterrain,elem==VEHICLE,filename,false,faction,string(""));
-	b->SetPosAndCumPos (xml->cursun+xml->systemcentroid);
+	Unit * b = UnitFactory::createBuilding (xml->parentterrain,elem==VEHICLE,filename,false,faction,string(""));
+	b->SetPosAndCumPos (xml->cursun.Cast()+xml->systemcentroid.Cast());
 	b->EnqueueAI( new Orders::AggressiveAI ("default.agg.xml", "default.int.xml"));
 	AddUnit (b);
 	  while (!dest.empty()) {
@@ -788,12 +849,12 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
 	  }
 
       }else if ((elem==BUILDING||elem==VEHICLE)&&xml->ct!=NULL) {
-	Unit * b=new Building (xml->ct,elem==VEHICLE,filename,false,faction);
+	Unit * b=UnitFactory::createBuilding (xml->ct,elem==VEHICLE,filename,false,faction);
 	b->SetPlanetOrbitData ((PlanetaryTransform *)xml->parentterrain);
-	b->SetPosAndCumPos (xml->cursun+xml->systemcentroid);
+	b->SetPosAndCumPos (xml->cursun.Cast()+xml->systemcentroid.Cast());
 	b->EnqueueAI( new Orders::AggressiveAI ("default.agg.xml", "default.int.xml"));
 	  b->SetTurretAI ();
-
+	    b->EnqueueAI(new Orders::FireAt (.2,15));
 	AddUnit (b);
 	  while (!dest.empty()) {
 	    b->AddDestination (dest.back());
@@ -802,26 +863,31 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
       }else {
    	    if (elem==UNIT) {
 	      Flightgroup *fg =getStaticBaseFlightgroup (faction);
-	      Unit *moon_unit=new Unit(filename,false,faction,"",fg,fg->nr_ships-1);
+	      Unit *moon_unit=UnitFactory::createUnit(filename,false,faction,"",fg,fg->nr_ships-1);
 	      moon_unit->setFullname(fullname);
 	      xml->moons.push_back((Planet *)moon_unit);
 	    }else if (elem==NEBULA){
 	      Flightgroup *fg =getStaticNebulaFlightgroup (faction);
-	      xml->moons.push_back ((Planet *)new Nebula (filename,false,faction,fg,fg->nr_ships-1));
+	      xml->moons.push_back ((Planet *)UnitFactory::createNebula (filename,false,faction,fg,fg->nr_ships-1));
 	    } else if (elem==ASTEROID){
 	    Flightgroup *fg =getStaticAsteroidFlightgroup (faction);
-	      xml->moons.push_back ((Planet *)new Asteroid (filename,faction,fg,fg->nr_ships-1,scalex));
+	      xml->moons.push_back ((Planet *)UnitFactory::createAsteroid (filename,faction,fg,fg->nr_ships-1,scalex));
 	    } else if (elem==ENHANCEMENT) {
-	      xml->moons.push_back ((Planet *)new Enhancement (filename,faction,string("")));
+	      xml->moons.push_back ((Planet *)UnitFactory::createEnhancement (filename,faction,string("")));
 	    }
 	    while (!dest.empty()) {
 	      xml->moons.back()->AddDestination (dest.back());
 	      dest.pop_back();
 	    }
-	    xml->moons.back()->SetAI(new PlanetaryOrbit(xml->moons[xml->moons.size()-1],velocity,position,R,S,xml->cursun+xml->systemcentroid, NULL));
+	    xml->moons.back()->SetAI(new PlanetaryOrbit(xml->moons[xml->moons.size()-1],velocity,position,R,S,xml->cursun.Cast()+xml->systemcentroid.Cast(), NULL));
 
-	    xml->moons.back()->SetPosAndCumPos(R+S+xml->cursun+xml->systemcentroid);
+	    xml->moons.back()->SetPosAndCumPos(R+S+xml->cursun.Cast()+xml->systemcentroid.Cast());
+	    xml->moons.back()->SetOwner (getTopLevelOwner());
+	    if (elem==UNIT&&xml->moons.back()->faction!=neutralfaction) {
+
 	      xml->moons.back()->SetTurretAI ();
+	      xml->moons.back()->EnqueueAI(new Orders::FireAt (.2,15));
+	    }
 
       }
     }
@@ -879,6 +945,7 @@ void StarSystem::LoadXML(const char *filename, const Vector & centroid, const fl
   }
 
   xml = new StarXML;
+  xml->scale=1;
   xml->parentterrain=NULL;
   xml->ct=NULL;
   xml->systemcentroid=centroid;

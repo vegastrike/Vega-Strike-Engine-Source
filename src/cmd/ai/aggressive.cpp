@@ -9,6 +9,8 @@
 #include "cmd/unit.h"
 #include "communication.h"
 #include "cmd/script/flightgroup.h"
+#include "flybywire.h"
+#include "hard_coded_scripts.h"
 using namespace Orders;
 
 const EnumMap::Pair element_names[] = {
@@ -29,9 +31,12 @@ const EnumMap::Pair element_names[] = {
 const EnumMap AggressiveAIel_map(element_names, 12);
 static float aggressivity=2.01;
 AggressiveAI::AggressiveAI (const char * filename, const char * interruptname, Unit * target):FireAt(.2,2), logic (AggressiveAIel_map), interrupts (AggressiveAIel_map) {
+  last_time_insys=true;
   obedient = true;
-  if (aggressivity==2.01)
-    aggressivity = XMLSupport::parse_float (vs_config->getVariable ("unit","aggressivity","2"));
+  if (aggressivity==2.01) {
+    float defagg = XMLSupport::parse_float (vs_config->getVariable ("unit","aggressivity","2"));
+    aggressivity = defagg;
+  }
   if (target !=NULL) {
     AttachOrder (target);
   }
@@ -168,7 +173,9 @@ bool AggressiveAI::ProcessCurrentFgDirective(Flightgroup * fg) {
   bool retval=false;
   if (fg !=NULL) {
     Unit * leader = fg->leader.GetUnit();
-
+    if (last_directive.empty()) {
+      last_directive = fg->directive;
+    }
     if (fg->directive!=last_directive) {
       if (float(rand())/RAND_MAX<(obedient?(1-logic.obedience):logic.obedience)) {
 	obedient = !obedient;
@@ -184,91 +191,100 @@ bool AggressiveAI::ProcessCurrentFgDirective(Flightgroup * fg) {
       }
     }
     if (obedient) {
-      if (fg->directive==string("a")) {
+      if (fg->directive==string("a")||fg->directive==string("A")) {
 	Unit * targ = fg->leader.GetUnit();
 	targ = targ!=NULL?targ->Target():NULL;
 	if (targ) {
-	  Vector vec;
-	  CommunicationMessage c(parent,leader,NULL,0);
-	  if (parent->InRange (targ,vec)) {
-	    parent->Target (targ);
-	    c.SetCurrentState (c.fsm->GetYesNode(),NULL,0);
-	  }else {
-	    c.SetCurrentState (c.fsm->GetNoNode(),NULL,0);
-	  }
-	  if (fg->directive!=last_directive) {
-	    leader->getAIState()->Communicate(c);
-	  }
-	}
-      }else if (fg->directive==string("f")) {
-	retval=true;
-	if (leader!=NULL) {
-	  if (fg->directive!=last_directive) {
-	    
+	  if (targ->InCorrectStarSystem(_Universe->activeStarSystem())) {
 	    CommunicationMessage c(parent,leader,NULL,0);
-	    c.SetCurrentState (c.fsm->GetYesNode(),NULL,0);
-	    //}else {
-	    //	  c.SetCurrentState (c.fsm->GetNoNode(),NULL,0);
-	    //	}
-	    leader->getAIState()->Communicate(c);
-	    float left= parent->getFgSubnumber()%2?1:-1;
-	    static float esc_percent= XMLSupport::parse_float(vs_config->getVariable ("AI",
-										      "Targetting",
-										      "EscortDistance",
-										      "2.0"));
-	    static float turn_leader= XMLSupport::parse_float(vs_config->getVariable ("AI",
-										      "Targetting",
-										      "TurnLeaderDist",
-										      "2.0"));
-
-	    float dist=esc_percent*(1+parent->getFgSubnumber()/2)*left*(parent->rSize()+leader->rSize());
-	    Order * ord = new Orders::FormUp(Vector(dist,0,-fabs(dist)));
-	    ord->SetParent (parent);
-	    ReplaceOrder (ord);
-	    ord = new Orders::FaceDirection(dist*turn_leader);
-	    ord->SetParent (parent);
-	    ReplaceOrder (ord);
-	  }
-	}
-	for (unsigned int i=0;i<suborders.size();i++) {
-	  suborders[i]->AttachSelfOrder (leader);
-	}
-      }else if (fg->directive==string("h")) {
-	//	fprintf (stderr,"he wnats to help out");
-	if (fg->directive!=last_directive&&leader) {
-	  //fprintf (stderr,"%s he wnats to help out and hasn't died\n", parent->name.c_str());
-	  Unit * th=NULL;
-	  if ((th=leader->Threat())) {
-	    //fprintf (stderr,"he wnats to help out and he has a threat\n");
-	    Vector vec;
-	    CommunicationMessage c(parent,leader,NULL,0);
-	    if (parent->InRange(th,vec)) {
-	      parent->Target(th);
+	    if (parent->InRange (targ,true,false)) {
+	      parent->Target (targ);
+	      parent->TargetTurret(targ);
 	      c.SetCurrentState (c.fsm->GetYesNode(),NULL,0);
 	    }else {
 	      c.SetCurrentState (c.fsm->GetNoNode(),NULL,0);
 	    }
-	    leader->getAIState()->Communicate(c);
-	  }else {
-	    bool targetted=false;
-	    float mindist;
-	    Unit * un=NULL;
-	    th= GetThreat(parent,leader);
-	    CommunicationMessage c(parent,leader,NULL,0);
-	    //fprintf (stderr,"he wnats to help out against threat %d",th);
-	    if (th) {
-	      Vector vec;
-	      if (parent->InRange (th,vec)) {
-		c.SetCurrentState (c.fsm->GetYesNode(),NULL,0);
-		parent->Target (th);
-	      }else {
-		c.SetCurrentState(c.fsm->GetNoNode(),NULL,0);
-	      }
-	      //fprintf (stderr,"Helping out kill: %s",th->name.c_str());
-	    }else {
-	      c.SetCurrentState (c.fsm->GetNoNode(),NULL,0);
+	    if (fg->directive!=last_directive) {
+	      leader->getAIState()->Communicate(c);
 	    }
-	    leader->getAIState()->Communicate(c);
+	  }
+	}
+      }else if (fg->directive==string("f")||fg->directive==string("F")) {
+	if (leader!=NULL) {
+	  if (leader->InCorrectStarSystem(_Universe->activeStarSystem())) {
+	    retval=true;
+	    if (fg->directive!=last_directive||(!last_time_insys)) {
+	      last_time_insys=true;
+	      CommunicationMessage c(parent,leader,NULL,0);
+	      c.SetCurrentState (c.fsm->GetYesNode(),NULL,0);
+	    //}else {
+	      //	  c.SetCurrentState (c.fsm->GetNoNode(),NULL,0);
+	      //	}
+	      leader->getAIState()->Communicate(c);
+	      float left= parent->getFgSubnumber()%2?1:-1;
+	      static float esc_percent= XMLSupport::parse_float(vs_config->getVariable ("AI",
+											"Targetting",
+											"EscortDistance",
+											"2.0"));
+	      static float turn_leader= XMLSupport::parse_float(vs_config->getVariable ("AI",
+											"Targetting",
+											"TurnLeaderDist",
+											"5.0"));
+	      
+	      double dist=esc_percent*(1+parent->getFgSubnumber()/2)*left*(parent->rSize()+leader->rSize());
+	      Order * ord = new Orders::FormUp(QVector(dist,0,-fabs(dist)));
+	      ord->SetParent (parent);
+	      ReplaceOrder (ord);
+	      ord = new Orders::FaceDirection(dist*turn_leader);
+	      ord->SetParent (parent);
+	      ReplaceOrder (ord);
+	    }
+	  } else {
+	    last_time_insys=false;
+	  }
+	  for (unsigned int i=0;i<suborders.size();i++) {
+	    suborders[i]->AttachSelfOrder (leader);
+	  }
+	}
+      }else if (fg->directive==string("h")||fg->directive==string("H")) {
+	//	fprintf (stderr,"he wnats to help out");
+	if (fg->directive!=last_directive&&leader) {
+	  if (leader->InCorrectStarSystem(_Universe->activeStarSystem())) {
+	    //fprintf (stderr,"%s he wnats to help out and hasn't died\n", parent->name.c_str());
+	    Unit * th=NULL;
+	    if ((th=leader->Threat())) {
+	      //fprintf (stderr,"he wnats to help out and he has a threat\n");
+
+	      CommunicationMessage c(parent,leader,NULL,0);
+	      if (parent->InRange(th,true,false)) {
+		parent->Target(th);
+		parent->TargetTurret(th);
+		c.SetCurrentState (c.fsm->GetYesNode(),NULL,0);
+	      }else {
+		c.SetCurrentState (c.fsm->GetNoNode(),NULL,0);
+	      }
+	      leader->getAIState()->Communicate(c);
+	    }else {
+	      bool targetted=false;
+	      float mindist;
+	      Unit * un=NULL;
+	      th= GetThreat(parent,leader);
+	      CommunicationMessage c(parent,leader,NULL,0);
+	      //fprintf (stderr,"he wnats to help out against threat %d",th);
+	      if (th) {
+		if (parent->InRange (th,true,false)) {
+		  c.SetCurrentState (c.fsm->GetYesNode(),NULL,0);
+		  parent->Target (th);
+		  parent->TargetTurret (th);
+		}else {
+		  c.SetCurrentState(c.fsm->GetNoNode(),NULL,0);
+		}
+		//fprintf (stderr,"Helping out kill: %s",th->name.c_str());
+	      }else {
+		c.SetCurrentState (c.fsm->GetNoNode(),NULL,0);
+	      }
+	      leader->getAIState()->Communicate(c);
+	    }
 	  }
 	}
       }
@@ -276,6 +292,11 @@ bool AggressiveAI::ProcessCurrentFgDirective(Flightgroup * fg) {
     last_directive=fg->directive;
   }
   return retval;
+}
+static bool overridable (const std::string &s) {
+  if (s.empty())
+    return true;
+  return (*s.begin())!=toupper(*s.begin());
 }
 extern void LeadMe (Unit * un, string directive, string speech);
 void AggressiveAI::ReCommandWing(Flightgroup * fg) {
@@ -285,17 +306,20 @@ void AggressiveAI::ReCommandWing(Flightgroup * fg) {
 											"100"));
   if (fg!=NULL) {
     Unit* lead;
-    if (NULL!=(lead=fg->leader.GetUnit())) {
-      if (lead->getFgSubnumber()>=parent->getFgSubnumber()) {
-	if (float(rand())/RAND_MAX<SIMULATION_ATOM/time_to_recommand_wing) {
-	  if ((parent->FShieldData()<.2||parent->RShieldData()<.2)){
-	    fg->directive = string("h");
-	    LeadMe (parent,"h","I need help here!");
-	  }else {
-	    fg->directive = string("b");
-	    LeadMe (parent,"h","I'm taking over this wing. Break and attack");
+    if (overridable (fg->directive)) {//computer won't override capital orders
+      if (NULL!=(lead=fg->leader.GetUnit())) {
+	  if (float(rand())/RAND_MAX<SIMULATION_ATOM/time_to_recommand_wing) {
+	    if (parent->Threat()&&(parent->FShieldData()<.2||parent->RShieldData()<.2)){
+	      fg->directive = string("h");
+	      LeadMe (parent,"h","I need help here!");
+	      fprintf (stderr,"he needs help %s",parent->name.c_str());
+	    }else {
+	      if (lead->getFgSubnumber()>=parent->getFgSubnumber()) {	
+		fg->directive = string("b");
+		LeadMe (parent,"b","I'm taking over this wing. Break and attack");
+	      }
+	    }
 	  }
-	}
       }
     }
   }
@@ -305,29 +329,52 @@ void AggressiveAI::Execute () {
   ReCommandWing(fg);
   FireAt::Execute();
   if (!ProcessCurrentFgDirective (fg)) {
-
-  if (
+  Unit * target = parent->Target();
+  bool isjumpable = target?((!target->GetDestinations().empty())&&parent->GetJumpStatus().drive>=0):false;
+  if (!isjumpable &&(
 #if 1
       curinter==INTRECOVER||//this makes it so only interrupts may not be interrupted
 #endif
-      curinter==INTNORMAL) {
+      curinter==INTNORMAL)) {
     if ((curinter = (ProcessLogic (interrupts, true)?INTERR:curinter))==INTERR) {
       logic.curtime=interrupts.maxtime;//set it to the time allotted
     }
   }
   //  if (parent->getAIState()->queryType (Order::FACING)==NULL&&parent->getAIState()->queryType (Order::MOVEMENT)==NULL) { 
+  
+
+
   if (queryType (Order::FACING)==NULL&&queryType (Order::MOVEMENT)==NULL) { 
-     ProcessLogic(logic);
-     curinter=(curinter==INTERR)?INTRECOVER:INTNORMAL;
+    if (isjumpable) {
+      AfterburnTurnTowards(this,parent);
+    }else {
+      if (target) {
+	ProcessLogic(logic);
+	curinter=(curinter==INTERR)?INTRECOVER:INTNORMAL;
+      }else {
+	FlyStraight(this,parent);
+	/*
+	Order * ord = new Orders::MatchLinearVelocity (parent->ClampVelocity(Vector (0,0,10000),false),true,true,false);
+	ord->SetParent(parent);
+	EnqueueOrder (ord);
+	*/
+      }
+    }
   } else {
+    if (target) {
     if ((--logic.curtime)==0) {
       curinter=(curinter==INTERR)?INTRECOVER:INTNORMAL;
       //parent->getAIState()->eraseType (Order::FACING);
       //parent->getAIState()->eraseType (Order::MOVEMENT);
       eraseType (Order::FACING);
       eraseType (Order::MOVEMENT);
-      ProcessLogic (logic);
+      if (isjumpable ) {
+	AfterburnTurnTowards(this,parent);
+      }else {
+	ProcessLogic (logic);
+      }
       logic.curtime = logic.maxtime;      
+    }
     }
   }
   }

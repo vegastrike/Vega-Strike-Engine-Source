@@ -17,9 +17,9 @@ struct LineCollide {
     int i;
   }object;
   ///The minimum x,y,z that this object has
-  Vector Mini;
+  QVector Mini;
   ///The maximum x,y,z that this object has
-  Vector Maxi;
+  QVector Maxi;
   /**
    * The last item that checked this for collisions
    * to prevent duplicate selection 
@@ -30,7 +30,7 @@ struct LineCollide {
   ///If this object was saved as a huge object (hhuge for dos oddities)
   bool hhuge;
   LineCollide(): Mini(0,0,0), Maxi(0,0,0), type(UNIT){object.u=NULL;hhuge=false;lastchecked=NULL;}
-  LineCollide (void * objec, enum collidables typ,const Vector &st, const Vector &en) {this->object.u=(Unit *)objec;this->type=typ;this->Mini=st;this->Maxi=en;hhuge=false; lastchecked=NULL;}
+  LineCollide (void * objec, enum collidables typ,const QVector &st, const QVector &en) {this->object.u=(Unit *)objec;this->type=typ;this->Mini=st;this->Maxi=en;hhuge=false; lastchecked=NULL;}
   LineCollide (const LineCollide &l) {object=l.object; type=l.type; Mini=l.Mini;Maxi=l.Maxi;hhuge=l.hhuge; lastchecked=NULL;}      
 };
 #endif

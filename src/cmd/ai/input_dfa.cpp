@@ -46,23 +46,25 @@ void InputDFA::NewLocationSelect(){
   Vector RunningTotal(0,0,0);
   UnitCollection::UnitIterator * ui = new un_iter(selected->createIterator());
   while ((un=ui->current())) {
-    RunningTotal+=un->Position();
+    RunningTotal+=un->Position().Cast();
     cnt++;
     ui->advance();
   }
   if (cnt==0) return;
-  RunningTotal = (1./cnt)*(RunningTotal);
+  RunningTotal = (RunningTotal.Scale((1./cnt)));
   if (locsel)
     delete locsel;
 
-  locsel = new CoordinateSelect (RunningTotal);
+  locsel = new CoordinateSelect (RunningTotal.Cast());
 }
 void InputDFA::BindOrder (int key, OrderFactory *ofac){
   /*  if (orderbindings[KEYMAP_SIZE]) 
     delete orderbindings[KEYMAP_SIZE];
   */
   orderbindings[key]= ofac;
+#ifdef USE_INPUT_DFA
   BindKey (key,0,InputDFA::OrderHandler);
+#endif
 }
 void InputDFA::SetOrder (OrderFactory *ofac) {
   if (orderfac) {
@@ -119,10 +121,10 @@ void InputDFA::LocSelect (KBSTATE k, int x, int y, int delx, int dely, int mod) 
     
       UnitCollection::UnitIterator * tmp = new un_iter(CurDFA->selected->createIterator());
       Unit * un;
-      Vector tmplocselvec = CurDFA->locsel->GetVector();
+      Vector tmplocselvec = CurDFA->locsel->GetVector().Cast();
       while ((un = tmp->current())) {
 	Order * nAI = CurDFA->orderfac->newOrder();
-	nAI->AttachOrder(tmplocselvec);
+	nAI->AttachOrder(tmplocselvec.Cast());
 	if (CurDFA->queueOrder) {
 	  un->EnqueueAI(nAI);
 	} else {
@@ -535,6 +537,7 @@ void InputDFA::ContextAcquire() {
     CurDFA->ContextSwitch();
   }
   CurDFA=this;
+#ifdef USE_INPUT_DFA
   switch (state) {
   case NONE:	BindKey (0,NoneSelect);
   break;
@@ -545,10 +548,12 @@ void InputDFA::ContextAcquire() {
   case TARGET_SELECT:BindKey (0,ClickSelect);
     break;
   }
+#endif
 }
 
 /** ContextSwitch unbinds the respective keys and appropriately to the given state*/
 void InputDFA::ContextSwitch (){
+#ifdef USE_INPUT_DFA
   switch (state) {
   case NONE:UnbindMouse(0);
       break;
@@ -559,4 +564,6 @@ void InputDFA::ContextSwitch (){
   case TARGET_SELECT:UnbindMouse(0);
     break;
   }
+#endif
 }
+

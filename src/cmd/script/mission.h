@@ -85,7 +85,6 @@ enum callback_module_std_type {
   CMT_STD_Rnd ,
   CMT_STD_getGameTime ,
   CMT_STD_ResetTimeCompression ,
-  CMT_STD_getSystemName ,
   CMT_STD_getSystemFile ,//useful when comparing _jumps_
   CMT_STD_getNumAdjacentSystems,
   CMT_STD_getAdjacentSystem,
@@ -99,6 +98,8 @@ enum callback_module_std_type {
   CMT_STD_setDifficulty,
   CMT_STD_getDifficulty,
   CMT_STD_playSound,
+  CMT_STD_playAnimation,
+  CMT_STD_getGalaxyProperty,
   CMT_STD_terminateMission
 };
 enum callback_module_briefing_type {
@@ -238,6 +239,7 @@ enum callback_module_unit_type {
     CMT_UNIT_getFgSubnumber ,
     CMT_UNIT_addCargo ,
     CMT_UNIT_removeCargo ,
+    CMT_UNIT_upgrade ,
     CMT_UNIT_incrementCargo ,
     CMT_UNIT_decrementCargo ,
     CMT_UNIT_scanSystem ,
@@ -248,7 +250,9 @@ enum callback_module_unit_type {
     CMT_UNIT_scannerNearestEnemyDist ,
     CMT_UNIT_scannerNearestFriendDist ,
     CMT_UNIT_scannerNearestShipDist ,
+  CMT_UNIT_correctStarSystem ,//useful when comparing _jumps_
   CMT_UNIT_getFgId ,
+  CMT_UNIT_frameOfReference ,
   CMT_UNIT_communicateTo ,
   CMT_UNIT_commAnimation ,
   CMT_UNIT_switchFg ,
@@ -299,7 +303,7 @@ class varInst {
   var_type type;
 
   scope_type scopetype;
-  float  float_val;
+  double  float_val;
   bool   bool_val;
   int    int_val;
   string string_val;
@@ -401,9 +405,9 @@ class missionNode : public tagDomNode {
 class Mission {
   class Briefing * briefing;
  public:
-  Mission(char *configfile);
+  Mission(char *configfile, bool loadscripts=true);
   void AddFlightgroup(Flightgroup * fg);
-  void initMission();
+  void initMission(bool loadscripts=true);
   ///alex Please help me make this function...this is called between mission loops
   ~Mission();
   //deletes missions pushed back onto a delete queue at a *safe time*
@@ -418,7 +422,7 @@ class Mission {
 
 
 #ifndef VS_MIS_SEL
-  void GetOrigin(Vector &pos,string &planetname);
+  void GetOrigin(QVector &pos,string &planetname);
 
   void DirectorLoop();
   void DirectorStart(missionNode *node);
@@ -450,7 +454,7 @@ void destroyClassInstance(string modulename,unsigned int classid);
 
   MessageCenter *msgcenter;
 
-void call_vector_into_olist(varInst *vec_vi,Vector vec3);
+void call_vector_into_olist(varInst *vec_vi,QVector vec3);
 void  deleteVarInst(varInst *vi,bool del_local=false);
 
 #endif // VS_MIS_SEL
@@ -516,13 +520,13 @@ void  deleteVarInst(varInst *vi,bool del_local=false);
   void initCallbackMaps();
 #endif // VS_MIS_SEL
 
-  bool checkMission(easyDomNode *node);
+  bool checkMission(easyDomNode *node,bool loadscripts);
   void doVariables(easyDomNode *node);
   void checkVar(easyDomNode *node);
   void doFlightgroups(easyDomNode *node);
   void doOrder(easyDomNode *node,Flightgroup *fg);
   void checkFlightgroup(easyDomNode *node);
-  bool doPosition(easyDomNode *node,float pos[3],class CreateFlightgroup *);
+  bool doPosition(easyDomNode *node,double pos[3],class CreateFlightgroup *);
   bool doRotation(easyDomNode *node,float rot[3],class CreateFlightgroup *);
   void doOrigin(easyDomNode *node);
   void doSettings(easyDomNode *node);
@@ -566,7 +570,7 @@ int checkIntExpr(missionNode *node,int mode);
 int  doIMath(missionNode *node,int mode);
 varInst * doMath(missionNode *node,int mode);
 int intMath(string mathname,int res1,int res2);
-float floatMath(string mathname,float res1,float res2);
+double floatMath(string mathname,double res1,double res2);
  varInst *checkExpression(missionNode *node,int mode);
 
  void assignVariable(varInst *v1,varInst *v2);
@@ -574,9 +578,9 @@ float floatMath(string mathname,float res1,float res2);
 scriptContext *makeContext(missionNode *node);
  bool checkVarType(varInst *var,enum var_type check_type);
 
- float checkFloatExpr(missionNode *node,int mode);
- float doFloatVar(missionNode *node,int mode);
- float doFMath(missionNode *node,int mode);
+ double checkFloatExpr(missionNode *node,int mode);
+ double doFloatVar(missionNode *node,int mode);
+ double doFMath(missionNode *node,int mode);
 
  void doArguments(missionNode *node,int mode,varInstMap *varmap=NULL);
  void doReturn(missionNode *node,int mode);
@@ -618,8 +622,9 @@ void printNode(missionNode *node,int mode);
  varInst * callGetGameTime(missionNode *node,int mode);
  varInst * callResetTimeCompression(missionNode *node,int mode);
 varInst * callGetSystemName(missionNode *node,int mode);
-varInst * callGetSystemFile(missionNode *node,int mode);
+varInst * callGetSystemFile(missionNode *node,int mode, StarSystem * ss =NULL);
 varInst * callGetNumAdjacentSystems(missionNode *node,int mode);
+varInst * callGetGalaxyProperty(missionNode *node,int mode);
 varInst * callGetAdjacentSystem(missionNode *node,int mode);
 varInst *  call_isNull(missionNode *node,int mode);
 varInst *  call_setNull(missionNode *node,int mode);
@@ -648,7 +653,7 @@ string method_str(missionNode *node);
 varInst * call_olist_at(missionNode *node,int mode,varInst *ovi,int index);
 varInst * call_olist_back(missionNode *node,int mode,varInst *ovi);
 void  call_olist_toxml(missionNode *node,int mode,varInst *ovi);
- Vector call_olist_tovector(missionNode *node,int mode,varInst *ovi);
+ QVector call_olist_tovector(missionNode *node,int mode,varInst *ovi);
  void call_olist_set(missionNode *node,int mode,varInst *ovi,int index,varInst *new_vi);
 
 varInst* call_omap(missionNode *node,int mode);
@@ -690,9 +695,9 @@ void deleteVarMap(varInstMap *vmap);
 varInst * call_order(missionNode *node,int mode);
 Order * getOrderObject(missionNode *node,int mode,varInst *ovi);
 
- Vector getVec3Arg(missionNode *node,int mode,int arg_nr);
- float getFloatArg(missionNode *node,int mode,int arg_nr);
- float getIntArg(missionNode *node,int mode,int arg_nr);
+ QVector getVec3Arg(missionNode *node,int mode,int arg_nr);
+ double getFloatArg(missionNode *node,int mode,int arg_nr);
+ int getIntArg(missionNode *node,int mode,int arg_nr);
  bool getBoolArg(missionNode *node,int mode,int arg_nr);
 Unit * getUnitArg(missionNode *node,int mode,int arg_nr);
 

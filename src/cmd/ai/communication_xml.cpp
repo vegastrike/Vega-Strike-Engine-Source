@@ -106,6 +106,8 @@ void FSM::beginElement(const string &name, const AttributeList attributes) {
 			}
 		}
 		break;
+        default :
+		break;
 	}
 }
 void FSM::endElement(void *userData, const XML_Char *name) {

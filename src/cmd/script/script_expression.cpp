@@ -205,8 +205,8 @@ int res=res1;
 }
 
 /* *********************************************************** */
-float Mission::floatMath(string mathname,float res1,float res2){
-float res=res1;
+double Mission::floatMath(string mathname,double res1,double res2){
+double res=res1;
 
 	if(mathname=="+"){
 	  res=res+res2;
@@ -229,7 +229,7 @@ float res=res1;
 
 /* *********************************************************** */
 
-float Mission::doFMath(missionNode *node,int mode){
+double Mission::doFMath(missionNode *node,int mode){
 
   //debug(0,node,mode,"deprecated Fmath");
   varInst *math_vi=doMath(node,mode);
@@ -239,7 +239,7 @@ float Mission::doFMath(missionNode *node,int mode){
     assert(0);
   }
 
-  float ret=math_vi->float_val;
+  double ret=math_vi->float_val;
   deleteVarInst(math_vi);
 
   return ret;
@@ -254,14 +254,14 @@ float Mission::doFMath(missionNode *node,int mode){
       assert(0);
     }
 
-    float res=checkFloatExpr((missionNode *)node->subnodes[0],mode);
+    double res=checkFloatExpr((missionNode *)node->subnodes[0],mode);
 
     char buffer[200];
     sprintf(buffer,"fmath: 1st expr returns %f",res);
     debug(4,node,mode,buffer);
 
     for(int i=1;i<len;i++){
-      float res2=checkFloatExpr((missionNode *)node->subnodes[i],mode);
+      double res2=checkFloatExpr((missionNode *)node->subnodes[i],mode);
       if(mode==SCRIPT_RUN){
 	if(mathname=="+"){
 	  res=res+res2;
@@ -353,8 +353,8 @@ int Mission::doIMath(missionNode *node,int mode){
 
 /* *********************************************************** */
 
-float Mission::checkFloatExpr(missionNode *node,int mode){
-  float res=0.0;
+double Mission::checkFloatExpr(missionNode *node,int mode){
+  double res=0.0;
 
     if(node->tag==DTAG_VAR_EXPR){
       res=doFloatVar(node,mode);
@@ -674,8 +674,8 @@ bool Mission::doTest(missionNode *node,int mode){
       
     if(SCRIPT_RUN){
       if(arg1_vi->type==VAR_FLOAT){
-	float arg1=arg1_vi->float_val;
-	float arg2=arg2_vi->float_val;
+	double arg1=arg1_vi->float_val;
+	double arg2=arg2_vi->float_val;
 
 	switch(node->script.tester){
 	case TEST_GT:

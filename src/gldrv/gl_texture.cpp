@@ -90,16 +90,49 @@ static void ConvertPalette(unsigned char *dest, unsigned char *src)
   }
 
 }
-
+int tmp_abs (int num) {
+  return num<0?-num:num;
+}
+bool isPowerOfTwo (int num) {
+  while (tmp_abs(num)>1) {
+    if ((num/2)*2!=num) {
+      return false;
+    }
+    num/=2;
+  }
+  return true;
+}
 GFXBOOL /*GFXDRVAPI*/ GFXCreateTexture(int width, int height, TEXTUREFORMAT textureformat, int *handle, char *palette , int texturestage, enum FILTER mipmap, enum TEXTURE_TARGET texture_target)
 {
+  if (!isPowerOfTwo (width)) {
+    fprintf (stderr,"Width %d not a power of two",width);
+    assert (false);
+  }
+  if (!isPowerOfTwo (height)) {
+    fprintf (stderr,"Height %d not a power of two",height);
+    assert (false);
+    
+  }
   GFXActiveTexture(texturestage);
   //case 3:  ... 3 pass... are you insane? well look who's talking to himself! oh.. good point :)
   *handle = 0;
-  while (*handle<textures.size()&&textures[*handle].alive)
-    (*handle)++;
-  if ((*handle)==textures.size())
+  while (*handle<textures.size()) {
+    if (!textures[*handle].alive){
+      fprintf (stderr,"got dead tex");
+      break;
+    }else{
+      (*handle)++;
+    }
+  }
+  if ((*handle)==textures.size()) {
+    fprintf (stderr,"!");
     textures.push_back(GLTexture());
+    textures.back().palette=NULL;
+    textures.back().alive=GFXTRUE;
+    textures.back().name=-1;
+    textures.back().width=textures.back().height=1;
+  }
+
   GLenum WrapMode;
   switch (texture_target) {
   case TEXTURE2D: textures [*handle].targets=GL_TEXTURE_2D;
@@ -110,12 +143,13 @@ GFXBOOL /*GFXDRVAPI*/ GFXCreateTexture(int width, int height, TEXTUREFORMAT text
     fprintf (stderr, "stage %d, wid %d, hei %d",texturestage,width,height);
     break;
   }
-  
+  fprintf (stderr,"!");  
   textures[*handle].name = *handle+1; //for those libs with stubbed out handle gen't
   //fprintf (stderr,"Texture Handle %d",*handle);
   textures[*handle].alive = GFXTRUE;
   textures[*handle].texturestage = texturestage;
   textures[*handle].mipmapped = mipmap;
+  fprintf (stderr,"!");
   glGenTextures (1,&textures[*handle].name);
   glBindTexture (textures[*handle].targets,textures[*handle].name);
   activetexture[texturestage]=*handle;
@@ -140,12 +174,14 @@ GFXBOOL /*GFXDRVAPI*/ GFXCreateTexture(int width, int height, TEXTUREFORMAT text
   glTexParameterf (textures[*handle].targets,GL_TEXTURE_PRIORITY,.5);
   textures[*handle].width = width;
   textures[*handle].height = height;
-  if (palette&&textureformat == PALETTE8)
-    {
-      textures[*handle].palette = (GLubyte *)malloc (sizeof (GLubyte)*1024);
+  textures[*handle].palette=NULL;
+  if (palette&&textureformat == PALETTE8){
+    fprintf (stderr," palette ");  
+    textures[*handle].palette = (GLubyte *)malloc (sizeof (GLubyte)*1024);
       ConvertPalette(textures[*handle].palette, (unsigned char *)palette);
     }
   textures[*handle].textureformat = GetUncompressedTextureFormat(textureformat);
+  fprintf (stderr,"!");
   //  GFXActiveTexture(0);
   return GFXTRUE;
 }
@@ -395,4 +431,5 @@ void /*GFXDRVAPI*/ GFXSelectTexture(int handle, int stage)
     }
   }
 }
+
 

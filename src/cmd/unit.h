@@ -35,12 +35,13 @@ struct GFXColor;
 #include "container.h"
 #include "collection.h"
 #include "gfx/cockpit.h"
-
+#include "gfx/halo_system.h"
+#include "script/flightgroup.h"
 using std::string;
 
-class Flightgroup;
-class Nebula;
 
+class Nebula;
+extern float capship_size;
 //#include "mission.h"
 class Beam;
 class Animation;
@@ -51,7 +52,7 @@ class Order;
 class Box;
 class Mesh;
 class Camera;
-class Halo;
+
 
 class PlanetaryOrbit;
 class UnitCollection;
@@ -97,9 +98,10 @@ struct Scanner {
  */
 class PlanetaryTransform;
 struct PlanetaryOrbitData;
-class Unit {
+class Unit
+{
   bool UpgradeSubUnits (Unit * up, int subunitoffset, bool touchme, bool downgrade, int &numave, double &percentage);
-  bool UpgradeMounts (Unit * up, int subunitoffset, bool touchme, bool downgrade, int &numave, Unit * templ, double &percentage);
+  bool UpgradeMounts (const Unit * up, int subunitoffset, bool touchme, bool downgrade, int &numave, Unit * templ, double &percentage);
 
   Nebula * nebula;
   PlanetaryOrbitData * planet;
@@ -140,6 +142,8 @@ class Unit {
       float maxrange;
       ///the dot with (0,0,1) indicating the farthest to the side the radar can handle.
       float maxcone;
+      float lockcone;
+      float trackingcone;
       ///The minimum radius of the target
       float mintargetsize;
       ///does this radar support IFF?
@@ -162,6 +166,8 @@ class Unit {
     ///Computer's restrictions of YPR to limit space combat maneuvers
     float max_yaw; float max_pitch; float max_roll;
     ///Whether or not an 'lead' indicator appears in front of target
+    unsigned char slide_start;
+    unsigned char slide_end;
     bool itts;
   };
 
@@ -186,7 +192,7 @@ class Unit {
   bool BuyCargo (unsigned int i, unsigned int quantity, Unit * buyer, float &creds);
   bool BuyCargo (const std::string &cargo,unsigned int quantity, Unit * buyer, float & creds);
   
-  void SetPlanetHackTransformation (Transformation *&ct, float *&ctm);
+  void SetPlanetHackTransformation (Transformation *&ct, Matrix *&ctm);
 
   UnitSounds * sound;
   ///The owner of this unit. This may not collide with owner or units owned by owner. Do not dereference (may be dead pointer)
@@ -213,8 +219,7 @@ class Unit {
   float shieldtight;
   /// the turrets and spinning parts fun fun stuff
   UnitCollection SubUnits; 
-  ///glowing halo effects on this unit
-  int numhalos;  Halo **halos;
+  HaloSystem halos;
   ///NUmber of weapons on this unit
   int nummounts;
   /** 
@@ -228,6 +233,7 @@ class Unit {
     Transformation LocalPosition;
   public:
     void SwapMounts (Mount & othermount);
+    void ReplaceMounts (const Mount & othermount);
     double Percentage (const Mount& oldmount) const;
     union REF{
       ///only beams are actually coming out of the gun at all times...bolts, balls, etc aren't
@@ -242,13 +248,15 @@ class Unit {
     short ammo;
     short volume;//-1 is infinite
     ///The data behind this weapon. May be accordingly damaged as time goes on
-    weapon_info type;
     enum MOUNTSTATUS{PROCESSED,UNFIRED,FIRED} processed;
     ///Status of the selection of this weapon. Does it fire when we hit space
     enum {ACTIVE, INACTIVE, DESTROYED, UNCHOSEN} status;
     ///The sound this mount makes when fired
+    const weapon_info *type;
     int sound;
-    Mount():type(weapon_info::BEAM) {size=weapon_info::NOWEAP; ammo=-1;status= UNCHOSEN; ref.gun=NULL; sound=-1;}
+    
+    float time_to_lock;
+    Mount();
     Mount(const std::string& name, short int ammo=-1, short int volume=-1);
     ///Sets this gun to active, unless unchosen or destroyed
     void Activate (bool Missile);
@@ -266,7 +274,7 @@ class Unit {
      * should it fire
      */ 
     void PhysicsAlignedUnfire();
-    bool PhysicsAlignedFire (const Transformation &Cumulative, const float * mat, const Vector & Velocity, Unit *owner,  Unit *target, bool autotrack);
+    bool PhysicsAlignedFire (const Transformation &Cumulative, const Matrix & mat, const Vector & Velocity, Unit *owner,  Unit *target, signed char autotrack, float trackingcone);//0 is no track...1 is target 2 is target + lead
     bool Fire (Unit *owner, bool Missile=false);
   } *mounts;
   ///Mount may access unit
@@ -398,8 +406,6 @@ class Unit {
   void calculate_extent(bool update_collide_queue);
   ///applies damage from the given pnt to the shield, and returns % damage applied and applies lighitn
   float DealDamageToShield (const Vector & pnt, float &Damage);
-  ///Deals remaining damage to the hull at point and applies lighting effects
-  float DealDamageToHull (const Vector &pnt, float Damage);
   ///Sets the parent to be this unit. Unit never dereferenced for this operation
   void SetCollisionParent (Unit *name);
   ///If the shields are up from this position
@@ -414,17 +420,21 @@ class Unit {
   //0 in additive is reaplce  1 is add 2 is mult
   bool UpAndDownGrade (Unit * up, Unit * templ, int mountoffset, int subunitoffset, bool touchme, bool downgrade, int additive, bool forcetransaction, double &percentage);
 public:
+  int LockMissile();//-1 is no lock necessary 1 is locked
+  float TrackingGuns(bool &missileLock);
+
   void EjectCargo (unsigned int index);
   void FixGauges();
   bool CanAddCargo (const Cargo &carg) const;
   void AddCargo (const Cargo &carg,bool sort=true);
   int RemoveCargo (unsigned int i, int quantity, bool eraseZero=true);
   float PriceCargo (const std::string &s);
-  void SwapOutHalos();
-  void SwapInHalos();
+  //  void SwapOutHalos();
+  //  void SwapInHalos();
   void SetFg (Flightgroup * fg, int fg_snumber);
   UnitImages &GetImageInformation();
   Cargo & GetCargo (unsigned int i);
+  void GetCargoCat (const std::string &category, vector <Cargo> &cat);
   ///below function returns NULL if not found
   Cargo * GetCargo (const std::string &s, unsigned int &i);
   unsigned int numCargo ()const;
@@ -436,32 +446,70 @@ public:
   const vector <struct DockingPorts> &DockingPortLocations();
   void ImportPartList (const std::string& category, float price, float pricedev,  float quantity, float quantdev);
   bool RequestClearance (Unit * dockingunit);
+  bool isDocked (Unit *dockingUnit);
   bool Dock (Unit * unitToDockWith);
   bool UnDock (Unit * unitToDockWith);
   ///Does a one way collision between smaller target and this
-  bool Inside (const Vector &position, const float radius, Vector & normal, float &dist);
+  bool Inside (const QVector &position, const float radius, Vector & normal, float &dist);
+  int GetNumMounts ()const  {return nummounts;}
   void SetPlanetOrbitData (PlanetaryTransform *trans);
   PlanetaryTransform *GetPlanetOrbit () const;
   ///Updates the collide Queue with any possible change in sectors
   void UpdateCollideQueue();
   ///Loads a user interface for the user to upgrade his ship
   void UpgradeInterface (Unit * base);
-  ///The name of this unit
+  ///The name (type) of this unit shouldn't be public
   std::string name;
+  ///
+
   ///The faction of this unit
   int faction;
   void SetFaction (int faction);
   bool canUpgrade (Unit * upgrador, int mountoffset,  int subunitoffset, int additive, bool force,  double & percentage, Unit * templ=NULL);
   bool Upgrade (Unit * upgrador, int mountoffset,  int subunitoffset, int additive, bool force,  double & percentage, Unit * templ=NULL);
+  double Upgrade (const std::string &file,int mountoffset, int subunitoffset, bool force, bool loop_through_mounts);
   bool canDowngrade (Unit *downgradeor, int mountoffset, int subunitoffset, double & percentage);
   bool Downgrade (Unit * downgradeor, int mountoffset, int subunitoffset,  double & percentage);
   vector <struct Cargo>& FilterDowngradeList (vector <struct Cargo> & mylist);
   vector <struct Cargo>& FilterUpgradeList (vector <struct Cargo> & mylist);
+
+private:
+  /// forbidden
+  Unit( const Unit& ); 
+  
+  /// forbidden
+  Unit& operator=( const Unit& );
+  
+  /** default constructor
+   */
   Unit();
-  ///Creates aa mesh with meshes as submeshes (number of them) as either as subunit with faction faction
+    
+protected:
+  /** Default constructor. This is just to figure out where default
+   *  constructors are used. The useless argument will be removed
+   *  again later.
+   */
+  Unit( int dummy );
+  
+  /** Constructor that creates aa mesh with meshes as submeshes (number
+   *  of them) as either as subunit with faction faction
+   */
   Unit (Mesh ** meshes  , int num, bool Subunit, int faction);
-  ///Creates a mesh from an XML file If it is a customizedUnit, it will check in that directory in teh home dir for the unit
-  Unit(const char *filename, bool SubUnit, int faction, std::string customizedUnit=string(""), Flightgroup *flightgroup=NULL,int fg_subnumber=0);
+
+  /** Constructor that creates a mesh from an XML file If it is a
+   *  customizedUnit, it will check in that directory in the home dir for
+   *  the unit.
+   */
+  Unit( const char *filename,
+        bool        SubUnit,
+       int         faction,
+       std::string customizedUnit=string(""),
+       Flightgroup *flightgroup=NULL,
+       int         fg_subnumber=0 );
+    
+  friend class UnitFactory;
+    
+public:
   virtual ~Unit();
 
   vector <Mesh *> StealMeshes();
@@ -487,11 +535,29 @@ public:
   ///explodes then deletes
   void Destroy();
   const LineCollide &GetCollideInfo () {return CollideInfo;}
-  bool InRange (Unit *target, Vector &localcoord) const{
-    localcoord =Vector(ToLocalCoordinates(target->Position()-Position()));
-    float mm= localcoord.Magnitude();
-    if (owner==target||this==target||((mm-rSize()-target->rSize())>computer.radar.maxrange&&target->isUnit()!=PLANETPTR)||(localcoord.k/mm)<computer.radar.maxcone||target->CloakVisible()<.8||target->rSize()<computer.radar.mintargetsize) {
+  Vector LocalCoordinates (Unit * un) const {
+    return ToLocalCoordinates ((un->Position()-Position()).Cast());
+  }
+  bool InRange (Unit *target, bool cone=true, bool cap=true) const{
+    double mm;
+    return InRange( target,mm,cone,cap);
+  }
+  bool InRange (Unit *target, double & mm, bool cone, bool cap) const{
+    if (this==target||target->CloakVisible()<.8)
       return false;
+    if (cone&&computer.radar.maxcone>-.99) {
+	QVector delta( target->Position()-Position());
+	mm = delta.Magnitude();
+	if ((ToLocalCoordinates (Vector(delta.i,delta.j,delta.k)).k/mm)<computer.radar.maxcone&&cone) {
+	  return false;
+	}
+    }else {
+      mm = (target->Position()-Position()).Magnitude();
+    }
+    if (((mm-rSize()-target->rSize())>computer.radar.maxrange)||target->rSize()<computer.radar.mintargetsize) {//owner==target?!
+      Flightgroup *fg = target->getFlightgroup();
+      if ((target->rSize()<capship_size||(!cap))&&(fg==NULL?true:fg->name!="Base")) 
+        return target->isUnit()==PLANETPTR;
     }
     return true;
   }
@@ -517,7 +583,7 @@ public:
   ///Gets the average gun speed of the unit::caution SLOW
   void getAverageGunSpeed (float & speed, float & range) const;
   ///Finds the position from the local position if guns are aimed at it with speed
-  Vector PositionITTS (const Vector & local_posit, float speed) const;
+  QVector PositionITTS (const QVector & local_posit, float speed) const;
   ///The cosine of the angle to the target given passed in speed and range
   float cosAngleTo (Unit * target, float & distance, float speed= 0.001, float range=0.001) const;
   ///Highest cosine from given mounts to target. Returns distance and cosine
@@ -543,6 +609,7 @@ public:
   float CourseDeviation (const Vector &OriginalCourse, const Vector &FinalCourse)const ;
   Computer & GetComputerData () {return computer;}
   const Computer & ViewComputerData () const {return computer;}
+  float computeLockingPercent();//how locked are we
   float FShieldData() const;  float RShieldData() const;  float LShieldData() const;  float BShieldData() const;
   void ArmorData(unsigned short armor[4])const;
   ///returns the current ammt of armor left
@@ -564,35 +631,35 @@ public:
   ///Returns the cockpit name so that the controller may load a new cockpit
   std::string getCockpit ()const;
   ///Draws this unit with the transformation and matrix (should be equiv) separately
-  virtual void Draw(const Transformation & quat = identity_transformation, const Matrix m = identity_matrix);
+  virtual void Draw(const Transformation & quat = identity_transformation, const Matrix &m = identity_matrix);
   ///Deprecated
   //virtual void ProcessDrawQueue();
   ///Gets the minimum distance away from the point in 3space
-  float getMinDis(const Vector &pnt);//for clicklist
+  double getMinDis(const QVector &pnt);//for clicklist
   ///queries the sphere for weapons (world space point)
-  bool querySphere (const Vector &pnt, float err) const;
+  bool querySphere (const QVector &pnt, float err) const;
   ///queries the sphere for beams (world space start,end)  size is added to by my_unit_radius
-  float querySphere (const Vector &start, const Vector & end, float my_unit_radius=0) const;
-  float querySphereNoRecurse (const Vector &start, const Vector &end, float my_unit_radius=0) const ;
+  float querySphere (const QVector &start, const QVector & end, float my_unit_radius=0) const;
+  float querySphereNoRecurse (const QVector &start, const QVector &end, float my_unit_radius=0) const ;
   ///queries the ship with a directed ray
-  float querySphereClickList (const Vector &st, const Vector &dir, float err) const;//for click list
+  float querySphereClickList (const QVector &st, const QVector &dir, float err) const;//for click list
   ///Queries the BSP tree with a world space st and end point. Returns the normal and distance on the line of the intersection
-  Unit * queryBSP (const Vector &st, const Vector & end, Vector & normal, float &distance, bool ShieldBSP=true);
+  Unit * queryBSP (const QVector &st, const QVector & end, Vector & normal, float &distance, bool ShieldBSP=true);
   ///queries the BSP with a world space pnt, radius err.  Returns the normal and distance of the plane to the shield. If Unit returned not NULL, that subunit hit
-  Unit * queryBSP (const Vector &pnt, float err, Vector & normal, float &dist,  bool ShieldBSP);
+  Unit * queryBSP (const QVector &pnt, float err, Vector & normal, float &dist,  bool ShieldBSP);
   ///Queries if this unit is within a given frustum
   bool queryFrustum (float frustum[6][4]) const;
 
   /**
    *Queries bounding box with a point, radius err
    */
-  bool queryBoundingBox (const Vector &pnt, float err);
+  bool queryBoundingBox (const QVector &pnt, float err);
   /**
    *Queries the bounding box with a ray.  1 if ray hits in front... -1 if ray
    * hits behind.
    * 0 if ray misses 
    */
-  int queryBoundingBox(const Vector &origin,const Vector &direction, float err);
+  int queryBoundingBox(const QVector &origin,const Vector &direction, float err);
   /**Queries the bounding sphere with a duo of mouse coordinates that project
    * to the center of a ship and compare with a sphere...pretty fast*/
   bool querySphereClickList (int,int, float err, Camera *activeCam);
@@ -612,8 +679,8 @@ public:
 
   un_iter getSubUnits();
   un_kiter viewSubUnits() const;
-  bool InsideCollideTree (Unit * smaller, Vector & bigpos, Vector & bigNormal, Vector & smallpos, Vector & smallNormal);
-  virtual void reactToCollision(Unit * smaller, const Vector & biglocation, const Vector & bignormal, const Vector & smalllocation, const Vector & smallnormal, float dist);
+  bool InsideCollideTree (Unit * smaller, QVector & bigpos, Vector & bigNormal, QVector & smallpos, Vector & smallNormal);
+  virtual void reactToCollision(Unit * smaller, const QVector & biglocation, const Vector & bignormal, const QVector & smalllocation, const Vector & smallnormal, float dist);
   ///returns true if jump possible even if not taken
   bool jumpReactToCollision (Unit *smaller);
   ///Does a collision between this and another unit
@@ -621,17 +688,15 @@ public:
   ///checks for collisions with all beams and other units roughly and then more carefully
   void CollideAll();
   ///Returns the current world space position
-  Vector Position() const{return cumulative_transformation.position;};
-  const float*  GetTransformation () const {return &cumulative_transformation_matrix[0];}
+  QVector Position() const{return cumulative_transformation.position;};
+  const Matrix &  GetTransformation () const {return cumulative_transformation_matrix;}
   ///Returns the unit-space position
-  Vector LocalPosition() const {return curr_physical_state.position;};
+  QVector LocalPosition() const {return curr_physical_state.position;};
   ///Sets the unit-space position
-  void SetPosition(const Vector &pos) {prev_physical_state.position = curr_physical_state.position = pos;}
+  void SetPosition(const QVector &pos) {prev_physical_state.position = curr_physical_state.position = pos;}
   ///Sets the cumulative transformation matrix's position...for setting up to be out in the middle of nowhere
-  void SetCurPosition (const Vector & pos) {curr_physical_state.position=pos;}
-  void SetPosAndCumPos (const Vector &pos) {SetPosition (pos);cumulative_transformation_matrix[12]=pos.i;cumulative_transformation_matrix[13]=pos.j;cumulative_transformation_matrix[14]=pos.k;cumulative_transformation.position=pos;}
-  ///Sets the unit-space position
-  void SetPosition(float x, float y, float z) {SetPosition (Vector (x,y,z));}
+  void SetCurPosition (const QVector & pos) {curr_physical_state.position=pos;}
+  void SetPosAndCumPos (const QVector &pos) {SetPosition (pos);cumulative_transformation_matrix.p=pos;cumulative_transformation.position=pos;}
   ///Sets the state of drawing
   void SetVisible(bool isvis);
   ///Rotates about the axis
@@ -650,7 +715,7 @@ public:
   /// applies a force that is multipled by the mass of the ship
   void Accelerate(const Vector &Vforce); 
   ///Apply a torque in world level coords
-  void ApplyTorque (const Vector &Vforce, const Vector &Location);
+  void ApplyTorque (const Vector &Vforce, const QVector &Location);
   ///Applies a torque in local level coordinates
   void ApplyLocalTorque (const Vector &Vforce, const Vector &Location);
   ///usually from thrusters remember if I have 2 balanced thrusters I should multiply their effect by 2 :)
@@ -662,6 +727,9 @@ public:
   void ApplyLocalDamage (const Vector &pnt, const Vector & normal, float amt, Unit * affectedSubUnit, const GFXColor &, float phasedamage=0);
   ///Applies damage to the pre-transformed area of the ship
   void ApplyDamage (const Vector & pnt, const Vector & normal, float amt, Unit * affectedSubUnit, const GFXColor &,  Unit *ownerDoNotDereference, float phasedamage=0 );
+  ///Deals remaining damage to the hull at point and applies lighting effects
+  float DealDamageToHull (const Vector &pnt, float Damage);
+
   ///Clamps thrust to the limits struct
   Vector ClampThrust(const Vector &thrust, bool afterburn);
   ///Takes a unit vector for direction of thrust and scales to limits
@@ -691,10 +759,11 @@ public:
   ///executes a repair if the repair bot is up to it
   void Repair();
   ///Updates physics given unit space transformations and if this is the last physics frame in the current gfx frame
-  virtual void UpdatePhysics (const Transformation &trans, const Matrix transmat, const Vector & CumulativeVelocity, bool ResolveLast, UnitCollection *uc=NULL);
+  virtual void UpdatePhysics (const Transformation &trans, const Matrix &transmat, const Vector & CumulativeVelocity, bool ResolveLast, UnitCollection *uc=NULL);
   ///Resolves forces of given unit on a physics frame
-  void ResolveForces (const Transformation &, const Matrix);
+  void ResolveForces (const Transformation &, const Matrix&);
   ///Returns the pqr oritnattion of the unit in world space
+  void SetOrientation (QVector q, QVector r);
   void GetOrientation(Vector &p, Vector &q, Vector &r) const;
   ///Transforms a orientation vector Up a coordinate level. Does not take position into account
   Vector UpCoordinateLevel(const Vector &v) const;
@@ -706,6 +775,8 @@ public:
   const Vector &GetAngularVelocity() const { return AngularVelocity; }
   ///Return unit-space velocity
   const Vector &GetVelocity() const { return cumulative_velocity; }
+
+  class Cockpit * GetVelocityDifficultyMult(float &) const;
   void SetVelocity (const Vector & v) {Velocity = v;}
   void SetAngularVelocity (const Vector & v) {AngularVelocity = v;}
   
@@ -739,9 +810,10 @@ public:
   void SortCargo();
  public:
   ///tries to warp as close to un as possible abiding by the distances of various enemy ships...it might not make it all the way
-  bool AutoPilotTo(Unit * un);
+  bool AutoPilotTo(Unit * un, bool ignore_friendlies=false);
   void WriteUnit(const char * modificationname="");
   void SetTurretAI ();
+  void DisableTurretAI ();
   ///get the flightgroup description
   Flightgroup *getFlightgroup() const { return flightgroup; };
   ///reduces shields to X percentage and reduces shield recharge to Y percentage
@@ -753,6 +825,7 @@ public:
   const string getFgID();
   /// sets the full name/fgid for planets
   void setFullname(string name)  { fullname=name; };
+  string getFullname() const { return fullname; };
   string getFullAIDescription();
   ///not used yet
   void setTargetFg(string primary,string secondary=string(),string tertiary=string());
@@ -779,7 +852,7 @@ public:
 };
 ///Holds temporary values for inter-function XML communication Saves deprecated restr info
 struct Unit::XML {
-  vector<Halo*> halos;
+  //  vector<Halo*> halos;
   vector<Unit::Mount *> mountz;
   vector<Mesh*> meshes;
   Mesh * shieldmesh;

@@ -5,11 +5,16 @@
 #include "cmd/images.h"
 #include "config_xml.h"
 #include "vs_globals.h"
-CommunicatingAI::CommunicatingAI (int ttype, int stype,  float rank, float mood, float anger, float moodswingyness, float randomresp) :Order (ttype,stype),anger(anger),moodswingyness(moodswingyness),randomresponse (randomresp),mood(mood),rank(rank) {
+#include "cmd/script/flightgroup.h"
+CommunicatingAI::CommunicatingAI (int ttype, int stype,  float rank, float mood, float anger,float appeas,  float moodswingyness, float randomresp) :Order (ttype,stype),anger(anger), appease(appeas), moodswingyness(moodswingyness),randomresponse (randomresp),mood(mood),rank(rank) {
   comm_face=NULL;
   if (rank==666) {
     static float ran = XMLSupport::parse_float(vs_config->getVariable ("AI","DefaultRank",".01"));
     this->rank = ran;
+  }
+  if (appease==666) {
+    static float appeas = XMLSupport::parse_float(vs_config->getVariable ("AI","EaseToAppease",".5"));
+    this->appease = appeas;    
   }
   if (anger==666) {
     static float ang = XMLSupport::parse_float(vs_config->getVariable ("AI","EaseToAnger","-.5"));
@@ -37,22 +42,53 @@ int CommunicatingAI::selectCommunicationMessageMood (CommunicationMessage &c, fl
 
   Unit * targ = c.sender.GetUnit();
   if (targ) {
-    float relation = _Universe->GetRelation(parent->faction,targ->faction);
-    mood+=(1-randomresponse)*relation;
+    mood+=(1-randomresponse)*GetEffectiveRelationship(targ);
   }
   return c.fsm->getCommMessageMood (c.curstate,mood,randomresponse);
 
 }
 using std::pair;
-float CommunicatingAI::GetEffectiveRelationship (const Unit * target)const {
+
+float CommunicatingAI::getAnger(const Unit * target)const {
   relationmap::const_iterator i=effective_relationship.find(target);
   float rel=0;
   if (i!=effective_relationship.end()) {
     rel = (*i).second;
   }
-  return Order::GetEffectiveRelationship (target)+rel;
+  return rel;
 }
+float CommunicatingAI::GetEffectiveRelationship (const Unit * target)const {
+  return Order::GetEffectiveRelationship (target)+getAnger(target);
+}
+static void AllUnitsCloseAndEngage(Unit * un, int faction) {
+	Unit * ally;
+	static float contraband_assist_range = XMLSupport::parse_float (vs_config->getVariable("physics","contraband_assist_range","50000"));
+	for (un_iter i=_Universe->activeStarSystem()->getUnitList().createIterator();
+		(ally = *i)!=NULL;
+		++i) {
+		Vector loc;
 
+		if (ally->faction==faction) {
+			//if (ally->InRange (un,loc,true)) {
+				if ((ally->Position()-un->Position()).Magnitude()<contraband_assist_range) {
+					Flightgroup * fg = ally->getFlightgroup();
+					if (fg) {
+						if (fg->directive.empty()?true:toupper(*fg->directive.begin())!=*fg->directive.begin()) {
+							ally->Target (un);
+							ally->TargetTurret (un);
+
+							fg->directive=string("a");//attack my target (of leader)
+						}else {
+							ally->Target (un);
+							ally->TargetTurret (un);
+
+						}
+					}
+				}
+			//}
+		}
+	}
+}
 void CommunicatingAI::TerminateContrabandSearch(bool contraband_detected) {
   //reports success or failure
   Unit * un;
@@ -62,6 +98,8 @@ void CommunicatingAI::TerminateContrabandSearch(bool contraband_detected) {
       c.SetCurrentState(c.fsm->GetContrabandDetectedNode(),comm_face,sex);
       static int numHitsPerContrabandFail=3;
       GetMadAt (un,numHitsPerContrabandFail);
+      AllUnitsCloseAndEngage(un,parent->faction);
+
     }else {
       c.SetCurrentState(c.fsm->GetContrabandUnDetectedNode(),comm_face,sex);      
     }
@@ -114,6 +152,9 @@ void CommunicatingAI::UpdateContrabandSearch () {
 void CommunicatingAI::InitiateContrabandSearch (float playaprob, float targprob) {
   Unit *u= GetRandomUnit (playaprob,targprob);
   if (u) {
+    Unit * un =_Universe->GetContraband (parent->faction);
+    if (un) {
+    if (un->numCargo()>0) {
     Unit * v;
     if ((v=contraband_searchee.GetUnit())) {
       if (v==u) {
@@ -127,6 +168,8 @@ void CommunicatingAI::InitiateContrabandSearch (float playaprob, float targprob)
     c.SetCurrentState(c.fsm->GetContrabandInitiateNode(),comm_face,sex);
     u->getAIState()->Communicate (c);
     which_cargo_item = 0;
+    }
+    }
   }
 }
 
@@ -142,8 +185,15 @@ void CommunicatingAI::AdjustRelationTo (Unit * un, float factor) {
   }
   _Universe->AdjustRelation (parent->faction,un->faction,factor,rank);  
   (*i).second+=factor;
-  if ((*i).second<anger) {
+  if ((*i).second<anger||(parent->Target()==NULL&&(*i).second+Order::GetEffectiveRelationship (un)<0)) {
     parent->Target(un);//he'll target you--even if he's friendly
+    parent->TargetTurret(un);//he'll target you--even if he's friendly
+  } else if ((*i).second>appease) {
+    if (parent->Target()==un) {
+      parent->Target(NULL);
+	  parent->TargetTurret(NULL);//he'll target you--even if he's friendly
+
+    }
   }
   mood+=factor*moodswingyness;
 }
@@ -157,11 +207,15 @@ Unit * CommunicatingAI::GetRandomUnit (float playaprob, float targprob) {
   if (a>RAND_MAX*(1-targprob)) {
     target = parent->Target();
   }
-  Vector localcoord;
-  if (target==NULL?true:(!parent->InRange (target,localcoord))) {
+  if (target!=NULL) {
+  if ((!parent->InRange (target))) {
+    target=NULL;
+  }
+  }
+  if (target==NULL) {
     for (un_iter ui=_Universe->activeStarSystem()->getUnitList().createIterator();
 	 (*ui)!=NULL; ++ui) {
-      if (parent->InRange ((*ui),localcoord)) {
+      if (parent->InRange ((*ui))) {
 	target = *ui;
       }
     }
@@ -182,15 +236,15 @@ void CommunicatingAI::RandomInitiateCommunication (float playaprob, float targpr
   }
 }
 
-int CommunicatingAI::selectCommunicationMessage (CommunicationMessage &c) {
-  if (mood==0) {
+int CommunicatingAI::selectCommunicationMessage (CommunicationMessage &c,Unit * un) {
+  if (0&&mood==0) {
     FSM::Node * n = c.getCurrentState ();  
     if (n)
       return rand()%n->edges.size();
     else
       return 0;
   }else {
-    return selectCommunicationMessageMood (c,mood);
+    return selectCommunicationMessageMood (c,.5*mood+.5*getAnger (un));
   }
 }
 
@@ -199,10 +253,10 @@ void CommunicatingAI::ProcessCommMessage (CommunicationMessage &c) {
   FSM::Node * n = c.getCurrentState ();
   if (n) {
      if (n->edges.size()) {
-      int b = selectCommunicationMessage (c);
       Unit * un = c.sender.GetUnit();
       if (un) {
-	un->getAIState()->Communicate (CommunicationMessage (parent,un,c,b,comm_face,sex));
+	      int b = selectCommunicationMessage (c,un);
+		  un->getAIState()->Communicate (CommunicationMessage (parent,un,c,b,comm_face,sex));
       }
     }
   }

@@ -56,18 +56,18 @@ public:
 
 class AIFlyToWaypoint : public AImissionScript {
  public:
-  AIFlyToWaypoint(Vector waypoint,float vel,bool afburn,float range);
+  AIFlyToWaypoint(const QVector &waypoint,float vel,bool afburn,float range);
 
-  Vector waypoint;
+  QVector waypoint;
   float vel;
   float range;
   bool aburn;
 };
 class AIFlyToWaypointDefend : public AImissionScript {
  public:
-  AIFlyToWaypointDefend(Vector waypoint,float vel,bool afburn,float range,float defend_range);
+  AIFlyToWaypointDefend(const QVector &waypoint,float vel,bool afburn,float range,float defend_range);
 
-  Vector waypoint;
+  QVector waypoint;
   float vel;
   float range;
   bool aburn;
@@ -80,12 +80,12 @@ class AIFlyToJumppoint : public AImissionScript {
 
 class AIPatrol : public AImissionScript {
  public:
-  AIPatrol(int mode,Vector area,float range,Unit *around_unit,float patrol_speed);
+  AIPatrol(int mode,const QVector &area,float range,Unit *around_unit,float patrol_speed);
 };
 
 class AIPatrolDefend : public AImissionScript {
  public:
-  AIPatrolDefend(int mode,Vector area,float range,Unit *around_unit,float patrol_speed);
+  AIPatrolDefend(int mode,const QVector &area,float range,Unit *around_unit,float patrol_speed);
 };
 
 class AISuperiority : public AImissionScript {

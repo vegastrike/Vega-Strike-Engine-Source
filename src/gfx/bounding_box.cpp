@@ -2,7 +2,12 @@
 #include "bounding_box.h"
 #include <stdio.h>
 
-BoundingBox::BoundingBox(Vector LX, Vector MX,Vector LY,Vector MY,Vector LZ,Vector MZ){
+BoundingBox::BoundingBox(const QVector &LX, 
+			 const QVector &MX,
+			 const QVector &LY,
+			 const QVector &MY,
+			 const QVector &LZ,
+			 const QVector &MZ){
   lx = LX;
   ly = LY;
   lz = LZ;
@@ -12,7 +17,7 @@ BoundingBox::BoundingBox(Vector LX, Vector MX,Vector LY,Vector MY,Vector LZ,Vect
 
 }
 //transform expects one to transform from inward out.... so turret then ship then unit then space... not general...but much easier to read code
-void BoundingBox::Transform (Matrix t) {  
+void BoundingBox::Transform (const Matrix &t) {  
   lx = ::Transform (t,lx);
   ly = ::Transform (t,ly);
   lz = ::Transform (t,lz);
@@ -41,10 +46,10 @@ void BoundingBox::Transform (const Transformation &trans) {
  *  r =   pnt.Dot (PlaneNorm)/PlaneNorm.Dot(PlaneAffine-eye) 
  *  xyz = r * pnt + eye;
  */
-int BoundingBox::Intersect (const Vector &eye, const Vector &pnt,float err) {
-  Vector IntersectXYZ (eye);
-  Vector Normal (mx - lx);
-  float divisor=pnt.Dot (Normal);
+int BoundingBox::Intersect (const QVector &eye, const QVector &pnt,float err) {
+  QVector IntersectXYZ (eye.i,eye.j,eye.k);
+  QVector Normal (mx - lx);
+  double divisor=pnt.Dot (Normal);
   if (divisor!=0) {
     IntersectXYZ+= (Normal.Dot(lx-eye)/divisor)*pnt;//point of intersection with lx plane
     //fprintf (stderr,"Intersect::%f,%f,%f>\n",IntersectXYZ.i,IntersectXYZ.j,IntersectXYZ.k);
@@ -59,7 +64,7 @@ int BoundingBox::Intersect (const Vector &eye, const Vector &pnt,float err) {
     if (OpenWithin (IntersectXYZ,err,0)) 
       return Normal.Dot(mx-eye)*divisor>=0?1:-1;
   }
-  Normal = Vector (my - ly);
+  Normal = my - ly;
   divisor = pnt.Dot(Normal);
   if (divisor!=0) {
     IntersectXYZ = eye + (Normal.Dot(ly-eye)/divisor)*pnt;//point of intersection with the ly plane
@@ -76,7 +81,7 @@ int BoundingBox::Intersect (const Vector &eye, const Vector &pnt,float err) {
     if (OpenWithin (IntersectXYZ,err,1)) 
       return Normal.Dot(my-eye)*divisor>=0?1:-1;
   }
-  Normal = Vector (mz - lz);
+  Normal = (mz - lz);
   divisor = pnt.Dot(Normal);
   if (divisor!=0) {
     IntersectXYZ = eye + (Normal.Dot(lz-eye)/divisor)*pnt;//point of intersection with the ly plane
@@ -99,10 +104,10 @@ int BoundingBox::Intersect (const Vector &eye, const Vector &pnt,float err) {
 /** queries the bounding box, excluding a select edge 
  *  0 = lx, 1=mx, 2=ly 3=my 4=lz 5=mz
  */
-bool BoundingBox::OpenWithin (const Vector &query, float err, int excludeWhich) {
+bool BoundingBox::OpenWithin (const QVector &query, float err, int excludeWhich) {
   err = -err;
-  Vector tquery (query -lx); // now it's in coords with respect to the minimum x;
-  Vector tmp (mx-lx);
+  QVector tquery (query -lx); // now it's in coords with respect to the minimum x;
+  QVector tmp (mx-lx);
   if (excludeWhich!=0){
     if (tquery.Dot (tmp) <err) {
       //fprintf (stderr,"tqueryreturn mx-lx%f Exc %d\n",tquery.Dot(tmp),excludeWhich);
@@ -153,10 +158,10 @@ bool BoundingBox::OpenWithin (const Vector &query, float err, int excludeWhich) 
 }
 
 /** Queries the bounding box whether the query vector is within it*/
-bool BoundingBox::Within (const Vector &query, float err) {
+bool BoundingBox::Within (const QVector &query, float err) {
   err = -err;
-  Vector tquery =query -lx; // now it's in coords with respect to the minimum x;
-  Vector tmp = mx-lx;
+  QVector tquery =query -lx; // now it's in coords with respect to the minimum x;
+  QVector tmp = mx-lx;
   if (tquery.Dot (tmp) <err) {
     //fprintf (stderr,"tqueryreturn mx-lx%f",tquery.Dot(tmp));
     return false;
