@@ -94,8 +94,8 @@ Quaternion Quaternion::from_axis_angle(const Vector &axis, float angle) {
   float sin_a = sin( angle / 2 );
   float cos_a = cos( angle / 2 );
   
-  return Quaternion(cos_a, Vector(axis.i / sin_a, 
-		axis.j / sin_a,
-		axis.k / sin_a));
+  return Quaternion(cos_a, Vector(axis.i * sin_a, 
+		axis.j * sin_a,
+		axis.k * sin_a));
 }
 

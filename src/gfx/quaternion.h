@@ -27,7 +27,7 @@ struct Quaternion {
   inline bool operator == (const Quaternion &rval) const {
     return s==rval.s&&v.i==rval.v.i&&v.j==rval.v.j&&v.k==rval.v.k;
   }
-  Quaternion Normalize() { v = v * (((float)1.0)/Magnitude()); s /= Magnitude(); return *this;}
+  Quaternion Normalize() { float mag = Magnitude();v = v * (((float)1.0)/mag); s /= mag; return *this;}
 
 
   static Quaternion from_vectors(const  Vector &v1, const Vector &v2, const Vector &v3);
