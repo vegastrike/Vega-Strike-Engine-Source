@@ -57,6 +57,10 @@ public:
     virtual GFXColor color(void) { return m_color; };
     virtual void setColor(const GFXColor& c) { m_color = c; };
 
+    // The color of the outline around the control.
+    virtual GFXColor outlineColor(void) { return m_outlineColor; };
+    virtual void setOutlineColor(const GFXColor& c) { m_outlineColor = c; };
+
     // Color of text in control.
     virtual GFXColor textColor(void) { return m_textColor; };
     virtual void setTextColor(const GFXColor& c) { m_textColor = c; };
@@ -77,11 +81,18 @@ public:
     Control(void);
     virtual ~Control(void) {};
 
+protected:
+    // INTERNAL IMPLEMENTATION
+
+    // Draw background.
+    virtual bool drawBackground(void);
+
     // VARIABLES
 protected:
     Rect m_rect;                // Boundary rectangle of this control.
     std::string m_id;           // ID of the control.  See window::findControlByName.
     GFXColor m_color;           // Color of control.  Meaning depends on control.
+	GFXColor m_outlineColor;	// Color of outline around control.
     GFXColor m_textColor;       // Text color, if control uses text.
     Font m_font;                // Font for the text, if text is needed.
     bool m_hidden;              // False = show the control on the window.

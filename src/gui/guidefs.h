@@ -175,12 +175,15 @@ enum Justification {
 
 
 // Predefined colors.
-const GFXColor GUI_OPAQUE_BLACK(0.0,0.0,0.0,1.0);
-const GFXColor GUI_OPAQUE_WHITE(1.0,1.0,1.0,1.0);
+const GFXColor GUI_OPAQUE_BLACK(0.0,0.0,0.0);
+const GFXColor GUI_OPAQUE_WHITE(1.0,1.0,1.0);
 const GFXColor GUI_CLEAR       (0.0,0.0,0.0,0.0);
+const GFXColor GUI_OPAQUE_LIGHT_GRAY  (0.25,0.25,0.25);
+const GFXColor GUI_OPAQUE_MEDIUM_GRAY (0.5,0.5,0.5);
+const GFXColor GUI_OPAQUE_DARK_GRAY   (0.75,0.75,0.75);
 
 // Whether a color is clear -- totally transparent.
-static bool isClear(const GFXColor& c) { return c.r <= 0.0; };
+static bool isClear(const GFXColor& c) { return c.a <= 0.0; };
 
 // Compare two colors.
 // Used in upgrade/downgrade to decide whether an item is OK.

@@ -99,9 +99,27 @@ void Scroller::setColor(const GFXColor& c) {
     assert(childCount() == CHILD_CONTROL_COUNT);
     childAt(DOWN_BUTTON_INDEX)->setColor(c);
     childAt(UP_BUTTON_INDEX)->setColor(c);
-    childAt(SLIDER_INDEX)->setColor(c);
+	if(isClear(m_thumbColor)) {
+		// If we don't have an explicit thumb color, calculate it.
+		Slider* slider = dynamic_cast<Slider*>(childAt(SLIDER_INDEX));
+		slider->setThumbColorBasedOnColor(c);
+	}
 
     GroupControl::setColor(c);
+}
+
+// The color of the thumb.
+void Scroller::setThumbColor(const GFXColor& c, const GFXColor& outline) {
+    assert(childCount() == CHILD_CONTROL_COUNT);
+	Slider* slider = dynamic_cast<Slider*>(childAt(SLIDER_INDEX));
+	slider->setThumbColor(c, outline);
+}
+
+// The color of the thumb.
+void Scroller::setButtonColor(const GFXColor& c) {
+    assert(childCount() == CHILD_CONTROL_COUNT);
+    childAt(DOWN_BUTTON_INDEX)->setColor(c);
+    childAt(UP_BUTTON_INDEX)->setColor(c);
 }
 
 // This is used as the color of the arrows on the scroller buttons.
@@ -255,7 +273,8 @@ void Scroller::createControls(void) {
 
     // Slider control.
     Slider* slider = new Slider;
-    slider->setColor(color());
+    slider->setColor(GUI_CLEAR);
+    slider->setThumbColorBasedOnColor(color());
     slider->setCommandTarget(this);
     addChild(slider);
 }
@@ -263,9 +282,7 @@ void Scroller::createControls(void) {
 // Draw the control. Return true if anything is drawn.
 bool Scroller::draw(void)
 {
-    if(!isClear(m_color)) {
-        drawRect(m_rect, m_color);
-    }
+	drawBackground();
 
     if(m_needLayout) {
         calcLayout();
@@ -298,6 +315,8 @@ m_minValue(0),
 m_maxValue(10),
 m_visible(1),
 m_scrollPosition(m_minValue),
+m_thumbColor(GUI_CLEAR),
+m_thumbOutlineColor(GUI_CLEAR),
 m_needLayout(true)
 {
     createControls();

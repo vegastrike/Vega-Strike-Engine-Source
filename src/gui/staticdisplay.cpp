@@ -54,9 +54,7 @@ void StaticDisplay::setRect(const Rect& r) {
 bool StaticDisplay::draw(void)
 {
     // Draw the background.
-    if(!isClear(m_color)) {
-        drawRect(m_rect, m_color);
-    }
+    drawBackground();
 
     // If we have a scroller and the layout has changed, need to reset the scroller.
     if(m_scroller && m_layoutVersion != m_paintText.layoutVersion()) {

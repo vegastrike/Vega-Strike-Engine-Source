@@ -53,7 +53,6 @@ PickerCell* PickerCells::cellWithId(const std::string& id) {
     return NULL;
 }
 
-
 // Draw the picker
 bool Picker::draw(void)
 {
@@ -63,7 +62,7 @@ bool Picker::draw(void)
     }
 
     // Draw the background.
-    drawRect(m_rect, m_color);
+    drawBackground();
 
     const float cellHeight = totalCellHeight();
 

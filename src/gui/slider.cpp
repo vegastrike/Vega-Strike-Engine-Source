@@ -135,16 +135,23 @@ static GFXColor lightenColor(const GFXColor& c, const float factor) {
     return result;
 }
 
+// Calculate the thumb colors based on the specified background color.
+void Slider::setThumbColorBasedOnColor(const GFXColor& c) {
+	if(!isClear(c)) {
+		if(isColorLight(c)) {
+			// Light color.  Make thumb darker.
+			setThumbColor(darkenColor(c,.3), GUI_OPAQUE_WHITE);
+		} else {
+			// Dark Color.
+			setThumbColor(lightenColor(c,.3), GUI_OPAQUE_WHITE);
+		}
+	}
+}
+
 // Set the background color.
 void Slider::setColor(const GFXColor& c) {
     // Calculate a reasonable thumb color.
-    if(isColorLight(c)) {
-        // Light color.  Make thumb darker.
-        setThumbColor(darkenColor(c,.3), GUI_OPAQUE_WHITE);
-    } else {
-        // Dark Color.
-        setThumbColor(lightenColor(c,.3), GUI_OPAQUE_WHITE);
-    }
+	setThumbColorBasedOnColor(c);
 
     Control::setColor(c);
 }
@@ -153,9 +160,7 @@ void Slider::setColor(const GFXColor& c) {
 bool Slider::draw(void)
 {
     // Draw the background.
-    if(!isClear(m_color)) {
-        drawRect(m_rect, m_color);
-    }
+	drawBackground();
 
     // Draw the thumb.
     if(!(isClear(m_thumbColor) && isClear(m_thumbOutlineColor))) {

@@ -45,6 +45,12 @@ public:
     int scrollPosition(void) { return m_scrollPosition; };
     void setScrollPosition(int pos);
 
+	// The color of the thumb.
+    void setThumbColor(const GFXColor& c, const GFXColor& outline);
+
+	// The background color of the buttons.
+    void setButtonColor(const GFXColor& c);
+
     // Draw the control. Return true if anything is drawn.
     virtual bool draw(void);
 
@@ -82,6 +88,8 @@ protected:
     int m_maxValue;         // The maximum value in the scrolling range.
     int m_visible;          // Number of visible cells.  Used for thumb length.
     int m_scrollPosition;   // The current position of this scroller.
+    GFXColor m_thumbColor;  // Color to paint the thumb.
+    GFXColor m_thumbOutlineColor;//Color of outline for thumb.
 
     bool m_needLayout;      // True = Need to re-layout the controls.
 };

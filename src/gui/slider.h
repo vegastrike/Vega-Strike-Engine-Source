@@ -46,8 +46,9 @@ public:
     void setPosition(int pos);
 
     // Color of thumb.
-    void setThumbColor(const GFXColor& color, const GFXColor& outline = GUI_OPAQUE_BLACK)
+    void setThumbColor(const GFXColor& color, const GFXColor& outline)
         { m_thumbColor = color; m_thumbOutlineColor = outline; };
+	void setThumbColorBasedOnColor(const GFXColor& c);
 
     // OVERRIDES
 
