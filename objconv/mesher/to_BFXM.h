@@ -310,5 +310,13 @@ void xmeshToBFXM(XML memfile,FILE* Outputfile,char mode); //converts input file 
 int writesuperheader(XML memfile, FILE* Outputfile); //Writes superheader to file Outputfile
 int appendrecordfromxml(XML memfile, FILE* Outputfile); // Append a record specified in memfile to the output file and return number of bytes written. Assumes Outputfile is appropriately positioned at the end of the file.
 int appendmeshfromxml(XML memfile, FILE* Outputfile); // Append a mesh specified in memfile to the output file and return number of bytes written. Assumes Outputfile is appropriately positioned at the end of the file.
+void AddNormal (GFXVertex &outp,
+                const GFXVertex &inp);
+void SetNormal (GFXVertex &outp,
+                const GFXVertex &a,
+                const GFXVertex &b,
+                const GFXVertex &c);
+
+
 
 #endif

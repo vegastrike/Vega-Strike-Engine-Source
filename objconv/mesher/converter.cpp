@@ -1,7 +1,5 @@
-#include "mesh_io.h"
-#include "to_BFXM.h"
+#include "from_obj.h"
 #include "from_BFXM.h"
-
 void usage();
 void usage(){
 	fprintf(stderr,"usage:\n\tmesher <inputfile> <outputfile> <command>\n\nWhere command is a 3 letter sequence of:\n\tInputfiletype:\n\t\tb:BFXM\n\t\to:OBJ\n\t\tx:xmesh\n\tOutputfiletype:\n\t\tb:BFXM\n\t\to:OBJ\n\t\tx:xmesh\n\tCommandflag:\n\t\ta: append to Outputfile\n\t\tc: create Outputfile\n");
@@ -51,7 +49,16 @@ int main (int argc, char** argv) {
         FILE * OutputObj = fopen (obj.c_str(),"w");
         FILE * OutputMtl = fopen (mtl.c_str(),"w");
 	BFXMToXmesh(Inputfile,Outputfile,OutputObj,OutputMtl,tmp);
-  } else if(createOBJfromBFXM||createOBJfromxmesh||createBFXMfromOBJ||createxmeshesfromOBJ){
+  }else if (createBFXMfromOBJ) {
+     FILE* Inputfile=fopen(argv[1],"r");
+     Outputfile=fopen(argv[2],"w+"); //create file for text output
+     string tmp = argv[1];
+     int where=where=tmp.find_last_of(".");
+     tmp = tmp.substr(0,where);
+     string mtl = tmp+".mtl";
+     FILE * InputMtl = fopen (mtl.c_str(),"r");
+     ObjToBFXM(Inputfile, InputMtl,Outputfile);
+  } else if(createOBJfromBFXM||createOBJfromxmesh||createxmeshesfromOBJ){
 	fprintf(stderr,"OBJ functions not yet supported: - aborting\n");
 	exit(-1);
   } else {
