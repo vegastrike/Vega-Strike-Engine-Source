@@ -2503,7 +2503,7 @@ void * grab_images_thread (struct fgdevice *fg)
  
  pthread_exit(NULL);
 }
-
+typedef void * (*pthread_func_type ) (void *);
 /* Initialize grabber and start grabbing-thread */
 int fg_start_grab_image (struct fgdevice *fg, int width, int height, int format)
 {
@@ -2599,7 +2599,7 @@ int fg_start_grab_image (struct fgdevice *fg, int width, int height, int format)
  fg->grabbing_active=1;
 
  /* Start grabbing thread */
- if (pthread_create(&fg->grab_thread,
+ if (pthread_create((pthread_func_type)&fg->grab_thread,
 						 NULL,
 						 (void *)grab_images_thread,
 						 (void *)fg)
