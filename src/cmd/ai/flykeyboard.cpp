@@ -155,7 +155,7 @@ void FlyByKeyboard::Execute (bool resetangvelocity) {
   }
   if (SSCK.switch_combat_mode) {
     SSCK.switch_combat_mode=false;
-    parent->SwitchCombatMode();
+    parent->SwitchCombatFlightMode();
   }
   if (SSCK.realauto) {
     Cockpit * cp = _Universe->isPlayerStarship(parent);
