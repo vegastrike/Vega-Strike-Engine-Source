@@ -446,7 +446,7 @@ bool Unit::UpAndDownGrade (Unit * up, Unit * templ, int mountoffset, int subunit
   templeak=1-(templ!=NULL?templ->computer.radar.maxcone:-1);
   STDUPGRADE(myleak,upleak,templeak,0);
   if (touchme)computer.radar.maxcone=1-myleak;
-  static float lc =XMLSupport::parse_float (vs_config->getVariable ("physics","lock_cone",".8"));
+  static float lc =XMLSupport::parse_float (vs_config->getVariable ("physics","lock_cone",".8"));// DO NOT CHANGE see unit_customize.cpp
   if (up->computer.radar.lockcone!=lc) {
     myleak = 1-computer.radar.lockcone;
     upleak=1-up->computer.radar.lockcone;
@@ -457,7 +457,7 @@ bool Unit::UpAndDownGrade (Unit * up, Unit * templ, int mountoffset, int subunit
     STDUPGRADE(myleak,upleak,templeak,0);
     if (touchme)computer.radar.lockcone=1-myleak;
   }
-  static float tc =XMLSupport::parse_float (vs_config->getVariable ("physics","autotracking",".93"));
+  static float tc =XMLSupport::parse_float (vs_config->getVariable ("physics","autotracking",".93"));//DO NOT CHANGE! see unit.cpp:258
   if (up->computer.radar.trackingcone!=tc) {
     myleak = 1-computer.radar.trackingcone;
     upleak=1-up->computer.radar.trackingcone;

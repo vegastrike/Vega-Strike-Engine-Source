@@ -255,10 +255,10 @@ void Unit::Init()
   computer.radar.maxcone=-1;
   static float minTrackingNum = XMLSupport::parse_float (vs_config->getVariable("physics",
 										  "autotracking",
-										  ".9"));
+										".93"));// DO NOT CHANGE see unit_customize.cpp
     
   computer.radar.trackingcone = minTrackingNum;
-  static float lc =XMLSupport::parse_float (vs_config->getVariable ("physics","lock_cone",".8"));
+  static float lc =XMLSupport::parse_float (vs_config->getVariable ("physics","lock_cone",".8"));// DO NOT CHANGE see unit_customize.cpp
   computer.radar.lockcone=lc;
   computer.radar.mintargetsize=0;
   computer.radar.color=true;
