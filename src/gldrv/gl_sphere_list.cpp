@@ -1,7 +1,7 @@
 #include "gfxlib.h"
 #include "gfxlib_struct.h"
 #include "gfx/matrix.h"
-#include <GL/glut.h>
+#include "gl_globals.h"
 #include <assert.h>
 
 void GFXSphereVertexList::Draw() {

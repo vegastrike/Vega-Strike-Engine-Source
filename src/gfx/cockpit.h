@@ -7,7 +7,7 @@
 #include <list>
 using namespace XMLSupport;
 class TextPlane;
-class Sprite;
+class VSSprite;
 class Gauge;
 class Unit;
 #include "vdu.h"
@@ -55,8 +55,8 @@ private:
   std::list <Matrix> headtrans;
   class Mesh * mesh;
   int soundfile;
-  Sprite *Pit [4];
-  Sprite *Radar[2];
+  VSSprite *Pit [4];
+  VSSprite *Radar[2];
   ///Video Display Units (may need more than 2 in future)
   std::vector <VDU *> vdu;
   ///Color of cockpit default text
@@ -65,7 +65,7 @@ private:
   TextPlane *text;
   Gauge *gauges[UnitImages::NUMGAUGES];
   ///holds misc panels.  Panel[0] is always crosshairs (and adjusted to be in center of view screen, not cockpit)
-  std::vector <Sprite *> Panel;
+  std::vector <VSSprite *> Panel;
   ///flag to decide whether to draw all target boxes
   bool draw_all_boxes;
   bool draw_line_to_target,draw_line_to_targets_target;

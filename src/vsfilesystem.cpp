@@ -119,7 +119,7 @@ namespace VSFileSystem
 			CASE( VSFileSystem::AiFile)
 			CASE( VSFileSystem::SaveFile)
 			CASE( VSFileSystem::AnimFile)
-			CASE( VSFileSystem::SpriteFile)
+			CASE( VSFileSystem::VSSpriteFile)
 			CASE( VSFileSystem::MissionFile)
 			CASE( VSFileSystem::BSPFile)
 			CASE( VSFileSystem::MusicFile)
@@ -678,7 +678,7 @@ namespace VSFileSystem
 		// Systems are in "sectors"/ config variable
 		// Cockpits are in cockpits/ (also a config var)
 		// Animations are in animations/
-		// Sprite are in sprites/ or in ./ (when full subpath is provided) or in the current cockpit dir that is being loaded
+		// VSSprite are in sprites/ or in ./ (when full subpath is provided) or in the current cockpit dir that is being loaded
 		
 		// First allocate an empty directory list for each file type
 		for( i=0; i<UnknownFile; i++)
@@ -734,7 +734,7 @@ namespace VSFileSystem
 		Directories[SoundFile] = sharedsounds;
 		Directories[CockpitFile] = sharedcockpits;
 		Directories[AnimFile] = sharedanims;
-		Directories[SpriteFile] = sharedsprites;
+		Directories[VSSpriteFile] = sharedsprites;
 
 		Directories[AiFile] = "ai";
 		SubDirectories[AiFile].push_back( "events");
@@ -811,7 +811,7 @@ namespace VSFileSystem
 			}
 			if( FileExists( datadir,"/"+sharedsprites+"."+volume_format)>=0)
 			{
-				UseVolumes[SpriteFile] = 1;
+				UseVolumes[VSSpriteFile] = 1;
 				cout<<"Using volume file "<<(datadir+"/"+sharedsprites)<<".pk3"<<endl;
 			}
 			if( FileExists( datadir,"/animations."+volume_format)>=0)
@@ -1084,7 +1084,7 @@ namespace VSFileSystem
 			extra = "/"+string( f.GetFilename());
 
 		// This test lists all the VSFileType that should be looked for in the current directory
-		if( current_path.back()!="" && (type==TextureFile || type==MeshFile || type==SpriteFile || type==AnimFile))
+		if( current_path.back()!="" && (type==TextureFile || type==MeshFile || type==VSSpriteFile || type==AnimFile))
 		{
 			curpath = current_path.back();
 			subdir = current_subdirectory.back();
@@ -1429,7 +1429,7 @@ namespace VSFileSystem
 		if( err<=Ok)
 		{
 			// We save the current path only when loading a unit, an animation, a sprite or a cockpit
-			if( (type==UnitFile || type==AnimFile || type==SpriteFile || type==CockpitFile))
+			if( (type==UnitFile || type==AnimFile || type==VSSpriteFile || type==CockpitFile))
 			{
 				current_path.push_back( this->rootname);
 				current_subdirectory.push_back( this->subdirectoryname);
@@ -1886,7 +1886,7 @@ namespace VSFileSystem
 			return;
 		}
 
-		if( this->valid && this->file_mode==ReadOnly && (file_type==UnitFile || file_type==AnimFile || file_type==SpriteFile || file_type==CockpitFile))
+		if( this->valid && this->file_mode==ReadOnly && (file_type==UnitFile || file_type==AnimFile || file_type==VSSpriteFile || file_type==CockpitFile))
 		{
 			assert( current_path.size()>1);
 			current_path.pop_back();
@@ -2047,7 +2047,7 @@ std::string   nameof( VSFileSystem::VSFileType type )
 		CASE( VSFileSystem::AiFile)
 		CASE( VSFileSystem::SaveFile)
 		CASE( VSFileSystem::AnimFile)
-		CASE( VSFileSystem::SpriteFile)
+		CASE( VSFileSystem::VSSpriteFile)
 		CASE( VSFileSystem::MissionFile)
 		CASE( VSFileSystem::BSPFile)
 		CASE( VSFileSystem::MusicFile)

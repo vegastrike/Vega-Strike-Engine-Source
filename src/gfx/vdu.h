@@ -14,7 +14,7 @@ class TextPlane;
  * on a fighter craft. Can print out target info, local damage info
  * Local weapon info or Nav info.
  */
-class VDU: public Sprite {
+class VDU: public VSSprite {
  private:
   class Animation * comm_ani;
   class Animation *	webcam;
@@ -58,7 +58,7 @@ class VDU: public Sprite {
   ///Draws the weapons activated on current unit
   void DrawWeapon(Unit *parent);
   ///Draws the sprite representing the current starship. Returns proper location and size for future use (with weaps and damage display)
-  void DrawTargetSpr(Sprite * s,float percent, float &x, float &y, float &w, float &h);
+  void DrawTargetSpr(VSSprite * s,float percent, float &x, float &y, float &w, float &h);
   ///draws the target camera
 void  DrawStarSystemAgain (float x,float y,float w,float h, VIEWSTYLE viewStyle,Unit *parent,Unit *target);
 public:

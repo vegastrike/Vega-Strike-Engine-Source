@@ -861,7 +861,7 @@ void GameCockpit::DrawGauges(Unit * un) {
       gauges[i]->Draw(LookupTargetStat (i,un));
 /*      if (rand01()>un->GetImageInformation().cockpit_damage[0]) {
         static Animation gauge_ani("static.ani",true,.1,BILINEAR);
-        gauge_ani.DrawAsSprite(Radar);
+        gauge_ani.DrawAsVSSprite(Radar);
       }*/
       float damage = un->GetImageInformation().cockpit_damage[(1+MAXVDUS+i)%(MAXVDUS+1+UnitImages::NUMGAUGES)];
       if (gauge_time[i]>=0) {
@@ -871,7 +871,7 @@ void GameCockpit::DrawGauges(Unit * un) {
           }
         } else {
           static Animation vdu_ani("static.ani",true,.1,BILINEAR);
-          vdu_ani.DrawAsSprite(gauges[i]);	
+          vdu_ani.DrawAsVSSprite(gauges[i]);	
         }
       } else {
         if (cockpit_time>(((1-(-gauge_time[i]))+damage))) {
@@ -1104,12 +1104,12 @@ void SuicideKey (int, KBSTATE k) {
 }
 
 class UnivMap {
-  Sprite * ul;
-  Sprite * ur;
-  Sprite * ll;
-  Sprite * lr;
+  VSSprite * ul;
+  VSSprite * ur;
+  VSSprite * ll;
+  VSSprite * lr;
 public:
-  UnivMap (Sprite * ull, Sprite *url, Sprite * lll, Sprite * lrl) {
+  UnivMap (VSSprite * ull, VSSprite *url, VSSprite * lll, VSSprite * lrl) {
     ul=ull;
     ur=url;
     ll=lll;
@@ -1138,10 +1138,10 @@ public:
 std::vector <UnivMap> univmap;
 void MapKey (int, KBSTATE k) {
   if (k==PRESS) {
-    static Sprite ul("upper-left-map.spr");
-    static Sprite ur("upper-right-map.spr");
-    static Sprite ll("lower-left-map.spr");
-    static Sprite lr("lower-right-map.spr");
+    static VSSprite ul("upper-left-map.spr");
+    static VSSprite ur("upper-right-map.spr");
+    static VSSprite ll("lower-left-map.spr");
+    static VSSprite lr("lower-right-map.spr");
     while (univmap.size()<=_Universe->CurrentCockpit())
       univmap.push_back(UnivMap(NULL,NULL,NULL,NULL));
     if (univmap[_Universe->CurrentCockpit()].isNull()) {
@@ -1361,12 +1361,12 @@ void GameCockpit::Draw() {
     //    GFXDisable(TEXTURE1);
     static int revspr = XMLSupport::parse_bool (vs_config->getVariable ("joystick","reverse_mouse_spr","true"))?1:-1;
     static string blah = vs_config->getVariable("joystick","mouse_crosshair","crosshairs.spr");
-    static Sprite MouseSprite (blah.c_str(),BILINEAR,GFXTRUE);
-    MouseSprite.SetPosition (-1+float(mousex)/(.5*g_game.x_resolution),-revspr+float(revspr*mousey)/(.5*g_game.y_resolution));
+    static VSSprite MouseVSSprite (blah.c_str(),BILINEAR,GFXTRUE);
+    MouseVSSprite.SetPosition (-1+float(mousex)/(.5*g_game.x_resolution),-revspr+float(revspr*mousey)/(.5*g_game.y_resolution));
     
-    MouseSprite.Draw();
-    //    DrawGlutMouse(mousex,mousey,&MouseSprite);
-    //    DrawGlutMouse(mousex,mousey,&MouseSprite);
+    MouseVSSprite.Draw();
+    //    DrawGlutMouse(mousex,mousey,&MouseVSSprite);
+    //    DrawGlutMouse(mousex,mousey,&MouseVSSprite);
   }
   RestoreViewPort();
   GFXBlendMode (ONE,ZERO);
@@ -1395,7 +1395,7 @@ void GameCockpit::Draw() {
 	}
 /*	if (rand01()>un->GetImageInformation().cockpit_damage[0]) {
 		static Animation radar_ani("round_static.ani",true,.1,BILINEAR);
-		radar_ani.DrawAsSprite(Radar);	
+		radar_ani.DrawAsVSSprite(Radar);	
 	}*/
 	float damage =(un->GetImageInformation().cockpit_damage[0]);
 	if (damage<.985) {
@@ -1406,8 +1406,8 @@ void GameCockpit::Draw() {
           }
         } else {
           static Animation radar_ani("static_round.ani",true,.1,BILINEAR);
-          radar_ani.DrawAsSprite(Radar[0]);	
-          radar_ani.DrawAsSprite(Radar[1]);	
+          radar_ani.DrawAsVSSprite(Radar[0]);	
+          radar_ani.DrawAsVSSprite(Radar[1]);	
         }
       } else {
         if (cockpit_time>((1-(-radar_time))+damage)) {
@@ -1440,7 +1440,7 @@ void GameCockpit::Draw() {
 	    } else {
 	      static Animation vdu_ani("static.ani",true,.1,BILINEAR);
 	      GFXEnable(TEXTURE0);
-	      vdu_ani.DrawAsSprite(vdu[vd]);	
+	      vdu_ani.DrawAsVSSprite(vdu[vd]);	
 	    }
 	  } else {
 	    if (cockpit_time>((1-(-vdu_time[vd]))+(damage))) {

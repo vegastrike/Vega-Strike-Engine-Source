@@ -54,7 +54,7 @@ namespace VSFileSystem
 						AiFile,			// Loaded from ai subdir
 						SaveFile,		// Loaded from homedir/save and saved in homedir/save
 						AnimFile,		// Loaded from animations subdir
-						SpriteFile,		// Loaded from current path or from sprites subdir
+						VSSpriteFile,		// Loaded from current path or from sprites subdir
 						MissionFile,	// Loaded from mission subdir
 						BSPFile,		// Loaded from homedir/generatedbsp and written in homedir/generatedbsp
 						MusicFile,		// Loaded from homedir

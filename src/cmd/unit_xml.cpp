@@ -1733,7 +1733,7 @@ using namespace UnitXML;
       switch(attribute_map.lookup((*iter).name)) {
       case HUDIMAGE:
 	if ((*iter).value.length()){
-	  image->hudImage = createSprite ((*iter).value.c_str());
+	  image->hudImage = createVSSprite ((*iter).value.c_str());
 	  xml->hudimage=(*iter).value;
 	}
 	break;

@@ -150,9 +150,9 @@ using namespace CockpitXML;
 void GameCockpit::beginElement(const string &name, const AttributeList &attributes) {
   AttributeList::const_iterator iter;
   Gauge::DIRECTION tmpdir=Gauge::GAUGE_UP;
-  Sprite ** newsprite=NULL;
+  VSSprite ** newsprite=NULL;
   VDU **newvdu=NULL;
-  Sprite * adjsprite=NULL;
+  VSSprite * adjsprite=NULL;
   std::string gaugename ("shieldstat.spr");
   std::string myfont ("9x12.font");
   Names elem = (Names)element_map.lookup(name);
@@ -187,7 +187,7 @@ void GameCockpit::beginElement(const string &name, const AttributeList &attribut
 		  cockpit_offset = XMLSupport::parse_float ((*iter).value);
 	break;
       case XFILE:
-	Pit[0]= new Sprite ((*iter).value.c_str(),NEAREST);
+	Pit[0]= new VSSprite ((*iter).value.c_str(),NEAREST);
 	break;
       case SOUNDFILE:
 	SetSoundFile((*iter).value);
@@ -199,7 +199,7 @@ void GameCockpit::beginElement(const string &name, const AttributeList &attribut
       case BACK:
       case LEFT:
       case RIGHT:
-	Pit[attr-FRONT] = new Sprite ((*iter).value.c_str(),NEAREST);
+	Pit[attr-FRONT] = new VSSprite ((*iter).value.c_str(),NEAREST);
 	break;
 	  default:
 		  break;
@@ -321,7 +321,7 @@ void GameCockpit::beginElement(const string &name, const AttributeList &attribut
       switch (attribute_map.lookup((*iter).name)) {
       case XFILE:
 	if (newsprite) {
-	  (*newsprite) = new Sprite ((*iter).value.c_str(),NEAREST);
+	  (*newsprite) = new VSSprite ((*iter).value.c_str(),NEAREST);
 	  adjsprite = *newsprite;
 	} else if (newvdu) {
 	  (*newvdu) = new VDU ((*iter).value.c_str(),text,mymodes,rows,cols,&StartArmor[0],&maxhull);
@@ -407,7 +407,7 @@ void GameCockpit::LoadXML ( VSFileSystem::VSFile & f) {
   if(!f.Valid()) {
 	 cockpit_offset=0;
 	 viewport_offset=0;
-	 Panel.push_back(new Sprite ("crosshairs.spr"));
+	 Panel.push_back(new VSSprite ("crosshairs.spr"));
 	 return;
   }
   XML_Parser parser = XML_ParserCreate(NULL);

@@ -146,7 +146,7 @@ void GameUnit<UnitType>::Init()
 */
 
 template <class UnitType>
-Sprite * GameUnit<UnitType>::getHudImage () const{
+VSSprite * GameUnit<UnitType>::getHudImage () const{
 	return this->image->hudImage;
 }
 

@@ -329,7 +329,7 @@ void StartGUIFrame(GFXBOOL clr) {
   GFXDisable (TEXTURE1);
   GFXEnable (TEXTURE0);
 }
-void DrawGlutMouse(int mousex, int mousey, Sprite * spr) {
+void DrawGlutMouse(int mousex, int mousey, VSSprite * spr) {
   GFXBlendMode (SRCALPHA,INVSRCALPHA);
   GFXColor4f (1,1,1,1);
   GFXDisable(TEXTURE1);
@@ -345,12 +345,12 @@ void DrawGlutMouse(int mousex, int mousey, Sprite * spr) {
 }
 extern void	ConditionalCursorDraw(bool);
 void EndGUIFrame(bool drawmouseover) {
-  static Sprite MouseOverSprite ("mouseover.spr",BILINEAR,GFXTRUE);
-  static Sprite MouseSprite ("mouse.spr",BILINEAR,GFXTRUE);
+  static VSSprite MouseOverVSSprite ("mouseover.spr",BILINEAR,GFXTRUE);
+  static VSSprite MouseVSSprite ("mouse.spr",BILINEAR,GFXTRUE);
   static Texture dummy ("white.bmp",0,NEAREST,TEXTURE2D,TEXTURE_2D,GFXTRUE);
   dummy.MakeActive();
   GFXDisable(CULLFACE);
-  DrawGlutMouse(mmx,mmy,drawmouseover?&MouseOverSprite:&MouseSprite);
+  DrawGlutMouse(mmx,mmy,drawmouseover?&MouseOverVSSprite:&MouseVSSprite);
   //  GFXEndScene();bad things...only call this once
   GFXHudMode(false);
   GFXEnable (CULLFACE);

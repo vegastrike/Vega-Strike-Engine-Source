@@ -73,7 +73,7 @@ class Beam;
 class Animation;
 class Nebula;
 class Animation;
-class Sprite;
+class VSSprite;
 class Box;
 class StarSystem;
 struct colTrees;
@@ -435,7 +435,7 @@ protected:
   virtual void UpdateHudMatrix(int whichcam) {}
   ///What's the HudImage of this unit
 // Uses GFX stuff so only in Unit class
-  virtual Sprite * getHudImage ()const {return NULL;}
+  virtual VSSprite * getHudImage ()const {return NULL;}
 // Not needed just in Unit class
 
 /***************************************************************************************/

@@ -57,7 +57,7 @@ void BaseInterface::Room::BaseObj::Draw (BaseInterface *base) {
 //		Do nothing...
 }
 
-void BaseInterface::Room::BaseSprite::Draw (BaseInterface *base) {
+void BaseInterface::Room::BaseVSSprite::Draw (BaseInterface *base) {
 	GFXBlendMode(SRCALPHA,INVSRCALPHA);
 	GFXEnable(TEXTURE0);
 	spr.Draw();
@@ -267,9 +267,9 @@ void BaseInterface::Room::Click (BaseInterface* base,float x, float y, int butto
 				}
 				if (button==WS_RIGHT_BUTTON) {
 					input[200]=input[199]='\0';
-					objs.push_back(new BaseSprite(input,"tex"));
-					((BaseSprite*)objs.back())->texfile=string(input);
-					((BaseSprite*)objs.back())->spr.SetPosition(x,y);
+					objs.push_back(new BaseVSSprite(input,"tex"));
+					((BaseVSSprite*)objs.back())->texfile=string(input);
+					((BaseVSSprite*)objs.back())->spr.SetPosition(x,y);
 				} else if (button==WS_MIDDLE_BUTTON&&makingstate==0) {
 					links.back()->x=x;
 					links.back()->y=y;

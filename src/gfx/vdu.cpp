@@ -86,7 +86,7 @@ int parse_vdu_type (const char * x) {
 
 
 
-VDU::VDU (const char * file, TextPlane *textp, unsigned short modes, short rwws, short clls, unsigned int *ma, float *mh) :Sprite (file),tp(textp),posmodes(modes), rows(rwws), cols(clls),scrolloffset(0){
+VDU::VDU (const char * file, TextPlane *textp, unsigned short modes, short rwws, short clls, unsigned int *ma, float *mh) :VSSprite (file),tp(textp),posmodes(modes), rows(rwws), cols(clls),scrolloffset(0){
   thismode.push_back(MSG);
   if (_Universe->numPlayers()>1) {
     posmodes&=(~VIEW);
@@ -105,9 +105,9 @@ VDU::VDU (const char * file, TextPlane *textp, unsigned short modes, short rwws,
   //cout << "vdu" << endl;
 };
 
-void VDU::DrawTargetSpr (Sprite *s, float per, float &sx, float &sy, float &w, float &h) {
+void VDU::DrawTargetSpr (VSSprite *s, float per, float &sx, float &sy, float &w, float &h) {
   float nw,nh;
-  static bool HighQTargetSprites = XMLSupport::parse_bool(vs_config->getVariable("graphics","high_quality_sprites","false"));
+  static bool HighQTargetVSSprites = XMLSupport::parse_bool(vs_config->getVariable("graphics","high_quality_sprites","false"));
   static bool drawweapsprite = XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","draw_weapon_sprite","false"));
 
   GetPosition (sx,sy);
@@ -125,7 +125,7 @@ void VDU::DrawTargetSpr (Sprite *s, float per, float &sx, float &sy, float &w, f
     h=-h;
     w = fabs (w*per);
   }else {
-	  if (HighQTargetSprites) {
+	  if (HighQTargetVSSprites) {
 		  GFXBlendMode (SRCALPHA,INVSRCALPHA);
 	  }else {
 		  GFXBlendMode (ONE,ZERO);
@@ -139,7 +139,7 @@ void VDU::DrawTargetSpr (Sprite *s, float per, float &sx, float &sy, float &w, f
 		  s->Draw();
 	  s->SetSize (nw,nh);
 	  h = fabs(h);
-	  if (HighQTargetSprites) {
+	  if (HighQTargetVSSprites) {
 		  GFXBlendMode (ONE,ZERO);
 	  }else {
 		  GFXAlphaTest(ALWAYS,0);
@@ -318,16 +318,16 @@ void VDU::DrawVDUShield (Unit * parent) {
   DrawTargetSpr (parent->getHudImage (),.25,x,y,w,h);
 
 }
-Sprite * getJumpImage () {
-  static Sprite s("jump-hud.spr");
+VSSprite * getJumpImage () {
+  static VSSprite s("jump-hud.spr");
   return &s;
 }
-Sprite * getSunImage () {
-  static Sprite s("sun-hud.spr");
+VSSprite * getSunImage () {
+  static VSSprite s("sun-hud.spr");
   return &s;
 }
-Sprite * getPlanetImage () {
-  static Sprite s("planet-hud.spr");
+VSSprite * getPlanetImage () {
+  static VSSprite s("planet-hud.spr");
   return &s;
 }
 
@@ -498,7 +498,7 @@ void VDU::DrawComm () {
     GFXEnable (TEXTURE0);
     GFXDisable(LIGHTING);
 
-    comm_ani->DrawAsSprite(this);
+    comm_ani->DrawAsVSSprite(this);
     if (comm_ani->Done()) {
       if (thismode.size()>1) {
 	if (XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","switch_back_from_comms","true"))) {
@@ -868,7 +868,7 @@ void VDU::DrawWebcam( Unit * parent)
 		    GFXEnable (TEXTURE0);
 		    GFXDisable(LIGHTING);
 			// Draw it
-		    webcam->DrawAsSprite(this);
+		    webcam->DrawAsVSSprite(this);
  		    GFXDisable (TEXTURE0);
 		}
 	}
@@ -884,7 +884,7 @@ void VDU::Draw (Unit * parent, const GFXColor & color) {
       GFXBlendMode(SRCALPHA,INVSRCALPHA);
       GFXEnable(TEXTURE0);
       GFXDisable(TEXTURE1);
-  Sprite::Draw();
+  VSSprite::Draw();
   //glDisable( GL_ALPHA_TEST);
   if (!parent) {
     return;

@@ -37,7 +37,7 @@ static float *mview = NULL;
 
 using namespace VSFileSystem;
 
-Sprite::Sprite(const char *file, enum FILTER texturefilter,GFXBOOL force) {
+VSSprite::VSSprite(const char *file, enum FILTER texturefilter,GFXBOOL force) {
   VSCONSTRUCT2('S')
   xcenter = 0;
   ycenter = 0;
@@ -49,7 +49,7 @@ Sprite::Sprite(const char *file, enum FILTER texturefilter,GFXBOOL force) {
   VSFile f;
   VSError err = Unspecified;
   if (file[0]!='\0') {
-	err = f.OpenReadOnly( file, SpriteFile);
+	err = f.OpenReadOnly( file, VSSpriteFile);
   }
   if (err<=Ok) {
     char texture[64]={0};
@@ -81,30 +81,30 @@ Sprite::Sprite(const char *file, enum FILTER texturefilter,GFXBOOL force) {
   }
 }	
 
-void	Sprite::ReadTexture( VSFileSystem::VSFile * f)
+void	VSSprite::ReadTexture( VSFileSystem::VSFile * f)
 {
 	if( !f->Valid())
 	{
     	widtho2 = heighto2 = 0;
     	xcenter = ycenter = 0;
-		cerr<<"Sprite::ReadTexture error : VSFile not valid"<<endl;
+		cerr<<"VSSprite::ReadTexture error : VSFile not valid"<<endl;
 		return;
 	}
 	surface = new Texture( f);
 }
 
-Sprite::~Sprite()
+VSSprite::~VSSprite()
 {
   VSDESTRUCT2
   if(surface!=NULL)
     delete surface;
 }
 
-void Sprite::SetST (const float s, const float t) {
+void VSSprite::SetST (const float s, const float t) {
   maxs = s;
   maxt = t;
 }
-void Sprite::DrawHere (Vector &ll, Vector &lr, Vector &ur, Vector &ul) {
+void VSSprite::DrawHere (Vector &ll, Vector &lr, Vector &ur, Vector &ul) {
     if (rotation) {
       const float cw = widtho2*cos(rotation);
       const float sw = widtho2*sin(rotation);
@@ -123,7 +123,7 @@ void Sprite::DrawHere (Vector &ll, Vector &lr, Vector &ur, Vector &ul) {
       ul=Vector(xcenter-widtho2, ycenter-heighto2, 0.00f);
     }
 }
-void Sprite::Draw()
+void VSSprite::Draw()
 {
   if (surface){//don't do anything if no surface
     surface->MakeActive();
@@ -144,30 +144,30 @@ void Sprite::Draw()
   }
 }
 
-void Sprite::SetPosition(const float &x1, const float &y1) {
+void VSSprite::SetPosition(const float &x1, const float &y1) {
   xcenter =x1;
   ycenter = y1;
 }
 
-void Sprite::GetPosition(float &x1, float &y1)
+void VSSprite::GetPosition(float &x1, float &y1)
 {
 	x1 = xcenter;
 	y1 = ycenter;
 }
-void Sprite::SetSize (float x1, float y1) {
+void VSSprite::SetSize (float x1, float y1) {
   widtho2 = x1/2;
   heighto2 = y1/2;
 }
-void Sprite::GetSize (float &x1,float &y1) {
+void VSSprite::GetSize (float &x1,float &y1) {
   x1 = widtho2*2;
   y1 = heighto2*2;
 }
 
-void Sprite::SetRotation(const float &rot) {
+void VSSprite::SetRotation(const float &rot) {
   rotation = rot;
 }
 
-void Sprite::GetRotation(float &rot) {
+void VSSprite::GetRotation(float &rot) {
   rot = rotation;
 }
 

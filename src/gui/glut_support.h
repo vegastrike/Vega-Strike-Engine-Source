@@ -57,7 +57,7 @@ void ShowText(float x, float y, float wid, int size, const char *string, int no_
 float WidthOfChar(char chr);
 void SetSoftwareMousePosition (int x, int y);
 void StartGUIFrame(GFXBOOL clear=GFXTRUE);
-void DrawGlutMouse (int mousex,int mousey, class Sprite * spr);
+void DrawGlutMouse (int mousex,int mousey, class VSSprite * spr);
 void EndGUIFrame(bool drawmouseover);
 extern int HAS_ALPHA;
 

@@ -94,7 +94,7 @@ void BaseInterface::Room::BaseShip::EndXML (FILE *fp) {
 			,mat.getQ().i,mat.getQ().j,mat.getQ().k);
 }
 
-void BaseInterface::Room::BaseSprite::EndXML (FILE *fp) {
+void BaseInterface::Room::BaseVSSprite::EndXML (FILE *fp) {
 	float x,y;
 	spr.GetPosition(x,y);
 	VSFileSystem::vs_fprintf(fp,"Base.Texture (room, '%s', '%s', %g, %g)\n",index.c_str(),texfile.c_str(),x,y);

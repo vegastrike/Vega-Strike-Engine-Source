@@ -1,6 +1,6 @@
 #include "sprite.h"
 class Cockpit;
-class Gauge: public Sprite {
+class Gauge: public VSSprite {
 
  public:
   enum DIRECTION {GAUGE_UP,GAUGE_DOWN,GAUGE_RIGHT, GAUGE_LEFT};

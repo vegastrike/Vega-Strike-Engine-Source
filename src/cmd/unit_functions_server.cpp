@@ -2,7 +2,7 @@
 #include "unit_generic.h"
 using std::string;
 
-Sprite * createSprite(const char *file)
+VSSprite * createVSSprite(const char *file)
 {
 	return NULL;
 }

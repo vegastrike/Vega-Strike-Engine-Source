@@ -17,11 +17,11 @@ namespace BaseUtil {
 	void Texture(int room, std::string index, std::string file, float x, float y) {
 		BaseInterface::Room *newroom=CheckRoom(room);
 		if (!newroom) return;
-		newroom->objs.push_back(new BaseInterface::Room::BaseSprite(file.c_str(),index));
+		newroom->objs.push_back(new BaseInterface::Room::BaseVSSprite(file.c_str(),index));
 #ifdef BASE_MAKER
-		((BaseInterface::Room::BaseSprite*)newroom->objs.back())->texfile=file;
+		((BaseInterface::Room::BaseVSSprite*)newroom->objs.back())->texfile=file;
 #endif
-		((BaseInterface::Room::BaseSprite*)newroom->objs.back())->spr.SetPosition(x,y);
+		((BaseInterface::Room::BaseVSSprite*)newroom->objs.back())->spr.SetPosition(x,y);
 	}
 	void Ship (int room, std::string index,QVector pos,Vector Q, Vector R) {
 		BaseInterface::Room *newroom=CheckRoom(room);

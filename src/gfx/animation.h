@@ -69,7 +69,7 @@ public:
 
   void DrawNoTransform ();
 
-  void DrawAsSprite (class Sprite *spr);
+  void DrawAsVSSprite (class VSSprite *spr);
 
   static void ProcessDrawQueue(std::vector <Animation *> &,float);
 

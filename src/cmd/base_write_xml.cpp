@@ -148,7 +148,7 @@ void BaseInterface::Room::BaseShip::EndXML (FILE *fp) {
 	endtag(fp,true);
 }
 
-void BaseInterface::Room::BaseSprite::EndXML (FILE *fp) {
+void BaseInterface::Room::BaseVSSprite::EndXML (FILE *fp) {
 	float x,y;
 	begintag(fp,"Texture",2);
 	spr.GetPosition(x,y);

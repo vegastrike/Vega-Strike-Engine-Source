@@ -9,7 +9,7 @@ void addBSPMesh( Unit::XML * xml, const char *filename, const float scale,int fa
 void pushMesh( Unit::XML * xml, const char *filename, const float scale,int faction,class Flightgroup * fg, int startframe/*-1 is random frame*/, double texturestarttime);
 
 Mount * createMount( const std::string& name, int ammo, int volume, float xyscale=0, float zscale=0); //short fix
-Sprite * createSprite(const char *file);
+VSSprite * createVSSprite(const char *file);
 
 void cache_ani (string s);
 

@@ -230,7 +230,7 @@ cloak_cg->cgLoadMedia("programs/cloaking_effect", "vertex.cg");
     g_game.use_ship_textures = XMLSupport::parse_bool (vs_config->getVariable ("graphics","UseShipTextures","false"));
     g_game.use_planet_textures = XMLSupport::parse_bool (vs_config->getVariable ("graphics","UsePlanetTextures","false"));
     g_game.use_logos = XMLSupport::parse_bool (vs_config->getVariable ("graphics","UseLogos","true"));
-    g_game.use_sprites = XMLSupport::parse_bool (vs_config->getVariable ("graphics","UseSprites","true"));
+    g_game.use_sprites = XMLSupport::parse_bool (vs_config->getVariable ("graphics","UseVSSprites","true"));
     g_game.use_animations = XMLSupport::parse_bool (vs_config->getVariable ("graphics","UseAnimations","true"));
 
 

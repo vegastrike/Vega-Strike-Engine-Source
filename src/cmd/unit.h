@@ -106,7 +106,7 @@ public:
   ///Sets the camera to be within this unit.
   void UpdateHudMatrix(int whichcam);
   ///What's the HudImage of this unit
-  Sprite * getHudImage ()const ;
+  VSSprite * getHudImage ()const ;
   ///Draws this unit with the transformation and matrix (should be equiv) separately
   virtual void Draw(const Transformation & quat = identity_transformation, const Matrix &m = identity_matrix);
   virtual void DrawNow(const Matrix &m = identity_matrix, float lod=1000000000);

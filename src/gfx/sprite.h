@@ -31,7 +31,7 @@ namespace VSFileSystem
 };
 
 class Texture;
-class Sprite {
+class VSSprite {
 	float xcenter;
 	float ycenter;
 	float widtho2;
@@ -42,8 +42,8 @@ class Sprite {
 	Texture *surface;
 
 public:
-	Sprite (const char *file, enum FILTER texturefilter=BILINEAR, GFXBOOL force=GFXFALSE);
-	~Sprite();
+	VSSprite (const char *file, enum FILTER texturefilter=BILINEAR, GFXBOOL force=GFXFALSE);
+	~VSSprite();
 	bool LoadSuccess() {return surface!=NULL;}
 	void Draw();
 	void DrawHere (Vector &ll, Vector &lr, Vector &ur, Vector &ul);

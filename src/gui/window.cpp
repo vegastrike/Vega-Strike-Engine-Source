@@ -203,15 +203,15 @@ void WindowManager::draw() {
     }
 
     // Emulate EndGUIFrame.
-    static Sprite MouseSprite("mouse.spr",BILINEAR,GFXTRUE);
+    static VSSprite MouseVSSprite("mouse.spr",BILINEAR,GFXTRUE);
     static Texture dummy("white.bmp",0,NEAREST,TEXTURE2D,TEXTURE_2D,GFXTRUE);
 	GFXDisable(CULLFACE);
 	ConditionalCursorDraw(true);
    // Figure position of cursor sprite.
     float sizex=0.0, sizey=0.0;
     const Point loc = globalEventManager().mouseLoc();
-    MouseSprite.GetSize(sizex,sizey);
-    MouseSprite.SetPosition(loc.x+sizex/2, loc.y+sizey/2);
+    MouseVSSprite.GetSize(sizex,sizey);
+    MouseVSSprite.SetPosition(loc.x+sizex/2, loc.y+sizey/2);
 
     dummy.MakeActive();
     GFXBlendMode(SRCALPHA,INVSRCALPHA);
@@ -221,7 +221,7 @@ void WindowManager::draw() {
     GFXEnable(TEXTURE0);
     GFXDisable(DEPTHTEST);
     GFXDisable(TEXTURE1);
-    MouseSprite.Draw();
+    MouseVSSprite.Draw();
 
     GFXHudMode(false);
     GFXEnable(CULLFACE);

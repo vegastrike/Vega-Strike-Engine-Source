@@ -9,7 +9,7 @@
 class StarSystem;
 class UnitCollection;
 class ClickList;
-class Sprite;
+class VSSprite;
 class OrderFactory;
 class CoordinateSelect;
 
@@ -20,8 +20,8 @@ class InputDFA {
   OrderFactory *orderfac;
   bool queueOrder;
   CoordinateSelect * locsel;
-  Sprite MouseArrow;
-  Sprite SelectBox;
+  VSSprite MouseArrow;
+  VSSprite SelectBox;
 
   //wish the mouse-bound functions could be member functions
   static void ClickSelect (KBSTATE, int,int,int,int,int);

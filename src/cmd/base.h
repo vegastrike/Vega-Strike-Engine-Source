@@ -107,16 +107,16 @@ public:
 			BaseShip (float r0, float r1, float r2, float r3, float r4, float r5, float r6, float r7, float r8, QVector pos, std::string ind)
 				:BaseObj (ind),mat (r0,r1,r2,r3,r4,r5,r6,r7,r8,QVector(pos.i/2,pos.j/2,pos.k))  {}
 		};
-		class BaseSprite : public BaseObj {
+		class BaseVSSprite : public BaseObj {
 		public:
 			virtual void Draw (::BaseInterface *base);
-			Sprite spr;
+			VSSprite spr;
 #ifdef BASE_MAKER
 			std::string texfile;
 			virtual void EndXML(FILE *fp);
 #endif
-			virtual ~BaseSprite () {}
-			BaseSprite (const char *spritefile, std::string ind) 
+			virtual ~BaseVSSprite () {}
+			BaseVSSprite (const char *spritefile, std::string ind) 
 				: BaseObj(ind),spr(spritefile,BILINEAR,GFXTRUE) {}
 		};
 		class BaseTalk : public BaseObj {
