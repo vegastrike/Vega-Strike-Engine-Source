@@ -86,6 +86,7 @@ NetServer::NetServer()
 	this->acctserver = 0;
 	this->srvtimeout.tv_sec = 0;
 	this->srvtimeout.tv_usec = 0;
+	this->snapchanged = 0;
 	/***** number of zones should be determined as server loads zones files *****/
 	zonemgr = new ZoneMgr();
 	UpdateTime();
@@ -722,7 +723,10 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
 					::iterator i = un->mounts.begin();//note to self: if vector<Mount *> is ever changed to vector<Mount> remove the const_ from the const_iterator
 				for (;i!=un->mounts.end();++i)
 					(*i).status=Mount::INACTIVE;
+				if (mount_num<un->mounts.size()&&mount_num>=0)
 					un->mounts[mount_num].status=Mount::ACTIVE;
+				else
+					COUT<<"ERROR --> Received a fire order on an invalid MOUNT: "<<mount_num<<" > "<<(un->mounts.size())<<endl;
 				// Ask for fire
 				if( mis != 0)
 					un->Fire(ROLES::FIRE_MISSILES|ROLES::EVERYTHING_ELSE,false);

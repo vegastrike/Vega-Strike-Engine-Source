@@ -200,12 +200,13 @@ void	ZoneMgr::removeClient( ClientPtr clt )
         exit( 1);
     }
 	for (ClientWeakList::iterator q = lst->begin();
-		q!=lst->end();
-		++q) {
+		q!=lst->end();) {
 			ClientWeakPtr cwp = *q;
 			ClientWeakPtr ocwp (clt);
 			if ((!(cwp<ocwp))&&!(ocwp<cwp)) {
-				lst->erase(q);
+				q=lst->erase(q);
+			} else {
+				++q;
 			}
 		}
 	zone_clients[zonenum]--;
