@@ -3560,7 +3560,7 @@ void BaseComputer::SellUpgradeOperation::concludeTransaction(void) {
     finish();
 }
 
-
+extern int GetModeFromName(const char *);
 // Buy a ship upgrade.
 bool BaseComputer::buyUpgrade(const EventCommandId& command, Control* control) {
     // Take care of Basic Repair, which is implemented entirely in this module.
@@ -3585,9 +3585,12 @@ bool BaseComputer::buyUpgrade(const EventCommandId& command, Control* control) {
 					Cargo itemCopy = *item;     // Copy this because we reload master list before we need it.
 					const int quantity=1;
 					playerUnit->BuyCargo(item->content, quantity, baseUnit, _Universe->AccessCockpit()->credits);
+					playerUnit->Upgrade(item->content,0,0,true,false);
+					/*
                                         const Unit * upgrade=getUnitFromUpgradeName(item->content,playerUnit->faction);                                            
                                         double percentage=0;
-                                        playerUnit->Upgrade(upgrade,0,0,0,true,percentage,makeTemplateUpgrade(playerUnit->name,playerUnit->faction));                                        
+                                        playerUnit->Upgrade(upgrade,0,0,GetModeFromName(item->content.c_str()),true,percentage,makeTemplateUpgrade(playerUnit->name,playerUnit->faction));                                        
+					*/
 					//RecomputeUnitUpgrades(playerUnit); //Narfed damage
 					loadUpgradeControls();
 					updateTransactionControls(itemCopy, true);

@@ -825,7 +825,13 @@ void ActivateAnimation(Unit * jumppoint) {
 		ActivateAnimation(un);
 	}
 }
-
+static bool isJumping(const vector <unorigdest*>&pending,Unit * un) {
+	for (size_t i =0;i<pending.size();++i) {
+		if (pending[i]->un==un)
+			return true;
+	}
+	return false;
+}
 bool StarSystem::JumpTo (Unit * un, Unit * jumppoint, const std::string &system, bool force) {
   if ((un->DockedOrDocking()&(~Unit::DOCKING_UNITS))!=0) {
     return false;
@@ -854,7 +860,7 @@ bool StarSystem::JumpTo (Unit * un, Unit * jumppoint, const std::string &system,
     justloaded=true;
     ss = _Universe->GenerateStarSystem (ssys.c_str(),filename.c_str(),Vector (0,0,0));
   }
-  if(ss) {
+  if(ss&&!isJumping(pendingjump,un)) {
 #ifdef JUMP_DEBUG
 	VSFileSystem::vs_fprintf (stderr,"Pushing back to pending queue!\n");
 #endif
@@ -879,6 +885,7 @@ bool StarSystem::JumpTo (Unit * un, Unit * jumppoint, const std::string &system,
       }
     
 #endif
+
   } else {
 #ifdef JUMP_DEBUG
 	VSFileSystem::vs_fprintf (stderr,"Failed to retrieve!\n");
