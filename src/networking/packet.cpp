@@ -2,10 +2,7 @@
 #include <config.h>
 #include <unistd.h>
 #include <math.h>
-
-#ifdef HAVE_ZLIB
 #include <zlib.h>
-#endif
 
 #include "packet.h"
 #include "lin_time.h"
