@@ -160,7 +160,7 @@ bool Unit::Dock (Unit * utdw) {
 bool Unit::UnDock (Unit * utdw) {
   unsigned int i=0;
 
-  for (i=0;utdw->image->dockedunits.size();i++) {
+  for (i=0;i<utdw->image->dockedunits.size();i++) {
     if (utdw->image->dockedunits[i]->uc.GetUnit()==this) {
       utdw->FreeDockingPort (i);
       i--;
