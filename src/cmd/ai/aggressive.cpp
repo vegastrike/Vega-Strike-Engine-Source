@@ -288,7 +288,9 @@ bool AggressiveAI::ProcessCurrentFgDirective(Flightgroup * fg) {
       }else {
 	    CommunicationMessage c(parent,leader,NULL,0);
 	    c.SetCurrentState (c.fsm->GetNoNode(),NULL,0);
-	    leader->getAIState()->Communicate(c);
+		Order * lo = leader->getAIState();
+		if (lo)
+			lo->Communicate(c);
       }
     }
     if (obedient) {
@@ -306,7 +308,9 @@ bool AggressiveAI::ProcessCurrentFgDirective(Flightgroup * fg) {
 	      c.SetCurrentState (c.fsm->GetNoNode(),NULL,0);
 	    }
 	    if (fg->directive!=last_directive) {
-	      leader->getAIState()->Communicate(c);
+			Order * lo = leader->getAIState();
+			if (lo)
+				lo->Communicate(c);
 	    }
 	  }
 	}
@@ -321,7 +325,9 @@ bool AggressiveAI::ProcessCurrentFgDirective(Flightgroup * fg) {
 	    //}else {
 	      //	  c.SetCurrentState (c.fsm->GetNoNode(),NULL,0);
 	      //	}
-	      leader->getAIState()->Communicate(c);
+		  Order * o = leader->getAIState();
+		  if (o)
+			  o->Communicate(c);
 	      float left= parent->getFgSubnumber()%2?1:-1;
 	      static float esc_percent= XMLSupport::parse_float(vs_config->getVariable ("AI",
 											"Targetting",
@@ -364,7 +370,9 @@ bool AggressiveAI::ProcessCurrentFgDirective(Flightgroup * fg) {
 	      }else {
 		c.SetCurrentState (c.fsm->GetNoNode(),NULL,0);
 	      }
-	      leader->getAIState()->Communicate(c);
+		  Order * oo = leader->getAIState();
+		  if (oo) 
+			  oo->Communicate(c);
 	    }else {
 	      //bool targetted=false;
 	      //float mindist;
@@ -384,7 +392,9 @@ bool AggressiveAI::ProcessCurrentFgDirective(Flightgroup * fg) {
 	      }else {
 		c.SetCurrentState (c.fsm->GetNoNode(),NULL,0);
 	      }
-	      leader->getAIState()->Communicate(c);
+		  Order * loo = leader->getAIState();
+		  if (loo)
+			  loo->Communicate(c);
 	    }
 	  }
 	}

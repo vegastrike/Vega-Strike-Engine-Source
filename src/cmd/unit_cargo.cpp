@@ -171,7 +171,11 @@ void GameUnit<UnitType>::EjectCargo (unsigned int index) {
 	}
       }
       if (!cargo) {
-		  cargo = UnitFactory::createUnit (tmpcontent.c_str(),false,FactionUtil::GetFaction("upgrades"));
+		  if (tmpcontent=="eject") {
+			  cargo = UnitFactory::createUnit ("eject",false,faction);
+		  }else {
+			  cargo = UnitFactory::createUnit (tmpcontent.c_str(),false,FactionUtil::GetFaction("upgrades"));
+		  }
       }
       if (cargo->name=="LOAD_FAILED") {
 	cargo->Kill();

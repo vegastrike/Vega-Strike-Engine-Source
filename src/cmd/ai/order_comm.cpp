@@ -70,7 +70,9 @@ void Order::ProcessCommunicationMessages(float AICommresponseTime, bool RemoveMe
             }else {
 	      c.SetCurrentState (c.fsm->GetUnAbleToDockNode(),NULL,0);
             }
-	    un->getAIState()->Communicate (c);
+			Order * o  = un->getAIState();
+			if (o)
+				o->Communicate (c);
 	  }  
 	}
 	if (cleared||(((float)rand())/RAND_MAX)<(1/time)) {

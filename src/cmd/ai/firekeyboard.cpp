@@ -375,7 +375,9 @@ void HelpOut (bool crit, std::string conv) {
 	} else {
 	  c.SetCurrentState (c.fsm->GetNoNode(),NULL,0);
 	}
-	un->getAIState()->Communicate (c);
+	Order * o = un->getAIState();
+	if (o)
+		o->Communicate (c);
       }
     }
   }
@@ -1218,7 +1220,9 @@ void FireKeyboard::Execute () {
 	  if (!AUDIsPlaying (c.getCurrentState()->GetSound(c.sex))) {
 	    AUDStartPlaying(c.getCurrentState()->GetSound(c.sex));
 	  }
-	  targ->getAIState ()->Communicate (c);
+	  Order * o = targ->getAIState();
+	  if (o)
+		  o->Communicate (c);
 	}else {
 	  FSM::Node * n = mymsg->getCurrentState();
 	  if (i<n->edges.size()) {
@@ -1227,7 +1231,9 @@ void FireKeyboard::Execute () {
 	    if (!AUDIsPlaying (c.getCurrentState()->GetSound(c.sex))) {
 	      AUDStartPlaying(c.getCurrentState()->GetSound(c.sex));
 	    }
-	    targ->getAIState ()->Communicate (c);
+		Order * oo = targ->getAIState();
+		if (oo)
+			oo->Communicate (c);
 	  }
 	}
       }

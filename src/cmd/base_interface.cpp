@@ -524,7 +524,8 @@ void BaseInterface::Room::Launch::Click (BaseInterface *base,float x, float y, i
 	    playa->UnDock (bas);
 	    CommunicationMessage c(bas,playa,NULL,0);
 	    c.SetCurrentState (c.fsm->GetUnDockNode(),NULL,0);
-	    playa->getAIState()->Communicate (c);
+		if (playa->getAIState())
+			playa->getAIState()->Communicate (c);
 	    abletodock(5);
 	  }
 	  }

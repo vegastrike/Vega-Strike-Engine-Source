@@ -206,7 +206,7 @@ void GameUnit<UnitType>::ApplyDamage (const Vector & pnt, const Vector & normal,
       //now we can dereference it because we checked it against the parent
       CommunicationMessage c(ownerDoNotDereference,this,NULL,0);
       c.SetCurrentState(c.fsm->GetHitNode(),NULL,0);
-      this->getAIState()->Communicate (c);      
+      if (this->getAIState()) this->getAIState()->Communicate (c);      
       Threaten (ownerDoNotDereference,10);//the dark danger is real!
   }
   bool mykilled = hull<0;

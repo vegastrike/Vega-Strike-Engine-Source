@@ -46,7 +46,9 @@ bool RequestClearence(Unit *parent, Unit *targ, unsigned char sex) {
 	}
 	CommunicationMessage c(parent,targ,NULL,sex);
 	c.SetCurrentState(c.fsm->GetRequestLandNode(),NULL,sex);
-	targ->getAIState()->Communicate (c);
+	Order * o=targ->getAIState();
+	if (o)
+		o->Communicate (c);
 	return true;
 }
 
@@ -229,8 +231,9 @@ void FireAt::ChooseTargets (int numtargs, bool force) {
     }
     float gspeed, grange, mrange;
     grange=FLT_MAX;
-	if (su->getAIState()) 
-		su->getAIState()->getAverageGunSpeed (gspeed,grange,mrange);
+	Order * o = su->getAIState();
+	if (o) 
+		o->getAverageGunSpeed (gspeed,grange,mrange);
     if (tbin [bnum].maxrange<grange) {
       tbin [bnum].maxrange=grange;
     }

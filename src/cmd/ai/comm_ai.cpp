@@ -104,7 +104,9 @@ void CommunicatingAI::TerminateContrabandSearch(bool contraband_detected) {
     }else {
       c.SetCurrentState(c.fsm->GetContrabandUnDetectedNode(),comm_face,sex);      
     }
-    un->getAIState()->Communicate(c);
+	Order * o = un->getAIState();
+	if (o)
+		o->Communicate(c);
   }
   contraband_searchee.SetUnit(NULL);
 
@@ -114,7 +116,7 @@ void CommunicatingAI::GetMadAt (Unit * un, int numHitsPerContrabandFail) {
       CommunicationMessage hit (un,parent,NULL,0);
       hit.SetCurrentState(hit.fsm->GetHitNode(),comm_face,sex);
       for (         int i=0;i<numHitsPerContrabandFail;i++) {
-	parent->getAIState()->Communicate(hit);
+		  parent->getAIState()->Communicate(hit);
       }
 }
 
@@ -138,7 +140,9 @@ void CommunicatingAI::UpdateContrabandSearch () {
       if (u->CourseDeviation(SpeedAndCourse,u->GetVelocity())>speed_course_change) {
 	CommunicationMessage c(parent,u,comm_face,sex);
 	c.SetCurrentState(c.fsm->GetContrabandWobblyNode(),comm_face,sex);
-	u->getAIState()->Communicate (c);
+	Order * o;
+	if ((o=u->getAIState()))
+		o->Communicate (c);
 	GetMadAt(u,1);
 	SpeedAndCourse=u->GetVelocity();
       }
@@ -168,7 +172,8 @@ void CommunicatingAI::InitiateContrabandSearch (float playaprob, float targprob)
     SpeedAndCourse = u->GetVelocity();
     CommunicationMessage c(parent,u,comm_face,sex);
     c.SetCurrentState(c.fsm->GetContrabandInitiateNode(),comm_face,sex);
-    u->getAIState()->Communicate (c);
+	if (u->getAIState())
+		u->getAIState()->Communicate (c);
     which_cargo_item = 0;
     }
     }
@@ -258,7 +263,9 @@ void CommunicatingAI::ProcessCommMessage (CommunicationMessage &c) {
       Unit * un = c.sender.GetUnit();
       if (un) {
 	      int b = selectCommunicationMessage (c,un);
-		  un->getAIState()->Communicate (CommunicationMessage (parent,un,c,b,comm_face,sex));
+		  Order * o = un->getAIState();
+		  if (o)
+			  o->Communicate (CommunicationMessage (parent,un,c,b,comm_face,sex));
       }
     }
   }
