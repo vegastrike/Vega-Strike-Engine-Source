@@ -157,7 +157,7 @@ public:
 	    CargoList->AddTextItem ("[Back To Categories]","[Back To Categories]");
 	  for (unsigned int i=0;i<CurrentList->size();i++) {
 	    if (match(curcategory.begin(),curcategory.end(),(*CurrentList)[i].category.begin(),(*CurrentList)[i].category.end(),true)) {
-	      CargoList->AddTextItem ((tostring((int)i)+ string(" ")+(*CurrentList)[i].content).c_str() ,((*CurrentList)[i].content+"("+tostring((*CurrentList)[i].quantity)+")").c_str());
+	      CargoList->AddTextItem ((tostring((int)i)+ string(" ")+(*CurrentList)[i].content).c_str() ,(beautify((*CurrentList)[i].content)+"("+tostring((*CurrentList)[i].quantity)+")").c_str());
 	    }
 	  }
 	}
