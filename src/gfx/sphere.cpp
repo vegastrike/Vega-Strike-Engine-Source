@@ -8,9 +8,11 @@
 #endif
 
 using XMLSupport::tostring;
-const int numspheres=4;
+const int pixelscalesize=50;
 SphereMesh::SphereMesh(float radius, int stacks, int slices, char *texture, char *alpha,bool Insideout,  const BLENDFUNC a, const BLENDFUNC b, bool envMapping) : Mesh() {
-
+  int numspheres = (stacks+slices)/8;
+  if (numspheres<1)
+    numspheres =1;
   Mesh *oldmesh;
   char ab[3];
   ab[2]='\0';
@@ -29,16 +31,22 @@ SphereMesh::SphereMesh(float radius, int stacks, int slices, char *texture, char
   mn = Vector (-radialSize,-radialSize,-radialSize);
   mx = Vector (radialSize,radialSize,radialSize);
   vector <MeshDrawContext> *odq=NULL;
-  stacks*=2;
-  slices*=2;
+  int origst = stacks;
+  int origsl = slices;
   for (int l=0;l<numspheres;l++) {
     
     draw_queue = new vector<MeshDrawContext>;
     if (!odq)
       odq = draw_queue;
-    stacks/=2;
-    slices/=2;
-
+    //    stacks = origst/(l+1);
+    //slices = origsl/(l+1);
+    if (stacks>8) {
+      stacks -=4;
+      slices-=4;
+    } else {
+      stacks-=2;
+      slices-=2;
+    }
     float rho, drho, theta, dtheta;
     float x, y, z;
     float s, t, ds, dt;
@@ -139,7 +147,7 @@ SphereMesh::SphereMesh(float radius, int stacks, int slices, char *texture, char
       refcount=1;
       orig=NULL;
       if (l>=1)
-	lodsize=(numspheres+1-l)*50;
+	lodsize=(numspheres+1-l)*pixelscalesize;
       oldmesh[l]=*this;
       refcount =0;
       orig = oldorig;
