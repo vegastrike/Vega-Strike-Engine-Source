@@ -44,7 +44,8 @@ public:
 			string name;
 			QVector position;
 			std::vector<unsigned> lowerdestinations;
-			const float * col;
+			GFXColor col;
+			void UpdateColor();
 			string &GetName();
 			const string &GetName() const;
 			bool isDrawable() const;
@@ -52,7 +53,7 @@ public:
 			const QVector &Position () const;
 			unsigned GetDestinationIndex (unsigned index) const;
 			unsigned GetDestinationSize() const;
-			GFXColor GetColor() const;
+			GFXColor GetColor();
 			SystemInfo(const string &name, const QVector &position, const std::vector<std::string> &destinations, const CachedSystemIterator *csi);
 		};
 

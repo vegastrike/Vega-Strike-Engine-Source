@@ -275,9 +275,15 @@ NavigationSystem::SystemIterator & NavigationSystem::SystemIterator::operator ++
 	return *this;
 }
 
+void NavigationSystem::CachedSystemIterator::SystemInfo::UpdateColor() {
+	const float *tcol=((!name.empty())&&(name!="-"))?FactionUtil::GetSparkColor(FactionUtil::GetFactionIndex(UniverseUtil::GetGalaxyFaction(name))):&(GrayColorArray[0]);
+	col=GFXColor(tcol[0],tcol[1],tcol[2],tcol[3]);
+}
+
 NavigationSystem::CachedSystemIterator::SystemInfo::SystemInfo(const string &name, const QVector &position, const std::vector<std::string> &destinations, const NavigationSystem::CachedSystemIterator *csi)
-		: name(name), position(position), col(((!name.empty())&&(name!="-"))?FactionUtil::GetSparkColor(FactionUtil::GetFactionIndex(UniverseUtil::GetGalaxyFaction(name))):&(GrayColorArray[0])) {
+		: name(name), position(position) {
 	// Eww... double for loop!
+	UpdateColor();
 	if (csi) {
 		for (int i=0;i<destinations.size();++i) {
 			for (int j=0;j<csi->systems.size();++j) {
@@ -389,8 +395,13 @@ unsigned NavigationSystem::CachedSystemIterator::SystemInfo::GetDestinationSize 
 	return lowerdestinations.size();
 }
 
-GFXColor NavigationSystem::CachedSystemIterator::SystemInfo::GetColor() const {
-	return GFXColor (col[0],col[1],col[2],col[3]);
+GFXColor NavigationSystem::CachedSystemIterator::SystemInfo::GetColor() {
+	static unsigned long lastupdate=0;
+	lastupdate+=1299811;
+	lastupdate%=104729;
+	if (lastupdate<32)
+		UpdateColor();
+	return col;
 }
 
 NavigationSystem::CachedSystemIterator & NavigationSystem::CachedSystemIterator::next () {

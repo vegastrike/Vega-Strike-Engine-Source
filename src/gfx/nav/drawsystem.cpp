@@ -170,7 +170,7 @@ void NavigationSystem::DrawSystem()
 	} 
 	//**********************************
 
-
+	
 
 	//Find Centers
 	//**********************************
@@ -179,6 +179,14 @@ void NavigationSystem::DrawSystem()
 	center_z = (min_z + max_z)/2;
 	//**********************************
 
+	max_x=2*max_x-center_x;
+	max_y=2*max_y-center_y;
+	max_z=2*max_z-center_z;
+	min_x=2*min_x-center_x;
+	min_y=2*min_y-center_y;
+	min_z=2*min_z-center_z;
+	
+	themaxvalue*=2;
 
 //#define SQRT3 1.7320508
 //	themaxvalue = sqrt(themaxvalue*themaxvalue + themaxvalue*themaxvalue + themaxvalue*themaxvalue);
@@ -189,9 +197,9 @@ void NavigationSystem::DrawSystem()
 	//**********************************
 
 //	{
-		float half_x=(0.5*(max_x - min_x));
-		float half_y=(0.5*(max_y - min_y));
-		float half_z=(0.5*(max_z - min_z));
+		float half_x=(max_x - min_x);
+		float half_y=(max_y - min_y);
+		float half_z=(max_z - min_z);
 	
 		camera_z = sqrt( ( half_x * half_x ) + ( half_y * half_y ) + ( half_z * half_z ));
 	

@@ -1560,12 +1560,13 @@ void NavigationSystem::Adjust3dTransformation(bool three_d, bool system_vs_galax
 	//	**********************************
 	if(	((mouse_previous_state[1] == 1) && TestIfInRange(screenskipby4[0], screenskipby4[1], screenskipby4[2], screenskipby4[3], mouse_x_current, mouse_y_current)) || (mouse_wentdown[3]||mouse_wentdown[4]))
 	{
+		static float wheel_zoom_level=XMLSupport::parse_float(vs_config->getVariable("graphics","wheel_zoom_amount","0.1"));
 		if(system_vs_galaxy)
 		{
 			if (mouse_wentdown[3]) {
-				zoom_s += .4;
+				zoom_s += wheel_zoom_level;
 			} else if (mouse_wentdown[4]) {
-				zoom_s -= .4;
+				zoom_s -= wheel_zoom_level;
 			} else {
 				zoom_s = zoom_s + ( /*1.0 +*/ 8*(mouse_y_current - mouse_y_previous) );
 			}
@@ -1580,9 +1581,9 @@ void NavigationSystem::Adjust3dTransformation(bool three_d, bool system_vs_galax
 		else
 		{
 			if (mouse_wentdown[3]) {
-				zoom += .4;
+				zoom += wheel_zoom_level;
 			} else if (mouse_wentdown[4]) {
-				zoom -= .4;
+				zoom -= wheel_zoom_level;
 			} else {
 				zoom = zoom + ( /*1.0 +*/ 8*(mouse_y_current - mouse_y_previous) );
 			}
