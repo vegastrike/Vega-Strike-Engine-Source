@@ -1372,7 +1372,7 @@ void Cockpit::Update () {
 	  fg->nr_ships++;
 	  fg->nr_ships_left++;
 	}
-	Unit * un = UnitFactory::createUnit (unitfilename.c_str(),false,this->unitfaction,unitmodname,fg,fgsnumber);
+	Unit * un = GameUnitFactory::createUnit (unitfilename.c_str(),false,this->unitfaction,unitmodname,fg,fgsnumber);
 	un->SetCurPosition (UniverseUtil::SafeEntrancePoint (savegame->GetPlayerLocation()));
 	ss->AddUnit (un);
 

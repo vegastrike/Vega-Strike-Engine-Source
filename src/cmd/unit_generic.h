@@ -267,9 +267,9 @@ protected:
 // Uses starsystem stuff so only in Unit class and maybe in
   virtual bool InCorrectStarSystem (StarSystem *active) {return false;}
 // Make it an array of string in AcctUnit and NetUnit and a Mesh * in Unit
- std::vector <string> meshdata;
+ std::vector <string> meshdata_string;
 //Use that only in sub classes not in GenericUnit
-  virtual int nummesh()const {return 0;}
+  int nummesh()const {return 0;}
 //void FixGauges();
 // Uses planet stuff to put in NetUnit
   virtual void SetPlanetOrbitData (PlanetaryTransform *trans) {}

@@ -46,12 +46,14 @@ Universe::Universe()
 Universe::~Universe()
 {
   unsigned int i;
+  /*
   for (i=0;i<factions.size();i++) {
     delete factions[i];
   }
   for (i=0;i<cockpit.size();i++) {
     delete cockpit[i];
   }
+  */
   factions.clear();
   cockpit.clear();
 }

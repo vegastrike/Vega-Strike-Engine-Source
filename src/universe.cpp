@@ -93,7 +93,7 @@ GameUniverse::GameUniverse():Universe()
 GameUniverse::~GameUniverse()
 {
   int i;
-  CacheJumpStar(true);
+  //CacheJumpStar(true);
   DeInitInput();
   GFXShutdown();
 }

@@ -127,9 +127,9 @@ Unit::Unit (std::vector <string> & meshes, bool SubU, int fact) {
   Init();
   this->faction = fact;
   SubUnit = SubU;
-  meshdata = meshes;
+  meshdata_string = meshes;
   meshes.clear();
-  meshdata.push_back(NULL);
+  meshdata_string.push_back(NULL);
   calculate_extent(false);
 }
 
@@ -179,8 +179,8 @@ Unit::Unit(const char *filename, bool SubU, int faction,std::string unitModifica
 	  if (fp) fclose (fp); 
 	  else {
 	    fprintf (stderr,"Warning: Cannot locate %s",filename);	  
-	    meshdata.clear();
-	    meshdata.push_back(NULL);
+	    meshdata_string.clear();
+	    meshdata_string.push_back(NULL);
 	    this->name=string("LOAD_FAILED");
 	    //	    assert ("Unit Not Found"==NULL);
 	  }
@@ -206,7 +206,7 @@ Unit::Unit(const char *filename, bool SubU, int faction,std::string unitModifica
 	LoadFile(filename);
 	int nummesh;
 	ReadInt(nummesh);
-	meshdata.clear();
+	meshdata_string.clear();
 	for(int meshcount = 0; meshcount < nummesh; meshcount++)
 	{
 		int meshtype;
@@ -214,11 +214,11 @@ Unit::Unit(const char *filename, bool SubU, int faction,std::string unitModifica
 		char meshfilename[64];
 		float x,y,z;
 		//ReadMesh(meshfilename, x,y,z);
-		meshdata.push_back(meshfilename);
+		meshdata_string.push_back(meshfilename);
 
-		//		meshdata[meshcount]->SetPosition(Vector (x,y,z));
+		//		meshdata_string[meshcount]->SetPosition(Vector (x,y,z));
 	}
-	meshdata.push_back(NULL);
+	meshdata_string.push_back(NULL);
 	int numsubunit;
 	ReadInt(numsubunit);
 	for(int unitcount = 0; unitcount < numsubunit; unitcount++)
@@ -674,26 +674,6 @@ void Unit::SetVisible(bool invis) {
 }
 
 float Unit::GetElasticity() {return .5;}
-
-
-/***********************************************************************************/
-/**** UNIT_FACTORY STUFF                                                           */
-/***********************************************************************************/
-
-Unit* UnitFactory::createGenericUnit( const char *filename,
-		               bool        SubUnit,
-		               int         faction,
-		               std::string customizedUnit,
-		               Flightgroup *flightgroup,
-		               int         fg_subnumber )
-{
-    return new Unit( filename,
-                     SubUnit,
-                     faction,
-                     customizedUnit,
-                     flightgroup,
-                     fg_subnumber );
-}
 
 
 /***********************************************************************************/
@@ -2037,8 +2017,8 @@ bool Unit::UpgradeSubUnits (Unit * up, int subunitoffset, bool touchme, bool dow
 	  addtome->SetRecursiveOwner(this);//set recursive owner
 	} else {
 	  Unit * un;//make garbage unit
-	  // TO REPLACE BACK WHEN WORK DONE ON FACTION !!
-	  // ui.preinsert (un=UnitFactory::createUnit("blank",true,faction));//give a default do-nothing unit
+	  // NOT 100% SURE A GENERIC UNIT CAN FIT (WAS GAME UNIT CREATION)
+	  ui.preinsert (un=UnitFactory::createGenericUnit("blank",true,faction));//give a default do-nothing unit
 	  ui.preinsert (un=new Unit(0));//give a default do-nothing unit
 	  un->limits.yaw=0;
 	  un->limits.pitch=0;
@@ -2469,8 +2449,16 @@ bool Unit::BuyCargo (const std::string &cargo,unsigned int quantity, Unit * sell
   return false;
 }
 
+Unit& GetUnitMasterPartList () {
+  return *UnitFactory::getMasterPartList( );
+}
+
+Cargo * GetMasterPartList(const char *input_buffer){
+  unsigned int i;
+  return GetUnitMasterPartList().GetCargo (input_buffer,i);
+}
+
 void Unit::ImportPartList (const std::string& category, float price, float pricedev,  float quantity, float quantdev) {
-/*
 	unsigned int numcarg = GetUnitMasterPartList().numCargo();
   float minprice=FLT_MAX;
   float maxprice=0;
@@ -2522,7 +2510,6 @@ void Unit::ImportPartList (const std::string& category, float price, float price
       AddCargo(c,false);
     }
   }
-*/
 }
 
 std::string Unit::massSerializer (const XMLType &input, void *mythis) {

@@ -1234,18 +1234,18 @@ Unit * Mission::call_unit_launch(CreateFlightgroup *fg, int type, const string &
 	 d=parse_alpha (bdst);
        if (bsrc[0]!='\0') 
 	 s=parse_alpha (bsrc);
-       my_unit = UnitFactory::createPlanet (QVector(0,0,0),QVector(0,0,0),0,Vector(0,0,0), 0,0,radius,tex,s,d, ParseDestinations(destinations),QVector(0,0,0),NULL,mat,vector<GFXLightLocal>(),faction_nr,tex);
+       my_unit = GameUnitFactory::createPlanet (QVector(0,0,0),QVector(0,0,0),0,Vector(0,0,0), 0,0,radius,tex,s,d, ParseDestinations(destinations),QVector(0,0,0),NULL,mat,vector<GFXLightLocal>(),faction_nr,tex);
 
        free (bsrc);
        free (bdst);
        free (tex);
        free (citylights);
      }else if (type==NEBULAPTR) {
-       my_unit=UnitFactory::createNebula (fg->fg->type.c_str(),false,faction_nr,fg->fg,u);
+       my_unit=GameUnitFactory::createNebula (fg->fg->type.c_str(),false,faction_nr,fg->fg,u);
      } else if (type==ASTEROIDPTR) {
-       my_unit=UnitFactory::createAsteroid(fg->fg->type.c_str(),faction_nr,fg->fg,u);
+       my_unit=GameUnitFactory::createAsteroid(fg->fg->type.c_str(),faction_nr,fg->fg,u);
      }else {
-       my_unit=UnitFactory::createUnit(fg->fg->type.c_str(),false,faction_nr,string(""),fg->fg,u);
+       my_unit=GameUnitFactory::createUnit(fg->fg->type.c_str(),false,faction_nr,string(""),fg->fg,u);
      }
      units[u]=my_unit;
    }

@@ -7,7 +7,7 @@
 #include "gfx/matrix.h"
 Briefing::Ship::Ship (const char * filename, int faction, const Vector & position) {
   VSCONSTRUCT2('s')
-  Unit * tmp  = UnitFactory::createUnit(filename,true,faction);
+  Unit * tmp  = GameUnitFactory::createUnit(filename,true,faction);
   meshdata = tmp->StealMeshes();
   tmp->Kill();
   cloak=1;

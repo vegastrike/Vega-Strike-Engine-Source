@@ -100,6 +100,7 @@ protected:
   ~GameUnit();
 
   friend class UnitFactory;
+  friend class GameUnitFactory;
 
 public:
   ///Initialize many of the defaults inherant to the constructor

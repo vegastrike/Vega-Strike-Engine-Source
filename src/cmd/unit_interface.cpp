@@ -653,7 +653,7 @@ void UpgradingInfo::CommitItem (const char *inp_buf, int button, int state) {
 	    fg->nr_ships_left++;
 	  }
 
-	  Unit * NewPart = UnitFactory::createUnit (input_buffer,false,base->faction,"",fg,fgsnumber);
+	  Unit * NewPart = GameUnitFactory::createUnit (input_buffer,false,base->faction,"",fg,fgsnumber);
 	  NewPart->SetFaction(un->faction);
 	  if (NewPart->name!=string("LOAD_FAILED")) {
 	    if (NewPart->nummesh()>0) {
@@ -692,7 +692,7 @@ void UpgradingInfo::CommitItem (const char *inp_buf, int button, int state) {
 
       char *unitdir =GetUnitDir(un->name.c_str());
 
-      Unit * temprate= UnitFactory::createUnit ((string(unitdir)+string(".template")).c_str(),true,un->faction);
+      Unit * temprate= GameUnitFactory::createUnit ((string(unitdir)+string(".template")).c_str(),true,un->faction);
       free(unitdir);
       if (temprate->name!=string("LOAD_FAILED")) {
 	templ=temprate;
@@ -724,11 +724,11 @@ void UpgradingInfo::CommitItem (const char *inp_buf, int button, int state) {
 	    input_buffer = strdup ((string(unitdir)+string(".blank")).c_str());
 	    free(unitdir);
 	  }
-	  NewPart = UnitFactory::createUnit (input_buffer,true,FactionUtil::GetFaction("upgrades"));
+	  NewPart = GameUnitFactory::createUnit (input_buffer,true,FactionUtil::GetFaction("upgrades"));
 	  NewPart->SetFaction(un->faction);
 	  if (NewPart->name==string("LOAD_FAILED")) {
 	    NewPart->Kill();
-	    NewPart = UnitFactory::createUnit (input_buffer,true,un->faction);
+	    NewPart = GameUnitFactory::createUnit (input_buffer,true,un->faction);
 	  }
 	  if (NewPart->name!=string("LOAD_FAILED")) {
    	    if (mode!=SHIPDEALERMODE) {

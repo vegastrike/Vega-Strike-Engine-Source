@@ -591,7 +591,7 @@ void createObjects(std::vector <std::string> &fighter0name, std::vector <StarSys
                 _Universe.SetActiveCockpit(_Universe.AccessCockpit(squadnum));
 
         }
-  	fighters[a] = UnitFactory::createUnit(fightername, false,tmptarget[a],modifications,fg,s);
+  	fighters[a] = GameUnitFactory::createUnit(fightername, false,tmptarget[a],modifications,fg,s);
     _Universe.activeStarSystem()->AddUnit(fighters[a]);
 	if (s==0&&squadnum<(int)fighter0name.size()) {
 		_Universe.AccessCockpit(squadnum)->Init (fighters[a]->getCockpit().c_str());
@@ -608,17 +608,17 @@ void createObjects(std::vector <std::string> &fighter0name, std::vector <StarSys
 	  bool isvehicle=false;
 	if (fg_terrain==-2) {
 
-	  fighters[a]= UnitFactory::createBuilding (myterrain,isvehicle,fightername,false,tmptarget[a],string(""),fg);
+	  fighters[a]= GameUnitFactory::createBuilding (myterrain,isvehicle,fightername,false,tmptarget[a],string(""),fg);
 	}else {
 	  
 	  if (fg_terrain>=(int)_Universe.activeStarSystem()->numTerrain()) {
 	    ContinuousTerrain * t;
 	    assert (fg_terrain-_Universe.activeStarSystem()->numTerrain()<_Universe.activeStarSystem()->numContTerrain());
 	    t =_Universe.activeStarSystem()->getContTerrain(fg_terrain-_Universe.activeStarSystem()->numTerrain());
-	    fighters[a]= UnitFactory::createBuilding (t,isvehicle,fightername,false,tmptarget[a],string(""),fg);
+	    fighters[a]= GameUnitFactory::createBuilding (t,isvehicle,fightername,false,tmptarget[a],string(""),fg);
 	  }else {
 	    Terrain *t=_Universe.activeStarSystem()->getTerrain(fg_terrain);
-	    fighters[a]= UnitFactory::createBuilding (t,isvehicle,fightername,false,tmptarget[a],string(""),fg);
+	    fighters[a]= GameUnitFactory::createBuilding (t,isvehicle,fightername,false,tmptarget[a],string(""),fg);
 	  }
 	  
 	}
@@ -676,12 +676,12 @@ void AddUnitToSystem (const SavedUnits *su) {
   Unit * un=NULL;
   switch (su->type) {
   case ENHANCEMENTPTR:
-    un = UnitFactory::createEnhancement (su->filename.c_str(),FactionUtil::GetFaction (su->faction.c_str()),string(""));
+    un = GameUnitFactory::createEnhancement (su->filename.c_str(),FactionUtil::GetFaction (su->faction.c_str()),string(""));
     un->SetPosition(QVector(0,0,0));
     break;
   case UNITPTR:
   default:
-    un = UnitFactory::createUnit (su->filename.c_str(),false,FactionUtil::GetFaction (su->faction.c_str()));
+    un = GameUnitFactory::createUnit (su->filename.c_str(),false,FactionUtil::GetFaction (su->faction.c_str()));
     un->EnqueueAI (new Orders::AggressiveAI ("default.agg.xml", "default.int.xml"));
     un->SetTurretAI ();
     if (_Universe.AccessCockpit()->GetParent()) {

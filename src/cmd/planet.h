@@ -69,7 +69,7 @@ protected:
     /// constructor - only to be called by UnitFactory
     Planet(QVector x,QVector y,float vely,const Vector & rotvel, float pos,float gravity,float radius,const char * filename, BLENDFUNC blendsrc, BLENDFUNC blenddst, vector<char *> dest, const QVector &orbitcent, Unit * parent, const GFXMaterial & ourmat, const std::vector <GFXLightLocal> &, int faction,string fullname, bool inside_out=false);
 
-    friend class UnitFactory;
+    friend class GameUnitFactory;
 
 public:
   UnitCollection satellites;

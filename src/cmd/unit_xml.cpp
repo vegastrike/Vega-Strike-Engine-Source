@@ -559,7 +559,7 @@ void GameUnit::beginElement(const string &name, const AttributeList &attributes)
 	break;
       }
     }    
-    GameUnit *upgradee =UnitFactory::createUnit(filename.c_str(),true,FactionUtil::GetFaction("upgrades"));
+    GameUnit *upgradee =GameUnitFactory::createUnit(filename.c_str(),true,FactionUtil::GetFaction("upgrades"));
 	Unit::Upgrade (upgradee,soffset,moffset,GetModeFromName (filename.c_str()),true,percent,NULL);
     upgradee->Kill();
     }
@@ -824,7 +824,7 @@ void GameUnit::beginElement(const string &name, const AttributeList &attributes)
     
     //    CrossProduct (Q,R,P);
     indx = xml->units.size();
-    xml->units.push_back(UnitFactory::createUnit (filename.c_str(),true,faction,xml->unitModifications,NULL)); // I set here the fg arg to NULL
+    xml->units.push_back(GameUnitFactory::createUnit (filename.c_str(),true,faction,xml->unitModifications,NULL)); // I set here the fg arg to NULL
     if (xml->units.back()->name=="LOAD_FAILED") {
 	  xml->units.back()->limits.yaw=0;
 	  xml->units.back()->limits.pitch=0;

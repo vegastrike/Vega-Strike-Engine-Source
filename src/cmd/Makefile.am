@@ -54,6 +54,7 @@ libcmd_a_SOURCES =				\
 	unit_repair.cpp			\
 	unit_weapon.cpp			\
 	unit_factory.cpp		\
+	unit_factory_generic.cpp		\
 	weapon_xml.cpp			\
 	weapon_xml.h			\
 	planet.h 				\

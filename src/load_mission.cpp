@@ -208,7 +208,7 @@ void LoadMission (const char * mission_name, bool loadFirstUnit) {
 	  tmptarget=FactionUtil::GetFaction(fg->faction.c_str()); // that should not be in xml?
 	  string modifications ("");
 	  if (a!=0||loadFirstUnit) {
-	    fighter = UnitFactory::createUnit(fightername, false,tmptarget,modifications,fg,s);
+	    fighter = GameUnitFactory::createUnit(fightername, false,tmptarget,modifications,fg,s);
 	  }else {
 	    continue;
 	  }

@@ -99,7 +99,7 @@ inline XVector operator*= (XVector &lval, const QFLOAT &obj) {lval.i *= obj; lva
 inline void Normalize(XVector &r)
 {
 	QFLOAT size = XSQRT(r.i*r.i+r.j*r.j+r.k*r.k);
-	if( size != 0)
+	if( size>0.00001)
 	{
 		r.i /= size;
 		r.j /= size;
@@ -130,7 +130,11 @@ inline void ScaledCrossProduct(const XVector &a, const XVector &b, XVector &r) {
     	r.j = a.k*b.i-a.i*b.k;
     	r.k = a.i*b.j-a.j*b.i;
 	QFLOAT size = XSQRT(r.i*r.i+r.j*r.j+r.k*r.k);
-	if( size != 0)
+	if( size<0.00001)
+	{
+		r.i = r.j = r.k = 0;
+	}
+	else
 	{
 		r.i /= size;
 		r.j /= size;

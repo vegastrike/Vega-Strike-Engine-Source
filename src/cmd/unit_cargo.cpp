@@ -7,14 +7,6 @@
 #include "unit_factory.h"
 #include <assert.h>
 #include "cmd/ai/aggressive.h"
-Unit& GetUnitMasterPartList () {
-  return *UnitFactory::getMasterPartList( );
-}
-
-Cargo * GetMasterPartList(const char *input_buffer){
-  unsigned int i;
-  return GetUnitMasterPartList().GetCargo (input_buffer,i);
-}
 
 extern int GetModeFromName (const char *);
 vector <Cargo>& GameUnit::FilterDowngradeList (vector <Cargo> & mylist)
@@ -24,11 +16,11 @@ vector <Cargo>& GameUnit::FilterDowngradeList (vector <Cargo> & mylist)
   for (unsigned int i=0;i<mylist.size();i++) {
     bool removethis=staticrem;
     if (GetModeFromName(mylist[i].content.c_str())!=2) {
-      GameUnit * NewPart = UnitFactory::createUnit(mylist[i].content.c_str(),false,FactionUtil::GetFaction("upgrades"));
+      GameUnit * NewPart = GameUnitFactory::createUnit(mylist[i].content.c_str(),false,FactionUtil::GetFaction("upgrades"));
       NewPart->SetFaction(faction);
       if (NewPart->name==string("LOAD_FAILED")) {
 	NewPart->Kill();
-	NewPart = UnitFactory::createUnit (mylist[i].content.c_str(),false,faction);
+	NewPart = GameUnitFactory::createUnit (mylist[i].content.c_str(),false,faction);
       }
       if (NewPart->name!=string("LOAD_FAILED")) {
 	int maxmountcheck = NewPart->GetNumMounts()?GetNumMounts():1;
@@ -126,7 +118,7 @@ void GameUnit::EjectCargo (unsigned int index) {
 	    fg->nr_ships++;
 	    fg->nr_ships_left++;
 	  }
-	  cargo = UnitFactory::createUnit (ans.c_str(),false,faction,"",fg,fgsnumber);
+	  cargo = GameUnitFactory::createUnit (ans.c_str(),false,faction,"",fg,fgsnumber);
 	  cargo->PrimeOrders();
 	  cargo->SetAI (new Orders::AggressiveAI ("default.agg.xml","default.int.xml"));
 	  cargo->SetTurretAI();	  
@@ -134,11 +126,11 @@ void GameUnit::EjectCargo (unsigned int index) {
 	}
       }
       if (!cargo) {
-		  cargo = UnitFactory::createUnit (tmpcontent.c_str(),false,FactionUtil::GetFaction("upgrades"));
+		  cargo = GameUnitFactory::createUnit (tmpcontent.c_str(),false,FactionUtil::GetFaction("upgrades"));
       }
       if (cargo->name=="LOAD_FAILED") {
 	cargo->Kill();
-	cargo = UnitFactory::createUnit ("generic_cargo",false,FactionUtil::GetFaction("upgrades"));
+	cargo = GameUnitFactory::createUnit ("generic_cargo",false,FactionUtil::GetFaction("upgrades"));
       }
       if (cargo->rSize()>=rSize()) {
 	cargo->Kill();

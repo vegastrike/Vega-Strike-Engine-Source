@@ -29,12 +29,12 @@
 #include "asteroid.h"
 #include "building.h"
 
-Unit* UnitFactory::createUnit( )
+Unit* GameUnitFactory::createUnit( )
 {
     return new GameUnit( 0 );
 }
 
-GameUnit* UnitFactory::createUnit( const char *filename,
+GameUnit* GameUnitFactory::createUnit( const char *filename,
 		               bool        SubUnit,
 		               int         faction,
 		               std::string customizedUnit,
@@ -49,7 +49,7 @@ GameUnit* UnitFactory::createUnit( const char *filename,
                      fg_subnumber );
 }
 
-GameUnit* UnitFactory::createUnit( vector <Mesh*> & meshes,
+GameUnit* GameUnitFactory::createUnit( vector <Mesh*> & meshes,
 		               bool Subunit,
 		               int faction )
 {
@@ -58,7 +58,7 @@ GameUnit* UnitFactory::createUnit( vector <Mesh*> & meshes,
                      faction );
 }
 
-Nebula* UnitFactory::createNebula( const char * unitfile, 
+Nebula* GameUnitFactory::createNebula( const char * unitfile, 
                                    bool SubU, 
                                    int faction, 
                                    Flightgroup* fg,
@@ -71,7 +71,7 @@ Nebula* UnitFactory::createNebula( const char * unitfile,
                        fg_snumber );
 }
 
-Missile* UnitFactory::createMissile( const char * filename,
+Missile* GameUnitFactory::createMissile( const char * filename,
                                      int faction,
                                      const string &modifications,
                                      const float damage,
@@ -92,12 +92,12 @@ Missile* UnitFactory::createMissile( const char * filename,
                         detonation_radius );
 }
 
-Planet* UnitFactory::createPlanet( )
+Planet* GameUnitFactory::createPlanet( )
 {
     return new Planet;
 }
 
-Planet* UnitFactory::createPlanet( QVector x,
+Planet* GameUnitFactory::createPlanet( QVector x,
                                    QVector y,
 				   float vely,
 				   const Vector & rotvel,
@@ -134,7 +134,7 @@ Planet* UnitFactory::createPlanet( QVector x,
 		       inside_out);
 }
 
-Enhancement* UnitFactory::createEnhancement( const char * filename,
+Enhancement* GameUnitFactory::createEnhancement( const char * filename,
                                              int faction,
 					     const string &modifications,
 					     Flightgroup * flightgrp,
@@ -147,7 +147,7 @@ Enhancement* UnitFactory::createEnhancement( const char * filename,
                             fg_subnumber );
 }
 
-Building* UnitFactory::createBuilding( ContinuousTerrain * parent,
+Building* GameUnitFactory::createBuilding( ContinuousTerrain * parent,
                                        bool vehicle,
 				       const char * filename,
 				       bool SubUnit,
@@ -164,7 +164,7 @@ Building* UnitFactory::createBuilding( ContinuousTerrain * parent,
 			 fg );
 }
 
-Building* UnitFactory::createBuilding( Terrain * parent,
+Building* GameUnitFactory::createBuilding( Terrain * parent,
                                        bool vehicle,
                                        const char *filename,
                                        bool SubUnit,
@@ -181,7 +181,7 @@ Building* UnitFactory::createBuilding( Terrain * parent,
                          fg );
 }
 
-Asteroid* UnitFactory::createAsteroid( const char * filename,
+Asteroid* GameUnitFactory::createAsteroid( const char * filename,
                                        int faction,
                                        Flightgroup* fg,
                                        int fg_snumber,
@@ -193,18 +193,4 @@ Asteroid* UnitFactory::createAsteroid( const char * filename,
                          fg_snumber,
                          difficulty );
 }
-
-/*** Change GameUnit to Unit when faction gets "cleaned" ***/
-GameUnit* UnitFactory::getMasterPartList( )
-{
-    if( _masterPartList == NULL )
-    {
-        _masterPartList = new GameUnit( "master_part_list",
-	                            true,
-				    FactionUtil::GetFaction("upgrades") );
-    }
-    return _masterPartList;
-}
-
-GameUnit* UnitFactory::_masterPartList = NULL;
 

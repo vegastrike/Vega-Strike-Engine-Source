@@ -362,7 +362,7 @@ void Faction::LoadXML(const char * filename, char * xmlbuffer, int buflength) {
 void GameFactionUtil::LoadContrabandLists() {
   for (unsigned int i=0;i<factions.size()&&i<contrabandlists.size();i++) {
     if (contrabandlists[i].length()>0) {
-      factions[i]->contraband = UnitFactory::createUnit (contrabandlists[i].c_str(),true,i);
+      factions[i]->contraband = GameUnitFactory::createUnit (contrabandlists[i].c_str(),true,i);
     }
   }
   contrabandlists.clear();

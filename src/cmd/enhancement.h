@@ -14,7 +14,7 @@ protected:
     , filename(filename) {
   }
 
-  friend class UnitFactory;
+  friend class GameUnitFactory;
 
 public:
   virtual void reactToCollision (Unit * smaller, const QVector & biglocation, const Vector & bignormal, const QVector & smalllocation, const Vector & smallnormal, float dist) {

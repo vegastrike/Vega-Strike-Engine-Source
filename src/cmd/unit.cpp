@@ -81,7 +81,7 @@ float GameUnit::getRelation (Unit * targ) {
 GameUnit::GameMount::GameMount (){static weapon_info wi(weapon_info::BEAM); type=&wi; size=weapon_info::NOWEAP; ammo=-1;status= UNCHOSEN; processed=GameMount::PROCESSED;ref.gun=NULL; sound=-1;}
 
 static GameUnit * getFuelUpgrade () {
-  return UnitFactory::createUnit("add_fuel",true,FactionUtil::GetFaction("upgrades"));
+  return GameUnitFactory::createUnit("add_fuel",true,FactionUtil::GetFaction("upgrades"));
 }
 static float getFuelAmt () {
   GameUnit * un = getFuelUpgrade();
@@ -308,7 +308,7 @@ GameUnit::GameUnit(const char *filename, bool SubU, int faction,std::string unit
 		switch(type)
 		{
 		default:
-		  SubUnits.prepend (un=UnitFactory::createUnit (unitfilename,true,faction,unitModifications,flightgroup,flightgroup_subnumber));
+		  SubUnits.prepend (un=GameUnitFactory::createUnit (unitfilename,true,faction,unitModifications,flightgroup,flightgroup_subnumber));
 
 		}
 		un->SetPosition(QVector(x,y,z));

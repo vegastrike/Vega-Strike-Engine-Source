@@ -278,8 +278,8 @@ static bool LoadTex(char * FileName, unsigned char scdata [lthei][ltwid][3]){
   unsigned char ctemp;
   FILE *fp = NULL;
   fp = fopen (FileName, "rb");
-  int sizeX;
-  int sizeY;
+  long sizeX;
+  long sizeY;
 	if (!fp)
 	{
 		return false;
