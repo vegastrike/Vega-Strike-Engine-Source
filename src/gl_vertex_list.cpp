@@ -140,6 +140,7 @@ void GFXVertexList::RefreshDisplayList () {
   }
 	int a;
 	int offset =0;
+	display_list = GFXCreateList();
 	if (myColors !=NULL) {
 	  for (int i=0;i<numlists;i++) {
 	    glBegin(mode[i]);
@@ -164,14 +165,17 @@ void GFXVertexList::RefreshDisplayList () {
 	    glEnd();
 	  }
 	}
-	glEndList();
+	if (!GFXEndList()){
+	    GFXDeleteList ( display_list);
+	    display_list=0;
+	}
 #endif
 }
 
 GFXVertexList::~GFXVertexList()
 {
   if (display_list)
-    glDeleteLists (display_list, 1); //delete dis
+    GFXDeleteList (display_list); //delete dis
   if (tessellation)
     delete tesslist;
   if (offsets)

@@ -145,12 +145,18 @@ int GFXCreateList() {
   glNewList(list, GL_COMPILE);
   return list;
 }
-void GFXEndList() {
+
+GFXBOOL GFXEndList() {
   glEndList();
+  return (glGetError ()!= GL_OUT_OF_MEMORY);
 }
 
 void GFXCallList(int list) {
   glCallList(list);
+}
+
+void GFXDeleteList (int list) {
+    glDeleteLists (list,1);
 }
 
 void GFXSubwindow(int x, int y, int xsize, int ysize) {

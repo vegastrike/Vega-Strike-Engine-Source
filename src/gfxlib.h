@@ -142,8 +142,9 @@ void /*GFXDRVAPI*/ GFXEnd();
 
 //display list
 int GFXCreateList();
-void GFXEndList();
+GFXBOOL GFXEndList();
 void GFXCallList(int list);
+void GFXDeleteList (int list);
 
 //pick mode
 void GFXBeginPick(int x, int y, int xsize, int ysize);
