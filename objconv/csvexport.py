@@ -1,15 +1,26 @@
 #!/usr/bin/python
 
+global showunits
+showunits=0
 
 
+def filterParen(l):
+	global showunits
+	if (showunits):
+		return l
+	where=l.find("(");
+	if (where!=-1):
+		return l[0:where]
+	return l;
 def interleave (l1,l2,add1,add2):
 	ret=[]
 	for i in range(len(l1)):
-		ret.append(add1+l1[i]+add2);
+		ret.append(add1+filterParen(l1[i])+add2);
 		ret.append(l2[i]);
 	return ret
-def makeName(nam,guide,useguide):
-	if (useguide):
+def makeName(nam,guide):
+	global showunits
+	if (showunits):
 		return nam+'('+guide+')'
 	return nam
 def ProcessStruct (guide,struc):
@@ -75,7 +86,7 @@ while len(line):
 			elif guide[i].find(';')!=-1:
 				ff.write(csv.writeList([key[i]]+ProcessStruct(guide[i],row[i])))
 			else:
-				ff.write(csv.writeList([makeName(key[i],guide[i],showunits),
+				ff.write(csv.writeList([makeName(key[i],guide[i]),
 							row[i]]));
 		ff.close();
 		break

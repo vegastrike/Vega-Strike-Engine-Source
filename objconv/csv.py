@@ -43,6 +43,8 @@ def writeList(lis,delim=','):
 			s+=delim
 	s+='\n'
 	return s
+def commaSeparatedList(s,delim=','):
+	return semiColonSeparatedList(s,delim)
 def semiColonSeparatedList(s, delim=','):
 	s = s.strip().rstrip()
 	trip=1
