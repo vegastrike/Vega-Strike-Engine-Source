@@ -598,29 +598,29 @@ void	NetClient::addClient( const Packet* packet )
 	}
 	*/
 
+	if( Clients[cltserial] != NULL)
+	{
+		cout<<"Error, client exists !!"<<endl;
+		exit( 1);
+	}
+
+	Clients[cltserial] = new Client;
+	nbclients++;
+	// Copy the client state in its structure
+	Clients[cltserial]->serial = cltserial;
+
+	cout<<"New client n°"<<cltserial<<" - now "<<nbclients<<" clients in system"<<endl;
+	cout<<"At : ";
+
+	// Should receive the name
+	string callsign ("player"+cltserial);
+	memcpy( Clients[cltserial]->name, callsign.c_str(), callsign.length());
+	ClientState cs;
+	memcpy( &cs, packet->getData(), sizeof( ClientState));
+	Clients[cltserial]->current_state = cs;
 	// If not a local player, add it in our array
 	if( !isLocalSerial( cltserial))
 	{
-		if( Clients[cltserial] != NULL)
-		{
-			cout<<"Error, client exists !!"<<endl;
-			exit( 1);
-		}
-
-		Clients[cltserial] = new Client;
-		nbclients++;
-		// Copy the client state in its structure
-		Clients[cltserial]->serial = cltserial;
-
-		cout<<"New client n°"<<cltserial<<" - now "<<nbclients<<" clients in system"<<endl;
-		cout<<"At : ";
-
-		// Should receive the name
-		string callsign ("player"+cltserial);
-		memcpy( Clients[cltserial]->name, callsign.c_str(), callsign.length());
-		ClientState cs;
-		memcpy( &cs, packet->getData(), sizeof( ClientState));
-		Clients[cltserial]->current_state = cs;
 		// The save buffer and XML buffer come after the ClientState
 		const char * buf = packet->getData()+sizeof( ClientState);
 		unsigned int savelen = ntohl( *( (unsigned int *)(buf)));
