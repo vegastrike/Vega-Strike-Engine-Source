@@ -170,7 +170,7 @@ fi
 fi
 
 
-if test "x${bsdthreads}" = "xyes"; then
+if test "x${bsdthread}" = "xyes"; then
 PTHREAD_CXXFLAGS="-pthread"
 PTHREAD_LIBS="-pthread"
 else
