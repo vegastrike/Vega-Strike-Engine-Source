@@ -221,9 +221,10 @@ void Beam::ProcessDrawQueue() {
       c.vlist->Draw();
     }
   }
+  //  GFXEnable (TEXTURE1);
   GFXEnable (DEPTHWRITE);
   GFXEnable (CULLFACE);
-  GFXEnable (LIGHTING);
+  GFXDisable (LIGHTING);
   GFXPopBlendMode();
 }
 

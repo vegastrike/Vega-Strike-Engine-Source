@@ -328,7 +328,7 @@ CoordinateSelect *locSel=NULL;
 Background * bg = NULL;
 SphereMesh *bg2=NULL;
 TextPlane *textplane = NULL;
-
+Beam * DABEAM;
 ClickList *shipList =NULL;
 Unit *midway = NULL;
 /*
@@ -439,6 +439,7 @@ void InitializeInput() {
 }
 void createObjects() {
   LoadWeapons("weapon_list.xml");
+  DABEAM= new Beam (identity_transformation, weapon_info(weapon_info::BEAM), NULL);
   //SetPriorityClass(GetCurrentProcess(), REALTIME_PRIORITY_CLASS);
   //SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_IDLE);
 
@@ -554,7 +555,7 @@ void createObjects() {
 }
 
 void destroyObjects() {  
-  //delete DABEAM;
+  delete DABEAM;
   for(int a = 0; a < numf; a++)
   	delete fighters[a];
   delete textplane;
@@ -585,8 +586,9 @@ void main_loop() {
     locSel->Draw();
   static float time=0;
   //  DABEAM->Draw(identity_transformation,identity_matrix);
+  DABEAM->Draw (identity_transformation,identity_matrix);
   Beam::ProcessDrawQueue();
-
+  
   //textplane->Draw();
   _GFX->EndDraw();
       
