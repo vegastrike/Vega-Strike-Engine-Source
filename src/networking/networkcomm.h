@@ -1,13 +1,13 @@
 #ifndef __NETWORKCOMM_H
 #define __NETWORKCOMM_H
 
+#include "client.h"
 #ifdef CRYPTO
 #include <crypto++/randpool.h>
 using namespace CryptoPP;
 #endif
 
 #include "const.h"
-#include "client.h"
 #include "clientptr.h"
 #include <string>
 #include <list>

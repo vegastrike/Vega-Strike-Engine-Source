@@ -20,7 +20,7 @@
  */
 
 #include "vegastrike.h"
-#if defined( _WIN32) && !defined(__CYGWIN__)
+#if defined( _WIN32) && !defined(__CYGWIN__) && !defined( __MINGW32__)
 // For WIN32 debugging.
 #include <crtdbg.h>
 #endif

@@ -99,7 +99,10 @@ case $target in
   *Darwin* | *darwin*)
     bsdthread=no
     ;;
-  *mingw* | *cygwin*)
+  *cygwin*)
+    bsdthread=no
+    ;;
+  *mingw*)
     bsdthread=no
     ;;
   *)
@@ -276,6 +279,19 @@ if test "x${is_win32}" = "xyes" ; then
 	WIN32="1"
 fi
 
+AC_MSG_CHECKING([for Mingw32 build])
+AC_EGREP_CPP(yes,
+[ 
+#if defined(__MINGW32__)
+  yes
+#endif
+], is_mingw=yes, is_mingw=no )
+AC_MSG_RESULT(${is_mingw})
+if test "x${is_mingw}" = "xyes" ; then
+	echo "Compiling for mingw32 : adding -lwsock32"
+	VS_LIBS="${VS_LIBS} -lwsock32"
+fi
+
 dnl --------------------------------------------------------------------------
 dnl Check if compiling for Linux
 dnl --------------------------------------------------------------------------
@@ -328,6 +344,8 @@ if test "x$is_macosx" = "xyes" ; then
     PYTHON_LDOPTS="-L/Library/Frameworks/Python.framework"
     with_python_inc=/Library/Frameworks/Python.framework/Headers
     VS_LIBS="$VS_LIBS -lobjc"
+dnl else
+dnl    VS_LIBS="$VS_LIBS -lutil"
 fi
 
 dnl
@@ -423,7 +441,7 @@ then
 	    if test "x$is_macosx" = "xyes" ; then
 	    	    PYTHON_LIBS="-lpython${PYTHON_SHORT} --export-dynamic"
 	    else
-		    	PYTHON_LIBS="-lpython${PYTHON_SHORT} -Xlinker -export-dynamic"
+		    PYTHON_LIBS="-lpython${PYTHON_SHORT} -Xlinker -export-dynamic"
 	    fi
             FOUND_LIBPYTHON_SO=yes
             break
@@ -442,9 +460,9 @@ then
           else
             if test -f $i/libpython${PYTHON_SHORT}.dll.a;	   
 	    then
-              echo "$i/libpython${PYTHON_SHORT}.dll.a yes"
     	      PYTHON_CXXFLAGS="-I${PYTHON_incdir}"
-	      	  PYTHON_LIBS="$i/libpython${PYTHON_SHORT}.dll.a  -Xlinker -export-dynamic"
+              echo "$i/libpython${PYTHON_SHORT}.dll.a yes"
+	      PYTHON_LIBS="$i/libpython${PYTHON_SHORT}.dll.a  -Xlinker -export-dynamic"
               FOUND_LIBPYTHON_SO=yes
             else
               echo "$i/libpython${PYTHON_SHORT}.so no"
@@ -1095,11 +1113,11 @@ if test "x$sdl_sound" != "xno" ; then
     
     for OPENAL_LIB_NAME in $OPENAL_LIB_LIST ; do
 
-	    if test "x$is_macosx" = "xyes" ; then
-	      MACORPCLIBS="$OPENAL_LDOPTS -framework OpenAL"
-	    else
-	      MACORPCLIBS="$OPENAL_LDOPTS -l$OPENAL_LIB_NAME"
-	    fi
+    if test "x$is_macosx" = "xyes" ; then
+      MACORPCLIBS="$OPENAL_LDOPTS -framework OpenAL"
+    else
+      MACORPCLIBS="$OPENAL_LDOPTS -l$OPENAL_LIB_NAME"
+    fi
         CHECK_FOR_OPENAL_LIB
     
         if test "x$have_openal_lib" = "xyes" ; then

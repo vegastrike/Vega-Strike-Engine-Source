@@ -2,7 +2,7 @@
 
 using namespace std;
 
-#if defined(_WIN32) && defined(_MSC_VER)
+#if (defined(_WIN32) && defined(_MSC_VER)) || defined( __MINGW32__)
   /*
    * nothing if WIN32
    */

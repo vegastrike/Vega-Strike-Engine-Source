@@ -1,11 +1,12 @@
+#include "networking/lowlevel/vsnet_headers.h"
 #include "fileutil.h"
 #include "vs_globals.h"
-#include "networking/lowlevel/vsnet_headers.h"
 #include "vsfilesystem.h"
 
-#ifdef _WIN32
-#include <winsock.h> // for ntohl
-#endif
+//#ifdef _WIN32
+//#include <winsock.h> // for ntohl
+//#endif
+extern unsigned long ntohl( unsigned long int netlong);
 
 #ifdef CRYPTO
 #include <crypto++/sha.h>
