@@ -27,7 +27,7 @@
 #include "sphere.h"
 
 	const float size = 10;
-Background::Background(const char *file)
+Background::Background(const char *file, int numstars, float spread):Stars (numstars,spread)
 {
 	char * temp=new char [strlen(file)+25];
 	
@@ -100,126 +100,125 @@ void Background::Draw()
 {
   if (SphereBackground) {
     SphereBackground->Draw();
-    return;
-  }   
-	GFXDisable(LIGHTING);
-	GFXDisable(DEPTHWRITE);
-	GFXTextureAddressMode(CLAMP);
-	//glMatrixMode(GL_MODELVIEW);
-	GFXLoadIdentity(MODEL);
+    Mesh::ProcessUndrawnMeshes();//background must be processed...dumb but necessary--otherwise might collide with other mehses
+  } else {
+    GFXDisable(LIGHTING);
+    GFXDisable(DEPTHWRITE);
+    GFXTextureAddressMode(CLAMP);
+    //glMatrixMode(GL_MODELVIEW);
+    GFXLoadIdentity(MODEL);
 
-	GFXSelectTexcoordSet(0, 0);
-	/***********************?????????
-	//Matrix oldproject;
-	//GFXGetMatrix(VIEW, oldproject);
-	//glPushMatrix();
-	//gluPerspective (90,1.33,0.01,1500); //set perspective to 78 degree FOV
-	********************************/
-	_Universe->AccessCamera()->UpdateGLCenter();
+    GFXSelectTexcoordSet(0, 0);
+    /***********************?????????
+			    //Matrix oldproject;
+			    //GFXGetMatrix(VIEW, oldproject);
+			    //glPushMatrix();
+			    //gluPerspective (90,1.33,0.01,1500); //set perspective to 78 degree FOV
+    ********************************/
+    _Universe->AccessCamera()->UpdateGLCenter();
 
 	
-	/*up*/
-	GFXColor4f(1.00F, 1.00F, 1.00F, 1.00F);
+    /*up*/
+    GFXColor4f(1.00F, 1.00F, 1.00F, 1.00F);
 
-	up->MakeActive();
-	GFXBegin(QUADS);
-	GFXTexCoord2f(0.998F, 0.002F);
-	GFXVertex3f(-size, size, size);
+    up->MakeActive();
+    GFXBegin(QUADS);
+    GFXTexCoord2f(0.998F, 0.002F);
+    GFXVertex3f(-size, size, size);
 	
-	GFXTexCoord2f(0.002F, 0.002F);
-	GFXVertex3f(-size, size, -size);
+    GFXTexCoord2f(0.002F, 0.002F);
+    GFXVertex3f(-size, size, -size);
 
-	GFXTexCoord2f(0.002F, 0.998F);
-	GFXVertex3f(size, size, -size);
+    GFXTexCoord2f(0.002F, 0.998F);
+    GFXVertex3f(size, size, -size);
 
-	GFXTexCoord2f(0.998F, 0.998F);
-	GFXVertex3f(size, size, size);
-	GFXEnd();
+    GFXTexCoord2f(0.998F, 0.998F);
+    GFXVertex3f(size, size, size);
+    GFXEnd();
 
-	/*Left*/
-	left->MakeActive();
-	GFXBegin(QUADS);
-	GFXTexCoord2f(0.998F, 0.002F);
-	GFXVertex3f(-size, size, -size);
+    /*Left*/
+    left->MakeActive();
+    GFXBegin(QUADS);
+    GFXTexCoord2f(0.998F, 0.002F);
+    GFXVertex3f(-size, size, -size);
 	
-	GFXTexCoord2f(0.002F, 0.002F);
-	GFXVertex3f(-size, size, size);
+    GFXTexCoord2f(0.002F, 0.002F);
+    GFXVertex3f(-size, size, size);
 
-	GFXTexCoord2f(0.002F, 0.998F);
-	GFXVertex3f(-size, -size, size);
+    GFXTexCoord2f(0.002F, 0.998F);
+    GFXVertex3f(-size, -size, size);
 
-	GFXTexCoord2f(0.998F, 0.998F);
-	GFXVertex3f(-size, -size, -size);
-	GFXEnd();
+    GFXTexCoord2f(0.998F, 0.998F);
+    GFXVertex3f(-size, -size, -size);
+    GFXEnd();
 	
-	///*Front
-	front->MakeActive();
-	GFXBegin(QUADS);
-	GFXTexCoord2f(0.998F, 0.002F);
-	GFXVertex3f(-size, size, size);
+    ///*Front
+    front->MakeActive();
+    GFXBegin(QUADS);
+    GFXTexCoord2f(0.998F, 0.002F);
+    GFXVertex3f(-size, size, size);
 	
-	GFXTexCoord2f(0.002F, 0.002F);
-	GFXVertex3f(size, size, size);
+    GFXTexCoord2f(0.002F, 0.002F);
+    GFXVertex3f(size, size, size);
 
-	GFXTexCoord2f(0.002F, 0.998F);
-	GFXVertex3f(size, -size, size);
+    GFXTexCoord2f(0.002F, 0.998F);
+    GFXVertex3f(size, -size, size);
 
-	GFXTexCoord2f(0.998F, 0.998F);
-	GFXVertex3f(-size, -size, size);
+    GFXTexCoord2f(0.998F, 0.998F);
+    GFXVertex3f(-size, -size, size);
 
-	GFXEnd();
+    GFXEnd();
 	
-	///*Right
-	right->MakeActive();
-	GFXBegin(QUADS);
-	GFXTexCoord2f(0.998F, 0.002F);
-	GFXVertex3f(size, size, size);
+    ///*Right
+    right->MakeActive();
+    GFXBegin(QUADS);
+    GFXTexCoord2f(0.998F, 0.002F);
+    GFXVertex3f(size, size, size);
 	
-	GFXTexCoord2f(0.002F, 0.002F);
-	GFXVertex3f(size, size, -size);
+    GFXTexCoord2f(0.002F, 0.002F);
+    GFXVertex3f(size, size, -size);
 
-	GFXTexCoord2f(0.002F, 0.998F);
-	GFXVertex3f(size, -size, -size);
+    GFXTexCoord2f(0.002F, 0.998F);
+    GFXVertex3f(size, -size, -size);
 
-	GFXTexCoord2f(0.998F, 0.998F);
-	GFXVertex3f(size, -size, size);
-	GFXEnd();
+    GFXTexCoord2f(0.998F, 0.998F);
+    GFXVertex3f(size, -size, size);
+    GFXEnd();
 	
-	///*Back
-	back->MakeActive();
-	GFXBegin(QUADS);
-	GFXTexCoord2f(0.998F, 0.002F);
-	GFXVertex3f(size, size, -size);
+    ///*Back
+    back->MakeActive();
+    GFXBegin(QUADS);
+    GFXTexCoord2f(0.998F, 0.002F);
+    GFXVertex3f(size, size, -size);
 	
-	GFXTexCoord2f(0.002F, 0.002F);
-	GFXVertex3f(-size, size, -size);
+    GFXTexCoord2f(0.002F, 0.002F);
+    GFXVertex3f(-size, size, -size);
 	
-	GFXTexCoord2f(0.002F, 0.998F);
-	GFXVertex3f(-size, -size, -size);
+    GFXTexCoord2f(0.002F, 0.998F);
+    GFXVertex3f(-size, -size, -size);
 	
-	GFXTexCoord2f(0.998F, 0.998F);
-	GFXVertex3f(size, -size, -size);
+    GFXTexCoord2f(0.998F, 0.998F);
+    GFXVertex3f(size, -size, -size);
 			
-	GFXEnd();
+    GFXEnd();
 	
-//	/*down
-	down->MakeActive();
-	GFXBegin(QUADS);
-	GFXTexCoord2f(0.002F, 0.998F);
-	GFXVertex3f(-size, -size, size);
+    //	/*down
+    down->MakeActive();
+    GFXBegin(QUADS);
+    GFXTexCoord2f(0.002F, 0.998F);
+    GFXVertex3f(-size, -size, size);
 	
-	GFXTexCoord2f(0.998F, 0.998F);
-	GFXVertex3f(size, -size, size);
+    GFXTexCoord2f(0.998F, 0.998F);
+    GFXVertex3f(size, -size, size);
 	
-	GFXTexCoord2f(0.998F, 0.002F);
-	GFXVertex3f(size, -size, -size);
+    GFXTexCoord2f(0.998F, 0.002F);
+    GFXVertex3f(size, -size, -size);
 	
-	GFXTexCoord2f(0.002F, 0.002F);
-	GFXVertex3f(-size, -size, -size);
+    GFXTexCoord2f(0.002F, 0.002F);
+    GFXVertex3f(-size, -size, -size);
 			
-	GFXEnd();//*/
+    GFXEnd();//*/
+  }
 
-	_Universe->AccessCamera()->UpdateGFX(false);
-	GFXEnable(DEPTHWRITE);
-	GFXEnable(LIGHTING);
+  _Universe->AccessCamera()->UpdateGFX(false);
 }

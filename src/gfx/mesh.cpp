@@ -189,7 +189,7 @@ void Mesh::Draw(const Transformation &trans, const Matrix m)
 }
 
 
-void Mesh::ProcessUndrawnMeshes() {
+void Mesh::ProcessUndrawnMeshes(bool pushSpecialEffects) {
   GFXEnable(DEPTHWRITE);
   GFXEnable(DEPTHTEST);
   GFXEnable(LIGHTING);
@@ -210,7 +210,9 @@ void Mesh::ProcessUndrawnMeshes() {
       m->will_be_drawn = false;
     }
     if (a==MESH_SPECIAL_FX_ONLY) {
-      GFXPopGlobalEffects();
+      if (!pushSpecialEffects) {
+	GFXPopGlobalEffects();
+      }
       GFXEnable(DEPTHWRITE);
     }
   }

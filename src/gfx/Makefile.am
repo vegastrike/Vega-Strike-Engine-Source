@@ -37,6 +37,8 @@ libgfx_a_SOURCES =	\
 	mesh_fx.cpp	\
 	mesh_poly.cpp	\
 	mesh_xml.cpp	\
+	star.h		\
+	star.cpp	\
 	sphere.cpp	\
 	sphere.h	\
 	sprite.cpp	\

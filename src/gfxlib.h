@@ -91,6 +91,7 @@ GFXBOOL /*GFXDRVAPI*/ GFXGetMaterial(unsigned int number, GFXMaterial &material)
 void /*GFXDRVAPI*/ GFXSelectMaterial(unsigned int number);
 
 //Matrix
+void /*GFXDRVAPI*/ GFXTranslate(MATRIXMODE mode, const Vector & r);
 void /*GFXDRVAPI*/ GFXMultMatrix(MATRIXMODE mode, const Matrix matrix);
 void  /*GFXDRVAPI*/ GFXLoadMatrix(MATRIXMODE mode, const Matrix matrix);
 void /*GFXDRVAPI*/ GFXLoadIdentity(MATRIXMODE mode);

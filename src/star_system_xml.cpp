@@ -58,6 +58,8 @@ namespace StarXML {
       EMMISIVB,
       EMMISIVA,
       BACKGROUND,
+      STARS,
+      STARSPREAD,
       REFLECTIVITY,
       ALPHA,
       DESTINATION,
@@ -74,6 +76,8 @@ namespace StarXML {
   const EnumMap::Pair attribute_names[] = {
     EnumMap::Pair ("UNKNOWN", UNKNOWN),
     EnumMap::Pair ("background", BACKGROUND), 
+    EnumMap::Pair ("stars", STARS), 
+    EnumMap::Pair ("starspread", STARSPREAD), 
     EnumMap::Pair ("reflectivity", REFLECTIVITY), 
     EnumMap::Pair ("file", XFILE),
     EnumMap::Pair ("alpha", ALPHA),
@@ -99,7 +103,7 @@ namespace StarXML {
 };
 
   const EnumMap element_map(element_names, 5);
-  const EnumMap attribute_map(attribute_names, 23);
+  const EnumMap attribute_map(attribute_names, 26);
 }
 
 using XMLSupport::EnumMap;
@@ -143,6 +147,12 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
     break;
   case BACKGROUND:
 	xml->backgroundname=(*iter).value;
+	break;
+      case STARS:
+	xml->numstars = parse_int ((*iter).value);
+	break;
+      case STARSPREAD:
+	xml->starsp = parse_float ((*iter).value);
 	break;
    case NAME:
 	this->name = new char [strlen((*iter).value.c_str())+1];
@@ -377,6 +387,8 @@ void StarSystem::LoadXML(const char *filename) {
   }
 
   xml = new StarXML;
+  xml->starsp = 1000;
+  xml->numstars=800;
   xml->backgroundname = string("cube");
   xml->reflectivity=.5;
   xml->unitlevel=0;
@@ -409,7 +421,7 @@ void StarSystem::LoadXML(const char *filename) {
 	}
 	LightMap[0] = new Texture((xml->backgroundname+"_light.bmp").c_str(), 1);
 #endif
-  bg = new Background(xml->backgroundname.c_str());
+  bg = new Background(xml->backgroundname.c_str(),xml->numstars,xml->starsp);
 
   delete xml;
 }

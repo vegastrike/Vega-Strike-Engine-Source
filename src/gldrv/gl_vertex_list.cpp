@@ -64,6 +64,9 @@ void GFXVertexList::Init (enum POLYTYPE *poly, int numVertices, const GFXVertex 
     case GFXLINESTRIP:
       mode[pol] = GL_LINE_STRIP;
       break;
+    case GFXPOINT:
+      mode[pol]=GL_POINTS;
+      break;
     }
   }
   if (numlists==1) {

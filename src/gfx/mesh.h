@@ -252,7 +252,7 @@ public:
   //  const char *get_name(){return name}
   void Draw(const Transformation &quat = identity_transformation, const Matrix = identity_matrix);
   virtual void ProcessDrawQueue();
-  static void ProcessUndrawnMeshes();
+  static void ProcessUndrawnMeshes(bool pushSpecialEffects=false);
   void setEnvMap(GFXBOOL newValue) {envMap = newValue;}
   void UpdateHudMatrix();//puts an object on the hud with the matrix
   Vector corner_min() { return mn; }

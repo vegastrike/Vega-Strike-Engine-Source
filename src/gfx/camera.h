@@ -47,6 +47,7 @@ public:
 
 	Camera(ProjectionType proj = PERSPECTIVE);
         void GetView (Matrix);
+        const Vector & GetR () {return R;}
 	void GetPQR (Vector &p1, Vector &q1, Vector &r1);
 	void UpdateGFX(GFXBOOL updateFrustum=true);
 	void UpdateGLCenter();

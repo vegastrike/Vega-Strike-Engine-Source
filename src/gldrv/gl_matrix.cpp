@@ -201,6 +201,44 @@ float GFXGetYInvPerspective() {
   return /*invprojection[11]*  */invprojection[5];//invprojection[15];//should be??  c/d == invproj[15]
 }
 
+
+void /*GFXDRVAPI*/ GFXTranslate(MATRIXMODE mode, const Vector & a) 
+{
+	switch(mode)
+	{
+	case MODEL:
+	  model[12]+=a.i*model[0]+a.j*model[4]+a.k*model[8];
+	  model[13]+=a.i*model[1]+a.j*model[5]+a.k*model[9];
+	  model[14]+=a.i*model[2]+a.j*model[6]+a.k*model[10];
+	  glMatrixMode(GL_MODELVIEW);
+	  glTranslatef(a.i,a.j,a.k);
+	  break;
+	case VIEW:
+	  view[12]+=a.i*view[0]+a.j*view[4]+a.k*view[8];
+	  view[13]+=a.i*view[1]+a.j*view[5]+a.k*view[9];
+	  view[14]+=a.i*view[2]+a.j*view[6]+a.k*view[10];
+	  glMatrixMode(GL_MODELVIEW);
+	  glPopMatrix();
+	  glLoadIdentity();
+	  glTranslatef(-view[12],-view[13],-view[14]);
+	  glPushMatrix();
+	  glMultMatrixf(model);
+	  break;
+	case PROJECTION:
+	  projection[12]+=a.i*projection[0]+a.j*projection[4]+a.k*projection[8];
+	  projection[13]+=a.i*projection[1]+a.j*projection[5]+a.k*projection[9];
+	  projection[14]+=a.i*projection[2]+a.j*projection[6]+a.k*projection[10];
+	  {
+	    Matrix t;
+	    MultMatrix (t,projection,rotview);
+	    glMatrixMode(GL_PROJECTION);
+	    glLoadMatrixf(t);
+	  }
+	  break;
+	}
+}
+
+
 void /*GFXDRVAPI*/ GFXMultMatrix(MATRIXMODE mode, const Matrix matrix)
 {
 	Matrix t;

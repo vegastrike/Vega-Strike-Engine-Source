@@ -132,7 +132,7 @@ void StarSystem::Draw() {
 
   GFXDisable (LIGHTING);
   bg->Draw();
-  Mesh::ProcessUndrawnMeshes();//background must be processed...dumb but necessary--otherwise might collide with other mehses
+
   Iterator *iter = drawList->createIterator();
   Unit *unit;
   while((unit = iter->current())!=NULL) {
@@ -141,10 +141,13 @@ void StarSystem::Draw() {
   }
   delete iter;
   SetViewport();//camera wielding unit is now drawn  Note: Background is one frame behind...big fat hairy deal
-  Mesh::ProcessUndrawnMeshes();
+  Mesh::ProcessUndrawnMeshes(true);
+  ((Stars*)bg)->Draw();
+  GFXPopGlobalEffects();
   Halo::ProcessDrawQueue();
   Beam::ProcessDrawQueue();
   Animation::ProcessDrawQueue();
+
   //  systemInputDFA->Draw();
 
 }

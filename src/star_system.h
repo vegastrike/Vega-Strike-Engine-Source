@@ -32,6 +32,8 @@ class StarSystem {
     string backgroundname;
     Vector cursun;
     float reflectivity;
+    int numstars;
+    float starsp;
   } *xml;
   UnitCollection *drawList;    // Everything to be drawn. Fold missiles in here someday
   UnitCollection *units;    // Objects subject to global physics

@@ -21,10 +21,10 @@
 #ifndef BACKGROUND_H
 #define BACKGROUND_H
 
-//#include <gl/gl.h>
+#include "star.h"
 class SphereMesh;
 class Texture;
-class Background{
+class Background : public Stars{
 	Texture *up;
 	Texture *left;
 	Texture *front;
@@ -33,7 +33,7 @@ class Background{
 	Texture *down;
         SphereMesh * SphereBackground;
 public:
-	Background(const char *file);
+	Background(const char *file, int numstars, float spread);
 	~Background();
 
 	void Draw();
