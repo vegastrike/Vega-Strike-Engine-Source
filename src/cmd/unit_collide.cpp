@@ -130,11 +130,11 @@ Vector Vabs (const Vector &in) {
 }
 
 Matrix WarpMatrixForCollisions (Unit * un, const Matrix& ctm) {
-	if (un->GetVelocity().MagnitudeSquared()*SIMULATION_ATOM*SIMULATION_ATOM<un->rSize()*un->rSize()) {
+	if (un->GetWarpVelocity().MagnitudeSquared()*SIMULATION_ATOM*SIMULATION_ATOM<un->rSize()*un->rSize()) {
 		return ctm;
 	}else {
 		Matrix k(ctm);
-		const Vector v(Vector(1,1,1)+Vabs(ctm.getR()*ctm.getR().Dot(un->GetVelocity().Scale(100*SIMULATION_ATOM/un->rSize()))));
+		const Vector v(Vector(1,1,1)+Vabs(ctm.getR()*ctm.getR().Dot(un->GetWarpVelocity().Scale(100*SIMULATION_ATOM/un->rSize()))));
 		
 /*		k.r[0]*=v.i;
 		k.r[1]*=v.i;
@@ -222,7 +222,7 @@ bool Unit::InsideCollideTree (Unit * smaller, QVector & bigpos, Vector &bigNorma
 	smalltransform.SetOrigin(smallorig.Cast());
       }
 #endif
-      if (smaller->colTrees->colTree(smaller,bigger->GetVelocity())->Collide (*bigger->colTrees->colTree(bigger,smaller->GetVelocity()),
+      if (smaller->colTrees->colTree(smaller,bigger->GetWarpVelocity())->Collide (*bigger->colTrees->colTree(bigger,smaller->GetWarpVelocity()),
 													 &smalltransform,
 													 &bigtransform)) {
 	//static int crashcount=0;
