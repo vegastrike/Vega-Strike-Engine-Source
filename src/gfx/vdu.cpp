@@ -765,7 +765,7 @@ void UpdateViewstyle (VIEWSTYLE &vs) {
     vs=CP_LEFT;
     break;
   case CP_CHASE:
-    vs = CP_FRONT;
+    vs = CP_TARGET;
     break;
   case CP_PAN:
     vs = CP_CHASE;
