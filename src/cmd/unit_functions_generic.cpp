@@ -88,12 +88,14 @@ void ScoreKill (Cockpit * cp, Unit * un, Unit * killedUnit) {
     int whichcp= rand()%_Universe->numPlayers();
     Unit * whichrecv = _Universe->AccessCockpit(whichcp)->GetParent();
     if (whichrecv!=NULL) {
-      if (un->getAIState()&&whichrecv->getAIState()) {      
-        unsigned char sex;
-        vector< Animation *>* anim = un->getAIState()->getCommFaces(sex);
-        CommunicationMessage c(un,whichrecv,anim,sex);
-        c.SetCurrentState(c.fsm->GetScoreKillNode(),anim,sex);
-        whichrecv->getAIState()->Communicate (c);
+      if (UnitUtil::getUnitSystemFile(whichrecv)==UnitUtil::getUnitSystemFile(un)) {
+        if (un->getAIState()&&whichrecv->getAIState()) {      
+          unsigned char sex;
+          vector< Animation *>* anim = un->getAIState()->getCommFaces(sex);
+          CommunicationMessage c(un,whichrecv,anim,sex);
+          c.SetCurrentState(c.fsm->GetScoreKillNode(),anim,sex);
+          whichrecv->getAIState()->Communicate (c);
+        }
       }
     }
   }

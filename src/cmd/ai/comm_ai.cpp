@@ -174,7 +174,7 @@ void CommunicatingAI::InitiateContrabandSearch (float playaprob, float targprob)
   if (u) {
     Unit * un =FactionUtil::GetContraband (parent->faction);
     if (un) {
-    if (un->numCargo()>0&&UnitUtil::getUnitSystemFile(un)==UnitUtil::getUnitSystemFile(parent)&&UnitUtil::getFlightgroupName(parent)!="Base"&&!isDockedAtAll(un)) {
+    if (un->numCargo()>0&&UnitUtil::getUnitSystemFile(parent)==UnitUtil::getUnitSystemFile(parent)&&!UnitUtil::isDockableUnit(parent)) {
     Unit * v;
     if ((v=contraband_searchee.GetUnit())) {
       if (v==u) {
