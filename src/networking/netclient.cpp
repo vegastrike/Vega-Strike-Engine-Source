@@ -720,11 +720,33 @@ int NetClient::recvMsg( Packet* outpacket )
 			break;
 #endif
 			case CMD_KILL :
-				un = UniverseUtil::GetUnitFromSerial( p1.getSerial());
-				if( un)
-					un->Kill();
+			{
+				ClientPtr clt = Clients.get( p1.getSerial());
+				// If it is not a player
+				if( !clt)
+				{
+					un = UniverseUtil::GetUnitFromSerial( p1.getSerial());
+					if( un)
+					{
+						un->Destroy();
+					}
+					else
+						COUT<<"!!! Problem -> CANNOT KILL UNIT NOT FOUND !!!"<<endl;
+				}
 				else
-					COUT<<"!!! Problem -> CANNOT KILL UNIT NOT FOUND !!!"<<endl;
+				{
+					//Remove the player unit
+					Unit * un = clt->game_unit.GetUnit();
+					_Universe->activeStarSystem()->RemoveUnit(clt->game_unit.GetUnit());
+					nbclients--;
+					Clients.remove(p1.getSerial());
+					un->Destroy();
+					COUT<<"Client n°"<<p1.getSerial()<<" killed - now "<<nbclients<<" clients in system"<<endl;
+
+					string msg = clt->callsign+" was killed";
+					UniverseUtil::IOmessage(0,"game","all","#FFFF66"+msg+"#000000");
+				}
+			}
 			break;
 			case CMD_JUMP :
 			{

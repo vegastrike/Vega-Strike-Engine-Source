@@ -2,6 +2,7 @@
 *** GENERAL ************************************************************
 
 - Prediction : predict when receive ClientState on server and then one time again when received on other clients
+               how can I compute positions between 2 updates with interpolation ?
 - Use crypto lib md5 class instead of the 2 md5 files I'm using now
 - Wait for DloadMgr buffer to buffer download support and use it to transfer webcam captures
 - Use crypto++ lib to implement comms encryption

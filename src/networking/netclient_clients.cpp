@@ -95,8 +95,6 @@ void	NetClient::addClient( const Packet* packet )
 		un->SetPosition( save.GetPlayerLocation());
 		un->SetSerial( cltserial);
 
-		// In that case, we want cubic spline based interpolation
-		prediction->InitInterpolation( clt);
 		_Universe->activeStarSystem()->AddUnit( un);
 		string msg = clt->callsign+" entered the system";
 		UniverseUtil::IOmessage(0,"game","all","#FFFF66"+msg+"#000000");
@@ -220,6 +218,8 @@ void	NetClient::receivePosition( const Packet* packet )
 				prediction->InitInterpolation( clt);
 				un->curr_physical_state = prediction->Interpolate( clt);
 				un->Velocity = cs.getVelocity();
+				QVector predpos = un->curr_physical_state.position;
+				cerr<<"Predicted location : x="<<predpos.i<<",y="<<predpos.j<<",z="<<predpos.k<<endl;
 
 				i++;
 			}

@@ -627,7 +627,7 @@ public:
   ///cloaks or decloaks the starship depending on the bool
   void Cloak (bool cloak);
   ///deletes
-  void Kill(bool eraseFromSave=true);
+  void Kill(bool eraseFromSave=true, bool quitting=false);
   ///Is dead yet?
   inline bool Killed() const {return killed;}
   ///returns the current ammt of armor left

@@ -86,7 +86,7 @@ void	ZoneMgr::removeUnit( Unit * un, int zone)
 {
 	if( zone_unitlist[zone].empty())
 	{
-		cerr<<"Trying to remove on an empty list !!"<<endl;
+		cerr<<"Trying to remove unit on an empty list !!"<<endl;
 		exit( 1);
 	}
 	zone_unitlist[zone].remove( un);
@@ -177,7 +177,7 @@ void	ZoneMgr::removeClient( ClientPtr clt )
 
 	if( lst == NULL || lst->empty() )
 	{
-        cerr<<"Trying to remove on an empty list !!"<<endl;
+        cerr<<"Trying to remove client on an empty list !!"<<endl;
         exit( 1);
     }
 

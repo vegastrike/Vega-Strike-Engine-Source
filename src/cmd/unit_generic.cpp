@@ -2811,14 +2811,15 @@ void Unit::DamageRandSys(float dam, const Vector &vec, float randnum, float degr
 	}
 }
 
-void Unit::Kill(bool erasefromsave) {
+void Unit::Kill(bool erasefromsave, bool quitting) {
 
   //if (erasefromsave)
   //  _Universe->AccessCockpit()->savegame->RemoveUnitFromSave((long)this);
 
   // The server send a kill notification to all concerned clients but not if it is an upgrade
   if( SERVER && this->faction!=FactionUtil::GetFaction("upgrades"))
-  	Server->sendKill( this->serial, this->zone);
+	if( !quitting)
+  		Server->sendKill( this->serial, this->zone);
   
   if (this->colTrees)
     this->colTrees->Dec();//might delete
