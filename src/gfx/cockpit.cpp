@@ -567,6 +567,7 @@ void GameCockpit::DrawEliteBlips (Unit * un) {
 }
 float GameCockpit::LookupTargetStat (int stat, Unit *target) {
   static float game_speed = XMLSupport::parse_float (vs_config->getVariable("physics","game_speed","1"));
+  bool lie=XMLSupport::parse_float (vs_config->getVariable("physics","game_speed_lying","true"));
   static float fpsval=0;
   const float fpsmax=1;
   static float numtimes=fpsmax;
@@ -607,9 +608,15 @@ float GameCockpit::LookupTargetStat (int stat, Unit *target) {
     }
     return 0;
   case UnitImages::KPS:
-    return (target->GetVelocity().Magnitude())*10/game_speed;
+	if (lie) 
+		return (target->GetVelocity().Magnitude())*10/game_speed;
+	else
+		return target->GetVelocity().Magnitude()*3.6;
   case UnitImages::SETKPS:
-    return target->GetComputerData().set_speed*10/game_speed;
+	if (lie) 
+	    return target->GetComputerData().set_speed*10/game_speed;
+	else
+		return target->GetComputerData().set_speed*3.6;
   case UnitImages::AUTOPILOT:
     if (target) {
       return (target->AutoPilotTo(target)?1:0);
