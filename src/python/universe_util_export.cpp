@@ -16,7 +16,7 @@
 #include "cmd/unit_util.h"
 #include "faction_generic.h"
 #include "cmd/ai/fire.h"
-#include "audilib.h"
+#include "audiolib.h"
 
 void StarSystemExports () {
 #define EXPORT_GLOBAL(name,aff) PYTHON_DEFINE_GLOBAL(VS,&name,#name);
