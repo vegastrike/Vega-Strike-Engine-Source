@@ -1,15 +1,21 @@
 #include "unit.h"
+#include "planet.h"
 #include <string>
+#include "gfx/animation.h"
+#include "unit_interface.h"
 using std::string;
 
 namespace UnitUtil {
 	string getFactionName (Unit *my_unit) {
+		if (!my_unit)return "";
 		return _Universe->GetFaction(my_unit->faction);
     }
 	string getName(Unit *my_unit){
+		if (!my_unit)return "";
 		return my_unit->name;
 	}
 	float getCredits(Unit *my_unit) {
+		if (!my_unit)return 0;
 		Cockpit * tmp;
 		float viret=0;
 		if ((tmp=_Universe->isPlayerStarship (my_unit))) {
@@ -17,13 +23,15 @@ namespace UnitUtil {
 		}
 		return viret;
 	}
-	void addCredits(float credits) {
+	void addCredits(Unit *my_unit,float credits) {
+		if (!my_unit)return;
 		Cockpit * tmp;
 		if ((tmp=_Universe->isPlayerStarship (my_unit))) {
 			tmp->credits+=credits;
 		}
 	}
-    string getFlightgroupName(){
+    string getFlightgroupName(Unit *my_unit){
+		if (!my_unit)return "";
 		string fgname;
 		Flightgroup *fg=my_unit->getFlightgroup();
 		if(fg){
@@ -32,13 +40,15 @@ namespace UnitUtil {
 		return fgname;
 	}
 	Unit *getFlightgroupLeader (Unit *my_unit) {
-		class Flightgroup * fg=my_unit->getFlightgroup()
-		Unit *ret_unit = fg?fg->getFlightgroup()->leader.GetUnit():my_unit;
+		if (!my_unit)return 0;
+		class Flightgroup * fg=my_unit->getFlightgroup();
+		Unit *ret_unit = fg?fg->leader.GetUnit():my_unit;
 		if (!ret_unit)
 			ret_unit=0;
 		return ret_unit;
 	}
-	bool setFlightgroupLeader (Unit *my_unit, Unit *oth_unit) {
+	bool setFlightgroupLeader (Unit *my_unit, Unit *un) {
+		if (!my_unit)return false;
 		if (my_unit->getFlightgroup()) {
 			my_unit->getFlightgroup()->leader.SetUnit(un);
 			return true;
@@ -47,13 +57,14 @@ namespace UnitUtil {
 		}
 	}
 	string getFgDirective(Unit *my_unit){
+		if (!my_unit)return "";
 		string fgdir ("b");
-		if (my_unit->getFlightGroup)
+		if (my_unit->getFlightgroup())
 			fgdir = my_unit->getFlightgroup()->directive;
 		return fgdir;
 	}
 	bool setFgDirective(Unit *my_unit,string inp){
-		string inp = getStringArgument (node,mode,1);
+		if (!my_unit)return false;
 		if (my_unit->getFlightgroup()!=NULL) {
 			my_unit->getFlightgroup()->directive = inp;
 			return true;
@@ -61,9 +72,11 @@ namespace UnitUtil {
 		return false;
 	}
 	int getFgSubnumber(Unit *my_unit){
+		if (!my_unit)return -1;
 		return my_unit->getFgSubnumber();
 	}
 	bool isSignificant(Unit *my_unit){
+		if (!my_unit)return false;
 		bool res=false;
 		clsptr typ = my_unit->isUnit();
 		string s=getFlightgroupName(my_unit);
@@ -71,6 +84,7 @@ namespace UnitUtil {
 		return res;
 	}
 	bool isSun(Unit *my_unit){
+		if (!my_unit)return false;
 		bool res=false;
 		res=my_unit->isPlanet();
 		if (res) {
@@ -79,6 +93,7 @@ namespace UnitUtil {
 		return res;
 	}
 	void switchFg(Unit *my_unit,string arg){
+		if (!my_unit)return;
 		string type= my_unit->name;
 		int nr_waves_left=0;
 		int nr_ships=1;
@@ -91,10 +106,11 @@ namespace UnitUtil {
 			fg->Decrement(my_unit);
 			order = fg->ainame;
 		}
-		fg = Flightgroup::newFlightgroup (arg,type,_Universe->GetFaction(my_unit->faction),order,nr_ships,nr_waves_left,"","",this);
+		fg = Flightgroup::newFlightgroup (arg,type,_Universe->GetFaction(my_unit->faction),order,nr_ships,nr_waves_left,"","",mission);
 		my_unit->SetFg (fg,fg->nr_ships_left-1);
 	}
 	int communicateTo(Unit *my_unit,Unit *other_unit,float mood){
+		if (!my_unit)return 0;
 		unsigned char sex=0;
 		Cockpit * tmp;
 		if ((tmp=_Universe->isPlayerStarship (my_unit))) {
@@ -109,7 +125,7 @@ namespace UnitUtil {
 		return sex;
 	}
 	bool commAnimation(Unit *my_unit,string anim){
-		string anim =getStringArgument (node,mode,1);
+		if (!my_unit)return false;
 		Cockpit * tmp;
 		if ((tmp=_Universe->isPlayerStarship (my_unit))) {
 			Hashtable <std::string, Animation, char [63]> AniHashTable;
@@ -124,29 +140,26 @@ namespace UnitUtil {
 			return false;
 		}
 	}
-	Unit* launch (string name_string,string faction_string,string shiptype, string unittype, string ai_string,int nr_of_ships,int nr_of_waves, QVector pos, string squadlogo){
-		launchJumppoint(name_string,faction_string,type_string,type_string,ai_string,nr_of_ships,nr_of_waves,pos,sqadlogo,"");
-	}
 	Unit *launchJumppoint(string name_string,
 			string faction_string,
 			string type_string,
-			string unittype_string;
+			string unittype_string,
 			string ai_string,
 			int nr_of_ships,
 			int nr_of_waves, 
 			QVector pos, 
 			string squadlogo, 
 			string destinations){
-		int clstype=Unit::UNITPTR;
+		int clstype=UNITPTR;
 		if (unittype_string=="planet") {
-			classtype =Unit::PLANETPTR;			
+			clstype =PLANETPTR;			
 		}else if (unittype_string=="asteroid") {
-			classtype = Unit::ASTEROIDPTR;
+			clstype = ASTEROIDPTR;
 		}else if (unittype_string=="nebula") {
-			classtype = Unit::NEBULAPTR;
+			clstype = NEBULAPTR;
 		}
 		CreateFlightgroup cf;
-		cf.fg = Flightgroup::newFlightgroup (name_string,type_string,faction_string,ai_string,nr_of_ships,nr_of_waves,logo_tex,"",mission);
+		cf.fg = Flightgroup::newFlightgroup (name_string,type_string,faction_string,ai_string,nr_of_ships,nr_of_waves,squadlogo,"",mission);
 		cf.unittype=CreateFlightgroup::UNIT;
 		cf.terrain_nr=-1;
 		cf.waves=nr_of_waves;
@@ -155,11 +168,15 @@ namespace UnitUtil {
 		for(int i=0;i<3;i++){
 			cf.rot[i]=0.0;
 		}
-		Unit *tmp= mission->call_unit_launch(&cf,clstyp,destinations);
+		Unit *tmp= mission->call_unit_launch(&cf,clstype,destinations);
 		mission->number_of_ships+=nr_of_ships;
 		return tmp;
 	}
+	Unit* launch (string name_string,string type_string,string faction_string,string unittype, string ai_string,int nr_of_ships,int nr_of_waves, QVector pos, string sqadlogo){
+		return launchJumppoint(name_string,faction_string,type_string,type_string,ai_string,nr_of_ships,nr_of_waves,pos,sqadlogo,"");
+	}
 	int removeCargo(Unit *my_unit,string s, int quantity, bool erasezero){
+		if (!my_unit)return 0;
 		int numret=0;
 		unsigned int index;
 		if (my_unit->GetCargo(s,index)) {
@@ -170,6 +187,7 @@ namespace UnitUtil {
 		return quantity;
 	}
 	float upgrade(Unit *my_unit, string file,int mountoffset,int subunitoffset, bool force,bool loop_through_mounts) {
+		if (!my_unit)return 0;
 		double percentage=0;
 		printf ("upgrading %s %s %d %d %s\n",my_unit->name.c_str(),file.c_str(),mountoffset, subunitoffset,loop_through_mounts?"true":"false");
 		fflush (stdout);
@@ -177,7 +195,8 @@ namespace UnitUtil {
 		my_unit->SetTurretAI();
 		return percentage;
 	}
-	int addCargo (Cargo carg) {
+	int addCargo (Unit *my_unit,Cargo carg) {
+	  if (!my_unit)return 0;
 	  int i;
 	  for (i=carg.quantity;i>0&&!my_unit->CanAddCargo(carg);i--) {
 	    carg.quantity=i;
@@ -214,12 +233,13 @@ namespace UnitUtil {
 	  if (ret) {
 	    return *ret;//uses copy
 	  }else {
-	    Cargo newret();
+	    Cargo newret;
 	    newret.quantity=0;
 	    return newret;
 	  }
 	}
 	bool incrementCargo(Unit *my_unit,float percentagechange,int quantity){
+		if (!my_unit)return false;
 		if (my_unit->numCargo()>0) {
 			unsigned int index;
 			index = rand()%my_unit->numCargo();
@@ -234,6 +254,7 @@ namespace UnitUtil {
 		return false;
 	}
 	bool decrementCargo(Unit *my_unit,float percentagechange){
+		if (!my_unit)return false;
 		if (my_unit->numCargo()>0) {
 			unsigned int index;
 			index = rand()%my_unit->numCargo();

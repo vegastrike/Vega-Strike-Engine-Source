@@ -421,6 +421,7 @@ class missionNode : public tagDomNode {
 class Mission {
   class Briefing * briefing;
  public:
+ Unit * call_unit_launch(class CreateFlightgroup *fg, int type/*clsptr type*/, const std::string &destinations);
   Mission(char *configfile, bool loadscripts=true);
   std::string Pickle ();//returns filename\npickleddata
   void UnPickle (std::string pickled);//takes in pickeddata
@@ -688,7 +689,6 @@ omap_t* getOMapObject(missionNode *node,int mode,varInst *ovi);
  Unit *getUnitObject(missionNode *node,int mode,varInst *ovi);
 
  // void call_unit_launch(missionNode *node,int mode,string name,string faction,string type,string ainame,int nr_ships,Vector &pos);
- Unit * call_unit_launch(class CreateFlightgroup *fg, int type/*clsptr type*/, const std::string &destinations);
 
  void call_unit_toxml(missionNode *node,int mode,varInst *ovi);
 

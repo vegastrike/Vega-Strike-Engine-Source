@@ -204,9 +204,9 @@ void Python::initpaths(){
 void Python::reseterrors() {
   if (PyErr_Occurred()) {
     PyErr_Print();
-	fflush(stderr);
     PyErr_Clear();
   }
+  fflush(stderr);
 }
 /*
 //PYTHON_INIT_GLOBALS(VS,UnitContainer);

@@ -66,9 +66,14 @@ BOOST_PYTHON_END_CONVERSION_NAMESPACE
         return *((SuperClass*)0); \
 	}
 //non_null_from_python
+#ifdef FROM_PYTHON_ERRORS
 #define PYTHON_INIT_INHERIT_GLOBALS(name,SuperClass) PythonClass <SuperClass> *PythonClass< SuperClass >::last_instance = NULL; \
 	ADD_FROM_PYTHON_FUNCTION(SuperClass)
 #define PYTHON_INIT_GLOBALS(name,Class) ADD_FROM_PYTHON_FUNCTION(Class)
+#else
+#define PYTHON_INIT_INHERIT_GLOBALS(name,SuperClass) PythonClass <SuperClass> *PythonClass< SuperClass >::last_instance = NULL;
+#define PYTHON_INIT_GLOBALS(name,Class)
+#endif
 #else
 #define PYTHON_INIT_INHERIT_GLOBALS(name,SuperClass) PythonClass <SuperClass> *PythonClass< SuperClass >::last_instance = NULL; 
 #define PYTHON_INIT_GLOBALS(name,Class) 

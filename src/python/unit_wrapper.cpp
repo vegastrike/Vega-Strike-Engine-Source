@@ -3,8 +3,8 @@
 #include <string>
 #include "gfx/vec.h"
 #include "cmd/unit.h"
-#include "cmd/images.h"
 #include "python_class.h"
+#include "cmd/unit_util.h"
 #include <boost/python/objects.hpp>
 
 //makes to_python for both vector and qvector turn them into tuples :-)
@@ -41,6 +41,8 @@ const char* error="\nERROR: NULL Unit used in Python script; returning default v
 #define voidWRAPPED1(name,atype,a) void name ( atype a){{CHECKME;} me -> name ( a );}  
 #define voidWRAPPED2(name,atype,a,btype,b) void name ( atype a, btype b ){{CHECKME;} me -> name ( a , b );}  
 #define voidWRAPPED3(name,atype,a,btype,b,ctype,c) void name ( atype a, btype b, ctype c ){{CHECKME;} me -> name ( a , b , c );}  
+#define EXPORT_UTIL(name,aff)
+#define voidEXPORT_UTIL(name) EXPORT_UTIL(name,0)
 //End of Macro City
 class UnitWrapper : public UnitContainer{
 public:
@@ -78,6 +80,7 @@ public:
   UnitWrapper(Unit *un=0) : UnitContainer(un){}
   operator Unit* () {return unit;}
   bool isNull () {return GetUnit()==0;}
+  void setNull () {SetUnit(0);}
 };
 
 PYTHON_BEGIN_MODULE(VS)
@@ -110,6 +113,8 @@ PYTHON_BEGIN_CLASS(VS,UnitWrapper,"Unit")
 #undef voidWRAPPED1
 #undef voidWRAPPED2
 #undef voidWRAPPED3
+#undef EXPORT_UTIL
+#undef voidEXPORT_UTIL
 #define WRAPPED0(type,name,nada) Class.def(&UnitWrapper::name,#name);
 #define WRAPPED1(type,name,atype,a,def) WRAPPED0(type,name,def)
 #define WRAPPED2(type,name,atype,a,btype,b,def) WRAPPED0(type,name,def)
@@ -118,6 +123,8 @@ PYTHON_BEGIN_CLASS(VS,UnitWrapper,"Unit")
 #define voidWRAPPED1(name,atype,a) WRAPPED0(void,name,0)
 #define voidWRAPPED2(name,atype,a,btype,b) WRAPPED0(void,name,0)
 #define voidWRAPPED3(name,atype,a,btype,b,ctype,c) WRAPPED0(void,name,0)
+#define EXPORT_UTIL(name,aff) Class.def(&UnitUtil::name,#name);
+#define voidEXPORT_UTIL(name) EXPORT_UTIL(name,0)
 #include "python_unit_wrap.h"
 #undef WRAPPED0
 #undef WRAPPED1
@@ -127,8 +134,11 @@ PYTHON_BEGIN_CLASS(VS,UnitWrapper,"Unit")
 #undef voidWRAPPED1
 #undef voidWRAPPED2
 #undef voidWRAPPED3
+#undef EXPORT_UTIL
+#undef voidEXPORT_UTIL
 //End of Macro City 2
   Class.def(boost::python::operators<boost::python::op_eq | boost::python::op_ne>(), boost::python::right_operand<UnitWrapper>());
+  Class.def(&UnitWrapper::setNull,"setNull");
   Class.def(&UnitWrapper::isNull,"isNull");
   Class.def(&UnitWrapper::Kill,"Kill");
   Class.def(&UnitWrapper::SetTarget,"SetTarget");
@@ -156,14 +166,17 @@ PYTHON_END_CLASS(VS,UnitCollection::UnitIterator)
 PYTHON_END_MODULE(VS)
 TO_PYTHON_SMART_POINTER(UnitWrapper);
 TO_PYTHON_SMART_POINTER(Cargo);
+
+PYTHON_INIT_GLOBALS(Unit,UnitWrapper)
+BOOST_PYTHON_BEGIN_CONVERSION_NAMESPACE
 PyObject *to_python(Unit * un) {
   return to_python (UnitWrapper(un));
 }
-
 Unit * from_python(PyObject *p,boost::python::type<Unit *>) {
-  UnitWrapper uw =from_python (p,boost::python::type<UnitWrapper >());
+  UnitWrapper uw =(from_python (p,boost::python::type<UnitWrapper&>()));
   return uw.GetUnit();
 }
+BOOST_PYTHON_END_CONVERSION_NAMESPACE
 
 
 
@@ -188,6 +201,8 @@ Unit * from_python(PyObject *p,boost::python::type<Unit *>) {
 #define voidWRAPPED1(name,atype,a) def name(self,a): ~    MYPRINT(name)
 #define voidWRAPPED2(name,atype,a,btype,b) def name(self,a,b): ~    MYPRINT(name)
 #define voidWRAPPED3(name,atype,a,btype,b,ctype,c) def name(self,a,b,c): ~    MYPRINT(name)
+#define voidEXPORT_UTIL(name) def name(self,a=None,b=None,c=None,d=None,e=None,f=None,g=None,h=None,i=None,j=None): ~    MYPRINT(name)
+#define EXPORT_UTIL(name,aff) voidEXPORT_UTIL(name) ~    return aff
 def string ():
   return ''
 class Unit:
@@ -199,6 +214,7 @@ class Unit:
   WRAPPED1(bool,__eq__,UnitWrapper,oth,false);
   WRAPPED1(bool,__ne__,UnitWrapper,oth,true);
   voidWRAPPED0(Kill);
+  voidWRAPPED0(setNull);
   voidWRAPPED0(isNull);
   voidWRAPPED1(SetTarget,UnitWrapper,un);
   WRAPPED0(UnitWrapper, GetTarget,UnitWrapper(0));
