@@ -82,8 +82,9 @@ void Sprite::Draw()
 		GFXDisable(DEPTHTEST);
 
 		UpdateHudMatrix();
-		surface->MakeActive();
 		GFXEnable(TEXTURE0);
+		surface->MakeActive();
+
 		//GFXVertex(Vector(0.00F, 0.00F, 1.00F), Vector(0.00F, 0.00F, 0.00F), 0.00F, 0.00F),
 		//GFXVertex(Vector(xsize, 0.00F, 1.00F), Vector(0.00F, 0.00F, 0.00F), 1.00F, 0.00F),
 		//GFXVertex(Vector(xsize, ysize, 1.00F), Vector(0.00F, 0.00F, 0.00F), 1.00F, 1.00F),

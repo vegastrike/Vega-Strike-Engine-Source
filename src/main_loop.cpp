@@ -443,7 +443,7 @@ void createObjects() {
   greenexp->SetPosition (0,0,5);
   fihneCarriah = new Sprite ("carrier.spr");
   bg = new Background("cube");
-  bg2 = new SphereMesh (20.0,8,8,"sun.bmp",true,true);
+  //bg2 = new SphereMesh (20.0,8,8,"sun.bmp",true,true);
   //HUDElement *t = new HUDElement("ucarrier.dat");
   /*************
 		locSel = new LocationSelect(Vector (0,-1,5),
@@ -500,7 +500,7 @@ void createObjects() {
     fighters[a] = new Unit("uosprey.dat");
     //fighters[a]->SetPosition((a%8)/8.0 - 2.0, (a/8)/8.0 - 2.0,5.0);
     fighters[a]->SetPosition((a%16)*5 - 40.0F, (a/16)*5 - 40.0F,7.0F);
-    //fighters[a]->Pitch(PI/2);
+    fighters[a]->Pitch(PI/2);
     //fighters[a]->Roll(PI/2);
     //fighters[a]->Scale(Vector(0.5,0.5,0.5));
     _GFX->activeStarSystem()->AddUnit(fighters[a]);
@@ -525,7 +525,7 @@ void destroyObjects() {
   delete fighter2;
   delete fighter;
   delete bg;
-  delete bg2;
+  //  delete bg2;  if you delete a sphere wiht paletted texture and its refcount you'll get a malloc problem
   delete s;
   delete greenexp;
   delete fihneCarriah;
@@ -549,8 +549,8 @@ void main_loop() {
   GFXDisable(DEPTHTEST);
   GFXEnable(TEXTURE0);
   GFXDisable(TEXTURE1);
-  bg2->Draw();
-  
+  //bg2->Draw();
+  bg->Draw();
   GFXEnable(DEPTHWRITE);
   GFXEnable(DEPTHTEST);
   GFXEnable(TEXTURE0);

@@ -32,15 +32,17 @@ Background::Background(char *file)
 {
 	char temp[80]; 
 	up = left = down = front=right=back=NULL;
-	
-	strcpy(temp, file);
+ 
 	up = new Texture(strcat(temp, "_up.bmp"), 0);
 	SphereBackground = NULL;
+
 	if (!up->LoadSuccess()) {
+	strcpy(temp, file);
+	  strcpy (temp,file);
+	  SphereBackground = new SphereMesh (20,8,8,strcat (temp,"_sphere.bmp"),true,true);
 	  delete up;
 	  up = NULL;
-	  SphereBackground = new SphereMesh (size,8,8,strcat (temp,"_sphere.bmp"),true,true);
-	}
+	}else {
 	//up->Clamp();
 	//up->Filter();
 
@@ -68,6 +70,7 @@ Background::Background(char *file)
 	down = new Texture(strcat(temp, "_down.bmp"), 0);
 	//down->Clamp();
 	//down->Filter();
+	}
 }
 
 Background::~Background()
@@ -90,7 +93,7 @@ Background::~Background()
 
 void Background::Draw()
 {
-  if (!up) {
+  if (SphereBackground) {
     SphereBackground->Draw();
     return;
   }   
