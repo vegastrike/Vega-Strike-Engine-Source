@@ -6,7 +6,6 @@
 #include <values.h>
 #include "xml_support.h"
 
-/*
 #ifdef max
 #undefine max
 #endif
@@ -24,7 +23,6 @@ static inline float min(float x, float y) {
   if(x<y) return x;
   else return y;
 }
-*/
 
 using XMLSupport::EnumMap;
 using XMLSupport::Attribute;
@@ -378,23 +376,22 @@ void Mesh::LoadXML(const char *filename, Mesh *oldmesh) {
   }
   radialSize = 0;
   for(int a=0; a<xml->tris.size(); a++, index++) {
+    vertexlist[index] = xml->tris[a];
     minSizeX = min(vertexlist[index].x, minSizeX);
     maxSizeX = max(vertexlist[index].x, maxSizeX);
     minSizeY = min(vertexlist[index].y, minSizeY);
     maxSizeY = max(vertexlist[index].y, maxSizeY);
     minSizeZ = min(vertexlist[index].z, minSizeZ);
     maxSizeZ = max(vertexlist[index].z, maxSizeZ);
-
-    vertexlist[index] = xml->tris[a];
   }
   for(int a=0; a<xml->quads.size(); a++, index++) {
+    vertexlist[index] = xml->quads[a];
     minSizeX = min(vertexlist[index].x, minSizeX);
     maxSizeX = max(vertexlist[index].x, maxSizeX);
     minSizeY = min(vertexlist[index].y, minSizeY);
     maxSizeY = max(vertexlist[index].y, maxSizeY);
     minSizeZ = min(vertexlist[index].z, minSizeZ);
     maxSizeZ = max(vertexlist[index].z, maxSizeZ);
-    vertexlist[index] = xml->quads[a];
   }
   radialSize = sqrtf ((maxSizeX-minSizeX)*(maxSizeX-minSizeX)+(maxSizeY-minSizeY)*(maxSizeY-minSizeY)+(maxSizeX-minSizeZ)*(maxSizeX-minSizeZ));
   vlist = new GFXVertexList(xml->tris.size() + xml->quads.size(),
@@ -402,7 +399,7 @@ void Mesh::LoadXML(const char *filename, Mesh *oldmesh) {
 			    vertexlist);
  
   //TODO: add force handling
- fprintf (stderr, "Minx %f maxx %f, miny %f maxy %fminz %fmaxz %f, radsiz %f\n",minSizeX, maxSizeX,  minSizeY, maxSizeY,  minSizeZ, maxSizeZ,radialSize);  
+  fprintf (stderr, "Minx %f maxx %f, miny %f maxy %fminz %fmaxz %f, radsiz %f\n",minSizeX, maxSizeX,  minSizeY, maxSizeY,  minSizeZ, maxSizeZ,radialSize);  
 
   if (radialSize==0) {
     int i;

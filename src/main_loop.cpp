@@ -497,6 +497,8 @@ void createObjects() {
   for(int a = 0; a < numf; a++) {
     //fighters[a] = new Unit("uosprey.dat");
     //fighters[a] = new Unit("Homeworld-HeavyCorvette.xml", true);
+    fighters[a] = new Unit("broadsword.xunit", true);
+    /*
     switch(a%7) {
     case 0:
       fighters[a] = new Unit("broadsword.xunit", true);
@@ -520,6 +522,7 @@ void createObjects() {
       fighters[a] = new Unit("Multiguncorvette.xunit", true);
       break;
     }
+    */
     //fighters[a] = new Unit("phantom.xunit", true);
     //fighters[a]->SetPosition((a%8)/8.0 - 2.0, (a/8)/8.0 - 2.0,5.0);
     fighters[a]->SetPosition((a%10)*35 - 40.0F, (a/10)*35 - 40.0F,7.0F);
@@ -575,7 +578,7 @@ void main_loop() {
   GFXEnable(TEXTURE0);
   GFXDisable(TEXTURE1);
   //bg2->Draw();
-  bg->Draw();
+  //bg->Draw();
   GFXEnable(DEPTHWRITE);
   GFXEnable(DEPTHTEST);
   GFXEnable(TEXTURE0);

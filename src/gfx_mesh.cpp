@@ -119,8 +119,9 @@ Mesh:: Mesh(const char * filename, bool xml):Primitive()
 	}
 	else
 	{
-		oldmesh = (Mesh*)malloc(sizeof(Mesh));
-		meshHashTable.Put(string(filename), oldmesh);
+	  //oldmesh = (Mesh*)malloc(sizeof(Mesh));
+	  oldmesh = new Mesh();
+	  meshHashTable.Put(string(filename), oldmesh);
 	}
 
 	strcpy(name, filename);
