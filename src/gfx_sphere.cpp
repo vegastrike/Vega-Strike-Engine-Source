@@ -137,9 +137,9 @@ void SphereMesh::Draw(const Transformation &transform /*= identity_transformatio
     Transformation tmp = transform;
     tmp.position = pos;
     Mesh::Draw (tmp,m1);
-  }		
-
-  Mesh::Draw(transform,m);
+  } else {	
+    Mesh::Draw(transform,m);
+  } 
 }
 void SphereMesh::SetBlendMode (const BLENDFUNC a, const BLENDFUNC b) {
   blendSrc=a; 

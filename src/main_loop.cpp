@@ -587,12 +587,7 @@ void main_loop() {
   fighters[0]->SetCameraToCockpit();
   _Universe->StartDraw();
 
-  GFXBlendMode (ONE,ZERO);
   _Universe->activeStarSystem()->Draw();
-    GFXDisable(TEXTURE1);
-    locSel->Draw();
-  Halo::ProcessDrawQueue();
-  Beam::ProcessDrawQueue();
 
   _Universe->activeStarSystem()->Update();
 

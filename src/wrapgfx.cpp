@@ -119,7 +119,6 @@ void Universe::StartDraw()
 	RESETTIME();
 #endif
 	GFXBeginScene();
-	SetViewport();
 }
 
 
