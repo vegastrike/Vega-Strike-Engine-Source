@@ -654,6 +654,7 @@ int getmicrosleep () {
 
 void restore_main_loop() {
   RestoreKB();
+  glutSetCursor(GLUT_CURSOR_NONE);
   RestoreMouse();
   GFXLoop (main_loop);
 

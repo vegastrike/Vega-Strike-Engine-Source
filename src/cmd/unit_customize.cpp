@@ -447,7 +447,7 @@ void EndFrame(void) {
   GFXEndScene();
   GFXHudMode(false);
   GFXEnable (CULLFACE);
-  glutSetCursor(GLUT_CURSOR_NONE);
+
 }
 
 void ProcessMouseClick(int button, int state, int x, int y) {
