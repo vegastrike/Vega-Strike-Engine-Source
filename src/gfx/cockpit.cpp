@@ -1328,7 +1328,7 @@ void GameCockpit::Draw() {
 			mission->msgcenter->add("game",playr,"Or Press #8080FFEsc#000000 to quit");
 		}
 		GFXColorf (textcol);
-		text->Draw ("#ff5555You Have Died!\n#000000Press #8080FF;#000000 (semicolon) to respawn\nOr Press #8080FFEsc#000000 to quit");
+		text->Draw ("#ff5555You Have Died!\n#000000Press #8080FF;#000000 (semicolon) to respawn\nOr Press #8080FFEsc and 'q'#000000 to quit");
 		GFXColor4f (1,1,1,1);
 	}
 	dietime +=GetElapsedTime();
