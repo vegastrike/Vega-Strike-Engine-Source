@@ -588,8 +588,11 @@ static void glut_keyboard_cb( unsigned char ch, int x, int y )
   
     if ( keyboard_func ) {
       int gm = glutGetModifiers();
+      if (gm) {
+        printf ("Down Modifier %d for char %d %c\n",gm,(int)ch,ch);
+      }
       if (gm&GLUT_ACTIVE_CTRL) {
-        AdjustKeyCtrl(ch);
+        ch=AdjustKeyCtrl(ch);
       }
       (*keyboard_func)( ch, gm, false, x, y );
       
@@ -608,8 +611,11 @@ static void glut_keyboard_up_cb( unsigned char ch, int x, int y )
 {
     if ( keyboard_func ) {
       int gm = glutGetModifiers();
+      if (gm) {
+        printf ("Up Modifier %d for char %d %c\n",gm,(int)ch,ch);
+      }
       if (gm&GLUT_ACTIVE_CTRL) {
-        AdjustKeyCtrl(ch);
+        ch=AdjustKeyCtrl(ch);
       }      
       (*keyboard_func)( ch, gm, true, x, y );
     }
