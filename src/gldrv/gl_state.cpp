@@ -300,11 +300,12 @@ void /*GFXDRVAPI*/ GFXSelectTexcoordSet(const int stage, const int texset)
 }
 
 void GFXActiveTexture (const int stage) {
+#if !defined(IRIX)
   if (g_game.Multitexture&&stage!=activeTextureStage) {
     glActiveTextureARB(GL_TEXTURE0_ARB+stage);
     activeTextureStage=stage;
   }
-
+#endif
 }
 
 void GFXAlphaTest (const enum DEPTHFUNC df, const float ref) {
