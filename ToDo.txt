@@ -5,6 +5,8 @@ Goals for 0.4.2 release:
 ** Fix a bit of the system generation code: so we can specify everything in the milky_way.xml
 ** Sparkles (particle system)
 ** Distance worth worth warping to playability?
+** check config value for insys warp_energy divisor (may need to make larger if players running out of juice - numbers not currently playbalanced - will fix balancing later - for now, set to higher value and ignore energy issues
+)
 
 *Map
 we should make the overall shift-m nav screen A) bigger - make it take up the full screen B) Since it's a HUD artifact, lit independent of scene - having your nav display go all dark, while it shows off the lighting, is... odd
