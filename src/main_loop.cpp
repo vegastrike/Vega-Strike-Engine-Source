@@ -194,6 +194,10 @@ namespace CockpitKeys {
 bool cockpitfront=true;
   void Inside(int,KBSTATE newState) {
     {
+      YawLeft (0,RELEASE);
+      YawRight (0,RELEASE);
+      PitchUp(0,RELEASE);
+      PitchDown (0,RELEASE);
       static bool back= XMLSupport::parse_bool (vs_config->getVariable ("graphics","background","true"));
       _Universe->activeStarSystem()->getBackground()->EnableBG(back);
     }
