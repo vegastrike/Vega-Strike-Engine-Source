@@ -236,12 +236,17 @@ public:
 			return ctm;
 		}else {
 			Matrix k(ctm);
+			
 			float speed = GetVelocity().Magnitude();
 			float stretchlength = (speed-cutoff)/cutoff;
+			//Matrix scalar=identity_matrix;
+			
 			static float maxstretch = XMLSupport::parse_float (vs_config->getVariable("graphics","warp_stretch_max","4"));
 			if (stretchlength>maxstretch)
 				stretchlength= maxstretch;
-			Vector v(Vector(1,1,1)+ctm.getR().Scale(stretchlength).Vabs());
+			ScaleMatrix(k,Vector(1,1,1+stretchlength));			
+			
+/*			Vector v(Vector(1,1,1)+ctm.getR().Scale(stretchlength).Vabs());
 			
 			k.r[0]*=v.i;
 			k.r[1]*=v.j;
@@ -253,7 +258,7 @@ public:
 			
 			k.r[6]*=v.i;
 			k.r[7]*=v.j;
-			k.r[8]*=v.k;		
+			k.r[8]*=v.k;		*/
 			return k;
 		}
 	}
