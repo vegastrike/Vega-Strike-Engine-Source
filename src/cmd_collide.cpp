@@ -153,7 +153,7 @@ void Unit::CollideAll() {
 	Position().j-radial_size<COLQ[i].Maxi.j&&
 	Position().k+radial_size>COLQ[i].Mini.k&&
 	Position().k-radial_size<COLQ[i].Maxi.k) {
-      switch (collidequeue[i].type) {
+      switch (COLQ[i].type) {
       case LineCollide::UNIT://other units!!!
 	((Unit*)COLQ[i].object)->Collide(this);
 	return;

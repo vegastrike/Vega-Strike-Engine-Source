@@ -63,7 +63,7 @@ public:
   static Texture * Exists (string s);
 	int Bind();
 	void Transfer();
-	void MakeActive(int stage = 0);
+	void MakeActive();
         bool LoadSuccess () {
           return (data!=NULL);
         }

@@ -196,7 +196,7 @@ void Beam::ProcessDrawQueue() {
   GFXEnable (TEXTURE0);
   GFXDisable (TEXTURE1);
   for (unsigned int decal = 0;decal < beamdrawqueue.size();decal++) {	
-    BeamDecal[decal]->MakeActive(0);
+    BeamDecal[decal]->MakeActive();
     while (beamdrawqueue[decal].size()) {
       DrawContext c= beamdrawqueue[decal].back();
       beamdrawqueue[decal].pop_back();

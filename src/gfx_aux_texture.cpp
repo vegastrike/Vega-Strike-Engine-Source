@@ -466,8 +466,8 @@ void Texture::Prioritize (float priority) {
   GFXPrioritizeTexture (name, priority);
 }
 
-void Texture::MakeActive(int stage)
+void Texture::MakeActive()
 {
   assert(name!=-1);
-	GFXSelectTexture(name, this->stage);
+  GFXSelectTexture(name,stage);
 }

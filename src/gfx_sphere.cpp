@@ -9,7 +9,7 @@
 using XMLSupport::tostring;
 
 SphereMesh::SphereMesh(float radius, int stacks, int slices, char *texture, bool Insideout,bool centeredOnShip) : Mesh() {
-  strcpy(name, "Sphere");
+  //strcpy(name, "Sphere");
 
   SphereMesh *oldmesh;
   string hash_key = string("@@Sphere") + "#" + tostring(radius) + "#" + texture + "#" + tostring(stacks) + "#" + tostring(slices) + "#" + (Insideout?"yes":"no");
@@ -129,7 +129,6 @@ void SphereMesh::ProcessDrawQueue() {
   GFXDisable (LIGHTING);
   GFXEnable(TEXTURE0);
   if(envMap) {
-    Reflect();
     GFXEnable(TEXTURE1);
   } else {
     GFXDisable(TEXTURE1);

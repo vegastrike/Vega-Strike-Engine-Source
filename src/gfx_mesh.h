@@ -21,18 +21,13 @@
 #ifndef _MESH_H_
 #define _MESH_H_
 
-#include "gfx_primitive.h"
-
-//#include "gfx_vertex.h"
-//#include "gfx_bsp.h"
-//#include "gfx_bounding_box.h"
-//#include "gfxlib.h"
-//#include "gfx_aux_logo.h"
-
 #include <string>
 #include <vector>
 #include "xml_support.h"
 #include "quaternion.h"
+#include "gfx_aux.h"
+#include "gfx_transform.h"
+
 using namespace std;
 
 class Planet;
@@ -49,7 +44,7 @@ using XMLSupport::AttributeList;
 
 #define NUM_MESH_SEQUENCE 4
 
-class Mesh:public Primitive
+class Mesh
 {
 private:
   // Display list hack
@@ -176,10 +171,15 @@ private:
   static void beginElement(void *userData, const XML_Char *name, const XML_Char **atts);
   static void endElement(void *userData, const XML_Char *name);
   
-  virtual void beginElement(const string &name, const AttributeList &attributes);
-  virtual void endElement(const string &name);
+  void beginElement(const string &name, const AttributeList &attributes);
+  void endElement(const string &name);
 
 protected:
+ 
+  Transformation local_transformation; 
+  enum BLENDFUNC blendSrc;
+  enum BLENDFUNC blendDst;
+
   static Hashtable<string, Mesh,char[513]> meshHashTable;
   int refcount;
   float maxSizeX,maxSizeY,maxSizeZ,minSizeX,minSizeY,minSizeZ;
@@ -213,8 +213,6 @@ protected:
   BOOL changed;
   void InitUnit();
   
-  void Reflect ();
-
   string *hash_name;
   // Support for reorganized rendering
   bool will_be_drawn;
@@ -231,30 +229,20 @@ public:
   Mesh();
   Mesh(const char *filename,  bool xml=false);
   ~Mesh();
-
-  virtual void Draw(const Transformation &quat = identity_transformation, const Matrix = identity_matrix);
-  virtual void ProcessDrawQueue();
+  void SetPosition (float,float,float);
+  void SetPosition (const Vector&);
+  void SetOrientation (const Vector &, const Vector &, const Vector&);
+  Vector &Position() {return local_transformation.position;}
+  //  const char *get_name(){return name}
+  void Draw(const Transformation &quat = identity_transformation, const Matrix = identity_matrix);
+  void ProcessDrawQueue();
   static void ProcessUndrawnMeshes();
-  
-  void setEnvMap(BOOL newValue) {envMap = newValue;}
+    void setEnvMap(BOOL newValue) {envMap = newValue;}
   void Destroy();
-
   void UpdateHudMatrix();//puts an object on the hud with the matrix
-
-	/*
-	BOOL Yaw(float rad);
-	BOOL Pitch(float rad);
-	BOOL Roll(float rad);
-	void XSlide(float factor);
-	void YSlide(float factor);
-	void ZSlide(float factor);
-	*/
-
   void Rotate(const Vector &torque);
-
   Vector corner_min() { return Vector(minSizeX, minSizeY, minSizeZ); }
   Vector corner_max() { return Vector(maxSizeX, maxSizeY, maxSizeZ); }
-
   // void Scale(const Vector &scale) {this->scale = scale;SetOrientation();};
   BoundingBox * getBoundingBox();
   float rSize () {return radialSize;}

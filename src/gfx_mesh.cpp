@@ -46,6 +46,19 @@ list<Mesh*> undrawn_meshes[NUM_MESH_SEQUENCE]; // lower priority means draw firs
 extern list<Logo*> undrawn_logos;
 Vector mouseline;
 
+
+
+void Mesh::SetPosition (float x,float y, float z) {
+  local_transformation.position = Vector (x,y,z);
+}
+void Mesh::SetPosition (const Vector &k) {
+  local_transformation.position = k;
+}
+void Mesh::SetOrientation(const Vector &p, const Vector &q, const Vector &r)
+{	
+  local_transformation.orientation = Quaternion::from_vectors(p,q,r);
+}
+
 void Mesh::ProcessUndrawnMeshes() {
   GFXEnable(DEPTHWRITE);
   GFXEnable(DEPTHTEST);
@@ -115,12 +128,12 @@ void Mesh::InitUnit()
 	draw_sequence = 1;
 }
 
-Mesh::Mesh():Primitive()
+Mesh::Mesh()
 {
 	InitUnit();
 }
 
-Mesh:: Mesh(const char * filename, bool xml):Primitive()
+Mesh:: Mesh(const char * filename, bool xml)
 {
 	int TexNameLength;
 	char *TexName=NULL;
@@ -137,7 +150,6 @@ Mesh:: Mesh(const char * filename, bool xml):Primitive()
 	int NumQuads;
 	int *Quads;
 	BOOL AlphaMap = FALSE;
-	//InitPrimitive();
 
 	InitUnit();
 
@@ -158,7 +170,7 @@ Mesh:: Mesh(const char * filename, bool xml):Primitive()
 	  draw_queue = new vector<MeshDrawContext>;
 	}
 
-	strcpy(name, filename);
+	//	strcpy(name, filename);
 	if(xml) {
 	  LoadXML(filename, oldmesh);
 	  return;
@@ -652,11 +664,6 @@ float const ooPI = 1.00F/3.1415926535F;
 
 //#include "d3d_internal.h"
 
-void Mesh::Reflect()
-{
-      return; // Using OGL reflection coordinate generator
-}
-
 void Mesh::Draw(const Transformation &trans, const Matrix m)
 {
   Matrix cumulative_transformation_matrix;
@@ -682,7 +689,6 @@ void Mesh::ProcessDrawQueue() {
 	GFXEnable(TEXTURE0);
 	GFXEnable(CULLFACE);
 	if(envMap) {
-	  Reflect();
 	  GFXEnable(TEXTURE1);
 	} else {
 	  GFXDisable(TEXTURE1);
