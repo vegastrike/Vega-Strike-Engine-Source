@@ -2739,7 +2739,7 @@ bool Unit::UpgradeMounts (const Unit *up, int mountoffset, bool touchme, bool do
 
 
 	  if (up->mounts[i]->type->size==(up->mounts[i]->type->size&mounts[jmod]->size)) {//only look at this mount if it can fit in the rack
-	    if (up->mounts[i]->type->weapon_name!=mounts[jmod]->type->weapon_name) {
+	    if (up->mounts[i]->type->weapon_name!=mounts[jmod]->type->weapon_name || mounts[jmod]->status==Mount::DESTROYED || mounts[jmod]->status==Mount::UNCHOSEN) {
 	      numave++;//ok now we can compute percentage of used parts
 	      if (templ) {
 		if (templ->GetNumMounts()>jmod) {
