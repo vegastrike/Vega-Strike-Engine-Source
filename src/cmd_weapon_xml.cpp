@@ -324,7 +324,6 @@ void LoadWeapons(const char *filename) {
   const int chunk_size = 16384;
   FILE * inFile= fopen (filename,"r+b");
   if (!inFile) {
-    assert (0);
     return;
   }
   XML_Parser parser = XML_ParserCreate (NULL);
