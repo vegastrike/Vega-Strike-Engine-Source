@@ -1777,6 +1777,8 @@ void FireKeyboard::Execute () {
   if (refresh_target) {
     Unit * targ;
     if ((targ =parent->Target())) {
+      if (parent->isSubUnit())
+        parent->TargetTurret(targ);
       CommunicationMessage *mymsg = GetTargetMessageQueue(targ,resp);
       FSM *fsm =FactionUtil::GetConversation (parent->faction,targ->faction);
       if (mymsg==NULL) {
