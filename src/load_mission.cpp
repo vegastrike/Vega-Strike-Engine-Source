@@ -161,6 +161,11 @@ std::string UnpickleAllMissions (FILE * fp) {
   return retval;
 }
 void LoadMission (const char * mission_name, bool loadFirstUnit) {
+  FILE * fp = fopen (mission_name,"r");
+  if (!fp) {
+    return;
+  }
+  fclose (fp);
   char * tmp = strdup (mission_name);
   active_missions.push_back (new Mission(tmp));
   active_missions.back()->initMission();

@@ -342,7 +342,7 @@ void Universe::SerializeFaction(FILE * fp) {
   }
 }
 int numnums (const char * str) {
-  int count;
+  int count=0;
   for (int i=0;str[i];i++) {
     count+=isdigit (str[i])?1:0;
   }
