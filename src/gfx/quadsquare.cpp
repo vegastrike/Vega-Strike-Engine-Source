@@ -121,7 +121,7 @@ quadsquare::quadsquare(quadcornerdata* pcd) {
 		Error[i] = 0;
 	}
 	for (i = 0; i < 4; i++) {
-		Error[i+2] = (unsigned short) (fabs((Vertex[0].Y + pcd->Verts[i].Y) - (Vertex[i+1].Y + Vertex[((i+1)&3) + 1].Y)) * 0.25);
+		Error[i+2] = (unsigned short) (fabs((double)((Vertex[0].Y + pcd->Verts[i].Y) - (Vertex[i+1].Y + Vertex[((i+1)&3) + 1].Y))) * 0.25);
 	}
 
 	// Compute MinY/MaxY based on corner verts.

@@ -406,7 +406,7 @@ float quadsquare::RecomputeErrorAndLighting(const quadcornerdata& cd) {
 			if (Child[i]->MaxY > MaxY) MaxY = Child[i]->MaxY;
 		} else {
 			// Compute difference between bilinear average at child center, and diagonal edge approximation.
-			Error[i+2] = (unsigned short)(fabs((Vertex[0].Y + cd.Verts[i].Y) - (Vertex[i+1].Y + Vertex[((i+1)&3) + 1].Y)) * 0.25);
+			Error[i+2] = (unsigned short)(fabs((double)((Vertex[0].Y + cd.Verts[i].Y) - (Vertex[i+1].Y + Vertex[((i+1)&3) + 1].Y))) * 0.25);
 		}
 		if (Error[i+2] > maxerror) maxerror = Error[i+2];
 	}
