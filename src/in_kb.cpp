@@ -42,11 +42,6 @@ static void kbGetInput(int key, bool release, int x, int y){
   int i=_Universe->CurrentCockpit();
   _Universe->SetActiveCockpit(playerBindings[key]);
 
-  if ((keyState[WSK_RSHIFT]==DOWN||keyState[WSK_LSHIFT==DOWN])) {
-    fprintf (stderr,"s");
-    if (isalpha(key)) 
-	key = toupper (key);
-  }
 
   if ((keyState[key]==RESET||keyState[key]==UP)&&!release)
     keyBindings[key](key,PRESS);
@@ -63,6 +58,14 @@ static void kbGetInput(int key, bool release, int x, int y){
     ch = toupper(ch);
   }
   kbGetInput( ch, release, x, y );
+  if (release) {
+    if (((unsigned int)tolower (ch))!=ch&&keyState[tolower(ch)]==DOWN) {
+      kbGetInput (tolower(ch),release,x,y);
+    }
+    if (((unsigned int)toupper (ch))!=ch&&keyState[toupper(ch)]==DOWN) {
+      kbGetInput (toupper(ch),release,x,y);
+    }
+  }
 }
 /*
 static void glut_special_cb( int key, int x, int y ) 
