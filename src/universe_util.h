@@ -29,6 +29,8 @@ public:
 	void remove (){UnitIterator::remove();}
 };
 	
+	string LookupUnitStat(string unitname, string faction, string statname);
+
 	Unit * GetUnitFromSerial( ObjSerial serial);
 ///this gets a unit with 1 of each cargo type in it
 	Unit *GetMasterPartList ();

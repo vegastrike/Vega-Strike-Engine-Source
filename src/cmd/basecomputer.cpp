@@ -1660,21 +1660,12 @@ void BaseComputer::loadListPicker(TransactionList& tlist, SimplePicker& picker, 
 
         // Construct the cell for this item.
         const bool transOK = isTransactionOK(item, transType);
-		/*
-		//REALLY SLOW - why?
-		string blnk;
-		static Flightgroup* staticFG=new Flightgroup();//sigh
-        int fgsNumber=0;
-	    current_unit_load_mode=NO_MESH;
-        Unit* newPart = UnitFactory::createUnit(item.content.c_str(), false, FactionUtil::GetFaction("upgrades"),blnk,staticFG,fgsNumber);
-	    current_unit_load_mode=DEFAULT;
-		string namestr=newPart->getFullname();
-	    delete newPart;
-		//END REALLY SLOW
 		
-        string itemName = beautify(namestr);
-		*/
-		string itemName=beautify(item.content); //FIXME FIXME WRONG Names will be printed - above code fixes, but is too slow...
+		string itemName = beautify(UniverseUtil::LookupUnitStat(item.content,"upgrades","Name"));
+		if(itemName==""){
+		  itemName=beautify(item.content); 
+		}
+		
           if (item.quantity > 1) {
             // If there is more than one item, show the number of items.
 	      itemName += " (" + tostring(item.quantity) + ")";

@@ -64,6 +64,7 @@ Goals for 'Sometime over the rainbow'
 ** grappling hooks?
 ** Area effect modeling
 ** Bomb-pumped laser modeling?
+** faction standing changes -- sanity?
 
 * Graphical stuff
 ** make engine lights proportional to accel, not to speed
