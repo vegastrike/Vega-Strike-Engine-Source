@@ -71,9 +71,13 @@ static void AllUnitsCloseAndEngage(Unit * un, int faction) {
 					if (fg) {
 						if (fg->directive.empty()?true:toupper(*fg->directive.begin())!=*fg->directive.begin()) {
 							ally->Target (un);
+							ally->TargetTurret (un);
+
 							fg->directive=string("a");//attack my target (of leader)
 						}else {
 							ally->Target (un);
+							ally->TargetTurret (un);
+
 						}
 					}
 				}
