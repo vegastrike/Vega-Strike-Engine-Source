@@ -8,7 +8,7 @@ const GFXVertex InitialVertices [4]= { GFXVertex (Vector(0,0,0),Vector (0,1,0), 
 				       GFXVertex (Vector(0,0,0),Vector (0,1,0), 0,0),
 				       GFXVertex (Vector(0,0,0),Vector (0,1,0), 0,0) };
  
-QuadTree::QuadTree ():vertices (GFXTRI,4,InitialVertices,4,true) {
+QuadTree::QuadTree (const char * filename):vertices (GFXTRI,4,InitialVertices,4,true) {
   detail =128;
   Identity (transformation);
   nonlinear_transform = new IdentityTransform;
@@ -29,6 +29,7 @@ QuadTree::QuadTree ():vertices (GFXTRI,4,InitialVertices,4,true) {
   
 
   VertexAllocated = VertexCount = 4;
+  /*
   textures.push_back (TerrainTexture());
   for (int i=1;i<10;i++) {
     char name[]="terrainX.bmp";
@@ -37,9 +38,14 @@ QuadTree::QuadTree ():vertices (GFXTRI,4,InitialVertices,4,true) {
     tmp.tex.t = new Texture (name);
     textures.push_back (tmp);
   }
+  */
   quadsquare::SetCurrentTerrain (&VertexAllocated, &VertexCount, &vertices, &unusedvertices, nonlinear_transform, &textures);
-  root = new quadsquare (&RootCornerData);
-  LoadData();
+
+  if (filename) {
+    LoadXML(filename);
+   } else {
+     root = new quadsquare (&RootCornerData);
+  }
   root->StaticCullData (RootCornerData,25);
   /*
         for (i = 0; i < 10; i++) {

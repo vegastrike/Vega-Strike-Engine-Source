@@ -115,8 +115,7 @@ unsigned char * readImage (const char * name, int & bpp, int &color_type, unsign
   png_structp png_ptr;
   png_bytepp row_pointers;
   png_infop info_ptr;
-  unsigned int sig_read = 0;
-  int bit_depth, interlace_type;
+  int  interlace_type;
    FILE *fp;
    if ((fp = fopen(name, "rb")) == NULL)
       return NULL;

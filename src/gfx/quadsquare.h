@@ -42,8 +42,8 @@ struct TerrainTexture {
 struct HeightMapInfo {
 	short*	Data;
 	int	XOrigin, ZOrigin;
-	int	XSize, ZSize;
-	int	RowWidth;
+	unsigned int	XSize, ZSize;
+	unsigned int	RowWidth;
 	int	Scale;
 
 	float	Sample(int x, int z) const;

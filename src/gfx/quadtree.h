@@ -24,7 +24,7 @@ class QuadTree {
   void LoadXML (const char * filename);
   TerraXML * xml;
  public:
-  QuadTree ();
+  QuadTree (const char * filename);
   ~QuadTree();
   void Render();
   void Update();

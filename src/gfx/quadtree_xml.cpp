@@ -2,19 +2,18 @@
 #include "xml_support.h"
 #include "gfxlib.h"
 #include "aux_texture.h"
-
+#include "png_texture.h"
 extern enum BLENDFUNC parse_alpha (char * tmp );
 
 
 struct TerrainData {
-	float scale;
+	int scale;
 	float OriginX;
 	float OriginY;
 	std::string file;
 };
 struct TerraXML {
 	float detail;
-	float level;
   	std::vector <GFXMaterial> mat;
 	std::vector <TerrainData> data;
 };
@@ -118,7 +117,7 @@ void QuadTree::beginElement(const string &name, const AttributeList &attributes)
 				xml->detail=parse_float((*iter).value);
 				break;
 			case LEVEL:
-				xml->level=parse_float((*iter).value);
+				RootCornerData.Level=parse_float((*iter).value);
 				break;
 			}
 		}
@@ -141,7 +140,7 @@ void QuadTree::beginElement(const string &name, const AttributeList &attributes)
 				textures.back().color=parse_int (((*iter).value));
 				break;
 			case SCALES:
-			  textures.back().scales = parse_float ((*iter).value);
+			  textures.back().scales = parse_int ((*iter).value);
 			  break;
 			case SCALET:
 			  textures.back().scalet = parse_float ((*iter).value);
@@ -239,7 +238,7 @@ void QuadTree::beginElement(const string &name, const AttributeList &attributes)
 		for (iter = attributes.begin();iter!=attributes.end();iter++) {
 			switch(attribute_map.lookup((*iter).name)) {
 			case SCALE:
-				xml->data.back().scale=parse_float((*iter).value);
+				xml->data.back().scale=parse_int((*iter).value);
 				break;
 			case ORIGINX:
 				xml->data.back().OriginX=parse_float((*iter).value);
@@ -272,7 +271,6 @@ void QuadTree::LoadXML (const char *filename) {
     return;
   }
   xml = new TerraXML;
-  xml->level = 15;
   xml->detail=20;
   XML_Parser parser = XML_ParserCreate(NULL);
   XML_SetUserData(parser, this);
@@ -298,10 +296,20 @@ void QuadTree::LoadXML (const char *filename) {
     }
 
   }
-  
-  quadsquare::SetCurrentTerrain (&VertexAllocated, &VertexCount, &vertices, &unusedvertices, nonlinear_transform, &textures);
   root = new quadsquare (&RootCornerData);
-
+  for (unsigned int i=0;i<xml->data.size();i++) {
+    HeightMapInfo hm;
+    hm.XOrigin =xml->data[i].OriginX;
+    hm.ZOrigin=xml->data[i].OriginY;
+    hm.Scale = xml->data[i].scale;
+    int format;int bpp; unsigned char * palette;
+    hm.Data = (short *) readImage (xml->data[i].file.c_str(),bpp, format, hm.XSize,hm.ZSize, palette, &heightmapTransform);
+    if (hm.Data) {
+      hm.RowWidth = hm.XSize;
+      root->AddHeightMap (RootCornerData,hm);
+      free (hm.Data);
+    }
+  }
   
   root->StaticCullData (RootCornerData,xml->detail);
   delete xml;
