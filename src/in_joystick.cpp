@@ -28,7 +28,11 @@
 //#include "dbg.h"
 #include "in_handler.h"
 #include "in_joystick.h"
+
 JoyStick *joystick[MAX_JOYSTICKS]; // until I know where I place it
+
+//static KBHandler joyBindings [MAX_BUTTONS];
+KBSTATE buttonState[MAX_BUTTONS];
 
 
 void InitJoystick(){
@@ -42,8 +46,16 @@ void InitJoystick(){
     }
     joystick[i]=new JoyStick(i); // SDL_Init is done in main.cpp
   }
+
+  for(int a=0; a<joystick[0]->NumButtons(); a++) {
+    buttonState[a] = UP;
+    UnbindButton(a);
+  }
+
+  
 #endif
 }
+
 void DeInitJoystick() {
 #ifdef HAVE_SDL
   int num_joysticks = SDL_NumJoysticks();
@@ -53,7 +65,29 @@ void DeInitJoystick() {
 #endif
 }
 
+void BindButton(int button,KBHandler handler){
+  // have to check if button>allowed
+  joyBindings[button]=handler;
+  handler(button,RESET);
+}
+
+static void DefaultJoyHandler(int button,KBSTATE state){
+	// do nothing
+	return;
+}
+
+void UnbindButton(int button) {
+  joyBindings[button] = DefaultJoyHandler;
+}
+
 void ProcessJoystick(){
+#if 1
+    for(int i=0;i<joystick[0]->NumButtons();i++){
+	joyBindings[i](-1,buttonState[i]);
+	buttonState[i]=UP;
+    }
+#endif
+
   // we don't need code here cause we don't queue events
 #if 0
   // not needed, this is done in FlyByJoystick
@@ -148,3 +182,6 @@ void JoyStick::GetJoyStick(float &x,float &y,int &buttons)
     return;
 }
 
+int JoyStick::NumButtons(){
+  return nr_of_buttons;
+}

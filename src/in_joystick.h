@@ -35,9 +35,26 @@
 //#include "dbg.h"
 #include "in_handler.h"
 
+class JoyStick;
+
+//typedef void (*JoyHandler) (int);
+
 extern void ProcessJoystick();
 extern void InitJoystick();
 extern void DeInitJoystick();
+
+extern void BindButton(int button,KBHandler handler);
+extern void UnbindButton(int button) ;
+
+const int MAX_JOYSTICKS=10;
+const int MAX_BUTTONS=32;
+
+static KBHandler joyBindings[MAX_BUTTONS];
+extern KBSTATE buttonState[MAX_BUTTONS];
+
+
+extern JoyStick *joystick[MAX_JOYSTICKS];
+
 class JoyStick {
     public:
     // initializes the joystick
@@ -46,6 +63,8 @@ class JoyStick {
     void GetJoyStick(float &x,float &y,int &buttons);
     bool isAvailable(void);
     bool is_around(float axe, float hswitch);
+    int NumButtons();
+
 #if defined(HAVE_SDL)
     SDL_Joystick *joy;
 #endif
@@ -59,7 +78,6 @@ class JoyStick {
     float  deadzone;
 }
 ;
-const int MAX_JOYSTICKS=10;
-extern JoyStick *joystick[MAX_JOYSTICKS];
+
 #endif // _JOYSTICK_H_
 

@@ -105,7 +105,7 @@ void ProcessKB()
 
 void BindKey(int key, KBHandler handler) {
 	keyBindings[key] = handler;
-	handler(key,RESET);
+	handler(-1,RESET); // key is not used in handler
 }
 
 static void DefaultKBHandler(int key, KBSTATE newState) {

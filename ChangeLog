@@ -1,5 +1,14 @@
 2001-10-11 Alexander Rawass <alexannika@users.sourceforge.net>
 
+	* added joystick buttons
+	  - wrote BindButton etc in in_joystick
+	  - buttonBindings are called in ProcessJoystick
+	  - buttons are bound in FlyByJoystick (FireKeyboardButtons don't work?)
+	  - buttonState is set in FlyByJoystick::Execute
+
+	
+2001-10-11 Alexander Rawass <alexannika@users.sourceforge.net>
+
 	* made joystick work (no buttons yet, no hat, just steering)
 	  - no FlyByWire::Execute(); is called in FlyByKeyboard::Execute()
 	      when Joystick is enabled
@@ -8,6 +17,7 @@
 	  - modified FlyByJoystick::Execute()
 	  - improved in_joystick
 	  - ProcessJoystick is just a dummy function now
+
 	
 2001-10-10 Alexander Rawass <alexannika@users.sourceforge.net>
 
