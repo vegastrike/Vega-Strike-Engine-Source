@@ -1207,14 +1207,14 @@ vector <Mesh*> Mesh::LoadMeshes(const char * filename, const Vector &scale, int 
   f.Read(&bfxm[3],1);
   if (bfxm[0]=='B'&&bfxm[1]=='F'&&bfxm[2]=='X'&&bfxm[3]=='M'){
     f.GoTo(0);
-    vector <Mesh*> retval=  LoadMeshes(f,scale,faction,fg)
+    vector <Mesh*> retval (LoadMeshes(f,scale,faction,fg));
     vector <Mesh*>* newvec = new vector<Mesh*>(retval);
     hash_name =(err==VSFileSystem::Shared)?VSFileSystem::GetSharedMeshHashName (filename,scale,faction):VSFileSystem::GetHashName(filename,scale,faction);
     for (unsigned int i=0;i<retval.size();++i) {
       retval[i]->hash_name=hash_name;
       if (retval[i]->orig)
         retval[i]->orig->hash_name=hash_name;
-      newvec[i]=retval[i]->orig?retval[i]->orig:retval[i];
+      (*newvec)[i]=retval[i]->orig?retval[i]->orig:retval[i];
     }
     bfxmHashTable.Put(hash_name, newvec);
     return retval;
