@@ -296,6 +296,25 @@ void Mesh::ProcessUndrawnMeshes(bool pushSpecialEffects) {
     }
   }
 }
+void Mesh::RestoreCullFace (int whichdrawqueue) {
+  if (blendDst!=ZERO &&whichdrawqueue!=NUM_ZBUF_SEQ) {
+    if (blendSrc!=SRCALPHA) {
+      GFXEnable (CULLFACE);
+    }
+  }
+}
+void Mesh::SelectCullFace (int whichdrawqueue) {
+  if (whichdrawqueue==NUM_ZBUF_SEQ) {
+    GFXEnable(CULLFACE);
+  }
+  if (blendDst!=ZERO&&whichdrawqueue!=NUM_ZBUF_SEQ) {
+    //    
+    GFXDisable(DEPTHWRITE);
+    if (blendSrc!=SRCALPHA) {
+      GFXDisable(CULLFACE);
+    }
+  }
+}
 void Mesh::ProcessDrawQueue(int whichdrawqueue) {
   //  assert(draw_queue->size());
 
@@ -311,7 +330,6 @@ void Mesh::ProcessDrawQueue(int whichdrawqueue) {
 		}
 	  }
       GFXEnable(LIGHTING);
-      GFXEnable(CULLFACE);
   }
 
   if (getLighting()) {
@@ -324,10 +342,8 @@ void Mesh::ProcessDrawQueue(int whichdrawqueue) {
   if (blendDst!=ZERO&&whichdrawqueue!=NUM_ZBUF_SEQ) {
     //    
     GFXDisable(DEPTHWRITE);
-    if (blendSrc!=SRCALPHA) {
-      GFXDisable(CULLFACE);
-    }
   }
+  SelectCullFace(whichdrawqueue)
   GFXBlendMode(blendSrc, blendDst);
   GFXEnable(TEXTURE0);
   if(Decal[0])
@@ -427,10 +443,8 @@ void Mesh::ProcessDrawQueue(int whichdrawqueue) {
   if (blendDst!=ZERO &&whichdrawqueue!=NUM_ZBUF_SEQ) {
     
     GFXEnable(DEPTHWRITE);//risky--for instance logos might be fubar!
-    if (blendSrc!=SRCALPHA) {
-      GFXEnable (CULLFACE);
-    }
   }
+  RestoreCullFace(whichdrawqueue);
 }
 void Mesh::CreateLogos(int faction, Flightgroup * fg) {
   numforcelogo=numsquadlogo =0;

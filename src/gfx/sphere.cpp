@@ -227,6 +227,12 @@ void SphereMesh::ProcessDrawQueue(int whichdrawqueue) {
     
 
 }
+void CityLights::RestoreCullFace (int whichdrawqueue) {
+  //always right
+}
+void CityLights::SelectCullFace (int whichdrawqueue) {
+  GFXEnable(CULLFACE);
+}
 
 void CityLights::ProcessDrawQueue(int whichdrawqueue) {
   GFXPolygonOffset (0,-1);

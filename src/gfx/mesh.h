@@ -354,6 +354,8 @@ public:
   ///Will draw all undrawn meshes of this type
   virtual void ProcessDrawQueue(int whichdrawqueue);
   ///Will draw all undrawn far meshes beyond the range of zbuffer (better be convex).
+  virtual void SelectCullFace (int whichdrawqueue);
+  virtual void RestoreCullFace (int whichdrawqueue);
   static void ProcessZFarMeshes ();
   ///Will draw all undrawn meshes in total If pushSpclFX, the last series of meshes will be drawn with other lighting off
   static void ProcessUndrawnMeshes(bool pushSpecialEffects=false);
