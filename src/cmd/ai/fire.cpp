@@ -46,9 +46,23 @@ float Priority (Unit * me, Unit * targ, float gunrange,float rangetotarget, floa
   if(gunrange <=0){
 	gunrange= 50000;
   }//probably a mountless capship. 50000 is chosen arbitrarily
+  float inertial_priority=0;
+  {
+    static float mass_inertial_priority_cutoff =XMLSupport::parse_int (vs_config->getVariable ("AI","Targetting","MassInertialPriorityCutoff","5000"));
+    if (me->GetMass()>mass_inertial_priority_cutoff) {
+      static float mass_inertial_priority_scale =XMLSupport::parse_int (vs_config->getVariable ("AI","Targetting","MassInertialPriorityScale",".0000001"));
+      Vector normv (me->GetVelocity());
+      float Speed = me->GetVelocity().Magnitude();
+      normv*=1/Speed;
+      Vector ourToThem = targ->Position()-me->Position();
+      ourToThem.Normalize();
+      inertial_priority = mass_inertial_priority_scale*(.5 + .5 * (normv.Dot(ourToThem)))*me->GetMass()*Speed;
+    }
+    
+  }
   float role_priority01 = ((float)rolepriority)/31.;
   float range_priority01 =.5*gunrange/rangetotarget;//number between 0 and 1 for most ships 1 is best
-  return range_priority01*role_priority01;
+  return range_priority01*role_priority01+inertial_priority;
 }
 void FireAt::SignalChosenTarget () {
 }
@@ -155,7 +169,7 @@ void FireAt::ChooseTargets (int numtargs, bool force) {
       tbin.push_back (TurretBin());
     }
     float gspeed, grange, mrange;
-    su->getAIState()->getAverageGunSpeed (gspeed,grange,mrange);  //FIXME Slow as a pig in mud
+    su->getAIState()->getAverageGunSpeed (gspeed,grange,mrange);
     if (tbin [bnum].maxrange<grange) {
       tbin [bnum].maxrange=grange;
     }

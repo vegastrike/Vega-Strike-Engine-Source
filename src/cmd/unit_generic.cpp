@@ -1468,15 +1468,25 @@ void Unit::RegenShields () {
 Vector Unit::ResolveForces (const Transformation &trans, const Matrix &transmat) {
   Vector p, q, r;
   GetOrientation(p,q,r);
-  Vector temp1 = (InvTransformNormal(transmat,NetTorque)+NetLocalTorque.i*p+NetLocalTorque.j*q+NetLocalTorque.k *r)*(1.0/MomentOfInertia);
-  Vector temp = temp1*SIMULATION_ATOM;
-  if (FINITE(temp.i)&&FINITE (temp.j)&&FINITE(temp.k)) {
+  Vector temp1 (NetLocalTorque.i*p+NetLocalTorque.j*q+NetLocalTorque.k *r);
+  if (NetTorque.i||NetTorque.j||NetTorque.k) {
+    Vector temp1 += InvTransformNormal(transmat,NetTorque);
+  }
+  temp1=temp1/MomentOfInertia;
+  Vector temp (temp1*SIMULATION_ATOM);
+  /*  //FIXME  does this shit happen!
+      if (FINITE(temp.i)&&FINITE (temp.j)&&FINITE(temp.k)) */
+  {
     AngularVelocity += temp;
   }
-  Vector temp2 = ((InvTransformNormal(transmat,NetForce) + NetLocalForce.i*p + NetLocalForce.j*q + NetLocalForce.k*r ))/mass; //acceleration
-
+  Vector temp2 = (NetLocalForce.i*p + NetLocalForce.j*q + NetLocalForce.k*r ); //acceleration
+  if (NetForce.i||NetForce.j||NetForce.k) {
+    temp2+=InvTransformNormal(transmat,NetForce);
+  }
+  temp2=temp2/mass;
   temp = temp2*SIMULATION_ATOM;
-  if (FINITE(temp.i)&&FINITE (temp.j)&&FINITE(temp.k)) {	//FIXME
+
+  /*if (FINITE(temp.i)&&FINITE (temp.j)&&FINITE(temp.k)) */{	//FIXME
     Velocity += temp;
   }
     static float air_res_coef =XMLSupport::parse_float (active_missions[0]->getVariable ("air_resistance","0"));
