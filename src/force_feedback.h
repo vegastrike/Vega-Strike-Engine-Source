@@ -31,8 +31,8 @@ public:
 
   bool haveFF();
 
-  void playDurationEffect(uint eff_nr,bool activate);
-  void playShortEffect(uint eff_nr);
+  void playDurationEffect(unsigned int eff_nr,bool activate);
+  void playShortEffect(unsigned int eff_nr);
 
  private:
   bool have_ff;
@@ -41,8 +41,8 @@ public:
  private:
   void init();
 
-  void playEffect(uint eff_nr);
-  void stopEffect(uint eff_nr);
+  void playEffect(unsigned int eff_nr);
+  void stopEffect(unsigned int eff_nr);
 
   int device_nr;
 
