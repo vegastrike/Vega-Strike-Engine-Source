@@ -65,24 +65,33 @@ float CommunicatingAI::getAnger(const Unit * target)const {
     rel = (*i).second;
   }
   static int pirates=FactionUtil::GetFactionIndex("pirates");
-  if (parent->faction==pirates&&_Universe->isPlayerStarship(target)){
-    static unsigned int cachedCargoNum=0;
-    static bool good=true;
-    if (cachedCargoNum!=target->numCargo()) {
-      cachedCargoNum=target->numCargo();
-      good=true;
-      for (unsigned int i=0;i<cachedCargoNum;++i) {
-        Cargo * c=&target->image->cargo[i];
-        if (c->quantity!=0&&c->category.find("upgrades")==string::npos){
-          good=false;
-          break;
+  if (_Universe->isPlayerStarship(target)){
+    if (parent->faction==pirates) {
+      static unsigned int cachedCargoNum=0;
+      static bool good=true;
+      if (cachedCargoNum!=target->numCargo()) {
+        cachedCargoNum=target->numCargo();
+        good=true;
+        for (unsigned int i=0;i<cachedCargoNum;++i) {
+          Cargo * c=&target->image->cargo[i];
+          if (c->quantity!=0&&c->category.find("upgrades")==string::npos){
+            good=false;
+            break;
+          }
         }
       }
+      if (good) {
+        static float goodness_for_nocargo=XMLSupport::parse_float(vs_config->getVariable("AI","pirate_bonus_for_empty_hold",".75"));
+        rel+=goodness_for_nocargo;
+      }    
     }
-    if (good) {
-      static float goodness_for_nocargo=XMLSupport::parse_float(vs_config->getVariable("AI","pirate_bonus_for_empty_hold",".75"));
-      rel+=goodness_for_nocargo;
-    }    
+    {
+      int fac=parent->faction;
+      MapStringFloat::iterator mapiter=factions[fac]->ship_relation_modifier.find(target->name);
+      if (mapiter!=factions[fac]->ship_relation_modifier.end()) {
+        rel+=(*mapiter).second;
+      }
+    }
   }
   return rel;
 }

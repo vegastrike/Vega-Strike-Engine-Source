@@ -2,13 +2,14 @@
 #define __FACTIONGENERIC_H
 
 #include <string>
+#include <map>
 #include "xml_support.h"
 
 class FSM;
 class Animation;
 class Unit;
 class Texture;
-
+typedef std::map<std::string, float> MapStringFloat;
   class Faction {
 
   public:
@@ -48,6 +49,7 @@ class Texture;
     std::vector <class Animation *> explosion;
     std::vector <std::string> explosion_name;
     std::vector <unsigned char> comm_face_sex;
+    MapStringFloat ship_relation_modifier;
     Unit * contraband;
     ///Figures out the relationships of each faction with each other
     static void ParseAllAllies(/*Universe * thisuni*/);
