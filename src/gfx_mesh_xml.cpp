@@ -937,6 +937,8 @@ void updateMax (Vector &mn, Vector & mx, const GFXVertex &ver) {
     mn.k = min(ver.z, mn.k);
     mx.k = max(ver.z, mx.k);
 }
+const bool USE_RECALC_NORM=true;
+const bool FLAT_SHADE=true;
 void Mesh::LoadXML(const char *filename, Mesh *oldmesh) {
   const int chunk_size = 16384;
   
@@ -967,7 +969,7 @@ void Mesh::LoadXML(const char *filename, Mesh *oldmesh) {
   // Now, copy everything into the mesh data structures
   assert(xml->load_stage==5);
   //begin vertex normal calculations if necessary
-  if (xml->recalc_norm) {
+  if (USE_RECALC_NORM||xml->recalc_norm) {//fixme!
     unsigned int i; unsigned int a=0;
     unsigned int j;
 
@@ -978,7 +980,7 @@ void Mesh::LoadXML(const char *filename, Mesh *oldmesh) {
 	  xml->vertices[i].k==0) {
 	vertrw[i]=true;
       }else {
-	vertrw[i]=false;
+	vertrw[i]=USE_RECALC_NORM;
       }
     }
     SumNormals (xml->tris.size()/3,3,xml->vertices, xml->triind,xml->vertexcount, vertrw);
@@ -1074,7 +1076,7 @@ void Mesh::LoadXML(const char *filename, Mesh *oldmesh) {
   unsigned int i=0;
   unsigned int j=0;
   for (i=0;i<trimax;i++,a+=3) {
-    if (xml->trishade[i]==1) {
+    if (xml->trishade[i]==1||FLAT_SHADE) {
       for (j=0;j<3;j++) {
 	Vector Cur (xml->vertices[xml->triind[a+j]].x,
 		    xml->vertices[xml->triind[a+j]].y,
@@ -1096,7 +1098,7 @@ void Mesh::LoadXML(const char *filename, Mesh *oldmesh) {
   a=0;
   trimax = xml->quads.size()/4;
   for (i=0;i<trimax;i++,a+=4) {
-    if (xml->quadshade[i]==1) {
+    if (xml->quadshade[i]==1||FLAT_SHADE) {
       for (j=0;j<4;j++) {
 	Vector Cur (xml->vertices[xml->quadind[a+j]].x,
 		    xml->vertices[xml->quadind[a+j]].y,
