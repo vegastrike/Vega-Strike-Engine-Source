@@ -264,7 +264,7 @@ void winsys_init( int *argc, char **argv, char *window_title,
     setup_sdl_video_mode();
 
     SDL_WM_SetCaption( window_title, icon_title );
-
+    glutInit(argc,argv);
 }
 
 
