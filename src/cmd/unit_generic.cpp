@@ -5149,14 +5149,14 @@ bool Unit::UpgradeMounts (const Unit *up, int mountoffset, bool touchme, bool do
 				*/	
 				if (templ->mounts[jmod].volume!=-1) {
 				  if (templ->mounts[jmod].volume<mounts[jmod].type->volume*tmpammo) {
-					tmpammo=(int)((templ->mounts[jmod].volume+1)/mounts[jmod].type->volume);
+					tmpammo=(int)floor(.125+((0+templ->mounts[jmod].volume)/mounts[jmod].type->volume));
 				  }
 				}
 		    
 			  }
 			} 
 			if (tmpammo*mounts[jmod].type->volume>mounts[jmod].volume) {
-			  tmpammo = (int)((1+mounts[jmod].volume)/mounts[jmod].type->volume);
+			  tmpammo = (int)floor(.125+((0+mounts[jmod].volume)/mounts[jmod].type->volume));
 			}
 			if (tmpammo>mounts[jmod].ammo) {
 			  cancompletefully=true;
