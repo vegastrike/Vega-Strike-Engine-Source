@@ -51,6 +51,9 @@ PFNGLCLIENTACTIVETEXTUREARBPROC glClientActiveTextureARB=0;
 PFNGLCLIENTACTIVETEXTUREARBPROC glActiveTextureARB=0;
 PFNGLCOLORTABLEEXTPROC glColorTable=0;
 PFNGLMULTITEXCOORD2FARBPROC glMultiTexCoord2fARB = 0;
+// the following two lines were not defined for WIN32... any particular reason?
+PFNGLLOCKARRAYSEXTPROC glLockArraysEXT_p;
+PFNGLUNLOCKARRAYSEXTPROC glUnlockArraysEXT_p;
 //PFNGLSELECTTEXTURESGISPROC glSelectTextureSGIS ;
 //PFNGLMULTITEXCOORD2FSGISPROC glMultiTexCoord2fSGIS ;
 //PFNGLMTEXCOORDPOINTERSGISPROC glMTexCoordPointerSGIS ;
@@ -74,6 +77,7 @@ typedef void (*(*get_gl_proc_fptr_t)(const GLubyte *))();
 void init_opengl_extensions()
 {
 	const unsigned char * extensions = glGetString(GL_EXTENSIONS);
+
 	fprintf (stderr,"OpenGL Extensions supported: %s\n",extensions);
 
     if ( glutExtensionSupported( "GL_EXT_compiled_vertex_array" ) ) {

@@ -18,7 +18,9 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
+
 #include <queue>
+
 using namespace std;
 
 #ifndef GFXSTAT
@@ -50,12 +52,15 @@ struct GFXStats{
 #ifdef WIN32
 #include <windows.h>
 #include <GL/gl.h>
+
 #ifdef GL_EXT_compiled_vertex_array
 # ifndef PFNGLLOCKARRAYSEXTPROC
 #  undef GL_EXT_compiled_vertex_array
-# endif
-#endif
+# endif	// PFNGLLOCKARRAYSEXTPROC
+#endif // GL_EXT_compiled_vertex_array
+
 #include <GL/glext.h>
+
 #define GL_TEXTURE0_ARB 0x84C0
 #define GL_TEXTURE1_ARB 0x84C1
 #define GL_TEXTURE_CUBE_MAP_ARB           0x8513
@@ -83,7 +88,9 @@ extern PFNGLMULTITEXCOORD2FARBPROC glMultiTexCoord2fARB;
 extern PFNGLCLIENTACTIVETEXTUREARBPROC glClientActiveTextureARB;
 extern PFNGLCLIENTACTIVETEXTUREARBPROC glActiveTextureARB;
 extern PFNGLCOLORTABLEEXTPROC glColorTable;
-#else
+
+#else // WIN32
+
 #include <GL/glut.h>
 #ifdef GL_EXT_compiled_vertex_array
 # ifndef PFNGLLOCKARRAYSEXTPROC
