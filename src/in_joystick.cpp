@@ -172,6 +172,7 @@ void JoyStick::GetJoyStick(float &x,float &y,int &buttons)
     Sint16 yi =  SDL_JoystickGetAxis(joy,1);
 
     buttons=0;
+    nr_of_buttons=SDL_JoystickNumButtons(joy);
    for(int i=0;i<nr_of_buttons;i++){
       int  butt=SDL_JoystickGetButton(joy,i);
       if(butt==1){
