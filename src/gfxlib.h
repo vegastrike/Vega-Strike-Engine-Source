@@ -256,8 +256,9 @@ void /*GFXDRVAPI*/ GFXSelectTexcoordSet(int stage, int texset);
 
 ///Turns on alpha testing mode (or turns if off if DEPTHFUNC is set to ALWAYS
 void /*GFXDRVALP*/ GFXAlphaTest (const enum DEPTHFUNC,const float ref);
-//primitive Begin/End 
 
+///Sets Depth Offset for polgyons
+void /*GFXDRVAPI*/ GFXPolygonOffset (float factor, float units);
 ///Begins a polytype
 void /*GFXDRVAPI*/ GFXBegin(const enum POLYTYPE);
 

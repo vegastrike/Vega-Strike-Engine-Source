@@ -1,3 +1,8 @@
+2001-11-01 Daniel Horn <hellcatv@hotmail.com>
+
+	* added Polygon Offset and employed its use for Logos... now they don't fade behind other polygons
+	* changed Z-buffer to be GL_LESS to prevent saturn's rings from "peeking" out behind saturn
+	
 2001-11-01 Alexander Rawass <alexannika@users.sourceforge.net>
 	
 	* added setVariable to config_xml
@@ -11,10 +16,15 @@
 	
 	
 2001-10-31 Daniel Horn <hellcatv@hotmail.com>
+
 	* happy halloween!
 	* added ship_ambient and planet_ambient into the picture
 	* of course I set them both to 0 :-)
-
+	* added halo parameters
+	* made turrets work with multiple subunits
+	* put in sample turret with sample carrier
+	* carrier has BSP problems due to self intersection...
+	
 2001-10-31 Alexander Rawass <alexannika@users.sourceforge.net>
 
 	* modified doxygenConfig to show comments in source

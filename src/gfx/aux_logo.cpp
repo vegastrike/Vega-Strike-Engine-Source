@@ -24,12 +24,51 @@
 #include "aux_texture.h"
 #include <assert.h>
 #include "gfxlib.h"
+#include "vs_globals.h"
+#include "config_xml.h"
+#include "xml_support.h"
+#if 0
+static float scl=0;
+static float offs=1;
 
+void incscl (int, KBSTATE k) {
+  if (k==DOWN) {
+    fprintf (stderr,"scl:%f",scl);
+    scl+=.1;
+  }
+
+}
+
+void decscl (int, KBSTATE k) {
+  if (k==DOWN) {
+    fprintf (stderr,"scl:%f",scl);
+    scl-=.1;
+  }
+
+
+}
+void incoff (int, KBSTATE k) {
+  if (k==DOWN) {
+    fprintf (stderr,"off:%f",offs);
+    offs+=.1;
+  }
+
+
+}
+
+void decoff (int, KBSTATE k) {
+  if (k==DOWN) {
+    fprintf (stderr,"off:%f",offs);
+    offs-=.1;
+  }
+}
+#endif
 list<Logo*> undrawn_logos;
 Hashtable<int, Logo,char[257]> Logo::decalHash;
 
 Logo::Logo(int numberlogos,  Vector* center,Vector* normal, float* size, float* rotation, float offset,Texture* Dec, Vector * Ref)
 {
+  offset=0;
   refcount = -1;
 	draw_queue = NULL;
 
@@ -123,6 +162,10 @@ void Logo::SetDecal(Texture *decal)
 
 
 }*/
+
+
+
+
 void Logo::Draw(Matrix m)
 {
 	if (!numlogos)
@@ -137,6 +180,9 @@ void Logo::Draw(Matrix m)
 }
 
 void Logo::ProcessDrawQueue() {
+  static float offs = XMLSupport::parse_float (vs_config->getVariable ("graphics","LogoOffset","-4")); 
+  static float scl = XMLSupport::parse_float(vs_config->getVariable ("graphics","LogoOffsetScale","-30.8"));
+
 	GFXEnable(TEXTURE0);
 	GFXEnable(TEXTURE1);
 	Decal->MakeActive();
@@ -145,6 +191,7 @@ void Logo::ProcessDrawQueue() {
 	GFXDisable (DEPTHWRITE);
 	GFXDisable (LIGHTING);
 	GFXColor4f (1,1,1,1);
+	GFXPolygonOffset (offs,scl);
 	GFXBlendMode(SRCALPHA,INVSRCALPHA);
 	//GFXBlendMode(ONE,ZERO);
         DrawContext c = draw_queue->back();
@@ -158,6 +205,7 @@ void Logo::ProcessDrawQueue() {
 	  c.vlist->EndDrawState(GFXFALSE);
 	}
 	GFXEnable (DEPTHWRITE);
+	GFXPolygonOffset (0,0);
 }
 
 Logo::~Logo ()

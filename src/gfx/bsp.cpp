@@ -24,7 +24,7 @@
 #include <float.h>
 #include "vs_path.h"
 //All or's are coded with the assumption that the inside of the object has a much bigger impact than the outside of the object when both need to be analyzed
-
+//#define BSPHACK .1
 BSPNode::BSPNode(BSPDiskNode **input) {
   
   isVirtual = (*input)->isVirtual;
@@ -56,7 +56,11 @@ BSPNode::BSPNode(BSPDiskNode **input) {
 float BSPNode::intersects(const Vector &start, const Vector &end, Vector & norm) const {
 	float peq1 = plane_eqn(start);
 	float peq2 = plane_eqn(end);
-
+#ifdef BSPHACK
+	if (fabs(peq2-peq1)<BSPHACK) {
+	  return 0;
+	}
+#endif
 	// n = normal, u = origin, v = direction vector
 	if(peq1==0 && peq2==0) { // on the plane; shouldn't collide unless the plane is a virtual plane
 	    return 

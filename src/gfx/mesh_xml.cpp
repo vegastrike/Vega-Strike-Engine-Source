@@ -1453,6 +1453,7 @@ void Mesh::CreateLogos(int faction) {
     Vector *Ref = new Vector [nfl];
     Vector norm1,norm2,norm;
     int ri=0;
+    float totoffset=0;
     for (unsigned int ind=0;ind<xml->logos.size();ind++) {
       if (xml->logos[ind].type==index) {
 	float weight=0;
@@ -1492,10 +1493,12 @@ void Mesh::CreateLogos(int faction) {
 	sizes[ri]=xml->logos[ind].size*xml->scale;
 	rotations[ri]=xml->logos[ind].rotate;
 	offset[ri]=xml->logos[ind].offset;
+	totoffset+=offset[ri];
 	ri++;
       }
     }
-    *tmplogo= new Logo (nfl,center,PolyNormal,sizes,rotations, (float)0.01,Dec,Ref);
+    totoffset/=nfl;
+    *tmplogo= new Logo (nfl,center,PolyNormal,sizes,rotations, totoffset,Dec,Ref);
     delete [] Ref;
     delete []PolyNormal;
     delete []center;

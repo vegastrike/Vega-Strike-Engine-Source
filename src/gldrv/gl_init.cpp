@@ -190,7 +190,7 @@ void GFXInit (int argc, char ** argv){
     glCullFace (GL_BACK);
     glShadeModel (GL_SMOOTH);
     glEnable(GL_DEPTH_TEST);
-    glDepthFunc (GL_LEQUAL);
+    glDepthFunc (GL_LESS);
     
     glEnable(GL_ALPHA_TEST);
     glAlphaFunc(GL_GREATER, 0.0);
