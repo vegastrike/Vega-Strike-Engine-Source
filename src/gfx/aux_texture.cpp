@@ -36,8 +36,8 @@ using std::string;
 
 
 #ifndef WIN32
-typedef unsigned long DWORD;
-typedef long  LONG;
+typedef unsigned int DWORD;
+typedef int  LONG;
 typedef unsigned short WORD;
 typedef unsigned char BYTE;
 /**
