@@ -37,7 +37,10 @@
 #  undef GL_EXT_compiled_vertex_array
 # endif
 #endif
-#   include <GL/glext.h>
+#if !defined(IRIX)
+# include <GL/glext.h>
+#endif
+
 #include <stdio.h>
 #include "gl_init.h"
 #define WINDOW_TITLE "Vega Strike "VERSION
@@ -88,26 +91,26 @@ typedef void (*(*get_gl_proc_fptr_t)(const GLubyte *))();
 
 #endif
 #include <GL/glut.h>
+
 void init_opengl_extensions()
 {
 	const unsigned char * extensions = glGetString(GL_EXTENSIONS);
 
-	fprintf (stderr,"OpenGL Extensions supported: %s\n",extensions);
+	(void) fprintf(stderr, "OpenGL Extensions supported: %s\n", extensions);
 
-    if ( glutExtensionSupported( "GL_EXT_compiled_vertex_array" ) ) {
-
-	printf( "OpenGL::GL_EXT_compiled_vertex_array extension supported\n" );
-
+#if defined(GL_EXT_compiled_vertex_array)
+    if (glutExtensionSupported( "GL_EXT_compiled_vertex_array")) {
 	glLockArraysEXT_p = (PFNGLLOCKARRAYSEXTPROC) 
 	    GET_GL_PROC( (GET_GL_PTR_TYP) "glLockArraysEXT" );
 	glUnlockArraysEXT_p = (PFNGLUNLOCKARRAYSEXTPROC) 
 	    GET_GL_PROC( (GET_GL_PTR_TYP) "glUnlockArraysEXT" );
-
-    } else {
-	printf(  "OpenGL::GL_EXT_compiled_vertex_array extension NOT supported\n" );
+	(void) fprintf(stderr, "OpenGL::GL_EXT_compiled_vertex_array supported\n");
+    } else
+#endif
+	{
 	glLockArraysEXT_p = NULL;
 	glUnlockArraysEXT_p = NULL;
-
+	(void) fprintf(stderr, "OpenGL::GL_EXT_compiled_vertex_array unsupported\n");
     }
 #ifdef WIN32
     glColorTable = (PFNGLCOLORTABLEEXTPROC ) GET_GL_PROC((GET_GL_PTR_TYP)"glColorTableEXT");
@@ -122,14 +125,17 @@ void init_opengl_extensions()
 #endif
     if (glutExtensionSupported ("GL_ARB_multitexture")||glutExtensionSupported ("GL_EXT_multitexture")) {
       g_game.Multitexture = 1*g_game.Multitexture;//might be zero by input
-      printf ("OpenGL::Multitexture supported\n");
+      (void) fprintf(stderr, "OpenGL::Multitexture supported\n");
     } else {
-      g_game.Multitexture =0;
-      printf ("OpenGL::Multitexture unsupported\n");
+      g_game.Multitexture = 0;
+      (void) fprintf(stderr, "OpenGL::Multitexture unsupported\n");
     }
     if ( glutExtensionSupported( "GL_ARB_texture_cube_map" ) || glutExtensionSupported( "GL_EXT_texture_cube_map" ) ) {
-      printf ("OpenGL::Texture Cube Map Ext Supported\n");
-      g_game.cubemap =1;
+      g_game.cubemap = 1;
+      (void) fprintf(stderr, "OpenGL::TextureCubeMapExt supported\n");
+    } else {
+      g_game.cubemap = 0;
+      (void) fprintf(stderr, "OpenGL::TextureCubeMapExt unsupported\n");
     }
 }
 
@@ -197,11 +203,11 @@ void GFXInit (int argc, char ** argv){
 	glutEnterGameMode();
     } else {
 	/* Set the initial window size */
-	glutInitWindowSize(g_game.x_resolution, g_game.y_resolution );
-	glutInitWindowPosition( 0, 0 );
-	glutWindow = glutCreateWindow( "Vegastrike " );
-	if ( glutWindow == 0 ) {
-	    fprintf( stderr, "Couldn't create a window.\n" );
+	glutInitWindowSize(g_game.x_resolution, g_game.y_resolution);
+	glutInitWindowPosition(0, 0);
+	glutWindow = glutCreateWindow("Vegastrike");
+	if (glutWindow == 0) {
+	    (void) fprintf(stderr, "Couldn't create a window.\n");
 	    exit(1);
 	} 
     }
@@ -227,14 +233,21 @@ void GFXInit (int argc, char ** argv){
     GFXInitTextureManager();
     if (g_game.Multitexture)
       GFXActiveTexture(0);
-    glEnable(GL_TEXTURE_2D);
-        glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    //glEnable(GL_SHARED_TEXTURE_PALETTE_EXT);
-    //int retval= glGetError();
-    if ( !glutExtensionSupported( "GL_EXT_color_table" ) ) {
+
+    glEnable(GL_TEXTURE_2D);		// use two-dimensional texturing
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
+
+#if defined(IRIX)
+    glEnable(GL_SHARED_TEXTURE_PALETTE_EXT);
+#endif
+    if (glutExtensionSupported("GL_EXT_color_table")) {
+      g_game.PaletteExt = 1;
+      //(void) fprintf(stderr, "OpenGL::EXTColorTable supported\n");
+    } else {
       g_game.PaletteExt = 0;
-      printf ("OpenGL::Color Table Not Supported\n");
+      (void) fprintf(stderr, "OpenGL::EXTColorTable unsupported\n");
     }
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
@@ -292,12 +305,38 @@ void GFXInit (int argc, char ** argv){
     
     glDisable(GL_NORMALIZE);
     int con;
-    GFXCreateLightContext (con);
-
-
-    glutSetCursor(GLUT_CURSOR_NONE );
-
+    GFXCreateLightContext(con);
+    glutSetCursor(GLUT_CURSOR_NONE);
 }
+
+#if defined(IRIX)
+#include "lin_time.h"
+
+/*
+** Update the game counter, generate a redisplay request.
+*/
+void idle_loop(void) {
+	UpdateTime();
+	glutPostRedisplay();
+}
+
+/*
+** Install idle loop only if window is visible.
+*/
+void visible(int vis) {
+	glutIdleFunc(vis == GLUT_VISIBLE ? idle_loop : NULL);
+}
+
+/*
+** Install the display and visibility callback functions,
+** start the main loop.
+*/
+void GFXLoop(void (*main_loop)(void)) {
+	glutDisplayFunc(main_loop);
+	glutVisibilityFunc(visible);
+	glutMainLoop(); /*NOTREACHED*/
+}
+#else
 
 void GFXLoop(void main_loop()) {
   glutDisplayFunc(main_loop);
@@ -309,9 +348,11 @@ void GFXLoop(void main_loop()) {
   //never make it here;
 
 }
-extern void GFXDestroyAllLights();
+#endif
 
 void GFXShutdown () {
+  extern void GFXDestroyAllLights();
+
   GFXDestroyAllTextures();
   GFXDestroyAllLights();
   if ( g_game.fullscreen ) {
