@@ -33,14 +33,8 @@ class MatchVelocity : public MatchLinearVelocity {
 
 class FlyByWire : public MatchVelocity {
  protected:
-  float set_speed;
-  float max_speed;
-  float max_ab_speed;
-  float max_yaw;
-  float max_pitch;
-  float max_roll;
  public:
-  FlyByWire (float max_ab_spd,float max_spd,float maxyaw,float maxpitch,float maxroll);
+  FlyByWire ();
   void Stop (float percentage);
   void Right (float percentage);//pass in the percentage of the turn they were turnin right.  -%age indicates left
   void Up (float percentage);//pass in the percentage of the turn they were turning up

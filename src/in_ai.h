@@ -19,7 +19,7 @@ class FlyByKeyboard: public FlyByWire {
   static void DecelKey (int,KBSTATE);
   static void RollLeftKey (int,KBSTATE);
   static void RollRightKey (int,KBSTATE);
-  FlyByKeyboard (float max_ab_spd,float max_spd,float maxyaw,float maxpitch,float maxroll);
+  FlyByKeyboard ();
   virtual ~FlyByKeyboard();
   AI * Execute();
 };

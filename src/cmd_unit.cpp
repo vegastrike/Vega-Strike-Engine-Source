@@ -115,6 +115,14 @@ void Unit::Init()
   limits.vertical = 10;
   limits.forward = 10;
   limits.retro=1;
+  Target(NULL);
+  computer.set_speed=0;
+  computer.max_speed=10;
+  computer.max_ab_speed=20;
+  computer.max_yaw=4;
+  computer.max_pitch=4;
+  computer.max_roll=4;
+  computer.NavPoint=Vector(0,0,0);
   //  Fire();
 }
 void Unit::UnRef() {
@@ -125,6 +133,7 @@ void Unit::UnRef() {
 }
 void Unit::Kill() {
   killed = true;
+  Target((Unit *)NULL);
   if (ucref==0)
     Unitdeletequeue.push_back(this);
 }

@@ -2,6 +2,7 @@
 #include "UnitCollection.h"
 #include "cmd_unit.h"
 
+
 UnitCollection::~UnitCollection() {
   UnitListNode *tmp =units;
   if (persist){

@@ -27,7 +27,7 @@
 //#include <iostream>
 #include <string>
 #include "cmd_weapon_xml.h"
-
+#include "UnitContainer.h"
 
 //using std::queue;
 #include "xml_support.h"
@@ -52,6 +52,18 @@ enum Aggression{
 	LOW, MEDIUM, HIGH, DISABLE, DESTROY
 };
 class Unit {
+ public:
+  struct Computer {
+    Vector NavPoint;
+    UnitContainer target;//...and check it each frame    
+    float set_speed;
+    float max_speed;
+    float max_ab_speed;
+    float max_yaw;
+    float max_pitch;
+    float max_roll;
+  };
+
  private:
 
   struct XML;
@@ -113,7 +125,7 @@ protected:
   int numsubunit;
   
   //static int refcount; for the inherited classes
-  Unit *target;//make sure to increase ucref when attaching a target...an check it each frame
+
   
   Aggression aggression;
   
@@ -153,7 +165,7 @@ protected:
     float forward;
     float retro;
   } limits;
-
+  Computer computer;
   bool calculatePhysics; // physics have an effect on this object (set to false for planets)
 
   bool selected;
@@ -164,6 +176,7 @@ protected:
 
 public:
   //no default constructor; dymanically allocated arrays are evil, gotta do it java style to make it more sane
+
   Unit();
   Unit(const char *filename, bool xml=false);
   virtual ~Unit();
@@ -175,8 +188,10 @@ public:
   inline bool Killed() {return killed;}
   inline void Ref() {ucref++;}
   void UnRef();
-  Unit *&Target(){return target;}; // Accessor for target; probably shouldn't use it
+  Unit *Target(){return computer.target.GetUnit();}
+  void Target (Unit * targ) {computer.target.SetUnit(targ);}
   void Fire();
+  Computer & GetComputerData () {return computer;}
 	/*COMMAND*/
 	/*
 	virtual void ChangeTarget(Unit *target) = 0; // sent by the flight commander, supercommand AI, or player; tells it to switch to this new target HANDLETHIS BY REPLACE/ENQUEUE ORDER after having primed orders

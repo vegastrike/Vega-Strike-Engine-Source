@@ -29,7 +29,7 @@ struct StarShipControlKeyboard {
 
 
 
-FlyByKeyboard::FlyByKeyboard (float max_ab_speed,float max_spd, float maxyaw, float maxpitch, float maxroll): FlyByWire (max_ab_speed,max_spd,maxyaw,maxpitch,maxroll) {
+FlyByKeyboard::FlyByKeyboard (): FlyByWire () {
   //FIXME:: change hard coded keybindings
   if (starshipcontrolkeys.refcount==0) {
     BindKey(';',FlyByKeyboard::StopKey);

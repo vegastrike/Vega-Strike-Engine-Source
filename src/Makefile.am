@@ -124,6 +124,8 @@ vegastrike_SOURCES =				\
 	iterator.h				\
 	UnitCollection.h			\
 	UnitCollection.cpp			\
+	UnitContainer.h				\
+	UnitContainer.cpp			\
 	wrapgfx.cpp				\
 	wrapgfx.h				\
 	xml_support.h  				\

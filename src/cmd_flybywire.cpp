@@ -46,40 +46,37 @@ AI * MatchVelocity::Execute () {
 
 
 
-FlyByWire::FlyByWire (float max_ab_spd,float max_spd,float maxyaw,float maxpitch,float maxroll): MatchVelocity(Vector(0,0,0),Vector(0,0,0),true), max_speed(max_spd), max_ab_speed(max_ab_spd), max_yaw(maxyaw),max_pitch(maxpitch),max_roll(maxroll) {
-  SetDesiredVelocity (Vector (0,0,0),true);
+FlyByWire::FlyByWire (): MatchVelocity(Vector(0,0,0),Vector(0,0,0),true){
+
 }
 void FlyByWire::Stop (float per) {
-  SetDesiredVelocity (Vector (0,0,per*max_speed),true);
+  SetDesiredVelocity (Vector (0,0,per*parent->GetComputerData().max_speed),true);
 }
 void FlyByWire::Right (float per) {
-  desired_ang_velocity += (per*max_yaw)*Vector (0,1,0);
-  fprintf (stderr,"r %f\n",per);
+  desired_ang_velocity += (per*parent->GetComputerData().max_yaw)*Vector (0,1,0);
 }
 
 void FlyByWire::Up (float per) {
-  desired_ang_velocity += (per*max_pitch)*Vector (1,0,0);
-  fprintf (stderr,"u %f\n",per);
+  desired_ang_velocity += (per*parent->GetComputerData().max_pitch)*Vector (1,0,0);
 }
 
 void FlyByWire::RollRight (float per) {
-  desired_ang_velocity += (per*max_roll)*Vector (0,0,1);
-  fprintf (stderr,"rr %f\n",per);
+  desired_ang_velocity += (per*parent->GetComputerData().max_roll)*Vector (0,0,1);
 }
 
 void FlyByWire::Afterburn (float per){
-  desired_velocity=Vector (0,0,set_speed+per*(max_ab_speed-set_speed));
-  fprintf (stderr,"ab %f STRENGTH: %f MAX_AB_SPEED %f\n",per,set_speed+per*(max_ab_speed-set_speed),max_ab_speed);
+  Unit::Computer * cpu = &parent->GetComputerData();
+  desired_velocity=Vector (0,0,cpu->set_speed+per*(cpu->max_ab_speed-cpu->set_speed));
 }
 
 void FlyByWire::Accel (float per) {
-  set_speed+=per*100*SIMULATION_ATOM;
-  if (set_speed>max_speed)
-    set_speed=max_speed;
-  if (set_speed<-max_speed*parent->Limits().retro/parent->Limits().forward)
-    set_speed = -max_speed*parent->Limits().retro/parent->Limits().forward;
-  desired_velocity= Vector (0,0,set_speed);
-  fprintf (stderr,"ac %f STRENGTH: %f\n",per, set_speed);
+  Unit::Computer *cpu = &parent->GetComputerData(); 
+  cpu->set_speed+=per*100*SIMULATION_ATOM;
+  if (cpu->set_speed>cpu->max_speed)
+    cpu->set_speed=cpu->max_speed;
+  if (cpu->set_speed<-cpu->max_speed*parent->Limits().retro/parent->Limits().forward)
+    cpu->set_speed = -cpu->max_speed*parent->Limits().retro/parent->Limits().forward;
+  desired_velocity= Vector (0,0,cpu->set_speed);
 }
 
 #define FBWABS(m) (m>=0?m:-m)
