@@ -395,6 +395,8 @@ class Unit
   bool killed;
   ///Should not be drawn
   bool invisible;
+  // Tell if networked unit
+  bool networked;
   
 
   unsigned char docked;
@@ -423,6 +425,7 @@ class Unit
   //0 in additive is reaplce  1 is add 2 is mult
   bool UpAndDownGrade (Unit * up, Unit * templ, int mountoffset, int subunitoffset, bool touchme, bool downgrade, int additive, bool forcetransaction, double &percentage);
 public:
+	void SetNetworkMode( bool mode) {networked = true;}
   int LockMissile() const;//-1 is no lock necessary 1 is locked
   void LockTarget(bool myboo){computer.radar.locked=myboo;}
   bool TargetLocked()const {return computer.radar.locked;}
