@@ -533,7 +533,7 @@ void createObjects() {
     fighters[a]->SetAI(new Order());
     ////fighters[a]->EnqueueAI(new Orders::ChangeHeading(v, 0.04));
     ////fighters[a]->EnqueueAI(new Orders::MoveTo(Vector (0,0,0), .75));
-    fighters[a]->EnqueueAI(new FlyByKeyboard (.01,.005,.0001,.0001,.0001));
+    fighters[a]->EnqueueAI(new FlyByKeyboard (.01,.005,.001,.001,.001));
 	//        fighters[a]->EnqueueAI(new Orders::ChangeHeading(Vector (.86,.86,0).Normalize(), 0.04));
     //fighters[a]->SetPosition(0, 0, -2.0F);
   

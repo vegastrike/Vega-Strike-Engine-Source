@@ -23,6 +23,15 @@
 #include "lin_time.h"
 #include "physics.h"
 #include "cmd_beam.h"
+#ifdef WIN32
+float copysign (float x, float y) {
+	if (y>0)
+			return x;
+	else
+			return -x;
+}
+#endif
+
 // the rotation should be applied in world coordinates
 void Unit:: Rotate (const Vector &axis)
 {
@@ -88,16 +97,8 @@ void Unit::ApplyLocalTorque(const Vector &torque) {
   fprintf (stderr,"P: %f,%f,%f Q: %f,%f,%f",p.i,p.j,p.k,q.i,q.j,q.k);
   NetTorque+=tmp.i*p+tmp.j*q+tmp.k*r; 
   */
-  NetLocalTorque+= ClampTorque(torque); 
+  NetLocalTorque+= torque;//ClampTorque(torque); 
 }
-#ifdef WIN32
-float copysign (float x, float y) {
-	if (y>0)
-			return x;
-	else
-			return -x;
-}
-#endif
 
 Vector Unit::MaxTorque(const Vector &torque) {
   // torque is a normal
@@ -122,12 +123,13 @@ Vector Unit::ClampTorque(const Vector &amt1) {
 //FIXME 062201
 Vector Unit::ClampTorque (const Vector &amt1) {
   Vector Res=amt1;
-  if (amt1.i>fabs(limits.yaw))
-    Res.i=amt1.i>0?fabs(limits.yaw):-fabs(limits.yaw);
-  if (amt1.j>fabs(limits.pitch))
-    Res.j=amt1.j>0?fabs(limits.pitch):-fabs(limits.pitch);
-  if (amt1.k>fabs(limits.roll))
-    Res.k=amt1.k>0?fabs(limits.roll):-fabs(limits.roll);
+  return Res;
+  if (fabs(amt1.i)>fabs(limits.pitch))
+    Res.i=copysign(limits.pitch,amt1.i);
+  if (fabs(amt1.j)>fabs(limits.yaw))
+    Res.j=copysign(limits.yaw,amt1.j);
+  if (fabs(amt1.k)>fabs(limits.roll))
+    Res.k=copysign(limits.roll,amt1.k);
   return Res;
 }
 
@@ -153,14 +155,15 @@ Vector Unit::ClampThrust(const Vector &amt1){
 //CMD_FLYBYWIRE depends on new version of Clampthrust... don't change without resolving it
 Vector Unit::ClampThrust (const Vector &amt1) {
   Vector Res=amt1;
-  if (amt1.i>fabs(limits.lateral))
-    Res.i=amt1.i>0?fabs(limits.lateral):-fabs(limits.lateral);
-  if (amt1.j>fabs(limits.vertical))
-    Res.j=amt1.j>0?fabs(limits.vertical):-fabs(limits.vertical);
-  if (amt1.k>fabs(limits.longitudinal))
-    Res.k=amt1.k>0?fabs(limits.longitudinal):-fabs(limits.longitudinal);
+  if (fabs(amt1.i)>fabs(limits.lateral))
+    Res.i=copysign(limits.lateral,amt1.i);
+  if (fabs(amt1.j)>fabs(limits.vertical))
+    Res.j=copysign(limits.vertical,amt1.j);
+  if (fabs(amt1.k)>fabs(limits.longitudinal))
+    Res.k=copysign(limits.longitudinal,amt1.k);
   return Res;
 }
+
 
 void Unit::Thrust(const Vector &amt1){
   Vector amt = ClampThrust(amt1);
