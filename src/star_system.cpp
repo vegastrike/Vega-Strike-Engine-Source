@@ -147,6 +147,7 @@ StarSystem::StarSystem(const char * filename, const Vector & centr,const float t
 
 }
 void StarSystem::activateLightMap() {
+  GFXActiveTexture (1);
 #ifdef NV_CUBE_MAP
   LightMap[0]->MakeActive();
   LightMap[1]->MakeActive();
@@ -154,9 +155,11 @@ void StarSystem::activateLightMap() {
   LightMap[3]->MakeActive();
   LightMap[4]->MakeActive();
   LightMap[5]->MakeActive();
+
 #else
     LightMap[0]->MakeActive();
 #endif
+  GFXActiveTexture (0);
 }
 
 StarSystem::~StarSystem() {

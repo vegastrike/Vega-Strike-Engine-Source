@@ -118,7 +118,7 @@ GFXBOOL /*GFXDRVAPI*/ GFXCreateTexture(int width, int height, TEXTUREFORMAT text
   textures[*handle].mipmapped = mipmap;
   glGenTextures (1,&textures[*handle].name);
   glBindTexture (textures[*handle].targets,textures[*handle].name);
-  
+  activetexture[texturestage]=*handle;
   glTexParameteri(textures[*handle].targets, GL_TEXTURE_WRAP_S, WrapMode);
   glTexParameteri(textures[*handle].targets, GL_TEXTURE_WRAP_T, WrapMode);
   if (textures[*handle].mipmapped&(TRILINEAR|MIPMAP)&&gl_options.mipmap>=2) {
