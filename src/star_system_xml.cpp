@@ -16,6 +16,7 @@
 #include "cmd/building.h"
 #include "cmd/ai/aggressive.h"
 #include "cmd/atmosphere.h"
+#include "cmd/nebula.h"
 void StarSystem::beginElement(void *userData, const XML_Char *name, const XML_Char **atts) {
   ((StarSystem*)userData)->beginElement(name, AttributeList(atts));
 }
@@ -92,7 +93,9 @@ namespace StarXML {
     MASS,
     BUILDING,
     VEHICLE,
-    ATMOSPHERE
+    ATMOSPHERE,
+	NEBULA,
+	NEBFILE
   };
 
   const EnumMap::Pair element_names[] = {
@@ -110,7 +113,8 @@ namespace StarXML {
     EnumMap::Pair ("ContinuousTerrain",CONTTERRAIN),
     EnumMap::Pair ("Building",BUILDING),
     EnumMap::Pair ("Vehicle",VEHICLE),
-    EnumMap::Pair ("Atmosphere",ATMOSPHERE)
+    EnumMap::Pair ("Atmosphere",ATMOSPHERE),
+	EnumMap::Pair ("Nebula",NEBULA)
   };
   const EnumMap::Pair attribute_names[] = {
     EnumMap::Pair ("UNKNOWN", UNKNOWN),
@@ -121,6 +125,7 @@ namespace StarXML {
     EnumMap::Pair ("starspread", STARSPREAD), 
     EnumMap::Pair ("reflectivity", REFLECTIVITY), 
     EnumMap::Pair ("file", XFILE),
+    EnumMap::Pair ("nebfile", NEBFILE),
     EnumMap::Pair ("alpha", ALPHA),
     EnumMap::Pair ("destination", DESTINATION), 
     EnumMap::Pair ("x", X), 
@@ -149,8 +154,8 @@ namespace StarXML {
     EnumMap::Pair ("Mass", MASS)
   };
 
-  const EnumMap element_map(element_names, 15);
-  const EnumMap attribute_map(attribute_names, 34);
+  const EnumMap element_map(element_names, 16);
+  const EnumMap attribute_map(attribute_names, 35);
 }
 
 using XMLSupport::EnumMap;
@@ -187,6 +192,7 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
   GFXColor tmpcol(0,0,0,1);
   LIGHT_TARGET tmptarg= POSITION;
   xml->cursun.j=0;
+  char * nebfile;
   int faction=0;
   xml->cursun.k=0;	
   GFXMaterial ourmat;
@@ -548,10 +554,13 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
   case UNIT:
   case BUILDING:
   case VEHICLE:
+  case NEBULA:
     assert (xml->unitlevel>0);
     xml->unitlevel++;
     S = Vector (0,1,0);
     R = Vector (0,0,1);
+    nebfile = new char [1];
+    nebfile[0]='\0';
     filename = new char [1];
     filename[0]='\0';
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
@@ -560,6 +569,11 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
 	delete []filename;
 	filename = new char [strlen((*iter).value.c_str())+1];
 	strcpy(filename,(*iter).value.c_str());
+	break;
+      case NEBFILE:
+	delete []nebfile;
+	nebfile = new char [strlen((*iter).value.c_str())+1];
+	strcpy(nebfile,(*iter).value.c_str());
 	break;
       case FACTION:
 	faction = _Universe->GetFaction ((*iter).value.c_str());
@@ -604,25 +618,40 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
       }
 
     }  
-    if ((xml->parentterrain==NULL&&xml->ct==NULL)&&xml->unitlevel>((xml->parentterrain==NULL&&xml->ct==NULL)?2:3)) {
+    if (((elem==UNIT||elem==NEBULA)||(xml->ct==NULL&&xml->parentterrain==NULL))&&(xml->unitlevel>2)) {
       assert(xml->moons.size()!=0);
-      xml->moons[xml->moons.size()-1]->Planet::beginElement(R,S,velocity,position,gravity,radius,filename,NULL,vector <char *>(),xml->unitlevel-((xml->parentterrain==NULL&&xml->ct==NULL)?1:2),ourmat,curlights,true,faction);
+	  Unit * un;
+	  Planet * plan =xml->moons.back()->GetTopPlanet(xml->unitlevel-1);
+	  if (elem==UNIT) {
+		  plan->AddSatellite(un=new Unit(filename,true,false,faction));
+	  } else if (elem==NEBULA) {
+		  plan->AddSatellite(un=new Nebula(nebfile,filename,false,faction));			
+	  }
+	  un->SetAI(new PlanetaryOrbit (un,velocity,position,R,S, Vector (0,0,0), plan));
+	  //     xml->moons[xml->moons.size()-1]->Planet::beginElement(R,S,velocity,position,gravity,radius,filename,NULL,vector <char *>(),xml->unitlevel-((xml->parentterrain==NULL&&xml->ct==NULL)?1:2),ourmat,curlights,true,faction);
     } else {
-      if (xml->ct==NULL&&xml->parentterrain!=NULL) {
+      if ((elem==BUILDING||elem==VEHICLE)&&xml->ct==NULL&&xml->parentterrain!=NULL) {
 	Unit * b = new Building (xml->parentterrain,elem==VEHICLE,filename,true,false,faction);
 	b->SetPosAndCumPos (xml->cursun+xml->systemcentroid);
 	b->EnqueueAI( new Orders::AggressiveAI ("default.agg.xml", "default.int.xml"));
 	AddUnit (b);
-      }else if (xml->ct!=NULL) {
+      }else if ((elem==BUILDING||elem==VEHICLE)&&xml->ct!=NULL) {
 	Unit * b=new Building (xml->ct,elem==VEHICLE,filename,true,false,faction);
 	b->SetPlanetOrbitData ((PlanetaryTransform *)xml->parentterrain);
 	b->SetPosAndCumPos (xml->cursun+xml->systemcentroid);
 	b->EnqueueAI( new Orders::AggressiveAI ("default.agg.xml", "default.int.xml"));
 	AddUnit (b);
       }else {
-	xml->moons.push_back((Planet *)new Unit(filename,true ,false,faction));
-	xml->moons[xml->moons.size()-1]->SetAI(new PlanetaryOrbit(xml->moons[xml->moons.size()-1],velocity,position,R,S,xml->cursun+xml->systemcentroid, NULL));
-	xml->moons[xml->moons.size()-1]->SetPosAndCumPos(R+S+xml->cursun+xml->systemcentroid);
+   	    if (elem==UNIT) {
+		  xml->moons.push_back((Planet *)new Unit(filename,true ,false,faction));
+		}else if (elem==NEBULA){
+		  xml->moons.push_back ((Planet *)new Nebula (nebfile,filename,false,faction));
+		} else {
+			const int NOTAUNITORNEBULA=0;
+			assert (NOTAUNITORNEBULA);
+		}
+		xml->moons[xml->moons.size()-1]->SetAI(new PlanetaryOrbit(xml->moons[xml->moons.size()-1],velocity,position,R,S,xml->cursun+xml->systemcentroid, NULL));
+		xml->moons[xml->moons.size()-1]->SetPosAndCumPos(R+S+xml->cursun+xml->systemcentroid);
       }
     }
     delete []filename;
@@ -655,12 +684,7 @@ void StarSystem::endElement(const string &name) {
     break;
   }
   if (xml->unitlevel==0) {
-    numprimaries = xml->moons.size();
-    this->primaries=new Unit * [xml->moons.size()];
-    for(unsigned int i=0;i<xml->moons.size();i++) {
-			
-      primaries[i]=xml->moons[i];
-    }
+
   }
 }
 
@@ -701,6 +725,11 @@ void StarSystem::LoadXML(const char *filename, const Vector & centroid) {
   } while(!feof(inFile));
   fclose (inFile);
   XML_ParserFree (parser);
+  numprimaries = xml->moons.size();
+  this->primaries=new Unit * [xml->moons.size()];
+  for(unsigned int i=0;i<xml->moons.size();i++) {
+    primaries[i]=xml->moons[i];
+  }
 #ifdef NV_CUBE_MAP
   LightMap[0]=new Texture ((xml->backgroundname+"_right_light.bmp").c_str(),1,BILINEAR,CUBEMAP,CUBEMAP_POSITIVE_X);
   LightMap[1]=new Texture ((xml->backgroundname+"_left_light.bmp").c_str(),1,BILINEAR,CUBEMAP,CUBEMAP_NEGATIVE_X);

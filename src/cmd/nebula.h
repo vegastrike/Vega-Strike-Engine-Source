@@ -15,7 +15,7 @@ private:
 	void beginElem(string&,AttributeList&);
 public:
 	virtual void reactToCollision (Unit *un, const Vector & normal, float dist);
-	Nebula(const char * filename, const char * unitfile, bool SubU, int faction, Flightgroup* fg, int fg_snumber);
+	Nebula(const char * filename, const char * unitfile, bool SubU, int faction, Flightgroup* fg=NULL, int fg_snumber=0);
 };
 
 #endif

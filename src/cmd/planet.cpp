@@ -80,6 +80,10 @@ Planet * Planet::GetTopPlanet (int level) {
   }
   
 }
+void Planet::AddSatellite (Unit * orbiter) {
+	satellites.prepend (orbiter);
+	orbiter->SetOwner (this);
+}
 void Planet::beginElement(Vector x,Vector y,float vely,float pos,float gravity,float radius,char * filename,char * alpha,vector<char *> dest,int level,  const GFXMaterial & ourmat, const vector <GFXLightLocal>& ligh, bool isunit, int faction){
   UnitCollection::UnitIterator * satiterator =NULL;
   if (level>2) {

@@ -33,6 +33,7 @@ struct GFXColor;
 #include "xml_support.h"
 
 class Flightgroup;
+class Nebula;
 
 //#include "mission.h"
 class Beam;
@@ -73,6 +74,7 @@ struct UnitSounds;
 class PlanetaryTransform;
 struct PlanetaryOrbitData;
 class Unit {
+  Nebula * nebula;
   PlanetaryOrbitData * planet;
   ///The orbit needs to have access to the velocity directly to disobey physics laws to precalculate orbits
   friend class PlanetaryOrbit;
@@ -80,6 +82,8 @@ class Unit {
   friend void VDU::DrawWeapon (Unit * parent);
   friend void VDU::DrawDamage (Unit * parent);
  public:
+  inline void Setnebula (Nebula *neb) {nebula=neb;}
+  inline Nebula * Getnebula () {return nebula;}
   /**
    * The computer holds all data in the navigation computer of the current unit
    * It is outside modifyable with GetComputerData() and holds only volatile

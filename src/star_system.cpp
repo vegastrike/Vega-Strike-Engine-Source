@@ -23,7 +23,10 @@
 #include "vs_globals.h"
 #include "cmd/cont_terrain.h"
 
+
 #include "cmd/atmosphere.h"
+
+
 
 extern Music *muzak;
 extern Vector mouseline;
@@ -31,6 +34,8 @@ extern Vector mouseline;
 vector<Vector> perplines;
 //static SphereMesh *foo;
 //static Unit *earth;
+
+
 
 Atmosphere *theAtmosphere;
 
@@ -86,29 +91,53 @@ StarSystem::StarSystem(char * filename, const Vector & centr,const string planet
   UpdateTime();
   time = 0;
 
+
   Atmosphere::Parameters params;
+
   params.radius = 40000;
 
+
+
   params.low_color[0] = GFXColor(0,0.5,0.0);
+
   params.low_color[1] = GFXColor(0,1.0,0.0);
+
   params.low_ambient_color[0] = GFXColor(0.0/255.0,0.0/255.0,0.0/255.0);
+
   params.low_ambient_color[1] = GFXColor(0.0/255.0,0.0/255.0,0.0/255.0);
+
   params.high_color[0] = GFXColor(0.5,0.0,0.0);
+
   params.high_color[1] = GFXColor(1.0,0.0,0.0);
+
   params.high_ambient_color[0] = GFXColor(0,0,0);
+
   params.high_ambient_color[1] = GFXColor(0,0,0);
+
   /*
+
   params.low_color[0] = GFXColor(241.0/255.0,123.0/255.0,67.0/255.0);
+
   params.low_color[1] = GFXColor(253.0/255.0,65.0/255.0,55.0/255.0);
+
   params.low_ambient_color[0] = GFXColor(0.0/255.0,0.0/255.0,0.0/255.0);
+
   params.low_ambient_color[1] = GFXColor(0.0/255.0,0.0/255.0,0.0/255.0);
+
   params.high_color[0] = GFXColor(60.0/255.0,102.0/255.0,249.0/255.0);
+
   params.high_color[1] = GFXColor(57.0/255.0,188.0/255.0,251.0/255.0);
+
   params.high_ambient_color[0] = GFXColor(0,0,0);
+
   params.high_ambient_color[1] = GFXColor(0,0,0);
+
   */
+
   params.scattering = 5;
+
   theAtmosphere = new Atmosphere(params);
+
 }
 void StarSystem::activateLightMap() {
 #ifdef NV_CUBE_MAP
@@ -242,13 +271,20 @@ void StarSystem::Draw() {
   Terrain::RenderAll();
   Mesh::ProcessUndrawnMeshes(true);
   
+
   GFXFogMode (FOG_OFF);
   Matrix ident;
+
   Identity(ident);
+
   //Atmosphere::ProcessDrawQueue();
   //theAtmosphere->Draw(Vector(0,1,0),ident);
 
+
+
   GFXPopGlobalEffects();
+
+
 
   GFXLightContextAmbient(tmpcol);
   Halo::ProcessDrawQueue();
@@ -258,7 +294,10 @@ void StarSystem::Draw() {
   Animation::ProcessDrawQueue();
   Bolt::Draw();
 
+
+
   stars->Draw();
+
   if (shouldfog)
     GFXFogMode (FOG_OFF);
 
@@ -304,6 +343,12 @@ void StarSystem::Update() {
 	static int numframes=0;
 	numframes++;//don't resolve physics until 2 seconds
 	if (numframes>2/(SIMULATION_ATOM)) {
+	  iter = drawList->createIterator();
+	  while((unit = iter->current())!=NULL) {
+		unit->Setnebula(NULL); 
+		iter->advance();
+	  }
+	  delete iter;
 	  iter = drawList->createIterator();
 	  while((unit = iter->current())!=NULL) {
 	    unit->CollideAll();

@@ -159,9 +159,12 @@ Nebula::Nebula(const char * filename, const char * unitfile, bool SubU, int fact
 		fclose (fp);
 	}
 	LoadXML(filename);
+	vscdup();
+	if (fp) 
+		vscdup();
+	vsresetdir();
 }
 
-void Nebula::reactToCollision(class Unit *,class Vector const &,float) {
-	//reacting code here
-
+void Nebula::reactToCollision(class Unit * un,class Vector const &,float) {
+	un->Setnebula(this);
 }

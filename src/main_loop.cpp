@@ -39,6 +39,7 @@
 #include "main_loop.h"
 #include "cmd/music.h"
 #include "audiolib.h"
+#include "cmd/nebula.h"
 #include "vs_path.h"
 #include "cmd/script/mission.h"
 #include "xml_support.h"
@@ -535,6 +536,7 @@ void createObjects() {
   shipList = _Universe->activeStarSystem()->getClickList();
   locSel = new CoordinateSelect (Vector (0,0,5));
   UpdateTime();
+//  _Universe->activeStarSystem()->AddUnit(new Nebula ("mynebula.xml","nebula",false,0,NULL,0));
 
 }
 
