@@ -379,7 +379,7 @@ Unit * Unit::BeamInsideCollideTree (const QVector & start,const QVector & end, Q
 
 
 bool Unit::Collide (Unit * target) {
-  if ((this->DockedOrDocking()&DOCKED_INSIDE|DOCKED)||(target->DockedOrDocking()&DOCKED_INSIDE|DOCKED)||target==this||((target->isUnit()!=NEBULAPTR&&isUnit()!=NEBULAPTR)&&(owner==target||target->owner==this||(owner!=NULL&&target->owner==owner))))
+  if ((this->DockedOrDocking()&(DOCKED_INSIDE|DOCKED))||(target->DockedOrDocking()&(DOCKED_INSIDE|DOCKED))||target==this||((target->isUnit()!=NEBULAPTR&&isUnit()!=NEBULAPTR)&&(owner==target||target->owner==this||(owner!=NULL&&target->owner==owner))))
     return false;
 
   //unit v unit? use point sampling?
