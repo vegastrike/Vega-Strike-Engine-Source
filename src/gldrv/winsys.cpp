@@ -733,13 +733,16 @@ void winsys_init( int *argc, char **argv, char *window_title,
     glutInitDisplayMode( GLUT_RGBA | GLUT_DEPTH | GLUT_DOUBLE );
 #endif 
     char str [1024];
-    sprintf (str, "%dx%d:%d",g_game.x_resolution,g_game.y_resolution,gl_options.color_depth); 
+    sprintf (str, "%dx%d:%d@60",g_game.x_resolution,g_game.y_resolution,gl_options.color_depth); 
     glutGameModeString(str);
+    fprintf (stderr,"Game Mode Params %dx%d at depth %d @ %d Hz\n",glutGameModeGet( GLUT_GAME_MODE_WIDTH ),glutGameModeGet( GLUT_GAME_MODE_WIDTH ),glutGameModeGet( GLUT_GAME_MODE_PIXEL_DEPTH ),glutGameModeGet( GLUT_GAME_MODE_REFRESH_RATE ));
 
     /* Create a window */
     if ( gl_options.fullscreen &&(glutGameModeGet(GLUT_GAME_MODE_POSSIBLE)!=-1)) {
 	glutInitWindowPosition( 0, 0 );
 	glutEnterGameMode();
+        fprintf (stderr,"Game Mode Params %dx%d at depth %d @ %d Hz\n",glutGameModeGet( GLUT_GAME_MODE_WIDTH ),glutGameModeGet( GLUT_GAME_MODE_WIDTH ),glutGameModeGet( GLUT_GAME_MODE_PIXEL_DEPTH ),glutGameModeGet( GLUT_GAME_MODE_REFRESH_RATE ));
+
     } else {
 	/* Set the initial window size */
 	glutInitWindowSize( g_game.x_resolution,g_game.y_resolution );
