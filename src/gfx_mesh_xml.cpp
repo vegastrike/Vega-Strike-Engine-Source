@@ -3,7 +3,28 @@
 #include <iostream.h>
 #include <fstream.h>
 #include <expat.h>
+#include <values.h>
 #include "xml_support.h"
+
+/*
+#ifdef max
+#undefine max
+#endif
+
+static inline float max(float x, float y) {
+  if(x>y) return x;
+  else return y;
+}
+
+#ifdef min
+#undefine min
+#endif
+
+static inline float min(float x, float y) {
+  if(x<y) return x;
+  else return y;
+}
+*/
 
 using XMLSupport::EnumMap;
 using XMLSupport::Attribute;
@@ -348,10 +369,24 @@ void Mesh::LoadXML(const char *filename, Mesh *oldmesh) {
 
   int index = 0;
   vertexlist = new GFXVertex[xml->tris.size()+xml->quads.size()];
+  minSizeX = minSizeY = minSizeZ = FLT_MAX;
+  maxSizeX = maxSizeY = maxSizeZ = -FLT_MAX;
   for(int a=0; a<xml->tris.size(); a++, index++) {
+    minSizeX = min(vertexlist[index].x, minSizeX);
+    maxSizeX = max(vertexlist[index].x, maxSizeX);
+    minSizeY = min(vertexlist[index].y, minSizeY);
+    maxSizeY = max(vertexlist[index].y, maxSizeY);
+    minSizeZ = min(vertexlist[index].z, minSizeZ);
+    maxSizeZ = max(vertexlist[index].z, maxSizeZ);
     vertexlist[index] = xml->tris[a];
   }
   for(int a=0; a<xml->quads.size(); a++, index++) {
+    minSizeX = min(vertexlist[index].x, minSizeX);
+    maxSizeX = max(vertexlist[index].x, maxSizeX);
+    minSizeY = min(vertexlist[index].y, minSizeY);
+    maxSizeY = max(vertexlist[index].y, maxSizeY);
+    minSizeZ = min(vertexlist[index].z, minSizeZ);
+    maxSizeZ = max(vertexlist[index].z, maxSizeZ);
     vertexlist[index] = xml->quads[a];
   }
   vlist = new GFXVertexList(xml->tris.size() + xml->quads.size(),
@@ -363,6 +398,10 @@ void Mesh::LoadXML(const char *filename, Mesh *oldmesh) {
   *oldmesh=*this;
   oldmesh->orig = NULL;
   oldmesh->refcount++;
+
+
+  // Calculate bounding sphere
+  radialSize = sqrtf(max(fabs(minSizeX),fabs(maxSizeX))*max(fabs(minSizeX),fabs(maxSizeX))+max(fabs(minSizeY),fabs(maxSizeY))*max(fabs(minSizeY),fabs(maxSizeY))+max(fabs(minSizeZ),fabs(maxSizeZ))*max(fabs(minSizeZ),fabs(maxSizeZ)));
 
   delete [] vertexlist;
   delete xml;

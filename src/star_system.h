@@ -15,6 +15,7 @@ class Planet;
 class UnitCollection;
 class ClickList;
 class Unit;
+class TextPlane;
 #define NUM_CAM		12
 
 class StarSystem {
@@ -26,6 +27,8 @@ class StarSystem {
   UnitCollection *units;    // Objects subject to global physics
   UnitCollection *missiles; // no physics modelling, not searched
                             // through for clicks
+
+  TextPlane *tp;
   
   Camera cam[NUM_CAM];
   int currentcamera;

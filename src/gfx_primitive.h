@@ -72,5 +72,6 @@ public:
         virtual void SetPosition (const Vector &);
 	virtual void SetOrientation(Vector &p, Vector &q, Vector &r);
 
+	const char *get_name() const { return name; }
 };
 #endif

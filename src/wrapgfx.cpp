@@ -60,8 +60,8 @@ WrapGFX::WrapGFX(int argc, char** argv)
 
 	GFXInit(argc,argv);
 	//if(TRUE)
-	ForceLog = new Texture ("TechPriRGB.bmp","TechPriA.bmp");
-	SquadLog = new Texture ("TechSecRGB.bmp","TechSecA.bmp");
+	ForceLogo = new Texture ("TechPriRGB.bmp","TechPriA.bmp");
+	SquadLogo = new Texture ("TechSecRGB.bmp","TechSecA.bmp");
 #ifdef NV_CUBE_MAP
 	LightMap[0]=new Texture ("cube_right_light.bmp",1,CUBEMAP,CUBEMAP_POSITIVE_X);
 	LightMap[1]=new Texture ("cube_left_light.bmp",1,CUBEMAP,CUBEMAP_NEGATIVE_X);
@@ -99,8 +99,8 @@ WrapGFX::~WrapGFX()
 #else
   delete LightMap[0];
 #endif
-	delete ForceLog;
-	delete SquadLog;
+	delete ForceLogo;
+	delete SquadLogo;
 	GFXShutdown();
 	//delete mouse;
 }

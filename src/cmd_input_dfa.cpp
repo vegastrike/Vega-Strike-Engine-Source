@@ -303,14 +303,18 @@ void InputDFA::Draw () {
   switch (state) {
   case NONE:	//draw arrow
     if (Selecting) { 
+      GFXDisable(CULLFACE);
       SelectBox.Draw();
+      GFXEnable(CULLFACE);
     }
     MouseArrow.Draw();
 
   break;
   case UNITS_SELECTED: //draw arrow, boxes
     if (Selecting) {
+      GFXDisable(CULLFACE);
       SelectBox.Draw();
+      GFXEnable(CULLFACE);
     }
     MouseArrow.Draw();
     

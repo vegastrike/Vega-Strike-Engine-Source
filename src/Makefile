@@ -69,9 +69,9 @@ RANLIB = ranlib
 SDL_CFLAGS = -I/usr/include/SDL -D_REENTRANT
 SDL_CONFIG = /usr/bin/sdl-config
 SDL_LIBS = -L/usr/lib -lSDL -lpthread
-TR_CFLAGS = -g -Wall -I/usr/include/SDL -D_REENTRANT
+TR_CFLAGS = -O2 -Wall -ffast-math -fexpensive-optimizations -malign-loops=2 -malign-jumps=2 -malign-functions=2 -I/usr/include/SDL -D_REENTRANT
 TR_CPPFLAGS =   -DTCL_HEADER=\<tcl.h\> -DHAVE_SDL=1 -DHAVE_SDL_MIXER=1   
-TR_CXXFLAGS = -g -Wall -I/usr/include/SDL -D_REENTRANT
+TR_CXXFLAGS = -O2 -Wall -ffast-math -fexpensive-optimizations -malign-loops=2 -malign-jumps=2 -malign-functions=2 -I/usr/include/SDL -D_REENTRANT
 TR_LIBS =   -ltcl8.3 -L/usr/lib -lSDL -lpthread -lSDL_mixer  -lGL -lGLU  -lglut  -lexpat
 VERSION = 0.0.1
 
@@ -95,7 +95,7 @@ PROGRAMS =  $(bin_PROGRAMS)
 
 
 DEFS = -DHAVE_CONFIG_H -I. -I$(srcdir) -I..
-CPPFLAGS =    -DTCL_HEADER=\<tcl.h\> -DHAVE_SDL=1 -DHAVE_SDL_MIXER=1   
+CPPFLAGS =    -DTCL_HEADER=\<tcl.h\> -DHAVE_SDL=1 -DHAVE_SDL_MIXER=1 -pg 
 LDFLAGS = 
 LIBS =    -ltcl8.3 -L/usr/lib -lSDL -lpthread -lSDL_mixer  -lGL -lGLU  -lglut  -lexpat
 vegastrike_OBJECTS =  alglib.o cmd_ai.o cmd_input_dfa.o cmd_unit.o \
@@ -114,11 +114,11 @@ xml_support.o cmd_unit_xml.o
 vegastrike_LDADD = $(LDADD)
 vegastrike_DEPENDENCIES = 
 vegastrike_LDFLAGS = 
-CXXFLAGS =  -g -Wall -I/usr/include/SDL -D_REENTRANT
+CXXFLAGS =  -O2 -Wall -ffast-math -fexpensive-optimizations -malign-loops=2 -malign-jumps=2 -malign-functions=2 -I/usr/include/SDL -D_REENTRANT
 CXXCOMPILE = $(CXX) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
 CXXLD = $(CXX)
 CXXLINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) $(LDFLAGS) -o $@
-CFLAGS =  -g -Wall -I/usr/include/SDL -D_REENTRANT
+CFLAGS =  -O2 -Wall -ffast-math -fexpensive-optimizations -malign-loops=2 -malign-jumps=2 -malign-functions=2 -I/usr/include/SDL -D_REENTRANT
 COMPILE = $(CC) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 CCLD = $(CC)
 LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(LDFLAGS) -o $@

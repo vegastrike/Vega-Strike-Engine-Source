@@ -413,7 +413,7 @@ Mesh:: Mesh(const char * filename, bool xml):Primitive()
 		offset [ii] = readf (fp);
 		
 	}
-	forcelogos = new Logo(numforcelogo,center,PolyNormal,sizes ,rotations, 0.01F, _GFX->getForceLog(),Ref);
+	forcelogos = new Logo(numforcelogo,center,PolyNormal,sizes ,rotations, 0.01F, _GFX->getForceLogo(),Ref);
 	delete [] Ref;
 	delete []PolyNormal;
 	delete []center;
@@ -539,7 +539,7 @@ Mesh:: Mesh(const char * filename, bool xml):Primitive()
 	}
 	
 
-	squadlogos = new Logo(numsquadlogo,center,PolyNormal,sizes ,rotations, (float)0.01, _GFX->getSquadLog(), Ref);
+	squadlogos = new Logo(numsquadlogo,center,PolyNormal,sizes ,rotations, (float)0.01, _GFX->getSquadLogo(), Ref);
 	delete [] Ref;
 	//fprintf (stderr, "Ri:%f Rj: %f Rk %f",vertexlist[0].i,vertexlist[0].j,vertexlist[0].k);
 	vlist = new GFXVertexList(numvertex,numtris,numquads, vertexlist);

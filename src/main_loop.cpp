@@ -483,8 +483,8 @@ void createObjects() {
   
   textplane = new TextPlane("9x12.fon");
   textplane->SetText(string("This is a test of the emergency broadcast system"));
-  textplane->SetPosition(Vector(0.250F, 0.250F, 1.00F));
-  //textplane->SetPosition(Vector(0.0F, 0.0F, 2.000F));
+  //textplane->SetPosition(Vector(0.250F, 0.250F, 1.00F));
+  textplane->SetPosition(Vector(0.0F, 0.0F, 2.000F));
   GFXEnable(TEXTURE0);
   GFXEnable(TEXTURE1);
 
@@ -495,10 +495,12 @@ void createObjects() {
   //  
   //  
   for(int a = 0; a < numf; a++) {
-    fighters[a] = new Unit("uosprey.dat");
+    //fighters[a] = new Unit("uosprey.dat");
+    fighters[a] = new Unit("Homeworld-HeavyCorvette.xml", true);
+    //fighters[a] = new Unit("phantom.xunit", true);
     //fighters[a]->SetPosition((a%8)/8.0 - 2.0, (a/8)/8.0 - 2.0,5.0);
-    fighters[a]->SetPosition((a%16)*5 - 40.0F, (a/16)*5 - 40.0F,7.0F);
-    fighters[a]->Pitch(PI/2);
+    fighters[a]->SetPosition((a%10)*6 - 40.0F, (a/10)*6 - 40.0F,7.0F);
+    //fighters[a]->Pitch(PI/2);
     //fighters[a]->Roll(PI/2);
     //fighters[a]->Scale(Vector(0.5,0.5,0.5));
     _GFX->activeStarSystem()->AddUnit(fighters[a]);
@@ -519,9 +521,9 @@ void createObjects() {
   midway->SetPosition(5,5, 15);
   _GFX->activeStarSystem()->AddUnit(midway);
   */
-  midway = new Unit("Homeworld-HeavyCorvette.xml", true);
-  midway->SetPosition(8,-5, 10);
-  _GFX->activeStarSystem()->AddUnit(midway);
+  //midway = new Unit("Homeworld-HeavyCorvette.xml", true);
+  //midway->SetPosition(8,-5, 10);
+  //_GFX->activeStarSystem()->AddUnit(midway);
   //exit(0);
 }
 
@@ -545,21 +547,12 @@ void main_loop() {
 
   _GFX->StartDraw();
   
-  //GFXDisable(TEXTURE0);
-  //GFXDisable(TEXTURE1);
-  //GFXBegin(QUADS);
-  //GFXColor4f(0.0,0.0,1.0,1.0);
-  //GFXVertex3f(10.0,10.0,1.0);
-  //GFXVertex3f(10.0,-10.0,1.0);
-  //GFXVertex3f(-10.0,-10.0,1.0);
-  //GFXVertex3f(-10.0,10.0,1.0);
-  //GFXEnd();
   GFXDisable(DEPTHWRITE);
   GFXDisable(DEPTHTEST);
   GFXEnable(TEXTURE0);
   GFXDisable(TEXTURE1);
   //bg2->Draw();
-  //bg->Draw();
+  bg->Draw();
   GFXEnable(DEPTHWRITE);
   GFXEnable(DEPTHTEST);
   GFXEnable(TEXTURE0);
@@ -578,44 +571,11 @@ void main_loop() {
 
 
   _GFX->activeStarSystem()->Draw();
-  //s->Draw();
-  //fihneCarriah->Draw();
   _GFX->activeStarSystem()->Update();
   ProcessKB();
-  //ProcessMouse();  
   
   GFXDisable(TEXTURE1);
-  //  _GFX->AccessHudCamera()->UpdateGFX(false);
-  textplane->Draw();
-  //  _GFX->AccessCamera()->UpdateGFX(false);
-
-  //for(a = 0; a < numf; a++) {
-  //fighters[a]->TDraw();
-  //fighters[a]->Yaw(rand()%2==0?-1.0:1.0*PI/180);
-  //fighters[a]->Yaw(PI/180);
-  //}
-  
-  //fighter2->DrawStreak(Vector(0.0, ((float)state/10.0), 0.0));
-  //fighter2->DrawStreak(Vector(0.0, ((float)state/100.0), 0.0));
-  //fighter2->SetPosition(fighter2->Position() + Vector(0.0, 0.1, 0.0));
-  //s->Draw();
-
-  //textplane->Yaw(PI/180);
-  //t->TDraw();
-  //s->Yaw(PI/180);
-  //////////locSel->Draw();
+  //textplane->Draw();
   _GFX->EndDraw();
-  /*carrier->Rotate(Vector(0.010F,0.010F,0.000F));
-  
-  if(state<50)
-    textplane->Scale(Vector(((float)state)/50.000F,0.100F,1.000F));
-  else if(state<100)
-    textplane->Scale(Vector(1.000F,((float)state-50)/50.000F,1.000F));
-  else
-    textplane->Scale(Vector(1.000F,1.000F,1.000F));
-  state++;
-  if(state > 100)
-    state = 100;*/
-  //fighter->Roll(PI/180);
 }
 

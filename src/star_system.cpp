@@ -4,17 +4,22 @@
 #include "cmd_unit.h"
 #include "UnitCollection.h"
 #include "gfx_click_list.h"
+#include "gfx_hud.h"
+
 StarSystem::StarSystem(Planet *primaries) : 
   primaries(primaries), 
   units(new UnitCollection()), 
   drawList(new UnitCollection()),
-  missiles(new UnitCollection()) {
+  missiles(new UnitCollection()), tp(new TextPlane("9x12.fon")) {
   currentcamera = 0;	
   systemInputDFA = new InputDFA (this);
   Iterator *iter = primaries->createIterator();
   drawList->prepend(iter);
 
   delete iter;
+
+  tp->SetPosition(0.5,0.5,1);
+
   // Calculate movement arcs; set behavior of primaries to follow these arcs
   //Iterator *primary_iterator = primaries->createIterator(); 
   //primaries->SetPosition(0,0,5);
@@ -54,6 +59,20 @@ void StarSystem::Draw() {
   }
   delete iter;
   systemInputDFA->Draw();
+
+  UnitCollection *col = systemInputDFA->getCollection();
+  string selected_units("");
+  if(0 != col) {
+    iter = col->createIterator();
+    Unit *u;
+    while(0!=(u = iter->current())) {
+      selected_units += string(", ") + u->get_name();
+      iter->advance();
+    }
+    tp->Draw();
+    delete iter;
+  }
+  tp->SetText(selected_units);
 }
 
 void StarSystem::Update() {

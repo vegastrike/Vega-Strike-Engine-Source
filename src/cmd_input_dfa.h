@@ -36,7 +36,6 @@ class InputDFA {
   //  enum State startOver ();
   //  enum State someSelected();
   //  enum State dragSelect();
-  UnitCollection *getCollection();
   void replaceCollection (UnitCollection * newcol);
   void appendCollection (UnitCollection *newcol);
 public:
@@ -44,5 +43,6 @@ public:
   ~InputDFA();
   void Draw();
   void ContextAcquire();
+  UnitCollection *getCollection();
 };
 #endif
