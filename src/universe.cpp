@@ -109,7 +109,7 @@ Universe::~Universe()
 //sets up all the stuff... in this case the ships to be rendered
 
 void Universe::activateLightMap() {
-	activeStarSystem()->activateLightMap();
+	activeStarSystem(0)->activateLightMap();
 }
 
 void Universe::StartGFX()
