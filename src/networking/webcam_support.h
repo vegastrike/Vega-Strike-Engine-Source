@@ -84,4 +84,21 @@ class	WebcamSupport
 		int		CopyImage();
 };
 
+// Windows specific stuff to convert images formats
+#if defined( _WIN32) && !defined( __CYGWIN__)
+#include "jpeglib.h"
+BOOL JpegFromDib(HANDLE     hDib,     //Handle to DIB
+                 int        nQuality, //JPEG quality (0-100)
+                 CString    csJpeg,   //Pathname to target jpeg file
+                 CString*   pcsMsg);  //Error msg to return
+
+BOOL BuildSamps(HANDLE                      hDib,
+                int                         nSampsPerRow,
+                struct jpeg_compress_struct cinfo,
+                JSAMPARRAY                  jsmpArray,
+                CString*                    pcsMsg);
+
+RGBQUAD QuadFromWord(WORD b16);
+#endif
+
 #endif
