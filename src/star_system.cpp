@@ -350,6 +350,7 @@ void GameStarSystem::Draw(bool DrawCockpit) {
 #endif
   if (!alreadysetviewport)
     _Universe->AccessCockpit()->SetupViewPort(true);///this is the final, smoothly calculated cam
+  stars->Draw();
   //  SetViewport();//camera wielding unit is now drawn  Note: Background is one frame behind...big fat hairy deal
   GFXColor tmpcol (0,0,0,1);
   GFXGetLightContextAmbient(tmpcol);
@@ -424,7 +425,6 @@ void GameStarSystem::Draw(bool DrawCockpit) {
   Animation::ProcessDrawQueue();
   Halo::ProcessDrawQueue();
   particleTrail.DrawAndUpdate();
-  stars->Draw();
   GameStarSystem::DrawJumpStars();
 
   //  static bool doInputDFA = XMLSupport::parse_bool (vs_config->getVariable ("graphics","MouseCursor","false"));
