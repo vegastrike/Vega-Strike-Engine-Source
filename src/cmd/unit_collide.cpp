@@ -139,7 +139,9 @@ bool Unit::Inside (const QVector &target, const float radius, Vector & normal, f
 
   return false;
 }
-
+static float tmpmax (float a, float b) {
+  return a>b?a:b;
+}
 bool Unit::InsideCollideTree (Unit * smaller, QVector & bigpos, Vector &bigNormal, QVector & smallpos, Vector & smallNormal) {
   if (smaller->colTrees==NULL||this->colTrees==NULL)
     return false;
@@ -149,34 +151,63 @@ bool Unit::InsideCollideTree (Unit * smaller, QVector & bigpos, Vector &bigNorma
     csRapidCollider::CollideReset();
     //    printf ("Col %s %s\n",name.c_str(),smaller->name.c_str());
     Unit * bigger =this;
+#ifdef SUPERCOLLIDER
+    float unitsmovement = tmpmax((bigger->curr_physical_state.position-bigger->prev_physical_state.position).Cast().Magnitude()/bigger->rSize(),(smaller->curr_physical_state.position-smaller->prev_physical_state.position).Cast().Magnitude()/smaller->rSize())/2;
+    static float max_collision_accuracy = XMLSupport::parse_float (vs_config->getVariable("physics","max_collision_accuracy","10"));
+    if (unitsmovement>max_collision_accuracy)
+      unitsmovement=max_collision_accuracy;
+    if (unitsmovement<1)
+     unitsmovement=1;
+    int um = (int)unitsmovement;
+    if (um>1) {
+      //printf ("um >1 for %s with %s\n",bigger->name.c_str(),smaller->name.c_str());
+    }
+#endif
     const csReversibleTransform bigtransform (bigger->cumulative_transformation_matrix);
     const csReversibleTransform smalltransform (smaller->cumulative_transformation_matrix);
-    if (smaller->colTrees->colTree->Collide (*bigger->colTrees->colTree,
-				  &smalltransform,
-				  &bigtransform)) {
-      //static int crashcount=0;
-      //      fprintf (stderr,"%s Crashez to %s %d\n", bigger->name.c_str(), smaller->name.c_str(),crashcount++);
-      csCollisionPair * mycollide = csRapidCollider::GetCollisions();
-      int numHits = csRapidCollider::numHits;
-      if (numHits) {
-	smallpos.Set((mycollide[0].a1.x+mycollide[0].b1.x+mycollide[0].c1.x)/3,  
-		     (mycollide[0].a1.y+mycollide[0].b1.y+mycollide[0].c1.y)/3,  
-		     (mycollide[0].a1.z+mycollide[0].b1.z+mycollide[0].c1.z)/3);
-	smallpos = Transform (smaller->cumulative_transformation_matrix,smallpos);
-	bigpos.Set((mycollide[0].a2.x+mycollide[0].b2.x+mycollide[0].c2.x)/3,  
-		   (mycollide[0].a2.y+mycollide[0].b2.y+mycollide[0].c2.y)/3,  
-		   (mycollide[0].a2.z+mycollide[0].b2.z+mycollide[0].c2.z)/3);
-	bigpos = Transform (bigger->cumulative_transformation_matrix,bigpos);
-	csVector3 sn, bn;
-	sn.Cross (mycollide[0].b1-mycollide[0].a1,mycollide[0].c1-mycollide[0].a1);
-	bn.Cross (mycollide[0].b2-mycollide[0].a2,mycollide[0].c2-mycollide[0].a2);
-	sn.Normalize();
-	bn.Normalize();
-	smallNormal.Set (sn.x,sn.y,sn.z);
-	bigNormal.Set (bn.x,bn.y,bn.z);
-	smallNormal = TransformNormal (smaller->cumulative_transformation_matrix,smallNormal);
-	bigNormal = TransformNormal (bigger->cumulative_transformation_matrix,bigNormal);
-	return true;
+#ifdef SUPERCOLLIDER
+    for (int iter=1;iter<=/*um*/1;++iter) 
+#endif
+      {
+      //we're only gonna lerp the positions for speed here... gahh!
+#ifdef SUPERCOLLIDER
+      float nowness=(((float)iter)/um);
+      float thenness = ((float)( um-iter))/um;
+      {
+	QVector bigorig(nowness*bigger->curr_physical_state.position+thenness*bigger->prev_physical_state.position);
+	bigtransform.SetOrigin(bigorig.Cast());
+      }{
+	QVector smallorig(nowness*smaller->curr_physical_state.position+thenness*smaller->prev_physical_state.position);
+	smalltransform.SetOrigin(smallorig.Cast());
+      }
+#endif
+      if (smaller->colTrees->colTree->Collide (*bigger->colTrees->colTree,
+					       &smalltransform,
+					       &bigtransform)) {
+	//static int crashcount=0;
+	//      fprintf (stderr,"%s Crashez to %s %d\n", bigger->name.c_str(), smaller->name.c_str(),crashcount++);
+	csCollisionPair * mycollide = csRapidCollider::GetCollisions();
+	int numHits = csRapidCollider::numHits;
+	if (numHits) {
+	  smallpos.Set((mycollide[0].a1.x+mycollide[0].b1.x+mycollide[0].c1.x)/3,  
+		       (mycollide[0].a1.y+mycollide[0].b1.y+mycollide[0].c1.y)/3,  
+		       (mycollide[0].a1.z+mycollide[0].b1.z+mycollide[0].c1.z)/3);
+	  smallpos = Transform (smaller->cumulative_transformation_matrix,smallpos);
+	  bigpos.Set((mycollide[0].a2.x+mycollide[0].b2.x+mycollide[0].c2.x)/3,  
+		     (mycollide[0].a2.y+mycollide[0].b2.y+mycollide[0].c2.y)/3,  
+		     (mycollide[0].a2.z+mycollide[0].b2.z+mycollide[0].c2.z)/3);
+	  bigpos = Transform (bigger->cumulative_transformation_matrix,bigpos);
+	  csVector3 sn, bn;
+	  sn.Cross (mycollide[0].b1-mycollide[0].a1,mycollide[0].c1-mycollide[0].a1);
+	  bn.Cross (mycollide[0].b2-mycollide[0].a2,mycollide[0].c2-mycollide[0].a2);
+	  sn.Normalize();
+	  bn.Normalize();
+	  smallNormal.Set (sn.x,sn.y,sn.z);
+	  bigNormal.Set (bn.x,bn.y,bn.z);
+	  smallNormal = TransformNormal (smaller->cumulative_transformation_matrix,smallNormal);
+	  bigNormal = TransformNormal (bigger->cumulative_transformation_matrix,bigNormal);
+	  return true;
+	}
       }
     }
     UnitCollection::UnitIterator i;
@@ -422,7 +453,6 @@ Unit * Unit::queryBSP (const QVector &pt, float err, Vector & norm, float &dist,
 
 
 Unit * Unit::queryBSP (const QVector &start, const QVector & end, Vector & norm, float &distance, bool ShieldBSP) {
-  int i;
   Unit * tmp;
   if (RecurseIntoSubUnitsOnCollision)
   if (!SubUnits.empty()) {
@@ -458,8 +488,8 @@ Unit * Unit::queryBSP (const QVector &start, const QVector & end, Vector & norm,
       return NULL;
     QVector st (InvTransform (cumulative_transformation_matrix,start));
     QVector ed (InvTransform (cumulative_transformation_matrix,end));
-    bool temp=false;
-    /*    for (i=0;i<nummesh()&&!temp;i++) {
+    /*bool temp=false;
+        for (i=0;i<nummesh()&&!temp;i++) {
       temp = (1==meshdata[i]->queryBoundingBox (st,ed,0));
     }
     if (!temp) {

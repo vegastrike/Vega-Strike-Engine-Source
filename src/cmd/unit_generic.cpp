@@ -2853,6 +2853,18 @@ void Unit::PerformDockingOperations () {
       continue;
     }
     //Transformation t = un->prev_physical_state;
+    unsigned short tmp;
+    tmp=un->maxwarpenergy;
+    if (tmp<un->jump.energy)
+      tmp=un->jump.energy;
+    if (tmp>un->warpenergy){
+      un->warpenergy=tmp;
+      int cockpit=UnitUtil::isPlayerStarship(un);
+      if (cockpit>=0&&cockpit<_Universe->numPlayers()) {
+	static float docking_fee = XMLSupport::parse_float (vs_config->getVariable("general","docking_fee","0"));
+	_Universe->AccessCockpit(cockpit)->credits-=docking_fee;
+      }
+    }
     un->prev_physical_state=un->curr_physical_state;
     un->curr_physical_state =HoldPositionWithRespectTo (un->curr_physical_state,prev_physical_state,curr_physical_state);
     un->NetForce=Vector(0,0,0);
