@@ -629,7 +629,7 @@ void StarSystem::Update(float priority , bool executeDirector) {
       if (owner) {
 	if (owner->InCorrectStarSystem(this)) {
 	  if (getTimeCompression()>1) {//if not paused
-	    if (!owner->AutoPilotTo (owner)) {
+	    if (!owner->AutoPilotTo (owner,true)) {
 	      
 	      reset_time_compression(0,PRESS);
 	    }

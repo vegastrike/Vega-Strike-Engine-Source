@@ -723,7 +723,7 @@ Vector Unit::ToWorldCoordinates(const Vector &v) const {
 #undef M
 
 }
-static float getAutoRSize (Unit * orig,Unit * un) {
+static float getAutoRSize (Unit * orig,Unit * un, bool ignore_friend=false) {
   static float friendly_autodist =  XMLSupport::parse_float (vs_config->getVariable ("physics","friendly_auto_radius","100"));
   static float neutral_autodist =  XMLSupport::parse_float (vs_config->getVariable ("physics","neutral_auto_radius","1000"));
   static float hostile_autodist =  XMLSupport::parse_float (vs_config->getVariable ("physics","hostile_auto_radius","8000"));
@@ -733,14 +733,14 @@ static float getAutoRSize (Unit * orig,Unit * un) {
   }
   float rel=_Universe->GetRelation(orig->faction,un->faction);
   if (rel>.1) {
-    return friendly_autodist;//min distance apart
-  }else if (rel<.1) {
+	  return ignore_friend?-FLT_MAX:friendly_autodist;//min distance apart
+  }else if (rel<-.1) {
     return hostile_autodist;
   }else {
-    return neutral_autodist;
+	  return ignore_friend?-FLT_MAX:neutral_autodist;
   }
 }
-bool Unit::AutoPilotTo (Unit * target) {
+bool Unit::AutoPilotTo (Unit * target, bool ignore_friendlies) {
   static float autopilot_term_distance = XMLSupport::parse_float (vs_config->getVariable ("physics","auto_pilot_termination_distance","6000"));
   static float autopilot_p_term_distance = XMLSupport::parse_float (vs_config->getVariable ("physics","auto_pilot_planet_termination_distance","60000"));
   static float planet_rad_percent =  XMLSupport::parse_float (vs_config->getVariable ("physics","auto_pilot_planet_radius_percent",".75"));
@@ -772,10 +772,10 @@ bool Unit::AutoPilotTo (Unit * target) {
     if (un->isUnit()!=NEBULAPTR) {
      
     if (un!=this&&un!=target) {
-      if ((start-un->Position()).Magnitude()-getAutoRSize (this,this)-rSize()-un->rSize()-getAutoRSize(this,un)<=0) {
+      if ((start-un->Position()).Magnitude()-getAutoRSize (this,this,ignore_friendlies)-rSize()-un->rSize()-getAutoRSize(this,un,ignore_friendlies)<=0) {
 	return false;
       }
-      float intersection = un->querySphere (start,end,getAutoRSize (this,un));
+      float intersection = un->querySphere (start,end,getAutoRSize (this,un,ignore_friendlies));
       if (intersection>0) {
 	end = start+ (end-start)*intersection;
 	ok=false;

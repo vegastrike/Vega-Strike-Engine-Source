@@ -787,7 +787,7 @@ public:
   void SortCargo();
  public:
   ///tries to warp as close to un as possible abiding by the distances of various enemy ships...it might not make it all the way
-  bool AutoPilotTo(Unit * un);
+  bool AutoPilotTo(Unit * un, bool ignore_friendlies=false);
   void WriteUnit(const char * modificationname="");
   void SetTurretAI ();
   void DisableTurretAI ();
