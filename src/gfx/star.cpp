@@ -143,7 +143,8 @@ void Stars::Draw() {
   int ligh;
   GFXSelectMaterial (0);
   if (fade) {
-    GFXLight FadeLight (true, GFXColor (cp.i,cp.j,cp.k), GFXColor (0,0,0,1), GFXColor (0,0,0,1), GFXColor (1,1,1,1), GFXColor (.01,0,1/(.4*spread*spread)));
+    static float star_spread_attenuation = XMLSupport::parse_float(vs_config->getVariable("graphics","star_spread_attenuation",".2"));
+    GFXLight FadeLight (true, GFXColor (cp.i,cp.j,cp.k), GFXColor (0,0,0,1), GFXColor (0,0,0,1), GFXColor (1,1,1,1), GFXColor (.01,0,1/(star_spread_attenuation*star_spread_attenuation*spread*spread)));
     GFXCreateLight (ligh,FadeLight,true);
     GFXEnable (LIGHTING);
   } else {
