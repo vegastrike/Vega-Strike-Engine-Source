@@ -455,6 +455,10 @@ bool Unit::jumpReactToCollision (Unit * smalle) {
   return false;
 }
 void Unit::reactToCollision(Unit * smalle, const Vector & biglocation, const Vector & bignormal, const Vector & smalllocation, const Vector & smallnormal,  float dist) {
+  if (smalle->isUnit()==ENHANCEMENTPTR) {
+    smalle->reactToCollision (this,smalllocation,smallnormal,biglocation,bignormal,dist);
+    return;
+  }	       
   //don't bounce if you can Juuuuuuuuuuuuuump
   if (!jumpReactToCollision(smalle)) {
 #ifdef NOBOUNCECOLLISION
@@ -465,6 +469,7 @@ void Unit::reactToCollision(Unit * smalle, const Vector & biglocation, const Vec
     smalle->ApplyDamage (biglocation,bignormal,  .5*fabs(bignormal.Dot(smalle->GetVelocity()-this->GetVelocity()))*this->mass*SIMULATION_ATOM,smalle,GFXColor(1,1,1,1));
     this->ApplyDamage (smalllocation,smallnormal, .5*fabs(smallnormal.Dot(smalle->GetVelocity()-this->GetVelocity()))*smalle->mass*SIMULATION_ATOM,this,GFXColor(1,1,1,1));
 #endif
+    
   //each mesh with each mesh? naw that should be in one way collide
   }
 }

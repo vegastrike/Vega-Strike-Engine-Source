@@ -138,7 +138,7 @@ void Nebula::LoadXML(const char * filename) {
 	FILE * inFile = fopen (filename, "r");
 	if(!inFile) {
 		fprintf(stderr,"\nUnit file %s not found\n",filename);
-		assert(0);
+		fogmode=FOG_OFF;
 		return;
 	}
 	XML_Parser parser = XML_ParserCreate(NULL);
@@ -172,29 +172,42 @@ void Nebula::SetFogState () {
   GFXFogIndex (index);
   
 }
-Nebula::Nebula(const char * filename, const char * unitfile, bool SubU, int faction, Flightgroup* fg, int fg_snumber):
+Nebula::Nebula(const char * unitfile, bool SubU, int faction, Flightgroup* fg, int fg_snumber):
   Unit (unitfile,true,SubU,faction,fg,fg_snumber) {
 
-	vssetdir (GetSharedUnitPath().c_str());
-	vschdir (unitfile);
-	explosiontime=0;
-	FILE *fp = fopen (unitfile,"r");
-	if (!fp) {
-		vscdup();
-		const char *c;
-		if ((c=_Universe->GetFaction(faction)))
-			vschdir (c);
-		else
-			vschdir ("unknown");
-		vschdir (unitfile);
-	} else {
-		fclose (fp);
-	}
-	LoadXML(filename);
-	vscdup();
-	if (fp) 
-		vscdup();
-	vsresetdir();
+  vssetdir (GetSharedUnitPath().c_str());
+  vschdir (unitfile);
+  string nebulafile (string(unitfile)+string(".nebula"));
+  explosiontime=0;
+  FILE *fp = fopen (nebulafile.c_str(),"r");
+  bool uptwice=false;
+  if (!fp) {
+    uptwice=true;
+    vscdup();
+    const char *c;
+    if ((c=_Universe->GetFaction(faction)))
+      vschdir (c);
+    else
+      vschdir ("unknown");
+    vschdir (unitfile);
+    fp = fopen (nebulafile.c_str(),"r");
+    if (fp) {
+      fclose (fp);
+    } else {
+      vscdup();
+      vscdup();
+      vschdir ("neutral");
+      vschdir (unitfile);
+      faction=_Universe->GetFaction("neutral");
+    }
+  } else {
+    fclose (fp);
+  }
+  LoadXML(nebulafile.c_str());
+  vscdup();
+  if (uptwice) 
+    vscdup();
+  vsresetdir();
 }
 void Nebula::reactToCollision(Unit * smaller, const Vector & biglocation, const Vector & bignormal, const Vector & smalllocation, const Vector & smallnormal, float dist){
   if (fogme)

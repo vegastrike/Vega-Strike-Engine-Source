@@ -461,6 +461,9 @@ string AnalyzeType (string &input, string &nebfile, float & radius) {
   case 'B':
     retval="Building";
     break;
+  case 'E':
+    retval="Enhancement";
+    break;
   case 'U':
   default:
     retval="Unit";

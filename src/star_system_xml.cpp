@@ -19,6 +19,7 @@
 #include "cmd/atmosphere.h"
 #include "cmd/nebula.h"
 #include "cmd/asteroid.h"
+#include "cmd/enhancement.h"
 void StarSystem::beginElement(void *userData, const XML_Char *name, const XML_Char **atts) {
   ((StarSystem*)userData)->beginElement(name, AttributeList(atts));
 }
@@ -103,7 +104,8 @@ namespace StarXML {
     SCALEX,
     NUMWRAPS,
     DIFFICULTY,
-    REFLECTNOLIGHT
+    REFLECTNOLIGHT,
+    ENHANCEMENT
   };
 
   const EnumMap::Pair element_names[] = {
@@ -111,6 +113,7 @@ namespace StarXML {
     EnumMap::Pair ("Planet", PLANET),
     EnumMap::Pair ("System", SYSTEM),
     EnumMap::Pair ("Unit", UNIT),
+    EnumMap::Pair ("Enhancement", ENHANCEMENT),
     EnumMap::Pair ("Jump", JUMP),
     EnumMap::Pair ("Light", LIGHT),
     EnumMap::Pair ("Attenuated",ATTEN),
@@ -134,7 +137,6 @@ namespace StarXML {
     EnumMap::Pair ("starspread", STARSPREAD), 
     EnumMap::Pair ("reflectivity", REFLECTIVITY), 
     EnumMap::Pair ("file", XFILE),
-    EnumMap::Pair ("nebfile", NEBFILE),
     EnumMap::Pair ("alpha", ALPHA),
     EnumMap::Pair ("destination", DESTINATION), 
     EnumMap::Pair ("x", X), 
@@ -168,8 +170,8 @@ namespace StarXML {
     EnumMap::Pair ("Difficulty", DIFFICULTY)
   };
 
-  const EnumMap element_map(element_names, 17);
-  const EnumMap attribute_map(attribute_names, 40);
+  const EnumMap element_map(element_names, 18);
+  const EnumMap attribute_map(attribute_names, 39);
 }
 
 using XMLSupport::EnumMap;
@@ -609,6 +611,7 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
   case VEHICLE:
   case NEBULA:
   case ASTEROID:
+  case ENHANCEMENT:
     assert (xml->unitlevel>0);
     xml->unitlevel++;
     S = Vector (0,1,0);
@@ -691,7 +694,7 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
       }
 
     }  
-    if (((elem==UNIT||elem==NEBULA)||(xml->ct==NULL&&xml->parentterrain==NULL))&&(xml->unitlevel>2)) {
+    if (((elem==UNIT||elem==NEBULA||elem==ENHANCEMENT||elem==ASTEROID)||(xml->ct==NULL&&xml->parentterrain==NULL))&&(xml->unitlevel>2)) {
       assert(xml->moons.size()!=0);
 	  Unit * un;
 	  Planet * plan =xml->moons.back()->GetTopPlanet(xml->unitlevel-1);
@@ -699,9 +702,11 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
 		  plan->AddSatellite(un=new Unit(filename,true,false,faction));
 		  un->setFullname(fullname);
 	  } else if (elem==NEBULA) {
-		  plan->AddSatellite(un=new Nebula(nebfile,filename,false,faction));			
+		  plan->AddSatellite(un=new Nebula(filename,false,faction));			
 	  } else if (elem==ASTEROID) {
 	    plan->AddSatellite (un=new Asteroid (filename,faction,NULL,0,scalex));
+	  } else if (elem==ENHANCEMENT) {
+	    plan->AddSatellite (un=new Enhancement (filename,faction));
 	  }
 	  while (!dest.empty()) {
 	    un->AddDestination (dest.back());
@@ -739,12 +744,14 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
    	    if (elem==UNIT) {
 	      Unit *moon_unit=new Unit(filename,true ,false,faction);
 	      moon_unit->setFullname(fullname);
-		  xml->moons.push_back((Planet *)moon_unit);
-		}else if (elem==NEBULA){
-		  xml->moons.push_back ((Planet *)new Nebula (nebfile,filename,false,faction));
-		} else if (elem==ASTEROID){
-		  xml->moons.push_back ((Planet *)new Asteroid (filename,faction,NULL,0,scalex));
-		}
+	      xml->moons.push_back((Planet *)moon_unit);
+	    }else if (elem==NEBULA){
+	      xml->moons.push_back ((Planet *)new Nebula (filename,false,faction));
+	    } else if (elem==ASTEROID){
+	      xml->moons.push_back ((Planet *)new Asteroid (filename,faction,NULL,0,scalex));
+	    } else if (elem==ENHANCEMENT) {
+	      xml->moons.push_back ((Planet *)new Enhancement (filename,faction));
+	    }
 	    while (!dest.empty()) {
 	      xml->moons.back()->AddDestination (dest.back());
 	      dest.pop_back();

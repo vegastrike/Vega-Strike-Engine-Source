@@ -62,7 +62,8 @@ enum clsptr {
 	PLANETPTR,
 	BUILDINGPTR,
 	NEBULAPTR,
-	ASTEROIDPTR
+	ASTEROIDPTR,
+	ENHANCEMENTPTR
 };
 
 class VDU;
@@ -179,6 +180,8 @@ class Unit {
    * Contains information about a particular Mount on a unit.
    * And the weapons it has, where it is, where it's aimed, 
    * The ammo and the weapon type. As well as the possible weapons it may fit
+   * Warning: Mounts may be memcpy 'd all over the place, so don't put any strings or classes with 
+   * copy constructors here.
    */
   class Mount {
     ///Where is it
@@ -379,7 +382,7 @@ public:
   std::string name;
   ///The faction of this unit
   int faction;
-
+  void Upgrade (Unit * upgrador);
 
   Unit();
   ///Creates aa mesh with meshes as submeshes (number of them) as either as subunit with faction faction)
