@@ -101,11 +101,17 @@ float CommunicatingAI::GetEffectiveRelationship (const Unit * target)const {
 void AllUnitsCloseAndEngage(Unit * un, int faction) {
 	Unit * ally;
 	static float contraband_assist_range = XMLSupport::parse_float (vs_config->getVariable("physics","contraband_assist_range","50000"));
+        float relation=0;
+        if ((relation=FactionUtil::GetIntRelation(faction,un->faction))>-.05) {
+          FactionUtil::AdjustIntRelation(faction,un->faction,-.05-relation,1);
+        }else {
+          FactionUtil::AdjustIntRelation(faction,un->faction,-.025,1);
+        }
 	for (un_iter i=_Universe->activeStarSystem()->getUnitList().createIterator();
 		(ally = *i)!=NULL;
 		++i) {
 		//Vector loc;
-
+          
 		if (ally->faction==faction) {
 			//if (ally->InRange (un,loc,true)) {
 				if ((ally->Position()-un->Position()).Magnitude()<contraband_assist_range) {
@@ -114,8 +120,7 @@ void AllUnitsCloseAndEngage(Unit * un, int faction) {
 						if (fg->directive.empty()?true:toupper(*fg->directive.begin())!=*fg->directive.begin()) {
 							ally->Target (un);
 							ally->TargetTurret (un);
-
-							fg->directive=string("a");//attack my target (of leader)
+                                                        
 						}else {
 							ally->Target (un);
 							ally->TargetTurret (un);
