@@ -22,7 +22,7 @@ public:
 		class Link {
 		public:
 			std::string pythonfile;
-			float x,y,wid,hei;
+			float x,y,wid,hei,alpha;
 			std::string text;
 			const std::string index;
 			virtual void Click (::BaseInterface* base,float x, float y, int button, int state);
