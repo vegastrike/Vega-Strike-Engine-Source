@@ -394,19 +394,23 @@ void HudDamage(float * dam, string damages) {
 }
 string WriteHudDamage (Unit * un) {
   string ret;
+  const string semi=";";
   if (un->image->cockpit_damage) {
     for (int i=0;i<1+MAXVDUS+UnitImages::NUMGAUGES;++i) {
-      ret=XMLSupport::tostring(un->image->cockpit_damage[i]);
+      ret+=XMLSupport::tostring(un->image->cockpit_damage[i]);
+      ret+=semi;
     }
   }
   return ret;
 }
 string WriteHudDamageFunc (Unit * un) {
   string ret;
+  const string semi=";";
   if (un->image->cockpit_damage) {
     int numg=1+MAXVDUS+UnitImages::NUMGAUGES;
     for (int i=numg;i<2*numg;++i) {
-      ret=XMLSupport::tostring(un->image->cockpit_damage[i]);
+      ret+=XMLSupport::tostring(un->image->cockpit_damage[i]);
+      ret+=semi;
     }
   }
   return ret;
