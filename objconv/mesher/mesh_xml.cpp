@@ -298,9 +298,6 @@ struct XML {
 		force_texture=0;
 		recalc_norm=0;
 		shouldreflect=0;
-		detailplane.x=0;
-		detailplane.y=0;
-		detailplane.z=0;
 		reflect=0;
 		lighting=0;
 		cullface=0;
