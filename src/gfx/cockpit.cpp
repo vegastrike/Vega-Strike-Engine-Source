@@ -146,14 +146,66 @@ float Unit::computeLockingPercent() {
 float Cockpit::computeLockingSymbol(Unit * par) {
   return par->computeLockingPercent();
 }
-inline void DrawOneTargetBox (const QVector & Loc, const float rSize, const Vector &CamP, const Vector & CamQ, const Vector & CamR, float lock_percent) {
-  GFXBegin (GFXLINESTRIP); 
-  GFXVertexf (Loc+(CamP+CamQ).Cast()*rSize);
-  GFXVertexf (Loc+(CamP-CamQ).Cast()*rSize);
-  GFXVertexf (Loc+(-CamP-CamQ).Cast()*rSize);
-  GFXVertexf (Loc+(CamQ-CamP).Cast()*rSize);
-  GFXVertexf (Loc+(CamP+CamQ).Cast()*rSize);
-  GFXEnd();
+inline void DrawOneTargetBox (const QVector & Loc, const float rSize, const Vector &CamP, const Vector & CamQ, const Vector & CamR, float lock_percent, bool ComputerLockon, bool Diamond=false) {
+  if (Diamond) {
+    float ModrSize=rSize/1.41;
+    GFXBegin (GFXLINESTRIP); 
+    GFXVertexf (Loc+(.75*CamP+CamQ).Cast()*ModrSize);
+    GFXVertexf (Loc+(CamP+.75*CamQ).Cast()*ModrSize);
+    GFXVertexf (Loc+(CamP-.75*CamQ).Cast()*ModrSize);
+    GFXVertexf (Loc+(.75*CamP-CamQ).Cast()*ModrSize);
+    GFXVertexf (Loc+(-.75*CamP-CamQ).Cast()*ModrSize);
+    GFXVertexf (Loc+(-CamP-.75*CamQ).Cast()*ModrSize);
+    GFXVertexf (Loc+(.75*CamQ-CamP).Cast()*ModrSize);
+    GFXVertexf (Loc+(CamQ-.75*CamP).Cast()*ModrSize);
+    GFXVertexf (Loc+(.75*CamP+CamQ).Cast()*ModrSize);
+    GFXEnd();    
+  }else if (ComputerLockon) {
+    GFXBegin (GFXLINESTRIP); 
+    GFXVertexf (Loc+(CamP+CamQ).Cast()*rSize);
+    GFXVertexf (Loc+(CamP-CamQ).Cast()*rSize);
+    GFXVertexf (Loc+(-CamP-CamQ).Cast()*rSize);
+    GFXVertexf (Loc+(CamQ-CamP).Cast()*rSize);
+    GFXVertexf (Loc+(CamP+CamQ).Cast()*rSize);
+    GFXEnd();
+  }else {
+    GFXBegin(GFXLINE);
+    GFXVertexf (Loc+(CamP+CamQ).Cast()*rSize);
+    GFXVertexf (Loc+(CamP+.66*CamQ).Cast()*rSize);
+
+    GFXVertexf (Loc+(CamP-CamQ).Cast()*rSize);
+    GFXVertexf (Loc+(CamP-.66*CamQ).Cast()*rSize);
+
+    GFXVertexf (Loc+(-CamP-CamQ).Cast()*rSize);
+    GFXVertexf (Loc+(-CamP-.66*CamQ).Cast()*rSize);
+
+
+    GFXVertexf (Loc+(CamQ-CamP).Cast()*rSize);
+    GFXVertexf (Loc+(CamQ-.66*CamP).Cast()*rSize);
+
+
+    GFXVertexf (Loc+(CamP+CamQ).Cast()*rSize);
+    GFXVertexf (Loc+(CamP+.66*CamQ).Cast()*rSize);
+
+
+    GFXVertexf (Loc+(CamP+CamQ).Cast()*rSize);
+    GFXVertexf (Loc+(.66*CamP+CamQ).Cast()*rSize);
+
+
+    GFXVertexf (Loc+(CamP-CamQ).Cast()*rSize);
+    GFXVertexf (Loc+(.66*CamP-CamQ).Cast()*rSize);
+
+    GFXVertexf (Loc+(-CamP-CamQ).Cast()*rSize);
+    GFXVertexf (Loc+(-.66*CamP-CamQ).Cast()*rSize);
+
+    GFXVertexf (Loc+(CamQ-CamP).Cast()*rSize);
+    GFXVertexf (Loc+(.66*CamQ-CamP).Cast()*rSize);
+
+    GFXVertexf (Loc+(CamP+CamQ).Cast()*rSize);
+    GFXVertexf (Loc+(.66*CamP+CamQ).Cast()*rSize);
+
+    GFXEnd();
+  }
   if (lock_percent<.99) {
     if (lock_percent<0) {
       lock_percent=0;
@@ -240,13 +292,36 @@ static GFXColor DockBoxColor (const string& name) {
 }
 inline void DrawDockingBoxes(Unit * un,Unit *target, const Vector & CamP, const Vector & CamQ, const Vector & CamR) {
   if (target->IsCleared (un)) {
-    static GFXColor dockbox = DockBoxColor("docking_box");
-    GFXColorf (dockbox);
+    static GFXColor dockboxstop = DockBoxColor("docking_box_halt");
+    static GFXColor dockboxgo = DockBoxColor("docking_box_proceed");
+    if (dockboxstop.r==1&&dockboxstop.g==1&&dockboxstop.b==1) {
+      dockboxstop.r=1;
+      dockboxstop.g=0;
+      dockboxstop.b=0;
+    }
+    if (dockboxgo.r==1&&dockboxgo.g==1&&dockboxgo.b==1) {
+      dockboxgo.r=0;
+      dockboxgo.g=1;
+      dockboxgo.b=.5;
+    }
+
     const vector <DockingPorts> d = target->DockingPortLocations();
     for (unsigned int i=0;i<d.size();i++) {
       float rad = d[i].radius/sqrt(2.0);
-      DrawOneTargetBox (Transform (target->GetTransformation(),d[i].pos.Cast())-_Universe->AccessCamera()->GetPosition(),rad ,CamP, CamQ, CamR,1);
+      GFXDisable (DEPTHTEST);
+      GFXDisable (DEPTHWRITE);
+      GFXColorf (dockboxstop);
+      DrawOneTargetBox (Transform (target->GetTransformation(),d[i].pos.Cast())-_Universe->AccessCamera()->GetPosition(),rad ,CamP, CamQ, CamR,1,true,true);
+      GFXEnable (DEPTHTEST);
+      GFXEnable (DEPTHWRITE);
+      GFXColorf (dockboxgo);
+      DrawOneTargetBox (Transform (target->GetTransformation(),d[i].pos.Cast())-_Universe->AccessCamera()->GetPosition(),rad ,CamP, CamQ, CamR,1,true,true);
+
     }
+    GFXDisable (DEPTHTEST);
+    GFXDisable (DEPTHWRITE);
+    GFXColor4f(1,1,1,1);
+
   }
 }
 
@@ -282,9 +357,12 @@ void Cockpit::DrawTargetBoxes(){
 	GFXColorf(drawcolor);
 
 	if(target->isUnit()==UNITPTR){
-	  DrawOneTargetBox (Loc, target->rSize(), CamP, CamQ, CamR,computeLockingSymbol(un));
+
 	  if (un->Target()==target) {
 	    DrawDockingBoxes(un,target,CamP,CamQ, CamR);
+	    DrawOneTargetBox (Loc, target->rSize(), CamP, CamQ, CamR,computeLockingSymbol(un),true);
+	  }else {
+	    DrawOneTargetBox (Loc, target->rSize(), CamP, CamQ, CamR,computeLockingSymbol(un),false);
 	  }
 	}
     }
@@ -333,7 +411,7 @@ void Cockpit::DrawTargetBox () {
     }
     GFXEnd();
   }
-  DrawOneTargetBox (Loc, target->rSize(), CamP, CamQ, CamR,computeLockingSymbol(un));
+  DrawOneTargetBox (Loc, target->rSize(), CamP, CamQ, CamR,computeLockingSymbol(un),un->TargetLocked());
   DrawDockingBoxes(un,target,CamP,CamQ,CamR);
   if (always_itts || un->GetComputerData().itts) {
     un->getAverageGunSpeed (speed,range);
