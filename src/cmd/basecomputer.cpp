@@ -3858,6 +3858,7 @@ string buildUpgradeDescription(Cargo &item) {
 string buildCargoDescription(Cargo &item){
 	//load the Unit
     string blnk; //modifications to an upgrade item???
+    /*
     Flightgroup* flightGroup=new Flightgroup();//sigh
     int fgsNumber=0;
 	current_unit_load_mode=NO_MESH;
@@ -3888,12 +3889,16 @@ string buildCargoDescription(Cargo &item){
 		}
 	  }
 	}
-	if(texturedescription!=""){
-      str+="@"+texturedescription+"@";
-	}
-	str+=item.description;
 	delete newPart;
-	return str;
+    if(texturedescription!=""){
+      str+="@"+texturedescription+"@";
+    }
+
+    
+    str+=item.description;
+    return str;
+    */
+	return item.description;
 }
 // Load the controls for the SHIP_DEALER display.
 void BaseComputer::loadShipDealerControls(void) {
