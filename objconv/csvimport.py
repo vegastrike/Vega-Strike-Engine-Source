@@ -17,6 +17,12 @@ def removeBraces(s):
 	for k in r:
 		s+=k
 	return s
+def removeParen(s):
+	o=s.find("(");
+	c=s.find(")")
+	if (o!=-1 and c!=-1):
+		return s[0:o]
+	return s
 def CollapseList(lis):
 	s=""
 	r=[]
@@ -64,21 +70,36 @@ def CollapseList(lis):
 
 def ProcessUnit(f):
 	l=[]
+	m=[]
 	line=f.readline()
 	while (line!=""):
 		x=csv.semiColonSeparatedList(line,',')
-		if (len(x)>=2):
-			if (len(x)==2):
-				l.append(x[1])
-			elif (x[1].find('{')!=-1):
-				l.append(CollapseList(x[1:]))
+		if (len(x)>=1):
+			m.append(removeParen(x[0]))
+			if (len(x)>=2):
+				if (len(x)==2):
+					l.append(x[1])
+				elif (x[1].find('{')!=-1):
+					l.append(CollapseList(x[1:]))
+				else:
+					l.append(CollapseStruct(x[2:]))
 			else:
-				l.append(CollapseStruct(x[2:]))
-		else:
-			l.append('')
+				l.append('')
 		line=f.readline()
 		
-	return l
+	return (m,l)
+
+def reorderList(keys,keylist):
+	h={}
+	ret=[]
+	for i in range(len(keylist[0])):
+		h[keylist[0][i]]=keylist[1][i]
+	for i in keys:
+		if i in h:
+			ret.append(h[i])
+		else:
+			ret.append("");
+	return ret
 import sys
 import csv
 units=sys.argv[1]
@@ -87,9 +108,10 @@ f=open (units);
 o=open(units+".tmp","w");
 u=open(unit+".csv");
 line=f.readline()
+key=csv.semiColonSeparatedList(line,',')
 while (line!=""):
 	if (csv.earlyStrCmp(line,unit)):
-		o.write(csv.writeList(ProcessUnit(u)));
+		o.write(csv.writeList(reorderList(key,ProcessUnit(u))));
 	else:
 		o.write(line);
 	line=f.readline();
