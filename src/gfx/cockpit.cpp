@@ -727,7 +727,7 @@ float GameCockpit::LookupTargetStat (int stat, Unit *target) {
   static float fpsval=0;
   const float fpsmax=1;
   static float numtimes=fpsmax;
-  unsigned short armordat[4];
+  unsigned int armordat[8]; //short fix
   Unit * tmpunit;
   switch (stat) {
   case UnitImages::SHIELDF:

@@ -51,7 +51,7 @@ float Mount::ComputeAnimatedFrame(Mesh * gun) {
 		}
 	}
 }
-Mount::Mount(const string& filename, short am,short vol, float xyscale, float zscale){
+Mount::Mount(const string& filename, int am, int vol, float xyscale, float zscale){ //short fix
   static weapon_info wi(weapon_info::BEAM);
   size = weapon_info::NOWEAP;
   static float xyscalestat=XMLSupport::parse_float (vs_config->getVariable ("graphics","weapon_xyscale","1"));
@@ -96,10 +96,10 @@ void Mount::UnFire () {
 }
 
 void Mount::SwapMounts(Mount * other) {
-	  short thisvol = volume;
-	  short othervol = other->volume;
+	  int thisvol = volume; //short fix
+	  int othervol = other->volume; //short fix
 	  //short othersize = other->size;
-	  short thissize = size;
+	  int thissize = size;
 	  Mount mnt = *this;
 	  this->size=thissize;
 	  *this=*other;
@@ -115,8 +115,8 @@ void Mount::SwapMounts(Mount * other) {
 	  other->SetMountOrientation (q);  
 }
 void Mount::ReplaceMounts (const Mount * other) {
-	short thisvol = volume;
-	short thissize = size;
+	int thisvol = volume; //short fix
+	int thissize = size;  //short fix
 	Quaternion q =this->GetMountOrientation();
 	Vector v = this->GetMountLocation();
 	*this=*other;

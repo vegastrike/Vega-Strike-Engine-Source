@@ -85,10 +85,10 @@ Mesh::~Mesh()
 	}
 }
 
-void Mesh::Draw(float lod, const Matrix &m, float toofar, short cloak, float nebdist, unsigned char damage, bool renormalize)
+void Mesh::Draw(float lod, const Matrix &m, float toofar, int cloak, float nebdist, unsigned char damage, bool renormalize) //short fix
 {
 }
-void Mesh::DrawNow(float lod,  bool centered, const Matrix &m, short cloak, float nebdist) {
+void Mesh::DrawNow(float lod,  bool centered, const Matrix &m, int cloak, float nebdist) { //short fix
 }
 void Mesh::ProcessZFarMeshes () {
 }

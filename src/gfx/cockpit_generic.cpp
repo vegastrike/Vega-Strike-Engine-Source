@@ -128,6 +128,10 @@ void Cockpit::SetParent (Unit * unit, const char * filename, const char * unitmo
     if (StartArmor[1]==0) StartArmor[1]=1;
     if (StartArmor[2]==0) StartArmor[2]=1;
     if (StartArmor[3]==0) StartArmor[3]=1;
+	if (StartArmor[4]==0) StartArmor[4]=1;
+    if (StartArmor[5]==0) StartArmor[5]=1;
+    if (StartArmor[6]==0) StartArmor[6]=1;
+    if (StartArmor[7]==0) StartArmor[7]=1;
     maxfuel = unit->FuelData();
     maxhull = unit->GetHull();
   }
@@ -535,7 +539,7 @@ void Cockpit::Update () {
     if (suicide[_Universe->CurrentCockpit()]) {
       Unit * un=NULL;
       if ((un = parent.GetUnit())) {
-	unsigned short armor[4];
+	unsigned int armor[8]; //short fix
 	un->ArmorData(armor);
 	un->DealDamageToHull(Vector(0,0,.1),un->GetHull()+2+armor[0]);
       }

@@ -13,6 +13,9 @@ using namespace VSFileSystem;
 std::string intStarHandler (const XMLType &input,void *mythis) {
   return XMLSupport::tostring(*input.w.i);
 }
+std::string uintStarHandler (const XMLType &input,void *mythis) {
+  return XMLSupport::tostring(*input.w.ui);
+}
 std::string floatStarHandler (const XMLType &input,void *mythis) {
   return XMLSupport::tostring(*input.w.f);
 }
@@ -22,9 +25,11 @@ std::string fabsFloatStarHandler (const XMLType &input,void *mythis) {
 std::string absIntStarHandler (const XMLType &input,void *mythis) {
   return XMLSupport::tostring((int)abs(*input.w.i));
 }
+/*
 std::string absShortStarHandler (const XMLType &input,void *mythis) {
   return XMLSupport::tostring((int)abs(*input.w.s));
 }
+*/
 std::string scaledFloatStarHandler (const XMLType &input,void *mythis) {
   return XMLSupport::tostring((float)((*input.w.f)/XMLSupport::parse_float(input.str)));
 }
@@ -47,12 +52,16 @@ std::string charStarHandler (const XMLType &input, void*mythis) {
 std::string ucharStarHandler (const XMLType &input, void*mythis) {
   return XMLSupport::tostring(*input.w.uc);
 }
+/*
 std::string shortStarHandler (const XMLType &input, void*mythis) {
   return XMLSupport::tostring(*input.w.s);
 }
+*/
+/*
 std::string ushortStarHandler (const XMLType &input, void*mythis) {
   return XMLSupport::tostring(*input.w.us);
 }
+*/
 std::string negationCharStarHandler (const XMLType &input, void*mythis) {
   return XMLSupport::tostring(-(*input.w.c));
 }
@@ -82,10 +91,16 @@ std::string lessNeg1Handler (const XMLType &input, void *mythis) {
 }
 
 std::string cloakHandler(const XMLType &input, void *mythis) { 
-  return XMLSupport::tostring (((*input.w.s)==-1)?1:0);
+  return XMLSupport::tostring (((*input.w.i)==-1)?1:0); // short fix
 }
+/*
 std::string shortToFloatHandler(const XMLType &input, void *mythis) { 
   return XMLSupport::tostring ((float)(((float)(*input.w.s))/32767.));
+}
+*/
+
+std::string intToFloatHandler(const XMLType &input, void *mythis) { 
+  return XMLSupport::tostring ((float)( ((float)(*input.w.i))/ ((float)(2147483647)) ) );
 }
 
 void XMLElement::Write (VSFileSystem::VSFile & f, void * mythis) {

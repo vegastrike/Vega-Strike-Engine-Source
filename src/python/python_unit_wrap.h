@@ -150,8 +150,8 @@
 	EXPORT_UTIL1(bool,commAnimation,string,anim)
 	EXPORT_UTIL1(bool,JumpTo,string,system)
 	EXPORT_UTIL0(int,isPlayerStarship )
-	voidEXPORT_UTIL1(setECM, short,NewECM)
-	EXPORT_UTIL0(short,getECM )
+	voidEXPORT_UTIL1(setECM, int,NewECM) //short fix
+	EXPORT_UTIL0(int,getECM ) //short fix
 	voidEXPORT_UTIL1(setSpeed, float,speed)
 	EXPORT_UTIL0(float,maxSpeed)
 	EXPORT_UTIL0(float,maxAfterburnerSpeed)

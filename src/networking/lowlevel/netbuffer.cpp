@@ -195,30 +195,38 @@ void	NetBuffer::addShield( Shield shield)
 	switch( shield.number)
 	{
 		case 2 :
-			this->addFloat( shield.fb[0]);	
-			this->addFloat( shield.fb[1]);	
-			this->addFloat( shield.fb[2]);	
-			this->addFloat( shield.fb[3]);	
+			this->addFloat( shield.shield2fb.front);	
+			this->addFloat( shield.shield2fb.back);	
+			this->addFloat( shield.shield2fb.frontmax);	
+			this->addFloat( shield.shield2fb.backmax);	
 		break;
 		case 4 :
-			this->addShort( shield.fbrl.front);
-			this->addShort( shield.fbrl.back);
-			this->addShort( shield.fbrl.right);
-			this->addShort( shield.fbrl.left);
-			this->addShort( shield.fbrl.frontmax);
-			this->addShort( shield.fbrl.backmax);
-			this->addShort( shield.fbrl.rightmax);
-			this->addShort( shield.fbrl.leftmax);
+			this->addFloat( shield.shield4fbrl.front);
+			this->addFloat( shield.shield4fbrl.back);
+			this->addFloat( shield.shield4fbrl.right);
+			this->addFloat( shield.shield4fbrl.left);
+			this->addFloat( shield.shield4fbrl.frontmax);
+			this->addFloat( shield.shield4fbrl.backmax);
+			this->addFloat( shield.shield4fbrl.rightmax);
+			this->addFloat( shield.shield4fbrl.leftmax);
 		break;
-		case 6 :
-			this->addShort( shield.fbrltb.v[0]);
-			this->addShort( shield.fbrltb.v[1]);
-			this->addShort( shield.fbrltb.v[2]);
-			this->addShort( shield.fbrltb.v[3]);
-			this->addShort( shield.fbrltb.v[4]);
-			this->addShort( shield.fbrltb.v[5]);
-			this->addShort( shield.fbrltb.fbmax);
-			this->addShort( shield.fbrltb.rltbmax);
+		case 8 :
+			this->addFloat( shield.shield8.frontrighttop);
+			this->addFloat( shield.shield8.backrighttop);
+			this->addFloat( shield.shield8.frontlefttop);
+			this->addFloat( shield.shield8.backlefttop);
+			this->addFloat( shield.shield8.frontrightbottom);
+			this->addFloat( shield.shield8.backrightbottom);
+			this->addFloat( shield.shield8.frontleftbottom);
+			this->addFloat( shield.shield8.backleftbottom);
+			this->addFloat( shield.shield8.frontrighttopmax);
+			this->addFloat( shield.shield8.backrighttopmax);
+			this->addFloat( shield.shield8.frontlefttopmax);
+			this->addFloat( shield.shield8.backlefttopmax);
+			this->addFloat( shield.shield8.frontrightbottommax);
+			this->addFloat( shield.shield8.backrightbottommax);
+			this->addFloat( shield.shield8.frontleftbottommax);
+			this->addFloat( shield.shield8.backleftbottommax);
 		break;
 	}
 }
@@ -231,30 +239,38 @@ Shield	NetBuffer::getShield()
 	switch( shield.number)
 	{
 		case 2 :
-			shield.fb[0]=this->getFloat();
-			shield.fb[1]=this->getFloat();
-			shield.fb[2]=this->getFloat();
-			shield.fb[3]=this->getFloat();
+			shield.shield2fb.front=this->getFloat();
+			shield.shield2fb.back=this->getFloat();
+			shield.shield2fb.frontmax=this->getFloat();
+			shield.shield2fb.backmax=this->getFloat();
 		break;
 		case 4 :
-			shield.fbrl.front = this->getShort();
-			shield.fbrl.back = this->getShort();
-			shield.fbrl.right = this->getShort();
-			shield.fbrl.left = this->getShort();
-			shield.fbrl.frontmax = this->getShort();
-			shield.fbrl.backmax = this->getShort();
-			shield.fbrl.rightmax = this->getShort();
-			shield.fbrl.leftmax = this->getShort();
+			shield.shield4fbrl.front = this->getFloat();
+			shield.shield4fbrl.back = this->getFloat();
+			shield.shield4fbrl.right = this->getFloat();
+			shield.shield4fbrl.left = this->getFloat();
+			shield.shield4fbrl.frontmax = this->getFloat();
+			shield.shield4fbrl.backmax = this->getFloat();
+			shield.shield4fbrl.rightmax = this->getFloat();
+			shield.shield4fbrl.leftmax = this->getFloat();
 		break;
-		case 6 :
-			shield.fbrltb.v[0] = this->getShort();
-			shield.fbrltb.v[1] = this->getShort();
-			shield.fbrltb.v[2] = this->getShort();
-			shield.fbrltb.v[3] = this->getShort();
-			shield.fbrltb.v[4] = this->getShort();
-			shield.fbrltb.v[5] = this->getShort();
-			shield.fbrltb.fbmax = this->getShort();
-			shield.fbrltb.rltbmax = this->getShort();
+		case 8 :
+			shield.shield8.frontrighttop=this->getFloat();
+			shield.shield8.backrighttop=this->getFloat();
+			shield.shield8.frontlefttop=this->getFloat();
+			shield.shield8.backlefttop=this->getFloat();
+			shield.shield8.frontrightbottom=this->getFloat();
+			shield.shield8.backrightbottom=this->getFloat();
+			shield.shield8.frontleftbottom=this->getFloat();
+			shield.shield8.backleftbottom=this->getFloat();
+			shield.shield8.frontrighttopmax=this->getFloat();
+			shield.shield8.backrighttopmax=this->getFloat();
+			shield.shield8.frontlefttopmax=this->getFloat();
+			shield.shield8.backlefttopmax=this->getFloat();
+			shield.shield8.frontrightbottommax=this->getFloat();
+			shield.shield8.backrightbottommax=this->getFloat();
+			shield.shield8.frontleftbottommax=this->getFloat();
+			shield.shield8.backleftbottommax=this->getFloat();
 		break;
 	}
 
@@ -262,18 +278,26 @@ Shield	NetBuffer::getShield()
 }
 void		NetBuffer::addArmor( Armor armor)
 {
-	this->addShort( armor.front);
-	this->addShort( armor.back);
-	this->addShort( armor.right);
-	this->addShort( armor.left);
+	this->addUInt32 ( armor.frontrighttop);
+	this->addUInt32( armor.backrighttop);
+	this->addUInt32( armor.frontlefttop);
+	this->addUInt32( armor.backlefttop);
+	this->addUInt32 ( armor.frontrightbottom);
+	this->addUInt32( armor.backrightbottom);
+	this->addUInt32( armor.frontleftbottom);
+	this->addUInt32( armor.backleftbottom);
 }
 Armor	NetBuffer::getArmor()
 {
 	Armor armor;
-	armor.front = this->getShort();
-	armor.back = this->getShort();
-	armor.right = this->getShort();
-	armor.left = this->getShort();
+	armor.frontrighttop = this->getUInt32();
+	armor.backrighttop = this->getUInt32();
+	armor.frontlefttop = this->getUInt32();
+	armor.backlefttop = this->getUInt32();
+	armor.frontrightbottom = this->getUInt32();
+	armor.backrightbottom = this->getUInt32();
+	armor.frontleftbottom = this->getUInt32();
+	armor.backleftbottom = this->getUInt32();
 
 	return armor;
 }

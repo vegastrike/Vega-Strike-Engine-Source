@@ -3728,18 +3728,24 @@ void showUnitStats(Unit * playerUnit,string &text,int subunitlevel, int mode, Ca
 	float shieldsum=0;
 		switch (playerUnit->shield.number) {
 		case 2:
-			shieldsum+=playerUnit->shield.fb[2]*RSconverter;
-			shieldsum+=playerUnit->shield.fb[3]*RSconverter;
+			shieldsum+=playerUnit->shield.shield2fb.frontmax*RSconverter;
+			shieldsum+=playerUnit->shield.shield2fb.frontmax*RSconverter;
 			break;
 		case 4:
-			shieldsum+=playerUnit->shield.fbrl.frontmax*RSconverter;
-			shieldsum+=playerUnit->shield.fbrl.backmax*RSconverter;
-			shieldsum+=playerUnit->shield.fbrl.leftmax*RSconverter;
-			shieldsum+=playerUnit->shield.fbrl.rightmax*RSconverter;
+			shieldsum+=playerUnit->shield.shield4fbrl.frontmax*RSconverter;
+			shieldsum+=playerUnit->shield.shield4fbrl.backmax*RSconverter;
+			shieldsum+=playerUnit->shield.shield4fbrl.leftmax*RSconverter;
+			shieldsum+=playerUnit->shield.shield4fbrl.rightmax*RSconverter;
 			break;
-		case 6:
-			shieldsum+=2*playerUnit->shield.fbrltb.fbmax*RSconverter;
-			shieldsum+=4*playerUnit->shield.fbrltb.rltbmax*RSconverter;
+		case 8:
+			shieldsum+=playerUnit->shield.shield8.frontlefttopmax*RSconverter;
+			shieldsum+=playerUnit->shield.shield8.backlefttopmax*RSconverter;
+			shieldsum+=playerUnit->shield.shield8.frontrighttopmax*RSconverter;
+			shieldsum+=playerUnit->shield.shield8.backrighttopmax*RSconverter;
+			shieldsum+=playerUnit->shield.shield8.frontleftbottommax*RSconverter;
+			shieldsum+=playerUnit->shield.shield8.backleftbottommax*RSconverter;
+			shieldsum+=playerUnit->shield.shield8.frontrightbottommax*RSconverter;
+			shieldsum+=playerUnit->shield.shield8.backrightbottommax*RSconverter;
 			break;
 		default:
 			break;
@@ -3817,7 +3823,7 @@ void showUnitStats(Unit * playerUnit,string &text,int subunitlevel, int mode, Ca
 		text+="#n##n##c0:1:.5#"+prefix+"[DURABILITY STATISTICS]#n##-c";
 		text+="#n#"+prefix+statcolor+"Armor damage resistance:#-c";
 	}
-	if(mode&&playerUnit->armor.front!=blankUnit->armor.front){
+	if(mode&&playerUnit->armor.frontlefttop!=blankUnit->armor.frontlefttop){
 		switch(replacement_mode){
 			case 0: // Replacement or new Module
 				text+="#n#"+prefix+statcolor+"Replaces existing armor, if any.#n#Armor damage resistance:#-c";
@@ -3833,11 +3839,15 @@ void showUnitStats(Unit * playerUnit,string &text,int subunitlevel, int mode, Ca
 				break;
 		}
 	}
-	if(!mode||playerUnit->armor.front!=blankUnit->armor.front){
-		PRETTY_ADDU(statcolor+"  fore - #-c",(mode&&replacement_mode==2)?100.0*(playerUnit->armor.front-1):playerUnit->armor.front*VSDM,0,"MJ");
-		PRETTY_ADDU(statcolor+"  aft - #-c",(mode&&replacement_mode==2)?100.0*(playerUnit->armor.back-1):playerUnit->armor.back*VSDM,0,"MJ"); 
-		PRETTY_ADDU(statcolor+"  port - #-c",(mode&&replacement_mode==2)?100.0*(playerUnit->armor.left-1):playerUnit->armor.left*VSDM,0,"MJ");
-		PRETTY_ADDU(statcolor+"  starboard - #-c",(mode&&replacement_mode==2)?100.0*(playerUnit->armor.right-1):playerUnit->armor.right*VSDM,0,"MJ");
+	if(!mode||playerUnit->armor.frontrighttop!=blankUnit->armor.frontrighttop){
+		PRETTY_ADDU(statcolor+"  Fore-starboard-high - #-c",(mode&&replacement_mode==2)?100.0*(playerUnit->armor.frontrighttop-1):playerUnit->armor.frontrighttop*VSDM,0,"MJ");
+		PRETTY_ADDU(statcolor+"  Aft-starboard-high - #-c",(mode&&replacement_mode==2)?100.0*(playerUnit->armor.backrighttop-1):playerUnit->armor.backrighttop*VSDM,0,"MJ"); 
+		PRETTY_ADDU(statcolor+"  Fore-port-high - #-c",(mode&&replacement_mode==2)?100.0*(playerUnit->armor.frontlefttop-1):playerUnit->armor.frontlefttop*VSDM,0,"MJ");
+		PRETTY_ADDU(statcolor+"  Aft-port-high - #-c",(mode&&replacement_mode==2)?100.0*(playerUnit->armor.backrighttop-1):playerUnit->armor.backrighttop*VSDM,0,"MJ");
+		PRETTY_ADDU(statcolor+"  Fore-starboard-low - #-c",(mode&&replacement_mode==2)?100.0*(playerUnit->armor.frontrighttop-1):playerUnit->armor.frontrightbottom*VSDM,0,"MJ");
+		PRETTY_ADDU(statcolor+"  Aft-starboard-low - #-c",(mode&&replacement_mode==2)?100.0*(playerUnit->armor.backrighttop-1):playerUnit->armor.backrightbottom*VSDM,0,"MJ"); 
+		PRETTY_ADDU(statcolor+"  Fore-port-low - #-c",(mode&&replacement_mode==2)?100.0*(playerUnit->armor.frontlefttop-1):playerUnit->armor.frontleftbottom*VSDM,0,"MJ");
+		PRETTY_ADDU(statcolor+"  Aft-port-low - #-c",(mode&&replacement_mode==2)?100.0*(playerUnit->armor.backrighttop-1):playerUnit->armor.backrightbottom*VSDM,0,"MJ");
 	}
 	if(!mode){
 		PRETTY_ADDU(statcolor+"Sustainable Hull Damage: #-c",playerUnit->GetHull()/(playerUnit->GetHullPercent())*VSDM,0,"MJ");
@@ -3867,7 +3877,7 @@ void showUnitStats(Unit * playerUnit,string &text,int subunitlevel, int mode, Ca
 		PRETTY_ADD(statcolor+"Number of shield emitter facings: #-c",playerUnit->shield.number,0);
 		text+="#n#"+prefix+statcolor+"Shield protection rating:#-c";
 	} else {
-		if(playerUnit->shield.fb[2]!=blankUnit->shield.fb[2]||playerUnit->shield.fbrl.frontmax!=blankUnit->shield.fbrl.frontmax||playerUnit->shield.fbrltb.fbmax!=blankUnit->shield.fbrltb.fbmax){
+		if(playerUnit->shield.shield2fb.frontmax!=blankUnit->shield.shield2fb.frontmax||playerUnit->shield.shield4fbrl.frontmax!=blankUnit->shield.shield4fbrl.frontmax||playerUnit->shield.shield8.frontrightbottommax!=blankUnit->shield.shield8.frontrightbottommax){
 			switch(replacement_mode){
 				case 0: // Replacement or new Module
 					text+="#n#"+prefix+statcolor+"Installs shield with following protection ratings:#-c";
@@ -3887,23 +3897,29 @@ void showUnitStats(Unit * playerUnit,string &text,int subunitlevel, int mode, Ca
 
 	switch (playerUnit->shield.number) {
 		case 2:
-			if(!mode||playerUnit->shield.fb[2]!=blankUnit->shield.fb[2]){
-				PRETTY_ADDU(statcolor+"  fore - #-c",(mode&&replacement_mode==2)?(100.0*(playerUnit->shield.fb[2]-1)):playerUnit->shield.fb[2]*VSDM,0, "MJ");
-				PRETTY_ADDU(statcolor+"  aft - #-c",(mode&&replacement_mode==2)?(100.0*(playerUnit->shield.fb[3]-1)):playerUnit->shield.fb[3]*VSDM,0, "MJ");
+			if(!mode||playerUnit->shield.shield2fb.frontmax!=blankUnit->shield.shield2fb.frontmax){
+				PRETTY_ADDU(statcolor+"  fore - #-c",(mode&&replacement_mode==2)?(100.0*(playerUnit->shield.shield2fb.backmax-1)):playerUnit->shield.shield2fb.frontmax*VSDM,0, "MJ");
+				PRETTY_ADDU(statcolor+"  aft - #-c",(mode&&replacement_mode==2)?(100.0*(playerUnit->shield.shield2fb.backmax-1)):playerUnit->shield.shield2fb.backmax*VSDM,0, "MJ");
 			}
 			break;
 		case 4:
-			if(!mode||playerUnit->shield.fbrl.frontmax!=blankUnit->shield.fbrl.frontmax){
-				PRETTY_ADDU(statcolor+"  fore - #-c",(mode&&replacement_mode==2)?(100.0*(playerUnit->shield.fbrl.frontmax-1)):playerUnit->shield.fbrl.frontmax*VSDM,0,"MJ");
-				PRETTY_ADDU(statcolor+"  aft - #-c",(mode&&replacement_mode==2)?(100.0*(playerUnit->shield.fbrl.backmax-1)):playerUnit->shield.fbrl.backmax*VSDM,0,"MJ");
-				PRETTY_ADDU(statcolor+"  port - #-c",(mode&&replacement_mode==2)?(100.0*(playerUnit->shield.fbrl.leftmax-1)):playerUnit->shield.fbrl.leftmax*VSDM,0,"MJ");
-				PRETTY_ADDU(statcolor+"  starboard - #-c",(mode&&replacement_mode==2)?(100.0*(playerUnit->shield.fbrl.rightmax-1)):playerUnit->shield.fbrl.rightmax*VSDM,0,"MJ");
+			if(!mode||playerUnit->shield.shield4fbrl.frontmax!=blankUnit->shield.shield4fbrl.frontmax){
+				PRETTY_ADDU(statcolor+"  fore - #-c",(mode&&replacement_mode==2)?(100.0*(playerUnit->shield.shield4fbrl.frontmax-1)):playerUnit->shield.shield4fbrl.frontmax*VSDM,0,"MJ");
+				PRETTY_ADDU(statcolor+"  aft - #-c",(mode&&replacement_mode==2)?(100.0*(playerUnit->shield.shield4fbrl.backmax-1)):playerUnit->shield.shield4fbrl.backmax*VSDM,0,"MJ");
+				PRETTY_ADDU(statcolor+"  port - #-c",(mode&&replacement_mode==2)?(100.0*(playerUnit->shield.shield4fbrl.leftmax-1)):playerUnit->shield.shield4fbrl.leftmax*VSDM,0,"MJ");
+				PRETTY_ADDU(statcolor+"  starboard - #-c",(mode&&replacement_mode==2)?(100.0*(playerUnit->shield.shield4fbrl.rightmax-1)):playerUnit->shield.shield4fbrl.rightmax*VSDM,0,"MJ");
 			}
 			break;
-		case 6:
-			if(!mode||playerUnit->shield.fbrltb.fbmax!=blankUnit->shield.fbrltb.fbmax){
-				PRETTY_ADDU(statcolor+"  fore and aft - #-c",(mode&&replacement_mode==2)?(100.0*(playerUnit->shield.fbrltb.fbmax-1)):playerUnit->shield.fbrltb.fbmax*VSDM,0,"MJ");
-				PRETTY_ADDU(statcolor+"  port, starboard, top, bottom - #-c",(mode&&replacement_mode==2)?(100.0*(playerUnit->shield.fbrltb.rltbmax-1)):playerUnit->shield.fbrltb.rltbmax*VSDM,0,"MJ");
+		case 8:
+			if(!mode||playerUnit->shield.shield8.frontrightbottommax!=blankUnit->shield.shield8.frontrightbottommax){
+				PRETTY_ADDU(statcolor+"  Fore-starboard-high - #-c",(mode&&replacement_mode==2)?100.0*(playerUnit->shield.shield8.frontrighttop-1):playerUnit->shield.shield8.frontrighttop*VSDM,0,"MJ");
+		PRETTY_ADDU(statcolor+"  Aft-starboard-high - #-c",(mode&&replacement_mode==2)?100.0*(playerUnit->shield.shield8.backrighttop-1):playerUnit->shield.shield8.backrighttop*VSDM,0,"MJ"); 
+		PRETTY_ADDU(statcolor+"  Fore-port-high - #-c",(mode&&replacement_mode==2)?100.0*(playerUnit->shield.shield8.frontlefttop-1):playerUnit->shield.shield8.frontlefttop*VSDM,0,"MJ");
+		PRETTY_ADDU(statcolor+"  Aft-port-high - #-c",(mode&&replacement_mode==2)?100.0*(playerUnit->shield.shield8.backrighttop-1):playerUnit->shield.shield8.backrighttop*VSDM,0,"MJ");
+		PRETTY_ADDU(statcolor+"  Fore-starboard-low - #-c",(mode&&replacement_mode==2)?100.0*(playerUnit->shield.shield8.frontrighttop-1):playerUnit->shield.shield8.frontrightbottom*VSDM,0,"MJ");
+		PRETTY_ADDU(statcolor+"  Aft-starboard-low - #-c",(mode&&replacement_mode==2)?100.0*(playerUnit->shield.shield8.backrighttop-1):playerUnit->shield.shield8.backrightbottom*VSDM,0,"MJ"); 
+		PRETTY_ADDU(statcolor+"  Fore-port-low - #-c",(mode&&replacement_mode==2)?100.0*(playerUnit->shield.shield8.frontlefttop-1):playerUnit->shield.shield8.frontleftbottom*VSDM,0,"MJ");
+		PRETTY_ADDU(statcolor+"  Aft-port-low - #-c",(mode&&replacement_mode==2)?100.0*(playerUnit->shield.shield8.backrighttop-1):playerUnit->shield.shield8.backrightbottom*VSDM,0,"MJ");
 			}
 			break;
 		default:

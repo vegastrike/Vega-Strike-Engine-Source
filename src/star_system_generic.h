@@ -99,10 +99,10 @@ class StarSystem {
   void RemoveStarsystemFromUniverse();
   int lightcontext;
   std::vector <class MissileEffect *> dischargedMissiles;
-  unsigned short zone;
+  unsigned int zone; //short fix
  public:
-  void	SetZone( unsigned short zonenum) { this->zone = zonenum; }
-  unsigned short GetZone() { return this->zone; }
+	 void	SetZone( unsigned int zonenum) { this->zone = zonenum; } //short fix
+  unsigned int GetZone() { return this->zone; } //short fix
   virtual void AddMissileToQueue(class MissileEffect *);
   virtual void UpdateMissiles();
   void UpdateUnitPhysics(bool firstframe);

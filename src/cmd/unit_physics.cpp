@@ -57,7 +57,7 @@ Vector Unit::ClampTorque(const Vector &amt1) {
 */
 //FIXME 062201
 
-extern unsigned short apply_float_to_short (float tmp);
+extern unsigned int apply_float_to_unsigned_int (float tmp); //short fix
 //    float max_speed;
 //    float max_ab_speed;
 //    float max_yaw;

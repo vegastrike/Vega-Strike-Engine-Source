@@ -261,7 +261,7 @@ void GameUnit<UnitType>::UpdateHudMatrix(int whichcam) {
   _Universe->AccessCamera(whichcam)->SetPosition (Transform (ctm,this->image->CockpitCenter.Cast()),this->GetWarpVelocity(),this->GetAngularVelocity());
 }
 extern bool flickerDamage (Unit * un, float hullpercent);   
-extern short cloakVal (short cloak, short cloakmin, short cloakrate, bool cloakglass);
+extern int cloakVal (int cloakint, int cloakminint, int cloakrateint, bool cloakglass); //short fix?
 template <class UnitType>
 void GameUnit<UnitType>::DrawNow (const Matrix &mato, float lod) {
   unsigned int i;
@@ -274,7 +274,8 @@ void GameUnit<UnitType>::DrawNow (const Matrix &mato, float lod) {
 	  pos=mato.p;
 	  VectorAndPositionToMatrix(mat,p,q,r,pos);
   }
-  short cloak=this->cloaking;
+
+  int cloak=this->cloaking;
   if (this->cloaking>this->cloakmin) {
     cloak = cloakVal (cloak,this->cloakmin,this->image->cloakrate, this->image->cloakglass);
   }
@@ -351,9 +352,9 @@ void GameUnit<UnitType>::Draw(const Transformation &parent, const Matrix &parent
 #ifdef PERFRAMESOUND
   AUDAdjustSound (sound.engine,cumulative_transformation.position,GetVelocity());
 #endif
-  short cloak=this->cloaking;
+  int cloak=this->cloaking;
   if (this->cloaking>this->cloakmin) {
-    cloak = (short)(this->cloaking-interpolation_blend_factor*this->image->cloakrate*SIMULATION_ATOM);
+    cloak = (int)(this->cloaking-interpolation_blend_factor*this->image->cloakrate*SIMULATION_ATOM);
     cloak = cloakVal ( cloak,this->cloakmin,this->image->cloakrate,this->image->cloakglass);
   }
   

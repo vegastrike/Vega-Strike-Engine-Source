@@ -273,12 +273,12 @@ namespace UnitUtil {
 		}
 		return my_unit->GetComputerData().max_ab_speed();
 	}
-  void setECM (Unit * my_unit, short NewECM) {
+	void setECM (Unit * my_unit, int NewECM) { //short fix
     if (!my_unit)
       return;
     my_unit->GetImageInformation().ecm = NewECM;
   }
-  short getECM (Unit * my_unit) {
+	int getECM (Unit * my_unit) { //short fix
     if (!my_unit)
       return 0;
     return my_unit->GetImageInformation().ecm;

@@ -13,6 +13,8 @@
 #include "xml_support.h"
 #include "gfxlib.h"
 #include "vs_random.h"
+
+
 #ifndef _WIN32
 #include <ctype.h>
 #endif
@@ -23,6 +25,9 @@
 
 using namespace VSFileSystem;
 using namespace std;
+
+std::map<std::string,std::string> readPlanetTypes(std::string filename);
+
 static VSRandom starsysrandom(time(NULL));
 static void seedrand(unsigned long seed) {
   starsysrandom=VSRandom(seed);
@@ -763,8 +768,8 @@ void MakePlanet(float radius, int entitytype, int callingentitytype, bool forceR
 //	static float concavity = XMLSupport::parse_float (vs_config->getVariable ("graphics","fog","concavity","0"));
 //	static float focus = XMLSupport::parse_float (vs_config->getVariable ("graphics","fog","focus",".5"));
 	Tab();f.Fprintf ("<Fog>\n");
-	Tab();Tab();f.Fprintf ("<FogElement file=\"atmXatm.xmesh\" ScaleAtmosphereHeight=\"1.0\"  red=\"%f\" blue=\"%f\" green=\"%f\" alpha=\"%f\" dired=\"%f\" diblue=\"%f\" digreen=\"%f\" dialpha=\"%f\" concavity=\".3\" focus=\".6\" minalpha=\"0\" maxalpha=\"0.7\"/>\n",r,g,b,a,dr,dg,db,da);
-	Tab();Tab();f.Fprintf ("<FogElement file=\"atmXhalo.xmesh\" ScaleAtmosphereHeight=\"1.0\"  red=\"%f\" blue=\"%f\" green=\"%f\" alpha=\"%f\" dired=\"%f\" diblue=\"%f\" digreen=\"%f\" dialpha=\"%f\" concavity=\"1\" focus=\".6\" minalpha=\"0\" maxalpha=\"0.7\"/>\n",r,g,b,a,dr,dg,db,da);		
+	Tab();Tab();f.Fprintf ("<FogElement file=\"atmXatm.bfxm\" ScaleAtmosphereHeight=\"1.0\"  red=\"%f\" blue=\"%f\" green=\"%f\" alpha=\"%f\" dired=\"%f\" diblue=\"%f\" digreen=\"%f\" dialpha=\"%f\" concavity=\".3\" focus=\".6\" minalpha=\"0\" maxalpha=\"0.7\"/>\n",r,g,b,a,dr,dg,db,da);
+	Tab();Tab();f.Fprintf ("<FogElement file=\"atmXhalo.bfxm\" ScaleAtmosphereHeight=\"1.0\"  red=\"%f\" blue=\"%f\" green=\"%f\" alpha=\"%f\" dired=\"%f\" diblue=\"%f\" digreen=\"%f\" dialpha=\"%f\" concavity=\"1\" focus=\".6\" minalpha=\"0\" maxalpha=\"0.7\"/>\n",r,g,b,a,dr,dg,db,da);		
 	Tab();f.Fprintf ("</Fog>\n");
 	}
   }
@@ -1082,10 +1087,33 @@ void generateStarSystem (string datapath, int seed, string sector, string system
   VSFileSystem::vs_fprintf (stderr,"star %d gas %d plan %d moon %d, natural %d, bases %d",nument[0],nument[1],nument[2],nument[3],numun[0],numun[1]); 
   starradius.push_back (sunradius);
   readColorGrads (gradtex,(starlist).c_str());
-  readentity (entities[PLANET],(planetlist).c_str());
-  planet_entities=entities[PLANET];
+  //Under construction
+  //readentity (entities[PLANET],(planetlist).c_str());
+  static map<string,string> planetcodes = readPlanetTypes("./universe/planet_abbrev.xml");
+	unsigned int where;
+	do {
+		where = planetlist.find("_");
+		string newone = planetlist.substr(0,where);
+		if (planetcodes[newone].length()) {
+			entities[PLANET].push_back(planetcodes[newone]);
+		}
+		if (where!=string::npos){ 
+			planetlist = planetlist.substr(where+1);
+		}
+	}while (where!=string::npos);
+	//End under construction
+	
+	planet_entities=entities[PLANET];
+
+  
   string desolate=string ("planets.desolate.txt");
-  readentity (planet_entities,desolate.c_str());
+  //Under construction
+  vector<string> desolates;
+  readentity (desolates,desolate.c_str());
+  for (unsigned int i=0;i < nument[PLANET]-entities[PLANET].size();++i) {
+	  planet_entities.push_back(desolates[vsrandom.rand()%desolates.size()]);
+  }
+  //end under construction
   readentity (entities[1],(gasgiantlist).c_str());
   readentity (entities[3],(moonlist).c_str());
   readentity (units[1],(smallunitlist).c_str());

@@ -29,3 +29,4 @@ enum textype{
 	ANIMATION,
 	TEXTURE
 };
+

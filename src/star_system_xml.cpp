@@ -34,7 +34,7 @@ extern void disableTerrainDraw( ContinuousTerrain *ct);
 AtmosphericFogMesh::AtmosphericFogMesh() {
 	er=eg=eb=ea=.5;
 	dr=dg=db=da=.5;	
-	meshname="sphereatm.xmesh";
+	meshname="sphereatm.bfxm";
 	scale=1.05;
 	focus=.5;
 	concavity=0;

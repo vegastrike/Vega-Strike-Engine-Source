@@ -220,7 +220,7 @@ Mesh::~Mesh()
 	  }
 	}
 }
-void Mesh::Draw(float lod, const Matrix &m, float toofar, short cloak, float nebdist,unsigned char hulldamage, bool renormalize)
+void Mesh::Draw(float lod, const Matrix &m, float toofar, int cloak, float nebdist,unsigned char hulldamage, bool renormalize) //short fix
 {
   //  Vector pos (local_pos.Transform(m));
   MeshDrawContext c(m);
@@ -277,7 +277,7 @@ void Mesh::Draw(float lod, const Matrix &m, float toofar, short cloak, float neb
   }
   will_be_drawn |= (1<<c.mesh_seq);
 }
-void Mesh::DrawNow(float lod,  bool centered, const Matrix &m, short cloak, float nebdist) {
+void Mesh::DrawNow(float lod,  bool centered, const Matrix &m, int cloak, float nebdist) { //short fix
   Mesh *o = getLOD (lod);
   //fixme: cloaking not delt with.... not needed for backgroudn anyway
   if (nebdist<0) {

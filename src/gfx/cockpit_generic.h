@@ -29,10 +29,10 @@ protected:
   int currentcamera;
   float radar_time;
   float gauge_time [UnitImages::NUMGAUGES];
-  /// 4 armor vals and 1 for startfuel
+  /// 8 armor vals and 1 for startfuel
 
-    /// 4 armor vals and 1 for startfuel
-  unsigned short StartArmor[5];
+    /// 8 armor vals and 1 for startfuel
+  unsigned int StartArmor[9]; //short fix
 
   ///saved values to compare with current values (might need more for damage)
   float maxfuel, maxhull;

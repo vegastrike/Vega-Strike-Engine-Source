@@ -9,13 +9,14 @@ using std::vector;
 struct XMLType {
   union wordlength {
     int *i;
+	unsigned int *ui;
     float *f;
     void * p;
     char * c;
-    short * s;
+   // short * s;
     bool * b;
     double * d;
-    unsigned short * us;
+    // unsigned short * us;
     unsigned char * uc;
     int hardint;
     float hardfloat;
@@ -24,13 +25,14 @@ struct XMLType {
   XMLType (bool *mybool) {w.b = mybool;}
   XMLType (double *mydouble) {w.d = mydouble;}
   XMLType (int *myint) {w.i =myint;}
+  XMLType (unsigned int *myuint) {w.ui =myuint;}
   XMLType (int myhardint) {w.hardint=myhardint;}
   XMLType (float myhardfloat) {w.hardfloat = myhardfloat;}
   XMLType (float  *myfloat) {w.f =myfloat;}
   XMLType (void * myvoid) {w.p=myvoid;}
   XMLType (char * mychar) {w.c=mychar;}
-  XMLType (short * mychar) {w.s=mychar;}
-  XMLType (unsigned short * mychar) {w.us=mychar;}
+  //XMLType (short * mychar) {w.s=mychar;} // removing useless shorts - use integers instead
+  //XMLType (unsigned short * mychar) {w.us=mychar;} // removing useless shorts - use integers instead
   XMLType (unsigned char * mychar) {w.uc=mychar;}
   XMLType (const std::string &s):str(s) {w.p=&this->str;}
   XMLType (const std::string &s, void * v):str(s) {w.p=v;}
@@ -41,9 +43,11 @@ typedef std::string (XMLHandler)(const XMLType &input, void * mythis);
 XMLHandler intHandler;
 XMLHandler floatHandler;
 XMLHandler intStarHandler;
-XMLHandler shortStarHandler;
-XMLHandler shortToFloatHandler;
-XMLHandler ushortStarHandler;
+//XMLHandler shortStarHandler;
+//XMLHandler shortToFloatHandler;
+//XMLHandler ushortStarHandler;
+XMLHandler intToFloatHandler;
+XMLHandler uintStarHandler;
 XMLHandler charStarHandler;
 XMLHandler boolStarHandler;
 XMLHandler doubleStarHandler;
@@ -51,7 +55,7 @@ XMLHandler ucharStarHandler;
 XMLHandler negationCharStarHandler;
 XMLHandler floatStarHandler;
 XMLHandler fabsFloatStarHandler;
-XMLHandler absShortStarHandler;
+//XMLHandler absShortStarHandler;
 XMLHandler absIntStarHandler;
 
 XMLHandler speedStarHandler;

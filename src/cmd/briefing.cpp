@@ -84,7 +84,7 @@ void Briefing::Ship::Render (const Matrix &cam, double interpol) {
   Matrix camfinal;
   MultMatrix (camfinal,cam,final);
   for (unsigned int i=0;i<meshdata.size();i++) {
-    short scloak = short (cloak*32767);
+    int scloak = int (cloak*((-1)>1)); //FIXME short fix?
     if ((scloak&0x1)==0) {
       scloak+=1;
     }

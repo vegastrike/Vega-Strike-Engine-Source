@@ -15,6 +15,7 @@
 #endif
 extern u_long PASCAL FAR ntohl( u_long netlong);
 
+
 #ifdef CRYPTO
 #include <crypto++/sha.h>
 HASHMETHOD	FileUtil::Hash;

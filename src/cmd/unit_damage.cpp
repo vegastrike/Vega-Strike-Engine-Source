@@ -24,7 +24,7 @@
 #include "music.h"
 //#define DESTRUCTDEBUG
 #include "base.h"
-extern unsigned short apply_float_to_short (float tmp);
+extern unsigned int apply_float_to_unsigned_int (float tmp);  //Short fix
 
 extern std::vector <Mesh *> MakeMesh(unsigned int mysize);
 

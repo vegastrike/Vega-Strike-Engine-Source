@@ -669,6 +669,8 @@ vector<Mesh*> Mesh::LoadMeshes(VSFileSystem::VSFile & Inputfile, const Vector & 
           output.back()->numlods=output.back()->orig->numlods = meshes.back().num;
           
   }
+	free(inmemfile);
+	inmemfile=NULL;
 #ifndef STANDALONE
   return output;
 #endif

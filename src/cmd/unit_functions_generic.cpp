@@ -13,9 +13,9 @@
 // From unit.cpp
 double interpolation_blend_factor;
 
-short cloakVal (short cloak, short cloakmin, short cloakrate, bool cloakglass) {
+int cloakVal (int cloak, int cloakmin, int cloakrate, bool cloakglass) { // Short fix ?
     if (cloak<0&&cloakrate<0) {
-      cloak=(unsigned short)32768;//intended warning should be -32768 :-) leave it be
+      cloak=1<<31;//intended warning should be max neg :-) leave it be
     }
     if ((cloak&0x1)&&!cloakglass) {
       cloak-=1;

@@ -118,10 +118,10 @@ class Mount {
     } ref;
     ///the size that this mount can hold. May be any bitwise combination of weapon_info::MOUNT_SIZE
 
-    short size;
+    int size; //short fix
     ///-1 is infinite
-    short ammo;
-    short volume;//-1 is infinite
+    int ammo; //short
+    int volume;//-1 is infinite //short fix
     ///The data behind this weapon. May be accordingly damaged as time goes on
     enum MOUNTSTATUS{REQUESTED,ACCEPTED,PROCESSED,UNFIRED,FIRED} processed;
     ///Status of the selection of this weapon. Does it fire when we hit space
@@ -131,7 +131,7 @@ class Mount {
     int sound;
     float time_to_lock;
     Mount();
-    Mount(const std::string& name, short int ammo, short int volume, float xyscale=0, float zscale=0);
+    Mount(const std::string& name, int ammo, int volume, float xyscale=0, float zscale=0); //short fix
 
 	void Activate (bool Missile) {
 	  if ((type->type==weapon_info::PROJECTILE)==Missile) {
@@ -509,8 +509,8 @@ public:
   StarSystem * getStarSystem();
     struct UnitJump {
     float warpDriveRating;
-    short energy;
-    short insysenergy;
+    float energy; //short fix
+    float insysenergy; //short fix
     signed char drive;
     unsigned char delay;
     unsigned char damage;
@@ -605,7 +605,7 @@ protected:
   float shieldtight;
   ///fuel of this unit
   float fuel;
-  unsigned short afterburnenergy;
+  float afterburnenergy;  //short fix
   ///-1 means it is off. -2 means it doesn't exist. otherwise it's engaged to destination (positive number)
  ///Moment of intertia of this unit
   float MomentOfInertia;
@@ -636,9 +636,9 @@ public:
 
 public:
   ///-1 is not available... ranges between 0 32767 for "how invisible" unit currently is (32768... -32768) being visible)
-  short cloaking;
+  int cloaking; //short fix
   ///the minimum cloaking value...
-  short cloakmin;
+  int cloakmin; //short fix
   ///How big is this unit
   float radial_size;
 protected:
@@ -668,8 +668,8 @@ public:
   ///Is dead yet?
   inline bool Killed() const {return killed;}
   ///returns the current ammt of armor left
-  unsigned short AfterburnData() const{ return afterburnenergy;}
-  void			 SetAfterBurn( unsigned short aft) { afterburnenergy = aft;}
+  unsigned float AfterburnData() const{ return afterburnenergy;} //short fix
+  void			 SetAfterBurn( float aft) { afterburnenergy = aft;} //short fix
   float FuelData() const;
   void  SetFuel( float f) { fuel = f;}
   ///Returns the current ammt of energy left
@@ -680,7 +680,7 @@ public:
   float ShieldRechargeData() const{return shield.recharge;}
   float EnergyData() const;
   float WarpEnergyData() const;
-  short GetWarpEnergy() {return warpenergy;}
+  float GetWarpEnergy() {return warpenergy;} //short fix
   ///Should we resolve forces on this unit (is it free to fly or in orbit)
   bool resolveforces;
   ///What's the size of this unit
@@ -732,12 +732,12 @@ public:
   ///Applies damage to the pre-transformed area of the ship
   void ApplyDamage (const Vector & pnt, const Vector & normal, float amt, Unit * affectedSubUnit, const GFXColor &,  Unit *ownerDoNotDereference, float phasedamage=0 );
   ///Deals remaining damage to the hull at point and applies lighting effects
-  float DealDamageToHullReturnArmor (const Vector &pnt, float Damage, unsigned short * &targ);
+  float DealDamageToHullReturnArmor (const Vector &pnt, float Damage, unsigned int * &targ);//short fix
   virtual void ArmorDamageSound( const Vector &pnt) {};
   virtual void HullDamageSound( const Vector &pnt) {};
   float DealDamageToHull (const Vector &pnt, float Damage)
   {
-	 unsigned short * nullvar = NULL;
+	 unsigned int * nullvar = NULL; //short fix
 	 return this->DealDamageToHullReturnArmor( pnt, Damage, nullvar);
   }
 
@@ -863,9 +863,9 @@ protected:
   ///current energy
   float energy;
   ///maximum energy
-  unsigned short maxwarpenergy;
+  float maxwarpenergy; //short fix
   ///current energy
-  unsigned short warpenergy;
+  float warpenergy; // short fix
   ///applies damage from the given pnt to the shield, and returns % damage applied and applies lighitn
   virtual float DealDamageToShield (const Vector & pnt, float &Damage);
   ///If the shields are up from this position
@@ -886,7 +886,7 @@ public:
   QVector PositionITTS (const QVector &firingposit, Vector firingvelocity, float gunspeed) const;
   ///returns percentage of course deviation for contraband searches.  .5 causes error and 1 causes them to get mad 
   float FShieldData() const;  float RShieldData() const;  float LShieldData() const;  float BShieldData() const;
-  void ArmorData(unsigned short armor[4])const;
+  void ArmorData(unsigned int armor[8])const; //short fix
   ///Gets the current status of the hull
   float GetHull() const{return hull;}
   float GetHullPercent() const{return maxhull!=0?hull/maxhull:hull;}

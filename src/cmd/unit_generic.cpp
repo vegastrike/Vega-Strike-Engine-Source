@@ -276,13 +276,15 @@ float rand01 () {
 	return ((float)rand()/(float)RAND_MAX);
 }
 float capship_size=500;
-unsigned short apply_float_to_short (float tmp) {
-  static unsigned int seed = 2531011;
+
+/* UGLYNESS short fix */
+unsigned int apply_float_to_unsigned_int (float tmp) {
+  static unsigned long int seed = 2531011;
   seed +=214013;
-  seed %=65536;
-  unsigned  short ans = (unsigned short) tmp;
+  seed %=4294967296;
+  unsigned  int ans = (unsigned int) tmp;
   tmp -=ans;//now we have decimal;
-  if (seed<(unsigned int)(65536*tmp))
+  if (seed<(unsigned long int)(4294967296*tmp))
     ans +=1;
   return ans;
 }
@@ -652,7 +654,7 @@ void Unit::Init()
   maxwarpenergy=0;
   recharge = 1;
   shield.recharge=shield.leak=0;
-  shield.fb[0]=shield.fb[1]=shield.fb[2]=shield.fb[3]=armor.front=armor.back=armor.right=armor.left=0;
+  shield.shield2fb.front=shield.shield2fb.back=shield.shield2fb.frontmax=shield.shield2fb.backmax=armor.frontrighttop=armor.backrighttop=armor.frontlefttop=armor.backlefttop=armor.frontrightbottom=armor.backrightbottom=armor.frontleftbottom=armor.backleftbottom=0;
   hull=10;
   maxhull=10;
   shield.number=2;
@@ -1608,21 +1610,21 @@ void Unit::UpdatePhysics (const Transformation &trans, const Matrix &transmat, c
       Cloak(false);//Decloak
     } else {
       if (image->cloakrate>0||cloaking==cloakmin) {
-		warpenergy-=apply_float_to_short(SIMULATION_ATOM*image->cloakenergy);
+		warpenergy-=(SIMULATION_ATOM*image->cloakenergy);
       }
       if (cloaking>cloakmin) {
 		AUDAdjustSound (sound->cloak, cumulative_transformation.position,cumulative_velocity);
-		if ((cloaking==32767&&image->cloakrate>0)||(cloaking==cloakmin+1&&image->cloakrate<0)) {
+		if ((cloaking==(2147483647)&&image->cloakrate>0)||(cloaking==cloakmin+1&&image->cloakrate<0)) {//short fix
 		  AUDStartPlaying (sound->cloak);
 	    }
-		cloaking-= (short)(image->cloakrate*SIMULATION_ATOM);
+		cloaking-= (int)(image->cloakrate*SIMULATION_ATOM); //short fix
 		if (cloaking<=cloakmin&&image->cloakrate>0) {
 		  //AUDStopPlaying (sound->cloak);
 		  cloaking=cloakmin;
 	    }
 	    if (cloaking<0&&image->cloakrate<0) {
 	      //AUDStopPlaying (sound->cloak);
-	      cloaking=(short)32768;//wraps
+	      cloaking=(1)<<31;//wraps short fix
 	    }
       }
     }
@@ -1792,7 +1794,7 @@ void Unit::UpdatePhysics (const Transformation &trans, const Matrix &transmat, c
     UnitCollection::UnitIterator iter=getSubUnits();
     while ((su=iter.current())) {
       su->UpdatePhysics(cumulative_transformation,cumulative_transformation_matrix,cumulative_velocity,lastframe,uc); 
-      su->cloaking = (short unsigned int) cloaking;
+      su->cloaking = (unsigned int) cloaking; //short fix
       if (hull<0) {
 	su->Target(NULL);
 		UnFire();//don't want to go off shooting while your body's splitting everywhere
@@ -1837,16 +1839,16 @@ void Unit::AddVelocity(float difficulty) {
 		 float minsizeeffect = (planet->rSize()>smallwarphack)?planet->rSize():smallwarphack;
 		 float effectiverad = autopilot_term_distance+minsizeeffect*(1.0f+UniverseUtil::getPlanetRadiusPercent())+getAutoRSize(this,this)+rSize();
 		 double onethird=1.0/3.0;
-		 double thoudist=1000000;
-		 double thoudistalt=minsizeeffect*160;
-		 thoudist=(thoudist<thoudistalt)?(thoudist):(thoudistalt);
-		 double thouslow=1000/pow(thoudist,onethird);
+		 double Nthoudist=9000000;
+		 double Nthoudistalt=minsizeeffect*450;
+		 Nthoudist=(Nthoudist<Nthoudistalt)?(Nthoudist):(Nthoudistalt);
+		 double Nthouslow=9000/pow(Nthoudist,onethird);
 		 double dist=(Position()-planet->Position()).Magnitude();
-		 double cuberoot=pow((dist-(effectiverad)-thoudist),onethird);
-		 if(dist>(effectiverad+thoudist)) {
-			 multipliertemp=1000+(314*cuberoot);
+		 double cuberoot=pow((dist-(effectiverad)-Nthoudist),onethird);
+		 if(dist>(effectiverad+Nthoudist)) {
+			 multipliertemp=9000+(314*cuberoot);
 		 } else if (dist>effectiverad){
-			multipliertemp=1000-(thouslow*pow(-(dist-(effectiverad)-thoudist),onethird));
+			multipliertemp=9000-(Nthouslow*pow(-(dist-(effectiverad)-Nthoudist),onethird));
 		 }else{
 			minmultiplier=1;
 		 }
@@ -1861,9 +1863,9 @@ void Unit::AddVelocity(float difficulty) {
 	     rampmult=(graphicOptions.InWarp)?1.0-((graphicOptions.RampCounter/warpramptime)*(graphicOptions.RampCounter/warpramptime)):(graphicOptions.RampCounter/warpramptime)*(graphicOptions.RampCounter/warpramptime);
 	   }
 	   minmultiplier*=rampmult;
-	   if(minmultiplier<PI*PI) {
-	     if(graphicOptions.InWarp==1){
-		   minmultiplier=PI*PI;
+	   if(minmultiplier<PI*PI*PI) {
+	     if(graphicOptions.InWarp==1|graphicOptions.RampCounter!=0){
+		   minmultiplier=PI*PI*PI;
 		 } else {
 		   minmultiplier=1;
 		 }
@@ -1873,8 +1875,8 @@ void Unit::AddVelocity(float difficulty) {
 	   }
 	   v*=minmultiplier;
 	   float vmag=sqrt(v.i*v.i+v.j*v.j+v.k*v.k);
-	   if(vmag>PI*PI*300000000.0){
-		   v*=PI*PI*300000000/vmag; // HARD LIMIT
+	   if(vmag>PI*PI*PI*300000000.0){
+		   v*=PI*PI*PI*300000000/vmag; // HARD LIMIT
 	   }
 	   graphicOptions.WarpFieldStrength=minmultiplier;
    } else {
@@ -2394,7 +2396,7 @@ Vector Unit::ClampThrust (const Vector &amt1, bool afterburn) {
     afterburn=false;
   }
   if (afterburn) {
-    energy -=apply_float_to_short( afterburnenergy*SIMULATION_ATOM);
+    energy -= afterburnenergy*SIMULATION_ATOM;
   }
 
   static float staticfuelclamp = XMLSupport::parse_float (vs_config->getVariable ("physics","NoFuelThrust",".4"));
@@ -2468,8 +2470,8 @@ float WARPENERGYMULTIPLIER(Unit * un) {
   }
   return player?playerwarpenergymultiplier:warpenergymultiplier;
 }
-static int applyto (unsigned short &shield, const unsigned short max, const float amt) {
-  shield+=apply_float_to_short(amt);
+static bool applyto (float &shield, const float max, const float amt) { //short fix
+  shield+=amt; //short fix
   if (shield>max)
     shield=max;
   return (shield>=max)?1:0;
@@ -2479,13 +2481,13 @@ float totalShieldVal (const Shield & shield) {
 	float maxshield=0;
 	switch (shield.number)  {
   case 2:
-    maxshield = shield.fb[2]+shield.fb[3];
+    maxshield = shield.shield2fb.frontmax+shield.shield2fb.backmax;
     break;
   case 4:
-    maxshield = (float)(shield.fbrl.frontmax)+(float)shield.fbrl.backmax+(float)shield.fbrl.leftmax+(float)shield.fbrl.rightmax;
+    maxshield = shield.shield4fbrl.frontmax+shield.shield4fbrl.backmax+shield.shield4fbrl.leftmax+shield.shield4fbrl.rightmax;
     break;
-  case 6:
-    maxshield = 2*(float)(shield.fbrltb.fbmax)+4*(float)shield.fbrltb.rltbmax;
+  case 8:
+    maxshield = shield.shield8.frontrighttopmax+shield.shield8.backrighttopmax+shield.shield8.frontlefttopmax+shield.shield8.backlefttopmax+shield.shield8.frontrightbottommax+shield.shield8.backrightbottommax+shield.shield8.frontleftbottommax+shield.shield8.backleftbottommax;
     break;
 	}
 	return maxshield;
@@ -2498,13 +2500,13 @@ float Unit::MaxShieldVal() const{
   float maxshield=0;
   switch (shield.number) {
   case 2:
-    maxshield = .5*(shield.fb[2]+shield.fb[3]);
+    maxshield = .5*(shield.shield2fb.frontmax+shield.shield2fb.backmax);
     break;
   case 4:
-    maxshield = .25*(float(shield.fbrl.frontmax)+shield.fbrl.backmax+shield.fbrl.leftmax+shield.fbrl.rightmax);
+    maxshield = .25*(shield.shield4fbrl.frontmax+shield.shield4fbrl.backmax+shield.shield4fbrl.leftmax+shield.shield4fbrl.rightmax);
     break;
   case 6:
-    maxshield = .25*float(shield.fbrltb.fbmax)+.75*shield.fbrltb.rltbmax;
+    maxshield = .125*(shield.shield8.frontrighttopmax+shield.shield8.backrighttopmax+shield.shield8.frontlefttopmax+shield.shield8.backlefttopmax+shield.shield8.frontrightbottommax+shield.shield8.backrightbottommax+shield.shield8.frontleftbottommax+shield.shield8.backleftbottommax);
     break;
   }
   return maxshield;
@@ -2513,6 +2515,7 @@ void Unit::RechargeEnergy() {
 #if 1
 	energy+=recharge*SIMULATION_ATOM;
 #else
+	/* short fix
     unsigned short newenergy=apply_float_to_short (recharge *SIMULATION_ATOM);
     if (((int)energy)+((int)newenergy)>65535) {
       newenergy= 65535 - energy;
@@ -2525,11 +2528,12 @@ void Unit::RechargeEnergy() {
       }
     }else {
       energy+=recharge*SIMULATION_ATOM;
-    }
+	}
+	*/
 #endif
 }
 void Unit::RegenShields () {
-  int rechargesh=1;
+  int rechargesh=1; // used ... oddly
   float maxshield=totalShieldEnergyCapacitance(shield);
   static bool energy_before_shield=XMLSupport::parse_bool(vs_config->getVariable ("physics","engine_energy_priority","true"));
   if (!energy_before_shield) {
@@ -2573,54 +2577,58 @@ void Unit::RegenShields () {
   switch (shield.number) {
   case 2:
 
-    shield.fb[0]+=rec;
-    shield.fb[1]+=rec;
-    if (shield.fb[0]>shield.fb[2]) {
-      shield.fb[0]=shield.fb[2];
+    shield.shield2fb.front+=rec;
+    shield.shield2fb.back+=rec;
+    if (shield.shield2fb.front>shield.shield2fb.frontmax) {
+      shield.shield2fb.front=shield.shield2fb.frontmax;
     } else {
       rechargesh=0;
     }
-    if (shield.fb[1]>shield.fb[3]) {
-      shield.fb[1]=shield.fb[3];
+    if (shield.shield2fb.back>shield.shield2fb.backmax) {
+      shield.shield2fb.back=shield.shield2fb.backmax;
 
     } else {
       rechargesh=0;
     }
     if (velocity_discharge) {
-      if (shield.fb[1]>min_shield_discharge*shield.fb[3])
-	shield.fb[1]*=dischargerate;
-      if (shield.fb[0]>min_shield_discharge*shield.fb[2])
-	shield.fb[0]*=dischargerate;
+      if (shield.shield2fb.back>min_shield_discharge*shield.shield2fb.backmax)
+	shield.shield2fb.back*=dischargerate;
+      if (shield.shield2fb.front>min_shield_discharge*shield.shield2fb.frontmax)
+	shield.shield2fb.front*=dischargerate;
     }
     break;
   case 4:
-    rechargesh = applyto (shield.fbrl.front,shield.fbrl.frontmax,rec)*(applyto (shield.fbrl.back,shield.fbrl.backmax,rec))*applyto (shield.fbrl.right,shield.fbrl.rightmax,rec)*applyto (shield.fbrl.left,shield.fbrl.leftmax,rec);
+    rechargesh = applyto (shield.shield4fbrl.front,shield.shield4fbrl.frontmax,rec)*(applyto (shield.shield4fbrl.back,shield.shield4fbrl.backmax,rec))*applyto (shield.shield4fbrl.right,shield.shield4fbrl.rightmax,rec)*applyto (shield.shield4fbrl.left,shield.shield4fbrl.leftmax,rec);
     if (velocity_discharge) {
-      if (shield.fbrl.front>min_shield_discharge*shield.fbrl.frontmax)
-	shield.fbrl.front*=dischargerate;
-      if (shield.fbrl.left>min_shield_discharge*shield.fbrl.leftmax)
-	shield.fbrl.left*=dischargerate;
-      if (shield.fbrl.back>min_shield_discharge*shield.fbrl.backmax)
-	shield.fbrl.back*=dischargerate;
-      if (shield.fbrl.right>min_shield_discharge*shield.fbrl.rightmax)
-	shield.fbrl.right*=dischargerate;
+      if (shield.shield4fbrl.front>min_shield_discharge*shield.shield4fbrl.frontmax)
+	shield.shield4fbrl.front*=dischargerate;
+      if (shield.shield4fbrl.left>min_shield_discharge*shield.shield4fbrl.leftmax)
+	shield.shield4fbrl.left*=dischargerate;
+      if (shield.shield4fbrl.back>min_shield_discharge*shield.shield4fbrl.backmax)
+	shield.shield4fbrl.back*=dischargerate;
+      if (shield.shield4fbrl.right>min_shield_discharge*shield.shield4fbrl.rightmax)
+	shield.shield4fbrl.right*=dischargerate;
     }
     break;
-  case 6:
-    rechargesh = (applyto(shield.fbrltb.v[0],shield.fbrltb.fbmax,rec))*applyto(shield.fbrltb.v[1],shield.fbrltb.fbmax,rec)*applyto(shield.fbrltb.v[2],shield.fbrltb.rltbmax,rec)*applyto(shield.fbrltb.v[3],shield.fbrltb.rltbmax,rec)*applyto(shield.fbrltb.v[4],shield.fbrltb.rltbmax,rec)*applyto(shield.fbrltb.v[5],shield.fbrltb.rltbmax,rec);
+  case 8:
+    rechargesh = applyto (shield.shield8.frontrighttop,shield.shield8.frontrighttopmax,rec)*(applyto (shield.shield8.backrighttop,shield.shield8.backrighttopmax,rec))*applyto (shield.shield8.frontlefttop,shield.shield8.frontlefttopmax,rec)*applyto (shield.shield8.backlefttop,shield.shield8.backlefttopmax,rec)*applyto (shield.shield8.frontrightbottom,shield.shield8.frontrightbottommax,rec)*(applyto (shield.shield8.backrightbottom,shield.shield8.backrightbottommax,rec))*applyto (shield.shield8.frontleftbottom,shield.shield8.frontleftbottommax,rec)*applyto (shield.shield8.backleftbottom,shield.shield8.backleftbottommax,rec);
     if (velocity_discharge) {
-      if (shield.fbrltb.v[0]>min_shield_discharge*shield.fbrltb.fbmax)
-	shield.fbrltb.v[0]*=dischargerate;
-      if (shield.fbrltb.v[1]>min_shield_discharge*shield.fbrltb.fbmax)
-	shield.fbrltb.v[1]*=dischargerate;
-      if (shield.fbrltb.v[2]>min_shield_discharge*shield.fbrltb.rltbmax)
-	shield.fbrltb.v[2]*=dischargerate;
-      if (shield.fbrltb.v[3]>min_shield_discharge*shield.fbrltb.rltbmax)
-	shield.fbrltb.v[3]*=dischargerate;
-      if (shield.fbrltb.v[4]>min_shield_discharge*shield.fbrltb.rltbmax)
-	shield.fbrltb.v[4]*=dischargerate;
-      if (shield.fbrltb.v[5]>min_shield_discharge*shield.fbrltb.rltbmax)
-	shield.fbrltb.v[5]*=dischargerate;
+      if (shield.shield8.frontrighttop>min_shield_discharge*shield.shield8.frontrighttopmax)
+		shield.shield8.frontrighttop*=dischargerate;
+	  if (shield.shield8.frontlefttop>min_shield_discharge*shield.shield8.frontlefttopmax)
+		shield.shield8.frontlefttop*=dischargerate;
+	  if (shield.shield8.backrighttop>min_shield_discharge*shield.shield8.backrighttopmax)
+		shield.shield8.backrighttop*=dischargerate;
+	  if (shield.shield8.backlefttop>min_shield_discharge*shield.shield8.backlefttopmax)
+		shield.shield8.backlefttop*=dischargerate;
+	  if (shield.shield8.frontrightbottom>min_shield_discharge*shield.shield8.frontrightbottommax)
+		shield.shield8.frontrightbottom*=dischargerate;
+	  if (shield.shield8.frontleftbottom>min_shield_discharge*shield.shield8.frontleftbottommax)
+		shield.shield8.frontleftbottom*=dischargerate;
+	  if (shield.shield8.backrightbottom>min_shield_discharge*shield.shield8.backrightbottommax)
+		shield.shield8.backrightbottom*=dischargerate;
+	  if (shield.shield8.backleftbottom>min_shield_discharge*shield.shield8.backleftbottommax)
+		shield.shield8.backleftbottom*=dischargerate;
     }
     break;
   }
@@ -2645,10 +2653,9 @@ void Unit::RegenShields () {
   if(graphicOptions.InWarp){ //FIXME FIXME FIXME
 	  static float bleedfactor = XMLSupport::parse_float(vs_config->getVariable("physics","warpbleed","10"));
 	  float truebleed=bleedfactor*SIMULATION_ATOM;
-	  short bleed=apply_float_to_short(truebleed);
-	  if(warpenergy>bleed){
+	  if(warpenergy>truebleed){
 		  if(modcounter==0){
-		    warpenergy-=bleed;
+		    warpenergy-=truebleed;
 		  }
 	  } else {
 		  graphicOptions.InWarp=0;
@@ -2660,8 +2667,8 @@ void Unit::RegenShields () {
       float excessenergy = energy - (menergy-maxshield);
       energy=menergy-maxshield;  
       if (excessenergy >0) {
-		  warpenergy=apply_float_to_short(warpenergy+WARPENERGYMULTIPLIER(this)*excessenergy);
-		  short mwe = maxwarpenergy;
+		  warpenergy=warpenergy+WARPENERGYMULTIPLIER(this)*excessenergy;
+		  float mwe = maxwarpenergy;
 		  if (mwe<jump.energy&&mwe==0)
 			  mwe = jump.energy;
 		  if (warpenergy>mwe)
@@ -3091,28 +3098,40 @@ void Unit::DamageRandSys(float dam, const Vector &vec, float randnum, float degr
 		}
 		switch (shield.number) {
 		case 2:
-			if (randnum>=.35&&randnum<.7) {
-				shield.fb[2]*=dam;
+			if (randnum>=.25&&randnum<.75) {
+				shield.shield2fb.frontmax*=dam;
 			} else {
-				shield.fb[3]*=dam;
+				shield.shield2fb.backmax*=dam;
 			}
 			break;
 		case 4:
-			if (randnum>=.5&&randnum<.7) {
-				shield.fbrl.frontmax*=dam;
-			} else if (randnum>=.3) {
-				shield.fbrl.backmax*=dam;
-			} else if (deg>180) {
-				shield.fbrl.leftmax*=dam;
+			if (randnum>=.5&&randnum<.75) {
+				shield.shield4fbrl.frontmax*=dam;
+			} else if (randnum>=.75) {
+				shield.shield4fbrl.backmax*=dam;
+			} else if (randnum>=.25) {
+				shield.shield4fbrl.leftmax*=dam;
 			} else {
-				shield.fbrl.rightmax*=dam;
+				shield.shield4fbrl.rightmax*=dam;
 			}
 			break;
-		case 6:
-			if (randnum>=.4&&randnum<.7) {
-				shield.fbrltb.fbmax*=dam;
+		case 8:
+			if (randnum<.125) {
+				shield.shield8.frontrighttopmax*=dam;
+			} else if (randnum<.25) {
+				shield.shield8.backrighttopmax*=dam;
+			} else if (randnum<.375) {
+				shield.shield8.frontlefttopmax*=dam;
+			} else if (randnum<.5) {
+				shield.shield8.backrighttopmax*=dam;
+			} else if (randnum<.625) {
+				shield.shield8.frontrightbottommax*=dam;
+			} else if (randnum<.75) {
+				shield.shield8.backrightbottommax*=dam;
+			} else if (randnum<.875) {
+				shield.shield8.frontleftbottommax*=dam;
 			} else {
-				shield.fbrltb.rltbmax*=dam;
+				shield.shield8.backrightbottommax*=dam;
 			}
 			break;
 		}
@@ -3242,18 +3261,24 @@ void Unit::leach (float damShield, float damShieldRecharge, float damEnRecharge)
   shield.recharge*=damShieldRecharge;
   switch (shield.number) {
   case 2:
-    shield.fb[2]*=damShield;
-    shield.fb[3]*=damShield;
+    shield.shield2fb.frontmax*=damShield;
+    shield.shield2fb.backmax*=damShield;
     break;
   case 4:
-    shield.fbrl.frontmax*=damShield;
-    shield.fbrl.backmax*=damShield;
-    shield.fbrl.leftmax*=damShield;
-    shield.fbrl.rightmax*=damShield;
+    shield.shield4fbrl.frontmax*=damShield;
+    shield.shield4fbrl.backmax*=damShield;
+    shield.shield4fbrl.leftmax*=damShield;
+    shield.shield4fbrl.rightmax*=damShield;
     break;
-  case 6:
-    shield.fbrltb.fbmax*=damShield;
-    shield.fbrltb.rltbmax*=damShield;
+  case 8:
+    shield.shield8.frontrighttopmax*=damShield;
+    shield.shield8.backrighttopmax*=damShield;
+    shield.shield8.frontlefttopmax*=damShield;
+    shield.shield8.backlefttopmax*=damShield;
+	shield.shield8.frontrightbottommax*=damShield;
+    shield.shield8.backrightbottommax*=damShield;
+    shield.shield8.frontleftbottommax*=damShield;
+    shield.shield8.backleftbottommax*=damShield;
     break;
   }
 }
@@ -3277,12 +3302,15 @@ float Unit::ExplosionRadius() {
   return expsize*rSize();
 }
 
-void Unit::ArmorData (unsigned short armor[4]) const{
-  //  memcpy (&armor[0],&this->armor.front,sizeof (unsigned short)*4);
-  armor[0]=this->armor.front;
-  armor[1]=this->armor.back;
-  armor[2]=this->armor.right;
-  armor[3]=this->armor.left;
+void Unit::ArmorData (unsigned int armor[8]) const{  //short fix
+  armor[0]=this->armor.frontrighttop;
+  armor[1]=this->armor.backrighttop;
+  armor[2]=this->armor.frontlefttop;
+  armor[3]=this->armor.backlefttop;
+  armor[4]=this->armor.frontrightbottom;
+  armor[5]=this->armor.backrightbottom;
+  armor[6]=this->armor.frontleftbottom;
+  armor[7]=this->armor.backleftbottom;
 }
 
 float Unit::FuelData () const{
@@ -3303,33 +3331,33 @@ float Unit::EnergyData() const{
 
 float Unit::FShieldData() const{
   switch (shield.number) {
-  case 2: { if( shield.fb[2]!=0) return shield.fb[0]/shield.fb[2];}
-  case 4: { if( shield.fbrl.frontmax!=0) return ((float)shield.fbrl.front)/shield.fbrl.frontmax;}
-  case 6: { if( shield.fbrltb.fbmax!=0) return ((float)shield.fbrltb.v[0])/shield.fbrltb.fbmax;}
+  case 2: { if( shield.shield2fb.frontmax!=0) return shield.shield2fb.front/shield.shield2fb.frontmax;}
+  case 4: { if( shield.shield4fbrl.frontmax!=0) return (shield.shield4fbrl.front)/shield.shield4fbrl.frontmax;}
+  case 8: { if( shield.shield8.frontrighttopmax!=0||shield.shield8.frontrightbottommax!=0||shield.shield8.frontlefttopmax!=0||shield.shield8.frontleftbottommax!=0) return (shield.shield8.frontrighttop+shield.shield8.frontrightbottom+shield.shield8.frontlefttop+shield.shield8.frontleftbottom)/(shield.shield8.frontrighttopmax+shield.shield8.frontrightbottommax+shield.shield8.frontlefttopmax+shield.shield8.frontleftbottommax);}
   }
   return 0;
 }
 float Unit::BShieldData() const{
   switch (shield.number) {
-  case 2: { if( shield.fb[3]!=0) return shield.fb[1]/shield.fb[3];}
-  case 4: { if( shield.fbrl.backmax!=0) return ((float)shield.fbrl.back)/shield.fbrl.backmax;}
-  case 6: { if( shield.fbrltb.fbmax!=0) return ((float)shield.fbrltb.v[1])/shield.fbrltb.fbmax;}
+  case 2: { if( shield.shield2fb.backmax!=0) return shield.shield2fb.back/shield.shield2fb.backmax;}
+  case 4: { if( shield.shield4fbrl.backmax!=0) return (shield.shield4fbrl.back)/shield.shield4fbrl.backmax;}
+  case 8: { if( shield.shield8.backrighttopmax!=0||shield.shield8.backrightbottommax!=0||shield.shield8.backlefttopmax!=0||shield.shield8.backleftbottommax!=0) return (shield.shield8.backrighttop+shield.shield8.backrightbottom+shield.shield8.backlefttop+shield.shield8.backleftbottom)/(shield.shield8.backrighttopmax+shield.shield8.backrightbottommax+shield.shield8.backlefttopmax+shield.shield8.backleftbottommax);}
   }
   return 0;
 }
 float Unit::LShieldData() const{
   switch (shield.number) {
   case 2: return 0;//no data, captain
-  case 4: { if( shield.fbrl.leftmax!=0) return ((float)shield.fbrl.left)/shield.fbrl.leftmax;}
-  case 6: { if( shield.fbrltb.rltbmax!=0) return ((float)shield.fbrltb.v[3])/shield.fbrltb.rltbmax;}
+  case 4: { if( shield.shield4fbrl.leftmax!=0) return (shield.shield4fbrl.left)/shield.shield4fbrl.leftmax;}
+  case 8: { if( shield.shield8.backlefttopmax!=0||shield.shield8.backleftbottommax!=0||shield.shield8.frontlefttopmax!=0||shield.shield8.frontleftbottommax!=0) return (shield.shield8.backlefttop+shield.shield8.backleftbottom+shield.shield8.frontlefttop+shield.shield8.frontleftbottom)/(shield.shield8.backlefttopmax+shield.shield8.backleftbottommax+shield.shield8.frontlefttopmax+shield.shield8.frontleftbottommax);}
   }
   return 0;
 }
 float Unit::RShieldData() const{
   switch (shield.number) {
   case 2: return 0;//don't react to stuff we have no data on
-  case 4: { if( shield.fbrl.rightmax!=0) return ((float)shield.fbrl.right)/shield.fbrl.rightmax;}
-  case 6: { if( shield.fbrltb.rltbmax!=0) return ((float)shield.fbrltb.v[2])/shield.fbrltb.rltbmax;}
+  case 4: { if( shield.shield4fbrl.rightmax!=0) return (shield.shield4fbrl.right)/shield.shield4fbrl.rightmax;}
+  case 8: { if( shield.shield8.backrighttopmax!=0||shield.shield8.backrightbottommax!=0||shield.shield8.frontrighttopmax!=0||shield.shield8.frontrightbottommax!=0) return (shield.shield8.backrighttop+shield.shield8.backrightbottom+shield.shield8.frontrighttop+shield.shield8.frontrightbottom)/(shield.shield8.backrighttopmax+shield.shield8.backrightbottommax+shield.shield8.frontrighttopmax+shield.shield8.frontrightbottommax);}
   }
   return 0;
 }
@@ -3378,27 +3406,43 @@ bool DestroyPlayerSystem (float hull, float maxhull, float numhits) {
 	return ret;
 }
 static const char * DamagedCategory="upgrades/Damaged/";
-float Unit::DealDamageToHullReturnArmor (const Vector & pnt, float damage, unsigned short * &targ) {
+float Unit::DealDamageToHullReturnArmor (const Vector & pnt, float damage, unsigned int * &targ) { //short fix
   float percent;
 #ifndef ISUCK
   if (hull<0) {
     return -1;
   }
 #endif
-  if (fabs  (pnt.k)>fabs(pnt.i)) {
-    if (pnt.k>0) {
-      targ = &armor.front;
-    }else {
-      targ = &armor.back;
-    }
+  if (pnt.i>0) {
+    if (pnt.j>0) {
+		if(pnt.k>0){
+			targ=&armor.frontlefttop;
+		} else {
+			targ=&armor.backlefttop;
+		}
+	} else {
+		if(pnt.k>0){
+			targ=&armor.frontleftbottom;
+		} else {
+			targ=&armor.backleftbottom;
+		}
+	}
   }else {
-    if (pnt.i>0) {
-      targ = &armor.left;
-    }else {
-      targ = &armor.right;
-    }
+    if (pnt.j>0) {
+		if(pnt.k>0){
+			targ=&armor.frontrighttop;
+		} else {
+			targ=&armor.backrighttop;
+		}
+	} else {
+		if(pnt.k>0){
+			targ=&armor.frontrightbottom;
+		} else {
+			targ=&armor.backrightbottom;
+		}
+	}
   }
-  int biggerthan=*targ;
+  unsigned int biggerthan=*targ; //short fix
   float absdamage = damage>=0?damage:-damage;
   percent = absdamage/(*targ+hull);
 
@@ -3407,12 +3451,12 @@ float Unit::DealDamageToHullReturnArmor (const Vector & pnt, float damage, unsig
   {
 		  if( percent == -1)
 			  return -1;
-		  if (absdamage<((float)*targ)) {
+		  if (absdamage<*targ) {
 			ArmorDamageSound( pnt);
-			*targ -= apply_float_to_short (absdamage);
+			*targ -= apply_float_to_unsigned_int(absdamage);  //short fix
 		  }else {
 			HullDamageSound( pnt);
-			absdamage -= ((float)*targ);
+			absdamage -= *targ;
 			damage= damage>=0?absdamage:-absdamage;
 			*targ= 0;
 			if (numCargo()>0) {
@@ -3489,55 +3533,94 @@ float Unit::DealDamageToHullReturnArmor (const Vector & pnt, float damage, unsig
 float Unit::DealDamageToShield (const Vector &pnt, float &damage) {
   int index;
   float percent=0;
-  unsigned short * targ=NULL;
+  float * targ=NULL; //short fix
   
   // ONLY APPLY DAMAGES IN NON-NETWORKING OR ON SERVER SIDE
   switch (shield.number){
   case 2:
-    index = (pnt.k>0)?0:1;
-	if( shield.fb[index+2]!=0)
-	    percent = damage/shield.fb[index+2];//comparing with max
-	else
-		percent = 0;
-	if( Network==NULL || SERVER)
-	{
-   	  shield.fb[index]-=damage;
-      damage =0;
-      if (shield.fb[index]<0) {
-        damage = -shield.fb[index];
-        shield.fb[index]=0;
-      }
+    index=(pnt.k>0)?0:1;
+	if(index){
+		if( shield.shield2fb.backmax!=0)
+			percent = damage/shield.shield2fb.backmax;//comparing with max
+		else
+			percent = 0;
+		if( Network==NULL || SERVER)
+		{
+   			shield.shield2fb.back-=damage;
+			damage =0;
+			if (shield.shield2fb.back<0) {
+				damage = -shield.shield2fb.back;
+				shield.shield2fb.back=0;
+			}
+		}
+	} else {
+		if( shield.shield2fb.frontmax!=0)
+			percent = damage/shield.shield2fb.frontmax;//comparing with max
+		else
+			percent = 0;
+				if( Network==NULL || SERVER)
+		{
+   			shield.shield2fb.front-=damage;
+			damage =0;
+			if (shield.shield2fb.front<0) {
+				damage = -shield.shield2fb.front;
+				shield.shield2fb.front=0;
+			}
+		}
+
 	}
+
+	
     break;
-  case 6:
-    percent = damage/shield.fbrltb.rltbmax;
-    if (fabs(pnt.i)>fabs(pnt.j)&&fabs(pnt.i)>fabs(pnt.k)) {
+  case 8:
       if (pnt.i>0) {
-	index = 3;//left
-      } else {
-	index = 2;//right
-      }
-    }else if (fabs(pnt.j)>fabs (pnt.k)) {
-      if (pnt.j>0) {
-	index = 4;//top;
-      } else {
-	index = 5;//bot;
-      }
-    } else {
-      percent = damage/shield.fbrltb.fbmax;
-      if (pnt.k>0) {
-	index = 0;
-      } else {
-	index = 1;
-      }
-    }
+		if(pnt.j>0){
+		  if(pnt.k>0){
+			  percent = damage/shield.shield8.frontlefttopmax;
+			  targ=&shield.shield8.frontlefttop;
+		  } else {
+			  percent = damage/shield.shield8.backlefttopmax;
+			  targ=&shield.shield8.backlefttop;
+		  }
+		} else {
+		  if(pnt.k>0){
+			  percent = damage/shield.shield8.frontleftbottommax;
+			  targ=&shield.shield8.frontleftbottom;
+		  } else {
+			  percent = damage/shield.shield8.backleftbottommax;
+			  targ=&shield.shield8.backleftbottom;
+		  }
+		}
+	  } else {
+		if(pnt.j>0){
+		  if(pnt.k>0){
+			  percent = damage/shield.shield8.frontrighttopmax;
+			  targ=&shield.shield8.frontrighttop;
+		  } else {
+			  percent = damage/shield.shield8.backrighttopmax;
+			  targ=&shield.shield8.backrighttop;
+		  }
+		} else {
+		  if(pnt.k>0){
+			  percent = damage/shield.shield8.frontrightbottommax;
+			  targ=&shield.shield8.frontrightbottom;
+		  } else {
+			  percent = damage/shield.shield8.backrightbottommax;
+			  targ=&shield.shield8.backrightbottom;
+		  }
+		}
+	  }
+    
+		
+
+
 	if( Network==NULL || SERVER)
 	{
-      if (damage>shield.fbrltb.v[index]) {
-        damage -= shield.fbrltb.v[index];
-          shield.fbrltb.v[index]=0;
+      if (damage>*targ) {
+        damage -= *targ;
+          *targ=0;
       } else {
-          shield.fbrltb.v[index]-=apply_float_to_short (damage);
+          *targ-=damage; //short fix
         damage = 0;
       }
 	}
@@ -3546,19 +3629,19 @@ float Unit::DealDamageToShield (const Vector &pnt, float &damage) {
   default:
     if (fabs(pnt.k)>fabs (pnt.i)) {
       if (pnt.k>0) {
-	targ = &shield.fbrl.front;
-	percent = damage/shield.fbrl.frontmax;
+	targ = &shield.shield4fbrl.front;
+	percent = damage/shield.shield4fbrl.frontmax;
       } else {
-	targ = &shield.fbrl.back;
-	percent = damage/shield.fbrl.backmax;
+	targ = &shield.shield4fbrl.back;
+	percent = damage/shield.shield4fbrl.backmax;
       }
     } else {
       if (pnt.i>0) {
-	percent = damage/shield.fbrl.leftmax;
-	targ = &shield.fbrl.left;
+	percent = damage/shield.shield4fbrl.leftmax;
+	targ = &shield.shield4fbrl.left;
       } else {
-	targ = &shield.fbrl.right;
-	percent = damage/shield.fbrl.rightmax;
+	targ = &shield.shield4fbrl.right;
+	percent = damage/shield.shield4fbrl.rightmax;
       }
     }
 	if( Network==NULL || SERVER)
@@ -3567,7 +3650,7 @@ float Unit::DealDamageToShield (const Vector &pnt, float &damage) {
         damage-=*targ;
           *targ=0;
       } else {
-          *targ -= apply_float_to_short (damage);	
+          *targ -= (damage); //short fix	
         damage=0;
       }
 	}
@@ -3586,44 +3669,53 @@ bool Unit::ShieldUp (const Vector &pnt) const{
     return false;
   switch (shield.number){
   case 2:
-    index = (pnt.k>0)?0:1;
-    return shield.fb[index]>shieldmin;
+	  return ((pnt.k>0)?(shield.shield2fb.front):(shield.shield2fb.back))>shieldmin;
     break;
-  case 6:
-    if (fabs(pnt.i)>fabs(pnt.j)&&fabs(pnt.i)>fabs(pnt.k)) {
-      if (pnt.i>0) {
-	index = 3;//left
-      } else {
-	index = 2;//right
-      }
-    }else if (fabs(pnt.j)>fabs (pnt.k)) {
-      if (pnt.j>0) {
-	index = 4;//top;
-      } else {
-	index = 5;//bot;
-      }
-    } else {
-      if (pnt.k>0) {
-	index = 0;
-      } else {
-	index = 1;
-      }
-    }
-    return shield.fbrltb.v[index]>shieldmin;
+  case 8:
+if (pnt.i>0) {
+		if(pnt.j>0){
+		  if(pnt.k>0){
+			  return shield.shield8.frontlefttop>shieldmin;
+		  } else {
+			  return shield.shield8.backlefttop>shieldmin;
+		  }
+		} else {
+		  if(pnt.k>0){
+			  return shield.shield8.frontleftbottom>shieldmin;
+		  } else {
+			  return shield.shield8.backleftbottom>shieldmin;
+		  }
+		}
+	  } else {
+		if(pnt.j>0){
+		  if(pnt.k>0){
+			  return shield.shield8.frontrighttop>shieldmin;
+		  } else {
+			  return shield.shield8.backrighttop>shieldmin;
+		  }
+		} else {
+		  if(pnt.k>0){
+			  return shield.shield8.frontrightbottom>shieldmin;
+		  } else {
+			  return shield.shield8.backrightbottom>shieldmin;
+		  }
+		}
+	  }   
+
     break;
   case 4:
   default:
     if (fabs(pnt.k)>fabs (pnt.i)) {
       if (pnt.k>0) {
-	return shield.fbrl.front>shieldmin;
+	return shield.shield4fbrl.front>shieldmin;
       } else {
-	return shield.fbrl.back>shieldmin;
+	return shield.shield4fbrl.back>shieldmin;
       }
     } else {
       if (pnt.i>0) {
-	return shield.fbrl.left>shieldmin;
+	return shield.shield4fbrl.left>shieldmin;
       } else {
-	return shield.fbrl.right>shieldmin;
+	return shield.shield4fbrl.right>shieldmin;
       }
     }
     return false;
@@ -3702,8 +3794,8 @@ void Unit::Cloak (bool loak) {
   if (loak) {
     if (image->cloakenergy<warpenergy) {
       image->cloakrate =(image->cloakrate>=0)?image->cloakrate:-image->cloakrate; 
-      if (cloaking==(short)32768) {
-	cloaking=32767;
+      if (cloaking==(1)<<31) { //short fix
+	cloaking=2147483647; //short fix
       } else {
        
       }
@@ -4285,7 +4377,7 @@ void Unit::PerformDockingOperations () {
       continue;
     }
     //Transformation t = un->prev_physical_state;
-    unsigned short tmp;
+    float tmp; //short fix
     tmp=un->maxwarpenergy;
     if (tmp<un->jump.energy)
       tmp=un->jump.energy;
@@ -5074,10 +5166,15 @@ bool Unit::UpAndDownGrade (const Unit * up, const Unit * templ, int mountoffset,
 
 #define STDUPGRADECLAMP(my,oth,temp,noth) STDUPGRADE_SPECIFY_DEFAULTS (my,oth,temp,noth,downgradelimit->my,blankship->my,!force_change_on_nothing,this->my)
 
-  STDUPGRADE(armor.front,up->armor.front,templ->armor.front,0);
-  STDUPGRADE(armor.back,up->armor.back,templ->armor.back,0);
-  STDUPGRADE(armor.right,up->armor.right,templ->armor.right,0);
-  STDUPGRADE(armor.left,up->armor.left,templ->armor.left,0);
+  STDUPGRADE(armor.frontrighttop,up->armor.frontrighttop,templ->armor.frontrighttop,0);
+  STDUPGRADE(armor.backrighttop,up->armor.backrighttop,templ->armor.backrighttop,0);
+  STDUPGRADE(armor.frontlefttop,up->armor.frontlefttop,templ->armor.frontlefttop,0);
+  STDUPGRADE(armor.backlefttop,up->armor.backlefttop,templ->armor.backlefttop,0);
+  STDUPGRADE(armor.frontrightbottom,up->armor.frontrightbottom,templ->armor.frontrightbottom,0);
+  STDUPGRADE(armor.backrightbottom,up->armor.backrightbottom,templ->armor.backrightbottom,0);
+  STDUPGRADE(armor.frontleftbottom,up->armor.frontleftbottom,templ->armor.frontleftbottom,0);
+  STDUPGRADE(armor.backleftbottom,up->armor.backleftbottom,templ->armor.backleftbottom,0);
+
   STDUPGRADE(shield.recharge,up->shield.recharge,templ->shield.recharge,0);
   STDUPGRADE(hull,up->hull,templ->hull,0);
   if (maxhull<hull) {
@@ -5121,18 +5218,24 @@ bool Unit::UpAndDownGrade (const Unit * up, const Unit * templ, int mountoffset,
   if (shield.number==up->shield.number) {
     switch (shield.number) {
     case 2:
-      STDUPGRADE(shield.fb[2],up->shield.fb[2],templ->shield.fb[2],0);
-      STDUPGRADE(shield.fb[3],up->shield.fb[3],templ->shield.fb[3],0);
+      STDUPGRADE(shield.shield2fb.frontmax,up->shield.shield2fb.frontmax,templ->shield.shield2fb.frontmax,0);
+      STDUPGRADE(shield.shield2fb.backmax,up->shield.shield2fb.backmax,templ->shield.shield2fb.backmax,0);
       break;
     case 4:
-      STDUPGRADE(shield.fbrl.frontmax,up->shield.fbrl.frontmax,templ->shield.fbrl.frontmax,0);
-      STDUPGRADE(shield.fbrl.backmax,up->shield.fbrl.backmax,templ->shield.fbrl.backmax,0);
-      STDUPGRADE(shield.fbrl.leftmax,up->shield.fbrl.leftmax,templ->shield.fbrl.leftmax,0);
-      STDUPGRADE(shield.fbrl.rightmax,up->shield.fbrl.rightmax,templ->shield.fbrl.rightmax,0);
+      STDUPGRADE(shield.shield4fbrl.frontmax,up->shield.shield4fbrl.frontmax,templ->shield.shield4fbrl.frontmax,0);
+      STDUPGRADE(shield.shield4fbrl.backmax,up->shield.shield4fbrl.backmax,templ->shield.shield4fbrl.backmax,0);
+      STDUPGRADE(shield.shield4fbrl.leftmax,up->shield.shield4fbrl.leftmax,templ->shield.shield4fbrl.leftmax,0);
+      STDUPGRADE(shield.shield4fbrl.rightmax,up->shield.shield4fbrl.rightmax,templ->shield.shield4fbrl.rightmax,0);
       break;
-    case 6:
-      STDUPGRADE(shield.fbrltb.fbmax,up->shield.fbrltb.fbmax,templ->shield.fbrltb.fbmax,0);
-      STDUPGRADE(shield.fbrltb.rltbmax,up->shield.fbrltb.rltbmax,templ->shield.fbrltb.rltbmax,0);
+    case 8:
+      STDUPGRADE(shield.shield8.frontrighttopmax,up->shield.shield8.frontrighttopmax,templ->shield.shield8.frontrighttopmax,0);
+      STDUPGRADE(shield.shield8.backrighttopmax,up->shield.shield8.backrighttopmax,templ->shield.shield8.backrighttopmax,0);
+      STDUPGRADE(shield.shield8.frontlefttopmax,up->shield.shield8.frontlefttopmax,templ->shield.shield8.frontlefttopmax,0);
+      STDUPGRADE(shield.shield8.backlefttopmax,up->shield.shield8.backlefttopmax,templ->shield.shield8.backlefttopmax,0);
+	  STDUPGRADE(shield.shield8.frontrightbottommax,up->shield.shield8.frontrightbottommax,templ->shield.shield8.frontrightbottommax,0);
+      STDUPGRADE(shield.shield8.backrightbottommax,up->shield.shield8.backrightbottommax,templ->shield.shield8.backrightbottommax,0);
+      STDUPGRADE(shield.shield8.frontleftbottommax,up->shield.shield8.frontleftbottommax,templ->shield.shield8.frontleftbottommax,0);
+      STDUPGRADE(shield.shield8.backleftbottommax,up->shield.shield8.backleftbottommax,templ->shield.shield8.backleftbottommax,0);
       break;     
     }
   }else {
@@ -5864,12 +5967,12 @@ std::string Unit::shieldSerializer (const XMLType &input, void * mythis) {
   Unit * un=(Unit *)mythis;
   switch (un->shield.number) {
   case 2:
-    return tostring(un->shield.fb[2])+string("\" back=\"")+tostring(un->shield.fb[3]);
-  case 6:
-    return tostring(un->shield.fbrltb.fbmax)+string("\" back=\"")+tostring(un->shield.fbrltb.fbmax)+string("\" left=\"")+tostring(un->shield.fbrltb.rltbmax)+string("\" right=\"")+tostring(un->shield.fbrltb.rltbmax)+string("\" top=\"")+tostring(un->shield.fbrltb.rltbmax)+string("\" bottom=\"")+tostring(un->shield.fbrltb.rltbmax);
+    return tostring(un->shield.shield2fb.frontmax)+string("\" back=\"")+tostring(un->shield.shield2fb.backmax);
+  case 8:
+    return string("\" frontrighttop=\"")+tostring(un->shield.shield8.frontrighttop)+string("\" backrighttop=\"")+tostring(un->shield.shield8.backrighttop)+string("\" frontlefttop=\"")+tostring(un->shield.shield8.frontlefttop)+string("\" backlefttop=\"")+tostring(un->shield.shield8.backlefttop)+string("\" frontrightbottom=\"")+tostring(un->shield.shield8.frontrightbottom)+string("\" backrightbottom=\"")+tostring(un->shield.shield8.backrightbottom)+string("\" frontleftbottom=\"")+tostring(un->shield.shield8.frontleftbottom)+string("\" backleftbottom=\"")+tostring(un->shield.shield8.backleftbottom);
   case 4:
   default:
-    return tostring(un->shield.fbrl.frontmax)+string("\" back=\"")+tostring(un->shield.fbrl.backmax)+string("\" left=\"")+tostring(un->shield.fbrl.leftmax)+string("\" right=\"")+tostring(un->shield.fbrl.rightmax);
+    return tostring(un->shield.shield4fbrl.frontmax)+string("\" back=\"")+tostring(un->shield.shield4fbrl.backmax)+string("\" left=\"")+tostring(un->shield.shield4fbrl.leftmax)+string("\" right=\"")+tostring(un->shield.shield4fbrl.rightmax);
   }
   return string("");
 }
@@ -6022,7 +6125,7 @@ void Unit::Repair() {
     if (GetNumMounts()) {
       if (rand01()<workunit) {
 	int whichmount = rand()%GetNumMounts();
-	mounts[whichmount].size |=(1>>(rand()%(8*sizeof(short))));
+	mounts[whichmount].size |=(1>>(rand()%(8*sizeof(int))));
       }
       if (rand01()<workunit) {
 	int whichmount= rand()%GetNumMounts();

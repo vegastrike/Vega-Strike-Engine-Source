@@ -647,9 +647,9 @@ std::map<VCString,VCString> parseTurretSizes () {
 }
 std::string getTurretSize (const std::string &size) {
   static std::map <VCString,VCString> turretmap = parseTurretSizes();
-  std::map<VCString,VCString>::iterator i= turretmap.find(size);
-  if (i!=turretmap.end()) {
-	  return (*i).second;
+  std::map<VCString,VCString>::iterator h= turretmap.find(size);
+  if (h!=turretmap.end()) {
+	  return (*h).second;
   }
   vector <string> tokens;
   Tokenize (size,tokens,"_");
