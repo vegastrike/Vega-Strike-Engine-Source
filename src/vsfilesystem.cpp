@@ -158,6 +158,7 @@ namespace VSFileSystem
 	string homedir;
 
 	string config_file;
+	string weapon_list;
 	string universe_name;
 	string HOMESUBDIR(".vegastrike");
 	vector<string>		current_path;
@@ -687,13 +688,20 @@ namespace VSFileSystem
 
 	void	LoadConfig( string subdir)
 	{
+		bool found = false;
 		// First check if we have a config file in homedir+"/"+subdir or in datadir+"/"+subdir
+		weapon_list = "weapon_list.xml";
 		if( subdir!="")
 		{
 			if( DirectoryExists( homedir+"/mods/"+subdir))
 			{
 				if( FileExists( homedir+"/mods/"+subdir, config_file)>=0)
+				{
 					cout<<"CONFIGFILE - Found a config file in home directory, using : "<<(homedir+"/mods/"+subdir+"/"+config_file)<<endl;
+					weapon_list = "mods/"+subdir+"/weapon_list.xml";
+					config_file = "mods/"+subdir+"/"+config_file;
+					found = true;
+				}
 			}
 			else
 			{
@@ -701,7 +709,12 @@ namespace VSFileSystem
 				if( DirectoryExists( datadir+"/mods/"+subdir))
 				{
 					if( FileExists( datadir+"/mods/"+subdir, config_file)>=0)
+					{
 						cout<<"CONFIGFILE - Found a config file in data directory, using : "<<(datadir+"/mods/"+subdir+"/"+config_file)<<endl;
+						weapon_list = "mods/"+subdir+"/weapon_list.xml";
+						config_file = "mods/"+subdir+"/"+config_file;
+						found = true;
+					}
 				}
 				else
 				{
@@ -712,7 +725,9 @@ namespace VSFileSystem
 		}
 		
 
-		// Next check if we have a config file in homedir
+		if( !found)
+		{
+		// Next check if we have a config file in homedir if we haven't found one for mod
 		if( FileExists( homedir, config_file)>=0)
 		{
 			cerr<<"CONFIGFILE - Found a config file in home directory, using : "<<(homedir+"/"+config_file)<<endl;
@@ -746,6 +761,8 @@ namespace VSFileSystem
 				VSExit(1);
 			}
 		}
+		}
+
 		char * conffile = new char[config_file.length()+1];
 		conffile[config_file.length()] = 0;
 		memcpy( conffile, config_file.c_str(), config_file.length());

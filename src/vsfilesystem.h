@@ -91,6 +91,7 @@ namespace VSFileSystem
 	extern string homedir;									// User home directory including .vegastrike subdir
 
 	extern string config_file;
+	extern string weapon_list;
 	extern string universe_name;
 	extern string HOMESUBDIR;
 	extern vector<string>		current_path;

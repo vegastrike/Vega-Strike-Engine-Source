@@ -67,7 +67,7 @@ jpeg_compress(char *dst, char *src, int width, int height, int dstsize, int qual
 }
 
 int
-jpeg_compress_to_file(char * *src, char *file, int width, int height, int quality) 
+jpeg_compress_to_file(char *src, char *file, int width, int height, int quality) 
 {
   FILE *outfile;
   struct jpeg_compress_struct cinfo;

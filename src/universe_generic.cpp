@@ -131,8 +131,7 @@ void SortStarSystems (std::vector <StarSystem *> &ss, StarSystem * drawn) {
 }
 void Universe::Init( const char * gal)
 {
-	// No need to load weapons on server side
-	//LoadWeapons("weapon_list.xml");
+	LoadWeapons(VSFileSystem::weapon_list.c_str());
 
 	this->galaxy = new GalaxyXML::Galaxy (gal);
 	static bool firsttime=false;
