@@ -150,7 +150,7 @@ Vector Planet::AddSpaceElevator (const std::string &name, const std::string & fa
 		Unit * un=UnitFactory::createUnit (name.c_str(),true,FactionUtil::GetFactionIndex(faction),"",NULL);
 		if (image->dockingports.back().pos.MagnitudeSquared()<10)
 			image->dockingports.clear();
-		image->dockingports.push_back (DockingPorts(ElevatorLoc.p,un->rSize()*1.5,true));
+		image->dockingports.push_back (DockingPorts(ElevatorLoc.p,un->rSize()*1.5,0,true));
 		un->SetRecursiveOwner(this);
 		un->SetOrientation(ElevatorLoc.getQ(),ElevatorLoc.getR());
 		un->SetPosition(ElevatorLoc.p);
@@ -303,7 +303,7 @@ void Planet::InitPlanet(QVector x,QVector y,float vely,const Vector & rotvel, fl
   static  float densityOfJumpPoint = XMLSupport::parse_float(vs_config->getVariable("physics","density_of_jump_point","100000"));
   static  float massofplanet = XMLSupport::parse_float(vs_config->getVariable("physics","mass_of_planet","10000000"));
   hull = (4./3)*M_PI*radius*radius*radius*(dest.empty()?densityOfRock:densityOfJumpPoint);
-  mass = massofplanet;
+  this->Mass = massofplanet;
   SetAI(new PlanetaryOrbit(this, vely, pos, x, y, orbitcent, parent)); // behavior
   terraintrans=NULL;
 
@@ -318,7 +318,7 @@ void Planet::InitPlanet(QVector x,QVector y,float vely,const Vector & rotvel, fl
       if (dock-radius<planetdockportminsize) {
 	dock = radius+planetdockportminsize;
       }
-      image->dockingports.push_back (DockingPorts (Vector(0,0,0),dock,true));
+      image->dockingports.push_back (DockingPorts (Vector(0,0,0),dock,0,true));
     }
   }
   string tempname = (::getCargoUnitName (filename));

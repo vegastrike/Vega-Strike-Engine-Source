@@ -727,7 +727,7 @@ float GameCockpit::LookupTargetStat (int stat, Unit *target) {
   static float fpsval=0;
   const float fpsmax=1;
   static float numtimes=fpsmax;
-  unsigned int armordat[8]; //short fix
+  float armordat[8]; //short fix
   Unit * tmpunit;
   switch (stat) {
   case UnitImages::SHIELDF:
@@ -786,7 +786,7 @@ float GameCockpit::LookupTargetStat (int stat, Unit *target) {
 	}
   case UnitImages::LOCK:
     if  ((tmpunit = target->GetComputerData().threat.GetUnit())) {
-      return (tmpunit->cosAngleTo (target,*(float*)&armordat[0],FLT_MAX,FLT_MAX)>.95);
+      return (tmpunit->cosAngleTo (target,*&armordat[0],FLT_MAX,FLT_MAX)>.95);
     }
     return 0;
   case UnitImages::MISSILELOCK:

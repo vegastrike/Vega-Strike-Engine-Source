@@ -32,7 +32,7 @@ protected:
   /// 8 armor vals and 1 for startfuel
 
     /// 8 armor vals and 1 for startfuel
-  unsigned int StartArmor[9]; //short fix
+  float StartArmor[9]; //short fix
 
   ///saved values to compare with current values (might need more for damage)
   float maxfuel, maxhull;

@@ -539,7 +539,7 @@ void Cockpit::Update () {
     if (suicide[_Universe->CurrentCockpit()]) {
       Unit * un=NULL;
       if ((un = parent.GetUnit())) {
-	unsigned int armor[8]; //short fix
+	float armor[8]; //short fix
 	un->ArmorData(armor);
 	un->DealDamageToHull(Vector(0,0,.1),un->GetHull()+2+armor[0]);
       }

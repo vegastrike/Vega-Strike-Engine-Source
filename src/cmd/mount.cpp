@@ -19,7 +19,10 @@ extern char SERVER;
 
 Mount::Mount() {
 	static weapon_info wi(weapon_info::BEAM);
+        functionality=1;
+        maxfunctionality=1;
 	type=&wi; size=weapon_info::NOWEAP;
+        functionality=maxfunctionality=1.0f;
 	ammo=-1;
 	status= UNCHOSEN;
 	processed=Mount::PROCESSED;
@@ -51,7 +54,9 @@ float Mount::ComputeAnimatedFrame(Mesh * gun) {
 		}
 	}
 }
-Mount::Mount(const string& filename, int am, int vol, float xyscale, float zscale){ //short fix
+Mount::Mount(const string& filename, int am, int vol, float xyscale, float zscale, float func,float maxfunc){ //short fix
+  functionality=func;
+  maxfunctionality=maxfunc;
   static weapon_info wi(weapon_info::BEAM);
   size = weapon_info::NOWEAP;
   static float xyscalestat=XMLSupport::parse_float (vs_config->getVariable ("graphics","weapon_xyscale","1"));

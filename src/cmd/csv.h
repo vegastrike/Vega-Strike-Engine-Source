@@ -31,6 +31,7 @@ class CSVRow {
   CSVTable * parent;
 public:
   std::string getRoot();
+  size_t size() {return parent->key.size();}
   CSVRow(CSVTable * parent, std::string key);
   CSVRow(CSVTable * parent, unsigned int which);
   CSVRow(){parent=NULL;iter=string::npos;}

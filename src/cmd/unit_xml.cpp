@@ -28,7 +28,7 @@
 
 /*ADDED FOR extensible use of unit pretty print and unit load */
 UNITLOADTYPE current_unit_load_mode = DEFAULT;
-
+extern float getFuelConversion();
 
 
 string KillQuadZeros(string inp) {
@@ -501,7 +501,8 @@ void pushMesh( Unit::XML * xml, const char *filename, const float scale,int fact
 
 Mount * createMount(const std::string& name, int ammo, int volume, float xyscale, float zscale) //short fix
 {
-	return new Mount (name.c_str(), ammo,volume,xyscale, zscale);
+	return new Mount (name.c_str(), ammo,volume,xyscale, zscale,1,1);
+
 }
 
 using XMLSupport::EnumMap;
@@ -510,7 +511,7 @@ using XMLSupport::AttributeList;
 extern int GetModeFromName (const char *);
 extern int parseMountSizes (const char * str);
 
-static unsigned int CLAMP_UINT(float x) {return (unsigned int)(((x)>4294967295)?4294967295:((x)<0?0:(x)));}  //short fix
+static unsigned int CLAMP_UINT(float x) {return (unsigned int)(((x)>4294967295.0)?(unsigned int)4294967295U:((x)<0?0:(x)));}  //short fix
 
 void Unit::beginElement(const string &name, const AttributeList &attributes) {
 using namespace UnitXML;
@@ -811,11 +812,11 @@ using namespace UnitXML;
       }
     }
     if (Q.i==FLT_MAX||Q.j==FLT_MAX||Q.k==FLT_MAX||R.i==FLT_MAX||R.j==FLT_MAX||R.k==FLT_MAX) {
-      image->dockingports.push_back (DockingPorts(pos.Cast(),P.i,tempbool));
+      image->dockingports.push_back (DockingPorts(pos.Cast(),P.i,0,tempbool));
     }else {
       QVector tQ = Q.Min (R);
       QVector tR = R.Max (Q);
-      image->dockingports.push_back (DockingPorts (tQ.Cast(),tR.Cast(),tempbool));
+      image->dockingports.push_back (DockingPorts (tQ.Cast(),tR.Cast(),0,tempbool));
     }
     break;
   case MESHLIGHT:
@@ -1440,13 +1441,14 @@ using namespace UnitXML;
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(attribute_map.lookup((*iter).name)) {
       case MASS:
-	mass = parse_float((*iter).value);
+	Mass = parse_float((*iter).value);
 	break;
       case MOMENTOFINERTIA:
-		  MomentOfInertia=parse_float((*iter).value);
+		  Momentofinertia=parse_float((*iter).value);
 	break;
       case FUEL:
-	fuel=parse_float((*iter).value);
+	fuel=Mass*60*getFuelConversion();
+        //FIXME! This is a hack until we get csv support
 	break;
       }
     }
@@ -1885,14 +1887,14 @@ void Unit::LoadXML(VSFileSystem::VSFile & f, const char * modifications, string 
     }
     {
       image->unitwriter->AddTag ("Armor");
-      image->unitwriter->AddElement("frontrighttop",uintStarHandler,XMLType(&armor.frontrighttop));//short fix
-      image->unitwriter->AddElement("backrighttop",uintStarHandler,XMLType(&armor.backrighttop)); //short fix
-      image->unitwriter->AddElement("frontlefttop",uintStarHandler,XMLType(&armor.frontlefttop)); //short fix
-      image->unitwriter->AddElement("backlefttop",uintStarHandler,XMLType(&armor.backlefttop)); //short fix
-	  image->unitwriter->AddElement("frontrightbottom",uintStarHandler,XMLType(&armor.frontrightbottom));//short fix
-      image->unitwriter->AddElement("backrightbottom",uintStarHandler,XMLType(&armor.backrightbottom)); //short fix
-      image->unitwriter->AddElement("frontleftbottom",uintStarHandler,XMLType(&armor.frontleftbottom)); //short fix
-      image->unitwriter->AddElement("backleftbottom",uintStarHandler,XMLType(&armor.backleftbottom)); //short fix
+      image->unitwriter->AddElement("frontrighttop",floatStarHandler,XMLType(&armor.frontrighttop));//short fix
+      image->unitwriter->AddElement("backrighttop",floatStarHandler,XMLType(&armor.backrighttop)); //short fix
+      image->unitwriter->AddElement("frontlefttop",floatStarHandler,XMLType(&armor.frontlefttop)); //short fix
+      image->unitwriter->AddElement("backlefttop",floatStarHandler,XMLType(&armor.backlefttop)); //short fix
+	  image->unitwriter->AddElement("frontrightbottom",floatStarHandler,XMLType(&armor.frontrightbottom));//short fix
+      image->unitwriter->AddElement("backrightbottom",floatStarHandler,XMLType(&armor.backrightbottom)); //short fix
+      image->unitwriter->AddElement("frontleftbottom",floatStarHandler,XMLType(&armor.frontleftbottom)); //short fix
+      image->unitwriter->AddElement("backleftbottom",floatStarHandler,XMLType(&armor.backleftbottom)); //short fix
       image->unitwriter->EndTag ("Armor");
     }    
     {
@@ -1927,8 +1929,8 @@ void Unit::LoadXML(VSFileSystem::VSFile & f, const char * modifications, string 
 
   {
     image->unitwriter->AddTag ("Stats");    
-    image->unitwriter->AddElement("mass",massSerializer,XMLType(&mass));
-    image->unitwriter->AddElement("momentofinertia",floatStarHandler,XMLType(&MomentOfInertia));
+    image->unitwriter->AddElement("mass",massSerializer,XMLType(&Mass));
+    image->unitwriter->AddElement("momentofinertia",floatStarHandler,XMLType(&Momentofinertia));
     image->unitwriter->AddElement("fuel",floatStarHandler,XMLType(&fuel));
     image->unitwriter->EndTag ("Stats");    
     image->unitwriter->AddTag ("Thrust");    

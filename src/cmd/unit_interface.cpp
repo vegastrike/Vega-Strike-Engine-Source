@@ -1379,7 +1379,7 @@ std::string GetNumKills(Unit *un) {
 		text+=FactionUtil::GetFactionName(i)+"  ";
 		relation = relation * 0.5;
 		relation = relation + 0.5;
-		int percent = relation * 100.0;
+		int percent = (int)(relation * 100.0);
 		text+=(XMLSupport::tostring (percent));
 		if (i<killlist->size()) {
 			text+=" | ";

@@ -3,7 +3,7 @@
 
   ///Armor values: how much damage armor can withhold before internal damage accrues
   struct Armor {
-    unsigned int frontlefttop, backlefttop, frontrighttop, backrighttop, frontleftbottom, backleftbottom, frontrightbottom, backrightbottom;
+    float frontlefttop, backlefttop, frontrighttop, backrighttop, frontleftbottom, backleftbottom, frontrightbottom, backrightbottom;
 
     Armor( ) : frontlefttop(0), backlefttop(0), frontrighttop(0), backrighttop(0), frontleftbottom(0), backleftbottom(0), frontrightbottom(0), backrightbottom(0) { }
   };

@@ -84,7 +84,7 @@ void GameUnit<UnitType>::Split (int level) {
     tempmeshes.push_back (old[i]);
     this->SubUnits.prepend(splitsub = UnitFactory::createUnit (tempmeshes,true,this->faction));
     splitsub->hull = 1000;
-    splitsub->mass = debrismassmult*this->mass/level;
+    splitsub->Mass = debrismassmult*Mass/level;
     splitsub->image->timeexplode=.1;
     if (splitsub->meshdata[0]) {
       Vector loc = splitsub->meshdata[0]->Position();
@@ -102,7 +102,7 @@ void GameUnit<UnitType>::Split (int level) {
   old.clear();
   this->meshdata.clear();
   this->meshdata.push_back(NULL);//the shield
-  this->mass*=debrismassmult;
+  this->Mass*=debrismassmult;
 }
 
 extern Music *muzak;

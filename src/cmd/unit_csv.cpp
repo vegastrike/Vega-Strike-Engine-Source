@@ -7,20 +7,51 @@
 #include "collide/rapcol.h"
 #include "gfx/bsp.h"
 #include "unit_factory.h"
+#include "audiolib.h"
+#include "unit_xml.h"
+#include "gfx/quaternion.h"
+#include "role_bitmask.h"
+#define VS_PI 3.1415926536
+
 using namespace std;
 extern int GetModeFromName (const char * input_buffer);
 extern void pushMesh( Unit::XML * xml, const char *filename, const float scale,int faction,class Flightgroup * fg, int startframe, double texturestarttime);
 void addShieldMesh( Unit::XML * xml, const char *filename, const float scale,int faction,class Flightgroup * fg);
 void addRapidMesh( Unit::XML * xml, const char *filename, const float scale,int faction,class Flightgroup * fg);
 void addBSPMesh( Unit::XML * xml, const char *filename, const float scale,int faction,class Flightgroup * fg);
+static vector<string> parseSemicolon(string inp) {
+  vector<string> ret;
+  string::size_type where;
+  while((where=inp.find(";"))!=string::npos) {
+    ret.push_back(inp.substr(0,where));
+    inp=inp.substr(where+1);
+  }
+  ret.push_back(inp);
+  return ret;
+}
+static vector<vector<string> > parseBracketSemicolon(string inp) {
+  vector<vector<string> >ret;  
+  string::size_type where;
+  while ((where=inp.find("{"))!=string::npos) {
+    inp=inp.substr(where+1);
+    where=inp.find("}");
+    string tmp=inp.substr(0,where);
+    inp=inp.substr(where+1);
+    ret.push_back(parseSemicolon(inp));
+  }
+  return ret;
+}
+
 static void UpgradeUnit (Unit * un, std::string upgrades) {
-  while (upgrades.length()) {
-    string::size_type where = upgrades.find(";");
+  string::size_type when;
+  while ((when=upgrades.find("{"))!=string::npos) {
+    upgrades=upgrades.substr(when+1);
+    string::size_type where = upgrades.find("}");
     unsigned int mountoffset=0;
     unsigned int subunitoffset=0;
     string upgrade = upgrades.substr(0,where);
-    string::size_type where1 = upgrade.find(":");
-    string::size_type where2 = upgrade.rfind(":");
+    string::size_type where1 = upgrade.find(";");
+    string::size_type where2 = upgrade.rfind(";");
     if (where1!=string::npos) {
       mountoffset=XMLSupport::parse_int(upgrade.substr(where1+1,where2!=where1?where2:upgrade.length()));      
       if (where2!=where1&&where2!=string::npos) {
@@ -40,36 +71,383 @@ static void UpgradeUnit (Unit * un, std::string upgrades) {
                        subunitoffset,
                        GetModeFromName (upgrade.c_str()),true,percent,NULL);
     upgradee->Kill();    
-    if (where!=string::npos) {
-      upgrades=upgrades.substr(where+1);
-    }else break;
   }  
 }
-static void AddMeshes(Unit::XML& xml, std::string meshes,string meshStartFrame, string textureStartTime,int faction,Flightgroup *fg){
+
+
+static void AddMeshes(Unit::XML& xml, std::string meshes,int faction,Flightgroup *fg){
   string::size_type where,wheresf,wherest;
-  while (meshes.length()) {
-    where=meshes.find(";");
-    wheresf = meshStartFrame.find(":");
-    wherest = textureStartTime.find(":");
-    string startf = strtoupper(meshStartFrame.substr(0,wheresf));
-    string startt = strtoupper(textureStartTime.substr(0,wherest));
+  while ((where=meshes.find("{"))!=string::npos) {
+    meshes=meshes.substr(where+1);
+    where=meshes.find("}");//matching closing brace
+    string mesh = meshes.substr(0,where);
+    
+    wheresf = mesh.find(";");
+    string startf = "0";
+    string startt="0";
+    if (wheresf!=string::npos) {
+      startf=mesh.substr(wheresf+1);
+      mesh = mesh.substr(0,wheresf); 
+      wherest = startf.find(";");
+      if (wherest!=string::npos) {
+        startt=startf.substr(wherest+1);
+        startf=startf.substr(0,wherest);
+      }
+    }    
     int startframe = startf=="RANDOM"?-1:(startf=="ASYNC"?-1:atoi(startf.c_str()));
     float starttime = startt=="RANDOM"?-1.0f:atof(startt.c_str());
-    string mesh = meshes.substr(0,where);
+    
     pushMesh(&xml,mesh.c_str(),xml.unitscale,faction,fg,startframe,starttime);
-    if (wheresf!=string::npos) 
-      meshStartFrame.substr(wheresf+1);
-    if (wherest!=string::npos) 
-      textureStartTime.substr(wherest+1);
-    if (where!=string::npos)
-      meshes=meshes.substr(where+1);
-    else
-      break;
   }
+}
+static string nextElement (string&inp) {
+  string::size_type where=inp.find(";");
+  if (where!=string::npos) {
+    string ret=inp.substr(0,where);
+    inp=inp.substr(where+1);
+    return ret;
+  }
+  string ret=inp;
+  inp="";
+  return ret;
+}
+static double stof(string inp, double def=0) {
+  if (inp.length()==0)
+    return XMLSupport::parse_float(inp);
+  return def;
+}
+static int stoi(string inp, int def=0) {
+  if (inp.length()==0)
+    return XMLSupport::parse_int(inp);
+  return def;
+}
+extern bool CheckAccessory(Unit *);
+extern int parseMountSizes (const char * str);
+static Mount * createMount(const std::string& name, int ammo, int volume, float xyscale, float zscale, float func, float maxfunc) //short fix
+{
+	return new Mount (name.c_str(), ammo,volume,xyscale, zscale,func,maxfunc);
+
+}
+
+static void AddMounts(Unit * thus, Unit::XML &xml, std::string mounts) {
+  string::size_type where;
+  while ((where=mounts.find("{"))!=string::npos) {
+    mounts=mounts.substr(where+1);    
+    if ((where=mounts.find("}"))!=string::npos) {
+      string mount=mounts.substr(0,where);      
+      mounts=mounts.substr(where+1);      
+      QVector P;
+      QVector Q = QVector (0,1,0);
+      QVector R = QVector (0,0,1);
+      QVector pos = QVector (0,0,0);
+      
+      string filename = nextElement(mount);
+      int ammo = stoi(nextElement(mount));      
+      int volume = stoi(nextElement(mount));      
+      string mountsize=nextElement(mount);
+      pos.i = stof(nextElement(mount));
+      pos.j = stof(nextElement(mount));
+      pos.k = stof(nextElement(mount));
+      double xyscale = stof(nextElement(mount));
+      double zscale = stof(nextElement(mount));
+      Q.i = stof(nextElement(mount));
+      Q.j = stof(nextElement(mount),1);
+      Q.k = stof(nextElement(mount));
+      R.i = stof(nextElement(mount));
+      R.j = stof(nextElement(mount));
+      R.k = stof(nextElement(mount),1);
+      float func =stof(nextElement(mount),1);
+      float maxfunc =stof(nextElement(mount),1);
+
+      Q.Normalize();
+      if (fabs(Q.i)==fabs(R.i)&&fabs(Q.j)==fabs(R.j)&&fabs(Q.k)==fabs(R.k)){
+        Q.i=-1;
+        Q.j=0;
+        Q.k=0;
+      }
+      R.Normalize();
+      
+      CrossProduct (Q,R,P);
+      CrossProduct (R,P,Q);
+      Q.Normalize();
+      //Transformation(Quaternion (from_vectors (P,Q,R),pos);
+      unsigned int indx = xml.mountz.size();
+      xml.mountz.push_back(createMount (filename.c_str(), ammo,volume,xyscale,zscale,func,maxfunc));
+      xml.mountz[indx]->SetMountOrientation(Quaternion::from_vectors(P.Cast(),Q.Cast(),R.Cast()));
+      xml.mountz[indx]->SetMountPosition(pos.Cast());
+      int mntsiz=weapon_info::NOWEAP;
+      if (mountsize.length()) {
+        mntsiz=parseMountSizes(mountsize.c_str());
+        xml.mountz[indx]->size=mntsiz;
+      }else {
+        xml.mountz[indx]->size = xml.mountz[indx]->type->size;
+      }
+      if (xml.mountz.size())
+      {
+        // DO not destroy anymore, just affect address
+	  for( int a=0; a<xml.mountz.size(); a++)
+		thus->mounts.push_back( *xml.mountz[a]);
+          //mounts[a]=*xml.mountz[a];
+          //delete xml.mountz[a];			//do it stealthily... no cons/destructor
+      }
+      unsigned char parity=0;
+      for (int a=0;a<xml.mountz.size();a++) {
+        static bool half_sounds = XMLSupport::parse_bool(vs_config->getVariable ("audio","every_other_mount","false"));
+        if (a%2==parity) {
+          int b=a;
+          if(a % 4 == 2 && (int) a < (thus->GetNumMounts()-1)) 
+            if (thus->mounts[a].type->type != weapon_info::PROJECTILE&&thus->mounts[a+1].type->type != weapon_info::PROJECTILE)
+              b=a+1;
+          thus->mounts[b].sound = AUDCreateSound (thus->mounts[b].type->sound,thus->mounts[b].type->type!=weapon_info::PROJECTILE);
+        } else if ((!half_sounds)||thus->mounts[a].type->type == weapon_info::PROJECTILE) {
+          thus->mounts[a].sound = AUDCreateSound (thus->mounts[a].type->sound,thus->mounts[a].type->type!=weapon_info::PROJECTILE);    //lloping also flase in unit_customize  
+        }
+        if (a>0) {
+          if (thus->mounts[a].sound==thus->mounts[a-1].sound&&thus->mounts[a].sound!=-1) {
+            printf ("Sound error\n");
+          }
+        }
+      }
+    }
+  }
+      
+    //->curr_physical_state=xml.units[indx]->prev_physical_state;
+}
+struct SubUnitStruct{
+  string filename;
+  QVector pos;
+  QVector Q;
+  QVector R;
+  double restricted;
+  SubUnitStruct(string fn, QVector POS, QVector q, QVector r, double res) {
+    filename=fn;
+    pos=POS;
+    Q=q;
+    R=r;
+    restricted=res;
+  }
+};
+static vector<SubUnitStruct> GetSubUnits(std::string subunits) {
+ string::size_type where;
+ vector<SubUnitStruct> ret;
+  while ((where=subunits.find("{"))!=string::npos) {
+    subunits=subunits.substr(where+1);    
+    if ((where=subunits.find("}"))!=string::npos) {
+      string subunit=subunits.substr(0,where);      
+      subunits=subunits.substr(where+1);      
+      string filename=nextElement(subunit);
+      QVector pos,Q,R;
+      pos.i=stof(nextElement(subunit));
+      pos.j=stof(nextElement(subunit));
+      pos.k=stof(nextElement(subunit));
+      R.i=stof(nextElement(subunit));
+      R.j=stof(nextElement(subunit));
+      R.k=stof(nextElement(subunit));
+      Q.i=stof(nextElement(subunit));
+      Q.j=stof(nextElement(subunit));
+      Q.k=stof(nextElement(subunit));
+      double restricted=stof(nextElement(subunit),-1);
+      ret.push_back(SubUnitStruct(filename,pos,R,Q,restricted));
+    }
+  }
+  return ret;
+}
+static void AddSubUnits (Unit *thus, Unit::XML &xml, std::string subunits, int faction) {
+  vector<SubUnitStruct> su=GetSubUnits(subunits);
+  for (vector<SubUnitStruct>::iterator i=su.begin();i!=su.end();++i) {
+    string filename=(*i).filename;
+    QVector pos=(*i).pos;
+    QVector Q= (*i).Q;
+    QVector R= (*i).R;
+    double restricted=(*i).restricted;
+    xml.units.push_back(UnitFactory::createUnit (filename.c_str(),true,faction,xml.unitModifications,NULL)); // I set here the fg arg to NULL
+    if (xml.units.back()->name=="LOAD_FAILED") {
+      xml.units.back()->limits.yaw=0;
+      xml.units.back()->limits.pitch=0;
+      xml.units.back()->limits.roll=0;
+      xml.units.back()->limits.lateral = xml.units.back()->limits.retro = xml.units.back()->limits.forward = xml.units.back()->limits.afterburn=0.0;        
+    }
+    xml.units.back()->SetRecursiveOwner (thus);
+    xml.units.back()->SetOrientation (Q,R);
+    R.Normalize();
+    xml.units.back()->prev_physical_state = xml.units.back()->curr_physical_state;
+    xml.units.back()->SetPosition(pos);
+    //    xml.units.back()->prev_physical_state= Transformation(Quaternion::from_vectors(P,Q,R),pos);
+    //    xml.units.back()->curr_physical_state=xml.units.back()->prev_physical_state;
+    xml.units.back()->limits.structurelimits=R.Cast();
+    xml.units.back()->limits.limitmin=restricted;
+    xml.units.back()->name = filename;
+    if (xml.units.back()->image->unitwriter!=NULL) {
+      xml.units.back()->image->unitwriter->setName (filename);
+    }
+    CheckAccessory(xml.units.back());//turns on the ceerazy rotation for the turr          
+  }
+  for(unsigned int a=0; a<xml.units.size(); a++) {
+    thus->SubUnits.prepend(xml.units[a]);
+  }
+}
+
+void AddDocks (Unit* thus, string docks) {
+  string::size_type where;
+  while ((where=docks.find("{"))!=string::npos) {
+    docks=docks.substr(where+1);    
+    if ((where=docks.find("}"))!=string::npos) {
+      string dock=docks.substr(0,where);      
+
+      docks=docks.substr(where+1);      
+      QVector pos=QVector(0,0,0);
+      bool internal=XMLSupport::parse_bool(nextElement(dock));
+      pos.i=stof(nextElement(dock));
+      pos.j=stof(nextElement(dock));
+      pos.k=stof(nextElement(dock));
+      double size=stof(nextElement(dock));
+      double minsize=stof(nextElement(dock));
+      thus->image->dockingports.push_back (DockingPorts(pos.Cast(),size,minsize,internal));      
+    }
+  }
+}
+void AddLights (Unit * thus, Unit::XML &xml, string lights) {
+  string::size_type where;
+  while ((where=lights.find("{"))!=string::npos) {
+    lights= lights.substr(where+1);
+    where=lights.find("}");
+    if (where!=string::npos) {
+      string light = lights.substr(0,where);
+      lights=lights.substr(where+1);
+      string filename = nextElement(light);
+      QVector pos,scale;
+      GFXColor halocolor;
+      pos.i=stof(nextElement(light));
+      pos.j=stof(nextElement(light));
+      pos.k=stof(nextElement(light));
+      scale.i=xml.unitscale*stof(nextElement(light),1);
+      scale.j=scale.k=scale.i;
+      halocolor.r=stof(nextElement(light),1);
+      halocolor.g=stof(nextElement(light),1);
+      halocolor.b=stof(nextElement(light),1);
+      halocolor.a=stof(nextElement(light),1);
+      double act_speed=stof(nextElement(light));
+      thus->addHalo(filename.c_str(),pos,scale.Cast(),halocolor,"",act_speed);
+    }
+  }
+}
+
+static void ImportCargo(Unit * thus,string imports) {
+  string::size_type where;
+  while ((where=imports.find("{"))!=string::npos) {
+    imports= imports.substr(where+1);
+    where=imports.find("}");
+    if (where!=string::npos) {
+      string imp = imports.substr(0,where);
+      imports=imports.substr(where+1);
+      string filename = nextElement(imp);
+      double price = stof(nextElement(imp),1);
+      double pricestddev = stof(nextElement(imp));
+      double quant = stof(nextElement(imp),1);
+      double quantstddev = stof(nextElement(imp));
+      thus->ImportPartList(filename,price,pricestddev,quant,quantstddev);
+    }
+  }
+}
+static void AddCarg (Unit *thus, string cargos) {
+ string::size_type where;
+  while ((where=cargos.find("{"))!=string::npos) {
+    cargos= cargos.substr(where+1);
+    where=cargos.find("}");
+    if (where!=string::npos) {
+      Cargo carg;
+      string cargo = cargos.substr(0,where);
+      cargos=cargos.substr(where+1);
+      carg.content = nextElement(cargo);      
+      carg.category = nextElement(cargo);      
+      carg.price = stof(nextElement(cargo));
+      carg.quantity = stoi(nextElement(cargo));
+      carg.mass = stof(nextElement(cargo));
+      carg.volume = stof(nextElement(cargo));
+      carg.functionality = stof(nextElement(cargo));
+      carg.maxfunctionality = stof(nextElement(cargo));
+      string ele=nextElement(cargo);
+      if (ele.length())
+        carg.description= strdup (ele.c_str());
+      else
+        carg.description="";
+      carg.mission = false;
+      string mis =nextElement(cargo);
+      if (mis.length()) {
+        carg.mission=XMLSupport::parse_bool(mis);
+      }
+      thus->AddCargo(carg,false);
+    }
+  }
+}
+void AddSounds(Unit * thus, string sounds) {
+  if (sounds.length()!=0) {
+    thus->sound->shield=AUDCreateSoundWAV(nextElement(sounds),false);
+    thus->sound->armor=AUDCreateSoundWAV(nextElement(sounds),false);
+    thus->sound->hull=AUDCreateSoundWAV(nextElement(sounds),false);
+    thus->sound->jump=AUDCreateSoundWAV(nextElement(sounds),false);
+    thus->sound->explode=AUDCreateSoundWAV(nextElement(sounds),false);
+    thus->sound->cloak=AUDCreateSoundWAV(nextElement(sounds),false);
+    thus->sound->engine=AUDCreateSoundWAV(nextElement(sounds),true);
+  }
+    if (thus->sound->cloak==-1) {
+      thus->sound->cloak=AUDCreateSound(vs_config->getVariable ("unitaudio","cloak", "sfx43.wav"),false);
+    }
+    if (thus->sound->engine==-1) {
+      thus->sound->engine=AUDCreateSound (vs_config->getVariable ("unitaudio","afterburner","sfx10.wav"),true);
+	  cout<<"default engine sound : sfx10.wav - thus->sound->engine : "<<thus->sound->engine<<endl;
+    }
+    if (thus->sound->shield==-1) {
+      thus->sound->shield=AUDCreateSound (vs_config->getVariable ("unitaudio","shield","sfx09.wav"),false);
+    }
+    if (thus->sound->armor==-1) {
+      thus->sound->armor=AUDCreateSound (vs_config->getVariable ("unitaudio","armor","sfx08.wav"),false);
+    }
+    if (thus->sound->hull==-1) {
+      thus->sound->hull=AUDCreateSound (vs_config->getVariable ("unitaudio","armor","sfx08.wav"),false);
+    }
+    if (thus->sound->explode==-1) {
+      thus->sound->explode=AUDCreateSound (vs_config->getVariable ("unitaudio","explode","sfx03.wav"),false);
+    }
+    if (thus->sound->jump==-1) {
+      thus->sound->jump=AUDCreateSound (vs_config->getVariable ("unitaudio","explode","sfx43.wav"),false);
+    }
+}
+void LoadCockpit(Unit * thus, string cockpit, string cockpitdamage) {
+  int i=0;
+  while (cockpitdamage!=""&&i<2*(UnitImages::NUMGAUGES+1+MAXVDUS)) {    
+    thus->image->cockpit_damage[i]=stof(nextElement(cockpitdamage));   
+    thus->image->cockpit_damage[i+1]=stof(nextElement(cockpitdamage));
+    i+=2;
+  }
+  thus->image->cockpitImage=nextElement(cockpit);
+  thus->image->CockpitCenter.i=stof(nextElement(cockpit));   
+  thus->image->CockpitCenter.j=stof(nextElement(cockpit));   
+  thus->image->CockpitCenter.k=stof(nextElement(cockpit));   
+
+}
+static string str(string inp, string def) {
+  if (inp.length()==0) return def;
+  return inp;
+}
+static int AssignIf(string inp,float &val,float&val1, float&val2) {
+  if (inp.length()) {
+    val=stof(inp);
+    val1=stof(inp);
+    val2=stof(inp);
+    return 1;
+  }
+  return 0;
+}
+float getFuelConversion(){
+  static float fuel_conversion = XMLSupport::parse_float(vs_config->getVariable("physics","FuelConversion",".00144"));
+  return fuel_conversion;
 }
 
 void Unit::LoadRow(CSVRow &row,string modification, string * netxml) {
   Unit::XML xml;
+
+  string tmpstr;
   csvRow = row[0];
   //
   image->cargo_volume = atof(row["CargoVolume"].c_str());
@@ -77,16 +455,154 @@ void Unit::LoadRow(CSVRow &row,string modification, string * netxml) {
 
   //begin the geometry (and things that depend on stats)
   UpgradeUnit(this,row["Upgrade"]);
-  xml.unitscale = atoi(row["Unit_Scale"].c_str());
+  fullname=row["Name"];
+  //image->description=row["Description"];
+  if ((tmpstr=row["Hud_image"]).length()!=0) {
+    image->hudImage = createVSSprite(tmpstr.c_str());
+  }  
+  combat_role=ROLES::getRole(row["Combat_Role"]);
+  xml.unitscale = stoi(row["Unit_Scale"],1);
   if (!xml.unitscale) xml.unitscale=1;
   image->unitscale=xml.unitscale;
-  AddMeshes(xml,row["Mesh"],row["MeshStartFrame"],row["MeshTextureStartFrame"],faction,getFlightgroup());
+  AddMeshes(xml,row["Mesh"],faction,getFlightgroup());
+  AddSubUnits(this,xml,row["Sub_Units"],faction);
   meshdata= xml.meshes;
   meshdata.push_back(NULL);
   corner_min = Vector(FLT_MAX, FLT_MAX, FLT_MAX);
   corner_max = Vector(-FLT_MAX, -FLT_MAX, -FLT_MAX);
   calculate_extent(false);
-  xml.shieldmesh_str = row["ShieldMesh"];
+  AddMounts(this,xml,row["Mounts"]);
+  this->image->cargo_volume=stof(row["Hold_Volume"]);
+  this->image->equipment_volume=stof(row["Equipment_Space"]);
+  ImportCargo(this,row["Cargo_Imports"]);
+  AddCarg(this,row["Cargo"]);
+  AddSounds(this,row["Sounds"]);
+  LoadCockpit(this,row["Cockpit"],row["CockpitDamage"]);
+  image->CockpitCenter.i=stof(row["CockpitX"])*xml.unitscale;
+  image->CockpitCenter.j=stof(row["CockpitY"])*xml.unitscale;
+  image->CockpitCenter.k=stof(row["CockpitZ"])*xml.unitscale;
+  Mass=stof(row["Mass"],1.0);
+  Momentofinertia=stof(row["Moment_Of_Inertia"],1.0);
+  fuel=Mass*stof(row["Fuel_Capacity"])*getFuelConversion();
+  hull=maxhull = stof(row["Hull"]);
+  armor.frontlefttop=stof(row["Armor_Front_Top_Left"]);
+  armor.frontrighttop=stof(row["Armor_Front_Top_Right"]);
+  armor.backlefttop=stof(row["Armor_Back_Top_Left"]);
+  armor.backrighttop=stof(row["Armor_Back_Top_Right"]);
+  armor.frontleftbottom=stof(row["Armor_Front_Bottom_Left"]);
+  armor.frontrightbottom=stof(row["Armor_Front_Bottom_Right"]);
+  armor.backleftbottom=stof(row["Armor_Back_Bottom_Left"]);
+  armor.backrightbottom=stof(row["Armor_Back_Bottom_Right"]);
+  int shieldcount=0;
+  Shield two;
+  Shield four;
+  Shield eight;
+  shieldcount+=AssignIf(row["Shield_Front_Top_Right"],
+                        two.shield2fb.front,four.shield4fbrl.front,eight.shield8.frontrighttop);
+  shieldcount+=AssignIf(row["Shield_Front_Top_Left"],
+                        two.shield2fb.front,four.shield4fbrl.front,eight.shield8.frontlefttop);
+  shieldcount+=AssignIf(row["Shield_Front_Top_Right"],
+                        two.shield2fb.front,four.shield4fbrl.front,eight.shield8.frontrighttop);
+  shieldcount+=AssignIf(row["Shield_Back_Top_Left"],
+                        two.shield2fb.back,four.shield4fbrl.back,eight.shield8.backlefttop);
+  shieldcount+=AssignIf(row["Shield_Back_Top_Right"],
+                        two.shield2fb.back,four.shield4fbrl.back,eight.shield8.backrighttop);
+
+  shieldcount+=AssignIf(row["Shield_Front_Bottom_Left"],
+                        two.shield2fb.front,four.shield4fbrl.left,eight.shield8.frontleftbottom);
+  shieldcount+=AssignIf(row["Shield_Front_Bottom_Right"],
+                        two.shield2fb.front,four.shield4fbrl.right,eight.shield8.frontrightbottom);
+  shieldcount+=AssignIf(row["Shield_Back_Bottom_Left"],
+                        two.shield2fb.back,four.shield4fbrl.left,eight.shield8.backleftbottom);
+  shieldcount+=AssignIf(row["Shield_Back_Bottom_Right"],
+                        two.shield2fb.back,four.shield4fbrl.right,eight.shield8.backrightbottom);
+  two.shield2fb.frontmax=two.shield2fb.front;
+  two.shield2fb.backmax=two.shield2fb.back;
+  four.shield4fbrl.frontmax=four.shield4fbrl.front;
+  four.shield4fbrl.backmax=four.shield4fbrl.back;
+  four.shield4fbrl.rightmax=four.shield4fbrl.right;
+  four.shield4fbrl.leftmax=four.shield4fbrl.left;
+
+  eight.shield8.frontlefttopmax=eight.shield8.frontlefttopmax;
+  eight.shield8.frontrighttopmax=eight.shield8.frontrighttopmax;
+  eight.shield8.backrighttopmax=eight.shield8.backrighttopmax;
+  eight.shield8.backlefttopmax=eight.shield8.backlefttopmax;
+  eight.shield8.frontleftbottommax=eight.shield8.frontleftbottommax;
+  eight.shield8.frontrightbottommax=eight.shield8.frontrightbottommax;
+  eight.shield8.backrightbottommax=eight.shield8.backrightbottommax;
+  eight.shield8.backleftbottommax=eight.shield8.backleftbottommax;
+  
+  if (shieldcount==8) {
+    shield=eight;
+    shield.number=8;
+    }else if (shieldcount==4){
+    shield=four;
+    shield.number=4;
+  }else {
+    shield=two;
+    shield.number=2;
+  }
+  shield.leak = (char)(stof(row["Shield_Leak"])*100.0);
+  shield.recharge=stof(row["Shield_Recharge"]);
+  maxwarpenergy=warpenergy=stof(row["Warp_Capacitor"]);
+  maxenergy=energy=stof(row["Primary_Capacitor"]);
+  recharge=stof(row["Reactor_Recharge"]);
+  jump.drive=XMLSupport::parse_bool(row["Jump_Drive_Present"])?-1:-2;
+  jump.delay = stoi(row["Jump_Drive_Delay"]);
+  image->forcejump=XMLSupport::parse_bool(row["Wormhole"]);
+  jump.energy=stof(row["Outsystem_Jump_Cost"]);
+  jump.insysenergy=stof(row["Warp_Usage_Cost"]);
+  afterburnenergy=stof(row["Afterburner_Usage_Cost"]);
+  if (stoi(row["Afterburner_Type"])==1)
+    afterburnenergy*=-1;
+  limits.yaw=Mass*stof(row["Maneuver_Yaw"])*Mass*VS_PI/180.;
+  limits.pitch=Mass*stof(row["Maneuver_Pitch"])*Mass*VS_PI/180.;
+  limits.roll=Mass*stof(row["Maneuver_Roll"])*Mass*VS_PI/180.;
+  computer.max_yaw=stof(row["Yaw_Governor"])*VS_PI/180.;
+  computer.max_pitch=stof(row["Pitch_Governor"])*VS_PI/180.;
+  computer.max_roll=stof(row["Roll_Governor"])*VS_PI/180.;
+  static float game_accel=XMLSupport::parse_float(vs_config->getVariable("physics","game_accel","1"));
+  static float game_speed=XMLSupport::parse_float(vs_config->getVariable("physics","game_speed","1"));
+  limits.afterburn = stof(row["Afterburner_Accel"])*game_accel*game_speed*Mass;
+  limits.forward = stof(row["Forward_Accel"])*game_accel*game_speed*Mass;
+  limits.retro = stof(row["Retro_Accel"])*game_accel*game_speed*Mass;
+  limits.lateral = .5*(stof(row["Left_Accel"])+stof(row["Right_Accel"]))*game_accel*game_speed*Mass;
+  limits.vertical = .5*(stof(row["Top_Accel"])+stof(row["Bottom_Accel"]))*game_accel*game_speed*Mass;
+  computer.max_combat_speed=stof(row["Default_Speed_Governor"])*game_speed;
+  computer.max_combat_ab_speed=stof(row["Afterburner_Speed_Governor"])*game_speed;
+  computer.itts = XMLSupport::parse_bool(row["ITTS"]);
+  computer.radar.color=XMLSupport::parse_bool(row["Radar_Color"]);
+  computer.radar.maxrange=XMLSupport::parse_bool(row["Radar_Range"]);
+  computer.radar.maxcone=cos(stof(row["Max_Cone"]))*180./VS_PI;
+  computer.radar.trackingcone=cos(stof(row["Tracking_Cone"]))*180./VS_PI;
+  computer.radar.lockcone=cos(stof(row["Lock_Cone"]))*180./VS_PI;
+  cloakmin=(int)(stof(row["Cloak_Min"])*100);
+  if (!XMLSupport::parse_bool(row["Can_Cloak"]))
+    cloaking=-1;
+  image->cloakrate = (int)(2147483647.*stof(row["Cloak_Rate"])); //short fix  
+  image->cloakenergy=stof(row["Cloak_Energy"]);
+  image->cloakglass=XMLSupport::parse_bool(row["Cloak_Glass"]);
+  image->repair_droid=stoi(row["Repair_Droid"]);
+  image->ecm = stoi(row["ECM_Rating"]);
+  if (image->ecm<0) image->ecm*=-1;
+  image->LifeSupportFunctionality=stof(row["Lifesupport_Functionality"]);
+  image->LifeSupportFunctionalityMax=stof(row["Max_Lifesupport_Functionality"]);
+  image->CommFunctionality=stof(row["Comm_Functionality"]);
+  image->CommFunctionalityMax=stof(row["Max_Comm_Functionality"]);
+  image->fireControlFunctionality=stof(row["FireControl_Functionality"]);
+  image->fireControlFunctionalityMax=stof(row["Max_FireControl_Functionality"]);
+  image->SPECDriveFunctionality=stof(row["SPECDrive_Functionality"]);
+  image->SPECDriveFunctionalityMax=stof(row["Max_SPECDrive_Functionality"]);
+  computer.slide_start=stoi(row["Slide_Start"]);
+  computer.slide_end=stoi(row["Slide_End"]);
+
+
+  this->image->explosion_type = row["Explosion"];
+  if (image->explosion_type.length())
+    cache_ani (image->explosion_type);
+
+
+  xml.shieldmesh_str = row["Shield_Mesh"];
   if (xml.shieldmesh_str.length()){
     addShieldMesh(&xml,xml.shieldmesh_str.c_str(),xml.unitscale,faction,getFlightgroup());
     meshdata.back()=xml.shieldmesh;
@@ -97,8 +613,8 @@ void Unit::LoadRow(CSVRow &row,string modification, string * netxml) {
   meshdata.back()->EnableSpecialFX();
   //Begin the Pow-w-w-war Zone Collide Tree Generation
   {
-    xml.bspmesh_str = row["BSPMesh"];
-    xml.rapidmesh_str = row["RapidMesh"];
+    xml.bspmesh_str = row["BSP_Mesh"];
+    xml.rapidmesh_str = row["Rapid_Mesh"];
     vector<bsp_polygon> polies;
     std::string collideTreeHash = VSFileSystem::GetHashName(string(modification)+"#"+row[0]);
     this->colTrees = collideTrees::Get(collideTreeHash);
@@ -114,10 +630,10 @@ void Unit::LoadRow(CSVRow &row,string modification, string * netxml) {
       string val;
       xml.hasBSP=1;
       xml.hasColTree=1;
-      if ((val=row["HasBSP"]).length()) {
+      if ((val=row["Use_BSP"]).length()) {
         xml.hasBSP = XMLSupport::parse_bool(val);
       }
-      if ((val=row["HasRapid"]).length()) {
+      if ((val=row["Use_Rapid"]).length()) {
         xml.hasColTree= XMLSupport::parse_bool(val);
       }
       if (xml.shieldmesh) {
@@ -134,8 +650,12 @@ void Unit::LoadRow(CSVRow &row,string modification, string * netxml) {
       }
       if (xml.rapidmesh_str.length())
         addRapidMesh(&xml,xml.rapidmesh_str.c_str(),xml.unitscale,faction,getFlightgroup());
+      else 
+        xml.rapidmesh=NULL;
       if (xml.bspmesh_str.length())
         addBSPMesh(&xml,xml.bspmesh_str.c_str(),xml.unitscale,faction,getFlightgroup());
+      else
+        xml.bspmesh=NULL;
       if (xml.hasBSP) {
         tmpname += ".bsp";
         if (!CheckBSP (tmpname.c_str())) {
@@ -236,6 +756,28 @@ void Unit::WriteUnit (const char * modifications) {
   }
 }
 using XMLSupport::tostring;
+
+static void mapToStringVec(map<string,string> a, vector<string> &key, vector<string> &value) {
+  for (map<string,string>::iterator i = a.begin();i!=a.end();++i) {
+    key.push_back(i->first);
+    value.push_back(i->second);
+  }
+}
+static string tos(float val) {
+  return XMLSupport::tostring(val);
+}
+static string tos(double val) {
+  return XMLSupport::tostring((float)val);
+}
+static string tos(unsigned int val) {
+  return XMLSupport::tostring(val);
+}
+static string tos(bool val) {
+  return XMLSupport::tostring((int)val);
+}
+static string tos(int val) {
+  return XMLSupport::tostring(val);
+}
 string Unit::WriteUnitString () {
   static bool UNITTAB = XMLSupport::parse_bool(vs_config->getVariable("physics","UnitTable","false"));
   string ret="";
@@ -247,51 +789,207 @@ string Unit::WriteUnitString () {
       unsigned int where;
       string val;
       if (unitTables[i]->RowExists(csvRow,where)) {
-        CSVRow row(unitTables[i],where);
-        vector<string> keys;
-        vector<string> values;
-        keys.push_back("Key");
-        values.push_back(csvRow);
-        keys.push_back("Directory");
-        values.push_back(row["Directory"]);
-
+        CSVRow row(unitTables[i],where);        
+        map<string,string> unit;        
+        for (int jj=0;
+             jj<row.size();
+             ++jj) {
+          if (jj!=0)
+            unit[row.getKey(jj)]=row[jj];
+        }
         // mutable things
-        keys.push_back("CargoVolume");
-        values.push_back(XMLSupport::tostring(image->cargo_volume));
-        
-        // immutable things
-        keys.push_back("Unit_Scale");
-        values.push_back(row["Unit_Scale"]);
-        keys.push_back("Mesh");
-        values.push_back(row["Mesh"]);       
-        if ((val=row["MeshStartFrame"]).length()) {
-          keys.push_back("MeshStartFrame");
-          values.push_back(val);
+        unit["Equipment_Space"]=XMLSupport::tostring(image->equipment_volume);
+        unit["Hold_Volume"]=XMLSupport::tostring(image->cargo_volume);
+        string mountstr;
+        double unitScale=  XMLSupport::parse_float(unit["Unit_Scale"]);
+        {//mounts
+          for (int j=0;j<mounts.size();++j) {
+            char mnt[1024];
+            Matrix m;
+            Transformation tr(mounts[j].GetMountOrientation(),
+                              mounts[j].GetMountLocation().Cast());
+            tr.to_matrix(m);
+            
+            mountstr+="{"+mounts[j].type->weapon_name+";"+XMLSupport::tostring(mounts[j].ammo)+";"+XMLSupport::tostring(mounts[j].volume)+";"+lookupMountSize(mounts[j].size);
+            sprintf(mnt,";%lf;%lf;%lf;%lf;%lf;%lf;%lf;%lf;%lf;%lf;%lf}",
+                    m.p.i/unitScale,
+                    m.p.j/unitScale,
+                    m.p.k/unitScale,
+                    (double)mounts[j].xyscale,
+                    (double)mounts[j].zscale,
+                    (double)m.getQ().i,
+                    (double)m.getQ().j,
+                    (double)m.getQ().k,
+                    (double)m.getR().i,
+                    (double)m.getR().j,
+                    (double)m.getR().k,
+                    (double)mounts[j].functionality,
+                    (double)mounts[j].maxfunctionality
+                    );
+            mountstr+=mnt;
+          }
+          unit["Mounts"]=mountstr;
         }
-        if ((val=row["MeshTextureStartTime"]).length()) {
-          keys.push_back("MeshTextureStartTime");
-          values.push_back(val);
+        {//subunits
+          vector<SubUnitStruct> subunits=GetSubUnits(unit["Sub_Units"]);
+          if (subunits.size()) {
+            unsigned int k=0;
+            Unit * subun;
+            for (;k<subunits.size();++k) {
+              subunits[k].filename="destroyed_blank";
+            }
+            k=0;
+            for (un_iter su=this->getSubUnits();(subun=(*su))!=NULL;++su,++k) {
+              unsigned int j=k;
+              for (;j<subunits.size();++j) {
+                if ((subun->Position()-subunits[j].pos).MagnitudeSquared()<.00000001) {
+                  //we've got a hit
+                  break;
+                }
+              }
+              if (j==subunits.size()) j=k;
+              subunits[j].filename=subun->name;
+            }
+            string str;
+            for (k=0;k<subunits.size();++k) {
+              char tmp[1024];
+              sprintf(tmp,";%lf;%lf;%lf;%lf;%lf;%lf;%lf;%lf;%lf;%lf}",
+                      subunits[k].pos.i,
+                      subunits[k].pos.j,
+                      subunits[k].pos.k,
+                      subunits[k].Q.i,
+                      subunits[k].Q.j,
+                      subunits[k].Q.k,
+                      subunits[k].R.i,
+                      subunits[k].R.j,
+                      subunits[k].R.k,
+                      subunits[k].restricted);
+              str+="{"+subunits[k].filename+tmp;
+            }
+            unit["Sub_Units"]=str;
+          }
         }
-        if ((val=row["ShieldMesh"]).length()) {
-          keys.push_back("ShieldMesh");
-          values.push_back(val);
+        {
+          string carg;
+          for (unsigned int i=0;i<numCargo();++i) {
+            Cargo *c=&GetCargo(i);
+            char tmp[2048];
+            sprintf (tmp,";%f;%d;%f;%f;%f;%f;;%s}",
+                     c->price,
+                     c->quantity,
+                     c->mass,
+                     c->volume,
+                     c->functionality,
+                     c->maxfunctionality,
+                     c->mission?"true":"false");
+            carg+="{"+c->content+";"+c->category+tmp;
+          }
+          unit["Cargo"]=carg;
         }
-        if ((val=row["RapidMesh"]).length()) {
-          keys.push_back("RapidMesh");
-          values.push_back(val);
+        unit["Mass"]=tos(Mass);
+        unit["Moment_Of_Inertia"]=tos(Momentofinertia);
+        unit["FuelCapacity"]=tos(fuel/(Mass*getFuelConversion()));
+        unit["Hull"]=hull;
+        row["Armor_Front_Top_Left"]=tos(armor.frontlefttop);
+        row["Armor_Front_Top_Right"]=tos(armor.frontrighttop);
+        row["Armor_Back_Top_Left"]=tos(armor.backlefttop);
+        row["Armor_Back_Top_Right"]=tos(armor.backrighttop);
+        row["Armor_Front_Bottom_Left"]=tos(armor.frontleftbottom);
+        row["Armor_Front_Bottom_Right"]=tos(armor.frontrightbottom);
+        row["Armor_Back_Bottom_Left"]=tos(armor.backleftbottom);
+        row["Armor_Back_Bottom_Right"]=tos(armor.backrightbottom);        
+        {
+          unit["Shield_Front_Top_Right"]="";
+          unit["Shield_Front_Top_Left"]="";
+          unit["Shield_Back_Top_Right"]="";
+          unit["Shield_Back_Top_Left"]="";
+          unit["Shield_Front_Bottom_Right"]="";
+          unit["Shield_Front_Bottom_Left"]="";
+          unit["Shield_Back_Bottom_Right"]="";
+          unit["Shield_Back_Bottom_Left"]="";
+
+          switch (shield.number) {
+          case 8:
+            unit["Shield_Front_Top_Right"]=tos(shield.shield8.frontrighttopmax);
+            unit["Shield_Front_Top_Left"]=tos(shield.shield8.frontlefttopmax);
+            unit["Shield_Back_Top_Right"]=tos(shield.shield8.backrighttopmax);
+            unit["Shield_Back_Top_Left"]=tos(shield.shield8.backlefttopmax);
+            unit["Shield_Front_Bottom_Right"]=tos(shield.shield8.frontrightbottommax);
+            unit["Shield_Front_Bottom_Left"]=tos(shield.shield8.frontleftbottommax);
+            unit["Shield_Back_Bottom_Right"]=tos(shield.shield8.backrightbottommax);
+            unit["Shield_Back_Bottom_Left"]=tos(shield.shield8.backleftbottommax);            
+            break;
+          case 4:
+            unit["Shield_Front_Top_Right"]=tos(shield.shield4fbrl.frontmax);            
+            unit["Shield_Back_Top_Right"]=tos(shield.shield4fbrl.backmax);
+            unit["Shield_Front_Bottom_Right"]=tos(shield.shield4fbrl.rightmax);
+            unit["Shield_Front_Bottom_Left"]=tos(shield.shield4fbrl.leftmax);            
+            break;
+          case 2:
+          default:
+            //assume 2 shields
+            unit["Shield_Front_Top_Right"]=tos(shield.shield2fb.frontmax);            
+            unit["Shield_Back_Top_Right"]=tos(shield.shield2fb.backmax);
+            break;
+          }
         }
-        if ((val=row["BSPMesh"]).length()) {
-          keys.push_back("BSPMesh");
-          values.push_back(val);
-        }
-        if ((val=row["HasRapid"]).length()) {
-          keys.push_back("HasRapid");
-          values.push_back(val);
-        }        
-        if ((val=row["HasBSP"]).length()) {
-          keys.push_back("HasBSP");
-          values.push_back(val);
-        }        
+        unit["Shield_Leak"]=tos(shield.leak/100.0);
+        unit["Shield_Recharge"]=tos(shield.recharge);
+        unit["Warp_Capacitor"]=tos(maxwarpenergy);
+        unit["Primary_Capacitor"]=tos(maxenergy);
+        unit["Reactor_Recharge"]=tos(recharge);
+        unit["Jump_Drive_Present"]=tos(jump.drive>=-1);
+        unit["Jump_Drive_Delay"]=tos(jump.delay);
+        unit["Wormhole"]=tos(image->forcejump!=0);
+        unit["Outsystem_Jump_Cost"]=tos(jump.energy);
+        unit["Warp_Usage_Cost"]=tos(jump.insysenergy);
+        unit["Afterburner_Usage_Cost"]=afterburnenergy>0?afterburnenergy:-afterburnenergy;
+        unit["Afterburner_Type"]=afterburnenergy>=0?0:1;
+        unit["Maneuver_Yaw"]=tos(limits.yaw*180/(VS_PI*Mass));
+        unit["Maneuver_Pitch"]=tos(limits.pitch*180/(VS_PI*Mass));
+        unit["Maneuver_Roll"]=tos(limits.roll*180/(VS_PI*Mass));
+        unit["YawGovernor"]=tos(computer.max_yaw*180/VS_PI);
+        unit["PitchGovernor"]=tos(computer.max_pitch*180/VS_PI);
+        unit["RollGovernor"]=tos(computer.max_roll*180/VS_PI);
+        static float game_accel=XMLSupport::parse_float(vs_config->getVariable("physics","game_accel","1"));
+        static float game_speed=XMLSupport::parse_float(vs_config->getVariable("physics","game_speed","1"));
+        unit["Afterburner_Accel"]=tos(limits.afterburn/(game_accel*game_speed*Mass));
+        unit["Forward_Accel"]=tos(limits.forward/(game_accel*game_speed*Mass));
+        unit["Retro_Accel"]=tos(limits.retro/(game_accel*game_speed*Mass));
+        unit["Left_Accel"]=unit["Right_Accel"]=tos(limits.lateral/(game_accel*game_speed*Mass));
+        unit["Bottom_Accel"]=unit["Top_Accel"]=tos(limits.vertical/(game_accel*game_speed*Mass));
+        unit["Default_Speed_Governor"]=tos(computer.max_combat_speed/game_speed);
+        unit["Default_Speed_Governor"]=tos(computer.max_combat_ab_speed/game_speed);
+        unit["ITTS"]=tos(computer.itts);
+        unit["Radar_Color"]=tos(computer.radar.color);
+        unit["Radar_Range"]=tos(computer.radar.maxrange);
+        unit["Tracking_Cone"]=tos(acos(computer.radar.trackingcone*VS_PI/180));
+        unit["Max_Cone"]=tos(acos(computer.radar.maxcone*VS_PI/180));
+        unit["Lock_Cone"]=tos(acos(computer.radar.lockcone*VS_PI/180));
+        unit["Cloak_Min"]=tos(cloakmin/100.0);
+        unit["Can_Cloak"]=tos(cloaking>=-1);
+        unit["Cloak_Rate"]=tos(image->cloakrate/2147483647.);
+        unit["Cloak_Energy"]=tos(image->cloakenergy);
+        unit["Cloak_Glass"]=tos(image->cloakglass);
+        unit["Repair_Droid"]=tos(image->repair_droid);
+        unit["ECM"]=tos(image->ecm>0?image->ecm:-image->ecm);
+        row["Lifesupport_Functionality"]=tos(image->LifeSupportFunctionality);
+        row["Max_Lifesupport_Functionality"]=tos(image->LifeSupportFunctionalityMax);
+        row["Comm_Functionality"]=tos(image->CommFunctionality);
+        row["Max_Comm_Functionality"]=tos(image->CommFunctionalityMax);        
+        row["Comm_Functionality"]=tos(image->CommFunctionality);
+        row["Max_Comm_Functionality"]=tos(image->CommFunctionalityMax);
+        row["FireControl_Functionality"]=tos(image->fireControlFunctionality);
+        row["Max_FireControl_Functionality"]=tos(image->fireControlFunctionalityMax);
+        row["SPECDrive_Functionality"]=tos(image->SPECDriveFunctionality);
+        row["Max_SPECDrive_Functionality"]=tos(image->SPECDriveFunctionalityMax);
+        row["Slide_Start"]=tos(computer.slide_start);
+        row["Slide_End"]=tos(computer.slide_end);
+        unit["Cargo_Import"]=unit["Upgrades"]="";//make sure those are empty        
+        vector<string>keys,values;
+        keys.push_back("Key");
+        values.push_back(csvRow);//key has to come first
+        mapToStringVec(unit,keys,values);
         return writeCSV(keys,values);
       }
     }

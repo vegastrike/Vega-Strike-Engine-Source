@@ -86,7 +86,7 @@ int parse_vdu_type (const char * x) {
 
 
 
-VDU::VDU (const char * file, TextPlane *textp, unsigned short modes, short rwws, short clls, unsigned int *ma, float *mh) :VSSprite (file),tp(textp),posmodes(modes), rows(rwws), cols(clls),scrolloffset(0){
+VDU::VDU (const char * file, TextPlane *textp, unsigned short modes, short rwws, short clls, float *ma, float *mh) :VSSprite (file),tp(textp),posmodes(modes), rows(rwws), cols(clls),scrolloffset(0){
   thismode.push_back(MSG);
   if (_Universe->numPlayers()>1) {
     posmodes&=(~VIEW);
@@ -305,7 +305,7 @@ void VDU::DrawVDUShield (Unit * parent) {
 
   h=fabs (h*.6);
   w=fabs (w*.6);
-  unsigned int armor[8];
+  float armor[8];
   GFXColor4f (.4,.4,1,1);
   GFXDisable (TEXTURE0);
   DrawShield (fs,rs,ls,bs,x,y,w,h);

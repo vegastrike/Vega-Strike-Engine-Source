@@ -19,7 +19,7 @@ class VDU: public VSSprite {
   class Animation * comm_ani;
   class Animation *	webcam;
   VIEWSTYLE viewStyle;
-  unsigned int * StartArmor;
+  float * StartArmor;
   float *maxhull;
   ///Holds a pointer to the font used to render text in the vdu
   TextPlane *tp;
@@ -67,7 +67,7 @@ public:
   int scrolloffset;
   ///Alert! To add a mode must change const array on the bottom. VIEW must remain LAST
   enum VDU_MODE {TARGET=0x1,NAV=0x2,OBJECTIVES=0x4, COMM=0x8, WEAPON=0x10, DAMAGE=0x20, SHIELD=0x40,  MANIFEST=0x80, TARGETMANIFEST=0x100, VIEW=0x200, MSG=0x400, SCANNING=0x800, NETWORK=0x1000, WEBCAM=0x2000};
-  VDU(const char *file, TextPlane *textp,unsigned short modes, short rows, short cols, unsigned int *MaxArmor, float * maxhull);
+  VDU(const char *file, TextPlane *textp,unsigned short modes, short rows, short cols, float *MaxArmor, float * maxhull);
   ///Draws the entire VDU, all data, etc
   void Draw(Unit * parent, const GFXColor & c);
   ///Changes the mode of the current VDU to another legal mode

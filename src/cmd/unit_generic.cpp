@@ -547,11 +547,11 @@ void Unit::ZeroAll( )
     Velocity.j            = 0;
     Velocity.k            = 0;
     image                 = NULL;
-    mass                  = 0;
+    Mass                  = 0;
     shieldtight           = 0;
     fuel                  = 0;
     afterburnenergy       = 0;
-    MomentOfInertia       = 0;
+    Momentofinertia       = 0;
     // limits has a constructor
     cloaking              = 0;
     cloakmin              = 0;
@@ -607,6 +607,7 @@ void Unit::Init()
   UncheckUnit (this);
 #endif
   static float capsize = XMLSupport::parse_float(vs_config->getVariable("physics","capship_size","500"));
+
   capship_size=capsize;
   activeStarSystem=NULL;
   xml=NULL;
@@ -632,10 +633,20 @@ void Unit::Init()
   image->cargo_volume=0;
   image->unitwriter=NULL;
   cloakmin=image->cloakglass?1:0;
+  image->equipment_volume=0;
   image->cloakrate=100;
   image->cloakenergy=0;
   image->forcejump=false;
   sound->engine=-1;  sound->armor=-1;  sound->shield=-1;  sound->hull=-1; sound->explode=-1;
+  image->fireControlFunctionality=1.0f;
+  image->fireControlFunctionalityMax=1.0f;
+  image->SPECDriveFunctionality=1.0f;
+  image->SPECDriveFunctionalityMax=1.0f;
+  image->CommFunctionality=1.0f;
+  image->CommFunctionalityMax=1.0f;
+  image->LifeSupportFunctionality=1.0f;
+  image->LifeSupportFunctionalityMax=1.0f;
+
   sound->cloak=-1;
   sound->jump=-1;
   image->hudImage=NULL;
@@ -667,7 +678,7 @@ void Unit::Init()
   Identity(cumulative_transformation_matrix);
   cumulative_transformation = identity_transformation;
   curr_physical_state = prev_physical_state = identity_transformation;
-  mass = .01;
+  Mass = .01;
   fuel = 000;
 
   static Vector myang(XMLSupport::parse_float (vs_config->getVariable ("general","pitch","0")),XMLSupport::parse_float (vs_config->getVariable ("general","yaw","0")),XMLSupport::parse_float (vs_config->getVariable ("general","roll","0")));
@@ -678,7 +689,7 @@ void Unit::Init()
     
   static float lc =XMLSupport::parse_float (vs_config->getVariable ("physics","lock_cone",".8"));// DO NOT CHANGE see unit_customize.cpp
 
-  MomentOfInertia = .01;
+  Momentofinertia = .01;
   AngularVelocity = myang;
   cumulative_velocity=Velocity = Vector(0,0,0);
   
@@ -724,7 +735,7 @@ void Unit::Init()
   scanner.last_scantime=0.0;
   // No cockpit reference here
   if (!image->cockpit_damage) {
-    int numg= 1+MAXVDUS+UnitImages::NUMGAUGES;
+    int numg= (1+MAXVDUS+UnitImages::NUMGAUGES)*2;
     image->cockpit_damage=(float*)malloc((numg)*sizeof(float));
     for (unsigned int damageiterator=0;damageiterator<numg;damageiterator++) {
       image->cockpit_damage[damageiterator]=1;
@@ -2287,14 +2298,14 @@ void Unit::FireEngines (const Vector &Direction/*unit vector... might default to
 					float FuelSpeed,
 					float FMass)
 {
-	mass -= FMass; //fuel is sent out
+  //mass -= FMass; //fuel is sent out Now we separated mass and fuel
 	static float fuelpct=XMLSupport::parse_float(vs_config->getVariable("physics","FuelUsage","1"));
 	fuel -= fuelpct*FMass;
 	if (fuel <0)
 	{
 		
 		FMass +=fuel;
-		mass -= fuel;
+		//mass -= fuel;
 		fuel = 0; //ha ha!
 	}
 	NetForce += Direction *(FuelSpeed *FMass/GetElapsedTime());
@@ -2318,7 +2329,7 @@ void Unit::ApplyLocalForce(const Vector &Vforce) //applies a force for the whole
 void Unit::Accelerate(const Vector &Vforce)
 {
 	if (FINITE (Vforce.i)&&FINITE(Vforce.j)&&FINITE(Vforce.k)) {	
-		NetForce += Vforce * mass;
+		NetForce += Vforce * GetMass();
 	}else {
 		VSFileSystem::vs_fprintf (stderr,"fatal force");
 	}
@@ -2753,8 +2764,8 @@ Vector Unit::ResolveForces (const Transformation &trans, const Matrix &transmat)
   if (NetTorque.i||NetTorque.j||NetTorque.k) {
     temp1 += InvTransformNormal(transmat,NetTorque);
   }
-  if (MomentOfInertia)
-	  temp1=temp1/MomentOfInertia;
+  if (GetMoment())
+	  temp1=temp1/GetMoment();
   else
 	  VSFileSystem::vs_fprintf (stderr,"zero moment of inertia %s\n",name.c_str());
   Vector temp (temp1*SIMULATION_ATOM);
@@ -2775,7 +2786,7 @@ Vector Unit::ResolveForces (const Transformation &trans, const Matrix &transmat)
     temp2+=InvTransformNormal(transmat,NetForce);
   }
   
-  temp2=temp2/mass;
+  temp2=temp2/GetMass();
   temp = temp2*SIMULATION_ATOM;
   if (!(FINITE(temp2.i)&&FINITE(temp2.j)&&FINITE(temp2.k))) {
 	  cout << "NetForce transform skrewed";
@@ -2819,7 +2830,7 @@ Vector Unit::ResolveForces (const Transformation &trans, const Matrix &transmat)
     
     if (air_res_coef||lateral_air_res_coef) {
       float velmag = Velocity.Magnitude();
-      Vector AirResistance = Velocity*(air_res_coef*velmag/mass)*(corner_max.i-corner_min.i)*(corner_max.j-corner_min.j);
+      Vector AirResistance = Velocity*(air_res_coef*velmag/GetMass())*(corner_max.i-corner_min.i)*(corner_max.j-corner_min.j);
       if (AirResistance.Magnitude()>velmag) {
 	Velocity.Set(0,0,0);
       }else {
@@ -2828,7 +2839,7 @@ Vector Unit::ResolveForces (const Transformation &trans, const Matrix &transmat)
 	  Vector p,q,r;
 	  GetOrientation (p,q,r);
 	  Vector lateralVel= p*Velocity.Dot (p)+q*Velocity.Dot (q);
-	  AirResistance = lateralVel*(lateral_air_res_coef*velmag/mass)*(corner_max.i-corner_min.i)*(corner_max.j-corner_min.j);	  
+	  AirResistance = lateralVel*(lateral_air_res_coef*velmag/GetMass())*(corner_max.i-corner_min.i)*(corner_max.j-corner_min.j);	  
 	  if (AirResistance.Magnitude ()> lateralVel.Magnitude()){
 	    Velocity = r*Velocity.Dot(r);
 	  }else {
@@ -3368,7 +3379,7 @@ float Unit::ExplosionRadius() {
   return expsize*rSize();
 }
 
-void Unit::ArmorData (unsigned int armor[8]) const{  //short fix
+void Unit::ArmorData (float armor[8]) const{  //short fix
   armor[0]=this->armor.frontrighttop;
   armor[1]=this->armor.backrighttop;
   armor[2]=this->armor.frontlefttop;
@@ -3472,7 +3483,7 @@ bool DestroyPlayerSystem (float hull, float maxhull, float numhits) {
 	return ret;
 }
 static const char * DamagedCategory="upgrades/Damaged/";
-float Unit::DealDamageToHullReturnArmor (const Vector & pnt, float damage, unsigned int * &targ) { //short fix
+float Unit::DealDamageToHullReturnArmor (const Vector & pnt, float damage, float * &targ) { //short fix
   float percent;
 #ifndef ISUCK
   if (hull<0) {
@@ -4892,7 +4903,7 @@ bool Unit::UpgradeMounts (const Unit *up, int mountoffset, bool touchme, bool do
 		*/
 		  if (templ->mounts[jmod].volume!=-1) {
 		    if (upmount.ammo*upmount.type->volume>templ->mounts[jmod].volume) {
-		      upmount.ammo = (templ->mounts[jmod].volume+1)/upmount.type->volume;
+		      upmount.ammo = (int)((templ->mounts[jmod].volume+1)/upmount.type->volume);
 		    }
 		  }
 		}
@@ -4916,14 +4927,14 @@ bool Unit::UpgradeMounts (const Unit *up, int mountoffset, bool touchme, bool do
 				*/	
 				if (templ->mounts[jmod].volume!=-1) {
 				  if (templ->mounts[jmod].volume<mounts[jmod].type->volume*tmpammo) {
-					tmpammo=(templ->mounts[jmod].volume+1)/mounts[jmod].type->volume;
+					tmpammo=(int)((templ->mounts[jmod].volume+1)/mounts[jmod].type->volume);
 				  }
 				}
 		    
 			  }
 			} 
 			if (tmpammo*mounts[jmod].type->volume>mounts[jmod].volume) {
-			  tmpammo = (1+mounts[jmod].volume)/mounts[jmod].type->volume;
+			  tmpammo = (int)((1+mounts[jmod].volume)/mounts[jmod].type->volume);
 			}
 			if (tmpammo>mounts[jmod].ammo) {
 			  cancompletefully=true;
@@ -5249,7 +5260,17 @@ bool Unit::UpAndDownGrade (const Unit * up, const Unit * templ, int mountoffset,
   }
   STDUPGRADE(recharge,up->recharge,templ->recharge,0);
   STDUPGRADE(image->repair_droid,up->image->repair_droid,templ->image->repair_droid,0);
+
+  STDUPGRADE(image->fireControlFunctionality,image->fireControlFunctionality,image->fireControlFunctionality,0);
+  STDUPGRADE(image->fireControlFunctionalityMax,image->fireControlFunctionalityMax,image->fireControlFunctionalityMax,0);
+  STDUPGRADE(image->SPECDriveFunctionality,image->SPECDriveFunctionality,image->SPECDriveFunctionality,0);
+  STDUPGRADE(image->SPECDriveFunctionalityMax,image->SPECDriveFunctionalityMax,image->SPECDriveFunctionalityMax,0);
+  STDUPGRADE(image->CommFunctionality,image->CommFunctionality,image->CommFunctionality,0);
+  STDUPGRADE(image->CommFunctionalityMax,image->CommFunctionalityMax,image->CommFunctionalityMax,0);
+  STDUPGRADE(image->LifeSupportFunctionality,image->LifeSupportFunctionality,image->LifeSupportFunctionality,0);
+  STDUPGRADE(image->LifeSupportFunctionalityMax,image->LifeSupportFunctionalityMax,image->LifeSupportFunctionalityMax,0);
   STDUPGRADE(image->cargo_volume,up->image->cargo_volume,templ->image->cargo_volume,0);
+  STDUPGRADE(image->equipment_volume,up->image->equipment_volume,templ->image->equipment_volume,0);
   image->ecm = abs(image->ecm);
   STDUPGRADE(image->ecm,abs(up->image->ecm),abs(templ->image->ecm),0);
   STDUPGRADE(maxenergy,up->maxenergy,templ->maxenergy,0);
@@ -5274,7 +5295,7 @@ bool Unit::UpAndDownGrade (const Unit * up, const Unit * templ, int mountoffset,
   STDUPGRADE(fuel,up->fuel,templ->fuel,0);
   static bool UpgradeCockpitDamage = XMLSupport::parse_bool (vs_config->getVariable("physics","upgrade_cockpit_damage","false"));
   if (UpgradeCockpitDamage){
-	  for (unsigned int upgr=0;upgr<UnitImages::NUMGAUGES+1+MAXVDUS;upgr++) {
+	  for (unsigned int upgr=0;upgr<(UnitImages::NUMGAUGES+1+MAXVDUS)*2;upgr++) {
 		  STDUPGRADE(image->cockpit_damage[upgr],up->image->cockpit_damage[upgr],templ->image->cockpit_damage[upgr],1);
 		  if (image->cockpit_damage[upgr]>1) {
 			  image->cockpit_damage[upgr]=1;//keep it real
@@ -5414,14 +5435,14 @@ bool Unit::UpAndDownGrade (const Unit * up, const Unit * templ, int mountoffset,
   }
   if (numave)
     percentage=percentage/numave;
-  if (0&&touchme&&up->mass&&numave) {
+  if (0&&touchme&&up->Mass&&numave) {
     float multiplyer =((downgrade)?-1:1);
-    mass +=multiplyer*percentage*up->mass;
-    if (mass<(templ?templ->mass:.000000001))
-      mass=(templ?templ->mass:.000000001);
-    MomentOfInertia +=multiplyer*percentage*up->MomentOfInertia;
-    if (MomentOfInertia<(templ?templ->MomentOfInertia:0.00000001)) {
-      MomentOfInertia=(templ?templ->MomentOfInertia:0.00000001);
+    Mass +=multiplyer*percentage*up->Mass;
+    if (Mass<(templ?templ->Mass:.000000001))
+      Mass=(templ?templ->Mass:.000000001);
+    Momentofinertia +=multiplyer*percentage*up->Momentofinertia;
+    if (Momentofinertia<(templ?templ->Momentofinertia:0.00000001)) {
+      Momentofinertia=(templ?templ->Momentofinertia:0.00000001);
     }
   }
   float MyPercentMin = ComputeMinDowngradePercent();
@@ -5438,7 +5459,7 @@ Unit * makeBlankUpgrade (string templnam, int faction) {
     int q =bl->GetCargo (i).quantity;
     bl->RemoveCargo (i,q);
   }
-  bl->mass=0;
+  bl->Mass=0;
   return bl;
 }
 
@@ -5491,7 +5512,7 @@ bool Unit::ReduceToTemplate() {
 int Unit::RepairCost () {
 	int cost =1;
 	unsigned int i;
-	for (i=0;i < 1+MAXVDUS+UnitImages::NUMGAUGES;i++) {
+	for (i=0;i < (1+MAXVDUS+UnitImages::NUMGAUGES)*2;i++) {
         if (image->cockpit_damage[i]!=1) {
 			cost++;
 		}
@@ -5519,7 +5540,7 @@ int Unit::RepairUpgrade () {
 	savedCargo.swap(image->cargo);
 	savedWeap.swap(mounts);
     UnitImages * im= &GetImageInformation();
-    for (int i=0;i < 1+MAXVDUS+UnitImages::NUMGAUGES;i++) {
+    for (int i=0;i < (1+MAXVDUS+UnitImages::NUMGAUGES)*2;i++) {
         if (im->cockpit_damage[i]!=1) {
             im->cockpit_damage[i]=1;
             success+=1;
@@ -5776,7 +5797,7 @@ void Unit::EjectCargo (unsigned int index) {
 	cargo->SetPosAndCumPos (Position()+randVector(-rSize(), rSize()));
 	cargo->SetOwner (this);
 	cargo->SetVelocity(Velocity+randVector(-.25,.25).Cast());
-	cargo->mass = tmp->mass;
+	cargo->Mass = tmp->mass;
 	if (name.length()>0) {
 	  cargo->name=name;
 	} else {
@@ -5810,7 +5831,7 @@ int Unit::RemoveCargo (unsigned int i, int quantity,bool eraseZero) {
     quantity=image->cargo[i].quantity;
   static bool usemass = XMLSupport::parse_bool(vs_config->getVariable ("physics","use_cargo_mass","true"));
   if (usemass)
-	  mass-=quantity*image->cargo[i].mass;
+	  Mass-=quantity*image->cargo[i].mass;
   image->cargo[i].quantity-=quantity;
   if (image->cargo[i].quantity<=0&&eraseZero)
     image->cargo.erase (image->cargo.begin()+i);
@@ -5821,7 +5842,7 @@ int Unit::RemoveCargo (unsigned int i, int quantity,bool eraseZero) {
 void Unit::AddCargo (const Cargo &carg, bool sort) {
   static bool usemass = XMLSupport::parse_bool(vs_config->getVariable ("physics","use_cargo_mass","true"));
   if (usemass)
-	  mass+=carg.quantity*carg.mass;
+	  Mass+=carg.quantity*carg.mass;
   image->cargo.push_back (carg);   
   if (sort)
     SortCargo();
@@ -5900,7 +5921,7 @@ std::string Unit::GetManifest (unsigned int i, Unit * scanningUnit, const Vector
 }
 
 bool Unit::SellCargo (unsigned int i, int quantity, float &creds, Cargo & carg, Unit *buyer){
-  if (i<0||i>=image->cargo.size()||!buyer->CanAddCargo(image->cargo[i])||mass<image->cargo[i].mass)
+  if (i<0||i>=image->cargo.size()||!buyer->CanAddCargo(image->cargo[i])||Mass<image->cargo[i].mass)
     return false;
   if (quantity>image->cargo[i].quantity)
     quantity=image->cargo[i].quantity;
@@ -5930,7 +5951,7 @@ bool Unit::BuyCargo (const Cargo &carg, float & creds){
   }
   AddCargo (carg);
   creds-=carg.quantity*carg.price;
-  mass+=carg.quantity*carg.mass;
+  Mass+=carg.quantity*carg.mass;
   return true;
 }
 bool Unit::BuyCargo (unsigned int i, unsigned int quantity, Unit * seller, float&creds) {
@@ -6019,7 +6040,7 @@ void Unit::ImportPartList (const std::string& category, float price, float price
 
 std::string Unit::massSerializer (const XMLType &input, void *mythis) {
   Unit * un = (Unit *)mythis;
-  float mass = un->mass;
+  float mass = un->Mass;
   static bool usemass = XMLSupport::parse_bool(vs_config->getVariable ("physics","use_cargo_mass","true"));
   for (unsigned int i=0;i<un->image->cargo.size();i++) {
     if (un->image->cargo[i].quantity>0){
@@ -6249,8 +6270,8 @@ void Unit::Repair() {
       int whichgauge=rand()%(UnitImages::NUMGAUGES+1+MAXVDUS);
       if (image->cockpit_damage[whichgauge]<1) {
 	image->cockpit_damage[whichgauge]+=workunit;
-	if (image->cockpit_damage[whichgauge]>1)
-	  image->cockpit_damage[whichgauge]=1;
+	if (image->cockpit_damage[whichgauge]>image->cockpit_damage[whichgauge+UnitImages::NUMGAUGES+1+MAXVDUS])
+	  image->cockpit_damage[whichgauge]=image->cockpit_damage[whichgauge+UnitImages::NUMGAUGES+1+MAXVDUS];
       }
     }    
   case 1:

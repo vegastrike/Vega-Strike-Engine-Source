@@ -93,6 +93,13 @@ PYTHON_DEFINE_METHOD(Class,&Cargo::GetCategory,"GetCategory");
 PYTHON_DEFINE_METHOD(Class,&Cargo::SetMissionFlag,"SetMissionFlag");
 PYTHON_DEFINE_METHOD(Class,&Cargo::GetMissionFlag,"GetMissionFlag");
 PYTHON_DEFINE_METHOD(Class,&Cargo::GetDescription,"GetDescription");
+PYTHON_DEFINE_METHOD(Class,&Cargo::SetFunctionality,"SetFunctionality");
+PYTHON_DEFINE_METHOD(Class,&Cargo::GetFunctionality,"GetFunctionality");
+PYTHON_DEFINE_METHOD(Class,&Cargo::SetMaxFunctionality,"SetMaxFunctionality");
+PYTHON_DEFINE_METHOD(Class,&Cargo::GetMaxFunctionality,"GetMaxFunctionality");
+
+
+
 PYTHON_END_CLASS(VS,Cargo)
 PYTHON_BEGIN_CLASS(VS,UnitWrapper,"Unit")
 PYTHON_DEFINE_METHOD(Class,&UnitWrapper::getSubUnits,"getSubUnits");

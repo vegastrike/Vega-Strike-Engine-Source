@@ -128,10 +128,12 @@ class Mount {
     enum STATUS{ACTIVE, INACTIVE, DESTROYED, UNCHOSEN} status;
     ///The sound this mount makes when fired
     const weapon_info *type;
+    float functionality;
+    float maxfunctionality;
     int sound;
     float time_to_lock;
     Mount();
-    Mount(const std::string& name, int ammo, int volume, float xyscale=0, float zscale=0); //short fix
+    Mount(const std::string& name, int ammo, int volume, float xyscale, float zscale, float functionality, float maxfunctionality); //short fix
 
 	void Activate (bool Missile) {
 	  if ((type->type==weapon_info::PROJECTILE)==Missile) {
@@ -198,11 +200,12 @@ struct PlanetaryOrbitData;
 class Unit
 {
 protected:
-  UnitSounds * sound;
   ///How many lists are referencing us
   int ucref;
   std::string csvRow;
 public:
+  UnitSounds * sound;
+
   ///The name (type) of this unit shouldn't be public
   std::string name;
   
@@ -599,7 +602,7 @@ public:
   Vector AngularVelocity;  Vector Velocity;  ///The image that will appear on those screens of units targetting this unit
   UnitImages *image;
   ///mass of this unit (may change with cargo)
-  float mass;
+  float Mass;
 protected:
   ///are shields tight to the hull.  zero means bubble
   float shieldtight;
@@ -608,7 +611,7 @@ protected:
   float afterburnenergy;  //short fix
   ///-1 means it is off. -2 means it doesn't exist. otherwise it's engaged to destination (positive number)
  ///Moment of intertia of this unit
-  float MomentOfInertia;
+  float Momentofinertia;
 
 public:
   struct Limits {
@@ -732,12 +735,12 @@ public:
   ///Applies damage to the pre-transformed area of the ship
   void ApplyDamage (const Vector & pnt, const Vector & normal, float amt, Unit * affectedSubUnit, const GFXColor &,  Unit *ownerDoNotDereference, float phasedamage=0 );
   ///Deals remaining damage to the hull at point and applies lighting effects
-  float DealDamageToHullReturnArmor (const Vector &pnt, float Damage, unsigned int * &targ);//short fix
+  float DealDamageToHullReturnArmor (const Vector &pnt, float Damage, float * &targ);//short fix
   virtual void ArmorDamageSound( const Vector &pnt) {};
   virtual void HullDamageSound( const Vector &pnt) {};
   float DealDamageToHull (const Vector &pnt, float Damage)
   {
-	 unsigned int * nullvar = NULL; //short fix
+	 float * nullvar = NULL; //short fix
 	 return this->DealDamageToHullReturnArmor( pnt, Damage, nullvar);
   }
 
@@ -793,7 +796,7 @@ public:
     if (NetForce.i||NetForce.j||NetForce.k) {
       res+=InvTransformNormal(identity_matrix,NetForce);
     }
-    res=res/mass;
+    res=res/GetMass();
 
   	return res;
   } //acceleration
@@ -814,8 +817,8 @@ public:
   }
   void SetVelocity (const Vector & v) {Velocity = v;}
   void SetAngularVelocity (const Vector & v) {AngularVelocity = v;}
-  float GetMoment() const { return MomentOfInertia; }
-  float GetMass() const { return mass; }
+  float GetMoment() const { return Momentofinertia+fuel; }
+  float GetMass() const { return Mass+fuel; }
   ///returns the ammt of elasticity of collisions with this unit
   float GetElasticity ();
   ///returns given limits (should not be necessary with clamping functions)
@@ -886,7 +889,7 @@ public:
   QVector PositionITTS (const QVector &firingposit, Vector firingvelocity, float gunspeed) const;
   ///returns percentage of course deviation for contraband searches.  .5 causes error and 1 causes them to get mad 
   float FShieldData() const;  float RShieldData() const;  float LShieldData() const;  float BShieldData() const;
-  void ArmorData(unsigned int armor[8])const; //short fix
+  void ArmorData(float armor[8])const; //short fix
   ///Gets the current status of the hull
   float GetHull() const{return hull;}
   float GetHullPercent() const{return maxhull!=0?hull/maxhull:hull;}

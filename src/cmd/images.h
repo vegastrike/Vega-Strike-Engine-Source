@@ -17,21 +17,24 @@ struct DockingPorts {
   Vector max;
   bool internal;
   bool used;
+  float minsize;
   DockingPorts(){}
-  DockingPorts (const Vector &pos, float radius, bool internal=true){
-	this->pos=(pos); this->radius=(radius);
+  DockingPorts (const Vector &pos, float radius, float minradius, bool internal){
+    this->pos=(pos); this->radius=(radius);
     min=Vector(pos-Vector (radius,radius,radius));
     max=Vector(pos+Vector (radius,radius,radius));
     this->internal=(internal);
     used=false;
+    this->minsize=minradius;
   }
-  DockingPorts (const Vector &min, const Vector &max, bool internal=true):radius((max-min).Magnitude()*.5) {
+  DockingPorts (const Vector &min, const Vector &max, float minradius, bool internal):radius((max-min).Magnitude()*.5) {
 	pos = ((float).5)*(min+max);
 	
     this->min =(min);
     this->max =(max);
     this->internal=(internal);
     this->used= (false);
+    this->minsize=minradius;
   }
 };
 struct DockedUnits {
@@ -51,8 +54,10 @@ public:
   float volume;
   std::string description;
   bool mission;
-  Cargo () {mass=0; volume=0;price=0;quantity=1;mission=false;}
-  Cargo (std::string name, std::string cc, float pp,int qq, float mm, float vv) {
+  float functionality;
+  float maxfunctionality;
+  Cargo () {mass=0; volume=0;price=0;quantity=1;mission=false;functionality=maxfunctionality=1.0f;}
+  Cargo (std::string name, std::string cc, float pp,int qq, float mm, float vv,float func, float maxfunc) {
 	quantity=qq;
 	content=name;
 	category=cc;
@@ -60,6 +65,29 @@ public:
 	mass = mm;
 	volume=vv;
 	mission=false;
+        functionality=func;
+        maxfunctionality=maxfunc;
+  }
+  Cargo (std::string name, std::string cc, float pp,int qq, float mm, float vv) {
+	quantity=qq;
+	content=name;
+	category=cc;
+	price=pp;
+	mass = mm;
+	volume=vv;
+	mission=false;    
+  }
+  float GetFunctionality() {
+    return functionality;
+  }
+  float GetMaxFunctionality() {
+    return maxfunctionality;
+  }
+  void SetFunctionality(float func) {
+    functionality=func;
+  }
+  void SetMaxFunctionality(float func) {
+    maxfunctionality=func;
   }
   void SetMissionFlag(bool flag){this->mission=flag;}
   bool GetMissionFlag() {return this->mission;}
@@ -117,6 +145,7 @@ struct UnitImages {
   ///if the unit is a wormhole
   bool forcejump;
   float cargo_volume;///mass just makes you turn worse
+  float equipment_volume;///mass just makes you turn worse
   std::vector <Cargo> cargo;
   std::vector <char *> destination;
   std::vector <DockingPorts> dockingports;
@@ -126,7 +155,14 @@ struct UnitImages {
   UnitContainer DockedTo;
   float unitscale;//for output
   class XMLSerializer *unitwriter;
-
+  float fireControlFunctionality;
+  float fireControlFunctionalityMax;
+  float SPECDriveFunctionality;
+  float SPECDriveFunctionalityMax;
+  float CommFunctionality;
+  float CommFunctionalityMax;
+  float LifeSupportFunctionality;
+  float LifeSupportFunctionalityMax;
   enum GAUGES {ARMORF,ARMORB,ARMORR,ARMORL,FUEL, SHIELDF,SHIELDR,SHIELDL,SHIELDB, ENERGY, AUTOPILOT,COLLISION,EJECT, LOCK, MISSILELOCK, JUMP, ECM, HULL,WARPENERGY, KPS, SETKPS, COCKPIT_FPS, WARPFIELDSTRENGTH, NUMGAUGES};
 };
 
