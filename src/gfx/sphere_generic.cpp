@@ -164,7 +164,7 @@ void SphereMesh::InitSphere(float radius, int stacks, int slices, const char *te
       delete [] QSOffsets;
 
     }else {
-      new GFXSphereVertexList(radius,stacks>slices?stacks:slices,Insideout,reverse_normals);
+      vlist = new GFXSphereVertexList(radius,stacks>slices?stacks:slices,Insideout,reverse_normals);
     }
       SetBlendMode (a,b);
       string inputtex = texture;
