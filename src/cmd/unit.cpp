@@ -71,6 +71,9 @@ void Unit::calculate_extent() {
   if (!SubUnit) {
     UpdateCollideQueue();
   }
+  if (isUnit()==PLANETPTR) {
+    radial_size = corner_max.i;
+  }
 }
 
 //FIXME Daughter units should be able to be turrets (have y/p/r)

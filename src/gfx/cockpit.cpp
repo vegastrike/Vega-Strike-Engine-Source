@@ -36,15 +36,17 @@ void Cockpit::DrawTargetBox () {
   //Vector Loc (un->ToLocalCoordinates(target->Position()-un->Position()));
   Vector Loc(target->Position());
   GFXDisable (TEXTURE0);
+  GFXDisable (DEPTHTEST);
+  GFXDisable (DEPTHWRITE);
   GFXBlendMode (SRCALPHA,INVSRCALPHA);
   GFXDisable (LIGHTING);
   GFXColorf (relationToColor(_Universe->GetRelation(un->faction,target->faction)));
   GFXBegin (GFXLINESTRIP); 
-  GFXVertexf (Loc+(CamP+CamQ)*un->rSize());
-  GFXVertexf (Loc+(CamP-CamQ)*un->rSize());
-  GFXVertexf (Loc+(-CamP-CamQ)*un->rSize());
-  GFXVertexf (Loc+(CamQ-CamP)*un->rSize());
-  GFXVertexf (Loc+(CamP+CamQ)*un->rSize());
+  GFXVertexf (Loc+(CamP+CamQ)*target->rSize());
+  GFXVertexf (Loc+(CamP-CamQ)*target->rSize());
+  GFXVertexf (Loc+(-CamP-CamQ)*target->rSize());
+  GFXVertexf (Loc+(CamQ-CamP)*target->rSize());
+  GFXVertexf (Loc+(CamP+CamQ)*target->rSize());
   GFXEnd();
   if (un->GetComputerData().itts) {
     un->getAverageGunSpeed (speed,range);
