@@ -5,14 +5,28 @@
 #include "vs_globals.h"
 #include "config_xml.h"
 #include <assert.h>
-
-Cargo * GetMasterPartList(const char *input_buffer){
+Unit& GetUnitMasterPartList () {
   static Unit MasterPartList ("master_part_list",false,_Universe->GetFaction("upgrades"));
-  unsigned int i;
-  return MasterPartList.GetCargo (input_buffer,i);
+  return MasterPartList;
 }
 
+Cargo * GetMasterPartList(const char *input_buffer){
+  unsigned int i;
+  return GetUnitMasterPartList().GetCargo (input_buffer,i);
+}
 
+void Unit::ImportPartList (const std::string& category, float price, float pricedev,  float quantity, float quantdev) {
+  unsigned int numcarg = GetUnitMasterPartList().numCargo();
+  for (unsigned int i=0;i<numcarg;i++) {
+    Cargo c= GetUnitMasterPartList().GetCargo (i);
+    if (c.category==category) {
+      c.quantity=quantity;
+      c.price*=price;
+      AddCargo(c);
+    }
+  }
+
+}
 using XMLSupport::tostring;
 using namespace std;
 std::string CargoToString (const Cargo& cargo) {

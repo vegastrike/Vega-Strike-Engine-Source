@@ -1,4 +1,4 @@
-/* config.h.in.  Generated automatically from configure.in by autoheader 2.13.  */
+/* config.h.in.  Generated automatically from configure.in by autoheader.  */
 
 /* Define to empty if the keyword does not work.  */
 #undef const
@@ -9,17 +9,11 @@
 /* Define if you can safely include both <sys/time.h> and <time.h>.  */
 #undef TIME_WITH_SYS_TIME
 
-/* Define if you have the SDL_JoystickOpen function.  */
-#undef HAVE_SDL_JOYSTICKOPEN
+/* Define if you have the finite function.  */
+#undef HAVE_FINITE
 
 /* Define if you have the _finite function.  */
 #undef HAVE__FINITE
-
-/* Define if you have the _isnan function.  */
-#undef HAVE__ISNAN
-
-/* Define if you have the finite function.  */
-#undef HAVE_FINITE
 
 /* Define if you have the getcwd function.  */
 #undef HAVE_GETCWD
@@ -32,6 +26,12 @@
 
 /* Define if you have the isnan function.  */
 #undef HAVE_ISNAN
+
+/* Define if you have the _isnan function.  */
+#undef HAVE__ISNAN
+
+/* Define if you have the SDL_JoystickOpen function.  */
+#undef HAVE_SDL_JOYSTICKOPEN
 
 /* Define if you have the strdup function.  */
 #undef HAVE_STRDUP
