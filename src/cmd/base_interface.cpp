@@ -57,7 +57,7 @@ void BaseInterface::Room::BaseShip::Draw (BaseInterface *base) {
 		GFXEnable (DEPTHWRITE);
 		Vector p,q,r;
 		_Universe->AccessCamera()->GetOrientation (p,q,r);
-		co=_Universe->AccessCamera()->getCockpitOffset();
+		int co=_Universe->AccessCamera()->getCockpitOffset();
 		_Universe->AccessCamera()->setCockpitOffset(0);
 		_Universe->AccessCamera()->UpdateGFX();
 		QVector pos =  _Universe->AccessCamera ()->GetPosition();
