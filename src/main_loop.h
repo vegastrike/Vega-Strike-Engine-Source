@@ -32,6 +32,8 @@ namespace CockpitKeys {
    void  ViewTarget(int,KBSTATE newState) ;
    void  OutsideTarget(int,KBSTATE newState) ;
    void  Quit(int,KBSTATE newState) ;
+
+   void  QuitNow();
 }
 
 

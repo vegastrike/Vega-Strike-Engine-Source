@@ -24,6 +24,12 @@ static char makingstate=0;
 extern const char *mission_key; //defined in main.cpp
 bool BaseInterface::Room::BaseTalk::hastalked=false;
 
+//#define NEW_GUI
+
+#ifdef NEW_GUI
+#include "gui/basecomputer.h"
+#endif
+
 static void CalculateRealXAndY (int xbeforecalc, int ybeforecalc, float *x, float *y) {
 	(*x)=(((float)(xbeforecalc*2))/g_game.x_resolution)-1;
 	(*y)=-(((float)(ybeforecalc*2))/g_game.y_resolution)+1;
@@ -163,7 +169,11 @@ bool RefreshGUI(void) {
 		if (BaseInterface::CurrentBase) {
 			if (_Universe->AccessCockpit()->GetParent()==BaseInterface::CurrentBase->caller.GetUnit()){
 				if (BaseInterface::CurrentBase->CallComp) {
-					return RefreshInterface ();	
+#ifdef NEW_GUI
+                                        return globalWindowManager().draw();
+#else
+					return RefreshInterface ();
+#endif
 				} else {
 					BaseInterface::CurrentBase->Draw();
 				}
@@ -527,6 +537,12 @@ void BaseInterface::Room::Python::Click (BaseInterface *base,float x, float y, i
 	}
 }
 
+// Need this for NEW_GUI.  Can't ifdef it out because it needs to link.
+void TerminateCurrentBase(void) {
+    BaseInterface::CurrentBase->Terminate();
+}
+// end NEW_GUI.
+
 void BaseInterface::Room::Comp::Click (BaseInterface *base,float x, float y, int button, int state) {
 	if (state==WS_MOUSE_UP) {
 		Link::Click(base,x,y,button,state);
@@ -534,7 +550,48 @@ void BaseInterface::Room::Comp::Click (BaseInterface *base,float x, float y, int
 		Unit *baseun=base->baseun.GetUnit();
 		if (un&&baseun) {
 			base->CallComp=true;
+#ifdef NEW_GUI
+                        // Map old modes to new modes.
+                        typedef std::pair<UpgradingInfo::BaseMode,BaseComputer::DisplayMode> ModePair;
+                        static std::map<UpgradingInfo::BaseMode,BaseComputer::DisplayMode> modeMap;
+                        static bool mapLoaded = false;
+                        if(!mapLoaded) {
+                            modeMap.insert(ModePair(UpgradingInfo::BUYMODE,BaseComputer::CARGO));
+                            modeMap.insert(ModePair(UpgradingInfo::SELLMODE,BaseComputer::CARGO));
+                            modeMap.insert(ModePair(UpgradingInfo::MISSIONMODE,BaseComputer::MISSIONS));
+                            modeMap.insert(ModePair(UpgradingInfo::NEWSMODE,BaseComputer::NEWS));
+                            modeMap.insert(ModePair(UpgradingInfo::SHIPDEALERMODE,BaseComputer::SHIP_DEALER));
+                            modeMap.insert(ModePair(UpgradingInfo::UPGRADEMODE,BaseComputer::UPGRADE));
+                            modeMap.insert(ModePair(UpgradingInfo::ADDMODE,BaseComputer::UPGRADE));
+                            modeMap.insert(ModePair(UpgradingInfo::DOWNGRADEMODE,BaseComputer::UPGRADE));
+                            modeMap.insert(ModePair(UpgradingInfo::BRIEFINGMODE,BaseComputer::PLAYER_INFO));
+                            mapLoaded = true;
+                        }
+
+                        std::vector<BaseComputer::DisplayMode> displayModes;
+                        for(int i=0; i<modes.size(); i++) {
+                            std::map<UpgradingInfo::BaseMode,BaseComputer::DisplayMode>::iterator iter = modeMap.find(modes[i]);
+                            if(iter != modeMap.end()) {
+                                // Put the mapped display mode into our vector.
+                                BaseComputer::DisplayMode currentMode = iter->second;
+                                int d;
+                                // Make sure we don't get duplicates.
+                                for(d=0; d<displayModes.size(); d++) {
+                                    if(displayModes[d] == currentMode) {
+                                        break;
+                                    }
+                                }
+                                if(d == displayModes.size()) {
+                                    displayModes.push_back(currentMode);
+                                }
+                            }
+                        }
+                        BaseComputer* bc = new BaseComputer(un, baseun, displayModes);
+                        bc->init();
+                        bc->run();
+#else
 			UpgradeCompInterface(un,baseun,modes);
+#endif // NEW_GUI
 		}
 	}
 }
