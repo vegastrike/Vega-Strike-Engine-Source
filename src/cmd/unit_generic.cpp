@@ -2763,13 +2763,12 @@ void Unit::RegenShields () {
     energy-=rec*shield_maintenance_cost;
 	maxshield=0;
   }
-  if (!max_shield_lowers_capacitance) {
-    maxshield=0;
-  }
   if (max_shield_lowers_recharge) {
      energy-=max_shield_lowers_recharge*SIMULATION_ATOM*maxshield;
   }
-
+  if (!max_shield_lowers_capacitance) {
+    maxshield=0;
+  }
   if (energy_before_shield) {
     RechargeEnergy();
   }
