@@ -50,6 +50,19 @@ for each record:
 	       namelength: integer
 	       Name: char string
 	       Word alignment padding: string of bytes (all 0)
+	Number of Logos: Integer
+	       for each logo:
+	       size:float
+	       offset: float
+	       rotation: float
+	       type: integer
+	       namelen:integer
+	       name: char string
+	       Word alignment padding: string of bytes (all 0)
+	       numrefs:integer
+		   for each ref:
+		   refnum: integer
+		   weight: float
 	Number of LODs: integer (Must be 0 for LOD or animation meshes)
 	       for each LOD:
 	       Size: float
