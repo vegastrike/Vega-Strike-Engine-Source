@@ -157,7 +157,7 @@ template<class domNodeType> class easyDomFactory {
 
 domNodeType *LoadCalike(const char *filename) {
 
-  const int chunk_size = 16384;
+  const int chunk_size = 262144;
 
   string module_str=parseCalike(filename);
   if(module_str.empty()) {
@@ -179,7 +179,7 @@ domNodeType *LoadCalike(const char *filename) {
   int is_final=false;
 
   do {
-    char *buf = (XML_Char*)XML_GetBuffer(parser, chunk_size);
+    char buf [chunk_size];
 
     int max_index=index+incr;
     int newlen=incr;
@@ -188,13 +188,13 @@ domNodeType *LoadCalike(const char *filename) {
     if(max_index>=string_size){
       newlen=module_str.size()-index;
       printf("getting string from %d length %d\n",index,newlen);
-      const char *strbuf=module_str.substr(index,newlen).c_str();
-      strncpy (buf,strbuf,newlen);
+      const char *strbuf=module_str.c_str();
+      memcpy (buf,strbuf+index,sizeof(char)*newlen);
     }
     else{
       printf("getting string from %d length %d\n",index,incr);
-      const char *strbuf=module_str.substr(index,incr).c_str();
-      strncpy (buf,strbuf,incr);
+      const char *strbuf=module_str.c_str();
+      memcpy (buf,strbuf+index,sizeof (char )*incr);
       newlen=incr;
     }
 
@@ -204,7 +204,7 @@ domNodeType *LoadCalike(const char *filename) {
       is_final=true;
     }
 
-    XML_ParseBuffer(parser, newlen, is_final);
+    XML_Parse(parser,buf, newlen, is_final);
   } while(!is_final);
 
   XML_ParserFree (parser);

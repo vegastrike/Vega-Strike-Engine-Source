@@ -14,6 +14,7 @@
 #include "vs_globals.h"
 #include "xml_support.h"
 #include "savegame.h"
+#include "gfx/cockpit.h"
 //#define DESTRUCTDEBUG
 static list<Unit*> Unitdeletequeue;
 void Unit::UnRef() {
@@ -562,9 +563,18 @@ void Unit::ApplyDamage (const Vector & pnt, const Vector & normal, float amt, Un
 bool Unit::Explode (bool drawit, float timeit) {
   if (image->explosion==NULL&&image->timeexplode==0) {	//no explosion in unit data file && explosions haven't started yet
     image->timeexplode=0;
-    image->explosion= new Animation ("explosion_orange.ani",false,.1,BILINEAR,false);
+	static std::string expani = vs_config->getVariable ("graphics","explosion_animation","explosion_orange.ani");
+    image->explosion= new Animation (expani.c_str(),false,.1,BILINEAR,false);
     image->explosion->SetDimensions(3*rSize(),3*rSize());
-    AUDPlay (sound->explode,cumulative_transformation.position,Velocity,1);
+	if (!SubUnit){
+		Vector exploc = cumulative_transformation.position;
+		Unit * un;
+		if (NULL!=(un=_Universe->AccessCockpit()->GetParent())) {
+			exploc = un->Position();						
+		}
+	    AUDPlay (sound->explode,exploc,Velocity,1);
+
+	}
   }
   if (image->explosion) {
       image->timeexplode+=timeit;
