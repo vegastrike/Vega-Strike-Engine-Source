@@ -15,7 +15,7 @@ using namespace CryptoPP;
 #include "boost/shared_ptr.hpp"
 #include <config.h>
 
-#ifndef NETCOMM_NOWEBCAM
+#ifdef NETCOMM_WEBCAM
 class WebcamSupport;
 #endif
 
@@ -53,14 +53,14 @@ class NetworkCommunication
 		bool				active;			// Tell wether the communication system is active
 		char				secured;		// Tell wether we are on a secured channel or not
 		unsigned char		method;			// Method used to spread comms
-#ifndef NETCOMM_NOWEBCAM
+#ifdef NETCOMM_WEBCAM
 		// Webcam support
 		WebcamSupport *		Webcam;
-#endif
         boost::shared_ptr<VsnetDownload::Client::Manager> _downloader;
         boost::shared_ptr<VsnetDownload::Server::Manager> _downloadServer;
         SocketSet                                         _sock_set;
 		VsnetDownload::Client::Buffer *					  bufitem;
+#endif
 #ifdef NETCOMM_JVOIP
 		JVOIPSession *				session;
 		JVOIPSessionParams *		params;

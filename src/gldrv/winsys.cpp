@@ -441,7 +441,7 @@ void winsys_atexit( winsys_atexit_func_t func )
 
   called = true;
   // atexit_func = func;
-  atexit (func);
+  //atexit (func);
 }
 
 
@@ -772,7 +772,7 @@ void winsys_atexit( winsys_atexit_func_t func )
 
     called = true;
 
-    atexit(func);
+    //atexit(func);
 }
 
 

@@ -1249,7 +1249,7 @@ dnl --------------------------------------------------------------------------
 
 TESTNETCOMM="0"
 TESTNETCOMM_NOSOUND="1"
-TESTNETCOMM_NOWEBCAM="1"
+TESTNETCOMM_WEBCAM="0"
 TESTNETCOMM_JVOIP="0"
 TESTNETCOMM_PORTAUDIO="0"
 
@@ -1260,7 +1260,6 @@ TESTNETCOMM_PORTAUDIO="0"
 				[Enable hazardous network communications (TYPE=nosound (default), jvoip, portaudio)]),
 				[
     				AC_DEFINE(NETCOMM,1,[enable hazardous network communications (Webcam and VoIP)])
-   					VS_CPPFLAGS="$VS_CPPFLAGS -DNETCOMM"
 					case "$enableval" in
 						"n" | "none" | "nosound")
 							TESTNETCOMM="1"
@@ -1365,7 +1364,6 @@ if test "$TESTNETCOMM" = "1" ; then
 		dnl	fi
 		else
 			if test "$TESTNETCOMM_PORTAUDIO" = "1" ; then
-   				VS_CPPFLAGS="$VS_CPPFLAGS -DNETCOMM_PORTAUDIO"
 				VS_LIBS="$VS_LIBS -L/usr/local/lib -lportaudio"
 	   			AC_DEFINE(NETCOMM_PORTAUDIO,1,[enable PortAudio library for sound support with NETCOMM])
 				echo "PortAudio support enabled."
@@ -1395,10 +1393,9 @@ if test "$TESTNETCOMM" = "1" ; then
 		CHECK_FOR_VFL_H
 		if test "x$have_vfl_h" = "xyes" ; then
 			echo "Webcam support enabled."
-			TESTNETCOMM_NOWEBCAM="0"
+			TESTNETCOMM_WEBCAM="1"
+    		AC_DEFINE(NETCOMM_WEBCAM,1,[enable video with NETCOMM])
 		else
-    		VS_CPPFLAGS="$VS_CPPFLAGS -DNETCOMM_NOWEBCAM"
-    		AC_DEFINE(NETCOMM_NOWEBCAM,1,[disable video with NETCOMM])
 			echo "*** Webcam support disabled."
 		fi
 	fi
@@ -1415,13 +1412,11 @@ if test "$TESTNETCOMM" = "1" ; then
 		CPPFLAGS="$CPPFLAGS -I/System/Library/Frameworks/QuickTime.framework/Versions/A/Headers"
 		CHECK_FOR_QT_H
 		if test "x$have_qt_h" = "xyes" ; then
-			TESTNETCOMM_NOWEBCAM="0"
+			TESTNETCOMM_WEBCAM="1"
+    		AC_DEFINE(NETCOMM_WEBCAM,1,[enable video with NETCOMM])
    			LIBS="$LIBS -framework QuickTime -framework Carbon"
 			echo "Webcam support enabled."
 		else
-    		VS_CPPFLAGS="$VS_CPPFLAGS -DNETCOMM_NOWEBCAM"
-			TESTNETCOMM_NOWEBCAM="1"
-    		AC_DEFINE(NETCOMM_NOWEBCAM,1,[disable video with NETCOMM])
 			echo "*** Webcam support disabled."
 		fi
 

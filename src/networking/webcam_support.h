@@ -3,14 +3,8 @@
 
 #include <string>
 #if defined( _WIN32) && !defined( __CYGWIN__)
-#ifndef DSHOW
-#include <windows.h>
-#include <vfw.h>
-//#include <afx.h>
-#else
 #include <dshow.h>
 #include <qedit.h>
-#ifdef DSHOW
 class WebcamSupport;
 
 // Global DShow variable
@@ -46,8 +40,6 @@ public:
 
 	STDMETHODIMP BufferCB( double Time, BYTE *pBuffer, long BufferLen );
 };
-#endif
-#endif
 #endif
 #ifdef __APPLE__
 #include <QuickTimeComponents.h>
@@ -229,13 +221,7 @@ class	WebcamSupport
 		int		oldchannel;
 		char	channeltext[128];
 #endif
-#if defined(_WIN32) && !defined(__CYGWIN__)
-#ifndef DSHOW
-		CAPSTATUS		gCapStatus ;
-		CAPDRIVERCAPS	gCapDriverCaps ;
-		HWND			capvideo, hwndCap;
-		CAPTUREPARMS	capparam;
-#else
+#if defined( _WIN32) && !defined( __CYGWIN__)
 		SampleGrabberCallback g_SampleCB;
 		IGraphBuilder *pGraph;
 		ICaptureGraphBuilder2 *pCaptureGraph;
@@ -248,7 +234,6 @@ class	WebcamSupport
 		ISampleGrabber *pSampleGrabber;
 
 		friend class SampleGrabberCallback;
-#endif
 #endif
 #ifdef __APPLE__
 		typedef struct
@@ -334,10 +319,6 @@ BOOL DibToSamps(HANDLE                      hDib,
                 std::string*                    pcsMsg);
 
 RGBQUAD QuadFromWord(WORD b16);
-#endif
-#ifdef DSHOW
-
-
 #endif
 
 #endif

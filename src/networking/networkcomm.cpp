@@ -21,7 +21,7 @@ using namespace CryptoPP;
 
 #include "universe_util.h"
 #include "networking/lowlevel/vsnet_dloadmgr.h"
-#ifndef NETCOMM_NOWEBCAM
+#ifdef NETCOMM_WEBCAM
 #include "networking/webcam_support.h"
 #endif /* NETCOMM_NOWEBCAM */
 #ifdef NETCOMM_JVOIP
@@ -157,7 +157,7 @@ void NetworkCommunication::private_init()
 	this->devinfo = NULL;
 #endif /* NETCOMM_PORTAUDIO */
 
-#ifndef NETCOMM_NOWEBCAM
+#ifdef NETCOMM_WEBCAM
 	this->Webcam = NULL;
 #endif
 }
@@ -172,7 +172,7 @@ NetworkCommunication::NetworkCommunication( float minfreq, float maxfreq, bool v
 	min_freq = minfreq;
 	max_freq = maxfreq;
     private_init( );
-#ifndef NETCOMM_NOWEBCAM
+#ifdef NETCOMM_WEBCAM
 
 	if( video)
 	{
@@ -250,7 +250,7 @@ NetworkCommunication::NetworkCommunication( float minfreq, float maxfreq, bool v
 
 char	NetworkCommunication::HasWebcam()
 {
-#ifndef NETCOMM_NOWEBCAM
+#ifdef NETCOMM_WEBCAM
 	if( this->Webcam)
 		return 1;
 	return 0;
@@ -467,7 +467,7 @@ void	NetworkCommunication::RecvMessage( string message, bool encrypted)
 void	NetworkCommunication::SendImage( SOCKETALT & send_sock)
 {
 	string jpeg_str( "");
-#ifndef NETCOMM_NOWEBCAM
+#ifdef NETCOMM_WEBCAM
 	if( Webcam && Webcam->isReady())
 	{
 		//cerr<<"--- Trying to grab an image..."<<endl;
@@ -525,7 +525,7 @@ if( use_pa)
 }
 #endif /* NETCOMM_PORTAUDIO */
 
-#ifndef NETCOMM_NOWEBCAM
+#ifdef NETCOMM_WEBCAM
 	if( Webcam)
 		this->Webcam->StartCapture();
 #endif /* NETCOMM_NOWEBCAM */
@@ -558,7 +558,7 @@ if( use_pa)
 	if( this->rtpparams)
 		delete this->rtpparams;
 #endif /* NETCOMM_JVOIP */
-#ifndef NETCOMM_NOWEBCAM
+#ifdef NETCOMM_WEBCAM
 	if( this->Webcam)
 		this->Webcam->EndCapture();
 	if( bufitem)
@@ -588,7 +588,7 @@ if( use_pa)
 	CheckPAError( Pa_Terminate(), "Pa_Terminate");
 
 #endif /* NETCOMM_PORTAUDIO */
-#ifndef NETCOMM_NOWEBCAM
+#ifdef NETCOMM_WEBCAM
 
 	if( this->Webcam)
 	{
@@ -606,7 +606,7 @@ if( use_pa)
 
 char *	NetworkCommunication::GetWebcamCapture()
 {
-#ifndef NETCOMM_NOWEBCAM
+#ifdef NETCOMM_WEBCAM
 	if( Webcam!=NULL)
 		return Webcam->jpeg_buffer;
 #endif
@@ -616,6 +616,7 @@ char *	NetworkCommunication::GetWebcamCapture()
 char *	NetworkCommunication::GetWebcamFromNetwork()
 {
 	char * wshot=NULL;
+#ifdef NETCOMM_WEBCAM
 	if( (*webcamClient) && bufitem)
 	{
 		if( !bufitem->done())
@@ -629,11 +630,13 @@ char *	NetworkCommunication::GetWebcamFromNetwork()
 			_downloader->addItem( bufitem);
 		}
 	}
+#endif
 	return wshot;
 }
 
 void	NetworkCommunication::SwitchWebcam()
 {
+#ifdef NETCOMM_WEBCAM
 	bool found = false;
 	CltPtrIterator it;
 	if( bufitem)
@@ -668,6 +671,7 @@ void	NetworkCommunication::SwitchWebcam()
 		//bufitem = new VsnetDownload::Client::Buffer(...);
 		_downloader->addItem( bufitem);
 	}
+#endif
 }
 
 void	NetworkCommunication::SwitchSecured()
