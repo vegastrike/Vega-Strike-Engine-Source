@@ -255,12 +255,16 @@ void Unit::EjectCargo (unsigned int index) {
     tmp = &GetCargo (index);
   }
   if (tmp) {
+    string tmpcontent=tmp->content;
+    if (tmp->mission)
+      tmpcontent="Mission_Cargo";
+
     if (tmp->quantity>0) {
       const int sslen=strlen("starships");
       Unit * cargo = NULL;
       if (tmp->category.length()>=sslen) {
-	if (memcmp (tmp->category.c_str(),"starships",sslen)==0) {
-	  string ans = tmp->content;
+	if ((!tmp->mission)&&memcmp (tmp->category.c_str(),"starships",sslen)==0) {
+	  string ans = tmpcontent;
 	  unsigned int blank = ans.find (".blank");
 	  if (blank != string::npos) {
 	    ans = ans.substr (0,blank);
@@ -280,7 +284,7 @@ void Unit::EjectCargo (unsigned int index) {
 	}
       }
       if (!cargo) {
-	cargo = UnitFactory::createUnit (tmp->content.c_str(),false,_Universe->GetFaction("upgrades"));
+	cargo = UnitFactory::createUnit (tmpcontent.c_str(),false,_Universe->GetFaction("upgrades"));
       }
       if (cargo->name=="LOAD_FAILED") {
 	cargo->Kill();
@@ -297,7 +301,7 @@ void Unit::EjectCargo (unsigned int index) {
 	  cargo->name=name;
 	} else {
 	  if (tmp) {
-	    cargo->name=tmp->content;
+	    cargo->name=tmpcontent;
 	  }
 	}
 	if (cp&&_Universe->numPlayers()==1) {
