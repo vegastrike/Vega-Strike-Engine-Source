@@ -43,8 +43,8 @@ float copysign (float x, float y) {
 // the rotation should be applied in world coordinates
 void Unit:: Rotate (const Vector &axis)
 {
-	float theta = axis.Magnitude();
-	float ootheta = 1/theta;
+	double theta = axis.Magnitude();
+	double ootheta = 1/theta;
 	float s = cos (theta * .5);
 	Quaternion rot = Quaternion(s, axis * (sinf (theta*.5)*ootheta));
 	if(theta < 0.0001) {
