@@ -163,13 +163,19 @@ static void Pan(int,KBSTATE newState) {
 }
 
 static void Hornet(int,KBSTATE newState) {
-	if(newState==PRESS||newState==DOWN) {
-	  _Universe->AccessCockpit()->Init ("hornet-cockpit.cpt");
+  static bool tmp=false;
+	if(newState==PRESS) {
+	  if (tmp) {
+	    _Universe->AccessCockpit()->Init ("hornet-cockpit.cpt");	    
+	  }else {
+	    _Universe->AccessCockpit()->Init ("");
+	  }
+	  tmp = !tmp;
 	}
 }
 static void Blank(int,KBSTATE newState) {
 	if(newState==PRESS||newState==DOWN) {
-	  _Universe->AccessCockpit()->Init ("");
+
 	}
 }
 
@@ -223,7 +229,7 @@ void clickhandler (KBSTATE k, int x, int y, int delx, int dely, int mod) {
 void InitializeInput() {
 	BindKey(GLUT_KEY_F1, Inside);
 	BindKey(GLUT_KEY_F2, Hornet);
-	BindKey(GLUT_KEY_F3, Blank);
+
 	BindKey(GLUT_KEY_F5, Behind);
 	BindKey(GLUT_KEY_F6, Pan);
 
