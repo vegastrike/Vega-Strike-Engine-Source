@@ -872,7 +872,7 @@ int main (int argc, char ** argv)
 	Tab(2); fprintf (fp, "<Hull strength=\"%d\"/>\n", 5);
 	Tab();ETag("Defense");
 	Tab();fprintf (fp,"<Stats mass=\"%d\" momentofinertia=\"%d\" fuel=\"%d\"></Stats>\n",2,2,20000);
-	Tab();fprintf (fp,"<Computer yaw=\"%d\" pitch=\"%d\" afterburner=\"%d\" maxspeed=\"%d\"/>\n",180,180,180,60,21);
+	Tab();fprintf (fp,"<Computer yaw=\"%d\" pitch=\"%d\" roll=\"%d\" afterburner=\"%d\" maxspeed=\"%d\"/>\n",180,180,180,60,21);
 	Tab();Tag("Energy");
 	Tab(2);fprintf (fp,"<Reactor recharge=\"%d\" limit=\"%d\"/>\n",10,100);
 	Tab();ETag("Energy");
