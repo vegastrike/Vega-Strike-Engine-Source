@@ -28,12 +28,6 @@
 #include "winsys.h"
 #include <assert.h>
 #include "gfxlib.h"
-PFNGLBINDBUFFERARBPROC glBindBufferARB_p=0;
-PFNGLGENBUFFERSARBPROC glGenBuffersARB_p=0;
-PFNGLDELETEBUFFERSARBPROC glDeleteBuffersARB_p=0;
-PFNGLBUFFERDATAARBPROC glBufferDataARB_p=0;
-PFNGLMAPBUFFERARBPROC  glMapBufferARB_p=0;
-PFNGLUNMAPBUFFERARBPROC  glUnmapBufferARB_p=0;
 
 
 #if !defined(_WIN32) && !defined(__CYGWIN__)
@@ -87,6 +81,14 @@ PFNGLUNMAPBUFFERARBPROC  glUnmapBufferARB_p=0;
 #endif
 
 #ifndef __APPLE_PANTHER_GCC33_CLI__
+
+PFNGLBINDBUFFERARBPROC glBindBufferARB_p=0;
+PFNGLGENBUFFERSARBPROC glGenBuffersARB_p=0;
+PFNGLDELETEBUFFERSARBPROC glDeleteBuffersARB_p=0;
+PFNGLBUFFERDATAARBPROC glBufferDataARB_p=0;
+PFNGLMAPBUFFERARBPROC  glMapBufferARB_p=0;
+PFNGLUNMAPBUFFERARBPROC  glUnmapBufferARB_p=0;
+
 PFNGLCLIENTACTIVETEXTUREARBPROC glClientActiveTextureARB_p=0;
 PFNGLCLIENTACTIVETEXTUREARBPROC glActiveTextureARB_p=0;
 PFNGLCOLORTABLEEXTPROC glColorTable_p=0;
@@ -114,12 +116,6 @@ void init_opengl_extensions()
 {
 	const unsigned char * extensions = glGetString(GL_EXTENSIONS);
 
-        glBindBufferARB_p=(PFNGLBINDBUFFERARBPROC)GET_GL_PROC((GET_GL_PTR_TYP)"glBindBuffer");	;
-        glGenBuffersARB_p=(PFNGLGENBUFFERSARBPROC)GET_GL_PROC((GET_GL_PTR_TYP)"glGenBuffers");	;
-        glDeleteBuffersARB_p=(PFNGLDELETEBUFFERSARBPROC)GET_GL_PROC((GET_GL_PTR_TYP)"glDeleteBuffers");	;
-        glBufferDataARB_p=(PFNGLBUFFERDATAARBPROC)GET_GL_PROC((GET_GL_PTR_TYP)"glBufferData");	;
-        glMapBufferARB_p=(PFNGLMAPBUFFERARBPROC)GET_GL_PROC((GET_GL_PTR_TYP)"glMapBuffer");	;
-        glUnmapBufferARB_p=(PFNGLUNMAPBUFFERARBPROC)GET_GL_PROC((GET_GL_PTR_TYP)"glUnmapBuffer");	
 (void) VSFileSystem::vs_fprintf(stderr, "OpenGL Extensions supported: %s\n", extensions);
     if (glutExtensionSupported( "GL_EXT_compiled_vertex_array")&&XMLSupport::parse_bool (vs_config->getVariable ("graphics","LockVertexArrays","true"))) {
 #ifdef __APPLE__
@@ -151,6 +147,12 @@ void init_opengl_extensions()
 	glActiveTextureARB_p = &glActiveTextureARB;		
 #endif /* __APPLE_PANTHER_GCC33_CLI__ */
 #else
+        glBindBufferARB_p=(PFNGLBINDBUFFERARBPROC)GET_GL_PROC((GET_GL_PTR_TYP)"glBindBuffer");	;
+        glGenBuffersARB_p=(PFNGLGENBUFFERSARBPROC)GET_GL_PROC((GET_GL_PTR_TYP)"glGenBuffers");	;
+        glDeleteBuffersARB_p=(PFNGLDELETEBUFFERSARBPROC)GET_GL_PROC((GET_GL_PTR_TYP)"glDeleteBuffers");	;
+        glBufferDataARB_p=(PFNGLBUFFERDATAARBPROC)GET_GL_PROC((GET_GL_PTR_TYP)"glBufferData");	;
+        glMapBufferARB_p=(PFNGLMAPBUFFERARBPROC)GET_GL_PROC((GET_GL_PTR_TYP)"glMapBuffer");	;
+        glUnmapBufferARB_p=(PFNGLUNMAPBUFFERARBPROC)GET_GL_PROC((GET_GL_PTR_TYP)"glUnmapBuffer");	
     glColorTable_p = (PFNGLCOLORTABLEEXTPROC ) GET_GL_PROC((GET_GL_PTR_TYP)"glColorTableEXT");
     glMultiTexCoord2fARB_p = (PFNGLMULTITEXCOORD2FARBPROC) GET_GL_PROC((GET_GL_PTR_TYP)"glMultiTexCoord2fARB");
     glClientActiveTextureARB_p = (PFNGLCLIENTACTIVETEXTUREARBPROC) GET_GL_PROC((GET_GL_PTR_TYP)"glClientActiveTextureARB");

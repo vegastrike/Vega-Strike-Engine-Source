@@ -119,6 +119,15 @@ struct GFXStats{
 #define glColorTable_p glColorTable
 #define glLockArraysEXT_p glLockArraysEXT
 #define glUnlockArraysEXT_p glUnlockArraysEXT
+
+
+#define glDeleteBuffersARB_p glDeleteBuffersARB
+#define glGenBuffersARB_p glGenBuffersARB
+#define glBindBufferARB_p glBindBufferARB
+#define glBufferDataARB_p glBufferDataARB
+#define glMapBufferARB_p glMapBufferARB
+#define glUnmapBufferARB_p glUnmapBufferARB
+
 #else
 extern PFNGLBINDBUFFERARBPROC glBindBufferARB_p;
 extern PFNGLGENBUFFERSARBPROC glGenBuffersARB_p;
