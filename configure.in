@@ -1123,6 +1123,7 @@ if test "$CRYPTO" = "1" ; then
 	dnl fi
 
 	TR_CPPFLAGS="$TR_CPPFLAGS -DCRPYTO"
+	TR_LIBS="$TR_LIBS -L/usr/local/lib -lcryptopp"
 	CPPFLAGS="$CPPFLAGS -I/usr/local/include"
 	echo "Crypto++ library support enabled"
 else
