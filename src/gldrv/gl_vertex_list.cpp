@@ -233,7 +233,7 @@ void GFXVertexList::EndMutate (int newvertexsize) {
   if (!(changed&CHANGE_MUTABLE)) {
     changed |= CHANGE_CHANGE;
   }
-  RenormalizeNormals ()
+  RenormalizeNormals ();
   RefreshDisplayList();
   if (changed&CHANGE_CHANGE) {
     changed&=(~CHANGE_CHANGE);
@@ -332,21 +332,19 @@ void GFXVertexList::ColVtxCopy (GFXVertexList * thus, GFXVertex *dst, int offset
       SetVertex (Vector (thus->data.colors[i+offset].x,thus->data.colors[i+offset].y,thus->data.colors[i+offset].z));
   }
 }
-void GFXVertexList::ReNormalize(int which) {
-  Vector firstNormal;
-}
 void GFXVertexList::RenormalizeNormals () {
   if (numVertices>0) {
     Vector firstNormal;
     if (changed&HAS_COLOR) {
-      firstNormal=    data.colors[0].GetNormal(firstNormal);
+      firstNormal=    data.colors[0].GetNormal();
     }else {
-      firstNormal=    data.vertices[0].GetNormal(firstNormal);
+      firstNormal=    data.vertices[0].GetNormal();
     }
-    if (firstNormal.Magnitude()>GL_SCALE/1.5&&firstNormal.Magnitude()<GL_SCALE*1.5) {
+    float mag = firstNormal.Magnitude();
+    if (mag>GFX_SCALE/1.5&&mag<GFX_SCALE*1.5) {
       return;
     }
-    if (firstNormal.Magnitude()<GL_SCALE/100) {
+    if (mag<GFX_SCALE/100) {
       firstNormal.Set(1,0,0);
     }
     firstNormal.Normalize();
@@ -363,9 +361,9 @@ void GFXVertexList::RenormalizeNormals () {
       }
     }else {
       for (int i=0;i<numVertices;i++) {
-	data.vertex[0].i/=GFX_SCALE;
-	data.vertex[0].j/=GFX_SCALE;
-	data.vertex[0].k/=GFX_SCALE;
+	data.vertices[0].i/=GFX_SCALE;
+	data.vertices[0].j/=GFX_SCALE;
+	data.vertices[0].k/=GFX_SCALE;
       }
     }
   }

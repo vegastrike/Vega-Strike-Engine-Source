@@ -26,6 +26,7 @@
 #include <string.h>
 #include <assert.h>
 #include "vegastrike.h"
+
 #include "vs_globals.h"
 #ifdef WIN32
 #include <windows.h>
@@ -34,7 +35,7 @@
 #endif
 #endif
 #include "gl_matrix.h"
-
+#include "gl_globals.h"
 #include "vs_globals.h"
 
 using namespace GFXMatrices;  //causes problems with g_game
