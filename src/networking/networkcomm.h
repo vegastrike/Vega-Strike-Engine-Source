@@ -17,7 +17,7 @@ class JVOIPSessionParams;
 class JVOIPRTPTransmissionParams;
 #endif
 #ifdef NETCOMM_PORTAUDIO
-#include "portaudio/pa_common/portaudio.h"
+#include <pa/portaudio.h>
 #endif
 
 class NetworkCommunication

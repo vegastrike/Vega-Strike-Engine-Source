@@ -6,8 +6,8 @@
 #include "networking/webcam_support.h"
 #endif /* NETCOMM_NOWEBCAM */
 #ifdef NETCOMM_JVOIP
-#include "jvoipsession.h"
-#include "jvoiprtptransmission.h"
+#include <jvoiplib/jvoipsession.h>
+#include <jvoiplib/jvoiprtptransmission.h>
 #endif /* NETCOMM_JVOIP */
 
 #define VOIP_PORT	5000

@@ -11,6 +11,8 @@ using std::endl;
 using std::hex;
 extern bool cleanexit;
 
+typedef void* (*VoidVoidFuncType)( void* );
+
 #ifdef DSHOW
 /**************************************************************************************************/
 /**** DirectShow Callback : SampleGrabberCallback                                              ****/
@@ -2454,9 +2456,10 @@ int fg_set_frequency(struct fgdevice *fg, int region, int index)
 }
 
 /* Self running thread that grabbs all images */
-void * grab_images_thread (struct fgdevice *fg)
+void* grab_images_thread(struct fgdevice *fg)
 {
  int in_loop;
+ //struct fgdevice * fg = (fgdevice *) ptr;
  
  /* Loop ... grabbing images */
  in_loop=1;
@@ -2599,10 +2602,9 @@ int fg_start_grab_image (struct fgdevice *fg, int width, int height, int format)
  fg->grabbing_active=1;
 
  /* Start grabbing thread */
- #warning casting void * to this function pointer thing
- if (pthread_create((pthread_func_type)&fg->grab_thread,
+ if (pthread_create( &fg->grab_thread,
 						 NULL,
-						 (void *)grab_images_thread,
+						 (VoidVoidFuncType)grab_images_thread,
 						 (void *)fg)
 				 	==-1)
  {
