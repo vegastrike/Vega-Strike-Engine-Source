@@ -52,13 +52,8 @@ bool BSPNode::intersects(const Vector &start, const Vector &end) const {
 
 	// n = normal, u = origin, v = direction vector
 	if(peq1==0 && peq2==0) { // on the plane; shouldn't collide unless the plane is a virtual plane
-		if(isVirtual) {
-			return ((back!=NULL)?back->intersects(start, end):true)
-				|| ((front!=NULL)?front->intersects(start, end):false);
-		}
-		else {
-			return false; 
-		}
+	    return ((back!=NULL)?back->intersects(start, end):true)
+		|| ((front!=NULL)?front->intersects(start, end):false);		
 	}
 
 	if(peq1<=0 && peq2<=0) {
@@ -84,13 +79,13 @@ bool BSPNode::intersects(const Vector &pt) const {
 		return (front!=NULL)?front->intersects(pt):false;
 	}
 	else if(peq==0) { // if on the plane and not virtual, then its not in the object
-		if(isVirtual) {
+	    //if(isVirtual) {//daniel080201
 			return ((back!=NULL)?back->intersects(pt):true)
 				|| ((front!=NULL)?front->intersects(pt):false);
-		}
-		else {
-			return false; 
-		}
+			//}
+			//else {
+			//return false; 
+			//}
 	}
 	else {
 		return (back!=NULL)?back->intersects(pt):true; // if behind and no back children, then there are no more subdivisions and thus this thing is in
