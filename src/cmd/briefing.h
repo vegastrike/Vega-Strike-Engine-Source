@@ -44,5 +44,6 @@ class Briefing{
   void EnqueueOrder (int,const Vector & destination, float time);
   void OverrideOrder (int, const Vector & destination, float time);
   void SetPosition (int,const Vector &Position);
+  Vector GetPosition(int);
   ~Briefing();
 };

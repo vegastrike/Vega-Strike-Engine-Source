@@ -367,36 +367,15 @@ varInst *Mission::call_unit(missionNode *node,int mode){
       }
     else if(method_id==CMT_UNIT_getPosition){
       if(mode==SCRIPT_RUN){
-	varInst *vec3_vi=call_olist_new(node,mode);
 
 	Vector pos=my_unit->Position();
 
-	varInst *pos_vi;
-
-	pos_vi=newVarInst(VI_TEMP);
-	pos_vi->type=VAR_FLOAT;
-	pos_vi->float_val=pos.i;
-	call_olist_push_back(node,mode,vec3_vi,pos_vi);
-
-	pos_vi=newVarInst(VI_TEMP);
-	pos_vi->type=VAR_FLOAT;
-	pos_vi->float_val=pos.j;
-	call_olist_push_back(node,mode,vec3_vi,pos_vi);
-
-	pos_vi=newVarInst(VI_TEMP);
-	pos_vi->type=VAR_FLOAT;
-	pos_vi->float_val=pos.k;
-	call_olist_push_back(node,mode,vec3_vi,pos_vi);
-
-	//	deleteVarInst(vec3_vi);
-	viret=vec3_vi;
-	//return vec3_vi;
+	call_vector_into_olist(viret,pos);
       }
       else{
 	viret=newVarInst(VI_TEMP);
 	viret->type=VAR_OBJECT;
 	viret->objectname="olist";
-	//return viret;
       }
     }
     else if(method_id==CMT_UNIT_getFaction){

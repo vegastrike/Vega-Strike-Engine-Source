@@ -10,8 +10,10 @@ varInst * Mission::call_briefing (missionNode * node, int mode) {
     string cmd=node->attr_value("name");
     node->script.method_id=module_unit_map[cmd];
   }
-  viret=newVarInst(VI_TEMP);
   callback_module_briefing_type method_id=(callback_module_briefing_type) node->script.method_id;
+  viret=newVarInst(VI_TEMP);
+  viret->type=VAR_VOID;//assumed void except when otherwise so stated
+  
   if (briefing!=NULL||mode!=SCRIPT_RUN) {
     if(method_id==CMT_BRIEFING_addShip){
       std::string name = getStringArgument(node,mode,0);
@@ -26,21 +28,52 @@ varInst * Mission::call_briefing (missionNode * node, int mode) {
       }
       viret->type = VAR_INT;
     }else if (method_id==CMT_BRIEFING_removeShip) {
-      
-    }else if (method_id==CMT_BRIEFING_enqueueOrder){
-      
-    }else if (method_id==CMT_BRIEFING_replaceOrder) {
-      
+      int whichship = (int)getIntArg(node,mode,0);
+      if (mode==SCRIPT_RUN) {
+	briefing->RemoveStarship(whichship);
+      }
+    }else if (method_id==CMT_BRIEFING_enqueueOrder||method_id==CMT_BRIEFING_replaceOrder){
+      int whichship = (int)getIntArg(node,mode,0);
+      float destx = getFloatArg(node,mode,1);
+      float desty = getFloatArg(node,mode,2);
+      float destz = getFloatArg(node,mode,3);
+      float time = getFloatArg(node,mode,4);
+      if (mode==SCRIPT_RUN) {
+	if (method_id==CMT_BRIEFING_enqueueOrder)
+	  briefing->EnqueueOrder(whichship,Vector(destx,desty,destz),time);
+	else
+	  briefing->OverrideOrder(whichship,Vector(destx,desty,destz),time);
+      }
     }else if (method_id==CMT_BRIEFING_getShipPosition) {
-      
+      int whichship = (int)getIntArg(node,mode,0);
+      Vector pos;
+      if (mode==SCRIPT_RUN) {
+	pos = briefing->GetPosition(whichship);
+      }
+      delete viret;
+      call_vector_into_olist(viret,pos);
     }else if (method_id==CMT_BRIEFING_setShipPosition) {
-      
+      int whichship = (int)getIntArg(node,mode,0);
+      float destx = getFloatArg(node,mode,1);
+      float desty = getFloatArg(node,mode,2);
+      float destz = getFloatArg(node,mode,3);
+      if (mode==SCRIPT_RUN) {
+	briefing->SetPosition(whichship,Vector(destx,desty,destz));
+      }
     }else if (method_id==CMT_BRIEFING_terminate) {
-      
+      BriefingEnd();
     }else if (method_id==CMT_BRIEFING_setCamPosition) {
-
+      Vector p(getFloatArg (node,mode,0),getFloatArg(node,mode,1),getFloatArg(node,mode,2));
+      if(mode==SCRIPT_RUN) {
+	briefing->cam.SetPosition(p);
+      }
     }else if (method_id==CMT_BRIEFING_setCamOrientation) {
-      
+      Vector p(getFloatArg (node,mode,0),getFloatArg(node,mode,1),getFloatArg(node,mode,2));
+      Vector q(getFloatArg (node,mode,3),getFloatArg(node,mode,4),getFloatArg(node,mode,5));
+      Vector r(getFloatArg (node,mode,6),getFloatArg(node,mode,7),getFloatArg(node,mode,8));
+      if (mode==SCRIPT_RUN) {
+	briefing->cam.SetOrientation(p,q,r);
+      }
     }
   }
   return viret;

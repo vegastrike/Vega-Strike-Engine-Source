@@ -101,6 +101,12 @@ void Briefing::SetPosition (int which,const Vector &Position) {
     starships[which]->SetPosition (Position);
   }
 }
+Vector Briefing::GetPosition (int which) {
+  if (which<(int)starships.size()&&which>0) {
+    return starships[which]->Position ();
+  }
+  return Vector(0,0,0);
+}
 int Briefing::AddStarship (const char * fn, int faction, const Vector &pos) {
   Ship * tmp = new Ship (fn,faction,pos);
   if (tmp->LoadFailed()) {
