@@ -60,6 +60,27 @@ public:
 };
 std::strstream PythonIOString::buffer = std::strstream();
 
+/* Basic mode of operation:
+  Define a module_builder per module and class_builders for each 
+  class to be exported to python
+
+  <module_builder|class_builder>.def defines a function in the module or class
+  <module_builder|class_builder>.add adds a variable to the module or class 
+
+From the boost documentation (I haven't used this yet)
+
+Direct Access to Data Members 
+Boost.Python uses the special __xxxattr__<name>__ functionality described above to allow direct access to data members through the following special functions on class_builder<> and extension_class<>: 
+
+def_getter(pointer-to-member, name) // read access to the member via attribute name 
+def_setter(pointer-to-member, name) // write access to the member via attribute name 
+def_readonly(pointer-to-member, name) // read-only access to the member via attribute name 
+def_read_write(pointer-to-member, name) // read/write access to the member via attribute name 
+
+  ( Pointer to member is &Class::member )
+
+  */
+
 BOOST_PYTHON_MODULE_INIT(Vegastrike)
 {
 	/* Create a new module VS in python */
