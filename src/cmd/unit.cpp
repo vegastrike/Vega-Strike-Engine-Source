@@ -172,36 +172,6 @@ GameUnit<UnitType>::~GameUnit()
   if (this->planet)
     delete this->planet;
   //  VSFileSystem::vs_fprintf (stderr,"Freeing Unit %s\n",name.c_str());
-  if (this->sound->engine!=-1) {
-    AUDStopPlaying (this->sound->engine);
-    AUDDeleteSound (this->sound->engine);
-  }
-  if (this->sound->explode!=-1) {
-    AUDStopPlaying (this->sound->explode);
-    AUDDeleteSound (this->sound->explode);
-  }
-  if (this->sound->shield!=-1) {
-    AUDStopPlaying (this->sound->shield);
-    AUDDeleteSound (this->sound->shield);
-  }
-  if (this->sound->armor!=-1) {
-    AUDStopPlaying (this->sound->armor);
-    AUDDeleteSound (this->sound->armor);
-  }
-  if (this->sound->hull!=-1) {
-    AUDStopPlaying (this->sound->hull);
-    AUDDeleteSound (this->sound->hull);
-  }
-  if (this->sound->cloak!=-1) {
-    AUDStopPlaying (this->sound->cloak);
-    AUDDeleteSound (this->sound->cloak);
-  }
-  for (int beamcount=0;beamcount<this->GetNumMounts();beamcount++) {
-    AUDStopPlaying(this->mounts[beamcount].sound);
-    AUDDeleteSound(this->mounts[beamcount].sound);
-    if (this->mounts[beamcount].ref.gun&&this->mounts[beamcount].type->type==weapon_info::BEAM)
-      delete this->mounts[beamcount].ref.gun;//hope we're not killin' em twice...they don't go in gunqueue
-  }
   for(unsigned int meshcount = 0; meshcount < this->meshdata.size(); meshcount++)
     if (this->meshdata[meshcount])
       delete this->meshdata[meshcount];

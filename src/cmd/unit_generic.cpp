@@ -3320,6 +3320,31 @@ void Unit::Kill(bool erasefromsave, bool quitting) {
   if (this->colTrees)
     this->colTrees->Dec();//might delete
   this->colTrees=NULL;
+  if (this->sound->engine!=-1) {
+    AUDStopPlaying (this->sound->engine);
+    AUDDeleteSound (this->sound->engine);
+  }
+  if (this->sound->explode!=-1) {
+    AUDStopPlaying (this->sound->explode);
+    AUDDeleteSound (this->sound->explode);
+  }
+  if (this->sound->shield!=-1) {
+    AUDStopPlaying (this->sound->shield);
+    AUDDeleteSound (this->sound->shield);
+  }
+  if (this->sound->armor!=-1) {
+    AUDStopPlaying (this->sound->armor);
+    AUDDeleteSound (this->sound->armor);
+  }
+  if (this->sound->hull!=-1) {
+    AUDStopPlaying (this->sound->hull);
+    AUDDeleteSound (this->sound->hull);
+  }
+  if (this->sound->cloak!=-1) {
+    AUDStopPlaying (this->sound->cloak);
+    AUDDeleteSound (this->sound->cloak);
+  }
+
   for (int beamcount=0;beamcount<GetNumMounts();beamcount++) {
     AUDStopPlaying(mounts[beamcount].sound);
     AUDDeleteSound(mounts[beamcount].sound);
@@ -3585,11 +3610,13 @@ float Unit::DealDamageToHullReturnArmor (const Vector & pnt, float damage, float
   {
 		  if( percent == -1)
 			  return -1;
+                  static float damage_factor_for_sound=XMLSupport::parse_float(vs_config->getVariable("audio","damage_factor_for_sound",".001"));
 		  if (absdamage<*targ) {
+                    if ((*targ)*damage_factor_for_sound<=absdamage) {
 			ArmorDamageSound( pnt);
-			*targ -= apply_float_to_unsigned_int(absdamage);  //short fix
+                    }
+                    *targ -= apply_float_to_unsigned_int(absdamage);  //short fix
 		  }else {
-			HullDamageSound( pnt);
 			absdamage -= *targ;
 			damage= damage>=0?absdamage:-absdamage;
 			*targ= 0;
@@ -3612,7 +3639,10 @@ float Unit::DealDamageToHullReturnArmor (const Vector & pnt, float damage, float
 					DamageRandSys(system_failure*rand01()+(1-system_failure)*(1-(absdamage/hull)),pnt);
 				}
 			  if (damage>0) {
-				  hull -=damage;//FIXME
+                            if (hull*damage_factor_for_sound<=damage) {
+                              HullDamageSound( pnt);
+                            }                            
+                            hull -=damage;//FIXME
 			  }else {
 				  recharge+=damage;
 				  shield.recharge+=damage;
