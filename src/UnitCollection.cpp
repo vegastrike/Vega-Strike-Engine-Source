@@ -1,11 +1,24 @@
 #include <stdlib.h>
 #include "UnitCollection.h"
 
-void UnitCollection::UnitIterator::insert(Unit *unit) {
+void UnitCollection::UnitIterator::preinsert(Unit *unit) {
+  if(pos->next!=NULL)
+    pos->next = new UnitListNode(unit, pos->next);
+  else
+    pos->next = new UnitListNode(unit, NULL);
+}
+
+void UnitCollection::UnitIterator::postinsert(Unit *unit) {
   if(pos->next!=NULL)
     pos->next->next = new UnitListNode(unit, pos->next->next);
   else
     pos->next = new UnitListNode(unit, NULL);
+}
+
+void UnitCollection::UnitIterator::remove() {
+  if(pos->next!=NULL) {
+    pos->next = pos->next->next;
+  }
 }
 
 Unit *UnitCollection::UnitIterator::current() {

@@ -12,10 +12,10 @@ AI *PlanetaryOrbit::Execute() {
   return this;
 }
 
-/* Move this into a Sphere class!!! */
-
 void Planet::InitPlanet(FILE *fp) {
   InitUnit();
+  satellites = NULL;
+  numSatellites = 0;
   calculatePhysics=false;
 
   double orbital_radius, orbital_velocity, orbital_position;
@@ -28,12 +28,12 @@ void Planet::InitPlanet(FILE *fp) {
   fscanf(fp, "%lf %lf %lf\n", &orbital_radius, &orbital_velocity, &orbital_position);
   SetAI(new PlanetaryOrbit(orbital_radius, orbital_velocity, orbital_position));
 
-  fscanf(fp, "%d\n", &numsubunit);
-  subunits = new Unit*[numsubunit];
+  fscanf(fp, "%d\n", &numSatellites);
+  satellites = new Planet*[numSatellites];
 
-  for(a=0; a<numsubunit; a++) {
-    subunits[a] = new Planet();
-    ((Planet*)subunits[a])->InitPlanet(fp);
+  for(a=0; a<numSatellites; a++) {
+    satellites[a] = new Planet();
+    satellites[a]->InitPlanet(fp);
   }
   
   meshdata = new Mesh*[1];
@@ -42,13 +42,13 @@ void Planet::InitPlanet(FILE *fp) {
   fpos = ftell(fp);
 }
 
-Planet::Planet()  : Unit(), radius(0.0f) {
+Planet::Planet()  : Unit(), radius(0.0f), origin(0,0,0), satellites(NULL), numSatellites(0) {
   InitUnit();
 
   SetAI(new AI()); // no behavior
 }
 
-Planet::Planet(char *filename) : Unit(), radius(0.0f) {
+Planet::Planet(char *filename) : Unit(), radius(0.0f), origin(0,0,0), satellites(NULL), numSatellites(0) {
   InitUnit();
 
   FILE *fp = fopen(filename, "r");
@@ -84,14 +84,26 @@ void Planet::gravitate(UnitCollection *uc, Matrix matrix) {
   }
   delete iterator;
 
-  //for(int a=0; a<numsubunit; a++) {
-  //  ((Planet*)subunits[a])->gravitate(uc, t);
-  //}
+  for(int a=0; a<numSatellites; a++) {
+    satellites[a]->gravitate(uc, t);
+    satellites[a]->origin = origin + pos;
+  }
 }
+
+void Planet::Draw() {
+  Matrix tmat;
+  Translate(tmat, origin);
+
+  GFXMultMatrix(MODEL, tmat);
+  Unit::Draw();
+}
+
+void Planet::Draw(Matrix tmatrix) {abort();}
+void Planet::DrawStreak(const Vector &v) {abort();}
+void Planet::Draw(Matrix tmatrix, const Vector &pp, const Vector &pq, const Vector &pr, const Vector &ppos) {abort();}
 
 void Planet::gravitate(UnitCollection *uc) {
   Matrix t;
   Identity(t);
   gravitate(uc, t);
 }
-

@@ -537,7 +537,6 @@ void Unit::Draw()
 #endif
 
 	for (int i=0;i<nummesh;i++) {
-	  GFXLoadMatrix(MODEL, currentMatrix); // not a problem with overhead if the mesh count is kept down
 	  //meshdata[i]->Draw(np, nq, nr, npos);
 	  /////////already completed if the camera was changedGFXCalculateFrustum(); Moved into update camera
 	  ;
@@ -553,11 +552,12 @@ void Unit::Draw()
 	  }else {
 
 	  }
+	  GFXLoadMatrix(MODEL, currentMatrix); // not a problem with overhead if the mesh count is kept down
 	}
-	for(int subcount = 0; subcount < numsubunit; subcount++)
+	for(int subcount = 0; subcount < numsubunit; subcount++) {
 		subunits[subcount]->Draw(tmatrix, np, nq, nr, npos);
-	if(aistate)
-		aistate = aistate->Execute();
+	  GFXLoadMatrix(MODEL, currentMatrix); // not a problem with overhead if the mesh count is kept down
+	}
 }
 
 void Unit::DrawStreak(const Vector &v)
@@ -609,4 +609,11 @@ void Unit::SetAI(AI *newAI)
 		delete aistate;
 	aistate = newAI;
 	aistate->SetParent(this);
+}
+
+void Unit::ExecuteAI() {
+  if(aistate) aistate->Execute();
+  for(int a=0; a<numsubunit; a++) {
+    subunits[a]->ExecuteAI();
+  }
 }

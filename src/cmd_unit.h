@@ -169,6 +169,7 @@ public:
         Vector &R(){return r;};
 
 	bool queryCalculatePhysics() { return calculatePhysics; }
+	void ExecuteAI();
 };
 
 class AI{
