@@ -1,6 +1,14 @@
-2002-01-24 Daniel Horn <hellcatv@users.sourceforge.net>
+2002-01-25 Daniel Horn <hellcatv@users.sourceforge.net>
 	
-	* Made collisions work inside a planet when no terrain or destinations were specified1
+	* Fixed a whole lot of lighting problems with local lights. Not all are fixed, but enough to do the standard things I think.
+	* Fixed a lot of problems with collision tables and multiple systems (weapons used to be left behind, which would cause random crashes
+	* Added AI jumping through jump portals.
+	* Made AI follow human through jumping
+	* Made all players exit at a jump point that would lead back to original system
+	* Added an animation (right now explosion) that will play before jumping
+	* Added ability to specify jump drives on specific starships with <Jump delay="3" jumpenergy="10"/> which would mean that it would take 10 energy to jump (if it were negative it would be 10 fuel times mass)
+	* Added ability to make planets not cull by passing in ONE ONE to the alphamap of the planet
+	* Made test2.mission demonstrate combat with jump points (fun)
 
 2002-01-24 Denial Horn <hellcatv@users.sourceforge.net>
 	* Added jump drives!  Now you can go to a planet designated as a jump point...press 'j' and it will load the system if not already loaded...
