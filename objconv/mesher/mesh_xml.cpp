@@ -10,9 +10,9 @@ using std::string;
 using namespace XMLSupport;
 
 struct GFXVertex {
-  float x,y,z;
-  float i,j,k;
-  float s,t;
+  float x,y,z; // Location
+  float i,j,k; // Normal
+  float s,t; // U,V coords
   GFXVertex operator * (float s) {
     GFXVertex ret (*this);
     ret.x*=s;
@@ -37,31 +37,35 @@ struct GFXMaterial
 
 struct line{
 	bool flatshade;
-	int indexref[2];
-	float s[2];
-	float t[2];
+	int indexref[2]; //Index into Points
+	float s[2]; //U
+	float t[2]; //V
 
 };
 
 struct triangle{
 	bool flatshade;
-	int indexref[3];
-	float s[3];
-	float t[3];
+	int indexref[3]; //Index into Points
+	float s[3]; //U
+	float t[3]; //V
 	
 };
 
 struct quad{
 	bool flatshade;
-	int indexref[4];
-	float s[4];
-	float t[4];
+	int indexref[4]; //Index into Points
+	float s[4]; //U
+	float t[4]; //V
 };
 
-enum polytype{ //FIXME
+enum polytype{ 
 	LINE,
 	TRIANGLE,
-	QUAD
+	QUAD,
+	LINESTRIP,
+    TRISTRIP,
+    TRIFAN,
+    QUADSTRIP
 };
 
 
@@ -130,7 +134,7 @@ struct XML {
 	FRAMESPERSECOND,
 	STARTFRAME
   };
-    ///Saves which attributes of vertex have been set in XML file
+    ///Saves which attributes of vertex have been set in XML file (debug)
     enum PointState {
       P_X = 0x1,
       P_Y = 0x2,
@@ -139,13 +143,13 @@ struct XML {
       P_J = 0x10,
       P_K = 0x20
     };
-    ///Saves which attributes of vertex have been set in Polygon for XML file
+    ///Saves which attributes of vertex have been set in Polygon for XML file (debug)
     enum VertexState {
       V_POINT = 0x1,
       V_S = 0x2,
       V_T = 0x4
     };
-    ///Save if various logo values have been set
+    ///Save if various logo values have been set (debug)
     enum LogoState {
       V_TYPE = 0x1,
       V_ROTATE = 0x2,
@@ -173,7 +177,7 @@ struct XML {
         string alpha_name;
         string animated_name;
     };
-	struct vec3f{
+	struct vec3f{ // a 3 dimensional vector
 		float x;
 		float y;
 		float z;
@@ -185,10 +189,10 @@ struct XML {
     static const EnumMap attribute_map;
     vector<Names> state_stack;
     vector<GFXVertex> vertices;
-
 	vector<line> lines;
     vector<triangle> tris;
     vector<quad> quads;
+
 	//FIXME - strips not currently supported
     vector <vector<GFXVertex> > linestrips;
     vector <vector<GFXVertex> > tristrips;
@@ -196,14 +200,22 @@ struct XML {
     vector <vector<GFXVertex> > quadstrips;
 	//END FIXME
 
+	//FIXME - Logos not currently supported
 	vector <ZeLogo> logos;
+	//End FIXME
+
+	vec3f detailplane;
+	//FIXME - currently do not support multiple detail planes
+	vector <vec3f> detailplanes;
+	//End FIXME
+
 	bool sharevert;
     bool usenormals;
     bool reverse;
     bool force_texture;
 	bool recalc_norm;
 	bool shouldreflect;
-	vec3f detailplane;
+	
 	bool reflect;
 	bool lighting;
 	bool cullface;
@@ -399,7 +411,7 @@ bool shouldreflect (string r) {
 	int i;
 	for (i=0;i<(int)r.length();++i) {
 		if (r[i]!='0'&&r[i]!='.'&&r[i]!='+'&&r[i]!='e')
-			return true;
+			return true; // Just about anything other than "FALSE" or 0.00 etc.
 	}
 	return false;
 }
@@ -415,6 +427,7 @@ void beginElement(const string &name, const AttributeList &attributes, XML * xml
   xml->state_stack.push_back(elem);
   switch(elem) {
   case XML::DETAILPLANE:
+	 memset(&xml->detailplane, 0, sizeof(xml->detailplane));
 	 for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
 	    switch(XML::attribute_map.lookup((*iter).name)) {
 		case XML::X:
@@ -423,12 +436,12 @@ void beginElement(const string &name, const AttributeList &attributes, XML * xml
 		case XML::Y:
 			xml->detailplane.y=XMLSupport::parse_float(iter->value);
 			break;
-			
 		case XML::Z:
 			xml->detailplane.z=XMLSupport::parse_float(iter->value);
 			break;
 			}
 	  }
+	  xml->detailplanes.push_back(xml->detailplane);
 	  break;
   case XML::MATERIAL:
   for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
@@ -814,11 +827,12 @@ int main (int argc, char** argv) {
   FILE * Outputfile=fopen(argv[2],"wb"); 
   unsigned int intbuf;
   float floatbuf;
-  int versionnumber=1;
+  int versionnumber=2;
   unsigned char bytebuf;
 
   //HEADER
-  bytebuf='B';
+
+  bytebuf='B'; // "Magic Word"
   fwrite(&bytebuf,1,1,Outputfile);
   bytebuf='F';
   fwrite(&bytebuf,1,1,Outputfile);
@@ -876,19 +890,21 @@ int main (int argc, char** argv) {
   fwrite(&floatbuf,sizeof(float),1,Outputfile);//Material:Specular:Blue
   floatbuf= VSSwapHostFloatToLittle(memfile.material.sa);
   fwrite(&floatbuf,sizeof(float),1,Outputfile);//Material:Specular:Alpha
-  
-  //Incorrectly implemented 
-  /*
-  floatbuf= memfile.detailplane.x;
-  fwrite(&floatbuf,sizeof(float),1,Outputfile);//Detail Plane:X
-  floatbuf= memfile.detailplane.y;
-  fwrite(&floatbuf,sizeof(float),1,Outputfile);//Detail Plane:Y
-  floatbuf= memfile.detailplane.z;
-  fwrite(&floatbuf,sizeof(float),1,Outputfile);//Detail Plane:Z
-  */
-  //End Incorrectly implemented
-
   //END HEADER
+  //Begin Variable sized Attributes
+  
+  intbuf= VSSwapHostIntToLittle(memfile.detailplanes.size());
+  fwrite(&intbuf,sizeof(int),1,Outputfile);//Number of detail planes
+  for(int plane=0;plane<memfile.detailplanes.size();plane++){
+	floatbuf= VSSwapHostFloatToLittle(memfile.detailplanes[plane].x);
+	fwrite(&floatbuf,sizeof(float),1,Outputfile);//Detail Plane:X
+	floatbuf= VSSwapHostFloatToLittle(memfile.detailplanes[plane].y);
+	fwrite(&floatbuf,sizeof(float),1,Outputfile);//Detail Plane:Y
+	floatbuf= VSSwapHostFloatToLittle(memfile.detailplanes[plane].z);
+	fwrite(&floatbuf,sizeof(float),1,Outputfile);//Detail Plane:Z
+  }
+  //End Variable sized Attributes
+
   //GEOMETRY
   intbuf= VSSwapHostIntToLittle(memfile.vertices.size());
   fwrite(&intbuf,sizeof(int),1,Outputfile);//Number of vertices

@@ -1,4 +1,5 @@
-Format for version 0.01 (current version not only doesn't support all features - it's x86 only!)
+Format for version 0.02
+All data stored in little endian order except for Type String
 ---Header---
 Type String:'BFXM'
 Version number*100:integer 
@@ -9,8 +10,13 @@ Sharevert: integer
 Polygonoffset:float
 Blendmode:<bsrc:integer,bdest:integer>
 Material<Power:float,Ambient.RGBA:4 floats,Diffuse.RGBA:4 floats,Emissive.RGBA:4 floats,Specular.RGBA:4 floats,Cullface:integer,lighting:integer,reflect:integer,usenormals:integer>
-# [removed until fixed] Detailplane<x:float,y:float,z:float>
 ---End Header---
+---Arbitrary length attributes---
+Number of Detail Planes: integer
+       for each plane:
+       <x:float,y:float,z:float>
+---End Arbitrary length attributes---
+---Geometry---
 Number of vertices: integer
        for each vertex:
        <x:float,y:float,z:float,i:float,j:float,k:float,s:float,t:float>
@@ -23,3 +29,4 @@ Number of Triangles: integer
 Number of Quads: integer
        for each Quad:
        <flatshade:integer,4 <index:integer,s:float,t:float>>
+---End Geometry---
