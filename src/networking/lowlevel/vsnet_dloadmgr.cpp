@@ -329,12 +329,13 @@ void Manager::private_eval_download( SOCKETALT sock, NetBuffer& buffer, Subcomma
                         smi->second->changeState( Completed, DownloadInterrupted );
                         _currentItems.erase( smi );
                     }
-                    cl->erase( mapi );
 
                     short sz = buffer.getShort( );
                     mapi->second->setSize( sz );
                     mapi->second->append( buffer.getBuffer(sz), sz );
                     mapi->second->changeState( Completed, Ok );
+
+                    cl->erase( mapi ); // mapi is now bad!
                 }
                 else
                 {

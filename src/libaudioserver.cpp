@@ -1,5 +1,6 @@
 #include <string>
 #include "audiolib.h"
+#include "gfx/cockpit.h"
 
 void AUDAdjustSound(int i, QVector const & qv, Vector const & vv) {}
 
@@ -18,3 +19,5 @@ void	AUDPlay (const int sound, const QVector &pos, const Vector & vel, const flo
 
 // From communication_xml.cpp
 int createSound( std::string file, bool val) { return -1;}
+
+soundContainer::~soundContainer () {}
