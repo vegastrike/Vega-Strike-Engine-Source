@@ -1,5 +1,9 @@
 #include "gfx_mesh.h"
 #include "lin_time.h"
+
+static float startpotency = 20;
+static float endpotency = 4;
+static float flickertime = 5;
 static void AvLights (float target[4], const float  other[4]) {
   target[0] = .5*(target[0] + other[0]);
   target[1] = .5*(target[1] + other[1]);
@@ -12,7 +16,7 @@ MeshFX::MeshFX (const float TTL, const float delta, const bool enabled, const GF
   this->TTD = this->TTL; this->delta = delta;
 }
 void MeshFX::MergeLights (const MeshFX & other) {
-  if (TTL>0) {
+  //  if (TTL>0) {
     delta = (other.delta + this->delta) *.5;
     /*  TTL = (TTL>other.TTL)
 	?
@@ -41,24 +45,24 @@ void MeshFX::MergeLights (const MeshFX & other) {
     attenuate[1]=1./attenuate[1];
     attenuate[1]+=1./other.attenuate[1]+sqrtf(distsqr);
     attenuate[1]= 1./attenuate[1];*/
-  } else {
-    memcpy(this, &other, sizeof (MeshFX));
-  }
+    //  } else {
+    //    memcpy(this, &other, sizeof (MeshFX));
+    //  }
 }
 bool MeshFX::Update() {
   TTL -= GetElapsedTime();
   if (TTL <0) {
     TTL = 0;
     TTD -= GetElapsedTime();
-    attenuate[2]+=2*delta*GetElapsedTime()
+    attenuate[2]+=1.5*delta*GetElapsedTime()
 ;
-    attenuate[1]+=2*delta*GetElapsedTime();
+    //    attenuate[1]+=2*delta*GetElapsedTime();
     
     //    attenuate[2]*=1+2*delta*GetElapsedTime();
     //    attenuate[1]*=1+2*delta*GetElapsedTime();
   } else {
-    attenuate[2]-=1.25*delta*GetElapsedTime();
-    attenuate[1]-=1.25*delta*GetElapsedTime();
+    attenuate[2]-=delta*GetElapsedTime();
+    //    attenuate[1]-=1.25*delta*GetElapsedTime();
     //    attenuate[2]*=1- .5*delta*GetElapsedTime();
     //    attenuate[1]*=1- .5*delta*GetElapsedTime();
   }
@@ -69,12 +73,14 @@ void Mesh::AddDamageFX(const Vector & pnt, const Vector &norm,  const float dama
 
   Vector loc(pnt+norm);
   if (!(norm.i||norm.j||norm.k)) {
-    loc = (pnt*(rSize()*rSize()/pnt.Dot(pnt)));
+    loc = pnt;
+    loc.Normalize();
+    loc*=(1+rSize());
   }
 
   GFXColor tmp (col.r,col.g,col.b,col.a);
-  float numsec = 5*damage;
-  MeshFX newFX (numsec,.2*numsec   ,true,GFXColor(loc.i,loc.j,loc.k,1),tmp,GFXColor (0,0,0,1),tmp,GFXColor (1,0,10/(rSize()*rSize())));
+  float numsec = flickertime*damage;
+  MeshFX newFX (numsec, (startpotency-endpotency)/(numsec*rSize()*rSize()) ,true,GFXColor(loc.i,loc.j,loc.k,1),tmp,GFXColor (0,0,0,1),tmp,GFXColor (1,0,startpotency/(rSize()*rSize())));
   if (LocalFX.size()>2) {
     LocalFX[(rand()%(LocalFX.size()))].MergeLights (newFX);
   } else {

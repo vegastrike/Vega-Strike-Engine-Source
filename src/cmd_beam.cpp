@@ -278,13 +278,13 @@ void Beam::UpdatePhysics(const Transformation &trans, const Matrix m) {
   Vector tmpvec (center + direction*curlength);
   Vector tmpMini = center.Min(tmpvec);
   tmpvec = center.Max (tmpvec);
+  CollideInfo.Mini= tmpMini;
+  CollideInfo.Maxi= tmpvec;
   if (TableLocationChanged (CollideInfo,tmpMini,tmpvec)||(curthick>0&&CollideInfo.object==NULL)) {
     if (CollideInfo.object !=NULL) {
       KillCollideTable (&CollideInfo);
     }
     CollideInfo.object = this;
-    CollideInfo.Mini= tmpMini;
-    CollideInfo.Maxi= tmpvec;
     AddCollideQueue (CollideInfo);
   }
   //Check if collide...that'll change max beam length REAL quick
