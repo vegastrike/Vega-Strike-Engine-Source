@@ -23,7 +23,7 @@
 #include "gfxlib.h"
 #include "vegastrike.h"
 #include "vs_globals.h"
-
+#include <stdio.h>
 extern GFXBOOL bTex0;
 extern GFXBOOL bTex1;
 
@@ -107,10 +107,10 @@ int GFXQuadList::AddQuad (const GFXVertex *vertices, const GFXColor * color) {
   return numQuads-1;
 }
 void GFXQuadList::DelQuad (int which ) {
-  if (which <0||which>=numQuads||quadassignments[which]==-1)
+  if (which <0||which>=numVertices/4||quadassignments[which]==-1)
     return;
   Dirty++;
-  for (int i=numQuads-1;i>=0;i--) {
+  for (int i=0;i<numVertices/4;i++) {
     if (quadassignments[i]==numQuads-1) {
       memcpy (myVertices+(quadassignments[which]*4),myVertices+((numQuads-1)*4),4*sizeof(GFXVertex));
       if (isColor)
@@ -121,9 +121,10 @@ void GFXQuadList::DelQuad (int which ) {
       return;
     }
   }
+  fprintf (stderr," error deleting engine flame\n");
 }
 void GFXQuadList::ModQuad (int which, const GFXVertex * vertices, const GFXColor * colors) {
-  if (which <0||which>=numQuads||quadassignments[which]==-1)
+  if (which <0||which>=numVertices/4||quadassignments[which]==-1)
     return;
   if (vertices)
     memcpy (myVertices+(quadassignments[which]*4),vertices,4*sizeof(GFXVertex));
