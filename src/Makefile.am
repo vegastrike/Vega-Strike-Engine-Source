@@ -3,7 +3,7 @@ noinst_LIBRARIES = libroot.a librootgeneric.a librootserver.a
 
 SUBDIRS = cmd gfx gldrv aldrv python gui networking boost common
 vegastrike_LDADD =  \
-libxml.a libroot.a librootgeneric.a \
+libroot.a librootgeneric.a \
 aldrv/libaldrv.a \
 cmd/collide/libcollide.a \
 common/libvscommon.a \
@@ -26,7 +26,6 @@ networking/libnet.a \
 -lpthread
 
 vegaserver_LDADD =  \
-libxml.a \
 networking/libnetserver.a \
 cmd/libcmdserver.a cmd/libcmdgeneric.a \
 cmd/ai/libaigeneric.a \
