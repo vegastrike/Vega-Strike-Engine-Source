@@ -72,6 +72,24 @@ public:
 					in.y<y?in.y:y,
 					in.z<z?in.z:z);
 	}
+	vec3 operator+ (const vec3 &oth) const {
+		return vec3(x+oth.x,y+oth.y,z+oth.z);
+	}
+	vec3 operator- (const vec3 &oth) const {
+		return vec3(x-oth.x,y-oth.y,z-oth.z);
+	}
+	vec3 &operator+= (const vec3 &oth) {
+		x+=oth.x;
+		y+=oth.y;
+		z+=oth.z;
+		return *this;
+	}
+	vec3 &operator-= (const vec3 &oth) {
+		x-=oth.x;
+		y-=oth.y;
+		z-=oth.z;
+		return *this;
+	}
 	bool operator< (const vec3 &oth) const {
 		return x<oth.x&&y<oth.y&&z<oth.z;
 	}
@@ -275,8 +293,8 @@ public:
 	void computeXYZ() {
 		xyz.z = distance * sin (declination);
 		float xy = distance * cos (declination);
-		xyz.y = xy*sin(ascension);
-		xyz.x = xy*cos(ascension);
+		xyz.y = xy*cos(ascension);
+		xyz.x = xy*sin(ascension);
 		char str[16384];
 		sprintf (str,"%lf %lf %lf",xyz.x,xyz.y,xyz.z);
 		(*this)["xyz"] = str;
@@ -301,10 +319,12 @@ vector <std::string> readCSV (std::string s) {
 void computeminmax(vector<System> sys ,vec3 & min, vec3 & max) {
 	min = vec3(DBL_MAX,DBL_MAX,DBL_MAX);
 	max = vec3(-DBL_MAX,-DBL_MAX,-DBL_MAX);
+	const vec3 fudgeFactor(0.001,0.001,0.001);
 	for (unsigned int i=0;i<sys.size();++i) {
-		min = min.min(sys[i].xyz);
-		max = max.max(sys[i].xyz);
+		min = min.min(sys[i].xyz-fudgeFactor);
+		max = max.max(sys[i].xyz+fudgeFactor);
 	}
+	
 }
 std::string strtoupper (std::string s) {
 	for (string::iterator i = s.begin() ; i!=s.end();++i ) {
@@ -986,7 +1006,7 @@ void processsystems (std::vector <System> & s){
 	}
 	if (1) {
 		fprintf(stderr,"\nOwnership\n");
-		for (map<string,int>::iterator i = numfactions.begin();i!=numfactions.end();++i) {
+		for (std::map<string,int>::iterator i = numfactions.begin();i!=numfactions.end();++i) {
 			fprintf (stderr,"%s owns %d systems\n",(*i).first.c_str(),(*i).second);
 		}
 	}
