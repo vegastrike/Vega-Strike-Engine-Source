@@ -1,11 +1,17 @@
 #ifndef _CG_GLOBAL_
 #define _CG_GLOBAL_
-#ifndef _WIN32
-#define UNIX
-#endif
+
 #if defined(CG_SUPPORT)
+
+#if defined(__APPLE__) || defined(MACOSX)
+#define MACOS 1
+#elif !defined(WIN32)
+#define UNIX 1
+#endif
+
 #include "gldrv/gl_globals.h"
-#ifdef UNIX
+#if defined(UNIX)
+#define GLX_GLXEXT_PROTOTYPES 1
 #include <GL/glx.h>
 #include "gldrv/glx_undefined_extensions.h"
 #include <GL/glxext.h>
@@ -31,10 +37,6 @@ class CG_Cloak
  CGcontext shaderContext;
 
  CGprofile vertexProfile;
-
- // float3
- CGparameter VecPosition;
- CGparameter VecNormal;
 
  // float4x4
  CGparameter ModelViewProj;
