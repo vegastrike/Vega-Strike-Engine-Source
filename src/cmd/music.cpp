@@ -20,6 +20,7 @@
 #include "base.h"
 #include "networking/inet.h"
 Music::Music (Unit *parent):random(false), p(parent),song(-1) {
+  loopsleft=0;
   if (!g_game.music_enabled)
 	  return;
   lastlist=PEACELIST;
@@ -64,8 +65,12 @@ void Music::ChangeVolume (float inc) {
     INET_Write(socket,strlen(tempbuf),tempbuf);
 }
 
-void Music::LoadMusic (const char *file) {
+bool Music::LoadMusic (const char *file) {
   FILE *fp = fopen (file,"r");
+  if (!fp) {
+    string temp (datadir+"/.vegastrike/"+file);
+    fp = fopen (temp.c_str(),"r");
+  }
   char songname[1024];
   this->playlist.push_back(std::vector <std::string> ());
   if (fp) {
@@ -86,7 +91,10 @@ void Music::LoadMusic (const char *file) {
       this->playlist.back().push_back (std::string(songname));
     }
     fclose (fp);
+  }else {
+    return false;
   }
+  return true;
 }
 
 inline int randInt (int max) {
@@ -98,7 +106,10 @@ inline int randInt (int max) {
 }
 
 int Music::SelectTracks(int &whichlist) {
-  if (Base::CurrentBase&&lastlist < playlist.size()&&lastlist>=0) {
+  if ((Base::CurrentBase||loopsleft>0)&&lastlist < playlist.size()&&lastlist>=0) {
+    if (loopsleft>0) {
+      loopsleft--;
+    }
     if (!playlist[lastlist].empty()) {
       whichlist=lastlist;
       return rand()%playlist[whichlist].size();
@@ -197,9 +208,13 @@ void Music::SkipRandList() {
 
 int Music::Addlist (std::string listfile) {
 	changehome();
-	LoadMusic(listfile.c_str());
+	bool retval=LoadMusic(listfile.c_str());
 	returnfromhome();
-	return playlist.size()-1;
+	if (retval) {
+	  return playlist.size()-1;
+	}else {
+	  return -1;
+	}
 }
 
 void Music::Skip() {

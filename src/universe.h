@@ -91,6 +91,7 @@ private:
      * holds the relationships to all _other_ factions loaded 
      * hold misguided info for self FIXME
      */
+    int playlist;
     vector <faction_stuff> faction;
     ///Logos used by the ships of that faction
     Texture * logo;
@@ -159,6 +160,10 @@ private:
   float GetRelation (const int myfaction, const int theirfaction){
     return factions[myfaction]->faction[theirfaction].relationship;
   }
+  int GetPlaylist (const int myfaction) {
+    return factions[myfaction]->playlist;//can be -1
+  }
+  void LoadFactionPlaylists();
   unsigned int GetNumFactions () {
     return factions.size();
   }

@@ -5,12 +5,11 @@
 #include "vegastrike.h"
 #include "xml_support.h"
 #include <assert.h>
-#include <algorithm>
 #include "ai/communication.h"
 #include "gfx/animation.h"
 #include "unit_factory.h"
-#include <map>
 #include "hashtable.h"
+#include "cmd/music.h"
 static int unitlevel;
 using namespace XMLSupport;
 using XMLSupport::EnumMap;
@@ -177,6 +176,7 @@ void Universe::Faction::beginElement(void *userData, const XML_Char *names, cons
       switch(attribute_map.lookup((*iter).name)) {
       case NAME:
 	thisuni->factions[thisuni->factions.size()-1]->factionname=new char[strlen((*iter).value.c_str())+1];
+	
 	strcpy(thisuni->factions[thisuni->factions.size()-1]->factionname,(*iter).value.c_str());
 		break;
 
@@ -392,11 +392,18 @@ void Universe::LoadSerializedFaction(FILE * fp) {
     delete [] tmp;
   }
 }
-
 Universe::Faction::Faction() {
+  playlist=-1;
 	logo=NULL;
 	contraband=NULL;
 	factionname=NULL;
+}
+void Universe::LoadFactionPlaylists() {
+  for (unsigned int i=0;i<factions.size();i++) {
+    string fac=GetFaction(i);
+    fac+=".m3u";
+    factions[i]->playlist= muzak->Addlist (fac.c_str());
+  }
 }
 Universe::Faction::~Faction() {
   for (unsigned int i=0;i<faction.size();i++) {

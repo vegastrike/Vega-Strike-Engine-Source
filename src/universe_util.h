@@ -65,6 +65,8 @@ namespace UniverseUtil {
 	void musicPlaySong(string str);
 ///this plays msuci from a given list (where the int is what was returned by musicAddList)
 	void musicPlayList(int which);
+///this plays msuci from a given list (where the int is what was returned by musicAddList)
+	void musicLoopList(int numloops);
 ///this gets the difficutly of the game... ranges between 0 and 1... many missions depend on it never going past .99 unless it's always at one.
 	float GetDifficulty ();
 ///this sets the difficulty

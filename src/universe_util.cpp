@@ -167,6 +167,9 @@ namespace UniverseUtil {
 	void musicPlayList(int which) {
 		muzak->SkipRandSong(which);
 	}
+        void musicLoopList (int numloops) {
+                muzak->loopsleft=numloops;
+        }
 	float GetDifficulty () {
 		return g_game.difficulty;
 	}

@@ -38,6 +38,10 @@ static double lasttime;
 #endif
 static double elapsedtime=.1;
 static double timecompression=1;
+double getNewTime() {
+  return newtime;
+}
+
 void inc_time_compression (int i, KBSTATE a) {
   if (a==PRESS) {
     timecompression*=1.5;

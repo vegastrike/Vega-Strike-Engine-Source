@@ -14,12 +14,13 @@ class Music {
   int lastlist;
   float vol;
   int SelectTracks(int &i);
-  void LoadMusic (const char *file);
+  bool LoadMusic (const char *file);
   std::vector <std::vector <std::string> > playlist;
  public:
   enum Playlist {NOLIST=-1,BATTLELIST=0,PEACELIST,PANICLIST,VICTORYLIST,LOSSLIST,MAXLIST};
   Music (Unit * parent);
   void Skip();
+  int loopsleft;  
   int Addlist (std::string listfile);
   void ChangeVolume(float inc=0);
   void GotoSong (int whichlist,int whichsong,bool skip);

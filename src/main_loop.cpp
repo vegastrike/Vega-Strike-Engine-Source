@@ -652,6 +652,7 @@ void createObjects(std::vector <std::string> &fighter0name, std::vector <StarSys
 
   delete [] tmptarget;
   muzak = new Music (fighters[0]);
+  _Universe->LoadFactionPlaylists()
   AUDListenerSize (fighters[0]->rSize()*4);
   for (unsigned int cnum=0;cnum<fighter0indices.size();cnum++) {
     if(benchmark==-1){
