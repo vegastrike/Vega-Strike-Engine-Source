@@ -339,7 +339,7 @@ bool Unit::UpAndDownGrade (Unit * up, Unit * templ, int mountoffset, int subunit
   image->ecm = abs(image->ecm);
   STDUPGRADE(image->ecm,abs(up->image->ecm),abs(templ->image->ecm),0);
   STDUPGRADE(maxenergy,up->maxenergy,templ->maxenergy,0);
-  STDUPGRADE(afterburnenergy,up->afterburnenergy,templ->afterburnenergy,0);
+  //  STDUPGRADE(afterburnenergy,up->afterburnenergy,templ->afterburnenergy,0);
   STDUPGRADE(limits.yaw,up->limits.yaw,templ->limits.yaw,0);
   STDUPGRADE(limits.pitch,up->limits.pitch,templ->limits.pitch,0);
   STDUPGRADE(limits.roll,up->limits.roll,templ->limits.roll,0);
@@ -415,13 +415,13 @@ bool Unit::UpAndDownGrade (Unit * up, Unit * templ, int mountoffset, int subunit
       numave++;
       percentage++;
     }
-    /*
-    if (afterburnenergy<32767&&up->afterburnenergy==32767) {
+  
+    if (afterburnenergy<32767&&up->afterburnenergy!=0) {
       if (touchme) afterburnenergy=32767;
       numave++;
       percentage++;
     }
-    */
+  
   }else {
     /*    if (image->cargo_volume<up->image->cargo_volume) {
       
@@ -436,13 +436,13 @@ bool Unit::UpAndDownGrade (Unit * up, Unit * templ, int mountoffset, int subunit
       numave++;
       percentage++;
     }
-    /*
+    
     if (afterburnenergy>up->afterburnenergy&&up->afterburnenergy>0) {
       numave++;
       percentage++;
       afterburnenergy=up->afterburnenergy;
     }
-    */
+    
     if (jump.drive==-2&&up->jump.drive>=-1) {
       if (touchme) {jump.drive = up->jump.drive;jump.energy=up->jump.energy;jump.delay=up->jump.delay; jump.damage=0;}
       numave++;
