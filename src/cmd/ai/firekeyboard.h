@@ -103,7 +103,9 @@ class FireKeyboard: public Order {
   static void BreakFormation (const KBData&,KBSTATE);
   static void FormUp (const KBData&,KBSTATE);
   static void AttackTarget (const KBData&,KBSTATE);
-  static void TurretAI (const KBData&,KBSTATE);
+  static void TurretAIOn (const KBData&,KBSTATE);
+  static void TurretAIOff (const KBData&,KBSTATE);
+  static void TurretFireAtWill (const KBData&,KBSTATE);
 protected:
   void * savedTargets[NUMSAVEDTARGETS];
   float distance;

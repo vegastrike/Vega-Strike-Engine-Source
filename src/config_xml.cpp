@@ -681,7 +681,10 @@ CommandMap initGlobalCommandMap() {
   commandMap["EjectNonMissionCargoKey"]=FireKeyboard::EjectNonMissionCargoKey ;  
   commandMap["EjectKey"]=FireKeyboard::EjectKey ;
   commandMap["SuicideKey"]=SuicideKey ;
-  commandMap["TurretAIKey"]=FireKeyboard::TurretAI ;
+  commandMap["TurretAIOn"]=FireKeyboard::TurretAIOn ;
+  commandMap["TurretAIOff"]=FireKeyboard::TurretAIOff ;
+  commandMap["TurretAIFireAtWill"]=FireKeyboard::TurretFireAtWill ;
+
   commandMap["DockKey"]=FireKeyboard::DockKey ;
   commandMap["UnDockKey"]=FireKeyboard::UnDockKey ;
   commandMap["RequestClearenceKey"]=FireKeyboard::RequestClearenceKey ;

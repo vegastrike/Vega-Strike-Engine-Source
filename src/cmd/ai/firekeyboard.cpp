@@ -34,7 +34,7 @@ const unsigned int NUMCOMMKEYS=10;
 
 struct FIREKEYBOARDTYPE {
   FIREKEYBOARDTYPE() {
-    togglewarpdrive=toggleglow=toggleanimation=lockkey=ECMkey=commKeys[0]=commKeys[1]=commKeys[2]=commKeys[3]=commKeys[4]=commKeys[5]=commKeys[6]=commKeys[7]=commKeys[8]=commKeys[9]=turretaikey = saveTargetKeys[0]=saveTargetKeys[1]=saveTargetKeys[2]=saveTargetKeys[3]=saveTargetKeys[4]=saveTargetKeys[5]=saveTargetKeys[6]=saveTargetKeys[7]=saveTargetKeys[8]=saveTargetKeys[9]=turretaikey = restoreTargetKeys[0]=restoreTargetKeys[1]=restoreTargetKeys[2]=restoreTargetKeys[3]=restoreTargetKeys[4]=restoreTargetKeys[5]=restoreTargetKeys[6]=restoreTargetKeys[7]=restoreTargetKeys[8]=restoreTargetKeys[9]=turretaikey = UP;
+    togglewarpdrive=toggleglow=toggleanimation=lockkey=ECMkey=commKeys[0]=commKeys[1]=commKeys[2]=commKeys[3]=commKeys[4]=commKeys[5]=commKeys[6]=commKeys[7]=commKeys[8]=commKeys[9]=turretaikey = turretoffkey=turretfaw=saveTargetKeys[0]=saveTargetKeys[1]=saveTargetKeys[2]=saveTargetKeys[3]=saveTargetKeys[4]=saveTargetKeys[5]=saveTargetKeys[6]=saveTargetKeys[7]=saveTargetKeys[8]=saveTargetKeys[9]=turretaikey = restoreTargetKeys[0]=restoreTargetKeys[1]=restoreTargetKeys[2]=restoreTargetKeys[3]=restoreTargetKeys[4]=restoreTargetKeys[5]=restoreTargetKeys[6]=restoreTargetKeys[7]=restoreTargetKeys[8]=restoreTargetKeys[9]=turretaikey = UP;
 
     eject=ejectcargo=ejectnonmissioncargo=firekey=missilekey=jfirekey=jtargetkey=jmissilekey=weapk=misk=rweapk=rmisk=cloakkey=
       neartargetkey=targetskey=targetukey=threattargetkey=picktargetkey=subtargetkey=targetkey=
@@ -85,6 +85,8 @@ struct FIREKEYBOARDTYPE {
  KBSTATE targetskey;
  KBSTATE targetukey;
  KBSTATE turretaikey;
+ KBSTATE turretoffkey;
+ KBSTATE turretfaw;
  KBSTATE toggleglow;
  KBSTATE togglewarpdrive;
  KBSTATE toggleanimation;	
@@ -333,15 +335,19 @@ void FireKeyboard::EjectKey (const KBData&,KBSTATE k) {
 }
 
 
-void FireKeyboard::TurretAI (const KBData&,KBSTATE k) {
+void FireKeyboard::TurretAIOn (const KBData&,KBSTATE k) {
   if (k==PRESS) {
-    if (g().turretaikey==UP) {
-
-      g().turretaikey=PRESS;
-    }else {
-
-      g().turretaikey=RELEASE;
-    }
+    g().turretaikey=k;
+  }
+}
+void FireKeyboard::TurretAIOff (const KBData&,KBSTATE k) {
+  if (k==PRESS) {    
+    g().turretoffkey=k;
+  }
+}
+void FireKeyboard::TurretFireAtWill (const KBData&,KBSTATE k) {
+  if (k==PRESS) {    
+    g().turretfaw=k;
   }
 }
 
@@ -1412,7 +1418,20 @@ static void PowerDownShield(Shield *shield, float howmuch){
   }
 
 }
-
+extern bool CheckAccessory(Unit*);
+static void TurretFAW(Unit * parent) {
+  UnitCollection::UnitIterator iter = parent->getSubUnits();
+  Unit * un;
+  while (NULL!=(un=iter.current())) {
+    if (!CheckAccessory(un)) {
+      un->EnqueueAIFirst (new Orders::FireAt(.2,15));
+      un->EnqueueAIFirst (new Orders::FaceTarget (false,3));
+    }
+    TurretFAW(un);
+    iter.advance();
+  }
+  
+}
 static void ForceChangeTarget(Unit*  parent) {
   Unit * curtarg = parent->Target();
   ChooseTargets(parent,TargThreat,false);
@@ -1584,13 +1603,21 @@ void FireKeyboard::Execute () {
   }
 
   if (f().turretaikey == PRESS) {
-      parent->DisableTurretAI();
-      f().turretaikey = DOWN;
-  }
-  if (f().turretaikey==RELEASE) {
-    f().turretaikey = UP;
     parent->SetTurretAI();
     parent->TargetTurret(parent->Target());
+    f().turretaikey=DOWN;
+  }
+  if(f().turretoffkey==PRESS) {
+      parent->DisableTurretAI();
+      f().turretoffkey = DOWN;
+  }
+  if(f().turretfaw==PRESS) {
+    TurretFAW(parent);
+      f().turretfaw = DOWN;
+  }
+  
+  if (f().turretaikey==RELEASE) {
+    f().turretaikey = UP;
   }
   if (f().turrettargetkey==PRESS) {
     f().turrettargetkey=DOWN;
