@@ -7,7 +7,7 @@ double VSSwapHostDoubleToLittle (double x);
 float VSSwapHostFloatToLittle (float x);
 unsigned int VSSwapHostIntToLittle (unsigned int x);
 unsigned short VSSwapHostShortToLittle (unsigned short x);
-#if defined(__APPLE__) || defined(MACOSX) || defined(BSD)
+#if defined(__APPLE__) || defined(MACOSX) || defined(BSD) || defined(__FreeBSD__)
     #include<machine/endian.h>
 #else
 
@@ -49,7 +49,7 @@ unsigned short VSSwapHostShortToLittle (unsigned short x);
     #  define le64_to_cpu(x) (x)
     # endif
     
-    #elif __BYTE_ORDER == __BIG_ENDIAN && !defined(BSD)
+    #elif __BYTE_ORDER == __BIG_ENDIAN && !defined(BSD) && !defined(__FreeBSD__)
     # include <byteswap.h>
     # define le32_to_cpu(x) (bswap_32(x))
     # define le16_to_cpu(x) (bswap_16(x))

@@ -44,7 +44,11 @@ ObjSerial	getUniqueSerial()
 
 extern string GetUnitDir( string filename);
 
+#if defined (__FreeBSD__) || defined(__APPLE__)
+int	selectdirs( struct dirent * entry)
+#else
 int	selectdirs( const struct dirent * entry)
+#endif
 {
 #if defined(_WIN32)
 	// Have to check if we have the full path or just relative (which would be a problem)
@@ -63,7 +67,11 @@ int	selectdirs( const struct dirent * entry)
 	return 0;
 }
 
+#if defined (__FreeBSD__) || defined(__APPLE__)
+int	selectpk3s( struct dirent * entry)
+#else
 int	selectpk3s( const struct dirent * entry)
+#endif
 {
 	// If this is a regular file and we have ".pk3" in it
 	if( (string( entry->d_name).find( ".pk3"))!=std::string::npos && (string( entry->d_name).find( "data"))==std::string::npos)
@@ -71,7 +79,11 @@ int	selectpk3s( const struct dirent * entry)
 	return 0;
 }
 
+#if defined (__FreeBSD__) || defined(__APPLE__)
+int	selectbigpk3s( struct dirent * entry)
+#else
 int	selectbigpk3s( const struct dirent * entry)
+#endif
 {
 	// If this is a regular file and we have ".pk3" in it
 	if( (string( entry->d_name).find( "data.pk3"))!=std::string::npos)

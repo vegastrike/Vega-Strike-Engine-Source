@@ -995,7 +995,7 @@ POSH_COMPILE_TIME_ASSERT(posh_i32_t, sizeof(posh_i32_t) == 4);
 
 #endif /* defined FORCE_DOXYGEN */
 
-#if defined POSH_CPU_AXP && ( defined POSH_OS_TRU64 || defined POSH_OS_LINUX )
+#if defined POSH_CPU_AXP && ( defined POSH_OS_TRU64 || defined POSH_OS_LINUX || defined __FreeBSD__)
 #  define POSH_64BIT_POINTER 1
 #endif
 
