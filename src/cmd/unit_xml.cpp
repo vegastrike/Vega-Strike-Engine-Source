@@ -33,6 +33,19 @@ void Unit::endElement(void *userData, const XML_Char *name) {
 }
 using std::map;
 static std::map<std::string,Animation *> cached_ani;
+vector <std::string> tempcache;
+void cache_ani (string s) {
+  tempcache.push_back (s);
+}
+void update_ani_cache () {
+  while (tempcache.size()) {
+    string explosion_type = tempcache.back();
+    tempcache.pop_back();
+    if (cached_ani.find (explosion_type)==cached_ani.end()) {
+      cached_ani.insert (pair <std::string,Animation *>(explosion_type,new Animation (explosion_type.c_str(),false,.1,BILINEAR,false)));
+    }
+  }
+}
 std::string getRandomCachedAniString () {
   if (cached_ani.size()) {
     unsigned int rn = rand()%cached_ani.size();
@@ -1323,11 +1336,7 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
 	if ((*iter).value.length()) {
 	  image->explosion_type = (*iter).value;
 	  {
-
-	    if (cached_ani.find (image->explosion_type)==cached_ani.end()) {
-	      cached_ani.insert (pair <std::string,Animation *>(image->explosion_type,new Animation (image->explosion_type.c_str(),false,.1,BILINEAR,false)));
-
-	    }
+	    cache_ani (image->explosion_type);
 
 	  }
 	}

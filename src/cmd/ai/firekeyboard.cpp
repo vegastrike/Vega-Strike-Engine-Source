@@ -10,7 +10,7 @@
 #include "audiolib.h"
 #include "config_xml.h"
 #include "cmd/images.h"
-FireKeyboard::FireKeyboard (unsigned int whichplayer, unsigned int whichjoystick): Order (WEAPON){
+FireKeyboard::FireKeyboard (unsigned int whichplayer, unsigned int whichjoystick): Order (WEAPON,0){
   this->whichjoystick = whichjoystick;
   this->whichplayer=whichplayer;
   gunspeed = gunrange = .0001;

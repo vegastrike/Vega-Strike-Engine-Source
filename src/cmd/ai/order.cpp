@@ -33,7 +33,7 @@ void Order::Execute () {
   unsigned int i=0;
 
   for (i=0;i<suborders.size();i++) {
-    if ((completed& ((suborders[i])->getType()&(MOVEMENT|FACING|WEAPON)))==0) {
+    if ((completed& ((suborders[i])->getType()&(ALLTYPES)))==0) {
       (suborders[i])->Execute();
       completed|=(suborders[i])->getType();
       if ((suborders[i])->Done()) {
@@ -54,7 +54,7 @@ void Order::Execute () {
   return;
 }
 
-Order * Order::queryType (int type) {
+Order * Order::queryType (unsigned int type) {
   for (unsigned int i=0;i<suborders.size();i++) {
     if ((suborders[i]->type&type)==type) {
       return suborders[i];
@@ -64,7 +64,7 @@ Order * Order::queryType (int type) {
 }
 
 
-void Order::eraseType (int type) {
+void Order::eraseType (unsigned int type) {
   for (unsigned int i=0;i<suborders.size();i++) {
     if ((suborders[i]->type&type)==type) {
       delete suborders[i];
@@ -102,7 +102,7 @@ Order* Order::EnqueueOrderFirst (Order *ord) {
 Order* Order::ReplaceOrder (Order *ord) {
   vector<Order*>::iterator ordd = suborders.begin();
   for (unsigned int i=0;i<suborders.size();i++) {
-    if (!(ord->getType()&(*ordd)->getType()&(FACING|WEAPON|MOVEMENT))){
+    if (!(ord->getType()&(*ordd)->getType()&(ALLTYPES))){
       	delete (*ordd);
 	ordd =suborders.erase(ordd);
     } else {
@@ -115,8 +115,8 @@ Order* Order::ReplaceOrder (Order *ord) {
 }
 
 bool Order::AttachOrder (UnitCollection *targets1) {
-  if (!(type&TARGET)) {
-    if (type&SELF) {
+  if (!(subtype&STARGET)) {
+    if (subtype&SSELF) {
       return AttachSelfOrder (targets1);//can use attach order to do shit
     }
     return false;
@@ -131,7 +131,7 @@ bool Order::AttachOrder (UnitCollection *targets1) {
   return true;
 }
 bool Order::AttachSelfOrder (UnitCollection *targets1) {
-  if (!(type&SELF))
+  if (!(subtype&SSELF))
     return false;
   if (group)
     delete group;
@@ -149,7 +149,7 @@ bool Order::AttachSelfOrder (UnitCollection *targets1) {
   return true;
 }
 bool Order::AttachOrder (Vector targetv) {
-  if (!(type&LOCATION)) {
+  if (!(subtype&SLOCATION)) {
     return false;
   }
   targetlocation = targetv;

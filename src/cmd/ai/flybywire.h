@@ -17,7 +17,7 @@ class MatchLinearVelocity : public Order {
   bool willfinish;
   bool afterburn;
  public:
-  MatchLinearVelocity (const Vector &desired, bool Local, bool afterburner, bool fini=true):Order (MOVEMENT|LOCATION), desired_velocity(desired),LocalVelocity(Local),willfinish(fini),afterburn(afterburner) {done = false;}
+  MatchLinearVelocity (const Vector &desired, bool Local, bool afterburner, bool fini=true):Order (MOVEMENT,SLOCATION), desired_velocity(desired),LocalVelocity(Local),willfinish(fini),afterburn(afterburner) {done = false;}
   void Execute ();
   void SetDesiredVelocity (const Vector &desired, bool Local) {desired_velocity=desired;LocalVelocity=Local;}
   virtual ~MatchLinearVelocity();
@@ -36,7 +36,7 @@ class MatchAngularVelocity : public Order {
   ///Whether this script should terminate upon reaching desired angular velocity
   bool willfinish;
  public:
-  MatchAngularVelocity (const Vector &desired, bool Local, bool fini=true):Order (FACING|LOCATION), desired_ang_velocity(desired),LocalAng(Local), willfinish(fini) {done = false;}
+  MatchAngularVelocity (const Vector &desired, bool Local, bool fini=true):Order (FACING,SLOCATION), desired_ang_velocity(desired),LocalAng(Local), willfinish(fini) {done = false;}
   void Execute ();
   void SetDesiredAngularVelocity (const Vector &desired, bool Local) {desired_ang_velocity=desired;LocalAng=Local;}
   virtual ~MatchAngularVelocity();
@@ -56,7 +56,7 @@ class MatchVelocity : public MatchAngularVelocity {
   bool LocalVelocity;
   bool afterburn;
  public:
-  MatchVelocity (const Vector &desired,const Vector &desired_ang, const bool Local, const bool afterburner, const bool fini=true) :MatchAngularVelocity (desired_ang,Local,fini),desired_velocity(desired), LocalVelocity(Local), afterburn(afterburner) {type = FACING | MOVEMENT|LOCATION;}
+  MatchVelocity (const Vector &desired,const Vector &desired_ang, const bool Local, const bool afterburner, const bool fini=true) :MatchAngularVelocity (desired_ang,Local,fini),desired_velocity(desired), LocalVelocity(Local), afterburn(afterburner) {type = FACING | MOVEMENT; subtype=SLOCATION;}
   void Execute ();
   void SetDesiredVelocity (const Vector &desired, const bool Local) {desired_velocity=desired;LocalVelocity=Local;}
   virtual ~MatchVelocity();

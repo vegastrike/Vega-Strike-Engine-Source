@@ -243,7 +243,8 @@ ChangeHeading::~ChangeHeading() {
 
 }
 FaceTargetITTS::FaceTargetITTS (bool fini, int accuracy):ChangeHeading(Vector(0,0,1),accuracy),finish(fini) {
-  type=FACING|TARGET;
+  type=FACING;
+  subtype = STARGET;
   speed=float(.00001);
   range=float(.00001);
 
@@ -277,7 +278,8 @@ void FaceTargetITTS::Execute() {
 
 
 FaceTarget::FaceTarget (bool fini, int accuracy):ChangeHeading(Vector(0,0,1),accuracy),finish(fini) {
-  type=FACING|TARGET;
+  type=FACING;
+  subtype =STARGET;
   
 }
 

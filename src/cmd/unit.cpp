@@ -300,10 +300,12 @@ Unit * _1800GetGod () {
   static Unit god ("god",true,_Universe->GetFaction("upgrades"),"",NULL,0);
   return &god;
 }
+extern void update_ani_cache();
 Unit::Unit(const char *filename, bool SubU, int faction,std::string unitModifications, Flightgroup *flightgrp,int fg_subnumber) {
 
 
 	Init();
+	update_ani_cache();
 	if (!SubU)
 	  _Universe->AccessCockpit()->savegame->AddUnitToSave(filename,UNITPTR,_Universe->GetFaction(faction),(int)this);
 	SubUnit = SubU;

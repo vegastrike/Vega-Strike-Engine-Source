@@ -17,7 +17,7 @@
 #include "images.h"
 #include "gfx/halo.h"
 #include "gfx/animation.h"
-PlanetaryOrbit:: PlanetaryOrbit(Unit *p, double velocity, double initpos, const Vector &x_axis, const Vector &y_axis, const Vector & centre, Unit * targetunit) : Order(MOVEMENT), parent(p), velocity(velocity), theta(initpos), x_size(x_axis), y_size(y_axis) { 
+PlanetaryOrbit:: PlanetaryOrbit(Unit *p, double velocity, double initpos, const Vector &x_axis, const Vector &y_axis, const Vector & centre, Unit * targetunit) : Order(MOVEMENT,0), parent(p), velocity(velocity), theta(initpos), x_size(x_axis), y_size(y_axis) { 
   parent->SetResolveForces(false);
     double delta = x_size.Magnitude() - y_size.Magnitude();
     if(delta == 0) {
@@ -29,12 +29,12 @@ PlanetaryOrbit:: PlanetaryOrbit(Unit *p, double velocity, double initpos, const 
       focus = y_size*(-delta/y_size.Magnitude());
     }
     if (targetunit) {
-      type = (MOVEMENT | TARGET);
+      type = (MOVEMENT);subtype=( STARGET);
       UnitCollection tmpcoll;
       tmpcoll.prepend (targetunit);
       AttachOrder (&tmpcoll);
     } else {
-      type = (MOVEMENT | LOCATION);
+      type = (MOVEMENT);subtype =(SLOCATION);
       AttachOrder (centre);
     }
 }
@@ -47,7 +47,7 @@ void PlanetaryOrbit::Execute() {
   Vector x_offset = cos(theta) * x_size;
   Vector y_offset = sin(theta) * y_size;
   Vector origin (targetlocation);
-  if (type&TARGET) {
+  if (subtype&STARGET) {
     if (targets) {
       UnitCollection::UnitIterator tmp = targets->createIterator();
       if (tmp.current()) {

@@ -28,7 +28,7 @@ class MoveTo : public Order {
   bool Done (const Vector &);
 public:
   ///takes in the destination target, whether afterburners should be applied, and the ammount of accuracy (how many times it shoudl miss destination and come back) should be used
-  MoveTo(const Vector &target, bool aft, unsigned char numswitchbacks) : Order(LOCATION|MOVEMENT), afterburnAndSwitchbacks(aft+(numswitchbacks<<1)),terminatingX(0), terminatingY(0), terminatingZ(0), last_velocity(0,0,0) {
+  MoveTo(const Vector &target, bool aft, unsigned char numswitchbacks) : Order(MOVEMENT,SLOCATION), afterburnAndSwitchbacks(aft+(numswitchbacks<<1)),terminatingX(0), terminatingY(0), terminatingZ(0), last_velocity(0,0,0) {
     targetlocation = target;
     done=false;
   }
@@ -60,7 +60,7 @@ protected:
  
  public:
   ///takes in the destination target, and the ammount of accuracy (how many times it should miss destination and come back) should be used
-   ChangeHeading(const Vector &final_heading, int switchback, float turning_speed=1) : Order(FACING|LOCATION), turningspeed(turning_speed), switchbacks(switchback),terminatingX(0),terminatingY(0),last_velocity(0,0,0),final_heading(final_heading), terminating(false) {}
+   ChangeHeading(const Vector &final_heading, int switchback, float turning_speed=1) : Order(FACING,SLOCATION), turningspeed(turning_speed), switchbacks(switchback),terminatingX(0),terminatingY(0),last_velocity(0,0,0),final_heading(final_heading), terminating(false) {}
   void SetDest (const Vector&);
   void Execute();
   virtual string getOrderDescription() { return "chhead"; };

@@ -5,7 +5,7 @@
 #include "cmd/images.h"
 #include "config_xml.h"
 #include "vs_globals.h"
-CommunicatingAI::CommunicatingAI (int ttype, float rank, float mood, float anger, float moodswingyness, float randomresp) :Order (ttype),anger(anger),moodswingyness(moodswingyness),randomresponse (randomresp),mood(mood),rank(rank) {
+CommunicatingAI::CommunicatingAI (int ttype, int stype,  float rank, float mood, float anger, float moodswingyness, float randomresp) :Order (ttype,stype),anger(anger),moodswingyness(moodswingyness),randomresponse (randomresp),mood(mood),rank(rank) {
   comm_face=NULL;
   if (rank==666) {
     static float ran = XMLSupport::parse_float(vs_config->getVariable ("AI","DefaultRank",".01"));

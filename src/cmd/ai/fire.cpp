@@ -7,7 +7,7 @@
 #include "vs_globals.h"
 using Orders::FireAt;
 
-FireAt::FireAt (float reaction_time, float aggressivitylevel): CommunicatingAI (WEAPON|TARGET),  rxntime (reaction_time), delay(0), agg (aggressivitylevel), distance(1){
+FireAt::FireAt (float reaction_time, float aggressivitylevel): CommunicatingAI (WEAPON,STARGET),  rxntime (reaction_time), delay(0), agg (aggressivitylevel), distance(1){
   gunspeed=float(.0001);
   gunrange=float(.0001);
   static float missileprob = XMLSupport::parse_float (vs_config->getVariable ("AI","Firing","MissileProbability",".01"));

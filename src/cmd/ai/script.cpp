@@ -37,7 +37,7 @@ static HardCodedMap hard_coded_scripts= MakeHardCodedScripts();
 struct AIScriptXML {
   int unitlevel;
   int acc;
-  float executefor;
+  vector <float> executefor;
   bool itts;
   bool afterburn;
   bool terminate;
@@ -470,7 +470,7 @@ void AIScript::beginElement(const string &name, const AttributeList &attributes)
     break;
   case CLOAKFOR:
     xml->unitlevel++;
-    xml->executefor=0;
+    xml->executefor.push_back (0);
     xml->terminate=true;
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(attribute_map.lookup((*iter).name)) {
@@ -478,17 +478,18 @@ void AIScript::beginElement(const string &name, const AttributeList &attributes)
 	xml->terminate=parse_bool ((*iter).value);
 	break;
       case TIME:
-	xml->executefor=parse_float((*iter).value);
+	xml->executefor.back()=parse_float((*iter).value);
 	break;
       }
     }
     break;
   case EXECUTEFOR:
     xml->unitlevel++;
+    xml->executefor.push_back (0);
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(attribute_map.lookup((*iter).name)) {
       case TIME:
-	xml->executefor=parse_float((*iter).value);
+	xml->executefor.back()=parse_float((*iter).value);
 	break;
       }
     }
@@ -675,13 +676,19 @@ void AIScript::endElement(const string &name) {
     break;
   case EXECUTEFOR:
     xml->unitlevel--;
-    if (xml->executefor>0) {
-      xml->orders[xml->orders.size()-1]=new ExecuteFor(xml->orders[xml->orders.size()-1],xml->executefor);
+    if (!xml->executefor.empty()){
+      if (xml->executefor.back()>0) {
+	xml->orders[xml->orders.size()-1]=new ExecuteFor(xml->orders[xml->orders.size()-1],xml->executefor.back());
+	xml->executefor.pop_back();
+      }
     }
     break;
   case CLOAKFOR:
     xml->unitlevel--;
-    xml->orders.push_back(new CloakFor(xml->terminate,xml->executefor));
+    if (!xml->executefor.empty()) {
+      xml->orders.push_back(new CloakFor(xml->terminate,xml->executefor.back()));
+      xml->executefor.pop_back();
+    }
     break;
   case DEFAULT:
     xml->unitlevel-=2;
@@ -741,7 +748,7 @@ void AIScript::LoadXML() {
   xml->unitlevel=0;
   xml->terminate=true;
   xml->afterburn=true;
-  xml->executefor=0;
+
   xml->acc=2;
   xml->defaultvec=Vector(0,0,0);
   xml->defaultf=0;
@@ -816,7 +823,7 @@ void AIScript::LoadXML() {
 #endif
 
 }
-AIScript::AIScript (const char * scriptname):Order (Order::MOVEMENT|Order::FACING){
+AIScript::AIScript (const char * scriptname):Order (Order::MOVEMENT|Order::FACING,STARGET){
   filename = new char [strlen (scriptname)+1];
   strcpy(filename,scriptname);
 

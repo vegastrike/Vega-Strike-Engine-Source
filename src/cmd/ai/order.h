@@ -46,7 +46,9 @@ protected:
   ///The unit this order is attached to
   Unit * parent;
   ///The bit code (from ORDERTYPES) that this order is (for parallel execution)
-  int type; 
+  unsigned int type; 
+  
+  unsigned int subtype;
   ///Whether or not this order is done
   bool done;
   ///If this order applies to a group of units (as in form up with this group)
@@ -67,19 +69,20 @@ public:
   ///clears the messasges of this order
   void ClearMessages();
   ///The varieties of order types  MOVEMENT,FACING, and WEAPON orders may not be mutually executed (lest one engine goes left, the other right)
-  enum ORDERTYPES { MOVEMENT =1, FACING = 2, WEAPON = 4, LOCATION = 8, TARGET = 16, SELF = 32 }; 
+  enum ORDERTYPES { MOVEMENT =1, FACING = 2, WEAPON = 4, CLOAKING=8, ALLTYPES=(1|2|4|8)};
+  enum SUBORDERTYPES {SLOCATION=1, STARGET=2, SSELF=4};
   ///The default constructor setting everything to NULL and no dependency on order
-  Order (): targetlocation(0,0,0){parent = NULL;group =targets=NULL;type=0;done=false; actionstring=""; }
+  Order (): targetlocation(0,0,0){parent = NULL;group =targets=NULL;type=0;subtype=0,done=false; actionstring=""; }
   ///The constructor that specifies what order dependencies this order has
-  Order(int ttype): targetlocation(0,0,0){parent = NULL;group=targets=NULL;type = ttype;done=false; actionstring=""; }
+  Order(int ttype,int subtype): targetlocation(0,0,0){parent = NULL;group=targets=NULL;type = ttype;done=false; actionstring=""; }
   ///The virutal destructor
   virtual ~Order ();
   ///The function that gets called and executes all queued suborders 
   virtual void Execute();
   ///returns a pointer to the first order that may be bitwised ored with that type
-  Order* queryType (int type);
+  Order* queryType (unsigned int type);
   ///Erases all orders that bitwise OR with that type
-  void eraseType (int type);
+  void eraseType (unsigned int type);
   ///Attaches a group of targets to this order (used for strategery-type games)
   bool AttachOrder (UnitCollection *targets);
   ///Attaches a navigation point to this order
@@ -92,6 +95,7 @@ public:
   Order* ReplaceOrder (Order * ord);
   bool Done() {return done;}
   int getType() {return type;}
+  int getSubType () {return subtype;}
   ///Sets the parent of this Unit.  Any virtual functions must call this one
   virtual void SetParent(Unit *parent1) {parent = parent1;};
   ///Sends a communication message from the Unit (encapulated in c) to this unit
@@ -136,7 +140,7 @@ class ExecuteFor:  public Order {
   ///the total time it can execute child order
   float maxtime;
  public:
-  ExecuteFor (Order * chld, float seconds): Order(chld->getType()),child(chld),time(0),maxtime(seconds) {}
+  ExecuteFor (Order * chld, float seconds): Order(chld->getType(),chld->getSubType()),child(chld),time(0),maxtime(seconds) {}
   ///Executes child order and then any suborders that may be pertinant
   void Execute ();
   ///Removes this order
