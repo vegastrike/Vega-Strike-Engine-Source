@@ -3208,11 +3208,13 @@ void showUnitStats(Unit * playerUnit,string &text,int subunitlevel) {
 	char conversionBuffer[30];
 	string prefix="";
 	for (int i=0;i<subunitlevel;i++) prefix+="   ";
-	//we display evrything in MegaJoules, get the conversion factor
+	//get conversion factor for damage -> MJ; note that shield and reactor stats use a different constant.
 	float VSDM = XMLSupport::parse_float (vs_config->getVariable ("physics","kilojoules_per_unit_damage","5400"))/1000.0;
+	float RSconverter = 100; // 100MJ per reactor or shield recharge energy unit
+	float Wconv= (1.0/0.12); // converts from reactor to warp energy scales
 	float totalWeaponEnergyUsage=0;
 	float totalWeaponDamage=0;
-    	text+="#c0:1:.5#"+prefix+"[GENERAL INFORMATIONS]#n##-c";
+    	text+="#c0:1:.5#"+prefix+"[GENERAL INFORMATION]#n##-c";
     	text+= "#n#"+prefix+"Name: "+playerUnit->name;
     	text+= " " + playerUnit->getFullname();
     	Flightgroup *fg = playerUnit->getFlightgroup();
@@ -3220,56 +3222,82 @@ void showUnitStats(Unit * playerUnit,string &text,int subunitlevel) {
      		text+= " Designation " +fg->name+ " "+ XMLSupport::tostring (playerUnit->getFgSubnumber());
     	}
     	
-	PRETTY_ADDU("Mass: ",playerUnit->mass,0,"tons");
-	PRETTY_ADDU("Moment of inertia: ",playerUnit->GetMoment(),2,"tons.m²");
-	PRETTY_ADDU("Fuel: ",playerUnit->FuelData()/1000.0f,2,"MJ");
+	PRETTY_ADDU("Mass: ",playerUnit->mass,0,"metric tons");
+	// Irrelevant to player as is proportional to mass in our physics system.
+	// PRETTY_ADDU("Moment of inertia: ",playerUnit->GetMoment(),2,"tons.m²");
+	PRETTY_ADDU("Hold volume: ",playerUnit->EmptyCargoVolume(),0,"cubic meters");
+	//following line somewhat borken
+	PRETTY_ADDU("Fuel Capacity: ",playerUnit->FuelData()/1000.0f,0,"Standard Fuel Units");
 	const Unit::Computer uc=playerUnit->ViewComputerData();
     	text+="#n##n#"+prefix+"#c0:1:.5#[FLIGHT CHARACTERISTICS]#n##-c";
-    	text+="#n#"+prefix+"Maneuver: ";	
+    	text+="#n#"+prefix+"Maneuvering: ";	
     	if (playerUnit->limits.yaw==playerUnit->limits.pitch &&playerUnit->limits.yaw==playerUnit->limits.roll) {
-		prettyPrintFloat(conversionBuffer,playerUnit->limits.yaw*180.0/PI,0,2);
-		printf("**%f\n",playerUnit->limits.yaw*180.0/PI);
+		prettyPrintFloat(conversionBuffer,playerUnit->limits.yaw/playerUnit->GetMoment(),0,2);
+		//printf("**%f\n",playerUnit->limits.yaw);
     		text+=conversionBuffer;
-		text+=" tons.deg/m² (yaw, pitch, roll)";
+			text+=" radians/second^2 (yaw, pitch, roll)";
 	    }
 	else {
-		PRETTY_ADDN(" yaw ",playerUnit->limits.yaw*180.0/PI,2);
-		PRETTY_ADDN("  pitch ",playerUnit->limits.pitch*180.0/PI,2);
-		PRETTY_ADDN("  roll ",playerUnit->limits.roll*180.0/PI,2);
-		text+=" tons.deg/m²";
+		PRETTY_ADDN(" yaw ",playerUnit->limits.yaw/(playerUnit->GetMoment()),2);
+		PRETTY_ADDN("  pitch ",playerUnit->limits.pitch/(playerUnit->GetMoment()),2);
+		PRETTY_ADDN("  roll ",playerUnit->limits.roll/(playerUnit->GetMoment()),2);
+		text+=" radians/second^2";
 	}
-	PRETTY_ADDU("Forward thrust: ",playerUnit->limits.forward,2,"tons.m/s^2");
-	PRETTY_ADDU("Backward thrust: ",playerUnit->limits.retro,2,"tons.m/s^2")
+	PRETTY_ADDU("Fore acceleration: ",playerUnit->limits.forward/(10*playerUnit->mass),2,"gravities");
+	PRETTY_ADDU("Aft acceleration: ",playerUnit->limits.retro/(10*playerUnit->mass),2,"gravities")
 	if (playerUnit->limits.lateral==playerUnit->limits.vertical) {
-		PRETTY_ADDU("Side thrust: ",playerUnit->limits.vertical,2,"tons.m/s^2");
-    		text+=" (vertical and horizontal)";
+		PRETTY_ADDU("Orthogonal acceleration: ",playerUnit->limits.vertical/(10*playerUnit->mass),2,"gravities");
+    		text+=" (vertical and lateral axes)";
     	}		
     	else {
-		PRETTY_ADDN(" horizontal ",playerUnit->limits.lateral,2);
-		PRETTY_ADDN("  vertical ",playerUnit->limits.vertical,2);
-		text+="tons.m/s²";
+		PRETTY_ADDN(" Lateral acceleration ",playerUnit->limits.lateral/(10*playerUnit->mass),2);
+		PRETTY_ADDN(" Vertical acceleration ",playerUnit->limits.vertical/(10*playerUnit->mass),2);
+		text+=" gravities";
     	}
-	PRETTY_ADDU("Afterburner: ",playerUnit->limits.afterburn,2,"tons.m/s^2");
-    	text+="#n#"+prefix+"Computer manoeuver limit: ";
+	PRETTY_ADDU("Forward acceleration with Afterburner: ",playerUnit->limits.afterburn/(10*playerUnit->mass),2,"gravities");
+    	text.append("#n##n##c0:1:.5#"+prefix+"[GOVERNOR SETTINGS]#n##-c");
+	static float non_combat_mode_mult = XMLSupport::parse_float (vs_config->getVariable ("physics","combat_speed_boost","100"));
+	
+	PRETTY_ADDU("Max combat speed: ",uc.max_speed()*3.6,0,"km/h");
+	PRETTY_ADDU("Max afterburner combat speed: ",uc.max_ab_speed()*3.6,0,"km/h");
+	PRETTY_ADDU("Max non-combat speed: ",uc.max_speed()*3.6*non_combat_mode_mult,0,"km/h");
 	if (uc.max_yaw==uc.max_pitch &&uc.max_yaw==uc.max_roll) {
-		prettyPrintFloat(conversionBuffer,uc.max_yaw*180.0f/PI,0,2);
-    		text+=conversionBuffer;
-		text+=" deg/s (yaw, pitch, roll)";
+		PRETTY_ADD("Max turn rate: ",uc.max_yaw,2);
+		text+=" Radians/second (yaw, pitch, roll)";
 	    }
 	else {
-		PRETTY_ADDN(" yaw ",uc.max_yaw*180.0/PI,2);
-		PRETTY_ADDN("  pitch ",uc.max_pitch*180.0/PI,2);
-		PRETTY_ADDN("  roll ",uc.max_roll*180.0/PI,2);
-		text+=" deg/s";
+		text+=("#n#"+prefix+"Max turn rates: ");
+		PRETTY_ADDN("  yaw ",uc.max_yaw,2);
+		PRETTY_ADDN("  pitch ",uc.max_pitch,2);
+		PRETTY_ADDN("  roll ",uc.max_roll,2);
+		text+=" Radians/second";
 	}
-	PRETTY_ADDU("Computer max combat speed: ",uc.max_speed(),2,"m/s");
-	PRETTY_ADDU("Computer max absolute combat speed: ",uc.max_ab_speed(),2,"m/s");
 
 	text.append("#n##n##c0:1:.5#"+prefix+"[ENERGY SUBSYSTEM]#n##-c");
-	PRETTY_ADDU("Recharge: ",playerUnit->EnergyRechargeData()*VSDM,2,"MJ/s");
-	PRETTY_ADDU("Max energy: ",playerUnit->MaxEnergyData()*VSDM,2,"MJ");
+	float shieldsum=0;
+		switch (playerUnit->shield.number) {
+		case 2:
+			shieldsum+=playerUnit->shield.fb[2]*RSconverter;
+			shieldsum+=playerUnit->shield.fb[3]*RSconverter;
+			break;
+		case 4:
+			shieldsum+=playerUnit->shield.fbrl.frontmax*RSconverter;
+			shieldsum+=playerUnit->shield.fbrl.backmax*RSconverter;
+			shieldsum+=playerUnit->shield.fbrl.leftmax*RSconverter;
+			shieldsum+=playerUnit->shield.fbrl.rightmax*RSconverter;
+			break;
+		case 6:
+			shieldsum+=2*playerUnit->shield.fbrltb.fbmax*RSconverter;
+			shieldsum+=4*playerUnit->shield.fbrltb.rltbmax*RSconverter;
+			break;
+		default:
+			break;
+	}
+
+	PRETTY_ADDU("Recharge: ",playerUnit->EnergyRechargeData()*RSconverter,0,"MJ/s");
+	PRETTY_ADDU("Weapon capacitor bank storage: ",(playerUnit->MaxEnergyData()*RSconverter)-(shieldsum/5),0,"MJ");
 	//note: I found no function to get max warp energy, but since we're docked they are the same
-	PRETTY_ADDU("Max warp energy: ",playerUnit->GetWarpEnergy()*VSDM,2,"MJ");
+	PRETTY_ADDU("Warp capacitor bank storage: ",playerUnit->GetWarpEnergy()*RSconverter*Wconv,0,"MJ");
 
     	text+="#n##n##c0:1:.5#"+prefix+"[JUMP SUBSYSTEM]#n##-c";
 	const Unit::UnitJump uj = playerUnit->GetJumpStatus(); 
@@ -3277,10 +3305,10 @@ void showUnitStats(Unit * playerUnit,string &text,int subunitlevel) {
 		text+="#c1:.3:.3#No jump drive present#-c"; //trouble here, seems to never happen
 	}
 	else {
-		PRETTY_ADDU("Insystem energy: ",uj.insysenergy*VSDM,2,"MJ");
-		PRETTY_ADDU("Outsystem energy: ",uj.energy*VSDM,2,"MJ");
+		PRETTY_ADDU("Insystem energy: ",uj.insysenergy*RSconverter*Wconv,0,"MJ");
+		PRETTY_ADDU("Outsystem energy: ",uj.energy*RSconverter*Wconv,0,"MJ");
 		if (uj.delay) {
-			PRETTY_ADDU("Delay: ",uj.delay,0,"s");
+			PRETTY_ADDU("Delay: ",uj.delay,0,"seconds");
 		}
 		if (uj.damage) {
 			PRETTY_ADDU("Damage: ",uj.damage*VSDM,0,"MJ");
@@ -3288,56 +3316,57 @@ void showUnitStats(Unit * playerUnit,string &text,int subunitlevel) {
 	}
 	
 	text+="#n##n##c0:1:.5#"+prefix+"[DEFENSE SUBSYSTEM]#n##-c";
-	text+="#n#"+prefix+"Armor: ";
-	PRETTY_ADDN(" front ",playerUnit->armor.front*VSDM,2);
-	PRETTY_ADDN("  back ",playerUnit->armor.back*VSDM,2); 
-	PRETTY_ADDN("  left ",playerUnit->armor.left*VSDM,2);
-	PRETTY_ADDN("  right ",playerUnit->armor.right*VSDM,2);
-	text+=" MJ";
-	PRETTY_ADDU("Hull: ",playerUnit->GetHull()*VSDM,2,"MJ");
-	if (playerUnit->GetHull()!=playerUnit->GetHullPercent()) {
-		PRETTY_ADDN("  (",playerUnit->GetHullPercent()*100,2);
-		text+=" %  ok)";
+	text+="#n#"+prefix+"Armor damage resistance:";
+	PRETTY_ADDU("  fore -",playerUnit->armor.front*VSDM,0,"MJ");
+	PRETTY_ADDU("  aft - ",playerUnit->armor.back*VSDM,0,"MJ"); 
+	PRETTY_ADDU("  port - ",playerUnit->armor.left*VSDM,0,"MJ");
+	PRETTY_ADDU("  starboard - ",playerUnit->armor.right*VSDM,0,"MJ");
+	PRETTY_ADDU("Sustainable Hull Damage: ",playerUnit->GetHull()*VSDM,0,"MJ");
+	if (1!=playerUnit->GetHullPercent()) {
+		PRETTY_ADD("  Current condition: ",playerUnit->GetHullPercent()*100,2);
+		text+="% of normal";
 	}	
-	PRETTY_ADD("Shield type: shield ",playerUnit->shield.number,0);
-	text+="#n#"+prefix+"Shield energy: ";
+	PRETTY_ADD("Number of shield emitter facings: ",playerUnit->shield.number,0);
+	text+="#n#"+prefix+"Shield protection rating:";
 	switch (playerUnit->shield.number) {
 		case 2:
-			PRETTY_ADDN(" front ",playerUnit->shield.fb[2]*VSDM,2);
-			PRETTY_ADDN("  back ",playerUnit->shield.fb[3]*VSDM,2);
-			text+=" MJ";
+			PRETTY_ADDU("  fore - ",playerUnit->shield.fb[2]*VSDM,0, "MJ");
+			PRETTY_ADDU("  aft - ",playerUnit->shield.fb[3]*VSDM,0, "MJ");
 			break;
 		case 4:
-			PRETTY_ADDN(" front ",playerUnit->shield.fbrl.frontmax*VSDM,2);
-			PRETTY_ADDN("  back ",playerUnit->shield.fbrl.backmax*VSDM,2);
-			PRETTY_ADDN("  left ",playerUnit->shield.fbrl.leftmax*VSDM,2);
-			PRETTY_ADDN("  right ",playerUnit->shield.fbrl.rightmax*VSDM,2);
-			text+=" MJ";
+			PRETTY_ADDU("  fore - ",playerUnit->shield.fbrl.frontmax*VSDM,0,"MJ");
+			PRETTY_ADDU("  aft - ",playerUnit->shield.fbrl.backmax*VSDM,0,"MJ");
+			PRETTY_ADDU("  port - ",playerUnit->shield.fbrl.leftmax*VSDM,0,"MJ");
+			PRETTY_ADDU("  starboard - ",playerUnit->shield.fbrl.rightmax*VSDM,0,"MJ");
 			break;
 		case 6:
-			PRETTY_ADDN(" front and back",playerUnit->shield.fbrltb.fbmax*VSDM,2);
-			PRETTY_ADDN("  left, right, top, bottom  ",playerUnit->shield.fbrltb.rltbmax*VSDM,2);
-			text+=" MJ";
+			PRETTY_ADDU("  fore and aft - ",playerUnit->shield.fbrltb.fbmax*VSDM,0,"MJ");
+			PRETTY_ADDU("  port, starboard, top, bottom - ",playerUnit->shield.fbrltb.rltbmax*VSDM,0,"MJ");
 			break;
 		default:
 			text+="#c1:.3:.3#Shield model unrecognized#-c";
 			break;
 	}
-	PRETTY_ADDU("Shield recharge speed: ",playerUnit->shield.recharge*VSDM,2,"MJ/s"); 
+	PRETTY_ADDU("Shield protection recharge speed: ",playerUnit->shield.recharge*VSDM,0,"MJ/s"); 
 	//cloaking device? If we don't have one, no need to mention it ever exists, right?
 	if( playerUnit->cloaking!=-1) {
-		PRETTY_ADDU("Cloaking device available, energy usage: ",playerUnit->image->cloakenergy*VSDM,2,"MJ/s");
+		PRETTY_ADDU("Cloaking device available, energy usage: ",playerUnit->image->cloakenergy*RSconverter*Wconv,0,"MJ/s");
 	}
 	text+="#n##n##c0:1:.5#"+prefix+"[TARGETTING SUBSYSTEM]#n##-c";
-	PRETTY_ADDU("Radar range: ",uc.radar.maxrange,2,"m");
-	PRETTY_ADD("Radar cone: ",acos(uc.radar.maxcone)*360.0/PI,2);
-	text+=" (planar angle: 360 means full space)";
-	PRETTY_ADD("Radar tracking cone: ",acos(uc.radar.trackingcone)*360.0/PI,2);
-	PRETTY_ADD("Radar locking cone: ",acos(uc.radar.lockcone)*360.0/PI,2);
-	PRETTY_ADDU("Minimum target size: ",uc.radar.mintargetsize,2,"m");
-	text+="#n#"+prefix+"ITTF (target track with lead) support: ";
+	PRETTY_ADDU("Radar range: ",uc.radar.maxrange/1000,0,"km");
+	if((acos(uc.radar.maxcone)*360/PI)<359){
+		PRETTY_ADDU("Tracking cone: ",acos(uc.radar.maxcone)*2,2,"Radians");
+		text+=" (planar angle: 2 pi means full space)";
+	} else {
+		text+="#n#"+prefix+"Tracking: OMNIDIRECTIONAL";
+	}
+	PRETTY_ADDU("Assisted targeting cone: ",acos(uc.radar.trackingcone)*2,2,"Radians");
+	PRETTY_ADDU("Missile locking cone: ",acos(uc.radar.lockcone)*2,2,"Radians");
+	
+	// Always zero PRETTY_ADDU("Minimum target size: ",uc.radar.mintargetsize,2,"m");
+	text+="#n#"+prefix+"ITTS (Intelligent Target Tracking System) support: ";
 	if (uc.itts) text+="yes"; else text+="no";
-	text+="#n#"+prefix+"IFFF (friend or foe) support: ";
+	text+="#n#"+prefix+"AFHH (Advanced Flag & Hostility Heuristics) support: ";
 	if (uc.radar.color) text+="yes"; else text+="no";
 
 	text+="#n##n##c0:1:.5#"+prefix+"[OFFENSIVE SUBSYSTEM]#n##-c";
@@ -3354,7 +3383,7 @@ void showUnitStats(Unit * playerUnit,string &text,int subunitlevel) {
 		}
 		else {
 			text+=wi->weapon_name;
-			//let's display some weapon informations
+			//let's display some weapon information
 			int s=1;
 			int off=0;
 			text+="#n#"+prefix+"   Weapon mount type: ";
@@ -3364,41 +3393,45 @@ void showUnitStats(Unit * playerUnit,string &text,int subunitlevel) {
 			PRETTY_ADDU("   Weapon range: ",wi->Range,0,"m");
 			if (wi->Damage<0) text+="#n#"+prefix+"   Weapon damage: special";
 			else {
-				PRETTY_ADDU("   Weapon damage: ",wi->Damage*VSDM,2,"MJ");
+				PRETTY_ADDU("   Weapon damage: ",wi->Damage*VSDM,0,"MJ");
 			}
-			PRETTY_ADDU("   Weapon energy usage: ",wi->EnergyRate*VSDM,2,wi->type==weapon_info::BEAM?"MJ/s":"MJ/shot");
-			totalWeaponEnergyUsage+=wi->EnergyRate;
-			PRETTY_ADDU("   Weapon refire delay: ",wi->Refire,4,"s");
+			PRETTY_ADDU("   Weapon energy usage: ",wi->EnergyRate*RSconverter,0,wi->type==weapon_info::BEAM?"MJ/s":"MJ/shot");
+			
+			PRETTY_ADDU("   Weapon refire delay: ",wi->Refire,2,"seconds");
 			if (wi->PhaseDamage) {
 				PRETTY_ADDU("   Phase damage: ",wi->PhaseDamage*VSDM,2,"MJ");
 			}
-			
+			PRETTY_ADD("   Range attenuation factor: ",100000*(1.0 - wi->Longrange)/(wi->Range),2);
+			text+="% per km";
 			
 			/*I don't see the point in displaying those
 			PRETTY_ADD("   Pulse speed: ",wi->PulseSpeed,2);
 			PRETTY_ADD("   Radial speed: ",wi->RadialSpeed,2);
 			PRETTY_ADD("   Radius: ",wi->Radius,2);
 			PRETTY_ADD("   Length: ",wi->Length,2);			
-			PRETTY_ADD("   Long range: ",wi->Longrange,2);
-			
 			*/
-			//display infos specific to some weapons type			
+
+			//display info specific to some weapons type			
 			switch ( wi->type) {
 				case weapon_info::BALL: //need ammo
 				case weapon_info::BOLT:
-					if (wi->Damage>0)
+					if (wi->Damage>0){
 						totalWeaponDamage+=(wi->Damage/wi->Refire); //damage per second
-					PRETTY_ADDU("   Speed: ",wi->Speed,2,"s");
-					PRETTY_ADD("   Ammunitions: ",playerUnit->mounts[i].ammo,0);
+					}
+					PRETTY_ADDU("   Exit velocity: ",wi->Speed,0,"meters/second");
+					PRETTY_ADD("   Rounds remaining: ",playerUnit->mounts[i].ammo,0);
+					totalWeaponEnergyUsage+=(wi->EnergyRate/wi->Refire);
 					break;
 				case weapon_info::PROJECTILE: //need ammo
-					PRETTY_ADD("   Lock time factor: ",wi->LockTime,2);
-					PRETTY_ADD("   Ammunitions: ",playerUnit->mounts[i].ammo,0);
+					PRETTY_ADD("   'Fire and Forget' lock time: ",wi->LockTime,0,"seconds");
+					PRETTY_ADD("   Missiles remaining: ",playerUnit->mounts[i].ammo,0);
+					totalWeaponEnergyUsage+=(wi->EnergyRate/wi->Refire);
 					break;
 				case weapon_info::BEAM:
 					if (wi->Damage>0)
 						totalWeaponDamage+=wi->Damage;
-					PRETTY_ADDU("   Stability: ",wi->Stability,2,"s");
+					PRETTY_ADDU("   Beam stability: ",wi->Stability,2,"seconds");
+					totalWeaponEnergyUsage+=wi->EnergyRate;
 					break;
 				default:
 					break;
@@ -3406,25 +3439,12 @@ void showUnitStats(Unit * playerUnit,string &text,int subunitlevel) {
 		}
 			
 	}}//end mountpoint list
-	//handle SubUnits
-	un_iter ki=playerUnit->getSubUnits(); //can't use kiter, MakeUnitXMLPretty takes non-const Unit
-	{	int i=1;
-	Unit *sub;	
-	while (sub=ki.next()) {
-		if (i==1) text+="#n##n##c0:1:.5#"+prefix+"[SUB UNITS INFORMATIONS]#n##-c";
-		PRETTY_ADD("#n##n#"+prefix+"<sub unit ",i,0);
-		text+=">#n##n#";
-		showUnitStats(sub,text,subunitlevel+1);
-		i++;
-	}}
 	if (subunitlevel==0) {
 		text+="#n##n##c0:1:.5#"+prefix+"[KEY FIGURES]#n##-c";
-		/*
-		this does not work, I have no idea why...
-		PRETTY_ADDU("Time to reach full speed: ",playerUnit->mass*uc.max_ab_speed()/playerUnit->limits.forward,2,"s");
-		*/
+		
+		PRETTY_ADDU("Minimum time to reach full afterburner speed: ",playerUnit->mass*uc.max_ab_speed()/playerUnit->limits.afterburn,2,"seconds");
 		//reactor
-		PRETTY_ADDU("Reactor nominal replenish time: ",playerUnit->MaxEnergyData()/playerUnit->EnergyRechargeData(),2,"s");
+		PRETTY_ADDU("Reactor nominal replenish time: ",((playerUnit->MaxEnergyData()*RSconverter)-(shieldsum/5))/(playerUnit->EnergyRechargeData()*RSconverter),2,"seconds");
 		//shield related stuff
 		//code taken from RegenShields in unit_generic.cpp, so we're sure what we say here is correct.
 		static float low_power_mode = XMLSupport::parse_float(vs_config->getVariable("physics","low_power_mode_energy","10"));
@@ -3446,16 +3466,29 @@ void showUnitStats(Unit * playerUnit,string &text,int subunitlevel) {
 			text+=conversionBuffer;
 			text+=" %.";
 		}
-		PRETTY_ADDU("Cumulative weapon energy usage: ",totalWeaponEnergyUsage*VSDM,2,"MJ/s");
-		if (totalWeaponEnergyUsage<playerUnit->EnergyRechargeData()) {
+		totalWeaponEnergyUsage=totalWeaponEnergyUsage*RSconverter;
+		PRETTY_ADDU("Combined weapon energy usage: ",totalWeaponEnergyUsage,0,"MJ/s");
+		if (totalWeaponEnergyUsage<playerUnit->EnergyRechargeData()*RSconverter) {
 			//waouh, impressive...
 			text+="#n##c0:1:.2#"+prefix+"Your reactor produces more energy that your weapons can use!#-c";
 		}
 		else {
-			PRETTY_ADDU("Reactor energy depletion time if weapons in continus use: ",playerUnit->MaxEnergyData()/(totalWeaponEnergyUsage-playerUnit->EnergyRechargeData()),2,"s");	
+			PRETTY_ADDU("Reactor energy depletion time if weapons in continuous use: ",(playerUnit->MaxEnergyData()*RSconverter)/(totalWeaponEnergyUsage-(playerUnit->EnergyRechargeData()*RSconverter)),2,"seconds");	
 		}
-	PRETTY_ADDU("Cumulative non-missile weapon damage: ",totalWeaponDamage*VSDM,2,"MJ/s");
+	PRETTY_ADDU("Combined (non-missile) weapon damage: ",totalWeaponDamage*VSDM,0,"MJ/s");
 	}
+	//handle SubUnits
+	un_iter ki=playerUnit->getSubUnits(); //can't use kiter, MakeUnitXMLPretty takes non-const Unit
+	{	int i=1;
+	Unit *sub;	
+	while (sub=ki.next()) {
+		if (i==1) text+="#n##n##c0:1:.5#"+prefix+"[SUB UNITS]#n##-c";
+		PRETTY_ADD("#n##n#"+prefix+"<sub unit ",i,0);
+		text+=">#n##n#";
+		showUnitStats(sub,text,subunitlevel+1);
+		i++;
+	}}
+
 }
 // Show the stats on the player's current ship.
 bool BaseComputer::showShipStats(const EventCommandId& command, Control* control) {
