@@ -299,12 +299,13 @@ void GameUniverse::StartDraw()
     ProcessInput(i);//input neesd to be taken care of;
     popActiveStarSystem();
   }
-  GFXEndScene();
+
   if (screenshotkey) {
     KBData b;
     Screenshot(b,PRESS);
     screenshotkey=false;
   }
+  GFXEndScene();
   micro_sleep (getmicrosleep());//so we don't starve the audio thread  
 
   //remove systems not recently visited?

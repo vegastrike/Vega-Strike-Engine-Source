@@ -1292,6 +1292,7 @@ static void DrawCrosshairs (float x, float y, float wid, float hei, const GFXCol
 	GFXEnable(TEXTURE0);
 }
 extern bool QuitAllow;
+extern bool screenshotkey;
 void GameCockpit::Draw() { 
   cockpit_time+=GetElapsedTime();
   if (cockpit_time>=100000)
@@ -1304,7 +1305,7 @@ void GameCockpit::Draw() {
   GFXDisable (DEPTHWRITE);
   GFXColor4f(1,1,1,1);
   static bool draw_any_boxes = XMLSupport::parse_bool (vs_config->getVariable("graphics","hud","DrawTargettingBoxes","true"));
-  if (draw_any_boxes) {
+  if (draw_any_boxes&&screenshotkey==false) {
   DrawTargetBox();
   DrawTurretTargetBoxes();
   if(draw_all_boxes){
@@ -1359,7 +1360,7 @@ void GameCockpit::Draw() {
   Unit * un;
   float crosscenx=0,crossceny=0;
   if (view==CP_FRONT) {
-    if (Panel.size()>0) {
+    if (Panel.size()>0&&screenshotkey==false) {
       static bool drawCrosshairs=parse_bool(vs_config->getVariable("graphics","draw_rendered_crosshairs","true"));
       Panel.front()->GetPosition(crosscenx,crossceny);
       if (drawCrosshairs) {
@@ -1375,7 +1376,7 @@ void GameCockpit::Draw() {
     }
   }
   static bool mouseCursor = XMLSupport::parse_bool (vs_config->getVariable ("joystick","mouse_cursor","false"));
-  if (mouseCursor) {  
+  if (mouseCursor&&screenshotkey==false) {  
     GFXBlendMode (SRCALPHA,INVSRCALPHA);
     GFXColor4f (1,1,1,1);
     GFXEnable(TEXTURE0);
