@@ -6,6 +6,8 @@ void Order::AdjustRelationTo (Unit * un, float factor) {
 }
 
 void Order::Communicate (const CommunicationMessage &c) {
+  if (this==NULL)
+    return;
   int completed=0;
   unsigned int i=0;
   CommunicationMessage * newC = new CommunicationMessage (c);

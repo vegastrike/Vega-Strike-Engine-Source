@@ -357,7 +357,8 @@ void Mission::DirectorShipDestroyed(Unit *unit){
       fg->nr_waves_left-=1;
       fg->nr_ships_left=fg->nr_ships;
 
-      Order *order=unit->getAIState()->findOrderList();
+      Order *order=NULL;
+      order= unit->getAIState()?unit->getAIState()->findOrderList():NULL;
       fg->orderlist=NULL;
       if(order){
 	printf("found an orderlist\n");

@@ -1065,7 +1065,11 @@ const string Unit::getFgID()  {
 };
 
 string Unit::getFullAIDescription(){
-  return getFgID()+":"+getAIState()->createFullOrderDescription(0).c_str();
+  if (getAIState()) {
+    return getFgID()+":"+getAIState()->createFullOrderDescription(0).c_str();
+  }else {
+    return "no order";
+  }
 }
 
 void Unit::setTargetFg(string primary,string secondary,string tertiary){

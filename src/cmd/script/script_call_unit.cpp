@@ -1128,9 +1128,12 @@ varInst *Mission::call_unit(missionNode *node,int mode){
       if(mode==SCRIPT_RUN){
 	Cockpit * tmp;
 	if ((tmp=_Universe->isPlayerStarship (my_unit))) {
-	  Animation * ani= other_unit->getAIState()->getCommFace (mood,sex);
-	  if (NULL!=ani) {
-	    tmp->SetCommAnimation (ani);
+	  Order * ord=other_unit->getAIState();
+	  if (ord) {
+	    Animation * ani= ord->getCommFace (mood,sex);
+	    if (NULL!=ani) {
+	      tmp->SetCommAnimation (ani);
+	    }
 	  }
 	}
       }

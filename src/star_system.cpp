@@ -165,6 +165,9 @@ void StarSystem::activateLightMap() {
 }
 
 StarSystem::~StarSystem() {
+  _Universe->activeStarSystem()->SwapOut();
+  _Universe->pushActiveStarSystem(this);
+  _Universe->activeStarSystem()->SwapIn();  
 #ifdef NV_CUBE_MAP
 
   delete LightMap[0];
@@ -189,8 +192,8 @@ StarSystem::~StarSystem() {
   */
 
   delete bolts;
-  delete collidetable;
-  GFXDeleteLightContext (lightcontext);
+
+
   UnitCollection::UnitIterator iter = drawList.createIterator();
   Unit *unit;
   //  fprintf (stderr,"|t%f i%lf|",GetElapsedTime(),interpolation_blend_factor);
@@ -198,7 +201,13 @@ StarSystem::~StarSystem() {
     unit->Kill(false);
     iter.advance();
   }
+  delete collidetable;
+  _Universe->activeStarSystem()->SwapOut();
+  //  GFXDeleteLightContext (lightcontext);
+  _Universe->popActiveStarSystem();
+  _Universe->activeStarSystem()->SwapIn();  
   RemoveStarsystemFromUniverse();
+  
 }
 
 

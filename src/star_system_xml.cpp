@@ -275,6 +275,7 @@ static Unit * getTopLevelOwner( ) {//returns terrible memory--don't dereference.
 }
 extern BLENDFUNC parse_alpha (const char *);
 void StarSystem::beginElement(const string &name, const AttributeList &attributes) {
+  static int neutralfaction=_Universe->GetFaction("neutral");
   static float asteroiddiff = XMLSupport::parse_float (vs_config->getVariable ("physics","AsteroidDifficulty",".4"));
   std::string myfile;
   vector <GFXLightLocal> curlights;
@@ -830,7 +831,7 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
 	  un->SetAI(new PlanetaryOrbit (un,velocity,position,R,S, QVector (0,0,0), plan));
 
 	  //     xml->moons[xml->moons.size()-1]->Planet::beginElement(R,S,velocity,position,gravity,radius,filename,NULL,vector <char *>(),xml->unitlevel-((xml->parentterrain==NULL&&xml->ct==NULL)?1:2),ourmat,curlights,true,faction);
-	  if (elem==UNIT) {
+	  if (elem==UNIT&&un->faction!=neutralfaction) {
 	    un->SetTurretAI ();
 	    un->EnqueueAI(new Orders::FireAt (.2,15));
 	  }
@@ -882,7 +883,7 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
 
 	    xml->moons.back()->SetPosAndCumPos(R+S+xml->cursun.Cast()+xml->systemcentroid.Cast());
 	    xml->moons.back()->SetOwner (getTopLevelOwner());
-	    if (elem==UNIT) {
+	    if (elem==UNIT&&xml->moons.back()->faction!=neutralfaction) {
 
 	      xml->moons.back()->SetTurretAI ();
 	      xml->moons.back()->EnqueueAI(new Orders::FireAt (.2,15));
