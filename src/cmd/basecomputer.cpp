@@ -3562,7 +3562,7 @@ bool BaseComputer::buyShip(const EventCommandId& command, Control* control) {
                     for (int j=0;j<2;++j) {
                       for (int i=playerUnit->numCargo()-1;i>=0;--i) {
                         Cargo c = playerUnit->GetCargo(i);
-                        if ((c.mission!=0&&j==0)||(c.mission==0&&j==1)) {
+                        if ((c.mission!=0&&j==0)||(c.mission==0&&j==1&&c.find('upgrades')!=0)) {
                           for (int k=c.quantity;k>0;--k) {
                             c.quantity=k;
                             if (newPart->CanAddCargo(c)) {
