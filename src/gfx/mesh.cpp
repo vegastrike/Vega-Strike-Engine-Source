@@ -31,7 +31,7 @@
 #include <list>
 #include <string>
 #include <fstream>
-
+#include "vs_path.h"
 #include "lin_time.h"
 #include "gfxlib.h"
 
@@ -104,7 +104,11 @@ Mesh::Mesh()
 
 bool Mesh::LoadExistant (const char * filehash) {
   Mesh * oldmesh;
-  if(0 != (oldmesh = meshHashTable.Get(string (filehash)))) {
+  oldmesh = meshHashTable.Get(GetHashName(filehash));
+  if (oldmesh==0) {
+    oldmesh = meshHashTable.Get(GetSharedMeshHashName(filehash));  
+  }
+  if(0 != oldmesh) {
     *this = *oldmesh;
     oldmesh->refcount++;
     orig = oldmesh;
@@ -120,19 +124,26 @@ Mesh:: Mesh(const char * filename, bool xml, int faction, bool orig):hash_name(f
   if (LoadExistant (filename)) {
     return;
   }
-
+  bool shared=false;
+  FILE * fp= fopen (filename,"r");
+  if (fp==NULL) {
+    shared=true;
+  }else {
+    fclose (fp);
+  }
 
   if(xml) {
-    LoadXML(filename,faction);
+    LoadXML(shared?GetSharedMeshPath(filename).c_str():filename,faction);
     oldmesh = this->orig;
   } else {
     this->xml= NULL;
-    LoadBinary(filename,faction);
+    LoadBinary(shared?GetSharedMeshPath(filename).c_str():filename,faction);
     oldmesh = new Mesh[1];
   }
   draw_queue = new vector<MeshDrawContext>;
   if (!orig) {
-    meshHashTable.Put(string(filename), oldmesh);
+    hash_name =shared?GetSharedMeshHashName (filename):GetHashName(filename);
+    meshHashTable.Put(hash_name, oldmesh);
     oldmesh[0]=*this;
     oldmesh->orig = NULL;
     oldmesh->refcount++;

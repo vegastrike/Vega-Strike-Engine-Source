@@ -58,7 +58,7 @@ struct Texture{
   ///The target this will go to (cubemap or otherwise)
   enum TEXTURE_TARGET texture_target; enum TEXTURE_IMAGE_TARGET image_target;
   ///Returns if this texture is actually already loaded
-  GFXBOOL checkold(const std::string &s);
+  GFXBOOL checkold(std::string s, bool shared, string & hashname);
   ///Loads the old texture
   void setold();
   ///Inits the class with default values

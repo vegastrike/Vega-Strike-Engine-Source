@@ -1,4 +1,5 @@
 #include "vs_globals.h"
+#include "vs_path.h"
 #include "vegastrike.h"
 #include "gauge.h"
 #include "cockpit.h"
@@ -232,7 +233,9 @@ void Cockpit::DrawGauges(Unit * un) {
 }
 void Cockpit::Init (const char * file) {
   Delete();
+  vschdir (file);
   LoadXML(file);
+  vscdup();
   if (Panel.size()>0) {
     float x,y;
     Panel.front()->GetPosition (x,y);

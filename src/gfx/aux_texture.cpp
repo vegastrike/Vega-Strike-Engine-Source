@@ -26,6 +26,7 @@
 #include <string>
 #include "endianness.h"
 #include "hashtable.h"
+#include "vs_path.h"
 using std::string;
 
 #ifndef WIN32
@@ -91,11 +92,15 @@ Texture * Texture::Exists (string s, string a) {
   return Texture::Exists (s+a);
 }
 Texture * Texture::Exists (string s) {
-    Texture * tmp = texHashTable.Get(s);
-    if (tmp)
-      if (tmp->original)
-	return tmp->original;
-    return tmp;
+  Texture * tmp = texHashTable.Get(GetHashName(s));
+  if (tmp==NULL){
+    string tmpo;
+    tmp = texHashTable.Get (GetSharedTextureHashName (s));
+  }
+  if (tmp)
+    if (tmp->original)
+      return tmp->original;
+  return tmp;
 }
 
 bool Texture::operator < (const Texture & b) {
@@ -106,25 +111,28 @@ bool Texture::operator == (const Texture & b) {
   return ( (original?original:this)==(b.original?b.original:&b));
 }
 
-GFXBOOL Texture::checkold(const string &s)
+GFXBOOL Texture::checkold(string s, bool shared, string & hashname)
 {
-	Texture *oldtex;
-	//FIX'D
-	if((oldtex = texHashTable.Get(s))!=NULL)
-	{
+  hashname = shared?GetSharedTextureHashName(s):GetHashName(s);
+  Texture *oldtex= texHashTable.Get (hashname);
+  if(oldtex!=NULL) {
 	  //*this = *oldtex;//will be obsoleted--unpredictable results with string()
-	  memcpy (this, oldtex, sizeof (Texture));
-	  original = oldtex;
-	  original->refcount++;
-	  return GFXTRUE;
-	}
-	else
-	{
-	  oldtex = (Texture*)malloc(sizeof(Texture));
-	  texHashTable.Put(s, oldtex);
-	  original = oldtex;
-	  return GFXFALSE;
-	}
+    memcpy (this, oldtex, sizeof (Texture));
+    original = oldtex;
+    original->refcount++;
+    return GFXTRUE;
+  } else {
+    oldtex = (Texture*)malloc(sizeof(Texture));
+    oldtex->InitTexture();
+    oldtex->name=-1;
+    oldtex->refcount=1;
+    oldtex->original=NULL;
+    oldtex->palette=NULL;
+    oldtex->data=NULL;
+    texHashTable.Put(hashname, oldtex);
+    original = oldtex;
+    return GFXFALSE;
+  }
 }
 void Texture::setold()
 {
@@ -167,18 +175,25 @@ Texture::Texture(const char * FileName, int stage, enum FILTER mipmap, enum TEXT
 	}
 	//	this->texfilename = texfilename;
 	//strcpy (filename,texfilename.c_str());
-	if(checkold(texfilename))
-		return;
-
-
 	FILE *fp = NULL;
 	fp = fopen (FileName, "rb");
+	bool shared = (fp==NULL);
+	if(checkold(texfilename,shared,texfilename)) {
+	  if (fp)
+	    fclose (fp);
+	  return;
+	}
+	if (!fp) {
+	  fp = fopen (GetSharedTexturePath (FileName).c_str(),"rb");
+	}
 	if (!fp)
 	{
-	  
-	  fprintf (stderr, "%s, not found",FileName);
+      	  fprintf (stderr, "%s, not found",FileName);
+
+	  texHashTable.Delete (texfilename);
 	  name=-1;
 	  data = NULL;
+	  free(original);
 	  original=NULL;
 	  return;
 	}
@@ -270,18 +285,22 @@ Texture::Texture (const char * FileNameRGB, const char *FileNameA, int stage, en
 	string texfilename = string(FileNameRGB) + string(FileNameA);
 	//this->texfilename = texfilename;
 	//strcpy (filename,texfilename.c_str());
-
-	if(checkold(texfilename))
-		return;
-
 	FILE *fp = NULL;
 	fp = fopen (FileNameRGB, "rb");
+	bool shared = (fp==NULL);
+	if(checkold(texfilename,shared,texfilename))
+		return;
+	if (shared) {
+	  fp = fopen (GetSharedTexturePath (FileNameRGB).c_str(),"rb");
+	}
 	if (!fp)
 	{
 	  texHashTable.Delete (texfilename);
 	  palette = NULL;
 	  data = NULL;
 	  name=-1;
+	  original->name=-1;
+	  free (original);
 	  original=NULL;
 	  return;
 	}
@@ -299,7 +318,9 @@ Texture::Texture (const char * FileNameRGB, const char *FileNameA, int stage, en
 
 	if (FileNameA)
 	{
-		fp1 = fopen (FileNameA, "rb");
+	  std::string tmp = shared?GetSharedTexturePath(FileNameA).c_str():FileNameA;
+		fp1 = fopen (tmp.c_str(), "rb");
+		
 		if (!fp1)
 		{
 			data = NULL;
@@ -451,12 +472,14 @@ Texture::~Texture()
 	{
 		if(original == NULL)
 		{
+		  /**DEPRECATED
 			if(data != NULL)
 			{
 				delete [] data;
 
 				data = NULL;
 			}
+		  */
 			if (name!=-1) {
 			  texHashTable.Delete (string(texfilename));
 			  GFXDeleteTexture(name);

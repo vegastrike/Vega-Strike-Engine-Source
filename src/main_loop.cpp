@@ -39,6 +39,7 @@
 #include "main_loop.h"
 #include "cmd/music.h"
 #include "audiolib.h"
+#include "vs_path.h"
 using namespace std;
 
 static Music * muzak=NULL;
@@ -383,7 +384,9 @@ void createObjects() {
   fighters[0]->EnqueueAI(new AIScript("aitest.xml"));
   fighters[0]->EnqueueAI(new FlyByJoystick (0,"player1.kbconf"));
   fighters[0]->EnqueueAI(new FireKeyboard (0,""));
+  vschdir ("hornet-cockpit.cpt");
   tmpcockpittexture = new Texture ("hornet-cockpit.bmp","hornet-cockpitalp.bmp",0,NEAREST);
+  vscdup();
   muzak = new Music ("programming.m3u",fighters[0]);
   AUDListenerSize (fighters[0]->rSize()*4);
   _Universe->AccessCockpit()->Init ("hornet-cockpit.cpt");
