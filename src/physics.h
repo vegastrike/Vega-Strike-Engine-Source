@@ -23,6 +23,7 @@
 #define PHYSICS_H
 
 #include "gfx_transform_vector.h"
+#include "quanternion.h"
 struct Force {
 	Vector F;
 	float t;

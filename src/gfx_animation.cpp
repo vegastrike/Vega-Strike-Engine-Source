@@ -1,0 +1,112 @@
+//#include "wrapgfx.h"
+#include "gfx_animation.h"
+#include "gfx_camera.h"
+#include "glob.h"
+//#include "win.h"
+#include "lin_time.h"
+Animation::Animation ():Primitive()
+{
+	cumtime = 0;
+	numframes = 0;
+	timeperframe = 0.001F;
+	height = 0.001F;
+	width = 0.001F;
+	Decal = NULL;
+}
+
+Animation::Animation (char * FileName):Primitive()
+{
+	cumtime = 0;
+	char temp [256];
+	char tempalp [256];
+	FILE * fp = fopen (FileName, "r+b");
+	if (!fp)
+		; // do something 
+	fread (&numframes, sizeof (short), 1, fp); 
+	Decal = new Texture* [numframes];
+	fread (&timeperframe,sizeof (float),1,fp);
+	float tmp;
+	fread (&tmp, sizeof (float),1,fp);
+	width = tmp*0.5F;
+	fread (&tmp, sizeof (float),1,fp);
+	height = tmp*0.5F;
+	for (int i=0; i<numframes;i++) //load all textures
+	{
+		for (int j=0; ;j++)
+		{
+			fread (&temp[j],sizeof (char), 1, fp);
+			if (!temp[j]) //ahh we have come upon a NULL
+			{
+				break;
+			}
+		}
+		for (int j=0; ;j++)
+		{
+			fread (&tempalp[j],sizeof (char), 1, fp);
+			if (!tempalp[j]) //ahh we have come upon a NULL
+			{
+				Decal[i] = new Texture (temp,tempalp);
+				break;
+			}
+		}
+	}
+	fclose (fp);
+}
+Animation:: ~Animation ()
+{
+	//if(!copied)
+	//{
+		for (int i=0; i< numframes; i++)
+			delete Decal[i];
+		delete [] Decal;
+	//}
+}
+void Animation:: Draw()
+{
+		cumtime += GetElapsedTime();
+		int framenum = (int)(cumtime/timeperframe);
+		if (framenum<numframes)
+		{
+			GFXDisable (LIGHTING);
+			//glMatrixMode(GL_MODELVIEW);
+			Vector p1,q1,r1;
+			Camera* TempCam = _GFX ->AccessCamera();
+			Vector posit;
+			TempCam->GetPosition (posit);
+			r1.i = -pos.i+posit.i;
+			r1.j = -pos.j+posit.j;
+			r1.k = -pos.k+posit.k;
+			Normalize (r1);
+			q1.i = 0;
+			q1.j = 1;
+			q1.k = 0;
+			ScaledCrossProduct (q1,r1,p1); 
+			ScaledCrossProduct (r1,p1,q1);		
+			//if the vectors are linearly dependant we're phucked :) fun fun fun
+			static float ShipMat [16];
+			VectorToMatrix (ShipMat,p1,q1,r1);
+			Translate(translation, pos.i, pos.j, pos.k);
+			MultMatrix(transformation, translation, ShipMat);
+
+			GFXLoadIdentity(MODEL);
+			GFXLoadMatrix (MODEL, transformation);
+			//glDisable(GL_TEXTURE_2D);
+			//Decal[framenum]->Transfer();//frame stuff needs to be done
+			Decal[framenum]->MakeActive();
+			GFXBegin (QUADS);
+				GFXTexCoord2f (0.00F,0.00F);
+				GFXVertex3f (-width,-height,0.00F);  //lower left
+				GFXTexCoord2f (0.00F,1.00F);
+				GFXVertex3f (width,-height,0.00F);  //upper left
+				GFXTexCoord2f (1.00F,1.00F);
+				GFXVertex3f (width,height,0.00F);  //upper right
+				GFXTexCoord2f (1.00F,0.00F);
+				GFXVertex3f (-width,height,0.00F);  //lower right
+			GFXEnd ();
+			//glEnable(GL_TEXTURE_2D);
+			GFXEnable (LIGHTING);
+		}
+		else
+			framenum = 0;
+
+}

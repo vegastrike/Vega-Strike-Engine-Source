@@ -29,7 +29,7 @@
 #include "audio_data.h"
 #include "audio.h"
 #include "joystick.h"
-
+#include "gl_globals.h"
 
 
 
@@ -38,8 +38,8 @@
  */
 
 game_data_t g_game;
-
-
+WrapGFX *_GFX;
+FILE * fpread=NULL;
 /* 
  * Function definitions
  */
@@ -60,6 +60,7 @@ void setup_game_data ( ){ //pass in config file l8r??
   g_game.prev_mode=RACING;
   g_game.fov=60;
   g_game.PaletteExt=1;
+  
 }
 
 /* This function is called on exit */

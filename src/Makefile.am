@@ -5,6 +5,10 @@ bin_PROGRAMS = vegastrike
 #	fonts.h
 ##	quadtree.cpp				\
 ##	quadtree.hpp				\
+#	gfx_hud.cpp				\
+#	gfx_hud.h				\
+#	gfx_light.cpp				\
+#	gfx_light.h				\
 
 
 
@@ -17,17 +21,50 @@ vegastrike_SOURCES =				\
 	audio.h					\
 	audio_data.c				\
 	audio_data.h				\
+	cmd_ai.cpp				\
+	cmd_ai.h				\
+	cmd_unit.h				\
+	cmd_unit.cpp				\
+	cmd_gun.cpp				\
+	cmd_gun.h				\
+	cmd_node.h				\
+	cmd_physics.cpp				\
+	cmd_physics.h				\
 	debug.c					\
 	debug.h					\
 	error_util.c				\
 	error_util.h				\
+	file.h					\
+	file_main.h				\
 	file_util.c				\
 	file_util.h				\
 	gauss.c					\
 	gauss.h					\
+	gfx_aux.h				\
+	gfx_aux_logo.cpp			\
+	gfx_aux_logo.h				\
+	gfx_aux_palette.cpp			\
+	gfx_aux_palette.h			\
+	gfx_aux_texture.cpp			\
+	gfx_aux_texture.h			\
+	gfx_background.cpp			\
+	gfx_background.h			\
+	gfx_bsp.cpp				\
+	gfx_bsp.h				\
+	gfx_camera.cpp				\
+	gfx_camera.h				\
+	gfx_hud.cpp				\
+	gfx_hud.h				\
+	gfx_mesh.cpp				\
+	gfx_mesh.h				\
+	gfx_primitive.cpp			\
+	gfx_primitive.h				\
+	gfx_sprite.cpp				\
+	gfx_sprite.h				\
 	gfx_transform_vector.cpp		\
 	gfx_transform_vector.h			\
 	gfx_transform_matrix.h			\
+	gfx_vertex.h				\
 	gfxlib.h				\
 	gfxlib_struct.h				\
 	gl_globals.cpp				\
@@ -76,4 +113,6 @@ vegastrike_SOURCES =				\
 	string_util.h				\
 	tex_font_metrics.c			\
 	tex_font_metrics.h			\
+	wrapgfx.cpp				\
+	wrapgfx.h				\
 	vegastrike.h				\

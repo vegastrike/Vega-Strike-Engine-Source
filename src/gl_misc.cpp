@@ -41,7 +41,7 @@ BOOL /*GFXDRVAPI*/ GFXEndScene()
 	
         glFlush();
 	glutSwapBuffers(); //swap the buffers
-	char temp[128];
+	//char temp[128];
 	/*	sprintf(temp, "Frame stats for frame # %d: %d Tris, %d Quads, %d Points, %d total vertices drawn in %d milliseconds.\n",
 		statsqueue.size(),
 		statsqueue.back().drawnTris,

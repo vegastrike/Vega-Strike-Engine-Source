@@ -1,5 +1,5 @@
 /* © 1998 Chris Fry & Daniel Horn*/
-
+#include "vegastrike.h"
 #include <math.h>
 #include "gfx_transform_vector.h"
 //#include "glob_externs.h"

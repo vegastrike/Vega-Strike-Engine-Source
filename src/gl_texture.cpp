@@ -127,6 +127,10 @@ BOOL /*GFXDRVAPI*/ GFXTransferTexture (unsigned char *buffer, int handle)
 	
 	switch(textures[handle].textureformat)
 	{
+	case DUMMY:
+	case RGB24:
+	  printf ("RGB24 bitmaps not yet supported");
+	  break;
 	case RGB32:
 		glTexImage2D(GL_TEXTURE_2D, 0, 3, textures[handle].width, textures[handle].height, 0, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
 		break;
@@ -215,7 +219,7 @@ BOOL /*GFXDRVAPI*/ GFXSelectTexture(int handle, int stage)
 			break;
 		}
 		glBindTexture(GL_TEXTURE_2D, textures[handle].name);
-		float ccolor[4] = {1.0,1.0,1.0,1.0};
+		//float ccolor[4] = {1.0,1.0,1.0,1.0};
 		switch(textures[handle].texturestage)
 		{
 		case 0:

@@ -21,7 +21,8 @@
 
 #include "gfxlib.h"
 #include <queue>
-
+#include "wrapgfx.h"
+extern WrapGFX *_GFX;
 using namespace std;
 
 #ifndef GFXSTAT

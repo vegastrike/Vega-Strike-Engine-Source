@@ -23,6 +23,7 @@
 //typedef float GLdouble;
 #include <math.h>
 #include <string.h>
+const float PI=3.1415926536;
 inline void Zero(float matrix[])
 {
 	matrix[0] = 0;

@@ -1,0 +1,147 @@
+#include <stdlib.h>
+
+#include "gfx_aux_texture.h"
+#include "gfx_sprite.h"
+#include "gfx_transform.h"
+#include "gfxlib.h"
+
+static float *mview = NULL;
+
+Sprite::Sprite(char *file):Mesh()
+{
+	static Matrix mat;
+	if(!mview) {
+		mview=mat;
+		GFXLoadIdentity(VIEW);
+		GFXLookAt(Vector(0,0,0), Vector(0,0,1), Vector(0,-1,0)); // optimization: cache this friggin' matrix
+		GFXGetMatrix(VIEW, mview);
+	}
+
+		pos.i = 0;
+	pos.j = 0;
+	pos.k = 1.0;
+	Mesh::SetPosition();
+
+	xcenter = 0;
+	ycenter = 0;
+	width = 0;
+	height = 0;
+	rotation = 0;
+	surface = NULL;
+	//changed = TRUE;
+	//vlist = NULL;
+
+	FILE *fp = fopen(file, "r");
+	char texture[64];
+	fscanf(fp, "%s", texture);
+	fscanf(fp, "%f %f", &width, &height);
+	fscanf(fp, "%f %f", &xcenter, &ycenter);
+	fclose(fp);
+	left = -xcenter;
+	right = width - xcenter;
+	top = -ycenter;
+	bottom = height - ycenter;
+
+	surface = new Texture(texture);
+	/*
+	GFXVertex vertices[4] = { 
+		GFXVertex(Vector(0.00F, 0.00F, 1.00F), Vector(0.00F, 0.00F, 0.00F), 0.00F, 0.00F),
+		GFXVertex(Vector(xsize, 0.00F, 1.00F), Vector(0.00F, 0.00F, 0.00F), 1.00F, 0.00F),
+		GFXVertex(Vector(xsize, ysize, 1.00F), Vector(0.00F, 0.00F, 0.00F), 1.00F, 1.00F),
+		GFXVertex(Vector(0.00F, ysize, 1.00F), Vector(0.00F, 0.00F, 0.00F), 0.00F, 1.00F)};
+	vlist = new GFXVertexList(4, vertices);
+	*/
+}
+
+Sprite::~Sprite()
+{
+	if(surface!=NULL)
+		delete surface;
+	//if(vlist!=NULL)
+	//	delete vlist;
+}
+
+void Sprite::Draw()
+{
+	if(surface!=NULL)
+	{
+	  /////////////Matrix model;
+		Matrix view;
+		Matrix project;
+
+		//GFXGetMatrix(MODEL, model);
+		GFXGetMatrix(VIEW, view);
+		GFXGetMatrix(PROJECTION, project);
+		
+		
+		//GFXLoadIdentity(VIEW);
+		GFXLoadMatrix(VIEW, mview);
+		/***********FIXME VEGASTRIKE
+		Matrix parallel = {
+			1, 0, 0, 0, 
+			0, 1, 0, 0, 
+			0, 0, -5, 0,
+			0, 0, 0, -1};
+		*************/
+		//GFXLoadIdentity(PROJECTION);
+		//GFXLoadMatrix(PROJECTION, parallel);
+		//GFXParallel(0.0, 1.0, 1.0, 0.0, 1.0, 10.0);
+		
+		GFXDisable(LIGHTING);
+		GFXDisable(DEPTHWRITE);
+		GFXDisable(DEPTHTEST);
+
+		GFXLoadIdentity(MODEL);
+		UpdateMatrix();
+		surface->MakeActive();
+
+		//GFXVertex(Vector(0.00F, 0.00F, 1.00F), Vector(0.00F, 0.00F, 0.00F), 0.00F, 0.00F),
+		//GFXVertex(Vector(xsize, 0.00F, 1.00F), Vector(0.00F, 0.00F, 0.00F), 1.00F, 0.00F),
+		//GFXVertex(Vector(xsize, ysize, 1.00F), Vector(0.00F, 0.00F, 0.00F), 1.00F, 1.00F),
+		//GFXVertex(Vector(0.00F, ysize, 1.00F), Vector(0.00F, 0.00F, 0.00F), 0.00F, 1.00F)};
+
+		GFXColor(1.00f, 1.00f, 1.00f, 1.00f);
+		GFXBegin(QUADS);
+
+		GFXTexCoord2f(0.00f, 0.00f);
+		GFXVertex3f(left, bottom, 0.00f);
+		GFXTexCoord2f(1.00f, 0.00f);
+		GFXVertex3f(right, bottom, 0.00f);
+		GFXTexCoord2f(1.00f, 0.00f);
+		GFXVertex3f(right, top, 0.00f);
+		GFXTexCoord2f(0.00f, 0.00f);
+		GFXVertex3f(left, top, 0.00f);
+
+		GFXEnd();
+		GFXEnable(LIGHTING);
+		GFXEnable(DEPTHWRITE);
+		GFXEnable(DEPTHTEST);
+
+		//GFXLoadMatrix(MODEL, model);
+		GFXLoadMatrix(VIEW, view);
+		GFXLoadMatrix(PROJECTION, project);
+	}
+}
+
+void Sprite::SetPosition(const float &x1, const float &y1)
+{
+	pos.i = x1;
+	pos.j = y1;
+}
+
+void Sprite::GetPosition(float &x1, float &y1)
+{
+	x1 = pos.i;
+	y1 = pos.j;
+}
+
+void Sprite::SetRotation(const float &rot)
+{
+	Roll(rot-rotation);
+	rotation = rot;
+}
+
+void Sprite::GetRotation(float &rot)
+{
+	rot = rotation;
+}
