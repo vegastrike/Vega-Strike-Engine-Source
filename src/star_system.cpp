@@ -318,6 +318,7 @@ void StarSystem::Draw(bool DrawCockpit) {
   fprintf (stderr,"ani");
   fflush (stderr);
 #endif
+  GFXColor4f(1,1,1,1);
   if (DrawCockpit) {
     AnimatedTexture::UpdateAllFrame();
   }
