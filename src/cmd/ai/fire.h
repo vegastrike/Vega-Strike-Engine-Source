@@ -20,6 +20,7 @@ protected:
   void FireWeapons (bool shouldfire,bool lockmissile);
   //  bool DealWithMultipleTargets();
   void ChooseTargets(int num, bool force=false);//chooses n targets and puts the best to attack in unit's target container
+  bool isJumpablePlanet(Unit *);
 public:
   FireAt (float reaction_time, float aggressivitylevel);//weapon prefs?
   virtual void Execute();

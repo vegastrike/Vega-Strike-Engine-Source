@@ -136,6 +136,18 @@ void FireAt::FireWeapons(bool shouldfire, bool lockmissile) {
     parent->UnFire();
   }
 }
+
+bool FireAt::isJumpablePlanet(Unit * targ) {
+    bool istargetjumpableplanet = targ->isUnit()==PLANETPTR;
+    if (istargetjumpableplanet) {
+      istargetjumpableplanet=(!((Planet*)targ)->GetDestinations().empty())&&(parent->GetJumpStatus().drive>=0);
+      if (!istargetjumpableplanet) {
+	ChooseTargets(1);
+      }
+    }
+    return istargetjumpableplanet;
+}
+
 void FireAt::Execute () {
   bool missilelock=false;
   bool tmp = done;
@@ -169,13 +181,7 @@ void FireAt::Execute () {
   //    shouldfire |=DealWithMultipleTargets();
 
   if ((targ = parent->Target())) {
-    bool istargetjumpableplanet = targ->isUnit()==PLANETPTR;
-    if (istargetjumpableplanet) {
-      istargetjumpableplanet=(!((Planet*)targ)->GetDestinations().empty())&&(parent->GetJumpStatus().drive>=0);
-      if (!istargetjumpableplanet) {
-	ChooseTargets(1);
-      }
-    }
+    bool istargetjumpableplanet = isJumpablePlanet (targ);
     if (targ->CloakVisible()>.8&&targ->GetHull()>=0) {
       if (parent->GetNumMounts()>0) {
 	if (!istargetjumpableplanet)

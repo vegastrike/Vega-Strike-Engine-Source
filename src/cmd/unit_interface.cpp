@@ -527,6 +527,7 @@ void UpgradingInfo::SelectItem (const char *item, int button, int buttonstate) {
         buy->Kill();
         RespawnNow(cp);
         DoDone();
+	Base::CurrentBase->Terminate();
       }
      }
     }
@@ -643,7 +644,15 @@ void UpgradingInfo::CommitItem (const char *inp_buf, int button, int state) {
       if (part) {
 	float usedprice = usedPrice (base->PriceCargo (_Universe->AccessCockpit()->GetUnitFileName()));
 	if (part->price<=usedprice+_Universe->AccessCockpit()->credits) {
-	  Unit * NewPart = UnitFactory::createUnit (input_buffer,false,base->faction);
+	  Flightgroup * fg = un->getFlightgroup();
+	  int fgsnumber=0;
+	  if (fg!=NULL) {
+	    fgsnumber=fg->nr_ships;
+	    fg->nr_ships++;
+	    fg->nr_ships_left++;
+	  }
+
+	  Unit * NewPart = UnitFactory::createUnit (input_buffer,false,base->faction,"",fg,fgsnumber);
 	  NewPart->SetFaction(un->faction);
 	  if (NewPart->name!=string("LOAD_FAILED")) {
 	    if (NewPart->nummesh>0) {
@@ -653,13 +662,17 @@ void UpgradingInfo::CommitItem (const char *inp_buf, int button, int state) {
 	      _Universe->activeStarSystem()->AddUnit (NewPart);
 	      
 	      _Universe->AccessCockpit()->SetParent(NewPart,input_buffer,_Universe->AccessCockpit()->GetUnitModifications().c_str(),un->curr_physical_state.position);//absolutely NO NO NO modifications...you got this baby clean off the slate
+
 	      SwitchUnits (NULL,NewPart);
+	      un->UnDock (base);
 	      base->RequestClearance(NewPart);
+	      buyer.SetUnit (NewPart);
 	      NewPart->Dock(base);
-	      buyer.SetUnit(NewPart);
 	      WriteSaveGame (_Universe->AccessCockpit(),true);
 	      NewPart=NULL;
 	      un->Kill();
+	      DoDone();
+	      Base::CurrentBase->Terminate();
 	      return;
 	    }
 	  }

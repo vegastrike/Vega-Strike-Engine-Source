@@ -183,7 +183,12 @@ bool AggressiveAI::ProcessCurrentFgDirective(Flightgroup * fg) {
       if (obedient) {
 	eraseType (Order::FACING);
 	eraseType (Order::MOVEMENT);
-	parent->Target(NULL);
+	Unit * targ = parent->Target();
+	if (targ) {
+	  if (!isJumpablePlanet (targ)) {
+	    parent->Target(NULL);
+	  }
+	}
       }else {
 	    CommunicationMessage c(parent,leader,NULL,0);
 	    c.SetCurrentState (c.fsm->GetNoNode(),NULL,0);

@@ -127,6 +127,7 @@ public:
 #ifdef BASE_MAKER
 	void EndXML(FILE *fp);
 #endif
+	void Terminate ();
 	void GotoLink(int linknum);
 	void InitCallbacks ();
 	void CallCommonLinks (std::string name, std::string value);

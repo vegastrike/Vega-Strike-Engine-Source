@@ -390,12 +390,15 @@ void Base::Room::Comp::Click (Base *base,float x, float y, int button, int state
 		}
 	}
 }
+void Base::Terminate() {
+  Base::CurrentBase=NULL;
 
+  restore_main_loop();
+  delete this;
+}
 void Base::Room::Launch::Click (Base *base,float x, float y, int button, int state) {
 	if (state==WS_MOUSE_UP) {
-		Base::CurrentBase=0;
-		delete base;
-		restore_main_loop();
+	  base->Terminate();
 	}
 }
 
