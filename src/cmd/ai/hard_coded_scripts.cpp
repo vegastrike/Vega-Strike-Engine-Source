@@ -18,7 +18,7 @@ extern PyObject *to_python (Unit *x);
 
 BOOST_PYTHON_END_CONVERSION_NAMESPACE
 bool useAfterburner () {
-	static bool useafterburner = XMLSupport::parse_float(vs_config->getVariable("physics","use_afterburner","true"));
+	static bool useafterburner = XMLSupport::parse_float(vs_config->getVariable("AI","use_afterburner","true"));
 	return useafterburner;
 }
 void AddOrd (Order *aisc, Unit * un, Order * ord) {
