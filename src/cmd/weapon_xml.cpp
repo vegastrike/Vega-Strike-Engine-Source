@@ -7,6 +7,8 @@
 #include "audiolib.h"
 #include "unit.h"
 #include "beam.h"
+#include "unit_const_cache.h"
+#include "vs_path.h"
 /*
 weapon_info& weapon_info::operator = (const weapon_info &tmp){
   size = tmp.size;
@@ -363,7 +365,19 @@ namespace BeamXML {
 using namespace BeamXML;
 
 weapon_info* getTemplate(const string &key) {
-  return lookuptable.Get(strtoupper(key));
+ 
+  weapon_info * wi =  lookuptable.Get(strtoupper(key));
+  if (wi) {
+    if (!WeaponMeshCache::getCachedMutable (wi->weapon_name)) {
+      string meshname = sharedmeshes+string ("weapons/") + key+".xmesh"; 
+      FILE * fp = fopen (meshname.c_str(),"rb");
+      if (fp) {
+	fclose (fp);
+	WeaponMeshCache::setCachedMutable (wi->weapon_name,new Mesh (meshname.c_str(),1,0,NULL));
+      }
+    }
+  }
+  return wi;
 }
 
 void LoadWeapons(const char *filename) {

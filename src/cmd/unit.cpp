@@ -57,7 +57,7 @@
 //#define DESTRUCTDEBUG
 #include "beam.h"
 #include "python/init.h"
-
+#include "unit_const_cache.h"
 double interpolation_blend_factor;
 
 GameUnit::GameUnit( int /*dummy*/ ) {
@@ -616,7 +616,21 @@ void GameUnit::Draw(const Transformation &parent, const Matrix &parentMatrix)
     delete tmpiter;
     **/
   }
+
   for (i=0;i<GetNumMounts();i++) {
+    static bool draw_mounts = XMLSupport::parse_bool (vs_config->getVariable ("graphics","draw_weapons","false"));
+
+    if (draw_mounts&&On_Screen) {
+      Mesh * gun = WeaponMeshCache::getCachedMutable (mounts[i]->type->weapon_name);
+      if (gun) {
+	Transformation mountLocation=mounts[i]->GetMountLocation();
+	mountLocation.Compose (*ct,*ctm);
+	Matrix mat;
+	mountLocation.to_matrix(mat);
+	gun->Draw(100,mat,1,cloak,(_Universe->AccessCamera()->GetNebula()==nebula&&nebula!=NULL)?-1:0);//cloakign and nebula
+		  
+      }
+    }
     if (mounts[i]->type->type==weapon_info::BEAM) {
       if (mounts[i]->ref.gun) {
 	mounts[i]->ref.gun->Draw(*ct,*ctm,((mounts[i]->size&weapon_info::AUTOTRACKING)&&mounts[i]->time_to_lock<=0)? Unit::Target():NULL,computer.radar.trackingcone);
