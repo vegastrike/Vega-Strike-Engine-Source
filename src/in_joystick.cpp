@@ -257,7 +257,7 @@ void JoyStick::GetMouse (float &x, float &y, float &z, int &buttons) {
     def_mouse_sens=25;
     fdy=(float)(_dy = _my-g_game.y_resolution/2);
   }else {
-    static float joystickblur=XMLSupport::parse_float(vs_config->getVariable("physics","mouse_blur",".1"));
+    static float joystickblur=XMLSupport::parse_float(vs_config->getVariable("joystick","mouse_blur",".025"));
     static std::list <mouseData> md;
     std::list<mouseData>::iterator i=md.begin();
     float ttime=getNewTime();
