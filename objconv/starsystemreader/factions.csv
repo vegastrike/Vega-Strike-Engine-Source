@@ -1,4 +1,4 @@
-confed,0,1,0,Sol/Sol
+confed,0,2,0,Sol/Sol
 purist,0.05,200,0,Sol
 aera,0.09,650,0,Aeneth
 rlaan,0.06,1500,0,Aantlbzz
@@ -10,7 +10,7 @@ highborn,0.0005,20,0,Vega
 mechanist,0.002,15,0,Torkelsen
 unadorned,0.00003,35,0,Torkelsen
 LIHW,0.002,100,2,Rhubarb
-merchant,0,1,0,Sol
+merchant,0,2,0,Sol
 klkk,0.002,15,1,Crucible
 dgn,0,1,0,Beckett
 forsaken,0.00002,20,0,Diaspora
@@ -20,4 +20,7 @@ unadorned,0.00003,10,0,Solace
 rlaan,0.1,50,0,Eebzpt
 rlaan,0.1,50,0,Bzzeen
 rlaan,0.4,50,0,Ahbzeentk
-LIHW,0.002,20,2,Rust
+LIHW,0.1,20,0,Rust
+rlaan,0.1,50,0,Bztutpt
+rlaan,0.1,50,0,Bzzahbtktk
+LIHW,0.1,20,0,Thanatos
