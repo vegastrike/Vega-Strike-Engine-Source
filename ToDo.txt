@@ -71,6 +71,9 @@ Goals for 'Sometime over the rainbow'
 * Graphical stuff
 ** make engine lights proportional to accel, not to speed
 
+*AI
+** add another dimension to roles (attack AND defend/predator AND prey roles) instead of forcing both to be the same.
+
 Scripting Goals:
 * Flightgroups
 ** Classification (fleet, squadron, flotilla? etc. - something to differentiate between {5 plowshares} and {3 archimedes, 2 Tesla, 8 kahan, 20 schroedinger, 10 goddard, 5 watson} )
