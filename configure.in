@@ -249,8 +249,17 @@ else
     PYTHON_CPPFLAGS="$PYTHON_CPPFLAGS $PYTHON_CFLAGS -DHAVE_PYTHON=1 "
 fi
 AC_SUBST(PYTHON_LIBS)
+dnl --------------------------------------------------------------------------
+dnl Check for car sim
+dnl --------------------------------------------------------------------------
 
-
+AC_ARG_ENABLE(car,[  --enable-car      Use Car Simulation (this is default)],  [car=no])
+if test "x$car" = "xno" ; then
+   echo "building space sim"
+else
+   echo "making car sim"
+    TR_CPPFLAGS="$TR_CPPFLAGS -DCAR_SIM"
+fi
 dnl --------------------------------------------------------------------------
 dnl Check for network protocol
 dnl --------------------------------------------------------------------------
