@@ -1091,6 +1091,7 @@ void disableSubUnits (Unit * uhn) {
 		for (unsigned int j=0;j<uhn->mounts.size();++j) {
 			uhn->mounts[j].status=Mount::DESTROYED;
 		}
+		uhn->ClearMounts();
 		
 	}
 }
