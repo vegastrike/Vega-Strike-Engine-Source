@@ -665,7 +665,7 @@ void BaseInterface::Room::Link::Click (BaseInterface *base,float x, float y, int
 	if (state==WS_MOUSE_UP) {
 		const char * filnam=this->pythonfile.c_str();
 		if (filnam[0]) {
-			FILE *fp=fopen(filnam,"r");
+			FILE *fp=VSFileSystem::vs_open(filnam,"r");
 			if (fp) {
 				int length=strlen(filnam);
 				char *newfile=new char[length+1];
