@@ -125,21 +125,17 @@ public: \
 #ifndef _WIN32
 #define LOCALCONST_DECL(Type,Name,Value) static const Type Name = Value;
 #define LOCALCONST_DEF(Class,Type,Name,Value)
-#else
-#ifndef __PRETTY_FUNCTION
+
+#ifndef __PRETTY_FUNCTION__
 #define __PRETTY_FUNCTION__ "<Unknown>"
 #endif
 
 #ifndef __FUNCTION__
-#if (_MSC_VER < 1300)  // 1300 == VC++ 7.0
 #define __FUNCTION__ "<Unknown>"
-#endif
 #endif
 
 #ifndef __LINE__
-#if (_MSC_VER < 1300)  // 1300 == VC++ 7.0
 #define __LINE__ "<Unknown>"
-#endif
 #endif
 
 #define LOCALCONST_DECL(Type,Name,Value) static Type Name;
