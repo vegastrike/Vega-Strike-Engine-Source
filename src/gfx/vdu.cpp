@@ -434,9 +434,9 @@ void VDU::DrawDamage(Unit * parent) {
 void VDU::SetViewingStyle(VIEWSTYLE vs) {
   viewStyle = vs;
 }
-void DrawStarSystemAgain (float x,float y,float h,float w, VIEWSTYLE viewStyle) {
+void DrawStarSystemAgain (float x,float y,float w,float h, VIEWSTYLE viewStyle) {
   VIEWSTYLE which=viewStyle;
-  _Universe->AccessCamera(which)->SetSubwindow (x,y,h,w);
+  _Universe->AccessCamera(which)->SetSubwindow (x,y,w,h);
   _Universe->SelectCamera(which);
   _Universe->AccessCamera(which)->UpdateGFX (true,true);
   GFXClear (GFXTRUE);
@@ -507,8 +507,8 @@ void VDU::Draw (Unit * parent) {
     break;
   case VIEW:
     GetPosition (x,y);
-    GetSize (h,w);
-    DrawStarSystemAgain (.5*(x+1),.5*(y+1)-fabs(h/2),fabs(h/2),fabs(w/2),viewStyle);
+    GetSize (w,h);
+    DrawStarSystemAgain (.5*(x-fabs(w/2)+1),.5*((y-fabs(h/2))+1),fabs(w/2),fabs(h/2),viewStyle);
     break;
   case NAV:
     DrawNav(parent->ToLocalCoordinates (parent->GetComputerData().NavPoint-parent->Position()));

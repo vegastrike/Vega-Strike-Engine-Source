@@ -167,12 +167,13 @@ void bootstrap_draw (Animation * SplashScreen) {
 void bootstrap_main_loop () {
   static bool LoadMission=true;
   InitTime();
-  static Animation * SplashScreen = new Animation (vs_config->getVariable ("graphics","splash_screen","vega_splash.ani").c_str(),0);
+  static Animation * SplashScreen = NULL;
   bootstrap_draw (SplashScreen);
   bootstrap_draw (SplashScreen);
   if (LoadMission) {
     LoadMission=false;
     mission=new Mission(mission_name);
+    SplashScreen = new Animation (vs_config->getVariable ("graphics","splash_screen","vega_splash.ani").c_str(),0);
     bootstrap_draw (SplashScreen);
     Vector pos;
     string planetname;
