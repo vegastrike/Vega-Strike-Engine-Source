@@ -704,12 +704,13 @@ bool Unit::Explode (bool drawit, float timeit) {
 
     image->timeexplode=0;
     static std::string expani = vs_config->getVariable ("graphics","explosion_animation","explosion_orange.ani");
-    static Animation cache(expani.c_str(),false,.1,BILINEAR,false);
+
     string bleh=image->explosion_type;
     if (bleh.empty()) {
       _Universe->getRandAnimation(faction,bleh);
     }
     if (bleh.empty()) {
+      static Animation cache(expani.c_str(),false,.1,BILINEAR,false);
       bleh = getRandomCachedAniString();
       if (bleh.size()==0) {
 	bleh = expani;

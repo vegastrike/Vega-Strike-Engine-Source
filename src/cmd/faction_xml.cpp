@@ -30,6 +30,7 @@ namespace FactionXML {
 	COMM_ANIMATION,
 	MOOD_ANIMATION,
 	CONTRABAND,
+	EXPLOSION,
 	SEX
   };
 
@@ -41,7 +42,8 @@ namespace FactionXML {
 	EnumMap::Pair ("Enemy", ENEMY),
   	EnumMap::Pair ("Stats", STATS),
   	EnumMap::Pair ("CommAnimation", COMM_ANIMATION),
-  	EnumMap::Pair ("MoodAnimation", MOOD_ANIMATION)
+  	EnumMap::Pair ("MoodAnimation", MOOD_ANIMATION),
+  	EnumMap::Pair ("Explosion", EXPLOSION)
   };
   const EnumMap::Pair attribute_names[] = {
 	EnumMap::Pair ("UNKNOWN", UNKNOWN),
@@ -55,7 +57,7 @@ namespace FactionXML {
 };
 
 
-  const EnumMap element_map(element_names, 8);
+  const EnumMap element_map(element_names, 9);
   const EnumMap attribute_map(attribute_names, 8);
 
 }
