@@ -13,6 +13,8 @@ typedef int Mix_Music;
 #define sleep(sec) Sleep(sec*1000);
 #else
 #include <unistd.h>
+#include <stdio.h>
+#include <pwd.h>
 #endif
 #include <stdarg.h>
 
@@ -22,9 +24,9 @@ typedef int Mix_Music;
 #include <vector>
 #include "inet.h"
 int fadeout=0, fadein=0;
-Sint16 stream[2][4096];
-int len=4096, done=0, bits=0, which=0;
-Uint32 flips=0;
+int bits=0,done=0;
+
+
 
 /******************************************************************************/
 /* some simple exit and error routines                                        */
@@ -76,7 +78,6 @@ std::string curmus;
 Mix_Music * PlayMusic (const char * file, Mix_Music *oldmusic) {
 #ifdef HAVE_SDL
 	Mix_Music *music;
-	bool home=false;
 	if((music=Mix_LoadMUS(file))==NULL){
 		changehome (true);
 		if((music=Mix_LoadMUS(file))==NULL){
@@ -100,17 +101,11 @@ Mix_Music * PlayMusic (const char * file, Mix_Music *oldmusic) {
 		oldmusic=NULL;
 	}
 	sende=true;
-	if (Mix_GetMusicType(NULL)==MUS_MID) {
-		if(Mix_PlayMusic(music, 1)==-1) {
-			printf("Mix_PlayMusic: %s\n", Mix_GetError());
-			return NULL;
-		}
-	} else {
-		if(Mix_FadeInMusic(music, 1, fadein)==-1) {
-			printf("Mix_FadeInMusic: %s\n", Mix_GetError());
-			return NULL;
-		}
+	if(Mix_FadeInMusic(music, 1, fadein)==-1) {
+	  printf("Mix_FadeInMusic: %s\n", Mix_GetError());
+	  return NULL;
 	}
+	
 	// well, there's no music, but most games don't break without music...
 //	int volume=SDL_MIX_MAXVOLUME;
 //	Mix_VolumeMusic(volume);
@@ -130,14 +125,12 @@ void music_finished () {
 }
 int main(int argc, char **argv)
 {
-	Mix_Music *music=NULL,*tempmusic=NULL;
+	Mix_Music *music=NULL;
 	int audio_rate,audio_channels,
 		// set this to any of 512,1024,2048,4096
 		// the higher it is, the more FPS shown and CPU needed
 		audio_buffers=4096;
 	Uint16 audio_format;
-	int volume=SDL_MIX_MAXVOLUME;
-
 	// initialize SDL for audio and video
 	if(SDL_Init(SDL_INIT_AUDIO)<0)
 		cleanExit("SDL_Init\n");
@@ -159,7 +152,6 @@ int main(int argc, char **argv)
 		mysocket = INET_AcceptFrom(4364,"localhost");
 	}
 	printf("\n[CONNECTED]\n");
-	unsigned long bytes=0;
 	char ministr[2]={'\0','\0'};
 	while (!done) {
 //		if ((Mix_PlayingMusic() || Mix_PausedMusic())&&(!done)) {
