@@ -8,7 +8,7 @@
 #include "hashtable_3d.h"
 #include "gfx/bsp.h"
 #include "collide/rapcol.h"
-
+#include "collide/csgeom/transfrm.h"
 
 bool TableLocationChanged (const Vector & Mini,const Vector & minz) { 
   return (_Universe->activeStarSystem()->collidetable->c.hash_int (Mini.i)!=_Universe->activeStarSystem()->collidetable->c.hash_int (minz.i) ||
