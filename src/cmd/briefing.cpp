@@ -43,14 +43,14 @@ extern double interpolation_blend_factor;
 void Briefing::Render() {
   cam.SetPosition(cam.GetPosition());
   cam.UpdateGFX(GFXTRUE,GFXFALSE);
-  glClearColor(1,0,0,1);
-  GFXClear(GFXTRUE);
+  //  glClearColor(1,0,0,1);
+  //  GFXClear(GFXTRUE);
   for (unsigned int i=0;i<starships.size();i++) {
     starships[i]->Render(identity_matrix,interpolation_blend_factor);
   }
   Mesh::ProcessUndrawnMeshes();
   _Universe->AccessCamera()->UpdateGFX(GFXTRUE,GFXFALSE);
-  glClearColor(0,0,0,0);
+  //  glClearColor(0,0,0,0);
 }
 void Briefing::Ship::Render (const Matrix cam, double interpol) {
   Matrix final;
@@ -94,27 +94,27 @@ Briefing::~Briefing() {
 
 
 void Briefing::RemoveStarship (int which) {
-  if (which<(int)starships.size()&&which>0) {
+  if (which<(int)starships.size()&&which>=0) {
     starships[which]->Destroy();
   }
 }
 void Briefing::EnqueueOrder (int which, const Vector & dest, float time) {
-  if (which<(int)starships.size()&&which>0) {
+  if (which<(int)starships.size()&&which>=0) {
     starships[which]->EnqueueOrder (dest,time);
   }
 }
 void Briefing::OverrideOrder (int which, const Vector & dest, float time) {
-  if (which<(int)starships.size()&&which>0) {
+  if (which<(int)starships.size()&&which>=0) {
     starships[which]->OverrideOrder (dest,time);
   }
 }
 void Briefing::SetPosition (int which,const Vector &Position) {
-  if (which<(int)starships.size()&&which>0) {
+  if (which<(int)starships.size()&&which>=0) {
     starships[which]->SetPosition (Position);
   }
 }
 Vector Briefing::GetPosition (int which) {
-  if (which<(int)starships.size()&&which>0) {
+  if (which<(int)starships.size()&&which>=0) {
     return starships[which]->Position ();
   }
   return Vector(0,0,0);
