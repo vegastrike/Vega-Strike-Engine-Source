@@ -1,9 +1,11 @@
 #ifndef __INET_H__
 #define __INET_H__
 
-unsigned long INET_BytesToRead (int socket);
+bool INET_BytesToRead (int socket);
 
 bool INET_Read (int socket, char *data, int bytestoread);
+
+int INET_Recv (int socket, char *data, int bytestoread);
 
 int INET_Write (int socket,int bytestowrite,const char *data);
 

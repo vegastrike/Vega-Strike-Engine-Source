@@ -13,14 +13,30 @@
 #endif
 #include <stdio.h>
 #include <stdlib.h>
-unsigned long INET_BytesToRead (int socket) {
+
+bool INET_BytesToRead (int socket) {
+#ifdef _WIN32
 	unsigned long datato;
 	if (0==ioctlsocket(socket,FIONREAD,&datato)) {
-		return datato;
+	  
+		return (datato>0);
 	}
-
-	return 0;
-	
+#else
+  struct timeval tv;
+  tv.tv_sec=0;  tv.tv_usec=00000;
+  int selres=0;
+  fd_set rfds;
+  FD_ZERO (&rfds);
+  FD_SET (socket,&rfds);
+   if ((selres=select (socket+1,&rfds,NULL,NULL,&tv))){
+      if (selres==-1) {
+        return false;
+      }
+      return true;
+   }
+#endif
+	return false;
+       
 }
 void INET_close (int socket) {
 #ifdef _WIN32
@@ -34,7 +50,9 @@ void INET_cleanup () {
 	WSACleanup();
 #endif
 }
-
+int INET_Recv (int socket, char * data, int bytestoread) {
+  return recv(socket,data,bytestoread,0);
+}
 bool INET_Read (int socket, char *data, int bytestoread) {
 	int bytes_read=0;
 	int ret;

@@ -24,15 +24,11 @@
 #include "config_xml.h"
 #include "vs_globals.h"
 #include <assert.h>
-#include <SDL/SDL_mixer.h>
 /* Windowing System Abstraction Layer */
 /* Abstracts creation of windows, handling of events, etc. */
 
 #if defined( SDL_WINDOWING ) && defined (HAVE_SDL)
 
-#if defined( HAVE_SDL_MIXER )
-#   include "SDL_mixer.h"
-#endif
 
 /*---------------------------------------------------------------------------*/
 /*---------------------------------------------------------------------------*/
