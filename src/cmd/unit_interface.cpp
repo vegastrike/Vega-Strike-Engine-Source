@@ -515,7 +515,7 @@ void UpgradingInfo::CompleteTransactionAfterTurretSelect() {
   int addmultmode=0;
   if (mode==ADDMODE)
     addmultmode=1;
-  if (multiplicitive=true)
+  if (multiplicitive==true)
     addmultmode=2;
   if ((un=buyer.GetUnit())) {
     switch (mode) {
