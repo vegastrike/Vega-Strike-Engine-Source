@@ -55,6 +55,8 @@ void Planet::InitPlanet(FILE *fp) {
   meshdata[0]->setEnvMap(FALSE);
   nummesh = 1;
   fpos = ftell(fp);
+
+  calculate_extent();
 }
 
 Planet::Planet()  : Unit(), radius(0.0f), origin(0,0,0), satellites(NULL), numSatellites(0) {

@@ -220,9 +220,23 @@ void InputDFA::replaceCollection (UnitCollection *newcol) {
   case LOCATION_SELECT:
   case UNITS_SELECTED:
   case NONE:
-    if (selected)
+    if (selected) {
+      UnitCollection::UnitIterator *it = selected->createIterator();
+      while(it->current()) {
+	it->current()->Deselect();
+	it->advance();
+      }
+      delete it;
       delete selected;
+    }
     selected = newcol;
+    UnitCollection::UnitIterator *it;
+    for(it = selected->createIterator();
+	it->current();
+	it->advance()) {
+      it->current()->Select();
+    }
+    delete it;
     break;
   case TARGET_SELECT:
     if (targetted)
@@ -238,6 +252,14 @@ void InputDFA::appendCollection (UnitCollection *newcol) {
   case UNITS_SELECTED:
   case NONE:
     if (selected) {
+      UnitCollection::UnitIterator *it;
+      for(it = newcol->createIterator();
+	  it->current();
+	  it->advance()) {
+	it->current()->Select();
+      }
+      delete it;
+    
       UnitCollection::UnitIterator *tmpit =newcol->createIterator();
       selected->append (tmpit);
       delete tmpit;

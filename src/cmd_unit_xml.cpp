@@ -102,15 +102,19 @@ void Unit::LoadXML(const char *filename) {
   // Load meshes into subunit
   nummesh = xml->meshes.size();
   meshdata = new Mesh*[nummesh];
-  for(int a=0; a<xml->meshes.size(); a++) {
+  corner_min = Vector(FLT_MAX, FLT_MAX, FLT_MAX);
+  corner_max = Vector(-FLT_MAX, -FLT_MAX, -FLT_MAX);
+  for(int a=0; a<nummesh; a++) {
     meshdata[a] = xml->meshes[a];
   }
 
   numsubunit = xml->units.size();
   subunits = new Unit*[numsubunit];
-  for(int a=0; a<xml->units.size(); a++) {
+  for(int a=0; a<numsubunit; a++) {
     subunits[a] = xml->units[a];
   }
+  
+  calculate_extent();
   delete xml;
 }
 

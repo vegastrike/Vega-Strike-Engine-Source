@@ -31,8 +31,16 @@
 //#define VARIABLE_LENGTH_PQR
 
 
-
-
+void Unit::calculate_extent() {  
+  for(int a=0; a<nummesh; a++) {
+    corner_min = corner_min.Min(meshdata[a]->corner_min() + meshdata[a]->Position());
+    corner_max = corner_max.Max(meshdata[a]->corner_max() + meshdata[a]->Position());
+  }
+  for(int a=0; a<numsubunit; a++) {
+    corner_min = corner_min.Min(subunits[a]->corner_min);
+    corner_max = corner_max.Max(subunits[a]->corner_max);
+  }
+}
 
 void Unit::Init()
 {
@@ -59,6 +67,7 @@ void Unit::Init()
 	NetForce = Vector(0,0,0);
 
 	calculatePhysics = true;
+	selected = false;
 }
 
 Unit::Unit()
@@ -73,6 +82,7 @@ Unit::Unit(const char *filename, bool xml):Mesh()
 	/*Insert file loading stuff here*/
 	if(xml) {
 	  LoadXML(filename);
+	  calculate_extent();
 	  return;
 	}
 	LoadFile(filename);
@@ -606,9 +616,99 @@ void Unit::Draw()
 	  }
 	  GFXLoadMatrix(MODEL, currentMatrix); // not a problem with overhead if the mesh count is kept down
 	}
+
 	for(int subcount = 0; subcount < numsubunit; subcount++) {
 		subunits[subcount]->Draw(tmatrix, np, nq, nr, npos);
 	  GFXLoadMatrix(MODEL, currentMatrix); // not a problem with overhead if the mesh count is kept down
+	}
+	if(selected) {
+	  GFXBlendMode(SRCALPHA,INVSRCALPHA);
+	  float radius = 1.5;
+	  cerr << name << " selected\n";
+	  GFXDisable(TEXTURE0);
+	  GFXDisable(TEXTURE1);
+	  GFXDisable(LIGHTING);
+	  GFXBegin(QUADS);
+	  /*
+	  GFXColor4f(0.0,1.0,0.0,0.2);
+
+	  GFXVertex3f(radius,-radius,radius);
+	  GFXVertex3f(radius,radius,radius);
+	  GFXVertex3f(-radius,radius,radius);
+	  GFXVertex3f(-radius,-radius,radius);
+
+	  GFXColor4f(0.0,0.0,1.0,0.2);
+	  GFXVertex3f(-radius,-radius,-radius);
+	  GFXVertex3f(-radius,radius,-radius);
+	  GFXVertex3f(radius,radius,-radius);
+	  GFXVertex3f(radius,-radius,-radius);
+
+	  GFXColor4f(1.0,0.0,0.0,0.2);
+
+	  GFXVertex3f(radius,-radius,radius);
+	  GFXVertex3f(-radius,-radius,radius);
+	  GFXVertex3f(-radius,-radius,-radius);
+	  GFXVertex3f(radius,-radius,-radius);
+
+	  GFXColor4f(1.0,1.0,0.0,0.2);
+	  GFXVertex3f(radius,radius,-radius);
+	  GFXVertex3f(-radius,radius,-radius);
+	  GFXVertex3f(-radius,radius,radius);
+	  GFXVertex3f(radius,radius,radius);
+
+	  GFXColor4f(1.0,0.0,1.0,0.2);
+	  GFXVertex3f(radius,radius,radius);
+	  GFXVertex3f(radius,-radius,radius);
+	  GFXVertex3f(radius,-radius,-radius);
+	  GFXVertex3f(radius,radius,-radius);
+
+	  GFXColor4f(0.0,1.0,1.0,0.2);
+	  GFXVertex3f(-radius,radius,-radius);
+	  GFXVertex3f(-radius,-radius,-radius);
+	  GFXVertex3f(-radius,-radius,radius);
+	  GFXVertex3f(-radius,radius,radius);
+	  */
+
+	  GFXColor4f(0.0,1.0,0.0,0.2);
+
+	  GFXVertex3f(corner_max.i,corner_min.j,corner_max.k);
+	  GFXVertex3f(corner_max.i,corner_max.j,corner_max.k);
+	  GFXVertex3f(corner_min.i,corner_max.j,corner_max.k);
+	  GFXVertex3f(corner_min.i,corner_min.j,corner_max.k);
+
+	  GFXColor4f(0.0,0.0,1.0,0.2);
+	  GFXVertex3f(corner_min.i,corner_min.j,corner_min.k);
+	  GFXVertex3f(corner_min.i,corner_max.j,corner_min.k);
+	  GFXVertex3f(corner_max.i,corner_max.j,corner_min.k);
+	  GFXVertex3f(corner_max.i,corner_min.j,corner_min.k);
+
+	  GFXColor4f(1.0,0.0,0.0,0.2);
+
+	  GFXVertex3f(corner_max.i,corner_min.j,corner_max.k);
+	  GFXVertex3f(corner_min.i,corner_min.j,corner_max.k);
+	  GFXVertex3f(corner_min.i,corner_min.j,corner_min.k);
+	  GFXVertex3f(corner_max.i,corner_min.j,corner_min.k);
+
+	  GFXColor4f(1.0,1.0,0.0,0.2);
+	  GFXVertex3f(corner_max.i,corner_max.j,corner_min.k);
+	  GFXVertex3f(corner_min.i,corner_max.j,corner_min.k);
+	  GFXVertex3f(corner_min.i,corner_max.j,corner_max.k);
+	  GFXVertex3f(corner_max.i,corner_max.j,corner_max.k);
+
+	  GFXColor4f(1.0,0.0,1.0,0.2);
+	  GFXVertex3f(corner_max.i,corner_max.j,corner_max.k);
+	  GFXVertex3f(corner_max.i,corner_min.j,corner_max.k);
+	  GFXVertex3f(corner_max.i,corner_min.j,corner_min.k);
+	  GFXVertex3f(corner_max.i,corner_max.j,corner_min.k);
+
+	  GFXColor4f(0.0,1.0,1.0,0.2);
+	  GFXVertex3f(corner_min.i,corner_max.j,corner_min.k);
+	  GFXVertex3f(corner_min.i,corner_min.j,corner_min.k);
+	  GFXVertex3f(corner_min.i,corner_min.j,corner_max.k);
+	  GFXVertex3f(corner_min.i,corner_max.j,corner_max.k);
+
+	  GFXEnd();
+	  GFXEnable(LIGHTING);
 	}
 }
 
@@ -668,6 +768,13 @@ void Unit::ExecuteAI() {
   for(int a=0; a<numsubunit; a++) {
     subunits[a]->ExecuteAI();
   }
+}
+
+void Unit::Select() {
+  selected = true;
+}
+void Unit::Deselect() {
+  selected = false;
 }
 
 ostream &Unit::output(ostream& os) const {

@@ -577,7 +577,7 @@ void main_loop() {
   GFXEnable(TEXTURE0);
   GFXDisable(TEXTURE1);
   //bg2->Draw();
-  //bg->Draw();
+  bg->Draw();
   GFXEnable(DEPTHWRITE);
   GFXEnable(DEPTHTEST);
   GFXEnable(TEXTURE0);

@@ -198,6 +198,9 @@ public:
 
 	void Rotate(const Vector &torque);
 
+	Vector corner_min() { return Vector(minSizeX, minSizeY, minSizeZ); }
+	Vector corner_max() { return Vector(maxSizeX, maxSizeY, maxSizeZ); }
+
   // void Scale(const Vector &scale) {this->scale = scale;SetOrientation();};
   BoundingBox * getBoundingBox();
   float rSize () {return radialSize;}

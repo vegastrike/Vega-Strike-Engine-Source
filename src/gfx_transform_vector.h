@@ -100,7 +100,17 @@ class Vector {
 		m1[2] * i + m1[6] * j + m1[10] * k + m1[14]);
 }
 
+		Vector Min(const Vector &other) {
+		  return Vector((i<other.i)?i:other.i,
+				(j<other.j)?j:other.j,
+				(k<other.k)?k:other.k);
+		}
 
+		Vector Max(const Vector &other) {
+		  return Vector((i>other.i)?i:other.i,
+				(j>other.j)?j:other.j,
+				(k>other.k)?k:other.k);
+		}
 };
 
 inline ostream &operator<<(ostream &os, const Vector &obj) {

@@ -98,7 +98,11 @@ protected:
   Vector Velocity;
   
   bool calculatePhysics; // physics have an effect on this object (set to false for planetse)
-  
+
+  bool selected;
+  Vector corner_min, corner_max; // corners of object
+  void calculate_extent();
+
 public:
   //no default constructor; dymanically allocated arrays are evil, gotta do it java style to make it more sane
   Unit();
@@ -181,6 +185,9 @@ public:
 
   inline bool queryCalculatePhysics() { return calculatePhysics; }
   void ExecuteAI();
+
+  void Select();
+  void Deselect();
 
   ostream &output(ostream& os) const;
 };

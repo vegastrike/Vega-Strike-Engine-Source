@@ -13,6 +13,7 @@ StarSystem::StarSystem(Planet *primaries) :
   missiles(new UnitCollection()), tp(new TextPlane("9x12.fon")) {
   currentcamera = 0;	
   systemInputDFA = new InputDFA (this);
+  primaries->SetPosition(0,0,5);
   Iterator *iter = primaries->createIterator();
   drawList->prepend(iter);
 

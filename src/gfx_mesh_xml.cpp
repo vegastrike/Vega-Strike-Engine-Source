@@ -433,4 +433,3 @@ void Mesh::LoadXML(const char *filename, Mesh *oldmesh) {
   delete [] vertexlist;
   delete xml;
 }
-
