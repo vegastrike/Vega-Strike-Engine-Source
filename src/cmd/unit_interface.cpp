@@ -43,7 +43,7 @@ static string beautify (const std::string &input) {
 }
 
 static float usedPrice (float percentage) {
-  return .66*percentage;
+  return .5*percentage;
 }
 bool final_cat (const std::string &cat) {
   if (cat.empty())

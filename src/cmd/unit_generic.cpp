@@ -2546,7 +2546,7 @@ double computeDowngradePercent (double old, double upgrade, double isnew) {
 static int UpgradeFloat (double &result,double tobeupgraded, double upgrador, double templatelimit, double (*myadd) (double,double), bool (*betterthan) (double a, double b), double nothing,  double completeminimum, double (*computepercentage) (double oldvar, double upgrador, double newvar), double & percentage, bool forcedowngrade, bool usetemplate, double at_least_this,bool (*atLeastthiscompare)( double a, double b)=AGreaterB) {
   if (upgrador!=nothing) {//if upgrador is better than nothing
     float newsum = (*myadd)(tobeupgraded,upgrador);
-    if (newsum < tobeupgraded&&at_least_this>=upgrador&&at_least_this>newsum){//if we're downgrading
+    if (newsum < tobeupgraded&&at_least_this>=upgrador&&at_least_this>newsum&&at_least_this>=tobeupgraded){//if we're downgrading
         return newsum==upgrador?CAUSESDOWNGRADE:NOTTHERE;
     }
     if (newsum!=tobeupgraded&&(((*betterthan)(newsum, tobeupgraded)||forcedowngrade))) {
@@ -3249,7 +3249,9 @@ int Unit::RemoveCargo (unsigned int i, int quantity,bool eraseZero) {
   assert (i<image->cargo.size());
   if (quantity>image->cargo[i].quantity)
     quantity=image->cargo[i].quantity;
-  mass-=quantity*image->cargo[i].mass;
+  static bool usemass = XMLSupport::parse_bool(vs_config->getVariable ("physics","use_cargo_mass","false"));
+  if (usemass)
+	  mass-=quantity*image->cargo[i].mass;
   image->cargo[i].quantity-=quantity;
   if (image->cargo[i].quantity<=0&&eraseZero)
     image->cargo.erase (image->cargo.begin()+i);
@@ -3258,7 +3260,9 @@ int Unit::RemoveCargo (unsigned int i, int quantity,bool eraseZero) {
 
 
 void Unit::AddCargo (const Cargo &carg, bool sort) {
-  mass+=carg.quantity*carg.mass;
+  static bool usemass = XMLSupport::parse_bool(vs_config->getVariable ("physics","use_cargo_mass","false"));
+  if (usemass)
+	  mass+=carg.quantity*carg.mass;
   image->cargo.push_back (carg);   
   if (sort)
     SortCargo();
