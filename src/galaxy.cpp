@@ -299,6 +299,8 @@ DWORD WINAPI DrawStartupDialog(
 
 
 StarSystem * Universe::GenerateStarSystem (const char * file, const char * jumpback, Vector center) {
+  static bool firsttime=true;
+  if (!firsttime) {
 #ifdef _WIN32
   hMutex=CreateMutex(NULL,FALSE,NULL); // nameless mutex object
   WaitForSingleObject(hMutex,INFINITE); // wait for ownership + print
@@ -312,6 +314,7 @@ StarSystem * Universe::GenerateStarSystem (const char * file, const char * jumpb
          );
 //	DialogBox (hInst,(LPCTSTR)IDD_START,hWnd,(DLGPROC)DLOG_start);
 #endif
+  }
   int count=0;
   while (GetCorrectStarSysPath (file).length()==0) {
     MakeStarSystem(file, galaxy,RemoveDotSystem (jumpback),count);
@@ -326,10 +329,13 @@ StarSystem * Universe::GenerateStarSystem (const char * file, const char * jumpb
     ss->SwapOut();
     activeStarSystem()->SwapIn();
   }
+  if (firsttime) {
+  	firsttime=false;
+  }else {
 #ifdef _WIN32
-  ReleaseMutex(hMutex);
+    ReleaseMutex(hMutex);
 #endif
-
+  }
   return ss;
 
 }

@@ -508,6 +508,8 @@ Cockpit::Cockpit (const char * file, Unit * parent): parent (parent),textcol (1,
 void Cockpit::SelectProperCamera () {
     _Universe->activeStarSystem()->SelectCamera(view);
 }
+int cachunki=0;
+int cachunkj=0;
 extern void reset_time_compression(int i, KBSTATE a);
 void Cockpit::Draw() { 
   GFXDisable (TEXTURE1);
@@ -584,6 +586,19 @@ void Cockpit::Draw() {
 	dietime +=GetElapsedTime();
 	SetView (CP_PAN);
 	zoomfactor=dietime*10;
+/*	un_iter ui= _Universe->activeStarSystem()->getUnitList();
+	Unit * un;
+	while ((un=ui.current()) {
+		if (un->faction==this->faction) {
+			this->SetParent(un);
+			//un->SetAI(new FireKeyboard ())
+			un->EnqueueAI(new FireKeyboard (0,""));
+			un->EnqueueAI(new FlyByJoystick (0,"player1.kbconf"));
+
+			break;
+		}
+		++ui;
+	}*/
   }
   GFXHudMode (false);
 
