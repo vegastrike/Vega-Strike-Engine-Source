@@ -3,6 +3,7 @@
 #include <vector>
 #include <algorithm>
 #include <stdio.h>
+using namespace std;
 
 string FileToString (const char * argv) {
   FILE * fp = fopen (argv,"rb");

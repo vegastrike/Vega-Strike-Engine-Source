@@ -2,6 +2,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <float.h>
+#ifdef __APPLE__
+#define sqrtf sqrt
+#define cosf cos
+#define sinf sin
+#endif
 #define M_PI 3.14159265358979323846264338328
 float safety_zone=0;
 using std::vector;

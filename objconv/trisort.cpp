@@ -11,7 +11,7 @@ public:
 };
 #ifdef __APPLE__
 int iswhitespace(int c) {
-    return isblank(c)||c=='\n'||c=='\r';
+    return isspace (c)||isblank(c)||c=='\n'||c=='\r';
 }
 #endif
 class Index {
@@ -19,12 +19,13 @@ public:
     Vector x;
     int p,n,t,c;
     Index (Vector xyz,int p, int n, int t, int c):x(xyz),p(p),n(n),t(t),c(c){}
-    bool operator < (const class Index &) const;
+
     void write (FILE * fp) const;
 };
 class Face {
 public:
 std::vector <Index> p;
+    bool operator < (const class Face &) const{return true;}
 };
 class Mesh {
     void processline (char * line);
