@@ -83,14 +83,14 @@ joyBindings[button] = DefaultJoyHandler;
 // we don't need code here cause we don't queue events
 /*
 // not needed, this is done in FlyByJoystick
-  int num_joysticks=SDL_NumJoysticks() ;
-  for(int i=0; i < num_joysticks; i++ )  {
-    if(joystick[i]->isAvailable()){
-      float x,y;
-      int buttons;
-      joystick[i]->GetJoyStick(x,y,buttons);
-    }
-  }
+int num_joysticks=SDL_NumJoysticks() ;
+for(int i=0; i < num_joysticks; i++ )  {
+if(joystick[i]->isAvailable()){
+float x,y;
+int buttons;
+joystick[i]->GetJoyStick(x,y,buttons);
+}
+}
 
 }
 
@@ -100,7 +100,13 @@ JoyStick::JoyStick(int which) {
   deadzone=0.01;
 
   joy_available = 0;
-
+    joy_xmin = (float) -1;
+    joy_xmax = (float) 1;
+    joy_ymin = (float) -1;
+    joy_ymax = (float) 1;
+    joy_zmin = (float) -1;
+    joy_zmax = (float) 1;
+    joy_x=joy_y=joy_z=0;
 #if !defined(HAVE_SDL)
   return;
 #else
@@ -124,12 +130,6 @@ JoyStick::JoyStick(int which) {
     nr_of_buttons=SDL_JoystickNumButtons(joy);
 
     printf("axes: %d buttons %d\n",nr_of_axes,nr_of_buttons);
-    joy_xmin = (float) -1;
-    joy_xmax = (float) 1;
-    joy_ymin = (float) -1;
-    joy_ymax = (float) 1;
-    joy_zmin = (float) -1;
-    joy_zmax = (float) 1;
 
 #endif // we have SDL
 }
@@ -163,7 +163,6 @@ if (numaxes>2) {
     nr_of_buttons=SDL_JoystickNumButtons(joy);
    for(int i=0;i<nr_of_buttons;i++){
      int  butt=SDL_JoystickGetButton(joy,i);
-     fprintf (stderr,"button %d  %d\n",i,butt);
      if(butt==1){
        buttons|=(1<<i);
       }

@@ -26,7 +26,8 @@ void ProcessJoystick () {
   SDL_Event event;
   float x,y,z;
   int buttons;
-  //  SDL_PumpEvents();
+
+
 #ifdef SDLEVENTSNOW
   while(SDL_PollEvent(&event)){
     switch(event.type){
@@ -67,8 +68,8 @@ void ProcessJoystick () {
 #endif
   for (int i=0;i<MAX_JOYSTICKS;i++) {
     buttons=0;
-    if (joystick[event.jbutton.which]->isAvailable()) {
-      joystick[event.jbutton.which]->GetJoyStick (x,y,z,buttons);
+    if (joystick[i]->isAvailable()) {
+      joystick[i]->GetJoyStick (x,y,z,buttons);
     }
     for (int j=0;j<NUMJBUTTONS;j++) {
       if (buttons&(1<<j)) {

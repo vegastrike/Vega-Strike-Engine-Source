@@ -29,21 +29,12 @@ void FlyByJoystick::Execute() {
   desired_ang_velocity=Vector(0,0,0); 
   if (joystick[which_joystick]->isAvailable()) {
     JoyStick *joy=joystick[which_joystick];
-    fprintf(stderr,"flybyjoy x=%f y=%f z=%f\n",joy->joy_x,joy->joy_y,joy->joy_z);
-    float x,y,z;
-    int buttons;
-    joy->GetJoyStick (x,y,z,buttons);
+
 
     //    joy->GetJoyStick(x,y,z,buttons);//don't want state updates in ai function
-    Up(-y);   // pretty easy
-    Right(-x);
-    RollRight (-z);
-
-    /*
     Up(-joy->joy_y);   // pretty easy
     Right(-joy->joy_x);
     RollRight (-joy->joy_z);
-    8*/
 
   }
   FlyByKeyboard::Execute(false);
