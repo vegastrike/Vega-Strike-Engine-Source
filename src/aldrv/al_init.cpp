@@ -111,10 +111,14 @@ bool AUDInit () {
 	return false;
 }
 
+extern std::vector<ALuint> buffers;
 void AUDDestroy() {
 #ifdef HAVE_AL
   //Go through and delete all loaded wavs
-  AUDFreeAllBuffers();
+  for (unsigned int i=0;i<buffers.size();i++) {
+    alDeleteBuffers (1,&buffers[i]);
+  }
+  buffers.clear();
   if (context_id)
     alcDestroyContext(context_id);
   if (dev)

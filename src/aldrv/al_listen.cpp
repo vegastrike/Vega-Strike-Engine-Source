@@ -4,8 +4,8 @@
 void AUDListener (const Vector & pos, const Vector & vel) {
 #ifdef HAVE_AL
   alListener3f (AL_POSITION, pos.i,pos.j,pos.k);
-  alListener3f (AL_VELOCITY, vel.i,pos.j,pos.k);
-  // printf ("(%f,%f,%f) <%f %f %f>\n",pos.i,pos.j,pos.k,vel.i,vel.j,vel.k);
+  //  alListener3f (AL_VELOCITY, vel.i,pos.j,pos.k);
+  //  printf ("(%f,%f,%f) <%f %f %f>\n",pos.i,pos.j,pos.k,vel.i,vel.j,vel.k);
 #endif
 }
 

@@ -11,44 +11,12 @@
 #include <vector>
 struct OurSound{
   ALuint source;
-  int buffer;//reference into buffers
-  ALuint registeredbuffer;//registered buffer ... or -1
+  ALint buffer;
   OurSound(ALuint source, ALuint buffername) {buffer=buffername;};
 };
 std::vector <unsigned int> dirtysounds;
 std::vector <OurSound> sounds;
-
-struct ALBuffer {
-  void *data;
-  ALsizei size;	
-  ALsizei bits;	
-  ALsizei freq;	
-  ALsizei format;
-  enum {MP3,WAV} type;
-  vector <ALuint> unusedbuffers;
-  ALuint AUDGenerateBuffer ();
-};
-
-std::vector <ALBuffer> buffers;
-using std::vector;
-void AUDFreeAllBuffers () {
-  for (unsigned int i=0;i<sounds.size();i++) {
-    AUDDeleteSound (i);
-  }
-  sounds.clear();
-  dirtysounds.clear();
-  vector <ALBuffer>::iterator b;
-  for (b=buffers.begin();b!=buffers.end();b++) {
-    if (b->data) {
-      free (b->data);
-    }
-    if (!b->unusedbuffers.empty()) {
-      alDeleteBuffers (b->unusedbuffers.size(),b->unusedbuffers.begin());
-    }
-    b->unusedbuffers.clear();
-  }
-  buffers.clear();
-}
+std::vector <ALuint> buffers;
 static int LoadSound (ALuint buffer, bool looping) {
   unsigned int i;
   if (!dirtysounds.empty()) {
@@ -61,19 +29,17 @@ static int LoadSound (ALuint buffer, bool looping) {
     sounds.push_back (OurSound (0,buffer));
   }
   alGenSources( 1, &sounds[i].source);
-  //  alSourcei(sounds[i].source, AL_BUFFER, buffer );//buffers cannot be shared among sources
+  alSourcei(sounds[i].source, AL_BUFFER, buffer );
   alSourcei(sounds[i].source, AL_LOOPING, looping ?AL_TRUE:AL_FALSE);
-  sounds[i].buffer = buffer;
-  sounds[i].registeredbuffer = (ALuint) 0;
   return i;
 }
-///Given an index to the buffers vector, it generates and loads a buffer from the saved data
+
 int AUDCreateSoundWAV (const std::string &s, const bool LOOP=false){
 #ifdef HAVE_AL
   ALuint * wavbuf = soundHash.Get(s);
   if (wavbuf==NULL) {
     wavbuf = (ALuint *) malloc (sizeof (ALuint));
-    //alGenBuffers (1,wavbuf);
+    alGenBuffers (1,wavbuf);
     ALsizei size;	
     ALsizei bits;	
     ALsizei freq;	
@@ -83,17 +49,10 @@ int AUDCreateSoundWAV (const std::string &s, const bool LOOP=false){
     if(err == AL_FALSE) {
       return -1;
     }
-    //    alBufferData( *wavbuf, format, wave, size, freq );
-    buffers.push_back (ALBuffer());
-    buffers.back().size=size;
-    buffers.back().bits=bits;
-    buffers.back().freq=freq;
-    buffers.back().format=format;
-    buffers.back().data = wave;
-    buffers.back().type = ALBuffer::WAV;
-
-    *wavbuf = buffers.size()-1;
+    alBufferData( *wavbuf, format, wave, size, freq );
+    free(wave);
     soundHash.Put (s,wavbuf);
+    buffers.push_back (*wavbuf);
   }
   return LoadSound (*wavbuf,LOOP);  
 #endif
@@ -113,12 +72,14 @@ int AUDCreateSoundMP3 (const std::string &s, const bool LOOP=false){
     fread (data,1,length,fp);
     fclose (fp);
     mp3buf = (ALuint *) malloc (sizeof (ALuint));
-    buffers.push_back (ALBuffer());
-    buffers.back().size=length;
-    buffers.back().data=data;
-    buffers.back().type=ALBuffer::MP3;
-    *mp3buf = buffers.size()-1;
+    alGenBuffers (1,mp3buf);
+    if ((*alutLoadMP3p)(*mp3buf,data,length)!=AL_TRUE) {
+      free (data);
+      return -1;
+    }
+    free (data);
     soundHash.Put (s,mp3buf);
+    buffers.push_back (*mp3buf);
   }
   return LoadSound (*mp3buf,LOOP);
 #endif
@@ -135,8 +96,6 @@ int AUDCreateSound (int sound,const bool LOOP=false){
 void AUDDeleteSound (int sound){
 #ifdef HAVE_AL
   if (sound>=0&&sound<(int)sounds.size()) {
-    if (AUDIsPlaying (sound))
-      AUDStopPlaying (sound);//redelivers buffer to "unused" pile
     dirtysounds.push_back (sound);
     alDeleteSources(1,&sounds[sound].source);
     sounds[sound].buffer=-1;
@@ -150,7 +109,7 @@ void AUDAdjustSound (const int sound, const Vector &pos, const Vector &vel){
     float p []= {pos.i,pos.j,pos.k};
     float v []= {vel.i,vel.j,vel.k};
     alSourcefv(sounds[sound].source,AL_POSITION,p);
-    alSourcefv(sounds[sound].source,AL_VELOCITY,v);
+    //    alSourcefv(sounds[sound].source,AL_VELOCITY,v);
   }
 #endif
 }
@@ -168,44 +127,21 @@ bool AUDIsPlaying (const int sound){
 void AUDStopPlaying (const int sound){
 #ifdef HAVE_AL
   if (sound>=0&&sound<(int)sounds.size()) {
-    OurSound * snd = &sounds[sound];
-    alSourceStop(snd->source);
-    if (snd->registeredbuffer!=0) {
-      alSourcei(snd->source, AL_BUFFER, 0 );//buffers cannot be shared among sources
-      buffers[snd->buffer].unusedbuffers.push_back (snd->registeredbuffer);
-      snd->registeredbuffer=0;
-    }
+    alSourceStop(sounds[sound].source);
   }
 #endif
 }
 void AUDStartPlaying (const int sound){
 #ifdef HAVE_AL
   if (sound>=0&&sound<(int)sounds.size()) {
-    OurSound * snd = &sounds[sound];
-    if (snd->registeredbuffer==0) {
-      snd->registeredbuffer = buffers[snd->buffer].AUDGenerateBuffer ();
-      alSourcei (snd->source,AL_BUFFER,snd->registeredbuffer);
-    }
-    alSourcePlay( snd->source );
+    alSourcePlay( sounds[sound].source );
   }
 #endif
 }
-
-ALuint ALBuffer::AUDGenerateBuffer () {
-  ALuint buf;
-  if (!unusedbuffers.empty()) {
-    buf = unusedbuffers.back();
-    unusedbuffers.pop_back();
-  } else {
-    alGenBuffers (1,&buf);
-    switch (type) {
-    case MP3:
-      if ((*alutLoadMP3p)(buf,data,size)!=AL_TRUE) {alDeleteBuffers (1,&buf);return 0;}
-      break;
-    case WAV:
-      alBufferData( buf, format, data, size, freq );
-      break;
-    }
+void AUDPausePlaying (const int sound){
+#ifdef HAVE_AL
+  if (sound>=0&&sound<(int)sounds.size()) {
+    //    alSourcePlay( sounds[sound].source() );
   }
-  return buf;
+#endif
 }
