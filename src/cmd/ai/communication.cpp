@@ -8,8 +8,8 @@ FSM::FSM (const char * filename) {
   nodes.push_back (Node("You are cool!",.06));
   nodes.push_back (Node("You are nice!",.05));
   nodes.push_back (Node("Ya you're naled! NALED PAL!",-.02));
-  nodes.push_back (Node("i 0wnz j00, b17c#",-.08));
-  nodes.push_back (Node("Fuck you!",-.1));
+  nodes.push_back (Node("i 0wnz j00",-.08));
+  nodes.push_back (Node("I hate you!",-.1));
 
 
   nodes.push_back (Node("Prepare To Be Searched. Maintain Speed and Course.",0));
