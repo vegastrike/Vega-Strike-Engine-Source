@@ -590,9 +590,9 @@ void beginElement(const string &name, const AttributeList &attributes, XML * xml
                 if (xml->curpolyindex==2) {
                   GFXVertex temp;
                   SetNormal(temp,
-                            xml->vertices[xml->triangletemp.indexref[0]],
+                            xml->vertices[xml->triangletemp.indexref[2]],
                             xml->vertices[xml->triangletemp.indexref[1]],
-                            xml->vertices[xml->triangletemp.indexref[2]]);
+                            xml->vertices[xml->triangletemp.indexref[0]]);
                   AddNormal(xml->vertices[xml->triangletemp.indexref[0]],
                             temp);
                   AddNormal(xml->vertices[xml->triangletemp.indexref[1]],
@@ -608,9 +608,9 @@ void beginElement(const string &name, const AttributeList &attributes, XML * xml
                 if (xml->curpolyindex==3) {
                   GFXVertex temp;
                   SetNormal(temp,
-                            xml->vertices[xml->quadtemp.indexref[0]],
+                            xml->vertices[xml->quadtemp.indexref[2]],
                             xml->vertices[xml->quadtemp.indexref[1]],
-                            xml->vertices[xml->quadtemp.indexref[2]]);
+                            xml->vertices[xml->quadtemp.indexref[0]]);
                   AddNormal(xml->vertices[xml->quadtemp.indexref[0]],
                             temp);
                   AddNormal(xml->vertices[xml->quadtemp.indexref[1]],
@@ -638,8 +638,8 @@ void beginElement(const string &name, const AttributeList &attributes, XML * xml
                               xml->curpolytype==TRISTRIP)
                     || xml->curpolytype==QUADSTRIP;
                   SetNormal(temp,
-                            xml->vertices[xml->striptemp.points[xml->striptemp.points.size()-(rev?2:3)].indexref],
                             xml->vertices[xml->striptemp.points[xml->striptemp.points.size()-(rev?3:2)].indexref],
+                            xml->vertices[xml->striptemp.points[xml->striptemp.points.size()-(rev?2:3)].indexref],
                             xml->vertices[xml->striptemp.points.back().indexref]);
                   AddNormal(xml->vertices[xml->striptemp.points.back().indexref],
                             temp);
