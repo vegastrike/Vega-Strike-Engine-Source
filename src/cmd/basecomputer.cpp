@@ -209,6 +209,28 @@ static double usedValue(double originalValue) {
   return .5*originalValue;
 }
 
+// Lowerifies a string.
+static std::string &tolower(std::string &loweritem) {
+	for (int i=0;i<loweritem.size();i++) {
+		loweritem[i]=tolower(loweritem[i]);
+	}
+	return loweritem;
+}
+
+// Takes in a category of an upgrade or cargo and returns true if it is any type of mountable weapon.
+static bool isWeapon (std::string name) {
+	tolower(name);
+	if (name.find("weapon")!=std::string::npos) {
+		return true;
+	}
+	if (name.find("subunit")!=std::string::npos) {
+		return true;
+	}
+	if (name.find("ammunition")!=std::string::npos) {
+		return true;
+	}
+	return false;
+}
 
 // CONSTRUCTOR.
 BaseComputer::BaseComputer(Unit* player, Unit* base, const std::vector<DisplayMode>& modes)
@@ -1326,13 +1348,15 @@ void BaseComputer::loadCargoControls(void) {
     resetTransactionLists();
 
     // Set up the base dealer's transaction list.
-    loadMasterList(m_base.GetUnit(), "missions", false, true, m_transList1); // Anything but a mission.
+	vector<string> donttakethis;
+	donttakethis.push_back("missions");
+    loadMasterList(m_base.GetUnit(), vector<string>(),donttakethis, true, m_transList1); // Anything but a mission.
     SimplePicker* basePicker = dynamic_cast<SimplePicker*>( window()->findControlById("BaseCargo") );
     assert(basePicker != NULL);
     loadListPicker(m_transList1, *basePicker, BUY_CARGO);
 
     // Set up the player's transaction list.
-    loadMasterList(m_player.GetUnit(), "missions", false, true, m_transList2); // Anything but a mission.
+    loadMasterList(m_player.GetUnit(),vector<string>(),donttakethis, true, m_transList2); // Anything but a mission.
     SimplePicker* inventoryPicker = dynamic_cast<SimplePicker*>( window()->findControlById("PlayerCargo") );
     assert(inventoryPicker != NULL);
     loadListPicker(m_transList2, *inventoryPicker, SELL_CARGO);
@@ -1343,22 +1367,35 @@ void BaseComputer::loadCargoControls(void) {
 
 
 // Get a filtered list of items from a unit.
-void BaseComputer::loadMasterList(Unit *un, const string& filterthis, bool inv, bool removezero, TransactionList& tlist){
-    vector<CargoColor>& items = tlist.masterList;
-    items.clear();
+void BaseComputer::loadMasterList(Unit *un, const vector<string>& filtervec, const vector<string> &invfiltervec, bool removezero, TransactionList& tlist){
+    vector<CargoColor>* items = &tlist.masterList;
+    items->clear();
     for (unsigned int i=0;i<un->numCargo();i++) {
-        unsigned int len = un->GetCargo(i).category.length();
-        len = len<filterthis.length()?len:filterthis.length();
-        if ((0==memcmp(un->GetCargo(i).category.c_str(),filterthis.c_str(),len))==inv) {//only compares up to category...so we could have starship_blue
-	    if ((!removezero)||un->GetCargo(i).quantity>0) {
-	        if (!un->GetCargo(i).mission) {
-	            CargoColor col;
-	            col.cargo=un->GetCargo(i);
-	            items.push_back (col);
-	        }
-	    }
-        }
-    }
+  	    bool filter = filtervec.empty();
+	    bool invfilter = true;
+		int vecindex;
+        for (vecindex=0;vecindex<filtervec.size();vecindex++) {
+			if (un->GetCargo(i).category.find(filtervec[vecindex])!=string::npos) {
+				filter = true;
+				break;
+			}
+		}
+        for (vecindex=0;vecindex<invfiltervec.size();vecindex++) {
+			if (un->GetCargo(i).category.find(invfiltervec[vecindex])!=string::npos) {
+				invfilter = false;
+				break;
+			}
+		}
+		if (filter&&invfilter) {
+            if ((!removezero)||un->GetCargo(i).quantity>0) {
+                if (!un->GetCargo(i).mission) {
+                    CargoColor col;
+                    col.cargo=un->GetCargo(i);
+                    items->push_back (col);
+                }
+			}
+		}
+	}
 }
 
 // Return a pointer to the selected item in the picker with the selection.
@@ -1689,7 +1726,9 @@ void BaseComputer::loadBuyUpgradeControls(void) {
 
     // Get all the upgrades.
     assert( equalColors(CargoColor().color, DEFAULT_UPGRADE_COLOR) );
-    loadMasterList(baseUnit, "upgrades", true, true, tlist);
+	std::vector<std::string> filtervec;
+	filtervec.push_back("upgrades");
+    loadMasterList(baseUnit, filtervec, std::vector<std::string>(), true, tlist);
     playerUnit->FilterUpgradeList(tlist.masterList);
 
     // Mark all the upgrades that we can't do.
@@ -1733,7 +1772,13 @@ void BaseComputer::loadSellUpgradeControls(void) {
 
     // Get a list of upgrades on our ship we could sell.
     Unit* partListUnit = &GetUnitMasterPartList();
-    loadMasterList(partListUnit, "upgrades", true, false, tlist);
+	std::vector<std::string> filtervec;
+
+	///// FIXME: the following may change in the future if we ever redo the master part list.
+	filtervec.push_back("upgrades/Weapon");
+	filtervec.push_back("SubUnits");
+	filtervec.push_back("upgrades/Ammunition");
+    loadMasterList(partListUnit, filtervec, std::vector<std::string>(), false, tlist);
     ClearDowngradeMap();
     playerUnit->FilterDowngradeList(tlist.masterList);
     static const bool clearDowngrades = XMLSupport::parse_bool(vs_config->getVariable("physics","only_show_best_downgrade","true"));
@@ -2310,7 +2355,9 @@ void BaseComputer::loadShipDealerControls(void) {
     resetTransactionLists();
 
     // Set up the base dealer's transaction list.
-    loadMasterList(m_base.GetUnit(), "starships", true, true, m_transList1);
+	std::vector<std::string> filtervec;
+	filtervec.push_back("starships");
+    loadMasterList(m_base.GetUnit(), filtervec, std::vector<std::string>(), true, m_transList1);
     // Add in the starships owned by this player.
     Cockpit* cockpit = _Universe->AccessCockpit();
     for (int i=1; i<cockpit->unitfilename.size(); i+=2) {

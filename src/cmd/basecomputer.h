@@ -182,7 +182,7 @@ protected:
     void constructControls(void);
 
     // Get a filtered list of items from a unit.
-    void loadMasterList(Unit *un, const string& filterthis, bool inv, bool removezero, TransactionList& list);
+    void loadMasterList(Unit *un, const vector<string>& filterthis,const vector<string>& invfilterthis, bool removezero, TransactionList& list);
 
     // Load a master list with missions.
     void loadMissionsMasterList(TransactionList& list);
