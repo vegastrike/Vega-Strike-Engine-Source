@@ -140,6 +140,26 @@ varInst *Mission::call_unit(missionNode *node,int mode){
 	return viret;
       }
     }
+    else if(cmd=="getFgId"){
+      if(mode==SCRIPT_RUN){
+	
+	Flightgroup *fg=my_unit->getFlightgroup();
+	int fgnum=my_unit->getFgSubnumber();
+
+	char buffer[100];
+	sprintf(buffer,"%s-%d",fg->name.c_str(),fgnum);
+
+	varInst *str_vi=call_string_new(node,mode,buffer);
+
+	return str_vi;
+      }
+      else{
+	varInst *vi=new varInst;
+	vi->type=VAR_OBJECT;
+	vi->objectname="string";
+	return vi;
+      }
+    }
     else{
       fatalError(node,mode,"no such method "+cmd);
       assert(0);

@@ -489,17 +489,19 @@ varInst *Mission::doConst(missionNode *node,int mode){
 	assert(0);
       }
     }
-#if 0
-    else if(typestr=="string"){
-      node->script.vartype=VAR_STRING;
-    }
-    else if(typestr=="vector"){
-      node->script.vartype=VAR_VECTOR;
-    }
-#endif
     else if(typestr=="object"){
-      fatalError(node,mode,"you cant have a const object");
-      assert(0);
+      string objecttype=node->attr_value("object");
+      if(objecttype=="string"){
+	varInst *svi=call_string_new(node,mode,valuestr);
+	vi->type=VAR_OBJECT;
+	assignVariable(vi,svi);
+	vi->type=VAR_OBJECT;
+	node->script.vartype=VAR_OBJECT;
+      }
+      else{
+	fatalError(node,mode,"you cant have a const object");
+	assert(0);
+      }
     }
     else{
       fatalError(node,mode,"unknown variable type");

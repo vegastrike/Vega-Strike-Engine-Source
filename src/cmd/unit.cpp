@@ -210,10 +210,13 @@ Unit::Unit (Mesh ** meshes, int num, bool SubU, int faction) {
   meshdata[nummesh]=NULL;//turn off shield
   calculate_extent();
 }
-Unit::Unit(const char *filename, bool xml, bool SubU, int faction,Flightgroup *flightgroup) {
+Unit::Unit(const char *filename, bool xml, bool SubU, int faction,Flightgroup *flightgrp,int fg_subnumber) {
 	Init();
 	SubUnit = SubU;
 	this->faction = faction;
+	flightgroup=flightgrp;
+	flightgroup_subnumber=fg_subnumber;
+
 	vssetdir (GetSharedUnitPath().c_str());
 	vschdir (filename);
 	FILE *fp = fopen (filename,"r");
@@ -267,7 +270,7 @@ Unit::Unit(const char *filename, bool xml, bool SubU, int faction,Flightgroup *f
 		switch(type)
 		{
 		default:
-		  subunits[unitcount] = new Unit (unitfilename,false,true,faction,flightgroup);
+		  subunits[unitcount] = new Unit (unitfilename,false,true,faction,flightgroup,flightgroup_subnumber);
 		}
 		subunits[unitcount]->SetPosition(Vector(x,y,z));
 	}

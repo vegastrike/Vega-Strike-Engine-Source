@@ -61,6 +61,7 @@ string module_string;
 
 %left '-' '+'
 %left '*' '/'
+%right '!'
 
 %%
 
@@ -225,7 +226,11 @@ if_statement:	L_IF '(' expr ')' block_statement L_ELSE block_statement	{
 block_statement:	'{' script_body '}'	{
 	$$="<block>\n"+$2+"\n</block>\n";
 };
-constant:	number { $$=$1; } | boolconst	{ $$=$1; };
+constant:	number { $$=$1; } | boolconst	{ $$=$1; }
+		| stringconst {$$=$1;};
+stringconst:	string_constant	{
+	$$="<const type=\"object\" object=\"string\" value="+$1+" />\n";
+};
 string_constant:	L_STRINGCONST {$$=$1;};
 
 init_val:	boolvalue {$$=$1;}
@@ -325,45 +330,3 @@ int yywrap(){
 }
 
 
-#if 0
-
-expr:   nonnull_exprlist
-                { $$ = build_compound_expr ($1); }
-        ;
-
-exprlist:
-          /* empty */
-                { $$ = NULL_TREE; }
-        | nonnull_exprlist
-        ;
- 
-nonnull_exprlist:
-        expr_no_commas
-                { $$ = build_tree_list (NULL_TREE, $1); }
-        | nonnull_exprlist ',' expr_no_commas
-                { chainon ($1, build_tree_list (NULL_TREE, $3)); }
-        ;
-
-expr_no_commas:
-          cast_expr
-        | expr_no_commas '+' expr_no_commas
-                { $$ = parser_build_binary_op ($2, $1, $3); }
-        | expr_no_commas '-' expr_no_commas
-                { $$ = parser_build_binary_op ($2, $1, $3); }
-        | expr_no_commas '*' expr_no_commas
-                { $$ = parser_build_binary_op ($2, $1, $3); }
-        | expr_no_commas '/' expr_no_commas
-                { $$ = parser_build_binary_op ($2, $1, $3); }
-        | expr_no_commas '%' expr_no_commas
-                { $$ = parser_build_binary_op ($2, $1, $3); }
-        | expr_no_commas LSHIFT expr_no_commas
-                { $$ = parser_build_binary_op ($2, $1, $3); }
-        | expr_no_commas RSHIFT expr_no_commas
-                { $$ = parser_build_binary_op ($2, $1, $3); }
-        | expr_no_commas ARITHCOMPARE expr_no_commas
-                { $$ = parser_build_binary_op ($2, $1, $3); }
-        | expr_no_commas EQCOMPARE expr_no_commas
-                { $$ = parser_build_binary_op ($2, $1, $3); }
-
-
-#endif

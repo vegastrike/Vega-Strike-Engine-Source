@@ -80,6 +80,17 @@ varInst *Mission::checkObjectExpr(missionNode *node,int mode){
 	assert(0);
       }
     }
+    else if(node->tag==DTAG_CONST){
+      varInst *vi=doConst(node,mode);
+      if(vi->type==VAR_OBJECT && vi->objectname=="string"){
+	res=vi;
+      }
+      else{
+	fatalError(node,mode,"expected a string const, got a different one: "+vi->objectname);
+	assert(0);
+      }
+    }
+ 
     else{
       fatalError(node,mode,"no such object expression tag");
       assert(0);

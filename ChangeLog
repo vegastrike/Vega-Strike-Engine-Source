@@ -1,8 +1,16 @@
+2001-12-13 Alexander Rawass <alexannika@users.sourceforge.net>
+
+	* added strings to c_alike.yacc
+	* added string callbacks src/cmd/script/script_call_string.cpp
+	* made Unit remember the Flightgroup & nr
+	* testd_unit1.mission now prints out also the fg id
+	
+
 2001-12-12 Alexander Rawass <alexannika@users.sourceforge.net>
 	
 	* added file src/cmd/script/script_call_unit.cpp
 
-	
+
 2001-12-12 Alexander Rawass <alexannika@users.sourceforge.net>
 	
 	* added file src/cmd/script/script_call_olist.cpp

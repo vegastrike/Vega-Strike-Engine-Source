@@ -327,6 +327,10 @@ varInst * call_olist_back(missionNode *node,int mode,varInst *ovi);
 varInst * call_unit(missionNode *node,int mode);
  Unit *getUnitObject(missionNode *node,int mode,varInst *ovi);
 
+ varInst *call_string(missionNode *node,int mode);
+void  call_string_print(missionNode *node,int mode,varInst *ovi);
+varInst * call_string_new(missionNode *node,int mode,string initstring);
+ string *getStringObject(missionNode *node,int mode,varInst *ovi);
 };
 
 #endif // _MISSION_H_

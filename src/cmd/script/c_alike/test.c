@@ -12,6 +12,9 @@ import a1;
  int aty:=34.3;
 
  void t1(){
+   int blah="whatever";
+   a="whatever"+"nothing"+_io.print("never","ever");
+
    float b1=a*b;
    float b2:=3.4;
    a->push(a,b,cd);

@@ -354,7 +354,7 @@ public:
   ///Creates aa mesh with meshes as submeshes (number of them) as either as subunit with faction faction)
   Unit (Mesh ** meshes  , int num, bool Subunit, int faction);
   ///Creates a mesh from an XML file
-  Unit(const char *filename, bool xml, bool SubUnit, int faction, Flightgroup *flightgroup=NULL);
+  Unit(const char *filename, bool xml, bool SubUnit, int faction, Flightgroup *flightgroup=NULL,int fg_subnumber=0);
   virtual ~Unit();
   ///Changes currently selected weapon
   void ToggleWeapon (bool Missile);
@@ -578,6 +578,14 @@ public:
   void SetResolveForces(bool);
   ///Executes 1 frame of physics-based AI
   void ExecuteAI();
+
+ private:
+  Flightgroup *flightgroup;
+  int flightgroup_subnumber;
+ public:
+  Flightgroup *getFlightgroup() const { return flightgroup; };
+  int getFgSubnumber() const { return flightgroup_subnumber; };
+  
 };
 ///Holds temporary values for inter-function XML communication Saves deprecated restr info
 struct Unit::XML {

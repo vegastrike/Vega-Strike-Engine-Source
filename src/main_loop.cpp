@@ -442,7 +442,7 @@ void createObjects() {
 
 	//	  cout << "before unit" << endl;
 	if (fg_terrain==-1||(fg_terrain==-2&&myterrain==NULL)) {
-	  fighters[a] = new Unit(fightername, true, false,tmptarget[a],fg);
+	  fighters[a] = new Unit(fightername, true, false,tmptarget[a],fg,s);
 	}else {
 	  if (fg_terrain==-2) {
 	    fighters[a]= new Building (myterrain,isvehicle,fightername,true,false,tmptarget[a],fg);
