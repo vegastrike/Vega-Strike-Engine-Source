@@ -161,8 +161,6 @@ SaveGame::SaveGame(const std::string &pilot) {
 }
 
 void SaveGame::SetStarSystem (string sys) {
-  // Saves the old system we were in
-  originalsystem = ForceStarSystem;
   ForceStarSystem = sys;
 }
 string SaveGame::GetStarSystem () {
