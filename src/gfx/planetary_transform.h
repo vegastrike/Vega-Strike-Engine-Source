@@ -1,5 +1,6 @@
 #include "nonlinear_transform.h"
 #include "matrix.h"
+#include "quaternion.h"
 
 
 inline Vector SwizzleIt (const Vector &v) {return Vector(-v.i,-v.j,v.k);}//return Vector (v.i,v.k,v.j);}
@@ -84,4 +85,14 @@ class PlanetaryTransform: public SphericalTransform{
     VectorAndPositionToMatrix (trans,p,q,r,Intersection);
   }
 
+};
+struct PlanetaryOrbitData {
+  ///Planetary Transform that will move to and from planet space
+  PlanetaryTransform * trans;
+  ///Current Physical State
+  Transformation cps;
+  ///Previous Physical State
+  Transformation pps;
+  ///Has this starship collided with a planet any more 
+  bool dirty;
 };

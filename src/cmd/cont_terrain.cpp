@@ -99,12 +99,36 @@ void ContinuousTerrain::Collide (Unit * un) {
     data[i]->Collide(un);
   }
 }
+Vector ContinuousTerrain::GetGroundPosIdentTrans (Vector ShipPos, Vector &norm) {
+  Matrix ident;
+  Identity (ident);
+  ShipPos.i/=Scales.i;
+  ShipPos.j/=Scales.j;
+  ShipPos.k/=Scales.k;
+  for (int i=0;i<numcontterr;i++) {
+    Vector tmploc = ShipPos-location[i]+Vector ((data[i])->getminX()+.5*(data[i])->getSizeX(),0,(data[i])->getminZ()+.5*(data[i])->getSizeZ());
+    if (data[i]->GetGroundPos (tmploc,norm,ident, sizeX*width,sizeZ*width)) {
+      tmploc+=location[i]-Vector ((data[i])->getminX()+.5*(data[i])->getSizeX(),0,(data[i])->getminZ()+.5*(data[i])->getSizeZ());;
+
+      tmploc.i*=Scales.i;
+      tmploc.j*=Scales.j;
+      tmploc.k*=Scales.k;
+      return tmploc;
+    }
+  }
+  fprintf (stderr,"Can't find %f,%f,%f\n",ShipPos.i,ShipPos.j,ShipPos.k);
+  ShipPos.i*=Scales.i;
+  ShipPos.j*=Scales.j;
+  ShipPos.k*=Scales.k;
+  return ShipPos;
+}
 Vector ContinuousTerrain::GetGroundPos (Vector ShipPos, Vector & norm) {
   for (int i=0;i<numcontterr;i++) {
     if (data[i]->GetGroundPos (ShipPos,norm,sizeX*width,sizeZ*width)) {
       return ShipPos;
     }
   }
+
   return ShipPos;
 }
 void ContinuousTerrain::DisableDraw () {

@@ -76,8 +76,8 @@ class Planet : public Unit {
   virtual void Draw(const Transformation & quat = identity_transformation, const Matrix m = identity_matrix);
 //  void InitPlanet(FILE *fp);
   virtual void Kill();
-  void setTerrain (ContinuousTerrain *); 
-  ContinuousTerrain * getTerrain() {return terrain;}
+  PlanetaryTransform*  setTerrain (ContinuousTerrain *); 
+  ContinuousTerrain * getTerrain(PlanetaryTransform *&t) {t = terraintrans;return terrain;}
   void setAtmosphere (Atmosphere *);
   Atmosphere * getAtmosphere () {return atmosphere;}
   void reactToCollision(Unit * smaller, const Vector & normal, float dist);

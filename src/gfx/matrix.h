@@ -298,6 +298,13 @@ inline Vector TransformNormal (const Matrix t, const float x, const float y, con
 }
 int invert (float b[], float a[]);
 
+inline void MatrixToVectors (const Matrix m,Vector &p,Vector&q,Vector&r, Vector &c) {
+  p.Set (m[0],m[1],m[2]);
+  q.Set (m[4],m[5],m[6]);
+  r.Set (m[8],m[9],m[10]);
+  c.Set (m[12],m[13],m[14]);
+}
+
 inline Vector InvScaleTransform (Matrix trans,  Vector pos) {
   pos = pos - Vector (trans[12],trans[13],trans[14]);
 #define a (trans[0])

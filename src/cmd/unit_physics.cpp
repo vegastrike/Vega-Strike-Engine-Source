@@ -27,6 +27,7 @@
 #include "audiolib.h"
 #include "images.h"
 //#ifdef WIN32
+#include "gfx/planetary_transform.h"
 float copysign (float x, float y) {
 	if (y>0)
 			return x;
@@ -282,8 +283,16 @@ void Unit::UpdatePhysics (const Transformation &trans, const Matrix transmat, co
   }
 
   RegenShields();
-  if (lastframe)
+  if (lastframe) {
     prev_physical_state = curr_physical_state;//the AIscript should take care
+    if (planet) {
+      if (!planet->dirty) {
+	SetPlanetOrbitData (NULL);
+      }else {
+	planet->pps = planet->cps;
+      }
+    }
+  }
   if (isUnit()==PLANETPTR) {
     ((Planet *)this)->gravitate (uc);
   } else {
@@ -301,7 +310,14 @@ void Unit::UpdatePhysics (const Transformation &trans, const Matrix transmat, co
     }
   } 
   curr_physical_state.position += Velocity*SIMULATION_ATOM;
-
+  if (planet) {
+    Matrix basis;
+    curr_physical_state.to_matrix (cumulative_transformation_matrix);
+    Vector p,q,r,c;
+    MatrixToVectors (cumulative_transformation_matrix,p,q,r,c);
+    planet->trans->InvTransformBasis (cumulative_transformation_matrix,p,q,r,c);
+    planet->cps=Transformation::from_matrix (cumulative_transformation_matrix);
+  }
   cumulative_transformation = curr_physical_state;
   cumulative_transformation.Compose (trans,transmat);
   cumulative_transformation.to_matrix (cumulative_transformation_matrix);
@@ -362,8 +378,24 @@ void Unit::UpdatePhysics (const Transformation &trans, const Matrix transmat, co
       Kill();
   }
 }
-void Unit::SetPlanetOrbitData (PlanetaryTransform *) {
-  //
+void Unit::SetPlanetOrbitData (PlanetaryTransform *t) {
+  if (isUnit()!=BUILDINGPTR)
+        return;
+  if (!planet)
+    planet = (PlanetaryOrbitData *)malloc (sizeof (PlanetaryOrbitData));
+  else if (!t) {
+    free (planet);
+    planet=NULL;
+  }
+  if (t) {
+    planet->trans = t;
+    planet->dirty=true;
+  }
+}
+PlanetaryTransform * Unit::GetPlanetOrbit () {
+  if (planet==NULL)
+    return NULL;
+  return planet->trans;
 }
 void Unit::ResolveForces (const Transformation &trans, const Matrix transmat) {
   Vector p, q, r;

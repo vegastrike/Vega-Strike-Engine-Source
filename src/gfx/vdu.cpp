@@ -173,7 +173,7 @@ void VDU::DrawTarget(Unit * parent, Unit * target) {
     st[i+k+1]='\0';
   }
   char qr[128];
-  sprintf (qr,"Dis %.4lf",(parent->Position()-target->Position()).Magnitude()*((target->isUnit()==PLANETPTR)?10:1));
+  sprintf (qr,"Dis %.4f",(parent->Position()-target->Position()).Magnitude()*((target->isUnit()==PLANETPTR)?10:1));
   strcat (st,qr);
   tp->Draw (std::string(st));  
   DrawTargetSpr (target->getHudImage (),.6,x,y,h,w);

@@ -160,7 +160,7 @@ SphereMesh::SphereMesh(float radius, int stacks, int slices, char *texture, char
   }
   draw_queue = odq;
 }
-void SphereMesh::Draw(float lod,  bool centered, const Transformation &transform /*= identity_transformation*/, const Matrix m) {
+void SphereMesh::Draw(float lod,  bool centered, const Matrix m) {
   if (centered) {
     float m1[16];
     memcpy (m1,m,sizeof (float)*16);
@@ -168,11 +168,9 @@ void SphereMesh::Draw(float lod,  bool centered, const Transformation &transform
     m1[12]=pos.i;
     m1[13]=pos.j;
     m1[14]=pos.k;
-    Transformation tmp = transform;
-    tmp.position = pos;
-    Mesh::Draw (lod,tmp,m1);
+    Mesh::Draw (lod,m1);
   } else {	
-    Mesh::Draw(lod,transform,m);
+    Mesh::Draw(lod,m);
   } 
 }
 static GFXColor getSphereColor () {

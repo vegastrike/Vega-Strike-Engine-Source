@@ -25,6 +25,7 @@ class ContinuousTerrain {
   void DisableUpdate();
   void EnableUpdate();
   void Draw();
+  Vector GetGroundPosIdentTrans (Vector ShipPos, Vector &norm);
   Vector GetGroundPos(Vector ShipPos, Vector & norm);
   Vector GetUpVector (const Vector & pos);
   void Collide (Unit * un, Matrix trans);

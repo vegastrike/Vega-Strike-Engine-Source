@@ -1,6 +1,6 @@
 #include "building.h"
 #include "cont_terrain.h"
-
+#include "gfx/planetary_transform.h"
 Building::Building (ContinuousTerrain * parent, bool vehicle, const char * filename, bool xml, bool SubUnit, int faction, Flightgroup * fg):Unit (filename,xml,SubUnit,faction,fg) {
   this->vehicle = vehicle;
   continuous=true;
@@ -16,14 +16,21 @@ Building::Building (Terrain * parent, bool vehicle, const char *filename, bool x
 
 
 void Building::UpdatePhysics (const Transformation &trans, const Matrix transmat, const Vector & cum_vel,  bool lastframe, UnitCollection *uc){
+  if (GetPlanetOrbit()) {
+    SetPlanetOrbitData(GetPlanetOrbit());//makes it dirty
+  }
   Unit::UpdatePhysics (trans,transmat,cum_vel,lastframe,uc);
   Vector tmp (LocalPosition());
   Vector p,q,r;
   GetOrientation (p,q,r);
   if (continuous) {
-    tmp = parent.plane->GetGroundPos (tmp,p);
+    if (!GetPlanetOrbit()) {
+      tmp = parent.plane->GetGroundPos (tmp,p);
+    }else {
+      tmp = GetPlanetOrbit()->Transform(parent.plane->GetGroundPosIdentTrans (GetPlanetOrbit()->InvTransform(tmp),p));
+    }
   } else {
-    parent.terrain->GetGroundPos (tmp,p,0,0);
+    parent.terrain->GetGroundPos (tmp,p,(float)0,(float)0);
 
   }
   if (vehicle) {

@@ -167,11 +167,10 @@ void Planet::Draw(const Transformation & quat, const Matrix m) {
   //  }
 
   if (inside&&terrain) {
-    Matrix tmp;
-    _Universe->AccessCamera()->UpdatePlanetGFX(tmp);
-    Camera * cc = _Universe->AccessCamera();
+    _Universe->AccessCamera()->UpdatePlanetGFX();
+    //    Camera * cc = _Universe->AccessCamera();
     //    VectorAndPositionToMatrix (tmp,cc->P,cc->Q,cc->R,cc->GetPosition()+cc->R*100);
-    terrain->SetTransformation (tmp);
+    terrain->SetTransformation (_Universe->AccessCamera()->GetPlanetGFX());
     terrain->AdjustTerrain(_Universe->activeStarSystem());
     terrain->Draw();
 #ifdef PLANETARYTRANSFORM
@@ -240,7 +239,7 @@ void Planet::reactToCollision (Unit *un, const Vector & normal, float dist) {
     un->SetPlanetOrbitData (terraintrans);
     Matrix top;
     Identity(top);
-    Vector posRelToTerrain = terraintrans->InvTransform(un->Position());
+    Vector posRelToTerrain = terraintrans->InvTransform(un->LocalPosition());
     top[12]=un->Position().i- posRelToTerrain.i;
     top[13]=un->Position().j- posRelToTerrain.j;
     top[14]=un->Position().k- posRelToTerrain.k;
@@ -286,7 +285,7 @@ Planet::~Planet() {
 	for (i=0;i<this->destination.size();i++) {
 		delete [] destination[i];
 	}
-	for (i=0;i<(int)this->lights.size();i++) {
+	for (i=0;i<this->lights.size();i++) {
 	  GFXDeleteLight (lights[i]);
 	}
 	if (terraintrans) {
@@ -298,13 +297,14 @@ Planet::~Planet() {
 	}
 }
 
-void Planet::setTerrain (ContinuousTerrain * t) {
+PlanetaryTransform *Planet::setTerrain (ContinuousTerrain * t) {
   terrain = t;
   terrain->DisableDraw();
   float x,z;
   t->GetTotalSize (x,z);
   terraintrans = new PlanetaryTransform (.8*corner_max.i,x*2,z,4);
   terraintrans->SetTransformation (cumulative_transformation_matrix);
+  return terraintrans;
 }
 void Planet::setAtmosphere (Atmosphere *t) {
   atmosphere = t;
@@ -324,9 +324,10 @@ void Planet::Kill() {
 }
 
 void Planet::gravitate(UnitCollection *uc) {
+  /*
   float *t = cumulative_transformation_matrix;
 
-  /*
+  
   if(gravity!=0.0&&uc) {
     Iterator *iterator = uc->createIterator();
     Unit *unit;

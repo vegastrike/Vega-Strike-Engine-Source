@@ -66,6 +66,11 @@ struct Transformation {
       m[13]=position.j;
       m[14]=position.k;
   }
+  static Transformation from_matrix (Matrix m) {
+    Vector p,q,r,c;
+    MatrixToVectors (m,p,q,r,c);
+    return Transformation(Quaternion::from_vectors (p,q,r),c);
+  }
 };
 
 const Transformation identity_transformation(identity_quaternion,Vector(0,0,0));

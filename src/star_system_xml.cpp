@@ -384,7 +384,7 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
 	    if (p) {
 	      xml->ct->DisableDraw();
 	      p->setTerrain (xml->ct);
-
+	      p->getTerrain((PlanetaryTransform*)xml->parentterrain);
 	    }
 	  } 
 	}
@@ -595,13 +595,14 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
       assert(xml->moons.size()!=0);
       xml->moons[xml->moons.size()-1]->Planet::beginElement(R,S,velocity,position,gravity,radius,filename,NULL,vector <char *>(),xml->unitlevel-((xml->parentterrain==NULL&&xml->ct==NULL)?1:2),ourmat,curlights,true,faction);
     } else {
-      if (xml->parentterrain!=NULL) {
+      if (xml->ct==NULL&&xml->parentterrain!=NULL) {
 	Unit * b = new Building (xml->parentterrain,elem==VEHICLE,filename,true,false,faction);
 	b->SetPosAndCumPos (xml->cursun+xml->systemcentroid);
 	b->EnqueueAI( new Orders::AggressiveAI ("default.agg.xml", "default.int.xml"));
 	AddUnit (b);
       }else if (xml->ct!=NULL) {
 	Unit * b=new Building (xml->ct,elem==VEHICLE,filename,true,false,faction);
+	b->SetPlanetOrbitData ((PlanetaryTransform *)xml->parentterrain);
 	b->SetPosAndCumPos (xml->cursun+xml->systemcentroid);
 	b->EnqueueAI( new Orders::AggressiveAI ("default.agg.xml", "default.int.xml"));
 	AddUnit (b);

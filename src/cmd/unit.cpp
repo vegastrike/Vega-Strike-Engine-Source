@@ -40,6 +40,7 @@
 #include "gfx/cockpit.h"
 #include "config_xml.h"
 #include "images.h"
+#include "gfx/planetary_transform.h"
 //if the PQR of the unit may be variable...for radius size computation
 //#define VARIABLE_LENGTH_PQR
 
@@ -93,6 +94,7 @@ void Unit::SetResolveForces (bool ys) {
 
 void Unit::Init()
 {
+  planet=NULL;
   image = new UnitImages;
   sound = new UnitSounds;
   limits.structurelimits=Vector(0,0,1);
@@ -226,7 +228,7 @@ Unit::Unit(const char *filename, bool xml, bool SubU, int faction,Flightgroup *f
 	if (!fp) {
 	  vscdup();
 	  const char *c;
-	  if (c=_Universe->GetFaction(faction))
+	  if ((c=_Universe->GetFaction(faction)))
 	    vschdir (c);
 	  else
 	    vschdir ("unknown");
@@ -332,6 +334,8 @@ Unit::~Unit()
     AUDDeleteSound (sound->cloak);
   }
 
+  if (planet)
+    delete planet;
   if (image->hudImage )
     delete image->hudImage;
   delete image;
@@ -488,31 +492,63 @@ bool Unit::queryFrustum(float frustum [6][4]) {
 
 float Unit::GetElasticity() {return .5;}
 void Unit::UpdateHudMatrix() {
-	Vector q (cumulative_transformation_matrix[4],
-			  cumulative_transformation_matrix[5],
-			  cumulative_transformation_matrix[6]);
-    Vector r (cumulative_transformation_matrix[8],
-			  cumulative_transformation_matrix[9],
-			  cumulative_transformation_matrix[10]);
-	Vector tmp;
-	CrossProduct(r,q, tmp);
-    _Universe->AccessCamera()->SetOrientation(tmp,q ,r);
-   
-    _Universe->AccessCamera()->SetPosition (Transform (cumulative_transformation_matrix,image->CockpitCenter));
+  Matrix m;
+  float * ctm=cumulative_transformation_matrix;
+  if (planet) {
+    Transformation ct (linear_interpolate(prev_physical_state, curr_physical_state, interpolation_blend_factor));  
+    ct.to_matrix (m);
+    ctm=m;
+  }
+  Vector q (ctm[4],	    ctm[5],	    ctm[6]);
+  Vector r (ctm[8],	    ctm[9],	    ctm[10]);
+  Vector tmp;
+  CrossProduct(r,q, tmp);
+  _Universe->AccessCamera()->SetOrientation(tmp,q ,r);
+  
+  _Universe->AccessCamera()->SetPosition (Transform (ctm,image->CockpitCenter));
 }
+   
+
 
 void Unit::Draw(const Transformation &parent, const Matrix parentMatrix)
 {
-  //Matrix cumulative_transformation_matrix;
-  /*Transformation*/ cumulative_transformation = linear_interpolate(prev_physical_state, curr_physical_state, interpolation_blend_factor);
+  static Transformation planet_temp_transformation;
+  static Matrix planet_temp_matrix;
+
+  cumulative_transformation = linear_interpolate(prev_physical_state, curr_physical_state, interpolation_blend_factor);
+  float * ctm;
+  Transformation * ct;
   cumulative_transformation.Compose(parent, parentMatrix);
+  ctm =cumulative_transformation_matrix;
+  ct = &cumulative_transformation;
   cumulative_transformation.to_matrix(cumulative_transformation_matrix);
+  if (planet) {
+    if (planet->trans==_Universe->AccessCamera()->GetPlanetaryTransform()) {
+      Matrix tmp;
+      Vector p,q,r,c;
+      MatrixToVectors (cumulative_transformation_matrix,p,q,r,c);
+      planet->trans->InvTransformBasis(tmp,p,q,r,c);
+      MultMatrix (planet_temp_matrix,_Universe->AccessCamera()->GetPlanetGFX(),tmp);
+      planet_temp_transformation = Transformation::from_matrix (planet_temp_matrix);
+      //planet_temp_transformation = Transformation::from_matrix(planet_temp_matrix);
+      //planet_temp_transformation.Compose (Transformation::from_matrix (_Universe->AccessCamera()->GetPlanetGFX()),_Universe->AccessCamera()->GetPlanetGFX());
+      //planet_temp_transformation.to_matrix(planet_temp_matrix);
+      ct = &planet_temp_transformation;
+      ctm = planet_temp_matrix;
+      ///warning: hack FIXME
+      cumulative_transformation=*ct;
+      CopyMatrix (cumulative_transformation_matrix,ctm);
+    }
+  }
+
+
+
 #ifdef PERFRAMESOUND
   AUDAdjustSound (sound.engine,cumulative_transformation.position,Velocity);
 #endif
   short cloak=cloaking;
   if (cloaking>cloakmin) {
-    cloak = cloaking-interpolation_blend_factor*image->cloakrate;
+    cloak = (short)cloaking-interpolation_blend_factor*image->cloakrate;
     if (cloak<0&&image->cloakrate<0) {
       cloak=(unsigned short)32768;//intended warning should be -32768 :-) leave it be
     }
@@ -538,11 +574,11 @@ void Unit::Draw(const Transformation &parent, const Matrix parentMatrix)
 		continue;
 	  if (i==nummesh&&(meshdata[i]->numFX()==0||hull<0)) 
 		continue;
-      Vector TransformedPosition = Transform (cumulative_transformation_matrix,
+      Vector TransformedPosition = Transform (ctm,
 					      meshdata[i]->Position());
 #if 0
       //This is a test of the box in frustum setup to be used with terrain
-      GFXBoxInFrustumModel (cumulative_transformation_matrix);
+      GFXBoxInFrustumModel (ctm);
       int tmp = GFXBoxInFrustum (meshdata[i]->corner_min(),meshdata[i]->corner_max());
       if ((d==0)!=(tmp==0)) {
 	fprintf (stderr,"Mismatch for %s with Box being %d", name.c_str(),tmp);
@@ -558,7 +594,7 @@ void Unit::Draw(const Transformation &parent, const Matrix parentMatrix)
       float lod;
       if (d) {  //d can be used for level of detail shit
 	if ((lod =g_game.detaillevel*g_game.x_resolution*2*meshdata[i]->rSize()/GFXGetZPerspective((d-meshdata[i]->rSize()<g_game.znear)?g_game.znear:d-meshdata[i]->rSize()))>=g_game.detaillevel) {//if the radius is at least half a pixel (detaillevel is the scalar... so you gotta make sure it's above that
-	  meshdata[i]->Draw(lod,cumulative_transformation, cumulative_transformation_matrix,d,cloak,0);//cloakign and nebula
+	  meshdata[i]->Draw(lod,ctm,d,cloak,0);//cloakign and nebula
 	} else {
 
 	}
@@ -566,12 +602,12 @@ void Unit::Draw(const Transformation &parent, const Matrix parentMatrix)
     }
     
     for(int subcount = 0; subcount < numsubunit; subcount++) {
-      subunits[subcount]->Draw(cumulative_transformation, cumulative_transformation_matrix);
+      subunits[subcount]->Draw(*ct, ctm);
     }
     if(selected) {
       static bool doInputDFA=XMLSupport::parse_bool (vs_config->getVariable ("graphics","MouseCursor","false"));
       if (doInputDFA)
-	image->selectionBox->Draw(g_game.x_resolution,cumulative_transformation, cumulative_transformation_matrix);
+	image->selectionBox->Draw(g_game.x_resolution,ctm);
     }
   } else {
 	  _Universe->AccessCockpit()->SetupViewPort();///this is the final, smoothly calculated cam
@@ -595,7 +631,7 @@ void Unit::Draw(const Transformation &parent, const Matrix parentMatrix)
   for (i=0;i<nummounts;i++) {
     if (mounts[i].type.type==weapon_info::BEAM) {
       if (mounts[i].ref.gun) {
-	mounts[i].ref.gun->Draw(cumulative_transformation,cumulative_transformation_matrix);
+	mounts[i].ref.gun->Draw(*ct,ctm);
       }
     }
   }
@@ -604,21 +640,9 @@ void Unit::Draw(const Transformation &parent, const Matrix parentMatrix)
     haloalpha=((float)cloak)/32767;
   }
   for (i=0;i<numhalos;i++) {
-    halos[i]->Draw(cumulative_transformation,cumulative_transformation_matrix,haloalpha);
+    halos[i]->Draw(*ct,ctm,haloalpha);
   }
 }
-/*
-
-void Unit::ProcessDrawQueue() {
-  int a;	
-  for(a=0; a<nummesh; a++) {
-    meshdata[a]->ProcessDrawQueue();
-  }
-  for(a=0; a<numsubunit; a++) {
-    subunits[a]->ProcessDrawQueue();
-  }
-}
-*/
 void Unit::PrimeOrders (int i) {
   subunits[i]->PrimeOrders();
 }

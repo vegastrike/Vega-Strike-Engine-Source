@@ -181,7 +181,7 @@ void Atmosphere::Draw()
 	Update(position,rot1);
 
 	GFXDisable(DEPTHWRITE);
-	dome->DrawNow(100000,GFXFALSE,identity_transformation,rot1);
+	dome->DrawNow(100000,GFXFALSE,rot1);
 	GFXDisableLight (l0);
 	GFXDisableLight (l1);
 	GFXDeleteLight(l0);

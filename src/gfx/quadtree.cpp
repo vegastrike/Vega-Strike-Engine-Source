@@ -83,20 +83,28 @@ QuadTree::~QuadTree () {
   delete nonlinear_transform;
   
 }
-bool QuadTree::GetGroundPos (Vector &Location, Vector & norm, float TotalTerrainSizeX, float TotalTerrainSizeZ) {
-  Vector Loc = nonlinear_transform->InvTransform (InvScaleTransform (transformation,Location));
+bool QuadTree::GetGroundPos (Vector &Location, Vector & norm, float * transf, float TotalTerrainSizeX, float TotalTerrainSizeZ) {
+  Vector Loc = nonlinear_transform->InvTransform (InvScaleTransform (transf,Location));
   if (TotalTerrainSizeX) {
+    float tmpx = Loc.i;
     Loc.i= fmod (Loc.i,TotalTerrainSizeX);
-    Loc.k= fmod (Loc.k,TotalTerrainSizeZ);
     if (Loc.i<0)
       Loc.i+=TotalTerrainSizeX;
+    TotalTerrainSizeX = tmpx;
+    tmpx = Loc.k;
+    Loc.k= fmod (Loc.k,TotalTerrainSizeZ);
     if (Loc.k<0)
       Loc.k+=TotalTerrainSizeZ;
+    TotalTerrainSizeZ = tmpx;
+  } else {
+    TotalTerrainSizeX = Loc.i;
+    TotalTerrainSizeZ = Loc.k;
   }
   float tmp =  root->GetHeight (RootCornerData,Loc.i,Loc.k,norm);
   if (tmp>-FLT_MAX) {
-    Location = Transform (transformation,nonlinear_transform->Transform (Vector (Loc.i,tmp,Loc.k)));
-    norm = TransformNormal (transformation,nonlinear_transform->TransformNormal (Location, norm));
+    //    fprintf (stderr,"Orig<%f,%f,%f> Now <%f,%f,%f>",Loc.i,Loc.j,Loc.k,Loc.i,tmp,Loc.k);
+    Location = Transform (transf,nonlinear_transform->Transform (Vector (TotalTerrainSizeX,tmp,TotalTerrainSizeZ)));
+    norm = TransformNormal (transf,nonlinear_transform->TransformNormal (Location, norm));
     norm.Normalize();
 
     return true;
@@ -120,7 +128,7 @@ float QuadTree::GetHeight (Vector Location, Vector & normal,  float * transf, fl
       Location.k+=TotalTerrainSizeZ;
   }
   float tmp =  Location.j-root->GetHeight (RootCornerData,Location.i,Location.k,normal);
-  normal = TransformNormal (transformation,nonlinear_transform->TransformNormal (Location, normal));
+  normal = TransformNormal (transf,nonlinear_transform->TransformNormal (Location, normal));
   normal.Normalize();
   //  fprintf (stderr,"<%f>",tmp);
   return tmp;

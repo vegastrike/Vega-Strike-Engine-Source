@@ -338,9 +338,9 @@ public:
   ///Returns center of this mesh
   Vector &Position() {return local_pos;}
   ///Draws lod pixel wide mesh at Transformation LATER
-  void Draw(float lod, const Transformation &quat = identity_transformation, const Matrix = identity_matrix, float toofar=1, short cloak=-1, float nebdist=0);
+  void Draw(float lod, const Matrix = identity_matrix, float toofar=1, short cloak=-1, float nebdist=0);
   ///Draws lod pixels wide, mesh at Transformation NOW. If centered, then will center on camera and disable cull
-  void DrawNow(float lod, bool centered, const Transformation &quat = identity_transformation, const Matrix = identity_matrix, short cloak=-1,float nebdist=0);
+  void DrawNow(float lod, bool centered, const Matrix = identity_matrix, short cloak=-1,float nebdist=0);
   ///Will draw all undrawn meshes of this type
   virtual void ProcessDrawQueue(int whichdrawqueue);
   ///Will draw all undrawn far meshes beyond the range of zbuffer (better be convex).

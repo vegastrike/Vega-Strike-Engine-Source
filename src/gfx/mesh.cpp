@@ -211,7 +211,7 @@ Mesh * Mesh::getLOD (float lod) {
   }
   return retval;
 }
-void Mesh::Draw(float lod, const Transformation &trans, const Matrix m, float toofar, short cloak, float nebdist)
+void Mesh::Draw(float lod, const Matrix m, float toofar, short cloak, float nebdist)
 {
   //  Vector pos (local_pos.Transform(m));
   MeshDrawContext c(m);
@@ -254,7 +254,7 @@ void Mesh::Draw(float lod, const Transformation &trans, const Matrix m, float to
   }
   will_be_drawn |= (1<<c.mesh_seq);
 }
-void Mesh::DrawNow(float lod,  bool centered, const Transformation &transform /*= identity_transformation*/, const Matrix m, short cloak, float nebdist) {
+void Mesh::DrawNow(float lod,  bool centered, const Matrix m, short cloak, float nebdist) {
   Mesh *o = getLOD (lod);
   //fixme: cloaking not delt with.... not needed for backgroudn anyway
   if (centered) {
@@ -264,8 +264,6 @@ void Mesh::DrawNow(float lod,  bool centered, const Transformation &transform /*
     m1[12]=pos.i;
     m1[13]=pos.j;
     m1[14]=pos.k;
-    Transformation tmp = transform;
-    tmp.position = pos;
     GFXLoadMatrix (MODEL,m1);    
   } else {	
     if (o->draw_sequence!=MESH_SPECIAL_FX_ONLY) {
@@ -398,8 +396,13 @@ void Mesh::ProcessDrawQueue(int whichdrawqueue) {
     return;
   }
   GFXSelectMaterial(myMatNum);
-  if (blendSrc!=SRCALPHA&&blendDst!=ZERO) 
+  if (blendDst!=ZERO) {
+    //    GFXDisable(CULLFACE);
     GFXDisable(DEPTHWRITE);
+    if (blendSrc!=SRCALPHA) {
+
+    }
+  }
   GFXBlendMode(blendSrc, blendDst);
 
   GFXEnable(TEXTURE0);
@@ -488,9 +491,13 @@ void Mesh::ProcessDrawQueue(int whichdrawqueue) {
     draw_queue->push_back (tmp_draw_queue.back());
     tmp_draw_queue.pop_back();
   }
-  if (blendSrc!=SRCALPHA&&blendDst!=ZERO) 
+  if (blendDst!=ZERO) {
+    //GFXEnable (CULLFACE);
     GFXEnable(DEPTHWRITE);//risky--for instance logos might be fubar!
-
+    if (blendSrc!=SRCALPHA) {
+   
+    }
+  }
 }
 enum EX_EXCLUSION {EX_X, EX_Y, EX_Z};
 inline bool OpenWithin (const Vector &query, const Vector &mn, const Vector &mx, const float err, enum EX_EXCLUSION excludeWhich) {

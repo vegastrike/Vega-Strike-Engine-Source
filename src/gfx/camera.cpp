@@ -41,7 +41,6 @@ Camera::Camera(ProjectionType proj) : projectionType(proj), myPhysics(0.1,0.075,
 	changed = GFXTRUE;
 	//SetPosition();
 	//SetOrientation();
-	Identity(view);
 	Yaw(PI);
 	x = y = 0;
 	xsize = ysize = 1.0;
@@ -85,7 +84,7 @@ void Camera::UpdateGFX(GFXBOOL clip, GFXBOOL updateFrustum)
 		Vector lastpos(view[12],view[13],view[14]);
 		AUDListener (Coord, (Coord-lastpos)/GetElapsedTime());//this pos-last pos / elapsed time
 #endif
-		GFXGetMatrix(VIEW,view);
+		//		GFXGetMatrix(VIEW,view);
 		GFXSubwindow(x,y,xsize,ysize);
 #ifdef PERFRAMESOUND
 		AUDListenerOrientation (P,Q,R);
@@ -121,18 +120,22 @@ void Camera::UpdateCameraSounds() {
     */
 
 #endif
-void Camera::UpdatePlanetGFX (Matrix updated) {
+
+void Camera::GetView (Matrix vw) {
+  GFXGetMatrix (VIEW,vw);
+}
+void Camera::UpdatePlanetGFX () {
 
   if (planet) {
     Matrix t;
     Matrix inv;
-    planet->InvTransformBasis(updated,P,Q,R,Coord);
+    planet->InvTransformBasis(planetview,P,Q,R,Coord);
 
-    InvertMatrix (inv,updated);
+    InvertMatrix (inv,planetview);
     VectorAndPositionToMatrix (t,P,Q,R,Coord);
-    MultMatrix (updated,t,inv);
+    MultMatrix (planetview,t,inv);
   } else {
-    Identity (updated);
+    Identity (planetview);
   }
 }
 
@@ -198,8 +201,9 @@ void Camera::GetOrientation(Vector &p, Vector &q, Vector &r) {
 /** GetView (Matrix x)
  *  returns the view matrix (inverse matrix based on camera pqr)
  */
-void Camera::GetView (Matrix x) {
-  CopyMatrix (x,view);
+float *Camera::GetPlanetGFX () {
+  return &planetview[0];
+  //  CopyMatrix (x,view);
 }
 
 void Camera::LookAt(const Vector &loc, const Vector &up) {

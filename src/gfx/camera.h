@@ -28,7 +28,7 @@ class PlanetaryTransform;
 class Camera{
 
 	Vector Coord;
-	Matrix view;
+	Matrix planetview;
 	GFXBOOL changed;
 	Vector lastpos;
 	float x, y, xsize, ysize;
@@ -56,7 +56,8 @@ public:
         const Vector & GetR () {return R;}
 	void GetPQR (Vector &p1, Vector &q1, Vector &r1);
 	void UpdateGFX(GFXBOOL clip= GFXTRUE, GFXBOOL updateFrustum=GFXTRUE);
-	void UpdatePlanetGFX(Matrix updated);//clip true, frustum true at all times
+	void UpdatePlanetGFX();//clip true, frustum true at all times
+	float * GetPlanetGFX();
 	void UpdateGLCenter();
 
 	void SetPosition(const Vector &origin);
