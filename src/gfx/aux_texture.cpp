@@ -222,7 +222,10 @@ Texture::Texture(const char * FileName, int stage, enum FILTER mipmap, enum TEXT
 	  t[tmp-2] = 'l';
 	  t[tmp-1] = 'p';
 	}
-	FILE *fp2 = fopen(t, "rb");
+	FILE *fp2=0;
+	if (t)
+	  if (t[0]!='\0')
+	    fp2 = fopen(t, "rb");
 
 
 	
@@ -232,11 +235,15 @@ Texture::Texture(const char * FileName, int stage, enum FILTER mipmap, enum TEXT
 	//	this->texfilename = texfilename;
 	//strcpy (filename,texfilename.c_str());
 	FILE *fp = NULL;
-	fp = fopen (FileName, "rb");
+	if (FileName)
+	  if (FileName[0])
+	    fp = fopen (FileName, "rb");
 	bool shared = (fp==NULL);
 	modold (texfilename,shared,texfilename);
 	if (shared) {
-	  fp = fopen (GetSharedTexturePath (FileName).c_str(),"rb");
+	  if (FileName)
+	    if (FileName[0])
+	      fp = fopen (GetSharedTexturePath (FileName).c_str(),"rb");
 	}
 	free ( t);
 	if (fp&&g_game.use_textures==0&&!force_load) {
@@ -258,7 +265,7 @@ Texture::Texture(const char * FileName, int stage, enum FILTER mipmap, enum TEXT
 	this->texfilename = new char [texfilename.length()+1];
 	strcpy(this->texfilename,texfilename.c_str());
 
-	 printf( "Width0 : %d - Height0 : %d", sizeX, sizeY);	  
+//	 printf( "Width0 : %d - Height0 : %d", sizeX, sizeY);	  //What's the point in printing out uninitialized memory, other than cluttering up stdout???
 	data = readImage (fp,bpp,format,sizeX,sizeY,palette,NULL/*texTransform*/,true);
 	if (data) {
 	  //FIXME deal with palettes and grayscale with alpha
