@@ -20,7 +20,7 @@ void GFXVertexList::DrawOnce (){}
 void GFXVertexList::Draw()
 {
 }
-void GFXVertexList::Draw (unsigned int *mode,const INDEX index, const int numlists, const int *offsets) {
+void GFXVertexList::Draw (enum POLYTYPE *mode,const INDEX index, const int numlists, const int *offsets) {
 }
 
 extern GFXBOOL /*GFXDRVAPI*/ GFXGetMaterial(const unsigned int number, GFXMaterial &material) { return GFXFALSE;}

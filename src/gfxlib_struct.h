@@ -282,7 +282,7 @@ class /*GFXDRVAPI*/ GFXVertexList {
     unsigned int *i;//stride 4
   } index;
   ///Array of modes that vertices will be drawn with
-  unsigned int *mode;
+  enum POLYTYPE *mode;
   ///Display list number if list is indeed active. 0 otherwise
   int display_list;
   ///number of different mode, drawn lists
@@ -312,7 +312,7 @@ class /*GFXDRVAPI*/ GFXVertexList {
   void Init (enum POLYTYPE *poly, int numVertices, const GFXVertex * vert, const GFXColorVertex *colors, int numlists, int *offsets, bool Mutable,unsigned int * indices);
   ///Propagates modifications to the display list
   void RefreshDisplayList();
-  void Draw (unsigned int *poly, const INDEX index, const int numLists, const int *offsets);
+  void Draw (enum POLYTYPE *poly, const INDEX index, const int numLists, const int *offsets);
   void RenormalizeNormals();
 
 public:

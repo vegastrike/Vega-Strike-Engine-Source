@@ -1,6 +1,19 @@
 #include "gfxlib_struct.h"
 #include "gldrv/gl_globals.h"
-
+GLenum PolyLookup (POLYTYPE poly) {
+  switch (poly) {
+  case GFXTRI:    return GL_TRIANGLES;
+  case GFXQUAD:    return GL_QUADS;
+  case GFXTRISTRIP:    return GL_TRIANGLE_STRIP;
+  case GFXQUADSTRIP:    return GL_QUAD_STRIP;
+  case GFXTRIFAN:    return GL_TRIANGLE_FAN;
+  case GFXPOLY:    return GL_POLYGON;
+  case GFXLINE:    return GL_LINES;
+  case GFXLINESTRIP:    return GL_LINE_STRIP;
+  case GFXPOINT:    return GL_POINTS;
+  default:    return GL_TRIANGLES;
+  }
+}
 void GFXVertexList::RefreshDisplayList () {
 #ifdef USE_DISPLAY_LISTS
   if ((!gl_options.display_lists)||(display_list&&!(changed&CHANGE_CHANGE))||(changed&CHANGE_MUTABLE)) {
@@ -14,7 +27,7 @@ void GFXVertexList::RefreshDisplayList () {
   display_list = GFXCreateList();
   if (changed&HAS_COLOR) {
     for (int i=0;i<numlists;i++) {
-      glBegin(mode[i]);
+      glBegin(PolyLookup(mode[i]));
       if (changed&HAS_INDEX) {
 	for(a=0; a<offsets[i]; a++) {
 	  glTexCoord2fv(&data.colors[GetIndex(offset+a)].s);
@@ -35,7 +48,7 @@ void GFXVertexList::RefreshDisplayList () {
     }
   }else {
     for (int i=0;i<numlists;i++) {
-      glBegin(mode[i]);
+      glBegin(PolyLookup(mode[i]));
       if (changed&HAS_INDEX) {
 	for(a=0; a<offsets[i]; a++) {
 	  glNormal3fv(&data.vertices[GetIndex(offset+a)].i);
@@ -135,7 +148,7 @@ void GFXVertexList::Draw()
   Draw (mode,index,numlists,offsets);
 }
 extern void GFXCallList(int list);
-void GFXVertexList::Draw (GLenum *mode,const INDEX index, const int numlists, const int *offsets) {
+void GFXVertexList::Draw (enum POLYTYPE *mode,const INDEX index, const int numlists, const int *offsets) {
 #ifdef USE_DISPLAY_LISTS
   if(display_list!=0) {
     GFXCallList(display_list);
@@ -151,12 +164,12 @@ void GFXVertexList::Draw (GLenum *mode,const INDEX index, const int numlists, co
 	     ? GL_UNSIGNED_SHORT 
 	     : GL_UNSIGNED_INT);
 	for (int i=0;i<numlists;i++) {
-	  glDrawElements (mode[i],offsets[i], indextype, &index.b[stride*totoffset]);//changed&INDEX_BYTE == stride!
+	  glDrawElements (PolyLookup(mode[i]),offsets[i], indextype, &index.b[stride*totoffset]);//changed&INDEX_BYTE == stride!
 	  totoffset +=offsets[i];
 	}
       } else {
 	for (int i=0;i<numlists;i++) {
-	  glDrawArrays(mode[i], totoffset, offsets[i]);
+	  glDrawArrays(PolyLookup(mode[i]), totoffset, offsets[i]);
 	  totoffset += offsets[i];
 	}
       }

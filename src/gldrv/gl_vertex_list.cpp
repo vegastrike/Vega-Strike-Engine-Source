@@ -91,39 +91,15 @@ void GFXOptimizeList (GFXVertex * old, int numV, GFXVertex ** nw, int * nnewV, u
   free (ijk);  
 }
 
-GLenum PolyLookup (POLYTYPE poly) {
-    switch (poly) {
-    case GFXTRI:
-      return GL_TRIANGLES;
-    case GFXQUAD:
-      return GL_QUADS;
-    case GFXTRISTRIP:
-      return GL_TRIANGLE_STRIP;
-    case GFXQUADSTRIP:
-      return GL_QUAD_STRIP;
-    case GFXTRIFAN:
-      return GL_TRIANGLE_FAN;
-    case GFXPOLY:
-      return GL_POLYGON;
-    case GFXLINE:
-      return GL_LINES;
-    case GFXLINESTRIP:
-      return GL_LINE_STRIP;
-    case GFXPOINT:
-      return GL_POINTS;
-    default:
-      return GL_TRIANGLES;
-    }
-}
+
 
 void GFXVertexList::Init (enum POLYTYPE *poly, int numVertices, const GFXVertex *vertices, const GFXColorVertex * colors, int numlists, int *offsets, bool Mutable, unsigned int * indices) {
   VSCONSTRUCT1('v')
   int stride=0;
   changed = HAS_COLOR*((colors!=NULL)?1:0);
-  mode = new GLenum [numlists];
+  mode = new POLYTYPE [numlists];
   for (int pol=0;pol<numlists;pol++) {
-    mode[pol]=PolyLookup (poly[pol]);
-
+      mode[pol]=poly[pol];//PolyLookup (poly[pol]);
   }
   this->numlists = numlists;
   this->numVertices = numVertices;
@@ -190,12 +166,12 @@ int GFXVertexList::numTris () {
     int tot=0;
     for (int i=0;i<numlists;i++) {
 	switch (mode[i]) {
-	case GL_TRIANGLES:
+	case GFXTRI:
 	    tot+= offsets[i]/3;
 	    break;
-	case GL_TRIANGLE_STRIP:
-	case GL_TRIANGLE_FAN:
-	case GL_POLYGON:
+	case GFXTRISTRIP:
+	case GFXTRIFAN:
+	case GFXPOLY:
 	    tot+= offsets[i]-2;
 	    break;
 	default:
@@ -208,10 +184,10 @@ int GFXVertexList::numQuads () {
     int tot=0;
     for (int i=0;i<numlists;i++) {
 	switch (mode[i]) {
-	case GL_QUADS:
+	case GFXQUAD:
 	    tot+=offsets[i]/4;
 	    break;
-	case GL_QUAD_STRIP:
+	case GFXQUADSTRIP:
 	    tot+= (offsets[i]-2)/2;
 	    break;
 	default:
@@ -369,12 +345,12 @@ void GFXVertexList::GetPolys (GFXVertex **vert, int *numpolys, int *numtris) {
   for (i=0;i<numlists;i++) {
     int j;
     switch (mode[i]) {
-    case GL_TRIANGLES:
+    case GFXTRI:
       (*vtxcpy) (this,&res[curtri],cur,offsets[i]);
       curtri+=offsets[i];
       break;
-    case GL_TRIANGLE_FAN:
-    case GL_POLYGON:
+    case GFXTRIFAN:
+    case GFXPOLY:
       for (j=1;j<offsets[i]-1;j++) {
 	(*vtxcpy) (this,&res[curtri],cur,1);
 	curtri++;
@@ -384,7 +360,7 @@ void GFXVertexList::GetPolys (GFXVertex **vert, int *numpolys, int *numtris) {
 	curtri++;
       }	    
       break;
-    case GL_TRIANGLE_STRIP:
+    case GFXTRISTRIP:
       for (j=2;j<offsets[i];j+=2) {
 	(*vtxcpy) (this,&res[curtri],(cur+j-2),1);
 	curtri++;
@@ -402,11 +378,11 @@ void GFXVertexList::GetPolys (GFXVertex **vert, int *numpolys, int *numtris) {
 	}
       }	    
       break;
-    case GL_QUADS:
+    case GFXQUAD:
       (*vtxcpy) (this,&res[curquad],(cur),offsets[i]);
 	    curquad+=offsets[i];
 	    break;
-    case GL_QUAD_STRIP:
+    case GFXQUADSTRIP:
       for (j=2;j<offsets[i]-1;j+=2) {
 	(*vtxcpy) (this,&res[curquad],(cur+j-2),1);
 	curquad++;

@@ -30,12 +30,13 @@
 #else
 #define GFXDRVAPI
 #endif
-
+/*#if 0
 #if defined(__APPLE__) || defined(MACOSX)
     #include <GLUT/glut.h>
 #else
     #include <GL/glut.h>
 #endif
+#endif*/
 #include <vector>
 class Matrix;
 
@@ -225,7 +226,7 @@ void /*GFXDRVAPI*/ GFXFrustum (float *mat, float *inv, float left,float right, f
 GFXBOOL /*GFXDRVAPI*/ GFXCreateTexture(int width, int height, TEXTUREFORMAT externaltextureformat, int *handle, char *palette = 0, int texturestage = 0, enum FILTER mipmap = MIPMAP, enum TEXTURE_TARGET texture_target = TEXTURE2D);
 
 ///Sets the priority of the texture for memory management.
-void /*GFXDRVAPI*/ GFXPrioritizeTexture (GLuint handle, float priority);
+void /*GFXDRVAPI*/ GFXPrioritizeTexture (unsigned int handle, float priority);
 
 ///Attaches a given palette to the current texture
 void /*GFXDRVAPI*/ GFXAttachPalette(unsigned char *palette, int handle);
