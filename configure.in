@@ -793,7 +793,11 @@ for PNG_LIB_NAME in $PNG_LIB_LIST ; do
 done
 
 if test "x$have_png_lib" = "xno" ; then
-    AC_MSG_ERROR([Png library not found])
+     PNG_LIB_NAME="png -lz -lm"
+     CHECK_FOR_PNG_LIB
+     if test "x$have_png_lib" = "xno" ; then
+       AC_MSG_ERROR([Png library not found])
+     fi
 fi
 
 LIBS="$saved_LIBS"
