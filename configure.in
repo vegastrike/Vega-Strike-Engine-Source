@@ -926,11 +926,6 @@ if test "$USEROPENAL" = "1" ; then
         OPENAL_LDOPTS="-L$with_openal_libs"
     fi
 
-    if test "x$is_macosx" = "xno" ; then
-        MACORPCLIBS="$OPENAL_LDOPTS -l$OPENAL_LIB_NAME"
-    else
-	MACORPCLIBS="$OPENAL_LDOPTS -framework OpenAL"
-    fi
     AC_DEFUN( CHECK_FOR_OPENAL_LIB, [
         AC_MSG_CHECKING([for $OPENAL_LIB_NAME library])
 	LIBS="$MACORPCLIBS"
@@ -943,6 +938,13 @@ if test "$USEROPENAL" = "1" ; then
     OPENAL_LIB_LIST="openal"
     
     for OPENAL_LIB_NAME in $OPENAL_LIB_LIST ; do
+
+    if test "x$is_macosx" = "xno" ; then
+        MACORPCLIBS="$OPENAL_LDOPTS -l$OPENAL_LIB_NAME"
+    else
+	MACORPCLIBS="$OPENAL_LDOPTS -framework OpenAL"
+    fi
+
         CHECK_FOR_OPENAL_LIB
     
         if test "x$have_openal_lib" = "xyes" ; then
