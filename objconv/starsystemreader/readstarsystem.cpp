@@ -295,7 +295,7 @@ std::vector<string> readMilkyWayNames( ) {
 			unsigned int quote=  s.find("\"");
 			if (quote!=string::npos) {
 				string newname=s.substr(0,quote);
-				if (newname!="max"&&newname!="min"&&newname!="maxlimit"&&newname!="minlimit"&&newname!="hardwicke"&&newname!="reid"&&newname!="lesnick")
+				if (newname!="max"&&newname!="min"&&newname!="maxlimit"&&newname!="minlimit"&&newname!="hardwicke"&&newname!="reid"&&newname!="lesnick"&&newname!="midgard"&&newname.find("blockade")==string::npos&& newname!="wolf359")
 					retval.push_back(newname);
 			}
 		}
