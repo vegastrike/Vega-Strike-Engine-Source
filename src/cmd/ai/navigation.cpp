@@ -253,7 +253,7 @@ void ChangeHeading::Execute() {
   char yswitch = ((local_heading.j>0)!=(last_velocity.j>0)||(!local_heading.j))&&last_velocity.j!=0?1:0;
   static bool AICheat = XMLSupport::parse_bool(vs_config->getVariable ("AI","turn_cheat","true"));
   bool cheater=false;
-  if (AICheat) {
+  if (AICheat&&!parent->isSubUnit()) {
     if (xswitch||yswitch) {   
 
       if (xswitch) {
@@ -271,6 +271,7 @@ void ChangeHeading::Execute() {
           ang_vel.j=.0f;
       }
       cheater=true;
+	  ang_vel.k=local_velocity.k=0;
       parent->SetAngularVelocity(ang_vel);
     }
   }
