@@ -423,6 +423,7 @@ void InitializeInput() {
 	BindKey('s', FighterPitchUp);*/
 }
 Animation * s;
+Animation * greenexp;
 Sprite *fihneCarriah;
 void createObjects() {
 
@@ -435,8 +436,10 @@ void createObjects() {
   fighter = new Unit("uosprey.dat");
   //Unit *fighter2 = new Unit("uosprey.dat");
   fighter2 = new Unit("uosprey.dat");
-  s = new Animation ("explode.ani");
+  s = new Animation ("explosion_orange.ani");
   s->SetPosition (0,0,5);
+  greenexp = new Animation ("explosion_green.ani");
+  greenexp->SetPosition (0,0,5);
   fihneCarriah = new Sprite ("carrier.spr");
   bg = new Background("cube");
   //HUDElement *t = new HUDElement("ucarrier.dat");
@@ -521,6 +524,7 @@ void destroyObjects() {
   delete fighter;
   delete bg;
   delete s;
+  delete greenexp;
   delete fihneCarriah;
 }
 
@@ -562,7 +566,8 @@ void main_loop() {
 
 
   _GFX->activeStarSystem()->Draw();
-  s->Draw();
+  //  s->Draw();
+  greenexp->Draw();
   fihneCarriah->Draw();
   _GFX->activeStarSystem()->Update();
   ProcessKB();

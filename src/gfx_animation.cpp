@@ -43,9 +43,7 @@ Animation::Animation (char * FileName):Primitive()
 	FILE * fp = fopen (FileName, "r+b");
 	if (!fp)
 		; // do something 
-	fscanf (fp,"%d",&numframes);
-	fscanf (fp, "%f",&timeperframe);
-	fprintf (stderr,"timeperframe: %f",timeperframe);
+	fscanf (fp,"%d %f",&numframes,&timeperframe);
 	//	fread (&numframes, sizeof (short), 1, fp); 
 	Decal = new Texture* [numframes];
 	//	fread (&timeperframe,sizeof (float),1,fp);
