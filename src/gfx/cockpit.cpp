@@ -1221,6 +1221,8 @@ void Cockpit::Draw() {
       un->Threaten (NULL,0);
     }
     if (_Universe->CurrentCockpit()<univmap.size()) {
+      GFXEnable(TEXTURE0);
+      GFXBlendMode(SRCALPHA,INVSRCALPHA);
       univmap[_Universe->CurrentCockpit()].Draw();
     }
   }
