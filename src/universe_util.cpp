@@ -24,6 +24,9 @@ namespace UniverseUtil {
 	int musicAddList(string str) {
 		return muzak->Addlist(str.c_str());
 	}
+	void musicSkip() {
+		 muzak->Skip();
+	}
 	void musicPlaySong(string str) {
 		muzak->GotoSong(str);
 	}
