@@ -77,6 +77,8 @@ WrapGFX::WrapGFX(int argc, char** argv)
 
 	StartGFX();
 	InitInput();
+
+	hud_camera = Camera();
 	star_system = new StarSystem(new Planet("test_system.dat"));
 	//	delete star_system;
 	

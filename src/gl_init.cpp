@@ -207,7 +207,9 @@ BOOL GFXInit (int argc, char ** argv){
     glClearDepth(1);
     glEnable (GL_BLEND);
     glDisable (GL_ALPHA_TEST);
-    glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    //glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    GFXBlendMode (SRCALPHA, INVSRCALPHA);
+    
     glColor3f(0,0,0);
     glMatrixMode (GL_MODELVIEW);
     glLoadIdentity();

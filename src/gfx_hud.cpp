@@ -96,18 +96,13 @@ void TextPlane::Draw()
 {
 	time += GetElapsedTime();
 	UpdateMatrix();
-	Vector np = Transform(pp,pq,pr,p), 
-		nq = Transform(pp,pq,pr,q),
-		nr = Transform(pp,pq,pr,r),
-		npos = ppos+pos;
-	for (int i=0;i<nummesh;i++) {
-	  GFXLoadMatrix (MODEL,transformation) ;
-	  meshdata[i]->Draw(np, nq, nr, npos);
-	}
 	Matrix tmatrix;
-	GFXGetMatrix(VIEW, tmatrix);
-	GFXLoadMatrix(VIEW, mview);
-	
+	GFXGetMatrix(MODEL, tmatrix);
+	for (int i=0;i<nummesh;i++) {
+	  GFXLoadMatrix (MODEL,tmatrix);
+	  meshdata[i]->Draw();
+	}
+
 	// some stuff to draw the text stuff
 	string::iterator text_it = myText.begin();
 	float row = 0.0, col = 0.0;
@@ -116,8 +111,6 @@ void TextPlane::Draw()
 	GFXSelectMaterial(myMaterial);
 	GFXDisable(LIGHTING);
 	GFXDisable(DEPTHTEST);
-	GFXColor4f(1.0, 1.0, 1.0, 1.0);
-	GFXBegin(QUADS);
 	/*
 	GFXTexCoord2f(0.0, 0.0);
 	GFXVertex3f(0.0, 0.0, 0.0);
@@ -138,19 +131,40 @@ void TextPlane::Draw()
 	GFXTexCoord2f(0.0, 0.0);
 	GFXVertex3f(myDims.i, 0.0, 0.0);
 	*/
-	GFXBlendMode(ZERO, ZERO);
+	GFXPushBlendMode();
+	GFXBlendMode(ONE, ONE);
 
+	GFXEnable(TEXTURE0);
+	/*
+	GFXBegin(QUADS);
+	GFXColor4f(1.0, 1.0, 1.0, 1.0);
+	GFXTexCoord2f(0.0, 0.0);
+	GFXVertex3f(-3, -3, 0.0);
+	GFXTexCoord2f(0.0, 1.0);
+	GFXVertex3f(-3, 3, 0.0);
+	GFXTexCoord2f(1.0, 1.0);
+	GFXVertex3f(3, 3, 0.0);
+	GFXTexCoord2f(1.0, 0.0);
+	GFXVertex3f(3, -3, 0.0);
+	GFXEnd();
+	*/
+
+	GFXBegin(QUADS);
 	while(*text_it != '\0' && row<myDims.j) {
 	  if(*text_it>=32 && *text_it<=127) {//always true
 			GlyphPosition g = myGlyphPos[*text_it-32];
-			GFXTexCoord2f(g.left,g.top);
-			GFXVertex3f(col, row, 0.0);
-			GFXTexCoord2f(g.left,g.bottom);
-			GFXVertex3f(col, row+myFontMetrics.j, 0.0);
+
 			GFXTexCoord2f(g.right,g.bottom);
-			GFXVertex3f(col+myFontMetrics.i, row+myFontMetrics.j, 0.0);
+			GFXVertex3f(-(col+myFontMetrics.i), row, 0.0);
+
 			GFXTexCoord2f(g.right,g.top);
-			GFXVertex3f(col+myFontMetrics.i, row, 0.0);
+			GFXVertex3f(-(col+myFontMetrics.i), row+myFontMetrics.j, 0.0);
+
+			GFXTexCoord2f(g.left,g.top);
+			GFXVertex3f(-col, row+myFontMetrics.j, 0.0);
+
+			GFXTexCoord2f(g.left,g.bottom);
+			GFXVertex3f(-col, row, 0.0);
 		}
 
 		if(*text_it=='\t')
@@ -159,7 +173,7 @@ void TextPlane::Draw()
 			col+=myFontMetrics.i;
 		if(col>myDims.i||*text_it == '\n') {
 			col = 0.0;
-			row += myFontMetrics.j;
+			row -= myFontMetrics.j;
 		}
 		text_it++;
 	}
@@ -167,10 +181,12 @@ void TextPlane::Draw()
 	GFXEnd();
 	GFXEnable(LIGHTING);
 	GFXEnable(DEPTHTEST);
-	GFXLoadMatrix(VIEW, tmatrix);
+	GFXPopBlendMode();
 
-	for(int subcount = 0; subcount < numsubunit; subcount++)
-		subunits[subcount]->Draw(tmatrix, np, nq, nr, npos);
+	for(int subcount = 0; subcount < numsubunit; subcount++) {
+	  GFXLoadMatrix (MODEL,tmatrix);
+	  subunits[subcount]->Draw();
+	}
 	if(aistate)
 		aistate = aistate->Execute();
 }

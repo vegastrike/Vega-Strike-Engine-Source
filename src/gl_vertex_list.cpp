@@ -147,8 +147,12 @@ BOOL GFXVertexList::Draw()
 		glTexCoordPointer(2, GL_FLOAT, sizeof(GFXVertex), &myVertices[0].s+GFXStage0*2);
 		
 		glClientActiveTextureARB (GL_TEXTURE1_ARB);
-		glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-		glTexCoordPointer(2, GL_FLOAT, sizeof(GFXVertex), &myVertices[0].s+GFXStage1*2);
+
+		  /*
+		    glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+		    glTexCoordPointer(2, GL_FLOAT, sizeof(GFXVertex), &myVertices[0].s+GFXStage1*2);
+		*/
+		glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 
 		glDrawArrays(GL_TRIANGLES, 0, numTriangles*3);
 	}

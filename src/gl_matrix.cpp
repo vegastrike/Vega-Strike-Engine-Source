@@ -588,6 +588,7 @@ BOOL /*GFXDRVAPI*/ GFXLookAt(Vector eye, Vector center, Vector up)
 {
 	LookAtHelper(eye.i, eye.j, eye.k, center.i, center.j, center.k, up.i, up.j, up.k);
 
+
 	//	Identity(transview);
 	//	transview[3]=center.i;
 	//	transview[7]=center.j;
@@ -596,8 +597,6 @@ BOOL /*GFXDRVAPI*/ GFXLookAt(Vector eye, Vector center, Vector up)
 	centery=center.j;
 	centerz=center.k;
 	GFXLoadMatrix(VIEW,view);
-		
-	
 
 
 

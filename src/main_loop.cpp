@@ -477,11 +477,12 @@ void createObjects() {
   
   textplane = new TextPlane("9x12.fon");
   textplane->SetText(string("This is a test of the emergency broadcast system"));
-  textplane->SetPosition(Vector(0.250F, 0.250F, 1.010F));
+  textplane->SetPosition(Vector(0.250F, 0.250F, 1.00F));
+  //textplane->SetPosition(Vector(0.0F, 0.0F, 2.000F));
   GFXEnable(TEXTURE0);
   GFXEnable(TEXTURE1);
 
-  
+
   fighter2->SetPosition(0.0, 1.0, 50.0);
   fighter2->Pitch(PI/2);
   
@@ -491,7 +492,7 @@ void createObjects() {
     fighters[a] = new Unit("uosprey.dat");
     //fighters[a]->SetPosition((a%8)/8.0 - 2.0, (a/8)/8.0 - 2.0,5.0);
     fighters[a]->SetPosition((a%16)*5 - 40.0F, (a/16)*5 - 40.0F,7.0F);
-    fighters[a]->Pitch(PI/2);
+    //fighters[a]->Pitch(PI/2);
     //fighters[a]->Roll(PI/2);
     //fighters[a]->Scale(Vector(0.5,0.5,0.5));
     _GFX->activeStarSystem()->AddUnit(fighters[a]);
@@ -568,8 +569,11 @@ void main_loop() {
   //fighter2->SetPosition(fighter2->Position() + Vector(0.0, 0.1, 0.0));
   //s->Draw();
   GFXDisable(TEXTURE1);
-  //textplane->TDraw();
-  textplane->Yaw(PI/180);
+  
+  
+  _GFX->AccessHudCamera()->UpdateGFX();
+  textplane->Draw();
+  //textplane->Yaw(PI/180);
   
   //t->TDraw();
   //s->Yaw(PI/180);

@@ -83,6 +83,7 @@ protected:
 	//Matrix modelview[16];
   //	Camera cam[NUM_CAM];
   //	int currentcamera;
+	Camera hud_camera;
 
 	BOOL StartGL();
 	BOOL active;
@@ -135,6 +136,7 @@ public:
 	  } else
 	    return NULL;
 	}
+	Camera *AccessHudCamera() { return &hud_camera; }
 
 	void SetViewport()
 	{
