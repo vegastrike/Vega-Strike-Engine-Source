@@ -1,6 +1,8 @@
+GCF = 
 
-INCLUDES = ${GTK_CFLAGS}
+INCLUDES = `gtk-config --cflags`
 bin_PROGRAMS=vslauncher
 commonLIB = ../src/common/libvscommon.a
-vslauncher_LDADD = ${commonLIB} ${GTK_LIBS} 
+vslauncher_LDFLAGS  =`gtk-config --libs`
+vslauncher_LDADD = ${commonLIB} 
 vslauncher_SOURCES= saveinterface.cpp general.cpp
