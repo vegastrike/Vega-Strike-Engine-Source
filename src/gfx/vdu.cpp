@@ -109,14 +109,13 @@ void VDU::DrawTargetSpr (Sprite *s, float per, float &sx, float &sy, float &w, f
   }
   GetPosition (sx,sy);
   GetSize (w,h);
-  static bool use_reduced_vdus=XMLSupport::parse_bool (vs_config->getVariable("graphics","use_reduced_vdus","false"));
-  if( use_reduced_vdus)
-  {
-    static float width_factor=XMLSupport::parse_float (vs_config->getVariable("graphics","reduced_vdus_width","0"));
-    static float height_factor=XMLSupport::parse_float (vs_config->getVariable("graphics","reduced_vdus_height","0"));
-  	w = w-width_factor;
-	h = h+height_factor;
-  }
+
+  // Use margins specified from config file
+  static float width_factor=XMLSupport::parse_float (vs_config->getVariable("graphics","reduced_vdus_width","0"));
+  static float height_factor=XMLSupport::parse_float (vs_config->getVariable("graphics","reduced_vdus_height","0"));
+  w = w-width_factor;
+  h = h+height_factor;
+
   h=-fabs (h*per);
 
   if (!s) {
@@ -287,14 +286,13 @@ void VDU::DrawVDUShield (Unit * parent) {
   float x,y,w,h;
   GetPosition (x,y);
   GetSize (w,h);
-  static bool use_reduced_vdus=XMLSupport::parse_bool (vs_config->getVariable("graphics","use_reduced_vdus","false"));
-  if( use_reduced_vdus)
-  {
-    static float width_factor=XMLSupport::parse_float (vs_config->getVariable("graphics","reduced_vdus_width","0"));
-    static float height_factor=XMLSupport::parse_float (vs_config->getVariable("graphics","reduced_vdus_height","0"));
-  	w = w-width_factor;
-	h = h+height_factor;
-  }
+
+  // Use margins specified from config file
+  static float width_factor=XMLSupport::parse_float (vs_config->getVariable("graphics","reduced_vdus_width","0"));
+  static float height_factor=XMLSupport::parse_float (vs_config->getVariable("graphics","reduced_vdus_height","0"));
+  w = w-width_factor;
+  h = h+height_factor;
+
   h=fabs (h*.6);
   w=fabs (w*.6);
   unsigned short armor[4];
@@ -824,14 +822,12 @@ void VDU::Draw (Unit * parent, const GFXColor & color) {
   float x,y;
   float h,w;
   GetSize (w,h);
-  static bool use_reduced_vdus=XMLSupport::parse_bool (vs_config->getVariable("graphics","use_reduced_vdus","false"));
-  if( use_reduced_vdus)
-  {
-    static float width_factor=XMLSupport::parse_float (vs_config->getVariable("graphics","reduced_vdus_width","0"));
-    static float height_factor=XMLSupport::parse_float (vs_config->getVariable("graphics","reduced_vdus_height","0"));
-  	w = w-width_factor;
-	h = h+height_factor;
-  }
+
+  static float width_factor=XMLSupport::parse_float (vs_config->getVariable("graphics","reduced_vdus_width","0"));
+  static float height_factor=XMLSupport::parse_float (vs_config->getVariable("graphics","reduced_vdus_height","0"));
+  w = w-width_factor;
+  h = h+height_factor;
+
   GetPosition (x,y);
   //tp->SetCharSize (fabs(w/cols),fabs(h/rows));
   float csx,csy;
