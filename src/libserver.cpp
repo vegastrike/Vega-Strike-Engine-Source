@@ -21,7 +21,5 @@ void	UpdateCameraSnds() {}
 void	NebulaUpdate( StarSystem * ss) {}
 void	TestMusic() {}
 void SwitchUnits2( Unit * nw) {
-	if (nw)
-		nw->PrimeOrders();
 }
 void DoCockpitKeys() {}

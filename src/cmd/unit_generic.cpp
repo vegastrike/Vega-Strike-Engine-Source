@@ -20,6 +20,7 @@
 #include "python/python_class.h"
 #include "cmd/unit_factory.h"
 #include "gfx/cockpit_generic.h"
+#include "gfx/vsbox.h"
 #include <algorithm>
 #include "cmd/ai/ikarus.h"
 #include "role_bitmask.h"
@@ -250,155 +251,13 @@ Unit::Unit (std::vector <Mesh *> & meshes, bool SubU, int fact) {
   SubUnit = SubU;
   meshdata = meshes;
   meshes.clear();
-  meshdata_string.push_back(NULL);
+  meshdata.push_back(NULL);
   calculate_extent(false);
 }
 
-Unit::Unit (std::vector <string> & meshes, bool SubU, int fact) {
-  Init();
-  this->faction = fact;
-  SubUnit = SubU;
-  RecurseIntoSubUnitsOnCollision=!isSubUnit();
-  meshdata_string = meshes;
-  meshes.clear();
-  meshdata_string.push_back(NULL);
-  calculate_extent(false);
-}
-
+extern void update_ani_cache();
 Unit::Unit(const char *filename, bool SubU, int faction,std::string unitModifications, Flightgroup *flightgrp,int fg_subnumber, char * netxml) {
-	Init();
-	//update_ani_cache();
-	//if (!SubU)
-	//  _Universe->AccessCockpit()->savegame->AddUnitToSave(filename,UNITPTR,GetFaction(faction),(long)this);
-	SubUnit = SubU;
-	RecurseIntoSubUnitsOnCollision=!isSubUnit();
-	this->faction = faction;
-	SetFg (flightgrp,fg_subnumber);
-	bool doubleup=false;
-	char * my_directory=GetUnitDir(filename);
-	vssetdir (GetSharedUnitPath().c_str());
-	FILE * fp=NULL;
-	if (!fp) {
-	  const char *c;
-	  if ((c=FactionUtil::GetFaction(faction)))
-	    vschdir (c);
-	  else
-	    vschdir ("unknown");
-	  doubleup=true;
-	  vschdir (my_directory);
-	} else {
-	  fclose (fp);
-	}
-	fp = fopen (filename,"r");
-	if (!fp) {
-	  vscdup();
-	  vscdup();
-	  doubleup=false;
-	  vschdir (my_directory);
-	  fp = fopen (filename,"r");
-	}
-
-	if (!fp) {
-	  if (doubleup) {
-	    vscdup();
-	  }
-	  vscdup();
-	  vschdir ("neutral");
-	  faction=FactionUtil::GetFaction("neutral");//set it to neutral
-	  doubleup=true;
-	  vschdir (my_directory);
-	  fp = fopen (filename,"r");
-	  if (fp) fclose (fp); 
-	  else {
-	    fprintf (stderr,"Warning: Cannot locate %s",filename);	  
-	    meshdata_string.clear();
-	    meshdata_string.push_back(NULL);
-	    this->name=string("LOAD_FAILED");
-	    //	    assert ("Unit Not Found"==NULL);
-	  }
-	}else {
-	  fclose (fp);
-	}
-	free(my_directory);
-	/*Insert file loading stuff here*/
-	if(1&&fp) {
-	  name = filename;
-
-	  LoadXML(filename,unitModifications.c_str());
-	}
-	if (1) {
-	  calculate_extent(false);
-	  ToggleWeapon(true);//change missiles to only fire 1
-       	  vscdup();
-	  if (doubleup) 
-	    vscdup();
-	  vsresetdir();
-	  return;
-	}
-	LoadFile(filename);
-	int nummesh;
-	ReadInt(nummesh);
-	meshdata_string.clear();
-	for(int meshcount = 0; meshcount < nummesh; meshcount++)
-	{
-		int meshtype;
-		ReadInt(meshtype);
-		char meshfilename[64];
-		//float x,y,z;
-		//ReadMesh(meshfilename, x,y,z);
-		meshdata_string.push_back(meshfilename);
-
-		//		meshdata_string[meshcount]->SetPosition(Vector (x,y,z));
-	}
-	meshdata_string.push_back(NULL);
-	int numsubunit;
-	ReadInt(numsubunit);
-	for(int unitcount = 0; unitcount < numsubunit; unitcount++)
-	{
-		char unitfilename[64];
-		float x,y,z;
-		int type;
-		ReadUnit(unitfilename, type, x,y,z);
-		Unit *un;
-		switch(type)
-		{
-		default:
-		  SubUnits.prepend (un=UnitFactory::createUnit (unitfilename,true,faction,unitModifications,flightgroup,flightgroup_subnumber));
-
-		}
-		un->SetPosition(QVector(x,y,z));
-	}
-
-	int restricted;
-	float min, max;
-	ReadInt(restricted); //turrets and weapons
-	//ReadInt(restricted); // What's going on here? i hsould have 2, but that screws things up
-
-	ReadRestriction(restricted, min, max);
-	if(restricted) {
-	  //RestrictYaw(min,max);
-	}
-	ReadRestriction(restricted, min, max);
-	if(restricted) {
-	  //RestrictPitch(min,max);
-	}
-	ReadRestriction(restricted, min, max);
-	if(restricted) {
-	  //RestrictRoll(min,max);
-	}
-	float maxspeed, maxaccel, mass;
-	ReadFloat(maxspeed);
-	ReadFloat(maxaccel);
-	ReadFloat(mass);
-
-
-	CloseFile();
-	calculate_extent(false);
-	ToggleWeapon(true);//change missiles to only fire 1
-	vscdup();
-	if (fp) 
-	  vscdup();
-	vsresetdir();
+	Init( filename, SubU, faction, unitModifications, flightgrp, fg_subnumber, netxml); 
 }
 
 Unit::~Unit()
@@ -466,9 +325,9 @@ Unit::~Unit()
   fflush (stderr);
 #endif
 }
+
 void Unit::Init()
 {
-  
 	this->networked=0;
 	this->combat_role=ROLES::getRole("INERT");
 	this->computer.combat_mode=true;
@@ -593,13 +452,10 @@ void Unit::Init()
   for (unsigned int damageiterator=0;damageiterator<numg;damageiterator++) {
     image->cockpit_damage[damageiterator]=1;
   }
-  // No CollideInfo yet
-  /*
   CollideInfo.object.u = NULL;
   CollideInfo.type = LineCollide::UNIT;
   CollideInfo.Mini.Set (0,0,0);
   CollideInfo.Maxi.Set (0,0,0);
-  */
   SetAI (new Order());
   /*
   yprrestricted=0;
@@ -620,7 +476,195 @@ void Unit::Init()
   // Not needed here
   //static float lc =XMLSupport::parse_float (vs_config->getVariable ("physics","lock_cone",".8"));// DO NOT CHANGE see unit_customize.cpp
   //  Fire();
+
 }
+void Unit::Init(const char *filename, bool SubU, int faction,std::string unitModifications, Flightgroup *flightgrp,int fg_subnumber, char * netxml)
+{
+	this->Unit::Init();
+	update_ani_cache();
+	//if (!SubU)
+	//  _Universe->AccessCockpit()->savegame->AddUnitToSave(filename,UNITPTR,FactionUtil::GetFaction(faction),(long)this);
+	SubUnit = SubU;
+	this->faction = faction;
+	SetFg (flightgrp,fg_subnumber);
+	bool doubleup=false;
+	char * my_directory=GetUnitDir(filename);
+	vssetdir (GetSharedUnitPath().c_str());
+	FILE * fp=NULL;
+	if (!fp) {
+	  const char *c;
+	  if ((c=FactionUtil::GetFaction(faction)))
+	    vschdir (c);
+	  else
+	    vschdir ("unknown");
+	  doubleup=true;
+	  vschdir (my_directory);
+	} else {
+	  fclose (fp);
+	}
+	if (filename[0])
+    	    fp = fopen (filename,"r");
+	if (!fp) {
+	  vscdup();
+	  vscdup();
+	  doubleup=false;
+	  vschdir (my_directory);
+	  if (filename[0])
+    	    fp = fopen (filename,"r");
+	}
+
+	if (!fp) {
+	  if (doubleup) {
+	    vscdup();
+	  }
+	  vscdup();
+	  vschdir ("neutral");
+	  faction=FactionUtil::GetFaction("neutral");//set it to neutral
+	  doubleup=true;
+	  vschdir (my_directory);
+	  if (filename[0])
+    	    fp = fopen (filename,"r");
+	  if (fp) fclose (fp); 
+	  else {
+	    fprintf (stderr,"Warning: Cannot locate %s",filename);	  
+	    meshdata.clear();
+	    meshdata.push_back(NULL);
+	    this->name=string("LOAD_FAILED");
+	    //	    assert ("Unit Not Found"==NULL);
+	  }
+	}else {
+	  fclose (fp);
+	}
+	free(my_directory);
+	//Insert file loading stuff here
+	if(1&&fp) {
+	  name = filename;
+
+	  Unit::LoadXML(filename,unitModifications.c_str());
+	}
+	if (1) {
+	  calculate_extent(false);
+	  ToggleWeapon(true);//change missiles to only fire 1
+       	  vscdup();
+	  if (doubleup) 
+	    vscdup();
+	  vsresetdir();
+	  return;
+	}
+	LoadFile(filename);
+	int nummesh;
+	ReadInt(nummesh);
+	meshdata.clear();
+	for(int meshcount = 0; meshcount < nummesh; meshcount++)
+	{
+		int meshtype;
+		ReadInt(meshtype);
+		char meshfilename[64];
+		float x,y,z;
+		ReadMesh(meshfilename, x,y,z);
+		meshdata.push_back(new Mesh(meshfilename, 1, faction,NULL));
+		//		meshdata[meshcount]->SetPosition(Vector (x,y,z));
+	}
+	meshdata.push_back(NULL);
+	int numsubunit;
+	ReadInt(numsubunit);
+	for(int unitcount = 0; unitcount < numsubunit; unitcount++)
+	{
+		char unitfilename[64];
+		float x,y,z;
+		int type;
+		ReadUnit(unitfilename, type, x,y,z);
+		Unit *un;
+		switch(type)
+		{
+		default:
+		  SubUnits.prepend (un=UnitFactory::createUnit (unitfilename,true,faction,unitModifications,flightgroup,flightgroup_subnumber));
+
+		}
+		un->SetPosition(QVector(x,y,z));
+	}
+
+	int restricted;
+	float min, max;
+	ReadInt(restricted); //turrets and weapons
+	//ReadInt(restricted); // What's going on here? i hsould have 2, but that screws things up
+
+	ReadRestriction(restricted, min, max);
+	if(restricted) {
+	  //RestrictYaw(min,max);
+	}
+	ReadRestriction(restricted, min, max);
+	if(restricted) {
+	  //RestrictPitch(min,max);
+	}
+	ReadRestriction(restricted, min, max);
+	if(restricted) {
+	  //RestrictRoll(min,max);
+	}
+	float maxspeed, maxaccel, mass;
+	ReadFloat(maxspeed);
+	ReadFloat(maxaccel);
+	ReadFloat(mass);
+
+
+	CloseFile();
+	calculate_extent(false);
+	ToggleWeapon(true);//change missiles to only fire 1
+	vscdup();
+	if (fp) 
+	  vscdup();
+	vsresetdir();
+}
+
+vector <Mesh *> Unit::StealMeshes() {
+  vector <Mesh *>ret;
+  
+  Mesh * shield = meshdata.empty()?NULL:meshdata.back();
+  for (int i=0;i<nummesh();i++) {
+    ret.push_back (meshdata[i]);
+  }
+  meshdata.clear();
+  meshdata.push_back(shield);
+  
+  return ret;
+}
+
+void Unit::calculate_extent(bool update_collide_queue) {  
+  int a;
+  corner_min=Vector (FLT_MAX,FLT_MAX,FLT_MAX);
+  corner_max=Vector (-FLT_MAX,-FLT_MAX,-FLT_MAX);
+
+  for(a=0; a<nummesh(); a++) {
+    corner_min = corner_min.Min(meshdata[a]->corner_min());
+    corner_max = corner_max.Max(meshdata[a]->corner_max());
+  }/* have subunits now in table*/
+  un_kiter iter =SubUnits.constIterator();
+  const Unit * un;
+  while ((un = iter.current())) {
+    corner_min = corner_min.Min(un->LocalPosition().Cast()+un->corner_min);
+    corner_max = corner_max.Max(un->LocalPosition().Cast()+un->corner_max);
+    iter.advance();
+  }
+
+  if (corner_min.i==FLT_MAX||corner_max.i==-FLT_MAX||!FINITE (corner_min.i)||!FINITE(corner_max.i)) {
+    radial_size=0;
+    corner_min.Set (0,0,0);
+    corner_max.Set (0,0,0);
+  }else {
+    float tmp1 = corner_min.Magnitude();
+    float tmp2 = corner_max.Magnitude();
+    radial_size = tmp1>tmp2?tmp1:tmp2;
+    if (!SubUnit)
+      image->selectionBox = new Box(corner_min, corner_max);
+  }
+  if (!SubUnit&&update_collide_queue) {
+    UpdateCollideQueue();
+  }
+  if (isUnit()==PLANETPTR) {
+    radial_size = corner_max.i;
+  }
+}
+
 void Unit::Fire (unsigned int weapon_type_bitmask, bool listen_to_owner) {
     if (cloaking>=0)
         return;

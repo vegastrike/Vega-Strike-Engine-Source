@@ -44,11 +44,6 @@
 
 #include "mission.h"
 
-void InitDirector() {
-	Python::reseterrors();
-	//PYTHON_INIT_MODULE(Director);
-	Python::reseterrors();
-}
 void InitBase() {
 	Python::reseterrors();
 	//PYTHON_INIT_MODULE(Base);

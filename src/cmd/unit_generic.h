@@ -147,7 +147,6 @@ public:
   /** Constructor that creates aa mesh with meshes as submeshes (number
    *  of them) as either as subunit with faction faction
    */
-  Unit (std::vector <string> &meshes  , bool Subunit, int faction);
   Unit (std::vector <Mesh *> &meshes  , bool Subunit, int faction);
 
 
@@ -157,6 +156,14 @@ public:
    */
 // Uses a lot of stuff that does not belong to here
   Unit( const char *filename,
+        bool        SubUnit,
+       int         faction,
+       std::string customizedUnit=string(""),
+       Flightgroup *flightgroup=NULL,
+       int         fg_subnumber=0, char * netxml=NULL);
+  ///Initialize many of the defaults inherant to the constructor
+  void Init();
+  void Init( const char *filename,
         bool        SubUnit,
        int         faction,
        std::string customizedUnit=string(""),
@@ -272,8 +279,7 @@ protected:
   ///Takes out of the collide table for this system.
   void RemoveFromSystem();
   bool InCorrectStarSystem (StarSystem *active) {return active==activeStarSystem;}
- std::vector <string> meshdata_string;
-  virtual int nummesh()const {return ((int)meshdata_string.size())-1;}
+  virtual int nummesh()const {return ((int)meshdata.size())-1;}
 //void FixGauges();
 // Uses planet stuff
   virtual void SetPlanetOrbitData (PlanetaryTransform *trans) {}
@@ -287,7 +293,7 @@ protected:
   virtual void addHalo( const char * filename, const QVector &loc, const Vector &size, const GFXColor & col, std::string halo_type) {}
 
 // Uses Mesh -> in NetUnit and Unit only
-  virtual vector <Mesh *> StealMeshes() { vector <Mesh *> v; return v;}
+  vector <Mesh *> StealMeshes();
   ///Begin and continue explosion
 // Uses GFX so only in Unit class
   virtual bool Explode(bool draw, float timeit) {return false;}
@@ -886,7 +892,7 @@ public:
 
   ///fils in corner_min,corner_max and radial_size
 // Uses Box stuff -> only in NetUnit and Unit
-  virtual void calculate_extent(bool update_collide_queue) {}
+  void calculate_extent(bool update_collide_queue);
 
 // To let only in Unit class
 ///Builds a BSP tree from either the hull or else the current meshdata[] array
@@ -997,8 +1003,6 @@ public:
   void setFullname(string name)  { fullname=name; };
   string getFullname() const { return fullname; };
 
-  ///Initialize many of the defaults inherant to the constructor
-  void Init();
   ///Is this class a unit
   virtual enum clsptr isUnit()const {return UNITPTR;}
   inline void Ref() {

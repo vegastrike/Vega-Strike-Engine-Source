@@ -96,7 +96,7 @@ protected:
 
 public:
   ///Initialize many of the defaults inherant to the constructor
-  void Init();
+  //void Init();
 
 /***************************************************************************************/
 /**** CARGO STUFF                                                                   ****/
@@ -126,7 +126,7 @@ protected:
   int nummesh()const {return ((int)meshdata.size())-1;}
 
 public:
-  vector <Mesh *> StealMeshes();
+  //vector <Mesh *> StealMeshes();
   ///Process all meshes to be deleted
   ///Split this mesh with into 2^level submeshes at arbitrary planes
   void Split (int level);
@@ -174,7 +174,7 @@ public:
 
 protected:
   ///fils in corner_min,corner_max and radial_size
-  void calculate_extent(bool update_collide_queue);
+  //void calculate_extent(bool update_collide_queue);
   ///Builds a BSP tree from either the hull or else the current meshdata[] array
   void BuildBSPTree (const char *filename, bool vplane=false, Mesh * hull=NULL);//if hull==NULL, then use meshdata **
   ///returns -1 if unit cannot dock, otherwise returns which dock it can dock at

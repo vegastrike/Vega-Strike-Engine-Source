@@ -102,49 +102,14 @@ void GameUnit<UnitType>::SetPlanetHackTransformation (Transformation *&ct,Matrix
 
 template <class UnitType>
 GameUnit<UnitType>::GameUnit<UnitType>( int /*dummy*/ ) {
-		this->GameUnit::Init();
+		this->Unit::Init();
 }
 
 #define PARANOIA .4
 
-template <class UnitType>
-void GameUnit<UnitType>::calculate_extent(bool update_collide_queue) {  
-  int a;
-  corner_min=Vector (FLT_MAX,FLT_MAX,FLT_MAX);
-  corner_max=Vector (-FLT_MAX,-FLT_MAX,-FLT_MAX);
-
-  for(a=0; a<nummesh(); a++) {
-    corner_min = corner_min.Min(meshdata[a]->corner_min());
-    corner_max = corner_max.Max(meshdata[a]->corner_max());
-  }/* have subunits now in table*/
-  un_kiter iter =SubUnits.constIterator();
-  const Unit * un;
-  while ((un = iter.current())) {
-    corner_min = corner_min.Min(un->LocalPosition().Cast()+un->corner_min);
-    corner_max = corner_max.Max(un->LocalPosition().Cast()+un->corner_max);
-    iter.advance();
-  }
-
-  if (corner_min.i==FLT_MAX||corner_max.i==-FLT_MAX||!FINITE (corner_min.i)||!FINITE(corner_max.i)) {
-    radial_size=0;
-    corner_min.Set (0,0,0);
-    corner_max.Set (0,0,0);
-  }else {
-    float tmp1 = corner_min.Magnitude();
-    float tmp2 = corner_max.Magnitude();
-    radial_size = tmp1>tmp2?tmp1:tmp2;
-    if (!SubUnit)
-      image->selectionBox = new Box(corner_min, corner_max);
-  }
-  if (!SubUnit&&update_collide_queue) {
-    UpdateCollideQueue();
-  }
-  if (isUnit()==PLANETPTR) {
-    radial_size = corner_max.i;
-  }
-}
-
 extern void UncheckUnit (Unit * un);
+
+/*
 template <class UnitType>
 void GameUnit<UnitType>::Init()
 {
@@ -159,18 +124,17 @@ void GameUnit<UnitType>::Init()
   CollideInfo.Mini.Set (0,0,0);
   CollideInfo.Maxi.Set (0,0,0);
   SetAI (new Order());
-  /*
-  yprrestricted=0;
-  ymin = pmin = rmin = -PI;
-  ymax = pmax = rmax = PI;
-  ycur = pcur = rcur = 0;
-  */
-  static Vector myang(XMLSupport::parse_float (vs_config->getVariable ("general","pitch","0")),XMLSupport::parse_float (vs_config->getVariable ("general","yaw","0")),XMLSupport::parse_float (vs_config->getVariable ("general","roll","0")));
+  //yprrestricted=0;
+  //ymin = pmin = rmin = -PI;
+  //ymax = pmax = rmax = PI;
+  //ycur = pcur = rcur = 0;
+  //static Vector myang(XMLSupport::parse_float (vs_config->getVariable ("general","pitch","0")),XMLSupport::parse_float (vs_config->getVariable ("general","yaw","0")),XMLSupport::parse_float (vs_config->getVariable ("general","roll","0")));
   //static float rr = XMLSupport::parse_float (vs_config->getVariable ("graphics","hud","radarRange","20000"));
   //static float minTrackingNum = XMLSupport::parse_float (vs_config->getVariable("physics", "autotracking", ".93"));// DO NOT CHANGE see unit_customize.cpp
   //static float lc =XMLSupport::parse_float (vs_config->getVariable ("physics","lock_cone",".8"));// DO NOT CHANGE see unit_customize.cpp
   //  Fire();
 }
+*/
 
 template <class UnitType>
 Sprite * GameUnit<UnitType>::getHudImage () const{
@@ -179,32 +143,17 @@ Sprite * GameUnit<UnitType>::getHudImage () const{
 
 template <class UnitType>
 GameUnit<UnitType>::GameUnit<UnitType> (std::vector <Mesh *>& meshes, bool SubU, int fact) {
-  Init ();
-  this->faction = fact;
-  SubUnit = SubU;
-  meshdata = meshes;
-  meshes.clear();
-  meshdata.push_back(NULL);
-  calculate_extent(false);
+	Unit( meshes, SubU, fact);
 }
-template <class UnitType>
-vector <Mesh *> GameUnit<UnitType>::StealMeshes() {
-  vector <Mesh *>ret;
-  
-  Mesh * shield = meshdata.empty()?NULL:meshdata.back();
-  for (int i=0;i<nummesh();i++) {
-    ret.push_back (meshdata[i]);
-  }
-  meshdata.clear();
-  meshdata.push_back(shield);
-  
-  return ret;
-}
-
 extern void update_ani_cache();
 template <class UnitType>
 GameUnit<UnitType>::GameUnit<UnitType>(const char *filename, bool SubU, int faction,std::string unitModifications, Flightgroup *flightgrp,int fg_subnumber, char * netxml) {
-	this->GameUnit::Init();
+	Unit::Init( filename, SubU, faction, unitModifications, flightgrp, fg_subnumber, netxml);
+}
+/*
+template <class UnitType>
+GameUnit<UnitType>::GameUnit<UnitType>(const char *filename, bool SubU, int faction,std::string unitModifications, Flightgroup *flightgrp,int fg_subnumber, char * netxml) {
+	this->Unit::Init();
 	update_ani_cache();
 	//if (!SubU)
 	//  _Universe->AccessCockpit()->savegame->AddUnitToSave(filename,UNITPTR,FactionUtil::GetFaction(faction),(long)this);
@@ -340,6 +289,8 @@ GameUnit<UnitType>::GameUnit<UnitType>(const char *filename, bool SubU, int fact
 	vsresetdir();
 
 }
+*/
+
 template <class UnitType>
 GameUnit<UnitType>::~GameUnit<UnitType>()
 {
