@@ -1,0 +1,7 @@
+Load balance hash-table
+support full expressivity of BFXM animations
+Fix excessive seeking in File-System
+Complete Ships list.
+Complete histories.
+Warp energy use
+Warp vs. Auto graphic
