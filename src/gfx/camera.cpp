@@ -22,9 +22,10 @@
 #include "matrix.h"
 
 //Remove GL specific stuff here
-#include "vegastrike.h"
-#include "vs_globals.h"
 
+#include "vs_globals.h"
+#include "audiolib.h"
+#include "lin_time.h"
 //const float PI=3.1415926536;
 Camera::Camera(ProjectionType proj) : projectionType(proj), myPhysics(0.1,0.075,&Coord,&P,&Q,&R)
 {
@@ -51,13 +52,13 @@ void Camera::UpdateGFX(GFXBOOL updateFrustum)
   float xmin, xmax, ymin, ymax;
 	if(changed)
 	{
+
 		myPhysics.Update();
 		GFXLoadIdentity(PROJECTION);
 		GFXLoadIdentity(VIEW);
 		switch(projectionType) {
 		case Camera::PERSPECTIVE:
 		  GFXPerspective (zoom*g_game.fov,g_game.aspect,g_game.znear,g_game.zfar,cockpit_offset); //set perspective to 78 degree FOV
-
 		  break;
 		case Camera::PARALLEL:
 		  ymax = g_game.znear * tanf( zoom*g_game.fov * PI / ((float)360.0) ); 
@@ -73,13 +74,21 @@ void Camera::UpdateGFX(GFXBOOL updateFrustum)
 		}
 		GFXLookAt (Coord-R, Coord, Q);
 		if (updateFrustum) GFXCalculateFrustum();
+		Vector lastpos(view[12],view[13],view[14]);
+		
+		AUDListener (Coord, (Coord-lastpos)/GetElapsedTime());//this pos-last pos / elapsed time
 		GFXGetMatrix(VIEW,view);
 		GFXSubwindow(x,y,xsize,ysize);
+
+		AUDListenerOrientation (P,Q,R);
 	}
 }
 
 void Camera::UpdateGLCenter()
 {
+#define ITISDEPRECATED 0
+  assert (ITISDEPRECATED);
+#undef ITISDEPRECATED
 //	static float rotfactor = 0;
 	//glMatrixMode(GL_PROJECTION);
   float xmin, xmax, ymin, ymax;
@@ -92,11 +101,9 @@ void Camera::UpdateGLCenter()
 		switch(Camera::PERSPECTIVE) {
 		case Camera::PERSPECTIVE:
 		  GFXPerspective (zoom*g_game.fov,g_game.aspect,g_game.znear,g_game.zfar,cockpit_offset); //set perspective to 78 degree FOV
-
 		  break;
 		case Camera::PARALLEL:
 		  ymax = g_game.znear * tanf( zoom*g_game.fov * PI / ((float)360.0) ); //78.0 --> 4.7046
-
 		  
 		  ymin = -ymax; //-4.7046
 		  

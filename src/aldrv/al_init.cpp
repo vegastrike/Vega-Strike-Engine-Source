@@ -3,7 +3,7 @@
 #include <AL/al.h>
 #include <AL/alc.h>
 #include <AL/alut.h>
-
+#include <stdio.h>
 
 
 static void fixup_function_pointers(void) {
@@ -77,34 +77,37 @@ static void fixup_function_pointers(void) {
 }
 #endif
 ///I don't think we'll need to switch contexts or devices in vegastrike
-static ALCdevice *dev;
-static void *context_id;
+static ALCdevice *dev=NULL;
+static void *context_id=NULL;
 
 bool AUDInit () {
 #ifdef HAVE_AL
 	int attrlist[] = { ALC_FREQUENCY, 22050, 0 };
-
 	dev = alcOpenDevice( NULL );
 	if( dev == NULL ) {
-		return 1;
+		return false;
 	}
 
 	/* Initialize ALUT. */
 	context_id = alcCreateContext( dev, attrlist );
 	if(context_id == NULL) {
 		alcCloseDevice( dev );
-		return 1;
+		return false;
 	}
 
 	alcMakeContextCurrent( context_id );
 
 	fixup_function_pointers();
+	return true;
 #endif
+	return false;
 }
 void AUDDestroy() {
 #ifdef HAVE_AL
   //Go through and delete all loaded wavs
-  alcDestroyContext(context_id);
-  alcCloseDevice( dev );
+  if (context_id)
+    alcDestroyContext(context_id);
+  if (dev)
+    alcCloseDevice( dev );
 #endif
 }

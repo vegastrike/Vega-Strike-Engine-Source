@@ -28,7 +28,7 @@
 #include "main_loop.h"
 #include "vegaconfig.h"
 #include "mission.h"
-
+#include "audiolib.h"
 /*
  * Globals 
  */
@@ -68,6 +68,7 @@ void cleanup(void)
 
   //    write_config_file();
   //  write_saved_games();
+  AUDDestroy();
   destroyObjects();
   delete _Universe;
 }
@@ -122,7 +123,7 @@ int main( int argc, char **argv )
     InitTime();
     UpdateTime();
     ParseCommandLine(argc,argv);
-
+    AUDInit();
 
     /* Set up a function to clean up when program exits */
     if ( atexit( cleanup ) != 0 ) {
