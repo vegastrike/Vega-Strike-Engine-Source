@@ -78,7 +78,7 @@ public:
 	std::vector<std::string> *dest; //let's just hope that the iterator doesn't get killed during the frame, which shouldn't happen.
 	bool moused;
 	char color;
-	navscreenoccupied * screenoccupation;
+s	navscreenoccupied * screenoccupation;
 	systemdrawnode(int type,float size,float x, float y, std::string source,navscreenoccupied * so, bool moused, std::vector<std::string> *dest):type(type),size(size),x(x),y(y),source(source),dest(dest) {
 		screenoccupation = so;
 		this->moused=moused;
@@ -410,11 +410,21 @@ void NavigationSystem::DrawGalaxy()
 	float max_z = (float)pos.k;
 	float min_z = (float)pos.k;
 	float themaxvalue = fabs(pos.i);
-
 	float center_nav_x = ((screenskipby4[0] + screenskipby4[1]) / 2);
 	float center_nav_y = ((screenskipby4[2] + screenskipby4[3]) / 2);
 	//	**********************************
 
+
+	
+	//Find Centers
+	//**********************************
+	// This will use the current system as the center
+	center_x=pos.i;
+	center_y=pos.j;
+	center_z=pos.k;
+	//**********************************
+
+	
 	//Retrieve system data min/max
 	//**********************************
 	while (!systemIter.done())	//	this goes through one time to get the major components locations, and scales its output appropriately
@@ -441,9 +451,10 @@ void NavigationSystem::DrawGalaxy()
 
 	//Find Centers
 	//**********************************
-	center_x = (min_x + max_x)/2;
-	center_y = (min_y + max_y)/2;
-	center_z = (min_z + max_z)/2;
+	// this will make the center be the center of the displayable area.
+//	center_x = (min_x + max_x)/2;
+//	center_y = (min_y + max_y)/2;
+//	center_z = (min_z + max_z)/2;
 	//**********************************
 /*	min_x = (min_x+center_x)/2;
 	min_y = (min_y+center_y)/2;
