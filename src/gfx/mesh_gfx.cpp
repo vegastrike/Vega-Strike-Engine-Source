@@ -42,7 +42,7 @@ public:
 
 typedef std::vector<OrigMeshContainer> OrigMeshVector;
 #define NUM_PASSES 4
-#define DAMAGE_PASS 3
+#define DAMAGE_PASS 2
 const int UNDRAWN_MESHES_SIZE= NUM_MESH_SEQUENCE*NUM_PASSES;
 OrigMeshVector undrawn_meshes[NUM_MESH_SEQUENCE][NUM_PASSES]; // lower priority means draw first
 
@@ -436,7 +436,7 @@ void SetupSpecMapSecondPass(Texture * decal,unsigned int mat,BLENDFUNC blendsrc,
       GFXEnable(TEXTURE1);
     }
 }
-void SetupGlowMapThirdPass(Texture * decal,unsigned int mat,BLENDFUNC blendsrc, const GFXColor &cloakFX, float polygon_offset) {
+void SetupGlowMapFourthPass(Texture * decal,unsigned int mat,BLENDFUNC blendsrc, const GFXColor &cloakFX, float polygon_offset) {
 	GFXPushBlendMode();			
     GFXSelectMaterialHighlights(mat,
                                 GFXColor(0,0,0,0),
@@ -452,7 +452,7 @@ void SetupGlowMapThirdPass(Texture * decal,unsigned int mat,BLENDFUNC blendsrc, 
 	GFXDisable(TEXTURE1);
 }
 extern void GFXSelectMaterialAlpha(const unsigned int, float);
-void SetupDamageMapFourthPass(Texture * decal,unsigned int mat, float polygon_offset) {
+void SetupDamageMapThirdPass(Texture * decal,unsigned int mat, float polygon_offset) {
 	GFXPushBlendMode();			
     GFXBlendMode (SRCALPHA,INVSRCALPHA);
     decal->MakeActive();
@@ -463,7 +463,7 @@ void SetupDamageMapFourthPass(Texture * decal,unsigned int mat, float polygon_of
 	GFXDisable(TEXTURE1);
 }
 
-void RestoreGlowMapState(bool write_to_depthmap, float polygonoffset,float NOT_USED_BUT_BY_HELPER=2) { 
+void RestoreGlowMapState(bool write_to_depthmap, float polygonoffset,float NOT_USED_BUT_BY_HELPER=3) { 
   float a,b;
     GFXGetPolygonOffset(&a,&b);
     GFXPolygonOffset (a, b+polygonoffset+NOT_USED_BUT_BY_HELPER);
@@ -568,11 +568,11 @@ void Mesh::ProcessDrawQueue(int whichpass,int whichdrawqueue) {
 	  
 	  SetupSpecMapSecondPass(Decal[whichpass],myMatNum,blendSrc,getEnvMap(), GFXColor(1,1,1,1),polygon_offset);
 	  break;
-  case 2:
-	  SetupGlowMapThirdPass (Decal[whichpass],myMatNum,ONE,GFXColor(1,1,1,1),polygon_offset);
+  case 3:
+	  SetupGlowMapFourthPass (Decal[whichpass],myMatNum,ONE,GFXColor(1,1,1,1),polygon_offset);
 	  break;
   case DAMAGE_PASS:
-	  SetupDamageMapFourthPass(Decal[whichpass],myMatNum,polygon_offset);
+	  SetupDamageMapThirdPass(Decal[whichpass],myMatNum,polygon_offset);
 	  break;
   }
   for(unsigned int draw_queue_index=0;draw_queue_index<draw_queue->size();++draw_queue_index) {	  
@@ -620,7 +620,7 @@ void Mesh::ProcessDrawQueue(int whichpass,int whichdrawqueue) {
 	case 1:
 		RestoreSpecMapState(getEnvMap(),write_to_depthmap,polygon_offset);
 		break;
-	case 2:
+	case 3:
 		RestoreGlowMapState(write_to_depthmap,polygon_offset);
 		break;
 	case DAMAGE_PASS:
