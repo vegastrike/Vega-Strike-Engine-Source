@@ -111,8 +111,10 @@ float item_zscalefactor;
 float minimumitemscaledown;
 float maximumitemscaleup;
 
-bool system_3d;
-bool galaxy_3d;
+enum ViewType {VIEW_2D, VIEW_ORTHO, VIEW_3D, VIEW_MAX};
+int system_view;
+int galaxy_view;
+
 bool system_multi_dimensional;
 bool galaxy_multi_dimensional;
 

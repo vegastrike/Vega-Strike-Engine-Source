@@ -57,7 +57,7 @@ void NavigationSystem::DrawSystem()
 	if(!(*bleh))
 		return;
 
-//	string mystr ("3d "+XMLSupport::tostring (system_3d)); 
+//	string mystr ("3d "+XMLSupport::tostring (system_view)); 
 //	UniverseUtil::IOmessage (0,"game","all",mystr);
 
 
@@ -86,7 +86,7 @@ void NavigationSystem::DrawSystem()
 	float zdistance = 0.0;
 	float zscale = 0.0;
 
-	Adjust3dTransformation(system_3d, 1);
+	Adjust3dTransformation(system_view==VIEW_3D, 1);
 
 
 	//	Set up first item to compare to + centres
@@ -110,7 +110,7 @@ void NavigationSystem::DrawSystem()
 
 	//Modify by old rotation amount
 	//*************************
-//	if(system_3d)
+//	if(system_view==VIEW_3D)
 //	{
 //		pos = dxyz(pos, 0, ry_s, 0);
 //		pos = dxyz(pos, rx_s, 0, 0);
@@ -151,7 +151,7 @@ void NavigationSystem::DrawSystem()
 		
 		//Modify by old rotation amount
 		//*************************
-//		if(system_3d)
+//		if(system_view==VIEW_3D)
 //		{
 //			pos = dxyz(pos, 0, ry_s, 0);
 //			pos = dxyz(pos, rx_s, 0, 0);

@@ -433,7 +433,7 @@ void NavigationSystem::DrawGalaxy()
 	float zscale = 1.0;
 	int l;
 
-	Adjust3dTransformation(galaxy_3d, 0);
+	Adjust3dTransformation(galaxy_view==VIEW_3D, 0);
 
 	float center_nav_x = ((screenskipby4[0] + screenskipby4[1]) / 2);
 	float center_nav_y = ((screenskipby4[2] + screenskipby4[3]) / 2);
@@ -463,7 +463,7 @@ void NavigationSystem::DrawGalaxy()
 				currentsystemindex=systemIter.getIndex();
 				pos=systemIter->Position();
 				ReplaceAxes(pos);
-//				if(galaxy_3d){pos = dxyz(pos, 0, ry, 0);pos = dxyz(pos, rx, 0, 0);}
+//				if(galaxy_view==VIEW_3D){pos = dxyz(pos, 0, ry, 0);pos = dxyz(pos, rx, 0, 0);}
 				
 				max_x = (float)pos.i;
 				min_x = (float)pos.i;
@@ -486,7 +486,7 @@ void NavigationSystem::DrawGalaxy()
 					for (unsigned i=0;i<destsize;++i) {
 						QVector posoth=systemIter[systemIter->GetDestinationIndex(i)].Position();
 						ReplaceAxes(posoth);
-//						if(galaxy_3d){posoth = dxyz(pos, 0, ry, 0);posoth = dxyz(pos, rx, 0, 0);}
+//						if(galaxy_view==VIEW_3D){posoth = dxyz(pos, 0, ry, 0);posoth = dxyz(pos, rx, 0, 0);}
 						
 						RecordMinAndMax(posoth,min_x,max_x,min_y,max_y,min_z,max_z,themaxvalue);
 					}
@@ -510,7 +510,7 @@ void NavigationSystem::DrawGalaxy()
 						ReplaceAxes(posoth);
 						//Modify by old rotation amount
 						//*************************
-//						if(galaxy_3d){posoth = dxyz(pos, 0, ry, 0);posoth = dxyz(pos, rx, 0, 0);}
+//						if(galaxy_view=VIEW_3D){posoth = dxyz(pos, 0, ry, 0);posoth = dxyz(pos, rx, 0, 0);}
 						//*************************
 						//*************************
 						RecordMinAndMax(posoth,min_x,max_x,min_y,max_y,min_z,max_z,themaxvalue);
@@ -544,10 +544,10 @@ void NavigationSystem::DrawGalaxy()
 		//**********************************
 
 #define SQRT3 1.7320508
-		themaxvalue = sqrt(themaxvalue*themaxvalue + themaxvalue*themaxvalue + themaxvalue*themaxvalue);
-		themaxvalue = SQRT3*themaxvalue;
+//		themaxvalue = sqrt(themaxvalue*themaxvalue + themaxvalue*themaxvalue + themaxvalue*themaxvalue);
+//		themaxvalue = SQRT3*themaxvalue;
 
-
+		themaxvalue*=3;
 
 		{
 			float half_x = vsmax(max_x-center_x,center_x-min_x);
@@ -593,7 +593,7 @@ void NavigationSystem::DrawGalaxy()
 
 		//Modify by old rotation amount
 		//*************************
-//		if(galaxy_3d){pos = dxyz(pos, 0, ry, 0);pos = dxyz(pos, rx, 0, 0);}
+//		if(galaxy_view==VIEW_3D){pos = dxyz(pos, 0, ry, 0);pos = dxyz(pos, rx, 0, 0);}
 		//*************************
 		//*************************
 
