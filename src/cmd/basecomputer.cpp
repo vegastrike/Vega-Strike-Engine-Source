@@ -1533,6 +1533,8 @@ bool BaseComputer::pickerChangedSelection(const EventCommandId& command, Control
 
 // Return whether or not the current item and quantity can be "transacted".
 bool BaseComputer::isTransactionOK(const Cargo& originalItem, TransactionType transType, int quantity) {
+    if(originalItem.mission)
+        return false;
     // Make sure we have somewhere to put stuff.
     Unit* playerUnit = m_player.GetUnit();
     if(!playerUnit) return false;
@@ -1737,11 +1739,13 @@ void BaseComputer::loadMasterList(Unit *un, const vector<string>& filtervec, con
 		}
 		if (filter&&invfilter) {
             if ((!removezero)||un->GetCargo(i).quantity>0) {
-                if (!un->GetCargo(i).mission) {
-                    CargoColor col;
-                    col.cargo=un->GetCargo(i);
-                    items->push_back (col);
-                }
+                CargoColor col;
+                col.cargo=un->GetCargo(i);
+				if (col.cargo.category=="")
+					col.cargo.category="#c.5:1:.3#Uncategorized Cargo";
+                items->push_back (col);
+//                if (!un->GetCargo(i).mission) {
+//                }
 			}
 		}
 	}

@@ -196,12 +196,16 @@ void CommunicatingAI::AdjustRelationTo (Unit * un, float factor) {
   FactionUtil::AdjustIntRelation (parent->faction,un->faction,factor,rank);  
   (*i).second+=factor;
   if ((*i).second<anger||(parent->Target()==NULL&&(*i).second+Order::GetEffectiveRelationship (un)<0)) {
-    parent->Target(un);//he'll target you--even if he's friendly
-    parent->TargetTurret(un);//he'll target you--even if he's friendly
+	  if (parent->Target()==NULL||(parent->getFlightgroup()==NULL||parent->getFlightgroup()->directive.find(".")==string::npos)){
+		  parent->Target(un);//he'll target you--even if he's friendly
+		  parent->TargetTurret(un);//he'll target you--even if he's friendly
+	  }
   } else if ((*i).second>appease) {
     if (parent->Target()==un) {
-      parent->Target(NULL);
-	  parent->TargetTurret(NULL);//he'll target you--even if he's friendly
+		if (parent->getFlightgroup()==NULL||parent->getFlightgroup()->directive.find(".")==string::npos) {
+			parent->Target(NULL);
+			parent->TargetTurret(NULL);//he'll target you--even if he's friendly
+		}
 
     }
   }
