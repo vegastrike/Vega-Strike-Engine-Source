@@ -81,30 +81,59 @@ char pwd[65536];
 void initpaths () {
   char tmppwd[65536];
   getcwd (tmppwd,32768);
+
+  chdir(tmppwd);
+  FILE *tfp1=fopen(CONFIGFILE,"r");
+  if(tfp1){
+    // we have a config file in the current directory
+    // so the current directory is the one with data
+    datadir=string(tmppwd);
+    fclose(tfp1);
+  }
+  else{
+    // search for the config file in the DATA_DIR define
 #ifdef DATA_DIR
-  datadir = string(DATA_DIR);
-  chdir(DATA_DIR);
+    chdir(DATA_DIR);
+    FILE *tfp2=fopen(CONFIGFILE,"r");
+    if(!tfp2){
+      cerr << "Didn't find data directory in either the current dir (" << tmppwd << ")" << endl;
+      cerr << "Or the install directory " << DATA_DIR << endl;
+      datadir=string(tmppwd);
+    }
+    else{
+      datadir=string(DATA_DIR);
+    }
 #else
-  datadir= string (tmppwd);  
+    // we can't find a data dir
+    cerr << "current directory is not data directory" << endl;
+    datadir=string(tmppwd);
 #endif
+  }
+
   sharedsounds = datadir;
+
   cerr << "Data directory is " << datadir << endl;
   FILE *fp= fopen (CONFIGFILE,"r");
+
+  //check if we have a config file in home dir
   changehome(true);
   FILE *fp1= fopen (CONFIGFILE,"r");
   if (fp1) {
+    //  we have a config file in home directory
     fclose (fp1);
     vs_config=new VegaConfig(CONFIGFILE); // move config to global or some other struct
+    cout << "using config file in home dir" << endl;
   }else if (fp) {
-#ifdef DATA_DIR
-    chdir(DATA_DIR);
-#else
-    chdir (tmppwd);
-#endif
+    // we don't have a config file in home dir
+    // but we have one in the data dir
+    chdir(datadir.c_str());
+
     fclose (fp);
     fp =NULL;
     vs_config = new VegaConfig (CONFIGFILE);
+    cout << "using config file in data dir " << datadir << endl;
   } else {
+    // no config file in home dir or data dir
     fprintf (stderr,"Could not open config file in either %s/%s\nOr in ~/.vegastrike/%s\n",tmppwd,CONFIGFILE,CONFIGFILE);
     exit (-1);
   }
@@ -116,7 +145,11 @@ void initpaths () {
 
   cout << "SIMULATION_ATOM: " << SIMULATION_ATOM << endl;
 
-  datadir = vs_config->getVariable ("data","directory",sharedsounds);
+  string config_datadir = vs_config->getVariable ("data","directory",datadir);
+  if(config_datadir!=datadir){
+    cout << "using data dir " << config_datadir << " from config file" << endl;
+    datadir=config_datadir;
+  }
   chdir (datadir.c_str());
   chdir (vs_config->getVariable ("data","sharedtextures","textures").c_str());
   getcwd (pwd,8191);

@@ -52,6 +52,8 @@ FILE * fpread=NULL;
 
 ForceFeedback *forcefeedback;
 
+TextPlane *bs_tp=NULL;
+
 /* 
  * Function definitions
  */
@@ -184,7 +186,6 @@ int main( int argc, char *argv[] )
     return 0;
 }
   static Animation * SplashScreen = NULL;
-  static TextPlane bs_tp ("9x12.font");
 static bool BootstrapMyStarSystemLoading=true;
 void SetStarSystemLoading (bool value) {
   BootstrapMyStarSystemLoading=value;
@@ -224,14 +225,14 @@ void bootstrap_draw (const std::string &message, float x, float y, Animation * n
   GFXLoadIdentityView();
   GFXLoadMatrix (MODEL,tmp);
   GFXBeginScene();
-  bs_tp.SetPos (x,y);
+  bs_tp->SetPos (x,y);
   //  bs_tp.SetCharSize (.4,.8);
 
   if (ani) {
     ani->UpdateAllFrame();
     ani->DrawNow(tmp);
   }
-  bs_tp.Draw (message);  
+  bs_tp->Draw (message);  
   GFXEndScene();
 
 }
@@ -251,6 +252,8 @@ void bootstrap_main_loop () {
 
     mission->initMission();
 
+    bs_tp=new TextPlane("9x12.font");
+ 
     SplashScreen = new Animation (mission->getVariable ("splashscreen",vs_config->getVariable ("graphics","splash_screen","vega_splash.ani")).c_str(),0);
     bootstrap_draw ("make Love",-.135,0,SplashScreen);
     bootstrap_draw ("make[1]: Entering directory /home/daniel<3");

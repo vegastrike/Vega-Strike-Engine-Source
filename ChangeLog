@@ -1,3 +1,13 @@
+2002-03-22 Alexander Rawass <alexannika@users.sourceforge.net>
+	
+	* made the textplane of the slash screen a TextPlane *
+	  because the font tried to load before the configuration
+	* tried to improve vs_path.cpp
+	  - data dir is first searched in current dir
+	  - then in DATA_DIR (if defined)
+	  - then in the data dir from ~/.vegastrike/vegastrike.config
+	
+
 2002-03-21 Daniel Horn <hellcatv@hotmail.com>
 	* Happy birthday Debra
 	* Made it so that all AI classes who wish to "talk back" inherit from
