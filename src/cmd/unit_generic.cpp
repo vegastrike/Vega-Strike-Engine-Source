@@ -705,26 +705,26 @@ void Unit::Init(const char *filename, bool SubU, int faction,std::string unitMod
 		  if (filename[0])
 			  err = f.OpenReadOnly( filepath, Unknown);
 		}
-	  // If save was not succesfull we try to open the unit file itself
-	  if( err>Ok)
-	      if (filename[0])
-			err = f.OpenReadOnly (filename, UnitFile);
-	  if(err>Ok) {
-		cout << "Unit file " << filename << " not found" << endl;
-		fprintf (stderr,"Assertion failed unit_generic.cpp:711 Unit %s not found\n",filename);
+	}
+  // If save was not succesfull we try to open the unit file itself
+  if( netxml==NULL || err>Ok)
+      if (filename[0])
+		err = f.OpenReadOnly (filename, UnitFile);
+  if(err>Ok) {
+	cout << "Unit file " << filename << " not found" << endl;
+	fprintf (stderr,"Assertion failed unit_generic.cpp:711 Unit %s not found\n",filename);
 
-	    VSFileSystem::vs_fprintf (stderr,"Warning: Cannot locate %s\n",filename);	  
-	    meshdata.clear();
-	    meshdata.push_back(NULL);
-		this->fullname=filename;
-	    this->name=string("LOAD_FAILED");
-		calculate_extent(false);		
-		radial_size=1;
-	    //	    assert ("Unit Not Found"==NULL);
-		//assert(0);
+    VSFileSystem::vs_fprintf (stderr,"Warning: Cannot locate %s\n",filename);	  
+    meshdata.clear();
+    meshdata.push_back(NULL);
+	this->fullname=filename;
+    this->name=string("LOAD_FAILED");
+	calculate_extent(false);		
+	radial_size=1;
+    //	    assert ("Unit Not Found"==NULL);
+	//assert(0);
 
-		return;
-	  }
+	return;
   }
 
 	name = filename;
