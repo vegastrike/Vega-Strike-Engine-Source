@@ -5,7 +5,7 @@
 #include "cmd/images.h"
 #include "config_xml.h"
 #include "vs_globals.h"
-CommunicatingAI::CommunicatingAI (int ttype, float rank, float mood, float anger, float moodswingyness, float randomresp) :Order (ttype),rank(rank),anger(anger),moodswingyness(moodswingyness),randomresponse (randomresp),mood(mood) {
+CommunicatingAI::CommunicatingAI (int ttype, float rank, float mood, float anger, float moodswingyness, float randomresp) :Order (ttype),anger(anger),moodswingyness(moodswingyness),randomresponse (randomresp),mood(mood),rank(rank) {
   comm_face=NULL;
   if (rank==666) {
     static float ran = XMLSupport::parse_float(vs_config->getVariable ("AI","DefaultRank",".01"));
@@ -28,35 +28,15 @@ void CommunicatingAI::SetParent (Unit * par) {
   Order::SetParent(par);
   comm_face = _Universe->GetRandAnimation(par->faction);
 }
-static float sq (float i) {return i*i;}
-bool nonneg (float i) {return i>=0;}
 int CommunicatingAI::selectCommunicationMessageMood (CommunicationMessage &c, float mood) {
-  FSM::Node * n = c.getCurrentState ();  
-  mood+=-randomresponse+2*randomresponse*((float)rand())/RAND_MAX;
+
   Unit * targ = c.sender.GetUnit();
   if (targ) {
-    mood+=(1-randomresponse)*_Universe->GetRelation(parent->faction,targ->faction);
+    float relation = _Universe->GetRelation(parent->faction,targ->faction);
+    mood+=(1-randomresponse)*relation;
   }
-  
-  int choice=0;
-  float bestchoice=4;
-  bool fitmood=false;
-  for (unsigned i=0;i<n->edges.size();i++) {
-    float md = c.fsm->nodes[n->edges[i]].messagedelta;
-    bool newfitmood=nonneg(mood)==nonneg(md);
-    if ((!fitmood)||newfitmood) {
-      float newbestchoice=sq(md-mood);
-      if ((newbestchoice<=bestchoice)||(fitmood==false&&newfitmood==true)) {
-	if ((newbestchoice==bestchoice&&rand()%2)||newbestchoice<bestchoice) {
-	  //to make sure some variety happens
-	  fitmood=newfitmood;
-	  choice =i;
-	  bestchoice = newbestchoice;
-	}
-      }
-    }
-  }
-  return choice;
+  return c.fsm->getCommMessageMood (c.curstate,mood,randomresponse);
+
 }
 using std::pair;
 float CommunicatingAI::GetEffectiveRelationship (const Unit * target)const {

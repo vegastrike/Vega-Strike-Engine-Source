@@ -17,6 +17,7 @@ class FSM {
   static void endElement(void *userData, const XML_Char *name);
   std::string GetEdgesString (int curstate);
   float getDeltaRelation (int prevstate, int curstate) const;
+  int getCommMessageMood(int curstate, float mood, float randomresponsefactor) const;
   int getDefaultState (float relationship) const;
   int GetHitNode ();
   int GetRequestLandNode();

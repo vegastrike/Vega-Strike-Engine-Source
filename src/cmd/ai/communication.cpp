@@ -50,8 +50,35 @@ int FSM::GetRequestLandNode () {
 int FSM::GetHitNode () {
   return nodes.size()-1;
 }
+static float sq (float i) {return i*i;}
+bool nonneg (float i) {return i>=0;}
+int FSM::getCommMessageMood (int curstate, float mood, float randomresponse) const{
+  const FSM::Node *n = &nodes[curstate];
+    mood+=-randomresponse+2*randomresponse*((float)rand())/RAND_MAX;
+  
+  int choice=0;
+  float bestchoice=4;
+  bool fitmood=false;
+  for (unsigned i=0;i<n->edges.size();i++) {
+    float md = nodes[n->edges[i]].messagedelta;
+    bool newfitmood=nonneg(mood)==nonneg(md);
+    if ((!fitmood)||newfitmood) {
+      float newbestchoice=sq(md-mood);
+      if ((newbestchoice<=bestchoice)||(fitmood==false&&newfitmood==true)) {
+	if ((newbestchoice==bestchoice&&rand()%2)||newbestchoice<bestchoice) {
+	  //to make sure some variety happens
+	  fitmood=newfitmood;
+	  choice =i;
+	  bestchoice = newbestchoice;
+	}
+      }
+    }
+  }
+  return choice;
+
+}
 int FSM::getDefaultState (float relationship) const{
-  return 0;
+  return nodes[0].edges[getCommMessageMood (0,relationship,.01)];
 }
 std::string FSM::GetEdgesString (int curstate) {
   std::string retval="\n";
