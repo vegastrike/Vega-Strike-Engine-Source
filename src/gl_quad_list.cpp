@@ -55,11 +55,14 @@ void GFXQuadList::Draw() {
     glClientActiveTextureARB (GL_TEXTURE1_ARB);
     glDisableClientState(GL_TEXTURE_COORD_ARRAY);
   }
-  if (isColor) {
+  if (isColor&&myColors) {
     glEnableClientState(GL_COLOR_ARRAY);
     glColorPointer (4,GL_FLOAT, sizeof (GFXColor), &myColors[0].r);    
   }
   glDrawArrays(GL_QUADS, 0, numQuads*4);
+  if (isColor) {
+    GFXColor (1,1,1,1);
+  }
 }
 
 
