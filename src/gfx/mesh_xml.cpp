@@ -383,6 +383,8 @@ void Mesh::beginElement(const string &name, const AttributeList &attributes) {
               string ind(iter->name.substr (strsize));
               if (!ind.empty())
                   texindex=XMLSupport::parse_int(ind);
+			  bool per_pixel_lighting = XMLSupport::parse_bool (vs_config->getVariable ("graphics","per_pixel_lighting","true"));
+			  if (texindex==0||per_pixel_lighting) {
               while (xml->decals.size()<=texindex)
                   xml->decals.push_back(XML::ZeTexture());
               switch (whichtype) {
@@ -395,6 +397,7 @@ void Mesh::beginElement(const string &name, const AttributeList &attributes) {
                   default:
                       xml->decals[texindex].decal_name=iter->value;
               }
+			  }
               if (texindex==0) {
                   texture_found = true;                  
               }
