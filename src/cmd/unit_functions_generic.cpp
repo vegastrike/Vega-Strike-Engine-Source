@@ -112,7 +112,10 @@ float getAutoRSize (Unit * orig,Unit * un, bool ignore_friend=false) {
   static float hostile_autodist =  XMLSupport::parse_float (vs_config->getVariable ("physics","hostile_auto_radius","1000"))*gamespeed;
   static int upgradefaction = FactionUtil::GetFaction("upgrades");
   static int neutral = FactionUtil::GetFaction("neutral");
-
+  if (un->isUnit()==ASTEROIDPTR) {
+    static float minasteroiddistance = XMLSupport::parse_float(vs_config->getVariable("physics","min_asteroid_distance","-100"));
+    return minasteroiddistance;
+  }
   if (un->isUnit()==PLANETPTR||(un->getFlightgroup()==orig->getFlightgroup()&&orig->getFlightgroup())) {
     //same flihgtgroup
     return orig->rSize();
