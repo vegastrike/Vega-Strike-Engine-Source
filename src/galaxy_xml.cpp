@@ -38,14 +38,17 @@ using namespace XMLSupport;
 extern std::string universe_path;
 #include "networking/netserver.h"
 
+
+std::vector <std::string> systems_vector;
+
 void	GalaxyXML::Galaxy::ComputeSerials( std::vector<std::string> & stak)
 {
+	cout<<"Generating random serial numbers :"<<endl;
 	static string sys = vs_config->getVariable("data","sectors","sectors");
-	for( std::vector<std::string>::iterator si=stak.begin(); si!=stak.end(); si++)
+	for( std::string sys=stak.back(); !stak.empty(); stak.pop_back())
 	{
-		string relpath( universe_path+sys+"/"+(*si)+".system");
+		string relpath( universe_path+sys+"/"+sys+".system");
 		string systempath( datadir+relpath);
-		cout<<"Generating random serial numbers :"<<endl;
 		cout<<"\t\tcomputing serials for "<<systempath<<"...";
 		
 		// Read the file
@@ -107,7 +110,7 @@ void	GalaxyXML::Galaxy::ComputeSerials( std::vector<std::string> & stak)
 		}
 
 		// Add the system xml string to the server
-		Server->addSystem( (*si), system);
+		Server->addSystem( sys, system);
 
 		// Overwrite the system files with the buffer containing serials
 		fseek( fp, 0, SEEK_SET);
@@ -133,6 +136,7 @@ void	GalaxyXML::Galaxy::ComputeSerials( std::vector<std::string> & stak)
 		cout<<" OK !"<<endl;
 		delete systembuf;
 	}
+	cout<<"Computing done."<<endl;
 }
 
 namespace GalaxyXML {
@@ -193,6 +197,8 @@ const EnumMap attribute_map(attribute_names, 3);
 					break;
 				}
 			}
+			// Add the system in the system vector so that we can later compute serials
+			systems_vector.push_back( name);
 			xml->stak.push_back (name);
 			xml->g->addSection (xml->stak);
 
@@ -338,10 +344,19 @@ Galaxy::Galaxy(const char *configfile){
 		  XML_Parse(parser,buf,length,feof(fp));
 	  }while (!feof(fp));
 	  fclose (fp);
+
 	  XML_ParserFree(parser);
 
 	  if(SERVER)
-		this->ComputeSerials( x.stak);
+		this->ComputeSerials( systems_vector);
+  }
+  else
+  {
+  	if(SERVER)
+	{
+		cerr<<"!!! ERROR : couldn't find galaxy file : "<<configfile<<endl;
+		exit(1);
+	}
   }
 }
 SubHeirarchy & Galaxy::getHeirarchy() {

@@ -878,6 +878,14 @@ int NetClient::recvMsg( Packet* outpacket )
 				Unit * un2 = UniverseUtil::GetUnitFromSerial( p1.getSerial());
 				un2->UnDock( un);
 			}
+			case CMD_POSUPDATE :
+			{
+				// If a client receives that it means the server want to force the client position to be updated
+				// with server data
+				QVector serverpos = netbuf.getQVector();
+				this->game_unit.GetUnit()->old_state.setPosition( serverpos);
+				this->game_unit.GetUnit()->curr_physical_state.position = serverpos;
+			}
             default :
                 COUT << ">>> " << local_serial << " >>> UNKNOWN COMMAND =( " << hex << cmd
                      << " )= --------------------------------------" << endl;

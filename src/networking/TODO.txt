@@ -24,9 +24,8 @@
 
 *** GAME SERVER ********************************************************
 
+- Remove unit from star system when docking and add it again when undocking
 - Associate serial by replacing strings in .system files (replace "<Planet ", "<Nebula", "<Unit ")
-- Add a check just before loading a unit from xml save and loading savegame to check data files for saved ship exist
-   if not just deny login and output error on stderr
 - Redo jumps :
   - client asks for a jump and do nothing
   - if client receives a CMD_JUMP ok then it tries to jump (if ok on server should be ok on client)
@@ -112,6 +111,8 @@ DONE - add a timeout test if !ingame with a second timeout much bigger
 
 === GAME SERVER =========================================================
 
+DONE - Add a check just before loading a unit from xml save and loading savegame to check data files for saved ship exist
+   if not just deny login and output error on stderr
 DONE - In savegame : add stardate loading and saving stuff to dynamic universe
 DONE - Handle docking with CMD_DOCK and CMD_UNDOCK and DockToSavedBase on server side
 DONE - When a request to jump -> check if the destination is reachable by origin system with UniverseUtil::GetAdjacentSystems()

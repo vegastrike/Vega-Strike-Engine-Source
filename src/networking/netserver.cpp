@@ -221,7 +221,9 @@ void	NetServer::start(int argc, char **argv)
 
 	// Create the _Universe telling it we are on server side
 	universe_file = vs_config->getVariable ("server","galaxy","milky_way.xml");
+	cout<<"LOADING Universe file : "<<universe_file<<endl;
 	_Universe = new Universe( argc, argv, universe_file.c_str(), true);
+	cout<<"Universe LOADED"<<endl;
 	string strmission = vs_config->getVariable( "server", "missionfile", "networking.mission");
 	mission = new Mission( strmission.c_str());
 	mission->initMission( false);
