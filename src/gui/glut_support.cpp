@@ -304,6 +304,7 @@ void StartGUIFrame(GFXBOOL clr) {
 static void DrawMouse(int mousex, int mousey) {
   static Sprite MouseSprite ("mouse.spr",BILINEAR);
   GFXColor4f (1,1,1,1);
+  GFXEnable(TEXTURE0);
   GFXBlendMode (ONE,ONE);
   float sizex,sizey;
   MouseSprite.GetSize(sizex,sizey);
