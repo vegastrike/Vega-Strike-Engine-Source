@@ -356,7 +356,7 @@ int main (int argc, char ** argv)
 	    Tab(1);
 	    Tag ("Point");
 	    Tab(2);TextP (DrawDat.FixP[i].Vertex.x,DrawDat.FixP[i].Vertex.y,DrawDat.FixP[i].Vertex.z);
-	    Tab(3);TextN (-DrawDat.FixP[i].Normal.i,-DrawDat.FixP[i].Normal.j,-DrawDat.FixP[i].Normal.k);
+	    Tab(2);TextN (-DrawDat.FixP[i].Normal.i,-DrawDat.FixP[i].Normal.j,-DrawDat.FixP[i].Normal.k);//FIXME
 	    Tab(1);
 	    ETag ("Point");
 
@@ -402,6 +402,12 @@ int main (int argc, char ** argv)
 	}
 	const float oo255 = 1./255;
 	Tag ("Polygons");
+	for (int i=0;i<DrawDat.NumLines;i++) {
+	  Tag ("Line");
+	  Vert (DrawDat.Lins[i][0],0,0);
+	  Vert (DrawDat.Lins[i][1],0,0);
+	  ETag ("Line");
+	}
 	for (int i=0;i<DrawDat.NumTris;i++) {
 	  Tag("Tri");
 	  Vert (DrawDat.Tris[i][2],

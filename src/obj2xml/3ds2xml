@@ -136,7 +136,7 @@ sub objdesc_chunk($$) {
 		print MESHOUT << "EOP"
 <Point>
     <Location x="$vertices[$vert]->[0]" y="$vertices[$vert]->[1]" z="$vertices[$vert]->[2]"/>
-    <Normal i="0" j="1" k="0"/>
+<!--  <Normal i="0" j="1" k="0"/> -->
 </Point>
 EOP
     ;
