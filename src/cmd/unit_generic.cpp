@@ -3872,7 +3872,12 @@ const Unit * makeTemplateUpgrade (string name, int faction) {
     lim = UnitConstCache::setCachedConst(StringIntKey(limiternam,faction),UnitFactory::createUnit(limiternam.c_str(),true,faction));
   return lim;
 }
-extern const Unit * loadUnitByCache(std::string name,int faction);
+const Unit * loadUnitByCache(std::string name,int faction) {
+      const Unit * temprate= UnitConstCache::getCachedConst (StringIntKey(name,faction));
+      if (!temprate)
+		  temprate = UnitConstCache::setCachedConst(StringIntKey(name,faction),UnitFactory::createUnit(name.c_str(),true,faction));
+	  return temprate;
+}
 bool Unit::RepairUpgrade () {
 	int upfac = FactionUtil::GetFaction("upgrades");
 	const Unit * temprate = makeFinalBlankUpgrade (name,faction);

@@ -36,6 +36,8 @@ class SaveGame {
   void ReadMissionData (char * &buf);
   void ReadMissionStringData (char * &buf);
   void ReadSavedPackets (char * &buf);
+  std::string WritePlayerData( const QVector &FP, std::vector<std::string> unitname, const char * systemname, float credits);
+  std::string WriteDynamicUniverse();
   MissionStringDat *missionstringdata;
   MissionFloatDat *missiondata;
   std::string playerfaction;

@@ -488,46 +488,76 @@ static char * tmprealloc (char * var, int &oldlength, int newlength) {
   memset (var,0,newlength);
   return var;
 }
-string SaveGame::WriteSaveGame (const char *systemname, const QVector &FP, float credits, std::vector<std::string> unitname, int player_num, bool write) {
-  int MB = MAXBUFFER;
-  char * tmp=(char *)malloc (MB);
-  memset( tmp, 0, MB);
-  savestring = string("");
-  if (outputsavegame.length()!=0) {
-    printf ("Writing Save Game %s",outputsavegame.c_str());
-    changehome();
-    vschdir ("save");
-    QVector FighterPos= PlayerLocation-FP;
+
+string SaveGame::WritePlayerData( const QVector &FP, std::vector<std::string> unitname, const char * systemname, float credits)
+{
+	  string playerdata("");
+  	  int MB = MAXBUFFER;
+  	  char * tmp=(char *)malloc (MB);
+  	  memset( tmp, 0, MB);
+
+      QVector FighterPos= PlayerLocation-FP;
 //    if (originalsystem!=systemname) {
       FighterPos=FP;
 //    }
       string pipedunitname = createPipedString(unitname);
       tmp = tmprealloc(tmp,MB,pipedunitname.length()+strlen(systemname)+256/*4 floats*/);
       sprintf (tmp,"%s^%f^%s %f %f %f",systemname,credits,pipedunitname.c_str(),FighterPos.i,FighterPos.j,FighterPos.k);
-      savestring += string( tmp);
-    SetSavedCredits (credits);
+      playerdata = string( tmp);
+      SetSavedCredits (credits);
+  	  free(tmp);tmp=NULL;
+
+	  return playerdata;
+}
+
+string SaveGame::WriteDynamicUniverse()
+{
+	string dyn_univ("");
+  	int MB = MAXBUFFER;
+  	char * tmp=(char *)malloc (MB);
+  	memset( tmp, 0, MB);
+
+	// Write mission data
     memset( tmp, 0, MB);
     sprintf (tmp,"\n%d %s %s",0,"mission","data ");
-    savestring += string( tmp);
-    savestring += WriteMissionData();
+    dyn_univ += string( tmp);
+    dyn_univ += WriteMissionData();
     memset( tmp, 0, MB);
     sprintf (tmp,"\n%d %s %s",0,"missionstring","data ");
-    savestring += string( tmp);
-    savestring += WriteMissionStringData();
+    dyn_univ += string( tmp);
+    dyn_univ += WriteMissionStringData();
     if (!STATIC_VARS_DESTROYED)
       last_written_pickled_data=PickleAllMissions(); 
     tmp = tmprealloc(tmp,MB,last_written_pickled_data.length()+256/*4 floats*/);
     sprintf (tmp,"\n%d %s %s %s ",0,"python","data",last_written_pickled_data.c_str());
-    savestring += string( tmp);
+    dyn_univ += string( tmp);
 
+	// Write news data
     memset( tmp, 0, MB);
     sprintf (tmp,"\n%d %s %s",0,"news","data ");
-    savestring += string( tmp);
-    savestring += WriteNewsData();
+    dyn_univ += string( tmp);
+    dyn_univ += WriteNewsData();
+	// Write faction relationships
     memset( tmp, 0, MB);
     sprintf (tmp,"\n%d %s %s",0,"factions","begin ");
-    savestring += string( tmp);
-    savestring += FactionUtil::SerializeFaction();
+    dyn_univ += string( tmp);
+    dyn_univ += FactionUtil::SerializeFaction();
+
+  	free(tmp);tmp=NULL;
+
+	return dyn_univ;
+}
+
+string SaveGame::WriteSaveGame (const char *systemname, const QVector &FP, float credits, std::vector<std::string> unitname, int player_num, bool write) {
+  savestring = string("");
+  if (outputsavegame.length()!=0) {
+    printf ("Writing Save Game %s",outputsavegame.c_str());
+    changehome();
+    vschdir ("save");
+
+	savestring += WritePlayerData( FP, unitname, systemname, credits);
+	savestring += WriteDynamicUniverse();
+
     if( write){
 	FILE * fp = fopen (outputsavegame.c_str(),"wb");
 		fwrite( savestring.c_str(), sizeof( char), savestring.length(), fp);
@@ -541,7 +571,6 @@ string SaveGame::WriteSaveGame (const char *systemname, const QVector &FP, float
     returnfromhome();
 
   }
-  free(tmp);tmp=NULL;
   return savestring;
 }
 

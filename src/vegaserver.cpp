@@ -31,8 +31,8 @@ LeakVector<Mission *> active_missions;
 int main( int argc, char **argv)
 {
 	NetServer *Server = new NetServer;
-	mission = new Mission( "test1.mission");
-	mission->initMission( false);
+	//mission = new Mission( "test1.mission");
+	//mission->initMission( false);
 
 	Server->start( argc, argv);
 
