@@ -65,8 +65,15 @@ AIEvents::ElemAttrMap * getProperScript(Unit * me, Unit * targ, bool interrupt) 
 
 void DoSpeech (Unit * un, const string &speech) {
   string myname ("[Static]");
-  if (un) {
-    myname= un->name;
+  if (un!=NULL) {
+    myname= un->getFullname();
+	Flightgroup * fg=un->getFlightgroup();
+		if (fg) {
+			if (fg->name!="base"&&fg->name!="Base") {
+				myname = fg->name+" "+XMLSupport::tostring(un->getFgSubnumber())+", "+un->name;
+			}
+		}else if (myname.length()==0)
+			myname = un->name;
   }
   mission->msgcenter->add (myname,"all",speech);
 }
