@@ -3011,7 +3011,7 @@ bool Unit::canUpgrade (const Unit * upgrador, int mountoffset,  int subunitoffse
   return UpAndDownGrade(upgrador,templ,mountoffset,subunitoffset,false,false,additive,force,percentage,this);
 }
 bool Unit::Upgrade (const Unit * upgrador, int mountoffset,  int subunitoffset, int additive, bool force,  double & percentage, const Unit * templ) {
-  return UpAndDownGrade(upgrador,templ,mountoffset,subunitoffset,true,false,additive,true,percentage,this);
+  return UpAndDownGrade(upgrador,templ,mountoffset,subunitoffset,true,false,additive,force,percentage,this);
 }
 bool Unit::canDowngrade (const Unit *downgradeor, int mountoffset, int subunitoffset, double & percentage, const Unit * downgradelimit){
   return UpAndDownGrade(downgradeor,NULL,mountoffset,subunitoffset,false,true,false,true,percentage,downgradelimit);
@@ -3291,7 +3291,7 @@ bool Unit::RepairUpgrade () {
     bool success=false;
     double pct=0;
     if (temprate->name!=string("LOAD_FAILED")) {
-        success = Upgrade(temprate,0,0,0,true,pct,NULL);
+        success = Upgrade(temprate,0,0,0,false,pct,NULL);
 	if (pct>0)
 	  success=true;
     }

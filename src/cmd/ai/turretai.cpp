@@ -9,7 +9,7 @@ TurretAI::TurretAI ():FaceTarget (false) {
   range=-1;
 }
 
-
+extern unsigned int FireBitmask (Unit * parent, bool shouldfire, float missileprob);
 void TurretAI::Execute () {
   Unit * targ = parent->Target();
   if (targ) {
@@ -27,12 +27,7 @@ void TurretAI::Execute () {
       Pos=Pos/mag;
       float dot = R.Dot (Pos.Cast());
       bool shouldfire = (mag-targ->rSize()-parent->rSize()<1.2*range&&dot>dot_cutoff);
-      unsigned int firebitm = ((1 << parent->combatRole()) |
-			       ROLES::FIRE_GUNS|
-			       (shouldfire?0:ROLES::FIRE_ONLY_AUTOTRACKERS)|
-			       (((float)rand())/
-				((float)RAND_MAX)<missile_prob)?ROLES::FIRE_MISSILES:0);
-      parent->Fire(firebitm);
+      parent->Fire(FireBitmask(parent,shouldfire,missile_prob));
       if (!shouldfire)
 	parent->UnFire();
       

@@ -56,8 +56,10 @@ void soundContainer::playsound () {
 }
 soundContainer::~soundContainer () {
 	if (sound>=0) {
+#if 0
 		AUDStopPlaying(sound);
 		AUDDeleteSound(sound,false);
+#endif
 		sound=-2;
 	}
 }

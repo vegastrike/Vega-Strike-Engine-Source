@@ -147,15 +147,8 @@ FireAt::~FireAt() {
 #endif
 
 }
-
-void FireAt::FireWeapons(bool shouldfire, bool lockmissile) {
-    if (shouldfire&&delay<rxntime) {
-        delay+=SIMULATION_ATOM;
-        return;
-    }else if (!shouldfire) {
-        delay=0;
-    }
-    unsigned int firebitm = ROLES::EVERYTHING_ELSE;
+unsigned int FireBitmask (Unit * parent,bool shouldfire, float missileprobability) {
+   unsigned int firebitm = ROLES::EVERYTHING_ELSE;
     Unit * un=parent->Target();
     if (un) {
       firebitm = (1 << parent->combatRole());
@@ -165,7 +158,15 @@ void FireAt::FireWeapons(bool shouldfire, bool lockmissile) {
       if (((float)rand())/((float)RAND_MAX)<missileprobability) 
 	firebitm |=ROLES::FIRE_MISSILES;
     }
-    parent->Fire(firebitm);
+}
+void FireAt::FireWeapons(bool shouldfire, bool lockmissile) {
+    if (shouldfire&&delay<rxntime) {
+        delay+=SIMULATION_ATOM;
+        return;
+    }else if (!shouldfire) {
+        delay=0;
+    }
+     parent->Fire(FireBitmask(parent,shouldfire,  missileprobability));
 }
 
 bool FireAt::isJumpablePlanet(Unit * targ) {
