@@ -292,9 +292,11 @@ void BaseComputer::constructControls(void) {
     options->setRect( Rect(.74, .85, .22, .1) );
     options->setLabel("Options");
     options->setCommand("ShowOptionsMenu");
-    options->setColor( GFXColor(.3,.3,1) );
-    options->setHighlightColor( GFXColor(.6,.6,1) );
-    options->setTextColor(GUI_OPAQUE_BLACK);
+    options->setColor( GFXColor(0,1,1,.25) );
+    options->setTextColor( GUI_OPAQUE_WHITE );
+    options->setDownColor( GFXColor(0,1,1,.6) );
+    options->setDownTextColor( GUI_OPAQUE_BLACK );
+    options->setHighlightColor( GFXColor(0,0,1,.4) );
     options->setFont(Font(.08));
     // Put the button on the window.
     window()->addControl(options);
@@ -304,9 +306,11 @@ void BaseComputer::constructControls(void) {
     done->setRect( Rect(.74, .71, .22, .1) );
     done->setLabel("Done");
     done->setCommand("Window::Close");
-    done->setColor( GFXColor(.3,.3,1) );
-    done->setHighlightColor( GFXColor(.6,.6,1) );
-    done->setTextColor(GUI_OPAQUE_BLACK);
+    done->setColor( GFXColor(0,1,1,.25) );
+    done->setTextColor( GUI_OPAQUE_WHITE );
+    done->setDownColor( GFXColor(0,1,1,.6) );
+    done->setDownTextColor( GUI_OPAQUE_BLACK );
+    done->setHighlightColor( GFXColor(0,0,1,.4) );
     done->setFont(Font(.08, BOLD_STROKE));
     window()->addControl(done);
 
@@ -314,9 +318,11 @@ void BaseComputer::constructControls(void) {
     NewButton* mode = new NewButton;
     mode->setRect( Rect(-.96, .86, .24, .09) );
     mode->setLabel("ERROR");
-    mode->setColor( GFXColor(.5,.5,.4) );
-    mode->setHighlightColor( GFXColor(.6,.6,1) );
-    mode->setTextColor(GUI_OPAQUE_BLACK);
+    mode->setColor( GFXColor(1,1,0,.25) );
+    mode->setTextColor( GUI_OPAQUE_WHITE );
+    mode->setDownColor( GFXColor(1,1,0,.5) );
+    mode->setDownTextColor( GUI_OPAQUE_BLACK );
+    mode->setHighlightColor( GFXColor(1,1,0,.4) );
     mode->setFont(Font(.07));
     mode->setId("ModeButton");
     // Put the button on the window.
@@ -399,10 +405,15 @@ void BaseComputer::constructControls(void) {
 
         // Buy button.
         NewButton* buy = new NewButton;
-        buy->setRect( Rect(-.11, .2, .22, .12) );
-        buy->setColor( GFXColor(.3,.3,1) );
-        buy->setHighlightColor( GFXColor(.6,.6,1) );
-        buy->setTextColor(GUI_OPAQUE_BLACK);
+        buy->setRect( Rect(-.11, .2, .22, .13) );
+        buy->setColor( GFXColor(0,1,1,.1) );
+        buy->setTextColor(GUI_OPAQUE_WHITE);
+		buy->setDownColor( GFXColor(0,1,1,.4) );
+		buy->setDownTextColor( GFXColor(.2,.2,.2) );
+		buy->setVariableBorderCycleTime(1.0);
+		buy->setBorderColor( GFXColor(.1,.1,.1) );
+		buy->setEndBorderColor( GFXColor(.4,.4,.4) );
+		buy->setShadowWidth(2.0);
         buy->setFont(Font(.1, BLACK_STROKE));
         buy->setId("Commit");
         cargoGroup->addChild(buy);
@@ -510,9 +521,14 @@ void BaseComputer::constructControls(void) {
         // Buy button.
         NewButton* buy = new NewButton;
         buy->setRect( Rect(-.11, .2, .22, .12) );
-        buy->setColor( GFXColor(.3,.3,1) );
-        buy->setHighlightColor( GFXColor(.6,.6,1) );
-        buy->setTextColor(GUI_OPAQUE_BLACK);
+        buy->setColor( GFXColor(0,1,1,.1) );
+        buy->setTextColor(GUI_OPAQUE_WHITE);
+		buy->setDownColor( GFXColor(0,1,1,.4) );
+		buy->setDownTextColor( GFXColor(.2,.2,.2) );
+		buy->setVariableBorderCycleTime(1.0);
+		buy->setBorderColor( GFXColor(.1,.1,.1) );
+		buy->setEndBorderColor( GFXColor(.4,.4,.4) );
+		buy->setShadowWidth(2.0);
         buy->setFont(Font(.1, BLACK_STROKE));
         buy->setId("Commit");
         upgradeGroup->addChild(buy);
@@ -656,10 +672,15 @@ void BaseComputer::constructControls(void) {
 
         // Accept button.
         NewButton* accept = new NewButton;
-        accept->setRect( Rect(-.23, -.95, .22, .1) );
-        accept->setColor( GFXColor(.3,.3,1) );
-        accept->setHighlightColor( GFXColor(.6,.6,1) );
-        accept->setTextColor(GUI_OPAQUE_BLACK);
+        accept->setRect( Rect(-.23, -.95, .22, .11) );
+        accept->setColor( GFXColor(0,1,1,.1) );
+        accept->setTextColor(GUI_OPAQUE_WHITE);
+		accept->setDownColor( GFXColor(0,1,1,.4) );
+		accept->setDownTextColor( GFXColor(.2,.2,.2) );
+		accept->setVariableBorderCycleTime(1.0);
+		accept->setBorderColor( GFXColor(.1,.1,.1) );
+		accept->setEndBorderColor( GFXColor(.4,.4,.4) );
+		accept->setShadowWidth(2.0);
         accept->setFont(Font(.08, BLACK_STROKE));
         accept->setId("Commit");
         missionsGroup->addChild(accept);
@@ -722,10 +743,15 @@ void BaseComputer::constructControls(void) {
 
         // Buy button.
         NewButton* buy = new NewButton;
-        buy->setRect( Rect(-.23, -.95, .22, .1) );
-        buy->setColor( GFXColor(.3,.3,1) );
-        buy->setHighlightColor( GFXColor(.6,.6,1) );
-        buy->setTextColor(GUI_OPAQUE_BLACK);
+        buy->setRect( Rect(-.23, -.95, .22, .11) );
+        buy->setColor( GFXColor(0,1,1,.1) );
+        buy->setTextColor(GUI_OPAQUE_WHITE);
+		buy->setDownColor( GFXColor(0,1,1,.4) );
+		buy->setDownTextColor( GFXColor(.2,.2,.2) );
+		buy->setVariableBorderCycleTime(1.0);
+		buy->setBorderColor( GFXColor(.1,.1,.1) );
+		buy->setEndBorderColor( GFXColor(.4,.4,.4) );
+		buy->setShadowWidth(2.0);
         buy->setFont(Font(.08, BLACK_STROKE));
         buy->setId("Commit");
         shipDealerGroup->addChild(buy);
@@ -742,9 +768,11 @@ void BaseComputer::constructControls(void) {
         playerInfo->setRect( Rect(-.40, .52, .27, .09) );
         playerInfo->setLabel("Player Info");
         playerInfo->setCommand("ShowPlayerInfo");
-        playerInfo->setColor( GFXColor(.5,.5,1) );
-        playerInfo->setHighlightColor( GFXColor(.6,.6,1) );
-        playerInfo->setTextColor(GUI_OPAQUE_BLACK);
+		playerInfo->setColor( GFXColor(1,1,0,.25) );
+		playerInfo->setTextColor( GUI_OPAQUE_WHITE );
+		playerInfo->setDownColor( GFXColor(1,1,0,.5) );
+		playerInfo->setDownTextColor( GUI_OPAQUE_BLACK );
+		playerInfo->setHighlightColor( GFXColor(1,1,0,.4) );
         playerInfo->setFont(Font(.07));
         infoGroup->addChild(playerInfo);
 
@@ -753,9 +781,11 @@ void BaseComputer::constructControls(void) {
         shipStats->setRect( Rect(-.05, .52, .27, .09) );
         shipStats->setLabel("Ship Stats");
         shipStats->setCommand("ShowShipStats");
-        shipStats->setColor( GFXColor(.5,.5,1) );
-        shipStats->setHighlightColor( GFXColor(.6,.6,1) );
-        shipStats->setTextColor(GUI_OPAQUE_BLACK);
+		shipStats->setColor( GFXColor(1,1,0,.25) );
+		shipStats->setTextColor( GUI_OPAQUE_WHITE );
+		shipStats->setDownColor( GFXColor(1,1,0,.5) );
+		shipStats->setDownTextColor( GUI_OPAQUE_BLACK );
+		shipStats->setHighlightColor( GFXColor(1,1,0,.4) );
         shipStats->setFont(Font(.07));
         infoGroup->addChild(shipStats);
 
@@ -904,10 +934,10 @@ void BaseComputer::recalcTitle() {
     string baseName;
     if(baseUnit) {
         if(baseUnit->isUnit() == PLANETPTR) {
-	    string temp = ((Planet*)baseUnit)->getHumanReadablePlanetType()+" Planet";
-	    baseName = temp;
+			string temp = ((Planet*)baseUnit)->getHumanReadablePlanetType()+" Planet";
+			baseName = temp;
         } else {
-	    baseName = baseUnit->name;
+			baseName = baseUnit->name;
         }
     }
     title += baseName + " ";

@@ -23,6 +23,7 @@
 
 #include "newbutton.h"
 
+#include "lin_time.h"				// For cycling borders.
 #include "eventmanager.h"
 #include "painttext.h"
 
@@ -31,30 +32,72 @@
 // pressed by the mouse, and, by default, send a command out when
 // it is pressed.
 
+// In variable-color borders, how many color-switches per second.
+static const int CYCLE_STEPS_PER_SECOND = 10;
+
+
 // Draw the button.
 void NewButton::draw(void)
 {
     const float lineWidth = shadowWidth();
 
+	GFXColor currentTextColor;			// Color of label text.
+
     switch(m_drawingState) {
         case NORMAL_STATE:
             drawRect(m_rect, color());
-            drawLowRightShadow(m_rect, GUI_OPAQUE_BLACK, lineWidth);
-            drawUpLeftShadow(m_rect, GUI_OPAQUE_WHITE, lineWidth);
+			if(m_variableBorderCycleTime > 0.0) {
+				drawCycleBorder(lineWidth);
+			} else {
+				drawLowRightShadow(m_rect, GUI_OPAQUE_BLACK, lineWidth);
+				drawUpLeftShadow(m_rect, GUI_OPAQUE_WHITE, lineWidth);
+			}
+			currentTextColor = textColor();
             break;
         case DOWN_STATE:
-            drawRect(m_rect, color());
-            drawUpLeftShadow(m_rect, GUI_OPAQUE_BLACK, lineWidth);
-            drawLowRightShadow(m_rect, GUI_OPAQUE_WHITE, lineWidth);
+			{
+			GFXColor currentDownColor = downColor();
+			if(isClear(currentDownColor)) {
+				currentDownColor = color();
+			}
+            drawRect(m_rect, currentDownColor);
+
+			currentTextColor = downTextColor();
+			if(isClear(currentTextColor)) {
+				currentTextColor = textColor();
+			}
+			
+ 			if(m_variableBorderCycleTime > 0.0) {
+				drawCycleBorder(lineWidth);
+			} else {
+				drawUpLeftShadow(m_rect, GUI_OPAQUE_BLACK, lineWidth);
+				drawLowRightShadow(m_rect, GUI_OPAQUE_WHITE, lineWidth);
+			}
+			}
             break;
         case HIGHLIGHT_STATE:
             drawRect(m_rect, highlightColor());
-            drawLowRightShadow(m_rect, GUI_OPAQUE_BLACK, lineWidth);
-            drawUpLeftShadow(m_rect, GUI_OPAQUE_WHITE, lineWidth);
+
+			currentTextColor = textHighlightColor();
+			if(isClear(currentTextColor)) {
+				currentTextColor = textColor();
+			}
+
+			if(m_variableBorderCycleTime > 0.0) {
+				drawCycleBorder(lineWidth);
+			} else {
+				drawLowRightShadow(m_rect, GUI_OPAQUE_BLACK, lineWidth);
+				drawUpLeftShadow(m_rect, GUI_OPAQUE_WHITE, lineWidth);
+			}
             break;
         case DISABLED_STATE:
             // Just the button -- no shadows.
-            drawRect(m_rect, color());
+			if(m_variableBorderCycleTime > 0.0) {
+				drawCycleBorder(lineWidth);
+			} else {
+				drawRect(m_rect, color());
+			}
+			currentTextColor = textColor();
             break;
     }
 
@@ -62,9 +105,52 @@ void NewButton::draw(void)
     m_paintText.setRect(m_rect);
     m_paintText.setText(label());
     m_paintText.setFont(font());
-    m_paintText.setColor(textColor());
     m_paintText.setJustification(CENTER_JUSTIFY);
+    m_paintText.setColor(currentTextColor);
     m_paintText.draw();
+}
+
+// Draw the cycled border.  Checks time to change colors, etc.
+void NewButton::drawCycleBorder(float lineWidth) {
+	if(m_cycleStepCount <= 0) {
+		// We need to figure out how many steps to use.
+		m_cycleStepCount = m_variableBorderCycleTime * CYCLE_STEPS_PER_SECOND;
+	}
+
+	const double elapsedTime = getNewTime();
+
+	if(elapsedTime-m_lastStepTime >= m_variableBorderCycleTime/m_cycleStepCount) {
+		m_lastStepTime = elapsedTime;
+
+		// It's time.  Change the step in the cycle.
+		m_currentCycle += m_cycleDirection;
+		if(m_currentCycle <= 0) {
+			// At the bottom of the cycle.
+			m_currentCycleColor = m_borderColor;
+			m_cycleDirection = 1;
+			m_cycleColorDelta.r = (m_endBorderColor.r-m_borderColor.r) / m_cycleStepCount;
+			m_cycleColorDelta.g = (m_endBorderColor.g-m_borderColor.g) / m_cycleStepCount;
+			m_cycleColorDelta.b = (m_endBorderColor.b-m_borderColor.b) / m_cycleStepCount;
+			m_cycleColorDelta.a = (m_endBorderColor.a-m_borderColor.a) / m_cycleStepCount;
+		} else if(m_currentCycle >= m_cycleStepCount) {
+			// At the top of the cycle.
+			m_currentCycleColor = m_endBorderColor;
+			m_cycleDirection = (-1);
+			m_cycleColorDelta.r = (m_borderColor.r-m_endBorderColor.r) / m_cycleStepCount;
+			m_cycleColorDelta.g = (m_borderColor.g-m_endBorderColor.g) / m_cycleStepCount;
+			m_cycleColorDelta.b = (m_borderColor.b-m_endBorderColor.b) / m_cycleStepCount;
+			m_cycleColorDelta.a = (m_borderColor.a-m_endBorderColor.a) / m_cycleStepCount;
+		} else {
+			// Somewhere in the middle of the cycle.
+			m_currentCycleColor.r += m_cycleColorDelta.r;
+			m_currentCycleColor.g += m_cycleColorDelta.g;
+			m_currentCycleColor.b += m_cycleColorDelta.b;
+			m_currentCycleColor.a += m_cycleColorDelta.a;
+		}
+	}
+
+	// Whew!  Now actually draw it.
+	drawRectOutline(m_rect, m_currentCycleColor, lineWidth);
 }
 
 // Set the button drawing state.  If the state changes, it will redraw.
@@ -127,7 +213,19 @@ NewButton::NewButton(void)
 m_drawingState(NewButton::NORMAL_STATE),
 m_commandId(),
 m_leftPressed(false),
-m_highlightColor( GUI_OPAQUE_WHITE ),
-m_shadowWidth(1.0)
+m_highlightColor(GUI_OPAQUE_WHITE),
+m_textHighlightColor(GUI_CLEAR),
+m_downColor(GUI_CLEAR),
+m_downTextColor(GUI_CLEAR),
+m_shadowWidth(1.0),
+m_variableBorderCycleTime(0.0),
+m_borderColor(GUI_OPAQUE_BLACK),
+m_endBorderColor(GUI_OPAQUE_WHITE),
+m_currentCycleColor(GUI_OPAQUE_BLACK),
+m_currentCycle(0),
+m_cycleStepCount(-1),
+m_cycleDirection(0),
+m_cycleColorDelta(),
+m_lastStepTime(0.0)
 {
 }

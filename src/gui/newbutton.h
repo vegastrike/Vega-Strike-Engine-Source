@@ -57,13 +57,37 @@ public:
     virtual void setLabel(std::string l) { m_label = l; };
     virtual std::string label(void) { return m_label; };
 
-    // Color when mouse is over button.
+    // Background color when mouse is over button.
     virtual void setHighlightColor(const GFXColor& c) { m_highlightColor = c; };
     virtual GFXColor highlightColor(void) { return m_highlightColor; } ;
+
+    // Text color when mouse is over button.
+    virtual void setTextHighlightColor(const GFXColor& c) { m_textHighlightColor = c; };
+    virtual GFXColor textHighlightColor(void) { return m_textHighlightColor; } ;
+
+    // Background color when button is pressed down.
+    virtual void setDownColor(const GFXColor& c) { m_downColor = c; };
+    virtual GFXColor downColor(void) { return m_downColor; } ;
+
+    // Text color when button is pressed down.
+    virtual void setDownTextColor(const GFXColor& c) { m_downTextColor = c; };
+    virtual GFXColor downTextColor(void) { return m_downTextColor; } ;
 
     // Width of shadow lines in pixels.
     virtual void setShadowWidth(float width) { m_shadowWidth = width; };
     virtual float shadowWidth(void) { return m_shadowWidth; };
+
+    // Variable-color border cycle time in seconds.  Substitutes for shadows.
+    virtual void setVariableBorderCycleTime(float cycleTime) { m_variableBorderCycleTime = cycleTime; m_cycleStepCount = (-1); };
+    virtual float variableBorderCycleTime(void) { return m_variableBorderCycleTime; };
+
+    // Set the border color of the button.  This overrides the shadow color.
+    virtual void setBorderColor(const GFXColor& c) { m_borderColor = c; };
+    virtual GFXColor borderColor(void) { return m_borderColor; } ;
+
+    // Border color at end of cycle.  Only used with variable border.
+    virtual void setEndBorderColor(const GFXColor& c) { m_endBorderColor = c; };
+    virtual GFXColor endBorderColor(void) { return m_endBorderColor; } ;
 
     // Draw the button.
     virtual void draw(void);
@@ -84,6 +108,9 @@ protected:
     // Override to change the behavior.
     virtual void sendButtonCommand(void);
 
+	// Draw the cycled border.  Checks time to change colors, etc.
+	virtual void drawCycleBorder(float lineWidth);
+
     // VARIABLES
 protected:
     int m_drawingState;                 // How the button looks.
@@ -91,8 +118,22 @@ protected:
     std::string m_label;                // The text on this button.
     bool m_leftPressed;                 // True = Mouse-down and no mouse-up yet.
     GFXColor m_highlightColor;          // Highlighted button color.
+	GFXColor m_textHighlightColor;		// Text color when mouse is highlighted.
+	GFXColor m_downColor;				// Background color when button is pressed down.
+	GFXColor m_downTextColor;			// Text color when button is pressed down.
     float m_shadowWidth;                // Line width of shadows in pixels.
+	float m_variableBorderCycleTime;	// Variable border cycle time (in seconds).
+	GFXColor m_borderColor;				// Color of border.
+	GFXColor m_endBorderColor;			// End color of border if cycling.
     PaintText m_paintText;              // Object that displays label.
+
+	// State for painting a cycling border.
+	GFXColor m_currentCycleColor;		// The current color of the cycling border.
+	int m_currentCycle;					// The "step" in the cycle we are currently painting.
+	int m_cycleStepCount;				// Number of steps from one color to the other (1/2 cycle).
+	int m_cycleDirection;				// 1 or -1 depending on which color we are heading toward.
+	GFXColor m_cycleColorDelta;			// Change in each color for one cycle.
+	double m_lastStepTime;				// Last time we changed steps.
 };
 
 #endif   // __BUTTON_H__
