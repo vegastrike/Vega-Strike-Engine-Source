@@ -17,8 +17,8 @@ libgfx_a_SOURCES =	\
 	background.h	\
 	bounding_box.cpp	\
 	bounding_box.h	\
-	box.cpp		\
-	box.h		\
+	vsbox.cpp		\
+	vsbox.h		\
 	bsp.cpp		\
 	bsp.h		\
 	camera.cpp	\

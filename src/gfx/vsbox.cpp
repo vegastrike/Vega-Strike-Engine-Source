@@ -1,4 +1,4 @@
-#include "box.h"
+#include "vsbox.h"
 #include "xml_support.h"
 
 using XMLSupport::tostring;
