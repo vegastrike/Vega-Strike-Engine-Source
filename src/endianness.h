@@ -3,9 +3,10 @@
 double DONTUSE__NXSwapBigDoubleToLittleEndian(double x);
 
 
-double NXSwapHostDoubleToLittle (double x);
-float NXSwapHostFloatToLittle (float x);
-
+double VSSwapHostDoubleToLittle (double x);
+float VSSwapHostFloatToLittle (float x);
+unsigned int VSSwapHostIntToLittle (unsigned int x);
+unsigned short VSSwapHostShortToLittle (unsigned short x);
 #if defined(__APPLE__) || defined(MACOSX)
     #include<machine/endian.h>
 #else
@@ -27,7 +28,7 @@ float NXSwapHostFloatToLittle (float x);
     # include <machine/byte_order.h>
     # define le32_to_cpu(x) (NXSwapHostLongToLittle(x))
     # define le16_to_cpu(x) (NXSwapHostShortToLittle(x))
-    # define le64_to_cpu(x) (DONTUSE__NXSwapBigDoubleToLittle(x))
+    # define le64_to_cpu(x) (NXSwapHostDoubleToLittle(x))
     #else
     # define le32_to_cpu(x) (x)
     # define le16_to_cpu(x) (x)

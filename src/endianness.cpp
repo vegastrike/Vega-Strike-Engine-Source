@@ -6,14 +6,20 @@ union LILfloat {
   float f;
   unsigned int i;
 };
-float NXSwapHostFloatToLittle (float x) {
+float VSSwapHostFloatToLittle (float x) {
   LILfloat l;
   l.f = x;
   l.i = le32_to_cpu (l.i);
   return l.f;
 }
-double NXSwapHostDoubleToLittle (double x) {
+double VSSwapHostDoubleToLittle (double x) {
   return le64_to_cpu (x);
+}
+unsigned int VSSwapHostIntToLittle (unsigned int x) {
+  return le32_to_cpu (x);
+}
+unsigned short VSSwapHostShortToLittle (unsigned short x) {
+  return le16_to_cpu (x);
 }
 double DONTUSE__NXSwapBigDoubleToLittleEndian(double x){
   LILdubl l;
