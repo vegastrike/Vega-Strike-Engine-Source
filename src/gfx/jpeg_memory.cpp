@@ -24,7 +24,7 @@ jpeg_memory_dest(j_compress_ptr cinfo, JOCTET *buffer,int bufsize)
 }
 
 int
-jpeg_compress(JSAMPLE *dst, JSAMPLE *src, int width, int height, int dstsize, int quality)
+jpeg_compress(char *dst, char *src, int width, int height, int dstsize, int quality)
 {
   struct jpeg_compress_struct cinfo;
   struct jpeg_error_mgr jerr;
@@ -67,7 +67,7 @@ jpeg_compress(JSAMPLE *dst, JSAMPLE *src, int width, int height, int dstsize, in
 }
 
 int
-jpeg_compress_to_file(JSAMPLE *src, char *file, int width, int height, int quality) 
+jpeg_compress_to_file(char * *src, char *file, int width, int height, int quality) 
 {
   FILE *outfile;
   struct jpeg_compress_struct cinfo;
