@@ -79,9 +79,12 @@ void Sprite::Draw()
 		GFXDisable(LIGHTING);
 		GFXDisable(DEPTHWRITE);
 		GFXDisable(DEPTHTEST);
-
+		GFXPushBlendMode();
+		GFXBlendMode(ONE, ONE);
 		UpdateHudMatrix();
+		//GFXColor4f (1,0,0,1);
 		GFXEnable(TEXTURE0);
+		GFXDisable(TEXTURE1);
 		surface->MakeActive();
 
 		GFXPushBlendMode();
@@ -105,6 +108,7 @@ void Sprite::Draw()
 		GFXVertex3f(left, top, 0.00f);
 
 		GFXEnd();
+		GFXPopBlendMode();
 		GFXEnable(LIGHTING);
 		GFXEnable(DEPTHWRITE);
 		GFXEnable(DEPTHTEST);
@@ -123,6 +127,14 @@ void Sprite::GetPosition(float &x1, float &y1)
 {
 	x1 = pos.i;
 	y1 = pos.j;
+}
+void Sprite::SetSize (float x1, float y1) {
+  right = left+x1;
+  bottom = top+y1;
+}
+void Sprite::GetSize (float &x1,float &y1) {
+  x1 = right-left;
+  y1 = bottom - top;
 }
 
 void Sprite::SetRotation(const float &rot)

@@ -3,12 +3,17 @@
 #include "in_kb.h"
 #include "in_mouse.h"
 #include "gfx_camera.h"
+#include "gfx_sprite.h"
 //#include "gfx_click_list.h"
 class StarSystem;
 class UnitCollection;
 class ClickList;
+class Sprite;
 class InputDFA {
   enum State {NONE, UNITS_SELECTED, LOCATION_SELECT, TARGET_SELECT};
+
+  Sprite MouseArrow;
+  Sprite SelectBox;
   //wish the mouse-bound functions could be member functions
   static void ClickSelect (KBSTATE, int,int,int,int,int);
   static void TargetSelect (KBSTATE,int,int,int,int,int);

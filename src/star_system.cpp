@@ -46,7 +46,6 @@ void StarSystem::RemoveUnit(Unit *unit) {
 
 void StarSystem::Draw() {
   //primaries->Draw();
-  systemInputDFA->Draw();
   Iterator *iter = drawList->createIterator();
   Unit *unit;
   while((unit = iter->current())!=NULL) {
@@ -54,6 +53,7 @@ void StarSystem::Draw() {
     iter->advance();
   }
   delete iter;
+  systemInputDFA->Draw();
 }
 
 void StarSystem::Update() {

@@ -87,18 +87,22 @@ LocationSelect::~LocationSelect() {
 #define POSITION_GFXVertex(x,y,z) (GFXVertex3f(LocalPosition.i+CrosshairSize* (x) ,LocalPosition.j+CrosshairSize* (y) , LocalPosition.k+CrosshairSize* (z) ))
 
 void LocationSelect:: Draw () {
+
+  
   GFXLoadIdentity(MODEL);
   GFXMultMatrix(MODEL, transformation);
-  GFXEnable(DEPTHWRITE);
-  GFXEnable(DEPTHTEST);
-  GFXDisable(TEXTURE0);
-  GFXDisable(TEXTURE1);
-  GFXDisable(LIGHTING);
-  GFXPushBlendMode();
-  //  GFXBlendMode(SRCALPHA,INVSRCALPHA);
-  //GFXColor4f (parentScene->HUDColor.r, parentScene->HUDColor.g, parentScene->HUDColor.b, parentScene->HUDColor.a);
+  /*
+    GFXEnable(DEPTHWRITE);
+    GFXEnable(DEPTHTEST);
+    GFXDisable(TEXTURE0);
+    GFXDisable(TEXTURE1);
+    GFXDisable(LIGHTING);
+    GFXPushBlendMode();
+    //  GFXBlendMode(SRCALPHA,INVSRCALPHA);
+    //GFXColor4f (parentScene->HUDColor.r, parentScene->HUDColor.g, parentScene->HUDColor.b, parentScene->HUDColor.a);
 
-  GFXColor4f (0,.5,0,.3);
+    GFXColor4f (0,.5,0,.3);
+*/
 #ifdef DELTA_MOVEMENT
   if (vert) {
     LocalPosition.k=0;
@@ -171,6 +175,12 @@ void LocationSelect:: Draw () {
     }
 #endif
   }
+
+  //draw the animation
+
+
+
+  /*
   GFXBegin(TRIANGLES);
   if (fabs(LocalPosition.k-CrosshairSize)>CrosshairSize) {
     int tmp;
@@ -331,7 +341,12 @@ void LocationSelect:: Draw () {
 
 
   GFXEnd();
+<<<<<<< gfx_location_select.cpp
+  //  GFXPopBlendMode();
+*/
+
   GFXPopBlendMode();
+
 
 }
 

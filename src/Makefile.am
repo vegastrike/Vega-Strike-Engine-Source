@@ -112,8 +112,6 @@ vegastrike_SOURCES =				\
 	pic.h					\
 	physics.h				\
 	physics.cpp				\
-	quadgeom.cpp				\
-	quadgeom.hpp				\
 	screenshot.c				\
 	screenshot.h				\
 	string_util.c				\

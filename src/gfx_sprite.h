@@ -50,7 +50,8 @@ public:
 
 	void SetPosition(const float &x1, const float &y1);
 	void GetPosition(float &x1, float &y1);
-
+        void SetSize (float s1, float s2);
+        void GetSize (float &x1, float &y1);
 	void SetRotation(const float &rot);
 	void GetRotation(float &rot);
 	//float &Rotation(){return rotation;};

@@ -1,6 +1,7 @@
 #include "cmd_input_dfa.h"
 #include "gfx_click_list.h"
-
+#include "gfx_sprite.h"
+#include "vegastrike.h"
 //needed as functions bound to keys may not be class member functions--Context switch handles it
 InputDFA *CurDFA=NULL;
 
@@ -35,9 +36,9 @@ void InputDFA::TargetSelect (KBSTATE k,int x,int y, int delx, int dely, int mod)
     CurDFA->SetStateNone(); //go back up the heirarchy;
   }
 }
-
 void InputDFA::ClickSelect (KBSTATE k, int x, int y, int delx, int dely, int mod) {
   static int kmod;
+  CurDFA->MouseArrow.SetPosition (1.33-((float)(x*2))/g_game.y_resolution,1-((float)(y*2))/g_game.y_resolution);
   if (k==RESET)
     return;///little hack to prevent the function from being 'primed' with reset and continuing on an infinite loop again and again and again
 
@@ -53,6 +54,8 @@ void InputDFA::ClickSelect (KBSTATE k, int x, int y, int delx, int dely, int mod
     return;
   }
   if (k==PRESS){
+
+    CurDFA->SelectBox.SetPosition (1.33-((float)(x*2))/g_game.y_resolution,1-((float)(y*2))/g_game.y_resolution);
     Unit * sel = CurDFA->clickList->requestShip(x,y);
     if (sel!=NULL) {
       UnitCollection *tmpcollection=new UnitCollection;
@@ -74,12 +77,10 @@ void InputDFA::ClickSelect (KBSTATE k, int x, int y, int delx, int dely, int mod
   }
   if (k==DOWN) {
     if (delx||dely) {
+      CurDFA->SelectBox.SetSize (((float)(CurDFA->prevx-x)*2)/g_game.y_resolution,((float)(CurDFA->prevy-y)*2)/g_game.y_resolution);
       CurDFA->Selecting=true;
-      UnitCollection * tmpcol = CurDFA->clickList->requestIterator(CurDFA->prevx,CurDFA->prevy,x,y);
       if (mod&ACTIVE_SHIFT) {
 	//do clickb0x0rz on both CurDFA->selection && tmpcol FIXME
-	delete tmpcol;
-
 	/*CurDFA->appendCollection(tmpcol)*/;
       }else{
 	//do clickb0x0rz on tmpcolFIXME
@@ -109,12 +110,14 @@ void InputDFA::ClickSelect (KBSTATE k, int x, int y, int delx, int dely, int mod
 
 //this function is bound in the NONE state...
 void InputDFA::NoneSelect (KBSTATE k,int x, int y, int delx, int dely, int mod) {
+  CurDFA->MouseArrow.SetPosition (1.33-((float)(x*2))/g_game.y_resolution,1-((float)(y*2))/g_game.y_resolution);
   static int kmod;
   if (k==RESET)
     return;///little hack to prevent the function from being 'primed' with reset and continuing on an infinite loop again and again and again
   if (mod&ACTIVE_CTRL)
     return; //you don't want control pressed
   if (k==PRESS) {
+    CurDFA->SelectBox.SetPosition (1.33-((float)(x*2))/g_game.y_resolution,1-((float)(y*2))/g_game.y_resolution);
     CurDFA->Selecting=false;
     kmod = mod;
     CurDFA->prevx=x;
@@ -131,12 +134,11 @@ void InputDFA::NoneSelect (KBSTATE k,int x, int y, int delx, int dely, int mod) 
       fprintf (stderr,"None::missed\n");if (CurDFA->state==TARGET_SELECT) fprintf (stderr," to target");else fprintf (stderr," to select");
     }
   }
+  
   if (k==DOWN) {
     if (delx||dely) {
+      CurDFA->SelectBox.SetSize (((float)(CurDFA->prevx-x)*2)/g_game.y_resolution,((float)(CurDFA->prevy-y)*2)/g_game.y_resolution);
       CurDFA->Selecting=true;
-      UnitCollection * tmpcol = CurDFA->clickList->requestIterator(CurDFA->prevx,CurDFA->prevy,x,y);
-      //FIXMEdo select boxes
-      delete tmpcol;
     }
   }
   if (k==RELEASE&&CurDFA->Selecting) {
@@ -154,7 +156,7 @@ void InputDFA::NoneSelect (KBSTATE k,int x, int y, int delx, int dely, int mod) 
   }
 }
 
-InputDFA::InputDFA (StarSystem * par) {
+InputDFA::InputDFA (StarSystem * par) :MouseArrow ("mouse.spr"), SelectBox("selectbox.spr"){
   parentSystem= par;
   clickList = parentSystem->getClickList();
   state = NONE;
@@ -300,12 +302,27 @@ void InputDFA::SetState (State st) {
 void InputDFA::Draw () {
   switch (state) {
   case NONE:	//draw arrow
+    if (Selecting) { 
+      SelectBox.Draw();
+    }
+    MouseArrow.Draw();
+
   break;
   case UNITS_SELECTED: //draw arrow, boxes
+    if (Selecting) {
+      SelectBox.Draw();
+    }
+    MouseArrow.Draw();
+    
     break;
   case LOCATION_SELECT:
     break;
   case TARGET_SELECT:
+    if (Selecting) {
+      SelectBox.Draw();
+    }
+    MouseArrow.Draw();
+    
     break;
   }
 }

@@ -435,13 +435,13 @@ void createObjects() {
 
   carrier = new Unit("ucarrier.dat");
   //star_system = new StarSystem(new Planet("test_system.dat"));  
-  //Unit *fighter = new Unit("uosprey.dat");
+  //Unit *fighter = new Unit("uospreys.dat");
   fighter = new Unit("uosprey.dat");
   //Unit *fighter2 = new Unit("uosprey.dat");
   fighter2 = new Unit("uosprey.dat");
-  s = new Animation ("explosion_orange.ani",true);
+  s = new Animation ("explosion_orange.ani",true,false);
   s->SetPosition (0,0,5);
-  fihneCarriah = new Sprite ("carrier.spr");
+  fihneCarriah = new Sprite ("mouse.spr");
   bg = new Background("cube");
   //bg2 = new SphereMesh (20.0,8,8,"sun.bmp",true,true);
   //HUDElement *t = new HUDElement("ucarrier.dat");
@@ -481,7 +481,7 @@ void createObjects() {
   GFXSelectMaterial(0);
   
   //  s = new Sprite("carrier.spr");
-  fihneCarriah->SetPosition (-.5,.8);
+  fihneCarriah->SetPosition (1,1);
   
   textplane = new TextPlane("9x12.fon");
   textplane->SetText(string("This is a test of the emergency broadcast system"));
@@ -512,7 +512,7 @@ void createObjects() {
   shipList = _GFX->activeStarSystem()->getClickList();
     //BindKey (1,startselect);
     //BindKey (0,clickhandler);
-  Mesh *foo = new Mesh("mid-20038.xml", true);
+  //Mesh *foo = new Mesh("mid-20038.xml", true);
   //exit(0);
 }
 
@@ -571,7 +571,7 @@ void main_loop() {
 
   _GFX->activeStarSystem()->Draw();
   s->Draw();
-  fihneCarriah->Draw();
+
   _GFX->activeStarSystem()->Update();
   ProcessKB();
   //ProcessMouse();  
@@ -579,6 +579,7 @@ void main_loop() {
   GFXDisable(TEXTURE1);
   //  _GFX->AccessHudCamera()->UpdateGFX(false);
   textplane->Draw();
+  fihneCarriah->Draw();
   //  _GFX->AccessCamera()->UpdateGFX(false);
 
   //for(a = 0; a < numf; a++) {

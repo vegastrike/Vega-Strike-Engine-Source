@@ -231,13 +231,14 @@ BOOL /*GFXDRVAPI*/ GFXTransferTexture (unsigned char *buffer, int handle,  enum 
 			int j =0;
 			for (int i=0; i< nsize; i+=4)
 			{
-				tbuf[i] = textures[handle].palette[3*buffer[j]];
-				tbuf[i+1] = textures[handle].palette[3*buffer[j]+1];
-				tbuf[i+2] = textures[handle].palette[3*buffer[j]+2];
-				tbuf[i+3]=255;
+				tbuf[i] = textures[handle].palette[4*buffer[j]];
+				tbuf[i+1] = textures[handle].palette[4*buffer[j]+1];
+				tbuf[i+2] = textures[handle].palette[4*buffer[j]+2];
+				tbuf[i+3]= textures[handle].palette[4*buffer[j]+3];//used to be 255
 				j ++;
 			}
-			glTexImage2D(image2D,0,3,textures[handle].width, textures[handle].height,0,GL_RGBA, GL_UNSIGNED_BYTE, tbuf);
+			glTexImage2D(image2D, 0, 4, textures[handle].width, textures[handle].height, 0, GL_RGBA, GL_UNSIGNED_BYTE, tbuf);
+			//unashiehized			glTexImage2D(image2D,0,3,textures[handle].width, textures[handle].height,0,GL_RGBA, GL_UNSIGNED_BYTE, tbuf);
 
 			//delete [] buffer;
 			//buffer = tbuf;
