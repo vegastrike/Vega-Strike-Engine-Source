@@ -283,7 +283,7 @@ void Enslave (Unit* parent, bool enslave) {
   unsigned int numcargo=parent->numCargo();
   for (i=0;i<numcargo;++i) {
     Cargo * carg= &parent->GetCargo(i);
-    if (free) {
+    if (enslave) {
       if (carg->category.find("Passengers")!=string::npos&&carg->content!="Hitchhiker") {
         ToBeChanged.push_back(*carg);
         parent->RemoveCargo(i,carg->quantity,true);
@@ -295,7 +295,7 @@ void Enslave (Unit* parent, bool enslave) {
       }
     }
   }
-  Cargo *newCarg  = UniverseUtil::GetMasterPartList()->GetCargo(free?"Hitchhiker":"Slaves",i);
+  Cargo *newCarg  = UniverseUtil::GetMasterPartList()->GetCargo(enslave?"Slaves":"Hitchhiker",i);
   if (newCarg) {
     Cargo slave=*newCarg;
     for (i=0;i<ToBeChanged.size();++i) {
