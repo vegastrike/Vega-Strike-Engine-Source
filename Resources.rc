@@ -89,7 +89,7 @@ BEGIN
         BEGIN
             VALUE "Comments", "Vega Strike is the 3D Space Simulator that allows you to trade and bounty hunt in a vast universe. Can you face the dangers and decisions that await...\0"
             VALUE "CompanyName", "Vega Strike Project\0"
-            VALUE "FileDescription", "Vega Strike Open Source Flight Simulator\0"
+            VALUE "FileDescription", "Vega Strike Open Source Space Simulator\0"
             VALUE "FileVersion", "0, 3, 1, 5\0"
             VALUE "InternalName", "vegastrike\0"
             VALUE "LegalCopyright", "© Copyright 1998-2003 Vega Strike Project.  All rights reserved.  See the Licence section of Readme.txt for details.\0"
