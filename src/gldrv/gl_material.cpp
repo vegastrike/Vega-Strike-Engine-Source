@@ -20,6 +20,7 @@
  */
 
 #include "gfxlib.h"
+#include "gl_globals.h"
 //#include "gl_globals.h"
 //#include "gfx_transform_vector.h"
 

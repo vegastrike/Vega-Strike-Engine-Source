@@ -2,7 +2,7 @@
 #define _GL_LIGHT_H_
 #include "gfxlib.h"
 #include "hashtable_3d.h"
-
+#include "gl_globals.h"
 extern GLint GFX_MAX_LIGHTS;
 extern GLint GFX_OPTIMAL_LIGHTS;
 extern GFXBOOL GFXLIGHTING;

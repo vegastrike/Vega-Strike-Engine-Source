@@ -1,4 +1,5 @@
 #include "gfxlib.h"
+#include "gl_globals.h"
 static struct _GFXFogState{
   bool enabled;
   FOGMODE curmode;

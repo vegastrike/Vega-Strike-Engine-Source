@@ -18,7 +18,8 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-
+#ifndef _GL_GLOBALS_H_
+#define _GL_GLOBALS_H_
 #include <queue>
 
 using namespace std;
@@ -48,7 +49,11 @@ struct GFXStats{
 
 //extern Matrix model;
 //extern Matrix view;
-
+#if defined(__APPLE__) || defined(MACOSX)
+    #include <GLUT/glut.h>
+#else
+    #include <GL/glut.h>
+#endif
 #if defined(__CYGWIN__)
 #define GL_EXT_color_subtable 1
 #endif
@@ -155,3 +160,4 @@ extern gl_options_t gl_options;
 // Maximum number of things that can be returned in a pick operation
 #define MAX_PICK 2048
 #define GFX_SCALE 1./1024.
+#endif

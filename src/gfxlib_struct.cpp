@@ -111,33 +111,33 @@ void GFXVertexList::EndDrawState(GFXBOOL lock) {
 extern GLenum PolyLookup (POLYTYPE poly);
 
 void GFXVertexList::Draw (enum POLYTYPE poly, int numV) {
-  GLenum tmp = PolyLookup(poly);
+  //  GLenum tmp = PolyLookup(poly);
   INDEX index;
   index.b = NULL;
-  Draw (&tmp,index,1,&numV);
+  Draw (&poly,index,1,&numV);
 }
 void GFXVertexList::Draw (enum POLYTYPE poly, int numV, unsigned char *index) {
   char tmpchanged = changed;
   changed = sizeof (unsigned char) | ((~HAS_INDEX)&changed);
-  GLenum myenum = PolyLookup (poly);
+  //  GLenum myenum = PolyLookup (poly);
   INDEX tmp; tmp.b =(index);
-  Draw (&myenum,tmp,1,&numV);
+  Draw (&poly,tmp,1,&numV);
   changed = tmpchanged;
 }
 void GFXVertexList::Draw (enum POLYTYPE poly, int numV, unsigned short *index) {
   char tmpchanged = changed;
   changed = sizeof (unsigned short) | ((~HAS_INDEX)&changed);
-  GLenum myenum = PolyLookup (poly);
+  //  GLenum myenum = PolyLookup (poly);
   INDEX tmp; tmp.s =(index);
-  Draw (&myenum,tmp,1,&numV);
+  Draw (&poly,tmp,1,&numV);
   changed = tmpchanged;
 }
 void GFXVertexList::Draw (enum POLYTYPE poly, int numV, unsigned int *index) {
   char tmpchanged = changed;
   changed = sizeof (unsigned int) | ((~HAS_INDEX)&changed);
-  GLenum myenum = PolyLookup (poly);
+  //  GLenum myenum = PolyLookup (poly);
   INDEX tmp;tmp.i= (index);
-  Draw (&myenum,tmp,1,&numV);
+  Draw (&poly,tmp,1,&numV);
   changed = tmpchanged;
 }
 
