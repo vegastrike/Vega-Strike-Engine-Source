@@ -100,10 +100,12 @@ void Mission::initMission(){
     msgcenter=active_missions[0]->msgcenter;
   }
   msgcenter->add("game","all","Welcome to Vegastrike");
+  /*
   msgcenter->add("game","news","A hero is born");
   msgcenter->add("game","news","2 hero is born");
   msgcenter->add("game","news","3 hero is born");
   msgcenter->add("game","news","4 hero is born.                That day, in teh news hero was born without even boring the born of bachunkuphe threw his last baseball throw he chewed his last hay the man was a hero a heayrinagia sf of a hero...who knw that ith all things iblicatedly obfusictaroed he arced his bunko bunka\nbachunk!jtkgjdfljg fdlg fdj glkdf jglkdfj glkdf jgjfd lkgj dflkg jlfkdjg ldjg  j");
+  */
   checkMission(top);
 }
 

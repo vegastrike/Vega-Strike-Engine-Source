@@ -28,6 +28,8 @@ class SaveGame {
   static Hashtable<int,SavedUnits,char[47]> savedunits;
   std::string callsign;
   void WriteMissionData(FILE * fp);
+  void WriteNewsData (FILE * fp);
+  void ReadNewsData(FILE * fp);
   void ReadMissionData (FILE * fp);
   vector <SavedUnits> ReadSavedUnits (FILE * fp);
   vector <MissionDat> mission_data;

@@ -38,6 +38,40 @@ void SaveGame::RemoveUnitFromSave (int address) {
     delete tmp;
   }
 }
+void SaveGame::WriteNewsData (FILE * fp) {
+  gameMessage * last;
+  vector <gameMessage *> tmp;
+  int i=0;
+  vector <string> newsvec;
+  newsvec.push_back ("news");
+  while (NULL!=(last=mission->msgcenter->last(i++,newsvec))) {
+    tmp.push_back (last);
+  }
+  fprintf (fp,"%d\n",i);
+  for (int j=tmp.size()-1;j>=0;j--) {
+    char * msg = strdup (tmp[j]->message.c_str());
+    int k=0;
+    while (msg[k]) {
+      if (msg[k]=='\n'||msg[k]=='\r')
+	msg[k]=' ';
+      k++;
+    }
+    fprintf (fp,"%s\n",msg);
+    free (msg);
+  }
+}
+void SaveGame::ReadNewsData (FILE * fp) {
+  int numnews;
+  fscanf (fp,"%d\n",&numnews);
+  char news [1024];
+  for (unsigned int i=0;i<numnews;i++) {
+    fgets (news,1023,fp);
+    news[1023]='\0';
+    if (news[0]!='\r'&&news[0]!='\n') {
+      mission->msgcenter->add ("game","news",news);
+    }
+  }
+}
 void SaveGame::AddUnitToSave (const char * filename, enum clsptr type, const char * faction, int address) {
   static string s = vs_config->getVariable ("physics","Drone","drone");
   if (0==strcmp (s.c_str(),filename)/*||type==ENHANCEMENTPTR*/) {
@@ -89,6 +123,8 @@ vector <SavedUnits> SaveGame::ReadSavedUnits (FILE * fp) {
       _Universe->LoadSerializedFaction(fp);
     }else if (a==0&&0==strcmp(unitname,"mission")&&0==strcmp(factname,"data")) {
       ReadMissionData(fp);
+    }else if (a==0&&0==strcmp(unitname,"news")&&0==strcmp(factname,"data")) {
+      ReadNewsData(fp);
     }else {
       su.push_back (SavedUnits (unitname,(clsptr)a,factname));
     }
@@ -120,6 +156,8 @@ void SaveGame::WriteSaveGame (const char *systemname, const Vector &FP, float cr
     }
     fprintf (fp,"\n%d %s %s",0,"mission","data ");
     WriteMissionData(fp);
+    fprintf (fp,"\n%d %s %s",0,"news","data ");
+    WriteNewsData(fp);
     fprintf (fp,"\n%d %s %s",0,"factions","begin ");
     _Universe->SerializeFaction(fp);
     fclose (fp);
