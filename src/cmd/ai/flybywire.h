@@ -20,6 +20,7 @@ class MatchLinearVelocity : public Order {
   MatchLinearVelocity (const Vector &desired, bool Local, bool afterburner, bool fini=true):Order (MOVEMENT|LOCATION), desired_velocity(desired),LocalVelocity(Local),willfinish(fini),afterburn(afterburner) {done = false;}
   void Execute ();
   void SetDesiredVelocity (const Vector &desired, bool Local) {desired_velocity=desired;LocalVelocity=Local;}
+  virtual ~MatchLinearVelocity();
 };
 
 /**
@@ -37,6 +38,7 @@ class MatchAngularVelocity : public Order {
   MatchAngularVelocity (const Vector &desired, bool Local, bool fini=true):Order (FACING|LOCATION), desired_ang_velocity(desired),LocalAng(Local), willfinish(fini) {done = false;}
   void Execute ();
   void SetDesiredAngularVelocity (const Vector &desired, bool Local) {desired_ang_velocity=desired;LocalAng=Local;}
+  virtual ~MatchAngularVelocity();
 };
 /**
  * This class matches both angular and linear velocity.
@@ -55,7 +57,9 @@ class MatchVelocity : public MatchAngularVelocity {
   MatchVelocity (const Vector &desired,const Vector &desired_ang, const bool Local, const bool afterburner, const bool fini=true) :MatchAngularVelocity (desired_ang,Local,fini),desired_velocity(desired), LocalVelocity(Local), afterburn(afterburner) {type = FACING | MOVEMENT|LOCATION;}
   void Execute ();
   void SetDesiredVelocity (const Vector &desired, const bool Local) {desired_velocity=desired;LocalVelocity=Local;}
+  virtual ~MatchVelocity();
 };
+
 }
 /**
  * This class uses a parent's computer struct 
@@ -69,6 +73,7 @@ class FlyByWire : public Orders::MatchVelocity {
   bool sheltonslide;
  public:
   FlyByWire ();
+  ~FlyByWire ();
   ///Turns on or off velocity resolution
   void SheltonSlide (bool onoff);
   ///Stops... sets desired velocity to 0

@@ -1,7 +1,7 @@
 #include "flybywire.h"
 #include "vegastrike.h"
 #include <math.h>
-
+#include <stdio.h>
 #define VELTHRESHOLD .1
 using Orders::MatchLinearVelocity;
 using Orders::MatchVelocity;
@@ -11,7 +11,6 @@ using Orders::MatchAngularVelocity;
 
 #define MATCHLINVELSETUP()   Vector desired (desired_velocity);  if (!LocalVelocity) {     desired = parent->ToLocalCoordinates (desired);   }   Vector velocity (parent->UpCoordinateLevel(parent->GetVelocity()));
 #define MATCHLINVELEXECUTE()  { parent->Thrust ( (parent->GetMass()*(desired-velocity)/SIMULATION_ATOM), afterburn); }
-
 /**
  * don't need to clamp thrust since the Thrust does it for you
  * caution might change 
@@ -24,6 +23,14 @@ void MatchLinearVelocity::Execute () {
   }
   MATCHLINVELEXECUTE();
 }
+MatchLinearVelocity::~MatchLinearVelocity () {
+#ifdef ORDERDEBUG
+  fprintf (stderr,"mlv%x",this);
+  fflush (stderr);
+#endif
+}
+
+
 /*  //deprecated: now inherits from MatchAngVelocity and uses LinVel macros
 #define MATCHANGVELOCITYSETUP() \
   Vector desired (desired_ang_velocity); \
@@ -46,6 +53,13 @@ void MatchAngularVelocity::Execute () {
   parent->ApplyLocalTorque (parent->GetMoment()*(desired-parent->UpCoordinateLevel(parent->GetAngularVelocity()))/SIMULATION_ATOM); 
 }
 
+MatchAngularVelocity::~MatchAngularVelocity () {
+#ifdef ORDERDEBUG
+  fprintf (stderr,"mav%x",this);
+  fflush (stderr);
+#endif
+}
+
 void MatchVelocity::Execute () {
   
   MatchAngularVelocity::Execute();
@@ -56,6 +70,14 @@ void MatchVelocity::Execute () {
   }
   MATCHLINVELEXECUTE();
 }
+MatchVelocity::~MatchVelocity () {
+#ifdef ORDERDEBUG
+  fprintf (stderr,"mv%x",this);
+  fflush (stderr);
+#endif
+}
+
+
 
 
 
@@ -118,3 +140,9 @@ void FlyByWire::Execute () {
   }
 } 
 
+FlyByWire::~FlyByWire () {
+#ifdef ORDERDEBUG
+  fprintf (stderr,"fbw%x",this);
+  fflush (stderr);
+#endif
+}

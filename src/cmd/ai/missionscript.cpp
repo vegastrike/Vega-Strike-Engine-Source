@@ -51,8 +51,14 @@ AImissionScript::AImissionScript (string modname){
 
 AImissionScript::~AImissionScript () {
   mission->runScript(modulename,"quitai",classid);
-  //  cout << "ai quitting" << endl;
+#ifdef ORDERDEBUG
+  fprintf (stderr,"aims%x",this);
+  fflush (stderr);
+#endif
 }
+
+  //  cout << "ai quitting" << endl;
+
 
 void AImissionScript::Execute () {
   desired_ang_velocity=Vector(0,0,0);

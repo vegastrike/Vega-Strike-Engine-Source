@@ -617,8 +617,17 @@ void main_loop() {
     cout << "Game was running for " << gametime << " secs,   av. framerate " << ((double)total_nr_frames)/gametime << endl;
     exit(0);
   }
+#ifdef UPDATEDEBUG
+  fprintf (stderr,"dl");
+  fflush (stderr);
+#endif
 
   mission->DirectorLoop();
+#ifdef UPDATEDEBUG
+  fprintf (stderr,"ld\n");
+  fflush (stderr);
+#endif
+
 }
 
 

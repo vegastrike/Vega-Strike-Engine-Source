@@ -342,6 +342,10 @@ Unit::~Unit()
   if ((!killed)&&(!SubUnit)) {
     fprintf (stderr,"Assumed exit on unit %s(if not quitting, report error)\n",name.c_str());
   }
+#ifdef DESTRUCTDEBUG
+  fprintf (stderr,"stage %d", 0);
+  fflush (stderr);
+#endif
   //  fprintf (stderr,"Freeing Unit %s\n",name.c_str());
   if (sound->engine!=-1) {
     AUDDeleteSound (sound->engine);
@@ -361,47 +365,90 @@ Unit::~Unit()
   if (sound->cloak!=-1) {
     AUDDeleteSound (sound->cloak);
   }
-
+#ifdef DESTRUCTDEBUG
+  fprintf (stderr,"%d", 1);
+  fflush (stderr);
+#endif
   if (planet)
     delete planet;
+#ifdef DESTRUCTDEBUG
+  fprintf (stderr,"%d", 2);
+  fflush (stderr);
+#endif
   if (image->hudImage )
     delete image->hudImage;
+#ifdef DESTRUCTDEBUG
+  fprintf (stderr,"%d", 3);
+  fflush (stderr);
+#endif
   delete image;
   delete sound;
+#ifdef DESTRUCTDEBUG
+  fprintf (stderr,"%d", 4);
+  fflush (stderr);
+#endif
   if (bspTree)
     delete bspTree;
   if (bspShield)
     delete bspShield;
+#ifdef DESTRUCTDEBUG
+  fprintf (stderr,"%d", 5);
+  fflush (stderr);
+#endif
   if (colTree)
     delete colTree;
   if (colShield)
     delete colShield;
+#ifdef DESTRUCTDEBUG
+  fprintf (stderr,"%d", 6);
+  fflush (stderr);
+#endif
   for (int beamcount=0;beamcount<nummounts;beamcount++) {
     AUDDeleteSound(mounts[beamcount].sound);
     if (mounts[beamcount].ref.gun&&mounts[beamcount].type.type==weapon_info::BEAM)
       delete mounts[beamcount].ref.gun;//hope we're not killin' em twice...they don't go in gunqueue
   }
+#ifdef DESTRUCTDEBUG
+  fprintf (stderr,"%d", 7);
+  fflush (stderr);
+#endif
 	if(meshdata&&nummesh>0)
 	{
 		for(int meshcount = 0; meshcount < nummesh; meshcount++)
 			delete meshdata[meshcount];
 		delete [] meshdata;
 	}
+#ifdef DESTRUCTDEBUG
+  fprintf (stderr,"%d", 8);
+  fflush (stderr);
+#endif
 	if(subunits)
 	{
 		for(int subcount = 0; subcount < numsubunit; subcount++)
 			delete subunits[subcount];
 		delete [] subunits;
 	}
+#ifdef DESTRUCTDEBUG
+  fprintf (stderr,"%d", 9);
+  fflush (stderr);
+#endif
 	if (halos) {
 	  for (int hc=0;hc<numhalos;hc++) {
 	    delete halos[hc];
 	  }
 	  delete [] halos;
 	}
+#ifdef DESTRUCTDEBUG
+  fprintf (stderr,"%d", 1);
+  fflush (stderr);
+#endif
 	if (mounts) {
 	  delete []mounts;
 	}
+#ifdef DESTRUCTDEBUG
+  fprintf (stderr,"%d", 0);
+  fflush (stderr);
+#endif
 /*
 	if(weapons)
 	{

@@ -137,6 +137,13 @@ void MoveTo::Execute(){
   parent->ApplyLocalForce (thrust);
   return;
 }
+MoveTo::~MoveTo () {
+#ifdef ORDERDEBUG
+  fprintf (stderr,"mt%x",this);
+  fflush (stderr);
+#endif
+}
+
 bool ChangeHeading::OptimizeAngSpeed (float optimal_speed,float v, float &a) {
   v += (a/parent->GetMoment())*SIMULATION_ATOM;
   if (!optimal_speed||fabs(v)<=optimal_speed) {
@@ -204,13 +211,25 @@ void ChangeHeading::Execute() {
   }
   parent->ApplyLocalTorque (torque);
 }
+ChangeHeading::~ChangeHeading() {
+#ifdef ORDERDEBUG
+  fprintf (stderr,"ch%x",this);
+  fflush (stderr);
+#endif
 
+}
 FaceTargetITTS::FaceTargetITTS (bool fini, int accuracy):ChangeHeading(Vector(0,0,1),accuracy),finish(fini) {
   type=FACING|TARGET;
   speed=float(.00001);
   range=float(.00001);
 
   
+}
+FaceTargetITTS::~FaceTargetITTS () {
+#ifdef ORDERDEBUG
+  fprintf (stderr,"fti%x",this);
+  fflush (stderr);
+#endif
 }
 
 void FaceTargetITTS::Execute() {
@@ -249,4 +268,12 @@ void FaceTarget::Execute() {
   if (!finish) {
     ResetDone();
   } 
+}
+
+
+FaceTarget::~FaceTarget() {
+#ifdef ORDERDEBUG
+  fprintf (stderr,"ft%x",this);
+  fflush (stderr);
+#endif
 }

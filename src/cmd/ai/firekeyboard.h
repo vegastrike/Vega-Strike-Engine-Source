@@ -34,6 +34,7 @@ protected:
 public:
   FireKeyboard (int whichjoystick, const char * configfile);//weapon prefs?
   virtual void Execute();
+  virtual ~FireKeyboard();
 };
 
 

@@ -30,7 +30,16 @@ void FireAt::ChooseTargets (int ) {
     }
     iter->advance();
   }
+#ifdef ORDERDEBUG
+  fprintf (stderr,"it%x");
+  fflush (stderr);
+#endif
   delete iter;
+#ifdef ORDERDEBUG
+  fprintf (stderr,"it");
+  fflush (stderr);
+#endif
+
   if (worstrelation>0) {
     parent->Target (NULL);
   }
@@ -59,7 +68,13 @@ bool FireAt::ShouldFire(Unit * targ) {
   return (dist<agg&&angle>1/agg);
 }
 
+FireAt::~FireAt() {
+#ifdef ORDERDEBUG
+  fprintf (stderr,"fire%x\n",this);
+  fflush (stderr);
+#endif
 
+}
 void FireAt::Execute () {
   bool tmp = done;
   Order::Execute();	
@@ -74,14 +89,32 @@ void FireAt::Execute () {
   
     if (!iter->current()) {
       ChooseTargets(2);
+#ifdef ORDERDEBUG
+  fprintf (stderr,"i1%x",iter);
+  fflush (stderr);
+#endif
       delete iter;
+#ifdef ORDERDEBUG
+  fprintf (stderr,"i1\n");
+  fflush (stderr);
+#endif
+
       iter = targets->createIterator();
     }
     while ((targ = iter->current())!=NULL) {
       shouldfire|=ShouldFire(targ);
       iter->advance();
     }
+#ifdef ORDERDEBUG
+  fprintf (stderr,"i2%x",iter);
+  fflush (stderr);
+#endif
     delete iter;  
+#ifdef ORDERDEBUG
+  fprintf (stderr,"i2");
+  fflush (stderr);
+#endif
+
   } else {
 
   }

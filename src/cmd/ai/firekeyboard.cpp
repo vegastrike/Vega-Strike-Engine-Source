@@ -84,7 +84,16 @@ void FireKeyboard::ChooseNearTargets() {
     }
     iter->advance();
   }
+#ifdef ORDERDEBUG
+  fprintf (stderr,"i4%x",iter);
+  fflush (stderr);
+#endif
   delete iter;
+#ifdef ORDERDEBUG
+  fprintf (stderr,"i4\n");
+  fflush (stderr);
+#endif
+
 }
 void FireKeyboard::ChooseThreatTargets() {
   Unit * threat = parent->Threat();
@@ -120,7 +129,15 @@ void FireKeyboard::ChooseTargets () {
 
 
     //  }
+#ifdef ORDERDEBUG
+  fprintf (stderr,"i5%x",iter);
+  fflush (stderr);
+#endif
   delete iter;
+#ifdef ORDERDEBUG
+  fprintf (stderr,"i5\n");
+  fflush (stderr);
+#endif
   if (!find) {
     iter = _Universe->activeStarSystem()->getUnitList()->createIterator();
     while ((un = iter->current())) {
@@ -137,8 +154,24 @@ void FireKeyboard::ChooseTargets () {
       parent->Target(un);
       break;
     }
-    delete iter;
+#ifdef ORDERDEBUG
+  fprintf (stderr,"i6%x",iter);
+  fflush (stderr);
+#endif
+  delete iter;
+#ifdef ORDERDEBUG
+  fprintf (stderr,"i6\n");
+  fflush (stderr);
+#endif
+
   }
+}
+FireKeyboard::~FireKeyboard () {
+#ifdef ORDERDEBUG
+  fprintf (stderr,"fkb%x",this);
+  fflush (stderr);
+#endif
+
 }
 bool FireKeyboard::ShouldFire(Unit * targ) {
   float dist;

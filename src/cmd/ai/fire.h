@@ -21,6 +21,7 @@ protected:
 public:
   FireAt (float reaction_time, float aggressivitylevel);//weapon prefs?
   virtual void Execute();
+  virtual ~FireAt();
 };
 
 

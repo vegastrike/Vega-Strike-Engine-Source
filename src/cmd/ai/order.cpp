@@ -181,7 +181,12 @@ Order* Order::findOrder(Order *ord){
   }
   return NULL;
 }
-
+Order::~Order () {
+#ifdef ORDERDEBUG
+  fprintf (stderr,"ofr%x\n",this);
+  fflush (stderr);
+#endif
+}
 void Order::eraseOrder(Order *ord){
   bool found=false;
 

@@ -684,8 +684,17 @@ void AIScript::LoadXML() {
     xml->orders[i]->SetParent(parent);
     EnqueueOrder (xml->orders[i]);
   }
+#ifdef ORDERDEBUG
+  fprintf (stderr,"xml%x",xml);
+  fflush (stderr);
+#endif
 
   delete xml;
+#ifdef ORDERDEBUG
+  fprintf (stderr,"\\xml\n");
+  fflush (stderr);
+#endif
+
 }
 AIScript::AIScript (const char * scriptname):Order (Order::MOVEMENT|Order::FACING){
   filename = new char [strlen (scriptname)+1];
@@ -694,17 +703,32 @@ AIScript::AIScript (const char * scriptname):Order (Order::MOVEMENT|Order::FACIN
 }
 
 AIScript::~AIScript () {
-
+#ifdef ORDERDEBUG
+  fprintf (stderr,"sc%x",this);
+  fflush (stderr);
+#endif
   if (filename) {
     delete [] filename;
   }
+#ifdef ORDERDEBUG
+  fprintf (stderr,"sc\n");
+  fflush (stderr);
+#endif
 }
 
 void AIScript::Execute () {
   if (filename) {
     LoadXML ();
+#ifdef ORDERDEBUG
+  fprintf (stderr,"fn%x",this);
+  fflush (stderr);
+#endif
     delete [] filename;
     filename = NULL;
+#ifdef ORDERDEBUG
+  fprintf (stderr,"fn\n");
+  fflush (stderr);
+#endif
 	
   }
   Order::Execute();

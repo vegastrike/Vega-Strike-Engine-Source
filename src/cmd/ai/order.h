@@ -36,6 +36,7 @@
  * is until Execute() time.  Perhaps "SetParent" Should be made virtual so that
  * various variables may be set earlier than at every execution time
  */
+#define ORDERDEBUG
 class Order {
 protected:
   ///The unit this order is attached to
@@ -60,7 +61,7 @@ public:
   ///The constructor that specifies what order dependencies this order has
   Order(int ttype): targetlocation(0,0,0){parent = NULL;group=targets=NULL;type = ttype;done=false;}
   ///The virutal destructor
-  virtual ~Order () {}
+  virtual ~Order ();
   ///The function that gets called and executes all queued suborders 
   virtual void Execute();
   ///returns a pointer to the first order that may be bitwised ored with that type

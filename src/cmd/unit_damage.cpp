@@ -130,12 +130,15 @@ void Unit::Kill() {
 void Unit::ProcessDeleteQueue() {
 #ifndef DISABLE_DELETE
   if (!Unitdeletequeue.empty()) {
-    fprintf (stderr,"Eliminatin' 0x%x - %d\n",Unitdeletequeue.back(),Unitdeletequeue.size());
+    fprintf (stderr,"Eliminatin' 0x%x - %d",Unitdeletequeue.back(),Unitdeletequeue.size());
+    fflush (stderr);
     if (Unitdeletequeue.back()->SubUnit) {
       fprintf (stderr,"Double deleting (related to double dipping)");
     }else {
       delete Unitdeletequeue.back();
     }
+    fprintf (stderr,"Completed\n",Unitdeletequeue.back(),Unitdeletequeue.size());
+    fflush (stderr);
     Unitdeletequeue.pop_back();
   }
 #endif

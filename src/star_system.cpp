@@ -287,27 +287,57 @@ void StarSystem::SwapOut () {
 }
 bool shouldfog=false;
 extern double interpolation_blend_factor;
+#define UPDATEDEBUG
 void StarSystem::Draw() {
+#ifdef UPDATEDEBUG
+  fprintf (stderr,"begin Draw");
+  fflush (stderr);
+#endif
   interpolation_blend_factor = (1./PHY_NUM)*((PHY_NUM*time)/SIMULATION_ATOM+current_stage);
+#ifdef UPDATEDEBUG
+  fprintf (stderr,"ani");
+  fflush (stderr);
+#endif
   AnimatedTexture::UpdateAllFrame();
   for (unsigned int i=0;i<contterrains.size();i++) {
     contterrains[i]->AdjustTerrain(this);
   }
   GFXDisable (LIGHTING);
+#ifdef UPDATEDEBUG
+  fprintf (stderr,"bg");
+  fflush (stderr);
+#endif
   bg->Draw();
 
   Iterator *iter = drawList->createIterator();
   Unit *unit;
   shouldfog=false;
   //  fprintf (stderr,"|t%f i%lf|",GetElapsedTime(),interpolation_blend_factor);
+#ifdef UPDATEDEBUG
+  fprintf (stderr,"cp");
+  fflush (stderr);
+#endif
   if (_Universe->AccessCockpit()->GetParent()==NULL) {
+#ifdef UPDATEDEBUG
+  fprintf (stderr,"cpu");
+  fflush (stderr);
+#endif
     AccessCamera()->UpdateGFX (GFXTRUE);
   }
+#ifdef UPDATEDEBUG
+  fprintf (stderr,">un<");
+  fflush (stderr);
+#endif
   while((unit = iter->current())!=NULL) {
     unit->Draw();
     iter->advance();
   }
   delete iter;
+#ifdef UPDATEDEBUG
+  fprintf (stderr,"fog");
+  fflush (stderr);
+#endif
+
   if (shouldfog) {
     GFXFogMode (FOG_EXP2);
     GFXFogDensity (.0005);
@@ -317,13 +347,29 @@ void StarSystem::Draw() {
   }else {
     GFXFogMode (FOG_OFF);
   }
+#ifdef UPDATEDEBUG
+  fprintf (stderr,"vp");
+  fflush (stderr);
+#endif
   _Universe->AccessCockpit()->SetupViewPort(true);///this is the final, smoothly calculated cam
   
   //  SetViewport();//camera wielding unit is now drawn  Note: Background is one frame behind...big fat hairy deal
   GFXColor tmpcol (0,0,0,1);
   GFXGetLightContextAmbient(tmpcol);
+#ifdef UPDATEDEBUG
+  fprintf (stderr,"farmsh");
+  fflush (stderr);
+#endif
   Mesh::ProcessZFarMeshes();
+#ifdef UPDATEDEBUG
+  fprintf (stderr,"terr");
+  fflush (stderr);
+#endif
   Terrain::RenderAll();
+#ifdef UPDATEDEBUG
+  fprintf (stderr,"nearmsh");
+  fflush (stderr);
+#endif
   Mesh::ProcessUndrawnMeshes(true);
   
 
@@ -342,14 +388,33 @@ void StarSystem::Draw() {
 
 
   GFXLightContextAmbient(tmpcol);
+#ifdef UPDATEDEBUG
+  fprintf (stderr,"halo");
+  fflush (stderr);
+#endif
   Halo::ProcessDrawQueue();
   if (shouldfog)
     GFXFogMode (FOG_EXP2);
+#ifdef UPDATEDEBUG
+  fprintf (stderr,"bem");
+  fflush (stderr);
+#endif
   Beam::ProcessDrawQueue();
+#ifdef UPDATEDEBUG
+  fprintf (stderr,"anidq");
+  fflush (stderr);
+#endif
   Animation::ProcessDrawQueue();
+#ifdef UPDATEDEBUG
+  fprintf (stderr,"bolt");
+  fflush (stderr);
+#endif
   Bolt::Draw();
 
-
+#ifdef UPDATEDEBUG
+  fprintf (stderr,"star");
+  fflush (stderr);
+#endif
 
   stars->Draw();
 
@@ -357,21 +422,31 @@ void StarSystem::Draw() {
     GFXFogMode (FOG_OFF);
 
   static bool doInputDFA = XMLSupport::parse_bool (vs_config->getVariable ("graphics","MouseCursor","false"));
+#ifdef UPDATEDEBUG
+  fprintf (stderr,"cpDraw");
+  fflush (stderr);
+#endif
   _Universe->AccessCockpit()->Draw();
   if (doInputDFA) {
     GFXHudMode (true);
     systemInputDFA->Draw();
     GFXHudMode (false);
   }
-
+#ifdef UPDATEDEBUG
+  fprintf (stderr,"end Draw\n");
+  fflush (stderr);
+#endif
 }
 
 
-
+#define UPDATEDEBUG
 void StarSystem::Update() {
 
   Unit *unit;
-
+#ifdef UPDATEDEBUG
+  fprintf (stderr,"begin Update");
+  fflush (stderr);
+#endif
   time += GetElapsedTime();
   bool firstframe = true;
   _Universe->pushActiveStarSystem(this);
@@ -382,9 +457,17 @@ void StarSystem::Update() {
 	iter = drawList->createIterator();
 	if (firstframe&&rand()%2) {
 	  if (this==_Universe->getActiveStarSystem(0)) {
+#ifdef UPDATEDEBUG
+  fprintf (stderr,"Snd");
+  fflush (stderr);
+#endif
 	    AUDRefreshSounds();
 	  }
 	}
+#ifdef UPDATEDEBUG
+  fprintf (stderr,"AI");
+  fflush (stderr);
+#endif
 	while((unit = iter->current())!=NULL) {
 	  unit->ExecuteAI(); 
 	  unit->ResetThreatLevel();
@@ -393,8 +476,16 @@ void StarSystem::Update() {
 	delete iter;
 	current_stage=TERRAIN_BOLT_COLLIDE;
       } else if (current_stage==TERRAIN_BOLT_COLLIDE) {
+#ifdef UPDATEDEBUG
+  fprintf (stderr,"TerCol");
+  fflush (stderr);
+#endif
 	Terrain::CollideAll();
 	current_stage=PHY_COLLIDE;
+#ifdef UPDATEDEBUG
+  fprintf (stderr,"Ani");
+  fflush (stderr);
+#endif
 	AnimatedTexture::UpdateAllPhysics();
 	///Do gravitation!
 	iter = units->createIterator();
@@ -404,11 +495,19 @@ void StarSystem::Update() {
 	  }
 	  delete iter;	
 	  //FIXME somehow only works if called once per frame
+#ifdef UPDATEDEBUG
+  fprintf (stderr,"DelQ");
+  fflush (stderr);
+#endif
 	  Unit::ProcessDeleteQueue();
       } else if (current_stage==PHY_COLLIDE) {
 	static int numframes=0;
 	numframes++;//don't resolve physics until 2 seconds
 	if (numframes>2/(SIMULATION_ATOM)) {
+#ifdef UPDATEDEBUG
+  fprintf (stderr,"neb");
+  fflush (stderr);
+#endif
 	  iter = drawList->createIterator();
 	  while((unit = iter->current())!=NULL) {
 		unit->Setnebula(NULL); 
@@ -416,6 +515,10 @@ void StarSystem::Update() {
 	  }
 	  delete iter;
 	  iter = drawList->createIterator();
+#ifdef UPDATEDEBUG
+  fprintf (stderr,"Coll");
+  fflush (stderr);
+#endif
 	  while((unit = iter->current())!=NULL) {
 	    unit->CollideAll();
 	    iter->advance();
@@ -424,20 +527,36 @@ void StarSystem::Update() {
 	}
 	current_stage=PHY_TERRAIN;
       } else if (current_stage==PHY_TERRAIN) {
+#ifdef UPDATEDEBUG
+  fprintf (stderr,"TerU");
+  fflush (stderr);
+#endif
 	Terrain::UpdateAll(64);	
 	current_stage=PHY_RESOLV;
       } else if (current_stage==PHY_RESOLV) {
 	iter = drawList->createIterator();
+#ifdef UPDATEDEBUG
+  fprintf (stderr,"muzak");
+  fflush (stderr);
+#endif
 	if (this==_Universe->getActiveStarSystem(0)) {
 	  AccessCamera()->UpdateCameraSounds();
 	  muzak->Listen();
 	}
 	AccessCamera()->SetNebula(NULL);//Update physics should set this
+#ifdef UPDATEDEBUG
+  fprintf (stderr,"unphi");
+  fflush (stderr);
+#endif
 	while((unit = iter->current())!=NULL) {
 	  unit->UpdatePhysics(identity_transformation,identity_matrix,Vector (0,0,0),firstframe,units);
 	  iter->advance();
 	}
 	delete iter;
+#ifdef UPDATEDEBUG
+  fprintf (stderr,"boltphi");
+  fflush (stderr);
+#endif
 	bolts->UpdatePhysics();
 	current_stage=PHY_AI;
 	firstframe = false;
@@ -445,7 +564,10 @@ void StarSystem::Update() {
       time -= (1./PHY_NUM)*SIMULATION_ATOM;
     }
   }
-
+#ifdef UPDATEDEBUG
+  fprintf (stderr,"endupd\n");
+  fflush (stderr);
+#endif
   _Universe->popActiveStarSystem();
   //  fprintf (stderr,"bf:%lf",interpolation_blend_factor);
 }

@@ -61,6 +61,10 @@ extern void SetTurretAI (Unit * fighter);
 extern Unit *player_unit;
 
 varInst *Mission::call_unit(missionNode *node,int mode){
+#ifdef ORDERDEBUG
+  fprintf (stderr,"callun%x",this);
+  fflush (stderr);
+#endif
 
   varInst *viret=NULL;
 
@@ -168,8 +172,17 @@ varInst *Mission::call_unit(missionNode *node,int mode){
       for(int i=0;i<3;i++){
 	fg->rot[i]=0.0;
       }
-      
+#ifdef ORDERDEBUG
+  fprintf (stderr,"cunl%x",this);
+  fflush (stderr);
+#endif
+
       call_unit_launch(fg);
+#ifdef ORDERDEBUG
+  fprintf (stderr,"ecun");
+  fflush (stderr);
+#endif
+
     }
 
     deleteVarInst(name_vi);
@@ -395,10 +408,23 @@ varInst *Mission::call_unit(missionNode *node,int mode){
       fatalError(node,mode,"no such method "+cmd);
       assert(0);
     }
+#ifdef ORDERDEBUG
+  fprintf (stderr,"callundel%x",ovi);
+  fflush (stderr);
+#endif
 
     deleteVarInst(ovi);
+#ifdef ORDERDEBUG
+  fprintf (stderr,"undel1");
+  fflush (stderr);
+#endif
+
     return viret;
   }//else (objects)
+#ifdef ORDERDEBUG
+  fprintf (stderr,"endcallun%x",this);
+  fflush (stderr);
+#endif
 
   return NULL; //never reach
 }

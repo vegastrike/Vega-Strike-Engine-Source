@@ -19,6 +19,10 @@ void CloakFor::Execute() {
   return;
 }
 CloakFor::~CloakFor () {
+#ifdef ORDERDEBUG
+  fprintf (stderr,"clk%x\n",this);
+  fflush (stderr);
+#endif
   if (parent&&time<=maxtime) {
     parent->Cloak (!enable);
   }
