@@ -113,9 +113,8 @@ void InitJoystick(){
   printf("The names of the joysticks are:\n");
 #else
   //use glut
-  if (glutDeviceGet(GLUT_HAS_JOYSTICK)) {
-      if (glutDeviceGet(GLUT_OWNS_JOYSTICK)||
-          XMLSupport::parse_bool(vs_config->getVariable("joystick",
+  if (1) {//glutDeviceGet(GLUT_HAS_JOYSTICK)) {
+      if (XMLSupport::parse_bool(vs_config->getVariable("joystick",
                                                         "force_use_of_joystick",
                                                         "false"))) {
           printf ("setting joystick functionality:: joystick online");
@@ -201,8 +200,8 @@ JoyStick::JoyStick(int which): mouse(which==MOUSE_JOYSTICK) {
         return;
     }
     joy_available=true;
-    nr_of_axes=glutDeviceGet(GLUT_JOYSTICK_AXES);
-    nr_of_buttons=glutDeviceGet(GLUT_JOYSTICK_BUTTONS);
+    nr_of_axes=3;//glutDeviceGet(GLUT_JOYSTICK_AXES);
+    nr_of_buttons=15;//glutDeviceGet(GLUT_JOYSTICK_BUTTONS);
     nr_of_hats=0;
 #endif // we have GLUT
 #endif
