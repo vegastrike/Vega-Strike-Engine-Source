@@ -122,11 +122,18 @@ void StarSystem::ProcessPendingJumps() {
       pendingjump[kk]->delay-=GetElapsedTime();
       continue;
     } else {
+#ifdef JUMP_DEBUG
+  fprintf (stderr,"Volitalizing pending jump animation.\n");
+#endif
+
       VolitalizeJumpAnimation (pendingjump[kk]->animation);
     }
     StarSystem * savedStarSystem = _Universe->activeStarSystem();
     Unit * un=pendingjump[kk]->un.GetUnit();
     if (un==NULL) {
+#ifdef JUMP_DEBUG
+  fprintf (stderr,"Adez Mon! Unit destroyed during jump!\n");
+#endif
       delete pendingjump[kk];
       pendingjump.erase (pendingjump.begin()+kk);
       kk--;
@@ -134,6 +141,10 @@ void StarSystem::ProcessPendingJumps() {
     }
     _Universe->setActiveStarSystem (pendingjump[kk]->orig);
     if (pendingjump[kk]->orig->RemoveUnit (un)) {
+#ifdef JUMP_DEBUG
+      fprintf (stderr,"Unit removed from star system\n");
+#endif
+
       un->RemoveFromSystem();
       pendingjump[kk]->dest->AddUnit (un);
       un->Target(NULL);
@@ -148,6 +159,9 @@ void StarSystem::ProcessPendingJumps() {
       }
       delete iter;
       if (un==fighters[0]) {
+#ifdef JUMP_DEBUG
+      fprintf (stderr,"Unit is a player character...changing scene graph\n");
+#endif
 	savedStarSystem->SwapOut();
 	savedStarSystem = pendingjump[kk]->dest;
 	pendingjump[kk]->dest->SwapIn();
@@ -166,6 +180,10 @@ void StarSystem::ProcessPendingJumps() {
 	un->SetCurPosition(possibilities[jumpdest%possibilities.size()]->Position());
 	jumpdest+=23231;
       }
+    } else {
+#ifdef JUMP_DEBUG
+      fprintf (stderr,"Unit FAILED remove from star system\n");
+#endif
     }
     Vector p,q,r;
     un->GetOrientation (p,q,r);
@@ -180,21 +198,37 @@ void StarSystem::ProcessPendingJumps() {
 
 }
 
-bool StarSystem::JumpTo (Unit * un, Planet * jumppoint, const std::string &system) {
 
+bool StarSystem::JumpTo (Unit * un, Planet * jumppoint, const std::string &system) {
+#ifdef JUMP_DEBUG
+  fprintf (stderr,"jumping to %s.  ",system.c_str());
+#endif
   StarSystem *ss = star_system_table.Get(system);
 
   if (!ss) {
     ss = star_system_table.Get (system+".system");
+#ifdef JUMP_DEBUG
+    fprintf (stderr,"Failed to find system. looking with .system appended\n");
+#endif
     if (!ss) {
+#ifdef JUMP_DEBUG
+      fprintf (stderr,"System not loaded, loading file\n");
+#endif
       std::string ssys (system);
       FILE * fp = fopen (ssys.c_str(),"r");
       if (!fp) {
+#ifdef JUMP_DEBUG
+    fprintf (stderr,"Failed to find system. looking with .system appended\n");
+#endif
 	ssys+=".system";
 	fp = fopen (ssys.c_str(),"r");
       }
-      if (!fp)
+      if (!fp) {
+#ifdef JUMP_DEBUG
+	fprintf (stderr,"Failed to find system. Abort jump!\n");
+#endif
 	return false;
+      }
       fclose (fp);
       ss = new StarSystem (ssys.c_str(),Vector (0,0,0),un->name);
       _Universe->LoadStarSystem (ss);
@@ -203,10 +237,16 @@ bool StarSystem::JumpTo (Unit * un, Planet * jumppoint, const std::string &syste
     }
   }
   if(ss) {
+#ifdef JUMP_DEBUG
+	fprintf (stderr,"Pushing back to pending queue!\n");
+#endif
     Vector p,q,r;
     un->GetOrientation (p,q,r);
     pendingjump.push_back (new unorigdest (un,jumppoint, this,ss,un->GetJumpStatus().delay,    AddJumpAnimation (un->Position()+r*un->rSize()*(un->GetJumpStatus().delay+.25), 10*un->rSize())));
   } else {
+#ifdef JUMP_DEBUG
+	fprintf (stderr,"Failed to retrieve!\n");
+#endif
     return false;
   }
   return true;
