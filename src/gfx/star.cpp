@@ -20,7 +20,10 @@
 
 StarVlist::StarVlist (int num ,float spread) {
 	lasttime=0;
-	camr = _Universe->AccessCamera()->GetR();	
+	_Universe->AccessCamera()->GetPQR(newcamr,camq,camr);
+	newcamr=camr;
+	newcamq=camq;
+	
 	this->spread=spread;
 	GFXColorVertex * tmpvertex = new GFXColorVertex[num*2];
 	memset (tmpvertex,0,sizeof(GFXVertex)*num*2);
