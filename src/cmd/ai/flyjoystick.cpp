@@ -148,13 +148,21 @@ void FlyByJoystick::Execute() {
 
 	  if (axis_value>1)
 		  axis_value=1;
+          /*
 	  float minspeed = parent->Limits().retro/parent->Limits().forward;
 	  static bool minzero=XMLSupport::parse_bool(vs_config->getVariable("joystick","zero_min_throttle","false"));
 	  if (minzero)
 		  minspeed = 0;
 	  if (axis_value<minspeed)
 		  axis_value=minspeed;
-	  
+          */
+          if (axis_value<-1) 
+            axis_value = -1; //this code due to paolodinca
+          
+          // put axis from 0 to 2 
+          axis_value++; 
+          // put axis from 0 to 1 
+          axis_value= axis_value / 2; //thanks!
 	  cpu->set_speed=axis_value*cpu->max_speed();
 	  desired_velocity= Vector (0,0,cpu->set_speed);
       }
