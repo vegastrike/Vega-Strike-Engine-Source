@@ -519,7 +519,7 @@ void MakeSmallUnit () {
   float radius;
   string type = AnalyzeType(nam,nebfile,radius);
   Vector center=generateAndUpdateRS(r,S,radius);
-  WriteUnit (type,nam,nam,r,S,center,nebfile,s,true);
+  WriteUnit (type,"",nam,r,S,center,nebfile,s,true);
 
 }
 
@@ -568,7 +568,7 @@ void MakeBigUnit (string name=string (""),float orbitalradius=0) {
       }
     } else {
       string type = AnalyzeType(fullname[i],nebfile,size);
-      WriteUnit(type,fullname[i],fullname[i],r,s,center,nebfile,string(""),i!=0,stdloy);
+      WriteUnit(type,"",fullname[i],r,s,center,nebfile,string(""),i!=0,stdloy);
     }
     first=false;
   }
@@ -637,7 +637,7 @@ void MakePlanet(float radius, int entitytype, bool forceRS, Vector R, Vector S, 
   static float pmin = XMLSupport::parse_float (vs_config->getVariable ("galaxy","PlanetaryRingMinPlanet","300000"));
   static float pmax = XMLSupport::parse_float (vs_config->getVariable ("galaxy","PlanetaryRingMaxPlanet","200000"));
   if (entitytype==GAS&&grand()<.8&&radius>pmin&&radius<pmax) {
-    WriteUnit ("unit","planetary-ring","planetary-ring",Vector (0,0,0), Vector (0,0,0), Vector (0,0,0), string (""), string (""),false);
+    WriteUnit ("unit","","planetary-ring",Vector (0,0,0), Vector (0,0,0), Vector (0,0,0), string (""), string (""),false);
   }
   if ((entitytype!=JUMP&&entitytype!=MOON)||grand()<moonofmoonprob) {
     int numu;
