@@ -300,9 +300,6 @@ Planet::~Planet() {
 	for (i=0;i<this->destination.size();i++) {
 		delete [] destination[i];
 	}
-	for (i=0;i<this->lights.size();i++) {
-	  GFXDeleteLight (lights[i]);
-	}
 	if (terraintrans) {
 	  float * tmp = (float *) malloc (sizeof(float)*16);
 	  memcpy (tmp,cumulative_transformation_matrix,sizeof(float)*16);
@@ -335,6 +332,10 @@ void Planet::Kill() {
 	  tmp->SetAI (new Order);
 	}
 	delete iter;
+	for (unsigned int i=0;i<this->lights.size();i++) {
+	  GFXDeleteLight (lights[i]);
+	}
+
 	Unit::Kill();
 }
 
