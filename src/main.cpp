@@ -139,7 +139,6 @@ int main( int argc, char *argv[] )
     if (strlen (parentdir)>0) {  
       chdir (parentdir);/* chdir to the binary app's parent */
     }
-	delete []parentdir;
 #if defined(WITH_MACOSX_BUNDLE)
     chdir ("../../../");/* chdir to the .app's parent */
 #endif
@@ -168,15 +167,9 @@ int main( int argc, char *argv[] )
 		
     initpaths();
     //can use the vegastrike config variable to read in the default mission
+
   g_game.music_enabled = XMLSupport::parse_bool (vs_config->getVariable ("audio","Music","true"));
-  if (g_game.music_enabled) {
-#ifdef _WIN32
-    int pid=spawnl(P_NOWAIT,"./soundserver","./soundserver",NULL);
-    if (!pid) {
-      g_game.music_enabled=false;
-      fprintf(stderr,"Unable to spawn music player server\n");
-    }
-#else
+#ifndef _WIN32
     int pid=fork();
     if (!pid) {
       pid=execlp("./soundserver","./soundserver",NULL);
@@ -188,8 +181,8 @@ int main( int argc, char *argv[] )
 	g_game.music_enabled=false;
       }
     }
-#endif
   }
+#endif
     if (mission_name[0]=='\0')
       strcpy(mission_name,vs_config->getVariable ("general","default_mission","test1.mission").c_str());
     //might overwrite the default mission with the command line
@@ -229,6 +222,7 @@ int main( int argc, char *argv[] )
 #endif
     */
     _Universe= new Universe(argc,argv,vs_config->getVariable ("general","galaxy","milky_way.xml").c_str());   
+	delete []parentdir;
     _Universe->Loop(bootstrap_main_loop);
     return 0;
 }
@@ -335,7 +329,16 @@ void bootstrap_main_loop () {
  
     SplashScreen = new Animation (mission->getVariable ("splashscreen",vs_config->getVariable ("graphics","splash_screen","vega_splash.ani")).c_str(),0);
     bootstrap_draw ("Vegastrike Loading...",-.135,0,SplashScreen);
-
+  if (g_game.music_enabled) {
+#ifdef _WIN32
+//    int pid=spawnl(P_NOWAIT,"./soundserver","./soundserver",NULL);
+	  int pid=(int)ShellExecute(NULL,"open","./soundserver.exe","","./",SW_MINIMIZE);
+    if (!pid) {
+      g_game.music_enabled=false;
+      fprintf(stderr,"Unable to spawn music player server\n");
+    }
+#endif
+  }
     QVector pos;
     string planetname;
 
