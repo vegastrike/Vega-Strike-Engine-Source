@@ -87,6 +87,7 @@ void TextPlane::Draw(const string & newText, int offset,bool force_highquality)
   GFXDisable (LIGHTING);
   GFXDisable (TEXTURE0);
   glPushMatrix();
+  glRasterPos2f(0,0);
   int entercount=0;
   for (;entercount<offset&&text_it!=newText.end();text_it++) {
     if (*text_it=='\n')
@@ -94,7 +95,7 @@ void TextPlane::Draw(const string & newText, int offset,bool force_highquality)
   }
   glTranslatef(col,row,0);  
   //  glRasterPos2f (g_game.x_resolution*(1-(col+1)/2),g_game.y_resolution*(row+1)/2);
-  glRasterPos2f (0,0);
+  //  glRasterPos2f (0,0);
   float scalex=1;
   float scaley=1;
   
@@ -141,6 +142,6 @@ void TextPlane::Draw(const string & newText, int offset,bool force_highquality)
   glDisable(GL_LINE_SMOOTH);
   glPopMatrix();
   GFXPopBlendMode();
-  glRasterPos2f (0,0);
+
 }
 

@@ -41,7 +41,7 @@
 #include "python/init.h"
 #include "savegame.h"
 #include "force_feedback.h"
-
+#include "gfx/hud.h"
 /*
  * Globals 
  */
@@ -183,34 +183,46 @@ int main( int argc, char *argv[] )
     _Universe->Loop(bootstrap_main_loop);
     return 0;
 }
-void bootstrap_draw (Animation * SplashScreen) {
-  UpdateTime();
-  if (SplashScreen) {
-    Matrix tmp;
-    Identity (tmp);
-    GFXDisable(LIGHTING);
-    GFXDisable(DEPTHTEST);
-    GFXBlendMode (ONE,ZERO);
-    GFXEnable (TEXTURE0);
-    GFXColor4f (1,1,1,1);
-    ScaleMatrix (tmp,Vector (7,7,0));
-    SplashScreen->UpdateAllFrame();
-    GFXClear (GFXTRUE);
-    GFXLoadIdentity (PROJECTION);
-    GFXLoadIdentityView();
-    GFXLoadMatrix (MODEL,tmp);
-    GFXBeginScene();
-    SplashScreen->DrawNow(tmp);
-    GFXEndScene();
+void bootstrap_draw (const std::string &message, float x, float y, Animation * SplashScreen) {
+  static Animation *ani;
+  static TextPlane tp ("9x12.font");
+  if (SplashScreen!=NULL) {
+    ani = SplashScreen;
   }
+  UpdateTime();
+
+  Matrix tmp;
+  Identity (tmp);
+  GFXDisable(LIGHTING);
+  GFXDisable(DEPTHTEST);
+  GFXBlendMode (ONE,ZERO);
+  GFXEnable (TEXTURE0);
+  GFXColor4f (1,1,1,1);
+  ScaleMatrix (tmp,Vector (7,7,0));
+  GFXClear (GFXTRUE);
+  GFXLoadIdentity (PROJECTION);
+  GFXLoadIdentityView();
+  GFXLoadMatrix (MODEL,tmp);
+  GFXBeginScene();
+  tp.SetPos (x,y);
+  //  tp.SetCharSize (.4,.8);
+
+  if (ani) {
+    ani->UpdateAllFrame();
+    ani->DrawNow(tmp);
+  }
+  tp.Draw (message);  
+  GFXEndScene();
+
 }
 extern Unit **fighters;
 void bootstrap_main_loop () {
+
   static bool LoadMission=true;
   InitTime();
   static Animation * SplashScreen = NULL;
-  bootstrap_draw (SplashScreen);
-  bootstrap_draw (SplashScreen);
+  //  bootstrap_draw ("Beginning Load...",SplashScreen);
+  //  bootstrap_draw ("Beginning Load...",SplashScreen);
   if (LoadMission) {
     LoadMission=false;
     active_missions.push_back(mission=new Mission(mission_name));
@@ -218,8 +230,8 @@ void bootstrap_main_loop () {
     mission->initMission();
 
     SplashScreen = new Animation (mission->getVariable ("splashscreen",vs_config->getVariable ("graphics","splash_screen","vega_splash.ani")).c_str(),0);
-    bootstrap_draw (SplashScreen);
-    bootstrap_draw (SplashScreen);
+    bootstrap_draw ("make Love",-.135,0,SplashScreen);
+    bootstrap_draw ("make[1]: Entering directory /home/daniel<3");
 
     Vector pos;
     string planetname;
@@ -234,6 +246,9 @@ void bootstrap_main_loop () {
     savedun=ParseSaveGame (savegamefile.length()>0?(vs_config->getVariable ("player","callsign","")+savegamefile):string(""),mysystem,mysystem,pos,setplayerloc,credits,playersaveunit);
    
     _Universe->Init (mysystem,pos,planetname);
+
+    bootstrap_draw ("make[1]: Nothing to be done for `Love`");
+    bootstrap_draw ("make[1]: Loving directory /home/daniel<3 <3");
     createObjects(playersaveunit);
     _Universe->AccessCockpit()->credits=credits;
     if (setplayerloc&&fighters) {

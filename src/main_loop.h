@@ -1,6 +1,8 @@
 #ifndef _MAIN_LOOP_H_
 #define _MAIN_LOOP_H_
 #include "cmd/unit.h"
+void bootstrap_draw (const std::string &message, float x=-.13, float y=0, Animation * SplashScreen=NULL);
+
 namespace CockpitKeys {
   void SkipMusicTrack(int,KBSTATE newState);
    void  PitchDown(int,KBSTATE newState) ;
