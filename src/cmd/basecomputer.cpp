@@ -118,8 +118,10 @@ extern void RespawnNow(Cockpit* cockpit);
 //headers for functions used internally
 //add to text a nicely-formated description of the unit and its subunits
 void showUnitStats(Unit * playerUnit,string &text,int subunitlevel,int mode, Cargo &item);
-//build the previous description from a cargo item
+//build the previous description for a ship purchase item
 string buildShipDescription(Cargo &item,string &descriptiontexture);
+//build the previous description from a cargo purchase item
+string buildCargoDescription(Cargo &item);
 //put in buffer a pretty prepresentation of the POSITIVE float f (ie 4,732.17)
 void prettyPrintFloat(char * buffer,float f, int digitsBefore, int digitsAfter);
 string buildUpgradeDescription(Cargo &item);
@@ -1401,6 +1403,9 @@ void BaseComputer::updateTransactionControlsForSelection(TransactionList* tlist)
         // Do the money.
         switch(tlist->transaction) {
             case BUY_CARGO:
+				if (item.description==""||item.description[0]!='@'){
+					item.description=buildCargoDescription(item);
+				}
                 if(item.category.find("My_Fleet") != string::npos) {
                     // This ship is in my fleet -- the price is just the transport cost to get it to
                     //  the current base.  "Buying" this ship makes it my current ship.
@@ -1431,7 +1436,9 @@ void BaseComputer::updateTransactionControlsForSelection(TransactionList* tlist)
 				}
                 break;
             case BUY_SHIP:
-		if (item.description=="") item.description=buildShipDescription(item,descriptiontexture);
+				if (item.description==""){
+					item.description=buildShipDescription(item,descriptiontexture);
+				}
                 if(item.category.find("My_Fleet") != string::npos) {
                     // This ship is in my fleet -- the price is just the transport cost to get it to
                     //  the current base.  "Buying" this ship makes it my current ship.
@@ -1444,6 +1451,9 @@ void BaseComputer::updateTransactionControlsForSelection(TransactionList* tlist)
                 descString += tempString;
                 break;
             case SELL_CARGO:
+				if (item.description==""||item.description[0]!='@'){
+					item.description=buildCargoDescription(item);
+				}
                 sprintf(tempString, "Value: #b#%.2f#-b, purchased for %.2f#n#",
                     baseUnit->PriceCargo(item.content), item.price);
                 descString += tempString;
@@ -3004,6 +3014,46 @@ string buildUpgradeDescription(Cargo &item) {
 }
 
 
+string buildCargoDescription(Cargo &item){
+	//load the Unit
+    string blnk; //modifications to an upgrade item???
+    Flightgroup* flightGroup=new Flightgroup();//sigh
+    int fgsNumber=0;
+	current_unit_load_mode=NO_MESH;
+    Unit* newPart = UnitFactory::createUnit(item.content.c_str(), false, FactionUtil::GetFaction("upgrades"),blnk,flightGroup,fgsNumber);
+	current_unit_load_mode=DEFAULT;
+	string str="";
+	string hudimage;
+    string texturedescription;
+	if(newPart->getHudImage()) {
+      if(newPart->getHudImage()->getTexture()) {
+        hudimage = newPart->getHudImage()->getTexture()->texfilename;
+        string::size_type doublepng = hudimage.find(".png");
+        if(doublepng==string::npos) doublepng=hudimage.find(".jpg");
+        if(doublepng!=string::npos) {
+          std::string shipname= hudimage.substr(doublepng+4);
+          if(shipname.find(".png")!=string::npos||shipname.find(".jpg")!=string::npos) {
+            hudimage = hudimage.substr(0,doublepng+4-shipname.length());
+            string shipnoblank = item.content.substr(0,item.content.find("."));
+            string::size_type ship = hudimage.rfind(shipnoblank);
+            if(ship!=string::npos) {
+              texturedescription="../units/"+shipnoblank+"/"+shipname;
+            }else{
+              texturedescription=shipname;
+            }                    
+		  }
+		}else {
+          texturedescription = hudimage.substr(hudimage.find(item.content));
+		}
+	  }
+	}
+	if(texturedescription!=""){
+      str+="@"+texturedescription+"@";
+	}
+	str+=item.description;
+	delete newPart;
+	return str;
+}
 // Load the controls for the SHIP_DEALER display.
 void BaseComputer::loadShipDealerControls(void) {
     // Make sure there's nothing in the transaction lists.
