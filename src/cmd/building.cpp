@@ -31,9 +31,9 @@ void Building::UpdatePhysics (const Transformation &trans, const Matrix transmat
     float k = p.Dot (q);
     Vector tmp1;
     if (k<=0) {
-      tmp1 = Vector (0,0,1);//q.Cross (p);
+      tmp1 = Vector (0,0,1);
       if (k=tmp1.Magnitude()){
-	tmp1*=400./k;
+	tmp1*=800./k;
       }
     } else {
       tmp1 = 200*q.Cross (p);
