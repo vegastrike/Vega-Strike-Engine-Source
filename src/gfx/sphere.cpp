@@ -21,7 +21,7 @@ SphereMesh::SphereMesh(float radius, int stacks, int slices, const char *texture
   ab[1]=b+'0';
   ab[0]=a+'0';
   hash_name = string("@@Sphere") + "#" + texture + "#" + XMLSupport::tostring(stacks) + "#" + XMLSupport::tostring(slices) +  ab + "#" + XMLSupport::tostring(rho_min) + "#" + XMLSupport::tostring(rho_max);
-  if (LoadExistant (hash_name.c_str(),radius)) {
+  if (LoadExistant (hash_name,radius)) {
     return;
   } else {
 

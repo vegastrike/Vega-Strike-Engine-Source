@@ -117,8 +117,9 @@ bool Mesh::LoadExistant (Mesh * oldmesh) {
     orig = oldmesh;
     return true;
 }
-bool Mesh::LoadExistant (const char * filehash, float scale) {
+bool Mesh::LoadExistant (const string filehash, float scale) {
   Mesh * oldmesh;
+
   hash_name = GetHashName (filehash,scale);
   oldmesh = meshHashTable.Get(hash_name);
 
