@@ -2312,6 +2312,10 @@ float Unit::PriceCargo (const std::string &s) {
   Cargo tmp;
   tmp.content=s;
   vector <Cargo>::iterator mycargo = std::find (image->cargo.begin(),image->cargo.end(),tmp);
+  if (mycargo==image->cargo.end()) {
+    static float spacejunk=parse_float (vs_config->getVariable ("cargo","space_junk_price","10"));
+    return spacejunk;
+  }
   float price;
  	/*
   if (mycargo==image->cargo.end()) {
