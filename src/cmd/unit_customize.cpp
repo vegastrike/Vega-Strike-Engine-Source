@@ -404,7 +404,7 @@ cout << "Starting docking\n";
 	glutMouseFunc(ProcessMouseClick);
 	glutMotionFunc(ProcessMouseActive);
 	glutPassiveMotionFunc(ProcessMousePassive);
-	glutDisplayFunc(RefreshGUI);
+	//	glutDisplayFunc(RefreshGUI);
 
 	                      //(x, y, width, height, with scrollbar)
 	CargoList = new TextArea(-1, 1, 1, 1.8, 1);
@@ -414,8 +414,8 @@ cout << "Starting docking\n";
 	CargoList->AddTextItem("b","And another just to be sure");
 
 	OK = new Button(-0.94, -0.85, 0.12, 0.1, "Done");
-
-	glutMainLoop();
+	GFXLoop (RefreshGUI);
+	//	glutMainLoop();
 }
 
 void RefreshGUI(void) {
