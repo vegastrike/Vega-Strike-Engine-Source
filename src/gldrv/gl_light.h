@@ -13,6 +13,7 @@ extern GFXBOOL GFXLIGHTING;
 //#define GFX_LIGHT_POS 16
 #define GFX_LIGHT_ENABLED 32
 #define GFX_LOCAL_LIGHT 64
+const unsigned int lighthuge=20*20*20;
 /**
  * This stores the state of a given GL Light in its fullness
  * It inherits all values a light may have, and gains a number of functions
@@ -75,7 +76,7 @@ class gfx_light: public GFXLight {
   void AddToTable();
   
   ///Removes this light from light table
-  void RemoveFromTable();
+  bool RemoveFromTable(bool shouldremove=true, const GFXLight &t = GFXLight ());
   
   ///Trash this light from active GLLights
   void TrashFromGLLights();
@@ -136,9 +137,9 @@ struct LineCollideStar {
 ///Finds the local lights that are clobberable for new lights (permanent perhaps)
 int findLocalClobberable();
 
-#define CTACC 200
+#define CTACC 4000
 ///table to store local lights, numerical pointers to _llights (eg indices)
-extern Hashtable3d <LineCollideStar, char[20],char[CTACC]> lighttable;
+extern Hashtable3d <LineCollideStar, char[20],char[CTACC], char [lighthuge]> lighttable;
 
 
 ///something that would normally round down

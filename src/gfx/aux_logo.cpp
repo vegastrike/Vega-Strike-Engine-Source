@@ -138,11 +138,13 @@ void Logo::Draw(Matrix m)
 
 void Logo::ProcessDrawQueue() {
 	GFXEnable(TEXTURE0);
-	GFXDisable(TEXTURE1);
+	GFXEnable(TEXTURE1);
 	Decal->MakeActive();
 	GFXSelectTexcoordSet(0, 0);
 	GFXSelectTexcoordSet(1, 1);
 	GFXDisable (DEPTHWRITE);
+	GFXDisable (LIGHTING);
+	GFXColor4f (1,1,1,1);
 	GFXBlendMode(SRCALPHA,INVSRCALPHA);
 	//GFXBlendMode(ONE,ZERO);
         DrawContext c = draw_queue->back();

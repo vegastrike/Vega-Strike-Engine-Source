@@ -41,6 +41,11 @@ class PlanetaryOrbit : public Order {
 
 };
 
+struct GFXLightLocal {
+  GFXLight ligh;
+  bool islocal;
+};
+
 class Planet : public Unit {
  private:
   float radius;
@@ -51,8 +56,8 @@ class Planet : public Unit {
  public:
   Planet();
   void endElement();
-  void beginElement(Vector x,Vector y,float vely,float velx,float gravity,float radius,char * filename,char * alpha,vector<char *>dest,int level, const GFXMaterial &ourmat, const std::vector <GFXLight> &ligh, bool isunit, int faction);
-  Planet(Vector x,Vector y,float vely,float velx,float gravity,float radius,char * filename,char *alpha,vector<char *> dest, const Vector &orbitcent, Unit * parent, const GFXMaterial & ourmat, const std::vector <GFXLight> &, int faction);
+  void beginElement(Vector x,Vector y,float vely,float velx,float gravity,float radius,char * filename,char * alpha,vector<char *>dest,int level, const GFXMaterial &ourmat, const std::vector <GFXLightLocal> &ligh, bool isunit, int faction);
+  Planet(Vector x,Vector y,float vely,float velx,float gravity,float radius,char * filename,char *alpha,vector<char *> dest, const Vector &orbitcent, Unit * parent, const GFXMaterial & ourmat, const std::vector <GFXLightLocal> &, int faction);
   ~Planet();
   virtual enum clsptr isUnit() {return PLANETPTR;}
   virtual void Draw(const Transformation & quat = identity_transformation, const Matrix m = identity_matrix);

@@ -8,14 +8,15 @@
 #define COLLIDETABLESIZE sizeof(CTSIZ)
 #define COLLIDETABLEACCURACY sizeof (CTACCURACY)
 ///objects that go over 16 sectors are considered huge and better to check against everything.
-const int HUGEOBJECT=12; 
+#define HUGEOBJECT sizeof (CTHUGE)
+//const int HUGEOBJECT=12; 
 
 /**
  * Hashtable3d is a 3d datastructure that holds various starships that are
  * near enough to crash into each other (or also lights that are big enough
  * to shine on nearby units.
  */
-template <class T, class CTSIZ, class CTACCURACY> class Hashtable3d {
+template <class T, class CTSIZ, class CTACCURACY, class CTHUGE> class Hashtable3d {
   ///Keeps track of the minimum and maximum write of the table since the last clear
   int minaccessx,minaccessy,minaccessz,maxaccessx,maxaccessy,maxaccessz;
   ///All objects that are too large to fit (fastly) in the collide table
@@ -77,7 +78,7 @@ public:
   }
   ///Returns all objects within sector(s) occupied by target
   int Get (const LineCollide* target, std::vector <T> *retval[]) {    
-    int sizer =1;
+    unsigned int sizer =1;
     //int minx,miny,minz,maxx,maxy,maxz;
     //    hash_vec(Min,minx,miny,minz);
     //    hash_vec(Max,maxx,maxy,maxz);
@@ -120,12 +121,11 @@ public:
     float minx= (floor(target->Mini.i/COLLIDETABLEACCURACY))*COLLIDETABLEACCURACY;
     float miny= (floor(target->Mini.j/COLLIDETABLEACCURACY))*COLLIDETABLEACCURACY;
     float minz= (floor(target->Mini.k/COLLIDETABLEACCURACY))*COLLIDETABLEACCURACY;
-
     if (target->Mini.i==maxx) 
       maxx+=COLLIDETABLEACCURACY/2;
     if (target->Mini.j==maxy) maxy+=COLLIDETABLEACCURACY/2;
     if (target->Mini.k==maxz) maxz+=COLLIDETABLEACCURACY/2;
-    if (fabs((maxx-minx)*(maxy-miny)*(maxz-minz))>COLLIDETABLEACCURACY*COLLIDETABLEACCURACY*COLLIDETABLEACCURACY*HUGEOBJECT) {
+    if (fabs(((maxx-minx)/HUGEOBJECT)*(maxy-miny)*(maxz-minz))>COLLIDETABLEACCURACY*COLLIDETABLEACCURACY*COLLIDETABLEACCURACY) {
       target->hhuge = true;
       hugeobjects.push_back(objectToPut);
       return;

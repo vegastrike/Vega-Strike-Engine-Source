@@ -174,7 +174,7 @@ bool cockpitfront=true;
   const int cockpiton=1;
   const int backgroundoff=2;
   const int max = 4;
-  static int tmp=1;
+  static int tmp=(XMLSupport::parse_bool (vs_config->getVariable ("graphics","cockpit","true"))?1:0)+((!XMLSupport::parse_bool (vs_config->getVariable ("graphics","background","true")))?2:0);
   if(newState==PRESS&&cockpitfront) {
     if (tmp&cockpiton) {
       _Universe->AccessCockpit()->Init ("hornet-cockpit.cpt");	    
@@ -389,6 +389,7 @@ void createObjects() {
 
       //cout << "before unit" << endl;
 
+
     fighters[a] = new Unit(fightername, true, false,tmptarget[a]);
     fighters[a]->SetPosition (pox);
     
@@ -441,7 +442,8 @@ void createObjects() {
 
   muzak = new Music (fighters[0]);
   AUDListenerSize (fighters[0]->rSize()*4);
-  _Universe->AccessCockpit()->Init ("hornet-cockpit.cpt");
+  Inside(0,PRESS);//set up hornet cockpti
+  //  _Universe->AccessCockpit()->Init ("hornet-cockpit.cpt");
 #ifdef IPILOTTURRET
   _Universe->AccessCockpit()->SetParent(fighters[0]->getSubUnit(0));
 #else

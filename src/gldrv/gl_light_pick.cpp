@@ -7,7 +7,7 @@ using std::priority_queue;
 using std::list;
 using std::vector;
  //optimization globals
-float intensity_cutoff=.05;//something that would normally round down
+float intensity_cutoff=.06;//something that would normally round down
 float optintense=.2;
 float optsat = .95;
 
@@ -76,14 +76,16 @@ void GFXPickLights (const Vector & center, const float radius) {
     tmpcollide.object.i=0;//FIXME, should this be -1?
     tmpcollide.type=LineCollide::UNIT;
     swappicked();
-    veclinecol *tmppickt[HUGEOBJECT+1];
+    //FIXMESPEEDHACK    veclinecol *tmppickt[lighthuge+1];
     //FIXMESPEEDHACK    if (radius < CTACC) {
-	lighttable.Get (center, tmppickt);
+    veclinecol *tmppickt[2];
+    lighttable.Get (center, tmppickt);
 	//FIXMESPEEDHACK} else {
 	//FIXMESPEEDHACKsizeget = lighttable.Get (&tmpcollide, tmppickt); 
 	//FIXMESPEEDHACK}
     for (int j=0;j<sizeget;j++) {
 	  veclinecol::iterator i;
+	  //fprintf (stderr,"pixked size %d",tmppickt[j]->size());
       for (i=tmppickt[j]->begin();i!=tmppickt[j]->end();i++){
 	//warning::duplicates may Exist
 	//FIXMESPEEDHACKif (i->lc->lastchecked!=rndvar) {
@@ -140,12 +142,12 @@ void gfx_light::dopickenables () {
   }    
   
   while (!oldpicked->empty()) {
-    int glind=(*_llights)[(*oldtrav)].target;
+    int glind=(*_llights)[oldpicked->front()].target;
     if ((GLLights[glind].options&OpenGLL::GL_ENABLED)&&GLLights[glind].index==-1) {//if hasn't been duly clobbered
       glDisable (GL_LIGHT0+glind);
       GLLights[glind].options &= (~OpenGLL::GL_ENABLED);
     }
-    (*_llights)[(*oldtrav)].target=-1;//make sure it doesn't think it owns any gl lights!
+    (*_llights)[oldpicked->front()].target=-1;//make sure it doesn't think it owns any gl lights!
     oldpicked->pop_front();
   }
 

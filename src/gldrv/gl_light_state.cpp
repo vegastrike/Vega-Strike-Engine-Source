@@ -1,10 +1,11 @@
 #include "gl_light.h"
 #include "hashtable_3d.h"
 #include <assert.h>
+#include <vegastrike.h>
 #define GFX_HARDWARE_LIGHTING
 //table to store local lights, numerical pointers to _llights (eg indices)
 int _GLLightsEnabled=0;
-Hashtable3d <LineCollideStar, char[20],char[CTACC]> lighttable;
+Hashtable3d <LineCollideStar, char[20],char[CTACC], char [lighthuge]> lighttable;
 
 GFXLight gfx_light::operator = (const GFXLight &tmp) {
     memcpy (this,&tmp,sizeof (GFXLight));
@@ -160,10 +161,18 @@ void gfx_light::ClobberGLLight (const int target) {
 
 
 void gfx_light::ResetProperties (const enum LIGHT_TARGET light_targ, const GFXColor &color) {
+  bool changed=false;
   if (LocalLight()) {
-    RemoveFromTable();
+    GFXLight t;
+    memcpy (&t,this,sizeof (GFXLight));
+    t.SetProperties (light_targ,color);
+    changed=RemoveFromTable(false,t);
+    memcpy (this,&t,sizeof (GFXLight));
+    if (changed)
+      AddToTable ();
     if (target>=0)
       TrashFromGLLights();
+    return;
   }
   switch (light_targ) {
   case DIFFUSE:
@@ -219,18 +228,31 @@ void gfx_light::AddToTable() {
   tmp.lc = coltarg;
   lighttable.Put (coltarg, tmp);
 }
-void gfx_light::RemoveFromTable() {
+bool gfx_light::RemoveFromTable(bool shouldremove, const GFXLight &t) {
   LineCollideStar tmp;
   bool err;
   LineCollide coltarg (CalculateBounds(err));
+  if (!shouldremove) {
+    bool err2;
+    LineCollide coltarg2 (CalculateBounds (err2));
+    if (lighttable.hash_int (coltarg2.Mini.i)==lighttable.hash_int (coltarg.Mini.i)&&
+	lighttable.hash_int (coltarg2.Mini.j)==lighttable.hash_int (coltarg.Mini.j)&&
+	lighttable.hash_int (coltarg2.Mini.k)==lighttable.hash_int (coltarg.Mini.k)&&
+	lighttable.hash_int (coltarg2.Maxi.i)==lighttable.hash_int (coltarg.Maxi.i)&&
+	lighttable.hash_int (coltarg2.Maxi.j)==lighttable.hash_int (coltarg.Maxi.j)&&
+	lighttable.hash_int (coltarg2.Maxi.k)==lighttable.hash_int (coltarg.Maxi.k)) {
+      return false;
+    }
+  }
   if (err)
-    return;
+    return false;
   tmp.lc = &coltarg;
   tmp = lighttable.Remove ( &coltarg, tmp);
   if (tmp.lc)
     delete tmp.lc;
   else
     assert (tmp.lc);
+  return true;
 }
 
 
@@ -281,10 +303,21 @@ LineCollide gfx_light::CalculateBounds (bool &error) {
   float tot_intensity = ((specular[0]+specular[1]+specular[2])*specular[3]+
 			 (diffuse[0]+diffuse[1]+diffuse[2])*diffuse[3]+ 
 			 (ambient[0]+ambient[1]+ambient[2])*ambient[3])*.33;
-  float d = (-attenuate[1]+sqrtf(attenuate[1]*attenuate[1]+4*attenuate[2]*((tot_intensity/intensity_cutoff) - attenuate[0])))/(2*attenuate[2]);
-  error = d<0;
-  Vector st (vect[0]-d,vect[1]-d,vect[2]-d);
-  Vector end (vect[0]+d,vect[1]+d,vect[2]+d);
+  //  double d = (-(double)attenuate[1]+sqrt((double)attenuate[1]*(double)attenuate[1]+4*(double)attenuate[2]*(((double)tot_intensity/(double)intensity_cutoff) - (double)attenuate[0])))/(2*(double)attenuate[2]);
+  //simplistic calculation above causes floating point inaccuracies
+  double ffastmathreallysucksd;
+  double ffastmathreallysucksq;
+
+  ffastmathreallysucksd = sqrt(tot_intensity/intensity_cutoff-ambient[0]);
+  
+  ffastmathreallysucksq = sqrt(attenuate[2]+attenuate[1]) ;
+  //  fprintf (stderr,"q%lf d%lf",ffastmathreallysucksq,ffastmathreallysucksd);
+  if (ffastmathreallysucksq==0||ffastmathreallysucksd<=0)
+    error=1;
+  ffastmathreallysucksd /=ffastmathreallysucksq;
+
+  Vector st (vect[0]-ffastmathreallysucksd,vect[1]-ffastmathreallysucksd,vect[2]-ffastmathreallysucksd);
+  Vector end (vect[0]+ffastmathreallysucksd,vect[1]+ffastmathreallysucksd,vect[2]+ffastmathreallysucksd);
   LineCollide retval(NULL,LineCollide::UNIT,st,end);
   *((int *)(&retval.object)) = lightNum();//put in a lightNum
   return retval;

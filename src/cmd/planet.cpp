@@ -59,7 +59,7 @@ void PlanetaryOrbit::Execute() {
 void Planet::endElement() {  
 }
 
-void Planet::beginElement(Vector x,Vector y,float vely,float pos,float gravity,float radius,char * filename,char * alpha,vector<char *> dest,int level,  const GFXMaterial & ourmat, const vector <GFXLight>& ligh, bool isunit, int faction){
+void Planet::beginElement(Vector x,Vector y,float vely,float pos,float gravity,float radius,char * filename,char * alpha,vector<char *> dest,int level,  const GFXMaterial & ourmat, const vector <GFXLightLocal>& ligh, bool isunit, int faction){
   UnitCollection::UnitIterator * satiterator =NULL;
   if (level>2) {
     UnitCollection::UnitIterator * satiterator = satellites.createIterator();
@@ -89,10 +89,10 @@ Planet::Planet()  : Unit(), radius(0.0f), satellites() {
   SetAI(new Order()); // no behavior
 }
 
-Planet::Planet(Vector x,Vector y,float vely, float pos,float gravity,float radius,char * textname,char * alpha,vector <char *> dest, const Vector & orbitcent, Unit * parent, const GFXMaterial & ourmat, const std::vector <GFXLight> &ligh, int faction) : Unit(), radius(0.0f),  satellites() {
+Planet::Planet(Vector x,Vector y,float vely, float pos,float gravity,float radius,char * textname,char * alpha,vector <char *> dest, const Vector & orbitcent, Unit * parent, const GFXMaterial & ourmat, const std::vector <GFXLightLocal> &ligh, int faction) : Unit(), radius(0.0f),  satellites() {
   for (unsigned int i=0;i<ligh.size();i++) {
     int l;
-    GFXCreateLight (l,ligh[i],true);
+    GFXCreateLight (l,ligh[i].ligh,!ligh[i].islocal);
     lights.push_back (l);
   }
   destination=dest;

@@ -25,6 +25,9 @@
 #include <stack>
 using std::stack;
 #include <assert.h>
+#include "vs_globals.h"
+#include "config_xml.h"
+
 int GFX_MAX_LIGHTS=8;
 int GFX_OPTIMAL_LIGHTS=4;
 GFXBOOL GFXLIGHTING=GFXFALSE;
@@ -282,6 +285,11 @@ static void SetupGLLightGlobals () {
 	GLLights[i].index=-1;
       }
     }
+    GFXSetCutoff( XMLSupport::parse_float (vs_config->getVariable ("graphics","lightcutoff",".06")));
+    GFXSetOptimalIntensity(XMLSupport::parse_float (vs_config->getVariable ("graphics","lightoptimalintensity",".06")),XMLSupport::parse_float (vs_config->getVariable ("graphics","lightsaturation",".95")));    
+    GFXSetOptimalNumLights(XMLSupport::parse_int (vs_config->getVariable ("graphics","numlights","4"))); 
+    GFXSetSeparateSpecularColor (XMLSupport::parse_bool (vs_config->getVariable ("graphics","separatespecularcolor","false"))?GFXTRUE:GFXFALSE); 
+    
 }
 
 

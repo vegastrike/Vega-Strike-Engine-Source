@@ -7,7 +7,8 @@
 #include "physics.h"
 #include "hashtable_3d.h"
 #include "gfx/bsp.h"
-Hashtable3d <LineCollide*, char[20],char[200]> collidetable;
+const int tablehuge=12;
+Hashtable3d <LineCollide*, char[20],char[200], char [tablehuge]> collidetable;
 
 bool TableLocationChanged (const Vector & Mini,const Vector & minz) { 
   return (collidetable.hash_int (Mini.i)!=collidetable.hash_int (minz.i) ||
@@ -51,7 +52,7 @@ void Unit::CollideAll() {
   if (SubUnit)
     return;
 
-  vector <LineCollide*> * colQ [HUGEOBJECT+1];
+  vector <LineCollide*> * colQ [tablehuge+1];
   int sizecolq = collidetable.Get (&CollideInfo,colQ);
   int j = 0;
   for (;j<sizecolq;j++) {

@@ -135,16 +135,21 @@ using XMLSupport::AttributeList;
 using namespace StarXML;
 
 
-static void GetLights (const vector <GFXLight> &origlights, vector <GFXLight> &curlights, const char *str) {
+static void GetLights (const vector <GFXLight> &origlights, vector <GFXLightLocal> &curlights, const char *str) {
   int tint;
+  char isloc;
   char * tmp=strdup (str);
+  GFXLightLocal  lloc;
   char * st =tmp;
-  while (1==sscanf (st,"%d",&tint)) {
+  int numel;
+  while ((numel=sscanf (st,"%d%c",&tint,&isloc))>0) {
     assert (tint<origlights.size());
-    curlights.push_back (origlights[tint]);
+    lloc.ligh = origlights[tint];
+    lloc.islocal = (numel>1&&isloc=='l');
+    curlights.push_back (lloc);
     while (isspace(*st) )
       st++;
-    while (*st>='0'&&*st<='9') {
+    while (isalnum (*st)) {
       st++;
     }
   }
@@ -152,7 +157,7 @@ static void GetLights (const vector <GFXLight> &origlights, vector <GFXLight> &c
 } 
 
 void StarSystem::beginElement(const string &name, const AttributeList &attributes) {
-  vector <GFXLight> curlights;
+  vector <GFXLightLocal> curlights;
   xml->cursun.i=0;
   GFXColor tmpcol(0,0,0,1);
   LIGHT_TARGET tmptarg= POSITION;
