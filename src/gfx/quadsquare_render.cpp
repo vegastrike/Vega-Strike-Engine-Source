@@ -81,7 +81,54 @@ int	quadsquare::Render(const quadcornerdata& cd)
   return totsize;
 }
 //#define DONOTDRAWBLENDEDQUADS
+/*static void swap(unsigned int & a,unsigned int & b) {
+	unsigned int baka;
+	baka=a;
+	a=b;
+	b=baka;
+}
+static void swapX(unsigned short & a,unsigned short & b) {
+	unsigned short baka;
+	baka=a;
+	a=b;
+	b=baka;
+}
+*/
+inline void RotateTriRight (unsigned int& aa, unsigned short& ta, unsigned int& bb, unsigned short& tb, unsigned int& cc, unsigned short& tc) {
+	unsigned int baki;
+	unsigned short baks;
+	baks=ta;
+	baki=aa;
+	aa=cc;
+	ta=tc;
+	cc=baki;
+	tc=baks;
+	baks=tb;
+	baki=bb;
+	tb=ta;
+	bb=aa;
+	aa=baki;
+	ta=baks;
+}
+
+inline void RotateTriLeft (unsigned int& aa, unsigned short& ta, unsigned int& bb, unsigned short& tb, unsigned int& cc, unsigned short& tc) {
+	unsigned int baki;
+	unsigned short baks;
+	baks=ta;
+	baki=aa;
+	aa=bb;
+	ta=tb;
+	bb=baki;
+	tb=baks;
+	baks=tc;
+	baki=cc;
+	tc=ta;
+	cc=aa;
+	aa=baki;
+	ta=baks;
+}
 void quadsquare::tri(unsigned int aa,unsigned short ta,unsigned int bb,unsigned short tb,unsigned int cc,unsigned short tc) {
+
 
 #ifdef DONOTDRAWBLENDEDQUADS
   if (ta==tb&&tb==tc) {
@@ -93,10 +140,24 @@ void quadsquare::tri(unsigned int aa,unsigned short ta,unsigned int bb,unsigned 
     return;
   }
 #endif
-  indices[ta].q.push_back (aa);
-  indices[ta].q.push_back (bb);
-  indices[ta].q.push_back (cc);
+
   if (!(ta==tb&&tb==tc)) {
+    /*
+    if (((*textures)[ta].blendDst==ZERO)&&((*textures)[tc].blendDst!=ZERO)) {
+      swapX(ta,tc);
+      swap(aa,cc);
+    } else if (((*textures)[tb].blendDst==ZERO)&&((*textures)[tc].blendDst!=ZERO)) {
+      swapX(tb,tc);
+      swap(bb,cc);
+	} else if (((*textures)[ta].blendDst==ZERO)&&((*textures)[tb].blendDst!=ZERO)) {
+      swapX(ta,tb);
+      swap(aa,bb);
+    }
+    */
+    if (((*textures)[ta].blendDst==ZERO)&&((*textures)[tb].blendDst!=ZERO))
+		RotateTriRight(aa,ta,bb,tb,cc,tc);
+	else if (((*textures)[ta].blendDst==ZERO)&&((*textures)[tc].blendDst!=ZERO))
+		RotateTriLeft (aa,ta,bb,tb,cc,tc);
     GFXColorVertex cv[3];
     cv[0].SetVtx(*vertices->GetVertex (aa));
     cv[1].SetVtx(*vertices->GetVertex (bb));
@@ -111,24 +172,27 @@ void quadsquare::tri(unsigned int aa,unsigned short ta,unsigned int bb,unsigned 
       indices[tb].c.push_back(cv[2]);
     }else {
       if (tb!=ta) {
-	cv[0].a = 0;
-	cv[1].a = 1;
-	cv[2].a = 0;
-	indices[tb].c.push_back(cv[0]);
-	indices[tb].c.push_back(cv[1]);
-	indices[tb].c.push_back(cv[2]);
+  	    cv[0].a = 0;
+	    cv[1].a = 1;
+	    cv[2].a = 0;
+	    indices[tb].c.push_back(cv[0]);
+	    indices[tb].c.push_back(cv[1]);
+	    indices[tb].c.push_back(cv[2]);
       }
       if (tc!=ta) {
-	cv[0].a = 0;
-	cv[1].a = 0;
-	cv[2].a = 1;
-	indices[tc].c.push_back(cv[0]);
-	indices[tc].c.push_back(cv[1]);
-	indices[tc].c.push_back(cv[2]);
+	    cv[0].a = 0;
+	    cv[1].a = 0;
+	    cv[2].a = 1;
+	    indices[tc].c.push_back(cv[0]);
+	    indices[tc].c.push_back(cv[1]);
+	    indices[tc].c.push_back(cv[2]);
       }
     }
   }
-  
+  indices[ta].q.push_back (aa);
+  indices[ta].q.push_back (bb);
+  indices[ta].q.push_back (cc);
+ 
 }
 
 unsigned short VertInfo::GetTex () const {

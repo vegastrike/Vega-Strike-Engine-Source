@@ -19,6 +19,7 @@ struct TerraXML {
   float scales;
   float scalet;
 	float detail;
+	std::vector <std::string> alpha;
   	std::vector <GFXMaterial> mat;
 	std::vector <TerrainData> data;
 };
@@ -43,6 +44,7 @@ namespace TerrainXML {
 		LEVEL,
 		BLEND,
 		FFILE,
+		ALPHAFILE,
 		TERRAINFILE,
 		DETAIL,
 		STATICDETAIL,
@@ -81,6 +83,7 @@ namespace TerrainXML {
 		EnumMap::Pair ("Level", LEVEL),
 		EnumMap::Pair ("Blend", BLEND),
 		EnumMap::Pair ("File", FFILE),
+		EnumMap::Pair ("AlphaFile", ALPHAFILE),
 		EnumMap::Pair ("TerrainFile", TERRAINFILE),
 		EnumMap::Pair ("Reflect", REFLECT),
 		EnumMap::Pair ("Color", COLOR),
@@ -96,7 +99,7 @@ namespace TerrainXML {
 		EnumMap::Pair ("power", POWER)
 	};
 	const EnumMap element_map(element_names,9);
-	const EnumMap attribute_map(attribute_names,19);
+	const EnumMap attribute_map(attribute_names,20);
 }
 using XMLSupport::EnumMap;
 using XMLSupport::Attribute;
@@ -139,11 +142,15 @@ void QuadTree::beginElement(const string &name, const AttributeList &attributes)
 		textures.push_back(TerrainTexture());
 		textures.back().color= textures.size()-1;
 		xml->mat.push_back(GFXMaterial());
+		xml->alpha.push_back (std::string());
 		GFXGetMaterial (0,xml->mat.back());
 		for (iter = attributes.begin();iter!=attributes.end();iter++) {
 			switch(attribute_map.lookup((*iter).name)) {
 			case FFILE:
 				textures.back().tex.filename=strdup ((*iter).value.c_str());
+				break;
+			case ALPHAFILE:
+				xml->alpha.back()=(*iter).value.c_str();
 				break;
 			case BLEND:
 				sscanf (((*iter).value).c_str(),"%s %s",csrc,cdst);
@@ -303,8 +310,13 @@ void QuadTree::LoadXML (const char *filename) {
     textures[i].scales = xml->scales;
     textures[i].scalet = xml->scalet;
     if (textures[i].tex.filename) {
-      Texture * tex = new Texture (textures[i].tex.filename);
-      free (textures[i].tex.filename);
+		Texture * tex;
+		if (xml->alpha[i].length()>0) {
+			tex = new Texture (textures[i].tex.filename,xml->alpha[i].c_str());
+		}else {
+			tex = new Texture (textures[i].tex.filename);
+		}
+		free (textures[i].tex.filename);
       textures[i].tex.t = tex;
       GFXSetMaterial (textures[i].material,xml->mat[i]);
     } else {
