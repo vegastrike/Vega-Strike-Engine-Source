@@ -1,7 +1,7 @@
 #include "fire.h"
 #include "flybywire.h"
 #include "navigation.h"
-#include "cmd/planet_generic.h"
+#include "cmd/planet.h"
 #include "config_xml.h"
 #include "vs_globals.h"
 #include "cmd/unit_util.h"
@@ -161,13 +161,23 @@ void FireAt::FireWeapons(bool shouldfire, bool lockmissile) {
     parent->Fire (true);
     parent->ToggleWeapon(true);
   }
+  int locked = parent->LockMissile();
+  
+	if (1||/*remove after testing*/((float(rand())/RAND_MAX)<missileprobability)/**SIMULATION_ATOM*/) {
+       if(locked==1){
+		fprintf(stderr,"AI firing missile!\n");
+	  	parent->Fire(true);
+		parent->ToggleWeapon(true);//change missiles to only fire 1
+	  }
+	}
   if (shouldfire) {
-    if ((float(rand())/RAND_MAX)<missileprobability*SIMULATION_ATOM) {
-      int locked = parent->LockMissile();
-      if (locked==-1) {
-	parent->Fire(true);
-	parent->ToggleWeapon(true);//change missiles to only fire 1
+    if (1||/*remove after testing*/((float(rand())/RAND_MAX)<missileprobability)/**SIMULATION_ATOM*/) {
+      
+      if (locked== -1) {
+		parent->Fire(true);
+		parent->ToggleWeapon(true);//change missiles to only fire 1
       }
+	 
     }
     if (delay>rxntime) {
       parent->Fire(false);
@@ -255,4 +265,3 @@ void FireAt::Execute () {
     FireWeapons (shouldfire,missilelock);
   }
 }
-
