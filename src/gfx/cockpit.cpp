@@ -1116,7 +1116,7 @@ void Cockpit::Update () {
 	zoomfactor=1.5;
 	respawnunit[_Universe->CurrentCockpit()]=0;
 	Unit * un = UnitFactory::createUnit (unitfilename.c_str(),false,this->unitfaction,unitmodname);
-	un->SetCurPosition (savegame->GetPlayerLocation());
+	un->SetCurPosition (LaunchUnitNear (savegame->GetPlayerLocation()));
 	_Universe->activeStarSystem()->AddUnit (un);
 	this->SetParent(un,unitfilename.c_str(),unitmodname.c_str(),savegame->GetPlayerLocation());
 	//un->SetAI(new FireKeyboard ())

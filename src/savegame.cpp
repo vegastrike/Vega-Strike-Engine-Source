@@ -10,6 +10,35 @@
 #include "savegame.h"
 #include <algorithm>
 using namespace std;
+
+
+QVector LaunchUnitNear (QVector pos) {
+  static double def_un_size = XMLSupport::parse_float (vs_config->getVariable ("physics","respawn_unit_size","400"));
+  for (unsigned int k=0;k<10;k++) {
+    Unit * un;
+    bool collision=false;
+    for (un_iter i=_Universe->activeStarSystem()->getUnitList().createIterator();(un=*i)!=NULL;++i) {
+      double dist = (pos-un->Position()).Magnitude()-un->rSize()-def_un_size;
+      if (dist<0) {
+	QVector delta  = pos-un->Position();
+	delta.Normalize();
+	delta = delta.Scale ( dist+def_un_size);
+	if (k<5) {
+	  pos = pos+delta;
+	}else {
+	  QVector r(.5,.5,.5);
+	  pos+=un->rSize()*r;
+	  collision=true;
+	}
+	
+      }
+    }
+    if (collision==false)
+      break;
+  }
+  return pos;
+}
+
 SaveGame::SaveGame(const std::string &pilot) {
   callsign=pilot;
   ForceStarSystem=string("");
@@ -224,7 +253,7 @@ vector<SavedUnits> SaveGame::ParseSaveGame (string filename, string &FSS, string
 	ForceStarSystem=string(tmp2);
       if (PlayerLocation.i==FLT_MAX||PlayerLocation.j==FLT_MAX||PlayerLocation.k==FLT_MAX) {
 	shouldupdatepos=true;
-	PlayerLocation=tmppos;
+	PlayerLocation=tmppos;//LaunchUnitNear(tmppos);
       }
       mysav=ReadSavedUnits (fp);
     }

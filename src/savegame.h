@@ -50,3 +50,4 @@ class SaveGame {
   vector<SavedUnits> ParseSaveGame (string filename, string &ForceStarSystem, string originalstarsystem, QVector & pos, bool &shouldupdatedfighter0pos, float &credits, string &originalunit);
 };
 void WriteSaveGame (class Cockpit * cp);
+QVector LaunchUnitNear (QVector);

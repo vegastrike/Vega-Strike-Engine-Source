@@ -490,7 +490,7 @@ void createObjects(std::vector <std::string> &fighter0name, std::vector <StarSys
 	    strcpy(fightername,fighter0name[squadnum].c_str());
 	  if (mission->getVariable ("savegame","").length()>0) {
 		  if (savedloc[squadnum].i!=FLT_MAX) {
-			pox = savedloc[squadnum];
+			pox = LaunchUnitNear(savedloc[squadnum]);
 		  }
 	    fighter0mods.push_back(modifications =vs_config->getVariable (string("player")+((squadnum>0)?tostring(squadnum+1):string("")),"callsign","")+mission->getVariable("savegame",""));
 	  }else {
