@@ -42,6 +42,7 @@ using namespace std;
 
 Hashtable<string, Mesh> Mesh::meshHashTable;
 list<Mesh*> undrawn_meshes[NUM_MESH_SEQUENCE]; // lower priority means draw first
+extern list<Logo*> undrawn_logos;
 Vector mouseline;
 
 void Mesh::ProcessUndrawnMeshes() {
@@ -53,6 +54,12 @@ void Mesh::ProcessUndrawnMeshes() {
       m->will_be_drawn = false;
     }
   }
+  while(undrawn_logos.size()) {
+    Logo *l = undrawn_logos.back();
+    undrawn_logos.pop_back();
+    l->ProcessDrawQueue();
+    l->will_be_drawn = false;
+    }
 }
 
 int Mesh::dlist_count = 1;

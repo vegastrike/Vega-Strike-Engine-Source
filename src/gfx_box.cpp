@@ -18,7 +18,7 @@ Box::Box(const Vector &corner1, const Vector &corner2) : corner_min(corner1), co
 
   Box *oldmesh;
   string hash_key = string("@@Box") + "#" + tostring(corner1) + "#" + tostring(corner2);
-  cerr << "hashkey: " << hash_key << endl;
+  //  cerr << "hashkey: " << hash_key << endl;
   if(0 != (oldmesh = (Box*)meshHashTable.Get(hash_key)))
     {
       *this = *oldmesh;

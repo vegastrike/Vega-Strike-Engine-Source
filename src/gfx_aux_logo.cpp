@@ -25,16 +25,21 @@
 
 #include "gfxlib.h"
 
+list<Logo*> undrawn_logos;
+Hashtable<string, Logo> Logo::decalHash;
+
 Logo::Logo(int numberlogos,  Vector* center,Vector* normal, float* size, float* rotation, float offset,Texture* Dec, Vector * Ref)
 {
-
-	Decal = Dec;
+  refcount = -1;
+	draw_queue = NULL;
+	SetDecal(Dec);
 	numlogos = numberlogos;
-	GFXVertex LogoCorner[4];
+	GFXVertex *vertices = new GFXVertex[numlogos*4];
+	GFXVertex *LogoCorner = vertices;
 	//LogoCorner = new glVertex* [numlogos]; //hope to hell we have enough mem
-	vlists = new GFXVertexList*[numlogos];
 	Vector p,q,r , v1,v2,v3,v4; //temps
-	for (int i=0; i< numlogos;i++)
+	will_be_drawn = false;
+	for (int i=0; i< numlogos;i++, LogoCorner+=4)
 	{
 		r = normal[i];
 		Normalize(r);
@@ -77,9 +82,28 @@ Logo::Logo(int numberlogos,  Vector* center,Vector* normal, float* size, float* 
 		LogoCorner[3].SetVertex(v4).SetNormal(r).SetTexCoord(1,0);
 		//LogoCorner[4] = LogoCorner[2];
 		//LogoCorner[5] = LogoCorner[1];
-		vlists[i] = new GFXVertexList(4,0,1, LogoCorner);
 	}
+	vlist = new GFXVertexList(4*numlogos,0,numlogos, vertices);
+	delete [] vertices;
 }
+
+void Logo::SetDecal(Texture *decal)
+{
+  Decal = decal;
+  //Check which draw_queue to use:
+  Logo *l;
+  if((l=decalHash.Get(string(decal->filename)))!=NULL) {
+    draw_queue = l->draw_queue;
+    owner_of_draw_queue = l;
+    l->refcount++;
+  } else {
+    decalHash.Put(string(decal->filename), l=new Logo(*this));
+    draw_queue = l->draw_queue = new vector<DrawContext>();
+    owner_of_draw_queue = l->owner_of_draw_queue = l;
+    l->refcount = 1;
+  }
+}
+
 /*Logo::Logo(int numberlogos,  Vector* center,Vector* normal, float* size, float* rotation, float* offset,char *tex, char *alp)
 {
 	Decal = NULL;
@@ -100,26 +124,46 @@ void Logo::Draw()
 {
 	if (!numlogos)
 		return;
+	Matrix m;
+	GFXGetMatrix(MODEL, m);
+	draw_queue->push_back(DrawContext(m, vlist));
+	if(!owner_of_draw_queue->will_be_drawn) {
+	  undrawn_logos.push_back(owner_of_draw_queue);
+	  owner_of_draw_queue->will_be_drawn=true;
+	}
+}
+
+void Logo::ProcessDrawQueue() {
 	GFXEnable(TEXTURE0);
 	GFXDisable(TEXTURE1);
 	Decal->MakeActive();
 	GFXSelectTexcoordSet(0, 0);
 	GFXSelectTexcoordSet(1, 1);
 	GFXBlendMode(SRCALPHA,INVSRCALPHA);
-	for (int i=0; i<numlogos; i++)
-	{
-		vlists[i]->Draw();
-		//glInterleavedArrays(GL_T2F_N3F_V3F, sizeof(glVertex) - (2+3+3)*sizeof(float), LogoCorner[i]);
-		//glDrawArrays(GL_QUADS,0,4);
+
+	while(draw_queue->size()) {
+	  DrawContext c = draw_queue->back();
+	  draw_queue->pop_back();
+	  GFXLoadMatrix(MODEL, c.m);
+	  c.vlist->Draw();
 	}
-
-
 }
+
 Logo::~Logo ()
 {
-	for (int i=0; i<numlogos;i++)
-		delete vlists[i];
-	delete [] vlists;
+	delete [] vlist;
+	
 	//if(LogoCorner!=NULL)
 	//	delete [] LogoCorner;
+	if(owner_of_draw_queue!=NULL) {
+	  owner_of_draw_queue->refcount--;
+	  if(owner_of_draw_queue->refcount==0 && owner_of_draw_queue!=this) 
+	    delete owner_of_draw_queue;
+	}
+	if(owner_of_draw_queue == this) {
+	  assert(refcount == 0);
+	  decalHash.Delete(string(Decal->filename));
+	  delete draw_queue;
+	}
 }
+

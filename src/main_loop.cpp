@@ -498,7 +498,7 @@ void createObjects() {
   for(int a = 0; a < numf; a++) {
     //fighters[a] = new Unit("uosprey.dat");
     //fighters[a] = new Unit("Homeworld-HeavyCorvette.xml", true);
-    switch(1) {
+    switch(7) {
     case 0:
       //fighters[a] = new Unit("broadsword.xunit", true);
       fighters[a] = new Unit("midway.xunit", true);
@@ -521,12 +521,15 @@ void createObjects() {
     case 6:
       fighters[a] = new Unit("Homeworld-HeavyCorvette.xml", true);
       break;
+    case 7:
+      fighters[a] = new Unit("uosprey.dat");
+      break;
     }
     //fighters[a] = new Unit("phantom.xunit", true);
     //fighters[a]->SetPosition((a%8)/8.0 - 2.0, (a/8)/8.0 - 2.0,5.0);
 
 
-    fighters[a]->SetPosition((a%5)/0.5 - 4.0F, (a/5)/0.5 - 4.0F,2.0F);
+    fighters[a]->SetPosition((a%5)/0.25 - 4.0F, (a/5)/0.25 - 4.0F,2.0F);
     //fighters[a]->SetPosition(0, 0, -2.0F);
   
     //fighters[a]->Pitch(PI/2);
