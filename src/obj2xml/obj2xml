@@ -35,7 +35,55 @@ $objname = $basename;
 $texture = $default_texture = "$basename-default";
 $in_strip = 0;
 sub finish_strip {
-print "strip vertices: " . join(" ", @strip_vertices) . "\n";
+		@vertices = @strip_vertices;
+		@output_vertices = ();
+		@output_texcoords = ();
+
+		while(@vertices) {
+			($point, $texcoord, $normal) = split m|/|, shift(@vertices);
+			$point--; $texcoord--; $normal--;
+			if($texcoord == -1 && $normal == -1) {
+				$texcoord = $normal = $point;
+			}
+			$point = << "POINT"
+	<Point>
+		<Location x="$point_list[$point][0]" y="$point_list[$point][1]" z="$point_list[$point][2]"/>
+		<Normal i="$normal_list[$normal][0]" j="$normal_list[$normal][1]" k="$normal_list[$normal][2]"/>
+	</Point>
+POINT
+;
+			unless(exists $encountered_points{$objname}{$texture}) {
+				$encountered_points{$objname}{$texture} = {};
+				$point_output{$objname}{$texture} = "<Points>\n";
+				$face_output{$objname}{$texture} = "<Polygons>\n";
+			}
+			unless(defined $encountered_points{$objname}{$texture}{$point}) {
+				$encountered_points{$objname}{$texture}{$point} = keys %{$encountered_points{$objname}{$texture}};
+				$point_output{$objname}{$texture} .= $point;
+			}
+			push @output_vertices, $encountered_points{$objname}{$texture}{$point};
+			push @output_texcoords, $texcoord;
+		}
+
+		if(@output_vertices==3) {
+			$face_output{$objname}{$texture} .= "<Tri>\n"
+		} elsif (@output_vertices==4) {
+			$face_output{$objname}{$texture} .= "<Quad>\n"
+		} else {
+			$face_output{$objname}{$texture} .= "<Tristrip>\n"
+		}
+		for($v=0;$v<@output_vertices;$v++) {
+			$face_output{$objname}{$texture} .= "	<Vertex point=\"$output_vertices[$v]\" s=\"$texcoord_list[$output_texcoords[$v]][0]\" t=\"$texcoord_list[$output_texcoords[$v]][1]\"/>\n"
+		}
+		if(@output_vertices==3) {
+			$face_output{$objname}{$texture} .= "</Tri>\n"
+		} elsif (@output_vertices==4) {
+			$face_output{$objname}{$texture} .= "</Quad>\n"
+		} else {
+			$face_output{$objname}{$texture} .= "</Tristrip>\n"
+		}
+		$num_polygons++;
+		print "strip vertices: " . join(" ", @strip_vertices) . "\n";
 $in_strip = 0;
 @strip_vertices = ();
 }
@@ -83,52 +131,11 @@ while($line = <INPUT>) {
 			$texture = $default_texture;
 		}
 	} elsif($line =~ / *f/i) {
+		$in_strip = 1;
 		chomp $line;
-		@vertices = split /\s/, $line;
-		shift @vertices; # dump out the 'f'
-		@output_vertices = ();
-		@output_texcoords = ();
-
-		while(@vertices) {
-			($point, $texcoord, $normal) = split m|/|, shift(@vertices);
-			$point--; $texcoord--; $normal--;
-			$point = << "POINT"
-	<Point>
-		<Location x="$point_list[$point][0]" y="$point_list[$point][1]" z="$point_list[$point][2]"/>
-		<Normal i="$normal_list[$normal][0]" j="$normal_list[$normal][1]" k="$normal_list[$normal][2]"/>
-	</Point>
-POINT
-;
-			unless(exists $encountered_points{$objname}{$texture}) {
-				$encountered_points{$objname}{$texture} = {};
-				$point_output{$objname}{$texture} = "<Points>\n";
-				$face_output{$objname}{$texture} = "<Polygons>\n";
-			}
-			unless(defined $encountered_points{$objname}{$texture}{$point}) {
-				$encountered_points{$objname}{$texture}{$point} = keys %{$encountered_points{$objname}{$texture}};
-				$point_output{$objname}{$texture} .= $point;
-			}
-			push @output_vertices, $encountered_points{$objname}{$texture}{$point};
-			push @output_texcoords, $texcoord;
-		}
-
-		if(@output_vertices==3) {
-			$face_output{$objname}{$texture} .= "<Tri>\n"
-		} elsif (@output_vertices==4) {
-			$face_output{$objname}{$texture} .= "<Quad>\n"
-		} else {
-			print "Invalid number of vertices in face: $line";
-			die "Invalid number of vertices in face: $line";
-		}
-		for($v=0;$v<@output_vertices;$v++) {
-			$face_output{$objname}{$texture} .= "	<Vertex point=\"$output_vertices[$v]\" s=\"$texcoord_list[$output_texcoords[$v]][0]\" t=\"$texcoord_list[$output_texcoords[$v]][1]\"/>\n"
-		}
-		if(@output_vertices==3) {
-			$face_output{$objname}{$texture} .= "</Tri>\n"
-		} elsif (@output_vertices==4) {
-			$face_output{$objname}{$texture} .= "</Quad>\n"
-		}
-		$num_polygons++;
+		@strip_vertices = split /\s/, $line;
+		shift @strip_vertices; # dump out the 'f'
+		finish_strip();
 	} elsif($line =~ /^ *t/) {
 		$in_strip = 1;
 		chomp $line;
@@ -151,7 +158,11 @@ for $objname (keys %encountered_points) {
 		open(SUBUNITOUTPUT, ">&UNITOUTPUT");
 	}
 	for $texture (keys %{$encountered_points{$objname}}) {
-		$meshfilename = "$basename-$objname-$texture.xmesh";
+		if($basename eq $objname) {
+		$meshfilename = "$basename-$texture.xmesh";
+		} else {
+			$meshfilename = "$basename-$objname-$texture.xmesh";
+		}
 		open(MESHOUTPUT, ">$meshfilename");
 		print MESHOUTPUT "<Mesh texture=\"$texture.bmp\">\n";
 		print MESHOUTPUT $point_output{$objname}{$texture};
