@@ -1016,6 +1016,8 @@ int32bit appendmeshfromxml(XML memfile, FILE* Outputfile){
 	  }
 	  floatbuf=VSSwapHostFloatToLittle(memfile.animdefs[anim].FPS);
 	  runningbytenum+=sizeof(float32bit)*fwrite(&floatbuf,sizeof(float32bit),1,Outputfile);//Animdef # anim: FPS
+	  intbuf=VSSwapHostIntToLittle(memfile.animdefs[anim].meshoffsets.size());
+	  runningbytenum+=sizeof(int32bit)*fwrite(&intbuf,sizeof(int32bit),1,Outputfile);//number of animation mesh offsets
 	  for(int32bit offset=0;offset<memfile.animdefs[anim].meshoffsets.size();offset++){
 		intbuf=submeshref+memfile.animdefs[anim].meshoffsets[offset];
 		intbuf=VSSwapHostIntToLittle(intbuf);

@@ -47,11 +47,12 @@ void BFXMToXmesh(FILE* Inputfile, FILE* Outputfile){
 	  //For each mesh
 	  for(int32bit meshindex=0;meshindex<nummeshes;meshindex++){
 		  if(recordindex>0||meshindex>0){
-			string filename="";
-			filename+=(char8bit)(recordindex+48);
-			filename+="_";
-			filename+=(char8bit)(meshindex+48);
-			filename+=".xmesh";
+			char filenamebuf[56]; // Is more than enough characters - int can't be this big in decimal
+			int32bit error=sprintf(filenamebuf,"%d_%d.xmesh",recordindex,meshindex);
+			if(error==-1){ // if wasn't enough characters - something is horribly wrong.
+				exit(error);
+			}
+			string filename=string(filenamebuf);
 			Outputfile=fopen(filename.c_str(),"w+");
 		  }
 		  //Extract Mesh Header
