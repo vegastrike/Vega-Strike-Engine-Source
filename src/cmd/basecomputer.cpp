@@ -85,7 +85,15 @@ bool upgradeNotAddedToCargo(std::string category) {
   return false;
 }
 extern vector<unsigned int > base_keyboard_queue;
-
+std::string getDisplayCategory(const Cargo &cargo) {
+  std::string::size_type where= cargo.description.find("<");
+  if (where!=string::npos) {
+    std::string category = cargo.description.substr(where+1);
+    where=category.find(">");
+    return category.substr(0,where);   
+  }
+  return cargo.category;
+}
 class TextInputDisplay: public StaticDisplay{
 	std::vector <unsigned int> local_keyboard_queue;
 	std::vector <unsigned int> *keyboard_queue;
@@ -1408,19 +1416,20 @@ bool BaseComputer::scrollToItem(Picker* picker, const Cargo& item, bool select, 
     PickerCell* categoryCell = NULL;    // Need this if we can't find the item.
 
     // Walk through the category list(s).
-    if(item.category.size() > 0 ) {     // Make sure we have a category.
+    std::string category=getDisplayCategory(item);
+    if(category.size() > 0 ) {     // Make sure we have a category.
         string::size_type categoryStart = 0;
         if(skipFirstCategory) {
             // We need to skip the first category in the string.
             // Generally need to do this when there's a category level that's not in the UI, like
             //  "upgrades" in the Upgrade UI.
-            categoryStart = item.category.find(CATEGORY_SEP, 0);
+            categoryStart = category.find(CATEGORY_SEP, 0);
             if(categoryStart != string::npos) categoryStart++;
         }
         while(true) {
             // See if we have multiple categories left.
-            const string::size_type categoryEnd = item.category.find(CATEGORY_SEP, categoryStart);
-            const string currentCategory = item.category.substr(categoryStart, categoryEnd-categoryStart);
+            const string::size_type categoryEnd = category.find(CATEGORY_SEP, categoryStart);
+            const string currentCategory = category.substr(categoryStart, categoryEnd-categoryStart);
 
             PickerCell* cell = cells->cellWithId(currentCategory);
             if(!cell || !cell->children()) {
@@ -1826,6 +1835,16 @@ void BaseComputer::updateTransactionControlsForSelection(TransactionList* tlist)
       else if (descimage)
         descimage->setTexture(descriptiontexture);
     }
+    {
+      pic = descString.find("<");
+      if (pic!=string::npos) {
+        std::string tmp=descString.substr(pic+1);
+        descString=descString.substr(0,pic);
+        if ((pic=tmp.find(">"))!=string::npos) {
+          descString+=tmp.substr(pic+1);
+        }
+      }
+    }
     desc->setText(descString);
 }
 
@@ -2002,10 +2021,11 @@ void BaseComputer::loadListPicker(TransactionList& tlist, SimplePicker& picker, 
     SimplePickerCell* parentCell = NULL;                // Place to add new items.  NULL = Add to picker.
 	for(int i=0; i<tlist.masterList.size(); i++) {
         Cargo& item = tlist.masterList[i].cargo;
-	    if(item.category != currentCategory) {
+        std::string icategory = getDisplayCategory(item);
+	    if(icategory != currentCategory) {
             // Create new cell(s) for the new category.
-            parentCell = createCategoryCell(*static_cast<SimplePickerCells*>(picker.cells()), item.category, skipFirstCategory);
-            currentCategory = item.category;
+            parentCell = createCategoryCell(*static_cast<SimplePickerCells*>(picker.cells()), icategory, skipFirstCategory);
+            currentCategory = icategory;
         }
 
         // Construct the cell for this item.
