@@ -25,24 +25,31 @@
 #include <math.h>
 #include <string>
 #include <vector>
-#include <map>
 #include <algorithm>
 
-#include <iostream>
-
+//const int hashsize = 1001;
 using namespace std;
+//Hashtable doesn't grow
+template<class KEY, class VALUE, int SIZ> class Hashtable {
 
-template<typename KEY, int SIZ> struct ValueHashtableKey
-{
-	static inline int hash(const int& key) {
-	    return key%SIZ;
+    typedef std::pair<KEY,VALUE*>                             HashElement;
+    typedef typename std::vector<HashElement>::iterator       It;
+    typedef typename std::vector<HashElement>::const_iterator CIt;
+
+    struct HashElementEq {
+        const KEY& key;
+        HashElementEq( const KEY& k ) : key(k) { }
+        bool operator()( const HashElement& elem ) const {
+            return ( key == elem.first );
+        }
+    };
+
+	std::vector<HashElement> table[SIZ];
+
+	static int hash(const int key) {
+	  return key%SIZ;
 	}
-
-	static inline long hash(const long& key) {
-	    return key%SIZ;
-	}
-
-	static inline int hash(const std::string& key) {
+	static int hash(const std::string &key) {
 		unsigned int k = 0;
 		typename std::string::const_iterator start = key.begin();
 		for(;start!=key.end(); start++) {
@@ -51,128 +58,70 @@ template<typename KEY, int SIZ> struct ValueHashtableKey
 		k %= SIZ;
 		return k;
 	}	
-};
-
-template <typename VALUE> struct ValueHashtableValue
-{
-    static inline VALUE invariant( ) {
-        return NULL;
-    }
-};
-
-template<typename KEY, class VALUE, int SIZ> class ValueHashtable
-{
-    typedef VALUE                         HashElement;
-    typedef std::pair<KEY,VALUE>          SlotPair;
-    typedef std::vector<SlotPair>         Slot;
-    typedef typename Slot::iterator       SlotIt;
-    typedef typename Slot::const_iterator SlotCit;
-
-    struct SlotEqPred {
-        KEY key;
-        SlotEqPred( const KEY& k ) : key(k) { }
-        bool operator()(const SlotPair& p ) {
-            return ( p.first == key );
-        }
-    };
-
-    Slot table[SIZ];
-
-	static inline int hash(const KEY& key) {
-        return ValueHashtableKey<KEY,SIZ>::hash( key );
-    }
-
-    static inline VALUE invariant( ) {
-        return ValueHashtableValue<VALUE>::invariant( );
-    }
-
 public:
-	ValueHashtable()
+
+	Hashtable()
 	{
 	}
-
-	ValueHashtable( const ValueHashtable& orig )
+	Hashtable( const Hashtable& orig )
 	{
         for( int i=0; i<SIZ; i++ ) {
             table[i] = orig.table[i];
         }
 	}
-
-	std::vector<VALUE> GetAll() const
+	std::vector <VALUE *> GetAll() const
 	{
-	  std::vector <VALUE> retval;
+	  std::vector <VALUE *> retval;
 	  for (unsigned int hashval=0;hashval<SIZ;hashval++) {
-	    SlotCit iter = table[hashval].begin();
-        SlotCit end  = table[hashval].end();
+	    CIt iter = table[hashval].begin(), end = table[hashval].end();
 	    for(;iter!=end;iter++) {
-	      retval.push_back(iter->second);
+	      retval.push_back (iter->second);
 	    }
 	  }
 	  return retval;
 	}
 
-	VALUE Get(const KEY &key) const
+	VALUE *Get(const KEY &key)
 	{
-        SlotEqPred eq( key );
+        HashElementEq eq(key);
 		int hashval = hash(key);
-		SlotCit iter;
-        iter = find_if( table[hashval].begin(), table[hashval].begin(), eq );
-        if( iter != table[hashval].end() ) {
-            return iter->second;
-        } else {
-			return invariant();
-        }
+		It iter;
+        It end = table[hashval].end();
+        iter = find_if( table[hashval].begin(), end, eq );
+		if(iter==end)
+			return NULL;
+		else
+			return iter->second;
 	}
 
-	VALUE Get(const KEY &key, const KEY& backupkey ) const
+	void Put(const KEY &key, VALUE *value)
 	{
-        SlotEqPred eq( key );
         int hashval = hash(key);
-		SlotCit iter;
-        iter = find_if( table[hashval].begin(), table[hashval].begin(), eq );
-        if( iter != table[hashval].end() ) {
-            return iter->second;
-        } else {
-            return Get( backupkey );
-        }
-	}
-
-	void Put(const KEY &key, VALUE value)
-	{
-		int hashval = hash(key);
-		table[hashval].push_back( SlotPair(key,value) );
+		table[hashval].push_back(HashElement(key, value));
 	}
 
 	void Delete(const KEY &key)
 	{
-        SlotEqPred eq( key );
+        HashElementEq eq(key);
 		int hashval = hash(key);
-		SlotIt iter;
-        iter = find_if( table[hashval].begin(), table[hashval].begin(), eq );
-        if( iter != table[hashval].end() ) {
+        It iter;
+        It end = table[hashval].end();
+        iter = find_if( table[hashval].begin(), end, eq );
+		if(iter==end)
+			return;
+		else {
 			table[hashval].erase(iter);
-        }
+		}
 	}
 
-private:
-    ValueHashtable& operator=( const ValueHashtable& );
-};
-
-template<class KEY, class VALUE, int SIZ> class Hashtable
-    : public ValueHashtable<KEY,VALUE*,SIZ>
-{
-public:
-    Hashtable( )
-        : ValueHashtable<KEY,VALUE*,SIZ>( )
-    { }
-
-    Hashtable( const Hashtable& orig )
-        : ValueHashtable<KEY,VALUE*,SIZ>( orig )
-    { }
+/*
+	VALUE *Get(const KEY &key);
+	void Put(const KEY &key, VALUE *value);
+	void Delete(const KEY &key);
+*/
 
 private:
-    Hashtable& operator=( const Hashtable& );
+	Hashtable& operator=( const Hashtable& orig );
 };
 
 #endif
-
