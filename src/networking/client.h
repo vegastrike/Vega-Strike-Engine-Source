@@ -85,6 +85,7 @@ public:
 private:
 	Client( const Client& );
 	Client& operator=( const Client& );
+	void Init();
 };
 
 #endif

@@ -920,6 +920,7 @@ namespace VSFileSystem
 		Directories[MusicFile] = "music";
 		Directories[PythonFile] = "bases";
 		Directories[BSPFile] = "generatedbsp";
+		Directories[AccountFile] = "accounts";
 
 		simulation_atom_var=atof(vs_config->getVariable("general","simulation_atom","0.1").c_str());
 		cout << "SIMULATION_ATOM: " << SIMULATION_ATOM << endl;

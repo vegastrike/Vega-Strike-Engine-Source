@@ -1,6 +1,6 @@
 #include "client.h"
 
-Client::Client()
+void Client::Init()
 {
 	latest_timestamp=0;
 	old_timestamp=0;
@@ -16,11 +16,16 @@ Client::Client()
 	comm_freq = MIN_COMMFREQ;
 }
 
+Client::Client()
+{
+	this->Init();
+}
+
 Client::Client( SOCKETALT& s, bool tcp )
 	    : is_tcp(tcp)
 	    , sock(s)
 {
-	Client::Client();
+	this->Init();
 }
 
 Client::~Client()
