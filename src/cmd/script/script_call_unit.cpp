@@ -244,7 +244,19 @@ varInst *Mission::call_unit(missionNode *node,int mode){
       if(mode==SCRIPT_RUN){
 	varInst *vec3_vi=call_olist_new(node,mode);
 
-	Vector pos=my_unit->GetVelocity()/my_unit->GetVelocity().Magnitude();
+	float vel_mag=my_unit->GetVelocity().Magnitude();
+	Vector pos;
+	
+	printf("VELMAG:%f\n",vel_mag);
+	if(vel_mag!=0){
+	  pos=my_unit->GetVelocity()/vel_mag;
+	}
+	else{
+	  Vector p,q,r;
+	  
+	  my_unit->GetOrientation(p,q,r);
+	  pos=r;
+	}
 
 	varInst *pos_vi;
 

@@ -198,3 +198,12 @@ AIPatrolDefend::AIPatrolDefend(int mode,Vector area,float range,Unit *around_uni
   vi_unit->object=around_unit;
 
 }
+
+
+AIOrderList::AIOrderList(olist_t *orderlist) : AImissionScript("ai_orderlist") {
+
+  varInst *vi_unit=mission->lookupClassVariable(modulename,"my_order_list",classid);
+  vi_unit->objectname="olist";
+  vi_unit->object=orderlist;
+
+}

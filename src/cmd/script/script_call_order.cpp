@@ -448,6 +448,27 @@ varInst *Mission::call_order(missionNode *node,int mode){
 
     return viret;
   }
+  else if(cmd=="newOrderList"){
+    missionNode *unit_node=getArgument(node,mode,0);
+    varInst *unit_vi=checkObjectExpr(unit_node,mode);
+    olist_t *orderlist=getOListObject(unit_node,mode,unit_vi);
+
+    Order *my_order=NULL;
+
+    if(mode==SCRIPT_RUN){
+      my_order=new AIOrderList(orderlist);
+    }
+
+    viret=newVarInst(VI_TEMP);
+    viret->type=VAR_OBJECT;
+    viret->objectname="order";
+    
+    viret->object=(void *)my_order;
+
+    deleteVarInst(unit_vi);
+
+    return viret;
+  }
   else if(cmd=="newSuperiority"){
     Order *my_order=NULL;
 

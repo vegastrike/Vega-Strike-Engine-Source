@@ -1,3 +1,11 @@
+2002-03-06 Alexander Rawass <alexannika@users.sourceforge.net>
+	
+	* homepage/docu
+	  added bugs/todo section
+	* exporer-missions: fixed? nan-velocity/position bug
+	* ordered the missions dir new
+
+
 2002-03-06 Corey O'Connor <zoldar256@users.sourceforge.net>
         * A few small changes to OS X target
 	  - GLUT mission selector now compiles

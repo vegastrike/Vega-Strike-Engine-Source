@@ -30,6 +30,8 @@
 #include "navigation.h"
 #include "flybywire.h"
 
+#include "cmd/script/mission.h"
+
 //class AImissionScript : public Order {
 class AImissionScript : public FlyByWire {
 public:
@@ -82,6 +84,11 @@ class AIPatrolDefend : public AImissionScript {
 class AISuperiority : public AImissionScript {
  public:
   AISuperiority();
+};
+
+class AIOrderList : public AImissionScript {
+ public:
+  AIOrderList(olist_t *orderlist);
 };
 
 #endif
