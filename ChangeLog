@@ -1,3 +1,7 @@
+2002-02-27 Daniel Horn <hellcatv@hotmail.com>
+	* Added caching to the collision data structures
+	* Added caching to sphere meshes (shields were taking long time to load)
+	
 2002-02-27 Alexander Rawass <alexannika@users.sourceforge.net>
 
 	* modified Universe
