@@ -1603,7 +1603,7 @@ void Unit::LoadXML(const char *filename, const char * modifications)
   }
   {
     image->unitwriter->AddTag ("Energy");
-    image->unitwriter->AddElement("afterburnerenergy",ushortStarHandler,XMLType(&afterburnenergy));
+    image->unitwriter->AddElement("afterburnenergy",ushortStarHandler,XMLType(&afterburnenergy));
     image->unitwriter->AddTag ("Reactor");
     image->unitwriter->AddElement ("recharge",floatStarHandler, XMLType (&recharge) );
     image->unitwriter->AddElement ("limit",ushortStarHandler, XMLType (&maxenergy) );

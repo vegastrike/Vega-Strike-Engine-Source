@@ -642,10 +642,12 @@ void Unit::ApplyLocalDamage (const Vector & pnt, const Vector & normal, float am
   //  #ifdef REALLY_EASY
   Cockpit * cpt;
   if ((cpt=_Universe->isPlayerStarship(this))!=NULL) {
-    //    ApplyDamage (amt);
-    phasedamage*= (g_game.difficulty);
-    amt*=(g_game.difficulty);
-    cpt->Shake (amt);
+    if (color.a!=2) {
+      //    ApplyDamage (amt);
+      phasedamage*= (g_game.difficulty);
+      amt*=(g_game.difficulty);
+      cpt->Shake (amt);
+    }
   }
   //  #endif
   if (affectedUnit!=this) {

@@ -440,8 +440,8 @@ void Unit::UpdatePhysics (const Transformation &trans, const Matrix &transmat, c
     Rotate (SIMULATION_ATOM*(AngularVelocity));
   }
   float difficulty =1;
-  Cockpit * player_cockpit=NULL;
-  if ((player_cockpit=_Universe->isPlayerStarship(this))!=NULL) {
+  Cockpit * player_cockpit=_Universe->isPlayerStarship(this);
+  if ((player_cockpit)==NULL) {
     difficulty = sqrtf (g_game.difficulty);
   }
   curr_physical_state.position = curr_physical_state.position +  (Velocity*SIMULATION_ATOM*difficulty).Cast();
@@ -649,8 +649,8 @@ void Unit::reactToCollision(Unit * smalle, const QVector & biglocation, const Ve
     smalle->ApplyForce (bignormal*.4*smalle->GetMass()*fabs(bignormal.Dot (((smalle->GetVelocity()-this->GetVelocity())/SIMULATION_ATOM))+fabs (dist)/(SIMULATION_ATOM*SIMULATION_ATOM)));
     this->ApplyForce (smallnormal*.4*(smalle->GetMass()*smalle->GetMass()/this->GetMass())*fabs(smallnormal.Dot ((smalle->GetVelocity()-this->GetVelocity()/SIMULATION_ATOM))+fabs (dist)/(SIMULATION_ATOM*SIMULATION_ATOM)));
     
-    smalle->ApplyDamage (biglocation.Cast(),bignormal,  .5*fabs(bignormal.Dot(smalle->GetVelocity()-this->GetVelocity()))*this->mass*SIMULATION_ATOM,smalle,GFXColor(1,1,1,1),NULL);
-    this->ApplyDamage (smalllocation.Cast(),smallnormal, .5*fabs(smallnormal.Dot(smalle->GetVelocity()-this->GetVelocity()))*smalle->mass*SIMULATION_ATOM,this,GFXColor(1,1,1,1),NULL);
+    smalle->ApplyDamage (biglocation.Cast(),bignormal,g_game.difficulty*(  .5*fabs(bignormal.Dot(smalle->GetVelocity()-this->GetVelocity()))*this->mass*SIMULATION_ATOM),smalle,GFXColor(1,1,1,2),NULL);
+    this->ApplyDamage (smalllocation.Cast(),smallnormal, g_game.difficulty*(.5*fabs(smallnormal.Dot(smalle->GetVelocity()-this->GetVelocity()))*smalle->mass*SIMULATION_ATOM),this,GFXColor(1,1,1,2),NULL);
 #endif
     
   //each mesh with each mesh? naw that should be in one way collide
