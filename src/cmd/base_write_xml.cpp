@@ -67,6 +67,24 @@ void Base::Room::Goto::EndXML (FILE *fp) {
 	endtag(fp,true);
 }
 
+void Base::Room::Talk::EndXML (FILE *fp) {
+	begintag(fp,"Talk",2);
+	Link::EndXML(fp);
+	endtag(fp,false);
+	for (int i=0;i<say.size();i++) {
+		begintag(fp,"say",3);
+		for (int j=0;j<say[i].size();j++) {
+			if (say[i][j]=='\n')
+				say[i][j]='\\';
+		}
+		midxmlchar(fp,"text",say[i].c_str());
+		midxmlchar(fp,"soundfile",soundfiles[i].c_str());
+		endtag(fp,true);
+	}
+	begintag(fp,"/Talk",2);
+	endtag(fp,false);
+}
+
 void Base::Room::Launch::EndXML (FILE *fp) {
 	begintag(fp,"Launch",2);
 	Link::EndXML(fp);

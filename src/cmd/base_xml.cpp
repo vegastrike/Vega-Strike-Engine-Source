@@ -34,19 +34,24 @@ namespace BaseXML {
 		QJ,
 		QK,
 		WID,
-		HEI
+		HEI,
+		SAY,
+		TALK,
+		SOUND
 	};
-	const int NUM_ELEMENTS=8;
-	const int NUM_ATTRIBUTES=24;
+	const int NUM_ELEMENTS=10;
+	const int NUM_ATTRIBUTES=25;
 	const EnumMap::Pair element_names[NUM_ELEMENTS] = {
 		EnumMap::Pair ("UNKNOWN", UNKNOWN),
 		EnumMap::Pair ("Base", BASE),
 		EnumMap::Pair ("Room", ROOM),
 		EnumMap::Pair ("Link", LINK),
+		EnumMap::Pair ("Talk", TALK),
 		EnumMap::Pair ("Comp", COMP),
 		EnumMap::Pair ("Launch", LAUNCH),
 		EnumMap::Pair ("Texture", TEXTURE),
-		EnumMap::Pair ("Ship", SHIP)
+		EnumMap::Pair ("Ship", SHIP),
+		EnumMap::Pair ("Say", SAY)
 	};
 	const EnumMap::Pair attribute_names[NUM_ATTRIBUTES] = {
 		EnumMap::Pair ("UNKNOWN", UNKNOWN),
@@ -62,6 +67,7 @@ namespace BaseXML {
 		EnumMap::Pair ("Index", INDEX), 
 		EnumMap::Pair ("File", SPRITEFILE), 
 		EnumMap::Pair ("Modes", MODES),
+		EnumMap::Pair ("Soundfile", SOUND),
 		EnumMap::Pair ("x", X),
 		EnumMap::Pair ("y", Y),
 		EnumMap::Pair ("z", Z),
@@ -111,18 +117,50 @@ void Base::CallCommonLinks (std::string name, std::string value) {
 void Base::beginElement(const string &name, const AttributeList attributes) {
 	AttributeList::const_iterator iter;
 	Names elem = (Names)element_map.lookup(name);
-	int lookup;
+	int lookup,i,j;
 	float x,y,z;
+	string mystr,spr,soundfile;
+	vector <string> say;
 	Vector P,Q,R;
 	switch(elem) {
 	case LINK:
 		if (unitlevel==2) {
 			rooms.back()->links.push_back(new Room::Goto ());
+			((Room::Goto*)rooms.back()->links.back())->index=0;
 			for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
 				CallCommonLinks ((*iter).name,(*iter).value);
 				switch(attribute_map.lookup((*iter).name)) {
 				case INDEX:
 					((Room::Goto*)rooms.back()->links.back())->index=parse_int((*iter).value);
+					break;
+				}
+			}
+		}
+		break;
+	case TALK:
+		if (unitlevel==2) {
+			rooms.back()->links.push_back(new Room::Talk ());
+			for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
+				CallCommonLinks ((*iter).name,(*iter).value);
+			}
+		}
+		break;
+	case SAY:
+		if (unitlevel==3) {
+			Room::Talk*say=((Room::Talk*)rooms.back()->links.back());
+			say->soundfiles.push_back("");
+			say->say.push_back("");
+			for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
+				switch(attribute_map.lookup((*iter).name)) {
+				case TEXT:
+					say->say.back()=((*iter).value);
+					for (i=0;i<say->say.back().size();i++) {
+						if (say->say.back()[i]=='\\')
+							say->say.back()[i]='\n';
+					}
+					break;
+				case SOUND:
+					say->soundfiles.back()=((*iter).value);
 					break;
 				}
 			}
@@ -218,6 +256,9 @@ void Base::beginElement(const string &name, const AttributeList attributes) {
 				case TEXT:
 					rooms.back()->deftext=(*iter).value;
 					break;
+				case SOUND:
+					rooms.back()->soundfile=(*iter).value;
+					break;
 				}
 			}
 		}
@@ -247,10 +288,13 @@ void Base::LoadXML(const char * filename) {
   vschdir("bases");
   FILE * inFile = fopen (filename, "r");
   if(!inFile) {
-    if (baseun->isUnit()==PLANETPTR)
-      inFile=fopen("planet.xbase","r");
-    else
-      inFile=fopen("unit.xbase","r");
+    Unit *baseun=this->baseun.GetUnit();
+    if (baseun) {
+      if (baseun->isUnit()==PLANETPTR)
+        inFile=fopen("planet.xbase","r");
+      else
+        inFile=fopen("unit.xbase","r");
+    }
     if (!inFile) {
       assert(0);
       vscdup();

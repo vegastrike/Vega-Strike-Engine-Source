@@ -1,6 +1,8 @@
 #include "base.h"
 #include "gldrv/winsys.h"
 #include "vs_path.h"
+#include "lin_time.h"
+#include "audiolib.h"
 #ifdef BASE_MAKER
  #include <stdio.h>
  #ifdef _WIN32
@@ -24,40 +26,73 @@ Base::Room::Room () {
 //		Do nothing...
 }
 
-void Base::Room::BaseObj::Draw () {
+void Base::Room::BaseObj::Draw (Base *base) {
 //		Do nothing...
 }
 
-void Base::Room::BaseSprite::Draw () {
+void Base::Room::BaseSprite::Draw (Base *base) {
 	GFXBlendMode(SRCALPHA,INVSRCALPHA);
 	GFXEnable(TEXTURE0);
 	spr.Draw();
 }
 
-void Base::Room::BaseShip::Draw () {
-	GFXHudMode (GFXFALSE);
-	GFXEnable (DEPTHTEST);
-	GFXEnable (DEPTHWRITE);
-	Vector p,q,r;
-	_Universe->AccessCamera()->GetOrientation (p,q,r);
-	QVector pos =  _Universe->AccessCamera ()->GetPosition();
-	Matrix cam (p.i,p.j,p.k,q.i,q.j,q.k,r.i,r.j,r.k,pos);
-	Matrix final;
-	MultMatrix (final,cam,this->mat);
-	CurrentBase->caller->DrawNow(final);
-	GFXDisable (DEPTHTEST);
-	GFXDisable (DEPTHWRITE);
-	GFXHudMode (GFXTRUE);
-}
+void Base::Room::BaseShip::Draw (Base *base) {
+	Unit *un=base->caller.GetUnit();
+	if (un) {
+		GFXHudMode (GFXFALSE);
+		GFXEnable (DEPTHTEST);
+		GFXEnable (DEPTHWRITE);
+		Vector p,q,r;
+		_Universe->AccessCamera()->GetOrientation (p,q,r);
+		QVector pos =  _Universe->AccessCamera ()->GetPosition();
+		Matrix cam (p.i,p.j,p.k,q.i,q.j,q.k,r.i,r.j,r.k,pos);
+		Matrix final;
+		Matrix newmat = mat;
+		newmat.p.i*=un->rSize();
+		newmat.p.j*=un->rSize();
+		newmat.p.k*=un->rSize();
+		newmat.p+=QVector(0,0,g_game.znear);
 
-void Base::Room::Draw () {
-	int i;
-	for (i=0;i<objs.size();i++) {
-		objs[i]->Draw();
+		MultMatrix (final,cam,newmat);
+		un->DrawNow(final);
+		GFXDisable (DEPTHTEST);
+		GFXDisable (DEPTHWRITE);
+		GFXHudMode (GFXTRUE);
 	}
 }
 
-int Base::Room::MouseOver (float x, float y) {
+void Base::Room::Draw (Base *base) {
+	int i;
+	for (i=0;i<objs.size();i++) {
+		objs[i]->Draw(base);
+	}
+}
+
+void Base::Room::BaseTalk::Draw (Base *base) {
+/*	GFXColor4f(1,1,1,1);
+	GFXBegin(GFXLINESTRIP);
+		GFXVertex3f(caller->x,caller->y,0);
+		GFXVertex3f(caller->x+caller->wid,caller->y,0);
+		GFXVertex3f(caller->x+caller->wid,caller->y+caller->hei,0);
+		GFXVertex3f(caller->x,caller->y+caller->hei,0);
+		GFXVertex3f(caller->x,caller->y,0);
+	GFXEnd();*/
+	if (curchar<caller->say[sayindex].size()) {
+		curtime+=GetElapsedTime();
+		if (curtime>.025) {
+			base->othtext.SetText(caller->say[sayindex].substr(0,++curchar));
+			curtime=0;
+		}
+	} else {
+		curtime+=GetElapsedTime();
+		if (curtime>.01*caller->say[sayindex].size()) {
+			curtime=0;
+			caller->Click(base,0,0,WS_LEFT_BUTTON,WS_MOUSE_UP);
+		}
+	}
+}
+
+int Base::Room::MouseOver (Base *base,float x, float y) {
 	for (int i=0;i<links.size();i++) {
 		if (x>=links[i]->x&&
 				x<=(links[i]->x+links[i]->wid)&&
@@ -76,7 +111,7 @@ bool RefreshGUI(void) {
 	bool retval=false;
 	if (_Universe->AccessCockpit()) {
 		if (Base::CurrentBase) {
-			if (_Universe->AccessCockpit()->GetParent()==Base::CurrentBase->caller){
+			if (_Universe->AccessCockpit()->GetParent()==Base::CurrentBase->caller.GetUnit()){
 				if (Base::CallComp) {
 					return RefreshInterface ();	
 				} else {
@@ -91,7 +126,7 @@ bool RefreshGUI(void) {
 
 void Base::Room::Click (::Base* base,float x, float y, int button, int state) {
 	if (button==WS_LEFT_BUTTON) {
-		int linknum=MouseOver (x,y);
+		int linknum=MouseOver (base,x,y);
 		if (linknum>=0) {
 			Link * link=links[linknum];
 			if (link) {
@@ -195,7 +230,7 @@ void Base::Room::Click (::Base* base,float x, float y, int button, int state) {
 }
 
 void Base::MouseOver (float x, float y) {
-	int i=rooms[curroom]->MouseOver(x,y);
+	int i=rooms[curroom]->MouseOver(this,x,y);
 	Room::Link *link=0;
 	if (i<0) {
 		link=0;
@@ -228,13 +263,25 @@ void Base::MouseOverWin (int x, int y) {
 }
 
 void Base::GotoLink (int linknum) {
+	othtext.SetText("");
 	if (rooms.size()>linknum) {
 		curlinkindex=0;
 		curroom=linknum;
 		curtext.SetText(rooms[curroom]->deftext);
 		drawlinkcursor=false;
 	} else {
+#ifndef BASE_MAKER
 		fprintf(stderr,"\nWARNING: base room #%d tried to go to an invalid index: #%d",curroom,linknum);
+		assert(0);
+#else
+		while(rooms.size()<=linknum) {
+			rooms.push_back(new Room());
+			char roomnum [50];
+			sprintf(roomnum,"Room #%d",linknum);
+			rooms.back()->deftext=roomnum;
+		}
+		GotoLink(linknum);
+#endif
 	}
 }
 
@@ -278,6 +325,30 @@ void Unit::UpgradeInterface(Unit * baseun) {
 	}
 }
 
+Base::Room::Talk::Talk () {
+	index=-1;
+#ifndef BASE_MAKER
+	gameMessage * last;
+	int i=0;
+	vector <std::string> who;
+	string newmsg;
+	string newsound;
+	who.push_back ("bar");
+	while ((last= mission->msgcenter->last(i++,who))!=NULL) {
+		newmsg=last->message;
+		newsound="";
+		int first=newmsg.find_first_of("[");
+		int last=newmsg.find_first_of("]");
+		if (first!=string::npos&&(first+1)<newmsg.size()) {
+			newsound=newmsg.substr(first+1,last-first-1);
+			newmsg=newmsg.substr(0,first);
+		}
+		this->say.push_back(newmsg);
+		this->soundfiles.push_back(newsound);
+	}
+#endif
+}
+
 Base::Base (const char *basefile, Unit *base, Unit*un) {
 	caller=un;
 	curlinkindex=0;
@@ -285,9 +356,13 @@ Base::Base (const char *basefile, Unit *base, Unit*un) {
 	float x,y;
 	curtext.GetCharSize(x,y);
 	curtext.SetCharSize(x*2,y*2);
+	othtext.GetCharSize(x,y);
+	othtext.SetCharSize(x*2,y*2);
+	othtext.SetSize(.75,-.75);
 	LoadXML(basefile);
 	if (!rooms.size()) {
 		fprintf(stderr,"\nERROR: there are no rooms...");
+		assert(0);
 		rooms.push_back(new Room ());
 		rooms.back()->objs.push_back(new Room::BaseShip (-1,0,0,0,0,-1,0,1,0,QVector(0,0,75)));
 		rooms.back()->links.push_back(new Room::Launch ());
@@ -307,8 +382,12 @@ void Base::Room::Link::Click (Base *base,float x, float y, int button, int state
 
 void Base::Room::Comp::Click (Base *base,float x, float y, int button, int state) {
 	if (state==WS_MOUSE_UP) {
-		Base::CallComp=true;
-		UpgradeCompInterface(base->caller,base->baseun,modes);
+		Unit *un=base->caller.GetUnit();
+		Unit *baseun=base->caller.GetUnit();
+		if (un&&baseun) {
+			Base::CallComp=true;
+			UpgradeCompInterface(un,baseun,modes);
+		}
 	}
 }
 
@@ -326,15 +405,49 @@ void Base::Room::Goto::Click (Base *base,float x, float y, int button, int state
 	}
 }
 
+void Base::Room::Talk::Click (Base *base,float x, float y, int button, int state) {
+	if (state==WS_MOUSE_UP) {
+		if (index>=0) {
+			delete base->rooms[curroom]->objs[index];
+			base->rooms[curroom]->objs.erase(base->rooms[curroom]->objs.begin()+index);
+			index=-1;
+			base->othtext.SetText("");
+		} else if (say.size()) {
+			curroom=base->curroom;
+			index=base->rooms[curroom]->objs.size();
+			base->rooms[curroom]->objs.push_back(new Room::BaseTalk(this));
+			int sayindex=rand()%say.size();
+			((Room::BaseTalk*)(base->rooms[curroom]->objs.back()))->sayindex=(sayindex);
+			((Room::BaseTalk*)(base->rooms[curroom]->objs.back()))->curtime=0;
+			if (soundfiles[sayindex].size()>0) {
+				int sound = AUDCreateSoundWAV (soundfiles[sayindex],false);
+				if (sound==-1) {
+					fprintf(stderr,"\nCan't find the sound file %s\n",soundfiles[sayindex].c_str());
+				} else {
+//					AUDAdjustSound (sound,_Universe->AccessCamera ()->GetPosition(),Vector(0,0,0));
+					AUDStartPlaying (sound);
+					AUDDeleteSound(sound);//won't actually toast it until it stops
+				}
+			}
+		} else {
+			fprintf(stderr,"\nThere are no things to say...\n");
+			assert(0);
+		}
+	}
+}
+
 void Base::Draw () {
 	GFXColor(0,0,0,0);
 	StartGUIFrame(GFXTRUE);
-	rooms[curroom]->Draw();
+	rooms[curroom]->Draw(this);
 	float x,y;
 	curtext.GetCharSize(x,y);
 	curtext.SetPos(-1+(1.5*x),-1+(1.5*y));
-	GFXColor(0,1,0,1);
+	GFXColor4f(0,1,0,1);
 	curtext.Draw();
+	othtext.SetPos(-1,1);
+	GFXColor4f(0,.5,1,1);
+	othtext.Draw();
 	EndGUIFrame (drawlinkcursor);
 }
 
