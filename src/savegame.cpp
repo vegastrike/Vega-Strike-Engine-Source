@@ -153,7 +153,7 @@ std::string GetReadPlayerSaveGame(int num) {
 }
 
 // Used only to copy a savegame to a different named one
-void FileCopy (const char * src, const char * dst) {
+void SaveFileCopy (const char * src, const char * dst) {
   if (dst[0]!='\0'&&src[0]!='\0') {
 
   VSFile f;
@@ -289,8 +289,35 @@ void WriteSaveGame (Cockpit * cp,bool auto_save) {
     if (GetWritePlayerSaveGame(player_num).length()&&!auto_save) {
       cp->savegame->SetSavedCredits (_Universe->AccessCockpit()->credits);
       cp->savegame->SetStarSystem(cp->activeStarSystem->getFileName());
-      un->WriteUnit(GetWritePlayerSaveGame(player_num).c_str());
+      //      un->WriteUnit(GetWritePlayerSaveGame(player_num).c_str());
       cp->savegame->SetPlayerLocation(un->LocalPosition());    
+      for (int i=0;i<cp->unitfilename.size();i+=2) {
+        if (i==2) i=1;
+        VSFile src,dst;
+        string srcnam=cp->GetUnitModifications();
+
+        VSError e = src.OpenReadOnly(srcnam+"/"+cp->unitfilename[i]+".csv",UnitSaveFile);
+        if (e<=Ok) {
+          string dstnam= GetWritePlayerSaveGame(player_num);
+          VSFileSystem::CreateDirectoryHome (VSFileSystem::savedunitpath+"/"+dstnam);
+          VSError f = dst.OpenCreateWrite(dstnam+"/"+cp->unitfilename[i]+".csv",UnitFile);
+          if (f<=Ok) {
+            string srcdata=src.ReadFull();
+            dst.Write(srcdata);
+          }else {
+            printf ("Error: Cannot Copy Unit %s from save file %s to %s\n",
+                    cp->unitfilename[i].c_str(),
+                    srcnam.c_str(),
+                    dstnam.c_str());
+                    
+          }
+        }else {
+            printf ("Error: Cannot Open Unit %s from save file %s.\n",
+                    cp->unitfilename[i].c_str(),
+                    srcnam.c_str());
+                    
+        }        
+      }
     }
   }
 
@@ -665,10 +692,12 @@ string SaveGame::WriteSaveGame (const char *systemname, const QVector &FP, float
 	f.Close();
 	if (player_num!=-1) {
 			// AND THEN COPY IT TO THE SPECIFIED SAVENAME (from save.4.x.txt)
-			last_pickled_data =last_written_pickled_data;
-			FileCopy (outputsavegame.c_str(),GetWritePlayerSaveGame(player_num).c_str());
+          last_pickled_data =last_written_pickled_data;
+          string sg =GetWritePlayerSaveGame(player_num);
+          SaveFileCopy (outputsavegame.c_str(),sg.c_str());
+          
 	}
-	}
+    }
 
   }
   return savestring;

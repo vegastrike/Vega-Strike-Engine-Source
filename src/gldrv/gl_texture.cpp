@@ -432,6 +432,11 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture (unsigned char *buffer, int handle,  TE
 void /*GFXDRVAPI*/ GFXDeleteTexture (int handle) {
   if (textures[handle].alive) {
     glDeleteTextures(1, &textures[handle].name);
+    for (size_t i=0;i<sizeof(activetexture)/sizeof(int);++i) {
+      if (activetexture[i]==handle) {
+        activetexture[i]=-1;
+      }
+    }
   }
   if (textures[handle].palette) {
     free  (textures[handle].palette);

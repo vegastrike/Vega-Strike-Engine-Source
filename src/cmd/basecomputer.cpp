@@ -3143,13 +3143,29 @@ bool BaseComputer::buyShip(const EventCommandId& command, Control* control) {
             newPart->SetFaction(playerUnit->faction);
             if (newPart->name != LOAD_FAILED) {
                 if (newPart->nummesh() > 0) {
-                    WriteSaveGame(_Universe->AccessCockpit(), false);//oops saved game last time at wrong place
                     _Universe->AccessCockpit()->credits -= shipCargo->price;
                     newPart->curr_physical_state = playerUnit->curr_physical_state;
                     newPart->SetPosAndCumPos(UniverseUtil::SafeEntrancePoint(playerUnit->Position(),newPart->rSize()));
                     newPart->prev_physical_state = playerUnit->prev_physical_state;
                     _Universe->activeStarSystem()->AddUnit(newPart);
                     SwapInNewShipName(_Universe->AccessCockpit(), item->content, swappingShipsIndex);
+                    for (int j=0;j<2;++j) {
+                      for (int i=playerUnit->numCargo()-1;i>=0;--i) {
+                        Cargo c = playerUnit->GetCargo(i);
+                        if ((c.mission!=0&&j==0)||(c.mission==0&&j==1)) {
+                          for (int k=c.quantity;k>0;--k) {
+                            c.quantity=k;
+                            if (newPart->CanAddCargo(c)) {
+                              newPart->AddCargo(c);
+                              playerUnit->RemoveCargo(i,c.quantity,true);
+                              break;
+                            }
+                          }
+                        }
+                      }
+                    }                    
+                    WriteSaveGame(_Universe->AccessCockpit(), true);//oops saved game last time at wrong place
+
                     _Universe->AccessCockpit()->SetParent(newPart, item->content.c_str(), _Universe->AccessCockpit()->GetUnitModifications().c_str(),
                         playerUnit->curr_physical_state.position);//absolutely NO NO NO modifications...you got this baby clean off the slate
 

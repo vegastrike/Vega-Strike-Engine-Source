@@ -390,8 +390,8 @@ void Cockpit::Update () {
 		  break;
 		}
 		if (k==_Universe->numPlayers()) k=0;
-		string newsystem;QVector pos; bool setplayerXloc;float credits;
-		savegame->ParseSaveGame(savegamefile,newsystem,newsystem,pos,setplayerXloc,credits,unitfilename,k);
+		string newsystem;QVector pos; bool setplayerXloc;
+		savegame->ParseSaveGame(savegamefile,newsystem,newsystem,pos,setplayerXloc,this->credits,unitfilename,k);
 		newsystem= savegame->GetStarSystem()+".system";
 		StarSystem * ss = _Universe->GenerateStarSystem (newsystem.c_str(),"",Vector(0,0,0));
 		_Universe->getActiveStarSystem(0)->SwapOut();
@@ -425,7 +425,7 @@ void Cockpit::Update () {
 
 		this->SetParent(un,GetUnitFileName().c_str(),unitmodname.c_str(),savegame->GetPlayerLocation());
 		SwitchUnits (NULL,un);
-		credits = savegame->GetSavedCredits();
+		this->credits = savegame->GetSavedCredits();
 		DoCockpitKeys();
 		savegame->ReloadPickledData();
 		_Universe->popActiveStarSystem();
