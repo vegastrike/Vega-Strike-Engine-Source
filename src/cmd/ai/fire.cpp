@@ -123,6 +123,12 @@ void FireAt::ChooseTargets (int num) {
 */
 bool FireAt::ShouldFire(Unit * targ, bool &missilelock) {
   float dist;
+    if (!targ) {
+      return false;
+        static int test=0;
+        if (test++%1000==1)
+            fprintf (stderr,"lost target");
+    }
   float angle = parent->cosAngleTo (targ, dist,parent->GetComputerData().itts?gunspeed:FLT_MAX,gunrange);
   missilelock=false;
   targ->Threaten (parent,angle/(dist<.8?.8:dist));
