@@ -21,7 +21,7 @@
 bool MacFixedLoadWAVFile(char * buf, ALenum *format,ALvoid **data,ALsizei *size,ALsizei *freq){
     ALboolean bleh=false;
     alutLoadWAVMemory((ALbyte*)buf,format,data,size,freq,&bleh);
-    free(buf);
+    //THIS IS NOW A VECTOR, no freeing    free(buf);
     return true;
 }
 
