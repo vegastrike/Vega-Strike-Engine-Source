@@ -131,6 +131,9 @@ namespace BeamXML {
   weapon_info tmpweapon(weapon_info::BEAM);
   int level=-1;
   void beginElement (void *userData, const XML_Char *name, const XML_Char **atts) {
+    static float game_speed=XMLSupport::parse_float (vs_config->getVariable ("physics","game_speed","1"));
+    static bool adj_gun_speed=XMLSupport::parse_float (vs_config->getVariable ("physics","gun_speed_adjusted_game_speed","false"));
+    static float gun_speed= XMLSupport::parse_float (vs_config->getVariable("physics","gun_speed","1"))*(adj_gun_speed?game_speed:1);
     AttributeList attributes (atts);
     //weapon_info * debugtmp = &tmpweapon;
     enum weapon_info::WEAPON_TYPE weaptyp;
@@ -306,7 +309,7 @@ namespace BeamXML {
 	  tmpweapon.volume = XMLSupport::parse_float ((*iter).value);
 	  break;
 	case SPEED:
-	  tmpweapon.Speed = XMLSupport::parse_float ((*iter).value);
+	  tmpweapon.Speed = gun_speed*XMLSupport::parse_float ((*iter).value);
 	  break;
 	case PULSESPEED:
 	  if (tmpweapon.type==weapon_info::BEAM) {
@@ -322,7 +325,7 @@ namespace BeamXML {
 	  tmpweapon.RadialSpeed = XMLSupport::parse_float ((*iter).value);
 	  break;
 	case RANGE:
-	  tmpweapon.Range= XMLSupport::parse_float ((*iter).value);
+	  tmpweapon.Range= gun_speed*XMLSupport::parse_float ((*iter).value);
 	  break;
 	case RADIUS:
 	  tmpweapon.Radius = XMLSupport::parse_float ((*iter).value);
