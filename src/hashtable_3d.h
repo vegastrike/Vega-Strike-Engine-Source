@@ -63,16 +63,18 @@ public:
     maxaccessy=0;
     maxaccessz=0;
   }
-  void Get (const Vector &Exact, std::vector <T> &retval) {
-    retval = table[hash_int(Exact.i)][hash_int(Exact.j)][hash_int(Exact.k)];
+  int Get (const Vector &Exact, std::vector <T> *retval[]) {
+    retval[1]=&table[hash_int(Exact.i)][hash_int(Exact.j)][hash_int(Exact.k)];
     //retval+=hugeobjects;
     //blah = blooh;
-    retval.insert (retval.end(),hugeobjects.begin(),hugeobjects.end());
+    retval[0]=&hugeobjects;
+    return 2;
   }
-  std::vector <T>& GetHuge () {
+  std::vector <T> & GetHuge () {
     return hugeobjects;
   }
-  void Get (const LineCollide* target, std::vector <T> &retval) {    
+  int Get (const LineCollide* target, std::vector <T> *retval[]) {    
+    int sizer =1;
     //int minx,miny,minz,maxx,maxy,maxz;
     //    hash_vec(Min,minx,miny,minz);
     //    hash_vec(Max,maxx,maxy,maxz);
@@ -83,9 +85,9 @@ public:
     if (target->Mini.i==maxx) maxx+=COLLIDETABLEACCURACY/2;
     if (target->Mini.j==maxy) maxy+=COLLIDETABLEACCURACY/2;
     if (target->Mini.k==maxz) maxz+=COLLIDETABLEACCURACY/2;
-    retval = hugeobjects;
+    retval[0] = &hugeobjects;
     if (target->hhuge) {
-      return;//we can't get _everything
+      return sizer;//we can't get _everything
     } 
     for (float i=target->Mini.i;i<maxx;i+=COLLIDETABLEACCURACY) {
       x = hash_int (i);
@@ -93,11 +95,17 @@ public:
 	y = hash_int(j);
 	for (float k=target->Mini.k;k<maxz;k+=COLLIDETABLEACCURACY) {
 	  z = hash_int(k);
-	  retval.insert (retval.end(),table[x][y][z].begin(),table[x][y][z].end());
+	  if (!table[x][y][z].empty()) {
+	    retval[sizer] = &table[x][y][z];
+	    sizer++;
+	    if (sizer>=HUGEOBJECT+1)
+	      return sizer;
+	  }
 	}
       }
     }
-    //    std::sort (retval.begin()+hugeobjects.size(),retval.end());
+    assert (sizer<=HUGEOBJECT+1);//make sure we didn't overrun our array
+    return sizer;
   }
   void Put(LineCollide* target,const T objectToPut) {
     int x,y,z;

@@ -64,26 +64,33 @@ static inline bool picklight (const LineCollide& light, const Vector & center, c
 
 void GFXPickLights (const Vector & center, const float radius) {
     Vector tmp;
+    void * rndvar = (void *)rand();
+    int sizeget=2;
     int lightsenabled = _GLLightsEnabled;
     LineCollide tmpcollide;
     tmp = Vector(radius,radius,radius);
     tmpcollide.Mini = center-tmp;
     tmpcollide.Maxi = center+tmp;
-    tmpcollide.hhuge=false;
+    tmpcollide.hhuge=false;//fixme!! may well be hhuge...don't have enough room in tmppickt
     tmpcollide.object=NULL;
     tmpcollide.type=LineCollide::UNIT;
     swappicked();
-    vector <LineCollideStar> tmppickt;
+    vector <LineCollideStar> *tmppickt[HUGEOBJECT+1];
     if (radius < CTACC) {
 	lighttable.Get (center, tmppickt);
     } else {
-	lighttable.Get (&tmpcollide, tmppickt); 
+	sizeget = lighttable.Get (&tmpcollide, tmppickt); 
     }
-    for (unsigned int i=0;i<tmppickt.size();i++){
-      //warning::duplicates may Exist
-      if (picklight (*tmppickt[i].lc,center,radius,lightsenabled)) {
-	newpicked->push_back (tmppickt[i].GetIndex());
-	lightsenabled++;
+    for (int j=0;j<sizeget;j++) {
+      for (vector <LineCollideStar>::iterator i=tmppickt[j]->begin();i!=tmppickt[j]->end();i++){
+	//warning::duplicates may Exist
+	if (i->lc->lastchecked!=rndvar) {
+	  i->lc->lastchecked = rndvar;
+	  if (picklight (*i->lc,center,radius,lightsenabled)) {
+	    newpicked->push_back (i->GetIndex());
+	    lightsenabled++;
+	  }
+	}
       }
     }
     gfx_light::dopickenables ();  

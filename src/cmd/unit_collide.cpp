@@ -48,37 +48,41 @@ void Unit::UpdateCollideQueue () {
 }
 
 void Unit::CollideAll() {
-  unsigned int i;
-  vector <LineCollide*> colQ;
-  collidetable.Get (&CollideInfo,colQ);
-  for (i=0;i<colQ.size();i++) {
-    if (colQ[i]->lastchecked==this)
-      continue;//ignore duplicates
-    colQ[i]->lastchecked = this;//now we're the last checked.
-    //    if (colQ[i]->object > this||)//only compare against stuff bigger than you
-    if ((!CollideInfo.hhuge||(CollideInfo.hhuge&&colQ[i]->type==LineCollide::UNIT))&&((colQ[i]->object>this||(!CollideInfo.hhuge&&i<collidetable.GetHuge().size()))))//the first stuffs are in the huge array
-      if (
-	  Position().i+radial_size>colQ[i]->Mini.i&&
-	  Position().i-radial_size<colQ[i]->Maxi.i&&
-	  Position().j+radial_size>colQ[i]->Mini.j&&
-	  Position().j-radial_size<colQ[i]->Maxi.j&&
-	  Position().k+radial_size>colQ[i]->Mini.k&&
-	  Position().k-radial_size<colQ[i]->Maxi.k) {
+
+  vector <LineCollide*>::const_iterator i;
+  vector <LineCollide*> * colQ [HUGEOBJECT+1];
+  int sizecolq = collidetable.Get (&CollideInfo,colQ);
+  int j = 0;
+  for (;j<sizecolq;j++) {
+    for (i=colQ[j]->begin();i!=colQ[j]->end();i++) {
+      if ((*i)->lastchecked==this)
+	continue;//ignore duplicates
+      (*i)->lastchecked = this;//now we're the last checked.
+      //    if (colQ[i]->object > this||)//only compare against stuff bigger than you
+      if ((!CollideInfo.hhuge||(CollideInfo.hhuge&&(*i)->type==LineCollide::UNIT))&&(((*i)->object>this||(!CollideInfo.hhuge&&j==0))))//the first stuffs are in the huge array
+	if (
+	    Position().i+radial_size>(*i)->Mini.i&&
+	    Position().i-radial_size<(*i)->Maxi.i&&
+	    Position().j+radial_size>(*i)->Mini.j&&
+	    Position().j-radial_size<(*i)->Maxi.j&&
+	    Position().k+radial_size>(*i)->Mini.k&&
+	    Position().k-radial_size<(*i)->Maxi.k) {
       //continue;
-      switch (colQ[i]->type) {
-      case LineCollide::UNIT://other units!!!
-	((Unit*)colQ[i]->object)->Collide(this);
-	break;
-      case LineCollide::BEAM:
-	((Beam*)colQ[i]->object)->Collide(this);
-	break;
-      case LineCollide::BALL:
-	break;
-      case LineCollide::BOLT:
-	break;
-      case LineCollide::PROJECTILE:
-	break;
-      }
+	  switch ((*i)->type) {
+	  case LineCollide::UNIT://other units!!!
+	    ((Unit*)(*i)->object)->Collide(this);
+	    break;
+	  case LineCollide::BEAM:
+	    ((Beam*)(*i)->object)->Collide(this);
+	    break;
+	  case LineCollide::BALL:
+	    break;
+	  case LineCollide::BOLT:
+	    break;
+	  case LineCollide::PROJECTILE:
+	    break;
+	  }
+	}
     }
   }
 #undef COLQ
@@ -144,22 +148,23 @@ bool Unit::Collide (Unit * target) {
 }
 
 bool Bolt::Collide () {
-  vector <LineCollide *> candidates;  
+  vector <LineCollide *> *candidates[2];  
   collidetable.Get (cur_position,candidates);
   Vector Mini ( prev_position.Min (cur_position));
   Vector Maxi ( prev_position.Max (cur_position));
-  
-  for (vector <LineCollide *>::iterator i=candidates.begin();i!=candidates.end();i++) {
-    if ((*i)->type==LineCollide::UNIT) {
-      if (Mini.i< (*i)->Maxi.i&&
-	  Mini.j< (*i)->Maxi.j&&
-	  Mini.k< (*i)->Maxi.k&&
-	  Maxi.i> (*i)->Mini.i&&
-	  Maxi.j> (*i)->Mini.j&&
-	  Maxi.k> (*i)->Mini.k) {
-	if (this->Collide ((Unit*)(*i)->object)) {
-	  delete this;
-	  return true;
+  for (unsigned int j=0;j<2;j++) {
+    for (vector <LineCollide *>::iterator i=candidates[j]->begin();i!=candidates[j]->end();i++) {
+      if ((*i)->type==LineCollide::UNIT) {
+	if (Mini.i< (*i)->Maxi.i&&
+	    Mini.j< (*i)->Maxi.j&&
+	    Mini.k< (*i)->Maxi.k&&
+	    Maxi.i> (*i)->Mini.i&&
+	    Maxi.j> (*i)->Mini.j&&
+	    Maxi.k> (*i)->Mini.k) {
+	  if (this->Collide ((Unit*)(*i)->object)) {
+	    delete this;
+	    return true;
+	  }
 	}
       }
     }
