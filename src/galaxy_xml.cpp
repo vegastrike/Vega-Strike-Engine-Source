@@ -422,14 +422,20 @@ string SGalaxy::getVariable(string section,string name,string defaultvalue){
  }
  
  string Galaxy::getPlanetVariable(string section,string name,string defaultvalue){
+	 SGalaxy *planet_types=&((*subheirarchy->find("<planets>")).second);
        if (planet_types) {
                SubHeirarchy::iterator i;
                i = planet_types->subheirarchy->find(section);
-               if (i!=planet_types->subheirarchy->end()) {
+               if (i==planet_types->subheirarchy->end()) {
+                       return getPlanetVariable(name,defaultvalue);
+               } else {
                        SGalaxy * g = &(*i).second;
-                       StringMap::iterator j = planet_types->data.find(name);
-                       if (j!=g->data.end())
+                       StringMap::iterator j = g->data.find(name);
+                       if (j==g->data.end()) {
+                               return getPlanetVariable(name,defaultvalue);
+                       } else {
                                return (*j).second;
+                       }
                }
        }
        return defaultvalue;
@@ -443,6 +449,7 @@ string Galaxy::getPlanetVariable(string name,string defaultvalue){
     if (j!=planet_types->data.end())
       return (*j).second;
   }
+  return defaultvalue;
 }
 SGalaxy*Galaxy::getInitialPlanetTypes() {
   if (subheirarchy) {

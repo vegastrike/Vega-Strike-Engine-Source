@@ -119,7 +119,6 @@ template<class domNodeType> class easyDomFactory {
 
 domNodeType *LoadXML(const char *filename) {
 
-  const int chunk_size = 16384;
   topnode=NULL;
   // Not really nice but should do its job
   unsigned int length = strlen( filename);

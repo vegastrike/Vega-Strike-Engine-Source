@@ -12,6 +12,8 @@
 #include "vs_globals.h"
 #include "xml_support.h"
 #include "gfxlib.h"
+#include "galaxy_xml.h"
+#include "galaxy_gen.h"
 #include "vs_random.h"
 
 
@@ -25,65 +27,6 @@
 
 using namespace VSFileSystem;
 using namespace std;
-
-static void beginPlanetElement (void *userDataVoid, const XML_Char *name, const XML_Char **attr) {
-	std::map<std::string, std::string> *userData = (std::map<std::string, std::string> *)userDataVoid;
-	std::string namestr((const char*)name);
-	for (int i=0;i<namestr.size();i++) {
-		namestr[i]=tolower(namestr[i]);
-	}
-	if (namestr.size()>=6&&memcmp(namestr.c_str(),"planet",6)==0) {
-		if (namestr.size()==6) {
-			if ((*userData)["\n"]!="\n") {
-				fprintf(stderr, "Warning: No surrounding planet tag specified.  This will probably result in missing data.\n");
-			}
-			std::string planetname;
-			std::string planettype;
-			// Name is "Planet"
-			for (int i=0; attr[i]!=NULL; i+=2) {
-				if (strcmp(attr[i], "type")==0) {
-					planettype=attr[i+1];
-				}
-				if (strcmp(attr[i], "name")==0) {
-					planetname=attr[i+1];
-				}
-			}
-			if (planettype.size()&&planetname.size()) {
-				(*userData)[planettype]=planetname;
-			} else {
-				fprintf(stderr, "Warning: \"type\" or \"name\" atributes missing... Ignoring planet type...\n");
-			}
-		} else {
-			(*userData)["\n"]="\n";
-		}
-	} else {
-		fprintf(stderr, "Warning: XML tag in planet types not valid: %s\n", name);
-	}
-}
-static void endPlanetElement (void *userData, const XML_Char *name) {
-}
-
-std::map<std::string, std::string> readPlanetTypes(std::string filename) {
-	std::map<std::string, std::string> planetTypes;
-	VSFile f;
-	VSError err = f.OpenReadOnly( filename, UniverseFile);
-	if (err>Ok) {
-		return planetTypes;
-	}
-	int len = f.Size();
-	XML_Parser parser=XML_ParserCreate(NULL);
-	void *buff = XML_GetBuffer(parser, len);
-	if (buff == NULL) {
-		fprintf(stderr, "Fatal error: out of memory for planet name file\n");
-		return planetTypes;
-	}
-	len=f.Read(buff, len);
-	XML_SetElementHandler(parser, &beginPlanetElement, &endPlanetElement);
-	XML_SetUserData(parser, &planetTypes);
-	XML_ParseBuffer(parser, len, 1);
-	XML_ParserFree(parser);
-	return planetTypes;
-}
 
 static VSRandom starsysrandom(time(NULL));
 static void seedrand(unsigned long seed) {
@@ -247,7 +190,13 @@ float grand () {
 }
 vector <Color> lights;
 VSFile f;
+int xmllevel;
 
+static void Tab () {
+  for (int i=0;i<xmllevel;i++)
+    f.Fprintf ("\t");
+}
+ 
 float difffunc (float inputdiffuse) {
   return sqrt(((inputdiffuse)));
 }
@@ -256,11 +205,13 @@ void WriteLight (unsigned int i) {
   float ambient =(lights[i].r+lights[i].g+lights[i].b);
   
   ambient*=ambientColorFactor;
-  f.Fprintf ("<Light>\n\t<ambient red=\"%f\" green=\"%f\" blue=\"%f\"/>\n\t<diffuse red=\"%f\" green=\"%f\" blue=\"%f\"/>\n\t<specular red=\"%f\" green=\"%f\" blue=\"%f\"/>\n</Light>\n",
-	   ambient,ambient,ambient,
-	   difffunc (lights[i].r),difffunc (lights[i].g),difffunc (lights[i].b),
-	   lights[i].nr,lights[i].ng,lights[i].nb);   
-
+  Tab();f.Fprintf ("<Light>\n");
+  xmllevel++;
+  Tab();f.Fprintf("<ambient red=\"%f\" green=\"%f\" blue=\"%f\"/>\n",ambient,ambient,ambient);
+  Tab();f.Fprintf("<diffuse red=\"%f\" green=\"%f\" blue=\"%f\"/>\n",difffunc (lights[i].r),difffunc (lights[i].g),difffunc (lights[i].b));
+  Tab();f.Fprintf("<specular red=\"%f\" green=\"%f\" blue=\"%f\"/>\n",lights[i].nr,lights[i].ng,lights[i].nb);
+  xmllevel--;
+  Tab();f.Fprintf("</Light>\n");
 }
 struct GradColor {
   float minrad;
@@ -270,64 +221,74 @@ struct GradColor {
   float variance;
 };
 
-const int PLANET = 2;
-const int GAS = 1;
-const int STAR = 0;
-const int MOON=3;
-const int JUMP=4;
+const int STAR   = 0;
+const int PLANET = 1;
+const int MOON   = 2;
+const int JUMP   = 3;
   //begin global variables
 
 
-vector <string> entities[5];
-vector <string> planet_entities;
+vector <string> starentities;
+vector <string> jumps;
 vector <string> gradtex;
-int nument[5];
-int numun[2];
-vector <string> units [2];
+vector <string> naturalphenomena;
+vector <string> starbases;
+unsigned int numstarbases;
+unsigned int numnaturalphenomena;
+unsigned int numstarentities;
 vector <string> background;
 vector <string> names;
 vector <string> rings;
 const float moonofmoonprob=.01;
 string systemname;
+//int numnaturalphenomena;
+//int numstarbases;
 vector <float> radii;
 const float minspeed=.001;
 const float maxspeed=8;
 vector <float> starradius;
 string faction;
 vector <GradColor> colorGradiant;
-  float compactness=2;
-  float jumpcompactness=2;
-  void ResetGlobalVariables () {
-    lights.clear();
-    gradtex.clear();
-    numun[0]=numun[1]=nument[STAR]=nument[GAS]=nument[PLANET]=nument[MOON]=nument[JUMP]=0;
-    units[0].clear();
-    units[1].clear();
-    entities[STAR].clear();
-    entities[GAS].clear();
-    entities[PLANET].clear();entities[MOON].clear();
-	planet_entities.clear();
-    entities[JUMP].clear();
-    background.clear();
-    names.clear();
-    rings.clear();
-    systemname=string ("");
-    starradius.clear();
-    faction=string ("");
-    colorGradiant.clear();
-    compactness=2;    jumpcompactness=2;
-    radii.clear();
+float compactness=2;
+float jumpcompactness=2;
 
-  }
+struct PlanetInfo {
+  string name;
+  unsigned int num; // The texture number for the city lights
+  unsigned int moonlevel; // 0==top-level planet, 1==first-level moon, 2 is second-level moon... probably won't be used.
+  unsigned int numstarbases; // Number of starbases allocated to orbit around this planet. Usually 1 or 0 but quite possibly more.
+  unsigned int numjumps; // Number of jump points.
+};
+vector <vector <PlanetInfo> > planets;
+unsigned int planetoffset, staroffset, moonlevel;
 
-void Tab () {
-  for (unsigned int i=0;i<radii.size();i++) {
-    f.Fprintf ("\t");
-  }
-
+void ResetGlobalVariables () {
+  xmllevel=0;
+  lights.clear();
+  gradtex.clear();
+//  numun[0]=numun[1]=numstarentities=0;
+  naturalphenomena.clear();
+  starbases.clear();
+  starentities.clear();
+  numstarentities=0;
+  numstarbases=0;
+  numnaturalphenomena=0;
+  background.clear();
+  planets.clear();
+  planetoffset=0;
+  staroffset=0;
+  moonlevel=0;
+  names.clear();
+  jumps.clear();
+  rings.clear();
+  systemname.erase();
+  starradius.clear();
+  faction.erase();
+  colorGradiant.clear();
+  compactness=2;
+  jumpcompactness=2;
+  radii.clear();
 }
- 
-
 
 void readColorGrads (vector <string> &entity,const char * file) {
   VSFile f;
@@ -415,11 +376,11 @@ void CreateLight(unsigned int i) {
   }
   unsigned int gradindex;
   lights.push_back (StarColor (starradius[i],gradindex));
-  entities[STAR].push_back (gradtex[gradindex]);
+  starentities.push_back (gradtex[gradindex]);
   float h = lights.back().r;
   if (h<lights.back().g) h=lights.back().g;
   if (h<lights.back().b) h=lights.back().b;
-  float norm = (.5+.5/nument[0]);
+  float norm = (.5+.5/numstarentities);
   if (h>.001) {
     lights.back().nr=lights.back().r/h;
     lights.back().ng=lights.back().g/h;
@@ -509,7 +470,7 @@ Vector generateAndUpdateRS (Vector &r, Vector & s, float thisplanetradius,bool j
   return generateCenter (tmp,jumppoint);
 }
 
-vector <string> parseBigUnit (string input) {
+vector <string> parseBigUnit (const string &input) {
   char * mystr = strdup (input.c_str());
   char * ptr = mystr;
   char * oldptr=mystr;
@@ -530,7 +491,7 @@ vector <string> parseBigUnit (string input) {
 }
 
 
-void WriteUnit(string tag, string name, string filename, Vector r, Vector s, Vector center, string nebfile, string destination, bool faction, float thisloy=0) {
+void WriteUnit(const string &tag, const string &name, const string &filename, const Vector &r, const Vector &s, const Vector &center, const string &nebfile, const string &destination, bool faction, float thisloy=0) {
   Tab();
   f.Fprintf ("<%s name=\"%s\" file=\"%s\" ",tag.c_str(),name.c_str(),filename.c_str());
   if (nebfile.length()>0) {
@@ -548,9 +509,9 @@ void WriteUnit(string tag, string name, string filename, Vector r, Vector s, Vec
   } else if (faction){
     f.Fprintf ("faction=\"%s\" ",StarSystemGent::faction.c_str());
   }
-  f.Fprintf (" />\n");
+  f.Fprintf ("/>\n");
 }
-string getJumpTo (string s) {
+string getJumpTo (const string &s) {
   char tmp[1000]="";
   if (1==sscanf (s.c_str(),"JumpTo%s",tmp)){
     tmp[0]=tolower(tmp[0]);
@@ -558,7 +519,7 @@ string getJumpTo (string s) {
   else return s;
   return string (tmp);
 }
-string starin (string input) {
+string starin (const string &input) {
   char * tmp = strdup (input.c_str());
   for (unsigned int i=0;tmp[i]!='\0';i++) {
     if (tmp[i]=='*') {
@@ -570,7 +531,7 @@ string starin (string input) {
   }
 
   free (tmp);
-  return string ("");
+  return string ();
 }
 
 string GetNebFile (string &input) {
@@ -586,7 +547,7 @@ string GetNebFile (string &input) {
     }
   }
   free (ptr);
-  return string ("");
+  return string ();
 }
 
 
@@ -628,39 +589,73 @@ string AnalyzeType (string &input, string &nebfile, float & radius) {
 
 }
 void MakeSmallUnit () {
-  Vector r,S;
+  Vector R,S;
 
   string nam;
   string s=string ("");
   while (s.length()==0) {
-    nam= getRandName (units[1]);
+    nam= getRandName (starbases);
     if (nam.length()==0)
       return;
     string tmp;
     if ((tmp=starin(nam)).length()>0) {
       nam=(tmp);
-      s = getRandName (entities[JUMP]);
+      s = getRandName (jumps);
     }else {
       break;
     }
   }
-
+  numstarbases--;
   string nebfile ("");
   float radius;
   string type = AnalyzeType(nam,nebfile,radius);
-  Vector center=generateAndUpdateRS(r,S,radius,true);
+  Vector center=generateAndUpdateRS(R,S,radius,true);
 
-  WriteUnit (type,"",nam,r,S,center,nebfile,s,true);
+  WriteUnit (type,"",nam,R,S,center,nebfile,s,true);
 
 }
 
 
 
-void MakePlanet(float radius, int entitytype, int callingentitytype,bool forceRS=false, Vector R=Vector (0,0,0), Vector S=Vector (0,0,0), Vector center=Vector (0,0,0), float loy=0);
-void MakeBigUnit (int callingentitytype, string name=string (""),float orbitalradius=0) {
+void MakeJump(float radius, bool forceRS=false, Vector R=Vector (0,0,0), Vector S=Vector (0,0,0), Vector center=Vector (0,0,0), float thisloy=0) {
+  string s =  getRandName (jumps);
+  if (s.length()==0)
+    return;
+  Vector RR,SS;
+  if (forceRS) {
+    RR=R;SS=S;
+    Updateradii (mmax(RR.Mag(),SS.Mag()),radius);
+  }else {
+    center=generateAndUpdateRS (RR,SS,radius,true);
+  }
+  string thisname;
+  thisname = string("Jump To ")+getStarSystemName(s);
+  if (thisname.length()>6) {
+    *(thisname.begin()+6)=toupper(*(thisname.begin()+6));
+  }
+  Tab();
+  f.Fprintf ("<Jump name=\"%s\" file=\"%s\" ",thisname.c_str(),"jump.png");
+  f.Fprintf ("ri=\"%f\" rj=\"%f\" rk=\"%f\" si=\"%f\" sj=\"%f\" sk=\"%f\" ",RR.i,RR.j,RR.k,SS.i,SS.j,SS.k);
+  f.Fprintf ("radius=\"%f\" ",radius);
+  f.Fprintf ("x=\"%f\" y=\"%f\" z=\"%f\" ",center.i,center.j,center.k);
+  float loy = LengthOfYear(RR,SS);
+  float temprandom=.1*fmod(loy,10);//use this so as not to alter state here
+  if (loy||thisloy) {
+    f.Fprintf ("year= \"%f\" ",thisloy?thisloy:loy);
+    temprandom=grand();
+    loy =864*temprandom;
+    if (loy) {
+      f.Fprintf ( "day=\"%f\" ",loy);
+    }
+  }
+  f.Fprintf ( "alpha=\"ONE ONE\" destination=\"%s\" faction=\"%s\" />\n",getJumpTo(s).c_str(),StarSystemGent::faction.c_str());
+
+  ///writes out some pretty planet tags
+}
+void MakeBigUnit (int callingentitytype, string name=string(),float orbitalradius=0) {
   vector <string> fullname;
   if (name.length()==0) {
-    string s= getRandName (units[0]);
+    string s= getRandName (naturalphenomena);
     if (s.length()==0)
       return;
     fullname = parseBigUnit(s);
@@ -669,6 +664,7 @@ void MakeBigUnit (int callingentitytype, string name=string (""),float orbitalra
   }
   if (fullname.empty())
     return;
+  numnaturalphenomena--;
   Vector r,s;
 
   float stdloy=0;
@@ -684,35 +680,15 @@ void MakeBigUnit (int callingentitytype, string name=string (""),float orbitalra
 	center=generateAndUpdateRS (r,s,size,callingentitytype!=STAR);
 	stdloy=LengthOfYear (r,s);	
       }
-      MakePlanet(size,JUMP,callingentitytype,true,r,s,center,stdloy);
-    }else if (1==sscanf (fullname[i].c_str(),"planet%f",&size)) {
-      if (!first) {
-	first= true;
-	center=generateAndUpdateRS (r,s,size,false);
-	stdloy=LengthOfYear (r,s);	
-      }
-      MakePlanet(size,PLANET,callingentitytype,true,r,s,center,stdloy);
-    }else if (1==sscanf (fullname[i].c_str(),"moon%f",&size)) {      
-      if (!first) {
-	first= true;
-	center=generateAndUpdateRS (r,s,size,false);
-	stdloy=LengthOfYear (r,s);	
-      }
-      MakePlanet (size,MOON,callingentitytype,true,r,s,center,stdloy);
-    } else if (1==sscanf (fullname[i].c_str(),"gas%f",&size)) {
-      if (!first) {
-	first= true;
-	center=generateAndUpdateRS (r,s,size,false);
-	stdloy=LengthOfYear (r,s);	
-      }
-      MakePlanet (size,GAS,callingentitytype,true,r,s,center,stdloy);
+      MakeJump(size,true,r,s,center,stdloy);
+	  // We still want jumps inside asteroid fields, etcVvv.
     }else if ((tmp=starin(fullname[i])).length()>0) {
       if (!first) {
 	first= true;
 	center=generateAndUpdateRS (r,s,size,callingentitytype!=STAR);
 	stdloy=LengthOfYear (r,s);	
       }
-      string S = getRandName (entities[JUMP]);
+      string S = getRandName (jumps);
       if (S.length()>0) {
 	string type = AnalyzeType(tmp,nebfile,size);
 	WriteUnit (type, S,tmp,r,s,center,nebfile,getJumpTo(S),false,stdloy);
@@ -720,7 +696,7 @@ void MakeBigUnit (int callingentitytype, string name=string (""),float orbitalra
     } else {
 		string type = AnalyzeType(fullname[i],nebfile,size);
 		if (!first) {
-			first= true;
+ 			first= true;
 			center=generateAndUpdateRS (r,s,size,callingentitytype!=STAR?type=="Unit":false);
 			stdloy=LengthOfYear (r,s);	
 		}
@@ -731,77 +707,69 @@ void MakeBigUnit (int callingentitytype, string name=string (""),float orbitalra
 
 
 }
-void MakeMoons (float radius, int entitytype, int callingentitytype, bool forceone=false);
-void MakePlanet(float radius, int entitytype, int callingentitytype, bool forceRS, Vector R, Vector S, Vector center, float thisloy) {
-  string s =  getRandName (entities[entitytype]);
-  if (s.length()==0)
+void MakeMoons (float callingradius, int callingentitytype);
+void MakeJumps (float callingradius, int callingentitytype, int numberofjumps );
+void MakePlanet(float radius, int entitytype, string texturename, int texturenum, int numberofjumps, int numberofstarbases) {
+  if (entitytype==JUMP){
+    MakeJump(radius);
     return;
-  Vector r,SS;
-  if (forceRS) {
-    r=R;SS=S;
-    Updateradii (mmax(r.Mag(),SS.Mag()),radius);
-  }else {
-    center=generateAndUpdateRS (r,SS,radius,entitytype==JUMP);
   }
+  if (texturename.length()==0) // FIXME?
+    return;
+  Vector RR,SS;
+  Vector center=generateAndUpdateRS (RR,SS,radius,false);
   string thisname;
-  if (entitytype!=JUMP) {
-    thisname=getRandName(names);
-  }else {
-    thisname = string("JumpTo")+getStarSystemName(s);
-    if (thisname.length()>6) {
-      *(thisname.begin()+6)=toupper(*(thisname.begin()+6));
-    }
-  }
+  thisname=getRandName(names);
   Tab();
-  string::size_type atmos = s.find ("~");
-  string atmosphere;
-  if (atmos!=string::npos) {
-    atmosphere = s.substr (atmos+1,s.length());
-    if (atmosphere.empty()) {
-      atmosphere = "sol/earthcloudmaptrans.png";
-    }
-    s = s.substr (0,atmos);
+  static string default_atmosphere=vs_config->getVariable("galaxy","DefaultAtmosphereTexture","sol/earthcloudmaptrans.png");
+  string atmosphere=_Universe->getGalaxy()->getPlanetVariable(texturename,"atmosphere","false");
+  if (atmosphere=="false") {
+    atmosphere="";
+  } else if (atmosphere=="true") {
+	atmosphere=default_atmosphere;
   }
-  string::size_type pos = s.find ("^");
   string cname;
-  if (pos==string::npos||entitytype==JUMP) {
-    f.Fprintf ("<Planet name=\"%s\" file=\"%s\" ",thisname.c_str(),entitytype==JUMP?"jump.png":s.c_str());
-  }else {
-    string pname= s.substr (0,pos);
-    cname = s.substr (pos+1,s.length());
-    f.Fprintf ("<Planet name=\"%s\" file=\"%s\" ",thisname.c_str(),pname.c_str());
+  string planetlites=_Universe->getGalaxy()->getPlanetVariable(texturename,"lights","");
+  if (!planetlites.empty()) {
+    planetlites=' '+planetlites;
+    std::vector<std::string::size_type> lites;
+    lites.push_back(0);
+    while(lites.back()!=std::string::npos) {
+		lites.push_back(planetlites.find(lites.back()+1,' '));
+    }
+	unsigned randomnum=rnd(0,lites.size()-1);
+    cname=planetlites.substr(lites[randomnum]+1,lites[randomnum+1]);
   }
-  f.Fprintf ("ri=\"%f\" rj=\"%f\" rk=\"%f\" si=\"%f\" sj=\"%f\" sk=\"%f\" ",r.i,r.j,r.k,SS.i,SS.j,SS.k);
+  f.Fprintf ("<Planet name=\"%s\" file=\"%s\" ",thisname.c_str(),texturename.c_str());
+  f.Fprintf ("ri=\"%f\" rj=\"%f\" rk=\"%f\" si=\"%f\" sj=\"%f\" sk=\"%f\" ",RR.i,RR.j,RR.k,SS.i,SS.j,SS.k);
   f.Fprintf ("radius=\"%f\" ",radius);
   f.Fprintf ("x=\"%f\" y=\"%f\" z=\"%f\" ",center.i,center.j,center.k);
-  float loy = LengthOfYear(r,SS);
+  float loy = LengthOfYear(RR,SS);
   float temprandom=.1*fmod(loy,10);//use this so as not to alter state here
-  if (loy||thisloy) {
-    f.Fprintf ("year= \"%f\" ",thisloy?thisloy:loy);
+  if (loy) {
+    f.Fprintf ("year= \"%f\" ",loy);
     temprandom=grand();
     loy =864*temprandom;
     if (loy) {
       f.Fprintf ( "day=\"%f\" ",loy);
     }
   }
-  if (entitytype==JUMP) {
-    f.Fprintf ( "alpha=\"ONE ONE\" destination=\"%s\" faction=\"%s\" ",getJumpTo(s).c_str(),StarSystemGent::faction.c_str());
-
-  }
-  f.Fprintf (" >\n");
+  f.Fprintf (">\n");
+  xmllevel++;
   if (!cname.empty()) {
     
     int wrapx=1;
     int wrapy=1;
     cname = GetWrapXY(cname,wrapx,wrapy);
+    string::size_type t;
+    while ((t=cname.find('*'))!=string::npos) {
+      cname.replace(t,1,texturenum==0?"":XMLSupport::tostring(texturenum));
+    }
     Tab();f.Fprintf ("<CityLights file=\"%s\" wrapx=\"%d\" wrapy=\"%d\"/>\n",cname.c_str(),wrapx,wrapy);
-  }
-  if (entitytype==PLANET) {
-	  entities[PLANET]=planet_entities;//this will make it so that while you have at least one habitable planet, not all ma
   }
   if ((entitytype==PLANET&&temprandom<.1)||(!atmosphere.empty())) {
     if (atmosphere.empty()) {
-      atmosphere="sol/earthcloudmaptrans.png";
+      atmosphere=default_atmosphere;
     }
     string NAME = thisname+" Atmosphere";
 	{
@@ -824,14 +792,27 @@ void MakePlanet(float radius, int entitytype, int callingentitytype, bool forceR
 	}
 //	static float concavity = XMLSupport::parse_float (vs_config->getVariable ("graphics","fog","concavity","0"));
 //	static float focus = XMLSupport::parse_float (vs_config->getVariable ("graphics","fog","focus",".5"));
+
+
+/*----------------------------------------------------------------------------------------*\
+| **************************************************************************************** |
+| ********************************* FIXME: USE BFXM  ************************************* |
+| **************************************************************************************** |
+\*----------------------------------------------------------------------------------------*/
+	
 	Tab();f.Fprintf ("<Fog>\n");
-	Tab();Tab();f.Fprintf ("<FogElement file=\"atmXatm.bfxm\" ScaleAtmosphereHeight=\"1.0\"  red=\"%f\" blue=\"%f\" green=\"%f\" alpha=\"%f\" dired=\"%f\" diblue=\"%f\" digreen=\"%f\" dialpha=\"%f\" concavity=\".3\" focus=\".6\" minalpha=\"0\" maxalpha=\"0.7\"/>\n",r,g,b,a,dr,dg,db,da);
-	Tab();Tab();f.Fprintf ("<FogElement file=\"atmXhalo.bfxm\" ScaleAtmosphereHeight=\"1.0\"  red=\"%f\" blue=\"%f\" green=\"%f\" alpha=\"%f\" dired=\"%f\" diblue=\"%f\" digreen=\"%f\" dialpha=\"%f\" concavity=\"1\" focus=\".6\" minalpha=\"0\" maxalpha=\"0.7\"/>\n",r,g,b,a,dr,dg,db,da);		
+	xmllevel++;
+	Tab();f.Fprintf ("<FogElement file=\"atmXatm.xmesh\" ScaleAtmosphereHeight=\"1.0\"  red=\"%f\" blue=\"%f\" green=\"%f\" alpha=\"%f\" dired=\"%f\" diblue=\"%f\" digreen=\"%f\" dialpha=\"%f\" concavity=\".3\" focus=\".6\" minalpha=\"0\" maxalpha=\"0.7\"/>\n",r,g,b,a,dr,dg,db,da);
+	Tab();f.Fprintf ("<FogElement file=\"atmXhalo.xmesh\" ScaleAtmosphereHeight=\"1.0\"  red=\"%f\" blue=\"%f\" green=\"%f\" alpha=\"%f\" dired=\"%f\" diblue=\"%f\" digreen=\"%f\" dialpha=\"%f\" concavity=\"1\" focus=\".6\" minalpha=\"0\" maxalpha=\"0.7\"/>\n",r,g,b,a,dr,dg,db,da);
+	xmllevel--;
 	Tab();f.Fprintf ("</Fog>\n");
 	}
   }
 
-  radii.push_back (entitytype!=GAS?radius:1.4*radius);
+//  FIRME: need scaling of radius based on planet type.
+//  radii.push_back (entitytype!=GAS?radius:1.4*radius);
+  radii.push_back (radius);
+
   static float ringprob = XMLSupport::parse_float (vs_config->getVariable ("galaxy","RingProbability",".1"));
   static float dualringprob = XMLSupport::parse_float (vs_config->getVariable ("galaxy","DoubleRingProbability",".025"));
   if (entitytype==PLANET) {
@@ -849,11 +830,11 @@ void MakePlanet(float radius, int entitytype, int callingentitytype, bool forceR
       }
       ringname = GetWrapXY(ringname,wrapx,wrapy);
       if (ringrand<(1-dualringprob)) {
-		f.Fprintf ("<Ring file=\"%s\" innerradius=\"%f\" outerradius=\"%f\"  wrapx=\"%d\" wrapy=\"%d\" />\n",ringname.c_str(),inner_rad,outer_rad,wrapx, wrapy);
+		  Tab();f.Fprintf ("<Ring file=\"%s\" innerradius=\"%f\" outerradius=\"%f\"  wrapx=\"%d\" wrapy=\"%d\" />\n",ringname.c_str(),inner_rad,outer_rad,wrapx, wrapy);
       }
       if (ringrand<dualringprob||ringrand>=(ringprob-dualringprob)){
 	Vector r,s;
-	makeRS(r,s,1,entitytype==JUMP);
+	makeRS(r,s,1,false);
 	float rmag = r.Mag();
 	if (rmag>.001) {
 	  r.i/=rmag;  r.j/=rmag;  r.k/=rmag;
@@ -868,52 +849,48 @@ void MakePlanet(float radius, int entitytype, int callingentitytype, bool forceR
 	inner_rad *= (1-.5*second_ring_move)+second_ring_move*movable;
 	outer_rad *= (1-.5*second_ring_move)+second_ring_move*movable;
 
-	f.Fprintf ("<Ring file=\"%s\" ri=\"%f\" rj=\"%f\" rk=\"%f\" si=\"%f\" sj=\"%f\" sk=\"%f\" innerradius=\"%f\" outerradius=\"%f\" wrapx=\"%d\" wrapy=\"%d\" />",ringname.c_str(),r.i,r.j,r.k,s.i,s.j,s.k,inner_rad,outer_rad, wrapx, wrapy);
+	Tab();f.Fprintf ("<Ring file=\"%s\" ri=\"%f\" rj=\"%f\" rk=\"%f\" si=\"%f\" sj=\"%f\" sk=\"%f\" innerradius=\"%f\" outerradius=\"%f\" wrapx=\"%d\" wrapy=\"%d\" />\n",ringname.c_str(),r.i,r.j,r.k,s.i,s.j,s.k,inner_rad,outer_rad, wrapx, wrapy);
       }
     }
     //    WriteUnit ("unit","","planetary-ring",Vector (0,0,0), Vector (0,0,0), Vector (0,0,0), string (""), string (""),false);
   }
-  if (entitytype!=JUMP&&(entitytype!=MOON||grand()<moonofmoonprob)) {
-    int numu;
-    if (entitytype==MOON||(nument[PLANET]+nument[GAS]==0)) {
-	numu=1;
-    }else {
-      numu = numun[1]/(nument[PLANET]+nument[GAS])+ (grand()*(nument[PLANET]+nument[GAS])<(numun[1]%(nument[PLANET]+nument[GAS]))?1:0);
-    }
-    for (int i=0;i<numu;i++) {
-      MakeSmallUnit ();
-    }
+  for (int i=0;i<numberofstarbases;i++) {
+    MakeSmallUnit ();
+  }
   static float moon_size_compared_to_planet = XMLSupport::parse_float (vs_config->getVariable ("galaxy","MoonRelativeToPlanet",".4"));
   static float moon_size_compared_to_moon = XMLSupport::parse_float (vs_config->getVariable ("galaxy","MoonRelativeToMoon",".8"));
-	
-    MakeMoons ((entitytype!=JUMP&&entitytype!=MOON)?moon_size_compared_to_planet*radius:moon_size_compared_to_moon*radius,MOON,entitytype,entitytype==JUMP||entitytype==MOON);
-    MakeMoons (100+grand()*300,JUMP,entitytype,entitytype==JUMP||entitytype==MOON);
-  }
+  moonlevel++;
+  MakeMoons (entitytype!=MOON?moon_size_compared_to_planet*radius:moon_size_compared_to_moon*radius,entitytype);
+  MakeJumps (100+grand()*300,entitytype,numberofjumps);
+  moonlevel--;
   radii.pop_back();
-
+  xmllevel--;
   Tab();f.Fprintf ("</Planet>\n"); 
 
-  ///writes out some pretty planet tags
+  // writes out some pretty planet tags
 }
 
-void MakeMoons (float radius, int entitytype, int callingentitytype, bool forceone      ) {
-  unsigned int nummoon;
-  if (nument[callingentitytype]&&!forceone) {
-    nummoon = nument[entitytype]/nument[callingentitytype]+((grand ()*nument[callingentitytype]<(nument[entitytype]%nument[callingentitytype]))?1:0);
-  }else {
-    nummoon=1;
-  }
-  for (unsigned int i=0;i<nummoon;i++) {
-    MakePlanet ((.5+.5*grand())*radius,entitytype,callingentitytype);
+
+void MakeJumps (float callingradius, int callingentitytype, int numberofjumps) {
+  for (int i=0;i<numberofjumps;i++) {
+    MakeJump ((.5+.5*grand())*callingradius);
   }
 }
-void beginStar (float radius, unsigned int which) {
+void MakeMoons (float callingradius, int callingentitytype) {
+  while(planetoffset<planets[staroffset].size()&&planets[staroffset][planetoffset].moonlevel==moonlevel) {
+    PlanetInfo &infos=planets[staroffset][planetoffset++];
+    MakePlanet((.5+.5*grand())*callingradius, callingentitytype==STAR?PLANET:MOON, infos.name, infos.num, infos.numjumps, infos.numstarbases);
+  }
+}
+void beginStar () {
+  float radius=starradius[staroffset];
   Vector r,s;
   //Vector center=generateAndUpdateRS (r,s,radius);
+  planetoffset=0;
 
   char b[3]=" A";
-  b[1]+=which;
-  Tab();f.Fprintf ("<Planet name=\"%s\" file=\"%s\" ",(systemname+b).c_str(),entities[0][which].c_str());
+  b[1]+=staroffset;
+  Tab();f.Fprintf ("<Planet name=\"%s%s\" file=\"%s\" ",systemname.c_str(),b,starentities[staroffset].c_str());
   f.Fprintf ("ri=\"%f\" rj=\"%f\" rk=\"%f\" si=\"%f\" sj=\"%f\" sk=\"%f\" ",r.i,r.j,r.k,s.i,s.j,s.k);
   f.Fprintf ("radius=\"%f\" x=\"0\" y=\"0\" z=\"0\" ",radius);
   float loy = LengthOfYear(r,s);
@@ -924,76 +901,87 @@ void beginStar (float radius, unsigned int which) {
       f.Fprintf ("day=\"%f\" ",loy);
     }
   }
-  f.Fprintf (" Red=\"%f\" Green=\"%f\" Blue=\"%f\" ReflectNoLight=\"true\" light=\"%d\">\n",lights[which].r,lights[which].g,lights[which].b,which);
-
+  f.Fprintf (" Red=\"%f\" Green=\"%f\" Blue=\"%f\" ReflectNoLight=\"true\" light=\"%d\">\n",lights[staroffset].r,lights[staroffset].g,lights[staroffset].b,staroffset);
   radii.push_back (1.5*radius);
   static float planet_size_compared_to_sun = XMLSupport::parse_float (vs_config->getVariable ("galaxy","RockyRelativeToPrinary",".05"));
-  static float gas_size_compared_to_sun = XMLSupport::parse_float (vs_config->getVariable ("galaxy","GasRelativeToPrinary",".2"));
-
-  MakeMoons (planet_size_compared_to_sun*radius,PLANET,STAR);
-  MakeMoons (gas_size_compared_to_sun*radius,GAS,STAR);
+//  static float gas_size_compared_to_sun = XMLSupport::parse_float (vs_config->getVariable ("galaxy","GasRelativeToPrinary",".2"));
+  xmllevel++;
   int numu;
-  if (nument[0]) {
-    numu= numun[0]/nument[0]+(grand()<float(numun[0]%nument[0])/nument[0]);
+  if (numstarentities) {
+    numu= numnaturalphenomena/(numstarentities-staroffset)+(grand()<float(numnaturalphenomena%(numstarentities-staroffset))/(numstarentities-staroffset));
   } else {
     numu=1;
   }
-  if ((int)which==nument[0]-1) {
-    numu=numun[0];
+  if ((int)staroffset==(int)(numstarentities-staroffset)-1) {
+    numu=numnaturalphenomena;
   }
-  numun[0]-=numu;
   for (int i=0;i<numu;i++) {
     MakeBigUnit(STAR);
   }
-  MakeMoons (100+grand()*300,JUMP,STAR);
-  if ((int)which+1>=nument[STAR]) {
-    while (!entities[JUMP].empty()) {
-      MakeMoons (300+grand()*800,JUMP,STAR);
+  MakeMoons (planet_size_compared_to_sun*radius,STAR);
+  // Fixme: no jumps should be made around the star.
+  if (!jumps.empty()) {
+    VSFileSystem::vs_fprintf(stderr,"ERROR: jumps not empty() Size==%u!!!!!\n",jumps.size());
+  }
+  staroffset++;
+  /*
+  //  No jump for you!!
+
+  MakeJumps (100+grand()*300,STAR);
+  if ((int)staroffset+1>=nument[STAR]) {
+    while (!jumps.empty()) {
+      MakeJumps (300+grand()*800,STAR);
     }
   }
+  */
 }
 
 void endStar () {
   radii.pop_back();
+  xmllevel--;
   Tab();f.Fprintf ("</Planet>\n");
 }
-void CreateStar (float radius, unsigned int which) {
-  beginStar (radius,which);
+void CreateStar () {
+  beginStar ();
   endStar();
 }
-void CreateFirstStar(float radius, unsigned int which){
-  beginStar(radius,which);
-  for (int i=which+1;i<nument[0];i++) {
+void CreateFirstStar(){
+  beginStar();
+  while (staroffset<numstarentities) {
     if (grand()>.5) {
-      CreateFirstStar(starradius[i],i);
+      CreateFirstStar();
       break;
     } else {
-      CreateStar (starradius[i],i);
+      CreateStar ();
     }
   }
   endStar();
 }
 
-void CreatePrimaries (float starradius) {
-  int numprimaryunits=rnd(0,1+numun[0]);
-  numun[0]-=numprimaryunits;
-  int i;
-  for (i=0;i<nument[0]||i==0;i++) {
-    CreateLight(i);
-  }
+void CreatePrimaries () {
+  unsigned int i;
+   for (i=0;i<numstarentities||i==0;i++) {
+     CreateLight(i);
+   }
+   /*
+  int numprimaryunits=rnd(0,1+naturalphenomena.size());
   for (i=0;i<numprimaryunits;i++) {
     MakeBigUnit(STAR);
   }
-  CreateFirstStar(starradius,0);
+  */
+  CreateFirstStar();
 
 }
 
 void CreateStarSystem () {
   assert (!starradius.empty());
   assert (starradius[0]);
-  f.Fprintf ("<system name=\"%s\" background=\"%s\" nearstars=\"%d\" stars=\"%d\" starspread=\"%d\">\n",systemname.c_str(),getRandName(background).c_str(),500,1000,150);
-  CreatePrimaries (starradius[0]);
-  f.Fprintf ("</system>\n");
+  xmllevel=0;
+  Tab();f.Fprintf ("<?xml version=\"1.0\" ?>\n<system name=\"%s\" background=\"%s\">\n",systemname.c_str(),getRandName(background).c_str());
+  xmllevel++;
+  CreatePrimaries ();
+  xmllevel--;
+  Tab();f.Fprintf ("</system>\n");
 }
 
 
@@ -1074,7 +1062,7 @@ void readnames (vector <string> &entity, const char * filename) {
     f.ReadLine (input_buffer,999);
     if (input_buffer[0]=='\0'||input_buffer[0]=='\n'||input_buffer[0]=='\r')
       continue;
-    for (unsigned int i=0;input_buffer[i]!='\0';i++) {
+    for (unsigned int i=0;input_buffer[i]!='\0'&&i<999;i++) {
       if (input_buffer[i]=='\r') {
 	input_buffer[i]='\0';
       }
@@ -1089,7 +1077,47 @@ void readnames (vector <string> &entity, const char * filename) {
 
 }
 
-
+void readplanetentity(vector <vector<PlanetInfo> > &planetinfos, std::string planetlist, unsigned int numstars) {
+  string::size_type i,j;
+  unsigned int u;
+  planetinfos.reserve(numstars);
+  for (u=0;u<numstars;++u)
+    planetinfos.push_back(vector<PlanetInfo> ());
+  u--;
+  while (i=planetlist.find(' '),1) {
+    int nummoon=0;
+    for (j=0;j<i&&j<planetlist.size()&&planetlist[j]=='*';++j) {
+      nummoon++;
+    }
+    if (nummoon==0)
+      u++;
+    if (j==string::npos||j>=planetlist.size()) break;
+    planetinfos[u%numstars].push_back(PlanetInfo());
+    planetinfos[u%numstars].back().moonlevel=nummoon;
+    {
+      GalaxyXML::Galaxy *galaxy=_Universe->getGalaxy();
+      string planetname=galaxy->getPlanetNameFromInitial(planetlist.substr(j,i==string::npos?string::npos:i-j));
+      string texturename=galaxy->getPlanetVariable(planetname,"texture","No texture supplied in <planets>!");
+      planetinfos[u%numstars].back().num=rnd(XMLSupport::parse_int(galaxy->getPlanetVariable(planetname,"texture_min","0")),XMLSupport::parse_int(galaxy->getPlanetVariable(planetname,"texture_max","0")));
+      string ext=galaxy->getPlanetVariable(planetname,"texture_ext","png");
+      planetinfos[u%numstars].back().name=texturename+(planetinfos[u%numstars].back().num==0?"":XMLSupport::tostring(planetinfos[u%numstars].back().num))+'.'+ext;
+      // should now have texname[min-max].png
+    }
+    planetinfos[u%numstars].back().numstarbases=0;
+    planetinfos[u%numstars].back().numjumps=0;
+    if (i==string::npos) break;
+    planetlist=planetlist.substr(i+1);
+  }
+  unsigned int k;
+  for (k=0;k<jumps.size();++k) {
+    vector<PlanetInfo> &temp=planetinfos[rnd(0,planetinfos.size())];
+    temp[rnd(0,temp.size())].numjumps++;
+  }
+  for (k=0;k<numstarbases;++k) {
+    vector<PlanetInfo> &temp=planetinfos[rnd(0,planetinfos.size())];
+    temp[rnd(0,temp.size())].numstarbases++;
+  }
+}
 
 static int pushDown (int val) {
   while (grand()>(1/val)) {
@@ -1112,99 +1140,70 @@ static int pushTowardsMean (int mean, int val) {
 }
 
 
-void generateStarSystem (string datapath, int seed, string sector, string system, string outputfile, float sunradius, float compac,  int numstars, int numgasgiants, int numrockyplanets, int nummoons, bool nebulae, bool asteroids, int numnaturalphenomena, int numstarbases, string factions, const vector <string> &jumplocations, string namelist, string starlist, string planetlist, string gasgiantlist, string moonlist, string smallunitlist, string nebulaelist, string asteroidlist,string ringlist, string backgroundlist, bool force) {
+//void generateStarSystem (string datapath, int seed, string sector, string system, string outputfile, float sunradius, int numstars, bool nebulae, bool asteroids, int numnaturalphenomena, int numstarbases, string factions, const vector <string> &jumplocations, string namelist, string starlist, string planetlist, string smallunitlist, string nebulaelist, string asteroidlist,string ringlist, string backgroundlist) {
+void generateStarSystem(SystemInfo &si) {
   ResetGlobalVariables();
   static float radiusscale= XMLSupport::parse_float (vs_config->getVariable("galaxy","StarRadiusScale","1000"));
-  sunradius *=radiusscale;
-  systemname=system;
+  si.sunradius *=radiusscale;
+  systemname=si.name;
   static float compactness_scale = XMLSupport::parse_float (vs_config->getVariable("galaxy","CompactnessScale","1.5"));
   static float jump_compactness_scale = XMLSupport::parse_float (vs_config->getVariable("galaxy","JumpCompactnessScale","1.5"));
   //  static int meansuns = XMLSupport::parse_int (vs_config->getVariable("galaxy","MeanSuns","1.5"));
-  static int meangas = XMLSupport::parse_int (vs_config->getVariable("galaxy","MeanGasGiants","1"));
-  static int meanplanets = XMLSupport::parse_int (vs_config->getVariable("galaxy","MeanPlanets","5"));
-  static int meanmoons = XMLSupport::parse_int (vs_config->getVariable("galaxy","MeanMoons","2"));
   static int meannaturalphenomena = XMLSupport::parse_int (vs_config->getVariable("galaxy","MeanNaturalPhenomena","1"));
   static int meanbases = XMLSupport::parse_int (vs_config->getVariable("galaxy","MeanStarBases","2"));
-  compactness = compac*compactness_scale;
-  jumpcompactness = compac*jump_compactness_scale;  
-  if (seed)
-    seedrand (seed);
+  compactness = si.compactness*compactness_scale;
+  jumpcompactness = si.compactness*jump_compactness_scale;  
+  if (si.seed)
+    seedrand (si.seed);
   else
-    seedrand (stringhash(sector+system));
-  VSFileSystem::vs_fprintf (stderr,"star %d gas %d plan %d moon %d, natural %d, bases %d",numstars,numgasgiants,numrockyplanets,nummoons,numnaturalphenomena,numstarbases); 
-  nument[0]=numstars;
-  nument[1]=pushTowardsMean(meangas,numgasgiants);
-  nument[2]=pushTowardsMean(meanplanets,numrockyplanets);
-  nument[3]=pushTowardsMean(meanmoons,nummoons);
-  int nat = pushTowardsMean(meannaturalphenomena,numnaturalphenomena);
-  numun[0]= nat>numnaturalphenomena?numnaturalphenomena:nat;
-  numun[1]=pushTowardsMean(meanbases,numstarbases);
+    seedrand (stringhash(si.sector+'/'+si.name));
+  VSFileSystem::vs_fprintf (stderr,"star %d, natural %d, bases %d",si.numstars,si.numun1,si.numun2); 
+  int nat = pushTowardsMean(meannaturalphenomena,si.numun1);
+  numnaturalphenomena= nat>si.numun1?si.numun1:nat;
+  numstarbases=pushTowardsMean(meanbases,si.numun2);
   static float smallUnitsMultiplier= XMLSupport::parse_float (vs_config->getVariable ("galaxy","SmallUnitsMultiplier","0"));
-  numun[1]=(int) (numun[1]*smallUnitsMultiplier);
-  VSFileSystem::vs_fprintf (stderr,"star %d gas %d plan %d moon %d, natural %d, bases %d",nument[0],nument[1],nument[2],nument[3],numun[0],numun[1]); 
-  starradius.push_back (sunradius);
-  readColorGrads (gradtex,(starlist).c_str());
-  //Under construction
-  //readentity (entities[PLANET],(planetlist).c_str());
-  static map<string,string> planetcodes = readPlanetTypes("./universe/planet_abbrev.xml");
-	string::size_type where;
-	do {
-		where = planetlist.find("_");
-		string newone = planetlist.substr(0,where);
-		if (planetcodes[newone].length()) {
-			entities[PLANET].push_back(planetcodes[newone]);
-		}
-		if (where!=string::npos){ 
-			planetlist = planetlist.substr(where+1);
-		}
-	}while (where!=string::npos);
-	//End under construction
-	
-	planet_entities=entities[PLANET];
+  numstarbases=(int)(si.numun2*smallUnitsMultiplier);
+  numstarentities=si.numstars;
+  VSFileSystem::vs_fprintf (stderr,"star %d, natural %d, bases %d",numstarentities,numnaturalphenomena,numstarbases); 
+  starradius.push_back (si.sunradius);
+  readColorGrads (gradtex,(si.stars).c_str());
 
+  readentity (starbases,(si.smallun).c_str());
+  readentity (background,(si.backgrounds).c_str());
   
-  string desolate=string ("planets.desolate.txt");
-  //Under construction
-  vector<string> desolates;
-  readentity (desolates,desolate.c_str());
-  for (unsigned int i=0;i < nument[PLANET]-entities[PLANET].size();++i) {
-	  planet_entities.push_back(desolates[vsrandom.rand()%desolates.size()]);
-  }
-  //end under construction
-  readentity (entities[1],(gasgiantlist).c_str());
-  readentity (entities[3],(moonlist).c_str());
-  readentity (units[1],(smallunitlist).c_str());
-  readentity (background,(backgroundlist).c_str());
-
   if (background.empty()) {
-    background.push_back (backgroundlist);
+    background.push_back (si.backgrounds);
   }
-  if (nebulae) {
-    readentity (units[0],(nebulaelist).c_str());
+  if (si.nebulae) {
+    readentity (naturalphenomena,(si.nebulaelist).c_str());
   }
-  if (asteroids) {
-    readentity (units[0],(asteroidlist).c_str());
+  if (si.asteroids) {
+    readentity (naturalphenomena,(si.asteroidslist).c_str());
   }
-  readentity(rings,(ringlist).c_str());
-  readnames (names,(namelist).c_str());
+  for (unsigned int i=0;i<si.jumps.size();i++) {
+    jumps.push_back (si.jumps[i]);
+  }
+  faction = si.faction;
 
-  CreateDirectoryHome( VSFileSystem::sharedsectors+"/"+VSFileSystem::universe_name+"/"+sector);
-  VSError err = f.OpenCreateWrite( outputfile, SystemFile);
+  readplanetentity (planets,si.planetlist,numstarentities);
+
+  readentity(rings,(si.ringlist).c_str());
+  readnames (names,(si.names).c_str());
+
+  CreateDirectoryHome( VSFileSystem::sharedsectors+"/"+VSFileSystem::universe_name+"/"+si.sector);
+
+  VSError err = f.OpenCreateWrite( si.filename, SystemFile);
   if (err<=Ok) {
-		  for (unsigned int i=0;i<jumplocations.size();i++) {
-				  entities[JUMP].push_back (jumplocations[i]);
-		  }
-		  nument[JUMP]=entities[JUMP].size();
-		  StarSystemGent::faction = factions;
 		  CreateStarSystem();
   		  f.Close();
   }
+  ResetGlobalVariables(); // deallocate any unused memory in vectors.
 }
 #ifdef CONSOLE_APP
 int main (int argc, char ** argv) {
 
   if (argc<9) {
-    VSFileSystem::vs_fprintf (stderr,"Usage: starsysgen <seed> <sector>/<system> <sunradius>/<compactness> <numstars> <numgasgiants> <numrockyplanets> <nummoons> [N][A]<numnaturalphenomena> <numstarbases> <faction> <namelist> [OtherSystemJumpNodes]...\n");
+    VSFileSystem::vs_fprintf (stderr,"Usage: starsysgen <seed> <sector>/<system> <sunradius>/<compactness> <numstars> [N][A]<numnaturalphenomena> <numstarbases> <faction> <namelist> [OtherSystemJumpNodes]...\n");
     return 1;
   }
   int seed;
