@@ -355,11 +355,10 @@ void Mission::loadMissionModules(){
 
 }
 
-void Mission::runScript(string modulename,string scriptname,unsigned int classid){
+bool Mission::runScript(string modulename,string scriptname,unsigned int classid){
   missionNode *module_node=runtime.modules[modulename];
   if(module_node==NULL){
-    fatalError(NULL,SCRIPT_RUN,"module "+modulename+" not found");
-    assert(0);
+    return false;
   }
 
   missionNode *script_node=module_node->script.scripts[scriptname];
@@ -376,6 +375,7 @@ void Mission::runScript(string modulename,string scriptname,unsigned int classid
 
   runtime.cur_thread->classid_stack.pop_back();
   runtime.cur_thread->module_stack.pop_back();
+  return true;
 }
 
 

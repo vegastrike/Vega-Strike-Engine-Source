@@ -538,10 +538,12 @@ void StarSystem::Update(float priority , bool executeDirector) {
 	  if (executeDirector) {
 	    for (unsigned int i=0;i<active_missions.size();i++) {
 	      if (active_missions[i]) {
+		mission=active_missions[i];
 		active_missions[i]->DirectorLoop();
 		active_missions[i]->DirectorBenchmark();
 	      }
 	    }
+		mission=active_missions[0];
 	  }
 #ifdef RUN_ONLY_FOR_PLAYER_STARSYSTEM
 	}

@@ -76,7 +76,11 @@ void AImissionScript::Execute () {
   mission->setCurrentAIOrder(this);
 
   if(first_run){
-    mission->runScript(modulename,"initai",classid);
+    for (int i=0;
+        (i<active_missions.size())&&
+        (!(mission->runScript(modulename,"initai",classid)));
+        i++) {
+    }
     first_run=false;
   }
 

@@ -432,7 +432,7 @@ class Mission {
   void  loadMissionModules();
  void  loadModule(string modulename);
 void addModule(string modulename);
-void runScript(string modulename,string scriptname,unsigned int classid=0);
+bool runScript(string modulename,string scriptname,unsigned int classid=0);
 unsigned int  createClassInstance(string modulename);
  void setCurrentAIUnit(Unit *unit) { current_ai_unit=unit; };
  void setCurrentAIOrder(Order *order) { current_ai_order=order; };
