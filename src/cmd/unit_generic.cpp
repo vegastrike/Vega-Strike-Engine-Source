@@ -2579,9 +2579,28 @@ float totalShieldVal (const Shield & shield) {
 	}
 	return maxshield;
 }
+
+float currentTotalShieldVal (const Shield & shield) {
+  float maxshield=0;
+  switch (shield.number)  {
+  case 2:
+    maxshield = shield.shield2fb.front+shield.shield2fb.back;
+    break;
+  case 4:
+    maxshield = shield.shield4fbrl.front+shield.shield4fbrl.back+shield.shield4fbrl.left+shield.shield4fbrl.right;
+    break;
+  case 8:
+    maxshield = shield.shield8.frontrighttop+shield.shield8.backrighttop+shield.shield8.frontlefttop+shield.shield8.backlefttop+shield.shield8.frontrightbottom+shield.shield8.backrightbottom+shield.shield8.frontleftbottom+shield.shield8.backleftbottom;
+    break;
+	}
+  return maxshield;
+}
+
 float totalShieldEnergyCapacitance (const Shield & shield) {
 	static float shieldenergycap = XMLSupport::parse_float(vs_config->getVariable ("physics","shield_energy_capacitance",".2"));
-	return shieldenergycap * totalShieldVal(shield);
+        static bool use_max_shield_value = XMLSupport::parse_bool(vs_config->getVariable("physics","use_max_shield_energy_usage","true"));
+        
+	return shieldenergycap * use_max_shield_value?totalShieldVal(shield):currentTotalShieldVal(shield);
 }
 float Unit::MaxShieldVal() const{
   float maxshield=0;
@@ -2721,8 +2740,16 @@ void Unit::RegenShields () {
   }
   if (rechargesh==0)
     energy-=rec;
+  static float max_shield_lowers_recharge=XMLSupport::parse_bool(vs_config->getVariable("physics","max_shield_recharge_drain","0"));
+  static bool max_shield_lowers_capacitance=XMLSupport::parse_bool(vs_config->getVariable("physics","max_shield_lowers_capacitance","true"));
+  if (max_shield_lowers_recharge) {
+    energy-=max_shield_lowers_recharge*SIMULATION_ATOM*maxshield;
+  }
   if (energy_before_shield) {
     RechargeEnergy();
+  }
+  if (!max_shield_lowers_capacitance) {
+    maxshield=0;
   }
   static float low_power_mode = XMLSupport::parse_float(vs_config->getVariable("physics","low_power_mode_energy","10"));
   float menergy = maxenergy;
