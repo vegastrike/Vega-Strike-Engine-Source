@@ -3136,6 +3136,7 @@ Unit * findUnitInStarsystem (Unit * unitDoNotDereference) {
 }
 extern void ScoreKill (Cockpit * cp, Unit * un, Unit * killedUnit);
 // Changed order of things -> Vectors and ApplyLocalDamage are computed before Cockpit thing now
+void AllUnitsCloseAndEngage(Unit*,int faction);
 void Unit::ApplyDamage (const Vector & pnt, const Vector & normal, float amt, Unit * affectedUnit, const GFXColor & color, Unit * ownerDoNotDereference, float phasedamage) {
   Cockpit * cp = _Universe->isPlayerStarship (ownerDoNotDereference);
   float hullpercent=GetHullPercent();
@@ -3179,6 +3180,11 @@ void Unit::ApplyDamage (const Vector & pnt, const Vector & normal, float amt, Un
       unsigned char sex;
       vector <Animation *>* anim = computerai->getAIState()->getCommFaces(sex);
       CommunicationMessage c(computerai,player,anim,sex);
+      if (cp) {
+        static bool assistallyinneed=XMLSupport::parse_bool(vs_config->getVariable("AI","assist_friend_in_need","true"));
+        if (assistallyinneed)
+          AllUnitsCloseAndEngage(player,computerai->faction);
+      }
       c.SetCurrentState(cp?c.fsm->GetDamagedNode():c.fsm->GetDealtDamageNode(),anim,sex);
       player->getAIState()->Communicate(c);                             
     }

@@ -98,7 +98,7 @@ float CommunicatingAI::getAnger(const Unit * target)const {
 float CommunicatingAI::GetEffectiveRelationship (const Unit * target)const {
   return Order::GetEffectiveRelationship (target)+getAnger(target);
 }
-static void AllUnitsCloseAndEngage(Unit * un, int faction) {
+void AllUnitsCloseAndEngage(Unit * un, int faction) {
 	Unit * ally;
 	static float contraband_assist_range = XMLSupport::parse_float (vs_config->getVariable("physics","contraband_assist_range","50000"));
 	for (un_iter i=_Universe->activeStarSystem()->getUnitList().createIterator();
