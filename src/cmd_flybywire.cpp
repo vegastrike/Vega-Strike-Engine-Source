@@ -33,11 +33,11 @@ FlyByWire::FlyByWire (float max_ab_spd,float max_spd,float maxyaw,float maxpitch
   if (starshipcontrolkeys.refcount==0) {
     BindKey(GLUT_KEY_UP,FlyByWire::UpKey);
     BindKey(GLUT_KEY_DOWN,FlyByWire::DownKey);
-    BindKey(GLUT_KEY_UP,FlyByWire::RightKey);
-    BindKey(GLUT_KEY_DOWN,FlyByWire::LeftKey);
-    BindKey(GLUT_KEY_UP,FlyByWire::ABKey);
-    BindKey(GLUT_KEY_DOWN,FlyByWire::AccelKey);
-    BindKey(GLUT_KEY_UP,FlyByWire::DecelKey);   
+    BindKey(GLUT_KEY_LEFT,FlyByWire::RightKey);
+    BindKey(GLUT_KEY_RIGHT,FlyByWire::LeftKey);
+    BindKey('\t',FlyByWire::ABKey);
+    BindKey('+',FlyByWire::AccelKey);
+    BindKey('-',FlyByWire::DecelKey);   
     BindKey('/',FlyByWire::RollLeftKey);
     BindKey('*',FlyByWire::RollRightKey);
     
@@ -60,23 +60,23 @@ FlyByWire::~FlyByWire() {
 }
 
 void FlyByWire::Right (float per) {
-
+  fprintf (stderr,"r %f\n",per);
 }
 
 void FlyByWire::Up (float per) {
-
+  fprintf (stderr,"u %f\n",per);
 }
 
 void FlyByWire::RollRight (float per) {
-
+  fprintf (stderr,"rr %f\n",per);
 }
 
 void FlyByWire::Afterburn (float per){
-
+  fprintf (stderr,"ab %f\n",per);
 }
 
 void FlyByWire::Accel (float per) {
-
+  fprintf (stderr,"ac %f\n",per);
 }
 
 
@@ -89,6 +89,7 @@ void FlyByWire::Accel (float per) {
 
 #define FBWABS(m) (m>=0?m:-m)
 AI * FlyByWire::Execute () {
+
 #define SSCK starshipcontrolkeys
   if (SSCK.dirty) {
     //go with what's last there: no frames since last physics frame
@@ -129,12 +130,12 @@ AI * FlyByWire::Execute () {
       Up(0);
     else {
       if (SSCK.uppress!=0&&SSCK.downpress==0)
-	Up((FBWABS(SSCK.uppress))/(FBWABS(SSCK.uppress)+SSCK.uprelease));
+	Up(((float)FBWABS(SSCK.uppress))/(FBWABS(SSCK.uppress)+SSCK.uprelease));
       else {
 	if (SSCK.downpress!=0&&SSCK.uppress==0)
-	  Up(-(FBWABS(SSCK.downpress))/(FBWABS(SSCK.downpress)+SSCK.downrelease));
+	  Up(-((float)FBWABS(SSCK.downpress))/(FBWABS(SSCK.downpress)+SSCK.downrelease));
         else {
-	  Up((FBWABS(SSCK.uppress)-FBWABS(SSCK.downpress))/(FBWABS(SSCK.downpress)+SSCK.downrelease+FBWABS(SSCK.uppress)+SSCK.uprelease));
+	  Up(((float)FBWABS(SSCK.uppress)-(float)FBWABS(SSCK.downpress))/(FBWABS(SSCK.downpress)+SSCK.downrelease+FBWABS(SSCK.uppress)+SSCK.uprelease));
 	}
       }
     }
@@ -142,12 +143,12 @@ AI * FlyByWire::Execute () {
       Right(0);
     else {
       if (SSCK.rightpress!=0&&SSCK.leftpress==0)
-	Right((FBWABS(SSCK.rightpress))/(FBWABS(SSCK.rightpress)+SSCK.rightrelease));
+	Right(((float)FBWABS(SSCK.rightpress))/(FBWABS(SSCK.rightpress)+SSCK.rightrelease));
       else {
 	if (SSCK.leftpress!=0&&SSCK.rightpress==0)
-	  Right(-(FBWABS(SSCK.leftpress))/(FBWABS(SSCK.leftpress)+SSCK.leftrelease));
+	  Right(-((float)FBWABS(SSCK.leftpress))/(FBWABS(SSCK.leftpress)+SSCK.leftrelease));
         else {
-	  Right((FBWABS(SSCK.rightpress)-FBWABS(SSCK.leftpress))/(FBWABS(SSCK.leftpress)+SSCK.leftrelease+FBWABS(SSCK.rightpress)+SSCK.rightrelease));
+	  Right(((float)FBWABS(SSCK.rightpress)-(float)FBWABS(SSCK.leftpress))/(FBWABS(SSCK.leftpress)+SSCK.leftrelease+FBWABS(SSCK.rightpress)+SSCK.rightrelease));
 	}
       }
     }
@@ -155,17 +156,24 @@ AI * FlyByWire::Execute () {
       RollRight(0);
     else {
       if (SSCK.rollrightpress!=0&&SSCK.rollleftpress==0)
-	RollRight((FBWABS(SSCK.rollrightpress))/(FBWABS(SSCK.rollrightpress)+SSCK.rollrightrelease));
+	RollRight(((float)FBWABS(SSCK.rollrightpress))/(FBWABS(SSCK.rollrightpress)+SSCK.rollrightrelease));
       else {
 	if (SSCK.rollleftpress!=0&&SSCK.rollrightpress==0)
-	  RollRight(-(FBWABS(SSCK.rollleftpress))/(FBWABS(SSCK.rollleftpress)+SSCK.rollleftrelease));
+	  RollRight(-((float)FBWABS(SSCK.rollleftpress))/(FBWABS(SSCK.rollleftpress)+SSCK.rollleftrelease));
         else {
-	  RollRight((FBWABS(SSCK.rollrightpress)-FBWABS(SSCK.rollleftpress))/(FBWABS(SSCK.rollleftpress)+SSCK.rollleftrelease+FBWABS(SSCK.rollrightpress)+SSCK.rollrightrelease));
+	  RollRight(((float)FBWABS(SSCK.rollrightpress)-(float)FBWABS(SSCK.rollleftpress))/(FBWABS(SSCK.rollleftpress)+SSCK.rollleftrelease+FBWABS(SSCK.rollrightpress)+SSCK.rollrightrelease));
 	}
       }
     }
-
-
+    if (SSCK.accelpress!=0) {
+      Accel (((float)FBWABS(SSCK.accelpress))/(FBWABS(SSCK.accelpress)+SSCK.accelrelease));
+    }
+    if (SSCK.decelpress!=0) {
+      Accel (-((float)FBWABS(SSCK.decelpress))/(FBWABS(SSCK.decelpress)+SSCK.decelrelease));
+    }
+    if (SSCK.ABpress||SSCK.ABrelease) {
+      Afterburn (((float)FBWABS(SSCK.ABpress))/(FBWABS(SSCK.ABpress)+SSCK.ABrelease));
+    }
   }
   SSCK.dirty=true;
 #undef SSCK
