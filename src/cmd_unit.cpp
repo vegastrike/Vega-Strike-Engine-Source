@@ -593,7 +593,7 @@ void Unit::EnqueueAI(AI *newAI) {
   }
 }
 void Unit::ExecuteAI() {
-  if(aistate) aistate->Execute();
+  if(aistate) aistate = aistate->Execute();
   for(int a=0; a<numsubunit; a++) {
     subunits[a]->ExecuteAI();
   }
