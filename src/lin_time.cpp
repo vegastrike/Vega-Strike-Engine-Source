@@ -121,12 +121,12 @@ void UpdateTime() {
 
   lasttime = newtime;
   newtime = (double)tv.tv_sec + (double)tv.tv_usec * 1.e-6;
-  //  elapsedtime = newtime-lasttime;
+      elapsedtime = newtime-lasttime;
 
 #elif defined(HAVE_SDL)
   lasttime = newtime;
   newtime = SDL_GetTicks() * 1.e-3;
-  //elapsedtime = newtime-lasttime;
+  elapsedtime = newtime-lasttime;
 
 #else
 # error "We have no way to determine the time on this system."
