@@ -206,6 +206,8 @@ extern void pause_key (int i, KBSTATE a);
 extern void dec_time_compression(int i, KBSTATE a);
 extern void reset_time_compression(int i, KBSTATE a);
 extern void MapKey(int i, KBSTATE a);
+extern void VolUp(int i, KBSTATE a);
+extern void VolDown(int i, KBSTATE a);
   using namespace CockpitKeys;
 
 void VegaConfig::initCommandMap(){
@@ -214,8 +216,8 @@ void VegaConfig::initCommandMap(){
   command_map["NoPositionalKey"]=mute;
   command_map["DopplerInc"]=incdop;
   command_map["DopplerDec"]=decdop;
-  command_map["VolumeInc"]=incvol;
-  command_map["VolumeDec"]=decvol;
+  command_map["VolumeInc"]=VolUp;
+  command_map["VolumeDec"]=VolDown;
 #endif
   command_map["SwitchControl"]=Cockpit::SwitchControl;
   command_map["Respawn"]=Cockpit::Respawn;

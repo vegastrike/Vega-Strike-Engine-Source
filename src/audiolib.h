@@ -12,6 +12,7 @@ void AUDRefreshSounds ();
 ///Will the sound be played
 void AUDListenerOrientation (const Vector & i, const Vector &j, const Vector &k);
 void AUDListenerGain (const float gain);
+float AUDGetListenerGain ();
 ///creates a buffer if one doesn't already exists, and then creates a source
 int AUDCreateSoundWAV (const std::string &, const bool LOOP=false);
 ///creates a buffer for an mp3 sound if one doesn't already exist, then creates a source

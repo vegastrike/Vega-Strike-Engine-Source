@@ -135,11 +135,18 @@ void AUDListenerOrientation (const Vector & p, const Vector & q, const Vector & 
   }
 #endif
 }
+
 void AUDListenerGain (const float gain) {
 #ifdef HAVE_AL
   mylistener.gain = gain;
   if (g_game.sound_enabled) {
     alListenerf (AL_GAIN,gain);	
   }
+#endif
+}
+
+float AUDGetListenerGain () {
+#ifdef HAVE_AL
+  return mylistener.gain;
 #endif
 }

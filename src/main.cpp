@@ -215,7 +215,7 @@ int main( int argc, char *argv[] )
 #endif
 
     AUDInit();
-
+    AUDListenerGain (XMLSupport::parse_float(vs_config->getVariable ("audio","sound_gain",".5")));   
     /* Set up a function to clean up when program exits */
     winsys_atexit( cleanup );
     /*

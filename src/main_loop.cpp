@@ -97,9 +97,26 @@ public:
 
 const float timek = .001;
 bool _Slew = true;
+ void VolUp(int,KBSTATE newState) {
+   if(newState==PRESS){
+     float gain=AUDGetListenerGain();
+     if (gain<.9375) {
+       gain+=.0625;
+       AUDListenerGain (gain);
+     }
+   }
+ }
+ void VolDown(int,KBSTATE newState) {
+   if(newState==PRESS){
+     float gain=AUDGetListenerGain();
+     if (gain>.0625) {
+       gain-=.0625;
+       AUDListenerGain (gain);
+     }
+   }
+ }
 
 namespace CockpitKeys {
-
 
  void SkipMusicTrack(int,KBSTATE newState) {
    if(newState==PRESS){
