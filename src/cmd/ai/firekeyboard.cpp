@@ -1229,8 +1229,8 @@ static void DoDockingOps (Unit * parent, Unit * targ,unsigned char playa, unsign
     vectorOfKeyboardInput[playa].doc=false;
     
   }
-  if (vectorOfKeyboardInput[playa].req) {
-    bool request=ExecuteRequestClearenceKey(parent,targ);
+  if (vectorOfKeyboardInput[playa].req&&endt!=NULL) {
+    bool request=ExecuteRequestClearenceKey(parent,endt);
     if (!request) {
       mission->msgcenter->add("game","all","[Computer] Cannot dock with insubstantidisabal object, target another object and retry.");
       abletodock(0);
@@ -1241,9 +1241,9 @@ static void DoDockingOps (Unit * parent, Unit * targ,unsigned char playa, unsign
     vectorOfKeyboardInput[playa].req=false;
   }
   
-  if (vectorOfKeyboardInput[playa].und) {
-    CommunicationMessage c(targ,parent,NULL,0);
-    if (UnDockNow(parent,targ)) {
+  if (vectorOfKeyboardInput[playa].und&&endt!=NULL) {
+    CommunicationMessage c(endt,parent,NULL,0);
+    if (UnDockNow(parent,endt)) {
       c.SetCurrentState (c.fsm->GetUnDockNode(),NULL,0);
       abletodock(5);
     }else {
