@@ -219,7 +219,7 @@ bool Mount::PhysicsAlignedFire(const Transformation &Cumulative, const Matrix & 
 			  if (target&&target!=owner) {
 					temp->Target (target);
 					temp->TargetTurret(target);
-					if (err<=0) {
+					if (err<=Ok) {
 						temp->EnqueueAI (new AIScript ((type->file+".xai").c_str()));
 						temp->EnqueueAI (new Orders::FireAllYouGot);
 						if (match_speed_with_target)
