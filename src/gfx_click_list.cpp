@@ -21,11 +21,15 @@ bool ClickList::queryShip (int mouseX, int mouseY,Unit *ship) {
   //  if (ship->querySphere(CamP,mousePoint,0)){  //FIXME  bounding spheres seem to be broken
   mousePoint.Normalize();
   mouseline =mousePoint + CamP;
+  // 
+  bool tmp = ship->queryBoundingBox(CamP,mousePoint,0);
+  if (tmp)
+    fprintf (stderr, "bounding box hit\n");
   if (ship->querySphere(CamP,mousePoint,0)){  // camera position is not actually the center of the camera
-    //        if (ship->queryBoundingBox(CamP,mousePoint,0)) 
-    return true;
-    }
-    //}
+    fprintf (stderr, "bounding sphere hit\n");
+    
+    if (tmp) return true;
+  }
   return false;
 }
 
