@@ -84,7 +84,7 @@ float unselectedalpha;
 
 
 public:
-NavigationSystem() {draw = -1; }
+NavigationSystem() {draw = -1; whattodraw=(1|2);}
  ~NavigationSystem();
 static void DrawCircle(float x, float y, float size, const GFXColor &col );
 static void DrawHalfCircleTop(float x, float y, float size, const GFXColor &col );
