@@ -198,9 +198,12 @@ Texture::Texture(const char * FileName, int stage, enum FILTER mipmap, enum TEXT
   }
   fprintf (stderr,"Loading bmp file %s ",FileName);
 	char *t= strdup (FileName);
-	t[strlen(FileName)-3] = 'a';
-	t[strlen(FileName)-2] = 'l';
-	t[strlen(FileName)-1] = 'p';
+	int tmp = strlen(FileName);
+	if (tmp>3) {
+	  t[tmp-3] = 'a';
+	  t[tmp-2] = 'l';
+	  t[tmp-1] = 'p';
+	}
 	FILE *fp2 = fopen(t, "rb");
 
 
