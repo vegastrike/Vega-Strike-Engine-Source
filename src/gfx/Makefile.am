@@ -1,6 +1,6 @@
 noinst_LIBRARIES = libgfx.a
 
-INCLUDES = -I ../ 
+INCLUDES = -I ../ -I ../boost
 
 libgfx_a_SOURCES =	\
 	ani_texture.h	\
