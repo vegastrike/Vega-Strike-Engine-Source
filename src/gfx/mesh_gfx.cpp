@@ -361,7 +361,7 @@ bool SetupSpecMapFirstPass (vector <Texture *> &decal, unsigned int mat, bool en
                                         GFXColor(1,1,1,1),
                                         GFXColor(1,1,1,1),
                                         GFXColor(0,0,0,0),
-                                        GFXColor(1,1,1,1));
+                                        GFXColor(0,0,0,0));
             retval=true;
             if (envMap)
                 GFXDisable(TEXTURE1);
@@ -579,3 +579,4 @@ void Mesh::CreateLogos(int faction, Flightgroup * fg) {
     delete [] offset;
   }
 }
+

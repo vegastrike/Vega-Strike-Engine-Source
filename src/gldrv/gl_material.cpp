@@ -74,10 +74,10 @@ void /*GFXDRVAPI*/ GFXSelectMaterialHighlights (const unsigned int number, const
 	matvect[3] = materialinfo[number].sa*specular.a;
 	glMaterialfv(GL_FRONT, GL_SPECULAR, matvect);
 
-	matvect[0] = materialinfo[number].er*emissive.r*emissive.a;
-	matvect[1] = materialinfo[number].eg*emissive.g*emissive.a;
-	matvect[2] = materialinfo[number].eb*emissive.b*emissive.a;
-	matvect[3] = materialinfo[number].ea*emissive.a;
+	matvect[0] = emissive.r*emissive.a;
+	matvect[1] = emissive.g*emissive.a;
+	matvect[2] = emissive.b*emissive.a;
+	matvect[3] = emissive.a;
 	glMaterialfv(GL_FRONT, GL_EMISSION, matvect);
 
 	glMaterialfv(GL_FRONT, GL_SHININESS, &materialinfo[number].power);

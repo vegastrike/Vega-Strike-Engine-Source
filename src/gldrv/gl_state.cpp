@@ -306,7 +306,8 @@ void /*GFXDRVAPI*/ GFXSelectTexcoordSet(const int stage, const int texset)
 	}
 }
 
-void GFXTextureAddOrModulate (int stage, bool add) {
+void GFXTextureAddOrModulate (int stage, bool modulate) {
+	bool add = !modulate;
   if (stage>=1) {
     if (GFXMultiTexAvailable()) {
       GFXActiveTexture (stage);
