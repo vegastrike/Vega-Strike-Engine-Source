@@ -1178,11 +1178,14 @@ void LaunchConverter(const char * input, const char * output, const char* args="
       waitpid(pid,&mystat,0);
     }
 #else
-  string ss_path = VSFileSystem::datadir+"/mesher.exe";
-  int pid=spawnl(P_WAIT,ss_path.c_str(),ss_path.c_str(),input,output,args,NULL);
+  string ss_path = VSFileSystem::datadir+"\\bin\\mesher.exe";
+  string intmp = string("\"")+input+string("\"");
+  string outtmp = string("\"")+output+string("\"");
+  string firstarg = string("\"")+ss_path+string("\"");
+  int pid=spawnl(P_WAIT,ss_path.c_str(),firstarg.c_str(),intmp.c_str(),outtmp.c_str(),args,NULL);
   if (pid==-1) {
-    ss_path = VSFileSystem::datadir+"/bin/mesher.exe";
-    int pid=spawnl(P_WAIT,ss_path.c_str(),ss_path.c_str(),input,output,args,NULL);
+    ss_path = VSFileSystem::datadir+"\\mesher.exe";
+    int pid=spawnl(P_WAIT,ss_path.c_str(),firstarg.c_str(),intmp.c_str(),outtmp.c_str(),args,NULL);
     if (pid==-1) {
       VSFileSystem::vs_fprintf(stderr,"Unable to spawn obj converter Error (%d)\n",pid);
     }
