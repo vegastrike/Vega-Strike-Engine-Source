@@ -47,6 +47,7 @@ class SaveGame {
  public:
   SaveGame() {}
   void ReloadPickledData();
+  string GetCallsign() {return callsign;}
   olist_t &getMissionData(const std::string &magic_number);
   SaveGame(const std::string &pilotname);
   float GetSavedCredits();

@@ -461,20 +461,24 @@ int NetClient::recvMsg( char* netbuffer, Packet* outpacket )
                 this->disconnect();
                 return -1;
                 break;
+			case LOGIN_UNAVAIL :
+				cout<<">>> ACCOUNT SERVER UNAVAILABLE ------------------------------------------------"<<endl;
+				this->disconnect();
+				break;
             // Create a character
             case CMD_CREATECHAR :
-		cout << endl;
+				cout << endl;
                 // Should begin character/ship creation process
                 //this->createChar();
                 break;
             // Receive start locations
             case CMD_LOCATIONS :
-		cout << endl;
+				cout << endl;
                 // Should receive possible starting locations list
                 this->receiveLocations( &p1 );
                 break;
             case CMD_SNAPSHOT :
-		cout << endl;
+				cout << endl;
                 // Should update another client's position
                 //cout<<"Received a SNAPSHOT from server"<<endl;
                 this->receivePosition( &p1 );
@@ -598,21 +602,56 @@ void	NetClient::addClient( const Packet* packet )
 
 	// Copy the client state in its structure
 	Clients[cltserial]->serial = cltserial;
+	// Should receive the name
+	string callsign ("player"+cltserial);
+	memcpy( Clients[cltserial]->name, callsign.c_str(), callsign.length());
 	ClientState cs;
 	memcpy( &cs, packet->getData(), sizeof( ClientState));
 	Clients[cltserial]->current_state = cs;
+	// The save buffer and XML buffer come after the ClientState
+	const char * buf = packet->getData()+sizeof( ClientState);
+	unsigned int savelen = ntohl( *( (unsigned int *)(buf)));
+	unsigned int xmllen = ntohl( *( (unsigned int *)(buf+sizeof( unsigned int)+savelen)));
+	char * savebuf = new char[savelen+1];
+	memcpy( savebuf, buf+sizeof( unsigned int), savelen);
+	savebuf[savelen]=0;
+	char * xmlbuf = new char[xmllen+1];
+	memcpy( xmlbuf, buf+2*sizeof( unsigned int)+savelen, xmllen);
+	xmlbuf[xmllen]=0;
+
+	// We will ignore - starsys as if a client enters he is in the same system
+	//                - pos since we received a ClientState
+	//                - creds as we don't care about other players' credits for now
+	string starsys;
+	QVector pos;
+	float creds;
+	bool update=true;
+	vector<string> savedships;
+	// Parse the save buffer
+	vector<SavedUnits> savedunits = save.ParseSaveGame( "", starsys, "", pos, update, creds, savedships, 0, savebuf, false);
 
 	cs.display();
+	// WE DON'T STORE FACTION IN SAVE YET
+	string PLAYER_FACTION_STRING( "privateer");
 	// Test if not a local player
 	if( !isLocalSerial( cltserial))
 	{
-		// CREATES THE UNIT... GET XML DATA OF UNIT FROM SERVER
-		Clients[cltserial]->game_unit.SetUnit( UniverseUtil::launch (string(""),"avenger",string(""),string( "unit"), string("default"),1,0, cs.getPosition(), string("")));
-		Clients[cltserial]->game_unit.GetUnit()->PrimeOrders();
+		// CREATES THE UNIT... GET SAVE AND XML FROM SERVER
+		// Use the first ship if there are more than one -> we don't handle multiple ships for now
+		// We name the flightgroup with the player name
+		Unit * un = UnitFactory::createUnit( callsign.c_str(),
+                             false,
+                             FactionUtil::GetFaction( PLAYER_FACTION_STRING.c_str()),
+                             string(""),
+                             Flightgroup::newFlightgroup ( callsign,savedships[0],PLAYER_FACTION_STRING,"default",1,1,"","",mission),
+                             0, xmlbuf);
+		Clients[cltserial]->game_unit.SetUnit( un);
+		//Clients[cltserial]->game_unit.GetUnit()->PrimeOrders();
 		Clients[cltserial]->game_unit.GetUnit()->SetNetworkMode( true);
 		//cout<<"Addclient 4"<<endl;
 
 		// Assign new coordinates to client
+		Clients[cltserial]->game_unit.GetUnit()->SetPosition( cs.getPosition());
 		Clients[cltserial]->game_unit.GetUnit()->SetOrientation( cs.getOrientation());
 		Clients[cltserial]->game_unit.GetUnit()->SetVelocity( cs.getVelocity());
 		Clients[cltserial]->game_unit.GetUnit()->SetNetworkMode( true);
@@ -625,6 +664,9 @@ void	NetClient::addClient( const Packet* packet )
 		Clients[cltserial]->game_unit.SetUnit( getNetworkUnit( cltserial));
 		assert( Clients[cltserial]->game_unit.GetUnit() != NULL);
 	}
+
+	delete savebuf;
+	delete xmlbuf;
 }
 
 /*************************************************************/

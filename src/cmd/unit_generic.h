@@ -424,6 +424,7 @@ public:
 public:
   ///tries to warp as close to un as possible abiding by the distances of various enemy ships...it might not make it all the way
   void WriteUnit(const char * modificationname="");
+  string WriteUnitString();
   ///Loads a unit from an xml file into a complete datastructure
   void LoadXML(const char *filename, const char * unitModifications="", char * xmlbuffer=0, int buflength=0);
 

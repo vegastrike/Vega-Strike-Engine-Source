@@ -28,6 +28,7 @@
 #include "vsnet_socket.h"
 #include "gfx/quaternion.h"  // for Transformation
 #include "cmd/container.h"
+#include "savegame.h"
 
 class Packet;
 class Unit;
@@ -47,6 +48,7 @@ class	NetClient
 		UnitContainer		game_unit;		// Unit struct from the game corresponding to that client
 
 		SOCKETALT			clt_sock;		// Comm. socket
+		SaveGame			save;
 		ObjSerial			serial;			// Serial # of client
 		int					nbclients;		// Number of clients in the zone
 		char				keeprun;		// Bool to test client stop

@@ -1506,6 +1506,16 @@ void Unit::WriteUnit (const char * modifications) {
     (*ui)->WriteUnit(modifications);
   } 
 }
+string Unit::WriteUnitString () {
+  string ret="";
+  if (image->unitwriter)
+    ret = image->unitwriter->WriteString();
+  for (un_iter ui= getSubUnits();(*ui)!=NULL;++ui) {
+    ret = ret + ((*ui)->WriteUnitString());
+  }
+  return ret;
+}
+
 extern std::string GetReadPlayerSaveGame (int);
 
 void Unit::LoadXML(const char *filename, const char * modifications, char * xmlbuffer, int buflength)

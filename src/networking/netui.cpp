@@ -23,11 +23,11 @@ static void static_initNetwork( )
         first_time = false;
 
         COUT <<"Initializing Winsock"<<std::endl;
-	WORD wVersionRequested = MAKEWORD( 1, 1 );
-	WSADATA wsaData; 
-	int res = WSAStartup(wVersionRequested,&wsaData);
-	if( res != 0)
-            COUT <<"Error initializing Winsock"<<std::endl;
+		WORD wVersionRequested = MAKEWORD( 1, 1 );
+		WSADATA wsaData; 
+		int res = WSAStartup(wVersionRequested,&wsaData);
+		if( res != 0)
+				COUT <<"Error initializing Winsock"<<std::endl;
     }
 #endif
 }
@@ -92,7 +92,7 @@ SOCKETALT NetUITCP::createSocket( char * host, unsigned short srv_port )
 	if( connect( local_fd, (sockaddr *)&remote_ip, sizeof( struct sockaddr))==SOCKET_ERROR)
 	{
 		perror( "Can't connect to server ");
-		exit( -1 );
+		//exit( -1 );
 	}
 	COUT << "Connected to " << inet_ntoa( remote_ip.sin_addr) << ":" << srv_port << std::endl;
 

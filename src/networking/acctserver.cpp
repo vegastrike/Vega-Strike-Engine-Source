@@ -185,26 +185,21 @@ void	AccountServer::recvMsg( SOCKETALT sock)
 					elem = *j;
 					if( !elem->compareName( name) && !elem->comparePass( passwd))
 					{
+						// We found the client in the account list
+						found = 1;
 						if( elem->isConnected())
+						{
+							// and he is connected
 							connected = 1;
-						else
-							found = 1;
+						}
 					}
 				}
 				if( !found)
 				{
-					if( connected)
-					{
-						COUT << "Inconsistency found !" << endl;
-						exit( 1);
-					}
-					else
-					{
-						cout<<"Login/passwd not found"<<endl;
-						elem = new Account( name, passwd);
-						this->sendUnauthorized( sock, elem);
-						delete elem;
-					}
+					cout<<"Login/passwd not found"<<endl;
+					Account elt(name, passwd);
+					this->sendUnauthorized( sock, &elt);
+					delete elem;
 				}
 				else
 				{
@@ -267,6 +262,13 @@ void	AccountServer::recvMsg( SOCKETALT sock)
 				// Should receive a new subscription
 				cout<<"<<< SUBSRIBE REQUEST --------------------------------------"<<endl;
 			break;
+			case CMD_RESYNCACCOUNTS:
+				cout<<">>> RESYNC ACCOUNTS --------------------------------------"<<endl;
+				// Should receive a list of active players for the concerned server
+				// So go through the Account list, look if server_sock == sock
+				// Then compare status (connected and now not anymore...)
+				cout<<"<<< RESYNC'ED ACCOUNTS --------------------------------------"<<endl;
+			break;
 			default:
 				cout<<">>> UNKNOWN command =( "<<cmd<<" )= ---------------------------------";
 		}
@@ -291,6 +293,8 @@ void	AccountServer::sendAuthorized( SOCKETALT sock, Account * acct)
 	// Get a serial for client
 	ObjSerial serial = getUniqueSerial();
 	cout<<"\tLOGIN REQUEST SUCCESS for <"<<acct->name<<">:<"<<acct->passwd<<">"<<endl;
+	// Store socket as a game server id
+	acct->setSocket( sock);
 	// Verify that client already has a ship or if it is a new account
 	if( acct->isNew())
 	{

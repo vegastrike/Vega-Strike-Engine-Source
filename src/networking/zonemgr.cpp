@@ -18,7 +18,7 @@ ZoneMgr::ZoneMgr()
 StarSystem *	ZoneMgr::addZone( string starsys)
 {
 	list<Client *> lst;
-	StarSystem * sts;
+	StarSystem * sts=NULL;
 	// Generate the StarSystem
 	string starsysfile = starsys+".system";
 	sts = _Universe->GenerateStarSystem (starsysfile.c_str(),"",Vector(0,0,0));

@@ -2,13 +2,10 @@
 #include "cmd/unit_generic.h"
 #include "cmd/images.h"
 #include "vs_path.h"
-#ifdef _SERVER
-	#include "configxml.h"
-#else
-	#include "config_xml.h"
-#endif
+#include "configxml.h"
 #include "vs_globals.h"
 #include "vegastrike.h"
+#include "networking/const.h"
 ///Assumes that the tag is  <Mount type=\"  and that it will finish with " ></Mount>
 using namespace XMLSupport;
 
@@ -145,6 +142,47 @@ void XMLSerializer::Write (const char * modificationname) {
   }
   fclose (fp);
 }
+
+static string TabString( int level) {
+  string ret="";
+  for (int i=0;i<level;i++) {
+    ret+='\t';
+  }
+  return ret;
+}
+string XMLSerializer::WriteString()
+{
+  string ret="";
+  for (unsigned int i=0;i<topnode.subnodes.size();i++) {
+    ret += topnode.subnodes[i].WriteString( mythis,0);
+  }
+  return ret;
+}
+string XMLnode::WriteString(void *mythis, int level) {
+  string ret;
+  char buffer[MAXBUFFER];
+  memset( buffer, 0, MAXBUFFER);
+  ret = TabString(level);ret = ret + "<" + val;
+  ret += string( buffer);
+  for (unsigned int i=0;i<elements.size();i++) {
+    ret += elements[i].WriteString(mythis);
+  }
+  if (subnodes.empty()) {
+    ret += "/>\n";    
+  } else {
+    ret += ">\n";
+    for (unsigned int i=0;i<subnodes.size();i++) {
+      ret += subnodes[i].WriteString(mythis,level+1);
+    }
+    ret += TabString(level);ret = ret + "</" + val + ">\n";
+  }
+  return ret;
+}
+string XMLElement::WriteString( void * mythis) {
+  string ret( " "+elem+"=\""+((*handler)(value,mythis))+"\"");
+  return ret;
+}
+
 XMLSerializer::XMLSerializer (const char * filename, const char *modificationname, void *mythis): savedir(modificationname), mythis(mythis) {
   curnode=&topnode;
   // In network mode we don't care about saving filename, we want always to save with modification

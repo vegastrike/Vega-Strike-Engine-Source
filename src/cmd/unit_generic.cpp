@@ -539,8 +539,10 @@ void Unit::Init(const char *filename, bool SubU, int faction,std::string unitMod
 	//Insert file loading stuff here
 	if(1&&fp) {
 	  name = filename;
-
-	  Unit::LoadXML(filename,unitModifications.c_str());
+	  if( netxml==NULL)
+		Unit::LoadXML(filename,unitModifications.c_str());
+	  else
+		Unit::LoadXML( "", "", netxml, strlen( netxml));
 	}
 	if (1) {
 	  calculate_extent(false);

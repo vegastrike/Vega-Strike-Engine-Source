@@ -27,6 +27,7 @@
 #include <stdio.h>
 #include "const.h"
 #include <assert.h>
+#include "netui.h"
 
 using std::cout;
 using std::endl;
@@ -38,6 +39,7 @@ class Account
 		ObjSerial	serial;
 		char		haschar;
 		bool		connected;
+		SOCKETALT	server_sock;
 
 	public:
 		  enum account_type {
@@ -63,6 +65,8 @@ class Account
 
 		ObjSerial	getSerial() { return this->serial;}
 		void		setSerial( ObjSerial sernum) { this->serial = sernum;}
+		SOCKETALT	getSocket() { return this->server_sock;}
+		void		setSocket( SOCKETALT sck) { this->server_sock = sck;}
 		void		set( char * sname, char * spasswd)
 		{
 			strncpy( name, sname, NAMELEN);

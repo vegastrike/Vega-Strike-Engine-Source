@@ -77,6 +77,7 @@ struct XMLElement {
     handler = hand;
   }
   void Write (FILE * fp,void *mythis);
+  string WriteString (void *mythis);
 };
 struct XMLnode {
   XMLnode *up;
@@ -86,6 +87,7 @@ struct XMLnode {
   XMLnode () {up=NULL;}
   XMLnode (const std::string &val, XMLnode * newup) {this->val=val;up=newup;}
   void Write (FILE * fp, void *mythis, int tablevel);
+  string WriteString( void *mythis, int tablevel);
 };
 class XMLSerializer {
   std::string filename;
@@ -98,6 +100,7 @@ class XMLSerializer {
   void AddTag (const std::string &tag);
   void AddElement (const std::string &element, XMLHandler *handler, const XMLType &input);
   void Write (const char * modificationname="");
+  string WriteString();
   void EndTag (const std::string endname=string(""));
   std::string getName (){return filename;}
   void setName (const std::string & fil) {this->filename = fil;}
