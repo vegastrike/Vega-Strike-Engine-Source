@@ -76,7 +76,7 @@ SOCKETALT NetUITCP::createSocket( char * host, unsigned short srv_port )
         if( (he = gethostbyname( host)) == NULL)
         {
             COUT << "Could not resolve hostname" << std::endl;
-            close( local_fd );
+            close_socket( local_fd );
             SOCKETALT ret( -1, SOCKETALT::TCP, remote_ip );
             return ret;
         }
@@ -89,7 +89,7 @@ SOCKETALT NetUITCP::createSocket( char * host, unsigned short srv_port )
         if( (remote_ip.sin_addr.s_addr=inet_addr( host)) == 0)
         {
             COUT << "Error inet_addr" << std::endl;
-            close( local_fd );
+            close_socket( local_fd );
             SOCKETALT ret( -1, SOCKETALT::TCP, remote_ip );
             return ret;
         }
@@ -97,7 +97,7 @@ SOCKETALT NetUITCP::createSocket( char * host, unsigned short srv_port )
         if( inet_aton( host, &remote_ip.sin_addr) == 0)
         {
             COUT << "Error inet_aton" << std::endl;
-            close( local_fd );
+            close_socket( local_fd );
             SOCKETALT ret( -1, SOCKETALT::TCP, remote_ip );
             return ret;
         }
@@ -111,7 +111,7 @@ SOCKETALT NetUITCP::createSocket( char * host, unsigned short srv_port )
     if( connect( local_fd, (sockaddr *)&remote_ip, sizeof( struct sockaddr))==SOCKET_ERROR)
     {
         perror( "Can't connect to server ");
-        close( local_fd );
+        close_socket( local_fd );
         SOCKETALT ret( -1, SOCKETALT::TCP, remote_ip );
         return ret;
     }
@@ -158,7 +158,7 @@ ServerSocket* NetUITCP::createServerSocket( unsigned short port )
     if( bind( local_fd, (sockaddr *)&local_ip, sizeof( struct sockaddr_in) )==SOCKET_ERROR )
     {
         perror( "Problem binding socket" );
-        close( local_fd );
+        close_socket( local_fd );
         return NULL;
     }
 
@@ -166,7 +166,7 @@ ServerSocket* NetUITCP::createServerSocket( unsigned short port )
     if( listen( local_fd, SOMAXCONN)==SOCKET_ERROR)
     {
         perror( "Problem listening on socket" );
-        close( local_fd );
+        close_socket( local_fd );
         return NULL;
     }
     COUT << "Listening on socket " << local_fd << std::endl
@@ -211,7 +211,7 @@ SOCKETALT NetUIUDP::createSocket( char * host, unsigned short srv_port )
     if( fcntl( local_fd, F_SETFL, O_NONBLOCK) == -1)
     {
         perror( "Error fcntl : ");
-    close( local_fd );
+    close_socket( local_fd );
         SOCKETALT ret( -1, SOCKETALT::UDP, remote_ip );
         return ret;
     }
@@ -220,7 +220,7 @@ SOCKETALT NetUIUDP::createSocket( char * host, unsigned short srv_port )
     if( ioctlsocket( local_fd, FIONBIO, &datato ) !=0 )
     {
         perror( "Error fcntl : ");
-    close( local_fd );
+    close_socket( local_fd );
         SOCKETALT ret( -1, SOCKETALT::UDP, remote_ip );
         return ret;
     }
@@ -235,7 +235,7 @@ SOCKETALT NetUIUDP::createSocket( char * host, unsigned short srv_port )
         if( (he = gethostbyname( host)) == NULL)
     {
             COUT << "Could not resolve hostname" << std::endl;
-        close( local_fd );
+        close_socket( local_fd );
             SOCKETALT ret( -1, SOCKETALT::UDP, remote_ip );
             return ret;
     }
@@ -251,7 +251,7 @@ SOCKETALT NetUIUDP::createSocket( char * host, unsigned short srv_port )
 #endif
     {
             COUT << "Error inet_aton" << std::endl;
-        close( local_fd );
+        close_socket( local_fd );
             SOCKETALT ret( -1, SOCKETALT::UDP, remote_ip );
             return ret;
     }
@@ -268,7 +268,7 @@ SOCKETALT NetUIUDP::createSocket( char * host, unsigned short srv_port )
     if( bind( local_fd, (sockaddr *)&local_ip, sizeof(struct sockaddr_in))==SOCKET_ERROR )
     {
     perror( "Can't bind socket" );
-    close( local_fd );
+    close_socket( local_fd );
         SOCKETALT ret( -1, SOCKETALT::UDP, remote_ip );
         return ret;
     }
@@ -306,7 +306,7 @@ ServerSocket* NetUIUDP::createServerSocket( unsigned short port )
     if( fcntl( local_fd, F_SETFL, O_NONBLOCK) == -1)
     {
         perror( "Error fcntl : ");
-    close( local_fd );
+    close_socket( local_fd );
         return NULL;
     }
 #else
@@ -314,7 +314,7 @@ ServerSocket* NetUIUDP::createServerSocket( unsigned short port )
     if( ioctlsocket( local_fd,FIONBIO,&datato ) !=0 )
     {
         perror( "Error fcntl : ");
-    close( local_fd );
+    close_socket( local_fd );
         return NULL;
     }
 #endif
@@ -327,7 +327,7 @@ ServerSocket* NetUIUDP::createServerSocket( unsigned short port )
     if( bind( local_fd, (sockaddr *)&local_ip, sizeof( struct sockaddr_in ) )==SOCKET_ERROR )
     {
         perror( "Cannot bind socket");
-    close( local_fd );
+    close_socket( local_fd );
         return NULL;
     }
 

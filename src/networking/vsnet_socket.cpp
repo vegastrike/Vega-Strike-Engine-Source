@@ -6,6 +6,15 @@
 #include "vsnet_socket.h"
 #include "vsnet_err.h"
 
+void close_socket( int fd)
+{
+#if defined(_WIN32) && !defined(__CYGWIN__)
+	closesocket( fd);
+#else
+	close( fd);
+#endif
+}
+
 using std::cout;
 using std::cerr;
 using std::endl;
@@ -221,6 +230,22 @@ bool operator==( const SOCKETALT& l, const SOCKETALT& r )
     }
 }
 
+bool SOCKETALT::sameAddress( const SOCKETALT& l)
+{
+    if( l._sock.isNull() )
+    {
+        return ( this->_sock.isNull() ? true : false );
+    }
+    else if( this->_sock.isNull() )
+    {
+        return false;
+    }
+    else
+    {
+        return this->_sock->eq(*l._sock);
+    }
+}
+
 /***********************************************************************
  * VsnetSocket - definition
  ***********************************************************************/
@@ -272,6 +297,12 @@ bool VsnetSocket::eq( const VsnetSocket& r )
 {
     const VsnetSocket* r2 = (const VsnetSocket*)&r;
     return ( (isTcp() == r2->isTcp()) && (fd == r2->fd) && (_remote_ip==r2->_remote_ip) );
+}
+
+bool VsnetSocket::sameAddress( const VsnetSocket& r)
+{
+    const VsnetSocket* r2 = (const VsnetSocket*)&r;
+    return ( (isTcp() == r2->isTcp()) && (_remote_ip==r2->_remote_ip) );
 }
 
 /***********************************************************************
@@ -478,11 +509,7 @@ void VsnetTCPSocket::disconnect( const char *s, bool fexit )
 {
     if( fd > 0 )
     {
-#if defined(_WIN32) && !defined(__CYGWIN__)
-        closesocket( fd );
-#else
-        close( fd );
-#endif
+        close_socket( fd );
         fd = -1;
     }
     cout << __FILE__ << ":" << __LINE__ << " "

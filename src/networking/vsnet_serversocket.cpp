@@ -30,11 +30,7 @@ void ServerSocket::disconnect( const char *s, bool fexit )
 {
     if( _fd > 0 )
     {
-#if defined(_WIN32) && !defined(__CYGWIN__)
-        closesocket( _fd );
-#else
-        close( _fd );
-#endif
+        close_socket( _fd );
     }
     cout << __FILE__ << ":" << __LINE__ << " "
          << s << " :\tWarning: disconnected" << strerror(errno) << endl;

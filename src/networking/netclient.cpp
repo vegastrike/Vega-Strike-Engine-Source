@@ -464,6 +464,7 @@ int NetClient::recvMsg( char* netbuffer, Packet* outpacket )
 			case LOGIN_UNAVAIL :
 				cout<<">>> ACCOUNT SERVER UNAVAILABLE ------------------------------------------------"<<endl;
 				this->disconnect();
+				return -1;
 				break;
             // Create a character
             case CMD_CREATECHAR :
@@ -525,6 +526,7 @@ int NetClient::recvMsg( char* netbuffer, Packet* outpacket )
 /**** Get the zone data from server                       ****/
 /*************************************************************/
 
+// NOT USED ANYMORE !!
 void NetClient::getZoneData( const Packet* packet )
 {
 	unsigned short nbclts;
@@ -588,7 +590,7 @@ void NetClient::getZoneData( const Packet* packet )
 void	NetClient::addClient( const Packet* packet )
 {
 	ObjSerial cltserial = packet->getSerial();
-	// NOTE : in splitscreen mode we may receive info about us
+	// NOTE : in splitscreen mode we may receive info about us so we comment the following test
 	/*
 	if( cltserial==this->serial)
 	{
@@ -625,6 +627,7 @@ void	NetClient::addClient( const Packet* packet )
 		const char * buf = packet->getData()+sizeof( ClientState);
 		unsigned int savelen = ntohl( *( (unsigned int *)(buf)));
 		unsigned int xmllen = ntohl( *( (unsigned int *)(buf+sizeof( unsigned int)+savelen)));
+		cout<<"\t\t>>>>>>>>>>>>>> RECEIVED SAVES : save_size = "<<savelen<<" - xml_size = "<<xmllen<<" <<<<<<<<<<<<<<<"<<endl;
 		char * savebuf = new char[savelen+1];
 		memcpy( savebuf, buf+sizeof( unsigned int), savelen);
 		savebuf[savelen]=0;
@@ -646,31 +649,29 @@ void	NetClient::addClient( const Packet* packet )
 		cs.display();
 		// WE DON'T STORE FACTION IN SAVE YET
 		string PLAYER_FACTION_STRING( "privateer");
-		// Test if not a local player
-		if( !isLocalSerial( cltserial))
-		{
-			// CREATES THE UNIT... GET SAVE AND XML FROM SERVER
-			// Use the first ship if there are more than one -> we don't handle multiple ships for now
-			// We name the flightgroup with the player name
-			Unit * un = UnitFactory::createUnit( callsign.c_str(),
-								 false,
-								 FactionUtil::GetFaction( PLAYER_FACTION_STRING.c_str()),
-								 string(""),
-								 Flightgroup::newFlightgroup ( callsign,savedships[0],PLAYER_FACTION_STRING,"default",1,1,"","",mission),
-								 0, xmlbuf);
-			Clients[cltserial]->game_unit.SetUnit( un);
-			//Clients[cltserial]->game_unit.GetUnit()->PrimeOrders();
-			Clients[cltserial]->game_unit.GetUnit()->SetNetworkMode( true);
-			//cout<<"Addclient 4"<<endl;
 
-			// Assign new coordinates to client
-			Clients[cltserial]->game_unit.GetUnit()->SetPosition( cs.getPosition());
-			Clients[cltserial]->game_unit.GetUnit()->SetOrientation( cs.getOrientation());
-			Clients[cltserial]->game_unit.GetUnit()->SetVelocity( cs.getVelocity());
-			Clients[cltserial]->game_unit.GetUnit()->SetNetworkMode( true);
-			// In that case, we want cubic spline based interpolation
-			//init_interpolation( cltserial);
-		}
+		// CREATES THE UNIT... GET SAVE AND XML FROM SERVER
+		// Use the first ship if there are more than one -> we don't handle multiple ships for now
+		// We name the flightgroup with the player name
+		Unit * un = UnitFactory::createUnit( callsign.c_str(),
+							 false,
+							 FactionUtil::GetFaction( PLAYER_FACTION_STRING.c_str()),
+							 string(""),
+							 Flightgroup::newFlightgroup ( callsign,savedships[0],PLAYER_FACTION_STRING,"default",1,1,"","",mission),
+							 0, xmlbuf);
+		Clients[cltserial]->game_unit.SetUnit( un);
+		//Clients[cltserial]->game_unit.GetUnit()->PrimeOrders();
+		Clients[cltserial]->game_unit.GetUnit()->SetNetworkMode( true);
+		//cout<<"Addclient 4"<<endl;
+
+		// Assign new coordinates to client
+		Clients[cltserial]->game_unit.GetUnit()->SetPosition( cs.getPosition());
+		Clients[cltserial]->game_unit.GetUnit()->SetOrientation( cs.getOrientation());
+		Clients[cltserial]->game_unit.GetUnit()->SetVelocity( cs.getVelocity());
+		Clients[cltserial]->game_unit.GetUnit()->SetNetworkMode( true);
+
+		// In that case, we want cubic spline based interpolation
+		//init_interpolation( cltserial);
 		delete savebuf;
 		delete xmlbuf;
 	}

@@ -6,6 +6,7 @@
 #include "cmd/unit_generic.h"
 #include "gfx/cockpit_generic.h"
 #include "packet.h"
+#include "savenet_util.h"
 //#include "netserver.h"
 #include "zonemgr.h"
 #include "vs_globals.h"
@@ -264,6 +265,9 @@ void	ZoneMgr::sendZoneClients( Client * clt)
 	ClientState tmpcs;
 	int nbclients=0;
 	Packet packet2;
+	string savestr, xmlstr;
+	char * savebuf;
+	int buflen;
 
 	// Loop through client in the same zone to send their current_state and save and xml to "clt"
 	for( k=zone_list[clt->zone].begin(); k!=zone_list[clt->zone].end(); k++)
@@ -271,21 +275,28 @@ void	ZoneMgr::sendZoneClients( Client * clt)
 		// Test if *k is the same as clt in which case we don't need to send info
 		if( clt!=(*k))
 		{
-			Cockpit * cp = _Universe->isPlayerStarship( clt->game_unit.GetUnit());
-			string savestr = cp->savegame->WriteSaveGame( cp->savegame->GetStarSystem().c_str(), clt->current_state.getPosition(), cp->credits, cp->unitfilename, 0, false);
-			string xmlstr = clt->game_unit.GetUnit()->WriteUnitString();
+			SaveNetUtil::GetSaveStrings( (*k), savestr, xmlstr);
+			buflen = 2*sizeof(unsigned int)+savestr.length()+xmlstr.length();
+			savebuf = new char[buflen];
+			/*
 			unsigned int savelen = savestr.length();
 			unsigned int xmllen = xmlstr.length();
 			unsigned int buflen = sizeof(ClientState)+2*sizeof(unsigned int)+savelen+xmllen;
 			char * savebuf = new char[buflen];
 			unsigned int nsavelen = htonl( savelen);
 			unsigned int nxmllen = htonl( xmllen);
+			*/
+			// Add the ClientState at the beginning of the buffer
 			memcpy( savebuf, &tmpcs, sizeof( ClientState));
+			// Add the save buffer after the ClientState
+			SaveNetUtil::GetSaveBuffer( savestr, xmlstr, savebuf+sizeof( ClientState));
+			/*
 			memcpy( savebuf+sizeof( ClientState), &nsavelen, sizeof( unsigned int));
 			memcpy( savebuf+sizeof( ClientState)+sizeof(unsigned short), savestr.c_str(), savelen);
 			memcpy( savebuf+sizeof( ClientState)+sizeof(unsigned short)+savelen, &nxmllen, sizeof( unsigned int));
 			memcpy( savebuf+sizeof( ClientState)+2*sizeof(unsigned short)+savelen, xmlstr.c_str(), xmllen);
-			packet2.send( CMD_ENTERCLIENT, clt->serial, savebuf, buflen, SENDRELIABLE, &clt->cltadr, clt->sock, __FILE__, __LINE__ );
+			*/
+			packet2.send( CMD_ENTERCLIENT, clt->serial, savebuf, buflen+sizeof( ClientState), SENDRELIABLE, &clt->cltadr, clt->sock, __FILE__, __LINE__ );
 			nbclients++;
 		}
 	}

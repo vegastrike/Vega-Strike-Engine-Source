@@ -31,6 +31,7 @@
 #include "lin_time.h"
 #include "netserver.h"
 #include "vsnet_serversocket.h"
+#include "savenet_util.h"
 
 VegaConfig * vs_config;
 double	clienttimeout;
@@ -162,17 +163,12 @@ void	NetServer::sendLoginAccept( Client * clt, AddressIP ipadr, int newacct)
 		// Get the save parts in the buffer
 		char * xml = buf + NAMELEN*2 + sizeof( unsigned int);
 		unsigned int xml_size = ntohl( *( (unsigned int *)(buf+NAMELEN*2)));
-		/*
-		char * xml_tmp = new char[xml_size+1];
-		memcpy( xml_tmp, xml, xml_size);
-		xml_tmp[xml_size]=0;
-		*/
-		bool update = true;
 		char * save = buf + NAMELEN*2 + sizeof( unsigned int)*2 + xml_size;
 		unsigned int save_size = ntohl( *( (unsigned int *)(buf+ NAMELEN*2 + sizeof( unsigned int) + xml_size)));
 		cout<<"XML="<<xml_size<<" bytes - SAVE="<<save_size<<" bytes"<<endl;
 		string PLAYER_CALLSIGN( clt->name);
 		QVector tmpvec( 0, 0, 0), safevec;
+		bool update = true;
 		float credits;
 		vector<string> savedships;
 		string str("");
@@ -231,13 +227,7 @@ void	NetServer::sendLoginAccept( Client * clt, AddressIP ipadr, int newacct)
 void	NetServer::sendLoginError( Client * clt, AddressIP ipadr)
 {
 	Packet	packet2;
-	char name[NAMELEN+1];
-	char passwd[NAMELEN+1];
-	const char * buf = packet.getData();
-	strcpy( name, buf);
-	strcpy( passwd, buf+NAMELEN);
 	// Send a login error
-	// int		retsend;
 	SOCKETALT	sockclt;
 	if( clt!=NULL)
 		sockclt = clt->sock;
@@ -245,6 +235,19 @@ void	NetServer::sendLoginError( Client * clt, AddressIP ipadr)
 	cout<<">>> SEND LOGIN ERROR -----------------------------------------------------------------"<<endl;
 	packet2.send( LOGIN_ERROR, 0, NULL, 0, SENDRELIABLE, &ipadr, sockclt, __FILE__, __LINE__ );
 	cout<<"<<< SENT LOGIN ERROR -----------------------------------------------------------------------"<<endl;
+}
+
+void	NetServer::sendLoginUnavailable( Client * clt, AddressIP ipadr)
+{
+	Packet	packet2;
+	// Send an unavailable login service
+	SOCKETALT	sockclt;
+	if( clt!=NULL)
+		sockclt = clt->sock;
+	//cout<<"Creating packet... ";
+	cout<<">>> SEND LOGIN UNAVAILABLE -----------------------------------------------------------------"<<endl;
+	packet2.send( LOGIN_UNAVAIL, 0, NULL, 0, SENDRELIABLE, &ipadr, sockclt, __FILE__, __LINE__ );
+	cout<<"<<< SENT LOGIN UNAVAILABLE -----------------------------------------------------------------------"<<endl;
 }
 
 void	NetServer::sendLoginAlready( Client * clt, AddressIP ipadr)
@@ -468,20 +471,32 @@ void	NetServer::start(int argc, char **argv)
 			acct_sock = NetUITCP::createSocket( srvip, tmpport );
 			if( acct_sock.valid())
 			{
+				int nbclients_here = udpClients.size() + tcpClients.size();
 				LI i;
+				int j=0;
 				COUT <<">>> Reconnected accountserver on socket "<<acct_sock<<" done."<<endl;
 				// Send a list of ingame clients
 				// Build a buffer with number of clients and client serials
-				int listlen = (tcpClients.size()+udpClients.size())*sizeof(ObjSerial)+sizeof(unsigned short);
+				int listlen = (tcpClients.size()+udpClients.size())*sizeof(ObjSerial);
 				char * buflist = new char[listlen];
-				for( i = tcpClients.begin(); i!=tcpClients.end(); i++)
+				ObjSerial sertmp;
+				// Put first the number of clients
+				memcpy( buflist, &nbclients, sizeof( unsigned short));
+				for( j=0, i = tcpClients.begin(); i!=tcpClients.end(); i++, j++)
 				{
+					// Add the current client's serial to the buffer
+					sertmp = htons( (*i)->serial);
+					memcpy( buflist+j*sizeof( ObjSerial), &sertmp, sizeof( ObjSerial));
 				}
-				for( i = udpClients.begin(); i!=udpClients.end(); i++)
+				for( i = udpClients.begin(); i!=udpClients.end(); i++, j++)
 				{
+					// Add the current client's serial to the buffer
+					sertmp = htons( (*i)->serial);
+					memcpy( buflist+j*sizeof( ObjSerial), &sertmp, sizeof( ObjSerial));
 				}
 				// Passing NULL to AddressIP arg because between servers -> only TCP
-				if( p2.send( CMD_RESYNCACCOUNTS, 0, buflist, listlen, SENDRELIABLE, NULL, acct_sock, __FILE__, __LINE__ ) < 0 )
+				// Use the serial packet's field to send the number of clients
+				if( p2.send( CMD_RESYNCACCOUNTS, nbclients_here, buflist, listlen, SENDRELIABLE, NULL, acct_sock, __FILE__, __LINE__ ) < 0 )
 				{
 					perror( "ERROR sending redirected login request to ACCOUNT SERVER : ");
 					cout<<"SOCKET was : "<<acct_sock<<endl;
@@ -895,6 +910,10 @@ void	NetServer::processPacket( Client * clt, unsigned char cmd, const AddressIP&
 			{
                 this->authenticate( clt, ipadr, packet );
 			}
+			else if( !acct_con)
+			{
+				this->sendLoginUnavailable( clt, ipadr);
+			}
             else
             {
 				SOCKETALT tmpsock;
@@ -918,24 +937,14 @@ void	NetServer::processPacket( Client * clt, unsigned char cmd, const AddressIP&
 					iptmp = &ipadr;
 					COUT << "Waiting authorization for client IP : " << ipadr << endl;
 				}
-				if( acct_con)
+				// Redirect the login request packet to account server
+				COUT << "Redirecting login request to account server on socket " << acct_sock << endl
+				<< "*** Packet to copy length : " << packet.getDataLength()<<endl;
+				if( p2.send( packet.getCommand(), 0, (char *)packet.getData(), packet.getDataLength(), SENDANDFORGET, iptmp, acct_sock, __FILE__, __LINE__ ) < 0 )
 				{
-					// Redirect the login request packet to account server
-					COUT << "Redirecting login request to account server on socket " << acct_sock << endl
-					<< "*** Packet to copy length : " << packet.getDataLength()<<endl;
-					if( p2.send( packet.getCommand(), 0, (char *)packet.getData(), packet.getDataLength(), SENDANDFORGET, iptmp, acct_sock, __FILE__, __LINE__ ) < 0 )
-					{
-						perror( "ERROR sending redirected login request to ACCOUNT SERVER : ");
-						cout<<"SOCKET was : "<<acct_sock<<endl;
-						cleanup();
-					}
-				}
-				else
-				{
-					// We lost connection to account server
-					// We refuse login
-					cout<<">>> SEND ACCTSERVER UNAVAILABLE --------------------------------------"<<endl;
-					p2.send( LOGIN_UNAVAIL, 0, NULL, 0, SENDRELIABLE, iptmp, tmpsock, __FILE__, __LINE__ );
+					perror( "ERROR sending redirected login request to ACCOUNT SERVER : ");
+					cout<<"SOCKET was : "<<acct_sock<<endl;
+					cleanup();
 				}
             }
             cout<<"<<< LOGIN REQUEST --------------------------------------"<<endl;
@@ -995,6 +1004,7 @@ void	NetServer::addClient( Client * clt)
 {
 	cout<<">>> SEND ENTERCLIENT =( serial n°"<<clt->serial<<" )= --------------------------------------"<<endl;
 	Packet packet2;
+	string savestr, xmlstr;
 
 	if( zonemgr->addClient( clt))
 	{
@@ -1013,21 +1023,14 @@ void	NetServer::addClient( Client * clt)
 		// For now assuming a default ship on client side
 
 		// Send savebuffer after clientstate
-		Cockpit * cp = _Universe->isPlayerStarship( clt->game_unit.GetUnit());
-		string savestr = cp->savegame->WriteSaveGame( cp->savegame->GetStarSystem().c_str(), clt->current_state.getPosition(), cp->credits, cp->unitfilename, 0, false);
-		string xmlstr = clt->game_unit.GetUnit()->WriteUnitString();
-		unsigned int savelen = savestr.length();
-		unsigned int xmllen = xmlstr.length();
-		unsigned int buflen = sizeof(ClientState)+2*sizeof(unsigned int)+savelen+xmllen;
+		SaveNetUtil::GetSaveStrings( clt, savestr, xmlstr);
+		unsigned int buflen = sizeof(ClientState)+2*sizeof(unsigned int)+savestr.length()+xmlstr.length();
 		char * savebuf = new char[buflen];
-		unsigned int nsavelen = htonl( savelen);
-		unsigned int nxmllen = htonl( xmllen);
 		memcpy( savebuf, &tmpcs, sizeof( ClientState));
-		memcpy( savebuf+sizeof( ClientState), &nsavelen, sizeof( unsigned int));
-		memcpy( savebuf+sizeof( ClientState)+sizeof(unsigned short), savestr.c_str(), savelen);
-		memcpy( savebuf+sizeof( ClientState)+sizeof(unsigned short)+savelen, &nxmllen, sizeof( unsigned int));
-		memcpy( savebuf+sizeof( ClientState)+2*sizeof(unsigned short)+savelen, xmlstr.c_str(), xmllen);
+		// Put the save buffer after the ClientState
+		SaveNetUtil::GetSaveBuffer( savestr, xmlstr, savebuf+sizeof( ClientState));
 		packet2.bc_create( CMD_ENTERCLIENT, clt->serial, savebuf, buflen, SENDRELIABLE, &clt->cltadr, clt->sock, __FILE__, __LINE__ );
+		delete savebuf;
 		cout<<"<<< SEND ENTERCLIENT -----------------------------------------------------------------------"<<endl;
 		zonemgr->broadcast( clt, &packet2 ); // , &NetworkToClient );
 		cout<<">>> SEND ADDED YOU =( serial n°"<<clt->serial<<" )= --------------------------------------"<<endl;
@@ -1223,22 +1226,6 @@ void	NetServer::closeAllSockets()
 /**** Save the server state                                ****/
 /**************************************************************/
 
-char *	CodeSaveBuffer( string savestr, string xmlstr)
-{
-	unsigned int total_size = savestr.length() + xmlstr.length() + 2*sizeof(unsigned int);
-	unsigned int nxmllen, nsavelen;
-	char * buffer = new char[total_size];
-	memset( buffer, 0, total_size);
-	nsavelen = htonl( savestr.length());
-	nxmllen = htonl( xmlstr.length());
-	memcpy( buffer, &nsavelen, sizeof( unsigned int));
-	memcpy( buffer + sizeof( unsigned int), savestr.c_str(), savestr.length());
-	memcpy( buffer + sizeof( unsigned int) + savestr.length(), &nxmllen, sizeof( unsigned int));
-	memcpy( buffer + 2*sizeof( unsigned int) + savestr.length(), xmlstr.c_str(), xmlstr.length());
-
-	return buffer;
-}
-
 // For now it only save units and player saves
 void	NetServer::save()
 {
@@ -1246,39 +1233,16 @@ void	NetServer::save()
 	Cockpit * cp;
 	Unit * un;
 	FILE * fp=NULL;
-	string xmlstr, savestr, savefile;
-	unsigned int xmllen, savelen, nxmllen, nsavelen;
+	string xmlstr, savestr;
+	//unsigned int xmllen, savelen, nxmllen, nsavelen;
 	char * buffer;
 	// Loop through all cockpits and write save files
 	for( int i=0; i<_Universe->numPlayers(); i++)
 	{
-		cp = _Universe->AccessCockpit( i);
-		un = cp->GetParent();
-		xmlstr = un->WriteUnitString();
-		savestr = cp->savegame->WriteSaveGame (cp->activeStarSystem->getFileName().c_str(),un->LocalPosition(),cp->credits,cp->unitfilename,0, false);
-		xmllen = xmlstr.length();
-		savelen = xmlstr.length();
-		// Write the xml unit
-		savefile = "./serversaves/"+cp->savegame->GetCallsign()+".xml";
-		fp = fopen( savefile.c_str(), "w");
-		if( !fp)
-		{
-			cout<<"Error opening save file "<<savefile<<endl;
-			exit(1);
-		}
-		fwrite( xmlstr.c_str(), sizeof( char), xmllen, fp);
-		fclose( fp);
-		// Write the save file
-		savefile = "./serversaves/"+cp->savegame->GetCallsign()+".save";
-		fp = fopen( savefile.c_str(), "w");
-		if( !fp)
-		{
-			cout<<"Error opening save file "<<savefile<<endl;
-			exit(1);
-		}
-		fwrite( savestr.c_str(), sizeof( char), savelen, fp);
-		fclose( fp);
-		// SHOULD SEND THE BUFFERS TO ACCOUNT SERVER
+		SaveNetUtil::GetSaveStrings( i, savestr, xmlstr);
+		// Write the save and xml unit
+		SaveNetUtil::SaveFiles( cp, savestr, xmlstr);
+		// SEND THE BUFFERS TO ACCOUNT SERVER
 		if( acctserver && acct_con)
 		{
 			bool found = false;
@@ -1302,9 +1266,11 @@ void	NetServer::save()
 				cout<<"Error client not found in save process !!!!"<<endl;
 				exit(1);
 			}
-			buffer = CodeSaveBuffer( savestr, xmlstr);
+			buffer = new char[savestr.length() + xmlstr.length() + 2*sizeof( unsigned int)];
+			SaveNetUtil::GetSaveBuffer( savestr, xmlstr, buffer);
 			if( pckt.send( CMD_SAVEACCOUNTS, clt->serial, buffer, strlen( buffer), SENDANDFORGET, NULL, acct_sock, __FILE__, __LINE__ ) < 0 )
 				cout<<"ERROR sending SAVE to account server"<<endl;
+			delete buffer;
 		}
 	}
 }

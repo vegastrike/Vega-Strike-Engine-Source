@@ -124,10 +124,28 @@ void	AccountServer::start()
 			}
 		}
 
+		VI vi;
 		for (LS j=DeadSocks.begin(); j!=DeadSocks.end(); j++)
 		{
-			cout<<"Closing socket number "<<(*j)<<endl;
-			j->disconnect( "closing socket", false );
+			int nbc_disc = 0;
+			cout<<">>>>>>> Closing socket number "<<(*j)<<endl;
+			// Disconnect all of that server clients
+			for( vi = Cltacct.begin(); vi!=Cltacct.end(); vi++)
+			{
+				// Check if the socket correspond to the one of the current account
+				// -> it was a client on the server that got disconnected
+				// We set them to disconnected in order to reactivate those in the resync list if we receive one
+
+				// We check only if it is the same address since the "fd" member of the socket should have been
+				// set to -1 because of disconnect
+				if( (*vi)->getSocket().sameAddress( (*j)))
+				{
+					(*vi)->setConnected( false);
+					nbc_disc++;
+				}
+			}
+			cout<<"\tDisconnected "<<nbc_disc<<" clients associated with that server socket"<<endl;
+			j->disconnect( "\tclosing socket", false );
 			Socks.remove( (*j));
 		}
 		DeadSocks.clear();
@@ -264,11 +282,44 @@ void	AccountServer::recvMsg( SOCKETALT sock)
 				cout<<"<<< SUBSRIBE REQUEST --------------------------------------"<<endl;
 			break;
 			case CMD_RESYNCACCOUNTS:
+			{
 				cout<<">>> RESYNC ACCOUNTS --------------------------------------"<<endl;
 				// Should receive a list of active players for the concerned server
 				// So go through the Account list, look if server_sock == sock
 				// Then compare status (connected and now not anymore...)
+				ObjSerial nbclients = packet.getSerial();
+				int i=0;
+				cout<<">>>>>>>>> SYNC RECEIVED FOR "<<nbclients<<" CLIENTS <<<<<<<<<<<<"<<endl;
+				ObjSerial sertmp;
+				VI vi;
+				
+				// Loop through accounts
+				// Maybe not necessary since when we get a game server disconnect we should have
+				// set all its accounts disconnected
+				/*
+				for( vi = Cltacct.begin; vi!=Cltacct.end(); vi++)
+				{
+					// Check if the socket correspond to the one of the current account
+					// -> it was a client on the server that asked for sync
+					// We set them to disconnected in order to reactivate those in the received list
+					if( (*vi)->getSocket() == sock)
+						(*vi)->setConnected( false);
+				}
+				*/
+				// Loop through received client serials
+				for( i=0; i<nbclients; i++)
+				{
+					sertmp = ntohs( *( (ObjSerial *)(buf+sizeof( ObjSerial)*i)));
+					// Loop through accounts
+					for( vi = Cltacct.begin(); vi!=Cltacct.end(); vi++)
+					{
+						// Reactivate the serial we received from server
+						if( (*vi)->getSerial() == sertmp)
+							(*vi)->setConnected( true);
+					}
+				}
 				cout<<"<<< RESYNC'ED ACCOUNTS --------------------------------------"<<endl;
+			}
 			break;
 			default:
 				cout<<">>> UNKNOWN command =( "<<cmd<<" )= ---------------------------------";
@@ -293,6 +344,7 @@ void	AccountServer::sendAuthorized( SOCKETALT sock, Account * acct)
 {
 	// Get a serial for client
 	ObjSerial serial = getUniqueSerial();
+	acct->setSerial( serial);
 	cout<<"\tLOGIN REQUEST SUCCESS for <"<<acct->name<<">:<"<<acct->passwd<<">"<<endl;
 	// Store socket as a game server id
 	acct->setSocket( sock);

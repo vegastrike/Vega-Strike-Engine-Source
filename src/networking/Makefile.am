@@ -49,6 +49,8 @@ libnetserver_a_SOURCES = $(libnetgeneric) \
 	netserver.h	\
 	cubicsplines.cpp	\
 	cubicsplines.h		\
+	savenet_util.h		\
+	savenet_util.cpp	\
 	zonemgr.cpp	\
 	zonemgr.h
 

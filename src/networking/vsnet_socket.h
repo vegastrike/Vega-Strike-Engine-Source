@@ -42,6 +42,8 @@
 #include "vsnet_socketset.h"
 #include "packetmem.h"
 
+void close_socket( int fd);
+
 class VsnetSocket
 {
 protected:
@@ -68,6 +70,7 @@ public:
     virtual bool isActive( SocketSet& set ) = 0;
 
     bool eq( const VsnetSocket& r );
+    bool sameAddress( const VsnetSocket& r );
 
     virtual int  sendbuf( PacketMem& packet, const AddressIP* to) = 0;
 
@@ -143,6 +146,8 @@ public:
     inline void disconnect( const char *s, bool fexit = true ) {
         if( !_sock.isNull() ) _sock->disconnect( s, fexit );
     }
+
+	bool sameAddress( const SOCKETALT& l);
 
     friend std::ostream& operator<<( std::ostream& ostr, const SOCKETALT& s );
     friend bool operator==( const SOCKETALT& l, const SOCKETALT& r );
