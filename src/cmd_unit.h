@@ -27,6 +27,7 @@
 //#include <iostream>
 #include <string>
 #include "cmd_weapon_xml.h"
+#include "cmd_collide.h"
 #include "UnitContainer.h"
 using std::string;
 //using std::queue;
@@ -85,6 +86,7 @@ friend class PlanetaryOrbit;
   void endElement(const string &name);
 
  protected:
+  void UpdateCollideTable();
   BSPTree *bspTree;
   int ucref;
   bool killed;
@@ -94,6 +96,7 @@ friend class PlanetaryOrbit;
   Transformation curr_physical_state;
   Matrix cumulative_transformation_matrix;
   Transformation cumulative_transformation;
+  LineCollide CollideInfo;
   Animation **explosion;
   float timeexplode;  
   int nummesh;

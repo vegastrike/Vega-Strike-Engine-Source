@@ -60,6 +60,8 @@ Vector &Beam::Position()
 
 void Beam::Init (const Transformation & trans, const weapon_info &cln , void * own)  {
   //Matrix m;
+  CollideInfo.object = NULL;
+  CollideInfo.type = LineCollide::BEAM;
   if (vlist)
     delete vlist;
   local_transformation = trans;//location on ship
@@ -127,6 +129,9 @@ void Beam::Init (const Transformation & trans, const weapon_info &cln , void * o
 }
 
 Beam::~Beam () {
+  if (CollideInfo.object) {
+    KillCollideTable (&CollideInfo);
+  }
   delete vlist;
   DecalRef[decal]--;
   if (DecalRef[decal]<=0) {
@@ -253,7 +258,6 @@ void Beam::UpdatePhysics(const Transformation &trans, const Matrix m) {
   cumulative_transformation.Compose(trans, m);
   cumulative_transformation.to_matrix(cumulative_transformation_matrix);
   //to help check for crashing.
-  
   if (stability&&numframes*SIMULATION_ATOM>stability)
     impact|=UNSTABLE;
   
@@ -264,9 +268,18 @@ void Beam::UpdatePhysics(const Transformation &trans, const Matrix m) {
     curthick =0;//die die die
   center = cumulative_transformation.position;
   direction = TransformNormal (cumulative_transformation_matrix,Vector(0,0,1));
-  Vector tmpvec = center + direction*curlength;
-
-  AddCollideQueue (LineCollide (this,LineCollide::BEAM,center.Min(tmpvec),center.Max(tmpvec)),false);
-				       
+  Vector tmpvec (center + direction*curlength);
+  Vector tmpMini = center.Min(tmpvec);
+  tmpvec = center.Max (tmpvec);
+  if (TableLocationChanged (CollideInfo,tmpMini,tmpvec)||CollideInfo.object==NULL) {
+    if (CollideInfo.object !=NULL) {
+      KillCollideTable (&CollideInfo);
+    }
+    CollideInfo.object = this;
+    CollideInfo.Mini= tmpMini;
+    CollideInfo.Maxi= tmpvec;
+    AddCollideQueue (CollideInfo);
+  }	
+  CollideHuge(CollideInfo);
   //Check if collide...that'll change max beam length REAL quick
 }

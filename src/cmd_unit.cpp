@@ -46,8 +46,8 @@ double interpolation_blend_factor;
 static list<Unit*> Unitdeletequeue;
 
 void Unit::calculate_extent() {  
-	int a;
-	for(a=0; a<nummesh; a++) {
+  int a;
+  for(a=0; a<nummesh; a++) {
     corner_min = corner_min.Min(meshdata[a]->corner_min());
     corner_max = corner_max.Max(meshdata[a]->corner_max());
   }
@@ -63,9 +63,13 @@ void Unit::calculate_extent() {
 
 void Unit::Init()
 {
+  CollideInfo.object = NULL;
+  CollideInfo.type = LineCollide::UNIT;
   bspTree = NULL;
   invisible=false;
-  origin= Vector(0,0,0);
+  origin.Set(0,0,0);
+  corner_min.Set (FLT_MAX,FLT_MAX,FLT_MAX);
+  corner_max.Set (-FLT_MAX,-FLT_MAX,-FLT_MAX);
   numhalos=0;
   halos=NULL;
   nummounts=0;
@@ -243,6 +247,8 @@ Unit::Unit(const char *filename, bool xml) {
 
 Unit::~Unit()
 {
+  if (CollideInfo.object)
+    KillCollideTable (&CollideInfo);
   if (bspTree)
     delete bspTree;
   for (int beamcount=0;beamcount<nummounts;beamcount++) {
@@ -685,7 +691,7 @@ void Unit::Draw(const Transformation &parent, const Matrix parentMatrix)
         Vector MeshCenter;
 #endif
   int i;
-  if (1||!invisible) {
+  if (!invisible) {
     for (i=0;i<nummesh;i++) {
       float d = GFXSphereInFrustum(Transform (cumulative_transformation_matrix,
 					      meshdata[i]->Position()),

@@ -4,54 +4,39 @@
 #include "cmd_collide.h"
 #include "physics.h"
 #include "hashtable_3d.h"
-vector <LineCollide*> collidequeue;
-//const int COLLIDETABLESIZE=20;//cube root of entries
-//const int COLLIDETABLEACCURACY=200;// "1/largeness of sectors"
 
-#define _USE_COLLIDE_TABLE
-Hashtable3d <LineCollide*, char[20],char[200]> collidetable;
+Hashtable3d <const LineCollide*, char[20],char[200]> collidetable;
 
-void AddCollideQueue (const LineCollide &tmp, bool hhuge) {
-  int size = collidequeue.size();
-  collidequeue.push_back (new LineCollide(tmp));
-#ifdef _USE_COLLIDE_TABLE
-  collidetable.Put (collidequeue[size],collidequeue[size]);
-#endif
-
-  
+bool TableLocationChanged (const Vector & Mini,const Vector & minz) { 
+  return (collidetable.hash_int (Mini.i)!=collidetable.hash_int (minz.i) ||
+	  collidetable.hash_int (Mini.j)!=collidetable.hash_int (minz.j) ||
+	  collidetable.hash_int (Mini.k)!=collidetable.hash_int (minz.k));
 }
-void ClearCollideQueue() {
-#ifdef _USE_COLLIDE_TABLE
-  collidetable.Clear();//blah might take some time
-#endif
-  for (unsigned int i=0;i<collidequeue.size();i++) {
-    delete collidequeue[i];
-  }
-  collidequeue = vector<LineCollide*>();
+bool TableLocationChanged (const LineCollide &lc, const Vector &minx, const Vector & maxx) {
+  return TableLocationChanged (lc.Mini,minx) || TableLocationChanged (lc.Maxi,maxx);
+}
+void KillCollideTable (LineCollide * lc) {
+  collidetable.Remove (lc, lc);
+}
+void AddCollideQueue (const LineCollide &tmp) {
+  collidetable.Put (&tmp,&tmp);
 }
 
 void Unit::CollideAll() {
   unsigned int i;
-  bool hhuge = false;
-  Vector minx (Position().i-radial_size,Position().j-radial_size,Position().k-radial_size);
-  Vector maxx(Position().i+radial_size,Position().j+radial_size,Position().k+radial_size);
-  //target->curr_physical_state.position;, rSize();
-#ifdef _USE_COLLIDE_TABLE
-  #define COLQ colQ
-  vector <LineCollide*> colQ;
-  hhuge = collidetable.Get (minx,maxx,colQ);
-  if (hhuge) 
-    colQ = collidequeue;
-#else
-  #define COLQ collidequeue
-#endif
+#define COLQ colQ
+  vector <const LineCollide*> colQ;
+  collidetable.Get (CollideInfo.Mini,CollideInfo.Maxi,colQ);
   for (i=0;i<COLQ.size();i++) {
-    if (Position().i+radial_size>COLQ[i]->Mini.i&&
-	Position().i-radial_size<COLQ[i]->Maxi.i&&
-	Position().j+radial_size>COLQ[i]->Mini.j&&
-	Position().j-radial_size<COLQ[i]->Maxi.j&&
-	Position().k+radial_size>COLQ[i]->Mini.k&&
-	Position().k-radial_size<COLQ[i]->Maxi.k) {
+    //    if (colQ[i]->object > this||)//only compare against stuff bigger than you
+    if (COLQ[i]->object!=this)
+      if (
+	  Position().i+radial_size>COLQ[i]->Mini.i&&
+	  Position().i-radial_size<COLQ[i]->Maxi.i&&
+	  Position().j+radial_size>COLQ[i]->Mini.j&&
+	  Position().j-radial_size<COLQ[i]->Maxi.j&&
+	  Position().k+radial_size>COLQ[i]->Mini.k&&
+	  Position().k-radial_size<COLQ[i]->Maxi.k) {
       //continue;
       switch (COLQ[i]->type) {
       case LineCollide::UNIT://other units!!!
@@ -69,26 +54,9 @@ void Unit::CollideAll() {
       }
     }
   }
-  //add self to the queue??? using prev and cur physical state as an UNKNOWN
-  AddCollideQueue (LineCollide(this,LineCollide::UNIT,minx,maxx),hhuge);
 #undef COLQ
 }
-/*
-bool Mesh::Collide (Unit * target, const Transformation &cumtrans, Matrix cumtransmat) {
-  Transformation cumulative_transformation(cumtrans);
-  cumulative_transformation.position = local_pos.Transform (cumtransmat);
 
-  if (bspTree||target->querySphere (cumulative_transformation.position,rSize())//test0808
-   ) {
-    float localTrans [16];// {1,0,0,0,0,1,0,0,0,0,1,0,target->Position().i,target->Position.j,target->Position().k,1};
-    if (QueryBSP (InvTransform(cumtransmat,target->Position()),target->rSize())) {//bsp      
-      fprintf (stderr,"mesh %s intersects unit %s", hash_name->c_str(), target->name.c_str());
-      return true;
-    }
-  }
-  return false;
-}
-*/
 bool Unit::OneWayCollide (Unit * target, Vector & normal, float &dist) {//do each of these bubbled subunits collide with the other unit?
   int i;
   if (!querySphere(target->Position(),target->rSize()))
@@ -103,6 +71,9 @@ bool Unit::OneWayCollide (Unit * target, Vector & normal, float &dist) {//do eac
   }
 
   return false;
+}
+
+void Unit::UpdateCollideTable () {
 }
 
 bool Unit::Collide (Unit * target) {
@@ -131,13 +102,29 @@ bool Unit::Collide (Unit * target) {
   //  smaller->ApplyForce (normal * fabs(elast*speedagainst)/SIMULATION_ATOM);
   //  bigger->ApplyForce (normal * -fabs((elast+1)*speedagainst*smaller->GetMass()/bigger->GetMass())/SIMULATION_ATOM);
   //deal damage similarly to beam damage!!  Apply some sort of repel force
-  smaller->ApplyForce (normal*smaller->GetMass()*fabs(normal.Dot ((smaller->GetVelocity()-bigger->GetVelocity()/SIMULATION_ATOM))+fabs (dist)/(SIMULATION_ATOM*SIMULATION_ATOM)));
-  bigger->ApplyForce (normal*(smaller->GetMass()*smaller->GetMass()/bigger->GetMass())*-fabs(normal.Dot ((smaller->GetVelocity()-bigger->GetVelocity()/SIMULATION_ATOM))+fabs (dist)/(SIMULATION_ATOM*SIMULATION_ATOM)));
+  fprintf (stderr,"Collidison %s %s",name.c_str(),target->name.c_str());
+  //082801GOODsmaller->ApplyForce (normal*smaller->GetMass()*fabs(normal.Dot ((smaller->GetVelocity()-bigger->GetVelocity()/SIMULATION_ATOM))+fabs (dist)/(SIMULATION_ATOM*SIMULATION_ATOM)));
+  //082801GOODbigger->ApplyForce (normal*(smaller->GetMass()*smaller->GetMass()/bigger->GetMass())*-fabs(normal.Dot ((smaller->GetVelocity()-bigger->GetVelocity()/SIMULATION_ATOM))+fabs (dist)/(SIMULATION_ATOM*SIMULATION_ATOM)));
   //each mesh with each mesh? naw that should be in one way collide
   return true;
 }
 
+void Beam::CollideHuge (const LineCollide & lc) {
+  vector <const LineCollide *> tmp = collidetable.GetHuge();
+  for (int i=0;i<tmp.size();i++) {
+    if (tmp[i]->type==LineCollide::UNIT) {
+      if (lc.Mini.i< tmp[i]->Maxi.i&&
+	  lc.Mini.j< tmp[i]->Maxi.j&&
+	  lc.Mini.k< tmp[i]->Maxi.k&&
+	  lc.Maxi.i> tmp[i]->Mini.i&&
+	  lc.Maxi.j> tmp[i]->Mini.j&&
+	  lc.Maxi.k> tmp[i]->Mini.k) {
+	this->Collide ((Unit*)tmp[i]->object);
+      }
+    }
+  }
 
+}
 bool Beam::Collide (Unit * target) {
 
   if (target==owner) 

@@ -1,33 +1,23 @@
-#include "cmd_collide.h"
-#include <algorithm>
 #ifndef _HASHTABLE_3D_H_
 #define _HASHTABLE_3D_H_
+#include "cmd_collide.h"
+#include <algorithm>
+
 #define COLLIDETABLESIZE sizeof(CTSIZ)
 #define COLLIDETABLEACCURACY sizeof (CTACCURACY)
 
 const int HUGEOBJECT=16; //objects that go over 16 sectors are considered huge and better to check against everything.
-struct LineCollide {
-  void * object;
-  enum collidables {UNIT, BEAM,BALL,BOLT,PROJECTILE} type;
-  Vector Mini;
-  Vector Maxi;
-  LineCollide (void * objec, enum collidables typ,const Vector &st, const Vector &en) {this->object=objec;this->type=typ;this->Mini=st;this->Maxi=en;}
-  LineCollide (const LineCollide &l) {object=l.object; type=l.type; Mini=l.Mini;Maxi=l.Maxi;}      
-};
 
 template <class T, class CTSIZ, class CTACCURACY> class Hashtable3d {
   int minaccessx,minaccessy,minaccessz,maxaccessx,maxaccessy,maxaccessz;
   vector <T> hugeobjects;
   vector <T> table [COLLIDETABLESIZE][COLLIDETABLESIZE][COLLIDETABLESIZE];
-  static int hash_int (float i) {
-    return (((int)(i<0?(i-COLLIDETABLEACCURACY):i))/COLLIDETABLEACCURACY)%(COLLIDETABLESIZE/2)+(COLLIDETABLESIZE/2); 
-  }
-  static void hash_vec (float i, float j, float k, int &x, int &y, int &z) {
+  void hash_vec (float i, float j, float k, int &x, int &y, int &z) {
     x = hash_int(i);
     y = hash_int(j);
     z = hash_int(k);
   }
-  static void hash_vec (const Vector & t,int &x, int&y,int&z) {
+  void hash_vec (const Vector & t,int &x, int&y,int&z) {
     hash_vec(t.i,t.j,t.k,x,y,z);
   }
 public:
@@ -38,6 +28,9 @@ public:
     maxaccessx=0;
     maxaccessy=0;
     maxaccessz=0;    
+  }
+  int hash_int (const float aye) {
+    return ((int)(((aye<0)?(aye-COLLIDETABLEACCURACY):aye)/COLLIDETABLEACCURACY))%(COLLIDETABLESIZE/2)+(COLLIDETABLESIZE/2); 
   }
   void Clear () {
     hugeobjects.clear();
@@ -72,6 +65,9 @@ public:
     //blah = blooh;
     retval.insert (retval.end(),hugeobjects.begin(),hugeobjects.end());
   }
+  vector <T>& GetHuge () {
+    return hugeobjects;
+  }
   bool Get (const Vector &Min, const Vector & Max, vector <T> &retval) {    
     //int minx,miny,minz,maxx,maxy,maxz;
     //    hash_vec(Min,minx,miny,minz);
@@ -84,7 +80,7 @@ public:
     if (Min.j==maxy) maxy+=COLLIDETABLEACCURACY/2;
     if (Min.k==maxz) maxz+=COLLIDETABLEACCURACY/2;
     if (fabs((maxx-Min.i)*(maxy-Min.j)*(maxz-Min.k))>COLLIDETABLEACCURACY*COLLIDETABLEACCURACY*COLLIDETABLEACCURACY*HUGEOBJECT) {
-      //      retval = collidequeue;
+      retval = hugeobjects;
       return true;
     } else {
       retval = hugeobjects;

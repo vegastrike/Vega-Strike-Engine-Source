@@ -1,6 +1,7 @@
 #ifndef _CMD_BEAM_H_
 #define _CMD_BEAM_H_
 #include "cmd_weapon_xml.h"
+#include "cmd_collide.h"
 #include "gfx_transform_matrix.h"
 #include "gfx_primitive.h"
 #include <vector>
@@ -12,6 +13,7 @@ private:
   Transformation local_transformation;
   unsigned int decal;
   GFXVertexList *vlist;
+  LineCollide CollideInfo;
   unsigned int numframes;
   float speed;//lite speed
   float texturespeed;
@@ -22,7 +24,6 @@ private:
   float thickness;
   float lastthick;
   float lastlength;
-  
   float stability;
   float damagerate;
   float rangepenalty;
@@ -41,9 +42,7 @@ private:
   Vector direction;
   
   void RecalculateVertices();
-  //static vector <Texture *> BeamDecal;
-  //static vector <int> DecalRef;
-  //static vector <vector <DrawContext> > drawqueue;
+  void CollideHuge(const LineCollide &);
 public:
   
   Beam (const Transformation & trans, const weapon_info & clne, void * own);

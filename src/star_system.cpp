@@ -158,7 +158,7 @@ void StarSystem::Update() {
     while(time/SIMULATION_ATOM >= 1.0) { // Chew up all SIMULATION_ATOMs that have elapsed since last update
       // Handle AI in pass 2 to maintain consistency
 
-      ClearCollideQueue();
+
       modelGravity();
       Iterator *iter = drawList->createIterator();
       while((unit = iter->current())!=NULL) {
