@@ -1680,14 +1680,14 @@ void GameCockpit::RestoreViewPort() {
 
 static void ShoveCamBehindUnit (int cam, Unit * un, float zoomfactor) {
   QVector unpos = un->GetPlanetOrbit()?un->LocalPosition():un->Position();
-  _Universe->AccessCamera(cam)->SetPosition(unpos-_Universe->AccessCamera()->GetR().Cast()*(un->rSize()+g_game.znear*2)*zoomfactor,un->GetVelocity(),un->GetAngularVelocity());
+  _Universe->AccessCamera(cam)->SetPosition(unpos-_Universe->AccessCamera()->GetR().Cast()*(un->rSize()+g_game.znear*2)*zoomfactor,un->GetWarpVelocity(),un->GetAngularVelocity());
 }
 static void ShoveCamBelowUnit (int cam, Unit * un, float zoomfactor) {
   QVector unpos = un->GetPlanetOrbit()?un->LocalPosition():un->Position();
   Vector p,q,r;
   _Universe->AccessCamera(cam)->GetOrientation(p,q,r);
   static float ammttoshovecam = XMLSupport::parse_float(vs_config->getVariable("graphics","shove_camera_down",".3"));
-  _Universe->AccessCamera(cam)->SetPosition(unpos-(r-ammttoshovecam*q).Cast()*(un->rSize()+g_game.znear*2)*zoomfactor,un->GetVelocity(),un->GetAngularVelocity());
+  _Universe->AccessCamera(cam)->SetPosition(unpos-(r-ammttoshovecam*q).Cast()*(un->rSize()+g_game.znear*2)*zoomfactor,un->GetWarpVelocity(),un->GetAngularVelocity());
 }
 void GameCockpit::SetupViewPort (bool clip) {
   _Universe->AccessCamera()->RestoreViewPort (0,(view==CP_FRONT?viewport_offset:0));

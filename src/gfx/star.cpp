@@ -305,7 +305,7 @@ bool StarVlist::BeginDrawState (const QVector &center, const Vector & velocity, 
 	if (StarStreaks) {
 		Matrix rollMatrix;
 		static float velstreakscale= XMLSupport::parse_float (vs_config->getVariable ("graphics","velocity_star_streak_scale","5"));
-		static float minstreak= XMLSupport::parse_float (vs_config->getVariable ("graphics","velocity_star_streak_min","10"));
+		static float minstreak= XMLSupport::parse_float (vs_config->getVariable ("graphics","velocity_star_streak_min","1"));
 
 		Vector vel (-velocity*velstreakscale);
 		if (vel.MagnitudeSquared()>=minstreak*minstreak) {
