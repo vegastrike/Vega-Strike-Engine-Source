@@ -146,10 +146,12 @@ void FireAt::ChooseTargets (int numtargs, bool force) {
 	break;
       }
       const char tprior=ROLES::getPriority (k->turret[0].tur->combatRole())[un->combatRole()];
-      if (relationship<0&&tprior<16){
-	k->listOfTargets[0].push_back (TargetAndRange (un,rangetotarget,relationship));
-      }else if (tprior<31){
-	k->listOfTargets[1].push_back (TargetAndRange (un,rangetotarget,relationship));
+      if (relationship<0) {
+	if (tprior<16){
+	  k->listOfTargets[0].push_back (TargetAndRange (un,rangetotarget,relationship));
+	}else if (tprior<31){
+	  k->listOfTargets[1].push_back (TargetAndRange (un,rangetotarget,relationship));
+	}
       }
     }
     iter.advance();
