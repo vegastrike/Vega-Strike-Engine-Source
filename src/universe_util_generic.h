@@ -106,6 +106,8 @@ namespace UniverseUtil {
 	void SetAutoStatus (int global_auto, int player_auto);
 	void LoadMission (string missionname);
 	QVector SafeEntrancePoint (QVector,float radial_size=-1);
+	std::string getVariable(std::string section,std::string name,std::string def);
+	std::string getSubVariable(std::string section,std::string subsection,std::string name,std::string def);
 	double sqrt (double);
 	double log (double);
 	double exp (double);

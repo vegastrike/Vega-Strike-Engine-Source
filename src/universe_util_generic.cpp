@@ -366,6 +366,12 @@ namespace UniverseUtil {
 		static float planet_rad_percent =  XMLSupport::parse_float (vs_config->getVariable ("physics","auto_pilot_planet_radius_percent",".75"));
 		return planet_rad_percent;
 	}
+	std::string getVariable(std::string section,std::string name,std::string def) {
+		return vs_config->getVariable(section,name,def);
+	}
+	std::string getSubVariable(std::string section,std::string subsection,std::string name,std::string def) {
+		return vs_config->getVariable(section,subsection,name,def);
+	}
   double timeofday () {return getNewTime();}
   double sqrt (double x) {return ::sqrt (x);}
   double log (double x) {return ::log (x);}

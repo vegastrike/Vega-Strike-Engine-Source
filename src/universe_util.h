@@ -151,6 +151,8 @@ namespace UniverseUtil {
 ///this gets the number of active players
 	int getNumPlayers ();
 	int maxMissions ();
+	std::string getVariable(std::string section,std::string name,std::string def);
+	std::string getSubVariable(std::string section,std::string subsection,std::string name,std::string def);
 	double timeofday ();
 	double sqrt (double);
 	double log (double);

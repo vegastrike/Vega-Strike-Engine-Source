@@ -240,6 +240,18 @@ namespace UnitUtil {
       my_unit->GetComputerData().set_speed = speed;
     }
   }
+	float maxSpeed (Unit * my_unit) {
+		if (!my_unit) {
+			return 0;
+		}
+		return my_unit->GetComputerData().max_speed();
+	}
+	float maxAfterburnerSpeed (Unit * my_unit) {
+		if (!my_unit) {
+			return 0;
+		}
+		return my_unit->GetComputerData().max_ab_speed();
+	}
   void setECM (Unit * my_unit, short NewECM) {
     if (!my_unit)
       return;

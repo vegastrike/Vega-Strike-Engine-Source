@@ -44,6 +44,8 @@ namespace UnitUtil {
 	short getECM (Unit * un);
 	void setSpeed (Unit * un, float speed);
 	Unit *owner (Unit *un);
+	float maxSpeed (Unit *un);
+	float maxAfterburnerSpeed (Unit *un);
 }
 
 #endif
