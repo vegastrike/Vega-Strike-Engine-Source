@@ -640,7 +640,19 @@ void Unit::getAverageGunSpeed(float & speed, float &range) const {
    }
   
 }
+StarSystem * Unit::getStarSystem () {
 
+  if (activeStarSystem) {
+    return activeStarSystem;
+  }else {
+    Cockpit * cp=_Universe->isPlayerStarship(this);
+    if (cp) {
+      if (cp->activeStarSystem)
+	return cp->activeStarSystem;
+    }
+  }
+  return _Universe->activeStarSystem();
+}
 float Unit::TrackingGuns(bool &missilelock) {
   float trackingcone = 0;
   missilelock=false;

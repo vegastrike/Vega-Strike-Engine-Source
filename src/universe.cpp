@@ -162,6 +162,11 @@ void Universe::StartGFX()
       	GFXEndScene();
 }
 void Universe::SetActiveCockpit (int i) {
+#ifdef VS_DEBUG
+  if (i<0||i>=cockpit.size()) {
+    fprintf (stderr,"ouch invalid cockpit %d",i);
+  }
+#endif 
   current_cockpit=i;
 }
 void Universe::SetActiveCockpit (Cockpit * cp) {

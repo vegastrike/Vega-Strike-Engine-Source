@@ -166,7 +166,7 @@ void Planet::AddCity (const std::string &texture,float radius,int numwrapx, int 
   m.ar=m.ag=m.ab=m.aa=1.0;
   m.dr=m.dg=m.db=m.da=0.0;
   m.sr=m.sg=m.sb=m.sa=0.0;
-  m.er=m.eg=m.eb=m.ea=0.0;
+  m.er=m.eg=m.eb=m.ea=m.power=0.0;
   static int stacks=XMLSupport::parse_int(vs_config->getVariable ("graphics","planet_detail","24"));
   meshdata.push_back(new CityLights (radius,stacks,stacks, texture.c_str(), numwrapx, numwrapy, inside_out,ONE, ONE));
   meshdata.back()->setEnvMap (GFXFALSE);

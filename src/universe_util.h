@@ -91,6 +91,10 @@ namespace UniverseUtil {
 	void setOwner(int which,Unit *owner);
 ///this gets an owner of a completeness (NULL means all players can see this objective)
 	Unit* getOwner(int which);
+	//gets the owner of this mission
+	int getMissionOwner();
+	//sets the owner of this mission to be a particular cockpit
+	void setMissionOwner(int);
 	///returns number missions running to tweak difficulty
 	int numActiveMissions();
 ///this sends an IO message... I'm not sure if delay currently works, but from, to and message do :-) ... if you want to send to the bar do "bar" as the to string... if you want to make news for the news room specify "news"

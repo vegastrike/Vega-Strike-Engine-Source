@@ -624,6 +624,11 @@ void restore_main_loop() {
 
 }
 void main_loop() {
+  /*  static int i=0;
+  setTimeCompression(i);
+  i++;
+  if (i>1000)
+  i=0;*/
   _Universe->StartDraw();
   if(myterrain){ 
     myterrain->AdjustTerrain(_Universe->activeStarSystem());

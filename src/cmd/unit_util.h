@@ -36,7 +36,7 @@ namespace UnitUtil {
 	int isPlayerStarship (Unit * un);
 	int hasCargo (Unit * my_unit, std::string mycarg);
 	Cargo GetCargo (Unit *my_unit, std::string cargname);
-
+	string getUnitSystemFile (Unit * my_unit);
 }
 
 

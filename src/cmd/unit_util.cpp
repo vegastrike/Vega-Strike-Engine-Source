@@ -199,6 +199,13 @@ namespace UnitUtil {
 		else
 			return false;
 	}
+        string getUnitSystemFile (Unit * un) {
+	  if (!un) {
+	    return _Universe->activeStarSystem()->getFileName();
+	  }
+	  StarSystem * ss = un->getStarSystem();
+	  return ss->getFileName();
+        }
 	bool incrementCargo(Unit *my_unit,float percentagechange,int quantity){
 		if (!my_unit)return false;
 		if (my_unit->numCargo()>0) {

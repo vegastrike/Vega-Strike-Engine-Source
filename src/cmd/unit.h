@@ -194,7 +194,7 @@ class Unit
   StarSystem * activeStarSystem;//the star system I'm in
   bool BuyCargo (unsigned int i, unsigned int quantity, Unit * buyer, float &creds);
   bool BuyCargo (const std::string &cargo,unsigned int quantity, Unit * buyer, float & creds);
-  
+
   void SetPlanetHackTransformation (Transformation *&ct, Matrix *&ctm);
 
   UnitSounds * sound;
@@ -531,6 +531,7 @@ public:
   void Split (int level);
   bool TransferUnitToSystem (StarSystem *NewSystem);
   void TransferUnitToSystem (unsigned int whichJumpQueue, class StarSystem *&previouslyActiveStarSystem, bool DoSightAndSound);
+    StarSystem * getStarSystem();
   ///Initialize many of the defaults inherant to the constructor
   void Init();
   void ActivateJumpDrive (int destination=0);

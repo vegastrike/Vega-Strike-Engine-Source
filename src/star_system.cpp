@@ -556,7 +556,7 @@ void StarSystem::Update(float priority , bool executeDirector) {
 	if (_Universe->getActiveStarSystem(0)==this) {
 #endif
 	  if (executeDirector) {
-		int curcockpit= _Universe->AccessCockpit()-_Universe->AccessCockpit(0);
+	    unsigned int curcockpit= _Universe->CurrentCockpit();
 	    for (unsigned int i=0;i<active_missions.size();i++) {
 	      if (active_missions[i]) {
 			  _Universe->SetActiveCockpit(active_missions[i]->player_num);

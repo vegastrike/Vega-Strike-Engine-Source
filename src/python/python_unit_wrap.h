@@ -127,6 +127,7 @@
   EXPORT_UTIL(decrementCargo,false)
   EXPORT_UTIL(getSignificantDistance,0)
   EXPORT_UTIL(isPlayerStarship,-1)
+  EXPORT_UTIL(getUnitSystemFile,"")
   EXPORT_UTIL(hasCargo,0)
   EXPORT_UTIL(GetCargo,Cargo("","",1,1,1,1))
 

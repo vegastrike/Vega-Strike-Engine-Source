@@ -32,6 +32,13 @@ namespace UniverseUtil {
 	string getSystemName() {
 		return activeSys->getName();
 	}
+	void setMissionOwner(int whichplayer) {
+		mission->player_num=whichplayer;
+	}
+	int getMissionOwner() {
+		return mission->player_num;
+	}
+
 	un_iter getUnitList() {
 		return activeSys->getUnitList().createIterator();
 	}
