@@ -30,7 +30,9 @@ libcmdgeneric =			\
 	container.h						\
 	container.cpp	\
 	unit_const_cache.cpp \
-	unit_const_cache.h
+	unit_const_cache.h	\
+	role_bitmask.cpp	\
+	role_bitmask.h
 
 libcmdserver_a_SOURCES =$(libcmdgeneric)			\
 	unit_util_server.cpp			\
