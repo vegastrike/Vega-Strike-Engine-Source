@@ -15,7 +15,7 @@ extern Unit * getTopLevelOwner();
 namespace UnitUtil {
 	void orbit (Unit * my_unit, Unit * orbitee, float speed, QVector R, QVector S, QVector center) {
 		if (my_unit) {
-			my_unit->PrimeOrders (new PlanetaryOrbit (my_unit,speed,0,R,S,center,orbitee));
+			my_unit->PrimeOrders (new PlanetaryOrbit (my_unit,speed/(3.1415926536*(S.Magnitude()+R.Magnitude())),0,R,S,center,orbitee));
 			if (orbitee){
 				if (orbitee->isUnit()==PLANETPTR) {
 					((Planet *)orbitee)->AddSatellite (my_unit);
