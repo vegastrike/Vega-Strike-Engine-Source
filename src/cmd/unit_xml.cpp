@@ -96,7 +96,7 @@ int GetModeFromName (const char * input_buffer) {
       }
       return 0;
 }
-
+extern bool CheckAccessory(Unit *);
 void Unit::beginElement(void *userData, const XML_Char *name, const XML_Char **atts) {
   ((Unit*)userData)->beginElement(name, AttributeList(atts));
 }
@@ -941,7 +941,7 @@ using namespace UnitXML;
     if (xml->units[indx]->image->unitwriter!=NULL) {
       xml->units[indx]->image->unitwriter->setName (filename);
     }
-    
+    CheckAccessory(xml->units[indx]);//turns on the ceerazy rotation for the turret
     break;
   case COCKPITDAMAGE:
 	  xml->unitlevel++;

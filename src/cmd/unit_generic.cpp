@@ -874,7 +874,7 @@ void Unit::Fire (unsigned int weapon_type_bitmask, bool listen_to_owner) {
     }
 
 }
-static bool CheckAccessory (Unit * tur) {
+bool CheckAccessory (Unit * tur) {
   bool accessory = tur->name.find ("accessory")!=string::npos;
   if (accessory) {
     tur->SetAngularVelocity(tur->DownCoordinateLevel(Vector (tur->GetComputerData().max_pitch,
