@@ -319,7 +319,8 @@ void Mesh::ProcessZFarMeshes () {
   GFXDisable (DEPTHTEST);
   GFXDisable (DEPTHWRITE);
   ///sort meshes  
-  std::sort<OrigMeshVector::iterator,MeshCloser>(undrawn_meshes[NUM_ZBUF_SEQ].begin(),undrawn_meshes[NUM_ZBUF_SEQ].end(),MeshCloser());
+  //std::sort<OrigMeshVector::iterator,MeshCloser>(undrawn_meshes[NUM_ZBUF_SEQ].begin(),undrawn_meshes[NUM_ZBUF_SEQ].end(),MeshCloser());
+  std::sort(undrawn_meshes[NUM_ZBUF_SEQ].begin(),undrawn_meshes[NUM_ZBUF_SEQ].end(),MeshCloser());
   for (OrigMeshVector::iterator i=undrawn_meshes[NUM_ZBUF_SEQ].begin();i!=undrawn_meshes[NUM_ZBUF_SEQ].end();i++) {
     i->orig->ProcessDrawQueue (NUM_ZBUF_SEQ);
     i->orig->will_be_drawn &= (~(1<<NUM_ZBUF_SEQ));
