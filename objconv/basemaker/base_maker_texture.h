@@ -1,5 +1,5 @@
 ///A single OpenGL texture
-
+#include <stdio.h>
 class Texture {
 public:
 	enum ColorMask {
