@@ -164,50 +164,81 @@ Mesh::Mesh (const Mesh & m) {
 }
 
 using namespace VSFileSystem;
-
+extern Hashtable<std::string, std::vector <Mesh*>, 127> bfxmHashTable;
 Mesh::Mesh(const char * filename,const Vector & scale, int faction, Flightgroup *fg, bool orig):hash_name(filename)
 {
-  this->orig=NULL;
-  InitUnit();
-  Mesh *oldmesh;
-  if (LoadExistant (filename,scale,faction)) {
-    return;
-  }
-  bool shared=false;
-  VSFile f;
-  VSError err=Unspecified;
-  err = f.OpenReadOnly( filename, MeshFile);
-  if( err>Ok)
-  {
-	VSFileSystem::vs_fprintf (stderr,"Cannot Open Mesh File %s\n",filename);
-	cleanexit=1;
-	winsys_exit(1);
-	return;
-  }
-  shared = (err==Shared);
-
-  bool xml=true;
-  if(xml) {
-    //LoadXML(filename,scale,faction,fg,orig);
-    LoadXML(f,scale,faction,fg,orig);
-    oldmesh = this->orig;
-  } else {
-	// This must be changed someday
-    LoadBinary(shared?(VSFileSystem::sharedmeshes+"/"+(filename)).c_str():filename,faction);
-    oldmesh = new Mesh[1];
-  }
-  if( err<=Ok)
-	  f.Close();
-  draw_queue = new vector<MeshDrawContext>;
-  if (!orig) {
-    hash_name =shared?VSFileSystem::GetSharedMeshHashName (filename,scale,faction):VSFileSystem::GetHashName(filename,scale,faction);
-    meshHashTable.Put(hash_name, oldmesh);
-    //oldmesh[0]=*this;
-    *oldmesh=*this;
-    oldmesh->orig = NULL;
-    oldmesh->refcount++;
-  } else {
+  Mesh* cpy=LoadMesh(filename,scale,faction,fg);
+  if (cpy->orig) {
+    LoadExistant(cpy->orig);
+    delete cpy;//wasteful, but hey
+    if (orig!=false) {
+      orig=false;
+      std::vector<Mesh*> *tmp=bfxmHashTable.Get(this->orig->hash_name);
+      if (tmp->size()&&(*tmp)[0]==this->orig) {
+        if (this->orig->refcount==1) {
+          bfxmHashTable.Delete(this->orig->hash_name);        
+          orig=true;
+        }
+      }
+      if (meshHashTable.Get(this->orig->hash_name)==this->orig) {
+        if (this->orig->refcount==1) {
+          meshHashTable.Delete(this->orig->hash_name);
+          orig=true;
+        }
+      }
+      if (orig) {
+        Mesh * tmp=this->orig;
+        tmp->orig=this;
+        this->orig=NULL;
+        refcount=2;
+        delete []tmp;
+      }
+    }
+  }else {
+    delete cpy;
+    fprintf (stderr,"fallback, %s unable to be loaded as bfxm\n",filename); 
     this->orig=NULL;
+    InitUnit();
+    Mesh *oldmesh;
+    if (LoadExistant (filename,scale,faction)) {
+      return;
+    }
+    bool shared=false;
+    VSFile f;
+    VSError err=Unspecified;
+    err = f.OpenReadOnly( filename, MeshFile);
+    if( err>Ok)
+    {
+      VSFileSystem::vs_fprintf (stderr,"Cannot Open Mesh File %s\n",filename);
+      cleanexit=1;
+      winsys_exit(1);
+      return;
+    }
+    shared = (err==Shared);
+    
+    bool xml=true;
+    if(xml) {
+      //LoadXML(filename,scale,faction,fg,orig);
+      LoadXML(f,scale,faction,fg,orig);
+      oldmesh = this->orig;
+    } else {
+      // This must be changed someday
+      LoadBinary(shared?(VSFileSystem::sharedmeshes+"/"+(filename)).c_str():filename,faction);
+      oldmesh = new Mesh[1];
+    }
+    if( err<=Ok)
+      f.Close();
+    draw_queue = new vector<MeshDrawContext>;
+    if (!orig) {
+      hash_name =shared?VSFileSystem::GetSharedMeshHashName (filename,scale,faction):VSFileSystem::GetHashName(filename,scale,faction);
+      meshHashTable.Put(hash_name, oldmesh);
+      //oldmesh[0]=*this;
+      *oldmesh=*this;
+      oldmesh->orig = NULL;
+      oldmesh->refcount++;
+    } else {
+      this->orig=NULL;
+    }
   }
 }
 float const ooPI = 1.00F/3.1415926535F;

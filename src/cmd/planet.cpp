@@ -74,8 +74,10 @@ public:
 					// Writing in the homedir texture directory
 					VSImage image;
 					image.WriteImage( (char *)nam.c_str(), &tex[0], PngImage, rez, 1, true, 8, TextureFile);
-					delete Decal[0];
-					Decal[0]= new Texture(nam.c_str(),nam.c_str());
+                                        if (!orig) {
+                                          delete Decal[0];
+                                          Decal[0]= new Texture(nam.c_str(),nam.c_str());
+                                        }
 				}
 			}
 		}
