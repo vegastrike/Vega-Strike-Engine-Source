@@ -361,7 +361,8 @@ void AggressiveAI::Execute () {
       }
     }
   } else {
-    if ((--logic.curtime)==0&&target) {
+    if (target) {
+    if ((--logic.curtime)==0) {
       curinter=(curinter==INTERR)?INTRECOVER:INTNORMAL;
       //parent->getAIState()->eraseType (Order::FACING);
       //parent->getAIState()->eraseType (Order::MOVEMENT);
@@ -373,6 +374,7 @@ void AggressiveAI::Execute () {
 	ProcessLogic (logic);
       }
       logic.curtime = logic.maxtime;      
+    }
     }
   }
   }
