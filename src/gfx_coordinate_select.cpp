@@ -81,7 +81,6 @@ void CoordinateSelect::Draw () {
   //  fprintf (stderr,"Location: %f %f %f", LocalPosition.i, LocalPosition.j, LocalPosition.k);
   GFXBlendMode(ONE,ONE);
   LocSelAni.SetPosition(LocalPosition);
-  //cerr << "location of locationselect : " << LocalPosition << endl;
   LocSelAni.Draw();
   GFXPopBlendMode();
 

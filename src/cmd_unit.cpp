@@ -336,9 +336,11 @@ int Unit::querySphere (float * t,const Vector &st, const Vector &dir, float err)
     //Vector tst = TargetPoint;
     float k = tst.Dot (dir);
     TargetPoint = tst - k*(dir);
+    /*
     cerr << origPoint << "-" << st << " = " << tst << " projected length " << k << " along direction " << dir << endl;
     cerr << "projected line " << st << " - " << st + k*dir << endl;
     cerr << "length of orthogonal projection " << TargetPoint.Magnitude() << ", " << "radius " << meshdata[i]->rSize() << endl;
+    */
     perplines.push_back(origPoint-TargetPoint);
     
     ///      fprintf (stderr, "i%f,j%f,k%f end %f,%f,%f>, k %f distance %f, rSize %f\n", st.i,st.j,st.k,end.i,end.j,end.k,k,TargetPoint.Dot(TargetPoint), meshdata[i]->rSize());    

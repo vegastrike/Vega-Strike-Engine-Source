@@ -33,7 +33,7 @@ Sprite::Sprite(char *file, bool trackzoom):Mesh(), track_zoom(trackzoom)
 {
   pos.i = 0;
   pos.j = 0;
-  pos.k = 1.000001;
+  pos.k = 1.00001;
   Mesh::SetPosition();
 
   xcenter = 0;
@@ -140,7 +140,6 @@ void Sprite::SetPosition(const float &x1, const float &y1)
 {
 	pos.i = x1;
 	pos.j = y1;
-	cerr << "position " << pos.i << ", " << pos.j << endl;
 }
 
 void Sprite::GetPosition(float &x1, float &y1)

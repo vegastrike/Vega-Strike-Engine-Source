@@ -59,7 +59,16 @@ void mouseMotionQueue(int x, int y) {
   eventQueue.push_back(MouseEvent(MouseEvent::MOTION, -1, -1, -1, x, y));
 }
 
-void mouseClick( int button, int state, int mod, int x, int y ) {
+void mouseClick( int button, int state, int x, int y ) {
+  int mod = glutGetModifiers();
+  if(button>=NUM_BUTTONS) return;
+  mousex = x;
+  mousey = y;
+  mouseBindings[button](state==GLUT_DOWN?PRESS:RELEASE,x,y,0,0,mod);
+  MouseState[button]=(state==GLUT_DOWN)?DOWN:UP;
+}
+
+void mouseClick0( int button, int state, int mod, int x, int y ) {
   if(button>=NUM_BUTTONS) return;
   mousex = x;
   mousey = y;
@@ -128,7 +137,7 @@ void ProcessMouse () {
     MouseEvent e = eventQueue.front();
     switch(e.type) {
     case MouseEvent::CLICK:
-      mouseClick(e.button, e.state, e.mod, e.x, e.y);
+      mouseClick0(e.button, e.state, e.mod, e.x, e.y);
       break;
     case MouseEvent::DRAG:
       mouseDrag(e.x, e.y);

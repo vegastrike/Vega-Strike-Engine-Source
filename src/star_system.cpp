@@ -91,13 +91,10 @@ void StarSystem::Draw() {
   Mesh::ProcessUndrawnMeshes();
   systemInputDFA->Draw();
 
+  /*
   Vector p,q,r,pos;
   pos = cam[0].GetPosition();
   cam[0].GetOrientation(p,q,r);
-  /*
-  cam[1].SetPosition(q);
-  cam[1].LookAt(Vector(0,0,0), Vector(0,0,-1));
-  */
 
   currentcamera=1;
   SetViewport();
@@ -148,9 +145,6 @@ void StarSystem::Draw() {
 
   currentcamera=2;
   SetViewport();
-  /*  cam[2].SetPosition(p);
-  cam[2].LookAt(Vector(0,0,0), Vector(0,0,-1));
-  */
   GFXClear();
   {
   Iterator *iter = drawList->createIterator();
@@ -161,7 +155,6 @@ void StarSystem::Draw() {
   }
   delete iter;
   }
-
   Mesh::ProcessUndrawnMeshes(); 
 
   glActiveTextureARB(GL_TEXTURE0_ARB);
@@ -199,6 +192,7 @@ void StarSystem::Draw() {
 
   currentcamera=0;
   SetViewport();
+*/
 }
 
 void StarSystem::Update() {

@@ -13,19 +13,17 @@ Vector MouseCoordinate (int mouseX, int mouseY) {
 bool ClickList::queryShip (int mouseX, int mouseY,Unit *ship) {   
   Vector mousePoint = MouseCoordinate (mouseX, mouseY);
 
-  cerr << "Mousepoint: " << mousePoint << endl;
     //mousePoint.k= -mousePoint.k;
   Vector CamP,CamQ,CamR;
   _GFX->AccessCamera()->GetPQR(CamP,CamQ,CamR);
   mousePoint = Transform (CamP,CamQ,CamR,mousePoint);	
-  cerr << "Transformed Mousepoint: " << mousePoint << endl;
   _GFX->AccessCamera()->GetPosition(CamP);    
   //  if (ship->querySphere(CamP,mousePoint,0)){  //FIXME  bounding spheres seem to be broken
   mousePoint.Normalize();
   mouseline =mousePoint + CamP;
   if (ship->querySphere(CamP,mousePoint,0)){  // camera position is not actually the center of the camera
-      return true;
-						//  if (ship->queryBoundingBox(CamP,mousePoint,0)) {
+    //        if (ship->queryBoundingBox(CamP,mousePoint,0)) 
+    return true;
     }
     //}
   return false;
