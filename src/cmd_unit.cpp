@@ -252,6 +252,8 @@ Unit::~Unit()
 			delete subunits[subcount];
 		delete [] subunits;
 	}
+	if (halos&&numhalos)
+	  delete [] halos;
 	if (mounts) {
 	  delete []mounts;
 	}
