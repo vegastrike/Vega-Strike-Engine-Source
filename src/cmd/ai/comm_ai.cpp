@@ -118,14 +118,29 @@ float CommunicatingAI::getAnger(const Unit * target)const {
 float CommunicatingAI::GetEffectiveRelationship (const Unit * target)const {
   return Order::GetEffectiveRelationship (target)+getAnger(target);
 }
+static void GetMadAt(Unit* un, Unit * parent, int numhits=0) {
+  if (numhits==0) {
+    static float snumhits = XMLSupport::parse_float(vs_config->getVariable("AI","ContrabandMadness","5"));
+    numhits =snumhits;
+  }
+  CommunicationMessage hit (un,parent,NULL,0);
+  hit.SetCurrentState(hit.fsm->GetHitNode(),NULL,0);
+  for (         int i=0;i<numhits;i++) {
+    parent->getAIState()->Communicate(hit);
+  }
+
+}
+
 void AllUnitsCloseAndEngage(Unit * un, int faction) {
 	Unit * ally;
 	static float contraband_assist_range = XMLSupport::parse_float (vs_config->getVariable("physics","contraband_assist_range","50000"));
         float relation=0;
-        if ((relation=FactionUtil::GetIntRelation(faction,un->faction))>-.05) {
-          FactionUtil::AdjustIntRelation(faction,un->faction,-.05-relation,1);
+        static float minrel = XMLSupport::parse_float (vs_config->getVariable("AI","max_faction_contraband_relation","-.05"));
+        static float adj = XMLSupport::parse_float (vs_config->getVariable("AI","faction_contraband_relation_adjust","-.025"));
+        if ((relation=FactionUtil::GetIntRelation(faction,un->faction))>minrel) {
+          FactionUtil::AdjustIntRelation(faction,un->faction,minrel-relation,1);
         }else {
-          FactionUtil::AdjustIntRelation(faction,un->faction,-.025,1);
+          FactionUtil::AdjustIntRelation(faction,un->faction,adj,1);
         }
 	for (un_iter i=_Universe->activeStarSystem()->getUnitList().createIterator();
 		(ally = *i)!=NULL;
@@ -135,6 +150,7 @@ void AllUnitsCloseAndEngage(Unit * un, int faction) {
 		if (ally->faction==faction) {
 			//if (ally->InRange (un,loc,true)) {
 				if ((ally->Position()-un->Position()).Magnitude()<contraband_assist_range) {
+                                        GetMadAt(un,ally);
 					Flightgroup * fg = ally->getFlightgroup();
 					if (fg) {
 						if (fg->directive.empty()?true:toupper(*fg->directive.begin())!=*fg->directive.begin()) {
@@ -159,8 +175,7 @@ void CommunicatingAI::TerminateContrabandSearch(bool contraband_detected) {
     CommunicationMessage c(parent,un,comm_face,sex);
     if (contraband_detected) {
       c.SetCurrentState(c.fsm->GetContrabandDetectedNode(),comm_face,sex);
-      static int numHitsPerContrabandFail=3;
-      GetMadAt (un,numHitsPerContrabandFail);
+      GetMadAt (un,0);
       AllUnitsCloseAndEngage(un,parent->faction);
 
     }else {
@@ -174,12 +189,7 @@ void CommunicatingAI::TerminateContrabandSearch(bool contraband_detected) {
 
 }
 void CommunicatingAI::GetMadAt (Unit * un, int numHitsPerContrabandFail) {
-
-      CommunicationMessage hit (un,parent,NULL,0);
-      hit.SetCurrentState(hit.fsm->GetHitNode(),comm_face,sex);
-      for (         int i=0;i<numHitsPerContrabandFail;i++) {
-		  parent->getAIState()->Communicate(hit);
-      }
+  ::GetMadAt(un,parent,numHitsPerContrabandFail);
 }
 
 static bool InList (std::string item, Unit * un) {
