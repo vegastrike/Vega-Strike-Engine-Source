@@ -325,17 +325,29 @@ void GameStarSystem::Draw(bool DrawCockpit) {
   fprintf (stderr,"cp");
   fflush (stderr);
 #endif
-  if (_Universe->AccessCockpit()->GetParent()==NULL) {
+  Unit * par;
+  bool alreadysetviewport=false;
+  if ((par=_Universe->AccessCockpit()->GetParent())==NULL) {
 #ifdef UPDATEDEBUG
   fprintf (stderr,"cpu");
   fflush (stderr);
 #endif
     _Universe->AccessCamera()->UpdateGFX (GFXTRUE);
+  }else {
+    if (!par->isSubUnit()) {
+      //now we can assume world is topps
+      par-> cumulative_transformation = linear_interpolate (par->prev_physical_state,par->curr_physical_state,interpolation_blend_factor);
+      _Universe->AccessCockpit()->SetupViewPort(true);
+      alreadysetviewport=true;
+    }
+
   }
 #ifdef UPDATEDEBUG
   fprintf (stderr,">un<");
   fflush (stderr);
 #endif
+
+
   while((unit = iter.current())!=NULL) {
     ((GameUnit<Unit> *)unit)->Draw();
     iter.advance();
@@ -351,7 +363,8 @@ void GameStarSystem::Draw(bool DrawCockpit) {
   fprintf (stderr,"vp");
   fflush (stderr);
 #endif
-  _Universe->AccessCockpit()->SetupViewPort(true);///this is the final, smoothly calculated cam
+  if (!alreadysetviewport)
+    _Universe->AccessCockpit()->SetupViewPort(true);///this is the final, smoothly calculated cam
   //  SetViewport();//camera wielding unit is now drawn  Note: Background is one frame behind...big fat hairy deal
   GFXColor tmpcol (0,0,0,1);
   GFXGetLightContextAmbient(tmpcol);
