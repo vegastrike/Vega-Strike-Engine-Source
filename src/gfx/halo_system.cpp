@@ -11,6 +11,7 @@
 #include "config_xml.h"
 #include "gfx/particle.h"
 #include "lin_time.h"
+#include "animation.h"
 static void DoParticles (QVector pos, float percent, const Vector & velocity, float radial_size,int faction) {
   percent = 1-percent;
   int i=rand();
@@ -58,6 +59,16 @@ MyIndHalo::MyIndHalo(const QVector & loc, const Vector & size) {
     this->size=size;
 }
 unsigned int HaloSystem::AddHalo (const char * filename, const QVector & loc, const Vector &size, const GFXColor & col) {
+#ifdef CAR_SIM
+  /*  GFXColor col;
+  col = GFXColor(1,0,0,1);
+  if (loc.k>0) {
+    col = GFXColor (1,1,1,1);
+    }*/
+  ani.push_back (new Animation ("flare6.ani",1,.1,MIPMAP,true,true,col));
+  ani.back()->SetDimensions (size.i,size.j);
+  ani.back()->SetPosition(loc);
+#endif
   if (mesh==NULL) {
     mesh = new Mesh ((string (filename)+".xmesh").c_str(), 1,FactionUtil::GetFaction("neutral"),NULL);
   }
@@ -70,11 +81,27 @@ unsigned int HaloSystem::AddHalo (const char * filename, const QVector & loc, co
 using std::vector;
 void HaloSystem::SetSize (unsigned int which, const Vector &size) {
   halo[which].size = size;
+#ifdef CAR_SIM
+  ani[which]->SetDimensions (size.i,size.j);
+#endif
 }
 void HaloSystem::SetPosition (unsigned int which, const QVector &loc) {
   halo[which].loc = loc;
+#ifdef CAR_SIM
+  ani[which]->SetPosition(loc);
+#endif
+
 }
 void HaloSystem::Draw(const Matrix & trans, const Vector &scale, short halo_alpha, float nebdist, float hullpercent, const Vector & velocity, int faction) {
+#ifdef CAR_SIM
+    for (unsigned int i=0;i<ani.size();++i) {
+      if ((i<3&&scale.k<.01&&scale.k>-.01)||(i>=3&&i<5&&scale.k<=-.01)||(i>=5&&scale.j>0)) {
+	ani[i]->SetPosition (Transform (trans,halo[i].loc));
+	ani[i]->SetDimensions (scale.i,scale.i);
+	ani[i]->Draw();
+      }
+    }
+#else
   if (scale.k>0) {
     vector<MyIndHalo>::iterator i = halo.begin();
     for (;i!=halo.end();++i) {
@@ -88,8 +115,15 @@ void HaloSystem::Draw(const Matrix & trans, const Vector &scale, short halo_alph
       }
     }
   }
+#endif
 }
 HaloSystem::~HaloSystem() {
+#ifdef CAR_SIM
+  for (unsigned int i=0;i<ani.size();i++) {
+    delete ani[i];
+  }
+  ani.clear();
+#endif
   VSDESTRUCT2
   if (mesh) {
     delete mesh;

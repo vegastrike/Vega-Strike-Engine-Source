@@ -15,6 +15,9 @@ class MyIndHalo {
 class HaloSystem {
  private:
   std::vector <MyIndHalo> halo;
+#ifdef CAR_SIM
+  std::vector <class Animation *> ani;
+#endif
   Mesh * mesh;
  public:
   HaloSystem ();
