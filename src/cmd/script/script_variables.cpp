@@ -502,6 +502,8 @@ void Mission::doDefVar(missionNode *node,int mode,bool global_var){
 
 void Mission::doSetVar(missionNode *node,int mode){
 
+  trace(node,mode);
+
   if(mode==SCRIPT_PARSE){
     node->script.name=node->attr_value("name");
     if(node->script.name.empty()){

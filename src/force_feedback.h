@@ -23,7 +23,7 @@
   Force Feedback support by Alexander Rawass <alexannika@users.sourceforge.net>
 */
 
-//#define  HAVE_FORCE_FEEDBACK 0
+//#define  HAVE_FORCE_FEEDBACK 1
 
 #ifndef _FORCE_FEEDBACK_H_
 #define _FORCE_FEEDBACK_H_
@@ -86,9 +86,10 @@ public:
   void playShortEffect(unsigned int eff_nr);
 
   void playHit(float angle,float strength);
-  void applyForce(float angle,float strength);
+  void updateForce(float angle,float strength);
+  void updateSpeedEffect(float strength);
   void  playAfterburner(bool activate);
- void playLaser();
+  void playLaser();
 
  private:
   bool have_ff;

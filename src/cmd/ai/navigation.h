@@ -35,6 +35,7 @@ public:
   void SetDest (const Vector&);
   void Execute();
   virtual ~MoveTo();
+  virtual string getOrderDescription() { return "moveto"; };
 };
 /**
  * This AI script attempts to change headings to face a given direction
@@ -62,6 +63,7 @@ protected:
    ChangeHeading(const Vector &final_heading, int switchback, float turning_speed=1) : Order(FACING|LOCATION), turningspeed(turning_speed), switchbacks(switchback),terminatingX(0),terminatingY(0),last_velocity(0,0,0),final_heading(final_heading), terminating(false) {}
   void SetDest (const Vector&);
   void Execute();
+  virtual string getOrderDescription() { return "chhead"; };
   virtual ~ChangeHeading();
 };
 /**
@@ -73,6 +75,7 @@ class FaceTarget : public ChangeHeading {
 public:
   FaceTarget (bool fini=false, int accuracy =3);
   void Execute ();
+  virtual string getOrderDescription() { return "facet"; };
   virtual ~FaceTarget();
 };
 /**
@@ -88,6 +91,7 @@ class FaceTargetITTS : public ChangeHeading {
 public:
   FaceTargetITTS (bool fini=false, int accuracy = 3);
   void Execute();
+  virtual string getOrderDescription() { return "faceitts"; };
   virtual ~FaceTargetITTS();
 };
 

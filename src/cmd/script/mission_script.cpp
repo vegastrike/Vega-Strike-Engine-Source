@@ -215,6 +215,9 @@ void Mission::removeContext()
 /* *********************************************************** */
 
 varInst * Mission::doScript(missionNode *node,int mode, varInstMap *varmap){
+
+  trace(node,mode);
+
   if(mode==SCRIPT_PARSE){
     current_script=node;
 
@@ -389,6 +392,9 @@ void Mission::doArguments(missionNode *node,int mode,varInstMap *varmap){
 /* *********************************************************** */
 
 void Mission::doReturn(missionNode *node,int mode){
+
+  trace(node,mode);
+
   if(mode==SCRIPT_PARSE){
     missionNode *script=current_script;
 
@@ -455,6 +461,9 @@ void Mission::doReturn(missionNode *node,int mode){
 /* *********************************************************** */
 
 void Mission::doBlock(missionNode *node,int mode){
+
+  trace(node,mode);
+
   if(mode==SCRIPT_PARSE){
     scope_stack.push_back(node);
   }
@@ -479,6 +488,9 @@ void Mission::doBlock(missionNode *node,int mode){
 /* *********************************************************** */
 
 varInst *Mission::doExec(missionNode *node,int mode){
+
+  trace(node,mode);
+
   if(mode==SCRIPT_PARSE){
     string name=node->attr_value("name");
     if(name.empty()){

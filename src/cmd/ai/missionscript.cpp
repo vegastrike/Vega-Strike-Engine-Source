@@ -32,6 +32,7 @@
 #include <stack>
 #include "vs_path.h"
 #include "tactics.h"
+#include "cmd/unit.h"
 
 #include "missionscript.h"
 #include "cmd/script/mission.h"
@@ -42,6 +43,8 @@ AImissionScript::AImissionScript (string modname){
   //printf("addr %x\n",(int)this);
   //  mission->addModule(modname);
 
+  actionstring="";
+
   modulename=modname;
 
   classid=mission->createClassInstance(modulename);
@@ -50,6 +53,9 @@ AImissionScript::AImissionScript (string modname){
 }
 
 AImissionScript::~AImissionScript () {
+
+  printf("destructor\n%s",parent->getFullAIDescription().c_str());
+
   mission->runScript(modulename,"quitai",classid);
 
   mission->destroyClassInstance(modulename,classid);

@@ -41,7 +41,14 @@ public:
   ///Loads the AI script from the hard drive, or executes if loaded
   void Execute();
 
+  virtual string getOrderDescription() {
+    char buffer[300];
+    sprintf(buffer,"%s:%d:%s",modulename.c_str(),classid,getActionString().c_str());
+    return buffer;
+  };
+  
  protected:
+  
   string modulename;
   unsigned int classid;
   bool first_run;

@@ -705,6 +705,7 @@ public:
   const string getFgID();
   /// sets the full name/fgid for planets
   void setFullname(string name)  { fullname=name; };
+  string getFullAIDescription();
   ///not used yet
   void setTargetFg(string primary,string secondary=string(),string tertiary=string());
   ///not used yet

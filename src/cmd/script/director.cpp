@@ -71,7 +71,9 @@ void Mission::DirectorStart(missionNode *node){
   cout << "DIRECTOR START" << endl;
 
   debuglevel=atoi(vs_config->getVariable("interpreter","debuglevel","0").c_str());
-start_game=XMLSupport::parse_bool(vs_config->getVariable("interpreter","startgame","true"));
+  start_game=XMLSupport::parse_bool(vs_config->getVariable("interpreter","startgame","true"));
+
+  do_trace=XMLSupport::parse_bool(vs_config->getVariable("interpreter","trace","false"));
 
   vi_counter=0;
   old_vi_counter=0;

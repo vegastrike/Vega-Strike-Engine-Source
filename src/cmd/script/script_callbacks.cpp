@@ -140,6 +140,9 @@ varInst *Mission::doCall(missionNode *node,int mode,string module,string method)
 
 
 varInst *Mission::doCall(missionNode *node,int mode){
+
+  trace(node,mode);
+
   if(mode==SCRIPT_PARSE){
     string name=node->attr_value("name");
     string module=node->attr_value("module");
@@ -783,6 +786,7 @@ void Mission::initCallbackMaps(){
     module_order_map["SteerAfterburn"]=CMT_ORDER_SteerAfterburn ;
     module_order_map["SteerSheltonSlide"]=CMT_ORDER_SteerSheltonSlide ;
     module_order_map["print"]=CMT_ORDER_print ;
+    module_order_map["setActionString"]=CMT_ORDER_setActionString ;
 
   module_olist_map["new"]=CMT_OLIST_new ;
   module_olist_map["delete"]=CMT_OLIST_delete ;
@@ -807,6 +811,9 @@ void Mission::initCallbackMaps(){
   module_string_map["equal"]=CMT_STRING_equal ;
   module_string_map["begins"]=CMT_STRING_begins; 
 
+  module_unit_map["getContainer"]=CMT_UNIT_getContainer ;
+  module_unit_map["getUnitFromContainer"]=CMT_UNIT_getUnitFromContainer ;
+  module_unit_map["deleteContainer"]=CMT_UNIT_deleteContainer ;
   module_unit_map["getUnit"]=CMT_UNIT_getUnit ;
   module_unit_map["getCredits"]=CMT_UNIT_getCredits ;
   module_unit_map["addCredits"]=CMT_UNIT_addCredits ;

@@ -21,6 +21,7 @@ class MatchLinearVelocity : public Order {
   void Execute ();
   void SetDesiredVelocity (const Vector &desired, bool Local) {desired_velocity=desired;LocalVelocity=Local;}
   virtual ~MatchLinearVelocity();
+  virtual string getOrderDescription() { return "mlv"; };
 };
 
 /**
@@ -39,6 +40,7 @@ class MatchAngularVelocity : public Order {
   void Execute ();
   void SetDesiredAngularVelocity (const Vector &desired, bool Local) {desired_ang_velocity=desired;LocalAng=Local;}
   virtual ~MatchAngularVelocity();
+  virtual string getOrderDescription() { return "mav"; };
 };
 /**
  * This class matches both angular and linear velocity.
@@ -58,6 +60,7 @@ class MatchVelocity : public MatchAngularVelocity {
   void Execute ();
   void SetDesiredVelocity (const Vector &desired, const bool Local) {desired_velocity=desired;LocalVelocity=Local;}
   virtual ~MatchVelocity();
+  virtual string getOrderDescription() { return "mv"; };
 };
 
 }
@@ -89,5 +92,6 @@ class FlyByWire : public Orders::MatchVelocity {
   ///negative is decel... 0 = nothing
   void Accel (float percentage);
   void Execute();
+  virtual string getOrderDescription() { return "wire"; };
 };
 #endif

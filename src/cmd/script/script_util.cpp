@@ -66,6 +66,23 @@ string Mission::modestring(int mode){
 
 /* *********************************************************** */
 
+void Mission::trace(missionNode *node,int mode){
+  if(!do_trace || mode==SCRIPT_PARSE){
+    return;
+  }
+
+  cout << "trace: " ;
+    missionNode *module_node=runtime.cur_thread->module_stack.back();
+    if(module_node){
+      cout << module_node->script.name << ":" << node->attr_value("line");
+    }
+
+    cout << " tag " << node->Name() <<  "name " << node->attr_value("name") << " module " << node->attr_value("module") << endl;
+
+}
+
+/* *********************************************************** */
+
 void Mission::fatalError(missionNode *node,int mode,string message){
   cout << "fatal (" << modestring(mode) << ") " << message << " : ";
   printNode(node,mode);

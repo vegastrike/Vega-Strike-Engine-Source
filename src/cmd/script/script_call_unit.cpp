@@ -78,6 +78,7 @@ varInst *Mission::call_unit(missionNode *node,int mode){
 
   varInst *viret=NULL;
 
+  trace(node,mode);
 
   if(mode==SCRIPT_PARSE){
     string cmd=node->attr_value("name");
@@ -240,7 +241,38 @@ varInst *Mission::call_unit(missionNode *node,int mode){
       debug(3,node,mode,"unit object: ");
       printVarInst(3,ovi);
 
-    if(method_id==CMT_UNIT_getPosition){
+      if(method_id==CMT_UNIT_getContainer){
+	UnitContainer *cont=NULL;
+	if(mode==SCRIPT_RUN){
+	  cont=new UnitContainer(my_unit);
+	  //	  printf("new container %x\n",cont);
+	}
+
+ 	viret=newVarInst(VI_TEMP);
+	viret->type=VAR_OBJECT;
+	viret->objectname="unitContainer";
+	viret->object=cont;
+     }
+      else if(method_id==CMT_UNIT_getUnitFromContainer){
+	Unit *ret=NULL;
+	if(mode==SCRIPT_RUN){
+	  ret=((UnitContainer *)my_unit)->GetUnit();
+	  //	  printf("ret from container: %x\n",ret);
+	}
+ 	viret=newVarInst(VI_TEMP);
+	viret->type=VAR_OBJECT;
+	viret->objectname="unit";
+	viret->object=ret;
+      }
+      else if(method_id==CMT_UNIT_deleteContainer){
+	UnitContainer *cont=(UnitContainer *)my_unit;
+	if(mode==SCRIPT_RUN){
+	  delete cont;
+	}
+ 	viret=newVarInst(VI_TEMP);
+	viret->type=VAR_VOID;
+      }
+    else if(method_id==CMT_UNIT_getPosition){
       if(mode==SCRIPT_RUN){
 	varInst *vec3_vi=call_olist_new(node,mode);
 

@@ -61,9 +61,9 @@ public:
   ///The varieties of order types  MOVEMENT,FACING, and WEAPON orders may not be mutually executed (lest one engine goes left, the other right)
   enum ORDERTYPES { MOVEMENT =1, FACING = 2, WEAPON = 4, LOCATION = 8, TARGET = 16, SELF = 32 }; 
   ///The default constructor setting everything to NULL and no dependency on order
-  Order (): targetlocation(0,0,0){parent = NULL;group =targets=NULL;type=0;done=false;}
+  Order (): targetlocation(0,0,0){parent = NULL;group =targets=NULL;type=0;done=false; actionstring=""; }
   ///The constructor that specifies what order dependencies this order has
-  Order(int ttype): targetlocation(0,0,0){parent = NULL;group=targets=NULL;type = ttype;done=false;}
+  Order(int ttype): targetlocation(0,0,0){parent = NULL;group=targets=NULL;type = ttype;done=false; actionstring=""; }
   ///The virutal destructor
   virtual ~Order ();
   ///The function that gets called and executes all queued suborders 
@@ -95,8 +95,17 @@ public:
   Order* EnqueueOrderFirst (Order *ord);
   /// returns the orderlist (NULL for orders that haven't got any)
   virtual olist_t* getOrderList(){ return NULL;};
+
+  virtual string getOrderDescription() { return "empty"; };
+
   ///searches the suborders recursively for the first order that has an orderlist
   Order *findOrderList();
+  string createFullOrderDescription(int level=0);
+  void setActionString(string astring) { actionstring=astring; };
+  string getActionString() { return actionstring; };
+
+ protected:
+  string  actionstring;
 };
 ///Convenience order factory for "clicking to create an order"
 class OrderFactory {

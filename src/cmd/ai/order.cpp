@@ -129,6 +129,12 @@ Order* Order::EnqueueOrder (Order *ord) {
   fprintf (stderr,"enqord");
   fflush (stderr);
 #endif
+
+  if(ord==NULL){
+    printf("NOT ENQEUEING NULL ORDER\n");
+    printf("this order: %s\n",getOrderDescription().c_str());
+    return NULL;
+  }
   ord->SetParent(parent);
   suborders.push_back (ord);
 #ifdef ORDERDEBUG
@@ -138,6 +144,12 @@ Order* Order::EnqueueOrder (Order *ord) {
   return this;
 }
 Order* Order::EnqueueOrderFirst (Order *ord) {
+  if(ord==NULL){
+    printf("NOT ENQEUEING NULL ORDER\n");
+    printf("this order: %s\n",getOrderDescription().c_str());
+    return NULL;
+  }
+
   ord->SetParent(parent);
 
   vector<Order*>::iterator first_elem = suborders.begin();
@@ -240,6 +252,11 @@ void ExecuteFor::Execute() {
 }
 
 Order* Order::findOrder(Order *ord){
+  if(ord==NULL){
+    printf("FINDING EMPTY ORDER\n");
+    printf("this order: %s\n",getOrderDescription().c_str());
+    return NULL;
+  }
   for (unsigned int i=0;i<suborders.size();i++) {
     if (suborders[i]==ord) {
       return suborders[i];
@@ -253,12 +270,23 @@ Order::~Order () {
   fflush (stderr);
 #endif
   for (unsigned int i=0;i<suborders.size();i++) {
-    delete suborders[i];
+    if(suborders[i]==NULL){
+      printf("ORDER: a null order\n");
+      printf("this order: %s\n",getOrderDescription().c_str());
+    }
+    else{
+      delete suborders[i];
+    }
   }
   suborders.clear();
 }
 void Order::eraseOrder(Order *ord){
   bool found=false;
+  if(ord==NULL){
+    printf("NOT ERASING A NULL ORDER\n");
+    printf("this order: %s\n",getOrderDescription().c_str());
+    return;
+  }
 
   for (unsigned int i=0;i<suborders.size() && found==false;i++) {
     if (suborders[i]==ord){
@@ -279,8 +307,13 @@ void Order::eraseOrder(Order *ord){
     }
   }
 
-  
+  if(!found){
+    printf("TOLD TO ERASE AN ORDER - NOT FOUND\n");
+    printf("this order: %s\n",getOrderDescription().c_str());
+
+  }
 }
+
 Order* Order::findOrderList(){
   olist_t *orderlist=getOrderList();
 
@@ -294,4 +327,19 @@ Order* Order::findOrderList(){
   }
 
   return found_order;
+}
+
+string Order::createFullOrderDescription(int level){
+  string tabs;
+  for(int i=0;i<level;i++){
+    tabs=tabs+"   ";
+  }
+
+  string desc=tabs+"+"+getOrderDescription()+"\n";
+
+  for (unsigned int i=0;i<suborders.size();i++) {
+    desc=desc+suborders[i]->createFullOrderDescription(level+1);
+  }
+
+  return desc;
 }

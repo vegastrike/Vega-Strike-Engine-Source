@@ -66,6 +66,18 @@ bool ForceFeedback::haveFF(){
   return have_ff;
 }
 
+void ForceFeedback::updateForce(float angle,float strength){
+  printf("update force %f degrees %f\n",angle,strength);
+}
+
+void ForceFeedback::updateSpeedEffect(float strength){
+  printf("speed effect %f\n",strength);
+}
+
+void ForceFeedback::playHit(float angle,float strength){
+  printf("shield hit %f degrees %f\n",angle,strength);
+}
+
 void ForceFeedback::playAfterburner(bool activate){
   if(!have_ff){
     return;

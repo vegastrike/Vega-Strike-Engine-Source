@@ -662,13 +662,22 @@ varInst *Mission::call_order(missionNode *node,int mode){
     }
     else if(method_id==CMT_ORDER_print){
       if(mode==SCRIPT_RUN){
-	printf("print: order=%x\n",(int)my_order);
+	printf("print: order=%s\n",my_order->getOrderDescription().c_str());
+      }
+      viret=newVarInst(VI_TEMP);
+      viret->type=VAR_VOID;
+    }
+    else if(method_id==CMT_ORDER_setActionString){
+      string astring=getStringArgument(node,mode,1);
+
+      if(mode==SCRIPT_RUN){
+	my_order->setActionString(astring);
       }
       viret=newVarInst(VI_TEMP);
       viret->type=VAR_VOID;
     }
     else{
-      fatalError(node,mode,"no such method "+node->script.name);
+      fatalError(node,mode,"no such method in orders "+node->script.name);
       assert(0);
     }
 

@@ -171,7 +171,8 @@ enum callback_module_order_type {
     CMT_ORDER_SteerAccel ,
     CMT_ORDER_SteerAfterburn ,
     CMT_ORDER_SteerSheltonSlide ,
-    CMT_ORDER_print 
+  CMT_ORDER_print ,
+    CMT_ORDER_setActionString 
 };
 
 enum callback_module_string_type {
@@ -185,6 +186,9 @@ enum callback_module_string_type {
 
 enum callback_module_unit_type {
   CMT_UNIT_UNKNOWN=0,
+  CMT_UNIT_getContainer,
+  CMT_UNIT_getUnitFromContainer,
+  CMT_UNIT_deleteContainer,
   CMT_UNIT_getUnit ,
   CMT_UNIT_getPlayer ,
   CMT_UNIT_getCredits ,
@@ -266,7 +270,11 @@ enum scope_type { VI_GLOBAL,VI_MODULE,VI_LOCAL,VI_TEMP, VI_IN_OBJECT,VI_ERROR,VI
 
 class varInst {
  public:
-  varInst(scope_type sctype) { scopetype=sctype; };
+  varInst(scope_type sctype) {
+    scopetype=sctype;
+    objectname=string();
+    object=NULL;
+  };
   varInst() { cout << "varInst() obsolete\n" << endl; assert(0); };
 
   string name;
@@ -430,6 +438,8 @@ void  deleteVarInst(varInst *vi,bool del_local=false);
 
   int debuglevel;
   bool start_game;
+  bool do_trace;
+  int tracelevel;//unusued
 
   double gametime;
   int total_nr_frames;
@@ -493,6 +503,9 @@ void  doModule(missionNode *node,int mode);
   void  removeContext();
   void removeContextStack();
   void addContextStack(missionNode *node);
+
+void  trace(missionNode *node,int mode);
+
 
 varInst *  doScript(missionNode *node,int mode,varInstMap *varmap=NULL);
 void  doBlock(missionNode *node,int mode);

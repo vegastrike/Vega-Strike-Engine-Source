@@ -1,3 +1,18 @@
+2002-03-18 Alexander Rawass <alexannika@users.sourceforge.net>
+
+	tag: alex_after_unitcontainer_changes
+	
+	* added to _unit:
+	  - _unit.getContainer
+	  - _unit.getUnitFromContainer
+	  - _unit.deleteContainer
+	* config var interpreter/trace will give you trace output
+	* updated ai_flyto_wp,ai_flyto_jp,ai_patrol,ai_orderlist
+	* added debug stuff to Order
+
+	
+tag: alex_before_unitcontainer_changes
+	
 2002-03-16 Alexander Rawass <alexannika@users.sourceforge.net>
 
 	* added data/force_feedback/vegastrike.ifr

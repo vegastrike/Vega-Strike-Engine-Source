@@ -915,6 +915,10 @@ const string Unit::getFgID()  {
     }
 };
 
+string Unit::getFullAIDescription(){
+  return getFgID()+":"+getAIState()->createFullOrderDescription(0).c_str();
+}
+
 void Unit::setTargetFg(string primary,string secondary,string tertiary){
   target_fgid[0]=primary;
   target_fgid[1]=secondary;
