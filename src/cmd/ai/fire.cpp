@@ -19,6 +19,7 @@ void FireAt::ReInit (float reaction_time, float aggressivitylevel) {
   rxntime = reaction_time;
   distance=1;
   lastchangedtarg=-100000;
+  had_target=false;
 }
 FireAt::FireAt (float reaction_time, float aggressivitylevel): CommunicatingAI (WEAPON,STARGET){
   ReInit (reaction_time,aggressivitylevel);
@@ -297,12 +298,22 @@ void FireAt::Execute () {
   if ((targ = parent->Target())) {
     istargetjumpableplanet = isJumpablePlanet (targ);
     if (targ->CloakVisible()>.8&&targ->GetHull()>=0) {
+      had_target=true;
       if (parent->GetNumMounts()>0) {
 	if (!istargetjumpableplanet)
 	  shouldfire |= ShouldFire (targ,missilelock);
       }
     }else {
+      if (had_target) {
+	had_target=false;
+	lastchangedtarg=-100000;
+      }
       ChooseTarget();
+    }
+  }else {
+    if (had_target) {
+      had_target=false;
+      lastchangedtarg=-100000;
     }
   }
   PossiblySwitchTarget(istargetjumpableplanet);
