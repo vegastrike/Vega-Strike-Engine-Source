@@ -1139,8 +1139,6 @@ namespace VSFileSystem
 		}
 		if( found<0)
 		{
-			failed = "";
-			fullpath = string( filename);
 			if( !UseVolumes[type])
 				failed += "\tTRY LOADING : "+fullpath+"... NOT FOUND\n";
 			else
@@ -1288,18 +1286,6 @@ namespace VSFileSystem
 	#endif
 		if( found>=0)
 		{
-			// We save the current path only when loading a unit, an animation, a sprite or a cockpit
-			if( (type==UnitFile || type==AnimFile || type==SpriteFile || type==CockpitFile))
-			{
-				current_path.push_back( curpath);
-				current_subdirectory.push_back( subdir);
-				current_type.push_back( type);
-		#ifdef VSFS_DEBUG
-				cerr<<endl<<"BEGINNING OF ";
-				DisplayType( type);
-				cerr<<endl;
-		#endif
-			}
 			if( type==SystemFile && Rootdir[i]==homedir)
 				shared = true;
 			f.SetDirectory( Directories[curtype]);
@@ -1504,6 +1490,21 @@ namespace VSFileSystem
 					}
 				}
 				this->valid = true;
+			}
+		}
+		if( err<=Ok)
+		{
+			// We save the current path only when loading a unit, an animation, a sprite or a cockpit
+			if( (type==UnitFile || type==AnimFile || type==SpriteFile || type==CockpitFile))
+			{
+				current_path.push_back( this->rootname);
+				current_subdirectory.push_back( this->subdirectoryname);
+				current_type.push_back( this->alt_type);
+		#ifdef VSFS_DEBUG
+				cerr<<endl<<"BEGINNING OF ";
+				DisplayType( type);
+				cerr<<endl;
+		#endif
 			}
 		}
 		return err;
