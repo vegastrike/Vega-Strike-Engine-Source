@@ -364,9 +364,11 @@ void Mission::DirectorShipDestroyed(Unit *unit){
       }
       CreateFlightgroup cf;
       cf.fg = fg;
-
+      cf.unittype= Flightgroup::UNIT;
       cf.fg->pos=unit->Position();
       cf.waves = fg->nr_waves_left;
+      cf.nr_ships = fg->nr_ships;
+      
       //      cf.type = fg->type;
       call_unit_launch(&cf,UNITPTR,string(""));
     }
