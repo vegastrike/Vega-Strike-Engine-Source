@@ -441,6 +441,7 @@ void UpgradingInfo::SetupCargoList () {
 		for (int i=len-1;i>=0;i--) {
 			string tmp = tostring(len-i-1)+" "+getSaveString(playernum,news_name,i);
 			CargoList->AddTextItem(tmp.c_str(),getSaveString(playernum,news_name,i).c_str());
+			fprintf (stderr,"<*>%s",tmp.c_str());
 			
 		}
 

@@ -14,20 +14,39 @@
 #define SINZ 4
 
 //extern Unit ** fighters;
-Stars::Stars(int num, float spread): spread(spread){
+
+StarVlist::StarVlist (int num ,float spread) {
+	this->spread=spread;
+	GFXVertex * tmpvertex = new GFXVertex[num*2];
+	memset (tmpvertex,0,sizeof(GFXVertex)*num*2);
+	for (int y=0;y<num;++y) {
+		int j= 2*y;
+		tmpvertex[j].x = -.5*spread+rand()*1.2*((float)spread/RAND_MAX);
+		tmpvertex[j].y = -.5*spread+rand()*1.2*((float)spread/RAND_MAX);
+		tmpvertex[j].z = -.5*spread+rand()*1.2*((float)spread/RAND_MAX);
+		tmpvertex[j+1].x =tmpvertex[j].x;
+		tmpvertex[j+1].y =tmpvertex[j].y;
+		tmpvertex[j+1].z =tmpvertex[j].z;
+		
+	}
+	vlist= new GFXVertexList (GFXLINE,2*num,tmpvertex, 2*num, true,0);  
+	delete []tmpvertex;
+}
+void StarVlist::BeginDrawState () {
+	vlist->LoadDrawState();
+	vlist->BeginDrawState();
+}
+void StarVlist::Draw() {
+	vlist->Draw();
+	vlist->Draw(GFXPOINT,vlist->GetNumVertices());
+}
+void StarVlist::EndDrawState() {
+	vlist->EndDrawState();
+}
+Stars::Stars(int num, float spread): vlist((num/STARnumvlist)+1,spread),spread(spread){
   int curnum = num/STARnumvlist+1;
   fade = blend=true;
-  GFXVertex * tmpvertex = new GFXVertex [curnum];
-  memset (tmpvertex,0,sizeof (GFXVertex)*curnum);
   ResetPosition(QVector(0,0,0));
-  for (int j=0;j<curnum;j++) {
-    tmpvertex[j].x = -.5*spread+rand()*1.2*((float)spread/RAND_MAX);
-    tmpvertex[j].y = -.5*spread+rand()*1.2*((float)spread/RAND_MAX);
-    tmpvertex[j].z = -.5*spread+rand()*1.2*((float)spread/RAND_MAX);
-  }
-  vlist= new GFXVertexList (GFXPOINT,curnum,tmpvertex, curnum, false,0);
-  
-  delete []tmpvertex;
 }
 void Stars::SetBlend(bool blendit, bool fadeit) {
 	blend = blendit;
@@ -57,16 +76,15 @@ void Stars::Draw() {
   } else {
     GFXDisable (LIGHTING);
   }
-  vlist->LoadDrawState();
-  vlist->BeginDrawState();
+  vlist.BeginDrawState();
   for (int i=0;i<STARnumvlist;i++) {
     if (i>=1)
       GFXTranslateModel (pos[i]-pos[i-1]);
     else
       GFXTranslateModel (pos[i]);
-    vlist->Draw();
+    vlist.Draw();
   }
-  vlist->EndDrawState();
+  vlist.EndDrawState();
   GFXEnable (TEXTURE0);
   GFXEnable (TEXTURE1);
   if (fade)
@@ -132,7 +150,7 @@ void Stars::UpdatePosition(const QVector & cp) {
 
 }
 
-Stars::~Stars () {
+StarVlist::~StarVlist () {
   delete vlist;
 
 }

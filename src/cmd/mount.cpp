@@ -13,7 +13,7 @@
 #include "gfx/cockpit_generic.h"
 #include "force_feedback.h"
 #include "networking/netclient.h"
-
+#include "ai/aggressive.h"
 extern char SERVER;
 
 Mount::Mount() {
@@ -171,8 +171,16 @@ bool Mount::PhysicsAlignedFire(const Transformation &Cumulative, const Matrix & 
 			  this->serial = 0;
 			  if (target&&target!=owner) {
 					temp->Target (target);
-					temp->EnqueueAI (new AIScript ((type->file+".xai").c_str()));
-					temp->EnqueueAI (new Orders::FireAllYouGot);
+					string s =string("ai/script/")+type->file+string(".xai");
+					FILE * fp = fopen (s.c_str(),"r");
+					if (fp) {
+						fclose(fp);
+						temp->EnqueueAI (new AIScript ((type->file+".xai").c_str()));
+						temp->EnqueueAI (new Orders::FireAllYouGot);
+					}else {
+						temp->EnqueueAI(new Orders::AggressiveAI("default.agg.xml","default.int.xml"));
+						temp->SetTurretAI();
+					}
 			  } else {
 					temp->EnqueueAI (new Orders::MatchLinearVelocity(Vector (0,0,100000),true,false));
 					temp->EnqueueAI (new Orders::FireAllYouGot);

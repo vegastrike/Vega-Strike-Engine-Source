@@ -20,12 +20,12 @@
  */
 #ifndef BACKGROUND_H
 #define BACKGROUND_H
-
+#include "star.h"
 class SphereMesh;
 struct Texture;
 class Background {
   bool Enabled;
-  GFXVertexList * stars;
+  StarVlist stars;
   Texture *up;
   Texture *left;
   Texture *front;

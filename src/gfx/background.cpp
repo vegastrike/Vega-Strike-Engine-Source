@@ -29,17 +29,8 @@
 #include "config_xml.h"
 #include <float.h>
 	const float size = 100;
-Background::Background(const char *file, int numstars, float spread):Enabled (true) {
+Background::Background(const char *file, int numstars, float spread):Enabled (true),stars(numstars,200/*spread*/) {
 	string temp;
-	GFXVertex * tmpvertex = new GFXVertex [numstars];
-	memset (tmpvertex,0,sizeof (GFXVertex)*numstars);	
-	for (int j=0;j<numstars;j++) {
-	  tmpvertex[j].x = -.5*spread+rand()*1.2*((float)spread/RAND_MAX);
-	  tmpvertex[j].y = -.5*spread+rand()*1.2*((float)spread/RAND_MAX);
-	  tmpvertex[j].z = -.5*spread+rand()*1.2*((float)spread/RAND_MAX);
-	}
-	stars= new GFXVertexList (GFXPOINT,numstars,tmpvertex, numstars, false,0);
-	delete [] tmpvertex;
 	up = left = down = front=right=back=NULL;
 	static int max_cube_size =XMLSupport::parse_int (vs_config->getVariable("graphics","max_cubemap_size","1024"));
 	temp = string(file)+"_up.bmp";
@@ -91,7 +82,6 @@ void Background::EnableBG(bool tf) {
 }
 Background::~Background()
 {
-  delete stars;
   if (up) 
     delete up;
   if (left) 
@@ -253,7 +243,9 @@ void Background::Draw()
   GFXColor (1,1,1,1);
   GFXDisable (TEXTURE1);
 
-  stars->DrawOnce();
+  stars.BeginDrawState();
+  stars.Draw();
+  stars.EndDrawState();
   GFXEnable (DEPTHTEST);
   GFXCenterCamera(false);
   //  _Universe->AccessCamera()->UpdateGFX(false);

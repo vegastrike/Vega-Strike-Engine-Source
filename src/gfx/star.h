@@ -1,10 +1,25 @@
+#ifndef _STAR_H_
+#define _STAR_H_
 #include "gfxlib.h"
+
 #include "gfxlib_struct.h"
 const int STARnumvlist = 27;
+
+
+class StarVlist {
+	GFXVertexList * vlist;
+	float spread;
+public:
+	StarVlist (int num, float spread);
+	~StarVlist();
+	void BeginDrawState();
+	void Draw();
+	void EndDrawState();
+};
 class Stars {
 private:
 
-  GFXVertexList * vlist;
+  StarVlist vlist;
   QVector pos[STARnumvlist];
   float spread;
   bool blend;
@@ -14,6 +29,6 @@ private:
 public:
   Stars (int num, float spread);
   void SetBlend(bool blendit, bool fadeit);
-  ~Stars ();
   void Draw();
 };
+#endif
