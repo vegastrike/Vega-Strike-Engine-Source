@@ -3230,7 +3230,7 @@ void showUnitStats(Unit * playerUnit,string &text,int subunitlevel) {
 	PRETTY_ADDU("Fuel Capacity: ",playerUnit->FuelData()/1000.0f,0,"Standard Fuel Units");
 	const Unit::Computer uc=playerUnit->ViewComputerData();
     	text+="#n##n#"+prefix+"#c0:1:.5#[FLIGHT CHARACTERISTICS]#n##-c";
-    	text+="#n#"+prefix+"Maneuvering: ";	
+    	text+="#n#"+prefix+"Turning Response: ";	
     	if (playerUnit->limits.yaw==playerUnit->limits.pitch &&playerUnit->limits.yaw==playerUnit->limits.roll) {
 		prettyPrintFloat(conversionBuffer,playerUnit->limits.yaw/playerUnit->GetMoment(),0,2);
 		//printf("**%f\n",playerUnit->limits.yaw);
@@ -3317,7 +3317,7 @@ void showUnitStats(Unit * playerUnit,string &text,int subunitlevel) {
 	
 	text+="#n##n##c0:1:.5#"+prefix+"[DEFENSE SUBSYSTEM]#n##-c";
 	text+="#n#"+prefix+"Armor damage resistance:";
-	PRETTY_ADDU("  fore -",playerUnit->armor.front*VSDM,0,"MJ");
+	PRETTY_ADDU("  fore - ",playerUnit->armor.front*VSDM,0,"MJ");
 	PRETTY_ADDU("  aft - ",playerUnit->armor.back*VSDM,0,"MJ"); 
 	PRETTY_ADDU("  port - ",playerUnit->armor.left*VSDM,0,"MJ");
 	PRETTY_ADDU("  starboard - ",playerUnit->armor.right*VSDM,0,"MJ");
