@@ -14,6 +14,9 @@ Apparently upgrade system doesn't quite work right and jump drive doesn't quite 
 ECM apparently causes some of these problems
 Jump drive goes away after selling it can't buy it back
 
+*Base Interface
+**Need to allow purchase of larger ammounts of ammo in one go
+
 *Map
 we should make the overall shift-m nav screen A) bigger - make it take up the full screen B) Since it's a HUD artifact, lit independent of scene - having your nav display go all dark, while it shows off the lighting, is... odd
 the circles could deal with being, at least on the galaxy view, even a bit smaller
@@ -27,21 +30,8 @@ the circles could deal with being, at least on the galaxy view, even a bit small
 ** Fix AI range trigger happiness
 ** Fix ITTS to use more iterations of Newton's method
 
-Scripting Goals:
-* Flightgroups
-** Classification (fleet, squadron, flotilla? etc. - something to differentiate between {5 plowshares} and {3 archimedes, 2 Tesla, 8 kahan, 20 schroedinger, 10 goddard, 5 watson} )
-** Flightgroups should have subsets of ships that spawn together (combined arms)
 
 * News
-** make news use new naming scheme
-** Fix news to report stories depending on import (fleet lead by dodo=wrong)
-	--Is this a problem with news, or the dynamic universe that calls
-	  the news?  If story is reported correctly, there's no problem.
-	  This means that there is actually a fleet led by a dodo, it's
-	  not wrong, just a bad simulation :-) --Dan.a
-	  -- By fix, we mean take advantage of the pending changes to script 
-	     side that will classify flightgroups in a reasonable way - thus, 
-	     if the lead ship is a dodo it shouldn't be a _fleet_
 ** Get formatted date back.
 ----------------------------------------------------------------------------
 
@@ -74,6 +64,22 @@ Goals for 'Sometime over the rainbow'
 
 * Graphical stuff
 ** make engine lights proportional to accel, not to speed
+
+Scripting Goals:
+* Flightgroups
+** Classification (fleet, squadron, flotilla? etc. - something to differentiate between {5 plowshares} and {3 archimedes, 2 Tesla, 8 kahan, 20 schroedinger, 10 goddard, 5 watson} )
+** Flightgroups should have subsets of ships that spawn together (combined arms)
+** make news use new naming scheme
+** Fix news to report stories depending on import (fleet lead by dodo=wrong)
+	--Is this a problem with news, or the dynamic universe that calls
+	  the news?  If story is reported correctly, there's no problem.
+	  This means that there is actually a fleet led by a dodo, it's
+	  not wrong, just a bad simulation :-) --Dan.a
+	  -- By fix, we mean take advantage of the pending changes to script 
+	     side that will classify flightgroups in a reasonable way - thus, 
+	     if the lead ship is a dodo it shouldn't be a _fleet_
+
+
 
 Emacs mode info:
 Local Variables:
