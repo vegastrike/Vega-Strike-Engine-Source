@@ -3,8 +3,16 @@
 #ifndef PY_INIT_H_
 #define PY_INIT_H_
 #include "gfx/vec.h"
+#ifdef USE_BOOST_129
+#include <boost/python/class.hpp>
+#include <boost/python/to_python_converter.hpp>
+#include <boost/python/to_python_indirect.hpp>
+#include <boost/python/to_python_value.hpp>
+#include <boost/python/converter/builtin_converters.hpp>
+#include <boost/python.hpp>
+#else
 #include <boost/python/detail/extension_class.hpp>
-
+#endif
 class Python {
 public:
 	static void init();
@@ -14,6 +22,18 @@ public:
 };
 
 BOOST_PYTHON_BEGIN_CONVERSION_NAMESPACE
+#ifdef USE_BOOST_129
+/*
+typedef boost::tuples::tuple<double,double,double> python_wector;
+struct to_python <Vector> {
+	inline PyObject *operator () (const Vector &vec) const{
+		boost::python::to_python<boost::python::tuple> a();
+		return a.convert(boost::python::make_tuple((double)vec.i,(double)vec.j,(double)vec.k)); 
+	}
+};
+*/
+BOOST_PYTHON_TO_PYTHON_BY_VALUE(Vector, new boost::python::tuple (boost::python::make_tuple((double)x.i,(double)x.j,(double)x.k)));
+#else
 inline PyObject *to_python (Vector vec) {
 	return to_python(boost::python::tuple((double)vec.i,(double)vec.j,(double)vec.k));
 }
@@ -31,6 +51,7 @@ inline QVector from_python(PyObject *p,boost::python::type<QVector>) {
  	PyArg_ParseTuple(p,"ddd",&vec.i,&vec.j,&vec.k);
 	return vec;
 }
+#endif
 BOOST_PYTHON_END_CONVERSION_NAMESPACE
 
 void InitBriefing ();

@@ -1,12 +1,18 @@
 #ifndef PYTHON_STUB
+#ifdef _WIN32
+#include <windows.h> //errors about WORD and DWORD
+#endif
 #include "cmd/container.h"
 #include <string>
 #include "init.h"
 #include "gfx/vec.h"
 #include "cmd/unit_generic.h"
 #include "python_class.h"
-
+#ifdef USE_BOOST_129
+#include <boost/python/object.hpp>
+#else
 #include <boost/python/objects.hpp>
+#endif
 #include "universe_util.h"
 #include "cmd/unit_util.h"
 #include "faction_generic.h"
@@ -95,11 +101,11 @@ PYTHON_INIT_INHERIT_GLOBALS(VS,FireAt);
 PYTHON_BEGIN_MODULE(VS)
 #undef EXPORT_UTIL
 #undef voidEXPORT_UTIL
-#define EXPORT_UTIL(name,aff) VS.def(&UniverseUtil::name,#name);
+#define EXPORT_UTIL(name,aff) PYTHON_DEFINE_GLOBAL(VS,&UniverseUtil::name,#name);
 #define voidEXPORT_UTIL(name) EXPORT_UTIL(name,0)
 #undef EXPORT_FACTION
 #undef voidEXPORT_FACTION
-#define EXPORT_FACTION(name,aff) VS.def(&FactionUtil::name,#name);
+#define EXPORT_FACTION(name,aff) PYTHON_DEFINE_GLOBAL(VS,&FactionUtil::name,#name);
 #define voidEXPORT_FACTION(name) EXPORT_FACTION(name,0)
 EXPORT_UTIL(SafeEntrancePoint,(10000000,0,0))
 voidEXPORT_UTIL(pushSystem)

@@ -1042,7 +1042,7 @@ using namespace StarXML;
   } while(!feof(inFile));
   fclose (inFile);
   XML_ParserFree (parser);
-  Iterator * iter;
+  UnIterator * iter;
   unsigned int i;
   for (i =0;i<xml->moons.size();i++) {
     if (xml->moons[i]->isUnit()==PLANETPTR) {

@@ -3,9 +3,9 @@
 
 class Unit;
 
-class Iterator {
+class UnIterator {
  public:
-  virtual ~Iterator() { };
+  virtual ~UnIterator() { };
   virtual void insert(Unit *unit) { postinsert(unit);}
   virtual void preinsert(Unit *unit) = 0;
   virtual void postinsert(Unit *unit) = 0;
@@ -17,9 +17,9 @@ class Iterator {
   inline Unit * operator * () {return current();}
 };
 
-class ConstantIterator {
+class UnConstantIterator {
  public:
-  virtual ~ConstantIterator() { };
+  virtual ~UnConstantIterator() { };
   virtual const Unit *current()const = 0;
   virtual void advance() = 0;
   inline const Unit * operator ++() {advance();return current();}

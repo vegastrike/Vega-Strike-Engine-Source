@@ -6,8 +6,12 @@
 #include <pythonrun.h>
 #include <compile.h>
 #include <eval.h>
+#ifdef USE_BOOST_129
+#include <boost/python/class.hpp>
+#else
 #include <boost/python/class_builder.hpp>
 #include <boost/python/detail/extension_class.hpp>
+#endif
 #include "configxml.h"
 #include "vs_globals.h"
 #include "vs_path.h"

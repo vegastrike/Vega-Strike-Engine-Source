@@ -83,7 +83,7 @@ public:
   virtual void reactToCollision(Unit * smaller, const QVector & biglocation, const Vector & bignormal, const QVector & smalllocation, const Vector & smallnormal,  float dist) {}
   virtual void gravitate(UnitCollection *units);
 
-  class PlanetIterator : public Iterator {
+  class PlanetIterator : public UnIterator {
     UnitCollection planetStack;
     un_iter *pos;
   public:
@@ -120,7 +120,7 @@ public:
       pos->advance();
     }
   };
-  Iterator *createIterator() { return new PlanetIterator(this);}
+  UnIterator *createIterator() { return new PlanetIterator(this);}
   /*
   bool isAtmospheric  () {
     return hasLights()||atmospheric;

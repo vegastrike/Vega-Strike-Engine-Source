@@ -39,16 +39,16 @@ namespace BriefingUtil {
 	}
 }
 PYTHON_BEGIN_MODULE(Briefing)
-Briefing.def(&BriefingUtil::addShip,"addShip");
-Briefing.def(&BriefingUtil::removeShip,"removeShip");
-Briefing.def(&BriefingUtil::enqueueOrder,"enqueueOrder");
-Briefing.def(&BriefingUtil::replaceOrder,"replaceOrder");
-Briefing.def(&BriefingUtil::getShipPosition,"getShipPosition");
-Briefing.def(&BriefingUtil::setShipPosition,"setShipPosition");
-Briefing.def(&BriefingUtil::terminate,"terminate");
-Briefing.def(&BriefingUtil::setCamPosition,"setCamPosition");
-Briefing.def(&BriefingUtil::setCamOrientation,"setCamOrientation");
-Briefing.def(&BriefingUtil::setCloak,"setCloak");
+PYTHON_DEFINE_GLOBAL(Briefing,&BriefingUtil::addShip,"addShip");
+PYTHON_DEFINE_GLOBAL(Briefing,&BriefingUtil::removeShip,"removeShip");
+PYTHON_DEFINE_GLOBAL(Briefing,&BriefingUtil::enqueueOrder,"enqueueOrder");
+PYTHON_DEFINE_GLOBAL(Briefing,&BriefingUtil::replaceOrder,"replaceOrder");
+PYTHON_DEFINE_GLOBAL(Briefing,&BriefingUtil::getShipPosition,"getShipPosition");
+PYTHON_DEFINE_GLOBAL(Briefing,&BriefingUtil::setShipPosition,"setShipPosition");
+PYTHON_DEFINE_GLOBAL(Briefing,&BriefingUtil::terminate,"terminate");
+PYTHON_DEFINE_GLOBAL(Briefing,&BriefingUtil::setCamPosition,"setCamPosition");
+PYTHON_DEFINE_GLOBAL(Briefing,&BriefingUtil::setCamOrientation,"setCamOrientation");
+PYTHON_DEFINE_GLOBAL(Briefing,&BriefingUtil::setCloak,"setCloak");
 PYTHON_END_MODULE(Briefing)
 
 void InitBriefing() {
