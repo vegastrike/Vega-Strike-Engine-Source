@@ -501,7 +501,7 @@ void createObjects() {
 	  string modifications ("");
 	  if (a==0) {
 	    fighter0name=string(fightername);
-	    if (mission->getVariable ("savegame","").length>0) 
+	    if (mission->getVariable ("savegame","").length()>0) 
 	      modifications =vs_config->getVariable ("player","callsign","Hellcat");
 	  }
 	  fighters[a] = new Unit(fightername, false,tmptarget[a],modifications,fg,s);
