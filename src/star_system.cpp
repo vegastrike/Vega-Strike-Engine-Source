@@ -4,7 +4,6 @@
 #include "cmd/unit.h"
 #include "cmd/collection.h"
 #include "cmd/click_list.h"
-#include "cmd/hud.h"
 #include "cmd/ai/input_dfa.h"
 #include "lin_time.h"
 #include "cmd/beam.h"

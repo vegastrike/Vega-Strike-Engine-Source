@@ -23,160 +23,75 @@
 #include "hud.h"
 #include "lin_time.h"
 #include "file_main.h"
-#include "gfx/mesh.h"
 #include "gfx/aux_texture.h"
-#include "ai/order.h"
-//#include "cmd_order.h"
-float *mview = NULL;
 
-HUDElement::HUDElement(char *filename):Unit(filename,true,false, 0) {
-	static Matrix view;
-	//myMesh = mesh;
+
+TextPlane::TextPlane(char *filename) {
+  myDims.i = 2;  myDims.j=2;
+  char font[64]={0};
+  char fonta[64]={0};
+  FILE * fp = fopen (filename, "r");
+  if (fp) {
+    fscanf (fp,"%63s %63s",font, fonta);
+    if (fonta[0]) {
+      myFont = new Texture(font,0,BILINEAR);
+    }else {
+      myFont = new Texture(font,fonta,0,BILINEAR);
+    }
+    fscanf (fp,"%f %f %f\n",&myFontMetrics.i,&myFontMetrics.j,&myFontMetrics.k);
+    fscanf (fp,"%d\n",&numlet);
+    if (numlet>256)numlet=256;
+    for(int a = 0; a < numlet; a++) {
+      fscanf (fp, "%f %f %f %f\n", &myGlyphPos[a].left, &myGlyphPos[a].right,&myGlyphPos[a].top,&myGlyphPos[a].bottom);
+    }
+    fclose (fp);
+  }
+  SetPos (0,0);
+}
+TextPlane::~TextPlane () {
+  delete myFont;
+}
+void TextPlane::Draw () {
+  Draw (myText);
 }
 
-
-
-void HUDElement::Draw() {
-  UpdateHudMatrix();//FIXME1.1  UpdateHudMatrix (in gfx_mesh.cpp) uses 1.1
-	
-	Unit::Draw();
-}
-
-TextPlane::TextPlane(char *filename):HUDElement(filename),myColor(0,0,0)
+void TextPlane::Draw(const string & newText)
 {
-  //static Matrix view;
-	//myMesh = mesh;
-
-  	colpos = rowpos = 0;
-
-	::LoadFile(filename);
-	::SetPosition(fpos);
-	//fseek(fpread, fpos, SEEK_SET);
-
-	char font[64];
-
-	ReadVector(myDims);
-	ReadInt(myMaterial);
-
-	ReadVector(myColor.r, myColor.g, myColor.b);
-	ReadFloat(myColor.a);
-	
-	ReadString(font);
-	myFont = new Texture(font);
-	ReadVector(myFontMetrics);
-	for(int a = 0; a < 96; a++) {
-		ReadFloat(myGlyphPos[a].left);
-		ReadFloat(myGlyphPos[a].right);
-		ReadFloat(myGlyphPos[a].top);
-		ReadFloat(myGlyphPos[a].bottom);
-	}
-
-	//fpos = ftell(fpread);
-	fpos = ::GetPosition();
-	::CloseFile();
-}
-
-TextPlane::~TextPlane()
-{
-	//delete myText;
-	delete myFont;
-}
-
-void TextPlane::Draw()
-{
-  //time += GetElapsedTime();
-	UpdateHudMatrix();//FIXME  UpdateHudMatrix (in gfx_mesh.cpp) uses 1.1
-	Matrix tmatrix;
-
-	for (int i=0;i<nummesh;i++) {
-	  meshdata[i]->Draw();
-	}
-
 	// some stuff to draw the text stuff
-	string::iterator text_it = myText.begin();
-	float row = 0.0, col = 0.0;
-
-	myFont->MakeActive();
-	GFXSelectMaterial(myMaterial);
-	GFXDisable(LIGHTING);
-	GFXDisable(DEPTHTEST);
-	/*
-	GFXTexCoord2f(0.0, 0.0);
-	GFXVertex3f(0.0, 0.0, 0.0);
-	GFXTexCoord2f(0.0, 1.0);
-	GFXVertex3f(0.0, 1.0, 0.0);
-	GFXTexCoord2f(1.0, 1.0);
-	GFXVertex3f(1.0, 1.0, 0.0);
-	GFXTexCoord2f(1.0, 0.0);
-	GFXVertex3f(1.0, 0.0, 0.0);
-	*/
-	/*
-	GFXTexCoord2f(0.0, 0.0);
-	GFXVertex3f(0.0, 0.0, 0.0);
-	GFXTexCoord2f(0.0, 0.0);
-	GFXVertex3f(0.0, myDims.j, 0.0);
-	GFXTexCoord2f(0.0, 0.0);
-	GFXVertex3f(myDims.i, myDims.j, 0.0);
-	GFXTexCoord2f(0.0, 0.0);
-	GFXVertex3f(myDims.i, 0.0, 0.0);
-	*/
-	GFXPushBlendMode();
-	GFXBlendMode(ONE, ONE);
-
-	GFXEnable(TEXTURE0);
-	/*
-	GFXBegin(GFXQUAD);
-	GFXColor4f(1.0, 1.0, 1.0, 1.0);
-	GFXTexCoord2f(0.0, 0.0);
-	GFXVertex3f(-3, -3, 0.0);
-	GFXTexCoord2f(0.0, 1.0);
-	GFXVertex3f(-3, 3, 0.0);
-	GFXTexCoord2f(1.0, 1.0);
-	GFXVertex3f(3, 3, 0.0);
-	GFXTexCoord2f(1.0, 0.0);
-	GFXVertex3f(3, -3, 0.0);
-	GFXEnd();
-	*/
-
-	GFXBegin(GFXQUAD);
-	while(*text_it != '\0' && row<myDims.j) {
-	  if(*text_it>=32 && *text_it<=127) {//always true
-			GlyphPosition g = myGlyphPos[*text_it-32];
-
-			GFXTexCoord2f(g.right,g.bottom);
-			GFXVertex3f(-(col+myFontMetrics.i), row, 0.0);
-
-			GFXTexCoord2f(g.right,g.top);
-			GFXVertex3f(-(col+myFontMetrics.i), row+myFontMetrics.j, 0.0);
-
-			GFXTexCoord2f(g.left,g.top);
-			GFXVertex3f(-col, row+myFontMetrics.j, 0.0);
-
-			GFXTexCoord2f(g.left,g.bottom);
-			GFXVertex3f(-col, row, 0.0);
-		}
-
-		if(*text_it=='\t')
-			col+=myFontMetrics.i*5;
-		else
-			col+=myFontMetrics.i;
-		if(col>myDims.i||*text_it == '\n') {
-			col = 0.0;
-			row -= myFontMetrics.j;
-		}
-		text_it++;
-	}
-
-	GFXEnd();
-	GFXEnable(LIGHTING);
-	GFXEnable(DEPTHTEST);
-	GFXPopBlendMode();
-
-	for(int subcount = 0; subcount < numsubunit; subcount++) {
-	  subunits[subcount]->Draw();
-	  //UpdateHudMatrix();
-	}
-	if(aistate)
-		aistate->Execute();
+  string::const_iterator text_it = newText.begin();
+  float row, col;
+  GetPos (row,col);
+  myFont->MakeActive();
+  GFXBlendMode (ONE,ONE);
+  GFXDisable (DEPTHTEST);
+  GFXDisable (CULLFACE);
+  GFXDisable (LIGHTING);
+  GFXEnable(TEXTURE0);
+  GFXBegin(GFXQUAD);
+  while(*text_it != '\0' && row<myDims.j) {
+    if(*text_it>=32 && *text_it<=127) {//always true
+      GlyphPosition g = myGlyphPos[*text_it-32];
+      
+      GFXTexCoord2f(g.right,g.bottom);
+      GFXVertex3f((col+myFontMetrics.i), row, 0.0);
+      GFXTexCoord2f(g.right,g.top);
+      GFXVertex3f((col+myFontMetrics.i), row+myFontMetrics.j, 0.0);
+      GFXTexCoord2f(g.left,g.top);
+      GFXVertex3f(col, row+myFontMetrics.j, 0.0);
+      GFXTexCoord2f(g.left,g.bottom);
+      GFXVertex3f(col, row, 0.0);
+    }
+    
+    if(*text_it=='\t')
+      col+=myFontMetrics.i*5;
+    else
+      col+=myFontMetrics.i;
+    if(col>myDims.i||*text_it == '\n') {
+      col = 0.0;
+      row -= myFontMetrics.j;
+    }
+    text_it++;
+  }
+  GFXEnd();
 }
 

@@ -33,6 +33,8 @@ libgfx_a_SOURCES =	\
 	gauge.h		\
 	halo.cpp	\
 	halo.h		\
+	hud.cpp		\
+	hud.h		\
 	lerp.cpp	\
 	lerp.h		\
 	loc_select.cpp	\

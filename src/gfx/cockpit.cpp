@@ -7,6 +7,8 @@
 #include "cmd/unit.h"
 #include "cmd/iterator.h"
 #include "cmd/collection.h"
+#include "hud.h"
+TextPlane * tp;
 static void LocalToRadar (const Vector & pos, float &s, float &t) {
   s = (pos.k>0?pos.k:0)+1;
   t = 2*sqrtf(pos.i*pos.i + pos.j*pos.j + s*s);
@@ -205,6 +207,9 @@ Cockpit::Cockpit (const char * file, Unit * parent): parent (parent),cockpit_off
   for (int i=0;i<NUMGAUGES;i++) {
     gauges[i]=NULL;
   }
+  tp = new TextPlane ("9x12.font");
+  tp->SetText (string ("www.cachunkcachunk.com"));
+  tp->SetPos (.5,-.5);
   Init (file);
 }
 void Cockpit::Draw() {
@@ -227,6 +232,7 @@ void Cockpit::Draw() {
   }
   GFXAlphaTest (ALWAYS,0);
   GFXBlendMode (SRCALPHA,INVSRCALPHA);
+
   if ((un = parent.GetUnit())) {
     if (view==CP_FRONT) {//only draw crosshairs for front view
       if (VDU[0]) {

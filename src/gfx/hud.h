@@ -19,44 +19,47 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 #include <string>
-#include "gfxlib.h"
-#include "unit.h"
+#include "vec.h"
 
 struct Texture;
 
-class HUDElement: public Unit {
-public:
-	HUDElement(char *filename);
-	void Draw();
-};
-using namespace std ;
-class TextPlane: public HUDElement {
-	string myText;
-
-	int myMaterial;
-	GFXColor myColor;
+class TextPlane {
+	std::string myText;
 
 	Texture *myFont;
 	Vector myFontMetrics; // i = width, j = height
 	Vector myDims;
-
+	int numlet;
 	struct GlyphPosition {
 		float left, right, top, bottom;
 	} myGlyphPos[256];
-	virtual clsptr isUnit() {return TEXTPTR;}
-
-	float rowpos, colpos;
 public:
 	TextPlane(char *filename);
 	~TextPlane();
-       
+	void SetPos (float x, float y) {
+	  myFontMetrics.k = x;
+	  myDims.k=y;
+	}
+	void SetCharSize (float x, float y) {
+	  myFontMetrics.i = x;
+	  myFontMetrics.j = y;
+	}
+	void GetCharSize (float &x, float &y) {
+	  x = myFontMetrics.i;
+	  y = myFontMetrics.j;
+	}
+	void GetPos (float &x, float &y) {
+	  x = myFontMetrics.k;
+	  y = myDims.k;
+	}
+	void SetSize (float x, float y) {
+	  myDims.i = x;
+	  myDims.j = y;
+	}
 	void Draw();
+	void Draw (const string &text);
 	void SetText(const string &newText) {
 		myText = newText;
 	}
 
-	void Scroll(float deltar, float deltac = 0) {
-		rowpos+=deltar;
-		colpos+=deltac;
-	}
 };
