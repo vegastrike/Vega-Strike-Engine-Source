@@ -208,6 +208,23 @@ void Unit::TransferUnitToSystem (unsigned int kk, StarSystem * &savedStarSystem,
 	}
       }
     }
+    if (docked&(DOCKED|DOCKED_INSIDE)) {
+      Unit * un = image->DockedTo.GetUnit();
+      if (!un) {
+	docked &= (~(DOCKED|DOCKED_INSIDE));
+      }else {
+	Unit * targ=NULL;
+	for (un_iter i=pendingjump[kk]->dest->getUnitList().createIterator();
+	     (targ = (*i));
+	     ++i) {
+	  if (targ==un) {
+	    break;
+	  }
+	}
+	if (targ!=un)
+	  UnDock (un);
+      }
+    }
   }else {
     fprintf (stderr,"Already jumped\n");
   }
