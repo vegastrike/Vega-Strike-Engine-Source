@@ -178,7 +178,13 @@ BOOST_PYTHON_MODULE_INIT(Vegastrike)
 void Python::init() {
 	/* initialize python library */
 	Py_Initialize();
-
+	char pwd[2048];
+	getcwd (pwd,2047);
+	pwd[2047]='\0';
+	std::string changepath ("import sys\nsys.path=sys.path + ['"+std::string(pwd)+DELIMSTR+"modules']\n");
+	char * temppython = strdup(changepath.c_str());
+	PyRun_SimpleString(temppython);	
+	free (temppython);
 	/* initialize vegastrike module so that 
 	'import VS' works in python */
 	initVegastrike();
@@ -234,15 +240,7 @@ PyObject* Py_CompileString(char *str, char *filename, int start)
     
     if ((d = PyModule_GetDict(m)) != NULL)
     {
-      PyRun_SimpleString(
-			 "import aitest.py\n"
-			 "hi2= MyAI()\n"
-			 "hi1 = VS.CommAI()\n"
-			 "print hi1.Execute()\n"
-			 "print hi2.Execute()\n");
-    printf("now we will use pyeval_evalcode\n");
     PyEval_EvalCode(codeobj, d, d);
-    printf("and all went ok, did it?\n");
     }
     }
     
