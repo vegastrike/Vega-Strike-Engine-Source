@@ -148,11 +148,11 @@ template <class UnitType>
 void GameUnit<UnitType>::Init()
 {
   this->Unit::Init();
-  unsigned int numg= 1+MAXVDUS+UnitImages::NUMGAUGES;
-  image->cockpit_damage=(float*)malloc((numg)*sizeof(float));
-  for (unsigned int damageiterator=0;damageiterator<numg;damageiterator++) {
-	image->cockpit_damage[damageiterator]=1;
-  }
+  //  unsigned int numg= 1+MAXVDUS+UnitImages::NUMGAUGES;
+  //  image->cockpit_damage=(float*)malloc((numg)*sizeof(float));
+  //  for (unsigned int damageiterator=0;damageiterator<numg;damageiterator++) {
+  //	image->cockpit_damage[damageiterator]=1;
+  //  }
   CollideInfo.object.u = NULL;
   CollideInfo.type = LineCollide::UNIT;
   CollideInfo.Mini.Set (0,0,0);

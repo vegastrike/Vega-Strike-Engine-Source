@@ -562,11 +562,11 @@ void Unit::Init()
 
   scanner.last_scantime=0.0;
   // No cockpit reference here
- //int numg= 1+MAXVDUS+UnitImages::NUMGAUGES;
-  //image->cockpit_damage=(float*)malloc((numg)*sizeof(float));
-  //for (unsigned int damageiterator=0;damageiterator<numg;damageiterator++) {
-//	image->cockpit_damage[damageiterator]=1;
-//  }
+  int numg= 1+MAXVDUS+UnitImages::NUMGAUGES;
+  image->cockpit_damage=(float*)malloc((numg)*sizeof(float));
+  for (unsigned int damageiterator=0;damageiterator<numg;damageiterator++) {
+    image->cockpit_damage[damageiterator]=1;
+  }
   // No CollideInfo yet
   /*
   CollideInfo.object.u = NULL;
