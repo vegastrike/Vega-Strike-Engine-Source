@@ -31,7 +31,7 @@ WebcamSupport::WebcamSupport( int f, int w, int h)
 
 int		WebcamSupport::Init()
 {
-#ifndef _WIN32 // Does not work under Cygwin
+#ifdef linux // Does not work under Cygwin
 	region = 0;
 	channel = 1;
 	oldchannel = 1;
@@ -49,7 +49,8 @@ int		WebcamSupport::Init()
 		this->Shutdown();
 		return -1;
 	}
-#else
+#endif
+#if defined(_WIN32) && !defined(__CYGWIN__)
 #if 0
 	HWND capvideo = capCreATEcAPTureWindow(NULL,0,0,0,width,height,NULL,1);
 	if( !capDriverConnect(capvideo, DEFAULT_CAPTURE_DRIVER))
@@ -76,21 +77,21 @@ bool	WebcamSupport::isReady()
 
 void	WebcamSupport::GetInfo()
 {
-#ifndef _WIN32 // Does not work under Cygwin
+#ifdef linux
 	if (fg_print_info (&fg)!=0) exit(-1);
-#else
 #endif
 }
 
 void	WebcamSupport::StartCapture()
 {
 	grabbing = true;
-#ifndef _WIN32 // Does not work under Cygwin
+#ifdef linux
 	if (fg_start_grab_image(&fg, this->width, this->height, FORMAT_RGB565)!=0)
 		exit(-1);
 
 	fg_set_fps_interval(&fg,this->fps);
-#else
+#endif
+#if defined(_WIN32) && !defined(__CYGWIN__)
 #if 0
 	CAPTUREPARMS capparam;
 	capCaptureGetSetup(capvideo,&capparam,sizeof(capparam));
@@ -105,24 +106,22 @@ void	WebcamSupport::StartCapture()
 
 void	WebcamSupport::CopyImage()
 {
-#ifndef _WIN32
-#else
+#ifdef linux
 #endif
 }
 
 void	WebcamSupport::EndCapture()
 {
 	grabbing = false;
-#ifndef _WIN32 // Does not work under Cygwin
+#ifdef linux
 	if (fg_stop_grab_image(&fg)!=0)
 		exit(-1);
-#else
 #endif
 }
 
 char *	WebcamSupport::CaptureImage()
 {
-#ifndef _WIN32 // Does not work under Cygwin
+#ifdef linux // Does not work under Cygwin
 	// Returns the image buffer
 	if( grabbing)
 	{
@@ -131,13 +130,12 @@ char *	WebcamSupport::CaptureImage()
 	else
 		cerr<<"!!! WARNING Webcam not grabbing !!!"<<endl;
 	return NULL;
-#else
 #endif
 }
 
 int		WebcamSupport::GetCapturedSize()
 {
-#ifndef _WIN32
+#ifdef linux
 	if( grabbing)
 	{
 	 	return fg.image_size;
@@ -145,16 +143,14 @@ int		WebcamSupport::GetCapturedSize()
 	else
 		cerr<<"!!! WARNING Webcam not grabbing !!!"<<endl;
 	return NULL;
-#else
 #endif
 }
 
 void	WebcamSupport::Shutdown()
 {
-#ifndef _WIN32 // Does not work under Cygwin
+#ifdef linux
 	if (fg_close_device (&fg)!=0)
 		exit(-1);
-#else
 #endif
 }
 

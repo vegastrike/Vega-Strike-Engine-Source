@@ -1,7 +1,7 @@
 #ifndef __WEBCAM_SUPPORT_H
 #define __WEBCAM_SUPPORT_H
 
-#ifdef _LINUX
+#ifdef linux
 #include "bgrab.h"
 #endif
 #if defined( _WIN32) && !defined( __CYGWIN__)
@@ -24,14 +24,13 @@
 class	WebcamSupport
 {
 	private:
-#ifndef _WIN32 // Does not work under Cygwin
+#ifdef linux
 		struct	fgdevice fg;
 
 		int		region;
 		int		channel;
 		int		oldchannel;
 		char	channeltext[128];
-#else
 #endif
 		int		width;
 		int		height;
