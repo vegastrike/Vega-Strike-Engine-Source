@@ -114,7 +114,7 @@ float Unit::getRelation (Unit * targ) {
   if (aistate) {
     return aistate->GetEffectiveRelationship (targ);
   }else {
-    return _Universe->GetRelationship (faction,targ->faction);
+    return _Universe->GetRelation (faction,targ->faction);
   }
 }
 //FIXME Daughter units should be able to be turrets (have y/p/r)
