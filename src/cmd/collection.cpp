@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <vector>
 #include "collection.h"
+#include <assert.h>
 #ifndef LIST_TESTING
 #include "unit.h"
 #endif
@@ -150,3 +151,4 @@ UnitCollection::UnitCollection (const UnitCollection& uc):u(NULL) {
     n = n->next;
   }
 }
+

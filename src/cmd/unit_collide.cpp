@@ -5,7 +5,6 @@
 #include "gfx/mesh.h"
 #include "unit_collide.h"
 #include "physics.h"
-#include "hashtable_3d.h"
 #include "gfx/bsp.h"
 #include "collide/rapcol.h"
 #include "collide/csgeom/transfrm.h"
@@ -109,11 +108,11 @@ void Unit::RemoveFromSystem() {
     }
 #endif
   CollideInfo.object.u=NULL;
-  int i;
-  for (i=0;i<nummounts;i++) {
-    if (mounts[i].type.type==weapon_info::BEAM) {
-      if (mounts[i].ref.gun) {
-	mounts[i].ref.gun->RemoveFromSystem(true);
+  int j;
+  for (j=0;j<nummounts;j++) {
+    if (mounts[j].type.type==weapon_info::BEAM) {
+      if (mounts[j].ref.gun) {
+	mounts[j].ref.gun->RemoveFromSystem(true);
       }
     }
   }
