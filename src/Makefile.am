@@ -19,7 +19,7 @@ gldrv/libgldrv.a \
 gui/libgui.a \
 networking/libnet.a \
 cmd/collide/libcollide.a \
-boost/libboost_python.a \
+$(LIB_BOOST) \
 -lpthread 
 
 vegaserver_LDADD =  \
@@ -36,7 +36,7 @@ python/libpythonserver.a \
 gfx/libgfxserver.a \
 gldrv/libgldrvserver.a \
 boost/libboost_python.a
-
+$(LIB_BOOST) \
 accountserver_LDADD =  \
 networking/libnetacct.a
 
