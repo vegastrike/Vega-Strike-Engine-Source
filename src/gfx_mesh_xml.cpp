@@ -193,7 +193,7 @@ void Mesh::beginElement(const string &name, const AttributeList &attributes) {
 	    XML::P_K) ) {
       if (!xml->recalc_norm) {
 	cerr.form ("Invalid Normal Data for point: <%f,%f,%f>\n",xml->vertex.x,xml->vertex.y, xml->vertex.z);
-	
+	xml->vertex.i=xml->vertex.j=xml->vertex.k=0;
 	xml->recalc_norm=true;
       }
     }
@@ -392,56 +392,66 @@ void Mesh::LoadXML(const char *filename, Mesh *oldmesh) {
     unsigned int i; unsigned int a=0;
     unsigned int j;
     unsigned int trimax = xml->tris.size()/3;
+    bool *vertrw = new bool [xml->vertices.size()]; 
     for (i=0;i<xml->vertices.size();i++) {
-      xml->vertices[i].i=0;//zero dis out
-      xml->vertices[i].j=0;
-      xml->vertices[i].k=0;
+      if (xml->vertices[i].i==0&&
+	  xml->vertices[i].j==0&&
+	  xml->vertices[i].k==0) {
+	vertrw[i]=true;
+      }else {
+	vertrw[i]=false;
+      }
     }
 
     for (i=0;i<trimax;i++,a+=3) {
       for (j=0;j<3;j++) {
-	Vector Cur (xml->vertices[xml->triind[a+j]].x,
-		    xml->vertices[xml->triind[a+j]].y,
-		    xml->vertices[xml->triind[a+j]].z);
-	Cur = (Vector (xml->vertices[xml->triind[a+((j+2)%3)]].x,
-		       xml->vertices[xml->triind[a+((j+2)%3)]].y,
-		       xml->vertices[xml->triind[a+((j+2)%3)]].z)-Cur)
-	  .Cross(Vector (xml->vertices[xml->triind[a+((j+1)%3)]].x,
-			 xml->vertices[xml->triind[a+((j+1)%3)]].y,
-			 xml->vertices[xml->triind[a+((j+1)%3)]].z)-Cur);
-	Normalize(Cur);
+	if (vertrw[xml->triind[a+j]]) {
+	  Vector Cur (xml->vertices[xml->triind[a+j]].x,
+		      xml->vertices[xml->triind[a+j]].y,
+		      xml->vertices[xml->triind[a+j]].z);
+	  Cur = (Vector (xml->vertices[xml->triind[a+((j+2)%3)]].x,
+			 xml->vertices[xml->triind[a+((j+2)%3)]].y,
+			 xml->vertices[xml->triind[a+((j+2)%3)]].z)-Cur)
+	    .Cross(Vector (xml->vertices[xml->triind[a+((j+1)%3)]].x,
+			   xml->vertices[xml->triind[a+((j+1)%3)]].y,
+			   xml->vertices[xml->triind[a+((j+1)%3)]].z)-Cur);
+	  Normalize(Cur);
 	//Cur = Cur*(1.00F/xml->vertexcount[a+j]);
-	xml->vertices[xml->triind[a+j]].i+=Cur.i/xml->vertexcount[xml->triind[a+j]];
-	xml->vertices[xml->triind[a+j]].j+=Cur.j/xml->vertexcount[xml->triind[a+j]];
-	xml->vertices[xml->triind[a+j]].k+=Cur.k/xml->vertexcount[xml->triind[a+j]];
+	  xml->vertices[xml->triind[a+j]].i+=Cur.i/xml->vertexcount[xml->triind[a+j]];
+	  xml->vertices[xml->triind[a+j]].j+=Cur.j/xml->vertexcount[xml->triind[a+j]];
+	  xml->vertices[xml->triind[a+j]].k+=Cur.k/xml->vertexcount[xml->triind[a+j]];
+	}
       }
     }
     a=0;
     trimax = xml->quads.size()/4;
     for (i=0;i<trimax;i++,a+=4) {
       for (j=0;j<4;j++) {
-	Vector Cur (xml->vertices[xml->quadind[a+j]].x,
-		    xml->vertices[xml->quadind[a+j]].y,
-		    xml->vertices[xml->quadind[a+j]].z);
-	Cur = (Vector (xml->vertices[xml->quadind[a+((j+2)%4)]].x,
-		       xml->vertices[xml->quadind[a+((j+2)%4)]].y,
-		       xml->vertices[xml->quadind[a+((j+2)%4)]].z)-Cur)
-	  .Cross(Vector (xml->vertices[xml->quadind[a+((j+1)%4)]].x,
-			 xml->vertices[xml->quadind[a+((j+1)%4)]].y,
-			 xml->vertices[xml->quadind[a+((j+1)%4)]].z)-Cur);
-	Normalize(Cur);
-	//Cur = Cur*(1.00F/xml->vertexcount[a+j]);
-	xml->vertices[xml->quadind[a+j]].i+=Cur.i/xml->vertexcount[xml->quadind[a+j]];
-	xml->vertices[xml->quadind[a+j]].j+=Cur.j/xml->vertexcount[xml->quadind[a+j]];
-	xml->vertices[xml->quadind[a+j]].k+=Cur.k/xml->vertexcount[xml->quadind[a+j]];
+	if (vertrw[xml->quadind[a+j]]) {
+	  Vector Cur (xml->vertices[xml->quadind[a+j]].x,
+		      xml->vertices[xml->quadind[a+j]].y,
+		      xml->vertices[xml->quadind[a+j]].z);
+	  Cur = (Vector (xml->vertices[xml->quadind[a+((j+2)%4)]].x,
+			 xml->vertices[xml->quadind[a+((j+2)%4)]].y,
+			 xml->vertices[xml->quadind[a+((j+2)%4)]].z)-Cur)
+	    .Cross(Vector (xml->vertices[xml->quadind[a+((j+1)%4)]].x,
+			   xml->vertices[xml->quadind[a+((j+1)%4)]].y,
+			   xml->vertices[xml->quadind[a+((j+1)%4)]].z)-Cur);
+	  Normalize(Cur);
+	  //Cur = Cur*(1.00F/xml->vertexcount[a+j]);
+	  xml->vertices[xml->quadind[a+j]].i+=Cur.i/xml->vertexcount[xml->quadind[a+j]];
+	  xml->vertices[xml->quadind[a+j]].j+=Cur.j/xml->vertexcount[xml->quadind[a+j]];
+	  xml->vertices[xml->quadind[a+j]].k+=Cur.k/xml->vertexcount[xml->quadind[a+j]];
+	}
       }
     }
+    delete []vertrw;
     for (i=0;i<xml->vertices.size();i++) {
-      float dis = sqrt (xml->vertices[i].i*xml->vertices[i].i +
+      float dis = sqrtf (xml->vertices[i].i*xml->vertices[i].i +
 			xml->vertices[i].j*xml->vertices[i].j +
 			xml->vertices[i].k*xml->vertices[i].k);
       if (dis!=0) {
-	xml->vertices[i].i/=dis;
+	xml->vertices[i].i/=dis;//renormalize
 	xml->vertices[i].j/=dis;
 	xml->vertices[i].k/=dis;
 	fprintf (stderr, "Vertex %d, (%f,%f,%f) <%f,%f,%f>\n",i,
