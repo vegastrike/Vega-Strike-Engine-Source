@@ -1318,6 +1318,7 @@ void FireKeyboard::Execute () {
   if (f().togglewarpdrive == PRESS) {
 	  f().togglewarpdrive=DOWN;
 	  parent->graphicOptions.InWarp=1-parent->graphicOptions.InWarp;
+	  parent->graphicOptions.WarpRamping=1;
   }
 
   if (f().misk==PRESS||f().rmisk==PRESS) {

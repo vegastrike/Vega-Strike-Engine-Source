@@ -319,13 +319,15 @@ public:
 	  unsigned FaceCamera:1;
 	  unsigned Animating:1;
 	  unsigned InWarp:1;
+	  unsigned WarpRamping:1;
 	  unsigned unused1:1;
-	  unsigned unused2:1;
 	  float WarpFieldStrength;
+	  float RampCounter;
 	  unsigned char NumAnimationPoints;
 	  graphic_options() {
-		  FaceCamera=Animating=missilelock=InWarp=unused1=unused2=0;
+		  FaceCamera=Animating=missilelock=InWarp=unused1=WarpRamping=0;
 		  NumAnimationPoints=0;
+		  RampCounter=0;
 	  }
   }graphicOptions;
   bool isSubUnit() {return graphicOptions.SubUnit?true:false;}

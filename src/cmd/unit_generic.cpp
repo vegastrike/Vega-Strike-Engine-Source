@@ -1812,9 +1812,13 @@ void Unit::UpdatePhysics (const Transformation &trans, const Matrix &transmat, c
   }
 }
 void Unit::AddVelocity(float difficulty) {
+   static float warpramptime=XMLSupport::parse_float (vs_config->getVariable ("physics","warpramptime","3"));     
    Vector v=Velocity;
-  
-   if(graphicOptions.InWarp==1){
+   if(graphicOptions.WarpRamping){ // Warp Turning off/on
+	  graphicOptions.RampCounter=warpramptime;
+	  graphicOptions.WarpRamping=0;
+   }
+   if(graphicOptions.InWarp==1||graphicOptions.RampCounter!=0){
 	   static float fmultiplier=XMLSupport::parse_float(vs_config->getVariable("physics","hyperspace_multiplier","314159"));
 	   static float autopilot_term_distance = XMLSupport::parse_float (vs_config->getVariable ("physics","auto_pilot_termination_distance","6000"));     
 	   static float smallwarphack = XMLSupport::parse_float (vs_config->getVariable ("physics","minwarpeffectsize","1000"));     
@@ -1847,6 +1851,15 @@ void Unit::AddVelocity(float difficulty) {
 		 }
 		 minmultiplier=(multipliertemp<minmultiplier)?multipliertemp:minmultiplier;
 	   }
+	   float rampmult=1;
+	   if(graphicOptions.RampCounter!=0){
+	     graphicOptions.RampCounter-=SIMULATION_ATOM;
+	     if(graphicOptions.RampCounter<=0){
+	       graphicOptions.RampCounter=0;
+		 }
+	     rampmult=(graphicOptions.InWarp)?1.0-(graphicOptions.RampCounter/warpramptime):(graphicOptions.RampCounter/warpramptime);
+	   }
+	   minmultiplier*=rampmult;
 	   if(minmultiplier<PI*PI) {
 		   minmultiplier=PI*PI;
 	   }
