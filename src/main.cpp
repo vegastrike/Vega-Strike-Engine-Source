@@ -53,6 +53,7 @@
 #include "save_util.h"
 #include "gfx/masks.h"
 #include "cmd/music.h"
+#include "cmd/csv.h"
 #include <time.h>
 #ifndef _WIN32
 #include <sys/signal.h>
@@ -247,6 +248,19 @@ int main( int argc, char *argv[] )
 	  cerr<<"MISSION_NAME is empty using : "<<mission_name<<endl;
 	}
     //might overwrite the default mission with the command line
+ {
+   VSFile allUnits;
+   VSError err = allUnits.OpenReadOnly("units.csv",UnitFile);
+   if (err<=Ok) {
+     unitTables.push_back(new CSVTable(allUnits));
+     allUnits.Close();
+   }
+   err = allUnits.OpenReadOnly(vs_config->getVariable("data","UnitCSV","../units.csv"),UnitFile);
+   if (err<=Ok) {
+     unitTables.push_back(new CSVTable(allUnits));
+     allUnits.Close();
+   }   
+ }
 
 #ifdef HAVE_PYTHON
     Python::init();

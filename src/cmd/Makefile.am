@@ -8,6 +8,7 @@ libcmdgeneric =			\
 	csv.h		\
 	unit_generic.h					\
 	unit_generic.cpp				\
+	unit_csv.cpp	\
 	atmosphere_generic.cpp			\
 	asteroid_generic.cpp			\
 	asteroid_generic.h			\

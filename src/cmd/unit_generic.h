@@ -201,11 +201,11 @@ protected:
   UnitSounds * sound;
   ///How many lists are referencing us
   int ucref;
-
+  std::string csvRow;
 public:
   ///The name (type) of this unit shouldn't be public
   std::string name;
-
+  
 /***************************************************************************************/
 /**** CONSTRUCTORS / DESCTRUCTOR                                                    ****/
 /***************************************************************************************/
@@ -261,7 +261,7 @@ public:
        Flightgroup *flightgroup=NULL,
        int         fg_subnumber=0, string * netxml=NULL);
   friend class UnitFactory;
-
+  void LoadRow(class CSVRow &row, std::string unitMod, string*netxml=NULL);
 public:    
   virtual ~Unit();
 

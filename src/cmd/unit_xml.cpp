@@ -1823,24 +1823,7 @@ unsigned char Unit::RecomputeRole() {
 
 	return combatRole();
 }
-void Unit::WriteUnit (const char * modifications) {
-  if (image->unitwriter)
-    image->unitwriter->Write(modifications);
-  for (un_iter ui= getSubUnits();(*ui)!=NULL;++ui) {
-    (*ui)->WriteUnit(modifications);
-  } 
-}
-string Unit::WriteUnitString () {
-  string ret="";
-  if (image->unitwriter)
-    ret = image->unitwriter->WriteString();
-  for (un_iter ui= getSubUnits();(*ui)!=NULL;++ui) {
-    ret = ret + ((*ui)->WriteUnitString());
-  }
-  return ret;
-}
 
-extern std::string GetReadPlayerSaveGame (int);
 
 using namespace VSFileSystem;
 

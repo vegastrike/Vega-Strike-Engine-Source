@@ -35,7 +35,7 @@
 #include "universe_generic.h"
 #include "unit_bsp.h"
 #include "gfx/bounding_box.h"
-
+#include "csv.h"
 #ifdef _WIN32
 #define strcasecmp stricmp
 #endif
@@ -281,10 +281,10 @@ float capship_size=500;
 unsigned int apply_float_to_unsigned_int (float tmp) {
   static unsigned long int seed = 2531011;
   seed +=214013;
-  seed %=4294967295;
+  seed %=4294967295u;
   unsigned  int ans = (unsigned int) tmp;
   tmp -=ans;//now we have decimal;
-  if (seed<(unsigned long int)(4294967295*tmp))
+  if (seed<(unsigned long int)(4294967295u*tmp))
     ans +=1;
   return ans;
 }
@@ -760,7 +760,8 @@ void Unit::Init()
 std::string getMasterPartListUnitName();
 using namespace VSFileSystem;
 extern std::string GetReadPlayerSaveGame (int);
-
+CSVRow GetUnitRow(string filename, bool subu, int faction, bool readLast, bool &read);
+#if 0
 static std::string csvUnit(std::string un) {
   unsigned int i=un.find_last_of(".");
   unsigned int del=un.find_last_of("/\\:");
@@ -772,8 +773,11 @@ static std::string csvUnit(std::string un) {
   }
   return un+".csv";
 }
+#endif
 void Unit::Init(const char *filename, bool SubU, int faction,std::string unitModifications, Flightgroup *flightgrp,int fg_subnumber, string * netxml)
 {
+        static bool UNITTAB = XMLSupport::parse_bool(vs_config->getVariable("physics","UnitTable","false"));
+
 	this->Unit::Init();
 	//if (!SubU)
 	//  _Universe->AccessCockpit()->savegame->AddUnitToSave(filename,UNITPTR,FactionUtil::GetFaction(faction),(long)this);
@@ -782,11 +786,12 @@ void Unit::Init(const char *filename, bool SubU, int faction,std::string unitMod
 	graphicOptions.RecurseIntoSubUnitsOnCollision=!isSubUnit();
 	this->faction = faction;
 	SetFg (flightgrp,fg_subnumber);
-
 	VSFile f;
-        VSFile unitTab;
+        VSFile f2;
 	VSError err = Unspecified;
+        VSFile unitTab;
         VSError taberr= Unspecified;;
+        bool foundFile=false;
   if( netxml==NULL)
   {
 		if (unitModifications.length()!=0) {
@@ -810,20 +815,24 @@ void Unit::Init(const char *filename, bool SubU, int faction,std::string unitMod
 		  if (filename[0]) {
                     taberr=unitTab.OpenReadOnly( filepath+".csv", UnitSaveFile);
                     if (taberr<=Ok) {
-                      
+                      unitTables.push_back(new CSVTable(unitTab));
+                      unitTab.Close();
                     }
-                    err = f.OpenReadOnly( filepath, UnitSaveFile);
-                          
+                    if (!UNITTAB) 
+                      err = f.OpenReadOnly( filepath, UnitSaveFile);
+                    
                   }
 		}
 	}
   // If save was not succesfull we try to open the unit file itself
-  VSFile f2;
   if( netxml==NULL)
   {
       if (filename[0]) {
 	    string subdir = "factions/"+FactionUtil::GetFactionName(faction);
            // begin deprecated code (5/11)            
+            if (UNITTAB) {
+
+            }else {
 		if( err>Ok) {
 	  	    f.SetSubDirectory(subdir);
 			// No save found loading default unit
@@ -841,10 +850,18 @@ void Unit::Init(const char *filename, bool SubU, int faction,std::string unitMod
 				err = f2.OpenReadOnly (filename, UnitFile);
 			}
 		}
+                
+            }
                 //end deprecated code
 	  }
   }
-  if(err>Ok) {
+  CSVRow unitRow;
+  if (UNITTAB) {
+    unitRow = GetUnitRow(filename,SubU,faction,true, foundFile);
+  }else {
+    foundFile = (err<=Ok);
+  }
+  if(!foundFile) {
 	cout << "Unit file " << filename << " not found" << endl;
 	fprintf (stderr,"Assertion failed unit_generic.cpp:711 Unit %s not found\n",filename);
 
@@ -857,22 +874,44 @@ void Unit::Init(const char *filename, bool SubU, int faction,std::string unitMod
 	radial_size=1;
     //	    assert ("Unit Not Found"==NULL);
 	//assert(0);
-
+        if (taberr<=Ok&&taberr!=Unspecified) {
+          delete unitTables.back();
+          unitTables.pop_back();
+        }
 	return;
   }
 
 	name = filename;
-	if( netxml==NULL)
-		Unit::LoadXML(f,unitModifications.c_str());
-	else
-		Unit::LoadXML( f, "", netxml);
-	  calculate_extent(false);
-///	  ToggleWeapon(true);//change missiles to only fire 1
+        bool tmpbool;
+        if (UNITTAB) {
+              // load from table?
 
-	if( err<=Ok)
-	  f.Close();
-	if( f2.Valid())
-		f2.Close();
+          // we have to set the root directory to where the saved unit would have come from.
+          // saved only exists if taberr<=Ok && taberr!=Unspecified...that's why we pass in said boolean
+              VSFileSystem::current_path.push_back(taberr<=Ok&&taberr!=Unspecified?GetUnitRow(filename,SubU,faction,false,tmpbool).getRoot():unitRow.getRoot());
+              VSFileSystem::current_subdirectory.push_back("/"+unitRow["Directory"]);
+              VSFileSystem::current_type.push_back(UnitFile);
+              LoadRow(unitRow,unitModifications,netxml);
+              VSFileSystem::current_type.pop_back();
+              VSFileSystem::current_subdirectory.pop_back();
+              VSFileSystem::current_path.pop_back();
+              if (taberr<=Ok&&taberr!=Unspecified) {
+                delete unitTables.back();
+                unitTables.pop_back();
+              }
+
+        }else {
+          if( netxml==NULL)
+            Unit::LoadXML(f,unitModifications.c_str());
+          else
+            Unit::LoadXML( f, "", netxml);
+          if( err<=Ok)
+            f.Close();
+          if( f2.Valid())
+            f2.Close();
+        }
+        calculate_extent(false);
+///	  ToggleWeapon(true);//change missiles to only fire 1
 }
 
 vector <Mesh *> Unit::StealMeshes() {
