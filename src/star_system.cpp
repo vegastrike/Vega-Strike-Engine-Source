@@ -85,12 +85,13 @@ void StarSystem::Draw() {
   SetViewport();
   Iterator *iter = drawList->createIterator();
   Unit *unit;
+  GFXEnable (LIGHTING);
   while((unit = iter->current())!=NULL) {
     unit->Draw();
     iter->advance();
   }
   delete iter;
-
+  GFXDisable(LIGHTING);
   Mesh::ProcessUndrawnMeshes();
   systemInputDFA->Draw();
 

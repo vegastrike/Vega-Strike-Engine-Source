@@ -179,7 +179,7 @@ BOOL /*GFXDRVAPI*/ GFXTransferTexture (unsigned char *buffer, int handle,  enum 
 	//	glTexParameteri(targets[handle], GL_TEXTURE_WRAP_T, GL_REPEAT);
 	glTexParameteri (targets[handle], GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri (targets[handle], GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 	int error;
 	textures[handle].texture = buffer;
 	
@@ -294,11 +294,11 @@ BOOL /*GFXDRVAPI*/ GFXSelectTexture(int handle, int stage)
 		{
 		case 0:
 			glActiveTextureARB(GL_TEXTURE0_ARB);	
-			glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+			glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 			break;
 		case 1:
 			glActiveTextureARB(GL_TEXTURE0_ARB);	
-			glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+			glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 			glActiveTextureARB(GL_TEXTURE1_ARB);	
 			glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 			glEnable (targets[handle]);		
@@ -306,7 +306,7 @@ BOOL /*GFXDRVAPI*/ GFXSelectTexture(int handle, int stage)
 		default:
 			glActiveTextureARB(GL_TEXTURE0_ARB);		
 			glEnable (targets[handle]);		
-			glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+			glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 			break;
 		}
 
@@ -327,7 +327,7 @@ BOOL /*GFXDRVAPI*/ GFXSelectTexture(int handle, int stage)
 			glBindTexture(targets[handle], textures[handle].name);
 			Stage0TextureName = textures[handle].name;
 		}
-		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 		float ccolor[4] = {1.0,1.0,1.0,1.0};
 		glTexEnvfv(GL_TEXTURE_ENV, GL_TEXTURE_ENV_COLOR, ccolor);
 	}

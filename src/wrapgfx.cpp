@@ -149,8 +149,14 @@ BOOL WrapGFX::StartGFX()
 	mat.ea = 1.0F;
 	int tmp;
 	GFXSetMaterial(tmp, mat);
-	GFXSelectMaterial(tmp);
-	
+	//GFXSelectMaterial(tmp);
+	int ligh;
+	GFXCreateLightContext(ligh);
+	GFXSetLightContext (ligh);
+	GFXCreateLight (ligh);
+	GFXSetLight (ligh, POSITION, GFXColor (10,10,10,0));
+	GFXSetLight (ligh, DIFFUSE, GFXColor (.8,.3,.8,1));
+	GFXEnableLight (ligh);
 	//GFXLoadIdentity(VIEW);
 	//GFXLookAt(Vector(0,0,0), Vector(0,0,1), Vector(0,-1,0)); // optimization: cache this friggin' matrix
       	GFXEndScene();

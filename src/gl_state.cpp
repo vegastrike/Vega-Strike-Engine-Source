@@ -255,7 +255,7 @@ BOOL GFXSetTexFunc(int stage, int texset)
 		if (!stage)
 		{
 			glActiveTextureARB(GL_TEXTURE0_ARB);	
-			glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+			glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 		}
 		if (stage==1)
 		{

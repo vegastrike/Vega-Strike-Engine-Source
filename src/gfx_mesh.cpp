@@ -740,7 +740,9 @@ void Mesh::Draw(const Transformation &trans, const Matrix m)
 
 void Mesh::ProcessDrawQueue() {
   assert(draw_queue->size());
-	GFXSelectMaterial(myMatNum);
+  	GFXSelectMaterial(myMatNum);
+	GFXEnable (LIGHTING);
+
 	//static float rot = 0;
 	GFXColor(1.0, 1.0, 1.0, 1.0);
 	
@@ -755,7 +757,6 @@ void Mesh::ProcessDrawQueue() {
 	if(Decal)
 	  Decal->MakeActive();
 	GFXBlendMode(ONE, ZERO);
-
 	GFXSelectTexcoordSet(0, 0);
 	if(envMap) {
 	  //_GFX->getLightMap()->MakeActive();
@@ -766,7 +767,7 @@ void Mesh::ProcessDrawQueue() {
   while(draw_queue->size()) {
     DrawContext c = draw_queue->back();
     draw_queue->pop_back();
-
+    GFXPickLights (Vector (0,0,0));
     GFXLoadMatrix(MODEL, c.mat);
     vlist->Draw();
     if(quadstrips!=NULL) {

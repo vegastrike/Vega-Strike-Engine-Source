@@ -20,7 +20,7 @@
  */
 #include <GL/gl.h>
 #include "gfxlib.h"
-#include "vegastrike.h"
+//#include "vegastrike.h"
 #include <list>
 #include <queue>
 #define GFX_DIFFUSE 1
@@ -31,6 +31,8 @@
 
 
 #define GFX_MAX_LIGHTS 8
+int GFX_OPTIMAL_LIGHTS=4;
+
 //for OpenGL
 
 struct gfx_light_loc {///yay 32 bytes! 1 cache line
@@ -55,8 +57,8 @@ struct gfx_light_data {
   float specular[4];
   float ambient[4];
   gfx_light_data() {
-    diffuse[0]=diffuse[1]=diffuse[2]=0;
-    specular[0]=specular[1]=specular[2]=0;
+    diffuse[0]=diffuse[1]=diffuse[2]=0;//openGL defaults
+    specular[0]=specular[1]=specular[2]=0;//openGL defaults
     ambient[0]=ambient[1]=ambient[2]=changed=options=0;
     spot[0]=spot[1]=spot[2]=0;
     exp =diffuse[3]=specular[3]=ambient[3]=1;
@@ -69,13 +71,14 @@ struct gfx_light_data {
 
 
 float cutoff=.05;
-int currentContex=0;
-int GLLights[GFX_MAX_LIGHTS]={-1};
+static int _currentContext=0;
+
+int GLLights[GFX_MAX_LIGHTS]={-1,-1,-1,-1,-1,-1,-1,-1};
 int GLLightState[GFX_MAX_LIGHTS]={0};//0 off 1 on 2=processed
 
 vector <vector <gfx_light_loc> > _local_lights_loc;
 vector <vector <gfx_light_data> > _local_lights_dat;
-
+vector <GFXColor> _ambient_light;
 vector <gfx_light_loc> * _llights_loc=NULL;
 vector <gfx_light_data> * _llights_dat=NULL;
 
@@ -86,8 +89,10 @@ BOOL GFXSetCutoff (float cutoff) {
   intensity_cutoff=cutoff;
   return TRUE;
 }
-BOOL GFXSetOptimalNumLights (int numLights) {
-
+BOOL /*GFXDRVAPI*/ GFXSetOptimalNumLights (int numLights) {
+  if (numLights>GFX_MAX_LIGHTS||numLights<0)
+    return FALSE;
+  GFX_OPTIMAL_LIGHTS=numLights;
 }
 
 
@@ -132,24 +137,31 @@ inline void SetLocalCompare (Vector x) {//does preprocessing of intensity for re
     }
   }
 }
-
 BOOL /*GFXDRVAPI*/ GFXCreateLightContext (int & con_number) {
+
   con_number = _local_lights_loc.size();
+  _currentContext= con_number;
+  _ambient_light.push_back (GFXColor (0,0,0,1));
   _local_lights_loc.push_back (vector <gfx_light_loc>());
   _local_lights_dat.push_back (vector <gfx_light_data>());
   _llights_loc = &_local_lights_loc[con_number];
   _llights_dat = &_local_lights_dat[con_number];
+  
   return TRUE;
 }
 
 BOOL /*GFXDRVAPI*/ GFXDeleteLightContext(int con_number) {
+
   _local_lights_loc[con_number]=vector <gfx_light_loc>();
   _local_lights_dat[con_number]=vector <gfx_light_data>();
   return TRUE;
 }
 BOOL /*GFXDRVAPI*/ GFXSetLightContext (int con_number) {
+  _currentContext = con_number;
   _llights_loc = &_local_lights_loc[con_number];
   _llights_dat = &_local_lights_dat[con_number];
+  float tmp[4]={_ambient_light[con_number].r,_ambient_light[con_number].g,_ambient_light[con_number].b,_ambient_light[con_number].a};
+  glLightModelfv (GL_LIGHT_MODEL_AMBIENT,tmp);
   for (unsigned int i=0;i<_llights_dat->size();i++) {
     (*_llights_dat)[i].target=-1;
   }
@@ -157,7 +169,21 @@ BOOL /*GFXDRVAPI*/ GFXSetLightContext (int con_number) {
     GLLights[i]=-1;
     GLLightState[i]=0;
   }
+  return TRUE;
 }
+
+
+BOOL /*GFXDRVAPI*/ GFXLightModelAmbient (GFXColor amb) {
+  if (_currentContext >=_ambient_light.size())
+    return FALSE;
+  (_ambient_light[_currentContext])=amb;
+  //  (_ambient_light[_currentContext])[1]=amb.g;
+  //  (_ambient_light[_currentContext])[2]=amb.b;
+  //  (_ambient_light[_currentContext])[3]=amb.a;
+  float tmp[4]={amb.r,amb.g,amb.b,amb.a};
+  glLightModelfv (GL_LIGHT_MODEL_AMBIENT,tmp);
+}
+
 
 BOOL /*GFXDRVAPI*/ GFXCreateLight (int &light) {
   for (light=0;light<_llights_dat->size();light++) {
@@ -229,8 +255,8 @@ BOOL /*GFXDRVAPI*/ GFXPickLights (const Vector& loc) {
     //replace wiht something that should generate a bell curve around optimal based on how far over/under you are using some sort of fuzzy logic
   }
   for (i=0;i<newQ.size();i++) {
-    if ((*_llights_dat)[i].target>=0) {
-      EnableExisting (i);
+    if ((*_llights_dat)[newQ[i]].target>=0) {
+      EnableExisting (newQ[i]);
     }
   }
   for (i=0;i<GFX_MAX_LIGHTS;i++) {
@@ -243,8 +269,8 @@ BOOL /*GFXDRVAPI*/ GFXPickLights (const Vector& loc) {
   unsigned int tmp=0;//where to start looking for disabled lights
   unsigned int newtarg=0;
   for (i=0;i<newQ.size();i++) {
-    if ((*_llights_dat)[i].target==-1) {
-      ForceEnable (i,tmp,newtarg);
+    if ((*_llights_dat)[newQ[i]].target==-1) {
+      ForceEnable (newQ[i],tmp,newtarg);
     }
   }
   return TRUE;
@@ -270,11 +296,11 @@ void ForceEnable (unsigned int light, unsigned int &tmp, unsigned int &newtarg) 
 	glLightfv (GL_LIGHT0+tmp, GL_SPECULAR, (*_llights_dat)[light].specular);
 	glLightfv (GL_LIGHT0+tmp, GL_AMBIENT, (*_llights_dat)[light].ambient);
 	glLightfv (GL_LIGHT0+tmp, GL_POSITION, (*_llights_loc)[light].vect);
-	glLightfv (GL_LIGHT0+tmp, GL_SPOT_DIRECTION, (*_llights_dat)[light].spot);
-	glLightf (GL_LIGHT0+tmp,GL_SPOT_EXPONENT, (*_llights_dat)[light].exp);
-	glLightf (GL_LIGHT0+tmp, GL_CONSTANT_ATTENUATION, (*_llights_loc)[light].attenuate[0]);
-	glLightf (GL_LIGHT0+tmp, GL_LINEAR_ATTENUATION, (*_llights_loc)[light].attenuate[1]);
-	glLightf (GL_LIGHT0+tmp, GL_QUADRATIC_ATTENUATION, (*_llights_loc)[light].attenuate[2]);
+      	glLightfv (GL_LIGHT0+tmp, GL_SPOT_DIRECTION, (*_llights_dat)[light].spot);
+      	glLightf (GL_LIGHT0+tmp,GL_SPOT_EXPONENT, (*_llights_dat)[light].exp);
+       	glLightf (GL_LIGHT0+tmp, GL_CONSTANT_ATTENUATION, (*_llights_loc)[light].attenuate[0]);
+       	glLightf (GL_LIGHT0+tmp, GL_LINEAR_ATTENUATION, (*_llights_loc)[light].attenuate[1]);
+       	glLightf (GL_LIGHT0+tmp, GL_QUADRATIC_ATTENUATION, (*_llights_loc)[light].attenuate[2]);
 	(*_llights_dat)[light].target=tmp;
 	(*_llights_dat)[light].changed=0;
 	GLLights[tmp]=light;//set pointer and backpointer
@@ -309,6 +335,7 @@ void ForceEnable (unsigned int light, unsigned int &tmp, unsigned int &newtarg) 
       glLightf (GL_LIGHT0+newtarg, GL_CONSTANT_ATTENUATION, (*_llights_loc)[light].attenuate[0]);
       glLightf (GL_LIGHT0+newtarg, GL_LINEAR_ATTENUATION, (*_llights_loc)[light].attenuate[1]);
       glLightf (GL_LIGHT0+newtarg, GL_QUADRATIC_ATTENUATION, (*_llights_loc)[light].attenuate[2]); //for the most part ignored by OpenGL, so not a big cost...I hope :-D
+      olddat->target=-1;
       (*_llights_dat)[light].target=newtarg;
       (*_llights_dat)[light].changed=0;
       GLLights[newtarg]=light;//set pointer and backpointer

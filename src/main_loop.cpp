@@ -457,7 +457,7 @@ void createObjects() {
 
   locSel = new CoordinateSelect (Vector (0,0,5));
 
-  GFXSelectMaterial(0);
+  //  GFXSelectMaterial(0);
   
   //  s = new Sprite("carrier.spr");
   
@@ -568,6 +568,7 @@ void main_loop() {
   _GFX->StartDraw();
   
   //bg2->Draw();
+  GFXBlendMode (ONE,ZERO);
   bg->Draw();
 
   //GFXDisable(TEXTURE1);
