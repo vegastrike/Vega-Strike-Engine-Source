@@ -128,7 +128,7 @@ void Missile::UpdatePhysics2 (const Transformation &trans, const Transformation 
 		}else {
 			if (rand()/((float)RAND_MAX)<((float)targ->GetImageInformation().ecm)*SIMULATION_ATOM/32768){
 				Target (this);//go wild
-			}else{
+			}else if (hull>0){
 				static unsigned int pointdef = ROLES::getRole("POINTDEF");
 				un_iter i = targ->getSubUnits();
 				Unit * su;
@@ -140,6 +140,7 @@ void Missile::UpdatePhysics2 (const Transformation &trans, const Transformation 
 								su->aistate->getAverageGunSpeed(speed,range,mrange);
 								if ((Position()-su->Position()).MagnitudeSquared()<range*range) {
 									su->Target(this);
+									
 								}
 							}
 						}

@@ -165,17 +165,22 @@ bool Mount::PhysicsAlignedFire(const Transformation &Cumulative, const Matrix & 
 			  new Bolt (*type,mat, velocity,  owner);//FIXME:turrets won't work      
 			  break;
 			case weapon_info::PROJECTILE:
-			  temp = UnitFactory::createMissile (type->file.c_str(),owner->faction,"",type->Damage,type->PhaseDamage,type->Range/type->Speed,type->Radius,type->RadialSpeed,type->PulseSpeed/*detonation_radius*/);
+			{
+				string skript =string("ai/script/")+type->file+string(".xai");
+				FILE * fp = fopen (skript.c_str(),"r");
+					if (fp) {
+						fclose(fp);
+						temp = UnitFactory::createMissile (type->file.c_str(),owner->faction,"",type->Damage,type->PhaseDamage,type->Range/type->Speed,type->Radius,type->RadialSpeed,type->PulseSpeed/*detonation_radius*/);
+					}else {
+						temp = UnitFactory::createUnit(type->file.c_str(),false,owner->faction);
+					}
 			  // Affect the stored mount serial to the new missile
 			  temp->SetSerial( this->serial);
 			  this->serial = 0;
 			  if (target&&target!=owner) {
 					temp->Target (target);
 					temp->TargetTurret(target);
-					string s =string("ai/script/")+type->file+string(".xai");
-					FILE * fp = fopen (s.c_str(),"r");
 					if (fp) {
-						fclose(fp);
 						temp->EnqueueAI (new AIScript ((type->file+".xai").c_str()));
 						temp->EnqueueAI (new Orders::FireAllYouGot);
 						temp->GetComputerData().velocity_ref.SetUnit(target);
@@ -194,7 +199,8 @@ bool Mount::PhysicsAlignedFire(const Transformation &Cumulative, const Matrix & 
 			  temp->curr_physical_state = temp->prev_physical_state= temp->cumulative_transformation = tmp;
 			  CopyMatrix (temp->cumulative_transformation_matrix,m);
 			  _Universe->activeStarSystem()->AddUnit(temp);
-			  break;
+			}
+			break;
 			}
 
     static bool use_separate_sound=XMLSupport::parse_bool (vs_config->getVariable ("audio","high_quality_weapon","true"));

@@ -1235,10 +1235,13 @@ void GameCockpit::Draw() {
   GFXDisable (DEPTHTEST);
   GFXDisable (DEPTHWRITE);
   GFXColor4f(1,1,1,1);
+  static bool draw_any_boxes = XMLSupport::parse_bool (vs_config->getVariable("graphics","hud","DrawTargettingBoxes","true"));
+  if (draw_any_boxes) {
   DrawTargetBox();
   DrawTurretTargetBoxes();
   if(draw_all_boxes){
     DrawTargetBoxes();
+  }
   }
   if (view<CP_CHASE) {
     if (mesh) {
