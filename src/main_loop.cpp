@@ -501,6 +501,7 @@ void destroyObjects() {
   //delete carrier;
   //delete fighter2;
   //delete fighter;
+  quadsquare::FreeSquares();
 }
 extern void micro_sleep (unsigned int n);
 void main_loop() {
