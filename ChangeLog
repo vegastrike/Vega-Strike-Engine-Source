@@ -1,5 +1,8 @@
-2001-10-19 Daniel Horn <hellcatv@hotmail.com>
+2001-10-20 Daniel Horn <hellcatv@hotmail.com>
 
+	* added maximum range and cone functions to various radars
+	* added color utilization to the radar 
+	* added radar config file to unit_xml that could specify radar stuff
 	* added stub functions in for planned audio functions
 	* used stub functions in the places where audio will be present
 	* added some init functions to OpenAL functions
