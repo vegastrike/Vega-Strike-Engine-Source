@@ -801,12 +801,24 @@ void Unit::Init(const char *filename, bool SubU, int faction,std::string unitMod
   {
       if (filename[0])
 	  {
-	  	if( err>Ok)
+	    string subdir = "factions/"+FactionUtil::GetFactionName(faction);
+		if( err>Ok) {
+	  	    f.SetSubDirectory(subdir);
 			// No save found loading default unit
 			err = f.OpenReadOnly (filename, UnitFile);
-		else
+			if (err>Ok) {
+				f.SetSubDirectory("");
+				err = f.OpenReadOnly (filename, UnitFile);
+			}
+		}else{
+			f2.SetSubDirectory(subdir);
 			// Save found so just opening default unit to get its directory for further loading
 			err = f2.OpenReadOnly (filename, UnitFile);
+			if (err>Ok) {
+				f2.SetSubDirectory("");
+				err = f2.OpenReadOnly (filename, UnitFile);
+			}
+		}
 	  }
   }
   if(err>Ok) {

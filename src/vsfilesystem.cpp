@@ -1131,7 +1131,7 @@ namespace VSFileSystem
 		for( i=0; found<0 && i<Rootdir.size(); i++)
 		{
 			curpath = Rootdir[i];
-			subdir = "";
+			subdir = f.GetSubDirectory();
 			if( extra!="")
 				subdir += extra;
 			found = FileExists( curpath, (subdir+"/"+f.GetFilename()).c_str(), type);
@@ -1140,6 +1140,10 @@ namespace VSFileSystem
 			{
 				curpath = Rootdir[i];
 				subdir = SubDirectories[curtype][j];
+				if (f.GetSubDirectory().length()) {
+					if (subdir.length())subdir+="/";
+					subdir+=f.GetSubDirectory();
+				}
 				if( extra!="")
 					subdir += extra;
 
