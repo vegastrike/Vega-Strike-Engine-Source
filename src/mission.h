@@ -65,11 +65,14 @@ enum tag_type {
   DTAG_UNKNOWN,
   DTAG_MODULE, DTAG_SCRIPT, DTAG_IF, DTAG_BLOCK,
   DTAG_SETVAR, DTAG_EXEC, DTAG_CALL, DTAG_WHILE,
-  DTAG_AND,DTAG_OR,DTAG_NOT,DTAG_TEST,
-  DTAG_FMATH,DTAG_VMATH
+  DTAG_AND_EXPR,DTAG_OR_EXPR,DTAG_NOT_EXPR,DTAG_TEST_EXPR,
+  DTAG_FMATH,DTAG_VMATH,
+  DTAG_VAR_EXPR
 };
 
 enum var_type { VAR_BOOL,VAR_FLOAT,VAR_VECTOR,VAR_OBJECT,VAR_STRING,VAR_VOID };
+
+enum tester_type { TEST_GT,TEST_LT,TEST_EQ,TEST_GE,TEST_LE };
 
 /* *********************************************************** */
 
@@ -92,13 +95,15 @@ class varInstMap : public map<string,varInst *> {
 /* *********************************************************** */
 
 class scriptContext {
+ public:
   varInstMap *varinsts;
 };
 
 /* *********************************************************** */
 
 class contextStack {
- vector<scriptContext> contexts;
+ public:
+ vector<scriptContext *> contexts;
 };
 
 /* *********************************************************** */
@@ -119,9 +124,10 @@ class missionNode : public tagDomNode {
     string name; // script,defvar,module
     vector<missionNode *> variables; // script,module
     varInst *varinst; // defvar
-    tagDomNode *if_block[3]; // if
+    missionNode *if_block[3]; // if
+    missionNode *while_arg[2]; // while
     int tester; // test
-    tagDomNode *test_arg[2]; // test
+    missionNode *test_arg[2]; // test
     enum var_type vartype; // defvar
     string initval;
   } script;
@@ -173,6 +179,8 @@ class Mission {
   void doOrigin(easyDomNode *node);
   void doSettings(easyDomNode *node);
 
+
+
 void  doModule(missionNode *node,int mode);
  scriptContext * addContext(missionNode *node);
   void  removeContext();
@@ -191,8 +199,19 @@ bool  checkBoolExpr(missionNode *node,int mode);
 bool  doAndOr(missionNode *node,int mode);
 bool  doNot(missionNode *node,int mode);
 bool  doTest(missionNode *node,int mode);
+ void doDefVar(missionNode *node,int mode);
+ void doSetVar(missionNode *node,int mode);
+ void doCall(missionNode *node,int mode);
+ void doExec(missionNode *node,int mode);
+
+scriptContext *makeContext(missionNode *node);
+ bool checkVarType(varInst *var,enum var_type check_type);
+
+ float checkFloatExpr(missionNode *node,int mode);
 
  void fatalError(string message);
+ void runtimeFatal(string message);
+ void warning(string message);
 
 
 

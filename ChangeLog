@@ -1,3 +1,9 @@
+2001-11-11 Alexander Rawass <alexannika@users.sourceforge.net>
+	
+	* added mission_script.cpp,script_*.cpp to src/Makefile.am
+	* added script_expression.cpp, script_statement.cpp
+	
+
 2001-11-09 Alexander Rawass <alexannika@users.sourceforge.net>
 
 	* added #ifdef HAVE_AL to the volume callbacks

@@ -78,24 +78,26 @@ string easyDomNode::attr_value(string search_name){
   return attribute_map[search_name];
 }
 
-void easyDomNode::walk(int level){
+void easyDomNode::printNode(ostream& out,int recurse_level,int level){
  map<string,string>::const_iterator iter;
  //vector<string>::const_iterator iter2;
 
- cout << "<" << name ;
+ out << "<" << name ;
 
  for(iter = attribute_map.begin(); iter!=attribute_map.end(); iter++){
-       cout << " " << (*iter).first << "=\"" << (*iter).second << "\"" ;
+       out << " " << (*iter).first << "=\"" << (*iter).second << "\"" ;
   }
-  cout << ">" << endl;
+  out << ">" << endl;
 
   vector<easyDomNode *>::const_iterator siter;
   
-  for(siter= subnodes.begin() ; siter!=subnodes.end() ; siter++){
-    (*siter)->walk(level+1);
+  if(recurse_level>0){
+    for(siter= subnodes.begin() ; siter!=subnodes.end() ; siter++){
+      (*siter)->printNode(out,recurse_level-1,level+1);
+    }
   }
 
-  cout << "</" << name << ">" << endl;
+  out << "</" << name << ">" << endl;
 }
 
 #if 0

@@ -44,7 +44,7 @@ class easyDomNode {
   easyDomNode();
 
   void set(easyDomNode *parent,string name,  AttributeList *attributes);
-  void walk(int level);
+  void printNode(ostream& out,int recurse_level,int level);
 
   void addChild(easyDomNode *child);
 
