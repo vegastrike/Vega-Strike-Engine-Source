@@ -507,7 +507,7 @@ int NetClient::recvMsg( char* netbuffer, Packet* outpacket )
 				// Find the unit
 				//Unit * un = zonemgr->getUnit( packet.getSerial(), zone);
 				it = UniverseUtil::getUnitList();
-				for( ; un==NULL && it.current!=NULL; it.advance())
+				for( ; un==NULL && it.current()!=NULL; it.advance())
 				{
 					if( it.current()->GetSerial()==p1.getSerial())
 						un = it.current();
@@ -539,7 +539,7 @@ int NetClient::recvMsg( char* netbuffer, Packet* outpacket )
 				mis = netbuf.getSerial();
 				it = UniverseUtil::getUnitList();
 				// Find the unit
-				for( ; un==NULL && it.current!=NULL; it.advance())
+				for( ; un==NULL && it.current()!=NULL; it.advance())
 				{
 					if( it.current()->GetSerial()==p1.getSerial())
 						un = it.current();
