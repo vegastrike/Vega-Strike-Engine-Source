@@ -119,7 +119,11 @@ GdkWindow * Help (const char *title, const char *text) {
     return (GdkWindow*)window;
 }
 
+#ifdef __MINGW32__
+void save_stuff( const char *filename) {
+#else
 void save_stuff(char *filename) {
+#endif
   changehome();
     FILE *file=fopen("../save.txt","wt");
     if (file) {
@@ -404,7 +408,7 @@ int main( int   argc,
          
          /* and the window */
          gtk_widget_show (window);
-#if defined(_WIN32)&& (!defined(_WINDOWS))
+#if defined(_WIN32)&& (!defined(_WINDOWS)) && !defined(__MINGW32__) && !defined(__CYGWIN__)
 	GetRidOfConsole();
 #else
 	printf (my_mission.c_str());
