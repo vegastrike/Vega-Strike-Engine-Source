@@ -21,6 +21,23 @@ struct GFXVertex {
 	return ret;
   }
 };
+enum BLENDFUNC{
+    ZERO            = 1,
+	ONE             = 2, 
+    SRCCOLOR        = 3,
+	INVSRCCOLOR     = 4, 
+    SRCALPHA        = 5,
+	INVSRCALPHA     = 6, 
+    DESTALPHA       = 7,
+	INVDESTALPHA    = 8, 
+    DESTCOLOR       = 9,
+	INVDESTCOLOR    = 10, 
+    SRCALPHASAT     = 11,
+    CONSTALPHA    = 12, 
+    INVCONSTALPHA = 13,
+    CONSTCOLOR = 14,
+    INVCONSTCOLOR = 15
+};
 
 struct GFXMaterial
 {  /// ambient rgba, if you don't like these things, ask me to rename them
@@ -33,6 +50,12 @@ struct GFXMaterial
 	float er;float eg;float eb;float ea;
   /// specular power
 	float power; 
+   GFXMaterial () {
+      dr=dg=db=da=sr=sg=sb=sa=ea=aa=1.0f;
+      er=eg=eb=ar=ag=ab=0.0f;
+      power=60.0f;
+      //defaults for material struct    
+   }
 };
 
 struct line{
@@ -302,8 +325,8 @@ struct XML {
 		lighting=0;
 		cullface=0;
 		polygon_offset=0;
-		blend_src=0;
-		blend_dst=0;
+		blend_src=ONE;
+		blend_dst=ZERO;
 		point_state=0;
 	}
   };
@@ -395,23 +418,6 @@ const EnumMap XML::attribute_map(XML::attribute_names, 40);
 
 
 
-enum BLENDFUNC{
-    ZERO            = 1,
-	ONE             = 2, 
-    SRCCOLOR        = 3,
-	INVSRCCOLOR     = 4, 
-    SRCALPHA        = 5,
-	INVSRCALPHA     = 6, 
-    DESTALPHA       = 7,
-	INVDESTALPHA    = 8, 
-    DESTCOLOR       = 9,
-	INVDESTCOLOR    = 10, 
-    SRCALPHASAT     = 11,
-    CONSTALPHA    = 12, 
-    INVCONSTALPHA = 13,
-    CONSTCOLOR = 14,
-    INVCONSTCOLOR = 15
-};
 
 
 
@@ -1161,7 +1167,8 @@ int appendrecordfromxml(XML memfile, FILE* Outputfile){
   runningbytenum+=sizeof(int)*fwrite(&intbuf,sizeof(int),1,Outputfile);// Number of meshes
   
   runningbytenum+=appendmeshfromxml(memfile,Outputfile); // write top level mesh
-  for(int mesh=0;mesh<memfile.LODs.size();mesh++){ //write all LOD meshes
+  int mesh;
+  for(mesh=0;mesh<memfile.LODs.size();mesh++){ //write all LOD meshes
 	string LODname="";
 	for(int i=0;i<memfile.LODs[mesh].name.size();i++){
          LODname+=memfile.LODs[mesh].name[i];
@@ -1256,14 +1263,15 @@ int appendmeshfromxml(XML memfile, FILE* Outputfile){
   //END HEADER
   //Begin Variable sized Attributes
   int VSAstart=runningbytenum;
-  intbuf= VSSwapHostFloatToLittle(0); // Temp value will overwrite later
+  intbuf= VSSwapHostIntToLittle(0); // Temp value will overwrite later
   runningbytenum+=sizeof(int)*fwrite(&intbuf,sizeof(int),1,Outputfile);//Length of Variable sized attribute section in bytes
   //Detail texture
   { 
 	int namelen=memfile.detailtexture.name.size();
-	intbuf= VSSwapHostFloatToLittle(namelen);
+	intbuf= VSSwapHostIntToLittle(namelen);
 	runningbytenum+=sizeof(int)*fwrite(&intbuf,sizeof(int),1,Outputfile);//Length of name of detail texture
-	for(int nametmp=0;nametmp<namelen;nametmp++){
+        int nametmp;
+	for(nametmp=0;nametmp<namelen;nametmp++){
 		bytebuf= memfile.detailtexture.name[nametmp];
 		runningbytenum+=fwrite(&bytebuf,sizeof(char),1,Outputfile);//char by char name of detail texture
 	}
@@ -1296,7 +1304,8 @@ int appendmeshfromxml(XML memfile, FILE* Outputfile){
 	int namelen=memfile.textures[texnum].name.size();
 	intbuf= VSSwapHostIntToLittle(namelen);
 	runningbytenum+=sizeof(int)*fwrite(&intbuf,sizeof(int),1,Outputfile);//Length of name of texture # texnum
-	for(int nametmp=0;nametmp<namelen;nametmp++){
+        int nametmp;
+	for(nametmp=0;nametmp<namelen;nametmp++){
 		bytebuf= memfile.textures[texnum].name[nametmp];
 		runningbytenum+=fwrite(&bytebuf,sizeof(char),1,Outputfile);//Name of texture # texnum
 	}
@@ -1335,26 +1344,27 @@ int appendmeshfromxml(XML memfile, FILE* Outputfile){
   //LODs + Animations
   //LODs
   int submeshref=1;
-  intbuf=VSSwapHostFloatToLittle(memfile.LODs.size());
+  intbuf=VSSwapHostIntToLittle(memfile.LODs.size());
   runningbytenum+=sizeof(int)*fwrite(&intbuf,sizeof(int),1,Outputfile);//Number of LODs
   for(int lod=0;lod<memfile.LODs.size();lod++){
 	floatbuf= VSSwapHostFloatToLittle(memfile.LODs[lod].size);
 	runningbytenum+=sizeof(float)*fwrite(&floatbuf,sizeof(float),1,Outputfile);//LOD # lod: size
 	intbuf=submeshref;
-	intbuf=VSSwapHostFloatToLittle(intbuf);
+	intbuf=VSSwapHostIntToLittle(intbuf);
 	runningbytenum+=sizeof(int)*fwrite(&intbuf,sizeof(int),1,Outputfile);//LOD mesh offset
 	submeshref++;
   }
 
   //Current VS File format is not compatible with new animation specification - can't test until I fix old files (only 1 at present uses animations)
   
-  	intbuf=VSSwapHostFloatToLittle(memfile.animdefs.size());
+  	intbuf=VSSwapHostIntToLittle(memfile.animdefs.size());
 	runningbytenum+=sizeof(int)*fwrite(&intbuf,sizeof(int),1,Outputfile);//Number of animdefs
 	for(int anim=0;anim<memfile.animdefs.size();anim++){
 	  int namelen=memfile.animdefs[anim].name.size();
 	  intbuf= VSSwapHostIntToLittle(namelen);
 	  runningbytenum+=sizeof(int)*fwrite(&intbuf,sizeof(int),1,Outputfile);//Length of name animation
-	  for(int nametmp=0;nametmp<namelen;nametmp++){
+          int nametmp;
+	  for(nametmp=0;nametmp<namelen;nametmp++){
 		bytebuf= memfile.animdefs[anim].name[nametmp];
 		runningbytenum+=fwrite(&bytebuf,sizeof(char),1,Outputfile);//char by char of above
 	  }
@@ -1367,7 +1377,7 @@ int appendmeshfromxml(XML memfile, FILE* Outputfile){
 	  runningbytenum+=sizeof(float)*fwrite(&floatbuf,sizeof(float),1,Outputfile);//Animdef # anim: FPS
 	  for(int offset=0;offset<memfile.animdefs[anim].meshoffsets.size();offset++){
 		intbuf=submeshref+memfile.animdefs[anim].meshoffsets[offset];
-		intbuf=VSSwapHostFloatToLittle(intbuf);
+		intbuf=VSSwapHostIntToLittle(intbuf);
 		runningbytenum+=sizeof(int)*fwrite(&intbuf,sizeof(int),1,Outputfile);//animation mesh offset
 	  }
 	}
@@ -1731,7 +1741,7 @@ void ReverseToFile(FILE* Inputfile, FILE* Outputfile){
 			  word32index+=1;
 			}
 			float FPS=VSSwapHostFloatToLittle(inmemfile[word32index].f32val);//FPS
-			fprintf(Outputfile,"<AnimationDefinition AnimationName=\"%s\" FPS=\"%f\">\n",animname,FPS);
+			fprintf(Outputfile,"<AnimationDefinition AnimationName=\"%s\" FPS=\"%f\">\n",animname.c_str(),FPS);
 			int numframerefs=VSSwapHostIntToLittle(inmemfile[word32index+1].i32val);//number of animation frame references
 		    word32index+=2;
 			for(int fref=0;fref<numframerefs;fref++){
