@@ -552,9 +552,10 @@ public:
       return false;
     if ((cone&&computer.radar.maxcone>-.98)&&((!lock)||(!TargetLocked()))) {
 	QVector delta( target->Position()-Position());
-	mm = delta.Magnitude()-target->rSize();
-	if (mm>0.0001) {
-	  if ((ToLocalCoordinates (Vector(delta.i,delta.j,delta.k)).k/mm)<computer.radar.maxcone&&cone) {
+	mm = delta.Magnitude();
+	double tempmm =mm-target->rSize();
+	if (tempmm>0.0001) {
+	  if ((ToLocalCoordinates (Vector(delta.i,delta.j,delta.k)).k/tempmm)<computer.radar.maxcone&&cone) {
 	    return false;
 	  }
 	}

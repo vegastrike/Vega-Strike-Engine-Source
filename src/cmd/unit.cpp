@@ -287,7 +287,7 @@ void Unit::Init()
   computer.itts = false;
   static float rr = XMLSupport::parse_float (vs_config->getVariable ("graphics","hud","radarRange","20000"));
   computer.radar.maxrange=rr;
-  comptuer.radar.locked=false;
+  computer.radar.locked=false;
   computer.radar.maxcone=-1;
   static float minTrackingNum = XMLSupport::parse_float (vs_config->getVariable("physics",
 										  "autotracking",

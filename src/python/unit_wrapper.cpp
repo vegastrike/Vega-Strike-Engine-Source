@@ -5,9 +5,15 @@
 #include "gfx/vec.h"
 #include "cmd/unit.h"
 #include "python_class.h"
-#include "cmd/unit_util.cpp"
+
 #include <boost/python/objects.hpp>
+#ifdef _WIN32
 #include "universe_util.h"
+#include "cmd/unit_util.h"
+#else
+#include "universe_util.cpp"
+#include "cmd/unit_util.cpp"
+#endif
 #include "cmd/ai/fire.h"
 //makes to_python for both vector and qvector turn them into tuples :-)
 

@@ -49,7 +49,6 @@ vegastrike_SOURCES =				\
 	star_system.h 				\
 	universe.cpp				\
 	universe.h				\
-	universe_util.cpp			\
 	universe_util.h				\
 	xml_support.h  				\
 	xml_support.cpp				\
