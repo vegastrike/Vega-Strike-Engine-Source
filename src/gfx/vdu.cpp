@@ -196,7 +196,7 @@ static void DrawHUDSprite (VDU * thus, VSSprite* s, float per, float &sx, float 
 	  s->SetSize (w,invertsprite?-h:h);
 	  if (drawsprite) {
   		static const float middle_point = XMLSupport::parse_float(vs_config->getVariable("graphics","hud","armor_hull_size",".55"));
-                static bool top_view = XMLSupport::parse_float(vs_config->getVariable("graphics","hud","top_view","false"));
+                static bool top_view = XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","top_view","false"));
   		float middle_point_small=1-middle_point;
   		Vector ll,lr,ur,ul,mll,mlr,mur,mul;
   		s->getTexture()->MakeActive();
@@ -519,6 +519,21 @@ static float OneOfFour(float a, float b, float c, float d){
 		return .4;
 	return 0;
 }
+static float TwoOfFour(float a, float b, float c, float d){
+	int aa=  a!=0?1:0;
+	int bb=  b!=0?1:0;
+	int cc=  c!=0?1:0;
+	int dd=  d!=0?1:0;
+	if (aa+bb+cc+dd==4)
+		return 1;
+	if (aa+bb+cc+dd==3)
+		return 1;
+	if (aa+bb+cc+dd==2)
+		return .8;
+	if (aa+bb+cc+dd==1)
+		return .4;
+	return 0;
+}
 void VDU::DrawTarget(Unit * parent, Unit * target) {
     float x,y,w,h;
 
@@ -534,8 +549,8 @@ void VDU::DrawTarget(Unit * parent, Unit * target) {
   target->ArmorData(armor);
   float au,ar,al,ad;
   au=OneOfFour(armor[0],armor[2],armor[4],armor[6]);
-  ar=OneOfFour(armor[0],armor[1],armor[4],armor[5]);
-  al=OneOfFour(armor[2],armor[3],armor[6],armor[7]);
+  ar=TwoOfFour(armor[0],armor[1],armor[4],armor[5]);
+  al=TwoOfFour(armor[2],armor[3],armor[6],armor[7]);
   ad=OneOfFour(armor[1],armor[3],armor[5],armor[7]);
 
   if (invert_target_shields){

@@ -3215,18 +3215,17 @@ void BaseComputer::BuyUpgradeOperation::start(void) {
     if (!m_theTemplate) {
         m_theTemplate = UnitConstCache::setCachedConst(StringIntKey(templateName,faction),UnitFactory::createUnit(templateName.c_str(),true,faction));
     }
-    if (m_theTemplate->name != LOAD_FAILED) {
-        m_addMultMode = GetModeFromName(m_selectedItem.content.c_str());   // Whether the price is linear or geometric.
-        unsigned int offset;                // Temp.  Not used.
-        Cargo* part = baseUnit->GetCargo(m_selectedItem.content, offset);    // Whether the base has any of these.
-        if(part && part->quantity > 0) {
-            m_part = *part;
-            endInit();
-        } else {
-            finish();
-        }
+    if (m_theTemplate->name == LOAD_FAILED) {
+      m_theTemplate=NULL;
+    }
+    m_addMultMode = GetModeFromName(m_selectedItem.content.c_str());   // Whether the price is linear or geometric.
+    unsigned int offset;                // Temp.  Not used.
+    Cargo* part = baseUnit->GetCargo(m_selectedItem.content, offset);    // Whether the base has any of these.
+    if(part && part->quantity > 0) {
+      m_part = *part;
+      endInit();
     } else {
-        finish();
+      finish();
     }
 
     // The object may be deleted now. Be careful here.
