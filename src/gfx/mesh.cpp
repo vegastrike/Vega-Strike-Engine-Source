@@ -54,6 +54,7 @@ Vector mouseline;
 
 
 void Mesh::InitUnit() {
+	polygon_offset=0;
   numlods=1;
   lodsize=FLT_MAX;
 	forcelogos = NULL;

@@ -19,7 +19,7 @@ static GFXColor getSphereColor () {
   return tmp;
 }
 
-void SphereMesh::ProcessDrawQueue(int whichdrawqueue) {
+void SphereMesh::ProcessDrawQueue(int whichpass,int whichdrawqueue) {
   static GFXColor spherecol (getSphereColor ());
   if (blendSrc!=ONE||blendDst!=ZERO) {
     GFXPolygonOffset (0,-2);
@@ -27,7 +27,7 @@ void SphereMesh::ProcessDrawQueue(int whichdrawqueue) {
   GFXColor tmpcol (0,0,0,1);
   GFXGetLightContextAmbient(tmpcol);
   GFXLightContextAmbient(spherecol);
-  Mesh::ProcessDrawQueue (whichdrawqueue);
+  Mesh::ProcessDrawQueue (whichpass,whichdrawqueue);
   GFXLightContextAmbient(tmpcol);
   GFXPolygonOffset (0,0);
     
@@ -37,13 +37,13 @@ void CityLights::SelectCullFace (int whichdrawqueue) {
   GFXEnable(CULLFACE);
 }
 
-void CityLights::ProcessDrawQueue(int whichdrawqueue) {
+void CityLights::ProcessDrawQueue(int whichpass,int whichdrawqueue) {
   GFXPolygonOffset (0,-1);
   const GFXColor citycol (1,1,1,1);
   GFXColor tmpcol (0,0,0,1);
   GFXGetLightContextAmbient(tmpcol);
   GFXLightContextAmbient(citycol);
-  Mesh::ProcessDrawQueue (whichdrawqueue);
+  Mesh::ProcessDrawQueue (whichpass,whichdrawqueue);
   GFXLightContextAmbient(tmpcol);
   GFXPolygonOffset (0,0);
 }

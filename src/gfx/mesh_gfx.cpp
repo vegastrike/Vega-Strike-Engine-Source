@@ -41,7 +41,9 @@ public:
 };
 
 typedef std::vector<OrigMeshContainer> OrigMeshVector;
-OrigMeshVector undrawn_meshes[NUM_MESH_SEQUENCE]; // lower priority means draw first
+#define NUM_PASSES 3
+const int UNDRAWN_MESHES_SIZE= NUM_MESH_SEQUENCE*NUM_PASSES;
+OrigMeshVector undrawn_meshes[NUM_MESH_SEQUENCE][NUM_PASSES]; // lower priority means draw first
 
 Texture * Mesh::TempGetTexture (int index, std::string factionname)const {
     Texture *tex=NULL;
@@ -100,13 +102,15 @@ Mesh::~Mesh()
 	if(!orig||orig==this)
 	{
 	  for (int j=0;j<NUM_MESH_SEQUENCE;j++) {
-	    for (unsigned int i=0;i<undrawn_meshes[j].size();i++) {
-	      if (undrawn_meshes[j][i].orig==this) {
-		undrawn_meshes[j].erase(undrawn_meshes[j].begin()+i);
-		i--;
-		fprintf (stderr,"stale mesh found in draw queue--removed!\n");
-	      }
-	    }
+		  for (int k=0;k<NUM_PASSES;++k) {
+			  for (unsigned int i=0;i<undrawn_meshes[j][k].size();i++) {
+				  if (undrawn_meshes[j][k][i].orig==this) {
+					  undrawn_meshes[j][k].erase(undrawn_meshes[j][k].begin()+i);
+					  i--;
+					  fprintf (stderr,"stale mesh found in draw queue--removed!\n");
+				  }
+			  }
+		  }
 	  }
 	  delete vlist;
 	  for (unsigned int i=0;i<Decal.size();i++) {
@@ -181,7 +185,11 @@ void Mesh::Draw(float lod, const Matrix &m, float toofar, short cloak, float neb
   if(!(origmesh->will_be_drawn&(1<<c.mesh_seq))) {
     origmesh->will_be_drawn |= (1<<c.mesh_seq);
     //    fprintf (stderr,"origmesh %x",origmesh);
-    undrawn_meshes[c.mesh_seq].push_back(OrigMeshContainer(origmesh,toofar-rSize()));//FIXME will not work if many of hte same mesh are blocking each other
+	for (unsigned int i=0;i<Decal.size()&& i < NUM_PASSES;++i) {
+		if (Decal[i]) {
+			undrawn_meshes[c.mesh_seq][i].push_back(OrigMeshContainer(origmesh,toofar-rSize()));//FIXME will not work if many of hte same mesh are blocking each other
+		}
+	}
   }
   will_be_drawn |= (1<<c.mesh_seq);
 }
@@ -251,12 +259,15 @@ void Mesh::ProcessZFarMeshes () {
   GFXDisable (DEPTHWRITE);
   ///sort meshes  
   //std::sort<OrigMeshVector::iterator,MeshCloser>(undrawn_meshes[NUM_ZBUF_SEQ].begin(),undrawn_meshes[NUM_ZBUF_SEQ].end(),MeshCloser());
-  std::sort(undrawn_meshes[NUM_ZBUF_SEQ].begin(),undrawn_meshes[NUM_ZBUF_SEQ].end(),MeshCloser());
-  for (OrigMeshVector::iterator i=undrawn_meshes[NUM_ZBUF_SEQ].begin();i!=undrawn_meshes[NUM_ZBUF_SEQ].end();i++) {
-    i->orig->ProcessDrawQueue (NUM_ZBUF_SEQ);
-    i->orig->will_be_drawn &= (~(1<<NUM_ZBUF_SEQ));
+  for (int k=0;k<NUM_PASSES;++k) {
+	  std::sort(undrawn_meshes[NUM_ZBUF_SEQ][k].begin(),undrawn_meshes[NUM_ZBUF_SEQ][k].end(),MeshCloser());
+	  
+	  for (OrigMeshVector::iterator i=undrawn_meshes[NUM_ZBUF_SEQ][k].begin();i!=undrawn_meshes[NUM_ZBUF_SEQ][k].end();i++) {
+		  i->orig->ProcessDrawQueue (k,NUM_ZBUF_SEQ);
+		  i->orig->will_be_drawn &= (~(1<<NUM_ZBUF_SEQ));//not accurate any more
+	  }
+	  undrawn_meshes[NUM_ZBUF_SEQ][k].clear();	  
   }
-  undrawn_meshes[NUM_ZBUF_SEQ].clear();
   GFXFogMode(FOG_OFF);
   Animation::ProcessFarDrawQueue(-FLT_MAX);
   _Universe->AccessCamera()->UpdateGFX (GFXTRUE, GFXFALSE);
@@ -279,17 +290,19 @@ void Mesh::ProcessUndrawnMeshes(bool pushSpecialEffects) {
       GFXDisable(DEPTHWRITE);
     } else {
     }
-    if (!undrawn_meshes[a].empty()) {
+	for (int k=0;k<NUM_PASSES;++k) {
+    if (!undrawn_meshes[a][k].empty()) {	
       // shouldn't the sort - if any - be placed here??
-      std::sort(undrawn_meshes[a].begin(),undrawn_meshes[a].end());//sort by texture address
-      undrawn_meshes[a].back().orig->vlist->LoadDrawState();
+      std::sort(undrawn_meshes[a][k].begin(),undrawn_meshes[a][k].end());//sort by texture address
+      undrawn_meshes[a][k].back().orig->vlist->LoadDrawState();
     }
-    while(!undrawn_meshes[a].empty()) {
-      Mesh *m = undrawn_meshes[a].back().orig;
-      undrawn_meshes[a].pop_back();
-      m->ProcessDrawQueue(a);
-      m->will_be_drawn &= (~(1<<a));
+    while(!undrawn_meshes[a][k].empty()) {
+      Mesh *m = undrawn_meshes[a][k].back().orig;
+      undrawn_meshes[a][k].pop_back();
+      m->ProcessDrawQueue(k,a);
+      m->will_be_drawn &= (~(1<<a));//not accurate any more
     }
+	}
     if (a==MESH_SPECIAL_FX_ONLY) {
       if (!pushSpecialEffects) {
 	GFXPopGlobalEffects();
@@ -368,7 +381,12 @@ static void SetupFogState (char cloaked) {
         GFXFogMode (FOG_OFF);
     }    
 }
-bool SetupSpecMapFirstPass (vector <Texture *> &decal, unsigned int mat, bool envMap) {
+bool SetupSpecMapFirstPass (vector <Texture *> &decal, unsigned int mat, bool envMap,float polygon_offset) {
+	if (polygon_offset){
+		float a,b;
+		GFXGetPolygonOffset(&a,&b);
+		GFXPolygonOffset (a, b-polygon_offset);
+	}
     bool retval=false;
     if (decal.size()>1) {
         if (decal[1]) {
@@ -387,7 +405,8 @@ bool SetupSpecMapFirstPass (vector <Texture *> &decal, unsigned int mat, bool en
     }
     return retval;
 }
-void SetupSpecMapSecondPass(Texture * decal,unsigned int mat,BLENDFUNC blendsrc, bool envMap, const GFXColor &cloakFX) {
+void SetupSpecMapSecondPass(Texture * decal,unsigned int mat,BLENDFUNC blendsrc, bool envMap, const GFXColor &cloakFX, float polygon_offset) {
+	GFXPushBlendMode();			
     GFXSelectMaterialHighlights(mat,
                                 GFXColor(0,0,0,0),
                                 GFXColor(0,0,0,0),
@@ -397,7 +416,7 @@ void SetupSpecMapSecondPass(Texture * decal,unsigned int mat,BLENDFUNC blendsrc,
     decal->MakeActive();
     float a,b;
     GFXGetPolygonOffset(&a,&b);
-    GFXPolygonOffset (a, b-1);
+    GFXPolygonOffset (a, b-1-polygon_offset);
     GFXDisable(DEPTHWRITE);
     if (envMap){
       GFXActiveTexture(1);
@@ -405,7 +424,8 @@ void SetupSpecMapSecondPass(Texture * decal,unsigned int mat,BLENDFUNC blendsrc,
       GFXEnable(TEXTURE1);
     }
 }
-void SetupGlowMapThirdPass(Texture * decal,unsigned int mat,BLENDFUNC blendsrc, const GFXColor &cloakFX) {
+void SetupGlowMapThirdPass(Texture * decal,unsigned int mat,BLENDFUNC blendsrc, const GFXColor &cloakFX, float polygon_offset) {
+	GFXPushBlendMode();			
     GFXSelectMaterialHighlights(mat,
                                 GFXColor(0,0,0,0),
                                 GFXColor(0,0,0,0),
@@ -415,7 +435,7 @@ void SetupGlowMapThirdPass(Texture * decal,unsigned int mat,BLENDFUNC blendsrc, 
     decal->MakeActive();
     float a,b;
     GFXGetPolygonOffset(&a,&b);
-    GFXPolygonOffset (a, b-2);
+    GFXPolygonOffset (a, b-2-polygon_offset);
     GFXDisable(DEPTHWRITE);
 	GFXDisable(TEXTURE1);
 }
@@ -427,6 +447,7 @@ void RestoreGlowMapState(bool write_to_depthmap) {
 		GFXEnable(DEPTHWRITE);
 	}
 	GFXEnable(TEXTURE1);
+	GFXPopBlendMode();				
 }
 
 void RestoreSpecMapState(bool envMap, bool write_to_depthmap) { 
@@ -440,9 +461,18 @@ void RestoreSpecMapState(bool envMap, bool write_to_depthmap) {
     if (write_to_depthmap) {
         GFXEnable(DEPTHWRITE);
     }
+	GFXPopBlendMode(); 	
 }
-void Mesh::ProcessDrawQueue(int whichdrawqueue) {
+void Mesh::ProcessDrawQueue(int whichpass,int whichdrawqueue) {
   //  assert(draw_queue->size());
+	if (whichpass>=(int)Decal.size()) {
+		fprintf (stderr,"Fatal error: drawing ship that has a nonexistant tex");
+		return;
+	}
+	if (Decal[whichpass]==NULL) {
+		fprintf (stderr,"Less Fatal error: drawing ship that has a nonexistant tex");
+		return;
+	}
 
   if (draw_queue->empty()) {
     fprintf (stderr,"cloaking queues issue! Report to hellcatv@hotmail.com\nn%d\n%s",whichdrawqueue,hash_name.c_str());
@@ -484,12 +514,25 @@ void Mesh::ProcessDrawQueue(int whichdrawqueue) {
   }
   vlist->BeginDrawState();	
   vector<MeshDrawContext> tmp_draw_queue;
-  while(draw_queue->size()) {	  
-    MeshDrawContext c = draw_queue->back();
-    draw_queue->pop_back();
+  switch (whichpass) {
+  case 0:
+	  SetupSpecMapFirstPass (Decal,myMatNum,getEnvMap(),polygon_offset);
+	  break;
+  case 1:
+	  
+	  SetupSpecMapSecondPass(Decal[whichpass],myMatNum,blendSrc,getEnvMap(), GFXColor(1,1,1,1),polygon_offset);
+	  break;
+  case 2:
+	  SetupGlowMapThirdPass (Decal[whichpass],myMatNum,ONE,GFXColor(1,1,1,1),polygon_offset);
+	  break;
+  }
+  for(unsigned int draw_queue_index=0;draw_queue_index<draw_queue->size();++draw_queue_index) {	  
+    MeshDrawContext &c ((*draw_queue)[draw_queue_index]);
     if (c.mesh_seq!=whichdrawqueue) {
-      tmp_draw_queue.push_back (c);
-      continue;
+		if (whichpass+1>=Decal.size()) {
+			tmp_draw_queue.push_back (c);
+		}
+		continue;
     }
     if (whichdrawqueue!=MESH_SPECIAL_FX_ONLY) {
       GFXLoadIdentity(MODEL);
@@ -505,28 +548,7 @@ void Mesh::ProcessDrawQueue(int whichdrawqueue) {
       specialfxlight.push_back(ligh);
     }
     SetupFogState(c.cloaked);
-    const bool SpecMap = SetupSpecMapFirstPass (Decal,myMatNum,getEnvMap());
-	bool GlowMap = Decal.size()>2;
-	if (GlowMap)
-		GlowMap = Decal[2]!=NULL;
     vlist->Draw();
-	if (SpecMap||GlowMap) {
-		GFXPushBlendMode();
-	}
-    if (SpecMap) {
-        SetupSpecMapSecondPass(Decal[1],myMatNum,blendSrc,getEnvMap(), c.CloakFX);
-	        vlist->Draw();
-        RestoreSpecMapState(getEnvMap(),write_to_depthmap);
-
-    }
-	if (GlowMap) {
-		SetupGlowMapThirdPass (Decal[2],myMatNum,ONE,c.CloakFX);
-			vlist->Draw();
-		RestoreGlowMapState(write_to_depthmap);
-	}
-	if (SpecMap||GlowMap) {
-		GFXPopBlendMode();
-	}
     for ( i=0;i<specialfxlight.size();i++) {
       GFXDeleteLight (specialfxlight[i]);
     }
@@ -540,12 +562,21 @@ void Mesh::ProcessDrawQueue(int whichdrawqueue) {
     }
   }
   vlist->EndDrawState();
+	switch(whichpass) {
+	case 0:
+		break;
+	case 1:
+		RestoreSpecMapState(getEnvMap(),write_to_depthmap);
+		break;
+	case 2:
+		RestoreGlowMapState(write_to_depthmap);
+		break;
+	}  
   if (!getLighting()) {
     GFXEnable(LIGHTING);
   }
-  while (tmp_draw_queue.size()) {
-    draw_queue->push_back (tmp_draw_queue.back());
-    tmp_draw_queue.pop_back();
+  if (whichpass+1>=Decal.size()) {
+	  *draw_queue=tmp_draw_queue;
   }
   if (!write_to_depthmap) {
     GFXEnable(DEPTHWRITE);//risky--for instance logos might be fubar!

@@ -108,13 +108,14 @@ const EnumMap::Pair Mesh::XML::attribute_names[] = {
   EnumMap::Pair ("LightingOn",XML::LIGHTINGON),
   EnumMap::Pair ("CullFace",XML::CULLFACE),
   EnumMap::Pair ("ForceTexture",XML::FORCETEXTURE),
-  EnumMap::Pair ("UseNormals",XML::USENORMALS)
+  EnumMap::Pair ("UseNormals",XML::USENORMALS),
+  EnumMap::Pair ("PolygonOffset",XML::POLYGONOFFSET)
 };
 
 
 
 const EnumMap Mesh::XML::element_map(XML::element_names, 23);
-const EnumMap Mesh::XML::attribute_map(XML::attribute_names, 34);
+const EnumMap Mesh::XML::attribute_map(XML::attribute_names, 35);
 
 
 
@@ -344,6 +345,9 @@ void Mesh::beginElement(const string &name, const AttributeList &attributes) {
       case XML::SHAREVERT:
 	xml->sharevert = (XMLSupport::parse_bool ((*iter).value)&&XMLSupport::parse_bool (vs_config->getVariable ("graphics","SharedVertexArrays","true")));
 	break;
+	  case XML::POLYGONOFFSET:
+		  this->polygon_offset = XMLSupport::parse_float ((*iter).value);
+		  break;
       case XML::BLENDMODE:
 	{
 	  char *csrc=strdup ((*iter).value.c_str());

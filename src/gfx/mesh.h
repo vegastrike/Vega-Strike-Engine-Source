@@ -162,7 +162,8 @@ private:
       OFFSET,
       ANIMATEDTEXTURE,
       USENORMALS,
-      REVERSE
+      REVERSE,
+	  POLYGONOFFSET
     };
     ///Saves which attributes of vertex have been set in XML file
     enum PointState {
@@ -304,7 +305,8 @@ protected:
   ///The number of the appropriate material for this mesh (default 0)
   unsigned int myMatNum;
   ///The decal relevant to this mesh
-  vector <Texture *> Decal;  
+  vector <Texture *> Decal;
+  float polygon_offset;
   ///whether this should be environment mapped 0x1 and 0x2 for if it should be lit (ored together)
   char envMapAndLit;
   ///Whether this original will be drawn this frame
@@ -355,7 +357,7 @@ public:
   ///Draws lod pixels wide, mesh at Transformation NOW. If centered, then will center on camera and disable cull
   void DrawNow(float lod, bool centered, const Matrix &m= identity_matrix, short cloak=-1,float nebdist=0);
   ///Will draw all undrawn meshes of this type
-  virtual void ProcessDrawQueue(int whichdrawqueue);
+  virtual void ProcessDrawQueue(int whichpass, int whichdrawqueue);
   ///Will draw all undrawn far meshes beyond the range of zbuffer (better be convex).
   virtual void SelectCullFace (int whichdrawqueue);
   virtual void RestoreCullFace (int whichdrawqueue);

@@ -61,7 +61,7 @@ void Mesh::ProcessZFarMeshes () {
 
 void Mesh::ProcessUndrawnMeshes(bool pushSpecialEffects) {
 }
-void Mesh::ProcessDrawQueue(int whichdrawqueue) {
+void Mesh::ProcessDrawQueue(int,int whichdrawqueue) {
 }
 void AddWarp (Unit * un, QVector, float) {}
 void WarpTrailDraw() {}

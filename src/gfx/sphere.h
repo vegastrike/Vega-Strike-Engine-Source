@@ -21,7 +21,7 @@ class SphereMesh : public Mesh {
     InitSphere (radius,stacks,slices,texture,alpha,insideout,a,b,envMap,rho_min,rho_max,theta_min,theta_max,mipmap);
   }
   void Draw(float lod, bool centered =false, const Matrix &m=identity_matrix);
-  virtual void ProcessDrawQueue(int which);
+  virtual void ProcessDrawQueue(int whichpass,int which);
 };
 class CityLights : public SphereMesh {
   //no local vars allowed
@@ -38,7 +38,7 @@ class CityLights : public SphereMesh {
 
   CityLights () : SphereMesh () {}
   CityLights (float radius, int stacks, int slices, const char *texture, int texturewrapx, int texturewrapy, bool insideout=false, const BLENDFUNC a=ONE, const BLENDFUNC b=ZERO, bool envMap=false, float rho_min=0.0, float rho_max=M_PI, float theta_min=0.0, float theta_max=2*M_PI);
-  virtual void ProcessDrawQueue(int which);
+  virtual void ProcessDrawQueue(int whichpass,int which);
 
 };
 #endif
