@@ -24,15 +24,47 @@ CXXFLAGS = ${LFLAGS} ${COPT} ${DEFS} ${INCLUDES}
 LDFLAGS	 = ${LFLAGS}
 LIBS	 = -lGL -lGLU -L/usr/freeware/lib32 -lglut -lexpat -lX11 -lm
 
-SOURCES = ani_texture.cpp animation.cpp aux_logo.cpp aux_palette.cpp \
-	  aux_texture.cpp background.cpp bounding_box.cpp box.cpp bsp.cpp \
-	  camera.cpp cockpit.cpp cockpit_xml.cpp coord_select.cpp \
-	  env_map_gent.cpp gauge.cpp halo.cpp hud.cpp lerp.cpp loc_select.cpp \
-	  matrix.cpp mesh.cpp mesh_bin.cpp mesh_fx.cpp mesh_poly.cpp \
-	  mesh_xml.cpp png_texture.cpp png_write.cpp \
-	  quadsquare.cpp quadsquare_cull.cpp quadsquare_render.cpp \
-	  quadsquare_update.cpp quadtree.cpp quadtree_xml.cpp quaternion.cpp \
-	  sphere.cpp sprite.cpp star.cpp vdu.cpp vec.cpp
+SOURCES =		\
+	ani_texture.cpp	\
+	animation.cpp	\
+	aux_logo.cpp	\
+	aux_palette.cpp	\
+	aux_texture.cpp	\
+	background.cpp	\
+	bounding_box.cpp	\
+	vsbox.cpp		\
+	bsp.cpp		\
+	camera.cpp	\
+	cockpit.cpp	\
+	cockpit_xml.cpp	\
+	coord_select.cpp	\
+	env_map_gent.cpp	\
+	gauge.cpp	\
+	halo.cpp	\
+	hud.cpp		\
+	lerp.cpp	\
+	loc_select.cpp	\
+	mesh.cpp	\
+	mesh_bin.cpp	\
+	mesh_fx.cpp	\
+	mesh_poly.cpp	\
+	mesh_xml.cpp	\
+	pipelined_texture.cpp	\
+	png_texture.cpp	\
+	png_write.cpp	\
+	quadtree.cpp	\
+	quadsquare.cpp	\
+	quadsquare_render.cpp	\
+	quadsquare_update.cpp	\
+	quadsquare_cull.cpp	\
+	quadtree_xml.cpp \
+	star.cpp	\
+	sphere.cpp	\
+	sprite.cpp	\
+	matrix.cpp	\
+	vdu.cpp		\
+	vec.cpp	\
+	quaternion.cpp
 
 OBJECTS = ${SOURCES:.cpp=.o}
 

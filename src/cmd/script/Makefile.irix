@@ -17,29 +17,41 @@ COPT	= -O3 -OPT:Olimit=0 -OPT:IEEE_arithmetic=1 \
 	  -DEBUG:optimize_space=on -OPT:space=on -CG:unique_exit=on \
 	  -OPT:unroll_times=0
 
-INCLUDES = -I/usr/freeware/include -I. -I..
+INCLUDES = -I/usr/freeware/include -I.. -I../..
 
 CFLAGS	 = ${LFLAGS} ${COPT} ${DEFS} ${INCLUDES}
 CXXFLAGS = ${LFLAGS} ${COPT} ${DEFS} ${INCLUDES}
 LDFLAGS	 = ${LFLAGS}
 LIBS	 = -lGL -lGLU -L/usr/freeware/lib32 -lglut -lexpat -lX11 -lm
 
+noinst_LIBRARIES = libscript.a
+
 SOURCES =					\
-	al_init.cpp				\
-	al_listen.cpp				\
-	al_sound.cpp				\
-	al_globals.cpp
+	mission.cpp				\
+	director.cpp				\
+	mission_script.cpp			\
+	script_variables.cpp			\
+	script_util.cpp				\
+	script_statement.cpp			\
+	script_expression.cpp			\
+	script_callbacks.cpp			\
+	script_call_olist.cpp			\
+	script_call_omap.cpp			\
+	script_call_unit.cpp			\
+	script_call_order.cpp			\
+	script_call_string.cpp			\
+	msgcenter.cpp
 
 OBJECTS = ${SOURCES:.cpp=.o}
 
-all: libaldrv.a
+all: libscript.a
 
-libaldrv.a:	${OBJECTS}
+libscript.a:	${OBJECTS}
 	-rm -f $@
 	${CXX} -ar -WR,-v -o $@ ${OBJECTS}
 
 clean:;
-	-rm -f libaldrv.a ${OBJECTS}
+	-rm -f libscript.a ${OBJECTS}
 
 include Makedepend
 

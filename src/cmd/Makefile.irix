@@ -24,10 +24,34 @@ CXXFLAGS = ${LFLAGS} ${COPT} ${DEFS} ${INCLUDES}
 LDFLAGS	 = ${LFLAGS}
 LIBS	 = -lGL -lGLU -L/usr/freeware/lib32 -lglut -lexpat -lX11 -lm
 
-SOURCES = beam.cpp building.cpp bolt.cpp click_list.cpp unit_collide.cpp faction_xml.cpp \
-	  music.cpp unit.cpp unit_bsp.cpp unit_damage.cpp unit_xml.cpp \
-	  unit_click.cpp unit_physics.cpp unit_weapon.cpp weapon_xml.cpp \
-	  planet.cpp terrain.cpp collection.cpp container.cpp cont_terrain.cpp
+SOURCES =				\
+	atmosphere.cpp			\
+	asteroid.cpp			\
+	beam.cpp			\
+	bolt.cpp			\
+	building.cpp			\
+	cont_terrain.cpp		\
+	click_list.cpp			\
+	unit_collide.cpp		\
+	faction_xml.cpp			\
+	music.cpp			\
+	nebula.cpp			\
+	terrain.cpp			\
+	unit.cpp			\
+	unit_bsp.cpp			\
+	unit_cargo.cpp			\
+	unit_customize.cpp		\
+	unit_damage.cpp			\
+	unit_dock.cpp			\
+	unit_xml.cpp  			\
+	unit_click.cpp			\
+	unit_physics.cpp		\
+	unit_weapon.cpp			\
+	weapon_xml.cpp			\
+	planet.cpp 			\
+	collection.cpp			\
+	container.cpp			
+
 
 OBJECTS = ${SOURCES:.cpp=.o}
 

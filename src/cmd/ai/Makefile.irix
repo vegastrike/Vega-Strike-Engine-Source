@@ -24,9 +24,20 @@ CXXFLAGS = ${LFLAGS} ${COPT} ${DEFS} ${INCLUDES}
 LDFLAGS	 = ${LFLAGS}
 LIBS	 = -lGL -lGLU -L/usr/freeware/lib32 -lglut -lexpat -lX11 -lm
 
-SOURCES = event_xml.cpp navigation.cpp flykeyboard.cpp fire.cpp \
-	  firekeyboard.cpp flyjoystick.cpp order.cpp aggressive.cpp \
-	  input_dfa.cpp flybywire.cpp tactics.cpp script.cpp 
+SOURCES =		\
+	event_xml.cpp	\
+	navigation.cpp	\
+	flykeyboard.cpp	\
+	fire.cpp	\
+	firekeyboard.cpp \
+	flyjoystick.cpp	\
+	order.cpp	\
+	aggressive.cpp	\
+	input_dfa.cpp	\
+	flybywire.cpp	\
+	tactics.cpp	\
+	script.cpp	\
+	missionscript.cpp
 
 OBJECTS = ${SOURCES:.cpp=.o}
 

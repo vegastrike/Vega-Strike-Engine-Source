@@ -24,10 +24,22 @@ CXXFLAGS = ${LFLAGS} ${COPT} ${DEFS} ${INCLUDES}
 LDFLAGS	 = ${LFLAGS}
 LIBS	 = -lGL -lGLU -L/usr/freeware/lib32 -lglut -lexpat -lX11 -lm
 
-SOURCES = gl_clip.cpp gl_globals.cpp gl_init.cpp gl_light.cpp \
-	  gl_light_pick.cpp gl_light_state.cpp gl_material.cpp \
-	  gl_matrix.cpp gl_misc.cpp gl_quad_list.cpp gl_state.cpp \
-	  gl_texture.cpp gl_vertex_list.cpp
+
+SOURCES =					\
+	gl_clip.cpp				\
+	gl_globals.cpp				\
+	gl_fog.cpp				\
+	gl_init.cpp				\
+	gl_light.cpp				\
+	gl_light_pick.cpp			\
+	gl_light_state.cpp			\
+	gl_matrix.cpp				\
+	gl_material.cpp				\
+	gl_misc.cpp				\
+	gl_quad_list.cpp			\
+	gl_state.cpp				\
+	gl_texture.cpp				\
+	gl_vertex_list.cpp			
 
 OBJECTS = ${SOURCES:.cpp=.o}
 

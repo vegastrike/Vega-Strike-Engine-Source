@@ -19,7 +19,7 @@ COPT	= -O3 -OPT:Olimit=0 -OPT:IEEE_arithmetic=2 \
 	  -DEBUG:optimize_space=on -OPT:space=on -CG:unique_exit=on \
 	  -OPT:unroll_times=0
 
-INCLUDES = -I. -I.. -I/usr/freeware/include
+INCLUDES = -I. -I.. -Icmd/script -I/usr/freeware/include
 
 CFLAGS	 = ${LFLAGS} ${COPT} ${DEFS} ${INCLUDES}
 CXXFLAGS = ${LFLAGS} ${COPT} ${DEFS} ${INCLUDES}
@@ -29,20 +29,40 @@ LIBS	 = -rpath /usr/freeware/lib32 \
 	   -lGLU -lGL -lXmu -lXt -lXext -lX11 -laudio -lm
 
 EXTRALIBS = cmd/libcmd.a cmd/ai/libai.a \
-	    gfx/libgfx.a gldrv/libgldrv.a aldrv/libaldrv.a
+	    cmd/script/libscript.a cmd/script/c_alike/libc_alike.a \
+	    gfx/libgfx.a gldrv/libgldrv.a aldrv/libaldrv.a \
+	    python/libpython.a cmd/collide/libcollide.a
 
-SUBDIRS = cmd gfx gldrv  aldrv
+SUBDIRS = cmd gfx gldrv aldrv python
 
-SOURCES = hashtable.cpp in_joystick.cpp in_kb.cpp in_sdl.cpp \
-	in_mouse.cpp in_main.cpp in_handler.cpp lin_time.cpp \
-	main.cpp main_loop.cpp physics.cpp star_system.cpp \
-	star_system_xml.cpp universe.cpp xml_support.cpp \
-	config_xml.cpp mission.cpp mission_script.cpp \
-	script_expression.cpp script_statement.cpp \
-	easydom.cpp vs_path.cpp
+SOURCES = 					\
+	galaxy.cpp				\
+	galaxy_xml.cpp				\
+	galaxy_gen.cpp				\
+	hashtable.cpp				\
+	in_joystick.cpp				\
+	in_kb.cpp				\
+	in_sdl.cpp				\
+	in_mouse.cpp				\
+	in_main.cpp				\
+	in_handler.cpp				\
+	lin_time.cpp				\
+	main.cpp				\
+	main_loop.cpp				\
+	savegame.cpp				\
+	physics.cpp				\
+	star_system.cpp 			\
+	star_system_jump.cpp			\
+	star_system_xml.cpp			\
+	universe.cpp				\
+	xml_support.cpp				\
+	xml_serializer.cpp			\
+	config_xml.cpp				\
+	easydom.cpp				\
+	vs_path.cpp				\
+        macosx_math.cpp
 
 OBJECTS = ${SOURCES:.cpp=.o}
-
 
 all: subdirs vegastrike
 
@@ -58,7 +78,7 @@ vegastrike: ${EXTRALIBS} ${OBJECTS}
 ${EXTRALIBS}:	subdirs
 
 subdirs:;
-	@for subd in aldrv gldrv gfx cmd cmd/ai; \
+	@for subd in $(SUBDIRS); \
 	do (echo "\nMaking all in $$subd"; \
 	    cd $$subd && \
 	    ${MAKE} -f ${MAKEFILE} -${MAKEFLAGS} COPT="${COPT}" DEFS="${DEFS}" LFLAGS="${LFLAGS}");\
@@ -66,11 +86,12 @@ subdirs:;
 
 clean:;
 	-rm -f vegastrike ${OBJECTS}
-	for subd in aldrv gldrv gfx cmd cmd/ai; \
+	for subd in $(SUBDIRS); \
 	do (cd $$subd && ${MAKE} -f ${MAKEFILE} -${MAKEFLAGS} clean); done
 
 realclean:	clean
-	-rm -rf ii_files aldrv/ii_files gldrv/ii_files gfx/ii_files cmd/ii_files cmd/ai/ii_files
+	for subd in . $(SUBDIRS); \
+	do (rm -rf $$subd/ii_files); done
 
 include Makedepend
 
