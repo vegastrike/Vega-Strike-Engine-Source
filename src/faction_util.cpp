@@ -131,7 +131,9 @@ void FactionUtil::LoadSerializedFaction(FILE * fp) {
       continue;
     }
     for (unsigned int j=0;j<factions[i]->faction.size();j++) {
-      sscanf (tmp2,"%f ",&factions[i]->faction[j].relationship);
+      if (1!=sscanf (tmp2,"%f ",&factions[i]->faction[j].relationship)) {
+	printf ("err");
+      }
       int k=0;
       bool founddig=false;
       while (tmp2[k]) {
@@ -148,36 +150,38 @@ void FactionUtil::LoadSerializedFaction(FILE * fp) {
     delete [] tmp;
   }
 }
-
+string savedFactions;
 void FactionUtil::LoadSerializedFaction(char * &buf) {
-  char * tmp;
+  if (buf==NULL) {
+    char * bleh = strdup (savedFactions.c_str());
+    char * blah = bleh;
+    LoadSerializedFaction(blah);
+    free (bleh);
+    return;
+  }
+  if (factions.size()==0) {
+    savedFactions=buf;
+    return;
+  }
   for (unsigned int i=0;i<factions.size();i++) {
-	/*
-    char * tmp = new char[24*factions[i]->faction.size()];
-    fgets (tmp,24*factions[i]->faction.size()-1,fp);
-	*/
-	tmp = buf;
-	buf+=24*factions[i]->faction.size()-1;
-    char * tmp2=tmp;
-    if (numnums(tmp)==0) {
+    if (numnums(buf)==0) {
       i--;
       continue;
     }
     for (unsigned int j=0;j<factions[i]->faction.size();j++) {
-      sscanf (tmp2,"%f ",&factions[i]->faction[j].relationship);
+      sscanf (buf,"%f ",&factions[i]->faction[j].relationship);
       int k=0;
       bool founddig=false;
-      while (tmp2[k]) {
-	if (isdigit(tmp2[k])) { 
+      while (buf[k]) {
+	if (isdigit(buf[k])) { 
 	  founddig=true;
 	}
-	if (founddig&&(!isdigit(tmp2[k])&&tmp2[k]!='.')) {
+	if (founddig&&(!isdigit(buf[k])&&buf[k]!='.')) {
 	  break;
 	}
 	k++;
       }
-      tmp2+=k;
+      buf+=k;
     }
-    delete [] tmp;
   }
 }

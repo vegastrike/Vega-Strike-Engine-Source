@@ -11,6 +11,7 @@
 #include "hashtable.h"
 #include "cmd/music.h"
 #include "faction.h"
+//#include "faction_util.h"
 static int unitlevel;
 using namespace XMLSupport;
 using XMLSupport::EnumMap;
@@ -18,6 +19,7 @@ using XMLSupport::Attribute;
 using XMLSupport::AttributeList;
 //using std::sort;
 using std::map;
+
 static FSM * getFSM (const std::string & value) {
   static Hashtable <std::string, FSM, char[16]> fsms;
   FSM * fsm = fsms.Get (value);
@@ -358,6 +360,8 @@ using namespace FactionXML;
       }
     }
   }
+  char * munull=NULL;
+  FactionUtil::LoadSerializedFaction(munull);
 }
 void FactionUtil::LoadContrabandLists() {
   for (unsigned int i=0;i<factions.size()&&i<contrabandlists.size();i++) {
