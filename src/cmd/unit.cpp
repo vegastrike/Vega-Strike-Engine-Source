@@ -307,7 +307,7 @@ Unit::Unit(const char *filename, bool SubU, int faction,std::string unitModifica
 
 	Init();
 	if (!SubU)
-	  AddUnitToSave(filename,UNITPTR,_Universe->GetFaction(faction),(int)this);
+	  _Universe->AccessCockpit()->savegame->AddUnitToSave(filename,UNITPTR,_Universe->GetFaction(faction),(int)this);
 	SubUnit = SubU;
 	this->faction = faction;
 	flightgroup=flightgrp;
@@ -735,7 +735,7 @@ void Unit::Draw(const Transformation &parent, const Matrix parentMatrix)
   if (hull <0) {
     Explode(true, GetElapsedTime());
   }
-  if (!invisible) {
+  if (!invisible||(this!=_Universe->AccessCockpit()->GetParent())) {
     for (i=0;i<=nummesh;i++) {//NOTE LESS THAN OR EQUALS...to cover shield mesh
       if (meshdata[i]==NULL) 
 		continue;

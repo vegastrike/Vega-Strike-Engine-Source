@@ -12,7 +12,9 @@ class Gauge;
 class Unit;
 #include "vdu.h"
 #include "in_kb.h"
+#include "camera.h"
 #define MAXVDUS 10
+#define NUM_CAM		12
 /**
  * The Cockpit Contains all displayable information about a particular Unit *
  * Gauges are used to indicate analog controls, and some diagital ones
@@ -22,6 +24,8 @@ class Cockpit {
 public:
   enum GAGUES {ARMORF,ARMORB,ARMORR,ARMORL,FUEL, SHIELDF,SHIELDR,SHIELDL,SHIELDB, ENERGY, EJECT, LOCK, HULL, KPS, SETKPS, FPS, NUMGAUGES};
 private:
+  Camera cam[NUM_CAM];
+  int currentcamera;
   float radar_time;
   float gauge_time [NUMGAUGES];
   float vdu_time [MAXVDUS];
@@ -102,17 +106,20 @@ private:
   float credits;//how much money player has
   ///How far away chasecam and pan cam is
   float zoomfactor;
-  Cockpit (const char * file, Unit * parent);
+  Cockpit (const char * file, Unit * parent, const std::string &pilotname);
   ~Cockpit();
   ///Looks up a particular Gauge stat on target unit
   float LookupTargetStat (int stat, Unit *target);
   ///Loads cockpit info...just as constructor
   void Init (const char * file);
   ///Sets owner of this cockpit
+  //  unsigned int whichcockpit;//0 is the first player, 1 is the second and so forth
+  class StarSystem* activeStarSystem;//used for context switch in Universe
   void SetParent(Unit * unit, const char * filename, const char * unitmodname,const Vector &startloc);
   Unit * GetParent () {return parent.GetUnit();}
   ///Draws Cockpit then restores viewport
   void Draw();
+  void Update();//respawns and the like.
   ///Sets the current viewstyle
   void SetView (const enum VIEWSTYLE tmp);
   enum VIEWSTYLE GetView () {return view;}
@@ -126,5 +133,17 @@ private:
   static void SwitchControl (int,KBSTATE);
   static void TurretControl (int, KBSTATE);
   void SetCommAnimation (Animation * ani);
+  class SaveGame * savegame;
+  ///Accesses the current camera
+  Camera *AccessCamera() {return &cam[currentcamera];}
+  ///Returns the passed in cam
+  Camera *AccessCamera(int);
+  ///Changes current camera to selected camera
+  void SelectCamera(int);
+  ///GFXLoadMatrix proper camera
+  void SetViewport() {
+    cam[currentcamera].UpdateGFX();
+  }
+
 };
 #endif

@@ -40,8 +40,8 @@ enum KBSTATE {
 
 typedef void (*KBHandler)(int, KBSTATE);
 
-void ProcessKB();
-void BindKey(int key, KBHandler handler);
+void ProcessKB(unsigned int player);
+void BindKey(int key, unsigned int player, KBHandler handler);
 void UnbindKey(int key);
 void InitKB ();
 void RestoreKB ();

@@ -29,13 +29,13 @@ CoordinateSelect::CoordinateSelect (Vector start):LocSelAni ("locationselect.ani
 void CoordinateSelect::UpdateMouse() {
   if (CoordinateSelectChange==1) {
     Vector CamPos, CamQ,CamR;
-    _Universe->activeStarSystem()->AccessCamera()->GetPQR(CamPos,CamQ,CamR);
+    _Universe->AccessCamera()->GetPQR(CamPos,CamQ,CamR);
 
     Vector mousePoint ( MouseCoordinate(CoordinateSelectmousex,CoordinateSelectmousey));
     float mouseDistance= mousePoint.k*mousePoint.k;
     mousePoint = Transform (CamPos,CamQ,CamR,mousePoint);
     
-    _Universe->activeStarSystem()->AccessCamera()->GetPosition (CamPos);  
+    _Universe->AccessCamera()->GetPosition (CamPos);  
     //float mouseDistance = mousePoint.Dot (CamR); 
     //distance out into z...straight line...
 
@@ -52,8 +52,8 @@ void CoordinateSelect::UpdateMouse() {
   }
   if (CoordinateSelectChange ==2) {
     Vector CamPos, CamQ,CamR;
-    _Universe->activeStarSystem()->AccessCamera()->GetPQR(CamPos,CamQ,CamR);
-    _Universe->activeStarSystem()->AccessCamera()->GetPosition (CamPos);
+    _Universe->AccessCamera()->GetPQR(CamPos,CamQ,CamR);
+    _Universe->AccessCamera()->GetPosition (CamPos);
 
     LocalPosition = LocalPosition - CamPos;
     float distance = sqrt (CamR.Dot (LocalPosition));//distance out into z...straight line...

@@ -83,6 +83,7 @@ public:
 	void XSlide(float factor);
 	void YSlide(float factor);
 	void ZSlide(float factor);
+	void RestoreViewPort(float xoffset, float yoffset);
 };
 
 #endif

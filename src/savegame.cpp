@@ -9,32 +9,35 @@
 #include "config_xml.h"
 #include "savegame.h"
 using namespace std;
-static std::string ForceStarSystem("") ;
-static Vector PlayerLocation (FLT_MAX,FLT_MAX,FLT_MAX);
-static std::string outputsavegame;
-static std::string originalsystem;
-Hashtable<int,SavedUnits,char[47]> savedunits;
-void SetStarSystem (string sys) {
+SaveGame::SaveGame(const std::string &pilot) {
+  callsign=pilot;
+  ForceStarSystem=string("");
+  PlayerLocation.Set(FLT_MAX, FLT_MAX,FLT_MAX);
+}
+
+void SaveGame::SetStarSystem (string sys) {
   ForceStarSystem = sys;
 }
-string GetStarSystem () {
+string SaveGame::GetStarSystem () {
   return ForceStarSystem;
 }
 
-void SetPlayerLocation (const Vector &v) {
+void SaveGame::SetPlayerLocation (const Vector &v) {
   PlayerLocation =v;
 }
-Vector GetPlayerLocation () {
+Vector SaveGame::GetPlayerLocation () {
   return PlayerLocation;
 }
-void RemoveUnitFromSave (int address) {
+
+Hashtable<int,SavedUnits,char[47]> SaveGame::savedunits;
+void SaveGame::RemoveUnitFromSave (int address) {
   SavedUnits *tmp;
   if (NULL!=(tmp =savedunits.Get (address))) {
     savedunits.Delete (address);
     delete tmp;
   }
 }
-void AddUnitToSave (const char * filename, enum clsptr type, const char * faction, int address) {
+void SaveGame::AddUnitToSave (const char * filename, enum clsptr type, const char * faction, int address) {
   static string s = vs_config->getVariable ("physics","Drone","drone");
   if (0==strcmp (s.c_str(),filename)/*||type==ENHANCEMENTPTR*/) {
     RemoveUnitFromSave (address);
@@ -55,10 +58,10 @@ vector <SavedUnits> ReadSavedUnits (FILE * fp) {
   }
   return su;
 }
-void WriteSavedUnit (FILE * fp, SavedUnits* su) {
+void SaveGame::WriteSavedUnit (FILE * fp, SavedUnits* su) {
   fprintf (fp,"\n%d %s %s",su->type, su->filename.c_str(),su->faction.c_str());
 }
-void WriteSaveGame (const char *systemname, const Vector &FP, float credits, std::string unitname) {
+void SaveGame::WriteSaveGame (const char *systemname, const Vector &FP, float credits, std::string unitname) {
   vector<SavedUnits *> myvec = savedunits.GetAll();
   if (outputsavegame.length()!=0) {
     printf ("Writing Save Game %s",outputsavegame.c_str());
@@ -84,14 +87,15 @@ void WriteSaveGame (const char *systemname, const Vector &FP, float credits, std
   }
 }
 static float savedcredits=0;
-float GetSavedCredits () {
+float SaveGame::GetSavedCredits () {
   return savedcredits;
 }
-void SetSavedCredits (float c) {
+void SaveGame::SetSavedCredits (float c) {
   savedcredits = c;
 }
-vector<SavedUnits> ParseSaveGame (const string filename, string &FSS, string originalstarsystem, Vector &PP, bool & shouldupdatepos,float &credits, string &savedstarship) {
-
+vector<SavedUnits> SaveGame::ParseSaveGame (string filename, string &FSS, string originalstarsystem, Vector &PP, bool & shouldupdatepos,float &credits, string &savedstarship) {
+  if (filename.length()>0)
+    filename=callsign+filename;
   vector <SavedUnits> mysav;
   shouldupdatepos=!(PlayerLocation.i==FLT_MAX||PlayerLocation.j==FLT_MAX||PlayerLocation.k==FLT_MAX);
   outputsavegame=filename;

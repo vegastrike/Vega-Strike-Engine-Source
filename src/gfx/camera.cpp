@@ -147,7 +147,9 @@ void Camera::UpdatePlanetGFX () {
     Identity (planetview);
   }
 }
-
+void Camera::RestoreViewPort (float xoffset,float yoffset) {
+  GFXSubwindow(x+xoffset,y+yoffset,xsize,ysize);
+}
 void Camera::UpdateGLCenter()
 {
 #define ITISDEPRECATED 0
@@ -178,8 +180,8 @@ void Camera::UpdateGLCenter()
 		  GFXParallel(g_game.aspect*-zoom,g_game.aspect*zoom,-zoom,zoom,-g_game.znear,g_game.zfar);
 		  break;
 		}
+		RestoreViewPort(0,0);
 
-		GFXSubwindow(x,y,xsize,ysize);
 		GFXLookAt (-R, Vector(0,0,0), Q);
 		//changed = GFXFALSE;
 	}

@@ -61,7 +61,7 @@ StarSystem::StarSystem(const char * filename, const Vector & centr,const float t
   //  cout << "origin: " << centr.i << " " << centr.j << " " << centr.k << " " << planetname << endl;
 
   current_stage=PHY_AI;
-  currentcamera = 0;	
+
   systemInputDFA = new InputDFA (this);
 
   LoadXML(filename,centr,timeofyear);
@@ -340,7 +340,7 @@ void StarSystem::Draw(bool DrawCockpit) {
   fprintf (stderr,"cpu");
   fflush (stderr);
 #endif
-    AccessCamera()->UpdateGFX (GFXTRUE);
+    _Universe->AccessCamera()->UpdateGFX (GFXTRUE);
   }
 #ifdef UPDATEDEBUG
   fprintf (stderr,">un<");
@@ -467,9 +467,10 @@ void StarSystem::Update(float priority , bool executeDirector) {
   bool firstframe = true;
 
   ///this makes it so systems without players may be simulated less accurately
-
-  if (_Universe->activeStarSystem()==this) {
-    priority=1;
+  for (int k=0;k<_Universe->numPlayers();k++) {
+    if (_Universe->AccessCockpit(k)->activeStarSystem==this) {
+      priority=1;
+    }
   }
   float normal_simulation_atom = SIMULATION_ATOM;
   SIMULATION_ATOM/=(priority/getTimeCompression());
@@ -587,11 +588,11 @@ void StarSystem::Update(float priority , bool executeDirector) {
   fflush (stderr);
 #endif
 	if (this==_Universe->getActiveStarSystem(0)) {
-	  AccessCamera()->UpdateCameraSounds();
+	  _Universe->AccessCockpit(0)->AccessCamera()->UpdateCameraSounds();
 	  if (muzak)
 	    muzak->Listen();
 	}
-	AccessCamera()->SetNebula(NULL);//Update physics should set this
+	_Universe->AccessCamera()->SetNebula(NULL);//Update physics should set this
 #ifdef UPDATEDEBUG
   fprintf (stderr,"unphi");
   fflush (stderr);
@@ -630,13 +631,3 @@ void StarSystem::Update(float priority , bool executeDirector) {
 }
 
 
-void StarSystem::SelectCamera(int cam){
-    if(cam<NUM_CAM&&cam>=0)
-      currentcamera = cam;
-}
-Camera* StarSystem::AccessCamera(int num){
-  if(num<NUM_CAM&&num>=0)
-    return &cam[num];
-  else
-    return NULL;
-}

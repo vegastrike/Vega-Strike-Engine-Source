@@ -20,7 +20,7 @@ class Enhancement : public Unit {
       string fn (filename);
       string fac(_Universe->GetFaction(faction));
       Kill();
-      AddUnitToSave(fn.c_str(),ENHANCEMENTPTR,fac.c_str(),(int)this);
+      _Universe->AccessCockpit()->savegame->AddUnitToSave(fn.c_str(),ENHANCEMENTPTR,fac.c_str(),(int)this);
     }
   }
 };

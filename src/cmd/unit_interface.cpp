@@ -152,6 +152,11 @@ struct UpgradingInfo {
     
 	CargoList = new TextArea(-1, 0.9, 1, 1.7, 1);
 	CargoInfo = new TextArea(0, 0.9, 1, 1.7, 0);
+	Cockpit * cp = _Universe->isPlayerStarship(un);
+	Cockpit * tmpcockpit = _Universe->AccessCockpit();
+	if (cp) {
+	  _Universe->SetActiveCockpit(cp);
+	}
 	NewPart=NULL;//no ship to upgrade
 	templ=NULL;//no template
 	//	CargoList->AddTextItem("a","Just a test item");
@@ -182,6 +187,7 @@ struct UpgradingInfo {
 	CargoList->RenderText();
 	CargoInfo->RenderText();	
 	SetMode (BUYMODE,NORMAL);
+	_Universe->SetActiveCockpit(tmpcockpit);
   }
   ~UpgradingInfo() {
     if (templ){
@@ -201,6 +207,12 @@ struct UpgradingInfo {
     }
   }
   void Render(){
+    Unit * un = buyer.GetUnit(); 
+    if (un) {
+      Cockpit * cp = _Universe->isPlayerStarship(un);
+      if (cp)
+	_Universe->SetActiveCockpit(cp);
+    }
 	StartGUIFrame();
 	// Black background
 	ShowColor(-1,-1,2,2, 0,0,0,1);
@@ -355,7 +367,7 @@ void UpgradingInfo::CommitItem (const char *inp_buf, int button, int state) {
 		base->RequestClearance(NewPart);
 		NewPart->Dock(base);
 		buyer.SetUnit(NewPart);
-		SetSavedCredits (_Universe->AccessCockpit()->credits);
+		_Universe->AccessCockpit()->savegame->SetSavedCredits (_Universe->AccessCockpit()->credits);
 		NewPart=NULL;
 		un->Kill();
 		return;

@@ -9,80 +9,104 @@
 #include "gfx/animation.h"
 #include "audiolib.h"
 #include "config_xml.h"
-FireKeyboard::FireKeyboard (int whichjoystick, const char *): Order (WEAPON){
+FireKeyboard::FireKeyboard (unsigned int whichplayer, unsigned int whichjoystick): Order (WEAPON){
+  this->whichjoystick = whichjoystick;
+  this->whichplayer=whichplayer;
   gunspeed = gunrange = .0001;
   refresh_target=true;
   sex = XMLSupport::parse_int( vs_config->getVariable ("player","sex","0"));
 }
-static KBSTATE firekey=UP;
-static bool doc=0;
-static bool und=0;
-static bool req=0;
-static KBSTATE missilekey = UP;
-static KBSTATE jfirekey=UP;
-static KBSTATE jtargetkey=UP;
-static KBSTATE jmissilekey = UP;
-static KBSTATE weapk=UP;
-static KBSTATE misk=UP;
-static KBSTATE cloakkey=UP;
-static KBSTATE neartargetkey=UP;
-static KBSTATE threattargetkey=UP;
-static KBSTATE picktargetkey=UP;
-static KBSTATE targetkey=UP;
 const unsigned int NUMCOMMKEYS=10;
-static KBSTATE commKeys[NUMCOMMKEYS]={UP,UP,UP,UP,UP,UP,UP,UP,UP,UP};
-static KBSTATE nearturrettargetkey=UP;
-static KBSTATE threatturrettargetkey=UP;
-static KBSTATE pickturrettargetkey=UP;
-static KBSTATE turrettargetkey=UP;
+struct FIREKEYBOARDTYPE {
+  FIREKEYBOARDTYPE() {
+    commKeys[0]=commKeys[1]=commKeys[2]=commKeys[3]=commKeys[4]=commKeys[5]=commKeys[6]=commKeys[7]=commKeys[8]=commKeys[9]=UP;
+    firekey=missilekey=jfirekey=jtargetkey=jmissilekey=weapk=misk=cloakkey=neartargetkey=threattargetkey=picktargetkey=targetkey=nearturrettargetkey =threatturrettargetkey= pickturrettargetkey=turrettargetkey=UP;
+    doc=und=req=0;
+  }
+ KBSTATE firekey;
+ bool doc;
+ bool und;
+ bool req;
+ KBSTATE missilekey;
+ KBSTATE jfirekey;
+ KBSTATE jtargetkey;
+ KBSTATE jmissilekey;
+ KBSTATE weapk;
+ KBSTATE misk;
+ KBSTATE cloakkey;
+ KBSTATE neartargetkey;
+ KBSTATE threattargetkey;
+ KBSTATE picktargetkey;
+ KBSTATE targetkey;
+
+  KBSTATE commKeys[NUMCOMMKEYS];
+ KBSTATE nearturrettargetkey;
+ KBSTATE threatturrettargetkey;
+ KBSTATE pickturrettargetkey;
+ KBSTATE turrettargetkey;
+};
+static std::vector <FIREKEYBOARDTYPE> vectorOfKeyboardInput;
+static FIREKEYBOARDTYPE &g() {
+  while (vectorOfKeyboardInput.size()<=(unsigned int)_Universe->CurrentCockpit()||vectorOfKeyboardInput.size()<=(unsigned int)MAX_JOYSTICKS) {
+    vectorOfKeyboardInput.push_back(FIREKEYBOARDTYPE());
+  }
+  return vectorOfKeyboardInput [_Universe->CurrentCockpit()];
+}
+FIREKEYBOARDTYPE &FireKeyboard::f() {
+  return vectorOfKeyboardInput[whichplayer];
+}
+FIREKEYBOARDTYPE &FireKeyboard::j() {
+  return vectorOfKeyboardInput[whichjoystick];
+}
+
 void FireKeyboard::PressComm1Key (int, KBSTATE k) {
   if (k==PRESS) {
-    commKeys[0]=PRESS;
+    g().commKeys[0]=PRESS;
   }
 }
 void FireKeyboard::PressComm2Key (int, KBSTATE k) {
   if (k==PRESS) {
-    commKeys[1]=PRESS;
+    g().commKeys[1]=PRESS;
   }
 }
 void FireKeyboard::PressComm3Key (int, KBSTATE k) {
   if (k==PRESS) {
-    commKeys[2]=PRESS;
+    g().commKeys[2]=PRESS;
   }
 }
 void FireKeyboard::PressComm4Key (int, KBSTATE k) {
   if (k==PRESS) {
-    commKeys[3]=PRESS;
+    g().commKeys[3]=PRESS;
   }
 }
 void FireKeyboard::PressComm5Key (int, KBSTATE k) {
   if (k==PRESS) {
-    commKeys[4]=PRESS;
+    g().commKeys[4]=PRESS;
   }
 }
 void FireKeyboard::PressComm6Key (int, KBSTATE k) {
   if (k==PRESS) {
-    commKeys[5]=PRESS;
+    g().commKeys[5]=PRESS;
   }
 }
 void FireKeyboard::PressComm7Key (int, KBSTATE k) {
   if (k==PRESS) {
-    commKeys[6]=PRESS;
+    g().commKeys[6]=PRESS;
   }
 }
 void FireKeyboard::PressComm8Key (int, KBSTATE k) {
   if (k==PRESS) {
-    commKeys[7]=PRESS;
+    g().commKeys[7]=PRESS;
   }
 }
 void FireKeyboard::PressComm9Key (int, KBSTATE k) {
   if (k==PRESS) {
-    commKeys[8]=PRESS;
+    g().commKeys[8]=PRESS;
   }
 }
 void FireKeyboard::PressComm10Key (int, KBSTATE k) {
   if (k==PRESS) {
-    commKeys[9]=PRESS;
+    g().commKeys[9]=PRESS;
   }
 }
 
@@ -90,114 +114,114 @@ void FireKeyboard::PressComm10Key (int, KBSTATE k) {
 void FireKeyboard::RequestClearenceKey(int, KBSTATE k) {
 
     if (k==PRESS) {
-      req=true;      
+      g().req=true;      
     }
     if (k==RELEASE) {
-      req=false;      
+      g().req=false;      
     }
 }
 void FireKeyboard::DockKey(int, KBSTATE k) {
 
     if (k==PRESS) {
-      doc=true;      
+      g().doc=true;      
     }
     if (k==RELEASE) {
-      doc=false;      
+      g().doc=false;      
     }
 }
 void FireKeyboard::UnDockKey(int, KBSTATE k) {
     if (k==PRESS) {
-      und=true;      
+      g().und=true;      
     }
     if (k==RELEASE) {
-      und=false;      
+      g().und=false;      
     }
 }
 
 void FireKeyboard::CloakKey(int, KBSTATE k) {
 
     if (k==PRESS) {
-      cloakkey = k;      
+      g().cloakkey = k;      
     }
 }
 void FireKeyboard::FireKey(int key, KBSTATE k) {
-  if(firekey==DOWN && k==UP){
+  if(g().firekey==DOWN && k==UP){
     return;
   }
-  if (k==UP&&firekey==RELEASE) {
+  if (k==UP&&g().firekey==RELEASE) {
 
   } else {
 
-    firekey = k;
+    g().firekey = k;
     //    printf("firekey %d %d\n",k,key);
   }
 }
 
 void FireKeyboard::TargetKey(int, KBSTATE k) {
-  if (targetkey!=PRESS)
-    targetkey = k;
+  if (g().targetkey!=PRESS)
+    g().targetkey = k;
   if (k==RESET) {
-    targetkey=PRESS;
+    g().targetkey=PRESS;
   }
 }
 void FireKeyboard::PickTargetKey(int, KBSTATE k) {
-  if (picktargetkey!=PRESS)
-    picktargetkey = k;
+  if (g().picktargetkey!=PRESS)
+    g().picktargetkey = k;
   if (k==RESET) {
-    picktargetkey=PRESS;
+    g().picktargetkey=PRESS;
   }
 }
 
 void FireKeyboard::NearestTargetKey(int, KBSTATE k) {
-  if (neartargetkey!=PRESS)
-    neartargetkey = k;
+  if (g().neartargetkey!=PRESS)
+    g().neartargetkey = k;
 
 }
 void FireKeyboard::ThreatTargetKey(int, KBSTATE k) {
-  if (threattargetkey!=PRESS)
-    threattargetkey = k;
+  if (g().threattargetkey!=PRESS)
+    g().threattargetkey = k;
 }
 
 
 void FireKeyboard::TargetTurretKey(int, KBSTATE k) {
-  if (turrettargetkey!=PRESS)
-    turrettargetkey = k;
+  if (g().turrettargetkey!=PRESS)
+    g().turrettargetkey = k;
   if (k==RESET) {
-    turrettargetkey=PRESS;
+    g().turrettargetkey=PRESS;
   }
 }
 void FireKeyboard::PickTargetTurretKey(int, KBSTATE k) {
-  if (pickturrettargetkey!=PRESS)
-    pickturrettargetkey = k;
+  if (g().pickturrettargetkey!=PRESS)
+    g().pickturrettargetkey = k;
   if (k==RESET) {
-    pickturrettargetkey=PRESS;
+    g().pickturrettargetkey=PRESS;
   }
 }
 
 void FireKeyboard::NearestTargetTurretKey(int, KBSTATE k) {
-  if (nearturrettargetkey!=PRESS)
-    nearturrettargetkey = k;
+  if (g().nearturrettargetkey!=PRESS)
+    g().nearturrettargetkey = k;
 
 }
 void FireKeyboard::ThreatTargetTurretKey(int, KBSTATE k) {
-  if (threatturrettargetkey!=PRESS)
-    threatturrettargetkey = k;
+  if (g().threatturrettargetkey!=PRESS)
+    g().threatturrettargetkey = k;
 }
 
 
 
 void FireKeyboard::WeapSelKey(int, KBSTATE k) {
-  if (weapk!=PRESS)
-    weapk = k;
+  if (g().weapk!=PRESS)
+    g().weapk = k;
 }
 void FireKeyboard::MisSelKey(int, KBSTATE k) {
-  if (misk!=PRESS)
-    misk = k;
+  if (g().misk!=PRESS)
+    g().misk = k;
 } 
 
 void FireKeyboard::MissileKey(int, KBSTATE k) {
-  if (missilekey!=PRESS)
-   missilekey = k;
+  if (g().missilekey!=PRESS)
+   g().missilekey = k;
 }
 void FireKeyboard::ChooseNearTargets(bool turret) {
   UnitCollection::UnitIterator iter = _Universe->activeStarSystem()->getUnitList().createIterator();
@@ -344,21 +368,21 @@ bool FireKeyboard::ShouldFire(Unit * targ) {
   return (dist<.8*agg&&angle>1/agg);
 }
 
-static void DoDockingOps (Unit * parent, Unit * targ,unsigned char sex) {
-    if (req) {
+static void DoDockingOps (Unit * parent, Unit * targ,unsigned char playa, unsigned char sex) {
+    if (vectorOfKeyboardInput[playa].req) {
       //      fprintf (stderr,"request %d", targ->RequestClearance (parent));
       CommunicationMessage c(parent,targ,NULL,sex);
       c.SetCurrentState(c.fsm->GetRequestLandNode(),NULL,sex);
       targ->getAIState()->Communicate (c);
-      req=false;
+      vectorOfKeyboardInput[playa].req=false;
     }
-    if (doc) {
+    if (vectorOfKeyboardInput[playa].doc) {
       fprintf (stderr,"dock %d", parent->Dock(targ));
-      doc=false;
+      vectorOfKeyboardInput[playa].doc=0;
     }
-    if (und) {
+    if (vectorOfKeyboardInput[playa].und) {
       fprintf (stderr,"udock %d", parent->UnDock(targ));
-      und=false;
+      vectorOfKeyboardInput[playa].und=0;
     }
 }
 using std::list;
@@ -406,93 +430,96 @@ static CommunicationMessage * GetTargetMessageQueue (Unit * targ,std::list <Comm
 
 
 void FireKeyboard::Execute () {
+  while (vectorOfKeyboardInput.size()<=whichplayer||vectorOfKeyboardInput.size()<=whichjoystick) {
+    vectorOfKeyboardInput.push_back(FIREKEYBOARDTYPE());
+  }
   ProcessCommunicationMessages(SIMULATION_ATOM,true);
   Unit * targ;
   if ((targ = parent->Target())) {
     ShouldFire (targ);
-    DoDockingOps(parent,targ,sex);
+    DoDockingOps(parent,targ,whichplayer,sex);
   } else {
     ChooseTargets(false);
     refresh_target=true;
   }
-  if (firekey==PRESS||jfirekey==PRESS||firekey==DOWN||jfirekey==DOWN) 
+  if (f().firekey==PRESS||f().jfirekey==PRESS||j().firekey==DOWN||j().jfirekey==DOWN) 
     parent->Fire(false);
-  if (missilekey==DOWN||missilekey==PRESS||jmissilekey==PRESS||jmissilekey==DOWN) {
+  if (f().missilekey==DOWN||f().missilekey==PRESS||j().jmissilekey==PRESS||j().jmissilekey==DOWN) {
     parent->Fire(true);
-    if (missilekey==PRESS)
-      missilekey = DOWN;
-    if (jmissilekey==PRESS)
-      jmissilekey=DOWN;
+    if (f().missilekey==PRESS)
+      f().missilekey = DOWN;
+    if (j().jmissilekey==PRESS)
+      j().jmissilekey=DOWN;
   }
-  else if (firekey==RELEASE||jfirekey==RELEASE) {
-    firekey=UP;
-    jfirekey=UP;
+  else if (f().firekey==RELEASE||j().jfirekey==RELEASE) {
+    f().firekey=UP;
+    j().jfirekey=UP;
     parent->UnFire();
   }
-  if (cloakkey==PRESS) {
+  if (f().cloakkey==PRESS) {
     static bool toggle=true;
-    cloakkey=DOWN;
+    f().cloakkey=DOWN;
     parent->Cloak(toggle);
     toggle=!toggle;
   }
-  if (targetkey==PRESS||jtargetkey==PRESS) {
-    targetkey=DOWN;
-    jtargetkey=DOWN;
+  if (f().targetkey==PRESS||j().jtargetkey==PRESS) {
+    f().targetkey=DOWN;
+    j().jtargetkey=DOWN;
     ChooseTargets(false);
     refresh_target=true;
   }
-  if(picktargetkey==PRESS){
-    picktargetkey=DOWN;
+  if(f().picktargetkey==PRESS){
+    f().picktargetkey=DOWN;
     PickTargets(false);
     refresh_target=true;
   }
-  if (neartargetkey==PRESS) {
+  if (f().neartargetkey==PRESS) {
     ChooseNearTargets (false);
-    neartargetkey=DOWN;
+    f().neartargetkey=DOWN;
     refresh_target=true;
   }
-  if (threattargetkey==PRESS) {
+  if (f().threattargetkey==PRESS) {
     ChooseThreatTargets (false);
-    threattargetkey=DOWN;
+    f().threattargetkey=DOWN;
     refresh_target=true;
   }
 
 
 
-  if (turrettargetkey==PRESS) {
-    turrettargetkey=DOWN;
+  if (f().turrettargetkey==PRESS) {
+    f().turrettargetkey=DOWN;
     ChooseTargets(true);
     refresh_target=true;
   }
-  if(pickturrettargetkey==PRESS){
-    pickturrettargetkey=DOWN;
+  if(f().pickturrettargetkey==PRESS){
+    f().pickturrettargetkey=DOWN;
     PickTargets(true);
     refresh_target=true;
   }
-  if (nearturrettargetkey==PRESS) {
+  if (f().nearturrettargetkey==PRESS) {
     ChooseNearTargets (true);
-    nearturrettargetkey=DOWN;
+    f().nearturrettargetkey=DOWN;
     refresh_target=true;
   }
-  if (threatturrettargetkey==PRESS) {
+  if (f().threatturrettargetkey==PRESS) {
     ChooseThreatTargets (true);
-    threatturrettargetkey=DOWN;
+    f().threatturrettargetkey=DOWN;
     refresh_target=true;
   }
 
 
 
-  if (weapk==PRESS) {
-    weapk=DOWN;
+  if (f().weapk==PRESS) {
+    f().weapk=DOWN;
     parent->ToggleWeapon (false);
   }
-  if (misk==PRESS) {
-    misk=DOWN;
+  if (f().misk==PRESS) {
+    f().misk=DOWN;
     parent->ToggleWeapon(true);
   }
   for (unsigned int i=0;i<NUMCOMMKEYS;i++) {
-    if (commKeys[i]==PRESS) {
-      commKeys[i]=RELEASE;
+    if (f().commKeys[i]==PRESS) {
+      f().commKeys[i]=RELEASE;
       Unit * targ=parent->Target();
       if (targ) {
 	CommunicationMessage * mymsg = GetTargetMessageQueue(targ,resp);       

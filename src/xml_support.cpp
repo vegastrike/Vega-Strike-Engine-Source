@@ -97,51 +97,17 @@ namespace XMLSupport {
 
 
   bool parse_bool (const string &str) {
-
-	if (str=="true"||str=="yes"||str=="1") {
-
+	if ((*str.begin())=='t'||(*str.begin())=='y'||(*str.begin())=='1') {
 		return true;
-
 	} else {
-
 		return false;
-
 	}
-
   }
-
-
-
   double parse_float(const string &str) {
-
-    double result;
-
-    const char *dat = str.c_str();
-
-    char *dat1;
-
-    result = strtod(dat, &dat1);
-
-
-    return result;
-
+    return atof (str.c_str());
   }
-
-
-
   int parse_int(const string &str) {
-
-    int result;
-
-    const char *dat = str.c_str();
-
-    char *dat1;
-
-    result = strtol(dat, &dat1, 10);
-
-
-    return result;
-
+    return atoi (str.c_str());
   }
 
 }

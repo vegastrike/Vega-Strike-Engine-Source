@@ -197,11 +197,11 @@ void Music::Listen() {
 	     if (!playlist[whichlist].empty ()) {
 	       song = AUDCreateMusic (playlist[whichlist][songnum],false);
 	       AUDStartPlaying (song); 
-	   	   AUDAdjustSound (song,_Universe->AccessCamera()->GetPosition(),_Universe->AccessCamera()->GetVelocity());
+	   	   AUDAdjustSound (song,_Universe->AccessCockpit(0)->AccessCamera()->GetPosition(),_Universe->AccessCockpit(0)->AccessCamera()->GetVelocity());
 
 		 }    
 		} else {
-		 AUDAdjustSound (song,_Universe->AccessCamera()->GetPosition(),_Universe->AccessCamera()->GetVelocity());
+		 AUDAdjustSound (song,_Universe->AccessCockpit(0)->AccessCamera()->GetPosition(),_Universe->AccessCockpit(0)->AccessCamera()->GetVelocity());
 		}
 	  }
 	}

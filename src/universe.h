@@ -27,7 +27,7 @@
 
 #include "gfx/camera.h"
 #include "star_system.h"
-
+#include "gfx/cockpit.h"
 class Cockpit;
 
 /**
@@ -47,7 +47,8 @@ class Universe {
 protected:
   class GalaxyXML::Galaxy * galaxy;
   ///The users cockpit
-  Cockpit * cockpit;
+  unsigned int current_cockpit;
+  std::vector <Cockpit *> cockpit;
   ///a generic camera facing the HUD
   Camera hud_camera;
   ///init proc
@@ -110,15 +111,19 @@ private:
   };
   ///Many C++ implementations count classes within as friends. (not all)
   friend class Faction;
+  friend void bootstrap_main_loop();//so it can get all cockpits
   ///A list of all factions 
   vector <Faction *> factions; //the factions
   
  public:
+  Cockpit * isPlayerStarship (Unit* fighter);
   vector <std::string> getAdjacentStarSystems(const std::string &ss);
   bool StillExists(StarSystem * ss);
   void setActiveStarSystem(StarSystem * ss) {active_star_system.back()=ss;}
   void pushActiveStarSystem(StarSystem * ss) {active_star_system.push_back (ss);}
   void popActiveStarSystem() {active_star_system.pop_back();}
+  void SetActiveCockpit (int whichcockpit);
+  void SetActiveCockpit (Cockpit * which);
   StarSystem * getActiveStarSystem (unsigned int size) {return active_star_system[size];}
   unsigned int getNumActiveStarSystem() {return active_star_system.size();}
   void LoadStarSystem(StarSystem * ss);
@@ -128,6 +133,8 @@ private:
   void LoadFactionXML (const char * factfile) {
     Faction::LoadXML (factfile,this);
   }
+  void SetupCockpits (std::vector <std::string> players);
+  void WriteSaveGame();
   ///returns the index of the faction with that name
   int GetFaction (const char *factionname);
   int GetNumAnimation(int faction);
@@ -156,7 +163,8 @@ private:
   ///Returns force logo FIXME should return squad logo!
   Texture * getSquadLogo (int faction);
   ///inits graphics with args
-  Universe(int argc, char **argv, const char * galaxy);
+  Universe(int argc, char **argv, const char * galaxy, const std::vector <std::string> &player_names);
+  
   ~Universe();
   ///Loads Defaults in Graphics Drivers
   void StartGFX();
@@ -170,24 +178,26 @@ private:
   StarSystem* activeStarSystem() {return active_star_system.back();}
   ///Wrapper function for Star System
   void SelectCamera(int cam) {
-    activeStarSystem()->SelectCamera(cam);
-    
+    AccessCockpit()->SelectCamera(cam);
   }
   ///Accessor to cockpit
-  Cockpit *AccessCockpit() {return cockpit;}
+  unsigned int CurrentCockpit(){return current_cockpit;}
+  Cockpit *AccessCockpit() {return cockpit[current_cockpit];}
+  int numPlayers () {return cockpit.size();}
+  Cockpit *AccessCockpit (int i) {return cockpit[i];}
   ///Wrapper function for Star System
   Camera *AccessCamera(int num) {
-    return activeStarSystem()->AccessCamera(num);
+    return AccessCockpit()->AccessCamera(num);
   }
   ///Wrapper function for star system
   Camera *AccessCamera() {
-    return activeStarSystem()->AccessCamera();
+    return AccessCockpit()->AccessCamera();
   }
   ///Returns the current hud cam
   Camera *AccessHudCamera() { return &hud_camera; }
   ///Wrapper function for star system
   void SetViewport() {
-    activeStarSystem()->SetViewport();
+    AccessCockpit()->SetViewport();
   }
 
   StarSystem *getStarSystem(string name);

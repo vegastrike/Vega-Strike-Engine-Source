@@ -34,14 +34,18 @@ extern InputListener* activelistener;
 */
 
 static KBHandler keyBindings [KEYMAP_SIZE];
+static unsigned int playerBindings [KEYMAP_SIZE];
 KBSTATE keyState [KEYMAP_SIZE];
 
 static void kbGetInput(int key, int special, int release, int x, int y){
+  int i=_Universe->CurrentCockpit();
+  _Universe->SetActiveCockpit(playerBindings[key]);
   if ((keyState[key]==RESET||keyState[key]==UP)&&!release)
     keyBindings[key](key,PRESS);
   if ((keyState[key]==DOWN||keyState[key]==RESET)&&release)
     keyBindings[key](key,RELEASE);
   keyState[key] = release?UP:DOWN;
+  _Universe->SetActiveCockpit(i);
 }
 
  void glut_keyboard_cb( unsigned char ch, int x, int y ) 
@@ -85,7 +89,7 @@ void InitKB()
 }
 
 
-void ProcessKB()
+void ProcessKB(unsigned int player)
 {
   /*  if(!activationreqqueue.empty()) {
     InputListener *newactive = NULL;
@@ -104,12 +108,14 @@ void ProcessKB()
     //empty & analyze to see which one deserves to be activated
     }*/
   for(int a=0; a<KEYMAP_SIZE; a++) {
-    keyBindings[a](a,keyState[a]);
+    if (playerBindings[a]==player)
+      keyBindings[a](a,keyState[a]);
   }
 }	
 
-void BindKey(int key, KBHandler handler) {
+void BindKey(int key, unsigned int player, KBHandler handler) {
 	keyBindings[key] = handler;
+	playerBindings[key]=player;
 	handler(-1,RESET); // key is not used in handler
 }
 

@@ -100,7 +100,7 @@ void Unit::Kill(bool erasefromsave) {
     colTrees->Dec();//might delete
   colTrees=NULL;
   if (erasefromsave)
-    RemoveUnitFromSave((int)this);
+    _Universe->AccessCockpit()->savegame->RemoveUnitFromSave((int)this);
   
   if (halos&&numhalos) {
     for (int hc=0;hc<numhalos;hc++) {
@@ -702,7 +702,7 @@ bool Unit::Explode (bool drawit, float timeit) {
 	if (!SubUnit){
 		Vector exploc = cumulative_transformation.position;
 		Unit * un;
-		if (NULL!=(un=_Universe->AccessCockpit()->GetParent())) {
+		if (NULL!=(un=_Universe->AccessCockpit(0)->GetParent())) {
 			exploc = un->Position();						
 		}
 	    AUDPlay (sound->explode,exploc,Velocity,1);

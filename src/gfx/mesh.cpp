@@ -346,7 +346,7 @@ public:
   }
 };
 void Mesh::ProcessZFarMeshes () {
-  _Universe->activeStarSystem()->AccessCamera()->UpdateGFX (GFXFALSE, GFXFALSE);
+  _Universe->AccessCamera()->UpdateGFX (GFXFALSE, GFXFALSE);
   GFXEnable(LIGHTING);
   GFXEnable(CULLFACE);
   GFXDisable (DEPTHTEST);
@@ -360,7 +360,7 @@ void Mesh::ProcessZFarMeshes () {
   }
   undrawn_meshes[NUM_ZBUF_SEQ].clear();
   Animation::ProcessFarDrawQueue();
-  _Universe->activeStarSystem()->AccessCamera()->UpdateGFX (GFXTRUE, GFXFALSE);
+  _Universe->AccessCamera()->UpdateGFX (GFXTRUE, GFXFALSE);
   GFXEnable (DEPTHTEST);
   GFXEnable (DEPTHWRITE);
 }

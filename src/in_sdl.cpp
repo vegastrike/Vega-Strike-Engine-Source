@@ -57,7 +57,7 @@ void UnbindDigitalHatswitchKey (int joy_nr,int hatswitch, int dir_index) {
 }
 
 
-void ProcessJoystick () {
+void ProcessJoystick (int whichplayer) {
 #ifdef HAVE_SDL
 
 #ifdef SDLEVENTSNOW
@@ -103,7 +103,7 @@ void ProcessJoystick () {
   float x,y,z;
   int buttons;
   SDL_JoystickUpdate();//FIXME isn't this supposed to be called already by SDL?
-  for (int i=0;i<MAX_JOYSTICKS;i++) {
+  for (int i=whichplayer;i<whichplayer+1&&i<MAX_JOYSTICKS;i++) {
     buttons=0;
     if(joystick[i]->isAvailable()){
       joystick[i]->GetJoyStick (x,y,z,buttons);

@@ -112,10 +112,10 @@ Unit * ClickList::requestShip (int mouseX, int mouseY) {
   float tmpdis;
   Unit * targetUnit=NULL;
   if (equalCheck&&lastSelected) {//the person clicked the same place and wishes to cycle through units from front to back
-    float morethan = lastSelected->getMinDis(parentSystem->AccessCamera()->GetPosition());
+    float morethan = lastSelected->getMinDis(_Universe->AccessCamera()->GetPosition());//parent system for access cam
     UAye = new un_iter (uc->createIterator());
     while ((un=UAye->current())) {
-      tmpdis = un->getMinDis (parentSystem->AccessCamera()->GetPosition());
+      tmpdis = un->getMinDis (_Universe->AccessCamera()->GetPosition());//parent_system? FIXME (for access cam
       if (tmpdis>morethan&&tmpdis<minDistance) {
 	minDistance=tmpdis;
 	targetUnit=un;
@@ -128,7 +128,7 @@ Unit * ClickList::requestShip (int mouseX, int mouseY) {
     //he clicked on the back of the list and wishes to start over
     UAye = new un_iter (uc->createIterator());
     while ((un=UAye->current())) {
-      tmpdis = un->getMinDis (parentSystem->AccessCamera()->GetPosition());
+      tmpdis = un->getMinDis (_Universe->AccessCamera()->GetPosition());//parent_system FIXME
       if (tmpdis<minDistance) {
 	minDistance=tmpdis;
 	targetUnit=un;

@@ -129,9 +129,13 @@ void Unit::TransferUnitToSystem (unsigned int kk, StarSystem * &savedStarSystem,
 	}
 	iter.advance();
       }
+      Cockpit * an_active_cockpit = _Universe->isPlayerStarship(this);
+      if (an_active_cockpit!=NULL) {
+	an_active_cockpit->activeStarSystem=pendingjump[kk]->dest;
+      }
       if (this==_Universe->AccessCockpit()->GetParent()) {//originally fighters[0] not sure if hti sis the right solution
 #ifdef JUMP_DEBUG
-      fprintf (stderr,"Unit is a player character...changing scene graph\n");
+      fprintf (stderr,"Unit is the active player character...changing scene graph\n");
 #endif
 	savedStarSystem->SwapOut();
 	savedStarSystem = pendingjump[kk]->dest;
@@ -139,13 +143,6 @@ void Unit::TransferUnitToSystem (unsigned int kk, StarSystem * &savedStarSystem,
       }
       _Universe->setActiveStarSystem(pendingjump[kk]->dest);
       vector <Unit *> possibilities;
-#if 0
-      //happes in generate star ssytem now
-      if (pendingjump[kk]->justloaded)
-	for (float tume=0;tume<=4*SIMULATION_ATOM;tume+=GetElapsedTime()) {
-	  pendingjump[kk]->dest->Update(1);
-	}
-#endif
       iter = pendingjump[kk]->dest->getUnitList().createIterator();
       Unit * primary;
       while ((primary = iter.current())!=NULL) {

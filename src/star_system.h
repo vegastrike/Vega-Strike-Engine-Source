@@ -3,9 +3,10 @@
 
 #include <expat.h>
 #include <string>
+#include "gfxlib.h"
+#include "gfxlib_struct.h"
 #include "xml_support.h"
 using std::string;
-#include "gfx/camera.h"
 #include "cmd/collection.h"
 class Stars;
 class Planet;
@@ -13,7 +14,8 @@ class ClickList;
 class Unit;
 class TextPlane;
 class InputDFA;
-#define NUM_CAM		12
+
+
 using XMLSupport::AttributeList;
 struct Texture;
 class Background;
@@ -59,9 +61,6 @@ class StarSystem {
   ///system name             
   char * name; 
   std::string filename;
-  ///All avail cameras in this system
-  Camera cam[NUM_CAM];
-  int currentcamera;
   ///Process global clicks for input/output
   InputDFA * systemInputDFA;
   ///to track the next given physics frame
@@ -93,16 +92,6 @@ class StarSystem {
   string getName();
   void beginElement(const string &name, const AttributeList &attributes);
   void endElement(const string &name);
-  ///Accesses the current camera
-  Camera *AccessCamera() {return &cam[currentcamera];}
-  ///Returns the passed in cam
-  Camera *AccessCamera(int);
-  ///Changes current camera to selected camera
-  void SelectCamera(int);
-  ///GFXLoadMatrix proper camera
-  void SetViewport() {
-    cam[currentcamera].UpdateGFX();
-  }
   ///Loads the star system from an XML file
   StarSystem(const char * filename, const Vector & centroid=Vector (0,0,0), const float timeofyear=0);
   ~StarSystem();

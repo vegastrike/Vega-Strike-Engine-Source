@@ -9,13 +9,10 @@
 static bool ab;
 static bool shelt;
 
-FlyByJoystick::FlyByJoystick(int whichjoystick, const char * configfile): FlyByKeyboard (configfile), which_joystick(whichjoystick) {
+FlyByJoystick::FlyByJoystick(int whichjoystick, unsigned int configfile): FlyByKeyboard (configfile), which_joystick(whichjoystick) {
   //remember keybindings from config file?  
 
   // this below is outdated
-  if (whichjoystick>=MAX_JOYSTICKS)
-    whichjoystick=0;
-
 #if 0
   // why does the compiler not allow this?//check out my queued events section in firekeyboard.cpp
   BindButton(0,FireKeyboard::FireKey);
@@ -62,6 +59,9 @@ void FlyByJoystick::JDecelKey (KBSTATE k, float, float, int) {
 
 void FlyByJoystick::Execute() {
   desired_ang_velocity=Vector(0,0,0); 
+
+  if (which_joystick<MAX_JOYSTICKS) {
+
   if (1 ){ //joystick[which_joystick]->isAvailable()) {
     JoyStick *joy=joystick[which_joystick];
 
@@ -76,6 +76,10 @@ void FlyByJoystick::Execute() {
     int joy_nr;
 
     joy_nr=vs_config->axis_joy[AXIS_Y];
+
+    if (_Universe->numPlayers()>1) {
+      joy_nr = which_joystick;
+    }
     if( joy_nr!= -1 && joystick[joy_nr]->isAvailable()){
       int config_axis=vs_config->axis_axis[AXIS_Y];
       bool inverse=vs_config->axis_inverse[AXIS_Y];
@@ -86,6 +90,10 @@ void FlyByJoystick::Execute() {
     }
 
     joy_nr=vs_config->axis_joy[AXIS_X];
+    if (_Universe->numPlayers()>1) {
+      joy_nr = which_joystick;
+    }
+
     if( joy_nr != -1 && joystick[joy_nr]->isAvailable() ){
       int config_axis=vs_config->axis_axis[AXIS_X];
       bool inverse=vs_config->axis_inverse[AXIS_X];
@@ -96,6 +104,10 @@ void FlyByJoystick::Execute() {
     }
 
     joy_nr=vs_config->axis_joy[AXIS_Z];
+    if (_Universe->numPlayers()>1) {
+      joy_nr = which_joystick;
+    }
+
     if( joy_nr!= -1 && joystick[joy_nr]->isAvailable()){
       int config_axis=vs_config->axis_axis[AXIS_Z];
       bool inverse=vs_config->axis_inverse[AXIS_Z];
@@ -106,6 +118,10 @@ void FlyByJoystick::Execute() {
     }
 
     joy_nr=vs_config->axis_joy[AXIS_THROTTLE];
+    if (_Universe->numPlayers()>1) {
+      joy_nr = which_joystick;
+    }
+
     if( joy_nr != -1 &&  joystick[joy_nr]->isAvailable()){
       int config_axis=vs_config->axis_axis[AXIS_THROTTLE];
       bool inverse=vs_config->axis_inverse[AXIS_THROTTLE];
@@ -115,7 +131,7 @@ void FlyByJoystick::Execute() {
       Accel( axis_value );
     }
   }
-  
+  }
   FlyByKeyboard::Execute(false);
 }
 FlyByJoystick::~FlyByJoystick() {

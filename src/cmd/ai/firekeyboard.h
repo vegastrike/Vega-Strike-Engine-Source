@@ -55,9 +55,13 @@ protected:
   void ChooseNearTargets(bool targetturrets);//chooses n targets and puts the best to attack in unit's target container
   void ChooseThreatTargets(bool targetturrets);//chooses n targets and puts the best to attack in unit's target container
   void PickTargets(bool targetturrets); // chooses the target which is nearest to the center of the screen
+  unsigned int whichplayer;
+  unsigned int whichjoystick;
+  struct FIREKEYBOARDTYPE &f();
+  struct FIREKEYBOARDTYPE &j();
 public:
   virtual void ProcessCommMessage (class CommunicationMessage&c);
-  FireKeyboard (int whichjoystick, const char * configfile);//weapon prefs?
+  FireKeyboard (unsigned int whichjoystick, unsigned int whichplayer);//weapon prefs?
   virtual void Execute();
   virtual ~FireKeyboard();
 };

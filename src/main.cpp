@@ -77,16 +77,8 @@ void ParseCommandLine(int argc, char ** CmdLine);
 void cleanup(void)
 {
   printf ("Thank you for playing!\n");
-  if (_Universe->AccessCockpit()) {
-    if (_Universe->AccessCockpit()->GetParent()) {
-      if(_Universe->AccessCockpit()->GetParent()->GetHull()>0) {
-	WriteSaveGame (_Universe->getActiveStarSystem(0)->getFileName().c_str(),_Universe->AccessCockpit()->GetParent()->Position(),_Universe->AccessCockpit()->credits,_Universe->AccessCockpit()->GetUnitFileName());
-	_Universe->AccessCockpit()->GetParent()->WriteUnit(_Universe->AccessCockpit()->GetUnitModifications().c_str());
-      } 
-    }
-  }
+  _Universe->WriteSaveGame();
   //    write_config_file();
-  //  write_saved_games();
   AUDDestroy();
   //destroyObjects();
   Unit::ProcessDeleteQueue();
@@ -106,6 +98,8 @@ void bootstrap_main_loop();
 #if defined(WITH_MACOSX_BUNDLE)
  #undef main
 #endif
+
+
 int main( int argc, char *argv[] ) 
 {
 #if defined(WITH_MACOSX_BUNDLE)
@@ -182,7 +176,7 @@ int main( int argc, char *argv[] )
 
 #endif
     */
-    _Universe= new Universe(argc,argv,vs_config->getVariable ("general","galaxy","milky_way.xml").c_str());   
+    _Universe= new Universe(argc,argv,vs_config->getVariable ("general","galaxy","milky_way.xml").c_str(),vector <string>());   
 
     _Universe->Loop(bootstrap_main_loop);
     return 0;
@@ -192,6 +186,7 @@ static bool BootstrapMyStarSystemLoading=true;
 void SetStarSystemLoading (bool value) {
   BootstrapMyStarSystemLoading=value;
 }
+
 void bootstrap_draw (const std::string &message, float x, float y, Animation * newSplashScreen) {
 
   static Animation *ani=NULL;
@@ -241,6 +236,34 @@ void bootstrap_draw (const std::string &message, float x, float y, Animation * n
 extern Unit **fighters;
 
 
+bool SetPlayerLoc (Vector &sys, bool set) {
+  static Vector mysys;
+  static bool isset=false;
+  if (set) {
+    isset = true;
+    mysys = sys;
+    return true;
+  }else {
+    if (isset)
+      sys =mysys;
+    return isset;
+  }  
+  
+}
+bool SetPlayerSystem (std::string &sys, bool set) {
+  static std::string mysys;
+  static bool isset=false;
+  if (set) {
+    isset = true;
+    mysys = sys;
+    return true;
+  }else {
+    if (isset)
+      sys =mysys;
+    return isset;
+  }
+}
+
 void bootstrap_main_loop () {
 
   static bool LoadMission=true;
@@ -257,8 +280,7 @@ void bootstrap_main_loop () {
     bs_tp=new TextPlane("9x12.font");
  
     SplashScreen = new Animation (mission->getVariable ("splashscreen",vs_config->getVariable ("graphics","splash_screen","vega_splash.ani")).c_str(),0);
-    bootstrap_draw ("make Love",-.135,0,SplashScreen);
-    bootstrap_draw ("make[1]: Entering directory /home/daniel<3");
+    bootstrap_draw ("Vegastrike Loading...",-.135,0,SplashScreen);
 
     Vector pos;
     string planetname;
@@ -266,18 +288,47 @@ void bootstrap_main_loop () {
     mission->GetOrigin(pos,planetname);
     bool setplayerloc=false;
     string mysystem = mission->getVariable("system","sol.system");
+    int numplayers = XMLSupport::parse_int (mission->getVariable ("num_players","1"));
+    vector <std::string>playername;
+    for (int p=0;p<numplayers;p++) {
+      playername.push_back(vs_config->getVariable("player"+((p>0)?tostring(p+1):string("")),"callsign",""));
+    }
+    _Universe->SetupCockpits(playername);
     float credits=XMLSupport::parse_float (mission->getVariable("credits","0"));
     string savegamefile = mission->getVariable ("savegame","");
     vector <SavedUnits> savedun;
-    string playersaveunit;
-    savedun=ParseSaveGame (savegamefile.length()>0?(vs_config->getVariable ("player","callsign","")+savegamefile):string(""),mysystem,mysystem,pos,setplayerloc,credits,playersaveunit);
-   
-    _Universe->Init (mysystem,pos,planetname);
+    vector <string> playersaveunit;
+
+    for (unsigned int k=0;k<_Universe->cockpit.size();k++) {
+      bool setplayerXloc=false;
+      std::string psu;
+      
+      if (k==0) {
+	Vector myVec;
+	if (SetPlayerLoc (myVec,false)) {
+	  _Universe->cockpit[0]->savegame->SetPlayerLocation(myVec);
+	}
+	std::string st;
+	if (SetPlayerSystem (st,false)) {
+	  _Universe->cockpit[0]->savegame->SetStarSystem(st);
+	}
+      }
+      vector <SavedUnits> saved=_Universe->cockpit[k]->savegame->ParseSaveGame (savegamefile,mysystem,mysystem,pos,setplayerXloc,credits,psu);
+      playersaveunit.push_back(psu);
+      _Universe->cockpit[k]->credits=credits;
+      if (k==0) {
+	setplayerloc=setplayerXloc;//FIX ME will only set first player where he was
+	_Universe->Init (mysystem,pos,planetname);
+      }
+      for (unsigned int j=0;j<saved.size();j++) {
+	savedun.push_back(saved[j]);
+
+      }
+
+    }
     SetStarSystemLoading (true);
-    bootstrap_draw ("make[1]: Nothing to be done for `Love`");
-    bootstrap_draw ("make[1]: Loving directory /home/daniel<3 <3");
     createObjects(playersaveunit);
-    _Universe->AccessCockpit()->credits=credits;
+
     if (setplayerloc&&fighters) {
       if (fighters[0]) {
 	fighters[0]->SetPosition (Vector (0,0,0));
@@ -310,9 +361,8 @@ void bootstrap_main_loop () {
 
 
 
-
-
 void ParseCommandLine(int argc, char ** lpCmdLine) {
+  std::string st;
   Vector PlayerLocation;
   for (int i=1;i<argc;i++) {
     if(lpCmdLine[i][0]=='-') {
@@ -334,11 +384,12 @@ void ParseCommandLine(int argc, char ** lpCmdLine) {
       case 'P':
       case 'p':
 	sscanf (lpCmdLine[i]+2,"%f,%f,%f",&PlayerLocation.i,&PlayerLocation.j,&PlayerLocation.k);
-	SetPlayerLocation (PlayerLocation);
+	SetPlayerLoc (PlayerLocation,true);
 	break;
       case 'J':
       case 'j'://low rez
-	SetStarSystem ( string ((lpCmdLine[i])+2));
+	st=string ((lpCmdLine[i])+2);
+	SetPlayerSystem (st ,true);
 	break;
       case 'A'://average rez
       case 'a': 

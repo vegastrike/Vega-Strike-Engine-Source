@@ -362,7 +362,7 @@ void ContinuousTerrain::AdjustTerrain (Matrix transform, const Matrix transforma
 void ContinuousTerrain::AdjustTerrain(StarSystem * ss) {
   Matrix transform;
 
-  Vector campos =InvScaleTransform (transformation, ss->AccessCamera()->GetPosition());
+  Vector campos =InvScaleTransform (transformation, _Universe->AccessCamera()->GetPosition());
   for (int i=0;i<numcontterr;i++) {
     if (1||dirty[i]) {
       AdjustTerrain (transform,transformation,campos,i);

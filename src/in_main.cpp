@@ -59,10 +59,10 @@ void RemoveListener(InputListener *il) {
 	listeners.remove(il);
 }
 
-void ProcessInput() {
-  ProcessKB();
+void ProcessInput(int whichplayer) {
+  ProcessKB(whichplayer);
   ProcessMouse();
-  ProcessJoystick();
+  ProcessJoystick(whichplayer);
 }
 
 void InitInput()

@@ -4,7 +4,7 @@ class FlyByJoystick: public FlyByKeyboard {
   int which_joystick;
   bool keyboard;
  public:
-  FlyByJoystick(int which, const char * configfile);
+  FlyByJoystick(int which, unsigned int whichplayer);
   static void JAccelKey (KBSTATE,float,float,int);
   static void JDecelKey (KBSTATE,float,float,int);
   static void JShelt (KBSTATE,float,float,int);

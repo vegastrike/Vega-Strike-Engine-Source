@@ -55,6 +55,9 @@ int parse_vdu_type (const char * x) {
 
 VDU::VDU (const char * file, TextPlane *textp, unsigned short modes, short rwws, short clls, unsigned short *ma, float *mh) :Sprite (file),scrolloffset(0),tp(textp),posmodes(modes), rows(rwws), cols(clls){
   thismode.push_back(MSG);
+  if (_Universe->numPlayers()>1) {
+    posmodes&=(~VIEW);
+  }
   comm_ani=NULL;
   viewStyle = CP_TARGET;
   StartArmor = ma;

@@ -32,25 +32,26 @@ struct StarShipControlKeyboard {
   bool dirty;//it wasn't updated...
   bool autopilot;
   bool terminateauto;
-  int refcount;
   void UnDirty() {sheltonpress=sheltonrelease=uppress=uprelease=downpress=downrelease=leftpress=leftrelease=rightpress=rightrelease=ABpress=ABrelease=accelpress=accelrelease=decelpress=decelrelease=rollrightpress=rollrightrelease=rollleftpress=rollleftrelease=0;jumpkey=startpress=stoppress=autopilot=dirty=terminateauto=setunvel=setnulvel=false;}
-  StarShipControlKeyboard() {UnDirty();refcount=0;}
-} starshipcontrolkeys;
+  StarShipControlKeyboard() {UnDirty();}
+};
+static vector <StarShipControlKeyboard> starshipcontrolkeys;
+static StarShipControlKeyboard &g() {
+  while (starshipcontrolkeys.size()<=(unsigned int)_Universe->CurrentCockpit()) {
+    starshipcontrolkeys.push_back(StarShipControlKeyboard());
+  }
+  return starshipcontrolkeys [_Universe->CurrentCockpit()];
+}
 
 
-
-FlyByKeyboard::FlyByKeyboard (const char * configfile): FlyByWire () {
-  //FIXME:: change hard coded keybindings
-  if (starshipcontrolkeys.refcount==0) {
-    // keys are bound in config_xml now
+FlyByKeyboard::FlyByKeyboard (unsigned int whichplayer): FlyByWire () {
+  this->whichplayer=whichplayer;
+  while(starshipcontrolkeys.size()<=whichplayer) {
+    starshipcontrolkeys.push_back (StarShipControlKeyboard());
   }
   autopilot=NULL;
-  starshipcontrolkeys.refcount++;
 }
 FlyByKeyboard::~FlyByKeyboard() {
-  starshipcontrolkeys.refcount--;
-  if (starshipcontrolkeys.refcount==0) {
-  }
   if (autopilot)
     delete autopilot;
 }
@@ -60,7 +61,7 @@ void FlyByKeyboard::Execute () {
   FlyByKeyboard::Execute (true);
 }
 void FlyByKeyboard::Execute (bool resetangvelocity) {
-#define SSCK starshipcontrolkeys
+#define SSCK starshipcontrolkeys[whichplayer]
   if (SSCK.setunvel) {
     SSCK.setunvel=false;
     parent->VelocityReference (parent->Target());
@@ -213,21 +214,21 @@ void FlyByKeyboard::Execute (bool resetangvelocity) {
 
 
 void FlyByKeyboard::SetVelocityRefKey(int, KBSTATE k) {
-  if (starshipcontrolkeys.dirty) starshipcontrolkeys.UnDirty();
+  if (g().dirty) g().UnDirty();
   switch (k) {
   case UP:
     break;
-  case DOWN:starshipcontrolkeys.setunvel=true;
+  case DOWN:g().setunvel=true;
     break;
   default:break;
   }
 }
 void FlyByKeyboard::SetNullVelocityRefKey(int, KBSTATE k) {
-  if (starshipcontrolkeys.dirty) starshipcontrolkeys.UnDirty();
+  if (g().dirty) g().UnDirty();
   switch (k) {
   case UP:
     break;
-  case DOWN:starshipcontrolkeys.setnulvel=true;
+  case DOWN:g().setnulvel=true;
     break;
   default:break;
   }
@@ -235,12 +236,12 @@ void FlyByKeyboard::SetNullVelocityRefKey(int, KBSTATE k) {
 
 
 void FlyByKeyboard::SheltonKey(int, KBSTATE k) {
-  if (starshipcontrolkeys.dirty) starshipcontrolkeys.UnDirty();
+  if (g().dirty) g().UnDirty();
   switch (k) {
   case UP:
-    starshipcontrolkeys.sheltonrelease=FBWABS(starshipcontrolkeys.sheltonrelease)+1;
+    g().sheltonrelease=FBWABS(g().sheltonrelease)+1;
     break;
-  case DOWN:starshipcontrolkeys.sheltonpress=FBWABS(starshipcontrolkeys.sheltonpress)+1;
+  case DOWN:g().sheltonpress=FBWABS(g().sheltonpress)+1;
     break;
   default:break;
   }
@@ -248,134 +249,134 @@ void FlyByKeyboard::SheltonKey(int, KBSTATE k) {
 void FlyByKeyboard::JumpKey(int, KBSTATE k) {
   switch (k) {
   case PRESS:
-    starshipcontrolkeys.jumpkey=true;
+    g().jumpkey=true;
     break;
   case UP:
   case RELEASE:
-    starshipcontrolkeys.jumpkey = false;
+    g().jumpkey = false;
     break;
   default:
     break;
   }
 }
 void FlyByKeyboard::UpKey(int, KBSTATE k) {
-  if (starshipcontrolkeys.dirty) starshipcontrolkeys.UnDirty();
+  if (g().dirty) g().UnDirty();
   switch (k) {
-  case UP: starshipcontrolkeys.uprelease++;
+  case UP: g().uprelease++;
     break;
-  case DOWN:starshipcontrolkeys.uppress=FBWABS(starshipcontrolkeys.uppress)+1;
+  case DOWN:g().uppress=FBWABS(g().uppress)+1;
     break;
-  case PRESS: starshipcontrolkeys.uppress=FBWABS(starshipcontrolkeys.uppress);
+  case PRESS: g().uppress=FBWABS(g().uppress);
     break;
-  case RELEASE: starshipcontrolkeys.uppress=-FBWABS(starshipcontrolkeys.uppress);
+  case RELEASE: g().uppress=-FBWABS(g().uppress);
     break;
   default:break;
   }
 }
 void FlyByKeyboard::DownKey (int,KBSTATE k) {
-  if (starshipcontrolkeys.dirty)starshipcontrolkeys.UnDirty();
+  if (g().dirty)g().UnDirty();
   switch (k) {
-  case UP: starshipcontrolkeys.downrelease++;
+  case UP: g().downrelease++;
     break;
-  case DOWN:starshipcontrolkeys.downpress=FBWABS(starshipcontrolkeys.downpress)+1;
+  case DOWN:g().downpress=FBWABS(g().downpress)+1;
     break;
-  case PRESS: starshipcontrolkeys.downpress=FBWABS(starshipcontrolkeys.downpress);
+  case PRESS: g().downpress=FBWABS(g().downpress);
     break;
-  case RELEASE: starshipcontrolkeys.downpress=-FBWABS(starshipcontrolkeys.downpress);
+  case RELEASE: g().downpress=-FBWABS(g().downpress);
     break;
   default:break;
   }
 }
 void FlyByKeyboard::LeftKey (int, KBSTATE k) {
-  if (starshipcontrolkeys.dirty) starshipcontrolkeys.UnDirty();
+  if (g().dirty) g().UnDirty();
   switch (k) {
-  case UP: starshipcontrolkeys.leftrelease++;
+  case UP: g().leftrelease++;
     break;
-  case DOWN:starshipcontrolkeys.leftpress=FBWABS(starshipcontrolkeys.leftpress)+1;
+  case DOWN:g().leftpress=FBWABS(g().leftpress)+1;
     break;
-  case PRESS: starshipcontrolkeys.leftpress=FBWABS(starshipcontrolkeys.leftpress);
+  case PRESS: g().leftpress=FBWABS(g().leftpress);
     break;
-  case RELEASE: starshipcontrolkeys.leftpress=-FBWABS(starshipcontrolkeys.leftpress);
+  case RELEASE: g().leftpress=-FBWABS(g().leftpress);
     break;
   default:break;
   }
 }
 void FlyByKeyboard::RightKey (int,KBSTATE k) {
-  if (starshipcontrolkeys.dirty)  starshipcontrolkeys.UnDirty();
+  if (g().dirty)  g().UnDirty();
   switch (k) {
-  case UP: starshipcontrolkeys.rightrelease++;
+  case UP: g().rightrelease++;
     break;
-  case DOWN:starshipcontrolkeys.rightpress=FBWABS(starshipcontrolkeys.rightpress)+1;
+  case DOWN:g().rightpress=FBWABS(g().rightpress)+1;
     break;
-  case PRESS: starshipcontrolkeys.rightpress=FBWABS(starshipcontrolkeys.rightpress);
+  case PRESS: g().rightpress=FBWABS(g().rightpress);
     break;
-  case RELEASE: starshipcontrolkeys.rightpress=-FBWABS(starshipcontrolkeys.rightpress);
+  case RELEASE: g().rightpress=-FBWABS(g().rightpress);
     break;
   default:break;
   }
 }
 void FlyByKeyboard::ABKey (int, KBSTATE k) {
-  if (starshipcontrolkeys.dirty)  starshipcontrolkeys.UnDirty();
+  if (g().dirty)  g().UnDirty();
   switch (k) {
-  case UP: starshipcontrolkeys.ABrelease++;
+  case UP: g().ABrelease++;
     break;
-  case DOWN:starshipcontrolkeys.ABpress=FBWABS(starshipcontrolkeys.ABpress)+1;
+  case DOWN:g().ABpress=FBWABS(g().ABpress)+1;
     break;
-  case PRESS: starshipcontrolkeys.ABpress=FBWABS(starshipcontrolkeys.ABpress);
+  case PRESS: g().ABpress=FBWABS(g().ABpress);
     break;
-  case RELEASE: starshipcontrolkeys.ABpress=-FBWABS(starshipcontrolkeys.ABpress);
+  case RELEASE: g().ABpress=-FBWABS(g().ABpress);
     break;
   default:break;
   }
 }
 
 void FlyByKeyboard::AutoKey (int, KBSTATE k) {
-  if (starshipcontrolkeys.dirty)  starshipcontrolkeys.UnDirty();
+  if (g().dirty)  g().UnDirty();
   if (k==PRESS) {
-    starshipcontrolkeys.autopilot=true;
+    g().autopilot=true;
   }
 }
 void FlyByKeyboard::StopAutoKey (int, KBSTATE k) {
-  if (starshipcontrolkeys.dirty)  starshipcontrolkeys.UnDirty();
+  if (g().dirty)  g().UnDirty();
   if (k==PRESS) {
-    starshipcontrolkeys.terminateauto=true;
+    g().terminateauto=true;
   }
 }
 
 void FlyByKeyboard::StopKey (int,KBSTATE k)  {
-  if (starshipcontrolkeys.dirty)  starshipcontrolkeys.UnDirty();
+  if (g().dirty)  g().UnDirty();
   switch (k) {
-  case UP: starshipcontrolkeys.stoppress=false;
+  case UP: g().stoppress=false;
     break;
-  case DOWN:starshipcontrolkeys.stoppress=true;
+  case DOWN:g().stoppress=true;
     break;
   default:break;
   }
 }
 void FlyByKeyboard::AccelKey (int,KBSTATE k) {
-  if (starshipcontrolkeys.dirty)  starshipcontrolkeys.UnDirty();
+  if (g().dirty)  g().UnDirty();
   switch (k) {
-  case UP: starshipcontrolkeys.accelrelease++;
+  case UP: g().accelrelease++;
     break;
-  case DOWN:starshipcontrolkeys.accelpress=FBWABS(starshipcontrolkeys.accelpress)+1;
+  case DOWN:g().accelpress=FBWABS(g().accelpress)+1;
     break;
-  case PRESS: starshipcontrolkeys.accelpress=FBWABS(starshipcontrolkeys.accelpress);
+  case PRESS: g().accelpress=FBWABS(g().accelpress);
     break;
-  case RELEASE: starshipcontrolkeys.accelpress=-FBWABS(starshipcontrolkeys.accelpress);
+  case RELEASE: g().accelpress=-FBWABS(g().accelpress);
     break;
   default:break;
   }
 }
 void FlyByKeyboard::DecelKey (int,KBSTATE k) {
-  if (starshipcontrolkeys.dirty)  starshipcontrolkeys.UnDirty();
+  if (g().dirty)  g().UnDirty();
   switch (k) {
-  case UP: starshipcontrolkeys.decelrelease++;
+  case UP: g().decelrelease++;
     break;
-  case DOWN:starshipcontrolkeys.decelpress=FBWABS(starshipcontrolkeys.decelpress)+1;
+  case DOWN:g().decelpress=FBWABS(g().decelpress)+1;
     break;
-  case PRESS: starshipcontrolkeys.decelpress=FBWABS(starshipcontrolkeys.decelpress);
+  case PRESS: g().decelpress=FBWABS(g().decelpress);
     break;
-  case RELEASE: starshipcontrolkeys.decelpress=-FBWABS(starshipcontrolkeys.decelpress);
+  case RELEASE: g().decelpress=-FBWABS(g().decelpress);
     break;
   default:break;
   }
@@ -383,11 +384,11 @@ void FlyByKeyboard::DecelKey (int,KBSTATE k) {
 
 
 void FlyByKeyboard::StartKey (int,KBSTATE k)  {
-  if (starshipcontrolkeys.dirty)  starshipcontrolkeys.UnDirty();
+  if (g().dirty)  g().UnDirty();
   switch (k) {
-  case UP: starshipcontrolkeys.startpress=false;
+  case UP: g().startpress=false;
     break;
-  case DOWN:starshipcontrolkeys.startpress=true;
+  case DOWN:g().startpress=true;
     break;
   default:break;
   }
@@ -397,35 +398,35 @@ void FlyByKeyboard::StartKey (int,KBSTATE k)  {
 
 
 void FlyByKeyboard::RollRightKey (int,KBSTATE k) {
-  if (starshipcontrolkeys.dirty)  starshipcontrolkeys.UnDirty();
+  if (g().dirty)  g().UnDirty();
   switch (k) {
-  case UP: starshipcontrolkeys.rollrightrelease++;
+  case UP: g().rollrightrelease++;
     break;
-  case DOWN:starshipcontrolkeys.rollrightpress=FBWABS(starshipcontrolkeys.rollrightpress)+1;
+  case DOWN:g().rollrightpress=FBWABS(g().rollrightpress)+1;
     break;
-  case PRESS: starshipcontrolkeys.rollrightpress=FBWABS(starshipcontrolkeys.rollrightpress);
+  case PRESS: g().rollrightpress=FBWABS(g().rollrightpress);
     break;
-  case RELEASE: starshipcontrolkeys.rollrightpress=-FBWABS(starshipcontrolkeys.rollrightpress);
+  case RELEASE: g().rollrightpress=-FBWABS(g().rollrightpress);
     break;
   default:break;
   }
 }
 void FlyByKeyboard::MatchSpeedKey (int, KBSTATE k) {
   if (k==PRESS) {
-    if (starshipcontrolkeys.dirty)  starshipcontrolkeys.UnDirty();
-    starshipcontrolkeys.matchspeed=true;
+    if (g().dirty)  g().UnDirty();
+    g().matchspeed=true;
   }
 }
 void FlyByKeyboard::RollLeftKey (int,KBSTATE k) {
-  if (starshipcontrolkeys.dirty)  starshipcontrolkeys.UnDirty();
+  if (g().dirty)  g().UnDirty();
   switch (k) {
-  case UP: starshipcontrolkeys.rollleftrelease++;
+  case UP: g().rollleftrelease++;
     break;
-  case DOWN:starshipcontrolkeys.rollleftpress=FBWABS(starshipcontrolkeys.rollleftpress)+1;
+  case DOWN:g().rollleftpress=FBWABS(g().rollleftpress)+1;
     break;
-  case PRESS: starshipcontrolkeys.rollleftpress=FBWABS(starshipcontrolkeys.rollleftpress);
+  case PRESS: g().rollleftpress=FBWABS(g().rollleftpress);
     break;
-  case RELEASE: starshipcontrolkeys.rollleftpress=-FBWABS(starshipcontrolkeys.rollleftpress);
+  case RELEASE: g().rollleftpress=-FBWABS(g().rollleftpress);
     break;
   default:break;
   }

@@ -62,7 +62,7 @@ void InputDFA::BindOrder (int key, OrderFactory *ofac){
     delete orderbindings[KEYMAP_SIZE];
   */
   orderbindings[key]= ofac;
-  BindKey (key,InputDFA::OrderHandler);
+  BindKey (key,0,InputDFA::OrderHandler);
 }
 void InputDFA::SetOrder (OrderFactory *ofac) {
   if (orderfac) {

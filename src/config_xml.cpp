@@ -609,7 +609,9 @@ void VegaConfig::checkBind(configNode *node){
   }
 
   string cmdstr=node->attr_value("command");
-  
+  string player_bound=node->attr_value("player");
+  if (player_bound.empty())
+    player_bound="0";
   KBHandler handler=command_map[cmdstr];
   
   if(handler==NULL){
@@ -627,9 +629,8 @@ void VegaConfig::checkBind(configNode *node){
   if(!keystr.empty()){
     // normal keyboard key
       // now map the command to a callback function and bind it
-    
     if(keystr.length()==1){
-      BindKey(keystr[0],handler);
+      BindKey(keystr[0],XMLSupport::parse_int(player_bound), handler);
     }
     else{
       int glut_key=key_map[keystr];
@@ -637,7 +638,7 @@ void VegaConfig::checkBind(configNode *node){
 	cout << "No such special key: " << keystr << endl;
 	return;
       }
-      BindKey(glut_key,handler);
+      BindKey(glut_key,XMLSupport::parse_int(player_bound),handler);
     }
 
     //    cout << "bound key " << keystr << " to " << cmdstr << endl;

@@ -381,24 +381,15 @@ void clickhandler (KBSTATE k, int x, int y, int delx, int dely, int mod) {
 
 void InitializeInput() {
 
-	BindKey(27, Quit); // always have quit on esc
+	BindKey(27,0, Quit); // always have quit on esc
 }
 
 //Cockpit *cockpit;
 static Texture *tmpcockpittexture;
 
-#if 0
-NEVER EVER EVER USE THIS
-Unit *player_unit;
-BAD BAD
-if anything use
-UnitContainer player_unit;
-but that may change over time
-
-use
-_Universe->AccessCockpit()->GetParent();
-#endif
-void createObjects(std::string fighter0name) {
+void createObjects(std::vector <std::string> fighter0name) {
+  vector <std::string> fighter0mods;
+  vector <int> fighter0indices;
   //  GFXFogMode (FOG_OFF);
   static Animation explosion("explosion_orange.ani",false,.1,BILINEAR,false);
 
@@ -449,135 +440,110 @@ void createObjects(std::string fighter0name) {
 
   map<string,int> targetmap;
 
-  std::string fighter0mods;
+
   char fightername [1024]="hornet.xunit";
   int a=0;
 
   vector<Flightgroup *>::const_iterator siter;
   vector<Flightgroup *> fg=mission->flightgroups;
-
+  int squadnum=0;
   for(siter= fg.begin() ; siter!=fg.end() ; siter++){
-
-    //cout << "loop " << endl;
-
     Flightgroup *fg=*siter;
-
     string fg_name=fg->name;
     string fullname=fg->type;// + ".xunit";
     int fg_terrain = fg->terrain_nr;
     bool isvehicle = (fg->unittype==Flightgroup::VEHICLE);
-    //    cout << "loop " << fg_name << endl;
-
     strcpy(fightername,fullname.c_str());
-	//	strcat(fightername,".xunit");
-
     string ainame=fg->ainame;
-    //    easyDomNode *dom=fg->domnode;
+    float fg_radius=0.0;
 
-#if 0
-	string strtarget=fg->ordermap["tmptarget"];
-	if(strtarget.empty()){
-	  cout << "WARNING: tmptarget set to 1" << endl;
+    for(int s=0;s < fg->nr_ships;s++){
+      numf++;
+      Vector pox (1000+150*a,100*a,100);
+      
+      pox.i=fg->pos[0]+s*fg_radius*3;
+      pox.j=fg->pos[1]+s*fg_radius*3;
+      pox.k=fg->pos[2]+s*fg_radius*3;
+      //	  cout << "loop pos " << fg_name << " " << pox.i << pox.j << pox.k << " a=" << a << endl;
+      
+      if (pox.i==pox.j&&pox.j==pox.k&&pox.k==0) {
+	pox.i=rand()*10000./RAND_MAX-5000;
+	pox.j=rand()*10000./RAND_MAX-5000;
+	pox.k=rand()*10000./RAND_MAX-5000;
+	
+      }
+      
+      
+      tmptarget[a]=_Universe->GetFaction(fg->faction.c_str()); // that should not be in xml?
+      
+      //	  cout << "before unit" << endl;
+      if (fg_terrain==-1||(fg_terrain==-2&&myterrain==NULL)) {
+	string modifications ("");
+	if (s==0&&squadnum<(int)fighter0name.size()) {
+	  fighter0indices.push_back(a);
+	  if (fighter0name[squadnum].length()==0)
+	    fighter0name[squadnum]=string(fightername);
+	  else
+	    strcpy(fightername,fighter0name[squadnum].c_str());
+	  if (mission->getVariable ("savegame","").length()>0) {  
+	    fighter0mods.push_back(modifications =vs_config->getVariable (string("player")+((squadnum>0)?tostring(squadnum+1):string("")),"callsign","")+mission->getVariable("savegame",""));
+	  }else {
+	    fighter0mods.push_back("");
+	  }
+	}
+	fighters[a] = new Unit(fightername, false,tmptarget[a],modifications,fg,s);
+      }else {
+	if (fg_terrain==-2) {
+	  fighters[a]= new Building (myterrain,isvehicle,fightername,false,tmptarget[a],string(""),fg);
+	}else {
+	  
+	  if (fg_terrain>=(int)_Universe->activeStarSystem()->numTerrain()) {
+	    ContinuousTerrain * t;
+	    assert (fg_terrain-_Universe->activeStarSystem()->numTerrain()<_Universe->activeStarSystem()->numContTerrain());
+	    t =_Universe->activeStarSystem()->getContTerrain(fg_terrain-_Universe->activeStarSystem()->numTerrain());
+	    fighters[a]= new Building (t,isvehicle,fightername,false,tmptarget[a],string(""),fg);
+	  }else {
+	    Terrain *t=_Universe->activeStarSystem()->getTerrain(fg_terrain);
+	    fighters[a]= new Building (t,isvehicle,fightername,false,tmptarget[a],string(""),fg);
+	  }
+	  
+	}
+      }
+      fighters[a]->SetPosAndCumPos (pox);
+      
+      fg_radius=fighters[a]->rSize();
+      
+      //    fighters[a]->SetAI(new Order());
+      
+      // cout << "before ai" << endl;
+      
+      if (benchmark>0.0  || (s!=0||squadnum>=(int)fighter0name.size())) {
+	if(ainame[0]!='_'){
+	  string ai_agg=ainame+".agg.xml";
+	  string ai_int=ainame+".int.xml";
+	  
+	  char ai_agg_c[1024];
+	  char ai_int_c[1024];
+	  strcpy(ai_agg_c,ai_agg.c_str());
+	  strcpy(ai_int_c,ai_int.c_str());
+	  //      printf("1 - %s  2 - %s\n",ai_agg_c,ai_int_c);
+	  
+	  fighters[a]->EnqueueAI( new Orders::AggressiveAI (ai_agg_c, ai_int_c));
 	}
 	else{
-	  Flightgroup *target_fg=mission->findFlightgroup(strtarget);
-	  if(target_fg==NULL){
-	    cout << "flightgroup " << strtarget << " not found to be a target for fg " << fg_name << endl;
-	  }
-	  else{
-	    cout << "setting tmptarget of " << fg_name << " to " << strtarget << " index " << target_fg->ship_nr << endl;
-	    tmptarget[a]=target_fg->ship_nr;
-	  }																	
-	  cout << "tmptarget = " << tmptarget[a] << endl;
-	}
-
-#endif
-
-	float fg_radius=0.0;
-
-	for(int s=0;s < fg->nr_ships;s++){
-		numf++;
-	  Vector pox (1000+150*a,100*a,100);
-
-	  pox.i=fg->pos[0]+s*fg_radius*3;
-	  pox.j=fg->pos[1]+s*fg_radius*3;
-	  pox.k=fg->pos[2]+s*fg_radius*3;
-	  //	  cout << "loop pos " << fg_name << " " << pox.i << pox.j << pox.k << " a=" << a << endl;
-
-	  if (pox.i==pox.j&&pox.j==pox.k&&pox.k==0) {
-	    pox.i=rand()*10000./RAND_MAX-5000;
-	    pox.j=rand()*10000./RAND_MAX-5000;
-	    pox.k=rand()*10000./RAND_MAX-5000;
-
-	  }
-
-
-	tmptarget[a]=_Universe->GetFaction(fg->faction.c_str()); // that should not be in xml?
-
-	//	  cout << "before unit" << endl;
-	if (fg_terrain==-1||(fg_terrain==-2&&myterrain==NULL)) {
-	  string modifications ("");
-	  if (a==0) {
-	    if (fighter0name.length()==0)
-	      fighter0name=string(fightername);
-	    else
-	      strcpy(fightername,fighter0name.c_str());
-	    if (mission->getVariable ("savegame","").length()>0) {  
-	      fighter0mods=modifications =vs_config->getVariable ("player","callsign","")+mission->getVariable("savegame","");
-	    }
-	  }
-	  fighters[a] = new Unit(fightername, false,tmptarget[a],modifications,fg,s);
-	}else {
-	  if (fg_terrain==-2) {
-	    fighters[a]= new Building (myterrain,isvehicle,fightername,false,tmptarget[a],string(""),fg);
-	  }else {
-
-	    if (fg_terrain>=(int)_Universe->activeStarSystem()->numTerrain()) {
-	      ContinuousTerrain * t;
-	      assert (fg_terrain-_Universe->activeStarSystem()->numTerrain()<_Universe->activeStarSystem()->numContTerrain());
-	      t =_Universe->activeStarSystem()->getContTerrain(fg_terrain-_Universe->activeStarSystem()->numTerrain());
-	      fighters[a]= new Building (t,isvehicle,fightername,false,tmptarget[a],string(""),fg);
-	    }else {
-	      Terrain *t=_Universe->activeStarSystem()->getTerrain(fg_terrain);
-	      fighters[a]= new Building (t,isvehicle,fightername,false,tmptarget[a],string(""),fg);
-	    }
-
-	  }
-	}
-	  fighters[a]->SetPosAndCumPos (pox);
+	  string modulename=ainame.substr(1);
 	  
-	  fg_radius=fighters[a]->rSize();
-
-	  //    fighters[a]->SetAI(new Order());
-
-	  // cout << "before ai" << endl;
-
-	  if (benchmark>0.0  || a!=0) {
-	    if(ainame[0]!='_'){
-	      string ai_agg=ainame+".agg.xml";
-	      string ai_int=ainame+".int.xml";
-
-	      char ai_agg_c[1024];
-	      char ai_int_c[1024];
-	      strcpy(ai_agg_c,ai_agg.c_str());
-	      strcpy(ai_int_c,ai_int.c_str());
-	      //      printf("1 - %s  2 - %s\n",ai_agg_c,ai_int_c);
-
-	      fighters[a]->EnqueueAI( new Orders::AggressiveAI (ai_agg_c, ai_int_c));
-	    }
-	    else{
-	      string modulename=ainame.substr(1);
-	      
-	      fighters[a]->EnqueueAI( new AImissionScript(modulename));
-	      //fighters[a]->SetAI( new AImissionScript(modulename));
-	    }
-	    fighters[a]->SetTurretAI ();
-	  }
-	  _Universe->activeStarSystem()->AddUnit(fighters[a]);
-	  a++;
-	} // for nr_ships
+	  fighters[a]->EnqueueAI( new AImissionScript(modulename));
+	  //fighters[a]->SetAI( new AImissionScript(modulename));
+	}
+	fighters[a]->SetTurretAI ();
+      }
+      _Universe->activeStarSystem()->AddUnit(fighters[a]);
+      a++;
+    } // for nr_ships
+    squadnum++;
   } // end of for flightgroups
-
+  
   for (int rr=0;rr<a;rr++) {
     for (int k=0;k<a-1;k++) {
       int j=rand()%a;
@@ -590,33 +556,17 @@ void createObjects(std::string fighter0name) {
 
 
   delete [] tmptarget;
-
-  if(benchmark==-1){
-#ifdef IPILOTTURRET
-  fighters[0]->EnqueueAI (new Orders::AggressiveAI ("default.agg.xml", "default.int.xml"));
-  fighters[0]->getSubUnit (0)->EnqueueAI(new FlyByJoystick (0,"player1.kbconf"));
-  fighters[0]->getSubUnit (0)->EnqueueAI(new FireKeyboard (0,""));
-#else
-  fighters[0]->EnqueueAI(new FlyByJoystick (0,"player1.kbconf"));
-  fighters[0]->EnqueueAI(new FireKeyboard (0,""));
-  
-  
-#endif
-  }
-
   muzak = new Music (fighters[0]);
   AUDListenerSize (fighters[0]->rSize()*4);
-  Inside(0,PRESS);//set up hornet cockpti
-  //  _Universe->AccessCockpit()->Init ("hornet-cockpit.cpt");
-#ifdef IPILOTTURRET
-  _Universe->AccessCockpit()->SetParent(fighters[0]->getSubUnit(0),fighter0name.c_str(),fighter0mods.c_str(),fighters[0]->LocalPosition());
-#else
-  _Universe->AccessCockpit()->SetParent(fighters[0],fighter0name.c_str(),fighter0mods.c_str(),fighters[0]->LocalPosition());
-  fighters[0]->SetTurretAI ();
-#endif
-
-  //  player_unit=fighters[0];
-  
+  for (unsigned int cnum=0;cnum<fighter0indices.size();cnum++) {
+    if(benchmark==-1){
+      fighters[fighter0indices[cnum]]->EnqueueAI(new FlyByJoystick (cnum,cnum));
+      fighters[fighter0indices[cnum]]->EnqueueAI(new FireKeyboard (cnum,cnum));
+    }
+    _Universe->AccessCockpit(cnum)->Init (fighters[fighter0indices[cnum]]->getCockpit().c_str());
+    _Universe->AccessCockpit(cnum)->SetParent(fighters[fighter0indices[cnum]],fighter0name[cnum].c_str(),fighter0mods[cnum].c_str(),fighters[fighter0indices[cnum]]->LocalPosition());
+    fighters[fighter0indices[cnum]]->SetTurretAI ();
+  }
 
   shipList = _Universe->activeStarSystem()->getClickList();
   locSel = new CoordinateSelect (Vector (0,0,5));
@@ -674,7 +624,7 @@ void main_loop() {
   if(myterrain){
     myterrain->AdjustTerrain(_Universe->activeStarSystem());
   }
-  ProcessInput();
+
 
 
 }

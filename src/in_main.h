@@ -26,7 +26,7 @@
 
 void InitInput();
 void DeInitInput();
-void ProcessInput();
+void ProcessInput(int whichplayer);
 int TermInput();
 void AddListener(InputListener *il);
 void ActivateListener(InputListener *il);
