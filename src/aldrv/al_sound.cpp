@@ -221,6 +221,10 @@ void AUDDeleteSound (int sound, bool music){
       } else
 	AUDStopPlaying (sound);
     }
+    if (sounds[sound].source){
+      unusedsrcs.push_back (sounds[sound].source);
+      sounds[sound].source=(ALuint)0;
+    }
     if (std::find (dirtysounds.begin(),dirtysounds.end(),sound)==dirtysounds.end()) {
       dirtysounds.push_back (sound);
     }else {

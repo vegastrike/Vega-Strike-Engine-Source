@@ -236,10 +236,18 @@ bool Unit::Mount::PhysicsAlignedFire(const Transformation &Cumulative, const Mat
       _Universe->activeStarSystem()->AddUnit(temp);
       break;
     }
+    static bool use_separate_sound=XMLSupport::parse_bool (vs_config->getVariable ("audio","high_quality_weapon","true"));
+    if ((!use_separate_sound)||type->type==weapon_info::BEAM) {
     if (!AUDIsPlaying (sound)) {
       AUDPlay (sound,tmp.position,velocity,1);
     }else {
       AUDAdjustSound(sound,tmp.position,velocity);
+    }
+    }else {
+      int snd =AUDCreateSound(sound,false);
+      AUDAdjustSound(snd,tmp.position,velocity);
+      AUDStartPlaying (snd);
+      AUDDeleteSound(snd);
     }
     return true;
   }

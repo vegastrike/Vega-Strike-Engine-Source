@@ -80,7 +80,10 @@ vecint soundstodelete;
 
 void AUDRefreshSounds () {
 #ifdef HAVE_AL
-  for (int i=0;i<hashsize;i++) {
+  static int i=0;
+  if (i>=hashsize) {
+    i=0;
+  }else {
     for (unsigned int j=0;j<playingbuffers[i].size();j++) {
       if (!AUDIsPlaying (playingbuffers[i][j].soundname)) {
 	totalplaying--;
@@ -94,13 +97,18 @@ void AUDRefreshSounds () {
 	j--;
       }
     }
-  } 
-  for (int j=soundstodelete.size()-1;j>=0;j--) {//might not get every one every time
+    ++i;
+  }
+  static unsigned int j=0;
+  if (j>=soundstodelete.size()) {
+    j=0;
+  }else {
     int tmp = soundstodelete[j];
     if (!AUDIsPlaying(tmp)) {
       soundstodelete.erase (soundstodelete.begin()+j);
       AUDDeleteSound (tmp,false);
     }
+    ++j;
   }
 #endif
 }
