@@ -5,13 +5,13 @@
 #include "vsnet_serversocket.h"
 
 #if defined(_WIN32) && !defined(__CYGWIN__)
-	//#warning "Win32 platform"
-	#define in_addr_t unsigned long
-	#include <winsock.h>
+    //#warning "Win32 platform"
+    #define in_addr_t unsigned long
+    #include <winsock.h>
 #else
-	//#warning "GCC platform"
-	#define SOCKET_ERROR -1
-	#include <fcntl.h>
+    //#warning "GCC platform"
+    #define SOCKET_ERROR -1
+    #include <fcntl.h>
 #endif
 
 static void static_initNetwork( )
@@ -23,11 +23,11 @@ static void static_initNetwork( )
         first_time = false;
 
         COUT <<"Initializing Winsock"<<std::endl;
-		WORD wVersionRequested = MAKEWORD( 1, 1 );
-		WSADATA wsaData; 
-		int res = WSAStartup(wVersionRequested,&wsaData);
-		if( res != 0)
-				COUT <<"Error initializing Winsock"<<std::endl;
+        WORD wVersionRequested = MAKEWORD( 1, 1 );
+        WSADATA wsaData; 
+        int res = WSAStartup(wVersionRequested,&wsaData);
+        if( res != 0)
+            COUT <<"Error initializing Winsock"<<std::endl;
     }
 #endif
 }
@@ -46,59 +46,80 @@ SOCKETALT NetUITCP::createSocket( char * host, unsigned short srv_port )
 
     static_initNetwork( );
 
-	int            local_fd;
-	AddressIP      remote_ip;
+    int            local_fd;
+    AddressIP      remote_ip;
 
-	// this->server = 0;
-	// SOCKETALT part
-	struct hostent	*he = NULL;
+    struct hostent  *he = NULL;
 #if defined(_WIN32) && !defined(__CYGWIN__)
-	int sockerr= INVALID_SOCKET;
+    int sockerr= INVALID_SOCKET;
 #else
-	int sockerr= -1;
+    int sockerr= -1;
 #endif
 
-	if( (local_fd = socket( PF_INET, SOCK_STREAM, 0))==sockerr)
-		f_error( "Could not create socket");
+    if( (local_fd = socket( PF_INET, SOCK_STREAM, 0))==sockerr)
+    {
+        COUT << "Could not create socket" << std::endl;
+        SOCKETALT ret( -1, SOCKETALT::TCP, remote_ip );
+        return ret;
+    }
 
-	// If port is not given, use the defaults ones --> do not work with specified ones yet... well, didn't try
-	if( srv_port == 0 )
-	    srv_port = SERVER_PORT;
+    // If port is not given, use the defaults ones --> do not work with specified ones yet... well, didn't try
+    if( srv_port == 0 )
+    {
+        srv_port = SERVER_PORT;
+    }
 
-	// Gets the host info for host
-	if( host[0]<48 || host[0]>57)
-	{
-		COUT <<"Resolving host name... ";
-		if( (he = gethostbyname( host)) == NULL)
-			f_error( "\nCould not resolve hostname ");
-		memcpy( &remote_ip.sin_addr.s_addr, he->h_addr_list[0], he->h_length);
-		COUT <<"found : "<<inet_ntoa( remote_ip.sin_addr)<<std::endl;
-	}
-	else
-	{
+    // Gets the host info for host
+    if( host[0]<48 || host[0]>57)
+    {
+        COUT <<"Resolving host name... ";
+        if( (he = gethostbyname( host)) == NULL)
+        {
+            COUT << "Could not resolve hostname" << std::endl;
+            close( local_fd );
+            SOCKETALT ret( -1, SOCKETALT::TCP, remote_ip );
+            return ret;
+        }
+        memcpy( &remote_ip.sin_addr.s_addr, he->h_addr_list[0], he->h_length);
+        COUT <<"found : "<<inet_ntoa( remote_ip.sin_addr)<<std::endl;
+    }
+    else
+    {
 #if defined(_WIN32) && !defined(__CYGWIN__)
-		if( (remote_ip.sin_addr.s_addr=inet_addr( host)) == 0)
-			f_error( "Error inet_addr ");
-#else			
-		if( inet_aton( host, &remote_ip.sin_addr) == 0)
-			f_error( "Error inet_aton ");
+        if( (remote_ip.sin_addr.s_addr=inet_addr( host)) == 0)
+        {
+            COUT << "Error inet_addr" << std::endl;
+            close( local_fd );
+            SOCKETALT ret( -1, SOCKETALT::TCP, remote_ip );
+            return ret;
+        }
+#else           
+        if( inet_aton( host, &remote_ip.sin_addr) == 0)
+        {
+            COUT << "Error inet_aton" << std::endl;
+            close( local_fd );
+            SOCKETALT ret( -1, SOCKETALT::TCP, remote_ip );
+            return ret;
+        }
 #endif
-	}
-	// Store it in srv_ip struct
-	remote_ip.sin_port   = htons( srv_port );
-	remote_ip.sin_family = AF_INET;
+    }
+    // Store it in srv_ip struct
+    remote_ip.sin_port   = htons( srv_port );
+    remote_ip.sin_family = AF_INET;
 
-	COUT << "Connecting to " << inet_ntoa( remote_ip.sin_addr) << " on port " << srv_port << std::endl;
-	if( connect( local_fd, (sockaddr *)&remote_ip, sizeof( struct sockaddr))==SOCKET_ERROR)
-	{
-		perror( "Can't connect to server ");
-		//exit( -1 );
-	}
-	COUT << "Connected to " << inet_ntoa( remote_ip.sin_addr) << ":" << srv_port << std::endl;
+    COUT << "Connecting to " << inet_ntoa( remote_ip.sin_addr) << " on port " << srv_port << std::endl;
+    if( connect( local_fd, (sockaddr *)&remote_ip, sizeof( struct sockaddr))==SOCKET_ERROR)
+    {
+        perror( "Can't connect to server ");
+        close( local_fd );
+        SOCKETALT ret( -1, SOCKETALT::TCP, remote_ip );
+        return ret;
+    }
+    COUT << "Connected to " << inet_ntoa( remote_ip.sin_addr) << ":" << srv_port << std::endl;
 
-	SOCKETALT ret( local_fd, SOCKETALT::TCP, remote_ip );
-	COUT << "SOCKETALT n° : " << ret.get_fd() << std::endl;
-	return ret;
+    SOCKETALT ret( local_fd, SOCKETALT::TCP, remote_ip );
+    COUT << "SOCKETALT n° : " << ret.get_fd() << std::endl;
+    return ret;
 }
 
 ServerSocket* NetUITCP::createServerSocket( unsigned short port )
@@ -120,7 +141,8 @@ ServerSocket* NetUITCP::createServerSocket( unsigned short port )
 
     if( (local_fd = socket( PF_INET, SOCK_STREAM, 0))==sockerr )
     {
-        f_error( "Could not create socket");
+        COUT << "Could not create socket" << std::endl;
+        return NULL;
     }
 
     // If port is not given, use the defaults ones --> do not work with specified ones yet... well, didn't try
@@ -131,18 +153,21 @@ ServerSocket* NetUITCP::createServerSocket( unsigned short port )
     local_ip.sin_port        = htons( port );
     local_ip.sin_family      = AF_INET;
     // binds socket
-    COUT << "Bind on " << ntohl(local_ip.sin_addr.s_addr) << ", port " << ntohs( local_ip.sin_port) << std::endl;
+    COUT << "Bind on " << ntohl(local_ip.sin_addr.s_addr) << ", port "
+         << ntohs( local_ip.sin_port) << std::endl;
     if( bind( local_fd, (sockaddr *)&local_ip, sizeof( struct sockaddr_in) )==SOCKET_ERROR )
     {
         perror( "Problem binding socket" );
-        exit( -1 );
+        close( local_fd );
+        return NULL;
     }
 
     COUT << "Accepting max : " << SOMAXCONN << std::endl;
     if( listen( local_fd, SOMAXCONN)==SOCKET_ERROR)
     {
         perror( "Problem listening on socket" );
-        exit( -1 );
+        close( local_fd );
+        return NULL;
     }
     COUT << "Listening on socket " << local_fd << std::endl
          << "*** ServerSocket n° : " << local_fd << std::endl;
@@ -177,32 +202,43 @@ SOCKETALT NetUIUDP::createSocket( char * host, unsigned short srv_port )
 
     if( (local_fd = socket( PF_INET, SOCK_DGRAM, 0))==sockerr)
     {
-        f_error( "Could not create socket");
+        perror( "Could not create socket");
+        SOCKETALT ret( -1, SOCKETALT::UDP, remote_ip );
+        return ret;
     }
 
 #if !defined(_WIN32) || defined(__CYGWIN__)
     if( fcntl( local_fd, F_SETFL, O_NONBLOCK) == -1)
     {
         perror( "Error fcntl : ");
-        exit( 1);
+    close( local_fd );
+        SOCKETALT ret( -1, SOCKETALT::UDP, remote_ip );
+        return ret;
     }
 #else
     unsigned long datato = 1;
     if( ioctlsocket( local_fd, FIONBIO, &datato ) !=0 )
     {
         perror( "Error fcntl : ");
-        exit( 1);
+    close( local_fd );
+        SOCKETALT ret( -1, SOCKETALT::UDP, remote_ip );
+        return ret;
     }
 #endif
 
     // Gets the host info for host
-    struct hostent	*he = NULL;
+    struct hostent  *he = NULL;
 
     if( host[0]<48 || host[0]>57)
     {
         COUT <<"Resolving host name... ";
         if( (he = gethostbyname( host)) == NULL)
-        f_error( "\nCould not resolve hostname ");
+    {
+            COUT << "Could not resolve hostname" << std::endl;
+        close( local_fd );
+            SOCKETALT ret( -1, SOCKETALT::UDP, remote_ip );
+            return ret;
+    }
         memcpy( &remote_ip.sin_addr.s_addr, he->h_addr_list[0], he->h_length);
         COUT <<"found : "<<inet_ntoa( remote_ip.sin_addr)<<std::endl;
     }
@@ -210,12 +246,15 @@ SOCKETALT NetUIUDP::createSocket( char * host, unsigned short srv_port )
     {
 #if defined(_WIN32) && !defined(__CYGWIN__)
         if( (remote_ip.sin_addr.s_addr=inet_addr( host)) == 0)
-#else			
+#else           
         if( inet_aton( host, &remote_ip.sin_addr) == 0)
 #endif
-	{
-            f_error( "Error inet_aton ");
-	}
+    {
+            COUT << "Error inet_aton" << std::endl;
+        close( local_fd );
+            SOCKETALT ret( -1, SOCKETALT::UDP, remote_ip );
+            return ret;
+    }
     }
     // Store it in srv_ip struct
     remote_ip.sin_port= htons( srv_port);
@@ -228,8 +267,10 @@ SOCKETALT NetUIUDP::createSocket( char * host, unsigned short srv_port )
     // binds socket
     if( bind( local_fd, (sockaddr *)&local_ip, sizeof(struct sockaddr_in))==SOCKET_ERROR )
     {
-	perror( "Can't bind socket" );
-	exit( -1 );
+    perror( "Can't bind socket" );
+    close( local_fd );
+        SOCKETALT ret( -1, SOCKETALT::UDP, remote_ip );
+        return ret;
     }
 
     SOCKETALT ret( local_fd, SOCKETALT::UDP, remote_ip );
@@ -256,20 +297,25 @@ ServerSocket* NetUIUDP::createServerSocket( unsigned short port )
     if( port == 0 ) port = SERVER_PORT;
 
     if( (local_fd = socket( PF_INET, SOCK_DGRAM, 0 ))==sockerr )
-        f_error( "Could not create socket");
+    {
+        COUT << "Could not create socket" << std::endl;
+    return NULL;
+    }
 
 #if !defined(_WIN32) || defined(__CYGWIN__)
     if( fcntl( local_fd, F_SETFL, O_NONBLOCK) == -1)
     {
         perror( "Error fcntl : ");
-        exit( 1);
+    close( local_fd );
+        return NULL;
     }
 #else
     unsigned long datato = 1;
     if( ioctlsocket( local_fd,FIONBIO,&datato ) !=0 )
     {
         perror( "Error fcntl : ");
-        exit( 1);
+    close( local_fd );
+        return NULL;
     }
 #endif
 
@@ -281,17 +327,12 @@ ServerSocket* NetUIUDP::createServerSocket( unsigned short port )
     if( bind( local_fd, (sockaddr *)&local_ip, sizeof( struct sockaddr_in ) )==SOCKET_ERROR )
     {
         perror( "Cannot bind socket");
-	exit( -1 );
+    close( local_fd );
+        return NULL;
     }
 
     ServerSocket* ret = new ServerSocketUDP( local_fd, local_ip );
     COUT << "Bind on localhost, " << *ret << std::endl;
     return ret;
-}
-
-void f_error( char *s)
-{
-    perror( s);
-    exit(1);
 }
 

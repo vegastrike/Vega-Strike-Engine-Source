@@ -26,8 +26,6 @@
 
 struct ServerSocket;
 
-void f_error( char *s );
-
 class NetUITCP
 {
 public:
