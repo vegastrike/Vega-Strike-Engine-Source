@@ -395,9 +395,10 @@ void createObjects() {
 	  }
 
 
-	tmptarget[a]=1; // that should not be in xml?
+	tmptarget[a]=_Universe->GetFaction(fg->faction.c_str()); // that should not be in xml?
 
 	//	  cout << "before unit" << endl;
+	
 	  fighters[a] = new Unit(fightername, true, false,tmptarget[a],fg);
 	  fighters[a]->SetPosition (pox);
 	  
