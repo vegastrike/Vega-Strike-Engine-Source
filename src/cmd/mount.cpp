@@ -237,7 +237,7 @@ bool Mount::PhysicsAlignedFire(const Transformation &Cumulative, const Matrix & 
 					}else {
 						temp = UnitFactory::createUnit(type->file.c_str(),false,owner->faction);
 					}
-					temp->SetVelocity(owner->GetVelocity());
+					temp->SetVelocity(owner->GetVelocity()+Vector(mat.r[6],mat.r[7],mat.r[8])*type->Speed);
 					
 			  // Affect the stored mount serial to the new missile
 			  temp->SetSerial( this->serial);
