@@ -15,27 +15,13 @@
 
 #undef VSNET_DEBUG
 
+extern std::ostream& vsnetDbgOut( const char* file, int line );
+
 #if !defined( COUT)
 	#if defined(_WIN32) && defined(_MSC_VER) && defined(USE_BOOST_129) //wierd error in MSVC
-	    #define COUT std::clog << __FILE__ << ":"
+	    #define COUT vsnetDbgOut(__FILE__,0)
 	#else
-        #ifdef VSNET_DEBUG
-            /** A trick to force an evaluation of gettimeofday during COUT. Useful
-             *  when timing makes trouble.
-             */
-            struct cout_time { };
-
-            static cout_time COUTTIME;
-
-            std::ostream& operator<<( std::ostream& ostr, const cout_time& c );
-#ifdef USE_PTHREAD
-	        #define COUT std::clog << pthread_self() << " " << COUTTIME << " " << __FILE__ << ":" << __LINE__ << " "
-#else
-	        #define COUT std::clog << " " << COUTTIME << " " << __FILE__ << ":" << __LINE__ << " "
-#endif
-        #else
-	        #define COUT std::clog << " " << __FILE__ << ":" << __LINE__ << " "
-        #endif
+	    #define COUT vsnetDbgOut(__FILE__,__LINE__)
 	#endif
 #endif
 

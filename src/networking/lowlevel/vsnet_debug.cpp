@@ -1,11 +1,18 @@
 #include "vsnet_debug.h"
 
-#if defined(_WIN32) && defined(_MSC_VER) && defined(USE_BOOST_129) //wierd error in MSVC
+using namespace std;
+
+#if defined(_WIN32) && defined(_MSC_VER)
   /*
    * nothing if WIN32
    */
-#else
-#ifdef VSNET_DEBUG
+ostream& vsnetDbgOut( const char* file, int line )
+{
+    clog << file << " ";
+    return clog;
+}
+
+#else /* not _WIN32 or _MSC_VER */
 
 #include <time.h>
 
@@ -13,7 +20,11 @@
 #include <sys/time.h>
 #endif
 
-std::ostream& operator<<( std::ostream& ostr, const cout_time& c )
+struct TimeTriggerStruct { };
+
+static TimeTriggerStruct time_trigger;
+
+ostream& operator<<( ostream& ostr, const TimeTriggerStruct& c )
 {
     struct timeval tv;
     gettimeofday( &tv, NULL );
@@ -21,6 +32,21 @@ std::ostream& operator<<( std::ostream& ostr, const cout_time& c )
     return ostr;
 }
 
+ostream& vsnetDbgOut( const char* file, int line )
+{
+    const char* printme = file;
+    int   len = strlen(file);
+    if( len > 30 ) printme = &file[len-30];
+
+#ifdef VSNET_DEBUG
+    clog << PTHREAD_SELF_OR_NONE << " "
+         << time_trigger
+         << " " << printme << ":" << line << " "
+#else /* !VSNET_DEBUG */
+    clog << printme << ":" << line << " ";
 #endif /* VSNET_DEBUG */
+    return clog;
+}
+
 #endif
 
