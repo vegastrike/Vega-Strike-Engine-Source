@@ -1,6 +1,6 @@
 #include <config.h>
 
-#if defined(USE_NET_THREAD_NONE)
+#if (!defined(USE_NET_THREAD_POSIX))&&(!defined(USE_NET_THREAD_SDL))
 #include "vsnet_thread.h"
 
 /*------------------------------------------------------------*
