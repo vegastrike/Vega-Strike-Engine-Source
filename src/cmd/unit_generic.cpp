@@ -3842,8 +3842,8 @@ float Unit::DealDamageToHullReturnArmor (const Vector & pnt, float damage, float
 			  }
 			}
 		  }
-		  if (*targ>biggerthan)
-			  VSFileSystem::vs_fprintf (stderr,"errore fatale mit den armorn")
+		  //if (*targ>biggerthan)
+                  //VSFileSystem::vs_fprintf (stderr,"errore fatale mit den armorn")
 ;
 		  if (hull <0) {
 			  static float cargoejectpercent = XMLSupport::parse_float(vs_config->getVariable ("physics","eject_cargo_percent",".25"));
