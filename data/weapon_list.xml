@@ -2,7 +2,7 @@
 <Beam name="Laser" mountsize="light"> 
 <Energy rate=".1" stability="4" refire=".2">
 </Energy>
-<Damage rate="8" damage="5" longrange="1">
+<Damage rate="36" damage="36" longrange="1">
 </Damage>
 <Distance speed="140" radialspeed="3" radius=".5" length="1.5" pulsespeed="15" range="800" >
 </Distance>
