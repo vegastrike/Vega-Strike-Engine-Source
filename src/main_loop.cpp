@@ -456,15 +456,7 @@ void createObjects() {
   BindKey (1,CoordinateSelect::MouseMoveHandle);
 
   locSel = new CoordinateSelect (Vector (0,0,5));
-  GFXMaterial mat;
-  GFXGetMaterial(0, mat);
-  mat.ar = 1.0;
-  mat.ag = 1.0;
-  mat.ab = 1.0;
-  mat.er = 1.0;
-  mat.eg = 1.0;
-  mat.eb = 1.0;
-  GFXSetMaterial(0, mat);
+
   GFXSelectMaterial(0);
   
   //  s = new Sprite("carrier.spr");
@@ -571,18 +563,6 @@ void main_loop() {
   bg->Draw();
 
   //GFXDisable(TEXTURE1);
-  GFXMaterial mat;
-  GFXGetMaterial(0, mat);
-  mat.ar = 1.0;
-  mat.ag = 1.0;
-  mat.ab = 1.0;
-  mat.er = 1.0;
-  mat.eg = 1.0;
-  mat.eb = 1.0;
-  GFXSetMaterial(0, mat);
-  GFXSelectMaterial(0);
-
-
   _GFX->activeStarSystem()->Draw();
   _GFX->activeStarSystem()->Update();
   

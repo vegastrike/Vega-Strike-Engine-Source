@@ -24,7 +24,7 @@ static inline float min(float x, float y) {
   else return y;
 }
 
-const float scale=0.06;
+const float scale=.06;
 
 using XMLSupport::EnumMap;
 using XMLSupport::Attribute;

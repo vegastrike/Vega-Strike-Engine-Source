@@ -222,26 +222,12 @@ BOOL GFXInit (int argc, char ** argv){
 //	glPushMatrix();
 
     glEnable(GL_LIGHTING);
-	//glDisable(GL_LIGHTING);
+    glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER, TRUE);//don't want lighting coming from infinity....we have to take the hit due to sphere mapping matrix tweaking
     glDisable(GL_NORMALIZE);
-    for(int count = 0; count<MAX_NUM_LIGHTS; count++) {
-      GFXDisableLight(count); //turn all lights off
-    }
+    int con;
+    GFXCreateLightContext (con);
+    
 
-	
-    GFXEnableLight(0);
-    {
-      float params[4] = {0.2F, 0.2F, 0.2F, 1.0F};
-      glLightfv(GL_LIGHT0, GL_AMBIENT, params);
-    }
-    {
-      float params[4] = {1.0F, 1.0F, 1.0F, 1.0F};
-      glLightfv(GL_LIGHT0, GL_DIFFUSE, params);
-    }
-    {
-      float params[4] = {1.0F, 1.0F, 1.0F, 1.0F};
-      glLightfv(GL_LIGHT0, GL_SPECULAR, params);
-    }
     //FIXME VEGASTRIKE //GFXLoadIdentity(MODEL);
     //FIXME VEGASTRIKE //GFXLoadIdentity(VIEW);
     //FIXME VEGASTRIKE //GFXLoadIdentity(PROJECTION);

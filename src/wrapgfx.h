@@ -30,7 +30,7 @@
 #include "in_main.h"
 #include "star_system.h"
 
-
+/*
 struct Light{
 	Vector direction;
 
@@ -51,44 +51,21 @@ struct Light{
 		this->b = b;
 	}
 };
-
+*/
 
 //extern StarSystem star_system;
 class WrapGFX {
 protected:
 
-/*
-	static int _NumLightSources; //Number of light sources
-	static float _OneOverNumberLight; //calculate this as 1/_NumLightSources to increase light rendering speed a LOT
-	static Light *_LightSources; //Dynamically allocated array of light sources
-	static float _CamTransConst;
-
-	static HGLRC glRC;
-	static HPALETTE hPalette;
-	static BOOL  done;
-
-	static Vector _CamCoord, _CamP, _CamQ, _CamR;
-*/
-	//int _NumLightSources; //Number of light sources
-	//float _OneOverNumberLight; //calculate this as 1/_NumLightSources to increase light rendering speed a LOT
-	//Light *_LightSources; //Dynamically allocated array of light sources
-	//float _CamTransConst;
-
 	char * hPalette;
 	BOOL  done;
 
-	//Vector _CamCoord, _CamP, _CamQ, _CamR;
-	
-	//Matrix view;
-	//Matrix modelview[16];
-  //	Camera cam[NUM_CAM];
-  //	int currentcamera;
 	Camera hud_camera;
 
 	BOOL StartGL();
 	BOOL active;
         StarSystem * star_system;
-	Light lights[NUM_LIGHT];
+	//	Light lights[NUM_LIGHT];
 	int numlights;
 	//Mouse *mouse;
         Texture *LightMap[6]; //type Texture
@@ -152,10 +129,6 @@ public:
 	}
 	void Switch();
 
-	void SetLight(int num);
-	void SetLight(int num, Light &newparams);
-	void EnableLight(int num);
-	void DisableLight(int num);
 };
 
 #endif

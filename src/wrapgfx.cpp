@@ -128,7 +128,6 @@ BOOL WrapGFX::StartGFX()
   //	SetViewport();
 	GFXBeginScene();
 	GFXMaterial mat;
-	GFXGetMaterial(0, mat);
 	mat.ar = 1.00F;
 	mat.ag = 1.00F;
 	mat.ab = 1.00F;
@@ -144,13 +143,13 @@ BOOL WrapGFX::StartGFX()
 	mat.sb = 1.00F;
 	mat.sa = 1.00F;
 
-	mat.er = 0.10F;
-	mat.eg = 0.10F;
-	mat.eb = 0.10F;
-	mat.ea = 0.10F;
-
-	GFXSetMaterial(0, mat);
-	GFXSelectMaterial(0);
+	mat.er = 0.0F;
+	mat.eg = 0.0F;
+	mat.eb = 0.0F;
+	mat.ea = 1.0F;
+	int tmp;
+	GFXSetMaterial(tmp, mat);
+	GFXSelectMaterial(tmp);
 	
 	//GFXLoadIdentity(VIEW);
 	//GFXLookAt(Vector(0,0,0), Vector(0,0,1), Vector(0,-1,0)); // optimization: cache this friggin' matrix

@@ -155,24 +155,34 @@ struct GFXColor
 	float g;
 	float b;
 	float a;
+  GFXColor (const Vector &v, float a=1.0) {
+    this->r = v.i;
+    this->g = v.j;
+    this->b = v.k;
+    this->a = a;
+  }
+  GFXColor(float r, float g, float b) {
+    this->r = r;
+    this->g = g;
+    this->b = b;
+    this->a = 1.0;
+  }
 
-	GFXColor(float r, float g, float b)
-	{
-		this->r = r;
-		this->g = g;
-		this->b = b;
-		this->a = 1.0;
-	}
-
-	GFXColor(float r, float g, float b, float a)
-	{
-		this->r = r;
-		this->g = g;
-		this->b = b;
-		this->a = a;
-	}
+  GFXColor(float r, float g, float b, float a) {
+    this->r = r;
+    this->g = g;
+    this->b = b;
+    this->a = a;
+  }
 };
-
+enum LIGHT_TARGET {
+  DIFFUSE=1,
+  SPECULAR=2,
+  AMBIENT=4,
+  POSITION=8,
+  DIRECTION=16,
+  ATTENUATE=32
+};
 typedef float Matrix[16];
 
 enum TEXTURE_TARGET {
