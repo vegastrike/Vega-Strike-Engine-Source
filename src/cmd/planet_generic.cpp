@@ -378,7 +378,7 @@ static std::map<std::string, std::string> readPlanetTypes(std::string filename) 
 	std::map<std::string, std::string> planetTypes;
 	VSFile f;
 	VSError err = f.OpenReadOnly( filename, UniverseFile);
-	if (err<=Ok) {
+	if (err>Ok) {
 		return planetTypes;
 	}
 	int len = f.Size();
