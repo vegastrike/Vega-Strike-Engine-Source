@@ -170,6 +170,11 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
   xml->cursun.k=0;	
   GFXMaterial ourmat;
   GFXGetMaterial (0,ourmat);
+  vs_config->getColor ("planet_mat_ambient",&ourmat.ar);
+  vs_config->getColor ("planet_mat_diffuse",&ourmat.dr);
+  vs_config->getColor ("planet_mat_specular",&ourmat.sr);
+  vs_config->getColor ("planet_mat_emmissive",&ourmat.er);
+
   vector <char *>dest;
   char * filename =NULL;
   char * alpha = NULL;

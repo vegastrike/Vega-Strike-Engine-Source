@@ -4,18 +4,9 @@ TODO:
 	* make a new release
 
 
---LOW PRIORITY--  PERHAPS GLUT IS NICE...I FOUND MORE GLUT KEYBINDINGS--
-* redo the keyboard with SDL
-* queue joystick events
-
 Job Assignment:
 Daniel
 	* Finish up VDU's
-	* do some dumb AIs for (openal) debugging
-
-	* create user mailing-list
-	* use ship_ambient from vegastrike.config
-	   to turn up ambient light for ships
 	* check in additional ships ;-)
 -later-
 	* pause key
