@@ -77,7 +77,7 @@ void PlanetaryOrbit::Execute() {
   
   parent->Velocity =parent->cumulative_velocity= (((origin - focus + x_offset+y_offset-parent->LocalPosition())*div2pi*(1./SIMULATION_ATOM)).Cast());
   //const int Unreasonable_value=(int)(100000/SIMULATION_ATOM);
-  const float Unreasonable_value = XMLSupport::parse_float(vs_config->getVariable("physics","planet_ejection_stophack","2000"));
+  static float Unreasonable_value = XMLSupport::parse_float(vs_config->getVariable("physics","planet_ejection_stophack","2000"));
   float v2=parent->Velocity.Dot (parent->Velocity);
   //double uglinesscheck=velocity*velocity*(x_size+y_size)*(x_size+y_size)*4*PI*PI;
   if (v2>Unreasonable_value*Unreasonable_value/*||v2>uglinesscheck*/) {
