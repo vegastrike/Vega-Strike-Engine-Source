@@ -518,7 +518,8 @@ void	VDU::DrawScanningMessage()
 }
 
 bool VDU::SetCommAnimation (Animation * ani) {
-  if (comm_ani==NULL) {
+  static bool override=XMLSupport::parse_bool (vs_config->getVariable("graphics","override_comm_screen","true"));
+  if (comm_ani==NULL||override) {
     if (posmodes&COMM) {
       comm_ani = ani;
       if (ani){
@@ -996,6 +997,10 @@ void VDU::Draw (Unit * parent, const GFXColor & color) {
   tp->SetPos (x-w,y+h);
   tp->SetSize (x+w,y-h-.5*fabs(w/cols));
   targ = parent->GetComputerData().target.GetUnit();
+  if (thismode.back()!=COMM&&comm_ani!=NULL) {    
+    if (comm_ani->Done())
+      comm_ani=NULL;
+  }
   switch (thismode.back()) {
   case NETWORK:
   {
