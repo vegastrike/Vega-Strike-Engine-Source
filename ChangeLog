@@ -1,3 +1,8 @@
+2001-10-25 Daniel Horn <hellcatv@hotmail.com>
+	* added starsystem based lighting (now planets may emit lights
+	* define a light at the top of a system then any planets may use such a light. 
+	* data directory changed so that starships get hot (glow) when they get close to the sun.  Ambient light index increased for dinged up monitors (you can edit it yourself... 
+
 2001-10-24 Daniel Horn <hellcatv@hotmail.com>
 
 	* added Turrets to the scenes.  They may use any preconcieved AI script, but right now they just load "turntowards" and "fireat" target
@@ -5,8 +10,7 @@
 	* IFLYTURRET will only work if the unit in question has a turret
 	* add turrets as follows:  	<Subunit file="rapier" y="10" ri="0" rj="1" rk="0" pi="0" pj="0" pk="1" restricted="-.5"/>
 	* turrets may not use their own type for a turret...
-	* retricted means dot with "Ri,Rj,Rk" vector must be greater than that value  (so turrets can't turn inside a hull)
-	
+	* retricted means dot with "Ri,Rj,Rk" vector must be greater than that value  (so turrets can't turn inside a hull)	
 
 2001-10-24 Alexander Rawass <alexannika@users.sourceforge.net>
 
