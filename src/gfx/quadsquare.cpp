@@ -14,7 +14,7 @@
 #include <GL/gl.h>
 #include <stdio.h>
 #include <math.h>
-#include "quadtree.h"
+#include "quadsquare.h"
 #include "gfxlib.h"
 
 unsigned int * quadsquare::VertexAllocated;
