@@ -93,7 +93,7 @@ void	AccountServer::start()
 	else
 		tmpport = atoi((vs_config->getVariable( "network", "accountsrvport", "")).c_str());
 	Network = NetworkToClient.createServerSocket( tmpport );
-	if( !Network->valid())
+	if( !Network)
 	{
 		cout<<"Error cannot start server... quitting."<<endl;
 		exit(1);

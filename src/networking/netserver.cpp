@@ -205,7 +205,7 @@ void	NetServer::sendLoginAccept( Client * clt, AddressIP ipadr, int newacct)
 		string PLAYER_SHIPNAME = savedships[0];
 		// WE DON'T KNOW THE FACTION YET !!! SO I MAKE IT DEFAULT TO "privateer"
 		string PLAYER_FACTION_STRING( "privateer");
-		Unit * un = UnitFactory::createUnit( PLAYER_CALLSIGN.c_str(),
+		Unit * un = UnitFactory::createUnit( PLAYER_SHIPNAME.c_str(),
                              false,
                              FactionUtil::GetFaction( PLAYER_FACTION_STRING.c_str()),
                              string(""),

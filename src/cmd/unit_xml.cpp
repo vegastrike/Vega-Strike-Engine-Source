@@ -335,6 +335,37 @@ namespace UnitXML {
   const EnumMap attribute_map(attribute_names, 102);
 }
 
+// USED TO BE IN UNIT_FUNCTIONS*.CPP BUT NOW ON BOTH CLIENT AND SERVER SIDE
+std::vector <Mesh *> MakeMesh(unsigned int mysize) {
+  std::vector <Mesh *> temp;
+  for (unsigned int i=0;i<mysize;i++) {
+    temp.push_back(NULL);
+  }
+  return temp;
+}
+
+void addShieldMesh( Unit::XML * xml, const char *filename, const float scale,int faction,class Flightgroup * fg)
+{
+	xml->shieldmesh = new Mesh(filename, Vector(scale,scale,scale), faction,fg);
+}
+void addRapidMesh( Unit::XML * xml, const char *filename, const float scale,int faction,class Flightgroup * fg)
+{
+	xml->rapidmesh = new Mesh(filename, Vector(scale,scale,scale), faction,fg);
+}
+void addBSPMesh( Unit::XML * xml, const char *filename, const float scale,int faction,class Flightgroup * fg)
+{
+	xml->bspmesh = new Mesh(filename, Vector(scale,scale,scale), faction,fg);
+}
+void pushMesh( Unit::XML * xml, const char *filename, const float scale,int faction,class Flightgroup * fg)
+{
+	xml->meshes.push_back(new Mesh(filename, Vector(scale,scale,scale), faction,fg));
+}
+
+Mount * createMount(const std::string& name, short int ammo=-1, short int volume=-1, float xyscale=0, float zscale=0)
+{
+	return new Mount (name.c_str(), ammo,volume,xyscale, zscale);
+}
+
 using XMLSupport::EnumMap;
 using XMLSupport::Attribute;
 using XMLSupport::AttributeList;
@@ -1590,16 +1621,7 @@ void Unit::LoadXML(const char *filename, const char * modifications, string xmlb
 				
 			  }
 		  }
-		  // If in network mode on client side we expect saves to be in ./save
-		  else if( !SERVER)
-			  vschdir( "save");
-		  // With account server we expect them in the ./accounts dir
-		  else if( SERVER==2)
-			  vschdir( "accounts");
-		  // With account server we expect them in the ./accountstmp dir
-		  else if( SERVER==1)
-			  vschdir( "accountstmp");
-
+		  vschdir( "save");
 
 		  inFile=NULL;
 		  if (filename[0])

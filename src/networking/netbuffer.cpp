@@ -17,12 +17,14 @@ NetBuffer::NetBuffer( int bufsize)
 		}
 NetBuffer::NetBuffer( char * buf, int bufsize)
 		{
+			offset = 0;
 			size=bufsize;
 			this->buffer = new char[size];
 			memcpy( buffer, buf, bufsize);
 		}
 NetBuffer::NetBuffer( const char * buf, int bufsize)
 		{
+			offset = 0;
 			size=bufsize;
 			this->buffer = new char[size];
 			memcpy( buffer, buf, bufsize);
