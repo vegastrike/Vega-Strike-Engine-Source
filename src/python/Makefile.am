@@ -1,4 +1,4 @@
-boostnoinst_LIBRARIES = libpython.a libpythonserver.a
+noinst_LIBRARIES = libpython.a libpythonserver.a
 
 INCLUDES = -I ../  -I/usr/include/python2.2
 
