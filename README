@@ -1,21 +1,39 @@
-Vega Strike 0.0.3
+Readme for VegaStrike version 0.0.7 Alpha
+-----------------------------------------------------------------------------------------------------------------------------
+Welcome to Sol, this latest release contains the entire Sol system, home system to the Terran Confederation! there will be some revisions and additions, but until then this is it.
+The AI will take you on an automated ride past a beam and then around with a view of the system.  Then you'll have control and can fly to the stars!
 
-Welcome to the latest build of Vegastrike!  This isn't a game --yet...
-but we have improved many features since 0.0.2
+---------------
+Installation:
+--------------
+automake
+autoconf
+./configure
+make
+tar -zxf vegastrike_data071901.tgz
+cd data071901
+../src/vegastrike
 
-Clicklists are built in... so you can click on ships and it will report so on console (same with selecting)
-There is a location selector built in, but with this build you cannot see it
-Utilizes SPHERE_MAP in OpenGL to produce fantastic spheremapped ships... shiny+fast
-Made it faster on software.... but backgrounds are still textured
-Physics works, but is disabled to allow viewing of sphere_map
+NOTE: you must execute from vegastrike_data DIR
 
+-----------
+ Features:
+-----------
+REAL Asteroid belts, which will soon have AI.
+Planets with correct orbits and realistic textures.
+A huge sun with detailed textures in cluding hotspots.
+WC style physics with afterburn slides.
+Programmable AI for complex functions like Shelton sliding, rolls, loops, and kickstops.
+-----------
+ Controls:
+-----------
+Arrow keys: WC style turning
+[ full throttle
+; zero throttle
+space Guns
+TAB Afterburners
+* Spin Right
+/ Spin Left
 
-Key bindings are as follows:
-+ forward 
-- backwards
-Arrow key move
-PgUp,PgDown
-/,* roll 
-q quit
-
-Pan around and view the planets orbiting the glittery sun...see the dozens of ships just sit there :-)....
+© 2001 Daniel Horn, Patrick Horn, & James Carthew
+Wing Commander TM is a trademark of origin systems and Electronic Arts no threat to their status is intended.
