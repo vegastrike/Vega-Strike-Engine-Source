@@ -298,7 +298,13 @@ void hello( GtkWidget *widget, gpointer   data ) {
 		char pwd [65535];
 		getcwd(pwd,65533);
 		pwd[65533]=pwd[65534]='\0';
-		spawnl(P_NOWAIT,"./Setup.exe",(std::string(pwd)+"/Setup.exe").c_str(),NULL);
+		int pid=spawnl(P_NOWAIT,"./Setup.exe",(std::string(pwd)+"/Setup.exe").c_str(),NULL);
+		if (pid==-1) {
+			if (chdir("bin")==0) {
+				spawnl(P_NOWAIT,"./Setup.exe",(std::string(pwd)+"/Setup.exe").c_str(),NULL);
+				chdir("..");
+			}
+		}
 		}
 #else
 		pid=fork();
@@ -321,11 +327,19 @@ void hello( GtkWidget *widget, gpointer   data ) {
     }
 }
 
-
+#if defined(_WINDOWS)&&defined(_WIN32)
+typedef char FileNameCharType [65535];
+#include <windows.h>
+int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nShowCmd) {
+	FileNameCharType argvc;
+	FileNameCharType *argv= &argvc;
+	GetModuleFileName(NULL, argvc, 65534);
+	int argc=0;
+#else
 int main( int   argc,
           char *argv[] )
 {
-
+#endif
 
     prog_arg = argv[0];
 #ifdef _WIN32
@@ -334,7 +348,7 @@ int main( int   argc,
     getdatadir(); // Will change to the data dir which makes selecting missions easier.
 #endif
     //    chdir ("./.vegastrike/save");
-    gtk_init (&argc, &argv);
+    gtk_init (&argc, (char***)(&argv));
     GtkWidget *window;
     GtkWidget *button;
     window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
@@ -364,7 +378,7 @@ int main( int   argc,
          
          /* and the window */
          gtk_widget_show (window);
-#ifdef _WIN32
+#if defined(_WIN32)&& (!defined(_WINDOWS))
 	GetRidOfConsole();
 #else
 	printf (my_mission.c_str());
