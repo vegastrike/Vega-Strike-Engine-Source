@@ -409,8 +409,8 @@ cout << "Starting docking\n";
 	//	glutDisplayFunc(RefreshGUI);
 
 	                      //(x, y, width, height, with scrollbar)
-	CargoList = new TextArea(-1, 1, 1, 1.8, 1);
-	CargoInfo = new TextArea(0, 1, 1, 1.8, 0);
+	CargoList = new TextArea(-1, 0.9, 1, 1.7, 1);
+	CargoInfo = new TextArea(0, 0.9, 1, 1.7, 0);
 
 	CargoList->AddTextItem("a","Just a test item");
 	CargoList->AddTextItem("b","And another just to be sure");
@@ -432,6 +432,8 @@ void RefreshGUI(void) {
 	StartFrame();
 	// Black background
 	ShowColor(-1,-1,2,2, 0,0,0,1);
+	ShowColor(0,0,0,0, 1,1,1,1);
+	ShowText(-0.98, 0.93, 1, 4, "Purchase Cargo", 0);
 	CargoList->Refresh();
 	CargoInfo->Refresh();
 	OK->Refresh();
@@ -507,7 +509,8 @@ void ProcessMouse(int type, int x, int y, int button, int state) {
 	ours = CargoList->DoMouse(type, cur_x, cur_y, button, state);
 	if (ours == 1 && type == 1) {
 		buy_name = CargoList->GetSelectedItemName();
-		CargoInfo->ChangeTextItem("name", (string("name: ")+buy_name).c_str());
+		if (buy_name != 0 && buy_name[0] != '\0') { CargoInfo->ChangeTextItem("name", (string("name: ")+buy_name).c_str()); }
+		else { CargoInfo->ChangeTextItem("name",""); }
 		CargoInfo->ChangeTextItem("price", "Price: Random. Hah.");
 	}
 	// Commented out because they don't need to use the mouse with CargoInfo
