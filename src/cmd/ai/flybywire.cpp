@@ -7,14 +7,14 @@ using Orders::MatchAngularVelocity;
 void MatchLinearVelocity::Execute () {
   Vector desired (desired_velocity);
   if (!LocalVelocity) {
-    desired = parent->UpCoordinateLevel (desired);
+    desired = parent->ToLocalCoordinates (desired);
   }
   Vector velocity (parent->UpCoordinateLevel(parent->GetVelocity()));
   if (willfinish) {
     if ((done = fabs(desired.i-velocity.i)<VELTHRESHOLD&&fabs(desired.j-velocity.j)<VELTHRESHOLD&&fabs(desired.k-velocity.k)<VELTHRESHOLD))
       return;
   }
-  parent->Thrust ( /*parent->ClampThrust*/(parent->GetMass()*(desired-velocity)/SIMULATION_ATOM), desired.i>parent->GetComputerData().max_speed);//don't need to clamp thrust since the Thrust does it for you
+  parent->Thrust ( (parent->GetMass()*(desired-velocity)/SIMULATION_ATOM), desired.i>parent->GetComputerData().max_speed);//don't need to clamp thrust since the Thrust does it for you
                  //caution might change 
 }
 

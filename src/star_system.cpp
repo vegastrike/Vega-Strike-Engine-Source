@@ -13,6 +13,7 @@
 #include "gfx/halo.h"
 #include "gfx/background.h"
 #include "gfx/animation.h"
+#include "gfx/aux_texture.h"
 #include <expat.h>
 extern Vector mouseline;
 

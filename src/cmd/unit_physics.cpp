@@ -131,6 +131,36 @@ Vector Unit::ClampTorque (const Vector &amt1) {
     Res.k=copysign(limits.roll,amt1.k);
   return Res;
 }
+//    float max_speed;
+//    float max_ab_speed;
+//    float max_yaw;
+//    float max_pitch;
+//    float max_roll;
+
+Vector Unit::ClampVelocity (const Vector & velocity, const bool afterburn) {
+  float limit = afterburn?computer.max_ab_speed:computer.max_speed;
+  float tmp = velocity.Magnitude();
+  if (tmp>fabs(limit)) {
+    return velocity * (limit/tmp);
+  }
+  return velocity;
+}
+
+
+Vector Unit::ClampAngVel (const Vector & velocity) {
+  Vector res (velocity);
+  if (fabs (res.i)>computer.max_pitch) {
+    res.i = copysign (computer.max_pitch,res.i);
+  }
+  if (fabs (res.j)>computer.max_yaw) {
+    res.j = copysign (computer.max_yaw,res.j);
+  }
+  if (fabs (res.k)>computer.max_roll) {
+    res.k = copysign (computer.max_roll,res.k);
+  }
+  return res;
+}
+
 
 Vector Unit::MaxThrust(const Vector &amt1) {
   // amt1 is a normal

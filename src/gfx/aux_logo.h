@@ -24,7 +24,7 @@
 #include "gfxlib.h"
 #include "hashtable.h"
 #include <vector>
-#include "primitive.h"
+
 //struct glVertex;
 class Mesh;
 struct Texture;

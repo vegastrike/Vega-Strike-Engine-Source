@@ -1,5 +1,4 @@
 #include "vec.h"
-#include "primitive.h"
 #include "animation.h"
 #include "in_mouse.h"
 

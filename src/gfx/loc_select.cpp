@@ -3,12 +3,12 @@
 #include "in.h"
 #include "vs_globals.h"
 #include <stdio.h>
-LocationSelect::LocationSelect (Vector start, Vector Plane1, Vector Plane2/*, System * par */): Primitive(),LocSelAni ("locationselect.ani",true,.5,MIPMAP,true),LocSelUpAni("locationselect_up.ani",true,.5,MIPMAP,false) {
+LocationSelect::LocationSelect (Vector start, Vector Plane1, Vector Plane2/*, System * par */): LocSelAni ("locationselect.ani",true,.5,MIPMAP,true),LocSelUpAni("locationselect_up.ani",true,.5,MIPMAP,false) {
   //  parentScene = par;
   CrosshairSize=2;
   MoveLocation (start,Plane1,Plane2);
 }
-LocationSelect::LocationSelect (Vector start,Vector Plane1, Vector Plane2, Vector Plane3/*, Scene* par */): Primitive(),LocSelAni ("locationselect.ani",true,.5,MIPMAP,true),LocSelUpAni("locationselect_up.ani",true,.5,MIPMAP,false) {
+LocationSelect::LocationSelect (Vector start,Vector Plane1, Vector Plane2, Vector Plane3/*, Scene* par */): LocSelAni ("locationselect.ani",true,.5,MIPMAP,true),LocSelUpAni("locationselect_up.ani",true,.5,MIPMAP,false) {
   //  parentScene=par;
   CrosshairSize=2;
   MoveLocation (start,Plane1,Plane2,Plane3);
@@ -49,6 +49,23 @@ void LocationSelect::MouseMoveHandle (KBSTATE kk,int x, int y, int delx, int del
     }
   }
 }
+
+void LocationSelect::SetPosition (float x,float y, float z) {
+  local_transformation.position = Vector (x,y,z);
+}
+void LocationSelect::SetPosition (const Vector &k) {
+  local_transformation.position = k;
+}
+void LocationSelect::SetOrientation(const Vector &p, const Vector &q, const Vector &r)
+{	
+  local_transformation.orientation = Quaternion::from_vectors(p,q,r);
+}
+
+Vector &LocationSelect::Position()
+{
+	return local_transformation.position;
+}
+
 
 void LocationSelect::MoveLocation (Vector start,Vector Plane1, Vector Plane2) {    
   //BindKey (1,LocationSelect::MouseMoveHandle);

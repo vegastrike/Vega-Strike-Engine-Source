@@ -1,9 +1,9 @@
 #include "mesh.h"
-#include "primitive.h"
 #include "aux_logo.h"
 #include "aux_texture.h"
 #include <stdio.h>
 #include "vegastrike.h"
+#include "file_main.h"
 void Mesh::LoadBinary (const char * filename) {
   GFXBOOL objtex;
   int TexNameLength;

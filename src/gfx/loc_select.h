@@ -1,9 +1,10 @@
 #include "vec.h"
-#include "primitive.h"
+
 #include "animation.h"
 #include "in_mouse.h"
-class LocationSelect:public Primitive {
+class LocationSelect {
 protected:
+  Transformation local_transformation;
   float CrosshairSize;
   //  System *parentSystem;
   Animation LocSelAni;
@@ -20,4 +21,11 @@ public:
   void MoveLocation (Vector pos,Vector p ,Vector q);
   void MoveLocation (Vector pos, Vector p, Vector q, Vector r); //requires normalized Vector triplet pqr
   void Draw();
+
+  Vector &Position();
+  void SetPosition (float, float, float);
+  void SetPosition (const Vector &);
+  void SetOrientation(const Vector &p, const Vector &q, const Vector &r);
+
+
 };

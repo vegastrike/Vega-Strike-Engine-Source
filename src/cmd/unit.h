@@ -291,7 +291,8 @@ public:
   void LateralThrust(float amt);
   void VerticalThrust(float amt);
   void LongitudinalThrust(float amt);
-
+  Vector ClampVelocity (const Vector & velocity, const bool afterburn);
+  Vector ClampAngVel (const Vector & vel);
   Vector ClampTorque(const Vector &torque);
   Vector MaxTorque(const Vector &torque);
   void YawTorque(float amt);
