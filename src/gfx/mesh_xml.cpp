@@ -228,7 +228,7 @@ void Mesh::beginElement(const string &name, const AttributeList &attributes) {
 		      setEnvMap ( parse_bool((*iter).value.c_str()));
 		      break;
 		    case XML::LIGHTINGON:
-		      setLighting (parse_bool((*iter).value.c_str())); 
+		      setLighting (XMLSupport::parse_bool (vs_config->getVariable ("graphics","ForceLighting","true"))||parse_bool((*iter).value)); 
 		      break;
 		    }
 		  }
