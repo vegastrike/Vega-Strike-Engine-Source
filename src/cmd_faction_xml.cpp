@@ -1,4 +1,3 @@
-#include "wrapgfx.h"
 #include <vector>
 #include <string>
 #include <expat.h>

@@ -1,5 +1,4 @@
 #include "vegastrike.h"
-#include "wrapgfx.h"
 #include "gfx_mesh.h"
 #include "cmd_unit.h"
 #include "gfx_bounding_box.h"

@@ -144,8 +144,8 @@ vegastrike_SOURCES =				\
 	UnitCollection.cpp			\
 	UnitContainer.h				\
 	UnitContainer.cpp			\
-	wrapgfx.cpp				\
-	wrapgfx.h				\
+	universe.cpp				\
+	universe.h				\
 	xml_support.h  				\
 	xml_support.cpp				\
 	profile.h 				\

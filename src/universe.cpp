@@ -21,7 +21,7 @@
 #include <stdio.h>
 #include <fcntl.h>
 #include "gfxlib.h"
-#include "wrapgfx.h"
+#include "universe.h"
 #include "lin_time.h"
 #include "planet.h"
 

@@ -28,6 +28,6 @@
 #include "gfx_mesh.h"
 #include "gfx_primitive.h"
 #include "gfx_transform.h"
-#include "wrapgfx.h"
+#include "universe.h"
 
 #endif

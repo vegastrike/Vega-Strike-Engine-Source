@@ -20,7 +20,7 @@
 
 #ifdef __cplusplus
 
-#include "wrapgfx.h"
+#include "universe.h"
 extern Universe * _Universe;
 extern "C"
 {
@@ -70,7 +70,6 @@ extern "C"
 #endif
 #define TRUE 1
 #define FALSE 0
-#define EPS 1e-13
 
 #define PROG_NAME "vegastrike"
 

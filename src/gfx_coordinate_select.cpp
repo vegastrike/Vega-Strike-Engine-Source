@@ -1,4 +1,4 @@
-#include "wrapgfx.h"
+#include "vegastrike.h"
 #include "star_system.h"
 #include "gfx_location_select.h"
 #include "gfx_coordinate_select.h"

@@ -18,15 +18,12 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-//#include <gl/gl.h>
-//#include <gl/glu.h>
-//#include "glob.h"
-#include "wrapgfx.h"
+#include "vegastrike.h"
 #include "gfx_camera.h"
 #include "gfx_aux_texture.h"
 #include "gfx_background.h"
 #include "gfxlib.h"
-#include "vegastrike.h"
+
 	const float size = 10;
 Background::Background(const char *file)
 {
