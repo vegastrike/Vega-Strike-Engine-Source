@@ -193,19 +193,29 @@ int main( int argc, char *argv[] )
     }
 	delete []parentdir;
 	}
-    FILE * test = fopen ("vegastrike.config","r");
-	if (test)
-		fclose(test);
-	else
-		chdir("..");
 #if defined(WITH_MACOSX_BUNDLE)
-	chdir ("Resources/data");/* chdir to the .app's parent */
+	FILE * testmac = fopen ("../Resources/data/vegastrike.config","r");
+	if (testmac) {
+		chdir ("../Resources/data");/* chdir to the .app's parent */
+		fclose(testmac);
+	}
 	//chdir ("../../../");/* chdir to the .app's parent */
 #endif
+	
+    FILE * testup = fopen ("../vegastrike.config","r");
+	FILE * test = fopen ("vegastrike.config","r");
+	if (testup)
+		fclose(testup);
+	if (test)
+		fclose(test);
+	if (testup&&NULL==test) {
+		chdir("..");
+	}
+	
 #endif
     /* Print copyright notice */
-  fprintf( stderr, "Vega Strike "  " \n"
-	     "See http://www.gnu.org/copyleft/gpl.html for license details.\n\n" );
+	printf("Vega Strike "  " \n"
+		   "See http://www.gnu.org/copyleft/gpl.html for license details.\n\n" );
     /* Seed the random number generator */
     
 

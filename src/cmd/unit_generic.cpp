@@ -546,6 +546,30 @@ void Unit::Init()
   //  Fire();
 
 }
+bool
+verify_path (const vector<string> &path) {
+	string realpath;
+	for (unsigned int i=0;i<path.size();++i) {
+		if (i!=0)
+			realpath+="/";		
+		realpath+=path[i];
+	}
+	FILE * fp = fopen (realpath.c_str(),"r");
+	if (fp)
+		fclose(fp);
+	return fp!=NULL;
+}
+void vschdirs (const vector<string> &path) {
+	for (unsigned int i=0;i<path.size();++i) {
+		vschdir(path[i].c_str());
+	}
+}
+void vscdups (const vector<string> &path) {
+	for (unsigned int i=0;i<path.size();++i) {
+		vscdup();
+	}
+}
+
 void Unit::Init(const char *filename, bool SubU, int faction,std::string unitModifications, Flightgroup *flightgrp,int fg_subnumber, char * netxml)
 {
 	this->Unit::Init();
@@ -556,138 +580,52 @@ void Unit::Init(const char *filename, bool SubU, int faction,std::string unitMod
 	RecurseIntoSubUnitsOnCollision=!SubUnit;
 	this->faction = faction;
 	SetFg (flightgrp,fg_subnumber);
-	bool doubleup=false;
 	char * my_directory=GetUnitDir(filename);
 	vssetdir (GetSharedUnitPath().c_str());
-	FILE * fp=NULL;
-	if (!fp) {
-	  const char *c;
-	  if (SubU&&faction!=FactionUtil::GetFactionIndex("upgrades"))//RED FLAG
-		  vschdir("subunits");
-	  else {
-	  if ((c=FactionUtil::GetFaction(faction)))
-	    vschdir (c);
-	  else
-	    vschdir ("unknown");
-	  }
-	  doubleup=true;
-	  vschdir (my_directory);
-	} else {
-	  fclose (fp);
+	vector<string>factionsubdir;
+	static string facsd = vs_config->getVariable("data","unitfactiondir","");
+	if (facsd.length()!=0) {
+		factionsubdir.push_back(facsd);
 	}
-	if (filename[0])
-    	    fp = fopen (filename,"r");
-	if (!fp) {
-	  vscdup();
-	  vscdup();
-	  doubleup=false;
-	  vschdir (my_directory);
-	  if (filename[0])
-    	    fp = fopen (filename,"r");
+	vector<vector <string> > path;
+	path.push_back (factionsubdir);
+	path.back().push_back("neutral");path.back().push_back(my_directory);path.back().push_back(filename);
+	path.push_back(vector<string>());
+	path.back().push_back(my_directory);path.back().push_back(filename);	
+	path.push_back (factionsubdir);
+	string facstr (FactionUtil::GetFaction(faction));
+	path.back().push_back(facstr);path.back().push_back(my_directory);path.back().push_back(filename);
+	if (SubU) {
+		path.push_back(vector<string>());
+		path.back().push_back("subunits");path.back().push_back("neutral");path.back().push_back(my_directory);path.back().push_back(filename);
+		path.push_back(vector<string>());		
+		path.back().push_back("subunits");path.back().push_back(my_directory);path.back().push_back(filename);
+		path.push_back(vector<string>());		
+		path.back().push_back("subunits");path.back().push_back(facstr);path.back().push_back(my_directory);path.back().push_back(filename);
 	}
-
-	if (!fp) {
-	  if (doubleup) {
-	    vscdup();
-	  }
-	  vscdup();
-	  vschdir ("neutral");
-	  faction=FactionUtil::GetFaction("neutral");//set it to neutral
-	  doubleup=true;
-	  vschdir (my_directory);
-	  if (filename[0])
-    	    fp = fopen (filename,"r");
-	  if (fp) fclose (fp); 
-	  else {
-	    fprintf (stderr,"Warning: Cannot locate %s",filename);	  
+	free(my_directory);	
+	while(!path.empty()) {
+		if (verify_path(path.back()))
+			break;
+		path.pop_back();
+	}
+	if (path.empty()) {
+	    fprintf (stderr,"Warning: Cannot locate %s\n",filename);	  
 	    meshdata.clear();
 	    meshdata.push_back(NULL);
 	    this->name=string("LOAD_FAILED");
 	    //	    assert ("Unit Not Found"==NULL);
-	  }
 	}else {
-	  fclose (fp);
-	}
-	free(my_directory);
-	//Insert file loading stuff here
-	if(1&&fp) {
+	  path.back().pop_back();vschdirs(path.back());
 	  name = filename;
 	  if( netxml==NULL)
 		Unit::LoadXML(filename,unitModifications.c_str());
 	  else
 		Unit::LoadXML( "", "", netxml, strlen( netxml));
-	}
-	if (1) {
 	  calculate_extent(false);
 	  ToggleWeapon(true);//change missiles to only fire 1
-       	  vscdup();
-	  if (doubleup) 
-	    vscdup();
-	  vsresetdir();
-	  return;
+	  vscdups(path.back());	  
 	}
-	LoadFile(filename);
-	int nummesh;
-	ReadInt(nummesh);
-	meshdata.clear();
-	for(int meshcount = 0; meshcount < nummesh; meshcount++)
-	{
-		int meshtype;
-		ReadInt(meshtype);
-		char meshfilename[64];
-		float x,y,z;
-		ReadMesh(meshfilename, x,y,z);
-		meshdata.push_back(new Mesh(meshfilename, Vector(1,1,1), faction,NULL));
-		//		meshdata[meshcount]->SetPosition(Vector (x,y,z));
-	}
-	meshdata.push_back(NULL);
-	int numsubunit;
-	ReadInt(numsubunit);
-	for(int unitcount = 0; unitcount < numsubunit; unitcount++)
-	{
-		char unitfilename[64];
-		float x,y,z;
-		int type;
-		ReadUnit(unitfilename, type, x,y,z);
-		Unit *un;
-		switch(type)
-		{
-		default:
-		  SubUnits.prepend (un=UnitFactory::createUnit (unitfilename,true,faction,unitModifications,flightgroup,flightgroup_subnumber));
-
-		}
-		un->SetPosition(QVector(x,y,z));
-	}
-
-	int restricted;
-	float min, max;
-	ReadInt(restricted); //turrets and weapons
-	//ReadInt(restricted); // What's going on here? i hsould have 2, but that screws things up
-
-	ReadRestriction(restricted, min, max);
-	if(restricted) {
-	  //RestrictYaw(min,max);
-	}
-	ReadRestriction(restricted, min, max);
-	if(restricted) {
-	  //RestrictPitch(min,max);
-	}
-	ReadRestriction(restricted, min, max);
-	if(restricted) {
-	  //RestrictRoll(min,max);
-	}
-	float maxspeed, maxaccel, mass;
-	ReadFloat(maxspeed);
-	ReadFloat(maxaccel);
-	ReadFloat(mass);
-
-
-	CloseFile();
-	calculate_extent(false);
-	ToggleWeapon(true);//change missiles to only fire 1
-	vscdup();
-	if (fp) 
-	  vscdup();
 	vsresetdir();
 }
 
