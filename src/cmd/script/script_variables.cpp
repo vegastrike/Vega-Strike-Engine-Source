@@ -638,6 +638,9 @@ void Mission::assignVariable(varInst *v1,varInst *v2){
       // the object has not been set
       // we set it below
     }
+    else if(v2->objectname.empty()){
+      //      printf("WARNING: assignVariable v2==empty\n");
+    }
     else{
       if(v1->objectname!=v2->objectname){
 	fatalError(NULL,SCRIPT_RUN,"wrong object types in assignment ("+v1->objectname+" , "+v2->objectname);
@@ -651,7 +654,9 @@ void Mission::assignVariable(varInst *v1,varInst *v2){
   v1->float_val=v2->float_val;
   v1->int_val=v2->int_val;
   v1->bool_val=v2->bool_val;
-  v1->objectname=v2->objectname;
+  if(!(v2->objectname.empty())){
+    v1->objectname=v2->objectname;
+  }
   v1->object=v2->object;
 }
 

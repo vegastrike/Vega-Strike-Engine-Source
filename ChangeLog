@@ -1,3 +1,9 @@
+2002-02-26 Alexander Rawass <alexannika@users.sourceforge.net>
+
+	* wrote ai_flyto_jumppoint, ai_explorer, ai_flyto_waypoint_defend
+	* addJPTravellers for random_launch.c
+	
+
 2002-02-25 Alexander Rawass <alexannika@users.sourceforge.net>
 	
 	* visit_aera:

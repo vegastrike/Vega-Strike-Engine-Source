@@ -56,7 +56,7 @@ class AIFlyToWaypoint : public AImissionScript {
 };
 class AIFlyToWaypointDefend : public AImissionScript {
  public:
-  AIFlyToWaypointDefend(Vector waypoint,float vel,bool afburn,float range);
+  AIFlyToWaypointDefend(Vector waypoint,float vel,bool afburn,float range,float defend_range);
 
   Vector waypoint;
   float vel;

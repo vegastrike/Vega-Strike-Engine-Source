@@ -23,6 +23,8 @@
 
 
 struct GFXColor;
+#include "vegastrike.h"
+
 #include "gfx/matrix.h"
 #include "gfx/quaternion.h"
 #include <string>
@@ -674,6 +676,12 @@ public:
   bool isStarShip(){ if(isUnit()==UNITPTR){ return true;} return false; };
   bool isPlanet(){ if(isUnit()==PLANETPTR){ return true;} return false; };
   bool isJumppoint(){ if(GetDestinations().size()!=0){ return true; } return false; }
+
+  bool isEnemy(Unit *other){ if(_Universe->GetRelation(this->faction,other->faction)<0.0){ return true; } return false; };
+  bool isFriend(Unit *other){ if(_Universe->GetRelation(this->faction,other->faction)>0.0){ return true; } return false; };
+  bool isNeutral(Unit *other){ if(_Universe->GetRelation(this->faction,other->faction)==0.0){ return true; } return false; };
+  float getRelation(Unit *other){ return(_Universe->GetRelation(this->faction,other->faction)); };
+
 };
 ///Holds temporary values for inter-function XML communication Saves deprecated restr info
 struct Unit::XML {

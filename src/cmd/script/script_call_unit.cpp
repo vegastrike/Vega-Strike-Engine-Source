@@ -282,6 +282,7 @@ varInst *Mission::call_unit(missionNode *node,int mode){
       Unit *res_unit=NULL;
       if(mode==SCRIPT_RUN){
 	res_unit=my_unit->Threat();
+	//	printf("threat: %x\n",(int)res_unit);
       }
       viret=newVarInst(VI_TEMP);
       viret->type=VAR_OBJECT;
@@ -414,6 +415,24 @@ varInst *Mission::call_unit(missionNode *node,int mode){
       viret=newVarInst(VI_TEMP);
       viret->type=VAR_BOOL;
       viret->bool_val=res;
+    }
+    else if(cmd=="getRelation"){
+      float res=0.0;
+      Unit *other_unit=getUnitArg(node,mode,1);
+
+      if(mode==SCRIPT_RUN){
+	res=my_unit->getRelation(other_unit);
+      }
+      viret=newVarInst(VI_TEMP);
+      viret->type=VAR_FLOAT;
+      viret->float_val=res;
+    }
+    else if(cmd=="Jump"){
+      if(mode==SCRIPT_RUN){
+	my_unit->ActivateJumpDrive();
+      }
+      viret=newVarInst(VI_TEMP);
+      viret->type=VAR_VOID;
     }
     else if(cmd=="getOrientationP"){
 #if 0

@@ -56,6 +56,8 @@
 
 //#include "vegastrike.h"
 
+extern Unit *player_unit;
+
 /* *********************************************************** */
 
 varInst *Mission::call_order(missionNode *node,int mode){
@@ -342,8 +344,63 @@ varInst *Mission::call_order(missionNode *node,int mode){
     if(mode==SCRIPT_RUN){
       Vector des3=call_olist_tovector(des_node,mode,des_vi);
       //      printf("vel=%f,afburn=%d,range=%f\n",vel,afburn,range);
+	my_order=new AIFlyToWaypoint(des3,vel,afburn,range);
+    }
 
-      my_order=new AIFlyToWaypoint(des3,vel,afburn,range);
+    viret=newVarInst(VI_TEMP);
+    viret->type=VAR_OBJECT;
+    viret->objectname="order";
+    
+    viret->object=(void *)my_order;
+
+    deleteVarInst(des_vi);
+
+    return viret;
+  }
+  else if(cmd=="newFlyToWaypointDefend"){
+    missionNode *des_node=getArgument(node,mode,0);
+    varInst *des_vi=checkObjectExpr(des_node,mode);
+    olist_t *des_olist=getOListObject(des_node,mode,des_vi);
+
+    float vel=getFloatArg(node,mode,1);
+    bool afburn=getBoolArg(node,mode,2);
+    float range=getFloatArg(node,mode,3);
+    float defend_range=getFloatArg(node,mode,4);
+
+
+    Order *my_order=NULL;
+
+    if(mode==SCRIPT_RUN){
+      Vector des3=call_olist_tovector(des_node,mode,des_vi);
+      //      printf("vel=%f,afburn=%d,range=%f\n",vel,afburn,range);
+	my_order=new AIFlyToWaypointDefend(des3,vel,afburn,range,defend_range);
+    }
+
+    viret=newVarInst(VI_TEMP);
+    viret->type=VAR_OBJECT;
+    viret->objectname="order";
+    
+    viret->object=(void *)my_order;
+
+    deleteVarInst(des_vi);
+
+    return viret;
+  }
+  else if(cmd=="newFlyToJumppoint"){
+    missionNode *des_node=getArgument(node,mode,0);
+    varInst *des_vi=checkObjectExpr(des_node,mode);
+    Unit *des_unit=getUnitObject(des_node,mode,des_vi);
+
+    float vel=getFloatArg(node,mode,1);
+    bool afburn=getBoolArg(node,mode,2);
+
+    Order *my_order=NULL;
+
+    if(mode==SCRIPT_RUN){
+      //      Vector des3=call_olist_tovector(des_node,mode,des_vi);
+      //      printf("vel=%f,afburn=%d,range=%f\n",vel,afburn,range);
+
+      my_order=new AIFlyToJumppoint(des_unit,vel,afburn);
     }
 
     viret=newVarInst(VI_TEMP);
@@ -409,6 +466,16 @@ varInst *Mission::call_order(missionNode *node,int mode){
   else{
     varInst *ovi=getObjectArg(node,mode);
     Order *my_order=getOrderObject(node,mode,ovi);
+
+    if(mode==SCRIPT_RUN){
+    if(my_order==player_unit->getAIState()){
+      printf("IGNOREING order for player\n");
+
+      viret=newVarInst(VI_TEMP);
+      viret->type=VAR_VOID;
+      return viret;
+    }
+    }
 
     if(cmd=="enqueueOrder"){
       missionNode *enq_node=getArgument(node,mode,1);

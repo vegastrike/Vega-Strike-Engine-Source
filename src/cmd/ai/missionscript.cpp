@@ -118,7 +118,7 @@ AIFlyToWaypoint::AIFlyToWaypoint(Vector wp,float velo,bool afburn,float rng) : A
 
 }
 
-AIFlyToWaypointDefend::AIFlyToWaypointDefend(Vector wp,float velo,bool afburn,float rng) : AImissionScript("ai_flyto_waypoint_defend") {
+AIFlyToWaypointDefend::AIFlyToWaypointDefend(Vector wp,float velo,bool afburn,float rng,float defend_range) : AImissionScript("ai_flyto_waypoint_defend") {
   waypoint=wp;
   vel=velo;
   range=rng;
@@ -129,6 +129,9 @@ AIFlyToWaypointDefend::AIFlyToWaypointDefend(Vector wp,float velo,bool afburn,fl
 
   varInst *vi_range=mission->lookupClassVariable(modulename,"abort_range",classid);
   vi_range->float_val=range;
+
+  varInst *vi_defrange=mission->lookupClassVariable(modulename,"defend_range",classid);
+  vi_defrange->float_val=defend_range;
 
   varInst *vi_vel=mission->lookupClassVariable(modulename,"vel",classid);
   vi_vel->float_val=vel;
@@ -149,7 +152,7 @@ AIFlyToJumppoint::AIFlyToJumppoint(Unit *jumppoint_unit,float fly_speed,bool aft
   vi_speed->float_val=fly_speed;
 
   varInst *vi_aft=mission->lookupClassVariable(modulename,"afterburner",classid);
-  vi_aft->float_val=aft;
+  vi_aft->bool_val=aft;
 
   varInst *vi_unit=mission->lookupClassVariable(modulename,"jumppoint_unit",classid);
   vi_unit->objectname="unit";
