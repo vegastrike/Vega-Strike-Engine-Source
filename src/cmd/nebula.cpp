@@ -236,7 +236,7 @@ void Nebula::UpdatePhysics (const Transformation &trans, const Matrix transmat, 
   if (fadeinvalue<0) {
     fadeinvalue=0;
   }
-  Unit::UpdatePhysics (trans,transmat,CumulativeVelocity,ResolveLast,uc);
+  GameUnit::UpdatePhysics (trans,transmat,CumulativeVelocity,ResolveLast,uc);
   Vector t1;
   float dis;
   unsigned int i;

@@ -468,7 +468,7 @@ void Planet::reactToCollision(Unit * un, const QVector & biglocation, const Vect
   jumpReactToCollision(un);
   //screws with earth having an atmosphere... blahrgh
   if (!terrain&&GetDestinations().empty()&&!atmospheric) {//no place to go and acts like a ship
-    Unit::reactToCollision (un,biglocation,bignormal,smalllocation,smallnormal,dist);
+    GameUnit::reactToCollision (un,biglocation,bignormal,smalllocation,smallnormal,dist);
   }
 
   //nothing happens...you fail to do anythign :-)
@@ -561,7 +561,7 @@ void Planet::Kill(bool erasefromsave) {
 	/*	*/
 	satellites.clear();
 	insiders.clear();
-	Unit::Kill(erasefromsave);
+	GameUnit::Kill(erasefromsave);
 }
 
 void Planet::gravitate(UnitCollection *uc) {

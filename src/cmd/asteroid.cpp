@@ -9,7 +9,7 @@ void Asteroid::reactToCollision(Unit * smaller, const QVector & biglocation, con
     smaller->reactToCollision(t,smalllocation,smallnormal,biglocation,bignormal,dist);
     break;
   default:
-    Unit::reactToCollision (smaller,biglocation,bignormal,smalllocation,smallnormal,dist);
+    GameUnit::reactToCollision (smaller,biglocation,bignormal,smalllocation,smallnormal,dist);
     break;
   }
 }
