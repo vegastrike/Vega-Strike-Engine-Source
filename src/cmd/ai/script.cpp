@@ -16,20 +16,20 @@ typedef std::map<string,CCScript *> HardCodedMap;
 HardCodedMap MakeHardCodedScripts() {
   HardCodedMap tmp;
   typedef pair<string, CCScript *> MyPair;
-  tmp.insert (MyPair ("++afterburnerslide.xml",AfterburnerSlide));
-  tmp.insert (MyPair ("++afterburn-turntowards-itts.xml",AfterburnTurnTowards));  
-  tmp.insert (MyPair ("++afterburn-turntowards.xml",AfterburnTurnTowardsITTS));  
-  tmp.insert (MyPair ("++cloak.xml",CloakForScript));  
-  tmp.insert (MyPair ("++evade.xml",Evade));    
-  tmp.insert (MyPair ("++kickstop.xml",Kickstop));      
-  tmp.insert (MyPair ("++moveto.xml",MoveTo));      
-  tmp.insert (MyPair ("++shelton-slide.xml",SheltonSlide));      
-  tmp.insert (MyPair ("++skilledabslide.xml",SkilledABSlide));      
-  tmp.insert (MyPair ("stop.xml",Stop));      
-  tmp.insert (MyPair ("++stop.xml",Stop));      
-  tmp.insert (MyPair ("++turnaway.xml",TurnAway));      
-  tmp.insert (MyPair ("++turntowards.xml",TurnTowards));      
-  tmp.insert (MyPair ("++turntowardsitts.xml",TurnTowardsITTS));      
+  tmp.insert (MyPair ("++afterburnerslide.xml",&AfterburnerSlide));
+  tmp.insert (MyPair ("++afterburn-turntowards-itts.xml",&AfterburnTurnTowards));  
+  tmp.insert (MyPair ("++afterburn-turntowards.xml",&AfterburnTurnTowardsITTS));  
+  tmp.insert (MyPair ("++cloak.xml",&CloakForScript));  
+  tmp.insert (MyPair ("++evade.xml",&Evade));    
+  tmp.insert (MyPair ("++kickstop.xml",&Kickstop));      
+  tmp.insert (MyPair ("++moveto.xml",&MoveTo));      
+  tmp.insert (MyPair ("++shelton-slide.xml",&SheltonSlide));      
+  tmp.insert (MyPair ("++skilledabslide.xml",&SkilledABSlide));      
+  tmp.insert (MyPair ("stop.xml",&Stop));      
+  tmp.insert (MyPair ("++stop.xml",&Stop));      
+  tmp.insert (MyPair ("++turnaway.xml",&TurnAway));      
+  tmp.insert (MyPair ("++turntowards.xml",&TurnTowards));      
+  tmp.insert (MyPair ("++turntowardsitts.xml",&TurnTowardsITTS));      
   return tmp;
 }
 
