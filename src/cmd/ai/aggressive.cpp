@@ -168,7 +168,9 @@ bool AggressiveAI::ProcessCurrentFgDirective(Flightgroup * fg) {
   bool retval=false;
   if (fg !=NULL) {
     Unit * leader = fg->leader.GetUnit();
-
+    if (last_directive.empty()) {
+      last_directive = fg->directive;
+    }
     if (fg->directive!=last_directive) {
       if (float(rand())/RAND_MAX<(obedient?(1-logic.obedience):logic.obedience)) {
 	obedient = !obedient;

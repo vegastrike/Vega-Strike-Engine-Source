@@ -5,6 +5,7 @@
 #include "cmd/planet.h"
 #include "config_xml.h"
 #include "vs_globals.h"
+#include "cmd/script/flightgroup.h"
 using Orders::FireAt;
 
 FireAt::FireAt (float reaction_time, float aggressivitylevel): CommunicatingAI (WEAPON,STARGET),  rxntime (reaction_time), delay(0), agg (aggressivitylevel), distance(1){
@@ -153,7 +154,18 @@ void FireAt::Execute () {
     }
     static float targetswitchprobability = XMLSupport::parse_float (vs_config->getVariable ("AI","Targetting","TargetSwitchProbability",".01"));
     if ((!istargetjumpableplanet)&&(float(rand())/RAND_MAX)<targetswitchprobability*SIMULATION_ATOM) {
-      ChooseTargets(1,true);
+      bool switcht=true;
+      Flightgroup * fg = parent->getFlightgroup();;
+      if (fg) {
+	if (!fg->directive.empty()) {
+	  if ((*fg->directive.begin())==toupper (*fg->directive.begin())) {
+	    switcht=false;
+	  }
+	}
+      }
+      if (switcht) {
+	ChooseTargets(1,true);
+      }
     }
   } else {
     ChooseTargets(1,false);
