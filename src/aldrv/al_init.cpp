@@ -7,6 +7,9 @@
 #include <stdio.h>
 #include "al_globals.h"
 #include <vector>
+#include "config_xml.h"
+#include "xml_support.h"
+#include "vs_globals.h"
 static void fixup_function_pointers(void) {
   alutLoadMP3p = (mp3Loader *) alGetProcAddress((ALubyte *)"alutLoadMP3_LOKI");
   if(alutLoadMP3p == NULL) {
@@ -90,7 +93,13 @@ static void *context_id=NULL;
 
 bool AUDInit () {
 #ifdef HAVE_AL
-	int attrlist[] = { ALC_FREQUENCY, 22050, 0 };
+  //  enabled = XMLSupport::parse_bool (vs_config->getVariable ("audio","enabled","true"));
+  maxallowedsingle = XMLSupport::parse_int (vs_config->getVariable ("audio","MaxSingleSounds","8"));
+  maxallowedtotal = XMLSupport::parse_int (vs_config->getVariable ("audio","MaxTotalSounds","20"));
+  g_game.audio_frequency_mode = XMLSupport::parse_int (vs_config->getVariable ("audio","frequency","22050"));
+  g_game.sound_enabled = XMLSupport::parse_bool (vs_config->getVariable ("audio","Sound","true"));
+  g_game.music_enabled = XMLSupport::parse_bool (vs_config->getVariable ("audio","Music","true"));
+	int attrlist[] = { ALC_FREQUENCY, g_game.audio_frequency_mode, 0 };
 	dev = alcOpenDevice( NULL );
 	if( dev == NULL ) {
 		return false;
@@ -115,7 +124,12 @@ bool AUDInit () {
 void AUDDestroy() {
 #ifdef HAVE_AL
   //Go through and delete all loaded wavs
-  for (unsigned int i=0;i<buffers.size();i++) {
+  unsigned int i;
+  for (i=0;i<sounds.size();i++) {
+    if (sounds[i].buffer!=-1)
+      AUDDeleteSound (i);
+  }
+  for (i=0;i<buffers.size();i++) {
     alDeleteBuffers (1,&buffers[i]);
   }
   buffers.clear();

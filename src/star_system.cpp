@@ -17,6 +17,7 @@
 #include "cmd/bolt.h"
 #include <expat.h>
 #include "gfx/cockpit.h"
+#include "audiolib.h"
 extern Vector mouseline;
 
 vector<Vector> perplines;
@@ -177,6 +178,10 @@ void StarSystem::Update() {
       Iterator *iter;
       if (current_stage==PHY_AI) {
       iter = drawList->createIterator();
+      if (firstframe&&rand()%2) {
+	AUDRefreshSounds();
+      }
+
       while((unit = iter->current())!=NULL) {
 	unit->ExecuteAI(); // must execute AI afterwards, since position might update (and ResolveLast=true saves the 2nd to last position for proper interpolation)
 	unit->ResetThreatLevel();

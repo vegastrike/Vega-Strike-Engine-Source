@@ -8,6 +8,7 @@
 #include "star_system.h"
 #include "collection.h"
 #include "unit.h"
+#include "vs_globals.h"
 Music::Music (const char *playlist,Unit *parent):p(parent),song(-1) {
   FILE *fp = fopen (playlist,"r");
   char songname[1024];
@@ -54,6 +55,7 @@ int Music::SelectTracks() {
 
   fprintf (stderr,"Choosing Song %f",goodness);
   goodness -= playlist.size()/8;
+  goodness += playlist.size()/2;
   int tmp=(rand()%(playlist.size()/4));
   goodness+=tmp;
   fprintf (stderr,"Choosing Song With Randomness %f",goodness);
@@ -67,10 +69,10 @@ int Music::SelectTracks() {
 
 
 void Music::Listen() {
-  if (!AUDIsPlaying (song) ) {
+  if ((!AUDIsPlaying (song))&&g_game.music_enabled ) {
     AUDDeleteSound (song,true);//delete buffer too;
     if (!playlist.empty()) {
-      song = AUDCreateSoundMP3 (playlist[SelectTracks()],false);
+      song = AUDCreateMusicMP3 (playlist[SelectTracks()],false);
       AUDStartPlaying (song);
     }
   }

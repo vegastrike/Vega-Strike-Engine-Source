@@ -10,8 +10,12 @@ using std::vector;
 static DecalQueue beamdecals;
 static vector <vector <DrawContext> > beamdrawqueue;
 extern double interpolation_blend_factor;
-Beam::Beam (const Transformation & trans, const weapon_info & clne, void * own) :vlist(NULL), Col(clne.r,clne.g,clne.b,clne.a){
+Beam::Beam (const Transformation & trans, const weapon_info & clne, void * own, int sound) :vlist(NULL), Col(clne.r,clne.g,clne.b,clne.a){
+#ifdef PERBOLTSOUND
   sound = AUDCreateSound (clne.sound,true);
+#else
+  this->sound = sound;
+#endif
   decal = beamdecals.AddTexture (clne.file.c_str(),TRILINEAR);
   if (decal>=beamdrawqueue.size()) {
     beamdrawqueue.push_back (vector<DrawContext>());
@@ -101,11 +105,15 @@ void Beam::Init (const Transformation & trans, const weapon_info &cln , void * o
 
   memcpy (&calah[16],&calah[0],sizeof(GFXColorVertex)*16);    
   vlist = new GFXVertexList (GFXQUAD,32,calah,32,true);//mutable color contained list
+#ifdef PERBOLTSOUND
   AUDStartPlaying (sound);
+#endif
 }
 
 Beam::~Beam () {
+#ifdef PERBOLTSOUND
   AUDDeleteSound (sound);
+#endif
   if (CollideInfo.object.b!=NULL) {
     KillCollideTable (&CollideInfo);
   }
@@ -181,8 +189,10 @@ void Beam::Draw (const Transformation &trans, const float* m) {//hope that the c
   Transformation cumulative_transformation = local_transformation;
   cumulative_transformation.Compose(trans, m);
   cumulative_transformation.to_matrix(cumulative_transformation_matrix);
+
   AUDAdjustSound (sound,cumulative_transformation.position,speed*Vector (cumulative_transformation_matrix[8],cumulative_transformation_matrix[9],cumulative_transformation_matrix[10]));
   AUDSoundGain (sound,curthick*curthick/(thickness*thickness));
+
   RecalculateVertices();
 
   beamdrawqueue[decal].push_back(DrawContext (cumulative_transformation_matrix,vlist));
@@ -226,9 +236,12 @@ void Beam::UpdatePhysics(const Transformation &trans, const Matrix m) {
     curlength=0;
   }
   if (curthick ==0) {
-    if (AUDIsPlaying(sound))
+    //#ifdef PERBOLTSOUND
+    //#endif
+    if (AUDIsPlaying(sound)&&refiretime>=SIMULATION_ATOM)
       AUDStopPlaying (sound);
     refiretime +=SIMULATION_ATOM;
+ 
     return;
   }
   if (stability&&numframes*SIMULATION_ATOM>stability)

@@ -11,6 +11,8 @@
 #include "gfx/bsp.h"
 #include "gfx/sprite.h"
 #include "audiolib.h"
+#include "config_xml.h"
+#include "vs_globals.h"
 #define VS_PI 3.1415926536
 void Unit::beginElement(void *userData, const XML_Char *name, const XML_Char **atts) {
   ((Unit*)userData)->beginElement(name, AttributeList(atts));
@@ -439,10 +441,10 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(attribute_map.lookup((*iter).name)) {
       case ENGINEWAV:
-	sound.engine = AUDCreateSoundWAV ((*iter).value,true);
+	sound.engine = AUDCreateSoundWAV ((*iter).value,false);
 	break;
       case ENGINEMP3:
-	sound.engine = AUDCreateSoundMP3((*iter).value,true); 
+	sound.engine = AUDCreateSoundMP3((*iter).value,false); 
 	break;
       case SHIELDMP3:
 	sound.shield = AUDCreateSoundMP3((*iter).value,false); 
@@ -470,6 +472,22 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
 	break;
       }
     }
+    if (sound.engine==-1) {
+      sound.engine=AUDCreateSound (vs_config->getVariable ("unitaudio","afterburner","sfx10.wav"),false);
+    }
+    if (sound.shield==-1) {
+      sound.shield=AUDCreateSound (vs_config->getVariable ("unitaudio","shield","sfx09.wav"),false);
+    }
+    if (sound.armor==-1) {
+      sound.armor=AUDCreateSound (vs_config->getVariable ("unitaudio","armor","sfx08.wav"),false);
+    }
+    if (sound.hull==-1) {
+      sound.hull=AUDCreateSound (vs_config->getVariable ("unitaudio","armor","sfx08.wav"),false);
+    }
+    if (sound.explode==-1) {
+      sound.explode=AUDCreateSound (vs_config->getVariable ("unitaudio","explode","sfx03.wav"),false);
+    }
+      
     break;    
   case ARMOR:
 	assert (xml->unitlevel==2);
@@ -863,9 +881,15 @@ void Unit::LoadXML(const char *filename) {
     mounts = new Mount [nummounts];
   else
     mounts = NULL;
+  char parity=0;
   for (a=0;a<nummounts;a++) {
     mounts[a]=*xml->mountz[a];
     delete xml->mountz[a];//do it stealthily... no cons/destructor
+    if (a%2==parity) {
+      int b=a;
+      if (a%4==2&&a<nummounts-1) b=a+1;
+      mounts[b].sound = AUDCreateSound (mounts[b].type.sound,mounts[b].type.type==weapon_info::BEAM);
+    }
   }
   numsubunit = xml->units.size();
   if (numsubunit)
@@ -916,8 +940,5 @@ void Unit::LoadXML(const char *filename) {
     delete xml->bspmesh;
   }
   delete xml;
-  if (sound.engine!=-1) {
-    AUDStartPlaying (sound.engine);
-  }
 }
 

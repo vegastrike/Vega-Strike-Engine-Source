@@ -49,7 +49,7 @@ private:
   void CollideHuge(const LineCollide &);
 public:
   
-  Beam (const Transformation & trans, const weapon_info & clne, void * own);
+  Beam (const Transformation & trans, const weapon_info & clne, void * own, int sound);
   void Init (const Transformation & trans, const weapon_info & clne, void * own);
   ~Beam();
   Vector &Position();

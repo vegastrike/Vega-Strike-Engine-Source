@@ -38,7 +38,7 @@
 #include "cmd/music.h"
 #include "main_loop.h"
 #include "cmd/music.h"
-
+#include "audiolib.h"
 using namespace std;
 
 static Music * muzak=NULL;
@@ -88,11 +88,9 @@ bool _Slew = true;
 namespace CockpitKeys {
 
  void SkipMusicTrack(int,KBSTATE newState) {
-   static bool flag=false;
-   if(newState==PRESS && flag==false){
+   if(newState==PRESS){
      printf("skipping\n");
     muzak->Skip();
-    flag=true;
    }
  }
 
@@ -387,6 +385,7 @@ void createObjects() {
   fighters[0]->EnqueueAI(new FireKeyboard (0,""));
   tmpcockpittexture = new Texture ("hornet-cockpit.bmp","hornet-cockpitalp.bmp",0,NEAREST);
   muzak = new Music ("programming.m3u",fighters[0]);
+  AUDListenerSize (fighters[0]->rSize()*4);
   _Universe->AccessCockpit()->Init ("hornet-cockpit.cpt");
   _Universe->AccessCockpit()->SetParent(fighters[0]);
   shipList = _Universe->activeStarSystem()->getClickList();

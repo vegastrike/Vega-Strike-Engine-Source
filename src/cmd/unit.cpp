@@ -284,6 +284,7 @@ Unit::~Unit()
   if (bspTree)
     delete bspTree;
   for (int beamcount=0;beamcount<nummounts;beamcount++) {
+    AUDDeleteSound(mounts[beamcount].sound);
     if (mounts[beamcount].ref.gun&&mounts[beamcount].type.type==weapon_info::BEAM)
       delete mounts[beamcount].ref.gun;//hope we're not killin' em twice...they don't go in gunqueue
   }
@@ -620,8 +621,8 @@ void Unit::Draw(const Transformation &parent, const Matrix parentMatrix)
   /*Transformation*/ cumulative_transformation = linear_interpolate(prev_physical_state, curr_physical_state, interpolation_blend_factor);
   cumulative_transformation.Compose(parent, parentMatrix);
   cumulative_transformation.to_matrix(cumulative_transformation_matrix);
-  if (sound.engine!=-1)
-    AUDAdjustSound (sound.engine,cumulative_transformation.position,Velocity);
+
+
   int i;
   if (hull <0) {
     Explode(true, GetElapsedTime());
@@ -857,10 +858,14 @@ void Unit::ActivateGuns (weapon_info::MOUNT_SIZE sz, bool ms) {
 void Unit::Mount::UnFire () {
   if (status!=ACTIVE||ref.gun==NULL||type.type!=weapon_info::BEAM)
     return;
+  //  AUDStopPlaying (sound);
   ref.gun->Destabilize();
 }
 bool Unit::Mount::Fire (const Transformation &Cumulative, const float * m, const Vector & velocity, Unit * owner, Unit *target, bool Missile) {
   Unit * temp;
+
+  Transformation tmp = LocalPosition;
+  tmp.Compose (Cumulative,m);
   if (status!=ACTIVE||(Missile!=(type.type==weapon_info::PROJECTILE))||ammo==0)
     return false;
   if (type.type==weapon_info::BEAM) {
@@ -868,7 +873,7 @@ bool Unit::Mount::Fire (const Transformation &Cumulative, const float * m, const
       if (ref.gun==NULL) {
 	if (ammo>0)
 	  ammo--;
-	ref.gun = new Beam (LocalPosition,type,owner);
+	ref.gun = new Beam (LocalPosition,type,owner,sound);
       } else {
 	if (ref.gun->Ready()) {
 	  if (ammo>0)
@@ -882,8 +887,6 @@ bool Unit::Mount::Fire (const Transformation &Cumulative, const float * m, const
     if (ref.refire>type.Refire) {
       ref.refire =0;
       Matrix mat;
-      Transformation tmp = LocalPosition;
-      tmp.Compose (Cumulative,m);
       tmp.to_matrix (mat);
       switch (type.type) {
       case weapon_info::BALL:
@@ -918,9 +921,15 @@ bool Unit::Mount::Fire (const Transformation &Cumulative, const float * m, const
       }
     }
   }
+
+  if (!AUDIsPlaying (sound)) {
+    AUDPlay (sound,tmp.position,velocity,1);
+  }else {
+    AUDAdjustSound(sound,tmp.position,velocity);
+  }
   return true;
 }
-Unit::Mount::Mount(const string& filename, short ammo): size(weapon_info::NOWEAP),ammo(ammo),type(weapon_info::BEAM){
+Unit::Mount::Mount(const string& filename, short ammo): size(weapon_info::NOWEAP),ammo(ammo),type(weapon_info::BEAM),sound(-1){
   ref.gun = NULL;
   status=(UNCHOSEN);
   weapon_info * temp = getTemplate (filename);  

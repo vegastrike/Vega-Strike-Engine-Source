@@ -235,13 +235,15 @@ float Unit::DealDamageToHull (const Vector & pnt, float damage ) {
   percent = damage/(*targ+hull);
   if (damage<*targ) {
     if (!AUDIsPlaying (sound.armor))
-      AUDStartPlaying (sound.armor);
-    AUDAdjustSound (sound.armor,ToWorldCoordinates(pnt)+cumulative_transformation.position,Velocity);
+      AUDPlay (sound.armor,ToWorldCoordinates(pnt)+cumulative_transformation.position,Velocity,1);
+    else
+      AUDAdjustSound (sound.armor,ToWorldCoordinates(pnt)+cumulative_transformation.position,Velocity);
     *targ -= apply_float_to_short (damage);
   }else {
     if (!AUDIsPlaying (sound.hull))
-      AUDStartPlaying (sound.hull);
-    AUDAdjustSound (sound.hull,ToWorldCoordinates(pnt)+cumulative_transformation.position,Velocity);
+      AUDPlay (sound.hull,ToWorldCoordinates(pnt)+cumulative_transformation.position,Velocity,1);
+    else
+      AUDAdjustSound (sound.hull,ToWorldCoordinates(pnt)+cumulative_transformation.position,Velocity);
     damage -= ((float)*targ);
     *targ= 0;
     hull -=damage;
@@ -372,8 +374,9 @@ float Unit::DealDamageToShield (const Vector &pnt, float &damage) {
       *targ=0;
     } else {
       if (!AUDIsPlaying (sound.shield))
-	AUDStartPlaying (sound.shield);
-      AUDAdjustSound (sound.shield,ToWorldCoordinates(pnt)+cumulative_transformation.position,Velocity);
+	AUDPlay (sound.shield,ToWorldCoordinates(pnt)+cumulative_transformation.position,Velocity,1);
+      else
+	AUDAdjustSound (sound.shield,ToWorldCoordinates(pnt)+cumulative_transformation.position,Velocity);
       *targ -= apply_float_to_short (damage);	
       damage=0;
     }
@@ -419,8 +422,7 @@ bool Unit::Explode (bool drawit, float timeit) {
     timeexplode=0;
     explosion= new Animation ("explosion_orange.ani",false,.1,BILINEAR,false);
     explosion->SetDimensions(3*rSize(),3*rSize());
-    AUDAdjustSound (sound.explode, cumulative_transformation.position,Velocity);
-    AUDStartPlaying (sound.explode);
+    AUDPlay (sound.explode,cumulative_transformation.position,Velocity,1);
   }
   float tmp[16];
   

@@ -24,6 +24,7 @@
 //#include "physics.h"
 #include "beam.h"
 #include "planet.h"
+#include "audiolib.h"
 //#ifdef WIN32
 float copysign (float x, float y) {
 	if (y>0)
@@ -199,6 +200,13 @@ Vector Unit::ClampThrust (const Vector &amt1, bool afterburn) {
 void Unit::Thrust(const Vector &amt1,bool afterburn){
   Vector amt = ClampThrust(amt1,afterburn);
   ApplyLocalForce(amt);
+  if (afterburn) {
+    if (!AUDIsPlaying (sound.engine)) {
+      AUDPlay (sound.engine,cumulative_transformation.position,Velocity,1);
+    } else {
+      AUDAdjustSound (sound.engine,cumulative_transformation.position,Velocity);
+    }
+  }
 }
 
 void Unit::LateralThrust(float amt) {

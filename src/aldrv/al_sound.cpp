@@ -9,6 +9,7 @@
 #include <AL/alext.h>
 #include <AL/alut.h>
 #include <vector>
+#include "vs_globals.h"
 std::vector <unsigned int> dirtysounds;
 std::vector <OurSound> sounds;
 std::vector <ALuint> buffers;
@@ -17,7 +18,7 @@ static int LoadSound (ALuint buffer, bool looping) {
   if (!dirtysounds.empty()) {
     i = dirtysounds.back();
     dirtysounds.pop_back();
-    assert (sounds[i].buffer==(ALuint)-1);
+    assert (sounds[i].buffer==(ALuint)0);
     sounds[i].buffer= buffer;
   } else {
     i=sounds.size();
@@ -31,30 +32,31 @@ static int LoadSound (ALuint buffer, bool looping) {
 
 int AUDCreateSoundWAV (const std::string &s, const bool music, const bool LOOP){
 #ifdef HAVE_AL
-  
-  ALuint * wavbuf =NULL;
-  if (!music)
-    wavbuf = soundHash.Get(s);
-  if (wavbuf==NULL) {
-    wavbuf = (ALuint *) malloc (sizeof (ALuint));
-    alGenBuffers (1,wavbuf);
-    ALsizei size;	
-    ALsizei bits;	
-    ALsizei freq;	
-    ALsizei format;
-    void *wave;
-    ALboolean err = alutLoadWAV(s.c_str(), &wave, &format, &size, &bits, &freq);
-    if(err == AL_FALSE) {
-      return -1;
+  if ((g_game.sound_enabled&&!music)||(g_game.music_enabled&&music)) {
+    ALuint * wavbuf =NULL;
+    if (!music)
+      wavbuf = soundHash.Get(s);
+    if (wavbuf==NULL) {
+      wavbuf = (ALuint *) malloc (sizeof (ALuint));
+      alGenBuffers (1,wavbuf);
+      ALsizei size;	
+      ALsizei bits;	
+      ALsizei freq;	
+      ALsizei format;
+      void *wave;
+      ALboolean err = alutLoadWAV(s.c_str(), &wave, &format, &size, &bits, &freq);
+      if(err == AL_FALSE) {
+	return -1;
+      }
+      alBufferData( *wavbuf, format, wave, size, freq );
+      free(wave);
+      if (!music) {
+	soundHash.Put (s,wavbuf);
+	buffers.push_back (*wavbuf);
+      }
     }
-    alBufferData( *wavbuf, format, wave, size, freq );
-    free(wave);
-    if (!music) {
-      soundHash.Put (s,wavbuf);
-      buffers.push_back (*wavbuf);
-    }
+    return LoadSound (*wavbuf,LOOP);  
   }
-  return LoadSound (*wavbuf,LOOP);  
 #endif
   return -1;
 }
@@ -67,32 +69,34 @@ int AUDCreateMusicWAV (const std::string &s, const bool LOOP) {
 
 int AUDCreateSoundMP3 (const std::string &s, const bool music, const bool LOOP){
 #ifdef HAVE_AL
-  ALuint * mp3buf=NULL;
-  if (!music)
-    mp3buf = soundHash.Get (s);
-  if (mp3buf==NULL) {
-    FILE * fp = fopen (s.c_str(),"rb");
-    if (!fp)
-      return -1;
-    fseek (fp,0,SEEK_END);
-    long length = ftell (fp);
-    rewind (fp);
-    char *data = (char *)malloc (length);
-    fread (data,1,length,fp);
-    fclose (fp);
-    mp3buf = (ALuint *) malloc (sizeof (ALuint));
-    alGenBuffers (1,mp3buf);
-    if ((*alutLoadMP3p)(*mp3buf,data,length)!=AL_TRUE) {
+  if ((g_game.sound_enabled&&!music)||(g_game.music_enabled&&music)) {
+    ALuint * mp3buf=NULL;
+    if (!music)
+      mp3buf = soundHash.Get (s);
+    if (mp3buf==NULL) {
+      FILE * fp = fopen (s.c_str(),"rb");
+      if (!fp)
+	return -1;
+      fseek (fp,0,SEEK_END);
+      long length = ftell (fp);
+      rewind (fp);
+      char *data = (char *)malloc (length);
+      fread (data,1,length,fp);
+      fclose (fp);
+      mp3buf = (ALuint *) malloc (sizeof (ALuint));
+      alGenBuffers (1,mp3buf);
+      if ((*alutLoadMP3p)(*mp3buf,data,length)!=AL_TRUE) {
+	free (data);
+	return -1;
+      }
       free (data);
-      return -1;
+      if (!music) {
+	soundHash.Put (s,mp3buf);
+	buffers.push_back (*mp3buf);
+      }
     }
-    free (data);
-    if (!music) {
-      soundHash.Put (s,mp3buf);
-      buffers.push_back (*mp3buf);
-    }
+    return LoadSound (*mp3buf,LOOP);
   }
-  return LoadSound (*mp3buf,LOOP);
 #endif
   return -1;
 }
@@ -103,7 +107,16 @@ int AUDCreateSoundMP3 (const std::string &s, const bool LOOP) {
 int AUDCreateMusicMP3 (const std::string &s, const bool LOOP) {
   return AUDCreateSoundMP3 (s,true,LOOP);
 }
-
+int AUDCreateSound (const std::string &s,const bool LOOP) {
+  if (s.end()-1>=s.begin()){
+    if (*(s.end()-1)=='3') {
+      return AUDCreateSoundMP3 (s,LOOP);
+    } else {
+      return AUDCreateSoundWAV (s,LOOP);
+    }
+  }
+  return -1;
+}
 ///copies other sound loaded through AUDCreateSound
 int AUDCreateSound (int sound,const bool LOOP=false){
 #ifdef HAVE_AL
@@ -123,7 +136,7 @@ void AUDDeleteSound (int sound, bool music){
     if (music) {
       alDeleteBuffers (1,&sounds[sound].buffer);
     }
-    sounds[sound].buffer=(ALuint)-1;
+    sounds[sound].buffer=(ALuint)0;
   }
 #endif
 }
@@ -132,6 +145,7 @@ void AUDAdjustSound (const int sound, const Vector &pos, const Vector &vel){
   if (sound>=0&&sound<(int)sounds.size()) {
     float p []= {pos.i,pos.j,pos.k};
     float v []= {vel.i,vel.j,vel.k};
+    sounds[sound].pos = pos;
     alSourcefv(sounds[sound].source,AL_POSITION,p);
     //    alSourcefv(sounds[sound].source,AL_VELOCITY,v);
   }
@@ -170,9 +184,27 @@ void AUDStartPlaying (const int sound){
   }
 #endif
 }
+
+void AUDPlay (const int sound, const Vector &pos, const Vector & vel, const float gain) {
+  char tmp;
+  if (sound<0)
+    return;
+  if ((tmp=AUDQueryAudability (sound,pos,vel,gain))!=0) {
+
+    ALfloat p [3] = {pos.i,pos.j,pos.k};
+    AUDAdjustSound (sound,pos,vel);
+    alSourcef(sounds[sound].source,AL_GAIN,gain);    
+    if (tmp!=2){
+      AUDAddWatchedPlayed (sound,pos);
+      alSourcePlay( sounds[sound].source );
+    }
+  }
+}
+
 void AUDPausePlaying (const int sound){
 #ifdef HAVE_AL
   if (sound>=0&&sound<(int)sounds.size()) {
+
     //    alSourcePlay( sounds[sound].source() );
   }
 #endif
