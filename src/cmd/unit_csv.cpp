@@ -429,7 +429,7 @@ void AddSounds(Unit * thus, string sounds) {
       thus->sound->cloak=AUDCreateSound(vs_config->getVariable ("unitaudio","cloak", "sfx43.wav"),false);
     }
     if (thus->sound->engine==-1) {
-      thus->sound->engine=AUDCreateSound (vs_config->getVariable ("unitaudio","afterburner","sfx10.wav"),true);
+      thus->sound->engine=AUDCreateSound (vs_config->getVariable ("unitaudio","afterburner","sfx10.wav"),false);
     }
     if (thus->sound->shield==-1) {
       thus->sound->shield=AUDCreateSound (vs_config->getVariable ("unitaudio","shield","sfx09.wav"),false);

@@ -35,6 +35,12 @@ Mount::Mount() {
 	serial = 0;
 }
 extern double interpolation_blend_factor;
+void DestroyMount (Mount * mount) {
+  mount->UnFire();
+  AUDStopPlaying(mount->sound); 
+  mount->status=Mount::DESTROYED;
+
+}
 float Mount::ComputeAnimatedFrame(Mesh * gun) {
 	if (type->type==weapon_info::BEAM) {
 		if (ref.gun) {

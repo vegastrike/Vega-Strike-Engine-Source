@@ -158,13 +158,38 @@ void GameUnit<UnitType>::UpdatePhysics2 (const Transformation &trans, const Tran
 template <class UnitType>
 void GameUnit<UnitType>::Thrust(const Vector &amt1,bool afterburn){
   Unit::Thrust( amt1, afterburn);
- if (_Universe->AccessCockpit(0)->GetParent()==this)
-  if (afterburn!=AUDIsPlaying (this->sound->engine)) {
-    if (afterburn)
-      AUDPlay (this->sound->engine,this->cumulative_transformation.position,this->cumulative_velocity,1);
-    else
-      //    if (Velocity.Magnitude()<computer.max_speed)
-      AUDStopPlaying (this->sound->engine);
+  if (_Universe->isPlayerStarship(this)!=NULL) {
+    static int playerengine = AUDCreateSound (vs_config->getVariable ("unitaudio","player_afterburner","sfx10.wav"),true);
+    static float enginegain=XMLSupport::parse_float(vs_config->getVariable("audio","afterburner_gain",".5"));
+    if (afterburn!=AUDIsPlaying (playerengine)) {
+      if (afterburn)
+        AUDPlay (playerengine,QVector(0,0,0),Vector(0,0,0),enginegain);
+      else
+        AUDStopPlaying (playerengine);
+    }
+  }else if (afterburn) {
+    static float buzzingtime=XMLSupport::parse_float(vs_config->getVariable("audio","buzzing_time","5"));
+    static float buzzingdistance=XMLSupport::parse_float(vs_config->getVariable("audio","buzzing_distance","10"));
+    static float lastbuzz=getNewTime();
+    Unit * playa = _Universe->AccessCockpit()->GetParent();
+    if (playa) {
+      Vector diff=Position()-playa->Position();
+      if (diff.MagnitudeSquared()-rSize()*rSize()-playa->rSize()*playa->rSize()<buzzingdistance*buzzingdistance) {
+        float ttime=getNewTime();
+        if (ttime-lastbuzz>buzzingtime) {
+          Vector pvel=playa->GetVelocity();
+          Vector vel=GetVelocity();
+          pvel.Normalize();
+          vel.Normalize();
+          float dotprod=vel.Dot(pvel);
+          if (dotprod<.75) {
+            lastbuzz=ttime;
+            AUDPlay(sound->engine,Position(),GetVelocity(),1);
+          }          
+        }
+      }
+    }
+    
   }
 }
 

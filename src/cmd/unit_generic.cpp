@@ -41,6 +41,7 @@
 #endif
 #include "config.h"
 using namespace Orders;
+extern void DestroyMount(Mount*);
 void	Unit::BackupState()
 {
 	this->old_state.setPosition( this->curr_physical_state.position);
@@ -1394,13 +1395,12 @@ void Unit::Deselect() {
 void disableSubUnits (Unit * uhn) {
 	Unit * un;
 	for (un_iter i = uhn->getSubUnits();(un=*i)!=NULL;++i) {
-		disableSubUnits(un);
-		for (unsigned int j=0;j<uhn->mounts.size();++j) {
-			uhn->mounts[j].status=Mount::DESTROYED;
-		}
-		uhn->ClearMounts();
-		
+          disableSubUnits(un);
 	}
+        for (unsigned int j=0;j<uhn->mounts.size();++j) {
+          DestroyMount(&uhn->mounts[j]);
+        }
+
 }
 un_iter Unit::getSubUnits () {
   return SubUnits.createIterator();
@@ -2436,11 +2436,19 @@ Vector Unit::ClampVelocity (const Vector & velocity, const bool afterburn) {
   return velocity;
 }
 void Unit::ClearMounts() {
-	mounts.clear();
-	Unit * su;
-	for (un_iter i = getSubUnits(); (su= *i)!=NULL;++i) {
-		su->ClearMounts();
-	}
+  for (unsigned int j=0;j<mounts.size();++j) {
+    DestroyMount(&mounts[j]);
+    AUDDeleteSound(mounts[j].sound);
+    if (mounts[j].ref.gun&&mounts[j].type->type==weapon_info::BEAM){
+      delete mounts[j].ref.gun;//hope we're not killin' em twice...they don't go in gunqueue
+      mounts[j].ref.gun=NULL;
+    }
+  }
+  mounts.clear();
+  Unit * su;
+  for (un_iter i = getSubUnits(); (su= *i)!=NULL;++i) {
+    su->ClearMounts();
+  }
 }
 
 Vector Unit::ClampAngVel (const Vector & velocity) {
@@ -3151,6 +3159,11 @@ void Unit::DamageRandSys(float dam, const Vector &vec, float randnum, float degr
 		degrees=360-degrees;
 	}
 	if (degrees>=0&&degrees<20) {
+          int which= rand()%(1+UnitImages::NUMGAUGES+MAXVDUS);
+          image->cockpit_damage[which]*=dam;
+          if (image->cockpit_damage[which]<.1) {
+            image->cockpit_damage[which]=0;
+          }
 		//DAMAGE COCKPIT
 		if (randnum>=.85) {
 			computer.set_speed=(rand01()*computer.max_speed()*(5/3))-(computer.max_speed()*(2/3)); //Set the speed to a random speed
@@ -3194,7 +3207,7 @@ void Unit::DamageRandSys(float dam, const Vector &vec, float randnum, float degr
 		} else if (GetNumMounts()) {
 			unsigned int whichmount=rand()%GetNumMounts();
 			if (randnum>=.9) {
-				mounts[whichmount].status=Mount::DESTROYED;
+                          DestroyMount(&mounts[whichmount]);
 			}else if (mounts[whichmount].ammo>0&&randnum>=.4) {
 			  mounts[whichmount].ammo*=dam;
 			} else if (randnum>=.1) {
@@ -3374,13 +3387,7 @@ void Unit::Kill(bool erasefromsave, bool quitting) {
     AUDStopPlaying (this->sound->cloak);
     AUDDeleteSound (this->sound->cloak);
   }
-
-  for (int beamcount=0;beamcount<GetNumMounts();beamcount++) {
-    AUDStopPlaying(mounts[beamcount].sound);
-    AUDDeleteSound(mounts[beamcount].sound);
-    if (mounts[beamcount].ref.gun&&mounts[beamcount].type->type==weapon_info::BEAM)
-      delete mounts[beamcount].ref.gun;//hope we're not killin' em twice...they don't go in gunqueue
-  }
+  ClearMounts();
 
   if (docked&(DOCKING_UNITS)) {
     vector <Unit *> dockedun;
@@ -3396,15 +3403,6 @@ void Unit::Kill(bool erasefromsave, bool quitting) {
     }
   }
 
-  #ifndef NO_MOUNT_STAR
-	for( vector<Mount *>::iterator jj=mounts.begin(); jj!=mounts.end(); jj++)
-	{
-		// Free all mounts elements
-		if( (*jj)!=NULL)
-			delete (*jj);
-	}
-	#endif
-    mounts.clear();
   //eraticate everything. naturally (see previous line) we won't erraticate beams erraticated above
   if (!isSubUnit()) 
     RemoveFromSystem();
@@ -4306,9 +4304,7 @@ int Unit::LockMissile() const{
 void Unit::Destroy() {
   if (!killed) {
     for (int beamcount=0;beamcount<GetNumMounts();beamcount++) {
-      UnFire();
-      AUDStopPlaying(mounts[beamcount].sound); 
-      mounts[beamcount].status=Mount::DESTROYED;
+      DestroyMount(&mounts[beamcount]);
     }
     if (!Explode(false,SIMULATION_ATOM))
 	{
