@@ -26,6 +26,9 @@
 #include "const.h"
 #include "netclass.h"
 #include "cubicsplines.h"
+#include "configxml.h"
+
+extern VegaConfig *vs_config;
 
 class Unit;
 struct Client;

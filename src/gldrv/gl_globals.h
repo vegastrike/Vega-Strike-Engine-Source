@@ -49,7 +49,11 @@ struct GFXStats{
 //extern Matrix model;
 //extern Matrix view;
 
-#ifdef WIN32
+#if defined(__CYGWIN__)
+#define GL_EXT_color_subtable 1
+#endif
+
+#if defined(_WIN32) || defined(__CYGWIN__)
 #include <windows.h>
 #include <GL/gl.h>
 

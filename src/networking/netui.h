@@ -58,7 +58,7 @@ class NETCLASS
 #else
 			srvtimeout.tv_sec = 0;
 			srvtimeout.tv_usec = 0;
-	#ifdef _WIN32
+	#if defined(_WIN32) && !defined(__CYGWIN__)
 	  WORD wVersionRequested = MAKEWORD( 1, 1 );
 	  WSADATA wsaData; 
 	  WSAStartup(wVersionRequested,&wsaData);
@@ -126,7 +126,7 @@ class NETCLASS
 					SDLNet_UDP_Unbind( this->sock, bsock);
 				#endif
 			#else
-				#ifdef _WIN32
+				#if defined(_WIN32) && !defined(__CYGWIN__)
 					closesocket(bsock);
 				#else
 					close(bsock);
@@ -241,7 +241,7 @@ inline SOCKETALT	NETCLASS::createSocket( char * host, unsigned short port, int s
 	#else
 		// SOCKETALT part
 		struct hostent	*he = NULL;
-#ifdef _WIN32
+#if defined(_WIN32) && !defined(__CYGWIN__)
 		int sockerr= INVALID_SOCKET;
 #else
 		int sockerr= -1;
@@ -255,7 +255,7 @@ inline SOCKETALT	NETCLASS::createSocket( char * host, unsigned short port, int s
 		#endif
 
 #ifndef _TCP_PROTO
-#ifndef _WIN32
+#if !defined(_WIN32) || defined(__CYGWIN__)
 		if( fcntl( this->sock, F_SETFL, O_NONBLOCK) == -1)
 		{
 			perror( "Error fcntl : ");
@@ -281,7 +281,7 @@ inline SOCKETALT	NETCLASS::createSocket( char * host, unsigned short port, int s
 		}
 		else
 		{
-#ifdef _WIN32
+#if defined(_WIN32) && !defined(__CYGWIN__)
 			if( (this->srv_ip.sin_addr.s_addr=inet_addr( host)) == 0)
 #else			
 			if( inet_aton( host, &this->srv_ip.sin_addr) == 0)
@@ -636,7 +636,7 @@ inline int		NETCLASS::sendbuf( SOCKETALT bsock, void *buffer, unsigned int len, 
 		#endif
 	#else
 		#ifdef _TCP_PROTO
-#ifdef _WIN32
+#if defined(_WIN32) && !defined(__CYGWIN__)
 		if( (numsent=send( bsock, (char *)buffer, len, 0))<0)
 #else
 		if( (numsent=send( bsock, buffer, len, 0))<0)
@@ -656,7 +656,7 @@ inline int		NETCLASS::sendbuf( SOCKETALT bsock, void *buffer, unsigned int len, 
 		else
 			dest = &this->srv_ip;
 		//getIPof( (*dest));
-#ifdef _WIN32
+#if defined(_WIN32) && !defined(__CYGWIN__)
 		if( (numsent = sendto( this->sock, (char *) buffer, len, 0, (sockaddr *) dest, sizeof( struct sockaddr)))<0)
 #else
 		if( (numsent = sendto( this->sock, buffer, len, 0, (sockaddr *) dest, sizeof( struct sockaddr)))<0)
@@ -688,7 +688,7 @@ inline void	NETCLASS::disconnect( char *s)
 			#endif
 			SDLNet_Quit();
 		#else
-			#ifdef _WIN32
+			#if defined(_WIN32) && !defined(__CYGWIN__)
 				closesocket (this->sock);
 			#else
 				close(this->sock);
@@ -704,7 +704,7 @@ inline void	NETCLASS::showIP( SOCKET socket)
 {
 #ifndef HAVE_SDLnet
 	struct sockaddr_in tmp;
-#if defined (_WIN32) || defined (__APPLE__)
+#if defined (_WIN32) || defined (__APPLE__) || defined(__CYGWIN__)
 	int ulen;
 #else
 	unsigned int ulen;

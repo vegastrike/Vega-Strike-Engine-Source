@@ -26,7 +26,7 @@
 #include <assert.h>
 //#include "gl_globals.h"
 
-#ifndef WIN32
+#if !defined(_WIN32) && !defined(__CYGWIN__)
 #if !(defined(__APPLE__) || defined(MACOSX))
 
 #define GLX_GLXEXT_PROTOTYPES
@@ -63,7 +63,7 @@
 #define WINDOW_TITLE "Vega Strike "VERSION
 
 
-#ifdef WIN32
+#ifdef _WIN32
 PFNGLCLIENTACTIVETEXTUREARBPROC glClientActiveTextureARB=0;
 PFNGLCLIENTACTIVETEXTUREARBPROC glActiveTextureARB=0;
 PFNGLCOLORTABLEEXTPROC glColorTable=0;
@@ -81,7 +81,7 @@ PFNGLUNLOCKARRAYSEXTPROC glUnlockArraysEXT_p;
 
 #endif
 typedef void (*(*get_gl_proc_fptr_t)(const GLubyte *))(); 
-#ifdef WIN32
+#ifdef _WIN32
     typedef char * GET_GL_PTR_TYP;
 #define GET_GL_PROC wglGetProcAddress
 
@@ -116,7 +116,7 @@ void init_opengl_extensions()
 	glUnlockArraysEXT_p = NULL;
 	(void) fprintf(stderr, "OpenGL::GL_EXT_compiled_vertex_array unsupported\n");
     }
-#ifdef WIN32
+#ifdef _WIN32
     glColorTable = (PFNGLCOLORTABLEEXTPROC ) GET_GL_PROC((GET_GL_PTR_TYP)"glColorTableEXT");
     glMultiTexCoord2fARB = (PFNGLMULTITEXCOORD2FARBPROC) GET_GL_PROC((GET_GL_PTR_TYP)"glMultiTexCoord2fARB");
     glClientActiveTextureARB = (PFNGLCLIENTACTIVETEXTUREARBPROC) GET_GL_PROC((GET_GL_PTR_TYP)"glClientActiveTextureARB");

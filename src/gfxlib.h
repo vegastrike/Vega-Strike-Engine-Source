@@ -21,7 +21,7 @@
 
 #ifndef _GFXLIB_H
 #define _GFXLIB_H
-#ifdef _WIN32
+#if defined(_WIN32) && !defined(__CYGWIN__)
 #ifdef GLDRV_EXPORTS
 #define GFXDRVAPI  __declspec(dllexport)
 #else

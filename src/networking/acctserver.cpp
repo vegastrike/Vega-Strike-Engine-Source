@@ -3,7 +3,7 @@
 #include "packet.h"
 #include "lin_time.h"
 
-VegaConfig * acct_config;
+VegaConfig * vs_config;
 //VegaConfig * acct_config;
 string acctdir;
 
@@ -54,14 +54,14 @@ void	AccountServer::start()
 	startMsg();
 
 	cout<<"Loading config file...";
-	acct_config = new VegaConfig( ACCTCONFIGFILE);
+	vs_config = new VegaConfig( ACCTCONFIGFILE);
 	cout<<" done."<<endl;
 	InitTime();
 	UpdateTime();
-	acctdir = acct_config->getVariable( "server", "accounts_dir", "");
+	acctdir = vs_config->getVariable( "server", "accounts_dir", "");
 	if( acctdir=="")
 		acctdir = "./accounts/";
-	strperiod = acct_config->getVariable( "server", "saveperiod", "");
+	strperiod = vs_config->getVariable( "server", "saveperiod", "");
 	int period;
 	if( strperiod=="")
 		period = 7200;
@@ -78,10 +78,10 @@ void	AccountServer::start()
 	// Create and bind socket
 	cout<<"Initializing network..."<<endl;
 	unsigned short tmpport;
-	if( acct_config->getVariable( "network", "accountsrvport", "")=="")
+	if( vs_config->getVariable( "network", "accountsrvport", "")=="")
 		tmpport = ACCT_PORT;
 	else
-		tmpport = atoi((acct_config->getVariable( "network", "accountsrvport", "")).c_str());
+		tmpport = atoi((vs_config->getVariable( "network", "accountsrvport", "")).c_str());
 	Network->createSocket( "127.0.0.1", tmpport, 1);
 	cout<<"done."<<endl;
 	while( keeprun)
@@ -117,7 +117,7 @@ void	AccountServer::start()
 		micro_sleep(40000);
 	}
 
-	delete acct_config;
+	delete vs_config;
 	Network->disconnect( "Shutting down.");
 }
 

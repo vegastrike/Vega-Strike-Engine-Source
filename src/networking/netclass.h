@@ -14,13 +14,15 @@ using std::endl;
 	#define TCPSOCKET TCPsocket
 	#define UDPSOCKET UDPsocket
 #else
-	#ifdef _WIN32
+	#if defined(_WIN32) && !defined(__CYGWIN__)
+	//#warning "Win32 platform"
 	#define in_addr_t unsigned long
 	#include <winsock.h>
 	#else
+	//#warning "GCC platform"
 	#define SOCKET_ERROR -1
 
-#ifndef __APPLE__
+#if !defined(__APPLE__) && !defined(__CYGWIN__)
 	#include <error.h>
 #endif
 	#include <netdb.h>
@@ -30,7 +32,10 @@ using std::endl;
 	#include <netinet/in.h>
 	#include <arpa/inet.h>
 	#include <unistd.h>
+	#include <fcntl.h>
+	#include <stdio.h>
 	#endif
+
 	#include <stdio.h>
 	#include <stdlib.h>
 	#define SOCKET int
@@ -42,8 +47,6 @@ using std::endl;
 	#define MAXQUEUE 10
 #endif
 
-#include <stdio.h>
-#include <fcntl.h>
 
 using std::cout;
 using std::cin;

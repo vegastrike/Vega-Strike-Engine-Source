@@ -8,9 +8,6 @@
 #include "accountsxml.h"
 #include "packet.h"
 
-extern VegaConfig *acct_config;
-//extern VegaSimpleConfig *acct_config;
-
 typedef vector<Account *>::iterator VI;
 
 /** Class that manages player accounts

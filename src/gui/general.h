@@ -74,9 +74,12 @@
 #include <stdlib.h>
 #include <windows.h>
 #include <direct.h>
-#else
+#elif !defined(__CYGWIN__)
 #include <stdio.h>
 #include <sys/dir.h>
+#include <unistd.h>
+#else
+#include <stdio.h>
 #include <unistd.h>
 #endif    // _WIN32
 

@@ -14,7 +14,7 @@ unsigned short VSSwapHostShortToLittle (unsigned short x);
     #if defined(IRIX)
     # include <sys/endian.h>
     
-    #elif !defined(_WIN32)
+    #elif !defined(_WIN32) && !defined(__CYGWIN__)
     # include <endian.h>
     #else
     # define __BIG_ENDIAN 1

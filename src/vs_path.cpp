@@ -6,7 +6,7 @@
 
 #include "common/common.h"
 
-#ifdef _WIN32
+#if defined(_WIN32) && !defined(__CYGWIN__)
 #include <direct.h>				// definitions of getcwd() and chdir() on win32
 #else
 #include <unistd.h>
@@ -46,7 +46,7 @@ void changehome(bool makehomedir) {
   if (chdir (HOMESUBDIR)==-1) {
       //      system ("mkdir " HOMESUBDIR);
       mkdir (HOMESUBDIR
-#ifndef _WIN32		  
+#if !defined(_WIN32) || defined(__CYGWIN__) 
 		  , 0xFFFFFFFF
 #endif		  
 		  );
@@ -56,7 +56,7 @@ void changehome(bool makehomedir) {
 
     if (chdir (HOMESUBDIR "/generatedbsp")==-1) {
 		mkdir (HOMESUBDIR "/generatedbsp"
-#ifndef _WIN32
+#if !defined(_WIN32) || defined(__CYGWIN__) 
 			, 0xFFFFFFFF
 #endif
 		);
@@ -69,7 +69,7 @@ void changehome(bool makehomedir) {
 
     if (chdir (HOMESUBDIR "/save")==-1) {
       mkdir (HOMESUBDIR "/save"
-#ifndef _WIN32
+#if !defined(_WIN32) || defined(__CYGWIN__) 
 		  , 0xFFFFFFFF
 #endif		  
 		  );
@@ -235,7 +235,7 @@ std::string MakeSharedPathReturnHome (const std::string &newpath) {
   getcwd (pwd,8191);
  
   if (chdir (newpath.c_str())==-1) {
-#ifdef _WIN32
+#if defined(_WIN32) && !defined(__CYGWIN__)
     mkdir (newpath.c_str());
 #else
     mkdir (newpath.c_str(), 0xFFFFFFFF);

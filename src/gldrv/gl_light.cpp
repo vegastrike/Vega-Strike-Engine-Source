@@ -183,7 +183,7 @@ GFXBOOL /*GFXDRVAPI*/ GFXSetOptimalNumLights (const int numLights) {
 
 
 GFXBOOL /*GFXDRVAPI*/ GFXSetSeparateSpecularColor(const GFXBOOL spec) {
-#ifndef WIN32
+#if !defined(_WIN32) && !defined(__CYGWIN__)
   if (spec) {
     glLightModeli (GL_LIGHT_MODEL_COLOR_CONTROL,GL_SEPARATE_SPECULAR_COLOR);
   }else {

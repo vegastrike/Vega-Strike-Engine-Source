@@ -1,4 +1,4 @@
- #ifndef _GL_LIGHT_H_
+#ifndef _GL_LIGHT_H_
 #define _GL_LIGHT_H_
 #include "gfxlib.h"
 #include "hashtable_3d.h"

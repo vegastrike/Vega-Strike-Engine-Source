@@ -2,7 +2,7 @@
 //#include "gfxlib.h"
 //#include "cmd/unit.h"
 #include "packet.h"
-#include "netserver.h"
+//#include "netserver.h"
 #include "zonemgr.h"
 
 ZoneMgr::ZoneMgr()

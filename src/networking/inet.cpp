@@ -1,11 +1,14 @@
-#ifdef _WIN32
+#if defined(_WIN32)
 #define in_addr_t unsigned long
 #include <winsock.h>
 #else
 #define SOCKET_ERROR -1
+#if defined(__CYGWIN__)
+#define in_addr_t unsigned long
+#endif
 #include <sys/time.h>
 #include <sys/types.h>
-#ifndef __APPLE__
+#if !defined(__APPLE__) && !defined(__CYGWIN__)
 #include <error.h>
 #endif
 #include <netdb.h>
@@ -118,7 +121,7 @@ int INET_listen (unsigned short port, const char * hostname) {
   int listenqueue=5;
   int hServerSocket; // so signal can be caught;
   struct sockaddr_in Address; //Internet socket address stuct
-#if defined (_WIN32) || defined (__APPLE__)
+#if defined (_WIN32) || defined (__APPLE__) || defined(__CYGWIN__)
   int
 #else
   socklen_t
@@ -156,7 +159,7 @@ int INET_listen (unsigned short port, const char * hostname) {
 }
 int INET_Accept (int hServerSocket) {
   sockaddr_in Address;
-#if defined (_WIN32) || defined (__APPLE__)
+#if defined (_WIN32) || defined (__APPLE__) || defined (__CYGWIN__)
   int 
 #else
     socklen_t

@@ -58,7 +58,7 @@ extern "C"
 typedef void (*PFNGLLOCKARRAYSEXTPROC)(GLint first, GLsizei count);
 typedef void (*PFNGLUNLOCKARRAYSEXTPROC)(void);
 
-#elif !defined(WIN32)
+#elif !defined(_WIN32)
 #if defined(__APPLE__) || defined(MACOSX)
     #include <GLUT/glut.h>
     #include <OpenGL/glext.h>
