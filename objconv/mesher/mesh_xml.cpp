@@ -319,15 +319,12 @@ struct XML {
 		usenormals=0;
 		reverse=0;
 		force_texture=0;
-		recalc_norm=0;
-		shouldreflect=0;
-		reflect=0;
-		lighting=0;
-		cullface=0;
+		reflect=1;
+		lighting=1;
+		cullface=1;
 		polygon_offset=0;
 		blend_src=ONE;
 		blend_dst=ZERO;
-		point_state=0;
 	}
   };
 
