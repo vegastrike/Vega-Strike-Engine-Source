@@ -1,19 +1,21 @@
 #ifndef _UNIT_FROM_TO_PYTHON_H_
 #define _UNIT_FROM_TO_PYTHON_H_
 #ifndef USE_BOOST_128
-#include <boost/python/converter/arg_from_python.hpp>
+//#include <boost/python/converter/arg_from_python.hpp>
+#include "init.h"
 BOOST_PYTHON_BEGIN_CONVERSION_NAMESPACE
 
 
-BOOST_PYTHON_TO_PYTHON_BY_VALUE(Unit*,to_python_value <UnitWrapper> ()(UnitWrapper(x)));
-
+BOOST_PYTHON_TO_PYTHON_BY_VALUE(Unit*,::boost::python::to_python_value <UnitWrapper> ()(UnitWrapper(x)));
+namespace default_result_converter{
+template <class MYTYPE> struct apply;
 template <>
-struct default_result_converter::apply<Unit *>
+struct apply<Unit *>
 {
 //	typedef boost::python::to_python_value<Unit *> type;
-	typedef default_result_converter::apply<UnitWrapper>::type type;
+	typedef ::boost::python::default_result_converter::apply<UnitWrapper>::type type;
 };
-
+}
 /*namespace converter{
 
 template <>

@@ -27,33 +27,42 @@ struct to_python <Vector> {
 	}
 };
 */
+struct my_builtin_to_python {
+	BOOST_STATIC_CONSTANT(bool, uses_registry = false);
+
+	
+};
+
 #ifndef BOOST_PYTHON_TO_PYTHON_BY_VALUE
 # define BOOST_PYTHON_RETURN_TO_PYTHON_BY_VALUE(T, expr)        \
+    template <class MYTYPE> struct to_python_value;                  \
     template <> struct to_python_value<T&>                      \
-        : detail::builtin_to_python                             \
+	: my_builtin_to_python                             \
     {                                                           \
         inline PyObject* operator()(T const& x) const           \
         {                                                       \
-            return (expr);                                      \
+            return expr;                                      \
         }                                                       \
     };                                                          \
     template <> struct to_python_value<T const&>                \
-        : detail::builtin_to_python                             \
+        : my_builtin_to_python                             \
     {                                                           \
         inline PyObject* operator()(T const& x) const           \
         {                                                       \
-            return (expr);                                      \
+            return expr;                                      \
         }                                                       \
     };
+
 
 # define BOOST_PYTHON_ARG_TO_PYTHON_BY_VALUE(T, expr)   \
     namespace converter                                 \
     {                                                   \
+	  template <class MYTYPE> struct arg_to_python;		    \
       template <> struct arg_to_python< T >             \
-        : handle<>                                      \
+        : ::boost::python::handle<>                     \
       {                                                 \
           arg_to_python(T const& x)                     \
-            : python::handle<>(expr) {}                 \
+            : ::boost::python::handle<>(expr) {}        \
       };                                                \
     } 
 
