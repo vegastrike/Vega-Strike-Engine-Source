@@ -16,25 +16,25 @@ void BFXMToXmesh(FILE* Inputfile, FILE* Outputfile, FILE * OutputObj, FILE * mtl
   } * inmemfile;
   //CHECK MAGIC WORD
   fseek(Inputfile,0,SEEK_SET);
-  fread(&bytebuf,sizeof(int32bit),1,Inputfile);
+  fread(&bytebuf,sizeof(char8bit),1,Inputfile);
   if(bytebuf!='B'){
 	  fprintf(stderr,"INVALID FILE FORMAT ENCOUNTERED - ABORTING\n");
 	  exit(-1);
   }
   fseek(Inputfile,1,SEEK_SET);
-  fread(&bytebuf,sizeof(int32bit),1,Inputfile);
+  fread(&bytebuf,sizeof(char8bit),1,Inputfile);
   if(bytebuf!='F'){
 	  fprintf(stderr,"INVALID FILE FORMAT ENCOUNTERED - ABORTING\n");
 	  exit(-1);
   }
   fseek(Inputfile,2,SEEK_SET);
-  fread(&bytebuf,sizeof(int32bit),1,Inputfile);
+  fread(&bytebuf,sizeof(char8bit),1,Inputfile);
   if(bytebuf!='X'){
 	  fprintf(stderr,"INVALID FILE FORMAT ENCOUNTERED - ABORTING\n");
 	  exit(-1);
   }
   fseek(Inputfile,3,SEEK_SET);
-  fread(&bytebuf,sizeof(int32bit),1,Inputfile);
+  fread(&bytebuf,sizeof(char8bit),1,Inputfile);
   if(bytebuf!='M'){
 	  fprintf(stderr,"INVALID FILE FORMAT ENCOUNTERED - ABORTING\n");
 	  exit(-1);
