@@ -1,3 +1,4 @@
+#include <assert.h>
 #include "networking/netbuffer.h"
 #include "networking/const.h"
 #include "endianness.h"
@@ -373,20 +374,21 @@ void	NetBuffer::addBuffer( const char * buf, int bufsize)
 		// Add and get a string with its length before the char * buffer part
 void	NetBuffer::addString( string str)
 		{
-			int length = str.length();
-			int netlength = 0;
-			resizeBuffer( offset+length+sizeof( int));
-			netlength = VSSwapHostIntToLittle( length);
-			memcpy( buffer+offset, &netlength, sizeof( int));
-			offset += sizeof(int);
+			assert( str.length()<0xFFFF);
+			unsigned short length = str.length();
+			unsigned short netlength = 0;
+			resizeBuffer( offset+length+sizeof( length));
+			netlength = VSSwapHostShortToLittle( length);
+			memcpy( buffer+offset, &netlength, sizeof( length));
+			offset += sizeof(length);
 			memcpy( buffer+offset, str.c_str(), length);
 			offset += length;
 		}
 string	NetBuffer::getString()
 		{
-			int s;
+			unsigned short s;
 			memcpy( &s, buffer+offset, sizeof( s));
-			s = VSSwapHostIntToLittle( s);
+			s = VSSwapHostShortToLittle( s);
 			offset+=sizeof(s);
 			char c = buffer[offset+s];
 			buffer[offset+s]=0;

@@ -775,10 +775,10 @@ void	NetServer::checkTimedoutClients_udp()
 		if( (*i)->latest_timeout!=0)
 		{
 			//cout<<"DELTATMP = "<<deltatmp<<" - clienttimeout = "<<clienttimeout<<endl;
-			// Here considering a delta > 0xFFFFFFFF*X where X should be at least something like 0.9
+			// Here considering a delta > 0xFFFFFFFX where X should be at least something like 0.9
 			// This allows a packet not to be considered as "old" if timestamp has been "recycled" on client
 			// side -> when timestamp has grown enough to became bigger than what an u_int can store
-			if( (*i)->ingame && deltatmp > clienttimeout && deltatmp < (0xFFFFFFFF*0.8) )
+			if( (*i)->ingame && deltatmp > clienttimeout && deltatmp < (0xFFFFFFFF*0.9) )
 			{
 				un = (*i)->game_unit.GetUnit();
 				cout<<"ACTIVITY TIMEOUT for client number "<<un->GetSerial()<<endl;
@@ -800,7 +800,6 @@ void	NetServer::recvMsg_tcp( Client * clt)
     char	command;
     AddressIP	ipadr;
     // int nbpackets = 0;
-    double ts = 0;
 
     assert( clt != NULL );
 
@@ -818,25 +817,17 @@ void	NetServer::recvMsg_tcp( Client * clt)
     else
     {
         Packet packet( mem );
-	packet.setNetwork( &ipadr, sockclt );
-        ts      = packet.getTimestamp();
-	command = packet.getCommand( );
+		packet.setNetwork( &ipadr, sockclt );
+		command = packet.getCommand( );
         if( clt!=NULL)
-        {
-            clt->old_timestamp = clt->latest_timestamp;
-            // In case the timestamp reached maximum in an u_int
-            if( ts < clt->latest_timestamp) 
-                clt->deltatime = 0xFFFFFFFF - clt->latest_timestamp + ts;
-            else
-                clt->deltatime = (ts - clt->latest_timestamp);
-            clt->latest_timestamp = ts;
-        }
+			this->updateTimestamps( clt, packet);
 
 #ifdef VSNET_DEBUG
-	COUT << "Created a packet with command " << displayCmd(Cmd(command)) << endl;
+		COUT << "Created a packet with command " << displayCmd(Cmd(command)) << endl;
 	    mem.dump( cout, 3 );
 #endif
 
+		// In TCP we always process
         this->processPacket( clt, command, ipadr, packet );
     }
 }
@@ -846,6 +837,7 @@ void NetServer::recvMsg_udp( )
     SOCKETALT sockclt( udpNetwork->get_udp_sock(), SOCKETALT::UDP, udpNetwork->get_adr() );
     Client*   clt = NULL;
     AddressIP ipadr;
+	bool process = true;
 
 	PacketMem mem;
     int    ret;
@@ -855,7 +847,6 @@ void NetServer::recvMsg_udp( )
         Packet packet( mem );
 	packet.setNetwork( &ipadr, sockclt );
 
-        double    ts      = packet.getTimestamp();
         ObjSerial nserial = packet.getSerial(); // Extract the serial from buffer received so we know who it is
         char      command = packet.getCommand();
 
@@ -863,7 +854,7 @@ void NetServer::recvMsg_udp( )
 
         // Find the corresponding client
         Client* tmp   = NULL;
-	bool    found = false;
+		bool    found = false;
         for( LI i=udpClients.begin(); i!=udpClients.end(); i++)
         {
             tmp = (*i);
@@ -871,8 +862,8 @@ void NetServer::recvMsg_udp( )
             {
                 clt = tmp;
                 found = 1;
-		COUT << " found client " << *clt << endl;
-		break;
+				COUT << " found client " << *clt << endl;
+				break;
             }
         }
         if( !found && command!=CMD_LOGIN)
@@ -882,38 +873,59 @@ void NetServer::recvMsg_udp( )
             return;
         }
 
-        // Check if the client's IP is still the same (a very little protection
+        // Check if the client's IP is still the same (a very little and unaccurate in some cases protection
 		// against spoofing client serial#)
         if( clt!=NULL && ipadr!=clt->cltadr )
         {
-	    assert( command != CMD_LOGIN ); // clt should be 0 because ObjSerial was 0
+	    	assert( command != CMD_LOGIN ); // clt should be 0 because ObjSerial was 0
 
             COUT << "Error : IP changed for client # " << clt->game_unit.GetUnit()->GetSerial() << endl;
             discList.push_back( clt);
 	    	/* It is not entirely impossible for this to happen; it would be nice
 			 * to add an additional identity check. For now we consider it an error.
-	     */
+	     	*/
         }
         else
         {
             if( clt != NULL )
-            {
-                // We know which client it is so we update its timeout
-                double curtime = getNewTime();
-                clt->latest_timeout = curtime;
+				process = this->updateTimestamps( clt, packet);
 
-                clt->old_timestamp = clt->latest_timestamp;
-                // In case the timestamp reached maximum in an u_int
-                if( ts < clt->latest_timestamp) 
-                    clt->deltatime = 0xFFFFFFFF - clt->latest_timestamp + ts;
-                else
-                    clt->deltatime = (ts - clt->latest_timestamp);
-                clt->latest_timestamp = ts;
-            }
-
-            this->processPacket( clt, command, ipadr, packet );
+			// Do not process a packet considered to be late and not important (positions and damage ?)
+			if( process)
+            	this->processPacket( clt, command, ipadr, packet );
         }
     }
+}
+
+// Return true if ok, false if we received a late packet
+bool	NetServer::updateTimestamps( Client * clt, Packet & p)
+{
+		bool 	  ret = true;
+        double    ts = p.getTimestamp();
+
+		// We know which client it is so we update its timeout
+		double curtime = getNewTime();
+		clt->latest_timeout = curtime;
+
+		clt->old_timestamp = clt->latest_timestamp;
+		// In case the timestamp is superior to the received tmestamp
+		if( ts < clt->latest_timestamp) 
+		{
+			// If ts > 0xFFFFFFF0 (15 seconds before the maxin an u_int) 
+			// This is not really a reliable test -> we may still have late packet in that range of timestamps
+			if( (clt->isTcp() && ts > 0xFFFFFFF0) || (clt->isUdp() && ts > 0xFFFFFFF0 && !(p.getFlags() & SENDANDFORGET)) )
+				clt->deltatime = 0xFFFFFFFF - clt->latest_timestamp + ts;
+			// Only check for late packets when sent non reliable because we need others
+			else if( clt->isUdp() && p.getFlags() & SENDANDFORGET)
+				ret = false;
+		}
+		else
+			clt->deltatime = (ts - clt->latest_timestamp);
+		// Only update latest_timestamp if we didn't receive a late packet (always true for TCP)
+		if( ret)
+			clt->latest_timestamp = ts;
+
+		return ret;
 }
 
 /**************************************************************/
@@ -996,6 +1008,8 @@ void	NetServer::processPacket( Client * clt, unsigned char cmd, const AddressIP&
         this->sendLocations( clt);
         break;
     case CMD_ADDCLIENT:
+		// Get the control stuff from buffer
+		// control = netbuf.get???();
         // Add the client to the game
         cout<<">>> ADD REQUEST =( serial n°"<<packet.getSerial()<<" )= --------------------------------------"<<endl;
         //cout<<"Received ADDCLIENT request"<<endl;
@@ -1160,6 +1174,23 @@ void	NetServer::processPacket( Client * clt, unsigned char cmd, const AddressIP&
 }
 
 /**************************************************************/
+/**** Check if the client has the right system file        ****/
+/**************************************************************/
+
+void	NetServer::checkSystem( Client * clt)
+{
+	// HERE SHOULD CONTROL THE CLIENT HAS THE SAME STARSYSTEM FILE OTHERWISE SEND IT TO CLIENT
+
+	Unit * un = clt->game_unit.GetUnit();
+	Cockpit * cp = _Universe->isPlayerStarship( un);
+
+	string starsys = cp->savegame->GetStarSystem();
+	// getCRC( starsys+".system");
+	// 
+
+}
+
+/**************************************************************/
 /**** Add a client in the game                             ****/
 /**************************************************************/
 
@@ -1183,6 +1214,7 @@ void	NetServer::addClient( Client * clt)
 	sts=zonemgr->addClient( clt, starsys, zoneid);
 
 	st2 = _Universe->getStarSystem( starsys+".system");
+
 	// On server side this is not done in Cockpit::SetParent()
 	cp->activeStarSystem = st2;
 	// Cannot use sts pointer since it may be NULL if the system was just created
@@ -1250,7 +1282,7 @@ void	NetServer::posUpdate( Client * clt)
 	un->curr_physical_state.position = cs.getPosition();
 	un->curr_physical_state.orientation = cs.getOrientation();
 	un->Velocity = cs.getVelocity();
-	// Put deltatime in the delay part of ClientState so that it is send to other clients later
+	// deltatime has already been updated when the packet was received
 	Cockpit * cp = _Universe->isPlayerStarship( clt->game_unit.GetUnit());
 	cp->savegame->SetPlayerLocation( un->curr_physical_state.position);
 	snapchanged = 1;

@@ -1,9 +1,7 @@
 
 *** GENERAL ************************************************************
 
-- Move the GetUniqueSerial use from accountserver to vegaserver
-- In NetBuffer : turn string size into a u_short instead of int (and assert no string length > 0xFFFF
-- When client starts server send galaxy filename with md5sum
+- When client starts server send galaxy filename with md5sum or other check system
 	if client has the file and the same md5 -> ok
 	if not server sends the file content and client writes it
 - Do the same for starsystems at enter time on clients side (even if  starsystem has already been loaded once to check for manual changes)
@@ -49,6 +47,8 @@ OR
 
 === GENERAL STUFF =======================================================
 
+DONE - Move the GetUniqueSerial use from accountserver to vegaserver
+DONE - In NetBuffer : turn string size into a u_short instead of int (and assert no string length > 0xFFFF
 DONE - Take a look at RegenShield() and RegenArmor and network enable them
 DONE - Add the player faction to SaveGame
 DONE ? Carsten - Compress sent data in Packet (_packetmem member)

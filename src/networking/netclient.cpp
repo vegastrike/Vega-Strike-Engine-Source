@@ -533,9 +533,11 @@ int NetClient::recvMsg( char* netbuffer, Packet* outpacket )
                 this->receiveLocations( &p1 );
                 break;
             case CMD_SNAPSHOT :
-				cout << endl;
                 // Should update another client's position
                 //cout<<"Received a SNAPSHOT from server"<<endl;
+				// We don't want to consider a late snapshot
+				if( old_timestamp > current_timestamp)
+					break;
                 this->receivePosition( &p1 );
                 break;
             case CMD_ENTERCLIENT :

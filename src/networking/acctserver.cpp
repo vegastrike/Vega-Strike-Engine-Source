@@ -193,7 +193,6 @@ void	AccountServer::recvMsg( SOCKETALT sock)
 					cout<<"Login/passwd not found"<<endl;
 					Account elt(callsign, passwd);
 					this->sendUnauthorized( sock, &elt);
-					delete elem;
 				}
 				else
 				{

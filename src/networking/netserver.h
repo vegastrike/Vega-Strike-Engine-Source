@@ -79,10 +79,12 @@ class NetServer
 
         queue<WaitListEntry> waitList;
 
+		bool			updateTimestamps( Client * clt, Packet & p);
 		//void			loadConfig();					// Loads configuration from server.xml
 		void			authenticate( Client * clt, AddressIP sernum, Packet& packet );	// Authenticate a connected client
 		void			posUpdate( Client * clt);		// Update a client position
 		void			addClient( Client * clt);		// Add the client in the game
+		void			checkSystem( Client * clt);		// Check if the client has the good system file
 		Client *		newConnection_udp( const AddressIP& ipadr);
 		Client *		newConnection_tcp( SocketSet& set );
 		void			prepareCheckAcctMsg( SocketSet& set );	// Check for account server message to receive
