@@ -10,7 +10,7 @@
 #include "hud.h"
 #include "vdu.h"
 #include "lin_time.h"//for fps
-#include "vegaconfig.h"
+#include "config_xml.h"
 
 
 

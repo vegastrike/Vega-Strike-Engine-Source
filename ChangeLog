@@ -1,8 +1,21 @@
+2001-10-20 Alexander Rawass <alexannika@users.sourceforge.net>
+
+	* added variables and colors to vegastrike.config
+	* renamed vegaconfig.* to config_xml.* (Daniel's request)
+	* modified src/Makefile.am (vegaconfig to config_xml)
+	* modified includes in config_xml.cpp, main.cpp and many more ;-)
+	* modified TODO/Jobs list
+	
+
 2001-10-20 Daniel Horn <hellcatv@hotmail.com>
 
 	* added maximum range and cone functions to various radars
 	* added color utilization to the radar 
 	* added radar config file to unit_xml that could specify radar stuff
+
+	
+2001-10-19 Daniel Horn <hellcatv@hotmail.com>
+
 	* added stub functions in for planned audio functions
 	* used stub functions in the places where audio will be present
 	* added some init functions to OpenAL functions

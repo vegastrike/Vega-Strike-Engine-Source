@@ -7,7 +7,7 @@
 #include "cmd/planet.h"
 #include "gfx/star.h"
 #include "vs_globals.h"
-#include "vegaconfig.h"
+#include "config_xml.h"
 #include "vegastrike.h"
 void StarSystem::beginElement(void *userData, const XML_Char *name, const XML_Char **atts) {
   ((StarSystem*)userData)->beginElement(name, AttributeList(atts));

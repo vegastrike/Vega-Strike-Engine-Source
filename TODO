@@ -11,12 +11,11 @@
 Job Assignment:
 Daniel
 	Finish up VDU's
+	do some dumb AIs for (openal) debugging
 
 
-
-alex:	write a rpm spec file
- 	write code for config-file
- 	re-make joystick/keybindings by using the config-file
+alex:	re-make joystick/keybindings by using the config-file
+	re-make createObjects with xml-Missions
+	OpenAL
 -later-
 	Radar colors for factions? (factions_xml.cpp... cockpit.cpp)
-	Mission file stuff

@@ -35,7 +35,7 @@
 
 #include "vegastrike.h"
 
-#include "vegaconfig.h"
+#include "config_xml.h"
 #include "easydom.h"
 
 //#include "vs_globals.h"

@@ -21,7 +21,7 @@
 
 #include "vs_globals.h"
 #include "xml_support.h"
-#include "vegaconfig.h"
+#include "config_xml.h"
 //#include "gl_globals.h"
 
 #ifndef WIN32

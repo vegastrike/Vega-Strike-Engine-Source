@@ -26,7 +26,7 @@
 #include "in_kb.h"
 #include "lin_time.h"
 #include "main_loop.h"
-#include "vegaconfig.h"
+#include "config_xml.h"
 #include "mission.h"
 #include "audiolib.h"
 /*
@@ -106,7 +106,7 @@ int main( int argc, char **argv )
 
     Mission *mission=new Mission("test1.mission");
 
-    //    exit(0);
+    //        exit(0);
 
     //read_vs_config_file();
     //init_debug("");

@@ -40,8 +40,8 @@ vegastrike_SOURCES =				\
 	universe.h				\
 	xml_support.h  				\
 	xml_support.cpp				\
-	vegaconfig.cpp				\
-	vegaconfig.h				\
+	config_xml.cpp				\
+	config_xml.h				\
 	mission.cpp				\
 	mission.h				\
 	easydom.cpp				\
