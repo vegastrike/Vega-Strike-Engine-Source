@@ -325,8 +325,6 @@ if test "x$is_macosx" = "xyes" ; then
     PYTHON_LDOPTS="-L/Library/Frameworks/Python.framework"
     with_python_inc=/Library/Frameworks/Python.framework/Headers
     VS_LIBS="$VS_LIBS -lobjc"
-else
-    VS_LIBS="$VS_LIBS -lutil"
 fi
 
 dnl
