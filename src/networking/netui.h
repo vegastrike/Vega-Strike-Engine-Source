@@ -181,11 +181,17 @@ inline SOCKETALT	NETCLASS::createSocket( char * host, unsigned short port, int s
 	#else
 		srv_port = CLIENT_PORT;
 	#endif
-		clt_port = port;
+		if( port!=0)
+			clt_port = port;
+		else
+			clt_port = SERVER_PORT;
 	}
 	else
 	{
-		srv_port = port;
+		if( port!=0)
+			srv_port = port;
+		else
+			srv_port = SERVER_PORT;
 	#ifdef _TCP_PROTO
 		clt_port = port;
 	#else
@@ -302,6 +308,7 @@ inline SOCKETALT	NETCLASS::createSocket( char * host, unsigned short port, int s
 		// binds socket
 		if( bind( this->sock, (sockaddr *) &clt_ip, sizeof( struct sockaddr))==SOCKET_ERROR)
 			this->disconnect( "Cannot bind socket");
+		cout<<"Bind on localhost, port = "<<clt_port<<endl;
 		this->max_sock = this->sock;
 #else
 		if( server)
