@@ -104,7 +104,7 @@ void Unit::CollideAll() {
 	continue;//ignore duplicates
       tmp->lastchecked = this;//now we're the last checked.
 
-	  if ((!Unit::CollideInfo.hhuge||(CollideInfo.hhuge&&tmp->type==LineCollide::UNIT))&&((tmp->object.u>this||(!CollideInfo.hhuge&&j==0))))//the first stuffs are in the huge array
+	  if ((!Unit::CollideInfo.hhuge||(CollideInfo.hhuge&&tmp->type==LineCollide::UNIT))&&((tmp->object.u>this||GetJumpStatus().drive>=0||un->GetJumpStatus().drive>=0||(!CollideInfo.hhuge&&j==0))))//the first stuffs are in the huge array
 	if (Position().i+radial_size>tmp->Mini.i&&
 	    Position().i-radial_size<tmp->Maxi.i&&
 	    Position().j+radial_size>tmp->Mini.j&&
