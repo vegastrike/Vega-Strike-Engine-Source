@@ -708,6 +708,7 @@ void createObjects(std::vector <std::string> &fighter0name, std::vector <StarSys
       fighters[fighter0indices[cnum]]->EnqueueAI(new FireKeyboard (cnum,cnum));
     }
     fighters[fighter0indices[cnum]]->SetTurretAI ();
+    fighters[fighter0indices[cnum]]->DisableTurretAI ();	
   }
 
   shipList = _Universe->activeStarSystem()->getClickList();

@@ -419,6 +419,7 @@ void Cockpit::Update () {
 	  SwitchUnits (NULL,un);
 	  parentturret.SetUnit(NULL);
 	  un->SetTurretAI();
+	  un->DisableTurretAI();
 	}
       }
     }
