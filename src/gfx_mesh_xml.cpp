@@ -40,8 +40,13 @@ const EnumMap::Pair Mesh::XML::element_names[] = {
   {"Location", XML::LOCATION},
   {"Normal", XML::NORMAL},
   {"Polygons", XML::POLYGONS},
+  {"Line", XML::LINE},
   {"Tri", XML::TRI},
   {"Quad", XML::QUAD},
+  {"Linestrip",XML::LINESTRIP},
+  {"Tristrip", XML::TRISTRIP},
+  {"Trifan", XML::TRIFAN},
+  {"Quadstrip", XML::QUADSTRIP},
   {"Vertex", XML::VERTEX}
 };
 
@@ -59,7 +64,7 @@ const EnumMap::Pair Mesh::XML::attribute_names[] = {
   {"s", XML::S},
   {"t", XML::T}};
 
-const EnumMap Mesh::XML::element_map(XML::element_names, 10);
+const EnumMap Mesh::XML::element_map(XML::element_names, 15);
 const EnumMap Mesh::XML::attribute_map(XML::attribute_names, 12);
 
 void Mesh::beginElement(void *userData, const XML_Char *name, const XML_Char **atts) {
@@ -232,6 +237,91 @@ void Mesh::beginElement(const string &name, const AttributeList &attributes) {
       }
     }
     break;
+
+  case XML::TRISTRIP:
+    assert(top==XML::POLYGONS);
+    assert(xml->load_stage==4);
+    xml->num_vertices=3;//minimum number vertices
+    xml->tristrips.push_back (vector<GFXVertex>());
+    xml->active_list = &(xml->tristrips[xml->tristrips.size()-1]);
+    xml->tstrcnt = xml->tristripind.size();
+    xml->active_ind = &xml->tristripind;
+    for(AttributeList::const_iterator iter = attributes.begin(); iter!=attributes.end(); iter++) {
+      switch(XML::attribute_map.lookup((*iter).name)) {
+      case XML::UNKNOWN:
+	cerr << "Unknown attribute '" << (*iter).name << "' encountered in Vertex tag" << endl;
+	break;
+      case XML::FLATSHADE:
+	if ((*iter).value=="Flat") {
+	  cerr << "Cannot Flatshade Tristrips" << endl;
+	}else {
+	  if ((*iter).value=="Smooth") {
+	    //ignored -- already done
+	  }
+	}
+	break;
+      default:
+	assert (0);
+      }
+    }
+    break;
+
+  case XML::TRIFAN:
+    assert(top==XML::POLYGONS);
+    assert(xml->load_stage==4);
+    xml->num_vertices=3;//minimum number vertices
+    xml->trifans.push_back (vector<GFXVertex>());
+    xml->active_list = &(xml->trifans[xml->trifans.size()-1]);
+    xml->tfancnt = xml->trifanind.size();
+    xml->active_ind = &xml->trifanind;
+    for(AttributeList::const_iterator iter = attributes.begin(); iter!=attributes.end(); iter++) {
+      switch(XML::attribute_map.lookup((*iter).name)) {
+      case XML::UNKNOWN:
+	cerr << "Unknown attribute '" << (*iter).name << "' encountered in Vertex tag" << endl;
+	break;
+      case XML::FLATSHADE:
+	if ((*iter).value=="Flat") {
+	  cerr << "Cannot Flatshade Trifans" << endl;
+	}else {
+	  if ((*iter).value=="Smooth") {
+	    //ignored -- already done
+	  }
+	}
+	break;
+      default:
+	assert (0);
+      }
+    }
+    break;
+
+  case XML::QUADSTRIP:
+    assert(top==XML::POLYGONS);
+    assert(xml->load_stage==4);
+    xml->num_vertices=4;//minimum number vertices
+    xml->quadstrips.push_back (vector<GFXVertex>());
+    xml->active_list = &(xml->quadstrips[xml->quadstrips.size()-1]);
+    xml->qstrcnt = xml->quadstripind.size();
+    xml->active_ind = &xml->quadstripind;
+    for(AttributeList::const_iterator iter = attributes.begin(); iter!=attributes.end(); iter++) {
+      switch(XML::attribute_map.lookup((*iter).name)) {
+      case XML::UNKNOWN:
+	cerr << "Unknown attribute '" << (*iter).name << "' encountered in Vertex tag" << endl;
+	break;
+      case XML::FLATSHADE:
+	if ((*iter).value=="Flat") {
+	  cerr << "Cannot Flatshade Quadstrips" << endl;
+	}else {
+	  if ((*iter).value=="Smooth") {
+	    //ignored -- already done
+	  }
+	}
+	break;
+      default:
+	assert (0);
+      }
+    }
+    break;
+   
   case XML::QUAD:
     assert(top==XML::POLYGONS);
     assert(xml->load_stage==4);
@@ -260,7 +350,7 @@ void Mesh::beginElement(const string &name, const AttributeList &attributes) {
     }
     break;
   case XML::VERTEX:
-    assert(top==XML::TRI || top==XML::QUAD);
+    assert(top==XML::TRI || top==XML::QUAD || top ==XML::TRISTRIP || top ==XML::TRIFAN||top ==XML::QUADSTRIP);
     assert(xml->load_stage==4);
 
     xml->vertex_state = 0;
@@ -328,7 +418,7 @@ void Mesh::endElement(const string &name) {
   XML::Names elem = (XML::Names)XML::element_map.lookup(name);
   assert(*xml->state_stack.rbegin() == elem);
   xml->state_stack.pop_back();
-
+  unsigned int i;
   switch(elem) {
   case XML::UNKNOWN:
     cerr << "Unknown element end tag '" << name << "' detected " << endl;
@@ -366,6 +456,39 @@ void Mesh::endElement(const string &name) {
   case XML::QUAD:
     assert(xml->num_vertices==0);
     break;
+  case XML::TRISTRIP:
+    assert(xml->num_vertices<=0);   
+    for (i=xml->tstrcnt+2;i<xml->tristripind.size();i++) {
+      if ((i-xml->tstrcnt)%2) {
+	//normal order
+	xml->nrmltristrip.push_back (xml->tristripind[i-2]);
+	xml->nrmltristrip.push_back (xml->tristripind[i-1]);
+	xml->nrmltristrip.push_back (xml->tristripind[i]);
+      } else {
+	//reverse order
+	xml->nrmltristrip.push_back (xml->tristripind[i-1]);
+	xml->nrmltristrip.push_back (xml->tristripind[i-2]);
+	xml->nrmltristrip.push_back (xml->tristripind[i]);
+      }
+    }
+    break;
+  case XML::TRIFAN:
+    assert (xml->num_vertices<=0);
+    for (i=xml->tfancnt+2;i<xml->trifanind.size();i++) {
+      xml->nrmltrifan.push_back (xml->trifanind[xml->tfancnt]);
+      xml->nrmltrifan.push_back (xml->trifanind[i-1]);
+      xml->nrmltrifan.push_back (xml->trifanind[i]);
+    }
+    break;
+  case XML::QUADSTRIP://have to fix up nrmlquadstrip so that it 'looks' like a quad list for smooth shading
+    assert(xml->num_vertices<=0);
+    for (i=xml->qstrcnt+3;i<xml->quadstripind.size();i+=2) {
+      xml->nrmlquadstrip.push_back (xml->quadstripind[i-3]);
+      xml->nrmlquadstrip.push_back (xml->quadstripind[i-2]);
+      xml->nrmlquadstrip.push_back (xml->quadstripind[i]);
+      xml->nrmlquadstrip.push_back (xml->quadstripind[i-1]);
+    }
+    break;
   case XML::POLYGONS:
     assert(xml->tris.size()%3==0);
     assert(xml->quads.size()%4==0);
@@ -399,6 +522,40 @@ void Mesh::endElement(const string &name) {
   }
 }
 
+
+
+void SumNormals (int trimax, int t3vert, 
+		 vector <GFXVertex> &vertices,
+		 vector <int> &triind,
+		 vector <int> &vertexcount,
+		 bool * vertrw ) {
+  int a=0;
+  int i=0;
+  int j=0;
+  for (i=0;i<trimax;i++,a+=t3vert) {
+    for (j=0;j<t3vert;j++) {
+      if (vertrw[triind[a+j]]) {
+	Vector Cur (vertices[triind[a+j]].x,
+		    vertices[triind[a+j]].y,
+		    vertices[triind[a+j]].z);
+	Cur = (Vector (vertices[triind[a+((j+2)%t3vert)]].x,
+		       vertices[triind[a+((j+2)%t3vert)]].y,
+		       vertices[triind[a+((j+2)%t3vert)]].z)-Cur)
+	  .Cross(Vector (vertices[triind[a+((j+1)%t3vert)]].x,
+			 vertices[triind[a+((j+1)%t3vert)]].y,
+			 vertices[triind[a+((j+1)%t3vert)]].z)-Cur);
+	Normalize(Cur);
+	//Cur = Cur*(1.00F/xml->vertexcount[a+j]);
+	vertices[triind[a+j]].i+=Cur.i/vertexcount[triind[a+j]];
+	vertices[triind[a+j]].j+=Cur.j/vertexcount[triind[a+j]];
+	vertices[triind[a+j]].k+=Cur.k/vertexcount[triind[a+j]];
+      }
+    }
+  }
+}
+
+
+
 void Mesh::LoadXML(const char *filename, Mesh *oldmesh) {
   const int chunk_size = 16384;
   
@@ -430,7 +587,7 @@ void Mesh::LoadXML(const char *filename, Mesh *oldmesh) {
   if (xml->recalc_norm) {
     unsigned int i; unsigned int a=0;
     unsigned int j;
-    unsigned int trimax = xml->tris.size()/3;
+
     bool *vertrw = new bool [xml->vertices.size()]; 
     for (i=0;i<xml->vertices.size();i++) {
       if (xml->vertices[i].i==0&&
@@ -441,49 +598,12 @@ void Mesh::LoadXML(const char *filename, Mesh *oldmesh) {
 	vertrw[i]=false;
       }
     }
+    SumNormals (xml->tris.size()/3,3,xml->vertices, xml->triind,xml->vertexcount, vertrw);
+    SumNormals (xml->quads.size()/4,4,xml->vertices, xml->quadind,xml->vertexcount, vertrw);
+    SumNormals (xml->nrmltristrip.size()/3,3,xml->vertices, xml->nrmltristrip,xml->vertexcount, vertrw);
+    SumNormals (xml->nrmltrifan.size()/3,3,xml->vertices, xml->nrmltrifan,xml->vertexcount, vertrw);
+    SumNormals (xml->nrmlquadstrip.size()/4,4,xml->vertices, xml->nrmlquadstrip,xml->vertexcount, vertrw);
 
-    for (i=0;i<trimax;i++,a+=3) {
-      for (j=0;j<3;j++) {
-	if (vertrw[xml->triind[a+j]]) {
-	  Vector Cur (xml->vertices[xml->triind[a+j]].x,
-		      xml->vertices[xml->triind[a+j]].y,
-		      xml->vertices[xml->triind[a+j]].z);
-	  Cur = (Vector (xml->vertices[xml->triind[a+((j+2)%3)]].x,
-			 xml->vertices[xml->triind[a+((j+2)%3)]].y,
-			 xml->vertices[xml->triind[a+((j+2)%3)]].z)-Cur)
-	    .Cross(Vector (xml->vertices[xml->triind[a+((j+1)%3)]].x,
-			   xml->vertices[xml->triind[a+((j+1)%3)]].y,
-			   xml->vertices[xml->triind[a+((j+1)%3)]].z)-Cur);
-	  Normalize(Cur);
-	//Cur = Cur*(1.00F/xml->vertexcount[a+j]);
-	  xml->vertices[xml->triind[a+j]].i+=Cur.i/xml->vertexcount[xml->triind[a+j]];
-	  xml->vertices[xml->triind[a+j]].j+=Cur.j/xml->vertexcount[xml->triind[a+j]];
-	  xml->vertices[xml->triind[a+j]].k+=Cur.k/xml->vertexcount[xml->triind[a+j]];
-	}
-      }
-    }
-    a=0;
-    trimax = xml->quads.size()/4;
-    for (i=0;i<trimax;i++,a+=4) {
-      for (j=0;j<4;j++) {
-	if (vertrw[xml->quadind[a+j]]) {
-	  Vector Cur (xml->vertices[xml->quadind[a+j]].x,
-		      xml->vertices[xml->quadind[a+j]].y,
-		      xml->vertices[xml->quadind[a+j]].z);
-	  Cur = (Vector (xml->vertices[xml->quadind[a+((j+2)%4)]].x,
-			 xml->vertices[xml->quadind[a+((j+2)%4)]].y,
-			 xml->vertices[xml->quadind[a+((j+2)%4)]].z)-Cur)
-	    .Cross(Vector (xml->vertices[xml->quadind[a+((j+1)%4)]].x,
-			   xml->vertices[xml->quadind[a+((j+1)%4)]].y,
-			   xml->vertices[xml->quadind[a+((j+1)%4)]].z)-Cur);
-	  Normalize(Cur);
-	  //Cur = Cur*(1.00F/xml->vertexcount[a+j]);
-	  xml->vertices[xml->quadind[a+j]].i+=Cur.i/xml->vertexcount[xml->quadind[a+j]];
-	  xml->vertices[xml->quadind[a+j]].j+=Cur.j/xml->vertexcount[xml->quadind[a+j]];
-	  xml->vertices[xml->quadind[a+j]].k+=Cur.k/xml->vertexcount[xml->quadind[a+j]];
-	}
-      }
-    }
     delete []vertrw;
     for (i=0;i<xml->vertices.size();i++) {
       float dis = sqrtf (xml->vertices[i].i*xml->vertices[i].i +
@@ -501,9 +621,21 @@ void Mesh::LoadXML(const char *filename, Mesh *oldmesh) {
 		 xml->vertices[i].j,
 		 xml->vertices[i].k);
       }else {
-	xml->vertices[i].i=0;
-	xml->vertices[j].j=0;
-	xml->vertices[i].k=1;
+	xml->vertices[i].i=xml->vertices[i].x;
+	xml->vertices[i].j=xml->vertices[i].y;
+	xml->vertices[i].k=xml->vertices[i].z;
+	dis = sqrtf (xml->vertices[i].i*xml->vertices[i].i +
+		     xml->vertices[i].j*xml->vertices[i].j +
+		     xml->vertices[i].k*xml->vertices[i].k);
+	if (dis!=0) {
+	  xml->vertices[i].i/=dis;//renormalize
+	  xml->vertices[i].j/=dis;
+	  xml->vertices[i].k/=dis;	  
+	}else {
+	  xml->vertices[i].i=0;
+	  xml->vertices[i].j=0;
+	  xml->vertices[i].k=1;	  
+	}
       } 
     }
 
@@ -523,16 +655,40 @@ void Mesh::LoadXML(const char *filename, Mesh *oldmesh) {
 	xml->quads[a+j].k=xml->vertices[xml->quadind[a+j]].k;
       }
     }
-  
+    a=0;
+    unsigned int k=0;
+    unsigned int l=0;
+    for (l=a=0;a<xml->tristrips.size();a++) {
+      for (k=0;k<xml->tristrips[a].size();k++,l++) {
+	xml->tristrips[a][k].i = xml->vertices[xml->tristripind[l]].i;
+	xml->tristrips[a][k].j = xml->vertices[xml->tristripind[l]].j;
+	xml->tristrips[a][k].k = xml->vertices[xml->tristripind[l]].k;
+      }
+    }
+    for (l=a=0;a<xml->trifans.size();a++) {
+      for (k=0;k<xml->trifans[a].size();k++,l++) {
+	xml->trifans[a][k].i = xml->vertices[xml->trifanind[l]].i;
+	xml->trifans[a][k].j = xml->vertices[xml->trifanind[l]].j;
+	xml->trifans[a][k].k = xml->vertices[xml->trifanind[l]].k;
+      }
+    }
+    for (l=a=0;a<xml->quadstrips.size();a++) {
+      for (k=0;k<xml->quadstrips[a].size();k++,l++) {
+	xml->quadstrips[a][k].i = xml->vertices[xml->quadstripind[l]].i;
+	xml->quadstrips[a][k].j = xml->vertices[xml->quadstripind[l]].j;
+	xml->quadstrips[a][k].k = xml->vertices[xml->quadstripind[l]].k;
+      }
+    }
+
   }
   
   // TODO: add alpha handling
 
    //check for per-polygon flat shading
   unsigned int trimax = xml->tris.size()/3;
-  int a=0;
-  int i=0;
-  int j=0;
+  unsigned int a=0;
+  unsigned int i=0;
+  unsigned int j=0;
   for (i=0;i<trimax;i++,a+=3) {
     if (xml->trishade[i]==1) {
       for (j=0;j<3;j++) {
@@ -575,14 +731,24 @@ void Mesh::LoadXML(const char *filename, Mesh *oldmesh) {
       }
     }
   }
-
-
- 
-
   Decal = new Texture(xml->decal_name.c_str(), 0);
 
   int index = 0;
-  vertexlist = new GFXVertex[xml->tris.size()+xml->quads.size()];
+
+  int totalvertexsize = xml->tris.size()+xml->quads.size();
+  for (index=0;index<xml->tristrips.size();index++) {
+    totalvertexsize += xml->tristrips[index].size();
+  }
+  for (index=0;index<xml->trifans.size();index++) {
+    totalvertexsize += xml->trifans[index].size();
+  }
+  for (index=0;index<xml->quadstrips.size();index++) {
+    totalvertexsize += xml->quadstrips[index].size();
+  }
+
+  index =0;
+  vertexlist = new GFXVertex[totalvertexsize];
+
   minSizeX = minSizeY = minSizeZ = FLT_MAX;
   maxSizeX = maxSizeY = maxSizeZ = -FLT_MAX;
   if (xml->tris.size()==0&&xml->quads.size()==0) {
@@ -609,13 +775,45 @@ void Mesh::LoadXML(const char *filename, Mesh *oldmesh) {
     minSizeZ = min(vertexlist[index].z, minSizeZ);
     maxSizeZ = max(vertexlist[index].z, maxSizeZ);
   }
-  
+  for (a=0;a<xml->tristrips.size();a++) {
+    for (int m=0;m<xml->tristrips[a].size();m++,index++) {
+      vertexlist[index] = xml->tristrips[a][m];
+      minSizeX = min(vertexlist[index].x, minSizeX);
+      maxSizeX = max(vertexlist[index].x, maxSizeX);
+      minSizeY = min(vertexlist[index].y, minSizeY);
+      maxSizeY = max(vertexlist[index].y, maxSizeY);
+      minSizeZ = min(vertexlist[index].z, minSizeZ);
+      maxSizeZ = max(vertexlist[index].z, maxSizeZ);
+    }
+  }
+  for (a=0;a<xml->trifans.size();a++) {
+    for (int m=0;m<xml->trifans[a].size();m++,index++) {
+      vertexlist[index] = xml->trifans[a][m];
+      minSizeX = min(vertexlist[index].x, minSizeX);
+      maxSizeX = max(vertexlist[index].x, maxSizeX);
+      minSizeY = min(vertexlist[index].y, minSizeY);
+      maxSizeY = max(vertexlist[index].y, maxSizeY);
+      minSizeZ = min(vertexlist[index].z, minSizeZ);
+      maxSizeZ = max(vertexlist[index].z, maxSizeZ);
+    }
+  }
+  for (a=0;a<xml->quadstrips.size();a++) {
+    for (int m=0;m<xml->quadstrips[a].size();m++,index++) {
+      vertexlist[index] = xml->quadstrips[a][m];
+      minSizeX = min(vertexlist[index].x, minSizeX);
+      maxSizeX = max(vertexlist[index].x, maxSizeX);
+      minSizeY = min(vertexlist[index].y, minSizeY);
+      maxSizeY = max(vertexlist[index].y, maxSizeY);
+      minSizeZ = min(vertexlist[index].z, minSizeZ);
+      maxSizeZ = max(vertexlist[index].z, maxSizeZ);
+    }
+  }
 
   float x_center = (minSizeX + maxSizeX)/2.0,
     y_center = (minSizeY + maxSizeY)/2.0,
     z_center = (minSizeZ + maxSizeZ)/2.0;
   SetPosition(x_center, y_center, z_center);
-  for(a=0; a<xml->tris.size()+xml->quads.size(); a++) {
+  for(a=0; a<totalvertexsize; a++) {
     vertexlist[a].x -= x_center;
     vertexlist[a].y -= y_center;
     vertexlist[a].z -= z_center;
@@ -630,10 +828,27 @@ void Mesh::LoadXML(const char *filename, Mesh *oldmesh) {
   
   radialSize = .5*sqrtf ((maxSizeX-minSizeX)*(maxSizeX-minSizeX)+(maxSizeY-minSizeY)*(maxSizeY-minSizeY)+(maxSizeX-minSizeZ)*(maxSizeX-minSizeZ));
 
-  vlist = new GFXVertexList(xml->tris.size() + xml->quads.size(),
-			    xml->tris.size()/3, xml->quads.size()/4,
-			    vertexlist);
- 
+  vlist[GFXTRI] = new GFXVertexList(GFXTRI,xml->tris.size(),vertexlist); 
+  vlist[GFXQUAD]= new GFXVertexList(GFXQUAD,xml->quads.size(),vertexlist+xml->tris.size());
+  index = xml->tris.size()+xml->quads.size();
+  numQuadstrips = xml->tristrips.size()+xml->trifans.size()+xml->quadstrips.size();
+  quadstrips = new GFXVertexList* [numQuadstrips];
+  unsigned int tmpind =0;
+  for (a=0;a<xml->tristrips.size();a++,tmpind++) {
+    quadstrips[tmpind]= new GFXVertexList (GFXTRISTRIP,xml->tristrips[a].size(),vertexlist+index);
+    index+= xml->tristrips[a].size();
+  }
+  for (a=0;a<xml->trifans.size();a++,tmpind++) {
+    quadstrips[tmpind]= new GFXVertexList (GFXTRIFAN,xml->trifans[a].size(),vertexlist+index);
+    index+= xml->trifans[a].size();
+  }
+  for (a=0;a<xml->quadstrips.size();a++,tmpind++) {
+    quadstrips[tmpind]= new GFXVertexList (GFXQUADSTRIP,xml->quadstrips[a].size(),vertexlist+index);
+    index+= xml->quadstrips[a].size();
+  }
+
+
+  
   //TODO: add force handling
 
 

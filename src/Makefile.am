@@ -88,7 +88,6 @@ vegastrike_SOURCES =				\
 	gl_state.cpp				\
 	gl_texture.cpp				\
 	gl_vertex_list.cpp			\
-	gl_quadstrip.cpp			\
 	hash.c					\
 	hash.h					\
 	hashtable.h				\

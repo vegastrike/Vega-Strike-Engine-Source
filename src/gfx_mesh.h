@@ -64,12 +64,17 @@ private:
       POINT, 
       LOCATION, 
       NORMAL, 
-      POLYGONS, 
+      POLYGONS,
+      LINE,
       TRI, 
-      QUAD, 
+      QUAD,
+      LINESTRIP,
+      TRISTRIP,
+      TRIFAN,
+      QUADSTRIP,
       VERTEX,
-      FLATSHADE,
       //attributes
+      FLATSHADE,
       TEXTURE,
       X,
       Y,
@@ -109,9 +114,22 @@ private:
     int num_vertices;
     vector<GFXVertex> vertices;
     vector<int>vertexcount;//keep count to make averaging easy 
+    vector<GFXVertex> lines;
     vector<GFXVertex> tris;
     vector<GFXVertex> quads;
+    vector <vector<GFXVertex> > tristrips;
+    vector <vector<GFXVertex> > trifans;
+    vector <vector<GFXVertex> > quadstrips;
+    int tstrcnt;
+    int tfancnt;
+    int qstrcnt;
     vector<int> triind;//for possible normal computation
+    vector<int> nrmltristrip;
+    vector<int> tristripind;
+    vector<int> nrmltrifan;
+    vector<int> trifanind;
+    vector<int> nrmlquadstrip;
+    vector<int> quadstripind;
     vector<int> quadind;
     vector<int> trishade;
     vector<int> quadshade;
@@ -132,67 +150,62 @@ private:
 protected:
   static Hashtable<string, Mesh> meshHashTable;
   int refcount;
-	float maxSizeX,maxSizeY,maxSizeZ,minSizeX,minSizeY,minSizeZ;
-	float radialSize;
-	Mesh *orig;
+  float maxSizeX,maxSizeY,maxSizeZ,minSizeX,minSizeY,minSizeZ;
+  float radialSize;
+  Mesh *orig;
+  
+  int numvertex;
+  //GFXVertex *vertexlist;
+  float *stcoords;
+  //GFXVertex *alphalist;
+  GFXVertex *vertexlist;
+  
+  GFXVertexList *vlist[3];//tri,quad,line
+  int numtris;
+  int numquads;
+  int numlines;
+  int numQuadstrips;//both quad and try strips (line strips too?)
+  GFXVertexList **quadstrips;
+  
+  GFXMaterial myMat;
+  int myMatNum;
+  
 
-	int numvertex;
-	//GFXVertex *vertexlist;
-	float *stcoords;
-	//GFXVertex *alphalist;
-	GFXVertex *vertexlist;
-
-	GFXVertexList *vlist;
-	
-	GFXQuadstrip **quadstrips;
-	int numQuadstrips;
-	
-	GFXMaterial myMat;
-	int myMatNum;
-
-	int numtris;
-	int numquads;
-	int numlines;
-
-  //	Vector scale; //scale that mofo in the file...no reason to have moster hellcat
- 
-	BOOL objtex;
-	Texture *Decal;
-	BOOL envMap;
-  //	int texturename[2];
-
-	BSPTree *bspTree;
-
-	BOOL changed;
-	void InitUnit();
-
-	void Reflect ();
-
-	string *hash_name;
-	// Support for reorganized rendering
-	bool will_be_drawn;
-	struct DrawContext {
-	  //Transformation transformation;
-	  //DrawContext(const Transformation &trans) : transformation(trans) { }
-	  Matrix mat;
-	  DrawContext(Matrix m) { memcpy(mat, m, sizeof(Matrix)); }
-	};
-	vector<DrawContext> *draw_queue;
-	int draw_sequence;
+  BOOL objtex;
+  Texture *Decal;
+  BOOL envMap;
+  
+  BSPTree *bspTree;
+  
+  BOOL changed;
+  void InitUnit();
+  
+  void Reflect ();
+  
+  string *hash_name;
+  // Support for reorganized rendering
+  bool will_be_drawn;
+  struct DrawContext {
+    //Transformation transformation;
+    //DrawContext(const Transformation &trans) : transformation(trans) { }
+    Matrix mat;
+    DrawContext(Matrix m) { memcpy(mat, m, sizeof(Matrix)); }
+  };
+  vector<DrawContext> *draw_queue;
+  int draw_sequence;
 public:
-	Mesh();
-	Mesh(const char *filename,  bool xml=false);
-	~Mesh();
+  Mesh();
+  Mesh(const char *filename,  bool xml=false);
+  ~Mesh();
 
-	virtual void Draw(const Transformation &quat = identity_transformation, const Matrix = identity_matrix);
-	virtual void ProcessDrawQueue();
-	static void ProcessUndrawnMeshes();
+  virtual void Draw(const Transformation &quat = identity_transformation, const Matrix = identity_matrix);
+  virtual void ProcessDrawQueue();
+  static void ProcessUndrawnMeshes();
+  
+  void setEnvMap(BOOL newValue) {envMap = newValue;}
+  void Destroy();
 
-	void setEnvMap(BOOL newValue) {envMap = newValue;}
-
-	void Destroy();
-
-	void UpdateHudMatrix();//puts an object on the hud with the matrix
+  void UpdateHudMatrix();//puts an object on the hud with the matrix
 
 	/*
 	BOOL Yaw(float rad);
@@ -203,16 +216,16 @@ public:
 	void ZSlide(float factor);
 	*/
 
-	void Rotate(const Vector &torque);
+  void Rotate(const Vector &torque);
 
-	Vector corner_min() { return Vector(minSizeX, minSizeY, minSizeZ); }
-	Vector corner_max() { return Vector(maxSizeX, maxSizeY, maxSizeZ); }
+  Vector corner_min() { return Vector(minSizeX, minSizeY, minSizeZ); }
+  Vector corner_max() { return Vector(maxSizeX, maxSizeY, maxSizeZ); }
 
   // void Scale(const Vector &scale) {this->scale = scale;SetOrientation();};
   BoundingBox * getBoundingBox();
   float rSize () {return radialSize;}
-	bool intersects(const Vector &start, const Vector &end);
-	bool intersects(const Vector &pt);
-	bool intersects(Mesh *mesh);
+  bool intersects(const Vector &start, const Vector &end);
+  bool intersects(const Vector &pt);
+  bool intersects(Mesh *mesh);
 };
 #endif

@@ -32,7 +32,7 @@
 
 #define GFX_MAX_LIGHTS 8
 int GFX_OPTIMAL_LIGHTS=4;
-
+BOOL GFXLIGHTING=FALSE;
 //for OpenGL
 
 struct gfx_light_loc {///yay 32 bytes! 1 cache line
@@ -265,6 +265,7 @@ BOOL /*GFXDRVAPI*/ GFXPickLights (const float * transform) {
   //float tm [16]={1,0,0,1000,0,1,0,1000,0,0,1,1000,0,0,0,1};
   //glLoadIdentity();
   //  GFXLoadIdentity(MODEL);
+  if (!GFXLIGHTING) return TRUE;
   Vector loc (transform[12],transform[13],transform[14]);
   SetLocalCompare (loc);
   newQsize=0;

@@ -38,110 +38,110 @@ SphereMesh::SphereMesh(float radius, int stacks, int slices, char *texture, bool
    centered = centeredOnShip; 
   float nsign = Insideout?-1.0:1.0;
   int fir=0;//Insideout?1:0;
-    int sec=1;//Insideout?0:1;
-  vlist = new GFXVertexList();
+  int sec=1;//Insideout?0:1;
+  vlist[GFXTRI] = NULL;
+  vlist[GFXQUAD] = NULL;
+  vlist[GFXLINE] = NULL;
   /* Code below adapted from gluSphere */
-
    drho = M_PI / (GLfloat) stacks;
    dtheta = 2.0 * M_PI / (GLfloat) slices;
 
-      ds = 1.0 / slices;
-      dt = 1.0 / stacks;
-      t = 1.0;			/* because loop now runs from 0 */
+   ds = 1.0 / slices;
+   dt = 1.0 / stacks;
+   t = 1.0;			/* because loop now runs from 0 */
 
-      imin = 0;
-      imax = stacks;
-      
-      numQuadstrips = stacks;
-      //      numQuadstrips = 0;
+   imin = 0;
+   imax = stacks;
+   
+   numQuadstrips = stacks;
+   //      numQuadstrips = 0;
 
-      quadstrips = new GFXQuadstrip*[numQuadstrips];
-      // draw intermediate stacks as quad strips 
-      vertexlist = new GFXVertex[stacks * (slices+1)*2];
-      GFXVertex *vl = vertexlist;
+   quadstrips = new GFXVertexList*[numQuadstrips];
+   // draw intermediate stacks as quad strips 
+   vertexlist = new GFXVertex[stacks * (slices+1)*2];
+   GFXVertex *vl = vertexlist;
+   
+   for (i = imin; i < imax; i++) {
+     GFXVertex *vertexlist = vl + (i * (slices+1)*2);
+     rho = i * drho;
+     
+     s = 0.0;
+     for (j = 0; j <= slices; j++) {
+       theta = (j == slices) ? 0.0 : j * dtheta;
+       x = -sin(theta) * sin(rho);
+       y = cos(theta) * sin(rho);
+       z = nsign * cos(rho);
+       
+       vertexlist[j*2+fir].i = x * nsign;
+       vertexlist[j*2+fir].j = y * nsign;
+       vertexlist[j*2+fir].k = z * nsign;
+       vertexlist[j*2+fir].s = insideout?1-s:s;
+       vertexlist[j*2+fir].t = t;
+       vertexlist[j*2+fir].x = x * radius;
+       vertexlist[j*2+fir].y = y * radius;
+       vertexlist[j*2+fir].z = z * radius;
 
-      for (i = imin; i < imax; i++) {
-	GFXVertex *vertexlist = vl + (i * (slices+1)*2);
-	rho = i * drho;
 
-	s = 0.0;
-	for (j = 0; j <= slices; j++) {
-	  theta = (j == slices) ? 0.0 : j * dtheta;
-	  x = -sin(theta) * sin(rho);
-	  y = cos(theta) * sin(rho);
-	  z = nsign * cos(rho);
+       x = -sin(theta) * sin(rho + drho);
+       y = cos(theta) * sin(rho + drho);
+       z = nsign * cos(rho + drho);
 
-	  vertexlist[j*2+fir].i = x * nsign;
-	  vertexlist[j*2+fir].j = y * nsign;
-	  vertexlist[j*2+fir].k = z * nsign;
-	  vertexlist[j*2+fir].s = insideout?1-s:s;
-	  vertexlist[j*2+fir].t = t;
-	  vertexlist[j*2+fir].x = x * radius;
-	  vertexlist[j*2+fir].y = y * radius;
-	  vertexlist[j*2+fir].z = z * radius;
+       vertexlist[j*2+sec].i = x * nsign;
+       vertexlist[j*2+sec].j = y * nsign;
+       vertexlist[j*2+sec].k = z * nsign;
+       vertexlist[j*2+sec].s = insideout?1-s:s;
+       vertexlist[j*2+sec].t = t - dt;
+       vertexlist[j*2+sec].x = x * radius;
+       vertexlist[j*2+sec].y = y * radius;
+       vertexlist[j*2+sec].z = z * radius;
 
+       s += ds;
+     }
 
-	  x = -sin(theta) * sin(rho + drho);
-	  y = cos(theta) * sin(rho + drho);
-	  z = nsign * cos(rho + drho);
-
-	  vertexlist[j*2+sec].i = x * nsign;
-	  vertexlist[j*2+sec].j = y * nsign;
-	  vertexlist[j*2+sec].k = z * nsign;
-	  vertexlist[j*2+sec].s = insideout?1-s:s;
-	  vertexlist[j*2+sec].t = t - dt;
-	  vertexlist[j*2+sec].x = x * radius;
-	  vertexlist[j*2+sec].y = y * radius;
-	  vertexlist[j*2+sec].z = z * radius;
-
-	  s += ds;
-	}
-
-	t -= dt;
-	quadstrips[i] = new GFXQuadstrip((slices+1) * 2, vertexlist);
-      }
-      Decal = new Texture(texture, 0);
-      centered?envMap = FALSE:envMap=TRUE;
-
-      if(centered) {
-	draw_sequence=0;
-      }
-  meshHashTable.Put(hash_key, this);
-  orig = this;
-  refcount++;
-  draw_queue = new vector<DrawContext>;
+     t -= dt;
+     quadstrips[i] = new GFXVertexList(GFXQUADSTRIP,(slices+1) * 2, vertexlist);
+   }
+   Decal = new Texture(texture, 0);
+   centered?envMap = FALSE:envMap=TRUE;
+   
+   if(centered) {
+     draw_sequence=0;
+   }
+   meshHashTable.Put(hash_key, this);
+   orig = this;
+   refcount++;
+   draw_queue = new vector<DrawContext>;
 }
 void SphereMesh::Draw(const Transformation &transform = identity_transformation) {
   if (centered) {
     SetPosition(_GFX->AccessCamera()->GetPosition());
-  }	
+  }		
 
   Mesh::Draw();
 }
 
 void SphereMesh::ProcessDrawQueue() {
-	GFXSelectMaterial(myMatNum);
-	//static float rot = 0;
-	GFXColor(1.0, 1.0, 1.0, 1.0);
-	
-	GFXEnable(TEXTURE0);
-	if(envMap) {
-	  Reflect();
-	  GFXEnable(TEXTURE1);
-	} else {
-	  GFXDisable(TEXTURE1);
-	}
-	Decal->MakeActive();
-	GFXBlendMode(ONE, ZERO);
-
-	GFXSelectTexcoordSet(0, 0);
-	if(envMap) {
-	  //_GFX->getLightMap()->MakeActive();
-	  _GFX->activateLightMap();
-	  GFXSelectTexcoordSet(1, 1);
-	  }
-
-	if (insideout) 
+  GFXSelectMaterial(myMatNum);
+  //static float rot = 0;
+  GFXColor(1.0, 1.0, 1.0, 1.0);
+  GFXDisable (LIGHTING);
+  GFXEnable(TEXTURE0);
+  if(envMap) {
+    Reflect();
+    GFXEnable(TEXTURE1);
+  } else {
+    GFXDisable(TEXTURE1);
+  }
+  Decal->MakeActive();
+  GFXBlendMode(ONE, ZERO);
+  
+  GFXSelectTexcoordSet(0, 0);
+  if(envMap) {
+    //_GFX->getLightMap()->MakeActive();
+    _GFX->activateLightMap();
+    GFXSelectTexcoordSet(1, 1);
+  }
+  if (insideout) 
     GFXDisable (CULLFACE);
   if (centered) {
     GFXDisable(LIGHTING);
@@ -158,23 +158,26 @@ void SphereMesh::ProcessDrawQueue() {
     Identity (tmp);
     if (!centered){
       VectorToMatrix (tmp,Vector (cos (theta),0,sin(theta)), Vector (0,1,0), Vector (-sin (theta),0,cos(theta)));
-      
-
     }
     MultMatrix (tmp2, c.mat, tmp);
     GFXLoadMatrix(MODEL, tmp2);
     GFXPickLights (tmp2);
     theta+=.01;
-	vlist->Draw();
-	if(quadstrips!=NULL) {
-	  for(int a=0; a<numQuadstrips; a++)
-	    quadstrips[a]->Draw();
-	}
-
-	if(0!=forcelogos) {
-	  forcelogos->Draw();
-	  squadlogos->Draw();
-	}
+    int a;
+    if (vlist[0])
+      vlist[0]->Draw();
+    if (vlist[1])
+      vlist[1]->Draw();
+    if (vlist[2])
+      vlist[2]->Draw();
+    if(quadstrips!=NULL) {
+      for(int a=0; a<numQuadstrips; a++)
+	quadstrips[a]->Draw();
+    }
+    if(0!=forcelogos) {
+      forcelogos->Draw();
+      squadlogos->Draw();
+    }
   }
 
   if (insideout)

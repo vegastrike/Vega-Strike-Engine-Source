@@ -80,7 +80,7 @@ void Mesh::InitUnit()
 	local_transformation = identity_transformation;
 
 	changed = TRUE;
-	vlist = NULL;
+	vlist[GFXTRI]=vlist[GFXQUAD]= vlist [GFXLINE] = NULL;
 	
 	radialSize=minSizeX=minSizeY=minSizeZ=maxSizeY=maxSizeZ=maxSizeX=0;
 	//GFXVertex *vertexlist;
@@ -88,7 +88,7 @@ void Mesh::InitUnit()
 
 	vertexlist = NULL;
 	quadstrips = NULL;
-	numQuadstrips = 0;
+	numQuadstrips = 0;//fans et all :-D
 	stcoords = NULL;
 	Decal = NULL;
 	
@@ -573,7 +573,9 @@ Mesh:: Mesh(const char * filename, bool xml):Primitive()
 	squadlogos = new Logo(numsquadlogo,center,PolyNormal,sizes ,rotations, (float)0.01, _GFX->getSquadLogo(), Ref);
 	delete [] Ref;
 	//fprintf (stderr, "Ri:%f Rj: %f Rk %f",vertexlist[0].i,vertexlist[0].j,vertexlist[0].k);
-	vlist = new GFXVertexList(numvertex,numtris,numquads, vertexlist);
+	vlist[GFXTRI] = new GFXVertexList(GFXTRI,numtris*3, vertexlist);
+	vlist[GFXQUAD]= new GFXVertexList(GFXQUAD,numquads*4, vertexlist+(numtris*3));
+	vlist[GFXLINE]=NULL;
 	//vlist = new GFXVertexList(numtris*4,0,numquads*4, vertexlist+numtris*3);
 	long pos = ftell(fp);
 	myMatNum = readi(fp);;
@@ -600,10 +602,17 @@ Mesh::~Mesh()
 {
 	if(!orig||orig==this)
 	{
-	  if(vlist!=NULL) {
-			delete vlist;
-			vlist = NULL;
+	  if(vlist[GFXTRI]!=NULL) {
+			delete vlist[GFXTRI];
 	  }
+
+	  if(vlist[GFXQUAD]!=NULL) {
+			delete vlist[GFXTRI];
+	  }
+	  if(vlist[GFXLINE]!=NULL) {
+			delete vlist[GFXTRI];
+	  }
+      
 	  if(quadstrips!=NULL) {
 	    for(int a=0; a<numQuadstrips; a++) delete quadstrips[a];
 	    delete [] quadstrips;
@@ -661,7 +670,7 @@ void Mesh::Reflect()
 	int nt3 = 3 * numtris;
 	int i;
 	float w;
-	vertexlist = vlist->LockUntransformed();
+	vertexlist = vlist[0]->LockUntransformed();
 	/*	Matrix currentMatrix;
 		VectorToMatrix(pp,pq,pr);
 	*/
@@ -720,7 +729,7 @@ void Mesh::Reflect()
 
 		}
 	}
-	vlist->UnlockUntransformed();
+	vlist[0]->UnlockUntransformed();
 }
 
 void Mesh::Draw(const Transformation &trans, const Matrix m)
@@ -740,8 +749,8 @@ void Mesh::Draw(const Transformation &trans, const Matrix m)
 void Mesh::ProcessDrawQueue() {
   assert(draw_queue->size());
   	GFXSelectMaterial(myMatNum);
-	GFXEnable(LIGHTING);
-
+	//GFXEnable(LIGHTING);
+	GFXDisable (LIGHTING);
 	//static float rot = 0;
 	GFXColor(1.0, 1.0, 1.0, 1.0);
 	
@@ -770,13 +779,16 @@ void Mesh::ProcessDrawQueue() {
 
     GFXLoadMatrix(MODEL, c.mat);
     GFXPickLights (c.mat/*GetPosition()*/);
-    vlist->Draw();
+    if (vlist[GFXTRI])
+      vlist[GFXTRI]->Draw();
+    if (vlist[GFXQUAD])
+      vlist[GFXQUAD]->Draw();
+    if (vlist[GFXLINE]) 
+      vlist[GFXLINE]->Draw();
     if(quadstrips!=NULL) {
       for(int a=0; a<numQuadstrips; a++)
-	quadstrips[a]->Draw()
-	  ;
+	quadstrips[a]->Draw();//includes tri strips
     }
-    
     if(0!=forcelogos) {
       forcelogos->Draw();
       squadlogos->Draw();

@@ -39,8 +39,9 @@ Box::Box(const Vector &corner1, const Vector &corner2) : corner_min(corner1), co
   VERTEX(corner_min.i,corner_max.j,corner_min.k);
   VERTEX(corner_min.i,corner_max.j,corner_max.k);
   VERTEX(corner_max.i,corner_max.j,corner_max.k);
-
-  vlist = new GFXVertexList(8,0,1,vertices);
+  vlist[GFXTRI]=NULL;
+  vlist[GFXQUAD] = new GFXVertexList(GFXQUAD,8,vertices);
+  vlist[GFXLINE]=NULL;
   delete [] vertices;
 
   a = 0;
@@ -63,8 +64,8 @@ Box::Box(const Vector &corner1, const Vector &corner2) : corner_min(corner1), co
 
 
   numQuadstrips = 1;
-  quadstrips = new GFXQuadstrip*[1];
-  quadstrips[0] = new GFXQuadstrip(10,vertices);
+  quadstrips = new GFXVertexList*[1];
+  quadstrips[0] = new GFXVertexList(GFXQUADSTRIP,10,vertices);
   delete [] vertices;
 
   meshHashTable.Put(hash_key, this);

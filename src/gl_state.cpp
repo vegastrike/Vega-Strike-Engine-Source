@@ -24,7 +24,7 @@
 #include <stack>
 BOOL bTex0 = TRUE;
 BOOL bTex1 = TRUE;
-
+extern BOOL GFXLIGHTING;
 BOOL /*GFXDRVAPI*/ GFXEnable (STATE state)
 {
 
@@ -32,6 +32,7 @@ BOOL /*GFXDRVAPI*/ GFXEnable (STATE state)
 	{
 	case LIGHTING:
 		glEnable(GL_LIGHTING);
+		GFXLIGHTING = TRUE;
 		break;
 	case DEPTHTEST:
 		glEnable(GL_DEPTH_TEST);
@@ -62,6 +63,7 @@ BOOL /*GFXDRVAPI*/ GFXDisable (STATE state)
 	{
 	case LIGHTING:
 		glDisable(GL_LIGHTING);
+		GFXLIGHTING = FALSE;
 		break;
 	case DEPTHTEST:
 		glDisable(GL_DEPTH_TEST);

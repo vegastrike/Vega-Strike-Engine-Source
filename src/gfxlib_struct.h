@@ -68,23 +68,29 @@ struct GFXTVertex // transformed vertex
 //Vertexlist object (will be turned into a function... or not)
 //Vertexlist object (will be turned into a function... or not)
 
+enum POLYTYPE {
+  GFXTRI,
+  GFXQUAD,
+  GFXLINE,
+  GFXTRISTRIP,
+  GFXQUADSTRIP,
+  GFXTRIFAN,//unsupported in mesh...
+  GFXLINESTRIP,//unsupported in mesh...
+  GFXPOLY//unsupported in mesh...
+};
 
 class /*GFXDRVAPI*/ GFXVertexList {
 
-
-	// Untransformed and transformed data 
-  /////FIXME VEGASTRIKEvoid* lpd3dvbUntransformed;
-  /////FIXME VEGASTRIKEvoid* lpd3dvbTransformed;
-	int numVertices;
-	int numTriangles;
-	int numQuads;
-	GFXVertex *myVertices;
-
-	int display_list;
+  //	int numTriangles;
+  //	int numQuads;
+  int numVertices;
+  GFXVertex *myVertices;
+  GLenum mode;
+  int display_list;
 
 public:
 	GFXVertexList();
-	GFXVertexList(int numVertices,int numTriangle, int numQuad, GFXVertex *vertices);
+	GFXVertexList(enum POLYTYPE poly, int numVertices, GFXVertex *vertices);
 	~GFXVertexList();
 
 	GFXTVertex *LockTransformed(); // Stuff to support environment mapping
@@ -94,30 +100,6 @@ public:
 	void UnlockUntransformed();
 
 	BOOL SetNext(GFXVertexList *vlist);
-
-	BOOL Draw();
-	BOOL SwapUntransformed();
-	BOOL SwapTransformed();
-};
-
-class GFXQuadstrip {
-
-
-	GFXVertex *myVertices;
-	int numVertices;
-
-	int display_list;
-
-public:
-	GFXQuadstrip() : myVertices(0), numVertices(0), display_list(0) { }
-	GFXQuadstrip(int numVertices, GFXVertex *vertices);
-	~GFXQuadstrip();
-
-	GFXTVertex *LockTransformed(); // Stuff to support environment mapping
-	void UnlockTransformed();
-
-	GFXVertex *LockUntransformed(); // Stuff to support environment mapping
-	void UnlockUntransformed();
 
 	BOOL Draw();
 	BOOL SwapUntransformed();
@@ -175,6 +157,7 @@ struct GFXColor
     this->a = a;
   }
 };
+
 enum LIGHT_TARGET {
   DIFFUSE=1,
   SPECULAR=2,

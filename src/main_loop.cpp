@@ -293,6 +293,12 @@ static void SlideRight(int,KBSTATE newState) {
 		//a=0;
 	}
 }
+static void reCenter (int, KBSTATE newState) {
+  if (newState==PRESS) {
+    _GFX->AccessCamera()->SetPosition(Vector (0,0,0));
+  }
+
+}
 static void Stop (int,KBSTATE newState) {
 
 	if (newState==PRESS) {
@@ -422,7 +428,7 @@ void InitializeInput() {
 	BindKey(',', SlideLeft);
 	BindKey('.',SlideRight);
 	BindKey('q', Quit);
-
+	BindKey ('c',reCenter);
 	/*	BindKey('a', FighterYawLeft);
 	BindKey('d', FighterYawRight);
 	BindKey('w', FighterPitchDown);
@@ -474,7 +480,7 @@ void createObjects() {
   for(int a = 0; a < numf; a++) {
     //fighters[a] = new Unit("uosprey.dat");
     //fighters[a] = new Unit("Homeworld-HeavyCorvette.xml", true);
-    switch(a%6+1) {
+    switch((a+1)%6) {
     case 0:
       //fighters[a] = new Unit("broadsword.xunit", true);
       fighters[a] = new Unit("midway.xunit", true);
@@ -517,7 +523,8 @@ void createObjects() {
     v.Normalize();
     fighters[a]->SetAI(new Order());
     fighters[a]->EnqueueAI(new Orders::ChangeHeading(v, 0.04));
-    fighters[a]->EnqueueAI(new Orders::MoveTo(v*10 + position, 1.75));
+    fighters[a]->EnqueueAI(new Orders::MoveTo(Vector (0,0,0), .75));
+    fighters[a]->EnqueueAI(new Orders::ChangeHeading(Vector (.86,.86,0).Normalize(), 0.04));
     //fighters[a]->SetPosition(0, 0, -2.0F);
   
     //fighters[a]->Pitch(PI/2);
