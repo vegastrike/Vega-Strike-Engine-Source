@@ -21,11 +21,11 @@ using XMLSupport::parse_float;
 using XMLSupport::parse_bool;
 using XMLSupport::parse_int;
 namespace AIEvents {
-  AIEvresult::AIEvresult (int type, float const min, const float max, float timetofinish,float timeuntilinterrupts, const std::string &aiscript) {
+  AIEvresult::AIEvresult (int type, float const min, const float max, float timetofinish,float timeuntilinterrupts, float priority , const std::string &aiscript) {
 	 this->timetointerrupt=timeuntilinterrupts;
 	 this->timetofinish=timetofinish;
 	 this->type = type; 
-
+         this->priority=priority;
 	 this->max = max; 
 
 	 this->min = min; 
@@ -42,6 +42,7 @@ namespace AIEvents {
   const int TIMEIT=5;
   const int OBEDIENCE=6;
   const int TIMETOINTERRUPT=7;
+  const int PRIORITY=8;
   const XMLSupport::EnumMap::Pair AIattribute_names[] = {
     EnumMap::Pair ("UNKNOWN", AIUNKNOWN),
     EnumMap::Pair ("min", AIMIN), 
@@ -50,9 +51,10 @@ namespace AIEvents {
     EnumMap::Pair ("Script", AISCRIPT),
     EnumMap::Pair ("time", TIMEIT),
     EnumMap::Pair ("obedience", OBEDIENCE),
-    EnumMap::Pair ("timetointerrupt", TIMETOINTERRUPT)	
+    EnumMap::Pair ("timetointerrupt", TIMETOINTERRUPT),
+    EnumMap::Pair ("priority", PRIORITY)	
   };
-  const XMLSupport::EnumMap attr_map(AIattribute_names, 8);
+  const XMLSupport::EnumMap attr_map(AIattribute_names, 9);
 
   void GeneralAIEventBegin (void *userData, const XML_Char *name, const XML_Char **atts) {
     AttributeList attributes (atts);
@@ -63,8 +65,11 @@ namespace AIEvents {
 	float timetointerrupt = 0;
     int elem = eam->element_map.lookup(name);
     AttributeList::const_iterator iter;
+    float priority=4;
     eam->level++;
     if (elem==0) {
+      eam->result.push_back(std::list<AIEvresult>());
+      eam->result.push_back(std::list<AIEvresult>());
       for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
 	switch(attr_map.lookup((*iter).name)) {
 	case TIMEIT:
@@ -75,9 +80,9 @@ namespace AIEvents {
 	}
       }
     }else {
-      assert (eam->level!=1);//might not have a back on result();
-      if (eam->level==2) 
-	eam->result.push_back(std::list<AIEvresult>());
+      assert (eam->level!=1&&eam->result.size()>=2);//might not have a back on result();
+      if (eam->result.back().size()!=eam->result[eam->result.size()-2].size())
+	eam->result.push_back(eam->result.back());
 
       for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
 	switch(attr_map.lookup((*iter).name)) {
@@ -94,22 +99,33 @@ namespace AIEvents {
 	  aiscriptname = (*iter).value;
 	  break;
 	case TIMEIT:
-		timetofinish=XMLSupport::parse_float ((*iter).value);
-		break;
+          timetofinish=XMLSupport::parse_float ((*iter).value);
+          break;
 	case TIMETOINTERRUPT:
-		timetointerrupt=XMLSupport::parse_float((*iter).value);
-		break;
+          timetointerrupt=XMLSupport::parse_float((*iter).value);
+          break;
+        case PRIORITY:
+          priority = XMLSupport::parse_float((*iter).value);
+          break;
 	default: 
 	  break;
 	}
       }
-      eam->result.back().push_back (AIEvresult(elem, min,max,timetofinish,timetointerrupt,aiscriptname));
+      AIEvresult newelem(elem, min,max,timetofinish,timetointerrupt,priority,aiscriptname);
+      eam->result.back().push_back (newelem);
+      eam->result[eam->result.size()-2].push_back (newelem);
     }
   }  
 
   void GeneralAIEventEnd (void *userData, const XML_Char *name) {
-    ((ElemAttrMap *)userData)->level--;    
-    
+    ElemAttrMap * eam = ((ElemAttrMap *)userData);
+    eam->level--;    
+    if (eam->result.back().size()==0) {
+      eam->result.pop_back();     
+      assert(eam->level==0);
+    }else {
+      eam->result.back().pop_back();
+    }        
   }  
   void LoadAI(const char * filename, ElemAttrMap &result, const string &faction) {//returns obedience
 	using namespace VSFileSystem;

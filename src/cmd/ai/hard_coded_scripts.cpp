@@ -371,11 +371,15 @@ void FlyStraight(Order * aisc, Unit * un) {
   Vector vec (0,0,10000);
   Order * ord = new Orders::MatchVelocity(un->ClampVelocity(vec,false),Vector(0,0,0),true,false,false);
   AddOrd (aisc,un,ord);
+  ord = new Orders::MatchAngularVelocity(Vector(0,0,0),1,false);
+  AddOrd (aisc,un,ord);
 }
 void FlyStraightAfterburner(Order * aisc, Unit * un) {
   Vector vec (0,0,10000);
   bool afterburn=useAfterburner();
   Order * ord = new Orders::MatchVelocity(un->ClampVelocity(vec,afterburn),Vector(0,0,0),true,afterburn,false);
+  AddOrd (aisc,un,ord);
+  ord = new Orders::MatchAngularVelocity(Vector(0,0,0),1,false);
   AddOrd (aisc,un,ord);
 }
 void CloakForScript(Order * aisc, Unit * un) {

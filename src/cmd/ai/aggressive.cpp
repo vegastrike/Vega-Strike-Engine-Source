@@ -47,9 +47,10 @@ const EnumMap::Pair element_names[] = {
   EnumMap::Pair ("Hull_Heal_Rate", AggressiveAI::HULL_HEAL_RATE),
   EnumMap::Pair ("Target_Faces_You", AggressiveAI::TARGET_FACES_YOU),
   EnumMap::Pair ("Target_In_Front_Of_You", AggressiveAI::TARGET_IN_FRONT_OF_YOU),
+  EnumMap::Pair ("Rand", AggressiveAI::RANDOMIZ),
   EnumMap::Pair ("Target_Going_Your_Direction", AggressiveAI::TARGET_GOING_YOUR_DIRECTION)
 };
-const EnumMap AggressiveAIel_map(element_names, 24);
+const EnumMap AggressiveAIel_map(element_names, 25);
 using std::pair;
 std::map<string,AIEvents::ElemAttrMap *> logic;
 std::map<string,AIEvents::ElemAttrMap *> interrupts;
@@ -134,6 +135,7 @@ void LeadMe (Unit * un, string directive, string speech) {
 
 static float aggressivity=2.01;
 AggressiveAI::AggressiveAI (const char * filename, const char * interruptname, Unit * target):FireAt(), logic (getProperScript(NULL,NULL,false)), interrupts(getProperScript(NULL,NULL,true)) {
+  currentpriority=0;
   last_jump_distance=FLT_MAX;
   interruptcurtime=0;
   jump_time_check=1;
@@ -202,7 +204,7 @@ void AggressiveAI::SignalChosenTarget () {
 bool AggressiveAI::ExecuteLogicItem (const AIEvents::AIEvresult &item) {
   
   if (item.script.length()!=0) {
-    Order * tmp = new AIScript (item.script.c_str());	
+    Order * tmp = new ExecuteFor(new AIScript (item.script.c_str()),item.timetofinish);	
     //    parent->EnqueueAI (tmp);
     EnqueueOrder (tmp);
     return true;
@@ -423,6 +425,7 @@ bool AggressiveAI::ProcessLogicItem (const AIEvents::AIEvresult &item) {
     return queryType (Order::MOVEMENT)==NULL;
   case RANDOMIZ:
     value= ((float)rand())/RAND_MAX;
+    break;
   default:
     return false;
   }
@@ -447,30 +450,40 @@ bool AggressiveAI::ProcessLogic (AIEvents::ElemAttrMap & logi, bool inter) {
     }
     if (trueit&&j==i->end()) {
       //do it
-      if (inter) {
+      if (j != i->begin())
+        j--;
+      if (j!=i->end()) {
+        float priority = (*j).priority;
+        if (priority>this->currentpriority||!inter) {
+          if (inter) {
 
-	//parent->getAIState()->eraseType (Order::FACING);
-	//parent->getAIState()->eraseType (Order::MOVEMENT);
-	eraseType (Order::FACING);
-	eraseType (Order::MOVEMENT);
+            //parent->getAIState()->eraseType (Order::FACING);
+            //parent->getAIState()->eraseType (Order::MOVEMENT);
+            eraseType (Order::FACING);
+            eraseType (Order::MOVEMENT);
 
 
+          }
+          j = i->begin();
+          logiccurtime=0;
+          interruptcurtime=0;
+          if (j!=i->end()) {
+            while (j!=i->end()) {
+              if (ExecuteLogicItem (*j)) {
+                this->currentpriority=priority;          
+                logiccurtime += (*j).timetofinish;
+                interruptcurtime += (*j).timetointerrupt;
+                //AIEvents::AIEvresult tmp = *j;
+                //i->erase(j);
+                retval=true;
+                //i->push_back (tmp);
+              }
+              j++;
+            }
+            if (retval) break;
+          }
+        }
       }
-      j = i->begin();
-      while (j!=i->end()) {
-	if (ExecuteLogicItem (*j)) {
-		logiccurtime = (*j).timetofinish;
-		interruptcurtime = (*j).timetointerrupt;
-	  AIEvents::AIEvresult tmp = *j;
-	  i->erase(j);
-	  retval=true;
-	  i->push_back (tmp);
-	  break; 
-	}else {
-	  j++;
-	}
-      }
-
     }
   }
   return retval;
@@ -740,7 +753,7 @@ void AggressiveAI::Execute () {
   }
   if ((!isjumpable) &&interruptcurtime<=0) {
 //	  fprintf (stderr,"i");
-	  ProcessLogic (*interrupts, true);
+	  ProcessLogic (*logic, true);
   }
   //  if (parent->getAIState()->queryType (Order::FACING)==NULL&&parent->getAIState()->queryType (Order::MOVEMENT)==NULL) { 
   
