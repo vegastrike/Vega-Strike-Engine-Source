@@ -63,6 +63,7 @@ vegastrike_SOURCES =				\
 	gfx_transform_vector.cpp		\
 	gfx_transform_vector.h			\
 	gfx_transform_matrix.h			\
+	gfx_transform_matrix.cpp		\
 	gfx_vertex.h				\
 	gfxlib.h				\
 	gfxlib_struct.h				\

@@ -304,21 +304,21 @@ static void Quit(KBSTATE newState) {
 }
 
 void InitializeInput() {
-	BindKey(GLUT_KEY_F3, Slew);
-	BindKey('-',Stop);
+	BindKey(GLUT_KEY_F1, Slew);
+	BindKey(GLUT_KEY_F12,Stop);
 	BindKey(GLUT_KEY_UP, PitchDown);
 	BindKey(GLUT_KEY_DOWN, PitchUp);
 	BindKey(GLUT_KEY_LEFT, YawLeft);
 	BindKey(GLUT_KEY_RIGHT, YawRight);
-	BindKey(GLUT_KEY_F11, RollLeft);
-	BindKey(GLUT_KEY_F12, RollRight);
-	BindKey(GLUT_KEY_PAGE_DOWN, SlideUp);
-	//BindKey(GLUT_KEY_HOME, SlideBackward);
-	BindKey(GLUT_KEY_END, SlideBackward);
-	BindKey(GLUT_KEY_INSERT, SlideForward);
-	BindKey(GLUT_KEY_HOME, SlideLeft);
-	BindKey(GLUT_KEY_PAGE_UP, SlideRight);
-	BindKey(GLUT_KEY_F1, Quit);
+	BindKey('/', RollLeft);
+	BindKey('*', RollRight);
+	BindKey(GLUT_KEY_PAGE_DOWN, SlideDown);
+	BindKey(GLUT_KEY_PAGE_UP, SlideUp);
+	BindKey('-', SlideBackward);
+	BindKey('+', SlideForward);
+	BindKey(',', SlideLeft);
+	BindKey('.',SlideRight);
+	BindKey('q', Quit);
 }
 Unit *carrier=NULL;
 Unit *fighter = NULL;
@@ -339,7 +339,7 @@ void createObjects() {
   fighter2 = new Unit("uosprey.dat");
   bg = new Background("cube");
   //HUDElement *t = new HUDElement("ucarrier.dat");
-  locSel = new LocationSelect(Vector (0,0,10),
+  locSel = new LocationSelect(Vector (0,0,5),
 			      Vector(.707,.707,0), 
 			      Vector (.707,-.707,0));
   //fighter->SetPosition(Vector(5.0, 5.0, 5.0));
@@ -372,7 +372,7 @@ void createObjects() {
   GFXEnable(TEXTURE1);
 
   
-  fighter2->SetPosition(0.0, 1.0, 5.0);
+  fighter2->SetPosition(0.0, 1.0, 50.0);
   fighter2->Pitch(PI/2);
   
   //  const int numf = 256;

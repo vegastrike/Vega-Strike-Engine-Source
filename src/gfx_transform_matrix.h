@@ -134,4 +134,8 @@ inline void CopyMatrix(Matrix dest, const Matrix source)
 		dest[matindex] = source[matindex];
 }
 
+
+int invert (float b[], float a[]);
+
+
 #endif

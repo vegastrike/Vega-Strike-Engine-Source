@@ -37,8 +37,10 @@ static KBHandler keyBindings [KEYMAP_SIZE];
 KBSTATE keyState [KEYMAP_SIZE];
 
 static void kbGetInput(int key, int special, int release, int x, int y){
-
-  keyBindings[key](release?RELEASE:PRESS);
+  if ((keyState[key]==RESET||keyState[key]==UP)&&!release)
+    keyBindings[key](PRESS);
+  if ((keyState[key]==DOWN||keyState[key]==RESET)&&release)
+    keyBindings[key](RELEASE);
   keyState[key] = release?UP:DOWN;
 }
 
@@ -66,7 +68,7 @@ static void glut_special_up_cb( int key, int x, int y )
 void InitKB()
 {
   for(int a=0; a<KEYMAP_SIZE; a++) {
-    keyState[a] = RELEASE;
+    keyState[a] = UP;
     UnbindKey(a);
   }
 

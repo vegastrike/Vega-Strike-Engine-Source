@@ -1,5 +1,7 @@
 #include "gfx_location_select.h"
 #include "gfxlib.h"
+#include "in.h"
+#include "vegastrike.h"
 
 LocationSelect::LocationSelect (Vector start, Vector Plane1, Vector Plane2/*, System * par */): Primitive() {
   //  parentScene = par;
@@ -9,8 +11,25 @@ LocationSelect::LocationSelect (Vector start,Vector Plane1, Vector Plane2, Vecto
   //  parentScene=par;
   MoveLocation (start,Plane1,Plane2,Plane3);
 }
+extern KBSTATE keyState[KEYMAP_SIZE];
+Vector DeltaPosition(0,0,0);
+bool changed = false;
+
+void MouseMoveHandle (KBSTATE,int x, int y, int delx, int dely, int mod) {
+  if (keyState['z']==DOWN) {
+    DeltaPosition.k+=.3*dely;
+  } else {
+    changed=true;
+    DeltaPosition.i=delx;
+    DeltaPosition.j=dely;
+    //DeltaPosition.i=x/((float)::g_game.x_resolution);
+    //DeltaPosition.j=y/((float)::g_game.y_resolution);
+  }
+}
+
 void LocationSelect::MoveLocation (Vector start,Vector Plane1, Vector Plane2) {    
-  LocalPosition = Vector(30,20,40);
+  BindKey (2,::MouseMoveHandle);
+  LocalPosition = Vector(0,0,0);
   r = Plane1.Cross(Plane2);
   Orthogonize (Plane1,Plane2,r);
   p = Plane1;
@@ -20,6 +39,7 @@ void LocationSelect::MoveLocation (Vector start,Vector Plane1, Vector Plane2) {
   UpdateMatrix();
 }
 void LocationSelect::MoveLocation (Vector start,Vector Plane1, Vector Plane2, Vector Plane3) {    
+  BindKey (2,::MouseMoveHandle);
   LocalPosition = Vector(0,10,1);
   r = Plane3;
   p = Plane1;
@@ -33,6 +53,7 @@ void LocationSelect::UpdateMatrix() {
   MultMatrix (transformation,translation,orientation);
 }
 LocationSelect::~LocationSelect() {
+  UnbindMouse (1);
 }
 
 
@@ -51,6 +72,37 @@ void LocationSelect:: Draw () {
   //GFXColor4f (parentScene->HUDColor.r, parentScene->HUDColor.g, parentScene->HUDColor.b, parentScene->HUDColor.a);
 
   GFXColor4f (0,.5,0,.3);
+
+  if (DeltaPosition.k!=0) {
+    LocalPosition.k+=DeltaPosition.k;
+    DeltaPosition.k=0;
+  }
+  if (changed&&fabs (DeltaPosition.i<10)&&fabs(DeltaPosition.j<10)) {
+    float t[16];
+    float m[16];
+    float v[16];
+
+    GFXGetMatrix (VIEW,v);
+    GFXGetMatrix (MODEL,m);
+    MultMatrix(t,v,m);
+
+    //the location in camera coordinates of the beginning of the location select
+    Vector tLocation (t[12],t[13],t[14]);
+    Vector tP (t[0],t[1],t[2]);//the p vector of the plane being selected on
+    Vector tQ (t[4],t[5],t[6]);//the q vector of the plane being selected on
+
+    //the approximate distance away that the cursor is
+    float zvalueXY = tLocation.k+LocalPosition.i*tP.k+LocalPosition.j*tQ.k;
+    
+    
+    LocalPosition.i+= fabs(zvalueXY)*.01*((DeltaPosition.i/tP.i)+(-DeltaPosition.j/tP.j));
+    LocalPosition.j+= fabs(zvalueXY)*.01*((DeltaPosition.i/tQ.i)+(-DeltaPosition.j/tQ.j));
+    
+    DeltaPosition= Vector(0,0,0);
+    //    Vector TransPQR (t[0]*i+t[4]*LocalPosition.j+t[8]*LocalPosition.k+t[12],t[1]*LocalPosition.i+t[5]*LocalPosition.j+t[9]*LocalPosition.k+t[13],t[2]*LocalPosition.i+t[6]*LocalPosition.j+t[10]*LocalPosition.k+t[14]);
+
+    changed=false;
+  }
   GFXBegin(TRIANGLES);
   if (fabs(LocalPosition.k-CrosshairSize)>CrosshairSize) {
     int tmp;
@@ -73,10 +125,8 @@ void LocationSelect:: Draw () {
     GFXVertex3f (LocalPosition.i-CrosshairSize*.125,LocalPosition.j,0);
     GFXVertex3f (LocalPosition.i+CrosshairSize*.125,LocalPosition.j,0);
     GFXVertex3f (LocalPosition.i,LocalPosition.j,LocalPosition.k-tmp*CrosshairSize);
-
  }
   if (fabs(LocalPosition.i)+fabs(LocalPosition.j)>CrosshairSize) {
-
     GFXVertex3f (0,0,0);
     GFXVertex3f (LocalPosition.i,LocalPosition.j,CrosshairSize*.125);
     GFXVertex3f (LocalPosition.i,LocalPosition.j,CrosshairSize*-.125);
@@ -84,7 +134,6 @@ void LocationSelect:: Draw () {
     GFXVertex3f (LocalPosition.i,LocalPosition.j,CrosshairSize*-.125);
     GFXVertex3f (LocalPosition.i,LocalPosition.j,CrosshairSize*.125);
     GFXVertex3f (0,0,0);
-
   }
   POSITION_GFXVertex (0,0,0);
   POSITION_GFXVertex (1,.1,.1);	
@@ -216,4 +265,6 @@ void LocationSelect:: Draw () {
   GFXEnd();
   //  GFXPopBlendMode();
 }
+
+
 #undef POSITION_GFXVertex

@@ -111,10 +111,15 @@ inline void CopyMatrix(Matrix dest, const Matrix source)
 		dest[matindex] = source[matindex];
 }
 
-static Matrix model, view, projection;
+static Matrix model, view, projection, invprojection;
 
 Vector eye, center, up;
-
+void getInverseProjection (float * inv) {
+  inv = invprojection;
+}
+void getProjection (float * proj) {
+  proj = projection;
+}
 BOOL /*GFXDRVAPI*/ GFXMultMatrix(MATRIXMODE mode, Matrix matrix)
 {
 	Matrix t;
@@ -220,7 +225,7 @@ static void gl_Frustum(
 {
    GLfloat x, y, a, b, c, d;
    GLfloat *m = projection;
-
+   GLfloat *i = invprojection;
    x = (((float)2.0)*nearval) / (right-left);
    y = (((float)2.0)*nearval) / (top-bottom);
    a = (right+left) / (right-left);
@@ -233,6 +238,12 @@ static void gl_Frustum(
    M(1,0) = 0.0F;  M(1,1) = y;     M(1,2) = b;      M(1,3) = 0.0F;
    M(2,0) = 0.0F;  M(2,1) = 0.0F;  M(2,2) = c;      M(2,3) = d;
    M(3,0) = 0.0F;  M(3,1) = 0.0F;  M(3,2) = -1.0F;  M(3,3) = 0.0F;
+#undef M
+#define M(row,col) i[col*4+row]
+   M(0,0) = 1./x;  M(0,1) = 0.0F;  M(0,2) = 0.0F;   M(0,3) = a/x;
+   M(1,0) = 0.0F;  M(1,1) = 1./y;  M(1,2) = 0.0F;   M(1,3) = b/y;
+   M(2,0) = 0.0F;  M(2,1) = 0.0F;  M(2,2) = 0.0F;   M(2,3) =-1.0F;
+   M(3,0) = 0.0F;  M(3,1) = 0.0F;  M(3,2) = 1./d;  M(3,3) = c/d;
 #undef M
 }
 

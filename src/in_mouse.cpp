@@ -24,7 +24,7 @@
 //#include "dbg.h"
 #include "in_handler.h"
 #include "in_mouse.h"
-#include <stdio.h>
+
 #define NUM_BUTTONS 3
 KBSTATE MouseState [NUM_BUTTONS]= {RELEASE};
 static MouseHandler mouseBindings [NUM_BUTTONS];
@@ -34,13 +34,15 @@ int mousey=0;
 void mouseClick( int button, int state, int x, int y ) {
   mousex = x;
   mousey = y;
-  mouseBindings[button](state==GLUT_DOWN?PRESS:RELEASE,x,y,0,0);
+  int mod =glutGetModifiers();
+  mouseBindings[button](state==GLUT_DOWN?PRESS:RELEASE,x,y,0,0,mod);
   MouseState[button]=(state==GLUT_DOWN)?DOWN:UP;
 }
 
 void  mouseDrag( int x, int y ) {
+  //  int mod =glutGetModifiers();
   for (int i=0;i<NUM_BUTTONS;i++) {
-    mouseBindings[i](MouseState[i],x,y,x-mousex,y-mousey);
+    mouseBindings[i](MouseState[i],x,y,x-mousex,y-mousey,0);
   }
 
   mousex = x;
@@ -49,18 +51,26 @@ void  mouseDrag( int x, int y ) {
 }	
 
 void mouseMotion(int x, int y) {
-  //draw cursor?  or update position??
+  //  int mod =glutGetModifiers();
   for (int i=0;i<NUM_BUTTONS;i++) {
-    mouseBindings[i](MouseState[i],x,y,x-mousex,y-mousey);
+    mouseBindings[i](MouseState[i],x,y,x-mousex,y-mousey,0);
   }
   mousex = x;
   mousey = y;
 }
 
 
-static void DefaultMouseHandler (KBSTATE, int x, int y, int delx, int dely) {
 
-  fprintf (stderr,"good");
+
+/**
+GLUT_ACTIVE_SHIFT 
+    Set if the Shift modifier or Caps Lock is active. 
+GLUT_ACTIVE_CTRL 
+    Set if the Ctrl modifier is active. 
+GLUT_ACTIVE_ALT 
+    Set if the Alt modifier is active. 
+*/
+static void DefaultMouseHandler (KBSTATE, int x, int y, int delx, int dely,int mod) {
   return;
 }
 
@@ -70,7 +80,7 @@ void UnbindMouse (int key) {
 }
 void BindKey (int key, MouseHandler handler) {
   mouseBindings[key]=handler;
-  handler (RESET,mousex,mousey,0,0);
+  handler (RESET,mousex,mousey,0,0,0);
 }
 void InitMouse(){
   for (int a=0;a<NUM_BUTTONS;a++) {
@@ -82,7 +92,7 @@ void InitMouse(){
 }				
 void ProcessMouse () {
   for (int a=0;a<NUM_BUTTONS;a++) {
-    mouseBindings[a](MouseState[a],mousex,mousey,0,0);
+    mouseBindings[a](MouseState[a],mousex,mousey,0,0,0);
   }
 
 }

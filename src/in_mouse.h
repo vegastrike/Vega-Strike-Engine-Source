@@ -22,13 +22,13 @@
 #ifndef _MOUSE_H_
 #define _MOUSE_H_
 #include "in_kb.h"
+
 extern int mousex, mousey;
 void InitMouse();
 void ProcessMouse();
-typedef void (*MouseHandler)(KBSTATE,int x, int y, int delx, int dely);
+typedef void (*MouseHandler)(KBSTATE,int x, int y, int delx, int dely, int mod);
 void BindKey(int key,MouseHandler handler);
 void UnbindMouse (int key);
- 
 
 #endif
 
