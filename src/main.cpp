@@ -432,12 +432,20 @@ void bootstrap_main_loop () {
     bootstrap_draw ("Vegastrike Loading...",-.135,0,SplashScreen);
   if (g_game.music_enabled) {
 #ifdef _WIN32
-//    int pid=spawnl(P_NOWAIT,"./soundserver","./soundserver",NULL);
-	  int pid=(int)ShellExecute(NULL,"open","./soundserver.exe","","./",SW_MINIMIZE);
-    if (pid<=32) {
-      g_game.music_enabled=false;
-      fprintf(stderr,"Unable to spawn music player server Error (%d)\n",pid);
-    }
+	  static bool isconsole=XMLSupport::parse_bool(vs_config->getVariable("audio","music_in_console","false");
+	  if (isconsole) {
+	    int pid=(int)ShellExecute(NULL,"open","./soundserver.exe","","./",SW_MINIMIZE);
+        if (pid<=32) {
+          g_game.music_enabled=false;
+          fprintf(stderr,"Unable to spawn music player server Error (%d)\n",pid);
+        }
+	  } else {
+	    int pid=spawnl(P_NOWAIT,"./soundserver.exe","./soundserver.exe",NULL);
+		if (pid==0) {
+          g_game.music_enabled=false;
+          fprintf(stderr,"Unable to spawn music player server Error (%d)\n",pid);
+		}
+	  }
 #endif
   }
     QVector pos;
