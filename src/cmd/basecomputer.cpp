@@ -3303,7 +3303,7 @@ void prettyPrintFloat(char * buffer,float f, int digitsBefore, int digitsAfter) 
 	
 	float dbgval=f;
 	int bufferPos=0;
-	if (!finite(f)) {
+	if (!FINITE(f)) {
 		buffer[0]='n';
 		buffer[1]='/';
 		buffer[2]='a';
