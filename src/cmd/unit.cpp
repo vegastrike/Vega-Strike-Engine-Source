@@ -895,7 +895,7 @@ void Unit::Draw(const Transformation &parent, const Matrix &parentMatrix)
 #endif
       //      fprintf (stderr,"%s %d ",name.c_str(),i);
       float d = GFXSphereInFrustum(TransformedPosition,
-				   meshdata[i]->rSize()
+				   meshdata[i]->clipRadialSize()
 #ifdef VARIABLE_LENGTH_PQR
 				   *SizeScaleFactor
 #endif 

@@ -366,6 +366,7 @@ public:
   bool queryBoundingBox (const QVector &start, const QVector & end, const float err); 
   ///returns the radial size of this 
   float rSize () {return radialSize;}
+  virtual float clipRadialSize() {return radialSize;}
   ///based on TTL, etc, updates shield effects
   void UpdateFX(float ttime);
   ///Adds a new damage effect with %age damage to the part of the unit. Color specifies the shield oclor
