@@ -35,7 +35,7 @@ char pwd[65536];
 //int gcc295vfscanf( FILE * fp, const char * format, va_list arglist) {
 //  return vfscanf(fp,format,arglist);
 //}
-VSVolumeType isin_bigvolumes = None;
+VSVolumeType isin_bigvolumes = VSFSNone;
 string curmodpath = "";
 
 ObjSerial	serial_seed = 0;
@@ -909,7 +909,7 @@ namespace VSFileSystem
 				}
 				else
 				{
-					isin_bigvolumes = None;
+					isin_bigvolumes = VSFSNone;
 					found = 1;
 				}
 			}
@@ -958,7 +958,7 @@ namespace VSFileSystem
 					//cerr<<"Volume is ok, looking for file in it"<<endl;
 					found = vol->FileExists( filestr.c_str());
 					if(found>=0)
-						isin_bigvolumes = Big;
+						isin_bigvolumes = VSFSBig;
 				}
 				else
 					found = -1;
@@ -998,7 +998,7 @@ namespace VSFileSystem
 						//cerr<<"Volume is ok, looking for file in it"<<endl;
 						found = vol->FileExists( filestr.c_str());
 						if(found>=0)
-							isin_bigvolumes = Split;
+							isin_bigvolumes = VSFSSplit;
 					}
 					else
 						found = -1;
@@ -1123,7 +1123,7 @@ namespace VSFileSystem
 					subdir += extra;
 
 				found = FileExists( curpath, (subdir+"/"+f.GetFilename()).c_str(), curtype, false);
-				f.SetVolume( None);
+				f.SetVolume( VSFSNone);
 			}
 		}
 
@@ -1172,7 +1172,7 @@ namespace VSFileSystem
 
 	#ifdef VSFS_DEBUG
 		//cerr<<failed<<" - VOLUME TYPE="<<isin_bigvolumes<<endl;
-		if( isin_bigvolumes>None)
+		if( isin_bigvolumes>VSFSNone)
 			cerr<<failed<<" - INDEX="<<found<<endl<<endl;
 		else
 			cerr<<failed<<endl;
@@ -1186,9 +1186,9 @@ namespace VSFileSystem
 			f.SetRoot( curpath);
 			f.SetVolume( isin_bigvolumes);
 			// If we found a file in a volume we store its index in the concerned archive
-			if( UseVolumes[curtype] && isin_bigvolumes>None)
+			if( UseVolumes[curtype] && isin_bigvolumes>VSFSNone)
 				f.SetIndex( found);
-			isin_bigvolumes = None;
+			isin_bigvolumes = VSFSNone;
 			if( shared)
 			{
 				return Shared;
@@ -1219,7 +1219,7 @@ namespace VSFileSystem
 		valid  = false;
 		file_type   = alt_type = UnknownFile;
 		file_index  = -1;
-		volume_type = None;
+		volume_type = VSFSNone;
 	}
 
 	VSFile::VSFile()
@@ -1237,7 +1237,7 @@ namespace VSFileSystem
 		this->file_type = this->alt_type = ZoneBuffer;
 		this->file_mode = mode;
 		// To say we want to read in volume even if it is not the case then it will read in pk3_extracted_file
-		this->volume_type = Big;
+		this->volume_type = VSFSBig;
 	}
 
 	VSFile::VSFile( const char * filename, VSFileType type, VSFileMode mode)
@@ -1269,7 +1269,7 @@ namespace VSFileSystem
 			if( !pk3_extracted_file)
 			{
 				string full_vol_path;
-				if( this->volume_type==Big)
+				if( this->volume_type==VSFSBig)
 				{
 					full_vol_path = this->rootname+"/data."+volume_format;
 				}
@@ -1413,7 +1413,7 @@ namespace VSFileSystem
 				}
 				// Test if we have found a file in another FileType's dir and if it doesn't use volumes
 				// If so we open the file as a normal one
-				if( this->volume_type==None || this->alt_type!=this->file_type && !UseVolumes[this->alt_type])
+				if( this->volume_type==VSFSNone || this->alt_type!=this->file_type && !UseVolumes[this->alt_type])
 				{
 					filestr = this->GetFullPath();
 					this->fp = fopen( filestr.c_str(), "rb");
@@ -1541,7 +1541,7 @@ namespace VSFileSystem
 	{
 		size_t nbread = 0;
 
-		if( !UseVolumes[this->alt_type] || this->volume_type==None)
+		if( !UseVolumes[this->alt_type] || this->volume_type==VSFSNone)
 		{
 			assert( fp!=NULL);
 			nbread = fread( ptr, 1, length, this->fp);
@@ -1567,7 +1567,7 @@ namespace VSFileSystem
 	VSError  VSFile::ReadLine( void * ptr, size_t length)
 	{
 		char * ret;
-		if( !UseVolumes[alt_type] || this->volume_type==None)
+		if( !UseVolumes[alt_type] || this->volume_type==VSFSNone)
 		{
 			ret = fgets( (char *)ptr, length, this->fp);
 			if( !ret)
@@ -1614,7 +1614,7 @@ namespace VSFileSystem
 
 	string  VSFile::ReadFull()
 	{
-		if( !UseVolumes[alt_type] || this->volume_type==None)
+		if( !UseVolumes[alt_type] || this->volume_type==VSFSNone)
 		{
 			char * content = new char[this->Size()+1];
 			content[this->Size()] = 0;
@@ -1646,7 +1646,7 @@ namespace VSFileSystem
 
 	size_t  VSFile::Write( const void * ptr, size_t length)
 	{
-		if( !UseVolumes[this->alt_type] || this->volume_type==None)
+		if( !UseVolumes[this->alt_type] || this->volume_type==VSFSNone)
 		{
 			size_t nbwritten = fwrite( ptr, 1, length, this->fp);
 			return nbwritten;
@@ -1667,7 +1667,7 @@ namespace VSFileSystem
 
 	VSError  VSFile::WriteLine( const void * ptr)
 	{
-		if( !UseVolumes[alt_type] || this->volume_type==None)
+		if( !UseVolumes[alt_type] || this->volume_type==VSFSNone)
 			fputs( (const char *)ptr, this->fp);
 		else
 		{
@@ -1683,7 +1683,7 @@ namespace VSFileSystem
 
 	int		VSFile::Fprintf( const char * format, ...)
 	{
-		if( !UseVolumes[alt_type] || this->volume_type==None)
+		if( !UseVolumes[alt_type] || this->volume_type==VSFSNone)
 		{
 			va_list ap;
 			va_start( ap, format);
@@ -1712,7 +1712,7 @@ namespace VSFileSystem
 		strcat( newformat, "%n");
 		va_list   arglist;
 		va_start( arglist, format);
-		if( !UseVolumes[alt_type] || this->volume_type==None)
+		if( !UseVolumes[alt_type] || this->volume_type==VSFSNone)
 		{
 			//return _input(fp,(unsigned char*)format,arglist);
 			ret = vfscanf( this->fp, newformat, arglist);
@@ -1742,7 +1742,7 @@ namespace VSFileSystem
 
 	void  VSFile::Begin()
 	{
-		if( !UseVolumes[alt_type] || this->volume_type==None || this->file_mode!=ReadOnly)
+		if( !UseVolumes[alt_type] || this->volume_type==VSFSNone || this->file_mode!=ReadOnly)
 		{
 			fseek( this->fp, 0, SEEK_SET);
 		}
@@ -1757,7 +1757,7 @@ namespace VSFileSystem
 
 	void  VSFile::End()
 	{
-		if( !UseVolumes[alt_type] || this->volume_type==None || this->file_mode!=ReadOnly)
+		if( !UseVolumes[alt_type] || this->volume_type==VSFSNone || this->file_mode!=ReadOnly)
 		{
 			fseek( this->fp, 0, SEEK_END);
 		}
@@ -1772,7 +1772,7 @@ namespace VSFileSystem
 
 	void  VSFile::GoTo( long foffset)	// Does a VSFileSystem::Fseek( fp, offset, SEEK_SET);
 	{
-		if( !UseVolumes[alt_type] || this->volume_type==None || this->file_mode!=ReadOnly)
+		if( !UseVolumes[alt_type] || this->volume_type==VSFSNone || this->file_mode!=ReadOnly)
 		{
 			fseek( this->fp, foffset, SEEK_SET);
 		}
@@ -1789,7 +1789,7 @@ namespace VSFileSystem
 	{
 		if( size == -1)
 		{
-			if( !UseVolumes[alt_type] || this->volume_type==None || file_mode!=ReadOnly)
+			if( !UseVolumes[alt_type] || this->volume_type==VSFSNone || file_mode!=ReadOnly)
 			{
 				struct stat st;
 				if( (fp!=NULL) && fstat( fileno(fp), &st)==0 )
@@ -1814,7 +1814,7 @@ namespace VSFileSystem
 
 	void  VSFile::Clear()
 	{
-		if( !UseVolumes[alt_type] || this->volume_type==None || file_mode!=ReadOnly)
+		if( !UseVolumes[alt_type] || this->volume_type==VSFSNone || file_mode!=ReadOnly)
 		{
 			fclose( fp);
 			this->fp = fopen( this->GetFullPath().c_str(), "w+b");
@@ -1835,7 +1835,7 @@ namespace VSFileSystem
 	long  VSFile::GetPosition()
 	{
 		long ret=0;
-		if( !UseVolumes[alt_type] || this->volume_type==None || file_mode!=ReadOnly)
+		if( !UseVolumes[alt_type] || this->volume_type==VSFSNone || file_mode!=ReadOnly)
 		{
 			ret = ftell( this->fp);
 		}
@@ -1855,7 +1855,7 @@ namespace VSFileSystem
 	bool  VSFile::Eof()
 	{
 		bool eof = false;
-		if( !UseVolumes[alt_type] || this->volume_type==None || file_mode!=ReadOnly)
+		if( !UseVolumes[alt_type] || this->volume_type==VSFSNone || file_mode!=ReadOnly)
 		{
 			eof = vs_feof( this->fp);
 		}
@@ -1898,7 +1898,7 @@ namespace VSFileSystem
 			cerr<<endl<<endl;
 		#endif
 		}
-		if( !UseVolumes[file_type] || this->volume_type==None || file_mode!=ReadOnly)
+		if( !UseVolumes[file_type] || this->volume_type==VSFSNone || file_mode!=ReadOnly)
 		{
 			fclose( this->fp);
 			this->fp = NULL;
@@ -1974,7 +1974,7 @@ namespace VSFileSystem
 	void	VSFile::SetVolume( VSVolumeType big)
 	{ this->volume_type = big; }
 	bool	VSFile::UseVolume()
-	{ return (UseVolumes[alt_type] && volume_type!=None); }
+	{ return (UseVolumes[alt_type] && volume_type!=VSFSNone); }
 
 	void	VSFile::GoAfterEOL( int length)
 	{

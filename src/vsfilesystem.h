@@ -66,7 +66,7 @@ namespace VSFileSystem
 						UnknownFile		// Loaded from homedir or datadir and written in homedir
 					};
 
-	enum VSVolumeType { None, Split, Big };
+	enum VSVolumeType { VSFSNone, VSFSSplit, VSFSBig };
 
 	void	      DisplayType( VSFileType type);
 	void	      DisplayType( VSFileType type, std::ostream& ostr );
