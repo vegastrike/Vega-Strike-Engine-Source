@@ -440,7 +440,8 @@ void Unit::UpdatePhysics (const Transformation &trans, const Matrix transmat, co
     Rotate (SIMULATION_ATOM*(AngularVelocity));
   }
   float difficulty =1;
-  if (_Universe->isPlayerStarship(this)!=NULL) {
+  Cockpit * player_cockpit=NULL;
+  if ((player_cockpit=_Universe->isPlayerStarship(this))!=NULL) {
     difficulty = sqrtf (g_game.difficulty);
   }
   curr_physical_state.position = curr_physical_state.position + QVector (Velocity*SIMULATION_ATOM*difficulty);
@@ -489,33 +490,43 @@ void Unit::UpdatePhysics (const Transformation &trans, const Matrix transmat, co
       increase_locking=true;
     }
   }
-
+  static string LockingSoundName = vs_config->getVariable ("unitaudio","locking","locking.wav");
+  static int LockingSound = AUDCreateSoundWAV (LockingSoundName,true);
+  bool locking=false;
+  bool touched=false;
   for (i=0;i<nummounts;i++) {
-    if (increase_locking) {
-      if (mounts[i].status==Mount::ACTIVE&&cloaking<0&&mounts[i].ammo!=0) {
+    if (mounts[i].status==Mount::ACTIVE&&cloaking<0&&mounts[i].ammo!=0) {
+      if (player_cockpit) {
+	  touched=true;
+      }
+      if (increase_locking) {
 	mounts[i].time_to_lock-=SIMULATION_ATOM;
 	static bool ai_lock_cheat=XMLSupport::parse_bool(vs_config->getVariable ("physics","ai_lock_cheat","true"));	
-	if (!_Universe->isPlayerStarship(this)) {
+	if (!player_cockpit) {
 	  if (ai_lock_cheat) {
 	    mounts[i].time_to_lock=0;
 	  }
 	}else {
+
 	  if (mounts[i].type->LockTime>0) {
-	    static string LockingSoundName = vs_config->getVariable ("unitaudio","locking","locking.wav");
-	    static int LockingSound = AUDCreateSoundWAV (LockingSoundName,false);
 	    static string LockedSoundName= vs_config->getVariable ("unitaudio","locked","locked.wav");
 	    static int LockedSound = AUDCreateSoundWAV (LockedSoundName,false);
+
 	    if (mounts[i].time_to_lock>-SIMULATION_ATOM&&mounts[i].time_to_lock<=0) {
 	      if (!AUDIsPlaying(LockedSound)) {
 		AUDStartPlaying(LockedSound);
 		AUDAdjustSound (LockedSound,Position(),GetVelocity());
+		AUDStopPlaying(LockingSound);	      
 	      }
 	    }else if (mounts[i].time_to_lock>0)  {
+	      locking=true;
 	      if (!AUDIsPlaying(LockingSound)) {
-		AUDStartPlaying(LockingSound);
+
+		AUDStartPlaying(LockingSound);	      
 		AUDAdjustSound (LockingSound,Position(),GetVelocity());
+
 	      }
-	      
+
 	    }
 	  }
 
@@ -541,6 +552,11 @@ void Unit::UpdatePhysics (const Transformation &trans, const Matrix transmat, co
     }else if (mounts[i].processed==Mount::UNFIRED) {
       mounts[i].PhysicsAlignedUnfire();
     }
+  }
+  if (locking==false&&touched==true) {
+    if (AUDIsPlaying(LockingSound)) {
+      AUDStopPlaying(LockingSound);	
+    }      
   }
   bool dead=true;
 
