@@ -3119,7 +3119,7 @@ float Unit::ApplyLocalDamage (const Vector & pnt, const Vector & normal, float a
 #endif
   }
 
-  return 1;
+  return ppercentage>0?2.0f:1.0f;
 }
 
 void	Unit::ApplyNetDamage( Vector & pnt, Vector & normal, float amt, float ppercentage, float spercentage, GFXColor & color)
@@ -3163,21 +3163,29 @@ void Unit::ApplyDamage (const Vector & pnt, const Vector & normal, float amt, Un
   Cockpit * cp = _Universe->isPlayerStarship (ownerDoNotDereference);
   float hullpercent=GetHullPercent();
   // Only on client side
-  if (!SERVER && cp) {
-      //now we can dereference it because we checked it against the parent
-      CommunicationMessage c(ownerDoNotDereference,this,NULL,0);
-      c.SetCurrentState(c.fsm->GetHitNode(),NULL,0);
-      if (this->getAIState()) this->getAIState()->Communicate (c);      
-      Threaten (ownerDoNotDereference,10);//the dark danger is real!
-  }
   bool mykilled = hull<0;
   Vector localpnt (InvTransform(cumulative_transformation_matrix,pnt));
   Vector localnorm (ToLocalCoordinates (normal));
   // Only call when on servre side or non-networking
   // If networking damages are applied as they are received
   static float hull_percent_for_comm=XMLSupport::parse_float(vs_config->getVariable("AI","HullPercentForComm",".75"));
-  if( SERVER || Network==NULL)
-	ApplyLocalDamage(localpnt, localnorm, amt,affectedUnit,color,phasedamage);
+  bool armor_damage=false;
+  if( SERVER || Network==NULL){
+    armor_damage=(ApplyLocalDamage(localpnt, localnorm, amt,affectedUnit,color,phasedamage)==2);
+  }
+  if (!SERVER && cp) {
+    static int MadnessForShieldDamage=XMLSupport::parse_bool(vs_config->getVariable("AI","ShieldDamageAnger","1"));
+    static int MadnessForHullDamage=XMLSupport::parse_bool(vs_config->getVariable("AI","HullDamageAnger","10"));
+    int howmany= armor_damage?MadnessForHullDamage:MadnessForShieldDamage;
+    for (int i=0;i<howmany;++i) {
+      //now we can dereference it because we checked it against the parent
+      CommunicationMessage c(ownerDoNotDereference,this,NULL,0);
+      c.SetCurrentState(c.fsm->GetHitNode(),NULL,0);
+      if (this->getAIState()) this->getAIState()->Communicate (c);      
+    }
+    Threaten (ownerDoNotDereference,10);//the dark danger is real!
+  }
+
   if (hull<0) {
 	  ClearMounts();
 	  if (!mykilled) {
