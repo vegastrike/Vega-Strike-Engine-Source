@@ -251,6 +251,11 @@ void Unit::Init()
   static float rr = XMLSupport::parse_float (vs_config->getVariable ("graphics","hud","radarRange","20000"));
   computer.radar.maxrange=rr;
   computer.radar.maxcone=-1;
+  static float minTrackingNum = XMLSupport::parse_float (vs_config->getVariable("physics",
+										  "autotracking",
+										  ".9"));
+    
+  computer.radar.trackingcone = minTrackingNum;
   static float lc =XMLSupport::parse_float (vs_config->getVariable ("physics","lock_cone",".8"));
   computer.radar.lockcone=lc;
   computer.radar.mintargetsize=0;

@@ -451,6 +451,14 @@ bool Unit::UpAndDownGrade (Unit * up, Unit * templ, int mountoffset, int subunit
     STDUPGRADE(myleak,upleak,templeak,0);
     if (touchme)computer.radar.lockcone=1-myleak;
   }
+  static float tc =XMLSupport::parse_float (vs_config->getVariable ("physics","autotracking",".93"));
+  if (up->computer.radar.trackingcone!=tc) {
+    myleak = 1-computer.radar.trackingcone;
+    upleak=1-up->computer.radar.trackingcone;
+    templeak=-(templ!=NULL?templ->computer.radar.trackingcone:0);
+    STDUPGRADE(myleak,upleak,templeak,0);
+    if (touchme)computer.radar.trackingcone=1-myleak;    
+  }
   cancompletefully=ccf;
   //NO CLUE FOR BELOW
   if (downgrade) {

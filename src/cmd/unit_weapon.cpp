@@ -161,18 +161,15 @@ void Unit::Mount::UnFire () {
   //  AUDStopPlaying (sound);
   ref.gun->Destabilize();
 }
-static void AdjustMatrix (Matrix mat, Unit * target, float speed) {
+static void AdjustMatrix (Matrix mat, Unit * target, float speed, bool lead, float cone) {
   if (target) {
-    static float minTrackingNum = XMLSupport::parse_float (vs_config->getVariable("physics",
-										  "autotracking",
-										  ".9"));
-    
     Vector pos (mat[12],mat[13],mat[14]);
     Vector R (mat[8],mat[9],mat[10]);
-    Vector targpos (target->PositionITTS (pos,speed));
+    Vector targpos (lead?target->PositionITTS (pos,speed):target->Position());
+
     Vector dir = targpos-pos;
     dir.Normalize();
-    if (dir.Dot (R)>=minTrackingNum) {
+    if (dir.Dot (R)>=cone) {
       Vector Q(mat[4],mat[5],mat[6]);
       Vector P;
       ScaledCrossProduct (Q,dir,P);
@@ -181,7 +178,7 @@ static void AdjustMatrix (Matrix mat, Unit * target, float speed) {
     }
   }
 }
-bool Unit::Mount::PhysicsAlignedFire(const Transformation &Cumulative, const float * m, const Vector & velocity, Unit * owner, Unit *target, bool autotrack) {
+bool Unit::Mount::PhysicsAlignedFire(const Transformation &Cumulative, const float * m, const Vector & velocity, Unit * owner, Unit *target, signed char autotrack, float trackingcone) {
   if (time_to_lock>0) {
     target=NULL;
   }
@@ -194,7 +191,7 @@ bool Unit::Mount::PhysicsAlignedFire(const Transformation &Cumulative, const flo
     Matrix mat;
     tmp.to_matrix (mat);
     if (autotrack&&NULL!=target) {
-      AdjustMatrix (mat,target,type->Speed);
+      AdjustMatrix (mat,target,type->Speed,autotrack>=2,trackingcone);
     }
     switch (type->type) {
     case weapon_info::BEAM:

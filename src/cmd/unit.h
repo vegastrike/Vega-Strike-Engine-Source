@@ -142,6 +142,7 @@ class Unit
       ///the dot with (0,0,1) indicating the farthest to the side the radar can handle.
       float maxcone;
       float lockcone;
+      float trackingcone;
       ///The minimum radius of the target
       float mintargetsize;
       ///does this radar support IFF?
@@ -252,6 +253,7 @@ class Unit
     ///The sound this mount makes when fired
     const weapon_info *type;
     int sound;
+    
     float time_to_lock;
     Mount();
     Mount(const std::string& name, short int ammo=-1, short int volume=-1);
@@ -271,7 +273,7 @@ class Unit
      * should it fire
      */ 
     void PhysicsAlignedUnfire();
-    bool PhysicsAlignedFire (const Transformation &Cumulative, const float * mat, const Vector & Velocity, Unit *owner,  Unit *target, bool autotrack);
+    bool PhysicsAlignedFire (const Transformation &Cumulative, const float * mat, const Vector & Velocity, Unit *owner,  Unit *target, signed char autotrack, float trackingcone);//0 is no track...1 is target 2 is target + lead
     bool Fire (Unit *owner, bool Missile=false);
   } *mounts;
   ///Mount may access unit

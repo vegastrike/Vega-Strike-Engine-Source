@@ -194,7 +194,8 @@ namespace UnitXML {
       MOUNTOFFSET,
       SUBUNITOFFSET,
       SLIDE_START,
-      SLIDE_END
+      SLIDE_END,
+      TRACKINGCONE
     };
 
   const EnumMap::Pair element_names[35]= {
@@ -235,7 +236,7 @@ namespace UnitXML {
     EnumMap::Pair ("Upgrade",UPGRADE      )
 
   };
-  const EnumMap::Pair attribute_names[90] = {
+  const EnumMap::Pair attribute_names[91] = {
     EnumMap::Pair ("UNKNOWN", UNKNOWN),
     EnumMap::Pair ("missing",MISSING),
     EnumMap::Pair ("file", XFILE), 
@@ -283,6 +284,7 @@ namespace UnitXML {
     EnumMap::Pair ("HudImage",HUDIMAGE),
     EnumMap::Pair ("ExplosionAni",EXPLOSIONANI),
     EnumMap::Pair ("MaxCone",MAXCONE),
+    EnumMap::Pair ("TrackingCone",TRACKINGCONE),
     EnumMap::Pair ("LockCone",LOCKCONE),
     EnumMap::Pair ("MinTargetSize",MINTARGETSIZE),
     EnumMap::Pair ("Range",RANGE),
@@ -329,7 +331,7 @@ namespace UnitXML {
   };
 
   const EnumMap element_map(element_names, 35);
-  const EnumMap attribute_map(attribute_names, 90);
+  const EnumMap attribute_map(attribute_names, 91);
 }
 
 using XMLSupport::EnumMap;
@@ -1201,7 +1203,8 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
    ADDELEMNAME("color",charStarHandler,XMLType(&computer.radar.color));    
     ADDELEMNAME("mintargetsize",charStarHandler,XMLType(&computer.radar.mintargetsize));    
     ADDELEMNAME("range",floatStarHandler,XMLType(&computer.radar.maxrange));    
-    ADDELEMNAME("maxcone",floatStarHandler,XMLType(&computer.radar.maxcone));    
+    ADDELEMNAME("maxcone",floatStarHandler,XMLType(&computer.radar.maxcone));   
+    ADDELEMNAME("TrackingCone",floatStarHandler,XMLType(&computer.radar.trackingcone));    
     ADDELEMNAME("lockcone",floatStarHandler,XMLType(&computer.radar.lockcone));    
     image->unitwriter->EndTag ("Radar");    
     break;
@@ -1222,6 +1225,9 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
 	break;
       case LOCKCONE:
 	computer.radar.lockcone = parse_float ((*iter).value);
+	break;
+      case TRACKINGCONE:
+	computer.radar.trackingcone = parse_float ((*iter).value);
 	break;
       case RANGE:
 	computer.radar.maxrange = parse_float ((*iter).value);
