@@ -391,7 +391,7 @@ but that may change over time
 use
 _Universe->AccessCockpit()->GetParent();
 #endif
-void createObjects() {
+void createObjects(std::string fighter0name) {
   //  GFXFogMode (FOG_OFF);
   explosion= new Animation ("explosion_orange.ani",false,.1,BILINEAR,false);
 
@@ -441,7 +441,7 @@ void createObjects() {
   GFXEnable(TEXTURE1);
 
   map<string,int> targetmap;
-  std::string fighter0name;
+
   std::string fighter0mods;
   char fightername [1024]="hornet.xunit";
   int a=0;
@@ -511,8 +511,11 @@ void createObjects() {
 	if (fg_terrain==-1||(fg_terrain==-2&&myterrain==NULL)) {
 	  string modifications ("");
 	  if (a==0) {
-	    fighter0name=string(fightername);
-	    if (mission->getVariable ("savegame","").length()>0) 
+	    if (fighter0name.length()==0)
+	      fighter0name=string(fightername);
+	    else
+	      strcpy(fightername,fighter0name.c_str());
+	    if (mission->getVariable ("savegame","").length()>0)   std::string fighter0name;
 	      fighter0mods=modifications =vs_config->getVariable ("player","callsign","Hellcat");
 	  }
 	  fighters[a] = new Unit(fightername, false,tmptarget[a],modifications,fg,s);

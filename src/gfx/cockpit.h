@@ -88,6 +88,8 @@ class Cockpit {
  public:
   ///Restores the view from the IDentity Matrix needed to draw sprites
   void RestoreViewPort();
+  std::string GetUnitFileName () {return unitfilename;}
+  std::string GetUnitModifications() {return unitmodname;}
 
   float credits;//how much money player has
   ///How far away chasecam and pan cam is

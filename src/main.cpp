@@ -77,7 +77,7 @@ void cleanup(void)
   if (_Universe->AccessCockpit()) {
     if (_Universe->AccessCockpit()->GetParent()) {
       if(_Universe->AccessCockpit()->GetParent()->GetHull()>0) {
-	WriteSaveGame (_Universe->getActiveStarSystem(0)->getFileName().c_str(),_Universe->AccessCockpit()->GetParent()->Position(),_Universe->AccessCockpit()->credits);
+	WriteSaveGame (_Universe->getActiveStarSystem(0)->getFileName().c_str(),_Universe->AccessCockpit()->GetParent()->Position(),_Universe->AccessCockpit()->credits,_Universe->AccessCockpit()->GetUnitFileName());
 	_Universe->AccessCockpit()->GetParent()->WriteUnit(vs_config->getVariable("player","callsign","Hellcat").c_str());
       } 
     }
@@ -228,10 +228,11 @@ void bootstrap_main_loop () {
     float credits=XMLSupport::parse_float (mission->getVariable("credits","0"));
     string savegamefile = mission->getVariable ("savegame","");
     vector <SavedUnits> savedun;
-    savedun=ParseSaveGame (savegamefile,mysystem,mysystem,pos,setplayerloc,credits);
+    string playersaveunit;
+    savedun=ParseSaveGame (savegamefile,mysystem,mysystem,pos,setplayerloc,credits,playersaveunit);
    
     _Universe->Init (mysystem,pos,planetname);
-    createObjects();
+    createObjects(playersaveunit);
     _Universe->AccessCockpit()->credits=credits;
     if (setplayerloc&&fighters) {
       if (fighters[0]) {

@@ -45,11 +45,8 @@ std::string Unit::massSerializer (const XMLType &input, void *mythis) {
   }
   return XMLSupport::tostring((float)mass);
 }
-std::string Unit::cargoSerializer (const XMLType &input, void * mythis) {
-  Unit * un= (Unit *)mythis;
-  if (un->image->cargo.size()==0) {
-    return string("0");
-  }
+void Unit::SortCargo() {
+  Unit *un=this;
   std::sort (un->image->cargo.begin(),un->image->cargo.end());
 
   for (unsigned int i=0;i+1<un->image->cargo.size();i++) {
@@ -66,6 +63,13 @@ std::string Unit::cargoSerializer (const XMLType &input, void * mythis) {
     }
 
   }
+}
+std::string Unit::cargoSerializer (const XMLType &input, void * mythis) {
+  Unit * un= (Unit *)mythis;
+  if (un->image->cargo.size()==0) {
+    return string("0");
+  }
+  un->SortCargo();
   string retval("");
   if (!(un->image->cargo.empty())) {
     retval= un->image->cargo[0].category+string ("\">\n")+CargoToString(un->image->cargo[0]);
@@ -96,6 +100,7 @@ bool Unit::CanAddCargo (const Cargo &carg)const {
 void Unit::AddCargo (const Cargo &carg) {
   mass+=carg.quantity*carg.mass;
   image->cargo.push_back (carg);
+  SortCargo();
 }
 int Unit::RemoveCargo (unsigned int i, int quantity,bool eraseZero) {
   assert (i<image->cargo.size());

@@ -693,6 +693,7 @@ public:
   static std::string subunitSerializer(const struct XMLType &input, void*mythis);
   ///if the unit is a planet, this contains the long-name 'mars-station'
   string fullname;
+  void SortCargo();
  public:
   void WriteUnit(const char * modificationname="");
   void SetTurretAI ();

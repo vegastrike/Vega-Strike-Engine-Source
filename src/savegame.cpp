@@ -35,7 +35,7 @@ void RemoveUnitFromSave (int address) {
 }
 void AddUnitToSave (const char * filename, enum clsptr type, const char * faction, int address) {
   static string s = vs_config->getVariable ("physics","Drone","drone");
-  if (0==strcmp (s.c_str(),filename)||type==ENHANCEMENTPTR) {
+  if (0==strcmp (s.c_str(),filename)/*||type==ENHANCEMENTPTR*/) {
     RemoveUnitFromSave (address);
     savedunits.Put (address,new SavedUnits (filename,type,faction));
   }
@@ -53,7 +53,7 @@ vector <SavedUnits> ReadSavedUnits (FILE * fp) {
 void WriteSavedUnit (FILE * fp, SavedUnits* su) {
   fprintf (fp,"\n%d %s %s",su->type, su->filename.c_str(),su->faction.c_str());
 }
-void WriteSaveGame (const char *systemname, const Vector &FP, float credits) {
+void WriteSaveGame (const char *systemname, const Vector &FP, float credits, std::string unitname) {
   vector<SavedUnits *> myvec = savedunits.GetAll();
   if (outputsavegame.length()!=0) {
     printf ("Writing Save Game %s",outputsavegame.c_str());
@@ -66,7 +66,7 @@ void WriteSaveGame (const char *systemname, const Vector &FP, float credits) {
     if (originalsystem!=systemname) {
       FighterPos=-FP;
     }
-    fprintf (fp,"%s^%f %f %f %f",systemname,credits,FighterPos.i,FighterPos.j,FighterPos.k);
+    fprintf (fp,"%s^%f^%s %f %f %f",systemname,credits,unitname.c_str(),FighterPos.i,FighterPos.j,FighterPos.k);
     SetSavedCredits (credits);
     while (myvec.empty()==false) {
       WriteSavedUnit (fp,myvec.back());
@@ -83,7 +83,7 @@ float GetSavedCredits () {
 void SetSavedCredits (float c) {
   savedcredits = c;
 }
-vector<SavedUnits> ParseSaveGame (const string filename, string &FSS, string originalstarsystem, Vector &PP, bool & shouldupdatepos,float &credits) {
+vector<SavedUnits> ParseSaveGame (const string filename, string &FSS, string originalstarsystem, Vector &PP, bool & shouldupdatepos,float &credits, string &savedstarship) {
 
   vector <SavedUnits> mysav;
   shouldupdatepos=!(PlayerLocation.i==FLT_MAX||PlayerLocation.j==FLT_MAX||PlayerLocation.k==FLT_MAX);
@@ -103,6 +103,13 @@ vector<SavedUnits> ParseSaveGame (const string filename, string &FSS, string ori
 	if (tmp2[j]=='^') {
 	  sscanf (tmp2+j+1,"%f",&credits);
 	  tmp2[j]='\0';
+	  for (int k=j+1;tmp2[k]!='\0';k++) {
+	    if (tmp2[k]=='^') {
+	      tmp2[k]='\0';
+	      savedstarship=string(tmp2+k+1);
+	      break;
+	    }
+	  }
 	  break;
 	}
       }

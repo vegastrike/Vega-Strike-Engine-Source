@@ -32,6 +32,7 @@ struct UpgradingInfo {
   int selectedmount;
   int selectedturret;
   //end it
+  struct LastSelected{int type; float x; float y; int button; int state;bool last;LastSelected() {last=false;}} lastselected;
   void ProcessMouse(int type, int x, int y, int button, int state);
 
   vector <Cargo> TempCargo;//used to store cargo list
@@ -54,7 +55,7 @@ struct UpgradingInfo {
 	  CargoList->AddTextItem ("[Back To Categories]","[Back To Categories]");
 	for (unsigned int i=0;i<CurrentList->size();i++) {
 	  if ((*CurrentList)[i].category==curcategory)
-	    CargoList->AddTextItem ((tostring((int)i)+ string(" ")+(*CurrentList)[i].content).c_str() ,(*CurrentList)[i].content.c_str());
+	    CargoList->AddTextItem ((tostring((int)i)+ string(" ")+(*CurrentList)[i].content).c_str() ,((*CurrentList)[i].content+"("+tostring((*CurrentList)[i].quantity)+")").c_str());
 	}
       } else {
 	string curcat=("");
@@ -93,7 +94,8 @@ struct UpgradingInfo {
     }
   }
   void SetMode (enum BaseMode mod, enum SubMode smod) {
-    curcategory="";
+    if (mod!=mode)
+      curcategory="";
     string ButtonText;
     switch (mod) {
     case BUYMODE:
@@ -105,7 +107,7 @@ struct UpgradingInfo {
       ButtonText= "SellCargo";
       break;
     case UPGRADEMODE:
-      title = "Upgrade/Repair Starship Mode";
+      title = "Upgrade/Repair Starship";
       ButtonText="Upgrade";
       break;
     case ADDMODE:
@@ -146,7 +148,8 @@ struct UpgradingInfo {
     
 	CargoList = new TextArea(-1, 0.9, 1, 1.7, 1);
 	CargoInfo = new TextArea(0, 0.9, 1, 1.7, 0);
-	NewPart=NULL;
+	NewPart=NULL;//no ship to upgrade
+	templ=NULL;//no template
 	//	CargoList->AddTextItem("a","Just a test item");
 	//	CargoList->AddTextItem("b","And another just to be sure");
 	CargoInfo->AddTextItem("name", "");
@@ -198,7 +201,7 @@ struct UpgradingInfo {
 	// Black background
 	ShowColor(-1,-1,2,2, 0,0,0,1);
 	ShowColor(0,0,0,0, 1,1,1,1);
-	ShowText(-0.98, 0.93, 1, 4, title.c_str(), 0);
+	ShowText(-0.98, 0.93, 1, 4, (title+ string(" Credits: ")+tostring (_Universe->AccessCockpit()->credits)).c_str(), 0);
 	CargoList->Refresh();
 	CargoInfo->Refresh();
 	OK->Refresh();
@@ -208,6 +211,7 @@ struct UpgradingInfo {
 	}
 	EndGUIFrame();
   }
+  void SelectLastSelected();
   void SelectItem (const char * str);
   void CommitItem (const char * str, int button, int state);
   //this function is called after the mount is selected and stored in selected mount
@@ -246,32 +250,60 @@ void Unit::UpgradeInterface(Unit * base) {
   GFXLoop (RefreshGUI);
 }
 void UpgradingInfo::SelectItem (const char *item) {
-
+  switch (mode) {
+  case BUYMODE:
+  case SELLMODE:
+  case UPGRADEMODE:
+  case ADDMODE:
+  case DOWNGRADEMODE:    
+  case SHIPDEALERMODE:
+    switch (submode) {
+    case NORMAL:
+      if (curcategory.length()!=0) {
+	int cargonumber;
+	sscanf (item,"%d",&cargonumber);
+	CargoInfo->ChangeTextItem ("name",(*CurrentList)[cargonumber].content.c_str());
+	CargoInfo->ChangeTextItem ("price",(tostring((*CurrentList)[cargonumber].price)).c_str());
+      }
+      break;
+    default:
+      CommitItem (item,0,1);
+      break;
+    }
+    break;
+  case MISSIONMODE:
+    break;
+  }
 
 }
-void UpgradingInfo::CommitItem (const char *input_buffer, int button, int state) {
+void UpgradingInfo::CommitItem (const char *inp_buf, int button, int state) {
   Unit * un;
   Unit * base;
   unsigned int offset;
   int quantity=(button==0)?1:(button==1?10000:10);
+  int index;
+  char * input_buffer = strdup (inp_buf);
+  sscanf (inp_buf,"%d %s",&index,input_buffer);
   if (templ!=NULL) {
     templ->Kill();
     templ=NULL;
   }
-  if (state==GLUT_DOWN&&(un=buyer.GetUnit())&&(base=this->base.GetUnit())) {
-  Unit * temprate= new Unit ((un->name+string(".template")).c_str(),false,un->faction);
-  if (temprate->name!=string("LOAD_FAILED")) {
-    templ=temprate;
-  }else {
-    templ=NULL;
-    temprate->Kill();
-  }
+  if (state==1&&(un=buyer.GetUnit())&&(base=this->base.GetUnit())) {
   
   switch (mode) {
   case UPGRADEMODE:
   case ADDMODE:
   case DOWNGRADEMODE:    
   case SHIPDEALERMODE:
+    {
+      Unit * temprate= new Unit ((un->name+string(".template")).c_str(),false,un->faction);
+      if (temprate->name!=string("LOAD_FAILED")) {
+	templ=temprate;
+      }else {
+	templ=NULL;
+	temprate->Kill();
+      }
+    }
     switch(submode) {
     case NORMAL:
       {
@@ -327,15 +359,15 @@ void UpgradingInfo::CommitItem (const char *input_buffer, int button, int state)
       }
       break;
     case MOUNT_MODE:
-      sscanf (input_buffer,"%d",&selectedmount);
+      selectedmount = index;
       CompleteTransactionAfterMountSelect();
       break;
     case SUBUNIT_MODE:
-      sscanf (input_buffer,"%d",&selectedturret);
+      selectedturret = index;
       CompleteTransactionAfterTurretSelect();
       break;
     case CONFIRM_MODE:
-      if (0==strcmp ("Yes",input_buffer)) {
+      if (0==strcmp ("Yes",inp_buf)) {
 	CompleteTransactionConfirm();
       }else {
 	SetMode(mode,NORMAL);
@@ -347,6 +379,8 @@ void UpgradingInfo::CommitItem (const char *input_buffer, int button, int state)
       if ((base=this->base.GetUnit())) {
 	un->BuyCargo (input_buffer,quantity,base,_Universe->AccessCockpit()->credits);
       }
+      SetMode (mode,submode);
+      SelectLastSelected();
     }
     break;
   case SELLMODE:
@@ -355,6 +389,8 @@ void UpgradingInfo::CommitItem (const char *input_buffer, int button, int state)
 	Cargo sold;
 	un->SellCargo (input_buffer,quantity,_Universe->AccessCockpit()->credits,sold,base);
       }
+      SetMode (mode,submode);
+      SelectLastSelected();
     }  
     break;
   case MISSIONMODE:
@@ -363,6 +399,7 @@ void UpgradingInfo::CommitItem (const char *input_buffer, int button, int state)
 
   }
   }
+  free (input_buffer);
 }
 
 
@@ -399,6 +436,20 @@ void UpgradingInfo::CompleteTransactionAfterTurretSelect() {
     }
   }
 }
+void UpgradingInfo::SelectLastSelected() {
+  if (lastselected.last) {
+    int ours = CargoList->DoMouse(lastselected.type, lastselected.x, lastselected.y, lastselected.button, lastselected.state);
+    if (ours) {
+      char *buy_name = CargoList->GetSelectedItemName();
+      
+      if (buy_name) {
+	if (buy_name[0]) {
+	  //not sure
+	}
+      }
+    }
+  }
+}
 void UpgradingInfo::CompleteTransactionConfirm () {
   double percentage;
   int mountoffset = selectedmount;
@@ -430,6 +481,7 @@ void UpgradingInfo::CompleteTransactionConfirm () {
     }
   }
   SetMode (mode,NORMAL);
+  SelectLastSelected();
 }
 // type=1 is mouse click
 // type=2 is mouse drag
@@ -452,7 +504,14 @@ void UpgradingInfo::ProcessMouse(int type, int x, int y, int button, int state) 
 		      SetupCargoList();
 		    }else {
 		      if (curcategory.length()!=0) {
-			SelectItem (buy_name);//changes state/side bar price depedning on submode
+			  lastselected.type=type;
+			  lastselected.x=cur_x;
+			  lastselected.y=cur_y;
+			  lastselected.button=button;
+			  lastselected.state=state;
+			  lastselected.last=true;
+			  SelectItem (buy_name);//changes state/side bar price depedning on submode
+
 			//CargoInfo->ChangeTextItem("name", (string("name: ")+buy_name).c_str()); 
 			//CargoInfo->ChangeTextItem("price", "Price: Random. Hah.");
 		      }else {
@@ -475,7 +534,7 @@ void UpgradingInfo::ProcessMouse(int type, int x, int y, int button, int state) 
 		}
 	}	
 	if (ours == 0) {
-		ours = COMMIT->DoMouse(type, cur_x, cur_y, button, state);
+		ours = COMMIT->DoMouse(type, cur_x, cur_y, 0/*button*/, state);
 		if (ours == 1 && type == 1) {
 			buy_name = CargoList->GetSelectedItemName();
 			if (buy_name) {
@@ -686,8 +745,9 @@ void Unit::UpgradeInterface (Unit * base) {
 vector <Cargo>&UpgradingInfo::FilterCargo(Unit *un, const string filterthis, bool inv){
   TempCargo.clear();
     for (unsigned int i=0;i<un->numCargo();i++) {
-      
-      if ((un->GetCargo(i).category==filterthis)==inv) {
+      int len = un->GetCargo(i).category.length();
+      len = len<filterthis.length()?len:filterthis.length();
+      if ((0==memcmp(un->GetCargo(i).category.c_str(),filterthis.c_str(),len))==inv) {//only compares up to category...so we could have starship_blue
 	TempCargo.push_back (un->GetCargo(i));
       }
     }
