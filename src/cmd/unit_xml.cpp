@@ -398,6 +398,13 @@ namespace UnitXML {
   const EnumMap element_map(element_names, 37);
   const EnumMap attribute_map(attribute_names, 106);
 }
+std::string delayucharStarHandler (const XMLType &input,void *mythis) {
+	static int jumpdelaymult =XMLSupport::parse_int(vs_config->getVariable("physics","jump_delay_multiplier","5"));
+	unsigned char uc  = (*input.w.uc)/jumpdelaymult;
+	if (uc<1)
+		uc=1;
+	return XMLSupport::tostring((int)uc);
+}
 
 // USED TO BE IN UNIT_FUNCTIONS*.CPP BUT NOW ON BOTH CLIENT AND SERVER SIDE
 std::vector <Mesh *> MakeMesh(unsigned int mysize) {
@@ -1777,7 +1784,7 @@ void Unit::LoadXML(const char *filename, const char * modifications, string * xm
     image->unitwriter->AddElement("missing",lessNeg1Handler,XMLType(&jump.drive));
     image->unitwriter->AddElement("jumpenergy",shortStarHandler,XMLType(&jump.energy));
     image->unitwriter->AddElement("insysenergy",shortStarHandler,XMLType(&jump.insysenergy));
-    image->unitwriter->AddElement("delay",ucharStarHandler,XMLType(&jump.delay));
+    image->unitwriter->AddElement("delay",delayucharStarHandler,XMLType(&jump.delay));
     image->unitwriter->AddElement("damage",ucharStarHandler,XMLType(&jump.damage));
     image->unitwriter->AddElement("wormhole",ucharStarHandler,XMLType(&image->forcejump));
     image->unitwriter->EndTag ("Jump");

@@ -30,15 +30,6 @@ using std::string;
 
 namespace UniverseUtil {
 
-	Unit * PythonUnitIter::current(){
-		Unit * ret=NULL;
-		while ((ret= UnitIterator::current())) {
-			if (ret->hull>0)
-				return ret;
-			advance();
-		}
-		return ret;
-	}
 	void playVictoryTune () {
 	  static string newssong=vs_config->getVariable("audio","missionvictorysong","../music/victory.ogg");
 	  muzak->GotoSong(newssong);

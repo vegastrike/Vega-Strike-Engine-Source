@@ -30,6 +30,16 @@ using std::string;
 #define activeSys _Universe->activeStarSystem() //less to write
 
 namespace UniverseUtil {
+	Unit * PythonUnitIter::current(){
+		Unit * ret=NULL;
+		while ((ret= UnitIterator::current())) {
+			if (ret->hull>0)
+				return ret;
+			advance();
+		}
+		return ret;
+	}
+	
 	Unit * GetUnitFromSerial( ObjSerial serial)
 	{
 		Unit * un;

@@ -2226,9 +2226,15 @@ void Unit::RollTorque(float amt) {
   else if(amt<-limits.roll) amt = -limits.roll;
   ApplyLocalTorque(amt * Vector(0,0,1));
 }
-float WARPENERGYMULTIPLIER() {
-  static float warpenergymultiplier = XMLSupport::parse_float (vs_config->getVariable ("physics","warp_energy_multiplier",".02"));
-  return warpenergymultiplier;
+float WARPENERGYMULTIPLIER(Unit * un) {
+  static float warpenergymultiplier = XMLSupport::parse_float (vs_config->getVariable ("physics","warp_energy_multiplier",".04"));
+  static float playerwarpenergymultiplier = XMLSupport::parse_float (vs_config->getVariable ("physics","warp_energy_player_multiplier",".3"));
+  bool player=_Universe->isPlayerStarship(un)!=NULL;
+  Flightgroup * fg =un->getFlightgroup();
+  if (fg&&!player) {
+	  player = _Universe->isPlayerStarship(fg->leader.GetUnit())!=NULL;
+  }
+  return player?playerwarpenergymultiplier:warpenergymultiplier;
 }
 static int applyto (unsigned short &shield, const unsigned short max, const float amt) {
   shield+=apply_float_to_short(amt);
@@ -2280,7 +2286,7 @@ void Unit::RechargeEnergy() {
       newenergy= 65535 - energy;
       energy=65535;
       if (newenergy>0) {
-	newenergy=apply_float_to_short (newenergy*WARPENERGYMULTIPLIER());
+	newenergy=apply_float_to_short (newenergy*WARPENERGYMULTIPLIER(this));
 	if (((int)warpenergy)+((int)newenergy)>65535) {	
 	  warpenergy+=newenergy;
 	}
@@ -2389,15 +2395,16 @@ void Unit::RegenShields () {
   float menergy = maxenergy;
   if (menergy-maxshield<low_power_mode) {
 	  menergy=maxshield+low_power_mode;
-	  if (rand()<.00005*RAND_MAX)
-		  UniverseUtil::IOmessage(0,"game","all","**Warning** Power Supply Overdrawn: downgrade shield or purchase reactor capacitance!");
+	  if (_Universe->isPlayerStarship(this))
+		  if (rand()<.00005*RAND_MAX)
+			  UniverseUtil::IOmessage(0,"	game","all","**Warning** Power Supply Overdrawn: downgrade shield or purchase reactor capacitance!");
   }
   if (menergy>maxshield) {
     if (energy>menergy-maxshield) {//allow shields to absorb xtra power
       float excessenergy = energy - (menergy-maxshield);
       energy=menergy-maxshield;  
       if (excessenergy >0) {
-		  warpenergy=apply_float_to_short(warpenergy+WARPENERGYMULTIPLIER()*excessenergy);
+		  warpenergy=apply_float_to_short(warpenergy+WARPENERGYMULTIPLIER(this)*excessenergy);
 		  short mwe = maxwarpenergy;
 		  if (mwe<jump.energy&&mwe==0)
 			  mwe = jump.energy;
