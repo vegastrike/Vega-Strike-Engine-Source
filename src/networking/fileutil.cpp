@@ -3,7 +3,7 @@
 #include "vs_path.h"
 
 #ifdef _WIN32
-#include <winsock2.h> // for ntohl
+#include <winsock.h> // for ntohl
 #endif
 
 #ifdef CRYPTO
