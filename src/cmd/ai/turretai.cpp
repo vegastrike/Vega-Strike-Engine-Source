@@ -17,7 +17,7 @@ void TurretAI::Execute () {
     FaceTarget::Execute();
     if (parent->GetNumMounts()>0) {
       if (range==-1) {
-	float speed;
+		float speed;
         parent->getAverageGunSpeed (speed, range);
       }
       Vector R (parent->GetTransformation().getR());
@@ -25,17 +25,24 @@ void TurretAI::Execute () {
       double mag = Pos.Magnitude();
       Pos=Pos/mag;
       float dot = R.Dot (Pos.Cast());
-      if (mag-targ->rSize()-parent->rSize()<1.2*range&&dot>dot_cutoff) {
-	parent->Fire(false);
-	if (missile_prob*SIMULATION_ATOM*RAND_MAX<rand()) {
-	  int locked = parent->LockMissile();
-	  if (locked==-1) {
-	    parent->Fire(true);
-	    parent->ToggleWeapon(true);//change missiles to only fire 1
+	  if (missile_prob*RAND_MAX>rand()) {
+		int locked = parent->LockMissile();
+		if (locked==1){
+		  parent->Fire(true);
+		  parent->ToggleWeapon(true);//change missiles to only fire 1
+		}
 	  }
-	}
-      }else {
-	parent->UnFire();
+      if (mag-targ->rSize()-parent->rSize()<1.2*range&&dot>dot_cutoff) {
+		parent->Fire(false);
+		if (missile_prob*RAND_MAX>rand()) {
+		  int locked = parent->LockMissile();
+		  if (locked==-1){
+		    parent->Fire(true);
+		    parent->ToggleWeapon(true);//change missiles to only fire 1
+		  }
+		}
+	  }else {
+		parent->UnFire();
       }
     }    
   }
