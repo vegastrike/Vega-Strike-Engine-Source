@@ -168,9 +168,9 @@ void Planet::Draw(const Transformation & quat, const Matrix m) {
       Vector p = (_Universe->AccessCamera()->GetPosition());
       Vector blah = p-Vector (tmp[12],tmp[13],tmp[14]);
       blah = p - (blah.Dot (TerrainUp))*TerrainUp;
-      tmp[12]=p.i;//blah.i;
-      tmp[13]=p.j;//blah.j;
-      tmp[14]=p.k;//blah.k;
+      tmp[12]=blah.i;
+      tmp[13]=blah.j;
+      tmp[14]=blah.k;
       
       atmosphere->SetMatricesAndDraw (_Universe->AccessCamera()->GetPosition(),tmp);
     }
