@@ -434,7 +434,7 @@ public:
   bool Upgrade (Unit * upgrador, int mountoffset,  int subunitoffset, bool additive, bool force,  double & percentage, Unit * templ=NULL);
   bool canDowngrade (Unit *downgradeor, int mountoffset, int subunitoffset, double & percentage);
   bool Downgrade (Unit * downgradeor, int mountoffset, int subunitoffset,  double & percentage);
-
+  vector <struct Cargo>& FilterDowngradeList (vector <struct Cargo> & mylist);
   Unit();
   ///Creates aa mesh with meshes as submeshes (number of them) as either as subunit with faction faction
   Unit (Mesh ** meshes  , int num, bool Subunit, int faction);

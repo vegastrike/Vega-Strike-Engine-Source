@@ -34,7 +34,42 @@ void Unit::ImportPartList (const std::string& category, float price, float price
   }
 
 }
+vector <Cargo>& Unit::FilterDowngradeList (vector <Cargo> & mylist) {
+  for (unsigned int i=0;i<mylist.size();i++) {
+    bool removethis=XMLSupport::parse_bool (vs_config->getVariable ("general","remove_impossible_downgrades","true"));
+    Unit * NewPart = new Unit (mylist[i].content.c_str(),false,_Universe->GetFaction("upgrades"));
+    NewPart->SetFaction(faction);
+    if (NewPart->name==string("LOAD_FAILED")) {
+      NewPart->Kill();
+      NewPart = new Unit (mylist[i].content.c_str(),false,faction);
+    }
+    if (NewPart->name!=string("LOAD_FAILED")) {
+      int maxmountcheck = NewPart->nummounts?nummounts:1;
+      for (int m=0;m<maxmountcheck;m++) {
+	int s =0;
+	for (un_iter ui=getSubUnits();s==0||((*ui)!=NULL);++ui,++s) {
+	  double percent=1;
+	  if (canDowngrade (NewPart,m,s,percent)) {
+	    if (percent>0) {
+	      removethis=false;
+	      break;
+	    }
+	  }
 
+	  if (*ui==NULL) {
+	    break;
+	  }
+	}
+      }
+    }
+    NewPart->Kill();
+    if (removethis) {
+      mylist.erase (mylist.begin()+i);
+      i--;
+    }
+  }
+  return mylist;
+}
 
 UnitImages &Unit::GetImageInformation() {
   return *image;

@@ -821,6 +821,9 @@ vector <Cargo>&UpgradingInfo::GetCargoList () {
       break;
     case DOWNGRADEMODE:
       relevant = &GetUnitMasterPartList();
+      if (buyer.GetUnit()) {
+	return buyer.GetUnit()->FilterDowngradeList (GetCargoFor (relevant));
+      }
       break;
     }
     if (relevant) {
