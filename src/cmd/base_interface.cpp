@@ -43,7 +43,19 @@ static void CalculateRealXAndY (int xbeforecalc, int ybeforecalc, float *x, floa
 	(*x)=(((float)(xbeforecalc*2))/g_game.x_resolution)-1;
 	(*y)=-(((float)(ybeforecalc*2))/g_game.y_resolution)+1;
 }
-
+#define mymin(a,b) (((a)<(b))?(a):(b))
+static void SetupViewport() {
+        static int base_max_width=XMLSupport::parse_float(vs_config->getVariable("graphics","base_max_width","0"));
+        static int base_max_height=XMLSupport::parse_float(vs_config->getVariable("graphics","base_max_height","0"));
+        if (base_max_width&&base_max_height) {
+          int xrez = mymin(g_game.x_resolution,base_max_width);
+          int yrez = mymin(g_game.y_resolution,base_max_height);
+          int offsetx = (g_game.x_resolution-xrez)/2;
+          int offsety = (g_game.y_resolution-yrez)/2;
+          glViewport(offsetx,offsety,xrez,yrez);
+        }
+}
+#undef mymin
 BaseInterface::Room::~Room () {
 	int i;
 	for (i=0;i<links.size();i++) {
@@ -98,12 +110,15 @@ void BaseInterface::Room::BaseShip::Draw (BaseInterface *base) {
 		newmat.p.i*=newmat.p.k;
 		newmat.p.j*=newmat.p.k;
 		MultMatrix (final,cam,newmat);
+                SetupViewport();
 		GFXClear(GFXFALSE);//clear the zbuf
+
 		GFXEnable (DEPTHTEST);
 		GFXEnable (DEPTHWRITE);
 		GFXEnable(LIGHTING);
 		int light=0;
 		GFXCreateLight(light,GFXLight(true,GFXColor(1,1,1,1),GFXColor(1,1,1,1),GFXColor(1,1,1,1),GFXColor(.1,.1,.1,1),GFXColor(1,0,0),GFXColor(1,1,1,0),24),true);
+
 		(un)->DrawNow(final,FLT_MAX);
 		GFXDeleteLight(light);
 		GFXDisable (DEPTHTEST);
@@ -113,11 +128,12 @@ void BaseInterface::Room::BaseShip::Draw (BaseInterface *base) {
                 GFXEnable(TEXTURE0);
 		_Universe->AccessCamera()->setCockpitOffset(co);
 		_Universe->AccessCamera()->UpdateGFX();
-                
+                SetupViewport();                
 //		_Universe->AccessCockpit()->SetView (CP_PAN);
 		GFXHudMode (GFXTRUE);
 	}
 }
+
 void BaseInterface::Room::Draw (BaseInterface *base) {
 	int i;
 	for (i=0;i<objs.size();i++) {
@@ -227,6 +243,7 @@ void BaseInterface::Room::Draw (BaseInterface *base) {
 			} // for i
 		} // if draw_borders
 	} // enable_markers
+
 }
 static std::vector<BaseInterface::Room::BaseTalk *> active_talks;
 
@@ -928,9 +945,9 @@ static void AnimationDraw() {
   GFXEnd();
 #endif
 }
-
 void BaseInterface::Draw () {
 	GFXColor(0,0,0,0);
+        SetupViewport();
 	StartGUIFrame(GFXTRUE);
 	AnimatedTexture::UpdateAllFrame();
 	Room::BaseTalk::hastalked=false;
@@ -938,6 +955,7 @@ void BaseInterface::Draw () {
         AnimationDraw();
 
 	float x,y;
+        glViewport (0, 0, g_game.x_resolution,g_game.y_resolution);
 	curtext.GetCharSize(x,y);
 	curtext.SetPos(-.99,-1+(y*1.5));
 //	if (!drawlinkcursor)
@@ -948,7 +966,9 @@ void BaseInterface::Draw () {
 	othtext.SetPos(-.99,1);
 //	GFXColor4f(0,.5,1,1);
 	othtext.Draw();
+        SetupViewport();
 	EndGUIFrame (drawlinkcursor);
+        glViewport (0, 0, g_game.x_resolution,g_game.y_resolution);
 	Unit *un=caller.GetUnit();
 	Unit *base=baseun.GetUnit();
 	if (un&&(!base)) {
