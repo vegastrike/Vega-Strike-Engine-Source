@@ -179,11 +179,11 @@ float GameCockpit::computeLockingSymbol(Unit * par) {
 }
 inline void DrawOneTargetBox (const QVector & Loc, float rSize, const Vector &CamP, const Vector & CamQ, const Vector & CamR, float lock_percent, bool ComputerLockon, bool Diamond=false) {
 
-  static float rat = 1/XMLSupport::parse_float(vs_config->getVariable("graphics","hud","min_target_box_size",".01"));
-  float len = (Loc-_Universe->AccessCamera()->GetPosition()).MagnitudeSquared();
-  float ratio = len/(rSize*rSize);
-  if (ratio>rat*rat) 
-    rSize = sqrt(len)/rat;
+  static float rat = XMLSupport::parse_float(vs_config->getVariable("graphics","hud","min_target_box_size",".01"));
+  float len = (Loc).Magnitude();
+  float curratio = rSize/len;
+  if (curratio<rat) 
+    rSize = len*rat;
   if (Diamond) {
     float ModrSize=rSize/1.41;
     GFXBegin (GFXLINESTRIP); 
