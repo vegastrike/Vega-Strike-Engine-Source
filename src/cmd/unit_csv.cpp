@@ -800,7 +800,7 @@ string Unit::WriteUnitString () {
         unit["Equipment_Space"]=XMLSupport::tostring(image->equipment_volume);
         unit["Hold_Volume"]=XMLSupport::tostring(image->cargo_volume);
         string mountstr;
-        double unitScale=  XMLSupport::parse_float(unit["Unit_Scale"]);
+        double unitScale=  stof(unit["Unit_Scale"],1);
         {//mounts
           for (int j=0;j<mounts.size();++j) {
             char mnt[1024];
@@ -887,7 +887,7 @@ string Unit::WriteUnitString () {
         }
         unit["Mass"]=tos(Mass);
         unit["Moment_Of_Inertia"]=tos(Momentofinertia);
-        unit["FuelCapacity"]=tos(fuel);
+        unit["Fuel_Capacity"]=tos(fuel);
         unit["Hull"]=tos(hull);
         row["Armor_Front_Top_Left"]=tos(armor.frontlefttop);
         row["Armor_Front_Top_Right"]=tos(armor.frontrighttop);
@@ -947,9 +947,9 @@ string Unit::WriteUnitString () {
         unit["Maneuver_Yaw"]=tos(limits.yaw*180/(VS_PI));
         unit["Maneuver_Pitch"]=tos(limits.pitch*180/(VS_PI));
         unit["Maneuver_Roll"]=tos(limits.roll*180/(VS_PI));
-        unit["YawGovernor"]=tos(computer.max_yaw*180/VS_PI);
-        unit["PitchGovernor"]=tos(computer.max_pitch*180/VS_PI);
-        unit["RollGovernor"]=tos(computer.max_roll*180/VS_PI);
+        unit["Yaw_Governor"]=tos(computer.max_yaw*180/VS_PI);
+        unit["Pitch_Governor"]=tos(computer.max_pitch*180/VS_PI);
+        unit["Roll_Governor"]=tos(computer.max_roll*180/VS_PI);
         static float game_accel=XMLSupport::parse_float(vs_config->getVariable("physics","game_accel","1"));
         static float game_speed=XMLSupport::parse_float(vs_config->getVariable("physics","game_speed","1"));
         unit["Afterburner_Accel"]=tos(limits.afterburn/(game_accel*game_speed));
