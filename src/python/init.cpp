@@ -198,11 +198,14 @@ void Python::initpaths(){
 	  if (pwd[i]=='\\')
 		  pwd[i]=DELIM;
   }
+  std::string moduledir (vs_config->getVariable ("data","python_modules","modules"));
+  std::string basesdir (vs_config->getVariable ("data","python_bases","bases"));
+
   std::string changepath ("import sys\nprint sys.path\nsys.path = ["
-	 "\""+std::string(pwd)+DELIMSTR"modules"DELIMSTR"builtin\""
-         ",\""+std::string(pwd)+DELIMSTR"modules\""
-         ",\""+std::string(pwd)+DELIMSTR"bases\""
-		 "]\n");
+			  "\""+std::string(pwd)+DELIMSTR"modules"DELIMSTR"builtin\""
+			  ",\""+std::string(pwd)+DELIMSTR+moduledir+string("\"")+
+			  ",\""+std::string(pwd)+DELIMSTR+basesdir + string("\"")+
+			  "]\n");
   fprintf (stderr,"running %s",changepath.c_str());
   char * temppython = strdup(changepath.c_str());
   PyRun_SimpleString(temppython);	
