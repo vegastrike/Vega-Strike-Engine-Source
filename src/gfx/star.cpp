@@ -111,7 +111,6 @@ void StarVlist::Draw() {
 void StarVlist::EndDrawState() {
 	vlist->EndDrawState();
 	GFXColorMaterial(0);
-	  
 }
 Stars::Stars(int num, float spread): vlist((num/STARnumvlist)+1,spread),spread(spread){
 
@@ -147,7 +146,10 @@ void Stars::Draw() {
   } else {
     GFXDisable (LIGHTING);
   }
+  
   vlist.BeginDrawState(_Universe->AccessCamera()->GetR().Scale(-spread).Cast(),_Universe->AccessCamera()->GetVelocity(),false);
+  _Universe->AccessCamera()->UpdateGFX(GFXFALSE,GFXFALSE,GFXFALSE);
+	
   for (int i=0;i<STARnumvlist;i++) {
     if (i>=1)
       GFXTranslateModel (pos[i]-pos[i-1]);
@@ -156,6 +158,8 @@ void Stars::Draw() {
     vlist.Draw();
   }
   vlist.EndDrawState();
+_Universe->AccessCamera()->UpdateGFX(GFXTRUE,GFXFALSE,GFXFALSE)	  ;
+
   GFXEnable (TEXTURE0);
   GFXEnable (TEXTURE1);
   if (fade)
