@@ -79,9 +79,9 @@ void returnfromhome() {
 
 char pwd[65536];
 void initpaths () {
-
-  getcwd (pwd,32768);
-  datadir= string (pwd);  
+  char tmppwd[65536];
+  getcwd (tmppwd,32768);
+  datadir= string (tmppwd);  
   sharedsounds = datadir;
   FILE *fp= fopen (CONFIGFILE,"r");
   changehome(true);
@@ -90,12 +90,12 @@ void initpaths () {
     fclose (fp1);
     vs_config=new VegaConfig(CONFIGFILE); // move config to global or some other struct
   }else if (fp) {
-    chdir (pwd);
+    chdir (tmppwd);
     fclose (fp);
     fp =NULL;
     vs_config = new VegaConfig (CONFIGFILE);
   } else {
-    fprintf (stderr,"Could not open config file in either %s/%s\nOr in ~/.vegastrike/%s\n",pwd,CONFIGFILE,CONFIGFILE);
+    fprintf (stderr,"Could not open config file in either %s/%s\nOr in ~/.vegastrike/%s\n",tmppwd,CONFIGFILE,CONFIGFILE);
     exit (-1);
   }
   if (fp)

@@ -733,7 +733,7 @@ void Cockpit::Draw() {
     if (!found)
       index=0;
   }
-  
+  GFXAlphaTest (ALWAYS,0);  
   GFXHudMode (false);
 
 }

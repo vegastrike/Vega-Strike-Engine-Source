@@ -141,5 +141,6 @@ void TextPlane::Draw(const string & newText, int offset,bool force_highquality)
   glDisable(GL_LINE_SMOOTH);
   glPopMatrix();
   GFXPopBlendMode();
+  glRasterPos2f (0,0);
 }
 

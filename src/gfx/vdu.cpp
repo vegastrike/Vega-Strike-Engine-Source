@@ -90,7 +90,7 @@ void VDU::DrawTargetSpr (Sprite *s, float per, float &sx, float &sy, float &w, f
   if (HighQTargetSprites) {
     GFXBlendMode (ONE,ZERO);
   }else {
-    GFXAlphaTest(GREATER,0);
+    GFXAlphaTest(ALWAYS,0);
   }
 
 }
