@@ -195,6 +195,13 @@ void JoyStick::GetJoyStick(float &x,float &y, float &z, int &buttons)
       joy_axis[a]=((float)axi[a]/32768.0);
       if(fabs(joy_axis[a])<=deadzone){
 	joy_axis[a]=0.0;
+      }else if (joy_axis[a]>0) {
+	joy_axis[a]-=deadzone;
+      }else {
+	joy_axis[a]+=deadzone;
+      }
+      if (deadzone<.999) {
+	joy_axis[a]/=(1-deadzone);
       }
     }
     x=joy_axis[0];
