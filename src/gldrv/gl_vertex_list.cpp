@@ -332,7 +332,10 @@ void GFXVertexList::ColVtxCopy (GFXVertexList * thus, GFXVertex *dst, int offset
       SetVertex (Vector (thus->data.colors[i+offset].x,thus->data.colors[i+offset].y,thus->data.colors[i+offset].z));
   }
 }
+float GFX_SCALE=.0001;
+float TEMPS=1;
 void GFXVertexList::RenormalizeNormals () {
+
   if (numVertices>0) {
     Vector firstNormal;
     if (changed&HAS_COLOR) {
@@ -344,7 +347,7 @@ void GFXVertexList::RenormalizeNormals () {
     if (mag>GFX_SCALE/1.5&&mag<GFX_SCALE*1.5) {
       return;
     }
-    if (mag<GFX_SCALE/100) {
+    if (mag<GFX_SCALE/100&&mag<.00001) {
       firstNormal.Set(1,0,0);
     }
     firstNormal.Normalize();
@@ -355,15 +358,17 @@ void GFXVertexList::RenormalizeNormals () {
     }
     if (changed&HAS_COLOR) {
       for (int i=0;i<numVertices;i++) {
-	data.colors[0].i/=GFX_SCALE;
-	data.colors[0].j/=GFX_SCALE;
-	data.colors[0].k/=GFX_SCALE;
+	data.colors[i].SetNormal(data.colors[i].GetNormal().Normalize());
+	data.colors[i].i*=GFX_SCALE*TEMPS;
+	data.colors[i].j*=GFX_SCALE*TEMPS;
+	data.colors[i].k*=GFX_SCALE*TEMPS;
       }
     }else {
       for (int i=0;i<numVertices;i++) {
-	data.vertices[0].i/=GFX_SCALE;
-	data.vertices[0].j/=GFX_SCALE;
-	data.vertices[0].k/=GFX_SCALE;
+	data.vertices[i].SetNormal(data.vertices[i].GetNormal().Normalize());
+	data.vertices[i].i*=GFX_SCALE*TEMPS;
+	data.vertices[i].j*=GFX_SCALE*TEMPS;
+	data.vertices[i].k*=GFX_SCALE*TEMPS;
       }
     }
   }
