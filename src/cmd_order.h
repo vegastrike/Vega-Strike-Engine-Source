@@ -44,7 +44,8 @@ public:
   bool AttachOrder (UnitCollection *targets);
   bool AttachOrder (Vector target);
   bool AttachSelfOrder (UnitCollection *targets=NULL);
-  bool AppendOrder (Order * ord);
+  bool EnqueueOrder (Order * ord);
+  bool ReplaceOrder (Order * ord);
   bool Done() {return done;}
   int getType() {return type;}
 };

@@ -36,17 +36,32 @@ AI * Order::Execute () {
       }
     }
   }
+  if (suborders.size()==0) {
+    delete this;
+    return new AI;
+  }
   return this;
 }
 
-bool Order::AppendOrder (Order *ord) {
-  if (ord->getType()&getType()) {
-    return false;
-  }
+bool Order::EnqueueOrder (Order *ord) {
   suborders.push_back (ord);
-
   return true;
 }
+bool Order::ReplaceOrder (Order *ord) {
+  int completed=0;
+  vector<Order*>::iterator ordd = suborders.begin();
+  for (unsigned int i=0;i<suborders.size();i++) {
+    if (!(ord->getType()&(*ordd)->getType())){
+      	delete (*ordd);
+	ordd =suborders.erase(ordd);
+    } else {
+      ordd++;
+    }
+  }
+  suborders.push_back(ord);
+  return true;
+}
+
 bool Order::AttachOrder (UnitCollection *targets1) {
   if (!(type&TARGET))
     return false;
