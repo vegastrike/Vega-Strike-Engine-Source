@@ -584,7 +584,7 @@ void Cockpit::RestoreGodliness() {
     godliness=maxgodliness;
 }
 Cockpit::Cockpit (const char * file, Unit * parent,const std::string &pilot_name): parent (parent),textcol (1,1,1,1),text(NULL),cockpit_offset(0), viewport_offset(0), view(CP_FRONT), zoomfactor (1.5),savegame (new SaveGame(pilot_name)) {
-  static int headlag = XMLSupport::parse_int (vs_config->getVariable("graphics","head_lag","8"));
+  static int headlag = XMLSupport::parse_int (vs_config->getVariable("graphics","head_lag","10"));
   int i;
   for (i=0;i<headlag;i++) {
     headtrans.push_back (MyMat());
@@ -728,8 +728,8 @@ static void SwitchUnitsTurret (Unit *ol, Unit *nw) {
 
 extern void reset_time_compression(int i, KBSTATE a);
 void Cockpit::Shake (float amt) {
-  static float shak= XMLSupport::parse_float(vs_config->getVariable("graphics","cockpit_shake","1.2"));
-  static float shak_max= XMLSupport::parse_float(vs_config->getVariable("graphics","cockpit_shake_max","5"));
+  static float shak= XMLSupport::parse_float(vs_config->getVariable("graphics","cockpit_shake","3"));
+  static float shak_max= XMLSupport::parse_float(vs_config->getVariable("graphics","cockpit_shake_max","20"));
   shakin+=shak;
   if (shakin>shak_max) {
     shakin=shak_max;
@@ -792,9 +792,9 @@ void Cockpit::Draw() {
 	headtrans.push_back (MyMat());
 	VectorAndPositionToMatrix(headtrans.back().m,P,Q,R,Vector(0,0,0));
 	static float theta=0;
-	static float shake_speed = XMLSupport::parse_float(vs_config->getVariable ("graphics","shake_speed","30"));
+	static float shake_speed = XMLSupport::parse_float(vs_config->getVariable ("graphics","shake_speed","50"));
 	theta+=shake_speed*GetElapsedTime();
-	static float shake_reduction = XMLSupport::parse_float(vs_config->getVariable ("graphics","shake_reduction","1"));
+	static float shake_reduction = XMLSupport::parse_float(vs_config->getVariable ("graphics","shake_reduction","8"));
 
 	headtrans.front().m[12]=shakin*cos(theta);//AccessCamera()->GetPosition().i+shakin*cos(theta);
 	headtrans.front().m[13]=shakin*cos(1.2*theta);//AccessCamera()->GetPosition().j+shakin*cos(theta);
