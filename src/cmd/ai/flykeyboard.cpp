@@ -197,11 +197,13 @@ void FlyByKeyboard::Execute (bool resetangvelocity) {
     SSCK.switch_combat_mode=false;
     parent->SwitchCombatFlightMode();
   }
+  bool enteredautopilot=false;
   if (SSCK.realauto) {
     Cockpit * cp = _Universe->isPlayerStarship(parent);
     if (cp) {
       cp->Autopilot (parent->Target());
     }
+    enteredautopilot=true;
     SSCK.realauto=false;
   }
   if (autopilot) {
@@ -305,7 +307,7 @@ void FlyByKeyboard::Execute (bool resetangvelocity) {
   if (SSCK.stoppress) {
     Stop(0);
   }
-  if (SSCK.startpress) {
+  if (SSCK.startpress||enteredautopilot) {
     Stop(1);
   }
   if (SSCK.sheltonpress>0) {
