@@ -83,7 +83,7 @@ void AggressiveAI::Execute () {
     parent->EnqueueAI (new Orders::FaceTarget (false));
   }
   if (parent->getAIState()->queryType (MOVEMENT)==NULL) {
-    parent->EnqueueAI (new Orders::MatchLinearVelocity (Vector (0,0,100),true,false));
+    parent->EnqueueAI (new Orders::MatchLinearVelocity (Vector (0,0,420),true,false));
   }
 
 }

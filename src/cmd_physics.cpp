@@ -206,7 +206,10 @@ void Unit::RollTorque(float amt) {
   else if(amt<-limits.roll) amt = -limits.roll;
   ApplyLocalTorque(amt * Vector(0,0,1));
 }
+
+
 void Unit::UpdatePhysics (const Transformation &trans, const Matrix transmat, bool lastframe, UnitCollection *uc) {
+  RegenShields();
   if (lastframe)
     prev_physical_state = curr_physical_state;//the AIscript should take care
   CollideAll(); 

@@ -596,7 +596,7 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
 	recharge=parse_float((*iter).value);
 	break;
       case LIMIT:
-	energy=parse_float((*iter).value);
+	maxenergy=energy=CLAMP_SHORT(parse_float((*iter).value));
 	break;
     }
     }

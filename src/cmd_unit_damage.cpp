@@ -113,6 +113,46 @@ static unsigned short apply_float_to_short (float tmp) {
     ans +=1;
   return ans;
 }
+
+static void applyto (unsigned short &shield, const unsigned short max, const float amt) {
+  shield+=apply_float_to_short(amt);
+  if (shield>max)
+    shield=max;
+}
+void Unit::RegenShields () {
+  energy +=apply_float_to_short (recharge);
+  if (energy>maxenergy)
+    energy=maxenergy;  
+  float rec = shield.recharge*SIMULATION_ATOM;
+  switch (shield.number) {
+  case 2:
+    shield.fb[0]+=rec;
+    shield.fb[1]+=rec;
+    if (shield.fb[0]>shield.fb[2]) {
+      shield.fb[0]=shield.fb[2];
+    }
+    if (shield.fb[1]>shield.fb[3]) {
+      shield.fb[1]=shield.fb[3];
+    }
+    break;
+  case 4:
+    applyto (shield.fbrl.front,shield.fbrl.frontmax,rec);
+    applyto (shield.fbrl.back,shield.fbrl.backmax,rec);
+    applyto (shield.fbrl.right,shield.fbrl.rightmax,rec);
+    applyto (shield.fbrl.left,shield.fbrl.leftmax,rec);
+    break;
+  case 6:
+    applyto(shield.fbrltb.v[0],shield.fbrltb.fbmax,rec);
+    applyto(shield.fbrltb.v[1],shield.fbrltb.fbmax,rec);
+    applyto(shield.fbrltb.v[2],shield.fbrltb.rltbmax,rec);
+    applyto(shield.fbrltb.v[3],shield.fbrltb.rltbmax,rec);
+    applyto(shield.fbrltb.v[4],shield.fbrltb.rltbmax,rec);
+    applyto(shield.fbrltb.v[5],shield.fbrltb.rltbmax,rec);
+    break;
+  }
+
+}
+
 float Unit::DealDamageToHull (const Vector & pnt, float damage ) {
   float percent;
   unsigned short * targ;

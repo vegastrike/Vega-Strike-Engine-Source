@@ -294,8 +294,8 @@ static void Quit(int,KBSTATE newState) {
 Unit *carrier=NULL;
 Unit *fighter = NULL;
 Unit *fighter2=NULL;
-const int numf = 20;
-Unit *fighters[numf];
+const int numf = 3;
+Unit **fighters;
 CoordinateSelect *locSel=NULL;
 //Background * bg = NULL;
 SphereMesh *bg2=NULL;
@@ -441,113 +441,48 @@ void createObjects() {
 //GOOD!!
   ****/
   BindKey (1,CoordinateSelect::MouseMoveHandle);
-
-
-
-  //  GFXSelectMaterial(0);
-  
-  //  s = new Sprite("carrier.spr");
+  FILE * fp = fopen ("testmission.txt", "r");
+  if (fp) {
+    fscanf (fp, "%d\n", &numf);
+  }	
+  fighters = new Unit * [numf];
   
 
   GFXEnable(TEXTURE0);
   GFXEnable(TEXTURE1);
     
 
-  //  
-  //  
+  
+  char fightername [1024]="hornet.xunit";
   for(int a = 0; a < numf; a++) {
-    //fighters[a] = new Unit("uosprey.dat");
-    //fighters[a] = new Unit("Homeworld-HeavyCorvette.xml", true);
-    switch(0) {
-    case 1:
-      //fighters[a] = new Unit("broadsword.xunit", true);
-      fighters[a] = new Unit("hornet.xunit", true);
-      fighters[a]->SetPosition (1000+100*a,100,100);
-      break;
-    case 0:
-      fighters[a] = new Unit("hornet.xunit", true);
-      fighters[a]->SetPosition (1000+150*a,100,100);
-      break;
-    case 2:
-      fighters[a] = new Unit("Heavycorvette.xunit", true);
-      break;
-    case 3:
-      fighters[a] = new Unit("Heavyinterceptor.xunit", true);
-      break;
-    case 4:
-      fighters[a] = new Unit("Lightcorvette.xunit", true);
-      break;
-    case 5:
-      fighters[a] = new Unit("Lightinterceptor.xunit", true);
-      break;
-    case 6:
-      fighters[a] = new Unit("Homeworld-HeavyCorvette.xml", true);
-      break;
-      /*
-    case 7:
-      fighters[a] = new Unit("uosprey.dat");
-      break;
-      */
+    int targetnum =0;
+    if (fp) {      
+      if (!feof(fp))
+	fscanf (fp, "%s %d\n",fightername,&targetnum);
     }
-    //fighters[a] = new Unit("phantom.xunit", true);
-    //fighters[a]->SetPosition((a%8)/8.0 - 2.0, (a/8)/8.0 - 2.0,5.0);
-
-    //Vector position((a%20)/0.25 - 4.0F, (a/20)/0.25 - 4.0F,2.0F);
-
-    Vector v(0,1,0);
-    v.Normalize();
-    //fighters[a]->SetAI(new Orders::MoveTo(Vector(5,10,1), 1.0));
-    v = Vector(0,.2,-1);
-    v.Normalize();
+    fighters[a] = new Unit(fightername, true);
+    fighters[a]->SetPosition (1000+150*a,100,100);
+    
     fighters[a]->SetAI(new Order());
     if (a!=0) {
       fighters[a]->EnqueueAI( new Orders::AggressiveAI ());
-      fighters[a]->Target (fighters[0]);
+      fighters[a]->Target (fighters[targetnum]);
     }
-    //fighters[a]->EnqueueAI(new Orders::ChangeHeading(v,6));
-    //fighters[a]->EnqueueAI(new Orders::MoveTo(Vector (-5,-10,10),true,10));
-    //fighters[a]->EnqueueAI(new Orders::ChangeHeading(-v,10));
-    //fighters[a]->EnqueueAI(new MatchVelocity(Vector(0,0,-1),Vector (0,0,.4),true,true));
-    //fighters[a]->EnqueueAI(new ExecuteFor(new FlyByKeyboard (),7));
-    //fighters[a]->EnqueueAI(new Orders::ChangeHeading(Vector (.86,.86,0).Normalize(),20));
-    //fighters[a]->EnqueueAI(new Orders::ChangeHeading(Vector (.86,.86,0).Normalize(), 0.04));
-    //fighters[a]->SetPosition(0, 0, -2.0F);
-  
-    //fighters[a]->Pitch(PI/2);
-    //fighters[a]->Roll(PI/2);
-    //fighters[a]->Scale(Vector(0.5,0.5,0.5));
     _Universe->activeStarSystem()->AddUnit(fighters[a]);
   }
+  if (fp)
+      fclose (fp);
+ 
   fighters[0]->EnqueueAI(new AIScript("aitest.xml"));
   fighters[0]->EnqueueAI(new FlyByKeyboard ());
-  //  fighters[1]->EnqueueAI(new Orders::FireAt (0,1.2));
-  //fighters[1]->Target (fighters[0]);
-
-  //_Universe->activeStarSystem()->AddUnit(fighter);
-  //_Universe->activeStarSystem()->AddUnit(carrier);
   shipList = _Universe->activeStarSystem()->getClickList();
-    //BindKey (1,startselect);
-    //BindKey (0,clickhandler);
-  /*
-    midway = new Unit("b_midway.xml", true);
-  midway = new Unit("square.xml", true);
-  midway->SetPosition(1,1, 10);
-  _Universe->activeStarSystem()->AddUnit(midway);
-  midway = new Unit("mid.xml", true);
-  midway->SetPosition(5,5, 15);
-  _Universe->activeStarSystem()->AddUnit(midway);
-  */
-  //midway = new Unit("Homeworld-HeavyCorvette.xml", true);
-  //midway->SetPosition(8,-5, 10);
-  //_Universe->activeStarSystem()->AddUnit(midway);
-  //exit(0);
   locSel = new CoordinateSelect (Vector (0,0,5));
 }
 
 void destroyObjects() {  
   for(int a = 0; a < numf; a++)
   	delete fighters[a];
-
+  delete [] fighters;
   delete locSel;
   //delete t;
   //delete s;

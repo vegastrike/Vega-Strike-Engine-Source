@@ -142,14 +142,14 @@ friend class PlanetaryOrbit;
       }fbrltb;
     };
   } shield;
+  void RegenShields();
   float hull;
-
-  
 
   Order *aistate;
   float accel;
   float recharge;
-  float energy;
+  unsigned short maxenergy;
+  unsigned short energy;
   float mass;
   float fuel;
   float MomentOfInertia;
