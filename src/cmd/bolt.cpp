@@ -140,7 +140,11 @@ Bolt::Bolt (const weapon_info & typ, const Matrix orientationpos,  const Vector 
   prev_position= cur_position;
   this->owner = owner;
   type = typ.type;
-  damage = typ.Damage;
+  damage = typ.Damage+typ.PhaseDamage;
+  if (damage) 
+    percentphase=(unsigned char) (255.*typ.PhaseDamage/damage);
+  else
+    percentphase=0;
   longrange = typ.Longrange;
   radius = typ.Radius;
   speed = typ.Speed/(type==weapon_info::BOLT?typ.Length:typ.Radius);//will scale it by length long!
@@ -243,7 +247,7 @@ bool Bolt::Collide (Unit * target) {
     if (coltmp.r>1)coltmp.r=1;
     if (coltmp.g>1)coltmp.g=1;
     if (coltmp.b>1)coltmp.b=1;*/
-    target->ApplyDamage (prev_position+tmp,normal, damage* ((1-distance)+distance*longrange),affectedSubUnit,coltmp);
+    target->ApplyDamage (prev_position+tmp,normal, ((float(255-percentphase)/255)*damage)* ((1-distance)+distance*longrange),affectedSubUnit,coltmp,((float(percentphase)/255)*damage)* ((1-distance)+distance*longrange));
     return true;
   }
   return false;

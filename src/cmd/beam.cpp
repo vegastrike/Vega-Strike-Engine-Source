@@ -57,6 +57,7 @@ void Beam::Init (const Transformation & trans, const weapon_info &cln , void * o
   stability = cln.Stability;
   rangepenalty=cln.Longrange;
   damagerate = cln.Damage;
+  phasedamage= cln.PhaseDamage;
   refiretime = 0;
   refire = cln.Refire;
   Col.r = cln.r;
@@ -358,7 +359,7 @@ bool Beam::Collide (Unit * target) {
     if (coltmp.b>1)coltmp.b=1;
     */
     float tmp=(curlength/range); 
-    target->ApplyDamage (center+direction*curlength,normal,(damagerate*SIMULATION_ATOM*curthick/thickness)*((1-tmp)+tmp*rangepenalty),colidee,coltmp);
+    target->ApplyDamage (center+direction*curlength,normal,(damagerate*SIMULATION_ATOM*curthick/thickness)*((1-tmp)+tmp*rangepenalty),colidee,coltmp,phasedamage*SIMULATION_ATOM);
     return true;
     
   }

@@ -30,6 +30,7 @@ private:
   float lastlength;
   float stability;
   float damagerate;
+  float phasedamage;
   float rangepenalty;
   float refire;
   float refiretime;

@@ -17,7 +17,7 @@ weapon_info& weapon_info::operator = (const weapon_info &tmp){
   return *this;
 }
 */
-void weapon_info::init() {size=NOWEAP;r=g=b=a=.5;Length=5;Speed=10;PulseSpeed=15;RadialSpeed=1;Range=100;Radius=.5;Damage=1.8;Stability=60;Longrange=.5;EnergyRate=18;Refire=.2;sound=-1;}
+void weapon_info::init() {size=NOWEAP;r=g=b=a=127;Length=5;Speed=10;PulseSpeed=15;RadialSpeed=1;Range=100;Radius=.5;Damage=1.8;PhaseDamage=0;Stability=60;Longrange=.5;EnergyRate=18;Refire=.2;sound=-1;}
 void weapon_info::Type (enum WEAPON_TYPE typ) {type=typ;switch(typ) {case BOLT:file=string("");break;case BEAM:file=string("beamtexture.bmp");break;case BALL:file=string("ball.ani");break;case PROJECTILE:file=string("missile.xmesh");break;default:break;}}
 
 
@@ -66,7 +66,8 @@ namespace BeamXML {
     LONGRANGE,
     CONSUMPTION,
     REFIRE,
-    LENGTH//,
+    LENGTH,
+    PHASEDAMAGE
     //YAW,
     //PITCH,
     //ROLL
@@ -102,6 +103,7 @@ namespace BeamXML {
     EnumMap::Pair ("Radius",RADIUS),
     EnumMap::Pair ("Rate",RATE),
     EnumMap::Pair ("Damage",DAMAGE),
+    EnumMap::Pair ("PhaseDamage",PHASEDAMAGE),
     EnumMap::Pair ("Stability",STABILITY),
     EnumMap::Pair ("Longrange",LONGRANGE),
     EnumMap::Pair ("Consumption",CONSUMPTION),
@@ -112,7 +114,7 @@ namespace BeamXML {
     // EnumMap::Pair ("Roll",ROLL)
   };
   const EnumMap element_map(element_names, 10);
-  const EnumMap attribute_map(attribute_names, 22);
+  const EnumMap attribute_map(attribute_names, 23);
   Hashtable <string, weapon_info,char[257]> lookuptable;
   string curname;
   weapon_info tmpweapon(weapon_info::BEAM);
@@ -242,6 +244,9 @@ namespace BeamXML {
 	  break;
 	case DAMAGE:
 	  tmpweapon.Damage = XMLSupport::parse_float((*iter).value);
+	  break;
+	case PHASEDAMAGE:
+	  tmpweapon.PhaseDamage = XMLSupport::parse_float((*iter).value);
 	  break;
 	case RATE:
 	  tmpweapon.Damage = XMLSupport::parse_float ((*iter).value);

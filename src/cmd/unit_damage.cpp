@@ -518,13 +518,13 @@ float Unit::DealDamageToShield (const Vector &pnt, float &damage) {
 
   return percent;
 }
-void Unit::ApplyLocalDamage (const Vector & pnt, const Vector & normal, float amt, Unit * affectedUnit,const GFXColor &color) {
+void Unit::ApplyLocalDamage (const Vector & pnt, const Vector & normal, float amt, Unit * affectedUnit,const GFXColor &color, float phasedamage) {
   static float nebshields=XMLSupport::parse_float(vs_config->getVariable ("physics","nebula_shield_recharge",".5"));
   if (affectedUnit!=this) {
-    affectedUnit->ApplyLocalDamage (pnt,normal,amt,affectedUnit,color);
+    affectedUnit->ApplyLocalDamage (pnt,normal,amt,affectedUnit,color,phasedamage);
     return;
   }
-  float leakamt = amt*.01*shield.leak;
+  float leakamt = phasedamage+amt*.01*shield.leak;
   amt *= 1-.01*shield.leak;
   float percentage=0;
   if (GetNebula()==NULL||(nebshields>0)) {
@@ -539,7 +539,7 @@ void Unit::ApplyLocalDamage (const Vector & pnt, const Vector & normal, float am
 	meshdata[nummesh]->AddDamageFX(pnt,shieldtight?shieldtight*normal:Vector(0,0,0),percentage,color);
     }
   }
-  if (shield.leak>0||!meshdata[nummesh]||percentage==0||amt>0) {
+  if (shield.leak>0||!meshdata[nummesh]||percentage==0||amt>0||phasedamage) {
     percentage = DealDamageToHull (pnt, leakamt+amt);
     for (int i=0;i<nummesh;i++) {
       if (percentage)
@@ -549,10 +549,10 @@ void Unit::ApplyLocalDamage (const Vector & pnt, const Vector & normal, float am
 }
 
 
-void Unit::ApplyDamage (const Vector & pnt, const Vector & normal, float amt, Unit * affectedUnit, const GFXColor & color) {
+void Unit::ApplyDamage (const Vector & pnt, const Vector & normal, float amt, Unit * affectedUnit, const GFXColor & color, float phasedamage) {
   Vector localpnt (InvTransform(cumulative_transformation_matrix,pnt));
   Vector localnorm (ToLocalCoordinates (normal));
-  ApplyLocalDamage(localpnt, localnorm, amt,affectedUnit,color);
+  ApplyLocalDamage(localpnt, localnorm, amt,affectedUnit,color,phasedamage);
 }
 
 
