@@ -600,6 +600,7 @@ float Unit::querySphere (const QVector &start, const QVector &end, float min_rad
 
 
 float Unit::querySphereNoRecurse (const QVector & start, const QVector & end, float min_radius) const {
+//	return querySphere(start,a(end-start).Magnitude());
   int i;
   float tmp;
   QVector st,dir;
