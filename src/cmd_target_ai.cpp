@@ -68,8 +68,25 @@ void FireAt::Execute () {
   
 }
 
+const EnumMap::Pair element_names[] = {
+  EnumMap::Pair ("UNKNOWN", UNKNOWN),
+  EnumMap::Pair ("Distance", AggressiveAI::DISTANCE),
+  EnumMap::Pair ("Threat", AggressiveAI::THREAT),
+  EnumMap::Pair ("FShield", AggressiveAI::FSHIELD),
+  EnumMap::Pair ("LShield",AggressiveAI:: LSHIELD),
+  EnumMap::Pair ("RShield", AggressiveAI::RSHIELD),
+  EnumMap::Pair ("BShield", AggressiveAI::BSHIELD),
+  EnumMap::Pair ("FArmor", AggressiveAI::FARMOR),
+  EnumMap::Pair ("BArmor", AggressiveAI::BARMOR),
+  EnumMap::Pair ("LArmor", AggressiveAI::LARMOR),
+  EnumMap::Pair ("RArmor", AggressiveAI::RARMOR),
+  EnumMap::Pair ("Hull", AggressiveAI::HULL),
+  EnumMap::Pair ("Facing", AggressiveAI::FACING),
+  EnumMap::Pair ("Movement", AggressiveAI::MOVEMENT)
+};
+const EnumMap AggressiveAIel_map(element_names, 14);
 
-AggressiveAI::AggressiveAI (Unit * target=NULL):FireAt(.2,6,false)  {
+AggressiveAI::AggressiveAI (Unit * target=NULL):FireAt(.2,6,false),threatened(false)  {
   if (target !=NULL) {
     UnitCollection tmp;
     tmp.prepend (target);

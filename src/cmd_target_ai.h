@@ -18,10 +18,16 @@ public:
   virtual void Execute();
 };
 
+  struct AIEvent {
+
+    
+  };
+
 class AggressiveAI: public FireAt {
 protected:	
-
+  bool threatened;
 public:
+  enum types {UNKNOWN, DISTANCE, THREAT, FSHIELD, LSHIELD, RSHIELD, BSHIELD, FARMOR, BARMOR, LARMOR, RARMOR, HULL, FACING, MOVEMENT};
   AggressiveAI (Unit * target=NULL);
   void Execute ();
 };

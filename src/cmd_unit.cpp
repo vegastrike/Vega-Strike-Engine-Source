@@ -302,7 +302,9 @@ Vector Unit::PositionITTS (const Vector & posit, float speed) {
 }
 float Unit::cosAngleTo (Unit * targ, float &dist, float speed, float range) {
    Vector Normal (cumulative_transformation_matrix[8],cumulative_transformation_matrix[9],cumulative_transformation_matrix[10]);
-   getAverageGunSpeed(speed,range);
+   if (range!=FLT_MAX) {
+     getAverageGunSpeed(speed,range);
+   }
    Vector totarget (targ->PositionITTS(cumulative_transformation.position, speed+((targ->Position()-Position()).Normalize().Dot (Velocity))));
    totarget = totarget-cumulative_transformation.position;
    float tmpcos = Normal.Dot (totarget);
