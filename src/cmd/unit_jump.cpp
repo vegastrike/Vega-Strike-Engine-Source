@@ -1,4 +1,4 @@
-#include "unit_template.h"
+//#include "unit_template.h"
 #include "audiolib.h"
 #include "star_system_generic.h"
 #include "cmd/images.h"
