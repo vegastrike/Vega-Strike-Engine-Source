@@ -1,10 +1,5 @@
 bin_PROGRAMS = vegastrike vegaserver accountserver
 
-if USEBOOST129
-BOOSTLIBS=boost129/libboost_python.a
-else
-BOOSTLIBS=boost/libboost_python.a
-endif
 SUBDIRS = cmd gfx gldrv aldrv python gui networking boost common boost129
 vegastrike_LDADD =   \
 aldrv/libaldrv.a \
@@ -24,7 +19,7 @@ gldrv/libgldrv.a \
 gui/libgui.a \
 networking/libnet.a \
 cmd/collide/libcollide.a \
-$(BOOSTLIBS) \
+boost129/libboost_python.a boost/libboost_python.a \
 -lpthread 
 
 vegaserver_LDADD =  \
