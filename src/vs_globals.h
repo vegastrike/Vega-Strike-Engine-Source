@@ -24,4 +24,3 @@ typedef struct {
 } game_data_t;
 
 extern game_data_t g_game;
-

@@ -28,11 +28,6 @@ void Primitive::InitPrimitive()
 {
 	forcelogos = NULL;
 	squadlogos = NULL;
-
-	Identity(orientation);
-	Identity(translation);
-	Identity(transformation);
-	Identity(stackstate);
 }
 
 Primitive:: Primitive ()
@@ -44,24 +39,19 @@ Primitive::~Primitive()
 {
 }
 
-void Primitive::Draw()
-{
-  //FIXME VEGASTRIKE	static float rot = 0;
-}
-
-void Primitive:: SetPosition (float x,float y, float z) {
-  pos = Vector (x,y,z);
+void Primitive::SetPosition (float x,float y, float z) {
+  local_transformation.position = Vector (x,y,z);
 }
 void Primitive::SetPosition (const Vector &k) {
-  pos = k;
+  local_transformation.position = k;
 }
-void Primitive::SetOrientation(Vector &p, Vector &q, Vector &r)
+void Primitive::SetOrientation(const Vector &p, const Vector &q, const Vector &r)
 {	
-	VectorToMatrix(orientation, p,q,r);
+  local_transformation.orientation = Quaternion::from_vectors(p,q,r);
 }
 
 Vector &Primitive::Position()
 {
-	return pos;
+	return local_transformation.position;
 }
 

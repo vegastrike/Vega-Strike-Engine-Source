@@ -19,8 +19,6 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 #include "gfx_transform.h"
-//#include <gl/glu.h>
-//#include <gl/gl.h>
 #include "gfxlib.h"
 #include "physics.h"
 

@@ -109,17 +109,17 @@ bool Order::AttachOrder (Vector targetv) {
   return true;
 }
 
-
+//Doesn't work anymore (as if it ever did)
 AI* FlyStraight::Execute() {
-	if(parent->GetTime() > time)
+  //if(GetElapsedTime() > time)
 		{
 			parent->Destroy();
 			delete this;
 			return NULL;
 		}
-		else
+		//		else
 		{
-			parent->YSlide(speed);
+		  //parent->YSlide(speed);
 			return this;
 		}
 }

@@ -36,7 +36,7 @@ extern BOOL bTex1;
 
 static int next_display_list = 1;
 #define USE_DISPLAY_LISTS
-GFXVertexList::GFXVertexList():myVertices(NULL),numQuads(0),numTriangles(0),numVertices(0), display_list(0)
+GFXVertexList::GFXVertexList():numVertices(0),numTriangles(0), myVertices(NULL),numQuads(0),display_list(0)
 {
 }
 

@@ -21,6 +21,7 @@
 #include "cmd_gun.h"
 #include "cmd_ai.h"
 #include "cmd_order.h"
+#include <stdio.h>
 Missile::Missile(char *filename):Unit(filename)
 {
 	//FILE *fp = fopen(filename, "r");
@@ -72,7 +73,7 @@ void Gun::Draw()
 void Gun::Fire()
 {
   //////??????????? FIXME VEGASTRIKE
-	Vector pos = ppos + this->pos;
+	Vector pos = this->local_transformation.position;
 	projectiles[num_proj] = new Missile(missilename);
 	num_proj++;
 }

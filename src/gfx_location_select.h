@@ -10,14 +10,13 @@ protected:
   Animation LocSelUpAni;
   Vector p,q,r;
   Vector LocalPosition;
-  void UpdateMatrix();
 
 public:
   static void MouseMoveHandle (KBSTATE,int,int,int,int,int);
   LocationSelect (Vector,Vector,Vector/*, Scene*   */);
   LocationSelect (Vector,Vector,Vector,Vector/*, Scene*   */);
   ~LocationSelect();
-  inline Vector GetVector (){return Transform (transformation,LocalPosition);}
+  inline Vector GetVector (){return Transform (cumulative_transformation_matrix,LocalPosition);}
   void MoveLocation (Vector pos,Vector p ,Vector q);
   void MoveLocation (Vector pos, Vector p, Vector q, Vector r); //requires normalized Vector triplet pqr
   void Draw();

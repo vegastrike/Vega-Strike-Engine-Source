@@ -31,10 +31,7 @@ static float *mview = NULL;
 
 Sprite::Sprite(char *file, bool trackzoom):Mesh(), track_zoom(trackzoom)
 {
-  pos.i = 0;
-  pos.j = 0;
-  pos.k = 1.00001;
-  Mesh::SetPosition();
+  local_transformation.position = Vector(0,0,1.00001);
 
   xcenter = 0;
   ycenter = 0;
@@ -75,23 +72,24 @@ Sprite::~Sprite()
 }
 
 
-void Sprite::UpdateMatrix() {
-  /*if(track_zoom) {
-    float zoom = _GFX->AccessCamera()->GetZoom();
-
-    Translate(translation, pos*zoom);
-    MultMatrix(transformation, translation, orientation);
-    //glGetFloatv(GL_MODELVIEW_MATRIX, stackstate);
-    GFXGetMatrix(MODEL, stackstate);
-    changed = FALSE;
-    GFXMultMatrix(MODEL, transformation);
-  } else {*/
-    Mesh::UpdateMatrix();
-    //}
+void Sprite::UpdateHudMatrix() {
+  //FIXME
+  Matrix tmatrix;
+  Vector camp,camq,camr;
+  _GFX->AccessCamera()->GetPQR(camp,camq,camr);
+  
+	//GFXIdentity(MODEL);
+	//Identity (tmatrix);
+	//	Translate (tmatrix,_GFX->AccessCamera()->GetPosition());
+	//	GFXLoadMatrix(MODEL,tmatrix);
+  //VectorAndPositionToMatrix (tmatrix,-camp,camq,camr,_GFX->AccessCamera()->GetPosition()+1.23*camr);//FIXME!!! WHY 1.25 
+  VectorAndPositionToMatrix (tmatrix,camp,camq,camr,_GFX->AccessCamera()->GetPosition());
+  Transformation t = identity_transformation;
 }
 
-void Sprite::Draw()
+void Sprite::Draw(const Transformation &dtrans, const Matrix m)
 {
+  GFXLoadMatrix(MODEL, m);
 	if(surface!=NULL)
 	{
 
@@ -138,14 +136,14 @@ void Sprite::Draw()
 
 void Sprite::SetPosition(const float &x1, const float &y1)
 {
-	pos.i = x1;
-	pos.j = y1;
+	local_transformation.position.i = x1;
+	local_transformation.position.j = y1;
 }
 
 void Sprite::GetPosition(float &x1, float &y1)
 {
-	x1 = pos.i;
-	y1 = pos.j;
+	x1 = local_transformation.position.i;
+	y1 = local_transformation.position.j;
 }
 void Sprite::SetSize (float x1, float y1) {
   right = left+x1;
@@ -158,11 +156,11 @@ void Sprite::GetSize (float &x1,float &y1) {
 
 void Sprite::SetRotation(const float &rot)
 {
-	Roll(rot-rotation);
-	rotation = rot;
+  local_transformation.orientation *= Quaternion::from_axis_angle(Vector(0,1,0), rot - rotation);
+  rotation = rot;
 }
 
 void Sprite::GetRotation(float &rot)
 {
-	rot = rotation;
+  rot = rotation;
 }

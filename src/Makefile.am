@@ -151,5 +151,7 @@ vegastrike_SOURCES =				\
 	gl_matrix.h \
 	vs_globals.h \
 	gfx_box.h \
-	gfx_box.cpp
-
+	gfx_box.cpp \
+	gfx_lerp.cpp \
+	gfx_lerp.h \
+	quaternion.h

@@ -1,5 +1,10 @@
 #include <stdio.h>
 #include <math.h>
+
+const float identity_matrix[16] = {1,0,0,0,
+				0,1,0,0,
+				0,0,1,0,
+				0,0,0,1};
 /*---------------------------------------------------------------------------*
  | mat_inv: Compute the inverse of a n x n matrix, using the maximum pivot   |
  |          strategy.  n <= MAX1.                                            |

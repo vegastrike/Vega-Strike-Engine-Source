@@ -24,6 +24,12 @@
 #include "gfx_transform_vector.h"
 
 typedef float Matrix[16];
+
+const Matrix identity_matrix = {1,0,0,0,
+				    0,1,0,0,
+				    0,0,1,0,
+				    0,0,0,1};
+
 /** moves a vector struct to a matrix */
 inline void VectorToMatrix(float matrix[], const Vector &v1, const Vector &v2, const Vector &v3)
 {
@@ -154,7 +160,7 @@ inline void Translate(float matrix[], const Vector &v) {
 /** Multiplies m1 and m2 and pops the result into dest;
  *  dest != m1, dest !=m2
  */
-inline void MultMatrix(float dest[], float m1[], float m2[])
+inline void MultMatrix(float dest[], const float m1[], const float m2[])
 {
   dest[0] = m1[0]*m2[0] + m1[4]*m2[1] + m1[8]*m2[2] + m1[12]*m2[3];
   dest[1] = m1[1]*m2[0] + m1[5]*m2[1] + m1[9]*m2[2] + m1[13]*m2[3];

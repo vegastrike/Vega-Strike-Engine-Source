@@ -21,11 +21,9 @@
 #ifndef _Primitive_H
 #define _Primitive_H
 #include <stdio.h>
-//#include <gl\gl.h>
-//#include <gl\glaux.h>
+#include "quaternion.h"
 #include "gfx_aux.h"
 #include "gfx_transform.h"
-//class Primitive;
 
 inline float readf (FILE *fp) {float temp;	fread (&temp,sizeof(float),1,fp);return temp;}
 inline short reads (FILE *fp) {short temp;	fread (&temp,sizeof(short),1,fp);return temp;}
@@ -36,16 +34,12 @@ class Primitive {
 protected:
 	//Texture *force;
 	//Texture *squad;
-
-	Vector pos;
-
+  
+  Transformation local_transformation;
+  Transformation cumulative_transformation;
+  Matrix cumulative_transformation_matrix;
   //  scalar_t prevtime;
   //	LONGLONG prevtime;
-
-	Matrix orientation;
-	Matrix translation;
-	Matrix transformation;
-	Matrix stackstate;
 
 	void InitPrimitive();
 
@@ -62,15 +56,12 @@ public:
 	Primitive ();
 	virtual ~Primitive();
 
-	virtual void Draw();//GL_T2F_C4F_N3F_V3F
-	virtual void Draw(const Vector &pp, const Vector &pq, const Vector &pr, const Vector &ppos){
-		Draw();
-	}
+	virtual void Draw(const Transformation &quat = identity_transformation, const Matrix m = identity_matrix) = 0;//GL_T2F_C4F_N3F_V3F
 
 	Vector &Position();
-        virtual void SetPosition (float, float, float);
-        virtual void SetPosition (const Vector &);
-	virtual void SetOrientation(Vector &p, Vector &q, Vector &r);
+        void SetPosition (float, float, float);
+        void SetPosition (const Vector &);
+	void SetOrientation(const Vector &p, const Vector &q, const Vector &r);
 
 	const char *get_name() const { return name; }
 };

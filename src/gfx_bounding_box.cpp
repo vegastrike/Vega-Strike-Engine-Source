@@ -21,21 +21,10 @@ void BoundingBox::Transform (Matrix t) {
   mz = ::Transform (t,mz);
 }
 
-void BoundingBox::Transform (const Vector &p,const Vector &q,const Vector &r) {
-  lx = ::Transform (p,q,r,lx);
-  ly = ::Transform (p,q,r,ly);
-  lz = ::Transform (p,q,r,lz);
-  mx = ::Transform (p,q,r,mx);
-  my = ::Transform (p,q,r,my);
-  mz = ::Transform (p,q,r,mz);
-}
-void BoundingBox::Transform (const Vector &Pos) {
-  lx +=Pos;
-  ly +=Pos;
-  lz +=Pos;
-  mx +=Pos;
-  my +=Pos;
-  mz +=Pos;
+void BoundingBox::Transform (const Transformation &trans) {
+  Matrix m;
+  trans.to_matrix(m);
+  Transform(m);
 }
 
 

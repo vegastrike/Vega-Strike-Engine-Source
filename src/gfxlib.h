@@ -67,8 +67,8 @@ BOOL /*GFXDRVAPI*/ GFXGetMaterial(int number, GFXMaterial &material);
 BOOL /*GFXDRVAPI*/ GFXSelectMaterial(int number);
 
 //Matrix
-BOOL /*GFXDRVAPI*/ GFXMultMatrix(MATRIXMODE mode, Matrix matrix);
-BOOL /*GFXDRVAPI*/ GFXLoadMatrix(MATRIXMODE mode, Matrix matrix);
+BOOL /*GFXDRVAPI*/ GFXMultMatrix(MATRIXMODE mode, const Matrix matrix);
+BOOL /*GFXDRVAPI*/ GFXLoadMatrix(MATRIXMODE mode, const Matrix matrix);
 BOOL /*GFXDRVAPI*/ GFXLoadIdentity(MATRIXMODE mode);
 BOOL /*GFXDRVAPI*/ GFXGetMatrix(MATRIXMODE mode, Matrix matrix);
 float /*GFXDRVAPI*/GFXGetXInvPerspective();

@@ -5,6 +5,8 @@ ok *
 #ifndef _PLANET_H_
 #define _PLANET_H_
 
+#include <stdio.h>
+
 #include "cmd_unit.h"
 #include "cmd_ai.h"
 #include "physics.h"
@@ -61,12 +63,6 @@ class Planet : public Unit {
 
   void InitPlanet(FILE *fp);
 
-  /*  virtual void Draw();
-  virtual void DrawStreak(const Vector &v);
-  virtual void Draw(Matrix tmatrix);
-  virtual void Draw(Matrix tmatrix, const Vector &pp, const Vector &pq, const Vector &pr, const Vector &ppos);
-  */
-  void gravitate(UnitCollection *units, Matrix t);
   void gravitate(UnitCollection *units);
 
   class PlanetIterator : public Iterator {

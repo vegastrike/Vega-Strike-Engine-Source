@@ -103,7 +103,7 @@ float DotProduct(Vector &a, Vector &b)
 	return a.Dot(b);
 }
 
-inline void MultMatrix(float dest[], float m1[], float m2[])
+inline void MultMatrix(float dest[], const float m1[], const float m2[])
 {
   dest[0] = m1[0]*m2[0] + m1[4]*m2[1] + m1[8]*m2[2] + m1[12]*m2[3];
   dest[1] = m1[1]*m2[0] + m1[5]*m2[1] + m1[9]*m2[2] + m1[13]*m2[3];
@@ -204,22 +204,16 @@ float GFXGetYInvPerspective() {
   return /*invprojection[11]*  */invprojection[5];//invprojection[15];//should be??  c/d == invproj[15]
 }
 
-BOOL /*GFXDRVAPI*/ GFXMultMatrix(MATRIXMODE mode, Matrix matrix)
+BOOL /*GFXDRVAPI*/ GFXMultMatrix(MATRIXMODE mode, const Matrix matrix)
 {
 	Matrix t;
 	switch(mode)
 	{
-	case MODEL:/**
-	  LoadMatrixf(model);
-	  MultMatrixf(matrix);
-		   **/
-		MultMatrix(t, model, matrix);
-		CopyMatrix(model, t);
-		//		MultMatrix(t, transview, model);
+	case MODEL:
+	  MultMatrix(t, model, matrix);
+	  CopyMatrix(model, t);
 		glMatrixMode(GL_MODELVIEW);
-		glLoadIdentity();
-		glTranslatef (-centerx,-centery,-centerz);
-		glMultMatrixf(t);
+		glMultMatrixf(matrix);
 		break;
 	case VIEW:
 		MultMatrix(t, view, matrix);
@@ -244,18 +238,17 @@ BOOL /*GFXDRVAPI*/ GFXMultMatrix(MATRIXMODE mode, Matrix matrix)
 	return TRUE;
 }
 
-BOOL /*GFXDRVAPI*/ GFXLoadMatrix(MATRIXMODE mode, Matrix matrix)
+BOOL /*GFXDRVAPI*/ GFXLoadMatrix(MATRIXMODE mode, const Matrix matrix)
 {
 	Matrix t;
 	switch(mode)
 	{
 	case MODEL:
-		CopyMatrix(model, matrix);
-		//		MultMatrix(t, transview, model);
+	  CopyMatrix(model, matrix);
 		glMatrixMode(GL_MODELVIEW);
 		glLoadIdentity();
 		glTranslatef(-centerx,-centery,-centerz);
-		glMultMatrixf(model);
+		glMultMatrixf(matrix);
 		break;
 	case VIEW:
 		CopyMatrix(view, matrix);
@@ -314,7 +307,7 @@ BOOL /*GFXDRVAPI*/ GFXGetMatrix(MATRIXMODE mode, Matrix matrix)
 	switch(mode)
 	{
 	case MODEL:
-		CopyMatrix(matrix, model);
+	  assert(0);
 		break;
 	case VIEW:
 	  Identity(translation);

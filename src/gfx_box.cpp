@@ -85,10 +85,11 @@ void Box::ProcessDrawQueue() {
   //GFXBlendMode(ONE, ONE);
 
   while(draw_queue->size()) {
-    DrawContext c;
-    c = draw_queue->back();
+    DrawContext c = draw_queue->back();
     draw_queue->pop_back();
-    GFXLoadMatrix(MODEL, c.m);
+    Matrix m;
+    c.transformation.to_matrix(m);
+    GFXLoadMatrix(MODEL, m);
 
 
   GFXBegin(QUADS);

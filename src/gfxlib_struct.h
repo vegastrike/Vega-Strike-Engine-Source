@@ -79,8 +79,6 @@ class /*GFXDRVAPI*/ GFXVertexList {
 	int numTriangles;
 	int numQuads;
 	GFXVertex *myVertices;
-	GFXVertexList *next;
-	//VLISTTYPE ptype;
 
 	int display_list;
 

@@ -24,6 +24,7 @@
 #include "gfx_hud.h"
 #include "lin_time.h"
 #include "file.h"
+#include "gfx_mesh.h"
 float *mview = NULL;
 
 HUDElement::HUDElement(char *filename):Unit(filename) {
@@ -81,7 +82,7 @@ TextPlane::~TextPlane()
 
 void TextPlane::Draw()
 {
-	time += GetElapsedTime();
+  //time += GetElapsedTime();
 	UpdateHudMatrix();//FIXME  UpdateHudMatrix (in gfx_mesh.cpp) uses 1.1
 	Matrix tmatrix;
 

@@ -18,9 +18,8 @@ AI *PlanetaryOrbit::Execute() {
 }
 
 void Planet::InitPlanet(FILE *fp) {
-  InitUnit();
-  strcpy(name, "Planet");
-  envMap = TRUE;
+  Init();
+  name = "Planet - ";
   satellites = NULL;
   numSatellites = 0;
   calculatePhysics=false;
@@ -32,7 +31,7 @@ void Planet::InitPlanet(FILE *fp) {
   int a;
 
   fscanf(fp, "%s\n", texname);
-  strcpy(name, texname);
+  name +=  texname;
   fscanf(fp, "%f\n", &radius);
   fscanf(fp, "%f\n", &gravity);
   fscanf(fp, "%f %f %f\n", &x_axis.i, &x_axis.j, &x_axis.k);
@@ -60,13 +59,13 @@ void Planet::InitPlanet(FILE *fp) {
 }
 
 Planet::Planet()  : Unit(), radius(0.0f), origin(0,0,0), satellites(NULL), numSatellites(0) {
-  InitUnit();
+  Init();
 
   SetAI(new AI()); // no behavior
 }
 
 Planet::Planet(char *filename) : Unit(), radius(0.0f), origin(0,0,0), satellites(NULL), numSatellites(0) {
-  InitUnit();
+  Init();
 
   FILE *fp = fopen(filename, "r");
   InitPlanet(fp);
@@ -77,9 +76,8 @@ Planet::Planet(char *filename) : Unit(), radius(0.0f), origin(0,0,0), satellites
 
 Planet::~Planet() { }
 
-void Planet::gravitate(UnitCollection *uc, Matrix matrix) {
-  Matrix t;
-  MultMatrix(t, matrix, transformation);
+void Planet::gravitate(UnitCollection *uc) {
+  float *t = cumulative_transformation_matrix;
   /*
   if(gravity!=0.0) {
     Iterator *iterator = uc->createIterator();
@@ -107,22 +105,7 @@ void Planet::gravitate(UnitCollection *uc, Matrix matrix) {
 
   // fake gravity
   for(int a=0; a<numSatellites; a++) {
-    satellites[a]->origin = origin + pos;
-    satellites[a]->gravitate(uc, t);
+    satellites[a]->origin = origin + local_transformation.position;
+    satellites[a]->gravitate(uc);
   }
-}
-
-/*void Planet::Draw() {
-  GFXMultMatrix(MODEL, tmat);
-  Unit::Draw();
-}
-void Planet::Draw(Matrix tmatrix) {abort();}
-void Planet::DrawStreak(const Vector &v) {abort();}
-void Planet::Draw(Matrix tmatrix, const Vector &pp, const Vector &pq, const Vector &pr, const Vector &ppos) {abort();}
-*/
-
-void Planet::gravitate(UnitCollection *uc) {
-  Matrix t;
-  Identity(t);
-  gravitate(uc, t);
 }

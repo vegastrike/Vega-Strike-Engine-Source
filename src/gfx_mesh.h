@@ -32,6 +32,7 @@
 #include <string>
 #include <vector>
 #include "xml_support.h"
+#include "quaternion.h"
 using namespace std;
 
 class Planet;
@@ -163,29 +164,16 @@ protected:
 	BSPTree *bspTree;
 
 	BOOL changed;
-	float ymin, ymax, ycur;
-	BOOL yrestricted;
-	float pmin, pmax, pcur;
-	BOOL prestricted;
-	float rmin, rmax, rcur;
-	BOOL rrestricted;
-
 	void InitUnit();
 
-	void SetOrientation2();
-	
 	void Reflect ();
-
-	Vector p,q,r;
-	Vector pp, pq, pr, ppos;
 
 	string *hash_name;
 	// Support for reorganized rendering
 	bool will_be_drawn;
 	struct DrawContext {
-	  Matrix m;
-	  DrawContext() { }
-	  DrawContext(Matrix a) { memcpy(m, a, sizeof(Matrix));}
+	  Transformation transformation;
+	  DrawContext(const Transformation &trans) : transformation(trans) { }
 	};
 	vector<DrawContext> *draw_queue;
 	int draw_sequence;
@@ -194,34 +182,24 @@ public:
 	Mesh(const char *filename,  bool xml=false);
 	~Mesh();
 
-	virtual void Draw();
-	virtual void Draw(const Vector &pp, const Vector &pq, const Vector &pr, const Vector &ppos);
+	virtual void Draw(const Transformation &quat = identity_transformation, const Matrix = identity_matrix);
 	virtual void ProcessDrawQueue();
 	static void ProcessUndrawnMeshes();
 
 	void setEnvMap(BOOL newValue) {envMap = newValue;}
 
-	void SetOrientation(Vector &p, Vector &q, Vector &r);
-	void SetOrientation();
+	void Destroy();
 
-	void RestrictYaw(float min, float max);
-	void RestrictPitch(float min, float max);
-	void RestrictRoll(float min, float max);
+	void UpdateHudMatrix();//puts an object on the hud with the matrix
 
+	/*
 	BOOL Yaw(float rad);
 	BOOL Pitch(float rad);
 	BOOL Roll(float rad);
-	void Destroy();
-
-	void UpdateMatrix();
-  void UpdateHudMatrix();//puts an object on the hud with the matrix
-	void SetPosition(float x,float y,float z);
-	void SetPosition(const Vector &origin);
-	void SetPosition();
-
 	void XSlide(float factor);
 	void YSlide(float factor);
 	void ZSlide(float factor);
+	*/
 
 	void Rotate(const Vector &torque);
 
@@ -233,24 +211,6 @@ public:
   float rSize () {return radialSize;}
 	bool intersects(const Vector &start, const Vector &end);
 	bool intersects(const Vector &pt);
-	bool intersects(Matrix t, const Vector &pt);
 	bool intersects(Mesh *mesh);
-	bool intersects(Matrix t, Mesh *mesh);
 };
 #endif
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

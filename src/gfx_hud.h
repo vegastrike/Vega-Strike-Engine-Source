@@ -22,6 +22,8 @@
 #include "gfxlib.h"
 #include "cmd_unit.h"
 
+class Texture;
+
 class HUDElement: public Unit {
 public:
 	HUDElement(char *filename);

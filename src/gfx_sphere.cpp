@@ -111,9 +111,8 @@ SphereMesh::SphereMesh(float radius, int stacks, int slices, char *texture, bool
   refcount++;
   draw_queue = new vector<DrawContext>;
 }
-void SphereMesh::Draw() {
+void SphereMesh::Draw(const Transformation &transform = identity_transformation) {
   if (centered) {
-    GFXLoadIdentity(MODEL);
     SetPosition(_GFX->AccessCamera()->GetPosition());
   }	
 
@@ -152,15 +151,17 @@ void SphereMesh::ProcessDrawQueue() {
   }	
   
   while(draw_queue->size()) {
-    DrawContext c;
-    c = draw_queue->back();
+    DrawContext c = draw_queue->back();
     draw_queue->pop_back();
-    GFXLoadMatrix(MODEL, c.m);
+
+    Matrix m;
+    c.transformation.to_matrix(m);
+
+    GFXLoadMatrix(MODEL, m);
 	vlist->Draw();
 	if(quadstrips!=NULL) {
 	  for(int a=0; a<numQuadstrips; a++)
-	    quadstrips[a]->Draw()
-	    ;
+	    quadstrips[a]->Draw();
 	}
 
 	if(0!=forcelogos) {
@@ -178,19 +179,3 @@ void SphereMesh::ProcessDrawQueue() {
   }
 }
 
-void SphereMesh::Draw (const Vector &x, const Vector &y, const Vector &z, const Vector & pos) {
-  if (insideout) {
-    GFXDisable (CULLFACE);
-  }
-  if (centered) {
-    GFXLoadIdentity(MODEL);
-    SetPosition(_GFX->AccessCamera()->GetPosition());
-  }	
-  Mesh::Draw(x,y,z,pos);
-  if (centered) {
-  }
-  if (insideout) {
-    GFXEnable(CULLFACE);
-  }
-
-}

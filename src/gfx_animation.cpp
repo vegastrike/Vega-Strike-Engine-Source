@@ -99,9 +99,16 @@ void Animation:: SetDimensions(float wid, float hei) {
   height = hei;
 }
 
-void Animation:: Draw()
+void Animation:: Draw(const Transformation &dtrans, const Matrix m)
 {
   float eee;
+  Matrix orientation;
+  Vector pos = local_transformation.position;
+
+  cumulative_transformation = local_transformation;
+  cumulative_transformation.Compose(dtrans, m);
+
+  local_transformation.orientation.to_matrix(orientation);
 		int framenum = (int)(cumtime/timeperframe);
 		if (framenum<numframes)
 		{
@@ -135,6 +142,7 @@ void Animation:: Draw()
 			//if the vectors are linearly dependant we're phucked :) fun fun fun
 			}
 			static float ShipMat [16];
+			Matrix translation, transformation;
 			VectorToMatrix (ShipMat,p1,q1,r1);
 			Translate(translation, pos.i, pos.j, pos.k);
 			MultMatrix(transformation, translation, ShipMat);

@@ -4,6 +4,18 @@
 #include <iostream.h>
 #include <fstream.h>
 #include <expat.h>
+#include <values.h>
+
+#include "gfx_mesh.h"
+
+void Unit::beginElement(void *userData, const XML_Char *name, const XML_Char **atts) {
+  ((Unit*)userData)->beginElement(name, AttributeList(atts));
+}
+
+void Unit::endElement(void *userData, const XML_Char *name) {
+  ((Unit*)userData)->endElement(name);
+}
+
 
 namespace UnitXML {
     enum Names {
@@ -88,7 +100,7 @@ void Unit::LoadXML(const char *filename) {
 
   XML_Parser parser = XML_ParserCreate(NULL);
   XML_SetUserData(parser, this);
-  XML_SetElementHandler(parser, &Mesh::beginElement, &Mesh::endElement);
+  XML_SetElementHandler(parser, &Unit::beginElement, &Unit::endElement);
   
   do {
     char *buf = (XML_Char*)XML_GetBuffer(parser, chunk_size);

@@ -93,7 +93,7 @@ class Vector {
 
 		//friend Vector operator+(const Vector &lval, const Vector &rval);
 		//friend Vector operator+(const Vector &lval, const Vector &rval);
-		inline const Vector Transform(float m1[]) const
+		inline const Vector Transform(const float m1[16]) const
 {
   return Vector(m1[0] * i + m1[4] * j + m1[8] * k + m1[12],
 		m1[1] * i + m1[5] * j + m1[9] * k + m1[13],

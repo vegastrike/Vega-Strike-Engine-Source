@@ -23,9 +23,12 @@
 #define PHYSICS_H
 
 #include "gfx_transform_vector.h"
-#include "quanternion.h"
 
 #define SIMULATION_ATOM (1.0/30.0F)
+
+static const float oocc = (float)0.0000000000000000111265005605; //   1/c^2
+static const float c = (float)299792458.0;
+static const float co10 = (float)29979245.8;
 
 struct Force {
 	Vector F;

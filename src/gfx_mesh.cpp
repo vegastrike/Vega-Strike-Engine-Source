@@ -77,6 +77,8 @@ void DrawVector(const Vector &start, const Vector &vect)
 
 void Mesh::InitUnit()
 {
+	local_transformation = identity_transformation;
+
 	changed = TRUE;
 	vlist = NULL;
 	
@@ -93,11 +95,6 @@ void Mesh::InitUnit()
 	bspTree = NULL;
 
 	alphalist = NULL;
-	ResetVectors(p,q,r);
-	yrestricted = prestricted = rrestricted = FALSE;
-	ymin = pmin = rmin = -PI;
-	ymax = pmax = rmax = PI;
-	ycur = pcur = rcur = 0;
 	
 	//	texturename[0] = -1;
 	numforcelogo = numsquadlogo = 0;
@@ -661,10 +658,6 @@ void Mesh::Reflect()
 	Vector nml [4];
 	Vector CamPos;
 	float dist, oodist;
-	//Vector p = pp;
-	//Vector q = pq;
-	//Vector r = pr;
-	//Vector pos = ppos;
 	int nt3 = 3 * numtris;
 	int i;
 	float w;
@@ -730,11 +723,14 @@ void Mesh::Reflect()
 	vlist->UnlockUntransformed();
 }
 
-void Mesh::Draw()
+void Mesh::Draw(const Transformation &trans, const Matrix m)
 {
-  DrawContext c;
-  UpdateMatrix();
-  GFXGetMatrix(MODEL, c.m);
+  //Matrix cumulative_transformation_matrix;
+  cumulative_transformation = local_transformation;
+  cumulative_transformation.Compose(trans, m);
+  //cumulative_transformation.to_matrix(cumulative_transformation_matrix);
+
+  DrawContext c(cumulative_transformation);
   orig->draw_queue->push_back(c);
   if(!orig->will_be_drawn) {
     orig->will_be_drawn = true;
@@ -742,17 +738,8 @@ void Mesh::Draw()
   }
 }
 
-void Mesh::Draw(const Vector &pp, const Vector &pq, const Vector &pr, const Vector &ppos)
-{
-	this->pp = pp;
-	this->pq = pq;
-	this->pr = pr;
-	this->ppos = ppos;
-	Draw();
-}
-
 void Mesh::ProcessDrawQueue() {
-  if(!draw_queue->size()) return;
+  assert(draw_queue->size());
 	GFXSelectMaterial(myMatNum);
 	//static float rot = 0;
 	GFXColor(1.0, 1.0, 1.0, 1.0);
@@ -776,220 +763,30 @@ void Mesh::ProcessDrawQueue() {
 	  }
 
   while(draw_queue->size()) {
-    DrawContext c;
-    c = draw_queue->back();
+    DrawContext c = draw_queue->back();
     draw_queue->pop_back();
-    GFXLoadMatrix(MODEL, c.m);
-	vlist->Draw();
-	if(quadstrips!=NULL) {
-	  for(int a=0; a<numQuadstrips; a++)
-	    quadstrips[a]->Draw()
-	    ;
-	}
 
-	if(0!=forcelogos) {
-	  forcelogos->Draw();
-	  squadlogos->Draw();
-	}
+    Matrix m;
+    c.transformation.to_matrix(m);
+    
+    GFXLoadMatrix(MODEL, m);
+    vlist->Draw();
+    if(quadstrips!=NULL) {
+      for(int a=0; a<numQuadstrips; a++)
+	quadstrips[a]->Draw()
+	  ;
+    }
+    
+    if(0!=forcelogos) {
+      forcelogos->Draw();
+      squadlogos->Draw();
+    }
   }
 }
 
-void Mesh::UpdateMatrix()
-{
-	  //MultMatrix(transformation, translation, orientation);
-  //cerr << "Update matrix on " << debugName << endl;
-  //	  cerr << "P: " << p << endl;
-  //  cerr << "Q: " << q << endl;
-  //  cerr << "R: " << r << endl;
-  //  cerr << "Translation vector: " << p * pos.i + q * pos.j + r * pos.k << endl;
-	  Translate(translation, pos);
-	  MultMatrix(transformation, translation, orientation);
-		//glGetFloatv(GL_MODELVIEW_MATRIX, stackstate);
-		GFXGetMatrix(MODEL, stackstate);
-		changed = FALSE;
-	GFXMultMatrix(MODEL, transformation);
-}
-
-void Mesh::UpdateHudMatrix() {
-  Matrix tmatrix;
-  Vector camp,camq,camr;
-  _GFX->AccessCamera()->GetPQR(camp,camq,camr);
-  
-	//GFXIdentity(MODEL);
-	//Identity (tmatrix);
-	//	Translate (tmatrix,_GFX->AccessCamera()->GetPosition());
-	//	GFXLoadMatrix(MODEL,tmatrix);
-  //VectorAndPositionToMatrix (tmatrix,-camp,camq,camr,_GFX->AccessCamera()->GetPosition()+1.23*camr);//FIXME!!! WHY 1.25 
-  VectorAndPositionToMatrix (tmatrix,camp,camq,camr,_GFX->AccessCamera()->GetPosition());
-  GFXLoadMatrix(MODEL,tmatrix);
-  UpdateMatrix();
-}
-
-
-void Mesh::SetOrientation2()
-{
-	static Vector y = Vector(0,1,0);
-
-	CrossProduct(y, r, p);
-	CrossProduct(r, p, q);
-	SetOrientation();
-}
-
-
-void Mesh::SetOrientation(Vector &p, Vector &q, Vector &r)
-{
-	this->p = p;
-	this->q = q;
-	this->r = r;
-
-	SetOrientation();
-}
-void Mesh::SetOrientation()
-{
-  //	VectorToMatrix(orientation, p*scale.i,q*scale.j,r*scale.k);
-  VectorToMatrix(orientation, p,q,r);
-  changed = TRUE;
-}
-
-void Mesh::RestrictYaw(float min, float max)
-{
-	yrestricted = TRUE;
-	ymin = min;
-	ymax = max;
-	if(ycur<ymin)
-		ycur = ymin;
-	else if(ycur>ymax)
-		ycur = ymax;
-}
-void Mesh::RestrictPitch(float min, float max)
-{
-	prestricted = TRUE;
-	pmin = min;
-	pmax = max;
-	if(pcur<pmin)
-		pcur = pmin;
-	else if(pcur>pmax)
-		pcur = pmax;
-}
-void Mesh::RestrictRoll(float min, float max)
-{
-	rrestricted = TRUE;
-	rmin = min;
-	rmax = max;
-	if(rcur<rmin)
-		rcur = rmin;
-	else if(rcur>rmax)
-		rcur = rmax;
-}
-
-BOOL Mesh::Yaw(float rad)
-{
-	BOOL retval = TRUE;
-	if(yrestricted)
-	{
-		if(ycur+rad<ymin)
-		{
-			rad = ycur-ymin;
-			ycur = ymin;
-			retval = FALSE;
-		}
-		else if(ycur+rad>ymax)
-			{
-				rad = ymax - ycur;
-				ycur = ymax;
-				retval = FALSE;
-			}
-		else
-			ycur += rad;
-	}
-	::Yaw(rad,p,q,r);
-	SetOrientation();
-	return retval;
-}
-BOOL Mesh::Pitch(float rad)
-{
-	BOOL retval = TRUE;
-	if(prestricted)
-	{
-		if(pcur+rad<pmin)
-		{
-			rad = pcur-pmin;
-			pcur = pmin;
-			retval = FALSE;
-		}
-		else if(pcur+rad>pmax)
-			{
-				rad = pmax - pcur;
-				pcur = pmax;
-				retval = FALSE;
-			}
-		else
-			pcur += rad;
-	}
-	::Pitch(rad,p,q,r);
-	SetOrientation();
-	return retval;
-}
-BOOL Mesh::Roll(float rad)
-{
-	BOOL retval = TRUE;
-	if(rrestricted)
-	{
-		if(rcur+rad<rmin)
-		{
-			rad = rcur-rmin;
-			rcur = rmin;
-			retval = FALSE;
-		}
-		else if(rcur+rad>rmax)
-			{
-				rad = rmax - rcur;
-				rcur = rmax;
-				retval = FALSE;
-			}
-		else
-			rcur += rad;
-	}
-	
-	::Roll(rad,p,q,r);
-	SetOrientation();
-	return retval;
-}
 void Mesh::Destroy()
 {
 }
-
-void Mesh::SetPosition(float x,float y,float z)
-{
-	SetPosition(Vector(x,y,z));
-	SetPosition();
-}
-void Mesh::SetPosition(const Vector &origin)
-{
-	pos = origin;
-	SetPosition();
-}
-void Mesh::SetPosition()
-{
-  //Translate(translation, pos.i,pos.j,pos.k);
-	changed = TRUE;
-}
-void Mesh::XSlide(float factor)
-{
-	pos += p * factor;
-	changed = TRUE;
-}
-void Mesh::YSlide(float factor)
-{
-	pos += q * factor;
-	changed = TRUE;
-}
-void Mesh::ZSlide(float factor)
-{
-	pos += r * factor;
-	changed = TRUE;
-}
-
 
 bool Mesh::intersects(const Vector &start, const Vector &end) {
 	return bspTree->intersects(start, end);
@@ -1001,21 +798,16 @@ BoundingBox * Mesh::getBoundingBox() {
   BoundingBox * tbox = new BoundingBox (Vector (minSizeX,0,0),Vector (maxSizeX,0,0),
 					Vector (0,minSizeY,0),Vector (0,maxSizeY,0),
 					Vector (0,0,minSizeZ),Vector (0,0,maxSizeZ));
-  tbox->Transform (p,q,r);
-  tbox->Transform (pos);
+  tbox->Transform (local_transformation);
   return tbox;
 }
 
 bool Mesh::intersects(const Vector &pt) {
+  Transformation tmp = cumulative_transformation;
+  tmp.Invert();
   Matrix t;
-  Identity(t);
-  return intersects(t, pt);
-}
+  tmp.to_matrix(t);
 
-bool Mesh::intersects(Matrix mat, const Vector &pt) {
-  Matrix t, u;
-  invert(u,transformation);
-  MultMatrix(t, u, mat); // accumulate a bunch of inverse transforms; we could do this more easily by taking the transpose of rotation matrices, and doing stuff to translation matrices
 
   Vector a = pt;
   a = a.Transform(t);

@@ -24,8 +24,10 @@
 #include "gfxlib.h"
 #include "gfx_aux_texture.h"
 #include "gfx_mesh.h"
+#include "quaternion.h"
 
 class Sprite:public Mesh {
+  
 	float xcenter;
 	float ycenter;
 	float width;
@@ -45,10 +47,10 @@ public:
 	Sprite(char *file, bool trackZoom = false);
 	~Sprite();
 
-	void UpdateMatrix();
-	void Draw();
+	void UpdateHudMatrix();
+	void Draw(const Transformation &quat = identity_transformation, const Matrix m = identity_matrix);
 
-	void Rotate(const float &rad){Yaw(rad);};
+	void Rotate(const float &rad){ rotation += rad;};
 
 	void SetPosition(const float &x1, const float &y1);
 	void GetPosition(float &x1, float &y1);

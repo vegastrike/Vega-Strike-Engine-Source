@@ -61,8 +61,7 @@ void LocationSelect::MoveLocation (Vector start,Vector Plane1, Vector Plane2) {
   q = Plane2;
 
 
-  pos= start;
-  UpdateMatrix();
+  local_transformation.position = start;
 }
 void LocationSelect::MoveLocation (Vector start,Vector Plane1, Vector Plane2, Vector Plane3) {    
   //BindKey (1,::MouseMoveHandle);
@@ -71,14 +70,9 @@ void LocationSelect::MoveLocation (Vector start,Vector Plane1, Vector Plane2, Ve
   r = Plane3;
   p = Plane1;
   q = Plane2;
-  pos= start;
-  UpdateMatrix();
+  local_transformation.position= start;
 }
-void LocationSelect::UpdateMatrix() {
-  VectorToMatrix(orientation,p,q,r);
-  Translate (translation,pos.i,pos.j,pos.k); 
-  MultMatrix (transformation,translation,orientation);
-}
+
 LocationSelect::~LocationSelect() {
   UnbindMouse (1);
 }
@@ -88,6 +82,8 @@ LocationSelect::~LocationSelect() {
 
 void LocationSelect:: Draw () {
 
+  Matrix transformation;
+  local_transformation.to_matrix(transformation);
   
   GFXLoadIdentity(MODEL);
   GFXMultMatrix(MODEL, transformation);

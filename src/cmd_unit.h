@@ -21,9 +21,18 @@
 #ifndef _UNIT_H_
 #define _UNIT_H_
 #include <time.h>
-#include "gfx.h"
 #include "gfx_transform_matrix.h"
-#include <iostream.h>
+#include "quaternion.h"
+#include "gfx_lerp.h"
+#include <iostream>
+#include <string>
+
+using std::string;
+using std::cerr;
+
+#include "xml_support.h"
+
+using namespace XMLSupport;
 //#include "Gun.h"
 //#include "Warhead.h"
 /*EXPLANATION OF TERMS:
@@ -34,29 +43,14 @@ class Gun;
 class Warhead;
 class AI;
 class Box;
-/*
-class MeshGroup{
-	Mesh **meshes; // "siblings"
-	int nummesh;
+class Mesh;
+class Camera;
 
-	Matrix tmatrix;
-
-	Vector pp, pq, pr, ppos;
-
-public:
-	MeshGroup(char *filename); // file containing file names of all the shits to load
-	~MeshGroup();
-
-	void Draw();
-	void Draw(Matrix tmatrix);
-	void Draw(Matrix tmatrix, const Vector &pp, const Vector &pq, const Vector &pr, const Vector &ppos);
-};
-*/
 //////OBSOLETE!!!!!! Vector MouseCoordinate (int x, int y, float zplane);
 enum Aggression{
 	LOW, MEDIUM, HIGH, DISABLE, DESTROY
 };
-class Unit:public Mesh{
+class Unit {
  private:
   struct XML {
     vector<Mesh*> meshes;
@@ -65,10 +59,17 @@ class Unit:public Mesh{
   
   void LoadXML(const char *filename);
 
+  static void beginElement(void *userData, const XML_Char *name, const XML_Char **atts);
+  static void endElement(void *userData, const XML_Char *name);
+
   void beginElement(const string &name, const AttributeList &attributes);
   void endElement(const string &name);
 
 protected:
+  Transformation local_transformation;
+  Transformation cumulative_transformation;
+  Matrix cumulative_transformation_matrix;
+
   int nummesh;
   Mesh **meshdata;
   Unit **subunits; // the new children fun fun stuff
@@ -81,31 +82,39 @@ protected:
   
   Aggression aggression;
   
-  Matrix tmatrix;
-  
-  float time;
-  BOOL active;
+  bool active;
   
   //Vector pp, pq, pr, ppos;
   AI *aistate;
   long fpos;
+  string name;
   
   float mass;
   float fuel;
   float MomentOfInertia;
-  Vector AngularVelocity;
   Vector NetForce;
   Vector NetTorque;
+  Vector AngularVelocity;
   Vector Velocity;
+  int slerp_direction;
+
+  float ymin, ymax, ycur;
+  bool yrestricted;
+  float pmin, pmax, pcur;
+  bool prestricted;
+  float rmin, rmax, rcur;
+  bool rrestricted;
+
+
+  //AffineTransform last_atom, current_atom;
   
-  bool calculatePhysics; // physics have an effect on this object (set to false for planetse)
+  bool calculatePhysics; // physics have an effect on this object (set to false for planets)
 
   bool selected;
   Vector corner_min, corner_max; // corners of object
   void calculate_extent();
   Box *selectionBox;
 
-  void realDrawBoundingBox();
 public:
   //no default constructor; dymanically allocated arrays are evil, gotta do it java style to make it more sane
   Unit();
@@ -131,45 +140,46 @@ public:
 	virtual void Damaged(Unit *shooter) = 0; // sent by the damager that hit it
 	*/
 
-  virtual void Draw();
+  void RestrictYaw(float min, float max);
+  void RestrictPitch(float min, float max);
+  void RestrictRoll(float min, float max);
+
+  void UpdateHudMatrix();
+
+
   virtual void DrawStreak(const Vector &v);
-  virtual void TDraw(){GFXLoadIdentity(MODEL); Draw();};
-  virtual void Draw(Matrix tmatrix);
-  virtual void Draw(Matrix tmatrix, const Vector &pp, const Vector &pq, const Vector &pr, const Vector &ppos);
+  virtual void Draw(const Transformation & quat = identity_transformation, const Matrix m = identity_matrix);
   virtual void ProcessDrawQueue();
   float getMinDis(const Vector &pnt);
-  float getMinDis(Matrix t, const Vector &pnt);
   bool querySphere (const Vector &pnt, float err);
   int querySphere (const Vector &st, const Vector &end, float err);
-  int querySphere (Matrix,const Vector &st, const Vector &end, float err);
-  bool querySphere (Matrix,const Vector &pnt, float err);
-  bool queryBoundingBox(const Vector &pnt, float err);
-  bool queryBoundingBox(Matrix,const Vector &, float);
   bool queryFrustum (float frustum[6][4]);
-  bool queryFrustum (Matrix, float [6][4]);
 
   /**Queries the bounding box with a ray.  1 if ray hits in front... -1 if ray
    * hits behind.
    * 0 if ray misses */
+  bool Unit::queryBoundingBox (const Vector &pnt, float err);
   int queryBoundingBox(const Vector &origin,const Vector &direction, float err);
-  int queryBoundingBox(Matrix,const Vector &, const Vector &pnt, float err);
   /**Queries the bounding sphere with a duo of mouse coordinates that project
    * to the center of a ship and compare with a sphere...pretty fast*/
   bool querySphere (int,int, float err, Camera *activeCam);
-  bool querySphere (Matrix,int,int, float err,Camera *,Matrix);
 
   void Select();
   void Deselect();
-  void DrawBoundingBox();
 
   void PrimeOrders();
   void SetAI(AI *newAI);
   void EnqueueAI(AI *newAI);
-  Vector &Position(){return pos;};
-  Vector &Nose(){return pr;};
-  float GetTime(){return time;};
+
+  Vector &Position(){return local_transformation.position;};
+  void SetPosition(const Vector &pos) {local_transformation.position = pos;}
+  void SetPosition(float x, float y, float z) {local_transformation.position = Vector(x,y,z);}
+
+  Vector Nose() {return Vector(cumulative_transformation_matrix[8],
+			       cumulative_transformation_matrix[9],
+			       cumulative_transformation_matrix[10]);};
   
-  void Destroy(){active = FALSE;};
+  void Destroy(){active = false;};
   virtual void Fire(){};
 
   Unit *Update() {
@@ -182,6 +192,7 @@ public:
     }
   }
 
+  void Rotate(const Vector &axis);
   void FireEngines (Vector Direction, /*unit vector... might default to "r"*/
 					float FuelSpeed,
 					float FMass);
@@ -191,9 +202,6 @@ public:
   void ApplyLocalTorque (Vector Vforce, Vector Location);
   void ApplyBalancedLocalTorque (Vector Vforce, Vector Location); //usually from thrusters remember if I have 2 balanced thrusters I should multiply their effect by 2 :)
   void ResolveForces ();
-  Vector &P(){return p;};
-  Vector &Q(){return q;};
-  Vector &R(){return r;};
 
   inline bool queryCalculatePhysics() { return calculatePhysics; }
   void ExecuteAI();

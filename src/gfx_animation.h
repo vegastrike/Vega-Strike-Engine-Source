@@ -23,6 +23,9 @@
 #include "lin_time.h"
 #include "gfx_primitive.h"
 #include "gfx_transform_vector.h"
+
+#include "quaternion.h"
+
 class Animation:public Primitive
 {
 	Texture **Decal; 
@@ -42,7 +45,7 @@ public:
 	~Animation();
   //  void SetPosition (float x,float y,float z);
   //  void SetPosition(const Vector &k);
-	void Draw();
+	void Draw(const Transformation &quat = identity_transformation, const Matrix m = identity_matrix);
         void SetDimensions(float wid, float hei);
 };
 

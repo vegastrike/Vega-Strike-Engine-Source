@@ -34,7 +34,7 @@ int Stage1Texture= 0;
 int Stage1TextureName;
 
 namespace GFXMatrices {
-  Matrix model, view, projection, invprojection;
+  Matrix model,view, projection, invprojection;
   Matrix  rotview;
 }
 

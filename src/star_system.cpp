@@ -6,6 +6,7 @@
 #include "gfx_click_list.h"
 #include "gfx_hud.h"
 #include "cmd_input_dfa.h"
+#include "lin_time.h"
 
 #include "gfx_sphere.h"
 extern Vector mouseline;
@@ -15,14 +16,14 @@ static Unit *earth;
 
 StarSystem::StarSystem(Planet *primaries) : 
   primaries(primaries), 
-  units(new UnitCollection()), 
   drawList(new UnitCollection()),
+  units(new UnitCollection()), 
   missiles(new UnitCollection()), tp(new TextPlane("9x12.fon")) {
   currentcamera = 0;	
   systemInputDFA = new InputDFA (this);
   primaries->SetPosition(0,0,5);
   Iterator *iter = primaries->createIterator();
-  drawList->prepend(iter);
+  //drawList->prepend(iter);
 
   delete iter;
   iter = primaries->createIterator();
@@ -83,7 +84,7 @@ void StarSystem::Draw() {
   Iterator *iter = drawList->createIterator();
   Unit *unit;
   while((unit = iter->current())!=NULL) {
-    unit->TDraw();
+    unit->Draw();
     iter->advance();
   }
   delete iter;
@@ -200,12 +201,15 @@ void StarSystem::Update() {
 
   Iterator *iter = drawList->createIterator();
   Unit *unit;
+  scalar_t time = GetElapsedTime();
+  float lerp = time;
   while((unit = iter->current())!=NULL) {
         unit->ResolveForces();
     // Do something with AI state here eventually
     unit->ExecuteAI();
     iter->advance();
   }
+  UpdateTime();
   delete iter;
 }
 

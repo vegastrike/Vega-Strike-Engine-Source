@@ -24,20 +24,15 @@
 #include "physics.h"
 
 
-void Mesh:: Rotate (const Vector &axis)
+void Unit:: Rotate (const Vector &axis)
 {
 	float theta = axis.Magnitude();
 	float ootheta = 1/theta;
 	float s = cos (theta * .5);
 	Quaternion rot = Quaternion(s, axis * (sinf (theta*.5)*ootheta));
-	Quaternion rotprime = rot.Conjugate();
-	Quaternion pquat = rot * Quaternion(0, p) * rotprime;
-	Quaternion qquat = rot * Quaternion(0, q) * rotprime;
-	Quaternion rquat = rot * Quaternion(0, r) * rotprime;
-	p = pquat.v;
-	q = qquat.v;
-	r = rquat.v;
+	local_transformation.orientation *= rot;
 }
+
 void Unit:: FireEngines (Vector Direction/*unit vector... might default to "r"*/,
 					float FuelSpeed,
 					float FMass)
@@ -65,7 +60,7 @@ void Unit::Accelerate(Vector Vforce)
 void Unit::ApplyTorque (Vector Vforce, Vector Location)
 {
 	NetForce += Vforce;
-	NetTorque += Vforce.Cross (Location-pos);
+	NetTorque += Vforce.Cross (Location-local_transformation.position);
 }
 void Unit::ApplyLocalTorque (Vector Vforce, Vector Location)
 {
@@ -93,9 +88,8 @@ void Unit::ResolveForces () // don't call this 2x
 		float y = (1-magvel*magvel*oocc);
 		temp = temp * powf (y,1.5);
 		}*/
-	pos += (Velocity+.5*temp)*SIMULATION_ATOM;
+	local_transformation.position += (Velocity+.5*temp)*SIMULATION_ATOM;
 	Velocity += temp;
 	NetForce = Vector(0,0,0);
 	NetTorque = Vector(0,0,0);
-	changed = TRUE;
 }

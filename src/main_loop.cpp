@@ -21,6 +21,8 @@
 #include "gfx_sphere.h"
 #include "gfx_coordinate_select.h"
 #include "gfx_mesh.h"
+#include "cmd_navigation_orders.h"
+
 using namespace std;
 
 #define KEYDOWN(name,key) (name[key] & 0x80)
@@ -60,7 +62,7 @@ public:
 	{
 		//parent->Position(); // query the position
 	  //parent->ZSlide(0.100F);
-	  parent->Pitch(PI/180);
+	  //parent->Pitch(PI/180);
 		count ++;
 		if(30 == count)
 		{
@@ -77,7 +79,7 @@ public:
 AI *Line::Execute()
 {
 	//parent->Position(); // query the position
-	parent->ZSlide(0.100F);
+  //parent->ZSlide(0.100F);
 	count ++;
 	/*
 	if(parent->Position().i > 0.75 ||
@@ -96,7 +98,7 @@ AI *Line::Execute()
 		return this;
 }
 
-const float timek = .01;
+const float timek = .005;
 bool _Slew = true;
 static void Slew (int,KBSTATE newState){
 	
@@ -312,7 +314,7 @@ static void Quit(int,KBSTATE newState) {
 Unit *carrier=NULL;
 Unit *fighter = NULL;
 Unit *fighter2=NULL;
-const int numf = 900;
+const int numf = 200;
 Unit *fighters[numf];
 CoordinateSelect *locSel=NULL;
 Background * bg = NULL;
@@ -355,7 +357,7 @@ void clickhandler (KBSTATE k, int x, int y, int delx, int dely, int mod) {
   }
 }
 */
-
+/*
 static void FighterPitchDown(int,KBSTATE newState) {
 	static Vector Q = fighter->Q();
 	static Vector R = fighter->R();
@@ -403,7 +405,7 @@ static void FighterYawRight(int,KBSTATE newState) {
 	else if(_Slew&&newState==RELEASE) {
 	}
 }
-
+*/
 void InitializeInput() {
 	BindKey(GLUT_KEY_F1, Slew);
 	BindKey(GLUT_KEY_F12,Stop);
@@ -451,23 +453,7 @@ void createObjects() {
 //GOOD!!
   ****/
   BindKey (1,CoordinateSelect::MouseMoveHandle);
-  //locSel = new LocationSelect (Vector (0,-1,5),
-  //			       Vector (1,0,0),
-  //			       Vector (0,-.35,-1));
 
-  //fighter->SetPosition(Vector(5.0, 5.0, 5.0));
-  fighter->SetPosition(Vector(0.0, 10.0, 0.0));
-  fighter->SetAI(new Orbit);
-  //fighter->Roll(PI/4);
-  //fighter->Accelerate(Vector(25,0,0));
-  carrier->SetPosition(Vector(0.0, 5.0, 10.0));
-  carrier->Pitch(-PI/2);
-  //carrier->Accelerate(Vector(0, 25, 0));
-  ////  fighter->Scale(Vector(0.1,0.1,0.1));
-  ////  fighter2->Scale(Vector(0.1,0.1,0.1));
-  ////  carrier->Scale(Vector(0.2,0.2,0.2));
-  //t->SetPosition(Vector(0.5, 0.5, 15.0));
-  //t->Pitch(PI/2);
   locSel = new CoordinateSelect (Vector (0,0,5));
   GFXMaterial mat;
   GFXGetMaterial(0, mat);
@@ -490,15 +476,12 @@ void createObjects() {
   GFXEnable(TEXTURE1);
 
 
-  fighter2->SetPosition(0.0, 1.0, 50.0);
-  fighter2->Pitch(PI/2);
-  
   //  
   //  
   for(int a = 0; a < numf; a++) {
     //fighters[a] = new Unit("uosprey.dat");
     //fighters[a] = new Unit("Homeworld-HeavyCorvette.xml", true);
-    switch(1) {
+    switch(a%7) {
     case 0:
       //fighters[a] = new Unit("broadsword.xunit", true);
       fighters[a] = new Unit("midway.xunit", true);
@@ -521,15 +504,19 @@ void createObjects() {
     case 6:
       fighters[a] = new Unit("Homeworld-HeavyCorvette.xml", true);
       break;
+      /*
     case 7:
       fighters[a] = new Unit("uosprey.dat");
       break;
+      */
     }
     //fighters[a] = new Unit("phantom.xunit", true);
     //fighters[a]->SetPosition((a%8)/8.0 - 2.0, (a/8)/8.0 - 2.0,5.0);
 
-
-    fighters[a]->SetPosition((a%5)/0.25 - 4.0F, (a/5)/0.25 - 4.0F,2.0F);
+    Vector position((a%20)/2 - 4.0F, (a/20)/2 - 4.0F,2.0F);
+    fighters[a]->SetPosition(position);
+    position.k += 6;
+    //fighters[a]->SetAI(new MoveOrder(position));
     //fighters[a]->SetPosition(0, 0, -2.0F);
   
     //fighters[a]->Pitch(PI/2);
