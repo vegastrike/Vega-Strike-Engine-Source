@@ -61,7 +61,7 @@ void LocationSelect::SetOrientation(const Vector &p, const Vector &q, const Vect
   local_transformation.orientation = Quaternion::from_vectors(p,q,r);
 }
 
-Vector &LocationSelect::Position()
+QVector &LocationSelect::Position()
 {
 	return local_transformation.position;
 }

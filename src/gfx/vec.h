@@ -37,11 +37,12 @@ inline Vector operator+= (Vector &lval, const Vector &obj);
 
 inline float DotProduct (const Vector &a, const Vector &b);
 inline void Normalize(Vector &r);
-
+class QVector;
 class Vector {
  public:
   float i,j,k;
   Vector () {}
+  Vector (const QVector &);
   Vector(float i,float j,float k) {
     this->i = i;
     this->j = j;

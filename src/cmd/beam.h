@@ -52,7 +52,7 @@ public:
   Beam (const Transformation & trans, const weapon_info & clne, void * own, int sound);
   void Init (const Transformation & trans, const weapon_info & clne, void * own);
   ~Beam();
-  Vector &Position();
+  Vector GetPosition();
   void SetPosition (float, float, float);
   void SetPosition (const Vector &);
   void SetOrientation(const Vector &p, const Vector &q, const Vector &r);

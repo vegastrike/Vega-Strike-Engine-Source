@@ -309,7 +309,7 @@ void Unit::UpdatePhysics (const Transformation &trans, const Matrix transmat, co
       }
     }
   } 
-  curr_physical_state.position += Velocity*SIMULATION_ATOM;
+  curr_physical_state.position = curr_physical_state.position + QVector (Velocity*SIMULATION_ATOM);
 #ifdef DEPRECATEDPLANETSTUFF
   if (planet) {
     Matrix basis;

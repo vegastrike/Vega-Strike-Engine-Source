@@ -22,7 +22,7 @@ public:
   void MoveLocation (Vector pos, Vector p, Vector q, Vector r); //requires normalized Vector triplet pqr
   void Draw();
 
-  Vector &Position();
+  QVector &Position();
   void SetPosition (float, float, float);
   void SetPosition (const Vector &);
   void SetOrientation(const Vector &p, const Vector &q, const Vector &r);

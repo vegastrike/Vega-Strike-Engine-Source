@@ -19,7 +19,7 @@ Transformation linear_interpolate(const Transformation &A, const Transformation 
 
   Quaternion result, a = A.orientation, b = B.orientation;
   double	f = blend, f0, f1;
-  double	cos_omega = a.v * b.v + a.s * b.s;
+  double	cos_omega = DotProduct (a.v, b.v) + a.s * b.s;
   
   // Adjust signs if necessary.
   if (cos_omega < 0) {

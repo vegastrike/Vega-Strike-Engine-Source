@@ -34,7 +34,7 @@ void Beam::SetOrientation(const Vector &p, const Vector &q, const Vector &r)
   local_transformation.orientation = Quaternion::from_vectors(p,q,r);
 }
 
-Vector &Beam::Position()
+Vector Beam::GetPosition()
 {
 	return local_transformation.position;
 }
