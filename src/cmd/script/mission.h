@@ -633,7 +633,7 @@ varInst * call_unit(missionNode *node,int mode);
  Unit *getUnitObject(missionNode *node,int mode,varInst *ovi);
 
  // void call_unit_launch(missionNode *node,int mode,string name,string faction,string type,string ainame,int nr_ships,Vector &pos);
- void call_unit_launch(Flightgroup *fg);
+ Unit * call_unit_launch(Flightgroup *fg);
  void call_unit_toxml(missionNode *node,int mode,varInst *ovi);
 
  varInst *call_string(missionNode *node,int mode);

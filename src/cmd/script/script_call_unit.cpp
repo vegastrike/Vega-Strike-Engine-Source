@@ -168,12 +168,12 @@ varInst *Mission::call_unit(missionNode *node,int mode){
       pos[i]=checkFloatExpr(pos_node[i],mode);
     }
 
+	Unit * my_unit=NULL;
     if(mode==SCRIPT_RUN){
       string name_string=*((string *)name_vi->object);
       string faction_string=*((string *)faction_vi->object);
       string type_string=*((string *)type_vi->object);
       string ai_string=*((string *)ai_vi->object);
-
 
       Flightgroup *fg=new Flightgroup;
 
@@ -198,8 +198,10 @@ varInst *Mission::call_unit(missionNode *node,int mode){
   fprintf (stderr,"cunl%x",this);
   fflush (stderr);
 #endif
-
-      call_unit_launch(fg);
+	  Unit *tmp= call_unit_launch(fg);
+	  if (!my_unit) {
+		my_unit=tmp;
+	  }
 #ifdef ORDERDEBUG
   fprintf (stderr,"ecun");
   fflush (stderr);
@@ -211,10 +213,15 @@ varInst *Mission::call_unit(missionNode *node,int mode){
     deleteVarInst(faction_vi);
     deleteVarInst(type_vi);
     deleteVarInst(ai_vi);
-
     viret=newVarInst(VI_TEMP);
-      viret->type=VAR_VOID;
-      return viret;
+    viret->type=VAR_OBJECT;
+    viret->objectname="unit";
+    
+    viret->object=(void *)my_unit;
+
+    debug(3,node,mode,"unit getUnit: ");
+
+    return viret;
   }else if (method_id==CMT_UNIT_getCredits) {
      viret=newVarInst(VI_TEMP);
      viret->type=VAR_FLOAT;
@@ -848,7 +855,7 @@ Unit *Mission::getUnitObject(missionNode *node,int mode,varInst *ovi){
 
 // void call_unit_launch(missionNode *node,int mode,string name,string faction,string type,string ainame,int nr_ships,Vector & pos){
 
-void Mission::call_unit_launch(Flightgroup *fg){
+Unit * Mission::call_unit_launch(Flightgroup *fg){
 
    int faction_nr=_Universe->GetFaction(fg->faction.c_str());
    //   printf("faction nr: %d %s\n",faction_nr,fg->faction.c_str());
@@ -860,9 +867,9 @@ void Mission::call_unit_launch(Flightgroup *fg){
    }
 
    float fg_radius=units[0]->rSize();
-
+   Unit *my_unit;
    for(u=0;u<fg->nr_ships;u++){
-     Unit *my_unit=units[u];
+     my_unit=units[u];
 
      Vector pox;
 
@@ -910,6 +917,7 @@ void Mission::call_unit_launch(Flightgroup *fg){
    char buffer[200];
    sprintf(buffer,"%s launched %s:%s %d-%d",fg->faction.c_str(),fg->name.c_str(),fg->type.c_str(),0,fg->nr_ships);
    msgcenter->add("game","all",buffer);
+   return my_unit;
 }
 
 void Mission::findNextEnemyTarget(Unit *my_unit){
