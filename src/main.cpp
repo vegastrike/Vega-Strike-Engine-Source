@@ -366,13 +366,7 @@ void bootstrap_main_loop () {
 	string srvip = vs_config->getVariable("network","server_ip","");
 	if( srvip != "")
 	{
-		string srvport = vs_config->getVariable("network","server_port","");
-		if( srvport=="")
-		{
-			cout<<"No port found, exiting"<<endl;
-			cleanup();
-			exit( 1);
-		}
+		string srvport = vs_config->getVariable("network","server_port",SERVER_PORT);
 		// Get the number of local players
 		Network = new NetClient[numplayers];
 
