@@ -36,7 +36,7 @@ extern void putSaveString (int whichcp, string key, unsigned int num,std::string
 static const char *miss_script="mission_scripts";
 static const char *miss_name="mission_names";
 static const char *miss_desc="mission_descriptions";
-static const char *news_name="news";
+static const char *news_name="dynamic_newsnews";
 using std::string;
 extern const Unit * makeFinalBlankUpgrade (string name, int faction);
 extern const Unit * makeTemplateUpgrade (string name, int faction);

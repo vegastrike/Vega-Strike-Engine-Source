@@ -1119,6 +1119,7 @@ bool BaseComputer::isTransactionOK(const Cargo& originalItem, TransactionType tr
 	    }
             break;
         case SELL_UPGRADE:
+			return true; // You can always sell upgrades, no matter what!
         case BUY_UPGRADE:
             // cargo.mission == true means you can't do the transaction.
             if(item.price <= cockpit->credits && !item.mission) {
@@ -1352,10 +1353,6 @@ bool BaseComputer::changeToNewsMode(const EventCommandId& command, Control* cont
     if(m_currentDisplay != NEWS) {
         switchToControls(NEWS);
         loadNewsControls();
-        // Turn on some cool music.
-	static string newssong=vs_config->getVariable("audio","newssong","../music/news1.ogg");
-	muzak->GotoSong(newssong);
-        m_playingMuzak = true;
     }
     return true;
 }
@@ -1375,7 +1372,12 @@ bool BaseComputer::newsPickerChangedSelection(const EventCommandId& command, Con
     } else {
         desc->setText(cell->text());
     }
-
+//	if (!m_playingMuzak) {
+		// Turn on some cool music.
+		static string newssong=vs_config->getVariable("audio","newssong","../music/news1.ogg");
+		muzak->GotoSong(newssong);
+		m_playingMuzak = true;
+//	}
     return true;
 }
 
@@ -1391,7 +1393,7 @@ void BaseComputer::loadNewsControls(void) {
         gameMessage last;
         int i = 0;
         vector<std::string> who;
-        who.push_back(NEWS_NAME_LABEL);
+        who.push_back("news");
         while((mission->msgcenter->last(i++, last, who))) {
             picker->addCell(SimplePickerCell(last.message));
         }
@@ -2317,10 +2319,30 @@ bool BaseComputer::showPlayerInfo(const EventCommandId& command, Control* contro
     int i = 0;
     for(; i<numFactions; i++) {
         float relation = FactionUtil::GetIntRelation(i, ( UniverseUtil::getPlayerX(UniverseUtil::getCurrentPlayer()) )->faction );
-        relation = relation * 0.5;
-        relation = relation + 0.5;
-        const int percent = relation * 100.0;
-        text += FactionUtil::GetFactionName(i) + "  " + XMLSupport::tostring(percent);
+//        relation = relation * 0.5;
+//        relation = relation + 0.5;
+        const int percent = (int)(relation * 100.0);
+
+		// The following gets the spark (faction) color.
+		const float *spark;
+		spark=FactionUtil::GetSparkColor(i);
+		text += "#c" + XMLSupport::tostring(spark[0]) + ':' + XMLSupport::tostring(spark[1]) +
+			':' + XMLSupport::tostring(spark[2]) + '#' + FactionUtil::GetFactionName(i) + "#-c  -  ";
+		
+		// The following code will make the text brighter, but then confed is hard to tell apart from the background.
+//		text += "#c" + XMLSupport::tostring(spark[0]/1.5f + .333f) + ':' + XMLSupport::tostring(spark[1]/1.5f+.333f) +
+//			':' + XMLSupport::tostring(spark[2]/1.5f+.333f) + '#' + FactionUtil::GetFactionName(i) + "#-c  -  ";
+
+		// Now we get the relation color.
+		float rel01 = ( relation + 1 ) / 2;
+		if (rel01 >= 1) {
+			text += "#c0.0:1.0:0.0#";
+		} else if (rel01 <= 0) {
+			text += "#c1.0:0.0:0.0#";
+		} else {
+			text += std::string("#c") + XMLSupport::tostring(1-rel01) + ':' + XMLSupport::tostring(rel01) + ":0.0#";
+		}
+		text += XMLSupport::tostring(percent) + "#-c";
         if (i < killList->size()) {
             text += ", kills: " + XMLSupport::tostring((int)(*killList)[i]);
         }
@@ -2331,7 +2353,6 @@ bool BaseComputer::showPlayerInfo(const EventCommandId& command, Control* contro
     if (i < killList->size()) {
         text += "#n##b4#Total Kills: " + XMLSupport::tostring((int)(*killList)[i]) + "#-b#";							
     }
-
     // Put this in the description.
     StaticDisplay* desc = dynamic_cast<StaticDisplay*>( window()->findControlById("Description") );
     assert(desc != NULL);
@@ -2347,14 +2368,34 @@ bool BaseComputer::showShipStats(const EventCommandId& command, Control* control
 
     // Need to translate some characters to make it even prettier.
     string text;
+	bool inQuote = false;
+	bool newLine = false;
     for(string::const_iterator i=rawText.begin(); i!=rawText.end(); i++) {
         switch(*i) {
             case '\n':
                 text.append("#n#");
+				if (!newLine) {
+					text.append("#c0.0:1.0:0.5#");
+					newLine = true;
+				}
                 break;
             case '"':
+				if (!inQuote) {
+					text.append("#c1.0:0.5:0.5#");
+					inQuote=true;
+				} else {
+					text.append("#-c");
+					inQuote=false;
+				}
                 // Delete these, so do nothing.
                 break;
+            case ' ':
+                if (newLine) {
+					newLine=false;
+					text.append("#-c");
+				}
+				text+=(*i);
+				break;
             default:
                 text+=(*i);
                 break;
