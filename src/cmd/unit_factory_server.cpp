@@ -10,10 +10,15 @@
 extern Unit * _masterPartList;
 
 Unit* UnitFactory::getMasterPartList( )
-{
+{ 
+	std::string mpl = vs_config->getVariable("data","master_part_list","master_part_list");
+char tmp[2048];
+tmp[2047]=0;
+getcwd (tmp,2046);
+
     if( _masterPartList == NULL )
     {
-        _masterPartList = new Unit( "master_part_list",
+        _masterPartList = new Unit(mpl.c_str(),
 	                            true,
 				    FactionUtil::GetFaction("upgrades") );
     }

@@ -411,7 +411,7 @@ bool Unit::Collide (Unit * target) {
   return true;
 }
 
-
+ 
 Unit * Unit::queryBSP (const QVector &pt, float err, Vector & norm, float &dist, bool ShieldBSP) {
   int i;
   if (RecurseIntoSubUnitsOnCollision)

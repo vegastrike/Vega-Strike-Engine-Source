@@ -55,8 +55,12 @@ SOCKETALT ServerSocketTCP::acceptNewConn( SocketSet& set )
     COUT << "enter " << __PRETTY_FUNCTION__ << endl;
 
     struct sockaddr_in remote_ip;
-    socklen_t  len = sizeof( struct sockaddr_in );
-
+#if defined (__APPLE__) || defined (_WIN32) 
+    int
+#else
+    socklen_t          
+#endif
+      len = sizeof( struct sockaddr_in );
     if( set.is_set( _fd ) )
     {
         int sock = accept( _fd, (sockaddr *)&remote_ip, &len );

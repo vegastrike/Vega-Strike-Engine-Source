@@ -187,14 +187,19 @@ int main( int argc, char *argv[] )
     while ((*c != '/')&&(*c != '\\')&&c>parentdir)      /* back up to parent */
         c--;
     
-    *c++ = '\0';             /* cut off last part (binary name) */
+    *c = '\0';             /* cut off last part (binary name) */
     if (strlen (parentdir)>0) {  
       chdir (parentdir);/* chdir to the binary app's parent */
     }
 	delete []parentdir;
 	}
+    FILE * test = fopen ("vegastrike.config","r");
+	if (test)
+		fclose(test);
+	else
+		chdir("..");
 #if defined(WITH_MACOSX_BUNDLE)
-	chdir ("../Resources/data");/* chdir to the .app's parent */
+	chdir ("Resources/data");/* chdir to the .app's parent */
 	//chdir ("../../../");/* chdir to the .app's parent */
 #endif
 #endif

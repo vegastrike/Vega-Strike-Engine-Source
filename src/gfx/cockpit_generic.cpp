@@ -15,8 +15,8 @@
 #include "cmd/images.h"
 #include "cmd/script/mission.h"
 #include "cmd/script/msgcenter.h"
-//#include "cmd/ai/flyjoystick.h"
-//#include "cmd/ai/firekeyboard.h"
+#include "cmd/ai/flyjoystick.h"
+#include "cmd/ai/firekeyboard.h"
 #include "cmd/ai/aggressive.h"
 //#include "main_loop.h"
 #include <assert.h>	// needed for assert() calls
@@ -72,10 +72,15 @@ void Cockpit::Init (const char * file) {
     return;
   }
   Delete();
+  string cpdir=vs_config->getVariable("data","cockpits","");
+  if (cpdir.length())
+	  vschdir (cpdir.c_str());
   vschdir (file);
   LoadXML(file);
   vscdup();
-}
+  if (cpdir.length())
+	  vscdup();
+} 
 Unit *  Cockpit::GetSaveParent() {
   Unit * un = parentturret.GetUnit();
   if (!un) {

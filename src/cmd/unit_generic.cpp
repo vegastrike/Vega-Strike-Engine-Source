@@ -562,10 +562,14 @@ void Unit::Init(const char *filename, bool SubU, int faction,std::string unitMod
 	FILE * fp=NULL;
 	if (!fp) {
 	  const char *c;
+	  if (SubU&&faction!=FactionUtil::GetFactionIndex("upgrades"))//RED FLAG
+		  vschdir("subunits");
+	  else {
 	  if ((c=FactionUtil::GetFaction(faction)))
 	    vschdir (c);
 	  else
 	    vschdir ("unknown");
+	  }
 	  doubleup=true;
 	  vschdir (my_directory);
 	} else {
@@ -758,7 +762,9 @@ void Unit::Fire (unsigned int weapon_type_bitmask, bool listen_to_owner) {
         const bool locked_missile = (mis&&locked_on&&lockable_weapon);
         const bool missile_and_want_to_fire_missiles = (mis&&(weapon_type_bitmask&ROLES::FIRE_MISSILES));
         const bool gun_and_want_to_fire_guns =((!mis)&&(weapon_type_bitmask&ROLES::FIRE_GUNS));
-        
+        if(missile_and_want_to_fire_missiles&&locked_missile){
+			fprintf (stderr,"\n about to fire locked missile \n");
+		}
         if (fire_non_autotrackers||autotracking_gun||locked_missile) {
             if ((ROLES::EVERYTHING_ELSE&weapon_type_bitmask&(*i)->type->role_bits)
                 ||(*i)->type->role_bits==0) {
