@@ -154,13 +154,13 @@ void Cockpit::beginElement(const string &name, const AttributeList &attributes) 
 		  cockpit_offset = XMLSupport::parse_float ((*iter).value);
 	break;
       case XFILE:
-	Pit[0]= new Sprite ((*iter).value.c_str());
+	Pit[0]= new Sprite ((*iter).value.c_str(),NEAREST);
 	break;
       case FRONT:
       case BACK:
       case LEFT:
       case RIGHT:
-	Pit[attr-FRONT] = new Sprite ((*iter).value.c_str());
+	Pit[attr-FRONT] = new Sprite ((*iter).value.c_str(),NEAREST);
 	break;
       } 
     }
@@ -253,7 +253,7 @@ void Cockpit::beginElement(const string &name, const AttributeList &attributes) 
       switch (attribute_map.lookup((*iter).name)) {
       case XFILE:
 	if (newsprite) {
-	  (*newsprite) = new Sprite ((*iter).value.c_str());
+	  (*newsprite) = new Sprite ((*iter).value.c_str(),NEAREST);
 	  adjsprite = *newsprite;
 	} else if (newvdu) {
 	  (*newvdu) = new VDU ((*iter).value.c_str(),text,mymodes,rows,cols);

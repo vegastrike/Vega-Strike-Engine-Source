@@ -38,7 +38,7 @@ class Sprite {
 	Texture *surface;
 
 public:
-	Sprite (const char *file);
+	Sprite (const char *file, enum FILTER texturefilter=BILINEAR);
 	~Sprite();
 
 	void Draw();

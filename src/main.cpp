@@ -48,8 +48,8 @@ void setup_game_data ( ){ //pass in config file l8r??
   g_game.capture_mouse=GFXFALSE;
   g_game.fullscreen = 0;
   g_game.color_depth = 16;
-  g_game.y_resolution = 600;
-  g_game.x_resolution = 800;
+  g_game.y_resolution = 768;
+  g_game.x_resolution = 1024;
   g_game.fov=78;
   g_game.PaletteExt=1;
   g_game.cubemap=0;

@@ -33,7 +33,7 @@
 #endif
 static float *mview = NULL;
 
-Sprite::Sprite(const char *file) {
+Sprite::Sprite(const char *file, enum FILTER texturefilter) {
 
 
 
@@ -59,9 +59,9 @@ Sprite::Sprite(const char *file) {
     widtho2/=2;
     heighto2/=-2;
     if (texturea[0]==0) {
-      surface = new Texture(texture);    
+      surface = new Texture(texture,0,texturefilter);    
     } else {
-      surface = new Texture(texture,texturea);    
+      surface = new Texture(texture,texturea,0,texturefilter);    
     }
     
     if (!surface->LoadSuccess()) {

@@ -33,12 +33,12 @@
 #include "cmd/ai/firekeyboard.h"
 #include "cmd/ai/script.h"
 #include "gfx/cockpit.h"
-
+#include "gfx/aux_texture.h"
 using namespace std;
 
 #define KEYDOWN(name,key) (name[key] & 0x80)
 
-extern Texture *logo;
+
 
  GFXBOOL capture;
 GFXBOOL quit = GFXFALSE;
@@ -280,7 +280,8 @@ void InitializeInput() {
 	BindKey(27, Quit);
 }
 
-Cockpit *cockpit;
+//Cockpit *cockpit;
+static Texture *tmpcockpittexture;
 void createObjects() {
   explosion= new Animation ("explosion_orange.ani",false,.1,BILINEAR,false);
   LoadWeapons("weapon_list.xml");
@@ -337,6 +338,7 @@ void createObjects() {
   fighters[0]->EnqueueAI(new AIScript("aitest.xml"));
   fighters[0]->EnqueueAI(new FlyByJoystick (0,"player1.kbconf"));
   fighters[0]->EnqueueAI(new FireKeyboard (0,""));
+  tmpcockpittexture = new Texture ("hornet-cockpit.bmp","hornet-cockpitalp.bmp",0,NEAREST);
   _Universe->AccessCockpit()->Init ("hornet-cockpit.cpt");
   _Universe->AccessCockpit()->SetParent(fighters[0]);
   shipList = _Universe->activeStarSystem()->getClickList();
@@ -346,7 +348,8 @@ void createObjects() {
 void destroyObjects() {  
   for(int a = 0; a < numf; a++)
   	delete fighters[a];
-  delete cockpit;
+  delete tmpcockpittexture;
+  //  delete cockpit;
   delete [] fighters;
   delete locSel;
   delete explosion;
