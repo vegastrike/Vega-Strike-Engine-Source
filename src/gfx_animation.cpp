@@ -35,7 +35,7 @@ Animation::Animation ():Primitive()
 	Decal = NULL;
 }
 
-Animation::Animation (char * FileName, bool Rep, float priority,  bool camorient):Primitive()
+Animation::Animation (char * FileName, bool Rep,  float priority,bool ismipmapped,  bool camorient):Primitive()
 {	
   repeat = Rep;
 	cumtime = 0;
@@ -61,7 +61,7 @@ Animation::Animation (char * FileName, bool Rep, float priority,  bool camorient
 	for (int i=0; i<numframes;i++) //load all textures
 	{
 	  fscanf (fp,"%s %s", temp, tempalp);
-	  Decal[i] = new Texture (temp,tempalp, 0,TEXTURE2D, TEXTURE_2D,alp,zeroval);
+	  Decal[i] = new Texture (temp,tempalp, 0,ismipmapped, TEXTURE2D, TEXTURE_2D,alp,zeroval);
 	  Decal[i]->Prioritize (priority);//standard animation priority
 	  /*int j;
 	    for (j=0; ;j++)

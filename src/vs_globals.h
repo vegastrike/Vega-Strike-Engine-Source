@@ -10,6 +10,7 @@ typedef struct {
   int fullscreen;
   int Multitexture;
   int PaletteExt;
+  int mipmap;
   int color_depth;
   int y_resolution;
   int x_resolution;  

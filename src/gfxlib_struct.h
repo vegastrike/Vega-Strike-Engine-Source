@@ -20,7 +20,6 @@
  */
 #ifndef D3D_STRUCT
 #define D3D_STRUCT
-
 #include "gfx_transform_vector.h"
 
 struct GFXVertex // Vertex, Normal, Texture, and Environment
@@ -85,25 +84,34 @@ class /*GFXDRVAPI*/ GFXVertexList {
   //	int numQuads;
   int numVertices;
   GFXVertex *myVertices;
-  GLenum mode;
+  GFXVertexList * tesslist;
+  GLenum *mode;
   int display_list;
-
+  int numlists;
+  int *offsets;
+  int tessellation;
+  bool changed;
+  void Init (enum POLYTYPE *poly, int numVertices, GFXVertex *vertices, int numlists, int *offsets, int tess);
+  void RefreshDisplayList();
 public:
-	GFXVertexList();
-	GFXVertexList(enum POLYTYPE poly, int numVertices, GFXVertex *vertices);
-	~GFXVertexList();
-
-	GFXTVertex *LockTransformed(); // Stuff to support environment mapping
-	void UnlockTransformed();
-
-	GFXVertex *LockUntransformed(); // Stuff to support environment mapping
-	void UnlockUntransformed();
-
-	BOOL SetNext(GFXVertexList *vlist);
-
-	BOOL Draw();
-	BOOL SwapUntransformed();
-	BOOL SwapTransformed();
+  GFXVertexList();
+  void Tess (int );
+  inline GFXVertexList(enum POLYTYPE poly, int numVertices, GFXVertex *vertices,int tess =0){Init (&poly, numVertices, vertices, 1, &numVertices,tess);}
+  inline GFXVertexList(enum POLYTYPE *poly, int numVertices, GFXVertex *vertices, int numlists, int *offsets, int tess =0) {
+    Init(poly,numVertices,vertices,numlists,offsets,tess);
+  }
+  ~GFXVertexList();
+  
+  GFXTVertex *LockTransformed(); // Stuff to support environment mapping
+  void UnlockTransformed();
+  GFXVertex *LockUntransformed(); // Stuff to support environment mapping
+  void UnlockUntransformed();
+  
+  BOOL SetNext(GFXVertexList *vlist);
+  
+  BOOL Draw();
+  BOOL SwapUntransformed();
+  BOOL SwapTransformed();
 };
 
 struct GFXMaterial

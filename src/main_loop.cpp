@@ -448,7 +448,7 @@ void createObjects() {
   fighter = new Unit("uosprey.dat");
   //Unit *fighter2 = new Unit("uosprey.dat");
   fighter2 = new Unit("uosprey.dat");
-  s = new Animation ("explosion_orange.ani",true,.1,false);
+  s = new Animation ("explosion_orange.ani",true,.1,false,false);
   s->SetPosition (0,0,5);
   bg = new Background("cube");
   //bg2 = new SphereMesh (20.0,8,8,"sun.bmp",true,true);
@@ -513,7 +513,7 @@ void createObjects() {
     //fighters[a]->SetPosition((a%8)/8.0 - 2.0, (a/8)/8.0 - 2.0,5.0);
 
     //Vector position((a%20)/0.25 - 4.0F, (a/20)/0.25 - 4.0F,2.0F);
-    Vector position = Vector(0,0,2);
+    Vector position = Vector(3,0,-2);
     fighters[a]->SetPosition(position);
     position.k += 6;
     Vector v(0,1,0);

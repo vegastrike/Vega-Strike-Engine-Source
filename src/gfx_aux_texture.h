@@ -32,6 +32,7 @@ using namespace std;
 
 struct Texture{
   char filename[64];
+  bool ismipmapped;
 	unsigned int sizeX;
 	unsigned int sizeY;
 	unsigned char *data;
@@ -55,8 +56,8 @@ struct Texture{
   }
 public:
 
-	Texture(const char *,const char *, int stage = 0, enum TEXTURE_TARGET target=TEXTURE2D, enum TEXTURE_IMAGE_TARGET imagetarget=TEXTURE_2D, float alpha=1, int zeroval=0);
-	Texture(const char * FileName, int stage = 0, enum TEXTURE_TARGET target=TEXTURE2D, enum TEXTURE_IMAGE_TARGET imagetarget=TEXTURE_2D);
+	Texture(const char *,const char *, int stage = 0, bool mipmap= true, enum TEXTURE_TARGET target=TEXTURE2D, enum TEXTURE_IMAGE_TARGET imagetarget=TEXTURE_2D, float alpha=1, int zeroval=0);
+	Texture(const char * FileName, int stage = 0, bool mipmap = true, enum TEXTURE_TARGET target=TEXTURE2D, enum TEXTURE_IMAGE_TARGET imagetarget=TEXTURE_2D);
 	~Texture()
 	{
 		if(original == NULL)

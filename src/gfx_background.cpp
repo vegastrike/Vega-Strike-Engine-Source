@@ -33,7 +33,7 @@ Background::Background(char *file)
 	char temp[80]; 
 	up = left = down = front=right=back=NULL;
 	strcpy(temp, file);
-	up = new Texture(strcat(temp, "_up.bmp"), 0);
+	up = new Texture(strcat(temp, "_up.bmp"), 0,false );
 	SphereBackground = NULL;
 	
 	if (!up->LoadSuccess()) {
@@ -51,27 +51,27 @@ Background::Background(char *file)
 	//up->Filter();
 
 	strcpy(temp, file);
-	left = new Texture(strcat(temp, "_left.bmp"), 0);
+	left = new Texture(strcat(temp, "_left.bmp"), 0,false);
 	//left->Clamp();
 	//left->Filter();
 
 	strcpy(temp, file);
-	front = new Texture(strcat(temp, "_front.bmp"), 0);
+	front = new Texture(strcat(temp, "_front.bmp"), 0,false);
 	//front->Clamp();
 	//front->Filter();
 
 	strcpy(temp, file);
-	right = new Texture(strcat(temp, "_right.bmp"), 0);
+	right = new Texture(strcat(temp, "_right.bmp"), 0,false);
 	//right->Clamp();
 	//right->Filter();
 
 	strcpy(temp, file);
-	back = new Texture(strcat(temp, "_back.bmp"), 0);
+	back = new Texture(strcat(temp, "_back.bmp"), 0,false);
 	//back->Clamp();
 	//back->Filter();
 
 	strcpy(temp, file);
-	down = new Texture(strcat(temp, "_down.bmp"), 0);
+	down = new Texture(strcat(temp, "_down.bmp"), 0,false);
 	//down->Clamp();
 	//down->Filter();
 	}

@@ -70,7 +70,7 @@ struct gfx_light_data {
 
 
 
-float cutoff=.05;
+
 static int _currentContext=0;
 
 int GLLights[GFX_MAX_LIGHTS]={-1,-1,-1,-1,-1,-1,-1,-1};
@@ -83,16 +83,24 @@ vector <gfx_light_loc> * _llights_loc=NULL;
 vector <gfx_light_data> * _llights_dat=NULL;
 
 float intensity_cutoff=.05;//something that would normally round down
-BOOL /*GFXDRVAPI*/ GFXSetCutoff (float cutoff) {
-  if (cutoff<0) 
+float optintense=.2;
+float optsat = .95;
+BOOL /*GFXDRVAPI*/ GFXSetCutoff (float ttcutoff) {
+  if (ttcutoff<0) 
     return FALSE;
-  intensity_cutoff=cutoff;
+  intensity_cutoff=ttcutoff;
+  return TRUE;
+}
+BOOL /*GFXDRVAPI*/ GFXSetOptimalIntensity (float intensity, float saturate) {
+  optintense = intensity;
+  optsat = saturate;
   return TRUE;
 }
 BOOL /*GFXDRVAPI*/ GFXSetOptimalNumLights (int numLights) {
   if (numLights>GFX_MAX_LIGHTS||numLights<0)
     return FALSE;
   GFX_OPTIMAL_LIGHTS=numLights;
+  return TRUE;
 }
 
 
@@ -144,6 +152,7 @@ BOOL /*GFXDRVAPI*/ GFXSetSeparateSpecularColor(BOOL spec) {
   }else {
     glLightModeli (GL_LIGHT_MODEL_COLOR_CONTROL,GL_SINGLE_COLOR);
   }
+  return TRUE;
 }
 BOOL /*GFXDRVAPI*/ GFXCreateLightContext (int & con_number) {
   static BOOL LightInit=FALSE;
@@ -276,6 +285,17 @@ BOOL /*GFXDRVAPI*/ GFXPickLights (const float * transform) {
     tmpvar = lightQ.top();
     if (i<GFX_MAX_LIGHTS) {
       //do more stuff with intensity before hacking it to hell
+      if (i>GFX_OPTIMAL_LIGHTS) {
+	if ((tmpvar.intensity_key-optintense)*(GFX_MAX_LIGHTS-GFX_OPTIMAL_LIGHTS) < (i - GFX_OPTIMAL_LIGHTS)*(optsat-optintense))
+	  break;//no new lights
+      }else {
+	if (i==GFX_OPTIMAL_LIGHTS-2&&tmpvar.intensity_key<.25*optintense)  
+	  break;//no new lights
+	if (i==GFX_OPTIMAL_LIGHTS-1&&tmpvar.intensity_key<.5*optintense)
+	  break;//no new lights
+	if (i==GFX_OPTIMAL_LIGHTS&&tmpvar.intensity_key < optintense)
+	  break;
+      }
       newQsize++;
       if ((*_llights_loc)[i].vect[3]) {
 	//intensity now has become the attenuation factor
@@ -286,10 +306,10 @@ BOOL /*GFXDRVAPI*/ GFXPickLights (const float * transform) {
 	AttenuateQ[i]=0;
       }
 
+    } else {
+      break;
     }
     lightQ.pop();
-    //really dumb policy that doesn't take in the optimal number of lights into account...
-    //replace wiht something that should generate a bell curve around optimal based on how far over/under you are using some sort of fuzzy logic
   }
   unsigned int light;
   for (i=0;i<newQsize;i++) {

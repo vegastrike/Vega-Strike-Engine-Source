@@ -61,6 +61,7 @@ BOOL /*GFXDRVAPI*/ GFXLightContextAmbient (const GFXColor &amb);
 BOOL /*GFXDRVAPI*/ GFXPickLights(const float *);
 BOOL /*GFXDRVAPI*/ GFXSetSeparateSpecularColor (BOOL spec);
 BOOL /*GFXDRVAPI*/ GFXSetCutoff (float cutoff);
+BOOL /*GFXDRVAPI*/ GFXSetOptimalIntensity (float newint, float saturatevalue);
 BOOL /*GFXDRVAPI*/ GFXSetOptimalNumLights (int numlights);
 
 BOOL /*GFXDRVAPI*/ GFXCreateLight (int &light);
@@ -104,7 +105,7 @@ BOOL /*GFXDRVAPI*/ GFXFrustum (float * mat, float *inv, float left,float right, 
 
 //Textures
 
-BOOL /*GFXDRVAPI*/ GFXCreateTexture(int width, int height, TEXTUREFORMAT textureformat, int *handle, char *palette = 0, int texturestage = 0, enum TEXTURE_TARGET texture_target = TEXTURE2D);
+BOOL /*GFXDRVAPI*/ GFXCreateTexture(int width, int height, TEXTUREFORMAT textureformat, int *handle, char *palette = 0, int texturestage = 0, bool mipmap = true, enum TEXTURE_TARGET texture_target = TEXTURE2D);
 BOOL /*GFXDRVAPI*/ GFXPrioritizeTexture (unsigned int handle, float priority);
 BOOL /*GFXDRVAPI*/ GFXAttachPalette(unsigned char *palette, int handle);
 BOOL /*GFXDRVAPI*/ GFXTransferTexture(unsigned char *buffer, int handle, enum TEXTURE_IMAGE_TARGET image2D=TEXTURE_2D);

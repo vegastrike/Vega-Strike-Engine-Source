@@ -24,7 +24,7 @@ static inline float min(float x, float y) {
   else return y;
 }
 
-const float scale=.06;
+const float scale=.5;
 
 using XMLSupport::EnumMap;
 using XMLSupport::Attribute;
@@ -735,7 +735,7 @@ void Mesh::LoadXML(const char *filename, Mesh *oldmesh) {
 
   int index = 0;
 
-  int totalvertexsize = xml->tris.size()+xml->quads.size();
+  unsigned int totalvertexsize = xml->tris.size()+xml->quads.size();
   for (index=0;index<xml->tristrips.size();index++) {
     totalvertexsize += xml->tristrips[index].size();
   }
@@ -757,6 +757,25 @@ void Mesh::LoadXML(const char *filename, Mesh *oldmesh) {
     fprintf (stderr, "uhoh");
   }
   radialSize = 0;
+  enum POLYTYPE * polytypes= new (enum POLYTYPE)[totalvertexsize];//overkill but what the hell
+  int *poly_offsets  = new int [totalvertexsize];
+  int o_index=0;
+  if (xml->tris.size()) {
+    polytypes[o_index]= GFXTRI;
+    poly_offsets[o_index]=xml->tris.size();
+    o_index++;
+  }
+  if (xml->quads.size()) {
+    polytypes[o_index]=GFXQUAD;
+    poly_offsets[o_index]=xml->quads.size();
+    o_index++;
+  }
+  /*
+  if (xml->lines.size())
+    polytypes[o_index]=GFXLINE;
+    poly_offsets[o_index]=xml->lines.size()*2;  
+    o_index++;
+  */
   for(a=0; a<xml->tris.size(); a++, index++) {
     vertexlist[index] = xml->tris[a];
     minSizeX = min(vertexlist[index].x, minSizeX);
@@ -776,6 +795,7 @@ void Mesh::LoadXML(const char *filename, Mesh *oldmesh) {
     maxSizeZ = max(vertexlist[index].z, maxSizeZ);
   }
   for (a=0;a<xml->tristrips.size();a++) {
+
     for (int m=0;m<xml->tristrips[a].size();m++,index++) {
       vertexlist[index] = xml->tristrips[a][m];
       minSizeX = min(vertexlist[index].x, minSizeX);
@@ -785,6 +805,9 @@ void Mesh::LoadXML(const char *filename, Mesh *oldmesh) {
       minSizeZ = min(vertexlist[index].z, minSizeZ);
       maxSizeZ = max(vertexlist[index].z, maxSizeZ);
     }
+    polytypes[o_index]= GFXTRISTRIP;
+    poly_offsets[o_index]=xml->tristrips[a].size();
+    o_index++;
   }
   for (a=0;a<xml->trifans.size();a++) {
     for (int m=0;m<xml->trifans[a].size();m++,index++) {
@@ -796,6 +819,10 @@ void Mesh::LoadXML(const char *filename, Mesh *oldmesh) {
       minSizeZ = min(vertexlist[index].z, minSizeZ);
       maxSizeZ = max(vertexlist[index].z, maxSizeZ);
     }
+    polytypes[o_index]= GFXTRIFAN;
+    poly_offsets[o_index]=xml->trifans[a].size();
+
+    o_index++;
   }
   for (a=0;a<xml->quadstrips.size();a++) {
     for (int m=0;m<xml->quadstrips[a].size();m++,index++) {
@@ -807,6 +834,9 @@ void Mesh::LoadXML(const char *filename, Mesh *oldmesh) {
       minSizeZ = min(vertexlist[index].z, minSizeZ);
       maxSizeZ = max(vertexlist[index].z, maxSizeZ);
     }
+    polytypes[o_index]= GFXQUADSTRIP;
+    poly_offsets[o_index]=xml->quadstrips[a].size();
+    o_index++;
   }
 
   float x_center = (minSizeX + maxSizeX)/2.0,
@@ -828,7 +858,9 @@ void Mesh::LoadXML(const char *filename, Mesh *oldmesh) {
   
   radialSize = .5*sqrtf ((maxSizeX-minSizeX)*(maxSizeX-minSizeX)+(maxSizeY-minSizeY)*(maxSizeY-minSizeY)+(maxSizeX-minSizeZ)*(maxSizeX-minSizeZ));
 
-  vlist[GFXTRI] = new GFXVertexList(GFXTRI,xml->tris.size(),vertexlist); 
+
+  vlist= new GFXVertexList(polytypes,totalvertexsize,vertexlist,o_index,poly_offsets); 
+  /*
   vlist[GFXQUAD]= new GFXVertexList(GFXQUAD,xml->quads.size(),vertexlist+xml->tris.size());
   index = xml->tris.size()+xml->quads.size();
   numQuadstrips = xml->tristrips.size()+xml->trifans.size()+xml->quadstrips.size();
@@ -846,7 +878,7 @@ void Mesh::LoadXML(const char *filename, Mesh *oldmesh) {
     quadstrips[tmpind]= new GFXVertexList (GFXQUADSTRIP,xml->quadstrips[a].size(),vertexlist+index);
     index+= xml->quadstrips[a].size();
   }
-
+  */
 
   
   //TODO: add force handling

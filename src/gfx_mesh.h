@@ -160,12 +160,7 @@ protected:
   //GFXVertex *alphalist;
   GFXVertex *vertexlist;
   
-  GFXVertexList *vlist[3];//tri,quad,line
-  int numtris;
-  int numquads;
-  int numlines;
-  int numQuadstrips;//both quad and try strips (line strips too?)
-  GFXVertexList **quadstrips;
+  GFXVertexList *vlist;//tri,quad,line
   
   GFXMaterial myMat;
   int myMatNum;

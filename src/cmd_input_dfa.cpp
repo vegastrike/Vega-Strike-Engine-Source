@@ -150,6 +150,8 @@ void InputDFA::ClickSelect (KBSTATE k, int x, int y, int delx, int dely, int mod
     }
     CurDFA->SetOrder (new OrderFactory());
   }
+
+
   if (CurDFA->orderfac!=NULL) {
     if (CurDFA->orderfac->type()&LOCATION) {
       LocSelect (k,x,y,delx,dely,kmod);
@@ -288,6 +290,7 @@ InputDFA::InputDFA (StarSystem * par) :MouseArrow ("mouse.spr", true), SelectBox
   Selecting=false;
   selected = NULL;
   targetted = NULL;
+  orderfac = NULL;
 }
 
 InputDFA::~InputDFA() {

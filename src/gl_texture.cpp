@@ -24,16 +24,18 @@
 
 const int  MAX_TEXTURES = 256;
 struct GLTexture{
-	unsigned char *texture;
-	GLubyte * palette;
-	unsigned int width;
-	unsigned int height;
-	int texturestage;
-	GLuint name;
-	BOOL alive;
-	TEXTUREFORMAT textureformat;
-
+  unsigned char *texture;
+  GLubyte * palette;
+  unsigned int width;
+  unsigned int height;
+  int texturestage;
+  GLuint name;
+  BOOL alive;
+  TEXTUREFORMAT textureformat;
+  GLenum targets;
+  bool mipmapped;
   bool shared_palette;
+  
 	GLTexture ()
 	{
 		alive = FALSE;
@@ -56,7 +58,6 @@ struct GLTexture{
 //static GLEnum * targets=NULL;
 
 static GLTexture textures[MAX_TEXTURES];
-static GLenum targets [MAX_TEXTURES];
 
 static void ConvertPalette(unsigned char *dest, unsigned char *src)
 {
@@ -67,7 +68,7 @@ static void ConvertPalette(unsigned char *dest, unsigned char *src)
 
 }
 
-BOOL /*GFXDRVAPI*/ GFXCreateTexture(int width, int height, TEXTUREFORMAT textureformat, int *handle, char *palette , int texturestage, enum TEXTURE_TARGET texture_target)
+BOOL /*GFXDRVAPI*/ GFXCreateTexture(int width, int height, TEXTUREFORMAT textureformat, int *handle, char *palette , int texturestage, bool mipmap, enum TEXTURE_TARGET texture_target)
 {
   //  if (!textures) {
   //    textures = new GLTexture [MAX_TEXTURES]; //if the dynamically allocated array is not made... make it
@@ -98,10 +99,10 @@ BOOL /*GFXDRVAPI*/ GFXCreateTexture(int width, int height, TEXTUREFORMAT texture
 		return FALSE;
 	GLenum WrapMode;
 	switch (texture_target) {
-	case TEXTURE2D: targets [*handle]=GL_TEXTURE_2D;
+	case TEXTURE2D: textures [*handle].targets=GL_TEXTURE_2D;
 	  WrapMode = GL_REPEAT;
 	  break;
-	case CUBEMAP: targets [*handle]=GL_TEXTURE_CUBE_MAP_EXT;
+	case CUBEMAP: textures [*handle].targets=GL_TEXTURE_CUBE_MAP_EXT;
 	  WrapMode = GL_CLAMP;
 	  fprintf (stderr, "stage %d, wid %d, hei %d",texturestage,width,height);
 	  break;
@@ -111,13 +112,17 @@ BOOL /*GFXDRVAPI*/ GFXCreateTexture(int width, int height, TEXTUREFORMAT texture
 	//fprintf (stderr,"Texture Handle %d",*handle);
 	textures[*handle].alive = TRUE;
 	textures[*handle].texturestage = texturestage;
+	textures[*handle].mipmapped = mipmap;
 	glGenTextures (1,&textures[*handle].name);
 	
-	glTexParameteri(targets[*handle], GL_TEXTURE_WRAP_S, WrapMode);
-	glTexParameteri(targets[*handle], GL_TEXTURE_WRAP_T, WrapMode);
-	glTexParameteri (targets[*handle], GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri (targets[*handle], GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameterf (targets[*handle],GL_TEXTURE_PRIORITY,.5);
+	glTexParameteri(textures[*handle].targets, GL_TEXTURE_WRAP_S, WrapMode);
+	glTexParameteri(textures[*handle].targets, GL_TEXTURE_WRAP_T, WrapMode);
+	glTexParameteri (textures[*handle].targets, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	if (textures[*handle].mipmapped&&g_game.mipmap)
+	  glTexParameteri (textures[*handle].targets, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
+	else
+	  glTexParameteri (textures[*handle].targets, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameterf (textures[*handle].targets,GL_TEXTURE_PRIORITY,.5);
 	textures[*handle].width = width;
 	textures[*handle].height = height;
 	if (palette&&textureformat == PALETTE8)
@@ -171,14 +176,17 @@ BOOL /*GFXDRVAPI*/ GFXTransferTexture (unsigned char *buffer, int handle,  enum 
     fprintf (stderr, "gotcha %d", imagetarget);
   }	
 	//probably want to set a server state here
-  	glBindTexture(targets[handle], 0);
+  	glBindTexture(textures[handle].targets, 0);
 	glDeleteTextures(1, &textures[handle].name);
 	glGenTextures(1, &textures[handle].name);
-	glBindTexture(targets[handle], textures[handle].name);
-	//	glTexParameteri(targets[handle], GL_TEXTURE_WRAP_S, GL_REPEAT);
-	//	glTexParameteri(targets[handle], GL_TEXTURE_WRAP_T, GL_REPEAT);
-	glTexParameteri (targets[handle], GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri (targets[handle], GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glBindTexture(textures[handle].targets, textures[handle].name);
+	//	glTexParameteri(textures[handle].targets, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	//	glTexParameteri(textures[handle].targets, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri (textures[handle].targets, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	if (textures[handle].mipmapped&&g_game.mipmap)
+	  glTexParameteri (textures[handle].targets, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
+	else
+	  glTexParameteri (textures[handle].targets, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 	int error;
 	textures[handle].texture = buffer;
@@ -190,23 +198,35 @@ BOOL /*GFXDRVAPI*/ GFXTransferTexture (unsigned char *buffer, int handle,  enum 
 	  fprintf (stderr,"RGB24 bitmaps not yet supported");
 	  break;
 	case RGB32:
-		glTexImage2D(image2D, 0, 3, textures[handle].width, textures[handle].height, 0, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
-		break;
+	  if (textures[handle].mipmapped&&g_game.mipmap)
+	    gluBuild2DMipmaps(image2D, 3, textures[handle].width, textures[handle].height, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
+	  else
+	    glTexImage2D(image2D, 0, 3, textures[handle].width, textures[handle].height, 0, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
+	  break;
 	case RGBA32:
-		glTexImage2D(image2D, 0, 4, textures[handle].width, textures[handle].height, 0, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
-		break;
+	  if (textures[handle].mipmapped&&g_game.mipmap)
+	    gluBuild2DMipmaps(image2D, 4, textures[handle].width, textures[handle].height, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
+	  else
+	    glTexImage2D(image2D, 0, 4, textures[handle].width, textures[handle].height, 0, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
+	  break;
 	case RGBA16:
-		glTexImage2D(image2D, 0, GL_RGBA16, textures[handle].width, textures[handle].height, 0, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
-		break;
+	  if (textures[handle].mipmapped&&g_game.mipmap)
+	    gluBuild2DMipmaps(image2D, GL_RGBA16, textures[handle].width, textures[handle].height, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
+	  else
+	    glTexImage2D(image2D, 0, GL_RGBA16, textures[handle].width, textures[handle].height, 0, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
+	  break;
 	case RGB16:
-		glTexImage2D(image2D, 0, GL_RGB16, textures[handle].width, textures[handle].height, 0, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
-		break;
+	  if (textures[handle].mipmapped&&g_game.mipmap)
+	    gluBuild2DMipmaps(image2D, GL_RGB16, textures[handle].width, textures[handle].height, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
+	  else
+	    glTexImage2D(image2D, 0, GL_RGB16, textures[handle].width, textures[handle].height, 0, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
+	  break;
 	case PALETTE8:
 		if (g_game.PaletteExt)
 		{
 			  textures[handle].shared_palette = false;
 			  cerr << "texture error 0\n";
-				glColorTable(targets[handle], 
+				glColorTable(textures[handle].targets, 
 					     GL_RGBA, 
 					     256, 
 					     GL_RGBA, 
@@ -218,10 +238,14 @@ BOOL /*GFXDRVAPI*/ GFXTransferTexture (unsigned char *buffer, int handle,  enum 
 				
 				//}
 			//memset(buffer, 0, textures[handle].width*textures[handle].height);
-			glTexImage2D(image2D, 0, GL_COLOR_INDEX8_EXT, textures[handle].width, textures[handle].height, 0, GL_COLOR_INDEX, GL_UNSIGNED_BYTE, buffer);
-			error = glGetError();
-			if (error) 
-				return FALSE;
+				if (textures[handle].mipmapped&&g_game.mipmap)
+				  gluBuild2DMipmaps(image2D, GL_COLOR_INDEX8_EXT, textures[handle].width, textures[handle].height, GL_COLOR_INDEX, GL_UNSIGNED_BYTE, buffer);
+				else
+				  glTexImage2D(image2D, 0, GL_COLOR_INDEX8_EXT, textures[handle].width, textures[handle].height, 0, GL_COLOR_INDEX, GL_UNSIGNED_BYTE, buffer);
+				break;
+				error = glGetError();
+				if (error) 
+				  return FALSE;
 		}
 		else
 		{
@@ -238,16 +262,21 @@ BOOL /*GFXDRVAPI*/ GFXTransferTexture (unsigned char *buffer, int handle,  enum 
 				tbuf[i+3]= textures[handle].palette[4*buffer[j]+3];//used to be 255
 				j ++;
 			}
-			glTexImage2D(image2D, 0, 4, textures[handle].width, textures[handle].height, 0, GL_RGBA, GL_UNSIGNED_BYTE, tbuf);
-			//unashiehized			glTexImage2D(image2D,0,3,textures[handle].width, textures[handle].height,0,GL_RGBA, GL_UNSIGNED_BYTE, tbuf);
+			if (textures[handle].mipmapped&&g_game.mipmap)
+			  gluBuild2DMipmaps(image2D, 4, textures[handle].width, textures[handle].height, GL_RGBA, GL_UNSIGNED_BYTE, tbuf);
+			else
+			  glTexImage2D(image2D, 0, 4, textures[handle].width, textures[handle].height, 0, GL_RGBA, GL_UNSIGNED_BYTE, tbuf);
 
+			//unashiehized			glTexImage2D(image2D,0,3,textures[handle].width, textures[handle].height,0,GL_RGBA, GL_UNSIGNED_BYTE, tbuf);
+			delete [] tbuf;
 			//delete [] buffer;
 			//buffer = tbuf;
 			
 		}
 		break;
 	}
-	//glBindTexture(targets[handle], textures[handle].name);
+
+	//glBindTexture(textures[handle].targets, textures[handle].name);
 	return TRUE;
 
 }
@@ -267,6 +296,7 @@ BOOL /*GFXDRVAPI*/ GFXDeleteTexture (int handle)
 	return TRUE;
 }
 
+
 BOOL /*GFXDRVAPI*/ GFXSelectTexture(int handle, int stage)
 {
 	if (g_game.Multitexture)
@@ -283,8 +313,13 @@ BOOL /*GFXDRVAPI*/ GFXSelectTexture(int handle, int stage)
 			glActiveTextureARB(GL_TEXTURE0_ARB);			
 			break;
 		}
-		glBindTexture(targets[handle], textures[handle].name);
-	
+
+		glBindTexture(textures[handle].targets, textures[handle].name);
+		if (textures[handle].mipmapped&&g_game.mipmap)
+		  glTexParameteri (textures[handle].targets, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
+		else
+		  glTexParameteri (textures[handle].targets, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		
 		if(g_game.PaletteExt&&textures[handle].textureformat == PALETTE8) {
 		  //memset(textures[handle].palette, 255, 1024);
 		}
@@ -301,11 +336,11 @@ BOOL /*GFXDRVAPI*/ GFXSelectTexture(int handle, int stage)
 			glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 			glActiveTextureARB(GL_TEXTURE1_ARB);	
 			glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-			glEnable (targets[handle]);		
+			glEnable (textures[handle].targets);		
 			break;
 		default:
 			glActiveTextureARB(GL_TEXTURE0_ARB);		
-			glEnable (targets[handle]);		
+			glEnable (textures[handle].targets);		
 			glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 			break;
 		}
@@ -314,7 +349,7 @@ BOOL /*GFXDRVAPI*/ GFXSelectTexture(int handle, int stage)
 	else
 	{
 		Stage0Texture = TRUE;
-		
+
 		if (textures[handle].texturestage)
 		{
 			Stage1Texture = TRUE;
@@ -323,13 +358,18 @@ BOOL /*GFXDRVAPI*/ GFXSelectTexture(int handle, int stage)
 		else
 		{
 			Stage1Texture = FALSE;
-			glEnable (targets[handle]);
-			glBindTexture(targets[handle], textures[handle].name);
+			glEnable (textures[handle].targets);
+			glBindTexture(textures[handle].targets, textures[handle].name);
 			Stage0TextureName = textures[handle].name;
 		}
+		if (textures[handle].mipmapped&&g_game.mipmap)
+		  glTexParameteri (textures[handle].targets, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
+		else
+		  glTexParameteri (textures[handle].targets, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
 		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 		float ccolor[4] = {1.0,1.0,1.0,1.0};
-		glTexEnvfv(GL_TEXTURE_ENV, GL_TEXTURE_ENV_COLOR, ccolor);
+		//FIXME VEGASTRIKE//REMOVED BY DANNYglTexEnvfv(GL_TEXTURE_ENV, GL_TEXTURE_ENV_COLOR, ccolor);
 	}
 	return TRUE;
 }

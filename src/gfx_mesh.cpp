@@ -80,15 +80,13 @@ void Mesh::InitUnit()
 	local_transformation = identity_transformation;
 
 	changed = TRUE;
-	vlist[GFXTRI]=vlist[GFXQUAD]= vlist [GFXLINE] = NULL;
+	vlist=NULL;
 	
 	radialSize=minSizeX=minSizeY=minSizeZ=maxSizeY=maxSizeZ=maxSizeX=0;
 	//GFXVertex *vertexlist;
 	GFXVertex *alphalist;
 
 	vertexlist = NULL;
-	quadstrips = NULL;
-	numQuadstrips = 0;//fans et all :-D
 	stcoords = NULL;
 	Decal = NULL;
 	
@@ -241,16 +239,14 @@ Mesh:: Mesh(const char * filename, bool xml):Primitive()
 			Quads[ii*4+jj] = readi(fp);
 
 	
-	int numtrivertex = NumTris*3;
-	int numquadvertex = NumQuads*4;
+	//	int numtrivertex = NumTris*3;
+	//	int numquadvertex = NumQuads*4;
 	numvertex = NumTris*3+NumQuads*4;
 	//GFXVertex *vertexlist;
 	//GFXVertex *alphalist;
 
 	vertexlist = new GFXVertex [numvertex];
 	stcoords = new float[numvertex * 2+10];
-	numtris = NumTris;
-	numquads = NumQuads ;
 
 	jj=0;
 	for (ii=0; ii<NumTris; ii++)
@@ -317,7 +313,7 @@ Mesh:: Mesh(const char * filename, bool xml):Primitive()
 		jj=0;
 		int temp = NumTris*3;
 		//float oo256 = .00390625;
-		long pos = ftell(fp);
+		/*long pos =*/ ftell(fp);
 		for (ii=0; ii< temp; ii++)
 		{
 			vertexlist[ii].s = readf(fp);//*oo256;  
@@ -391,29 +387,29 @@ Mesh:: Mesh(const char * filename, bool xml):Primitive()
 			Ref[ii].k= vertexlist[offst].z - vertexlist[offst+2].z;
 			break;
 		case 'Q':
-		case 'q': offst = 3*numtris+4*readi(fp);
+		case 'q': offst = 3*NumTris+4*readi(fp);
 			break;
 		case '0':
 		case '4':
-			offst = 3*numtris+4*readi(fp);
+			offst = 3*NumTris+4*readi(fp);
 			Ref[ii].i= vertexlist[offst+1].x - vertexlist[offst].x;
 			Ref[ii].j= vertexlist[offst+1].y - vertexlist[offst].y;
 			Ref[ii].k= vertexlist[offst+1].z - vertexlist[offst].z;
 			break;
 		case '5':
-		case '1': offst = 3*numtris+4*readi(fp);
+		case '1': offst = 3*NumTris+4*readi(fp);
 			Ref[ii].i= vertexlist[offst+2].x - vertexlist[offst+1].x;
 			Ref[ii].j= vertexlist[offst+2].y - vertexlist[offst+1].y;
 			Ref[ii].k= vertexlist[offst+2].z - vertexlist[offst+1].z;
 			break;
 		case '6':
-		case '2': offst = 3*numtris+4*readi(fp);
+		case '2': offst = 3*NumTris+4*readi(fp);
 			Ref[ii].i= vertexlist[offst+3].x - vertexlist[offst+2].x;
 			Ref[ii].j= vertexlist[offst+3].y - vertexlist[offst+2].y;
 			Ref[ii].k= vertexlist[offst+3].z - vertexlist[offst+2].z;
 			break;
 		case '7':
-		case '3': offst = 3*numtris+4*readi(fp); //total number of triangles incl pents
+		case '3': offst = 3*NumTris+4*readi(fp); //total number of triangles incl pents
 			Ref[ii].i= vertexlist[offst].x - vertexlist[offst+3].x;
 			Ref[ii].j= vertexlist[offst].y - vertexlist[offst+3].y;
 			Ref[ii].k= vertexlist[offst].z - vertexlist[offst+3].z;
@@ -451,7 +447,7 @@ Mesh:: Mesh(const char * filename, bool xml):Primitive()
 	delete [] sizes;
 	delete [] rotations;
 	delete [] offset;
-	for (ii=0; ii< numtris*3; ii+=3)
+	for (ii=0; ii< NumTris*3; ii+=3)
 	{
 		Vector Norm1 (vertexlist[ii+1].x-vertexlist[ii].x,vertexlist[ii+1].y-vertexlist[ii].y,vertexlist[ii+1].z-vertexlist[ii].z);
 		Vector Norm2 (vertexlist[ii+2].x-vertexlist[ii].x,vertexlist[ii+2].y-vertexlist[ii].y,vertexlist[ii+2].z-vertexlist[ii].z);
@@ -463,7 +459,7 @@ Mesh:: Mesh(const char * filename, bool xml):Primitive()
 		vertexlist[ii].j =  vertexlist[ii+1].j = vertexlist[ii+2].j =Normal.j;
 		vertexlist[ii].k =  vertexlist[ii+1].k = vertexlist[ii+2].k =Normal.k;
 	}
-	for (ii=numtris*3; ii< numtris*3+numquads*4; ii+=4)
+	for (ii=NumTris*3; ii< NumTris*3+NumQuads*4; ii+=4)
 	{
 		Vector Norm1 (vertexlist[ii+1].x-vertexlist[ii].x,vertexlist[ii+1].y-vertexlist[ii].y,vertexlist[ii+1].z-vertexlist[ii].z);
 		Vector Norm2 (vertexlist[ii+3].x-vertexlist[ii].x,vertexlist[ii+3].y-vertexlist[ii].y,vertexlist[ii+3].z-vertexlist[ii].z);
@@ -517,29 +513,29 @@ Mesh:: Mesh(const char * filename, bool xml):Primitive()
 			Ref[ii].k= vertexlist[offst].z - vertexlist[offst+2].z;
 			break;
 		case 'Q':
-		case 'q': offst = 3*numtris+4*readi(fp);
+		case 'q': offst = 3*NumTris+4*readi(fp);
 			break;
 		case '0':
 		case '4':
-			offst = 3*numtris+4*readi(fp);
+			offst = 3*NumTris+4*readi(fp);
 			Ref[ii].i= vertexlist[offst+1].x - vertexlist[offst].x;
 			Ref[ii].j= vertexlist[offst+1].y - vertexlist[offst].y;
 			Ref[ii].k= vertexlist[offst+1].z - vertexlist[offst].z;
 			break;
 		case '5':
-		case '1': offst = 3*numtris+4*readi(fp);
+		case '1': offst = 3*NumTris+4*readi(fp);
 			Ref[ii].i= vertexlist[offst+2].x - vertexlist[offst+1].x;
 			Ref[ii].j= vertexlist[offst+2].y - vertexlist[offst+1].y;
 			Ref[ii].k= vertexlist[offst+2].z - vertexlist[offst+1].z;
 			break;
 		case '6':
-		case '2': offst = 3*numtris+4*readi(fp);
+		case '2': offst = 3*NumTris+4*readi(fp);
 			Ref[ii].i= vertexlist[offst+3].x - vertexlist[offst+2].x;
 			Ref[ii].j= vertexlist[offst+3].y - vertexlist[offst+2].y;
 			Ref[ii].k= vertexlist[offst+3].z - vertexlist[offst+2].z;
 			break;
 		case '7':
-		case '3': offst = 3*numtris+4*readi(fp); //total number of triangles incl pents
+		case '3': offst = 3*NumTris+4*readi(fp); //total number of triangles incl pents
 			Ref[ii].i= vertexlist[offst].x - vertexlist[offst+3].x;
 			Ref[ii].j= vertexlist[offst].y - vertexlist[offst+3].y;
 			Ref[ii].k= vertexlist[offst].z - vertexlist[offst+3].z;
@@ -573,11 +569,15 @@ Mesh:: Mesh(const char * filename, bool xml):Primitive()
 	squadlogos = new Logo(numsquadlogo,center,PolyNormal,sizes ,rotations, (float)0.01, _GFX->getSquadLogo(), Ref);
 	delete [] Ref;
 	//fprintf (stderr, "Ri:%f Rj: %f Rk %f",vertexlist[0].i,vertexlist[0].j,vertexlist[0].k);
-	vlist[GFXTRI] = new GFXVertexList(GFXTRI,numtris*3, vertexlist);
-	vlist[GFXQUAD]= new GFXVertexList(GFXQUAD,numquads*4, vertexlist+(numtris*3));
-	vlist[GFXLINE]=NULL;
+	int vert_offset[2];
+	vert_offset[0]=NumTris*3;
+	vert_offset[1]=NumQuads*4;
+	enum POLYTYPE modes [2];
+	modes[0]=GFXTRI;
+	modes[1]=GFXQUAD;
+	vlist = new GFXVertexList(modes,NumTris*3+NumQuads*4, vertexlist,2,vert_offset);
 	//vlist = new GFXVertexList(numtris*4,0,numquads*4, vertexlist+numtris*3);
-	long pos = ftell(fp);
+	/*long pos =*/ ftell(fp);
 	myMatNum = readi(fp);;
 	fclose(fp);
 
@@ -602,22 +602,7 @@ Mesh::~Mesh()
 {
 	if(!orig||orig==this)
 	{
-	  if(vlist[GFXTRI]!=NULL) {
-			delete vlist[GFXTRI];
-	  }
-
-	  if(vlist[GFXQUAD]!=NULL) {
-			delete vlist[GFXTRI];
-	  }
-	  if(vlist[GFXLINE]!=NULL) {
-			delete vlist[GFXTRI];
-	  }
-      
-	  if(quadstrips!=NULL) {
-	    for(int a=0; a<numQuadstrips; a++) delete quadstrips[a];
-	    delete [] quadstrips;
-	    quadstrips = NULL;
-	  }
+	  delete vlist;
 		//if(vertexlist != NULL)
 		//	delete [] vertexlist;
 	  if(stcoords != NULL) {
@@ -663,73 +648,6 @@ float const ooPI = 1.00F/3.1415926535F;
 void Mesh::Reflect()
 {
       return; // Using OGL reflection coordinate generator
-	Vector pnt;
-	Vector nml [4];
-	Vector CamPos;
-	float dist, oodist;
-	int nt3 = 3 * numtris;
-	int i;
-	float w;
-	vertexlist = vlist[0]->LockUntransformed();
-	/*	Matrix currentMatrix;
-		VectorToMatrix(pp,pq,pr);
-	*/
-	Matrix currentMatrix;
-	GFXGetMatrix(MODEL, currentMatrix);
-	for (i=0; i< nt3;i+=3)
-	{
-		for (int j=0; j<3;j++)
-		{
-			int k = i+j;
-			pnt = ::Transform(currentMatrix, vertexlist[k].x, vertexlist[k].y, vertexlist[k].z);
-			nml[j] = ::TransformNormal(currentMatrix, vertexlist[k].i, vertexlist[k].j, vertexlist[k].k);
-
-			Camera* TempCam = _GFX->AccessCamera();
-			TempCam->GetPosition (CamPos);
-			CamPos = CamPos - pnt;
-			//dist = sqrtf (CamPos.i*CamPos.i + CamPos.j*CamPos.j + CamPos.k*CamPos.k); //use this in glide homogenious coord calc
-			dist = CamPos.Magnitude();
-			oodist = ((float)1.0)/ dist;
-			CamPos *= oodist;
-			Vector reflect = nml[j] * 2 * nml[j].Dot(CamPos) - CamPos;
-
-			nml[j] = reflect;
-			
-			//EQUIV BELOW//float w1 = 1/sqrt (2*(-nml[j].k+1));
-			w = sqrtf (((float) .5)/(((float) 1)-nml[j].k));
-			vertexlist[k].u = (nml[j].i*w+1.23)*.40625;
-			vertexlist[k].v = 1-(nml[j].j*w+1.23)*.40625;
-			
-		}
-		
-	}
-	int nq4= 4*numquads;
-	vertexlist += 3*numtris;//it moves up by 1 vertex each increment with pointer math... I think :)
-	for (i=0; i< nq4;i+=4)
-	{
-		for (int j=0; j<4;j++)
-		{
-			int k = i+j;
-			pnt = ::Transform(currentMatrix, vertexlist[k].x, vertexlist[k].y, vertexlist[k].z);
-			nml[j] = ::TransformNormal(currentMatrix, vertexlist[k].i, vertexlist[k].j, vertexlist[k].k);
-			
-			Camera* TempCam = _GFX->AccessCamera();
-			TempCam->GetPosition (CamPos);
-			CamPos = CamPos - pnt;
-			dist = CamPos.Magnitude();
-			oodist = ((float)1.0)/ (float)dist;
-			CamPos *= oodist;
-			Vector reflect = nml[j] * 2 * nml[j].Dot(CamPos) - CamPos;
-
-			nml[j] = reflect;
-			//EQUIV BELOWfloat w1 = 1/sqrt (2*(-nml[j].k+1));
-			w = sqrtf (((float) .5)/(((float) 1)-nml[j].k));
-			vertexlist[k].u = (nml[j].i*w+1.23)*.40625;
-			vertexlist[k].v = 1-(nml[j].j*w+1.23)*.40625;
-
-		}
-	}
-	vlist[0]->UnlockUntransformed();
 }
 
 void Mesh::Draw(const Transformation &trans, const Matrix m)
@@ -758,7 +676,7 @@ void Mesh::ProcessDrawQueue() {
 	GFXEnable(CULLFACE);
 	if(envMap) {
 	  Reflect();
-	  //GFXEnable(TEXTURE1);
+	  GFXEnable(TEXTURE1);
 	} else {
 	  GFXDisable(TEXTURE1);
 	}
@@ -779,16 +697,7 @@ void Mesh::ProcessDrawQueue() {
 
     GFXLoadMatrix(MODEL, c.mat);
     GFXPickLights (c.mat/*GetPosition()*/);
-    if (vlist[GFXTRI])
-      vlist[GFXTRI]->Draw();
-    if (vlist[GFXQUAD])
-      vlist[GFXQUAD]->Draw();
-    if (vlist[GFXLINE]) 
-      vlist[GFXLINE]->Draw();
-    if(quadstrips!=NULL) {
-      for(int a=0; a<numQuadstrips; a++)
-	quadstrips[a]->Draw();//includes tri strips
-    }
+    vlist->Draw();
     if(0!=forcelogos) {
       forcelogos->Draw();
       squadlogos->Draw();

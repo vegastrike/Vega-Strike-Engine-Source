@@ -27,10 +27,7 @@ SphereMesh::SphereMesh(float radius, int stacks, int slices, char *texture, bool
   maxSizeX = maxSizeY = maxSizeZ = radialSize;
   //  minSizeX = minSizeY = minSizeZ = -radialSize*10;
   //  maxSizeX = maxSizeY = maxSizeZ = radialSize*10;
-  numlines = 0;
-  numquads = 0;
-  numtris =0;
-  numvertex=0;
+
    float rho, drho, theta, dtheta;
    float x, y, z;
    float s, t, ds, dt;
@@ -39,9 +36,7 @@ SphereMesh::SphereMesh(float radius, int stacks, int slices, char *texture, bool
   float nsign = Insideout?-1.0:1.0;
   int fir=0;//Insideout?1:0;
   int sec=1;//Insideout?0:1;
-  vlist[GFXTRI] = NULL;
-  vlist[GFXQUAD] = NULL;
-  vlist[GFXLINE] = NULL;
+  vlist = NULL;
   /* Code below adapted from gluSphere */
    drho = M_PI / (GLfloat) stacks;
    dtheta = 2.0 * M_PI / (GLfloat) slices;
@@ -53,14 +48,16 @@ SphereMesh::SphereMesh(float radius, int stacks, int slices, char *texture, bool
    imin = 0;
    imax = stacks;
    
-   numQuadstrips = stacks;
+   int numQuadstrips = stacks;
    //      numQuadstrips = 0;
-
-   quadstrips = new GFXVertexList*[numQuadstrips];
-   // draw intermediate stacks as quad strips 
-   vertexlist = new GFXVertex[stacks * (slices+1)*2];
-   GFXVertex *vl = vertexlist;
+   int *QSOffsets = new int [numQuadstrips];
    
+   // draw intermediate stacks as quad strips 
+   numvertex=stacks*(slices+1)*2;
+   vertexlist = new GFXVertex[numvertex];
+   
+   GFXVertex *vl = vertexlist;
+   enum POLYTYPE *modes= new (enum POLYTYPE) [numQuadstrips];   
    for (i = imin; i < imax; i++) {
      GFXVertex *vertexlist = vl + (i * (slices+1)*2);
      rho = i * drho;
@@ -99,8 +96,13 @@ SphereMesh::SphereMesh(float radius, int stacks, int slices, char *texture, bool
      }
 
      t -= dt;
-     quadstrips[i] = new GFXVertexList(GFXQUADSTRIP,(slices+1) * 2, vertexlist);
+     QSOffsets[i]= (slices+1)*2;
+     modes[i]=GFXQUADSTRIP;
    }
+
+   vlist = new GFXVertexList(modes,numvertex, vertexlist, numQuadstrips ,QSOffsets);
+   delete [] modes;
+   delete [] QSOffsets;
    Decal = new Texture(texture, 0);
    centered?envMap = FALSE:envMap=TRUE;
    
@@ -163,17 +165,7 @@ void SphereMesh::ProcessDrawQueue() {
     GFXLoadMatrix(MODEL, tmp2);
     GFXPickLights (tmp2);
     theta+=.01;
-    int a;
-    if (vlist[0])
-      vlist[0]->Draw();
-    if (vlist[1])
-      vlist[1]->Draw();
-    if (vlist[2])
-      vlist[2]->Draw();
-    if(quadstrips!=NULL) {
-      for(int a=0; a<numQuadstrips; a++)
-	quadstrips[a]->Draw();
-    }
+    vlist->Draw();
     if(0!=forcelogos) {
       forcelogos->Draw();
       squadlogos->Draw();

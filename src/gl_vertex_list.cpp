@@ -34,46 +34,98 @@ GFXVertexList *next;
 extern BOOL bTex0;
 extern BOOL bTex1;
 
-static int next_display_list = 1;
-//#define USE_DISPLAY_LISTS
-GFXVertexList::GFXVertexList():myVertices(NULL),numVertices(0),display_list(0)
-{
-}
 
-GFXVertexList::GFXVertexList(enum POLYTYPE poly, int numVertices, GFXVertex *vertices) // TODO: Add in features to accept flags for what's
+#define USE_DISPLAY_LISTS
+GFXVertexList::GFXVertexList():numVertices(0),myVertices(NULL),display_list(0), numlists(0) { }
+/*
+GFXVertexList::GFXVertexList (enum POLYTYPE poly, int numVertices, GFXVertex *vertices) {
+  Init (&poly, numVertices, vertices, 1, &numVertices);
+}
+GFXVertexList::GFXVertexList(enum POLYTYPE *poly, int numVertices, GFXVertex *vertices, int numlists, int *offsets) // TODO: Add in features to accept flags for what's
 {
-  switch (poly) {
-  case GFXTRI:
-    mode = GL_TRIANGLES;
-    break;
-  case GFXQUAD:
-    mode = GL_QUADS;
-    break;
-  case GFXTRISTRIP:
-    mode = GL_TRIANGLE_STRIP;
-    break;
-  case GFXQUADSTRIP:
-    mode = GL_QUAD_STRIP;
-    break;
-  case GFXTRIFAN:
-    mode = GL_TRIANGLE_FAN;
-    break;
-  case GFXPOLY:
-    mode = GL_POLYGON;
-    break;
-  case GFXLINE:
-    mode = GL_LINES;
-    break;
-  case GFXLINESTRIP:
-    mode = GL_LINE_STRIP;
-    break;
+  Init (poly,numVertices, vertices, numlists, offsets);
+}
+*/
+void GFXVertexList::Init (enum POLYTYPE *poly, int numVertices, GFXVertex *vertices, int numlists, int *offsets, int tess) {
+  mode = new GLenum [numlists];
+  for (int pol=0;pol<numlists;pol++) {
+    switch (poly[pol]) {
+    case GFXTRI:
+      mode[pol] = GL_TRIANGLES;
+      break;
+    case GFXQUAD:
+      mode[pol] = GL_QUADS;
+      break;
+    case GFXTRISTRIP:
+      mode[pol] = GL_TRIANGLE_STRIP;
+      break;
+    case GFXQUADSTRIP:
+      mode[pol] = GL_QUAD_STRIP;
+      break;
+    case GFXTRIFAN:
+      mode[pol] = GL_TRIANGLE_FAN;
+      break;
+    case GFXPOLY:
+      mode[pol] = GL_POLYGON;
+      break;
+    case GFXLINE:
+      mode[pol] = GL_LINES;
+      break;
+    case GFXLINESTRIP:
+      mode[pol] = GL_LINE_STRIP;
+      break;
+    }
   }
+  if (numlists==1) {
+    offsets = new int[1];
+    offsets[0]= numVertices;
+  }
+  assert (offsets!=NULL);
+  
+  this->numlists = numlists;
   this->numVertices = numVertices;
   myVertices = new GFXVertex[numVertices];
   memcpy(myVertices, vertices, sizeof(GFXVertex)*numVertices);
+  this->offsets = new int [numlists];
+  memcpy(this->offsets, offsets, sizeof(int)*numlists);
   display_list = 0;
+  this->tessellation = tess;
+  changed = true;
+  if (tess) 
+    Tess (tess);
+  else {
+    tesslist = NULL;
+    RefreshDisplayList();
+  }
+  changed = false;//for display lists
 
+
+}
+void GFXVertexList::Tess (int tess) {
+  if (tessellation ==tess)
+    return;
+  if (tesslist) {
+    delete tesslist;
+    tesslist = NULL;
+  }
+  if (tess==0) {
+    RefreshDisplayList();
+    tessellation = 0;
+    return;
+  }
+
+  for(;tess>0;tess--) {
+    
+
+
+  }
+}
+void GFXVertexList::RefreshDisplayList () {
 #ifdef USE_DISPLAY_LISTS
+  if (display_list&&!changed) {
+      return;
+  }
+  /*
 	display_list = GFXCreateList();
 	glVertexPointer(3, GL_FLOAT, sizeof(GFXVertex), &myVertices[0].x);
 	glTexCoordPointer(2, GL_FLOAT, sizeof(GFXVertex), &myVertices[0].s+GFXStage0*2);
@@ -87,70 +139,102 @@ GFXVertexList::GFXVertexList(enum POLYTYPE poly, int numVertices, GFXVertex *ver
 
 	glClientActiveTextureARB (GL_TEXTURE1_ARB);
 	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-		
-	//glDrawArrays(mode, 0, numVertices);
-	
+  		
+	glDrawArrays(mode, 0, numVertices);
+  */
 	int a;
-	glBegin(mode);
-	for(a=0; a<numVertices; a++) {
-	  glNormal3f(myVertices[a].i,myVertices[a].j,myVertices[a].k);
-	  glTexCoord2f(myVertices[a].s, myVertices[a].t);
-	  glVertex3f(myVertices[a].x,myVertices[a].y,myVertices[a].z);
+	int offset =0;
+	for (int i=0;i<numlists;i++) {
+	  glBegin(mode[i]);
+	  for(a=0; a<offsets[i]; a++) {
+	    glNormal3fv(&myVertices[offset+a].i);
+	    glTexCoord2fv(&myVertices[offset+a].s);
+	    glVertex3fv(&myVertices[offset+a].x);
+	  }
+	  offset +=offsets[i];
+	  glEnd();
 	}
-	glEnd();
-	glEndList();
 
+	glEndList();
+	/*
 	glDisableClientState(GL_VERTEX_ARRAY);
 	glDisableClientState(GL_NORMAL_ARRAY);
 	glClientActiveTextureARB (GL_TEXTURE0_ARB);
 	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+	*/
 #endif
 }
 
 GFXVertexList::~GFXVertexList()
 {
-	if(myVertices)
-		delete [] myVertices;
+  if (display_list)
+    glDeleteLists (display_list, 1); //delete dis
+  if (tessellation)
+    delete tesslist;
+  if (offsets)
+    delete [] offsets;
+  if(myVertices)
+    delete [] myVertices;
 }
 
 GFXTVertex *GFXVertexList::LockTransformed()
 {
+  if (tessellation)
+    tesslist->LockTransformed();
 	return NULL;
 } // Stuff to support environment mapping
 
 void GFXVertexList::UnlockTransformed()
 {
+  if (tessellation)
+    tesslist->UnlockTransformed();
+
 }
 
 GFXVertex *GFXVertexList::LockUntransformed()
 {
-	
-	return myVertices;
+  if (tessellation)
+    tesslist->LockUntransformed();
+  return myVertices;
 }// Stuff to support environment mapping
 
 void GFXVertexList::UnlockUntransformed()
 {
+  if (tessellation)
+    tesslist->UnlockUntransformed();
 }
 
 BOOL GFXVertexList::SetNext(GFXVertexList *vlist)
 {
+  
 	return FALSE;
 }
 
 BOOL GFXVertexList::SwapUntransformed()
 {
+  if (tessellation)
+    tesslist->SwapUntransformed();
+  
 	return FALSE;
 }
 
 BOOL GFXVertexList::SwapTransformed()
 {
+  if (tessellation)
+    tesslist->SwapTransformed();
+
 	return FALSE;
 }
 BOOL GFXVertexList::Draw()
 {
+  if (tessellation&&tesslist) {
+    tesslist->Draw();
+    return TRUE;
+  }
 #ifdef STATS_QUEUE
   //  statsqueue.back() += GFXStats(numTriangles, numQuads, 0);
 #endif
+#ifdef USE_DISPLAY_LISTS
   if(display_list!=0) {
 	if(g_game.Multitexture) {
 	  glActiveTextureARB(GL_TEXTURE0_ARB);	
@@ -171,7 +255,9 @@ BOOL GFXVertexList::Draw()
 	  glActiveTextureARB(GL_TEXTURE0_ARB);
 	} 
 	GFXCallList(display_list);
-  } else {
+  } else 
+#endif
+    {
     if(g_game.Multitexture) {
       glActiveTextureARB(GL_TEXTURE0_ARB);	
       if(bTex0) 
@@ -216,8 +302,12 @@ BOOL GFXVertexList::Draw()
 	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 	glTexCoordPointer(2, GL_FLOAT, sizeof(GFXVertex), &myVertices[0].s+GFXStage1*2);
       */
-      glDisableClientState(GL_TEXTURE_COORD_ARRAY);  
-      glDrawArrays(mode, 0, numVertices);
+      glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+      int totoffset=0;
+      for (int i=0;i<numlists;i++) {
+	glDrawArrays(mode[i], totoffset, offsets[i]);
+	totoffset += offsets[i];
+      }
     }else{ 
       /*transfer vertex, texture coords, and normal pointer*/
       //GLenum err;
@@ -230,7 +320,11 @@ BOOL GFXVertexList::Draw()
       glEnableClientState(GL_NORMAL_ARRAY);
       
       if(bTex0) {
-	glDrawArrays(mode, 0, numVertices);
+	int totoffset=0;
+	for (int i=0;i<numlists;i++) {
+	  glDrawArrays(mode[i], totoffset, offsets[i]);
+	  totoffset += offsets[i];
+	}
       }
       if (Stage1Texture&&bTex1) {
 	/* int ssrc,ddst;
@@ -242,7 +336,11 @@ BOOL GFXVertexList::Draw()
 	   
 	   //now transfer textures that correspond to second set of coords
 	   glTexCoordPointer(2, GL_FLOAT, sizeof(GFXVertex), &myVertices[0].s+GFXStage1*2);
-	   glDrawArrays(GL_TRIANGLES, 0, numTriangles*3);
+	   int totoffset=0;
+	   for (int i=0;i<numlists;i++) {
+	   glDrawArrays(mode[i], totoffset, offsets[i]);
+	   totoffset += offsets[i];
+	   }
 	   
 	   glBlendFunc (ssrc,ddst);
 	   glBindTexture(GL_TEXTURE_2D, Stage0TextureName);
@@ -255,8 +353,9 @@ BOOL GFXVertexList::Draw()
       
     }
 	
-    return TRUE;
-  }
+
+    }
+  return TRUE;
 }
 
 

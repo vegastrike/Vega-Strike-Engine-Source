@@ -27,7 +27,7 @@ Box::Box(const Vector &corner1, const Vector &corner2) : corner_min(corner1), co
       return;
     }
   int a=0;
-  GFXVertex *vertices = new GFXVertex[8];
+  GFXVertex *vertices = new GFXVertex[18];
 #define VERTEX(i,j,k) { vertices[a].x = i; vertices[a].y = j; vertices[a].z = k;a++;}
 
   VERTEX(corner_max.i,corner_min.j,corner_max.k);
@@ -39,13 +39,9 @@ Box::Box(const Vector &corner1, const Vector &corner2) : corner_min(corner1), co
   VERTEX(corner_min.i,corner_max.j,corner_min.k);
   VERTEX(corner_min.i,corner_max.j,corner_max.k);
   VERTEX(corner_max.i,corner_max.j,corner_max.k);
-  vlist[GFXTRI]=NULL;
-  vlist[GFXQUAD] = new GFXVertexList(GFXQUAD,8,vertices);
-  vlist[GFXLINE]=NULL;
-  delete [] vertices;
 
-  a = 0;
-  vertices = new GFXVertex[10];
+
+  a = 8;
 
   VERTEX(corner_max.i,corner_min.j,corner_max.k);
   VERTEX(corner_min.i,corner_min.j,corner_max.k);
@@ -62,10 +58,14 @@ Box::Box(const Vector &corner1, const Vector &corner2) : corner_min(corner1), co
   VERTEX(corner_max.i,corner_min.j,corner_max.k);
   VERTEX(corner_min.i,corner_min.j,corner_max.k);
 
-
-  numQuadstrips = 1;
-  quadstrips = new GFXVertexList*[1];
-  quadstrips[0] = new GFXVertexList(GFXQUADSTRIP,10,vertices);
+  int offsets[2];
+  offsets[0]=8;
+  offsets[1]=10;
+  enum POLYTYPE polys[2];
+  polys[0]=GFXQUAD;
+  polys[1]=GFXQUADSTRIP;
+  vlist = new GFXVertexList(polys,18,vertices,2,offsets);
+  //  quadstrips[0] = new GFXVertexList(GFXQUADSTRIP,10,vertices);
   delete [] vertices;
 
   meshHashTable.Put(hash_key, this);

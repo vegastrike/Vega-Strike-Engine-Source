@@ -98,8 +98,9 @@ void Texture::setold()
 	original->refcount++;
 }
 
-Texture::Texture(const char * FileName, int stage, enum TEXTURE_TARGET target, enum TEXTURE_IMAGE_TARGET imagetarget)
+Texture::Texture(const char * FileName, int stage, bool mipmap, enum TEXTURE_TARGET target, enum TEXTURE_IMAGE_TARGET imagetarget)
 {
+  ismipmapped  = mipmap;
   InitTexture();
   palette = NULL;
   texture_target =target;
@@ -196,8 +197,9 @@ Texture::Texture(const char * FileName, int stage, enum TEXTURE_TARGET target, e
 	setold();
 }
 
-Texture::Texture (const char * FileNameRGB, const char *FileNameA, int stage, enum TEXTURE_TARGET target, enum TEXTURE_IMAGE_TARGET imagetarget, float alpha, int zeroval)
+Texture::Texture (const char * FileNameRGB, const char *FileNameA, int stage, bool mipmap, enum TEXTURE_TARGET target, enum TEXTURE_IMAGE_TARGET imagetarget, float alpha, int zeroval)
 {
+  ismipmapped  = mipmap;
   InitTexture();
   palette = NULL;
 
@@ -399,15 +401,15 @@ int Texture::Bind()
 	{
 	case _24BITRGBA:
 		//GFXCreateTexture(sizeX, sizeY, RGBA32, &name, NULL, stage);
-		GFXCreateTexture(sizeX, sizeY, RGBA32, &name, NULL, stage,texture_target);
+		GFXCreateTexture(sizeX, sizeY, RGBA32, &name, NULL, stage,ismipmapped, texture_target);
 		break;
 	case _24BIT:
 		//not supported by most cards, so i use rgba32
 		//GFXCreateTexture(sizeX, sizeY, RGB24, &name);
-		GFXCreateTexture(sizeX, sizeY, RGB32, &name, NULL, stage,texture_target);
+		GFXCreateTexture(sizeX, sizeY, RGB32, &name, NULL, stage,ismipmapped,texture_target);
 		break;
 	case _8BIT:
-		GFXCreateTexture(sizeX, sizeY, PALETTE8, &name, (char *)palette, stage,texture_target);
+		GFXCreateTexture(sizeX, sizeY, PALETTE8, &name, (char *)palette, stage,ismipmapped,texture_target);
 		break;
 	}
 	Transfer();
