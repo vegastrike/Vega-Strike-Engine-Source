@@ -1636,6 +1636,13 @@ void BaseComputer::loadCargoControls(void) {
     // Make the title right.
     recalcTitle();
 }
+// Need this class to sort CargoColor's.
+class CargoColorSort {
+public:
+    bool operator () (const CargoColor & a, const CargoColor&b) {
+	return( a.cargo < b.cargo );
+    }
+};
 
 
 // Get a filtered list of items from a unit.
@@ -1667,6 +1674,7 @@ void BaseComputer::loadMasterList(Unit *un, const vector<string>& filtervec, con
 			}
 		}
 	}
+	std::sort(items->begin(),items->end(),CargoColorSort());
 }
 
 // Return a pointer to the selected item in the picker with the selection.
@@ -1882,13 +1890,6 @@ bool BaseComputer::changeToMissionsMode(const EventCommandId& command, Control* 
     return true;
 }
 
-// Need this class to sort CargoColor's.
-class CargoColorSort {
-public:
-    bool operator () (const CargoColor & a, const CargoColor&b) {
-	return( a.cargo < b.cargo );
-    }
-};
 
 // Load a master list with missions.
 void BaseComputer::loadMissionsMasterList(TransactionList& tlist) {
