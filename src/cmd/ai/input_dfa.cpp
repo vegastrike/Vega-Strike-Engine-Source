@@ -18,7 +18,7 @@ static float GetX (float x) {
   return ((float)2*x)/g_game.x_resolution-1;
 }
 static float GetY (float x) {
-  return ((float)2*x)/g_game.y_resolution-1;
+  return 1-((float)2*x)/g_game.y_resolution;
 }
 
 void InputDFA::OrderHandler (int key, KBSTATE k) {
@@ -74,7 +74,6 @@ void InputDFA::SetOrder (OrderFactory *ofac) {
 void InputDFA::TargetSelect (KBSTATE k,int x,int y, int delx, int dely, int mod) {
   if (k==RESET)
     return;///little hack to prevent the function from being 'primed' with reset and continuing on an infinite loop again and again and again
-  y = g_game.y_resolution-y;
   CurDFA->state=TARGET_SELECT;//to fool the Noneselect function into using targets
   //don't bind keys above...."quiet state update"
   if (mod&ACTIVE_CTRL) {
@@ -109,7 +108,6 @@ void InputDFA::TargetSelect (KBSTATE k,int x,int y, int delx, int dely, int mod)
 void InputDFA::LocSelect (KBSTATE k, int x, int y, int delx, int dely, int mod) {
   if (k==RESET)
     return;///little hack to prevent the function from being 'primed' with reset and continuing on an infinite loop again and again and again
-  y = g_game.y_resolution-y;
   CoordinateSelect::MouseMoveHandle(k,x,y,delx,dely,mod);
 
   if (k==PRESS) {
@@ -142,7 +140,6 @@ void InputDFA::ClickSelect (KBSTATE k, int x, int y, int delx, int dely, int mod
   static int kmod;
   //  Vector v = GFXDeviceToEye(x,y);
   float xs,ys;
-  y = g_game.y_resolution-y;
   CurDFA->MouseArrow.GetSize (xs,ys);
   CurDFA->MouseArrow.SetPosition (.5*xs+GetX(x), .5*ys+GetY(y));
 
@@ -247,7 +244,7 @@ void InputDFA::ClickSelect (KBSTATE k, int x, int y, int delx, int dely, int mod
 void InputDFA::NoneSelect (KBSTATE k,int x, int y, int delx, int dely, int mod) {
   Vector v = GFXDeviceToEye(x,y);
   float xs,ys;
-  y = g_game.y_resolution-y;
+
   CurDFA->MouseArrow.GetSize (xs,ys);
   CurDFA->MouseArrow.SetPosition (.5*xs+GetX(x), .5*ys+GetY(y));
 
