@@ -256,7 +256,6 @@ do
         then
             FOUND_PYTHON=yes
             PYTHON_SHORT=`echo ${PYTHON_VERSION} | sed -e 's/\./ /g; s/[a-z|A-Z|+]/ /g' | awk '{print $1"."$2}'`
-			PYTHON_SHORT=2.2
             PYTHON_incchk="/usr/include/python /usr/include/python${PYTHON_SHORT} /usr/local/include/python /usr/local/include/python${PYTHON_SHORT}"
         else
             FOUND_PYTHON=no
