@@ -14,8 +14,8 @@ bool ClickList::queryShip (int mouseX, int mouseY,Unit *ship) {
   cerr << "top - bottom " <<  t-b << endl;
   cerr << "right - left " <<  r-l << endl;
   */
-  Vector mousePoint(l + (r-l) * float(mouseX)/g_game.x_resolution,
-		    b + (t-b) * float(mouseY)/g_game.y_resolution,
+  Vector mousePoint(.8*(l + (r-l) * float(mouseX)/g_game.x_resolution),
+		    .8*(t + (b-t) * float(mouseY)/g_game.y_resolution),
 		    n);
   mouseline =mousePoint;
   cerr << "Mousepoint: " << mousePoint << endl;

@@ -97,10 +97,36 @@ void InputDFA::TargetSelect (KBSTATE k,int x,int y, int delx, int dely, int mod)
     CurDFA->SetStateNone(); //go back up the heirarchy;
   }
 }
+
 void InputDFA::LocSelect (KBSTATE k, int x, int y, int delx, int dely, int mod) {
-
-
+  if (k==RESET)
+    return;///little hack to prevent the function from being 'primed' with reset and continuing on an infinite loop again and again and again
+  LocationSelect::MouseMoveHandle(k,x,y,delx,dely,mod);
+  if (k==PRESS) {
+    
+      UnitCollection::UnitIterator * tmp = CurDFA->selected->createIterator();
+      Unit * un;
+      Vector tmplocselvec = CurDFA->locsel->GetVector();
+      while (un = tmp->current()) {
+	Order * nAI = CurDFA->orderfac->newOrder();
+	nAI->AttachOrder(tmplocselvec);
+	if (CurDFA->queueOrder) {
+	  un->EnqueueAI(nAI);
+	} else {
+	  un->SetAI(nAI);//will take care of doing the setparent 
+	}
+	tmp->advance();
+      }
+      delete tmp;
+      delete CurDFA->targetted;
+      CurDFA->targetted=NULL;  
+      
+      CurDFA->orderfac = NULL;//I know we don't dealloc
+  }
+  CurDFA->SetStateNone(); //go back up the heirarchy;
 }
+
+
 
 void InputDFA::ClickSelect (KBSTATE k, int x, int y, int delx, int dely, int mod) {
   static int kmod;

@@ -3,12 +3,12 @@
 #include "in.h"
 #include "vegastrike.h"
 #include <stdio.h>
-LocationSelect::LocationSelect (Vector start, Vector Plane1, Vector Plane2/*, System * par */): Primitive() {
+LocationSelect::LocationSelect (Vector start, Vector Plane1, Vector Plane2/*, System * par */): Primitive(),LocSelAni ("locationselect.ani",true,.5,true),LocSelUpAni("locationselect_up.ani",true,.5,false) {
   //  parentScene = par;
   CrosshairSize=2;
   MoveLocation (start,Plane1,Plane2);
 }
-LocationSelect::LocationSelect (Vector start,Vector Plane1, Vector Plane2, Vector Plane3/*, Scene* par */): Primitive() {
+LocationSelect::LocationSelect (Vector start,Vector Plane1, Vector Plane2, Vector Plane3/*, Scene* par */): Primitive(),LocSelAni ("locationselect.ani",true,.5,true),LocSelUpAni("locationselect_up.ani",true,.5,false) {
   //  parentScene=par;
   CrosshairSize=2;
   MoveLocation (start,Plane1,Plane2,Plane3);
@@ -20,7 +20,7 @@ bool vert = false;
 #define DELTA_MOVEMENT
 
 
-void MouseMoveHandle (KBSTATE kk,int x, int y, int delx, int dely, int mod) {
+void LocationSelect::MouseMoveHandle (KBSTATE kk,int x, int y, int delx, int dely, int mod) {
   if (keyState['z']==DOWN) {
 #ifdef DELTA_MOVEMENT
     if (kk==PRESS) {
@@ -51,8 +51,8 @@ void MouseMoveHandle (KBSTATE kk,int x, int y, int delx, int dely, int mod) {
 }
 
 void LocationSelect::MoveLocation (Vector start,Vector Plane1, Vector Plane2) {    
-  BindKey (1,::MouseMoveHandle);
-  UnbindMouse (getMouseDrawFunc()); //don't draw the mouse
+  //BindKey (1,LocationSelect::MouseMoveHandle);
+  //UnbindMouse (getMouseDrawFunc()); //don't draw the mouse
   //BindKey (']',::incConstant);
   //BindKey ('[',::decConstant);
   LocalPosition = Vector(0,0,0);
@@ -65,8 +65,8 @@ void LocationSelect::MoveLocation (Vector start,Vector Plane1, Vector Plane2) {
   UpdateMatrix();
 }
 void LocationSelect::MoveLocation (Vector start,Vector Plane1, Vector Plane2, Vector Plane3) {    
-  BindKey (1,::MouseMoveHandle);
-  UnbindMouse (getMouseDrawFunc());
+  //BindKey (1,::MouseMoveHandle);
+  //UnbindMouse (getMouseDrawFunc());
   LocalPosition = Vector(0,0,0);
   r = Plane3;
   p = Plane1;
@@ -151,8 +151,8 @@ void LocationSelect:: Draw () {
     if (zvalueXY<-1000)
       zvalueXY = -1000;
 
-      LocalPosition.i= fabs(zvalueXY)*(((2*DeltaPosition.i/g_game.x_resolution - 1)*g_game.MouseSensitivityX*GFXGetXInvPerspective()*tP.i)-((2*DeltaPosition.j/g_game.y_resolution - 1)*g_game.MouseSensitivityY*GFXGetYInvPerspective()*tP.j));
-      LocalPosition.j= fabs(zvalueXY)*(((2*DeltaPosition.i/g_game.x_resolution - 1)*g_game.MouseSensitivityX*GFXGetXInvPerspective()*tQ.i)-((2*DeltaPosition.j/g_game.y_resolution - 1)*tQ.j*g_game.MouseSensitivityY*GFXGetYInvPerspective()));
+      LocalPosition.i= fabs(zvalueXY)*(((2*DeltaPosition.i/g_game.x_resolution - 1)*g_game.MouseSensitivityX*GFXGetXInvPerspective()*tP.i)-(1-(2*DeltaPosition.j/g_game.y_resolution)*g_game.MouseSensitivityY*GFXGetYInvPerspective()*tP.j));
+      LocalPosition.j= fabs(zvalueXY)*(((2*DeltaPosition.i/g_game.x_resolution - 1)*g_game.MouseSensitivityX*GFXGetXInvPerspective()*tQ.i)-(1-(2*DeltaPosition.j/g_game.y_resolution)*tQ.j*g_game.MouseSensitivityY*GFXGetYInvPerspective()));
       DeltaPosition= Vector(0,0,0);
       //    Vector TransPQR (t[0]*i+t[4]*LocalPosition.j+t[8]*LocalPosition.k+t[12],t[1]*LocalPosition.i+t[5]*LocalPosition.j+t[9]*LocalPosition.k+t[13],t[2]*LocalPosition.i+t[6]*LocalPosition.j+t[10]*LocalPosition.k+t[14]);
       changed=false;
@@ -177,8 +177,11 @@ void LocationSelect:: Draw () {
   }
 
   //draw the animation
-
-
+  LocSelUpAni.SetPosition (Vector (LocalPosition.i,LocalPosition.j,0));
+  LocSelUpAni.Draw();
+  LocSelAni.SetPosition(LocalPosition);
+  LocSelAni.Draw();
+  
 
   /*
   GFXBegin(TRIANGLES);

@@ -314,7 +314,7 @@ Unit *fighter = NULL;
 Unit *fighter2=NULL;
 const int numf = 1;
 Unit *fighters[numf];
-//LocationSelect *locSel=NULL;
+LocationSelect *locSel=NULL;
 Background * bg = NULL;
 SphereMesh *bg2=NULL;
 TextPlane *textplane = NULL;
@@ -444,12 +444,12 @@ void createObjects() {
   bg = new Background("cube");
   //bg2 = new SphereMesh (20.0,8,8,"sun.bmp",true,true);
   //HUDElement *t = new HUDElement("ucarrier.dat");
-  /*************
-		locSel = new LocationSelect(Vector (0,-1,5),
-		Vector(1,0,0), 
-		Vector (0,-.4,-1));
+  
+  locSel = new LocationSelect(Vector (0,-2,2),
+			      Vector(1,0,-1), 
+			      Vector (-1,0,-1));
 //GOOD!!
-  *************/
+  BindKey (1,LocationSelect::MouseMoveHandle);
   //locSel = new LocationSelect (Vector (0,-1,5),
   //			       Vector (1,0,0),
   //			       Vector (0,-.35,-1));
@@ -560,7 +560,7 @@ void destroyObjects() {
   for(int a = 0; a < numf; a++)
   	delete fighters[a];
   delete textplane;
-  //delete locSel;
+  delete locSel;
   //delete t;
   //delete s;
   delete carrier;
@@ -602,7 +602,10 @@ void main_loop() {
   _GFX->activeStarSystem()->Draw();
   _GFX->activeStarSystem()->Update();
   
-  GFXDisable(TEXTURE1);
+  //  GFXDisable(TEXTURE1);
+  //  GFXBlendMode(ONE,ONE);
+  //  locSel->Draw();
+
   //textplane->Draw();
   _GFX->EndDraw();
   ProcessInput();
