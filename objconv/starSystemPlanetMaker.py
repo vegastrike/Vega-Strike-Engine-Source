@@ -29,6 +29,10 @@ def getVal(node,val):
 		if (i.getAttribute('name')==val):
 			return i.getAttribute('value')
 	return getParentVal(node,val)
+def removeVal(node,val):
+	for i in node.getElementsByTagName('var'):
+		if (i.getAttribute('name')==val):
+			node.removeChild(i)
 fil = open(sys.argv[1],"r")
 g = xml.dom.minidom.parseString(fil.read());
 fil.close()
@@ -42,6 +46,10 @@ if (len(sys.argv)>3):
 	stardatalines=stardatalines[1:]
 	for i in range(len(stardatalines)):
 		stardatalines[i]=stardatalines[i].strip().split(',')
+		if (len(stardatalines[i])<4):
+			starcoords.append((1./0.000001,1./0.00000001,1./0.000000000001))
+			print 'error '+str(stardatalines[i])			
+			continue
 		rad = float(stardatalines[i][1])
 		asc = float(stardatalines[i][2])
 		dec = float(stardatalines[i][3])
@@ -51,6 +59,7 @@ if (len(sys.argv)>3):
 	stardata=stardatalines
 if (stardata):
 	for s in systems:
+		removeVal(s,'designation')
 		coord = toPair(getVal(s,'xyz'))
 		if (not coord):
 			continue	

@@ -6,19 +6,37 @@ void usage(){
 }
 
 int main (int argc, char** argv) {
+//	FILE * kk = fopen("/bleh.txt","w");
+	for (int k=0;k<argc;++k) {
+		if (argv[k]==0||argv[k][0]==0){
+			for (int i=k;i+1<argc;++i) {
+				argv[i]=argv[i+1];
+			}
+			argc--;
+			k--;
+		}
+	}
+//	for (int k=0;k<argc;++k) {
+//		fprintf(kk,"argv[%d]=(%s)\n",k,argv[k]);
+//	}
 	if (argc!=4){
-		fprintf(stderr,"wrong number of arguments, aborting\n");
+		fprintf(stderr,"wrong number of arguments %d, aborting\n",argc);
+//		fprintf(kk,"wrong number of arguments %d , aborting\n",argc);
 		for(int i = 0; i<argc;i++){
-			fprintf(stderr,"%d : %s\n",i,argv[i]);
+			fprintf(stderr,"%d : %s\n",i,argv[i]);			
 		}
 		usage();
+//		fclose(kk);
 		exit(-1);
 	}
 	if(strlen(argv[3])!=3){
 		fprintf(stderr,"Invalid command %s, aborting\n",argv[3]);
+//		fprintf(kk,"Invalid command %s, aborting\n",argv[3]);
 		usage();
+//		fclose(kk);
 		exit(-1);
 	}
+//	fclose(kk);
 
   bool appendxmeshtobfxm=(argv[3][0]=='x'&&argv[3][1]=='b'&&argv[3][2]=='a');
   bool createBFXMfromxmesh=(argv[3][0]=='x'&&argv[3][1]=='b'&&argv[3][2]=='c');
