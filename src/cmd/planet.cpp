@@ -22,7 +22,8 @@
 #include "gfx/animation.h"
 #include "cmd/script/flightgroup.h"
 #include "gfx/ring.h"
-
+#include "alphacurve.h"
+#include "gfx/png_texture.h"
 extern string getCargoUnitName (const char *name);
 
 GamePlanet::GamePlanet()
@@ -39,7 +40,48 @@ GamePlanet::GamePlanet()
 }
 class FogMesh : public Mesh {
 public:
+	void SetMaterialColor (const GFXColor &color) {
+		GFXMaterial m;m.ar=m.ag=m.ab=m.aa=m.sr=m.sg=m.sb=m.sa=0;m.power=0;
+		static float emm=XMLSupport::parse_float (vs_config->getVariable("graphics","atmosphere_emmissive",".5"));
+		static float diff=XMLSupport::parse_float (vs_config->getVariable("graphics","atmosphere_diffuse",".5"));
+		m.er= emm*color.r;
+		m.eg= emm*color.g;
+		m.eb= emm*color.b;
+		m.ea= emm*color.a;
+		m.dr= diff*color.r;
+		m.dg= diff*color.g;
+		m.db= diff*color.b;
+		m.da= diff*color.a;
+		this->SetMaterial(m);
+		
+	}
 	FogMesh (std::string filename,const GFXColor & color, float radius, double focus, double concavity, int tail_mode_start, int tail_mode_end):Mesh(filename.c_str(),Vector(radius,radius,radius),0,NULL,true) {
+		SetMaterialColor(color);
+		if (Decal.size()) {
+			if (Decal[0]) {
+				if (1 || concavity!=0 || focus!=.5 || tail_mode_start!=-1 || tail_mode_end!=-1) {
+					changehome();
+					vschdir("backgrounds");
+					int rez=XMLSupport::parse_int (vs_config->getVariable("graphics","atmosphere_texture_resolution","512"));
+					unsigned char * tex= (unsigned char *) malloc (sizeof(char) *rez*4);
+					for (int i=0;i<rez;++i) {
+						tex[i*4]=255;
+						tex[i*4+1]=255;
+						tex[i*4+2]=255;
+						tex[i*4+3]=get_alpha(i,rez,0,255,focus,concavity,tail_mode_start,tail_mode_end);
+					}
+					static int count=0;
+					count++;
+					string nam = filename+XMLSupport::tostring(count);
+					png_write(nam.c_str(),&tex[0],rez,1,true,8);
+					delete Decal[0];
+					Decal[0]= new Texture(nam.c_str(),nam.c_str());
+					vscdup();
+					returnfromhome();
+						
+				}
+			}
+		}
 		
 	}
 	virtual ~FogMesh (){}
@@ -52,6 +94,7 @@ void GamePlanet::AddFog (const GFXColor & colror, double focus, double concavity
 	std::vector <Mesh * > fogs;
 	for (unsigned int i=1;i<=5;++i) {
 		Mesh *fog=new FogMesh (string("sphereatm")+XMLSupport::tostring(i)+".xmesh",colror,rSize(),focus,concavity,tail_mode_start,tail_mode_end);
+		
 		fogs.push_back(fog);
 	}
 	Unit* fawg=UnitFactory::createUnit(fogs,true,0);
