@@ -23,6 +23,7 @@ void ProcessJoystick () {
   SDL_Event event;
   float x,y;
   int buttons;
+  SDL_PumpEvents();
   while(SDL_PollEvent(&event)){
     fprintf (stderr,"We have event type %d\n",event.type);
     switch(event.type){
