@@ -14,6 +14,7 @@
 #include "atmosphere.h"
 #include "gfx/planetary_transform.h"
 #include "collide/rapcol.h"
+#include "images.h"
 PlanetaryOrbit:: PlanetaryOrbit(Unit *p, double velocity, double initpos, const Vector &x_axis, const Vector &y_axis, const Vector & centre, Unit * targetunit) : Order(MOVEMENT), parent(p), velocity(velocity), theta(initpos), x_size(x_axis), y_size(y_axis) { 
   parent->SetResolveForces(false);
     double delta = x_size.Magnitude() - y_size.Magnitude();
@@ -194,6 +195,7 @@ Planet::Planet(Vector x,Vector y,float vely, const Vector & rotvel, float pos,fl
   */
   meshdata[1]=NULL;
   SetAngularVelocity (rotvel);
+  image->dockingports.push_back (DockingPorts (Vector(0,0,0),radius+1000,true));
 }
 extern bool shouldfog;
 
