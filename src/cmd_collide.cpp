@@ -3,143 +3,19 @@
 #include "gfx_mesh.h"
 #include "cmd_collide.h"
 #include "physics.h"
+#include "hashtable_3d.h"
 vector <LineCollide*> collidequeue;
-const int COLLIDETABLESIZE=20;//cube root of entries
-const int COLLIDETABLEACCURACY=200;// "1/largeness of sectors"
-const int HUGEOBJECT=16; //objects that go over 16 sectors are considered huge and better to check against everything.
+//const int COLLIDETABLESIZE=20;//cube root of entries
+//const int COLLIDETABLEACCURACY=200;// "1/largeness of sectors"
+
 #define _USE_COLLIDE_TABLE
-class CollideTable {
-  int minaccessx,minaccessy,minaccessz,maxaccessx,maxaccessy,maxaccessz;
-  vector <LineCollide*> hugeobjects;
-  vector <LineCollide*> table [COLLIDETABLESIZE][COLLIDETABLESIZE][COLLIDETABLESIZE];
-  static int hash_int (float i) {
-    return (((int)(i<0?(i-COLLIDETABLEACCURACY):i))/COLLIDETABLEACCURACY)%(COLLIDETABLESIZE/2)+(COLLIDETABLESIZE/2); 
-  }
-  static void hash_vec (float i, float j, float k, int &x, int &y, int &z) {
-    x = hash_int(i);
-    y = hash_int(j);
-    z = hash_int(k);
-  }
-  static void hash_vec (const Vector & t,int &x, int&y,int&z) {
-    hash_vec(t.i,t.j,t.k,x,y,z);
-  }
-public:
-  CollideTable() {
-    minaccessx=COLLIDETABLESIZE-1;
-    minaccessy=COLLIDETABLESIZE-1;
-    minaccessz=COLLIDETABLESIZE-1;
-    maxaccessx=0;
-    maxaccessy=0;
-    maxaccessz=0;    
-  }
-  void Clear () {
-    hugeobjects = vector <LineCollide*>();
-    for (int i=minaccessx;i<=maxaccessx;i++) {
-    for (int j=minaccessy;j<=maxaccessy;j++) {
-    for (int k=minaccessz;k<=maxaccessz;k++) {
-      if (table[i][j][k].size())
-	table[i][j][k]=vector <LineCollide*>();
-    }
-    }
-    }
-    minaccessx=COLLIDETABLESIZE-1;
-    minaccessy=COLLIDETABLESIZE-1;
-    minaccessz=COLLIDETABLESIZE-1;
-    maxaccessx=0;
-    maxaccessy=0;
-    maxaccessz=0;
-    /*
-    for (int l=0;l<COLLIDETABLESIZE;l++) {
-      for (int m=0;m<COLLIDETABLESIZE;m++) {
-	for (int n=0;n<COLLIDETABLESIZE;n++) {
-	  if (table[l][m][n].size()!=0)
-	    fprintf (stderr,"ERROR!!! SIZE: %d\n\n\n",table[l][m][n].size());
-	}
-      }
-
-      }*/
-
-  }
-  bool Get (const Vector &Min, const Vector & Max, vector <LineCollide*> &retval) {    
-    //int minx,miny,minz,maxx,maxy,maxz;
-    //    hash_vec(Min,minx,miny,minz);
-    //    hash_vec(Max,maxx,maxy,maxz);
-    float maxx= (ceil(Max.i/COLLIDETABLEACCURACY))*COLLIDETABLEACCURACY;
-    float maxy= (ceil(Max.j/COLLIDETABLEACCURACY))*COLLIDETABLEACCURACY;
-    float maxz= (ceil(Max.k/COLLIDETABLEACCURACY))*COLLIDETABLEACCURACY;
-    int x,y,z;
-    if (Min.i==maxx) maxx+=COLLIDETABLEACCURACY/2;
-    if (Min.j==maxy) maxy+=COLLIDETABLEACCURACY/2;
-    if (Min.k==maxz) maxz+=COLLIDETABLEACCURACY/2;
-    if (fabs((maxx-Min.i)*(maxy-Min.j)*(maxz-Min.k))>COLLIDETABLEACCURACY*COLLIDETABLEACCURACY*COLLIDETABLEACCURACY*HUGEOBJECT) {
-      retval = collidequeue;
-      return true;
-    } else {
-      retval = hugeobjects;
-    }
-    for (float i=Min.i;i<maxx;i+=COLLIDETABLEACCURACY) {
-      x = hash_int (i);
-      for (float j=Min.j;j<maxy;j+=COLLIDETABLEACCURACY) {   
-	y = hash_int(j);
-	for (float k=Min.k;k<maxz;k+=COLLIDETABLEACCURACY) {
-	  z = hash_int(k);
-	  //	  table[i][j][k].push_back(target);
-	  for (unsigned int l=0;l<table[x][y][z].size();l++) {
-	    unsigned int m=0;
-	    for (;m<retval.size();m++) {
-	      if (retval[m]==table[x][y][z][l])
-		//make sure we're not pushing back duplicates;
-		break;
-	    }
-	    if (m==retval.size())
-	      retval.push_back (table[x][y][z][l]);
-	  }
-	}
-      }
-    }
-    return false;
-  }
-  
-  void Put(LineCollide* target, bool hhuge) {
-    //    int minx,miny,minz,maxx,maxy,maxz;
-    //    hash_vec(target->Mini,minx,miny,minz);
-    //    hash_vec(target->Maxi,maxx,maxy,maxz);
-    if (hhuge) {
-      hugeobjects.push_back(target);
-      return;
-    }
-    int x,y,z;
-    float maxx= (ceil(target->Maxi.i/COLLIDETABLEACCURACY))*COLLIDETABLEACCURACY;
-    float maxy= (ceil(target->Maxi.j/COLLIDETABLEACCURACY))*COLLIDETABLEACCURACY;
-    float maxz= (ceil(target->Maxi.k/COLLIDETABLEACCURACY))*COLLIDETABLEACCURACY;
-    if (target->Mini.i==maxx) maxx+=COLLIDETABLEACCURACY/2;
-    if (target->Mini.j==maxy) maxy+=COLLIDETABLEACCURACY/2;
-    if (target->Mini.k==maxz) maxz+=COLLIDETABLEACCURACY/2;
-    for (float i=target->Mini.i;i<maxx;i+=COLLIDETABLEACCURACY) {
-      x = hash_int(i);
-      if (x<minaccessx) minaccessx=x;
-      if (x>maxaccessx) maxaccessx=x;
-      for (float j=target->Mini.j;j<maxy;j+=COLLIDETABLEACCURACY) {    
-	y = hash_int(j);
-	if (y<minaccessy) minaccessy=y;
-	if (y>maxaccessy) maxaccessy=y;
-	for (float k=target->Mini.k;k<maxz;k+=COLLIDETABLEACCURACY) {
-	  z = hash_int(k);
-	  if (z<minaccessz) minaccessz=z;
-	  if (z>maxaccessz) maxaccessz=z;
-	  table[x][y][z].push_back(target);
-	}
-      }
-    }
-
-  }
-} collidetable;
+Hashtable3d <LineCollide*, char[20],char[200]> collidetable;
 
 void AddCollideQueue (const LineCollide &tmp, bool hhuge) {
   int size = collidequeue.size();
   collidequeue.push_back (new LineCollide(tmp));
 #ifdef _USE_COLLIDE_TABLE
-  collidetable.Put (collidequeue[size],hhuge);
+  collidetable.Put (collidequeue[size],collidequeue[size],hhuge);
 #endif
 
   

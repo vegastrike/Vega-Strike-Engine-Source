@@ -1,5 +1,6 @@
 #ifndef _CMD_COLLIDE_H_
 #define _CMD_COLLIDE_H_
+
 struct LineCollide {
   void * object;
   enum collidables {UNIT, BEAM,BALL,BOLT,PROJECTILE} type;

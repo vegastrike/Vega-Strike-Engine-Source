@@ -112,6 +112,7 @@ vegastrike_SOURCES =				\
 	gl_quad_list.cpp			\
 	hashtable.h				\
 	hashtable.cpp				\
+	hashtable_3d.h				\
 	in.h					\
 	in_ai.h					\
 	in_ai.cpp				\
