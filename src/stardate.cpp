@@ -49,7 +49,7 @@ string	StarDate::ConvertFullStarDate( double date)
 	// Then seconds must be counted from 0 to 480 (HOURS_DIV=8 minutes) before the minute effectively is incremented
 	unsigned int secs = seconds + (hours*100+minutes)%(HOURS_DIV*60);
 
-	sprintf( cdate, "%d.%.2d:%.2d", days, hrs, secs);
+	sprintf( cdate, "%d.%.4d:%.2d", days, hrs, secs);
 	return string( cdate);
 }
 
@@ -67,7 +67,7 @@ string	StarDate::ConvertStarDate( double date)
 	char cdate[32];
 	unsigned int hrs = (hours*100+minutes)/HOURS_DIV;
 
-	sprintf( cdate, "%d.%.2d", days, hrs);
+	sprintf( cdate, "%d.%.4d", days, hrs);
 	return string( cdate);
 }
 
@@ -79,7 +79,7 @@ double	StarDate::ConvertStarDate( string date)
 	// Replace the dot with 'a' so sscanf won't take it for a decimal symbol
 	pos = date.find( ".");
 	date.replace( pos, 1, "a");
-	if( (nb=sscanf( date.c_str(), "%da%2d:%2d", &days, &minutes, &seconds))!=3)
+	if( (nb=sscanf( date.c_str(), "%da%4d:%2d", &days, &minutes, &seconds))!=3)
 	{
 		cerr<<"!!! ERROR reading date"<<endl;
 	}

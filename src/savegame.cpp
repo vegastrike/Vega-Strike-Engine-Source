@@ -544,7 +544,7 @@ string SaveGame::WriteDynamicUniverse()
 	// Write mission data
 	// On server side we save the stardate
 	if( SERVER)
-		dyn_univ += AnyStringWriteString( "\nstardate data "+_Universe->current_stardate.GetFullCurrentStarDate());
+		dyn_univ += "\n0 stardate data"+AnyStringWriteString( _Universe->current_stardate.GetFullCurrentStarDate());
     memset( tmp, 0, MB);
     sprintf (tmp,"\n%d %s %s",0,"mission","data ");
     dyn_univ += string( tmp);
