@@ -84,7 +84,8 @@ libroot =		\
 	profile.h 				\
 	audiolib.h				\
     macosx_math.cpp			\
-    macosx_math.h
+    macosx_math.h			\
+	cg_global.cpp
 
 librootgeneric =			\
 	star_system_generic.cpp 	\
@@ -123,8 +124,7 @@ librootgeneric =			\
 	vegastrike.h			\
 	vs_globals.cpp			\
 	vs_path.cpp				\
-	vs_path.h			\
-	cg_global.cpp
+	vs_path.h
 
 librootserver =					\
 	gfxlib_struct_server.cpp	\
