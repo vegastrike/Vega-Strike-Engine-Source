@@ -211,7 +211,7 @@ static double usedValue(double originalValue) {
 
 // Lowerifies a string.
 static std::string &tolower(std::string &loweritem) {
-	for (int i=0;i<loweritem.size();i++) {
+	for (unsigned int i=0;i<loweritem.size();i++) {
 		loweritem[i]=tolower(loweritem[i]);
 	}
 	return loweritem;
@@ -219,14 +219,13 @@ static std::string &tolower(std::string &loweritem) {
 
 // Takes in a category of an upgrade or cargo and returns true if it is any type of mountable weapon.
 static bool isWeapon (std::string name) {
-	tolower(name);
-	if (name.find("weapon")!=std::string::npos) {
+	if (name.find("Weapon")!=std::string::npos) {
 		return true;
 	}
-	if (name.find("subunit")!=std::string::npos) {
+	if (name.find("SubUnit")!=std::string::npos) {
 		return true;
 	}
-	if (name.find("ammunition")!=std::string::npos) {
+	if (name.find("Ammunition")!=std::string::npos) {
 		return true;
 	}
 	return false;
@@ -816,7 +815,7 @@ void BaseComputer::createModeButtons(void) {
     if(m_displayModes.size() > 1) {
         // Create a button for each display mode, copying the original button.
         Rect rect = originalButton->rect();
-        for(int i=0; i<m_displayModes.size(); i++) {
+        for(unsigned int i=0; i<m_displayModes.size(); i++) {
             DisplayMode mode = m_displayModes[i];
             NewButton* newButton = new NewButton(*originalButton);
             newButton->setRect(rect);
@@ -1350,7 +1349,7 @@ void BaseComputer::loadCargoControls(void) {
     // Set up the base dealer's transaction list.
 	vector<string> donttakethis;
 	donttakethis.push_back("missions");
-//	donttakethis.push_back("upgrades"); // Uncomment this only hen you are *absolutely sure* that downgrade/upgrade works.
+	donttakethis.push_back("upgrades");
     loadMasterList(m_base.GetUnit(), vector<string>(),donttakethis, true, m_transList1); // Anything but a mission.
     SimplePicker* basePicker = dynamic_cast<SimplePicker*>( window()->findControlById("BaseCargo") );
     assert(basePicker != NULL);
@@ -1446,9 +1445,6 @@ bool BaseComputer::buyCargo(const EventCommandId& command, Control* control) {
     if(item) {
         Cargo itemCopy = *item;     // Copy this because we reload master list before we need it.
         playerUnit->BuyCargo(item->content, quantity, baseUnit, _Universe->AccessCockpit()->credits);
-		static bool ComponentBasedUpgrades = XMLSupport::parse_bool (vs_config->getVariable("physics","component_based_upgrades","false"));
-		if (ComponentBasedUpgrades)
-			RecomputeUnitUpgrades(playerUnit);
         // Reload the UI -- inventory has changed.  Because we reload the UI, we need to 
         //  find, select, and scroll to the thing we bought.  The item might be gone from the
         //  list (along with some categories) after the transaction.
@@ -1473,9 +1469,6 @@ bool BaseComputer::sellCargo(const EventCommandId& command, Control* control) {
         Cargo itemCopy = *item;     // Not sure what "sold" has in it.  Need copy of sold item.
  	Cargo sold;
         playerUnit->SellCargo(item->content, quantity, _Universe->AccessCockpit()->credits, sold, baseUnit);
-		static bool ComponentBasedUpgrades = XMLSupport::parse_bool (vs_config->getVariable("physics","component_based_upgrades","false"));
-		if (ComponentBasedUpgrades)
-			RecomputeUnitUpgrades(playerUnit);
 
         // Reload the UI -- inventory has changed.  Because we reload the UI, we need to 
         //  find, select, and scroll to the thing we bought.  The item might be gone from the
@@ -1803,7 +1796,7 @@ void BaseComputer::loadSellUpgradeControls(void) {
     }
 
 	std::vector<std::string> invplayerfiltervec=weapfiltervec;
-	invplayerfiltervec.push_back("damaged");
+	invplayerfiltervec.push_back("Damaged");
 	std::vector<string> playerfiltervec;
 	playerfiltervec.push_back("upgrades");
 	loadMasterList(playerUnit, playerfiltervec, invplayerfiltervec, false, tlist); // Get upgrades, but not weapons.
@@ -2249,12 +2242,30 @@ void BaseComputer::SellUpgradeOperation::concludeTransaction(void) {
 bool BaseComputer::buyUpgrade(const EventCommandId& command, Control* control) {
     // Take care of Basic Repair, which is implemented entirely in this module.
     Cargo* item = selectedItem();
-    if(item && item->content == BASIC_REPAIR_NAME) {
-        BasicRepair(m_player.GetUnit());
-        assert(m_selectedList != NULL);
-        m_selectedList->picker->selectCell(NULL);       // Turn off selection.
-        return true;
-    }
+	if (item) {
+		Unit * playerUnit = m_player.GetUnit();
+		if(item->content == BASIC_REPAIR_NAME) {
+			if (playerUnit) {
+				BasicRepair(playerUnit);
+				assert(m_selectedList != NULL);				
+				m_selectedList->picker->selectCell(NULL);       // Turn off selection.
+			}
+			return true;
+		}
+		if (!isWeapon(item->category)) {
+			if (playerUnit) {
+				Unit * baseUnit = m_base.GetUnit();
+				if (baseUnit) {
+					const int quantity=1;
+					playerUnit->BuyCargo(item->content, quantity, baseUnit, _Universe->AccessCockpit()->credits);
+					RecomputeUnitUpgrades(playerUnit);
+					loadUpgradeControls();
+					updateTransactionControls(*item);
+				}
+			}
+			return true;
+		}
+	}
 
     // This complicated operation is done in a separate object.
     BuyUpgradeOperation* op = new BuyUpgradeOperation(*this);
@@ -2265,6 +2276,22 @@ bool BaseComputer::buyUpgrade(const EventCommandId& command, Control* control) {
 
 // Sell an upgrade on your ship.
 bool BaseComputer::sellUpgrade(const EventCommandId& command, Control* control) {
+	Cargo* item = selectedItem();
+	if (item) {
+		if (!isWeapon(item->category)) {
+			Cargo sold;
+			const int quantity=1;
+			Unit * playerUnit = m_player.GetUnit();
+			Unit * baseUnit = m_base.GetUnit();
+			if (baseUnit&&playerUnit) {
+				playerUnit->SellCargo(item->content, quantity, _Universe->AccessCockpit()->credits, sold, baseUnit);
+				RecomputeUnitUpgrades(playerUnit);
+				loadUpgradeControls();
+				updateTransactionControls(*item);				
+			}
+			return true;
+		}
+	}
     // This complicated operation is done in a separate object.
     SellUpgradeOperation* op = new SellUpgradeOperation(*this);
     op->start();
