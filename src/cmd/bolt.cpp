@@ -226,7 +226,8 @@ void bolt_draw::UpdatePhysics () {
 }
 
 bool Bolt::Collide (Unit * target) {
-  if (target==owner||target->isUnit()==NEBULAPTR)
+  enum clsptr type = target->isUnit();
+  if (target==owner||type==NEBULAPTR||type==ASTEROIDPTR)
     return false;
   Vector normal;
   float distance;

@@ -272,7 +272,7 @@ bool cockpitfront=true;
 
 	if(newState==PRESS||newState==DOWN) {
 	  cockpitfront=false;
-	  _Universe->AccessCockpit()->SetView (CP_PAN);
+	  _Universe->AccessCockpit()->SetView (CP_PANTARGET);
 	}
 }
 

@@ -87,19 +87,19 @@ StarSystem::StarSystem(const char * filename, const Vector & centr,const float t
   //Iterator *primary_iterator = primaries->createIterator(); 
   //primaries->SetPosition(0,0,5);
   //foo = new SphereMesh(1,5,5,"moon.bmp");
-  cam[1].SetProjectionType(Camera::PARALLEL);
-  cam[1].SetZoom(1);
-  cam[1].SetPosition(Vector(0,0,0));
-  cam[1].LookAt(Vector(0,0,0), Vector(0,0,1));
+  //cam[1].SetProjectionType(Camera::PARALLEL);
+  //cam[1].SetZoom(1);
+  //cam[1].SetPosition(Vector(0,0,0));
+  //cam[1].LookAt(Vector(0,0,0), Vector(0,0,1));
   //cam[1].SetPosition(Vector(0,5,-2.5));
-  cam[1].SetSubwindow(0,0,1,1);
+  //cam[1].SetSubwindow(0,0,1,1);
 
-  cam[2].SetProjectionType(Camera::PARALLEL);
-  cam[2].SetZoom(10.0);
-  cam[2].SetPosition(Vector(5,0,0));
-  cam[2].LookAt(Vector(0,0,0), Vector(0,-1,0));
+  //cam[2].SetProjectionType(Camera::PARALLEL);
+  //cam[2].SetZoom(10.0);
+  //cam[2].SetPosition(Vector(5,0,0));
+  //cam[2].LookAt(Vector(0,0,0), Vector(0,-1,0));
   //cam[2].SetPosition(Vector(5,0,-2.5));
-  cam[2].SetSubwindow(0.10,0,0.10,0.10);
+  //cam[2].SetSubwindow(0.10,0,0.10,0.10);
   UpdateTime();
   time = 0;
 

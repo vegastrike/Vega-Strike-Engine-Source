@@ -11,7 +11,7 @@ class Sprite;
 class Gauge;
 class Unit;
 class VDU;
-enum VIEWSTYLE {CP_FRONT, CP_LEFT, CP_RIGHT, CP_BACK, CP_CHASE, CP_PAN};
+enum VIEWSTYLE {CP_FRONT,  CP_BACK,CP_LEFT, CP_RIGHT, CP_TARGET, CP_CHASE, CP_PAN,  CP_PANTARGET};
 
 /**
  * The Cockpit Contains all displayable information about a particular Unit *

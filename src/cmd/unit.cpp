@@ -568,7 +568,7 @@ bool Unit::queryFrustum(float frustum [6][4]) const{
 
 
 float Unit::GetElasticity() {return .5;}
-void Unit::UpdateHudMatrix() {
+void Unit::UpdateHudMatrix(int whichcam) {
   Matrix m;
   float * ctm=cumulative_transformation_matrix;
   if (planet) {
@@ -580,9 +580,9 @@ void Unit::UpdateHudMatrix() {
   Vector r (ctm[8],	    ctm[9],	    ctm[10]);
   Vector tmp;
   CrossProduct(r,q, tmp);
-  _Universe->AccessCamera()->SetOrientation(tmp,q ,r);
+  _Universe->AccessCamera(whichcam)->SetOrientation(tmp,q ,r);
   
-  _Universe->AccessCamera()->SetPosition (Transform (ctm,image->CockpitCenter));
+  _Universe->AccessCamera(whichcam)->SetPosition (Transform (ctm,image->CockpitCenter));
 }
    
 

@@ -337,7 +337,8 @@ bool Beam::Collide (Unit * target) {
   float distance;
   Vector normal;//apply shields
   Vector end (center+direction*curlength);
-  if (target==owner||target->isUnit()==NEBULAPTR) 
+  enum clsptr type = target->isUnit();
+  if (target==owner||type==NEBULAPTR||type==ASTEROIDPTR) 
     return false;
   
 

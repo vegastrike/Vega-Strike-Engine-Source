@@ -591,14 +591,14 @@ void Cockpit::SetView (const enum VIEWSTYLE tmp) {
   view = tmp;
 }
 void Cockpit::VDUSwitch (int vdunum) {
-  if (vdunum<vdu.size()) {
+  if (vdunum<(int)vdu.size()) {
     if (vdu[vdunum]) {
       vdu[vdunum]->SwitchMode();
     }
   }
 }
 void Cockpit::ScrollVDU (int vdunum, int howmuch) {
-  if (vdunum<vdu.size()) {
+  if (vdunum<(int)vdu.size()) {
     if (vdu[vdunum]) {
       vdu[vdunum]->Scroll(howmuch);
     }
@@ -612,41 +612,59 @@ void Cockpit::ScrollAllVDU (int howmuch) {
 void Cockpit::RestoreViewPort() {
   GFXViewPort (0, 0, g_game.x_resolution,g_game.y_resolution);
 }
-void Cockpit::SetupViewPort (bool clip) {
-    GFXViewPort (0,(int)((view<CP_CHASE?viewport_offset:0)*g_game.y_resolution), g_game.x_resolution,g_game.y_resolution);
-  _Universe->activeStarSystem()->AccessCamera()->setCockpitOffset (view<CP_CHASE?cockpit_offset:0);
-  Unit * un;
-  if ((un = parent.GetUnit())) {
 
-    if (view!=CP_PAN) {
-      un->UpdateHudMatrix();
-      if (view==CP_CHASE) {
-	_Universe->AccessCamera()->SetPosition(_Universe->AccessCamera()->GetPosition()-_Universe->AccessCamera()->GetR()*un->rSize()*zoomfactor);
-      } else  {
-	Vector p,q,r;
-	_Universe->AccessCamera()->GetOrientation(p,q,r);
-	if (view==CP_LEFT) {
-	  Vector tmp = r;
-	  r = -p;
-	  p = tmp;
-	  _Universe->AccessCamera()->SetOrientation(p,q,r);
-	} else if (view==CP_RIGHT) {
-	  Vector tmp = r;
-	  r = p;
-	  p = -tmp;
-	  _Universe->AccessCamera()->SetOrientation(p,q,r);
-	} else if (view==CP_BACK) {
-	  r = -r;
-	  p = -p;
-	  _Universe->AccessCamera()->SetOrientation(p,q,r);
-	}
-      }
-    }else {
-      Vector unpos = un->GetPlanetOrbit()?un->LocalPosition():un->Position();
-      _Universe->AccessCamera()->SetPosition (unpos-_Universe->AccessCamera()->GetR()*un->rSize()*zoomfactor);
-    }
-    un->SetVisible(view>=CP_CHASE);
+static void ShoveCamBehindUnit (int cam, Unit * un, float zoomfactor) {
+  Vector unpos = un->GetPlanetOrbit()?un->LocalPosition():un->Position();
+  _Universe->AccessCamera(cam)->SetPosition(unpos-_Universe->AccessCamera()->GetR()*un->rSize()*zoomfactor);
+}
+void Cockpit::SetupViewPort (bool clip) {
+    GFXViewPort (0,(int)((view==CP_FRONT?viewport_offset:0)*g_game.y_resolution), g_game.x_resolution,g_game.y_resolution);
+  _Universe->activeStarSystem()->AccessCamera()->setCockpitOffset (view<CP_CHASE?cockpit_offset:0);
+  Unit * un, *tgt;
+  if ((un = parent.GetUnit())) {
+    un->UpdateHudMatrix (CP_FRONT);
+    un->UpdateHudMatrix (CP_LEFT);
+    un->UpdateHudMatrix (CP_RIGHT);
+    un->UpdateHudMatrix (CP_BACK);
+    un->UpdateHudMatrix (CP_CHASE);
     
+    Vector p,q,r;
+    _Universe->AccessCamera(CP_FRONT)->GetOrientation(p,q,r);
+    Vector tmp = r;
+    r = -p;
+    p = tmp;
+    _Universe->AccessCamera(CP_LEFT)->SetOrientation(p,q,r);
+    _Universe->AccessCamera(CP_FRONT)->GetOrientation(p,q,r);
+    tmp = r;
+    r = p;
+    p = -tmp;
+    _Universe->AccessCamera(CP_RIGHT)->SetOrientation(p,q,r);
+    _Universe->AccessCamera(CP_FRONT)->GetOrientation(p,q,r);
+    r = -r;
+    p = -p;
+    _Universe->AccessCamera(CP_BACK)->SetOrientation(p,q,r);
+
+    tgt = un->Target();
+    if (tgt) {
+      
+      Vector p,q,r,tmp;
+      un->GetOrientation (p,q,r);
+      r = tgt->Position()-un->Position();
+      r.Normalize();
+      CrossProduct (r,q,tmp);
+      CrossProduct (tmp,r,q);
+      _Universe->AccessCamera(CP_TARGET)->SetOrientation(tmp,q,r);
+      _Universe->AccessCamera(CP_PANTARGET)->SetOrientation(tmp,q,r);
+    }else {
+      un->UpdateHudMatrix (CP_TARGET);
+      un->UpdateHudMatrix (CP_PANTARGET);
+    }
+    ShoveCamBehindUnit (CP_CHASE,un,zoomfactor);
+    ShoveCamBehindUnit (CP_PANTARGET,un,zoomfactor);
+    ShoveCamBehindUnit (CP_PAN,un,zoomfactor);
+
+    un->SetVisible(view>=CP_CHASE);
+    _Universe->activeStarSystem()->SelectCamera(view);
   }
   _Universe->activeStarSystem()->AccessCamera()->UpdateGFX(clip?GFXTRUE:GFXFALSE);
     

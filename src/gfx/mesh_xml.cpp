@@ -1034,7 +1034,10 @@ void Mesh::LoadXML(const char *filename, int faction) {
   fclose (inFile);
   XML_ParserFree (parser);
   // Now, copy everything into the mesh data structures
-  assert(xml->load_stage==5);
+
+  if(xml->load_stage!=5) {
+    fprintf (stderr,"Warning: mesh load possibly failed\n");
+  }
   //begin vertex normal calculations if necessary
   if (USE_RECALC_NORM||xml->recalc_norm) {//fixme!
     unsigned int i; unsigned int a=0;

@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-
+float safety_zone=0;
 using std::vector;
 class Vector {
 public:
@@ -147,17 +147,22 @@ void determine_centers_and_radii (vector <asteroid> & field, const Vector &cube_
     field[i].YawPitchRoll.j = 2*M_PI*((float)rand())/RAND_MAX;
     field[i].YawPitchRoll.k = 2*M_PI*((float)rand())/RAND_MAX;
     bool insideanother=false;
-    for (unsigned int j=0;j<i;j++) {
-      if (fabs (field[j].center.i-field[i].center.i)<1.2
-*(field[j].radius+field[i].radius)&&
-	  fabs (field[j].center.j-field[i].center.j)<1.2*(field[j].radius+field[i].radius)&&
-	  fabs (field[j].center.j-field[i].center.j)<1.2*(field[j].radius+field[i].radius)) {
-	insideanother =true;
-	break;
+    if (field[i].center.Mag()>safety_zone) {
+      insideanother=true;
+    } else {
+      for (unsigned int j=0;j<i;j++) {
+	if ((fabs (field[j].center.i-field[i].center.i)<1.2
+	     *(field[j].radius+field[i].radius)&&
+	     fabs (field[j].center.j-field[i].center.j)<1.2*(field[j].radius+field[i].radius)&&
+	     fabs (field[j].center.j-field[i].center.j)<1.2*(field[j].radius+field[i].radius))) {
+	  insideanother =true;
+	  break;
+	}
       }
     }
-    if (insideanother)
+    if (insideanother) {
       i--;
+    }
   }
 }
 
@@ -305,7 +310,9 @@ int main (int argc, char ** argv) {
     sscanf (argv[6],"%f",&deviation);
     sscanf (argv[7],"%d",&poly_min);
     sscanf (argv[8],"%d",&poly_max);
-
+    if (argc>=10) {
+      sscanf (argv[9],"%f",&safety_zone);
+    }
   }else {
     printf ("Enter Ouput File: ");
 
@@ -317,10 +324,13 @@ int main (int argc, char ** argv) {
     scanf ("%d", &numroids);
     printf ("Enter asteroid minimum and max radius\n");
     scanf ("%f %f",&radiusmin,&radiusmax);
-    printf ("Enter cragginess\n");  
+    printf ("Enter cragginess from 0 to 1\n");  
     scanf ("%f",&deviation);
     printf ("Enter minimum number of polys and max num polys\n");
     scanf ("%d %d",&poly_min,&poly_max);
+    printf ("Enter size of safety zone (0 to disable)\n");  
+    scanf ("%f",&safety_zone);
+   
   }
   for (int i=0;i<numroids;i++) {
     field.push_back (asteroid());

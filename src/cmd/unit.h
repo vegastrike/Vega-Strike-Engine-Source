@@ -451,7 +451,7 @@ public:
   ///Gets the current status of the hull
   float GetHull() const{return hull;}
   ///Sets the camera to be within this unit.
-  void UpdateHudMatrix();
+  void UpdateHudMatrix(int whichcam);
   ///Returns the current AI state of the current unit for modification
   Order *getAIState() const{return aistate;}
   ///Should we resolve forces on this unit (is it free to fly or in orbit)
