@@ -1,12 +1,14 @@
-Name: vegastrike
+Name: vegastrike-data
 Summary: Vegastrike - a free 3D space fight simulator
 Version: 0.2.1cvs
 Release: 1
 Copyright: GPL
 Group: X11/GL/Games
 Source: http://prdownloads.sourceforge.net/vegastrike/vegastrike-0.2.1cvs.tar.gz
+Source1: http://prdownloads.sourceforge.net/vegastrike/vegastrike-0.2.1_unixdata.tar.gz
+NoSource: 1
 Packager: Alexander Rawass <alexannika@users.sourceforge.net>
-BuildRoot: /tmp/vsbuild
+BuildRoot: /vast2/alex/buildroot
 Prefix: /usr/local
 
 %description
@@ -19,22 +21,33 @@ Vega Strike is an Interactive Flight Simulator/Real Time Stratagy being
 
 %prep
 rm -rf $RPM_BUILD_ROOT/*
+
+mkdir $RPM_BUILD_ROOT/vegastrike-data-0.2.1cvs
+
+echo PREP END
+
 %setup -n vegastrike-0.2.1cvs
 
+echo SETUP END
+
 %build
-./configure --prefix=/usr/local --enable-debug
-make
+echo BUILD
 
 %install
-make DESTDIR=$RPM_BUILD_ROOT install
+echo INSTALL
+mkdir -p $RPM_BUILD_ROOT%{prefix}/games/vegastrike
+cd $RPM_BUILD_ROOT%{prefix}/games/vegastrike
+tar zxvf $RPM_SOURCE_DIR/vegastrike-0.2.1_unixdata.tar.gz
+#chown -R root.root .
+rm -Rf data/units/confed/truck_small
+rm -Rf data/units/phantom
+rm -Rf data/units/tesat
 
-cd $RPM_BUILD_ROOT/usr/local/games/vegastrike/data
-mv vegastrike vegastrike-bin
-mv select glselect
+find . -type d|xargs --no-run-if-empty chmod go+rx
+find . -type f|xargs --no-run-if-empty chmod go+r-w 
 
 %clean
 rm -rf $RPM_BUILD_ROOT/*
 
 %files
-%{prefix}/games/vegastrike/data/vegastrike
-%{prefix}/games/vegastrike/data/select
+%{prefix}/games/vegastrike

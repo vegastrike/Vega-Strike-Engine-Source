@@ -1,3 +1,13 @@
+2002-03-19 Alexander Rawass <alexannika@users.sourceforge.net>
+	
+	* modified src/Makefile.am (bindir was screwed up)
+	* modified mission/Makefile.am (bindir)
+	* added missile.h to src/cmd/Makefile.am
+	* modified vegastrike.spec
+	* added vegastrike-data.spec
+	* improved some modules (unit==NULL checks)
+	
+	
 2002-03-18 Alexander Rawass <alexannika@users.sourceforge.net>
 
 	tag: alex_after_unitcontainer_changes

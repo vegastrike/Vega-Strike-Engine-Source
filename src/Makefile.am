@@ -1,5 +1,5 @@
 
-bindir = ../$(prefix)
+bindir = $(prefix)/games/vegastrike/data
 
 bin_PROGRAMS = vegastrike
 SUBDIRS = cmd gfx gldrv aldrv python gui
