@@ -6,18 +6,7 @@ extern Vector mouseline;
 extern vector<Vector> perplines;
 
 Vector MouseCoordinate (int mouseX, int mouseY) {
-  float l, r, b, t , n, f;
-  GFXGetFrustumVars (true,&l,&r,&b,&t,&n,&f);
-  //fprintf (stderr, "N: %f\n",n);
-  //Vector mousePoint (MouseCoordinate (mouseX,mouseY,1));
-  /*  cerr.form("%f, %f, %f, %f\n", l,r,b,t);
-  cerr << "top - bottom " <<  t-b << endl;
-  cerr << "right - left " <<  r-l << endl;
-  */
-  return Vector ((l + (r-l) * float(mouseX)/g_game.x_resolution),
-		 (t + (b-t) * float(mouseY)/g_game.y_resolution),
-		 n);
-
+  return GFXDeviceToEye(mouseX, mouseY);
 }
 
 
@@ -34,7 +23,7 @@ bool ClickList::queryShip (int mouseX, int mouseY,Unit *ship) {
   //  if (ship->querySphere(CamP,mousePoint,0)){  //FIXME  bounding spheres seem to be broken
   mousePoint.Normalize();
   mouseline =mousePoint + CamP;
-  if (ship->querySphere(CamP+CamR,mousePoint,0)){  // camera position is not actually the center of the camera
+  if (ship->querySphere(CamP,mousePoint,0)){  // camera position is not actually the center of the camera
       return true;
 						//  if (ship->queryBoundingBox(CamP,mousePoint,0)) {
     }

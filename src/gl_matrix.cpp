@@ -25,6 +25,10 @@
 #include <math.h>
 #include <string.h>
 #include "gl_matrix.h"
+
+#include "vs_globals.h"
+
+
 //#include <GL/glu.h>
 const float PI=3.1415926536;
 inline void Zero(float matrix[])
@@ -757,4 +761,18 @@ BOOL /*GFXDRVAPI*/ GFXCalculateFrustum (float frustum[6][4], float *modl,float *
    frustum[5][2] /= t;
    frustum[5][3] /= t;
    return TRUE;
+}
+
+Vector GFXDeviceToEye(int x, int y) {
+  float l, r, b, t , n, f;
+  GFXGetFrustumVars (true,&l,&r,&b,&t,&n,&f);
+  //fprintf (stderr, "N: %f\n",n);
+  //Vector mousePoint (MouseCoordinate (mouseX,mouseY,1));
+  /*  cerr.form("%f, %f, %f, %f\n", l,r,b,t);
+  cerr << "top - bottom " <<  t-b << endl;
+  cerr << "right - left " <<  r-l << endl;
+  */
+  return Vector ((l + (r-l) * float(x)/g_game.x_resolution),
+		 (t + (b-t) * float(y)/g_game.y_resolution),
+		 n);
 }

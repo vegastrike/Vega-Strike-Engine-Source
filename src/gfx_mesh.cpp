@@ -807,7 +807,8 @@ void Mesh::UpdateHudMatrix() {
 	//Identity (tmatrix);
 	//	Translate (tmatrix,_GFX->AccessCamera()->GetPosition());
 	//	GFXLoadMatrix(MODEL,tmatrix);
-  VectorAndPositionToMatrix (tmatrix,-camp,camq,camr,_GFX->AccessCamera()->GetPosition()+1.23*camr);//FIXME!!! WHY 1.25 
+  //VectorAndPositionToMatrix (tmatrix,-camp,camq,camr,_GFX->AccessCamera()->GetPosition()+1.23*camr);//FIXME!!! WHY 1.25 
+  VectorAndPositionToMatrix (tmatrix,camp,camq,camr,_GFX->AccessCamera()->GetPosition());
   GFXLoadMatrix(MODEL,tmatrix);
   UpdateMatrix();
 }

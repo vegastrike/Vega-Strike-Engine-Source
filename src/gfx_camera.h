@@ -57,7 +57,7 @@ public:
 	void GetPosition(Vector &vect);
 
 	void GetOrientation(Vector &p, Vector &q, Vector &r);
-	Vector &GetPosition();
+	const Vector &GetPosition();
 
 	void LookAt(const Vector &loc, const Vector &up);
 	void SetOrientation(const Vector &p, const Vector &q, const Vector &r);

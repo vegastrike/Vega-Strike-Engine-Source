@@ -148,4 +148,6 @@ vegastrike_SOURCES =				\
 	profile.h \
 	gfx_coordinate_select.cpp		\
 	gfx_coordinate_select.h			\
-	gl_matrix.h
+	gl_matrix.h \
+	vs_globals.h
+

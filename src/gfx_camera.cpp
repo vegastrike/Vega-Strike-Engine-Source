@@ -73,7 +73,7 @@ void Camera::UpdateGFX(bool updateFrustum)
 		  GFXParallel(aspect*-zoom,aspect*zoom,-zoom,zoom,-zfar,zfar);
 		  break;
 		}
-		GFXLookAt (Coord, Coord+R, Q);
+		GFXLookAt (Coord-R, Coord, Q);
 		if (updateFrustum) GFXCalculateFrustum();
 		GFXGetMatrix(VIEW,view);
 		GFXSubwindow(x,y,xsize,ysize);
@@ -109,7 +109,7 @@ void Camera::UpdateGLCenter()
 		}
 
 		GFXSubwindow(x,y,xsize,ysize);
-		GFXLookAt (Vector(0,0,0), R, Q);
+		GFXLookAt (-R, Vector(0,0,0), Q);
 		//changed = FALSE;
 	}
 	//glMultMatrixf(view);
@@ -125,7 +125,7 @@ void Camera::GetPosition(Vector &vect)
 {
 	vect = Coord;
 }
-Vector &Camera::GetPosition()
+const Vector &Camera::GetPosition()
 {
 	return Coord;
 }

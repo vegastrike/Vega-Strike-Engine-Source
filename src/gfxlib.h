@@ -142,4 +142,7 @@ vector<PickData> *GFXEndPick();
 void GFXSubwindow(int x, int y, int xsize, int ysize);
 void GFXSubwindow(float x, float y, float xsize, float ysize);
 
+//Coordinate system conversion
+Vector GFXDeviceToEye(int x, int y);
+
 #endif

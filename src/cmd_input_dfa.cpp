@@ -128,7 +128,9 @@ void InputDFA::LocSelect (KBSTATE k, int x, int y, int delx, int dely, int mod) 
 
 void InputDFA::ClickSelect (KBSTATE k, int x, int y, int delx, int dely, int mod) {
   static int kmod;
-  CurDFA->MouseArrow.SetPosition (1.33-((float)(x*2.66))/g_game.x_resolution,1-((float)(y*2))/g_game.y_resolution);
+  Vector v = GFXDeviceToEye(x,y);
+  CurDFA->MouseArrow.SetPosition (v.i, v.j);
+
   if (k==RESET)
     return;///little hack to prevent the function from being 'primed' with reset and continuing on an infinite loop again and again and again
 
@@ -162,7 +164,8 @@ void InputDFA::ClickSelect (KBSTATE k, int x, int y, int delx, int dely, int mod
   }
   if (k==PRESS){
 
-    CurDFA->SelectBox.SetPosition (1.33-((float)(x*2.66))/g_game.x_resolution,1-((float)(y*2))/g_game.y_resolution);
+  Vector v = GFXDeviceToEye(x,y);
+  CurDFA->SelectBox.SetPosition (v.i, v.j);
     Unit * sel = CurDFA->clickList->requestShip(x,y);
     if (sel!=NULL) {
       UnitCollection *tmpcollection=new UnitCollection;
@@ -186,7 +189,8 @@ void InputDFA::ClickSelect (KBSTATE k, int x, int y, int delx, int dely, int mod
   }
   if (k==DOWN) {
     if (delx||dely) {
-      CurDFA->SelectBox.SetSize (((float)(CurDFA->prevx-x)*2.66)/g_game.x_resolution,((float)(CurDFA->prevy-y)*2)/g_game.y_resolution);
+      Vector v = GFXDeviceToEye(delx, dely);
+      CurDFA->SelectBox.SetSize (v.i, v.j);
       CurDFA->Selecting=true;
       if (mod&ACTIVE_SHIFT) {
 	//do clickb0x0rz on both CurDFA->selection && tmpcol FIXME
@@ -219,14 +223,16 @@ void InputDFA::ClickSelect (KBSTATE k, int x, int y, int delx, int dely, int mod
 
 //this function is bound in the NONE state...
 void InputDFA::NoneSelect (KBSTATE k,int x, int y, int delx, int dely, int mod) {
-  CurDFA->MouseArrow.SetPosition (1.33-((float)(x*2.66))/g_game.x_resolution,1-((float)(y*2))/g_game.y_resolution);
+  Vector v = GFXDeviceToEye(x,y);
+  CurDFA->MouseArrow.SetPosition (v.i, v.j);
   static int kmod;
   if (k==RESET)
     return;///little hack to prevent the function from being 'primed' with reset and continuing on an infinite loop again and again and again
   if (mod&ACTIVE_CTRL)
     return; //you don't want control pressed
   if (k==PRESS) {
-    CurDFA->SelectBox.SetPosition (1.33-((float)(x*2.66))/g_game.x_resolution,1-((float)(y*2))/g_game.y_resolution);
+    Vector v = GFXDeviceToEye(x,y);
+    CurDFA->SelectBox.SetPosition (v.i, v.j);
     CurDFA->Selecting=false;
     kmod = mod;
     CurDFA->prevx=x;
@@ -249,7 +255,8 @@ void InputDFA::NoneSelect (KBSTATE k,int x, int y, int delx, int dely, int mod) 
   
   if (k==DOWN) {
     if (delx||dely) {
-      CurDFA->SelectBox.SetSize (((float)(CurDFA->prevx-x)*2.66)/g_game.x_resolution,((float)(CurDFA->prevy-y)*2)/g_game.y_resolution);
+      Vector v = GFXDeviceToEye(delx, dely);
+      CurDFA->SelectBox.SetSize (v.i, v.j);
       CurDFA->Selecting=true;
     }
   }

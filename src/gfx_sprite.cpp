@@ -19,6 +19,7 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 #include <stdlib.h>
+#include <iostream.h>
 
 #include "gfx_aux_texture.h"
 #include "gfx_sprite.h"
@@ -32,7 +33,7 @@ Sprite::Sprite(char *file, bool trackzoom):Mesh(), track_zoom(trackzoom)
 {
   pos.i = 0;
   pos.j = 0;
-  pos.k = 1.0;
+  pos.k = 1;
   Mesh::SetPosition();
 
   xcenter = 0;
@@ -75,7 +76,7 @@ Sprite::~Sprite()
 
 
 void Sprite::UpdateMatrix() {
-  if(track_zoom) {
+  /*if(track_zoom) {
     float zoom = _GFX->AccessCamera()->GetZoom();
 
     Translate(translation, pos*zoom);
@@ -84,9 +85,9 @@ void Sprite::UpdateMatrix() {
     GFXGetMatrix(MODEL, stackstate);
     changed = FALSE;
     GFXMultMatrix(MODEL, transformation);
-  } else {
+  } else {*/
     Mesh::UpdateMatrix();
-  }
+    //}
 }
 
 void Sprite::Draw()
@@ -116,14 +117,14 @@ void Sprite::Draw()
 		GFXColor(1.00f, 1.00f, 1.00f, 1.00f);
 		GFXBegin(QUADS);
 		
-		GFXTexCoord2f(1.00f, 0.00f);
-		GFXVertex3f(left, bottom, 0.00f);
-		GFXTexCoord2f(0.00f, 0.00f);
-		GFXVertex3f(right, bottom, 0.00f);
 		GFXTexCoord2f(0.00f, 1.00f);
-		GFXVertex3f(right, top, 0.00f);
-		GFXTexCoord2f(1.00f, 1.00f);
 		GFXVertex3f(left, top, 0.00f);
+		GFXTexCoord2f(1.00f, 1.00f);
+		GFXVertex3f(right, top, 0.00f);
+		GFXTexCoord2f(1.00f, 0.00f);
+		GFXVertex3f(right, bottom, 0.00f);
+		GFXTexCoord2f(0.00f, 0.00f);
+		GFXVertex3f(left, bottom, 0.00f);
 
 		GFXEnd();
 		GFXPopBlendMode();
@@ -139,6 +140,7 @@ void Sprite::SetPosition(const float &x1, const float &y1)
 {
 	pos.i = x1;
 	pos.j = y1;
+	cerr << "position " << pos.i << ", " << pos.j << endl;
 }
 
 void Sprite::GetPosition(float &x1, float &y1)
