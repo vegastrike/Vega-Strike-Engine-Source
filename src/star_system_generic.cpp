@@ -664,7 +664,7 @@ void StarSystem::Update(float priority , bool executeDirector) {
 /*** STAR SYSTEM JUMP STUFF                                                          ***/
 /***************************************************************************************/
 
-Hashtable<std::string, StarSystem ,char [127]> star_system_table;
+Hashtable<std::string, StarSystem, 127> star_system_table;
 
 void StarSystem::AddStarsystemToUniverse(const string &mname) {
   star_system_table.Put (mname,this);

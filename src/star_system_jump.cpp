@@ -14,7 +14,7 @@
 #include "cmd/images.h"
 #include "cmd/script/flightgroup.h"
 extern Unit ** fighters;
-extern Hashtable<std::string, StarSystem ,char [127]> star_system_table;
+extern Hashtable<std::string, StarSystem, 127> star_system_table;
 void CacheJumpStar (bool destroy) {
   static Animation * cachedani=new Animation (vs_config->getVariable ("graphics","jumpgate","explosion_orange.ani").c_str(),true,.1,MIPMAP,false);
   if (destroy)

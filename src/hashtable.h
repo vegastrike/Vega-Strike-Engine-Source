@@ -25,86 +25,159 @@
 #include <math.h>
 #include <string>
 #include <vector>
+#include <map>
 
-//const int hashsize = 1001;
 using namespace std;
-//Hashtable doesn't grow
-template<class KEY, class VALUE, class SIZ> class Hashtable {
-	class HashElement {
-	public:
-		KEY key;
-		VALUE *value;
-		HashElement(KEY k, VALUE *v) {key = k; value = v;}
-	};
-	std::vector<HashElement> table[sizeof (SIZ)];
-	static int hash(const int key) {
-	  return key%sizeof(SIZ);
+
+template<typename KEY, int SIZ> struct ValueHashtableKey
+{
+    // partial specialization for int and string exists below
+	static inline int hash(const KEY& key);
+};
+
+template<int SIZ> struct ValueHashtableKey<int,SIZ>
+{
+	static inline int hash(const int& key) {
+	    return key%SIZ;
 	}
-	static int hash(const std::string &key) {
+};
+
+template<int SIZ> struct ValueHashtableKey<long,SIZ>
+{
+	static inline long hash(const long& key) {
+	    return key%SIZ;
+	}
+};
+
+template<int SIZ> struct ValueHashtableKey<string,SIZ>
+{
+	static inline int hash(const std::string& key) {
 		unsigned int k = 0;
 		typename std::string::const_iterator start = key.begin();
 		for(;start!=key.end(); start++) {
 			k += (k * 128) + *start;
 		}
-		k %= sizeof(SIZ);
+		k %= SIZ;
 		return k;
 	}	
-public:
+};
 
-	Hashtable()
+template <typename VALUE> struct ValueHashtableValue
+{
+    static inline VALUE invariant( ) {
+        return VALUE();
+    }
+};
+
+template <typename VALUE> struct ValueHashtableValue<VALUE*>
+{
+    static inline VALUE* invariant( ) {
+        return NULL;
+    }
+};
+
+template<typename KEY, class VALUE, int SIZ> class ValueHashtable
+{
+    typedef VALUE                                              HashElement;
+    typedef std::map<KEY,HashElement>                          Slot;
+    typedef typename std::map<KEY,HashElement>::iterator       SlotIt;
+    typedef typename std::map<KEY,HashElement>::const_iterator SlotCit;
+    typedef std::pair<KEY,HashElement>                         SlotPair;
+
+    Slot table[SIZ];
+
+	static inline int hash(const KEY& key) {
+        return ValueHashtableKey<KEY,SIZ>::hash( key );
+    }
+
+    static inline VALUE invariant( ) {
+        return ValueHashtableValue<VALUE>::invariant( );
+    }
+
+public:
+	ValueHashtable()
 	{
 	}
-	std::vector <VALUE *> GetAll() const
+
+	ValueHashtable( const ValueHashtable& orig )
 	{
-	  std::vector <VALUE *> retval;
-	  for (unsigned int hashval=0;hashval<sizeof(SIZ);hashval++) {
-	    typename std::vector<HashElement>::const_iterator iter = table[hashval].begin(), end = table[hashval].end();
+        for( int i=0; i<SIZ; i++ ) {
+            table[i] = orig.table[i];
+        }
+	}
+
+	std::vector<VALUE> GetAll() const
+	{
+	  std::vector <VALUE> retval;
+	  for (unsigned int hashval=0;hashval<SIZ;hashval++) {
+	    SlotCit iter = table[hashval].begin();
+        SlotCit end  = table[hashval].end();
 	    for(;iter!=end;iter++) {
-	      retval.push_back ((*iter).value);
+	      retval.push_back(iter->second);
 	    }
 	  }
 	  return retval;
 	}
-	VALUE *Get(const KEY &key) const
+
+	VALUE Get(const KEY &key) const
 	{
 		int hashval = hash(key);
-		typename std::vector<HashElement>::const_iterator iter = table[hashval].begin(), end = table[hashval].end();
-
-		for(;iter!=end;iter++)
-			if((*iter).key == key)
-				break;
-		if(iter==end)
-			return NULL;
-		else
-			return (*iter).value;
+		SlotCit iter;
+        iter = table[hashval].find(key);
+        if( iter != table[hashval].end() ) {
+            return iter->second;
+        } else {
+			return invariant();
+        }
 	}
 
-	void Put(const KEY &key, VALUE *value)
+	VALUE Get(const KEY &key, const KEY& backupkey ) const
 	{
-	        int hashval = hash(key);
-		table[hashval].push_back(HashElement(key, value));
+        int hashval = hash(key);
+		SlotCit iter;
+        iter = table[hashval].find(key);
+        if( iter != table[hashval].end() ) {
+            return iter->second;
+        } else {
+            return Get( backupkey );
+        }
+	}
+
+	void Put(const KEY &key, VALUE value)
+	{
+		int hashval = hash(key);
+		table[hashval].insert( SlotPair(key,value) );
 	}
 
 	void Delete(const KEY &key)
 	{
 		int hashval = hash(key);
-		typename std::vector<HashElement>::iterator iter = table[hashval].begin(), end = table[hashval].end();
-
-		for(;iter!=end;iter++)
-			if((*iter).key == key)
-				break;
-		if(iter==end)
-			return;
-		else {
+		SlotIt iter;
+        iter = table[hashval].find(key);
+        if( iter != table[hashval].end() ) {
 			table[hashval].erase(iter);
-		}
+        }
 	}
 
-/*
-	VALUE *Get(const KEY &key);
-	void Put(const KEY &key, VALUE *value);
-	void Delete(const KEY &key);
-*/
+private:
+    ValueHashtable& operator=( const ValueHashtable& );
+};
+
+template<class KEY, class VALUE, int SIZ> class Hashtable
+    : public ValueHashtable<KEY,VALUE*,SIZ>
+{
+public:
+    Hashtable( )
+        : ValueHashtable<KEY,VALUE*,SIZ>( )
+    { }
+
+    Hashtable( const Hashtable& orig )
+        : ValueHashtable<KEY,VALUE*,SIZ>( orig )
+    { }
+
+private:
+    Hashtable& operator=( const Hashtable& );
 };
 
 #endif
+

@@ -7,9 +7,9 @@
 #if defined (_MSC_VER) && defined(_DEBUG)
 #include <crtdbg.h>
 #endif
-Hashtable <long,char,char[65535]> constructed;
+Hashtable <long,char,65535> constructed;
 
-Hashtable <long,char,char[65535]> destructed;
+Hashtable <long,char,65535> destructed;
 bool DEBUG_ERROR_IN_MY_CODE=true;
 void VS_DEBUG_ERROR () {
   VSFileSystem::Fprintf(stderr,"WARNING: invalid refcount in vegastrike object\n");
