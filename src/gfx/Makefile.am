@@ -53,6 +53,8 @@ libgfx_a_SOURCES =	\
 	sprite.h	\
 	matrix.cpp	\
 	matrix.h	\
+	terrain.h	\
+	terrain.cpp	\
 	vdu.cpp		\
 	vdu.h		\
 	vec.h	\
