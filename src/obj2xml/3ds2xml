@@ -13,7 +13,8 @@
 		0x4110=>vertexlist_chunk,
 		0x4120=>facelist_chunk,
 		0x4130=>facematerial_chunk,
-		0x4140=>texcoord_chunk
+		0x4140=>texcoord_chunk,
+		  0x4150=>smoothgroup_chunk
 		);
 
 sub dispatch_chunk($) {
@@ -132,7 +133,13 @@ sub objdesc_chunk($$) {
 	    }
 	    $polytext .= "</Polygons>\n";
 	    for (my $index=0, $vert=$points_to_print[0]; $index<@points_to_print; $vert=$points_to_print[++$index]) {
-		print MESHOUT "<Point>\n   <Location x=\"$vertices[$vert]->[0]\" y=\"$vertices[$vert]->[1]\" z=\"$vertices[$vert]->[2]\"/>\n</Point>\n";
+		print MESHOUT << "EOP"
+<Point>
+    <Location x="$vertices[$vert]->[0]" y="$vertices[$vert]->[1]" z="$vertices[$vert]->[2]"/>
+    <Normal i="0" j="1" k="0"/>
+</Point>
+EOP
+    ;
 	    }
 	    print MESHOUT "</Points>\n$polytext</Mesh>";
 	}
@@ -209,4 +216,9 @@ sub facematerial_chunk($$) {
 	    push @{$obj_materials{$name}}, $face;
 	    $data = substr($data,2);
 	}
+}
+
+sub smoothgroup_chunk($$) {
+	my ($size, $data) = @_;
+	print STDERR "Smoothgroup chunk\n";
 }

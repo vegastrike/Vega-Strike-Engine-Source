@@ -82,6 +82,8 @@ class /*GFXDRVAPI*/ GFXVertexList {
 	GFXVertexList *next;
 	//VLISTTYPE ptype;
 
+	int display_list;
+
 public:
 	GFXVertexList();
 	GFXVertexList(int numVertices,int numTriangle, int numQuad, GFXVertex *vertices);
@@ -106,8 +108,10 @@ class GFXQuadstrip {
 	GFXVertex *myVertices;
 	int numVertices;
 
+	int display_list;
+
 public:
-	GFXQuadstrip() : myVertices(0), numVertices(0) { }
+	GFXQuadstrip() : myVertices(0), numVertices(0), display_list(0) { }
 	GFXQuadstrip(int numVertices, GFXVertex *vertices);
 	~GFXQuadstrip();
 

@@ -87,7 +87,7 @@ public:
 			if((*iter).key == key)
 				break;
 		if(iter==end)
-			return NULL;
+			return;
 		else {
 			table[hashval].erase(iter);
 		}

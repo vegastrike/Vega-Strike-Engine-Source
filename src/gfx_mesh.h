@@ -48,6 +48,10 @@ using XMLSupport::AttributeList;
 class Mesh:public Primitive
 {
 private:
+  // Display list hack
+  static int dlist_count;
+  int dlist;
+
   struct XML {
     enum Names {
       //elements
@@ -164,6 +168,15 @@ protected:
 
 	Vector p,q,r;
 	Vector pp, pq, pr, ppos;
+
+	string *hash_name;
+	// Support for reorganized rendering
+	struct DrawContext {
+	  Matrix m;
+	  DrawContext() { }
+	  DrawContext(Matrix a) { memcpy(m, a, sizeof(Matrix));}
+	};
+	vector<DrawContext> *draw_queue;
 public:
 	Mesh();
 	Mesh(const char *filename,  bool xml=false);
@@ -171,6 +184,7 @@ public:
 
 	virtual void Draw();
 	virtual void Draw(const Vector &pp, const Vector &pq, const Vector &pr, const Vector &ppos);
+	virtual void ProcessDrawQueue();
 
 	void setEnvMap(BOOL newValue) {envMap = newValue;}
 

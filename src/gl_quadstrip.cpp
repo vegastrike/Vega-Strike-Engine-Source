@@ -27,11 +27,32 @@ extern BOOL bTex0;
 extern BOOL bTex1;
 
 
-GFXQuadstrip::GFXQuadstrip(int numVertices,GFXVertex *vertices): numVertices(numVertices)
+GFXQuadstrip::GFXQuadstrip(int numVertices,GFXVertex *vertices): numVertices(numVertices), display_list(0)
 {
   // error check # of vertices
 	myVertices = new GFXVertex[numVertices];
 	memcpy(myVertices, vertices, sizeof(GFXVertex)*numVertices);
+
+#ifdef USE_DISPLAY_LISTS
+	display_list = GFXCreateList();
+		glVertexPointer(3, GL_FLOAT, sizeof(GFXVertex), &myVertices[0].x);
+		glNormalPointer(GL_FLOAT, sizeof(GFXVertex), &myVertices[0].i);
+
+		glEnableClientState(GL_VERTEX_ARRAY);
+		glEnableClientState(GL_NORMAL_ARRAY);
+
+		glClientActiveTextureARB (GL_TEXTURE0_ARB);
+		glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+		glTexCoordPointer(2, GL_FLOAT, sizeof(GFXVertex), &myVertices[0].s+GFXStage0*2);
+		
+		glClientActiveTextureARB (GL_TEXTURE1_ARB);
+		glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+		/*glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+		  glTexCoordPointer(2, GL_FLOAT, sizeof(GFXVertex), &myVertices[0].s+GFXStage1*2);*/
+		
+		glDrawArrays(GL_QUAD_STRIP, 0, numVertices);
+		GFXEndList();
+#endif
 }
 
 GFXQuadstrip::~GFXQuadstrip()
@@ -72,7 +93,7 @@ BOOL GFXQuadstrip::SwapTransformed()
 BOOL GFXQuadstrip::Draw()
 {
 
-
+  //  return TRUE;
 
 #ifdef STATS_QUEUE
   statsqueue.back() += GFXStats(0, (numVertices-2)/2, 0);
@@ -100,7 +121,9 @@ BOOL GFXQuadstrip::Draw()
 	//int num3tri = numTriangles*3;
 
 	//float *texcoords = NULL;
-
+	if(display_list!=0) {
+	  GFXCallList(display_list);
+	} else {
 	if (g_game.Multitexture)
 	{
 	  //GLenum err;
@@ -123,9 +146,10 @@ BOOL GFXQuadstrip::Draw()
 		glTexCoordPointer(2, GL_FLOAT, sizeof(GFXVertex), &myVertices[0].s+GFXStage0*2);
 		
 		glClientActiveTextureARB (GL_TEXTURE1_ARB);
-		glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-		glTexCoordPointer(2, GL_FLOAT, sizeof(GFXVertex), &myVertices[0].s+GFXStage1*2);
-
+		glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+		/*glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+		  glTexCoordPointer(2, GL_FLOAT, sizeof(GFXVertex), &myVertices[0].s+GFXStage1*2);*/
+		
 		glDrawArrays(GL_QUAD_STRIP, 0, numVertices);
 	}
 	else
@@ -167,6 +191,6 @@ BOOL GFXQuadstrip::Draw()
 		}
 
 	}
-
 	return TRUE;
+	}
 }

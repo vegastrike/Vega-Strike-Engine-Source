@@ -27,6 +27,9 @@
 #include "wrapgfx.h"
 #include "lin_time.h"
 #include "planet.h"
+
+#include "profile.h"
+
 //#include "cmd.h"
 //#include "glob.h"
 
@@ -162,6 +165,7 @@ void WrapGFX::Loop(void main_loop()) {
 void WrapGFX::StartDraw()
 {
 	//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  STARTTIMER();
 	GFXBeginScene();
 //	SetViewport();
 
@@ -176,6 +180,7 @@ void WrapGFX::StartDraw()
 void WrapGFX::EndDraw()
 {
 	GFXEndScene();
+	ENDTIMER();
 	//glFinish();//finish all drawing commands
 	//SwapBuffers(_hDC); //swap the buffers
 }

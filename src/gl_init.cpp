@@ -158,7 +158,7 @@ BOOL GFXInit (int argc, char ** argv){
     glEnable(GL_TEXTURE_2D);
         glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glEnable(GL_SHARED_TEXTURE_PALETTE_EXT);
+    //glEnable(GL_SHARED_TEXTURE_PALETTE_EXT);
     int retval= glGetError();
     if (retval == 0x0500) {
       g_game.PaletteExt = 0;

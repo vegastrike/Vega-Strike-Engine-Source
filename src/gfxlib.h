@@ -125,4 +125,9 @@ void /*GFXDRVAPI*/ GFXNormal(Vector n);
 void /*GFXDRVAPI*/ GFXVertex3f(float x, float y, float z = 1.0);
 BOOL /*GFXDRVAPI*/ GFXEnd();
 
+//display list
+int GFXCreateList();
+void GFXEndList();
+void GFXCallList(int list);
+
 #endif

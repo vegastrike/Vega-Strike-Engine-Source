@@ -165,3 +165,16 @@ BOOL /*GFXDRVAPI*/ GFXEnd()
 	glEnd();
 	return FALSE;
 }
+
+int GFXCreateList() {
+  int list = glGenLists(1);
+  glNewList(list, GL_COMPILE);
+  return list;
+}
+void GFXEndList() {
+  glEndList();
+}
+
+void GFXCallList(int list) {
+  glCallList(list);
+}

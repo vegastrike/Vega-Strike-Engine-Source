@@ -87,6 +87,7 @@ SphereMesh::SphereMesh(float radius, int stacks, int slices, char *texture, bool
       }
       Decal = new Texture(texture, 0);
       centered?envMap = FALSE:envMap=TRUE;
+      orig = this;
 }
 void SphereMesh::Draw() {
   if (insideout) 

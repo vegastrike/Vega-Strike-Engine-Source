@@ -34,8 +34,9 @@ GFXVertexList *next;
 extern BOOL bTex0;
 extern BOOL bTex1;
 
+static int next_display_list = 1;
 
-GFXVertexList::GFXVertexList():myVertices(NULL),numQuads(0),numTriangles(0),numVertices(0)
+GFXVertexList::GFXVertexList():myVertices(NULL),numQuads(0),numTriangles(0),numVertices(0), display_list(0)
 {
 }
 
@@ -47,6 +48,7 @@ GFXVertexList::GFXVertexList(int numVertices,int numTriangle, int numQuad, GFXVe
 	this->numQuads = numQuad;
 	myVertices = new GFXVertex[numVertices];
 	memcpy(myVertices, vertices, sizeof(GFXVertex)*numVertices);
+	display_list = 0;
 
 
 	//fprintf (stderr, "ffRi:%f ffRj: %f ffRk %f",vertices[0].i,vertices[0].j,vertices[0].k);
@@ -54,9 +56,38 @@ GFXVertexList::GFXVertexList(int numVertices,int numTriangle, int numQuad, GFXVe
 	//    fprintf (stderr, "i:%f\n",myVertices[0].i);
 	//fprintf (stderr, "j:%f\n",myVertices[0].j);
 	//fprintf (stderr, "k:%f\n",myVertices[0].k);
-		    
+#ifdef USE_DISPLAY_LISTS
+	display_list = GFXCreateList();
+	glVertexPointer(3, GL_FLOAT, sizeof(GFXVertex), &myVertices[0].x);
+	glTexCoordPointer(2, GL_FLOAT, sizeof(GFXVertex), &myVertices[0].s+GFXStage0*2);
+	glNormalPointer(GL_FLOAT, sizeof(GFXVertex), &myVertices[0].i);
+	
+	glEnableClientState(GL_VERTEX_ARRAY);
+	glEnableClientState(GL_NORMAL_ARRAY);
+	
+	glClientActiveTextureARB (GL_TEXTURE0_ARB);
+	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 
+	glClientActiveTextureARB (GL_TEXTURE1_ARB);
+	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+		
+	//glDrawArrays(GL_TRIANGLES, 0, numTriangles*3);
+	//glDrawArrays(GL_QUADS, numTriangles*3, numQuads*4);
+	glActiveTextureARB(GL_TEXTURE0_ARB);
+	glBegin(GL_TRIANGLES);
+	for(int a=0; a<numTriangles*3; a++) {
+	  glNormal3f(myVertices[a].i,myVertices[a].j,myVertices[a].k);
+	  glTexCoord2f(myVertices[a].s, myVertices[a].t);
+	  glVertex3f(myVertices[a].x,myVertices[a].y,myVertices[a].z);
+	}
+	glEnd();
+	glEndList();
 
+	glDisableClientState(GL_VERTEX_ARRAY);
+	glDisableClientState(GL_NORMAL_ARRAY);
+	glClientActiveTextureARB (GL_TEXTURE0_ARB);
+	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+#endif
 }
 
 GFXVertexList::~GFXVertexList()
@@ -103,6 +134,26 @@ BOOL GFXVertexList::Draw()
 #ifdef STATS_QUEUE
   statsqueue.back() += GFXStats(numTriangles, numQuads, 0);
 #endif
+  if(display_list!=0) {
+	if(g_game.Multitexture) {
+		glActiveTextureARB(GL_TEXTURE0_ARB);	
+		if(bTex0) 
+			glEnable (GL_TEXTURE_2D);		
+		else
+			glDisable(GL_TEXTURE_2D);
+
+		glActiveTextureARB(GL_TEXTURE1_ARB);	
+		if(bTex1)
+#ifdef NV_CUBE_MAP
+		  glEnable (GL_TEXTURE_CUBE_MAP_EXT);////FIXME--have some gneeral state that holds CUBE MAPPING values
+#else
+			glEnable (GL_TEXTURE_2D);
+#endif
+		else
+			glDisable(GL_TEXTURE_2D);
+	}
+    GFXCallList(display_list);
+  } else {
 	if(g_game.Multitexture) {
 		glActiveTextureARB(GL_TEXTURE0_ARB);	
 		if(bTex0) 
@@ -230,5 +281,9 @@ BOOL GFXVertexList::Draw()
 		glDisableClientState(GL_VERTEX_ARRAY);
 		glDisableClientState(GL_NORMAL_ARRAY);
 	}
+	}
 	return TRUE;
 }
+
+
+

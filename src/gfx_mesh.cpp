@@ -37,7 +37,11 @@ using namespace std;
 
 #include "hashtable.h"
 #include "vegastrike.h"
+
+#include <GL/gl.h>
 static Hashtable<string, Mesh> meshHashTable;
+
+int Mesh::dlist_count = 1;
 
 void DrawVector(const Vector &start, const Vector &vect)
 { 
@@ -81,6 +85,9 @@ void Mesh::InitUnit()
 	orig = NULL;
 	
 	envMap = TRUE;
+	dlist = 0;
+	draw_queue = NULL;
+	hash_name = NULL;
 }
 
 Mesh::Mesh():Primitive()
@@ -122,6 +129,8 @@ Mesh:: Mesh(const char * filename, bool xml):Primitive()
 	  //oldmesh = (Mesh*)malloc(sizeof(Mesh));
 	  oldmesh = new Mesh();
 	  meshHashTable.Put(string(filename), oldmesh);
+	  hash_name = new string(filename);
+	  draw_queue = new vector<DrawContext>;
 	}
 
 	strcpy(name, filename);
@@ -567,7 +576,7 @@ Mesh:: Mesh(const char * filename, bool xml):Primitive()
 
 Mesh::~Mesh()
 {
-	if(!orig)
+	if(!orig||orig==this)
 	{
 	  if(vlist!=NULL) {
 			delete vlist;
@@ -603,6 +612,12 @@ Mesh::~Mesh()
 	    delete bspTree;
 	    bspTree= NULL;
 	  }
+	  if(hash_name!=NULL) {
+	    meshHashTable.Delete(*hash_name);
+	    delete hash_name;
+	  }
+	  if(draw_queue!=NULL)
+	    delete draw_queue;
 	} else {
 	  orig->refcount--;
 	  //printf ("orig refcount: %d",refcount);
@@ -696,6 +711,7 @@ void Mesh::Draw()
 	//static float rot = 0;
 	GFXColor(1.0, 1.0, 1.0, 1.0);
 	UpdateMatrix();
+	
 	GFXEnable(TEXTURE0);
 	if(envMap) {
 	  Reflect();
@@ -711,18 +727,18 @@ void Mesh::Draw()
 	  //_GFX->getLightMap()->MakeActive();
 	  _GFX->activateLightMap();
 	  GFXSelectTexcoordSet(1, 1);
-	}
+	  }
 	vlist->Draw();
 	if(quadstrips!=NULL) {
 	  for(int a=0; a<numQuadstrips; a++)
 	    quadstrips[a]->Draw()
 	    ;
 	}
+
 	if(0!=forcelogos) {
 	  forcelogos->Draw();
 	  squadlogos->Draw();
 	}
-	
 	//GFXSelectTexcoordSet(1, 0);
 
 	/*
@@ -780,6 +796,14 @@ void Mesh::Draw(const Vector &pp, const Vector &pq, const Vector &pr, const Vect
 	this->pr = pr;
 	this->ppos = ppos;
 	Draw();
+}
+
+void Mesh::ProcessDrawQueue() {
+  while(draw_queue->size()) {
+    DrawContext c;
+    c = draw_queue->back();
+    draw_queue->pop_back();
+  }
 }
 
 void Mesh::UpdateMatrix()

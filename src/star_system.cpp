@@ -61,6 +61,7 @@ void StarSystem::Draw() {
   delete iter;
   systemInputDFA->Draw();
 
+  /*
   UnitCollection *col = systemInputDFA->getCollection();
   string selected_units("");
   if(0 != col) {
@@ -74,6 +75,7 @@ void StarSystem::Draw() {
     delete iter;
   }
   tp->SetText(selected_units);
+  */
 }
 
 void StarSystem::Update() {

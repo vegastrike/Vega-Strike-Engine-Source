@@ -24,6 +24,8 @@ static inline float min(float x, float y) {
   else return y;
 }
 
+const float scale=0.06;
+
 using XMLSupport::EnumMap;
 using XMLSupport::Attribute;
 using XMLSupport::AttributeList;
@@ -248,6 +250,9 @@ void Mesh::beginElement(const string &name, const AttributeList &attributes) {
 
     memset(&xml->vertex, 0, sizeof(xml->vertex));
     xml->vertex = xml->vertices[index];
+    xml->vertex.x *= scale;
+    xml->vertex.y *= scale;
+    xml->vertex.z *= scale;
     xml->vertex.s = s;
     xml->vertex.t = t;
     xml->active_list->push_back(xml->vertex);

@@ -144,4 +144,5 @@ vegastrike_SOURCES =				\
 	gfx_mesh_xml.cpp 			\
 	xml_support.h  				\
 	xml_support.cpp				\
-	cmd_unit_xml.cpp
+	cmd_unit_xml.cpp  \
+	profile.h
