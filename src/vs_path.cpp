@@ -10,7 +10,8 @@
 #include <sys/types.h>
 #endif
 
-#define CONFIGFILE ".vegastrikerc"
+#define CONFIGFILE "vegastrike.config"
+#define HOMESUBDIR ".vegastrike"
 #define DELIM '/'
 std::vector <std::string> savedpwd;
 std::string sharedtextures;
@@ -24,6 +25,7 @@ void changehome() {
   struct passwd *pwent;
   pwent = getpwuid (getuid());
   chdir (pwent->pw_dir);
+  chdir (HOMESUBDIR);
 #endif
 }
 
@@ -45,7 +47,7 @@ void initpaths () {
     fp =NULL;
     vs_config = new VegaConfig (CONFIGFILE);
   } else {
-    fprintf (stderr,"Could not open config file %s\n",CONFIGFILE);
+    fprintf (stderr,"Could not open config file in either %s/%s\nOr in ~/.vegastrike/%s\n",pwd,CONFIGFILE,CONFIGFILE);
     exit (-1);
   }
   if (fp)
