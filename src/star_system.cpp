@@ -436,8 +436,8 @@ void StarSystem::Draw(bool DrawCockpit) {
   fprintf (stderr,"star");
   fflush (stderr);
 #endif
-  if (_Universe->AccessCamera()->GetNebula()!=NULL)
-    GFXFogMode (FOG_OFF);
+  //  if (_Universe->AccessCamera()->GetNebula()!=NULL)
+  GFXFogMode (FOG_OFF);
   Animation::ProcessDrawQueue();
   Halo::ProcessDrawQueue();
   stars->Draw();
