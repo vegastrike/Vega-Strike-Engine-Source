@@ -2,6 +2,8 @@
 
 	* Added VDU type to cockpit file... you can select what sort of type of VDU it is by adding the type flag like so <VDU type="Message Navigation"/>
 	* Added Disable-sound option to configure
+	* Added Scroll buttons to scroll up and down on the vDU's
+	* Changed Scroll buttons to only react on press :-/
 	
 2002-01-28 Daniel Horn <hellcatv@hotmail.com>
 	* Added jump sounds on exit and entrance (jumparrive jumpleave in config)
