@@ -61,6 +61,7 @@ struct Texture{
   enum TEXTURE_TARGET texture_target; enum TEXTURE_IMAGE_TARGET image_target;
   ///Returns if this texture is actually already loaded
   GFXBOOL checkold(std::string s, bool shared, string & hashname);
+  void modold(std::string s, bool shared, string & hashname);
   ///Loads the old texture
   void setold();
   ///Inits the class with default values
@@ -69,17 +70,20 @@ struct Texture{
     refcount = 0;
     name = -1;
   }
+  protected:
   ///Binds this texture to GFX library
   int Bind();
   ///Transfers this texture to GFX library
   void Transfer();
-public:
+  public:
   ///Creates a texture with a single bitmap as color data and another grayscale .bmp as alpha data
   Texture(const char *,const char *, int stage = 0, enum FILTER mipmap= MIPMAP, enum TEXTURE_TARGET target=TEXTURE2D, enum TEXTURE_IMAGE_TARGET imagetarget=TEXTURE_2D, float alpha=1, int zeroval=0);
   ///Creates a texture with only color data as a single bitmap
   Texture(const char * FileName, int stage = 0, enum FILTER mipmap = MIPMAP, enum TEXTURE_TARGET target=TEXTURE2D, enum TEXTURE_IMAGE_TARGET imagetarget=TEXTURE_2D);
+  
+  virtual Texture * Clone ();
   ///Texture copy constructor that increases appropriate refcounts
-  Texture (Texture *t);
+  //  Texture (Texture *t);
   ///Destructor for texture
   virtual ~Texture();
   ///Do not use! For inheritors only

@@ -14,6 +14,7 @@ class AnimatedTexture: public Texture {
   void Load (FILE * openedfile, int stage, enum FILTER imm);
   void Destroy();
   ~AnimatedTexture();
+  virtual Texture * Clone ();
   bool operator < (const Texture &b);
   bool operator == (const Texture &b);
   void MakeActive();

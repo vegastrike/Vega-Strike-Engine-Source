@@ -87,12 +87,12 @@ void Mesh::Fork (Mesh *&x, Mesh *&y, float a, float b, float c, float d) {
 
   x->forcelogos = x->squadlogos = NULL;
   x->numforcelogo = x->numsquadlogo =0;
-  x->Decal = new Texture (Decal);
+  x->Decal = Decal->Clone();
 
 
   y->squadlogos=y->forcelogos = NULL;
   y->numforcelogo = y->numsquadlogo = 0;
-  y->Decal = new Texture (Decal);//use copy constructor;
+  y->Decal = Decal->Clone();//use copy constructor;
 
   if (numtqx[0]&&numtqx[1]) {
     x->vlist = new GFXVertexList (polytypes, numtqx[0]+numtqx[1], X, 2, numtqx, true); 

@@ -82,6 +82,7 @@ void Cockpit::DrawTargetBox () {
   //Vector Loc (un->ToLocalCoordinates(target->Position()-un->Position()));
   Vector Loc(target->Position());
   GFXDisable (TEXTURE0);
+  GFXDisable (TEXTURE1);
   GFXDisable (DEPTHTEST);
   GFXDisable (DEPTHWRITE);
   GFXBlendMode (SRCALPHA,INVSRCALPHA);
@@ -309,6 +310,7 @@ Cockpit::Cockpit (const char * file, Unit * parent): parent (parent),textcol (1,
   Init (file);
 }
 void Cockpit::Draw() {
+  GFXDisable (TEXTURE1);
   DrawTargetBox();
   GFXHudMode (true);
   GFXColor4f (1,1,1,1);

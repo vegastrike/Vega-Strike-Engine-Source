@@ -57,12 +57,27 @@ AnimatedTexture::AnimatedTexture (FILE * fp, int stage, enum FILTER imm){
     Load (fp,stage,imm);
 }
 
+Texture *AnimatedTexture::Clone () {
+  AnimatedTexture * retval = new AnimatedTexture ();
+  *retval = *this;
+  retval->Decal = new Texture * [numframes];
+  for (int i=0;i<numframes;i++) {
+    retval->Decal[i]= Decal[i]->Clone ();
+  }
+  return retval;
+}
+
 AnimatedTexture::~AnimatedTexture () {
   Destroy();
+  data= (unsigned char *)0xBADF00D;
+  palette=NULL;//(unsigned char *)0xBADF00D;
 }
 AnimatedTexture::AnimatedTexture () {Decal=NULL;}
 void AnimatedTexture::Destroy() {
   int i;
+  if (data==(unsigned char *)0xBADF00D||palette==(unsigned char *)0xBADF00D) {
+    fprintf (stderr,"Eating Bad food here!");
+  }
   if (Decal) {
     for (i=0;i<myvec.size();i++) {
       if (myvec[i]==this)
