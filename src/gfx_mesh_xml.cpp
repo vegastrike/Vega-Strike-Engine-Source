@@ -73,6 +73,7 @@ const EnumMap::Pair Mesh::XML::attribute_names[] = {
   EnumMap::Pair("blue", XML::BLUE),
   EnumMap::Pair("alpha", XML::ALPHA),
   EnumMap::Pair("power", XML::POWER),
+  EnumMap::Pair("reflect", XML::REFLECT),
   EnumMap::Pair("x", XML::X),
   EnumMap::Pair("y", XML::Y),
   EnumMap::Pair("z", XML::Z),
@@ -92,7 +93,7 @@ const EnumMap::Pair Mesh::XML::attribute_names[] = {
 };
 
 const EnumMap Mesh::XML::element_map(XML::element_names, 22);
-const EnumMap Mesh::XML::attribute_map(XML::attribute_names, 25);
+const EnumMap Mesh::XML::attribute_map(XML::attribute_names, 26);
 
 void Mesh::beginElement(void *userData, const XML_Char *name, const XML_Char **atts) {
   ((Mesh*)userData)->beginElement(name, AttributeList(atts));
@@ -179,14 +180,17 @@ void Mesh::beginElement(const string &name, const AttributeList &attributes) {
 		  assert(xml->load_stage==4);
 		  xml->load_stage=7;
 		  for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
-			  switch(XML::attribute_map.lookup((*iter).name)) {
-			  case XML::POWER:
-				xml->material.power=parse_float((*iter).value);
+		    switch(XML::attribute_map.lookup((*iter).name)) {
+		    case XML::POWER:
+		      xml->material.power=parse_float((*iter).value);
+		      break;
+		    case XML::REFLECT:
+		      if (strcmp((*iter).value.c_str(),"0")==0||strcmp((*iter).value.c_str(),"FALSE")==0)
+			envMap=GFXFALSE;
+		      break;
+		    }
 
-			break;
-			  }
-
-			}
+		  }
 		  break;
   case XML::DIFFUSE:
 	  assert(xml->load_stage==7);

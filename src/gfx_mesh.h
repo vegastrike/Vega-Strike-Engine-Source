@@ -77,6 +77,7 @@ private:
       REF,
       //attributes
 	  POWER,
+      REFLECT,
       FLATSHADE,
       TEXTURE,
       ALPHAMAP,

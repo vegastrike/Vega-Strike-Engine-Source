@@ -120,25 +120,25 @@ void /*GFXDRVAPI*/ GFXAttachPalette (unsigned char *palette, int handle)
 static void DownSampleTexture (unsigned char **newbuf,const unsigned char * oldbuf, int height, int width, int pixsize, int handle) {
   int i,j,k,l,m;
   float *temp = (float *)malloc (pixsize*sizeof(float));
-  int newwidth = width>height?width:height;
-  int scale = newwidth / MAX_TEXTURE_SIZE;
-  int newheight = height / scale;
-  newwidth = width/scale;
+  int newwidth = width>MAX_TEXTURE_SIZE?MAX_TEXTURE_SIZE:width;
+  int scalewidth = width/newwidth;
+  int newheight = height>MAX_TEXTURE_SIZE?MAX_TEXTURE_SIZE:height;
+  int scaleheight = height/newheight;
   *newbuf = (unsigned char*)malloc (newwidth*newheight*pixsize*sizeof(unsigned char));
   for (i=0;i<newheight;i++) {
     for (j=0;j<newwidth;j++) {
       for (m=0;m<pixsize;m++) {
 	temp[m]=0;
       }
-      for (k=0;k<scale;k++) {
-	for (l=0;l<scale;l++) {
+      for (k=0;k<scaleheight;k++) {
+	for (l=0;l<scalewidth;l++) {
 	  for (m=0;m<pixsize;m++) {
-	    temp[m] += oldbuf[m+pixsize*(j*scale+l+width*(i*scale+k))];
+	    temp[m] += oldbuf[m+pixsize*(j*scalewidth+l+width*(i*scaleheight+k))];
 	  }
 	}
       }
       for (m=0;m<pixsize;m++) {
-	(*newbuf)[m+pixsize*(j+i*newwidth)] = temp[m]/(scale*scale);
+	(*newbuf)[m+pixsize*(j+i*newwidth)] = temp[m]/(scaleheight*scalewidth);
       }
     }
   }
