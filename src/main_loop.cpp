@@ -679,7 +679,7 @@ void createObjects(std::vector <std::string> &fighter0name, std::vector <StarSys
       int j=rand()%a;
       if (FactionUtil::GetIntRelation(tmptarget[rr],tmptarget[j])<0)
 	  {
-		  fighters[rr]->Target (fighters[j]);
+	    //fighters[rr]->Target (fighters[j]);
 		  break;
       }
     }

@@ -368,7 +368,7 @@ void AggressiveAI::ReCommandWing(Flightgroup * fg) {
 }
 void AggressiveAI::Execute () {  
   Flightgroup * fg=parent->getFlightgroup();
-  ReCommandWing(fg);
+  //ReCommandWing(fg);
   FireAt::Execute();
   if (!ProcessCurrentFgDirective (fg)) {
   Unit * target = parent->Target();

@@ -26,87 +26,127 @@ FireAt::FireAt (): CommunicatingAI (WEAPON,STARGET) {
   static float aggr = XMLSupport::parse_float (vs_config->getVariable ("AI","Firing","Aggressivity","15"));
   ReInit (reaction,aggr);
 }
+float Priority (Unit * me, Unit * targ, float gunrange,float rangetotarget, float relationship) {
+  if (relationship>=0)
+    return -1;
+  char rolepriority = (31-ROLES::getPriority (me->combatRole())[targ->combatRole()]);//number btw 0 and 31 higher better
+  if (rolepriority<=0)
+    return -1;
+  if (rangetotarget<.5*gunrange)
+    rangetotarget=.5*gunrange;
+  float role_priority01 = ((float)rolepriority)/31.;
+  float range_priority01 =.5*gunrange/rangetotarget;//number between 0 and 1  1 is best
+  return range_priority01*role_priority01;
+}
 //temporary way of choosing
+struct TargetAndRange {
+  Unit * t;
+  float range;
+  float relation;
+  TargetAndRange (Unit * tt, float r,float rel) {
+    t =tt;range=r;this->relation = rel;
+  }
+};
+struct RangeSortedTurrets {
+  Unit * tur;
+  float gunrange;
+  RangeSortedTurrets (Unit * t, float r) {tur = t; gunrange = r;}
+  bool operator < (const RangeSortedTurrets &o) const{
+    return gunrange<o.gunrange;
+  }
+};
+struct TurretBin{
+  float maxrange;
+  vector <RangeSortedTurrets> turret;
+  vector <TargetAndRange> listOfTargets;  
+  bool operator < (const TurretBin & o) const{
+    return (maxrange>o.maxrange);
+  }
+  void AssignTargets(const TargetAndRange &finalChoice) {
+    //go through modularly assigning as you go;
+    int count=0;
+    const unsigned int lotsize = listOfTargets.size();
+    for (vector<RangeSortedTurrets>::iterator uniter=turret.begin();uniter!=turret.end();++uniter) {
+      bool foundfinal=false;
+      uniter->tur->Target(NULL);
+      uniter->tur->TargetTurret(NULL);
+      if (finalChoice.t) {
+	if (finalChoice.range<uniter->gunrange&&ROLES::getPriority (uniter->tur->combatRole())[finalChoice.t->combatRole()]<31) {
+	  uniter->tur->Target(finalChoice.t);
+	  uniter->tur->TargetTurret(finalChoice.t);
+	  foundfinal=true;
+	}
+      }
+      if (!foundfinal) {
+	for (unsigned int i=0;i<lotsize;i++) {
+	  const int index =(count+i)%lotsize;
+	  if (listOfTargets[index].range<uniter->gunrange) {
+	    uniter->tur->Target(listOfTargets[index].t);
+	    uniter->tur->TargetTurret(listOfTargets[index].t);
+	    count++;
+	    break;
+	  }
+	}
+      }
+    }
+  }
+};
 void FireAt::ChooseTargets (int numtargs, bool force) {
   parent->getAverageGunSpeed (gunspeed,gunrange);  
-  Unit * inRangeThreat =NULL;
-  Unit * outRangeThreat=NULL;
-  Unit * inRangeHate =NULL;
-  Unit * outRangeHate=NULL;
-  float irt=FLT_MAX;
-  float ort=FLT_MAX;
-  float irrelation=0;
-  float irh=FLT_MAX;
-  float orh=FLT_MAX;
-  float relation=1;
-  float worstrelation=0;
-  un_iter subun = parent->getSubUnits();
-  Unit * su=NULL;
-  double dist;
+
   UnitCollection::UnitIterator iter (_Universe->activeStarSystem()->getUnitList().createIterator());
   Unit * un=NULL;
+  vector <TurretBin> tbin;;
+  
+  float priority=0;
+  Unit * mytarg=NULL;
+  Unit * su=NULL;
+  un_iter subun = parent->getSubUnits();
+  for (;(su = *subun)!=NULL;++subun) {
+    unsigned int bnum=0;
+    for (;bnum<tbin.size();bnum++) {
+      if (su->combatRole()==tbin[bnum].turret[0].tur->combatRole())
+	break;
+    }
+    if (bnum>=tbin.size()) {
+      tbin.push_back (TurretBin());
+    }
+    float gspeed, grange;
+    parent->getAverageGunSpeed (gspeed,grange);  //FIXME Slow as a pig in mud
+    if (tbin [bnum].maxrange<grange) {
+      tbin [bnum].maxrange=grange;
+    }
+    tbin[bnum].turret.push_back (RangeSortedTurrets (su,grange));
+  }
+  std::sort (tbin.begin(),tbin.end());
   while ((un = iter.current())) {
-    float range=UnitUtil::getDistance(parent,un);
-    relation = GetEffectiveRelationship (un);
-    bool tmp = parent->InRange (un,dist,false,false,true);
-    if (tmp && relation<0) {
-      if (((relation<worstrelation||(relation==worstrelation&&range<orh)))) {
-	worstrelation = relation;
-	orh = range;
-	outRangeHate=un;
+    float rangetotarget = UnitUtil::getDistance (parent,un);
+    float relationship = GetEffectiveRelationship (un);
+    float tmp=Priority (parent,un, gunrange,rangetotarget, relationship);
+    if (tmp>priority) {
+      mytarg = un;
+    }
+    for (vector <TurretBin>::iterator k=tbin.begin();k!=tbin.end();++k) {
+      if (rangetotarget>k->maxrange) {
+	break;
       }
-
-      bool threat = (un->Target()==parent);
-      bool aturret=false;
-      if (threat) {
-	if (range<ort) {
-	  ort = range;
-	  outRangeThreat = un;
-	}
-      }
-      if (range < gunrange) {
-	aturret=true;
-	if (threat) {
-	  if (range < irt) {
-	    irt = range;
-	    inRangeThreat = un;
-	  }
-	}else {
-	  if (((relation<irrelation||(relation==irrelation&&range<irh)))) {
-	    irh = range;
-	    irrelation=relation;
-	    inRangeHate = un;
-	  }
-	}
-      }
-      su = *subun;
-      if (su&&aturret) {
-	//	while (su->InRange (un,t,false,false)) {
-	  su->Target (un);
-	  su->TargetTurret(un);
-	  ++subun;
-	  //	  if (!(su=*subun))
-	  //    break;
-	  //}
-      }
+      if (relationship<0&&ROLES::getPriority (k->turret[0].tur->combatRole())[un->combatRole()]<31 ){
+	k->listOfTargets.push_back (TargetAndRange (un,rangetotarget,relationship));
+      }    
     }
     iter.advance();
   }
-  Unit * mytarg = inRangeThreat;
-  if (!mytarg) {
-    mytarg = inRangeHate;
-    if (!mytarg) {
-      mytarg = outRangeThreat;
-      if (!mytarg) {
-	mytarg = outRangeHate;
-      }
-    }
+  float efrel = 0;
+  float mytargrange = FLT_MAX;
+  if (mytarg) {
+    efrel=GetEffectiveRelationship (mytarg);
+    mytargrange = UnitUtil::getDistance (parent,mytarg);
   }
+  TargetAndRange my_target (mytarg,mytargrange,efrel);
+  for (vector <TurretBin>::iterator k =  tbin.begin();k!=tbin.end();++k) {
+    k->AssignTargets(my_target);
+  } 
   parent->Target (mytarg);
-  for (;(su=*subun)!=NULL;++subun) {
-    su->Target (mytarg);
-    su->TargetTurret(mytarg);
-  }
 }
 /* Proper choosing of targets
 void FireAt::ChooseTargets (int num) {
@@ -158,6 +198,7 @@ unsigned int FireBitmask (Unit * parent,bool shouldfire, float missileprobabilit
       if (((float)rand())/((float)RAND_MAX)<missileprobability) 
 	firebitm |=ROLES::FIRE_MISSILES;
     }
+    return firebitm;
 }
 void FireAt::FireWeapons(bool shouldfire, bool lockmissile) {
     if (shouldfire&&delay<rxntime) {

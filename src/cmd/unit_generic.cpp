@@ -464,7 +464,9 @@ Unit::~Unit()
 }
 void Unit::Init()
 {
+  
 	this->networked=0;
+	this->combat_role=ROLES::getRole("INERT");
 	this->computer.combat_mode=true;
 #ifdef CONTAINER_DEBUG
   UncheckUnit (this);

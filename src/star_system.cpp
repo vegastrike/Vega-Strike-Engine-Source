@@ -318,6 +318,10 @@ void GameStarSystem::Draw(bool DrawCockpit) {
     if (!par->isSubUnit()) {
       //now we can assume world is topps
       par-> cumulative_transformation = linear_interpolate (par->prev_physical_state,par->curr_physical_state,interpolation_blend_factor);
+      Unit * targ = par->Target();
+      if (targ) {
+	targ-> cumulative_transformation = linear_interpolate (targ->prev_physical_state,targ->curr_physical_state,interpolation_blend_factor);
+      }
       _Universe->AccessCockpit()->SetupViewPort(true);
       alreadysetviewport=true;
     }
