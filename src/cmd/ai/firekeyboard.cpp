@@ -714,6 +714,19 @@ void ChooseTargets(Unit * me, bool (*typeofunit)(Unit *,Unit *), bool reverse) {
 	}
 	if (reverse) {
 		std::reverse (vec.begin(),vec.end());
+		static soundContainer foosound;
+		if (foosound.sound<0) {
+			static string str=vs_config->getVariable("cockpitaudio","target","vdu_b");
+			foosound.loadsound(str);
+		}
+		foosound.playsound();
+	} else {
+		static soundContainer foobersound;
+		if (foobersound.sound<0) {
+			static string str=vs_config->getVariable("cockpitaudio","target_reverse","vdu_a");
+			foobersound.loadsound(str);
+		}
+		foobersound.playsound();
 	}
 	std::vector <Unit *>::const_iterator veciter=std::find(vec.begin(),vec.end(),me->Target());
 	if (veciter!=vec.end())
@@ -1170,10 +1183,22 @@ void FireKeyboard::Execute () {
   if (f().weapk==PRESS) {
     f().weapk=DOWN;
     parent->ToggleWeapon (false);
+		static soundContainer weapsound;
+		if (weapsound.sound<0) {
+			static string str=vs_config->getVariable("cockpitaudio","weapon_switch","vdu_d");
+			weapsound.loadsound(str);
+		}
+		weapsound.playsound();
   }
   if (f().misk==PRESS) {
     f().misk=DOWN;
     parent->ToggleWeapon(true);
+    static soundContainer missound;
+    if (missound.sound<0) {
+      static string str=vs_config->getVariable("cockpitaudio","missile_switch","vdu_d");
+      missound.loadsound(str);
+    }
+    missound.playsound();
   }
   for (unsigned int i=0;i<NUMCOMMKEYS;i++) {
     if (f().commKeys[i]==PRESS) {

@@ -38,7 +38,7 @@ static soundContainer disableautosound;
 static soundContainer enableautosound;
 
 void soundContainer::loadsound (string soundfile,bool looping) {
-	if (this->sound==-2) {
+	if (this->sound==-2&&soundfile.size()) {
 		string sound=GameCockpit::getsoundfile(soundfile);
 		if (sound.size()) {
 			this->sound=AUDCreateSoundWAV(sound,looping);
