@@ -237,7 +237,8 @@ bool Mount::PhysicsAlignedFire(const Transformation &Cumulative, const Matrix & 
 					}else {
 						temp = UnitFactory::createUnit(type->file.c_str(),false,owner->faction);
 					}
-					temp->SetVelocity(owner->GetVelocity()+Vector(mat.r[6],mat.r[7],mat.r[8])*type->Speed);
+                                        Vector adder=Vector(mat.r[6],mat.r[7],mat.r[8])*type->Speed;
+					temp->SetVelocity(owner->GetVelocity()+adder);
 					
 			  // Affect the stored mount serial to the new missile
 			  temp->SetSerial( this->serial);
@@ -261,7 +262,7 @@ bool Mount::PhysicsAlignedFire(const Transformation &Cumulative, const Matrix & 
 					temp->EnqueueAI (new Orders::FireAllYouGot);
 			  }
 			  temp->SetOwner (owner);
-			  temp->Velocity = velocity;
+			  temp->Velocity = velocity+adder;
 			  temp->curr_physical_state = temp->prev_physical_state= temp->cumulative_transformation = tmp;
 			  CopyMatrix (temp->cumulative_transformation_matrix,m);
 			  _Universe->activeStarSystem()->AddUnit(temp);
