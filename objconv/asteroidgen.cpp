@@ -114,8 +114,18 @@ struct asteroid {
   int num_polys;
   vector <Vector> points;
   vector <Tri> polygon;
-};
+  void CenterAndRotate () {
+    for (unsigned int i=0;i<points.size();i++) {
+      points[i].Pitch (YawPitchRoll.i);
+      points[i].Yaw (YawPitchRoll.j);
+      points[i].Roll (YawPitchRoll.k);
+      points[i].i+=center.i;
+      points[i].j+=center.j;
+      points[i].k+=center.k;
 
+    }
+  }
+};
 
 char texture [100] ="asteroid";
 float scale=1;
@@ -142,17 +152,39 @@ float getR(float minr,float maxr) {
 }
 void generateTet (vector <Vector> &v, vector <Tri> & p, const float minr, const float maxr) {
 
+  double h = 1/sqrt (2);
+  double r = getR (minr,maxr);  
+  double rA =r;
+  v.push_back (Vector (0 ,-r,h*r,0,0));
+  r = getR (minr,maxr);  
+  v.push_back (Vector (r,0,-h*r,.5,0));
+  r = rA;
+  v.push_back (Vector (0,-r,h*r,1,0));
+  r = getR (minr,maxr);  
+  double rD = r;
+  v.push_back (Vector (0,r,h*r,1,1));
+  r = getR (minr,maxr);
+  v.push_back (Vector (-r,0,-h*r,.5,1));
+  r = rD;
+  v.push_back (Vector (0,r,h*r,0,1));
+  p.push_back (Tri(0,5,1));//AFB
+  p.push_back (Tri(3,4,2));//DEC
+  p.push_back (Tri(4,2,1));//ECB
+  p.push_back (Tri(1,5,4));//BFE
 }
 void generateNTet (vector <Vector> &v, vector <Tri> & p, const float minr, const float maxr,int stacks, int slices) {
   for (unsigned int i=0;i<stacks+2;i++) {
+    float tempR = getR (minr,maxr);
     for (unsigned int j=0;j<slices;j++) {
-      float tempR = getR (minr,maxr);
+      if (i!=0&&i!=stacks+1)
+	tempR = getR (minr,maxr);///don't want the tip ot have different points
       float projR = sin (M_PI*i/(stacks+1));
       v.push_back (Vector (projR*cos (M_PI*j/(slices-1)),//i
 			   tempR*cos (M_PI*i/(stacks+1)),//j
 			   projR*sin (M_PI*j/(slices-1)),//k
 			   ((float)j)/(slices-1),//s
 			   ((float)i)/(stacks+1)));//t
+      int joinit = j%2?1:0;//for joining the top and bottom textures
       if (i!=0&&i!=1&&i!=stacks+1) {
 	p.push_back (Tri ((i-1)*slices+j,
 			  i*slices+j,
@@ -160,14 +192,15 @@ void generateNTet (vector <Vector> &v, vector <Tri> & p, const float minr, const
 			  (i-1)*slices+ ((j+1)%slices)));
       }else if (i==1) {
 	//do top pyr
-	p.push_back (Tri ((i-1)*slices+j,
+
+	p.push_back (Tri ((i-1)*slices+((j+joinit)%slices),
 			  i*slices+j,
 			  i*slices+ ((j+1)%slices)));
 		
       } else if (i==stacks+1) {
 	p.push_back (Tri ((i-1)*slices+j,
 			  i*slices+j,
-			  (i-1)*slices+ ((j+1)%slices)));
+			  (i-1)*slices+ ((j+joinit)%slices)));
 	//do bottom pyr
       }
     }
@@ -195,6 +228,7 @@ void createShapes (asteroid & a, float dev) {
 void createShapes (vector <asteroid> &field, float deviation) {
   for (unsigned int i=0;i<field.size();i++) {
     createShapes (field[i],deviation);
+    field[i].CenterAndRotate();
   }
 }
 
