@@ -57,7 +57,7 @@ SphereMesh::SphereMesh(float radius, int stacks, int slices, char *texture, bool
    vertexlist = new GFXVertex[numvertex];
    
    GFXVertex *vl = vertexlist;
-   enum POLYTYPE *modes= new (enum POLYTYPE) [numQuadstrips];   
+   enum POLYTYPE *modes= new enum POLYTYPE [numQuadstrips];   
    for (i = imin; i < imax; i++) {
      GFXVertex *vertexlist = vl + (i * (slices+1)*2);
      rho = i * drho;
@@ -114,7 +114,7 @@ SphereMesh::SphereMesh(float radius, int stacks, int slices, char *texture, bool
    refcount++;
    draw_queue = new vector<DrawContext>;
 }
-void SphereMesh::Draw(const Transformation &transform = identity_transformation) {
+void SphereMesh::Draw(const Transformation &transform /*= identity_transformation*/) {
   if (centered) {
     SetPosition(_GFX->AccessCamera()->GetPosition());
   }		

@@ -22,6 +22,9 @@
 #include "cmd_ai.h"
 #include "cmd_order.h"
 #include <stdio.h>
+#ifdef WIN32
+#include <windows.h>
+#endif
 Missile::Missile(char *filename):Unit(filename)
 {
 	//FILE *fp = fopen(filename, "r");

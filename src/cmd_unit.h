@@ -27,9 +27,6 @@
 #include <iostream>
 #include <string>
 
-using std::string;
-using std::cerr;
-
 #include "xml_support.h"
 
 using namespace XMLSupport;
@@ -240,9 +237,6 @@ public:
 
   inline bool queryCalculatePhysics() { return calculatePhysics; }
   void ExecuteAI();
-
-  ostream &output(ostream& os) const;
 };
 
-ostream &operator<<(ostream &os, const Unit &);
 #endif

@@ -83,6 +83,14 @@ void Unit::ApplyBalancedLocalTorque (const Vector &Vforce, const Vector &Locatio
 void Unit::ApplyLocalTorque(const Vector &torque) {
   NetTorque += ClampTorque(torque);
 }
+#ifdef WIN32
+float copysign (float x, float y) {
+	if (y>0)
+			return x;
+	else
+			return -x;
+}
+#endif
 
 Vector Unit::MaxTorque(const Vector &torque) {
   // torque is a normal
@@ -173,7 +181,7 @@ void Unit::ResolveForces () // don't call this 2x
   }
 	Vector p, q, r;
 	GetOrientation(p,q,r);
-	cerr << "Orientation: " << p << q << r << endl;
+//	cerr << "Orientation: " << p << q << r << endl;
 	temp = ((NetForce + NetLocalForce.i*p + NetLocalForce.j*q + NetLocalForce.k*r ) * SIMULATION_ATOM)/mass; //acceleration
 	Velocity += temp; // modelled as an impulse
 	//now the fuck with it... add relitivity to the picture here

@@ -23,7 +23,7 @@
 
 #include "gfxlib.h"
 #include "hashtable.h"
-#include <vector.h>
+#include <vector>
 
 //struct glVertex;
 class Mesh;

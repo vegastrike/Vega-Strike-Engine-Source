@@ -1,11 +1,11 @@
 #include "cmd_unit.h"
 #include "xml_support.h"
 
-#include <iostream.h>
-#include <fstream.h>
+//#include <iostream.h>
+#include <fstream>
 #include <expat.h>
-#include <values.h>
-
+//#include <values.h>
+#include <float.h>
 #include "gfx_mesh.h"
 
 void Unit::beginElement(void *userData, const XML_Char *name, const XML_Char **atts) {
@@ -27,14 +27,14 @@ namespace UnitXML {
     };
 
   const EnumMap::Pair element_names[] = {
-    {"UNKNOWN", UNKNOWN},
-    {"Unit", UNIT},
-    {"SubUnit", SUBUNIT},
-    {"MeshFile", MESHFILE} };
+    EnumMap::Pair ("UNKNOWN", UNKNOWN),
+    EnumMap::Pair ("Unit", UNIT),
+    EnumMap::Pair ("SubUnit", SUBUNIT),
+    EnumMap::Pair ("MeshFile", MESHFILE) };
 
   const EnumMap::Pair attribute_names[] = {
-    {"UNKNOWN", UNKNOWN},
-    {"file", XFILE} };
+    EnumMap::Pair ("UNKNOWN", UNKNOWN),
+    EnumMap::Pair ("file", XFILE) };
 
   const EnumMap element_map(element_names, 4);
   const EnumMap attribute_map(attribute_names, 2);
@@ -47,13 +47,13 @@ using namespace UnitXML;
 
 void Unit::beginElement(const string &name, const AttributeList &attributes) {
   Names elem = (Names)element_map.lookup(name);
-
+	AttributeList::const_iterator iter;
   switch(elem) {
   case UNKNOWN:
-    cerr << "Unknown element start tag '" << name << "' detected " << endl;
+//    cerr << "Unknown element start tag '" << name << "' detected " << endl;
     break;
   case MESHFILE:
-    for(AttributeList::const_iterator iter = attributes.begin(); iter!=attributes.end(); iter++) {
+    for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(attribute_map.lookup((*iter).name)) {
       case XFILE:
 	xml->meshes.push_back(new Mesh((*iter).value.c_str(), true));
@@ -62,7 +62,7 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
     }
     break;
   case SUBUNIT:
-    for(AttributeList::const_iterator iter = attributes.begin(); iter!=attributes.end(); iter++) {
+    for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(attribute_map.lookup((*iter).name)) {
       case XFILE:
 	xml->units.push_back(new Unit((*iter).value.c_str(), true));
@@ -80,7 +80,7 @@ void Unit::endElement(const string &name) {
 
   switch(elem) {
   case UNKNOWN:
-    cerr << "Unknown element end tag '" << name << "' detected " << endl;
+//    cerr << "Unknown element end tag '" << name << "' detected " << endl;
     break;
   default:
     ;
@@ -90,7 +90,7 @@ void Unit::endElement(const string &name) {
 void Unit::LoadXML(const char *filename) {
   const int chunk_size = 16384;
   
-  ifstream inFile(filename, ios::in | ios::binary);
+  FILE * inFile = fopen (filename, "r+b");
   if(!inFile) {
     assert(0);
     return;
@@ -106,23 +106,24 @@ void Unit::LoadXML(const char *filename) {
     char *buf = (XML_Char*)XML_GetBuffer(parser, chunk_size);
     int length;
     
-    inFile.read(buf, chunk_size);
-    length = inFile.gcount();
-    XML_ParseBuffer(parser, length, inFile.eof());
-  } while(!inFile.eof());
- 
+    length = fread (buf,1, chunk_size,inFile);
+    //length = inFile.gcount();
+    XML_ParseBuffer(parser, length, feof(inFile));
+  } while(!feof(inFile));
+fclose (inFile);
   // Load meshes into subunit
   nummesh = xml->meshes.size();
   meshdata = new Mesh*[nummesh];
   corner_min = Vector(FLT_MAX, FLT_MAX, FLT_MAX);
   corner_max = Vector(-FLT_MAX, -FLT_MAX, -FLT_MAX);
-  for(int a=0; a<nummesh; a++) {
+  int a;
+  for( a=0; a<nummesh; a++) {
     meshdata[a] = xml->meshes[a];
   }
 
   numsubunit = xml->units.size();
   subunits = new Unit*[numsubunit];
-  for(int a=0; a<numsubunit; a++) {
+  for( a=0; a<numsubunit; a++) {
     subunits[a] = xml->units[a];
   }
   

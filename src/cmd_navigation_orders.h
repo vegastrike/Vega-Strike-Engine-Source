@@ -1,6 +1,7 @@
 #ifndef _CMD_NAVIGATION_ORDERS_H_
 #define _CMD_NAVIGATION_ORDERS_H_
 
+
 #include "cmd_order.h"
 #include "physics.h"
 
@@ -58,7 +59,9 @@ public:
 	  /* ==> start braking just before real zeros exist */
 	  det = speed * speed + 2.0 * max_retro_accel * distance;
 	  if(det > 0) { 
+#ifndef WIN32
 	    clog << parent->GetPosition() << "switching to brake state\n";
+#endif
 	    state = 3;
 	    goto case3;
 	    /*
@@ -79,10 +82,14 @@ public:
 	      // bleed off the excess
 	      accel = (max_speed - speed)/(SIMULATION_ATOM);
 	      parent->Thrust(vel_normal * accel * parent->GetMass());
-	      clog << "Killing velocity: " << parent->GetPosition() << ", " << speed << "\n";
-	    }
+#ifndef WIN32
+		  clog << "Killing velocity: " << parent->GetPosition() << ", " << speed << "\n";
+#endif
+		}
+#ifndef WIN32
 	    clog << parent->GetPosition() << "switching to glide state\n";
-	    state = 1;
+#endif
+		state = 1;
 	    break;
 	  }
 	}
@@ -110,38 +117,52 @@ public:
 	  } */
       } else if(distance + speed * SIMULATION_ATOM + 0.5 * max_retro_accel * SIMULATION_ATOM*SIMULATION_ATOM < 0) { // enough retro deltav to land on the target in the next tick
 	state = 3;
+#ifndef WIN32
 	clog << parent->GetPosition() << "Switching to brake state\n";
+#endif
 	goto case3;
       }
       break;
     case2:
     case 2:
       // Decelerate until we hit the target that we want (could also decelerate until stop on the precise position)
-      clog << "braking, distance remaining: " << distance << "\n";
-      // distance = v*t + 0.5a*t^2
+#ifndef WIN32
+		clog << "braking, distance remaining: " << distance << "\n";
+#endif
+		// distance = v*t + 0.5a*t^2
       if(distance-SIMULATION_ATOM > 0 && vel_normal * heading > 0) {
-	clog << "full retro\n";
-	parent->Thrust(parent->MaxThrust(-vel_normal));
+#ifndef WIN32
+		  clog << "full retro\n";
+#endif
+		  parent->Thrust(parent->MaxThrust(-vel_normal));
       } else {
-	clog << "partial retro\n";
-	// (v+at)*t + 0.5a*t^2
+#ifndef WIN32
+		  clog << "partial retro\n";
+#endif
+		  // (v+at)*t + 0.5a*t^2
 	accel = 1/1.5 * (distance-speed*SIMULATION_ATOM) / (SIMULATION_ATOM * SIMULATION_ATOM);
 	parent->Thrust(heading * accel * parent->GetMass());	
 	state = 3;
+#ifndef WIN32
 	clog << parent->GetPosition() << "Switching to brake phase2\n";
+#endif
 	break;
       }
       break;
     case3:
     case 3:
       if(speed < bleed_threshold) { 
+#ifndef WIN32
 	clog << "velocity killed; done\n";
+#endif
 	done = true;
 	return NULL;
       }
       accel = (0 - speed)/(SIMULATION_ATOM);
       parent->Thrust(vel_normal * accel * parent->GetMass());
+#ifndef WIN32
       clog << "Killing velocity: " << parent->GetPosition() << ", " << speed << "\n";
+#endif
     }
     // Always bleed off lateral speed
     if(orthogonal_magnitude > bleed_threshold) {
@@ -170,7 +191,7 @@ class ChangeHeading : public Order {
     Vector p,q,r;
     parent->GetOrientation(p,q,r);
     
-    cerr << "local heading: " << local_heading << endl;
+    fprintf (stderr,"local heading: %s\n",local_heading );
 
     Vector ang_vel_norm = ang_vel;
     float ang_speed = ang_vel.Magnitude();
@@ -192,7 +213,7 @@ class ChangeHeading : public Order {
     */
     Vector turning;
     CrossProduct(local_heading, Vector(0,0,1), turning);
-    cerr << "turning: " << turning << endl;
+    fprintf(stderr,"turning: %s\n", turning);
     float angle = asin(turning.Magnitude());
 
     if(fabs(angle) < THRESHOLD) { // handle case where we're really close to the target (or 180 degrees away)
@@ -217,7 +238,7 @@ class ChangeHeading : public Order {
 	angle = -PI - angle;
       }
     }
-    cerr << "angle: " << angle << endl;
+    fprintf (stderr, "angle: %d", angle );
     if(fabs(angle) > THRESHOLD) {
       Vector turning_norm = turning;
       turning_norm.Normalize();
@@ -233,10 +254,10 @@ class ChangeHeading : public Order {
       angular_velocity = angular_velocity - torque / parent->GetMoment() * SIMULATION_ATOM;
 
       float angular_speed = angular_velocity * turning_norm;
-      cerr << "Current angular speed: " << angular_speed << endl;
+      fprintf (stderr,"Current angular speed: %s\n", angular_speed );
       angular_velocity = turning_norm * (angular_speed);
       angle = angle - angular_speed * SIMULATION_ATOM; // how much we want to try to conver in the next frame
-      cerr << "angle after adjustment: " << angle << endl;
+      fprintf (stderr, "angle after adjustment: %s\n", angle) ;
 
       float max_accel = parent->MaxTorque(turning_norm).Magnitude()/parent->GetMoment();
       Vector max_retro_torque = parent->MaxTorque(-turning_norm);
@@ -246,26 +267,27 @@ class ChangeHeading : public Order {
       
       if(angle > 0) {
      	// Figure out maximum torque in deceleration direction
-	cerr << "max accel distance: " << max_accel_distance << endl;
+	fprintf (stderr,"max accel distance: %s\n", max_accel_distance );
 	int n = fabs(floor(angular_speed / (retro_torque/parent->GetMoment()))); // n = # of turns needed to kill all speed
 	float braking_distance = fabs(max_accel_distance) * (((n+1)*(n)/2) );
-	cerr << "Need " << n << " turns to kill all speed, distance of " << braking_distance << "\n";
+	fprintf (stderr,"Need %s turns to kill all speed, distance of %d\n",n ,braking_distance) ;
 	// n*(n+1)/2
       // figure out how far we can get while braking (discrete
 	// summation since everything is done with impulses
 	if(n<0) {
-	  cerr << "overbraked\n";
+	  fprintf (stderr,"overbraked\n");
 	  braking = false;
 	} else if(!braking && braking_distance > fabs(angle)) {
 	// start braking
-	  braking = true;
-	  cerr << "Starting to brake\n";
-	} else if(!braking && braking_distance > fabs(angle - max_accel_distance)) { // prevent this turn from doing the full acceleration
+	    braking = true;
+	    fprintf (stderr, "Starting to brake\n");
+	  }
+	 else if(!braking && braking_distance > fabs(angle - max_accel_distance)) { // prevent this turn from doing the full acceleration
 	  angle -= braking_distance;
 	}
       }
       if(braking && (angular_speed > THRESHOLD && fabs(angle) > max_accel_distance)) { // max brake if positive angle and braking flag is set and we are still moving
-	cerr << "Braking\n";
+	fprintf (stderr,"Braking\n");
 	// apply maximum braking power
 	angle = - angular_speed / SIMULATION_ATOM;
 	angular_speed = 0;
@@ -274,15 +296,19 @@ class ChangeHeading : public Order {
                                 // cover this distance
       delta_v -= angular_speed; // adjust speed downward
       Vector more_torque = turning_norm * (delta_v / SIMULATION_ATOM * parent->GetMoment());
+#ifndef WIN32
       cerr << "Torque for turning towards target " << more_torque << endl;
       cerr << "clamped torque " << parent->ClampTorque(more_torque) << endl;
+#endif
       torque += more_torque;
     } else {
       // Kill angular momentum
       Vector angular_velocity = parent->GetAngularVelocity();
       Vector more_torque = Vector(-angular_velocity.i, -angular_velocity.j, 0);
       more_torque = more_torque * parent->GetMoment() / SIMULATION_ATOM;
+#ifndef WIN32
       cerr << "Killing angular momentum " << more_torque << endl;
+#endif
       torque += more_torque;
       if(torque.Magnitude() < THRESHOLD) {
 	done = true;
@@ -293,7 +319,7 @@ class ChangeHeading : public Order {
 
     if(ang_vel.Magnitude() < THRESHOLD && angle < THRESHOLD) {
       done = true;
-      cerr << "Done\n";
+      fprintf (stderr, "Done\n");
     }
   }
 };

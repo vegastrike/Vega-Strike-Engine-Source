@@ -22,7 +22,7 @@
 #include "gfxlib.h"
 #include "vegastrike.h"
 #include "gl_globals.h"
-
+#include <assert.h>
 // Untransformed and transformed data 
 //LPDIRECT3DVERTEXBUFFER lpd3dvbUntransformed;
 //LPDIRECT3DVERTEXBUFFER lpd3dvbTransformed;

@@ -24,6 +24,7 @@
 //typedef float GLdouble;
 #include <math.h>
 #include <string.h>
+#include <assert.h>
 #include "gl_matrix.h"
 
 #include "vs_globals.h"
@@ -157,7 +158,7 @@ inline void CopyMatrix(Matrix dest, const Matrix source)
   */
 }
 
-using namespace GFXMatrices;
+using namespace GFXMatrices;  //causes problems with g_game
 
 float centerx,centery,centerz;
 void evaluateViews () {
@@ -468,6 +469,7 @@ BOOL /*GFXDRVAPI*/ GFXParallel(float left, float right, float bottom, float top,
    GFXLoadMatrix(PROJECTION, projection);
 
   GFXGetFrustumVars(false,&left,&right,&bottom,&top,&nearval,&farval);
+  return TRUE;
 }
 
 
@@ -764,18 +766,4 @@ BOOL /*GFXDRVAPI*/ GFXCalculateFrustum (float frustum[6][4], float *modl,float *
    frustum[5][2] /= t;
    frustum[5][3] /= t;
    return TRUE;
-}
-
-Vector GFXDeviceToEye(int x, int y) {
-  float l, r, b, t , n, f;
-  GFXGetFrustumVars (true,&l,&r,&b,&t,&n,&f);
-  //fprintf (stderr, "N: %f\n",n);
-  //Vector mousePoint (MouseCoordinate (mouseX,mouseY,1));
-  /*  cerr.form("%f, %f, %f, %f\n", l,r,b,t);
-  cerr << "top - bottom " <<  t-b << endl;
-  cerr << "right - left " <<  r-l << endl;
-  */
-  return Vector ((l + (r-l) * float(x)/g_game.x_resolution),
-		 (t + (b-t) * float(y)/g_game.y_resolution),
-		 n);
 }

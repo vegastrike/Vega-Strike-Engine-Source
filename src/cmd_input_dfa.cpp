@@ -179,7 +179,7 @@ void InputDFA::ClickSelect (KBSTATE k, int x, int y, int delx, int dely, int mod
 	CurDFA->replaceCollection (tmpcollection);
 	fprintf (stderr,"Select:replacingselected\n");
       }
-      cerr << *sel << endl;
+//      cerr << *sel << endl;
       CurDFA->SetStateSomeSelected();
     }else {
       if (!(mod&ACTIVE_SHIFT)){
@@ -245,7 +245,7 @@ void InputDFA::NoneSelect (KBSTATE k,int x, int y, int delx, int dely, int mod) 
       tmpcollection->append(sel);
       fprintf (stderr,"None::replacing Single Unit");if (CurDFA->state==TARGET_SELECT) fprintf (stderr," to target\n");else fprintf (stderr," to select\n");
 
-      cerr << *sel << endl;
+//      cerr << *sel << endl;
       
       CurDFA->replaceCollection (tmpcollection);
       CurDFA->SetStateSomeSelected();
@@ -270,7 +270,7 @@ void InputDFA::NoneSelect (KBSTATE k,int x, int y, int delx, int dely, int mod) 
     if (tmp2->current()) {
       fprintf (stderr,"None::replacing SelectBox Units");if (CurDFA->state==TARGET_SELECT) fprintf (stderr," to target");else fprintf (stderr," to select");
       while(tmp2->current()) {
-	cerr << *tmp2->current() << endl;
+//	cerr << *tmp2->current() << endl;
 	tmp2->advance();
       }
       CurDFA->SetStateSomeSelected();

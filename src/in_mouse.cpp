@@ -24,8 +24,8 @@
 //#include "dbg.h"
 #include "in_handler.h"
 #include "in_mouse.h"
-#include <deque.h>
-
+#include <deque>
+using std::deque;
 #define NUM_BUTTONS 3
 
 /** Gets the button number of the function used to draw the mouse*/

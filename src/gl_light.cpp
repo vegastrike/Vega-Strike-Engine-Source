@@ -21,8 +21,10 @@
 #include <GL/gl.h>
 #include "gfxlib.h"
 //#include "vegastrike.h"
-#include <list>
+//#include <list>
 #include <queue>
+using std::priority_queue;
+//using std::list
 #define GFX_DIFFUSE 1
 #define GFX_SPECULAR 2
 #define GFX_AMBIENT 4
@@ -117,7 +119,7 @@ struct light_key {
 };
 static bool operator < (light_key tmp1,light_key tmp2) {return tmp1.intensity_key<tmp2.intensity_key;}
 
-priority_queue <light_key> lightQ;
+priority_queue<light_key> lightQ;
 inline void SetLocalCompare (Vector x) {//does preprocessing of intensity for relatively small source 
   float dis, dissqr;
   unsigned int i;
@@ -147,11 +149,13 @@ inline void SetLocalCompare (Vector x) {//does preprocessing of intensity for re
 }
 
 BOOL /*GFXDRVAPI*/ GFXSetSeparateSpecularColor(BOOL spec) {
-  if (spec) {
+#ifndef WIN32
+	if (spec) {
     glLightModeli (GL_LIGHT_MODEL_COLOR_CONTROL,GL_SEPARATE_SPECULAR_COLOR);
   }else {
     glLightModeli (GL_LIGHT_MODEL_COLOR_CONTROL,GL_SINGLE_COLOR);
   }
+#endif
   return TRUE;
 }
 BOOL /*GFXDRVAPI*/ GFXCreateLightContext (int & con_number) {
@@ -184,10 +188,11 @@ BOOL /*GFXDRVAPI*/ GFXSetLightContext (int con_number) {
   _llights_dat = &_local_lights_dat[con_number];
   float tmp[4]={_ambient_light[con_number].r,_ambient_light[con_number].g,_ambient_light[con_number].b,_ambient_light[con_number].a};
   glLightModelfv (GL_LIGHT_MODEL_AMBIENT,tmp);
-  for (unsigned int i=0;i<_llights_dat->size();i++) {
+  unsigned int i;
+  for (i=0;i<_llights_dat->size();i++) {
     (*_llights_dat)[i].target=-1;
   }
-  for (unsigned int i=0;i<GFX_MAX_LIGHTS;i++) {
+  for (i=0;i<GFX_MAX_LIGHTS;i++) {
     GLLights[i]=-1;
     GLLightState[i]=0;
   }

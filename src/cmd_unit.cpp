@@ -42,11 +42,12 @@ Vector MouseCoordinate (int mouseX, int mouseY);
 double interpolation_blend_factor;
 
 void Unit::calculate_extent() {  
-  for(int a=0; a<nummesh; a++) {
+	int a;
+	for(a=0; a<nummesh; a++) {
     corner_min = corner_min.Min(meshdata[a]->corner_min() + meshdata[a]->Position());
     corner_max = corner_max.Max(meshdata[a]->corner_max() + meshdata[a]->Position());
   }
-  for(int a=0; a<numsubunit; a++) {
+  for(a=0; a<numsubunit; a++) {
     corner_min = corner_min.Min(subunits[a]->corner_min);
     corner_max = corner_max.Max(subunits[a]->corner_max);
   }
@@ -538,10 +539,11 @@ void Unit::DrawStreak(const Vector &v)
 }
 
 void Unit::ProcessDrawQueue() {
-  for(int a=0; a<nummesh; a++) {
+  int a;	
+  for(a=0; a<nummesh; a++) {
     meshdata[a]->ProcessDrawQueue();
   }
-  for(int a=0; a<numsubunit; a++) {
+  for(a=0; a<numsubunit; a++) {
     subunits[a]->ProcessDrawQueue();
   }
 }
@@ -584,15 +586,16 @@ void Unit::Select() {
 void Unit::Deselect() {
   selected = false;
 }
-
+/*
 ostream &Unit::output(ostream& os) const {
   return os << name;
 }
-
+*/
+/*
 ostream &operator<<(ostream &os, const Unit &u) {
   return u.output(os);
 } 
-
+*/
 void Unit::RestrictYaw(float min, float max) {
   ymin = min; ymax = max;
 }

@@ -173,7 +173,9 @@ void WrapGFX::Loop(void main_loop()) {
 
 void WrapGFX::StartDraw()
 {
-  RESETTIME();
+#ifndef WIN32
+	RESETTIME();
+#endif
 	GFXBeginScene();
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 //	SetViewport();

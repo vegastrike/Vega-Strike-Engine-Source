@@ -22,7 +22,7 @@
 #include "gfx_vertex.h"
 #include "gfx_aux_logo.h"
 #include "gfx_aux_texture.h"
-
+#include <assert.h>
 #include "gfxlib.h"
 
 list<Logo*> undrawn_logos;

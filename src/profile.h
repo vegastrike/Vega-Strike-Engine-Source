@@ -1,5 +1,10 @@
-#include <sys/time.h>
+#ifdef WIN32
+#include <time.h>
+#else
+
 #include <unistd.h>
+#include <sys/time.h>
+
 
 #define RESETTIME() startTime()
 #define REPORTTIME(comment) endTime(comment,__FILE__,__LINE__)
@@ -15,3 +20,4 @@ static inline void endTime(const char* comment, const char* file, int lineno) {
   double time = end.tv_sec - start.tv_sec + (end.tv_usec - start.tv_usec)/1000000.0;
   clog << file << "(" << comment << "):" << lineno << ": " << time << endl;
 }
+#endif

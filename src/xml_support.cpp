@@ -1,6 +1,6 @@
 #include <string.h>
 #include <stdlib.h>
-#include <strstream.h>
+//#include <strstream.h>
 #include <ctype.h>
 #include <assert.h>
 #include "xml_support.h"

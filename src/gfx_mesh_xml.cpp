@@ -1,13 +1,18 @@
 #include "gfx_mesh.h"
 
-#include <iostream.h>
-#include <fstream.h>
+#include <iostream>
+#include <fstream>
 #include <expat.h>
+#include <float.h>
+#include <assert.h>
+#ifdef WIN32
+#else
 #include <values.h>
+#endif
 #include "xml_support.h"
 #include "gfx_transform_vector.h"
 #ifdef max
-#undefine max
+#undef max
 #endif
 
 static inline float max(float x, float y) {
@@ -16,7 +21,7 @@ static inline float max(float x, float y) {
 }
 
 #ifdef min
-#undefine min
+#undef min
 #endif
 
 static inline float min(float x, float y) {
@@ -33,36 +38,37 @@ using XMLSupport::parse_float;
 using XMLSupport::parse_int;
 
 const EnumMap::Pair Mesh::XML::element_names[] = {
-  {"UNKNOWN", XML::UNKNOWN},
-  {"Mesh", XML::MESH},
-  {"Points", XML::POINTS},
-  {"Point", XML::POINT},
-  {"Location", XML::LOCATION},
-  {"Normal", XML::NORMAL},
-  {"Polygons", XML::POLYGONS},
-  {"Line", XML::LINE},
-  {"Tri", XML::TRI},
-  {"Quad", XML::QUAD},
-  {"Linestrip",XML::LINESTRIP},
-  {"Tristrip", XML::TRISTRIP},
-  {"Trifan", XML::TRIFAN},
-  {"Quadstrip", XML::QUADSTRIP},
-  {"Vertex", XML::VERTEX}
+  EnumMap::Pair("UNKNOWN", XML::UNKNOWN),
+  EnumMap::Pair("Mesh", XML::MESH),
+  EnumMap::Pair("Points", XML::POINTS),
+  EnumMap::Pair("Point", XML::POINT),
+  EnumMap::Pair("Location", XML::LOCATION),
+  EnumMap::Pair("Normal", XML::NORMAL),
+  EnumMap::Pair("Polygons", XML::POLYGONS),
+  EnumMap::Pair("Line", XML::LINE),
+  EnumMap::Pair("Tri", XML::TRI),
+  EnumMap::Pair("Quad", XML::QUAD),
+  EnumMap::Pair("Linestrip",XML::LINESTRIP),
+  EnumMap::Pair("Tristrip", XML::TRISTRIP),
+  EnumMap::Pair("Trifan", XML::TRIFAN),
+  EnumMap::Pair("Quadstrip", XML::QUADSTRIP),
+  EnumMap::Pair("Vertex", XML::VERTEX)
 };
 
 const EnumMap::Pair Mesh::XML::attribute_names[] = {
-  {"UNKNOWN", XML::UNKNOWN},
-  {"texture", XML::TEXTURE},
-  {"x", XML::X},
-  {"y", XML::Y},
-  {"z", XML::Z},
-  {"i", XML::I},
-  {"j", XML::J},
-  {"k", XML::K},
-  {"Shade", XML::FLATSHADE},
-  {"point", XML::POINT},
-  {"s", XML::S},
-  {"t", XML::T}};
+  EnumMap::Pair("UNKNOWN", XML::UNKNOWN),
+  EnumMap::Pair("texture", XML::TEXTURE),
+  EnumMap::Pair("x", XML::X),
+  EnumMap::Pair("y", XML::Y),
+  EnumMap::Pair("z", XML::Z),
+  EnumMap::Pair("i", XML::I),
+  EnumMap::Pair("j", XML::J),
+  EnumMap::Pair("k", XML::K),
+  EnumMap::Pair("Shade", XML::FLATSHADE),
+  EnumMap::Pair("point", XML::POINT),
+  EnumMap::Pair("s", XML::S),
+  EnumMap::Pair("t", XML::T)
+};
 
 const EnumMap Mesh::XML::element_map(XML::element_names, 15);
 const EnumMap Mesh::XML::attribute_map(XML::attribute_names, 12);
@@ -88,6 +94,8 @@ will be no need for this sort of checking
 void Mesh::beginElement(const string &name, const AttributeList &attributes) {
   //cerr << "Start tag: " << name << endl;
   //static bool flatshadeit=false;
+  AttributeList::const_iterator iter;
+
   XML::Names elem = (XML::Names)XML::element_map.lookup(name);
   XML::Names top;
   if(xml->state_stack.size()>0) top = *xml->state_stack.rbegin();
@@ -96,7 +104,7 @@ void Mesh::beginElement(const string &name, const AttributeList &attributes) {
   bool texture_found = false;
   switch(elem) {
   case XML::UNKNOWN:
-    cerr << "Unknown element start tag '" << name << "' detected " << endl;
+   fprintf (stderr, "Unknown element start tag '%s' detected\n",name.c_str());
     break;
   case XML::MESH:
     assert(xml->load_stage == 0);
@@ -105,7 +113,7 @@ void Mesh::beginElement(const string &name, const AttributeList &attributes) {
     xml->load_stage = 1;
     // Read in texture attribute
     
-    for(AttributeList::const_iterator iter = attributes.begin(); iter!=attributes.end(); iter++) {
+    for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(XML::attribute_map.lookup((*iter).name)) {
       case XML::TEXTURE:
 	xml->decal_name = (*iter).value;
@@ -131,10 +139,10 @@ void Mesh::beginElement(const string &name, const AttributeList &attributes) {
   case XML::LOCATION:
     assert(top==XML::POINT);
 
-    for(AttributeList::const_iterator iter = attributes.begin(); iter!=attributes.end(); iter++) {
+    for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(XML::attribute_map.lookup((*iter).name)) {
       case XML::UNKNOWN:
-	cerr << "Unknown attribute '" << (*iter).name << "' encountered in Location tag" << endl;
+	fprintf (stderr, "Unknown attribute '%s' encountered in Location tag\n",(*iter).name.c_str());
 	break;
       case XML::X:
 	assert(!(xml->point_state & XML::P_X));
@@ -168,10 +176,10 @@ void Mesh::beginElement(const string &name, const AttributeList &attributes) {
   case XML::NORMAL:
     assert(top==XML::POINT);
 
-    for(AttributeList::const_iterator iter = attributes.begin(); iter!=attributes.end(); iter++) {
+    for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(XML::attribute_map.lookup((*iter).name)) {
       case XML::UNKNOWN:
-	cerr << "Unknown attribute '" << (*iter).name << "' encountered in Normal tag" << endl;
+	fprintf (stderr, "Unknown attribute '%s' encountered in Normal tag\n",(*iter).name.c_str());
 	break;
       case XML::I:
 	assert(!(xml->point_state & XML::P_I));
@@ -199,7 +207,7 @@ void Mesh::beginElement(const string &name, const AttributeList &attributes) {
 	    XML::P_J |
 	    XML::P_K) ) {
       if (!xml->recalc_norm) {
-	cerr.form ("Invalid Normal Data for point: <%f,%f,%f>\n",xml->vertex.x,xml->vertex.y, xml->vertex.z);
+	fprintf(stderr,"Invalid Normal Data for point: <%f,%f,%f>\n",xml->vertex.x,xml->vertex.y, xml->vertex.z);
 	xml->vertex.i=xml->vertex.j=xml->vertex.k=0;
 	xml->recalc_norm=true;
       }
@@ -218,14 +226,14 @@ void Mesh::beginElement(const string &name, const AttributeList &attributes) {
     xml->num_vertices=2;
     xml->active_list = &xml->lines;
     xml->active_ind = &xml->lineind;
-    for(AttributeList::const_iterator iter = attributes.begin(); iter!=attributes.end(); iter++) {
+    for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(XML::attribute_map.lookup((*iter).name)) {
       case XML::UNKNOWN:
-	cerr << "Unknown attribute '" << (*iter).name << "' encountered in Vertex tag" << endl;
+	fprintf (stderr,"Unknown attribute '%s' encountered in Vertex tag\n",(*iter).name.c_str() );
 	break;
       case XML::FLATSHADE:
 	if ((*iter).value=="Flat") {
-	  cerr << "Cannot Flatshade Lines" << endl;
+	  fprintf (stderr,"Cannot Flatshade Lines\n");
 	}else {
 	  if ((*iter).value=="Smooth") {
 	    //ignored -- already done
@@ -245,10 +253,10 @@ void Mesh::beginElement(const string &name, const AttributeList &attributes) {
     xml->active_list = &xml->tris;
     xml->active_ind = &xml->triind;
     xml->trishade.push_back (0);
-    for(AttributeList::const_iterator iter = attributes.begin(); iter!=attributes.end(); iter++) {
+    for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(XML::attribute_map.lookup((*iter).name)) {
       case XML::UNKNOWN:
-	cerr << "Unknown attribute '" << (*iter).name << "' encountered in Vertex tag" << endl;
+	fprintf (stderr,"Unknown attribute '%s' encountered in Vertex tag\n",(*iter).name.c_str() );
 	break;
       case XML::FLATSHADE:
 	if ((*iter).value=="Flat") {
@@ -273,14 +281,14 @@ void Mesh::beginElement(const string &name, const AttributeList &attributes) {
     xml->active_list = &(xml->linestrips[xml->linestrips.size()-1]);
     xml->lstrcnt = xml->linestripind.size();
     xml->active_ind = &xml->linestripind;
-    for(AttributeList::const_iterator iter = attributes.begin(); iter!=attributes.end(); iter++) {
+    for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(XML::attribute_map.lookup((*iter).name)) {
       case XML::UNKNOWN:
-	cerr << "Unknown attribute '" << (*iter).name << "' encountered in Vertex tag" << endl;
+	fprintf (stderr,"Unknown attribute '%s' encountered in Vertex tag\n",(*iter).name.c_str() );
 	break;
       case XML::FLATSHADE:
 	if ((*iter).value=="Flat") {
-	  cerr << "Cannot Flatshade Linestrips" << endl;
+	  fprintf(stderr,"Cannot Flatshade Linestrips\n");
 	}else {
 	  if ((*iter).value=="Smooth") {
 	    //ignored -- already done
@@ -301,14 +309,14 @@ void Mesh::beginElement(const string &name, const AttributeList &attributes) {
     xml->active_list = &(xml->tristrips[xml->tristrips.size()-1]);
     xml->tstrcnt = xml->tristripind.size();
     xml->active_ind = &xml->tristripind;
-    for(AttributeList::const_iterator iter = attributes.begin(); iter!=attributes.end(); iter++) {
+    for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(XML::attribute_map.lookup((*iter).name)) {
       case XML::UNKNOWN:
-	cerr << "Unknown attribute '" << (*iter).name << "' encountered in Vertex tag" << endl;
+	fprintf (stderr,"Unknown attribute '%s' encountered in Vertex tag\n",(*iter).name.c_str() );
 	break;
       case XML::FLATSHADE:
 	if ((*iter).value=="Flat") {
-	  cerr << "Cannot Flatshade Tristrips" << endl;
+	  fprintf(stderr,"Cannot Flatshade Tristrips\n");
 	}else {
 	  if ((*iter).value=="Smooth") {
 	    //ignored -- already done
@@ -329,14 +337,14 @@ void Mesh::beginElement(const string &name, const AttributeList &attributes) {
     xml->active_list = &(xml->trifans[xml->trifans.size()-1]);
     xml->tfancnt = xml->trifanind.size();
     xml->active_ind = &xml->trifanind;
-    for(AttributeList::const_iterator iter = attributes.begin(); iter!=attributes.end(); iter++) {
+    for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(XML::attribute_map.lookup((*iter).name)) {
       case XML::UNKNOWN:
-	cerr << "Unknown attribute '" << (*iter).name << "' encountered in Vertex tag" << endl;
+	fprintf (stderr,"Unknown attribute '%s' encountered in Vertex tag\n",(*iter).name.c_str() );
 	break;
       case XML::FLATSHADE:
 	if ((*iter).value=="Flat") {
-	  cerr << "Cannot Flatshade Trifans" << endl;
+	  fprintf (stderr,"Cannot Flatshade Trifans\n");
 	}else {
 	  if ((*iter).value=="Smooth") {
 	    //ignored -- already done
@@ -357,14 +365,14 @@ void Mesh::beginElement(const string &name, const AttributeList &attributes) {
     xml->active_list = &(xml->quadstrips[xml->quadstrips.size()-1]);
     xml->qstrcnt = xml->quadstripind.size();
     xml->active_ind = &xml->quadstripind;
-    for(AttributeList::const_iterator iter = attributes.begin(); iter!=attributes.end(); iter++) {
+    for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(XML::attribute_map.lookup((*iter).name)) {
       case XML::UNKNOWN:
-	cerr << "Unknown attribute '" << (*iter).name << "' encountered in Vertex tag" << endl;
+	fprintf (stderr,"Unknown attribute '%s' encountered in Vertex tag\n",(*iter).name.c_str() );
 	break;
       case XML::FLATSHADE:
 	if ((*iter).value=="Flat") {
-	  cerr << "Cannot Flatshade Quadstrips" << endl;
+	  fprintf (stderr, "Cannot Flatshade Quadstrips\n");
 	}else {
 	  if ((*iter).value=="Smooth") {
 	    //ignored -- already done
@@ -384,11 +392,10 @@ void Mesh::beginElement(const string &name, const AttributeList &attributes) {
     xml->active_list = &xml->quads;
     xml->active_ind = &xml->quadind;
     xml->quadshade.push_back (0);
-    for(AttributeList::const_iterator iter = attributes.begin(); iter!=attributes.end(); iter++) {
-      cerr << "another shade bites the dust";
+    for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(XML::attribute_map.lookup((*iter).name)) {
       case XML::UNKNOWN:
-	cerr << "Unknown attribute '" << (*iter).name << "' encountered in Vertex tag" << endl;
+	fprintf (stderr,"Unknown attribute '%s' encountered in Vertex tag\n",(*iter).name.c_str() );
 	break;
       case XML::FLATSHADE:
 	if ((*iter).value=="Flat") {
@@ -411,10 +418,10 @@ void Mesh::beginElement(const string &name, const AttributeList &attributes) {
     xml->vertex_state = 0;
     unsigned int index;
     float s, t;
-    for(AttributeList::const_iterator iter = attributes.begin(); iter!=attributes.end(); iter++) {
+    for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(XML::attribute_map.lookup((*iter).name)) {
       case XML::UNKNOWN:
-	cerr << "Unknown attribute '" << (*iter).name << "' encountered in Vertex tag" << endl;
+	fprintf (stderr,"Unknown attribute '%s' encountered in Vertex tag\n",(*iter).name.c_str() );
 	break;
       case XML::POINT:
 	assert(!(xml->vertex_state & XML::V_POINT));
@@ -448,7 +455,7 @@ void Mesh::beginElement(const string &name, const AttributeList &attributes) {
     xml->vertexcount[index]+=1;
     if ((!xml->vertex.i)&&(!xml->vertex.j)&&(!xml->vertex.k)) {
       if (!xml->recalc_norm) {
-	cerr.form ("Invalid Normal Data for point: <%f,%f,%f>\n",xml->vertex.x,xml->vertex.y, xml->vertex.z);
+	fprintf(stderr,"Invalid Normal Data for point: <%f,%f,%f>\n",xml->vertex.x,xml->vertex.y, xml->vertex.z);
 	
 	xml->recalc_norm=true;
       }
@@ -476,7 +483,7 @@ void Mesh::endElement(const string &name) {
   unsigned int i;
   switch(elem) {
   case XML::UNKNOWN:
-    cerr << "Unknown element end tag '" << name << "' detected " << endl;
+    fprintf (stderr,"Unknown element end tag '%s' detected\n",name.c_str());
     break;
   case XML::POINT:
     assert(xml->point_state & (XML::P_X | 
@@ -646,7 +653,7 @@ void updateMax (float &minSizeX, float &maxSizeX, float &minSizeY, float &maxSiz
 void Mesh::LoadXML(const char *filename, Mesh *oldmesh) {
   const int chunk_size = 16384;
   
-  ifstream inFile(filename, ios::in | ios::binary);
+  FILE* inFile = fopen (filename, "r+b");
   if(!inFile) {
     assert(0);
     return;
@@ -663,11 +670,11 @@ void Mesh::LoadXML(const char *filename, Mesh *oldmesh) {
     char *buf = (XML_Char*)XML_GetBuffer(parser, chunk_size);
     int length;
     
-    inFile.read(buf, chunk_size);
-    length = inFile.gcount();
-    XML_ParseBuffer(parser, length, inFile.eof());
-  } while(!inFile.eof());
-
+    length = fread(buf,1, chunk_size,inFile);
+    //length = inFile.gcount();
+    XML_ParseBuffer(parser, length, feof(inFile));
+  } while(!feof(inFile));
+	fclose (inFile);
   // Now, copy everything into the mesh data structures
   assert(xml->load_stage==5);
   //begin vertex normal calculations if necessary
@@ -843,7 +850,7 @@ void Mesh::LoadXML(const char *filename, Mesh *oldmesh) {
   minSizeX = minSizeY = minSizeZ = FLT_MAX;
   maxSizeX = maxSizeY = maxSizeZ = -FLT_MAX;
   radialSize = 0;
-  enum POLYTYPE * polytypes= new (enum POLYTYPE)[totalvertexsize];//overkill but what the hell
+  enum POLYTYPE * polytypes= new enum POLYTYPE[totalvertexsize];//overkill but what the hell
   int *poly_offsets  = new int [totalvertexsize];
   int o_index=0;
   if (xml->tris.size()) {

@@ -26,7 +26,7 @@
 #include "gfx_transform.h"
 #include "gfxlib.h"
 #include "vegastrike.h"
-
+#include <assert.h>
 static float *mview = NULL;
 
 Sprite::Sprite(char *file, bool trackzoom):Mesh(), track_zoom(trackzoom)

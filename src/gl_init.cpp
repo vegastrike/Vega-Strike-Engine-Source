@@ -123,7 +123,7 @@ BOOL GFXInit (int argc, char ** argv){
 	/* Set the initial window size */
 	glutInitWindowSize(g_game.x_resolution, g_game.y_resolution );
 	glutInitWindowPosition( 0, 0 );
-	glutWindow = glutCreateWindow( WINDOW_TITLE );
+	glutWindow = glutCreateWindow( "Vegastrike Texturizer" );
 	if ( glutWindow == 0 ) {
 	    fprintf( stderr, "Couldn't create a window.\n" );
 	    exit(1);

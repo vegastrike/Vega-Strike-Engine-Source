@@ -1,15 +1,19 @@
 #ifndef _XML_SUPPORT_H_
 #define _XML_SUPPORT_H_
-
+#include <stdio.h>
 #include <string>
+
+#ifndef WIN32
 #include <strstream>
+#endif
 #include "hashtable.h"
-#include <vector.h>
+#include <vector>
 #include <expat.h>
 
 using std::string;
+#ifndef WIN32
 using std::ostrstream;
-
+#endif
 namespace XMLSupport {
 
   struct Attribute {
@@ -27,14 +31,20 @@ namespace XMLSupport {
   class EnumMap {
     static inline string strtoupper(const string &foo);
 
-    struct Pair {
-      string name;
-      int val;
-    };
     Hashtable<string,const int> forward;
     Hashtable<string,const string> reverse;
   public:
+ 	struct Pair {
+      string name;
+      int val;
+	  Pair (const string c, int v) {
+		name = c;
+		val = v;
+	  }
+    };
+ 
     EnumMap(const Pair *data, unsigned int num);
+
 
     int lookup(const string &str) const;
     const string &lookup(int val) const;
@@ -46,8 +56,22 @@ namespace XMLSupport {
     string tostring(int num);
     string tostring(float num);
   */
+//#ifdef WIN32
+  string inline tostring (int num) {
+	char tmp[256];
+	sprintf (tmp,"%d",num);
+	return string(tmp);
+  }
+  string inline tostring (float num) {
+	char tmp[256];
+	sprintf (tmp,"%f",num);
+	return string(tmp);
+  }
+/*#else
   template<class T> inline string tostring(T num) {
     return string(((ostrstream*)&(ostrstream() << num << '\0'))->str());
+	
   }
+#endif*/
 }
 #endif

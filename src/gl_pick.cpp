@@ -6,7 +6,7 @@
 #include "gfxlib.h"
 #include "gl_matrix.h"
 #include "gl_globals.h"
-
+#include  <assert.h>
 #define SELECTBUF_SIZE MAX_PICK*4
 const float epsilon = 0.001;
 

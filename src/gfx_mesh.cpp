@@ -26,6 +26,7 @@
 #include "gfx_camera.h"
 #include "gfx_bounding_box.h"
 #include "gfx_bsp.h"
+#include <assert.h>
 
 #include <math.h>
 
