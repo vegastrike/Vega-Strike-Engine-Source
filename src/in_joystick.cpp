@@ -37,6 +37,7 @@ JoyStick::JoyStick () {
   for (int j=0;j<MAX_AXES;++j) {
     axis_axis[j]=-1;
     axis_inverse[j]=false;
+    joy_axis[j]=axis_axis[j]=0;
   }
 }
 
@@ -92,6 +93,7 @@ JoyStick::JoyStick(int which): mouse(which==MOUSE_JOYSTICK) {
   for (int j=0;j<MAX_AXES;++j) {
     axis_axis[j]=-1;
     axis_inverse[j]=false;
+    joy_axis[j]=axis_axis[j]=0;
   }
   player=which;//by default bind players to whichever joystick it is
   debug_digital_hatswitch=XMLSupport::parse_bool(vs_config->getVariable("joystick","debug_digital_hatswitch","false"));
