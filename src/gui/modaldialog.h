@@ -33,10 +33,12 @@
 //     code identify which dialog is responding.
 //  3. The integer "result".  A simple result from the dialog.  More complex
 //     results could be obtained from the window.
+// The callback returns true if the window is to be closed, false otherwise
+// (it will then return true on a later callback).
 class ModalDialogCallback
 {
 public:
-    virtual void modalDialogResult(
+    virtual bool modalDialogResult(
         const std::string& id,
         int result,
         WindowController& controller

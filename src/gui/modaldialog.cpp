@@ -46,11 +46,15 @@ void ModalDialog::run(void) {
 
 // Process a command from the window.
 bool ModalDialog::processWindowCommand(const EventCommandId& command, Control* control) {
+    bool dontContinueWithCommand=false;
     if(m_callback && command == "Window::Close") {
-        m_callback->modalDialogResult(m_callbackId, m_result, *this);
+        dontContinueWithCommand=m_callback->modalDialogResult(m_callbackId, m_result, *this);
     }
-
-    return WindowController::processWindowCommand(command, control);
+    if (!dontContinueWithCommand) {
+        return WindowController::processWindowCommand(command, control);
+    } else {
+        return true;
+    }
 }
 
 // CONSTRUCTOR

@@ -83,6 +83,7 @@ static const char* const NEWS_NAME_LABEL = "news";
 
 // Some upgrade declarations.
 // These should probably be in a header file somewhere.
+extern void RecomputeUnitUpgrades (Unit * un);
 extern const Unit* makeFinalBlankUpgrade(string name, int faction);
 extern int GetModeFromName(const char *);  // 1=add, 2=mult, 0=neither.
 extern Cargo* GetMasterPartList(const char *input_buffer);
@@ -121,7 +122,7 @@ struct ModeInfo {
 	string command;
 	string groupId;
 	ModeInfo(string t="", string b="", string c="", string g="")
-		: title(t), command(c), button(b), groupId(g) {
+		: title(t), button(b), command(c), groupId(g) {
 	}
 };
 static const ModeInfo modeInfo[] = {
@@ -212,11 +213,11 @@ static double usedValue(double originalValue) {
 // CONSTRUCTOR.
 BaseComputer::BaseComputer(Unit* player, Unit* base, const std::vector<DisplayMode>& modes)
     : 
+    m_displayModes(modes),
     m_player(player), 
     m_base(base), 
-    m_displayModes(modes),
-    m_selectedList(NULL),
     m_currentDisplay(NULL_DISPLAY),
+    m_selectedList(NULL),
     m_playingMuzak(false)
 {
     // Make sure we get this color loaded.
@@ -1391,7 +1392,6 @@ void BaseComputer::updateTransactionControls(const Cargo& item, bool skipFirstCa
 }
 
 // Buy an item from the cargo list.
-extern void RecomputeUnitUpgrades (Unit * un);
 bool BaseComputer::buyCargo(const EventCommandId& command, Control* control) {
     Unit* playerUnit = m_player.GetUnit();
     Unit* baseUnit = m_base.GetUnit();
@@ -1825,15 +1825,15 @@ protected:
     void showMountPicker(void);         // Let the user pick a mount.
     void showTurretPicker(void);        // Let the user pick a turret.
     bool endInit(void);                 // Finish initialization.  Returns true if successful.
-    void gotSelectedMount(int index);   // We have the mount number.
-    void gotSelectedTurret(int index);  // We have the turret number.
+    bool gotSelectedMount(int index);   // We have the mount number.  Returns true if the operation was completed.
+    bool gotSelectedTurret(int index);  // We have the turret number.  Returns true if the operation was completed.
     void updateUI(void);                // Make the UI right after we are done.
 
     // OVERRIDES FOR DERIVED CLASSES.
-    virtual void checkTransaction(void) = 0;    // Check, and verify user wants transaction.
+    virtual bool checkTransaction(void) = 0;    // Check, and verify user wants transaction.
     virtual void concludeTransaction(void) = 0; // Finish the transaction.
 
-    virtual void modalDialogResult( // Dispatch to correct function after some modal UI.
+    virtual bool modalDialogResult( // Dispatch to correct function after some modal UI.
         const std::string& id,
         int result,
         WindowController& controller
@@ -1855,7 +1855,7 @@ public:
 
     BuyUpgradeOperation(BaseComputer& p) : UpgradeOperation(p),  m_theTemplate(NULL), m_addMultMode(0) {};
 protected:
-    virtual void checkTransaction(void);    // Check, and verify user wants transaction.
+    virtual bool checkTransaction(void);    // Check, and verify user wants transaction.
     virtual void concludeTransaction(void);     // Finish the transaction.
 
     virtual ~BuyUpgradeOperation(void) {};
@@ -1872,7 +1872,7 @@ public:
 
     SellUpgradeOperation(BaseComputer& p) : UpgradeOperation(p), m_downgradeLimiter(NULL) {};
 protected:
-    virtual void checkTransaction(void);        // Check, and verify user wants transaction.
+    virtual bool checkTransaction(void);        // Check, and verify user wants transaction.
     virtual void concludeTransaction(void);     // Finish the transaction.
 
     virtual ~SellUpgradeOperation(void) {};
@@ -1963,42 +1963,47 @@ void BaseComputer::UpgradeOperation::showTurretPicker(void) {
 }
 
 // Got the mount number.
-void BaseComputer::UpgradeOperation::gotSelectedMount(int index) {
+bool BaseComputer::UpgradeOperation::gotSelectedMount(int index) {
     if(index < 0) {
         // The user cancelled somehow.
         finish();
+		return false; // kill the window.
     } else {
         m_selectedMount = index;
         if(m_newPart->viewSubUnits().current() != NULL) {
             // Need to get selected turret.
             showTurretPicker();
+			return false;
         } else {
             // No turrets.  Proceed with the transaction.
-            checkTransaction();
+            return checkTransaction();
         }
     }
 }
 
 // Got the mount number.
-void BaseComputer::UpgradeOperation::gotSelectedTurret(int index) {
+bool BaseComputer::UpgradeOperation::gotSelectedTurret(int index) {
     if(index < 0) {
         // The user cancelled somehow.
         finish();
+		return false; // kill the window.
     } else {
         m_selectedTurret = index;
-        checkTransaction();
+        return checkTransaction();
     }
 }
 
 // Dispatch to correct function after some modal UI.
-void BaseComputer::UpgradeOperation::modalDialogResult(
+bool BaseComputer::UpgradeOperation::modalDialogResult(
     const std::string& id, int result, WindowController& controller) {
     if(id == GOT_MOUNT_ID) {
         // Got the selected mount from the user.
         gotSelectedMount(result);
+		return false;
     } else if(id == GOT_TURRET_ID) {
         // Got the selected turret from the user.
-        gotSelectedTurret(result);
+		gotSelectedTurret(result);
+		return false;
     } else if(id == CONFIRM_ID) {
         // User answered whether or not to conclude the transaction.
         if(result == YES_ANSWER) {
@@ -2009,6 +2014,7 @@ void BaseComputer::UpgradeOperation::modalDialogResult(
             finish();
         }
     }
+	return false;
 }
 
 
@@ -2050,21 +2056,23 @@ void BaseComputer::BuyUpgradeOperation::start(void) {
     // The object may be deleted now. Be careful here.
 }
 
-// Check, and verify user wants Buy Upgrade transaction.
-void BaseComputer::BuyUpgradeOperation::checkTransaction(void) {
+// Check, and verify user wants Buy Upgrade transaction.  Returns true if more input is required.
+bool BaseComputer::BuyUpgradeOperation::checkTransaction(void) {
     Unit* playerUnit = m_parent.m_player.GetUnit();
     if(!playerUnit) {
         finish();
-        return;
+        return false; // We want the window to die to avoid accessing of deleted memory. 
     }
 
     double percent;         // Temp.  Not used.
     if(playerUnit->canUpgrade(m_newPart, m_selectedMount, m_selectedTurret, m_addMultMode, false, percent, m_theTemplate) ) {
         // We can buy the upgrade.
         concludeTransaction();
+		return false;
     } else {
         showYesNoQuestion("The item cannot fit the frame of your starship.  Do you want to buy it anyway?",
             this, CONFIRM_ID);
+		return true;
     }
 }
  
@@ -2128,21 +2136,23 @@ void BaseComputer::SellUpgradeOperation::start(void) {
     // The object may be deleted now. Be careful here.
 }
 
-// Check, and verify user wants Sell Upgrade transaction.
-void BaseComputer::SellUpgradeOperation::checkTransaction(void) {
+// Check, and verify user wants Sell Upgrade transaction.  Returns true if more input is required.
+bool BaseComputer::SellUpgradeOperation::checkTransaction(void) {
     Unit* playerUnit = m_parent.m_player.GetUnit();
     if(!playerUnit) {
         finish();
-        return;
+        return false; // We want the window to die to avoid accessing of deleted memory. 
     }
 
     double percent;         // Temp.  Not used.
     if( playerUnit->canDowngrade(m_newPart, m_selectedMount, m_selectedTurret, percent, m_downgradeLimiter) ) {
         // We can sell the upgrade.
         concludeTransaction();
+		return false;
     } else {
         showYesNoQuestion("You don't have exactly what you wish to sell.  Continue?",
             this, CONFIRM_ID);
+		return true;
     }
 }
  
