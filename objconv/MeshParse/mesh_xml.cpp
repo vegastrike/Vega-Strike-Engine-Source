@@ -299,7 +299,7 @@ void beginElement(const string &name, const AttributeList &attributes, XML * xml
   case XML::POINTS:
     break;
   case XML::POINT:
-    assert(top==XML::POINTS);
+    //    assert(top==XML::POINTS);
     break;
   case XML::LOCATION:
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
