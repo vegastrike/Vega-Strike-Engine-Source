@@ -24,7 +24,7 @@ void AnimatedTexture::UpdateAllFrame() {
     myvec[i]->cumtime+=GetElapsedTime();
     if (myvec[i]->timeperframe) {
       myvec[i]->active = ((int)(myvec[i]->cumtime/myvec[i]->timeperframe))%myvec[i]->numframes;
-     // myvec[i]->original = myvec[i]->Decal[myvec[i]->active]->Original();
+      //      myvec[i]->original = myvec[i]->Decal[myvec[i]->active]->Original();
     }
   }
 }
