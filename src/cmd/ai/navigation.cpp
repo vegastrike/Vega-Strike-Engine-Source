@@ -133,6 +133,10 @@ bool MoveToParent::Execute(Unit * parent, const QVector& targetlocation) {
   Vector normheading=heading;
   normheading.Normalize();
   Vector max_velocity=max_speed*normheading;
+  max_velocity.Set(fabs(max_velocity.i),
+                   fabs(max_velocity.j),
+                   fabs(max_velocity.k));
+                   
   if (done) return done;//unreachable
   unsigned char numswitchbacks = afterburnAndSwitchbacks>>1;
   if (terminatingX>numswitchbacks&&
