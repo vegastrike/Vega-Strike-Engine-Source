@@ -7,5 +7,5 @@ libc_alike_a_SOURCES =				\
 	lex.yy.cpp		\
 	c_alike.h
 
-CXXFLAGS =
+AM_CXXFLAGS =
 
