@@ -19,8 +19,10 @@
 #ifndef WINSYS_H
 #define WINSYS_H 1
 
-
-
+#ifndef UCHAR_MAX
+#define UCHAR_MAX 255
+#endif
+#define HAVE_GLUT
 #if defined( HAVE_SDL )
 #   include "SDL.h"
 #elif defined( HAVE_GLUT )
