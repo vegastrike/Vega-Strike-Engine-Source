@@ -2,7 +2,7 @@
 # adds a light and a star referring to that light
 use POSIX qw(floor);
 
-@color_table = ( [ 1,2,3 ], [4,5,6] ,[7,8,9],[10,11,12],[13,14,15],[16,17,18]);
+@color_table = ( [ 1,.3,.1 ], [.5,.5,1] ,[1,.8,5],[1,1,.7],[.6,.6,1],[1,.9,1],[1,1,1],[1,.2,.2],[.5,.5,1],[1,.8,.5],[1,1,.7],[1,.9,1],[1,1,1],[.6,.6,1],[1,.6,.6]);
 $state = 0;
 $sysname = $ARGV[0];
 print STDERR $sysname;
@@ -10,6 +10,7 @@ $sysname =~ s/system$//;
 $sysname =~ s{[/.]}{}g;
 $red = $green = $blue = 0;
 @colors = (\$red, \$green, \$blue);
+#      srand(time());
 while($foo=<>) {
   @tokens = split //,$foo;
       print $foo;
@@ -20,7 +21,7 @@ while($foo=<>) {
     } 
     elsif($state==1 && $tok eq ">") {
       $state=-1;
-      srand(time());
+
       ($red,$green,$blue) = @{$color_table[floor(rand(1)*@color_table)]};
 if(0) {
       ${$colors[floor(rand(3))]} = 1;
