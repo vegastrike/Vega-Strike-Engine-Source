@@ -294,7 +294,7 @@ static void Quit(int,KBSTATE newState) {
 Unit *carrier=NULL;
 Unit *fighter = NULL;
 Unit *fighter2=NULL;
-const int numf = 3;
+int numf = 3;
 Unit **fighters;
 CoordinateSelect *locSel=NULL;
 //Background * bg = NULL;
@@ -456,12 +456,13 @@ void createObjects() {
   char fightername [1024]="hornet.xunit";
   for(int a = 0; a < numf; a++) {
     int targetnum =0;
+    Vector pox (1000+150*a,100*a,100);
     if (fp) {      
       if (!feof(fp))
-	fscanf (fp, "%s %d\n",fightername,&targetnum);
+	fscanf (fp, "%s %f %f %f %d\n",fightername,&pox.i, &pox.j, &pox.k,&targetnum);
     }
     fighters[a] = new Unit(fightername, true);
-    fighters[a]->SetPosition (1000+150*a,100,100);
+    fighters[a]->SetPosition (pox);
     
     fighters[a]->SetAI(new Order());
     if (a!=0) {
