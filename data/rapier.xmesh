@@ -1161,4 +1161,5 @@
 <Vertex point="76" s="0.937255" t="0.098039"/>
 </Quad>
 </Polygons>
+<LOD meshfile="rapierPYR.xmesh" size="40"/>
 </Mesh>

@@ -11,7 +11,7 @@
 		<Engine Afterburner="1200.000000" Forward="336.000000" Retro="294.000000" Left="168.000000" Right="168.000000" Top="168.000000" Bottom="168.000000"/>
 		<Maneuver yaw="3643.200050" pitch="4098.600151" roll="3643.200050"/>
 	</Thrust>
-	<Defense>
+	<Defense HudImage="hornet-top.spr">
 		<Armor front="30" right="30" left="30" back="30"/>
 		<Shields front="30" back="30" recharge="4.333333"/>
 		<Hull strength="50"/>

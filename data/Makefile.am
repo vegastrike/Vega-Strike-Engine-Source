@@ -190,6 +190,7 @@ pkgdata_DATA = \
 ./radar.bmp \
 ./radar.spr \
 ./rapier.xmesh \
+./rapierPYR.xmesh \
 ./rapier.xunit \
 ./saturn-ring.alp \
 ./saturn-ring.bmp \
