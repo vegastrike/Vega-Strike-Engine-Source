@@ -850,8 +850,8 @@ void Unit::Deselect() {
 }
 bool Unit::InRange (Unit *target, Vector &localcoord) const {
   localcoord =Vector(ToLocalCoordinates(target->Position()-Position()));
-  float mm= localcoord.Magnitude()-rSize()-target->rSize();
-  if (owner==target||this==target||(mm>computer.radar.maxrange&&target->isUnit()!=PLANETPTR)||(localcoord.k/mm)<computer.radar.maxcone||target->CloakVisible()<.8||target->rSize()<computer.radar.mintargetsize) {
+  float mm= localcoord.Magnitude();
+  if (owner==target||this==target||((mm-rSize()-target->rSize())>computer.radar.maxrange&&target->isUnit()!=PLANETPTR)||(localcoord.k/mm)<computer.radar.maxcone||target->CloakVisible()<.8||target->rSize()<computer.radar.mintargetsize) {
     return false;
   }
   return true;
