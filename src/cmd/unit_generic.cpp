@@ -4741,7 +4741,7 @@ else
 return 0;
 }
 
-inline bool insideDock (const DockingPorts &dock, const Vector & pos, float radius) {
+inline bool insideDock (const DockingPorts &dock, const QVector & pos, float radius) {
   if (dock.used)
     return false;
   double rad=dock.radius+radius;
@@ -4774,14 +4774,14 @@ int Unit::CanDockWithMe(Unit * un) {
     for (unsigned int i=0;i<image->dockingports.size();i++) {
       if (un->image->dockingports.size()) {
 	for (unsigned int j=0;j<un->image->dockingports.size();j++) {
-	  if (insideDock (image->dockingports[i],InvTransform (cumulative_transformation_matrix,Transform (un->cumulative_transformation_matrix,un->image->dockingports[j].pos)),un->image->dockingports[j].radius)) {
+	  if (insideDock (image->dockingports[i],InvTransform (cumulative_transformation_matrix,Transform (un->cumulative_transformation_matrix,un->image->dockingports[j].pos.Cast())),un->image->dockingports[j].radius)) {
 	    if (((un->docked&(DOCKED_INSIDE|DOCKED))==0)&&(!(docked&DOCKED_INSIDE))) {
 	      return i;
 	    }
 	  }
 	}  
       }else {
-	if (insideDock (image->dockingports[i],InvTransform (cumulative_transformation_matrix,un->Position().Cast()),un->rSize())) {
+	if (insideDock (image->dockingports[i],InvTransform (cumulative_transformation_matrix,un->Position()),un->rSize())) {
 	  return i;
 	}
       }
