@@ -484,7 +484,7 @@ void Unit::UpdatePhysics (const Transformation &trans, const Matrix &transmat, c
   }      
   Unit * target = Target();
   bool increase_locking=false;
-  if (target) {
+  if (target&&cloaking<0/*-1 or -32768*/) {
     Vector TargetPos (ToLocalCoordinates ((target->Position()-Position()).Cast())); 
     TargetPos.Normalize(); 
     if (TargetPos.Dot(Vector(0,0,1))>computer.radar.lockcone) {
@@ -537,6 +537,8 @@ void Unit::UpdatePhysics (const Transformation &trans, const Matrix &transmat, c
       }else {
 	mounts[i].time_to_lock=mounts[i].type->LockTime;
       }
+    } else {
+      mounts[i].time_to_lock=mounts[i].type->LockTime;
     }
     if (mounts[i].type->type==weapon_info::BEAM) {
       if (mounts[i].ref.gun) {
