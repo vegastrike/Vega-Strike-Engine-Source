@@ -754,8 +754,10 @@ void StarSystem::ProcessPendingJumps() {
                                   un->SetCurPosition(un->LocalPosition()+SIMULATION_ATOM*delta*(speed/dist));
                                 }else if (!player){
                                   un->SetVelocity(Vector(0,0,0));
-                                }			      
-                                SetShieldZero(un);
+                                }		
+                                static bool setshieldzero=XMLSupport::parse_bool(vs_config->getVariable("physics","jump_disables_shields","true"));
+                                if (setshieldzero)
+                                  SetShieldZero(un);
 			}
 		}
 		double time = GetElapsedTime();
