@@ -1,0 +1,540 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+
+<HTML>
+<HEAD>
+        <TITLE>Vega Strike</TITLE>
+</HEAD>
+<BODY  bgcolor="#000000" text="#C0C0C0" link="#00BB5E" vlink="#008040" alink="#00FF00" STYLE="margin-top: 0px; margin-left: 0px;" marginheight=0 marginwidth=0>
+<table width="700"><tr><td align="left">
+<img src="pics/logo.gif" border="0" alt="">
+</td></tr></table>
+<BR>
+<BLOCKQUOTE>
+<Table width="80%"><tr><td>
+<CENTER>
+<BR>
+<!-- BEGIN LE FASTCOUNTER CODE -->
+         <a href="http://member.linkexchange.com/cgi-bin/fc/fastcounter-login?50841" target="_top">
+         <img border="0" src="http://fastcounter.linkexchange.com/fastcounter?50841+101689"></a>
+         <!-- END LE FASTCOUNTER CODE -->
+         <br>
+         <!-- BEGIN LE FASTCOUNTER LINK -->
+         <font face="arial" size="1">
+         <a href="http://www.fastcounter.com/fc-join">LE FastCounter</a></font><br>
+         <!-- END LE FASTCOUNTER LINK --> 
+<br>
+<a target=_top href=http://extreme-dm.com/s/?tag=hellcatv>
+<img name=im src=http://extreme-dm.com/i/ height=38
+width=41 border=0></a><script><!--
+an=navigator.appName;sr='http://extreme-dm.com/';srw="na";
+srb="na";d=document;r=41;function pr(n) {d.write("<img width=1 sr",
+"c=\""+sr+""+n+"\/?tag=hellcatv&j=y&srw="+srw+"&srb="+srb+"&l=",
+""+escape(parent.document.referrer)+"&rs="+r+"\" height=1>");}//-->
+</script><script language="javascript1.2"><!--
+s=screen;srw=s.width;an!="Netscape"?srb=s.colorDepth:srb=s.pixelDepth//-->
+</script><script><!--
+d.images?r=d.im.width:z=0;pr("z")//-->
+</script><noscript><img src=http://extreme-dm.com/z/?tag=hellcatv&j=n
+height=1 width=1></noscript>
+<br><A HREF = "pics/NovaSol.jpg"><img SRC="pics/NovaSol-sml.jpg" BORDER=0 height=158 width=243></A><A HREF = "pics/voidspace.gif"><img SRC="pics/voidspace.jpg" BORDER=0 height=158 width=243></A>
+<br><a href="main.html">Info</a> || <a href="pics.html">Screen Shots</a>
+|| <a href="download.html">Download</a> || <a href="http://sourceforge.net/projects/vegastrike/">SourceforgeProject</a> || <a href = "http://cvs.sourceforge.net/cgi-bin/viewcvs.cgi/vegastrike/vegastrike/src/">Working Logs</a> || <A HREF="http://lists.sourceforge.net/mailman/listinfo/vegastrike-users">Mailing List</a> || <a href="credits.html">Credits</a> || <a href="email.html">E-mail</a>
+|| <a href="links.html">Links</a> || <a href="http://hkn.eecs.berkeley.edu/~ashieh/184/">CS 184 Project</a></center> 
+
+<table WIDTH="100%" >
+<tr>
+<td BGCOLOR="#393939"><b><font face="Arial"><font size=-1><font color="#FFFFFF"\
+>&nbsp;&nbsp;
+Update! </font><font color="#006834">December 5, 2001</font></font></font></b></td\
+>
+</tr>
+</table>
+<ul> 
+<li> I suffered a sleepless night to get this release out to everyone.
+<li> Finally you can explore sol and go into planets... in this case the earth!
+<li> Windows users <a href="http://hkn.berkeley.edu/~daniel/vegastrike-0.1.3.zip">Download</a> it now!
+<li> To run it, run vspiii550.exe  It may well be slow.
+<li> Unix users can get the <a href="http://hkn.berkeley.edu/~daniel/vegastrike_src120501.zip">source</a> and the unix <a href="http://hkn.berkeley.edu/~daniel/vegastrike_unixdata-0.1.3.tgz">data</a> If the source doesn't work (it was only heavily tested on FAT32 case insensitivity) you can simply check out vegastrike cvs (it's smaller).
+<li> You have been provided with a ferret-scout to explore the earth. Enjoy the fog.
+<li> This test has been optimized for high end computers due to the fact that I'm very tired and have no time for making configuration files that will work with slow ones.  Edit the vegastrike.config if you have a slow computer or vid card and let me know what you come up with.
+<li> Hand me any comments at <a href="mailto:vegastrike-users@lists.sourceforge.net">the mailing list</a>
+<li> Enjoy the grand canyon! If you want to DIE when you crash, edit sol.system and change continuous terrain's mass="100" instead of ".0000001" that will havea  more releastic mass...but I figure most of you want to just fly around and don't want to die on crash
+</ul>
+
+
+
+<table WIDTH="100%" >
+<tr>
+<td BGCOLOR="#393939"><b><font face="Arial"><font size=-1><font color="#FFFFFF"\
+>&nbsp;&nbsp;
+Update! </font><font color="#006834">December 1, 2001</font></font></font></b></td\
+>
+</tr>
+</table>
+<ul> 
+<li> Almost no one except those I knew personally could not run vegastrike 0.1.1
+<li> I have no idea why, cus it worked for me every time, but I have compiled a new version with a win98 machine instead of win2k, and people have reported success with this version!
+<li> <a href="http://hkn.berkeley.edu/~ashieh/184/vegastrike-0.1.2.zip">Download</a> it now!
+<li> To run it, run vegastrike.exe
+<li> Remember this is just a test release that has a slab of terrain for you to fly through at top speed in a nova (I have increased your speed by 1000%).
+<li> This test requires 256 megabytes of ram. If you do not have that much, you can try editing terrain.xml and changing down both detail levels at the top.
+<li> Hand me any comments at <a href="mailto:vegastrike-users@lists.sourceforge.net">the mailing list</a>
+</ul>
+
+<table WIDTH="100%" >
+<tr>
+<td BGCOLOR="#393939"><b><font face="Arial"><font size=-1><font color="#FFFFFF"\
+>&nbsp;&nbsp;
+Update! </font><font color="#006834">November 28, 2001</font></font></font></b></td\
+>
+</tr>
+</table>
+<ul> 
+<li> I have compiled a nice windows version of the terrain for people to enjoy.
+<li> <a href="http://hkn.berkeley.edu/~ashieh/184/vegastrike-0.1.1.zip">Download</a> it now!
+<li> To run it, run vsDONOTEDIT.exe  :-) 
+<li> Remember this is just a test release that has a slab of terrain for you to fly through.
+<li> Expect a nice polished version on December 6th! Terrain will be able to be round, fog might spill over the terrain, etc, etc!
+<li> This test requires 256 megabytes of ram. If you do not have that much, you can try editing terrain.xml and changing down both detail levels at the top.
+</ul>
+
+
+<table WIDTH="100%" >
+<tr>
+<td BGCOLOR="#393939"><b><font face="Arial"><font size=-1><font color="#FFFFFF"\
+>&nbsp;&nbsp;
+Update! </font><font color="#006834">November 14, 2001</font></font></font></b></td\
+>
+</tr>
+</table>
+<ul> 
+<li> I have slaved away at a <a href="pics/terrain1.jpg">quad</a> tree algorithm for continuous LOD meshing of <a href="pics/terrain3.jpg">terrain</a>!
+<li> And the results appeared to <a href = "pics/terrain2.jpg">work</a> out of the box! Hopefully textures will work with terrain soon :-)
+</ul>
+
+<table WIDTH="100%" >
+<tr>
+<td BGCOLOR="#393939"><b><font face="Arial"><font size=-1><font color="#FFFFFF"\
+>&nbsp;&nbsp;
+Update! </font><font color="#006834">November 5, 2001</font></font></font></b></td\
+>
+</tr>
+</table>
+<ul> 
+<li> The Vegastrike BETA release is <a href="pics/NovaSol.jpg">complete</a>!  
+<li> The Features include Sounds, Joystick support, new visual effects
+<li> Support for a wider variety of cards
+<li> All new models, and new weapons that glow and shimmer.
+<li> Cloaking effect, Red-Hot melting effect near the sun
+<li> New Alien race to combat, the Aera, named after Aries, the God of War.
+<li> 5 Challenging missions.
+<li> Please send any fun missions you design and fiction to <a href="mailto:vegastrike-users@lists.sourceforge.net">vegastrike-users@lists.sourceforge.net</a> So that I can put them up for all to enjoy! In addition, use this list to send me any bugs or feature requests you may have!
+<li> UPDATE Windows users:   Sound causes problems on certain windows 2000 machines (perhaps without updates?) I have included a question in the install program that asks if you wish to have sound.  If you are having trouble with vegastrike randomly quitting, try saying "no" to sound and seeing if it works
+<li> Windows users: download <a href="http://prdownloads.sourceforge.net/vegastrike/vegastrike-0.1.0.zip">Vegastrike Beta!</a>
+<li> UPDATE Linux users: an older version of the source that requred OpenAL was uploaded.  That shoudl be fixed; now you don't absolutely have to have OpenAL
+<li> Linux users: compile <a href="http://prdownloads.sourceforge.net/vegastrike/vegastrike-0.1.0.tar.gz">Vegastrike</a> and run from the <a href="http://prdownloads.sourceforge.net/vegastrike/vegastrike-0.1.0_data.tar.gz">Data directory</a> or put a well crafted vegastrike.config (with data dir specified) into your ~/.vegastrike dir
+</ul>
+
+
+<table WIDTH="100%" >
+<tr>
+<td BGCOLOR="#393939"><b><font face="Arial"><font size=-1><font color="#FFFFFF"\
+>&nbsp;&nbsp;
+Update! </font><font color="#006834">October 31, 2001</font></font></font></b></td\
+>
+</tr>
+</table>
+<ul> 
+<li> Happy Halloween all!  As a special Halloween present, Major A Payne has sent a bunch of perfectly digitally mastered weapon sounds! Finally Vegastrike will have high quality, free weapon sounds!
+<li> A mailing list for users to discuss desired effects and additions to vegastrike has been created! <A HREF="http://lists.sourceforge.net/mailman/listinfo/vegastrike-users">Sign up for the mailing list</a> and send me your ideas and suggestions for the beta release due by the end of this week!
+<li> And throughout the week, the renowned Somall has created from scratch a wonderful shield damage and weapon damage sound as well as a laser sound that brings back memories of old!   
+<li> In addition he has some cool flyby sounds he's sent a bunch of nice afterburner, explosion, and missile sounds! Thank you so much Major & Somall! You have made the imminent Vegastrike beta possible!
+<li> Also Tobias Wollgarn has sent me a couple of very nice engine and explosion sounds! You can expect to be hearing them soon as well!
+<li> You can expect the beta most likely by Friday if my art goes well!  I need to still make some nice Beam textures... If any artists think they can make a few bolt and beam and weapon animations or stillframe textures, please contact me to help out at <a href="mailto:hellcatv@hotmail.com">hellcatv@hotmail.com</a>
+<li> And, Last by very certainly not least, Daniel Aleksandrow has made a number of beautiful LODs that one an hardly tell (at a distance) are not the original models!  He's been working on a <a href="help.html">Vegastrike Model HOWTO</a> detailing how a 3d modeller can make starships for vegastrike! Read it and see if you can help out too!
+<li> Thanks all for your support! Vegastrike Beta Is made possible by...viewers like you!
+<li> Note to linux users:  I have been trying to track down a bug related to drawing lines with MESA_FX... Apparently the bug is not my own, but when I call glEnable (TEXTURE0) in Mesa 3.x it segfaults upon calling a null function. If you're getting strange errors in Mesa with a Voodoo1 or 2 card, the fix is: Upgrade to Mesa 4.0 (just released)... make sure to compile with glide and put your glide libs in the strange dirs recommended by the docs!
+</ul>
+<table WIDTH="100%" >
+<tr>
+<td BGCOLOR="#393939"><b><font face="Arial"><font size=-1><font color="#FFFFFF"\
+>&nbsp;&nbsp;
+Update! </font><font color="#006834">October 29, 2001</font></font></font></b></td\
+>
+</tr>
+</table>
+<ul> 
+<li> A Windows version now compiles and works properly. OpenAL uses DirectSound3D for sound support, making Vegastrike hardware accelerated with respect to sound in Windows
+<li> I rewrote the sound library in vegastrike to comply with some of DirectSound's limitations
+<li> I added the doppler effect to work with sounds and added configuration to the configuration file for "how much" doppler should be applied to moving sounds
+<li> I still need various weapons sounds (laser bolts, mass weapons, disruptor beams, shield hit sounds (electric) and hull and armor hit and damage sounds for a release, but nothing else is barring this release)
+<li> I got a nice GeForce 3 card today! Maybe this means we'll be seeing some vertex programs in the future (imagine cloaking distorting the mesh like in the movies!)  I'll have to fiddle with it a lot though!
+</ul>
+
+<table WIDTH="100%" >
+<tr>
+<td BGCOLOR="#393939"><b><font face="Arial"><font size=-1><font color="#FFFFFF"\
+>&nbsp;&nbsp;
+Update! </font><font color="#006834">October 24, 2001</font></font></font></b></td\
+>
+</tr>
+</table>
+<ul> 
+<li> I have completed turrets! Starships may be built with turrets on them. Turrets may be restricted to a cone, half-sphere, or inverse cone (or sphere) in directions, and they can use normal pilot personalities or your keys.  The number of lines of code needed to do this correctly was surprisingly little! :-) glad I planned for this all along!
+<li> Vegastrike Beta is ready to release with sounds, music, and much more!
+<li> However, there's a catch... In order to release to the public I need some original, free sounds... If you have some .wav's or .mp3's lying around on your computer that match one of the following (they also need to be high quality, I don't want junk sounds...at leasr 22050) descriptions, please send to me or contact me to arrange transportation if they're larger than half a meg or so...
+<li> To release vegastrike I need at least 1 of each of the following (send them to <a href="mailto:hellcatv@hotmail.com">hellcatv@hotmail.com</a>:
+<li> laser sound
+<li> mass weapon sound
+<li> explosion sound
+<li> loopable afterburner sound
+<li> shield hit sound
+<li> armor hit sound
+<li> hull hit sound
+<li> missile firing sound
+<li> assorted weapon sounds
+<li> loopable beam weapon sound
+<li> cloaking sound
+<li> In addition vegastrike would be very happy to include any of your personal music (released under any license you choose esp. GPL...open source music whoohoo!) or other general uncopyrighted music for the final release.  If you think you're a good composer and can write tunes, please make some spacey themes.
+<li> Currently vegastrike will play tunes from the following 3 themes:
+<li> a) peace b) battle c) panic
+<li> if you have some music that isn't copyrighted that fits one of those bills, please send it to me.
+<li> Thank you for your time
+</ul>
+
+
+<table WIDTH="100%" >
+<tr>
+<td BGCOLOR="#393939"><b><font face="Arial"><font size=-1><font color="#FFFFFF"\
+>&nbsp;&nbsp;
+Update! </font><font color="#006834">October 21, 2001</font></font></font></b></td\
+>
+</tr>
+</table>
+<ul> 
+<li> Vegastrike now has fully configurable sound and music!
+<li> The way music works is that you put a .m3u playlist in the data directory
+and it loads mp3's from it. Near the top means "I'm in trouble" near the bottom means "I'm winning the battle!
+<li> Sounds are done completely in OpenAL 3D-sound, and it will be shortly hardware accelerated on Windows Creative Labs drivers!
+<li> expect a beta shortly (programmers can grab the cvs)
+<li> enjoy as lasers blast around you and starships explode on every side of you, sending sound shockwaves flying through the (wait) vacuum of space ;-)
+<li> Note: I do not have very good sound effects for laser blasts and explosions. If you have some nice sounds (noncopyrighted please) then please get in contact with me so we can arrange a file transfer and I can include good sounds in the beta! Contact me at hellcatv@hotmail.com Thanks!
+<li> Radar is now configurable on certain ships to have color/black and white, different ranges, itts, etc
+<li> I would send a sound screenshot, but it wouldn't really be...visible, would it ;-)
+<li> Alexander Rawass has made a completely configurable configuration file in XML. He wrote a DOM parser and made all keybindings configurable! Go Alex!
+<li> So currently the only thing delaying the beta is a) lack of LODs (see post below how you can help)
+</ul>
+
+
+
+
+<table WIDTH="100%" >
+<tr>
+<td BGCOLOR="#393939"><b><font face="Arial"><font size=-1><font color="#FFFFFF"\
+>&nbsp;&nbsp;
+Update! </font><font color="#006834">October 16, 2001</font></font></font></b></td\
+>
+</tr>
+</table>
+<ul> 
+<li> Vegastrike is now completely Geometry bound... So I spent a lot of time perfecting an intricate system of LOD's that will not impact speed at all.
+<li> However now that I can select LODs, I do not have ANY LODs to work with, so Vegastrike is still geometry bound. This is a plea to ALL artists that have 3d modellers.  I need to convert a number of models for the beta release.  I have placed the models at <a href="http://reflection.dyn.dhs.org/3ds/vsorig/">here</a> in .obj format.  I beg anyone that has a 3d modeller that can do Level of details to make me about 4 or 5 simplifications of hte given meshes.  They don't need to look so great since they will be in the distance and only a few pixels wide.  Anyone who helps me with just a few of their favorite ships and sends conversions to <a href="mailto:hellcatv@hotmail.com">me</a> would be sincerely thanked and would receive part of the credit for the art of vegastrike!
+<li> if the object files above do not work, try <a href="http://reflection.dyn.dhs.org/3ds/">here</a>
+<li> Random lockups on nVidia drivers and texture-lessness on the voodoo 5 have been worked around by using VertexArrays instead of Display Lists (though display lists remain a command line option)
+<li> collision table speed has been further improved and a bug there has been terminated
+<li> Alexander Rawass has finished joystick support! It is going into the beta for sure.
+<li> So currently the only things delaying the beta are a) lack of LODs and b) Sound.
+<li> VDu's are done and will display a variety fo info from shields to target status!  Cockpits look marvelous!  As soon as some LODs come in I can release the Beta! So please help out :-)
+</ul>
+
+
+<table WIDTH="100%" >
+<tr>
+<td BGCOLOR="#393939"><b><font face="Arial"><font size=-1><font color="#FFFFFF"\
+>&nbsp;&nbsp;
+Update! </font><font color="#006834">October 10, 2001</font></font></font></b></td\
+>
+</tr>
+</table>
+<ul> 
+<li> A number of major changes have been put in for the up-and-coming beta! A fully configurable HUD is now available to be selected!  Dials glow, radar has all the ships, missile lights flicker... It's a sight to be <a href="pics/cockpit-screenshot.jpg"> Seen!!!</a>  Credit for the brilliant and most amazing hornet cockpit design goes soley to H.E. Day!  He is the most amazing artist I have met!
+<li> I am working on text right now--there was some legacy text code from VS-classic, and now it's been pretty well perfected. I have to add KPS readouts, etc!
+<li> Also the speed of vegastrike has been improved about 200% on certain hardware systems!  Physics has been divided up into 3 stages that each execute in sequence every .3333 seconds (instead of every .1 seconds all three stages execute.
+<li> collision table speed has been much improved, and 2 offending simple but time consuming functions have been optimized!!  This leaves no functions as the single time killers!  Speed gains have been shown to be at least 180%!
+<li> Joystick support is being worked on by a new developer, Alexander Rawass! He has figured out the code in no time flat!!! And is currently adding support! Go Alex!
+<li> A mailing list has been created for those interested in feature requests or development progress or suggestions! <A HREF="http://lists.sourceforge.net/mailman/listinfo/vegastrike-devel">Join the list now</a> and offer suggestions and comments!
+</ul>
+
+
+<table WIDTH="100%" >
+<tr>
+<td BGCOLOR="#393939"><b><font face="Arial"><font size=-1><font color="#FFFFFF"\
+>&nbsp;&nbsp;
+Update! </font><font color="#006834">October 4, 2001</font></font></font></b></td\
+>
+</tr>
+</table>
+<ul> 
+<li> A couple of important goals have been achieved. Factions have been completed: meaning now objects are "owned" by various factions.  In the beta release the number you specify will be the corresponding faction (from pirate to merchant to kilrathi) instead of the target.
+<li> Also missiles, beams, and bolts are done! It's not on the web yet, but when it will be, animated balls and bolts will be yours to fire around!
+<li> ITTS has been better integrated! Now the AI will use its ITTS if it has it!
+<li> A lot of expat small issues have been fixed to reduce memory usage...and texture data isn't saved in duplicate until exit any more. So expect less memory usage (except for up-and-coming sound) in the final
+</ul>
+
+
+<table WIDTH="100%" >
+<tr>
+<td BGCOLOR="#393939"><b><font face="Arial"><font size=-1><font color="#FFFFFF"\
+>&nbsp;&nbsp;
+Update! </font><font color="#006834">September 28, 2001</font></font></font></b></td\
+>
+</tr>
+</table>
+<ul> 
+<li> <B><U>Update::Midnight. Windows users: </B></U>Due to a CVS failure, the last change, a fix for a windows condition that could cause vegastrike to stop rendering once a player was destroyed, was not placed in vegastrike before midnight. <B>Please update your copy below</B>.
+<li>This is what you've been waiting for! This is the vegastrike release you can PLAY! 
+<li> You can design missions, fight against kats! (check out the README)
+<li> Stars fly by the scene, adding the mood.
+<li> Explosions tear starships in half!
+<li> Hide in the dock to save yourself from enemy fire! (its shields will protect you)
+<li> Customize the AI to your liking! (send me if you get some good AI scripts <a href="mailto:hellcatv@hotmail.com">hellcatv@hotmail.com</a> )
+<li> Shelton slide is active, just hold down 'q' to turn at will
+<li> Windoze users: <a href = "ftp://vegastrike.sourceforge.net/pub/vegastrike/vegastrike-0.0.9.zip">download here</a>!
+<li> Linux users get the <a href="ftp://vegastrike.sourceforge.net/pub/vegastrike/vegastrike-0.0.9_src.tar.gz">source here</a>, and the <a href = "ftp://vegastrike.sourceforge.net/pub/vegastrike/vegastrike-0.0.9_unixdata.tgz">data here</a>!
+<li> Enjoy and mail me any comments or modifications to ship files (they're just like html for stats editing any .xunit files) at <a href="mailto:hellcatv@hotmail.com">hellcatv@hotmail.com</a> 
+<li> I hope this brings back the flight sim mood in 32 bit color (-32 flag BTW  and -f for fullscreen)
+</ul>
+
+
+<table WIDTH="100%" >
+<tr>
+<td BGCOLOR="#393939"><b><font face="Arial"><font size=-1><font color="#FFFFFF"\
+>&nbsp;&nbsp;
+Update! </font><font color="#006834">September 24, 2001</font></font></font></b></td\
+>
+</tr>
+</table>
+<ul>
+<li> The AI "personality" engine is now complete.  You can control a number of things about the enemy AI as in when it breaks off, when it goes full speed at you, when it afterburner slides around you.  This is all customizable within a text file, which will soon give each individual pilot his own personality!
+<li> A number of AI scripts have been programmed including shelton slide and afterburner slide.  You, too can perform a shelton slide.
+<li> debris for explosions scatters the area when you indeed have a rare, but successful kill!
+<li> Shield meshes may be separate from hull meshes... meaning once the shield is down the artist has the option to have a separate hull BSP tree (so skin-tight shields have an advantage)
+<li> Mini-missions are creatable... this is a very basic and stupid format...check the readme for details when it is released.
+<li> expect a release in a number of days after this version has been beta-tested some.
+</ul>
+
+
+<table WIDTH="100%" >
+<tr>
+<td BGCOLOR="#393939"><b><font face="Arial"><font size=-1><font color="#FFFFFF"\
+>&nbsp;&nbsp;
+Update! </font><font color="#006834">September 14, 2001</font></font></font></b></td\
+>
+</tr>
+</table>
+<ul>
+<li> Some major news has taken place.  I have created my very own monsters...attacking fighting ships!
+<li> Currently they just fly towards my hornet shooting me till I'm dead...
+<li> The code (somewhat tested) is there to make them do afterburner slides and all sorts of maneuvers ... and I will activate it in a number of days.
+<li> Yes this means fighting backguys and spectacular blood splitting, ear curdling explosions... well not ear yet, but I have begin very basic preliminaries to make MP3's the choice sound format for vegastrike!
+<li> it';s very impressive!
+</ul>
+
+<table WIDTH="100%" >
+<tr>
+<td BGCOLOR="#393939"><b><font face="Arial"><font size=-1><font color="#FFFFFF"\
+>&nbsp;&nbsp;
+Update! </font><font color="#006834">September 2, 2001</font></font></font></b></td\
+>
+</tr>
+</table>
+<ul>
+<li> This is a major milestone release! Not only do starships bounce off each other when hitting each other, but close-in collisions work using BSP trees (a bonus to prophecy, I made a bsp generator that generates prophecy bsp trees)
+<li> In addition, a revolutionary shielding system has been devised using OpenGL lights (completely accelerated on GeForce and ATI Radeon cards).
+<li> Shields can be hit in multiple directions by the beams, and they flicker appropriately!
+<li> And as a bonus to you realists, the saturn ring has been added to the solar system to make it seem more...complete!
+<li> So fire up vegastrike, turn 90 degrees left, and start blasting at the line of hornets.
+<li> don't crash into them or the planets or you might go careening off into space! 
+<li> Windows users: download the .exe release: <a href="http://prdownloads.sourceforge.net/vegastrike/vegastrike090201.zip"> here!</a> Enjoy!
+<li> Linux users can compile the source from cvs or the project site!
+<li> <A href ="mailto:hellcatv@hotmail.com">Mail Me Comments: Hellcatv@hotmail.com</a>
+<li> Just added a <a href="http://prdownloads.sourceforge.net/vegastrike/vegastrike090201_unixdata.tgz">Unix datafile</a> package and <a href="http://prdownloads.sourceforge.net/vegastrike/vegastrike_src090201.tgz">source</a>! 
+</ul>
+
+<br>&nbsp;
+<table WIDTH="100%" >
+<tr>
+<td BGCOLOR="#393939"><b><font face="Arial"><font size=-1><font color="#FFFFFF"\
+>&nbsp;&nbsp;
+Update! </font><font color="#006834">August 29, 2001</font></font></font></b></td\
+>
+</tr>
+</table>
+<ul>
+<li> Shield <a href = "pics/shieldshot.jpg">proof-of-concept </a> is complete.  Now when I fire, the shield lights up... I still have to make it animate nicely...which should be doable but slightly tricky due to variable mesh sizes, etc.
+<li> I'm using OpenGL lights for shields, meaning that the lights themselves around the shield light it up for damage.
+<li> each shot that hits factors into the creation of possibly new lights to light up the shield in certain places (where in other cases it would be completely transparent). 
+<li> this method of doing shields doesn't suffer from the problem of large ships getting hit in many places (just put lights on both sides) nor the problem of having to change and redownload the mesh each time part of the shield is hit (to change the way it looks).  It just uses weak lights that fade to make the shield <a href = "pics/shieldshot2.jpg">shine</a>.
+<li> Expect the shields to look magnificent in the next release, which I anticipate fairly shortly.
+</ul>
+
+
+<br>&nbsp;
+<table WIDTH="100%" >
+<tr>
+<td BGCOLOR="#393939"><b><font face="Arial"><font size=-1><font color="#FFFFFF"\
+>&nbsp;&nbsp;
+Update! </font><font color="#006834">August 28, 2001</font></font></font></b></td\
+>
+</tr>
+</table>
+<ul>
+<li> modified collisions to be about 6x as fast as they used to be (by only updating the table when a ship left or entered a sector of a system) 
+<li> added bouncing feature so you bounce off stuff
+<li> fixed up little problems with bsp and rounding errors.
+<li> fixed many hidden problems with the old collision system in corner-cases
+<li> keyed in 5 hornets as your wingmen and flew 'em one by one into jupiter and watched 'em bounce off (hilarious)
+<li> fixed a huge fillrate problem (clearing both color and Z twice instead of Z once...should improve speed 2-3x in fill-limited situations 
+<li> working on a unified lighting scheme that should be about 5-10 times faster than the previous system.
+<li> adding to this system the ability to have weapon glare on an arbitrary shield mesh using attenuated OpenGL lights 
+<li> fixed many of the macintosh problems (trying to make vegastrike endian clean for those mac users)
+<li> ace_123 working on a brilliant system editor that should make system editing easy
+<li> darkmage working on entering the data from the prophecy map so that jumping is possible!
+</ul>
+
+
+<table WIDTH="100%" >
+<tr>
+<td BGCOLOR="#393939"><b><font face="Arial"><font size=-1><font color="#FFFFFF"\
+>&nbsp;&nbsp;
+Update! </font><font color="#006834">August 12, 2001</font></font></font></b></td\
+>
+</tr>
+</table>
+<ul>
+<li> BSP trees now work perfectly for both line and starship collisions.
+<li> this means that, unlike vegastrike classic, you'll be able to fly close to the hull of a large starship, hug the deck, fly through the launch bay...
+<li> Any closed model (eg Midway) can only be hit by a well placed beam (no hitting if you fire between the legs of those Midway pants)
+<li> This also will make way for skin-tight shield effects on those large ships!
+<li> an optimized BSP tree generator is available that can generate trees for Vegastrike and even for prophecy.  
+<li> this generator can minimize the size of the tree or the time it takes to search through it, using ideas inspired from the crystal space engine (http://crystal.sourceforge.net)
+<li> if anyone has any ideas how to enforce the closed-ness of a model, please let me know.  Currently many of the vegastrike classic models are "open" and have gaps in them that allow you to collide, mid-space! (bad things)
+<li> These BSP trees are the last _major_ challenge to getting vegastrike working.
+<li> from here on out it's all details associated with gameplay and organization, as opposed to new algorithms I need to learn.
+</ul>
+
+
+<table WIDTH="100%" >
+<tr>
+<td BGCOLOR="#393939"><b><font face="Arial"><font size=-1><font color="#FFFFFF"\
+>&nbsp;&nbsp;
+Update! </font><font color="#006834">July 19, 2001</font></font></font></b></td\
+>
+</tr>
+</table>
+<ul>
+<li> <a href="pics/Asteroid2.jpg">Sol</a> is finished. That wonderful star system we live in now is there for you to <a href="pics/Asteroid.jpg">fly</a> in as well! 
+<li> many thanks to Darkmage from our partner-project Wing Commander Universe for patiently debugging through the beta and making this star system <a href="pics/Asteroid3.jpg">sparkling and beautiful</a>! 
+<li> Explore the solar system to your satisfaction!
+<li> find asteroids, planets, maybe even relics of a war... 
+<li> AI was perfected more and now properly finishes time and time again.
+<li> work was put into a faction file where people and whole empires can have relationships with eath other!   
+<li> Please <a href="mailto:hellcatv@hotmail.com"> mail me</a> any comments! or suggestions.
+<li> Windows Users: <a href = "http://prdownloads.sourceforge.net/vegastrike/vegastrike_data071901.zip">Get the Binary .Exe Here!</a>
+<li> Linux Users: <a href = "http://prdownloads.sourceforge.net/vegastrike/vegastrike_data071901.tgz">Get the datafiles Here!</a> and the source  <a href = "http://prdownloads.sourceforge.net/vegastrike/vegastrike071901.tgz">here!</a>
+</ul>
+
+
+
+
+
+
+
+<table WIDTH="100%" >
+<tr>
+<td BGCOLOR="#393939"><b><font face="Arial"><font size=-1><font color="#FFFFFF"\
+>&nbsp;&nbsp;
+Update! </font><font color="#006834">July 17, 2001</font></font></font></b></td\
+>
+</tr>
+</table>
+<ul>
+<li> AI is almost complete.  Currently I have a scripting ability that lets you:
+<li> Execute any command for x seconds, Turn towards something (an object or a location in space), Match speeds with something, Move to a location, Orbit a location, and Combine movement and turning for a specified ammt of time.
+<li> This enables us to do afterburner slide for instance!  Face 90 degrees off enemy path while engaging afterburners to that direction; then turn to target for x seconds.
+<li> Additionally the space of the arena was increased ten thousand-fold from the lame 100 meters.  Now ships can be truly far off until they shrink into specs of dust.
+<li> Orbiting of planets was fixed so they turn the correct way with respect to textures
+<li> Star systems may now have asteroids, multiple suns, and space stations! Thanks to Patrick!
+<li> Collision was fixed to be fast for large objects greater than 200 meters on a side (eg planets)  (it used to be slow if ships were too big)
+<li> Units can now orbit planets (asteroids, space stations, etc)
+<li> code has been started to split the world into factions.
+<li> Thomas Bruckner has aided us with a wonderful ship converter from .pof format.
+<li> He's thinking of making the prophecy ship editor work with vegastrike! What a treat that would be!
+<li> Unfortunately I'm going to be away for a week and a half starting 7-19-01
+</ul>
+
+
+
+<table WIDTH="100%" >
+<tr>
+<td BGCOLOR="#393939"><b><font face="Arial"><font size=-1><font color="#FFFFFF"\
+>&nbsp;&nbsp;
+Update! </font><font color="#006834">July 12, 2001</font></font></font></b></td\
+>
+</tr>
+</table>
+<ul>
+
+<li> This release also shows the glowing engines... they will soon dim as you lower the throttle, but right now they're just decorations, and don't yet emit light either :-)
+<li> AI has had a major breakthrough yesterday--it can finally direct its fire at stuff--- so very efficient enemies will be created soon!  So the sun will not be the only enemy for very long! Look forward to a very skilled AI! Coming soon....
+<li> Vegastrike is coming to fruition! Check out the latest release, and if you want to change the information about lasers (such as speed, range and radius) you might wish to edit the weapon_list.xml 
+<li> Add your own weapons and put them on the hornet.xunit :-)  both open in notepad!
+<li> <a href = "pics/hornetfire.jpg">Weapons</a> have been activated and may be <a href = "pics/hornetcharging.jpg">fired</a> with the flick of the spacebar!
+<li> try zooming out with '1' and aiming for the planet.... steer, and watch the weapon hit it.
+<li> note to windows users: printed messages to the console may slow down vegastrike. It will run faster if you minimize the dos box while playing.
+<li> <a href="http://prdownloads.sourceforge.net/vegastrike/vegastrike_data071101.zip">Get a windows</a> release now (data files for linux people also)!
+<li> <a href="http://prdownloads.sourceforge.net/vegastrike/vegastrike071101.tgz">Source Code</a> is available too.
+</ul>
+
+
+
+
+<table WIDTH="100%" >
+<tr>
+<td BGCOLOR="#393939"><b><font face="Arial"><font size=-1><font color="#FFFFFF"\
+>&nbsp;&nbsp;
+Update! </font><font color="#006834">July 4, 2001</font></font></font></b></td\
+>
+</tr>
+</table>
+<ul>
+<li> The weapon editor is complete, and now finally saves the weapon info properly as well as halo glow and turret info!
+<li> <a href="http://prdownloads.sourceforge.net/vegastrike/texturizer_data071101.zip">Download</a> the latest release now! <a href="http://prdownloads.sourceforge.net/vegastrike/vegastrike071101.tgz">Source</a> is available too.
+<li> Instructions were updated the texture editor for those interested in helping out.
+<li> Engine glow is complete and looks <a href="pics/hornet-glow1.jpg">perfect</a>.
+<li> Much time was spent making the glow <a href="pics/hornet-glow2.jpg">spherical</a>.
+<li> <a href="pics/hornet-glow3.jpg">Glow</a> may be specified by the above texturizer for viewing in the next official release!
+</ul>
+
+
+<br>&nbsp;
+<br>&nbsp;
+<p><a href="oldnews.html">Archived News:: Before July 2001</a>
+<CENTER>
+<BR><B><A href="http://sourceforge.net">
+<BR><IMG src="http://sourceforge.net/sflogo.php?group_id=19507&type=1"
+
+width="88" height="31" border="0" alt="SourceForge Logo"> </A>
+</B>
+<br>
+</center>
+</td>
+</tr>
+</table>
+</blockquote>
+
+</body>
+</html>
+
+
+

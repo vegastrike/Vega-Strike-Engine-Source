@@ -731,6 +731,7 @@ void StarSystem::LoadXML(const char *filename, const Vector & centroid) {
     primaries[i]=xml->moons[i];
   }
 #ifdef NV_CUBE_MAP
+  printf("using NV_CUBE_MAP\n");
   LightMap[0]=new Texture ((xml->backgroundname+"_right_light.bmp").c_str(),1,BILINEAR,CUBEMAP,CUBEMAP_POSITIVE_X);
   LightMap[1]=new Texture ((xml->backgroundname+"_left_light.bmp").c_str(),1,BILINEAR,CUBEMAP,CUBEMAP_NEGATIVE_X);
   LightMap[2]=new Texture ((xml->backgroundname+"_up_light.bmp").c_str(),1,BILINEAR,CUBEMAP,CUBEMAP_POSITIVE_Y);

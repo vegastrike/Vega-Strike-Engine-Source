@@ -116,7 +116,7 @@ class StarSystem {
   ///Disables included lights and terrains
   void SwapOut ();
 
-  friend Atmosphere;
+  friend class Atmosphere;
 };
 
 #endif
