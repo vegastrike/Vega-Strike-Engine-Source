@@ -257,7 +257,7 @@ string Unit::WriteUnitString () {
 
         // mutable things
         keys.push_back("CargoVolume");
-        values.push_back(tostring(image->cargo_volume));
+        values.push_back(XMLSupport::tostring(image->cargo_volume));
         
         // immutable things
         keys.push_back("Scale");
