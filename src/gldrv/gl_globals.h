@@ -137,6 +137,8 @@ typedef struct {
   int color_depth;
   int cubemap;  
   int compression;
+  char wireframe;
+  char smooth_shade;
   bool s3tc;
 } gl_options_t;
 extern gl_options_t gl_options;

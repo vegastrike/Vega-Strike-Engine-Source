@@ -13,6 +13,7 @@ static DecalQueue beamdecals;
 static vector <vector <DrawContext> > beamdrawqueue;
 extern double interpolation_blend_factor;
 Beam::Beam (const Transformation & trans, const weapon_info & clne, void * own, int sound) :vlist(NULL), Col(clne.r,clne.g,clne.b,clne.a){
+  VSCONSTRUCT2('B')
 #ifdef PERBOLTSOUND
   sound = AUDCreateSound (clne.sound,true);
 #else
@@ -105,6 +106,7 @@ void Beam::Init (const Transformation & trans, const weapon_info &cln , void * o
 }
 
 Beam::~Beam () {
+  VSDESTRUCT2
   //  fprintf (stderr,"Deleting %x",this);
 #ifdef PERBOLTSOUND
   AUDDeleteSound (sound);

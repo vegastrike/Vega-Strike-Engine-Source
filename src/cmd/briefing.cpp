@@ -6,6 +6,7 @@
 #include "gfx/ani_texture.h"
 #include "gfx/matrix.h"
 Briefing::Ship::Ship (const char * filename, int faction, const Vector & position) {
+  VSCONSTRUCT2('s')
   Unit * tmp  = UnitFactory::createUnit(filename,true,faction);
   meshdata = tmp->StealMeshes();
   tmp->Kill();
@@ -92,6 +93,7 @@ void Briefing::Ship::Render (const Matrix &cam, double interpol) {
 }
 Briefing::Ship::~Ship() {
   Destroy();
+  VSDESTRUCT2
 }
 void Briefing::Ship::Destroy() {
   for (unsigned int i=0;i<meshdata.size();i++) {
@@ -100,12 +102,14 @@ void Briefing::Ship::Destroy() {
   meshdata.clear();  
 }
 Briefing::Briefing() {
+  VSCONSTRUCT2('b')
   cam.SetPosition(QVector(0,0,0));
   cam.SetOrientation(Vector(1,0,0),Vector(0,1,0),Vector(0,0,1));
   tp.SetPos (-1,1);
   tp.SetSize (1,-.5);
 }
 Briefing::~Briefing() {
+  VSDESTRUCT2
   for (unsigned int i=0;i<starships.size();i++) {
     delete starships[i];
   }

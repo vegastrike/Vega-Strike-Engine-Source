@@ -22,10 +22,29 @@
 #include "cmd/script/flightgroup.h"
 #include "music.h"
 //#define DESTRUCTDEBUG
+
 static list<Unit*> Unitdeletequeue;
+static Hashtable <long, Unit, char[2095]> deletedUn;
+int deathofvs=1;
+void CheckUnit(Unit * un) {
+  if (deletedUn.Get ((long)un)!=NULL) {
+    while (deathofvs) {
+      printf ("%ld died",(long)un);
+    }
+  }
+}
+void UncheckUnit (Unit * un) {
+  if (deletedUn.Get ((long)un)!=NULL) {
+    deletedUn.Delete ((long)un);
+  }  
+}
 void Unit::UnRef() {
+#ifdef CONTAINER_DEBUG
+  CheckUnit(this);
+#endif
   ucref--;
   if (killed&&ucref==0) {
+    deletedUn.Put ((long)this,this);
     Unitdeletequeue.push_back(this);//delete
 #ifdef DESTRUCTDEBUG
     fprintf (stderr,"%s 0x%x - %d\n",name.c_str(),this,Unitdeletequeue.size());
@@ -446,9 +465,15 @@ void Unit::DamageRandSys(float dam, const Vector &vec) {
 		return;
 	}
 }
+
 float Unit::DealDamageToHull (const Vector & pnt, float damage ) {
   float percent;
   unsigned short * targ;
+#ifndef ISUCK
+  if (hull<0) {
+    return -1;
+  }
+#endif
   if (fabs  (pnt.k)>fabs(pnt.i)) {
     if (pnt.k>0) {
       targ = &armor.front;
@@ -501,9 +526,17 @@ float Unit::DealDamageToHull (const Vector & pnt, float damage ) {
 	}
       }
     }
+#ifdef ISUCK
     Destroy();
-    SetAI (new Order());
+#endif
+    PrimeOrders();
+    maxenergy=energy=0;
+
     Split (rand()%3+1);
+#ifndef ISUCK
+    Destroy();
+    return -1;
+#endif
   }
   if (!FINITE (percent))
     percent = 0;
@@ -676,9 +709,11 @@ void Unit::ApplyLocalDamage (const Vector & pnt, const Vector & normal, float am
   }
   if (shield.leak>0||!meshdata[nummesh]||percentage==0||amt>0||phasedamage) {
     percentage = DealDamageToHull (pnt, leakamt+amt);
-    for (int i=0;i<nummesh;i++) {
-      if (percentage)
-	meshdata[i]->AddDamageFX(pnt,shieldtight?shieldtight*normal:Vector (0,0,0),percentage,color);
+    if (percentage!=-1) {//returns -1 on death--could delete
+      for (int i=0;i<nummesh;i++) {
+	if (percentage)
+	  meshdata[i]->AddDamageFX(pnt,shieldtight?shieldtight*normal:Vector (0,0,0),percentage,color);
+      }
     }
   }
 }

@@ -122,6 +122,7 @@ static GLenum PolyLookup (POLYTYPE poly) {
 }
 
 void GFXVertexList::Init (enum POLYTYPE *poly, int numVertices, const GFXVertex *vertices, const GFXColorVertex * colors, int numlists, int *offsets, bool Mutable, unsigned int * indices) {
+  VSCONSTRUCT1('v')
   int stride=0;
   changed = HAS_COLOR*((colors!=NULL)?1:0);
   mode = new GLenum [numlists];
@@ -306,6 +307,7 @@ void GFXVertexList::RefreshDisplayList () {
 }
 
 GFXVertexList::~GFXVertexList() {
+  VSDESTRUCT1
   if (display_list)
     GFXDeleteList (display_list); //delete dis
   if (offsets)

@@ -172,7 +172,7 @@ Order* Order::findOrder(Order *ord){
   return NULL;
 }
 Order::~Order () {
-
+  VSDESTRUCT1
 }
 void Order::Destructor () {
   delete this;

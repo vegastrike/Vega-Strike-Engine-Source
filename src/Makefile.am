@@ -4,6 +4,8 @@ vegastrike_LDADD = cmd/script/libscript.a cmd/libcmd.a cmd/ai/libai.a cmd/script
 INCLUDES = -Iboost/
 #/usr/lib/python2.2/config/libpython2.2.a 
 vegastrike_SOURCES =				\
+	debug_vs.h				\
+	debug_vs.cpp				\
 	endianness.h				\
 	file_main.h				\
 	galaxy.cpp				\

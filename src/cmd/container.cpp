@@ -3,11 +3,14 @@
 #include "unit.h"
 UnitContainer::UnitContainer() {
   unit=NULL;
+  VSCONSTRUCT1('U')
 }
 UnitContainer::UnitContainer(Unit * un):unit (NULL) {
   SetUnit (un);
+  VSCONSTRUCT1('U');
 }
 UnitContainer::~UnitContainer() {
+  VSDESTRUCT1
   if (unit)
     unit->UnRef();
   //bad idea...arrgh!

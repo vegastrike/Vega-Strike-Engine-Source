@@ -40,11 +40,13 @@ const unsigned char ani_alpha=4;
 const unsigned char ani_repeat=8;
 Animation::Animation ()
 {
+  VSCONSTRUCT2('a')
 	height = 0.001F;
 	width = 0.001F;
 }
 Animation::Animation (const char * FileName, bool Rep,  float priority,enum FILTER ismipmapped,  bool camorient, bool appear_near_by_radius, const GFXColor &c) : mycolor(c)
 {	
+  VSCONSTRUCT2('a')
   vschdir ("animations");
   vschdir (FileName);
   //  repeat = Rep;
@@ -74,7 +76,7 @@ Animation::Animation (const char * FileName, bool Rep,  float priority,enum FILT
   vscdup();
 }
 Animation:: ~Animation () {
-  
+  VSDESTRUCT2  
 }
 void Animation::SetPosition (const QVector &p) {
   local_transformation.p = p;

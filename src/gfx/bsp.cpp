@@ -136,6 +136,7 @@ bool BSPTree::intersects(const BSPTree *t1) const {
 }
 
 BSPTree::BSPTree(BSPDiskNode *input) {
+  VSCONSTRUCT2('s')
   BSPDiskNode * inp = input;
   root = new BSPNode(&inp);
 }
@@ -153,6 +154,7 @@ bool CheckBSP (const char * filename) {
   return false;
 }
 BSPTree::BSPTree(const char *filename) {
+  VSCONSTRUCT2('s')
   changehome();
   vschdir ("generatedbsp");
   FILE *fp = fopen(filename, "rb");

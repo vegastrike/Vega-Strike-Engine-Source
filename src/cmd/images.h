@@ -75,6 +75,12 @@ public:
 };
 
 struct UnitImages {
+  UnitImages() {
+    VSCONSTRUCT1('i')
+  }
+  ~UnitImages() {
+    VSDESTRUCT1
+  }
   std::string cockpitImage;
   std::string explosion_type;
   Vector CockpitCenter;

@@ -169,8 +169,13 @@ void Unit::DeactivateJumpDrive () {
   }
 }
 float capship_size=500;
+
+extern void UncheckUnit (Unit * un);
 void Unit::Init()
 {
+#ifdef CONTAINER_DEBUG
+  UncheckUnit (this);
+#endif
   static float capsize = XMLSupport::parse_float(vs_config->getVariable("physics","capship_size","500"));
   capship_size=capsize;
   activeStarSystem=NULL;

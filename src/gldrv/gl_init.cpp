@@ -216,6 +216,8 @@ void GFXInit (int argc, char ** argv){
   winsys_enable_key_repeat(false);
     glViewport (0, 0, g_game.x_resolution,g_game.y_resolution);
     float clearcol[4];
+    gl_options.wireframe = XMLSupport::parse_bool (vs_config->getVariable ("graphics","use_wireframe","0"));     
+    gl_options.smooth_shade = XMLSupport::parse_bool (vs_config->getVariable ("graphics","SmoothShade","true"));     
     gl_options.mipmap = XMLSupport::parse_int (vs_config->getVariable ("graphics","mipmapdetail","2"));     
     gl_options.compression = XMLSupport::parse_int (vs_config->getVariable ("graphics","texture_compression","0"));
     gl_options.Multitexture = XMLSupport::parse_bool (vs_config->getVariable ("graphics","reflection","true"));
@@ -232,7 +234,13 @@ void GFXInit (int argc, char ** argv){
     glShadeModel (GL_SMOOTH);
     glEnable(GL_DEPTH_TEST);
     glDepthFunc (GL_LESS);
-    
+    if (gl_options.wireframe) {
+      glPolygonMode(GL_FRONT_AND_BACK,GL_LINE);
+    }
+    if (gl_options.smooth_shade==0) {
+      glShadeModel (GL_FLAT);
+    }
+
     glEnable(GL_ALPHA_TEST);
     glAlphaFunc(GL_GREATER, 0.0);
 

@@ -55,6 +55,7 @@ extern float simulation_atom_var;
 #include <string.h>
 #include <limits.h>
 #include <stdarg.h>
+#include "debug_vs.h"
 #if defined( WIN32 ) || defined( __CYGWIN__ )
     /* Note that this will define WIN32 for us, if it isn't defined already
      */

@@ -101,9 +101,9 @@ class Order {
   enum ORDERTYPES { MOVEMENT =1, FACING = 2, WEAPON = 4, CLOAKING=8, ALLTYPES=(1|2|4|8)};
   enum SUBORDERTYPES {SLOCATION=1, STARGET=2, SSELF=4};
   ///The default constructor setting everything to NULL and no dependency on order
-  Order (): targetlocation(0,0,0){parent = NULL;type=0;subtype=0,done=false; actionstring=""; }
+  Order (): targetlocation(0,0,0){parent = NULL;type=0;subtype=0,done=false; actionstring=""; VSCONSTRUCT1('O')}
   ///The constructor that specifies what order dependencies this order has
-  Order(int ttype,int subtype): targetlocation(0,0,0){parent = NULL;type = ttype;done=false; actionstring=""; }
+  Order(int ttype,int subtype): targetlocation(0,0,0){parent = NULL;type = ttype;done=false; actionstring=""; VSCONSTRUCT1('O')}
   ///The virutal function that unrefs all memory then calls Destruct () which takes care of unreffing this or calling delete on this
   virtual void Destroy();
 

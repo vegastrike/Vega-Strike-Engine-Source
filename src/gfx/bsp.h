@@ -26,7 +26,7 @@
 
 #include "vec.h"
 #include "stdlib.h"
-
+#include "debug_vs.h"
 struct BSPDiskNode {
 	float x,y,z,d;
 	bool isVirtual;
@@ -66,6 +66,7 @@ public:
 	BSPTree(BSPDiskNode *input);
 	BSPTree(const char *filename);
 	~BSPTree() {
+	  VSDESTRUCT2
 		delete root;
 	}
 

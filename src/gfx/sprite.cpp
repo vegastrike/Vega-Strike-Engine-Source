@@ -35,6 +35,7 @@
 static float *mview = NULL;
 
 Sprite::Sprite(const char *file, enum FILTER texturefilter,GFXBOOL force) {
+  VSCONSTRUCT2('S')
   vschdir ("sprites");
   xcenter = 0;
   ycenter = 0;
@@ -79,6 +80,7 @@ Sprite::Sprite(const char *file, enum FILTER texturefilter,GFXBOOL force) {
 
 Sprite::~Sprite()
 {
+  VSDESTRUCT2
   if(surface!=NULL)
     delete surface;
 }

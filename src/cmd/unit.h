@@ -20,8 +20,10 @@
  */
 #ifndef _UNIT_H_
 #define _UNIT_H_
-
-
+#define CONTAINER_DEBUG
+#ifdef CONTAINER_DEBUG
+void CheckUnit(class Unit *);
+#endif
 struct GFXColor;
 #include "vegastrike.h"
 
@@ -577,7 +579,12 @@ public:
   ///Takes out of the collide table for this system.
   void RemoveFromSystem ();
   ///Low level list function to reference the unit as being the target of a UnitContainer or Colleciton
-  inline void Ref() {ucref++;}
+  inline void Ref() {
+#ifdef CONTAINER_DEBUG
+    CheckUnit(this);
+#endif
+    ucref++;
+  }
   ///Releases the unit from this reference of UnitContainer or Collection
   void UnRef();
   ///Gets the average gun speed of the unit::caution SLOW
@@ -887,11 +894,15 @@ inline void UnitCollection::UnitIterator::GetNextValidUnit () {
 inline Unit * UnitContainer::GetUnit() {
   if (unit==NULL)
     return NULL;
+#ifdef CONTAINER_DEBUG
+  CheckUnit(unit);
+#endif
   if (unit->Killed()) {
     unit->UnRef();
     unit = NULL;
     return NULL;
   }
+
   return unit;
 }
 
