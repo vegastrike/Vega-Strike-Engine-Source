@@ -1622,7 +1622,6 @@ using namespace UnitXML;
 	  image->explosion_type = (*iter).value;
 	  {
 	    cache_ani (image->explosion_type);
-
 	  }
 	}
 	break;

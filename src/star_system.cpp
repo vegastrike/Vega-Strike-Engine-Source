@@ -458,9 +458,9 @@ void GameStarSystem::Draw(bool DrawCockpit) {
   fflush (stderr);
 #endif
 }
-
+extern void update_ani_cache();
 void	UpdateAnimatedTexture()
-{ AnimatedTexture::UpdateAllPhysics();}
+{ AnimatedTexture::UpdateAllPhysics();		update_ani_cache();}
 void	TerrainCollide()
 { Terrain::CollideAll();}
 void	UpdateTerrain()

@@ -664,7 +664,6 @@ void vscdups (const vector<string> &path) {
 void Unit::Init(const char *filename, bool SubU, int faction,std::string unitModifications, Flightgroup *flightgrp,int fg_subnumber, string * netxml)
 {
 	this->Unit::Init();
-	update_ani_cache();
 	//if (!SubU)
 	//  _Universe->AccessCockpit()->savegame->AddUnitToSave(filename,UNITPTR,FactionUtil::GetFaction(faction),(long)this);
 	graphicOptions.SubUnit = SubU?1:0;
