@@ -306,6 +306,9 @@ void StarSystem::SwapOut () {
 extern double interpolation_blend_factor;
 //#define UPDATEDEBUG  //for hard to track down bugs
 void StarSystem::Draw(bool DrawCockpit) {
+  GFXEnable (DEPTHTEST);
+  GFXEnable (DEPTHWRITE);
+
 #ifdef UPDATEDEBUG
   fprintf (stderr,"begin Draw");
   fflush (stderr);
