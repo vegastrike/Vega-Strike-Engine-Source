@@ -7,6 +7,13 @@ struct UnitImages {
   Animation *explosion; 
   float timeexplode;
   Box *selectionBox;
+  ///how fast this starship decloaks/close...if negative, decloaking
+  short cloakrate;
+  ///How much energy cloaking takes per frame
+  float cloakenergy;
+  bool cloakglass;
+
+
 };
 
 struct UnitSounds {

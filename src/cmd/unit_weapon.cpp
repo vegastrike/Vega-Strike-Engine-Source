@@ -9,6 +9,7 @@
 #include "ai/script.h"
 #include "ai/navigation.h"
 #include "ai/flybywire.h"
+#include "images.h"
 void Unit::UnFire () {
   for (int i=0;i<nummounts;i++) {
     mounts[i].UnFire();//turns off beams;
@@ -252,8 +253,8 @@ void Unit::SetOwner(Unit *target) {
 
 void Unit::Cloak (bool loak) {
   if (loak) {
-    if (cloakenergy<energy) {
-      cloakrate =(cloakrate>=0)?cloakrate:-cloakrate; 
+    if (image->cloakenergy<energy) {
+      image->cloakrate =(image->cloakrate>=0)?image->cloakrate:-image->cloakrate; 
       if (cloaking==(short)32768) {
 	cloaking=32767;
       } else {
@@ -261,7 +262,7 @@ void Unit::Cloak (bool loak) {
       }
     }
   }else {
-    cloakrate= (cloakrate>=0)?-cloakrate:cloakrate;
+    image->cloakrate= (image->cloakrate>=0)?-image->cloakrate:image->cloakrate;
     if (cloaking==cloakmin)
       cloaking++;
   }

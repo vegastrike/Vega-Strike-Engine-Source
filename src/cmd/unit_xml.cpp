@@ -102,6 +102,7 @@ namespace UnitXML {
       CLOAKRATE,
       CLOAKMIN,
       CLOAKENERGY,
+      CLOAKGLASS,
       CLOAKWAV,
       CLOAKMP3,
       ENGINEWAV,
@@ -205,6 +206,7 @@ namespace UnitXML {
     EnumMap::Pair ("ExplodeMp3",EXPLODEMP3),
     EnumMap::Pair ("ExplodeWav",EXPLODEWAV),
     EnumMap::Pair ("CloakRate",CLOAKRATE),
+    EnumMap::Pair ("CloakGlass",CLOAKGLASS),
     EnumMap::Pair ("CloakEnergy",CLOAKENERGY),
     EnumMap::Pair ("CloakMin",CLOAKMIN),
     EnumMap::Pair ("CloakMp3",CLOAKMP3),
@@ -215,7 +217,7 @@ namespace UnitXML {
 };
 
   const EnumMap element_map(element_names, 27);
-  const EnumMap attribute_map(attribute_names, 64);
+  const EnumMap attribute_map(attribute_names, 65);
 }
 
 using XMLSupport::EnumMap;
@@ -531,22 +533,31 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
   case CLOAK:
     assert (xml->unitlevel==2);
     xml->unitlevel++;
-    cloakrate=.2*32767*SIMULATION_ATOM;
-    cloakmin=0;
-    cloakenergy=0;
+    image->cloakrate=.2*32767*SIMULATION_ATOM;
+    cloakmin=1;
+    image->cloakenergy=0;
     cloaking = (short) 32768;//lowest negative number
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(attribute_map.lookup((*iter).name)) {
       case CLOAKMIN:
 	cloakmin = 32767*parse_float ((*iter).value);
 	break;
+      case CLOAKGLASS:
+	image->cloakglass=parse_bool ((*iter).value);
+	break;
       case CLOAKRATE:
-	cloakrate = 32767*parse_float ((*iter).value)*SIMULATION_ATOM;
+	image->cloakrate = 32767*parse_float ((*iter).value)*SIMULATION_ATOM;
 	break;
       case CLOAKENERGY:
-	cloakenergy = parse_float ((*iter).value);
+	image->cloakenergy = parse_float ((*iter).value);
 	break;
       }
+    }
+    if ((cloakmin&0x1)&&!image->cloakglass) {
+      cloakmin-=1;
+    }
+    if ((cloakmin&0x1)==0&&image->cloakglass) {
+      cloakmin+=1;
     }
     break;
   case ARMOR:

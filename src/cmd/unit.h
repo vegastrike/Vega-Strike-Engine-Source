@@ -306,10 +306,6 @@ class Unit {
   bool SubUnit;
   ///-1 is not available... ranges between 0 32767 for "how invisible" unit currently is (32768... -32768) being visible)
   short cloaking;
-  ///how fast this starship decloaks/close...if negative, decloaking
-  short cloakrate;
-  ///How much energy cloaking takes per frame
-  float cloakenergy;
   ///the minimum cloaking value...
   short cloakmin;
   ///Should draw selection box?

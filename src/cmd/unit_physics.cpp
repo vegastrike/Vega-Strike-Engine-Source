@@ -257,23 +257,23 @@ void Unit::RollTorque(float amt) {
 const float VELOCITY_MAX=1000;
 void Unit::UpdatePhysics (const Transformation &trans, const Matrix transmat, const Vector & cum_vel,  bool lastframe, UnitCollection *uc) {
   if (cloaking>=cloakmin) {
-    if (cloakenergy*SIMULATION_ATOM>energy) {
+    if (image->cloakenergy*SIMULATION_ATOM>energy) {
       Cloak(false);//Decloak
     } else {
-      if (cloakrate>0||cloaking==cloakmin) {
-	energy-=SIMULATION_ATOM*cloakenergy;
+      if (image->cloakrate>0||cloaking==cloakmin) {
+	energy-=SIMULATION_ATOM*image->cloakenergy;
       }
       if (cloaking>cloakmin) {
 	AUDAdjustSound (sound->cloak, cumulative_transformation.position,cumulative_velocity);
-	if ((cloaking==32767&&cloakrate>0)||(cloaking==cloakmin+1&&cloakrate<0)) {
+	if ((cloaking==32767&&image->cloakrate>0)||(cloaking==cloakmin+1&&image->cloakrate<0)) {
 	  AUDStartPlaying (sound->cloak);
 	}
-	cloaking-=cloakrate;
-	if (cloaking<=cloakmin&&cloakrate>0) {
+	cloaking-=image->cloakrate;
+	if (cloaking<=cloakmin&&image->cloakrate>0) {
 	  //AUDStopPlaying (sound->cloak);
 	  cloaking=cloakmin;
 	}
-	if (cloaking<0&&cloakrate<0) {
+	if (cloaking<0&&image->cloakrate<0) {
 	  //AUDStopPlaying (sound->cloak);
 	  cloaking=(short)32768;//wraps
 	}

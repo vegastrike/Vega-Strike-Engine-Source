@@ -221,15 +221,19 @@ void Mesh::Draw(float lod, const Transformation &trans, const Matrix m, float to
   c.cloaked=MeshDrawContext::NONE;
   if (cloak>=0) {
     c.cloaked|=MeshDrawContext::CLOAK;
+    if ((cloak&0x1)) {
+      c.cloaked |= MeshDrawContext::GLASSCLOAK;
+      c.mesh_seq=MESH_SPECIAL_FX_ONLY;//draw near the end with lights
+    } else {
+      c.mesh_seq =2;
+    }
     if (cloak<16384) {
       c.cloaked|=MeshDrawContext::NEARINVIS;
     }
-    c.mesh_seq =2;
-    //c.mesh_seq=MESH_SPECIAL_FX_ONLY;//draw near the end with lights
     float tmp = ((float)cloak)/32767;
-    c.CloakFX.r = 1;
-    c.CloakFX.g = 1;
-    c.CloakFX.b = 1;
+    c.CloakFX.r = (c.cloaked&MeshDrawContext::GLASSCLOAK)?tmp:1;
+    c.CloakFX.g = (c.cloaked&MeshDrawContext::GLASSCLOAK)?tmp:1;
+    c.CloakFX.b = (c.cloaked&MeshDrawContext::GLASSCLOAK)?tmp:1;
     c.CloakFX.a = tmp;
     /*
     c.CloakNebFX.ambient[0]=((float)cloak)/32767;
@@ -419,20 +423,20 @@ void Mesh::ProcessDrawQueue(int whichdrawqueue) {
       GFXBlendColor (c.CloakFX);
       GFXBlendMode (CONSTCOLOR,INVCONSTCOLOR);
 #else
-#if 0
+      if (c.cloaked&MeshDrawContext::GLASSCLOAK) {
 	GFXDisable (TEXTURE1);
-      int ligh;
-      GFXCreateLight (ligh,GFXLight (true,GFXColor(0,0,0,1),GFXColor (0,0,0,1),GFXColor (0,0,0,1),c.CloakFX,GFXColor(1,0,0)),true);
-      specialfxlight.push_back (ligh);
-      GFXBlendMode (ONE,ONE);
-#else
-      if (c.cloaked&MeshDrawContext::NEARINVIS) {      
-	//NOT sure I like teh jump this produces	GFXDisable (TEXTURE1);
+	int ligh;
+	GFXCreateLight (ligh,GFXLight (true,GFXColor(0,0,0,1),GFXColor (0,0,0,1),GFXColor (0,0,0,1),c.CloakFX,GFXColor(1,0,0)),true);
+	specialfxlight.push_back (ligh);
+	GFXBlendMode (ONE,ONE);
+      }else {
+	if (c.cloaked&MeshDrawContext::NEARINVIS) {      
+	  //NOT sure I like teh jump this produces	GFXDisable (TEXTURE1);
+	}
+	GFXBlendMode (SRCALPHA, INVSRCALPHA);
+	GFXColorMaterial (AMBIENT|DIFFUSE);
+	GFXColorf(c.CloakFX);
       }
-      GFXBlendMode (SRCALPHA, INVSRCALPHA);
-      GFXColorMaterial (AMBIENT|DIFFUSE);
-      GFXColorf(c.CloakFX);
-#endif
 #endif
     }
 

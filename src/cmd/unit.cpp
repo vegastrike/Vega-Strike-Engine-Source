@@ -97,9 +97,10 @@ void Unit::Init()
   limits.structurelimits=Vector(0,0,1);
   limits.limitmin=-1;
   cloaking=-1;
-  cloakmin=0;
-  cloakrate=100;
-  cloakenergy=0;
+  image->cloakglass=false;
+  cloakmin=image->cloakglass?1:0;
+  image->cloakrate=100;
+  image->cloakenergy=0;
   sound->engine=-1;  sound->armor=-1;  sound->shield=-1;  sound->hull=-1; sound->explode=-1;
   sound->cloak=-1;
   image->hudImage=NULL;
@@ -504,12 +505,20 @@ void Unit::Draw(const Transformation &parent, const Matrix parentMatrix)
 #endif
   short cloak=cloaking;
   if (cloaking>cloakmin) {
-    cloak = cloaking-interpolation_blend_factor*cloakrate;
-    if (cloak<0&&cloakrate<0) {
+    cloak = cloaking-interpolation_blend_factor*image->cloakrate;
+    if (cloak<0&&image->cloakrate<0) {
       cloak=(unsigned short)32768;//intended warning should be -32768 :-) leave it be
     }
-    if (cloak<cloakmin&&cloakrate>0)
+    if ((cloak&0x1)&&!image->cloakglass) {
+      cloak-=1;
+    }
+    if ((cloak&0x1)==0&&image->cloakglass) {
+      cloak+=1;
+    }
+    if (cloak<cloakmin&&image->cloakrate>0)
       cloak=cloakmin;
+
+
   }
   
   int i;
