@@ -11,6 +11,7 @@ VegaConfig * vs_config;
 string acctdir;
 
 AccountServer::AccountServer()
+    : _sock_set( true )
 {
 	cout<<"AccountServer init"<<endl;
 	// Network = new TCPNetUI;
@@ -95,12 +96,14 @@ void	AccountServer::start()
 	}
 	cout<<"done."<<endl;
 
+    _sock_set.start( );
+
 	while( keeprun)
 	{
 		//cout<<"Loop"<<endl;
 		// Check for incoming connections
 
-		_sock_set.select( NULL );
+		_sock_set.wait( );
 
 		comsock = Network->acceptNewConn( );
 		if( comsock.valid() )
@@ -124,7 +127,7 @@ void	AccountServer::start()
 		// Check for automatic server status save time
 		curtime = getNewTime();
 
-		micro_sleep(40000);
+		// micro_sleep(40000);
 	}
 
 	delete CONFIGFILE;

@@ -57,12 +57,19 @@ int VsnetUDPSocket::sendbuf( PacketMem& packet, const AddressIP* to)
 
 int VsnetUDPSocket::recvbuf( PacketMem& buffer, AddressIP* from)
 {
-    if( _cpq.empty() ) return -1;
+    _cpq_mx.lock( );
+    if( _cpq.empty() )
+    {
+        _cpq_mx.unlock( );
+        return -1;
+    }
 
     buffer = _cpq.front().mem;
     if( from )
         *from = _cpq.front().ip;
     _cpq.pop();
+    _cpq_mx.unlock( );
+    _set.dec_pending( );
     return buffer.len();
 }
 
@@ -71,14 +78,12 @@ void VsnetUDPSocket::dump( std::ostream& ostr ) const
     ostr << "( s=" << _fd << " UDP r=" << _remote_ip << " )";
 }
 
-bool VsnetUDPSocket::needReadAlwaysTrue( ) const
-{
-    return ( !_cpq.empty() );
-}
-
 bool VsnetUDPSocket::isActive( )
 {
-    return ( _cpq.empty() == false );
+    _cpq_mx.lock( );
+    bool ret = ( _cpq.empty() == false );
+    _cpq_mx.unlock( );
+    return ret;
 }
 
 void VsnetUDPSocket::lower_selected( )
@@ -105,7 +110,10 @@ void VsnetUDPSocket::lower_selected( )
     {
 	    COUT << "NETUI : Recvd " << ret << " bytes" << " <- " << from << endl;
         Pending mem( _recv_buf, ret, from );
+        _cpq_mx.lock( );
         _cpq.push( mem );
+        _cpq_mx.unlock( );
+        _set.inc_pending( );
     }
 }
 

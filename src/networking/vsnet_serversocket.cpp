@@ -58,7 +58,10 @@ void ServerSocketTCP::lower_selected( )
     {
         COUT << "accepted" << endl;
         SOCKETALT newsock( sock, SOCKETALT::TCP, remote_ip, _set );
+        _ac_mx.lock( );
 	    _accepted_connections.push( newsock );
+        _ac_mx.unlock( );
+        _set.inc_pending( );
     }
     else
     {
@@ -71,17 +74,29 @@ ServerSocketTCP::ServerSocketTCP( int fd, const AddressIP& adr, SocketSet& set )
     : ServerSocket( fd, adr, set )
 { }
 
+bool ServerSocketTCP::isActive( )
+{
+    _ac_mx.lock( );
+    bool ret = ( _accepted_connections.empty() == false );
+    _ac_mx.unlock( );
+    return ret;
+}
+
 SOCKETALT ServerSocketTCP::acceptNewConn( )
 {
-    COUT << "enter " << __PRETTY_FUNCTION__ << endl;
+    _ac_mx.lock( );
     if( !_accepted_connections.empty() )
     {
+        COUT << "A connection has been accepted" << endl;
         SOCKETALT ret( _accepted_connections.front() );
         _accepted_connections.pop();
+        _ac_mx.unlock( );
+        _set.dec_pending( );
         return ret;
     }
     else
     {
+        _ac_mx.unlock( );
         SOCKETALT ret;
         return ret;
     }
@@ -90,6 +105,11 @@ SOCKETALT ServerSocketTCP::acceptNewConn( )
 ServerSocketUDP::ServerSocketUDP( int fd, const AddressIP& adr, SocketSet& set )
     : ServerSocket( fd, adr, set )
 { }
+
+bool ServerSocketUDP::isActive( )
+{
+    return false;
+}
 
 SOCKETALT ServerSocketUDP::acceptNewConn( )
 {

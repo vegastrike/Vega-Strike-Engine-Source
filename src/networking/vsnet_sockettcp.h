@@ -14,6 +14,7 @@
 #include <queue>
 
 #include "vsnet_socket.h"
+#include "vsnet_thread.h"
 #include "packetmem.h"
 
 /***********************************************************************
@@ -37,8 +38,6 @@ public:
 
     virtual bool isActive( );
 
-    virtual bool needReadAlwaysTrue( ) const;
-
     virtual void lower_selected( );
 
 protected:
@@ -57,6 +56,7 @@ private:
      */
     Blob*                 _incomplete_packet;
     std::queue<PacketMem> _cpq;
+    VSMutex               _cpq_mx;
 
     /** We send 4 bytes as a packet length indicator. Unfortunately, even these
      *  4 bytes may be split by TCP. These two variables are needed for

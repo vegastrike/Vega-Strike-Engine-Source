@@ -12,6 +12,7 @@
 #include <queue>
 
 #include "vsnet_socket.h"
+#include "vsnet_thread.h"
 #include "packetmem.h"
 
 /***********************************************************************
@@ -26,7 +27,6 @@ public:
 
     virtual bool isTcp() const { return false; }
 
-    virtual bool needReadAlwaysTrue( ) const;
     virtual bool isActive( );
     virtual int  sendbuf( PacketMem& packet, const AddressIP* to);
     virtual int  recvbuf( PacketMem& buffer, AddressIP *from);
@@ -49,6 +49,7 @@ private:
     };
 
     std::queue<Pending> _cpq;
+    VSMutex             _cpq_mx;
 
     size_t _negotiated_max_size;
     char*  _recv_buf;

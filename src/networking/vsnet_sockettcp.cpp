@@ -41,6 +41,14 @@ struct VsnetTCPSocket::Blob
         delete [] buf;
     }
 
+    inline size_t missing( ) const {
+        return expected_len - present_len;
+    }
+
+    inline char* base( ) {
+        return &buf[present_len];
+    }
+
 private:
     Blob( const Blob& orig );             // forbidden
     Blob& operator=( const Blob& orig );  // forbidden
@@ -94,27 +102,27 @@ int VsnetTCPSocket::sendbuf( PacketMem& packet, const AddressIP* to)
     return numsent;
 }
 
-// void VsnetTCPSocket::ack( )
-// {
-//     /* meaningless, TCP is reliable */
-// }
-
 int VsnetTCPSocket::recvbuf( PacketMem& buffer, AddressIP* )
 {
+    _cpq_mx.lock( );
     if( _cpq.empty() == false )
     {
         buffer = _cpq.front();
         _cpq.pop();
+        _cpq_mx.unlock( );
+        _set.dec_pending( );
         return buffer.len();
     }
     else if( _connection_closed )
     {
+        _cpq_mx.unlock( );
         _fd = -1;
         COUT << __PRETTY_FUNCTION__ << " connection is closed" << endl;
         return 0;
     }
     else
     {
+        _cpq_mx.unlock( );
         return -1;
     }
 }
@@ -150,11 +158,6 @@ ostream& operator<<( ostream& ostr, const VsnetSocket& s )
     return ostr;
 }
 
-bool VsnetTCPSocket::needReadAlwaysTrue( ) const
-{
-    return ( !_cpq.empty() );
-}
-
 bool VsnetTCPSocket::isActive( )
 {
     /* True is the correct answer when the connection is closed:
@@ -166,7 +169,13 @@ bool VsnetTCPSocket::isActive( )
      */
     if( _connection_closed ) return true;
 
-    if( _cpq.empty() == false ) return true;
+    _cpq_mx.lock( );
+    if( _cpq.empty() == false )
+    {
+        _cpq_mx.unlock( );
+        return true;
+    }
+    _cpq_mx.unlock( );
 
     return false;
 }
@@ -197,6 +206,7 @@ void VsnetTCPSocket::lower_selected( )
 	            if( ret == 0 )
 		        {
 		            _connection_closed = true;
+                    _fd = -1;
 		        }
                 else if( vsnetEWouldBlock() == false )
                 {
@@ -214,8 +224,8 @@ void VsnetTCPSocket::lower_selected( )
 	    }
         if( _incomplete_packet != 0 )
 	    {
-	        int len = _incomplete_packet->expected_len - _incomplete_packet->present_len;
-	        int ret = recv( _fd, _incomplete_packet->buf, len, 0 );
+	        int len = _incomplete_packet->missing( );
+	        int ret = ::recv( _fd, _incomplete_packet->base(), len, 0 );
 	        assert( ret <= len );
 	        if( ret <= 0 )
 	        {
@@ -229,27 +239,30 @@ void VsnetTCPSocket::lower_selected( )
 		        }
                 return;
 	        }
-	        if( ret > 0 ) _incomplete_packet->present_len += len;
-	        if( ret == len )
-	        {
-		        assert( _incomplete_packet->expected_len ==
-                        _incomplete_packet->present_len );
-                inner_complete_a_packet( _incomplete_packet );
+            else
+            {
+	            _incomplete_packet->present_len += ret;
+	            if( ret == len )
+	            {
+		            assert( _incomplete_packet->expected_len ==
+                            _incomplete_packet->present_len );
 #ifdef VSNET_DEBUG
-                //
-                // DEBUG block - remove soon
-                //
-                {
-                    Blob* b = _incomplete_packet;
-                    COUT << "received buffer with len " << b->present_len << ": " << endl;
-		            PacketMem m( b->buf, b->present_len, PacketMem::LeaveOwnership );
-		            m.dump( cout, 3 );
-                }
+                    //
+                    // DEBUG block - remove soon
+                    //
+                    {
+                        Blob* b = _incomplete_packet;
+                        COUT << "received buffer with len " << b->present_len << ": " << endl;
+		                PacketMem m( b->buf, b->present_len, PacketMem::LeaveOwnership );
+		                m.dump( cout, 3 );
+                    }
 #endif
 
-		        _incomplete_packet = 0;
-                // either endless is false, or we exit with EWOULDBLOCK
-	        }
+                    inner_complete_a_packet( _incomplete_packet );
+		            _incomplete_packet = 0;
+                    // either endless is false, or we exit with EWOULDBLOCK
+	            }
+            }
         }
     }
     while( endless );  // exit only for EWOULDBLOCK or closed socket
@@ -262,7 +275,10 @@ void VsnetTCPSocket::inner_complete_a_packet( Blob* b )
 
     PacketMem mem( b->buf, b->present_len, PacketMem::TakeOwnership );
     b->buf = NULL;
+    _cpq_mx.lock( );
     _cpq.push( mem );
+    _cpq_mx.unlock( );
+    _set.inc_pending( );
     delete b;
 }
 

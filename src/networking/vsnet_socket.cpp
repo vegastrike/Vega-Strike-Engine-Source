@@ -33,14 +33,6 @@ SOCKETALT::SOCKETALT( )
 {
 }
 
-// SOCKETALT::SOCKETALT( int sock, bool mode, const AddressIP& remote_ip )
-// {
-//     if( mode == TCP )
-//         _sock = new VsnetTCPSocket( sock, remote_ip, NULL );
-//     else
-//         _sock = new VsnetUDPSocket( sock, remote_ip, NULL );
-// }
-
 SOCKETALT::SOCKETALT( int sock, bool mode, const AddressIP& remote_ip, SocketSet& set )
 {
     if( mode == TCP )

@@ -22,6 +22,7 @@
 #include "vsnet_address.h"
 #include "vsnet_socketset.h"
 #include "vsnet_socket.h"
+#include "vsnet_thread.h"
 
 #include <queue>
 
@@ -59,6 +60,8 @@ class ServerSocketTCP : public ServerSocket
 public:
     ServerSocketTCP( int fd, const AddressIP& adr, SocketSet& set );
 
+    virtual bool isActive( );
+
 	// Accept a new connection
 	virtual SOCKETALT acceptNewConn( );
 
@@ -66,6 +69,7 @@ public:
 
 private:
     std::queue<SOCKETALT> _accepted_connections;
+    VSMutex               _ac_mx;
 
 private:
     ServerSocketTCP( );
@@ -77,6 +81,8 @@ class ServerSocketUDP : public ServerSocket
 {
 public:
 	ServerSocketUDP( int fd, const AddressIP& adr, SocketSet& set );
+
+    virtual bool isActive( );
 
 	// Accept a new connection
 	virtual SOCKETALT acceptNewConn( );

@@ -387,6 +387,8 @@ void	NetServer::start(int argc, char **argv)
 	memset( input_buffer, 0, MAXINPUT);
 	Packet p2;
 
+    _sock_set.start( );
+
 	startMsg();
 
 	CONFIGFILE = new char[42];
@@ -517,18 +519,14 @@ void	NetServer::start(int argc, char **argv)
 		//this->checkKey( keyset);
 
 		// Check received communications
-		nb = _sock_set.select( 0, 0);
-		if( nb > 0 )
+		newConnection_tcp( );
+		checkMsg( _sock_set );
+		if( acctserver && acct_con )
 		{
-			newConnection_tcp( );
-			checkMsg( _sock_set );
-			if( acctserver && acct_con )
-			{
-				// Listen for account server answers
-				checkAcctMsg( _sock_set );
-				// And send to it the login request we received
-				// Then send clients confirmations or errors
-			}
+			// Listen for account server answers
+			checkAcctMsg( _sock_set );
+			// And send to it the login request we received
+			// Then send clients confirmations or errors
 		}
 		curtime = getNewTime();
 		if( acctserver && !acct_con && (curtime - reconnect_time)>periodrecon)
@@ -643,7 +641,7 @@ void	NetServer::start(int argc, char **argv)
 		}
 
 
-		micro_sleep(10000);
+		_sock_set.waste_time(0,10000);
 	}
 
 	delete CONFIGFILE;
@@ -658,10 +656,11 @@ void	NetServer::start(int argc, char **argv)
 
 void	NetServer::checkKey( SocketSet & sets)
 {
+#if 0
 	int		memory_use=0;
 	char	c;
 
-	if( sets.select( 0, 0) && sets.is_set( 0))
+	if( sets.select( 0, 0) )
 	{
 		if( read( 0, &c, 1)==-1)
 			cerr<<"Error reading char on std input "<<endl;
@@ -712,6 +711,7 @@ void	NetServer::checkKey( SocketSet & sets)
 			memset( input_buffer, 0, MAXINPUT);
 		}
 	}
+#endif
 }
 
 
@@ -805,11 +805,11 @@ void	NetServer::checkAcctMsg( SocketSet& sets )
 /**************************************************************/
 
 void	NetServer::checkMsg( SocketSet& sets )
-{
 #ifdef VSNET_DEBUG
+{
     ostringstream ostr;
+    bool          printit = false;
     ostr << "Checking activity on sockets, TCP=";
-#endif
 	for( LI i=allClients.begin(); i!=allClients.end(); i++)
 	{
         Client* cl = *i;
@@ -817,35 +817,41 @@ void	NetServer::checkMsg( SocketSet& sets )
         {
 		    if( cl->sock.isActive( ) )
 		    {
-#ifdef VSNET_DEBUG
                 ostr << cl->sock.get_fd() << "+ ";
-#endif
+                printit = true;
 			    this->recvMsg_tcp( cl );
 		    }
-#ifdef VSNET_DEBUG
-            else
-            {
-                ostr << cl->sock.get_fd() << "- ";
-            }
-#endif
+        }
+	}
+    ostr << " ";
+	if( udpNetwork->isActive( ) )
+	{
+        ostr << "UDP=" << udpNetwork->get_fd() << "+" << ends;
+	    recvMsg_udp( );
+        printit = true;
+	}
+    ostr << ends;
+    if( printit ) COUT << ostr.str() << endl;
+}
+#else
+{
+	for( LI i=allClients.begin(); i!=allClients.end(); i++)
+	{
+        Client* cl = *i;
+        if( cl->isTcp() )
+        {
+		    if( cl->sock.isActive( ) )
+		    {
+			    this->recvMsg_tcp( cl );
+		    }
         }
 	}
 	if( udpNetwork->isActive( ) )
 	{
-#ifdef VSNET_DEBUG
-        ostr << "UDP=" << udpNetwork->get_fd() << "+" << ends;
-#endif
 	    recvMsg_udp( );
 	}
-#ifdef VSNET_DEBUG
-    else
-    {
-        ostr << "UDP=" << udpNetwork->get_fd() << "-" << ends;
-    }
-    ostr << ends;
-    COUT << ostr.str() << endl;
-#endif
 }
+#endif
 
 /**************************************************************/
 /**** Disconnects timed out clients                        ****/

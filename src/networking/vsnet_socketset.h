@@ -41,33 +41,55 @@
 
 #include <set>
 
+#include "vsnet_thread.h"
+
 class ServerSocket;
 class VsnetSocketBase;
 
-class SocketSet
+class SocketSet : public VSThread
 {
     typedef std::set<VsnetSocketBase*>  Set;
 
-    fd_set _read_set_select;
-    int    _max_sock_select;
-
     Set    _autoset;
 
+    int     _thread_wakeup[2];
+    VSMutex _thread_mx;
+    VSCond  _thread_cond;
+    bool    _thread_end;
+
+    bool    _blockmain;
+    size_t  _blockmain_pending;
+    VSMutex _blockmain_mx;
+    VSCond  _blockmain_cond;
+
 public:
-    SocketSet( );
+    SocketSet( bool blockmainthread = false );
+    ~SocketSet( );
 
     /** Once a socket is registered using this function, setRead is
      *  automatically called for it before each select */
     void set( VsnetSocketBase* s );
 
-    /// Take a socket out of the _autoset
+    /// The upper thread takes a socket out of the _autoset
     void unset( VsnetSocketBase* s );
 
-    bool is_set( int fd ) const;
-//     bool is_setRead( int fd ) const;
+    /// The upper thread waits for something to arrive on the socket
+    void wait( );
+    void dec_pending( );
+    void inc_pending( );
 
-    int select( timeval* timeout );
-    int select( long sec, long usec );
+    /** Use this function liberally in you code. If you don't have a
+     *  network thread, it will check select and return. If you
+     *  have a place in your code where you want to wait anyway,
+     *  replace your waiting function with a call to this function.
+     */
+    void waste_time( long sec, long usec );
+
+    virtual void run( );
+
+private:
+    int private_select( timeval* timeout );
+    void private_wakeup( );
 
 private:
     SocketSet( const SocketSet& ); // forbidden copy constructor

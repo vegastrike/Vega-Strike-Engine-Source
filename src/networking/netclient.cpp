@@ -49,6 +49,11 @@
 #include "networking/netbuffer.h"
 #include "md5.h"
 
+#ifdef micro_sleep
+#undef micro_sleep
+#endif
+#define micro_sleep(m) _sock_set.waste_time( 0, m )
+
 using std::cout;
 using std::endl;
 using std::cin;
@@ -401,9 +406,8 @@ vector<string>	NetClient::loginAcctLoop( string str_callsign, string str_passwd)
 			globalsaves.push_back( "!!! NETWORK ERROR : Connection to account server timed out !!!");
 			timeout = 1;
 		}
-		nb = _sock_set.select( 1, 0 );
-		if( nb > 0 )
-			recv = checkAcctMsg( );
+
+		recv = checkAcctMsg( );
 
 		micro_sleep( 40000);
 	}
@@ -433,6 +437,8 @@ SOCKETALT	NetClient::init_acct( char * addr, unsigned short port)
     COUT << " enter " << __PRETTY_FUNCTION__
 	     << " with " << addr << ":" << port << endl;
 
+    _sock_set.start( );
+
 	cout<<"Initializing connection to account server..."<<endl;
 	acct_sock = NetUITCP::createSocket( addr, port, _sock_set );
 	COUT <<"accountserver on socket "<<acct_sock<<" done."<<endl;
@@ -448,6 +454,8 @@ SOCKETALT	NetClient::init( char * addr, unsigned short port)
 {
     COUT << " enter " << __PRETTY_FUNCTION__
 	     << " with " << addr << ":" << port << endl;
+
+    _sock_set.start( );
 
 	string strnetatom;
 	strnetatom = vs_config->getVariable( "network", "network_atom", "");
@@ -569,12 +577,9 @@ int NetClient::checkMsg( Packet* outpacket )
 {
     int ret=0;
 
-    if( _sock_set.select( 0, 0 ) > 0 )
+    if( clt_sock.isActive( ) )
     {
-        if( clt_sock.isActive( ) )
-        {
-            ret = recvMsg( outpacket );
-        }
+        ret = recvMsg( outpacket );
     }
     return ret;
 }

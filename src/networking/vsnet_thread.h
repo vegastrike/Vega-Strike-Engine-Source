@@ -1,7 +1,12 @@
 #ifndef VSNET_THREAD_H
 #define VSNET_THREAD_H
 
-#define USE_PTHREAD
+/* Choose an implementation that you like. Only that one will be
+ * compiled. Later, the decision should be made by configure.
+ */
+#undef  USE_PTHREAD
+#undef  USE_SDL_THREAD
+#define USE_NO_THREAD
 
 /*------------------------------------------------------------*
  * declaration of VSThread                                    *
@@ -11,10 +16,9 @@ class VSThread
 {
 public:
     VSThread( bool detached );
-    ~VSThread( );
+    virtual ~VSThread( );
 
     void start( );
-    void exit( );
     void join( );
 
     virtual void run( ) = 0;

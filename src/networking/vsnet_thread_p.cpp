@@ -1,6 +1,7 @@
 #include <config.h>
 
-#ifdef USE_PTHREADS
+#include "vsnet_thread.h"
+#ifdef USE_PTHREAD
 
 #include <pthread.h>
 #include <stdio.h>
@@ -20,7 +21,7 @@ static void* vs_thread_start( void* info )
     return NULL;
 }
 
-struct Private
+struct VSThread::Private
 {
     bool           detach;
     pthread_attr_t ta;
@@ -43,9 +44,10 @@ VSThread::~VSThread( )
     delete _internal;
 }
 
-bool VSThread::start( )
+void VSThread::start( )
 {
     int ret;
+    int err;
 
     if( _internal->detach )
     {
@@ -62,39 +64,34 @@ bool VSThread::start( )
     {
         perror( "pthread_attr_setscope failed" );
     }
-    signal( SIGRTMIN, SIG_DFL );
+    // signal( SIGRTMIN, SIG_DFL );
 #endif
 
 #if defined(_AIX) && defined(_AIX32_THREADS)
     // obsolete DCE thread API on AIX
     err = ::pthread_create( &_internal->t,
                             _internal->ta,
-                            mn_thread_start,
+                            vs_thread_start,
                             (void*)this );
 #else
     err = ::pthread_create( &_internal->t,
                             &_internal->ta,
-                            mn_thread_start,
+                            vs_thread_start,
                             (void*)this );
 #endif
     if ( err != 0 )
     {
         perror( "pthread_create failed" );
-        return false;
+        // return false;
     }
-    return true;
-}
-
-void VSThread::exit( )
-{
-    ::pthread_exit( NULL );
+    // return true;
 }
 
 void VSThread::join( )
 {
     if( _internal->detach == false )
     {
-        ::pthread_join( &_internal->t, NULL );
+        ::pthread_join( _internal->t, NULL );
     }
 }
 
@@ -190,10 +187,10 @@ void VSMutex::lock( )
 
 void VSMutex::unlock( )
 {
-    int ret = ::pthread_unmutex_lock( &_internal->lck );
+    int ret = ::pthread_mutex_unlock( &_internal->lck );
     if ( ret != 0 )
     {
-        perror("pthread_unmutex_lock failed");
+        perror("pthread_mutex_unlock failed");
     }
 }
 
@@ -232,7 +229,7 @@ VSCond::~VSCond( )
     {
         perror( "pthread_cond_destroy failed" );
     }
-    ret = ::pthread_condattr_destroy( &_internal->ctr );
+    ret = ::pthread_condattr_destroy( &_internal->attr );
     if( ret != 0 )
     {
         perror( "pthread_condattr_destroy failed" );
@@ -251,18 +248,20 @@ void VSCond::wait( VSMutex& mx )
 
 void VSCond::signal( )
 {
-    ret = ::pthread_cond_signal( &_internal->ctr );
+    int ret = ::pthread_cond_signal( &_internal->ctr );
     if( ret != 0 )
     {
         perror( "pthread_cond_signal failed" );
+    }
 }
 
 void VSCond::broadcast( )
 {
-    ret = ::pthread_cond_broadcast( &_internal->ctr );
+    int ret = ::pthread_cond_broadcast( &_internal->ctr );
     if( ret != 0 )
     {
         perror( "pthread_cond_broadcast failed" );
+    }
 }
 
 #endif /* USE_PTHREADS */

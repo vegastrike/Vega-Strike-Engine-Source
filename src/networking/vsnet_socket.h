@@ -57,12 +57,10 @@ public:
     bool set_nonblock( );
     bool get_nonblock( ) const;
 
-    virtual bool isActive( ) { return _set.is_set(_fd); }
+    virtual bool isActive( ) = 0;
 
     void disconnect( const char *s, bool fexit );
     
-    virtual bool needReadAlwaysTrue( ) const { return false; }
-
     virtual void lower_selected( ) { }
 
 protected:
@@ -84,9 +82,6 @@ private:
 
 class VsnetSocket : public VsnetSocketBase
 {
-protected:
-    AddressIP  _remote_ip; // IP address structure of remote server
-
 public:
     VsnetSocket( int sock, const AddressIP& remote_ip, SocketSet& set );
 
@@ -94,11 +89,6 @@ public:
 
     bool eq( const VsnetSocket& r );
     bool sameAddress( const VsnetSocket& r );
-
-    /// pretty useless pass-through for broken compilers
-    virtual bool isActive( ) {
-        return VsnetSocketBase::isActive();
-    }
 
     virtual int  sendbuf( PacketMem& packet, const AddressIP* to) = 0;
 
@@ -113,6 +103,9 @@ public:
     virtual void dump( std::ostream& ostr ) const = 0;
 
     // virtual void ack( ) = 0;
+
+protected:
+    AddressIP  _remote_ip; // IP address structure of remote server
 
 private:
     VsnetSocket( );

@@ -35,7 +35,9 @@ libnetgeneric = \
 	vsnet_clientstate.h		\
 	vsnet_serversocket.cpp	\
 	vsnet_serversocket.h	\
+    vsnet_thread_non.cpp    \
     vsnet_thread_p.cpp      \
+    vsnet_thread_sdl.cpp    \
     vsnet_thread.h          \
 	savenet_util.cpp		\
 	savenet_util.h
