@@ -304,7 +304,7 @@ void StarVlist::UpdateGraphics() {
 		lasttime=time;
 	}
 }
-bool PointStarVlist::BeginDrawState (const QVector &center, const Vector & velocity, const Vector & torque, bool roll, bool yawpitch) {
+bool PointStarVlist::BeginDrawState (const QVector &center, const Vector & velocity, const Vector & torque, bool roll, bool yawpitch, int whichTexture) {
 	UpdateGraphics();
 	static bool StarStreaks=XMLSupport::parse_bool(vs_config->getVariable("graphics","star_streaks","false"));
 	GFXColorMaterial(AMBIENT|DIFFUSE);
@@ -356,14 +356,14 @@ bool PointStarVlist::BeginDrawState (const QVector &center, const Vector & veloc
 	}
 	return ret;
 }
-void PointStarVlist::Draw(bool stretch) {
+void PointStarVlist::Draw(bool stretch, int whichTexture) {
 	if (stretch) {
 		vlist->Draw();
 		vlist->Draw(GFXPOINT,vlist->GetNumVertices());
 	}else
 		nonstretchvlist->Draw();
 }
-void PointStarVlist::EndDrawState(bool stretch) {
+void PointStarVlist::EndDrawState(bool stretch, int whichTexture) {
 	if (stretch)
 		vlist->EndDrawState();
 	else
@@ -420,17 +420,22 @@ void Stars::Draw() {
     GFXDisable (LIGHTING);
   }
   
-  bool stretch=vlist->BeginDrawState(_Universe->AccessCamera()->GetR().Scale(-spread).Cast(),_Universe->AccessCamera()->GetVelocity(),_Universe->AccessCamera()->GetAngularVelocity(),false,false);
   _Universe->AccessCamera()->UpdateGFX(GFXFALSE,GFXFALSE,GFXFALSE);
-	
-  for (int i=0;i<STARnumvlist;i++) {
-    if (i>=1)
-      GFXTranslateModel (pos[i]-pos[i-1]);
-    else
-      GFXTranslateModel (pos[i]);
-    vlist->Draw(stretch);
+  int LC=0,LN=vlist->NumTextures();
+  for (LC=0;LC<LN;++LC) {
+    bool stretch=vlist->BeginDrawState(_Universe->AccessCamera()->GetR().Scale(-spread).Cast(),_Universe->AccessCamera()->GetVelocity(),_Universe->AccessCamera()->GetAngularVelocity(),false,false,LC);
+    int i;
+    for (i=0;i<STARnumvlist;i++) {
+      if (i>=1)
+        GFXTranslateModel (pos[i]-pos[i-1]);
+      else
+        GFXTranslateModel (pos[i]);
+      vlist->Draw(stretch,LC);
+    }
+    GFXTranslateModel(-pos[i-1]);
+    vlist->EndDrawState(stretch,LC);
+
   }
-  vlist->EndDrawState(stretch);
 _Universe->AccessCamera()->UpdateGFX(GFXTRUE,GFXFALSE,GFXFALSE)	  ;
 
   GFXEnable (TEXTURE0);
@@ -503,11 +508,40 @@ Stars::~Stars() {
   
 }
 
-SpriteStarVlist::SpriteStarVlist(int num, float spread, std::string sysnam, std::string texturename,float size):StarVlist(spread) {
-  if (texturename.find(".ani")!=string::npos) {
-    decal= new AnimatedTexture(texturename.c_str(),0,MIPMAP);
-  }else{
-    decal = new Texture(texturename.c_str());
+SpriteStarVlist::SpriteStarVlist(int num, float spread, std::string sysnam, std::string texturenames,float size):StarVlist(spread) {
+  int curtexture=0;
+  vector<AnimatedTexture *>animations;
+  for (curtexture=0;curtexture<NUM_ACTIVE_ANIMATIONS;++curtexture) {
+    std::string::size_type where=texturenames.find(" ");
+    string texturename=texturenames.substr(0,where);
+    if (where!=string::npos) {
+      texturenames=texturenames.substr(where);
+    }else texturenames="";
+    
+    if (texturename.find(".ani")!=string::npos) {
+      animations.push_back(new AnimatedTexture(texturename.c_str(),0,MIPMAP));
+      decal[curtexture]=animations.back();
+    }else if (texturename.length()==0) {
+      if (curtexture==0) {
+        decal[curtexture]= new Texture("white.bmp");
+      }else {
+        if (animations.size()) {
+          AnimatedTexture *tmp= static_cast<AnimatedTexture*>(animations[curtexture%animations.size()]->Clone());
+          int num= tmp->numFrames();
+          if (num) {
+            num = rand()%num;
+            tmp->setTime(num/tmp->framesPerSecond());
+          }
+          decal[curtexture]=tmp;
+          
+          
+        }else {
+          decal[curtexture]=decal[rand()%curtexture]->Clone();
+        }
+      }
+    }else{      
+      decal[curtexture] = new Texture(texturename.c_str());
+    }
   }
   GFXColorVertex * tmpvertex = AllocVerticesForSystem(sysnam,this->spread,&num,12);
   
@@ -571,37 +605,56 @@ SpriteStarVlist::SpriteStarVlist(int num, float spread, std::string sysnam, std:
     tmpvertex[LC+11].t=0;
     
   }
-  vlist= new GFXVertexList (GFXQUAD,num,tmpvertex, num, true,0);
+  {
+    int start=0;
+    int inc = num/NUM_ACTIVE_ANIMATIONS;
+    inc-=inc%12;
+    for (int i=0;i<NUM_ACTIVE_ANIMATIONS;++i,start+=inc) {
+      int later=start+inc;
+      if (i==NUM_ACTIVE_ANIMATIONS-1)
+        later=num;
+      vlist[i]= new GFXVertexList (GFXQUAD,later-start,tmpvertex+start, later-start, true,0);
+      
+    }
+  }
   delete []tmpvertex;
   
 }
+int SpriteStarVlist::NumTextures() {
+    return NUM_ACTIVE_ANIMATIONS;
+}
 
-bool SpriteStarVlist::BeginDrawState(const QVector &center, const Vector &velocity, const Vector & torque, bool roll, bool yawpitch) {
+bool SpriteStarVlist::BeginDrawState(const QVector &center, const Vector &velocity, const Vector & torque, bool roll, bool yawpitch, int whichTex) {
+
   UpdateGraphics();
   GFXEnable(TEXTURE0);
+  decal[whichTex]->MakeActive();
   GFXDisable(CULLFACE);
-  decal->MakeActive();
   GFXColorMaterial(AMBIENT|DIFFUSE);
-  vlist->LoadDrawState();
-  vlist->BeginDrawState();
+  vlist[whichTex]->LoadDrawState();
+  vlist[whichTex]->BeginDrawState();
   return false;  
 }
 
-void SpriteStarVlist::EndDrawState(bool stretch) {
-  vlist->EndDrawState();
+void SpriteStarVlist::EndDrawState(bool stretch, int whichTex) {
+  vlist[whichTex]->EndDrawState();
   GFXDisable(TEXTURE0);
   GFXEnable(CULLFACE);
   GFXColorMaterial(0);
 }
 
-void SpriteStarVlist::Draw(bool strertch) {
-  vlist->Draw();
+void SpriteStarVlist::Draw(bool strertch, int whichTexture) {
+  vlist[whichTexture]->Draw();
 }
 
 SpriteStarVlist::~SpriteStarVlist() {
-  if (decal)
-    delete decal;
-  if (vlist)
-    delete vlist;
+  for (int i=0;i<NUM_ACTIVE_ANIMATIONS;++i) {
+    if (decal[i])
+      delete decal[i];
+  }
+  for (int j=0;j<NUM_ACTIVE_ANIMATIONS;++j) {
+    if (vlist[j])
+      delete vlist[j];
+  }
 }
 

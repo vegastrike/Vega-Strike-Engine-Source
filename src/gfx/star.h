@@ -18,10 +18,18 @@ public:
   StarVlist(float spread);
   void UpdateGraphics();
   virtual ~StarVlist(){}
-  virtual bool BeginDrawState(const QVector &center, const Vector & vel,const Vector & angular_vel,bool rotate, bool yawpitch){}
-  virtual void Draw(bool){}
-  virtual void EndDrawState(bool){}
-
+  virtual bool BeginDrawState(const QVector &center, const Vector & vel,const Vector & angular_vel,bool rotate, bool yawpitch, int whichTexture){}
+  virtual void Draw(bool,int whichtex){}
+  virtual void EndDrawState(bool, int whichtex){}
+  virtual int NumTextures() {return 1;}
+  void DrawAll(const QVector &center, const Vector&vel, const Vector&ang_vel, bool rot,bool yawpitch) {
+    int LC=0,LN=NumTextures();
+    for (LC=0;LC<LN;++LC) {
+      bool tmp=this->BeginDrawState(center,vel,ang_vel,rot,yawpitch,LC);
+      this->Draw(tmp,LC);
+      this->EndDrawState(tmp,LC);
+    }
+  }
 };
 
 class PointStarVlist:public StarVlist{
@@ -30,20 +38,22 @@ class PointStarVlist:public StarVlist{
 public:
   PointStarVlist (int num, float spread,const std::string &our_system_name);
   ~PointStarVlist();
-  bool BeginDrawState(const QVector &center, const Vector & vel,const Vector & angular_vel,bool rotate, bool yawpitch);
-  void Draw(bool);
-  void EndDrawState(bool);
+  bool BeginDrawState(const QVector &center, const Vector & vel,const Vector & angular_vel,bool rotate, bool yawpitch, int whichTexture);
+  void Draw(bool, int whichTexture);
+  void EndDrawState(bool,int whichTexture);
 };
 
+#define NUM_ACTIVE_ANIMATIONS 8
 class SpriteStarVlist:public StarVlist{
-  GFXVertexList * vlist;
-  class Texture *decal;
+  GFXVertexList * vlist[NUM_ACTIVE_ANIMATIONS];
+  class Texture *decal[NUM_ACTIVE_ANIMATIONS];
 public:
   SpriteStarVlist (int num, float spread, std::string our_system_name, std::string texturename,float size);
   ~SpriteStarVlist();
-  bool BeginDrawState(const QVector &center, const Vector & vel,const Vector & angular_vel,bool rotate, bool yawpitch);
-  void Draw(bool);
-  void EndDrawState(bool);
+  int NumTextures();
+  bool BeginDrawState(const QVector &center, const Vector & vel,const Vector & angular_vel,bool rotate, bool yawpitch, int whichTexture);
+  void Draw(bool, int whichTexture);
+  void EndDrawState(bool, int whichTexture);
 };
 
 class Stars {
