@@ -1,4 +1,10 @@
 2001-11-27 Alexander Rawass <alexannika@users.sourceforge.net>
+	
+	* modified main_loop/main to have benchmarking mode
+	* mission variable: terrain
+	
+
+2001-11-27 Alexander Rawass <alexannika@users.sourceforge.net>
 
 	* last fix to link for icc
 	

@@ -329,7 +329,7 @@ void createObjects() {
   explosion= new Animation ("explosion_orange.ani",false,.1,BILINEAR,false);
   LoadWeapons("weapon_list.xml");
   Vector TerrainScale (XMLSupport::parse_float (vs_config->getVariable ("terrain","xscale","1")),XMLSupport::parse_float (vs_config->getVariable ("terrain","yscale","1")),XMLSupport::parse_float (vs_config->getVariable ("terrain","zscale","1")));
-  Terrain * terr = new Terrain ("terrain.xml", TerrainScale);
+  Terrain * terr = new Terrain (mission->getVariable("terrain","terrain.xml").c_str(), TerrainScale);
   Matrix tmp;
   Identity (tmp);
   tmp[0]=TerrainScale.i;tmp[5]=TerrainScale.j;tmp[10]=TerrainScale.k;
@@ -431,7 +431,7 @@ void createObjects() {
 
 	  // cout << "before ai" << endl;
 
-	  if (a!=0) {
+	  if (benchmark>0.0  || a!=0) {
 	    string ai_agg=ainame+".agg.xml";
 	    string ai_int=ainame+".int.xml";
 
@@ -463,7 +463,7 @@ void createObjects() {
 
   delete [] tmptarget;
 
- 
+  if(benchmark==-1){
 #ifdef IPILOTTURRET
   fighters[0]->EnqueueAI (new Orders::AggressiveAI ("default.agg.xml", "default.int.xml"));
   fighters[0]->getSubUnit (0)->EnqueueAI(new FlyByJoystick (0,"player1.kbconf"));
@@ -474,6 +474,8 @@ void createObjects() {
   
   
 #endif
+  }
+
   muzak = new Music (fighters[0]);
   AUDListenerSize (fighters[0]->rSize()*4);
   Inside(0,PRESS);//set up hornet cockpti
@@ -509,9 +511,14 @@ void destroyObjects() {
   //delete fighter;
 }
 extern void micro_sleep (unsigned int n);
+
+double gametime=0.0;
+int total_nr_frames=0;
+
 void main_loop() {
 
   static int microsleep = XMLSupport::parse_int (vs_config->getVariable ("audio","threadtime","2000"));
+
 
   _Universe->StartDraw();
   _Universe->activeStarSystem()->Draw();
@@ -526,6 +533,18 @@ void main_loop() {
       
   ProcessInput();
 
+  double elapsed=GetElapsedTime();
+
+  gametime+=elapsed;
+  total_nr_frames++;
+
+  //cout << "elapsed= " << elapsed << " fps= " << 1.0/elapsed << " average= " << ((double)total_nr_frames)/gametime << " in " << gametime << " seconds" << endl;
+
+  if(benchmark>0.0 && benchmark<gametime){
+    cout << "Game was running for " << gametime << " secs,   av. framerate " << ((double)total_nr_frames)/gametime << endl;
+    exit(0);
+  }
+    
 }
 
 

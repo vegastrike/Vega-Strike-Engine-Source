@@ -80,6 +80,7 @@ void cleanup(void)
 
 VegaConfig *vs_config;
 Mission *mission;
+double benchmark=-1.0;
 
 char mission_name[1024];
 
@@ -129,10 +130,10 @@ int main( int argc, char *argv[] )
     }
 
 #endif
-
+#if 0
     InitTime();
     UpdateTime();
-
+#endif
     strcpy(mission_name,"test1.mission");
 
     ParseCommandLine(argc,argv);
@@ -167,6 +168,9 @@ int main( int argc, char *argv[] )
        InitializeInput();
 
        vs_config->bindKeys();
+
+       InitTime();
+       UpdateTime();
 
     _Universe->Loop(main_loop);
 
@@ -235,6 +239,13 @@ void ParseCommandLine(int argc, char ** lpCmdLine) {
       case 'g':
 	//viddrv = "GLDRV.DLL";
 	break;
+      case '-':
+	// long options
+	if(strcmp(lpCmdLine[i],"--benchmark")==0){
+	  //benchmark=30.0;
+	  benchmark=atof(lpCmdLine[i+1]);
+	  i++;
+	}
       }
     }
     else{

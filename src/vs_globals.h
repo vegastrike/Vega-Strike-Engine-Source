@@ -39,5 +39,7 @@ extern VegaConfig *vs_config;
 class Mission;
 extern Mission *mission;
 
+extern double benchmark;
+
 #endif
 
