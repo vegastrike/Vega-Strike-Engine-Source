@@ -277,14 +277,17 @@ void CommunicatingAI::AdjustRelationTo (Unit * un, float factor) {
   mood+=factor*moodswingyness;
 }
 
+
+//modified not to check player when hostiles are around--unless player IS the hostile
 Unit * CommunicatingAI::GetRandomUnit (float playaprob, float targprob) {
   float a =rand ();
   Unit * target=NULL;
-  if (a<RAND_MAX*playaprob&&_Universe->AccessCockpit()->GetParent()!=parent) {
+  Unit * originaltarget=parent->Target();
+  if (originaltarget==NULL&&a<RAND_MAX*playaprob&&_Universe->AccessCockpit()->GetParent()!=parent) {
     target = _Universe->AccessCockpit()->GetParent();
   }
-  if (a>RAND_MAX*(1-targprob)) {
-    target = parent->Target();
+  if (originaltarget!=NULL||a>RAND_MAX*(1-targprob)) {
+    target = originaltarget;
   }
   if (target!=NULL) {
   if ((!parent->InRange (target))) {
