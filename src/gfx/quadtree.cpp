@@ -27,8 +27,8 @@ QuadTree::QuadTree (const char * filename, const Vector &Scales, const float rad
   RootCornerData.Verts[3].Y = 0;   RootCornerData.Verts[3].vertindex=3;
   RootCornerData.Verts[0].SetTex(0);
   RootCornerData.Verts[1].SetTex(0);
-  RootCornerData.Verts[2].SetTex(9);
-  RootCornerData.Verts[3].SetTex(9);
+  RootCornerData.Verts[2].SetTex(0);
+  RootCornerData.Verts[3].SetTex(0);
   
 
   VertexAllocated = VertexCount = 4;
