@@ -1409,6 +1409,8 @@ void GameCockpit::Draw() {
     static bool drawF6VDU (XMLSupport::parse_bool(vs_config->getVariable("graphics","draw_vdus_from_panning_cam","false")));
     static bool drawF7VDU (XMLSupport::parse_bool(vs_config->getVariable("graphics","draw_vdus_from_target_cam","false")));
     if (view==CP_FRONT||(view==CP_CHASE&&drawF5VDU)||(view==CP_PAN&&drawF6VDU)||(view==CP_TARGET&&drawF7VDU)) {//only draw crosshairs for front view
+      DrawGauges(un);
+
       if (Radar) {
 	//Radar->Draw();
 	if(radar_type=="Elite"){
@@ -1443,7 +1445,6 @@ void GameCockpit::Draw() {
 	}
       }
 
-      DrawGauges(un);
       
       GFXColor4f(1,1,1,1);
       for (unsigned int vd=0;vd<vdu.size();vd++) {
