@@ -705,7 +705,7 @@ int		ZoneMgr::displayMemory()
 	{
 		
 		cout<<"\t\tStar system "<<i<<" = \"<<_Universe->star_system[i]->getName()"<<"\""<<endl;
-		memclient = zone_clients[i]*sizeof( struct Client);
+		memclient = zone_clients[i]*sizeof( class Client);
 		memunit = zone_units[i]*sizeof( class Unit);
 		memvars = zone_clients[i]*sizeof( int)*2;
 		cout<<"\t\t\tMemory for clients :\t"<<(memclient/1024)<<" KB ("<<memclient<<" bytes)"<<endl;

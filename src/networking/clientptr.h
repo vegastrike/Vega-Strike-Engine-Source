@@ -23,7 +23,7 @@
 #include "boost/smart_ptr.hpp"
 #include "boost/weak_ptr.hpp"
 
-struct Client;
+class Client;
 
 typedef boost::shared_ptr<Client>          ClientPtr;
 typedef boost::weak_ptr<Client>            ClientWeakPtr;
