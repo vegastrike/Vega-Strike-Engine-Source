@@ -84,10 +84,8 @@ void gfx_light::Kill() {
  */
 
 void gfx_light::SendGLPosition (const GLenum target) {
-  int tmp = options;
-  w = 1;//(float)(attenuated()!=0);
-  glLightfv (target,GL_POSITION,vect);
-  options = tmp;
+  float v[4] = {vect[0],vect[1],vect[2],1};
+  glLightfv (target,GL_POSITION,v);
 }  
 
 inline void gfx_light::ContextSwitchClobberLight (const GLenum gltarg) {

@@ -124,11 +124,7 @@ class GFXLight {
   int target;
   ///last is w for positional, otherwise 3 for spec
   float vect[3];
-  union {
-    ///also may be referred to as vect[3];
-    float w;
-    int options;
-  };
+  int options;
   float diffuse [4];
   float specular[4];
   float ambient[4];
