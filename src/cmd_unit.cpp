@@ -25,7 +25,6 @@
 #include "cmd_gun.h"
 #include "gfx_sprite.h"
 #include "lin_time.h"
-#include "cmd_unitenum.h"
 #include "gfx_hud.h"
 #include "gfx_bounding_box.h"
 #include "cmd_ai.h"
@@ -204,20 +203,10 @@ Unit::Unit(const char *filename, bool xml) {
 		float x,y,z;
 		int type;
 		ReadUnit(unitfilename, type, x,y,z);
-		switch((UnitType)type)
+		switch(type)
 		{
-		case TEXTPLANE:
-			subunits[unitcount] = new TextPlane(unitfilename);
-			break;
-		case LIGHT:
-			subunits[unitcount] = new Unit(unitfilename);	//how to group turrets like fighters??? maybes stick in special cases
-														//Translation: This ROYALLY screws up the idea of having every object as a class...
-														//perhaps use a switch statement? that would get rather big, although it would be straightforward
-														//maybe have a behavior variable in each turret that specifies its stats, but that sucks too
-														//or, make a special exception to the copy constructor rule... *frumple* this sucks
-			break;
 		default:
-		  printf ("unit type not supported");
+		  subunits[unitcount] = new Unit (unitfilename);
 		}
 		subunits[unitcount]->SetPosition(Vector(x,y,z));
 	}
