@@ -289,7 +289,7 @@ float	quadsquare::GetHeight(const quadcornerdata& cd, float x, float z,  Vector 
 		s11 = cd.Verts[3].Y;
 		break;
 	}
-	normal = Vector (half,s01-s00,0).Cross (Vector (0,s10-s00,half));
+	normal = (Vector (0,s10-s00,half)).Cross (Vector (half,s01-s00,0));
 	return (s00 * (1-lx) + s01 * lx) * (1 - lz) + (s10 * (1-lx) + s11 * lx) * lz;
 }
 

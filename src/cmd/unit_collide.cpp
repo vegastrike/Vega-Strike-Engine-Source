@@ -144,7 +144,7 @@ bool Unit::Collide (Unit * target) {
       normal.Normalize();
   }
   //NOT USED BUT GOOD  Vector farce = normal*smaller->GetMass()*fabs(normal.Dot ((smaller->GetVelocity()-bigger->GetVelocity()/SIMULATION_ATOM))+fabs (dist)/(SIMULATION_ATOM*SIMULATION_ATOM));
-  smaller->ApplyForce (normal*.4*smaller->GetMass()*fabs(normal.Dot ((smaller->GetVelocity()-bigger->GetVelocity()/SIMULATION_ATOM))+fabs (dist)/(SIMULATION_ATOM*SIMULATION_ATOM)));
+  smaller->ApplyForce (normal*.4*smaller->GetMass()*fabs(normal.Dot (((smaller->GetVelocity()-bigger->GetVelocity())/SIMULATION_ATOM))+fabs (dist)/(SIMULATION_ATOM*SIMULATION_ATOM)));
   bigger->ApplyForce (normal*.4*(smaller->GetMass()*smaller->GetMass()/bigger->GetMass())*-fabs(normal.Dot ((smaller->GetVelocity()-bigger->GetVelocity()/SIMULATION_ATOM))+fabs (dist)/(SIMULATION_ATOM*SIMULATION_ATOM)));
   smaller->ApplyDamage (bigger->Position(),-normal,  .5*fabs(normal.Dot(smaller->GetVelocity()-bigger->GetVelocity()))*bigger->mass*SIMULATION_ATOM,GFXColor(1,1,1,1));
   bigger->ApplyDamage (smaller->Position(),normal, .5*fabs(normal.Dot(smaller->GetVelocity()-bigger->GetVelocity()))*smaller->mass*SIMULATION_ATOM,GFXColor(1,1,1,1));

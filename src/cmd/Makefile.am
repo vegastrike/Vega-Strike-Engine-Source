@@ -14,6 +14,8 @@ libcmd_a_SOURCES =				\
 	faction_xml.cpp			\
 	music.cpp			\
 	music.h				\
+	terrain.cpp			\
+	terrain.h			\
 	unit.h				\
 	unit.cpp				\
 	unit_bsp.cpp			\

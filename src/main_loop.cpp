@@ -43,7 +43,8 @@
 #include "mission.h"
 #include "xml_support.h"
 #include "config_xml.h"
-#include "gfx/quadtree.h"
+#include "cmd/terrain.h"
+
 using namespace std;
 
  Music * muzak=NULL;
@@ -324,11 +325,11 @@ static void SetTurretAI (Unit * fighter) {
 }
 
 
-QuadTree * qt;
 void createObjects() {
   explosion= new Animation ("explosion_orange.ani",false,.1,BILINEAR,false);
   LoadWeapons("weapon_list.xml");
-  qt = new QuadTree("terrain.xml");
+  new Terrain ("terrain.xml");
+  //  qt = new QuadTree("terrain.xml");
   /****** 
   locSel = new LocationSelect(Vector (0,-2,2),
 			      Vector(1,0,-1), 
@@ -486,13 +487,14 @@ void createObjects() {
 void destroyObjects() {  
   for(int a = 0; a < numf; a++)
   	delete fighters[a];
+  Terrain::DeleteAll();
   delete tmpcockpittexture;
   delete muzak;
   //  delete cockpit;
   delete [] fighters;
   delete locSel;
   delete explosion;
-  delete qt;
+
   explosion=NULL;
   //delete t;
   //delete s;

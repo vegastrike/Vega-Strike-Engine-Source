@@ -79,6 +79,10 @@ void QuadTree::Update (unsigned short numstages, unsigned short whichstage) {
   root->Update (RootCornerData,InvTransform (transformation,_Universe->AccessCamera()->GetPosition()),detail,numstages,whichstage);
 }
 
+void QuadTree::SetTransformation(const Matrix mat) {
+  memcpy (transformation,mat,sizeof(float)*16);
+}
+
 void QuadTree::Render () {
   GFXLoadMatrix (MODEL,transformation);
   GFXBoxInFrustumModel (transformation);

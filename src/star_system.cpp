@@ -21,10 +21,10 @@
 #include "cmd/music.h"
 #include "config_xml.h"
 #include "vs_globals.h"
-#include "gfx/quadtree.h"
+#include "cmd/terrain.h"
 extern Music *muzak;
 extern Vector mouseline;
-extern QuadTree * qt;
+
 vector<Vector> perplines;
 //static SphereMesh *foo;
 //static Unit *earth;
@@ -153,9 +153,6 @@ void StarSystem::Draw() {
     unit->Draw();
     Vector norm;
     float t;
-    if ((t=qt->GetHeight (unit->Position(),norm))<0) {
-      fprintf (stderr,"Unit %s crashed at height %f <%f,%f,%f>", unit->name.c_str(),t,norm.i,norm.j,norm.k);
-    }
     iter->advance();
   }
   delete iter;
@@ -165,7 +162,7 @@ void StarSystem::Draw() {
   GFXColor tmpcol (0,0,0,1);
   GFXGetLightContextAmbient(tmpcol);
   Mesh::ProcessZFarMeshes();
-  qt->Render();
+  Terrain::RenderAll();
   Mesh::ProcessUndrawnMeshes(true);
   GFXPopGlobalEffects();
   GFXLightContextAmbient(tmpcol);
@@ -209,7 +206,7 @@ void StarSystem::Update() {
 	delete iter;
 	current_stage=TERRAIN_BOLT_COLLIDE;
       } else if (current_stage==TERRAIN_BOLT_COLLIDE) {
-	Bolt::UpdatePhysics();
+	Terrain::CollideAll();
 	current_stage=PHY_COLLIDE;
       } else if (current_stage==PHY_COLLIDE) {
 	static int numframes=0;
@@ -224,8 +221,7 @@ void StarSystem::Update() {
 	}
 	current_stage=PHY_TERRAIN;
       } else if (current_stage==PHY_TERRAIN) {
-	static unsigned int stage=0;
-	qt->Update(64,((stage++)%64));	
+	Terrain::UpdateAll(64);	
 	current_stage=PHY_RESOLV;
       } else if (current_stage==PHY_RESOLV) {
 	iter = drawList->createIterator();
@@ -236,6 +232,7 @@ void StarSystem::Update() {
 	  iter->advance();
 	}
 	delete iter;
+	Bolt::UpdatePhysics();
 	current_stage=PHY_AI;
 	firstframe = false;
       }
