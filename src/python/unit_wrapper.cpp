@@ -95,6 +95,7 @@ PYTHON_BEGIN_MODULE(VS)
 #undef voidEXPORT_UTIL
 #define EXPORT_UTIL(name,aff) VS.def(&UniverseUtil::name,#name);
 #define voidEXPORT_UTIL(name) EXPORT_UTIL(name,0)
+EXPORT_UTIL(SafeEntrancePoint,(10000000,0,0))
 voidEXPORT_UTIL(pushSystem)
 voidEXPORT_UTIL(popSystem)
 EXPORT_UTIL(getSystemFile,"")
@@ -323,7 +324,7 @@ EXPORT_UTIL(GetAdjacentSystem,"")
 EXPORT_UTIL(GetGalaxyProperty,"")
 EXPORT_UTIL(GetNumAdjacentSystems,0)
 EXPORT_UTIL(musicAddList,0)
-
+EXPORT_UTIL(SafeEntrancePoint,(10000000,0,0))
 voidEXPORT_UTIL(musicPlaySong)
 voidEXPORT_UTIL(musicPlayList)
 EXPORT_UTIL(GetDifficulty,.88)

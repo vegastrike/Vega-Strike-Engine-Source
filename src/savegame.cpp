@@ -135,41 +135,6 @@ void FileCopy (const char * src, const char * dst) {
   }
   }
 }
-QVector LaunchUnitNear (QVector pos) {
-  static double def_un_size = XMLSupport::parse_float (vs_config->getVariable ("physics","respawn_unit_size","400"));
-  for (unsigned int k=0;k<10;k++) {
-    Unit * un;
-    bool collision=false;
-    for (un_iter i=_Universe->activeStarSystem()->getUnitList().createIterator();(un=*i)!=NULL;++i) {
-      if (un->isUnit()==ASTEROIDPTR||un->isUnit()==NEBULAPTR) {
-	continue;
-      }
-      double dist = (pos-un->Position()).Magnitude()-un->rSize()-def_un_size;
-      if (dist<0) {
-	QVector delta  = pos-un->Position();
-        double mag = delta.Magnitude();
-        if (mag>.01){
-	  delta=delta/mag;
-        }else {
-          delta.Set(0,0,1);
-        }
-	delta = delta.Scale ( dist+def_un_size);
-	if (k<5) {
-	  pos = pos+delta;
-	  collision=true;
-	}else {
-	  QVector r(.5,.5,.5);
-	  pos+=un->rSize()*r;
-	  collision=true;
-	}
-	
-      }
-    }
-    if (collision==false)
-      break;
-  }
-  return pos;
-}
 
 SaveGame::SaveGame(const std::string &pilot) {
   callsign=pilot;

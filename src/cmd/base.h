@@ -99,7 +99,7 @@ public:
 #endif
 			explicit BaseShip (std::string ind) : BaseObj (ind) {}
 			BaseShip (float r0, float r1, float r2, float r3, float r4, float r5, float r6, float r7, float r8, QVector pos, std::string ind)
-				:mat (r0,r1,r2,r3,r4,r5,r6,r7,r8,pos) , BaseObj (ind) {}
+				:BaseObj (ind),mat (r0,r1,r2,r3,r4,r5,r6,r7,r8,pos)  {}
 		};
 		class BaseSprite : public BaseObj {
 		public:
@@ -111,7 +111,7 @@ public:
 #endif
 			virtual ~BaseSprite () {}
 			BaseSprite (const char *spritefile, std::string ind) 
-				:spr(spritefile,BILINEAR,GFXTRUE), BaseObj(ind) {}
+				: BaseObj(ind),spr(spritefile,BILINEAR,GFXTRUE) {}
 		};
 		class BaseTalk : public BaseObj {
 		public:
@@ -124,7 +124,7 @@ public:
 			virtual ~BaseTalk () {}
 			std::string message;
 //			BaseTalk (Talk *caller) : caller (caller),  sayindex (0),curchar(0) {}
-			BaseTalk (std::string msg,std::string ind) : curchar (0), curtime (0), message(msg), BaseObj(ind) {}
+			BaseTalk (std::string msg,std::string ind) :BaseObj(ind), curchar (0), curtime (0), message(msg) {}
 #ifdef BASE_MAKER
 			virtual void EndXML(FILE *fp) {}
 #endif

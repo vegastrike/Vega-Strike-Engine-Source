@@ -4,7 +4,7 @@
 #include "lin_time.h"
 #include "audiolib.h"
 #include "planet.h"
-#include <python.h>
+#include <Python.h>
 #include <algorithm>
 #ifdef BASE_MAKER
  #include <stdio.h>

@@ -26,7 +26,7 @@
 #include "savegame.h"
 #include "animation.h"
 #include "mesh.h"
-
+#include "universe_util.h"
 extern float rand01();
 #define SWITCH_CONST .9
 
@@ -1282,7 +1282,7 @@ void Cockpit::Update () {
 	}
 	ss->SwapIn();
 	Unit * un = UnitFactory::createUnit (unitfilename.c_str(),false,this->unitfaction,unitmodname);
-	un->SetCurPosition (LaunchUnitNear (savegame->GetPlayerLocation()));
+	un->SetCurPosition (UniverseUtil::SafeEntrancePoint (savegame->GetPlayerLocation()));
 	ss->AddUnit (un);
 
 	this->SetParent(un,unitfilename.c_str(),unitmodname.c_str(),savegame->GetPlayerLocation());
