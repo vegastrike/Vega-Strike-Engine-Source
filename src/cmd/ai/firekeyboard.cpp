@@ -671,9 +671,20 @@ bool TargNear (Unit *me,Unit *target) {
 	return me->getRelation(target)<0&&TargAll(me,target);
 }
 bool TargFront (Unit *me,Unit *target) {
+	/*
 	float dist;
 	if (me->cosAngleTo(target,dist)>.6) {
 		return true;
+	}
+	return false;
+	*/
+	QVector delta( target->Position()-me->Position());
+	double mm = delta.Magnitude();
+	double tempmm =mm-target->rSize();
+	if (tempmm>0.0001) {
+		if ((me->ToLocalCoordinates (Vector(delta.i,delta.j,delta.k)).k/tempmm)>.85) {
+			return true;
+		}
 	}
 	return false;
 }
