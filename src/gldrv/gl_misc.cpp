@@ -54,6 +54,9 @@ GFXBOOL /*GFXDRVAPI*/ GFXCapture(char *filename)
 	return GFXFALSE;
 }
 
+void GFXPointSize (const float size) {
+  glPointSize (size);
+}
 void /*GFXDRVAPI*/ GFXBegin(const enum POLYTYPE ptype)
 {
 	GLenum mode;

@@ -33,22 +33,30 @@ void Cockpit::DrawBlips (Unit * un) {
   Radar->GetPosition (xcent,ycent);
   GFXDisable (TEXTURE0);
   GFXDisable (LIGHTING);
+  GFXPointSize (2);
   GFXBegin(GFXPOINT);
   while ((target = iter->current())!=NULL) {
     if (target!=un) {
       LocalToRadar (un->ToLocalCoordinates(target->Position()-un->Position()),s,t);
       GFXColorf (relationToColor (_Universe->GetRelation(un->faction,target->faction)));
       GFXVertex3f (xcent+xsize*s,ycent+ysize*t,0);
+      
       if (target==makeBigger) {
-	      GFXVertex3f (xcent+2./g_game.x_resolution+xsize*s,ycent+ysize*t,0);
-	      GFXVertex3f (xcent-2./g_game.x_resolution+xsize*s,ycent+ysize*t,0);
-	      GFXVertex3f (xcent+xsize*s,ycent+2./g_game.y_resolution+ysize*t,0);
-	      GFXVertex3f (xcent+xsize*s,ycent-2./g_game.y_resolution+ysize*t,0);
+	GFXPointSize(4);
+	/*
+	      GFXVertex3f (xcent+4./g_game.x_resolution+xsize*s,ycent+ysize*t,0);
+	      GFXVertex3f (xcent-4./g_game.x_resolution+xsize*s,ycent+ysize*t,0);
+	      GFXVertex3f (xcent+xsize*s,ycent+4./g_game.y_resolution+ysize*t,0);
+	      GFXVertex3f (xcent+xsize*s,ycent-4./g_game.y_resolution+ysize*t,0);
+	*/
+	GFXPointSize (2);
       }
+      
     }
     iter->advance();
   }
   GFXEnd();
+  GFXPointSize (1);
   GFXColor (1,1,1,1);
   GFXEnable (TEXTURE0);
   delete iter;
