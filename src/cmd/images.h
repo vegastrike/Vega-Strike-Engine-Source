@@ -1,5 +1,4 @@
 
-
 struct UnitImages {
 	std::string cockpitImage;
   Sprite * hudImage;
