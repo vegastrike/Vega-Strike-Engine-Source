@@ -692,7 +692,8 @@ void UnitBeginElement(const string &name, const AttributeList &attributes, XML *
 			  }
           }
       } else if (xeq (name,"radar")) {
-          fprintf(xml->tfp," itts=\"false\" error=\"0\" range=\"5000\" maxcone=\".25\" color=\"false\"");
+          fprintf(xml->tfp," itts=\"true\" error=\"0\" range=\"600000000\" maxcone=\"-1\" color=\"true\" ");
+		  fprintf(xml->bfp," itts=\"false\" error=\"0\" range=\"30000000\" maxcone=\"-1\" color=\"false\"");
           
       }else
 	for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
@@ -792,7 +793,7 @@ void UnitEndElement(const string &name, XML * xml) {
 	  fprintf (xml->bfp,"<Upgrade file=\"shield_%d\"/>\n",xml->num_shield_facings);
   }  
   if (xeq (name,"energy")){
-      fprintf (xml->tfp,"<Upgrade file=\"engine%s\"/>\n<Upgrade file=\"mult_gun_cooler\"/>\n",LookUp (engineLookup (),xml->energy_recharge).c_str());
+      fprintf (xml->tfp,"<Upgrade file=\"reactor%s\"/>\n<Upgrade file=\"mult_gun_cooler\"/>\n",LookUp (engineLookup (),xml->energy_recharge).c_str());
       fprintf (xml->bfp,"<Upgrade file=\"reactor_level_0\"/>\n");
   }
 }
