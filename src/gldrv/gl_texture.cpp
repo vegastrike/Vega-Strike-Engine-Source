@@ -18,6 +18,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
+#define GL_EXT_texture_env_combine 1
 #include "gl_globals.h"
 #include "vs_globals.h"
 #include "vegastrike.h"
