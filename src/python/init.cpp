@@ -1,6 +1,7 @@
 
 #ifdef HAVE_PYTHON
 #include <stdio.h>
+#include <math.h>
 #include <Python.h>
 #include <pyerrors.h>
 #include <pythonrun.h>

@@ -4,14 +4,8 @@ incl2 = \
 	 -I/System/Library/Frameworks/Carbon.framework/Versions/A/Headers
 endif
 
-if NETCOMM_JVOIP
 incl = \
-	-I/usr/local/include/jvoiplib	\
-	-I/usr/local/include/jrtplib	\
-	-I/usr/local/include/jthread
-else
-incl =
-endif
+	 -I$(top_srcdir)/src
 
 if USEBOOST128
 INCLUDES= $(incl) $(incl2)	\
@@ -27,9 +21,10 @@ endif
 noinst_LIBRARIES = libnet.a libnetclient.a libnetserver.a libnetacct.a
 bin_PROGRAMS = soundserver
 
+soundserver_LDADD = -L/usr/local/lib $(SDL_LIBS) -lSDL_mixer
+
 SUBDIRS = lowlevel
 
-soundserver_LDADD = -L/usr/local/lib -lSDL -lSDL_mixer
 soundserver_SOURCES = inet.cpp inet.h soundserver.cpp
 
 libacctserver = \
@@ -81,18 +76,12 @@ libnet_a_SOURCES =	\
 	inet.cpp		\
 	inet.h
 
-libnetclient = $(libnetclientserver) \
-	networkcomm.cpp		\
-	networkcomm.h		\
-	webcam_support.cpp	\
-	webcam_support.h
 
-libnetclient_a_SOURCES = $(libnetclient)
+libnetclient_a_SOURCES = $(libnetclientserver)
 
 libnetacct_a_SOURCES = $(libacctserver) $(liblowlevel) \
 	acctserver.cpp \
 	acctserver.h
 
-libnetserver_a_SOURCES = $(libnetclientserver) \
-	networkcomm_server.cpp
 
+libnetserver_a_SOURCES = $(libnetclientserver)

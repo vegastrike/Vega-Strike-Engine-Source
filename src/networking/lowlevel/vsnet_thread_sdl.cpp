@@ -1,7 +1,7 @@
 #include <config.h>
 
+#if defined(USE_NET_THREAD_SDL)
 #include "vsnet_thread.h"
-#ifdef USE_JTHREAD
 
 #include <iostream>
 using namespace std;
@@ -128,5 +128,6 @@ void VSCond::broadcast( )
     }
 }
 
-#endif /* USE_JTHREAD */
+#endif /* defined(USE_NET_THREAD_SDL) */
+
 

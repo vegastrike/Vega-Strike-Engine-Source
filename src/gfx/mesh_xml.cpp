@@ -8,7 +8,7 @@
 #include <float.h>
 #include <assert.h>
 #include "ani_texture.h"
-#if !defined(_WIN32) && !(defined(__APPLE__) || defined(MACOSX))
+#if !defined(_WIN32) && !(defined(__APPLE__) || defined(MACOSX)) && !defined(BSD)
 #include <values.h>
 #endif
 #include "xml_support.h"

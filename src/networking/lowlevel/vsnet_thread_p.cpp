@@ -1,8 +1,8 @@
 #include <config.h>
 
+#if defined(USE_NET_THREAD_POSIX)
 #include "vsnet_thread.h"
 #include "vsnet_debug.h"
-#ifdef USE_PTHREAD
 
 #include <pthread.h>
 #include <stdio.h>
@@ -259,5 +259,5 @@ void VSCond::broadcast( )
     }
 }
 
-#endif /* USE_PTHREADS */
+#endif /* defined(USE_NET_THREAD_POSIX) */
 

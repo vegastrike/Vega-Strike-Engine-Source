@@ -29,11 +29,20 @@
 #include <assert.h>
 //#include "gl_globals.h"
 #include "gfxlib.h"
-#if !defined(_WIN32) && !defined(__CYGWIN__)
-#if !(defined(__APPLE__) || defined(MACOSX))
 
-    #   include <GL/glx.h>
+
+#if !defined(_WIN32) && !defined(__CYGWIN__)
+
+#if !(defined(__APPLE__) || defined(MACOSX))
+#define GL_GLEXT_PROTOTYPES 1
+#define GLX_GLXEXT_PROTOTYPES 1
+#define GLX_GLXEXT_LEGACY 1
+
+//    #   include <GL/glxext.h>
+  //  #   include <GL/glx.h>
+    //#   include <GL/glxext.h>
 #endif
+
 #include <stdlib.h>
 
 #else
@@ -43,6 +52,7 @@
     #include <OpenGL/gl.h>
 #else
     #include <GL/gl.h>
+    #include <GL/glx.h>
 #endif
 #ifdef GL_EXT_compiled_vertex_array
 # ifndef PFNGLLOCKARRAYSEXTPROC
@@ -54,12 +64,15 @@
 //typedef void (APIENTRY * PFNGLUNLOCKARRAYSEXTPROC) (void);
 #undef GL_EXT_compiled_vertex_array
 #ifndef _WIN32
-#define GL_GLEXT_PROTOTYPES
+#define GL_GLEXT_PROTOTYPES 1
+#define GLX_GLXEXT_PROTOTYPES 1
+#define GLX_GLXEXT_LEGACY 1
 #endif
 #if defined(__APPLE__) || defined(MACOSX)
     #include <OpenGL/glext.h>
 #else
     # include <GL/glext.h>
+    # include <GL/glxext.h>
 #endif
 #endif
 

@@ -32,8 +32,7 @@ networking/libnet.a 				\
 cmd/collide/libcollide.a 			\
 boost129/libboost_python.a          \
 boost/libboost_python.a             \
-gfx/nav/libnav.a 					\
--lpthread -lz
+gfx/nav/libnav.a
 
 vegaserver_LDADD =  			\
 networking/netserver_devices.o	\
@@ -53,7 +52,7 @@ gfx/libgfxserver.a 				\
 gldrv/libgldrvserver.a 			\
 cmd/collide/libcollide.a 		\
 boost129/libboost_python.a      \
-boost/libboost_python.a -lz
+boost/libboost_python.a	        
 
 accountserver_LDADD =           \
 common/libvscommon.a            \

@@ -1,4 +1,5 @@
 #ifndef PYTHON_STUB
+#include <math.h>
 #include "python_class.h"
 #include "cmd/briefing.h"
 #include "cmd/script/mission.h"

@@ -1,7 +1,7 @@
 #include <config.h>
 
+#if defined(USE_NET_THREAD_NONE)
 #include "vsnet_thread.h"
-#ifdef USE_NO_THREAD
 
 /*------------------------------------------------------------*
  * definition of VSThread                                     *
@@ -71,5 +71,5 @@ void VSCond::broadcast( )
 {
 }
 
-#endif /* USE_NO_THREAD */
+#endif /* defined(USE_NET_THREAD_NONE) */
 

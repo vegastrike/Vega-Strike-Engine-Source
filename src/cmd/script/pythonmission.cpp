@@ -1,3 +1,4 @@
+#include <math.h>
 #include "pythonmission.h"
 #include <Python.h>
 #include "python/python_compile.h"

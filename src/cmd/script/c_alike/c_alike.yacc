@@ -26,7 +26,6 @@
 
 
 #include "c_alike.h"
-
 std::string module_string;
 
 bool have_yy_error;
@@ -68,7 +67,7 @@ module_body:	/* empty */   { $$=""; }
 		| module_body module_statement ';' {
 	$$=$1+"\n"+$2;
 }		;
-module_statement:	 defvar {$$=$1} | script  { $$=$1; } | import { $$=$1 } | globals { $$=$1; };
+module_statement:	 defvar { $$=$1; } | script  { $$=$1; } | import { $$=$1; } | globals { $$=$1; };
 
 globals:	L_GLOBALS '{' globals_body '}' {
 	$$="<globals "+lineno()+" >\n"+$3+"\n</globals>\n";
@@ -82,18 +81,19 @@ import:		L_IMPORT L_ID 	{
 	$$="<import  "+lineno()+" name="+q($2)+"/>";
  };
 vartype:	inttype {$$=$1;} | floattype {$$=$1;}
-		| booltype {$$=$1;} | objecttype {$$=$1}
+		| booltype {$$=$1;} | objecttype {$$=$1;}
 		| voidtype { $$=$1;};
 
-inttype:        L_INT  		{ $$="int" };
-floattype:      L_FLOAT 	  { $$="float"};
-booltype:       L_BOOL		{  $$="bool"};
-objecttype:     L_OBJECT 	 { $$="object"};
-voidtype:	L_VOID		{ $$="void"};
+inttype:        L_INT  		{ $$="int"; };
+floattype:      L_FLOAT 	  { $$="float";};
+booltype:       L_BOOL		{  $$="bool";};
+objecttype:     L_OBJECT 	 { $$="object";};
+voidtype:	L_VOID		{ $$="void";};
 argvar:		vartype L_ID {
 	$$="<defvar name="+q($2)+" type="+q($1)+"/>\n";
 //	printf("DEVFAR %s\n",$2.c_str());
-}
+};
+
 classvar:	L_CLASS {
 	 $$="true";
 }
@@ -103,11 +103,11 @@ classvar:	L_CLASS {
 
 defvar_begin:	vartype  {
 	$$=" classvar=\"false\" type="+q($1);
-}
+} 	
 
 		| L_CLASS vartype  {
 	$$=" classvar=\"true\" type="+q($2);
-}
+};
 
 defvar:		defvar_begin L_ID '=' expr {
 	$$="<defvar  "+lineno()+" name="+q($2)+" "+$1+" />\n"+"<setvar name="+q($2)+" >\n"+$4+"\n</setvar>\n";
@@ -182,7 +182,7 @@ var_or_voidtype:	vartype { printf("var_or_voidtype\n"); $$=$1;}
 	| voidtype {$$=$1;};
 
 arguments:	/* empty */	{ $$="\n"; }
-	| nonnull_arguments  { $$=$1;}
+	| nonnull_arguments  { $$=$1;};
 
 nonnull_arguments:
 	argument { $$=$1;}
@@ -213,7 +213,7 @@ return_statement: 	L_RETURN	{
 }
 			| L_RETURN expr {
 	$$="<return "+lineno()+" >\n"+$2+"\n</return>\n";
-}
+};
 
 while_statement: L_WHILE expr block_statement	{
 	$$="<while "+lineno()+" >\n"+$2+"\n"+$3+"\n</while>\n";
@@ -234,7 +234,7 @@ call_void:	L_ID '.' L_ID '(' attributes call_arglist ')'	{
 	$$="<exec  "+lineno()+" name="+q($1)+" >\n"+$3+"\n</exec>\n";
 };
 call_arglist:	/* empty */	{ $$="\n"; }
-	| nonnull_arglist  { $$=$1;}
+	| nonnull_arglist  { $$=$1;};
 
 nonnull_arglist:	expr {$$=$1;}
 	| nonnull_arglist ',' expr {
@@ -252,7 +252,7 @@ attribute:	':' L_ID '=' string_constant 	 {
 
 setvar:			L_ID '=' expr   {
 	$$="<setvar name="+q($1)+lineno()+" >\n"+$3+"\n</setvar>\n";
-}
+};
 if_statement:	L_IF '(' expr ')' block_statement L_ELSE block_statement	{
 	$$="<if "+lineno()+" >\n"+$3+"\n"+$5+"\n"+$7+"\n</if>\n";
 }
@@ -274,11 +274,11 @@ string_constant:	L_STRINGCONST {$$=$1;};
 
 init_val:	boolvalue {$$=$1;}
 		| L_FLOATCONST	{$$=$1;}
-		| L_INTCONST	{$$=$1;}
+		| L_INTCONST	{$$=$1;};
 
 boolvalue:	L_BOOLCONST_TRUE  {
 	 $$="true";
- };
+ }
 		| L_BOOLCONST_FALSE {
 	 $$="false";
 };	
@@ -291,8 +291,8 @@ number:			L_FLOATCONST {
  }
 			| L_INTCONST	{
 	 $$="<const  "+lineno()+" type=\"int\" value="+q($1)+" />\n";
-}
-expr:			constant	{ $$=$1; };
+};
+expr:			constant	{ $$=$1; }
 			| L_ID {
 	$$="<var  "+lineno()+" name="+q($1)+" />\n";
 }
@@ -369,5 +369,6 @@ int yyerror(char *s){
 int yywrap(){
 	return 1;
 }
+
 
 

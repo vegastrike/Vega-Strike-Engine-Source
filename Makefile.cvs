@@ -1,0 +1,4 @@
+aclocal
+autoheader -f
+autoconf -f
+automake -acf

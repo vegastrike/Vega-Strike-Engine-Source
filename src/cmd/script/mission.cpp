@@ -22,7 +22,7 @@
 /*
   xml Mission written by Alexander Rawass <alexannika@users.sourceforge.net>
 */
-
+#include <math.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <errno.h>

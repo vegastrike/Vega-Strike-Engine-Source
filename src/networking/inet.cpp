@@ -5,7 +5,7 @@
 #define SOCKET_ERROR -1
 #include <sys/time.h>
 #include <sys/types.h>
-#if !defined(__APPLE__) && !defined(__CYGWIN__)
+#if !defined(__APPLE__) && !defined(__CYGWIN__) && !defined(BSD)
 #include <error.h>
 #endif
 #include <netdb.h>
