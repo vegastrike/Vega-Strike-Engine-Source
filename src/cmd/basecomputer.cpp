@@ -3383,7 +3383,7 @@ void showUnitStats(Unit * playerUnit,string &text,int subunitlevel, int mode, Ca
     	text+="#n#"+prefix+statcolor+"Turning Response: #-c";
 	}
     if (playerUnit->limits.yaw==playerUnit->limits.pitch &&playerUnit->limits.yaw==playerUnit->limits.roll) {
-		prettyPrintFloat(conversionBuffer,playerUnit->limits.yaw/playerUnit->GetMoment(),0,2);
+		prettyPrintFloat(conversionBuffer,playerUnit->limits.yaw/(playerUnit->GetMoment()!=0)?playerUnit->GetMoment():1,0,2);
 		if(!mode){
 			text+=conversionBuffer;
 			text+=" radians/second^2 "+statcolor+"(yaw, pitch, roll)#-c";
@@ -3426,7 +3426,7 @@ void showUnitStats(Unit * playerUnit,string &text,int subunitlevel, int mode, Ca
 	}
 	
 	if(!subunitlevel){
-		if(!mode){
+		if(!mode&&(playerUnit->mass!=0)){
 			PRETTY_ADDU(statcolor+"Fore acceleration: #-c",playerUnit->limits.forward/(10*playerUnit->mass),2,"gravities");
 			PRETTY_ADDU(statcolor+"Aft acceleration: #-c",playerUnit->limits.retro/(10*playerUnit->mass),2,"gravities")
 			if (playerUnit->limits.lateral==playerUnit->limits.vertical) {
@@ -3594,13 +3594,16 @@ void showUnitStats(Unit * playerUnit,string &text,int subunitlevel, int mode, Ca
 		text+="#n##n##c0:1:.5#"+prefix+"[DURABILITY STATISTICS]#n##-c";
 		text+="#n#"+prefix+statcolor+"Armor damage resistance:#-c";
 	}
-	if(mode){
+	if(mode&&playerUnit->armor.front!=blankUnit->armor.front){
 		switch(replacement_mode){
 			case 0: // Replacement or new Module
+				text+="#n#"+prefix+statcolor+"Replaces existing armor, if any.#n#Armor damage resistance:#-c";
 				break;
 			case 1: // Additive
+				text+="#n#"+prefix+statcolor+"Adds the following to armor damage resistance ratings:#-c";
 				break;
 			case 2: // multiplicative
+				text+="#n#"+prefix+statcolor+"Armor damage resistance increased by following percentages:#-c";
 				break;
 			default: // Failure 
 				text+="Oh dear, this wasn't an upgrade. Please debug code.";
@@ -3608,10 +3611,10 @@ void showUnitStats(Unit * playerUnit,string &text,int subunitlevel, int mode, Ca
 		}
 	}
 	if(!mode||playerUnit->armor.front!=blankUnit->armor.front){
-		PRETTY_ADDU(statcolor+"  fore - #-c",playerUnit->armor.front*VSDM,0,"MJ");
-		PRETTY_ADDU(statcolor+"  aft - #-c",playerUnit->armor.back*VSDM,0,"MJ"); 
-		PRETTY_ADDU(statcolor+"  port - #-c",playerUnit->armor.left*VSDM,0,"MJ");
-		PRETTY_ADDU(statcolor+"  starboard - #-c",playerUnit->armor.right*VSDM,0,"MJ");
+		PRETTY_ADDU(statcolor+"  fore - #-c",(mode&&replacement_mode==2)?100*(playerUnit->armor.front-1):playerUnit->armor.front*VSDM,0,"MJ");
+		PRETTY_ADDU(statcolor+"  aft - #-c",(mode&&replacement_mode==2)?100*(playerUnit->armor.back-1):playerUnit->armor.back*VSDM,0,"MJ"); 
+		PRETTY_ADDU(statcolor+"  port - #-c",(mode&&replacement_mode==2)?100*(playerUnit->armor.left-1):playerUnit->armor.left*VSDM,0,"MJ");
+		PRETTY_ADDU(statcolor+"  starboard - #-c",(mode&&replacement_mode==2)?100*(playerUnit->armor.right-1):playerUnit->armor.right*VSDM,0,"MJ");
 	}
 	if(!mode){
 		PRETTY_ADDU(statcolor+"Sustainable Hull Damage: #-c",playerUnit->GetHull()/(playerUnit->GetHullPercent())*VSDM,0,"MJ");
@@ -3620,54 +3623,64 @@ void showUnitStats(Unit * playerUnit,string &text,int subunitlevel, int mode, Ca
 			text+="% of normal";
 		}	
 	}else{
-		switch(replacement_mode){
-			case 0: // Replacement or new Module
-				break;
-			case 1: // Additive
-				break;
-			case 2: // multiplicative
-				break;
-			default: // Failure 
-				text+="Oh dear, this wasn't an upgrade. Please debug code.";
-				break;
-		}	
+		if(playerUnit->GetHull()!=blankUnit->GetHull()){
+			switch(replacement_mode){
+				case 0: // Replacement or new Module
+					PRETTY_ADDU(statcolor+"New Sustained Hull Damage Rating: #-c",playerUnit->GetHull()/(playerUnit->GetHullPercent())*VSDM,0,"MJ");
+					break;
+				case 1: // Additive
+					PRETTY_ADDU(statcolor+"Increases sustainable hull damage by #-c",playerUnit->GetHull()/(playerUnit->GetHullPercent())*VSDM,0,"MJ");
+					break;
+				case 2: // multiplicative
+					PRETTY_ADDU(statcolor+"Hull Strength increased by #-c",100*(playerUnit->GetHull()-1),0,"%");				
+					break;
+				default: // Failure 
+					text+="Oh dear, this wasn't an upgrade. Please debug code.";
+					break;
+			}	
+		}
 	}
 	if(!mode){
 		PRETTY_ADD(statcolor+"Number of shield emitter facings: #-c",playerUnit->shield.number,0);
 		text+="#n#"+prefix+statcolor+"Shield protection rating:#-c";
 	} else {
-		switch(replacement_mode){
-			case 0: // Replacement or new Module
-				break;
-			case 1: // Additive
-				break;
-			case 2: // multiplicative
-				break;
-			default: // Failure 
-				text+="Oh dear, this wasn't an upgrade. Please debug code.";
-				break;
+		if(playerUnit->shield.fb[2]!=blankUnit->shield.fb[2]||playerUnit->shield.fbrl.frontmax!=blankUnit->shield.fbrl.frontmax||playerUnit->shield.fbrltb.fbmax!=blankUnit->shield.fbrltb.fbmax){
+			switch(replacement_mode){
+				case 0: // Replacement or new Module
+					text+="#n#"+prefix+statcolor+"Installs shield with following protection ratings:#-c";
+					break;
+				case 1: // Additive
+					text+="#n#"+prefix+statcolor+"Adds following amounts to shield protection ratings:#-c";
+					break;
+				case 2: // multiplicative
+					text+="#n#"+prefix+statcolor+"Shield protection rating for each emitter increased by listed percentage:#-c";
+					break;
+				default: // Failure 
+					text+="Oh dear, this wasn't an upgrade. Please debug code.";
+					break;
+			}
 		}
 	}
 
 	switch (playerUnit->shield.number) {
 		case 2:
 			if(!mode||playerUnit->shield.fb[2]!=blankUnit->shield.fb[2]){
-				PRETTY_ADDU(statcolor+"  fore - #-c",playerUnit->shield.fb[2]*VSDM,0, "MJ");
-				PRETTY_ADDU(statcolor+"  aft - #-c",playerUnit->shield.fb[3]*VSDM,0, "MJ");
+				PRETTY_ADDU(statcolor+"  fore - #-c",(mode&&replacement_mode==2)?(100*(playerUnit->shield.fb[2]-1)):playerUnit->shield.fb[2]*VSDM,0, "MJ");
+				PRETTY_ADDU(statcolor+"  aft - #-c",(mode&&replacement_mode==2)?(100*(playerUnit->shield.fb[3]-1)):playerUnit->shield.fb[3]*VSDM,0, "MJ");
 			}
 			break;
 		case 4:
 			if(!mode||playerUnit->shield.fbrl.frontmax!=blankUnit->shield.fbrl.frontmax){
-				PRETTY_ADDU(statcolor+"  fore - #-c",playerUnit->shield.fbrl.frontmax*VSDM,0,"MJ");
-				PRETTY_ADDU(statcolor+"  aft - #-c",playerUnit->shield.fbrl.backmax*VSDM,0,"MJ");
-				PRETTY_ADDU(statcolor+"  port - #-c",playerUnit->shield.fbrl.leftmax*VSDM,0,"MJ");
-				PRETTY_ADDU(statcolor+"  starboard - #-c",playerUnit->shield.fbrl.rightmax*VSDM,0,"MJ");
+				PRETTY_ADDU(statcolor+"  fore - #-c",(mode&&replacement_mode==2)?(100*(playerUnit->shield.fbrl.frontmax-1)):playerUnit->shield.fbrl.frontmax*VSDM,0,"MJ");
+				PRETTY_ADDU(statcolor+"  aft - #-c",(mode&&replacement_mode==2)?(100*(playerUnit->shield.fbrl.backmax-1)):playerUnit->shield.fbrl.backmax*VSDM,0,"MJ");
+				PRETTY_ADDU(statcolor+"  port - #-c",(mode&&replacement_mode==2)?(100*(playerUnit->shield.fbrl.leftmax-1)):playerUnit->shield.fbrl.leftmax*VSDM,0,"MJ");
+				PRETTY_ADDU(statcolor+"  starboard - #-c",(mode&&replacement_mode==2)?(100*(playerUnit->shield.fbrl.rightmax-1)):playerUnit->shield.fbrl.rightmax*VSDM,0,"MJ");
 			}
 			break;
 		case 6:
 			if(!mode||playerUnit->shield.fbrltb.fbmax!=blankUnit->shield.fbrltb.fbmax){
-				PRETTY_ADDU(statcolor+"  fore and aft - #-c",playerUnit->shield.fbrltb.fbmax*VSDM,0,"MJ");
-				PRETTY_ADDU(statcolor+"  port, starboard, top, bottom - #-c",playerUnit->shield.fbrltb.rltbmax*VSDM,0,"MJ");
+				PRETTY_ADDU(statcolor+"  fore and aft - #-c",(mode&&replacement_mode==2)?(100*(playerUnit->shield.fbrltb.fbmax-1)):playerUnit->shield.fbrltb.fbmax*VSDM,0,"MJ");
+				PRETTY_ADDU(statcolor+"  port, starboard, top, bottom - #-c",(mode&&replacement_mode==2)?(100*(playerUnit->shield.fbrltb.rltbmax-1)):playerUnit->shield.fbrltb.rltbmax*VSDM,0,"MJ");
 			}
 			break;
 		default:
@@ -3678,16 +3691,21 @@ void showUnitStats(Unit * playerUnit,string &text,int subunitlevel, int mode, Ca
 	if(!mode){
 		PRETTY_ADDU(statcolor+"Shield protection recharge speed: #-c",playerUnit->shield.recharge*VSDM,0,"MJ/s"); 
 	}else{
-		switch(replacement_mode){
-			case 0: // Replacement or new Module
+		if(playerUnit->shield.recharge!=blankUnit->shield.recharge){
+			switch(replacement_mode){
+				case 0: // Replacement or new Module
+					PRETTY_ADDU(statcolor+"Shield protection recharge speed set to: #-c",playerUnit->shield.recharge*VSDM,0,"MJ/s"); 
+					break;
+				case 1: // Additive
+					PRETTY_ADDU(statcolor+"Increases shield protection recharge speed by #-c",playerUnit->shield.recharge*VSDM,0,"MJ/s"); 
+					break;
+				case 2: // multiplicative
+					PRETTY_ADDU(statcolor+"Shield protection recharge speed increased by #-c",100*(playerUnit->shield.recharge-1),0,"%"); 
+					break;
+				default: // Failure 
+					text+="Oh dear, this wasn't an upgrade. Please debug code.";
 				break;
-			case 1: // Additive
-				break;
-			case 2: // multiplicative
-				break;
-			default: // Failure 
-				text+="Oh dear, this wasn't an upgrade. Please debug code.";
-			break;
+			}
 		}
 	}
 	//cloaking device? If we don't have one, no need to mention it ever exists, right?
@@ -3697,10 +3715,13 @@ void showUnitStats(Unit * playerUnit,string &text,int subunitlevel, int mode, Ca
 		} else {
 			switch(replacement_mode){
 				case 0: // Replacement or new Module
+					PRETTY_ADDU(statcolor+"Installs a cloaking device.#n#  Activated energy usage: #-c",playerUnit->image->cloakenergy*RSconverter*Wconv,0,"MJ/s");
 					break;
 				case 1: // Additive
+					text+="#n#Additive Cloaking...Seems like a bug to me.#n#";
 					break;
 				case 2: // multiplicative
+					text+="#n#Multiplicative Cloaking...Seems like a bug to me.#n#";
 					break;
 				default: // Failure 
 					text+="Oh dear, this wasn't an upgrade. Please debug code.";
