@@ -5,7 +5,6 @@
 #include <assert.h>
 #include "xml_support.h"
 
-
 string strtoupper(const string &foo) {
   string rval;
   string::const_iterator src = foo.begin();
