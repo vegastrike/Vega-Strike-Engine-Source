@@ -20,273 +20,281 @@
  */
 
 /*
-  who wrote this? probably DanielH?
+  Daniel Horn
 */
 
 #include <expat.h>
 #include "xml_support.h"
 
-#include "vegastrike.h"
-#include <assert.h>
-
 #include "galaxy_xml.h"
-#include "easydom.h"
 #include "galaxy_gen.h"
+
+#include <float.h>
+using namespace XMLSupport;
+namespace GalaxyXML {
+enum GalaxyNames {
+	UNKNOWN,
+	GALAXY,
+	SYSTEMS,
+	SECTOR,
+	SYSTEM,
+	VAR,
+	NAME,
+	VALUE
+};
+const EnumMap::Pair element_names [] = {
+	EnumMap::Pair ("UNKNOWN", UNKNOWN),
+    EnumMap::Pair ("Galaxy",GALAXY),
+    EnumMap::Pair ("Systems", SYSTEMS),
+    EnumMap::Pair ("Sector", SECTOR),
+    EnumMap::Pair ("System", SYSTEM),
+    EnumMap::Pair ("Var", VAR)
+};
+const EnumMap::Pair attribute_names [] = {
+	EnumMap::Pair ("UNKNOWN", UNKNOWN),
+	EnumMap::Pair ("name",NAME),
+    EnumMap::Pair ("value",VALUE)
+};
+
+const EnumMap element_map(element_names, 6);
+const EnumMap attribute_map(attribute_names, 3);
+	class XML {
+	public:
+		Galaxy * g;
+		std::vector <std::string> stak;
+	};
+	void beginElement( void * userdata, const XML_Char * nam, const XML_Char ** atts){
+		AttributeList::const_iterator iter;
+		XML * xml = (XML *)userdata;
+		string tname (nam);
+		AttributeList attributes (atts);
+		GalaxyNames elem = (GalaxyNames) element_map.lookup(tname);
+		GalaxyNames attr;
+		string name;
+		string value;
+		switch (elem) {
+		case GALAXY:
+			break;
+		case SYSTEMS:
+			break;
+		case SECTOR:
+		case SYSTEM:
+			for (iter = attributes.begin(); iter!=attributes.end();++iter) {
+				attr = (GalaxyNames)attribute_map.lookup((*iter).name);
+				switch (attr) {
+				case NAME:
+					name = (*iter).value;
+					break;
+				default:
+					break;
+				}
+			}
+			xml->stak.push_back (name);
+			xml->g->addSection (xml->stak);
+
+			break;
+		case VAR:
+			for (iter = attributes.begin(); iter!=attributes.end();++iter) {
+				attr = (GalaxyNames)attribute_map.lookup((*iter).name);
+				switch(attr) {
+				case NAME:
+					name = (*iter).value;
+					break;
+				case VALUE:
+					value = (*iter).value;
+					break;
+				default:break;
+				}
+			}
+			xml->g->setVariable(xml->stak,name,value);
+			break;
+		default:break;
+		}
+
+		
+	}
+	void endElement( void * userdata, const XML_Char * nam){
+		XML * xml = (XML *)userdata;
+		string name (nam);
+		GalaxyNames elem = (GalaxyNames) element_map.lookup(name);
+		switch (elem) {
+		case GALAXY:
+		case SYSTEMS:
+			break;
+		case VAR:
+			break;
+		case SECTOR:
+		case SYSTEM:
+			xml->stak.pop_back();
+			break;
+		default:break;
+		}
+	}
+}
+
 using namespace GalaxyXML;
-
+Galaxy::~Galaxy() {
+	if (subheirarchy)
+		delete subheirarchy;
+	subheirarchy = NULL;
+}
+Galaxy & Galaxy::operator = (const Galaxy & g) {
+	if (g.subheirarchy) {
+		map<std::string, class Galaxy> *temp = new map<std::string,class Galaxy> (*g.subheirarchy);
+		if (subheirarchy)
+			delete subheirarchy;
+		subheirarchy = temp;
+	}else {
+		if (subheirarchy) {
+			delete subheirarchy;
+			subheirarchy = NULL;
+		}
+	}
+	data = g.data;
+	return *this;
+}
+Galaxy::Galaxy (const Galaxy & g):data(g.data) {
+	if (g.subheirarchy) {
+		subheirarchy = new map <std::string, class Galaxy> (*g.subheirarchy);
+	}else
+		subheirarchy = NULL;
+}
 Galaxy::Galaxy(const char *configfile){
-
-  configNodeFactory *domf = new configNodeFactory();
+  subheirarchy=NULL;
   FILE * fp = fopen (configfile,"r");
   string cf = configfile;
   if (!fp) {
     
     //    fp = fopen ((vs_config->getVariable (
     cf=getUniversePath()+"/"+configfile;
-  }else {
-    fclose (fp);
+	fp = fopen (cf.c_str(),"r");
   }
-  
-  configNode *top=(configNode *)domf->LoadXML(cf.c_str());
-
-  if(top==NULL){
-    cout << "Panicing   - no galaxy" << endl;
-    return;
+  if (fp) {
+	  GalaxyXML::XML x;
+	  x.g=this;
+	  
+	  XML_Parser parser = XML_ParserCreate(NULL);
+	  XML_SetUserData(parser,&x);
+	  XML_SetElementHandler (parser,&GalaxyXML::beginElement,&GalaxyXML::endElement);
+	  do {
+		  const int chunk_size = 65536;
+		  char buf[chunk_size];
+		  int length;
+		  length = fread (buf,1,chunk_size,fp);
+		  XML_Parse(parser,buf,length,feof(fp));
+	  }while (!feof(fp));
+	  fclose (fp);
+	  XML_ParserFree(parser);
   }
-  variables=NULL;
-  checkConfig(top);
 }
-
+std::map<std::string, class Galaxy > & Galaxy::getHeirarchy() {
+	if (!subheirarchy) {
+		subheirarchy = new std::map<std::string, class Galaxy >();
+	}
+	return *subheirarchy;
+}
 /* *********************************************************** */
 
-bool Galaxy::checkConfig(configNode *node){
-  if(node->Name()!="galaxy"){
-    cout << "this is no Vegastrike galaxy file" << endl;
-    return false;
-  }
-
-  vector<easyDomNode *>::const_iterator siter;
-  
-  for(siter= node->subnodes.begin() ; siter!=node->subnodes.end() ; siter++){
-    configNode *cnode=(configNode *)(*siter);
-
-    if(cnode->Name()=="systems"){
-      doVariables(cnode);
-    }
-    else{
-      cout << "Unknown tag: " << cnode->Name() << endl;
-    }
-  }
-  return true;
-}
-
 /* *********************************************************** */
-
-void Galaxy::doVariables(configNode *node){
-  if(variables!=NULL){
-    cout << "only one variable section allowed" << endl;
-    return;
-  }
-  variables=node;
-
-  vector<easyDomNode *>::const_iterator siter;
-  
-  for(siter= node->subnodes.begin() ; siter!=node->subnodes.end() ; siter++){
-    configNode *cnode=(configNode *)(*siter);
-    checkSection(cnode,SECTION_VAR);
-  }
+string Galaxy::getVariable (std::vector<string> section, string name, string default_value) {
+	Galaxy * g = this;
+	for (unsigned int i=0;i<section.size();++i) {
+		if (g->subheirarchy) {
+			map<std::string,Galaxy>::iterator sub = subheirarchy->find (section[i]);
+			if (sub!=subheirarchy->end()) {
+				g=  &(*sub).second;
+			}else return default_value;
+		}else return default_value;
+	}
+	map<string,string>::iterator dat = data.find (name);
+	if (dat!=data.end())
+		return (*dat).second;
+	return default_value;										  
 }
-
-/* *********************************************************** */
-
-void Galaxy::doSection(configNode *node, enum section_t section_type){
-  string section=node->attr_value("name");
-  if(section.empty()){
-    cout << "no name given for section" << endl;
-  }
-  
-  vector<easyDomNode *>::const_iterator siter;
-  
-  for(siter= node->subnodes.begin() ; siter!=node->subnodes.end() ; siter++){
-    configNode *cnode=(configNode *)(*siter);
-    if(section_type==SECTION_VAR){
-      if(cnode->Name()=="var"){
-	doVar(cnode);
-      }
-      else if(cnode->Name()=="sector"){
-	doSection(cnode,section_type);
-      }
-      else{
-	cout << "neither a variable nor a section" << endl;
-      }
-    }
-  }
+void Galaxy::addSection (std::vector<string> section) {
+	map<string,Galaxy> * temp= &getHeirarchy();
+	for (unsigned int i=0;i<section.size();++i) {
+		temp = &((*temp)[section[i]].getHeirarchy());
+	}
 }
-
-/* *********************************************************** */
-
-void Galaxy::checkSection(configNode *node, enum section_t section_type){
-    if(node->Name()!="sector"){
-      cout << "galaxy_xml: not a section" << endl;
-      node->printNode(cout,0,1);
-    return;
-  }
-
-    doSection(node,section_type);
-}
-
-/* *********************************************************** */
-
-void Galaxy::doVar(configNode *node){
-  string name=node->attr_value("name");
-  string value=node->attr_value("value");
-
-  //  cout << "checking var " << name << " value " << value << endl;
-  if(name.empty() || value.empty()){
-    cout << "no name or value given for variable" << endl;
-  }
-}
-
-/* *********************************************************** */
-
-void Galaxy::checkVar(configNode *node){
-    if(node->Name()!="var"){
-      cout << "not a variable" << endl;
-    return;
-  }
-
-    doVar(node);
-}
-
-/* *********************************************************** */
-string Galaxy::getRandSystem (string sect, string def) {
-  configNode *secnodes=findSection(sect,variables);  
-  if (secnodes!=NULL) {
-    unsigned int size = secnodes->subnodes.size();
-    if (size>0) {
-      return secnodes->subnodes[rand()%size]->attr_value("name");
-    }
-  }
-  return def;
-}
-string Galaxy::getVariable(string section,string subsection,string name,string defaultvalue){
-  configNode *secnode=findSection(section,variables);
-  if(secnode!=NULL){
-    configNode *subnode=findSection(subsection,secnode);
-    if(subnode!=NULL){
-      configNode *entrynode=findEntry(name,subnode);
-      if(entrynode!=NULL){
-	return entrynode->attr_value("value");
-      }
-    }
-  }
-
-  return defaultvalue;
-}
-
-/* *********************************************************** */
-
-string Galaxy::getVariable(string section,string name,string defaultval){
-   vector<easyDomNode *>::const_iterator siter;
-  
-  for(siter= variables->subnodes.begin() ; siter!=variables->subnodes.end() ; siter++){
-    configNode *cnode=(configNode *)(*siter);
-    string scan_name=(cnode)->attr_value("name");
-    //    cout << "scanning section " << scan_name << endl;
-
-    if(scan_name==section){
-      return getVariable(cnode,name,defaultval);
-    }
-  }
-
-  //cout << "WARNING: no section named " << section << endl;
-
-  return defaultval;
-}
-
-/* *********************************************************** */
-
-string Galaxy::getVariable(configNode *section,string name,string defaultval){
-    vector<easyDomNode *>::const_iterator siter;
-  
-  for(siter= section->subnodes.begin() ; siter!=section->subnodes.end() ; siter++){
-    configNode *cnode=(configNode *)(*siter);
-    if((cnode)->attr_value("name")==name){
-      return (cnode)->attr_value("value");
-    }
-  }
-
-  cout << "WARNING: no var named " << name << " in section " << section->attr_value("name") << " using default: " << defaultval << endl;
-
-  return defaultval; 
-}
-
-
-
-
-
-/* *********************************************************** */
-
-configNode *Galaxy::findEntry(string name,configNode *startnode){
-  return findSection(name,startnode);
-}
-
-/* *********************************************************** */
-
-configNode *Galaxy::findSection(string section,configNode *startnode){
-   vector<easyDomNode *>::const_iterator siter;
-  
-  for(siter= startnode->subnodes.begin() ; siter!=startnode->subnodes.end() ; siter++){
-    configNode *cnode=(configNode *)(*siter);
-    string scan_name=(cnode)->attr_value("name");
-    //    cout << "scanning section " << scan_name << endl;
-
-    if(scan_name==section){
-      return cnode;
-    }
-  }
-  //cout << "WARNING: no section/variable/color named " << section << endl;
-
-  return NULL;
- 
-  
-}
-
-/* *********************************************************** */
-
-void Galaxy::setVariable(configNode *entry,string value){
-      entry->set_attribute("value",value);
+void Galaxy::setVariable (std::vector<string> section, string name, string value) {
+	Galaxy * g = this;
+	for (unsigned int i=0;i<section.size();++i) {
+		g= &g->getHeirarchy()[section[i]];
+	}
+	g->data[name]=value;
 }
 
 /* *********************************************************** */
 
 bool Galaxy::setVariable(string section,string name,string value){
-  configNode *sectionnode=findSection(section,variables);
-  if(sectionnode!=NULL){
-    configNode *varnode=findEntry(name,sectionnode);
-
-    if(varnode!=NULL){
-      // now set the thing
-      setVariable(varnode,value);
-      return true;
-    }
-  }
-  return false;
+	getHeirarchy()[section].data[name]=value;
+	return true;
 }
 
 bool Galaxy::setVariable(string section,string subsection,string name,string value){
-  configNode *sectionnode=findSection(section,variables);
-  if(sectionnode!=NULL){
-    configNode *subnode=findSection(name,sectionnode);
+	getHeirarchy()[section].getHeirarchy()[subsection].data[name]=value;
+	return true;
+}
 
-	if(subnode!=NULL) {
-		configNode *varnode=findEntry(name,subnode);
-		if(varnode!=NULL){
-			// now set the thing
-			setVariable(varnode,value);
-			return true;
+
+string Galaxy::getRandSystem (string sect, string def) {
+	Galaxy &sector= getHeirarchy ()[sect];
+	if (sector.subheirarchy==NULL) {
+		return def;
+	}
+	unsigned int size = sector.getHeirarchy().size();
+    if (size>0) {
+		int which = rand()%size;
+		map<string,Galaxy>::iterator i =
+			sector.getHeirarchy().begin();
+		for (;which>0;which--,i++) {
+		}
+		return (*i).first;
+
+    }
+	return def;
+}
+string Galaxy::getVariable(string section,string subsection,string name,string defaultvalue){
+
+	map<string,Galaxy> * s = subheirarchy;
+	map<string,Galaxy>::iterator i;
+	if (s) {
+		i = s->find(section);
+		if (i!=s->end()) {
+			s = (*i).second.subheirarchy;
+			if (s) {
+				i = s->find(subsection);
+				if (i!=s->end()) {
+					Galaxy * g = &(*i).second;
+					map<string,string>::iterator j = g->data.find(name);
+					if (j!=g->data.end())
+						return (*j).second;
+				}
+					
+			}
 		}
 	}
-  }
-  return false;
+	return defaultvalue;
 }
+
+
+
+string Galaxy::getVariable(string section,string name,string defaultvalue){
+
+	map<string,Galaxy> * s = subheirarchy;
+	map<string,Galaxy>::iterator i;
+	if (s) {
+		i = s->find(section);
+		if (i!=s->end()) {
+			Galaxy * g = &(*i).second;
+			map<string,string>::iterator j = g->data.find(name);
+			if (j!=g->data.end())
+				return (*j).second;
+		}
+		
+	}
+	return defaultvalue;
+}
+
+
