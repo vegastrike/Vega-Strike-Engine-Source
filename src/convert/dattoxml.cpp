@@ -349,7 +349,7 @@ int main (int argc, char ** argv)
 	    revpnts[DrawDat.RevHexs[i][j]]=1;
 	  }
 	int maxrev=0;
-	for (int i=0;i<revpnts[i];i++) {
+	for (int i=0;i<DrawDat.NumPoints;i++) {
 	  if (revpnts[i]==1) {
 	    revpnts[i]=maxrev;//so now we have a lookup into revpnts
 	    maxrev++;
