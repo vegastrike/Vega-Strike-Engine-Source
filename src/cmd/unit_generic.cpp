@@ -2351,7 +2351,11 @@ void Unit::DamageRandSys(float dam, const Vector &vec) {
 		//DAMAGE Reactor
 		//DAMAGE JUMP
 		if (randnum>=.9) {
-			shield.leak+=((1-dam)*100);
+			shield.leak=(char)((randnum-.9)*900);
+			if (shield.leak<0)
+				shield.leak=0;
+			if (shield.leak>100)
+				shield.leak=100;
 		} else if (randnum>=.7) {
 			shield.recharge*=dam;
 		} else if (randnum>=.5) {
@@ -2588,6 +2592,7 @@ float Unit::DealDamageToHullReturnArmor (const Vector & pnt, float damage, unsig
       targ = &armor.right;
     }
   }
+  short biggerthan=*targ;
   percent = damage/(*targ+hull);
 
   if( percent == -1)
@@ -2608,6 +2613,8 @@ float Unit::DealDamageToHullReturnArmor (const Vector & pnt, float damage, unsig
       DamageRandSys(rand01()*.5+.2,pnt);//get system damage...but live!
     }
   }
+  if (*targ>biggerthan)
+	  fprintf (stderr,"errore fatale mit den armorn");
   if (hull <0) {
       static float hulldamtoeject = XMLSupport::parse_float(vs_config->getVariable ("physics","hull_damage_to_eject","100"));
     if (!SubUnit&&hull>-hulldamtoeject) {
