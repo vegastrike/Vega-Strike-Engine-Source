@@ -176,16 +176,23 @@ bool Unit::querySphere (const Vector &pnt, float err) {
   Vector TargetPoint (transformation[0],transformation[1],transformation[2]);
 
 #ifdef VARIABLE_LENGTH_PQR
-  float SizeScaleFactor = TargetPoint.Dot(TargetPoint); //the scale factor of the current UNIT
+  float SizeScaleFactor = sqrtf(TargetPoint.Dot(TargetPoint)); //the scale factor of the current UNIT
 #endif
   for (i=0;i<nummesh;i++) {
 
     TargetPoint = Transform(transformation,meshdata[i]->Position())-pnt;
-    if (TargetPoint.Dot (TargetPoint)< err*err+meshdata[i]->rSizeSquared()
+    if (TargetPoint.Dot (TargetPoint)< 
+	err*err+
+	meshdata[i]->rSize()*meshdata[i]->rSize()
 #ifdef VARIABLE_LENGTH_PQR
-*SizeScaleFactor
+	*SizeScaleFactor*SizeScaleFactor
 #endif
-)
+	+
+#ifdef VARIABLE_LENGTH_PQR
+	SizeScaleFactor*
+#endif
+	2*err*meshdata[i]->rSize()
+	)
       return true;
   }
   for (int i=0;i<numsubunit;i++) {
@@ -203,15 +210,22 @@ bool Unit::querySphere (Matrix t,const Vector &pnt, float err) {
   
   Vector TargetPoint (tmpo[0],tmpo[1],tmpo[2]);
 #ifdef VARIABLE_LENGTH_PQR
-  float SizeScaleFactor = TargetPoint.Dot(TargetPoint);//adjust the ship radius by the scale of local coordinates
+  float SizeScaleFactor = sqrtf(TargetPoint.Dot(TargetPoint));//adjust the ship radius by the scale of local coordinates
 #endif
   for (i=0;i<nummesh;i++) {
     TargetPoint = Transform (tmpo,meshdata[i]->Position())-pnt;
-    if (TargetPoint.Dot (TargetPoint)< err*err+meshdata[i]->rSizeSquared()
+    if (TargetPoint.Dot (TargetPoint)< 
+	err*err+
+	meshdata[i]->rSize()*meshdata[i]->rSize()
 #ifdef VARIABLE_LENGTH_PQR
-*SizeScaleFactor
+	*SizeScaleFactor*SizeScaleFactor
 #endif
-)
+	+
+#ifdef VARIABLE_LENGTH_PQR
+	SizeScaleFactor*
+#endif
+	2*err*meshdata[i]->rSize()
+	)
       return true;
   }
   for (int i=0;i<numsubunit;i++) {
@@ -342,7 +356,7 @@ bool Unit::querySphere (int mouseX, int mouseY, float err) {
   Vector mousePoint;
   Vector TargetPoint (transformation[0],transformation[1],transformation[2]);
 #ifdef VARIABLE_LENGTH_PQR
-  float SizeScaleFactor = TargetPoint.Dot(TargetPoint);
+  float SizeScaleFactor = sqrtf(TargetPoint.Dot(TargetPoint));
 #endif
   Vector CamP,CamQ,CamR;
   for (i=0;i<nummesh;i++) {
@@ -362,11 +376,18 @@ bool Unit::querySphere (int mouseX, int mouseY, float err) {
     
     
     TargetPoint =TargetPoint-mousePoint;
-      if (TargetPoint.Dot (TargetPoint)< err*err+meshdata[i]->rSizeSquared()
+    if (TargetPoint.Dot (TargetPoint)< 
+	err*err+
+	meshdata[i]->rSize()*meshdata[i]->rSize()
 #ifdef VARIABLE_LENGTH_PQR
-*SizeScaleFactor
+	*SizeScaleFactor*SizeScaleFactor
 #endif
-)
+	+
+#ifdef VARIABLE_LENGTH_PQR
+	SizeScaleFactor*
+#endif
+	2*err*meshdata[i]->rSize()
+	)
       return true;
   }
   for (int i=0;i<numsubunit;i++) {
@@ -384,7 +405,7 @@ bool Unit::querySphere (Matrix t,int mouseX, int mouseY, float err, Matrix vw) {
   Vector mousePoint;
   Vector TargetPoint(tmpo[0],tmpo[1],tmpo[2]);//adjusts the mesh size by the relative size of the current unit
 #ifdef VARIABLE_LENGTH_PQR
-  float SizeScaleFactor = TargetPoint.Dot(TargetPoint);
+  float SizeScaleFactor = sqrtf(TargetPoint.Dot(TargetPoint));
 #endif
   Vector CamP,CamQ,CamR;
   for (i=0;i<nummesh;i++) {
@@ -399,10 +420,15 @@ bool Unit::querySphere (Matrix t,int mouseX, int mouseY, float err, Matrix vw) {
     mousePoint +=CamP; 
 
     TargetPoint = TargetPoint-mousePoint;
-    if (TargetPoint.Dot (TargetPoint)< err*err+meshdata[i]->rSizeSquared()
+    if (TargetPoint.Dot (TargetPoint)< err*err+meshdata[i]->rSize()*meshdata[i]->rSize()
 #ifdef VARIABLE_LENGTH_PQR
-	*SizeScaleFactor
+	*SizeScaleFactor*SizeScaleFactor 
 #endif
+	+ 
+#ifdef VARIABLE_LENGTH_PQR
+	SizeScaleFactor* 
+#endif
+	err*2*meshdata[i]->rSize()
 	)
       return true;
   }
@@ -411,65 +437,6 @@ bool Unit::querySphere (Matrix t,int mouseX, int mouseY, float err, Matrix vw) {
       return true;
   }
   return false;
-}
-
-bool Unit::queryBoundingBox (int mouseX,int mouseY, float err) {
-  UpdateMatrix();
-  int i;
-  Vector mousePoint;
-  Vector CamP,CamQ,CamR;
-  BoundingBox * bbox=NULL;
-  for (i=0;i<nummesh;i++) {
-    bbox = meshdata[i]->getBoundingBox();
-    bbox->Transform (transformation);
-    mousePoint = MouseCoordinate (mouseX,mouseY,1);
-    //mousePoint.k= -mousePoint.k;
-    _GFX->AccessCamera()->GetPQR(CamP,CamQ,CamR);
-    mousePoint = Transform (CamP,CamQ,CamR,mousePoint);	
-    _GFX->AccessCamera()->GetPosition(CamP);    
-    if (bbox->Intersect(CamP,mousePoint,err)==1) {
-	delete bbox;
-	return true;
-    }
-    delete bbox;
-  }
-  for (i=0;i<numsubunit;i++) {
-    if (subunits[i]->queryBoundingBox (transformation,mouseX,mouseY,err)) 
-      return true;
-  }
-  return false;
-}
-
-bool Unit::queryBoundingBox (Matrix t,int mouseX,int mouseY, float err) {
-  int i;
-  Matrix tmpo;
-  MultMatrix (tmpo,t, transformation);
-  BoundingBox *bbox=0;
-  Vector mousePoint;
-  Vector CamP,CamQ,CamR;
-  for (i=0;i<nummesh;i++) {
-    bbox = meshdata[i]->getBoundingBox();
-    bbox->Transform (tmpo);
-    mousePoint = MouseCoordinate (mouseX,mouseY,1);
-    //mousePoint.k= -mousePoint.k;
-    _GFX->AccessCamera()->GetPQR(CamP,CamQ,CamR);
-    mousePoint = Transform (CamP,CamQ,CamR,mousePoint);	
-    _GFX->AccessCamera()->GetPosition(CamP);    
-    ////mousePoint +=CamP; //the intersect function takes a location then a nonnormalized eye vector 
-    if (bbox->Intersect(CamP,mousePoint,err)==1){
-      delete bbox;
-      return true;
-    }
-    delete bbox;
-  }
-  if (numsubunit>0) {
-    for (i=0;i<numsubunit;i++) {
-      if (subunits[i]->queryBoundingBox (tmpo,mouseX,mouseY,err))
-	return true;
-    }
-  }
-  return false;
-
 }
 
 void Unit::Draw()

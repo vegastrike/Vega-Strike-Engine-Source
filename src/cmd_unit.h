@@ -50,6 +50,7 @@ public:
 	void Draw(Matrix tmatrix, const Vector &pp, const Vector &pq, const Vector &pr, const Vector &ppos);
 };
 */
+Vector MouseCoordinate (int x, int y, float zplane);
 enum Aggression{
 	LOW, MEDIUM, HIGH, DISABLE, DESTROY
 };
@@ -125,11 +126,10 @@ public:
    * 0 if ray misses */
 	int queryBoundingBox(const Vector &origin,const Vector &direction, float err);
 	int queryBoundingBox(Matrix,const Vector &, const Vector &pnt, float err);
-
+  /**Queries the bounding sphere with a duo of mouse coordinates that project
+   * to the center of a ship and compare with a sphere...pretty fast*/
 	bool querySphere (int,int, float err);
 	bool querySphere (Matrix,int,int, float err,Matrix);
-	bool queryBoundingBox(int,int, float err);
-	bool queryBoundingBox(Matrix,int,int, float);
 
 	void SetAI(AI *newAI);
 	Vector &Position(){return pos;};

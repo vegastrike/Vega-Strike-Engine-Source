@@ -197,7 +197,7 @@ Mesh:: Mesh(char * filename/*, Texture* ForceLog, Texture* SquadLog*/):Primitive
 		
 	}
 	//below, the square fo teh radial size, because sqrtf will be useless l8r
-	radialSize = max(fabs(minSizeX),fabs(maxSizeX))*max(fabs(minSizeX),fabs(maxSizeX))+max(fabs(minSizeY),fabs(maxSizeY))*max(fabs(minSizeY),fabs(maxSizeY))+max(fabs(minSizeZ),fabs(maxSizeZ))*max(fabs(minSizeZ),fabs(maxSizeZ));
+	radialSize = sqrtf(max(fabs(minSizeX),fabs(maxSizeX))*max(fabs(minSizeX),fabs(maxSizeX))+max(fabs(minSizeY),fabs(maxSizeY))*max(fabs(minSizeY),fabs(maxSizeY))+max(fabs(minSizeZ),fabs(maxSizeZ))*max(fabs(minSizeZ),fabs(maxSizeZ)));
 	
 	NumTris = readi (fp);
 
@@ -946,10 +946,6 @@ bool Mesh::intersects(const Vector &start, const Vector &end) {
 	return bspTree->intersects(start, end);
 }
 
-float Mesh::rSizeSquared() {
-  return radialSize*p.Dot(p);
-
-}
 
 BoundingBox * Mesh::getBoundingBox() {
   
