@@ -251,15 +251,17 @@ float Unit::getMinDis (Matrix t,const Vector &pnt) {
 
 bool Unit::querySphere (const Vector &pnt, float err) {
   Matrix mat;
-  Identity (mat);
-  return querySphere(mat, pnt, err);
+  //  Identity (mat);
+  return querySphere(NULL, pnt, err);
 }
 
-bool Unit::querySphere (Matrix t,const Vector &pnt, float err) {
+bool Unit::querySphere (float * t,const Vector &pnt, float err) {
   UpdateMatrix();
   int i;
-  Matrix tmpo;
-  MultMatrix (tmpo,t,transformation);
+  float * tmpo = transformation;
+  if (t!=NULL) { 
+    MultMatrix (tmpo,t,transformation);
+  }
   
   Vector TargetPoint (tmpo[0],tmpo[1],tmpo[2]);
 #ifdef VARIABLE_LENGTH_PQR

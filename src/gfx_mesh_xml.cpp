@@ -417,7 +417,7 @@ void Mesh::LoadXML(const char *filename, Mesh *oldmesh) {
 			    vertexlist);
  
   //TODO: add force handling
-  fprintf (stderr, "Minx %f maxx %f, miny %f maxy %fminz %fmaxz %f, radsiz %f\n",minSizeX, maxSizeX,  minSizeY, maxSizeY,  minSizeZ, maxSizeZ,radialSize);  
+
 
   if (radialSize==0) {
     int i;
@@ -429,7 +429,7 @@ void Mesh::LoadXML(const char *filename, Mesh *oldmesh) {
   *oldmesh=*this;
   oldmesh->orig = NULL;
   oldmesh->refcount++;
-
+  fprintf (stderr, "Minx %f maxx %f, miny %f maxy %fminz %fmaxz %f, radsiz %f\n",minSizeX, maxSizeX,  minSizeY, maxSizeY,  minSizeZ, maxSizeZ,radialSize);  
   delete [] vertexlist;
   delete xml;
 }
