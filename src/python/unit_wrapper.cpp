@@ -19,13 +19,11 @@ Vector from_python(PyObject *p,boost::python::type<Vector>) {
 	PyArg_ParseTuple(p,"fff",&vec.i,&vec.j,&vec.k);
 	return vec;
 }
-const Vector& from_python(PyObject *p,boost::python::type<const Vector&>) {return from_python(p,boost::python::type<Vector>());}
 QVector from_python(PyObject *p,boost::python::type<QVector>) {
 	QVector vec(0,0,0);
 	PyArg_ParseTuple(p,"ddd",&vec.i,&vec.j,&vec.k);
 	return vec;
 }
-const QVector& from_python(PyObject *p,boost::python::type<const QVector&>) {return from_python(p,boost::python::type<QVector>());}
 BOOST_PYTHON_END_CONVERSION_NAMESPACE
 
 using std::string;
@@ -59,7 +57,7 @@ public:
   UnitWrapper getFlightgroupLeader () {{CHECKME 0;}Flightgroup *group=unit->getFlightgroup();if (group) return group->leader; else return 0;}
   float GetVelocityDifficultyMult() {{CHECKME 0;}float diff=1;unit->GetVelocityDifficultyMult(diff);return diff;}
   int GetJumpStatus(){{CHECKME -1;} return unit->GetJumpStatus().drive;}
-  void ApplyDamage (const Vector & pnt, const Vector & normal, float amt, UnitWrapper dealer, float phasedamage, float r, float g, float b, float a) {
+  void ApplyDamage (Vector pnt,Vector normal, float amt, UnitWrapper dealer, float phasedamage, float r, float g, float b, float a) {
 	  {CHECKME;}
 	  unit->ApplyDamage(pnt,normal,amt,unit,GFXColor(r,g,b,a),dealer.GetUnit(),phasedamage);
   }
