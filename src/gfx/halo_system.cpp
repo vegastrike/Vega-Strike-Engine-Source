@@ -33,7 +33,7 @@ void DoParticles (QVector pos, float percent, const Vector & velocity, float rad
   static float spread = XMLSupport::parse_float (vs_config->getVariable("graphics",
 								       "sparklespread",
 								       
-								       "0"));
+								       ".1"));
   if (i<(RAND_MAX*percent)*(GetElapsedTime()*scale)) {
       ParticlePoint pp;
       float r1 = rand()/((float)RAND_MAX*.5)-1;

@@ -35,10 +35,16 @@ void ParticleTrail::DrawAndUpdate (){
   GFXDisable(TEXTURE0);
   GFXDisable(LIGHTING);
   GFXLoadIdentity(MODEL);
-  glEnable(GL_POINT_SMOOTH);
-  GFXBlendMode(SRCALPHA,INVSRCALPHA);
+  static bool psmooth=XMLSupport::parse_bool (vs_config->getVariable ("graphics","sparkesmooth","false"));  
+  glEnable(psmooth);
+  static bool pblend=XMLSupport::parse_bool (vs_config->getVariable ("graphics","sparkeblend","false"));
+  if (pblend)
+	  GFXBlendMode(SRCALPHA,INVSRCALPHA);
+  else
+	  GFXBlendMode(ONE,ZERO);
   //GFXBlendMode(ONE,ZERO);
-  GFXPointSize(1.5);
+  static float psiz=XMLSupport::parse_float (vs_config->getVariable ("graphics","sparkesize","1.5"));
+  GFXPointSize(psiz);
   GFXBegin (GFXPOINT);
   double mytime= GetElapsedTime();
   while (p!=particle.end()) {
