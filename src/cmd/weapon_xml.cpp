@@ -295,12 +295,12 @@ namespace BeamXML {
 	  tmpweapon.Speed = XMLSupport::parse_float ((*iter).value);
 	  break;
 	case PULSESPEED:
-	  if (tmpweapon.type!=weapon_info::PROJECTILE) {
+	  if (tmpweapon.type==weapon_info::BEAM) {
 	    tmpweapon.PulseSpeed = XMLSupport::parse_float ((*iter).value);
 	  }
 	  break;
 	case DETONATIONRADIUS:
-	  if (tmpweapon.type==weapon_info::PROJECTILE) {
+	  if (tmpweapon.type!=weapon_info::BEAM) {
 	    tmpweapon.PulseSpeed = XMLSupport::parse_float ((*iter).value);
 	  }
 	  break;
