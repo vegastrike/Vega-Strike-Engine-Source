@@ -21,7 +21,9 @@ unsigned int HaloSystem::AddHalo (const char * filename, const QVector & loc, co
   if (mesh==NULL) {
     mesh = new Mesh ((string (filename)+".xmesh").c_str(), 1,_Universe->GetFaction("neutral"),NULL);
   }
-  static float engine_scale = XMLSupport::parse_float (vs_config->getVariable ("graphics","engine_radii_scale",".25"));
+  static float engine_scale = XMLSupport::parse_float (vs_config->getVariable ("graphics","engine_radii_scale",".4"));
+  static float engine_length = XMLSupport::parse_float (vs_config->getVariable ("graphics","engine_length_scale","1.25"));
+
   halo.push_back (MyIndHalo (loc, Vector (size.i*engine_scale,size.j*engine_scale,size.k)));
   return halo.size()-1;
 }
