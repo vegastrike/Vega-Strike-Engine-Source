@@ -22,12 +22,14 @@
 #include "fonts.h"
 #include "gfxlib.h"
 #include "render_util.h"
-//#include "keyboard.h"
 #include "in_kb.h"
 #include "fog.h"
-#include "audio_data.h"
-#include "audio.h"
+#include "sdl_audio_data.h"
+#include "sdl_audio.h"
+#include "sdl_init.h"
 #include "joystick.h"
+#include "lin_time.h"
+#include "main_loop.h"
 
 /*
  * Globals 
@@ -56,214 +58,120 @@ void setup_game_data ( ){ //pass in config file l8r??
   g_game.PaletteExt=1;
   
 }
-
-/* This function is called on exit */
+void ParseCommandLine(int argc, char ** CmdLine);
 void cleanup(void)
 {
   //    write_config_file();
-  GFXShutdown();
+  //  write_saved_games();
+  destroyObjects();
+  delete _GFX;
 }
-
-
-#if defined (HAVE_SDL) && defined (HAVE_SDL_MIXER)
-
-void setup_sdl() 
-{
-    int hz, channels, buffer;
-    Uint16 format;
-    Uint32 flags;
-
-    flags = 0;
-
-    if ( g_game.sound_enabled ) {
-	flags |= SDL_INIT_AUDIO;
-    }
- 
-#ifdef HAVE_SDL_JOYSTICKOPEN
-    flags |= SDL_INIT_JOYSTICK;
-#endif
-
-    /*
-     * Initialize SDL
-     */
-    if ( SDL_Init(flags) < 0 ) {
-	handle_error(1, "Couldn't initialize SDL: %s\n",SDL_GetError());
-    }
-
-    if ( g_game.sound_enabled) {
-	/* Open the audio device */
-	switch (g_game.audio_frequency_mode%3) {
-	case 0:
-	    hz = 11025;
-	    break;
-	case 1:
-	    hz = 22050;
-	    break;
-	case 2:
-	    hz = 44100;
-	    break;
-	default:
-	    hz = 22050;
-	}
-
-	switch ( (g_game.audio_frequency_mode/3)%2 ) {
-	case 0:
-	    format = AUDIO_U8;
-	    break;
-	case 1:
-	    format = AUDIO_S16SYS;
-	    break;
-	default:
-	    format = AUDIO_S16SYS;
-	}
-
-	if ( g_game.audio_frequency_mode/6 ) {
-	    channels = 1;
-	} else {
-	    channels = 2;
-	}
-
-	buffer = 2048;//getparam_audio_buffer_size();
-
-	if ( Mix_OpenAudio(hz, format, channels, buffer) < 0 ) {
-	    print_warning( 1,
-			   "Warning: Couldn't set %d Hz %d-bit audio\n"
-			   "  Reason: %s\n", 
-			   hz,  
-			   (g_game.audio_frequency_mode/3)%2 == 0 ? 8 : 16,
-			   SDL_GetError());
-	} else {
-	    print_debug( DEBUG_SOUND,
-			 "Opened audio device at %d Hz %d-bit audio",
-			 hz, 
-			 (g_game.audio_frequency_mode/3)%2 == 0 ? 8 : 16);
-			 
-	}
-    }
-
-    atexit(SDL_Quit);
-}
-
-#endif /* defined (HAVE_SDL) && defined (HAVE_SDL_MIXER) */
-
-
-void displayCB(void)            /* function called whenever redisplay needed */
-{
-  glClear(GL_COLOR_BUFFER_BIT);         /* clear the display */
-  glColor3f(1.0, 1.0, 1.0);             /* set current color to white */
-  //  glBegin(GL_POLYGON);                  /* draw filled triangle */
-  //glVertex3f(.30,.50,.5);                  /* specify each vertex of triangle */
-  //glVertex3f(.70,.50,.5);
-  //glVertex3f(.50,.70,.5);
-  //glEnd();                              /* OpenGL draws the filled triangle */
-  glFlush();                            /* Complete any pending operations */
-  glutSwapBuffers();
-}
-
-
 
 int main( int argc, char **argv ) 
 {
 
     /* Print copyright notice */
-    fprintf( stderr, "Vega Strike " VERSION " -- Final Conflict "
+    fprintf( stderr, "Vega Strike " VERSION " -- Final Conflict\n"
 	     "See http://www.gnu.org/copyleft/gpl.html for license details.\n\n" );
-    
-    /* Init the game clock */
-    g_game.secs_since_start = 0;
-
     /* Seed the random number generator */
     srand( time(NULL) );
-
-
-    /*
-     * Set up the game configuration
-     */
-
-
-    /* Setup the configuration variables and read the ~/.tuxracer/options file */
-     //init_game_configuration();
     setup_game_data(); 
     //read_config_file();
-
-
-    /* Set up the debugging modes */
     init_debug("");
 
-    /* Let GLUT process its command-line options */
-    GFXInit(argc,argv);
-
-
-    /*
-     * Initialize SDL
-     */
-
 #if defined(HAVE_SDL) && defined(HAVE_SDL_MIXER)
-    setup_sdl();
+    sdl_init();
 #endif
+    InitTime();
+    ParseCommandLine(argc,argv);
+
 
     /* Set up a function to clean up when program exits */
     if ( atexit( cleanup ) != 0 ) {
 	perror( "atexit" );
     }
-
-    /* 
-     * Initial OpenGL settings 
-     */
-    glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
-
-
-
     //init_textures();
-
-    //FIXME VEGASTRIKE
-//init_fonts();
-
+    //init_fonts();
 
     init_audio_data();
     init_audio();
     init_joystick();
 
-    //g_game.player[local_player()].view.pos = make_point( 0., 0., 0. );
 
-    /* Placeholder name until we give players way to enter name */
-    //g_game.player[0].name = "noname";
+    _GFX= new WrapGFX(argc,argv);    
+    //    glutSetCursor(GLUT_CURSOR_NONE); 
+    InitInput();
+    createObjects();
 
-    //init_preview();
+    InitializeInput();
+    _GFX->Loop(main_loop);
 
-    //splash_screen_register();
-    //intro_register();
-    //racing_register();
-    //game_over_register();
-    //paused_register();
-    //reset_register();
-    //game_type_select_register();
-    //event_select_register();
-    //race_select_register();
-    //credits_register();
-
-
-    //set_game_mode( SPLASH );
-
-    InitKB();
-    
-
-    glutSetCursor( GLUT_CURSOR_NONE );
-
-    /* We use this to "prime" the GLUT loop */
-    //    glutIdleFunc( main_loop );
-    //    glutDisplayFunc (main_loop);
-    glClearColor(0.0,0.0,0.0,0.0);        /* set background to black */
-    glutDisplayFunc(displayCB);           /* set window's display callback */
-    //glutKeyboardFunc(keyCB);              /* set window's key callback */
-
- 
-   
-    /* 
-     * ...and off we go!
-     */
-    glutMainLoop();
-
+    // never makes it here
     return 0;
 } 
 
+
+
+
+
+
+
+
+
+
+void ParseCommandLine(int argc, char ** lpCmdLine) {
+ 
+  for (int i=1;i<argc;i++) {
+    if(lpCmdLine[i][0]=='-') {
+      switch(lpCmdLine[i][1]){
+      case 'M':
+      case 'm':
+	g_game.music_enabled=1;
+	break;
+      case 'S':
+      case 's':
+	g_game.sound_enabled=1;
+	break;
+      case '1':
+	g_game.color_depth = 16;
+	break;
+      case 'L':
+      case 'l'://low rez
+	g_game.y_resolution = 480;
+	g_game.x_resolution = 640;
+	break;
+      case 'A'://average rez
+      case 'a': 
+	g_game.y_resolution = 600;
+	g_game.x_resolution = 800;
+	break;
+      case 'H':
+      case 'h'://high rez
+	g_game.y_resolution = 768;
+	g_game.x_resolution = 1024;
+	break;
+      case 'V':
+      case 'v':
+	g_game.y_resolution = 1024;
+	g_game.x_resolution = 1280;
+	break;
+      case 'D':
+      case 'd':
+	//viddrv = "D3DDRV.DLL";
+	break;
+      case 'G':
+      case 'g':
+	//viddrv = "GLDRV.DLL";
+	break;
+      }
+    }
+  }
+  //FILE *fp = fopen("vid.cfg", "rb");
+  //  GUID temp;
+  //fread(&temp, sizeof(GUID), 1, fp);
+  //fread(&temp, sizeof(GUID), 1, fp);
+  //fread(&_ViewPortWidth, sizeof(DWORD), 1, fp);
+  //fread(&_ViewPortHeight, sizeof(DWORD), 1, fp);
+  //fread(&_ColDepth,sizeof(DWORD),1,fp);
+  //fclose(fp);
+}

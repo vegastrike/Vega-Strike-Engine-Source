@@ -53,7 +53,7 @@ class Mesh:public Primitive
 
 	BOOL objtex;
 	Texture *Decal;
-	int texturename[2];
+  //	int texturename[2];
 
 	BSPTree *bspTree;
 

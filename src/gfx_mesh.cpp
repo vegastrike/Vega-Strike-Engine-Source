@@ -66,12 +66,12 @@ void Mesh::InitUnit()
 	ymax = pmax = rmax = PI;
 	ycur = pcur = rcur = 0;
 
-	texturename[0] = -1;
+	//	texturename[0] = -1;
 	numforcelogo = numsquadlogo = 0;
 	GFXGetMaterial(0, myMat);
 	myMatNum = 0;
 	scale = Vector(1.0,1.0,1.0);
-	refcount = 0;
+	refcount = 1;  //FIXME VEGASTRIKE  THIS _WAS_ zero...NOW ONE
 	orig = NULL;
 }
 
@@ -126,10 +126,11 @@ Mesh:: Mesh(char * filename/*, Texture* ForceLog, Texture* SquadLog*/):Primitive
 	FILE* fp = NULL;
 	int jj;
 	fp = fopen (filename, "r+b");
+	printf ("Loading file %s",filename);
 	if (!fp)
 	{
-		
-
+	  printf ("Failed to load file %s",filename);
+	  exit(1);
 	}
 		
 	TexNameLength = readi(fp);
@@ -538,6 +539,7 @@ Mesh::~Mesh()
 {
 	if(!orig)
 	{
+	        printf ("orig refcount: %d",refcount);
 		if(vlist!=NULL)
 			delete vlist;
 		//if(vertexlist != NULL)
@@ -557,7 +559,9 @@ Mesh::~Mesh()
 	}
 	else
 	{
+
 		orig->refcount--;
+		printf ("orig refcount: %d",refcount);
 		if(orig->refcount == 0)
 			delete orig;
 	}

@@ -41,6 +41,7 @@ typedef int BOOL;
 
 //Init functions
 BOOL /*GFXDRVAPI*/ GFXInit(int, char **);
+BOOL /*GFXDRVAPI*/ GFXLoop(void main_loop ());
 BOOL /*GFXDRVAPI*/ GFXShutdown();
 
 //Misc functions

@@ -29,7 +29,7 @@ using namespace std;
 #include "hashtable.h"
 
 typedef unsigned int DWORD;
-typedef long	     LONG;
+typedef unsigned long  LONG;
 typedef unsigned short WORD;
 typedef unsigned char BYTE;
 typedef struct {
@@ -78,10 +78,10 @@ int Texture::checkold(const string &s)
 	}
 	else
 	{
-		oldtex = (Texture*)malloc(sizeof(Texture));
-		texHashTable.Put(s, oldtex);
-		original = oldtex;
-		return FALSE;
+	  oldtex = (Texture*)malloc(sizeof(Texture));
+	  texHashTable.Put(s, oldtex);
+	  original = oldtex;
+	  return FALSE;
 	}
 }
 
@@ -103,12 +103,18 @@ Texture::Texture(char * FileName, int stage)
 		data = NULL;
 		return;
 	}
-	fseek (fp,sizeof(BITMAPFILEHEADER),SEEK_SET);
+	fseek (fp,sizeof(WORD)+sizeof(DWORD)+sizeof(WORD)+sizeof(WORD)+sizeof(DWORD),SEEK_SET);
 	//long temp;
 	BITMAPINFOHEADER info;
-	fread(&info, sizeof(BITMAPINFOHEADER),1,fp);
+	fread(&info, sizeof(DWORD)+sizeof(LONG)+sizeof(LONG)+2*sizeof(WORD)+2*sizeof(DWORD)+2*sizeof(LONG)+2*sizeof(DWORD),1,fp);
 	sizeX = info.biWidth;
+	int i;
+	
 	sizeY = info.biHeight;
+	printf ("sizex%d sizey%d",sizeX,sizeY);
+
+
+	//while(1);
 	char t[64];
 	strcpy(t, FileName);
 	t[strlen(FileName)-3] = 'a';
@@ -209,7 +215,7 @@ Texture::Texture (char * FileNameRGB, char *FileNameA, int stage)
 		if (!fp1)
 		{
 			data = NULL;
-			printf("Alpha file not found\n");
+			printf("Alpha file %s not found\n",FileNameA);
 			FileNameA = NULL;
 			//fclose(fp);
 			//*this = Texture(FileNameRGB, NULL);

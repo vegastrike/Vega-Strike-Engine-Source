@@ -69,7 +69,9 @@ void InitKB()
     keyState[a] = RELEASE;
     UnbindKey(a);
   }
+
   glutKeyboardFunc( glut_keyboard_cb );
+
   glutKeyboardUpFunc( glut_keyboard_up_cb );
   glutSpecialFunc( glut_special_cb );
   glutSpecialUpFunc( glut_special_up_cb );

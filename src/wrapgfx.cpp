@@ -80,6 +80,8 @@ WrapGFX::~WrapGFX()
 }
 //sets up all the stuff... in this case the ships to be rendered
 
+
+
 BOOL WrapGFX::StartGFX()
 {
 	SetViewport();
@@ -110,6 +112,10 @@ BOOL WrapGFX::StartGFX()
 	GFXSelectMaterial(0);
 	GFXEndScene();
 	return TRUE;
+}
+
+void WrapGFX::Loop(void main_loop()) {
+  GFXLoop(main_loop);
 }
 
 void WrapGFX::StartDraw()

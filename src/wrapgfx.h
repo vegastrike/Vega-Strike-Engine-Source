@@ -103,7 +103,7 @@ public:
 
 	void StartDraw();
 	void EndDraw();
-
+        void Loop(void main_loop());
 	void SelectCamera(int cam)
 	{
 		if(cam<NUM_CAM&&cam>=0)

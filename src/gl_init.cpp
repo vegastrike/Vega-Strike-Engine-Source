@@ -85,6 +85,7 @@ void init_opengl_extensions()
     } else {
       g_game.Multitexture =0;
     }
+    g_game.Multitexture=1;
     if ( glutExtensionSupported( "GL_ARB_texture_cube_map" ) ) {
 	print_debug( DEBUG_GL_EXT, "GL_ARB_texture_cube_map extension "
 		     "supported" );
@@ -213,10 +214,19 @@ BOOL GFXInit (int argc, char ** argv){
 
 
 
-
+    glutSetCursor(GLUT_CURSOR_INHERIT );
     //GFXPerspective(78,1.33,0.5,20);
     return TRUE;
 }
+
+BOOL GFXLoop(void main_loop()) {
+  glutDisplayFunc(main_loop);
+  glutIdleFunc (main_loop);
+  glutMainLoop();
+  //never make it here;
+  return TRUE;
+}
+
 
 BOOL GFXShutdown () {
   if ( g_game.fullscreen ) {

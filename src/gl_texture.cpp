@@ -84,6 +84,7 @@ BOOL /*GFXDRVAPI*/ GFXCreateTexture(int width, int height, TEXTUREFORMAT texture
 	if (*handle==MAX_TEXTURES)
 		return FALSE;
 	textures[*handle].name = *handle; //for those libs with stubbed out handle gen't
+	printf ("Texture Handle %d",*handle);
 	textures[*handle].alive = TRUE;
 	textures[*handle].texturestage = texturestage;
 	glGenTextures (1,&textures[*handle].name);

@@ -77,7 +77,6 @@ void InitMouse(){
   glutMouseFunc(mouseClick);
   glutMotionFunc(mouseDrag);
   glutPassiveMotionFunc(mouseMotion);
-  
 }				
 void ProcessMouse () {
   for (int a=0;a<NUM_BUTTONS;a++) {

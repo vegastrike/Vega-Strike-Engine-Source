@@ -17,10 +17,7 @@ bin_PROGRAMS = vegastrike
 vegastrike_SOURCES =				\
 	alglib.c				\
 	alglib.h				\
-	audio.c					\
-	audio.h					\
-	audio_data.c				\
-	audio_data.h				\
+	cmd.h					\
 	cmd_ai.cpp				\
 	cmd_ai.h				\
 	cmd_unit.h				\
@@ -82,6 +79,7 @@ vegastrike_SOURCES =				\
 	hash.h					\
 	hashtable.h				\
 	hashtable.cpp				\
+	in.h					\
 	in_kb.cpp				\
 	in_kb.h					\
 	in_mouse.cpp				\
@@ -97,6 +95,8 @@ vegastrike_SOURCES =				\
         list.c					\
         list.h					\
 	main.cpp				\
+	main_loop.h				\
+	main_loop.cpp				\
         nmrcl.c					\
         nmrcl.h					\
 	pic.c					\
@@ -107,6 +107,12 @@ vegastrike_SOURCES =				\
 	quadgeom.hpp				\
 	screenshot.c				\
 	screenshot.h				\
+	sdl_audio.c				\
+	sdl_audio.h				\
+	sdl_audio_data.c			\
+	sdl_audio_data.h			\
+	sdl_init.h				\
+	sdl_init.c				\
 	string_util.c				\
 	string_util.h				\
 	tex_font_metrics.c			\
