@@ -1350,6 +1350,7 @@ void BaseComputer::loadCargoControls(void) {
     // Set up the base dealer's transaction list.
 	vector<string> donttakethis;
 	donttakethis.push_back("missions");
+//	donttakethis.push_back("upgrades"); // Uncomment this only hen you are *absolutely sure* that downgrade/upgrade works.
     loadMasterList(m_base.GetUnit(), vector<string>(),donttakethis, true, m_transList1); // Anything but a mission.
     SimplePicker* basePicker = dynamic_cast<SimplePicker*>( window()->findControlById("BaseCargo") );
     assert(basePicker != NULL);
@@ -1369,7 +1370,6 @@ void BaseComputer::loadCargoControls(void) {
 // Get a filtered list of items from a unit.
 void BaseComputer::loadMasterList(Unit *un, const vector<string>& filtervec, const vector<string> &invfiltervec, bool removezero, TransactionList& tlist){
     vector<CargoColor>* items = &tlist.masterList;
-    items->clear();
     for (unsigned int i=0;i<un->numCargo();i++) {
   	    bool filter = filtervec.empty();
 	    bool invfilter = true;
@@ -1723,6 +1723,7 @@ void BaseComputer::loadBuyUpgradeControls(void) {
     Unit* baseUnit = m_base.GetUnit();
 
     TransactionList& tlist = m_transList1;
+	tlist.masterList.clear(); // Just in case
 
     // Get all the upgrades.
     assert( equalColors(CargoColor().color, DEFAULT_UPGRADE_COLOR) );
@@ -1769,16 +1770,18 @@ void BaseComputer::loadSellUpgradeControls(void) {
     }
 
     TransactionList& tlist = m_transList2;
+	tlist.masterList.clear(); // Just in case
 
     // Get a list of upgrades on our ship we could sell.
     Unit* partListUnit = &GetUnitMasterPartList();
-	std::vector<std::string> filtervec;
 
+	std::vector<std::string> weapfiltervec;
 	///// FIXME: the following may change in the future if we ever redo the master part list.
-	filtervec.push_back("upgrades/Weapon");
-	filtervec.push_back("SubUnits");
-	filtervec.push_back("upgrades/Ammunition");
-    loadMasterList(partListUnit, filtervec, std::vector<std::string>(), false, tlist);
+	weapfiltervec.push_back("upgrades/Weapon");
+	weapfiltervec.push_back("SubUnits");
+	weapfiltervec.push_back("upgrades/Ammunition");
+
+    loadMasterList(partListUnit, weapfiltervec, std::vector<std::string>(), false, tlist);
     ClearDowngradeMap();
     playerUnit->FilterDowngradeList(tlist.masterList);
     static const bool clearDowngrades = XMLSupport::parse_bool(vs_config->getVariable("physics","only_show_best_downgrade","true"));
@@ -1799,6 +1802,12 @@ void BaseComputer::loadSellUpgradeControls(void) {
         iter->cargo.mission = ( !equalColors(iter->color, DEFAULT_UPGRADE_COLOR) );
     }
 
+	std::vector<std::string> invplayerfiltervec=weapfiltervec;
+	invplayerfiltervec.push_back("damaged");
+	std::vector<string> playerfiltervec;
+	playerfiltervec.push_back("upgrades");
+	loadMasterList(playerUnit, playerfiltervec, invplayerfiltervec, false, tlist); // Get upgrades, but not weapons.
+	
     // Sort the tlist.  Better for display, easier to compile into categories, etc.
     std::sort(tlist.masterList.begin(), tlist.masterList.end(), CargoColorSort());
 
