@@ -82,11 +82,11 @@ vector <double> findNumbers (FILE * fp) {
   }
   return retval;;
 }
-void findNReplace (char * argv) {
+void findNReplace (char * argv, double adjustment) {
   FILE * fp = fopen (argv,"rb");
   vector <double> instances = findNumbers (fp);
   double mynum= bestNumber (instances);
-  double myreplaceme= mynum*1.2;
+  double myreplaceme= mynum*adjustment;
   char myname[100];
   sprintf (myname,"%.2lf",mynum);
   char myreplacement[100];
@@ -109,7 +109,11 @@ void findNReplace (char * argv) {
 
 
 int main (int argc, char ** argv) {
-  for (int i=1;i<argc;++i) {
-    findNReplace (argv[i]);
+  if (argc<=1)
+    return -1;
+  double adjustment = strtod (argv[1],NULL);
+  for (int i=2;i<argc;++i) {
+    findNReplace (argv[i],adjustment);
   }
+  return 0;
 }
