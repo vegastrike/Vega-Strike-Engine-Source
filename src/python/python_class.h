@@ -106,7 +106,7 @@ BOOST_PYTHON_BEGIN_CONVERSION_NAMESPACE \
 #define PYTHON_DEFINE_GLOBAL(modul,fun,funname) boost::python::def (funname,fun)
 #else
 #define PYTHON_BEGIN_MODULE(name) BOOST_PYTHON_MODULE_INIT(name) {boost::python::module_builder name(#name);
-#define PYTHON_DEFINE_GLOBAL(modul,fun.funname) modul.def (fun,funname)
+#define PYTHON_DEFINE_GLOBAL(modul,fun,funname) modul.def (fun,funname)
 #endif
 #define PYTHON_END_MODULE(name) }
 #define PYTHON_INIT_MODULE(name) init##name()
