@@ -238,7 +238,8 @@ void Animation::DrawNoTransform() {
 void Animation:: Draw() {
   static float HaloOffset = XMLSupport::parse_float(vs_config->getVariable ("graphics","HaloOffset",".1"));
   QVector R (_Universe->AccessCamera()->GetR().i,_Universe->AccessCamera()->GetR().j,_Universe->AccessCamera()->GetR().k);
-  if ((R.Dot (Position()-_Universe->AccessCamera()->GetPosition())-HaloOffset*(height>width?height:width))<.8*g_game.zfar   ) {
+  static float too_far_dist = XMLSupport::parse_float (vs_config->getVariable ("graphics","anim_far_percent",".8"));
+  if ((R.Dot (Position()-_Universe->AccessCamera()->GetPosition())-HaloOffset*(height>width?height:width))<too_far_dist*g_game.zfar   ) {
     animationdrawqueue.push_back (this);
   }else {
     far_animationdrawqueue.push_back(this);
