@@ -47,37 +47,32 @@ void GameUnit<UnitType>::Split (int level) {
   }
   
   std::vector <Mesh *> old = this->meshdata;
-
+  Mesh * shield=old.back();
+  old.pop_back();
   for (int split=0;split<level;split++) {
-    std::vector<Mesh *> nw= MakeMesh(nm*2+1);
-    nw[nm*2]=old[nm];//copy shield
-    for (i=0;i<nm;i++) {
+    std::vector<Mesh *> nw;
+    size_t oldsize=old.size();
+    for (i=0;i<oldsize;i++) {
       PlaneNorm.Set (rand()-RAND_MAX/2,rand()-RAND_MAX/2,rand()-RAND_MAX/2+.5);
       PlaneNorm.Normalize();  
-      old[i]->Fork (nw[i*2], nw[i*2+1],PlaneNorm.i,PlaneNorm.j,PlaneNorm.k,-PlaneNorm.Dot(old[i]->Position()));//splits somehow right down the middle.
-      if (nw[i*2]&&nw[i*2+1]) {
-	delete old[i];
-	old[i]=NULL;
-      }else {
-	nw[i*2+1]= NULL;
-	nw[i*2]=old[i];
+      nw.push_back(NULL);
+      nw.push_back(NULL);
+      old[i]->Fork (nw[nw.size()-2], nw.back(),PlaneNorm.i,PlaneNorm.j,PlaneNorm.k,-PlaneNorm.Dot(old[i]->Position()));//splits somehow right down the middle.
+      delete old[i];
+      old[i]=NULL;
+      if (nw[nw.size()-2]==NULL) {
+        nw[nw.size()-2]=nw.back();
+        nw.pop_back();
       }
-    }
-    nm*=2;
-    for (i=0;i<nm;i++) {
-      if (nw[i]==NULL) {
-	for (int j=i+1;j<nm;j++) {
-	  nw[j-1]=nw[j];
-	}
-	nm--;
-	nw[nm]=NULL;
-      }
+      if (nw.back()==NULL)
+        nw.pop_back();
     }
     old = nw;
   }
-  if (old[nm])
-    delete old[nm];
-  old[nm]=NULL;
+  old.push_back(NULL);//push back shield
+  if (shield)
+    delete shield;
+  nm = old.size()-1;
   for (i=0;i<nm;i++) {
     Unit * splitsub;
     std::vector<Mesh *> tempmeshes;
