@@ -208,7 +208,7 @@ float GFXGetYInvPerspective() {
   return /*invprojection[11]*  */invprojection[5];//invprojection[15];//should be??  c/d == invproj[15]
 }
 
-BOOL /*GFXDRVAPI*/ GFXMultMatrix(MATRIXMODE mode, const Matrix matrix)
+void /*GFXDRVAPI*/ GFXMultMatrix(MATRIXMODE mode, const Matrix matrix)
 {
 	Matrix t;
 	switch(mode)
@@ -244,10 +244,9 @@ BOOL /*GFXDRVAPI*/ GFXMultMatrix(MATRIXMODE mode, const Matrix matrix)
 		glLoadMatrixf(t);
 		break;
 	}
-	return TRUE;
 }
 
-BOOL /*GFXDRVAPI*/ GFXLoadMatrix(MATRIXMODE mode, const Matrix matrix)
+void /*GFXDRVAPI*/ GFXLoadMatrix(MATRIXMODE mode, const Matrix matrix)
 {
 	Matrix t;
 	switch(mode)
@@ -281,10 +280,9 @@ BOOL /*GFXDRVAPI*/ GFXLoadMatrix(MATRIXMODE mode, const Matrix matrix)
 		glMultMatrixf(rotview);
 		break;
 	}
-	return TRUE;
 }
 
-BOOL /*GFXDRVAPI*/ GFXLoadIdentity(MATRIXMODE mode)
+void /*GFXDRVAPI*/ GFXLoadIdentity(MATRIXMODE mode)
 {
 	switch(mode)
 	{
@@ -312,10 +310,9 @@ BOOL /*GFXDRVAPI*/ GFXLoadIdentity(MATRIXMODE mode)
 		glLoadMatrixf(rotview);
 		break;
 	}
-	return TRUE;
 }
 
-BOOL /*GFXDRVAPI*/ GFXGetMatrix(MATRIXMODE mode, Matrix matrix)
+void /*GFXDRVAPI*/ GFXGetMatrix(MATRIXMODE mode, Matrix matrix)
 {
   Matrix translation;
 	switch(mode)
@@ -335,7 +332,6 @@ BOOL /*GFXDRVAPI*/ GFXGetMatrix(MATRIXMODE mode, Matrix matrix)
 		CopyMatrix(matrix, projection);
 		break;
 	}
-	return TRUE;
 }
 
 static void gl_Frustum (float left,float right, float bottom, float top, float nearval,float farval){
@@ -344,7 +340,7 @@ static void gl_Frustum (float left,float right, float bottom, float top, float n
 
   
 }
-BOOL GFXGetFrustumVars (bool retr, float *l, float *r, float *b, float *t, float *n, float *f) {
+void GFXGetFrustumVars (bool retr, float *l, float *r, float *b, float *t, float *n, float *f) {
   static float nnear,ffar,left,right,bot,top;//Visual C++ reserves near and far
   if (!retr) {
     nnear = *n;
@@ -362,11 +358,11 @@ BOOL GFXGetFrustumVars (bool retr, float *l, float *r, float *b, float *t, float
     *f = ffar;
   }
   //  fprintf (stderr,"<FUN%f,%f,%f,%f,%f,%f>>",near,far,left,right,bot,top);
-	return TRUE;
+
 }
 
 
-BOOL GFXFrustum(float * m,float *i, 
+void GFXFrustum(float * m,float *i, 
                  float left, float right,
 	 	 float bottom, float top,
 		 float nearval, float farval )
@@ -392,10 +388,8 @@ BOOL GFXFrustum(float * m,float *i,
    M(2,0) = 0.0F;  M(2,1) = 0.0F;  M(2,2) = 0.0F;   M(2,3) =-1.0F;
    M(3,0) = 0.0F;  M(3,1) = 0.0F;  M(3,2) = 1.F/d;  M(3,3) = (float)c/d;
 #undef M
-   return TRUE;
 }
-
-BOOL /*GFXDRVAPI*/ GFXPerspective(float fov, float aspect, float znear, float zfar)
+void /*GFXDRVAPI*/ GFXPerspective(float fov, float aspect, float znear, float zfar)
 {
 
   //  gluPerspective (fov,aspect,znear,zfar);
@@ -418,7 +412,7 @@ BOOL /*GFXDRVAPI*/ GFXPerspective(float fov, float aspect, float znear, float zf
    //glMatrixMode(GL_PROJECTION);
    //glFrustum(xmin,xmax,ymin,ymax,znear,zfar);
 
-   return TRUE;
+
 
 /*	float fov_vert = fov*(PI/180);
 	float fov_horiz = aspect*fov_vert; //I HOPE this is right
@@ -453,7 +447,7 @@ BOOL /*GFXDRVAPI*/ GFXPerspective(float fov, float aspect, float znear, float zf
 */
 }
 
-BOOL /*GFXDRVAPI*/ GFXParallel(float left, float right, float bottom, float top, float nearval, float farval)
+void /*GFXDRVAPI*/ GFXParallel(float left, float right, float bottom, float top, float nearval, float farval)
 {
   float *m = projection, x,y,z,tx,ty,tz;
    x = 2.0 / (right-left);
@@ -472,7 +466,7 @@ BOOL /*GFXDRVAPI*/ GFXParallel(float left, float right, float bottom, float top,
    GFXLoadMatrix(PROJECTION, projection);
 
   GFXGetFrustumVars(false,&left,&right,&bottom,&top,&nearval,&farval);
-  return TRUE;
+
 }
 
 
@@ -615,7 +609,7 @@ static void LookAtHelper( float eyex, float eyey, float eyez,
    
 }
 
-BOOL /*GFXDRVAPI*/ GFXLookAt(Vector eye, Vector center, Vector up )
+void /*GFXDRVAPI*/ GFXLookAt(Vector eye, Vector center, Vector up )
 {
 	LookAtHelper(eye.i, eye.j, eye.k, center.i, center.j, center.k, up.i, up.j, up.k);
 
@@ -628,10 +622,6 @@ BOOL /*GFXDRVAPI*/ GFXLookAt(Vector eye, Vector center, Vector up )
 	centery=center.j;
 	centerz=center.k;
 	GFXLoadMatrix(VIEW,view);
-
-
-
-	return TRUE;
 }
 float frust [6][4];
 float /*GFXDRVAPI*/ GFXSphereInFrustum (const Vector &Cnt, float radius) {
@@ -650,15 +640,14 @@ float /*GFXDRVAPI*/ GFXSphereInFrustum (float f [6][4],const Vector &Cnt, float 
 }
 
 
-BOOL /*GFXDRVAPI*/ GFXGetFrustum(float f[6][4]) {
+void /*GFXDRVAPI*/ GFXGetFrustum(float f[6][4]) {
   f = frust;
-  return TRUE;
 }
-BOOL /*GFXDRVAPI*/ GFXCalculateFrustum() {
-  return GFXCalculateFrustum (frust,view,projection);
+void /*GFXDRVAPI*/ GFXCalculateFrustum() {
+  GFXCalculateFrustum (frust,view,projection);
 }
 
-BOOL /*GFXDRVAPI*/ GFXCalculateFrustum (float frustum[6][4], float *modl,float * proj){
+void /*GFXDRVAPI*/ GFXCalculateFrustum (float frustum[6][4], float *modl,float * proj){
 ////float   *proj=projection;
 ////float   *modl=view;
    float   clip[16];
@@ -768,5 +757,5 @@ BOOL /*GFXDRVAPI*/ GFXCalculateFrustum (float frustum[6][4], float *modl,float *
    frustum[5][1] /= t;
    frustum[5][2] /= t;
    frustum[5][3] /= t;
-   return TRUE;
+   
 }

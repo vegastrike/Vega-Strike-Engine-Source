@@ -30,11 +30,11 @@
 */
 #include <GL/glut.h>
 #include <vector>
-#ifndef BOOL
-#define BOOL int
+#ifndef GFXBOOL
+#define GFXBOOL unsigned char
 #endif
-#define TRUE 1
-#define FALSE 0
+#define GFXTRUE 1
+#define GFXFALSE 0
 
 
 using std::vector;
@@ -49,30 +49,30 @@ void /*GFXDRVAPI*/ GFXLoop(void main_loop ());
 void /*GFXDRVAPI*/ GFXShutdown();
 
 //Misc functions
-BOOL /*GFXDRVAPI*/ GFXBeginScene();
-BOOL /*GFXDRVAPI*/ GFXEndScene();
-BOOL /*GFXDRVAPI*/ GFXClear();
+void /*GFXDRVAPI*/ GFXBeginScene();
+void /*GFXDRVAPI*/ GFXEndScene();
+void /*GFXDRVAPI*/ GFXClear();
 
 //Light
 
-BOOL /*GFXDRVAPI*/ GFXCreateLightContext(int &con_number);
-BOOL /*GFXDRVAPI*/ GFXDeleteLightContext(int con_number);
-BOOL /*GFXDRVAPI*/ GFXSetLightContext(int con_number);
-BOOL /*GFXDRVAPI*/ GFXLightContextAmbient (const GFXColor &amb);
+void /*GFXDRVAPI*/ GFXCreateLightContext(int &con_number);
+void /*GFXDRVAPI*/ GFXDeleteLightContext(int con_number);
+void /*GFXDRVAPI*/ GFXSetLightContext(int con_number);
+GFXBOOL /*GFXDRVAPI*/ GFXLightContextAmbient (const GFXColor &amb);
 
-BOOL /*GFXDRVAPI*/ GFXPickLights(const float *);
-BOOL /*GFXDRVAPI*/ GFXSetSeparateSpecularColor (BOOL spec);
-BOOL /*GFXDRVAPI*/ GFXSetCutoff (float cutoff);
-BOOL /*GFXDRVAPI*/ GFXSetOptimalIntensity (float newint, float saturatevalue);
-BOOL /*GFXDRVAPI*/ GFXSetOptimalNumLights (int numlights);
+void /*GFXDRVAPI*/ GFXPickLights(const float *);
+GFXBOOL /*GFXDRVAPI*/ GFXSetSeparateSpecularColor (GFXBOOL spec);
+GFXBOOL /*GFXDRVAPI*/ GFXSetCutoff (float cutoff);
+void /*GFXDRVAPI*/ GFXSetOptimalIntensity (float newint, float saturatevalue);
+GFXBOOL /*GFXDRVAPI*/ GFXSetOptimalNumLights (int numlights);
 
-BOOL /*GFXDRVAPI*/ GFXCreateLight (int &light);
-BOOL /*GFXDRVAPI*/ GFXDeleteLight (int light);
-BOOL /*GFXDRVAPI*/ GFXEnableLight(int light);
-BOOL /*GFXDRVAPI*/ GFXDisableLight(int light);
+void /*GFXDRVAPI*/ GFXCreateLight (int &light);
+void /*GFXDRVAPI*/ GFXDeleteLight (int light);
+GFXBOOL /*GFXDRVAPI*/ GFXEnableLight(int light);
+GFXBOOL /*GFXDRVAPI*/ GFXDisableLight(int light);
 
-BOOL /*GFXDRVAPI*/ GFXSetPower(int light, float power);
-BOOL /*GFXDRVAPI*/ GFXSetLight(int light, enum LIGHT_TARGET, const GFXColor &color);
+GFXBOOL /*GFXDRVAPI*/ GFXSetPower(int light, float power);
+GFXBOOL /*GFXDRVAPI*/ GFXSetLight(int light, enum LIGHT_TARGET, const GFXColor &color);
 
 
 
@@ -82,61 +82,61 @@ BOOL /*GFXDRVAPI*/ GFXSetLight(int light, enum LIGHT_TARGET, const GFXColor &col
 
 
 //Materials
-BOOL /*GFXDRVAPI*/ GFXSetMaterial(int &number, const GFXMaterial &material);
-BOOL /*GFXDRVAPI*/ GFXModifyMaterial (int number, const GFXMaterial &material);
-BOOL /*GFXDRVAPI*/ GFXGetMaterial(int number, GFXMaterial &material);
-BOOL /*GFXDRVAPI*/ GFXSelectMaterial(int number);
+void /*GFXDRVAPI*/ GFXSetMaterial(unsigned int &number, const GFXMaterial &material);
+void /*GFXDRVAPI*/ GFXModifyMaterial (unsigned int number, const GFXMaterial &material);
+GFXBOOL /*GFXDRVAPI*/ GFXGetMaterial(unsigned int number, GFXMaterial &material);
+void /*GFXDRVAPI*/ GFXSelectMaterial(unsigned int number);
 
 //Matrix
-BOOL /*GFXDRVAPI*/ GFXMultMatrix(MATRIXMODE mode, const Matrix matrix);
-BOOL /*GFXDRVAPI*/ GFXLoadMatrix(MATRIXMODE mode, const Matrix matrix);
-BOOL /*GFXDRVAPI*/ GFXLoadIdentity(MATRIXMODE mode);
-BOOL /*GFXDRVAPI*/ GFXGetMatrix(MATRIXMODE mode, Matrix matrix);
+void /*GFXDRVAPI*/ GFXMultMatrix(MATRIXMODE mode, const Matrix matrix);
+void  /*GFXDRVAPI*/ GFXLoadMatrix(MATRIXMODE mode, const Matrix matrix);
+void /*GFXDRVAPI*/ GFXLoadIdentity(MATRIXMODE mode);
+void /*GFXDRVAPI*/ GFXGetMatrix(MATRIXMODE mode, Matrix matrix);
 float /*GFXDRVAPI*/GFXGetXInvPerspective();
 float /*GFXDRVAPI*/GFXGetYInvPerspective();
-BOOL /*GFXDRVAPI*/ GFXPerspective(float fov, float aspect, float znear, float zfar);
-BOOL /*GFXDRVAPI*/ GFXParallel(float left, float right, float bottom, float top, float znear, float zfar);
-BOOL /*GFXDRVAPI*/ GFXLookAt(Vector eye, Vector center, Vector up);
-BOOL /*GFXDRVAPI*/ GFXGetFrustum (float f[6][4]);
-BOOL /*GFXDRVAPI*/ GFXCalculateFrustum();
-BOOL /*GFXDRVAPI*/ GFXCalculateFrustum(float frustum[6][4],float *modlmatrix, float *projection);
-BOOL /*GFXDRVAPI*/ GFXGetFrustumVars (bool, float *l,float *r, float *b, float *t, float *n, float *f);
+void /*GFXDRVAPI*/ GFXPerspective(float fov, float aspect, float znear, float zfar);
+void /*GFXDRVAPI*/ GFXParallel(float left, float right, float bottom, float top, float znear, float zfar);
+void /*GFXDRVAPI*/ GFXLookAt(Vector eye, Vector center, Vector up);
+void /*GFXDRVAPI*/ GFXGetFrustum (float f[6][4]);
+void /*GFXDRVAPI*/ GFXCalculateFrustum();
+void /*GFXDRVAPI*/ GFXCalculateFrustum(float frustum[6][4],float *modlmatrix, float *projection);
+void /*GFXDRVAPI*/ GFXGetFrustumVars (bool, float *l,float *r, float *b, float *t, float *n, float *f);
 float /*GFXDRVAPI*/ GFXSphereInFrustum(const Vector &Center, float Radius);
 float /*GFXDRVAPI*/ GFXSphereInFrustum(float f[6][4],const Vector &Center, float Radius);
-BOOL /*GFXDRVAPI*/ GFXFrustum (float * mat, float *inv, float left,float right, float bottom, float top, float nearval, float farval);
+void /*GFXDRVAPI*/ GFXFrustum (float * mat, float *inv, float left,float right, float bottom, float top, float nearval, float farval);
 
 //Textures
 
-BOOL /*GFXDRVAPI*/ GFXCreateTexture(int width, int height, TEXTUREFORMAT textureformat, int *handle, char *palette = 0, int texturestage = 0, enum FILTER mipmap = MIPMAP, enum TEXTURE_TARGET texture_target = TEXTURE2D);
-BOOL /*GFXDRVAPI*/ GFXPrioritizeTexture (unsigned int handle, float priority);
-BOOL /*GFXDRVAPI*/ GFXAttachPalette(unsigned char *palette, int handle);
-BOOL /*GFXDRVAPI*/ GFXTransferTexture(unsigned char *buffer, int handle, enum TEXTURE_IMAGE_TARGET image2D=TEXTURE_2D);
-BOOL /*GFXDRVAPI*/ GFXDeleteTexture(int handle);
-BOOL /*GFXDRVAPI*/ GFXSelectTexture(int handle, int stage=0);
+GFXBOOL /*GFXDRVAPI*/ GFXCreateTexture(int width, int height, TEXTUREFORMAT textureformat, int *handle, char *palette = 0, int texturestage = 0, enum FILTER mipmap = MIPMAP, enum TEXTURE_TARGET texture_target = TEXTURE2D);
+void /*GFXDRVAPI*/ GFXPrioritizeTexture (unsigned int handle, float priority);
+void /*GFXDRVAPI*/ GFXAttachPalette(unsigned char *palette, int handle);
+GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture(unsigned char *buffer, int handle, enum TEXTURE_IMAGE_TARGET image2D=TEXTURE_2D);
+GFXBOOL /*GFXDRVAPI*/ GFXDeleteTexture(int handle);
+GFXBOOL /*GFXDRVAPI*/ GFXSelectTexture(int handle, int stage=0);
 
 
 
 //Screen capture
-BOOL /*GFXDRVAPI*/ GFXCapture(char *filename);
+GFXBOOL /*GFXDRVAPI*/ GFXCapture(char *filename);
 
 //State
-BOOL /*GFXDRVAPI*/ GFXEnable(enum STATE);
-BOOL /*GFXDRVAPI*/ GFXDisable(enum STATE);
-BOOL /*GFXDRVAPI*/ GFXTextureAddressMode(ADDRESSMODE);
-BOOL /*GFXDRVAPI*/ GFXBlendMode(enum BLENDFUNC src, enum BLENDFUNC dst);
-BOOL /*GFXDRVAPI*/ GFXPushBlendMode();
-BOOL /*GFXDRVAPI*/ GFXPopBlendMode();
-BOOL /*GFXDRVAPI*/ GFXSelectTexcoordSet(int stage, int texset);
+void /*GFXDRVAPI*/ GFXEnable(enum STATE);
+void /*GFXDRVAPI*/ GFXDisable(enum STATE);
+void /*GFXDRVAPI*/ GFXTextureAddressMode(ADDRESSMODE);
+void /*GFXDRVAPI*/ GFXBlendMode(enum BLENDFUNC src, enum BLENDFUNC dst);
+void /*GFXDRVAPI*/ GFXPushBlendMode();
+void /*GFXDRVAPI*/ GFXPopBlendMode();
+void /*GFXDRVAPI*/ GFXSelectTexcoordSet(int stage, int texset);
 
 //primitive Begin/End 
-BOOL /*GFXDRVAPI*/ GFXBegin(enum PRIMITIVE);
+void /*GFXDRVAPI*/ GFXBegin(enum PRIMITIVE);
 void /*GFXDRVAPI*/ GFXColor4f(float r, float g, float b, float a = 1.0);
 void /*GFXDRVAPI*/ GFXTexCoord2f(float s, float t);
 void /*GFXDRVAPI*/ GFXTexCoord4f(float s, float t, float u, float v);
 void /*GFXDRVAPI*/ GFXNormal3f(float i, float j, float k);
 void /*GFXDRVAPI*/ GFXNormal(Vector n);
 void /*GFXDRVAPI*/ GFXVertex3f(float x, float y, float z = 1.0);
-BOOL /*GFXDRVAPI*/ GFXEnd();
+void /*GFXDRVAPI*/ GFXEnd();
 
 //display list
 int GFXCreateList();

@@ -32,8 +32,8 @@
 //int numPolygons;
 GFXVertexList *next;
 
-extern BOOL bTex0;
-extern BOOL bTex1;
+extern GFXBOOL bTex0;
+extern GFXBOOL bTex1;
 
 #define CHANGE_MUTABLE 1
 #define CHANGE_CHANGE 2
@@ -138,23 +138,6 @@ void GFXVertexList::RefreshDisplayList () {
   if ((display_list&&!(changed&CHANGE_CHANGE))||(changed&CHANGE_MUTABLE)) {
     return;//don't used lists if they're mutable
   }
-  /*
-	display_list = GFXCreateList();
-	glVertexPointer(3, GL_FLOAT, sizeof(GFXVertex), &myVertices[0].x);
-	glTexCoordPointer(2, GL_FLOAT, sizeof(GFXVertex), &myVertices[0].s+GFXStage0*2);
-	glNormalPointer(GL_FLOAT, sizeof(GFXVertex), &myVertices[0].i);
-	
-	glEnableClientState(GL_VERTEX_ARRAY);
-	glEnableClientState(GL_NORMAL_ARRAY);
-	
-	glClientActiveTextureARB (GL_TEXTURE0_ARB);
-	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-
-	glClientActiveTextureARB (GL_TEXTURE1_ARB);
-	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-  		
-	glDrawArrays(mode, 0, numVertices);
-  */
 	int a;
 	int offset =0;
 	if (myColors !=NULL) {
@@ -182,12 +165,6 @@ void GFXVertexList::RefreshDisplayList () {
 	  }
 	}
 	glEndList();
-	/*
-	glDisableClientState(GL_VERTEX_ARRAY);
-	glDisableClientState(GL_NORMAL_ARRAY);
-	glClientActiveTextureARB (GL_TEXTURE0_ARB);
-	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-	*/
 #endif
 }
 
@@ -233,96 +210,50 @@ void GFXVertexList::UnlockUntransformed()
 }
 
 
-BOOL GFXVertexList::SwapUntransformed()
+GFXBOOL GFXVertexList::SwapUntransformed()
 {
   if (tessellation)
     tesslist->SwapUntransformed();
   
-	return FALSE;
+	return GFXFALSE;
 }
 
-BOOL GFXVertexList::SwapTransformed()
+GFXBOOL GFXVertexList::SwapTransformed()
 {
   if (tessellation)
     tesslist->SwapTransformed();
 
-	return FALSE;
+	return GFXFALSE;
 }
 
-BOOL GFXVertexList::Mutate (int offset, const GFXVertex *vlist, int number, const GFXColor *color){  
+GFXBOOL GFXVertexList::Mutate (int offset, const GFXVertex *vlist, int number, const GFXColor *color){  
   if (offset+number>numVertices)
-    return FALSE;
+    return GFXFALSE;
   memcpy (&myVertices[offset].x, vlist, number*sizeof(GFXVertex));
   if (myColors&&color) {
     memcpy (&myColors[offset].r,color,number*sizeof(GFXColor));
   }
   RefreshDisplayList();
-  return TRUE;
+  return GFXTRUE;
 } 
 
 
-BOOL GFXVertexList::Draw()
+void GFXVertexList::Draw()
 {
   if (tessellation&&tesslist) {
     tesslist->Draw();
-    return TRUE;
+    return;
   }
 #ifdef STATS_QUEUE
   //  statsqueue.back() += GFXStats(numTriangles, numQuads, 0);
 #endif
 #ifdef USE_DISPLAY_LISTS
   if(display_list!=0) {
-	if(g_game.Multitexture) {
-	  glActiveTextureARB(GL_TEXTURE0_ARB);	
-	  if(bTex0) 
-	    glEnable (GL_TEXTURE_2D);		
-	  else
-	    glDisable(GL_TEXTURE_2D);
-	  
-	  glActiveTextureARB(GL_TEXTURE1_ARB);	
-	  if(bTex1)
-#ifdef NV_CUBE_MAP
-	    glEnable (GL_TEXTURE_CUBE_MAP_EXT);////FIXME--have some gneeral state that holds CUBE MAPPING values
-#else	
-	  glEnable (GL_TEXTURE_2D);
-#endif
-	  else
-	    glDisable(GL_TEXTURE_2D);
-	  glActiveTextureARB(GL_TEXTURE0_ARB);
-	} 
-	GFXCallList(display_list);
+    GFXCallList(display_list);
   } else 
 #endif
     {
-    if(g_game.Multitexture) {
-      glActiveTextureARB(GL_TEXTURE0_ARB);	
-      if(bTex0) 
-	glEnable (GL_TEXTURE_2D);		
-      else
-	glDisable(GL_TEXTURE_2D);
-      
-      glActiveTextureARB(GL_TEXTURE1_ARB);	
-      if(bTex1)
-#ifdef NV_CUBE_MAP
-	glEnable (GL_TEXTURE_CUBE_MAP_EXT);////FIXME--have some gneeral state that holds CUBE MAPPING values
-#else	
-      glEnable (GL_TEXTURE_2D);
-#endif	
-      else
-	glDisable(GL_TEXTURE_2D);
-    }
-#ifdef STATS_QUEUE
-    //    statsqueue.back() += GFXStats(numTriangles, numQuads, 0);
-#endif
-    //float *texcoords = NULL;
     if (g_game.Multitexture){
-      /*texcoords = new float[numVertices*4];
-	for(int a=0; a<numVertices; a++) {
-	texcoords[4*a] = myVertices[a].s;
-	texcoords[4*a+1] = myVertices[a].t;
-	texcoords[4*a+2] = myVertices[a].u;
-	texcoords[4*a+3] = myVertices[a].v;
-	}*/ 
       if (myColors!=NULL) {
 	glEnableClientState(GL_COLOR_ARRAY);
 	glColorPointer (4,GL_FLOAT, sizeof (GFXColor), &myColors[0].r);
@@ -367,43 +298,16 @@ BOOL GFXVertexList::Draw()
       glEnableClientState(GL_VERTEX_ARRAY);
       glEnableClientState(GL_NORMAL_ARRAY);
       
-      if(bTex0) {
-	int totoffset=0;
-	for (int i=0;i<numlists;i++) {
-	  glDrawArrays(mode[i], totoffset, offsets[i]);
-	  totoffset += offsets[i];
-	}
-      }
-      if (Stage1Texture&&bTex1) {
-	/* int ssrc,ddst;
-	   glGetIntegerv (GL_BLEND_SRC, &ssrc);
-	   glGetIntegerv (GL_BLEND_DST, &ddst);
-	   glBindTexture(GL_TEXTURE_2D, Stage1TextureName);
-	   glEnable (GL_BLEND);
-	   glBlendFunc(GL_ZERO, GL_SRC_COLOR);
-	   
-	   //now transfer textures that correspond to second set of coords
-	   glTexCoordPointer(2, GL_FLOAT, sizeof(GFXVertex), &myVertices[0].s+GFXStage1*2);
-	   int totoffset=0;
-	   for (int i=0;i<numlists;i++) {
-	   glDrawArrays(mode[i], totoffset, offsets[i]);
-	   totoffset += offsets[i];
-	   }
-	   
-	   glBlendFunc (ssrc,ddst);
-	   glBindTexture(GL_TEXTURE_2D, Stage0TextureName);
-	   //glDisable (GL_BLEND);
-	   
-	   //reload the old texture pointer
-	   glTexCoordPointer(2, GL_FLOAT, sizeof(GFXVertex), &myVertices[0].s+GFXStage0*2);
-	*/  //if hardware doesn't support multitexturem don't even try it mon
+      int totoffset=0;
+      for (int i=0;i<numlists;i++) {
+	glDrawArrays(mode[i], totoffset, offsets[i]);
+	totoffset += offsets[i];
       }
       
     }
 	
 
     }
-  return TRUE;
 }
 
 

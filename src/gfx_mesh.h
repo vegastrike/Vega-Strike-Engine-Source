@@ -204,13 +204,13 @@ protected:
   int myMatNum;
   
 
-  BOOL objtex;
+  GFXBOOL objtex;
   Texture *Decal;
-  BOOL envMap;
+  GFXBOOL envMap;
   
   BSPTree *bspTree;
   
-  BOOL changed;
+  GFXBOOL changed;
   void InitUnit();
   
   string *hash_name;
@@ -237,7 +237,7 @@ public:
   void Draw(const Transformation &quat = identity_transformation, const Matrix = identity_matrix);
   virtual void ProcessDrawQueue();
   static void ProcessUndrawnMeshes();
-    void setEnvMap(BOOL newValue) {envMap = newValue;}
+    void setEnvMap(GFXBOOL newValue) {envMap = newValue;}
   void Destroy();
   void UpdateHudMatrix();//puts an object on the hud with the matrix
   void Rotate(const Vector &torque);

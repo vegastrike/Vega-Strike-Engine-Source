@@ -77,7 +77,7 @@ Texture * Texture::Exists (string s) {
     return texHashTable.Get(s);
 }
 
-int Texture::checkold(const string &s)
+GFXBOOL Texture::checkold(const string &s)
 {
 	Texture *oldtex;
 	//FIX'D
@@ -87,14 +87,14 @@ int Texture::checkold(const string &s)
 	  memcpy (this, oldtex, sizeof (Texture));
 	  original = oldtex;
 	  original->refcount++;
-	  return TRUE;
+	  return GFXTRUE;
 	}
 	else
 	{
 	  oldtex = (Texture*)malloc(sizeof(Texture));
 	  texHashTable.Put(s, oldtex);
 	  original = oldtex;
-	  return FALSE;
+	  return GFXFALSE;
 	}
 }
 void Texture::setold()

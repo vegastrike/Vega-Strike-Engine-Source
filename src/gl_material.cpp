@@ -25,10 +25,10 @@
 
 vector <GFXMaterial> materialinfo;
 int selectedmaterial = -1;
-BOOL /*GFXDRVAPI*/ GFXSetMaterial(int &number, const GFXMaterial &material)
+void /*GFXDRVAPI*/ GFXSetMaterial(unsigned int &number, const GFXMaterial &material)
 {
   number = -1;
-  for (int i=0;i<materialinfo.size();i++){
+  for (unsigned int i=0;i<materialinfo.size();i++){
     if (memcmp (&materialinfo[i],&material,sizeof(GFXMaterial))==0) {
       number = i;
       break;
@@ -38,22 +38,21 @@ BOOL /*GFXDRVAPI*/ GFXSetMaterial(int &number, const GFXMaterial &material)
     number = materialinfo.size();
     materialinfo.push_back (material);
   }
-  return TRUE;
+
 }
 
-BOOL GFXModifyMaterial (int number, const GFXMaterial &material) {
+void GFXModifyMaterial (unsigned int number, const GFXMaterial &material) {
   materialinfo [number]=material;
-  return TRUE;
 }
-BOOL /*GFXDRVAPI*/ GFXGetMaterial(int number, GFXMaterial &material)
+GFXBOOL /*GFXDRVAPI*/ GFXGetMaterial(unsigned int number, GFXMaterial &material)
 {
   if (number<0||number>=materialinfo.size())
-    return FALSE;
+    return GFXFALSE;
   material = materialinfo[number];
-  return TRUE;
+  return GFXTRUE;
 }
 
-BOOL /*GFXDRVAPI*/ GFXSelectMaterial(int number)
+void /*GFXDRVAPI*/ GFXSelectMaterial(unsigned int number)
 {
   if (number!=selectedmaterial){
 	float matvect[4];
@@ -84,5 +83,5 @@ BOOL /*GFXDRVAPI*/ GFXSelectMaterial(int number)
 	glMaterialfv(GL_FRONT, GL_SHININESS, &materialinfo[number].power);
 	selectedmaterial = number;
   }
-  return TRUE;
+
 }

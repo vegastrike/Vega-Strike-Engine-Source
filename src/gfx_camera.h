@@ -27,7 +27,7 @@
 class Camera{
 	Vector Coord;
 	Matrix view;
-	BOOL changed;
+	GFXBOOL changed;
 	
 	float x, y, xsize, ysize;
 	float zoom;
@@ -48,7 +48,7 @@ public:
 	Camera(ProjectionType proj = PERSPECTIVE);
         void GetView (Matrix);
 	void GetPQR (Vector &p1, Vector &q1, Vector &r1);
-	void UpdateGFX(bool updateFrustum=true);
+	void UpdateGFX(GFXBOOL updateFrustum=true);
 	void UpdateGLCenter();
 
 	void SetPosition(const Vector &origin);

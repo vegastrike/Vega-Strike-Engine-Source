@@ -24,12 +24,12 @@
 #include "gfxlib.h"
 #include "gl_globals.h"
 #include "vs_globals.h"
-extern BOOL bTex0;
-extern BOOL bTex1;
+extern GFXBOOL bTex0;
+extern GFXBOOL bTex1;
 
 
 
-BOOL /*GFXDRVAPI*/ GFXBeginScene()
+void /*GFXDRVAPI*/ GFXBeginScene()
 {
 #ifdef STATS_QUEUE
 	statsqueue.push(GFXStats());
@@ -37,10 +37,9 @@ BOOL /*GFXDRVAPI*/ GFXBeginScene()
 	GFXClear();
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity(); // bad this should instead load the cached view matrix
-	return TRUE;
 }
 
-BOOL /*GFXDRVAPI*/ GFXEndScene()
+void /*GFXDRVAPI*/ GFXEndScene()
 {
   //	glFinish();//finish all drawing commandes
 	
@@ -54,21 +53,20 @@ BOOL /*GFXDRVAPI*/ GFXEndScene()
 		statsqueue.back().drawnPoints,
 		statsqueue.back().total());
 #endif
-	return TRUE;
+	
 }
 
-BOOL /*GFXDRVAPI*/ GFXClear()
+void /*GFXDRVAPI*/ GFXClear()
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	return TRUE;
 }
 
-BOOL /*GFXDRVAPI*/ GFXCapture(char *filename)
+GFXBOOL /*GFXDRVAPI*/ GFXCapture(char *filename)
 {
-	return FALSE;
+	return GFXFALSE;
 }
 
-BOOL /*GFXDRVAPI*/ GFXBegin(enum PRIMITIVE ptype)
+void /*GFXDRVAPI*/ GFXBegin(enum PRIMITIVE ptype)
 {
 	GLenum mode;
 	switch(ptype)
@@ -95,32 +93,9 @@ BOOL /*GFXDRVAPI*/ GFXBegin(enum PRIMITIVE ptype)
 		mode = GL_POLYGON;
 		break;
 	}
-	if(g_game.Multitexture) {
-		glActiveTextureARB(GL_TEXTURE0_ARB);	
-		if(bTex0)
-			glEnable (GL_TEXTURE_2D);
-		else
-			glDisable(GL_TEXTURE_2D);
-		glActiveTextureARB(GL_TEXTURE1_ARB);	
-		if(bTex1)
-#ifdef NV_CUBE_MAP
-		  glEnable (GL_TEXTURE_CUBE_MAP_EXT);
-#else
-			glEnable (GL_TEXTURE_2D);
-#endif
-		else
-			glDisable(GL_TEXTURE_2D);
-		glActiveTextureARB(GL_TEXTURE0_ARB);	
-	}
-	else {
-		if(bTex0) {
-			glEnable(GL_TEXTURE_2D);
-		}
-	}
-
 	glBegin(mode);
 
-	return TRUE;
+
 }
 
 void /*GFXDRVAPI*/ GFXColor4f(float r, float g, float b, float a)
@@ -160,10 +135,9 @@ void /*GFXDRVAPI*/ GFXVertex3f(float x, float y, float z)
 	glVertex3f(x,y,z);
 }
 
-BOOL /*GFXDRVAPI*/ GFXEnd()
+void /*GFXDRVAPI*/ GFXEnd()
 {
 	glEnd();
-	return FALSE;
 }
 
 int GFXCreateList() {

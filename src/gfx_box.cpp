@@ -80,8 +80,9 @@ void Box::ProcessDrawQueue() {
   GFXBlendMode(SRCALPHA,INVSRCALPHA);
   //GFXColor(0.0,.90,.3,0.9);
   GFXDisable(LIGHTING);
-  GFXDisable(TEXTURE0);
+  GFXDisable (TEXTURE0);
   GFXDisable(TEXTURE1);
+
   GFXDisable(CULLFACE);
   //GFXBlendMode(ONE, ONE);
 

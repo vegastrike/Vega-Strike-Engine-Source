@@ -30,10 +30,7 @@ struct GFXVertex // Vertex, Normal, Texture, and Environment
 	float i;
 	float j;
 	float k;
-	//DWORD diffuse;
-	//DWORD specular;
 	float s,t;
-  //	float u,v;
 
 	GFXVertex()
 	{
@@ -103,7 +100,26 @@ enum POLYTYPE {
   GFXLINESTRIP,//unsupported in mesh...
   GFXPOLY//unsupported in mesh...
 };
-
+/**
+ *   Meant to be a huge list of individual quads (like light maps) 
+ *   that need to be resizable, etc all to be drawn at once.... nice on GL :-) 
+ */
+class /*GFXDRVAPI*/ GFXQuadList {
+  int numVertices;
+  int numQuads;
+  int * quadassignments;
+  GFXVertex * myVertices;
+  GFXColor *myColors;
+  GFXBOOL isColor;
+  int Dirty;
+ public:
+  GFXQuadList(GFXBOOL color=GFXFALSE);
+  ~GFXQuadList();
+  void Draw();
+  int AddQuad (GFXVertex *vertices, GFXColor * colors=NULL);
+  void DelQuad (int which);
+  void ModQuad (int which, GFXVertex *vertices, GFXColor * colors=NULL);
+};
 class /*GFXDRVAPI*/ GFXVertexList {
 
   //	int numTriangles;
@@ -139,11 +155,11 @@ public:
   GFXVertex *LockUntransformed(); // Stuff to support environment mapping
   void UnlockUntransformed();
   
-  BOOL SetNext(GFXVertexList *vlist);
-  BOOL Mutate (int offset,  const GFXVertex *vlist,int number, const GFXColor *color=NULL);
-  BOOL Draw();
-  BOOL SwapUntransformed();
-  BOOL SwapTransformed();
+  GFXBOOL SetNext(GFXVertexList *vlist);
+  GFXBOOL Mutate (int offset,  const GFXVertex *vlist,int number, const GFXColor *color=NULL);
+  void Draw();
+  GFXBOOL SwapUntransformed();
+  GFXBOOL SwapTransformed();
 };
 
 struct DrawContext {

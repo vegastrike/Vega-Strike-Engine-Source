@@ -97,7 +97,7 @@ void Mesh::InitUnit()
 	local_transformation = identity_transformation;
 	blendSrc=ONE;
 	blendDst=ZERO;
-	changed = TRUE;
+	changed = GFXTRUE;
 	vlist=NULL;
 	
 	radialSize=minSizeX=minSizeY=minSizeZ=maxSizeY=maxSizeZ=maxSizeX=0;
@@ -120,7 +120,7 @@ void Mesh::InitUnit()
 	refcount = 1;  //FIXME VEGASTRIKE  THIS _WAS_ zero...NOW ONE
 	orig = NULL;
 	
-	envMap = TRUE;
+	envMap = GFXTRUE;
 	dlist = 0;
 	draw_queue = NULL;
 	hash_name = NULL;
@@ -149,7 +149,7 @@ Mesh:: Mesh(const char * filename, bool xml)
 	int *Tris;
 	int NumQuads;
 	int *Quads;
-	BOOL AlphaMap = FALSE;
+	GFXBOOL AlphaMap = GFXFALSE;
 
 	InitUnit();
 
@@ -192,11 +192,11 @@ Mesh:: Mesh(const char * filename, bool xml)
 	{
 		if (TexNameLength < 0) 
 		{
-			AlphaMap = TRUE;
+			AlphaMap = GFXTRUE;
 			TexNameLength = -TexNameLength;
 		}
 		
-		objtex = TRUE;
+		objtex = GFXTRUE;
 		TexName = new char [TexNameLength +5];
 		fread (TexName, TexNameLength,1,fp);
 		TexName[TexNameLength+4] = '\0';
@@ -207,7 +207,7 @@ Mesh:: Mesh(const char * filename, bool xml)
 	}
 	else
 	{
-		objtex = FALSE;
+		objtex = GFXFALSE;
 	}
 	NumPoints = readi(fp);
 	x = new float [NumPoints];
@@ -363,7 +363,7 @@ Mesh:: Mesh(const char * filename, bool xml)
 			Decal = new Texture (TexName, 0);
 		}
 		if (!Decal)
-			objtex = FALSE;
+			objtex = GFXFALSE;
 	}
 	numforcelogo = readi (fp);
 	Vector *PolyNormal = new Vector [numforcelogo];

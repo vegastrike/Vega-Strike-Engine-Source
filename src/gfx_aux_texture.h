@@ -47,7 +47,7 @@ struct Texture{
 	int refcount;
         enum TEXTURE_TARGET texture_target;
         enum TEXTURE_IMAGE_TARGET image_target;
-        BOOL checkold(const string &s);
+        GFXBOOL checkold(const string &s);
 	void setold();
   //char  texfilename;
   void InitTexture() {

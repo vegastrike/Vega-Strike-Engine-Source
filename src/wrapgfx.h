@@ -41,7 +41,7 @@ struct Light{
 		r = 0;
 		g = 0;
 		b = 0;
-		enabled = FALSE;
+		enabled = GFXFALSE;
 	}
 	Light(Vector dir, float r, float g, float b)
 	{
@@ -58,12 +58,12 @@ class WrapGFX {
 protected:
 
 	char * hPalette;
-	BOOL  done;
+	GFXBOOL  done;
 
 	Camera hud_camera;
 
-	BOOL StartGL();
-	BOOL active;
+	void StartGL();
+	GFXBOOL active;
         StarSystem * star_system;
 	//	Light lights[NUM_LIGHT];
 	int numlights;
@@ -75,13 +75,13 @@ protected:
 public:
 	//move back to private!!!
 	Primitive *topobject; // the top object of the object list
-  BOOL activateLightMap();
+  void activateLightMap();
   Texture * getForceLogo () {return ForceLogo;};
   Texture * getSquadLogo () {return SquadLogo;};
 	WrapGFX(int argc, char **argv);
 	~WrapGFX();
 
-	BOOL StartGFX();
+	void StartGFX();
 
 	void StartDraw();
 	void EndDraw();

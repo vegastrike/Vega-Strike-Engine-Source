@@ -31,21 +31,21 @@ struct GLTexture{
   unsigned int height;
   int texturestage;
   GLuint name;
-  BOOL alive;
+  GFXBOOL alive;
   TEXTUREFORMAT textureformat;
   GLenum targets;
   enum FILTER mipmapped;
-  bool shared_palette;
+  GFXBOOL shared_palette;
   
 	GLTexture ()
 	{
-		alive = FALSE;
+		alive = GFXFALSE;
 		name = 0;
 		width =0;
 		height = 0;
 		texture = NULL;
 		palette = NULL;
-		shared_palette = true;
+		shared_palette = GFXTRUE;
 	}
 	~GLTexture()
 	{
@@ -69,7 +69,7 @@ static void ConvertPalette(unsigned char *dest, unsigned char *src)
 
 }
 
-BOOL /*GFXDRVAPI*/ GFXCreateTexture(int width, int height, TEXTUREFORMAT textureformat, int *handle, char *palette , int texturestage, enum FILTER mipmap, enum TEXTURE_TARGET texture_target)
+GFXBOOL /*GFXDRVAPI*/ GFXCreateTexture(int width, int height, TEXTUREFORMAT textureformat, int *handle, char *palette , int texturestage, enum FILTER mipmap, enum TEXTURE_TARGET texture_target)
 {
   //  if (!textures) {
   //    textures = new GLTexture [MAX_TEXTURES]; //if the dynamically allocated array is not made... make it
@@ -97,7 +97,7 @@ BOOL /*GFXDRVAPI*/ GFXCreateTexture(int width, int height, TEXTUREFORMAT texture
 	while (*handle<MAX_TEXTURES&&textures[*handle].alive)
 		(*handle)++;
 	if (*handle==MAX_TEXTURES)
-		return FALSE;
+		return GFXFALSE;
 	GLenum WrapMode;
 	switch (texture_target) {
 	case TEXTURE2D: textures [*handle].targets=GL_TEXTURE_2D;
@@ -111,7 +111,7 @@ BOOL /*GFXDRVAPI*/ GFXCreateTexture(int width, int height, TEXTUREFORMAT texture
 	
 	textures[*handle].name = *handle; //for those libs with stubbed out handle gen't
 	//fprintf (stderr,"Texture Handle %d",*handle);
-	textures[*handle].alive = TRUE;
+	textures[*handle].alive = GFXTRUE;
 	textures[*handle].texturestage = texturestage;
 	textures[*handle].mipmapped = mipmap;
 	glGenTextures (1,&textures[*handle].name);
@@ -148,20 +148,17 @@ BOOL /*GFXDRVAPI*/ GFXCreateTexture(int width, int height, TEXTUREFORMAT texture
 	}
 	textures[*handle].textureformat = textureformat;
 
-	return TRUE;
+	return GFXTRUE;
 }
-BOOL GFXPrioritizeTexture (unsigned int handle, float priority) {
-  if (priority<0||priority>1)
-    return FALSE;
+void GFXPrioritizeTexture (unsigned int handle, float priority) {
   glPrioritizeTextures (1,&handle,&priority); 
 }
-BOOL /*GFXDRVAPI*/ GFXAttachPalette (unsigned char *palette, int handle)
+void /*GFXDRVAPI*/ GFXAttachPalette (unsigned char *palette, int handle)
 {
 	ConvertPalette(textures[handle].palette, palette);
 	//memcpy (textures[handle].palette,palette,768);
-	return TRUE;
 }
-BOOL /*GFXDRVAPI*/ GFXTransferTexture (unsigned char *buffer, int handle,  enum TEXTURE_IMAGE_TARGET imagetarget)
+GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture (unsigned char *buffer, int handle,  enum TEXTURE_IMAGE_TARGET imagetarget)
 {	
   GLenum image2D;
   switch (imagetarget) {
@@ -251,7 +248,7 @@ BOOL /*GFXDRVAPI*/ GFXTransferTexture (unsigned char *buffer, int handle,  enum 
 	case PALETTE8:
 		if (g_game.PaletteExt)
 		{
-			  textures[handle].shared_palette = false;
+			  textures[handle].shared_palette = GFXFALSE;
 			  fprintf (stderr,"texture error 0\n");
 				glColorTable(textures[handle].targets, 
 					     GL_RGBA, 
@@ -261,7 +258,7 @@ BOOL /*GFXDRVAPI*/ GFXTransferTexture (unsigned char *buffer, int handle,  enum 
 					     textures[handle].palette);
 				error = glGetError();
 				if (error)
-					return FALSE;
+					return GFXFALSE;
 				
 				//}
 			//memset(buffer, 0, textures[handle].width*textures[handle].height);
@@ -272,7 +269,7 @@ BOOL /*GFXDRVAPI*/ GFXTransferTexture (unsigned char *buffer, int handle,  enum 
 				break;
 				error = glGetError();
 				if (error) 
-				  return FALSE;
+				  return GFXFALSE;
 		}
 		else
 		{
@@ -304,10 +301,10 @@ BOOL /*GFXDRVAPI*/ GFXTransferTexture (unsigned char *buffer, int handle,  enum 
 	}
 
 	//glBindTexture(textures[handle].targets, textures[handle].name);
-	return TRUE;
+	return GFXTRUE;
 
 }
-BOOL /*GFXDRVAPI*/ GFXDeleteTexture (int handle)
+GFXBOOL /*GFXDRVAPI*/ GFXDeleteTexture (int handle)
 {
 	
 	if (textures[handle].texture)
@@ -319,16 +316,16 @@ BOOL /*GFXDRVAPI*/ GFXDeleteTexture (int handle)
 		delete [] textures[handle].palette;
 		textures[handle].palette=0;
 	}
-	textures[handle].alive = FALSE;
-	return TRUE;
+	textures[handle].alive = GFXFALSE;
+	return GFXTRUE;
 }
 
 
-BOOL /*GFXDRVAPI*/ GFXSelectTexture(int handle, int stage)
+GFXBOOL /*GFXDRVAPI*/ GFXSelectTexture(int handle, int stage)
 {
   //FIXME? is this legit?
   if (activetexture[stage]==handle)
-    return TRUE;
+    return GFXTRUE;
   else
     activetexture[stage] = handle;
 
@@ -394,16 +391,16 @@ BOOL /*GFXDRVAPI*/ GFXSelectTexture(int handle, int stage)
 	}
 	else
 	{
-		Stage0Texture = TRUE;
+		Stage0Texture = GFXTRUE;
 
 		if (textures[handle].texturestage)
 		{
-			Stage1Texture = TRUE;
+			Stage1Texture = GFXTRUE;
 			Stage1TextureName = textures[handle].name;
 		}	
 		else
 		{
-			Stage1Texture = FALSE;
+			Stage1Texture = GFXFALSE;
 			glEnable (textures[handle].targets);
 			glBindTexture(textures[handle].targets, textures[handle].name);
 			Stage0TextureName = textures[handle].name;
@@ -425,9 +422,8 @@ BOOL /*GFXDRVAPI*/ GFXSelectTexture(int handle, int stage)
 		  }
 		}
 		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-		float ccolor[4] = {1.0,1.0,1.0,1.0};
 		//FIXME VEGASTRIKE//REMOVED BY DANNYglTexEnvfv(GL_TEXTURE_ENV, GL_TEXTURE_ENV_COLOR, ccolor);
 	}
-	return TRUE;
+	return GFXTRUE;
 }
 

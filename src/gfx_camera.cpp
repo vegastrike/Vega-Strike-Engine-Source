@@ -49,7 +49,7 @@ Camera::Camera(ProjectionType proj) : projectionType(proj), myPhysics(0.1,0.075,
 
 void Camera::GetPQR (Vector &p1, Vector &q1, Vector &r1){p1.i = P.i;p1.j = P.j; p1.k = P.k;q1.i = Q.i;q1.j = Q.j; q1.k = Q.k;r1.i = R.i;r1.j = R.j; r1.k = R.k;}
 
-void Camera::UpdateGFX(bool updateFrustum)
+void Camera::UpdateGFX(GFXBOOL updateFrustum)
 {
   float xmin, xmax, ymin, ymax;
 	if(changed)

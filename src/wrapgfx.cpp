@@ -56,7 +56,7 @@ WrapGFX::WrapGFX(int argc, char** argv)
   //currentcamera = 0;
 	numlights = NUM_LIGHT; 
 	topobject = NULL;
-	active = FALSE;
+	active = GFXFALSE;
 
 	//Select drivers
 	
@@ -109,7 +109,7 @@ WrapGFX::~WrapGFX()
 }
 //sets up all the stuff... in this case the ships to be rendered
 
-BOOL WrapGFX::activateLightMap() {
+void WrapGFX::activateLightMap() {
 #ifdef NV_CUBE_MAP
   LightMap[0]->MakeActive();
   LightMap[1]->MakeActive();
@@ -120,10 +120,9 @@ BOOL WrapGFX::activateLightMap() {
 #else
     LightMap[0]->MakeActive();
 #endif
-    return TRUE;
 }
 
-BOOL WrapGFX::StartGFX()
+void WrapGFX::StartGFX()
 {
   //	SetViewport();
 	GFXBeginScene();
@@ -148,7 +147,7 @@ BOOL WrapGFX::StartGFX()
 	mat.eb = 0.0F;
 	mat.ea = 1.0F;
 	mat.power=60.0F;
-	int tmp;
+	unsigned int tmp;
 	GFXSetMaterial(tmp, mat);
 	GFXSelectMaterial(tmp);
 	int ligh;
@@ -164,7 +163,6 @@ BOOL WrapGFX::StartGFX()
 	//GFXLoadIdentity(VIEW);
 	//GFXLookAt(Vector(0,0,0), Vector(0,0,1), Vector(0,-1,0)); // optimization: cache this friggin' matrix
       	GFXEndScene();
-	return TRUE;
 }
 
 void WrapGFX::Loop(void main_loop()) {

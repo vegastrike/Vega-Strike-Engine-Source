@@ -23,10 +23,10 @@
 #include "gl_globals.h"
 #include "vs_globals.h"
 #include <stack>
-BOOL bTex0 = TRUE;
-BOOL bTex1 = TRUE;
-extern BOOL GFXLIGHTING;
-BOOL /*GFXDRVAPI*/ GFXEnable (STATE state)
+GFXBOOL bTex0 = GFXTRUE;
+GFXBOOL bTex1 = GFXTRUE;
+extern GFXBOOL GFXLIGHTING;
+void /*GFXDRVAPI*/ GFXEnable (STATE state)
 {
 
 	switch(state)
@@ -45,19 +45,26 @@ BOOL /*GFXDRVAPI*/ GFXEnable (STATE state)
 		break;
 	case TEXTURE0:
 		bTex0 = TRUE;
+		glActiveTextureARB(GL_TEXTURE0_ARB);	
+		glEnable (GL_TEXTURE_2D);		
 		break;
 	case TEXTURE1:
 		bTex1 = TRUE;
+		glActiveTextureARB (GL_TEXTURE1_ARB);
+#ifdef NV_CUBE_MAP
+		glEnable (GL_TEXTURE_CUBE_MAP_EXT);
+#else
+		glEnable (GL_TEXTURE_2D);		
+#endif
+		glActiveTextureARB(GL_TEXTURE0_ARB);
 		break;
 	case CULLFACE:
 	  glEnable(GL_CULL_FACE);
 	  break;
 	}
-	return TRUE;
-	
 }
 
-BOOL /*GFXDRVAPI*/ GFXDisable (STATE state)
+void /*GFXDRVAPI*/ GFXDisable (STATE state)
 {
 	
 	switch(state)
@@ -74,19 +81,29 @@ BOOL /*GFXDRVAPI*/ GFXDisable (STATE state)
 		break;
 	case TEXTURE0:
 		bTex0 = FALSE;
-		bTex1 = FALSE;
+		glActiveTextureARB(GL_TEXTURE0_ARB);	
+		glDisable (GL_TEXTURE_2D);		
 		break;
 	case TEXTURE1:
 		bTex1 = FALSE;
+		bTex1 = TRUE;
+		glActiveTextureARB (GL_TEXTURE1_ARB);
+#ifdef NV_CUBE_MAP
+		glDisable (GL_TEXTURE_CUBE_MAP_EXT);
+#else
+		glDisable (GL_TEXTURE_2D);		
+#endif
+		glActiveTextureARB(GL_TEXTURE0_ARB);
+		
 		break;
 	case CULLFACE:
 	  glDisable(GL_CULL_FACE);
 	  break;
 	}
-	return TRUE;
+
 }
 
-BOOL GFXTextureAddressMode(ADDRESSMODE mode)
+void GFXTextureAddressMode(ADDRESSMODE mode)
 {
 	float BColor [4] = {0,0,0,0};//set border color to clear... dunno if we wanna change?
 	switch(mode)
@@ -106,11 +123,10 @@ BOOL GFXTextureAddressMode(ADDRESSMODE mode)
 		glTexParameterfv(GL_TEXTURE_2D,GL_TEXTURE_BORDER_COLOR, BColor);
 		break;
 	case MIRROR:
-		//nope not goin here I hope
+		//nope not goin here I hope nVidia extension?
 	default:
-		return FALSE; // won't work
+		return ; // won't work
 	}
-	return TRUE;
 }
 
 struct BlendMode {
@@ -120,7 +136,7 @@ struct BlendMode {
 
 stack<BlendMode> blendstack;
 
-BOOL GFXBlendMode(enum BLENDFUNC src, enum BLENDFUNC dst)
+void GFXBlendMode(enum BLENDFUNC src, enum BLENDFUNC dst)
 {
 	GLenum sfactor,dfactor;
 	switch (src)
@@ -153,8 +169,9 @@ BOOL GFXBlendMode(enum BLENDFUNC src, enum BLENDFUNC dst)
 	  break;
 	case SRCCOLOR:
 	case INVSRCCOLOR:	
-	default:		
-	return FALSE;
+	default:	
+	  return;
+	  //	return FALSE;
 	}
 	
 	switch (dst)
@@ -189,33 +206,29 @@ BOOL GFXBlendMode(enum BLENDFUNC src, enum BLENDFUNC dst)
 	case SRCALPHASAT:	
 
 		default:		
-		return FALSE;
+		return ;
 	}
 	glBlendFunc (sfactor, dfactor);
 	currBlendMode.sfactor = src;
 	currBlendMode.dfactor = dst;
-	return TRUE;
 }
 
-BOOL GFXPushBlendMode()
+void GFXPushBlendMode()
 {
 	blendstack.push(currBlendMode);
-	return TRUE;
 }
 
-BOOL GFXPopBlendMode()
+void GFXPopBlendMode()
 {
-	if(!blendstack.empty())
-	{
-		currBlendMode = blendstack.top();
-		GFXBlendMode(currBlendMode.sfactor, currBlendMode.dfactor);
-		blendstack.pop();
-		return TRUE;
-	}
-	else return FALSE;
+  if(!blendstack.empty())
+    {
+      currBlendMode = blendstack.top();
+      GFXBlendMode(currBlendMode.sfactor, currBlendMode.dfactor);
+      blendstack.pop();
+    }
 }
 
-BOOL GFXDepthFunc(enum DEPTHFUNC dfunc)
+void GFXDepthFunc(enum DEPTHFUNC dfunc)
 {
 	switch (dfunc)
 	{
@@ -237,11 +250,9 @@ BOOL GFXDepthFunc(enum DEPTHFUNC dfunc)
 	case ALWAYS:	glDepthFunc (GL_ALWAYS); 
 		break;
 	};
-	return TRUE;
-
 }
 
-BOOL /*GFXDRVAPI*/ GFXSelectTexcoordSet(int stage, int texset)
+void /*GFXDRVAPI*/ GFXSelectTexcoordSet(int stage, int texset)
 {
 	if (stage)
 	{
@@ -251,10 +262,9 @@ BOOL /*GFXDRVAPI*/ GFXSelectTexcoordSet(int stage, int texset)
 	{
 		GFXStage0 = texset;
 	}
-	return TRUE;
 }
 
-BOOL GFXSetTexFunc(int stage, int texset)
+GFXBOOL GFXSetTexFunc(int stage, int texset)
 {
 
 	if (stage)

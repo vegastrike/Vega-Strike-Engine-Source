@@ -95,6 +95,7 @@ vegastrike_SOURCES =				\
 	gl_state.cpp				\
 	gl_texture.cpp				\
 	gl_vertex_list.cpp			\
+	gl_quad_list.cpp			\
 	hashtable.h				\
 	hashtable.cpp				\
 	in.h					\

@@ -34,7 +34,7 @@ using std::priority_queue;
 
 #define GFX_MAX_LIGHTS 8
 int GFX_OPTIMAL_LIGHTS=4;
-BOOL GFXLIGHTING=FALSE;
+GFXBOOL GFXLIGHTING=GFXFALSE;
 //for OpenGL
 
 struct gfx_light_loc {///yay 32 bytes! 1 cache line
@@ -87,22 +87,21 @@ vector <gfx_light_data> * _llights_dat=NULL;
 float intensity_cutoff=.05;//something that would normally round down
 float optintense=.2;
 float optsat = .95;
-BOOL /*GFXDRVAPI*/ GFXSetCutoff (float ttcutoff) {
+GFXBOOL /*GFXDRVAPI*/ GFXSetCutoff (float ttcutoff) {
   if (ttcutoff<0) 
-    return FALSE;
+    return GFXFALSE;
   intensity_cutoff=ttcutoff;
-  return TRUE;
+  return GFXTRUE;
 }
-BOOL /*GFXDRVAPI*/ GFXSetOptimalIntensity (float intensity, float saturate) {
+void /*GFXDRVAPI*/ GFXSetOptimalIntensity (float intensity, float saturate) {
   optintense = intensity;
   optsat = saturate;
-  return TRUE;
 }
-BOOL /*GFXDRVAPI*/ GFXSetOptimalNumLights (int numLights) {
+GFXBOOL /*GFXDRVAPI*/ GFXSetOptimalNumLights (int numLights) {
   if (numLights>GFX_MAX_LIGHTS||numLights<0)
-    return FALSE;
+    return GFXFALSE;
   GFX_OPTIMAL_LIGHTS=numLights;
-  return TRUE;
+  return GFXTRUE;
 }
 
 
@@ -148,20 +147,23 @@ inline void SetLocalCompare (Vector x) {//does preprocessing of intensity for re
   }
 }
 
-BOOL /*GFXDRVAPI*/ GFXSetSeparateSpecularColor(BOOL spec) {
+GFXBOOL /*GFXDRVAPI*/ GFXSetSeparateSpecularColor(GFXBOOL spec) {
 #ifndef WIN32
 	if (spec) {
     glLightModeli (GL_LIGHT_MODEL_COLOR_CONTROL,GL_SEPARATE_SPECULAR_COLOR);
   }else {
     glLightModeli (GL_LIGHT_MODEL_COLOR_CONTROL,GL_SINGLE_COLOR);
+    return GFXFALSE;
   }
+#else
+	return GFXFALSE;
 #endif
-  return TRUE;
+	return GFXTRUE;
 }
-BOOL /*GFXDRVAPI*/ GFXCreateLightContext (int & con_number) {
-  static BOOL LightInit=FALSE;
+void /*GFXDRVAPI*/ GFXCreateLightContext (int & con_number) {
+  static GFXBOOL LightInit=GFXFALSE;
   if (!LightInit) {
-    LightInit = TRUE;
+    LightInit = GFXTRUE;
     glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER, 1);//don't want lighting coming from infinity....we have to take the hit due to sphere mapping matrix tweaking
     //
   }
@@ -172,17 +174,14 @@ BOOL /*GFXDRVAPI*/ GFXCreateLightContext (int & con_number) {
   _local_lights_dat.push_back (vector <gfx_light_data>());
   _llights_loc = &_local_lights_loc[con_number];
   _llights_dat = &_local_lights_dat[con_number];
-  
-  return TRUE;
 }
 
-BOOL /*GFXDRVAPI*/ GFXDeleteLightContext(int con_number) {
+void /*GFXDRVAPI*/ GFXDeleteLightContext(int con_number) {
 
   _local_lights_loc[con_number]=vector <gfx_light_loc>();
   _local_lights_dat[con_number]=vector <gfx_light_data>();
-  return TRUE;
 }
-BOOL /*GFXDRVAPI*/ GFXSetLightContext (int con_number) {
+void /*GFXDRVAPI*/ GFXSetLightContext (int con_number) {
   _currentContext = con_number;
   _llights_loc = &_local_lights_loc[con_number];
   _llights_dat = &_local_lights_dat[con_number];
@@ -196,23 +195,22 @@ BOOL /*GFXDRVAPI*/ GFXSetLightContext (int con_number) {
     GLLights[i]=-1;
     GLLightState[i]=0;
   }
-  return TRUE;
 }
 
-BOOL /*GFXDRVAPI*/ GFXLightContextAmbient (const GFXColor &amb) {
+GFXBOOL /*GFXDRVAPI*/ GFXLightContextAmbient (const GFXColor &amb) {
   if (_currentContext >=_ambient_light.size())
-    return FALSE;
+    return GFXFALSE;
   (_ambient_light[_currentContext])=amb;
   //  (_ambient_light[_currentContext])[1]=amb.g;
   //  (_ambient_light[_currentContext])[2]=amb.b;
   //  (_ambient_light[_currentContext])[3]=amb.a;
   float tmp[4]={amb.r,amb.g,amb.b,amb.a};
   glLightModelfv (GL_LIGHT_MODEL_AMBIENT,tmp);
-  return TRUE;
+  return GFXTRUE;
 }
 
 
-BOOL /*GFXDRVAPI*/ GFXCreateLight (int &light) {
+void /*GFXDRVAPI*/ GFXCreateLight (int &light) {
   for (light=0;light<_llights_dat->size();light++) {
     if ((*_llights_dat)[light].target==-2)
       break;
@@ -221,42 +219,40 @@ BOOL /*GFXDRVAPI*/ GFXCreateLight (int &light) {
     _llights_dat->push_back (gfx_light_data());
     _llights_loc->push_back (gfx_light_loc());
   }
-  return TRUE;
 }
-BOOL /*GFXDRVAPI*/ GFXDeleteLight (int light) {
+void /*GFXDRVAPI*/ GFXDeleteLight (int light) {
   if ((*_llights_dat)[light].target>=0) {
     GLLights[(*_llights_dat)[light].target]=-1;//ensure only valid lights are in the state
   }
   (*_llights_dat)[light].target=-2;
   (*_llights_dat)[light].enabled=false;
   (*_llights_loc)[light].intensity=-1;
-  return TRUE;
 }
 
 
 
-BOOL /*GFXDRVAPI*/ GFXEnableLight (int light) {
+GFXBOOL /*GFXDRVAPI*/ GFXEnableLight (int light) {
   //  assert (_llights);
   //  if (light<0||light>=_llights->size()) 
   //    return FALSE;
   if ((*_llights_dat)[light].target==-2) {
-    return FALSE;
+    return GFXFALSE;
   }
   (*_llights_dat)[light].enabled=true;
   (*_llights_loc)[light].intensity = fabs ((*_llights_loc)[light].intensity);
-  return TRUE;
+  return GFXTRUE;
 }
 
-BOOL /*GFXDRVAPI*/ GFXDisableLight (int light) {
+GFXBOOL /*GFXDRVAPI*/ GFXDisableLight (int light) {
   //  assert (_llights);
   //  if (light<0||light>=_llights->size()) 
   //    return FALSE;
   if ((*_llights_dat)[light].target==-2) {
-    return FALSE;
+    return GFXFALSE;
   }
   (*_llights_dat)[light].enabled=false;
   (*_llights_loc)[light].intensity =-fabs ((*_llights_loc)[light].intensity);
-  return TRUE;
+  return GFXTRUE;
 }
 
 void EnableExisting (unsigned int);
@@ -272,14 +268,14 @@ float AttenuateQ[GFX_MAX_LIGHTS];
 static float AttTmp[4];
 static float VecT[4];
 
-BOOL /*GFXDRVAPI*/ GFXPickLights (const float * transform) {
+void /*GFXDRVAPI*/ GFXPickLights (const float * transform) {
   //picks 1-5 lights to use
   // glMatrixMode(GL_MODELVIEW);
   //glPushMatrix();
   //float tm [16]={1,0,0,1000,0,1,0,1000,0,0,1,1000,0,0,0,1};
   //glLoadIdentity();
   //  GFXLoadIdentity(MODEL);
-  if (!GFXLIGHTING) return TRUE;
+  if (!GFXLIGHTING) return ;
   Vector loc (transform[12],transform[13],transform[14]);
   SetLocalCompare (loc);
   newQsize=0;
@@ -363,7 +359,6 @@ BOOL /*GFXDRVAPI*/ GFXPickLights (const float * transform) {
     }
   }
   //glPopMatrix();
-  return TRUE;
 }
 
 
@@ -595,12 +590,11 @@ void EnableExistingAttenuated (unsigned int light, float AttenFactor) {
   glEnable (GL_LIGHT0+gl_targ);
   GLLightState[gl_targ]=2;
   (*_llights_dat)[light].changed=0;
-  return;
 }
 
 //minor differences between d3d and gl direction and position, will be dealt with if need be
 
-BOOL /*GFXDRVAPI*/ GFXSetLightProperties(gfx_light_data &curlight,gfx_light_loc &curlightloc, enum LIGHT_TARGET lighttarg, const GFXColor &color) {
+GFXBOOL /*GFXDRVAPI*/ GFXSetLightProperties(gfx_light_data &curlight,gfx_light_loc &curlightloc, enum LIGHT_TARGET lighttarg, const GFXColor &color) {
   curlight.changed |=lighttarg;
   if (color.r==color.g&&color.g==color.b&&color.b==0) {
     curlight.options &= (~lighttarg);
@@ -648,7 +642,7 @@ BOOL /*GFXDRVAPI*/ GFXSetLightProperties(gfx_light_data &curlight,gfx_light_loc 
   }
   if (curlight.target==-2) {
     curlightloc.intensity=-1;
-    return FALSE;
+    return GFXFALSE;
   }else {
     if (lighttarg==AMBIENT||lighttarg==SPECULAR||lighttarg==DIFFUSE) {
       curlightloc.intensity=(curlight.specular[0]+curlight.specular[1]+curlight.specular[2]+curlight.diffuse[0]+curlight.diffuse[1]+curlight.diffuse[2]+curlight.ambient[0]+curlight.ambient[1]+curlight.ambient[2])*.333333333333333333333333;//calculate new cuttof val for light 'caching'
@@ -656,17 +650,17 @@ BOOL /*GFXDRVAPI*/ GFXSetLightProperties(gfx_light_data &curlight,gfx_light_loc 
 	curlightloc.intensity=-curlightloc.intensity;
     }
   }
-  return TRUE;
+  return GFXTRUE;
 }
 
-BOOL /*GFXDRVAPI*/ GFXSetLight(int light, enum LIGHT_TARGET lightarg, const GFXColor & color) {
+GFXBOOL /*GFXDRVAPI*/ GFXSetLight(int light, enum LIGHT_TARGET lightarg, const GFXColor & color) {
   return GFXSetLightProperties ((*_llights_dat)[light],(*_llights_loc)[light], lightarg ,color);
 }
-BOOL /*GFXDRVAPI*/ GFXSetPower (int light, float power) {
+GFXBOOL /*GFXDRVAPI*/ GFXSetPower (int light, float power) {
   if (light < _llights_dat->size()&&light >=0) {
     (*_llights_dat)[light].exp = power;
   } else
-    return FALSE;
-  return TRUE;
+    return GFXFALSE;
+  return GFXTRUE;
 }
 

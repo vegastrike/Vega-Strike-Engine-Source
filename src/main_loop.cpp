@@ -31,8 +31,8 @@ using namespace std;
 
 extern Texture *logo;
 
-BOOL capture;
-BOOL quit = FALSE;
+GFXBOOL capture;
+GFXBOOL quit = GFXFALSE;
 
 /*11-7-98
  *Cool shit happened when a position rotation matrix from a unit was used for the drawing of the background... not very useful though
