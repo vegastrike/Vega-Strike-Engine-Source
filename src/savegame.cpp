@@ -67,6 +67,7 @@ void WriteSaveGame (const char *systemname, const Vector &FP, float credits) {
       FighterPos=-FP;
     }
     fprintf (fp,"%s^%f %f %f %f",systemname,credits,FighterPos.i,FighterPos.j,FighterPos.k);
+    SetSavedCredits (credits);
     while (myvec.empty()==false) {
       WriteSavedUnit (fp,myvec.back());
       delete myvec.back();
@@ -129,7 +130,7 @@ vector<SavedUnits> ParseSaveGame (const string filename, string &FSS, string ori
     originalsystem = ForceStarSystem;
     FSS = ForceStarSystem;
   }
-  savedcredits =credits;
+  SetSavedCredits(credits);
   return mysav;
 }
 
