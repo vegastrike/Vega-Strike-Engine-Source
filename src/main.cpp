@@ -203,6 +203,7 @@ void bootstrap_main_loop () {
     _Universe->Init (mysystem,pos,planetname);
     bootstrap_draw (SplashScreen);
     createObjects();
+    if(!savegamefile.empty()){
     if (setplayerloc&&fighters) {
       if (fighters[0]) {
 	fighters[0]->SetPosition (Vector (0,0,0));
@@ -211,6 +212,7 @@ void bootstrap_main_loop () {
     while (!savedun.empty()) {
       AddUnitToSystem (&savedun.back());
       savedun.pop_back();
+    }
     }
     InitializeInput();
 

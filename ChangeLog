@@ -1,3 +1,9 @@
+2002-02-16 Alexander Rawass <alexannika@users.sourceforge.net>
+
+	* modified main.cpp, so that the savegame is only loaded if
+	  there's a savegame variable
+	
+
 2002-02-13 Daniel Horn <hellcatv@hotmail.com>
 	* Made genearted light maps save in home directory
 	* Made universes searched for in home directory
