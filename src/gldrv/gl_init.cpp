@@ -97,6 +97,7 @@ void init_opengl_extensions()
 	const unsigned char * extensions = glGetString(GL_EXTENSIONS);
 
 	(void) fprintf(stderr, "OpenGL Extensions supported: %s\n", extensions);
+#if !defined(IRIX)
     if (glutExtensionSupported( "GL_EXT_compiled_vertex_array")&&XMLSupport::parse_bool (vs_config->getVariable ("graphics","LockVertexArrays","true"))) {
 #if defined(__APPLE__) || defined(MACOSX)
         glLockArraysEXT_p = &glLockArraysEXT;
@@ -109,6 +110,9 @@ void init_opengl_extensions()
 #endif
 	(void) fprintf(stderr, "OpenGL::GL_EXT_compiled_vertex_array supported\n");
     } else {
+#else
+    {
+#endif
 	glLockArraysEXT_p = NULL;
 	glUnlockArraysEXT_p = NULL;
 	(void) fprintf(stderr, "OpenGL::GL_EXT_compiled_vertex_array unsupported\n");
