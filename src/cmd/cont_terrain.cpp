@@ -337,7 +337,7 @@ void ContinuousTerrain::Collide (Unit * un, Matrix t) {
 	}
       }
       if (autocol) {
-	static float mass =  XMLSupport::parse_float (vs_config->getVariable ("terrain","mass","1000"));
+	static float mass = 1000;// XMLSupport::parse_float (vs_config->getVariable ("terrain","mass","1000"));
 	un->ApplyForce (bigNormal*.4*un->GetMass()*fabs(bigNormal.Dot ((un->GetVelocity()/SIMULATION_ATOM))));
 	un->ApplyDamage (un->Position().Cast()-bigNormal*un->rSize(),-bigNormal,  .5*fabs(bigNormal.Dot(un->GetVelocity()))*mass*SIMULATION_ATOM,un,GFXColor(1,1,1,1),NULL);
 	

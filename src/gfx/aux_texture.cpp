@@ -265,7 +265,7 @@ Texture::Texture(const char * FileName, int stage, enum FILTER mipmap, enum TEXT
 	if (err>Ok)
 	{
 		FileNotFound(texfilename);
-      	VSFileSystem::vs_fprintf (stderr, "%s, not found",FileName);
+      	VSFileSystem::vs_fprintf (stderr, "\n%s, not found\n",FileName);
 		if (err2<=Ok) {
 			f2.Close();
 		}

@@ -240,14 +240,8 @@ void Universe::Generate2( StarSystem * ss)
 
   pushActiveStarSystem(ss);
   for (int tume=0;tume<=6;++tume) {
-    VSFileSystem::vs_fprintf (stderr,"star system ex ai\n");
-    fflush(stderr);
     ss->ExecuteUnitAI();
-    VSFileSystem::vs_fprintf (stderr,"star system up phys\n");
-    fflush(stderr);
     ss->UpdateUnitPhysics(true);    
-    VSFileSystem::vs_fprintf (stderr,"star system done up phys\n");
-    fflush(stderr);
   }
   // notify the director that a new system is loaded (gotta have at least one active star system)
   StarSystem *old_script_system=script_system;
@@ -258,9 +252,6 @@ void Universe::Generate2( StarSystem * ss)
   for (unsigned int i=0;i<adjacent.size();i++) {
     VSFileSystem::vs_fprintf (stderr,"\n Next To: %s",adjacent[i].c_str());
     vector <std::string> adj = getAdjacentStarSystems(adjacent[i]);
-    for (unsigned int j=0;j<adj.size();j++) {
-      VSFileSystem::vs_fprintf (stderr,"\n\tNext To %s",adj[j].c_str()); 
-    }
   }
   static bool first=true;
   if (!first) {

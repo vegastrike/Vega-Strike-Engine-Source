@@ -281,7 +281,6 @@ void Planet::InitPlanet(QVector x,QVector y,float vely,const Vector & rotvel, fl
   static float bodyradius = XMLSupport::parse_float(vs_config->getVariable ("graphics","star_body_radius",".33"));
   if (lights_num){
     radius*=bodyradius;
-    VSFileSystem::vs_fprintf (stderr,"scaling %s",filename);
   }
   inside =false;
   curr_physical_state.position = prev_physical_state.position=cumulative_transformation.position=orbitcent+x;

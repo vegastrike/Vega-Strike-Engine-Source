@@ -392,6 +392,7 @@ void	NetServer::start(int argc, char **argv)
 
 	delete CONFIGFILE;
 	delete vs_config;
+        vs_config=NULL;
 	this->closeAllSockets();
 }
 

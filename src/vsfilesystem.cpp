@@ -27,8 +27,14 @@ struct dirent { char d_name[1]; };
 
 using std::map;
 
-#define VSFS_DEBUG
 
+int VSFS_DEBUG() {
+  if (vs_config) {
+    static bool vs_debug = XMLSupport::parse_bool(vs_config->getVariable("general","debug_fs","0"));
+    return vs_debug;
+  }
+  return 0;
+}
 char *CONFIGFILE;
 char pwd[65536];
 //extern int vfscanf( FILE * fp, const char * format, va_list arglist) ;
@@ -287,27 +293,30 @@ namespace VSFileSystem
 					output += "... NOT FOUND\n\tTry loading : "+fullpath;
 					fp = fopen( fullpath.c_str(), mode);
 				}
-			#ifdef VSFS_DEBUG
-				if( fp)
-					cerr<<fullpath<<" SUCCESS !!!"<<endl;
-				else
-					cerr<<output<<" NOT FOUND !!!"<<endl;
-			#endif
+                                if (VSFS_DEBUG()) {
+                                  if( fp){
+                                    if (VSFS_DEBUG()>2)
+                                      cerr<<fullpath<<" SUCCESS !!!"<<endl;
+                                  }else {
+                                    cerr<<output<<" NOT FOUND !!!"<<endl;
+                                  }
+                                }
 			}
-		#ifdef VSFS_DEBUG
 			else
 			{
 				fp = fopen( fullpath.c_str(), mode);
 				if( fp)
 				{
+                                  if (VSFS_DEBUG()>2) 
 					cerr<<fullpath<<" opened for writing SUCCESS !!!"<<endl;
 				}
 				else
 				{
-					cerr<<fullpath<<" FAILED !!!"<<endl;
+                                  if (VSFS_DEBUG())
+                                    cerr<<fullpath<<" FAILED !!!"<<endl;
 				}
 			}
-		#endif
+		
 			return fp;
 
 		return NULL;
@@ -595,6 +604,7 @@ namespace VSFileSystem
 
 		// Delete the default config in order to reallocate it with the right one (if it is a mod)
 		delete vs_config;
+                vs_config=NULL;
 		char * conffile = new char[config_file.length()+1];
 		conffile[config_file.length()] = 0;
 		memcpy( conffile, config_file.c_str(), config_file.length());
@@ -1170,13 +1180,13 @@ namespace VSFileSystem
 			}
 		}
 
-	#ifdef VSFS_DEBUG
+                if (VSFS_DEBUG()>1) {
 		//cerr<<failed<<" - VOLUME TYPE="<<isin_bigvolumes<<endl;
-		if( isin_bigvolumes>VSFSNone)
-			cerr<<failed<<" - INDEX="<<found<<endl<<endl;
-		else
+                  if( isin_bigvolumes>VSFSNone)
+			 cerr<<failed<<" - INDEX="<<found<<endl<<endl;
+                  else
 			cerr<<failed<<endl;
-	#endif
+                }
 		if( found>=0)
 		{
 			if( (type==SystemFile && i==0)||(type==SoundFile/*right now only allow shared ones?!*/ ) /* Rootdir[i]==homedir*/ )
@@ -1317,8 +1327,9 @@ namespace VSFileSystem
 		failed="";
 
 		VSError err = Ok;
-
-		cerr<<"Loading a " << type << " : "<<file<<endl;
+                if (VSFS_DEBUG()) {
+                  cerr<<"Loading a " << type << " : "<<file<<endl;
+                }
 	if( type < ZoneBuffer || type==UnknownFile) // It is a "classic file"
 	{
 		if( !UseVolumes[type])
@@ -1362,11 +1373,11 @@ namespace VSFileSystem
 				}
 				if( found<0)
 				{
-			#ifdef VSFS_DEBUG
-					cerr<<failed<<endl;
-			#endif
-					this->valid = false;
-					err = FileNotFound;
+                                  if (VSFS_DEBUG()) {
+                                    cerr<<failed<<endl;
+                                  }
+                                  this->valid = false;
+                                  err = FileNotFound;
 				}
 				else
 				{
@@ -1376,7 +1387,8 @@ namespace VSFileSystem
 						VSExit(1);
 					}
 					this->valid = true;
-					cerr<<filestr<<" SUCCESS !!!"<<endl;
+                                        if (VSFS_DEBUG()>1)
+                                          cerr<<filestr<<" SUCCESS !!!"<<endl;
 				}
 			}
 			else
@@ -1434,11 +1446,11 @@ namespace VSFileSystem
 				current_path.push_back( this->rootname);
 				current_subdirectory.push_back( this->subdirectoryname);
 				current_type.push_back( this->alt_type);
-		#ifdef VSFS_DEBUG
-				cerr<<endl<<"BEGINNING OF ";
-				DisplayType( type);
-				cerr<<endl;
-		#endif
+                                if (VSFS_DEBUG()>1) {
+                                  cerr<<endl<<"BEGINNING OF ";
+                                  DisplayType( type);
+                                  cerr<<endl;
+                                }
 			}
 		}
 	}
@@ -1892,11 +1904,11 @@ namespace VSFileSystem
 			current_path.pop_back();
 			current_subdirectory.pop_back();
 			current_type.pop_back();
-		#ifdef VSFS_DEBUG
-			cerr<<"END OF ";
-			DisplayType( this->file_type);
-			cerr<<endl<<endl;
-		#endif
+                        if (VSFS_DEBUG()>2) {
+                          cerr<<"END OF ";
+                          DisplayType( this->file_type);
+                          cerr<<endl<<endl;
+                        }
 		}
 		if( !UseVolumes[file_type] || this->volume_type==VSFSNone || file_mode!=ReadOnly)
 		{

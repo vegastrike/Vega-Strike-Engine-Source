@@ -593,7 +593,11 @@ void GameVegaConfig::checkBind(configNode *node){
 	//cout << "Bound joy= " << joystick_nr << " button= " << button_nr << "to " << cmdstr << endl;
 	}
 	else{
-	  cout << "refusing to bind command to joystick (joy-nr too high)" << endl;
+          static bool first=true;
+          if (first) {
+            cout << "\nrefusing to bind command to joystick (joy-nr too high)" << endl;
+            first=false;
+          }
 	}
       }
     }

@@ -142,6 +142,7 @@ void    AccountServer::start()
 
     delete CONFIGFILE;
     delete vs_config;
+    vs_config=NULL;
     Network->disconnect( "Shutting down.", true );
 }
 

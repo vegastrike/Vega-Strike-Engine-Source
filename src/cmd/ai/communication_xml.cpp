@@ -130,8 +130,7 @@ void FSM::LoadXML(const char * filename) {
  using namespace CommXML;
  using namespace VSFileSystem;
  unitlevel=0;
-  //const int chunk_size = 16384;
-  cout << "CommXML:LoadXML " << filename << endl;
+  //const int chunk_size = 16384; 
   //FILE * inFile = VSFileSystem::vs_open (filename, "r");
   VSFile f;
   VSError err = f.OpenReadOnly( filename, CommFile);

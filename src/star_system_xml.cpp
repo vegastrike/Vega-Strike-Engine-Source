@@ -383,7 +383,6 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
       case STARS:
       case STARSPREAD:
       case FADESTARS:
-		  VSFileSystem::vs_fprintf (stderr,"The System XML Tag %s is deprecated\n",(*iter).name.c_str());
 	break;
       case NAME:
 	this->name = new char [strlen((*iter).value.c_str())+1];
@@ -1021,7 +1020,6 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
 	break;
       case NAME:
 	fullname=(*iter).value;
-	cout << "\nFOUND unit name " << fullname << endl;
 	break;
       case XFILE:
 	delete []filename;

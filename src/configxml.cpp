@@ -162,8 +162,8 @@ void VegaConfig::doVar(configNode *node){
   string value=node->attr_value("value");
 
   //  cout << "checking var " << name << " value " << value << endl;
-  if(name.empty() || value.empty()){
-    cout << "no name or value given for variable" << endl;
+  if(name.empty()){
+    cout << "no name given for variable " << name << " " << value<< " "<<endl;
   }
 }
 
@@ -318,9 +318,17 @@ string VegaConfig::getVariable(configNode *section,string name,string defaultval
       return (cnode)->attr_value("value");
     }
   }
-
-  cout << "WARNING: no var named " << name << " in section " << section->attr_value("name") << " using default: " << defaultval << endl;
-
+  static bool foundshouldwarn=false;
+  static bool shouldwarn=true;
+  if (!foundshouldwarn) {
+    if (name!="debug_config") {
+      shouldwarn=XMLSupport::parse_bool(getVariable("general","debug_config","true"));
+      foundshouldwarn=true;
+    }
+  }
+  if (shouldwarn) {
+    cout << "WARNING: no var named " << name << " in section " << section->attr_value("name") << " using default: " << defaultval << endl;
+  }
   return defaultval; 
 }
 

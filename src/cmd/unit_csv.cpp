@@ -430,7 +430,6 @@ void AddSounds(Unit * thus, string sounds) {
     }
     if (thus->sound->engine==-1) {
       thus->sound->engine=AUDCreateSound (vs_config->getVariable ("unitaudio","afterburner","sfx10.wav"),true);
-	  cout<<"default engine sound : sfx10.wav - thus->sound->engine : "<<thus->sound->engine<<endl;
     }
     if (thus->sound->shield==-1) {
       thus->sound->shield=AUDCreateSound (vs_config->getVariable ("unitaudio","shield","sfx09.wav"),false);

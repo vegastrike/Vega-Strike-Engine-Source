@@ -276,9 +276,6 @@ void Mission::checkVar(easyDomNode *node){
 
   string name=node->attr_value("name");
   string value=node->attr_value("value");
-  if(name.empty() || value.empty()){
-    cout << "no name or value given for variable" << endl;
-  }
 }
 
 /* *********************************************************** */
@@ -468,7 +465,7 @@ string Mission::getVariable(string name,string defaultval){
     }
   }
 
-  cout << "WARNING: no variable named " << name << endl;
+  //cout << "WARNING: no variable named " << name << endl;
 
   return defaultval;
  

@@ -112,14 +112,14 @@ GFXBOOL /*GFXDRVAPI*/ GFXCreateTexture(int width, int height, TEXTUREFORMAT text
   *handle = 0;
   while (*handle<textures.size()) {
     if (!textures[*handle].alive){
-      VSFileSystem::vs_fprintf (stderr,"got dead tex");
+      //VSFileSystem::vs_fprintf (stderr,"got dead tex");
       break;
     }else{
       (*handle)++;
     }
   }
   if ((*handle)==textures.size()) {
-    VSFileSystem::vs_fprintf (stderr,"!");
+    VSFileSystem::vs_fprintf (stderr,"x");
     textures.push_back(GLTexture());
     textures.back().palette=NULL;
     textures.back().alive=GFXTRUE;
@@ -137,13 +137,13 @@ GFXBOOL /*GFXDRVAPI*/ GFXCreateTexture(int width, int height, TEXTUREFORMAT text
     VSFileSystem::vs_fprintf (stderr, "stage %d, wid %d, hei %d",texturestage,width,height);
     break;
   }
-  VSFileSystem::vs_fprintf (stderr,"!");  
+  VSFileSystem::vs_fprintf (stderr,"y");  
   textures[*handle].name = *handle+1; //for those libs with stubbed out handle gen't
   //VSFileSystem::vs_fprintf (stderr,"Texture Handle %d",*handle);
   textures[*handle].alive = GFXTRUE;
   textures[*handle].texturestage = texturestage;
   textures[*handle].mipmapped = mipmap;
-  VSFileSystem::vs_fprintf (stderr,"!");
+  VSFileSystem::vs_fprintf (stderr,"z");
   glGenTextures (1,&textures[*handle].name);
   glBindTexture (textures[*handle].targets,textures[*handle].name);
   activetexture[texturestage]=*handle;
@@ -175,7 +175,7 @@ GFXBOOL /*GFXDRVAPI*/ GFXCreateTexture(int width, int height, TEXTUREFORMAT text
       ConvertPalette(textures[*handle].palette, (unsigned char *)palette);
     }
   textures[*handle].textureformat = GetUncompressedTextureFormat(textureformat);
-  VSFileSystem::vs_fprintf (stderr,"!");
+  VSFileSystem::vs_fprintf (stderr,"w");
   //  GFXActiveTexture(0);
   return GFXTRUE;
 }

@@ -1212,7 +1212,6 @@ using namespace UnitXML;
     }
     if (sound->engine==-1) {
       sound->engine=AUDCreateSound (vs_config->getVariable ("unitaudio","afterburner","sfx10.wav"),true);
-	  cout<<"default engine sound : sfx10.wav - sound->engine : "<<sound->engine<<endl;
     }
     if (sound->shield==-1) {
       sound->shield=AUDCreateSound (vs_config->getVariable ("unitaudio","shield","sfx09.wav"),false);
