@@ -1,19 +1,20 @@
 Name: vegastrike
-Summary: Vegastrike - a free 3D space fight simulator
-Version: 0.2.9.4
-Release: 2
+Summary: Vegastrike - a free 3D space fight simulator (program files)
+Version: 0.3
+Release: gcc3.2
 Copyright: GPL
-Group: X11/GL/Games
+Group: Amusements/Games
 Source: vegastrike.tar.gz
-Packager: Jonathan Hunt <jhuntnz@users.sourceforge.net>
+URL: http://vegastrike.sourceforge.net
+Packager: Daniel Aleksandrow <dandandaman@users.sourceforge.net>
 BuildRoot: /tmp/vsbuild
 Prefix: /usr/local
-Icon: vegastrike.xpm
 Provides: vegastrike
-Requires: vegastrike-data 
 
 %description
 Vega Strike is a GPL 3d OpenGL Action RPG space sim for Windows/Linux that allows a player to trade and bounty hunt in the spirit of Elite. You start in an old beat up Wayfarer cargo ship, with endless possibility before you and just enough cash to scrape together a life. Yet danger lurks in the space beyond.
+
+this archive contains the program files necessary to play Vegastrike.
 
 %prep
 rm -rf $RPM_BUILD_ROOT
@@ -21,16 +22,23 @@ rm -rf $RPM_BUILD_ROOT
 %setup -n vegastrike
 
 %build
-./configure --prefix=$RPM_BUILD_ROOT/usr/local 
+aclocal
+autoconf
+automake -a --add-missing
+./configure
 make
 
 %install
-make install
+mkdir -p $RPM_BUILD_ROOT/usr/local/bin
 cp vssetup $RPM_BUILD_ROOT/usr/local/bin/
-mkdir $RPM_BUILD_ROOT/usr/local/share
-mkdir $RPM_BUILD_ROOT/usr/local/share/vegastrike
-mkdir $RPM_BUILD_ROOT/usr/local/share/vegastrike/data
-cp $RPM_BUILD_ROOT/usr/local/bin/soundserver $RPM_BUILD_ROOT/usr/local/share/vegastrike/data/
+cp vslauncher $RPM_BUILD_ROOT/usr/local/bin/
+cp src/networking/soundserver $RPM_BUILD_ROOT/usr/local/bin/
+cp src/vegastrike $RPM_BUILD_ROOT/usr/local/bin/
+mkdir -p $RPM_BUILD_ROOT/usr/local/games/vegastrike/data
+cp $RPM_BUILD_ROOT/usr/local/bin/soundserver $RPM_BUILD_ROOT/usr/local/games/vegastrike/data/
+mkdir -p $RPM_BUILD_ROOT/usr/local/doc/vegastrike/
+cp README $RPM_BUILD_ROOT/usr/local/doc/vegastrike/
+
 %clean
 rm -rf $RPM_BUILD_ROOT
 
@@ -39,4 +47,5 @@ rm -rf $RPM_BUILD_ROOT
 /usr/local/bin/vslauncher
 /usr/local/bin/vssetup
 /usr/local/bin/soundserver
-/usr/local/share/vegastrike/data/soundserver
+/usr/local/games/vegastrike/data/soundserver
+/usr/local/doc/vegastrike/README
