@@ -6,16 +6,18 @@
 #define SAFE_COLLIDE_DEBUG
 
 const int tablehuge=10;
+const int coltableacc = 200;
+const int coltablesize=20;
 class CollideTable {
  public:
-  Hashtable3d <LineCollide*, char[20],char[200], char [tablehuge]> c;
+  Hashtable3d <LineCollide*, char[coltablesize],char[coltableacc], char [tablehuge]> c;
 };
 
-void AddCollideQueue(LineCollide & );
+void AddCollideQueue(LineCollide &,StarSystem * ss);
 bool TableLocationChanged (const Vector &, const Vector &);
 bool TableLocationChanged (const LineCollide &, const Vector &, const Vector &);
-void KillCollideTable (LineCollide* lc);
-bool EradicateCollideTable (LineCollide* lc);
+void KillCollideTable (LineCollide* lc, StarSystem * ss);
+bool EradicateCollideTable (LineCollide* lc, StarSystem * ss);
 
 class csRapidCollider;
 class BSPTree;

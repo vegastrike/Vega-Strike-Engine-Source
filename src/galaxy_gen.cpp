@@ -765,11 +765,12 @@ string getStarSystemSector (string in) {
   char * tmp = strdup (in.c_str());
   char * freer=tmp;
   bool found=false;
-  while (*tmp++) {
+  while (*tmp) {
     if (*tmp=='/') {
       found=true;
       break;
     }
+    tmp++;
   }
   if (*tmp=='/') {
     *tmp='\0';

@@ -171,6 +171,7 @@ class Unit {
   void endElement(const std::string &name);
 
  protected:
+  StarSystem * activeStarSystem;//the star system I'm in
   bool BuyCargo (unsigned int i, unsigned int quantity, Unit * buyer, float &creds);
   bool BuyCargo (const std::string &cargo,unsigned int quantity, Unit * buyer, float & creds);
 
@@ -455,6 +456,7 @@ public:
   static void ProcessDeleteQueue();
   ///Split this mesh with into 2^level submeshes at arbitrary planes
   void Split (int level);
+  bool TransferUnitToSystem (StarSystem *NewSystem);
   void TransferUnitToSystem (unsigned int whichJumpQueue, class StarSystem *&previouslyActiveStarSystem, bool DoSightAndSound);
   ///Initialize many of the defaults inherant to the constructor
   void Init();
@@ -465,6 +467,7 @@ public:
   bool Explode(bool draw, float timeit);
   ///explodes then deletes
   void Destroy();
+  const LineCollide &GetCollideInfo () {return CollideInfo;}
   bool InRange (Unit *target, Vector &localcoord) const;
   ///how visible the ship is from 0 to 1
   float CloakVisible () const;

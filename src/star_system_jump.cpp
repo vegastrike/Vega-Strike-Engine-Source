@@ -111,16 +111,30 @@ static void VolitalizeJumpAnimation (const int ani) {
     AnimationNulls.push_back (ani);
   }
 } 
+bool Unit::TransferUnitToSystem (StarSystem * Current) {
+  if (activeStarSystem->RemoveUnit (this)) {
+    this->RemoveFromSystem();  
+    this->Target(NULL);
+    Current->AddUnit (this);    
+
+    activeStarSystem = Current;
+    return true;
+  }else {
+    fprintf (stderr,"Fatal Error: cannot remove starship from critical system");
+  }
+  return false;
+}
 void Unit::TransferUnitToSystem (unsigned int kk, StarSystem * &savedStarSystem, bool dosightandsound) {
-    if (pendingjump[kk]->orig->RemoveUnit (this)) {
+  if (pendingjump[kk]->orig==activeStarSystem||activeStarSystem==NULL) {
+    if (TransferUnitToSystem (pendingjump[kk]->dest)) {
 #ifdef JUMP_DEBUG
       fprintf (stderr,"Unit removed from star system\n");
 #endif
 
       ///eradicating from system, leaving no trace
-      this->RemoveFromSystem();
-      pendingjump[kk]->dest->AddUnit (this);
-      this->Target(NULL);
+      TransferUnitToSystem(pendingjump[kk]->dest);
+
+
       UnitCollection::UnitIterator iter = pendingjump[kk]->orig->getUnitList().createIterator();
       Unit * unit;
       while((unit = iter.current())!=NULL) {
@@ -134,14 +148,13 @@ void Unit::TransferUnitToSystem (unsigned int kk, StarSystem * &savedStarSystem,
       if (an_active_cockpit!=NULL) {
 	an_active_cockpit->activeStarSystem=pendingjump[kk]->dest;
       }
-      if (this==_Universe->AccessCockpit()->GetParent()) {//originally fighters[0] not sure if hti sis the right solution
-#ifdef JUMP_DEBUG
-      fprintf (stderr,"Unit is the active player character...changing scene graph\n");
-#endif
+      if (this==_Universe->AccessCockpit()->GetParent()) {
+	fprintf (stderr,"Unit is the active player character...changing scene graph\n");
 	savedStarSystem->SwapOut();
 	savedStarSystem = pendingjump[kk]->dest;
 	pendingjump[kk]->dest->SwapIn();
       }
+      
       _Universe->setActiveStarSystem(pendingjump[kk]->dest);
       vector <Unit *> possibilities;
       iter = pendingjump[kk]->dest->getUnitList().createIterator();
@@ -176,6 +189,9 @@ void Unit::TransferUnitToSystem (unsigned int kk, StarSystem * &savedStarSystem,
 	}
       }
     }
+  }else {
+    fprintf (stderr,"Already jumped\n");
+  }
 }
 
 void StarSystem::DrawJumpStars() {

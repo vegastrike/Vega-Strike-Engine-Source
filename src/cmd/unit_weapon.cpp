@@ -264,7 +264,35 @@ void Unit::TargetTurret (Unit * targ) {
   }
 }
 void Unit::Target (Unit *targ) {
-  computer.target.SetUnit(targ);
+  if (!(activeStarSystem==NULL||activeStarSystem==_Universe->activeStarSystem())) {
+    computer.target.SetUnit(NULL);
+    return;
+    fprintf (stderr,"bad target system");
+    const int BADTARGETSYSTEM=0;
+    assert (BADTARGETSYSTEM);
+  }
+  if (targ) {
+    if (targ->activeStarSystem==_Universe->activeStarSystem()||targ->activeStarSystem==NULL) {
+      computer.target.SetUnit(targ);
+    }else {
+      if (jump.drive!=-1) {
+	un_iter i= _Universe->activeStarSystem()->getUnitList().createIterator();
+	Unit * u;
+	for (;(u=*i)!=NULL;i++) {
+	  if (!u->GetDestinations().empty()) {
+	    if (std::find (u->GetDestinations().begin(),u->GetDestinations().end(),targ->activeStarSystem->getFileName())!=u->GetDestinations().end()) {
+	      Target (u);
+	      ActivateJumpDrive(0);
+	    }
+	  }
+	}
+      }else {
+	computer.target.SetUnit(NULL);
+      }
+    }
+  }else {
+    computer.target.SetUnit(NULL);
+  }
 }
 void Unit::VelocityReference (Unit *targ) {
   computer.velocity_ref.SetUnit(targ);

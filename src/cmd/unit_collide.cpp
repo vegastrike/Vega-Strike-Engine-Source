@@ -45,14 +45,14 @@ bool TableLocationChanged (const Vector & Mini,const Vector & minz) {
 bool TableLocationChanged (const LineCollide &lc, const Vector &minx, const Vector & maxx) {
   return TableLocationChanged (lc.Mini,minx) || TableLocationChanged (lc.Maxi,maxx);
 }
-void KillCollideTable (LineCollide * lc) {
-  _Universe->activeStarSystem()->collidetable->c.Remove (lc, lc);
+void KillCollideTable (LineCollide * lc,StarSystem * ss) {
+  ss->collidetable->c.Remove (lc, lc);
 }
-bool EradicateCollideTable (LineCollide * lc) {
-  return _Universe->activeStarSystem()->collidetable->c.Eradicate (lc);
+bool EradicateCollideTable (LineCollide * lc, StarSystem * ss) {
+  return ss->collidetable->c.Eradicate (lc);
 }
-void AddCollideQueue (LineCollide &tmp) {
-  _Universe->activeStarSystem()->collidetable->c.Put (&tmp,&tmp);
+void AddCollideQueue (LineCollide &tmp,StarSystem * ss) {
+  ss->collidetable->c.Put (&tmp,&tmp);
 }
 void Unit::SetCollisionParent (Unit * name) {
   assert (0); //deprecated... many less collisions with subunits out of the table
@@ -66,7 +66,7 @@ void Unit::SetCollisionParent (Unit * name) {
 void Unit::RemoveFromSystem() {
 #if (defined SAFE_COLLIDE_DEBUG) || (defined  UNSAFE_COLLIDE_RELEASE) 
   if (CollideInfo.object.u!=NULL) {
-    KillCollideTable (&CollideInfo);
+    KillCollideTable (&CollideInfo,activeStarSystem);
     CollideInfo.object.u = NULL;
   }
 #endif
@@ -75,7 +75,7 @@ void Unit::RemoveFromSystem() {
 #ifdef SAFE_COLLIDE_DEBUG
     if (
 #endif
-	EradicateCollideTable (&CollideInfo)
+	EradicateCollideTable (&CollideInfo,activeStarSystem)
 #ifdef SAFE_COLLIDE_DEBUG 
 	) {
       fprintf (stderr,"RECOVERED from (formerly) fatal, currently nonfatal error with unit deletion\n");      
@@ -83,6 +83,16 @@ void Unit::RemoveFromSystem() {
 #else
     ;
 #endif
+#endif
+#ifdef SAFE_COLLIDE_DEBUG
+    for (unsigned int i=0;i<_Universe->star_system.size();i++) {
+      _Universe->pushActiveStarSystem(_Universe->star_system[i]);
+    
+    if (EradicateCollideTable (&CollideInfo,_Universe->star_system[i])) {
+      fprintf (stderr,"VERY BAD ERROR FATAL! 0x%x %s",this,this->name.c_str());
+    }
+    _Universe->popActiveStarSystem();
+    }
 #endif
   CollideInfo.object.u=NULL;
   int i;
@@ -93,20 +103,26 @@ void Unit::RemoveFromSystem() {
       }
     }
   }
+  activeStarSystem=NULL;
 }
 
 void Unit::UpdateCollideQueue () {
+  if (activeStarSystem==NULL) {
+    activeStarSystem = _Universe->activeStarSystem();
+  } else {
+    assert (activeStarSystem==_Universe->activeStarSystem());
+  }
   CollideInfo.lastchecked =NULL;//reset who checked it last in case only one thing keeps crashing with it;
   Vector Puffmin (Position().i-radial_size,Position().j-radial_size,Position().k-radial_size);
   Vector Puffmax (Position().i+radial_size,Position().j+radial_size,Position().k+radial_size);
   if (CollideInfo.object.u == NULL||TableLocationChanged(CollideInfo,Puffmin,Puffmax)) {//assume not mutable
     if (CollideInfo.object.u!=NULL) {
-      KillCollideTable(&CollideInfo);
+      KillCollideTable(&CollideInfo,activeStarSystem);
     }
     CollideInfo.object.u = this;
     CollideInfo.Mini= Puffmin;
     CollideInfo.Maxi=Puffmax;
-    AddCollideQueue (CollideInfo);
+    AddCollideQueue (CollideInfo,activeStarSystem);
   } else {
     CollideInfo.Mini= Puffmin;
     CollideInfo.Maxi=Puffmax;
@@ -496,18 +512,34 @@ bool Bolt::Collide () {
   return false;
 }
 
-
+static bool lcwithin (const LineCollide & lc, const LineCollide&tmp) {
+  return (lc.Mini.i< tmp.Maxi.i&&
+	  lc.Mini.j< tmp.Maxi.j&&
+	  lc.Mini.k< tmp.Maxi.k&&
+	  lc.Maxi.i> tmp.Mini.i&&
+	  lc.Maxi.j> tmp.Mini.j&&
+	  lc.Maxi.k> tmp.Mini.k);
+}
 void Beam::CollideHuge (const LineCollide & lc) {
-  vector <LineCollide *> tmp = _Universe->activeStarSystem()->collidetable->c.GetHuge();
-  for (unsigned int i=0;i<tmp.size();i++) {
-    if (tmp[i]->type==LineCollide::UNIT) {
-      if (lc.Mini.i< tmp[i]->Maxi.i&&
-	  lc.Mini.j< tmp[i]->Maxi.j&&
-	  lc.Mini.k< tmp[i]->Maxi.k&&
-	  lc.Maxi.i> tmp[i]->Mini.i&&
-	  lc.Maxi.j> tmp[i]->Mini.j&&
-	  lc.Maxi.k> tmp[i]->Mini.k) {
-	this->Collide ((Unit*)tmp[i]->object.u);
+  vector <LineCollide *> *colQ [tablehuge+1];
+  if (!lc.hhuge) {
+    int sizecolq = _Universe->activeStarSystem()->collidetable->c.Get (&lc,colQ);
+    for (int j=0;j<sizecolq;j++) {
+      for (unsigned int i=0;i<colQ[j]->size();i++) {
+	LineCollide * tmp = (*colQ[j])[i];
+	if (tmp->type==LineCollide::UNIT) {
+	  if (lcwithin(lc,*tmp)) {
+	    this->Collide ((Unit*)tmp->object.u);
+	  }
+	}
+      }
+    }
+  }else {
+    un_iter i=_Universe->activeStarSystem()->getUnitList().createIterator();
+    Unit *un;
+    for (;(un=*i)!=NULL;++i) {
+      if (lcwithin (lc,un->GetCollideInfo())) {
+	this->Collide(un);
       }
     }
   }

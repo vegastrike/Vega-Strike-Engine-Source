@@ -1,7 +1,10 @@
-#include "beam.h"
+
+
 #include "weapon_xml.h"
 #include <assert.h>
 #include "audiolib.h"
+#include "star_system.h"
+#include "beam.h"
 weapon_info::weapon_info(const weapon_info &tmp) {
   *this = tmp;
 }
@@ -124,6 +127,10 @@ namespace BeamXML {
     weapon_info * debugtmp = &tmpweapon;
     enum weapon_info::WEAPON_TYPE weaptyp;
     Names elem = (Names) element_map.lookup(string (name));
+#ifdef TESTBEAMSONLY
+    if (elem==BOLT)
+      elem=BEAM;
+#endif
     AttributeList::const_iterator iter;
     switch (elem) {
     case UNKNOWN:

@@ -24,7 +24,7 @@
 #include "vs_globals.h"
 #include "file_main.h"
 #include "gfx/halo.h"
-#include "beam.h"
+
 #include "unit.h"
 
 #include "gfx/sprite.h"
@@ -54,7 +54,7 @@
 //#define VARIABLE_LENGTH_PQR
 
 //#define DESTRUCTDEBUG
-
+#include "beam.h"
 
 
 double interpolation_blend_factor;
@@ -147,7 +147,7 @@ void Unit::SetNebula (Nebula * neb) {
 }
 void Unit::Init()
 {
-
+  activeStarSystem=NULL;
   xml=NULL;
   docked=NOT_DOCKED;
   SubUnit =0;

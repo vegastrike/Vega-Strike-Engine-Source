@@ -14,6 +14,9 @@ class UnitCollection {
  private:
   ///units is the beginning of the list. It isn't a pointer to reduce indirection
   class UnitListNode {
+#ifdef _TEST_
+  friend void Iterate (UnitCollection &c);
+#endif
   public:
     Unit *unit;
     UnitListNode *next;
@@ -29,13 +32,16 @@ class UnitCollection {
   ///Destroys the list until init is called. Functions will segfault.
   void destr ();
   ///Initializes the list so that there are 2 empty nodes (u and u->next)  NULL unit terminates this list.
-  void init () {u.next = new UnitListNode (NULL);}
+  void init () {u.next = new UnitListNode (NULL, new UnitListNode(NULL));}
  public:  
   ///Initislizes the first unit and then calls init;
   UnitCollection() : u(NULL) {init();}
   ///destroys the list permanently
   ~UnitCollection() {destr();}
   class UnitIterator : public Iterator {
+#ifdef _TEST_
+  friend void Iterate (UnitCollection &c);
+#endif
   private:
     ///the position in the list
     UnitListNode *pos;
@@ -82,6 +88,7 @@ class UnitCollection {
     private:
     UnitListNode *pos;
   public:
+
     ///removes something after pos.  eg the first valid unit. or current()
     void remove();
     ///inserts in front of current
@@ -93,7 +100,11 @@ class UnitCollection {
     Unit *current() {return pos->next->unit;}
     void advance() {pos = pos->next;}
   };
-    
+  static void FreeUnusedNodes();//not allowed to happen if any lists are traversing    
+  static void * PushUnusedNode(UnitListNode * node);
+#ifdef _TEST_
+  friend void Iterate (UnitCollection &c);
+#endif
   bool empty() const {return (u.next->unit==NULL);}
   UnitIterator createIterator() {return UnitIterator(&u);}
   ConstIterator constIterator() const {return ConstIterator (&u);}

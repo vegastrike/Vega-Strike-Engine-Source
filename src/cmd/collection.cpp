@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <vector>
 #include "collection.h"
 #ifndef LIST_TESTING
 #include "unit.h"
@@ -29,6 +30,30 @@ void UnitCollection::destr() {
   }  
 }
 
+void * UnitCollection::PushUnusedNode (UnitListNode * node) {
+  static UnitListNode cat(NULL,NULL);
+  static UnitListNode dog(NULL,&cat);
+  static bool cachunk=true;
+  if (cachunk) {
+    cachunk=false;
+    fprintf (stderr,"%x %x",&dog,&cat);
+  }
+  static std::vector <UnitCollection::UnitListNode * >dogpile;
+  if (node==NULL) {
+    return &dogpile;
+  }else {
+    node->next=&dog;
+    dogpile.push_back (node);
+  }
+  return NULL;
+}
+void UnitCollection::FreeUnusedNodes () {
+  std::vector<UnitCollection::UnitListNode *> *dogpile = (std::vector <UnitCollection::UnitListNode *> *)PushUnusedNode (NULL);
+  while (!dogpile->empty()) {
+    delete dogpile->back();
+    dogpile->pop_back ();
+  }
+}
 void UnitCollection::prepend(Iterator *iter) {
   UnitListNode *n = &u;
   Unit * tmp;
@@ -66,9 +91,13 @@ void UnitCollection::FastIterator::postinsert(Unit *unit) {
 }
 void UnitCollection::UnitListNode::Remove () {
   if (next->unit) {
-    UnitListNode * tmp = next->next;
-    delete next; //takes care of unref!
+    UnitListNode *tmp = next->next;
+    //    delete next; //takes care of unref! And causes a shitload of bugs
+    //concurrent lists, man
+    PushUnusedNode(next);
     next = tmp;
+  }else {
+    assert (0);
   }
 }
 void UnitCollection::UnitIterator::remove() {
@@ -93,6 +122,7 @@ void UnitCollection::ConstIterator::GetNextValidUnit () {
 }
 
 const UnitCollection &UnitCollection::operator = (const UnitCollection & uc){
+  printf ("warning could cause problems with concurrent lists. Make sure no one is traversing gotten list");
   destr();
   u=NULL;
   init();

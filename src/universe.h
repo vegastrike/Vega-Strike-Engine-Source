@@ -55,7 +55,7 @@ protected:
   void StartGL();
   ///currently only 1 star system is stored
   std::vector <StarSystem *> active_star_system;
-  std::vector <StarSystem *> star_system;
+
   // the system currently used by the scripting
   StarSystem *script_system;
 
@@ -217,7 +217,8 @@ private:
     }
     return false;
   }
-
+ public:
+  std::vector <StarSystem *> star_system;
 };
 
 #endif

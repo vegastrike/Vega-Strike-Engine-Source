@@ -626,6 +626,7 @@ void StarSystem::Update(float priority , bool executeDirector) {
   fprintf (stderr,"endupd\n");
   fflush (stderr);
 #endif
+  UnitCollection::FreeUnusedNodes();
   SIMULATION_ATOM =  normal_simulation_atom;
   _Universe->popActiveStarSystem();
   //  fprintf (stderr,"bf:%lf",interpolation_blend_factor);

@@ -116,7 +116,9 @@ Beam::~Beam () {
 #ifdef PERBOLTSOUND
   AUDDeleteSound (sound);
 #endif
+#ifdef BEAMCOLQ
   RemoveFromSystem(true);
+#endif
   delete vlist;
   beamdecals.DelTexture(decal);
 }
@@ -235,6 +237,8 @@ void Beam::ProcessDrawQueue() {
   GFXPopBlendMode();
 }
 void Beam::RemoveFromSystem(bool eradicate) {
+  //beams not in table any more
+#if 0
   if (CollideInfo.object.b!=NULL
 #ifndef SAFE_COLLIDE_DEBUG
 #ifndef UNSAFE_COLLIDE_RELEASE
@@ -258,8 +262,18 @@ void Beam::RemoveFromSystem(bool eradicate) {
 #else
     ;
 #endif
+    for (unsigned int i=0;i<_Universe->star_system.size();i++) {
+      _Universe->pushActiveStarSystem(_Universe->star_system[i]);
+    
+    if (EradicateCollideTable (&CollideInfo)) {
+      fprintf (stderr,"VERY BAD ERROR FATAL! 0x%x",this);
+    }
+    _Universe->popActiveStarSystem();
+    }
     CollideInfo.object.b = NULL;
+
   }
+#endif
 #endif
 }
 void Beam::UpdatePhysics(const Transformation &trans, const Matrix m) {
@@ -299,8 +313,9 @@ void Beam::UpdatePhysics(const Transformation &trans, const Matrix m) {
   if (curthick<=0) {
 
     curthick =0;//die die die
+#ifdef BEAMCOLQ
     RemoveFromSystem(false);
-    
+#endif    
   } else {
 
     CollideHuge(CollideInfo);
@@ -316,16 +331,21 @@ void Beam::UpdatePhysics(const Transformation &trans, const Matrix m) {
 
 
     tmpvec = center.Max (tmpvec);
-    if (TableLocationChanged (CollideInfo,tmpMini,tmpvec)||(curthick>0&&CollideInfo.object.b==NULL)) {
-      RemoveFromSystem(false);
+#ifdef BEAMCOLQ
+        if (TableLocationChanged (CollideInfo,tmpMini,tmpvec)||(curthick>0&&CollideInfo.object.b==NULL)) {
+	  RemoveFromSystem(false);
+#endif
       CollideInfo.object.b = this;
+      CollideInfo.hhuge=(((CollideInfo.Maxi.i-CollideInfo.Mini.i)/coltableacc)*((CollideInfo.Maxi.j-CollideInfo.Mini.j)/coltableacc)*(CollideInfo.Maxi.k-CollideInfo.Mini.k)/coltableacc>tablehuge);
       CollideInfo.Mini= tmpMini;
       CollideInfo.Maxi= tmpvec;
+#ifdef BEAMCOLQ
       AddCollideQueue (CollideInfo);
     } else {
       CollideInfo.Mini= tmpMini;
       CollideInfo.Maxi= tmpvec;
     }
+#endif
   }
   //Check if collide...that'll change max beam length REAL quick
 }
