@@ -181,17 +181,23 @@ bool Mount::PhysicsAlignedFire(const Transformation &Cumulative, const Matrix & 
 			}
 
     static bool use_separate_sound=XMLSupport::parse_bool (vs_config->getVariable ("audio","high_quality_weapon","true"));
-    if ((((!use_separate_sound)||type->type==weapon_info::BEAM)||(!_Universe->isPlayerStarship(owner)))&&(type->type!=weapon_info::PROJECTILE)) {
-    if (!AUDIsPlaying (sound)) {
-      AUDPlay (sound,tmp.position,velocity,1);
+	static bool ai_sound=XMLSupport::parse_bool (vs_config->getVariable ("audio","ai_sound","true"));	
+	bool ips = (_Universe->isPlayerStarship(owner)!=NULL);
+    if ((((!use_separate_sound)||type->type==weapon_info::BEAM)||(!ips))&&(type->type!=weapon_info::PROJECTILE)) {
+		if (ai_sound||(ips&&type->type==weapon_info::BEAM)) {
+			if (!AUDIsPlaying (sound)) {
+				AUDPlay (sound,tmp.position,velocity,1);
+			}else {
+				AUDAdjustSound(sound,tmp.position,velocity);
+			}
+		}
     }else {
-      AUDAdjustSound(sound,tmp.position,velocity);
-    }
-    }else {
-      int snd =AUDCreateSound(sound,false);
-      AUDAdjustSound(snd,tmp.position,velocity);
-      AUDStartPlaying (snd);
-      AUDDeleteSound(snd);
+		if (ai_sound||ips) {
+			int snd =AUDCreateSound(sound,false);
+			AUDAdjustSound(snd,tmp.position,velocity);
+			AUDStartPlaying (snd);
+			AUDDeleteSound(snd);
+		}
     }
     return true;
   }

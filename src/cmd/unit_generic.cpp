@@ -3706,6 +3706,7 @@ public:
   }
 };
 std::map <int, DoubleName> downgrademap;
+int curdowngrademapoffset = 5*sizeof (Unit);
 bool AddToDowngradeMap (std::string name,double value, int unitoffset,std::map <int,DoubleName> &tempdowngrademap) {
   using std::map;
   map<int,DoubleName>::iterator i =downgrademap.find (unitoffset);
@@ -3744,6 +3745,11 @@ bool Unit::UpAndDownGrade (const Unit * up, const Unit * templ, int mountoffset,
   comparer Comparer;
   percenter Percenter;
   std::map <int, DoubleName> tempdownmap;
+  if (cancompletefully&&cancompletefully1&&downgrade) {
+	  if (percentage>0)
+		  AddToDowngradeMap (up->name,1,curdowngrademapoffset++,tempdownmap);
+  }
+  
   float tmax_speed = up->computer.max_combat_speed;
   float tmax_ab_speed = up->computer.max_combat_ab_speed;
   float tmax_yaw = up->computer.max_yaw;
@@ -3910,17 +3916,20 @@ bool Unit::UpAndDownGrade (const Unit * up, const Unit * templ, int mountoffset,
       if (touchme) jump.drive=-2;
       numave++;
       percentage+=.5*((float)(100-jump.damage))/(101-up->jump.damage);
+	  AddToDowngradeMap (up->name,up->jump.drive,((char *)&this->jump.drive)-((char *)this),tempdownmap);
     }
     if (cloaking!=-1&&up->cloaking!=-1) {
       if (touchme) cloaking=-1;
       numave++;
       percentage++;
+	  AddToDowngradeMap (up->name,up->cloaking,((char *)&this->cloaking)-((char *)this),tempdownmap);	  
     }
   
     if (afterburnenergy<32767&&afterburnenergy<=up->afterburnenergy&&up->afterburnenergy!=0) {
       if (touchme) afterburnenergy=32767;
       numave++;
       percentage++;
+	  AddToDowngradeMap (up->name,65536-((int)up->afterburnenergy),((char *)&this->afterburnenergy)-((char *)this),tempdownmap);	  	  
     }
   
   }else {
