@@ -100,6 +100,7 @@ enum callback_module_std_type {
   CMT_STD_getDifficulty,
   CMT_STD_playSound,
   CMT_STD_playAnimation,
+  CMT_STD_getGalaxyProperty,
   CMT_STD_terminateMission
 };
 enum callback_module_briefing_type {
@@ -621,6 +622,7 @@ void printNode(missionNode *node,int mode);
 varInst * callGetSystemName(missionNode *node,int mode);
 varInst * callGetSystemFile(missionNode *node,int mode);
 varInst * callGetNumAdjacentSystems(missionNode *node,int mode);
+varInst * callGetGalaxyProperty(missionNode *node,int mode);
 varInst * callGetAdjacentSystem(missionNode *node,int mode);
 varInst *  call_isNull(missionNode *node,int mode);
 varInst *  call_setNull(missionNode *node,int mode);

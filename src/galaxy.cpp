@@ -299,7 +299,11 @@ DWORD WINAPI DrawStartupDialog(
 	return 0;
 }
 #endif
-
+std::string Universe::getGalaxyProperty (const std::string & sys, const std::string & prop) {
+  string sector = getStarSystemSector (sys);
+  string name = RemoveDotSystem (getStarSystemName (sys).c_str());
+  return galaxy->getVariable (sector,name,prop,"");
+}
 vector <std::string> Universe::getAdjacentStarSystems (const std::string &file) {
   string sector =getStarSystemSector (file); 
   string name =RemoveDotSystem (getStarSystemName (file).c_str()); 

@@ -103,12 +103,6 @@ varInst *Mission::doCall(missionNode *node,int mode,string module,string method)
     else if(method_id==CMT_STD_getSystemFile){
       vi=callGetSystemFile(node,mode);
     }
-    else if(method_id==CMT_STD_getNumAdjacentSystems){
-      vi=callGetNumAdjacentSystems(node,mode);
-    }
-    else if(method_id==CMT_STD_getAdjacentSystem){
-      vi=callGetAdjacentSystem(node,mode);
-    }
     else if(method_id==CMT_STD_getCurrentAIUnit){
       vi=callGetCurrentAIUnit(node,mode);
     }
@@ -130,6 +124,9 @@ varInst *Mission::doCall(missionNode *node,int mode,string module,string method)
     else if(method_id==CMT_STD_Int){
       vi=call_int_cast(node,mode);
     }
+    else if(method_id==CMT_STD_getGalaxyProperty){
+      vi=callGetGalaxyProperty(node,mode);
+    }
     else if (method_id==CMT_STD_getDifficulty) {
       vi = newVarInst (VI_TEMP);
       vi->type=VAR_FLOAT;
@@ -142,6 +139,12 @@ varInst *Mission::doCall(missionNode *node,int mode,string module,string method)
       }
       vi = newVarInst (VI_TEMP);
       vi->type=VAR_VOID;
+    }
+    else if(method_id==CMT_STD_getNumAdjacentSystems){
+      vi=callGetNumAdjacentSystems(node,mode);
+    }
+    else if(method_id==CMT_STD_getAdjacentSystem){
+      vi=callGetAdjacentSystem(node,mode);
     }
     else if(method_id==CMT_STD_terminateMission){
       vi=terminateMission(node,mode);
@@ -434,10 +437,24 @@ varInst *Mission::callGetAdjacentSystem (missionNode *node,int mode) {
   }
   return vi;
 }
+
+varInst *Mission::callGetGalaxyProperty (missionNode *node,int mode) {
+  varInst *vi=newVarInst(VI_TEMP);
+  vi->type=VAR_OBJECT;
+  vi->objectname="string";
+  string sys = getStringArgument (node,mode,0);
+  string prop = getStringArgument(node,mode,1);
+  if(mode==SCRIPT_RUN){
+    deleteVarInst(vi);
+    string sysname=_Universe->getGalaxyProperty(sys,prop);
+    vi=call_string_new(node,mode,sysname);
+  }
+  return vi;
+}
 varInst *Mission::callGetNumAdjacentSystems (missionNode *node,int mode) {
 
   string sysname = getStringArgument (node,mode,0);
-  int ret;
+  int ret=0;
   if(mode==SCRIPT_RUN){
     ret=_Universe->getAdjacentStarSystems(sysname).size();
   }
@@ -899,6 +916,7 @@ void Mission::initCallbackMaps(){
   module_std_map["GetSystemName"]=CMT_STD_getSystemName;
   module_std_map["getSystemName"]=CMT_STD_getSystemName;
   module_std_map["getNumAdjacentSystems"]=CMT_STD_getNumAdjacentSystems;
+  module_std_map["getGalaxyProperty"]=CMT_STD_getGalaxyProperty;
   module_std_map["getAdjacentSystem"]=CMT_STD_getAdjacentSystem;
   module_std_map["GetSystemFile"]=CMT_STD_getSystemFile;
   module_std_map["getSystemFile"]=CMT_STD_getSystemFile;
