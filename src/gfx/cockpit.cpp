@@ -23,13 +23,40 @@ static GFXColor relationToColor (float relation) {
     :
     GFXColor (1,relation+1,relation+1,.5);
 }
+void Cockpit::DrawNavigationSymbol (const Vector &Loc, const Vector & P, const Vector & Q, float size) {
+  GFXColor4f (1,1,1,1);
+  size = .125*GFXGetZPerspective (size);
+  GFXBegin (GFXLINE);
+  GFXVertexf(Loc+P*size);
+  GFXVertexf(Loc+.125*P*size);
+  GFXVertexf(Loc-P*size);
+  GFXVertexf(Loc-.125*P*size);
+  GFXVertexf(Loc+Q*size);
+  GFXVertexf(Loc+.125*Q*size);
+  GFXVertexf(Loc-Q*size);
+  GFXVertexf(Loc-.125*Q*size);
+  GFXVertexf(Loc+.0625*Q*size);
+  GFXVertexf(Loc+.0625*P*size);
+  GFXVertexf(Loc-.0625*Q*size);
+  GFXVertexf(Loc-.0625*P*size);
+  GFXVertexf(Loc+.9*P*size+.125*Q*size);
+  GFXVertexf(Loc+.9*P*size-.125*Q*size);
+  GFXVertexf(Loc-.9*P*size+.125*Q*size);
+  GFXVertexf(Loc-.9*P*size-.125*Q*size);
+  GFXVertexf(Loc+.9*Q*size+.125*P*size);
+  GFXVertexf(Loc+.9*Q*size-.125*P*size);
+  GFXVertexf(Loc-.9*Q*size+.125*P*size);
+  GFXVertexf(Loc-.9*Q*size-.125*P*size);
+
+  GFXEnd();
+}
 void Cockpit::DrawTargetBox () {
   float speed,range;
   
   Unit * un = parent.GetUnit();
   if (!un)
     return;
-  
+
   Unit *target = un->Target();
   if (!target)
     return;
@@ -42,6 +69,7 @@ void Cockpit::DrawTargetBox () {
   GFXDisable (DEPTHWRITE);
   GFXBlendMode (SRCALPHA,INVSRCALPHA);
   GFXDisable (LIGHTING);
+  DrawNavigationSymbol (un->GetComputerData().NavPoint,CamP,CamQ, CamR.Dot(un->GetComputerData().NavPoint-un->Position()));
   GFXColorf (relationToColor(_Universe->GetRelation(un->faction,target->faction)));
   GFXBegin (GFXLINESTRIP); 
   GFXVertexf (Loc+(CamP+CamQ)*target->rSize());

@@ -93,7 +93,9 @@ void VDU::DrawTarget(Unit * target) {
 }
 
 void VDU::DrawNav (const Vector & nav) {
-
+  char navdata[256];
+  sprintf (navdata,"\nNavigation\n----------\nRelativeLocation\nx: %.4f\ny:%.4f\nz:%.4f\nDistance:\n%f",nav.i,nav.j,nav.k,nav.Magnitude());
+  tp->Draw (std::string(navdata));  
 }
 static void DrawGun (Vector  pos, float w, float h, weapon_info::MOUNT_SIZE sz) {
   w=fabs (w);
@@ -176,6 +178,22 @@ static void DrawGun (Vector  pos, float w, float h, weapon_info::MOUNT_SIZE sz) 
 }
 void VDU::DrawDamage(Unit * parent) {
   float x,y,w,h;
+  float th;
+  char st[256];
+
+  Unit * thr = parent->Threat();
+  sprintf (st,"\nHull: %.3f",parent->GetHull());
+  if (thr) {
+    int k=strlen(st);
+    for (int i=0;i<rows-2&&i+k<128;i++) {
+      st[i+k]='\n';
+      st[i+k+1]='\0';
+    }
+    char qr[256];
+    sprintf (qr, "%6s\nThreat:%4.4f",thr->name.c_str(),thr->cosAngleTo (parent,th,100000000,10000000));
+    strncat (st,qr,128);
+  }
+  tp->Draw (std::string(st));  
   DrawTargetSpr (parent->getHudImage (),.6,x,y,w,h);
   
 }
@@ -229,7 +247,7 @@ void VDU::Draw (Unit * parent) {
   
   h=fabs(h/2);  w=fabs (w/2);
   tp->SetPos (x-w,y+h);
-  tp->SetSize (x+w,y-h);
+  tp->SetSize (x+w,y-h-.9*fabs(w/cols));
   switch (thismode) {
   case TARGET:
     parent = parent->GetComputerData().target.GetUnit();

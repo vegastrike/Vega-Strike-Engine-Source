@@ -53,6 +53,8 @@ class Cockpit {
   void endElement(const string &name);
   ///Destructs cockpit info for new loading
   void Delete();
+  ///draws the navigation symbol around targetted location
+  void DrawNavigationSymbol (const Vector &loc, const Vector &p, const Vector &q, float size);
   ///draws the target box around targetted unit
   void DrawTargetBox ();
   ///Draws all teh blips on the radar. No color info (yet)
