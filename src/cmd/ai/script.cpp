@@ -93,12 +93,16 @@ namespace AiXml {
       TARGETPOS,
       THREATPOS,
       YOURPOS,
+      TARGETV,
+      THREATV,
+      YOURV,
       TARGETWORLD,
       THREATWORLD,
       TARGETLOCAL,
       THREATLOCAL,
       YOURLOCAL,
       YOURWORLD,
+      SIMATOM,
       DEFAULT
     };
 
@@ -109,12 +113,10 @@ namespace AiXml {
     EnumMap::Pair ("Vector", VECTOR),
     EnumMap::Pair ("Moveto", MOVETO),
     EnumMap::Pair ("Default", DEFAULT),
-    EnumMap::Pair ("Targetpos", TARGETPOS),
     EnumMap::Pair ("Targetworld", TARGETWORLD),
     EnumMap::Pair ("Yourworld", YOURWORLD),
     EnumMap::Pair ("Targetlocal", TARGETLOCAL),
     EnumMap::Pair ("Yourlocal", YOURLOCAL),
-    EnumMap::Pair ("Yourpos", YOURPOS),
     EnumMap::Pair ("FaceTarget", FACETARGET),
     EnumMap::Pair ("ExecuteFor", EXECUTEFOR),
     EnumMap::Pair ("ChangeHead", CHANGEHEAD),
@@ -132,9 +134,9 @@ namespace AiXml {
     EnumMap::Pair ("Fromf", FROMF),
     EnumMap::Pair ("Tof", TOF),
     EnumMap::Pair ("Linear", LINEAR),
-    EnumMap::Pair ("Threatpos", THREATPOS),
     EnumMap::Pair ("Threatworld", THREATWORLD),
     EnumMap::Pair ("Threatlocal", THREATLOCAL)
+    
   };
   const EnumMap::Pair attribute_names[] = {
     EnumMap::Pair ("UNKNOWN", UNKNOWN),
@@ -146,11 +148,19 @@ namespace AiXml {
     EnumMap::Pair ("Terminate", TERMINATE), 
     EnumMap::Pair ("Local", LOCAL), 
     EnumMap::Pair ("Value", VALUE),
-    EnumMap::Pair ("ITTS", ITTTS)
+    EnumMap::Pair ("ITTS", ITTTS),
+    EnumMap::Pair ("Position", YOURPOS), 
+    EnumMap::Pair ("TargetPos", TARGETPOS),
+    EnumMap::Pair ("ThreatPos", THREATPOS),
+    EnumMap::Pair ("Velocity", YOURV), 
+    EnumMap::Pair ("TargetV", TARGETV),
+    EnumMap::Pair ("ThreatV", THREATV),
+    EnumMap::Pair ("SimlationAtom", SIMATOM)
+
   };
 
-  const EnumMap element_map(element_names, 31);
-  const EnumMap attribute_map(attribute_names, 10);
+  const EnumMap element_map(element_names, 29);
+  const EnumMap attribute_map(attribute_names, 17);
 }
 
 using XMLSupport::EnumMap;
@@ -197,9 +207,55 @@ void AIScript::beginElement(const string &name, const AttributeList &attributes)
       case Z:
  	topv().k=parse_float((*iter).value);
  	break;
-      }
+
+      case THREATPOS:
+	if((tmp = this->parent->Threat())) {
+	  topv() =(tmp->Position());
+	} else {
+	  if ((tmp = this->parent->Target())) {
+	    topv()= (tmp->Position());
+	  } else {
+	    topv()=(xml->defaultvec);
+	  }
 	}
 	break;
+      case TARGETPOS:
+	if((tmp = this->parent->Target())) {
+	  topv()=(tmp->Position());
+	} else {
+	  topv()=(xml->defaultvec);
+	}	
+	break;
+	
+      case YOURPOS:
+	topv()=(this->parent->Position());	  
+	break;
+
+      case THREATV:
+	if((tmp = this->parent->Threat())) {
+	  topv() =(tmp->GetVelocity());
+	} else {
+	  if ((tmp = this->parent->Target())) {
+	    topv()= (tmp->GetVelocity());
+	  } else {
+	    topv()=(xml->defaultvec);
+	  }
+	}
+	break;
+      case TARGETV:
+	if((tmp = this->parent->Target())) {
+	  topv()=(tmp->GetVelocity());
+	} else {
+	  topv()=(xml->defaultvec);
+	}
+	break;
+	
+      case YOURV:
+	topv()=(this->parent->GetVelocity());	  
+	break;
+      }
+    }
+    break;
   case MOVETO:
     assert (xml->unitlevel>=1);
     xml->unitlevel++;
@@ -248,6 +304,7 @@ void AIScript::beginElement(const string &name, const AttributeList &attributes)
 	  }
 	}
 	break;
+	/*
   case THREATPOS:
 	  assert(xml->unitlevel>=2);
 	  xml->unitlevel++;
@@ -270,6 +327,7 @@ void AIScript::beginElement(const string &name, const AttributeList &attributes)
 		  xml->vectors.push(xml->defaultvec);
 	  }
 	  break;
+	*/
   case YOURPOS:
 	  assert(xml->unitlevel>=2);
 	  xml->unitlevel++;
@@ -323,6 +381,8 @@ void AIScript::beginElement(const string &name, const AttributeList &attributes)
       case VALUE:
  	topf()=parse_float((*iter).value);
  	break;
+      case SIMATOM:
+	topf()= SIMULATION_ATOM;
       }
 	}
 	break;
