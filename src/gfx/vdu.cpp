@@ -29,15 +29,13 @@ string getUnitNameAndFgNoBase (Unit * target) {
       return hr+string(":")+reformatName(target->name);
     }
   }else if (target->isUnit()==UNITPTR){
-    if (!target->getFullname().empty()) {
-      return target->getFullname()+string(":")+reformatName(target->name);
-    }
+	if (fg) {
+	  if (fg->name!="Base"&&fg->name!="Asteroid"&&fg->name!="Nebula") {
+		  return fg->name+":"+target->getFullname();
+	  }
+	}	 
   }
-  if (fg) {
-    if (fg->name!="Base"&&fg->name!="Asteroid"&&fg->name!="Nebula") {
-		return fg->name+":"+reformatName(target->name);
-    }
-  }
+  
   if (string("neutral")!=FactionUtil::GetFaction(target->faction)) {
     return /*string(_Universe->GetFaction(target->faction))+" "+*/reformatName(target->name);
   }
