@@ -4,6 +4,7 @@ Goals for 0.4.2 release:
 ** Fix systems to have jump points only outside the "slow-zone"
 ** Fix a bit of the system generation code: so we can specify everything in the milky_way.xml
 ** Sparkles (particle system)
+** Distance worth worth warping to playability?
 
 *Map
 we should make the overall shift-m nav screen A) bigger - make it take up the full screen B) Since it's a HUD artifact, lit independent of scene - having your nav display go all dark, while it shows off the lighting, is... odd
