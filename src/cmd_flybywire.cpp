@@ -15,25 +15,167 @@ struct StarShipControlKeyboard {
   int accelrelease;
   int decelpress;
   int decelrelease;
+  int rollrightpress;
+  int rollrightrelease;
+  int rollleftpress;
+  int rollleftrelease;
   bool dirty;//it wasn't updated...
-  void UnDirty() {uppress=uprelease=downpress=downrelease=leftpress=leftrelease=rightpress=rightrelease=ABpress=ABrelease=accelpress=accelrelease=decelpress=decelrelease=0;
+  int refcount;
+  void UnDirty() {uppress=uprelease=downpress=downrelease=leftpress=leftrelease=rightpress=rightrelease=ABpress=ABrelease=accelpress=accelrelease=decelpress=decelrelease=rollrightpress=rollrightrelease=rollleftpress=rollleftrelease=0;
   dirty=false;}
-  StarShipControlKeyboard() {UnDirty();}
+  StarShipControlKeyboard() {UnDirty();refcount=0;}
 } starshipcontrolkeys;
 
 FlyByWire::FlyByWire (float max_ab_spd,float max_spd,float maxyaw,float maxpitch,float maxroll): Order(), max_speed(max_spd), max_ab_speed(max_ab_spd), max_yaw(maxyaw),max_pitch(maxpitch),max_roll(maxroll) {
   type = TARGET;
   done = false;
-  
+  //FIXME:: change hard coded keybindings
+  if (starshipcontrolkeys.refcount==0) {
+    BindKey(GLUT_KEY_UP,FlyByWire::UpKey);
+    BindKey(GLUT_KEY_DOWN,FlyByWire::DownKey);
+    BindKey(GLUT_KEY_UP,FlyByWire::RightKey);
+    BindKey(GLUT_KEY_DOWN,FlyByWire::LeftKey);
+    BindKey(GLUT_KEY_UP,FlyByWire::ABKey);
+    BindKey(GLUT_KEY_DOWN,FlyByWire::AccelKey);
+    BindKey(GLUT_KEY_UP,FlyByWire::DecelKey);   
+    BindKey('/',FlyByWire::RollLeftKey);
+    BindKey('*',FlyByWire::RollRightKey);
+    
+  }
+  starshipcontrolkeys.refcount++;
+}
+FlyByWire::~FlyByWire() {
+  starshipcontrolkeys.refcount--;
+  if (starshipcontrolkeys.refcount==0) {
+    UnbindKey (GLUT_KEY_UP);
+    UnbindKey (GLUT_KEY_DOWN);
+    UnbindKey (GLUT_KEY_LEFT);
+    UnbindKey (GLUT_KEY_RIGHT);
+    UnbindKey ('/');
+    UnbindKey ('*');
+    UnbindKey ('+');
+    UnbindKey ('-');
+    UnbindKey ('\t');
+  }
 }
 
+void FlyByWire::Right (float per) {
+
+}
+
+void FlyByWire::Up (float per) {
+
+}
+
+void FlyByWire::RollRight (float per) {
+
+}
+
+void FlyByWire::Afterburn (float per){
+
+}
+
+void FlyByWire::Accel (float per) {
+
+}
+
+
+
+
+
+
+
+
+
+#define FBWABS(m) (m>=0?m:-m)
 AI * FlyByWire::Execute () {
-  
+#define SSCK starshipcontrolkeys
+  if (SSCK.dirty) {
+    //go with what's last there: no frames since last physics frame
+    if (SSCK.uppress<=0&&SSCK.downpress<=0)
+      Up(0);
+    else {
+      if (SSCK.uppress>0)
+	Up(1);
+      if (SSCK.downpress>0)
+	Up(-1);
+    }
+    if (SSCK.leftpress<=0&&SSCK.rightpress<=0)
+      Up(0);
+    else {
+      if (SSCK.rightpress>0)
+	Right(1);
+      if (SSCK.leftpress>0)
+	Right(-1);
+    }
+    if (SSCK.rollrightpress<=0&&SSCK.rollleftpress<=0)
+      RollRight(0);
+    else {
+      if (SSCK.rollrightpress>0)
+	RollRight(1);
+      if (SSCK.rollleftpress>0)
+	RollRight(-1);
+    }
+    if (SSCK.ABpress>0)
+      Afterburn(1);
+    else
+      Afterburn (0);
+    if (SSCK.accelpress>0)
+      Accel(1);
+    if (SSCK.decelpress>0)
+      Accel(-1);
+  }else {
+    if (SSCK.uppress==0&&SSCK.downpress==0)
+      Up(0);
+    else {
+      if (SSCK.uppress!=0&&SSCK.downpress==0)
+	Up((FBWABS(SSCK.uppress))/(FBWABS(SSCK.uppress)+SSCK.uprelease));
+      else {
+	if (SSCK.downpress!=0&&SSCK.uppress==0)
+	  Up(-(FBWABS(SSCK.downpress))/(FBWABS(SSCK.downpress)+SSCK.downrelease));
+        else {
+	  Up((FBWABS(SSCK.uppress)-FBWABS(SSCK.downpress))/(FBWABS(SSCK.downpress)+SSCK.downrelease+FBWABS(SSCK.uppress)+SSCK.uprelease));
+	}
+      }
+    }
+    if (SSCK.rightpress==0&&SSCK.leftpress==0)
+      Right(0);
+    else {
+      if (SSCK.rightpress!=0&&SSCK.leftpress==0)
+	Right((FBWABS(SSCK.rightpress))/(FBWABS(SSCK.rightpress)+SSCK.rightrelease));
+      else {
+	if (SSCK.leftpress!=0&&SSCK.rightpress==0)
+	  Right(-(FBWABS(SSCK.leftpress))/(FBWABS(SSCK.leftpress)+SSCK.leftrelease));
+        else {
+	  Right((FBWABS(SSCK.rightpress)-FBWABS(SSCK.leftpress))/(FBWABS(SSCK.leftpress)+SSCK.leftrelease+FBWABS(SSCK.rightpress)+SSCK.rightrelease));
+	}
+      }
+    }
+    if (SSCK.rollrightpress==0&&SSCK.rollleftpress==0)
+      RollRight(0);
+    else {
+      if (SSCK.rollrightpress!=0&&SSCK.rollleftpress==0)
+	RollRight((FBWABS(SSCK.rollrightpress))/(FBWABS(SSCK.rollrightpress)+SSCK.rollrightrelease));
+      else {
+	if (SSCK.rollleftpress!=0&&SSCK.rollrightpress==0)
+	  RollRight(-(FBWABS(SSCK.rollleftpress))/(FBWABS(SSCK.rollleftpress)+SSCK.rollleftrelease));
+        else {
+	  RollRight((FBWABS(SSCK.rollrightpress)-FBWABS(SSCK.rollleftpress))/(FBWABS(SSCK.rollleftpress)+SSCK.rollleftrelease+FBWABS(SSCK.rollrightpress)+SSCK.rollrightrelease));
+	}
+      }
+    }
+
+
+  }
+  SSCK.dirty=true;
+#undef SSCK
+
   return this;
 } 
-#define FBWABS(m) (m>=0?m:-m)
+
 
 void FlyByWire::UpKey(int, KBSTATE k) {
+  if (starshipcontrolkeys.dirty) starshipcontrolkeys.UnDirty();
   switch (k) {
   case UP: starshipcontrolkeys.uprelease++;
     break;
@@ -47,6 +189,7 @@ void FlyByWire::UpKey(int, KBSTATE k) {
   }
 }
 void FlyByWire::DownKey (int,KBSTATE k) {
+  if (starshipcontrolkeys.dirty)starshipcontrolkeys.UnDirty();
   switch (k) {
   case UP: starshipcontrolkeys.downrelease++;
     break;
@@ -60,6 +203,7 @@ void FlyByWire::DownKey (int,KBSTATE k) {
   }
 }
 void FlyByWire::LeftKey (int, KBSTATE k) {
+  if (starshipcontrolkeys.dirty) starshipcontrolkeys.UnDirty();
   switch (k) {
   case UP: starshipcontrolkeys.leftrelease++;
     break;
@@ -73,6 +217,7 @@ void FlyByWire::LeftKey (int, KBSTATE k) {
   }
 }
 void FlyByWire::RightKey (int,KBSTATE k) {
+  if (starshipcontrolkeys.dirty)  starshipcontrolkeys.UnDirty();
   switch (k) {
   case UP: starshipcontrolkeys.rightrelease++;
     break;
@@ -86,6 +231,7 @@ void FlyByWire::RightKey (int,KBSTATE k) {
   }
 }
 void FlyByWire::ABKey (int, KBSTATE k) {
+  if (starshipcontrolkeys.dirty)  starshipcontrolkeys.UnDirty();
   switch (k) {
   case UP: starshipcontrolkeys.ABrelease++;
     break;
@@ -99,6 +245,7 @@ void FlyByWire::ABKey (int, KBSTATE k) {
   }
 }
 void FlyByWire::AccelKey (int,KBSTATE k) {
+  if (starshipcontrolkeys.dirty)  starshipcontrolkeys.UnDirty();
   switch (k) {
   case UP: starshipcontrolkeys.accelrelease++;
     break;
@@ -112,6 +259,7 @@ void FlyByWire::AccelKey (int,KBSTATE k) {
   }
 }
 void FlyByWire::DecelKey (int,KBSTATE k) {
+  if (starshipcontrolkeys.dirty)  starshipcontrolkeys.UnDirty();
   switch (k) {
   case UP: starshipcontrolkeys.decelrelease++;
     break;
@@ -120,6 +268,36 @@ void FlyByWire::DecelKey (int,KBSTATE k) {
   case PRESS: starshipcontrolkeys.decelpress=FBWABS(starshipcontrolkeys.decelpress);
     break;
   case RELEASE: starshipcontrolkeys.decelpress=-FBWABS(starshipcontrolkeys.decelpress);
+    break;
+  default:break;
+  }
+}
+
+
+void FlyByWire::RollRightKey (int,KBSTATE k) {
+  if (starshipcontrolkeys.dirty)  starshipcontrolkeys.UnDirty();
+  switch (k) {
+  case UP: starshipcontrolkeys.rollrightrelease++;
+    break;
+  case DOWN:starshipcontrolkeys.rollrightpress=FBWABS(starshipcontrolkeys.rollrightpress)+1;
+    break;
+  case PRESS: starshipcontrolkeys.rollrightpress=FBWABS(starshipcontrolkeys.rollrightpress);
+    break;
+  case RELEASE: starshipcontrolkeys.rollrightpress=-FBWABS(starshipcontrolkeys.rollrightpress);
+    break;
+  default:break;
+  }
+}
+void FlyByWire::RollLeftKey (int,KBSTATE k) {
+  if (starshipcontrolkeys.dirty)  starshipcontrolkeys.UnDirty();
+  switch (k) {
+  case UP: starshipcontrolkeys.rollleftrelease++;
+    break;
+  case DOWN:starshipcontrolkeys.rollleftpress=FBWABS(starshipcontrolkeys.rollleftpress)+1;
+    break;
+  case PRESS: starshipcontrolkeys.rollleftpress=FBWABS(starshipcontrolkeys.rollleftpress);
+    break;
+  case RELEASE: starshipcontrolkeys.rollleftpress=-FBWABS(starshipcontrolkeys.rollleftpress);
     break;
   default:break;
   }

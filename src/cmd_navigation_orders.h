@@ -18,6 +18,7 @@ public:
   MoveTo(const Vector &target, float max_velocity) : Order(), state(0), max_speed(max_velocity) {
     type = LOCATION;
     targetlocation = target;
+    done=false;
   }
   AI *Execute() {
     Vector local_location = targetlocation - parent->GetPosition();
