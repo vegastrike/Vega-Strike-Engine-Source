@@ -40,12 +40,12 @@ public:
     maxaccessz=0;    
   }
   void Clear () {
-    hugeobjects = vector <T>();
+    hugeobjects.clear();
     for (int i=minaccessx;i<=maxaccessx;i++) {
     for (int j=minaccessy;j<=maxaccessy;j++) {
     for (int k=minaccessz;k<=maxaccessz;k++) {
       if (table[i][j][k].size())
-	table[i][j][k]=vector <T>();
+	table[i][j][k].clear();
     }
     }
     }

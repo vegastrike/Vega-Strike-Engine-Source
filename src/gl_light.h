@@ -67,6 +67,9 @@ struct LineCollideStar {
   bool operator == (const LineCollideStar & b) {
     return lc->object==b.lc->object;
   }
+  bool operator < (const LineCollideStar &b) {
+      return (*((int *)&(lc->object)) < *((int *)&(b.lc->object)));
+  }
 };
 
 //table to store local lights, numerical pointers to _llights (eg indices)

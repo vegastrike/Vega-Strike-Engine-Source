@@ -184,7 +184,7 @@ void SphereMesh::ProcessDrawQueue() {
     }
     MultMatrix (tmp2, c.mat, tmp);
     GFXLoadMatrix(MODEL, tmp2);
-    GFXPickLights (Vector (tmp2[12],tmp2[13],tmp2[14]));
+    GFXPickLights (Vector (tmp2[12],tmp2[13],tmp2[14]),rSize());
     theta+=.01;
     vlist->Draw();
     if(0!=forcelogos) {

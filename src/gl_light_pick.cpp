@@ -25,16 +25,37 @@ static bool operator < (light_key tmp1,light_key tmp2) {return tmp1.intensity_ke
 
 static priority_queue<light_key> lightQ;
 
+static vector <LineCollideStar> pickedlights [2];
+static vector <LineCollideStar>* newpicked=&pickedlights[0];
+static vector <LineCollideStar>* oldpicked=&pickedlights[1];
 
+inline int getIndex (const LineCollide & t) {
+    return *((int *)(&t.object));
+}
+static void swappicked () {
+    if (newpicked==&pickedlights[0]) {
+	newpicked=&pickedlights[1];
+	oldpicked=&pickedlights[0];
+    }else {
+	newpicked=&pickedlights[0];
+	oldpicked=&pickedlights[1];
+    }
+    newpicked->clear();
+}
 void GFXPickLights (const Vector & center, const float radius) {
-    vector <LineCollideStar> pickedlights;
+    Vector tmp;
+    int index;
+    swappicked();
     if (radius < .1*COLLIDETABLEACCURACY) {
 	lighttable.Get (center, pickedlights);
     } else {
-	Vector tmp (radius,radius,radius);
-	lighttable.Get (center-tmp,center+tmp, pickedlights);
+	tmp = Vector(radius,radius,radius);
+	lighttable.Get (center-tmp,center+tmp, *newpicked);
     }
-
+    for (int i=0;i<lighttable.size();i++){
+	
+    }
+  
 }
 
 
