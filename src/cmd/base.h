@@ -94,7 +94,7 @@ class Base {
 #endif
 			virtual ~BaseSprite () {}
 			BaseSprite (const char *spritefile) 
-				:spr(spritefile) {}
+				:spr(spritefile,BILINEAR,GFXTRUE) {}
 		};
 		class BaseTalk : public BaseObj {
 		public:

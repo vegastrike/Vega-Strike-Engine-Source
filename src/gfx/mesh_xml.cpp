@@ -1252,9 +1252,9 @@ void Mesh::LoadXML(const char *filename, float scale, int faction, Flightgroup *
     //printf("tex\n");
 
     if (xml->alpha_name.length()==0) {
-      Decal = new Texture(xml->decal_name.c_str(), 0);    
+      Decal = new Texture(xml->decal_name.c_str(),0,MIPMAP,TEXTURE2D,TEXTURE_2D,0,g_game.use_ship_textures?GFXTRUE:GFXFALSE);    
     }else {
-      Decal = new Texture(xml->decal_name.c_str(), xml->alpha_name.c_str(),0);
+      Decal = new Texture(xml->decal_name.c_str(), xml->alpha_name.c_str(),0,MIPMAP,TEXTURE2D,TEXTURE_2D,1,0,0,g_game.use_ship_textures?GFXTRUE:GFXFALSE);
      
     }
   }

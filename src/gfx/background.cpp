@@ -39,7 +39,7 @@ Background::Background(const char *file, int numstars, float spread):Enabled (tr
 	stars= new GFXVertexList (GFXPOINT,numstars,tmpvertex, numstars, false,0);
 	up = left = down = front=right=back=NULL;
 	strcpy(temp, file);
-	up = new Texture(strcat(temp, "_up.bmp") );
+	up = new Texture(strcat(temp, "_up.bmp"),0,MIPMAP,TEXTURE2D,TEXTURE_2D,GFXTRUE );
 	SphereBackground = NULL;
 	
 	if (!up->LoadSuccess()) {
@@ -57,27 +57,27 @@ Background::Background(const char *file, int numstars, float spread):Enabled (tr
 	//up->Filter();
 
 	strcpy(temp, file);
-	left = new Texture(strcat(temp, "_left.bmp"));
+	left = new Texture(strcat(temp, "_left.bmp"),0,MIPMAP,TEXTURE2D,TEXTURE_2D,GFXTRUE );
 	//left->Clamp();
 	//left->Filter();
 
 	strcpy(temp, file);
-	front = new Texture(strcat(temp, "_front.bmp"));
+	front = new Texture(strcat(temp, "_front.bmp"),0,MIPMAP,TEXTURE2D,TEXTURE_2D,GFXTRUE );
 	//front->Clamp();
 	//front->Filter();
 
 	strcpy(temp, file);
-	right = new Texture(strcat(temp, "_right.bmp"));
+	right = new Texture(strcat(temp, "_right.bmp"),0,MIPMAP,TEXTURE2D,TEXTURE_2D,GFXTRUE );
 	//right->Clamp();
 	//right->Filter();
 
 	strcpy(temp, file);
-	back = new Texture(strcat(temp, "_back.bmp"));
+	back = new Texture(strcat(temp, "_back.bmp"),0,MIPMAP,TEXTURE2D,TEXTURE_2D,GFXTRUE );
 	//back->Clamp();
 	//back->Filter();
 
 	strcpy(temp, file);
-	down = new Texture(strcat(temp, "_down.bmp"));
+	down = new Texture(strcat(temp, "_down.bmp"),0,MIPMAP,TEXTURE2D,TEXTURE_2D,GFXTRUE );
 	//down->Clamp();
 	//down->Filter();
 	delete temp;

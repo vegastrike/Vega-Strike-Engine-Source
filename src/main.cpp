@@ -65,8 +65,11 @@ void setup_game_data ( ){ //pass in config file l8r??
   g_game.audio_frequency_mode=4;//22050/16
   g_game.sound_enabled =1;
   g_game.use_textures =1;
+  g_game.use_ship_textures =0;
+  g_game.use_planet_textures =0;
   g_game.use_sprites =1;
   g_game.use_animations =1;
+  g_game.use_logos =1;
   g_game.music_enabled=1;
   g_game.sound_volume=1;
   g_game.music_volume=1;

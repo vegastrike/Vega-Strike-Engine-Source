@@ -185,6 +185,9 @@ void init_opengl_extensions()
     g_game.zfar = XMLSupport::parse_float (vs_config->getVariable ("graphics","zfar","100000"));
     g_game.detaillevel = XMLSupport::parse_float (vs_config->getVariable ("graphics","ModelDetail","1"));
     g_game.use_textures = XMLSupport::parse_bool (vs_config->getVariable ("graphics","UseTextures","true"));
+    g_game.use_ship_textures = XMLSupport::parse_bool (vs_config->getVariable ("graphics","UseShipTextures","false"));
+    g_game.use_planet_textures = XMLSupport::parse_bool (vs_config->getVariable ("graphics","UsePlanetTextures","false"));
+    g_game.use_logos = XMLSupport::parse_bool (vs_config->getVariable ("graphics","UseLogos","true"));
     g_game.use_sprites = XMLSupport::parse_bool (vs_config->getVariable ("graphics","UseSprites","true"));
     g_game.use_animations = XMLSupport::parse_bool (vs_config->getVariable ("graphics","UseAnimations","true"));
 

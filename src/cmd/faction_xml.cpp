@@ -174,7 +174,7 @@ void Universe::Faction::beginElement(void *userData, const XML_Char *names, cons
 			strcpy(tmpstr,(*iter).value.c_str());
 		} else {
 			RGBfirst =3;
-			thisuni->factions[thisuni->factions.size()-1]->logo=new Texture((*iter).value.c_str(),tmpstr);
+			thisuni->factions[thisuni->factions.size()-1]->logo=new Texture((*iter).value.c_str(),tmpstr,0,MIPMAP,TEXTURE2D,TEXTURE_2D,1,0,GFXTRUE);
 		}
 		break;
 	  case LOGOA:
@@ -184,7 +184,7 @@ void Universe::Faction::beginElement(void *userData, const XML_Char *names, cons
 			strcpy(tmpstr,(*iter).value.c_str());
 		} else {
 			RGBfirst =3;
-			thisuni->factions[thisuni->factions.size()-1]->logo=new Texture(tmpstr,(*iter).value.c_str());
+			thisuni->factions[thisuni->factions.size()-1]->logo=new Texture(tmpstr,(*iter).value.c_str(),0,MIPMAP,TEXTURE2D,TEXTURE_2D,1,0,GFXTRUE);
 		}
 		break;
       case SECLOGORGB:
@@ -201,18 +201,18 @@ void Universe::Faction::beginElement(void *userData, const XML_Char *names, cons
     thisuni->factions[thisuni->factions.size()-1]->secondaryLogo=NULL;
     if (!secString.empty()) {
       if (secStringAlph.empty()) {
-	thisuni->factions[thisuni->factions.size()-1]->secondaryLogo=new Texture(secString.c_str());
+	thisuni->factions[thisuni->factions.size()-1]->secondaryLogo=new Texture(secString.c_str(),0,MIPMAP,TEXTURE2D,TEXTURE_2D,GFXTRUE);;
       }else {
-	thisuni->factions[thisuni->factions.size()-1]->secondaryLogo=new Texture(secString.c_str(),secStringAlph.c_str());
+	thisuni->factions[thisuni->factions.size()-1]->secondaryLogo=new Texture(secString.c_str(),secStringAlph.c_str(),0,MIPMAP,TEXTURE2D,TEXTURE_2D,1,0,GFXTRUE);;
       }
 
     }
 	assert (RGBfirst!=0);
 	if (RGBfirst==1) {
-			thisuni->factions[thisuni->factions.size()-1]->logo=new Texture(tmpstr);
+			thisuni->factions[thisuni->factions.size()-1]->logo=new Texture(tmpstr,0,MIPMAP,TEXTURE2D,TEXTURE_2D,GFXTRUE);
 	}
 	if (RGBfirst==2) {
-			thisuni->factions[thisuni->factions.size()-1]->logo=new Texture(tmpstr,tmpstr);
+			thisuni->factions[thisuni->factions.size()-1]->logo=new Texture(tmpstr,tmpstr,0,MIPMAP,TEXTURE2D,TEXTURE_2D,1,0,GFXTRUE);
 	}
 	if (tmpstr!=NULL) {
 		delete []tmpstr; 

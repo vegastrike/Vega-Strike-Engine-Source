@@ -157,10 +157,10 @@ void SphereMesh::InitSphere(float radius, int stacks, int slices, const char *te
       }
       if (!found_texture) {
 	if (alpha) {
-	  Decal = new Texture(texture, alpha,0,mipmap);
+	  Decal = new Texture(texture, alpha,0,mipmap,TEXTURE2D,TEXTURE_2D,1,0,(Insideout||g_game.use_planet_textures)?GFXTRUE:GFXFALSE);
 	  
 	}else {
-	  Decal = new Texture (texture,0,mipmap);
+	  Decal = new Texture (texture,0,mipmap,TEXTURE2D,TEXTURE_2D,(Insideout||g_game.use_planet_textures)?GFXTRUE:GFXFALSE);
 	}
       }
       Insideout?setEnvMap(GFXFALSE):setEnvMap(envMapping);

@@ -157,7 +157,11 @@ Bolt::Bolt (const weapon_info & typ, const Matrix &orientationpos,  const Vector
     decal = q->boltdecals->AddTexture (typ.file.c_str(),MIPMAP);
     if (decal>=(int)q->bolts.size()) {
       q->bolts.push_back (vector <Bolt *>());
-      q->cachedecals.push_back (q->boltdecals->AddTexture (typ.file.c_str(),MIPMAP));
+      int blargh = q->boltdecals->AddTexture (typ.file.c_str(),MIPMAP);
+      if (blargh>=(int)q->bolts.size()) {
+	q->bolts.push_back (vector <Bolt *>());	
+      }
+      q->cachedecals.push_back (blargh);
     }
     q->bolts[decal].push_back (this);
   } else {

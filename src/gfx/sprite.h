@@ -38,7 +38,7 @@ class Sprite {
 	Texture *surface;
 
 public:
-	Sprite (const char *file, enum FILTER texturefilter=BILINEAR);
+	Sprite (const char *file, enum FILTER texturefilter=BILINEAR, GFXBOOL force=GFXFALSE);
 	~Sprite();
 	bool LoadSuccess() {return surface!=NULL;}
 	void Draw();

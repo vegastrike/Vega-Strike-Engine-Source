@@ -34,7 +34,7 @@
 #endif
 static float *mview = NULL;
 
-Sprite::Sprite(const char *file, enum FILTER texturefilter) {
+Sprite::Sprite(const char *file, enum FILTER texturefilter,GFXBOOL force) {
   vschdir ("sprites");
   xcenter = 0;
   ycenter = 0;
@@ -58,7 +58,7 @@ Sprite::Sprite(const char *file, enum FILTER texturefilter) {
     widtho2/=2;
     heighto2/=-2;
     surface=NULL;
-    if (g_game.use_sprites) {
+    if (g_game.use_sprites||force==GFXTRUE) {
       if (texturea[0]=='0') {
 	surface = new Texture(texture,0,texturefilter,TEXTURE2D,TEXTURE_2D,GFXTRUE);    
       } else {
