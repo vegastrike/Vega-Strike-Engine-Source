@@ -25,6 +25,7 @@ QVector LaunchUnitNear (QVector pos) {
 	delta = delta.Scale ( dist+def_un_size);
 	if (k<5) {
 	  pos = pos+delta;
+	  collision=true;
 	}else {
 	  QVector r(.5,.5,.5);
 	  pos+=un->rSize()*r;
