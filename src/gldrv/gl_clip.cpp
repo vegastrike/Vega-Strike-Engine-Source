@@ -7,7 +7,7 @@ using namespace GFXMatrices;  //causes problems with g_game
 float BoxFrust [6][4];
 float frust [6][4];
 
-float /*GFXDRVAPI*/ GFXSphereInFrustum (const Vector &Cnt, float radius) {
+float /*GFXDRVAPI*/ GFXSphereInFrustum (const QVector &Cnt, float radius) {
   return GFXSphereInFrustum (frust,Cnt,radius);
 }
 CLIPSTATE GFXBoxInFrustum (const Vector &min, const Vector &max) {
