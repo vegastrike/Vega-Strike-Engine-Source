@@ -28,6 +28,7 @@
 #include "bsp.h"
 #include <assert.h>
 #include <math.h>
+#include "cmd/nebula.h"
 #include <list>
 #include <string>
 #include <fstream>
@@ -211,14 +212,24 @@ Mesh * Mesh::getLOD (float lod) {
   }
   return retval;
 }
+
+
+
+
+
+
 void Mesh::Draw(float lod, const Matrix m, float toofar, short cloak, float nebdist)
 {
+
   //  Vector pos (local_pos.Transform(m));
   MeshDrawContext c(m);
   UpdateFX(GetElapsedTime());
   c.SpecialFX = &LocalFX;
   c.mesh_seq=((toofar+rSize()>g_game.zfar)/*&&draw_sequence==0*/)?NUM_ZBUF_SEQ:draw_sequence;
   c.cloaked=MeshDrawContext::NONE;
+  if (nebdist<0) {
+    c.cloaked|=MeshDrawContext::FOG;
+  }
   if (cloak>=0) {
     c.cloaked|=MeshDrawContext::CLOAK;
     if ((cloak&0x1)) {
@@ -257,6 +268,14 @@ void Mesh::Draw(float lod, const Matrix m, float toofar, short cloak, float nebd
 void Mesh::DrawNow(float lod,  bool centered, const Matrix m, short cloak, float nebdist) {
   Mesh *o = getLOD (lod);
   //fixme: cloaking not delt with.... not needed for backgroudn anyway
+  if (nebdist<0) {
+    Nebula * t=_Universe->AccessCamera()->GetNebula();
+    if (t) {
+      t->SetFogState();
+    }
+  } else {
+    GFXFogMode(FOG_OFF);
+  }
   if (centered) {
     float m1[16];
     memcpy (m1,m,sizeof (float)*16);
@@ -463,6 +482,14 @@ void Mesh::ProcessDrawQueue(int whichdrawqueue) {
       int ligh;
       GFXCreateLight (ligh,(*c.SpecialFX)[i],true);
       specialfxlight.push_back(ligh);
+    }
+    if (c.cloaked&MeshDrawContext::FOG) {
+      Nebula *t=_Universe->AccessCamera()->GetNebula();
+      if (t) {
+	t->SetFogState();
+      }
+    } else {
+      GFXFogMode (FOG_OFF);
     }
     vlist->Draw();
 

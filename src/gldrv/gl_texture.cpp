@@ -40,6 +40,8 @@ static int MAX_TEXTURE_SIZE=256;
 
 GLenum GetUncompressedTextureFormat (TEXTUREFORMAT textureformat) {
   switch (textureformat) {
+  case RGB24:
+    return GL_RGB;
   case RGB32:
     return GL_RGB;
   case RGBA32:
@@ -219,8 +221,7 @@ GLenum GetTextureFormat (TEXTUREFORMAT textureformat) {
   default:
   case DUMMY:
   case RGB24:
-    fprintf (stderr,"RGB24 bitmaps not yet supported");
-    return GL_RGB;
+    return RGBCompressed (GL_RGB);
   }
 }
 GLenum GetImageTarget (TEXTURE_IMAGE_TARGET imagetarget) {
@@ -268,7 +269,7 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture (unsigned char *buffer, int handle,  TE
   GLenum image2D=GetImageTarget (imagetarget);
   glBindTexture(textures[handle].targets, textures[handle].name);
   if (textures[handle].width>MAX_TEXTURE_SIZE||textures[handle].height>MAX_TEXTURE_SIZE) {
-    DownSampleTexture (&tempbuf,buffer,textures[handle].height,textures[handle].width,(internformat==PALETTE8?1:4)* sizeof(unsigned char ), handle);
+    DownSampleTexture (&tempbuf,buffer,textures[handle].height,textures[handle].width,(internformat==PALETTE8?1:(internformat==RGBA32?4:3))* sizeof(unsigned char ), handle);
     buffer = tempbuf;
   }
   if (internformat!=PALETTE8) {

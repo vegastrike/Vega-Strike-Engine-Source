@@ -2,6 +2,7 @@
 #include <png.h>
 #include <stdlib.h>
 #include "png_texture.h"
+#include <assert.h>
 #ifndef png_jmpbuf
 #  define png_jmpbuf(png_ptr) ((png_ptr)->jmpbuf)
 #endif
@@ -9,6 +10,21 @@
 int PNG_HAS_PALETTE =1;
 int PNG_HAS_COLOR=2;
 int PNG_HAS_ALPHA=4;
+unsigned char * texTransform (int &bpp, int &color_type, unsigned int &width, unsigned int &height, unsigned char ** rp){
+  unsigned char * data;
+  unsigned int row_size;
+  assert (bpp==8);
+  if ((color_type&PNG_HAS_PALETTE)||(!(color_type&PNG_HAS_COLOR))) {
+    row_size =width*(bpp/8)*sizeof (unsigned char)*((color_type&PNG_HAS_ALPHA)?2:1);
+  } else {
+    row_size = width*(bpp/8)*sizeof(unsigned char)*((color_type&PNG_HAS_ALPHA)?4:3);
+  }
+  data = (unsigned char *)malloc (row_size*height);
+  for (unsigned int i=0;i<height;i++) {
+    memcpy  (data+i*row_size,rp[i],row_size);
+  }
+  return data;
+}
 
 unsigned char * heightmapTransform (int &bpp, int &color_type, unsigned int &width, unsigned int &height, unsigned char ** row_pointers) {
   unsigned short * dat = (unsigned short *) malloc (sizeof (unsigned short)*width*height);
@@ -120,18 +136,14 @@ png_cexcept_error(png_structp png_ptr, png_const_charp msg)
 
 }
 
-unsigned char * readImage (const char * name, int & bpp, int &color_type, unsigned int &width, unsigned int &height, unsigned char * &palette, textureTransform * tt) {
+unsigned char * readImage (FILE *fp, int & bpp, int &color_type, unsigned int &width, unsigned int &height, unsigned char * &palette, textureTransform * tt, bool strip_16) {
   palette = NULL;
   unsigned char sig[8];
-  fprintf (stderr,"Loading %s",name);
   png_structp png_ptr;
   png_bytepp row_pointers;
   png_infop info_ptr;
   int  interlace_type;
-   FILE *fp;
-   if ((fp = fopen(name, "rb")) == NULL)
-      return NULL;
-   fread(sig, 1, 8, fp);
+  fread(sig, 1, 8, fp);
   if (!png_check_sig(sig, 8))
        return NULL;   /* bad signature */
     png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL,
@@ -139,20 +151,17 @@ unsigned char * readImage (const char * name, int & bpp, int &color_type, unsign
 	  (png_error_ptr)NULL);
 	if (png_ptr == NULL)
    {
-      fclose(fp);
       return NULL;
    }
    info_ptr = png_create_info_struct(png_ptr);
    if (info_ptr == NULL)
    {
-      fclose(fp);
       png_destroy_read_struct(&png_ptr, (png_infopp)NULL, (png_infopp)NULL);
       return NULL;
    }
    if (setjmp(png_jmpbuf(png_ptr))) {
       /* Free all of the memory associated with the png_ptr and info_ptr */
       png_destroy_read_struct(&png_ptr, &info_ptr, (png_infopp)NULL);
-      fclose(fp);
       /* If we get here, we had a problem reading the file */
       return NULL;
    }
@@ -162,10 +171,20 @@ unsigned char * readImage (const char * name, int & bpp, int &color_type, unsign
    png_read_info(png_ptr, info_ptr);  /* read all PNG info up to image data */
    png_get_IHDR(png_ptr, info_ptr, (png_uint_32 *)&width, (png_uint_32 *)&height, &bpp, &color_type, &interlace_type, NULL, NULL);
 # if __BYTE_ORDER != __BIG_ENDIAN
-
    if (bpp==16)
      png_set_swap (png_ptr);
 #endif
+
+   if (bpp==16&&strip_16)
+     png_set_strip_16(png_ptr);
+   if (strip_16&&color_type == PNG_COLOR_TYPE_PALETTE)
+     png_set_palette_to_rgb(png_ptr);
+   
+   if (color_type == PNG_COLOR_TYPE_GRAY &&
+       bpp < 8) png_set_gray_1_2_4_to_8(png_ptr);
+   
+
+
    png_set_expand (png_ptr);
    png_read_update_info (png_ptr,info_ptr);
    png_get_IHDR(png_ptr, info_ptr, (png_uint_32 *)&width, (png_uint_32 *)&height, &bpp, &color_type, &interlace_type, NULL, NULL);
@@ -196,7 +215,6 @@ unsigned char * readImage (const char * name, int & bpp, int &color_type, unsign
    fprintf (stderr,"Decompressing Done.\n");
 
    /* close the file */
-   fclose(fp);
    return result;
 }
 

@@ -382,18 +382,25 @@ void QuadTree::LoadXML (const char *filename, const Vector & Scales, const float
     hm.ZOrigin=(int)xml->data[i].OriginY;
     hm.Scale = xml->data[i].scale;
     int format;int bpp; unsigned char * palette;
-    hm.Data = (short *) readImage (xml->data[i].file.c_str(),bpp, format, hm.XSize,hm.ZSize, palette, &heightmapTransform);
+    FILE * fp;
+    fp = fopen (xml->data[i].file.c_str(),"rb");
+    if (fp) {
+      hm.Data = (short *) readImage (fp,bpp, format, hm.XSize,hm.ZSize, palette, &heightmapTransform,false);
+      fclose (fp);
+    }
 	  //LoadData();
     unsigned int xsize;unsigned int zsize;
-    hm.terrainmap = (unsigned char *)readImage (xml->data[i].terrainfile.c_str(),
-						bpp,
-						format,
-						xsize,
-						zsize,
-						palette,
-						&terrainTransform);
-
-    
+    fp = fopen (xml->data[i].terrainfile.c_str(),"rb");
+    if (fp) {
+      hm.terrainmap = (unsigned char *)readImage (fp,
+						  bpp,
+						  format,
+						  xsize,
+						  zsize,
+						  palette,
+						  &terrainTransform,true);
+      fclose (fp);
+    }
     if (hm.Data&&hm.terrainmap) {
       assert (xsize==hm.XSize&&zsize==hm.ZSize);
       SetXSizes (hm.XOrigin, hm.XSize<<hm.Scale);

@@ -5,15 +5,15 @@
 #include "xml_support.h"
 
 namespace NebulaXML {
-	char parse_fogmode (string val) {
+	FOGMODE parse_fogmode (string val) {
 		if (val=="exp") {
-			return 1;
+			return FOG_EXP;
 		} else if (val=="exp2") {
-			return 2;
+			return FOG_EXP2;
 		} else if (val=="linear") {
-			return 3;
+			return FOG_LINEAR;
 		} else {
-			return 0;
+			return FOG_OFF;
 		}
 	}
 	enum Names {
@@ -141,7 +141,14 @@ void Nebula::LoadXML(const char * filename) {
 	fclose (inFile);
 	XML_ParserFree (parser);
 }
-
+void Nebula::SetFogState () {
+  GFXFogMode (fogmode);
+  GFXFogDensity (Density);
+  GFXFogLimits (fognear,fogfar);
+  GFXFogColor (GFXColor (color.i,color.j,color.k,1));
+  GFXFogIndex (index);
+  
+}
 Nebula::Nebula(const char * filename, const char * unitfile, bool SubU, int faction, Flightgroup* fg, int fg_snumber):
   Unit (unitfile,true,SubU,faction,fg,fg_snumber) {
 	vssetdir (GetSharedUnitPath().c_str());

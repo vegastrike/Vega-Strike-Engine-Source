@@ -10,14 +10,14 @@ private:
 	float fognear;
 	float fogfar;
 	int index;
-	char fogmode; // 0=OFF (I won't use this), 1=EXP, 2=EXP2, 3=LINEAR
+	enum FOGMODE fogmode; // 0=OFF (I won't use this), 1=EXP, 2=EXP2, 3=LINEAR
 	void LoadXML(const char * filename);
 	void beginElem(const std::string&,const AttributeList&);
 public:
 	virtual void reactToCollision (Unit *un, const Vector & normal, float dist);
 	Nebula(const char * filename, const char * unitfile, bool SubU, int faction, Flightgroup* fg=NULL, int fg_snumber=0);
 	virtual void UpdatePhysics (const Transformation &trans, const Matrix transmat, const Vector & CumulativeVelocity, bool ResolveLast, UnitCollection *uc=NULL);
-
+	void SetFogState();
 };
 
 #endif

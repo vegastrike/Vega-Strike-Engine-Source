@@ -27,7 +27,9 @@
 #include "endianness.h"
 #include "hashtable.h"
 #include "vs_path.h"
+#include "png_texture.h"
 using std::string;
+
 
 #ifndef WIN32
 typedef unsigned long DWORD;
@@ -224,69 +226,87 @@ Texture::Texture(const char * FileName, int stage, enum FILTER mipmap, enum TEXT
 	  return;
 	}
 	//	strcpy(filename, FileName);
-	fseek (fp,SIZEOF_BITMAPFILEHEADER,SEEK_SET);
-	//long temp;
-	BITMAPINFOHEADER info;
-	fread(&info, SIZEOF_BITMAPINFOHEADER,1,fp);
-	sizeX = le32_to_cpu(info.biWidth);	
-	sizeY = le32_to_cpu(info.biHeight);
-
-
-	//while(1);
-	this->texfilename = new char [texfilename.length()+1];
-	strcpy(this->texfilename,texfilename.c_str());
-
-	if(le16_to_cpu(info.biBitCount) == 24)
-	{
-		mode = _24BIT;
-		if(fp2)
-			mode = _24BITRGBA;
-		data = NULL;
-		data= new unsigned char [4*sizeY*sizeX]; // all bitmap data needs to be 32 bits
-		if (!data)
-			return;
-		for (int i=sizeY-1; i>=0;i--)
+	int bpp;
+	int format;
+	data = readImage (fp,bpp,format,sizeX,sizeY,palette,texTransform,true);
+	if (data) {
+	  //FIXME deal with palettes and grayscale with alpha
+	  if (!format&PNG_HAS_COLOR||(format&PNG_HAS_PALETTE)) {
+	    mode=_8BIT;
+	  } 
+	  if (format&PNG_HAS_COLOR) {
+	    if (format&PNG_HAS_ALPHA) {
+	      mode=_24BITRGBA;
+	    } else {
+	      mode=_24BIT;
+	    }
+	  }
+	}else {
+	  //seek back to beginning
+	  fseek (fp,SIZEOF_BITMAPFILEHEADER,SEEK_SET);
+	  //long temp;
+	  BITMAPINFOHEADER info;
+	  fread(&info, SIZEOF_BITMAPINFOHEADER,1,fp);
+	  sizeX = le32_to_cpu(info.biWidth);	
+	  sizeY = le32_to_cpu(info.biHeight);
+	  
+	  
+	  //while(1);
+	  this->texfilename = new char [texfilename.length()+1];
+	  strcpy(this->texfilename,texfilename.c_str());
+	  
+	  if(le16_to_cpu(info.biBitCount) == 24)
+	    {
+	      mode = _24BITRGBA;
+	      if(fp2)
+		mode = _24BITRGBA;
+	      data = NULL;
+	      data= new unsigned char [4*sizeY*sizeX]; // all bitmap data needs to be 32 bits
+	      if (!data)
+		return;
+	      for (int i=sizeY-1; i>=0;i--)
 		{
-			int itimes4width= 4*i*sizeX;//speed speed speed (well if I really wanted speed Pos'd have wrote this function)
-			for (unsigned int j=0; j<sizeX;j++)
-			{
-				if(fp2)
+		  int itimes4width= 4*i*sizeX;//speed speed speed (well if I really wanted speed Pos'd have wrote this function)
+		  for (unsigned int j=0; j<sizeX;j++)
+		    {
+		      if(fp2)
 					fread(data+3, sizeof(unsigned char), 1, fp2);
-				else
-					*(data+3) = 0xff; // default alpha = 1
-				for (int k=2; k>=0;k--)
-				{
-					fread (data+k+4*j+itimes4width,sizeof (unsigned char),1,fp);
-				}
-				
-			}
-		}
-	}
-	else if(le16_to_cpu(info.biBitCount) == 8)
-	{
-		mode = _8BIT;
-		data = NULL;
-		data= new unsigned char [sizeY*sizeX];
-		palette = new unsigned char [256*4+1];
-		unsigned char *paltemp = palette;
-		unsigned char ctemp;
-		for(int palcount = 0; palcount < 256; palcount++)
-		{
-		  fread(paltemp, SIZEOF_RGBQUAD, 1, fp);
-			ctemp = paltemp[0];
-			paltemp[0] = paltemp[2];
-			paltemp[2] = ctemp;
-			paltemp+=4; // pal size
-		}
-		if (!data)
-			return;
-		for (int i=sizeY-1; i>=0;i--)
-		{
-			for (unsigned int j=0; j<sizeX;j++)
+		      else
+			*(data+3) = 0xff; // default alpha = 1
+		      for (int k=2; k>=0;k--)
 			{
-				fread (data+ j + i * sizeX,sizeof (unsigned char),1,fp);
+					fread (data+k+4*j+itimes4width,sizeof (unsigned char),1,fp);
 			}
+		      
+		    }
 		}
+	    }
+	  else if(le16_to_cpu(info.biBitCount) == 8)
+	    {
+	      mode = _8BIT;
+	      data = NULL;
+	      data= new unsigned char [sizeY*sizeX];
+	      palette = new unsigned char [256*4+1];
+	      unsigned char *paltemp = palette;
+	      unsigned char ctemp;
+		for(int palcount = 0; palcount < 256; palcount++)
+		  {
+		    fread(paltemp, SIZEOF_RGBQUAD, 1, fp);
+		    ctemp = paltemp[0];
+		    paltemp[0] = paltemp[2];
+		    paltemp[2] = ctemp;
+		    paltemp+=4; // pal size
+		  }
+		if (!data)
+		  return;
+		for (int i=sizeY-1; i>=0;i--)
+		  {
+		    for (unsigned int j=0; j<sizeX;j++)
+		      {
+			fread (data+ j + i * sizeX,sizeof (unsigned char),1,fp);
+		      }
+		  }
+	    }
 	}
 	fprintf (stderr,"Bind... ");
 	Bind();
@@ -341,166 +361,184 @@ Texture::Texture (const char * FileNameRGB, const char *FileNameA, int stage, en
 	  original=NULL;
 	  return;
 	}
-	fseek (fp,SIZEOF_BITMAPFILEHEADER,SEEK_SET);
-	//long temp;
-	BITMAPINFOHEADER info;
-	fread(&info, SIZEOF_BITMAPINFOHEADER,1,fp);
-	sizeX = le32_to_cpu(info.biWidth);
-	sizeY = le32_to_cpu(info.biHeight);
-	BITMAPINFOHEADER info1;
-	FILE *fp1 = NULL;
-
-	this->texfilename = new char [texfilename.length()+1];
-	strcpy(this->texfilename,texfilename.c_str());
-
-	if (FileNameA)
-	{
-	  std::string tmp = shared?GetSharedTexturePath(FileNameA).c_str():FileNameA;
-		fp1 = fopen (tmp.c_str(), "rb");
-		
-		if (!fp1)
-		{
-			data = NULL;
-			FileNameA = NULL;
-			//fclose(fp);
-			//*this = Texture(FileNameRGB, NULL);
-			//return;
-		}
-		else
-		{
-			fseek (fp1,SIZEOF_BITMAPFILEHEADER,SEEK_SET);
-			
-			fread (&info1,SIZEOF_BITMAPINFOHEADER,1,fp1);
-			if (sizeX != (unsigned int) le32_to_cpu(info1.biWidth)||sizeY!=(unsigned int)le32_to_cpu(info1.biHeight))
-			{
-				data = NULL;
-				fclose (fp1);
-				if (fp) 
-				  fclose (fp);
-				return;
-			}
-			RGBQUAD ptemp1;	
-			if (le16_to_cpu(info1.biBitCount) == 8)
-			{
-				for (int i=0; i<256; i++)
-					fread(&ptemp1, sizeof(RGBQUAD), 1, fp1); //get rid of the palette for a b&w greyscale alphamap
-
-			}
-		}
-	}
-	if(le16_to_cpu(info.biBitCount) == 24) {
-	  mode = _24BITRGBA;
-	  data= new unsigned char [4*sizeY*sizeX];
-	  for (int i=sizeY-1; i>=0;i--)
+	int bpp;
+	int format;
+	FILE * fp1=NULL;
+	data = readImage (fp,bpp,format,sizeX,sizeY,palette,texTransform,true);
+	if (data) {
+	  //FIXME deal with palettes and grayscale with alpha
+	  if (!format&PNG_HAS_COLOR||(format&PNG_HAS_PALETTE)) {
+	    mode=_8BIT;
+	  } 
+	  if (format&PNG_HAS_COLOR) {
+	    if (format&PNG_HAS_ALPHA) {
+	      mode=_24BITRGBA;
+	    } else {
+	      mode=_24BIT;
+	    }
+	  }
+	}else {
+	  ///seek back to the beginning
+	  fseek (fp,SIZEOF_BITMAPFILEHEADER,SEEK_SET);
+	  //long temp;
+	  BITMAPINFOHEADER info;
+	  fread(&info, SIZEOF_BITMAPINFOHEADER,1,fp);
+	  sizeX = le32_to_cpu(info.biWidth);
+	  sizeY = le32_to_cpu(info.biHeight);
+	  BITMAPINFOHEADER info1;
+	  
+	  this->texfilename = new char [texfilename.length()+1];
+	  strcpy(this->texfilename,texfilename.c_str());
+	  
+	  if (FileNameA)
 	    {
-	      int itimes4width= 4*i*sizeX;//speed speed speed (well if I really wanted speed Pos'd have wrote this function)
-	      for (unsigned int j=0; j<sizeX;j++)
+	      std::string tmp = shared?GetSharedTexturePath(FileNameA).c_str():FileNameA;
+	      fp1 = fopen (tmp.c_str(), "rb");
+	      
+	      if (!fp1)
 		{
-		  for (int k=2; k>=0;k--) {
-		    fread (data+k+4*j+itimes4width,sizeof (unsigned char),1,fp);
-		  }
-		  if (FileNameA){
-		    if (le16_to_cpu(info1.biBitCount)==24)
+		  data = NULL;
+		  FileNameA = NULL;
+		  //fclose(fp);
+		  //*this = Texture(FileNameRGB, NULL);
+		  //return;
+		}
+	      else
+		{
+		  fseek (fp1,SIZEOF_BITMAPFILEHEADER,SEEK_SET);
+		  
+		  fread (&info1,SIZEOF_BITMAPINFOHEADER,1,fp1);
+		  if (sizeX != (unsigned int) le32_to_cpu(info1.biWidth)||sizeY!=(unsigned int)le32_to_cpu(info1.biHeight))
+		    {
+		      data = NULL;
+		      fclose (fp1);
+		      if (fp) 
+			fclose (fp);
+		      return;
+		    }
+		  RGBQUAD ptemp1;	
+		  if (le16_to_cpu(info1.biBitCount) == 8)
+		    {
+		      for (int i=0; i<256; i++)
+			fread(&ptemp1, sizeof(RGBQUAD), 1, fp1); //get rid of the palette for a b&w greyscale alphamap
+		      
+		    }
+		}
+	    }
+	  if(le16_to_cpu(info.biBitCount) == 24) {
+	    mode = _24BITRGBA;
+	    data= new unsigned char [4*sizeY*sizeX];
+	    for (int i=sizeY-1; i>=0;i--)
+	      {
+		int itimes4width= 4*i*sizeX;//speed speed speed (well if I really wanted speed Pos'd have wrote this function)
+		for (unsigned int j=0; j<sizeX;j++)
+		  {
+		    for (int k=2; k>=0;k--) {
+		      fread (data+k+4*j+itimes4width,sizeof (unsigned char),1,fp);
+		    }
+		    if (FileNameA){
+		      if (le16_to_cpu(info1.biBitCount)==24)
 		      for (int k=2; k>=0;k--) {
 			fread (data+3+4*j+itimes4width,sizeof (unsigned char),1,fp1);
 			//*(data+3+4*j+itimes4width) = 30;
 		      } else {
 			fread (data+3+4*j+itimes4width,sizeof (unsigned char),1,fp1);
 		      }
+		    }
+		    else {
+		      if (!data[4*j+itimes4width]&&!data[4*j+itimes4width+1]&&!data[4*j+itimes4width+2])
+			data[4*j+itimes4width+3] = 0;
+		      else
+			data[4*j+itimes4width+3] = 255;
+		    }
+		    //*(data+3+4*j+itimes4width) = 30;
+		    
+		    
 		  }
-		  else {
-		    if (!data[4*j+itimes4width]&&!data[4*j+itimes4width+1]&&!data[4*j+itimes4width+2])
-		      data[4*j+itimes4width+3] = 0;
-		    else
-		      data[4*j+itimes4width+3] = 255;
-		  }
-		  //*(data+3+4*j+itimes4width) = 30;
-				
-				
-		}
-	    }
-	}
-	else if(le16_to_cpu(info.biBitCount) == 8) {
-	  unsigned char index = 0;
-	  mode = _24BITRGBA;
-	  data = NULL;
-	  data= new unsigned char [4*sizeY*sizeX];
-	  palette = new unsigned char [256*4+1];
-	  unsigned char *paltemp = palette;
-	  unsigned char ctemp;
-	  for(int palcount = 0; palcount < 256; palcount++) {
-	    fread(paltemp, sizeof(RGBQUAD), 1, fp);
-	    ctemp = paltemp[0];
-	    paltemp[0] = paltemp[2];
-	    paltemp[2] = ctemp;
-	    paltemp+=4;
-	  }
-	  if (!data) {
-	    if (fp)
-	      fclose (fp);
-	    if (fp1)
-	      fclose (fp1);
-	    return;
-	  }
-		//FIXME VEGASTRIKE???		int k=0;
-	  for (int i=sizeY-1; i>=0;i--) {
-	    for (unsigned int j=0; j<sizeX;j++)
-	      {
-		fread (&index,sizeof (unsigned char),1,fp);
-		data [4*(i*sizeX+j)] = palette[((short)index)*4];	
-		data [4*(i*sizeX+j)+1] = palette[((short)index)*4+1];
-		data [4*(i*sizeX+j)+2] = palette[((short)index)*4+2];
 	      }
 	  }
-	  delete [] palette;
-	  palette = NULL;
-	  if (FileNameA)
-	    {
-	      for (int i=sizeY-1; i>=0;i--)
+	  else if(le16_to_cpu(info.biBitCount) == 8) {
+	    unsigned char index = 0;
+	    mode = _24BITRGBA;
+	    data = NULL;
+	    data= new unsigned char [4*sizeY*sizeX];
+	    palette = new unsigned char [256*4+1];
+	    unsigned char *paltemp = palette;
+	    unsigned char ctemp;
+	    for(int palcount = 0; palcount < 256; palcount++) {
+	      fread(paltemp, sizeof(RGBQUAD), 1, fp);
+	      ctemp = paltemp[0];
+	      paltemp[0] = paltemp[2];
+	      paltemp[2] = ctemp;
+	      paltemp+=4;
+	    }
+	    if (!data) {
+	      if (fp)
+		fclose (fp);
+	      if (fp1)
+		fclose (fp1);
+	      return;
+	    }
+		//FIXME VEGASTRIKE???		int k=0;
+	    for (int i=sizeY-1; i>=0;i--) {
+	      for (unsigned int j=0; j<sizeX;j++)
 		{
-		  int itimes4width= 4*i*sizeX;//speed speed speed (well if I really wanted speed Pos'd have wrote this function)
-		  for (unsigned int j=0; j<sizeX;j++) {
-		    if (le16_to_cpu(info1.biBitCount)==24)
-		      for (int k=2; k>=0;k--) {
+		  fread (&index,sizeof (unsigned char),1,fp);
+		  data [4*(i*sizeX+j)] = palette[((short)index)*4];	
+		  data [4*(i*sizeX+j)+1] = palette[((short)index)*4+1];
+		  data [4*(i*sizeX+j)+2] = palette[((short)index)*4+2];
+		}
+	    }
+	    delete [] palette;
+	    palette = NULL;
+	    if (FileNameA)
+	      {
+		for (int i=sizeY-1; i>=0;i--)
+		  {
+		    int itimes4width= 4*i*sizeX;//speed speed speed (well if I really wanted speed Pos'd have wrote this function)
+		    for (unsigned int j=0; j<sizeX;j++) {
+		      if (le16_to_cpu(info1.biBitCount)==24)
+			for (int k=2; k>=0;k--) {
+			  fread (data+3+4*j+itimes4width,sizeof (unsigned char),1,fp1);
+			}
+		      else {
 			fread (data+3+4*j+itimes4width,sizeof (unsigned char),1,fp1);
 		      }
-		    else {
-		      fread (data+3+4*j+itimes4width,sizeof (unsigned char),1,fp1);
 		    }
 		  }
+	      } else{
+		for (unsigned int i=0; i<sizeY;i++) {
+		  int itimes4width= 4*i*sizeX;//speed speed speed (well if I really wanted speed Pos'd have wrote this function)
+		  for (unsigned int j=0; j<sizeX;j++){
+		    if (!data[4*j+itimes4width]&&!data[4*j+itimes4width+1]&&!data[4*j+itimes4width+2])
+		      data[4*j+itimes4width+3]=0;
+		    else
+		      data[4*j+itimes4width+3]=255;
+		  }
 		}
-	    } else{
-	      for (unsigned int i=0; i<sizeY;i++) {
-		int itimes4width= 4*i*sizeX;//speed speed speed (well if I really wanted speed Pos'd have wrote this function)
-		for (unsigned int j=0; j<sizeX;j++){
-		  if (!data[4*j+itimes4width]&&!data[4*j+itimes4width+1]&&!data[4*j+itimes4width+2])
-		    data[4*j+itimes4width+3]=0;
-		  else
-		    data[4*j+itimes4width+3]=255;
-		}
+		
 	      }
-	      
-	    }
-	}
-
-	if (alpha!=1) {
-	  float tmpclamp;
-	  for (unsigned int i=0; i<sizeY;i++) {
-	    int itimes4width= 4*i*sizeX;//speed speed speed (well if I really wanted speed Pos'd have wrote this function)
-	    for (unsigned int j=0; j<sizeX;j++){
-	      tmpclamp = data[4*j+itimes4width+3];
-	      if (tmpclamp>zeroval) {
-		tmpclamp /=255.;
-		tmpclamp =pow (tmpclamp,alpha);
-		tmpclamp *=255;
+	  }
+	  
+	  if (alpha!=1) {
+	    float tmpclamp;
+	    for (unsigned int i=0; i<sizeY;i++) {
+	      int itimes4width= 4*i*sizeX;//speed speed speed (well if I really wanted speed Pos'd have wrote this function)
+	      for (unsigned int j=0; j<sizeX;j++){
+		tmpclamp = data[4*j+itimes4width+3];
+		if (tmpclamp>zeroval) {
+		  tmpclamp /=255.;
+		  tmpclamp =pow (tmpclamp,alpha);
+		  tmpclamp *=255;
 		if (tmpclamp>255)
 		  tmpclamp = 255;
 		data[4*j+itimes4width+3]= (unsigned char)tmpclamp;
-			
-	      }
+		
+		}
 	    }
+	    }
+	    
 	  }
-	  
 	}
 	fprintf (stderr,"Bind... ");
 	Bind();
@@ -561,7 +599,7 @@ void Texture::Transfer ()
 		GFXTransferTexture(data, name,RGBA32,image_target);
 		break;
 	case _24BIT:
-		GFXTransferTexture(data, name,RGBA32,image_target);
+		GFXTransferTexture(data, name,RGB24,image_target);
 		break;
 	case _8BIT:
 		GFXTransferTexture(data, name,PALETTE8, image_target);
@@ -582,7 +620,7 @@ int Texture::Bind()
 	case _24BIT:
 		//not supported by most cards, so i use rgba32
 		//GFXCreateTexture(sizeX, sizeY, RGB24, &name);
-		GFXCreateTexture(sizeX, sizeY, RGBA32, &name, NULL, stage,ismipmapped,texture_target);
+		GFXCreateTexture(sizeX, sizeY, RGB24, &name, NULL, stage,ismipmapped,texture_target);
 		break;
 	case _8BIT:
 		GFXCreateTexture(sizeX, sizeY, PALETTE8, &name, (char *)palette, stage,ismipmapped,texture_target);
