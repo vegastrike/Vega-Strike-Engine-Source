@@ -14,6 +14,18 @@ PyObject *to_python (Vector vec) {
 PyObject *to_python (QVector vec) {
 	return to_python(boost::python::tuple((double)vec.i,(double)vec.j,(double)vec.k));
 }
+Vector from_python(PyObject *p,boost::python::type<Vector>) {
+	Vector vec(0,0,0);
+	PyArg_ParseTuple(p,"fff",&vec.i,&vec.j,&vec.k);
+	return vec;
+}
+const Vector& from_python(PyObject *p,boost::python::type<const Vector&>) {return from_python(p,boost::python::type<Vector>());}
+QVector from_python(PyObject *p,boost::python::type<QVector>) {
+	QVector vec(0,0,0);
+	PyArg_ParseTuple(p,"ddd",&vec.i,&vec.j,&vec.k);
+	return vec;
+}
+const QVector& from_python(PyObject *p,boost::python::type<const QVector&>) {return from_python(p,boost::python::type<QVector>());}
 BOOST_PYTHON_END_CONVERSION_NAMESPACE
 
 using std::string;
