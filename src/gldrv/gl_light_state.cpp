@@ -13,7 +13,7 @@ GFXLight gfx_light::operator = (const GFXLight &tmp) {
 }
 
 int gfx_light::lightNum() {
-  int tmp =  (this-_llights->begin());
+  int tmp =  (this-&_llights->front());
   assert (tmp>=0&&tmp<(int)_llights->size());
   //  assert (&(*_llights)[GLLights[target].index]==this);
   return tmp;
