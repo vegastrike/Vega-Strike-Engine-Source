@@ -374,7 +374,14 @@ void VDU::DrawTarget(Unit * parent, Unit * target) {
   if(lie){
 	  sprintf (qr,"Distance: %.2f",((parent->Position()-target->Position()).Magnitude()-((target->isUnit()==PLANETPTR)?target->rSize():0))*10./game_speed);
   } else {
-	sprintf (qr,"Distance: %.0f Meters",((parent->Position()-target->Position()).Magnitude()-((target->isUnit()==PLANETPTR)?target->rSize():0)));
+	double dist=((parent->Position()-target->Position()).Magnitude()-((target->isUnit()==PLANETPTR)?target->rSize():0));
+	if(dist<100000){
+		sprintf (qr,"Distance: %.0f Meters",dist);
+	} else if (dist <100000000){
+		sprintf (qr,"Distance: %.0f Kilometers",dist/1000);
+	}else {
+		sprintf (qr,"Distance: %.2f LightSeconds",dist/300000000);
+	}
   }
   strcat (st,qr);
   tp->Draw (MangleString (st,_Universe->AccessCamera()->GetNebula()!=NULL?.4:0),0,true);  
