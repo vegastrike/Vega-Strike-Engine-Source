@@ -28,7 +28,7 @@ unsigned short VSSwapHostShortToLittle (unsigned short x);
     # include <machine/byte_order.h>
     # define le32_to_cpu(x) (NXSwapHostLongToLittle(x))
     # define le16_to_cpu(x) (NXSwapHostShortToLittle(x))
-    # define le64_to_cpu(x) (NXSwapHostDoubleToLittle(x))
+    # define le64_to_cpu(x) (DONTUSE__NXSwapBigDoubleToLittleEndian(x))
     #else
     # define le32_to_cpu(x) (x)
     # define le16_to_cpu(x) (x)
