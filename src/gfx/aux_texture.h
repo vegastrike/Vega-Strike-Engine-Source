@@ -86,6 +86,10 @@ struct Texture{
   virtual ~Texture();
   ///Do not use! For inheritors only
   Texture();
+  virtual unsigned int numFrames() const{return 1;}
+  virtual double curTime() const{return 0;}
+  virtual void setTime(double tim) {}
+  virtual float framesPerSecond () const{return 0;}
   ///Whether or not the string exists as a texture
   static Texture * Exists (std::string s);
   ///Whether or not the color and alpha data already exist

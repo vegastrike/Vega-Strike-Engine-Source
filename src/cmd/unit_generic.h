@@ -1163,6 +1163,8 @@ public:
 
 ///Holds temporary values for inter-function XML communication Saves deprecated restr info
 struct Unit::XML {
+  float randomstartframe;
+  float randomstartseconds;
   //  vector<Halo*> halos;
   vector<Mount *> mountz;
   vector<Mesh*> meshes;

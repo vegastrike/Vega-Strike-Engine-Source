@@ -85,6 +85,33 @@ Texture * Mesh::TempGetTexture(std::string filename, std::string factionname, GF
 	}
 	return ret;
 }
+ int  Mesh::getNumTextureFrames() {
+	if (Decal.size())
+		if (Decal[0]) {
+			return Decal[0]->numFrames();
+		}
+	return 1;
+}
+double Mesh::getTextureCumulativeTime() {
+	if (Decal.size())
+		if (Decal[0]) {
+			return Decal[0]->curTime();
+		}
+	return 0;
+}
+float Mesh::getTextureFramesPerSecond(){
+	if (Decal.size())
+		if (Decal[0]) {
+			return Decal[0]->framesPerSecond();
+		}
+	return 0;
+}
+void Mesh::setTextureCumulativeTime(double d) {
+	for (unsigned int i=0;i<Decal.size();++i) {
+		if (Decal[i])
+			Decal[i]->setTime(d);
+	}
+}
 Texture * Mesh::TempGetTexture (int index, std::string factionname)const {
     Texture *tex=NULL;
     assert (index<(int)xml->decals.size());

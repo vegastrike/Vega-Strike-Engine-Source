@@ -39,7 +39,10 @@ void AnimatedTexture::UpdateAllFrame() {
 bool AnimatedTexture::Done() {
   return physicsactive<0;
 }
-
+void AnimatedTexture::setTime (double tim) {
+	cumtime=tim;
+	active = ((unsigned int)(cumtime/timeperframe))%numframes;
+}
 AnimatedTexture::AnimatedTexture (const char *file,int stage, enum FILTER imm,bool detailtex){
   AniInit();
   FILE * fp = fopen (file,"r");

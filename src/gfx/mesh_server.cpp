@@ -10,6 +10,17 @@ void winsys_exit( int code )
 }
 #endif
 
+ int  Mesh::getNumTextureFrames() {
+	return 1;
+}
+double Mesh::getTextureCumulativeTime() {
+	return 0;
+}
+float Mesh::getTextureFramesPerSecond(){
+	return 0;
+}
+void Mesh::setTextureCumulativeTime(double d) {
+}
 void Mesh::RestoreCullFace (int whichdrawqueue) {
 }
 void Mesh::SelectCullFace (int whichdrawqueue) {

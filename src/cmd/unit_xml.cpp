@@ -240,7 +240,9 @@ namespace UnitXML {
 	  XYSCALE,
 	  INSYSENERGY,
 	  ZSCALE,
-	  NUMANIMATIONSTAGES
+	  NUMANIMATIONSTAGES,
+	  STARTFRAME,
+	  TEXTURESTARTTIME
     };
 
   const EnumMap::Pair element_names[37]= {
@@ -283,7 +285,7 @@ namespace UnitXML {
     EnumMap::Pair ("Description",DESCRIPTION),
     
   };
-  const EnumMap::Pair attribute_names[103] = {
+  const EnumMap::Pair attribute_names[105] = {
     EnumMap::Pair ("UNKNOWN", UNKNOWN),
     EnumMap::Pair ("missing",MISSING),
     EnumMap::Pair ("file", XFILE), 
@@ -386,12 +388,14 @@ namespace UnitXML {
     EnumMap::Pair ("CombatRole",COMBATROLE),
     EnumMap::Pair ("RecurseSubunitCollision",RECURSESUBUNITCOLLISION),
     EnumMap::Pair ("FaceCamera",FACECAMERA),
-	EnumMap::Pair ("NumAnimationStages",NUMANIMATIONSTAGES)
+	EnumMap::Pair ("NumAnimationStages",NUMANIMATIONSTAGES),
+	EnumMap::Pair("StartFrame",STARTFRAME),
+	EnumMap::Pair("TextureStartTime",TEXTURESTARTTIME)
 
   };
 
   const EnumMap element_map(element_names, 37);
-  const EnumMap attribute_map(attribute_names, 103);
+  const EnumMap attribute_map(attribute_names, 105);
 }
 
 // USED TO BE IN UNIT_FUNCTIONS*.CPP BUT NOW ON BOTH CLIENT AND SERVER SIDE
@@ -415,10 +419,37 @@ void addBSPMesh( Unit::XML * xml, const char *filename, const float scale,int fa
 {
 	xml->bspmesh = new Mesh(filename, Vector(scale,scale,scale), faction,fg);
 }
-void pushMesh( Unit::XML * xml, const char *filename, const float scale,int faction,class Flightgroup * fg)
+void pushMesh( Unit::XML * xml, const char *filename, const float scale,int faction,class Flightgroup * fg, int startframe, double texturestarttime)
 {
 	xml->meshes.push_back(new Mesh(filename, Vector(scale,scale,scale), faction,fg));
-	xml->meshes.back()->setCurrentFrame(0);
+	if (startframe>=0) {
+		xml->meshes.back()->setCurrentFrame(startframe);
+	}else if (startframe==-2){
+		float r = ((float)rand())/RAND_MAX;
+		xml->meshes.back()->setCurrentFrame(r*xml->meshes.back()->getFramesPerSecond());
+	}else if (startframe==-1) {
+		if (xml->randomstartseconds==0) {
+			xml->randomstartseconds=xml->randomstartframe*xml->meshes.back()->getNumLOD()/xml->meshes.back()->getFramesPerSecond();
+		}
+		xml->meshes.back()->setCurrentFrame(xml->randomstartseconds*xml->meshes.back()->getFramesPerSecond());
+	}
+	if (texturestarttime>0) {
+		xml->meshes.back()->setTextureCumulativeTime(texturestarttime);
+	}else {
+		float fps =xml->meshes.back()->getTextureFramesPerSecond();
+		int frames = xml->meshes.back()->getNumTextureFrames();
+		double ran = xml->randomstartframe;
+		if (fps>0&&frames>1) {
+			ran *= frames/fps;
+		}else {
+			static float anitime = XMLSupport::parse_float(vs_config->getVariable("graphics","max_animation_time","1000"));
+			ran*=1000;
+			
+			
+		}
+		xml->meshes.back()->setTextureCumulativeTime(ran);
+
+	}
 }
 
 Mount * createMount(const std::string& name, short int ammo, short int volume, float xyscale, float zscale)
@@ -609,19 +640,39 @@ using namespace UnitXML;
       AddCargo (carg,false);
     break;
   case MESHFILE:
-    ADDTAG;
-    assert (xml->unitlevel==1);
-    xml->unitlevel++;
-    for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
-      switch(attribute_map.lookup((*iter).name)) {
-      case XFILE:
-	ADDDEFAULT;
-	pushMesh( xml, (*iter).value.c_str(), xml->unitscale, faction,flightgroup);
-	//xml->meshes.push_back(createMesh((*iter).value.c_str(), xml->unitscale, faction,flightgroup));
-	break;
-      }
-    }
-    break;
+  {
+	  std::string file="box.xmesh";
+	  int startframe=0;
+	  double texturestarttime=0;
+	  ADDTAG;
+	  assert (xml->unitlevel==1);
+	  xml->unitlevel++;
+	  for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
+		  switch(attribute_map.lookup((*iter).name)) {
+		  case XFILE:
+			  ADDDEFAULT;
+			  file = (*iter).value;
+			  //xml->meshes.push_back(cr		eateMesh((*iter).value.c_str(), xml->unitscale, faction,flightgroup));
+			  break;
+		  case STARTFRAME:
+			  if (strtoupper((*iter).value)=="RANDOM")
+				  startframe=-1;
+			  else if (strtoupper((*iter).value)=="ASYNC")
+				  startframe=-2;
+			  else
+				  startframe = parse_int((*iter).value);
+			  break;
+		  case TEXTURESTARTTIME:
+			  if (strtoupper((*iter).value)=="RANDOM")
+				  texturestarttime=-1;
+			  else
+				  texturestarttime = parse_float((*iter).value);
+		  }
+	  }
+	  pushMesh( xml, file.c_str(), xml->unitscale, faction,flightgroup,startframe,texturestarttime);
+	  
+  }
+  break;
   case UPGRADE:
     {
       assert (xml->unitlevel>=1);
@@ -1822,6 +1873,8 @@ void Unit::LoadXML(const char *filename, const char * modifications, string * xm
   }
   image->CockpitCenter.Set (0,0,0);
   xml = new XML();
+  xml->randomstartframe=((float)rand())/RAND_MAX;
+  xml->randomstartseconds=0;
   xml->calculated_role=false;
   xml->damageiterator=0;
   xml->unitModifications = modifications;

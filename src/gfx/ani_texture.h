@@ -1,7 +1,7 @@
 #include "aux_texture.h"
 #include <stdio.h>
 class AnimatedTexture: public Texture {
-  int numframes;
+  unsigned int numframes;
   float timeperframe;
   double cumtime;
   Texture ** Decal;
@@ -9,6 +9,14 @@ class AnimatedTexture: public Texture {
   double physicsactive;
   void AniInit();
  public:
+  virtual void setTime(double tim);
+  virtual double curTime() const{
+		return cumtime;
+  }
+  virtual unsigned int numFrames()const {
+		return numframes;
+  }
+  virtual float framesPerSecond()const {return 1/timeperframe;}
   AnimatedTexture ();
   AnimatedTexture (const char * file, int stage, enum FILTER imm, bool detailtexture=false);
   AnimatedTexture (FILE * openedfile, int stage, enum FILTER imm,bool detailtexture=false);

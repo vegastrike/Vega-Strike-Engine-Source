@@ -168,7 +168,8 @@ private:
 	  POLYGONOFFSET,
 	  DETAILTEXTURE,
 	  DETAILPLANE,
-	  FRAMESPERSECOND
+	  FRAMESPERSECOND,
+	  STARTFRAME
     };
     ///Saves which attributes of vertex have been set in XML file
     enum PointState {
@@ -342,6 +343,10 @@ public:
   float getCurrentFrame() const;
   void setCurrentFrame(float);
   int getNumLOD()const;
+  int getNumTextureFrames();
+  float getTextureFramesPerSecond();
+  double getTextureCumulativeTime();
+  void setTextureCumulativeTime(double );
   virtual int MeshType() {return 0;}
   BLENDFUNC getBlendSrc() {return blendSrc;}
   BLENDFUNC getBlendDst() {return blendDst;}		
