@@ -64,17 +64,24 @@ void TextPlane::Draw(const string & newText, int offset,bool force_highquality)
 {
 	// some stuff to draw the text stuff
   string::const_iterator text_it = newText.begin();
-  static bool use_bit = force_highquality||XMLSupport::parse_bool(vs_config->getVariable ("graphics","high_quality_font","true"));
+  static bool use_bit = force_highquality||XMLSupport::parse_bool(vs_config->getVariable ("graphics","high_quality_font","false"));
+  static float font_point = XMLSupport::parse_float (vs_config->getVariable ("graphics","font_point","16"));
+  static bool font_antialias = XMLSupport::parse_bool (vs_config->getVariable ("graphics","font_antialias","true"));
   void * fnt = g_game.x_resolution>=800?GLUT_BITMAP_HELVETICA_12:GLUT_BITMAP_HELVETICA_10;
-  myFontMetrics.i=(g_game.x_resolution>=800?14:12)*glutStrokeWidth (GLUT_STROKE_ROMAN,'W')/(119.05+33.33);
-  myFontMetrics.j=g_game.x_resolution>=800?14:12;
-  myFontMetrics.i/=2.*g_game.x_resolution;
-  myFontMetrics.j/=2.*g_game.y_resolution;
+  myFontMetrics.i=font_point*glutStrokeWidth (GLUT_STROKE_ROMAN,'W')/(119.05+33.33);
+  myFontMetrics.j=font_point;
+  myFontMetrics.i/=.5*g_game.x_resolution;
+  myFontMetrics.j/=.5*g_game.y_resolution;
   float tmp,row, col;
   GetPos (row,col);
   GFXPushBlendMode();
-  GFXBlendMode (SRCALPHA,INVSRCALPHA);
-  glEnable(GL_LINE_SMOOTH);
+  if (!use_bit&&font_antialias) {
+    GFXBlendMode (SRCALPHA,INVSRCALPHA);
+    glEnable(GL_LINE_SMOOTH);
+  }else {
+    GFXBlendMode (ONE,ZERO);
+    glDisable (GL_LINE_SMOOTH);
+  }
   GFXDisable (DEPTHTEST);
   GFXDisable (CULLFACE);
   GFXDisable (LIGHTING);
