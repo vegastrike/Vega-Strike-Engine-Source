@@ -2,7 +2,8 @@
 	
 	* updated systems a bit
 	* started to work on AI scripting again
-
+	- wrote Order AIFlyToWaypoint that uses the module ai_flyto_waypoint.c
+	
 
 2002-01-25 Daniel Aleksandrow <dandandaman@users.sourceforge.net>
 

@@ -320,12 +320,18 @@ varInst *Mission::call_order(missionNode *node,int mode){
     varInst *des_vi=checkObjectExpr(des_node,mode);
     olist_t *des_olist=getOListObject(des_node,mode,des_vi);
 
+    float vel=getFloatArg(node,mode,1);
+    bool afburn=getBoolArg(node,mode,2);
+    float range=getFloatArg(node,mode,3);
+
+
     Order *my_order=NULL;
 
     if(mode==SCRIPT_RUN){
       Vector des3=call_olist_tovector(des_node,mode,des_vi);
-      
-      my_order=new AIFlyToWaypoint(des3,1.0,100.0);
+      printf("vel=%f,afburn=%d,range=%f\n",vel,afburn,range);
+
+      my_order=new AIFlyToWaypoint(des3,vel,afburn,range);
     }
 
     viret=newVarInst(VI_TEMP);

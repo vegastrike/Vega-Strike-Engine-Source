@@ -89,12 +89,23 @@ void AImissionScript::Execute () {
 }
 
 
-AIFlyToWaypoint::AIFlyToWaypoint(Vector wp,float velo,float rng) : AImissionScript("ai_flyto_waypoints1") {
+AIFlyToWaypoint::AIFlyToWaypoint(Vector wp,float velo,bool afburn,float rng) : AImissionScript("ai_flyto_waypoint") {
   waypoint=wp;
   vel=velo;
   range=rng;
+  aburn=afburn;
 
   varInst *vi_wp=mission->lookupClassVariable(modulename,"waypoint",classid);
-
   mission->call_vector_into_olist(vi_wp,waypoint);
+
+  varInst *vi_range=mission->lookupClassVariable(modulename,"abort_range",classid);
+  vi_range->float_val=range;
+
+  varInst *vi_vel=mission->lookupClassVariable(modulename,"vel",classid);
+  vi_vel->float_val=vel;
+
+  varInst *vi_aburn=mission->lookupClassVariable(modulename,"afterburner",classid);
+  vi_vel->bool_val=aburn;
+
+
 };

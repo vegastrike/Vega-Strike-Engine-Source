@@ -47,11 +47,12 @@ public:
 
 class AIFlyToWaypoint : public AImissionScript {
  public:
-  AIFlyToWaypoint(Vector waypoint,float vel,float range);
+  AIFlyToWaypoint(Vector waypoint,float vel,bool afburn,float range);
 
   Vector waypoint;
   float vel;
   float range;
+  bool aburn;
 };
 
 #endif
