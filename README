@@ -32,6 +32,19 @@ TAB Afterburners
 / Spin Left
 q (hold down, engage shelton slide)
 
+-----------
+Command Line Arguments
+------------
+-M     add music
+-S     add sound 
+-16    color depth 16
+-32    color depth 32
+-f     fullscrn
+-l     640x480
+-a     800x600
+-h     1024x768
+-v     1280x1024
+
 --------------------------------------
 Editing Missions  (By Darkmage)
 --------------------------------------
