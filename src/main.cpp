@@ -84,7 +84,14 @@ int main( int argc, char **argv )
     setup_game_data(); 
 
     // preliminary for me to test
-    //VegaConfig *config=new VegaConfig("vegastrike.config");
+    VegaConfig *config=new VegaConfig("vegastrike.config"); // move config to global or some other struct
+
+    cout << "test1 " << config->getVariable("graphics","fov","73.0") << endl;
+    cout << "test2 " << config->getVariable("player","email","none") << endl;
+
+    // these should fail
+    cout << "test3 " << config->getVariable("hardware","cpu","6502") << endl;
+    cout << "test4 " << config->getVariable("player","adress","none") << endl;
 
     //read_config_file();
     //init_debug("");

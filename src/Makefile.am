@@ -42,6 +42,8 @@ vegastrike_SOURCES =				\
 	xml_support.cpp				\
 	vegaconfig.cpp				\
 	vegaconfig.h				\
+	easydom.cpp				\
+	easydom.h				\
 	profile.h 				\
 	vegastrike.h				\
 	vs_globals.h 				

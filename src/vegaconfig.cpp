@@ -1,109 +1,168 @@
+/* 
+ * Vega Strike
+ * Copyright (C) 2001-2002 Daniel Horn
+ * 
+ * http://vegastrike.sourceforge.net/
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+ */
+
+/*
+  xml Configuration written by Alexander Rawass <alexannika@users.sourceforge.net>
+*/
+
+#include <stdlib.h>
+#include <stdio.h>
+#include <errno.h>
+#include <time.h>
+#include <ctype.h>
+#include <unistd.h>
+
 #include <expat.h>
 #include "xml_support.h"
+
+#include "vegastrike.h"
+
 #include "vegaconfig.h"
+#include "easydom.h"
 
 //#include "vs_globals.h"
 //#include "vegastrike.h"
 
-using XMLSupport::EnumMap;
-using XMLSupport::Attribute;
-using XMLSupport::AttributeList;
-
 VegaConfig::VegaConfig(char *configfile){
-  LoadXML(configfile);
-}
+  //LoadXML(configfile);
 
-void VegaConfig::beginElement(void *userData, const XML_Char *name, const XML_Char **atts) {
-  ((VegaConfig*)userData)->beginElement(name, AttributeList(atts));
-}
+  easyDomFactory *domf = new easyDomFactory();
 
-void VegaConfig::endElement(void *userData, const XML_Char *name) {
-  ((VegaConfig*)userData)->endElement(name);
-}
+  easyDomNode *top=domf->LoadXML(configfile);
 
-namespace VegaConfigXML {
-    enum Names {
-      UNKNOWN,
-      VEGACONFIG,
-      BINDINGS
-    };
-
-  const EnumMap::Pair element_names[] = {
-    EnumMap::Pair ("UNKNOWN", UNKNOWN)
-  };
-  const EnumMap::Pair attribute_names[] = {
-   EnumMap::Pair ("UNKNOWN", UNKNOWN)
-  };
-
-
-  const EnumMap element_map(element_names, 1);
-  const EnumMap attribute_map(attribute_names, 1);
-}
-
-using namespace VegaConfigXML;
-
-void VegaConfig::beginElement(const string &name, const AttributeList &attributes) {
-
-  Names elem = (Names)element_map.lookup(name);
-
-
-  AttributeList::const_iterator iter;
-  for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
-    cout <<  name << "::" << (*iter).name << endl;
+  if(top==NULL){
+    cout << "Panic exit - no configuration" << endl;
+    exit(0);
   }
-#if 0
-  switch(elem) {
-  case UNKNOWN:
-	xml->unitlevel++;
-
-//    cerr << "Unknown element start tag '" << name << "' detected " << endl;
-    return;
-#endif
-
+  //top->walk(0);
+ 
+  checkConfig(top);
 }
 
-void VegaConfig::endElement(const string &name) {
-  Names elem = (Names)element_map.lookup(name);
-#if 0
-  switch(elem) {
-  case UNKNOWN:
-	  xml->unitlevel--;
-//    cerr << "Unknown element end tag '" << name << "' detected " << endl;
-    break;
-  default:
-	  xml->unitlevel--;
-    break;
-  }
-#endif
-}
-
-
-void VegaConfig::LoadXML(const char *filename) {
-
-  const int chunk_size = 16384;
-
-  FILE * inFile = fopen (filename, "r");
-  if(!inFile) {
-    assert(0);
-    return;
+bool VegaConfig::checkConfig(easyDomNode *node){
+  if(node->Name()!="vegaconfig"){
+    cout << "this is no Vegastrike config file" << endl;
+    return false;
   }
 
-  xml = new VegaConfigXML;
-
-  XML_Parser parser = XML_ParserCreate(NULL);
-  XML_SetUserData(parser, this);
-  XML_SetElementHandler(parser, &VegaConfig::beginElement, &VegaConfig::endElement);
+  vector<easyDomNode *>::const_iterator siter;
   
-  do {
-    char *buf = (XML_Char*)XML_GetBuffer(parser, chunk_size);
-    int length;
-    
-    length = fread (buf,1, chunk_size,inFile);
-    //length = inFile.gcount();
-    XML_ParseBuffer(parser, length, feof(inFile));
-  } while(!feof(inFile));
-  fclose (inFile);
-  XML_ParserFree (parser);
+  for(siter= node->subnodes.begin() ; siter!=node->subnodes.end() ; siter++){
+    if((*siter)->Name()=="variables"){
+      doVariables(*siter);
+    }
+    else if(((*siter)->Name()=="colors")){
+      doColors(*siter);
+    }
+    else if(((*siter)->Name()=="bindings")){
+      doBindings(*siter);
+    }
+    else{
+      cout << "Unknown tag: " << (*siter)->Name() << endl;
+    }
+  }
+  return true;
+}
 
+void VegaConfig::doVariables(easyDomNode *node){
+  if(variables!=NULL){
+    cout << "only one variable section allowed" << endl;
+    return;
+  }
+  variables=node;
+
+  vector<easyDomNode *>::const_iterator siter;
+  
+  for(siter= node->subnodes.begin() ; siter!=node->subnodes.end() ; siter++){
+    checkSection(*siter);
+  }
+}
+
+void VegaConfig::checkSection(easyDomNode *node){
+    if(node->Name()!="section"){
+      cout << "not a section" << endl;
+    return;
+  }
+
+  string section=node->attr_value("name");
+  if(section.empty()){
+    cout << "no name given for section" << endl;
+  }
+  
+  vector<easyDomNode *>::const_iterator siter;
+  
+  for(siter= node->subnodes.begin() ; siter!=node->subnodes.end() ; siter++){
+    checkVar(*siter);
+  }
+
+}
+
+void VegaConfig::checkVar(easyDomNode *node){
+    if(node->Name()!="var"){
+      cout << "not a variable" << endl;
+    return;
+  }
+
+  string name=node->attr_value("name");
+  string value=node->attr_value("value");
+  if(name.empty() || value.empty()){
+    cout << "no name or value given for variable" << endl;
+  }
+}
+
+void VegaConfig::doColors(easyDomNode *node){
+}
+
+void VegaConfig::doBindings(easyDomNode *node){
+}
+
+string VegaConfig::getVariable(string section,string name,string defaultval){
+   vector<easyDomNode *>::const_iterator siter;
+  
+  for(siter= variables->subnodes.begin() ; siter!=variables->subnodes.end() ; siter++){
+    string scan_name=(*siter)->attr_value("name");
+    //    cout << "scanning section " << scan_name << endl;
+
+    if(scan_name==section){
+      return getVariable(*siter,name,defaultval);
+    }
+  }
+
+  cout << "WARNING: no section with name " << section << endl;
+
+  return defaultval;
+ 
+}
+string VegaConfig::getVariable(easyDomNode *section,string name,string defaultval){
+    vector<easyDomNode *>::const_iterator siter;
+  
+  for(siter= section->subnodes.begin() ; siter!=section->subnodes.end() ; siter++){
+    if((*siter)->attr_value("name")==name){
+      return (*siter)->attr_value("value");
+    }
+  }
+
+  cout << "WARNING: no variable with name " << name << endl;
+
+  return defaultval;
+ 
 }
 
