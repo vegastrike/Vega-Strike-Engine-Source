@@ -220,8 +220,10 @@ public:
       }
     }
 
-
-    return *retval;
+    if (retval)
+      return *retval;
+    else 
+      return T();
   }
 };
 
