@@ -90,12 +90,14 @@ StarVlist::StarVlist (int num ,float spread,const std::string &our_system_name) 
 	float xyzspread = spread*2*staroverlap;
 	if (!our_system_name.empty())
 		num =NumStarsInGalaxy();
+	
 	GFXColorVertex * tmpvertex = new GFXColorVertex[num*2];
 	memset (tmpvertex,0,sizeof(GFXVertex)*num*2);
 	StarIter si;
 	int starcount=0;
+	int j=0;
 	for (int y=0;y<num;++y) {
-		int j= 2*y;
+		
 		tmpvertex[j+1].x = -.5*xyzspread+rand()*((float)xyzspread/RAND_MAX);
 		tmpvertex[j+1].y = -.5*xyzspread+rand()*((float)xyzspread/RAND_MAX);
 		tmpvertex[j+1].z = -.5*xyzspread+rand()*((float)xyzspread/RAND_MAX);
@@ -106,6 +108,7 @@ StarVlist::StarVlist (int num ,float spread,const std::string &our_system_name) 
 		tmpvertex[j+1].i=.57735;
 		tmpvertex[j+1].j=.57735;
 		tmpvertex[j+1].k=.57735;
+		int incj=2;
 		if (our_system_name.size()>0&&!si.Done()) {
 
 			starcount++;
@@ -151,10 +154,10 @@ StarVlist::StarVlist (int num ,float spread,const std::string &our_system_name) 
 		tmpvertex[j].r=0;
 		tmpvertex[j].g=0;
 		tmpvertex[j].b=0;
-		
+		j+=incj;
 	}
 	fprintf (stderr,"Read In Star Count %d\n",starcount);
-	vlist= new GFXVertexList (GFXLINE,2*num,tmpvertex, 2*num, true,0);  
+	vlist= new GFXVertexList (GFXLINE,j,tmpvertex, j, true,0);  
 	delete []tmpvertex;
 }
 void StarVlist::UpdateGraphics() {

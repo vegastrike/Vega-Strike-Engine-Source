@@ -298,7 +298,7 @@ void GFXInit (int argc, char ** argv){
 			glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-			GFXTextureAddOrModulate (i,false);
+			GFXTextureEnv (i,GFXADDTEXTURE);
 			glPixelStorei(GL_UNPACK_SKIP_ROWS, 0);
 			glPixelStorei(GL_UNPACK_SKIP_PIXELS, 0);
 			glPixelStorei(GL_UNPACK_ALIGNMENT, 1);

@@ -476,11 +476,20 @@ bool SetupSpecMapFirstPass (vector <Texture *> &decal, unsigned int mat, bool en
 			for (unsigned int i=1;i<detailPlanes.size();i+=2) {
 				int stage = (i/2)+detailoffset;
 				GFXActiveTexture(stage);
+				GFXTextureEnv(stage,GFXADDSIGNEDTEXTURE);
+				/* 
+				glTexEnvi(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,GL_COMBINE);
+				glTexEnvi(GL_TEXTURE_ENV,GL_SOURCE0_RGB,GL_PREVIOUS);
+				glTexEnvi(GL_TEXTURE_ENV,GL_SOURCE1_RGB,GL_TEXTURE);
+				glTexEnvi(GL_TEXTURE_ENV,GL_COMBINE_RGB,GL_ADD_SIGNED);
+				*/
 				const float params[4]={detailPlanes[i-1].i,detailPlanes[i-1].j,detailPlanes[i-1].k,0};
 				const float paramt[4]={detailPlanes[i].i,detailPlanes[i].j,detailPlanes[i].k,0};
 				GFXTextureCoordGenMode(OBJECT_LINEAR_GEN,params,paramt);
 				detailTexture->MakeActive(stage);
-				GFXToggleTexture(true,stage);
+				GFXToggleTexture(true,stage);	
+				
+				
 			}
 	}
 	
@@ -490,6 +499,7 @@ void RestoreFirstPassState(Texture * detailTexture, const vector<Vector> & detai
 	if (detailTexture) {
 		static float tempo[4]={1,0,0,0};
 		GFXActiveTexture(1);
+		GFXTextureEnv(1,GFXADDTEXTURE);		
 		GFXTextureCoordGenMode(SPHERE_MAP_GEN,tempo,tempo);
 		_Universe->activeStarSystem()->activateLightMap();
 		unsigned int sizeplus1=detailPlanes.size()/2+1;
@@ -513,7 +523,7 @@ void SetupSpecMapSecondPass(Texture * decal,unsigned int mat,BLENDFUNC blendsrc,
     GFXDisable(DEPTHWRITE);
     if (envMap){
       GFXActiveTexture(1);
-      GFXTextureAddOrModulate(1,true); 
+      GFXTextureEnv(1,GFXMODULATETEXTURE); 
       GFXEnable(TEXTURE1);
     }
 }
@@ -564,7 +574,7 @@ void RestoreSpecMapState(bool envMap, bool write_to_depthmap, float polygonoffse
     GFXPolygonOffset (a, b+1+polygonoffset);
     if (envMap) {
       GFXActiveTexture(1);
-      GFXTextureAddOrModulate(1,false); //restore modulate
+      GFXTextureEnv(1,GFXADDTEXTURE); //restore modulate
     }
     if (write_to_depthmap) {
         GFXEnable(DEPTHWRITE);

@@ -285,7 +285,14 @@ void /*GFXDRVAPI*/ GFXSelectTexcoordSet(const int stage, const int texset);
 
 ///Turns on alpha testing mode (or turns if off if DEPTHFUNC is set to ALWAYS
 void /*GFXDRVALP*/ GFXAlphaTest (const enum DEPTHFUNC,const float ref);
-void GFXTextureAddOrModulate(int stage, bool modulate);
+enum GFXTEXTUREENVMODES{
+	GFXREPLACETEXTURE,
+	GFXADDTEXTURE,
+	GFXMODULATETEXTURE,
+	GFXADDSIGNEDTEXTURE,
+	GFXINTERPOLATETEXTURE
+};
+void GFXTextureEnv(int stage,GFXTEXTUREENVMODES mode);
 bool GFXMultiTexAvailable();
 ///Sets Depth Offset for polgyons
 void /*GFXDRVAPI*/ GFXPolygonOffset (float factor, float units);

@@ -211,7 +211,7 @@ static void DownSampleTexture (unsigned char **newbuf,const unsigned char * oldb
 	}
       }
       for (m=0;m<pixsize;m++) {
-	(*newbuf)[m+pixsize*(j+i*newwidth)] = (unsigned char)(temp[m]*newfade/(scaleheight*scalewidth));
+	(*newbuf)[m+pixsize*(j+i*newwidth)] = (unsigned char)((1-newfade)*128+temp[m]*newfade/(scaleheight*scalewidth));
       }
     }
   }
@@ -516,3 +516,34 @@ void /*GFXDRVAPI*/ GFXSelectTexture(int handle, int stage)
 }
 
 
+void GFXTextureEnv (int stage, GFXTEXTUREENVMODES mode) {
+	if (stage>=1&&!GFXMultiTexAvailable()) {
+		return;
+	}
+	GLenum type;
+	GFXActiveTexture(stage);
+	switch (mode) {
+	case GFXREPLACETEXTURE:
+		type = GL_REPLACE;
+		goto ENVMODE;
+	case GFXADDTEXTURE:
+		type = GL_ADD;
+		goto ENVMODE;
+	case GFXMODULATETEXTURE:
+		type = GL_MODULATE;
+	  ENVMODE:
+		glTexEnvi(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,type);
+		break;
+	case GFXINTERPOLATETEXTURE:
+		type = GL_INTERPOLATE;
+		goto COMBINERS;
+	case GFXADDSIGNEDTEXTURE:
+		type = GL_ADD_SIGNED;		
+	  COMBINERS:
+		glTexEnvi(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,GL_COMBINE);
+		glTexEnvi(GL_TEXTURE_ENV,GL_SOURCE0_RGB,GL_PREVIOUS);
+		glTexEnvi(GL_TEXTURE_ENV,GL_SOURCE1_RGB,GL_TEXTURE);
+		glTexEnvi(GL_TEXTURE_ENV,GL_COMBINE_RGB,type);
+		break;
+	}
+}
