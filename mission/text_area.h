@@ -18,9 +18,10 @@
 #ifndef TEXT_AREA_H
 #define TEXT_AREA_H
 
-// Version: 1.1  - February 27, 2002
+// Version: 1.2  - February 27, 2002
 // Changes:
-//    1.0 - Fixed misaligned down scroll button (FINALLY). Fixed text going past the text area (horizontal). Added multiline text areas.
+//    1.1 - Fixed misaligned down scroll button (FINALLY). Fixed text going past the text area (horizontal). Added multiline text areas.
+//    1.2 - Added sorting
 
 /* This class is designed to be self sufficient.
  * The only external functions it requires that aren't provided by system libs are in glut_support.h
@@ -88,6 +89,7 @@ public:
 	// Returns the char of the currently selected item. NULL if nothing is selected
 	char *GetSelectedItemName(void);
 	char *GetSelectedItemDesc(void);
+	void SortList(void);
 
 	// Returns 1 if the click is inside the text area. 0 if it's outside. Same thing for movement
 	// The class requires you convert the x,y co-ordinate to a -1 to 1 float. The class doesn't know the screen dimensions
@@ -198,6 +200,7 @@ public:
 
 	void AddChild(char *new_name, char *desc);
 	void ExpandTree(void);
+	void Sort(void);
 
 	char *name;
 	char *description;

@@ -15,10 +15,11 @@
  *                                                                         *
  **************************************************************************/
 
-// Version 2.31
+// Version 2.32
 
 // Feb 20, 2002: Imported changes made by Daniel Horn & ace123 for (Vega Strike). Replaces the glob() with portable calls
 //               This adds isdir() and FindPath() and changes FindFiles() and FindDirs() to wrappers to FindPath()
+// Mar 05, 2002: StripExtension() now returns the extension that was stripped
 
 #ifndef GENERAL_H
 #define GENERAL_H
@@ -115,7 +116,7 @@ char *strmov(char *to, char *from);
 void lower(char *line);
 void strappend(char *dest, char *source, int length);
 char *StripPath(char *filename);
-void StripExtension(char *filename);
+char *StripExtension(char *filename);
 #endif    // _G_STRING_PARSE
 
 #ifdef _G_RANDOM

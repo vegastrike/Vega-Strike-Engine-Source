@@ -293,6 +293,10 @@ char *TextArea::GetSelectedItem(int type) {
 	else { return search->description; }
 }
 
+void TextArea::SortList(void) {
+	ItemList->Sort();
+}
+
 // The button checks assume that the scroll buttons and scrollbar are on the same x axis
 // If you change the position of the buttons, you'll need to add more checks here
 int TextArea::MouseClick(int button, int state, float x, float y) {
@@ -565,14 +569,30 @@ TextAreaItem *TextAreaItem::FindChild(char *search_name) {
 	return NULL;
 }
 
+void TextAreaItem::Sort(void) {
+	int cur, cur2;
+	TextAreaItem *temp;
+	for (cur = 0; cur < child_count; cur++) {
+		child[cur]->Sort();
+		for (cur2 = 0; cur2 < child_count-1; cur2++) {
+			if (strcmp(child[cur2]->description, child[cur2+1]->description) > 0) {
+				temp = child[cur2];
+				child[cur2] = child[cur2+1];
+				child[cur2+1] = temp;
+			}
+		}
+	}
+	
+}
+
 TextAreaItem *TextAreaItem::FindCount(int count, int cur) {
 	static int current = 0;
 	if (cur == 0) { current = 0; }
-	int max = child_count_multiplier * 10;
+	//int max = child_count_multiplier * 10;
 	TextAreaItem *match;
 	if (count == current) { return this; }
 	current++;
-	for (cur = 0; cur < max; cur++) {
+	for (cur = 0; cur < child_count; cur++) {
 		match = child[cur]->FindCount(count, cur+1);
 		if (match != NULL) { return match; }
 	}

@@ -171,16 +171,16 @@ char *StripPath(char *filename) {
 	return last;
 }
 
-void StripExtension(char *filename) {
+char *StripExtension(char *filename) {
 	int length, cur;
 	char *last = filename;
 	length = strlen(filename) - 1;
-	if (length <= 0) { return; }
+	if (length <= 0) { return "\0"; }
 	for (cur = 0; cur <= length; cur++) {
 		if (filename[cur] == '.') { last = &filename[cur]; }
 	}
-	if (last[0] == '.') { last[0] = '\0'; }
-	return;
+	if (last[0] == '.') { last[0] = '\0'; return last+1; }
+	return last;
 }
 
 #endif    // _G_STRING_PARSE

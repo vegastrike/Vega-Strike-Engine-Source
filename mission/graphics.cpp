@@ -221,7 +221,7 @@ void AddMissionsToTree(char *path, char *parent) {
         glob_t *search;
         unsigned int length;
         int count, max;
-        char *file, *filename;
+        char *file, *filename, *extension;
 
         // First we check for sub directories. stick them at the top
         // For some reason, glob(,,GLOB_ONLYDIR,) doesn't seem to only match directories,
@@ -238,18 +238,6 @@ void AddMissionsToTree(char *path, char *parent) {
                 filename = strdup(file);
                 filename = StripPath(filename);
                 if (strcmp("CVS", filename) == 0) { continue; } // Don't need to display this directory
-//		MissionArea->AddTextItem(file, filename, parent);
-/*
-                item = AddItem(tree, filename, "dir");
-
-                subtree = gtk_tree_new();
-                gtk_signal_connect(GTK_OBJECT(subtree), "select_child", GTK_SIGNAL_FUNC(cb_select_child), subtree);
-                gtk_signal_connect(GTK_OBJECT(subtree), "unselect_child", GTK_SIGNAL_FUNC(cb_unselect_child), subtree);
-
-                gtk_tree_set_selection_mode(GTK_TREE(subtree), GTK_SELECTION_SINGLE);
-                gtk_tree_set_view_mode(GTK_TREE(subtree), GTK_TREE_VIEW_ITEM);
-                gtk_tree_item_set_subtree(GTK_TREE_ITEM(item), subtree);
-*/
                 AddMissionsToTree(file, filename);
 
         }
@@ -263,11 +251,14 @@ void AddMissionsToTree(char *path, char *parent) {
 
                 filename = strdup(file);
                 filename = StripPath(filename);
-                StripExtension(filename);
+                extension = StripExtension(filename);
+		if (strcmp(extension, "mission") != 0) { continue; }
 		replace(filename, "_", " ", strlen(filename));
-		MissionArea->AddTextItem(file, filename, parent);
-//                AddItem(tree, filename, file);
+		// Uncomment when expanding trees are available
+		//MissionArea->AddTextItem(file, filename, parent);
+		MissionArea->AddTextItem(file, filename, NULL);
         }
+	MissionArea->SortList();
         return;
 }
 
