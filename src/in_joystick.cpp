@@ -138,8 +138,8 @@ void JoyStick::GetMouse (float &x, float &y, float &z, int &buttons) {
   static float mouse_exp = XMLSupport::parse_float(vs_config->getVariable ("joystick","mouse_exponent","3"));
   int dx, dy;
   GetMouseDelta (dx,dy);
-  joy_axis[0]=x = (float(dx))/(g_game.x_resolution/mouse_sensitivity);
-  joy_axis[1]=y = (float(dy))/(g_game.y_resolution/mouse_sensitivity);
+  joy_axis[0]=x = ((float)dx)/(g_game.x_resolution/mouse_sensitivity);
+  joy_axis[1]=y = ((float)dy)/(g_game.y_resolution/mouse_sensitivity);
 
   joy_axis[0]*=mouse_exp;
   joy_axis[1]*=mouse_exp;
