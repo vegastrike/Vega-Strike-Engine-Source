@@ -467,7 +467,7 @@ void GameUnit<UnitType>::Draw(const Transformation &parent, const Matrix &parent
 //      Mesh * gun = WeaponMeshCache::getCachedMutable (mounts[i]->type->weapon_name);
 	 if (mahnt->xyscale!=0&&mahnt->zscale!=0) {		
       Mesh * gun = mahnt->type->gun;	  
-      if (gun) {
+      if (gun&&mahnt->status!=Mount::UNCHOSEN) {
 		  Transformation mountLocation(mahnt->GetMountOrientation(),mahnt->GetMountLocation().Cast());
 		  mountLocation.Compose (*ct,this->WarpMatrix(*ctm));
 		  Matrix mat;
