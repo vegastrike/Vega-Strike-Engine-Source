@@ -1,5 +1,5 @@
-bin_PROGRAMS = trisort replace asteroidgen
-
+bin_PROGRAMS = trisort replace asteroidgen 
+SUBDIRS = mesher
 pkgdatadir = ../$(prefix)/objconv
 
 pkgdata_DATA = 3ds2xml obj2xml wcp2xml
