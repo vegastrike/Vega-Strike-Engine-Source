@@ -106,7 +106,7 @@ void TextPlane::Draw(const string & newText, int offset)
       glPopMatrix();
       glPushMatrix ();
       glTranslatef (col,row,0);
-      glRasterPos2f(0,0);
+      //      glRasterPos2f(0,0);
     }
     text_it++;
   }
