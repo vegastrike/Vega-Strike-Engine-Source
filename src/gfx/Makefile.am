@@ -49,6 +49,9 @@ libgfx_a_SOURCES =	\
 	png_texture.cpp	\
 	quadtree.cpp	\
 	quadsquare.cpp	\
+	quadsquare_render.cpp	\
+	quadsquare_update.cpp	\
+	quadsquare_cull.cpp	\
 	quadtree_xml.cpp \
 	star.h		\
 	star.cpp	\
