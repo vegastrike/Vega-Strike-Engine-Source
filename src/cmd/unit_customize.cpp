@@ -440,14 +440,17 @@ bool Unit::UpAndDownGrade (Unit * up, Unit * templ, int mountoffset, int subunit
   
   myleak = 1-computer.radar.maxcone;
   upleak=1-up->computer.radar.maxcone;
-  templeak=-(templ!=NULL?templ->computer.radar.maxcone:0);
+  templeak=1-(templ!=NULL?templ->computer.radar.maxcone:-1);
   STDUPGRADE(myleak,upleak,templeak,0);
   if (touchme)computer.radar.maxcone=1-myleak;
   static float lc =XMLSupport::parse_float (vs_config->getVariable ("physics","lock_cone",".8"));
   if (up->computer.radar.lockcone!=lc) {
     myleak = 1-computer.radar.lockcone;
     upleak=1-up->computer.radar.lockcone;
-    templeak=-(templ!=NULL?templ->computer.radar.lockcone:0);
+    templeak=1-(templ!=NULL?templ->computer.radar.lockcone:-1);
+    if (templeak == 1-lc) {
+      templeak=2;
+    }
     STDUPGRADE(myleak,upleak,templeak,0);
     if (touchme)computer.radar.lockcone=1-myleak;
   }
@@ -455,7 +458,10 @@ bool Unit::UpAndDownGrade (Unit * up, Unit * templ, int mountoffset, int subunit
   if (up->computer.radar.trackingcone!=tc) {
     myleak = 1-computer.radar.trackingcone;
     upleak=1-up->computer.radar.trackingcone;
-    templeak=-(templ!=NULL?templ->computer.radar.trackingcone:0);
+    templeak=1-(templ!=NULL?templ->computer.radar.trackingcone:-1);
+    if (templeak==1-tc) {
+      templeak=2;
+    }
     STDUPGRADE(myleak,upleak,templeak,0);
     if (touchme)computer.radar.trackingcone=1-myleak;    
   }
