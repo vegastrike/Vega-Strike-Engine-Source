@@ -5,7 +5,7 @@
 #include <expat.h>
 #include <values.h>
 #include "xml_support.h"
-
+#include "gfx_transform_vector.h"
 #ifdef max
 #undefine max
 #endif
@@ -189,7 +189,8 @@ void Mesh::beginElement(const string &name, const AttributeList &attributes) {
 	    XML::P_J |
 	    XML::P_K) ) {
       if (!xml->recalc_norm) {
-	cerr.form ("Invalid Normal Data for point: <%f,%f,%f>\n",xml->vertex.x,xml->vertex.y, xml->vertex.z); 
+	cerr.form ("Invalid Normal Data for point: <%f,%f,%f>\n",xml->vertex.x,xml->vertex.y, xml->vertex.z);
+	
 	xml->recalc_norm=true;
       }
     }
@@ -376,7 +377,89 @@ void Mesh::LoadXML(const char *filename, Mesh *oldmesh) {
 
   // Now, copy everything into the mesh data structures
   assert(xml->load_stage==5);
+  //begin vertex normal calculations if necessary
+  if (xml->recalc_norm) {
+    unsigned int i; unsigned int a=0;
+    unsigned int j;
+    unsigned int trimax = xml->tris.size()/3;
+    for (i=0;i<xml->vertices.size();i++) {
+      xml->vertices[i].i=0;//zero dis out
+      xml->vertices[i].j=0;
+      xml->vertices[i].k=0;
+    }
 
+    for (i=0;i<trimax;i++,a+=3) {
+      for (j=0;j<3;j++) {
+	Vector Cur (xml->vertices[xml->triind[a+j]].x,
+		    xml->vertices[xml->triind[a+j]].y,
+		    xml->vertices[xml->triind[a+j]].z);
+	Cur = (Vector (xml->vertices[xml->triind[a+((j+2)%3)]].x,
+		       xml->vertices[xml->triind[a+((j+2)%3)]].y,
+		       xml->vertices[xml->triind[a+((j+2)%3)]].z)-Cur)
+	  .Cross(Vector (xml->vertices[xml->triind[a+((j+1)%3)]].x,
+			 xml->vertices[xml->triind[a+((j+1)%3)]].y,
+			 xml->vertices[xml->triind[a+((j+1)%3)]].z)-Cur);
+	Normalize(Cur);
+	//Cur = Cur*(1.00F/xml->vertexcount[a+j]);
+	xml->vertices[xml->triind[a+j]].i+=Cur.i/xml->vertexcount[xml->triind[a+j]];
+	xml->vertices[xml->triind[a+j]].j+=Cur.j/xml->vertexcount[xml->triind[a+j]];
+	xml->vertices[xml->triind[a+j]].k+=Cur.k/xml->vertexcount[xml->triind[a+j]];
+      }
+    }
+    a=0;
+    trimax = xml->quads.size()/4;
+    for (i=0;i<trimax;i++,a+=4) {
+      for (j=0;j<4;j++) {
+	Vector Cur (xml->vertices[xml->quadind[a+j]].x,
+		    xml->vertices[xml->quadind[a+j]].y,
+		    xml->vertices[xml->quadind[a+j]].z);
+	Cur = (Vector (xml->vertices[xml->quadind[a+((j+2)%4)]].x,
+		       xml->vertices[xml->quadind[a+((j+2)%4)]].y,
+		       xml->vertices[xml->quadind[a+((j+2)%4)]].z)-Cur)
+	  .Cross(Vector (xml->vertices[xml->quadind[a+((j+1)%4)]].x,
+			 xml->vertices[xml->quadind[a+((j+1)%4)]].y,
+			 xml->vertices[xml->quadind[a+((j+1)%4)]].z)-Cur);
+	Normalize(Cur);
+	//Cur = Cur*(1.00F/xml->vertexcount[a+j]);
+	xml->vertices[xml->quadind[a+j]].i+=Cur.i/xml->vertexcount[xml->quadind[a+j]];
+	xml->vertices[xml->quadind[a+j]].j+=Cur.j/xml->vertexcount[xml->quadind[a+j]];
+	xml->vertices[xml->quadind[a+j]].k+=Cur.k/xml->vertexcount[xml->quadind[a+j]];
+      }
+    }
+    for (i=0;i<xml->vertices.size();i++) {
+      float dis = sqrt (xml->vertices[i].i*xml->vertices[i].i +
+			xml->vertices[i].j*xml->vertices[i].j +
+			xml->vertices[i].k*xml->vertices[i].k);
+      if (dis!=0) {
+	xml->vertices[i].i/=dis;
+	xml->vertices[i].j/=dis;
+	xml->vertices[i].k/=dis;
+      }else {
+	xml->vertices[i].i=0;
+	xml->vertices[j].j=0;
+	xml->vertices[i].k=1;
+      } 
+    }
+
+    a=0;
+    for (i=0;i<xml->tris.size();i++,a+=3) {
+      for (j=0;j<3;j++) {
+	xml->tris[a+j].i = xml->vertices[xml->triind[a+j]].i;
+	xml->tris[a+j].j = xml->vertices[xml->triind[a+j]].j;
+	xml->tris[a+j].k = xml->vertices[xml->triind[a+j]].k;
+      }
+    }
+    a=0;
+    for (i=0;i<xml->quads.size();i++,a+=4) {
+      for (j=0;j<4;j++) {
+	xml->quads[a+j].i=xml->vertices[xml->quadind[a+j]].i;
+	xml->quads[a+j].j=xml->vertices[xml->quadind[a+j]].j;
+	xml->quads[a+j].k=xml->vertices[xml->quadind[a+j]].k;
+      }
+    }
+  
+  }
+  
   // TODO: add alpha handling
   Decal = new Texture(xml->decal_name.c_str(), 0);
 
@@ -390,7 +473,8 @@ void Mesh::LoadXML(const char *filename, Mesh *oldmesh) {
     fprintf (stderr, "uhoh");
   }
   radialSize = 0;
-  for(int a=0; a<xml->tris.size(); a++, index++) {
+  int a;
+  for(a=0; a<xml->tris.size(); a++, index++) {
     vertexlist[index] = xml->tris[a];
     minSizeX = min(vertexlist[index].x, minSizeX);
     maxSizeX = max(vertexlist[index].x, maxSizeX);
@@ -399,7 +483,7 @@ void Mesh::LoadXML(const char *filename, Mesh *oldmesh) {
     minSizeZ = min(vertexlist[index].z, minSizeZ);
     maxSizeZ = max(vertexlist[index].z, maxSizeZ);
   }
-  for(int a=0; a<xml->quads.size(); a++, index++) {
+  for(a=0; a<xml->quads.size(); a++, index++) {
     vertexlist[index] = xml->quads[a];
     minSizeX = min(vertexlist[index].x, minSizeX);
     maxSizeX = max(vertexlist[index].x, maxSizeX);
@@ -408,6 +492,8 @@ void Mesh::LoadXML(const char *filename, Mesh *oldmesh) {
     minSizeZ = min(vertexlist[index].z, minSizeZ);
     maxSizeZ = max(vertexlist[index].z, maxSizeZ);
   }
+  
+
   float x_center = (minSizeX + maxSizeX)/2.0,
     y_center = (minSizeY + maxSizeY)/2.0,
     z_center = (minSizeZ + maxSizeZ)/2.0;
