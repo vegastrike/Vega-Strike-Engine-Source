@@ -1,4 +1,6 @@
 #include "communication.h"
+#include "vs_globals.h"
+#include "config_xml.h"
 #include <assert.h>
 FSM::FSM (const char * filename) {
     //loads a conversation finite state machine with deltaRelation weight transition from an XML?
@@ -99,11 +101,19 @@ int FSM::getCommMessageMood (int curstate, float mood, float randomresponse) con
 #endif
 	vector<unsigned int> g;
 	vector <unsigned int>b;
+	static float pos_limit =XMLSupport::parse_float(vs_config->getVariable ("AI",
+											"LowestPositiveCommChoice",
+											"-.015"));
+	static float neg_limit =XMLSupport::parse_float(vs_config->getVariable ("AI",
+											"LowestNegativeCommChoice",
+											".025"));
+
 	for (unsigned int i=0;i<n->edges.size();i++) {
 		float md=nodes[n->edges[i]].messagedelta;
-		if (md>=0) {
+		if (md>=pos_limit) {
 			g.push_back(i);
-		} else {
+		}
+		if (md<=neg_limit) {
 			b.push_back(i);
 		}
 	}

@@ -642,7 +642,7 @@ void restore_main_loop() {
 }
 void main_loop() {
   _Universe->StartDraw();
-  if(myterrain){
+  if(myterrain){ 
     myterrain->AdjustTerrain(_Universe->activeStarSystem());
   }
 
