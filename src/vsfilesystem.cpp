@@ -273,7 +273,9 @@ namespace VSFileSystem
 
 	FILE *	vs_open( const char * filename, const char * mode)
 	{
+          if (VSFS_DEBUG()>1) {
 		cerr<<"-= VS_OPEN in mode "<<mode<<" =- ";
+          }
 
 			FILE * fp;
 			string fullpath = homedir+"/"+string( filename);
