@@ -108,11 +108,13 @@ ClickList *StarSystem::getClickList() {
 }
 
 void StarSystem::modelGravity() {
-	for (int i=0;i<numprimaries;i++) {
-       if (primaries[i]->isUnit ()==PLANETPTR) 
-		   ((Planet *)primaries[i])->gravitate(units);
-	}
-}
+  for (int i=0;i<numprimaries;i++) {
+    if (primaries[i]->isUnit ()==PLANETPTR) 
+      ((Planet *)primaries[i])->gravitate(units);
+    else
+      ((Unit *)primaries[i])->ResolveForces (identity_transformation,identity_matrix,false); 
+  }   
+}	
 
 void StarSystem::AddUnit(Unit *unit) {
   units->prepend(unit);
@@ -179,7 +181,7 @@ void StarSystem::Update() {
 	iter->advance();
       }
       delete iter;
-		  
+        
       time -= SIMULATION_ATOM;
       firstframe = false;
     }

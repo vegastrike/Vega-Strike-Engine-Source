@@ -129,7 +129,7 @@ Planet::~Planet() {
 
 void Planet::gravitate(UnitCollection *uc) {
   float *t = cumulative_transformation_matrix;
-  UpdateCollideQueue();
+
   /*
   if(gravity!=0.0) {
     Iterator *iterator = uc->createIterator();
@@ -160,7 +160,13 @@ void Planet::gravitate(UnitCollection *uc) {
     satellites[a]->origin =  curr_physical_state.position;
 	if (satellites[a]->isUnit()==PLANETPTR) 
 	    ((Planet *)satellites[a])->gravitate(uc);//FIXME 071201
-	else
-	  ((Unit *)satellites[a])->ResolveForces (identity_transformation,identity_matrix,false); 
+	else { //FIXME...[causes flickering for crashing orbiting units
+	
+	  //((Unit *)satellites[a])->ResolveForces (identity_transformation,identity_matrix,false); 
+	  ((Unit *)satellites[a])->UpdateCollideQueue();
+	}
   }
+  cumulative_transformation = curr_physical_state;
+  cumulative_transformation.to_matrix(cumulative_transformation_matrix);
+  UpdateCollideQueue();
 }

@@ -94,7 +94,7 @@ bool Unit::Collide (Unit * target) {
   if ((Position()-target->Position()).Magnitude()>radial_size+target->radial_size)
     return false;
   //now do some serious checks
-  Vector normal;
+  Vector normal(-1,-1,-1);
   float dist;
   Unit * bigger;
   Unit * smaller;
@@ -112,9 +112,15 @@ bool Unit::Collide (Unit * target) {
   //  smaller->ApplyForce (normal * fabs(elast*speedagainst)/SIMULATION_ATOM);
   //  bigger->ApplyForce (normal * -fabs((elast+1)*speedagainst*smaller->GetMass()/bigger->GetMass())/SIMULATION_ATOM);
   //deal damage similarly to beam damage!!  Apply some sort of repel force
-  fprintf (stderr,"Collidison %s %s",name.c_str(),target->name.c_str());
-  //GOODsmaller->ApplyForce (normal*smaller->GetMass()*fabs(normal.Dot ((smaller->GetVelocity()-bigger->GetVelocity()/SIMULATION_ATOM))+fabs (dist)/(SIMULATION_ATOM*SIMULATION_ATOM)));
-  //GOODbigger->ApplyForce (normal*(smaller->GetMass()*smaller->GetMass()/bigger->GetMass())*-fabs(normal.Dot ((smaller->GetVelocity()-bigger->GetVelocity()/SIMULATION_ATOM))+fabs (dist)/(SIMULATION_ATOM*SIMULATION_ATOM)));
+  if (normal.i==-1&&normal.j==-1) {
+    normal = (smaller->Position()-bigger->Position());
+    if (normal.i||normal.j||normal.k)
+      normal.Normalize();
+  }
+  Vector farce = normal*smaller->GetMass()*fabs(normal.Dot ((smaller->GetVelocity()-bigger->GetVelocity()/SIMULATION_ATOM))+fabs (dist)/(SIMULATION_ATOM*SIMULATION_ATOM));
+  smaller->ApplyForce (normal*smaller->GetMass()*fabs(normal.Dot ((smaller->GetVelocity()-bigger->GetVelocity()/SIMULATION_ATOM))+fabs (dist)/(SIMULATION_ATOM*SIMULATION_ATOM)));
+  bigger->ApplyForce (normal*(smaller->GetMass()*smaller->GetMass()/bigger->GetMass())*-fabs(normal.Dot ((smaller->GetVelocity()-bigger->GetVelocity()/SIMULATION_ATOM))+fabs (dist)/(SIMULATION_ATOM*SIMULATION_ATOM)));
+  fprintf (stderr,"Colliison %s %s force: <%f %f %f>",name.c_str(),target->name.c_str(),farce.i,farce.j,farce.k);
   //each mesh with each mesh? naw that should be in one way collide
   return true;
 }

@@ -86,7 +86,7 @@ friend class PlanetaryOrbit;
   void endElement(const string &name);
 
  protected:
-  void UpdateCollideQueue();
+
   BSPTree *bspTree;
   int ucref;
   bool killed;
@@ -183,7 +183,8 @@ friend class PlanetaryOrbit;
   Box *selectionBox;
 
 public:
-	  Vector origin;
+  void UpdateCollideQueue();
+  Vector origin;
   string name;
   float rSize () {return radial_size;}
   //no default constructor; dymanically allocated arrays are evil, gotta do it java style to make it more sane
