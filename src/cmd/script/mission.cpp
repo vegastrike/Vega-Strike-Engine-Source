@@ -47,6 +47,7 @@
 #include "Python.h"
 #endif
 #include "python/python_class.h"
+#include "savegame.h"
 //#include "easydom.h"
 
 //#include "msgcenter.h"
@@ -201,20 +202,35 @@ void Mission::wipeDeletedMissions() {
   while (!Mission_delqueue.empty()) {
     delete Mission_delqueue.back();
     Mission_delqueue.pop_back();
+    
   }
 }
 
 void Mission::terminateMission(){
 	vector<Mission *> *active_missions = ::active_missions.Get();
 	vector<Mission *>::iterator f = std::find (active_missions->begin(),active_missions->end(),this);
+        int queuenum = f-active_missions->begin();
 	if (f!=active_missions->end()) {
 		active_missions->erase (f);
 	}
 	if (this!=(*active_missions)[0]) {
 		Mission_delqueue.push_back(this);//only delete if we arent' the base mission
 	}
-	if (runtime.pymissions)
-		runtime.pymissions->Destroy();
+        if (queuenum>0) {
+          int num=queuenum-1;
+          vector<std::string> * scripts = &_Universe->AccessCockpit(player_num)->savegame->getMissionStringData("active_scripts");
+          if (num<scripts->size()) {
+            scripts->erase(scripts->begin()+num);
+          }
+          vector<std::string> * missions = &_Universe->AccessCockpit(player_num)->savegame->getMissionStringData("active_missions");
+          if (num<missions->size()) {
+            missions->erase(missions->begin()+num);
+          }
+        }
+	if (runtime.pymissions){
+          
+          runtime.pymissions->Destroy();
+        }
 	runtime.pymissions=NULL;
 }
 

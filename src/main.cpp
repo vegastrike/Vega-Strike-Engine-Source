@@ -741,7 +741,10 @@ void bootstrap_main_loop () {
 		}
 	}
 	cur_check = getNewTime();
-    _Universe->Loop(main_loop);
+        for (unsigned int i=0;i<_Universe->numPlayers();++i) {
+          _Universe->AccessCockpit(i)->savegame->LoadSavedMissions();
+        }
+        _Universe->Loop(main_loop);
     ///return to idle func which now should call main_loop mohahahah
   }
   ///Draw Texture

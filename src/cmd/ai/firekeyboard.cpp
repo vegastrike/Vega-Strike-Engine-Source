@@ -1772,7 +1772,7 @@ void FireKeyboard::Execute () {
       cp->Eject();
     }
   }
-  bool actually_arrest=XMLSupport::parse_bool(vs_config->getVariable("AI","arrest_energy_zero","false"));
+  static bool actually_arrest=XMLSupport::parse_bool(vs_config->getVariable("AI","arrest_energy_zero","false"));
   
   if (actually_arrest&&parent->EnergyRechargeData()==0) {
 	  Arrested(parent);

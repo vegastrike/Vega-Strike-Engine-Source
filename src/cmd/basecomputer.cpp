@@ -4087,6 +4087,15 @@ bool BaseComputer::buyShip(const EventCommandId& command, Control* control) {
 //					if (BaseInterface::CurrentBase)
 //						BaseInterface::CurrentBase->caller.SetUnit(newPart);
 					m_player.SetUnit(newPart);
+                    static bool persistent_missions_across_ship_switch=XMLSupport::parse_bool(vs_config->getVariable("general","persistent_mission_across_ship_switch","true"));
+                    if (persistent_missions_across_ship_switch){
+                      for (int i=active_missions.size()-1;i>0;--i){// don't terminate zeroth mission
+                        if (active_missions[i]->player_num==_Universe->CurrentCockpit())
+                          active_missions[i]->terminateMission();
+                      }
+                    
+                      _Universe->AccessCockpit()->savegame->LoadSavedMissions();
+                    }
                     newPart=NULL;
                     playerUnit->Kill();
                     window()->close();

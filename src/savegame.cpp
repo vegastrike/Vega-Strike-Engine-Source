@@ -13,6 +13,7 @@
 #include "gfx/cockpit_generic.h"
 #include "networking/const.h"
 #include "vsfilesystem.h"
+#include <Python.h>
 using namespace std;
 using namespace VSFileSystem;
 std::string CurrentSaveGameName="";
@@ -597,7 +598,8 @@ void SaveGame::ReadSavedPackets (char * &buf, bool commitfactions) {
         buf+=hopto (buf,' ','\n',0);
     if (a==0&&0==strcmp(unitname,"factions")&&0==strcmp(factname,"begin")) {
       if (commitfactions) FactionUtil::LoadSerializedFaction(buf);
-      return;//GOT TO BE THE LAST>... cus it's stupid :-) and mac requires the factions to be loaded AFTER this function call
+
+      break;//GOT TO BE THE LAST>... cus it's stupid :-) and mac requires the factions to be loaded AFTER this function call
     }else if (a==0&&0==strcmp(unitname,"mission")&&0==strcmp(factname,"data")) {
       ReadMissionData(buf);
     }else if (a==0&&0==strcmp(unitname,"missionstring")&&0==strcmp(factname,"data")) {
@@ -614,7 +616,28 @@ void SaveGame::ReadSavedPackets (char * &buf, bool commitfactions) {
       //su.push_back (SavedUnits (unitname,(clsptr)a,factname));
     }
   }
- cout<<"\tExiting ReadSavedPackets"<<endl;
+  cout<<"\tExiting ReadSavedPackets"<<endl;
+}
+
+void SaveGame::LoadSavedMissions() {
+  vector<std::string> scripts = getMissionStringData("active_scripts");
+  vector<std::string> missions = getMissionStringData("active_missions");
+  for (unsigned int i=0;i<scripts.size()&&i<missions.size();++i) {
+    try {
+      LoadMission(missions[i].c_str(),scripts[i],false);
+    }catch (...) {
+      if (PyErr_Occurred()) {
+        PyErr_Print();
+        PyErr_Clear();
+        fflush(stderr);         
+        fflush(stdout);
+      }else throw;    
+      
+    }
+    
+  }
+  getMissionStringData("active_scripts")=scripts;
+  getMissionStringData("active_missions")=missions;
 }
 string SaveGame::WriteSavedUnit (SavedUnits* su) {
   return string("\n")+XMLSupport::tostring(su->type)+string(" ")+su->filename+" "+su->faction;

@@ -67,6 +67,7 @@ class SaveGame {
   void RemoveUnitFromSave (long address);//cast it to a long
   //void ParseSaveGame (std::string filename, std::string &ForceStarSystem, std::string originalstarsystem, QVector & pos, bool &shouldupdatedfighter0pos, float &credits, std::vector <std::string> & originalunit, int player_num, char * savebuf=NULL, bool read=true);
   void ParseSaveGame (std::string filename, std::string &ForceStarSystem, std::string originalstarsystem, QVector & pos, bool &shouldupdatedfighter0pos, float &credits, std::vector <std::string> & originalunit, int player_num, std::string savestr="", bool read=true, bool commitFaction=true);
+  void LoadSavedMissions();
 };
 void WriteSaveGame (class Cockpit * cp, bool auto_save);
 void CopySavedShips(std::string filename, int player_num,const std::vector<std::string>&starships,bool load);
