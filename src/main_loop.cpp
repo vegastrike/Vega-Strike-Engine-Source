@@ -116,10 +116,10 @@ namespace CockpitKeys {
 		_Universe->AccessCamera()->myPhysics.ApplyBalancedLocalTorque(-Q, R,timek);
 		//a =1;
 	}
-	else if(_Slew&&newState==RELEASE) {
-		_Universe->AccessCamera()->myPhysics.ApplyBalancedLocalTorque(Q, R,timek);
-		//a=0;
-	}
+	if (_Slew&&newState==RELEASE) {
+	  _Universe->AccessCamera()->myPhysics.SetAngularVelocity(Vector(0,0,0));
+	}//a=0;
+	
 }
 
  void PitchUp(int,KBSTATE newState) {
@@ -133,9 +133,8 @@ namespace CockpitKeys {
 		_Universe->AccessCamera()->myPhysics.ApplyBalancedLocalTorque(Q, R,timek);
 		
 	}
-	else if(_Slew&&newState==RELEASE) {
-		_Universe->AccessCamera()->myPhysics.ApplyBalancedLocalTorque(-Q, R,timek);
-		
+	if (_Slew&&newState==RELEASE) {
+	  _Universe->AccessCamera()->myPhysics.SetAngularVelocity(Vector(0,0,0));
 	}
 }
 
@@ -143,18 +142,14 @@ namespace CockpitKeys {
 	
 	static Vector P;
 	static Vector R;
-	if (newState==RELEASE) {
-	  _Universe->AccessCamera()->myPhysics.SetAngularVelocity(Vector(0,0,0));
-	}
 	if(newState==PRESS) {
 		P = _Universe->AccessCamera()->P;
 		R = _Universe->AccessCamera()->R;
 		_Universe->AccessCamera()->myPhysics.ApplyBalancedLocalTorque(-P, R,timek);
 		
 	}
-	else if(_Slew&&newState==RELEASE) {
-		_Universe->AccessCamera()->myPhysics.ApplyBalancedLocalTorque(P, R,timek);
-		
+	if (_Slew&&newState==RELEASE) {
+	  _Universe->AccessCamera()->myPhysics.SetAngularVelocity(Vector(0,0,0));
 	}
 }
 
@@ -168,9 +163,8 @@ namespace CockpitKeys {
 		_Universe->AccessCamera()->myPhysics.ApplyBalancedLocalTorque(P, R,timek);
 	
 	}
-	else if(_Slew&&newState==RELEASE) {
-		_Universe->AccessCamera()->myPhysics.ApplyBalancedLocalTorque(-P, R,timek);
-	       
+	if (_Slew&&newState==RELEASE) {
+	  _Universe->AccessCamera()->myPhysics.SetAngularVelocity(Vector(0,0,0));
 	}
 }
 
