@@ -45,7 +45,8 @@ void Unit:: Rotate (const Vector &axis)
 {
 	double theta = axis.Magnitude();
 	double ootheta=0;
-	if( theta!=0) ootheta = 1/theta;
+	if( theta==0) return;
+	ootheta = 1/theta;
 	float s = cos (theta * .5);
 	Quaternion rot = Quaternion(s, axis * (sinf (theta*.5)*ootheta));
 	if(theta < 0.0001) {
