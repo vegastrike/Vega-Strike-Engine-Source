@@ -87,7 +87,8 @@ void Unit::Upgrade (Unit * up) {
   limits.retro+=up->limits.retro;
   limits.afterburn+=up->limits.afterburn;
   computer.radar.maxrange+=up->computer.radar.maxrange;
-  computer.radar.maxcone-=up->computer.radar.maxcone;
+  if (computer.radar.maxcone>up->computer.radar.maxcone) 
+    computer.radar.maxcone=up->computer.radar.maxcone;
   computer.max_speed+=up->computer.max_speed;
   computer.max_ab_speed+=up->computer.max_ab_speed;
   computer.max_yaw+=up->computer.max_yaw;

@@ -21,7 +21,7 @@ static unsigned int ssrand()
         return starsysrandom;
 }
 
-
+int nument[5];
 namespace StarSystemGent {
 
 float mmax (float a, float b) {
@@ -168,7 +168,7 @@ const int MOON=3;
 const int JUMP=4;
   //begin global variables
 
-int nument[5];
+
 vector <string> entities[5];
 vector <string> gradtex;
 int numun[2];
@@ -185,7 +185,9 @@ string faction;
 vector <GradColor> colorGradiant;
   float compactness=2;
   void ResetGlobalVariables () {
-    nument[STAR]=nument[GAS]=nument[PLANET]=nument[MOON]=nument[JUMP]=0;
+    numun[0]=numun[1]=nument[STAR]=nument[GAS]=nument[PLANET]=nument[MOON]=nument[JUMP]=0;
+    units[0].clear();
+    units[1].clear();
     entities[STAR].clear();
     entities[GAS].clear();
     entities[PLANET].clear();entities[MOON].clear();
@@ -596,10 +598,11 @@ void MakePlanet(float radius, int entitytype, bool forceRS, Vector R, Vector S, 
     WriteUnit ("unit","planetary-ring","planetary-ring",Vector (0,0,0), Vector (0,0,0), Vector (0,0,0), string (""), string (""),false);
   }
   if ((entitytype!=JUMP&&entitytype!=MOON)||grand()<moonofmoonprob) {
-    int numu = numun[1]/(nument[PLANET]+nument[GAS])+ grand()*(nument[PLANET]+nument[GAS])>(numun[1]%(nument[PLANET]+nument[GAS]))?1:0;
+    int numu = numun[1]/(nument[PLANET]+nument[GAS])+ (grand()*(nument[PLANET]+nument[GAS])<(numun[1]%(nument[PLANET]+nument[GAS]))?1:0);
     if (entitytype==MOON)
       if (numu>1)
 	numu=1;
+    
     for (int i=0;i<numu;i++) {
       MakeSmallUnit ();
     }
@@ -612,7 +615,7 @@ void MakePlanet(float radius, int entitytype, bool forceRS, Vector R, Vector S, 
 }
 
 void MakeMoons (float radius, int entitytype, int callingentitytype, bool forceone      ) {
-  unsigned int nummoon = nument[entitytype]/nument[callingentitytype]+(grand ()*nument[callingentitytype]<(nument[entitytype]%nument[callingentitytype]))?1:0;
+  unsigned int nummoon = nument[entitytype]/nument[callingentitytype]+((grand ()*nument[callingentitytype]<(nument[entitytype]%nument[callingentitytype]))?1:0);
   if (forceone)
     nummoon=1;
   for (unsigned int i=0;i<nummoon;i++) {
@@ -812,6 +815,9 @@ void generateStarSystem (string datapath, int seed, string sector, string system
   readentity (entities[3],(datapath+moonlist).c_str());
   readentity (units[1],(datapath+smallunitlist).c_str());
   readentity (background,(datapath+backgroundlist).c_str());
+  if (background.empty()) {
+    background.push_back (backgroundlist);
+  }
   if (nebulae) {
     readentity (units[0],(datapath+nebulaelist).c_str());
   }
