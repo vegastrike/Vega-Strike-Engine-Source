@@ -310,7 +310,7 @@ string dodad (int which) {
 vector<string> shuffle (const vector<string> & inp) {
 	vector<string> retval;
 	for (unsigned int i=0;i<inp.size();++i) {
-		int index = random()%(retval.size()+1);
+		int index = rand()%(retval.size()+1);
 		if (std::find(retval.begin(),retval.end(),inp[i])==retval.end()) {
 			retval.insert(retval.begin()+index,inp[i]);
 		}
@@ -492,15 +492,16 @@ public:
 };
 
 void stripwhitespace(std::string &str) {
+	unsigned int i;
 	// Strip whitespace from a string.
-	for (int i=str.size()-1;i>=0;i--) {
+	for (i=str.size()-1;i>=0;i--) {
 		if (isspace(str[i])) {
 			str.erase(i);
 		} else {
 			break;
 		}
 	}
-	for (int i=0;i<str.size();i++) {
+	for (i=0;i<str.size();i++) {
 		if (isspace(str[i])) {
 			str.erase(i);
 		} else {
@@ -606,7 +607,7 @@ void processsystems (std::vector <System> & s){
 		}
 //		s[i]["jumps"]=j;
 	}
-	for (unsigned int i=0;i<s.size();++i) {
+	for (i=0;i<s.size();++i) {
 		if (s[i].habitable){
 			unsigned int jsize = s[i].jumps.size();
 			for (unsigned int k=0;k<jsize;++k) {
