@@ -1267,7 +1267,7 @@ if test "$TESTNETCOMM" = "1" ; then
 		CHECK_FOR_QT_H
 		if test "x$have_qt_h" = "xyes" ; then
 			TESTNETCOMM_NOWEBCAM="0"
-   			LIBS="$LIBS -framework QuickTime -framework Carbon -lz"
+   			LIBS="$LIBS -framework QuickTime -framework Carbon"
 			echo "Webcam support enabled."
 		else
     		TR_CPPFLAGS="$TR_CPPFLAGS -DNETCOMM_NOWEBCAM"

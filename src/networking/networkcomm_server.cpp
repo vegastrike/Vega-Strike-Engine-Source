@@ -6,7 +6,7 @@ NetworkCommunication::NetworkCommunication()
 {
 }
 
-void	NetworkCommunication::AddToSession( ClientPtr clt)
+void	NetworkCommunication::AddToSession( ClientPtr clt, bool webcam, bool pa)
 {
 }
 

@@ -1,9 +1,9 @@
 
 *** GENERAL ************************************************************
 
-- Check if I really send path relative to datadir with filenames to download
 - Add text message support to NetworkCommunication class
 - Complete jVoIP support
+- PortAudio : tune PA_MAX_CPU_LOAD when support is complete
 - About NetworkCommunications : assign a different freq range for each faction ?
 - Download manager must be told that sockets have closed or timeout out
 - Use and "hand-shake" protocol between server and client
@@ -50,6 +50,7 @@ OR
 
 === GENERAL STUFF =======================================================
 
+DONE OK - Check if I really send path relative to datadir with filenames to download
 DONE - Implement a download manager -> Carsten is on that one
 DONE - When client starts server send galaxy filename with md5sum or other check system
 	if client has the file and the same md5 -> ok

@@ -51,21 +51,21 @@ void	Pa_DisplayInfo( PaDeviceID id)
 	cout<<"\tnativeSampleFormats : ";
 	switch( info->nativeSampleFormats)
 	{
-		case (1<<0) :
+		case (paFloat32) :
 			cout<<"paFloat32"<<endl; break;
-		case (1<<1) :
+		case (paInt16) :
 			cout<<"paInt16"<<endl; break;
-		case (1<<2) :
+		case (paInt32) :
 			cout<<"paInt32"<<endl; break;
-		case (1<<3) :
+		case (paInt24) :
 			cout<<"paInt24"<<endl; break;
-		case (1<<4) :
+		case (paPackedInt24) :
 			cout<<"paPackedInt24"<<endl; break;
-		case (1<<5) :
+		case (paInt8) :
 			cout<<"paInt8"<<endl; break;
-		case (1<<6) :
+		case (paUInt8) :
 			cout<<"paUInt8"<<endl; break;
-		case (1<<16) :
+		case (paCustomFormat) :
 			cout<<"paCustomFormat"<<endl; break;
 		
 	}
@@ -74,8 +74,30 @@ void	Pa_DisplayInfo( PaDeviceID id)
 		cout<<"\t\tRate "<<i<<" = "<<info->sampleRates[i];
 }
 
-int	Pa_Callback( void * inputBuffer, void * outputBuffer, unsigned long framesPerBuffer, PaTimestamp outTime, void * userdata)
+int	Pa_RecordCallback( void * inputBuffer, void * outputBuffer, unsigned long framesPerBuffer, PaTimestamp outTime, void * userdata)
 {
+	NetworkCommunication * netcomm = (NetworkCommunication *) userdata;
+	unsigned short * in = (unsigned short *) inputBuffer;
+
+	// Only act if PA CPU Load is low enough and if we have data in the input buffer
+	if( Pa_GetCPULoad(netcomm->instream)<MAX_PA_CPU_LOAD && in)
+	{
+		memset( netcomm->audio_inbuffer, 0, MAXBUFFER);
+		memcpy( netcomm->audio_inbuffer, in, framesPerBuffer*sizeof(unsigned short));
+	}
+
+	return 0;
+}
+
+int	Pa_PlayCallback( void * inputBuffer, void * outputBuffer, unsigned long framesPerBuffer, PaTimestamp outTime, void * userdata)
+{
+	NetworkCommunication * netcomm = (NetworkCommunication *) userdata;
+	unsigned short * out = (unsigned short *) outputBuffer;
+
+	// Copy the last received sound buffer if not yet played (would be NULL) and if PA CPU load is low enough
+	if( Pa_GetCPULoad(netcomm->outstream)<MAX_PA_CPU_LOAD && netcomm->audio_outbuffer)
+		memcpy( outputBuffer, netcomm->audio_outbuffer, sizeof( unsigned short)*framesPerBuffer);
+
 	return 0;
 }
 
@@ -129,10 +151,6 @@ NetworkCommunication::NetworkCommunication()
 	}
 
 #endif /* NETCOMM_NOWEBCAM */
-#ifdef HYBRID_PROTO
-	// Create a server socket to receive video data ?
-	videoSocket = NetUIUDP::createServerSocket( VIDEO_PORT, _serversock_set);
-#endif /* HYBRID_PROTO */
 }
 
 NetworkCommunication::NetworkCommunication( int nb)
@@ -141,15 +159,21 @@ NetworkCommunication::NetworkCommunication( int nb)
 	this->max_messages = nb;
 }
 
-void	NetworkCommunication::AddToSession( ClientPtr clt)
+void	NetworkCommunication::AddToSession( ClientPtr clt, bool webcam, bool pa)
 {
 	this->commClients.push_back( clt);
+	// If the client has a webcam enabled
+	if( webcam)
+		this->webcamClients.push_back( clt);
+	// Affect 1st client to webcam view
+	if( this->webcamClients.size()==1)
+		this->webcamClient = clt;
+	// If the client has a PortAudio support
+	if( pa)
+		this->paClients.push_back( clt);
 #ifdef NETCOMM_JVOIP
 	CheckVOIPError( this->session->AddDestination( ntohl( clt->cltadr.inaddr() ), VOIP_PORT));
 #endif /* NETCOMM_JVOIP */
-#ifdef HYBRID_PROTO
-	this->sockClients.push_back( NetUIUDP::createSocket( clt->cltadr, VIDEO_PORT, this->_sock_set));
-#endif /* HYBRID_PROTO */
 }
 
 void	NetworkCommunication::RemoveFromSession( ClientPtr clt)
@@ -160,6 +184,10 @@ void	NetworkCommunication::RemoveFromSession( ClientPtr clt)
 #endif /* NETCOMM_JVOIP */
 }
 
+/***************************************************************************************/
+/**** Send text message                                                             ****/
+/**** Broadcast string function param as a text message to the current frequency    ****/
+/***************************************************************************************/
 void	NetworkCommunication::SendMessage( SOCKETALT & send_sock, string message)
 {
 	// If max log size is reached we remove the oldest message
@@ -167,20 +195,41 @@ void	NetworkCommunication::SendMessage( SOCKETALT & send_sock, string message)
 		this->message_history.pop_front();
 	this->message_history.push_back( message);
 
-	// Send the text message according to the chosen method (HYBRID_PROTO or SERVER_PROTO)
-#ifdef HYBRID_PROTO
-#endif /* HYBRID_PROTO */
+	// Send the text message according to the chosen method
+	if( method==1)
+	{
+		// SEND STRNIG PARAMETER TO SERVER SO THAT HE BROADCASTS IT TO CONCERNED PLAYERS
+	}
+	else if( method==2)
+	{
+		// SEND STRING PARAMETER TO EACH PLAYER COMMUNICATING ON THAT FREQUENCY
+	}
 }
 
-// Send sound sample
+/***************************************************************************************/
+/**** Send sound sample in PortAudio mode                                           ****/
+/**** Send audio_inbuffer over the network according to the chosen method           ****/
+/***************************************************************************************/
 void	NetworkCommunication::SendSound( SOCKETALT & send_sock)
 {
 #ifdef USE_PORTAUDIO
+	if( method==1)
+	{
+		// SEND INPUT AUDIO BUFFER TO SERVER SO THAT HE BROADCASTS IT TO CONCERNED PLAYERS
+	}
+	else if( method==2)
+	{
+		// SEND INPUT AUDIO BUFFER TO EACH PLAYER COMMUNICATING ON THAT FREQUENCY
+	}
+	memset( audio_inbuffer, 0, MAXBUFFER);
 #endif /* USE_PORTAUDIO */
 // Do not do anything when using JVoIP lib
 }
 
-// Send a grabbed image
+/***************************************************************************************/
+/**** Send a webcam capture                                                         ****/
+/**** Send jpeg_buffer over the network according to the chosen method              ****/
+/***************************************************************************************/
 void	NetworkCommunication::SendImage( SOCKETALT & send_sock)
 {
 	string jpeg_str( "");
@@ -192,29 +241,21 @@ void	NetworkCommunication::SendImage( SOCKETALT & send_sock)
 		jpeg_str = Webcam->CaptureImage();
 		//cerr<<"--- grabbing finished"<<endl;
 	}
-	switch( method)
+	if( method==1)
 	{
-		case 1 :
-		{
-			// SEND GRABBED IMAGE TO SERVER SO THAT HE BROADCASTS IT TO CONCERNED PLAYERS
-		}
-		break;
-		case 2 :
-		{
-			// SEND GRABBED IMAGE TO EACH PLAYER COMMUNICATING ON THAT FREQUENCY
-		}
-		break;
-		default :
-			cerr<<"!!! ERROR : communication method do not exist !!!"<<endl;
-			exit(1);
+		// SEND GRABBED IMAGE TO SERVER SO THAT HE BROADCASTS IT TO CONCERNED PLAYERS
+	}
+	else if( method==2)
+	{
+		// SEND GRABBED IMAGE TO EACH PLAYER COMMUNICATING ON THAT FREQUENCY
 	}
 
-		/*
-		Packet p;
-		// We don't need that to be reliable in UDP mode
-		p.send( CMD_CAMSHOT, clt->serial, netbuf.getData(), netbuf.getDataLength(), SENDANDFORGET, NULL, clt->clt_sock,
-                      __FILE__, PSEUDO__LINE__(49) );
-		*/
+	/* MAYBE USE A VSDOWNLOADSERVER AND CLIENT
+	Packet p;
+	// We don't need that to be reliable in UDP mode
+	p.send( CMD_CAMSHOT, clt->serial, netbuf.getData(), netbuf.getDataLength(), SENDANDFORGET, NULL, clt->clt_sock,
+                     __FILE__, PSEUDO__LINE__(49) );
+	*/
 #endif /* NETCOMM_NOWEBCAM */
 }
 
@@ -234,11 +275,24 @@ int		NetworkCommunication::InitSession( float frequency)
 #endif /* NETCOMM_JVOIP */
 #ifdef NETCOMM_PORTAUDIO
 
-	CheckPAError( Pa_OpenStream( &this->stream,
+	// Create the input stream with indev and 1 channel with paInt16 samples
+	CheckPAError( Pa_OpenStream( &this->instream,
 								 this->indev, 1, paInt16, NULL,
-								 this->outdev, 2, paInt16, NULL,
+								 paNoDevice, 0, paInt16, NULL,
 								 this->sample_rate, 256, 0, paNoFlag,
-								 Pa_Callback, (void *)this));
+								 Pa_RecordCallback, (void *)this));
+
+	// Create the output stream with outdev and 1 channel with paInt16 samples
+	CheckPAError( Pa_OpenStream( &this->outstream,
+								 paNoDevice, 0, paInt16, NULL,
+								 this->outdev, 1, paInt16, NULL,
+								 this->sample_rate, 256, 0, paNoFlag,
+								 Pa_PlayCallback, (void *)this));
+
+	if( this->instream)
+		CheckPAError( Pa_StartStream( this->instream));
+	if( this->outstream)
+		CheckPAError( Pa_StartStream( this->outstream));
 
 #endif /* NETCOMM_PORTAUDIO */
 
@@ -255,6 +309,10 @@ int		NetworkCommunication::InitSession( float frequency)
 int		NetworkCommunication::DestroySession()
 {
 	this->active = false;
+#ifdef NETCOMM_PORTAUDIO
+	CheckPAError( Pa_StopStream( this->instream));
+	CheckPAError( Pa_StopStream( this->outstream));
+#endif
 #ifdef NETCOMM_JVOIP
 	CheckVOIPError( this->session->Destroy());
 

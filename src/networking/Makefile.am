@@ -10,7 +10,7 @@ incl = \
 	-I/usr/local/include/jrtplib	\
 	-I/usr/local/include/jthread
 else
-incl = ""
+incl =
 endif
 
 if USEBOOST128
