@@ -318,9 +318,12 @@ void StartGUIFrame(GFXBOOL clr) {
 }
 static void DrawMouse(int mousex, int mousey, bool drawmouseover) {
   static Sprite MouseOverSprite ("mouseover.spr",BILINEAR,GFXTRUE);
-  GFXColor4f (1,1,1,1);
-  GFXEnable(TEXTURE0);
   GFXBlendMode (SRCALPHA,INVSRCALPHA);
+  GFXColor4f (1,1,1,1);
+
+  GFXEnable(TEXTURE0);
+  GFXDisable (DEPTHTEST);
+  GFXDisable(TEXTURE1);
   float sizex,sizey;
   if (drawmouseover) {
     static Sprite MouseOverSprite ("mouseover.spr",BILINEAR,GFXTRUE);

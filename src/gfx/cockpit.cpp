@@ -883,6 +883,12 @@ public:
     lr = lrl;
   }
   void Draw() {
+    if (ul||ur||ll||lr) {
+      GFXBlendMode(SRCALPHA,INVSRCALPHA);
+      GFXEnable(TEXTURE0);
+      GFXDisable(TEXTURE1);
+      GFXColor4f(1,1,1,1);
+    }
     if (ul) 
       ul->Draw();
     if (ur)
@@ -1222,8 +1228,6 @@ void Cockpit::Draw() {
       un->Threaten (NULL,0);
     }
     if (_Universe->CurrentCockpit()<univmap.size()) {
-      GFXEnable(TEXTURE0);
-      GFXBlendMode(SRCALPHA,INVSRCALPHA);
       univmap[_Universe->CurrentCockpit()].Draw();
     }
   }
