@@ -1,6 +1,6 @@
 #include "vs_globals.h"
 #include "vegastrike.h"
-#include "sprite.h"
+#include "gauge.h"
 #include "cockpit.h"
 #include "universe.h"
 #include "star_system.h"
@@ -130,11 +130,11 @@ float Cockpit::LookupTargetStat (int stat, Unit *target) {
   }
 }
 void Cockpit::DrawGauges() {
-  Unit * un = parent->GetUnit();
+  Unit * un = parent.GetUnit();
   if (un) {
     for (int i=0;i<NUMGAUGES;i++) {
       if (gauges[i]) {
-	gauges[i]->Draw(LookupStat (i,un));
+	gauges[i]->Draw(LookupTargetStat (i,un));
       }
     }
   }
@@ -152,8 +152,8 @@ void Cockpit::Init (const char * file) {
 void Cockpit::SetParent (Unit * unit) {
   parent.SetUnit (unit);
   if (unit) {
-    
-
+    unit->ArmorData (StartArmor);
+    maxfuel = unit->FuelData();
   }
 }
 void Cockpit::Delete () {
