@@ -28,7 +28,7 @@ extern "C"
 
 #ifndef _VEGASTRIKE_H_
 #define _VEGASTRIKE_H_
-
+static const float SIMULATION_ATOM = (float)(1.0/10.0);
 #ifdef HAVE_CONFIG_H
 #   include <config.h>
 #endif

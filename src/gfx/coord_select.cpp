@@ -1,4 +1,3 @@
-#include "vegastrike.h"
 #include "star_system.h"
 #include "loc_select.h"
 #include "coord_select.h"

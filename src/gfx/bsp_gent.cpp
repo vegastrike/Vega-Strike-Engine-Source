@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #ifndef PROPHECY
 #include "mesh.h"
-#include "cmd_unit.h"
+#include "cmd/unit.h"
 #else
 #include <vector>
 using std::vector;

@@ -4,31 +4,30 @@
 #include <string.h>
 #include <stdlib.h>
 #include "lin_time.h"
-#include "cmd.h"
+#include "cmd/unit.h"
 #include "in.h"
-#include "cmd.h"
 #include "gfx/mesh.h"
 #include "gfx/sprite.h"
 #include "physics.h"
-#include "cmd_hud.h"
+//#include "cmd_hud.h"
 #include "gfxlib.h"
 #include "gfx/loc_select.h"
 #include <string>
-#include "cmd_input_dfa.h"
-#include "UnitCollection.h"
+#include "cmd/ai/input_dfa.h"
+#include "cmd/collection.h"
 #include "star_system.h"
-#include "planet.h"
+#include "cmd/planet.h"
 #include "gfx/sphere.h"
 #include "gfx/coord_select.h"
 
-#include "cmd_fireat.h"
-#include "cmd_aggressive_ai.h"
-#include "cmd_navigation_orders.h"
-#include "cmd_beam.h"
+#include "cmd/ai/fire.h"
+#include "cmd/ai/aggressive.h"
+#include "cmd/ai/navigation.h"
+#include "cmd/beam.h"
 #include  "gfx/halo.h"
 #include "gfx/matrix.h"
-#include "in_ai.h"
-#include "cmd_aiscript.h"
+#include "cmd/ai/flykeyboard.h"
+#include "cmd/ai/script.h"
 
 
 using namespace std;

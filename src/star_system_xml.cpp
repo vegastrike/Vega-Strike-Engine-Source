@@ -4,7 +4,7 @@
 #include "gfx/background.h"
 #include "gfx/env_map_gent.h"
 #include "gfx/aux_texture.h"
-#include "planet.h"
+#include "cmd/planet.h"
 void StarSystem::beginElement(void *userData, const XML_Char *name, const XML_Char **atts) {
   ((StarSystem*)userData)->beginElement(name, AttributeList(atts));
 }

@@ -23,7 +23,7 @@
 #include "gfxlib.h"
 #include "universe.h"
 #include "lin_time.h"
-#include "planet.h"
+//#include "cmd/planet.h"
 #include "gfx/aux_texture.h"
 #include "profile.h"
 

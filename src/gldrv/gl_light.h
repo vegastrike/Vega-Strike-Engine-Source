@@ -2,7 +2,6 @@
 #define _GL_LIGHT_H_
 #include "gfxlib.h"
 #include "hashtable_3d.h"
-#include "cmd_collide.h"
 
 extern int GFX_MAX_LIGHTS;
 extern int GFX_OPTIMAL_LIGHTS;

@@ -1,6 +1,5 @@
 #include "gl_light.h"
 #include "hashtable_3d.h"
-#include "cmd_collide.h"
 #include <assert.h>
 #define GFX_HARDWARE_LIGHTING
 //table to store local lights, numerical pointers to _llights (eg indices)

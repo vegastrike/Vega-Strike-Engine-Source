@@ -3,7 +3,6 @@
 #include <list>
 using std::priority_queue;
 #include "hashtable_3d.h"
-#include "cmd_collide.h"
 using std::list;
 
  //optimization globals
