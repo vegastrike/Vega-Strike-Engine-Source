@@ -121,6 +121,7 @@ namespace StarXML {
 	DIALPHA,
 	TAILMODESTART,
 	TAILMODEEND
+	,OPTICALILLUSION
   };
 
   const EnumMap::Pair element_names[23] = {
@@ -148,7 +149,7 @@ namespace StarXML {
     EnumMap::Pair ("Fog",FOG),
     EnumMap::Pair ("FogElement",FOGELEMENT)		
   };
-  const EnumMap::Pair attribute_names[58] = {
+  const EnumMap::Pair attribute_names[59] = {
     EnumMap::Pair ("UNKNOWN", UNKNOWN),
     EnumMap::Pair ("background", BACKGROUND), 
     EnumMap::Pair ("stars", STARS),
@@ -206,12 +207,13 @@ namespace StarXML {
     EnumMap::Pair ("Focus",FOCUS),
     EnumMap::Pair ("Concavity",CONCAVITY),
     EnumMap::Pair ("TailModeStart",TAILMODESTART),
-    EnumMap::Pair ("TailModeEnd",TAILMODEEND)
+    EnumMap::Pair ("TailModeEnd",TAILMODEEND),
+	EnumMap::Pair ("OpticalIllusion",OPTICALILLUSION)
     
   };
 
   const EnumMap element_map(element_names, 23);
-  const EnumMap attribute_map(attribute_names, 58);
+  const EnumMap attribute_map(attribute_names, 59);
 }
 
 using XMLSupport::EnumMap;
@@ -509,10 +511,17 @@ void GameStarSystem::beginElement(const string &name, const AttributeList &attri
     }
 
   case FOG:
-  
-     xml->unitlevel++;
-	 xml->fog.clear();
-	 break;
+	  xml->fogopticalillusion=true;
+ 	  xml->fog.clear();
+	  for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
+	    switch(attribute_map.lookup((*iter).name)) {
+		case OPTICALILLUSION:
+			xml->fogopticalillusion=XMLSupport::parse_bool (iter->value);
+			break;
+		}
+	  }
+	  xml->unitlevel++;
+	  break;
   case FOGELEMENT:
 	  xml->unitlevel++;
 
@@ -1160,7 +1169,7 @@ using namespace StarXML;
       Unit  * p = (Unit *)xml->moons.back()->GetTopPlanet(xml->unitlevel);  
       if (p!=NULL){
 		  if (p->isUnit()==PLANETPTR) {	  
-			  ((Planet *)p)->AddFog(xml->fog);
+			  ((Planet *)p)->AddFog(xml->fog,xml->fogopticalillusion);
 		  }
 	  }
 	  

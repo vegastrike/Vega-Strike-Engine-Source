@@ -95,28 +95,28 @@ public:
 		planetRadius= radiusOfPlanet;
 	}
 	virtual void Draw(const Transformation & quat=identity_transformation, const Matrix & m = identity_matrix) {
-		static bool rescale_planet_halo = XMLSupport::parse_bool (vs_config->getVariable("graphics","rescale_planet_halo","false"));
-		if (rescale_planet_halo) {
-			QVector dirtocam = _Universe->AccessCamera()->GetPosition()-m.p;
-			Transformation qua=quat;
-			Matrix mat = m;
-			float distance = dirtocam.Magnitude();
-			
-			float distanceToMovCam=planetRadius/distance;
-			float zscale;
-			float xyscale = zscale =sqrt(1-distanceToMovCam*distanceToMovCam);
-			zscale = sqrt(1-xyscale*xyscale);
-			dirtocam.Normalize();
-			mat.p+=distanceToMovCam*planetRadius*dirtocam;
-			ScaleMatrix(mat,Vector(xyscale,xyscale,zscale));
-			qua.position=mat.p;
-			GameUnit<Unit>::Draw(qua,mat);
-		}else{
-			GameUnit<Unit>::Draw(quat,m);
-		}
+		QVector dirtocam = _Universe->AccessCamera()->GetPosition()-m.p;
+		Transformation qua=quat;
+		Matrix mat = m;
+		float distance = dirtocam.Magnitude();
+		
+		float MyDistanceRadiusFactor=planetRadius/distance;
+		//float AngleA = asin (MyDistanceRadiusFactor);
+		//float AngleC = 3.1415926536/2-AngleA;
+		//float HorizonHeight = sin(AngleC)*planetRadius; // these three lines are equiv to next 1 line (and much slower);
+		float HorizonHeight = sqrt(1-MyDistanceRadiusFactor*MyDistanceRadiusFactor)*planetRadius;
+		
+		float zscale;
+		float xyscale = zscale =HorizonHeight/planetRadius;
+		zscale=0;
+		dirtocam.Normalize();
+		mat.p+=sqrt(planetRadius*planetRadius-HorizonHeight*HorizonHeight)*dirtocam;
+		ScaleMatrix(mat,Vector(xyscale,xyscale,zscale));
+		qua.position=mat.p;
+		GameUnit<Unit>::Draw(qua,mat);
 	}
 };
-void GamePlanet::AddFog (const std::vector <AtmosphericFogMesh> & v) {
+void GamePlanet::AddFog (const std::vector <AtmosphericFogMesh> & v, bool opticalillusion) {
 	if(meshdata.empty()) meshdata.push_back(NULL);
 #ifdef MESHONLY
 	Mesh *shield = meshdata.back(); meshdata.pop_back();
@@ -124,12 +124,16 @@ void GamePlanet::AddFog (const std::vector <AtmosphericFogMesh> & v) {
 	std::vector <Mesh * > fogs;
 	for (unsigned int i=0;i<v.size();++i) {
 //		static float radiusmult = XMLSupport::parse_float (vs_config->getVariable("graphics","atmosphere_size","1.01"));
-		
-		Mesh *fog=new FogMesh (v[i],rSize());	
+
+		Mesh *fog=new FogMesh (v[i],rSize());
 		fogs.push_back(fog);
 	}
-	Unit* fawg=//UnitFactory::createUnit(fogs,true,0);
-		new AtmosphereHalo(this->rSize(),fogs,0);
+	Unit* fawg;
+	if (opticalillusion) {
+		fawg=new AtmosphereHalo(this->rSize(),fogs,0);
+	}else {
+		fawg=UnitFactory::createUnit(fogs,true,0);	
+	}
 	fawg->setFaceCamera();
 	getSubUnits().preinsert (fawg);
 	fawg->hull/=fawg->GetHullPercent();

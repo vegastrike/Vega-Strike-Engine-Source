@@ -67,6 +67,7 @@ class StarSystem {
     float starsp;
     float scale;
 	std::vector <AtmosphericFogMesh> fog;
+	int fogopticalillusion;
   } *xml_string;
 
  protected:
