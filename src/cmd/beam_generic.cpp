@@ -228,7 +228,7 @@ void Beam::RemoveFromSystem(bool eradicate) {
 	EradicateCollideTable (&CollideInfo)
 #ifdef SAFE_COLLIDE_DEBUG 
 	) {
-      fprintf (stderr,"RECOVERED from (formerly) fatal, currently nonfatal error with beam deletion\n");      
+      VSFileSystem::vs_fprintf (stderr,"RECOVERED from (formerly) fatal, currently nonfatal error with beam deletion\n");      
     }
 #else
     ;
@@ -237,7 +237,7 @@ void Beam::RemoveFromSystem(bool eradicate) {
       _Universe->pushActiveStarSystem(_Universe->star_system[i]);
     
     if (EradicateCollideTable (&CollideInfo)) {
-      fprintf (stderr,"VERY BAD ERROR FATAL! 0x%x",this);
+      VSFileSystem::vs_fprintf (stderr,"VERY BAD ERROR FATAL! 0x%x",this);
     }
     _Universe->popActiveStarSystem();
     }
@@ -324,7 +324,7 @@ void Beam::UpdatePhysics(const Transformation &trans, const Matrix &m, Unit * ta
 extern Cargo * GetMasterPartList (const char *);
 bool Beam::Collide (Unit * target) {
   if (this==NULL||target==NULL){
-    fprintf (stderr,"Recovering from nonfatal beam error when beam inactive\n");
+    VSFileSystem::vs_fprintf (stderr,"Recovering from nonfatal beam error when beam inactive\n");
     return false;
   }
   float distance;

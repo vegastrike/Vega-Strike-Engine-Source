@@ -17,11 +17,11 @@ namespace BaseUtil {
 	void Texture(int room, std::string index, std::string file, float x, float y) {
 		BaseInterface::Room *newroom=CheckRoom(room);
 		if (!newroom) return;
-		newroom->objs.push_back(new BaseInterface::Room::BaseSprite(file.c_str(),index));
+		newroom->objs.push_back(new BaseInterface::Room::BaseVSSprite(file.c_str(),index));
 #ifdef BASE_MAKER
-		((BaseInterface::Room::BaseSprite*)newroom->objs.back())->texfile=file;
+		((BaseInterface::Room::BaseVSSprite*)newroom->objs.back())->texfile=file;
 #endif
-		((BaseInterface::Room::BaseSprite*)newroom->objs.back())->spr.SetPosition(x,y);
+		((BaseInterface::Room::BaseVSSprite*)newroom->objs.back())->spr.SetPosition(x,y);
 	}
 	void Ship (int room, std::string index,QVector pos,Vector Q, Vector R) {
 		BaseInterface::Room *newroom=CheckRoom(room);
@@ -79,7 +79,8 @@ namespace BaseUtil {
 			EnumMap::Pair ("ShipDealer", BaseComputer::SHIP_DEALER), 
 			EnumMap::Pair ("Missions", BaseComputer::MISSIONS),
 			EnumMap::Pair ("News", BaseComputer::NEWS), 
-			EnumMap::Pair ("Info", BaseComputer::INFO), 
+			EnumMap::Pair ("Info", BaseComputer::INFO),
+			EnumMap::Pair ("LoadSave", BaseComputer::LOADSAVE), 
 		};
 		static const EnumMap modemap (modelist,BaseComputer::DISPLAY_MODE_COUNT);
 		const char *newmode=modes.c_str();
@@ -101,7 +102,7 @@ namespace BaseUtil {
 			if (modearg<BaseComputer::DISPLAY_MODE_COUNT) {
 				newcomp->modes.push_back((BaseComputer::DisplayMode)(modearg));
 			} else {
-				fprintf(stderr,"WARNING: Unknown computer mode %s found in python script...\n",curmode);
+				VSFileSystem::vs_fprintf(stderr,"WARNING: Unknown computer mode %s found in python script...\n",curmode);
 			}
 		}
 		delete [] curmode;
@@ -118,13 +119,21 @@ namespace BaseUtil {
 		}
 		BaseLink(newroom,x,y,wid,hei,text,front);
 	}
+	void MessageToRoom(int room, std::string text) {
+		if (!BaseInterface::CurrentBase) return;
+		BaseInterface::CurrentBase->rooms[room]->objs.push_back(new BaseInterface::Room::BaseTalk(text,"currentmsg",true));
+	}
+	void EnqueueMessageToRoom(int room, std::string text) {
+		if (!BaseInterface::CurrentBase) return;
+		BaseInterface::CurrentBase->rooms[room]->objs.push_back(new BaseInterface::Room::BaseTalk(text,"currentmsg",false));
+	}
 	void Message(std::string text) {
 		if (!BaseInterface::CurrentBase) return;
-		BaseInterface::CurrentBase->rooms[BaseInterface::CurrentBase->curroom]->objs.push_back(new BaseInterface::Room::BaseTalk(text,"currentmsg",true));
+		MessageToRoom(BaseInterface::CurrentBase->curroom,text);
 	}
 	void EnqueueMessage(std::string text) {
 		if (!BaseInterface::CurrentBase) return;
-		BaseInterface::CurrentBase->rooms[BaseInterface::CurrentBase->curroom]->objs.push_back(new BaseInterface::Room::BaseTalk(text,"currentmsg",false));
+		EnqueueMessageToRoom(BaseInterface::CurrentBase->curroom,text);
 	}
 	void EraseLink (int room, std::string index) {
 		BaseInterface::Room *newroom=CheckRoom(room);

@@ -134,10 +134,19 @@ typedef enum {
 	WSK_MOD_MODE=KMOD_MODE  
 } winsys_modifiers;
 
+// mouse wheel events are only available with SDL 1.2.5 or later
+#ifndef SDL_BUTTON_WHEELUP
+# define SDL_BUTTON_WHEELUP 254
+#endif
+#ifndef SDL_BUTTON_WHEELDOWN
+# define SDL_BUTTON_WHEELDOWN 255
+#endif
 typedef enum {
     WS_LEFT_BUTTON = SDL_BUTTON_LEFT,
     WS_MIDDLE_BUTTON = SDL_BUTTON_MIDDLE,
-    WS_RIGHT_BUTTON = SDL_BUTTON_RIGHT
+    WS_RIGHT_BUTTON = SDL_BUTTON_RIGHT,
+	WS_WHEEL_UP = SDL_BUTTON_WHEELUP,
+	WS_WHEEL_DOWN = SDL_BUTTON_WHEELDOWN
 } winsys_mouse_button_t;
 
 typedef enum {
@@ -239,7 +248,9 @@ typedef enum {
 typedef enum {
     WS_LEFT_BUTTON = GLUT_LEFT_BUTTON,
     WS_MIDDLE_BUTTON = GLUT_MIDDLE_BUTTON,
-    WS_RIGHT_BUTTON = GLUT_RIGHT_BUTTON 
+    WS_RIGHT_BUTTON = GLUT_RIGHT_BUTTON,
+	WS_WHEEL_UP,
+	WS_WHEEL_DOWN
 } winsys_mouse_button_t;
 
 typedef enum {

@@ -2,6 +2,7 @@
 #include <string>
 #include "vec.h"
 #include "matrix.h"
+#include "cmd/unit_generic.h"
 #include "halo_system.h"
 #include "universe.h"
 #include <stdlib.h>
@@ -15,6 +16,11 @@
 #include "lin_time.h"
 #include "animation.h"
 #include "car_assist.h"
+#include "cmd/collide/rapcol.h"
+#include "cmd/unit_collide.h"
+static float ffmax(float a, float b) {
+  return a>b?a:b;
+}
 void DoParticles (QVector pos, float percent, const Vector & velocity, float radial_size,float particle_size,int faction) {
   percent = 1-percent;
   int i=rand();
@@ -34,6 +40,14 @@ void DoParticles (QVector pos, float percent, const Vector & velocity, float rad
 								       "sparklespread",
 								       
 								       ".04"));
+  static float absspeed = XMLSupport::parse_float (vs_config->getVariable("graphics",
+								       "sparkleabsolutespeed",
+								       
+								       ".04"));
+  static bool fixed_size= XMLSupport::parse_bool (vs_config->getVariable("graphics",
+								       "sparklefixedsize",
+								       
+								       "0"));
   if (i<(RAND_MAX*percent)*(GetElapsedTime()*scale)) {
       ParticlePoint pp;
       float r1 = rand()/((float)RAND_MAX*.5)-1;
@@ -45,25 +59,46 @@ void DoParticles (QVector pos, float percent, const Vector & velocity, float rad
       pp.col.j=col[1];
       pp.col.k=col[2];
 	  static float sciz=XMLSupport::parse_float (vs_config->getVariable("graphics","sparklesizeenginerelative",".125"));
-      particleTrail.AddParticle(pp,rand*velocity.Magnitude()*spread+velocity*sspeed,particle_size*sciz);
+      particleTrail.AddParticle(pp,rand*(ffmax(velocity.Magnitude(),absspeed)*spread+absspeed)+velocity*sspeed,fixed_size?sciz:(particle_size*sciz));
     }
 }
   
 
-void LaunchOneParticle (const Matrix &mat,const Vector &vel,unsigned int seed, Mesh * mush, float hull,int faction) {
-	if (mush){
-		static bool ignoreGetBlendDst = XMLSupport::parse_bool (vs_config->getVariable ("graphics","sparkleoffglow","true"));
-	if (mush->getBlendDst()!=ONE||ignoreGetBlendDst) {		
-		unsigned int numvert = mush->numVertices();
-		if (numvert) {
-			unsigned int whichvert = seed%numvert;
-			QVector v (mush->GetVertex(whichvert).Cast());
-			v=Transform(mat,v);
-			static float sciz = XMLSupport::parse_float (vs_config->getVariable ("graphics","sparkleenginesizerelativetoship",".0625"));
-			DoParticles (v,hull,vel,0,mush->rSize()*sciz,faction);
-		}
+void LaunchOneParticle (const Matrix &mat,const Vector &vel,unsigned int seed, Unit * mush, float hull,int faction) {
+  static float sciz = XMLSupport::parse_float (vs_config->getVariable ("graphics","sparkleenginesizerelativetoship",".0625"));
+  
+  if (mush){
+          bool done=false;
+          collideTrees * colTrees=mush->colTrees;
+          if (colTrees) {
+            if (colTrees->usingColTree()) {            
+              csRapidCollider * colTree=colTrees->rapidColliders[0];
+              unsigned int numvert=colTree->getNumVertex();
+              if (numvert) {
+                unsigned int whichvert = seed%numvert;
+                QVector v (colTree->getVertex(whichvert).Cast());
+                v=Transform(mat,v);
+                DoParticles (v,hull,vel,0,mush->rSize()*sciz,faction);
+                done=true;
+              }
+            }
+          }
+          if (!done) {
+            // get it from the BSP
+            
+          }
+          if (!done) {
+            unsigned int siz=(unsigned int) (2*mush->rSize());
+            if (siz!=0){
+              QVector v((seed%siz)-siz/2,
+                        (seed%siz)-siz/2,
+                        (seed%siz)-siz/2);
+              DoParticles(v,hull,vel,0,mush->rSize()*sciz,faction);
+              done=true;
+            }
+          }
 	}
-	}
+
 }
 
 
@@ -87,7 +122,7 @@ unsigned int HaloSystem::AddHalo (const char * filename, const QVector & loc, co
   halo_type.push_back (CAR::type_map.lookup(type));//should default to headlights
 #endif
   if (mesh==NULL) {
-    mesh = new Mesh ((string (filename)+".xmesh").c_str(), Vector(1,1,1),FactionUtil::GetFaction("neutral"),NULL);
+	  mesh = Mesh::LoadMesh ((string (filename)).c_str(), Vector(1,1,1),FactionUtil::GetFaction("neutral"),NULL);
     float gs =XMLSupport::parse_float (vs_config->getVariable("physics","game_speed","1"));
     activation=activation_speed*activation_speed*gs*gs;
   }
@@ -114,7 +149,7 @@ void HaloSystem::SetPosition (unsigned int which, const QVector &loc) {
 bool HaloSystem::ShouldDraw (float speedsquared) {
   return speedsquared>activation;
 }
-void HaloSystem::Draw(const Matrix & trans, const Vector &scale, short halo_alpha, float nebdist, float hullpercent, const Vector & velocity, int faction) {
+void HaloSystem::Draw(const Matrix & trans, const Vector &scale, int halo_alpha, float nebdist, float hullpercent, const Vector & velocity, int faction) {
 #ifdef CAR_SIM
     for (unsigned int i=0;i<ani.size();++i) {
       int bitwise = scale.j;
@@ -160,6 +195,13 @@ void HaloSystem::Draw(const Matrix & trans, const Vector &scale, short halo_alph
 
     }
 #else
+  if (halo_alpha>=0) {
+    halo_alpha/=2;
+    if ((halo_alpha&0x1)==0) {
+      halo_alpha+=1;
+    }
+    
+  }
   if (scale.k>0) {
     vector<MyIndHalo>::iterator i = halo.begin();
     for (;i!=halo.end();++i) {

@@ -30,7 +30,7 @@ Beam::Beam (const Transformation & trans, const weapon_info & clne, void * own, 
 
 Beam::~Beam () {
   VSDESTRUCT2
-  //  fprintf (stderr,"Deleting %x",this);
+  //  VSFileSystem::vs_fprintf (stderr,"Deleting %x",this);
 #ifdef PERBOLTSOUND
   AUDDeleteSound (sound);
 #endif
@@ -64,7 +64,7 @@ void Beam::Draw (const Transformation &trans, const Matrix &m, Unit * targ, floa
 }
 
 void Beam::ProcessDrawQueue() {
-  //  fprintf (stderr,"DrawingAll\n");
+  //  VSFileSystem::vs_fprintf (stderr,"DrawingAll\n");
     GFXDisable (LIGHTING);
     GFXDisable (CULLFACE);//don't want lighting on this baby
     GFXDisable (DEPTHWRITE);

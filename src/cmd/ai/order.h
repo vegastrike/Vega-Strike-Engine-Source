@@ -30,7 +30,6 @@
 #define _CMD_ORDER_H
 
 #include "gfx/vec.h"
-#include "cmd/collection.h"
 #include "cmd/container.h"
 #include <list>
 #include <vector>

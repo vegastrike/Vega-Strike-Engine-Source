@@ -38,7 +38,7 @@ namespace AIEvents {
   };
   struct ElemAttrMap {
     XMLSupport::EnumMap element_map;
-    int level; short curtime; short maxtime; float obedience;
+    int level; float curtime; float maxtime; float obedience; //short fix
     std::vector <std::list <AIEvresult> >result;
     ElemAttrMap (const XMLSupport::EnumMap &el):
       element_map (el), level(0) { } 

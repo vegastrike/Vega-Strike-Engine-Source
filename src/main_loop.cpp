@@ -42,7 +42,7 @@
 #include "cmd/music.h"
 #include "audiolib.h"
 #include "cmd/nebula.h"
-#include "vs_path.h"
+#include "vsfilesystem.h"
 #include "cmd/script/mission.h"
 #include "xml_support.h"
 #include "config_xml.h"
@@ -121,7 +121,7 @@ bool _Slew = true;
      }
    }
  }
-static bool QuitAllow=false;
+bool QuitAllow=false;
 extern bool cleanexit;
 namespace CockpitKeys {
   
@@ -173,9 +173,6 @@ namespace CockpitKeys {
 	static Vector R;
 	for (int i=0;i<NUM_CAM;i++) {
 	if(newState==PRESS) {
-	  if (QuitAllow) {
-	    QuitNow();
-	  }
 
 		Q = _Universe->AccessCockpit()->AccessCamera(i)->Q;
 		R = _Universe->AccessCockpit()->AccessCamera(i)->R;
@@ -193,9 +190,6 @@ namespace CockpitKeys {
 	static Vector R;
 	for (int i=0;i<NUM_CAM;i++) {
 	if(newState==PRESS) {
-	  if (QuitAllow) {
-	    QuitNow();
-	  }
 
 		P = _Universe->AccessCockpit()->AccessCamera(i)->P;
 		R = _Universe->AccessCockpit()->AccessCamera(i)->R;
@@ -213,9 +207,6 @@ namespace CockpitKeys {
 	static Vector P;
 	static Vector R;
 	if(newState==PRESS) {
-	  if (QuitAllow) {
-	    QuitNow();
-	  }
 		P = _Universe->AccessCockpit()->AccessCamera(i)->P;
 		R = _Universe->AccessCockpit()->AccessCamera(i)->R;
 		_Universe->AccessCockpit()->AccessCamera(i)->myPhysics.ApplyBalancedLocalTorque(P, R,timek);
@@ -228,22 +219,13 @@ namespace CockpitKeys {
 }
 
   void Quit(int,KBSTATE newState) {
-    /*
-    if (newState==PRESS) {
-      ouch = (!ouch);
-    }
-    */
 	if(newState==PRESS) {
 	  if (QuitAllow) {
-	    UniverseUtil::IOmessage(0,"game","all","");
-	    UniverseUtil::IOmessage(0,"game","all","");
 	    UniverseUtil::IOmessage(0,"game","all","#ffff00Quit Mode cancelled, Camera Keys restored to former function.");
 	    UniverseUtil::IOmessage(0,"game","all","#00ff00Press Esc and then q to Quit at a later point.");
 	  }else {
-	    UniverseUtil::IOmessage(0,"game","all","");
-	    UniverseUtil::IOmessage(0,"game","all","");
 	    UniverseUtil::IOmessage(0,"game","all","#ff0000You have pressed the quit key.");
-	    UniverseUtil::IOmessage(0,"game","all","#00ffffIf you hit q,z,s or f, the Camera Keys, the game will quit.");
+	    UniverseUtil::IOmessage(0,"game","all","#00ffffIf you hit q, the game will quit.");
 	    UniverseUtil::IOmessage(0,"game","all","#00ff55Pressing ESC again will cancel quit confirm mode.");
 	    
 	  }
@@ -455,21 +437,21 @@ void clickhandler (KBSTATE k, int x, int y, int delx, int dely, int mod) {
   if (k==DOWN) {
     UnitCollection *c = shipList->requestIterator (oldx,oldy,x,y);
     if (c->createIterator()->current()!=NULL)
-      fprintf (stderr,"Select Box Hit single target");
+      VSFileSystem::Fprintf (stderr,"Select Box Hit single target");
     if (c->createIterator()->advance()!=NULL)
-      fprintf (stderr,"Select Box Hit Multiple Targets");
+      VSFileSystem::Fprintf (stderr,"Select Box Hit Multiple Targets");
   }else {
     oldx = x;
     oldy = y;
   }
   if (k==PRESS) {
-    fprintf (stderr,"click?");
+    VSFileSystem::Fprintf (stderr,"click?");
     UnitCollection * c = shipList->requestIterator (x,y);
     if (c->createIterator()->current()!=NULL)
-      fprintf (stderr,"Hit single target");
+      VSFileSystem::Fprintf (stderr,"Hit single target");
     if (c->createIterator()->advance()!=NULL)
-      fprintf (stderr,"Hit Multiple Targets");
-    fprintf (stderr,"\n");
+      VSFileSystem::Fprintf (stderr,"Hit Multiple Targets");
+    VSFileSystem::Fprintf (stderr,"\n");
     
   }
 }
@@ -614,6 +596,7 @@ void createObjects(std::vector <std::string> &fighter0name, std::vector <StarSys
 					pox = UniverseUtil::SafeEntrancePoint(savedloc[squadnum]);
 				}
 				fighter0mods.push_back(modifications =vs_config->getVariable (string("player")+((squadnum>0)?tostring(squadnum+1):string("")),"callsign",""));
+				fprintf( stderr, "FOUND MODIFICATION = %s FOR PLAYER #%d\n", modifications.c_str(), squadnum);
 			  }
 			  else
 			  {
@@ -646,6 +629,7 @@ void createObjects(std::vector <std::string> &fighter0name, std::vector <StarSys
 			if( Network!=NULL && backupcp != NULL)
 			{
 				fighters[a]->SetNetworkMode();
+				fighters[a]->SetSerial(Network[squadnum].serial);
 				Network[squadnum].setUnit( fighters[a]);
 				cout<<"Creating fighter["<<squadnum<<"] from "<<modifications<<" on Network["<<squadnum<<"] named "<<Network[squadnum].getCallsign()<<endl;
 			}
@@ -790,6 +774,7 @@ void restore_main_loop() {
   GFXLoop (main_loop);
 
 }
+
 void main_loop() {
   // Evaluate number of loops per second each XX loops
   if( loop_count==500)

@@ -4,9 +4,14 @@
 #include "cmd/container.h"
 #include <vector>
 #include "gfx/vec.h"
+#include "vsfilesystem.h"
 using namespace XMLSupport;
 enum VIEWSTYLE {CP_FRONT,  CP_BACK,CP_LEFT, CP_RIGHT, CP_VIEWTARGET, CP_CHASE, CP_PAN,  CP_PANTARGET, CP_TARGET};
+#ifdef NETCOMM_WEBCAM
+#define MAXVDUS 13
+#else
 #define MAXVDUS 12
+#endif
 class Unit;
 class Camera;
 class Animation;
@@ -24,10 +29,10 @@ protected:
   int currentcamera;
   float radar_time;
   float gauge_time [UnitImages::NUMGAUGES];
-  /// 4 armor vals and 1 for startfuel
+  /// 8 armor vals and 1 for startfuel
 
-    /// 4 armor vals and 1 for startfuel
-  unsigned short StartArmor[5];
+    /// 8 armor vals and 1 for startfuel
+  float StartArmor[9]; //short fix
 
   ///saved values to compare with current values (might need more for damage)
   float maxfuel, maxhull;
@@ -55,6 +60,7 @@ protected:
   virtual void LocalToRadar (const Vector & pos, float &s, float &t) {}
 
   virtual void LoadXML (const char *file) {}
+  virtual void LoadXML (VSFileSystem::VSFile & f) {}
   static void beginElement(void *userData, const XML_Char *name, const XML_Char **atts);
   static void endElement(void *userData, const XML_Char *name);
   virtual void beginElement(const string &name, const AttributeList &attributes) {}
@@ -79,6 +85,7 @@ protected:
   float cockpit_time;
   bool ejecting;
  public:
+  double TimeOfLastCollision;
   char jumpok;
   virtual void	ReceivedTargetInfo() {}
   std::vector<std::string> unitfilename;

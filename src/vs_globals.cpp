@@ -1,17 +1,16 @@
 #include "vs_globals.h"
-#include "vs_random.h"
 #include <time.h>
 /*
  * Globals 
  */
 game_data_t g_game;
-ForceFeedback *forcefeedback;
-VegaConfig * vs_config;
+ForceFeedback *forcefeedback = NULL;
+VegaConfig * vs_config = NULL;
 bool cleanexit=false;
 bool run_only_player_starsystem=true;
 
 NetClient * Network=NULL;
-NetServer * Server=NULL;
+NetServer * VSServer=NULL;
 
 FILE * fpread=NULL;
 
@@ -28,4 +27,3 @@ double avg_loop=0;
 int nb_checks=1;
 double last_check=1;
 double cur_check=1;
-VSRandom vsrandom(time(NULL));

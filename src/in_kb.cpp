@@ -144,7 +144,7 @@ int shiftdown (int ch) {
  void glut_keyboard_cb( unsigned int  ch,unsigned int mod, bool release, int x, int y ) 
 {
   bool shifton=false;
-  //  fprintf (stderr,"keyboard  %d",ch);
+  //  VSFileSystem::Fprintf (stderr,"keyboard  %d",ch);
   if ((WSK_MOD_LSHIFT==(mod&WSK_MOD_LSHIFT))||(WSK_MOD_RSHIFT==(mod&WSK_MOD_RSHIFT))) {
     ch = shiftup(ch);
     shifton=true;
@@ -165,19 +165,19 @@ int shiftdown (int ch) {
 /*
 static void glut_special_cb( int key, int x, int y ) 
 {
-  //  fprintf (stderr,"keyboard s %d",key);
+  //  VSFileSystem::Fprintf (stderr,"keyboard s %d",key);
     kbGetInput( 128+key, 1, 0, x, y );
 }
 
 static void glut_keyboard_up_cb( unsigned char ch, int x, int y ) 
 {
-  //  fprintf (stderr,"keyboard up %d",ch);
+  //  VSFileSystem::Fprintf (stderr,"keyboard up %d",ch);
     kbGetInput( ch, 0, 1, x, y );
 }
 
 static void glut_special_up_cb( int key, int x, int y ) 
 {
-  //  fprintf (stderr,"keyboard s up %d",key);
+  //  VSFileSystem::Fprintf (stderr,"keyboard s up %d",key);
     kbGetInput( 128+key, 1, 1, x, y );
 }
 */

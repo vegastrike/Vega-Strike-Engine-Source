@@ -1,17 +1,14 @@
-if USEBOOST128
-INCLUDES=-I$(top_srcdir)/src \
-	 -I$(top_srcdir)/src/boost
-else
-INCLUDES=-I$(top_srcdir)/src \
-	 -I$(top_srcdir)/src/boost129
-endif
 
 noinst_LIBRARIES = libcmd.a libcmdserver.a
 SUBDIRS = ai script collide
 
 libcmdgeneric =			\
+	unit_bsp.cpp	\
+	csv.cpp		\
+	csv.h		\
 	unit_generic.h					\
 	unit_generic.cpp				\
+	unit_csv.cpp	\
 	atmosphere_generic.cpp			\
 	asteroid_generic.cpp			\
 	asteroid_generic.h			\
@@ -99,7 +96,6 @@ libcmd_a_SOURCES =$(libcmdgeneric) 				\
 	terrain.cpp			\
 	terrain.h			\
 	unit.h				\
-	unit_bsp.cpp			\
 	unit_interface.cpp		\
 	unit_factory.cpp		\
 	planet.h 				\

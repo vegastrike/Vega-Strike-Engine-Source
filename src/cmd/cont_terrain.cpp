@@ -14,9 +14,9 @@
 ContinuousTerrain::ContinuousTerrain (const char * filename, const Vector & Scales, const float mass) {
 
   float tmass;
-  FILE *fp = fopen (filename,"r");
+  FILE *fp = VSFileSystem::vs_open (filename,"r");
   if (fp) {
-    fscanf (fp,"%d %f\n<%f %f %f>",&width,&tmass,&this->Scales.i,&this->Scales.j,&this->Scales.k);
+    VSFileSystem::vs_fscanf (fp,"%d %f\n<%f %f %f>",&width,&tmass,&this->Scales.i,&this->Scales.j,&this->Scales.k);
     if (mass)
       tmass = mass;
     if (Scales.i&&Scales.j&&Scales.k) {
@@ -32,14 +32,14 @@ ContinuousTerrain::ContinuousTerrain (const char * filename, const Vector & Scal
     for (i=0;i<numcontterr;i++) {
       data[i]=NULL;md[i].mesh =NULL; md[i].collider=NULL;
       char tmp[512];
-      fscanf (fp,"%511s",tmp);
+      VSFileSystem::vs_fscanf (fp,"%511s",tmp);
       tmp[511]='\0';
       for (int k=0;k<512;k++) {
 	if (tmp[k]=='^') {
 	  tmp[k]='\0';
 
 	  vector <bsp_polygon> polies;
-	  md[i].mesh=new Mesh(tmp,Vector(1,1,1),0,NULL);
+	  md[i].mesh= Mesh::LoadMesh(tmp,Vector(1,1,1),0,NULL);
 	  sscanf (tmp+i+1,"%f,%f",&sizeX,&sizeZ);
 	  md[i].mesh->GetPolys(polies);
 	  sizeX=md[i].mesh->corner_max().i-md[i].mesh->corner_min().i;
@@ -52,7 +52,7 @@ ContinuousTerrain::ContinuousTerrain (const char * filename, const Vector & Scal
       }
       filenames[i]=tmp;
     }
-    fclose (fp);
+    VSFileSystem::vs_close (fp);
     
     for (i=0;i<width;i++) {
       for (int j=0;j<width;j++) {
@@ -78,7 +78,7 @@ ContinuousTerrain::ContinuousTerrain (const char * filename, const Vector & Scal
     for (i=0;i<numcontterr;i++) {
       if (data[i]) {
 	if (sizeX!=data[i]->getSizeX()||sizeZ!=data[i]->getSizeZ()) {
-	  fprintf (stderr,"Warning: Sizes of terrain do not match...expect gaps in continuous terrain\n");
+	  VSFileSystem::vs_fprintf (stderr,"Warning: Sizes of terrain do not match...expect gaps in continuous terrain\n");
 	}
 	data[i]->SetTotalSize (sizeX*width,sizeZ*width);
       }
@@ -170,7 +170,7 @@ QVector ContinuousTerrain::GetGroundPosIdentTrans (QVector ShipPos, Vector &norm
       return tmploc;
     }
   }
-  fprintf (stderr,"Can't find %f,%f,%f\n",ShipPos.i,ShipPos.j,ShipPos.k);
+  VSFileSystem::vs_fprintf (stderr,"Can't find %f,%f,%f\n",ShipPos.i,ShipPos.j,ShipPos.k);
   ShipPos.i*=Scales.i;
   ShipPos.j*=Scales.j;
   ShipPos.k*=Scales.k;
@@ -280,8 +280,8 @@ void ContinuousTerrain::Collide (Unit * un, Matrix t) {
       diff.k = fmod ((double) diff.k,(double) sizeZ*width);
       if (diff.k<0)
 	diff.k+=sizeZ*width;
-      if (!rand()%10)
-	fprintf (stderr,"unit in out sapce %f %f %f\n",diff.i,diff.j,diff.k);
+      if (!(rand()%10))
+	VSFileSystem::vs_fprintf (stderr,"unit in out sapce %f %f %f\n",diff.i,diff.j,diff.k);
       diff = Transform (t,diff);
       const csReversibleTransform bigtransform (transform);
       Matrix smallmat=(un->GetTransformation());
@@ -337,7 +337,7 @@ void ContinuousTerrain::Collide (Unit * un, Matrix t) {
 	}
       }
       if (autocol) {
-	static float mass =  XMLSupport::parse_float (vs_config->getVariable ("terrain","mass","1000"));
+	static float mass = 1000;// XMLSupport::parse_float (vs_config->getVariable ("terrain","mass","1000"));
 	un->ApplyForce (bigNormal*.4*un->GetMass()*fabs(bigNormal.Dot ((un->GetVelocity()/SIMULATION_ATOM))));
 	un->ApplyDamage (un->Position().Cast()-bigNormal*un->rSize(),-bigNormal,  .5*fabs(bigNormal.Dot(un->GetVelocity()))*mass*SIMULATION_ATOM,un,GFXColor(1,1,1,1),NULL);
 	

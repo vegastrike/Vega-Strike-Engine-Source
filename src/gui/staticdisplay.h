@@ -24,6 +24,7 @@
 
 #include "control.h"
 #include "painttext.h"
+#include "guitexture.h"
 
 // See cpp file for detailed descriptions of classes, functions, etc.
 
@@ -74,6 +75,9 @@ public:
     // The outside boundaries of the control.
     virtual void setRect(const Rect& r);
 
+    // OVERRIDES - used for scrolling.
+    virtual bool processMouseDown(const InputEvent& event);
+
     // Process a command event.
     virtual bool processCommand(const EventCommandId& command, Control* control);
 
@@ -95,6 +99,29 @@ protected:
     int m_scrollPosition;       // Index of first display cell shown.
     int m_layoutVersion;        // A way to tell when the PaintText layout has changed.
     Scroller* m_scroller;
+};
+
+
+
+class StaticImageDisplay : public Control
+{
+public:
+    // Draw the control.
+   virtual void draw(void) {if (texturename.length()) texture.draw(m_rect);}
+
+    // Text that appears on the control.
+    virtual void setTexture(std::string t) { texturename=t;texture.read(t); };
+
+    // CONSTRUCTION
+public:
+    StaticImageDisplay(void){}
+    virtual ~StaticImageDisplay(void) {};
+
+protected:
+   std::string texturename;
+   GuiTexture texture;
+    // INTERNAL IMPLEMENTATION
+
 };
 
 #endif   // __STATICDISPLAY_H__

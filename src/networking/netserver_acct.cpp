@@ -1,6 +1,6 @@
 #include "networking/netserver.h"
 #include "networking/lowlevel/vsnet_debug.h"
-#include "vs_path.h"
+#include "vsfilesystem.h"
 #include "networking/savenet_util.h"
 #include "networking/lowlevel/netbuffer.h"
 #include "networking/fileutil.h"
@@ -14,7 +14,7 @@ extern int acct_con;
 void	NetServer::checkAcctMsg( SocketSet& sets )
 {
 	int len=0;
-	AddressIP	ipadr, ip2;
+	AddressIP	ipadr;
 	ClientPtr   clt;
 	unsigned char cmd=0;
 
@@ -25,13 +25,16 @@ void	NetServer::checkAcctMsg( SocketSet& sets )
 		//COUT<<"Net activity !"<<endl;
 		// Receive packet and process according to command
 
-		PacketMem mem;
-		if( (len=acct_sock.recvbuf( mem, &ip2 ))>0 )
+		Packet    p;
+        AddressIP act_srv_ipadr;
+		if( (len=acct_sock.recvbuf( &p, &act_srv_ipadr ))>0 )
 		{
-			// Maybe copy that in a "else" condition too if when it fails we have to disconnect a client
+			// Maybe copy that in a "else" condition too if when it fails we
+            // have to disconnect a client
 
 			// Here we get the latest client which asked for a login
-			// Since coms between game servers and account server are TCP the order of request/answers
+			// Since coms between game servers and account server are TCP
+            // the order of request/answers
 			// should be ok and we can use a "queue" for waiting clients
 			if( waitList.size()==0)
 			{
@@ -39,6 +42,7 @@ void	NetServer::checkAcctMsg( SocketSet& sets )
 				exit( 1);
 			}
             WaitListEntry entry( waitList.front() );
+			char flags = 0;
 			if( entry.tcp )
 			{
 			    clt = entry.t;
@@ -51,20 +55,19 @@ void	NetServer::checkAcctMsg( SocketSet& sets )
 			}
 			waitList.pop();
 
-			Packet p( mem );
 			packeta = p;
 			switch( packeta.getCommand())
 			{
 				case LOGIN_NEW :
 					COUT << ">>> NEW LOGIN =( serial n°"<<packet.getSerial()<<" )= --------------------------------------"<<endl;
 					// We received a login authorization for a new account (no ship created)
-					this->sendLoginAccept( clt, ipadr, 1);
+					this->sendLoginAccept( clt, ipadr, 1, flags);
 					COUT << "<<< NEW LOGIN ----------------------------------------------------------------"<<endl;
 				break;
 				case LOGIN_ACCEPT :
 					// Login is ok
 					COUT<<">>> LOGIN ACCEPTED =( serial n°"<<packet.getSerial()<<" )= --------------------------------------"<<endl;
-					sendLoginAccept( clt, ipadr, 0);
+					sendLoginAccept( clt, ipadr, 0, flags);
 					COUT<<"<<< LOGIN ACCEPTED -----------------------------------------------------------"<<endl;
 				break;
 				case LOGIN_ERROR :
@@ -99,6 +102,8 @@ void	NetServer::checkAcctMsg( SocketSet& sets )
 // For now it only save units and player saves
 void	NetServer::save()
 {
+	using namespace VSFileSystem;
+
 	Packet pckt;
 	Cockpit * cp;
 	Unit * un;
@@ -108,9 +113,10 @@ void	NetServer::save()
 	NetBuffer netbuf;
 
 	// Save the Dynamic Universe in the data dir for now
-	string dynuniv_path = datadir+"dynaverse.dat";
-	fp = fopen( dynuniv_path.c_str(), "w+b");
-	if( !fp)
+	string dynuniv_path = "dynaverse.dat";
+	VSFile f;
+	VSError err = f.OpenCreateWrite( dynuniv_path, ::VSFileSystem::UnknownFile);
+	if( err>Ok)
 	{
 		cerr<<"Error opening dynamic universe file"<<endl;
 		VSExit(1);
@@ -118,14 +124,8 @@ void	NetServer::save()
 	else
 	{
 		string dyn_univ = globalsave->WriteDynamicUniverse();
-		int wlen = fwrite( dyn_univ.c_str(), sizeof( char), dyn_univ.length(), fp);
-		if( wlen != dyn_univ.length())
-		{
-			cerr<<"Error writing dynamic universe file"<<endl;
-			VSExit(1);
-		}
-		fclose( fp);
-		fp = NULL;
+		f.Write( dyn_univ);
+		f.Close();
 	}
 
 	// Loop through all clients and write saves
@@ -134,7 +134,7 @@ void	NetServer::save()
 		cp = _Universe->AccessCockpit( i);
 		SaveNetUtil::GetSaveStrings( i, savestr, xmlstr);
 		// Write the save and xml unit
-		FileUtil::WriteSaveFiles( savestr, xmlstr, datadir+"/serversaves", cp->savegame->GetCallsign());
+		//FileUtil::WriteSaveFiles( savestr, xmlstr, VSFileSystem::datadir+"/serversaves", cp->savegame->GetCallsign());
 		// SEND THE BUFFERS TO ACCOUNT SERVER
 		if( acctserver && acct_con)
 		{

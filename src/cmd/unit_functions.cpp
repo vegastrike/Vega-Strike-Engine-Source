@@ -21,9 +21,9 @@
 // Those functions are client specific
 
 // Wrappers used in unit_xml.cpp
-Sprite * createSprite(const char *file)
+VSSprite * createVSSprite(const char *file)
 {
-	return new Sprite (file);
+	return new VSSprite (file);
 }
 
 // From communication_xml.cpp

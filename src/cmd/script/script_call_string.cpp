@@ -29,6 +29,7 @@
 #include <time.h>
 #include <ctype.h>
 #include <assert.h>
+#include "cmd/unit_generic.h"
 #ifndef WIN32
 // this file isn't available on my system (all win32 machines?) i dun even know what it has or if we need it as I can compile without it
 #include <unistd.h>
@@ -39,6 +40,7 @@
 
 #include "vegastrike.h"
 
+#include "cmd/unit_generic.h"
 #include "mission.h"
 #include "easydom.h"
 

@@ -7,7 +7,7 @@
 #include <list>
 using namespace XMLSupport;
 class TextPlane;
-class Sprite;
+class VSSprite;
 class Gauge;
 class Unit;
 #include "vdu.h"
@@ -55,8 +55,8 @@ private:
   std::list <Matrix> headtrans;
   class Mesh * mesh;
   int soundfile;
-  Sprite *Pit [4];
-  Sprite *Radar[2];
+  VSSprite *Pit [4];
+  VSSprite *Radar[2];
   ///Video Display Units (may need more than 2 in future)
   std::vector <VDU *> vdu;
   ///Color of cockpit default text
@@ -65,13 +65,15 @@ private:
   TextPlane *text;
   Gauge *gauges[UnitImages::NUMGAUGES];
   ///holds misc panels.  Panel[0] is always crosshairs (and adjusted to be in center of view screen, not cockpit)
-  std::vector <Sprite *> Panel;
+  std::vector <VSSprite *> Panel;
   ///flag to decide whether to draw all target boxes
   bool draw_all_boxes;
   bool draw_line_to_target,draw_line_to_targets_target;
   bool draw_line_to_itts;
   ///flag to tell wheter to draw the itts, even if the ship has none
   bool always_itts;
+  ///flag controlling whether to use old school, less jumpy (and less accurate) itts // ** jay
+  bool steady_itts;
   // colors of blips/targetting boxes
   GFXColor friendly,enemy,neutral,targeted,targetting,planet;
   // gets the color by relation
@@ -81,10 +83,15 @@ private:
   void drawUnToTarget(Unit* a,Unit * b, float xcent, float ycent, float xsize, float ysize, bool reardar);
   // the style of the radar (WC|Elite)
   string radar_type;
+  /// Used to display the arrow pointing to the currently selected target.
+  float projection_limit_x, projection_limit_y;
+  float inv_screen_aspect_ratio;  // Precomputed division 1 / g_game.aspect.
+
   void LocalToEliteRadar (const Vector & pos, float &s, float &t,float &h);
   void LocalToRadar (const Vector & pos, float &s, float &t);
 
   void LoadXML (const char *file);
+  void LoadXML (VSFileSystem::VSFile & f);
   void beginElement(const string &name, const AttributeList &attributes);
   void endElement(const string &name);
   ///Destructs cockpit info for new loading
@@ -105,6 +112,8 @@ private:
   ///Draws gauges
   void DrawGauges(Unit * un);
   NavigationSystem ThisNav;
+  // Draw the arrow pointing to the target.
+  void DrawArrowToTarget(Unit *, Unit *);
  public:
   void	ReceivedTargetInfo();
   static void NavScreen (int, KBSTATE k); // scheherazade

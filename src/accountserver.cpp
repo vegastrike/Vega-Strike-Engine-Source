@@ -20,12 +20,18 @@
 
 #include <iostream>
 #include <stdlib.h>
+#include <string>
+using std::string;
 #include "networking/acctserver.h"
 
+
 void	VSExit( int code)
-{
-	exit( code);
-}
+{ exit( code); }
+
+string getStarSystemSector (string in) { return string( ""); }
+
+string GetUnitDir( string filename)
+{ return string( ""); }
 
 char SERVER = 2;
 float simulation_atom_var = (float)1.0/10.0;

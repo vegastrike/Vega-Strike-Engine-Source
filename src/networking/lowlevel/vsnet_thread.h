@@ -7,12 +7,9 @@
  * one will be compiled.
  */
 #undef USE_PTHREAD
-#undef USE_JTHREAD
 #undef USE_NO_THREAD
 #if defined(USE_NET_THREAD_POSIX)
 #  define USE_PTHREAD
-#elif defined(USE_NET_THREAD_J)
-#  define USE_JTHREAD
 #else
 #  define USE_NO_THREAD
 #endif

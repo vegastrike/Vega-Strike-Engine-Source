@@ -24,6 +24,7 @@
 #include "vegastrike.h"
 #include "vs_globals.h"
 #include <stdio.h>
+#include "vsfilesystem.h"
 extern GFXBOOL bTex0;
 extern GFXBOOL bTex1;
 
@@ -104,13 +105,13 @@ int GFXQuadList::AddQuad (const GFXVertex *vertices, const GFXColorVertex * colo
       }
     }
 
-  fprintf (stderr,"Fatal Error adding quads");
+  VSFileSystem::vs_fprintf (stderr,"Fatal Error adding quads");
   //should NOT get here!
   return -1;
 }
 void GFXQuadList::DelQuad (int which ) {
   if (quadassignments[which]>=numQuads) {
-    fprintf (stderr,"error del");
+    VSFileSystem::vs_fprintf (stderr,"error del");
     return;
   }
   if (which <0||which>=numVertices/4||quadassignments[which]==-1)
@@ -129,7 +130,7 @@ void GFXQuadList::DelQuad (int which ) {
     }
   }
 
-  fprintf (stderr," error deleting engine flame\n");
+  VSFileSystem::vs_fprintf (stderr," error deleting engine flame\n");
 }
 void GFXQuadList::ModQuad (int which, const GFXVertex * vertices, float alpha) {
   if (which <0||which>=numVertices/4||quadassignments[which]==-1)

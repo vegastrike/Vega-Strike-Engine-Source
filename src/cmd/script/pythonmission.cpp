@@ -1,20 +1,22 @@
+#include <math.h>
 #include "pythonmission.h"
 #include <Python.h>
 #include "python/python_compile.h"
 #include <string>
 #include "pythonmission.h"
 #include "python/init.h"
-#ifndef USE_BOOST_129
+#ifdef USE_BOOST_128
 #include <boost/python/reference.hpp>
 #include <boost/python/callback.hpp>
 #endif
+#include "vsfilesystem.h"
 PythonMissionBaseClass::PythonMissionBaseClass () {
 }
 void PythonMissionBaseClass::Destructor () {
 	delete this;
 }
 PythonMissionBaseClass::~PythonMissionBaseClass(){
-	fprintf (stderr,"BASE Destruct called. If called from C++ this is death %ld (0x%x)",(unsigned long)this,(unsigned int)this);
+	VSFileSystem::vs_fprintf (stderr,"BASE Destruct called. If called from C++ this is death %ld (0x%x)",(unsigned long)this,(unsigned int)this);
 }
 
 void PythonMissionBaseClass::Execute () {

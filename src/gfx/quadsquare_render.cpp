@@ -117,7 +117,7 @@ inline void RotateTriLeft (unsigned int& aa, unsigned short& ta, unsigned int& b
 	ta=baks;
 }
 void quadsquare::tri(unsigned int aa,unsigned short ta,unsigned int bb,unsigned short tb,unsigned int cc,unsigned short tc) {
-
+  assert(0);//see below #if VERTEX_LIST functions... this whole contraption sorely needs a rewrite
 
 #ifdef DONOTDRAWBLENDEDQUADS
   if (ta==tb&&tb==tc) {
@@ -134,9 +134,11 @@ void quadsquare::tri(unsigned int aa,unsigned short ta,unsigned int bb,unsigned 
 	else if (((*textures)[ta].blendDst==ZERO)&&((*textures)[tc].blendDst!=ZERO))
 		RotateTriLeft (aa,ta,bb,tb,cc,tc);
     GFXColorVertex cv[3];
+#ifdef VERTEX_LIST
     cv[0].SetVtx(*vertices->GetVertex (aa));
     cv[1].SetVtx(*vertices->GetVertex (bb));
     cv[2].SetVtx(*vertices->GetVertex (cc));
+#endif
     cv[0].SetColor (GFXColor(1,1,1,1));    cv[1].SetColor (GFXColor(1,1,1,1));    cv[2].SetColor (GFXColor(1,1,1,1));
     if (tb==tc) {
       cv[0].a = 0;

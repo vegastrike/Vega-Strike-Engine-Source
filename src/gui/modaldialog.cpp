@@ -239,7 +239,7 @@ void QuestionDialog::init(const std::string& title) {
 	setWindow(new Window);
 	initControls();
 
-    StaticDisplay* titleControl = dynamic_cast<StaticDisplay*>( window()->findControlById("Title") );
+    StaticDisplay* titleControl = static_cast<StaticDisplay*>( window()->findControlById("Title") );
     assert(titleControl != NULL);
     titleControl->setText(title);
 
@@ -315,7 +315,7 @@ bool ListQuestionDialog::processWindowCommand(const EventCommandId& command, Con
         return true;
     } else if(command == "OK") {
         // The OK button was clicked.
-        Picker* picker = dynamic_cast<Picker*>( window()->findControlById("Picker") );
+        Picker* picker = static_cast<Picker*>( window()->findControlById("Picker") );
         assert(picker != NULL);
         m_result = picker->selectedItem();
         if(m_result >= 0) {
@@ -343,7 +343,7 @@ void showListQuestion(const std::string& title, const std::vector<std::string>& 
 	dialog->setCallback(cb, id);
 
     // Fill the picker with the choices supplied by the caller.
-    SimplePicker* picker = dynamic_cast<SimplePicker*>( dialog->window()->findControlById("Picker") );
+    SimplePicker* picker = static_cast<SimplePicker*>( dialog->window()->findControlById("Picker") );
     assert(picker != NULL);
     for(int i=0; i<options.size(); i++) {
         picker->addCell(SimplePickerCell(options[i]));

@@ -231,6 +231,11 @@ namespace UnitUtil {
 		ret.quantity=0;
 		return ret;
 	}
+	bool isDockableUnit(Unit *my_unit) {
+		if (!my_unit) return false;
+		std::string unit_fgid = getFlightgroupName(my_unit);
+		return ((((my_unit->isPlanet ())&&(!isSun(my_unit))&&isSignificant(my_unit)&&(!my_unit->isJumppoint()))||unit_fgid=="Base")&&my_unit->DockingPortLocations().size()>0);
+	}
 	float getDistance(Unit *my_unit,Unit *un){
 	  if (my_unit==NULL||un==NULL)
 	    return FLT_MAX;
@@ -273,12 +278,12 @@ namespace UnitUtil {
 		}
 		return my_unit->GetComputerData().max_ab_speed();
 	}
-  void setECM (Unit * my_unit, short NewECM) {
+	void setECM (Unit * my_unit, int NewECM) { //short fix
     if (!my_unit)
       return;
     my_unit->GetImageInformation().ecm = NewECM;
   }
-  short getECM (Unit * my_unit) {
+	int getECM (Unit * my_unit) { //short fix
     if (!my_unit)
       return 0;
     return my_unit->GetImageInformation().ecm;

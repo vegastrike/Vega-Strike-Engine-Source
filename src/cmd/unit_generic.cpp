@@ -6,7 +6,7 @@
 #include "beam.h"
 #include "lin_time.h"
 #include "xml_serializer.h"
-#include "vs_path.h"
+#include "vsfilesystem.h"
 #include "file_main.h"
 #include "universe_util.h"
 #include "unit_util.h"
@@ -33,63 +33,60 @@
 #include "networking/netclient.h"
 #include "gfx/cockpit_generic.h"
 #include "universe_generic.h"
-
+#include "unit_bsp.h"
+#include "gfx/bounding_box.h"
+#include "csv.h"
 #ifdef _WIN32
 #define strcasecmp stricmp
 #endif
 #include "config.h"
 using namespace Orders;
-
-bool verify_path (const vector<string> &path, bool allowmpl);
-void vschdirs (const vector<string> &path);
-void vscdups (const vector<string> &path);
-vector<vector <string> > lookforUnit( const char * filename, int faction, bool SubU);
-
-vector<vector <string> > lookforUnit( const char * filename, int faction, bool SubU)
-{
-	char * my_directory=GetUnitDir(filename);
-	vssetdir (GetSharedUnitPath().c_str());
-	vector<string>factionsubdir;
-	static string facsd = vs_config->getVariable("data","unitfactiondir","");
-	if (facsd.length()!=0) {
-		factionsubdir.push_back(facsd);
-	}
-	string facstr (FactionUtil::GetFaction(faction));
-	vector<vector <string> > path;
-	path.push_back (factionsubdir);
-	path.back().push_back("neutral");path.back().push_back(my_directory);path.back().push_back(filename);
-	{
-		path.push_back(vector<string>());		
-		path.back().push_back("weapons");path.back().push_back(my_directory);path.back().push_back(filename);
-		path.push_back(factionsubdir);		
-		path.back().insert(path.back().begin(),"weapons");path.back().push_back(facstr);path.back().push_back(my_directory);path.back().push_back(filename);
-	}
-	path.push_back(vector<string>());
-	path.back().push_back(my_directory);path.back().push_back(filename);	
-	path.push_back (factionsubdir);
-	path.back().push_back(facstr);path.back().push_back(my_directory);path.back().push_back(filename);
-	if (SubU) {
-		path.push_back(vector<string>());		
-		path.back().push_back("subunits");path.back().push_back(my_directory);path.back().push_back(filename);
-		path.push_back(factionsubdir);		
-		path.back().insert(path.back().begin(),"subunits");path.back().push_back(facstr);path.back().push_back(my_directory);path.back().push_back(filename);
-	}
-	free(my_directory);	
-	while(!path.empty()) {
-		if (verify_path(path.back(),true))
-			break;
-		path.pop_back();
-	}
-
-	return path;
-}
-
 void	Unit::BackupState()
 {
 	this->old_state.setPosition( this->curr_physical_state.position);
 	this->old_state.setOrientation( this->curr_physical_state.orientation);
 	this->old_state.setVelocity( this->Velocity);
 	this->old_state.setAcceleration( this->net_accel);
+}
+
+void Unit::BuildBSPTree(const char *filename, bool vplane, Mesh * hull) {
+  bsp_tree * bsp=NULL;
+  bsp_tree temp_node;
+  vector <bsp_polygon> tri;
+  vector <bsp_tree> triplane;
+  if (hull!=NULL) {
+    hull->GetPolys (tri);
+  } else {
+    for (int j=0;j<nummesh();j++) {
+      meshdata[j]->GetPolys(tri);
+    }
+  }	
+  for (unsigned int i=0;i<tri.size();i++) {
+    if (!Cross (tri[i],temp_node)) {
+      vector <bsp_polygon>::iterator ee = tri.begin();
+      ee+=i;
+      tri.erase(ee);
+      i--;
+      continue;
+    }	
+    // Calculate 'd'
+    temp_node.d = (double) ((temp_node.a*tri[i].v[0].i)+(temp_node.b*tri[i].v[0].j)+(temp_node.c*tri[i].v[0].k));
+    temp_node.d*=-1.0;
+    triplane.push_back(temp_node);
+    //                bsp=put_plane_in_tree3(bsp,&temp_node,&temp_poly3); 
+ }
+ 
+ bsp = buildbsp (bsp,tri,triplane, vplane?VPLANE_ALL:0);
+ if (bsp) {
+   VSError err = fo.OpenCreateWrite( filename, BSPFile);
+   if (err<=Ok) {
+     write_bsp_tree(bsp,0);
+     fo.Close();
+     bsp_stats (bsp);
+     FreeBSP (&bsp);
+   }
+ }	
+
 }
 
 bool flickerDamage (Unit * un, float hullpercent) {
@@ -153,14 +150,26 @@ void Unit::reactToCollision(Unit * smalle, const QVector & biglocation, const Ve
 	//Vector Elastic_dvl = (m1-m2)/(m1+m2)*smalle->GetVelocity() + smalle->GetVelocity()*2*m2/(m1+m2);
     //Vector Elastic_dvs = (m2-m1)/(m1+m2)*smalle->GetVelocity() + smalle->GetVelocity()*2*m1/(m1+m2);
     Vector Inelastic_vf = (m1/(m1+m2))*smalle->GetVelocity() + (m2/(m1+m2))*GetVelocity();
-	Vector SmallerElastic_vf = ReflectNormal(smalle->GetVelocity()-Inelastic_vf,bignormal)+Inelastic_vf;
-	Vector ThisElastic_vf = ReflectNormal(smalle->GetVelocity()-Inelastic_vf,smallnormal)+Inelastic_vf;
-	
+//	Vector SmallerElastic_vf = ReflectNormal(smalle->GetVelocity()-Inelastic_vf,bignormal)+Inelastic_vf;
+//	Vector ThisElastic_vf = ReflectNormal(smalle->GetVelocity()-Inelastic_vf,smallnormal)+Inelastic_vf;
+	Vector SmallerElastic_vf = (smalle->GetVelocity()*(m1-m2)/(m1+m2)+(2*m2/(m1+m2))*GetVelocity());
+	Vector ThisElastic_vf = (GetVelocity()*(m2-m1)/(m1+m2)+(2*m1/(m1+m2))*smalle->GetVelocity());
+	// Make bounce along opposite normals
+	// HACK ALERT: FOLLOWING LINES are the victims of A HACK
+	Cockpit * thcp = _Universe->isPlayerStarship (this);
+	Cockpit * smcp = _Universe->isPlayerStarship (smalle);
+	static float mintime = XMLSupport::parse_float (vs_config->getVariable ("physics","minimum_time_between_recorded_player_collisions","0.1"));
+	bool isnotplayerorhasbeenmintime=true;
+	static float minvel = XMLSupport::parse_float (vs_config->getVariable ("physics","minimum_collision_velocity","5"));
+	ThisElastic_vf=((ThisElastic_vf.Magnitude()>minvel||!thcp)?ThisElastic_vf.Magnitude():minvel)*smallnormal;
+	SmallerElastic_vf=((SmallerElastic_vf.Magnitude()>minvel||!smcp)?SmallerElastic_vf.Magnitude():minvel)*bignormal;
+
     float LargeKE = (0.5)*m2*GetVelocity().MagnitudeSquared();
     float SmallKE = (0.5)*m1*smalle->GetVelocity().MagnitudeSquared();
     float FinalInelasticKE = Inelastic_vf.MagnitudeSquared()*(0.5)*(m1+m2);
 	float InelasticDeltaKE = LargeKE +SmallKE - FinalInelasticKE;
     static float kilojoules_per_damage = XMLSupport::parse_float (vs_config->getVariable ("physics","kilojoules_per_unit_damage","5400"));
+	
     static float inelastic_scale = XMLSupport::parse_float (vs_config->getVariable ("physics","inelastic_scale",".5"));
 	float large_damage=inelastic_scale*(InelasticDeltaKE *(1.0/4.0 + (0.5*m2/(m1+m2))) )/kilojoules_per_damage;
     float small_damage=inelastic_scale*(InelasticDeltaKE *(1.0/4.0 + (0.5*m1/(m1+m2))) )/kilojoules_per_damage;
@@ -176,18 +185,38 @@ void Unit::reactToCollision(Unit * smalle, const QVector & biglocation, const Ve
 	if (tmag>.000001)
 		thisforce = (thisforce/tmag)*(large_damage+small_damage)*INVERSEFORCEDISTANCE*bouncepercent;
 #endif
-	Vector ThisDesiredVelocity = ThisElastic_vf*(1-inelastic_scale)+Inelastic_vf*inelastic_scale;
+	Vector ThisDesiredVelocity = ThisElastic_vf*(1-inelastic_scale/2)+Inelastic_vf*inelastic_scale/2;
 	Vector SmallerDesiredVelocity = SmallerElastic_vf*(1-inelastic_scale)+Inelastic_vf*inelastic_scale;
 	Vector smforce = (SmallerDesiredVelocity-smalle->GetVelocity())*smalle->GetMass()/SIMULATION_ATOM;
 	Vector thisforce = (ThisDesiredVelocity-GetVelocity())*GetMass()/SIMULATION_ATOM;
 	
 	
 	//UniverseUtil::IOmessage(0,"game","all",string("damaging collision ")+XMLSupport::tostring(smforce.i)+string(",")+XMLSupport::tostring(smforce.j)+string(",")+XMLSupport::tostring(smforce.k)+string(" resultantkinetic ")+XMLSupport::tostring(FinalInelasticKE)+string(" resultant damages ")+XMLSupport::tostring(small_damage)+string(" ")+XMLSupport::tostring(large_damage)+string(" bouncepercent ")+XMLSupport::tostring(bouncepercent)); 
+
+	if(thcp){
+		if((getNewTime()-thcp->TimeOfLastCollision)>mintime){
+			if(ThisDesiredVelocity.Magnitude()>minvel){
+				thcp->TimeOfLastCollision=getNewTime();
+			}
+		}else{
+			isnotplayerorhasbeenmintime=false;
+		}
+	}
     
-	if(smalle->isUnit()!=MISSILEPTR){ 
+	if(smcp){
+		if((getNewTime()-smcp->TimeOfLastCollision)>mintime){
+			if(SmallerDesiredVelocity.Magnitude()>minvel){
+				smcp->TimeOfLastCollision=getNewTime();
+			}
+		}else{
+			isnotplayerorhasbeenmintime=false;
+		}
+	}
+
+	if((smalle->isUnit()!=MISSILEPTR)&&isnotplayerorhasbeenmintime){ 
 	  smalle->ApplyForce (smforce);
 	}
-    if(this->isUnit()!=MISSILEPTR) {
+    if((this->isUnit()!=MISSILEPTR)&&isnotplayerorhasbeenmintime) {
 	  this->ApplyForce (thisforce);
 	}
 /*    smalle->curr_physical_state = smalle->prev_physical_state;
@@ -246,13 +275,15 @@ float rand01 () {
 	return ((float)rand()/(float)RAND_MAX);
 }
 float capship_size=500;
-unsigned short apply_float_to_short (float tmp) {
-  static unsigned int seed = 2531011;
+
+/* UGLYNESS short fix */
+unsigned int apply_float_to_unsigned_int (float tmp) {
+  static unsigned long int seed = 2531011;
   seed +=214013;
-  seed %=65536;
-  unsigned  short ans = (unsigned short) tmp;
+  seed %=4294967295u;
+  unsigned  int ans = (unsigned int) tmp;
   tmp -=ans;//now we have decimal;
-  if (seed<(unsigned int)(65536*tmp))
+  if (seed<(unsigned long int)(4294967295u*tmp))
     ans +=1;
   return ans;
 }
@@ -268,7 +299,7 @@ std::string speedStarHandler (const XMLType &input,void *mythis) {
 }
 
 static list<Unit*> Unitdeletequeue;
-static Hashtable <long, Unit, char[2095]> deletedUn;
+static Hashtable <long, Unit, 2095> deletedUn;
 int deathofvs=1;
 void CheckUnit(Unit * un) {
   if (deletedUn.Get ((long)un)!=NULL) {
@@ -348,6 +379,7 @@ std::string lookupMountSize (int s) {
 /**** UNIT STUFF                                                            */
 /***********************************************************************************/
 Unit::Unit( int /*dummy*/ ) {
+  ZeroAll();
   image = new UnitImages;
   sound = new UnitSounds;
   aistate=NULL;
@@ -356,6 +388,7 @@ Unit::Unit( int /*dummy*/ ) {
   Init();
 }
 Unit::Unit() {
+  ZeroAll();
   image = new UnitImages;
   sound = new UnitSounds;
   aistate=NULL;
@@ -365,6 +398,7 @@ Unit::Unit() {
 }
 
 Unit::Unit (std::vector <Mesh *> & meshes, bool SubU, int fact) {
+  ZeroAll();
   image = new UnitImages;
   sound = new UnitSounds;
   aistate=NULL;
@@ -383,6 +417,7 @@ Unit::Unit (std::vector <Mesh *> & meshes, bool SubU, int fact) {
 
 extern void update_ani_cache();
 Unit::Unit(const char *filename, bool SubU, int faction,std::string unitModifications, Flightgroup *flightgrp,int fg_subnumber, string * netxml) {
+  ZeroAll();
   image = new UnitImages;
   sound = new UnitSounds;
   aistate=NULL;
@@ -395,19 +430,19 @@ Unit::~Unit()
 {
   free(image->cockpit_damage);
   if ((!killed)) {
-    fprintf (stderr,"Assumed exit on unit %s(if not quitting, report error)\n",name.c_str());
+    VSFileSystem::vs_fprintf (stderr,"Assumed exit on unit %s(if not quitting, report error)\n",name.c_str());
   }
   if (ucref) {
-    fprintf (stderr,"DISASTER AREA!!!!");
+    VSFileSystem::vs_fprintf (stderr,"DISASTER AREA!!!!");
   }
 #ifdef DESTRUCTDEBUG
-  fprintf (stderr,"stage %d %x %d\n", 0,this,ucref);
+  VSFileSystem::vs_fprintf (stderr,"stage %d %x %d\n", 0,this,ucref);
   fflush (stderr);
 #endif
 #ifdef DESTRUCTDEBUG
-  fprintf (stderr,"%d %x ", 1,planet);
+  VSFileSystem::vs_fprintf (stderr,"%d %x ", 1,planet);
   fflush (stderr);
-  fprintf (stderr,"%d %x\n", 2,image->hudImage);
+  VSFileSystem::vs_fprintf (stderr,"%d %x\n", 2,image->hudImage);
   fflush (stderr);
 #endif
   if (image->unitwriter)
@@ -418,30 +453,30 @@ Unit::~Unit()
   }
 
 #ifdef DESTRUCTDEBUG
-  fprintf (stderr,"%d %x", 3,image);
+  VSFileSystem::vs_fprintf (stderr,"%d %x", 3,image);
   fflush (stderr);
 #endif
   delete image;
   delete sound;
 #ifdef DESTRUCTDEBUG
-  fprintf (stderr,"%d %x %x", 4,bspTree, bspShield);
+  VSFileSystem::vs_fprintf (stderr,"%d %x %x", 4,bspTree, bspShield);
   fflush (stderr);
 #endif
 #ifdef DESTRUCTDEBUG
-  fprintf (stderr,"%d", 5);
+  VSFileSystem::vs_fprintf (stderr,"%d", 5);
   fflush (stderr);
 #endif
 #ifdef DESTRUCTDEBUG
-  fprintf (stderr,"%d %x", 6,&mounts);
+  VSFileSystem::vs_fprintf (stderr,"%d %x", 6,&mounts);
   fflush (stderr);
 #endif
 
 #ifdef DESTRUCTDEBUG
-  fprintf (stderr,"%d %x ", 9, halos);
+  VSFileSystem::vs_fprintf (stderr,"%d %x ", 9, halos);
   fflush (stderr);
 #endif
 #ifdef DESTRUCTDEBUG
-  fprintf (stderr,"%d %x ", 1,&mounts);
+  VSFileSystem::vs_fprintf (stderr,"%d %x ", 1,&mounts);
   fflush (stderr);
 #endif
 #ifndef NO_MOUNT_STAR
@@ -454,7 +489,7 @@ Unit::~Unit()
 #endif
 	mounts.clear();
 #ifdef DESTRUCTDEBUG
-  fprintf (stderr,"%d", 0);
+  VSFileSystem::vs_fprintf (stderr,"%d", 0);
   fflush (stderr);
 #endif
   for(unsigned int meshcount = 0; meshcount < meshdata.size(); meshcount++)
@@ -463,26 +498,117 @@ Unit::~Unit()
   meshdata.clear();
 }
 
+void Unit::ZeroAll( )
+{
+    sound            = NULL;
+    ucref            = 0;
+    networked        = false;
+    serial           = 0;
+    net_accel.i      = 0;
+    net_accel.j      = 0;
+    net_accel.k      = 0;
+    // old_state has a constructor
+    damages          = NO_DAMAGE;
+    // SubUnits has a constructor
+    combat_role      = 0;
+    nebula           = NULL;
+    planet           = NULL;
+    activeStarSystem = NULL;
+    // computer has a constructor
+    // jump needs fixing
+    selected         = false;
+    // scanner needs fixing
+    xml              = NULL;
+    owner            = NULL;
+    // prev_physical_state has a constructor
+    // curr_physical_state has a constructor
+    // cumulative_transformation_matrix has a constructor
+    // cumulative_transformation has a constructor
+    cumulative_velocity.i = 0;
+    cumulative_velocity.j = 0;
+    cumulative_velocity.k = 0;
+    NetForce.i            = 0;
+    NetForce.j            = 0;
+    NetForce.k            = 0;
+    NetLocalForce.i       = 0;
+    NetLocalForce.j       = 0;
+    NetLocalForce.k       = 0;
+    NetTorque.i           = 0;
+    NetTorque.j           = 0;
+    NetTorque.k           = 0;
+    NetLocalTorque.i      = 0;
+    NetLocalTorque.j      = 0;
+    NetLocalTorque.k      = 0;
+    AngularVelocity.i     = 0;
+    AngularVelocity.j     = 0;
+    AngularVelocity.k     = 0;
+    Velocity.i            = 0;
+    Velocity.j            = 0;
+    Velocity.k            = 0;
+    image                 = NULL;
+    Mass                  = 0;
+    shieldtight           = 0;
+    fuel                  = 0;
+    afterburnenergy       = 0;
+    Momentofinertia       = 0;
+    // limits has a constructor
+    cloaking              = 0;
+    cloakmin              = 0;
+    radial_size           = 0;
+    killed                = false;
+    invisible             = 0;
+    corner_min.i          = 0;
+    corner_min.j          = 0;
+    corner_min.k          = 0;
+    corner_max.i          = 0;
+    corner_max.j          = 0;
+    corner_max.k          = 0;
+    resolveforces         = false;
+    // armor has a constructor
+    // shield has a constructor
+    hull                  = 0;
+    maxhull               = 0;
+    recharge              = 0;
+    maxenergy             = 0;
+    energy                = 0;
+    maxwarpenergy         = 0;
+    warpenergy            = 0;
+    // target_fgid has a constructor
+    aistate               = NULL;
+    // CollideInfo has a constructor
+    colTrees              = NULL;
+    docked                = NOT_DOCKED;
+    faction               = 0;
+    flightgroup           = NULL;
+    flightgroup_subnumber = 0;
+}
+
 void Unit::Init()
 {
   /*
   static std::map <Unit *, bool> m;
   if (m[this]) {
-    fprintf (stderr,"already called this");
+    VSFileSystem::vs_fprintf (stderr,"already called this");
   }else {
     m[this]=1;
     }*/
-	this->networked=0;
+	if( Network==NULL)
+		this->networked=0;
+	else
+		this->networked=1;
 
 	damages = NO_DAMAGE;
 
 	graphicOptions.RecurseIntoSubUnitsOnCollision=false;
+        graphicOptions.WarpFieldStrength=1;
+        
 	this->combat_role=ROLES::getRole("INERT");
 	this->computer.combat_mode=true;
 #ifdef CONTAINER_DEBUG
   UncheckUnit (this);
 #endif
   static float capsize = XMLSupport::parse_float(vs_config->getVariable("physics","capship_size","500"));
+
   capship_size=capsize;
   activeStarSystem=NULL;
   xml=NULL;
@@ -493,6 +619,7 @@ void Unit::Init()
   jump.insysenergy=insys_jump_cost*jump.energy;
   jump.delay=5;
   jump.damage=0;
+  jump.warpDriveRating=0;
   graphicOptions.FaceCamera=false;
   jump.drive=-2;// disabled
   afterburnenergy=0;
@@ -507,10 +634,20 @@ void Unit::Init()
   image->cargo_volume=0;
   image->unitwriter=NULL;
   cloakmin=image->cloakglass?1:0;
+  image->equipment_volume=0;
   image->cloakrate=100;
   image->cloakenergy=0;
   image->forcejump=false;
   sound->engine=-1;  sound->armor=-1;  sound->shield=-1;  sound->hull=-1; sound->explode=-1;
+  image->fireControlFunctionality=1.0f;
+  image->fireControlFunctionalityMax=1.0f;
+  image->SPECDriveFunctionality=1.0f;
+  image->SPECDriveFunctionalityMax=1.0f;
+  image->CommFunctionality=1.0f;
+  image->CommFunctionalityMax=1.0f;
+  image->LifeSupportFunctionality=1.0f;
+  image->LifeSupportFunctionalityMax=1.0f;
+
   sound->cloak=-1;
   sound->jump=-1;
   image->hudImage=NULL;
@@ -529,7 +666,7 @@ void Unit::Init()
   maxwarpenergy=0;
   recharge = 1;
   shield.recharge=shield.leak=0;
-  shield.fb[0]=shield.fb[1]=shield.fb[2]=shield.fb[3]=armor.front=armor.back=armor.right=armor.left=0;
+  shield.shield2fb.front=shield.shield2fb.back=shield.shield2fb.frontmax=shield.shield2fb.backmax=armor.frontrighttop=armor.backrighttop=armor.frontlefttop=armor.backlefttop=armor.frontrightbottom=armor.backrightbottom=armor.frontleftbottom=armor.backleftbottom=0;
   hull=10;
   maxhull=10;
   shield.number=2;
@@ -542,7 +679,7 @@ void Unit::Init()
   Identity(cumulative_transformation_matrix);
   cumulative_transformation = identity_transformation;
   curr_physical_state = prev_physical_state = identity_transformation;
-  mass = .01;
+  Mass = .01;
   fuel = 000;
 
   static Vector myang(XMLSupport::parse_float (vs_config->getVariable ("general","pitch","0")),XMLSupport::parse_float (vs_config->getVariable ("general","yaw","0")),XMLSupport::parse_float (vs_config->getVariable ("general","roll","0")));
@@ -553,7 +690,7 @@ void Unit::Init()
     
   static float lc =XMLSupport::parse_float (vs_config->getVariable ("physics","lock_cone",".8"));// DO NOT CHANGE see unit_customize.cpp
 
-  MomentOfInertia = .01;
+  Momentofinertia = .01;
   AngularVelocity = myang;
   cumulative_velocity=Velocity = Vector(0,0,0);
   
@@ -599,7 +736,7 @@ void Unit::Init()
   scanner.last_scantime=0.0;
   // No cockpit reference here
   if (!image->cockpit_damage) {
-    int numg= 1+MAXVDUS+UnitImages::NUMGAUGES;
+    int numg= (1+MAXVDUS+UnitImages::NUMGAUGES)*2;
     image->cockpit_damage=(float*)malloc((numg)*sizeof(float));
     for (unsigned int damageiterator=0;damageiterator<numg;damageiterator++) {
       image->cockpit_damage[damageiterator]=1;
@@ -633,36 +770,26 @@ void Unit::Init()
 }
 
 std::string getMasterPartListUnitName();
-bool
-verify_path (const vector<string> &path, bool allowmpl) {
-	string realpath;
-	for (unsigned int i=0;i<path.size();++i) {
-		if (i!=0)
-			realpath+="/";		
-		realpath+=path[i];
-	}
-	FILE * fp = fopen (realpath.c_str(),"r");
-	if (fp)
-		fclose(fp);
-	
-	if (path.size()==2&&fp==NULL&&allowmpl)
-		if (path[1]==getMasterPartListUnitName())
-			return true;
-	return fp!=NULL;
+using namespace VSFileSystem;
+extern std::string GetReadPlayerSaveGame (int);
+CSVRow GetUnitRow(string filename, bool subu, int faction, bool readLast, bool &read);
+#if 0
+static std::string csvUnit(std::string un) {
+  string::size_type i=un.find_last_of(".");
+  string::size_type del=un.find_last_of("/\\:");
+  if (i==std::string::npos) {
+    return un+".csv";
+  }
+  if (del==std::string::npos||del<i) {
+    return un.substr(0,i)+".csv";
+  }
+  return un+".csv";
 }
-void vschdirs (const vector<string> &path) {
-	for (unsigned int i=0;i<path.size();++i) {
-		vschdir(path[i].c_str());
-	}
-}
-void vscdups (const vector<string> &path) {
-	for (unsigned int i=0;i<path.size();++i) {
-		vscdup();
-	}
-}
-
+#endif
 void Unit::Init(const char *filename, bool SubU, int faction,std::string unitModifications, Flightgroup *flightgrp,int fg_subnumber, string * netxml)
 {
+        static bool UNITTAB = XMLSupport::parse_bool(vs_config->getVariable("physics","UnitTable","false"));
+
 	this->Unit::Init();
 	//if (!SubU)
 	//  _Universe->AccessCockpit()->savegame->AddUnitToSave(filename,UNITPTR,FactionUtil::GetFaction(faction),(long)this);
@@ -671,31 +798,132 @@ void Unit::Init(const char *filename, bool SubU, int faction,std::string unitMod
 	graphicOptions.RecurseIntoSubUnitsOnCollision=!isSubUnit();
 	this->faction = faction;
 	SetFg (flightgrp,fg_subnumber);
+	VSFile f;
+        VSFile f2;
+	VSError err = Unspecified;
+        VSFile unitTab;
+        VSError taberr= Unspecified;;
+        bool foundFile=false;
+  if( netxml==NULL)
+  {
+		if (unitModifications.length()!=0) {
+		  string nonautosave=GetReadPlayerSaveGame(_Universe->CurrentCockpit());
+		  string filepath("");
+		  // In network mode we only look in the save subdir in HOME
+		  if( Network==NULL && !SERVER)
+		  {
+			  if (nonautosave.empty()) {
+				  VSFileSystem::CreateDirectoryHome (VSFileSystem::savedunitpath+"/"+unitModifications);
+				  filepath = unitModifications+"/"+string(filename);
+			  }else {
+				  VSFileSystem::CreateDirectoryHome (VSFileSystem::savedunitpath+"/"+nonautosave);
+				  filepath = nonautosave+"/"+string(filename);
+			  }
+		  }
+		  // This is not necessary as I think... to watch
+		  //VSFileSystem::vs_chdir( "save");
 
-	vector<vector <string> > path = lookforUnit( filename, faction, SubU);
-
-	if (path.empty()) {
-	    fprintf (stderr,"Warning: Cannot locate %s\n",filename);	  
-	    meshdata.clear();
-	    meshdata.push_back(NULL);
-		this->fullname=filename;
-	    this->name=string("LOAD_FAILED");
-		calculate_extent(false);		
-		radial_size=1;
-		
-	    //	    assert ("Unit Not Found"==NULL);
-	}else {
-	  path.back().pop_back();vschdirs(path.back());
-	  name = filename;
-	  if( netxml==NULL)
-		Unit::LoadXML(filename,unitModifications.c_str());
-	  else
-		Unit::LoadXML( filename, "", netxml);
-	  calculate_extent(false);
-///	  ToggleWeapon(true);//change missiles to only fire 1
-	  vscdups(path.back());	  
+		  // Try to open save
+		  if (filename[0]) {
+                    taberr=unitTab.OpenReadOnly( filepath+".csv", UnitSaveFile);
+                    if (taberr<=Ok) {
+                      unitTables.push_back(new CSVTable(unitTab));
+                      unitTab.Close();
+                    }
+                    if (!UNITTAB) 
+                      err = f.OpenReadOnly( filepath, UnitSaveFile);
+                    
+                  }
+		}
 	}
-	vsresetdir();
+  // If save was not succesfull we try to open the unit file itself
+  if( netxml==NULL)
+  {
+      if (filename[0]) {
+	    string subdir = "factions/"+FactionUtil::GetFactionName(faction);
+           // begin deprecated code (5/11)            
+            if (UNITTAB) {
+
+            }else {
+		if( err>Ok) {
+	  	    f.SetSubDirectory(subdir);
+			// No save found loading default unit
+			err = f.OpenReadOnly (filename, UnitFile);
+			if (err>Ok) {
+				f.SetSubDirectory("");
+				err = f.OpenReadOnly (filename, UnitFile);
+			}
+		}else{
+			f2.SetSubDirectory(subdir);
+			// Save found so just opening default unit to get its directory for further loading
+			err = f2.OpenReadOnly (filename, UnitFile);
+			if (err>Ok) {
+				f2.SetSubDirectory("");
+				err = f2.OpenReadOnly (filename, UnitFile);
+			}
+		}
+                
+            }
+                //end deprecated code
+	  }
+  }
+  CSVRow unitRow;
+  if (UNITTAB) {
+    unitRow = GetUnitRow(filename,SubU,faction,true, foundFile);
+  }else {
+    foundFile = (err<=Ok);
+  }
+  if(!foundFile) {
+	cout << "Unit file " << filename << " not found" << endl;
+	fprintf (stderr,"Assertion failed unit_generic.cpp:711 Unit %s not found\n",filename);
+
+    VSFileSystem::vs_fprintf (stderr,"Warning: Cannot locate %s\n",filename);	  
+    meshdata.clear();
+    meshdata.push_back(NULL);
+	this->fullname=filename;
+    this->name=string("LOAD_FAILED");
+	calculate_extent(false);		
+	radial_size=1;
+    //	    assert ("Unit Not Found"==NULL);
+	//assert(0);
+        if (taberr<=Ok&&taberr!=Unspecified) {
+          delete unitTables.back();
+          unitTables.pop_back();
+        }
+	return;
+  }
+
+	name = filename;
+        bool tmpbool;
+        if (UNITTAB) {
+              // load from table?
+
+          // we have to set the root directory to where the saved unit would have come from.
+          // saved only exists if taberr<=Ok && taberr!=Unspecified...that's why we pass in said boolean
+              VSFileSystem::current_path.push_back(taberr<=Ok&&taberr!=Unspecified?GetUnitRow(filename,SubU,faction,false,tmpbool).getRoot():unitRow.getRoot());
+              VSFileSystem::current_subdirectory.push_back("/"+unitRow["Directory"]);
+              VSFileSystem::current_type.push_back(UnitFile);
+              LoadRow(unitRow,unitModifications,netxml);
+              VSFileSystem::current_type.pop_back();
+              VSFileSystem::current_subdirectory.pop_back();
+              VSFileSystem::current_path.pop_back();
+              if (taberr<=Ok&&taberr!=Unspecified) {
+                delete unitTables.back();
+                unitTables.pop_back();
+              }
+
+        }else {
+          if( netxml==NULL)
+            Unit::LoadXML(f,unitModifications.c_str());
+          else
+            Unit::LoadXML( f, "", netxml);
+          if( err<=Ok)
+            f.Close();
+          if( f2.Valid())
+            f2.Close();
+        }
+        calculate_extent(false);
+///	  ToggleWeapon(true);//change missiles to only fire 1
 }
 
 vector <Mesh *> Unit::StealMeshes() {
@@ -842,7 +1070,7 @@ StarSystem * Unit::getStarSystem () {
 }
 
 void Unit::Fire (unsigned int weapon_type_bitmask, bool listen_to_owner) {
-    if (cloaking>=0)
+    if (cloaking>=0||graphicOptions.InWarp)
         return;
 	int nm = 0;
 	vector <Mount>
@@ -853,7 +1081,7 @@ void Unit::Fire (unsigned int weapon_type_bitmask, bool listen_to_owner) {
 					// On server side send a PACKET TO ALL CLIENT TO NOTIFY UNFIRE
 					// Including the one who fires to make sure it stops
 					if( SERVER)
-						Server->BroadcastUnfire( this->serial, nm, this->zone);
+						VSServer->BroadcastUnfire( this->serial, nm, this->activeStarSystem->GetZone());
 					// NOT ONLY IN non-networking mode : anyway, the server will tell everyone including us to stop if not already done
 					// if( !SERVER && Network==NULL)
 						(*i).UnFire();
@@ -874,7 +1102,7 @@ void Unit::Fire (unsigned int weapon_type_bitmask, bool listen_to_owner) {
 			const bool missile_and_want_to_fire_missiles = (mis&&(weapon_type_bitmask&ROLES::FIRE_MISSILES));
 			const bool gun_and_want_to_fire_guns =((!mis)&&(weapon_type_bitmask&ROLES::FIRE_GUNS));
 			if(missile_and_want_to_fire_missiles&&locked_missile){
-				fprintf (stderr,"\n about to fire locked missile \n");
+				VSFileSystem::vs_fprintf (stderr,"\n about to fire locked missile \n");
 			}
 			if (fire_non_autotrackers||autotracking_gun||locked_missile) {
 				if ((ROLES::EVERYTHING_ELSE&weapon_type_bitmask&(*i).type->role_bits)
@@ -895,7 +1123,7 @@ void Unit::Fire (unsigned int weapon_type_bitmask, bool listen_to_owner) {
 								else
 									serid = 0;
 								if( SERVER)
-									Server->BroadcastFire( this->serial, nm, serid, this->zone);
+									VSServer->BroadcastFire( this->serial, nm, serid, this->activeStarSystem->GetZone());
 								// We could only refresh energy on server side or in non-networking mode, on client side it is done with
 								// info the server sends with ack for fire
 								// FOR NOW WE TRUST THE CLIENT SINCE THE SERVER CAN REFUSE A FIRE
@@ -1035,7 +1263,7 @@ void Unit::getAverageGunSpeed(float & speed, float &grange, float &mrange) const
   }
 }
 
-QVector Unit::PositionITTS (const QVector& absposit,Vector velocity, float speed) const{
+QVector Unit::PositionITTS (const QVector& absposit,Vector velocity, float speed, bool steady_itts) const{
 	if (speed==FLT_MAX)
 		return this->Position();
 	float difficultyscale=1;
@@ -1049,7 +1277,12 @@ QVector Unit::PositionITTS (const QVector& absposit,Vector velocity, float speed
 		if(speed>0.001){
 			time = curguess.Magnitude()/speed;
 		}	 
-		curguess = posit+velocity.Scale(time).Cast();
+		if (steady_itts) {
+			curguess = posit+GetVelocity().Cast().Scale(time); // ** jay
+		}
+		else {
+			curguess = posit+velocity.Scale(time).Cast();
+		}
 	}
 	return curguess+absposit;
 }
@@ -1078,7 +1311,7 @@ float Unit::cosAngleTo (Unit * targ, float &dist, float speed, float range) cons
    //   if (range!=FLT_MAX) {
    //     getAverageGunSpeed(speed,range);
    //   }
-   QVector totarget (targ->PositionITTS(cumulative_transformation.position,cumulative_velocity, speed));
+   QVector totarget (targ->PositionITTS(cumulative_transformation.position,cumulative_velocity, speed,false));
    totarget = totarget-cumulative_transformation.position;
    double tmpcos = Normal.Cast().Dot (totarget);
    dist = totarget.Magnitude();
@@ -1114,7 +1347,7 @@ float Unit::cosAngleFromMountTo (Unit * targ, float & dist) const{
     finaltrans.to_matrix (mat);
     Vector Normal (mat.getR());
     
-    QVector totarget (targ->PositionITTS(finaltrans.position,cumulative_velocity, mounts[i].type->Speed));
+    QVector totarget (targ->PositionITTS(finaltrans.position,cumulative_velocity, mounts[i].type->Speed,false));
     
     tmpcos = Normal.Dot (totarget.Cast());
     tmpdist = totarget.Magnitude();
@@ -1436,7 +1669,7 @@ void Unit::DisableTurretAI () {
 
 extern signed char  ComputeAutoGuarantee ( Unit * un);
 extern float getAutoRSize (Unit * orig,Unit * un, bool ignore_friend=false);
-
+extern void SetShieldZero(Unit*);
 void Unit::UpdatePhysics (const Transformation &trans, const Matrix &transmat, const Vector & cum_vel,  bool lastframe, UnitCollection *uc) {
   static float VELOCITY_MAX=XMLSupport::parse_float(vs_config->getVariable ("physics","velocity_max","10000"));
 
@@ -1451,22 +1684,23 @@ void Unit::UpdatePhysics (const Transformation &trans, const Matrix &transmat, c
     if (image->cloakenergy*SIMULATION_ATOM>warpenergy) {
       Cloak(false);//Decloak
     } else {
+      SetShieldZero(this);
       if (image->cloakrate>0||cloaking==cloakmin) {
-		warpenergy-=apply_float_to_short(SIMULATION_ATOM*image->cloakenergy);
+		warpenergy-=(SIMULATION_ATOM*image->cloakenergy);
       }
       if (cloaking>cloakmin) {
 		AUDAdjustSound (sound->cloak, cumulative_transformation.position,cumulative_velocity);
-		if ((cloaking==32767&&image->cloakrate>0)||(cloaking==cloakmin+1&&image->cloakrate<0)) {
+		if ((cloaking==(2147483647)&&image->cloakrate>0)||(cloaking==cloakmin+1&&image->cloakrate<0)) {//short fix
 		  AUDStartPlaying (sound->cloak);
 	    }
-		cloaking-= (short)(image->cloakrate*SIMULATION_ATOM);
+		cloaking-= (int)(image->cloakrate*SIMULATION_ATOM); //short fix
 		if (cloaking<=cloakmin&&image->cloakrate>0) {
 		  //AUDStopPlaying (sound->cloak);
 		  cloaking=cloakmin;
 	    }
 	    if (cloaking<0&&image->cloakrate<0) {
 	      //AUDStopPlaying (sound->cloak);
-	      cloaking=(short)32768;//wraps
+	      cloaking=-2147483647-1;//wraps short fix
 	    }
       }
     }
@@ -1620,7 +1854,8 @@ void Unit::UpdatePhysics (const Transformation &trans, const Matrix &transmat, c
 //		  if (isPlayerStarship(this))
 //			  ToggleWeapon (true);
       }
-    }else if (mounts[i].processed==Mount::UNFIRED) {
+    }else if (mounts[i].processed==Mount::UNFIRED||mounts[i].ref.refire>2*mounts[i].type->Refire) {
+      mounts[i].processed=Mount::UNFIRED;
       mounts[i].PhysicsAlignedUnfire();
     }
   }
@@ -1636,7 +1871,7 @@ void Unit::UpdatePhysics (const Transformation &trans, const Matrix &transmat, c
     UnitCollection::UnitIterator iter=getSubUnits();
     while ((su=iter.current())) {
       su->UpdatePhysics(cumulative_transformation,cumulative_transformation_matrix,cumulative_velocity,lastframe,uc); 
-      su->cloaking = (short unsigned int) cloaking;
+      su->cloaking = (unsigned int) cloaking; //short fix
       if (hull<0) {
 	su->Target(NULL);
 		UnFire();//don't want to go off shooting while your body's splitting everywhere
@@ -1656,7 +1891,84 @@ void Unit::UpdatePhysics (const Transformation &trans, const Matrix &transmat, c
     UpdateCollideQueue();
   }
 }
-
+void Unit::AddVelocity(float difficulty) {
+   static float warpramptime=XMLSupport::parse_float (vs_config->getVariable ("physics","warpramptime","0.5"));     
+   Vector v=Velocity;
+   if(graphicOptions.WarpRamping){ // Warp Turning off/on
+	  graphicOptions.RampCounter=warpramptime;
+	  graphicOptions.WarpRamping=0;
+   }
+   if(graphicOptions.InWarp==1||graphicOptions.RampCounter!=0){
+	   static float fmultiplier=XMLSupport::parse_float(vs_config->getVariable("physics","hyperspace_multiplier","3141592"));
+	   static float autopilot_term_distance = XMLSupport::parse_float (vs_config->getVariable ("physics","auto_pilot_termination_distance","6000"));     
+	   static float smallwarphack = XMLSupport::parse_float (vs_config->getVariable ("physics","minwarpeffectsize","1000"));     
+       //    float speed = v.Magnitude();
+       //    if (speed>.01)
+       //      if (speed>(computer.max_combat_speed))
+       //      v*=computer.max_combat_speed/speed;
+	   float minmultiplier=fmultiplier;
+	   Unit * planet;
+	   for (un_iter iter = _Universe->activeStarSystem()->gravitationalUnits().createIterator();(planet=*iter);++iter) {
+		   if (planet==this) {
+			   continue;
+		   }
+		 float multipliertemp=1;
+		 float minsizeeffect = (planet->rSize()>smallwarphack)?planet->rSize():smallwarphack;
+		 float effectiverad = autopilot_term_distance+minsizeeffect*(1.0f+UniverseUtil::getPlanetRadiusPercent())+getAutoRSize(this,this)+rSize();
+		 double onethird=1.0/3.0;
+		 double Nthoudist=9000000;
+		 double Nthoudistalt=minsizeeffect*450;
+		 Nthoudist=(Nthoudist<Nthoudistalt)?(Nthoudist):(Nthoudistalt);
+		 double Nthouslow=9000/pow(Nthoudist,onethird);
+		 double dist=(Position()-planet->Position()).Magnitude();
+		 double cuberoot=pow((dist-(effectiverad)-Nthoudist),onethird);
+		 if(dist>(effectiverad+Nthoudist)) {
+			 multipliertemp=9000+(314*cuberoot);
+		 } else if (dist>effectiverad){
+			multipliertemp=9000-(Nthouslow*pow(-(dist-(effectiverad)-Nthoudist),onethird));
+		 }else{
+			minmultiplier=1;
+		 }
+		 minmultiplier=(multipliertemp<minmultiplier)?multipliertemp:minmultiplier;
+	   }
+	   float rampmult=1;
+	   if(graphicOptions.RampCounter!=0){
+	     graphicOptions.RampCounter-=SIMULATION_ATOM;
+	     if(graphicOptions.RampCounter<=0){
+	       graphicOptions.RampCounter=0;
+		 }
+	     rampmult=(graphicOptions.InWarp)?1.0-((graphicOptions.RampCounter/warpramptime)*(graphicOptions.RampCounter/warpramptime)):(graphicOptions.RampCounter/warpramptime)*(graphicOptions.RampCounter/warpramptime);
+	   }
+           static float warpMultiplier=XMLSupport::parse_float(vs_config->getVariable("physics","warpMultiplier","0"));
+           static float warpMultiplierMax=XMLSupport::parse_float(vs_config->getVariable("physics","warpMultiplierMax","300000000"));
+           if (warpMultiplier==0) {
+             warpMultiplier=PI*PI*PI;
+           }
+	   minmultiplier*=rampmult;
+	   if(minmultiplier<warpMultiplier) {
+		 if(graphicOptions.InWarp==1) {
+		   minmultiplier=warpMultiplier*(1-graphicOptions.RampCounter);
+//		   printf("RAMP: %f\n",graphicOptions.RampCounter);
+		 } else if (graphicOptions.RampCounter!=0) {
+		   minmultiplier=warpMultiplier*graphicOptions.RampCounter;
+		 } else {
+		   minmultiplier=1;
+		 }
+	   }
+	   if(minmultiplier>fmultiplier) {
+		   minmultiplier=fmultiplier; //SOFT LIMIT
+	   }
+	   v*=minmultiplier;
+	   float vmag=sqrt(v.i*v.i+v.j*v.j+v.k*v.k);
+	   if(vmag>warpMultiplier*warpMultiplierMax){
+		   v*=warpMultiplier*warpMultiplierMax/vmag; // HARD LIMIT
+	   }
+	   graphicOptions.WarpFieldStrength=minmultiplier;
+   } else {
+	   graphicOptions.WarpFieldStrength=1;
+   }
+   curr_physical_state.position = curr_physical_state.position +  (v*SIMULATION_ATOM*difficulty).Cast();
+}
 void Unit::UpdatePhysics2 (const Transformation &trans, const Transformation & old_physical_state, const Vector & accel, float difficulty, const Matrix &transmat, const Vector & cum_vel,  bool lastframe, UnitCollection *uc)
 {
 	Cockpit * cp = _Universe->isPlayerStarship( this);
@@ -1671,7 +1983,8 @@ void Unit::UpdatePhysics2 (const Transformation &trans, const Transformation & o
 	// SERVERSIDE ONLY : If it is not a player, it is a unit controlled by server so compute changes
 	if( SERVER && Network!=NULL && !cp)
 	{
-		curr_physical_state.position = curr_physical_state.position +  (Velocity*SIMULATION_ATOM*difficulty).Cast();
+		AddVelocity(difficulty);
+                
 		cumulative_transformation = curr_physical_state;
 		cumulative_transformation.Compose (trans,transmat);
 		cumulative_transformation.to_matrix (cumulative_transformation_matrix);
@@ -1706,6 +2019,11 @@ static QVector AutoSafeEntrancePoint (const QVector start, float rsize,Unit * go
   return def;
 }
 bool Unit::AutoPilotTo (Unit * target, bool ignore_energy_requirements, int recursive_level) {
+	static bool auto_valid = XMLSupport::parse_bool (vs_config->getVariable ("physics","insystem_jump_or_timeless_auto-pilot","false"));	
+	if(!auto_valid) {
+		return false;
+	}
+	
 	if (target->isUnit()==PLANETPTR) {
 		un_iter i = target->getSubUnits();
 		Unit * targ =*i;
@@ -1785,7 +2103,8 @@ bool Unit::AutoPilotTo (Unit * target, bool ignore_energy_requirements, int recu
 	  Unit * un;
 	  for (un_iter i=ss->getUnitList().createIterator(); (un=*i)!=NULL; ++i) {
 		  if (un->isUnit()==ASTEROIDPTR) {
-			  if (UnitUtil::getDistance(this,un)<0) {
+                    static float minasteroiddistance = XMLSupport::parse_float(vs_config->getVariable("physics","min_asteroid_distance","-100"));
+			  if (UnitUtil::getDistance(this,un)<minasteroiddistance) {
 				  return false;//no auto in roid field
 			  }
 		  }
@@ -1833,7 +2152,9 @@ bool Unit::AutoPilotTo (Unit * target, bool ignore_energy_requirements, int recu
 			UniverseUtil::cacheAnimation (insys_jump_ani);
 			docache=false;
 		}
-		UniverseUtil::playAnimationGrow (insys_jump_ani,RealPosition(this),rSize()*4,.99);
+                static float insys_jump_ani_size = XMLSupport::parse_float(vs_config->getVariable("graphics","insys_jump_animation_size","4"));
+                static float insys_jump_ani_growth = XMLSupport::parse_float(vs_config->getVariable("graphics","insys_jump_animation_growth",".99"));
+		UniverseUtil::playAnimationGrow (insys_jump_ani,RealPosition(this),rSize()*insys_jump_ani_size,insys_jump_ani_growth);
 
 
       Vector v(GetVelocity());
@@ -1878,6 +2199,7 @@ bool Unit::AutoPilotTo (Unit * target, bool ignore_energy_requirements, int recu
   }
   return ok;
 }
+
 extern void ActivateAnimation(Unit * jp);
 void TurnJumpOKLightOn(Unit * un, Cockpit * cp) {
 	if (cp) {
@@ -1907,14 +2229,14 @@ bool Unit::jumpReactToCollision (Unit * smalle) {
 		Unit * jumppoint = this;
 		_Universe->activeStarSystem()->JumpTo (smalle, jumppoint, std::string(GetDestinations()[dest%GetDestinations().size()]));
 		if( SERVER)
-			Server->sendJump( smalle->GetSerial(), this->serial, true);
+			VSServer->sendJump( smalle->GetSerial(), this->serial, true);
 		return true;
     }
 	/* NOT NECESSARY ANYMORE SINCE THE CLIENT ONLY ASK FOR AUTH WITHOUT EXPECTING AN ANSWER
 	else
 	{
 		if( SERVER)
-			Server->sendJump( this->serial, false);
+			VSServer->sendJump( this->serial, false);
 	}
 	*/
     return true;
@@ -1928,24 +2250,25 @@ bool Unit::jumpReactToCollision (Unit * smalle) {
 			||(ai_jump_cheat&&cp==NULL)
 				))
 		||smalle->image->forcejump){
+	  warpenergy-=GetJumpStatus().energy;		
       DeactivateJumpDrive();
       Unit * jumppoint = smalle;
       _Universe->activeStarSystem()->JumpTo (this, jumppoint, std::string(smalle->GetDestinations()[GetJumpStatus().drive%smalle->GetDestinations().size()]));
 		if( SERVER)
-			Server->sendJump( smalle->GetSerial(), this->serial, true);
+			VSServer->sendJump( smalle->GetSerial(), this->serial, true);
       return true;
     }
 	else
 	{
 		if( SERVER)
-			Server->sendJump( this->serial, smalle->GetSerial(), false);
+			VSServer->sendJump( this->serial, smalle->GetSerial(), false);
 	}
     return true;
   }
   else
   {
 	if( SERVER)
-		Server->sendJump( this->serial, smalle->GetSerial(), false);
+		VSServer->sendJump( this->serial, smalle->GetSerial(), false);
   }
   return false;
 }
@@ -1979,7 +2302,7 @@ void Unit::Rotate (const Vector &axis)
 	  curr_physical_state.orientation.to_matrix (mat);
 	  if (limits.structurelimits.Dot (mat.getR())<limits.limitmin) {
 	    curr_physical_state.orientation=prev_physical_state.orientation;
-		//fprintf (stderr,"wierd case... with an i before the e\n", mat.getR().i,mat.getR().j,mat.getR().k);
+		//VSFileSystem::vs_fprintf (stderr,"wierd case... with an i before the e\n", mat.getR().i,mat.getR().j,mat.getR().k);
 		
 	  }
 	}
@@ -1990,14 +2313,14 @@ void Unit::FireEngines (const Vector &Direction/*unit vector... might default to
 					float FuelSpeed,
 					float FMass)
 {
-	mass -= FMass; //fuel is sent out
+  //mass -= FMass; //fuel is sent out Now we separated mass and fuel
 	static float fuelpct=XMLSupport::parse_float(vs_config->getVariable("physics","FuelUsage","1"));
 	fuel -= fuelpct*FMass;
 	if (fuel <0)
 	{
 		
 		FMass +=fuel;
-		mass -= fuel;
+		//mass -= fuel;
 		fuel = 0; //ha ha!
 	}
 	NetForce += Direction *(FuelSpeed *FMass/GetElapsedTime());
@@ -2007,7 +2330,7 @@ void Unit::ApplyForce(const Vector &Vforce) //applies a force for the whole game
 	if (FINITE (Vforce.i)&&FINITE(Vforce.j)&&FINITE(Vforce.k)) {
 		NetForce += Vforce;
 	}else {
-		fprintf (stderr,"fatal force");
+		VSFileSystem::vs_fprintf (stderr,"fatal force");
 	}
 }
 void Unit::ApplyLocalForce(const Vector &Vforce) //applies a force for the whole gameturn upon the center of mass
@@ -2015,15 +2338,15 @@ void Unit::ApplyLocalForce(const Vector &Vforce) //applies a force for the whole
 	if (FINITE (Vforce.i)&&FINITE(Vforce.j)&&FINITE(Vforce.k)) {
 		NetLocalForce += Vforce;
 	}else {
-		fprintf (stderr,"fatal local force");
+		VSFileSystem::vs_fprintf (stderr,"fatal local force");
 	}
 }
 void Unit::Accelerate(const Vector &Vforce)
 {
 	if (FINITE (Vforce.i)&&FINITE(Vforce.j)&&FINITE(Vforce.k)) {	
-		NetForce += Vforce * mass;
+		NetForce += Vforce * GetMass();
 	}else {
-		fprintf (stderr,"fatal force");
+		VSFileSystem::vs_fprintf (stderr,"fatal force");
 	}
 }
 
@@ -2048,7 +2371,7 @@ void Unit::ApplyLocalTorque(const Vector &torque) {
   /*  Vector p,q,r;
   Vector tmp(ClampTorque(torque));
   GetOrientation (p,q,r);
-  fprintf (stderr,"P: %f,%f,%f Q: %f,%f,%f",p.i,p.j,p.k,q.i,q.j,q.k);
+  VSFileSystem::vs_fprintf (stderr,"P: %f,%f,%f Q: %f,%f,%f",p.i,p.j,p.k,q.i,q.j,q.k);
   NetTorque+=tmp.i*p+tmp.j*q+tmp.k*r; 
   */
   NetLocalTorque+= ClampTorque(torque); 
@@ -2080,7 +2403,8 @@ Vector Unit::ClampTorque (const Vector &amt1) {
     Res.j=copysign(fuelclamp*limits.yaw,amt1.j);
   if (fabs(amt1.k)>fuelclamp*limits.roll)
     Res.k=copysign(fuelclamp*limits.roll,amt1.k);
-  fuel-=Res.Magnitude()*SIMULATION_ATOM*GetFuelUsage(false);
+  static float fuelenergytomassconversionconstant = XMLSupport::parse_float(vs_config->getVariable ("physics","FuelEnergyDensity","343596000000000.0")); // note that we have KiloJoules, so it's to the 14th
+  fuel-=GetFuelUsage(false)*SIMULATION_ATOM*Res.Magnitude()*.00000004;//HACK this forces the reaction to be deut-deut fusion with efficiency governed by the getFuelUsage function
   return Res;
 }
 float Unit::Computer::max_speed() const {
@@ -2104,7 +2428,7 @@ Vector Unit::ClampVelocity (const Vector & velocity, const bool afterburn) {
   static float staticfuelclamp = XMLSupport::parse_float (vs_config->getVariable ("physics","NoFuelThrust",".9"));
   static float staticabfuelclamp = XMLSupport::parse_float (vs_config->getVariable ("physics","NoFuelAfterburn",".1"));
   float fuelclamp=(fuel<=0)?staticfuelclamp:1;
-  float abfuelclamp= (fuel<=0||(energy<afterburnenergy))?staticabfuelclamp:1;
+  float abfuelclamp= (fuel<=0||(energy<afterburnenergy*SIMULATION_ATOM))?staticabfuelclamp:1;
   float limit = afterburn?(abfuelclamp*(computer.max_ab_speed()-computer.max_speed())+(fuelclamp*computer.max_speed())):fuelclamp*computer.max_speed();
   float tmp = velocity.Magnitude();
   if (tmp>fabs(limit)) {
@@ -2158,11 +2482,11 @@ Vector Unit::ClampThrust(const Vector &amt1){
 
 Vector Unit::ClampThrust (const Vector &amt1, bool afterburn) {
   Vector Res=amt1;
-  if (energy<afterburnenergy) {
+  if (energy<afterburnenergy*SIMULATION_ATOM) {
     afterburn=false;
   }
   if (afterburn) {
-    energy -=apply_float_to_short( afterburnenergy*SIMULATION_ATOM);
+    energy -= afterburnenergy*SIMULATION_ATOM;
   }
 
   static float staticfuelclamp = XMLSupport::parse_float (vs_config->getVariable ("physics","NoFuelThrust",".4"));
@@ -2182,7 +2506,9 @@ Vector Unit::ClampThrust (const Vector &amt1, bool afterburn) {
     Res.k=ablimit;
   if (amt1.k<-limits.retro)
     Res.k =-limits.retro;
-  fuel-=GetFuelUsage(afterburn)*Res.Magnitude();
+  //energy = 1/2t^2*Force^2/mass
+  static float fuelenergytomassconversionconstant = XMLSupport::parse_float(vs_config->getVariable ("physics","FuelEnergyDensity","343596000000000.0")); // note that we have KiloJoules, so it's to the 14th
+  fuel-=GetFuelUsage(afterburn)*SIMULATION_ATOM*Res.Magnitude()*.00000004;//HACK this forces the reaction to be deut-deut fusion with efficiency governed by the getFuelUsage function
   return Res;
 }
 
@@ -2236,8 +2562,8 @@ float WARPENERGYMULTIPLIER(Unit * un) {
   }
   return player?playerwarpenergymultiplier:warpenergymultiplier;
 }
-static int applyto (unsigned short &shield, const unsigned short max, const float amt) {
-  shield+=apply_float_to_short(amt);
+static bool applyto (float &shield, const float max, const float amt) { //short fix
+  shield+=amt; //short fix
   if (shield>max)
     shield=max;
   return (shield>=max)?1:0;
@@ -2247,32 +2573,50 @@ float totalShieldVal (const Shield & shield) {
 	float maxshield=0;
 	switch (shield.number)  {
   case 2:
-    maxshield = shield.fb[2]+shield.fb[3];
+    maxshield = shield.shield2fb.frontmax+shield.shield2fb.backmax;
     break;
   case 4:
-    maxshield = (float)(shield.fbrl.frontmax)+(float)shield.fbrl.backmax+(float)shield.fbrl.leftmax+(float)shield.fbrl.rightmax;
+    maxshield = shield.shield4fbrl.frontmax+shield.shield4fbrl.backmax+shield.shield4fbrl.leftmax+shield.shield4fbrl.rightmax;
     break;
-  case 6:
-    maxshield = 2*(float)(shield.fbrltb.fbmax)+4*(float)shield.fbrltb.rltbmax;
+  case 8:
+    maxshield = shield.shield8.frontrighttopmax+shield.shield8.backrighttopmax+shield.shield8.frontlefttopmax+shield.shield8.backlefttopmax+shield.shield8.frontrightbottommax+shield.shield8.backrightbottommax+shield.shield8.frontleftbottommax+shield.shield8.backleftbottommax;
     break;
 	}
 	return maxshield;
 }
+
+float currentTotalShieldVal (const Shield & shield) {
+  float maxshield=0;
+  switch (shield.number)  {
+  case 2:
+    maxshield = shield.shield2fb.front+shield.shield2fb.back;
+    break;
+  case 4:
+    maxshield = shield.shield4fbrl.front+shield.shield4fbrl.back+shield.shield4fbrl.left+shield.shield4fbrl.right;
+    break;
+  case 8:
+    maxshield = shield.shield8.frontrighttop+shield.shield8.backrighttop+shield.shield8.frontlefttop+shield.shield8.backlefttop+shield.shield8.frontrightbottom+shield.shield8.backrightbottom+shield.shield8.frontleftbottom+shield.shield8.backleftbottom;
+    break;
+	}
+  return maxshield;
+}
+
 float totalShieldEnergyCapacitance (const Shield & shield) {
 	static float shieldenergycap = XMLSupport::parse_float(vs_config->getVariable ("physics","shield_energy_capacitance",".2"));
-	return shieldenergycap * totalShieldVal(shield);
+    static bool use_max_shield_value = XMLSupport::parse_bool(vs_config->getVariable("physics","use_max_shield_energy_usage","true"));
+    return shieldenergycap * use_max_shield_value?totalShieldVal(shield):currentTotalShieldVal(shield);
 }
 float Unit::MaxShieldVal() const{
   float maxshield=0;
   switch (shield.number) {
   case 2:
-    maxshield = .5*(shield.fb[2]+shield.fb[3]);
+    maxshield = .5*(shield.shield2fb.frontmax+shield.shield2fb.backmax);
     break;
   case 4:
-    maxshield = .25*(float(shield.fbrl.frontmax)+shield.fbrl.backmax+shield.fbrl.leftmax+shield.fbrl.rightmax);
+    maxshield = .25*(shield.shield4fbrl.frontmax+shield.shield4fbrl.backmax+shield.shield4fbrl.leftmax+shield.shield4fbrl.rightmax);
     break;
-  case 6:
-    maxshield = .25*float(shield.fbrltb.fbmax)+.75*shield.fbrltb.rltbmax;
+  case 8:
+    maxshield = .125*(shield.shield8.frontrighttopmax+shield.shield8.backrighttopmax+shield.shield8.frontlefttopmax+shield.shield8.backlefttopmax+shield.shield8.frontrightbottommax+shield.shield8.backrightbottommax+shield.shield8.frontleftbottommax+shield.shield8.backleftbottommax);
     break;
   }
   return maxshield;
@@ -2281,6 +2625,7 @@ void Unit::RechargeEnergy() {
 #if 1
 	energy+=recharge*SIMULATION_ATOM;
 #else
+	/* short fix
     unsigned short newenergy=apply_float_to_short (recharge *SIMULATION_ATOM);
     if (((int)energy)+((int)newenergy)>65535) {
       newenergy= 65535 - energy;
@@ -2293,27 +2638,49 @@ void Unit::RechargeEnergy() {
       }
     }else {
       energy+=recharge*SIMULATION_ATOM;
-    }
+	}
+	*/
 #endif
 }
 void Unit::RegenShields () {
-  int rechargesh=1;
-  float maxshield=totalShieldEnergyCapacitance(shield);
+  static float shieldenergycap = XMLSupport::parse_float(vs_config->getVariable ("physics","shield_energy_capacitance",".2"));
   static bool energy_before_shield=XMLSupport::parse_bool(vs_config->getVariable ("physics","engine_energy_priority","true"));
+  static bool apply_difficulty_shields = XMLSupport::parse_bool (vs_config->getVariable("physics","difficulty_based_shield_recharge","true"));
+  static float shield_maintenance_cost=XMLSupport::parse_float(vs_config->getVariable("physics","shield_maintenance_charge",".25"));
+  static bool shields_require_power=XMLSupport::parse_bool(vs_config->getVariable ("physics","shields_require_passive_recharge_maintenance","true"));
+  static float discharge_per_second=XMLSupport::parse_float (vs_config->getVariable("physics","speeding_discharge",".25"));
+  const float dischargerate = (1-(1-discharge_per_second)*SIMULATION_ATOM);//approx
+  static float min_shield_discharge=XMLSupport::parse_float (vs_config->getVariable("physics","min_shield_speeding_discharge",".1"));
+  static float speed_leniency = XMLSupport::parse_float (vs_config->getVariable("physics","speed_shield_drain_leniency","1.18"));
+  static float low_power_mode = XMLSupport::parse_float(vs_config->getVariable("physics","low_power_mode_energy","10"));
+  static float max_shield_lowers_recharge=XMLSupport::parse_float(vs_config->getVariable("physics","max_shield_recharge_drain","0"));
+  static bool max_shield_lowers_capacitance=XMLSupport::parse_bool(vs_config->getVariable("physics","max_shield_lowers_capacitance","false"));
+  static bool use_max_shield_value = XMLSupport::parse_bool(vs_config->getVariable("physics","use_max_shield_energy_usage","false"));
+
+  int rechargesh=1; // used ... oddly
+  float maxshield=totalShieldEnergyCapacitance(shield);
+  bool velocity_discharge=false;
+  energy=energy<0?0:energy;
   if (!energy_before_shield) {
     RechargeEnergy();
   }
-  float rec = shield.recharge*SIMULATION_ATOM>energy?energy:shield.recharge*SIMULATION_ATOM;
-  if (!_Universe->isPlayerStarship(this)) {
-    rec*=g_game.difficulty;
-  }else {
-    rec*=g_game.difficulty;//sqrtf(g_game.difficulty);
+  float rec = ((shield.recharge*SIMULATION_ATOM*shield.number)>energy)?(energy/shield.number):shield.recharge*SIMULATION_ATOM;
+  if (apply_difficulty_shields) {
+    if (!_Universe->isPlayerStarship(this)) {
+      rec*=g_game.difficulty;
+    }else {
+      rec*=g_game.difficulty;//sqrtf(g_game.difficulty);
+    }
   }
-  bool velocity_discharge=false;
-  static float speed_leniency = XMLSupport::parse_float (vs_config->getVariable("physics","speed_shield_drain_leniency","1.18"));
+  /*
   if ((computer.max_combat_ab_speed>4)&&(GetVelocity().MagnitudeSquared()>(computer.max_combat_ab_speed*speed_leniency*computer.max_combat_ab_speed*speed_leniency))) {
-    rec=0;
-    velocity_discharge=true;
+      rec=0;
+      velocity_discharge=true;
+  }
+  */
+  if (graphicOptions.InWarp) {
+      rec=0;
+      velocity_discharge=true;
   }
   if ((image->ecm>0)) {
     static float ecmadj = XMLSupport::parse_float(vs_config->getVariable ("physics","ecm_energy_cost",".05"));
@@ -2321,91 +2688,116 @@ void Unit::RegenShields () {
     if (energy-10>sim_atom_ecm) {
       energy-=sim_atom_ecm;
     }else {
-      energy=energy<10?energy:10;
+      energy=energy<10?10:energy;
     }
   }
   if (GetNebula()!=NULL) {
     static float nebshields=XMLSupport::parse_float(vs_config->getVariable ("physics","nebula_shield_recharge",".5"));
     rec *=nebshields;
   }
-  static float discharge_per_second=XMLSupport::parse_float (vs_config->getVariable("physics","speeding_discharge",".95"));
-  const float dischargerate = (1-(1-discharge_per_second)*SIMULATION_ATOM);//approx
-  static float min_shield_discharge=XMLSupport::parse_float (vs_config->getVariable("physics","min_shield_speeding_discharge",".1"));
-
   switch (shield.number) {
   case 2:
 
-    shield.fb[0]+=rec;
-    shield.fb[1]+=rec;
-    if (shield.fb[0]>shield.fb[2]) {
-      shield.fb[0]=shield.fb[2];
+    shield.shield2fb.front+=rec;
+    shield.shield2fb.back+=rec;
+    if (shield.shield2fb.front>shield.shield2fb.frontmax) {
+      shield.shield2fb.front=shield.shield2fb.frontmax;
     } else {
       rechargesh=0;
     }
-    if (shield.fb[1]>shield.fb[3]) {
-      shield.fb[1]=shield.fb[3];
+    if (shield.shield2fb.back>shield.shield2fb.backmax) {
+      shield.shield2fb.back=shield.shield2fb.backmax;
 
     } else {
       rechargesh=0;
     }
     if (velocity_discharge) {
-      if (shield.fb[1]>min_shield_discharge*shield.fb[3])
-	shield.fb[1]*=dischargerate;
-      if (shield.fb[0]>min_shield_discharge*shield.fb[2])
-	shield.fb[0]*=dischargerate;
+      if (shield.shield2fb.back>min_shield_discharge*shield.shield2fb.backmax)
+	shield.shield2fb.back*=dischargerate;
+      if (shield.shield2fb.front>min_shield_discharge*shield.shield2fb.frontmax)
+	shield.shield2fb.front*=dischargerate;
     }
+	rec=rec*2*shieldenergycap;
     break;
   case 4:
-    rechargesh = applyto (shield.fbrl.front,shield.fbrl.frontmax,rec)*(applyto (shield.fbrl.back,shield.fbrl.backmax,rec))*applyto (shield.fbrl.right,shield.fbrl.rightmax,rec)*applyto (shield.fbrl.left,shield.fbrl.leftmax,rec);
+    rechargesh = applyto (shield.shield4fbrl.front,shield.shield4fbrl.frontmax,rec)*(applyto (shield.shield4fbrl.back,shield.shield4fbrl.backmax,rec))*applyto (shield.shield4fbrl.right,shield.shield4fbrl.rightmax,rec)*applyto (shield.shield4fbrl.left,shield.shield4fbrl.leftmax,rec);
     if (velocity_discharge) {
-      if (shield.fbrl.front>min_shield_discharge*shield.fbrl.frontmax)
-	shield.fbrl.front*=dischargerate;
-      if (shield.fbrl.left>min_shield_discharge*shield.fbrl.leftmax)
-	shield.fbrl.left*=dischargerate;
-      if (shield.fbrl.back>min_shield_discharge*shield.fbrl.backmax)
-	shield.fbrl.back*=dischargerate;
-      if (shield.fbrl.right>min_shield_discharge*shield.fbrl.rightmax)
-	shield.fbrl.right*=dischargerate;
+      if (shield.shield4fbrl.front>min_shield_discharge*shield.shield4fbrl.frontmax)
+	shield.shield4fbrl.front*=dischargerate;
+      if (shield.shield4fbrl.left>min_shield_discharge*shield.shield4fbrl.leftmax)
+	shield.shield4fbrl.left*=dischargerate;
+      if (shield.shield4fbrl.back>min_shield_discharge*shield.shield4fbrl.backmax)
+	shield.shield4fbrl.back*=dischargerate;
+      if (shield.shield4fbrl.right>min_shield_discharge*shield.shield4fbrl.rightmax)
+	shield.shield4fbrl.right*=dischargerate;
     }
+	rec=rec*4*shieldenergycap;
     break;
-  case 6:
-    rechargesh = (applyto(shield.fbrltb.v[0],shield.fbrltb.fbmax,rec))*applyto(shield.fbrltb.v[1],shield.fbrltb.fbmax,rec)*applyto(shield.fbrltb.v[2],shield.fbrltb.rltbmax,rec)*applyto(shield.fbrltb.v[3],shield.fbrltb.rltbmax,rec)*applyto(shield.fbrltb.v[4],shield.fbrltb.rltbmax,rec)*applyto(shield.fbrltb.v[5],shield.fbrltb.rltbmax,rec);
+  case 8:
+    rechargesh = applyto (shield.shield8.frontrighttop,shield.shield8.frontrighttopmax,rec)*(applyto (shield.shield8.backrighttop,shield.shield8.backrighttopmax,rec))*applyto (shield.shield8.frontlefttop,shield.shield8.frontlefttopmax,rec)*applyto (shield.shield8.backlefttop,shield.shield8.backlefttopmax,rec)*applyto (shield.shield8.frontrightbottom,shield.shield8.frontrightbottommax,rec)*(applyto (shield.shield8.backrightbottom,shield.shield8.backrightbottommax,rec))*applyto (shield.shield8.frontleftbottom,shield.shield8.frontleftbottommax,rec)*applyto (shield.shield8.backleftbottom,shield.shield8.backleftbottommax,rec);
     if (velocity_discharge) {
-      if (shield.fbrltb.v[0]>min_shield_discharge*shield.fbrltb.fbmax)
-	shield.fbrltb.v[0]*=dischargerate;
-      if (shield.fbrltb.v[1]>min_shield_discharge*shield.fbrltb.fbmax)
-	shield.fbrltb.v[1]*=dischargerate;
-      if (shield.fbrltb.v[2]>min_shield_discharge*shield.fbrltb.rltbmax)
-	shield.fbrltb.v[2]*=dischargerate;
-      if (shield.fbrltb.v[3]>min_shield_discharge*shield.fbrltb.rltbmax)
-	shield.fbrltb.v[3]*=dischargerate;
-      if (shield.fbrltb.v[4]>min_shield_discharge*shield.fbrltb.rltbmax)
-	shield.fbrltb.v[4]*=dischargerate;
-      if (shield.fbrltb.v[5]>min_shield_discharge*shield.fbrltb.rltbmax)
-	shield.fbrltb.v[5]*=dischargerate;
+      if (shield.shield8.frontrighttop>min_shield_discharge*shield.shield8.frontrighttopmax)
+		shield.shield8.frontrighttop*=dischargerate;
+	  if (shield.shield8.frontlefttop>min_shield_discharge*shield.shield8.frontlefttopmax)
+		shield.shield8.frontlefttop*=dischargerate;
+	  if (shield.shield8.backrighttop>min_shield_discharge*shield.shield8.backrighttopmax)
+		shield.shield8.backrighttop*=dischargerate;
+	  if (shield.shield8.backlefttop>min_shield_discharge*shield.shield8.backlefttopmax)
+		shield.shield8.backlefttop*=dischargerate;
+	  if (shield.shield8.frontrightbottom>min_shield_discharge*shield.shield8.frontrightbottommax)
+		shield.shield8.frontrightbottom*=dischargerate;
+	  if (shield.shield8.frontleftbottom>min_shield_discharge*shield.shield8.frontleftbottommax)
+		shield.shield8.frontleftbottom*=dischargerate;
+	  if (shield.shield8.backrightbottom>min_shield_discharge*shield.shield8.backrightbottommax)
+		shield.shield8.backrightbottom*=dischargerate;
+	  if (shield.shield8.backleftbottom>min_shield_discharge*shield.shield8.backleftbottommax)
+		shield.shield8.backleftbottom*=dischargerate;
     }
+	rec=rec*8*shieldenergycap;
     break;
   }
-  if (rechargesh==0)
+  if (rechargesh==0){
     energy-=rec;
+  }
+  if (shields_require_power) {
+    energy-=rec*shield_maintenance_cost;
+	maxshield=0;
+  }
+  if (!max_shield_lowers_capacitance) {
+    maxshield=0;
+  }
+  if (max_shield_lowers_recharge) {
+     energy-=max_shield_lowers_recharge*SIMULATION_ATOM*maxshield;
+  }
+
   if (energy_before_shield) {
     RechargeEnergy();
   }
-  static float low_power_mode = XMLSupport::parse_float(vs_config->getVariable("physics","low_power_mode_energy","10"));
   float menergy = maxenergy;
+  
   if (menergy-maxshield<low_power_mode) {
 	  menergy=maxshield+low_power_mode;
 	  if (_Universe->isPlayerStarship(this))
 		  if (rand()<.00005*RAND_MAX)
 			  UniverseUtil::IOmessage(0,"	game","all","**Warning** Power Supply Overdrawn: downgrade shield or purchase reactor capacitance!");
   }
+  if(graphicOptions.InWarp){ //FIXME FIXME FIXME
+	  static float bleedfactor = XMLSupport::parse_float(vs_config->getVariable("physics","warpbleed","20"));
+	  float bleed=jump.insysenergy/bleedfactor*SIMULATION_ATOM;
+	  if(warpenergy>bleed){
+		    warpenergy-=bleed;
+	  } else {
+		  graphicOptions.InWarp=0;
+	  }
+  }
+
   if (menergy>maxshield) {
-    if (energy>menergy-maxshield) {//allow shields to absorb xtra power
+    if (energy>menergy-maxshield) {//allow warp caps to absorb xtra power
       float excessenergy = energy - (menergy-maxshield);
       energy=menergy-maxshield;  
       if (excessenergy >0) {
-		  warpenergy=apply_float_to_short(warpenergy+WARPENERGYMULTIPLIER(this)*excessenergy);
-		  short mwe = maxwarpenergy;
+		  warpenergy=warpenergy+WARPENERGYMULTIPLIER(this)*excessenergy;
+		  float mwe = maxwarpenergy;
 		  if (mwe<jump.energy&&mwe==0)
 			  mwe = jump.energy;
 		  if (warpenergy>mwe)
@@ -2414,7 +2806,8 @@ void Unit::RegenShields () {
     }
   }else {
     energy=0;
-}
+  }
+  energy=energy<0?0:energy;
 }
 
 Vector Unit::ResolveForces (const Transformation &trans, const Matrix &transmat) {
@@ -2424,10 +2817,10 @@ Vector Unit::ResolveForces (const Transformation &trans, const Matrix &transmat)
   if (NetTorque.i||NetTorque.j||NetTorque.k) {
     temp1 += InvTransformNormal(transmat,NetTorque);
   }
-  if (MomentOfInertia)
-	  temp1=temp1/MomentOfInertia;
+  if (GetMoment())
+	  temp1=temp1/GetMoment();
   else
-	  fprintf (stderr,"zero moment of inertia %s\n",name.c_str());
+	  VSFileSystem::vs_fprintf (stderr,"zero moment of inertia %s\n",name.c_str());
   Vector temp (temp1*SIMULATION_ATOM);
   /*  //FIXME  does this shit happen!
       if (FINITE(temp.i)&&FINITE (temp.j)&&FINITE(temp.k)) */
@@ -2446,7 +2839,7 @@ Vector Unit::ResolveForces (const Transformation &trans, const Matrix &transmat)
     temp2+=InvTransformNormal(transmat,NetForce);
   }
   
-  temp2=temp2/mass;
+  temp2=temp2/GetMass();
   temp = temp2*SIMULATION_ATOM;
   if (!(FINITE(temp2.i)&&FINITE(temp2.j)&&FINITE(temp2.k))) {
 	  cout << "NetForce transform skrewed";
@@ -2490,7 +2883,7 @@ Vector Unit::ResolveForces (const Transformation &trans, const Matrix &transmat)
     
     if (air_res_coef||lateral_air_res_coef) {
       float velmag = Velocity.Magnitude();
-      Vector AirResistance = Velocity*(air_res_coef*velmag/mass)*(corner_max.i-corner_min.i)*(corner_max.j-corner_min.j);
+      Vector AirResistance = Velocity*(air_res_coef*velmag/GetMass())*(corner_max.i-corner_min.i)*(corner_max.j-corner_min.j);
       if (AirResistance.Magnitude()>velmag) {
 	Velocity.Set(0,0,0);
       }else {
@@ -2499,7 +2892,7 @@ Vector Unit::ResolveForces (const Transformation &trans, const Matrix &transmat)
 	  Vector p,q,r;
 	  GetOrientation (p,q,r);
 	  Vector lateralVel= p*Velocity.Dot (p)+q*Velocity.Dot (q);
-	  AirResistance = lateralVel*(lateral_air_res_coef*velmag/mass)*(corner_max.i-corner_min.i)*(corner_max.j-corner_min.j);	  
+	  AirResistance = lateralVel*(lateral_air_res_coef*velmag/GetMass())*(corner_max.i-corner_min.i)*(corner_max.j-corner_min.j);	  
 	  if (AirResistance.Magnitude ()> lateralVel.Magnitude()){
 	    Velocity = r*Velocity.Dot(r);
 	  }else {
@@ -2578,8 +2971,11 @@ float Unit::ApplyLocalDamage (const Vector & pnt, const Vector & normal, float a
   if ( (cpt=_Universe->isPlayerStarship(this))!=NULL) {
     if (color.a!=2) {
       //    ApplyDamage (amt);
-      phasedamage*= (g_game.difficulty);
-      amt*=(g_game.difficulty);
+      static bool apply_difficulty_enemy_damage=XMLSupport::parse_bool(vs_config->getVariable("physics","difficulty_based_enemy_damage","true"));
+      if (apply_difficulty_enemy_damage) {
+        phasedamage*= g_game.difficulty;
+        amt*=g_game.difficulty;
+      }
       cpt->Shake (amt);
     }
   }
@@ -2609,17 +3005,19 @@ float Unit::ApplyLocalDamage (const Vector & pnt, const Vector & normal, float a
   if (GetNebula()==NULL||(nebshields>0)) {
 	// Compute spercentage even in networking because doesn't apply damage on client side
 	//if( Network==NULL || SERVER)
-		spercentage = DealDamageToShield (pnt,absamt);
+    float origabsamt=absamt;
+    spercentage = DealDamageToShield (pnt,absamt);
+    
     //percentage = DealDamageToShield (pnt,absamt);
-	amt = amt>=0?absamt:-absamt;
-    if (meshdata.back()&&spercentage>0&&amt==0) {//shields are up
+    amt = amt>=0?absamt:-absamt;
+    if (meshdata.back()&&spercentage>0&&(origabsamt-absamt>shield.recharge||amt==0)){//shields are up
       /*      meshdata[nummesh]->LocalFX.push_back (GFXLight (true,
 	      GFXColor(pnt.i+normal.i,pnt.j+normal.j,pnt.k+normal.k),
 	      GFXColor (.3,.3,.3), GFXColor (0,0,0,1), 
 	      GFXColor (.5,.5,.5),GFXColor (1,0,.01)));*/
       //calculate percentage
       if (GetNebula()==NULL) 
-		meshdata.back()->AddDamageFX(pnt,shieldtight?shieldtight*normal:Vector(0,0,0),spercentage,color);
+		meshdata.back()->AddDamageFX(pnt,shieldtight?shieldtight*normal:Vector(0,0,0),spercentage>1?1:spercentage,color);
     }
   }
   // If shields failing or... => WE COMPUTE DAMAGE TO HULL
@@ -2644,9 +3042,9 @@ float Unit::ApplyLocalDamage (const Vector & pnt, const Vector & normal, float a
 	  Vector netpnt = pnt;
 	  Vector netnormal = normal;
 	  GFXColor col( color.r, color.g, color.b, color.a);
-	  Server->sendDamages( this->serial, this->zone, shield, armor, ppercentage, spercentage, amt, netpnt, netnormal, col);
+	  VSServer->sendDamages( this->serial, this->activeStarSystem->GetZone(), shield, armor, ppercentage, spercentage, amt, netpnt, netnormal, col);
 	  // This way the client computes damages based on what we send to him => less reliable
-	  //Server->sendDamages( this->serial, pnt, normal, amt, col, phasedamage);
+	  //VSServer->sendDamages( this->serial, pnt, normal, amt, col, phasedamage);
 #else
 		// SECOND METHOD : we just put a flag on the unit telling its shield/armor data has changed
 		if( spercentage)
@@ -2833,28 +3231,40 @@ void Unit::DamageRandSys(float dam, const Vector &vec, float randnum, float degr
 		}
 		switch (shield.number) {
 		case 2:
-			if (randnum>=.35&&randnum<.7) {
-				shield.fb[2]*=dam;
+			if (randnum>=.25&&randnum<.75) {
+				shield.shield2fb.frontmax*=dam;
 			} else {
-				shield.fb[3]*=dam;
+				shield.shield2fb.backmax*=dam;
 			}
 			break;
 		case 4:
-			if (randnum>=.5&&randnum<.7) {
-				shield.fbrl.frontmax*=dam;
-			} else if (randnum>=.3) {
-				shield.fbrl.backmax*=dam;
-			} else if (deg>180) {
-				shield.fbrl.leftmax*=dam;
+			if (randnum>=.5&&randnum<.75) {
+				shield.shield4fbrl.frontmax*=dam;
+			} else if (randnum>=.75) {
+				shield.shield4fbrl.backmax*=dam;
+			} else if (randnum>=.25) {
+				shield.shield4fbrl.leftmax*=dam;
 			} else {
-				shield.fbrl.rightmax*=dam;
+				shield.shield4fbrl.rightmax*=dam;
 			}
 			break;
-		case 6:
-			if (randnum>=.4&&randnum<.7) {
-				shield.fbrltb.fbmax*=dam;
+		case 8:
+			if (randnum<.125) {
+				shield.shield8.frontrighttopmax*=dam;
+			} else if (randnum<.25) {
+				shield.shield8.backrighttopmax*=dam;
+			} else if (randnum<.375) {
+				shield.shield8.frontlefttopmax*=dam;
+			} else if (randnum<.5) {
+				shield.shield8.backrighttopmax*=dam;
+			} else if (randnum<.625) {
+				shield.shield8.frontrightbottommax*=dam;
+			} else if (randnum<.75) {
+				shield.shield8.backrightbottommax*=dam;
+			} else if (randnum<.875) {
+				shield.shield8.frontleftbottommax*=dam;
 			} else {
-				shield.fbrltb.rltbmax*=dam;
+				shield.shield8.backrightbottommax*=dam;
 			}
 			break;
 		}
@@ -2877,8 +3287,6 @@ void Unit::DamageRandSys(float dam, const Vector &vec, float randnum, float degr
 		} else if (randnum>=.3) {
 			this->maxenergy*=dam;
 		} else if (randnum>=.2) {
-			this->jump.energy*=(2-dam);
-		} else if (randnum>=.03){
 			this->jump.damage+=100*(1-dam);
 		} else {
 		  if (image->repair_droid>0) {
@@ -2914,6 +3322,31 @@ void Unit::Kill(bool erasefromsave, bool quitting) {
   if (this->colTrees)
     this->colTrees->Dec();//might delete
   this->colTrees=NULL;
+  if (this->sound->engine!=-1) {
+    AUDStopPlaying (this->sound->engine);
+    AUDDeleteSound (this->sound->engine);
+  }
+  if (this->sound->explode!=-1) {
+    AUDStopPlaying (this->sound->explode);
+    AUDDeleteSound (this->sound->explode);
+  }
+  if (this->sound->shield!=-1) {
+    AUDStopPlaying (this->sound->shield);
+    AUDDeleteSound (this->sound->shield);
+  }
+  if (this->sound->armor!=-1) {
+    AUDStopPlaying (this->sound->armor);
+    AUDDeleteSound (this->sound->armor);
+  }
+  if (this->sound->hull!=-1) {
+    AUDStopPlaying (this->sound->hull);
+    AUDDeleteSound (this->sound->hull);
+  }
+  if (this->sound->cloak!=-1) {
+    AUDStopPlaying (this->sound->cloak);
+    AUDDeleteSound (this->sound->cloak);
+  }
+
   for (int beamcount=0;beamcount<GetNumMounts();beamcount++) {
     AUDStopPlaying(mounts[beamcount].sound);
     AUDDeleteSound(mounts[beamcount].sound);
@@ -2974,7 +3407,7 @@ void Unit::Kill(bool erasefromsave, bool quitting) {
   }
 
 #ifdef DESTRUCTDEBUG
-    fprintf (stderr,"%s 0x%x - %d\n",name.c_str(),this,Unitdeletequeue.size());
+    VSFileSystem::vs_fprintf (stderr,"%s 0x%x - %d\n",name.c_str(),this,Unitdeletequeue.size());
 #endif
   }
 }
@@ -2984,18 +3417,24 @@ void Unit::leach (float damShield, float damShieldRecharge, float damEnRecharge)
   shield.recharge*=damShieldRecharge;
   switch (shield.number) {
   case 2:
-    shield.fb[2]*=damShield;
-    shield.fb[3]*=damShield;
+    shield.shield2fb.frontmax*=damShield;
+    shield.shield2fb.backmax*=damShield;
     break;
   case 4:
-    shield.fbrl.frontmax*=damShield;
-    shield.fbrl.backmax*=damShield;
-    shield.fbrl.leftmax*=damShield;
-    shield.fbrl.rightmax*=damShield;
+    shield.shield4fbrl.frontmax*=damShield;
+    shield.shield4fbrl.backmax*=damShield;
+    shield.shield4fbrl.leftmax*=damShield;
+    shield.shield4fbrl.rightmax*=damShield;
     break;
-  case 6:
-    shield.fbrltb.fbmax*=damShield;
-    shield.fbrltb.rltbmax*=damShield;
+  case 8:
+    shield.shield8.frontrighttopmax*=damShield;
+    shield.shield8.backrighttopmax*=damShield;
+    shield.shield8.frontlefttopmax*=damShield;
+    shield.shield8.backlefttopmax*=damShield;
+	shield.shield8.frontrightbottommax*=damShield;
+    shield.shield8.backrightbottommax*=damShield;
+    shield.shield8.frontleftbottommax*=damShield;
+    shield.shield8.backleftbottommax*=damShield;
     break;
   }
 }
@@ -3009,7 +3448,7 @@ void Unit::UnRef() {
     deletedUn.Put ((long)this,this);
     Unitdeletequeue.push_back(this);//delete
 #ifdef DESTRUCTDEBUG
-    fprintf (stderr,"%s 0x%x - %d\n",name.c_str(),this,Unitdeletequeue.size());
+    VSFileSystem::vs_fprintf (stderr,"%s 0x%x - %d\n",name.c_str(),this,Unitdeletequeue.size());
 #endif
   }
 }
@@ -3019,12 +3458,15 @@ float Unit::ExplosionRadius() {
   return expsize*rSize();
 }
 
-void Unit::ArmorData (unsigned short armor[4]) const{
-  //  memcpy (&armor[0],&this->armor.front,sizeof (unsigned short)*4);
-  armor[0]=this->armor.front;
-  armor[1]=this->armor.back;
-  armor[2]=this->armor.right;
-  armor[3]=this->armor.left;
+void Unit::ArmorData (float armor[8]) const{  //short fix
+  armor[0]=this->armor.frontrighttop;
+  armor[1]=this->armor.backrighttop;
+  armor[2]=this->armor.frontlefttop;
+  armor[3]=this->armor.backlefttop;
+  armor[4]=this->armor.frontrightbottom;
+  armor[5]=this->armor.backrightbottom;
+  armor[6]=this->armor.frontleftbottom;
+  armor[7]=this->armor.backleftbottom;
 }
 
 float Unit::FuelData () const{
@@ -3037,41 +3479,46 @@ float Unit::WarpEnergyData() const {
     return ((float)warpenergy)/((float)jump.energy);
 }
 float Unit::EnergyData() const{
-  if (maxenergy<=totalShieldEnergyCapacitance(shield)) {
-    return 0;
+  static bool max_shield_lowers_capacitance=XMLSupport::parse_bool(vs_config->getVariable("physics","max_shield_lowers_capacitance","false"));
+  if (max_shield_lowers_capacitance) {
+    if (maxenergy<=totalShieldEnergyCapacitance(shield)) {
+      return 0;
+    }
+    return ((float)energy)/(maxenergy-totalShieldEnergyCapacitance(shield));
+  }else {
+    return ((float)energy)/maxenergy;
   }
-  return ((float)energy)/(maxenergy-totalShieldEnergyCapacitance(shield));
 }
 
 float Unit::FShieldData() const{
   switch (shield.number) {
-  case 2: { if( shield.fb[2]!=0) return shield.fb[0]/shield.fb[2];}
-  case 4: { if( shield.fbrl.frontmax!=0) return ((float)shield.fbrl.front)/shield.fbrl.frontmax;}
-  case 6: { if( shield.fbrltb.fbmax!=0) return ((float)shield.fbrltb.v[0])/shield.fbrltb.fbmax;}
+  case 2: { if( shield.shield2fb.frontmax!=0) return shield.shield2fb.front/shield.shield2fb.frontmax;}
+  case 4: { if( shield.shield4fbrl.frontmax!=0) return (shield.shield4fbrl.front)/shield.shield4fbrl.frontmax;}
+  case 8: { if( shield.shield8.frontrighttopmax!=0||shield.shield8.frontrightbottommax!=0||shield.shield8.frontlefttopmax!=0||shield.shield8.frontleftbottommax!=0) return (shield.shield8.frontrighttop+shield.shield8.frontrightbottom+shield.shield8.frontlefttop+shield.shield8.frontleftbottom)/(shield.shield8.frontrighttopmax+shield.shield8.frontrightbottommax+shield.shield8.frontlefttopmax+shield.shield8.frontleftbottommax);}
   }
   return 0;
 }
 float Unit::BShieldData() const{
   switch (shield.number) {
-  case 2: { if( shield.fb[3]!=0) return shield.fb[1]/shield.fb[3];}
-  case 4: { if( shield.fbrl.backmax!=0) return ((float)shield.fbrl.back)/shield.fbrl.backmax;}
-  case 6: { if( shield.fbrltb.fbmax!=0) return ((float)shield.fbrltb.v[1])/shield.fbrltb.fbmax;}
+  case 2: { if( shield.shield2fb.backmax!=0) return shield.shield2fb.back/shield.shield2fb.backmax;}
+  case 4: { if( shield.shield4fbrl.backmax!=0) return (shield.shield4fbrl.back)/shield.shield4fbrl.backmax;}
+  case 8: { if( shield.shield8.backrighttopmax!=0||shield.shield8.backrightbottommax!=0||shield.shield8.backlefttopmax!=0||shield.shield8.backleftbottommax!=0) return (shield.shield8.backrighttop+shield.shield8.backrightbottom+shield.shield8.backlefttop+shield.shield8.backleftbottom)/(shield.shield8.backrighttopmax+shield.shield8.backrightbottommax+shield.shield8.backlefttopmax+shield.shield8.backleftbottommax);}
   }
   return 0;
 }
 float Unit::LShieldData() const{
   switch (shield.number) {
   case 2: return 0;//no data, captain
-  case 4: { if( shield.fbrl.leftmax!=0) return ((float)shield.fbrl.left)/shield.fbrl.leftmax;}
-  case 6: { if( shield.fbrltb.rltbmax!=0) return ((float)shield.fbrltb.v[3])/shield.fbrltb.rltbmax;}
+  case 4: { if( shield.shield4fbrl.leftmax!=0) return (shield.shield4fbrl.left)/shield.shield4fbrl.leftmax;}
+  case 8: { if( shield.shield8.backlefttopmax!=0||shield.shield8.backleftbottommax!=0||shield.shield8.frontlefttopmax!=0||shield.shield8.frontleftbottommax!=0) return (shield.shield8.backlefttop+shield.shield8.backleftbottom+shield.shield8.frontlefttop+shield.shield8.frontleftbottom)/(shield.shield8.backlefttopmax+shield.shield8.backleftbottommax+shield.shield8.frontlefttopmax+shield.shield8.frontleftbottommax);}
   }
   return 0;
 }
 float Unit::RShieldData() const{
   switch (shield.number) {
   case 2: return 0;//don't react to stuff we have no data on
-  case 4: { if( shield.fbrl.rightmax!=0) return ((float)shield.fbrl.right)/shield.fbrl.rightmax;}
-  case 6: { if( shield.fbrltb.rltbmax!=0) return ((float)shield.fbrltb.v[2])/shield.fbrltb.rltbmax;}
+  case 4: { if( shield.shield4fbrl.rightmax!=0) return (shield.shield4fbrl.right)/shield.shield4fbrl.rightmax;}
+  case 8: { if( shield.shield8.backrighttopmax!=0||shield.shield8.backrightbottommax!=0||shield.shield8.frontrighttopmax!=0||shield.shield8.frontrightbottommax!=0) return (shield.shield8.backrighttop+shield.shield8.backrightbottom+shield.shield8.frontrighttop+shield.shield8.frontrightbottom)/(shield.shield8.backrighttopmax+shield.shield8.backrightbottommax+shield.shield8.frontrighttopmax+shield.shield8.frontrightbottommax);}
   }
   return 0;
 }
@@ -3079,14 +3526,14 @@ float Unit::RShieldData() const{
 void Unit::ProcessDeleteQueue() {
   while (!Unitdeletequeue.empty()) {
 #ifdef DESTRUCTDEBUG
-    fprintf (stderr,"Eliminatin' 0x%x - %d",Unitdeletequeue.back(),Unitdeletequeue.size());
+    VSFileSystem::vs_fprintf (stderr,"Eliminatin' 0x%x - %d",Unitdeletequeue.back(),Unitdeletequeue.size());
     fflush (stderr);
-    fprintf (stderr,"Eliminatin' %s\n",Unitdeletequeue.back()->name.c_str());
+    VSFileSystem::vs_fprintf (stderr,"Eliminatin' %s\n",Unitdeletequeue.back()->name.c_str());
 #endif
 #ifdef DESTRUCTDEBUG
     if (Unitdeletequeue.back()->isSubUnit()){
 
-      fprintf (stderr,"Subunit Deleting (related to double dipping)");
+      VSFileSystem::vs_fprintf (stderr,"Subunit Deleting (related to double dipping)");
 
     }
 #endif
@@ -3095,21 +3542,21 @@ void Unit::ProcessDeleteQueue() {
     delete mydeleter;///might modify unitdeletequeue
     
 #ifdef DESTRUCTDEBUG
-    fprintf (stderr,"Completed %d\n",Unitdeletequeue.size());
+    VSFileSystem::vs_fprintf (stderr,"Completed %d\n",Unitdeletequeue.size());
     fflush (stderr);
 #endif
 
   }
 }
 bool DestroySystem (float hull, float maxhull, float numhits) {
-	static float damage_chance=XMLSupport::parse_float(vs_config->getVariable ("physics","damage_chance",".001"));
+	static float damage_chance=XMLSupport::parse_float(vs_config->getVariable ("physics","damage_chance",".005"));
 	float chance = 1-(damage_chance*(maxhull-hull)/maxhull);
 	if (numhits>1)
 		chance=pow (chance,numhits);
 	return (rand01()>chance);
 }
 bool DestroyPlayerSystem (float hull, float maxhull, float numhits) {
-	static float damage_chance=XMLSupport::parse_float(vs_config->getVariable ("physics","damage_player_chance",".1"));
+	static float damage_chance=XMLSupport::parse_float(vs_config->getVariable ("physics","damage_player_chance",".5"));
 	float chance = 1-(damage_chance*(maxhull-hull)/maxhull);
 	if (numhits>1)
 		chance=pow (chance,numhits);
@@ -3120,27 +3567,43 @@ bool DestroyPlayerSystem (float hull, float maxhull, float numhits) {
 	return ret;
 }
 static const char * DamagedCategory="upgrades/Damaged/";
-float Unit::DealDamageToHullReturnArmor (const Vector & pnt, float damage, unsigned short * &targ) {
+float Unit::DealDamageToHullReturnArmor (const Vector & pnt, float damage, float * &targ) { //short fix
   float percent;
 #ifndef ISUCK
   if (hull<0) {
     return -1;
   }
 #endif
-  if (fabs  (pnt.k)>fabs(pnt.i)) {
-    if (pnt.k>0) {
-      targ = &armor.front;
-    }else {
-      targ = &armor.back;
-    }
+  if (pnt.i>0) {
+    if (pnt.j>0) {
+		if(pnt.k>0){
+			targ=&armor.frontlefttop;
+		} else {
+			targ=&armor.backlefttop;
+		}
+	} else {
+		if(pnt.k>0){
+			targ=&armor.frontleftbottom;
+		} else {
+			targ=&armor.backleftbottom;
+		}
+	}
   }else {
-    if (pnt.i>0) {
-      targ = &armor.left;
-    }else {
-      targ = &armor.right;
-    }
+    if (pnt.j>0) {
+		if(pnt.k>0){
+			targ=&armor.frontrighttop;
+		} else {
+			targ=&armor.backrighttop;
+		}
+	} else {
+		if(pnt.k>0){
+			targ=&armor.frontrightbottom;
+		} else {
+			targ=&armor.backrightbottom;
+		}
+	}
   }
-  int biggerthan=*targ;
+  unsigned int biggerthan=*targ; //short fix
   float absdamage = damage>=0?damage:-damage;
   percent = absdamage/(*targ+hull);
 
@@ -3149,12 +3612,14 @@ float Unit::DealDamageToHullReturnArmor (const Vector & pnt, float damage, unsig
   {
 		  if( percent == -1)
 			  return -1;
-		  if (absdamage<((float)*targ)) {
+                  static float damage_factor_for_sound=XMLSupport::parse_float(vs_config->getVariable("audio","damage_factor_for_sound",".001"));
+		  if (absdamage<*targ) {
+                    if ((*targ)*damage_factor_for_sound<=absdamage) {
 			ArmorDamageSound( pnt);
-			*targ -= apply_float_to_short (absdamage);
+                    }
+                    *targ -= apply_float_to_unsigned_int(absdamage);  //short fix
 		  }else {
-			HullDamageSound( pnt);
-			absdamage -= ((float)*targ);
+			absdamage -= *targ;
 			damage= damage>=0?absdamage:-absdamage;
 			*targ= 0;
 			if (numCargo()>0) {
@@ -3176,7 +3641,10 @@ float Unit::DealDamageToHullReturnArmor (const Vector & pnt, float damage, unsig
 					DamageRandSys(system_failure*rand01()+(1-system_failure)*(1-(absdamage/hull)),pnt);
 				}
 			  if (damage>0) {
-				  hull -=damage;//FIXME
+                            if (hull*damage_factor_for_sound<=damage) {
+                              HullDamageSound( pnt);
+                            }                            
+                            hull -=damage;//FIXME
 			  }else {
 				  recharge+=damage;
 				  shield.recharge+=damage;
@@ -3193,7 +3661,7 @@ float Unit::DealDamageToHullReturnArmor (const Vector & pnt, float damage, unsig
 			}
 		  }
 		  if (*targ>biggerthan)
-			  fprintf (stderr,"errore fatale mit den armorn");
+			  VSFileSystem::vs_fprintf (stderr,"errore fatale mit den armorn");
 		  if (hull <0) {
 			  static float hulldamtoeject = XMLSupport::parse_float(vs_config->getVariable ("physics","hull_damage_to_eject","100"));
 			if (!isSubUnit()&&hull>-hulldamtoeject) {
@@ -3231,55 +3699,94 @@ float Unit::DealDamageToHullReturnArmor (const Vector & pnt, float damage, unsig
 float Unit::DealDamageToShield (const Vector &pnt, float &damage) {
   int index;
   float percent=0;
-  unsigned short * targ=NULL;
+  float * targ=NULL; //short fix
   
   // ONLY APPLY DAMAGES IN NON-NETWORKING OR ON SERVER SIDE
   switch (shield.number){
   case 2:
-    index = (pnt.k>0)?0:1;
-	if( shield.fb[index+2]!=0)
-	    percent = damage/shield.fb[index+2];//comparing with max
-	else
-		percent = 0;
-	if( Network==NULL || SERVER)
-	{
-   	  shield.fb[index]-=damage;
-      damage =0;
-      if (shield.fb[index]<0) {
-        damage = -shield.fb[index];
-        shield.fb[index]=0;
-      }
+    index=(pnt.k>0)?0:1;
+	if(index){
+		if( shield.shield2fb.backmax!=0)
+			percent = damage/shield.shield2fb.backmax;//comparing with max
+		else
+			percent = 0;
+		if( Network==NULL || SERVER)
+		{
+   			shield.shield2fb.back-=damage;
+			damage =0;
+			if (shield.shield2fb.back<0) {
+				damage = -shield.shield2fb.back;
+				shield.shield2fb.back=0;
+			}
+		}
+	} else {
+		if( shield.shield2fb.frontmax!=0)
+			percent = damage/shield.shield2fb.frontmax;//comparing with max
+		else
+			percent = 0;
+				if( Network==NULL || SERVER)
+		{
+   			shield.shield2fb.front-=damage;
+			damage =0;
+			if (shield.shield2fb.front<0) {
+				damage = -shield.shield2fb.front;
+				shield.shield2fb.front=0;
+			}
+		}
+
 	}
+
+	
     break;
-  case 6:
-    percent = damage/shield.fbrltb.rltbmax;
-    if (fabs(pnt.i)>fabs(pnt.j)&&fabs(pnt.i)>fabs(pnt.k)) {
+  case 8:
       if (pnt.i>0) {
-	index = 3;//left
-      } else {
-	index = 2;//right
-      }
-    }else if (fabs(pnt.j)>fabs (pnt.k)) {
-      if (pnt.j>0) {
-	index = 4;//top;
-      } else {
-	index = 5;//bot;
-      }
-    } else {
-      percent = damage/shield.fbrltb.fbmax;
-      if (pnt.k>0) {
-	index = 0;
-      } else {
-	index = 1;
-      }
-    }
+		if(pnt.j>0){
+		  if(pnt.k>0){
+			  percent = damage/shield.shield8.frontlefttopmax;
+			  targ=&shield.shield8.frontlefttop;
+		  } else {
+			  percent = damage/shield.shield8.backlefttopmax;
+			  targ=&shield.shield8.backlefttop;
+		  }
+		} else {
+		  if(pnt.k>0){
+			  percent = damage/shield.shield8.frontleftbottommax;
+			  targ=&shield.shield8.frontleftbottom;
+		  } else {
+			  percent = damage/shield.shield8.backleftbottommax;
+			  targ=&shield.shield8.backleftbottom;
+		  }
+		}
+	  } else {
+		if(pnt.j>0){
+		  if(pnt.k>0){
+			  percent = damage/shield.shield8.frontrighttopmax;
+			  targ=&shield.shield8.frontrighttop;
+		  } else {
+			  percent = damage/shield.shield8.backrighttopmax;
+			  targ=&shield.shield8.backrighttop;
+		  }
+		} else {
+		  if(pnt.k>0){
+			  percent = damage/shield.shield8.frontrightbottommax;
+			  targ=&shield.shield8.frontrightbottom;
+		  } else {
+			  percent = damage/shield.shield8.backrightbottommax;
+			  targ=&shield.shield8.backrightbottom;
+		  }
+		}
+	  }
+    
+		
+
+
 	if( Network==NULL || SERVER)
 	{
-      if (damage>shield.fbrltb.v[index]) {
-        damage -= shield.fbrltb.v[index];
-          shield.fbrltb.v[index]=0;
+      if (damage>*targ) {
+        damage -= *targ;
+          *targ=0;
       } else {
-          shield.fbrltb.v[index]-=apply_float_to_short (damage);
+          *targ-=damage; //short fix
         damage = 0;
       }
 	}
@@ -3288,19 +3795,19 @@ float Unit::DealDamageToShield (const Vector &pnt, float &damage) {
   default:
     if (fabs(pnt.k)>fabs (pnt.i)) {
       if (pnt.k>0) {
-	targ = &shield.fbrl.front;
-	percent = damage/shield.fbrl.frontmax;
+	targ = &shield.shield4fbrl.front;
+	percent = damage/shield.shield4fbrl.frontmax;
       } else {
-	targ = &shield.fbrl.back;
-	percent = damage/shield.fbrl.backmax;
+	targ = &shield.shield4fbrl.back;
+	percent = damage/shield.shield4fbrl.backmax;
       }
     } else {
       if (pnt.i>0) {
-	percent = damage/shield.fbrl.leftmax;
-	targ = &shield.fbrl.left;
+	percent = damage/shield.shield4fbrl.leftmax;
+	targ = &shield.shield4fbrl.left;
       } else {
-	targ = &shield.fbrl.right;
-	percent = damage/shield.fbrl.rightmax;
+	targ = &shield.shield4fbrl.right;
+	percent = damage/shield.shield4fbrl.rightmax;
       }
     }
 	if( Network==NULL || SERVER)
@@ -3309,7 +3816,7 @@ float Unit::DealDamageToShield (const Vector &pnt, float &damage) {
         damage-=*targ;
           *targ=0;
       } else {
-          *targ -= apply_float_to_short (damage);	
+          *targ -= (damage); //short fix	
         damage=0;
       }
 	}
@@ -3328,44 +3835,53 @@ bool Unit::ShieldUp (const Vector &pnt) const{
     return false;
   switch (shield.number){
   case 2:
-    index = (pnt.k>0)?0:1;
-    return shield.fb[index]>shieldmin;
+	  return ((pnt.k>0)?(shield.shield2fb.front):(shield.shield2fb.back))>shieldmin;
     break;
-  case 6:
-    if (fabs(pnt.i)>fabs(pnt.j)&&fabs(pnt.i)>fabs(pnt.k)) {
-      if (pnt.i>0) {
-	index = 3;//left
-      } else {
-	index = 2;//right
-      }
-    }else if (fabs(pnt.j)>fabs (pnt.k)) {
-      if (pnt.j>0) {
-	index = 4;//top;
-      } else {
-	index = 5;//bot;
-      }
-    } else {
-      if (pnt.k>0) {
-	index = 0;
-      } else {
-	index = 1;
-      }
-    }
-    return shield.fbrltb.v[index]>shieldmin;
+  case 8:
+if (pnt.i>0) {
+		if(pnt.j>0){
+		  if(pnt.k>0){
+			  return shield.shield8.frontlefttop>shieldmin;
+		  } else {
+			  return shield.shield8.backlefttop>shieldmin;
+		  }
+		} else {
+		  if(pnt.k>0){
+			  return shield.shield8.frontleftbottom>shieldmin;
+		  } else {
+			  return shield.shield8.backleftbottom>shieldmin;
+		  }
+		}
+	  } else {
+		if(pnt.j>0){
+		  if(pnt.k>0){
+			  return shield.shield8.frontrighttop>shieldmin;
+		  } else {
+			  return shield.shield8.backrighttop>shieldmin;
+		  }
+		} else {
+		  if(pnt.k>0){
+			  return shield.shield8.frontrightbottom>shieldmin;
+		  } else {
+			  return shield.shield8.backrightbottom>shieldmin;
+		  }
+		}
+	  }   
+
     break;
   case 4:
   default:
     if (fabs(pnt.k)>fabs (pnt.i)) {
       if (pnt.k>0) {
-	return shield.fbrl.front>shieldmin;
+	return shield.shield4fbrl.front>shieldmin;
       } else {
-	return shield.fbrl.back>shieldmin;
+	return shield.shield4fbrl.back>shieldmin;
       }
     } else {
       if (pnt.i>0) {
-	return shield.fbrl.left>shieldmin;
+	return shield.shield4fbrl.left>shieldmin;
       } else {
-	return shield.fbrl.right>shieldmin;
+	return shield.shield4fbrl.right>shieldmin;
       }
     }
     return false;
@@ -3400,7 +3916,7 @@ void Unit::Target (Unit *targ) {
   if (!(activeStarSystem==NULL||activeStarSystem==_Universe->activeStarSystem())) {
     computer.target.SetUnit(NULL);
     return;
-    fprintf (stderr,"bad target system");
+    VSFileSystem::vs_fprintf (stderr,"bad target system");
     const int BADTARGETSYSTEM=0;
     assert (BADTARGETSYSTEM);
   }
@@ -3444,8 +3960,8 @@ void Unit::Cloak (bool loak) {
   if (loak) {
     if (image->cloakenergy<warpenergy) {
       image->cloakrate =(image->cloakrate>=0)?image->cloakrate:-image->cloakrate; 
-      if (cloaking==(short)32768) {
-	cloaking=32767;
+      if (cloaking<-1) { //short fix
+	cloaking=2147483647; //short fix
       } else {
        
       }
@@ -3533,7 +4049,7 @@ public:
 		WeaponGroup allWeaponsNoSpecial;
 		WeaponGroupSet myset;
 		unsigned int i;
-		WeaponGroupSet::const_iterator iter;
+		typename WeaponGroupSet::const_iterator iter;
 		printf("ToggleWeaponSet: %s\n", FORWARD?"true":"false");
 		for (i=0;i<un->mounts.size();i++) {
 			if (checkmount(un,i,missile)) {
@@ -3555,7 +4071,8 @@ public:
 		const WeaponGroupSet mypairset (myset);
 		for (iter=mypairset.begin();iter!=mypairset.end();++iter) {
 			if ((*iter).size()&&notSpecial(un->mounts[(*((*iter).begin()))])) {
-				for (WeaponGroupSet::const_iterator iter2=mypairset.begin();iter2!=mypairset.end();++iter2) {
+				typename WeaponGroupSet::const_iterator iter2;
+				for (iter2=mypairset.begin();iter2!=mypairset.end();++iter2) {
 					if ((*iter2).size()&&notSpecial(un->mounts[(*((*iter2).begin()))])) {
 						WeaponGroup myGroup;
 						set_union((*iter).begin(), (*iter).end(), (*iter2).begin(), (*iter2).end(),
@@ -3759,15 +4276,21 @@ int Unit::LockMissile() const{
 /***********************************************************************************/
 
 void Unit::Destroy() {
-  if (!killed)
+  if (!killed) {
+    for (int beamcount=0;beamcount<GetNumMounts();beamcount++) {
+      UnFire();
+      AUDStopPlaying(mounts[beamcount].sound); 
+      mounts[beamcount].status=Mount::DESTROYED;
+    }
     if (!Explode(false,SIMULATION_ATOM))
 	{
   		// The server send a kill notification to all concerned clients but not if it is an upgrade
   		if( SERVER)
-  			Server->sendKill( this->serial, this->zone);
+  			VSServer->sendKill( this->serial, this->activeStarSystem->GetZone());
   
         Kill();
  	}
+  }
 }
 
 void Unit::SetCollisionParent (Unit * name) {
@@ -3778,6 +4301,184 @@ void Unit::SetCollisionParent (Unit * name) {
       subunits[i]->SetCollisionParent (name);
     }
 #endif
+}
+
+double Unit::getMinDis (const QVector &pnt) {
+  float minsofar=1e+10;
+  float tmpvar;
+  int i;
+  Vector TargetPoint (cumulative_transformation_matrix.getP());
+
+#ifdef VARIABLE_LENGTH_PQR
+  float SizeScaleFactor = sqrtf(TargetPoint.Dot(TargetPoint)); //the scale factor of the current UNIT
+#endif
+  for (i=0;i<nummesh();i++) {
+
+    TargetPoint = (Transform(cumulative_transformation_matrix,meshdata[i]->Position()).Cast()-pnt).Cast();
+    tmpvar = sqrtf (TargetPoint.Dot (TargetPoint))-meshdata[i]->rSize()
+#ifdef VARIABLE_LENGTH_PQR
+	*SizeScaleFactor
+#endif
+      ;
+    if (tmpvar<minsofar) {
+      minsofar = tmpvar;
+    }
+  }
+  un_fiter ui = SubUnits.fastIterator();
+  Unit * su;
+  while ((su=ui.current())) {
+    tmpvar = su->getMinDis (pnt);
+    if (tmpvar<minsofar) {
+      minsofar=tmpvar;
+    }			
+    ui.advance();
+  }
+  return minsofar;
+}
+
+// This function should not be used on server side
+extern vector<Vector> perplines;
+float Unit::querySphereClickList (const QVector &st, const QVector &dir, float err) const{
+  int i;
+  float retval=0;
+  float adjretval=0;
+  const Matrix * tmpo = &cumulative_transformation_matrix;
+
+  Vector TargetPoint (tmpo->getP());
+  for (i=0;i<nummesh();i++) {
+    TargetPoint = Transform (*tmpo,meshdata[i]->Position());
+    Vector origPoint = TargetPoint;
+
+    perplines.push_back(TargetPoint);
+    //find distance away from the line now :-)
+    //find scale factor of end on start to get line.
+    QVector tst = TargetPoint.Cast()-st;
+    //Vector tst = TargetPoint;
+    float k = tst.Dot (dir);
+    TargetPoint = (tst - k*(dir)).Cast();
+    /*
+    cerr << origPoint << "-" << st << " = " << tst << " projected length " << k << " along direction " << dir << endl;
+    cerr << "projected line " << st << " - " << st + k*dir << endl;
+    cerr << "length of orthogonal projection " << TargetPoint.Magnitude() << ", " << "radius " << meshdata[i]->rSize() << endl;
+    */
+    perplines.push_back(origPoint-TargetPoint);
+    
+    ///      VSFileSystem::vs_fprintf (stderr, "i%f,j%f,k%f end %f,%f,%f>, k %f distance %f, rSize %f\n", st.i,st.j,st.k,end.i,end.j,end.k,k,TargetPoint.Dot(TargetPoint), meshdata[i]->rSize());    
+    
+    if (TargetPoint.Dot (TargetPoint)< 
+	err*err+
+	meshdata[i]->rSize()*meshdata[i]->rSize()+2*err*meshdata[i]->rSize()
+	)
+      {
+	if (retval==0) {
+	  retval = k;
+	  adjretval=k;
+	  if (adjretval<0) {
+		adjretval+=meshdata[i]->rSize();
+		if (adjretval>0)
+				adjretval=.001;
+		}
+	}else {
+		if (retval>0&&k<retval&&k>-meshdata[i]->rSize()){
+			retval = k;
+			adjretval=k;
+			if (adjretval<0) {
+				adjretval+=meshdata[i]->rSize();
+				if (adjretval>0)
+					adjretval=.001;
+			}
+		}
+		if (retval<0&&k+meshdata[i]->rSize()>retval) {
+			retval = k;
+			adjretval=k+meshdata[i]->rSize();
+			if (adjretval>0)
+				adjretval=.001;//THRESHOLD;
+		}
+	}
+    }
+  }
+  un_kiter ui = viewSubUnits();
+  const Unit * su;
+  while ((su=ui.current())) {
+    float tmp=su->querySphereClickList (st,dir,err);
+    if (tmp==0) {
+      ui.advance();
+      continue;
+    }
+    if (retval==0) {
+      retval = tmp;
+    }else{
+		if (adjretval>0&&tmp<adjretval) {
+			retval = tmp;
+			adjretval=tmp;
+		}
+		if (adjretval<0&&tmp>adjretval) {
+		    retval = tmp;
+			adjretval=tmp;
+		}
+    }
+    ui.advance();
+  }
+
+  return adjretval;
+}
+
+
+bool Unit::queryBoundingBox (const QVector &pnt, float err) {
+  int i;
+  BoundingBox * bbox=NULL;
+  for (i=0;i<nummesh();i++) {
+    bbox = meshdata[i]->getBoundingBox();
+    bbox->Transform (cumulative_transformation_matrix);
+    if (bbox->Within(pnt,err)) {
+      delete bbox;
+      return true;
+    }
+    delete bbox;
+  }
+  Unit * su;
+  UnitCollection::UnitIterator ui=getSubUnits();
+  while ((su=ui.current())) {
+    if ((su)->queryBoundingBox (pnt,err)) {
+      return true;
+    }
+    ui.advance();
+  }
+  return false;
+}
+
+int Unit::queryBoundingBox (const QVector &origin, const Vector &direction, float err) {
+  int i;
+  int retval=0;
+  BoundingBox * bbox=NULL;
+  for (i=0;i<nummesh();i++) {
+    bbox = meshdata[i]->getBoundingBox();
+    bbox->Transform (cumulative_transformation_matrix);
+    switch (bbox->Intersect(origin,direction.Cast(),err)) {
+    case 1:delete bbox;
+      return 1;
+    case -1:delete bbox;
+      retval =-1;
+      break;
+    case 0: delete bbox;
+      break;
+    }
+  }
+  UnitCollection::UnitIterator ui = getSubUnits();
+  Unit  * su;
+  while ((su=ui.current())) {
+    switch (su->queryBoundingBox (origin,direction,err)) {
+    case 1: 
+      return 1;
+    case -1: 
+      retval= -1;
+      break;
+    case 0: 
+      break;
+    }
+    ui.advance();
+  }
+  return retval;
 }
 
 /***********************************************************************************/
@@ -3848,7 +4549,7 @@ void Unit::PerformDockingOperations () {
       continue;
     }
     //Transformation t = un->prev_physical_state;
-    unsigned short tmp;
+    float tmp; //short fix
     tmp=un->maxwarpenergy;
     if (tmp<un->jump.energy)
       tmp=un->jump.energy;
@@ -3940,6 +4641,7 @@ else
 	if( playernum>=0)
 		Network[playernum].dockRequest( utdw->serial);
 }
+return 0;
 }
 
 inline bool insideDock (const DockingPorts &dock, const Vector & pos, float radius) {
@@ -4215,27 +4917,18 @@ public:
 	VCString(const string & s): string(s){}
 };
 std::map<VCString,VCString> parseTurretSizes () {
+	using namespace VSFileSystem;
 	std::map<VCString,VCString> t;
-	FILE * fp = fopen ("size.txt","r");
-	if (!fp) {
-		fp = fopen ("units/size.txt","r");
-		if (!fp) {
-			fp = fopen("units/subunits/size.txt","r");
-			if (!fp) {
-				fp = fopen ("subunits/size.txt","r");
-			}
-		}
-	}
-	if (fp) {
-		fseek (fp,0,SEEK_END);
-		int siz = ftell (fp);
-		fseek (fp,0,SEEK_SET);
+	VSFile f;
+	VSError err = f.OpenReadOnly( "units/subunits/size.txt", UnknownFile);
+	if (err<=Ok) {
+		int siz = f.Size();
 		char * filedata= (char *)malloc (siz+1);
 		filedata[siz]=0;
-		while (fgets (filedata,siz,fp)) {
+		while (f.ReadLine(filedata,siz)==Ok) {
 
 			std::string x(filedata);
-			int len= x.find (",");
+			string::size_type len= x.find (",");
 			if (len!=std::string::npos) {
 				std::string y = x.substr (len+1);
 				x = x.substr(0,len);				
@@ -4249,7 +4942,7 @@ std::map<VCString,VCString> parseTurretSizes () {
 			}
 		}
 		free(filedata);
-		fclose (fp);
+		f.Close();
 	}
 	return t;
 }
@@ -4293,14 +4986,19 @@ bool Unit::UpgradeMounts (const Unit *up, int mountoffset, bool touchme, bool do
 		  
 	      if (templ) {
 		if (templ->GetNumMounts()>jmod) {
-			
-		  int maxammo = templ->mounts[jmod].ammo;
+
+		/* Volume controls maxammo, not template ammo
+		 
+		   int maxammo = templ->mounts[jmod].ammo;
+
 		  if ((upmount.ammo>maxammo||upmount.ammo==-1)&&maxammo!=-1) {
 		    upmount.ammo = maxammo;
 		  }
+
+		*/
 		  if (templ->mounts[jmod].volume!=-1) {
 		    if (upmount.ammo*upmount.type->volume>templ->mounts[jmod].volume) {
-		      upmount.ammo = (templ->mounts[jmod].volume+1)/upmount.type->volume;
+		      upmount.ammo = (int)((templ->mounts[jmod].volume+1)/upmount.type->volume);
 		    }
 		  }
 		}
@@ -4312,32 +5010,34 @@ bool Unit::UpgradeMounts (const Unit *up, int mountoffset, bool touchme, bool do
 	    }else {
 	      int tmpammo = mounts[jmod].ammo;
 	      if (mounts[jmod].ammo!=-1&&up->mounts[i].ammo!=-1) {
-		tmpammo+=up->mounts[i].ammo;
-		if (templ) {
-		  if (templ->GetNumMounts()>jmod) {
-		    if (templ->mounts[jmod].ammo!=-1) {
-		      if (templ->mounts[jmod].ammo>tmpammo) {
-			tmpammo=templ->mounts[jmod].ammo;
-		      }
-		    }
-		    if (templ->mounts[jmod].volume!=-1) {
-		      if (templ->mounts[jmod].volume>mounts[jmod].type->volume*tmpammo) {
-			tmpammo=(templ->mounts[jmod].volume+1)/mounts[jmod].type->volume;
-		      }
-		    }
+			tmpammo+=up->mounts[i].ammo;
+			if (templ) {
+			  if (templ->GetNumMounts()>jmod) {
+				/* this shouldn't be here... we don't know why it's here, but we're leaving it commented out
+				if (templ->mounts[jmod].ammo!=-1) {
+				  if (templ->mounts[jmod].ammo>tmpammo) {
+					tmpammo=templ->mounts[jmod].ammo;
+				  }
+				}
+				*/	
+				if (templ->mounts[jmod].volume!=-1) {
+				  if (templ->mounts[jmod].volume<mounts[jmod].type->volume*tmpammo) {
+					tmpammo=(int)((templ->mounts[jmod].volume+1)/mounts[jmod].type->volume);
+				  }
+				}
 		    
-		  }
-		} 
-		if (tmpammo*mounts[jmod].type->volume>mounts[jmod].volume) {
-		  tmpammo = (1+mounts[jmod].volume)/mounts[jmod].type->volume;
-		}
-		if (tmpammo>mounts[jmod].ammo) {
-		  cancompletefully=true;
-		  if (touchme)
-		    mounts[jmod].ammo = tmpammo;
-		}else {
-		  cancompletefully=false;
-		}
+			  }
+			} 
+			if (tmpammo*mounts[jmod].type->volume>mounts[jmod].volume) {
+			  tmpammo = (int)((1+mounts[jmod].volume)/mounts[jmod].type->volume);
+			}
+			if (tmpammo>mounts[jmod].ammo) {
+			  cancompletefully=true;
+			  if (touchme)
+				mounts[jmod].ammo = tmpammo;
+			}else {
+			  cancompletefully=false;
+			}
 	      }
 	      
 	    }
@@ -4373,9 +5073,17 @@ bool Unit::UpgradeMounts (const Unit *up, int mountoffset, bool touchme, bool do
 	      if (strcasecmp(mounts[jkmod].type->weapon_name.c_str(),up->mounts[i].type->weapon_name.c_str())==0) {///search for right mount to remove starting from j. this is the right name
 		found=true;//we got one
 		percentage+=mounts[jkmod].Percentage(&up->mounts[i]);///calculate scrap value (if damaged)
-		if (touchme) //if we modify
-		  mounts[jkmod].status=Mount::UNCHOSEN;///deactivate weapon
-		break;
+		if (touchme){ //if we modify
+			if (up->mounts[i].ammo&&up->mounts[i].ammo!=-1&&mounts[jkmod].ammo!=-1){ //if downgrading ammo based upgrade, checks for infinite ammo
+				mounts[jkmod].ammo-=(mounts[jkmod].ammo>=up->mounts[i].ammo)?up->mounts[i].ammo:mounts[jkmod].ammo; //remove upgrade-worth, else remove remaining
+				if(!mounts[jkmod].ammo){ //if none left
+					mounts[jkmod].status=Mount::UNCHOSEN;///deactivate weapon
+				}
+			}else{
+				mounts[jkmod].status=Mount::UNCHOSEN;///deactivate weapon
+			}
+		}
+		break; 
 	      }
 	    }
 	  
@@ -4630,10 +5338,15 @@ bool Unit::UpAndDownGrade (const Unit * up, const Unit * templ, int mountoffset,
 
 #define STDUPGRADECLAMP(my,oth,temp,noth) STDUPGRADE_SPECIFY_DEFAULTS (my,oth,temp,noth,downgradelimit->my,blankship->my,!force_change_on_nothing,this->my)
 
-  STDUPGRADE(armor.front,up->armor.front,templ->armor.front,0);
-  STDUPGRADE(armor.back,up->armor.back,templ->armor.back,0);
-  STDUPGRADE(armor.right,up->armor.right,templ->armor.right,0);
-  STDUPGRADE(armor.left,up->armor.left,templ->armor.left,0);
+  STDUPGRADE(armor.frontrighttop,up->armor.frontrighttop,templ->armor.frontrighttop,0);
+  STDUPGRADE(armor.backrighttop,up->armor.backrighttop,templ->armor.backrighttop,0);
+  STDUPGRADE(armor.frontlefttop,up->armor.frontlefttop,templ->armor.frontlefttop,0);
+  STDUPGRADE(armor.backlefttop,up->armor.backlefttop,templ->armor.backlefttop,0);
+  STDUPGRADE(armor.frontrightbottom,up->armor.frontrightbottom,templ->armor.frontrightbottom,0);
+  STDUPGRADE(armor.backrightbottom,up->armor.backrightbottom,templ->armor.backrightbottom,0);
+  STDUPGRADE(armor.frontleftbottom,up->armor.frontleftbottom,templ->armor.frontleftbottom,0);
+  STDUPGRADE(armor.backleftbottom,up->armor.backleftbottom,templ->armor.backleftbottom,0);
+
   STDUPGRADE(shield.recharge,up->shield.recharge,templ->shield.recharge,0);
   STDUPGRADE(hull,up->hull,templ->hull,0);
   if (maxhull<hull) {
@@ -4642,11 +5355,14 @@ bool Unit::UpAndDownGrade (const Unit * up, const Unit * templ, int mountoffset,
   }
   STDUPGRADE(recharge,up->recharge,templ->recharge,0);
   STDUPGRADE(image->repair_droid,up->image->repair_droid,templ->image->repair_droid,0);
+  static bool unittable=XMLSupport::parse_bool(vs_config->getVariable("physics","UnitTable","false"));
   STDUPGRADE(image->cargo_volume,up->image->cargo_volume,templ->image->cargo_volume,0);
+  STDUPGRADE(image->equipment_volume,up->image->equipment_volume,templ->image->equipment_volume,0);
   image->ecm = abs(image->ecm);
   STDUPGRADE(image->ecm,abs(up->image->ecm),abs(templ->image->ecm),0);
   STDUPGRADE(maxenergy,up->maxenergy,templ->maxenergy,0);
   STDUPGRADE(maxwarpenergy,up->maxwarpenergy,templ->maxwarpenergy,0);
+  STDUPGRADE(jump.warpDriveRating,up->jump.warpDriveRating,templ->jump.warpDriveRating,0);
   STDUPGRADE(limits.yaw,tlimits_yaw,templ->limits.yaw,0);
   STDUPGRADE(limits.pitch,tlimits_pitch,templ->limits.pitch,0);
   STDUPGRADE(limits.roll,tlimits_roll,templ->limits.roll,0);
@@ -4664,30 +5380,46 @@ bool Unit::UpAndDownGrade (const Unit * up, const Unit * templ, int mountoffset,
   STDUPGRADE(computer.max_pitch,tmax_pitch,templ->computer.max_pitch,0);
   STDUPGRADE(computer.max_roll,tmax_roll,templ->computer.max_roll,0);
   STDUPGRADE(fuel,up->fuel,templ->fuel,0);
+
   static bool UpgradeCockpitDamage = XMLSupport::parse_bool (vs_config->getVariable("physics","upgrade_cockpit_damage","false"));
-  if (UpgradeCockpitDamage){
-	  for (unsigned int upgr=0;upgr<UnitImages::NUMGAUGES+1+MAXVDUS;upgr++) {
-		  STDUPGRADE(image->cockpit_damage[upgr],up->image->cockpit_damage[upgr],templ->image->cockpit_damage[upgr],1);
-		  if (image->cockpit_damage[upgr]>1) {
-			  image->cockpit_damage[upgr]=1;//keep it real
-		  }
-	  }
+  if (UpgradeCockpitDamage) {
+    STDUPGRADE(image->fireControlFunctionality,up->image->fireControlFunctionality,templ->image->fireControlFunctionality,(unittable?0:1));
+    STDUPGRADE(image->fireControlFunctionalityMax,up->image->fireControlFunctionalityMax,templ->image->fireControlFunctionalityMax,(unittable?0:1));
+    STDUPGRADE(image->SPECDriveFunctionality,up->image->SPECDriveFunctionality,templ->image->SPECDriveFunctionality,(unittable?0:1));
+    STDUPGRADE(image->SPECDriveFunctionalityMax,up->image->SPECDriveFunctionalityMax,templ->image->SPECDriveFunctionalityMax,(unittable?0:1));
+    STDUPGRADE(image->CommFunctionality,up->image->CommFunctionality,templ->image->CommFunctionality,(unittable?0:1));
+    STDUPGRADE(image->CommFunctionalityMax,up->image->CommFunctionalityMax,templ->image->CommFunctionalityMax,(unittable?0:1));
+    STDUPGRADE(image->LifeSupportFunctionality,up->image->LifeSupportFunctionality,templ->image->LifeSupportFunctionality,(unittable?0:1));
+    STDUPGRADE(image->LifeSupportFunctionalityMax,up->image->LifeSupportFunctionalityMax,templ->image->LifeSupportFunctionalityMax,(unittable?0:1));
+    
+    for (unsigned int upgr=0;upgr<(UnitImages::NUMGAUGES+1+MAXVDUS)*2;upgr++) {
+      STDUPGRADE(image->cockpit_damage[upgr],up->image->cockpit_damage[upgr],templ->image->cockpit_damage[upgr],(unittable?0:1));
+      if (image->cockpit_damage[upgr]>1) {
+        image->cockpit_damage[upgr]=1;//keep it real
+      }
+    }
   }
   if (shield.number==up->shield.number) {
     switch (shield.number) {
     case 2:
-      STDUPGRADE(shield.fb[2],up->shield.fb[2],templ->shield.fb[2],0);
-      STDUPGRADE(shield.fb[3],up->shield.fb[3],templ->shield.fb[3],0);
+      STDUPGRADE(shield.shield2fb.frontmax,up->shield.shield2fb.frontmax,templ->shield.shield2fb.frontmax,0);
+      STDUPGRADE(shield.shield2fb.backmax,up->shield.shield2fb.backmax,templ->shield.shield2fb.backmax,0);
       break;
     case 4:
-      STDUPGRADE(shield.fbrl.frontmax,up->shield.fbrl.frontmax,templ->shield.fbrl.frontmax,0);
-      STDUPGRADE(shield.fbrl.backmax,up->shield.fbrl.backmax,templ->shield.fbrl.backmax,0);
-      STDUPGRADE(shield.fbrl.leftmax,up->shield.fbrl.leftmax,templ->shield.fbrl.leftmax,0);
-      STDUPGRADE(shield.fbrl.rightmax,up->shield.fbrl.rightmax,templ->shield.fbrl.rightmax,0);
+      STDUPGRADE(shield.shield4fbrl.frontmax,up->shield.shield4fbrl.frontmax,templ->shield.shield4fbrl.frontmax,0);
+      STDUPGRADE(shield.shield4fbrl.backmax,up->shield.shield4fbrl.backmax,templ->shield.shield4fbrl.backmax,0);
+      STDUPGRADE(shield.shield4fbrl.leftmax,up->shield.shield4fbrl.leftmax,templ->shield.shield4fbrl.leftmax,0);
+      STDUPGRADE(shield.shield4fbrl.rightmax,up->shield.shield4fbrl.rightmax,templ->shield.shield4fbrl.rightmax,0);
       break;
-    case 6:
-      STDUPGRADE(shield.fbrltb.fbmax,up->shield.fbrltb.fbmax,templ->shield.fbrltb.fbmax,0);
-      STDUPGRADE(shield.fbrltb.rltbmax,up->shield.fbrltb.rltbmax,templ->shield.fbrltb.rltbmax,0);
+    case 8:
+      STDUPGRADE(shield.shield8.frontrighttopmax,up->shield.shield8.frontrighttopmax,templ->shield.shield8.frontrighttopmax,0);
+      STDUPGRADE(shield.shield8.backrighttopmax,up->shield.shield8.backrighttopmax,templ->shield.shield8.backrighttopmax,0);
+      STDUPGRADE(shield.shield8.frontlefttopmax,up->shield.shield8.frontlefttopmax,templ->shield.shield8.frontlefttopmax,0);
+      STDUPGRADE(shield.shield8.backlefttopmax,up->shield.shield8.backlefttopmax,templ->shield.shield8.backlefttopmax,0);
+	  STDUPGRADE(shield.shield8.frontrightbottommax,up->shield.shield8.frontrightbottommax,templ->shield.shield8.frontrightbottommax,0);
+      STDUPGRADE(shield.shield8.backrightbottommax,up->shield.shield8.backrightbottommax,templ->shield.shield8.backrightbottommax,0);
+      STDUPGRADE(shield.shield8.frontleftbottommax,up->shield.shield8.frontleftbottommax,templ->shield.shield8.frontleftbottommax,0);
+      STDUPGRADE(shield.shield8.backleftbottommax,up->shield.shield8.backleftbottommax,templ->shield.shield8.backleftbottommax,0);
       break;     
     }
   }else {
@@ -4800,14 +5532,14 @@ bool Unit::UpAndDownGrade (const Unit * up, const Unit * templ, int mountoffset,
   }
   if (numave)
     percentage=percentage/numave;
-  if (0&&touchme&&up->mass&&numave) {
+  if (0&&touchme&&up->Mass&&numave) {
     float multiplyer =((downgrade)?-1:1);
-    mass +=multiplyer*percentage*up->mass;
-    if (mass<(templ?templ->mass:.000000001))
-      mass=(templ?templ->mass:.000000001);
-    MomentOfInertia +=multiplyer*percentage*up->MomentOfInertia;
-    if (MomentOfInertia<(templ?templ->MomentOfInertia:0.00000001)) {
-      MomentOfInertia=(templ?templ->MomentOfInertia:0.00000001);
+    Mass +=multiplyer*percentage*up->Mass;
+    if (Mass<(templ?templ->Mass:.000000001))
+      Mass=(templ?templ->Mass:.000000001);
+    Momentofinertia +=multiplyer*percentage*up->Momentofinertia;
+    if (Momentofinertia<(templ?templ->Momentofinertia:0.00000001)) {
+      Momentofinertia=(templ?templ->Momentofinertia:0.00000001);
     }
   }
   float MyPercentMin = ComputeMinDowngradePercent();
@@ -4824,9 +5556,11 @@ Unit * makeBlankUpgrade (string templnam, int faction) {
     int q =bl->GetCargo (i).quantity;
     bl->RemoveCargo (i,q);
   }
-  bl->mass=0;
+  bl->Mass=0;
   return bl;
 }
+
+
 const Unit * makeFinalBlankUpgrade (string name, int faction) {
   char * unitdir = GetUnitDir(name.c_str());
   string limiternam = name;
@@ -4875,11 +5609,28 @@ bool Unit::ReduceToTemplate() {
 int Unit::RepairCost () {
 	int cost =1;
 	unsigned int i;
-	for (i=0;i < 1+MAXVDUS+UnitImages::NUMGAUGES;i++) {
-        if (image->cockpit_damage[i]!=1) {
+	for (i=0;i < (1+MAXVDUS+UnitImages::NUMGAUGES)*2;i++) {
+        if (image->cockpit_damage[i]<1) {
 			cost++;
 		}
 	}
+        if (image->fireControlFunctionality<1)
+          cost++;
+        if (image->fireControlFunctionalityMax<1)
+          cost++;
+        if (image->SPECDriveFunctionality<1)
+          cost++;
+        if (image->SPECDriveFunctionalityMax<1)
+          cost++;
+        if (image->CommFunctionality<1)
+          cost++;
+        if (image->CommFunctionalityMax<1)
+          cost++;
+        if (image->LifeSupportFunctionality<1)
+          cost++;
+        if (image->LifeSupportFunctionalityMax<1)
+          cost++;
+        
 	for (i=0;i<numCargo();++i) {
 		if (GetCargo(i).category.find(DamagedCategory)==0)
 			cost++;
@@ -4903,13 +5654,54 @@ int Unit::RepairUpgrade () {
 	savedCargo.swap(image->cargo);
 	savedWeap.swap(mounts);
     UnitImages * im= &GetImageInformation();
-    for (int i=0;i < 1+MAXVDUS+UnitImages::NUMGAUGES;i++) {
-        if (im->cockpit_damage[i]!=1) {
+    for (int i=0;i < (1+MAXVDUS+UnitImages::NUMGAUGES)*2;i++) {
+        if (im->cockpit_damage[i]<1) {
             im->cockpit_damage[i]=1;
             success+=1;
             pct = 1;
         }
     }
+    if (im->fireControlFunctionality<1) {
+      im->fireControlFunctionality=1;
+      pct=1;
+      success+=1;
+    }
+    if (im->fireControlFunctionalityMax<1) {
+      im->fireControlFunctionalityMax=1;
+      pct=1;
+      success+=1;
+    }
+    if (im->SPECDriveFunctionality<1) {
+      im->SPECDriveFunctionality=1;
+      pct=1;
+      success+=1;
+    }
+    if (im->SPECDriveFunctionalityMax<1) {
+      im->SPECDriveFunctionalityMax=1;
+      pct=1;
+      success+=1;
+    } 
+    if (im->CommFunctionality<1) {
+      im->CommFunctionality=1;
+      pct=1;
+      success+=1;
+    }
+    if (im->CommFunctionalityMax<1) {
+      im->CommFunctionalityMax=1;
+      pct=1;
+      success+=1;
+    }
+    if (im->LifeSupportFunctionality<1) {
+      im->LifeSupportFunctionality=1;
+      pct=1;
+      success+=1;
+    }
+    if (im->LifeSupportFunctionalityMax<1) {
+      im->LifeSupportFunctionalityMax=1;
+      pct=1;
+      success+=1;
+    }
+     
 	bool ret = success && pct>0;
 	static bool ComponentBasedUpgrades = XMLSupport::parse_bool (vs_config->getVariable("physics","component_based_upgrades","false"));
 	if (ComponentBasedUpgrades){
@@ -5122,7 +5914,7 @@ void Unit::EjectCargo (unsigned int index) {
       if (tmp->category.length()>=(unsigned int)sslen) {
 	if ((!tmp->mission)&&memcmp (tmp->category.c_str(),"starships",sslen)==0) {
 	  string ans = tmpcontent;
-	  unsigned int blank = ans.find (".blank");
+	  string::size_type blank = ans.find (".blank");
 	  if (blank != string::npos) {
 	    ans = ans.substr (0,blank);
 	  }
@@ -5160,7 +5952,7 @@ void Unit::EjectCargo (unsigned int index) {
 	cargo->SetPosAndCumPos (Position()+randVector(-rSize(), rSize()));
 	cargo->SetOwner (this);
 	cargo->SetVelocity(Velocity+randVector(-.25,.25).Cast());
-	cargo->mass = tmp->mass;
+	cargo->Mass = tmp->mass;
 	if (name.length()>0) {
 	  cargo->name=name;
 	} else {
@@ -5194,7 +5986,7 @@ int Unit::RemoveCargo (unsigned int i, int quantity,bool eraseZero) {
     quantity=image->cargo[i].quantity;
   static bool usemass = XMLSupport::parse_bool(vs_config->getVariable ("physics","use_cargo_mass","true"));
   if (usemass)
-	  mass-=quantity*image->cargo[i].mass;
+	  Mass-=quantity*image->cargo[i].mass;
   image->cargo[i].quantity-=quantity;
   if (image->cargo[i].quantity<=0&&eraseZero)
     image->cargo.erase (image->cargo.begin()+i);
@@ -5205,7 +5997,7 @@ int Unit::RemoveCargo (unsigned int i, int quantity,bool eraseZero) {
 void Unit::AddCargo (const Cargo &carg, bool sort) {
   static bool usemass = XMLSupport::parse_bool(vs_config->getVariable ("physics","use_cargo_mass","true"));
   if (usemass)
-	  mass+=carg.quantity*carg.mass;
+	  Mass+=carg.quantity*carg.mass;
   image->cargo.push_back (carg);   
   if (sort)
     SortCargo();
@@ -5284,7 +6076,7 @@ std::string Unit::GetManifest (unsigned int i, Unit * scanningUnit, const Vector
 }
 
 bool Unit::SellCargo (unsigned int i, int quantity, float &creds, Cargo & carg, Unit *buyer){
-  if (i<0||i>=image->cargo.size()||!buyer->CanAddCargo(image->cargo[i])||mass<image->cargo[i].mass)
+  if (i<0||i>=image->cargo.size()||!buyer->CanAddCargo(image->cargo[i])||Mass<image->cargo[i].mass)
     return false;
   if (quantity>image->cargo[i].quantity)
     quantity=image->cargo[i].quantity;
@@ -5314,7 +6106,7 @@ bool Unit::BuyCargo (const Cargo &carg, float & creds){
   }
   AddCargo (carg);
   creds-=carg.quantity*carg.price;
-  mass+=carg.quantity*carg.mass;
+  Mass+=carg.quantity*carg.mass;
   return true;
 }
 bool Unit::BuyCargo (unsigned int i, unsigned int quantity, Unit * seller, float&creds) {
@@ -5403,7 +6195,7 @@ void Unit::ImportPartList (const std::string& category, float price, float price
 
 std::string Unit::massSerializer (const XMLType &input, void *mythis) {
   Unit * un = (Unit *)mythis;
-  float mass = un->mass;
+  float mass = un->Mass;
   static bool usemass = XMLSupport::parse_bool(vs_config->getVariable ("physics","use_cargo_mass","true"));
   for (unsigned int i=0;i<un->image->cargo.size();i++) {
     if (un->image->cargo[i].quantity>0){
@@ -5417,12 +6209,12 @@ std::string Unit::shieldSerializer (const XMLType &input, void * mythis) {
   Unit * un=(Unit *)mythis;
   switch (un->shield.number) {
   case 2:
-    return tostring(un->shield.fb[2])+string("\" back=\"")+tostring(un->shield.fb[3]);
-  case 6:
-    return tostring(un->shield.fbrltb.fbmax)+string("\" back=\"")+tostring(un->shield.fbrltb.fbmax)+string("\" left=\"")+tostring(un->shield.fbrltb.rltbmax)+string("\" right=\"")+tostring(un->shield.fbrltb.rltbmax)+string("\" top=\"")+tostring(un->shield.fbrltb.rltbmax)+string("\" bottom=\"")+tostring(un->shield.fbrltb.rltbmax);
+    return tostring(un->shield.shield2fb.frontmax)+string("\" back=\"")+tostring(un->shield.shield2fb.backmax);
+  case 8:
+    return string("\" frontrighttop=\"")+tostring(un->shield.shield8.frontrighttop)+string("\" backrighttop=\"")+tostring(un->shield.shield8.backrighttop)+string("\" frontlefttop=\"")+tostring(un->shield.shield8.frontlefttop)+string("\" backlefttop=\"")+tostring(un->shield.shield8.backlefttop)+string("\" frontrightbottom=\"")+tostring(un->shield.shield8.frontrightbottom)+string("\" backrightbottom=\"")+tostring(un->shield.shield8.backrightbottom)+string("\" frontleftbottom=\"")+tostring(un->shield.shield8.frontleftbottom)+string("\" backleftbottom=\"")+tostring(un->shield.shield8.backleftbottom);
   case 4:
   default:
-    return tostring(un->shield.fbrl.frontmax)+string("\" back=\"")+tostring(un->shield.fbrl.backmax)+string("\" left=\"")+tostring(un->shield.fbrl.leftmax)+string("\" right=\"")+tostring(un->shield.fbrl.rightmax);
+    return tostring(un->shield.shield4fbrl.frontmax)+string("\" back=\"")+tostring(un->shield.shield4fbrl.backmax)+string("\" left=\"")+tostring(un->shield.shield4fbrl.leftmax)+string("\" right=\"")+tostring(un->shield.shield4fbrl.rightmax);
   }
   return string("");
 }
@@ -5472,6 +6264,12 @@ std::string Unit::subunitSerializer (const XMLType &input, void * mythis) {
     }
   }
   return string("destroyed_turret");
+}
+void Unit::setCombatRole(std::string s) {
+   combatRole(ROLES::getRole(s));
+}
+std::string Unit::getCombatRole() const{
+   return ROLES::getRole(combatRole());
 }
 
 void Unit::SortCargo() {
@@ -5549,7 +6347,7 @@ bool Unit::TransferUnitToSystem (StarSystem * Current) {
     activeStarSystem = Current;
     return true;
   }else {
-    fprintf (stderr,"Fatal Error: cannot remove starship from critical system");
+    VSFileSystem::vs_fprintf (stderr,"Fatal Error: cannot remove starship from critical system");
   }
   return false;
 }
@@ -5569,7 +6367,7 @@ void Unit::Repair() {
     if (GetNumMounts()) {
       if (rand01()<workunit) {
 	int whichmount = rand()%GetNumMounts();
-	mounts[whichmount].size |=(1>>(rand()%(8*sizeof(short))));
+	mounts[whichmount].size |=(1>>(rand()%(8*sizeof(int))));
       }
       if (rand01()<workunit) {
 	int whichmount= rand()%GetNumMounts();
@@ -5627,8 +6425,8 @@ void Unit::Repair() {
       int whichgauge=rand()%(UnitImages::NUMGAUGES+1+MAXVDUS);
       if (image->cockpit_damage[whichgauge]<1) {
 	image->cockpit_damage[whichgauge]+=workunit;
-	if (image->cockpit_damage[whichgauge]>1)
-	  image->cockpit_damage[whichgauge]=1;
+	if (image->cockpit_damage[whichgauge]>image->cockpit_damage[whichgauge+UnitImages::NUMGAUGES+1+MAXVDUS])
+	  image->cockpit_damage[whichgauge]=image->cockpit_damage[whichgauge+UnitImages::NUMGAUGES+1+MAXVDUS];
       }
     }    
   case 1:

@@ -24,7 +24,7 @@ using Orders::MatchAngularVelocity;
 //#define MATCHLINVELEXECUTE()  if(!(desired.i==-2 && desired.j==0 && desired.k==0)){ parent->Thrust ( (parent->GetMass()*(desired-velocity)/SIMULATION_ATOM), afterburn); }
 
 
-#define MATCHLINVELSETUP()   Unit *match=parent->VelocityReference(); Vector desired (desired_velocity);  Vector FrameOfRef(0,0,0); if (match!=NULL) {float dif1,dif2; match->GetVelocityDifficultyMult(dif1);parent->GetVelocityDifficultyMult(dif2);FrameOfRef=parent->ToLocalCoordinates(match->GetVelocity()*dif1/dif2);};  if (!LocalVelocity) {desired = parent->ToLocalCoordinates (desired);}   Vector velocity (parent->UpCoordinateLevel(parent->GetVelocity()));
+#define MATCHLINVELSETUP()   Unit *match=parent->VelocityReference(); Vector desired (desired_velocity);  Vector FrameOfRef(0,0,0); if (match!=NULL) {float dif1,dif2; match->GetVelocityDifficultyMult(dif1);dif1*=match->graphicOptions.WarpFieldStrength;parent->GetVelocityDifficultyMult(dif2);dif2*=parent->graphicOptions.WarpFieldStrength;FrameOfRef=parent->ToLocalCoordinates(match->GetWarpVelocity()*dif1/dif2);};  if (!LocalVelocity) {desired = parent->ToLocalCoordinates (desired);}   Vector velocity (parent->UpCoordinateLevel(parent->GetVelocity()));
 
 #define MATCHLINVELEXECUTE()  { parent->Thrust ( (parent->GetMass()*(parent->ClampVelocity(desired,afterburn)+FrameOfRef-velocity)/SIMULATION_ATOM), afterburn); }
 
@@ -40,7 +40,7 @@ void MatchLinearVelocity::Execute () {
 	if (!suborders.empty()) {
 		static int i=0;
 		if (i++%1000==0) {
-			fprintf (stderr,"cannot execute suborders as Linear Velocity Matcher");//error printout just in case
+			VSFileSystem::vs_fprintf (stderr,"cannot execute suborders as Linear Velocity Matcher");//error printout just in case
 		}
 	}
   MATCHLINVELSETUP()
@@ -59,7 +59,7 @@ void MatchLinearVelocity::Execute () {
 
 MatchLinearVelocity::~MatchLinearVelocity () {
 #ifdef ORDERDEBUG
-  fprintf (stderr,"mlv%x",this);
+  VSFileSystem::vs_fprintf (stderr,"mlv%x",this);
   fflush (stderr);
 #endif
 }
@@ -113,7 +113,7 @@ void MatchAngularVelocity::Execute () {
 
 MatchAngularVelocity::~MatchAngularVelocity () {
 #ifdef ORDERDEBUG
-  fprintf (stderr,"mav%x",this);
+  VSFileSystem::vs_fprintf (stderr,"mav%x",this);
   fflush (stderr);
 #endif
 }
@@ -140,18 +140,21 @@ void MatchVelocity::Execute () {
 
 MatchVelocity::~MatchVelocity () {
 #ifdef ORDERDEBUG
-  fprintf (stderr,"mv%x",this);
+  VSFileSystem::vs_fprintf (stderr,"mv%x",this);
   fflush (stderr);
 #endif
 }
-
-FlyByWire::FlyByWire (): MatchVelocity(Vector(0,0,0),Vector(0,0,0),true,false,false), sheltonslide(false),controltype(!XMLSupport::parse_bool (vs_config->getVariable ("physics","CarControl",
+static bool getControlType() {
+  static bool control=XMLSupport::parse_bool (vs_config->getVariable ("physics","CarControl",
 #ifdef CAR_SIM
-"true"
+                                                                 "true"
 #else
-"false"
+                                                                 "false"
 #endif
-))){
+                                                ));
+  return control;
+}
+FlyByWire::FlyByWire (): MatchVelocity(Vector(0,0,0),Vector(0,0,0),true,false,false), sheltonslide(false),controltype(!getControlType()){
   DesiredThrust= Vector(0,0,0);
   stolen_setspeed=false;
   stolen_setspeed_value=0;
@@ -287,7 +290,9 @@ void FlyByWire::Execute () {
       stolen_setspeed=false;
     }
   }
-  if ((sheltonslide||!controltype)&&(!desireThrust)) {
+  static double collidepanic = XMLSupport::parse_float (vs_config->getVariable("physics","collision_inertial_time","1.25"));
+  Cockpit * tempcp = _Universe->isPlayerStarship (parent);
+  if (((sheltonslide||!controltype)&&(!desireThrust))||(tempcp&&((getNewTime()-tempcp->TimeOfLastCollision)<collidepanic))) {
     MatchAngularVelocity::Execute();//only match turning, keep velocity same
   }else {
     MatchVelocity::Execute();
@@ -300,7 +305,7 @@ void FlyByWire::Execute () {
 
 FlyByWire::~FlyByWire () {
 #ifdef ORDERDEBUG
-  fprintf (stderr,"fbw%x",this);
+  VSFileSystem::vs_fprintf (stderr,"fbw%x",this);
   fflush (stderr);
 #endif
 }

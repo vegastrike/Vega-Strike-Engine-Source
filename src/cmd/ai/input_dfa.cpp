@@ -193,10 +193,10 @@ void InputDFA::ClickSelect (KBSTATE k, int x, int y, int delx, int dely, int mod
       tmpcollection->append(sel);
       if (mod&ACTIVE_SHIFT) {      
 	CurDFA->appendCollection(tmpcollection);
-	fprintf (stderr,"Select:appendingselected\n");
+	VSFileSystem::vs_fprintf (stderr,"Select:appendingselected\n");
       } else {
 	CurDFA->replaceCollection (tmpcollection);
-	fprintf (stderr,"Select:replacingselected\n");
+	VSFileSystem::vs_fprintf (stderr,"Select:replacingselected\n");
       }
 //      cerr << *sel << endl;
       CurDFA->SetStateSomeSelected();
@@ -204,7 +204,7 @@ void InputDFA::ClickSelect (KBSTATE k, int x, int y, int delx, int dely, int mod
       if (!(mod&ACTIVE_SHIFT)){
 	CurDFA->UnselectAll();
 	CurDFA->SetStateNone();
-	fprintf (stderr,"Select:missedReplaceselected\n");
+	VSFileSystem::vs_fprintf (stderr,"Select:missedReplaceselected\n");
       }
     }
   }
@@ -235,12 +235,12 @@ void InputDFA::ClickSelect (KBSTATE k, int x, int y, int delx, int dely, int mod
       UnitCollection::UnitIterator * tmp2 = new un_iter(tmpcol->createIterator());
       if (!tmp2->current()) {
 	CurDFA->SetStateNone();
-	fprintf (stderr,"SelectBoxMissed\n");
+	VSFileSystem::vs_fprintf (stderr,"SelectBoxMissed\n");
       } else 
-	fprintf (stderr,"SelectBoxReplace\n");//      SetStateSomeSelected(); already there
+	VSFileSystem::vs_fprintf (stderr,"SelectBoxReplace\n");//      SetStateSomeSelected(); already there
       delete tmp2;
     }else {
-      fprintf (stderr,"Select:SelectBoxAppending\n");
+      VSFileSystem::vs_fprintf (stderr,"Select:SelectBoxAppending\n");
       CurDFA->appendCollection(tmpcol);
     }
   }
@@ -271,7 +271,7 @@ void InputDFA::NoneSelect (KBSTATE k,int x, int y, int delx, int dely, int mod) 
     if (sel!=NULL) {
       UnitCollection *tmpcollection=new UnitCollection();
       tmpcollection->append(sel);
-      fprintf (stderr,"None::replacing Single Unit");if (CurDFA->state==TARGET_SELECT) fprintf (stderr," to target\n");else fprintf (stderr," to select\n");
+      VSFileSystem::vs_fprintf (stderr,"None::replacing Single Unit");if (CurDFA->state==TARGET_SELECT) VSFileSystem::vs_fprintf (stderr," to target\n");else VSFileSystem::vs_fprintf (stderr," to select\n");
 
 //      cerr << *sel << endl;
       
@@ -279,7 +279,7 @@ void InputDFA::NoneSelect (KBSTATE k,int x, int y, int delx, int dely, int mod) 
       CurDFA->SetStateSomeSelected();
     }else {
       CurDFA->UnselectAll();
-      fprintf (stderr,"None::missed\n");if (CurDFA->state==TARGET_SELECT) fprintf (stderr," to target");else fprintf (stderr," to select");
+      VSFileSystem::vs_fprintf (stderr,"None::missed\n");if (CurDFA->state==TARGET_SELECT) VSFileSystem::vs_fprintf (stderr," to target");else VSFileSystem::vs_fprintf (stderr," to select");
     }
   }
   
@@ -300,14 +300,14 @@ void InputDFA::NoneSelect (KBSTATE k,int x, int y, int delx, int dely, int mod) 
     CurDFA->replaceCollection(tmpcol);
     UnitCollection::UnitIterator * tmp2 = new un_iter(tmpcol->createIterator());
     if (tmp2->current()) {
-      fprintf (stderr,"None::replacing SelectBox Units");if (CurDFA->state==TARGET_SELECT) fprintf (stderr," to target");else fprintf (stderr," to select");
+      VSFileSystem::vs_fprintf (stderr,"None::replacing SelectBox Units");if (CurDFA->state==TARGET_SELECT) VSFileSystem::vs_fprintf (stderr," to target");else VSFileSystem::vs_fprintf (stderr," to select");
       while(tmp2->current()) {
 //	cerr << *tmp2->current() << endl;
 	tmp2->advance();
       }
       CurDFA->SetStateSomeSelected();
     }else {
-      fprintf (stderr,"None::select box missed");
+      VSFileSystem::vs_fprintf (stderr,"None::select box missed");
     }
     delete tmp2;
   }

@@ -1,6 +1,10 @@
 #include "endianness.h"
 #include <assert.h>
 #include "unit_bsp.h"
+#include "vsfilesystem.h"
+
+using namespace VSFileSystem;
+
 using std::vector;
 #ifdef PROPHECY
 struct Vector {
@@ -43,7 +47,8 @@ double Dot (const bsp_vector & A, const bsp_vector & B) {
     return A.i *B.i + A.j*B.j+A.k*B.k;
 }
 */
-FILE * o;
+//FILE * o;
+VSFile fo;
 //ax + by + cz =0;  A.i + (B.i - A.i)k = x;A.j + (B.j - A.j)k = y;A.k + (B.k - A.k)k = z;
 // x*A.i + b*B.j + c*C.k + d + k*(a*B.i - a*A.i + b*B.j - b&A.j + c*B.k - c*A.k) = 0;
 // k = (A * n + d) / (A * n - B * n) 
@@ -125,17 +130,15 @@ void FreeBSP (bsp_tree ** tree) {
 long getsize (char * name)
 
 {
-  FILE *f;
   long size;
-  f=fopen (name,"rb");
-  fseek (f,0L,SEEK_END);
-  size= ftell (f);
-  fclose (f);
+  VSFile f;
+  VSError err = f.OpenReadOnly( name, BSPFile);
+  size= f.Size();
+  f.Close();
   return size;
 }
 
 void load (vector <bsp_polygon> &tri) {
-  FILE *f;
   long size;
   double x,y,z;
   vector <Vector> vec;
@@ -156,48 +159,46 @@ void load (vector <bsp_polygon> &tri) {
   long i;
   // Loading VERT ...
   
-  size = getsize ("vert.wcp");
-
-  f=fopen ("vert.wcp","rb");
-  if (f == NULL) {
+  VSFile f;
+  VSError err = f.OpenReadOnly( "vert.wcp", BSPFile);
+  if (err>Ok) {
     printf ("Cannot open file\n");
     return;
   }
   Vector tmpvec;
+  size = f.Size();
   for (i=0;i<size;i+=12) {
-    fread (&tmpvec.i,4,1,f);
-    fread (&tmpvec.j,4,1,f);
-    fread (&tmpvec.k,4,1,f);
+    VSFileSystem::vs_read (&tmpvec.i,4,1,f);
+    VSFileSystem::vs_read (&tmpvec.j,4,1,f);
+    VSFileSystem::vs_read (&tmpvec.k,4,1,f);
     vec.push_back (tmpvec);
   }
-  fclose (f);
+  f.Close();
   // Loading VTNM ...
 
-  size = getsize ("vtnm.wcp");
-
-  f=fopen ("vtnm.wcp","rb");
-  if (f == NULL) {
+  err = f.OpenReadOnly( "vtnm.wcp", BSPFile);
+  if (err>Ok) {
     printf ("Cannot open file\n");
     return;
   }
+  size = f.Size();
   for (i=0;i<size;i+=12) {
-    fread (&x,4,1,f);
-    fread (&y,4,1,f);
-    fread (&z,4,1,f);
+    f.Read(&x,4,1,f);
+    f.Read(&y,4,1,f);
+    f.Read(&z,4,1,f);
     //    add_to_vector_list (normals,x,y,z);
   }
-  fclose (f);
+  f.Close();
 // Loading FACE ...
 
-  size = getsize ("face.wcp");
-
-  f=fopen ("face.wcp","rb");
-  if (f == NULL)
+  err = f.OpenReadOnly( "face.wcp", BSPFile);
+  if (err>Ok)
     {
       printf ("Cannot open file\n");
       return;
     }
   
+  size = f.Size();
   for (i=0;i<size;i+=28)
         {
 
@@ -209,39 +210,38 @@ void load (vector <bsp_polygon> &tri) {
         long unknown2;
         long end;
 
-        fread (&normal_number,4,1,f);
-        fread (&unknown1,4,1,f);
-        fread (&texture,4,1,f);
-        fread (&face_number,4,1,f);
-        fread (&number_of_vertices,4,1,f);
-        fread (&unknown2,4,1,f);
-        fread (&end,4,1,f);
+        VSFileSystem::vs_read (&normal_number,4,1,f);
+        VSFileSystem::vs_read (&unknown1,4,1,f);
+        VSFileSystem::vs_read (&texture,4,1,f);
+        VSFileSystem::vs_read (&face_number,4,1,f);
+        VSFileSystem::vs_read (&number_of_vertices,4,1,f);
+        VSFileSystem::vs_read (&unknown2,4,1,f);
+        VSFileSystem::vs_read (&end,4,1,f);
 
 	numberof.push_back (number_of_vertices);
         }
 
-fclose (f);
+	f.Close();
 // Loading FVRT ...
 
-size = getsize ("fvrt.wcp");
-
-f=fopen ("fvrt.wcp","rb");
-if (f == NULL)
+err = f.OpenReadOnly( "fvrt.wcp", BSPFile);
+if (err>Ok)
         {
         printf ("Cannot open file\n");
         return;
         }
 
+size = f.Size();
 for (i=0;i<size;i+=16)
         {
-        fread (&vert,4,1,f);
-        fread (&light,4,1,f);
-        fread (&fx,4,1,f);
-        fread (&fy,4,1,f);
+        VSFileSystem::vs_read (&vert,4,1,f);
+        VSFileSystem::vs_read (&light,4,1,f);
+        VSFileSystem::vs_read (&fx,4,1,f);
+        VSFileSystem::vs_read (&fy,4,1,f);
 	vertexnum.push_back (vert);
         }
 
- fclose (f);
+ f.CLose();
  Vector thevec;;
  int targetvec=0;
  for (int i=0;i<numberof.size();i++) {
@@ -278,9 +278,9 @@ int main(int argc, char * argv) {
  }
  bsp = buildbsp (bsp,tri,triplane, 0);
  if (bsp) {
-   o = fopen ("output.bsp", "wb");
+   fo.OpenCreateWrite( "output.bsp", BSPFile);
    write_bsp_tree(bsp,0);
-   fclose (o);
+   fo.Close()
    bsp_stats (bsp);
    FreeBSP (&bsp);
  }	
@@ -314,7 +314,7 @@ bsp_tree * buildbsp(bsp_tree * bsp,vector <bsp_polygon> &tri, vector <bsp_tree> 
       select = rand()%tri.size();
     }
     if (select >=tri.size()) {
-      fprintf (stderr,"Error Selecting tri for splittage");
+      VSFileSystem::vs_fprintf (stderr,"Error Selecting tri for splittage");
       return NULL;
     }	
     temp->a=triplane[select].a;
@@ -520,9 +520,9 @@ void bsp_stats (bsp_tree * tree) {
     if (numends>0)
       average_height /=numends;
   }
-  fprintf (stderr,"Num Nodes: %d, NumEnds: %d\n", numnodes,numends);
-  fprintf (stderr,"Min Height: %d, Max Height: %d\n",minheight, maxheight);
-  fprintf (stderr,"Average Height %f\n", average_height);
+  VSFileSystem::vs_fprintf (stderr,"Num Nodes: %d, NumEnds: %d\n", numnodes,numends);
+  VSFileSystem::vs_fprintf (stderr,"Min Height: %d, Max Height: %d\n",minheight, maxheight);
+  VSFileSystem::vs_fprintf (stderr,"Average Height %f\n", average_height);
 }
 
 static void display_bsp_tree(bsp_tree * tree)
@@ -629,9 +629,9 @@ printf ("}\n");
 static void wrtf(float f) {
 	union { float fval; unsigned int ival; } t;
 	t.fval = f; t.ival = le32_to_cpu(t.ival);
-	(void) fwrite(&t.fval, sizeof t.fval, 1, o);
+	fo.Write(&t.fval, sizeof t.fval);
 }
-static void wrtb(const bool b) { (void) fwrite (&b, sizeof(bool), 1, o); }
+static void wrtb(const bool b) { fo.Write(&b, sizeof(bool)); }
 
 
 void write_bsp_tree (bsp_tree *tree,int level)//assume open file

@@ -25,13 +25,13 @@ void Mesh::RestoreCullFace (int whichdrawqueue) {
 }
 void Mesh::SelectCullFace (int whichdrawqueue) {
 }
-void Mesh::CreateLogos(int faction, Flightgroup * fg) {
+void Mesh::CreateLogos(struct MeshXML *, int faction, Flightgroup * fg) {
 }
-Texture * Mesh::TempGetTexture(std::string filename, std::string factionname, GFXBOOL detail )const {
+Texture * Mesh::TempGetTexture(struct MeshXML *, std::string filename, std::string factionname, GFXBOOL detail )const {
 	return NULL;
 }
    
-Texture * Mesh::TempGetTexture (int index, std::string factionname)const {
+Texture * Mesh::TempGetTexture (struct MeshXML*, int index, std::string factionname)const {
 	return NULL;    
 }
 const GFXMaterial &Mesh::GetMaterial () {
@@ -56,6 +56,7 @@ Logo * createLogo(int numberlogos,Vector* center, Vector* normal, float* sizes, 
 	return NULL;
 }
 
+extern Hashtable<std::string, std::vector <Mesh*>, 127> bfxmHashTable;
 Mesh::~Mesh()
 {
 	if(!orig||orig==this)
@@ -63,6 +64,19 @@ Mesh::~Mesh()
 	  delete vlist;
 	  if (meshHashTable.Get(hash_name)==this)
 	    meshHashTable.Delete(hash_name);
+          vector <Mesh *>* hashers = bfxmHashTable.Get(hash_name);
+          vector <Mesh *>::iterator finder;
+          if (hashers) {
+            for (int i=hashers->size()-1;i>=0;--i) {
+              if ((*hashers)[i]==this) {
+                hashers->erase (hashers->begin()+i);
+                if (hashers->empty()) {
+                  bfxmHashTable.Delete(hash_name);
+                  delete hashers;
+                }
+              }
+            }
+          }
 	  
 	  orig->refcount--;
 	  //printf ("orig refcount: %d",refcount);
@@ -71,10 +85,10 @@ Mesh::~Mesh()
 	}
 }
 
-void Mesh::Draw(float lod, const Matrix &m, float toofar, short cloak, float nebdist, unsigned char damage, bool renormalize)
+void Mesh::Draw(float lod, const Matrix &m, float toofar, int cloak, float nebdist, unsigned char damage, bool renormalize) //short fix
 {
 }
-void Mesh::DrawNow(float lod,  bool centered, const Matrix &m, short cloak, float nebdist) {
+void Mesh::DrawNow(float lod,  bool centered, const Matrix &m, int cloak, float nebdist) { //short fix
 }
 void Mesh::ProcessZFarMeshes () {
 }

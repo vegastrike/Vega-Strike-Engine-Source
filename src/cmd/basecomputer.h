@@ -47,6 +47,7 @@ public:
         MISSIONS,           // Show available missions.
         NEWS,               // Show news items.
         INFO,				// Show basic info.
+		LOADSAVE,           // LOAD SAVE
         DISPLAY_MODE_COUNT, // Number of display modes.
         NULL_DISPLAY = DISPLAY_MODE_COUNT,   // No display.
     };
@@ -87,9 +88,28 @@ protected:
         TransactionList() : picker(NULL), transaction(NULL_TRANSACTION) {};
     };
 
+    class LoadSaveQuitConfirm : public WindowController {
+        BaseComputer *m_parent;
+        std::string type;
+        std::string text;
+    public:
+        
+        // CONSTRUCTION.
+        LoadSaveQuitConfirm(BaseComputer* player, std::string confirmtype, std::string text) : m_parent(player), type(confirmtype), text(text) {};
+        virtual ~LoadSaveQuitConfirm(void) {};
+        
+        // Set up the window and get everything ready.
+        virtual void init(void);
+        
+        // Process a command event from the window.
+        virtual bool processWindowCommand(const EventCommandId& command, Control* control);
+    };
+    friend class LoadSaveQuitConfirm;
     // HANDLERS
     // The selection in the News picker changed.
     bool newsPickerChangedSelection(const EventCommandId& command, Control* control);
+    // The selection in the News picker changed.
+    bool loadSavePickerChangedSelection(const EventCommandId& command, Control* control);
     // Something in a Picker was selected.
     bool pickerChangedSelection(const EventCommandId& command, Control* control);
     // Buy an item from the cargo list.
@@ -110,10 +130,21 @@ protected:
     bool sellUpgrade(const EventCommandId& command, Control* control);
     // Buy ship from the base.
     bool buyShip(const EventCommandId& command, Control* control);
+    // Sell ship from your stock
+    bool sellShip(const EventCommandId& command, Control* control);
     // Accept a mission.
     bool acceptMission(const EventCommandId& command, Control* control);
-    // Show options.
-    bool showOptionsMenu(const EventCommandId& command, Control* control);
+    // Quit Game
+    bool actionConfirmedLoadGame();
+    bool actionLoadGame(const EventCommandId& command, Control* control);
+    // Save Game
+    bool actionConfirmedSaveGame();
+    bool actionSaveGame(const EventCommandId& command, Control* control);
+    // Load Game
+    bool actionConfirmedQuitGame();
+    bool actionQuitGame(const EventCommandId& command, Control* control);
+
+
     // Show the player's basic information.
     bool showPlayerInfo(const EventCommandId& command, Control* control);
     // Show the stats on the player's current ship.
@@ -130,7 +161,8 @@ protected:
     bool changeToMissionsMode(const EventCommandId& command, Control* control);
     // Change display mode to INFO.
     bool changeToInfoMode(const EventCommandId& command, Control* control);
-
+    // Change display mode to LOAD/SAVE
+    bool changeToLoadSaveMode(const EventCommandId& command, Control* control);
     // Redo the title string.
     void recalcTitle(void);
 
@@ -154,11 +186,11 @@ protected:
     // Update the controls when the selection for a transaction changes.
     void updateTransactionControlsForSelection(TransactionList* list);
 
-	// Hide the controls that commit transactions.
-	void hideCommitControls(void);
+    // Hide the controls that commit transactions.
+    void hideCommitControls(void);
 
-	// Update the commit controls in the Cargo screen, since we have three of them.
-	void configureCargoCommitControls(const Cargo& item, TransactionType trans);
+    // Update the commit controls in the Cargo screen, since we have three of them.
+    void configureCargoCommitControls(const Cargo& item, TransactionType trans);
 
     // Make sure the info in the transaction lists is gone.
     void resetTransactionLists(void);
@@ -166,20 +198,22 @@ protected:
     // Load the controls for the CARGO display.
     void loadCargoControls(void);
 
-	// Buy some items from the Cargo list.  Use -1 for quantity to buy all of the item.
-	bool buySelectedCargo(int requestedQuantity);
+    // Buy some items from the Cargo list.  Use -1 for quantity to buy all of the item.
+    bool buySelectedCargo(int requestedQuantity);
 
-	// The max number of a particular item this player can buy.  Limits by price, cargo space, etc.
-	int maxQuantityForPlayer(const Cargo& item, int suggestedQuantity);
+    // The max number of a particular item this player can buy.  Limits by price, cargo space, etc.
+    int maxQuantityForPlayer(const Cargo& item, int suggestedQuantity);
 
-	// Sell some items from the Cargo list.  Use -1 for quantity to buy all of the item.
-	bool sellSelectedCargo(int requestedQuantity);
+    // Sell some items from the Cargo list.  Use -1 for quantity to buy all of the item.
+    bool sellSelectedCargo(int requestedQuantity);
 
     // Load the controls for the MISSIONS display.
     void loadShipDealerControls(void);
 
     // Load the controls for the NEWS display.
     void loadNewsControls(void);
+
+    void loadLoadSaveControls(void);
 
     // Load the controls for the MISSIONS display.
     void loadMissionsControls(void);
@@ -204,8 +238,8 @@ protected:
     // Contruct the controls in code.
     void constructControls(void);
 
-	GFXColor getColorForGroup(std::string id);
-	
+    GFXColor getColorForGroup(std::string id);
+    
     // Get a filtered list of items from a unit.
     void loadMasterList(Unit *un, const vector<string>& filterthis,const vector<string>& invfilterthis, bool removezero, TransactionList& list);
 
@@ -240,7 +274,6 @@ protected:
     class UpgradeOperation;
     class BuyUpgradeOperation;
     class SellUpgradeOperation;
-    class OptionsMenu;
 
     friend class UpgradeOperation;
     friend class BuyUpgradeOperation;

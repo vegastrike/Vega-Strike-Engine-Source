@@ -28,7 +28,7 @@
 
 //struct glVertex;
 class Mesh;
-struct Texture;
+class Texture;
 class Vector;
 class Logo{
 	int numlogos;
@@ -37,7 +37,7 @@ class Logo{
 	GFXVertexList *vlist;
 	Texture* Decal;
 
-	static Hashtable<int, Logo, char[257]> decalHash;
+	static Hashtable<int, Logo, 257> decalHash;
 	Logo() { }
  protected:
 	friend class Mesh;

@@ -4,7 +4,7 @@
 #include <Python.h>
 #include <string>
 #include <compile.h>
-extern Hashtable < std::string,PyCodeObject , char [1023]> compiled_python;
+extern Hashtable < std::string, PyCodeObject, 1023> compiled_python;
 class PythonBasicType {
  public:
   string objects;

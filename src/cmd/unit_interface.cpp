@@ -59,7 +59,8 @@ static string beautify (const std::string &input) {
 }
 
 static float usedPrice (float percentage) {
-  return .5*percentage;
+  static float shipSellback=XMLSupport::parse_float(vs_config->getVariable("economics","upgrade_sellback_price",".5"));
+  return shipSellback*percentage;
 }
 bool final_cat (const std::string &cat) {
   if (cat.empty())
@@ -441,7 +442,7 @@ void UpgradingInfo::SetupCargoList () {
 		for (int i=len-1;i>=0;i--) {
 			string tmp = tostring(len-i-1)+" "+getSaveString(playernum,news_name,i);
 			CargoList->AddTextItem(tmp.c_str(),getSaveString(playernum,news_name,i).c_str());
-			fprintf (stderr,"<*>%s",tmp.c_str());
+			VSFileSystem::vs_fprintf (stderr,"<*>%s",tmp.c_str());
 			
 		}
 
@@ -450,7 +451,7 @@ void UpgradingInfo::SetupCargoList () {
       }else {
 	bool addedsomething=false;
 	if (curcategory.empty()) {
-	  int pos=title.find("Category: ",0);
+	  string::size_type pos=title.find("Category: ",0);
 	  if (pos!=string::npos) {
 	    title=title.substr(0,pos);
 	  }
@@ -463,7 +464,7 @@ void UpgradingInfo::SetupCargoList () {
 	  }
 	}
 	if (!curcategory.empty()) {
-	  int pos=title.find("Category: ",0);
+	  string::size_type pos=title.find("Category: ",0);
 	  if (pos!=string::npos) {
 	    title=title.substr(0,pos);
 	  }
@@ -524,7 +525,7 @@ void UpgradingInfo::SetupCargoList () {
 			  string printstr;
 			  if (mode==MISSIONMODE) {
 				  string tmpstr ((*CurrentList)[i].cargo.content);
-				  int pos=tmpstr.rfind("/",tmpstr.size()-2);
+				  string::size_type pos=tmpstr.rfind("/",tmpstr.size()-2);
 				  if (pos!=string::npos) {
 					  tmpstr=tmpstr.substr(pos+1,tmpstr.size()-(pos+1));
 					  tmpstr[0]=toupper(tmpstr[0]);
@@ -1037,7 +1038,7 @@ void UpgradingInfo::CommitItem (const char *inp_buf, int button, int state) {
 	  if (0==strcmp (input_buffer,"repair")) {
 	    free (input_buffer);
 	    char *unitdir =GetUnitDir(un->name.c_str());
-	    fprintf (stderr,"SOMETHING WENT WRONG WITH REPAIR UPGRADE");
+	    VSFileSystem::vs_fprintf (stderr,"SOMETHING WENT WRONG WITH REPAIR UPGRADE");
 	    input_buffer = strdup ((string(unitdir)+string(".blank")).c_str());
 	    free(unitdir);
 	  }
@@ -1379,7 +1380,7 @@ std::string GetNumKills(Unit *un) {
 		text+=FactionUtil::GetFactionName(i)+"  ";
 		relation = relation * 0.5;
 		relation = relation + 0.5;
-		int percent = relation * 100.0;
+		int percent = (int)(relation * 100.0);
 		text+=(XMLSupport::tostring (percent));
 		if (i<killlist->size()) {
 			text+=" | ";
@@ -1448,7 +1449,7 @@ vector <CargoColor>&UpgradingInfo::MakeMissionsFromSavegame(Unit *base) {
   Unit *un=_Universe->AccessCockpit()->GetParent();
   int playernum=UnitUtil::isPlayerStarship(un);
   if (playernum<0) {
-	  fprintf(stderr,"docked ship not a player");
+	  VSFileSystem::vs_fprintf(stderr,"docked ship not a player");
 	  TempCargo.clear();
 	  return TempCargo;
   }
@@ -1473,7 +1474,7 @@ vector <CargoColor>&UpgradingInfo::MakeMissionsFromSavegame(Unit *base) {
     c.cargo.price=0;
     c.cargo.content=getSaveString(playernum,miss_name,i);
 	c.cargo.description=getSaveString(playernum,miss_desc,i);
-	int index=c.cargo.content.rfind("/");
+	string::size_type index=c.cargo.content.rfind("/");
 	if (index==std::string::npos) {
 		c.cargo.category=std::string("missions");
 	} else {
@@ -1578,7 +1579,7 @@ vector <CargoColor>&UpgradingInfo::GetCargoFor(Unit *un) {//un !=NULL
       //      curcategory.push_back (string("briefings"));
       return MakeActiveMissionCargo ();
     }
-    fprintf (stderr,"Error in picking cargo lists");
+    VSFileSystem::vs_fprintf (stderr,"Error in picking cargo lists");
     return TempCargo;
   }
 vector <CargoColor>&UpgradingInfo::GetCargoList () {

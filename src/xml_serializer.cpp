@@ -1,16 +1,20 @@
 #include "xml_serializer.h"
 #include "cmd/unit_generic.h"
 #include "cmd/images.h"
-#include "vs_path.h"
+#include "vsfilesystem.h"
 #include "configxml.h"
 #include "vs_globals.h"
 #include "vegastrike.h"
 #include "networking/const.h"
 ///Assumes that the tag is  <Mount type=\"  and that it will finish with " ></Mount>
 using namespace XMLSupport;
+using namespace VSFileSystem;
 
 std::string intStarHandler (const XMLType &input,void *mythis) {
   return XMLSupport::tostring(*input.w.i);
+}
+std::string uintStarHandler (const XMLType &input,void *mythis) {
+  return XMLSupport::tostring(*input.w.ui);
 }
 std::string floatStarHandler (const XMLType &input,void *mythis) {
   return XMLSupport::tostring(*input.w.f);
@@ -21,9 +25,11 @@ std::string fabsFloatStarHandler (const XMLType &input,void *mythis) {
 std::string absIntStarHandler (const XMLType &input,void *mythis) {
   return XMLSupport::tostring((int)abs(*input.w.i));
 }
+/*
 std::string absShortStarHandler (const XMLType &input,void *mythis) {
   return XMLSupport::tostring((int)abs(*input.w.s));
 }
+*/
 std::string scaledFloatStarHandler (const XMLType &input,void *mythis) {
   return XMLSupport::tostring((float)((*input.w.f)/XMLSupport::parse_float(input.str)));
 }
@@ -46,12 +52,16 @@ std::string charStarHandler (const XMLType &input, void*mythis) {
 std::string ucharStarHandler (const XMLType &input, void*mythis) {
   return XMLSupport::tostring(*input.w.uc);
 }
+/*
 std::string shortStarHandler (const XMLType &input, void*mythis) {
   return XMLSupport::tostring(*input.w.s);
 }
+*/
+/*
 std::string ushortStarHandler (const XMLType &input, void*mythis) {
   return XMLSupport::tostring(*input.w.us);
 }
+*/
 std::string negationCharStarHandler (const XMLType &input, void*mythis) {
   return XMLSupport::tostring(-(*input.w.c));
 }
@@ -81,66 +91,62 @@ std::string lessNeg1Handler (const XMLType &input, void *mythis) {
 }
 
 std::string cloakHandler(const XMLType &input, void *mythis) { 
-  return XMLSupport::tostring (((*input.w.s)==-1)?1:0);
+  return XMLSupport::tostring (((*input.w.i)==-1)?1:0); // short fix
 }
+/*
 std::string shortToFloatHandler(const XMLType &input, void *mythis) { 
   return XMLSupport::tostring ((float)(((float)(*input.w.s))/32767.));
 }
+*/
 
-void XMLElement::Write (FILE * fp, void * mythis) {
-  fprintf (fp," %s=\"%s\"",elem.c_str(),((*handler)(value,mythis)).c_str());
+std::string intToFloatHandler(const XMLType &input, void *mythis) { 
+  return XMLSupport::tostring ((float)( ((float)(*input.w.i))/ ((float)(2147483647)) ) );
 }
-static void Tab (FILE * fp) {
-  fprintf (fp,"\t");
+
+void XMLElement::Write (VSFileSystem::VSFile & f, void * mythis) {
+  f.Fprintf (" %s=\"%s\"",elem.c_str(),((*handler)(value,mythis)).c_str());
 }
-static void Tab (FILE * fp, int level) {
+static void Tab (VSFileSystem::VSFile & f) {
+  f.Fprintf ("\t");
+}
+static void Tab (VSFileSystem::VSFile & f, int level) {
   for (int i=0;i<level;i++) {
-    Tab (fp);
+    Tab (f);
   }
 }
-void XMLnode::Write (FILE* fp, void *mythis, int level) {
-  Tab(fp,level);fprintf (fp,"<%s",val.c_str());
+void XMLnode::Write (VSFileSystem::VSFile & f, void *mythis, int level) {
+  Tab(f,level);f.Fprintf ("<%s",val.c_str());
   for (unsigned int i=0;i<elements.size();i++) {
-    elements[i].Write (fp,mythis);
+    elements[i].Write (f,mythis);
   }
   if (subnodes.empty()) {
-    fprintf (fp,"/>\n");    
+    f.Fprintf ("/>\n");    
   } else {
-    fprintf (fp,">\n");
+    f.Fprintf (">\n");
     for (unsigned int i=0;i<subnodes.size();i++) {
-      subnodes[i].Write (fp,mythis,level+1);
+      subnodes[i].Write (f,mythis,level+1);
     }
-    Tab(fp,level);fprintf (fp,"</%s>\n",val.c_str());
+    Tab(f,level);f.Fprintf ("</%s>\n",val.c_str());
   }
 }
 void XMLSerializer::Write (const char * modificationname) {
-  std::string savedunitpath;
   if (modificationname)
     if (strlen(modificationname)!=0) 
       savedir=modificationname;
 
-  // If in network mode on client side we expect saves to be in ./save
-  if( Network==NULL && !SERVER)
-	  savedunitpath=vs_config->getVariable ("data","serialized_xml","serialized_xml");
-  else if( !SERVER)
-	  savedunitpath = "save";
-  // With account server we expect them in the ./accounts dir
-  else if( SERVER==2)
-	  savedunitpath = "accounts";
-  // With account server we expect them in the ./accountstmp dir
-  else if( SERVER==1)
-	  savedunitpath = "accountstmp";
-
-  MakeSharedPath (savedunitpath);
-  string retdir =MakeSharedPath (savedunitpath+string("/")+savedir);
-  FILE * fp =fopen ((retdir+string("/")+filename).c_str(),"w");
-  if (!fp) {
+  VSFileSystem::CreateDirectoryHome( VSFileSystem::savedunitpath+"/"+savedir);
+  VSFile f;
+  //string filepath( savedir+"/"+this->filename);
+  //cerr<<"Saving Unit to : "<<filepath<<endl;
+  VSError err = f.OpenCreateWrite( savedir+"/"+this->filename, UnitFile);
+  if (err>Ok) {
+    fprintf( stderr, "!!! ERROR : Writing saved unit file : %s\n", f.GetFullPath().c_str() );
     return;
   }
   for (unsigned int i=0;i<topnode.subnodes.size();i++) {
-    topnode.subnodes[i].Write (fp,mythis,0);
+    topnode.subnodes[i].Write (f,mythis,0);
   }
-  fclose (fp);
+  f.Close();
 }
 
 static string TabString( int level) {

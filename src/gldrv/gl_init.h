@@ -47,7 +47,7 @@ extern "C"
    recent gl.h's do.  However, versions of Mesa as recent as 3.2.1
    don't do this, so we have to work around it.
 */
-#undef GL_EXT_compiled_vertex_array
+//#undef GL_EXT_compiled_vertex_array
 
 /* Shouldn't need to include glext.h if gl.h is recent, but alas we can't
  * count on that...  */

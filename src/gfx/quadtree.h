@@ -3,7 +3,7 @@
 #include "quadsquare.h"
 #include "xml_support.h"
 #include "matrix.h"
-struct Texture;
+class Texture;
 /** 
  * This class is a wrapper class for quadsquare
  * It takes care of activating textures, having possession of the vlist

@@ -93,7 +93,7 @@ public:
 public:
   HaloSystem halos;
 protected:
-  int nummesh()const {return ((int)meshdata.size())-1;}
+  int nummesh()const {return ((int)this->meshdata.size())-1;}
 
 public:
 
@@ -106,7 +106,7 @@ public:
   ///Sets the camera to be within this unit.
   void UpdateHudMatrix(int whichcam);
   ///What's the HudImage of this unit
-  Sprite * getHudImage ()const ;
+  VSSprite * getHudImage ()const ;
   ///Draws this unit with the transformation and matrix (should be equiv) separately
   virtual void Draw(const Transformation & quat = identity_transformation, const Matrix &m = identity_matrix);
   virtual void DrawNow(const Matrix &m = identity_matrix, float lod=1000000000);
@@ -136,20 +136,10 @@ public:
 protected:
   ///fils in corner_min,corner_max and radial_size
   //void calculate_extent(bool update_collide_queue);
-  ///Builds a BSP tree from either the hull or else the current meshdata[] array
-  void BuildBSPTree (const char *filename, bool vplane=false, Mesh * hull=NULL);//if hull==NULL, then use meshdata **
   ///returns -1 if unit cannot dock, otherwise returns which dock it can dock at
 
 public:
   ///Updates the collide Queue with any possible change in sectors
-  ///Gets the minimum distance away from the point in 3space
-  double getMinDis(const QVector &pnt);//for clicklist
-  ///queries the ship with a directed ray
-  float querySphereClickList (const QVector &st, const QVector &dir, float err) const;//for click list
-  ///Queries the BSP tree with a world space st and end point. Returns the normal and distance on the line of the intersection
-  Unit * queryBSP (const QVector &st, const QVector & end, Vector & normal, float &distance, bool ShieldBSP=true);
-  ///queries the BSP with a world space pnt, radius err.  Returns the normal and distance of the plane to the shield. If Unit returned not NULL, that subunit hit
-  Unit * queryBSP (const QVector &pnt, float err, Vector & normal, float &dist,  bool ShieldBSP);
   ///Queries if this unit is within a given frustum
   bool queryFrustum (double frustum[6][4]) const;
 
@@ -232,12 +222,12 @@ public:
 		static float cutoff =XMLSupport::parse_float (vs_config->getVariable( "graphics","warp_stretch_cutoff","500000"))*XMLSupport::parse_float(vs_config->getVariable("physics","game_speed","1"));
 		static float cutoffcutoff=  cutoff*cutoff;
 		
-		if (GetVelocity().MagnitudeSquared()<cutoffcutoff) {
+		if (this->GetWarpVelocity().MagnitudeSquared() < cutoffcutoff) {
 			return ctm;
 		}else {
 			Matrix k(ctm);
 			
-			float speed = GetVelocity().Magnitude();
+			float speed = this->GetWarpVelocity().Magnitude();
 			//Matrix scalar=identity_matrix;
 			
 			static float maxstretch = XMLSupport::parse_float (vs_config->getVariable("graphics","warp_stretch_max","4"));

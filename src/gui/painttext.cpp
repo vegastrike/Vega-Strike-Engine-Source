@@ -493,7 +493,7 @@ void PaintText::parseFragmentsWithCharBreak(
 
     while(curPos < endPos) {
         // Is there a format char left in this string?
-        const int formatPos = m_text.find(DT_FORMAT_CHAR, curPos);
+        const string::size_type formatPos = m_text.find(DT_FORMAT_CHAR, curPos);
         if(formatPos == std::string::npos || formatPos >= endPos) {
             // No format char.
             addFragment(line, endPos, curPos, curWidth);
@@ -624,7 +624,7 @@ void PaintText::parseFragmentsWithWordBreak(
     //  then call parseFragmentsWithCharBreak once we know how far to go.
     while(curPos < endPos) {
         // Is there a format char left in this string?
-        const int formatPos = m_text.find(DT_FORMAT_CHAR, curPos);
+        const string::size_type formatPos = m_text.find(DT_FORMAT_CHAR, curPos);
         int endFragPos = formatPos;
         if(formatPos == std::string::npos || formatPos >= endPos) {
             // No format char.

@@ -3,8 +3,14 @@
 #ifndef PY_INIT_H_
 #define PY_INIT_H_
 #include "gfx/vec.h"
-#ifdef USE_BOOST_129
+#ifndef USE_BOOST_128
+#if defined (_MSC_VER) && _MSC_VER<=1200
+#define Vector Vactor
+#endif
 #include <boost/python.hpp>
+#if defined (_MSC_VER) && _MSC_VER<=1200
+#undef Vector
+#endif
 #else
 #include <boost/python/detail/extension_class.hpp>
 #endif
@@ -17,7 +23,7 @@ public:
 };
 
 BOOST_PYTHON_BEGIN_CONVERSION_NAMESPACE
-#ifdef USE_BOOST_129
+#ifndef USE_BOOST_128
 /*
 typedef boost::tuples::tuple<double,double,double> python_wector;
 struct to_python <Vector> {
@@ -27,6 +33,50 @@ struct to_python <Vector> {
 	}
 };
 */
+struct my_builtin_to_python {
+	BOOST_STATIC_CONSTANT(bool, uses_registry = false);
+
+	
+};
+
+#ifndef BOOST_PYTHON_TO_PYTHON_BY_VALUE
+# define BOOST_PYTHON_RETURN_TO_PYTHON_BY_VALUE(T, expr)        \
+    template <class MYTYPE> struct to_python_value;                  \
+    template <> struct to_python_value<T&>                      \
+	: my_builtin_to_python                             \
+    {                                                           \
+        inline PyObject* operator()(T const& x) const           \
+        {                                                       \
+            return expr;                                      \
+        }                                                       \
+    };                                                          \
+    template <> struct to_python_value<T const&>                \
+        : my_builtin_to_python                             \
+    {                                                           \
+        inline PyObject* operator()(T const& x) const           \
+        {                                                       \
+            return expr;                                      \
+        }                                                       \
+    };
+
+
+# define BOOST_PYTHON_ARG_TO_PYTHON_BY_VALUE(T, expr)   \
+    namespace converter                                 \
+    {                                                   \
+	  template <class MYTYPE> struct arg_to_python;		    \
+      template <> struct arg_to_python< T >             \
+        : ::boost::python::handle<>                     \
+      {                                                 \
+          arg_to_python(T const& x)                     \
+            : ::boost::python::handle<>(expr) {}        \
+      };                                                \
+    } 
+
+// Specialize argument and return value converters for T using expr
+# define BOOST_PYTHON_TO_PYTHON_BY_VALUE(T, expr)       \
+        BOOST_PYTHON_RETURN_TO_PYTHON_BY_VALUE(T,expr)  \
+        BOOST_PYTHON_ARG_TO_PYTHON_BY_VALUE(T,expr)
+#endif
 BOOST_PYTHON_TO_PYTHON_BY_VALUE(Vector, boost::python::to_python_value<boost::python::tuple> ()(boost::python::make_tuple((double)x.i,(double)x.j,(double)x.k)));
 BOOST_PYTHON_TO_PYTHON_BY_VALUE(QVector, boost::python::to_python_value<boost::python::tuple> ()(boost::python::make_tuple((double)x.i,(double)x.j,(double)x.k)));
 #else

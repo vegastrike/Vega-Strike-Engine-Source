@@ -15,7 +15,7 @@ Beam::Beam (const Transformation & trans, const weapon_info & clne, void * own, 
 
 Beam::~Beam () {
   VSDESTRUCT2
-  //  fprintf (stderr,"Deleting %x",this);
+  //  VSFileSystem::vs_fprintf (stderr,"Deleting %x",this);
 #ifdef BEAMCOLQ
   RemoveFromSystem(true);
 #endif

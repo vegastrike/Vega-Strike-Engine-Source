@@ -22,7 +22,7 @@
 /*
   xml Mission Scripting written by Alexander Rawass <alexannika@users.sourceforge.net>
 */
-
+#include <math.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <errno.h>
@@ -36,12 +36,13 @@
 #include "Python.h"
 #endif
 #include "python/python_class.h"
-#ifdef USE_BOOST_129
+#ifndef USE_BOOST_128
 #include <boost/python/class.hpp>
 #else
 #include <boost/python/detail/extension_class.hpp>
 #endif
 
+#include "cmd/unit_generic.h"
 #include "mission.h"
 
 void InitBase() {

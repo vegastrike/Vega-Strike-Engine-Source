@@ -2,7 +2,7 @@
 #include "networking/clientptr.h"
 #include "networking/lowlevel/vsnet_debug.h"
 #include "networking/lowlevel/netbuffer.h"
-#include "vs_path.h"
+#include "vsfilesystem.h"
 #include "cmd/unit_factory.h"
 #include "networking/fileutil.h"
 
@@ -16,6 +16,7 @@ extern vector<vector <string> > lookforUnit( const char * filename, int faction,
 /**** Authenticate a connected client                      ****/
 /**************************************************************/
 
+// Not used anymore
 void	NetServer::authenticate( ClientPtr clt, AddressIP ipadr, Packet& packet )
 {
 	Packet	packet2;
@@ -25,6 +26,7 @@ void	NetServer::authenticate( ClientPtr clt, AddressIP ipadr, Packet& packet )
 	Account *	elem = NULL;
 	NetBuffer netbuf( packet.getData(), packet.getDataLength());
 
+	char flags = 0;
 	// Get the callsign/passwd from network
 	callsign = netbuf.getString();
 	passwd = netbuf.getString();
@@ -44,9 +46,9 @@ void	NetServer::authenticate( ClientPtr clt, AddressIP ipadr, Packet& packet )
 	else
 	{
 		if( elem->isNew())
-			sendLoginAccept( clt, ipadr, 1);
+			sendLoginAccept( clt, ipadr, 1, flags);
 		else
-			sendLoginAccept( clt, ipadr, 0);
+			sendLoginAccept( clt, ipadr, 0, flags);
 	}
 }
 
@@ -72,7 +74,7 @@ ClientPtr NetServer::getClientFromSerial( ObjSerial serial)
 	return clt;
 }
 
-void	NetServer::sendLoginAccept( ClientPtr clt, AddressIP ipadr, int newacct)
+void	NetServer::sendLoginAccept( ClientPtr clt, AddressIP ipadr, int newacct, char flags)
 {
     COUT << "enter " << __PRETTY_FUNCTION__ << endl;
 
@@ -120,6 +122,10 @@ void	NetServer::sendLoginAccept( ClientPtr clt, AddressIP ipadr, int newacct)
 		// Put the save parts in buffers in order to load them properly
 		COUT<<"SAVE="<<saves[0].length()<<" bytes - XML="<<saves[1].length()<<" bytes"<<endl;
 		netbuf.Reset();
+
+		string datestr = _Universe->current_stardate.GetFullTrekDate();
+		cerr<<"SENDING STARDATE : "<<datestr<<endl;
+		netbuf.addString( datestr);
 		netbuf.addString( saves[0]);
 		netbuf.addString( saves[1]);
 
@@ -147,11 +153,21 @@ void	NetServer::sendLoginAccept( ClientPtr clt, AddressIP ipadr, int newacct)
 		string PLAYER_FACTION_STRING = cp->savegame->GetPlayerFaction();
 
         int saved_faction = FactionUtil::GetFaction( PLAYER_FACTION_STRING.c_str());
-		vector<vector <string> > path = lookforUnit( savedships[0].c_str(), saved_faction, false);
-		if( path.empty())
+		//vector<vector <string> > path = lookforUnit( savedships[0].c_str(), saved_faction, false);
+		bool exist = (VSFileSystem::LookForFile( savedships[0], VSFileSystem::UnitFile)<=VSFileSystem::Ok);
+		if( !exist)
 		{
 			// We can't find the unit saved for player -> send a login error
 			this->sendLoginError( clt, ipadr);
+			Packet p2;
+			// Send the account server a logout info
+			Unit * un = clt->game_unit.GetUnit();
+			if( p2.send( CMD_LOGOUT, un->GetSerial(), netbuf.getData(), netbuf.getDataLength(),
+						 SENDRELIABLE, NULL, acct_sock, __FILE__,
+						 PSEUDO__LINE__(162) ) < 0 )
+			{
+				COUT<<"ERROR sending LOGOUT to account server"<<endl;
+			}
 			cerr<<"WARNING : Unit file ("<<savedships[0]<<") not found for "<<callsign<<endl;
 			return;
 		}
@@ -174,28 +190,31 @@ void	NetServer::sendLoginAccept( ClientPtr clt, AddressIP ipadr, int newacct)
 		COUT<<"-> COCKPIT AFFECTED TO UNIT"<<endl;
 
         Packet packet2;
-		static string univ = vs_config->getVariable("data","universe_path","universe");
-		string reluniv = univ+"/"+universe_file;
-		netbuf.addString( reluniv);
+		netbuf.addString( universe_file);
 #ifdef CRYPTO
 		unsigned char * digest = new unsigned char[FileUtil::Hash.DigestSize()];
-		FileUtil::HashFileCompute( reluniv, digest);
+		FileUtil::HashFileCompute( universe_file, digest, UniverseFile);
 		// Add the galaxy filename with relative path to datadir
 		netbuf.addBuffer( digest, FileUtil::Hash.DigestSize());
 #endif
 
 		// Add the initial star system filename + hash if crypto++ support too
-		static string sys = vs_config->getVariable("data","sectors","sectors");
-		string relsys = sys+"/"+cp->savegame->GetStarSystem()+".system";
+		string relsys = cp->savegame->GetStarSystem()+".system";
 		netbuf.addString( relsys);
 
 		// Generate the starsystem before addclient so that it already contains serials
-		zonemgr->addZone( cp->savegame->GetStarSystem());
+		StarSystem * sts = zonemgr->addZone( cp->savegame->GetStarSystem());
+		int zoneid = _Universe->StarSystemIndex(sts);
 #ifdef CRYPTO
-		FileUtil::HashFileCompute( relsys, digest);
+		string sysxml;
+		if( (sysxml=zonemgr->getSystem( relsys))!="")
+			FileUtil::HashStringCompute( sysxml, digest);
+		else
+			FileUtil::HashFileCompute( relsys, digest, SystemFile);
 		netbuf.addBuffer( digest, FileUtil::Hash.DigestSize());
 		delete digest;
 #endif
+		netbuf.addShort( zoneid);
 		/*
 		cerr<<endl<<"BEGIN FULL BUFFER -------------------------------------------"<<endl<<endl;
 		cerr<<netbuf.getData()<<endl;

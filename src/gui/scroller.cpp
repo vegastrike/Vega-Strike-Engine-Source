@@ -57,7 +57,7 @@ void Scroller::setScrollPosition(int pos) {
     if(m_scrollPosition != newScrollPosition) {
         m_scrollPosition = newScrollPosition;
 
-        Slider* slider = dynamic_cast<Slider*>(childAt(SLIDER_INDEX));
+        Slider* slider = static_cast<Slider*>(childAt(SLIDER_INDEX));
         slider->setPosition(m_scrollPosition);
 
         sendCommand("Scroller::PositionChanged", this);
@@ -73,7 +73,7 @@ void Scroller::setRangeValues(int max, int visible, int min) {
         m_visible = visible;
         m_needLayout = true;
 
-        Slider* slider = dynamic_cast<Slider*>(childAt(SLIDER_INDEX));
+        Slider* slider = static_cast<Slider*>(childAt(SLIDER_INDEX));
         slider->setMaxMin(newMax, min);
         const float thumbLength = (float)visible / (max-min+1);
         // Note that impossible thumb lengths turn off the thumb.
@@ -98,7 +98,7 @@ void Scroller::setColor(const GFXColor& c) {
     childAt(UP_BUTTON_INDEX)->setColor(c);
 	if(isClear(m_thumbColor)) {
 		// If we don't have an explicit thumb color, calculate it.
-		Slider* slider = dynamic_cast<Slider*>(childAt(SLIDER_INDEX));
+		Slider* slider = static_cast<Slider*>(childAt(SLIDER_INDEX));
 		slider->setThumbColorBasedOnColor(c);
 	}
 
@@ -108,7 +108,7 @@ void Scroller::setColor(const GFXColor& c) {
 // The color of the thumb.
 void Scroller::setThumbColor(const GFXColor& c, const GFXColor& outline) {
     assert(childCount() == CHILD_CONTROL_COUNT);
-	Slider* slider = dynamic_cast<Slider*>(childAt(SLIDER_INDEX));
+	Slider* slider = static_cast<Slider*>(childAt(SLIDER_INDEX));
 	slider->setThumbColor(c, outline);
 }
 
@@ -206,8 +206,8 @@ void Scroller::calcLayout(void) {
     static const Size BUTTON_INSET = Size(.005,.005);
 
     // Get pointers to the buttons.
-    ScrollerButton* downButton = dynamic_cast<ScrollerButton*>( childAt(DOWN_BUTTON_INDEX) );
-    ScrollerButton* upButton = dynamic_cast<ScrollerButton*>( childAt(UP_BUTTON_INDEX) );
+    ScrollerButton* downButton = static_cast<ScrollerButton*>( childAt(DOWN_BUTTON_INDEX) );
+    ScrollerButton* upButton = static_cast<ScrollerButton*>( childAt(UP_BUTTON_INDEX) );
 
     // Make the buttons square, and at the bottom/right of the scroller.
     if(m_rect.size.height >= m_rect.size.width) {
@@ -295,7 +295,7 @@ bool Scroller::processCommand(const EventCommandId& command, Control* control) {
         setScrollPosition(scrollPosition()+1);
         return true;
     } else if(command == "Slider::PositionChanged") {
-        Slider* slider = dynamic_cast<Slider*>(childAt(SLIDER_INDEX));
+        Slider* slider = static_cast<Slider*>(childAt(SLIDER_INDEX));
         setScrollPosition(slider->position());
         return true;
     }

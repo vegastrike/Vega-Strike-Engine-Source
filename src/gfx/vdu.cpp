@@ -11,6 +11,8 @@
 #include "config_xml.h"
 #include "xml_support.h"
 #include "gfx/animation.h"
+#include "gfx/vsimage.h"
+
 ///ALERT to change must change enum in class
 const std::string vdu_modes [] = {"Target","Nav","Objectives","Comm","Weapon","Damage","Shield", "Manifest", "TargetManifest","View","Message"};
 string reformatName (string nam) {
@@ -27,15 +29,42 @@ string getUnitNameAndFgNoBase (Unit * target) {
       return hr+string(":")+reformatName(target->name);
     }
   }else if (target->isUnit()==UNITPTR){
-    if (!target->getFullname().empty()) {
-      return target->getFullname()+string(":")+reformatName(target->name);
-    }
+	if (fg) {
+	  if (fg->name!="Base"&&fg->name!="Asteroid"&&fg->name!="Nebula") {
+		  char* fgnum;
+		  vector<char> stack;
+		  int tempint=target->getFgSubnumber();
+		  do{
+			  stack.push_back((char)((tempint%10)+48));
+			  tempint/=10;
+		  }while(tempint);
+		  fgnum=(char*)malloc(sizeof(char)*(stack.size()+1));
+		  fgnum[stack.size()]=0;
+		  int offset=0;
+		  int end=stack.size()-1;
+		  while(end-offset>=0){
+			fgnum[offset]=(char)(stack[end-offset]);
+			offset++;
+          }
+		  string fgnstring=string(fgnum);
+		  free(fgnum);
+		  fgnum=NULL;
+		  static bool confignums=XMLSupport::parse_bool (vs_config->getVariable ("graphics","printFGsubID","false"));
+		  if(confignums){
+			return fg->name+" ="+fgnstring+"= : "+reformatName(target->getFullname());
+		  } else {
+			return fg->name+" : "+reformatName(target->getFullname());
+		  }
+	  } else if(fg->name=="Base"){
+		  if(reformatName(target->name)==(reformatName(target->getFullname()))){
+		    return reformatName(target->name);
+		  } else {
+		    return reformatName(target->name)+":"+target->getFullname();
+		  }
+	  }
+	}	 
   }
-  if (fg) {
-    if (fg->name!="Base"&&fg->name!="Asteroid"&&fg->name!="Nebula") {
-		return fg->name+":"+reformatName(target->name);
-    }
-  }
+  
   if (string("neutral")!=FactionUtil::GetFaction(target->faction)) {
     return /*string(_Universe->GetFaction(target->faction))+" "+*/reformatName(target->name);
   }
@@ -84,7 +113,7 @@ int parse_vdu_type (const char * x) {
 
 
 
-VDU::VDU (const char * file, TextPlane *textp, unsigned short modes, short rwws, short clls, unsigned short *ma, float *mh) :Sprite (file),tp(textp),posmodes(modes), rows(rwws), cols(clls),scrolloffset(0){
+VDU::VDU (const char * file, TextPlane *textp, unsigned short modes, short rwws, short clls, float *ma, float *mh) :VSSprite (file),tp(textp),posmodes(modes), rows(rwws), cols(clls),scrolloffset(0){
   thismode.push_back(MSG);
   if (_Universe->numPlayers()>1) {
     posmodes&=(~VIEW);
@@ -97,15 +126,15 @@ VDU::VDU (const char * file, TextPlane *textp, unsigned short modes, short rwws,
     got_target_info = false;
   else
     got_target_info = true;
-  SwitchMode();
+  SwitchMode( NULL);
 
   //  printf("\nVDU rows=%d,col=%d\n",rows,cols);
   //cout << "vdu" << endl;
 };
 
-void VDU::DrawTargetSpr (Sprite *s, float per, float &sx, float &sy, float &w, float &h) {
+void VDU::DrawTargetSpr (VSSprite *s, float per, float &sx, float &sy, float &w, float &h) {
   float nw,nh;
-  static bool HighQTargetSprites = XMLSupport::parse_bool(vs_config->getVariable("graphics","high_quality_sprites","false"));
+  static bool HighQTargetVSSprites = XMLSupport::parse_bool(vs_config->getVariable("graphics","high_quality_sprites","false"));
   static bool drawweapsprite = XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","draw_weapon_sprite","false"));
 
   GetPosition (sx,sy);
@@ -123,7 +152,7 @@ void VDU::DrawTargetSpr (Sprite *s, float per, float &sx, float &sy, float &w, f
     h=-h;
     w = fabs (w*per);
   }else {
-	  if (HighQTargetSprites) {
+	  if (HighQTargetVSSprites) {
 		  GFXBlendMode (SRCALPHA,INVSRCALPHA);
 	  }else {
 		  GFXBlendMode (ONE,ZERO);
@@ -137,7 +166,7 @@ void VDU::DrawTargetSpr (Sprite *s, float per, float &sx, float &sy, float &w, f
 		  s->Draw();
 	  s->SetSize (nw,nh);
 	  h = fabs(h);
-	  if (HighQTargetSprites) {
+	  if (HighQTargetVSSprites) {
 		  GFXBlendMode (ONE,ZERO);
 	  }else {
 		  GFXAlphaTest(ALWAYS,0);
@@ -303,29 +332,33 @@ void VDU::DrawVDUShield (Unit * parent) {
 
   h=fabs (h*.6);
   w=fabs (w*.6);
-  unsigned short armor[4];
+  float armor[8];
   GFXColor4f (.4,.4,1,1);
   GFXDisable (TEXTURE0);
   DrawShield (fs,rs,ls,bs,x,y,w,h);
   parent->ArmorData (armor);
   GFXColor4f (1,.6,0,1);
-  DrawShield (armor[0]/(float)StartArmor[0],armor[2]/(float)StartArmor[2],armor[3]/(float)StartArmor[3],armor[1]/(float)StartArmor[1],x,y,w/2,h/2);
+  DrawShield ((armor[0]+armor[2]+armor[4]+armor[6])/(float)(StartArmor[0]+StartArmor[2]+StartArmor[4]+StartArmor[6]),(armor[0]+armor[1]+armor[4]+armor[5])/(float)(StartArmor[0]+StartArmor[1]+StartArmor[4]+StartArmor[5]),(armor[2]+armor[3]+armor[6]+armor[7])/(float)(StartArmor[2]+StartArmor[3]+StartArmor[6]+StartArmor[7]),(armor[1]+armor[3]+armor[5]+armor[7])/(float)(StartArmor[1]+StartArmor[3]+StartArmor[5]+StartArmor[7]),x,y,w/2,h/2);
   GFXColor4f (1,parent->GetHullPercent(),parent->GetHullPercent(),1);
   GFXEnable (TEXTURE0);
   GFXColor4f (1,parent->GetHullPercent(),parent->GetHullPercent(),1);
   DrawTargetSpr (parent->getHudImage (),.25,x,y,w,h);
 
 }
-Sprite * getJumpImage () {
-  static Sprite s("jump-hud.spr");
+VSSprite * getJumpImage () {
+  static VSSprite s("jump-hud.spr");
   return &s;
 }
-Sprite * getSunImage () {
-  static Sprite s("sun-hud.spr");
+VSSprite * getSunImage () {
+  static VSSprite s("sun-hud.spr");
   return &s;
 }
-Sprite * getPlanetImage () {
-  static Sprite s("planet-hud.spr");
+VSSprite * getPlanetImage () {
+  static VSSprite s("planet-hud.spr");
+  return &s;
+}
+VSSprite * getNavImage () {
+  static VSSprite s("nav-hud.spr");
   return &s;
 }
 
@@ -342,7 +375,7 @@ void VDU::DrawTarget(Unit * parent, Unit * target) {
   DrawTargetSpr ((target->isUnit()!=PLANETPTR?target->getHudImage ():
 		  (target->GetDestinations().size()!=0? getJumpImage():
 		   (((Planet *)target)->hasLights()?getSunImage():
-		    getPlanetImage()))),.6,x,y,w,h);
+		    (target->getFullname().find("invisible")!=string::npos?getNavImage():getPlanetImage())))),.6,x,y,w,h);
   GFXDisable (TEXTURE0);    
   //sprintf (t,"\n%4.1f %4.1f",target->FShieldData()*100,target->RShieldData()*100);
   double mm=0;
@@ -368,7 +401,19 @@ void VDU::DrawTarget(Unit * parent, Unit * target) {
   st[i]='\0';
   char qr[256];
   static float game_speed = XMLSupport::parse_float (vs_config->getVariable("physics","game_speed","1"));
-  sprintf (qr,"Dis %.4f",((parent->Position()-target->Position()).Magnitude()-((target->isUnit()==PLANETPTR)?target->rSize():0))*10./game_speed);
+  static bool lie=XMLSupport::parse_bool (vs_config->getVariable("physics","game_speed_lying","true"));
+  if(lie){
+	  sprintf (qr,"Distance: %.2f",((parent->Position()-target->Position()).Magnitude()-((target->isUnit()==PLANETPTR)?target->rSize():0))/game_speed);
+  } else {
+	double dist=((parent->Position()-target->Position()).Magnitude()-((target->isUnit()==PLANETPTR)?target->rSize():0));
+	if(dist<100000){
+		sprintf (qr,"Distance: %.0f Meters",dist);
+	} else if (dist <100000000){
+		sprintf (qr,"Distance: %.0f Kilometers",dist/1000);
+	}else {
+		sprintf (qr,"Distance: %.2f LightSeconds",dist/300000000);
+	}
+  }
   strcat (st,qr);
   tp->Draw (MangleString (st,_Universe->AccessCamera()->GetNebula()!=NULL?.4:0),0,true);  
   GFXColor4f (.4,.4,1,1);
@@ -473,7 +518,7 @@ void VDU::DrawNav (const Vector & nav) {
   string nam="none";
   if (targ)
 	  nam= reformatName(targ->name);
-  sprintf (navdata,"Navigation\n----------\n%s\nTarget:\n  %s\nRelativeLocation\nx: %.4f\ny:%.4f\nz:%.4f\nDistance:\n%f",_Universe->activeStarSystem()->getName().c_str(),nam.c_str(),nav.i,nav.j,nav.k,lie?(10*nav.Magnitude()/game_speed):nav.Magnitude());
+  sprintf (navdata,"Navigation\n----------\n%s\nTarget:\n  %s\nRelativeLocation\nx: %.4f\ny:%.4f\nz:%.4f\nDistance:\n%f",_Universe->activeStarSystem()->getName().c_str(),nam.c_str(),nav.i,nav.j,nav.k,lie?(nav.Magnitude()/game_speed):nav.Magnitude());
   tp->Draw (MangleString (navdata,_Universe->AccessCamera()->GetNebula()!=NULL?.4:0),scrolloffset,true,true);  
   delete [] navdata;
 
@@ -484,7 +529,7 @@ void VDU::DrawComm () {
     GFXEnable (TEXTURE0);
     GFXDisable(LIGHTING);
 
-    comm_ani->DrawAsSprite(this);
+    comm_ani->DrawAsVSSprite(this);
     if (comm_ani->Done()) {
       if (thismode.size()>1) {
 	if (XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","switch_back_from_comms","true"))) {
@@ -822,13 +867,55 @@ void VDU::DrawVDUObjectives (Unit *parent) {
   tp->Draw(rez,offset);
 }
 
+bool VDU::SetWebcamAnimation ( ) {
+  if (comm_ani==NULL) {
+    if (posmodes&WEBCAM) {
+      comm_ani = new Animation();
+	  thismode.push_back(WEBCAM);
+	  comm_ani->Reset();
+	  return true;
+    }
+  }
+  return false;
+}
+void VDU::DrawWebcam( Unit * parent)
+{
+	int length;
+	char * netcam;
+	int playernum = _Universe->whichPlayerStarship( parent);
+	if( Network[playernum].hasWebcam())
+	{
+		netcam = Network[playernum].getWebcamFromNetwork( length);
+		if( netcam)
+		{
+			// Delete the previous displayed webcam shot if any
+			if( this->webcam)
+				delete webcam;
+			// Read the new one
+		    VSFile f( netcam, length, JPEGBuffer);
+			this->webcam = new Animation( &f);
+			delete netcam;
+		    GFXDisable (TEXTURE1);
+		    GFXEnable (TEXTURE0);
+		    GFXDisable(LIGHTING);
+			// Draw it
+		    webcam->DrawAsVSSprite(this);
+ 		    GFXDisable (TEXTURE0);
+		}
+	}
+	else
+	{
+	    tp->Draw (MangleString ("No webcam to view",_Universe->AccessCamera()->GetNebula()!=NULL?.4:0),scrolloffset,true);  
+	}
+}
+
 void VDU::Draw (Unit * parent, const GFXColor & color) {
   tp->col=color;
   GFXDisable(LIGHTING);
       GFXBlendMode(SRCALPHA,INVSRCALPHA);
       GFXEnable(TEXTURE0);
       GFXDisable(TEXTURE1);
-  Sprite::Draw();
+  VSSprite::Draw();
   //glDisable( GL_ALPHA_TEST);
   if (!parent) {
     return;
@@ -888,11 +975,18 @@ void VDU::Draw (Unit * parent, const GFXColor & color) {
 		else
 			str += " - #FF0000OFF";
 		str += "#000000\n";
-		str += "SD: "+_Universe->current_stardate.GetFullCurrentStarDate();
+		str += "SD: "+_Universe->current_stardate.GetFullTrekDate();
   		tp->Draw(MangleString (str.c_str(),_Universe->AccessCamera()->GetNebula()!=NULL?.4:0),0,true);
 	}
   }
   break;
+  case WEBCAM:
+  {
+  	if( Network!=NULL)
+	{
+		DrawWebcam( parent);
+	}
+  }
   case SCANNING:
 		if( !got_target_info)
 			DrawScanningMessage();
@@ -968,12 +1062,18 @@ void UpdateViewstyle (VIEWSTYLE &vs) {
     break;
   }
 }
-void VDU::SwitchMode() {
+void VDU::SwitchMode( Unit * parent) {
   if (!posmodes)
     return;
   // If we switch from SCANNING VDU VIEW_MODE we loose target info
   if( thismode.back()==SCANNING && Network!=NULL)
 		got_target_info = false;
+  // If we switch from WEBCAM VDU VIEW_MODE we stop dlding images
+  if( thismode.back()==WEBCAM && Network!=NULL && parent!=NULL)
+  {
+		int playernum = _Universe->whichPlayerStarship( parent);
+		Network[playernum].stopWebcamTransfer();
+  }
   if (thismode.back()==VIEW&&viewStyle!=CP_CHASE&&(thismode.back()&posmodes)) {
     UpdateViewstyle (viewStyle);
   }else {
@@ -990,4 +1090,10 @@ void VDU::SwitchMode() {
   // If we switch to SCANNING MODE we consider we lost target info
   if( thismode.back()==SCANNING && Network!=NULL)
 		got_target_info = false;
+  // If we switch to WEBCAM MODE we start dlding images
+  if( thismode.back()==WEBCAM && Network!=NULL && parent!=NULL)
+  {
+		int playernum = _Universe->whichPlayerStarship( parent);
+		Network[playernum].startWebcamTransfer();
+  }
 }

@@ -21,7 +21,7 @@
 
 #include "vsnet_address.h"
 #include "vsnet_socketset.h"
-#include "vsnet_socket.h"
+#include "vsnet_socketbase.h"
 #include "vsnet_thread.h"
 
 #include <queue>
@@ -32,8 +32,8 @@ protected:
     AddressIP _srv_ip; // own IP address structure of this server
 
 public:
-    ServerSocket( int fd, const AddressIP& adr, SocketSet& set )
-        : VsnetSocketBase( fd, set )
+    ServerSocket( int fd, const AddressIP& adr, const char* socktype, SocketSet& set )
+        : VsnetSocketBase( fd, socktype, set )
     {
         _srv_ip = adr;
     }
@@ -86,6 +86,9 @@ public:
 
 	// Accept a new connection
 	virtual SOCKETALT acceptNewConn( );
+
+    // Can't happen
+    virtual void lower_selected( ) { }
 
 private:
 	ServerSocketUDP( );

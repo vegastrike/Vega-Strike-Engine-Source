@@ -43,8 +43,9 @@ bolt_draw::~bolt_draw () {
 bolt_draw::bolt_draw () {
   boltdecals = new DecalQueue;
   if (!boltmesh) {
+    static float beam_offset =XMLSupport::parse_float (vs_config->getVariable("graphics","bolt_offset","-.2"));
     GFXVertex vtx[12];
-#define V(ii,xx,yy,zz,ss,tt) vtx[ii].x=xx;vtx[ii].y=yy;vtx[ii].z=zz;vtx[ii].i=0;vtx[ii].j=0;vtx[ii].k=1;vtx[ii].s=ss;vtx[ii].t=tt;
+#define V(ii,xx,yy,zz,ss,tt) vtx[ii].x=xx;vtx[ii].y=yy;vtx[ii].z=zz+beam_offset+.875;vtx[ii].i=0;vtx[ii].j=0;vtx[ii].k=1;vtx[ii].s=ss;vtx[ii].t=tt;
     V(0,0,0,-.875,0,.5);
     V(1,0,-1,0,.875,1);
     V(2,0,0,.125,1,.5);
@@ -209,7 +210,7 @@ Bolt::~Bolt () {
     (*target)[decal].erase(tmp);
   } else {
     //might as well look for potential faults! Doesn't cost us time
-    fprintf (stderr,"Bolt Fault! Not found in draw queue! Attempting to recover\n");
+    VSFileSystem::vs_fprintf (stderr,"Bolt Fault! Not found in draw queue! Attempting to recover\n");
     for (vector <vector <Bolt *> > *srch = &q->bolts;srch!=NULL;srch=&q->balls) {
       for (unsigned int mdecal=0;mdecal<(*srch).size();mdecal++) {
 	vector <Bolt *>::iterator mtmp= (*srch)[mdecal].begin();
@@ -217,7 +218,7 @@ Bolt::~Bolt () {
 	  std::find ((*srch)[mdecal].begin(),(*srch)[mdecal].end(),this);       
 	  if (mtmp!=(*srch)[mdecal].end()) {
 	    (*srch)[mdecal].erase (mtmp);
-	    fprintf (stderr,"Bolt Fault Recovered\n");
+	    VSFileSystem::vs_fprintf (stderr,"Bolt Fault Recovered\n");
 	  }
 	}
       }

@@ -1,10 +1,16 @@
-#include <map>
 #include <string>
 #include <vector>
+#include <map>
+
 #include "unit_generic.h"
 #include "unit_const_cache.h"
-std::map <StringIntKey,Unit*> UnitConstCache::unit_cache;
-std::map <std::string, Mesh*> WeaponMeshCache::unit_cache;
+
+#if (!defined(__GNUC__)) || !(defined(__GNUC__)&& ((__GNUC__ == 3 && __GNUC_MINOR__ >= 4)|| __GNUC__>3))
+std::map<StringIntKey,Unit*> UnitConstCache::unit_cache;
+std::map <std::string , Mesh*> WeaponMeshCache::unit_cache;
+#endif
+
+
 #if 0
 typedef std::map <keyval, Unit *> UnitCacheType;
 static UnitCacheType unit_cache;

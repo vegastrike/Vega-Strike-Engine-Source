@@ -42,7 +42,8 @@ namespace UnitUtil {
 			res = ((Planet *)my_unit)->hasLights();
 		}
 		return res;
-	}	int communicateTo(Unit *my_unit,Unit *other_unit,float mood){
+	}
+	int communicateTo(Unit *my_unit,Unit *other_unit,float mood){
 		if (!my_unit)return 0;
 		unsigned char sex=0;
 		Cockpit * tmp;
@@ -61,7 +62,7 @@ namespace UnitUtil {
 		if (!my_unit)return false;
 		Cockpit * tmp;
 		if ((tmp=_Universe->isPlayerStarship (my_unit))) {
-			Hashtable <std::string, Animation, char [63]> AniHashTable;
+			Hashtable <std::string, Animation, 63> AniHashTable;
 			Animation * ani= AniHashTable.Get(anim);
 			if (NULL==ani) {
 				ani = new Animation (anim.c_str());

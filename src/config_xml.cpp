@@ -46,7 +46,7 @@
 
 /* *********************************************************** */
 
-GameVegaConfig::GameVegaConfig(char *configfile): VegaConfig( configfile)
+GameVegaConfig::GameVegaConfig(const char *configfile): VegaConfig( configfile)
 {
 	/*
   configNodeFactory *domf = new configNodeFactory();
@@ -236,6 +236,8 @@ void GameVegaConfig::initCommandMap(){
   command_map["MusicVolumeInc"]=incmusicvol;
   command_map["MusicVolumeDec"]=decmusicvol;
 #endif
+  command_map["SetShieldsOneThird"]=FireKeyboard::SetShieldsOneThird;
+  command_map["SetShieldsTwoThird"]=FireKeyboard::SetShieldsTwoThird;
   command_map["SwitchControl"]=GameCockpit::SwitchControl;
   command_map["Respawn"]=GameCockpit::Respawn;
   command_map["TurretControl"]=GameCockpit::TurretControl;
@@ -244,6 +246,11 @@ void GameVegaConfig::initCommandMap(){
   command_map["TimeDec"]=dec_time_compression;
   command_map["TimeReset"]=reset_time_compression;
   // mapping from command string to keyboard handler
+  // Networking bindings
+
+
+  command_map["SwitchWebcam"]=FlyByKeyboard::SwitchWebcam ;
+  command_map["SwitchSecured"]=FlyByKeyboard::SwitchSecured ;
   command_map["ChangeCommStatus"]=FlyByKeyboard::ChangeCommStatus ;
   command_map["UpFreq"]=FlyByKeyboard::UpFreq ;
   command_map["DownFreq"]=FlyByKeyboard::DownFreq ;
@@ -277,6 +284,7 @@ void GameVegaConfig::initCommandMap(){
   command_map["SetVelocityRefKey"]=FlyByKeyboard::SetVelocityRefKey ;
   command_map["SetVelocityNullKey"]=FlyByKeyboard::SetNullVelocityRefKey ;
   command_map["ToggleGlow"]=FireKeyboard::ToggleGlow;
+  command_map["ToggleWarpDrive"]=FireKeyboard::ToggleWarpDrive;
   command_map["ToggleAnimation"]=FireKeyboard::ToggleAnimation;  
   command_map["CommAttackTarget"]=FireKeyboard::AttackTarget;
   
@@ -587,7 +595,11 @@ void GameVegaConfig::checkBind(configNode *node){
 	//cout << "Bound joy= " << joystick_nr << " button= " << button_nr << "to " << cmdstr << endl;
 	}
 	else{
-	  cout << "refusing to bind command to joystick (joy-nr too high)" << endl;
+          static bool first=true;
+          if (first) {
+            cout << "\nrefusing to bind command to joystick (joy-nr too high)" << endl;
+            first=false;
+          }
 	}
       }
     }

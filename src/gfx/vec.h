@@ -1,7 +1,19 @@
 #ifndef _3DMANIP_H_
 #define _3DMANIP_H_
+#include "config.h" // for Solaris
 #include "macosx_math.h"
 #include <math.h>
+
+#ifdef SOLARIS
+extern float __sqrtf( float);
+extern float __cosf( float);
+extern float __sinf( float);
+extern float __tanf( float);
+#define sqrtf __sqrtf
+#define cosf __cosf
+#define sinf __sinf
+#define tanf __tanf
+#endif
 
 #include "endianness.h"
 

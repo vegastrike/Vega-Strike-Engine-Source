@@ -37,7 +37,18 @@
 #include "cmd/unit_collide.h"
 #include "savegame.h"
 #include "networking/netclient.h"
-//vector<Vector> perplines;
+#ifndef USE_BOOST_128
+#if defined (_MSC_VER) && _MSC_VER<=1200
+#define Vector Vactor
+#endif
+#include <boost/python.hpp>
+#if defined (_MSC_VER) && _MSC_VER<=1200
+#undef Vector
+#endif
+#else
+#include <boost/python/detail/extension_class.hpp>
+#endif
+vector<Vector> perplines;
 //static SphereMesh *foo;
 //static Unit *earth;
 
@@ -79,11 +90,13 @@ StarSystem::StarSystem() {
   //AddStarsystemToUniverse(filename);
   time = 0;
   //_Universe->popActiveStarSystem ();
+  zone = 0;
 }
 StarSystem::StarSystem(const char * filename, const Vector & centr,const float timeofyear) {
   no_collision_time=0;//(int)(1+2.000/SIMULATION_ATOM);
   ///adds to jumping table;
   name = NULL;
+  zone = 0;
   _Universe->pushActiveStarSystem (this);
   //GFXCreateLightContext (lightcontext);
   //bolts = new bolt_draw;
@@ -164,7 +177,7 @@ StarSystem::~StarSystem() {
 
   UnitCollection::UnitIterator iter = drawList.createIterator();
   Unit *unit;
-  //  fprintf (stderr,"|t%f i%lf|",GetElapsedTime(),interpolation_blend_factor);
+  //  VSFileSystem::vs_fprintf (stderr,"|t%f i%lf|",GetElapsedTime(),interpolation_blend_factor);
   while((unit = iter.current())!=NULL) {
     unit->Kill(false);
     iter.advance();
@@ -281,13 +294,24 @@ bool StarSystem::RemoveUnit(Unit *un) {
 }
 
 void StarSystem::ExecuteUnitAI () {
-  un_iter iter = this->getUnitList().createIterator();
-  Unit * unit=NULL;
-	while((unit = iter.current())!=NULL) {
+   try {
+      un_iter iter = this->getUnitList().createIterator();
+      Unit * unit=NULL;
+      while((unit = iter.current())!=NULL) {
 	  unit->ExecuteAI(); 
 	  unit->ResetThreatLevel();
 	  iter.advance();
-	}
+      }
+   }catch (const boost::python::error_already_set) {
+      if (PyErr_Occurred()) {
+         PyErr_Print();
+         PyErr_Clear();
+         fflush(stderr);         
+         fflush(stdout);
+      }
+      throw;
+   }
+
 }
 //sorry boyz...I'm just a tourist with a frag nav console--could you tell me where I am?
 Unit * getTopLevelOwner( ) {//returns terrible memory--don't dereference...ever...not even aligned
@@ -322,7 +346,7 @@ void StarSystem::UpdateUnitPhysics (bool firstframe) {
 	    static float neardist =XMLSupport::parse_float(vs_config->getVariable("physics","autodist","4000"));
 	    Vector diff (owner->Position()-unit->Position());
 	    if (diff.Dot(diff)<neardist*neardist) {
-	      if (getTimeCompression!=.0000001) {//if not paused
+	      if (0&&getTimeCompression!=.0000001) {//if not paused
 		reset_time_compression(0,PRESS);
 	      }
 	    }
@@ -358,7 +382,7 @@ void StarSystem::Update( float priority)
 {
 	Unit * unit;
 #ifdef UPDATEDEBUG
-  fprintf (stderr,"begin Update");
+  VSFileSystem::vs_fprintf (stderr,"begin Update");
   fflush (stderr);
 #endif
   bool firstframe = true;
@@ -375,7 +399,7 @@ void StarSystem::Update( float priority)
       if (current_stage==PHY_AI)
 	  {
 		#ifdef UPDATEDEBUG
-		  fprintf (stderr,"AI");
+		  VSFileSystem::vs_fprintf (stderr,"AI");
 		  fflush (stderr);
 		#endif
 		  ExecuteUnitAI();
@@ -384,12 +408,12 @@ void StarSystem::Update( float priority)
 	  else if (current_stage==TERRAIN_BOLT_COLLIDE)
 	  {
 		#ifdef UPDATEDEBUG
-		  fprintf (stderr,"TerCol");
+		  VSFileSystem::vs_fprintf (stderr,"TerCol");
 		  fflush (stderr);
 		#endif
 			TerrainCollide();
 		#ifdef UPDATEDEBUG
-		  fprintf (stderr,"DelQ");
+		  VSFileSystem::vs_fprintf (stderr,"DelQ");
 		  fflush (stderr);
 		#endif
 		  Unit::ProcessDeleteQueue();
@@ -409,7 +433,7 @@ void StarSystem::Update( float priority)
 		#endif
 			{
 		#ifdef UPDATEDEBUG
-		  fprintf (stderr,"neb");
+		  VSFileSystem::vs_fprintf (stderr,"neb");
 		  fflush (stderr);
 		#endif
 			  iter = drawList.createIterator();
@@ -419,7 +443,7 @@ void StarSystem::Update( float priority)
 			  }
 			  iter = drawList.createIterator();
 		#ifdef UPDATEDEBUG
-		  fprintf (stderr,"Coll");
+		  VSFileSystem::vs_fprintf (stderr,"Coll");
 		  fflush (stderr);
 		#endif
 			  while((unit = iter.current())!=NULL) {
@@ -438,12 +462,12 @@ void StarSystem::Update( float priority)
 	  else if (current_stage==PHY_RESOLV)
 	  {
 		#ifdef UPDATEDEBUG
-		  fprintf (stderr,"muzak");
+		  VSFileSystem::vs_fprintf (stderr,"muzak");
 		  fflush (stderr);
 		#endif
 		  UpdateUnitPhysics(firstframe);
 		#ifdef UPDATEDEBUG
-		  fprintf (stderr,"boltphi");
+		  VSFileSystem::vs_fprintf (stderr,"boltphi");
 		  fflush (stderr);
 		#endif
 		  bolts->UpdatePhysics();
@@ -459,14 +483,14 @@ void StarSystem::Update( float priority)
     }
   }
 #ifdef UPDATEDEBUG
-  fprintf (stderr,"endupd\n");
+  VSFileSystem::vs_fprintf (stderr,"endupd\n");
   fflush (stderr);
 #endif
   UnitCollection::FreeUnusedNodes();
   collidetable->Update();
   SIMULATION_ATOM =  normal_simulation_atom;
   _Universe->popActiveStarSystem();
-  //  fprintf (stderr,"bf:%lf",interpolation_blend_factor);
+  //  VSFileSystem::vs_fprintf (stderr,"bf:%lf",interpolation_blend_factor);
 }
 void ExecuteDirector () {
 	    unsigned int curcockpit= _Universe->CurrentCockpit();
@@ -484,12 +508,30 @@ void ExecuteDirector () {
 		_Universe->SetActiveCockpit(curcockpit);
 		mission=active_missions[0];
 		processDelayedMissions();
+	    for (unsigned int i=1;i<active_missions.size();) {
+              if (active_missions[i]) {
+                if(active_missions[i]->runtime.pymissions) {
+                  i++;
+                }else {
+                  int w=active_missions.size();
+                  active_missions[i]->terminateMission();
+                  if (w==active_missions.size()) {
+                    printf ("MISSION NOT ERASED\n");
+                    break;
+                  }
+                }
+              }else {
+                active_missions.Get()->erase(active_missions.Get()->begin()+i);
+                
+              }
+            }
+
 }
 void StarSystem::Update(float priority , bool executeDirector) {
 
   Unit *unit;
 #ifdef UPDATEDEBUG
-  fprintf (stderr,"begin Update");
+  VSFileSystem::vs_fprintf (stderr,"begin Update");
   fflush (stderr);
 #endif
   bool firstframe = true;
@@ -517,26 +559,26 @@ void StarSystem::Update(float priority , bool executeDirector) {
 	if (firstframe&&rand()%2) {
 	  if (this==_Universe->getActiveStarSystem(0)) {
 #ifdef UPDATEDEBUG
-  fprintf (stderr,"Snd");
+  VSFileSystem::vs_fprintf (stderr,"Snd");
   fflush (stderr);
 #endif
 	    AUDRefreshSounds();
 	  }
 	}
 #ifdef UPDATEDEBUG
-  fprintf (stderr,"AI");
+  VSFileSystem::vs_fprintf (stderr,"AI");
   fflush (stderr);
 #endif
   ExecuteUnitAI();
 	current_stage=TERRAIN_BOLT_COLLIDE;
       } else if (current_stage==TERRAIN_BOLT_COLLIDE) {
 #ifdef UPDATEDEBUG
-  fprintf (stderr,"TerCol");
+  VSFileSystem::vs_fprintf (stderr,"TerCol");
   fflush (stderr);
 #endif
 	TerrainCollide();
 #ifdef UPDATEDEBUG
-  fprintf (stderr,"Ani");
+  VSFileSystem::vs_fprintf (stderr,"Ani");
   fflush (stderr);
 #endif
 	UpdateAnimatedTexture();
@@ -548,7 +590,7 @@ void StarSystem::Update(float priority , bool executeDirector) {
 	  }
 	  //FIXME somehow only works if called once per frame
 #ifdef UPDATEDEBUG
-  fprintf (stderr,"DelQ");
+  VSFileSystem::vs_fprintf (stderr,"DelQ");
   fflush (stderr);
 #endif
 	  Unit::ProcessDeleteQueue();
@@ -571,7 +613,7 @@ void StarSystem::Update(float priority , bool executeDirector) {
 #endif
 	  {
 #ifdef UPDATEDEBUG
-  fprintf (stderr,"neb");
+  VSFileSystem::vs_fprintf (stderr,"neb");
   fflush (stderr);
 #endif
 	  iter = drawList.createIterator();
@@ -581,7 +623,7 @@ void StarSystem::Update(float priority , bool executeDirector) {
 	  }
 	  iter = drawList.createIterator();
 #ifdef UPDATEDEBUG
-  fprintf (stderr,"Coll");
+  VSFileSystem::vs_fprintf (stderr,"Coll");
   fflush (stderr);
 #endif
 	  while((unit = iter.current())!=NULL) {
@@ -594,7 +636,7 @@ void StarSystem::Update(float priority , bool executeDirector) {
 	current_stage=PHY_TERRAIN;
       } else if (current_stage==PHY_TERRAIN) {
 #ifdef UPDATEDEBUG
-  fprintf (stderr,"TerU");
+  VSFileSystem::vs_fprintf (stderr,"TerU");
   fflush (stderr);
 #endif
 	UpdateTerrain();
@@ -610,7 +652,7 @@ void StarSystem::Update(float priority , bool executeDirector) {
       } else if (current_stage==PHY_RESOLV) {
 	iter = drawList.createIterator();
 #ifdef UPDATEDEBUG
-  fprintf (stderr,"muzak");
+  VSFileSystem::vs_fprintf (stderr,"muzak");
   fflush (stderr);
 #endif
 	if (this==_Universe->getActiveStarSystem(0))
@@ -618,13 +660,13 @@ void StarSystem::Update(float priority , bool executeDirector) {
 	TestMusic();
 	NebulaUpdate( this);
 #ifdef UPDATEDEBUG
-  fprintf (stderr,"unphi");
+  VSFileSystem::vs_fprintf (stderr,"unphi");
   fflush (stderr);
 #endif
       Unit * owner = _Universe->AccessCockpit()->GetParent();
       if (owner) {
 	if (owner->InCorrectStarSystem(this)) {
-	  if (getTimeCompression()>1) {//if not paused
+	  if (0&&getTimeCompression()>1) {//if not paused
 	    if (!owner->AutoPilotTo (owner,true)) {
 	      
 	      reset_time_compression(0,PRESS);
@@ -634,7 +676,7 @@ void StarSystem::Update(float priority , bool executeDirector) {
       }
       UpdateUnitPhysics(firstframe);
 #ifdef UPDATEDEBUG
-  fprintf (stderr,"boltphi");
+  VSFileSystem::vs_fprintf (stderr,"boltphi");
   fflush (stderr);
 #endif
 	bolts->UpdatePhysics();
@@ -648,21 +690,21 @@ void StarSystem::Update(float priority , bool executeDirector) {
     }
   }
 #ifdef UPDATEDEBUG
-  fprintf (stderr,"endupd\n");
+  VSFileSystem::vs_fprintf (stderr,"endupd\n");
   fflush (stderr);
 #endif
   UnitCollection::FreeUnusedNodes();
   collidetable->Update();
   SIMULATION_ATOM =  normal_simulation_atom;
   _Universe->popActiveStarSystem();
-  //  fprintf (stderr,"bf:%lf",interpolation_blend_factor);
+  //  VSFileSystem::vs_fprintf (stderr,"bf:%lf",interpolation_blend_factor);
 }
 
 /***************************************************************************************/
 /*** STAR SYSTEM JUMP STUFF                                                          ***/
 /***************************************************************************************/
 
-Hashtable<std::string, StarSystem ,char [127]> star_system_table;
+Hashtable<std::string, StarSystem, 127> star_system_table;
 
 void StarSystem::AddStarsystemToUniverse(const string &mname) {
   star_system_table.Put (mname,this);
@@ -706,7 +748,7 @@ void StarSystem::ProcessPendingJumps() {
 		continue;
     } else {
 #ifdef JUMP_DEBUG
-  fprintf (stderr,"Volitalizing pending jump animation.\n");
+  VSFileSystem::vs_fprintf (stderr,"Volitalizing pending jump animation.\n");
 #endif
       _Universe->activeStarSystem()->VolitalizeJumpAnimation (pendingjump[kk]->animation);
     }
@@ -715,18 +757,22 @@ void StarSystem::ProcessPendingJumps() {
  	if( Network==NULL || playernum<0 || Network!=NULL && playernum>=0 &&  Network[playernum].readyToJump())
 	{
 	    Unit * un=pendingjump[kk]->un.GetUnit();
+
+	    StarSystem * savedStarSystem = _Universe->activeStarSystem();
+		// Download client descriptions of the new zone (has to be blocking)
+ 		if( Network!=NULL)
+ 			Network[playernum].downloadZoneInfo();
  
 	    if (un==NULL||!_Universe->StillExists (pendingjump[kk]->dest)||!_Universe->StillExists(pendingjump[kk]->orig))
 		{
 #ifdef JUMP_DEBUG
-	      fprintf (stderr,"Adez Mon! Unit destroyed during jump!\n");
+	      VSFileSystem::vs_fprintf (stderr,"Adez Mon! Unit destroyed during jump!\n");
 #endif
 	      delete pendingjump[kk];
 	      pendingjump.erase (pendingjump.begin()+kk);
 	      kk--;
 	      continue;
 	    }
-	    StarSystem * savedStarSystem = _Universe->activeStarSystem();
 	    bool dosightandsound = ((pendingjump[kk]->dest==savedStarSystem)||_Universe->isPlayerStarship(un));
 	    _Universe->setActiveStarSystem (pendingjump[kk]->orig);
 	    un->TransferUnitToSystem (kk, savedStarSystem,dosightandsound);
@@ -769,7 +815,7 @@ bool StarSystem::JumpTo (Unit * un, Unit * jumppoint, const std::string &system,
     un->jump.drive=-1;
   }
 #ifdef JUMP_DEBUG
-  fprintf (stderr,"jumping to %s.  ",system.c_str());
+  VSFileSystem::vs_fprintf (stderr,"jumping to %s.  ",system.c_str());
 #endif
   StarSystem * ss = star_system_table.Get(system);
   if( SERVER && !ss)
@@ -789,7 +835,7 @@ bool StarSystem::JumpTo (Unit * un, Unit * jumppoint, const std::string &system,
   }
   if(ss) {
 #ifdef JUMP_DEBUG
-	fprintf (stderr,"Pushing back to pending queue!\n");
+	VSFileSystem::vs_fprintf (stderr,"Pushing back to pending queue!\n");
 #endif
     bool dosightandsound = ((this==_Universe->getActiveStarSystem (0))||_Universe->isPlayerStarship (un));
     int ani =-1;
@@ -814,7 +860,7 @@ bool StarSystem::JumpTo (Unit * un, Unit * jumppoint, const std::string &system,
 #endif
   } else {
 #ifdef JUMP_DEBUG
-	fprintf (stderr,"Failed to retrieve!\n");
+	VSFileSystem::vs_fprintf (stderr,"Failed to retrieve!\n");
 #endif
     return false;
   }

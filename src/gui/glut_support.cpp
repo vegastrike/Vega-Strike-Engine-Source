@@ -22,36 +22,43 @@
 #include "gfx/aux_texture.h"
 #include "vs_globals.h"
 #include "config_xml.h"
+#include "gfx/vsimage.h"
+#include "vsfilesystem.h"
+using namespace VSFileSystem;
 
 #define isspace(chr) ((chr=='\t')||(chr=='\n')||(chr=='\v')||(chr=='\f')||(chr=='\r')||(chr==' '))
 
 float colors[] = {1, 1, 1, 1};
 
 GUITexture ReadTex(char *texfile) {
-        FILE* file=0;
+	VSFile file;
+	VSError err;
 	int PNG_HAS_ALPHA=4;
         GUITexture tex;
         if (texfile)
         	if (texfile[0])
-                	file=fopen(texfile,"rb");
-	GLuint name=0;
-        unsigned int width=0,height=0;
-        if (file) {
-        	int bpp,colortype;
-                unsigned char * palette;
-                unsigned char * image=readImage(file,bpp,colortype,width,height,palette);
-                glGenTextures (1,&name);
-                glBindTexture (GL_TEXTURE_2D,name);
-                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-                glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-                glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-                glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-                glTexImage2D(GL_TEXTURE_2D,0,(colortype&PNG_HAS_ALPHA)?GL_RGBA8:GL_RGB8,width,height,0,(colortype&PNG_HAS_ALPHA)?GL_RGBA:GL_RGB,GL_UNSIGNED_BYTE,image);
-                fclose(file);
-
-		tex.wid = width;
-		tex.hei = height;
+					err=file.OpenReadOnly(texfile,TextureFile);
+		GLuint name=0;
+		unsigned int width=0,height=0;
+		if (err<=Ok) {
+				VSImage img;
+				int bpp,colortype;
+				unsigned char * palette;
+				unsigned char * image=img.ReadImage( &file);
+						//	readImage(file,bpp,colortype,width,height,palette);
+				bpp = img.Depth();
+				colortype = img.Format();
+				glGenTextures (1,&name);
+				glBindTexture (GL_TEXTURE_2D,name);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+				glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+				glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+				glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+				glTexImage2D(GL_TEXTURE_2D,0,(colortype&PNG_HAS_ALPHA)?GL_RGBA8:GL_RGB8,img.sizeX,img.sizeY,0,(colortype&PNG_HAS_ALPHA)?GL_RGBA:GL_RGB,GL_UNSIGNED_BYTE,image);
+				file.Close();
+		tex.wid = img.sizeX;
+		tex.hei = img.sizeY;
 		tex.name = name;
 
 		free(image);
@@ -69,7 +76,7 @@ char * readString (FILE * fp,char endchar) {
         std::vector <char> chr_vec;
         char tmpchr;
         for (int i=0;;i++) {
-                fread(&tmpchr,sizeof(char),1,fp);
+                VSFileSystem::vs_read(&tmpchr,sizeof(char),1,fp);
                 if ((tmpchr==endchar)||(tmpchr=='\0')||feof(fp)) break;
                 chr_vec.push_back(tmpchr);
         }
@@ -95,7 +102,7 @@ unsigned char * readImage (FILE *fp, int & bpp, int &color_type, unsigned int &w
         png_bytepp row_pointers;
         png_infop info_ptr;
         int     interlace_type;
-        fread(sig, 1, 8, fp);
+        VSFileSystem::vs_read(sig, 1, 8, fp);
         if (!png_check_sig(sig, 8))
                 return NULL;    /* bad signature */
         png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL,
@@ -322,26 +329,31 @@ void StartGUIFrame(GFXBOOL clr) {
   GFXDisable (TEXTURE1);
   GFXEnable (TEXTURE0);
 }
-void DrawGlutMouse(int mousex, int mousey, Sprite * spr) {
+void DrawGlutMouse(int mousex, int mousey, VSSprite * spr) {
   GFXBlendMode (SRCALPHA,INVSRCALPHA);
   GFXColor4f (1,1,1,1);
-
+  GFXDisable(TEXTURE1);
   GFXEnable(TEXTURE0);
   GFXDisable (DEPTHTEST);
-  GFXDisable(TEXTURE1);
+  GFXDisable(LIGHTING);
   float sizex=0,sizey=0;
   spr->GetSize(sizex,sizey);
-  spr->SetPosition(-1+.5*sizex+float(mousex)/(.5*g_game.x_resolution),1+.5*sizey-float(mousey)/(.5*g_game.y_resolution));
+  float tempx=0,tempy=0;
+  spr->GetPosition(tempx,tempy);
+  spr->SetPosition(tempx+-1+.5*sizex+float(mousex)/(.5*g_game.x_resolution),tempy+1+.5*sizey-float(mousey)/(.5*g_game.y_resolution));
   spr->Draw();
+  GFXDisable(TEXTURE0);
+  GFXEnable(TEXTURE0);
+  spr->SetPosition(tempx,tempy);
 }
 extern void	ConditionalCursorDraw(bool);
 void EndGUIFrame(bool drawmouseover) {
-  static Sprite MouseOverSprite ("mouseover.spr",BILINEAR,GFXTRUE);
-  static Sprite MouseSprite ("mouse.spr",BILINEAR,GFXTRUE);
+  static VSSprite MouseOverVSSprite ("mouseover.spr",BILINEAR,GFXTRUE);
+  static VSSprite MouseVSSprite ("mouse.spr",BILINEAR,GFXTRUE);
   static Texture dummy ("white.bmp",0,NEAREST,TEXTURE2D,TEXTURE_2D,GFXTRUE);
   dummy.MakeActive();
   GFXDisable(CULLFACE);
-  DrawGlutMouse(mmx,mmy,drawmouseover?&MouseOverSprite:&MouseSprite);
+  DrawGlutMouse(mmx,mmy,drawmouseover?&MouseOverVSSprite:&MouseVSSprite);
   //  GFXEndScene();bad things...only call this once
   GFXHudMode(false);
   GFXEnable (CULLFACE);

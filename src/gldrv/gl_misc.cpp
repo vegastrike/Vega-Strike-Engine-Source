@@ -19,7 +19,9 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 #include <string.h>
+#define GL_MISC_CPP
 #include "gl_globals.h"
+#undef GL_MISC_CPP
 #include "vegastrike.h"
 #include "gfxlib.h"
 #include "vs_globals.h"
@@ -210,10 +212,10 @@ GFXBOOL GFXEndList() {
 }
 
 void GFXCallList(int list) {
-//	fprintf (stderr,"CallListStart");///causes crash with GF2 privaledge instruction on Win2k in certain instances
+//	VSFileSystem::Fprintf (stderr,"CallListStart");///causes crash with GF2 privaledge instruction on Win2k in certain instances
 //	fflush (stderr);
   glCallList(list);
-//	fprintf (stderr,"CallListEnd");
+//	VSFileSystem::Fprintf (stderr,"CallListEnd");
 //	fflush (stderr);
   
 }

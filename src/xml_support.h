@@ -10,6 +10,7 @@
 #include <vector>
 #include <expat.h>
 #include <iostream>		// needed for cout calls in config_xml.cpp (and other places too i'm sure)
+#include "gfx/vec.h"
 
 #define ARRAY_LENGTH(a) (sizeof(a)/sizeof(a[0]))
 
@@ -38,8 +39,8 @@ namespace XMLSupport {
   class EnumMap {
 
     //    static inline double parse_float (const string &str) {return ::parse_float (str)};
-    Hashtable<string,const int,char [1001]> forward;
-    Hashtable<string,const string, char [1001]> reverse;
+    Hashtable<string,const int,1001>    forward;
+    Hashtable<string,const string,1001> reverse;
   public:
 
     struct Pair {
@@ -63,33 +64,45 @@ namespace XMLSupport {
     string tostring(float num);
   */
 //#ifdef WIN32
-  string inline tostring5 (unsigned short num) {
+  inline string tostring5 (unsigned short num) {
 	char tmp[256];
 	sprintf (tmp,"%.5d",num);
 	return string(tmp);
   }
-  string inline tostring (int num) {
+  inline string tostring (int num) {
 	char tmp[256];
 	sprintf (tmp,"%d",num);
 	return string(tmp);
   }
-  string inline tostring (unsigned int num) {
+  inline string tostring (unsigned int num) {
 	char tmp[256];
 	sprintf (tmp,"%u",num);
 	return string(tmp);
   }
-  string inline tostring (long num) {
+  inline string tostring (long num) {
 	char tmp[256];
 	sprintf (tmp,"%ld",num);
 	return string(tmp);
   }
-  string inline tostring (float num) {
+  inline string tostring (float num) {
 	char tmp[256];
 	sprintf (tmp,"%f",num);
 	return string(tmp);
   }
+  inline string floattostringh (float f) {
+	char c[128];
+	sprintf (c,"%2.2f",f);
+	return string(c);
+  }
+  inline string VectorToString(const Vector & v) {
+	string ret(floattostringh(v.i));
+	if (v.i!=v.j||v.j!=v.k) {
+		ret+=string(",")+floattostringh(v.j)+string(",")+floattostringh(v.k);
+	}
+	return ret;
+  }
 /*#else
-  template<class T> inline string tostring(T num) {
+  inline template<class T> string tostring(T num) {
     return string(((ostrstream*)&(ostrstream() << num << '\0'))->str());
 	
   }

@@ -1,4 +1,5 @@
 #include "mesh.h"
+#include "mesh_xml.h"
 #include "aux_texture.h"
 #include "aux_logo.h"
 #include "vegastrike.h"
@@ -8,7 +9,15 @@
 #include <float.h>
 #include <assert.h>
 #include "ani_texture.h"
-#if !defined(_WIN32) && !(defined(__APPLE__) || defined(MACOSX))
+#ifndef _WIN32
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+#else
+#include <direct.h>
+#include <process.h>
+#endif
+#if !defined(_WIN32) && !(defined(__APPLE__) || defined(MACOSX)) && !defined(BSD)
 #include <values.h>
 #endif
 #include "xml_support.h"
@@ -17,6 +26,8 @@
 #include "vs_globals.h"
 #include "cmd/script/mission.h"
 #include "cmd/script/flightgroup.h"
+#include "hashtable.h"
+
 #ifdef max
 #undef max
 #endif
@@ -47,89 +58,91 @@ using XMLSupport::parse_bool;
 using XMLSupport::parse_int;
 struct GFXMaterial;
 
-const EnumMap::Pair Mesh::XML::element_names[] = {
-  EnumMap::Pair("UNKNOWN", XML::UNKNOWN),
-  EnumMap::Pair("Material", XML::MATERIAL),
-  EnumMap::Pair("LOD", XML::LOD),
-  EnumMap::Pair("Ambient", XML::AMBIENT),
-  EnumMap::Pair("Diffuse", XML::DIFFUSE),
-  EnumMap::Pair("Specular", XML::SPECULAR),
-  EnumMap::Pair("Emissive", XML::EMISSIVE),
-  EnumMap::Pair("Mesh", XML::MESH),
-  EnumMap::Pair("Points", XML::POINTS),
-  EnumMap::Pair("Point", XML::POINT),
-  EnumMap::Pair("Location", XML::LOCATION),
-  EnumMap::Pair("Normal", XML::NORMAL),
-  EnumMap::Pair("Polygons", XML::POLYGONS),
-  EnumMap::Pair("Line", XML::LINE),
-  EnumMap::Pair("Tri", XML::TRI),
-  EnumMap::Pair("Quad", XML::QUAD),
-  EnumMap::Pair("Linestrip",XML::LINESTRIP),
-  EnumMap::Pair("Tristrip", XML::TRISTRIP),
-  EnumMap::Pair("Trifan", XML::TRIFAN),
-  EnumMap::Pair("Quadstrip", XML::QUADSTRIP),
-  EnumMap::Pair("Vertex", XML::VERTEX),
-  EnumMap::Pair("Logo", XML::LOGO),
-  EnumMap::Pair("Ref",XML::REF),
-  EnumMap::Pair("DetailPlane",XML::DETAILPLANE)
+const EnumMap::Pair MeshXML::element_names[] = {
+  EnumMap::Pair("UNKNOWN", MeshXML::UNKNOWN),
+  EnumMap::Pair("Material", MeshXML::MATERIAL),
+  EnumMap::Pair("LOD", MeshXML::LOD),
+  EnumMap::Pair("Ambient", MeshXML::AMBIENT),
+  EnumMap::Pair("Diffuse", MeshXML::DIFFUSE),
+  EnumMap::Pair("Specular", MeshXML::SPECULAR),
+  EnumMap::Pair("Emissive", MeshXML::EMISSIVE),
+  EnumMap::Pair("Mesh", MeshXML::MESH),
+  EnumMap::Pair("Points", MeshXML::POINTS),
+  EnumMap::Pair("Point", MeshXML::POINT),
+  EnumMap::Pair("Location", MeshXML::LOCATION),
+  EnumMap::Pair("Normal", MeshXML::NORMAL),
+  EnumMap::Pair("Polygons", MeshXML::POLYGONS),
+  EnumMap::Pair("Line", MeshXML::LINE),
+  EnumMap::Pair("Tri", MeshXML::TRI),
+  EnumMap::Pair("Quad", MeshXML::QUAD),
+  EnumMap::Pair("Linestrip",MeshXML::LINESTRIP),
+  EnumMap::Pair("Tristrip", MeshXML::TRISTRIP),
+  EnumMap::Pair("Trifan", MeshXML::TRIFAN),
+  EnumMap::Pair("Quadstrip", MeshXML::QUADSTRIP),
+  EnumMap::Pair("Vertex", MeshXML::VERTEX),
+  EnumMap::Pair("Logo", MeshXML::LOGO),
+  EnumMap::Pair("Ref",MeshXML::REF),
+  EnumMap::Pair("DetailPlane",MeshXML::DETAILPLANE)
 };
 
-const EnumMap::Pair Mesh::XML::attribute_names[] = {
-  EnumMap::Pair("UNKNOWN", XML::UNKNOWN),
-  EnumMap::Pair("Scale",XML::SCALE),
-  EnumMap::Pair("Blend",XML::BLENDMODE),
-  EnumMap::Pair("texture", XML::TEXTURE),
-  EnumMap::Pair("alphamap", XML::ALPHAMAP),
-  EnumMap::Pair("sharevertex", XML::SHAREVERT),
-  EnumMap::Pair("red", XML::RED),
-  EnumMap::Pair("green", XML::GREEN),
-  EnumMap::Pair("blue", XML::BLUE),
-  EnumMap::Pair("alpha", XML::ALPHA),
-  EnumMap::Pair("power", XML::POWER),
-  EnumMap::Pair("reflect", XML::REFLECT),
-  EnumMap::Pair("x", XML::X),
-  EnumMap::Pair("y", XML::Y),
-  EnumMap::Pair("z", XML::Z),
-  EnumMap::Pair("i", XML::I),
-  EnumMap::Pair("j", XML::J),
-  EnumMap::Pair("k", XML::K),
-  EnumMap::Pair("Shade", XML::FLATSHADE),
-  EnumMap::Pair("point", XML::POINT),
-  EnumMap::Pair("s", XML::S),
-  EnumMap::Pair("t", XML::T),
+const EnumMap::Pair MeshXML::attribute_names[] = {
+  EnumMap::Pair("UNKNOWN", MeshXML::UNKNOWN),
+  EnumMap::Pair("Scale",MeshXML::SCALE),
+  EnumMap::Pair("Blend",MeshXML::BLENDMODE),
+  EnumMap::Pair("texture", MeshXML::TEXTURE),
+  EnumMap::Pair("alphamap", MeshXML::ALPHAMAP),
+  EnumMap::Pair("sharevertex", MeshXML::SHAREVERT),
+  EnumMap::Pair("red", MeshXML::RED),
+  EnumMap::Pair("green", MeshXML::GREEN),
+  EnumMap::Pair("blue", MeshXML::BLUE),
+  EnumMap::Pair("alpha", MeshXML::ALPHA),
+  EnumMap::Pair("power", MeshXML::POWER),
+  EnumMap::Pair("reflect", MeshXML::REFLECT),
+  EnumMap::Pair("x", MeshXML::X),
+  EnumMap::Pair("y", MeshXML::Y),
+  EnumMap::Pair("z", MeshXML::Z),
+  EnumMap::Pair("i", MeshXML::I),
+  EnumMap::Pair("j", MeshXML::J),
+  EnumMap::Pair("k", MeshXML::K),
+  EnumMap::Pair("Shade", MeshXML::FLATSHADE),
+  EnumMap::Pair("point", MeshXML::POINT),
+  EnumMap::Pair("s", MeshXML::S),
+  EnumMap::Pair("t", MeshXML::T),
   //Logo stuffs
-  EnumMap::Pair("Type",XML::TYPE),
-  EnumMap::Pair("Rotate", XML::ROTATE),
-  EnumMap::Pair("Weight", XML::WEIGHT),
-  EnumMap::Pair("Size", XML::SIZE),
-  EnumMap::Pair("Offset",XML::OFFSET),
-  EnumMap::Pair("meshfile",XML::LODFILE),
-  EnumMap::Pair ("Animation",XML::ANIMATEDTEXTURE),
-  EnumMap::Pair ("Reverse",XML::REVERSE),
-  EnumMap::Pair ("LightingOn",XML::LIGHTINGON),
-  EnumMap::Pair ("CullFace",XML::CULLFACE),
-  EnumMap::Pair ("ForceTexture",XML::FORCETEXTURE),
-  EnumMap::Pair ("UseNormals",XML::USENORMALS),
-  EnumMap::Pair ("PolygonOffset",XML::POLYGONOFFSET),
-  EnumMap::Pair ("DetailTexture",XML::DETAILTEXTURE),
-  EnumMap::Pair ("FramesPerSecond",XML::FRAMESPERSECOND)
+  EnumMap::Pair("Type",MeshXML::TYPE),
+  EnumMap::Pair("Rotate", MeshXML::ROTATE),
+  EnumMap::Pair("Weight", MeshXML::WEIGHT),
+  EnumMap::Pair("Size", MeshXML::SIZE),
+  EnumMap::Pair("Offset",MeshXML::OFFSET),
+  EnumMap::Pair("meshfile",MeshXML::LODFILE),
+  EnumMap::Pair ("Animation",MeshXML::ANIMATEDTEXTURE),
+  EnumMap::Pair ("Reverse",MeshXML::REVERSE),
+  EnumMap::Pair ("LightingOn",MeshXML::LIGHTINGON),
+  EnumMap::Pair ("CullFace",MeshXML::CULLFACE),
+  EnumMap::Pair ("ForceTexture",MeshXML::FORCETEXTURE),
+  EnumMap::Pair ("UseNormals",MeshXML::USENORMALS),
+  EnumMap::Pair ("PolygonOffset",MeshXML::POLYGONOFFSET),
+  EnumMap::Pair ("DetailTexture",MeshXML::DETAILTEXTURE),
+  EnumMap::Pair ("FramesPerSecond",MeshXML::FRAMESPERSECOND)
 };
 
 
 
-const EnumMap Mesh::XML::element_map(XML::element_names, 24);
-const EnumMap Mesh::XML::attribute_map(XML::attribute_names, 37);
+const EnumMap MeshXML::element_map(MeshXML::element_names, 24);
+const EnumMap MeshXML::attribute_map(MeshXML::attribute_names, 37);
 
 
 
 void Mesh::beginElement(void *userData, const XML_Char *name, const XML_Char **atts) {
-  ((Mesh*)userData)->beginElement(name, AttributeList(atts));
+  MeshXML * xml = (MeshXML*)userData;
+  xml->mesh->beginElement(xml,name, AttributeList(atts));
 }
 
 
 
 void Mesh::endElement(void *userData, const XML_Char *name) {
-  ((Mesh*)userData)->endElement(name);
+  MeshXML * xml = (MeshXML*)userData;
+  xml->mesh->endElement(xml,std::string(name));
 }
 
 
@@ -202,6 +215,32 @@ enum BLENDFUNC parse_alpha (const char * tmp ) {
 
 
 
+#if 0
+std::string parse_alpha (enum BLENDMODE tmp ) {
+  switch (tmp) {
+  case ZERO: return "ZERO";
+  case ONE: return "ONE";
+  case SRCCOLOR: return "SRCCOLOR";
+  case INVSRCCOLOR: return "INVSRCCOLOR";
+  case SRCALPHA: return "SRCALPHA";
+  case INVSRCALPHA: return "INVSRCALPHA";
+  case DESTALPHA: return "DESTALPHA";
+  case INVDESTALPHA: return "INVDESTALPHA";
+  case DESTCOLOR: return "DESTCOLOR";
+  case INVDESTCOLOR: return "INVDESTCOLOR";
+  case SRCALPHASAT: return "SRCALPHASAT";
+  case CONSTALPHA: return "CONSTALPHA";
+  case INVCONSTALPHA: return "INVCONSTALPHA";
+  case CONSTCOLOR: return "CONSTCOLOR";
+  case INVCONSTCOLOR: return "INVCONSTCOLOR";
+  }
+  return ZERO;
+}
+#endif
+
+
+
+
 /* Load stages:
 
 0 - no tags seen
@@ -224,30 +263,30 @@ bool shouldreflect (string r) {
 	}
 	return false;
 }
-void Mesh::beginElement(const string &name, const AttributeList &attributes) {
+void Mesh::beginElement(MeshXML * xml, const string &name, const AttributeList &attributes) {
 	static bool use_detail_texture = XMLSupport::parse_bool(vs_config->getVariable("graphics","use_detail_texture","true"));
   //static bool flatshadeit=false;
   AttributeList::const_iterator iter;
   float flotsize=1;
-  XML::Names elem = (XML::Names)XML::element_map.lookup(name);
-  XML::Names top;
+  MeshXML::Names elem = (MeshXML::Names)MeshXML::element_map.lookup(name);
+  MeshXML::Names top;
   if(xml->state_stack.size()>0) top = *xml->state_stack.rbegin();
   xml->state_stack.push_back(elem);
   bool texture_found = false;
   switch(elem) {
-      case XML::DETAILPLANE:
+      case MeshXML::DETAILPLANE:
 	  if (use_detail_texture) {
 		  Vector vec (detailPlanes.size()>=2?1:0,detailPlanes.size()==1?1:0,detailPlanes.size()==0?1:0);
 		  for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
-		    switch(XML::attribute_map.lookup((*iter).name)) {
-			case XML::X:
+		    switch(MeshXML::attribute_map.lookup((*iter).name)) {
+			case MeshXML::X:
 				vec.i=XMLSupport::parse_float(iter->value);
 				break;
-			case XML::Y:
+			case MeshXML::Y:
 				vec.j=XMLSupport::parse_float(iter->value);
 				break;
 				
-			case XML::Z:
+			case MeshXML::Z:
 				vec.k=XMLSupport::parse_float(iter->value);
 				break;
 			}
@@ -259,135 +298,135 @@ void Mesh::beginElement(const string &name, const AttributeList &attributes) {
 
 	  }
 	  break;
-	  case XML::MATERIAL:
+	  case MeshXML::MATERIAL:
 	    //		  assert(xml->load_stage==4);
 		  xml->load_stage=7;
 		  for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
-		    switch(XML::attribute_map.lookup((*iter).name)) {
-			case XML::USENORMALS:
+		    switch(MeshXML::attribute_map.lookup((*iter).name)) {
+			case MeshXML::USENORMALS:
 			  xml->usenormals = XMLSupport::parse_bool (iter->value);
 			  break;
-		    case XML::POWER:
+		    case MeshXML::POWER:
 		      xml->material.power=XMLSupport::parse_float((*iter).value);
 		      break;
-		    case XML::REFLECT:
+		    case MeshXML::REFLECT:
 		      setEnvMap ( shouldreflect((*iter).value));
 		      break;
-		    case XML::LIGHTINGON:
+		    case MeshXML::LIGHTINGON:
 		      setLighting (XMLSupport::parse_bool (vs_config->getVariable ("graphics","ForceLighting","true"))||XMLSupport::parse_bool((*iter).value)); 
 		      break;
-		    case XML::CULLFACE:
+		    case MeshXML::CULLFACE:
 		      forceCullFace (XMLSupport::parse_bool((*iter).value)); 
 		      break;
 		    }
 		  }
 		  break;
-  case XML::DIFFUSE:
+  case MeshXML::DIFFUSE:
 	  //assert(xml->load_stage==7);
 	  xml->load_stage=8;
 	  for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
-		  switch(XML::attribute_map.lookup((*iter).name)) {
-		  case XML::RED:
+		  switch(MeshXML::attribute_map.lookup((*iter).name)) {
+		  case MeshXML::RED:
 			  xml->material.dr=XMLSupport::parse_float((*iter).value);
 			  break;
-		  case XML::BLUE:
+		  case MeshXML::BLUE:
 			  xml->material.db=XMLSupport::parse_float((*iter).value);
 			  break;
-		  case XML::ALPHA:
+		  case MeshXML::ALPHA:
 			  xml->material.da=XMLSupport::parse_float((*iter).value);
 			  break;
-		  case XML::GREEN:
+		  case MeshXML::GREEN:
 			  xml->material.dg=XMLSupport::parse_float((*iter).value);
 			  break;
 		  }
 	  }
 	  break;
-  case XML::EMISSIVE:
+  case MeshXML::EMISSIVE:
 	  //assert(xml->load_stage==7);
 	  xml->load_stage=8;
 	  for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
-		  switch(XML::attribute_map.lookup((*iter).name)) {
-		  case XML::RED:
+		  switch(MeshXML::attribute_map.lookup((*iter).name)) {
+		  case MeshXML::RED:
 			  xml->material.er=XMLSupport::parse_float((*iter).value);
 			  break;
-		  case XML::BLUE:
+		  case MeshXML::BLUE:
 			  xml->material.eb=XMLSupport::parse_float((*iter).value);
 			  break;
-		  case XML::ALPHA:
+		  case MeshXML::ALPHA:
 			  xml->material.ea=XMLSupport::parse_float((*iter).value);
 			  break;
-		  case XML::GREEN:
+		  case MeshXML::GREEN:
 			  xml->material.eg=XMLSupport::parse_float((*iter).value);
 			  break;
 		  }
 	  }
 	  break;
-  case XML::SPECULAR:
+  case MeshXML::SPECULAR:
 	  //assert(xml->load_stage==7);
 	  xml->load_stage=8;
 	  for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
-		  switch(XML::attribute_map.lookup((*iter).name)) {
-		  case XML::RED:
+		  switch(MeshXML::attribute_map.lookup((*iter).name)) {
+		  case MeshXML::RED:
 			  xml->material.sr=XMLSupport::parse_float((*iter).value);
 			  break;
-		  case XML::BLUE:
+		  case MeshXML::BLUE:
 			  xml->material.sb=XMLSupport::parse_float((*iter).value);
 			  break;
-		  case XML::ALPHA:
+		  case MeshXML::ALPHA:
 			  xml->material.sa=XMLSupport::parse_float((*iter).value);
 			  break;
-		  case XML::GREEN:
+		  case MeshXML::GREEN:
 			  xml->material.sg=XMLSupport::parse_float((*iter).value);
 			  break;
 		  }
 	  }
 	  break;
-  case XML::AMBIENT:
+  case MeshXML::AMBIENT:
 	  //assert(xml->load_stage==7);
 	  xml->load_stage=8;
 	  for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
-		  switch(XML::attribute_map.lookup((*iter).name)) {
-		  case XML::RED:
+		  switch(MeshXML::attribute_map.lookup((*iter).name)) {
+		  case MeshXML::RED:
 			  xml->material.ar=XMLSupport::parse_float((*iter).value);
 			  break;
-		  case XML::BLUE:
+		  case MeshXML::BLUE:
 			  xml->material.ab=XMLSupport::parse_float((*iter).value);
 			  break;
-		  case XML::ALPHA:
+		  case MeshXML::ALPHA:
 			  xml->material.aa=XMLSupport::parse_float((*iter).value);
 			  break;
-		  case XML::GREEN:
+		  case MeshXML::GREEN:
 			  xml->material.ag=XMLSupport::parse_float((*iter).value);
 			  break;
 		  }
 	  }
 	  break;
-  case XML::UNKNOWN:
-   fprintf (stderr, "Unknown element start tag '%s' detected\n",name.c_str());
+  case MeshXML::UNKNOWN:
+   VSFileSystem::vs_fprintf (stderr, "Unknown element start tag '%s' detected\n",name.c_str());
     break;
-  case XML::MESH:
+  case MeshXML::MESH:
     assert(xml->load_stage == 0);
     assert(xml->state_stack.size()==1);
     xml->load_stage = 1;
     // Read in texture attribute
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
-      switch(XML::attribute_map.lookup((*iter).name)) {
-      case XML::REVERSE:
+      switch(MeshXML::attribute_map.lookup((*iter).name)) {
+      case MeshXML::REVERSE:
 	xml->reverse = XMLSupport::parse_bool((*iter).value);
 	break;
-      case XML::FORCETEXTURE:
+      case MeshXML::FORCETEXTURE:
 	xml->force_texture=XMLSupport::parse_bool ((*iter).value);
 	break;
-      case XML::SCALE:
+      case MeshXML::SCALE:
 	xml->scale *=  XMLSupport::parse_float ((*iter).value);
 	break;
-      case XML::SHAREVERT:
+      case MeshXML::SHAREVERT:
 	xml->sharevert = (XMLSupport::parse_bool ((*iter).value)&&XMLSupport::parse_bool (vs_config->getVariable ("graphics","SharedVertexArrays","true")));
 	break;
-	  case XML::POLYGONOFFSET:
+	  case MeshXML::POLYGONOFFSET:
 		  this->polygon_offset = XMLSupport::parse_float ((*iter).value);
 		  break;
-      case XML::BLENDMODE:
+      case MeshXML::BLENDMODE:
 	{
 	  char *csrc=strdup ((*iter).value.c_str());
 	  char *cdst=strdup((*iter).value.c_str());
@@ -397,31 +436,31 @@ void Mesh::beginElement(const string &name, const AttributeList &attributes) {
 	  free (cdst);
 	}
 	break;
-	  case XML::DETAILTEXTURE:
+	  case MeshXML::DETAILTEXTURE:
 		  if (use_detail_texture)
-			  detailTexture = TempGetTexture(iter->value,FactionUtil::GetFaction(xml->faction),GFXTRUE);
+			  detailTexture = TempGetTexture(xml, iter->value,FactionUtil::GetFaction(xml->faction),GFXTRUE);
 		  break;
-      case XML::TEXTURE:
+      case MeshXML::TEXTURE:
           //NO BREAK..goes to next statement
-      case XML::ALPHAMAP:
-      case XML::ANIMATEDTEXTURE:
-      case XML::UNKNOWN:
+      case MeshXML::ALPHAMAP:
+      case MeshXML::ANIMATEDTEXTURE:
+      case MeshXML::UNKNOWN:
         {
-          XML::Names whichtype = XML::UNKNOWN;
+          MeshXML::Names whichtype = MeshXML::UNKNOWN;
           int strsize=0;
           if (strtoupper(iter->name).find("ANIMATION")==0) {
-              whichtype = XML::ANIMATEDTEXTURE;
+              whichtype = MeshXML::ANIMATEDTEXTURE;
               strsize = strlen ("ANIMATION");
           }
           if (strtoupper(iter->name).find("TEXTURE")==0){
-              whichtype= XML::TEXTURE;
+              whichtype= MeshXML::TEXTURE;
               strsize = strlen ("TEXTURE");
           }
           if (strtoupper(iter->name).find("ALPHAMAP")==0){
-              whichtype=XML::ALPHAMAP;
+              whichtype=MeshXML::ALPHAMAP;
               strsize= strlen ("ALPHAMAP");
           }
-          if (whichtype!=XML::UNKNOWN) {
+          if (whichtype!=MeshXML::UNKNOWN) {
               unsigned int texindex =0;
               string ind(iter->name.substr (strsize));
               if (!ind.empty())
@@ -429,12 +468,12 @@ void Mesh::beginElement(const string &name, const AttributeList &attributes) {
 			  static bool per_pixel_lighting = XMLSupport::parse_bool (vs_config->getVariable ("graphics","per_pixel_lighting","true"));
 			  if (texindex==0||per_pixel_lighting) {
               while (xml->decals.size()<=texindex)
-                  xml->decals.push_back(XML::ZeTexture());
+                  xml->decals.push_back(MeshXML::ZeTexture());
               switch (whichtype) {
-                  case XML::ANIMATEDTEXTURE:
+                  case MeshXML::ANIMATEDTEXTURE:
                       xml->decals[texindex].animated_name=iter->value;
                       break;
-                  case XML::ALPHAMAP:
+                  case MeshXML::ALPHAMAP:
                       xml->decals[texindex].alpha_name=iter->value;
                       break;
                   default:
@@ -451,116 +490,116 @@ void Mesh::beginElement(const string &name, const AttributeList &attributes) {
     }
     assert(texture_found);
     break;
-  case XML::POINTS:
-    assert(top==XML::MESH);
+  case MeshXML::POINTS:
+    assert(top==MeshXML::MESH);
     //assert(xml->load_stage == 1);
     xml->load_stage = 2;
     break;
-  case XML::POINT:
-    assert(top==XML::POINTS);
+  case MeshXML::POINT:
+    assert(top==MeshXML::POINTS);
     
     memset(&xml->vertex, 0, sizeof(xml->vertex));
     xml->point_state = 0; // Point state is used to check that all necessary attributes are recorded
     break;
-  case XML::LOCATION:
-    assert(top==XML::POINT);
+  case MeshXML::LOCATION:
+    assert(top==MeshXML::POINT);
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
-      switch(XML::attribute_map.lookup((*iter).name)) {
-      case XML::UNKNOWN:
-	fprintf (stderr, "Unknown attribute '%s' encountered in Location tag\n",(*iter).name.c_str());
+      switch(MeshXML::attribute_map.lookup((*iter).name)) {
+      case MeshXML::UNKNOWN:
+	VSFileSystem::vs_fprintf (stderr, "Unknown attribute '%s' encountered in Location tag\n",(*iter).name.c_str());
 	break;
-      case XML::X:
-	assert(!(xml->point_state & XML::P_X));
+      case MeshXML::X:
+	assert(!(xml->point_state & MeshXML::P_X));
 	xml->vertex.x = XMLSupport::parse_float((*iter).value);
 	xml->vertex.i = 0;
-	xml->point_state |= XML::P_X;
+	xml->point_state |= MeshXML::P_X;
 	break;
-      case XML::Y:
-	assert(!(xml->point_state & XML::P_Y));
+      case MeshXML::Y:
+	assert(!(xml->point_state & MeshXML::P_Y));
 	xml->vertex.y = XMLSupport::parse_float((*iter).value);
 	xml->vertex.j = 0;
-	xml->point_state |= XML::P_Y;
+	xml->point_state |= MeshXML::P_Y;
 	break;
-     case XML::Z:
-	assert(!(xml->point_state & XML::P_Z));
+     case MeshXML::Z:
+	assert(!(xml->point_state & MeshXML::P_Z));
 	xml->vertex.z = XMLSupport::parse_float((*iter).value);
 	xml->vertex.k = 0;
-	xml->point_state |= XML::P_Z;
+	xml->point_state |= MeshXML::P_Z;
 	break;
-      case XML::S:
+      case MeshXML::S:
 	xml->vertex.s = XMLSupport::parse_float ((*iter).value);
 	break;
-      case XML::T:
+      case MeshXML::T:
 	xml->vertex.t = XMLSupport::parse_float ((*iter).value);
 	break;
       default:
 	assert(0);
       }
     }
-    assert(xml->point_state & (XML::P_X |
-			       XML::P_Y |
-			       XML::P_Z) == 
-	   (XML::P_X |
-	    XML::P_Y |
-	    XML::P_Z) );
+    assert(xml->point_state & (MeshXML::P_X |
+			       MeshXML::P_Y |
+			       MeshXML::P_Z) == 
+	   (MeshXML::P_X |
+	    MeshXML::P_Y |
+	    MeshXML::P_Z) );
     break;
-  case XML::NORMAL:
-    assert(top==XML::POINT);
+  case MeshXML::NORMAL:
+    assert(top==MeshXML::POINT);
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
-      switch(XML::attribute_map.lookup((*iter).name)) {
-      case XML::UNKNOWN:
-	fprintf (stderr, "Unknown attribute '%s' encountered in Normal tag\n",(*iter).name.c_str());
+      switch(MeshXML::attribute_map.lookup((*iter).name)) {
+      case MeshXML::UNKNOWN:
+	VSFileSystem::vs_fprintf (stderr, "Unknown attribute '%s' encountered in Normal tag\n",(*iter).name.c_str());
 	break;
-      case XML::I:
-	assert(!(xml->point_state & XML::P_I));
+      case MeshXML::I:
+	assert(!(xml->point_state & MeshXML::P_I));
 	xml->vertex.i = XMLSupport::parse_float((*iter).value);
-	xml->point_state |= XML::P_I;
+	xml->point_state |= MeshXML::P_I;
 	break;
-      case XML::J:
-	assert(!(xml->point_state & XML::P_J));
+      case MeshXML::J:
+	assert(!(xml->point_state & MeshXML::P_J));
 	xml->vertex.j = XMLSupport::parse_float((*iter).value);
-	xml->point_state |= XML::P_J;
+	xml->point_state |= MeshXML::P_J;
 	break;
-      case XML::K:
-	assert(!(xml->point_state & XML::P_K));
+      case MeshXML::K:
+	assert(!(xml->point_state & MeshXML::P_K));
 	xml->vertex.k = XMLSupport::parse_float((*iter).value);
-	xml->point_state |= XML::P_K;
+	xml->point_state |= MeshXML::P_K;
 	break;
       default:
 	assert(0);
       }
     }
-    if (xml->point_state & (XML::P_I |
-			       XML::P_J |
-			       XML::P_K) != 
-	   (XML::P_I |
-	    XML::P_J |
-	    XML::P_K) ) {
+    if (xml->point_state & (MeshXML::P_I |
+			       MeshXML::P_J |
+			       MeshXML::P_K) != 
+	   (MeshXML::P_I |
+	    MeshXML::P_J |
+	    MeshXML::P_K) ) {
       if (!xml->recalc_norm) {
 	xml->vertex.i=xml->vertex.j=xml->vertex.k=0;
 	xml->recalc_norm=true;
       }
     }
     break;
-  case XML::POLYGONS:
-    assert(top==XML::MESH);
+  case MeshXML::POLYGONS:
+    assert(top==MeshXML::MESH);
     //assert(xml->load_stage==3);
     xml->load_stage = 4;
     break;
-  case XML::LINE:
-    assert(top==XML::POLYGONS);
+  case MeshXML::LINE:
+    assert(top==MeshXML::POLYGONS);
     //assert(xml->load_stage==4);
     xml->num_vertices=2;
     xml->active_list = &xml->lines;
     xml->active_ind = &xml->lineind;
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
-      switch(XML::attribute_map.lookup((*iter).name)) {
-      case XML::UNKNOWN:
-	fprintf (stderr,"Unknown attribute '%s' encountered in Vertex tag\n",(*iter).name.c_str() );
+      switch(MeshXML::attribute_map.lookup((*iter).name)) {
+      case MeshXML::UNKNOWN:
+//	VSFileSystem::vs_fprintf (stderr,"Unknown attribute '%s' encountered in Vertex tag\n",(*iter).name.c_str() );
 	break;
-      case XML::FLATSHADE:
+      case MeshXML::FLATSHADE:
 	if ((*iter).value=="Flat") {
-	  fprintf (stderr,"Cannot Flatshade Lines\n");
+	  VSFileSystem::vs_fprintf (stderr,"Cannot Flatshade Lines\n");
 	}else {
 	  if ((*iter).value=="Smooth") {
 	    //ignored -- already done
@@ -572,19 +611,19 @@ void Mesh::beginElement(const string &name, const AttributeList &attributes) {
       }
     }
     break;
-  case XML::TRI:
-    assert(top==XML::POLYGONS);
+  case MeshXML::TRI:
+    assert(top==MeshXML::POLYGONS);
     //assert(xml->load_stage==4);
     xml->num_vertices=3;
     xml->active_list = &xml->tris;
     xml->active_ind = &xml->triind;
     xml->trishade.push_back (0);
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
-      switch(XML::attribute_map.lookup((*iter).name)) {
-      case XML::UNKNOWN:
-	fprintf (stderr,"Unknown attribute '%s' encountered in Vertex tag\n",(*iter).name.c_str() );
+      switch(MeshXML::attribute_map.lookup((*iter).name)) {
+      case MeshXML::UNKNOWN:
+//	VSFileSystem::vs_fprintf (stderr,"Unknown attribute '%s' encountered in Vertex tag\n",(*iter).name.c_str() );
 	break;
-      case XML::FLATSHADE:
+      case MeshXML::FLATSHADE:
 	if ((*iter).value=="Flat") {
 	  xml->trishade[xml->trishade.size()-1]=1;
 	}else {
@@ -598,8 +637,8 @@ void Mesh::beginElement(const string &name, const AttributeList &attributes) {
       }
     }
     break;
-  case XML::LINESTRIP:
-    assert(top==XML::POLYGONS);
+  case MeshXML::LINESTRIP:
+    assert(top==MeshXML::POLYGONS);
     //assert(xml->load_stage==4);
     xml->num_vertices=2;
     xml->linestrips.push_back (vector<GFXVertex>());
@@ -607,13 +646,13 @@ void Mesh::beginElement(const string &name, const AttributeList &attributes) {
     xml->lstrcnt = xml->linestripind.size();
     xml->active_ind = &xml->linestripind;
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
-      switch(XML::attribute_map.lookup((*iter).name)) {
-      case XML::UNKNOWN:
-	fprintf (stderr,"Unknown attribute '%s' encountered in Vertex tag\n",(*iter).name.c_str() );
+      switch(MeshXML::attribute_map.lookup((*iter).name)) {
+      case MeshXML::UNKNOWN:
+//	VSFileSystem::vs_fprintf (stderr,"Unknown attribute '%s' encountered in Vertex tag\n",(*iter).name.c_str() );
 	break;
-      case XML::FLATSHADE:
+      case MeshXML::FLATSHADE:
 	if ((*iter).value=="Flat") {
-	  fprintf(stderr,"Cannot Flatshade Linestrips\n");
+	  VSFileSystem::vs_fprintf(stderr,"Cannot Flatshade Linestrips\n");
 	}else {
 	  if ((*iter).value=="Smooth") {
 	    //ignored -- already done
@@ -626,8 +665,8 @@ void Mesh::beginElement(const string &name, const AttributeList &attributes) {
     }
     break;
 
-  case XML::TRISTRIP:
-    assert(top==XML::POLYGONS);
+  case MeshXML::TRISTRIP:
+    assert(top==MeshXML::POLYGONS);
     //assert(xml->load_stage==4);
     xml->num_vertices=3;//minimum number vertices
     xml->tristrips.push_back (vector<GFXVertex>());
@@ -635,13 +674,13 @@ void Mesh::beginElement(const string &name, const AttributeList &attributes) {
     xml->tstrcnt = xml->tristripind.size();
     xml->active_ind = &xml->tristripind;
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
-      switch(XML::attribute_map.lookup((*iter).name)) {
-      case XML::UNKNOWN:
-	fprintf (stderr,"Unknown attribute '%s' encountered in Vertex tag\n",(*iter).name.c_str() );
+      switch(MeshXML::attribute_map.lookup((*iter).name)) {
+      case MeshXML::UNKNOWN:
+//	VSFileSystem::vs_fprintf (stderr,"Unknown attribute '%s' encountered in Vertex tag\n",(*iter).name.c_str() );
 	break;
-      case XML::FLATSHADE:
+      case MeshXML::FLATSHADE:
 	if ((*iter).value=="Flat") {
-	  fprintf(stderr,"Cannot Flatshade Tristrips\n");
+	  VSFileSystem::vs_fprintf(stderr,"Cannot Flatshade Tristrips\n");
 	}else {
 	  if ((*iter).value=="Smooth") {
 	    //ignored -- already done
@@ -654,8 +693,8 @@ void Mesh::beginElement(const string &name, const AttributeList &attributes) {
     }
     break;
 
-  case XML::TRIFAN:
-    assert(top==XML::POLYGONS);
+  case MeshXML::TRIFAN:
+    assert(top==MeshXML::POLYGONS);
     //assert(xml->load_stage==4);
     xml->num_vertices=3;//minimum number vertices
     xml->trifans.push_back (vector<GFXVertex>());
@@ -663,13 +702,13 @@ void Mesh::beginElement(const string &name, const AttributeList &attributes) {
     xml->tfancnt = xml->trifanind.size();
     xml->active_ind = &xml->trifanind;
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
-      switch(XML::attribute_map.lookup((*iter).name)) {
-      case XML::UNKNOWN:
-	fprintf (stderr,"Unknown attribute '%s' encountered in Vertex tag\n",(*iter).name.c_str() );
+      switch(MeshXML::attribute_map.lookup((*iter).name)) {
+      case MeshXML::UNKNOWN:
+//	VSFileSystem::vs_fprintf (stderr,"Unknown attribute '%s' encountered in Vertex tag\n",(*iter).name.c_str() );
 	break;
-      case XML::FLATSHADE:
+      case MeshXML::FLATSHADE:
 	if ((*iter).value=="Flat") {
-	  fprintf (stderr,"Cannot Flatshade Trifans\n");
+	  VSFileSystem::vs_fprintf (stderr,"Cannot Flatshade Trifans\n");
 	}else {
 	  if ((*iter).value=="Smooth") {
 	    //ignored -- already done
@@ -682,8 +721,8 @@ void Mesh::beginElement(const string &name, const AttributeList &attributes) {
     }
     break;
 
-  case XML::QUADSTRIP:
-    assert(top==XML::POLYGONS);
+  case MeshXML::QUADSTRIP:
+    assert(top==MeshXML::POLYGONS);
     //assert(xml->load_stage==4);
     xml->num_vertices=4;//minimum number vertices
     xml->quadstrips.push_back (vector<GFXVertex>());
@@ -691,13 +730,13 @@ void Mesh::beginElement(const string &name, const AttributeList &attributes) {
     xml->qstrcnt = xml->quadstripind.size();
     xml->active_ind = &xml->quadstripind;
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
-      switch(XML::attribute_map.lookup((*iter).name)) {
-      case XML::UNKNOWN:
-	fprintf (stderr,"Unknown attribute '%s' encountered in Vertex tag\n",(*iter).name.c_str() );
+      switch(MeshXML::attribute_map.lookup((*iter).name)) {
+      case MeshXML::UNKNOWN:
+//	VSFileSystem::vs_fprintf (stderr,"Unknown attribute '%s' encountered in Vertex tag\n",(*iter).name.c_str() );
 	break;
-      case XML::FLATSHADE:
+      case MeshXML::FLATSHADE:
 	if ((*iter).value=="Flat") {
-	  fprintf (stderr, "Cannot Flatshade Quadstrips\n");
+	  VSFileSystem::vs_fprintf (stderr, "Cannot Flatshade Quadstrips\n");
 	}else {
 	  if ((*iter).value=="Smooth") {
 	    //ignored -- already done
@@ -710,19 +749,19 @@ void Mesh::beginElement(const string &name, const AttributeList &attributes) {
     }
     break;
    
-  case XML::QUAD:
-    assert(top==XML::POLYGONS);
+  case MeshXML::QUAD:
+    assert(top==MeshXML::POLYGONS);
     //assert(xml->load_stage==4);
     xml->num_vertices=4;
     xml->active_list = &xml->quads;
     xml->active_ind = &xml->quadind;
     xml->quadshade.push_back (0);
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
-      switch(XML::attribute_map.lookup((*iter).name)) {
-      case XML::UNKNOWN:
-	fprintf (stderr,"Unknown attribute '%s' encountered in Vertex tag\n",(*iter).name.c_str() );
+      switch(MeshXML::attribute_map.lookup((*iter).name)) {
+      case MeshXML::UNKNOWN:
+//	VSFileSystem::vs_fprintf (stderr,"Unknown attribute '%s' encountered in Vertex tag\n",(*iter).name.c_str() );
 	break;
-      case XML::FLATSHADE:
+      case MeshXML::FLATSHADE:
 	if ((*iter).value=="Flat") {
 	  xml->quadshade[xml->quadshade.size()-1]=1;
 	}else {
@@ -736,18 +775,18 @@ void Mesh::beginElement(const string &name, const AttributeList &attributes) {
       }
     }
     break;
-  case XML::LOD: 
+  case MeshXML::LOD: 
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
-      switch(XML::attribute_map.lookup((*iter).name)) {
-      case XML::UNKNOWN:
+      switch(MeshXML::attribute_map.lookup((*iter).name)) {
+      case MeshXML::UNKNOWN:
 	break;
-	  case XML::FRAMESPERSECOND:
-		  framespersecond=parse_float((*iter).value);
+	  case MeshXML::FRAMESPERSECOND:
+		  framespersecond=XMLSupport::parse_float((*iter).value);
 		  break;
-      case XML::LODFILE:
+      case MeshXML::LODFILE:
 	xml->lod.push_back(new Mesh ((*iter).value.c_str(),xml->lodscale,xml->faction,xml->fg,true));//make orig mesh
 	break;
-      case XML::SIZE:
+      case MeshXML::SIZE:
 	flotsize = XMLSupport::parse_float ((*iter).value);
 	break;
       }
@@ -756,43 +795,43 @@ void Mesh::beginElement(const string &name, const AttributeList &attributes) {
       xml->lodsize.push_back (flotsize);
     }
     break;
-  case XML::VERTEX:
-    assert(top==XML::TRI || top==XML::QUAD || top==XML::LINE ||top ==XML::TRISTRIP || top ==XML::TRIFAN||top ==XML::QUADSTRIP || top==XML::LINESTRIP);
+  case MeshXML::VERTEX:
+    assert(top==MeshXML::TRI || top==MeshXML::QUAD || top==MeshXML::LINE ||top ==MeshXML::TRISTRIP || top ==MeshXML::TRIFAN||top ==MeshXML::QUADSTRIP || top==MeshXML::LINESTRIP);
     //assert(xml->load_stage==4);
 
     xml->vertex_state = 0;
     unsigned int index;
     float s, t;
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
-      switch(XML::attribute_map.lookup((*iter).name)) {
-      case XML::UNKNOWN:
-	fprintf (stderr,"Unknown attribute '%s' encountered in Vertex tag\n",(*iter).name.c_str() );
+      switch(MeshXML::attribute_map.lookup((*iter).name)) {
+      case MeshXML::UNKNOWN:
+//	VSFileSystem::vs_fprintf (stderr,"Unknown attribute '%s' encountered in Vertex tag\n",(*iter).name.c_str() );
 	break;
-      case XML::POINT:
-	assert(!(xml->vertex_state & XML::V_POINT));
-	xml->vertex_state |= XML::V_POINT;
+      case MeshXML::POINT:
+	assert(!(xml->vertex_state & MeshXML::V_POINT));
+	xml->vertex_state |= MeshXML::V_POINT;
 	index = XMLSupport::parse_int((*iter).value);
 	break;
-      case XML::S:
-	assert(!(xml->vertex_state & XML::V_S));
-	xml->vertex_state |= XML::V_S;
+      case MeshXML::S:
+	assert(!(xml->vertex_state & MeshXML::V_S));
+	xml->vertex_state |= MeshXML::V_S;
 	s = XMLSupport::parse_float((*iter).value);
 	break;
-      case XML::T:
-	assert(!(xml->vertex_state & XML::V_T));
-	xml->vertex_state |= XML::V_T;
+      case MeshXML::T:
+	assert(!(xml->vertex_state & MeshXML::V_T));
+	xml->vertex_state |= MeshXML::V_T;
 	t = XMLSupport::parse_float((*iter).value);
 	break;
       default:
 	assert(0);
      }
     }
-    assert(xml->vertex_state & (XML::V_POINT|
-				XML::V_S|
-				XML::V_T) == 
-	   (XML::V_POINT|
-	    XML::V_S|
-	    XML::V_T) );
+    assert(xml->vertex_state & (MeshXML::V_POINT|
+				MeshXML::V_S|
+				MeshXML::V_T) == 
+	   (MeshXML::V_POINT|
+	    MeshXML::V_S|
+	    MeshXML::V_T) );
     assert(index < xml->vertices.size());
 
     memset(&xml->vertex, 0, sizeof(xml->vertex));
@@ -824,38 +863,38 @@ void Mesh::beginElement(const string &name, const AttributeList &attributes) {
     }
     xml->num_vertices--;
     break;
-  case XML::LOGO: 
-    assert (top==XML::MESH);
+  case MeshXML::LOGO: 
+    assert (top==MeshXML::MESH);
     //assert (xml->load_stage==4);
     xml->load_stage=5;
     xml->vertex_state=0;
     unsigned int typ;
     float rot, siz,offset;
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
-      switch(XML::attribute_map.lookup((*iter).name)) {
-      case XML::UNKNOWN:
-	fprintf (stderr,"Unknown attribute '%s' encountered in Vertex tag\n",(*iter).name.c_str() );
+      switch(MeshXML::attribute_map.lookup((*iter).name)) {
+      case MeshXML::UNKNOWN:
+//	VSFileSystem::vs_fprintf (stderr,"Unknown attribute '%s' encountered in Vertex tag\n",(*iter).name.c_str() );
 	break;
-      case XML::TYPE:
-	assert (!(xml->vertex_state&XML::V_TYPE));
-	xml->vertex_state|=XML::V_TYPE;
+      case MeshXML::TYPE:
+	assert (!(xml->vertex_state&MeshXML::V_TYPE));
+	xml->vertex_state|=MeshXML::V_TYPE;
 	typ = XMLSupport::parse_int((*iter).value);
 	
 	break;
-      case XML::ROTATE:
-	assert (!(xml->vertex_state&XML::V_ROTATE));
-	xml->vertex_state|=XML::V_ROTATE;
+      case MeshXML::ROTATE:
+	assert (!(xml->vertex_state&MeshXML::V_ROTATE));
+	xml->vertex_state|=MeshXML::V_ROTATE;
 	rot = XMLSupport::parse_float((*iter).value);
 
 	break;
-      case XML::SIZE:
-	assert (!(xml->vertex_state&XML::V_SIZE));
-	xml->vertex_state|=XML::V_SIZE;
+      case MeshXML::SIZE:
+	assert (!(xml->vertex_state&MeshXML::V_SIZE));
+	xml->vertex_state|=MeshXML::V_SIZE;
 	siz = XMLSupport::parse_float((*iter).value);
 	break;
-      case XML::OFFSET:
-	assert (!(xml->vertex_state&XML::V_OFFSET));
-	xml->vertex_state|=XML::V_OFFSET;
+      case MeshXML::OFFSET:
+	assert (!(xml->vertex_state&MeshXML::V_OFFSET));
+	xml->vertex_state|=MeshXML::V_OFFSET;
 	offset = XMLSupport::parse_float ((*iter).value);
 	break;
       default:
@@ -863,23 +902,23 @@ void Mesh::beginElement(const string &name, const AttributeList &attributes) {
      }
     }
 
-    assert(xml->vertex_state & (XML::V_TYPE|
-				XML::V_ROTATE|
-				XML::V_SIZE|
-				XML::V_OFFSET) == 
-	   (XML::V_TYPE|
-	    XML::V_ROTATE|
-	    XML::V_SIZE|
-	    XML::V_OFFSET) );
-    xml->logos.push_back(XML::ZeLogo());
+    assert(xml->vertex_state & (MeshXML::V_TYPE|
+				MeshXML::V_ROTATE|
+				MeshXML::V_SIZE|
+				MeshXML::V_OFFSET) == 
+	   (MeshXML::V_TYPE|
+	    MeshXML::V_ROTATE|
+	    MeshXML::V_SIZE|
+	    MeshXML::V_OFFSET) );
+    xml->logos.push_back(MeshXML::ZeLogo());
     xml->logos[xml->logos.size()-1].type = typ;
     xml->logos[xml->logos.size()-1].rotate = rot;
     xml->logos[xml->logos.size()-1].size = siz;
     xml->logos[xml->logos.size()-1].offset = offset;
     break;
-  case XML::REF:
+  case MeshXML::REF:
     {
-    assert (top==XML::LOGO);
+    assert (top==MeshXML::LOGO);
     //assert (xml->load_stage==5);
     xml->load_stage=6;
     unsigned int ind=0;
@@ -888,21 +927,21 @@ void Mesh::beginElement(const string &name, const AttributeList &attributes) {
     int ttttttt;
     ttttttt=0;
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
-      switch(XML::attribute_map.lookup((*iter).name)) {
-      case XML::UNKNOWN:
-	fprintf (stderr,"Unknown attribute '%s' encountered in Vertex tag\n",(*iter).name.c_str() );
+      switch(MeshXML::attribute_map.lookup((*iter).name)) {
+      case MeshXML::UNKNOWN:
+//	VSFileSystem::vs_fprintf (stderr,"Unknown attribute '%s' encountered in Vertex tag\n",(*iter).name.c_str() );
 	break;
-      case XML::POINT:
+      case MeshXML::POINT:
 	assert (ttttttt<2);
-	xml->vertex_state |= XML::V_POINT;
+	xml->vertex_state |= MeshXML::V_POINT;
 	ind = XMLSupport::parse_int((*iter).value);
 	foundindex=true;
 	ttttttt+=2;
 	break;
-      case XML::WEIGHT:
+      case MeshXML::WEIGHT:
 	assert ((ttttttt&1)==0);
 	ttttttt+=1;
-	xml->vertex_state |= XML::V_S;
+	xml->vertex_state |= MeshXML::V_S;
 	indweight = XMLSupport::parse_float((*iter).value);
 	break;
       default:
@@ -911,11 +950,11 @@ void Mesh::beginElement(const string &name, const AttributeList &attributes) {
     }
     assert (ttttttt==3);
     if (!foundindex) {
-      fprintf (stderr,"mesh with uninitalized logo");
+      VSFileSystem::vs_fprintf (stderr,"mesh with uninitalized logo");
     }
     xml->logos[xml->logos.size()-1].refpnt.push_back(ind);
     xml->logos[xml->logos.size()-1].refweight.push_back(indweight);
-    xml->vertex_state+=XML::V_REF;
+    xml->vertex_state+=MeshXML::V_REF;
     }
     break;
   default:
@@ -923,34 +962,34 @@ void Mesh::beginElement(const string &name, const AttributeList &attributes) {
   }
 }
 
-void Mesh::endElement(const string &name) {
+void Mesh::endElement(MeshXML* xml, const string &name) {
   //cerr << "End tag: " << name << endl;
 
-  XML::Names elem = (XML::Names)XML::element_map.lookup(name);
+  MeshXML::Names elem = (MeshXML::Names)MeshXML::element_map.lookup(name);
   assert(*xml->state_stack.rbegin() == elem);
   xml->state_stack.pop_back();
   unsigned int i;
   switch(elem) {
-  case XML::UNKNOWN:
-    fprintf (stderr,"Unknown element end tag '%s' detected\n",name.c_str());
+  case MeshXML::UNKNOWN:
+    VSFileSystem::vs_fprintf (stderr,"Unknown element end tag '%s' detected\n",name.c_str());
     break;
-  case XML::POINT:
-    assert(xml->point_state & (XML::P_X | 
-			       XML::P_Y | 
-			       XML::P_Z |
-			       XML::P_I |
-			       XML::P_J |
-			       XML::P_K) == 
-	   (XML::P_X | 
-	    XML::P_Y | 
-	    XML::P_Z |
-	    XML::P_I |
-	    XML::P_J |
-	    XML::P_K) );
+  case MeshXML::POINT:
+    assert(xml->point_state & (MeshXML::P_X | 
+			       MeshXML::P_Y | 
+			       MeshXML::P_Z |
+			       MeshXML::P_I |
+			       MeshXML::P_J |
+			       MeshXML::P_K) == 
+	   (MeshXML::P_X | 
+	    MeshXML::P_Y | 
+	    MeshXML::P_Z |
+	    MeshXML::P_I |
+	    MeshXML::P_J |
+	    MeshXML::P_K) );
     xml->vertices.push_back(xml->vertex);
     xml->vertexcount.push_back(0);
     break;
-  case XML::POINTS:
+  case MeshXML::POINTS:
     xml->load_stage = 3;
 
     /*
@@ -961,23 +1000,23 @@ void Mesh::endElement(const string &name) {
     clog << endl;
     */
     break;
-  case XML::LINE:
+  case MeshXML::LINE:
     assert (xml->num_vertices==0);
     break;
-  case XML::TRI:
+  case MeshXML::TRI:
     assert(xml->num_vertices==0);
     break;
-  case XML::QUAD:
+  case MeshXML::QUAD:
     assert(xml->num_vertices==0);
     break;
-  case XML::LINESTRIP:
+  case MeshXML::LINESTRIP:
     assert (xml->num_vertices<=0);
     for (i=xml->lstrcnt+1;i<xml->linestripind.size();i++) {
       xml->nrmllinstrip.push_back (xml->linestripind[i-1]);
       xml->nrmllinstrip.push_back (xml->linestripind[i]);
     }
     break;
-  case XML::TRISTRIP:
+  case MeshXML::TRISTRIP:
     assert(xml->num_vertices<=0);   
     for (i=xml->tstrcnt+2;i<xml->tristripind.size();i++) {
       if ((i-xml->tstrcnt)%2) {
@@ -993,7 +1032,7 @@ void Mesh::endElement(const string &name) {
       }
     }
     break;
-  case XML::TRIFAN:
+  case MeshXML::TRIFAN:
     assert (xml->num_vertices<=0);
     for (i=xml->tfancnt+2;i<xml->trifanind.size();i++) {
       xml->nrmltrifan.push_back (xml->trifanind[xml->tfancnt]);
@@ -1001,7 +1040,7 @@ void Mesh::endElement(const string &name) {
       xml->nrmltrifan.push_back (xml->trifanind[i]);
     }
     break;
-  case XML::QUADSTRIP://have to fix up nrmlquadstrip so that it 'looks' like a quad list for smooth shading
+  case MeshXML::QUADSTRIP://have to fix up nrmlquadstrip so that it 'looks' like a quad list for smooth shading
     assert(xml->num_vertices<=0);
     for (i=xml->qstrcnt+3;i<xml->quadstripind.size();i+=2) {
       xml->nrmlquadstrip.push_back (xml->quadstripind[i-3]);
@@ -1010,43 +1049,43 @@ void Mesh::endElement(const string &name) {
       xml->nrmlquadstrip.push_back (xml->quadstripind[i-1]);
     }
     break;
-  case XML::POLYGONS:
+  case MeshXML::POLYGONS:
     assert(xml->tris.size()%3==0);
     assert(xml->quads.size()%4==0);
     break;
-  case XML::REF:
+  case MeshXML::REF:
     //assert (xml->load_stage==6);
     xml->load_stage=5;
     break;
-  case XML::LOGO:
+  case MeshXML::LOGO:
     //assert (xml->load_stage==5);
-    assert (xml->vertex_state>=XML::V_REF*3);//make sure there are at least 3 reference points
+    assert (xml->vertex_state>=MeshXML::V_REF*3);//make sure there are at least 3 reference points
     xml->load_stage=4;
     break;
-  case XML::MATERIAL:
+  case MeshXML::MATERIAL:
 	  //assert(xml->load_stage==7);
 	  xml->load_stage=4;
 	  break;
-  case XML::DETAILPLANE:
+  case MeshXML::DETAILPLANE:
 	  
 	  break;
-  case XML::DIFFUSE:
+  case MeshXML::DIFFUSE:
 	  //assert(xml->load_stage==8);
 	  xml->load_stage=7;
 	  break;
-  case XML::EMISSIVE:
+  case MeshXML::EMISSIVE:
 	  //assert(xml->load_stage==8);
 	  xml->load_stage=7;
 	  break;
-  case XML::SPECULAR:
+  case MeshXML::SPECULAR:
 	  //assert(xml->load_stage==8);
 	  xml->load_stage=7;
 	  break;
-  case XML::AMBIENT:
+  case MeshXML::AMBIENT:
 	  //assert(xml->load_stage==8);
 	  xml->load_stage=7;
 	  break;
-  case XML::MESH:
+  case MeshXML::MESH:
     //assert(xml->load_stage==4);//4 is done with poly, 5 is done with Logos
 
     xml->load_stage=5;
@@ -1118,20 +1157,213 @@ void updateMax (Vector &mn, Vector & mx, const GFXVertex &ver) {
     mn.k = min(ver.z, mn.k);
     mx.k = max(ver.z, mx.k);
 }
+
+using namespace VSFileSystem;
+void LaunchConverter(const char * input, const char * output, const char* args="obc") {
+  string intmp = string("\"")+input+string("\"");
+  string outtmp = string("\"")+output+string("\"");
+#ifndef _WIN32
+    int pid=fork();
+    if (!pid) {
+      string soundserver_path = VSFileSystem::datadir+"/bin/mesher";
+	  string firstarg = string("\"")+soundserver_path+string("\"");
+      pid=execlp(soundserver_path.c_str() , soundserver_path.c_str(),input,output,args,NULL);
+      soundserver_path = VSFileSystem::datadir+"/mesher";
+      firstarg = string("\"")+soundserver_path+string("\"");
+      pid=execlp(soundserver_path.c_str() , soundserver_path.c_str(),input,output,args,NULL);
+      VSFileSystem::vs_fprintf(stderr,"Unable to spawn converter\n");
+      exit (-1);
+    } else {
+      if (pid==-1) {
+        VSFileSystem::vs_fprintf(stderr,"Unable to spawn converter\n");
+        exit (-1);        
+      }
+      int mystat=0;
+      waitpid(pid,&mystat,0);
+    }
+#else
+  string ss_path = VSFileSystem::datadir+"\\bin\\mesher.exe";
+  string firstarg = string("\"")+ss_path+string("\"");
+  int pid=spawnl(P_WAIT,ss_path.c_str(),firstarg.c_str(),intmp.c_str(),outtmp.c_str(),args,NULL);
+  if (pid==-1) {
+    ss_path = VSFileSystem::datadir+"\\mesher.exe";
+    firstarg = string("\"")+ss_path+string("\"");
+    int pid=spawnl(P_WAIT,ss_path.c_str(),firstarg.c_str(),intmp.c_str(),outtmp.c_str(),args,NULL);
+    if (pid==-1) {
+      VSFileSystem::vs_fprintf(stderr,"Unable to spawn obj converter Error (%d)\n",pid);
+    }
+  }
+#endif
+}
+bool isBFXM(VSFile & f) {
+  char bfxm[4];
+  f.Read(&bfxm[0],1);
+  f.Read(&bfxm[1],1);
+  f.Read(&bfxm[2],1);
+  f.Read(&bfxm[3],1);
+  f.GoTo(0);
+  return (bfxm[0]=='B'&&bfxm[1]=='F'&&bfxm[2]=='X'&&bfxm[3]=='M');
+}
+void CopyFile (VSFile &src, VSFile &dst) {
+  size_t hm;
+  size_t srcstruct;
+  size_t * srcptr = &srcstruct;
+  while (hm = src.Read(srcptr,sizeof(srcstruct))) {
+    dst.Write(srcptr,hm);
+  }
+}
+bool loadObj(VSFile &f, std::string str) {
+  string fullpath = f.GetFullPath();
+  VSFile output;
+  output.OpenCreateWrite("output.bfxm",BSPFile);
+  output.Close();
+  output.OpenReadOnly("output.bfxm",BSPFile);
+  string outputpath = output.GetFullPath();
+  output.Close();
+  LaunchConverter(fullpath.c_str(),outputpath.c_str());
+  output.OpenReadOnly("output.bfxm",BSPFile);
+  if (isBFXM(output)) {
+    output.Close();
+    f.Close();
+    f.OpenReadOnly("output.bfxm",BSPFile);
+    return true;
+  }else {
+    output.Close();
+  }
+  VSFile input;
+  input.OpenCreateWrite("input.obj",BSPFile);
+  f.GoTo(0);
+  CopyFile(f,input);
+  input.Close();
+  input.OpenReadOnly("input.obj",BSPFile);
+  string inputpath = input.GetFullPath();  
+  input.Close();
+
+  f.Close();
+  int where = str.find_last_of(".");
+  str = str.substr(0,where)+".mtl";
+  f.OpenReadOnly(str,MeshFile);
+  VSFile inputmtl;
+  inputmtl.OpenCreateWrite("input.mtl",BSPFile);
+  CopyFile(f,inputmtl);
+  f.Close();
+  inputmtl.Close();
+  LaunchConverter(inputpath.c_str(),outputpath.c_str());  
+  output.OpenReadOnly("output.bfxm",BSPFile);
+  if (isBFXM(output)) {
+    output.Close();
+    f.OpenReadOnly("output.bfxm",BSPFile);
+    return true;
+  }else {
+    output.Close();
+  }
+  return false;
+}
 const bool USE_RECALC_NORM=true;
 const bool FLAT_SHADE=true;
-void Mesh::LoadXML(const char *filename,const Vector& scale, int faction, Flightgroup * fg, bool origthis) {
-  const int chunk_size = 16384;
-  std::vector <unsigned int> ind;  
-  FILE* inFile = fopen (filename, "r");
-  if(!inFile) {
-    fprintf (stderr,"Cannot Open Mesh File %s\n",filename);
-	cleanexit=1;
-    winsys_exit(1);
-    return;
+Mesh * Mesh::LoadMesh (const char * filename, const Vector & scale, int faction, Flightgroup * fg,const std::vector<std::string> & overridetextures){
+  vector<Mesh *> m = LoadMeshes(filename,scale,faction,fg,overridetextures);
+  if (m.empty()) {
+    return 0;
   }
+  if (m.size()>1) {
+    fprintf (stderr,"Mesh %s has %d subcomponents. Only first used!\n",filename,m.size());
+    for (unsigned int i=1;i<m.size();++i) {
+      delete m[i];
+    }
+  }
+  return m[0];
+}
 
-  xml = new XML;
+Hashtable<std::string, std::vector <Mesh*>, 127> bfxmHashTable;
+vector <Mesh*> Mesh::LoadMeshes(const char * filename, const Vector &scale, int faction, Flightgroup * fg, const std::vector<std::string> &overrideTextures) {
+  /*
+  if (strstr(filename,".xmesh")) {
+    Mesh * m = new Mesh (filename,scale,faction,fg);
+    vector <Mesh*> ret;
+    ret.push_back(m);
+    return ret;
+    }*/
+  string hash_name = VSFileSystem::GetHashName (filename,scale,faction);
+  vector <Mesh *>* oldmesh = bfxmHashTable.Get(hash_name);
+  if (oldmesh==0) {
+    hash_name =VSFileSystem::GetSharedMeshHashName(filename,scale,faction);
+    oldmesh = bfxmHashTable.Get(hash_name);
+  }
+  if (0!=oldmesh) {
+    vector <Mesh *> ret;
+    for (unsigned int i=0;i<oldmesh->size();++i) {
+      ret.push_back(new Mesh());      
+      Mesh* m = (*oldmesh)[i];
+      ret.back()->LoadExistant(m->orig?m->orig:m);
+    }
+    return ret;
+  }
+    
+  VSFile f;
+  VSError err = f.OpenReadOnly( filename, MeshFile);
+  if( err>Ok)
+  {
+	VSFileSystem::vs_fprintf (stderr,"Cannot Open Mesh File %s\n",filename);
+	return vector<Mesh*>();
+  }  
+  char bfxm[4];
+  f.Read(&bfxm[0],1);
+  f.Read(&bfxm[1],1);
+  f.Read(&bfxm[2],1);
+  f.Read(&bfxm[3],1);
+  bool isbfxm = (bfxm[0]=='B'&&bfxm[1]=='F'&&bfxm[2]=='X'&&bfxm[3]=='M');
+  if (isbfxm||strstr(filename,".obj")){    
+    if (!isbfxm) {
+      if (!loadObj(f,filename)) {
+	VSFileSystem::vs_fprintf (stderr,"Cannot Open Mesh File %s\n",filename);
+	cleanexit=1;
+	winsys_exit(1);
+	return vector<Mesh*>();        
+      }
+    }
+    f.GoTo(0);
+    hash_name =(err==VSFileSystem::Shared)?VSFileSystem::GetSharedMeshHashName (filename,scale,faction):VSFileSystem::GetHashName(filename,scale,faction);
+    vector <Mesh*> retval (LoadMeshes(f,scale,faction,fg,hash_name,overrideTextures));
+    vector <Mesh*>* newvec = new vector<Mesh*>(retval);
+    for (unsigned int i=0;i<retval.size();++i) {
+      retval[i]->hash_name=hash_name;
+      if (retval[i]->orig)
+        retval[i]->orig->hash_name=hash_name;
+      (*newvec)[i]=retval[i]->orig?retval[i]->orig:retval[i];
+    }
+    bfxmHashTable.Put(hash_name, newvec);
+    return retval;
+  }else {
+    f.Close();
+    int dummyXML;
+    Mesh * m = new Mesh (filename,scale,faction,fg,dummyXML);
+    vector <Mesh*> ret;
+    ret.push_back(m);
+    return ret;    
+  }
+}
+void Mesh::LoadXML(const char *filename,const Vector& scale, int faction, Flightgroup * fg, bool origthis, const vector<string> &textureOverride) {
+  VSFile f;
+  VSError err = f.OpenReadOnly( filename, MeshFile);
+  if( err>Ok)
+  {
+	VSFileSystem::vs_fprintf (stderr,"Cannot Open Mesh File %s\n",filename);
+	cleanexit=1;
+	winsys_exit(1);
+	return;
+  }
+  LoadXML( f, scale, faction, fg, origthis,textureOverride);
+  f.Close();
+}
+
+void Mesh::LoadXML( VSFileSystem::VSFile & f, const Vector & scale, int faction, Flightgroup *fg, bool origthis, const vector<string> &textureOverride)
+{
+  const int chunk_size = 16384;
+  std::vector <unsigned int> ind;
+
+  MeshXML * xml = new MeshXML;
+  xml->mesh = this;
   xml->fg = fg;
   xml->usenormals=false;
   xml->force_texture=false;
@@ -1144,9 +1376,12 @@ void Mesh::LoadXML(const char *filename,const Vector& scale, int faction, Flight
   xml->scale=scale;
   xml->lodscale=scale;
   XML_Parser parser = XML_ParserCreate(NULL);
-  XML_SetUserData(parser, this);
+  XML_SetUserData(parser, xml);
   XML_SetElementHandler(parser, &Mesh::beginElement, &Mesh::endElement);
-  
+
+  XML_Parse (parser,(f.ReadFull()).c_str(),f.Size(),1);
+
+  /*
   do {
 #ifdef BIDBG
     char *buf = (XML_Char*)XML_GetBuffer(parser, chunk_size);
@@ -1155,22 +1390,39 @@ void Mesh::LoadXML(const char *filename,const Vector& scale, int faction, Flight
 #endif
     int length;
     
-    length = fread(buf,1, chunk_size,inFile);
+    length = VSFileSystem::vs_read(buf,1, chunk_size,inFile);
     //length = inFile.gcount();
 #ifdef BIDBG
-    XML_ParseBuffer(parser, length, feof(inFile));
+    XML_ParseBuffer(parser, length, VSFileSystem::vs_feof(inFile));
 #else
-    XML_Parse (parser,buf,length,feof(inFile));
+    XML_Parse (parser,buf,length,VSFileSystem::vs_feof(inFile));
 #endif
-  } while(!feof(inFile));
-  fclose (inFile);
+  } while(!VSFileSystem::vs_feof(inFile));
+  */
   XML_ParserFree (parser);
   // Now, copy everything into the mesh data structures
 
   if(xml->load_stage!=5) {
-    fprintf (stderr,"Warning: mesh load possibly failed\n");
+    VSFileSystem::vs_fprintf (stderr,"Warning: mesh load possibly failed\n");
     exit(-1);
   }
+
+  PostProcessLoading(xml,textureOverride);
+  numlods=xml->lod.size()+1;
+  if (origthis) {
+    orig=NULL;
+  }else {
+    orig = new Mesh [numlods];
+    unsigned int i;
+    for (i=0;i<xml->lod.size();i++) {
+      orig[i+1] = *xml->lod[i];
+      orig[i+1].lodsize=xml->lodsize[i];
+    } 
+  }
+
+  delete xml;
+}
+void Mesh::PostProcessLoading(MeshXML * xml,const vector<string> &textureOverride) {
   unsigned int i; unsigned int a=0;
   unsigned int j;
   //begin vertex normal calculations if necessary
@@ -1203,7 +1455,7 @@ void Mesh::LoadXML(const char *filename,const Vector& scale, int faction, Flight
 	xml->vertices[i].i/=dis;//renormalize
 	xml->vertices[i].j/=dis;
 	xml->vertices[i].k/=dis;
-	/*	fprintf (stderr, "Vertex %d, (%f,%f,%f) <%f,%f,%f>\n",i,
+	/*	VSFileSystem::vs_fprintf (stderr, "Vertex %d, (%f,%f,%f) <%f,%f,%f>\n",i,
 		 xml->vertices[i].x,
 		 xml->vertices[i].y,
 		 xml->vertices[i].z,
@@ -1230,7 +1482,7 @@ void Mesh::LoadXML(const char *filename,const Vector& scale, int faction, Flight
     }
   }
     a=0;
-
+  std::vector <unsigned int> ind;
     for (a=0;a<xml->tris.size();a+=3) {
       for (j=0;j<3;j++) {
 	ind.push_back (xml->triind[a+j]);
@@ -1361,11 +1613,30 @@ void Mesh::LoadXML(const char *filename,const Vector& scale, int faction, Flight
       
   }
   string factionname = FactionUtil::GetFaction(xml->faction);
+  
+  for (int LC=0;LC<textureOverride.size();++LC) {
+    if (textureOverride[LC]!="") {
+      while (xml->decals.size()<=LC) {
+        MeshXML::ZeTexture z;
+        xml->decals.push_back(z);
+      }
+      if (textureOverride[LC].find(".ani")!=string::npos) {
+        xml->decals[LC].decal_name="";
+        xml->decals[LC].animated_name=textureOverride[LC];
+        xml->decals[LC].alpha_name="";
+      }else {
+        xml->decals[LC].animated_name="";
+        xml->decals[LC].alpha_name="";
+        xml->decals[LC].decal_name=textureOverride[LC];
+      }
+    }
+  }
+
   while (Decal.size()<xml->decals.size())
       Decal.push_back(NULL);
-  Decal[0]=(TempGetTexture(0,factionname));
+  Decal[0]=(TempGetTexture(xml, 0,factionname));
   {for (unsigned int i=1;i<xml->decals.size();i++) {
-      Decal[i]=(TempGetTexture(i,factionname));
+      Decal[i]=(TempGetTexture(xml, i,factionname));
   }}
   while (Decal.back()==NULL&&Decal.size()>1) {
       Decal.pop_back();
@@ -1525,7 +1796,7 @@ void Mesh::LoadXML(const char *filename,const Vector& scale, int faction, Flight
   if (xml->sharevert) {
     vlist = new GFXVertexList (&polytypes[0], xml->vertices.size(),&xml->vertices[0],o_index,&poly_offsets[0],false,&ind[0]);
   }else {
-    static bool usopttmp=(XMLSupport::parse_bool (vs_config->getVariable ("graphics","OptimizeVertexArrays","true")));
+    static bool usopttmp=(XMLSupport::parse_bool (vs_config->getVariable ("graphics","OptimizeVertexArrays","false")));
     static float optvertexlimit= (XMLSupport::parse_float (vs_config->getVariable ("graphics", "OptimizeVertexCondition","1.0")));
     bool cachunk=false;
     if (usopttmp) {
@@ -1563,7 +1834,7 @@ void Mesh::LoadXML(const char *filename,const Vector& scale, int faction, Flight
     index+= xml->quadstrips[a].size();
   }
   */
-  CreateLogos(faction,fg);
+  CreateLogos(xml,xml->faction,xml->fg);
   // Calculate bounding sphere
   
   if (mn.i==FLT_MAX) {
@@ -1574,16 +1845,6 @@ void Mesh::LoadXML(const char *filename,const Vector& scale, int faction, Flight
   GFXSetMaterial (myMatNum,xml->material);
 
   delete [] vertexlist;
-  numlods=xml->lod.size()+1;
-  if (origthis) {
-    orig=NULL;
-  }else {
-    orig = new Mesh [numlods];
-    for (i=0;i<xml->lod.size();i++) {
-      orig[i+1] = *xml->lod[i];
-      orig[i+1].lodsize=xml->lodsize[i];
-    } 
-  }
-  delete xml;
+
 }
 

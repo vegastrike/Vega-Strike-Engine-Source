@@ -4,6 +4,8 @@
 #include <config.h>
 
 #include <iostream>
+#include "vsfilesystem.h"
+using namespace VSFileSystem;
 
 namespace VsnetDownload
 {
@@ -48,21 +50,7 @@ enum State
 
 std::ostream& operator<<( std::ostream& ostr, State s );
 
-/*------------------------------------------------------------*
- * declaration VsnetDownload::Client::Error
- *------------------------------------------------------------*/
-
-enum Error
-{
-    Ok,
-    SocketError,
-    FileNotFound,
-    LocalPermissionDenied,
-    RemotePermissionDenied,
-    DownloadInterrupted
-};
-
-std::ostream& operator<<( std::ostream& ostr, Error e );
+std::ostream& operator<<( std::ostream& ostr, VSError e );
 
 }; // namespace Client
 

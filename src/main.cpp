@@ -17,6 +17,7 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
+#include "config.h"
 #if defined(HAVE_SDL)
 #include <SDL/SDL.h>
 #endif
@@ -36,7 +37,7 @@
 #include "cmd/script/mission.h"
 #include "audiolib.h"
 #include "config_xml.h"
-#include "vs_path.h"
+#include "vsfilesystem.h"
 #include "vs_globals.h"
 #include "gfx/animation.h"
 #include "cmd/unit.h"
@@ -52,7 +53,12 @@
 #include "save_util.h"
 #include "gfx/masks.h"
 #include "cmd/music.h"
+#include "cmd/csv.h"
 #include <time.h>
+#ifndef _WIN32
+#include <sys/signal.h>
+#endif
+
 #if defined (_MSC_VER) && defined(_DEBUG)
 #include <crtdbg.h>
 #endif
@@ -123,8 +129,8 @@ void VSExit( int code)
 
 void cleanup(void)
 {
-  fprintf( stdout, "\n\nLoop average : %g\n\n", avg_loop);
-  fprintf( stderr, "\n\nLoop average : %g\n\n", avg_loop);
+  VSFileSystem::vs_fprintf( stdout, "\n\nLoop average : %g\n\n", avg_loop);
+  VSFileSystem::vs_fprintf( stderr, "\n\nLoop average : %g\n\n", avg_loop);
   STATIC_VARS_DESTROYED=true;
   printf ("Thank you for playing!\n");
 
@@ -189,50 +195,7 @@ int main( int argc, char *argv[] )
 {
 	CONFIGFILE=0;
 	mission_name[0]='\0';
-//	char *TEST_STUFF=NULL;
-//	*TEST_STUFF='0';//MAKE IT CRASH
-#if defined(WITH_MACOSX_BUNDLE)||defined(_WIN32)
-    // We need to set the path back 2 to make everything ok.
-	{
-    char *parentdir;
-	int pathlen=strlen(argv[0]);
-	parentdir=new char[pathlen+1];
-    char *c;
-    strncpy ( parentdir, argv[0], pathlen+1 );
-    c = (char*) parentdir;
 
-    while (*c != '\0')     /* go to end */
-        c++;
-    
-    while ((*c != '/')&&(*c != '\\')&&c>parentdir)      /* back up to parent */
-        c--;
-    
-    *c = '\0';             /* cut off last part (binary name) */
-    if (strlen (parentdir)>0) {  
-      chdir (parentdir);/* chdir to the binary app's parent */
-    }
-	delete []parentdir;
-	}
-#if defined(WITH_MACOSX_BUNDLE)
-	FILE * testmac = fopen ("../Resources/data/vegastrike.config","r");
-	if (testmac) {
-		chdir ("../Resources/data");/* chdir to the .app's parent */
-		fclose(testmac);
-	}
-	//chdir ("../../../");/* chdir to the .app's parent */
-#endif
-	
-    FILE * testup = fopen ("../vegastrike.config","r");
-	FILE * test = fopen ("vegastrike.config","r");
-	if (testup)
-		fclose(testup);
-	if (test)
-		fclose(test);
-	if (testup&&NULL==test) {
-		chdir("..");
-	}
-	
-#endif
     /* Print copyright notice */
 	printf("Vega Strike "  " \n"
 		   "See http://www.gnu.org/copyleft/gpl.html for license details.\n\n" );
@@ -248,15 +211,17 @@ int main( int argc, char *argv[] )
     }
     //this sets up the vegastrike config variable
     setup_game_data(); 
-    // loads the configuration file .vegastrikerc from home dir if such exists
+    // loads the configuration file .vegastrike/vegastrike.config from home dir if such exists
 	{
-    string subdir=ParseCommandLine(argc,argv);
-	if (CONFIGFILE==0) {
-		CONFIGFILE=new char[42];
-		sprintf(CONFIGFILE,"vegastrike.config");
-	}
+	    string subdir=ParseCommandLine(argc,argv);
+		cerr<<"GOT SUBDIR ARG = "<<subdir<<endl;
+		if (CONFIGFILE==0) {
+			CONFIGFILE=new char[42];
+			sprintf(CONFIGFILE,"vegastrike.config");
+		}
 
-    initpaths(subdir);
+		// Specify the config file and the possible mod subdir to play
+		VSFileSystem::InitPaths( CONFIGFILE, subdir);
 	}
     //can use the vegastrike config variable to read in the default mission
 
@@ -265,9 +230,12 @@ int main( int argc, char *argv[] )
   if (g_game.music_enabled) {
     int pid=fork();
     if (!pid) {
-      pid=execlp("./soundserver","./soundserver",NULL);
+	  string soundserver_path = VSFileSystem::datadir+"/bin/soundserver";
+      pid=execlp(soundserver_path.c_str() , soundserver_path.c_str(),NULL);
+      soundserver_path = VSFileSystem::datadir+"/soundserver";
+      pid=execlp(soundserver_path.c_str() , soundserver_path.c_str(),NULL);
       g_game.music_enabled=false;
-      fprintf(stderr,"Unable to spawn music player server\n");
+      VSFileSystem::vs_fprintf(stderr,"Unable to spawn music player server\n");
       exit (0);
     } else {
       if (pid==-1) {
@@ -277,33 +245,48 @@ int main( int argc, char *argv[] )
   }
 #endif
     if (mission_name[0]=='\0')
-      strcpy(mission_name,vs_config->getVariable ("general","default_mission","test1.mission").c_str());
+	{
+      strcpy(mission_name,vs_config->getVariable ("general","default_mission","test/test1.mission").c_str());
+	  cerr<<"MISSION_NAME is empty using : "<<mission_name<<endl;
+	}
     //might overwrite the default mission with the command line
+ {
+   VSFile allUnits;
+
+   VSError err = allUnits.OpenReadOnly("units.csv",UnitFile);
+   if (err<=Ok) {
+     unitTables.push_back(new CSVTable(allUnits));
+     allUnits.Close();
+   }
+   static string unitdata= vs_config->getVariable("data","UnitCSV","modunits.csv");
+   while (unitdata.length()!=0) {
+     string::size_type  where=unitdata.find(" ");
+     if (where==string::npos)
+       where=unitdata.length();
+     string tmp = unitdata.substr(0,where);     
+     err = allUnits.OpenReadOnly(tmp,UnitFile);
+     if (err<=Ok) {
+       unitTables.push_back(new CSVTable(allUnits));
+       allUnits.Close();
+     }
+     unitdata=unitdata.substr(where,unitdata.length());
+   }
+ }
 
 #ifdef HAVE_PYTHON
     Python::init();
 
     Python::test();
 #endif
-
-	fprintf (stderr,"Max role value %d\n",ROLES::maxRoleValue()); 
-	fprintf (stderr,"role value of FIGHTER %d\n", ROLES::readBitmask("FIgHteR"));
-	fprintf (stderr,"role value of FIGHTER %d\n", ROLES::readBitmask("FIgHteR BOMber MISSile"));
-	fprintf (stderr,"role value of FIGHTER %d\n", ROLES::readBitmask("AERO BOMb"));
-	vector <vector <char> >temp=ROLES::getAllRolePriorities();
-	for(unsigned int i=0;i<temp.size();i++) {
-		for (unsigned int j=0;j<temp[i].size();j++) {
-			fprintf (stderr,"%d ",(int)temp[i][j]);
-		}
-		fprintf (stderr,"\n");
-	}
+    std::vector<std::vector <char > > temp = ROLES::getAllRolePriorities();
 #if defined(HAVE_SDL)
 #ifndef NO_SDL_JOYSTICK
     // && defined(HAVE_SDL_MIXER)
   if (  SDL_InitSubSystem( SDL_INIT_JOYSTICK )) {
-        fprintf(stderr, "Couldn't initialize SDL: %s\n", SDL_GetError());
+        VSFileSystem::vs_fprintf(stderr, "Couldn't initialize SDL: %s\n", SDL_GetError());
         winsys_exit(1);
     }
+    // signal( SIGSEGV, SIG_DFL );
 #endif
 #endif
 #if 0
@@ -422,7 +405,7 @@ bool SetPlayerSystem (std::string &sys, bool set) {
 }
 vector<string> parse_space_string(std::string s) {
 	vector<string> ret;
-	int index=0;
+	string::size_type index=0;
 	while ((index =s.find(" "))!=string::npos) {
 		ret.push_back (s.substr(0,index));
 		s = s.substr (index+1);
@@ -463,15 +446,16 @@ void bootstrap_main_loop () {
     bootstrap_draw ("Vegastrike Loading...",SplashScreen);
     if (g_game.music_enabled) {
 #if defined( _WIN32) && !defined( __CYGWIN__)
-      int pid=spawnl(P_NOWAIT,"./soundserver.exe","./soundserver.exe",NULL);
+	  string ss_path = VSFileSystem::datadir+"/soundserver.exe";
+      int pid=spawnl(P_NOWAIT,ss_path.c_str(),ss_path.c_str(),NULL);
       if (pid==-1) {
-	vschdir("bin");
-	int pid=spawnl(P_NOWAIT,"./soundserver.exe","./soundserver.exe",NULL);
-	if (pid==-1) {
-	  g_game.music_enabled=false;
-	  fprintf(stderr,"Unable to spawn music player server Error (%d)\n",pid);
-	}
-	vscdup();
+		ss_path = VSFileSystem::datadir+"/bin/soundserver.exe";
+		chdir("bin");
+		int pid=spawnl(P_NOWAIT,ss_path.c_str(),ss_path.c_str(),NULL);
+		if (pid==-1) {
+			g_game.music_enabled=false;
+			VSFileSystem::vs_fprintf(stderr,"Unable to spawn music player server Error (%d)\n",pid);
+		}
       }
 #endif
     }
@@ -597,22 +581,28 @@ void bootstrap_main_loop () {
 			winsys_exit(1);
 		}
 		//sleep( 3);
-		cout<<"Waiting for player "<<(k)<<" = "<<(*it)<<":"<<(*jt)<<"login response...";
-		if( use_acctserver=="true")
-			savefiles.push_back( Network[k].loginAcctLoop( (*it), (*jt)));
-		else
-			savefiles.push_back( Network[k].loginLoop( (*it), (*jt)));
-		if( savefiles[k][0]=="")
-		{
-				cout<<savefiles[k][1]<<endl;
-				cout<<"QUITTING"<<endl;
-				cleanexit=true;
-				winsys_exit(1);
-		}
-		else
-		{
-			cout<<" logged in !"<<endl;
-		}
+        cout<<"Waiting for player "<<(k)<<" = "<<(*it)<<":"<<(*jt)<<"login response...";
+        vector<string> loginResp;
+        if( use_acctserver=="true")
+            loginResp = Network[k].loginAcctLoop( (*it), (*jt));
+        else
+            loginResp = Network[k].loginLoop( (*it), (*jt));
+        savefiles.push_back( loginResp );
+
+        if( savefiles[k].empty() || savefiles[k][0]=="")
+        {
+            if( savefiles[k].empty() )
+                cout << "Server must have closed connection without warning" << endl;
+            else
+                cout<<savefiles[k][1]<<endl;
+            cout<<"QUITTING"<<endl;
+            cleanexit=true;
+            winsys_exit(1);
+        }
+        else
+        {
+            cout<<" logged in !"<<endl;
+        }
 	  }
 		/************* NETWORK PART ***************/
 	  if( Network!=NULL)
@@ -693,13 +683,24 @@ void bootstrap_main_loop () {
 			DockToSavedBases(i);
 		}
 	}
-	cout<<"Loading completed"<<endl;
+	cout<<"Loading completed, now network init"<<endl;
 	// Send a network msg saying we are ready and also send position info
 	if( Network!=NULL) {
-		for( int l=0; l<_Universe->numPlayers(); l++)
+		int l;
+		for(l=0; l<_Universe->numPlayers(); l++)
+		{
+			Network[l].downloadZoneInfo();
+		}
+		for(l=0; l<_Universe->numPlayers(); l++)
+		{
 			Network[l].inGame();
+		}
 	}
-
+	{
+		for (unsigned int i=0;i<_Universe->numPlayers();++i) {
+			WriteSaveGame(_Universe->AccessCockpit(i),false);
+		}
+	}
 	cur_check = getNewTime();
     _Universe->Loop(main_loop);
     ///return to idle func which now should call main_loop mohahahah
@@ -713,8 +714,8 @@ const char helpmessage[] =
 "Command line options for vegastrike\n"
 "\n"
 " -D -d     Specify data directory\n"
-" -M -m     Number of players\n"
-" -S -s     Specify data subdirectory\n"
+" -N -n     Number of players\n"
+" -M -m     Specify a mod to play\n"
 " -P -p     Specify player location\n"
 " -j -j     Start in a specific system\n"
 " -A -A     Normal resolution (800x600)\n"
@@ -725,9 +726,11 @@ const char helpmessage[] =
 std::string ParseCommandLine(int argc, char ** lpCmdLine) {
   std::string st;
   std::string retstr;
+  std::string datatmp;
   QVector PlayerLocation;
   for (int i=1;i<argc;i++) {
     if(lpCmdLine[i][0]=='-') {
+		cerr<<"ARG #"<<i<<" = "<<lpCmdLine[i]<<endl;
       switch(lpCmdLine[i][1]){
     case 'd':
     case 'D': {
@@ -736,26 +739,29 @@ std::string ParseCommandLine(int argc, char ** lpCmdLine) {
             cout << "Option -D requires an argument" << endl;
             exit(1);
         }
- 		string datadir = &lpCmdLine[i][2];
-        cout << "Using data dir " << datadir << endl;
-        if(chdir(datadir.c_str())) {
-            cout << "Error changing to specified data dir" << endl;
-            exit(1);
-         }
-        }
+ 		datatmp = &lpCmdLine[i][2];
+		if( VSFileSystem::DirectoryExists( datatmp))
+			VSFileSystem::datadir = datatmp;
+		else
+		{
+			cout<<"Specified data directory not found... exiting"<<endl;
+			exit(1);
+		}
+        cout << "Using data dir specified on command line : " << datatmp << endl;
+	  }
 	  case 'r':
       case 'R':
 	break;
-      case 'M':
-      case 'm':
+      case 'N':
+      case 'n':
 		  if (!(lpCmdLine[i][2]=='1'&&lpCmdLine[i][3]=='\0')) {
 	  		CONFIGFILE=new char[40+strlen(lpCmdLine[i])+1];
 			sprintf(CONFIGFILE,"vegastrike.config.%splayer",lpCmdLine[i]+2);
 		  }
 	break;
-      case 'S':
-      case 's':
-	retstr=(lpCmdLine[i]+2);
+      case 'M':
+      case 'm':
+		retstr=string(lpCmdLine[i]+2);
 	break;
       case 'f':
       case 'F':
@@ -813,12 +819,4 @@ std::string ParseCommandLine(int argc, char ** lpCmdLine) {
     }
   }
   return retstr;
-  //FILE *fp = fopen("vid.cfg", "rb");
-  //  GUID temp;
-  //fread(&temp, sizeof(GUID), 1, fp);
-  //fread(&temp, sizeof(GUID), 1, fp);
-  //fread(&_ViewPortWidth, sizeof(DWORD), 1, fp);
-  //fread(&_ViewPortHeight, sizeof(DWORD), 1, fp);
-  //fread(&_ColDepth,sizeof(DWORD),1,fp);
-  //fclose(fp);
 }

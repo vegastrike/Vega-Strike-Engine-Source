@@ -39,7 +39,9 @@ extern float simulation_atom_var;
 
 #include "macosx_math.h"
 #include <math.h>
-
+#ifdef HAVE_IEEEFP_H
+#include <ieeefp.h>
+#endif
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -86,7 +88,10 @@ extern float simulation_atom_var;
 
 #include <float.h>
 
-#ifdef HAVE_FINITE
+#if defined(HAVE_MATH_H)
+#include <math.h>
+#endif
+#if  defined(HAVE_FINITE) || defined(BSD)
 #   define FINITE(x) (finite(x))
 #else
 #	define FINITE(x) (_finite(x))

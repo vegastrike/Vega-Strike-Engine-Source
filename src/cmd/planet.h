@@ -19,7 +19,7 @@ ok *
 struct GFXMaterial;
 /* Orbits in the xy plane with the given radius. Depends on a reorientation of coordinate bases */
 
-struct Texture;
+class Texture;
 class Atmosphere;
 
 class ContinuousTerrain;

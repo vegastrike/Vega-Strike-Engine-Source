@@ -1,6 +1,7 @@
 #include "planet_generic.h"
 #include "unit_factory.h"
 #include "gfx/mesh.h"
+#include "galaxy_xml.h"
 #include <sys/types.h>
 #include <sys/stat.h>
 
@@ -71,9 +72,12 @@ void PlanetaryOrbit::Execute() {
       }
   }
   //unuseddouble radius =  sqrt((x_offset - focus).MagnitudeSquared() + (y_offset - focus).MagnitudeSquared());
-  theta+=velocity*SIMULATION_ATOM;
-  parent->Velocity = ((origin - focus + x_offset+y_offset-parent->LocalPosition())*(1./SIMULATION_ATOM)).Cast();
-  const int Unreasonable_value=(int)(100000/SIMULATION_ATOM);
+  const double div2pi = (1.0/(2.0*PI));
+  theta+=velocity*SIMULATION_ATOM*div2pi;
+  
+  parent->Velocity =parent->cumulative_velocity= (((origin - focus + x_offset+y_offset-parent->LocalPosition())*div2pi*(1./SIMULATION_ATOM)).Cast());
+  //const int Unreasonable_value=(int)(100000/SIMULATION_ATOM);
+  const float Unreasonable_value = XMLSupport::parse_float(vs_config->getVariable("physics","velocity_max","10000"));
   if (parent->Velocity.Dot (parent->Velocity)>Unreasonable_value*Unreasonable_value) {
     parent->Velocity.Set (0,0,0);
     parent->SetCurPosition (origin-focus+x_offset+y_offset);
@@ -81,12 +85,14 @@ void PlanetaryOrbit::Execute() {
 }
 string GetElMeshName (string name, string faction,char direction)
 {
+	using namespace VSFileSystem;
 		char strdir[2]={direction,0};
-		string elxmesh=string(strdir)+"_elevator.xmesh";
-		string elevator_mesh =name+"_"+faction+elxmesh;				 
-		string tump = string("meshes/"+elevator_mesh);
-		FILE * fp = fopen (tump.c_str(),"r");
-		if (fp) fclose( fp);
+		string elxmesh=string(strdir)+"_elevator.bfxm";
+		string elevator_mesh =name+"_"+faction+elxmesh;
+		VSFile f;
+		VSError err = f.OpenReadOnly( elevator_mesh, MeshFile);
+		if( err>Ok)
+			f.Close();
 		else elevator_mesh=name+elxmesh;
 		return elevator_mesh;
 }
@@ -125,7 +131,7 @@ Vector Planet::AddSpaceElevator (const std::string &name, const std::string & fa
 	if (meshdata.empty()) meshdata.push_back(NULL);
 	Mesh * shield = meshdata.back();
 	string elevator_mesh=GetElMeshName(name,faction,direction);//filename	
-	Mesh * tmp = meshdata.back()=new Mesh (elevator_mesh.c_str(),
+	Mesh * tmp = meshdata.back()=Mesh::LoadMesh (elevator_mesh.c_str(),
 										   scale,
 										   FactionUtil::
 										   GetFaction(faction.c_str()),
@@ -144,7 +150,7 @@ Vector Planet::AddSpaceElevator (const std::string &name, const std::string & fa
 		Unit * un=UnitFactory::createUnit (name.c_str(),true,FactionUtil::GetFactionIndex(faction),"",NULL);
 		if (image->dockingports.back().pos.MagnitudeSquared()<10)
 			image->dockingports.clear();
-		image->dockingports.push_back (DockingPorts(ElevatorLoc.p,un->rSize()*1.5,true));
+		image->dockingports.push_back (DockingPorts(ElevatorLoc.p,un->rSize()*1.5,0,true));
 		un->SetRecursiveOwner(this);
 		un->SetOrientation(ElevatorLoc.getQ(),ElevatorLoc.getR());
 		un->SetPosition(ElevatorLoc.p);
@@ -162,7 +168,7 @@ Planet * Planet::GetTopPlanet (int level) {
 	  if (satiterator.current()->isUnit()==PLANETPTR) {
 	    return ((Planet *)satiterator.current())->GetTopPlanet (level-1);
 	  } else {
-	    fprintf (stderr,"Planets are unable to orbit around units");
+	    VSFileSystem::vs_fprintf (stderr,"Planets are unable to orbit around units");
 	    return NULL;
 	  }
 
@@ -232,7 +238,7 @@ Unit * Planet::beginElement(QVector x,QVector y,float vely, const Vector & rotve
 	  if (satiterator.current()->isUnit()==PLANETPTR) {
 		un =((Planet *)satiterator.current())->beginElement(x,y,vely,rotvel, pos,gravity,radius,filename,blendSrc,blendDst,dest,level-1,ourmat,ligh, isunit, faction,fullname,inside_out);
 	  } else {
-	    fprintf (stderr,"Planets are unable to orbit around units");
+	    VSFileSystem::vs_fprintf (stderr,"Planets are unable to orbit around units");
 	  }
   } else {
     if (isunit==true) {
@@ -265,6 +271,10 @@ Planet::Planet()
   // Not needed as Unit default constructor is called and already does Init
   //Init();
   terraintrans = NULL;
+  atmospheric = false;
+  // Force shields to 0
+  memset(&(this->shield),0,sizeof(Unit::shield));
+  this->shield.number=2;
 }
 
 void Planet::InitPlanet(QVector x,QVector y,float vely,const Vector & rotvel, float pos,float gravity,float radius,const char * filename, vector<char *> dest, const QVector &orbitcent, Unit * parent, int faction,string fullname, bool inside_out, unsigned int lights_num)
@@ -274,7 +284,6 @@ void Planet::InitPlanet(QVector x,QVector y,float vely,const Vector & rotvel, fl
   static float bodyradius = XMLSupport::parse_float(vs_config->getVariable ("graphics","star_body_radius",".33"));
   if (lights_num){
     radius*=bodyradius;
-    fprintf (stderr,"scaling %s",filename);
   }
   inside =false;
   curr_physical_state.position = prev_physical_state.position=cumulative_transformation.position=orbitcent+x;
@@ -292,11 +301,11 @@ void Planet::InitPlanet(QVector x,QVector y,float vely,const Vector & rotvel, fl
   this->fullname=name;
   this->radius=radius;
   this->gravity=gravity;
-  static  float densityOfRock = XMLSupport::parse_float(vs_config->getVariable("physics","density_of_jump_point",".01"));
+  static  float densityOfRock = XMLSupport::parse_float(vs_config->getVariable("physics","density_of_rock","3"));
   static  float densityOfJumpPoint = XMLSupport::parse_float(vs_config->getVariable("physics","density_of_jump_point","100000"));
-  static  float massofplanet = XMLSupport::parse_float(vs_config->getVariable("physics","mass_of_planet","10000000"));
+  //static  float massofplanet = XMLSupport::parse_float(vs_config->getVariable("physics","mass_of_planet","10000000"));
   hull = (4./3)*M_PI*radius*radius*radius*(dest.empty()?densityOfRock:densityOfJumpPoint);
-  mass = massofplanet;
+  this->Mass = (4./3)*M_PI*radius*radius*radius*(dest.empty()?densityOfRock:(densityOfJumpPoint/100000));
   SetAI(new PlanetaryOrbit(this, vely, pos, x, y, orbitcent, parent)); // behavior
   terraintrans=NULL;
 
@@ -311,7 +320,7 @@ void Planet::InitPlanet(QVector x,QVector y,float vely,const Vector & rotvel, fl
       if (dock-radius<planetdockportminsize) {
 	dock = radius+planetdockportminsize;
       }
-      image->dockingports.push_back (DockingPorts (Vector(0,0,0),dock,true));
+      image->dockingports.push_back (DockingPorts (Vector(0,0,0),dock,0,true));
     }
   }
   string tempname = (::getCargoUnitName (filename));
@@ -332,78 +341,25 @@ Planet::Planet(QVector x,QVector y,float vely,const Vector & rotvel, float pos,f
     int l=-1;
     lights.push_back (l);
   }
+  // Force shields to 0
+  /*
+  this->shield.number=2;
+  this->shield.recharge=0;
+  this->shield.shield2fb.frontmax=0;
+  this->shield.shield2fb.backmax=0;
+  this->shield.shield2fb.front=0;
+  this->shield.shield2fb.back=0;
+*/
+  memset(&(this->shield),0,sizeof(Unit::shield));
+  this->shield.number=2;
 }
 
-static void beginPlanetElement (void *userDataVoid, const XML_Char *name, const XML_Char **attr) {
-	std::map<std::string, std::string> *userData = (std::map<std::string, std::string> *)userDataVoid;
-	std::string namestr((const char*)name);
-	for (int i=0;i<namestr.size();i++) {
-		namestr[i]=tolower(namestr[i]);
-	}
-	if (namestr.size()>=6&&memcmp(namestr.c_str(),"planet",6)==0) {
-		if (namestr.size()==6) {
-			if ((*userData)["\n"]!="\n") {
-				fprintf(stderr, "Warning: No surrounding planet tag specified.  This will probably result in missing data.\n");
-			}
-			std::string planetname;
-			std::string planettype;
-			// Name is "Planet"
-			for (int i=0; attr[i]!=NULL; i+=2) {
-				if (strcmp(attr[i], "type")==0) {
-					planettype=attr[i+1];
-				}
-				if (strcmp(attr[i], "name")==0) {
-					planetname=attr[i+1];
-				}
-			}
-			if (planettype.size()&&planetname.size()) {
-				(*userData)[planettype]=planetname;
-			} else {
-				fprintf(stderr, "Warning: \"type\" or \"name\" atributes missing... Ignoring planet type...\n");
-			}
-		} else {
-			(*userData)["\n"]="\n";
-		}
-	} else {
-		fprintf(stderr, "Warning: XML tag in planet types not valid: %s\n", name);
-	}
-}
-static void endPlanetElement (void *userData, const XML_Char *name) {
-}
-
-static std::map<std::string, std::string> readPlanetTypes(std::string filename) {
-	std::map<std::string, std::string> planetTypes;
-	FILE *fp=fopen(filename.c_str(),"r");
-	if (!fp) {
-		return planetTypes;
-	}
-	int len;
-	{
-		struct stat st;
-		if (fstat(fileno(fp), &st)!=0) {
-			return planetTypes;
-		} else {
-			len=st.st_size;
-		}
-	}
-	XML_Parser parser=XML_ParserCreate(NULL);
-	void *buff = XML_GetBuffer(parser, len);
-	if (buff == NULL) {
-		fprintf(stderr, "Fatal error: out of memory for planet name file\n");
-		return planetTypes;
-	}
-	len=fread(buff, 1, len, fp);
-	XML_SetElementHandler(parser, &beginPlanetElement, &endPlanetElement);
-	XML_SetUserData(parser, &planetTypes);
-	XML_ParseBuffer(parser, len, 1);
-	XML_ParserFree(parser);
-	return planetTypes;
-}
+extern std::map<std::string,std::string> readPlanetTypes(std::string filename);
 
 string Planet::getHumanReadablePlanetType () const{
-	  static std::map<std::string, std::string> planetTypes (readPlanetTypes("universe/planet_types.xml"));
-  	  string temp =getCargoUnitName();
-	  return planetTypes[temp];
+  //static std::map<std::string, std::string> planetTypes (readPlanetTypes("planet_types.xml"));
+  //return planetTypes[getCargoUnitName()];
+  return _Universe->getGalaxy()->getPlanetNameFromTexture(getCargoUnitName());
 }
 Planet::~Planet() { 
 	if (terraintrans) {

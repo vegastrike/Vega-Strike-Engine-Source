@@ -105,6 +105,16 @@ csRapidCollider::csRapidCollider (const std::vector <bsp_polygon> &polygons)
   GeometryInitialize (polygons);
 }
 
+
+Vector csRapidCollider::getVertex(unsigned int which) const {
+  
+  csVector3 k=m_pCollisionModel->getVertex(which);
+  return Vector(k.x,k.y,k.z);
+}
+unsigned int csRapidCollider::getNumVertex()const {
+  return m_pCollisionModel->getNumVertex();
+}
+
 inline float min3 (float a, float b, float c)
 { return (a < b ? (a < c ? a : (c < b ? c : b)) : (b < c ? b : c)); }
 inline float max3(float a, float b, float c)
@@ -808,7 +818,7 @@ int obb_disjoint (const csMatrix3& B, const csVector3& T,
   s = T.x * B.m11 + T.y * B.m21 + T.z * B.m31;
   t = ABS (s);
 
-  r &= (t <= (b.x + a.y * Bf.m11 + a.y * Bf.m21 + a.z * Bf.m31));
+  r &= (t <= (b.x + a.x * Bf.m11 + a.y * Bf.m21 + a.z * Bf.m31));
   if (!r) return 2;
 
   // A2 x A0 = A1

@@ -1,4 +1,5 @@
 /* example-start entry entry.c */
+#include <string>
 #if defined(_WIN32) && _MSC_VER > 1300 
 #define __restrict
 #endif
@@ -27,7 +28,7 @@ void LoadSaveDialog (char *, char *, int);
 void LoadAutoDialog (char *, char *, int);
 #define NUM_TITLES 9
 static const char * titles [NUM_TITLES] = {"Select Mission", "New Game","Load Saved Game","Recover From Autosave","Launch Last Savegame", "Launch No Savegame","Options","Help","Exit Launcher"};
-std::string my_mission ("mission/explore_universe.mission");
+std::string my_mission ("explore_universe.mission");
 #define NUM_HELPS 7
 static const char * helps [NUM_HELPS] = {
   "|SELECT MISSION BUTTON|\nThis allows you to select which mission vegastrike\nwill start the next time you press one\nof the keys below it. Most missions do not involve\nsave games and will ignore those options,\nhowever the default, in the mission/exploration folder will\nindeed ustilize the save games you specify.\nIf you ignore this option you begin in the standard\ntrading/bounty hunting mission.",
@@ -38,6 +39,7 @@ static const char * helps [NUM_HELPS] = {
   "|LAUNCH NO SAVEGAME BUTTON|\nThis button allows you to launch the selected\nmission without using a saved game.",
   "|OPTIONS BUTTON|\nThis button will start up the configurator to allow you to\nselect your preferred options."
 };
+std::string HOMESUBDIR= ".vegastrike";
 
 
 char * prog_arg=0;
@@ -119,14 +121,18 @@ GdkWindow * Help (const char *title, const char *text) {
     return (GdkWindow*)window;
 }
 
+#ifdef __MINGW32__
+void save_stuff( const char *filename) {
+#else
 void save_stuff(char *filename) {
+#endif
   changehome();
-    FILE *file=fopen("../save.txt","wt");
+    FILE *file=fopen("../save.4.x.txt","wt");
     if (file) {
       fprintf (file, "%s%c", filename,0);
       fclose(file);
     } else {
-      Help("Error","ERROR: Unable to open ../save.txt");
+      Help("Error","ERROR: Unable to open ../save.4.x.txt");
     }
 }
 
@@ -237,11 +243,31 @@ void launch_mission () {
 #endif
   }
 }
+using std::string;
 void file_mission_sel (GtkWidget *w, GtkFileSelection *fs) {
   std::string tmp = gtk_file_selection_get_filename (GTK_FILE_SELECTION (fs));
   FILE * fp =(fopen (tmp.c_str(),"r"));
   if (fp!=NULL) {
     fclose (fp);
+	int where=tmp.find ("/mission/");
+	if (where==string::npos) {
+		where = tmp.find ("\\mission\\");
+		if (where==string::npos) {
+			where = tmp.find("mission/");
+			if (where==string::npos) {
+				where=  tmp.find("mission\\");
+				if (where==string::npos) {
+					where = tmp.find ("mission");
+				}
+			}
+		}
+	}
+	if (where!=string::npos){
+		tmp = tmp.substr(where+strlen("mission/"));
+		if (*tmp.begin()=='\\'||*tmp.begin()=='/') {
+			tmp = tmp.substr(1);
+		}
+	}
     my_mission=tmp;
   }
   GdkWindow * ww=gtk_widget_get_parent_window(w);
@@ -307,7 +333,7 @@ void hello( GtkWidget *widget, gpointer   data ) {
 		int pid=spawnl(P_NOWAIT,"./Setup.exe",(std::string(pwd)+"/Setup.exe").c_str(),NULL);
 		if (pid==-1) {
 			if (chdir("bin")==0) {
-				spawnl(P_NOWAIT,"./Setup.exe",(std::string(pwd)+"/Setup.exe").c_str(),NULL);
+				spawnl(P_NOWAIT,"./Setup.exe",(std::string(pwd)+"/bin/Setup.exe").c_str(),NULL);
 				chdir("..");
 			}
 		}
@@ -353,6 +379,23 @@ int main( int   argc,
 #else
     getdatadir(); // Will change to the data dir which makes selecting missions easier.
 #endif
+	FILE *version=fopen("Version.txt","r");
+	if (!version)
+		version=fopen("../Version.txt","r");
+	if (version) {
+		std::string hsd="";
+		int c;
+		while ((c=fgetc(version))!=EOF) {
+			if (isspace(c))
+				break;
+			hsd+=(char)c;
+		}
+		fclose(version);
+		if (hsd.length()) {
+			HOMESUBDIR=hsd;
+			//fprintf (STD_OUT,"Using %s as the home directory\n",hsd.c_str());
+		}			
+	}
     //    chdir ("./.vegastrike/save");
     gtk_init (&argc, (char***)(&argv));
     GtkWidget *window;
@@ -384,7 +427,7 @@ int main( int   argc,
          
          /* and the window */
          gtk_widget_show (window);
-#if defined(_WIN32)&& (!defined(_WINDOWS))
+#if defined(_WIN32)&& (!defined(_WINDOWS)) && !defined(__MINGW32__) && !defined(__CYGWIN__)
 	GetRidOfConsole();
 #else
 	printf (my_mission.c_str());
@@ -397,17 +440,17 @@ int main( int   argc,
 #include <wchar.h>
 #endif
 char *makeasc(wchar_t *str) {
-	int i;
-	for (i=0;str[i]!='\0';i+=2) {
+	const int WCHAR_SIZE=4;//(sizeof(wchar_t)/sizeof(char));
+	int *ptr=(int*)str;
+    char * cptr = (char*)str;
+	while (*ptr) {
+		*cptr = (char)*ptr;
+		if (*cptr=='\0')
+			break;
+		++cptr;++ptr;
 	}
-	int len=i/2;
-	char *newstr=new char [len+2];
-	int j;
-	for (i=0,j=0;str[i]!='\0';i+=2,j++) {
-		newstr[j]=str[i];
-	}
-	newstr[j]='\0';
-	return newstr;
+	*cptr='\0';
+	return (char*)str;
 }
 
 #include "general.h"
@@ -436,7 +479,7 @@ void delfile ( GtkWidget        *w,
 		remove(newstr);
 		delete []newstr;
 		delete []remstr;
-		gtk_file_selection_set_filename (fs,"");
+		gtk_file_selection_set_filename (fs,"\0\0\0\0\0\0\0\0");
 		gtk_widget_destroy(GTK_FILE_SELECTION(fs)->fileop_dialog);
 		GTK_FILE_SELECTION(fs)->fileop_dialog=0;
 	}
@@ -510,7 +553,8 @@ void renfile ( GtkWidget        *w,
 		sprintf(rementstr,"../serialized_xml/%s/",newentstr);
 		rename(remstr,rementstr);
 		rename(newstr,newentstr);
-		gtk_file_selection_set_filename (fs,"");
+		gtk_file_selection_set_filename (fs,"\0\0\0\0\0\0\0\0");
+		// "U\0n\0i\0c\0o\0d\0e\0 \0\0\0\0\0"
 		delete []newstr;
 		delete []remstr;
 		delete []newentstr;
@@ -629,7 +673,7 @@ void copyfile ( GtkWidget        *w,
 		}
 		delete []newstr;
 		delete []remstr;
-		gtk_file_selection_set_filename (fs,"");
+		gtk_file_selection_set_filename (fs,"\0\0\0\0\0\0\0\0");
 		delete []newentstr;
 		gtk_widget_destroy(GTK_FILE_SELECTION(fs)->fileop_dialog);
 		GTK_FILE_SELECTION(fs)->fileop_dialog=0;
@@ -705,7 +749,7 @@ void copynormal ( GtkWidget        *w,
 				fclose(f1);
 			}
 		}
-		gtk_file_selection_set_filename (fs,"");
+		gtk_file_selection_set_filename (fs,"\0\0\0\0\0\0\0\0");
 		delete []newstr;
 		delete []newentstr;
 	}
@@ -759,7 +803,7 @@ void copynormal_conf ( GtkWidget        *w,
 	}
 }
 
-void LoadSaveFunction (char *Filename, char *otherstr, int i, GtkSignalFunc func,const char * default_thing="",bool usenormalbuttons=false) {
+void LoadSaveFunction (char *Filename, char *otherstr, int i, GtkSignalFunc func,const char * default_thing="\0\0\0\0\0\0\0\0",bool usenormalbuttons=false) {
      GtkWidget *filew;
     filew = gtk_file_selection_new (Filename);
 	if (!usenormalbuttons){
@@ -826,9 +870,8 @@ void LoadMissionDialog (char * Filename,int i) {
   char mypwd [1000];
   getcwd (mypwd,1000);
   //  fprintf (stderr,mypwd);
-  LoadSaveFunction (Filename,"Select the mission, then run by clicking new or load game.",i,(GtkSignalFunc) file_mission_sel,"exploration/explore_universe.mission",true);
+  LoadSaveFunction (Filename,"Select the mission, then run by clicking new or load game.",i,(GtkSignalFunc) file_mission_sel,my_mission.c_str(),true);
 }
-#define HOMESUBDIR ".vegastrike"
 void changehome() {
   static char pw_dir[2000];
 #ifndef _WIN32
@@ -838,13 +881,13 @@ void changehome() {
 #else
   GoToParentDir ();
 #endif
-  if (chdir (HOMESUBDIR)==-1) {
-    mkdir (HOMESUBDIR
+  if (chdir (HOMESUBDIR.c_str())==-1) {
+    mkdir (HOMESUBDIR.c_str()
 #ifndef _WIN32		  
 	     , 0xFFFFFFFF
 #endif		  
 	     );
-    chdir (HOMESUBDIR);
+    chdir (HOMESUBDIR.c_str());
   }
   if (chdir ("save")==-1) {
     mkdir ("save"

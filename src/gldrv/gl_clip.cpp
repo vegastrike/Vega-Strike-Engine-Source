@@ -136,7 +136,7 @@ float /*GFXDRVAPI*/ GFXSphereInFrustum (double f [6][4],const QVector &Cnt, floa
    {
       d = f[p][0] * Cnt.i + f[p][1] * Cnt.j + f[p][2] * Cnt.k + f[p][3];
       if (d<0)
-	//	fprintf (stderr,"cin %f",d);
+	//	VSFileSystem::Fprintf (stderr,"cin %f",d);
       if( d <= -radius ){
 	return 0;
       }
@@ -161,7 +161,7 @@ void GFXGetFrustumVars (bool retr, float *l, float *r, float *b, float *t, float
     *n = nnear;
     *f = ffar;
   }
-  //  fprintf (stderr,"<FUN%f,%f,%f,%f,%f,%f>>",near,far,left,right,bot,top);
+  //  VSFileSystem::Fprintf (stderr,"<FUN%f,%f,%f,%f,%f,%f>>",near,far,left,right,bot,top);
 
 }
 

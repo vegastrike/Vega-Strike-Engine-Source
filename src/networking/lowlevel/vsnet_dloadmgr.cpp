@@ -1,13 +1,18 @@
 #include <config.h>
 
-#include "vs_path.h"
+#include "vsfilesystem.h"
+#include "vs_globals.h"
+#include "networking/lowlevel/vsnet_oss.h"
 #include "networking/lowlevel/vsnet_dloadmgr.h"
 #include "networking/lowlevel/vsnet_notify.h"
 #include "networking/lowlevel/vsnet_cmd.h"
+#include "networking/lowlevel/vsnet_parsecmd.h"
 #include "networking/lowlevel/netbuffer.h"
 #include "networking/lowlevel/packet.h"
 
 using namespace std;
+
+extern void	getZoneInfoBuffer( unsigned short zoneid, NetBuffer & netbuf);
 
 #ifndef HAVE_ACCESS
     #ifdef R_OK
@@ -68,7 +73,7 @@ Manager::Manager( SocketSet& sets )
 {
     COUT << "Enter " << __PRETTY_FUNCTION__ << endl;
 
-    _local_search_paths.push_back( datadir );
+    _local_search_paths.push_back( VSFileSystem::datadir );
 }
 
 void Manager::addItem( Item* item )
@@ -87,14 +92,26 @@ void Manager::addItems( list<Item*>& items )
     _pending_mx.lock( );
     for( it=items.begin(); it!=items.end(); it++ )
     {
-        COUT << "adding an item" << endl;
-        _pending.push( *it );
+        Item* item = (*it);
+        if( item->getFilename() != "" )
+        {
+            COUT << "adding item: " << item->getFilename() << endl;
+            _pending.push( item );;
+        }
     }
     _pending_mx.unlock( );
 
     for( it=items.begin(); it!=items.end(); it++ )
     {
-        (*it)->changeState( Queued );
+        Item* item = (*it);
+        if( item->getFilename() == "" )
+        {
+            item->changeState( Completed, FileNotFound );
+        }
+        else
+        {
+            item->changeState( Queued );
+        }
     }
 
     _set.wakeup( );
@@ -183,6 +200,7 @@ void Manager::private_lower_poll( )
             netbuf.addShort( cl->size() );
             for( ItemList_I strit=cl->begin(); strit!=cl->end(); strit++ )
             {
+				netbuf.addChar( (*strit)->getFileType() );
                 netbuf.addString( (*strit)->getFilename() );
             }
 
@@ -245,6 +263,7 @@ void Manager::private_eval_resolve_response( SOCKETALT sock, NetBuffer& respbuff
             reqbuffer.addShort( num );
             for( rli=requestlist.begin(); rli!=requestlist.end(); rli++ )
             {
+                reqbuffer.addChar( (*rli)->getFileType() );
                 reqbuffer.addString( (*rli)->getFilename() );
                 (*rli)->changeState( Requested, Ok );
             }
@@ -413,27 +432,15 @@ namespace Server
  * definition VsnetDownload::Server::DownloadItem
  *------------------------------------------------------------*/
 
-DownloadItem::DownloadItem( SOCKETALT sock, string file )
+DownloadItem::DownloadItem( SOCKETALT sock, bool error, const string& file )
     : _sock( sock )
-    , _error( true )
+    , _error( error )
     , _file( file )
-    , _handle( NULL )
-{
-}
-
-DownloadItem::DownloadItem( SOCKETALT sock, string file, ifstream* f, size_t sz )
-    : _sock( sock )
-    , _error( false )
-    , _file( file )
-    , _handle( f )
-    , _size( sz )
-    , _offset( 0 )
 {
 }
 
 DownloadItem::~DownloadItem( )
 {
-    if( _handle ) delete _handle;
 }
 
 SOCKETALT DownloadItem::getSock( ) const
@@ -451,20 +458,86 @@ string DownloadItem::file( ) const
     return _file;
 }
 
-size_t DownloadItem::offset( ) const
+/*------------------------------------------------------------*
+ * definition VsnetDownload::Server::DownloadItemFile
+ *------------------------------------------------------------*/
+
+DownloadItemFile::DownloadItemFile( SOCKETALT sock, const string& file )
+    : DownloadItem( sock, true, file )
+    , _handle( NULL )
+    , _size( 0 )
+    , _offset( 0 )
+{
+}
+
+DownloadItemFile::DownloadItemFile( SOCKETALT sock, const string& file, VSFileSystem::VSFile * f, size_t sz )
+    : DownloadItem( sock, false, file )
+    , _handle( f )
+    , _size( sz )
+    , _offset( 0 )
+{
+}
+
+DownloadItemFile::~DownloadItemFile( )
+{
+    if( _handle ) delete _handle;
+}
+
+size_t DownloadItemFile::offset( ) const
 {
     return _offset;
 }
 
-size_t DownloadItem::remainingSize( ) const
+size_t DownloadItemFile::remainingSize( ) const
 {
     return ( _size - _offset );
 }
 
-void DownloadItem::copyFromFile( unsigned char* buf, size_t sz )
+void DownloadItemFile::copyFromFile( unsigned char* buf, size_t sz )
 {
-    _handle->read( (char*)buf, sz );
-    _offset += sz;
+    if( _handle )
+    {
+        _handle->Read( (char*)buf, sz );
+        _offset += sz;
+    }
+}
+
+/*------------------------------------------------------------*
+ * definition VsnetDownload::Server::DownloadItemBuf
+ *------------------------------------------------------------*/
+
+DownloadItemBuf::DownloadItemBuf( SOCKETALT sock, const string& file, const char* buf, size_t sz )
+    : DownloadItem( sock, false, file )
+    , _size( sz )
+    , _offset( 0 )
+{
+    _buf = new char[sz];
+    VsnetOSS::memcpy( _buf, buf, sz );
+}
+
+DownloadItemBuf::~DownloadItemBuf( )
+{
+    if( _buf ) delete [] _buf;
+}
+
+size_t DownloadItemBuf::offset( ) const
+{
+    return _offset;
+}
+
+size_t DownloadItemBuf::remainingSize( ) const
+{
+    return ( _size - _offset );
+}
+
+void DownloadItemBuf::copyFromFile( unsigned char* buf, size_t sz )
+{
+    if( remainingSize() < sz ) sz = remainingSize();
+    if( sz > 0 )
+    {
+        VsnetOSS::memcpy( buf, &_buf[_offset], sz );
+        _offset += sz;
+    }
 }
 
 /*------------------------------------------------------------*
@@ -491,34 +564,49 @@ Manager::Manager( SocketSet& sets )
 {
     COUT << "Enter " << __PRETTY_FUNCTION__ << endl;
 
-    _local_search_paths.push_back( datadir );
+    _local_search_paths.push_back( VSFileSystem::datadir );
 }
 
 void Manager::addCmdDownload( SOCKETALT sock, NetBuffer& buffer )
 {
     COUT << "Enter " << __PRETTY_FUNCTION__ << endl;
 
-    char c = buffer.getChar( );
+    RecvCmdDownload recv( buffer );
+    Subcommand c = recv.parse( );
+
+    COUT << "   *** " << " cmd " << c << endl;
 
     switch( c )
     {
     case ResolveRequest :
         {
-            short num = buffer.getShort( );
+            Adapter::ResolveRequest* r = recv.asResolveRequest();
+
+            short num = r->num;
 
             NetBuffer respbuffer;
             respbuffer.addChar( ResolveResponse );
             respbuffer.addShort( num );
 
-            while( num > 0 )
+            Adapter::ResolveRequest::iterator iter;
+            for( iter = r->files.begin(); iter!=r->files.end(); iter++ )
             {
-                string file;
                 bool   ok;
-                file = buffer.getString( );
-                ok   = private_test_access( file );
+				char   ft   = iter->ft;
+                string file = iter->file;
+				// If we want to download a memory buffer from server access is considered ok
+				if( ft==VSFileSystem::ZoneBuffer)
+				{
+					// We receive a filename containing a zone id so we test it exists
+					int zoneid = atoi( file.c_str());
+					ok = true;
+				}
+				else
+                {
+                	ok = private_test_access( file , (VSFileSystem::VSFileType) ft );
+                }
                 respbuffer.addString( file );
                 respbuffer.addChar( ok ? 1 : 0 );
-                num--;
             }
 
             Packet packet;
@@ -531,29 +619,47 @@ void Manager::addCmdDownload( SOCKETALT sock, NetBuffer& buffer )
         break;
     case DownloadRequest :
         {
-            short num = buffer.getShort( );
+            Adapter::DownloadRequest* r = recv.asDownloadRequest();
+            short num = r->num;
+
             if( num > 0 )
             {
-                while( num > 0 )
+                Adapter::DownloadRequest::iterator iter;
+                for( iter = r->files.begin(); iter!=r->files.end(); iter++ )
                 {
-                    DownloadItemPtr di;
-                    string          file = buffer.getString( );
+					char            ft   = iter->ft;
+                    string          file = iter->file;
                     string          path = file;
-                    ifstream*       f    = private_access( path );
-                    if( f )
+                    DownloadItemPtr di;
+					VSFileSystem::VSFile * f;
+					// If a request for ZoneBuffer we create a VSFile based on a memory buffer
+					if( ft==VSFileSystem::ZoneBuffer)
+					{
+						NetBuffer netbuf;
+						getZoneInfoBuffer( atoi( file.c_str()), netbuf);
+						// f = new VSFile( netbuf.getData(), netbuf.getDataLength());
+
+                        DownloadItemBuf* buf;
+                        buf = new DownloadItemBuf( sock, file, netbuf.getData(), netbuf.getDataLength() );
+                        di.reset( buf );
+					}
+					else
                     {
-                        size_t bytes = private_file_size( path );
-                        di.reset( new DownloadItem( sock, file, f, bytes ) );
-                    }
-                    else
-                    {
-                        // Couldn't open for reading, maybe removed since resolve?
-                        di.reset( new DownloadItem( sock, file ) );
+                    	f = private_access( path , (VSFileSystem::VSFileType) ft );
+                        if( f )
+                        {
+                            size_t bytes = f->Size();
+                            di.reset( new DownloadItemFile( sock, file, f, bytes ) );
+                        }
+                        else
+                        {
+                            // Couldn't open for reading, maybe removed since resolve?
+                            di.reset( new DownloadItemFile( sock, file ) );
+                        }
                     }
                     _download_mx.lock( );
                     _download.push( di );
                     _download_mx.unlock( );
-                    num--;
                 }
                 _set.wakeup( );
             }
@@ -733,7 +839,7 @@ bool Manager::private_lower_try_push_queue( SOCKETALT sock, ItemQueuePtr q )
     return q->empty();
 }
 
-bool Manager::private_test_access( const string& file )
+bool Manager::private_test_access( const string& file , VSFileSystem::VSFileType ft )
 {
     COUT << "Enter " << __PRETTY_FUNCTION__ << endl;
 
@@ -742,7 +848,9 @@ bool Manager::private_test_access( const string& file )
          it++ )
     {
         string path = *it + "/" + file;
-        if( ::access( path.c_str(), R_OK ) == 0 )
+        //if( ::access( path.c_str(), R_OK ) == 0 )
+		string ffile( file);
+		if( LookForFile( ffile, ft) <= Ok)
         {
             COUT << "Found local file " << path.c_str() << endl;
             return true;
@@ -752,10 +860,18 @@ bool Manager::private_test_access( const string& file )
     return false;
 }
 
-std::ifstream* Manager::private_access( string& file )
+VSFileSystem::VSFile * Manager::private_access( string& file , VSFileSystem::VSFileType ft )
 {
     COUT << "Enter " << __PRETTY_FUNCTION__ << endl;
 
+	VSFileSystem::VSFile * f = new VSFileSystem::VSFile;
+	VSFileSystem::VSError err;
+	if( (err = f->OpenReadOnly( file, ft)) <=Ok)
+	{
+    	COUT << "Opened local file " << file << endl;
+		return f;
+	}
+	/*
     for( vector<string>::const_iterator it=_local_search_paths.begin();
          it!=_local_search_paths.end();
          it++ )
@@ -769,7 +885,9 @@ std::ifstream* Manager::private_access( string& file )
             return f;
         }
     }
-    COUT << "Couldn't open local file for " << file.c_str() << endl;
+	*/
+    COUT << "Couldn't open local file for " << file << endl;
+	delete f;
     return NULL;
 }
 
@@ -814,16 +932,16 @@ int access( const char* name, int mode )
 #ifndef HAVE_LSTAT
 int lstat( const char* name, struct stat* buf )
 {
-    FILE* f = fopen( name , "rb" );
+    FILE* f = VSFileSystem::OpenFile( name , "rb" );
     if( f == NULL ) return -1;
 
     int retval = -1;
-    if( fseek( f, 0, SEEK_END ) == 0 )
+    if( VSFileSystem::Fseek( f, 0, SEEK_END ) == 0 )
     {
-        buf->st_size = ftell( f );
+        buf->st_size = VSFileSystem::Ftell( f );
         if( buf->st_size >= 0 ) retval = 0;
     }
-    fclose( f );
+    VSFileSystem::Close( f );
     return retval;
 }
 #endif /* HAVE_LSTAT */
@@ -844,21 +962,6 @@ const char * getState( State s)
 		CASE( Completed);
 		default:
 			return "Unknown state";
-	}
-}
-
-const char * getError( Error e)
-{
-	switch( e)
-	{
-		CASE( Ok);
-		CASE( SocketError);
-		CASE( FileNotFound);
-		CASE( LocalPermissionDenied);
-		CASE( RemotePermissionDenied);
-		CASE( DownloadInterrupted);
-		default:
-			return "Unknown error";
 	}
 }
 

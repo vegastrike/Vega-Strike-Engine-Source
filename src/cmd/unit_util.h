@@ -35,14 +35,15 @@ namespace UnitUtil {
 	float getCredits(Unit *my_unit);
 	void addCredits(Unit *my_unit,float credits);
 	bool isSignificant(Unit *my_unit);
+	bool isDockableUnit(Unit *my_unit);
 	bool isSun(Unit *my_unit);
 	void switchFg(Unit *my_unit,string arg);
 	int communicateTo(Unit *my_unit,Unit *other_unit,float mood);
 	bool commAnimation(Unit *my_unit,string anim);
 	bool JumpTo (Unit * unit, string system);
 	int isPlayerStarship (Unit * un);
-	void setECM (Unit * un, short NewECM);
-	short getECM (Unit * un);
+	void setECM (Unit * un, int NewECM);  //short fix
+	int getECM (Unit * un); //short fix
 	void setSpeed (Unit * un, float speed);
 	Unit *owner (Unit *un);
 	float maxSpeed (Unit *un);

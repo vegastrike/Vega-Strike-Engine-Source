@@ -25,20 +25,31 @@
 #include <math.h>
 #include <string>
 #include <vector>
+#include <algorithm>
 
 //const int hashsize = 1001;
 using namespace std;
 //Hashtable doesn't grow
-template<class KEY, class VALUE, class SIZ> class Hashtable {
-	class HashElement {
-	public:
-		KEY key;
-		VALUE *value;
-		HashElement(KEY k, VALUE *v) {key = k; value = v;}
-	};
-	std::vector<HashElement> table[sizeof (SIZ)];
+template<class KEY, class VALUE, int SIZ> class Hashtable {
+
+    typedef std::pair<KEY,VALUE*>                             HashElement;
+    typedef typename std::vector<HashElement>::iterator       It;
+    typedef typename std::vector<HashElement>::const_iterator CIt;
+
+    struct HashElementEq {
+        const KEY& key;
+        HashElementEq( const KEY& k ) : key(k) { }
+        bool operator()( const HashElement& elem ) const {
+            return ( key == elem.first );
+        }
+    };
+
+	std::vector<HashElement> table[SIZ];
+
 	static int hash(const int key) {
-	  return key%sizeof(SIZ);
+		unsigned int k = key;
+		k%=SIZ;
+		return k;
 	}
 	static int hash(const std::string &key) {
 		unsigned int k = 0;
@@ -46,7 +57,7 @@ template<class KEY, class VALUE, class SIZ> class Hashtable {
 		for(;start!=key.end(); start++) {
 			k += (k * 128) + *start;
 		}
-		k %= sizeof(SIZ);
+		k %= SIZ;
 		return k;
 	}	
 public:
@@ -54,45 +65,51 @@ public:
 	Hashtable()
 	{
 	}
+	Hashtable( const Hashtable& orig )
+	{
+        for( int i=0; i<SIZ; i++ ) {
+            table[i] = orig.table[i];
+        }
+	}
 	std::vector <VALUE *> GetAll() const
 	{
 	  std::vector <VALUE *> retval;
-	  for (unsigned int hashval=0;hashval<sizeof(SIZ);hashval++) {
-	    typename std::vector<HashElement>::const_iterator iter = table[hashval].begin(), end = table[hashval].end();
+	  for (unsigned int hashval=0;hashval<SIZ;hashval++) {
+	    CIt iter = table[hashval].begin(), end = table[hashval].end();
 	    for(;iter!=end;iter++) {
-	      retval.push_back ((*iter).value);
+	      retval.push_back (iter->second);
 	    }
 	  }
 	  return retval;
 	}
+
 	VALUE *Get(const KEY &key) const
 	{
+        HashElementEq eq(key);
 		int hashval = hash(key);
-		typename std::vector<HashElement>::const_iterator iter = table[hashval].begin(), end = table[hashval].end();
-
-		for(;iter!=end;iter++)
-			if((*iter).key == key)
-				break;
+	    CIt iter = table[hashval].begin(), end = table[hashval].end();
+	    for(;iter!=end;iter++) {
+			if( eq(*iter) ) break;
+		}
 		if(iter==end)
 			return NULL;
 		else
-			return (*iter).value;
+			return iter->second;
 	}
 
 	void Put(const KEY &key, VALUE *value)
 	{
-	        int hashval = hash(key);
+        int hashval = hash(key);
 		table[hashval].push_back(HashElement(key, value));
 	}
 
 	void Delete(const KEY &key)
 	{
+        HashElementEq eq(key);
 		int hashval = hash(key);
-		typename std::vector<HashElement>::iterator iter = table[hashval].begin(), end = table[hashval].end();
-
-		for(;iter!=end;iter++)
-			if((*iter).key == key)
-				break;
+        It iter;
+        It end = table[hashval].end();
+        iter = find_if( table[hashval].begin(), end, eq );
 		if(iter==end)
 			return;
 		else {
@@ -105,6 +122,9 @@ public:
 	void Put(const KEY &key, VALUE *value);
 	void Delete(const KEY &key);
 */
+
+private:
+	Hashtable& operator=( const Hashtable& orig );
 };
 
 #endif

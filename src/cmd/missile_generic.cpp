@@ -72,9 +72,11 @@ void Missile::reactToCollision (Unit * smaller, const QVector & biglocation, con
   if (doesmissilebounce) {
     Unit::reactToCollision (smaller,biglocation,bignormal,smalllocation,smallnormal,dist);
   }
-  Discharge();
-  if (!killed)
-    DealDamageToHull (smalllocation.Cast(),hull+1);//should kill, applying addmissile effect
+  if (smaller->isUnit()!=MISSILEPTR) {//2 missiles in a row can't hit each other
+    Discharge();
+    if (!killed)
+      DealDamageToHull (smalllocation.Cast(),hull+1);//should kill, applying addmissile effect
+  }
   
 }
 
@@ -141,7 +143,7 @@ void Missile::UpdatePhysics2 (const Transformation &trans, const Transformation 
 								if ((Position()-su->Position()).MagnitudeSquared()<range*range) {
 									su->Target(this);
 									su->TargetTurret(this);
-									//fprintf (stderr,"%f targets %s",mission->getGametime(),targ->name.c_str());
+									//VSFileSystem::vs_fprintf (stderr,"%f targets %s",mission->getGametime(),targ->name.c_str());
 
 								}
 							}

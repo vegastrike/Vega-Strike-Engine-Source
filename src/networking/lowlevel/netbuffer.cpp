@@ -1,5 +1,6 @@
 #include <assert.h>
 #include "networking/lowlevel/netbuffer.h"
+#include "networking/lowlevel/vsnet_oss.h"
 #include "networking/const.h"
 #include "posh.h"
 #include "gfxlib_struct.h"
@@ -20,22 +21,19 @@ NetBuffer::NetBuffer( int bufsize)
 			memset( buffer, 0x20, size);
 			this->buffer[size-1] = 0;
 		}
-NetBuffer::NetBuffer( char * buf, int bufsize)
-		{
-			offset = 0;
-			size=bufsize+1;
-			this->buffer = new char[size];
-			memset( buffer, 0x20, size);
-			memcpy( buffer, buf, bufsize);
-			this->buffer[size-1] = 0;
-		}
+
+/** If there is a platform where b in the call VsnetOSS::memcpy(a,b,c) must be char*
+ *  instead of const char* or const void*, that systems header files are
+ *  badly broken. That requirement must be a lie.
+ *  If you have that, implement an ifdef in VsnetOSS::VsnetOSS::memcpy
+ */
 NetBuffer::NetBuffer( const char * buf, int bufsize)
 		{
 			offset = 0;
 			size=bufsize+1;
 			this->buffer = new char[size];
 			memset( buffer, 0x20, size);
-			memcpy( buffer, buf, bufsize);
+			VsnetOSS::memcpy( buffer, buf, bufsize);
 			this->buffer[size-1] = 0;
 		}
 NetBuffer::~NetBuffer()
@@ -58,7 +56,7 @@ void	NetBuffer::resizeBuffer( int newsize)
 			{
 				char * tmp = new char [newsize+1];
 				memset( tmp, 0, newsize+1);
-				memcpy( tmp, buffer, size);
+				VsnetOSS::memcpy( tmp, buffer, size);
 				delete buffer;
 				buffer = tmp;
 				size = newsize+1;
@@ -79,24 +77,25 @@ void	NetBuffer::checkBuffer( int len, const char * fun)
 // NOTE : IMPORTANT - I ONLY INCREMENT OFFSET IN PRIMARY DATATYPES SINCE ALL OTHER ARE COMPOSED WITH THEM
 
 void	NetBuffer::addClientState( ClientState cs)
-		{
-			this->addUInt32( cs.delay);
-			this->addSerial( cs.client_serial);
-			this->addTransformation( cs.pos);
-			this->addVector( cs.veloc);
-			this->addVector( cs.accel);
-		}
-ClientState NetBuffer::getClientState()
-		{
-			ClientState cs;
-			cs.delay = this->getUInt32();
-			cs.client_serial = this->getSerial();
-			cs.pos = this->getTransformation();
-			cs.veloc = this->getVector();
-			cs.accel = this->getVector();
+{
+    //this->addFloat( cs.delay);
+    this->addSerial( cs.client_serial);
+    this->addTransformation( cs.pos);
+    this->addVector( cs.veloc);
+    this->addVector( cs.accel);
+}
 
-			return cs;
-		}
+ClientState NetBuffer::getClientState()
+{
+    ClientState cs;
+    //cs.delay = this->getFloat();
+    cs.client_serial = this->getSerial();
+    cs.pos = this->getTransformation();
+    cs.veloc = this->getVector();
+    cs.accel = this->getVector();
+
+    return cs;
+}
 
 void	NetBuffer::addVector( Vector v)
 		{
@@ -196,30 +195,38 @@ void	NetBuffer::addShield( Shield shield)
 	switch( shield.number)
 	{
 		case 2 :
-			this->addFloat( shield.fb[0]);	
-			this->addFloat( shield.fb[1]);	
-			this->addFloat( shield.fb[2]);	
-			this->addFloat( shield.fb[3]);	
+			this->addFloat( shield.shield2fb.front);	
+			this->addFloat( shield.shield2fb.back);	
+			this->addFloat( shield.shield2fb.frontmax);	
+			this->addFloat( shield.shield2fb.backmax);	
 		break;
 		case 4 :
-			this->addShort( shield.fbrl.front);
-			this->addShort( shield.fbrl.back);
-			this->addShort( shield.fbrl.right);
-			this->addShort( shield.fbrl.left);
-			this->addShort( shield.fbrl.frontmax);
-			this->addShort( shield.fbrl.backmax);
-			this->addShort( shield.fbrl.rightmax);
-			this->addShort( shield.fbrl.leftmax);
+			this->addFloat( shield.shield4fbrl.front);
+			this->addFloat( shield.shield4fbrl.back);
+			this->addFloat( shield.shield4fbrl.right);
+			this->addFloat( shield.shield4fbrl.left);
+			this->addFloat( shield.shield4fbrl.frontmax);
+			this->addFloat( shield.shield4fbrl.backmax);
+			this->addFloat( shield.shield4fbrl.rightmax);
+			this->addFloat( shield.shield4fbrl.leftmax);
 		break;
-		case 6 :
-			this->addShort( shield.fbrltb.v[0]);
-			this->addShort( shield.fbrltb.v[1]);
-			this->addShort( shield.fbrltb.v[2]);
-			this->addShort( shield.fbrltb.v[3]);
-			this->addShort( shield.fbrltb.v[4]);
-			this->addShort( shield.fbrltb.v[5]);
-			this->addShort( shield.fbrltb.fbmax);
-			this->addShort( shield.fbrltb.rltbmax);
+		case 8 :
+			this->addFloat( shield.shield8.frontrighttop);
+			this->addFloat( shield.shield8.backrighttop);
+			this->addFloat( shield.shield8.frontlefttop);
+			this->addFloat( shield.shield8.backlefttop);
+			this->addFloat( shield.shield8.frontrightbottom);
+			this->addFloat( shield.shield8.backrightbottom);
+			this->addFloat( shield.shield8.frontleftbottom);
+			this->addFloat( shield.shield8.backleftbottom);
+			this->addFloat( shield.shield8.frontrighttopmax);
+			this->addFloat( shield.shield8.backrighttopmax);
+			this->addFloat( shield.shield8.frontlefttopmax);
+			this->addFloat( shield.shield8.backlefttopmax);
+			this->addFloat( shield.shield8.frontrightbottommax);
+			this->addFloat( shield.shield8.backrightbottommax);
+			this->addFloat( shield.shield8.frontleftbottommax);
+			this->addFloat( shield.shield8.backleftbottommax);
 		break;
 	}
 }
@@ -232,30 +239,38 @@ Shield	NetBuffer::getShield()
 	switch( shield.number)
 	{
 		case 2 :
-			shield.fb[0]=this->getFloat();
-			shield.fb[1]=this->getFloat();
-			shield.fb[2]=this->getFloat();
-			shield.fb[3]=this->getFloat();
+			shield.shield2fb.front=this->getFloat();
+			shield.shield2fb.back=this->getFloat();
+			shield.shield2fb.frontmax=this->getFloat();
+			shield.shield2fb.backmax=this->getFloat();
 		break;
 		case 4 :
-			shield.fbrl.front = this->getShort();
-			shield.fbrl.back = this->getShort();
-			shield.fbrl.right = this->getShort();
-			shield.fbrl.left = this->getShort();
-			shield.fbrl.frontmax = this->getShort();
-			shield.fbrl.backmax = this->getShort();
-			shield.fbrl.rightmax = this->getShort();
-			shield.fbrl.leftmax = this->getShort();
+			shield.shield4fbrl.front = this->getFloat();
+			shield.shield4fbrl.back = this->getFloat();
+			shield.shield4fbrl.right = this->getFloat();
+			shield.shield4fbrl.left = this->getFloat();
+			shield.shield4fbrl.frontmax = this->getFloat();
+			shield.shield4fbrl.backmax = this->getFloat();
+			shield.shield4fbrl.rightmax = this->getFloat();
+			shield.shield4fbrl.leftmax = this->getFloat();
 		break;
-		case 6 :
-			shield.fbrltb.v[0] = this->getShort();
-			shield.fbrltb.v[1] = this->getShort();
-			shield.fbrltb.v[2] = this->getShort();
-			shield.fbrltb.v[3] = this->getShort();
-			shield.fbrltb.v[4] = this->getShort();
-			shield.fbrltb.v[5] = this->getShort();
-			shield.fbrltb.fbmax = this->getShort();
-			shield.fbrltb.rltbmax = this->getShort();
+		case 8 :
+			shield.shield8.frontrighttop=this->getFloat();
+			shield.shield8.backrighttop=this->getFloat();
+			shield.shield8.frontlefttop=this->getFloat();
+			shield.shield8.backlefttop=this->getFloat();
+			shield.shield8.frontrightbottom=this->getFloat();
+			shield.shield8.backrightbottom=this->getFloat();
+			shield.shield8.frontleftbottom=this->getFloat();
+			shield.shield8.backleftbottom=this->getFloat();
+			shield.shield8.frontrighttopmax=this->getFloat();
+			shield.shield8.backrighttopmax=this->getFloat();
+			shield.shield8.frontlefttopmax=this->getFloat();
+			shield.shield8.backlefttopmax=this->getFloat();
+			shield.shield8.frontrightbottommax=this->getFloat();
+			shield.shield8.backrightbottommax=this->getFloat();
+			shield.shield8.frontleftbottommax=this->getFloat();
+			shield.shield8.backleftbottommax=this->getFloat();
 		break;
 	}
 
@@ -263,18 +278,26 @@ Shield	NetBuffer::getShield()
 }
 void		NetBuffer::addArmor( Armor armor)
 {
-	this->addShort( armor.front);
-	this->addShort( armor.back);
-	this->addShort( armor.right);
-	this->addShort( armor.left);
+	this->addUInt32 ( armor.frontrighttop);
+	this->addUInt32( armor.backrighttop);
+	this->addUInt32( armor.frontlefttop);
+	this->addUInt32( armor.backlefttop);
+	this->addUInt32 ( armor.frontrightbottom);
+	this->addUInt32( armor.backrightbottom);
+	this->addUInt32( armor.frontleftbottom);
+	this->addUInt32( armor.backleftbottom);
 }
 Armor	NetBuffer::getArmor()
 {
 	Armor armor;
-	armor.front = this->getShort();
-	armor.back = this->getShort();
-	armor.right = this->getShort();
-	armor.left = this->getShort();
+	armor.frontrighttop = this->getUInt32();
+	armor.backrighttop = this->getUInt32();
+	armor.frontlefttop = this->getUInt32();
+	armor.backlefttop = this->getUInt32();
+	armor.frontrightbottom = this->getUInt32();
+	armor.backrightbottom = this->getUInt32();
+	armor.frontleftbottom = this->getUInt32();
+	armor.backleftbottom = this->getUInt32();
 
 	return armor;
 }
@@ -367,24 +390,24 @@ void	NetBuffer::addChar( char c)
 		{
 			int tmpsize = sizeof( c);
 			resizeBuffer( offset+tmpsize);
-			memcpy( buffer+offset, &c, sizeof( c));
+			VsnetOSS::memcpy( buffer+offset, &c, sizeof( c));
 			offset += tmpsize;
 		}
 char	NetBuffer::getChar()
 		{
 			char c;
 			checkBuffer( sizeof( c), "getChar");
-			memcpy( &c, buffer+offset, sizeof( c));
+			VsnetOSS::memcpy( &c, buffer+offset, sizeof( c));
 			offset+=sizeof(c);
 			return c;
 		}
-void	NetBuffer::addBuffer( unsigned char * buf, int bufsize)
+void	NetBuffer::addBuffer( const unsigned char * buf, int bufsize)
 		{
 			resizeBuffer( offset+bufsize);
-			memcpy( buffer+offset, buf, bufsize);
+			VsnetOSS::memcpy( buffer+offset, buf, bufsize);
 			offset+=bufsize;
 		}
-unsigned char* NetBuffer::extAddBuffer( int bufsize)
+unsigned char* NetBuffer::extAddBuffer( int bufsize )
 		{
 			resizeBuffer( offset+bufsize);
             unsigned char* retval = (unsigned char*)buffer+offset;
@@ -398,36 +421,172 @@ unsigned char *	NetBuffer::getBuffer( int offt)
 			offset += offt;
 			return tmp;
 		}
-void	NetBuffer::addBuffer( const unsigned char * buf, int bufsize)
-		{
-			resizeBuffer( offset+bufsize);
-			memcpy( buffer+offset, buf, bufsize);
-			offset+=bufsize;
-		}
 		// Add and get a string with its length before the char * buffer part
-void	NetBuffer::addString( string str)
-		{
-			assert( str.length()<0xFFFF);
-			unsigned short length = str.length();
-			this->addShort( length);
-			resizeBuffer( offset+length);
-			memcpy( buffer+offset, str.c_str(), length);
-			offset += length;
-		}
-string	NetBuffer::getString()
-		{
-			unsigned short s;
-			s = this->getShort();
-			checkBuffer( s, "getString");
-			//cerr<<"getString :: offset="<<offset<<" - length="<<s<<endl;
-			char c = buffer[offset+s];
-			buffer[offset+s]=0;
-			string str( buffer+offset);
-			buffer[offset+s]=c;
-			offset += s;
+void	NetBuffer::addString( const string& str)
+{
+	unsigned int len = str.length();
+    if( len < 0xffff )
+	{
+        unsigned short length = len;
+        this->addShort( length );
+        resizeBuffer( offset+length );
+        VsnetOSS::memcpy( buffer+offset, str.c_str(), length );
+        offset += length;
+	}
+	else
+	{
+		assert( len < 0xffffffff );
+        this->addShort( 0xffff );
+		this->addInt32( len );
+        resizeBuffer( offset+len );
+        VsnetOSS::memcpy( buffer+offset, str.c_str(), len );
+        offset += len;
+	}
+}
 
-			return str;
-		}
+string	NetBuffer::getString()
+{
+	unsigned short s;
+	s = this->getShort();
+	if( s != 0xffff )
+	{
+		checkBuffer( s, "getString");
+		char c = buffer[offset+s];
+		buffer[offset+s]=0;
+	    string str( buffer+offset);
+	    buffer[offset+s]=c;
+	    offset += s;
+
+	    return str;
+	}
+	else
+	{
+		unsigned int len = this->getInt32();
+		checkBuffer( len, "getString");
+		char c = buffer[offset+len];
+		buffer[offset+len]=0;
+	    string str( buffer+offset);
+	    buffer[offset+len]=c;
+	    offset += len;
+
+	    return str;
+	}
+}
+
+GFXMaterial		NetBuffer::getGFXMaterial()
+{
+	GFXMaterial mat;
+
+	mat.ar = this->getFloat();
+	mat.ag = this->getFloat();
+	mat.ab = this->getFloat();
+	mat.aa = this->getFloat();
+
+	mat.dr = this->getFloat();
+	mat.dg = this->getFloat();
+	mat.db = this->getFloat();
+	mat.da = this->getFloat();
+
+	mat.sr = this->getFloat();
+	mat.sg = this->getFloat();
+	mat.sb = this->getFloat();
+	mat.sa = this->getFloat();
+
+	mat.er = this->getFloat();
+	mat.eg = this->getFloat();
+	mat.eb = this->getFloat();
+	mat.ea = this->getFloat();
+
+	mat.power = this->getFloat();
+
+	return mat;
+}
+
+void	NetBuffer::addGFXMaterial( const GFXMaterial & mat)
+{
+	this->addFloat( mat.ar);
+	this->addFloat( mat.ag);
+	this->addFloat( mat.ab);
+	this->addFloat( mat.aa);
+
+	this->addFloat( mat.dr);
+	this->addFloat( mat.dg);
+	this->addFloat( mat.db);
+	this->addFloat( mat.da);
+
+	this->addFloat( mat.sr);
+	this->addFloat( mat.sg);
+	this->addFloat( mat.sb);
+	this->addFloat( mat.sa);
+
+	this->addFloat( mat.er);
+	this->addFloat( mat.eg);
+	this->addFloat( mat.eb);
+	this->addFloat( mat.ea);
+
+	this->addFloat( mat.power);
+}
+
+GFXLight		NetBuffer::getGFXLight()
+{
+	GFXLight	light;
+	int i=0;
+	light.target = this->getInt32();
+	for( i=0; i<3; i++)
+		light.vect[i] = this->getFloat();
+	light.options = this->getInt32();
+	for( i=0; i<4; i++)
+		light.diffuse[i] = this->getFloat();
+	for( i=0; i<4; i++)
+		light.specular[i] = this->getFloat();
+	for( i=0; i<4; i++)
+		light.ambient[i] = this->getFloat();
+	for( i=0; i<3; i++)
+		light.attenuate[i] = this->getFloat();
+	for( i=0; i<3; i++)
+		light.direction[i] = this->getFloat();
+	light.exp = this->getFloat();
+	light.cutoff = this->getFloat();
+
+	return light;
+}
+
+void	NetBuffer::addGFXLight( const GFXLight & light)
+{
+	int i=0;
+	this->addInt32( light.target);
+	for( i=0; i<3; i++)
+		this->addFloat( light.vect[i]);
+	this->addInt32( light.options);
+	for( i=0; i<4; i++)
+		this->addFloat( light.diffuse[i]);
+	for( i=0; i<4; i++)
+		this->addFloat( light.specular[i]);
+	for( i=0; i<4; i++)
+		this->addFloat( light.ambient[i]);
+	for( i=0; i<3; i++)
+		this->addFloat( light.attenuate[i]);
+	for( i=0; i<3; i++)
+		this->addFloat( light.direction[i]);
+	this->addFloat( light.exp);
+	this->addFloat( light.cutoff);
+}
+
+GFXLightLocal	NetBuffer::getGFXLightLocal()
+{
+	GFXLightLocal light;
+
+	light.ligh = this->getGFXLight();
+	light.islocal = this->getChar();
+
+	return light;
+}
+
+void	NetBuffer::addGFXLightLocal( const GFXLightLocal & light)
+{
+	this->addGFXLight( light.ligh);
+	this->addChar( light.islocal);
+}
 
 int		NetBuffer::getDataLength() { return offset;}
 int		NetBuffer::getSize() { return size;}

@@ -36,7 +36,6 @@ const char* displayCmd( Cmd cmd )
     CASE( CMD_LETSGO       )
     CASE( CMD_UPDATECLT    )
     CASE( CMD_ADDCLIENT    )
-    CASE( CMD_FULLUPDATE   )
     CASE( CMD_PING         )
     CASE( CMD_SNAPSHOT     )
 
@@ -68,6 +67,12 @@ const char* displayCmd( Cmd cmd )
     CASE( CMD_STOPNETCOMM  )
     CASE( CMD_DOCK         )
     CASE( CMD_UNDOCK       )
+
+    CASE( CMD_CREATEUNIT   )
+    CASE( CMD_CREATEPLANET )
+    CASE( CMD_CREATENEBULA )
+    CASE( CMD_CREATEASTER  )
+    CASE( CMD_CREATEMISSILE)
 
     CASE( CMD_NEWSUBSCRIBE )
 

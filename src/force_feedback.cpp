@@ -26,7 +26,7 @@
 #include "force_feedback.h"
 
 #include "vegastrike.h"
-#include "vs_path.h"
+#include "vsfilesystem.h"
 #include "vs_globals.h"
 
 #include "config_xml.h"

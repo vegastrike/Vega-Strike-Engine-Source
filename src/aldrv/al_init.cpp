@@ -7,8 +7,9 @@
 #ifdef __APPLE__
 #include <al.h>
 #include <alc.h>
+#define KeyMap AppleKeyMap 
 #include <alut.h>
-
+#undef KeyMap
 #else
 #include <AL/al.h>
 #include <AL/alc.h>
@@ -21,7 +22,7 @@
 static void fixup_function_pointers(void) {
   alutLoadMP3p = (mp3Loader *) alGetProcAddress((ALubyte *)"alutLoadMP3_LOKI");
   if(alutLoadMP3p == NULL) {
-    fprintf(stderr, "Could not GetProc %s\n","alutLoadMP3_LOKI");
+    VSFileSystem::vs_fprintf(stderr, "Could not GetProc %s\n","alutLoadMP3_LOKI");
   }
 
 
@@ -43,7 +44,7 @@ static void fixup_function_pointers(void) {
 		GP("alBombOnError_LOKI");
 
 	if(talBombOnError == NULL) {
-		fprintf(stderr,
+		VSFileSystem::vs_fprintf(stderr,
 			"Could not GetProcAddress alBombOnError_LOKI\n");
 		exit(1);
 	}
@@ -52,7 +53,7 @@ static void fixup_function_pointers(void) {
 		GP("alBufferi_LOKI");
 
 	if(talBufferi == NULL) {
-		fprintf(stderr,
+		VSFileSystem::vs_fprintf(stderr,
 			"Could not GetProcAddress alBufferi_LOKI\n");
 		exit(1);
 	}
@@ -68,25 +69,25 @@ static void fixup_function_pointers(void) {
 
 	talGenStreamingBuffers = (void (*)(ALsizei n, ALuint *bids )) GP("alGenStreamingBuffers_LOKI");
 	if( talGenStreamingBuffers == NULL ) {
-		fprintf( stderr, "Could not GP alGenStreamingBuffers_LOKI\n");
+		VSFileSystem::vs_fprintf( stderr, "Could not GP alGenStreamingBuffers_LOKI\n");
 		exit(1);
 	}
 	
 	talutLoadRAW_ADPCMData = (ALboolean (*)(ALuint bid,ALvoid *data, ALuint size, ALuint freq,ALenum format)) GP("alutLoadRAW_ADPCMData_LOKI");
 	if( talutLoadRAW_ADPCMData == NULL ) {
-		fprintf( stderr, "Could not GP alutLoadRAW_ADPCMData_LOKI\n");
+		VSFileSystem::vs_fprintf( stderr, "Could not GP alutLoadRAW_ADPCMData_LOKI\n");
 		exit(1);
 	}
 
 	talutLoadIMA_ADPCMData = (ALboolean (*)(ALuint bid,ALvoid *data, ALuint size, ALuint freq,ALenum format)) GP("alutLoadIMA_ADPCMData_LOKI");
 	if( talutLoadIMA_ADPCMData == NULL ) {
-		fprintf( stderr, "Could not GP alutLoadIMA_ADPCMData_LOKI\n");
+		VSFileSystem::vs_fprintf( stderr, "Could not GP alutLoadIMA_ADPCMData_LOKI\n");
 		exit(1);
 	}
 
 	talutLoadMS_ADPCMData = (ALboolean (*)(ALuint bid,ALvoid *data, ALuint size, ALuint freq,ALenum format)) GP("alutLoadMS_ADPCMData_LOKI");
 	if( talutLoadMS_ADPCMData == NULL ) {
-		fprintf( stderr, "Could not GP alutLoadMS_ADPCMData_LOKI\n");
+		VSFileSystem::vs_fprintf( stderr, "Could not GP alutLoadMS_ADPCMData_LOKI\n");
 		exit(1);
 	}
 

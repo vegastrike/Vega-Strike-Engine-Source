@@ -14,28 +14,13 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #endif
+#include "networking/lowlevel/netbuffer.h"
+#include "networking/netserver.h"
 
 extern Unit * _masterPartList;
 std::string getMasterPartListUnitName() {
 	static std::string mpl = vs_config->getVariable("data","master_part_list","master_part_list");
 	return mpl;
-}
-
-Unit* UnitFactory::getMasterPartList( )
-{ 
-	
-char tmp[2048];
-tmp[2047]=0;
-getcwd (tmp,2046);
-
-    if( _masterPartList == NULL )
-    {
-		std::string mpl=getMasterPartListUnitName();
-        _masterPartList = new Unit(mpl.c_str(),
-	                            true,
-				    FactionUtil::GetFaction("upgrades") );
-    }
-    return _masterPartList;
 }
 
 Unit* UnitFactory::createUnit( )
@@ -48,14 +33,25 @@ Unit* UnitFactory::createUnit( const char *filename,
 		               int         faction,
 		               std::string customizedUnit,
 		               Flightgroup *flightgroup,
-		               int         fg_subnumber, string * netxml)
+		               int         fg_subnumber, string * netxml, ObjSerial netcreate)
 {
-    return new Unit( filename,
+	Unit * un = new Unit( filename,
                      SubUnit,
                      faction,
                      customizedUnit,
                      flightgroup,
                      fg_subnumber, netxml);
+	if( netcreate)
+	{
+		// Send a packet to clients in order to make them create this unit
+		NetBuffer netbuf;
+		getUnitBuffer( netbuf, filename, SubUnit, faction, customizedUnit, flightgroup, fg_subnumber, netxml, netcreate);
+		// Broadcast to the current universe star system
+		VSServer->broadcast( netbuf, _Universe->activeStarSystem()->GetZone(), CMD_CREATEUNIT);
+
+		un->SetSerial( netcreate);
+	}
+	return un;
 }
 Unit* UnitFactory::createServerSideUnit( const char *filename,
 		               bool        SubUnit,
@@ -85,13 +81,23 @@ Nebula* UnitFactory::createNebula( const char * unitfile,
                                    bool SubU, 
                                    int faction, 
                                    Flightgroup* fg,
-                                   int fg_snumber )
+                                   int fg_snumber, ObjSerial netcreate )
 {
-    return new Nebula( unitfile,
+    Nebula * neb = new Nebula( unitfile,
         SubU,
 	    faction,
 	    fg,
 	    fg_snumber);
+	if( netcreate)
+	{
+		// Send a packet to clients in order to make them create this unit
+		NetBuffer netbuf;
+		getNebulaBuffer( netbuf, unitfile, SubU, faction, fg, fg_snumber, netcreate);
+		VSServer->broadcast( netbuf, _Universe->activeStarSystem()->GetZone(), CMD_CREATENEBULA);
+
+		neb->SetSerial( netcreate);
+	}
+	return neb;
 }
 
 Unit* UnitFactory::createMissile( const char * filename,
@@ -102,9 +108,9 @@ Unit* UnitFactory::createMissile( const char * filename,
                                      float time,
                                      float radialeffect,
                                      float radmult,
-                                     float detonation_radius )
+                                     float detonation_radius, ObjSerial netcreate )
 {
-    return new Missile( filename,
+    Unit * un = new Missile( filename,
          faction,
 	     modifications,
 	     damage,
@@ -113,6 +119,15 @@ Unit* UnitFactory::createMissile( const char * filename,
 	     radialeffect,
 	     radmult,
 	     detonation_radius);
+	if( netcreate)
+	{
+		NetBuffer netbuf;
+		getMissileBuffer( netbuf, filename, faction, modifications, damage, phasedamage, time, radialeffect, radmult, detonation_radius, netcreate);
+		VSServer->broadcast( netbuf, _Universe->activeStarSystem()->GetZone(), CMD_CREATEMISSILE);
+
+		un->SetSerial( netcreate);
+	}
+	return un;
 }
 
 Planet* UnitFactory::createPlanet( )
@@ -136,11 +151,21 @@ Planet* UnitFactory::createPlanet( QVector x,
 				   const std::vector <GFXLightLocal> & ligh,
 				   int faction,
 				   string fullname ,
-				   bool inside_out)
+				   bool inside_out, ObjSerial netcreate)
 {
-    return new Planet( x, y, vely, rotvel, pos, gravity, radius,
+    Planet * p = new Planet( x, y, vely, rotvel, pos, gravity, radius,
 		               filename, dest, orbitcent, parent, faction,
 					   fullname, inside_out, 0);
+	if( netcreate)
+	{
+		// Send a packet to clients in order to make them create this unit
+		NetBuffer netbuf;
+		getPlanetBuffer( netbuf, x, y, vely, rotvel, pos, gravity, radius, filename, sr, ds, dest, orbitcent, parent, ourmat, ligh, faction, fullname, inside_out, netcreate);
+		VSServer->broadcast( netbuf, _Universe->activeStarSystem()->GetZone(), CMD_CREATEPLANET);
+
+		p->SetSerial( netcreate);
+	}
+	return p;
 }
 
 Enhancement* UnitFactory::createEnhancement( const char * filename,
@@ -178,9 +203,19 @@ Asteroid* UnitFactory::createAsteroid( const char * filename,
                                        int faction,
                                        Flightgroup* fg,
                                        int fg_snumber,
-                                       float difficulty )
+                                       float difficulty, ObjSerial netcreate )
 {
-    return new Asteroid( filename, faction, fg, fg_snumber, difficulty);
+    Asteroid * ast = new Asteroid( filename, faction, fg, fg_snumber, difficulty);
+	if( netcreate)
+	{
+		// Send a packet to clients in order to make them create this unit
+		NetBuffer netbuf;
+		getAsteroidBuffer( netbuf, filename, faction, fg, fg_snumber, difficulty, netcreate);
+		VSServer->broadcast( netbuf, _Universe->activeStarSystem()->GetZone(), CMD_CREATEASTER);
+
+		ast->SetSerial( netcreate);
+	}
+	return ast;
 }
 
 Terrain*	UnitFactory::createTerrain( const char * file, Vector scale, float position, float radius, Matrix & t)

@@ -25,6 +25,7 @@
 
 #include <vector>
 #include <list>
+// WARNING : using std::queue gives conflicts under Solaris so we must use std::queue explicitly each time we need to
 #include <queue>
 #include <string.h>
 #include <stdlib.h>
@@ -89,7 +90,7 @@ class NetServer
 		    AddressIP u; // Client addresses waiting for login response
 	    };
 
-        queue<WaitListEntry> waitList;
+        std::queue<WaitListEntry> waitList;
 
         boost::shared_ptr<VsnetDownload::Server::Manager> _downloadManagerServer;
         static const char*                                _downloadSearchDirs[];
@@ -98,7 +99,7 @@ class NetServer
 		//void			loadConfig();					// Loads configuration from server.xml
 		void			authenticate( ClientPtr clt, AddressIP sernum, Packet& packet );	// Authenticate a connected client
 		void			posUpdate( ClientPtr clt);		// Update a client position
-		void			addClient( ClientPtr clt, char flags );		// Add the client in the game
+		void			addClient( ClientPtr clt);		// Add the client in the game
 		void			removeClient( ClientPtr clt);		// Remove the client from the game
 		void			checkSystem( ClientPtr clt);		// Check if the client has the good system file
 		ClientPtr       newConnection_udp( const AddressIP& ipadr);
@@ -117,7 +118,7 @@ class NetServer
         ClientPtr       addNewClient( SOCKETALT sock, bool is_tcp );  // Adds a new client to listen for
 		void			sendLoginError( ClientPtr clt, AddressIP ipadr);
 		void			sendLoginAlready( ClientPtr clt, AddressIP ipadr);
-		void			sendLoginAccept( ClientPtr clt, AddressIP ipadr, int acctnew);
+		void			sendLoginAccept( ClientPtr clt, AddressIP ipadr, int acctnew, char flags);
 		void			sendLoginUnavailable( ClientPtr clt, AddressIP ipadr);
 		ClientPtr       getClientFromSerial( ObjSerial serial);
 
@@ -127,6 +128,8 @@ class NetServer
 
 		void	start( int argc, char ** argv);
 		void	save();
+
+		void	broadcast( NetBuffer & netbuf, unsigned short zone, Cmd command);
 
 		// WEAPON STUFF
 		void	BroadcastUnfire( ObjSerial serial, int weapon_index, unsigned short zone);
@@ -143,17 +146,11 @@ class NetServer
 		void	sendUnDock( ObjSerial serial, ObjSerial utdwserial, unsigned short zone);
 
 		void	addSystem( string & sysname, string & system);
+		void	getZoneInfo( unsigned short zoneid, NetBuffer & netbuf);
+		int		getZoneNumber()	{ return zonemgr->getZoneNumber(); }
 		friend class ZoneMgr;
 
 		void			closeAllSockets();				// Disconnect all clients for shutdown
-
-private:
-#ifdef HAVE_ZLIB_H
-        inline bool canCompress() const { return true; }
-#else
-        inline bool canCompress() const { return false; }
-#endif
-
 };
 
 //void	str_cat( char *res, char c, char *s);

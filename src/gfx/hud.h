@@ -25,7 +25,7 @@
 #include <string>
 #include "vec.h"
 #include "gfxlib_struct.h"
-struct Texture;
+class Texture;
 
 class TextPlane {
 	std::string myText;

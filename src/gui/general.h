@@ -26,6 +26,8 @@
 #ifndef GENERAL_H
 #define GENERAL_H
 
+#include "config.h"
+
 /* Don't forget, these defines can be set at compile time with the compile flag -D */
 
 //#define _G_ALL		// Enable everything except _G_DEBUG
@@ -74,7 +76,7 @@
 #include <stdlib.h>
 #include <windows.h>
 #include <direct.h>
-#elif !defined(__CYGWIN__)
+#elif !defined(__CYGWIN__) && !defined(SOLARIS)
 #include <stdio.h>
 #include <sys/dir.h>
 #include <unistd.h>

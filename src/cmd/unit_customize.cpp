@@ -22,8 +22,8 @@ extern Unit * CreateGameTurret (std::string tur,int faction);
 
 template <class UnitType>
 bool GameUnit<UnitType>::UpgradeSubUnits (const Unit * up, int subunitoffset, bool touchme, bool downgrade, int &numave, double &percentage)  {
-  bool bl = UpgradeSubUnitsWithFactory( up, subunitoffset, touchme, downgrade, numave, percentage,&CreateGameTurret);
-  DisableTurretAI();
+  bool bl = this->UpgradeSubUnitsWithFactory( up, subunitoffset, touchme, downgrade, numave, percentage,&CreateGameTurret);
+  this->DisableTurretAI();
   return bl;
 }
 extern char * GetUnitDir (const char *);
@@ -43,11 +43,11 @@ double GameUnit<UnitType>::Upgrade (const std::string &file, int mountoffset, in
 						       FactionUtil::GetFaction("upgrades")),
 			     UnitFactory::createUnit (file.c_str(),true,FactionUtil::GetFaction("upgrades")));
   }
-  char * unitdir  = GetUnitDir(name.c_str());
+  char * unitdir  = GetUnitDir(this->name.c_str());
   string templnam = string(unitdir)+".template";	  
-  const Unit * templ = UnitConstCache::getCachedConst (StringIntKey(templnam,faction));
+  const Unit * templ = UnitConstCache::getCachedConst (StringIntKey(templnam,this->faction));
 	if (templ==NULL) {
-	  templ = UnitConstCache::setCachedConst (StringIntKey(templnam,faction),UnitFactory::createUnit (templnam.c_str(),true,this->faction));
+	  templ = UnitConstCache::setCachedConst (StringIntKey(templnam,this->faction),UnitFactory::createUnit (templnam.c_str(),true,this->faction));
 	}
 	free (unitdir);
 	double percentage=0;

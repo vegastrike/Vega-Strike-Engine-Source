@@ -5,6 +5,19 @@ PipelinedTexture::PipelinedTexture () :Texture() {
 unsigned char * PipelinedTexture::beginMutate() {
   return data;
 }
+
+Texture * PipelinedTexture::Original ()
+{
+	// Had to duplicate the Texture::Original() function otherwise VC++ 6 would not compile anymore
+	// reporting an undefined reference to Texture::Original()
+  if (original) {
+    return original->Original();
+  }else {
+    return this;
+  }
+
+}
+
 void PipelinedTexture::endMutate (int xoffset,int yoffset, int width, int height) {
   GFXTransferSubTexture (data,name,xoffset,yoffset,width,height,TEXTURE_2D);
 }

@@ -4,7 +4,7 @@
 #include <stdlib.h>
 
 #ifndef PROPHECY
-#include "vs_path.h"
+#include "vsfilesystem.h"
 #include "gfx/mesh.h"
 //#include "unit.h"
 #else
@@ -98,7 +98,8 @@ struct bsp_tree {
   bsp_tree(): tri(), triplane() {left = right = NULL;}
 };
 
-extern FILE * o;
+using namespace VSFileSystem;
+extern VSFile fo;
 bool intersectionPoint (const bsp_tree &n, const Vector & A, const Vector & B, Vector & res);
 enum INTERSECT_TYPE whereIs (const TVECTOR & v, const bsp_tree & temp_node);
 void dividePlane (const bsp_polygon & tri, const bsp_tree &unificator, bsp_polygon &back, bsp_polygon &front);

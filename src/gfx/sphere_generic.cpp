@@ -3,7 +3,7 @@
 #include "vegastrike.h"
 #include "config_xml.h"
 #include "vs_globals.h"
-#include "vs_path.h"
+#include "vsfilesystem.h"
 #include "xml_support.h"
 #ifndef M_PI
 #define M_PI 3.1415926536F
@@ -31,7 +31,7 @@ float CityLights::GetS (float theta, float theta_min, float theta_max) {
   return wrapx * SphereMesh::GetS(theta,theta_min,theta_max);
 }
 string truncateByPipe (string & input) {
-  int i=input.find ("|");
+  string::size_type i=input.find ("|");
   string ret=input;
   if (i!=string::npos) {
     ret=input.substr (0,i);
@@ -41,7 +41,7 @@ string truncateByPipe (string & input) {
   }
   return ret;
 }
-void SphereMesh::InitSphere(float radius, int stacks, int slices, const char *texture, const char *alpha,bool Insideout,  const BLENDFUNC a, const BLENDFUNC b, bool envMapping, float rho_min, float rho_max, float theta_min, float theta_max, FILTER mipmap, bool reverse_normals){
+void SphereMesh::InitSphere(float radius, int stacks, int slices, const char *texture, const char *alpha,bool Insideout,  const BLENDFUNC a, const BLENDFUNC b, bool envMapping, float rho_min, float rho_max, float theta_min, float theta_max, FILTER mipmap, bool reverse_normals,bool subclass){
   int numspheres = (stacks+slices)/8;
   if (numspheres<1)
     numspheres =1;
@@ -60,8 +60,8 @@ void SphereMesh::InitSphere(float radius, int stacks, int slices, const char *te
   oldmesh = this->orig;
   numlods=numspheres;
   
-  meshHashTable.Put (hash_name=GetSharedMeshHashName(hash_name,Vector(radius,radius,radius),0), oldmesh);
-  //  fprintf (stderr,"\nput %s\n",hash_name.c_str());
+  meshHashTable.Put (hash_name, oldmesh);
+  //  VSFileSystem::Fprintf (stderr,"\nput %s\n",hash_name.c_str());
   radialSize = radius;//MAKE SURE FRUSTUM CLIPPING IS DONE CORRECTLY!!!!!
   mn = Vector (-radialSize,-radialSize,-radialSize);
   mx = Vector (radialSize,radialSize,radialSize);
@@ -69,32 +69,33 @@ void SphereMesh::InitSphere(float radius, int stacks, int slices, const char *te
   for (int l=0;l<numspheres;l++) {
     
     draw_queue = new vector<MeshDrawContext>;
-    if (!odq)
+    if (subclass||rho_max!=M_PI||rho_min!=0.0||theta_min!=0.0||theta_max!=2*M_PI)
       odq = draw_queue;
     //    stacks = origst/(l+1);
     //slices = origsl/(l+1);
-    if (stacks>12) {
-      stacks -=4;
-      slices-=4;
-    } else {
-      stacks-=2;
-      slices-=2;
-    }
-    float rho, drho, theta, dtheta;
-    float x, y, z;
-    float s, t, ds, dt;
-    int i, j, imin, imax;
-    float nsign = Insideout?-1.0:1.0;
-	float normalscale=reverse_normals?-1.0:1.0;
-    int fir=0;//Insideout?1:0;
-    int sec=1;//Insideout?0:1;
     vlist = NULL;
-    /* Code below adapted from gluSphere */
-    drho = (rho_max-rho_min)/ (GLfloat) stacks;
-    dtheta = (theta_max-theta_min)/ (GLfloat) slices;
-    
-    ds = 1.0 / slices;
-    dt = 1.0 / stacks;
+    if (subclass) {
+      if (stacks>12) {
+        stacks -=4;
+        slices-=4;
+      } else {
+        stacks-=2;
+        slices-=2;
+      }
+      float rho, drho, theta, dtheta;
+      float x, y, z;
+      float s, t, ds, dt;
+      int i, j, imin, imax;
+      float nsign = Insideout?-1.0:1.0;
+      float normalscale=reverse_normals?-1.0:1.0;
+      int fir=0;//Insideout?1:0;
+      int sec=1;//Insideout?0:1;
+      /* Code below adapted from gluSphere */
+      drho = (rho_max-rho_min)/ (GLfloat) stacks;
+      dtheta = (theta_max-theta_min)/ (GLfloat) slices;
+      
+      ds = 1.0 / slices;
+      dt = 1.0 / stacks;
       t = 1.0;			/* because loop now runs from 0 */
       
       imin = 0;
@@ -125,7 +126,7 @@ void SphereMesh::InitSphere(float radius, int stacks, int slices, const char *te
 	  x = -sin(theta) * sin(rho);
 	  y = cos(theta) * sin(rho);
 	  z = nsign * cos(rho);
-	
+          
 	  vertexlist[j*2+fir].i = x *normalscale;
 	  vertexlist[j*2+fir].k = -y*normalscale;
 	  vertexlist[j*2+fir].j = z*normalscale;
@@ -161,6 +162,10 @@ void SphereMesh::InitSphere(float radius, int stacks, int slices, const char *te
       delete [] vertexlist;
       delete [] modes;
       delete [] QSOffsets;
+
+    }else {
+      vlist = new GFXSphereVertexList(radius,stacks>slices?stacks:slices,Insideout,reverse_normals);
+    }
       SetBlendMode (a,b);
       string inputtex = texture;
       int count=0;
@@ -231,7 +236,7 @@ CityLights::CityLights (float radius, int stacks, int slices, const char *textur
   wrapy = zzwrapy;
   /*    if (texture!=NULL) {
       string wrap = string(texture);
-      int pos =wrap.find ("wrapx");
+      string::size_type pos =wrap.find ("wrapx");
       if (pos!=string::npos) {
 	string Wrapx = wrap.substr (pos+5,wrap.length());
 	sscanf(Wrapx.c_str(),"%f",&wrapx);
@@ -243,6 +248,6 @@ CityLights::CityLights (float radius, int stacks, int slices, const char *textur
       }
     }*/
     FILTER filter = (FILTER)XMLSupport::parse_int(vs_config->getVariable ("graphics","CityLightFilter",XMLSupport::tostring(((int)TRILINEAR))));    
-    InitSphere(radius,stacks,slices,texture,NULL,insideout,a,b,envMap,rho_min,rho_max,theta_min,theta_max,filter,reversed_normals);
+    InitSphere(radius,stacks,slices,texture,NULL,insideout,a,b,envMap,rho_min,rho_max,theta_min,theta_max,filter,reversed_normals,zzwrapx!=1||zzwrapy!=1);
 
 }

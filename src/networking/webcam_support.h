@@ -2,15 +2,9 @@
 #define __WEBCAM_SUPPORT_H
 
 #include <string>
-#if defined( _WIN32) && !defined( __CYGWIN__)
-#ifndef DSHOW
-#include <windows.h>
-#include <vfw.h>
-//#include <afx.h>
-#else
+#if defined( _WIN32) && !defined( __CYGWIN__) && defined( NETCOMM_WEBCAM)
 #include <dshow.h>
 #include <qedit.h>
-#ifdef DSHOW
 class WebcamSupport;
 
 // Global DShow variable
@@ -46,8 +40,6 @@ public:
 
 	STDMETHODIMP BufferCB( double Time, BYTE *pBuffer, long BufferLen );
 };
-#endif
-#endif
 #endif
 #ifdef __APPLE__
 #include <QuickTimeComponents.h>
@@ -229,13 +221,7 @@ class	WebcamSupport
 		int		oldchannel;
 		char	channeltext[128];
 #endif
-#if defined(_WIN32) && !defined(__CYGWIN__)
-#ifndef DSHOW
-		CAPSTATUS		gCapStatus ;
-		CAPDRIVERCAPS	gCapDriverCaps ;
-		HWND			capvideo, hwndCap;
-		CAPTUREPARMS	capparam;
-#else
+#if defined( _WIN32) && !defined( __CYGWIN__) && defined( NETCOMM_WEBCAM)
 		SampleGrabberCallback g_SampleCB;
 		IGraphBuilder *pGraph;
 		ICaptureGraphBuilder2 *pCaptureGraph;
@@ -248,7 +234,6 @@ class	WebcamSupport
 		ISampleGrabber *pSampleGrabber;
 
 		friend class SampleGrabberCallback;
-#endif
 #endif
 #ifdef __APPLE__
 		typedef struct
@@ -297,9 +282,9 @@ class	WebcamSupport
 		int		CopyImage();
 		void	DoError( long code, char * msg);
 };
-
 // Windows specific stuff to convert BMP to JPEG
 #if defined( _WIN32) && !defined( __CYGWIN__)
+/*
 #ifndef HAVE_BOOLEAN
 #define HAVE_BOOLEAN
 #define FALSE 0
@@ -310,12 +295,15 @@ typedef unsigned char boolean;
 #define XMD_H
 typedef int INT32;
 #endif
+*/
 #ifdef _WIN32
 #include <windows.h>
 #endif
 #include <string>
 
 extern "C" { 
+#include "jconfig.h"
+#include "jmorecfg.h"
 #include "jpeglib.h" 
 }
 
@@ -334,10 +322,6 @@ BOOL DibToSamps(HANDLE                      hDib,
                 std::string*                    pcsMsg);
 
 RGBQUAD QuadFromWord(WORD b16);
-#endif
-#ifdef DSHOW
-
-
 #endif
 
 #endif

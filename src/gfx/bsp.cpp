@@ -22,7 +22,7 @@
 #include "bsp.h"
 #include "file_main.h"
 #include <float.h>
-#include "vs_path.h"
+#include "vsfilesystem.h"
 //All or's are coded with the assumption that the inside of the object has a much bigger impact than the outside of the object when both need to be analyzed
 //#define BSPHACK .1
 BSPNode::BSPNode(BSPDiskNode **input) {
@@ -160,28 +160,20 @@ BSPTree::BSPTree(BSPDiskNode *input) {
 }
 
 bool CheckBSP (const char * filename) {
-  changehome();
-  vschdir ("generatedbsp");
-  FILE *fp = fopen(filename, "rb");
-  vscdup();
-  returnfromhome();
-  if (fp!=NULL) {
-    fclose (fp);
+  VSFile f;
+  VSError err = f.OpenReadOnly( filename, BSPFile);
+  if (err<=Ok) {
+    f.Close();
     return true;
   }
   return false;
 }
 BSPTree::BSPTree(const char *filename) {
   VSCONSTRUCT2('s')
-  changehome();
-  vschdir ("generatedbsp");
-  FILE *fp = fopen(filename, "rb");
-  vscdup();
-  returnfromhome();
-  fseek(fp, 0, SEEK_END);
-  int size = ftell(fp);
+  VSFile fp;
+  VSError err = fp.OpenReadOnly( filename, BSPFile);
+  int size = fp.Size();
   int numRecords = size / (sizeof(float)*4+2);
-  rewind(fp);
   BSPDiskNode *nodes = new BSPDiskNode[numRecords];
   BSPDiskNode * tmpnode;
   for(int a=0; a<numRecords; a++) {
@@ -201,5 +193,5 @@ BSPTree::BSPTree(const char *filename) {
   tmpnode = nodes;
   root = new BSPNode(&tmpnode);
   delete [] nodes;
-  fclose(fp);
+  fp.Close();
 }

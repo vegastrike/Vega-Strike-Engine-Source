@@ -1,21 +1,28 @@
 
 #ifdef HAVE_PYTHON
 #include <stdio.h>
+#include <math.h>
 #include <Python.h>
 #include <pyerrors.h>
 #include <pythonrun.h>
 #include <compile.h>
 #include <eval.h>
-#ifdef USE_BOOST_129
+#ifndef USE_BOOST_128
+#if defined (_MSC_VER) && _MSC_VER<=1200
+#define Vector Vactor
+#endif
 #include <boost/python.hpp>
 #include <boost/python/converter/from_python.hpp>
+#if defined (_MSC_VER) && _MSC_VER<=1200
+#undef Vector
+#endif
 #else
 #include <boost/python/class_builder.hpp>
 #include <boost/python/detail/extension_class.hpp>
 #endif
 #include "configxml.h"
 #include "vs_globals.h"
-#include "vs_path.h"
+#include "vsfilesystem.h"
 #include "init.h"
 #include "python_compile.h"
 #include "python_class.h"
@@ -31,7 +38,7 @@ class Unit;
       public:
          hello(const std::string& country) { this->country = country; }
          virtual std::string greet() const { return "Hello from " + country; }
-         virtual ~hello(){fprintf (stderr,"NO HELLO %d",this);} // Good practice 
+         virtual ~hello(){VSFileSystem::vs_fprintf (stderr,"NO HELLO %d",this);} // Good practice 
      };
 	 struct hello_callback : hello
      {
@@ -46,7 +53,7 @@ class Unit;
          // Override greet to call back into Python
          std::string greet() const // 4
              { return boost::python::callback<std::string>::call_method(self, "greet"); }
-             virtual ~hello_callback () {fprintf (stderr,"NO CALLBAC %d",this);}
+             virtual ~hello_callback () {VSFileSystem::vs_fprintf (stderr,"NO CALLBAC %d",this);}
          // Supplies the default implementation of greet
          static std::string default_greet(const hello& self_) //const // 5
              { return self_.hello::greet(); }
@@ -194,7 +201,9 @@ BOOST_PYTHON_MODULE_INIT(Vegastrike)
 	return from_python(p,boost::python::type<Orders::FireAt &>());
 }*/
 #endif
+#include "vsfilesystem.h"
 void Python::initpaths(){
+  /*
   char pwd[2048];
   getcwd (pwd,2047);
   pwd[2047]='\0';
@@ -202,15 +211,41 @@ void Python::initpaths(){
 	  if (pwd[i]=='\\')
 		  pwd[i]=DELIM;
   }
+  */
   std::string moduledir (vs_config->getVariable ("data","python_modules","modules"));
   std::string basesdir (vs_config->getVariable ("data","python_bases","bases"));
 
-  std::string changepath ("import sys\nprint sys.path\nsys.path = ["
+  /*
+   std::string changepath ("import sys\nprint sys.path\nsys.path = ["
 			  "\""+std::string(pwd)+DELIMSTR"modules"DELIMSTR"builtin\""
 			  ",\""+std::string(pwd)+DELIMSTR+moduledir+string("\"")+
 			  ",\""+std::string(pwd)+DELIMSTR+basesdir + string("\"")+
 			  "]\n");
-  fprintf (stderr,"running %s",changepath.c_str());
+   */
+  std::string modpaths("");
+  // Find all the mods dir (ignore homedir)
+  for( int i=1; i<VSFileSystem::Rootdir.size(); i++)
+  {
+	  modpaths += "r\""+VSFileSystem::Rootdir[i]+"/modules/builtin/\",";
+	  modpaths += "r\""+VSFileSystem::Rootdir[i]+"/"+moduledir+"/\",";
+	  modpaths += "r\""+VSFileSystem::Rootdir[i]+"/"+basesdir+"/\"";
+	  if( i+1<VSFileSystem::Rootdir.size())
+		  modpaths+= ",";
+  }
+  /*
+  string::size_type backslash;
+  while ((backslash=modpaths.find("\\"))!=std::string::npos) {
+     modpaths[backslash]='/';
+     }*/
+   std::string changepath ("import sys\nprint sys.path\nsys.path = ["+modpaths+"]\n");
+  /*
+   std::string changepath ("import sys\nprint sys.path\nsys.path = ["
+			  "\""+VSFileSystem::datadir+DELIMSTR"modules"DELIMSTR"builtin\""
+			  ",\""+VSFileSystem::datadir+DELIMSTR+moduledir+string("\"")+
+			  ",\""+VSFileSystem::datadir+DELIMSTR+basesdir + string("\"")+
+			  "]\n");
+	*/
+  VSFileSystem::vs_fprintf (stderr,"running %s",changepath.c_str());
   char * temppython = strdup(changepath.c_str());
   PyRun_SimpleString(temppython);	
   Python::reseterrors();
@@ -244,7 +279,7 @@ PYTHON_END_CLASS(VS,Unit)
 PYTHON_END_MODULE(VS)
 TO_PYTHON_SMART_POINTER(Unit) 
 */
-#ifdef USE_BOOST_129
+#ifndef USE_BOOST_128
 static void* Vector_convertible(PyObject* p) {
 	return PyTuple_Check(p)?p:0;
 }
@@ -279,15 +314,15 @@ void Python::init() {
 // initialize python library
   Py_Initialize();
   initpaths();
-#ifdef USE_BOOST_129
+#ifndef USE_BOOST_128
   boost::python::converter::registry::insert(Vector_convertible, QVector_construct, boost::python::type_id<QVector>());
 	boost::python::converter::registry::insert(Vector_convertible, Vector_construct, boost::python::type_id<Vector>());
 #endif
 	InitBriefing ();
 	InitVS ();
-	fprintf (stderr,"testing VS random");
+	VSFileSystem::vs_fprintf (stderr,"testing VS random");
 	std::string changepath ("import sys\nprint sys.path\n");
-	fprintf (stderr,"running %s",changepath.c_str());
+	VSFileSystem::vs_fprintf (stderr,"running %s",changepath.c_str());
 	char * temppython = strdup(changepath.c_str());
 	PyRun_SimpleString(temppython);	
 	Python::reseterrors();
@@ -330,19 +365,19 @@ PyObject* Py_CompileString(char *str, char *filename, int start)
 */
 
 #if 0//defined(WIN32)
-	FILE *fp = fopen("config.py","r");
+	FILE *fp = VSFileSystem::OpenFile("config.py","r");
 
 	freopen("stderr","w",stderr);
 	freopen("stdout","w",stdout);
 	changehome(true);
-	FILE *fp1 = fopen("config.py","r");
+	FILE *fp1 = VSFileSystem::OpenFile("config.py","r");
 	returnfromhome();
 	if (fp1==NULL) {
 	  fp1=fp;
 	}
 	if(fp1!=NULL) {
 		PyRun_SimpleFile(fp, "config.py");
-		fclose(fp1);
+		VSFileSystem::Close(fp1);
 	}
 #endif
 #ifdef OLD_PYTHON_TEST
@@ -375,8 +410,8 @@ PyObject* Py_CompileString(char *str, char *filename, int start)
 //	char buffer[128];
 //	PythonIOString::buffer << endl << '\0';
 //	vs_config->setVariable("data","test","NULL");
-//	fprintf(stdout, "%s", vs_config->getVariable("data","test", string()).c_str());
-//	fprintf(stdout, "output %s\n", PythonIOString::buffer.str());
+//	VSFileSystem::vs_fprintf(stdout, "%s", vs_config->getVariable("data","test", string()).c_str());
+//	VSFileSystem::vs_fprintf(stdout, "output %s\n", PythonIOString::buffer.str());
 	fflush(stderr);
 	fflush(stdout);
 }

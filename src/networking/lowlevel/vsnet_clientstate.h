@@ -33,7 +33,7 @@ class NetBuffer;
 // Structure used to transmit client updates
 class	ClientState
 {
-	unsigned int	delay;
+	//float			delay;
 	ObjSerial		client_serial;
 	Transformation	pos;
 	Vector			veloc;
@@ -52,20 +52,23 @@ class	ClientState
 		Vector		getVelocity() { return this->veloc;}
 		Vector		getAcceleration() { return this->accel;}
 		ObjSerial	getSerial() const { return this->client_serial;}
-		unsigned int	getDelay() { return this->delay;}
-		void		setDelay( unsigned int del) { this->delay = del;}
+		//float		getDelay() { return this->delay;}
+		//void		setDelay( float del) { this->delay = del;}
 		void		setSerial( ObjSerial ser) { this->client_serial = ser;}
 		void		setPosition( QVector posit) { this->pos.position = posit;}
 		void		setOrientation( Quaternion orient) { this->pos.orientation = orient;}
 		void		setAcceleration( Vector acc) { this->accel = acc;}
 		void		setVelocity( Vector vel) { this->veloc = vel;}
 
+		void	display( std::ostream& ostr ) const;
 		void	display() const;
 		int		operator==( const ClientState & ctmp);
 		void	netswap();
 
 		friend	class NetBuffer;
 };
+
+std::ostream& operator<<( std::ostream& ostr, const ClientState& cs );
 
 #endif
 

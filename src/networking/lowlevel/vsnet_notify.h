@@ -16,7 +16,9 @@
 #include "boost/shared_array.hpp"
 
 #include "vsnet_socket.h"
-#include <fstream>
+
+#include "vsfilesystem.h"
+
 namespace VsnetDownload
 {
 
@@ -118,7 +120,7 @@ class FileSet;
 class Notify
 {
 public:
-    virtual void notify( State s, Error e ) = 0;
+    virtual void notify( State s, VSError e ) = 0;
     virtual void setTotalBytes( int sz ) { }
     virtual void addBytes( int sz ) { }
 };
@@ -135,7 +137,7 @@ public:
     NotifyMe( );
     virtual ~NotifyMe( ) { }
 
-    virtual void notify( State s, Error e );
+    virtual void notify( State s, VSError e );
     virtual void setTotalBytes( int sz );
     virtual void addBytes( int sz );
 
@@ -157,7 +159,7 @@ public:
 
 private:
     State _state;
-    Error _error;
+    VSError _error;
     int   _total;
     int   _offset;
 };
@@ -169,14 +171,17 @@ private:
 class Item
 {
 public:
-    Item( SOCKETALT sock, const std::string& filename, NotifyPtr notify = NotifyPtr() );
+    Item( SOCKETALT sock, const std::string& filename, VSFileSystem::VSFileType=VSFileSystem::UnknownFile, NotifyPtr notify = NotifyPtr() );
     virtual ~Item( );
 
     State state( ) const;
-    Error error( ) const;
+    VSError error( ) const;
 
     void changeState( State s );
-    void changeState( State s, Error e );
+    void changeState( State s, VSError e );
+
+	void setFileType( VSFileSystem::VSFileType ft);
+	VSFileSystem::VSFileType getFileType();
 
     void setSize( int len );
     void append( unsigned char* buffer, int bufsize );
@@ -189,13 +194,16 @@ protected:
     virtual void childSetSize( int len ) = 0;
     virtual void childAppend( unsigned char* buffer, int bufsize ) = 0;
 
+    void    protected_replace_notifier( NotifyPtr ptr );
+	VSFileSystem::VSFileType _filetype;
+
 private:
     SOCKETALT         _sock;
     const std::string _filename;
 
     mutable VSMutex _mx;
     State           _state;
-    Error           _error;
+    VSError           _error;
     NotifyPtr       _notify;
 };
 
@@ -209,6 +217,7 @@ public:
     File( SOCKETALT          sock,
           const std::string& filename,
           std::string        localbasepath,
+		  VSFileSystem::VSFileType ft,
           NotifyPtr          notify = NotifyPtr() );
 
     virtual ~File( );
@@ -219,7 +228,7 @@ protected:
 
 private:
     std::string    _localbasepath;
-    std::ofstream* _of;
+    VSFileSystem::VSFile * _of;
     int            _len;
     int            _offset;
 };
@@ -228,33 +237,82 @@ private:
  * declaration VsnetDownload::Client::NoteFile
  *------------------------------------------------------------*/
 
-class NoteFile : public File, public NotifyMe
+class NoteFile : public File
 {
+private:
+    NotifyPtr _me;
+
+    inline const NotifyMe* me() const {
+    	return (NotifyMe*)_me.get();
+    }
+
 public:
     NoteFile( SOCKETALT          sock,
               const std::string& filename,
+			  VSFileSystem::VSFileType ft,
               std::string        localbasepath );
     NoteFile( SOCKETALT          sock,
-              const std::string& filename );
+              const std::string& filename,
+			  VSFileSystem::VSFileType ft );
 
-    virtual ~NoteFile( ) { }
+    virtual ~NoteFile( );
+
+    inline bool done( ) const {
+        return me()->done();
+    }
+
+    inline bool ok( ) const {
+        return me()->ok();
+    }
+
+    inline int total( ) const {
+        return me()->total();
+    }
+
+    inline int offset( ) const {
+        return me()->offset();
+    }
 };
+
 /*------------------------------------------------------------*
  * declaration VsnetDownload::Client::Buffer
  *------------------------------------------------------------*/
 
-class Buffer : public Item, public NotifyMe
+class Buffer : public Item
 {
+
     typedef unsigned char uchar;
+    NotifyPtr _me;
+
+    inline const NotifyMe* me() const {
+    	return (NotifyMe*)_me.get();
+    }
 
 public:
     Buffer( SOCKETALT          sock,
             const std::string& filename,
-            NotifyPtr          notify = NotifyPtr() );
+			VSFileSystem::VSFileType ft );
 
     virtual ~Buffer( );
 
     boost::shared_array<uchar> getBuffer( ) const;
+	int                        getSize() { return this->_len; }
+
+    inline bool done( ) const {
+        return me()->done();
+    }
+
+    inline bool ok( ) const {
+        return me()->ok();
+    }
+
+    inline int total( ) const {
+        return me()->total();
+    }
+
+    inline int offset( ) const {
+        return me()->offset();
+    }
 
 protected:
     virtual void childSetSize( int len );
@@ -329,13 +387,13 @@ private:
 class Notify_f : public Notify
 {
 public:
-    typedef void (*NotifyFunction)( std::string str, State s, Error e, int total, int offset );
+    typedef void (*NotifyFunction)( std::string str, State s, VSError e, int total, int offset );
 
 public:
     Notify_f( std::string filename, NotifyFunction fun );
     virtual ~Notify_f();
 
-    virtual void notify( State s, Error e );
+    virtual void notify( State s, VSError e );
     virtual void setTotalBytes( int sz );
     virtual void addBytes( int sz );
 
@@ -364,7 +422,7 @@ struct Notify_fp : public NotifyPtr
 class VSNotify : public Notify
 {
 	public:
-		void notify( State s, Error e);
+		void notify( State s, VSError e);
     	void setTotalBytes( int sz );
     	void addBytes( int sz );
 };

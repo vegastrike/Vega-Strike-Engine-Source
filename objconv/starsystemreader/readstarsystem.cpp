@@ -188,6 +188,7 @@ public:
 		return sector+"/"+name;
 	}
 	void computeProperties(bool interestingname,const vector<string> homeworlds) {
+          // make sure to propogate changes to wcSystemReader.py
 		this->interesting=interestingname;
 		double rad=16000;
 		double lifeprob= .25;

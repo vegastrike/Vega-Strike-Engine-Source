@@ -51,7 +51,7 @@ StarSystem * GameUniverse::Init (string systemfile, const Vector & centr,const s
   static bool js = true;
   if (js) {
 	js=false;
-	LoadWeapons("weapon_list.xml");
+	LoadWeapons(VSFileSystem::weapon_list.c_str());
 	CacheJumpStar(false);
   }
   return this->Universe::Init( systemfile, centr, planetname);
@@ -308,7 +308,7 @@ void GameUniverse::StartDraw()
 	  delete star_system.back();
 	  star_system.pop_back();
 	} else {
-	  fprintf (stderr,"error with active star system list\n");
+	  VSFileSystem::vs_fprintf (stderr,"error with active star system list\n");
 	}
       }
 	}

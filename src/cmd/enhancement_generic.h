@@ -23,7 +23,7 @@ public:
       char * tempdata = (char *)malloc (sizeof(this->shield));
       memcpy (tempdata,&this->shield,sizeof(this->shield));
       shield.number=2;//don't want them getting our boosted shields!
-      shield.fb[0]=shield.fb[1]=shield.fb[2]=shield.fb[3]=0;
+      shield.shield2fb.front=shield.shield2fb.back=shield.shield2fb.frontmax=shield.shield2fb.backmax=0;
       smaller->Upgrade (this,0,0,true,true,percent);
       memcpy (&this->shield,tempdata,sizeof(this->shield));
       string fn (filename);

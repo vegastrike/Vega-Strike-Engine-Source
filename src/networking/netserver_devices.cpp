@@ -4,6 +4,8 @@
 #include "networking/lowlevel/vsnet_debug.h"
 #include "lin_time.h"
 
+extern StarSystem * GetLoadedStarSystem( const char * system);
+
 // WEAPON STUFF
 
 void	NetServer::BroadcastUnfire( ObjSerial serial, int weapon_index, unsigned short zone)
@@ -15,7 +17,10 @@ void	NetServer::BroadcastUnfire( ObjSerial serial, int weapon_index, unsigned sh
 	netbuf.addInt32( weapon_index);
 
 	//p.send( CMD_UNFIREREQUEST, serial, netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, NULL, this->clt_sock, __FILE__, __LINE__);
-	p.bc_create( CMD_UNFIREREQUEST, serial, netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, NULL, acct_sock, __FILE__, PSEUDO__LINE__(1695) );
+	p.bc_create( CMD_UNFIREREQUEST, serial,
+                 netbuf.getData(), netbuf.getDataLength(),
+                 SENDRELIABLE,
+                 __FILE__, PSEUDO__LINE__(1695) );
 	zonemgr->broadcast( zone, serial, &p );
 }
 
@@ -30,7 +35,10 @@ void	NetServer::BroadcastFire( ObjSerial serial, int weapon_index, ObjSerial mis
 	netbuf.addInt32( weapon_index);
 	netbuf.addSerial( missile_serial);
 
-	p.bc_create( CMD_FIREREQUEST, serial, netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, NULL, acct_sock, __FILE__, PSEUDO__LINE__(1710) );
+	p.bc_create( CMD_FIREREQUEST, serial,
+                 netbuf.getData(), netbuf.getDataLength(),
+                 SENDRELIABLE,
+                 __FILE__, PSEUDO__LINE__(1710) );
 	// WARNING : WE WILL SEND THE INFO BACK TO THE CLIENT THAT HAS FIRED -> SHOULD USE broadcastNoSelf instead if we dont want that
 	zonemgr->broadcast( zone, serial, &p );
 }
@@ -49,7 +57,10 @@ void	NetServer::sendDamages( ObjSerial serial, unsigned short zone, Shield shiel
 	netbuf.addShield( shield);
 	netbuf.addArmor( armor);
 
-	p.bc_create( CMD_DAMAGE, serial, netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, NULL, acct_sock, __FILE__, PSEUDO__LINE__(1729) );
+	p.bc_create( CMD_DAMAGE, serial,
+                 netbuf.getData(), netbuf.getDataLength(),
+                 SENDRELIABLE,
+                 __FILE__, PSEUDO__LINE__(1729) );
 	// WARNING : WE WILL SEND THE INFO BACK TO THE CLIENT THAT HAS FIRED
 	zonemgr->broadcast( zone, serial, &p );
 }
@@ -65,8 +76,8 @@ void	NetServer::sendKill( ObjSerial serial, unsigned short zone)
 	if( !clt )
 	{
 		COUT<<"Killed a non client Unit = "<<serial<<endl;
-		un = zonemgr->getUnit( serial, zone);
-		zonemgr->removeUnit( un, zone);
+		//un = zonemgr->getUnit( serial, zone);
+		//zonemgr->removeUnit( un, zone);
 	}
 	else
 	{
@@ -74,7 +85,9 @@ void	NetServer::sendKill( ObjSerial serial, unsigned short zone)
 		zonemgr->removeClient( clt );
 	}
 
-	p.bc_create( CMD_KILL, serial, NULL, 0, SENDRELIABLE, NULL, acct_sock, __FILE__, PSEUDO__LINE__(1771) );
+	p.bc_create( CMD_KILL, serial,
+                 NULL, 0, SENDRELIABLE,
+                 __FILE__, PSEUDO__LINE__(1771) );
 	// WARNING : WE WILL SEND THE INFO BACK TO THE CLIENT THAT HAS FIRED
 	zonemgr->broadcast( zone, serial, &p );
 }
@@ -95,21 +108,29 @@ void	NetServer::sendJump( ObjSerial serial, ObjSerial jumpserial, bool ok)
 	// And remove the player from its old starsystem and set it out of game
 	//this->removeClient( clt );
 	// Have to set new starsystem here
-	// ??????
+	Cockpit * cp = _Universe->isPlayerStarship( clt->game_unit.GetUnit());
+	cp->savegame->SetStarSystem( clt->jumpfile);
+	StarSystem* sts = GetLoadedStarSystem( clt->jumpfile.c_str());
+	unsigned short zoneid = _Universe->StarSystemIndex( sts);
+	netbuf.addShort( zoneid);
 
 	// Test whether the jump was accepted or not by server
 	if( ok)
 	{
 		// If jumpfile is empty the hash was correct
-		if( clt->jumpfile=="" )
-			p2.bc_create( CMD_JUMP, serial, netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, &clt->cltadr, clt->sock, __FILE__, PSEUDO__LINE__(1164) );
+		if( clt->jumpok==1 )
+			p2.bc_create( CMD_JUMP, serial,
+                          netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE,
+                          __FILE__, PSEUDO__LINE__(1164) );
 		// New system file HASH is wrong tell the client with serial != player serial so he can ask for a new download
-		else
-			p2.bc_create( CMD_JUMP, serial+1, netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, &clt->cltadr, clt->sock, __FILE__, PSEUDO__LINE__(1164) );
+		else if( clt->jumpok==2)
+			p2.bc_create( CMD_JUMP, serial+1,
+                          netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE,
+                          __FILE__, PSEUDO__LINE__(1164) );
 		zonemgr->broadcast( clt, &p2);
 	}
 
-	// Should broadcast JUMP so other client display jump anim too
+	// Should broadcast JUMP so other client display jump anim too ?
 }
 
 void	NetServer::sendDockAuthorize( ObjSerial serial, ObjSerial utdw_serial, int docknum, unsigned short zone)
@@ -118,7 +139,7 @@ void	NetServer::sendDockAuthorize( ObjSerial serial, ObjSerial utdw_serial, int 
 	ClientPtr clt = this->getClientFromSerial( serial);
 	clt->ingame = false;
 	// Set timestamps to 0 so we won't have prediction problem when undocking
-	clt->old_timestamp = clt->latest_timestamp = 0;
+	clt->clearLatestTimestamp();
 	StarSystem * currentsys = clt->game_unit.GetUnit()->activeStarSystem;
 	// Remove the unit from the system list
 	currentsys->RemoveUnit( clt->game_unit.GetUnit());
@@ -128,7 +149,9 @@ void	NetServer::sendDockAuthorize( ObjSerial serial, ObjSerial utdw_serial, int 
 	// Send a CMD_DOCK with serial, an ObjSerial = unit_to_dock_with_serial and an int = docking port num
 	netbuf.addSerial( utdw_serial);
 	netbuf.addInt32( docknum);
-	p.bc_create( CMD_DOCK, serial, netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, NULL, acct_sock, __FILE__, PSEUDO__LINE__(118) );
+	p.bc_create( CMD_DOCK, serial,
+                 netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE,
+                 __FILE__, PSEUDO__LINE__(118) );
 	zonemgr->broadcast( zone, serial, &p );
 }
 
@@ -143,7 +166,9 @@ void	NetServer::sendUnDock( ObjSerial serial, ObjSerial utdwserial, unsigned sho
 	NetBuffer netbuf;
 	Packet p;
 	netbuf.addSerial( utdwserial);
-	p.bc_create( CMD_UNDOCK, serial, netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, NULL, acct_sock, __FILE__, PSEUDO__LINE__(134) );
+	p.bc_create( CMD_UNDOCK, serial,
+                 netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE,
+                 __FILE__, PSEUDO__LINE__(134) );
 	zonemgr->broadcastNoSelf( zone, serial, &p );
 
 	// Set client ingame

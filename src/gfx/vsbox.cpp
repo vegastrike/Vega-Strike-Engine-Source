@@ -1,7 +1,6 @@
 #include "vsbox.h"
 #include "xml_support.h"
 
-using XMLSupport::tostring;
 
 /*
 inline ostream &operator<<(ostrstream os, const Vector &obj) {
@@ -9,7 +8,7 @@ inline ostream &operator<<(ostrstream os, const Vector &obj) {
 }
 */
 string tostring(const Vector &v) {
-  return string("(") + tostring(v.i) + ", " + tostring(v.j) + ", " + tostring(v.k) + ")";
+	return std::string("(") + XMLSupport::tostring(v.i) + ", " + XMLSupport::tostring(v.j) + ", " + XMLSupport::tostring(v.k) + ")";
 }
 
 Box::Box(const Vector &corner1, const Vector &corner2) : corner_min(corner1), corner_max(corner2) {

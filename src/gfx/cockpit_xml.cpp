@@ -1,3 +1,4 @@
+#include "config.h"
 #include "cockpit.h"
 #include "xml_support.h"
 #include "gauge.h"
@@ -101,7 +102,9 @@ namespace CockpitXML {
     EnumMap::Pair ("Speed", UnitImages::KPS),
     EnumMap::Pair ("SetSpeed", UnitImages::SETKPS),
     EnumMap::Pair ("Auto", UnitImages::AUTOPILOT),
-    EnumMap::Pair ("FPS", UnitImages::COCKPIT_FPS)
+	EnumMap::Pair ("Collision", UnitImages::COLLISION),
+    EnumMap::Pair ("FPS", UnitImages::COCKPIT_FPS),
+    EnumMap::Pair ("WarpFieldStrength", UnitImages::WARPFIELDSTRENGTH)
   };
   const EnumMap::Pair attribute_names[] = {
     EnumMap::Pair ("UNKNOWN", UNKNOWN),
@@ -133,7 +136,7 @@ namespace CockpitXML {
     EnumMap::Pair ("type", VDUTYPE)
   };
 
-  const EnumMap element_map(element_names, 30);
+  const EnumMap element_map(element_names, 32);
   const EnumMap attribute_map(attribute_names, 27);
 }
 
@@ -145,11 +148,12 @@ using namespace CockpitXML;
 
 
 void GameCockpit::beginElement(const string &name, const AttributeList &attributes) {
+  static bool cockpit_smooth=XMLSupport::parse_bool(vs_config->getVariable("graphics","cockpit_smooth_texture","false"));
   AttributeList::const_iterator iter;
   Gauge::DIRECTION tmpdir=Gauge::GAUGE_UP;
-  Sprite ** newsprite=NULL;
+  VSSprite ** newsprite=NULL;
   VDU **newvdu=NULL;
-  Sprite * adjsprite=NULL;
+  VSSprite * adjsprite=NULL;
   std::string gaugename ("shieldstat.spr");
   std::string myfont ("9x12.font");
   Names elem = (Names)element_map.lookup(name);
@@ -184,19 +188,19 @@ void GameCockpit::beginElement(const string &name, const AttributeList &attribut
 		  cockpit_offset = XMLSupport::parse_float ((*iter).value);
 	break;
       case XFILE:
-	Pit[0]= new Sprite ((*iter).value.c_str(),NEAREST);
+	Pit[0]= new VSSprite ((*iter).value.c_str(),cockpit_smooth?BILINEAR:NEAREST);
 	break;
       case SOUNDFILE:
 	SetSoundFile((*iter).value);
 	break;
       case MESH:
-	mesh = new Mesh ((*iter).value.c_str(),Vector(1,1,1),0,NULL,false);
+		  mesh = Mesh::LoadMesh ((*iter).value.c_str(),Vector(1,1,1),0,NULL);
 	break;
       case FRONT:
       case BACK:
       case LEFT:
       case RIGHT:
-	Pit[attr-FRONT] = new Sprite ((*iter).value.c_str(),NEAREST);
+	Pit[attr-FRONT] = new VSSprite ((*iter).value.c_str(),cockpit_smooth?BILINEAR:NEAREST);
 	break;
 	  default:
 		  break;
@@ -224,7 +228,9 @@ void GameCockpit::beginElement(const string &name, const AttributeList &attribut
   case UnitImages::KPS:
   case UnitImages::SETKPS:
   case UnitImages::AUTOPILOT:
+  case UnitImages::COLLISION:
   case UnitImages::COCKPIT_FPS:
+  case UnitImages::WARPFIELDSTRENGTH:
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) { 
       switch (attribute_map.lookup((*iter).name)) {
       case XFILE:
@@ -292,6 +298,9 @@ void GameCockpit::beginElement(const string &name, const AttributeList &attribut
   case RADAR: newsprite = &Radar[0];goto loadsprite;
   case REARRADAR: newsprite = &Radar[1];goto loadsprite;
   case LVDU: vdu.push_back(NULL);newvdu = &vdu.back();mymodes=VDU::MANIFEST|VDU::WEAPON|VDU::DAMAGE|VDU::SHIELD;
+#ifdef NETCOMM_WEBCAM
+		mymodes = mymodes | VDU::WEBCAM;
+#endif
   	if( Network!=NULL)
 		mymodes = mymodes | VDU::NETWORK;
 	goto loadsprite;
@@ -313,7 +322,7 @@ void GameCockpit::beginElement(const string &name, const AttributeList &attribut
       switch (attribute_map.lookup((*iter).name)) {
       case XFILE:
 	if (newsprite) {
-	  (*newsprite) = new Sprite ((*iter).value.c_str(),NEAREST);
+	  (*newsprite) = new VSSprite ((*iter).value.c_str(),cockpit_smooth?BILINEAR:NEAREST);
 	  adjsprite = *newsprite;
 	} else if (newvdu) {
 	  (*newvdu) = new VDU ((*iter).value.c_str(),text,mymodes,rows,cols,&StartArmor[0],&maxhull);
@@ -381,28 +390,33 @@ void GameCockpit::endElement(const string &name) {
 }
 
 
-
+using namespace VSFileSystem;
 void GameCockpit::LoadXML (const char * filename) {
   const int chunk_size = 16384;
 
-  FILE * inFile=NULL;
+  VSFile f;
+  VSError err = Unspecified;
 
   if (filename[0]!='\0') {
-	inFile = fopen (filename, "r");
-
+  	VSError err = f.OpenReadOnly( filename, CockpitFile);
   }
-  if(!inFile) {
+  LoadXML( f);
+}
+
+void GameCockpit::LoadXML ( VSFileSystem::VSFile & f) {
+
+  if(!f.Valid()) {
 	 cockpit_offset=0;
 	 viewport_offset=0;
-	 Panel.push_back(new Sprite ("crosshairs.spr"));
+	 Panel.push_back(new VSSprite ("crosshairs.spr"));
 	 return;
-	
-
   }
   XML_Parser parser = XML_ParserCreate(NULL);
   XML_SetUserData(parser, this);
   XML_SetElementHandler(parser, &Cockpit::beginElement, &Cockpit::endElement);
   
+  XML_Parse (parser,(f.ReadFull()).c_str(),f.Size(),1);
+  /*
   do {
 #ifdef BIDBG
     char *buf = (XML_Char*)XML_GetBuffer(parser, chunk_size);
@@ -411,14 +425,15 @@ void GameCockpit::LoadXML (const char * filename) {
 #endif
     int length;
     
-    length = fread (buf,1, chunk_size,inFile);
+    length = VSFileSystem::vs_read (buf,1, chunk_size,inFile);
     //length = inFile.gcount();
 #ifdef BIDBG
-    XML_ParseBuffer(parser, length, feof(inFile));
+    XML_ParseBuffer(parser, length, VSFileSystem::vs_feof(inFile));
 #else
-    XML_Parse (parser,buf,length,feof(inFile));
+    XML_Parse (parser,buf,length,VSFileSystem::vs_feof(inFile));
 #endif
-  } while(!feof(inFile));
-  fclose (inFile);
+  } while(!VSFileSystem::vs_feof(inFile));
+  VSFileSystem::vs_close (inFile);
+  */
   XML_ParserFree (parser);
 }

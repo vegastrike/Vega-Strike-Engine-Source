@@ -25,6 +25,9 @@
 
 #include "eventmanager.h"
 
+#include "vs_globals.h"
+#include "config_xml.h"
+#include "xml_support.h"
 
 // The Slider class controls the setting for a simple integer range.
 
@@ -183,6 +186,7 @@ void Slider::draw(void)
 }
 
 bool Slider::processMouseDown(const InputEvent& event) {
+	static int zoominc = XMLSupport::parse_int (vs_config->getVariable("general","wheel_increment_lines","3"));
     if(event.code == LEFT_MOUSE_BUTTON && m_thumbLength != NO_THUMB_LENGTH && hitTest(event.loc)) {
         if(m_vertical) {
             if(event.loc.y < m_thumbRect.origin.y) {
@@ -210,7 +214,15 @@ bool Slider::processMouseDown(const InputEvent& event) {
         // Make sure we see mouse events *first* until we get a mouse-up.
         globalEventManager().pushResponder(this);
         return true;
-    }
+    } else if (event.code == WHEELUP_MOUSE_BUTTON) {
+		if(hitTest(event.loc)) {
+			setPosition(position()-zoominc);
+		}
+	} else if (event.code == WHEELDOWN_MOUSE_BUTTON) {
+		if(hitTest(event.loc)) {
+			setPosition(position()+zoominc);
+		}
+	}
 
     return Control::processMouseDown(event);
 }

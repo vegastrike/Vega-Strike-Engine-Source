@@ -20,7 +20,7 @@ void TurretAI::Execute () {
     float tspeed, trange,tmrange;
     Unit * gun;
     if (parent->GetNumMounts()==0){
-      speed=1;range=1;//not much
+      speed=1;range=1;mrange=1;//not much
     }
     for (un_iter i=parent->getSubUnits();(gun=*i)!=NULL;++i) {
       (*i)->getAverageGunSpeed(tspeed,trange,tmrange);

@@ -10,6 +10,7 @@
 #include <vector>
 #include "al_globals.h"
 #include "vs_globals.h"
+#include "vsfilesystem.h"
 using std::vector;
 struct Listener {
   Vector pos;
@@ -54,7 +55,7 @@ char AUDQueryAudability (const int sound, const Vector &pos, const Vector & vel,
     if (sounds[target1].buffer==sounds[sound].buffer) {
       if (t.Dot(t)>mag) {	
 	ALuint tmpsrc = sounds[target1].source;
-	//	fprintf (stderr,"stole sound %d %f\n", target1,mag);
+	//	VSFileSystem::vs_fprintf (stderr,"stole sound %d %f\n", target1,mag);
 	sounds[target1].source = sounds[sound].source;
 	sounds[sound].source = tmpsrc;
 	playingbuffers[hashed][target].soundname = sound;
@@ -64,7 +65,7 @@ char AUDQueryAudability (const int sound, const Vector &pos, const Vector & vel,
 	    break;
 	  }
 	}else {
-	  //fprintf (stderr,"stole %d",tmpsrc);
+	  //VSFileSystem::vs_fprintf (stderr,"stole %d",tmpsrc);
 	  return 2;
 	}
       }
@@ -83,11 +84,11 @@ void AUDAddWatchedPlayed (const int sound, const Vector &pos) {
   if (sounds[sound].buffer!=(ALuint)0) {
     int h= hash_sound(sounds[sound].buffer);
     if (sounds[sound].source==0) {
-      fprintf (stderr,"adding null sound"); 
+      VSFileSystem::vs_fprintf (stderr,"adding null sound"); 
     }
     playingbuffers[h].push_back (ApproxSound());
     playingbuffers[h].back().soundname = sound;
-    //    fprintf (stderr,"pushingback %f",(pos-mylistener.pos).Magnitude());
+    //    VSFileSystem::vs_fprintf (stderr,"pushingback %f",(pos-mylistener.pos).Magnitude());
   }
 #endif
 }

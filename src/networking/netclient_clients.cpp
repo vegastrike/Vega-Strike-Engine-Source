@@ -1,7 +1,9 @@
+#include "lin_time.h"
 #include "networking/lowlevel/vsnet_debug.h"
 #include "networking/client.h"
 #include "networking/netclient.h"
 #include "networking/lowlevel/netbuffer.h"
+#include "networking/zonemgr.h"
 #include "networking/lowlevel/packet.h"
 #include "networking/lowlevel/vsnet_clientstate.h"
 #include "cmd/unit_generic.h"
@@ -9,6 +11,8 @@
 #include "cmd/unit_factory.h"
 #include "networking/prediction.h"
 #include "networking/fileutil.h"
+#include "networking/lowlevel/vsnet_notify.h"
+#include "networking/lowlevel/vsnet_dloadmgr.h"
 
 /*************************************************************/
 /**** Adds an entering client in the actual zone          ****/
@@ -16,7 +20,13 @@
 
 void	NetClient::addClient( const Packet* packet )
 {
-	ObjSerial cltserial = packet->getSerial();
+	//Packet ptmp = packet;
+	NetBuffer netbuf( packet->getData(), packet->getDataLength());
+	this->AddClientObject( netbuf, packet->getSerial());
+}
+
+void	NetClient::AddClientObject( NetBuffer & netbuf, ObjSerial cltserial)
+{
 	ClientPtr clt;
 	// NOTE : in splitscreen mode we may receive info about us so we comment the following test
 	/*
@@ -40,21 +50,15 @@ void	NetClient::addClient( const Packet* packet )
 		nbclients++;
 		COUT<<"New client n°"<<cltserial<<" - now "<<nbclients<<" clients in system"<<endl;
 	}
-
-
-	//Packet ptmp = packet;
-	NetBuffer netbuf( packet->getData(), packet->getDataLength());
 	// Should receive the name
 	clt->name = netbuf.getString();
+	string savestr = netbuf.getString();
+	string xmlstr = netbuf.getString();
 	// If not a local player, add it in our array
 	if( !isLocalSerial( cltserial))
 	{
 		// The save buffer and XML buffer come after the ClientState
 		//COUT<<"GETTING SAVES FOR NEW CLIENT"<<endl;
-		vector<string> saves;
-		saves.push_back( netbuf.getString());
-		saves.push_back( netbuf.getString());
-		//saves = FileUtil::GetSaveFromBuffer( packet->getData()+sizeof( ClientState));
 		//COUT<<"SAVE="<<saves[0].length()<<" bytes - XML="<<saves[1].length()<<" bytes"<<endl;
 
 		// We will ignore - starsys as if a client enters he is in the same system
@@ -66,10 +70,9 @@ void	NetClient::addClient( const Packet* packet )
 		bool update=true;
 		vector<string> savedships;
 		// Parse the save buffer
-		save.ParseSaveGame( "", starsys, "", pos, update, creds, savedships, 0, saves[0], false);
+		save.ParseSaveGame( "", starsys, "", pos, update, creds, savedships, 0, savestr, false);
 
-		// WE DON'T STORE FACTION IN SAVE YET
-		string PLAYER_FACTION_STRING( "privateer");
+		string PLAYER_FACTION_STRING( save.GetPlayerFaction());
 
 		// CREATES THE UNIT... GET SAVE AND XML FROM SERVER
 		// Use the first ship if there are more than one -> we don't handle multiple ships for now
@@ -81,7 +84,7 @@ void	NetClient::addClient( const Packet* packet )
 							 FactionUtil::GetFaction( PLAYER_FACTION_STRING.c_str()),
 							 string(""),
 							 Flightgroup::newFlightgroup ( callsign,savedships[0],PLAYER_FACTION_STRING,"default",1,1,"","",mission),
-							 0, &saves[1]);
+							 0, &xmlstr);
 		clt->game_unit.SetUnit( un);
 		// Set all weapons to inactive
 		vector <Mount>
@@ -105,6 +108,48 @@ void	NetClient::addClient( const Packet* packet )
 	{
 		clt->game_unit.SetUnit( getNetworkUnit( cltserial));
 		assert( clt->game_unit.GetUnit() != NULL);
+	}
+}
+
+/*************************************************************/
+/**** Ask the server for the entering zone info           ****/
+/*************************************************************/
+
+void	NetClient::downloadZoneInfo()
+{
+	char tbuf[1024];
+	sprintf( tbuf, "%d", this->zone);
+    COUT << __PRETTY_FUNCTION__ << " zone: " << tbuf << endl;
+	VsnetDownload::Client::Buffer buf( this->clt_sock, tbuf, VSFileSystem::ZoneBuffer);
+	_downloadManagerClient->addItem( &buf);
+	while( !buf.done())
+	{
+		checkMsg( NULL);
+		micro_sleep( 40000);
+	}
+	const char * tmp = (char *) buf.getBuffer().get();
+	NetBuffer netbuf( tmp, buf.getSize());
+	this->AddObjects( netbuf);
+}
+
+void	NetClient::AddObjects( NetBuffer & netbuf)
+{
+	char subcmd;
+
+	// Loop until the end of the buffer
+	while( (subcmd=netbuf.getChar())!=ZoneMgr::End)
+	{
+		switch( subcmd)
+		{
+			case ZoneMgr::AddClient :
+			{
+				ObjSerial serial = netbuf.getSerial();
+				this->AddClientObject( netbuf, serial);
+			}
+			break;
+			default :
+				cerr<<"WARNING : Unknown sub command in AddObjects"<<endl;
+		}
 	}
 }
 
@@ -160,45 +205,45 @@ void	NetClient::sendPosition( const ClientState* cs )
 /**** Update another client position                       ****/
 /**************************************************************/
 
-void	NetClient::receivePosition( const Packet* packet )
+void NetClient::receivePositions( unsigned int numUnits, unsigned int int_ts, NetBuffer& netbuf, double delta_t )
 {
-	// When receiving a snapshot, packet serial is considered as the number of client updates
-	ClientState		cs;
-	const char*		databuf;
-	ObjSerial   	sernum=0;
-	int				nbclts=0, i, j;
-	unsigned char	cmd;
-	ClientPtr		clt;
-	Unit *			un = NULL;
-	bool			localplayer = false;
-
-	nbclts = packet->getSerial();
+	this->elapsed_since_packet = 0;
 
 	// Computes deltatime only when receiving a snapshot since we interpolate positions between 2 snapshots
 	// We don't want to consider a late snapshot
-	unsigned int int_ts = packet->getTimestamp();
 	if( latest_timestamp < int_ts)
 	{
-	    old_timestamp     = latest_timestamp;
-	    latest_timestamp  = int_ts;
-	    deltatime         = latest_timestamp - old_timestamp;
-		cerr<<"DELTATIME = "<<deltatime<<" --------------------------------"<<endl;
+        COUT << "   *** SNAPSHOT is not late - evaluating" << endl;
 
-		COUT << "Received update for " << nbclts << " clients - LENGTH="
-		     << packet->getDataLength() << endl;
-		databuf = packet->getData();
-		NetBuffer netbuf( packet->getData(), packet->getDataLength());
+	    this->old_timestamp    = this->latest_timestamp;
+	    this->latest_timestamp = int_ts;
+		this->deltatime        = delta_t;
 
 		// Loop throught received snapshot
-		for( i=0, j=0; (i+j)<nbclts;)
+        int i = 0;
+        int j = 0;
+		while( (i+j)<numUnits )
 		{
-			// Get the command from buffer
-			cmd = netbuf.getChar();
+            ObjSerial       sernum = 0;
+            unsigned char   cmd;
+	        bool			localplayer = false;
+	        ClientPtr		clt;
+	        Unit *			un = NULL;
+
+			// Get the ZoneMgr::SnapshotSubCommand from buffer
+			cmd    = netbuf.getChar();
+
 			// Get the serial number of current element
-			sernum = netbuf.getSerial();
-			// Test if it is a client or a unit
-			if( !(clt = Clients.get(sernum)))
+			sernum = netbuf.getShort();
+
+			// First test if it is us
+			if( sernum == this->serial)
+            {
+				localplayer = true;
+            }
+			else if( !(clt = Clients.get(sernum)))
 			{
+			    // Test if it is a client or a unit
 				if( !(un = UniverseUtil::GetUnitFromSerial( sernum)))
 				{
 					COUT<<"WARNING : No client, no unit found for this serial ("<<sernum<<")"<<endl;
@@ -206,54 +251,83 @@ void	NetClient::receivePosition( const Packet* packet )
 			}
 			// Test if local player
 			else
+            {
 				localplayer = _Universe->isPlayerStarship( Clients.get(sernum)->game_unit.GetUnit());
+            }
 
-			if( clt && !localplayer || un)
+			if( cmd == ZoneMgr::FullUpdate )
 			{
-				if( clt)
-					un = clt->game_unit.GetUnit();
-	
-				if( cmd == CMD_FULLUPDATE)
-				{
-					// Do what needed with update
-					COUT<<"Received FULLSTATE ";
-					// Tell we received the ClientState so we can convert byte order from network to host
-					//cs.display();
-					cs = netbuf.getClientState();
-					cs.display();
+                COUT << "   *** SubCommand is FullUpdate ser=" << sernum << endl;
 
+	            ClientState	cs;
+
+				// Do what needed with update
+				COUT<<"Received ZoneMgr::FullUpdate ";
+				// Tell we received the ClientState so we can convert byte order from network to host
+				cs = netbuf.getClientState();
+                COUT << "   *** cs=" << cs << endl;
+
+				if( (!localplayer) && (clt || un))
+				{
+					cs.display();
+					if( clt)
+						un = clt->game_unit.GetUnit();
+					// Get our "semi-ping" from server
+					// We received delay in ms so we convert it into seconds
 					// Backup old state
 					un->BackupState();
 					// Update concerned client with predicted position directly in network client list
 					un->curr_physical_state.position = cs.getPosition();
 					un->curr_physical_state.orientation = cs.getOrientation();
-					prediction->InitInterpolation( clt);
-					un->curr_physical_state = prediction->Interpolate( clt);
+                    assert( prediction );
+					prediction->InitInterpolation( un, this->deltatime);
+					un->curr_physical_state = prediction->Interpolate( un, this->deltatime);
 					un->Velocity = cs.getVelocity();
 					QVector predpos = un->curr_physical_state.position;
 					cerr<<"Predicted location : x="<<predpos.i<<",y="<<predpos.j<<",z="<<predpos.k<<endl;
-
-					i++;
 				}
-				else if( cmd == CMD_POSUPDATE)
+				else if( localplayer)
+                {
+					cerr<<" IGNORING LOCAL PLAYER"<<endl;
+                }
+				i++;
+			}
+			else if( cmd == ZoneMgr::PosUpdate )
+			{
+                COUT << "   *** SubCommand is PosUpdate ser=" << sernum << endl;
+				QVector pos = netbuf.getQVector();
+                COUT << "   *** pos=" << pos.i << "," << pos.j << "," << pos.k << endl;
+				if( (!localplayer) && (clt || un))
 				{
-					// Get the serial #
-					sernum = netbuf.getShort();
-					clt = Clients.get(sernum);
-					//COUT<<"Received POSUPDATE for serial "<<sernum<<" -> ";
-
+					if( clt)
+						un = clt->game_unit.GetUnit();
 					// Backup old state
 					un->BackupState();
 					// Set the new received position in curr_physical_state
-					un->curr_physical_state.position = netbuf.getQVector();
-					prediction->InitInterpolation( clt);
-					un->curr_physical_state.position = prediction->InterpolatePosition( clt);
+					un->curr_physical_state.position = pos;
+                    assert( prediction );
+					prediction->InitInterpolation( un, this->deltatime);
+					un->curr_physical_state.position = prediction->InterpolatePosition( un, this->deltatime);
 					//predict( sernum);
-					j++;
 				}
+				else if( localplayer)
+                {
+					cerr<<" IGNORING LOCAL PLAYER"<<endl;
+                }
+				j++;
 			}
+            else
+            {
+                COUT << "   *** SubCommand is neither FullUpdate nor PosUpdate" << endl
+                     << "   *** TERMINATING ***" << endl;
+                VSExit( 1 );
+            }
 		}
 	}
+    else
+    {
+        COUT << "   *** SNAPSHOT is late - ignoring" << endl;
+    }
 }
 
 /*************************************************************/
@@ -265,8 +339,6 @@ void	NetClient::inGame()
 	Packet    packet2;
 	NetBuffer netbuf;
     char      flags = 0;
-    if( canCompress() ) flags |= CMD_CAN_COMPRESS;
-    netbuf.addChar( flags );
 
 	//ClientState cs( this->serial, this->game_unit.GetUnit()->curr_physical_state, this->game_unit.GetUnit()->Velocity, Vector(0,0,0), 0);
 	// HERE SEND INITIAL CLIENTSTATE !! NOT NEEDED ANYMORE -> THE SERVER ALREADY KNOWS
@@ -276,8 +348,7 @@ void	NetClient::inGame()
                   SENDRELIABLE, NULL, this->clt_sock,
                   __FILE__, PSEUDO__LINE__(1307) );
 	this->game_unit.GetUnit()->SetSerial( this->serial);
-	COUT << "Sending ingame with serial n°" << this->serial
-         << " " << (canCompress() ? "(compress)" : "(no compress)") <<endl;
+	COUT << "Sending ingame with serial n°" << this->serial << endl;
 	this->ingame = true;
 	Unit * un = this->game_unit.GetUnit();
 	cerr<<"STARTING LOCATION : x="<<un->Position().i<<",y="<<un->Position().j<<",z="<<un->Position().k<<endl;
@@ -289,13 +360,15 @@ void	NetClient::inGame()
 
 void NetClient::sendAlive()
 {
-    if( clt_sock.isTcp() == false )
+    /* WE NEED PING PACKET EVEN IN TCP MODE : THAT ALLOWS US TO COMPUTE A "SEMI-PING" TIME BETWEEN SERVER AND CLIENTS
+	if( clt_sock.isTcp() == false )
     {
+	*/
         Packet	p;
         p.send( CMD_PING, this->game_unit.GetUnit()->GetSerial(),
                 (char *)NULL, 0,
                 SENDANDFORGET, NULL, this->clt_sock,
-                __FILE__, PSEUDO__LINE__(1325) );
-    }
+                __FILE__, PSEUDO__LINE__(305) );
+    //}
 }
 

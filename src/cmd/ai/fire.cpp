@@ -202,7 +202,7 @@ struct TurretBin{
 		}
       }
       if (!foundfinal) {
-	for (char f=0;f<2&&!foundfinal;f++) {
+	for (unsigned int f=0;f<2&&!foundfinal;f++) {
 	for (unsigned int i=0;i<lotsize[f];i++) {
 	  const int index =(count+i)%lotsize[f];
 	  if (listOfTargets[f][index].range<uniter->gunrange) {
@@ -257,7 +257,7 @@ void FireAt::ChooseTargets (int numtargs, bool force) {
   lastchangedtarg=0;
   if (fg) {
     if (!fg->directive.empty()) {
-      if ((*fg->directive.begin())==toupper (*fg->directive.begin())) {
+      if (curtarg!=NULL&&(*fg->directive.begin())==toupper (*fg->directive.begin())) {
 		  return;//not 	allowed to switch targets
       }
     }
@@ -346,7 +346,7 @@ bool FireAt::ShouldFire(Unit * targ, bool &missilelock) {
       return false;
         static int test=0;
         if (test++%1000==1)
-            fprintf (stderr,"lost target");
+            VSFileSystem::vs_fprintf (stderr,"lost target");
     }
   float angle = parent->cosAngleTo (targ, dist,parent->GetComputerData().itts?gunspeed:FLT_MAX,gunrange);
   missilelock=false;
@@ -360,7 +360,7 @@ bool FireAt::ShouldFire(Unit * targ, bool &missilelock) {
 
 FireAt::~FireAt() {
 #ifdef ORDERDEBUG
-  fprintf (stderr,"fire%x\n",this);
+  VSFileSystem::vs_fprintf (stderr,"fire%x\n",this);
   fflush (stderr);
 #endif
 
@@ -400,7 +400,7 @@ bool FireAt::isJumpablePlanet(Unit * targ) {
 }
 using std::string;
 void FireAt::PossiblySwitchTarget(bool unused) {
-  static float targetswitchprobability = XMLSupport::parse_float (vs_config->getVariable ("AI","Targetting","TargetSwitchProbability",".01"));
+//  static float targetswitchprobability = XMLSupport::parse_float (vs_config->getVariable ("AI","Targetting","TargetSwitchProbability",".01"));
   static float targettime = XMLSupport::parse_float (vs_config->getVariable ("AI","Targetting","TimeUntilSwitch","20"));
   if (lastchangedtarg+targettime<0) {
 	  bool ct= true;
@@ -426,13 +426,13 @@ void FireAt::Execute () {
   done = tmp;
   Unit * targ;
   if (parent->isUnit()==UNITPTR) {
-    static float cont_update_time = XMLSupport::parse_float (vs_config->getVariable ("AI","AI","ContrabandUpdateTime","1"));
+    static float cont_update_time = XMLSupport::parse_float (vs_config->getVariable ("AI","ContrabandUpdateTime","1"));
     if (rand()<RAND_MAX*SIMULATION_ATOM/cont_update_time) {
       UpdateContrabandSearch();
     }
-    static float cont_initiate_time = XMLSupport::parse_float (vs_config->getVariable ("AI","AI","CommInitiateTime","300"));
+    static float cont_initiate_time = XMLSupport::parse_float (vs_config->getVariable ("AI","CommInitiateTime","300"));
     if ((float)rand()<((float)RAND_MAX*(SIMULATION_ATOM/cont_initiate_time))) {
-      static float contraband_initiate_time = XMLSupport::parse_float (vs_config->getVariable ("AI","AI","ContrabandInitiateTime","3000"));
+      static float contraband_initiate_time = XMLSupport::parse_float (vs_config->getVariable ("AI","ContrabandInitiateTime","3000"));
       unsigned int modulo = ((unsigned int)(contraband_initiate_time/cont_initiate_time));
       if (modulo<1)
 	modulo=1;

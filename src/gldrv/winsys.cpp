@@ -24,6 +24,7 @@
 #include "config_xml.h"
 #include "vs_globals.h"
 #include <assert.h>
+// #include <sys/signal.h>
 /* Windowing System Abstraction Layer */
 /* Abstracts creation of windows, handling of events, etc. */
 
@@ -202,17 +203,43 @@ static void setup_sdl_video_mode()
     }
 
     bpp = gl_options.color_depth;
-
+    if (bpp==16) {
+      SDL_GL_SetAttribute( SDL_GL_RED_SIZE, 5 );
+      SDL_GL_SetAttribute( SDL_GL_GREEN_SIZE, 5 );
+      SDL_GL_SetAttribute( SDL_GL_BLUE_SIZE, 5 );
+      SDL_GL_SetAttribute( SDL_GL_DEPTH_SIZE, 24 );
+      SDL_GL_SetAttribute( SDL_GL_DOUBLEBUFFER, 1 );
+    }else {
+      SDL_GL_SetAttribute( SDL_GL_RED_SIZE, 8 );
+      SDL_GL_SetAttribute( SDL_GL_GREEN_SIZE, 8 );
+      SDL_GL_SetAttribute( SDL_GL_BLUE_SIZE, 8 );
+      SDL_GL_SetAttribute( SDL_GL_DEPTH_SIZE, 24 );
+      SDL_GL_SetAttribute( SDL_GL_DOUBLEBUFFER, 1 );      
+    }
     width = g_game.x_resolution;
     height =g_game.y_resolution  ;
 
     if ( ( screen = SDL_SetVideoMode( width, height, bpp, video_flags ) ) == 
 	 NULL ) 
     {
-	fprintf( stderr, "Couldn't initialize video: %s", 
+	VSFileSystem::vs_fprintf( stderr, "Couldn't initialize video: %s", 
 		 SDL_GetError() );
-	exit(1);
+        SDL_GL_SetAttribute( SDL_GL_DEPTH_SIZE, 32 );      
+        if ( ( screen = SDL_SetVideoMode( width, height, bpp, video_flags|SDL_ANYFORMAT ) ) == 
+             NULL )
+        {          
+          SDL_GL_SetAttribute( SDL_GL_DEPTH_SIZE, 16 );      
+          if ( ( screen = SDL_SetVideoMode( width, height, bpp, video_flags|SDL_ANYFORMAT ) ) == 
+               NULL )
+          {          
+            
+            VSFileSystem::vs_fprintf( stderr, "Couldn't initialize video: %s", 
+                                      SDL_GetError() );
+            exit(1);
+          }
+        }
     }
+    printf ("Setting Screen to w %d h %d and pitch of %d and %d bpp %d bytes per pix mode\n",screen->w,screen->h,screen->pitch, screen->format->BitsPerPixel, screen->format->BytesPerPixel);
 }
 
 
@@ -232,14 +259,15 @@ void winsys_init( int *argc, char **argv, char *window_title,
     g_game.x_resolution = XMLSupport::parse_int (vs_config->getVariable ("graphics","x_resolution","1024"));     
     g_game.y_resolution = XMLSupport::parse_int (vs_config->getVariable ("graphics","y_resolution","768"));     
     gl_options.fullscreen = XMLSupport::parse_bool (vs_config->getVariable ("graphics","fullscreen","false"));
-    gl_options.color_depth = XMLSupport::parse_int (vs_config->getVariable ("graphics","colordepth","16"));
+    gl_options.color_depth = XMLSupport::parse_int (vs_config->getVariable ("graphics","colordepth","32"));
     /*
      * Initialize SDL
      */
     if ( SDL_Init( sdl_flags ) < 0 ) {
-	fprintf( stderr, "Couldn't initialize SDL: %s", SDL_GetError() );
+	VSFileSystem::vs_fprintf( stderr, "Couldn't initialize SDL: %s", SDL_GetError() );
 	exit(1);
     }
+    // signal( SIGSEGV, SIG_DFL );
 #if 1
 	{
 	SDL_Surface *tempsurf=SDL_LoadBMP(icon_title);
@@ -262,7 +290,7 @@ void winsys_init( int *argc, char **argv, char *window_title,
     setup_sdl_video_mode();
 
     SDL_WM_SetCaption( window_title, icon_title );
-
+    glutInit(argc,argv);
 }
 
 
@@ -435,11 +463,11 @@ void winsys_atexit( winsys_atexit_func_t func )
       static bool called = false;
 
   if ( called != false)
-     fprintf (stderr,"winsys_atexit called twice" );
+     VSFileSystem::vs_fprintf (stderr,"winsys_atexit called twice" );
 
   called = true;
   // atexit_func = func;
-  atexit (func);
+  //atexit (func);
 }
 
 
@@ -651,7 +679,7 @@ void winsys_init( int *argc, char **argv, char *window_title,
     g_game.x_resolution = XMLSupport::parse_int (vs_config->getVariable ("graphics","x_resolution","1024"));     
     g_game.y_resolution = XMLSupport::parse_int (vs_config->getVariable ("graphics","y_resolution","768"));     
     gl_options.fullscreen = XMLSupport::parse_bool (vs_config->getVariable ("graphics","fullscreen","false"));
-    gl_options.color_depth = XMLSupport::parse_int (vs_config->getVariable ("graphics","colordepth","16"));
+    gl_options.color_depth = XMLSupport::parse_int (vs_config->getVariable ("graphics","colordepth","32"));
     glutInit( argc, argv );
 
 #ifdef USE_STENCIL_BUFFER
@@ -674,7 +702,7 @@ void winsys_init( int *argc, char **argv, char *window_title,
 	glutWindow = glutCreateWindow(window_title);
 
 	if ( glutWindow == 0 ) {
-	    (void) fprintf(stderr, "Couldn't create a window.\n");
+	    (void) VSFileSystem::vs_fprintf(stderr, "Couldn't create a window.\n");
 	    exit(1);
 	}
     }
@@ -766,11 +794,11 @@ void winsys_atexit( winsys_atexit_func_t func )
     static bool called = false;
 
     if (called)
-      fprintf (stderr,"winsys_atexit called twice\n" );
+      VSFileSystem::vs_fprintf (stderr,"winsys_atexit called twice\n" );
 
     called = true;
 
-    atexit(func);
+    //atexit(func);
 }
 
 

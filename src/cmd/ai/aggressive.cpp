@@ -139,7 +139,7 @@ AggressiveAI::AggressiveAI (const char * filename, const char * interruptname, U
 }
 void AggressiveAI::SetParent (Unit * parent1) {
   FireAt::SetParent(parent1);
-  unsigned int which = last_directive.find("|");
+  string::size_type which = last_directive.find("|");
   string filename (string("default.agg.xml"));
   string interruptname (string("default.int.xml"));
   if (which!=string::npos) {
@@ -199,19 +199,19 @@ bool AggressiveAI::ProcessLogicItem (const AIEvents::AIEvresult &item) {
     value = parent->GetComputerData().threatlevel;
     break;
   case FSHIELD:
-    value = parent->FShieldData();
+    value = parent->graphicOptions.InWarp?1:parent->FShieldData();
     break;
   case BSHIELD:
-    value = parent->BShieldData();
+    value = parent->graphicOptions.InWarp?1:parent->BShieldData();
     break;
   case HULL:
     value = parent->GetHull();
     break;
   case LSHIELD:
-    value = parent->LShieldData();
+    value = parent->graphicOptions.InWarp?1:parent->LShieldData();
     break;
   case RSHIELD:
-    value = parent->RShieldData();
+    value = parent->graphicOptions.InWarp?1:parent->RShieldData();
     break;
   case FACING:
     //    return parent->getAIState()->queryType (Order::FACING)==NULL;
@@ -312,7 +312,10 @@ bool AggressiveAI::ProcessCurrentFgDirective(Flightgroup * fg) {
 	eraseType (Order::MOVEMENT);
 	Unit * targ = parent->Target();
 	if (targ) {
-	  if (!isJumpablePlanet (targ)) {
+          bool attacking=fg->directive.length()>0;
+          if (attacking)
+            attacking=tolower(fg->directive[0])=='a';
+	  if ((!isJumpablePlanet (targ))&&attacking==false) {
 	    parent->Target(NULL);
 	  }
 	}
@@ -325,7 +328,7 @@ bool AggressiveAI::ProcessCurrentFgDirective(Flightgroup * fg) {
       }
     }
     if (obedient) {
-      if (fg->directive==string("a")||fg->directive==string("A")) {
+      if (fg->directive.find("a")!=string::npos||fg->directive.find("A")!=string::npos) {
 	Unit * targ = fg->leader.GetUnit();
 	targ = targ!=NULL?targ->Target():NULL;
 	if (targ) {
@@ -345,7 +348,7 @@ bool AggressiveAI::ProcessCurrentFgDirective(Flightgroup * fg) {
 	    }
 	  }
 	}
-      }else if (fg->directive==string("f")||fg->directive==string("F")) {
+      }else if (fg->directive.find("f")!=string::npos||fg->directive.find("F")!=string::npos) {
 	if (leader!=NULL) {
 	  if (leader->InCorrectStarSystem(_Universe->activeStarSystem())) {
 	    retval=true;
@@ -399,14 +402,14 @@ bool AggressiveAI::ProcessCurrentFgDirective(Flightgroup * fg) {
 	    suborders[i]->AttachSelfOrder (leader);
 	  }
 	}
-      }else if (fg->directive==string("h")||fg->directive==string("H")) {
-	//	fprintf (stderr,"he wnats to help out");
+      }else if (fg->directive.find("h")!=string::npos||fg->directive.find("H")!=string::npos) {
+	//	VSFileSystem::vs_fprintf (stderr,"he wnats to help out");
 	if (fg->directive!=last_directive&&leader) {
 	  if (leader->InCorrectStarSystem(_Universe->activeStarSystem())) {
-	    //fprintf (stderr,"%s he wnats to help out and hasn't died\n", parent->name.c_str());
+	    //VSFileSystem::vs_fprintf (stderr,"%s he wnats to help out and hasn't died\n", parent->name.c_str());
 	    Unit * th=NULL;
 	    if ((th=leader->Threat())) {
-	      //fprintf (stderr,"he wnats to help out and he has a threat\n");
+	      //VSFileSystem::vs_fprintf (stderr,"he wnats to help out and he has a threat\n");
 
 	      CommunicationMessage c(parent,leader,NULL,0);
 	      if (parent->InRange(th,true,false)) {
@@ -425,7 +428,7 @@ bool AggressiveAI::ProcessCurrentFgDirective(Flightgroup * fg) {
 	      //Unit * un=NULL;
 	      th= GetThreat(parent,leader);
 	      CommunicationMessage c(parent,leader,NULL,0);
-	      //fprintf (stderr,"he wnats to help out against threat %d",th);
+	      //VSFileSystem::vs_fprintf (stderr,"he wnats to help out against threat %d",th);
 	      if (th) {
 		if (parent->InRange (th,true,false)) {
 		  c.SetCurrentState (c.fsm->GetYesNode(),NULL,0);
@@ -434,7 +437,7 @@ bool AggressiveAI::ProcessCurrentFgDirective(Flightgroup * fg) {
 		}else {
 		  c.SetCurrentState(c.fsm->GetNoNode(),NULL,0);
 		}
-		//fprintf (stderr,"Helping out kill: %s",th->name.c_str());
+		//VSFileSystem::vs_fprintf (stderr,"Helping out kill: %s",th->name.c_str());
 	      }else {
 		c.SetCurrentState (c.fsm->GetNoNode(),NULL,0);
 	      }
@@ -469,7 +472,7 @@ void AggressiveAI::ReCommandWing(Flightgroup * fg) {
 	    if (parent->Threat()&&(parent->FShieldData()<.2||parent->RShieldData()<.2)){
 	      fg->directive = string("h");
 	      LeadMe (parent,"h","I need help here!");
-	      fprintf (stderr,"he needs help %s",parent->name.c_str());
+	      VSFileSystem::vs_fprintf (stderr,"he needs help %s",parent->name.c_str());
 	    }else {
 	      if (lead->getFgSubnumber()>=parent->getFgSubnumber()) {	
 		fg->directive = string("b");
@@ -503,9 +506,9 @@ void AggressiveAI::Execute () {
   Flightgroup * fg=parent->getFlightgroup();
   //ReCommandWing(fg);
   FireAt::Execute();
-  if (!ProcessCurrentFgDirective (fg)) {
   Unit * target = parent->Target();
   bool isjumpable = target?(!target->GetDestinations().empty()):false;
+  if (!ProcessCurrentFgDirective (fg)) {
   if (isjumpable) {
   if (parent->GetJumpStatus().drive<0) {
     parent->ActivateJumpDrive(0);
@@ -514,12 +517,12 @@ void AggressiveAI::Execute () {
       if (AIjumpCheat) {
 		  static int i=0;
 		  if (!i) {
-			  fprintf (stderr,"FIXME: warning ship not equipped to jump");
+			  VSFileSystem::vs_fprintf (stderr,"FIXME: warning ship not equipped to jump");
 			  i=1;
 		  }
 		  parent->jump.drive=-1;
       }else {
-	//	fprintf (stderr,"warning ship not equipped to jump");
+	//	VSFileSystem::vs_fprintf (stderr,"warning ship not equipped to jump");
 	parent->Target(NULL);
       }
     }else if (parent->GetJumpStatus().drive<0){
@@ -577,7 +580,7 @@ void AggressiveAI::Execute () {
   }
   }
 #ifdef AGGDEBUG
-  fprintf (stderr,"endagg");
+  VSFileSystem::vs_fprintf (stderr,"endagg");
   fflush (stderr);
 #endif    
   if (getTimeCompression()>3) {
@@ -586,6 +589,13 @@ void AggressiveAI::Execute () {
 		mag = 1/mag;
     parent->SetVelocity(parent->GetVelocity()*(mag*parent->GetComputerData().max_speed()/getTimeCompression()));
 	parent->NetLocalForce=parent->NetForce=Vector(0,0,0);
+  }
+  target = parent->Target();
+  isjumpable = target?(!target->GetDestinations().empty()):false;
+  if (!isjumpable) {
+     if (parent->GetJumpStatus().drive>=0) {
+        parent->ActivateJumpDrive(-1);
+     }     
   }
 }  
 

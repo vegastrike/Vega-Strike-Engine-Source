@@ -1,3 +1,4 @@
+#include "cmd/unit_generic.h"
 #include "ani_texture.h"
 
 #include <vector>
@@ -5,9 +6,8 @@
 #include <stdlib.h>
 #include "lin_time.h"
 #include "vegastrike.h"
-#include "vs_path.h"
+#include "vsfilesystem.h"
 #include "vs_globals.h"
-//extern Hashtable<string, Texture,char [127]> texHashTable;
 
 static vector <AnimatedTexture *> myvec;
 
@@ -43,28 +43,30 @@ void AnimatedTexture::setTime (double tim) {
 	cumtime=tim;
 	active = ((unsigned int)(cumtime/timeperframe))%numframes;
 }
+using namespace VSFileSystem;
+
 AnimatedTexture::AnimatedTexture (const char *file,int stage, enum FILTER imm,bool detailtex){
   AniInit();
-  FILE * fp = fopen (file,"r");
-  bool setdir=false;
-  if (!fp) {
-	string str(datadir+DELIM+string("animations")+DELIM+string(file)+DELIM);
-    vssetdir (str.c_str());
-    fp = fopen (file, "r");
+  VSFile f;
+  VSError err = f.OpenReadOnly( file, AnimFile);
+  //bool setdir=false;
+  if (err<=Ok) {
     float width,height;
-    if (fp) {
-      fscanf (fp, "%f %f", &width, &height);//it's actually an animation in global animation shares
-    }
-    setdir=true;
+    f.Fscanf("%f %f", &width, &height);//it's actually an animation in global animation shares
+    //setdir=true;
     
-}
-  if (fp){
-    Load (fp,stage,imm,detailtex);
-    fclose (fp);
   }
+  if (err<=Ok){
+    Load (f,stage,imm,detailtex);
+    f.Close();
+  }else {
+    loadSuccess=false;
+  }
+/*
 if (setdir) {
-    vsresetdir();
+    VSFileSystem::vs_resetdir();
 }
+*/
 }
 void AnimatedTexture::AniInit() {
   numframes=1;
@@ -75,10 +77,15 @@ void AnimatedTexture::AniInit() {
   active=0;
   original = NULL;
 }
-AnimatedTexture::AnimatedTexture (FILE * fp, int stage, enum FILTER imm, bool detailtex){
+//AnimatedTexture::AnimatedTexture (FILE * fp, int stage, enum FILTER imm, bool detailtex){
+//  AniInit();
+//  if (fp)
+//    Load (fp,stage,imm,detailtex);
+//}
+
+AnimatedTexture::AnimatedTexture (VSFileSystem::VSFile &fp, int stage, enum FILTER imm, bool detailtex){
   AniInit();
-  if (fp)
-    Load (fp,stage,imm,detailtex);
+  Load (fp,stage,imm,detailtex);
 }
 
 Texture *AnimatedTexture::Original(){
@@ -130,6 +137,7 @@ void AnimatedTexture::Reset () {
   active=0;
   physicsactive = numframes*timeperframe;
 }
+/*
 void AnimatedTexture::Load( char * buffer, int length, int nframe, enum FILTER ismipmapped,bool detailtex)
 {
 	myvec.push_back (this);
@@ -160,10 +168,11 @@ void AnimatedTexture::Load( char * buffer, int length, int nframe, enum FILTER i
   }
   original = NULL;
 }
+*/
 
-void AnimatedTexture::Load(FILE * fp, int stage, enum FILTER ismipmapped, bool detailtex) {
+void AnimatedTexture::Load(VSFileSystem::VSFile & f, int stage, enum FILTER ismipmapped, bool detailtex) {
   myvec.push_back (this);
-  fscanf (fp,"%d %f",&numframes,&timeperframe);
+  f.Fscanf ("%d %f",&numframes,&timeperframe);
   cumtime=0;
   Reset();
 
@@ -182,8 +191,8 @@ void AnimatedTexture::Load(FILE * fp, int stage, enum FILTER ismipmapped, bool d
 
   for (;i<numframes;i++) {
     int numgets=0;
-    while (numgets<=0&&!feof (fp)) {
-		if (fgets (temp,511,fp)) {
+    while (numgets<=0&&!f.Eof()) {
+		if (f.ReadLine(temp,511)==Ok) {
 			temp[511]='\0';
 			file[0]='z';file[1]='\0';
 			alp[0]='z';alp[1]='\0';//windo	ws crashes on null
@@ -210,4 +219,8 @@ void AnimatedTexture::Load(FILE * fp, int stage, enum FILTER ismipmapped, bool d
     Decal[0]=dec;
   }
   original = NULL;
+  loadSuccess=true;
+}
+ bool AnimatedTexture::LoadSuccess (){
+  return loadSuccess!=false;
 }

@@ -1,0 +1,87 @@
+Goals for 0.4.2 release:
+* MUST TEST:
+** Upgrades, especially repair on milspec and known previous troublemakers
+** Fix systems to have jump points only outside the "slow-zone"
+** Fix a bit of the system generation code: so we can specify everything in the milky_way.xml
+** Sparkles (particle system)
+** Distance worth worth warping to playability?
+** check config value for insys warp_energy divisor (may need to make larger if players running out of juice - numbers not currently playbalanced - will fix balancing later - for now, set to higher value and ignore energy issues
+)
+
+*Clydesdale
+http://vegastrike.sourceforge.net/forums/viewtopic.php?t=1467&postdays=0&postorder=asc&start=0
+Apparently upgrade system doesn't quite work right and jump drive doesn't quite install right and cargo sometimes grows without bounds...
+ECM apparently causes some of these problems
+Jump drive goes away after selling it can't buy it back
+
+*Base Interface
+**Need to allow purchase of larger ammounts of ammo in one go
+
+*Map
+we should make the overall shift-m nav screen A) bigger - make it take up the full screen B) Since it's a HUD artifact, lit independent of scene - having your nav display go all dark, while it shows off the lighting, is... odd
+the circles could deal with being, at least on the galaxy view, even a bit smaller
+(12:43:37) Jack: there needs to be some way to control which names get printed so as not to clutter the entire screen with overlapping text
+(12:44:02) Jack: there should be some color cue that highlights the jumps out of the selected system
+
+*Damage
+** Fix System Damage so it happens with reasonable frequency
+
+* AI:
+** Fix AI range trigger happiness
+** Fix ITTS to use more iterations of Newton's method
+
+
+* News
+** Get formatted date back.
+----------------------------------------------------------------------------
+
+Goals for 'Sometime over the rainbow'
+* File loading: 
+** Load balance hash-table
+** Support full expressivity of BFXM animations
+** Fix excessive seeking in File-System
+** Install time generation of all BSP files
+** Per-System (versus strict per need) ship loading optimization
+
+* Vega Strike universe information:
+** Complete Ships list.
+** Complete histories.
+
+* UI:
+** Add more cargo pics
+** Merge BaseComputer modes with NavScreen?
+** radio chatter from: to:
+
+* Resource management/organization:
+** trim redundant thrust animation images
+
+* Universe consistency
+** make pirates... more pirate-like
+** grappling hooks?
+** Area effect modeling
+** Bomb-pumped laser modeling?
+** faction standing changes -- sanity?
+
+* Graphical stuff
+** make engine lights proportional to accel, not to speed
+
+Scripting Goals:
+* Flightgroups
+** Classification (fleet, squadron, flotilla? etc. - something to differentiate between {5 plowshares} and {3 archimedes, 2 Tesla, 8 kahan, 20 schroedinger, 10 goddard, 5 watson} )
+** Flightgroups should have subsets of ships that spawn together (combined arms)
+** make news use new naming scheme
+** Fix news to report stories depending on import (fleet lead by dodo=wrong)
+	--Is this a problem with news, or the dynamic universe that calls
+	  the news?  If story is reported correctly, there's no problem.
+	  This means that there is actually a fleet led by a dodo, it's
+	  not wrong, just a bad simulation :-) --Dan.a
+	  -- By fix, we mean take advantage of the pending changes to script 
+	     side that will classify flightgroups in a reasonable way - thus, 
+	     if the lead ship is a dodo it shouldn't be a _fleet_
+
+
+
+Emacs mode info:
+Local Variables:
+mode: outline
+End:

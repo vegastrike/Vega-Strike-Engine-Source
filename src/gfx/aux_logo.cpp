@@ -19,6 +19,7 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 #include "gfx/vec.h"
+#include "cmd/unit_generic.h"
 #include "vertex.h"
 #include "aux_logo.h"
 #include "aux_texture.h"
@@ -33,7 +34,7 @@ static float offs=1;
 
 void incscl (int, KBSTATE k) {
   if (k==DOWN) {
-    fprintf (stderr,"scl:%f",scl);
+    VSFileSystem::Fprintf (stderr,"scl:%f",scl);
     scl+=.1;
   }
 
@@ -41,7 +42,7 @@ void incscl (int, KBSTATE k) {
 
 void decscl (int, KBSTATE k) {
   if (k==DOWN) {
-    fprintf (stderr,"scl:%f",scl);
+    VSFileSystem::Fprintf (stderr,"scl:%f",scl);
     scl-=.1;
   }
 
@@ -49,7 +50,7 @@ void decscl (int, KBSTATE k) {
 }
 void incoff (int, KBSTATE k) {
   if (k==DOWN) {
-    fprintf (stderr,"off:%f",offs);
+    VSFileSystem::Fprintf (stderr,"off:%f",offs);
     offs+=.1;
   }
 
@@ -58,13 +59,13 @@ void incoff (int, KBSTATE k) {
 
 void decoff (int, KBSTATE k) {
   if (k==DOWN) {
-    fprintf (stderr,"off:%f",offs);
+    VSFileSystem::Fprintf (stderr,"off:%f",offs);
     offs-=.1;
   }
 }
 #endif
 vector<Logo*> undrawn_logos;
-Hashtable<int, Logo,char[257]> Logo::decalHash;
+Hashtable<int, Logo, 257> Logo::decalHash;
 
 Logo::Logo(int numberlogos,  Vector* center,Vector* normal, float* size, float* rotation, float offset,Texture* Dec, Vector * Ref)
 {
@@ -180,7 +181,7 @@ void Logo::Draw(const Matrix &m)
 }
 
 void Logo::ProcessDrawQueue() {
-  if (!g_game.use_logos) {
+  if (!g_game.use_logos||draw_queue->empty()) {
     return;
   }
   static float offs = XMLSupport::parse_float (vs_config->getVariable ("graphics","LogoOffset","-4")); 

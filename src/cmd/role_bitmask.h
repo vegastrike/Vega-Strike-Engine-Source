@@ -14,6 +14,8 @@ namespace ROLES {
 	unsigned int maxRoleValue();
 	//getRole returns a number between 0 and 32 that's the discrete log
 	unsigned char getRole (const std::string &role);
+	std::string getRole (unsigned char role);
+
 	//returns the getRoles or'd together
 	unsigned int readBitmask (const std::string &s);
 	const std::string &getRoleEvents (unsigned char ourrole, unsigned char theirs);//get AI ervent associated with this

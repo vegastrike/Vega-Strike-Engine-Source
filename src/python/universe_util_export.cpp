@@ -1,4 +1,4 @@
-#ifdef USE_BOOST_129
+#ifndef USE_BOOST_128
 
 #include "cmd/container.h"
 #include <string>
@@ -6,7 +6,7 @@
 #include "gfx/vec.h"
 #include "cmd/unit_generic.h"
 #include "python_class.h"
-#ifdef USE_BOOST_129
+#ifndef USE_BOOST_128
 #include <boost/python.hpp>
 #else
 #include <boost/python/objects.hpp>

@@ -31,15 +31,18 @@ void Faction::ParseAllies (unsigned int thisfaction) {
 		}
 	}
 	for (i=0;i<factions.size();i++) {
-		tempvec.push_back (faction_stuff());
-		tempvec[i].stats.index=i;
-		
-		tempvec[i].relationship =((i==thisfaction)?1:0);
+          tempvec.push_back (faction_stuff());
+          tempvec[i].stats.index=i;          
+          tempvec[i].relationship =((i==thisfaction)?1:0);
 	}
 	for (i=0;i<faction.size();i++) {
-		tempvec[faction[i].stats.index].relationship = faction[i].relationship;
+          
+          faction_stuff::faction_name tmp = tempvec[faction[i].stats.index].stats;
+          tempvec[faction[i].stats.index] = faction[i];
+          tempvec[faction[i].stats.index].stats=tmp;
+          
 	}
-	faction = tempvec;
+	faction.swap(tempvec);
 	/*
 	while (faction.size()<factions.size()) {
 		faction.push_back (faction_stuff());

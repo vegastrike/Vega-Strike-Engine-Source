@@ -29,7 +29,6 @@
 class Unit;
 void CheckUnit(class Unit *);
 void UncheckUnit (class Unit * un);
-//extern Hashtable <long, Unit, char[2095]> deletedUn;
 #endif
 #include "vegastrike.h"
 #include "vs_globals.h"
@@ -51,6 +50,7 @@ void UncheckUnit (class Unit * un);
 #include "networking/const.h"
 #include "networking/lowlevel/vsnet_clientstate.h"
 #include "gfx/cockpit_generic.h"
+#include "vsfilesystem.h"
 using std::string;
 
 extern char * GetUnitDir (const char * filename);
@@ -73,7 +73,7 @@ class Beam;
 class Animation;
 class Nebula;
 class Animation;
-class Sprite;
+class VSSprite;
 class Box;
 class StarSystem;
 struct colTrees;
@@ -118,20 +118,22 @@ class Mount {
     } ref;
     ///the size that this mount can hold. May be any bitwise combination of weapon_info::MOUNT_SIZE
 
-    short size;
+    int size; //short fix
     ///-1 is infinite
-    short ammo;
-    short volume;//-1 is infinite
+    int ammo; //short
+    int volume;//-1 is infinite //short fix
     ///The data behind this weapon. May be accordingly damaged as time goes on
     enum MOUNTSTATUS{REQUESTED,ACCEPTED,PROCESSED,UNFIRED,FIRED} processed;
     ///Status of the selection of this weapon. Does it fire when we hit space
     enum STATUS{ACTIVE, INACTIVE, DESTROYED, UNCHOSEN} status;
     ///The sound this mount makes when fired
     const weapon_info *type;
+    float functionality;
+    float maxfunctionality;
     int sound;
     float time_to_lock;
     Mount();
-    Mount(const std::string& name, short int ammo, short int volume, float xyscale=0, float zscale=0);
+    Mount(const std::string& name, int ammo, int volume, float xyscale, float zscale, float functionality, float maxfunctionality); //short fix
 
 	void Activate (bool Missile) {
 	  if ((type->type==weapon_info::PROJECTILE)==Missile) {
@@ -198,14 +200,15 @@ struct PlanetaryOrbitData;
 class Unit
 {
 protected:
-  UnitSounds * sound;
   ///How many lists are referencing us
   int ucref;
-
+  std::string csvRow;
 public:
+  UnitSounds * sound;
+
   ///The name (type) of this unit shouldn't be public
   std::string name;
-
+  
 /***************************************************************************************/
 /**** CONSTRUCTORS / DESCTRUCTOR                                                    ****/
 /***************************************************************************************/
@@ -245,6 +248,13 @@ public:
        std::string customizedUnit=string(""),
        Flightgroup *flightgroup=NULL,
        int         fg_subnumber=0, string * netxml=NULL);
+
+private:
+  /** Fix all those uninitialized variables by calling this from every
+   *  constructor.  */
+  void ZeroAll( );
+
+public:
   ///Initialize many of the defaults inherant to the constructor
   void Init();
   void Init( const char *filename,
@@ -254,7 +264,7 @@ public:
        Flightgroup *flightgroup=NULL,
        int         fg_subnumber=0, string * netxml=NULL);
   friend class UnitFactory;
-
+  void LoadRow(class CSVRow &row, std::string unitMod, string*netxml=NULL);
 public:    
   virtual ~Unit();
 
@@ -266,7 +276,6 @@ protected:
   // Tell if networked unit
   bool				networked;
   ObjSerial			serial;
-  unsigned short	zone;
   Vector			net_accel;
 public:
   ClientState		old_state;
@@ -276,8 +285,6 @@ public:
   void				SetNetworkMode( bool mode=true) {this->networked = mode;}
   ObjSerial 		GetSerial() { return this->serial;}
   void				SetSerial( ObjSerial ser) { this->serial = ser;}
-  unsigned short	GetZone() { return this->zone;}
-  void				SetZone( unsigned short zn) { this->zone = zn;}
   void				BackupState();
 
 /***************************************************************************************/
@@ -314,13 +321,16 @@ public:
 	  unsigned missilelock:1;	    
 	  unsigned FaceCamera:1;
 	  unsigned Animating:1;
+	  unsigned InWarp:1;
+	  unsigned WarpRamping:1;
 	  unsigned unused1:1;
-	  unsigned unused2:1;
-	  unsigned unused3:1;
+	  float WarpFieldStrength;
+	  float RampCounter;
 	  unsigned char NumAnimationPoints;
 	  graphic_options() {
-		  FaceCamera=Animating=missilelock=unused2=unused3=unused1=0;
+		  FaceCamera=Animating=missilelock=InWarp=unused1=WarpRamping=0;
 		  NumAnimationPoints=0;
+		  RampCounter=0;
 	  }
   }graphicOptions;
   bool isSubUnit() {return graphicOptions.SubUnit?true:false;}
@@ -353,6 +363,9 @@ public:
 
   std::vector <Mesh *> meshdata;
   unsigned char combatRole() const {return combat_role;}
+  void combatRole(unsigned char c){combat_role=c;}
+  void setCombatRole(std::string s);
+  std::string getCombatRole()const;
 protected:
   unsigned char combat_role;
   Nebula * nebula;
@@ -425,7 +438,7 @@ protected:
   virtual void UpdateHudMatrix(int whichcam) {}
   ///What's the HudImage of this unit
 // Uses GFX stuff so only in Unit class
-  virtual Sprite * getHudImage ()const {return NULL;}
+  virtual VSSprite * getHudImage ()const {return NULL;}
 // Not needed just in Unit class
 
 /***************************************************************************************/
@@ -457,6 +470,9 @@ public:
       ///does this radar support IFF?
       bool color;
       bool locked;
+
+      RADARLIM() : maxrange(0), maxcone(0), lockcone(0), trackingcone(0),
+      		mintargetsize(0), color(false), locked(false) { }
     } radar;
     ///The nav point the unit may be heading for
     Vector NavPoint;
@@ -481,6 +497,11 @@ public:
     bool itts;
     //tells whether the speed is clamped draconian-like or not
     bool combat_mode;
+
+    Computer() : NavPoint(0,0,0) , threatlevel(0) , set_speed(0)
+        , max_combat_speed(0) , max_combat_ab_speed(0)
+        , max_yaw(0) , max_pitch(0) , max_roll(0) , slide_start(0) , slide_end(0)
+        , itts(false) , combat_mode(false) { }
   };
   Computer computer;
   void SwitchCombatFlightMode();
@@ -490,8 +511,9 @@ public:
   virtual void TransferUnitToSystem (unsigned int whichJumpQueue, class StarSystem *&previouslyActiveStarSystem, bool DoSightAndSound) {}
   StarSystem * getStarSystem();
     struct UnitJump {
-    short energy;
-    short insysenergy;
+    float warpDriveRating;
+    float energy; //short fix
+    float insysenergy; //short fix
     signed char drive;
     unsigned char delay;
     unsigned char damage;
@@ -542,6 +564,7 @@ public:
   string WriteUnitString();
   ///Loads a unit from an xml file into a complete datastructure
   void LoadXML(const char *filename, const char * unitModifications="", string * xmlbuffer=NULL);
+  void LoadXML(VSFileSystem::VSFile & f, const char * unitModifications="", string * xmlbuffer=NULL);
 
 /***************************************************************************************/
 /**** PHYSICS STUFF                                                                 ****/
@@ -579,16 +602,16 @@ public:
   Vector AngularVelocity;  Vector Velocity;  ///The image that will appear on those screens of units targetting this unit
   UnitImages *image;
   ///mass of this unit (may change with cargo)
-  float mass;
+  float Mass;
 protected:
   ///are shields tight to the hull.  zero means bubble
   float shieldtight;
   ///fuel of this unit
   float fuel;
-  unsigned short afterburnenergy;
+  float afterburnenergy;  //short fix
   ///-1 means it is off. -2 means it doesn't exist. otherwise it's engaged to destination (positive number)
  ///Moment of intertia of this unit
-  float MomentOfInertia;
+  float Momentofinertia;
 
 public:
   struct Limits {
@@ -608,13 +631,17 @@ public:
     Vector structurelimits;
     ///the minimum dot that the current heading can have with the structurelimit
     float limitmin;
+
+    Limits( )
+       : yaw(0) , pitch(0) , roll(0) , lateral(0) , vertical(0) , forward(0)
+       , retro(0) , afterburn(0) , structurelimits(0,0,0) , limitmin(0) { }
   } limits;
 
 public:
   ///-1 is not available... ranges between 0 32767 for "how invisible" unit currently is (32768... -32768) being visible)
-  short cloaking;
+  int cloaking; //short fix
   ///the minimum cloaking value...
-  short cloakmin;
+  int cloakmin; //short fix
   ///How big is this unit
   float radial_size;
 protected:
@@ -634,7 +661,7 @@ public:
   float CloakVisible() const {
     if (cloaking<0)
       return 1;
-    return ((float)cloaking)/32767;
+    return ((float)cloaking)/2147483647;
   }
 
   ///cloaks or decloaks the starship depending on the bool
@@ -644,8 +671,8 @@ public:
   ///Is dead yet?
   inline bool Killed() const {return killed;}
   ///returns the current ammt of armor left
-  unsigned short AfterburnData() const{ return afterburnenergy;}
-  void			 SetAfterBurn( unsigned short aft) { afterburnenergy = aft;}
+  float AfterburnData() const{ return afterburnenergy;} //short fix
+  void			 SetAfterBurn( float aft) { afterburnenergy = aft;} //short fix
   float FuelData() const;
   void  SetFuel( float f) { fuel = f;}
   ///Returns the current ammt of energy left
@@ -656,7 +683,7 @@ public:
   float ShieldRechargeData() const{return shield.recharge;}
   float EnergyData() const;
   float WarpEnergyData() const;
-  short GetWarpEnergy() {return warpenergy;}
+  float GetWarpEnergy() {return warpenergy;} //short fix
   ///Should we resolve forces on this unit (is it free to fly or in orbit)
   bool resolveforces;
   ///What's the size of this unit
@@ -708,12 +735,12 @@ public:
   ///Applies damage to the pre-transformed area of the ship
   void ApplyDamage (const Vector & pnt, const Vector & normal, float amt, Unit * affectedSubUnit, const GFXColor &,  Unit *ownerDoNotDereference, float phasedamage=0 );
   ///Deals remaining damage to the hull at point and applies lighting effects
-  float DealDamageToHullReturnArmor (const Vector &pnt, float Damage, unsigned short * &targ);
+  float DealDamageToHullReturnArmor (const Vector &pnt, float Damage, float * &targ);//short fix
   virtual void ArmorDamageSound( const Vector &pnt) {};
   virtual void HullDamageSound( const Vector &pnt) {};
   float DealDamageToHull (const Vector &pnt, float Damage)
   {
-	 unsigned short * nullvar = NULL;
+	 float * nullvar = NULL; //short fix
 	 return this->DealDamageToHullReturnArmor( pnt, Damage, nullvar);
   }
 
@@ -748,6 +775,7 @@ public:
   ///Updates physics given unit space transformations and if this is the last physics frame in the current gfx frame
 // Not needed here, so only in NetUnit and Unit classes
   void UpdatePhysics (const Transformation &trans, const Matrix &transmat, const Vector & CumulativeVelocity, bool ResolveLast, UnitCollection *uc=NULL);
+  void AddVelocity(float difficulty);
   virtual void UpdatePhysics2 (const Transformation &trans, const Transformation & old_physical_state, const Vector & accel, float difficulty, const Matrix &transmat, const Vector & CumulativeVelocity, bool ResolveLast, UnitCollection *uc=NULL);
   ///Resolves forces of given unit on a physics frame
   virtual Vector ResolveForces (const Transformation &, const Matrix&);
@@ -768,7 +796,7 @@ public:
     if (NetForce.i||NetForce.j||NetForce.k) {
       res+=InvTransformNormal(identity_matrix,NetForce);
     }
-    res=res/mass;
+    res=res/GetMass();
 
   	return res;
   } //acceleration
@@ -784,11 +812,13 @@ public:
   const Vector &GetAngularVelocity() const { return AngularVelocity; }
   ///Return unit-space velocity
   const Vector &GetVelocity() const { return cumulative_velocity; }
-
+  Vector GetWarpVelocity() const {
+	return cumulative_velocity*graphicOptions.WarpFieldStrength;
+  }
   void SetVelocity (const Vector & v) {Velocity = v;}
   void SetAngularVelocity (const Vector & v) {AngularVelocity = v;}
-  float GetMoment() const { return MomentOfInertia; }
-  float GetMass() const { return mass; }
+  float GetMoment() const { return Momentofinertia+fuel; }
+  float GetMass() const { return Mass+fuel; }
   ///returns the ammt of elasticity of collisions with this unit
   float GetElasticity ();
   ///returns given limits (should not be necessary with clamping functions)
@@ -836,9 +866,9 @@ protected:
   ///current energy
   float energy;
   ///maximum energy
-  unsigned short maxwarpenergy;
+  float maxwarpenergy; //short fix
   ///current energy
-  unsigned short warpenergy;
+  float warpenergy; // short fix
   ///applies damage from the given pnt to the shield, and returns % damage applied and applies lighitn
   virtual float DealDamageToShield (const Vector & pnt, float &Damage);
   ///If the shields are up from this position
@@ -856,10 +886,10 @@ public:
   ///Gets the average gun speed of the unit::caution SLOW
   void getAverageGunSpeed (float & speed, float & grange, float & mrange) const;
   ///Finds the position from the local position if guns are aimed at it with speed
-  QVector PositionITTS (const QVector &firingposit, Vector firingvelocity, float gunspeed) const;
+  QVector PositionITTS (const QVector &firingposit, Vector firingvelocity, float gunspeed, bool smooth_itts) const;
   ///returns percentage of course deviation for contraband searches.  .5 causes error and 1 causes them to get mad 
   float FShieldData() const;  float RShieldData() const;  float LShieldData() const;  float BShieldData() const;
-  void ArmorData(unsigned short armor[4])const;
+  void ArmorData(float armor[8])const; //short fix
   ///Gets the current status of the hull
   float GetHull() const{return hull;}
   float GetHullPercent() const{return maxhull!=0?hull/maxhull:hull;}
@@ -944,6 +974,7 @@ public:
 protected:
   void SortCargo();
 public:
+  static Unit* makeMasterPartList();
   bool CanAddCargo (const Cargo &carg) const;
   void AddCargo (const Cargo &carg,bool sort=true);
   int RemoveCargo (unsigned int i, int quantity, bool eraseZero=true);
@@ -988,7 +1019,7 @@ public:
   bool EnqueueLastPythonAIScript ();
 // Uses Order class but just a poiner so ok
 // Uses AI so only in NetUnit and Unit classes
-  virtual double getMinDis(const QVector &pnt){ return 1;}//for clicklist
+  double getMinDis(const QVector &pnt);//for clicklist
 // Uses AI stuff so only in NetUnit and Unit classes
   void SetTurretAI ();
   void DisableTurretAI ();
@@ -1026,7 +1057,7 @@ public:
 
 // To let only in Unit class
 ///Builds a BSP tree from either the hull or else the current meshdata[] array
-  virtual void BuildBSPTree (const char *filename, bool vplane=false, Mesh * hull=NULL){}//if hull==NULL, then use meshdata **
+void BuildBSPTree (const char *filename, bool vplane=false, Mesh * hull=NULL); //if hull==NULL, then use meshdata **
 // Uses mesh stuff (only rSize()) : I have to find something to do
   bool Inside (const QVector &position, const float radius, Vector & normal, float &dist);
 // Uses collide and Universe stuff -> put in NetUnit
@@ -1039,10 +1070,10 @@ public:
   float querySphere (const QVector &start, const QVector & end, float my_unit_radius=0)const;
   float querySphereNoRecurse (const QVector &start, const QVector &end, float my_unit_radius=0)const;
   ///queries the ship with a directed ray
-  virtual float querySphereClickList (const QVector &st, const QVector &dir, float err) const {return 1;}//for click list
+  float querySphereClickList (const QVector &st, const QVector &dir, float err) const;//for click list
   ///Queries if this unit is within a given frustum
 // Uses GFX -> defined only Unit class
-  virtual bool queryFrustum (double frustum[6][4]) const {return false;}
+  bool queryFrustum (double frustum[6][4]) const {return false;}
 
   /**
    *Queries bounding box with a point, radius err
@@ -1054,8 +1085,8 @@ public:
    * hits behind.
    * 0 if ray misses 
    */
-  virtual bool queryBoundingBox (const QVector &pnt, float err) {return false;}
-  virtual int queryBoundingBox(const QVector &origin,const Vector &direction, float err) { return 0;}
+  bool queryBoundingBox (const QVector &pnt, float err);
+  int queryBoundingBox(const QVector &origin,const Vector &direction, float err);
   /**Queries the bounding sphere with a duo of mouse coordinates that project
    * to the center of a ship and compare with a sphere...pretty fast*/
   ///queries the sphere for weapons (world space point)

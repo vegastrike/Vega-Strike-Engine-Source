@@ -1,5 +1,5 @@
 #include <set>
-#include "vs_path.h"
+#include "vsfilesystem.h"
 #include "vs_globals.h"
 #include "vegastrike.h"
 #include "gfx/gauge.h"
@@ -75,20 +75,15 @@ void NavigationSystem::mouseMotion (int x, int y){
 void NavigationSystem::mouseClick (int button, int state, int x, int y){
 	mousex=x;
 	mousey=y;
-	if (state==WS_MOUSE_DOWN)
+	if (state==WS_MOUSE_DOWN) {
 		mousestat|=(1<<lookupMouseButton(button));
-	else
+	}else if (button!=WS_WHEEL_UP&&button!=WS_WHEEL_DOWN)
 		mousestat&= (~(1<<lookupMouseButton(button)));
 }
 
 void NavigationSystem::Setup()
 
 {
-
-	string directory = "default";
-	vschdir ("nav"); 
-	vschdir (directory.c_str());
-
 	configmode = 0;
 
 	rotations = 0;
@@ -97,17 +92,29 @@ void NavigationSystem::Setup()
 	maximumitemscaleup = 3.0;
 
 	axis = 3;
-	rx = 0.0;
-	ry = 0.0;
+
+	rx = -0.5;		//	galaxy mode settings
+	ry = 0.5;
 	rz = 0.0;
-	zoom = 1.2;
+	zoom = 1.8;
+
+	rx_s = -0.5;		//	system mode settings
+	ry_s = 1.5;
+	rz_s = 0.0;
+	zoom_s = 1.8;
+
 	camera_z = 1.0;	//	updated after a pass
 	center_x = 0.0;	//	updated after a pass
 	center_y = 0.0;	//	updated after a pass
 	center_z = 0.0;	//	updated after a pass
 
+	galaxy_view = VIEW_2D;
+	system_view = VIEW_2D;
+	system_multi_dimensional = 1;
+	galaxy_multi_dimensional = 1;
+
 	zshiftmultiplier = 2.5;	//	shrink the output
-	item_zscalefactor = 2.0;	//	camera distance prespective multiplier for affecting item sizes
+	item_zscalefactor = 1.0;	//	camera distance prespective multiplier for affecting item sizes
 
 
 
@@ -117,16 +124,23 @@ void NavigationSystem::Setup()
 	mouse_previous_state[0] = 0;	//	could have used a loop, but this way the system uses immediate instead of R type.
 	mouse_previous_state[1] = 0;
 	mouse_previous_state[2] = 0;
+	mouse_previous_state[3] = 0;
+	mouse_previous_state[4] = 0;
 	mouse_wentup[0] = 0;
 	mouse_wentup[1] = 0;
 	mouse_wentup[2] = 0;
+	mouse_wentup[3] = 0;
+	mouse_wentup[4] = 0;
 	mouse_wentdown[0] = 0;
 	mouse_wentdown[1] = 0;
 	mouse_wentdown[2] = 0;
+	mouse_wentdown[3] = 0;
+	mouse_wentdown[4] = 0;
 	mouse_x_previous = (-1+float(mousex)/(.5*g_game.x_resolution));
 	mouse_y_previous = (1+float(-1*mousey)/(.5*g_game.y_resolution));
 
-
+	currentsystem=UniverseUtil::getSystemFile();
+	systemIter.init(currentsystem,100);
 
 	buttonstates = 0;
 	if (getSaveData(0,"436457r1K3574r7uP71m35",0)<=1+XMLSupport::parse_int(vs_config->getVariable("general","times_to_show_help_screen","3"))) {
@@ -139,7 +153,7 @@ void NavigationSystem::Setup()
 	unselectedalpha = 1.0;
 
 
-	int p;
+	unsigned int p;
 	for( p=0; p < FactionUtil::GetNumFactions(); p++)
 	{
 		factioncolours[p].r = 1;
@@ -275,7 +289,10 @@ void NavigationSystem::Setup()
 		buttonskipby4_7[1] = .95;
 		buttonskipby4_7[2] = .25;
 		buttonskipby4_7[3] = .30;
-
+		for (int i=0;i<NAVTOTALMESHCOUNT;i++) {
+			mesh[i]=NULL;
+		}
+		vs_fprintf(stderr,"ERROR: Map mesh file not found!!! Using default: blank mesh.\n");
 		//	end DUMMY VARS
 	}
 
@@ -343,10 +360,6 @@ void NavigationSystem::Setup()
 		system_item_scale *= (screenskipby4[3]-screenskipby4[2]);
 
 	screenoccupation = new navscreenoccupied(screenskipby4[0], screenskipby4[1], screenskipby4[2], screenskipby4[3], 1);
-
-
-	vscdup(); 
-	vscdup(); 
 }
 
 //	**********************************
@@ -362,17 +375,21 @@ void NavigationSystem::Setup()
 
 
 
-void visitSystemHelp (Cockpit * cp, string systemname) {
+void visitSystemHelp (Cockpit * cp, string systemname,float num) {
 	string key (string("visited_")+systemname);
-	vector<string> *v = &_Universe->AccessCockpit()->savegame->getMissionStringData(key);
-	if (v->empty())v->push_back ("v"); else (*v)[0]="v";
+	vector<float> *v = &_Universe->AccessCockpit()->savegame->getMissionData(key);
+	if (v->empty()){
+		v->push_back (num);
+	} else if ((*v)[0]!=1.0&&num==1) {
+		(*v)[0]=num;
+	}
 	
 }
 void visitSystem (Cockpit * cp , string systemname ) {
-	visitSystemHelp (cp,systemname);
+	visitSystemHelp (cp,systemname,1.0);
 	int adj = UniverseUtil::GetNumAdjacentSystems(systemname);
 	for (int i=0;i<adj;++i) {
-		visitSystemHelp (cp,UniverseUtil::GetAdjacentSystem(systemname,i));
+		visitSystemHelp (cp,UniverseUtil::GetAdjacentSystem(systemname,i),0.0);
 	}
 
 }
@@ -393,7 +410,7 @@ void NavigationSystem::Draw()
  
 
 	GFXEnable (TEXTURE0);
-	GFXEnable (DEPTHTEST);
+	GFXDisable (DEPTHTEST);
 	GFXClear (GFXFALSE);
 
 	GFXEnable(LIGHTING);
@@ -436,7 +453,9 @@ void NavigationSystem::Draw()
 
 
 		Matrix mat (p,q,r,pos);
-		mesh[i]->DrawNow(1,true,mat);
+		if (mesh[i]) {
+			mesh[i]->DrawNow(1,true,mat);
+		}
 	}
 
 
@@ -453,11 +472,15 @@ void NavigationSystem::Draw()
 	//	**********************************
 
 
-
-
-
 	screenoccupation->reset();
 
+
+
+	//	Save current mouse location
+	//	**********************************
+	mouse_x_current = (-1+float(mousex)/(.5*g_game.x_resolution));
+	mouse_y_current = (1+float(-1*mousey)/(.5*g_game.y_resolution));
+	//	**********************************
 
 
 
@@ -475,7 +498,7 @@ void NavigationSystem::Draw()
 
 	//	Draw the screen basics
 	//	**********************************
-	DrawCursor(-1+float(mousex)/(.5*g_game.x_resolution),1+float(-1*mousey)/(.5*g_game.y_resolution), .1, .2, GFXColor(1,1,1,0.5) );
+	DrawCursor(mouse_x_current, mouse_y_current, .1, .2, GFXColor(1,1,1,0.5) );
 	//	**********************************
 
 
@@ -488,14 +511,26 @@ void NavigationSystem::Draw()
 	//	**********************************
 	if(checkbit(whattodraw, 1))	
 	{
-		DrawGrid(screenskipby4[0], screenskipby4[1], screenskipby4[2], screenskipby4[3], GFXColor(1,1,1,0.2) );
-
 
 		if(checkbit(whattodraw, 2))
+		{
+			if(galaxy_view==VIEW_3D)
+				DrawNavCircle( ((screenskipby4[0]+screenskipby4[1])/2.0), ((screenskipby4[2]+screenskipby4[3])/2.0), 0.6, rx, ry, GFXColor(1,1,1,0.2));
+			else
+				DrawGrid(screenskipby4[0], screenskipby4[1], screenskipby4[2], screenskipby4[3], GFXColor(1,1,1,0.2) );
+		
 			DrawGalaxy();
+		}
 
 		else
+		{
+			if(system_view==VIEW_3D)
+				DrawNavCircle( ((screenskipby4[0]+screenskipby4[1])/2.0), ((screenskipby4[2]+screenskipby4[3])/2.0), 0.6, rx_s, ry_s, GFXColor(1,1,1,0.2));
+			else
+				DrawGrid(screenskipby4[0], screenskipby4[1], screenskipby4[2], screenskipby4[3], GFXColor(1,1,1,0.2) );
+
 			DrawSystem();
+		}
 	}
 
 	else
@@ -516,12 +551,12 @@ void NavigationSystem::Draw()
 	//	Draw Button Outlines
 	//	**********************************
 	bool outlinebuttons = 0;
-//	if(configmode > 0)
-//		outlinebuttons = 1;
+	if(configmode > 0)
+		outlinebuttons = 1;
 
 	DrawButton(buttonskipby4_1[0], buttonskipby4_1[1], buttonskipby4_1[2], buttonskipby4_1[3], 1, outlinebuttons);
 	DrawButton(buttonskipby4_2[0], buttonskipby4_2[1], buttonskipby4_2[2], buttonskipby4_2[3], 2, outlinebuttons);
-	DrawButton(buttonskipby4_3[0], buttonskipby4_3[1], buttonskipby4_3[2], buttonskipby4_3[3], 3, outlinebuttons);
+//	DrawButton(buttonskipby4_3[0], buttonskipby4_3[1], buttonskipby4_3[2], buttonskipby4_3[3], 3, outlinebuttons);
 	DrawButton(buttonskipby4_4[0], buttonskipby4_4[1], buttonskipby4_4[2], buttonskipby4_4[3], 4, outlinebuttons);
 	DrawButton(buttonskipby4_5[0], buttonskipby4_5[1], buttonskipby4_5[2], buttonskipby4_5[3], 5, outlinebuttons);
 	DrawButton(buttonskipby4_6[0], buttonskipby4_6[1], buttonskipby4_6[2], buttonskipby4_6[3], 6, outlinebuttons);
@@ -601,11 +636,11 @@ void NavigationSystem::DrawMission()
 		
 	}
 	
-	factionlist.drawdescription(relationskills, (originx + (0.1*deltax)),(originy - (0.1*deltay)), 1, 1, 0, GFXColor(.3,1,.3,1));
-	factionlist.drawdescription(" ", (originx + (0.1*deltax)),(originy - (0.1*deltay)), 1, 1, 0, GFXColor(.3,1,.3,1));
+	drawdescription(relationskills, (originx + (0.1*deltax)),(originy - (0.1*deltay)), 1, 1, 0, screenoccupation, GFXColor(.3,1,.3,1));
+	drawdescription(" ", (originx + (0.1*deltax)),(originy - (0.1*deltay)), 1, 1, 0, screenoccupation, GFXColor(.3,1,.3,1));
 
-	factionlist.drawdescription(" ", (originx + (0.3*deltax)),(originy - (0.1*deltay)), 1, 1, 0, GFXColor(.3,1,.3,1));
-	factionlist.drawdescription(" ", (originx + (0.3*deltax)),(originy - (0.1*deltay)), 1, 1, 0, GFXColor(.3,1,.3,1));
+	drawdescription(" ", (originx + (0.3*deltax)),(originy - (0.1*deltay)), 1, 1, 0, screenoccupation, GFXColor(.3,1,.3,1));
+	drawdescription(" ", (originx + (0.3*deltax)),(originy - (0.1*deltay)), 1, 1, 0, screenoccupation, GFXColor(.3,1,.3,1));
 
 
 	int numfactions = FactionUtil::GetNumFactions();
@@ -620,10 +655,11 @@ void NavigationSystem::DrawMission()
 		relation = 	FactionUtil::GetIntRelation(i, ( UniverseUtil::getPlayerX(UniverseUtil::getCurrentPlayer()) )->faction );
 
 		//	draw faction name
-		factionlist.drawdescription(FactionUtil::GetFactionName(i), (originx + (0.1*deltax)),(originy - (0.1*deltay)), 1, 1, 0, factioncolours[i]);
+		const float *colors=FactionUtil::GetSparkColor(i);
+		drawdescription(FactionUtil::GetFactionName(i), (originx + (0.1*deltax)),(originy - (0.1*deltay)), 1, 1, 0, screenoccupation, GFXColor(colors[0],colors[1],colors[2],1.));
 
-		relation = relation * 0.5;
-		relation = relation + 0.5;
+		float relation01 = relation * 0.5 + 0.5;
+		relation = ((relation>1?1:relation)<-1?-1:relation);
 		int percent = relation * 100.0;
 		string relationtext (XMLSupport::tostring (percent));
 		if (i<killlist->size()) {
@@ -631,7 +667,7 @@ void NavigationSystem::DrawMission()
 			relationtext += XMLSupport::tostring ((int)(*killlist)[i]);
 		}
 
-		factionlist.drawdescription(relationtext, (originx + (0.3*deltax)),(originy - (0.1*deltay)), 1, 1, 0, GFXColor((1.0-relation),relation,(1.0-(2.0*Delta(relation, 0.5))),1));
+		drawdescription(relationtext, (originx + (0.3*deltax)),(originy - (0.1*deltay)), 1, 1, 0, screenoccupation, GFXColor((1.0-relation01),(relation01),(1.0-(2.0*Delta(relation01, 0.5))),1));
 		}
 		i+=1;
 	}
@@ -640,13 +676,13 @@ void NavigationSystem::DrawMission()
 		relation=1;
 		
 		relationtext += XMLSupport::tostring ((int)(*killlist)[i]);
-		factionlist.drawdescription(relationtext, (originx + (0.3*deltax)),(originy - (0.1*deltay)), 1, 1, 0, GFXColor((1.0-relation),relation,(1.0-(2.0*Delta(relation, 0.5))),1));
+		drawdescription(relationtext, (originx + (0.3*deltax)),(originy - (0.1*deltay)), 1, 1, 0, screenoccupation, GFXColor((1.0-relation),relation,(1.0-(2.0*Delta(relation, 0.5))),1));
 							
 	}
    
-//	factionlist.drawdescription(" Terran : ", (originx + (0.1*deltax)),(originy - (0.1*deltay)), 1, 1, 0, GFXColor(.3,1,.3,1));
-//	factionlist.drawdescription(" Rlaan : ", (originx + (0.1*deltax)),(originy - (0.1*deltay)), 1, 1, 0, GFXColor(1,.3,.3,1));
-//	factionlist.drawdescription(" Aera : ", (originx + (0.1*deltax)),(originy - (0.1*deltay)), 1, 1, 0, GFXColor(.3,.3,1,1));
+//	drawdescription(" Terran : ", (originx + (0.1*deltax)),(originy - (0.1*deltay)), 1, 1, 0, screenoccupation, GFXColor(.3,1,.3,1));
+//	drawdescription(" Rlaan : ", (originx + (0.1*deltax)),(originy - (0.1*deltay)), 1, 1, 0, screenoccupation, GFXColor(1,.3,.3,1));
+//	drawdescription(" Aera : ", (originx + (0.1*deltax)),(originy - (0.1*deltay)), 1, 1, 0, screenoccupation, GFXColor(.3,.3,1,1));
 
 
 //	float love_from_terran = FactionUtil::getRelation(1);
@@ -747,6 +783,24 @@ void NavigationSystem::SetDraw(bool n)
 
 
 
+//	this gets rid of states that could be damaging
+//	**********************************
+void NavigationSystem::ClearPriorities()
+{
+	unsetbit(buttonstates, 1);
+	currentselection = NULL;
+//	rx = 1.0;		//	resetting rotations is up to hitting the 2d/3d button
+//	ry = 1.0;
+//	rz = 0.0;
+//	rx_s = 1.0;
+//	ry_s = 1.0;
+//	rz_s = 0.0;
+}
+//	**********************************
+
+
+
+
 
 
 
@@ -761,18 +815,20 @@ void NavigationSystem::SetMouseFlipStatus()
 //	getMouseButtonStatus()&1 = mouse button 1 standard = button 1 VS
 //	getMouseButtonStatus()&2 = mouse button 3 standard = button 2 VS
 //	getMouseButtonStatus()&4 = mouse button 2 standard = button 3 VS
+//	getMouseButtonStatus()&8 = mouse wheel up
+//	getMouseButtonStatus()&16 = mouse wheel down
 
-	//	use the VS scheme, (1 2 3) , instead of standard (1 3 2)
+	//	use the VS scheme, (1 2 3 4 5) , instead of standard (1 3 2 4 5)
 	//	state 0 = up
 	//	state 1 = down
 
 
 	bool status = 0;
 	int i;
-	for(i = 0; i < 3; i++)
+	for(i = 0; i < 5; i++)
 	{
 
-		status = ( getMouseButtonStatus()&(1<<i) );
+		status = ( getMouseButtonStatus()&(1<<i) )?1:0;
 
 		if( (status == 1)&&(mouse_previous_state[i] == 0) )
 		{
@@ -790,11 +846,14 @@ void NavigationSystem::SetMouseFlipStatus()
 		{
 			mouse_wentup[i] = 0;
 			mouse_wentdown[i] = 0;
+			if (i==3||i==4)
+				mousestat&= (~(1<<i));
+
 		}
 	}
 
 
-	for(i = 0; i < 3; i++)
+	for(i = 0; i < 5; i++)
 	{
 		mouse_previous_state[i] = (getMouseButtonStatus()&(1<<i));	//	button 'i+1' state VS
 	}
@@ -882,7 +941,16 @@ QVector NavigationSystem::dxyz(QVector vector, double x_, double y_, double z_)
 
 void NavigationSystem::setCurrentSystem(string newCurrentSystem) {
 	currentsystem = newCurrentSystem;
-	systemIter.init(currentsystem);
+	themaxvalue=0;
+	if (galaxy_view!=VIEW_3D) {
+		// This resets the panning position when not in 3d view.
+		// Otehrwise, the current system may end up off screen which will cause a lot of confusion.
+		rx = -0.5;		//	galaxy mode settings
+		ry = 0.5;
+		rz = 0.0;
+	}
+	camera_z=0; // calculate camera distance again... it may have changed.
+//	systemIter.init(currentsystem);
 }
 
 
@@ -903,6 +971,7 @@ void NavigationSystem::setCurrentSystem(string newCurrentSystem) {
 //	3 = up
 //	4 = down
 //	5 = toggle prespective rezoom
+//	6 = toggle 2d/3d mode
 int NavigationSystem::mousey=0;
 int NavigationSystem::mousex=0;
 int NavigationSystem::mousestat;
@@ -910,65 +979,149 @@ int NavigationSystem::mousestat;
 void NavigationSystem::DrawButton(float &x1, float &x2, float &y1, float &y2, int button_number, bool outline)
 {
 
-	float mx = -1+float(mousex)/(.5*g_game.x_resolution);
-	float my = 1+float(-1*mousey)/(.5*g_game.y_resolution);
-
-
+	float mx = mouse_x_current;
+	float my = mouse_y_current;
 	bool inrange = TestIfInRange(x1, x2, y1, y2, mx, my);
 
+
+	if (1)
+//	if(inrange == 1)
+	{
+		string label;
+		if(button_number == 1)
+		{
+			label = "Navigation";
+		}
+		else if(button_number == 2)
+		{
+			label = "Information";
+		}
+//		else if(button_number == 3)
+//		{
+//			label = "Choose Target (disabled)"; // It's disabled, so why show it?
+//		}
+		else if(button_number == 4)
+		{
+			label = "Up";
+		}
+		else if(button_number == 5)
+		{
+			label = "Down";
+		}
+		else if(button_number == 6)
+		{
+			label = "Axis Swap";
+		}
+		else if(button_number == 7)
+		{
+			label = "2D/Ortho/3D";
+		}
+		TextPlane a_label;
+		a_label.col = GFXColor(1,1,1,1);
+		int length = label.size();
+		float offset = (float(length)*0.0065);
+		float xl = (x1+x2)/2.0;
+		float yl = (y1+y2)/2.0;
+		a_label.SetPos((xl-offset)-(checkbit(buttonstates,button_number-1)?0.006:0), (yl+0.025));
+		a_label.SetText(label);
+		a_label.Draw();
+	}
+
+	//!!! DEPRESS !!!
 	if((inrange == 1)&&(mouse_wentdown[0] == 1))
 	{	
 
 		currentselection = NULL;	//	any new button depression means no depression on map, no selection made
 
-		if( (button_number != 2) && ( checkbit(buttonstates, 1)) )	//	unset select if start soemthing else
+		//******************************************************
+		//**                 ALL BUTTONS DROP (except 2)      **	SOME OTHER KEY PRESSED, FUNCTION #2 DIES
+		//******************************************************
+		if( (button_number != 3) && ( checkbit(buttonstates, 2)) )	//	unset select if start soemthing else
 		{
-			unsetbit(buttonstates, 1);
+			unsetbit(buttonstates, 2);
 		}
+		//******************************************************
 
 
-		if(button_number == 2)	//	toggle select, toggle map rezoom
+
+
+
+		//******************************************************
+		//**                 BUTTON 2 FUNCTION                **	DEPRESS ALL, TOGGLE #2
+		//******************************************************
+		if(button_number == 3)	//	toggle select, toggle map rezoom
 		{
 			flipbit(buttonstates, (button_number-1));
 		}
 		else
 			dosetbit(buttonstates, (button_number-1));	//	all other buttons go down
-
+		//******************************************************
 	}
 
 
+
+
+	//!!! RELEASE !!!
 	if((inrange == 1) && (checkbit(buttonstates, (button_number-1))) && (mouse_wentup[0]))
 	{
-		if(button_number != 2)	//	#2 is for select. do not deactivate untill something is (selected)
-		{
-			unsetbit(buttonstates, (button_number-1));	//	all but 2 go up, all are up in mission mode
-		}
 
-
-
+		//******************************************************
+		//**                 MISSION MODE	                  **	UNSET BITS WHEN ENTERING MISSION MODE
+		//******************************************************
 		if(!checkbit(whattodraw, 1))
 		{
 			unsetbit(buttonstates, (button_number-1));	// all are up in mission mode
 		}
+		//******************************************************
 
 
 
-		if(button_number == 5)	//	releasing #1, toggle the draw (nav / mission)
-		{
-			axis = axis - 1;
-			if(axis == 0)
-				axis = 3;
-		}
 
 
 
+		//******************************************************
+		//**                 BUTTON 1 FUNCTION                **	NAV-INFO vs STATUS-INFO
+		//******************************************************
 		if(button_number == 1)	//	releasing #1, toggle the draw (nav / mission)
 		{
-			flipbit(whattodraw, 1);
+			dosetbit(whattodraw, 1);
 		}
+		//******************************************************
 
 
-		if(button_number == 3)	//	hit up
+
+
+		
+		//******************************************************
+		//**                 BUTTON 2 FUNCTION                **	NAV-INFO vs STATUS-INFO
+		//******************************************************
+		if(button_number == 2)	//	releasing #2, toggle the draw (nav / mission)
+		{
+			unsetbit(whattodraw, 1);
+		}
+		//******************************************************
+
+
+
+
+
+		//******************************************************
+		//**                 BUTTON 3 FUNCTION NULLIFICATION  **	SOME OTHER KEY RELEASED, FUNCTION #2 DIES
+		//******************************************************
+		if(button_number != 3)	//	#3 is for select. do not deactivate untill something is (selected)
+		{
+			unsetbit(buttonstates, (button_number-1));	//	all but 3 go up, all are up in mission mode
+		}
+		//******************************************************
+
+
+
+
+
+		//******************************************************
+		//**                 BUTTON 4 FUNCTION                **	UP
+		//******************************************************
+		if(button_number == 4)	//	hit --UP--
 		{
 			if(checkbit(whattodraw, 1)) // if in nav system NOT mission
 			{
@@ -981,10 +1134,15 @@ void NavigationSystem::DrawButton(float &x1, float &x2, float &y1, float &y2, in
 				dosetbit(whattodraw, 2);	//	draw shipstats	
 			}
 		}
+		//******************************************************
+ 
 
 
 
-		if(button_number == 4)	//	hit down
+		//******************************************************
+		//**                 BUTTON 5 FUNCTION                **	DOWN
+		//******************************************************
+		if(button_number == 5)	//	hit --DOWN--
 		{
 			if(checkbit(whattodraw, 1)) // if in nav system NOT mission
 			{
@@ -996,11 +1154,63 @@ void NavigationSystem::DrawButton(float &x1, float &x2, float &y1, float &y2, in
 				unsetbit(whattodraw, 2);	//	draw system
 			}
 		}
+		//******************************************************
+
+
+
+
+		//******************************************************
+		//**                 BUTTON 6 FUNCTION                **	AXIS
+		//******************************************************
+		if(button_number == 6)	//	releasing #1, toggle the draw (nav / mission)
+		{
+			zoom = 1.8;
+			zoom_s = 1.8;
+
+			axis = axis - 1;
+			if(axis == 0)
+				axis = 3;
+			camera_z=0;
+		}
+		//******************************************************
+
+
+
+
+		//******************************************************
+		//**                 BUTTON 7 FUNCTION                **	2D/3D
+		//******************************************************
+		if(button_number == 7)
+		{
+			if( (checkbit(whattodraw, 1)) && (checkbit(whattodraw, 2)) && galaxy_multi_dimensional )
+			{
+				galaxy_view=(galaxy_view+1)%VIEW_MAX;
+				rx = -0.5;
+				ry = 0.5;
+				rz = 0.0;
+			}
+
+			if( (checkbit(whattodraw, 1)) && (!checkbit(whattodraw, 2)) && system_multi_dimensional )
+			{
+				system_view=(system_view+1)%VIEW_MAX;
+				rx_s = -0.5;
+				ry_s = 0.5;
+				rz_s = 0.0;
+			}
+			camera_z=0;
+		}
+		//******************************************************
 	}
 
+
+
+	// !!! OUT OF BOUNDS !!!
+	//******************************************************
+	//**                 OUT OF RANGE	                  **	ALL DIE, but #2
+	//******************************************************
 	if(inrange == 0)
 	{
-		if(button_number != 2)	//	#2 is for select. do not deactivate untill something is (selected), leave 5 too 
+		if(button_number != 3)	//	#2 is for select. do not deactivate untill something is (selected), leave 5 too 
 		{
 			unsetbit(buttonstates, (button_number-1));
 		}
@@ -1011,8 +1221,14 @@ void NavigationSystem::DrawButton(float &x1, float &x2, float &y1, float &y2, in
 			unsetbit(buttonstates, (button_number-1));
 		}
 	}
+	//******************************************************
 
 
+
+
+	//******************************************************
+	//**             TRACE OUTLINES FOR EZ SETUP          **	ARTIST DEV UTIL
+	//******************************************************
 	if(outline == 1)
 	{
 		if(inrange == 1)
@@ -1031,6 +1247,9 @@ void NavigationSystem::DrawButton(float &x1, float &x2, float &y1, float &y2, in
 				DrawButtonOutline(x1, x2, y1, y2, GFXColor(1,1,1,1)); 
 		}
 	}
+	//******************************************************
+
+
 }
 //	**********************************
 
@@ -1069,35 +1288,84 @@ void NavigationSystem::DrawButtonOutline(float &x1, float &x2, float &y1, float 
 
 
 
-
-
-
-
-
-//	this gets rid of states that could be damaging
-//	**********************************
-void NavigationSystem::ClearPriorities()
+template <class T> static inline bool intersect(T x0,T y0,T x1,T y1,T sx0,T sy0,T sx1,T sy1,T & ansx, T & ansy)
 {
-	unsetbit(buttonstates, 1);
-	currentselection = NULL;
-	rx = 0.0;
-	ry = 0.0;
-	rz = 0.0;
+	bool fxy=false;
+	if (((x1==x0)&&(sx1==sx0))||((x1==x0)&&(y1==y0))||((sx1==sx0)&&(sy1==sy0))) {
+		// If both lines are vertical, then act as if they don't intersect.
+		// If either one is a point, then for all practical purposes they do not intersect.
+		return false;
+	}
+	if ((x1==x0)&&(sy1==sy0)) {
+		// Line 1 vertical, line 2 horizontal.
+		ansx=x1;
+		ansy=sy1;
+		return ((sx0<=x1&&x1<=sx1)||(sx1<=x1&&x1<=sx0))&&((y0<=sy1&&sy1<=y1)||(y1<=sy1&&sy1<=y0));
+	}
+	if ((sx1==sx0)&&(y1==y0)) {
+		// line 1 horizontal, Line 2 vertical.
+		ansx=sx1;
+		ansy=y1;
+		return ((x0<=sx1&&sx1<=x1)||(x1<=sx1&&sx1<=x0))&&((sy0<=y1&&y1<=sy1)||(sy1<=y1&&y1<=sy0));
+	}
+	// If either line is vertical (both was handled above), then flip the coordinate plane to prevent division by zero.
+	if ((x1==x0)||(sx1==sx0)) {
+		T temp=x0;
+		x0=y0;
+		y0=temp;
+		temp=x1;
+		x1=y1;
+		y1=temp;
+		fxy=true;
+		temp=sx0;
+		sx0=sy0;
+		sy0=temp;
+		temp=sx1;
+		sx1=sy1;
+		sy1=temp;
+		fxy=true;
+	}
+	// Now we can be sure that no vertical lines exist.
+	// Proceed with the operation.
+	T m=(y1-y0)/(x1-x0);
+	T sm=(sy1-sy0)/(sx1-sx0);
+	if (m==sm) {
+		// Parallel Lines
+		return false;
+	}
+	ansx=(m*x1-sm*sx1-y1+sy1)/(m-sm);
+	ansy=(y1-m*x1+m*ansx);
+	if (((x0<=ansx&&ansx<=x1)||(x1<=ansx&&ansx<=x0))&&((sx0<=ansx&&ansx<=sx1)||(sx1<=ansx&&ansx<=sx0))) {
+		// Inside the line segment.
+		if (fxy) {
+			// Deswapify them!
+			T temp=ansx;
+			ansx=ansy;
+			ansy=temp;
+		}
+		return true;
+	}
+	// Too bad. They are outside the line segment
+	return false;
 }
-//	**********************************
 
 
 
 
+void NavigationSystem::IntersectBorder(float & x, float & y, const float & x1, const float & y1) const
+{
+	float ansx;
+	float ansy;
+	if (intersect(x,y,x1,y1,screenskipby4[1],screenskipby4[3],screenskipby4[0],screenskipby4[3],ansx,ansy)||
+			intersect(x,y,x1,y1,screenskipby4[0],screenskipby4[2],screenskipby4[0],screenskipby4[3],ansx,ansy)||
+			intersect(x,y,x1,y1,screenskipby4[0],screenskipby4[2],screenskipby4[1],screenskipby4[2],ansx,ansy)||
+			intersect(x,y,x1,y1,screenskipby4[1],screenskipby4[3],screenskipby4[1],screenskipby4[2],ansx,ansy)) {
+		x=ansx;
+		y=ansy;
+	}
+}
 
-
-
-
-
-
-
-
-
+	
 
 
 //	tests if given are in the range
@@ -1203,28 +1471,86 @@ bool NavigationSystem::CheckDraw()
 }
 //	**********************************
 
-void NavigationSystem::Adjust3dTransformation()
+void NavigationSystem::Adjust3dTransformation(bool three_d, bool system_vs_galaxy)
 {
 	//	Adjust transformation
 	//	**********************************
-	if(	(mouse_previous_state[0] == 1) && TestIfInRange(screenskipby4[0], screenskipby4[1], screenskipby4[2], screenskipby4[3], (-1+float(mousex)/(.5*g_game.x_resolution)), (1+float(-1*mousey)/(.5*g_game.y_resolution))))
+	if(	(mouse_previous_state[0] == 1) && TestIfInRange(screenskipby4[0], screenskipby4[1], screenskipby4[2], screenskipby4[3], mouse_x_current, mouse_y_current))
 	{
-		float ndx = -1.0*( (1+float(-1*mousey)/(.5*g_game.y_resolution)) - mouse_y_previous);
-		float ndy = -4.0*( (-1+float(mousex)/(.5*g_game.x_resolution)) - mouse_x_previous);
-		float ndz = 0.0;
+		if(system_vs_galaxy)
+		{
+			if(three_d)
+			{
+				float ndx = -1.0*( mouse_y_current - mouse_y_previous);
+				float ndy = -4.0*( mouse_x_current - mouse_x_previous);
+				float ndz = 0.0;
 
-		rx = rx+=ndx;
-		ry = ry+=ndy;
-		rz = rz+=ndz;
+				rx_s = rx_s+=ndx;
+				ry_s = ry_s+=ndy;
+				rz_s = rz_s+=ndz;
 
-		if(rx > 3.14/2)		rx = 3.14/2;
-		if(rx < -3.14/2)	rx = -3.14/2;
+				if(rx_s > 0.0/2)		rx_s = 0.0/2;
+				if(rx_s < -6.28/2)		rx_s = -6.28/2;
 
-		if(ry >= 6.28)		ry -= 6.28;
-		if(ry <= -6.28)		ry += 6.28;
+				if(ry_s >= 6.28)		ry_s -= 6.28;
+				if(ry_s <= -6.28)		ry_s += 6.28;
 
-		if(rz >= 6.28)		rz -= 6.28;
-		if(rz <= -6.28)		rz += 6.28;
+				if(rz_s >= 6.28)		rz_s -= 6.28;
+				if(rz_s <= -6.28)		rz_s += 6.28;
+			}
+			else	//	rotation switches to panning
+			{
+				float ndy = -1.0*( mouse_y_current - mouse_y_previous);
+				float ndx = -1.0*( mouse_x_current - mouse_x_previous);
+				float ndz = 0.0;
+
+				//	shift less when zoomed in more
+				//  float zoom_modifier = ( (1-(((zoom_s-0.5*MAXZOOM)/MAXZOOM)*(0.85))) / 1 );
+//				float _l2 = log(2.0);
+				float zoom_modifier = 1.;//(log(zoom_s)/_l2);
+
+				rx_s = rx_s-=((ndx*camera_z)/zoom_modifier);
+				ry_s = ry_s-=((ndy*camera_z)/zoom_modifier);
+				rz_s = rz_s-=((ndz*camera_z)/zoom_modifier);
+			}
+		}
+		else	//	galaxy
+		{
+			if(three_d)
+			{
+				float ndx = -1.0*( mouse_y_current - mouse_y_previous);
+				float ndy = -4.0*( mouse_x_current - mouse_x_previous);
+				float ndz = 0.0;
+
+				rx = rx+=ndx;
+				ry = ry+=ndy;
+				rz = rz+=ndz;
+
+				if(rx > 0.0/2)		rx = 0.0/2;
+				if(rx < -6.28/2)	rx = -6.28/2;
+
+				if(ry >= 6.28)		ry -= 6.28;
+				if(ry <= -6.28)		ry += 6.28;
+
+				if(rz >= 6.28)		rz -= 6.28;
+				if(rz <= -6.28)		rz += 6.28;
+			}
+			else	//	rotation switches to panning
+			{
+				float ndy = -1.0*( mouse_y_current - mouse_y_previous);
+				float ndx = -1.0*( mouse_x_current - mouse_x_previous);
+				float ndz = 0.0;
+
+				//	shift less when zoomed in more
+				//  float zoom_modifier = ( (1-(((zoom-0.5*MAXZOOM)/MAXZOOM)*(0.85))) / 1 );
+//				float _l2 = log(2.0);
+				float zoom_modifier = 1.;//(log(zoom)/_l2);
+
+				rx = rx-=((ndx*camera_z)/zoom_modifier);
+				ry = ry-=((ndy*camera_z)/zoom_modifier);
+				rz = rz-=((ndz*camera_z)/zoom_modifier);
+			}
+		}
 	}
 	//	**********************************
 
@@ -1232,16 +1558,43 @@ void NavigationSystem::Adjust3dTransformation()
 
 	//	Set the prespective zoom level
 	//	**********************************
-	if(	(mouse_previous_state[1] == 1) && TestIfInRange(screenskipby4[0], screenskipby4[1], screenskipby4[2], screenskipby4[3], (-1+float(mousex)/(.5*g_game.x_resolution)), (1+float(-1*mousey)/(.5*g_game.y_resolution))))
+	if(	((mouse_previous_state[1] == 1) && TestIfInRange(screenskipby4[0], screenskipby4[1], screenskipby4[2], screenskipby4[3], mouse_x_current, mouse_y_current)) || (mouse_wentdown[3]||mouse_wentdown[4]))
 	{
-		zoom = zoom + 10*( /*1.0 +*/ 8*( (1+float(-1*mousey)/(.5*g_game.y_resolution)) - mouse_y_previous) );
-//		if(zoom < 1.0)
-//			zoom = 1.0;
-		static float zoommax = XMLSupport::parse_float (vs_config->getVariable("graphics","nav_zoom_max","100"));
-		if (zoom<-zoommax*MAXZOOM)
-			zoom=-zoommax*MAXZOOM;
-		if(zoom > MAXZOOM)
-			zoom = MAXZOOM;
+		if(system_vs_galaxy)
+		{
+			if (mouse_wentdown[3]) {
+				zoom_s += .4;
+			} else if (mouse_wentdown[4]) {
+				zoom_s -= .4;
+			} else {
+				zoom_s = zoom_s + ( /*1.0 +*/ 8*(mouse_y_current - mouse_y_previous) );
+			}
+	//		if(zoom < 1.0)
+	//			zoom = 1.0;
+//			static float zoommax = XMLSupport::parse_float (vs_config->getVariable("graphics","nav_zoom_max","100"));
+			if (zoom_s<1.2)
+				zoom_s=1.2;
+			if(zoom_s > MAXZOOM)
+				zoom_s = MAXZOOM;
+		}
+		else
+		{
+			if (mouse_wentdown[3]) {
+				zoom += .4;
+			} else if (mouse_wentdown[4]) {
+				zoom -= .4;
+			} else {
+				zoom = zoom + ( /*1.0 +*/ 8*(mouse_y_current - mouse_y_previous) );
+			}
+	//		if(zoom < 1.0)
+	//			zoom = 1.0;
+//			static float zoommax = XMLSupport::parse_float (vs_config->getVariable("graphics","nav_zoom_max","100"));
+			if (zoom<.5)
+				zoom=.5;
+			if(zoom > MAXZOOM/2)
+				zoom = MAXZOOM/2;
+
+		}
 	}
 	//	**********************************
 }
@@ -1285,8 +1638,11 @@ void NavigationSystem::RecordMinAndMax (const QVector &pos, float &min_x, float 
 	if((float)pos.i < min_x)
 		min_x = (float)pos.i;
 			
-	if( fabs((float)pos.i) > max_all )
-		max_all = fabs((float)pos.i);
+//	if( fabs((float)pos.i) > max_all )
+//		max_all = fabs((float)pos.i);
+
+	if( (fabs(max_x - min_x)) > max_all)
+		max_all = 0.5*(fabs(max_x - min_x));
 
 
 
@@ -1298,8 +1654,12 @@ void NavigationSystem::RecordMinAndMax (const QVector &pos, float &min_x, float 
 
 		min_y = (float)pos.j;
 
-	if( fabs((float)pos.j) > max_all )
-		max_all = fabs((float)pos.j);
+//	if( fabs((float)pos.j) > max_all )
+//		max_all = fabs((float)pos.j);
+
+	if( (fabs(max_y - min_y)) > max_all)
+		max_all = 0.5*(fabs(max_y - min_y));
+
 
 
 
@@ -1310,13 +1670,16 @@ void NavigationSystem::RecordMinAndMax (const QVector &pos, float &min_x, float 
 	if((float)pos.k < min_z)
 		min_z = (float)pos.k;
 
-	if( fabs((float)pos.k) > max_all )
-		max_all = fabs((float)pos.k);
+//	if( fabs((float)pos.k) > max_all )
+//		max_all = fabs((float)pos.k);
+
+	if( (fabs(max_z - min_z)) > max_all)
+		max_all = 0.5*(fabs(max_z - min_z));
 
 	//**********************************	
 }
 
-void NavigationSystem::DrawOriginOrientationTri(float center_nav_x, float center_nav_y)
+void NavigationSystem::DrawOriginOrientationTri(float center_nav_x, float center_nav_y, bool system_not_galaxy)
 {
 
 
@@ -1371,14 +1734,35 @@ void NavigationSystem::DrawOriginOrientationTri(float center_nav_x, float center
 		directionz.k = 0.1;
 	}
 
-	directionx = dxyz(directionx, 0, ry, 0);
-	directionx = dxyz(directionx, rx, 0, 0);
 
-	directiony = dxyz(directiony, 0, ry, 0);
-	directiony = dxyz(directiony, rx, 0, 0);
+	if(system_not_galaxy)
+	{
+		if(system_view==VIEW_3D)
+		{
+			directionx = dxyz(directionx, 0,    0, ry_s);
+			directionx = dxyz(directionx, rx_s, 0, 0);
 
-	directionz = dxyz(directionz, 0, ry, 0);
-	directionz = dxyz(directionz, rx, 0, 0);
+			directiony = dxyz(directiony, 0,    0, ry_s);
+			directiony = dxyz(directiony, rx_s, 0, 0);
+
+			directionz = dxyz(directionz, 0,    0, ry_s);
+			directionz = dxyz(directionz, rx_s, 0, 0);
+		}
+	}
+	else
+	{
+		if(galaxy_view==VIEW_3D)
+		{
+			directionx = dxyz(directionx, 0,  0, ry);
+			directionx = dxyz(directionx, rx, 0, 0);
+
+			directiony = dxyz(directiony, 0,  0, ry);
+			directiony = dxyz(directiony, rx, 0, 0);
+
+			directionz = dxyz(directionz, 0,  0, ry);
+			directionz = dxyz(directionz, rx, 0, 0);
+		}
+	}
 
 
 	GFXDisable(TEXTURE0);
@@ -1413,28 +1797,24 @@ void NavigationSystem::DrawOriginOrientationTri(float center_nav_x, float center
 	//**********************************
 }
 
-float NavigationSystem::CalculatePerspectiveAdjustment(float &zscale, float &zdistance,
-		QVector &pos, QVector &pos_flat, float &system_item_scale_temp)
-{
-		
-	ReplaceAxes(pos);
-			
-			
-	pos_flat.i = pos.i;
-	pos_flat.j = center_y;
-//		pos_flat.j = 0.0;
-	pos_flat.k = pos.k;
 
+
+
+
+
+
+
+float NavigationSystem::CalculatePerspectiveAdjustment(float &zscale, float &zdistance,
+		QVector &pos, QVector &pos_flat, float &system_item_scale_temp, bool system_not_galaxy)
+{
+
+	pos_flat.i = pos.i;
+	pos_flat.j = pos.j;
+	pos_flat.k = center_z;
 
 	//Modify by rotation amount
 	//*************************
-	pos = dxyz(pos, 0, ry, 0);
-	pos = dxyz(pos, rx, 0, 0);
-
-	pos_flat = dxyz(pos_flat, 0, ry, 0);
-	pos_flat = dxyz(pos_flat, rx, 0, 0);
-	//*************************
-
+	
 	pos.i -= center_x;
 	pos.j -= center_y;
 	pos.k -= center_z;
@@ -1443,28 +1823,90 @@ float NavigationSystem::CalculatePerspectiveAdjustment(float &zscale, float &zdi
 	pos_flat.j -= center_y;
 	pos_flat.k -= center_z;
 
+	if(system_not_galaxy)
+	{
+		if(system_view==VIEW_3D)	//	3d = rotate
+		{
+			pos = dxyz(pos, 0,    0, ry_s);
+			pos = dxyz(pos, rx_s, 0, 0);
+
+			pos_flat = dxyz(pos_flat, 0,    0, ry_s);
+			pos_flat = dxyz(pos_flat, rx_s, 0, 0);
+		}
+		else			//	2d = pan
+		{
+			pos.i += rx_s;
+			pos.j += ry_s;
+
+			pos_flat.i += rx_s;
+			pos_flat.j += ry_s;
+		}
+	}
+	else
+	{
+		if(galaxy_view==VIEW_3D)	//	3d = rotate
+		{
+			pos = dxyz(pos, 0,  0, ry);
+			pos = dxyz(pos, rx, 0, 0);
+
+			pos_flat = dxyz(pos_flat, 0,  0, ry);
+			pos_flat = dxyz(pos_flat, rx, 0, 0);
+		}
+		else			//	2d = pan
+		{
+			pos.i += rx;
+			pos.j += ry;
+
+			pos_flat.i += rx;
+			pos_flat.j += ry;
+		}
+	}
+	//*************************
+
+
 
 	//CALCULATE PRESPECTIVE ADJUSTMENT
 	//**********************************
-	double real_z=(camera_z - pos.k);
-	zdistance = sqrt( (pos.i * pos.i) + (pos.j * pos.j) + ( real_z * real_z ) );
-	zscale = ( zdistance / (2.0*camera_z) ) * zshiftmultiplier;
-	//zscale = 1.0;
-	
-	double real_zoom = ( (1-(((zoom-0.5*MAXZOOM)/MAXZOOM)*(0.85))) / zscale );
+
+	float standard_unit = 0.25*camera_z; // maxvalue=X, camera_z=4X
+
+	zdistance = (camera_z - pos.k);	//	3-5 standard_unit
+	double zdistance_flat = (camera_z - pos_flat.k);
+
+	zscale = standard_unit/zdistance;	//	1 / (zdistance/standard_unit)
+	double zscale_flat = standard_unit/zdistance_flat;
+
+	double real_zoom = 0.0;
+	double real_zoom_flat = 0.0;
+//	float _l2 = log(2.0f);
+	if(system_not_galaxy)
+	{
+		real_zoom = zoom_s*zoom_s*zscale;
+		real_zoom_flat = zoom_s*zoom_s*zscale_flat;
+//		real_zoom = zoom_s*zscale;
+//		real_zoom_flat = zoom_s*zscale_flat;
+///		real_zoom = (log(zoom_s)/_l2)*zscale;
+///		real_zoom_flat = (log(zoom_s)/_l2)*zscale_flat;
+	}
+	else
+	{
+		real_zoom = zoom*zoom*zscale;
+		real_zoom_flat = zoom*zoom*zscale_flat;
+//		real_zoom = (log(zoom)/_l2)*zscale;
+//		real_zoom_flat = (log(zoom)/_l2)*zscale_flat;
+	}
+
 	pos.i *= real_zoom;
 	pos.j *= real_zoom;
 	pos.k *= real_zoom;
 
-	pos_flat.i *= real_zoom;
-	pos_flat.j *= real_zoom;
-	pos_flat.k *= real_zoom;
+	pos_flat.i *= real_zoom_flat;
+	pos_flat.j *= real_zoom_flat;
+	pos_flat.k *= real_zoom_flat;
 				
 
-	float itemscale =  ( ((camera_z*item_zscalefactor)-zdistance) / (camera_z*item_zscalefactor) );	
+	float itemscale =  real_zoom*item_zscalefactor;	
 				
-//				if(zdistance > 2*camera_z)	//	outliers
-//					itemscale = 1;
 
 	if(itemscale < minimumitemscaledown)	//	dont shrink into nonexistance
 		itemscale = minimumitemscaledown;
@@ -1477,37 +1919,63 @@ float NavigationSystem::CalculatePerspectiveAdjustment(float &zscale, float &zdi
 	return itemscale;
 }
 
-void NavigationSystem::TranslateAndDisplay (QVector &pos, QVector &pos_flat, float center_nav_x, float center_nav_y, float themaxvalue
-		, float zscale, float zdistance, float &the_x, float &the_y, float &system_item_scale_temp)
+
+
+
+void NavigationSystem::TranslateCoordinates(QVector &pos, QVector &pos_flat, float center_nav_x, float center_nav_y, float themaxvalue, float &zscale,
+	float &zdistance, float &the_x, float &the_y, float &the_x_flat, float &the_y_flat, float &system_item_scale_temp, bool system_not_galaxy)
 {
-	float itemscale = CalculatePerspectiveAdjustment(zscale, zdistance, pos, pos_flat, system_item_scale_temp);
+	float itemscale = CalculatePerspectiveAdjustment(zscale, zdistance, pos, pos_flat, system_item_scale_temp, system_not_galaxy);
 
 	//TRANSLATE INTO SCREEN DISPLAY COORDINATES
 	//**********************************
 	the_x = (float)pos.i;
 	the_y = (float)pos.j;
-	float the_x_flat = (float)pos_flat.i;
-	float the_y_flat = (float)pos_flat.j;
+	the_x_flat = (float)pos_flat.i;
+	the_y_flat = (float)pos_flat.j;
 
+	the_x = (the_x / (themaxvalue));
+	the_y = (the_y / (themaxvalue));
 
-	the_x = (the_x / (	(themaxvalue - center_x)*2	));
-	the_y = (the_y / (	(themaxvalue - center_y)*2	));
-	the_x_flat = (the_x_flat / (	(themaxvalue - center_x)*2	));
-	the_y_flat = (the_y_flat / (	(themaxvalue - center_y)*2	));
+	the_x_flat = (the_x_flat / (themaxvalue));
+	the_y_flat = (the_y_flat / (themaxvalue));
 
+	float navscreen_width_delta = (screenskipby4[1] - screenskipby4[0]);
+	float navscreen_height_delta = (screenskipby4[3] - screenskipby4[2]);
+	float navscreen_small_delta = min(navscreen_width_delta, navscreen_height_delta);
 
-	the_x = (the_x * (screenskipby4[1] - screenskipby4[0]));
+	the_x = (the_x * navscreen_small_delta);
 	the_x = the_x + center_nav_x;
-	the_y = (the_y * (screenskipby4[3] - screenskipby4[2]));
+	the_y = (the_y * navscreen_small_delta);
 	the_y = the_y + center_nav_y;
 
-	the_x_flat = (the_x_flat * (screenskipby4[1] - screenskipby4[0]));
+	the_x_flat = (the_x_flat * navscreen_small_delta);
 	the_x_flat = the_x_flat + center_nav_x;
-	the_y_flat = (the_y_flat * (screenskipby4[3] - screenskipby4[2]));
+	the_y_flat = (the_y_flat * navscreen_small_delta);
 	the_y_flat = the_y_flat + center_nav_y;
 	//**********************************
+	if ((system_not_galaxy?system_view:galaxy_view)==VIEW_ORTHO) {
+		the_x=the_x_flat;
+		the_y=the_y_flat;
+		pos=pos_flat;
+	}
+}
 
 
+
+void NavigationSystem::TranslateAndDisplay (QVector &pos, QVector &pos_flat, float center_nav_x, float center_nav_y, float themaxvalue
+		, float &zscale, float &zdistance, float &the_x, float &the_y, float &system_item_scale_temp, bool system_not_galaxy)
+{ 
+	float the_x_flat;
+	float the_y_flat;
+	if ((system_not_galaxy?system_view:galaxy_view)==VIEW_ORTHO) {
+		TranslateCoordinates(pos, pos_flat, center_nav_x, center_nav_y, themaxvalue, zscale, zdistance,
+			the_x, the_y, the_x_flat, the_y_flat, system_item_scale_temp, system_not_galaxy);
+		return;
+	} else {
+		TranslateCoordinates(pos, pos_flat, center_nav_x, center_nav_y, themaxvalue, zscale, zdistance,
+			the_x, the_y, the_x_flat, the_y_flat, system_item_scale_temp, system_not_galaxy);
+	}
 
 	//Draw orientation lines
 	//**********************************
@@ -1522,37 +1990,77 @@ void NavigationSystem::TranslateAndDisplay (QVector &pos, QVector &pos_flat, flo
 	//		GFXVertex3f(the_x_flat,	the_y_flat	,0);
 
 
+	GFXColorf(GFXColor(0,1,0,.3));
+
+	bool display_flat_circle=true;
+		
 	if(the_y_flat > screenskipby4[3])
-		the_y_flat = screenskipby4[3];
+	{
+//		the_y_flat = screenskipby4[3];
+		GFXColorf(GFXColor(0,1,1,.05));
+		display_flat_circle=false;
+	}
 
 	if(the_y_flat < screenskipby4[2])
-		the_y_flat = screenskipby4[2];
-
-
-	if(the_y > screenskipby4[3])
-		the_y = screenskipby4[3];
-
-	if(the_y < screenskipby4[2])
-		the_y = screenskipby4[2];
-
-
-	if(	(the_x_flat > screenskipby4[0]) && (the_x_flat < screenskipby4[1]) )
-		{
-			GFXColorf(GFXColor(0,1,0,.2));
-			GFXVertex3f(the_x_flat,	the_y_flat	,0);
-			GFXVertex3f(the_x,		the_y		,0);
-		}
-
+	{
+//		the_y_flat = screenskipby4[2];
+		GFXColorf(GFXColor(0,1,1,.05));
+		display_flat_circle=false;
+	}
+	
+	if(the_x_flat > screenskipby4[1])
+	{
+//		the_x_flat = screenskipby4[1];
+		GFXColorf(GFXColor(0,1,1,.05));
+		display_flat_circle=false;
+	}
 
 	if(the_x_flat < screenskipby4[0])
-		the_x_flat = screenskipby4[0];
+	{
+//		the_x_flat = screenskipby4[0];
+		GFXColorf(GFXColor(0,1,1,.05));
+		display_flat_circle=false;
+	}
 
-	if(the_x_flat > screenskipby4[1])
-		the_x_flat = screenskipby4[1];
+	bool display_flat=true;
+		
+	if(the_x > screenskipby4[1])
+	{
+//		the_x = screenskipby4[1];
+		GFXColorf(GFXColor(1,1,0,.05));
+		display_flat=false;
+	}
 
+	if(the_x < screenskipby4[0])
+	{
+//		the_x = screenskipby4[0];
+		GFXColorf(GFXColor(1,1,0,.05));
+		display_flat=false;
+	}
 
-	DrawCircle(the_x_flat, the_y_flat, (.005*system_item_scale), GFXColor(1,1,1,.2));
+	if(the_y > screenskipby4[3])
+	{
+//		the_y = screenskipby4[3];
+		GFXColorf(GFXColor(1,1,0,.05));
+		display_flat=false;
+	}
 
+	if(the_y < screenskipby4[2])
+	{
+//		the_y = screenskipby4[2];
+		GFXColorf(GFXColor(1,1,0,.05));
+		display_flat=false;
+	}
+	
+	if (display_flat) {
+		IntersectBorder(the_x_flat,the_y_flat,the_x,the_y);
+		GFXVertex3f(the_x_flat,	the_y_flat	,0);
+		GFXVertex3f(the_x,		the_y		,0);
+		if (display_flat_circle) {
+			DrawCircle(the_x_flat, the_y_flat, (.005*system_item_scale), GFXColor(1,1,1,.2));
+		}
+	}
+	
 	GFXEnd();
 	GFXEnable(TEXTURE0);
 	//**********************************

@@ -1,5 +1,5 @@
 #include "in.h"
-#include "vs_path.h"
+#include "vsfilesystem.h"
 #include "vs_globals.h"
 #include "vegastrike.h"
 #include "cockpit_generic.h"
@@ -64,6 +64,7 @@ void Cockpit::Eject() {
   ejecting=true;
 }
 
+using namespace VSFileSystem;
 void Cockpit::Init (const char * file, bool isDisabled) {
   shakin=0;
   autopilot_time=0;
@@ -81,17 +82,10 @@ void Cockpit::Init (const char * file, bool isDisabled) {
     Init (disname.c_str());
     return;
   }
-  string cpdir=vs_config->getVariable("data","cockpits","");
-  if (cpdir.length())
-	  vschdir (cpdir.c_str());  
-  vschdir (file);
-  FILE *tempfp = fopen(file, "rb");
-  vscdup();
-  if (cpdir.length())
-	  vscdup();  
-  if (tempfp) {
-	  fclose(tempfp);
-  } else {
+  VSFile f;
+  VSError err = f.OpenReadOnly( file, CockpitFile);
+  if (err>Ok)
+  {
 	  // File not found...
 	  if (isDisabled==false && (string(file).find("disabled-")==string::npos)) {
 	    Init(file, true);
@@ -104,13 +98,8 @@ void Cockpit::Init (const char * file, bool isDisabled) {
   }
   Delete();
 //  string cpdir=vs_config->getVariable("data","cockpits","");
-  if (cpdir.length())
-	  vschdir (cpdir.c_str());
-  vschdir (file);
-  LoadXML(file);
-  vscdup();
-  if (cpdir.length())
-	  vscdup();
+  LoadXML(f);
+  f.Close();
 } 
 Unit *  Cockpit::GetSaveParent() {
   Unit * un = parentturret.GetUnit();
@@ -139,6 +128,10 @@ void Cockpit::SetParent (Unit * unit, const char * filename, const char * unitmo
     if (StartArmor[1]==0) StartArmor[1]=1;
     if (StartArmor[2]==0) StartArmor[2]=1;
     if (StartArmor[3]==0) StartArmor[3]=1;
+	if (StartArmor[4]==0) StartArmor[4]=1;
+    if (StartArmor[5]==0) StartArmor[5]=1;
+    if (StartArmor[6]==0) StartArmor[6]=1;
+    if (StartArmor[7]==0) StartArmor[7]=1;
     maxfuel = unit->FuelData();
     maxhull = unit->GetHull();
   }
@@ -163,6 +156,8 @@ Cockpit::Cockpit (const char * file, Unit * parent,const std::string &pilot_name
   //  static int headlag = XMLSupport::parse_int (vs_config->getVariable("graphics","head_lag","10"));
   //int i;
   fg=NULL;
+  jumpok = 0;
+  TimeOfLastCollision=-200;
   /*
   for (i=0;i<headlag;i++) {
     headtrans.push_back (Matrix());
@@ -382,60 +377,64 @@ void Cockpit::Update () {
   UpdAutoPilot();
   Unit * par=GetParent();
   if (!par) {
-    if (respawnunit.size()>_Universe->CurrentCockpit())
-      if (respawnunit[_Universe->CurrentCockpit()]){
-	parentturret.SetUnit(NULL);
-	static float initialzoom = XMLSupport::parse_float(vs_config->getVariable("graphics","inital_zoom_factor","2.25"));
-	zoomfactor=initialzoom;
-	respawnunit[_Universe->CurrentCockpit()]=0;
-	std::string savegamefile =mission->getVariable ("savegame","");
-	int k;
-	for ( k=0;k<_Universe->numPlayers();++k) {
-	  if (_Universe->AccessCockpit(k)==this)
-	    break;
-	}
-	if (k==_Universe->numPlayers()) k=0;
-	string newsystem;QVector pos; bool setplayerXloc;float credits;
-	savegame->ParseSaveGame(savegamefile,newsystem,newsystem,pos,setplayerXloc,credits,unitfilename,k);
-	newsystem= savegame->GetStarSystem()+".system";
-	StarSystem * ss = _Universe->GenerateStarSystem (newsystem.c_str(),"",Vector(0,0,0));
-	_Universe->getActiveStarSystem(0)->SwapOut();
-	this->activeStarSystem=ss;
-	_Universe->pushActiveStarSystem(ss);
+	if (respawnunit.size()>_Universe->CurrentCockpit()){
+	  if (respawnunit[_Universe->CurrentCockpit()]){
+		parentturret.SetUnit(NULL);
+		static float initialzoom = XMLSupport::parse_float(vs_config->getVariable("graphics","inital_zoom_factor","2.25"));
+		zoomfactor=initialzoom;
+		respawnunit[_Universe->CurrentCockpit()]=0;
+		std::string savegamefile =mission->getVariable ("savegame","");
+		int k;
+		for ( k=0;k<_Universe->numPlayers();++k) {
+		  if (_Universe->AccessCockpit(k)==this)
+		  break;
+		}
+		if (k==_Universe->numPlayers()) k=0;
+		string newsystem;QVector pos; bool setplayerXloc;
+                savegame->SetStarSystem("");
+		savegame->ParseSaveGame(savegamefile,newsystem,newsystem,pos,setplayerXloc,this->credits,unitfilename,k);
+		newsystem= savegame->GetStarSystem()+".system";
+		StarSystem * ss = _Universe->GenerateStarSystem (newsystem.c_str(),"",Vector(0,0,0));
+		_Universe->getActiveStarSystem(0)->SwapOut();
+		this->activeStarSystem=ss;
+		_Universe->pushActiveStarSystem(ss);
 
 
-	vector <StarSystem *> saved;
-	while (_Universe->getNumActiveStarSystem()) {
-	  saved.push_back (_Universe->activeStarSystem());
-	  _Universe->popActiveStarSystem();
-	}
-	if (!saved.empty()) {
-	  saved.back()=ss;
-	}
-	unsigned int mysize = saved.size();
-	for (unsigned int i=0;i<mysize;i++) {
-	  _Universe->pushActiveStarSystem (saved.back());
-	  saved.pop_back();
-	}
-	ss->SwapIn();
-	int fgsnumber = 0;
-	if (fg) {
-	  fgsnumber=fg->flightgroup_nr++;
-	  fg->nr_ships++;
-	  fg->nr_ships_left++;
-	}
-	Unit * un = UnitFactory::createUnit (GetUnitFileName().c_str(),false,this->unitfaction,unitmodname,fg,fgsnumber);
-	un->SetCurPosition (UniverseUtil::SafeEntrancePoint (savegame->GetPlayerLocation()));
-	ss->AddUnit (un);
+		vector <StarSystem *> saved;
+		while (_Universe->getNumActiveStarSystem()) {
+		  saved.push_back (_Universe->activeStarSystem());
+		  _Universe->popActiveStarSystem();
+		}
+		if (!saved.empty()) {
+		  saved.back()=ss;
+		}
+		unsigned int mysize = saved.size();
+		for (unsigned int i=0;i<mysize;i++) {
+		  _Universe->pushActiveStarSystem (saved.back());
+		  saved.pop_back();
+		}
+		ss->SwapIn();
+		int fgsnumber = 0;
+		if (fg) {
+		  fgsnumber=fg->flightgroup_nr++;
+		  fg->nr_ships++;
+		  fg->nr_ships_left++;
+		}
+		Unit * un = UnitFactory::createUnit (GetUnitFileName().c_str(),false,this->unitfaction,unitmodname,fg,fgsnumber);
+		un->SetCurPosition (UniverseUtil::SafeEntrancePoint (savegame->GetPlayerLocation()));
+		ss->AddUnit (un);
 
-	this->SetParent(un,GetUnitFileName().c_str(),unitmodname.c_str(),savegame->GetPlayerLocation());
-	SwitchUnits (NULL,un);
-	credits = savegame->GetSavedCredits();
-	DoCockpitKeys();
-	savegame->ReloadPickledData();
-	_Universe->popActiveStarSystem();
-	DockToSavedBases((int)(this - _Universe->AccessCockpit(0)));
+		this->SetParent(un,GetUnitFileName().c_str(),unitmodname.c_str(),savegame->GetPlayerLocation());
+		SwitchUnits (NULL,un);
+		this->credits = savegame->GetSavedCredits();
+		DoCockpitKeys();
+		savegame->ReloadPickledData();
+		_Universe->popActiveStarSystem();
+                _Universe->pushActiveStarSystem(ss);
+		DockToSavedBases((int)(this - _Universe->AccessCockpit(0)));
+                _Universe->popActiveStarSystem();
       }
+	} 
   }
   if (turretcontrol.size()>_Universe->CurrentCockpit())
   if (turretcontrol[_Universe->CurrentCockpit()]) {
@@ -543,7 +542,7 @@ void Cockpit::Update () {
     if (suicide[_Universe->CurrentCockpit()]) {
       Unit * un=NULL;
       if ((un = parent.GetUnit())) {
-	unsigned short armor[4];
+	float armor[8]; //short fix
 	un->ArmorData(armor);
 	un->DealDamageToHull(Vector(0,0,.1),un->GetHull()+2+armor[0]);
       }

@@ -165,7 +165,6 @@ void FlyByKeyboard::Execute (bool resetangvelocity) {
 	Network[whichplayer].startCommunication();
 	SSCK.commchanged=false;
   }
-#ifdef NETCOMM
   if( Network!=NULL && SSCK.freq_increase)
   {
   	SSCK.freq_increase = false;
@@ -186,7 +185,6 @@ void FlyByKeyboard::Execute (bool resetangvelocity) {
     SSCK.switchsecured=false;
 	Network[whichplayer].switchSecured();
   }
-#endif
   if (SSCK.setunvel) {
     SSCK.setunvel=false;
     parent->VelocityReference (parent->Target());
@@ -242,7 +240,7 @@ void FlyByKeyboard::Execute (bool resetangvelocity) {
 	KeyboardRollRight(-1);
     }
 
-    //    fprintf(stderr,"AB: press %d rel %d\n",SSCK.ABpress,SSCK.ABrelease);
+    //    VSFileSystem::vs_fprintf(stderr,"AB: press %d rel %d\n",SSCK.ABpress,SSCK.ABrelease);
     if (SSCK.ABpress>=1)
       Afterburn(1);
     else
@@ -300,7 +298,7 @@ void FlyByKeyboard::Execute (bool resetangvelocity) {
       Accel (-((float)FBWABS(SSCK.decelpress))/(FBWABS(SSCK.decelpress)+SSCK.decelrelease));
     }
     if (SSCK.ABpress||SSCK.ABrelease) {
-      //fprintf(stderr,"AB: press %d rel %d\n",SSCK.ABpress,SSCK.ABrelease);
+      //VSFileSystem::vs_fprintf(stderr,"AB: press %d rel %d\n",SSCK.ABpress,SSCK.ABrelease);
       Afterburn ((SSCK.ABpress>=1)?1:0);
     }
   }

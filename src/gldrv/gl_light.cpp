@@ -49,7 +49,7 @@ void /*GFXDRVAPI*/ GFXPushGlobalEffects() {
       glDisable (GL_LIGHT0+i);
     }      
   }
-  //  fprintf (stderr,"PUSH %d",GlobalEffects.size());
+  //  VSFileSystem::Fprintf (stderr,"PUSH %d",GlobalEffects.size());
   GlobalEffects.push (tmp);
   GlobalEffectsAmbient.push (_ambient_light[_currentContext]);
   GFXLightContextAmbient (GFXColor (0,0,0,1));
@@ -57,7 +57,7 @@ void /*GFXDRVAPI*/ GFXPushGlobalEffects() {
 GFXBOOL /*GFXDRVAPI*/ GFXPopGlobalEffects() {
   if (GlobalEffects.empty())
     return false;
-  //  fprintf (stderr,"GES %d",GlobalEffects.size());
+  //  VSFileSystem::Fprintf (stderr,"GES %d",GlobalEffects.size());
   for (int i=0;i<GFX_MAX_LIGHTS;i++) {
     if (GlobalEffects.top()[i]) {
       glEnable (GL_LIGHT0+i);

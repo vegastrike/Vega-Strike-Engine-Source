@@ -23,13 +23,19 @@
 #include "vegastrike.h"
 #include <math.h>
 #include "vec.h"
-#ifdef USE_BOOST_129
+#ifndef USE_BOOST_128
+#if defined (_MSC_VER) && _MSC_VER<=1200
+#define Vector Vactor
+#endif
 #include <boost/python/class.hpp>
 #include <boost/python/to_python_converter.hpp>
 #include <boost/python/to_python_indirect.hpp>
 #include <boost/python/to_python_value.hpp>
 #include <boost/python/converter/builtin_converters.hpp>
 #include <boost/python.hpp>
+#if defined (_MSC_VER) && _MSC_VER<=1200
+#undef Vector
+#endif
 #else
 #include <boost/python/detail/extension_class.hpp>
 #endif

@@ -1,5 +1,5 @@
 
-#include "vs_path.h"
+#include "vsfilesystem.h"
 #include "vs_globals.h"
 #include "vegastrike.h"
 #include "gauge.h"
@@ -177,7 +177,13 @@ void GameCockpit::DrawNavigationSymbol (const Vector &Loc, const Vector & P, con
 float GameCockpit::computeLockingSymbol(Unit * par) {
   return par->computeLockingPercent();
 }
-inline void DrawOneTargetBox (const QVector & Loc, const float rSize, const Vector &CamP, const Vector & CamQ, const Vector & CamR, float lock_percent, bool ComputerLockon, bool Diamond=false) {
+inline void DrawOneTargetBox (const QVector & Loc, float rSize, const Vector &CamP, const Vector & CamQ, const Vector & CamR, float lock_percent, bool ComputerLockon, bool Diamond=false) {
+
+  static float rat = XMLSupport::parse_float(vs_config->getVariable("graphics","hud","min_target_box_size",".01"));
+  float len = (Loc).Magnitude();
+  float curratio = rSize/len;
+  if (curratio<rat) 
+    rSize = len*rat;
   if (Diamond) {
     float ModrSize=rSize/1.41;
     GFXBegin (GFXLINESTRIP); 
@@ -242,7 +248,7 @@ inline void DrawOneTargetBox (const QVector & Loc, const float rSize, const Vect
       lock_percent=0;
     }
     float max=2.05;
-    //    fprintf (stderr,"lock percent %f\n",lock_percent);
+    //    VSFileSystem::Fprintf (stderr,"lock percent %f\n",lock_percent);
     float coord = 1.05+(max-1.05)*lock_percent;//rSize/(1-lock_percent);//this is a number between 1 and 100
    
     double rtot = 1./sqrtf(2);
@@ -448,7 +454,7 @@ void GameCockpit::DrawTargetBox () {
 	float mrange;
     un->getAverageGunSpeed (speed,range,mrange);
     float err = (.01*(1-un->CloakVisible()));
-   QVector iLoc = target->PositionITTS (un->Position(),un->cumulative_velocity,speed)-_Universe->AccessCamera()->GetPosition()+10*err*QVector (-.5*.25*un->rSize()+rand()*.25*un->rSize()/RAND_MAX,-.5*.25*un->rSize()+rand()*.25*un->rSize()/RAND_MAX,-.5*.25*un->rSize()+rand()*.25*un->rSize()/RAND_MAX);
+   QVector iLoc = target->PositionITTS (un->Position(),un->cumulative_velocity,speed,steady_itts)-_Universe->AccessCamera()->GetPosition()+10*err*QVector (-.5*.25*un->rSize()+rand()*.25*un->rSize()/RAND_MAX,-.5*.25*un->rSize()+rand()*.25*un->rSize()/RAND_MAX,-.5*.25*un->rSize()+rand()*.25*un->rSize()/RAND_MAX);
     
     GFXBegin (GFXLINESTRIP);
     if(draw_line_to_itts){
@@ -721,7 +727,9 @@ float GameCockpit::LookupTargetStat (int stat, Unit *target) {
   static float fpsval=0;
   const float fpsmax=1;
   static float numtimes=fpsmax;
-  unsigned short armordat[4];
+  float armordat[8]; //short fix
+  float retval;
+  int armori;
   Unit * tmpunit;
   switch (stat) {
   case UnitImages::SHIELDF:
@@ -737,10 +745,23 @@ float GameCockpit::LookupTargetStat (int stat, Unit *target) {
   case UnitImages::ARMORL:
   case UnitImages::ARMORB:
     target->ArmorData (armordat);
-    if (armordat[stat-UnitImages::ARMORF]>StartArmor[stat-UnitImages::ARMORF]) {
-      StartArmor[stat-UnitImages::ARMORF]=armordat[stat-UnitImages::ARMORF];
-    }
-    return ((float)armordat[stat-UnitImages::ARMORF])/StartArmor[stat-UnitImages::ARMORF];
+	for (armori=0;armori<8;++armori) {	   
+		if (armordat[armori]>StartArmor[armori]) {
+			StartArmor[armori]=armordat[armori];
+		}
+		armordat[armori]/=StartArmor[armori];		
+	}
+	switch (stat) {
+	case UnitImages::ARMORR:
+		return .25*(armordat[0]+armordat[1]+armordat[4]+armordat[5]);	   
+	case UnitImages::ARMORL:
+		return .25*(armordat[2]+armordat[3]+armordat[6]+armordat[7]);		
+	case UnitImages::ARMORB:
+		return .25*(armordat[1]+armordat[3]+armordat[5]+armordat[7]);
+	case UnitImages::ARMORF:
+	default:
+		return .25*(armordat[0]+armordat[2]+armordat[4]+armordat[6]);		
+	}
   case UnitImages::FUEL:
 	if (target->FuelData()>maxfuel)
 		maxfuel=target->FuelData();
@@ -780,33 +801,45 @@ float GameCockpit::LookupTargetStat (int stat, Unit *target) {
 	}
   case UnitImages::LOCK:
     if  ((tmpunit = target->GetComputerData().threat.GetUnit())) {
-      return (tmpunit->cosAngleTo (target,*(float*)&armordat[0],FLT_MAX,FLT_MAX)>.95);
+      return (tmpunit->cosAngleTo (target,*&armordat[0],FLT_MAX,FLT_MAX)>.95);
     }
     return 0;
   case UnitImages::MISSILELOCK:
 	  if (target->graphicOptions.missilelock)
 		  return 1;
 	  return 0;
+  case UnitImages::COLLISION:{
+	  static double collidepanic = XMLSupport::parse_float (vs_config->getVariable("physics","collision_inertial_time","1.25"));
+	  return (getNewTime()-TimeOfLastCollision)<collidepanic;
+	  break;
+  }
   case UnitImages::ECM:
 	  return target->GetImageInformation().ecm>0?1:0;
+  case UnitImages::WARPFIELDSTRENGTH:
+          return target->graphicOptions.WarpFieldStrength;
   case UnitImages::JUMP:
 	  return jumpok?1:0;
   case UnitImages::KPS:
 	if (lie) 
-		return (target->GetVelocity().Magnitude())*10/game_speed;
+		return (target->GetVelocity().Magnitude())/game_speed;
 	else
 		return target->GetVelocity().Magnitude()*3.6;
   case UnitImages::SETKPS:
 	if (lie) 
-	    return target->GetComputerData().set_speed*10/game_speed;
+	    return target->GetComputerData().set_speed/game_speed;
 	else
 		return target->GetComputerData().set_speed*3.6;
   case UnitImages::AUTOPILOT:
     {
     static int wasautopilot=0;
 	int abletoautopilot=0;
+	static bool auto_valid = XMLSupport::parse_bool (vs_config->getVariable ("physics","insystem_jump_or_timeless_auto-pilot","false"));	
     if (target) {
-      abletoautopilot=(target->AutoPilotTo(target,false)?1:0);
+		if (!auto_valid) {
+			abletoautopilot=(target->graphicOptions.InWarp);
+		}else {
+			abletoautopilot=(target->AutoPilotTo(target,false)?1:0);
+		}
     }
 	if (abletoautopilot!=wasautopilot) {
 		if (abletoautopilot==0) {
@@ -848,7 +881,7 @@ void GameCockpit::DrawGauges(Unit * un) {
       gauges[i]->Draw(LookupTargetStat (i,un));
 /*      if (rand01()>un->GetImageInformation().cockpit_damage[0]) {
         static Animation gauge_ani("static.ani",true,.1,BILINEAR);
-        gauge_ani.DrawAsSprite(Radar);
+        gauge_ani.DrawAsVSSprite(Radar);
       }*/
       float damage = un->GetImageInformation().cockpit_damage[(1+MAXVDUS+i)%(MAXVDUS+1+UnitImages::NUMGAUGES)];
       if (gauge_time[i]>=0) {
@@ -858,7 +891,7 @@ void GameCockpit::DrawGauges(Unit * un) {
           }
         } else {
           static Animation vdu_ani("static.ani",true,.1,BILINEAR);
-          vdu_ani.DrawAsSprite(gauges[i]);	
+          vdu_ani.DrawAsVSSprite(gauges[i]);	
         }
       } else {
         if (cockpit_time>(((1-(-gauge_time[i]))+damage))) {
@@ -980,7 +1013,16 @@ GameCockpit::GameCockpit (const char * file, Unit * parent,const std::string &pi
   draw_line_to_targets_target=XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","drawLineToTargetsTarget","false"));
   draw_line_to_itts=XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","drawLineToITTS","false"));
   always_itts=XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","drawAlwaysITTS","false"));
+  steady_itts=XMLSupport::parse_bool(vs_config->getVariable ("physics","steady_itts","false"));
   radar_type=vs_config->getVariable("graphics","hud","radarType","WC");
+
+  // Compute the screen limits. Used to display the arrow pointing to the selected target.
+  projection_limit_y = XMLSupport::parse_float(vs_config->getVariable("graphics","fov","78"));
+  // The angle betwwen the center of the screen and the border is half the fov.
+  projection_limit_y = tan(projection_limit_y * M_PI / (180*2));
+  projection_limit_x = projection_limit_y * g_game.aspect;
+  // Precompute this division... performance.
+  inv_screen_aspect_ratio = 1 / g_game.aspect;
 
   friendly=GFXColor(-1,-1,-1,-1);
   enemy=GFXColor(-1,-1,-1,-1);
@@ -1091,12 +1133,12 @@ void SuicideKey (int, KBSTATE k) {
 }
 
 class UnivMap {
-  Sprite * ul;
-  Sprite * ur;
-  Sprite * ll;
-  Sprite * lr;
+  VSSprite * ul;
+  VSSprite * ur;
+  VSSprite * ll;
+  VSSprite * lr;
 public:
-  UnivMap (Sprite * ull, Sprite *url, Sprite * lll, Sprite * lrl) {
+  UnivMap (VSSprite * ull, VSSprite *url, VSSprite * lll, VSSprite * lrl) {
     ul=ull;
     ur=url;
     ll=lll;
@@ -1125,10 +1167,10 @@ public:
 std::vector <UnivMap> univmap;
 void MapKey (int, KBSTATE k) {
   if (k==PRESS) {
-    static Sprite ul("upper-left-map.spr");
-    static Sprite ur("upper-right-map.spr");
-    static Sprite ll("lower-left-map.spr");
-    static Sprite lr("lower-right-map.spr");
+    static VSSprite ul("upper-left-map.spr");
+    static VSSprite ur("upper-right-map.spr");
+    static VSSprite ll("lower-left-map.spr");
+    static VSSprite lr("lower-right-map.spr");
     while (univmap.size()<=_Universe->CurrentCockpit())
       univmap.push_back(UnivMap(NULL,NULL,NULL,NULL));
     if (univmap[_Universe->CurrentCockpit()].isNull()) {
@@ -1193,33 +1235,34 @@ int GameCockpit::Autopilot (Unit * target) {
     enableautosound.playsound();
     Unit * un=NULL;
     if ((un=GetParent())) {
-      if ((retauto = un->AutoPilotTo(un,false))) {//can he even start to autopilot
-	if (autopan)
-	  SetView (CP_PAN);
-	un->AutoPilotTo(target,false);
-	static bool face_target_on_auto = XMLSupport::parse_bool (vs_config->getVariable ( "physics","face_on_auto", "false"));
-	if (face_target_on_auto) {
-	  //	  FaceTarget(un,un->LocalPosition(),un->Target());
-	}	  
-	static double averagetime = GetElapsedTime()/getTimeCompression();
-	static double numave = 1.0;
-	averagetime+=GetElapsedTime()/getTimeCompression();
-	static float autospeed = XMLSupport::parse_float (vs_config->getVariable ("physics","autospeed",".020"));//10 seconds for auto to kick in;
-	numave++;
-	if (autopan) {
-	  AccessCamera(CP_PAN)->myPhysics.SetAngularVelocity(Vector(0,0,0));
-	  AccessCamera(CP_PAN)->myPhysics.ApplyBalancedLocalTorque(_Universe->AccessCamera()->P,
+      if((retauto = un->AutoPilotTo(un,false))) {//can he even start to autopilot
+		if (autopan){
+		  SetView (CP_PAN);
+		}
+		un->AutoPilotTo(target,false);
+		static bool face_target_on_auto = XMLSupport::parse_bool (vs_config->getVariable ( "physics","face_on_auto", "false"));
+		if (face_target_on_auto) {
+			//	  FaceTarget(un,un->LocalPosition(),un->Target());
+		}	  
+		static double averagetime = GetElapsedTime()/getTimeCompression();
+		static double numave = 1.0;
+		averagetime+=GetElapsedTime()/getTimeCompression();
+		static float autospeed = XMLSupport::parse_float (vs_config->getVariable ("physics","autospeed",".020"));//10 seconds for auto to kick in;
+		numave++;
+		if (autopan) {
+		  AccessCamera(CP_PAN)->myPhysics.SetAngularVelocity(Vector(0,0,0));
+		  AccessCamera(CP_PAN)->myPhysics.ApplyBalancedLocalTorque(_Universe->AccessCamera()->P,
 								   _Universe->AccessCamera()->R,
 								   averagetime*autospeed/(numave));
-	  static float initialzoom=XMLSupport::parse_float(vs_config->getVariable("graphics","inital_zoom_factor","2.25"));
-	  zoomfactor=initialzoom;
-	}
-	static float autotime = XMLSupport::parse_float (vs_config->getVariable ("physics","autotime","10"));//10 seconds for auto to kick in;
+		  static float initialzoom=XMLSupport::parse_float(vs_config->getVariable("graphics","inital_zoom_factor","2.25"));
+		  zoomfactor=initialzoom;
+		}
+		static float autotime = XMLSupport::parse_float (vs_config->getVariable ("physics","autotime","10"));//10 seconds for auto to kick in;
 
-	autopilot_time=autotime;
-	autopilot_target.SetUnit (target);
-      }
-    }
+		autopilot_time=autotime;
+		autopilot_target.SetUnit (target);
+	  }
+	}
   }
   return retauto;
 }
@@ -1258,7 +1301,7 @@ static void DrawCrosshairs (float x, float y, float wid, float hei, const GFXCol
 	GFXEnd();
 	GFXEnable(TEXTURE0);
 }
-
+extern bool QuitAllow;
 void GameCockpit::Draw() { 
   cockpit_time+=GetElapsedTime();
   if (cockpit_time>=100000)
@@ -1333,6 +1376,8 @@ void GameCockpit::Draw() {
         Panel.front()->GetPosition(x,y);
         DrawCrosshairs(x,y,wid,hei,textcol);
       } else {
+        GFXBlendMode(SRCALPHA,INVSRCALPHA);
+        GFXEnable (TEXTURE0);
         Panel.front()->Draw();//draw crosshairs
       }
     }
@@ -1341,22 +1386,22 @@ void GameCockpit::Draw() {
   if (mouseCursor) {  
     GFXBlendMode (SRCALPHA,INVSRCALPHA);
     GFXColor4f (1,1,1,1);
-    
-    //    GFXEnable(TEXTURE0);
+    GFXEnable(TEXTURE0);
     //    GFXDisable (DEPTHTEST);
     //    GFXDisable(TEXTURE1);
     static int revspr = XMLSupport::parse_bool (vs_config->getVariable ("joystick","reverse_mouse_spr","true"))?1:-1;
     static string blah = vs_config->getVariable("joystick","mouse_crosshair","crosshairs.spr");
-    static Sprite MouseSprite (blah.c_str(),BILINEAR,GFXTRUE);
-    MouseSprite.SetPosition (-1+float(mousex)/(.5*g_game.x_resolution),-revspr+float(revspr*mousey)/(.5*g_game.y_resolution));
+    static VSSprite MouseVSSprite (blah.c_str(),BILINEAR,GFXTRUE);
+    MouseVSSprite.SetPosition (-1+float(mousex)/(.5*g_game.x_resolution),-revspr+float(revspr*mousey)/(.5*g_game.y_resolution));
     
-    MouseSprite.Draw();
-    //    DrawGlutMouse(mousex,mousey,&MouseSprite);
-    //    DrawGlutMouse(mousex,mousey,&MouseSprite);
+    MouseVSSprite.Draw();
+    //    DrawGlutMouse(mousex,mousey,&MouseVSSprite);
+    //    DrawGlutMouse(mousex,mousey,&MouseVSSprite);
   }
   RestoreViewPort();
   GFXBlendMode (ONE,ZERO);
-  GFXAlphaTest (GREATER,.1);
+  static float AlphaTestingCutoff =XMLSupport::parse_float(vs_config->getVariable("graphics","AlphaTestCutoff",".8"));
+  GFXAlphaTest (GREATER,AlphaTestingCutoff);
   GFXColor4f(1,1,1,1);
   if (view<CP_CHASE) {
     if (Pit[view]) 
@@ -1381,7 +1426,7 @@ void GameCockpit::Draw() {
 	}
 /*	if (rand01()>un->GetImageInformation().cockpit_damage[0]) {
 		static Animation radar_ani("round_static.ani",true,.1,BILINEAR);
-		radar_ani.DrawAsSprite(Radar);	
+		radar_ani.DrawAsVSSprite(Radar);	
 	}*/
 	float damage =(un->GetImageInformation().cockpit_damage[0]);
 	if (damage<.985) {
@@ -1392,8 +1437,8 @@ void GameCockpit::Draw() {
           }
         } else {
           static Animation radar_ani("static_round.ani",true,.1,BILINEAR);
-          radar_ani.DrawAsSprite(Radar[0]);	
-          radar_ani.DrawAsSprite(Radar[1]);	
+          radar_ani.DrawAsVSSprite(Radar[0]);	
+          radar_ani.DrawAsVSSprite(Radar[1]);	
         }
       } else {
         if (cockpit_time>((1-(-radar_time))+damage)) {
@@ -1426,7 +1471,7 @@ void GameCockpit::Draw() {
 	    } else {
 	      static Animation vdu_ani("static.ani",true,.1,BILINEAR);
 	      GFXEnable(TEXTURE0);
-	      vdu_ani.DrawAsSprite(vdu[vd]);	
+	      vdu_ani.DrawAsVSSprite(vdu[vd]);	
 	    }
 	  } else {
 	    if (cockpit_time>((1-(-vdu_time[vd]))+(damage))) {
@@ -1445,7 +1490,7 @@ void GameCockpit::Draw() {
     if (un->GetHull()>=0)
       die = false;
     if (un->Threat()!=NULL) {
-      if (getTimeCompression()>1) {
+      if (0&&getTimeCompression()>1) {
 	reset_time_compression(0,PRESS);
       }
       un->Threaten (NULL,0);
@@ -1453,7 +1498,10 @@ void GameCockpit::Draw() {
     if (_Universe->CurrentCockpit()<univmap.size()) {
       univmap[_Universe->CurrentCockpit()].Draw();
     }
+    // Draw the arrow to the target.
+    DrawArrowToTarget(parent.GetUnit(), parent.GetUnit()->Target());
   }
+
   if (die) {
 	if (un) {
 		if (un->GetHull()>=0) {
@@ -1490,6 +1538,11 @@ void GameCockpit::Draw() {
 	SetView (CP_PAN);
 	zoomfactor=dietime*10;
 	}
+  }
+  if (QuitAllow) {
+	  static VSSprite QuitSprite("quit.spr",BILINEAR,GFXTRUE);
+	  GFXEnable(TEXTURE0);
+	  QuitSprite.Draw();	  
   }
   GFXAlphaTest (ALWAYS,0);  
   GFXHudMode (false);
@@ -1528,11 +1581,12 @@ string GameCockpit::getsoundending(int which) {
 
 #include <algorithm>
 string GameCockpit::getsoundfile(string sound) {
-	FILE *fp=NULL;
+	bool ok = false;
 	int i;
 	string lastsound="";
-	for (i=0;i<9&&fp==NULL;i++) {
-		string anothertmpstr=getsoundending(i);
+	string anothertmpstr = "";
+	for (i=0;i<9&&!ok;i++) {
+		anothertmpstr=getsoundending(i);
 		bool foundyet=false;
 		while (1) {
 			std::string::iterator found=std::find(anothertmpstr.begin(),anothertmpstr.end(),'*');
@@ -1547,12 +1601,13 @@ string GameCockpit::getsoundfile(string sound) {
 				break;
 			}
 		}
-		lastsound=GetSharedSoundPath (anothertmpstr);
-		fp=fopen(lastsound.c_str(),"rb");
+		if( VSFileSystem::LookForFile( anothertmpstr, SoundFile) < Ok)
+			ok = true;
 	}
-	if (fp) {
-		fclose(fp);
-		return lastsound;
+	if( ok) 
+	{
+		//return lastsound;
+		return anothertmpstr;
 	} else {
 		return "";
 	}
@@ -1629,7 +1684,7 @@ void GameCockpit::VDUSwitch (int vdunum) {
   }
   if (vdunum<(int)vdu.size()) {
     if (vdu[vdunum]) {
-      vdu[vdunum]->SwitchMode();
+      vdu[vdunum]->SwitchMode( this->parent.GetUnit());
     }
   }
 }
@@ -1664,14 +1719,14 @@ void GameCockpit::RestoreViewPort() {
 
 static void ShoveCamBehindUnit (int cam, Unit * un, float zoomfactor) {
   QVector unpos = un->GetPlanetOrbit()?un->LocalPosition():un->Position();
-  _Universe->AccessCamera(cam)->SetPosition(unpos-_Universe->AccessCamera()->GetR().Cast()*(un->rSize()+g_game.znear*2)*zoomfactor,un->GetVelocity(),un->GetAngularVelocity());
+  _Universe->AccessCamera(cam)->SetPosition(unpos-_Universe->AccessCamera()->GetR().Cast()*(un->rSize()+g_game.znear*2)*zoomfactor,un->GetWarpVelocity(),un->GetAngularVelocity());
 }
 static void ShoveCamBelowUnit (int cam, Unit * un, float zoomfactor) {
   QVector unpos = un->GetPlanetOrbit()?un->LocalPosition():un->Position();
   Vector p,q,r;
   _Universe->AccessCamera(cam)->GetOrientation(p,q,r);
   static float ammttoshovecam = XMLSupport::parse_float(vs_config->getVariable("graphics","shove_camera_down",".3"));
-  _Universe->AccessCamera(cam)->SetPosition(unpos-(r-ammttoshovecam*q).Cast()*(un->rSize()+g_game.znear*2)*zoomfactor,un->GetVelocity(),un->GetAngularVelocity());
+  _Universe->AccessCamera(cam)->SetPosition(unpos-(r-ammttoshovecam*q).Cast()*(un->rSize()+g_game.znear*2)*zoomfactor,un->GetWarpVelocity(),un->GetAngularVelocity());
 }
 void GameCockpit::SetupViewPort (bool clip) {
   _Universe->AccessCamera()->RestoreViewPort (0,(view==CP_FRONT?viewport_offset:0));
@@ -1749,4 +1804,87 @@ Camera* GameCockpit::AccessCamera(int num){
     return &cam[num];
   else
     return NULL;
+}
+
+/**
+ * Draw the arrow pointing to the target.
+ */
+// THETA : angle between the arrow head and the two branches (divided by 2) (20 degrees here).
+#define TARGET_ARROW_COS_THETA    0.93969262078590838405410927732473
+#define TARGET_ARROW_SIN_THETA    0.34202014332566873304409961468226
+#define TARGET_ARROW_SIZE         0.05
+void GameCockpit::DrawArrowToTarget(Unit *un, Unit *target) {
+  float s, t, s_normalized, t_normalized, inv_len;
+  Vector p1, p2, p_n;
+
+  if ( ! target )
+    return;
+
+  Vector localcoord(un->LocalCoordinates(target));
+
+  // Project target position on k.
+  inv_len = 1 / fabs(localcoord.k);
+  s = -localcoord.i * inv_len;
+  t = localcoord.j * inv_len;
+
+  if ( localcoord.k > 0 ) {       // The unit is in front of us.
+    // Check if the unit is in the screen.
+    if ( (fabs(s) < projection_limit_x) && (fabs(t) < projection_limit_y) )
+      return;     // The unit is in the screen, do not display the arrow.
+  }
+
+  inv_len = 1 / sqrt(s*s + t*t);
+  s_normalized = s * inv_len;                 // Save the normalized projected coordinates.
+  t_normalized = t * inv_len;
+
+  // Apply screen aspect ratio correction.
+  s *= inv_screen_aspect_ratio;
+
+  if ( fabs(t) > fabs(s) ) {    // Normalize t.
+    if ( t > 0 ) {
+      s /= t;
+      t = 1;
+    }
+    else if ( t < 0 ) {
+      s /= -t;
+      t = -1;
+    }                           // case t == 0, do nothing everything is ok.
+  }
+  else {                        // Normalize s.
+    if ( s > 0 ) {
+      t /= s;
+      s = 1;
+    }
+    else if ( s < 0 ) {
+      t /= -s;
+      s = -1;
+    }                          // case s == 0, do nothing everything is ok.
+  }
+
+  // Compute points p1 and p2 composing the arrow. Hard code a 2D rotation.
+  // p1 = p - TARGET_ARROW_SIZE * p.normalize().rot(THETA), p being the arrow head position (s,t).
+  // p2 = p - TARGET_ARROW_SIZE * p.normalize().rot(-THETA)
+  p_n.i = -TARGET_ARROW_SIZE * s_normalized;  // Vector p will be used to compute the two branches of the arrow.
+  p_n.j = -TARGET_ARROW_SIZE * t_normalized;
+  p1.i = p_n.i*TARGET_ARROW_COS_THETA - p_n.j*TARGET_ARROW_SIN_THETA;     // p1 = p.rot(THETA)
+  p1.j = p_n.j*TARGET_ARROW_COS_THETA + p_n.i*TARGET_ARROW_SIN_THETA;
+  p2.i = p_n.i*TARGET_ARROW_COS_THETA - p_n.j*(-TARGET_ARROW_SIN_THETA);  // p2 = p.rot(-THETA)
+  p2.j = p_n.j*TARGET_ARROW_COS_THETA + p_n.i*(-TARGET_ARROW_SIN_THETA);
+  p1.i += s;
+  p1.j *= g_game.aspect;
+  p1.j += t;
+  p2.i += s;
+  p2.j *= g_game.aspect;
+  p2.j += t;
+  p2.k = p1.k = 0;
+
+  static GFXColor black_and_white = DockBoxColor("black_and_white");
+  GFXColorf(un->GetComputerData().radar.color ? unitToColor(un, target) : black_and_white);
+
+  glBegin(GL_LINE_LOOP);
+  GFXVertex3f(s, t, 0);
+  GFXVertexf(p1);
+  GFXVertexf(p2);
+  GFXEnd();
+  GFXColor4f (1,1,1,1);
 }

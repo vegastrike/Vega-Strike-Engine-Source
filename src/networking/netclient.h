@@ -32,6 +32,7 @@
 #include "networking/lowlevel/vsnet_socket.h"
 #include "networking/lowlevel/vsnet_socketset.h"
 #include "networking/lowlevel/vsnet_cmd.h"
+#include "networking/lowlevel/netbuffer.h"
 #include "cmd/container.h"   // for UnitContainer
 #include "gfx/quaternion.h"  // for Transformation
 
@@ -76,7 +77,9 @@ class	NetClient
         SOCKETALT			acct_sock;		// Connection socket for account server
         SocketSet           _sock_set;      // Encapsulates select()
         SaveGame			save;
+	public:
         ObjSerial			serial;			// Serial # of client
+	private:
         int					nbclients;		// Number of clients in the zone
         int					zone;			// Zone id in universe
         char				keeprun;		// Bool to test client stop
@@ -93,12 +96,12 @@ class	NetClient
 
 		int					enabled;		// Bool to say network is enabled
 		// Time used for refresh - not sure still used
-		int					old_time;
+		//int					old_time;
 		double				cur_time;
-		// Timestamps from packets
-		unsigned int		old_timestamp;
-		unsigned int		latest_timestamp;
-		unsigned int		deltatime;
+		unsigned int		old_timestamp;		// Previous timestamp
+		unsigned int		latest_timestamp;	// Last received timestamp
+		double				deltatime;			// Semi-ping value between this client and server in ms
+		double				elapsed_since_packet;	// Time elapsed since we we received the last SNAPSHOT or PING packet
 		bool				jumpok;
 		bool				ingame;
 		float				current_freq;
@@ -113,7 +116,10 @@ class	NetClient
 		int		checkAcctMsg( );
 
 		void	receiveLocations( const Packet* packet );
-		void	receivePosition( const Packet* packet );
+		void	receivePositions( unsigned int numUnits,
+                                  unsigned int timestamp,
+                                  NetBuffer&   netbuf,
+                                  double       deltat );
 		void	addClient( const Packet* packet );
 		void	removeClient( const Packet* packet );
 
@@ -141,7 +147,7 @@ class	NetClient
 
 		/********************* Network stuff **********************/
 		// Get the lag time between us and the server
-		unsigned int	getLag() { return deltatime;}
+		unsigned int	getLag() { return (unsigned int)(deltatime*1000);}
 		// Check if it is time to send our update
 		int		isTime();
 		// Warn the server we are leaving the game
@@ -155,6 +161,8 @@ class	NetClient
 		void	inGame();		// Tells the server we are ready to go in game
 		bool	isInGame() { return this->ingame;}
 
+		Transformation	Interpolate( Unit * un, double addtime);
+
 		// void	disable() { enabled=false;}
 		// int		isEnabled() { return enabled; }
 		// void	setNetworkedMode( bool mode) { enabled = mode;}
@@ -164,6 +172,10 @@ class	NetClient
 		void	scanRequest( Unit * target);
 		void	fireRequest( ObjSerial serial, int mount_index, char mis);
 		void	unfireRequest( ObjSerial serial, int mount_index);
+
+		void	downloadZoneInfo();
+		void	AddObjects( NetBuffer & netbuf);
+		void	AddClientObject( NetBuffer & netbuf, ObjSerial cltserial);
 
 		bool	jumpRequest( string newsystem, ObjSerial jumpserial);
 		bool	readyToJump();
@@ -176,24 +188,30 @@ class	NetClient
 		/********************* Communication stuff **********************/
 	private:
 	public:
+		void	createNetComm( float minfreq, float maxfreq, bool video, bool secured, string method);
+		void	destroyNetComm();
 		void	startCommunication();
 		void	stopCommunication();
+		void	startWebcamTransfer();
+		void	stopWebcamTransfer();
 		void	sendWebcamPicture();
 		char *	getWebcamCapture();
+		char *	getWebcamFromNetwork( int & length);
 		void	increaseFrequency();
 		void	decreaseFrequency();
 		float	getSelectedFrequency();
 		float	getCurrentFrequency();
 		void	switchSecured();
 		void	switchWebcam();
+		bool	hasWebcam();
 
 		void	sendTextMessage( string message);
 		bool	IsNetcommActive() const;
 		bool	IsNetcommSecured() const;
 
-
     private:
-        bool canCompress() const;
+        NetClient( const NetClient& );
+        NetClient& operator=( const NetClient& );
 };
 
 Unit * getNetworkUnit( ObjSerial cserial);

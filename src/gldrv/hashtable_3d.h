@@ -6,18 +6,17 @@
 #include <stdio.h>
 #include <assert.h>
 #include "linecollide.h"
-#define COLLIDETABLESIZE sizeof(CTSIZ)
-#define COLLIDETABLEACCURACY sizeof (CTACCURACY)
+// #define COLLIDETABLESIZE sizeof(CTSIZ)
+// #define COLLIDETABLEACCURACY sizeof (CTACCURACY)
 ///objects that go over 16 sectors are considered huge and better to check against everything.
-#define HUGEOBJECT sizeof (CTHUGE)
-//const int HUGEOBJECT=12; 
+// #define HUGEOBJECT sizeof (CTHUGE)
 
 /**
  * Hashtable3d is a 3d datastructure that holds various starships that are
  * near enough to crash into each other (or also lights that are big enough
  * to shine on nearby units.
  */
-template <class T, class CTSIZ, class CTACCURACY, class CTHUGE> class Hashtable3d {
+template <class T, int COLLIDETABLESIZE, int COLLIDETABLEACCURACY, int HUGEOBJECT> class Hashtable3d {
   ///All objects that are too large to fit (fastly) in the collide table
   std::vector <T> hugeobjects;
   ///The hash table itself. Holds most units to be collided with

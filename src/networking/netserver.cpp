@@ -40,7 +40,7 @@
 #include "networking/lowlevel/vsnet_serversocket.h"
 #include "networking/lowlevel/vsnet_debug.h"
 #include "networking/savenet_util.h"
-#include "vs_path.h"
+#include "vsfilesystem.h"
 #include "networking/lowlevel/netbuffer.h"
 #include "networking/lowlevel/vsnet_dloadmgr.h"
 #include "cmd/ai/script.h"
@@ -67,6 +67,13 @@ int		nbchars;
 string	universe_file;
 string	universe_path;
 
+using namespace VSFileSystem;
+
+void	getZoneInfoBuffer( unsigned short zoneid, NetBuffer & netbuf)
+{
+	VSServer->getZoneInfo( zoneid, netbuf);
+}
+
 /**************************************************************/
 /**** Constructor / Destructor                             ****/
 /**************************************************************/
@@ -89,6 +96,9 @@ NetServer::NetServer()
 
     _downloadManagerServer.reset( new VsnetDownload::Server::Manager( _sock_set ) );
     _sock_set.addDownloadManager( _downloadManagerServer );
+#ifdef CRYPTO
+	FileUtil::use_crypto = true;
+#endif
 }
 
 NetServer::~NetServer()
@@ -135,7 +145,7 @@ void	NetServer::start(int argc, char **argv)
 	CONFIGFILE = new char[42];
 	strcpy( CONFIGFILE, "vegaserver.config");
 	cout<<"Loading server config...";
-	initpaths();
+	VSFileSystem::InitPaths( CONFIGFILE);
 	// Here we say we want to only handle activity in all starsystems
 	run_only_player_starsystem=false;
 	//vs_config = new VegaConfig( SERVERCONFIGFILE);
@@ -229,35 +239,20 @@ void	NetServer::start(int argc, char **argv)
 	active_missions.push_back( mission = new Mission( strmission.c_str()));
 	mission->initMission( false);
 
-	/*
-	 * NOW IN DYNAVERSE.DAT
-	string strstardate = vs_config->getVariable( "server", "initial_stardate", "2000.00:00");
-	_Universe->current_stardate.Init( strstardate);
-	cout<<"Starting STARDATE : "<<_Universe->current_stardate.GetFullCurrentStarDate()<<endl;
-	*/
-
 	// Loads dynamic universe
-	string dynpath = datadir+"/dynaverse.dat";
-	FILE * fp = fopen( dynpath.c_str(), "rb");
-	if( !fp)
+	string dynpath = "dynaverse.dat";
+	VSFile f;
+	VSError err = f.OpenReadOnly( dynpath, ::VSFileSystem::UnknownFile);
+	if( err>Ok)
 	{
 		cerr<<"!!! ERROR : opening dynamic universe file " << dynpath.c_str() << " !!!"<<endl;
 	}
 	else
 	{
-		fseek( fp, 0, SEEK_END);
-		int dynsize = ftell( fp);
-		fseek( fp, 0, SEEK_SET);
-		char * dynaverse = new char[dynsize+1];
-		dynaverse[dynsize] = 0;
-		int nbread;
-		if( (nbread = fread( dynaverse, sizeof( char), dynsize, fp)) != dynsize)
-		{
-			cerr<<"!!! ERROR : read "<<nbread<<" bytes, there were "<<dynsize<<" to read !!!"<<endl;
-			VSExit(1);
-		}
-
-		globalsave->ReadSavedPackets( dynaverse);
+		string dynaverse = f.ReadFull();
+		char * dynchar = strdup( dynaverse.c_str());
+		globalsave->ReadSavedPackets( dynchar);
+		f.Close();
 	}
 
 	// Server loop
@@ -272,7 +267,6 @@ void	NetServer::start(int argc, char **argv)
 		//this->checkKey( keyset);
 
 		// Check received communications
-		newConnection_tcp( );
 		checkMsg( _sock_set );
 		if( acctserver && acct_con )
 		{
@@ -285,7 +279,7 @@ void	NetServer::start(int argc, char **argv)
 		if( acctserver && !acct_con && (curtime - reconnect_time)>periodrecon)
 		{
 			NetBuffer netbuf;
-			curtime += periodrecon;
+			reconnect_time += periodrecon;
 			// We previously lost connection to account server
 			// We try to reconnect
 			acct_sock = NetUITCP::createSocket( srvip, tmpport, _sock_set );
@@ -398,6 +392,7 @@ void	NetServer::start(int argc, char **argv)
 
 	delete CONFIGFILE;
 	delete vs_config;
+        vs_config=NULL;
 	this->closeAllSockets();
 }
 
@@ -479,7 +474,7 @@ void	NetServer::checkMsg( SocketSet& sets )
     ostr << "Checking activity on sockets, TCP=";
 	for( LI i=allClients.begin(); i!=allClients.end(); i++)
 	{
-        Client* cl = *i;
+        ClientPtr cl = *i;
         if( cl->isTcp() )
         {
 		    if( cl->sock.isActive( ) )
@@ -497,6 +492,10 @@ void	NetServer::checkMsg( SocketSet& sets )
 	    recvMsg_udp( );
         printit = true;
 	}
+    if( tcpNetwork->isActive( ) )
+    {
+		newConnection_tcp( );
+    }
     ostr << ends;
     if( printit ) COUT << ostr.str() << endl;
 }
@@ -517,6 +516,10 @@ void	NetServer::checkMsg( SocketSet& sets )
 	{
 	    recvMsg_udp( );
 	}
+    if( tcpNetwork->isActive( ) )
+    {
+		newConnection_tcp( );
+    }
 }
 #endif
 
@@ -530,21 +533,28 @@ bool	NetServer::updateTimestamps( ClientPtr cltp, Packet & p )
 		// A packet's timestamp is in ms whereas getNewTime is in seconds
 		unsigned int int_ts = p.getTimestamp();
 
+		cerr<<"GOT TIMESTAMP="<<int_ts<<" latest is="<<clt->getLatestTimestamp() << " in " << p.getCommand() << endl;
 		double curtime = getNewTime();
 		// Check for late packet : compare received timestamp to the latest we have
-		if( int_ts < clt->latest_timestamp)
+		assert( int_ts >= clt->getLatestTimestamp());
+		if( int_ts < clt->getLatestTimestamp())
 		{
 			// If ts > 0xFFFFFFF0 (15 seconds before the maxin an u_int) 
 			// This is not really a reliable test -> we may still have late packet in that range of timestamps
-			/*
-			if( (clt->isTcp() && ts > 0xFFFFFFF0) || (clt->isUdp() && ts > 0xFFFFFFF0 && !(p.getFlags() & SENDANDFORGET)) )
-				clt->deltatime = 0xFFFFFFFF - clt->latest_timestamp + ts;
-			else if( clt->isUdp() && p.getFlags() & SENDANDFORGET)
-			*/
 			// Only check for late packets when sent non reliable because we need others
-			if( clt->isUdp() && p.getFlags() & SENDANDFORGET)
+			if( clt->isUdp() && (p.getFlags() & SENDANDFORGET))
+			{
 				ret = false;
+			}
+			else if( clt->isTcp())
+			{
+				COUT << "!!!ERROR : Late packet in TCP mode : this should not happen !!!" << endl
+                     << "   Previous client timestamp: " << clt->getLatestTimestamp() << "ms" << endl
+                     << "   Current  client timtstamp: " << int_ts << "ms" << endl;
+				VSExit(1);
+			}
 		}
+		// If packet is late we don't update time vars but we process it if we have to
 		else
 		{
 			// Update the timeout vals anytime we receive a packet
@@ -553,15 +563,11 @@ bool	NetServer::updateTimestamps( ClientPtr cltp, Packet & p )
 			clt->latest_timeout = curtime;
 
 			// Packet is not late so we update timestamps only when receving a CMD_SNAPSHOT
-			// because we predict and interpolate based on the elapsed time between 2 SNAPSHOTS
-			if( p.getCommand()==CMD_SNAPSHOT)
+			// because we predict and interpolate based on the elapsed time between 2 SNAPSHOTS or PING
+			if( p.getCommand()==CMD_SNAPSHOT || p.getCommand()==CMD_PING)
 			{
 				// Set old_timestamp to the old latest_timestamp and the latest_timestamp to the received one
-				clt->old_timestamp = clt->latest_timestamp;
-				clt->latest_timestamp = int_ts;
-				// Compute the deltatime that is time between packet_timestamp in ms and the old_timestamp in ms
-				clt->deltatime = (unsigned int) (int_ts - clt->old_timestamp);
-				cerr<<"DELTATIME = "<<clt->deltatime<<" --------------------"<<endl;
+				clt->setLatestTimestamp( int_ts );
 			}
 		}
 
@@ -605,12 +611,13 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
 			}
             else
             {
+	  			char flags = netbuf.getChar();
 				SOCKETALT tmpsock;
 				const AddressIP* iptmp;
+				WaitListEntry entry;
 				if( clt )
 				{
 					// This must be a TCP client
-					WaitListEntry entry;
 					entry.tcp = true;
 					entry.t   = clt;
 					this->waitList.push( entry );
@@ -619,17 +626,17 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
 				}
 				else
 				{
-					WaitListEntry entry;
 					entry.tcp = false;
 					entry.u   = ipadr;
 					this->waitList.push( entry );
 					iptmp = &ipadr;
 					COUT << "Waiting authorization for client IP : " << ipadr << endl;
 				}
+
 				// Redirect the login request packet to account server
 				COUT << "Redirecting login request to account server on socket " << acct_sock << endl
 				<< "*** Packet to copy length : " << packet.getDataLength()<<endl;
-				if( p2.send( packet.getCommand(), 0, (char *)packet.getData(), packet.getDataLength(), SENDANDFORGET, iptmp, acct_sock, __FILE__, PSEUDO__LINE__(1031) ) < 0 )
+				if( p2.send( packet.getCommand(), 0, (char *)packet.getData(), packet.getDataLength(), SENDRELIABLE, iptmp, acct_sock, __FILE__, PSEUDO__LINE__(1031) ) < 0 )
 				{
 					perror( "ERROR sending redirected login request to ACCOUNT SERVER : ");
 					COUT<<"SOCKET was : "<<acct_sock<<endl;
@@ -643,7 +650,7 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
 			// Add the client to the game
 			COUT<<">>> ADD REQUEST =( serial n°"<<packet.getSerial()<<" )= --------------------------------------"<<endl;
 			//COUT<<"Received ADDCLIENT request"<<endl;
-			this->addClient( clt, netbuf.getChar() );
+			this->addClient( clt);
 			COUT<<"<<< ADD REQUEST --------------------------------------------------------------"<<endl;
 			break;
 		case CMD_POSUPDATE:
@@ -702,7 +709,7 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
 			// target_serial is in fact the serial of the firing unit (client itself or turret)
 			target_serial = netbuf.getSerial();
 			mount_num = netbuf.getInt32();
-			zone = clt->zone;
+			zone = clt->game_unit.GetUnit()->activeStarSystem->GetZone();
 			mis = netbuf.getChar();
 			// Find the unit
 			// Set the concerned mount as ACTIVE and others as INACTIVE
@@ -729,7 +736,7 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
 			string newsystem = netbuf.getString();
 			ObjSerial jumpserial = netbuf.getSerial();
 			unsigned short zonenum = netbuf.getShort();
-			unsigned char * client_hash;
+			unsigned char * client_hash=0;
 			unsigned char * server_hash;
 #ifdef CRYPTO
 			server_hash = new unsigned char[FileUtil::Hash.DigestSize()];
@@ -765,15 +772,12 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
 						// but that's no big deal since they all will be loaded finally
 						if( !(sts = _Universe->getStarSystem( newsystem+".system")))
 							zonemgr->addZone( newsystem);
-						cp->savegame->SetStarSystem( newsystem);
 
-						if( FileUtil::HashCompare( newsystem, client_hash) )
-							clt->jumpfile = "";
+						clt->jumpfile = newsystem;
+						if( FileUtil::HashCompare( newsystem, client_hash, SystemFile) )
+							clt->jumpok = 1;
 						else
-						{
-							// Store he system the client has to download
-							clt->jumpfile = newsystem;
-						}
+							clt->jumpok = 2;
 					}
 			}	
 #ifdef CRYPTO
@@ -813,9 +817,11 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
 		/* SHOULD NOT RECEIVE THIS SINCE COMM SESSIONS ARE HANDLED IN A CLIENT-TO-CLIENT WAY
 		case CMD_CAMSHOT :
 		{
-			p2.bc_create( packet.getCommand(), packet.getSerial(), packet.getData(), packet.getDataLength(), SENDANDFORGET, &clt->cltadr, clt->sock, __FILE__, PSEUDO__LINE__(1281));
+			p2.bc_create( packet.getCommand(), packet.getSerial(),
+                          packet.getData(), packet.getDataLength(), SENDANDFORGET,
+                          __FILE__, PSEUDO__LINE__(1281));
 			// Send to concerned clients
-			zonemgr->broadcast_camshots( clt->zone, clt->serial, &p2);
+			zonemgr->broadcast_camshots( clt->game_unit.GetUnit()->activeStarSystem->GetZone(), clt->serial, &p2);
 		}
 		*/
 		break;
@@ -827,9 +833,11 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
 			clt->webcam = netbuf.getChar();
 			clt->portaudio = netbuf.getChar();
 			// Broadcast players with same frequency that there is a new one listening to it
-			p2.bc_create( packet.getCommand(), packet_serial, packet.getData(), packet.getDataLength(), SENDRELIABLE, &clt->cltadr, clt->sock, __FILE__, PSEUDO__LINE__(1293));
+			p2.bc_create( packet.getCommand(), packet_serial,
+                          packet.getData(), packet.getDataLength(), SENDRELIABLE,
+                          __FILE__, PSEUDO__LINE__(1293));
 			// Send to concerned clients
-			zonemgr->broadcast( clt->zone, packet_serial, &p2);
+			zonemgr->broadcast( clt->game_unit.GetUnit()->activeStarSystem->GetZone(), packet_serial, &p2);
 		}
 		break;
 		case CMD_STOPNETCOMM :
@@ -837,23 +845,29 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
 			clt->comm_freq = -1;
 			// float freq = netbuf.getFloat();
 			// Broadcast players with same frequency that this client is leaving the comm session
-			p2.bc_create( packet.getCommand(), packet_serial, packet.getData(), packet.getDataLength(), SENDRELIABLE, &clt->cltadr, clt->sock, __FILE__, PSEUDO__LINE__(1302));
+			p2.bc_create( packet.getCommand(), packet_serial,
+                          packet.getData(), packet.getDataLength(), SENDRELIABLE,
+                          __FILE__, PSEUDO__LINE__(1302));
 			// Send to concerned clients
-			zonemgr->broadcast( clt->zone, packet_serial, &p2);
+			zonemgr->broadcast( clt->game_unit.GetUnit()->activeStarSystem->GetZone(), packet_serial, &p2);
 		}
 		break;
 		case CMD_SOUNDSAMPLE :
 		{
 			// Broadcast sound sample to the clients in the same zone and the have PortAudio support
-			p2.bc_create( packet.getCommand(), packet_serial, packet.getData(), packet.getDataLength(), SENDRELIABLE, &clt->cltadr, clt->sock, __FILE__, PSEUDO__LINE__(1341));
-			zonemgr->broadcastSample( clt->zone, packet_serial, &p2, clt->comm_freq);
+			p2.bc_create( packet.getCommand(), packet_serial,
+                          packet.getData(), packet.getDataLength(), SENDRELIABLE,
+                          __FILE__, PSEUDO__LINE__(1341));
+			zonemgr->broadcastSample( clt->game_unit.GetUnit()->activeStarSystem->GetZone(), packet_serial, &p2, clt->comm_freq);
 
 		}
 		case CMD_TXTMESSAGE :
 		{
 			// Broadcast sound sample to the clients in the same zone and the have PortAudio support
-			p2.bc_create( packet.getCommand(), packet_serial, packet.getData(), packet.getDataLength(), SENDRELIABLE, &clt->cltadr, clt->sock, __FILE__, PSEUDO__LINE__(1341));
-			zonemgr->broadcastText( clt->zone, packet_serial, &p2, clt->comm_freq);
+			p2.bc_create( packet.getCommand(), packet_serial,
+                          packet.getData(), packet.getDataLength(), SENDRELIABLE,
+                          __FILE__, PSEUDO__LINE__(1341));
+			zonemgr->broadcastText( clt->game_unit.GetUnit()->activeStarSystem->GetZone(), packet_serial, &p2, clt->comm_freq);
 
 		}
 		case CMD_DOCK :
@@ -861,7 +875,7 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
 			Unit * docking_unit;
 			un = clt->game_unit.GetUnit();
 			ObjSerial utdwserial = netbuf.getShort();
-			unsigned short zonenum = clt->zone;
+			unsigned short zonenum = clt->game_unit.GetUnit()->activeStarSystem->GetZone();
 			cerr<<"RECEIVED a DockRequest from unit "<<un->GetSerial()<<" to unit "<<utdwserial<<" in zone "<<zonenum<<endl;
 			docking_unit = zonemgr->getUnit( utdwserial, zonenum);
 			if( docking_unit)
@@ -880,7 +894,7 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
 			Unit * docking_unit;
 			un = clt->game_unit.GetUnit();
 			ObjSerial utdwserial = netbuf.getShort();
-			unsigned short zonenum = clt->zone;
+			unsigned short zonenum = clt->game_unit.GetUnit()->activeStarSystem->GetZone();
 			cerr<<"RECEIVED an UnDockRequest from unit "<<un->GetSerial()<<" to unit "<<utdwserial<<" in zone "<<zonenum<<endl;
 			docking_unit = zonemgr->getUnit( utdwserial, zonenum);
 			if( docking_unit)
@@ -897,6 +911,19 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
         	COUT << "Unknown command " << Cmd(cmd) << " ! "
              	 << "from client " << clt->game_unit.GetUnit()->GetSerial() << endl;
     }
+}
+
+/**************************************************************/
+/**** Broadcast a netbuffer to a given zone                ****/
+/**************************************************************/
+
+void	NetServer::broadcast( NetBuffer & netbuf, unsigned short zone, Cmd command)
+{
+	Packet p;
+	p.bc_create( command, 0,
+                 netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE,
+                 __FILE__, PSEUDO__LINE__(902));
+	zonemgr->broadcast( zone, 0, &p);
 }
 
 /**************************************************************/

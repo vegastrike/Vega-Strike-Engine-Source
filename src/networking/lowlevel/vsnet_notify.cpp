@@ -1,7 +1,7 @@
 #include <config.h>
 #include <fstream>
 
-#include "vs_path.h"
+#include "vsfilesystem.h"
 #include "vsnet_dloadmgr.h"
 #include "vsnet_notify.h"
 #include "vsnet_debug.h"
@@ -25,7 +25,7 @@ NotifyMe::NotifyMe( )
     , _offset( 0 )
 { }
 
-void NotifyMe::notify( State s, Error e )
+void NotifyMe::notify( State s, VSError e )
 {
     _state = s;
     _error = e;
@@ -45,11 +45,12 @@ void NotifyMe::addBytes( int sz )
  * definition VsnetDownload::Client::Item
  *------------------------------------------------------------*/
 
-Item::Item( SOCKETALT sock, const string& filename, NotifyPtr notify )
+Item::Item( SOCKETALT sock, const string& filename, VSFileSystem::VSFileType ft, NotifyPtr notify )
     : _sock( sock )
     , _filename( filename )
     , _state( Idle )
     , _error( Ok )
+	, _filetype( ft)
     , _notify( notify )
 {
 }
@@ -66,12 +67,21 @@ State Item::state( ) const
     return ret;
 }
 
-Error Item::error( ) const
+VSError Item::error( ) const
 {
     _mx.lock( );
-    Error ret = _error;
+    VSError ret = _error;
     _mx.unlock( );
     return ret;
+}
+void Item::setFileType( VSFileSystem::VSFileType ft)
+{
+	_filetype = ft;
+}
+
+VSFileSystem::VSFileType Item::getFileType()
+{
+	return _filetype;
 }
 
 void Item::setSize( int len )
@@ -88,15 +98,19 @@ void Item::append( unsigned char* buffer, int bufsize )
 
 void Item::changeState( State s )
 {
+    COUT << __FUNCTION__ << " " << s << " " << (int)_error << endl;
+
     _mx.lock( );
     _state = s;
-    Error e = _error;
+    VSError e = _error;
     _mx.unlock( );
     if( _notify ) _notify->notify( s, e );
 }
 
-void Item::changeState( State s, Error e )
+void Item::changeState( State s, VSError e )
 {
+    COUT << __FUNCTION__ << " " << s << " " << (int)e << endl;
+
     _mx.lock( );
     _state = s;
     _error = e;
@@ -119,6 +133,11 @@ int Item::get_fd() const
     return _sock.get_fd( );
 }
 
+void Item::protected_replace_notifier( NotifyPtr ptr )
+{
+   _notify = ptr;
+}
+
 /*------------------------------------------------------------*
  * definition VsnetDownload::Client::File
  *------------------------------------------------------------*/
@@ -126,8 +145,9 @@ int Item::get_fd() const
 File::File( SOCKETALT     sock,
             const string& filename,
             string        localbasepath,
+			VSFileSystem::VSFileType ft,
             NotifyPtr     notify )
-    : Item( sock, filename, notify )
+    : Item( sock, filename, ft, notify )
     , _localbasepath( localbasepath )
     , _of( NULL )
     , _len( 0 )
@@ -139,7 +159,7 @@ File::~File( )
 {
     if( _of )
     {
-        _of->close( );
+        _of->Close( );
         delete _of;
     }
 }
@@ -148,8 +168,9 @@ void File::childSetSize( int len )
 {
     string filename = _localbasepath + "/" + getFilename();
 
-    _of = new ofstream( filename.c_str(), ios::out );
-    if( !_of->is_open() )
+    _of = new VSFileSystem::VSFile;
+	VSFileSystem::VSError err = _of->OpenCreateWrite( filename.c_str(), this->_filetype );
+    if( err>Ok )
     {
         delete _of;
         _of = NULL;
@@ -164,11 +185,11 @@ void File::childAppend( unsigned char* buffer, int bufsize )
 {
     if( _of )
     {
-        _of->write( (const char*)buffer, bufsize );
+        _of->Write( (const char*)buffer, bufsize );
         _offset += bufsize;
         if( _offset >= _len )
         {
-            _of->close( );
+            _of->Close( );
             delete _of;
             _of = NULL;
         }
@@ -181,14 +202,24 @@ void File::childAppend( unsigned char* buffer, int bufsize )
 
 NoteFile::NoteFile( SOCKETALT          sock,
                     const std::string& filename,
+					VSFileSystem::VSFileType ft,
                     std::string        localbasepath )
-    : File( sock, filename, localbasepath, NotifyPtr(this) )
+    : File( sock, filename, localbasepath, ft, NotifyPtr() )
+    , _me( new NotifyMe )
 {
+    protected_replace_notifier( _me );
 }
 
 NoteFile::NoteFile( SOCKETALT          sock,
-                    const std::string& filename )
-    : File( sock, filename, datadir, NotifyPtr(this) )
+                    const std::string& filename,
+					VSFileSystem::VSFileType ft )
+    : File( sock, filename, VSFileSystem::homedir, ft, NotifyPtr() )
+    , _me( new NotifyMe )
+{
+    protected_replace_notifier( _me );
+}
+
+NoteFile::~NoteFile( )
 {
 }
 
@@ -196,11 +227,13 @@ NoteFile::NoteFile( SOCKETALT          sock,
  * definition VsnetDownload::Client::Buffer
  *------------------------------------------------------------*/
 
-Buffer::Buffer( SOCKETALT sock, const string& filename, NotifyPtr notify )
-    : Item( sock, filename, notify )
+Buffer::Buffer( SOCKETALT sock, const string& filename, VSFileSystem::VSFileType ft )
+    : Item( sock, filename, ft, NotifyPtr() )
+    , _me( new NotifyMe )
     , _len( 0 )
     , _offset( 0 )
 {
+    protected_replace_notifier( _me );
 }
 
 Buffer::~Buffer( )
@@ -233,7 +266,7 @@ void Buffer::childAppend( unsigned char* buffer, int bufsize )
  *------------------------------------------------------------*/
 
 TestItem::TestItem( SOCKETALT sock, const string& filename )
-    : Item( sock, filename, NotifyPtr(this) )
+    : Item( sock, filename, VSFileSystem::UnknownFile, NotifyPtr(this) )
 {
     COUT << "Created TestItem for downloading " << filename << endl;
 }
@@ -248,7 +281,7 @@ public:
     NotifyConclusion( FileSet* f, std::string s );
     virtual ~NotifyConclusion( );
 
-    virtual void notify( State s, Error e );
+    virtual void notify( State s, VSError e );
 
 private:
     FileSet*    _fileset;
@@ -265,7 +298,7 @@ FileSet::NotifyConclusion::~NotifyConclusion( )
 {
 }
 
-void FileSet::NotifyConclusion::notify( State s, Error e )
+void FileSet::NotifyConclusion::notify( State s, VSError e )
 {
     if( s==Completed ) _fileset->update( _file, (e==Ok) );
 }
@@ -287,7 +320,7 @@ FileSet::FileSet( boost::shared_ptr<Manager> mgr,
     {
         _files.insert( std::pair<std::string,int>( *cit, -1 ) );
         NotifyPtr ptr( new NotifyConclusion( this, *cit ) );
-        items.push_back( new File( sock, *cit, path, ptr ) );
+        items.push_back( new File( sock, *cit, path, VSFileSystem::UnknownFile, ptr ) );
         _to_go++;
     }
 
@@ -324,7 +357,7 @@ Notify_f::Notify_f( std::string filename, NotifyFunction fun )
 Notify_f::~Notify_f()
 { }
 
-void Notify_f::notify( State s, Error e )
+void Notify_f::notify( State s, VSError e )
 {
     (*_fun)( _filename, s, e, _total, _offset );
 }
@@ -343,9 +376,9 @@ void Notify_f::addBytes( int sz )
  * definition VsnetDownload::Client::VSNotify
  *------------------------------------------------------------*/
 
-void	VSNotify( VsnetDownload::Client::State s, VsnetDownload::Client::Error e)
+void	VSNotify( VsnetDownload::Client::State s, VSFileSystem::VSError e)
 {
-	cerr << "!!! DOWNLOAD ERROR : State="<< s <<" - Error="<< e <<endl;
+	cerr << "!!! DOWNLOAD ERROR : State="<< s <<" - Error="<< (int)e <<endl;
 }
 
 void	VsnetDownload::Client::VSNotify::setTotalBytes( int sz )

@@ -32,17 +32,19 @@ FireKeyboard::FireKeyboard (unsigned int whichplayer, unsigned int whichjoystick
 const unsigned int NUMCOMMKEYS=10;
 struct FIREKEYBOARDTYPE {
   FIREKEYBOARDTYPE() {
-    toggleglow=toggleanimation=lockkey=ECMkey=commKeys[0]=commKeys[1]=commKeys[2]=commKeys[3]=commKeys[4]=commKeys[5]=commKeys[6]=commKeys[7]=commKeys[8]=commKeys[9]=turretaikey = UP;
+    togglewarpdrive=toggleglow=toggleanimation=lockkey=ECMkey=commKeys[0]=commKeys[1]=commKeys[2]=commKeys[3]=commKeys[4]=commKeys[5]=commKeys[6]=commKeys[7]=commKeys[8]=commKeys[9]=turretaikey = UP;
     eject=ejectcargo=firekey=missilekey=jfirekey=jtargetkey=jmissilekey=weapk=misk=rweapk=rmisk=cloakkey=
-		neartargetkey=targetskey=targetukey=threattargetkey=picktargetkey=subtargetkey=targetkey=
-		rneartargetkey=rtargetskey=rtargetukey=rthreattargetkey=rpicktargetkey=rtargetkey=
-		nearturrettargetkey =threatturrettargetkey= pickturrettargetkey=turrettargetkey=UP;
+      neartargetkey=targetskey=targetukey=threattargetkey=picktargetkey=subtargetkey=targetkey=
+      rneartargetkey=rtargetskey=rtargetukey=rthreattargetkey=rpicktargetkey=rtargetkey=
+      nearturrettargetkey =threatturrettargetkey= pickturrettargetkey=turrettargetkey=UP;
+      shieldpowerstate=1;
 #ifdef CAR_SIM
     blinkleftkey=blinkrightkey=headlightkey=sirenkey=UP;
 #endif
     doc=und=req=0;
   }
  KBSTATE firekey;
+ float shieldpowerstate;
  bool doc;
  bool und;
  bool req;
@@ -80,6 +82,7 @@ struct FIREKEYBOARDTYPE {
  KBSTATE targetukey;
  KBSTATE turretaikey;
  KBSTATE toggleglow;
+ KBSTATE togglewarpdrive;
  KBSTATE toggleanimation;	
  KBSTATE commKeys[NUMCOMMKEYS];
  KBSTATE nearturrettargetkey;
@@ -100,11 +103,28 @@ FIREKEYBOARDTYPE &FireKeyboard::f() {
 FIREKEYBOARDTYPE &FireKeyboard::j() {
   return vectorOfKeyboardInput[whichjoystick];
 }
+void FireKeyboard::SetShieldsOneThird(int,KBSTATE k) {
+  if (k==DOWN) {
+    g().shieldpowerstate=1./3;
+  }
+}
+void FireKeyboard::SetShieldsTwoThird(int,KBSTATE k) {
+  if (k==DOWN) {
+    g().shieldpowerstate=2./3;
+  }
+}
 void FireKeyboard::ToggleGlow (int,KBSTATE k) {
 	if (k==PRESS) {
 		g().toggleglow=PRESS;
 	}
 }
+
+void FireKeyboard::ToggleWarpDrive (int,KBSTATE k) {
+	if (k==PRESS) {
+		g().togglewarpdrive=PRESS;
+	}
+}
+
 void FireKeyboard::ToggleAnimation (int,KBSTATE k) {
 	if (k==PRESS) {
 		g().toggleanimation=PRESS;
@@ -517,12 +537,12 @@ void FireKeyboard::ChooseNearTargets(bool turret,bool reverse) {
     iter.advance();
   }
 #ifdef ORDERDEBUG
-  fprintf (stderr,"i4%x",iter);
+  VSFileSystem::vs_fprintf (stderr,"i4%x",iter);
   fflush (stderr);
 #endif
 
 #ifdef ORDERDEBUG
-  fprintf (stderr,"i4\n");
+  VSFileSystem::vs_fprintf (stderr,"i4\n");
   fflush (stderr);
 #endif
 
@@ -657,13 +677,13 @@ void FireKeyboard::ChooseTargets (bool turret,bool significant,bool reverse) {
 
     //  }
 #ifdef ORDERDEBUG
-  fprintf (stderr,"i5%x",iter);
+  VSFileSystem::vs_fprintf (stderr,"i5%x",iter);
   fflush (stderr);
 #endif
 
   
 #ifdef ORDERDEBUG
-  fprintf (stderr,"i5\n");
+  VSFileSystem::vs_fprintf (stderr,"i5\n");
   fflush (stderr);
 #endif
   if (!find) {
@@ -720,6 +740,9 @@ bool TargFront (Unit *me,Unit *target) {
 bool TargThreat (Unit *me,Unit *target) {
 	if (!TargAll(me,target))
 		return false;
+	if (target->isUnit()==MISSILEPTR) {
+		return false;
+	}
 	if (target->Target()==me) {
 		return true;
 	}
@@ -729,7 +752,7 @@ bool TargThreat (Unit *me,Unit *target) {
 	return false;
 }
 bool TargNear (Unit *me,Unit *target) {
-	return (me->getRelation(target)<0||TargThreat(me,target)||target->getRelation(me)<0)&&TargAll(me,target);
+	return (me->getRelation(target)<0||TargThreat(me,target)||target->getRelation(me)<0)&&TargAll(me,target)&&target->isUnit()!=MISSILEPTR;
 }
 
 void ChooseTargets(Unit * me, bool (*typeofunit)(Unit *,Unit *), bool reverse) {
@@ -810,7 +833,7 @@ void ChooseSubTargets(Unit * me) {
 
 FireKeyboard::~FireKeyboard () {
 #ifdef ORDERDEBUG
-  fprintf (stderr,"fkb%x",this);
+  VSFileSystem::vs_fprintf (stderr,"fkb%x",this);
   fflush (stderr);
 #endif
 
@@ -968,26 +991,39 @@ static void DoDockingOps (Unit * parent, Unit * targ,unsigned char playa, unsign
     }
 }
 using std::list;
-
+void FireKeyboard::DoSpeechAndAni(Unit * un, Unit* parent, class CommunicationMessage&c) {
+  this->AdjustRelationTo(un,c.getCurrentState()->messagedelta);
+  DoSpeech (un,parent,*c.getCurrentState());
+  if (parent==_Universe->AccessCockpit()->GetParent()) {
+    _Universe->AccessCockpit()->SetCommAnimation (c.ani);
+  }
+  this->refresh_target=true;
+}
 void FireKeyboard::ProcessCommMessage (class CommunicationMessage&c){
 
   Unit * un = c.sender.GetUnit();
-  if (!AUDIsPlaying (c.getCurrentState()->GetSound(c.sex))) {
-    AUDStartPlaying(c.getCurrentState()->GetSound(c.sex));
+  int sound=c.getCurrentState()->GetSound(c.sex);
+  //AUDAdjustSound(sound,parent->Position(),parent->GetVelocity());
+  if (!AUDIsPlaying (sound)) {
+    AUDStartPlaying(sound);
   }
+  bool foundValidMessage=false;
   if (un) {
     for (list<CommunicationMessage>::iterator i=resp.begin();i!=resp.end();i++) {
       if ((*i).sender.GetUnit()==un) {
+#if 0
+        //caused the docking clearence nodes to be duplicated
+        if ((*i).curstate>=(*i).fsm->GetUnDockNode()&&(*i).curstate<(*i).fsm->nodes.size()) {
+          DoSpeechAndAni(un,parent,(*i));
+          foundValidMessage=true;
+        }        
+#endif
 	i = resp.erase (i);
       }
     }
     resp.push_back(c);
-    AdjustRelationTo(un,c.getCurrentState()->messagedelta);
-    DoSpeech (un,parent,*c.getCurrentState());
-    if (parent==_Universe->AccessCockpit()->GetParent()) {
-      _Universe->AccessCockpit()->SetCommAnimation (c.ani);
-    }
-    refresh_target=true;
+    if (!foundValidMessage)
+      DoSpeechAndAni(un,parent,c);
   }else {
     DoSpeech (NULL,NULL,*c.getCurrentState());
     if (parent==_Universe->AccessCockpit()->GetParent()) {
@@ -1086,7 +1122,49 @@ void Arrested (Unit * parent) {
 	}
 	}
 }
+static void PowerDownShield(Shield *shield, float howmuch){
+  switch (shield->number) {
+  case 2:
+    if (shield->shield2fb.front/howmuch>shield->shield2fb.frontmax)
+      shield->shield2fb.front=shield->shield2fb.frontmax*howmuch;
+    if (shield->shield2fb.back/howmuch>shield->shield2fb.backmax)
+      shield->shield2fb.back=shield->shield2fb.backmax*howmuch;
+    break;
+  case 4:
+    if (shield->shield4fbrl.front/howmuch>shield->shield4fbrl.frontmax)
+      shield->shield4fbrl.front=shield->shield4fbrl.frontmax*howmuch;
+    if (shield->shield4fbrl.right/howmuch>shield->shield4fbrl.rightmax)
+      shield->shield4fbrl.right=shield->shield4fbrl.rightmax*howmuch;
+    if (shield->shield4fbrl.left/howmuch>shield->shield4fbrl.leftmax)
+      shield->shield4fbrl.left=shield->shield4fbrl.leftmax*howmuch;
+    if (shield->shield4fbrl.back/howmuch>shield->shield4fbrl.backmax)
+      shield->shield4fbrl.back=shield->shield4fbrl.backmax*howmuch;
+    break;
+  case 8:
+    if (shield->shield8.frontlefttop/howmuch>shield->shield8.frontlefttopmax)
+      shield->shield8.frontlefttop=shield->shield8.frontlefttopmax*howmuch;
+    if (shield->shield8.frontleftbottom/howmuch>shield->shield8.frontleftbottommax)
+      shield->shield8.frontleftbottom=shield->shield8.frontleftbottommax*howmuch;
+    if (shield->shield8.frontrighttop/howmuch>shield->shield8.frontrighttopmax)
+      shield->shield8.frontrighttop=shield->shield8.frontrighttopmax*howmuch;
+    if (shield->shield8.frontrightbottom/howmuch>shield->shield8.frontrightbottommax)
+      shield->shield8.frontrightbottom=shield->shield8.frontrightbottommax*howmuch;
 
+    if (shield->shield8.backlefttop/howmuch>shield->shield8.backlefttopmax)
+      shield->shield8.backlefttop=shield->shield8.backlefttopmax*howmuch;
+    if (shield->shield8.backleftbottom/howmuch>shield->shield8.backleftbottommax)
+      shield->shield8.backleftbottom=shield->shield8.backleftbottommax*howmuch;
+    if (shield->shield8.backrighttop/howmuch>shield->shield8.backrighttopmax)
+      shield->shield8.backrighttop=shield->shield8.backrighttopmax*howmuch;
+    if (shield->shield8.backrightbottom/howmuch>shield->shield8.backrightbottommax)
+      shield->shield8.backrightbottom=shield->shield8.backrightbottommax*howmuch;
+
+    break;
+  default:
+    break;
+  }
+
+}
 void FireKeyboard::Execute () {
 	
   while (vectorOfKeyboardInput.size()<=whichplayer||vectorOfKeyboardInput.size()<=whichjoystick) {
@@ -1104,6 +1182,11 @@ void FireKeyboard::Execute () {
   } else {
     ChooseTargets(parent,TargAll,false);
     refresh_target=true;
+  }
+  if (f().shieldpowerstate!=1) {
+    Shield  * shield = &parent->shield;
+    PowerDownShield(shield,f().shieldpowerstate);
+    f().shieldpowerstate=1;
   }
   if (f().firekey==PRESS||f().jfirekey==PRESS||j().firekey==DOWN||j().jfirekey==DOWN){
     if (!_Universe->AccessCockpit()->CanDrawNavSystem())
@@ -1306,6 +1389,13 @@ void FireKeyboard::Execute () {
 	  isvis=!isvis;
 	  parent->SetGlowVisible (isvis);
   }
+
+  if (f().togglewarpdrive == PRESS) {
+	  f().togglewarpdrive=DOWN;
+	  parent->graphicOptions.InWarp=1-parent->graphicOptions.InWarp;
+	  parent->graphicOptions.WarpRamping=1;
+  }
+
   if (f().misk==PRESS||f().rmisk==PRESS) {
     bool forward;
     if (f().misk==PRESS) {
@@ -1330,28 +1420,35 @@ void FireKeyboard::Execute () {
       Unit * targ=parent->Target();
       if (targ) {
 	CommunicationMessage * mymsg = GetTargetMessageQueue(targ,resp);       
-
-	if (mymsg==NULL) {
+        FSM *fsm =FactionUtil::GetConversation (parent->faction,targ->faction);
+	if (mymsg==NULL||mymsg->curstate>=fsm->nodes.size()) {
 	  CommunicationMessage c(parent,targ,i,NULL,sex);
 	  DoSpeech (targ,targ,*c.getCurrentState());
-	  if (!AUDIsPlaying (c.getCurrentState()->GetSound(c.sex))) {
-	    AUDStartPlaying(c.getCurrentState()->GetSound(c.sex));
+          int sound = c.getCurrentState()->GetSound(c.sex);
+          //AUDAdjustSound(sound,parent->Position(),parent->GetVelocity());
+	  if (!AUDIsPlaying (sound)) {
+	    AUDStartPlaying(sound);
 	  }
 	  Order * o = targ->getAIState();
 	  if (o)
 		  o->Communicate (c);
 	}else {
+          FSM * tmp = mymsg->fsm;
+          mymsg->fsm = fsm;
 	  FSM::Node * n = mymsg->getCurrentState();
 	  if (i<n->edges.size()) {
 	    CommunicationMessage c(parent,targ,*mymsg,i,NULL,sex);
 	    DoSpeech (targ,targ,*c.getCurrentState());
-	    if (!AUDIsPlaying (c.getCurrentState()->GetSound(c.sex))) {
-	      AUDStartPlaying(c.getCurrentState()->GetSound(c.sex));
+            int sound=c.getCurrentState()->GetSound(c.sex);
+            //AUDAdjustSound(sound,parent->Position(),parent->GetVelocity());
+	    if (!AUDIsPlaying (sound)) {
+	      AUDStartPlaying(sound);
 	    }
-		Order * oo = targ->getAIState();
-		if (oo)
-			oo->Communicate (c);
+            Order * oo = targ->getAIState();
+            if (oo)
+              oo->Communicate (c);
 	  }
+          mymsg->fsm=tmp;
 	}
       }
     }
@@ -1360,11 +1457,11 @@ void FireKeyboard::Execute () {
     Unit * targ;
     if ((targ =parent->Target())) {
       CommunicationMessage *mymsg = GetTargetMessageQueue(targ,resp);
+      FSM *fsm =FactionUtil::GetConversation (parent->faction,targ->faction);
       if (mymsg==NULL) {
-	FSM *fsm =FactionUtil::GetConversation (parent->faction,targ->faction);
 	_Universe->AccessCockpit()->communication_choices=fsm->GetEdgesString(fsm->getDefaultState(parent->getRelation(targ)));
       }else {
-       _Universe->AccessCockpit()->communication_choices=mymsg->fsm->GetEdgesString(mymsg->curstate);
+       _Universe->AccessCockpit()->communication_choices=fsm->GetEdgesString(mymsg->curstate);
       }
     } else {
       _Universe->AccessCockpit()->communication_choices="\nNo Communication\nLink\nEstablished";

@@ -20,8 +20,10 @@
  */
 #include <stdlib.h>
 #include <iostream>
-#include "vs_path.h"
+#include "vsfilesystem.h"
+#include "cmd/unit_generic.h"
 #include "aux_texture.h"
+#include "ani_texture.h"
 #include "sprite.h"
 #include "matrix.h"
 #include "gfxlib.h"
@@ -29,14 +31,18 @@
 #include "vs_globals.h"
 #include <assert.h>
 #include <math.h>
+#ifdef _WIN32
+#include <direct.h>
+#endif
 #ifndef M_PI_2
 # define M_PI_2		1.57079632679489661923	/* pi/2 */
 #endif
 static float *mview = NULL;
 
-Sprite::Sprite(const char *file, enum FILTER texturefilter,GFXBOOL force) {
+using namespace VSFileSystem;
+
+VSSprite::VSSprite(const char *file, enum FILTER texturefilter,GFXBOOL force) {
   VSCONSTRUCT2('S')
-  vschdir ("sprites");
   xcenter = 0;
   ycenter = 0;
   widtho2 = 0;
@@ -44,61 +50,85 @@ Sprite::Sprite(const char *file, enum FILTER texturefilter,GFXBOOL force) {
   rotation = 0;
   surface = NULL;
   maxs = maxt =0;
-  FILE *fp = NULL;
+  VSFile f;
+  VSError err = Unspecified;
   if (file[0]!='\0') {
-    fp = fopen(file, "r");
+	err = f.OpenReadOnly( file, VSSpriteFile);
   }
-  bool changeup=true;
-  if (!fp) {
-    changeup=false;
-	vscdup();
-	if (file[0]!='\0')
-	  fp = fopen(file,"r");
-  }
-  if (fp) {
-    char texture[64]={0};
-    char texturea[64]={0};
-    fscanf(fp, "%63s %63s", texture, texturea);
-    fscanf(fp, "%f %f", &widtho2, &heighto2);
-    fscanf(fp, "%f %f", &xcenter, &ycenter);
-    fclose(fp);
+  if (err<=Ok) {
+    char texture[127]={0};
+    char texturea[127]={0};
+    f.Fscanf( "%126s %126s", texture, texturea);
+    f.Fscanf( "%f %f", &widtho2, &heighto2);
+    f.Fscanf( "%f %f", &xcenter, &ycenter);
     
     widtho2/=2;
     heighto2/=-2;
     surface=NULL;
     if (g_game.use_sprites||force==GFXTRUE) {
-      if (texturea[0]=='0') {
-	surface = new Texture(texture,0,texturefilter,TEXTURE2D,TEXTURE_2D,GFXTRUE);    
+      int len=strlen(texture);
+      if (len>4&&texture[len-1]=='i'&&texture[len-2]=='n'&&texture[len-3]=='a'&&texture[len-4]=='.') {
+        char olddir[1023];
+        char *newtex=NULL;
+        for (int i=len-1;i>0;--i) {
+          if (texture[i]=='/') {
+            newtex=texture+i+1;
+            break;
+          }
+        }
+        if (newtex) {
+          getcwd(olddir,1022);
+          for (int i=len-1;i>0;--i) {
+            if (texture[i]=='/') {
+              texture[i]='\0';
+            }
+          }
+          chdir(texture);
+        }
+        surface=surface = new AnimatedTexture(f,0,texturefilter,GFXFALSE);
+      } else if (texturea[0]=='0') {
+        surface = new Texture(texture,0,texturefilter,TEXTURE2D,TEXTURE_2D,GFXTRUE,65536,GFXFALSE);
       } else {
-	surface = new Texture(texture,texturea,0,texturefilter,TEXTURE2D,TEXTURE_2D,1,0,GFXTRUE);    
+        surface = new Texture(texture,texturea,0,texturefilter,TEXTURE2D,TEXTURE_2D,1,0,GFXTRUE,65536,GFXFALSE);    
       }
       
       if (!surface->LoadSuccess()) {
-	delete surface;
-	surface = NULL;
+		delete surface;
+		surface = NULL;
       }
     }
+    // Finally close file
+    f.Close();
   }else {
     widtho2 = heighto2 = 0;
     xcenter = ycenter = 0;
   }
-  if (changeup) {
-	  vscdup();
-  } 
 }	
 
-Sprite::~Sprite()
+void	VSSprite::ReadTexture( VSFileSystem::VSFile * f)
+{
+	if( !f->Valid())
+	{
+    	widtho2 = heighto2 = 0;
+    	xcenter = ycenter = 0;
+		cerr<<"VSSprite::ReadTexture error : VSFile not valid"<<endl;
+		return;
+	}
+	surface = new Texture( f);
+}
+
+VSSprite::~VSSprite()
 {
   VSDESTRUCT2
   if(surface!=NULL)
     delete surface;
 }
 
-void Sprite::SetST (const float s, const float t) {
+void VSSprite::SetST (const float s, const float t) {
   maxs = s;
   maxt = t;
 }
-void Sprite::DrawHere (Vector &ll, Vector &lr, Vector &ur, Vector &ul) {
+void VSSprite::DrawHere (Vector &ll, Vector &lr, Vector &ur, Vector &ul) {
     if (rotation) {
       const float cw = widtho2*cos(rotation);
       const float sw = widtho2*sin(rotation);
@@ -117,7 +147,7 @@ void Sprite::DrawHere (Vector &ll, Vector &lr, Vector &ur, Vector &ul) {
       ul=Vector(xcenter-widtho2, ycenter-heighto2, 0.00f);
     }
 }
-void Sprite::Draw()
+void VSSprite::Draw()
 {
   if (surface){//don't do anything if no surface
     surface->MakeActive();
@@ -138,30 +168,30 @@ void Sprite::Draw()
   }
 }
 
-void Sprite::SetPosition(const float &x1, const float &y1) {
+void VSSprite::SetPosition(const float &x1, const float &y1) {
   xcenter =x1;
   ycenter = y1;
 }
 
-void Sprite::GetPosition(float &x1, float &y1)
+void VSSprite::GetPosition(float &x1, float &y1)
 {
 	x1 = xcenter;
 	y1 = ycenter;
 }
-void Sprite::SetSize (float x1, float y1) {
+void VSSprite::SetSize (float x1, float y1) {
   widtho2 = x1/2;
   heighto2 = y1/2;
 }
-void Sprite::GetSize (float &x1,float &y1) {
+void VSSprite::GetSize (float &x1,float &y1) {
   x1 = widtho2*2;
   y1 = heighto2*2;
 }
 
-void Sprite::SetRotation(const float &rot) {
+void VSSprite::SetRotation(const float &rot) {
   rotation = rot;
 }
 
-void Sprite::GetRotation(float &rot) {
+void VSSprite::GetRotation(float &rot) {
   rot = rotation;
 }
 

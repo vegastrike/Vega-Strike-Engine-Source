@@ -1,9 +1,10 @@
+#include <math.h>
 #include <Python.h>
 #include "python/python_class.h"
 #include "base.h"
 #include "base_util.h"
-#include "vs_path.h"
-#ifdef USE_BOOST_129
+#include "vsfilesystem.h"
+#ifndef USE_BOOST_128
 #include <boost/python/object.hpp>
 #else
 #include <boost/python/objects.hpp>
@@ -21,9 +22,9 @@ static boost::python::tuple GetRandomBarMessage () {
 	while (( mission->msgcenter->last(i++,last,who))) {
 		newmsg=last.message;
 		newsound="";
-		int first=newmsg.find_first_of("[");
+		std::string::size_type first=newmsg.find_first_of("[");
 		{
-			int last=newmsg.find_first_of("]");
+			string::size_type last=newmsg.find_first_of("]");
 			if (first!=string::npos&&(first+1)<newmsg.size()) {
 				newsound=newmsg.substr(first+1,last-first-1);
 				newmsg=newmsg.substr(0,first);
@@ -54,8 +55,10 @@ PYTHON_BEGIN_MODULE(Base)
 	PYTHON_DEFINE_GLOBAL(Base,&BaseUtil::EraseLink,"EraseLink");
 	PYTHON_DEFINE_GLOBAL(Base,&BaseUtil::Ship,"Ship");
 	PYTHON_DEFINE_GLOBAL(Base,&BaseUtil::Texture,"Texture");
-	PYTHON_DEFINE_GLOBAL(Base,&BaseUtil::Message,"Message");
+	PYTHON_DEFINE_GLOBAL(Base,&BaseUtil::EnqueueMessageToRoom,"EnqueueMessageToRoom");
+	PYTHON_DEFINE_GLOBAL(Base,&BaseUtil::MessageToRoom,"MessageToRoom");
 	PYTHON_DEFINE_GLOBAL(Base,&BaseUtil::EnqueueMessage,"EnqueueMessage");
+	PYTHON_DEFINE_GLOBAL(Base,&BaseUtil::Message,"Message");
 	PYTHON_DEFINE_GLOBAL(Base,&BaseUtil::EraseObj,"EraseObj");
 	PYTHON_DEFINE_GLOBAL(Base,&GetRandomBarMessage,"GetRandomBarMessage");
 PYTHON_END_MODULE(Base)

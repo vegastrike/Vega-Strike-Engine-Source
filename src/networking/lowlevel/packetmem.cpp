@@ -22,130 +22,104 @@ LOCALCONST_DEF(PacketMem,bool,LeaveOwnership,0)
 
 PacketMem::PacketMem( )
 {
-    _buffer  = NULL;
+    MAKE_VALID
     _len     = 0;
-    _cnt     = NULL;
 }
 
 PacketMem::PacketMem( const PacketMem& orig )
 {
+    MAKE_VALID
     _buffer  = orig._buffer;
     _len     = orig._len;
-    _cnt     = orig._cnt;
-
-    if( _cnt ) ref();
 }
 
 PacketMem::PacketMem( size_t bytesize )
 {
-    _buffer  = new char[bytesize];
+    MAKE_VALID
+    _buffer  = ptr( new char[bytesize] );
     _len     = bytesize;
-    _cnt     = new size_t;
-    *_cnt    = 1;
 }
 
 PacketMem::PacketMem( const void* buffer, size_t size )
 {
+    MAKE_VALID
     if( buffer != NULL )
     {
-        _buffer  = new char[size];
+        char* v  = new char[size];
         _len     = size;
-        _cnt     = new size_t;
-        *_cnt    = 1;
-
-        memcpy( _buffer, buffer, size );
+        memcpy( v, buffer, size );
+        _buffer  = ptr( v );
     }
     else
     {
-        _buffer  = NULL;
         _len     = 0;
-        _cnt     = NULL;
     }
 }
 
 PacketMem::PacketMem( void* buffer, size_t size, bool own )
 {
-    inner_set( buffer, size, own );
-}
-
-void PacketMem::set( void* buffer, size_t size, bool own )
-{
-    release( );
+    MAKE_VALID
     inner_set( buffer, size, own );
 }
 
 PacketMem::~PacketMem( )
 {
-    release( );
+    CHECK_VALID
+    MAKE_INVALID
+}
+
+void PacketMem::set( void* buffer, size_t size, bool own )
+{
+    CHECK_VALID
+    inner_set( buffer, size, own );
 }
 
 PacketMem& PacketMem::operator=( const PacketMem& orig )
 {
-    release( );
-
+    CHECK_VALID
     _buffer  = orig._buffer;
     _len     = orig._len;
-    _cnt     = orig._cnt;
-
-    if( _cnt ) ref( );
-
     return *this;
-}
-
-void PacketMem::release( )
-{
-    if( _cnt == NULL ) return;
-
-    unref( );
-    if( *_cnt != 0 ) return;
-
-    delete _cnt;
-    if( _buffer == NULL ) return;
-
-    delete [] _buffer;
 }
 
 void PacketMem::inner_set( void* buffer, size_t size, bool own )
 {
+    CHECK_VALID
     if( buffer != NULL )
     {
         if( own == false )
         {
-            _buffer  = new char[size];
+            char* v  = new char[size];
             _len     = size;
-            _cnt     = new size_t;
-            *_cnt    = 1;
-
-            memcpy( _buffer, buffer, size );
+            memcpy( v, buffer, size );
+            _buffer = ptr( v );
         }
         else
         {
-            _buffer  = (char*)buffer;
+            _buffer  = ptr( (char*)buffer );
             _len     = size;
-            _cnt     = new size_t;
-            *_cnt    = 1;
         }
     }
     else
     {
-        _buffer  = NULL;
-        _len     = 0;
-        _cnt     = NULL;
+        _buffer.reset( 0 );
+        _len = 0;
     }
 }
 
 void PacketMem::dump( ostream& ostr, size_t indent_depth ) const
 {
+    CHECK_VALID
     static const size_t LEN = 15;
 
     char x[LEN];
-    char* buf  = _buffer;
+    char* buf  = _buffer.get();
     size_t len = _len;
     size_t i=0;
     while( len > 0 )
     {
         for( i=0; i<indent_depth; i++ ) ostr << " ";
-        memset( x, -1, LEN );
+        memset( x, 0, LEN );
         for( i=0; i<LEN && len>0; i++ )
         {
             x[i] = *buf;
@@ -159,7 +133,8 @@ void PacketMem::dump( ostream& ostr, size_t indent_depth ) const
         ostr << "   ";
         for( i=0; i<LEN; i++ )
         {
-            if( isprint(x[i]) ) ostr << x[i]; else ostr << "@";
+	    int v = x[i];
+            if( isprint(v) ) ostr << x[i]; else ostr << "@";
         }
         ostr << endl;
     }
@@ -168,102 +143,28 @@ void PacketMem::dump( ostream& ostr, size_t indent_depth ) const
 
 bool PacketMem::operator==( const PacketMem& r ) const
 {
+    CHECK_VALID
     if( _buffer == r._buffer ) return true;
     if( _len != r._len ) return false;
-    if( memcmp( _buffer, r._buffer, _len ) == 0 ) return true;
+    if( memcmp( _buffer.get(), r._buffer.get(), _len ) == 0 ) return true;
     return false;
 }
 
 size_t PacketMem::len() const
 {
+    CHECK_VALID
     return _len;
-}
-
-void PacketMem::trunc( size_t len )
-{
-    if( len >= 0 && len < _len ) _len = len;
 }
 
 const char* PacketMem::getConstBuf() const
 {
-    return _buffer;
+    CHECK_VALID
+    return _buffer.get();
 }
 
 char* PacketMem::getVarBuf()
 {
-    return _buffer;
-}
-
-void PacketMem::ref( )
-{
-    assert( _cnt );
-    (*_cnt)++;
-}
-
-void PacketMem::unref( )
-{
-    assert( _cnt );
-    assert( *_cnt > 0 );
-    (*_cnt)--;
-}
-
-/***********************************************************************
- * PacketMemShadow - definition
- ***********************************************************************/
-
-PacketMemShadow::PacketMemShadow( )
-    : _idx( 0 )
-    , _len( 0 )
-{ }
-
-PacketMemShadow::PacketMemShadow( const PacketMemShadow& orig )
-    : _mem( orig._mem )
-    , _idx( orig._idx )
-    , _len( orig._len )
-{ }
-
-PacketMemShadow::PacketMemShadow( const PacketMem& mem )
-    : _mem( mem )
-    , _idx( 0 )
-    , _len( mem.len() )
-{ }
-
-PacketMemShadow::PacketMemShadow( const PacketMem& mem, size_t idx, size_t len )
-    : _mem( mem )
-    , _idx( idx )
-    , _len( len )
-{
-    if( _idx + _len > _mem.len() )
-    {
-        if( _idx > _mem.len() )
-            _len = 0;
-        else
-            _len = _mem.len() - _idx;
-    }
-}
-
-PacketMemShadow& PacketMemShadow::operator=( const PacketMemShadow& orig )
-{
-    _mem = orig._mem;
-    _idx = orig._idx;
-    _len = orig._len;
-    return *this;
-}
-
-size_t PacketMemShadow::len() const
-{
-    return _len;
-}
-
-char* PacketMemShadow::getVarBuf( )
-{
-    char* r = _mem.getVarBuf( );
-    return &r[_idx];
-}
-
-const char* PacketMemShadow::getConstBuf( ) const
-{
-    const char* r = _mem.getConstBuf( );
-    return &r[_idx];
+    CHECK_VALID
+    return _buffer.get();
 }
 

@@ -21,6 +21,8 @@ UnitCollection::UnitListNode::~UnitListNode() {
   if(NULL!=unit) {
     unit->UnRef(); 	
   }
+  unit = NULL;
+  next = NULL;
 }
 void UnitCollection::destr() {
   UnitListNode *tmp;
@@ -28,7 +30,9 @@ void UnitCollection::destr() {
     tmp = u.next;
     u.next = u.next->next;
     delete tmp;
-  }  
+  }
+  u.unit = NULL;
+  u.next = NULL;
 }
 
 void * UnitCollection::PushUnusedNode (UnitListNode * node) {
@@ -37,7 +41,7 @@ void * UnitCollection::PushUnusedNode (UnitListNode * node) {
   static bool cachunk=true;
   if (cachunk) {
     cachunk=false;
-    //fprintf (stderr,"%x %x",&dog,&cat);
+    //VSFileSystem::vs_fprintf (stderr,"%x %x",&dog,&cat);
   }
   static std::vector <UnitCollection::UnitListNode * >dogpile;
   if (node==NULL) {
@@ -120,7 +124,6 @@ void UnitCollection::ConstIterator::GetNextValidUnit () {
 const UnitCollection &UnitCollection::operator = (const UnitCollection & uc){
   printf ("warning could cause problems with concurrent lists. Make sure no one is traversing gotten list");
   destr();
-  u=NULL;
   init();
   un_iter ui = createIterator();
   const UnitListNode * n = &uc.u;
@@ -134,7 +137,6 @@ const UnitCollection &UnitCollection::operator = (const UnitCollection & uc){
   return uc;
 }
 UnitCollection::UnitCollection (const UnitCollection& uc):u(NULL) {
-  u=NULL;
   init();
   un_iter ui = createIterator();
   const UnitListNode * n = &uc.u;

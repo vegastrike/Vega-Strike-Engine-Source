@@ -32,7 +32,7 @@
 #include <list>
 #include <string>
 #include <fstream>
-#include "vs_path.h"
+#include "vsfilesystem.h"
 #include "lin_time.h"
 #include "gfxlib.h"
 #include "vs_globals.h"
@@ -41,6 +41,8 @@
 #include "vegastrike.h"
 #include "sphere.h"
 #include "lin_time.h"
+#include "gldrv/winsys.h"
+#include "mesh_xml.h"
 #if defined(__APPLE__) || defined(MACOSX)
     #include <OpenGL/gl.h>
 #else
@@ -49,9 +51,19 @@
 #include <float.h>
 #include <algorithm>
 using std::list;
-Hashtable<string, Mesh, char [127]> Mesh::meshHashTable;
+Hashtable<std::string, Mesh, 127> Mesh::meshHashTable;
+Hashtable<std::string, std::vector<int>, 127> Mesh::animationSequences;
 Vector mouseline;
-
+int Mesh::getNumAnimationFrames(string which)const {
+   if (which.empty()) {
+      vector<int>* animSeq = animationSequences.Get(hash_name);
+      if (animSeq) return animSeq->size();
+   }else {
+      vector<int>* animSeq = animationSequences.Get(hash_name+"*"+which);
+      if (animSeq) return animSeq->size();
+   }
+   return 0;      
+}
 
 void Mesh::InitUnit() {
   polygon_offset=0;
@@ -98,79 +110,130 @@ bool Mesh::LoadExistant (Mesh * oldmesh) {
     orig = oldmesh;
     return true;
 }
-Vector Mesh::GetVertex (int index) const {
-	if (vlist->hasColor()) {
-		const GFXColorVertex * v=vlist->GetColorVertex(index);
-		return Vector(v->x,v->y,v->z);
-	}else {
-		const GFXVertex * v=vlist->GetVertex(index);
-		return Vector(v->x,v->y,v->z);
-	}
-}
-int Mesh::numVertices() const {
-	return vlist->GetNumVertices();
-}
 bool Mesh::LoadExistant (const string filehash, const Vector& scale, int faction) {
   Mesh * oldmesh;
 
-  hash_name = GetHashName (filehash,scale,faction);
+  hash_name = VSFileSystem::GetHashName (filehash,scale,faction);
   oldmesh = meshHashTable.Get(hash_name);
 
   if (oldmesh==0) {
-    hash_name =GetSharedMeshHashName(filehash,scale,faction);
+    hash_name =VSFileSystem::GetSharedMeshHashName(filehash,scale,faction);
     oldmesh = meshHashTable.Get(hash_name);  
   }
   if(0 != oldmesh) {
     return LoadExistant(oldmesh);
   }
-  //  fprintf (stderr,"cannot cache %s",GetSharedMeshHashName(filehash,scale,faction).c_str());
+  //  VSFileSystem::Fprintf (stderr,"cannot cache %s",GetSharedMeshHashName(filehash,scale,faction).c_str());
   return false;
 }
+
+extern Hashtable<std::string, std::vector <Mesh*>, 127> bfxmHashTable;
 Mesh::Mesh (const Mesh & m) {
+  fprintf (stderr,"UNTESTED MESH COPY CONSTRUCTOR");
   this->orig=NULL;
   this->hash_name = m.hash_name;
   InitUnit();
   Mesh * oldmesh = meshHashTable.Get (hash_name);
+  if (0==oldmesh) {
+    vector<Mesh*>* vec = bfxmHashTable.Get(hash_name);
+    for (unsigned int i=0;i<vec->size();++i) {
+      Mesh * mush = (*vec)[i]->orig?(*vec)[i]->orig:(*vec)[i];
+      if (mush==m.orig||mush==&m)
+        oldmesh=(*vec)[i];
+    }
+    if (0==oldmesh) {
+      if (vec->size()>1) fprintf (stderr,"Copy constructor %s used in ambiguous Situation",hash_name.c_str());
+      if (vec->size())
+        oldmesh=(*vec)[0];
+    }
+  }
   if (LoadExistant (oldmesh->orig!=NULL?oldmesh->orig:oldmesh)) {
     return;
   }
 }
-Mesh:: Mesh(const char * filename,const Vector & scale, int faction, Flightgroup *fg, bool orig):hash_name(filename)
+
+using namespace VSFileSystem;
+extern Hashtable<std::string, std::vector <Mesh*>, 127> bfxmHashTable;
+Mesh::Mesh(std::string filename,const Vector & scale, int faction, Flightgroup *fg, bool orig):hash_name(filename)
 {
-  this->orig=NULL;
-  InitUnit();
-  Mesh *oldmesh;
-  if (LoadExistant (filename,scale,faction)) {
-    return;
-  }
-  bool shared=false;
-  FILE * fp= fopen (filename,"r");
-  if (fp==NULL) {
-    shared=true;
+  Mesh* cpy=LoadMesh(filename.c_str(),scale,faction,fg,vector<std::string>());
+  if (cpy->orig) {
+    LoadExistant(cpy->orig);
+    delete cpy;//wasteful, but hey
+    if (orig!=false) {
+      orig=false;
+      std::vector<Mesh*> *tmp=bfxmHashTable.Get(this->orig->hash_name);
+      if (tmp&&tmp->size()&&(*tmp)[0]==this->orig) {
+        if (this->orig->refcount==1) {
+          bfxmHashTable.Delete(this->orig->hash_name);        
+          delete tmp;
+          orig=true;
+        }
+      }
+      if (meshHashTable.Get(this->orig->hash_name)==this->orig) {
+        if (this->orig->refcount==1) {
+          meshHashTable.Delete(this->orig->hash_name);
+          orig=true;
+        }
+      }
+      if (orig) {
+        Mesh * tmp=this->orig;
+        tmp->orig=this;
+        this->orig=NULL;
+        refcount=2;
+        delete []tmp;
+      }
+    }
   }else {
-    fclose (fp);
-  }
-  bool xml=true;
-  if(xml) {
-    LoadXML(shared?GetSharedMeshPath(filename).c_str():filename,scale,faction,fg,orig);
-    oldmesh = this->orig;
-  } else {
-    this->xml= NULL;
-    LoadBinary(shared?GetSharedMeshPath(filename).c_str():filename,faction);
-    oldmesh = new Mesh[1];
-  }
-  draw_queue = new vector<MeshDrawContext>;
-  if (!orig) {
-    hash_name =shared?GetSharedMeshHashName (filename,scale,faction):GetHashName(filename,scale,faction);
-    meshHashTable.Put(hash_name, oldmesh);
-    //oldmesh[0]=*this;
-    *oldmesh=*this;
-    oldmesh->orig = NULL;
-    oldmesh->refcount++;
-  } else {
-    this->orig=NULL;
+    delete cpy;
+    fprintf (stderr,"fallback, %s unable to be loaded as bfxm\n",filename.c_str()); 
   }
 }
+Mesh::Mesh(const char * filename,const Vector & scale, int faction, Flightgroup *fg, bool orig, const vector<string>&textureOverride):hash_name(filename){
+    this->orig=NULL;
+    InitUnit();
+    Mesh *oldmesh;
+    if (LoadExistant (filename,scale,faction)) {
+      return;
+    }
+    bool shared=false;
+    VSFile f;
+    VSError err=Unspecified;
+    err = f.OpenReadOnly( filename, MeshFile);
+    if( err>Ok)
+    {
+      VSFileSystem::vs_fprintf (stderr,"Cannot Open Mesh File %s\n",filename);
+      cleanexit=1;
+      winsys_exit(1);
+      return;
+    }
+    shared = (err==Shared);
+    
+    bool xml=true;
+    if(xml) {
+      //LoadXML(filename,scale,faction,fg,orig);
+      LoadXML(f,scale,faction,fg,orig,textureOverride);
+      oldmesh = this->orig;
+    } else {
+      // This must be changed someday
+      LoadBinary(shared?(VSFileSystem::sharedmeshes+"/"+(filename)).c_str():filename,faction);
+      oldmesh = new Mesh[1];
+    }
+    if( err<=Ok)
+      f.Close();
+    draw_queue = new vector<MeshDrawContext>;
+    if (!orig) {
+      hash_name =shared?VSFileSystem::GetSharedMeshHashName (filename,scale,faction):VSFileSystem::GetHashName(filename,scale,faction);
+      meshHashTable.Put(hash_name, oldmesh);
+      //oldmesh[0]=*this;
+      *oldmesh=*this;
+      oldmesh->orig = NULL;
+      oldmesh->refcount++;
+    } else {
+      this->orig=NULL;
+    }
+}
+
 float const ooPI = 1.00F/3.1415926535F;
 //#include "d3d_internal.h"
 void Mesh::SetMaterial (const GFXMaterial & mat) {
@@ -198,16 +261,18 @@ Mesh * Mesh::getLOD (float lod) {
   if (!orig)
     return this;
   Mesh * retval =&orig[0];
-  if (getFramesPerSecond()>.0000001) {
+  vector <int> *animFrames=0;
+  if (getFramesPerSecond()>.0000001&&(animFrames=animationSequences.Get(hash_name))) {
 	  //return &orig[(int)floor(fmod (getNewTime()*getFramesPerSecond(),numlods))];
-	  unsigned int which=(int)floor(fmod(getCurrentFrame(),getNumLOD()));
+	  unsigned int which=(int)floor(fmod(getCurrentFrame(),
+                                             animFrames->size()));
 	  float adv = GetElapsedTime()*getFramesPerSecond();
 	  static float max_frames_skipped=XMLSupport::parse_float(vs_config->getVariable("graphics","mesh_animation_max_frames_skipped","3"));
 	  if (adv>max_frames_skipped) {
 		  adv= max_frames_skipped;
 	  }
 	  setCurrentFrame(getCurrentFrame()+adv);
-	  return &orig[which%getNumLOD()];
+	  return &orig[(*animFrames)[which%animFrames->size()]%getNumLOD()];
   }else {
 	  for (int i=1;i<numlods;i++) {
 		  if (lod<orig[i].lodsize) {

@@ -1,17 +1,24 @@
+#include "cmd/unit_generic.h"
 #include "networking/client.h"
 #include "networking/acctserver.h"
 #include "networking/lowlevel/packet.h"
 #include "lin_time.h"
 #include "networking/lowlevel/vsnet_serversocket.h"
-#include "vs_path.h"
+#include "vsfilesystem.h"
 #include "vs_globals.h"
 #include "networking/lowlevel/netbuffer.h"
 #include "networking/lowlevel/vsnet_debug.h"
 #include "networking/fileutil.h"
 #include "posh.h"
 
-VegaConfig * vs_config;
+using namespace VSFileSystem;
+
+VegaConfig * vs_config = NULL;
 string acctdir;
+
+void	getZoneInfoBuffer( unsigned short zoneid, NetBuffer & netbuf)
+{
+}
 
 AccountServer::AccountServer()
     : _sock_set( true )
@@ -57,14 +64,12 @@ void    AccountServer::start()
     CONFIGFILE = new char[42];
     strcpy( CONFIGFILE, "accountserver.config");
     cout<<"Loading config file...";
-    initpaths();
+    VSFileSystem::InitPaths(CONFIGFILE);
     //vs_config = new VegaConfig( ACCTCONFIGFILE);
     cout<<" done."<<endl;
     InitTime();
     UpdateTime();
-    acctdir = datadir + vs_config->getVariable( "server", "accounts_dir", "");
-    if( acctdir=="")
-        acctdir = datadir + "/accounts/";
+    acctdir = VSFileSystem::datadir + vs_config->getVariable( "server", "accounts_dir", "/accounts/");
     strperiod = vs_config->getVariable( "server", "saveperiod", "");
     int period;
     if( strperiod=="")
@@ -104,7 +109,7 @@ void    AccountServer::start()
 
     while( keeprun)
     {
-        //COUT << "Loop" << endl;
+        COUT << "Loop" << endl;
         // Check for incoming connections
 
         _sock_set.wait( );
@@ -117,12 +122,13 @@ void    AccountServer::start()
         }
 
         // Loop for each active client and process request
-        LS i;
+        list<SOCKETALT>::iterator i;
         for( i=Socks.begin(); i!=Socks.end(); i++)
         {
-            if( i->isActive( ) )
+            SOCKETALT alt( *i );
+            if( alt.isActive( ) )
             {
-                this->recvMsg( (*i));
+                this->recvMsg( alt );
             }
         }
 
@@ -136,28 +142,26 @@ void    AccountServer::start()
 
     delete CONFIGFILE;
     delete vs_config;
+    vs_config=NULL;
     Network->disconnect( "Shutting down.", true );
 }
 
 void    AccountServer::recvMsg( SOCKETALT sock)
 {
     string callsign, passwd;
-    AddressIP       ipadr;
     int             recvcount=0;
     unsigned char   cmd;
     Account *       elem = NULL;
     int             found=0, connected=0;
 
     // Receive data from sock
-    PacketMem mem;
-    if( (recvcount = sock.recvbuf( mem, &ipadr))>0)
+    Packet    p;
+    AddressIP ipadr;
+    if( (recvcount = sock.recvbuf( &p, &ipadr ))>0)
     {
         cout<<"Socket : "<<endl<<sock<<endl;
-        //Packet p( buffer, recvcount );
-        Packet p( mem);
-
         packet = p;
-        NetBuffer netbuf( p.getData(), p.getDataLength());
+        NetBuffer netbuf( packet.getData(), packet.getDataLength());
         // Check the command of the packet
         cmd = packet.getCommand();
         cout<<"Buffer => "<<p.getData()<<endl;
@@ -203,6 +207,8 @@ void    AccountServer::recvMsg( SOCKETALT sock)
                 }
             break;
             case CMD_LOGIN :
+			{
+				char flags = netbuf.getChar();
                 callsign = netbuf.getString();
                 passwd = netbuf.getString();
                 cout<<">>> LOGIN REQUEST =( "<<callsign<<":"<<passwd<<" )= --------------------------------------"<<endl;
@@ -246,6 +252,7 @@ void    AccountServer::recvMsg( SOCKETALT sock)
                     }
                 }
                 cout<<"<<< LOGIN REQUEST ------------------------------------------"<<endl;
+			}
             break;
             case CMD_LOGOUT :
                 callsign = netbuf.getString();
@@ -313,9 +320,9 @@ void    AccountServer::recvMsg( SOCKETALT sock)
                 if( !found)
                 {
                     // Add the account at the end of accounts.xml
-                    string acctpath = datadir+"/accounts.xml";
-                    FILE * fp = fopen( acctpath.c_str(), "r+b");
-                    if( fp==NULL)
+					VSFile f;
+					VSError err = f.OpenReadOnly( "accounts.xml", AccountFile);
+                    if( err>Ok)
                     {
                         cout<<"ERROR opening accounts file";
                         if( packet2.send( (Cmd) 0, packet.getSerial(), (char *)NULL, 0, SENDRELIABLE, NULL, sock, __FILE__, __LINE__ ) < 0 )
@@ -325,20 +332,19 @@ void    AccountServer::recvMsg( SOCKETALT sock)
                     else
                     {
                         cout<<"Account file opened"<<endl;
-                        //fseek( fp, 0, SEEK_SET);
                         char * fbuf = new char[MAXBUFFER];
                         size_t i=0;
                         vector<string> acctlines;
                         // Read a line per account and one line for the "<ACCOUNTS>" tag
                         for( i=0; i<Cltacct.size()+1; i++)
                         {
-                            fbuf=fgets( fbuf, MAXBUFFER, fp);
+                            f.ReadLine( fbuf, MAXBUFFER);
                             acctlines.push_back( fbuf);
                             cout<<"Read line : "<<fbuf<<endl;
                         }
-                        fclose( fp);
-                        fp = fopen( acctpath.c_str(), "wb");
-                        if( !fp)
+						f.Close();
+                        err = f.OpenCreateWrite( "accounts.xml", AccountFile);
+                        if( err>Ok)
                         {
                             cerr<<"!!! ERROR : opening account file in write mode !!!"<<endl;
                             VSExit(1);
@@ -348,8 +354,9 @@ void    AccountServer::recvMsg( SOCKETALT sock)
                         //cout<<"Adding to file : "<<acctstr<<endl;
                         for( i=0; i<acctlines.size(); i++)
                         {
-                            if( fputs( acctlines[i].c_str(), fp) < 0)
+                            if( f.WriteLine( acctlines[i].c_str()) < 0)
                             {
+								f.Close();
                                 cout<<"!!! ERROR : writing to account file !!!"<<endl;
                                 VSExit(1);
                             }
@@ -361,7 +368,7 @@ void    AccountServer::recvMsg( SOCKETALT sock)
                             VSExit(1);
                         }
                         */
-                        fclose( fp);
+						f.Close();
                         Cltacct.push_back( new Account( callsign, passwd));
                     }
                     if( packet2.send( packet.getCommand(), packet.getSerial(), (char*)NULL, 0, SENDRELIABLE, NULL, sock, __FILE__, __LINE__ ) < 0 )
@@ -464,71 +471,64 @@ void    AccountServer::sendAuthorized( SOCKETALT sock, Account * acct)
     else
     {
         NetBuffer netbuf;
-        unsigned int readsize=0, readsize2=0, xmlsize=0, savesize=0;
 
     // Try to open save file
-        string acctfile = acctdir+acct->callsign+".save";
+		string acctfile = acct->callsign+".save";
         cerr<<"Trying to open : "<<acctfile<<endl;
-        FILE *fp = fopen( acctfile.c_str(), "rb");
-        if( fp == NULL)
+		VSFile f;
+		VSError err = f.OpenReadOnly( acctfile, AccountFile);
+        if( err>Ok)
         {
             cerr<<"Account save file does not exists... sending default one to game server"<<endl;
-            acctfile = acctdir+"default.save";
+			acctfile = "default.save";
             cerr<<"Trying to open : "<<acctfile<<endl;
-            fp = fopen( acctfile.c_str(), "rb");
+            err = f.OpenReadOnly( "default.save", AccountFile);
+			if( err > Ok )
+			{
+            	cout<<"Error, default save not found"<<endl;
+				VSExit(1);
+			}
         }
         else
             cout<<"... done !"<<endl;
     // Try to open xml file
         string acctsave;
         // If we loaded default save -> we must load default xml
-        if( acctfile==acctdir+"default.save")
-            acctsave = acctdir+"default.xml";
-        acctsave = acctdir+acct->callsign+".xml";
+        if( acctfile=="default.save")
+            acctsave = "default.xml";
+		else
+        	acctsave = acct->callsign+".xml";
         cerr<<"Trying to open : "<<acctsave<<endl;
-        FILE * fp2 = fopen( acctsave.c_str(), "rb");
-        if( fp2 == NULL)
+		VSFile f2;
+		VSError err2 = f2.OpenReadOnly( acctsave, AccountFile);
+        if( err2>Ok)
         {
             cout<<"XML save file does not exists... sending default one to game server"<<endl;
-            acctsave = acctdir+"default.xml";
+            acctsave = "default.xml";
             cerr<<"Trying to open : "<<acctsave<<endl;
-            if( acctfile!=acctdir+"default.save")
+            if( acctfile!="default.save")
             {
                 // We loaded an existing save but no corresponding xml file so load default
-                fclose( fp);
+				f.Close();
                 cerr<<"Default XML Loaded -> reload the default save !"<<endl;
-                acctfile = acctdir+"default.save";
+                acctfile = "default.save";
                 cerr<<"Trying to open : "<<acctfile<<endl;
-                fp = fopen( acctfile.c_str(), "rb");
+                err = f.OpenReadOnly( acctfile.c_str(), AccountFile);
             }
-            fp2 = fopen( acctsave.c_str(), "rb");
+            err2 = f2.OpenReadOnly( acctsave.c_str(), AccountFile);
         }
         else
             cout<<"... done !"<<endl;
-    // Allocate the needed buffer
-        char * savebuf;
-        char * xmlbuf;
-        if( fp!=NULL && fp2!=NULL)
-        {
-            fseek( fp, 0, SEEK_END);
-            savesize = ftell( fp);
-            fseek( fp, 0, SEEK_SET);
-            fseek( fp2, 0, SEEK_END);
-            xmlsize = ftell( fp2);
-            fseek( fp2, 0, SEEK_SET);
-            savebuf = new char[savesize];
-            xmlbuf = new char[xmlsize];
-        }
+        string savebuf;
+        string xmlbuf;
+
+        cout<<"Save size = "<<f.Size()<<" - XML size = "<<f2.Size()<<endl;
+        cout<<"Loaded -= "<<acct->callsign<<" =- save files ("<<(f.Size()+f2.Size())<<")"<<endl;
     // Read the save unit file
-        if( fp!=NULL)
+        if( err<=Ok)
         {
-            readsize = fread( savebuf, sizeof( char), savesize, fp);
-            if( readsize!=savesize)
-            {
-                cout<<"Error reading save file : "<<readsize<<" read ("<<savesize<<" to read)"<<endl;
-                exit( 1);
-            }
-            fclose( fp);
+			savebuf = f.ReadFull();
+            f.Close();
         }
         else
         {
@@ -541,31 +541,26 @@ void    AccountServer::sendAuthorized( SOCKETALT sock, Account * acct)
         netbuf.addString( acct->serverip);
         netbuf.addString( acct->serverport);
         // Put the size of the first save file in the buffer to send
-        netbuf.addString( string(savebuf));
+        netbuf.addString( savebuf);
 
     // Read the XML file
-        if( fp2!=NULL)
+        if( err2<=Ok)
         {
-            // Read the XML unit file
-            readsize2 = fread( xmlbuf, sizeof( char), xmlsize, fp2);
-            if( xmlsize!=readsize2)
-            {
-                cout<<"Error reading xml save file : "<<readsize2<<" read ("<<xmlsize<<" to read)"<<endl;
-                exit( 1);
-            }
-            fclose( fp2);
+			xmlbuf = f2.ReadFull();
+			f2.Close();
         }
         else
         {
             cout<<"Error, default xml not found"<<endl;
 			VSExit(1);
         }
-        netbuf.addString( string( xmlbuf));
-        cout<<"Save size = "<<readsize<<" - XML size = "<<readsize2<<endl;
-        cout<<"Loaded -= "<<acct->callsign<<" =- save files ("<<(readsize+readsize2)<<")"<<endl;
+        netbuf.addString( xmlbuf);
 
         Packet  packet2;
-        if( packet2.send( LOGIN_ACCEPT, serial, netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE|COMPRESSED, NULL, sock, __FILE__, __LINE__ ) < 0 )
+        if( packet2.send( LOGIN_ACCEPT, serial,
+                          netbuf.getData(), netbuf.getDataLength(),
+                          SENDRELIABLE|COMPRESSED,
+                          NULL, sock, __FILE__, __LINE__ ) < 0 )
         {
             cout<<"ERROR sending authorization"<<endl;
             exit( 1);
@@ -615,7 +610,8 @@ void    AccountServer::removeDeadSockets()
     VI vi;
     int nbc_disc = 0;
     int nbs_disc = 0;
-    for (LS j=DeadSocks.begin(); j!=DeadSocks.end(); j++)
+    list<SOCKETALT>::iterator j;
+    for (j=DeadSocks.begin(); j!=DeadSocks.end(); j++)
     {
         bool found=false;
         COUT << ">>>>>>> Closing socket number "<<(*j)<<endl;
@@ -665,5 +661,5 @@ void    AccountServer::writeSave( const char * buffer)
     }
     else
         // Save the files
-        FileUtil::WriteSaveFiles( savestr, xmlstr, acctdir, (*vi)->callsign);
+        FileUtil::WriteSaveFiles( savestr, xmlstr, (*vi)->callsign);
 }

@@ -22,7 +22,7 @@
 /*
   xml Mission written by Alexander Rawass <alexannika@users.sourceforge.net>
 */
-
+#include <math.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <errno.h>
@@ -39,6 +39,7 @@
 
 //#include "vegastrike.h"
 #include <assert.h>
+#include "cmd/unit_generic.h"
 #include "mission.h"
 #include "flightgroup.h"
 //#include "gldrv/winsys.h"
@@ -55,7 +56,7 @@
 
 /* *********************************************************** */
 Mission::~Mission() {
-  fprintf (stderr,"Mission Cleanup Not Yet Implemented");
+  VSFileSystem::vs_fprintf (stderr,"Mission Cleanup Not Yet Implemented");
   //do not delete msgcenter...could be vital
 }
 double   Mission::gametime=0.0;
@@ -275,9 +276,6 @@ void Mission::checkVar(easyDomNode *node){
 
   string name=node->attr_value("name");
   string value=node->attr_value("value");
-  if(name.empty() || value.empty()){
-    cout << "no name or value given for variable" << endl;
-  }
 }
 
 /* *********************************************************** */
@@ -467,7 +465,7 @@ string Mission::getVariable(string name,string defaultval){
     }
   }
 
-  cout << "WARNING: no variable named " << name << endl;
+  //cout << "WARNING: no variable named " << name << endl;
 
   return defaultval;
  

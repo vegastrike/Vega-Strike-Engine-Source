@@ -29,7 +29,10 @@ class Matrix {
  public:
   float r[9];
   QVector p;  
-  Matrix() {}
+
+  Matrix() : p(0,0,0) {
+    r[0]=r[1]=r[2]=r[3]=r[4]=r[5]=r[6]=r[7]=r[8]=0;
+  }
 
   // Convert the matrix into network byte order
   void	netswap()

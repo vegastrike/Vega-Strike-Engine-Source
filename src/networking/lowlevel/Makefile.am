@@ -1,17 +1,10 @@
-if USEBOOST128
-INCLUDES= \
-	 -I$(top_srcdir)/src	\
-	 -I$(top_srcdir)/src/boost
-else
-INCLUDES= \
-	 -I$(top_srcdir)/src	\
-	 -I$(top_srcdir)/src/boost129
-endif
 
 noinst_LIBRARIES = libnetlowlevel.a
 
 libnetlowlevel_a_SOURCES = \
 	GCPtr.h		\
+	vsnet_debug.cpp	\
+	vsnet_debug.h	\
 	vsnet_dloadmgr.cpp	\
 	vsnet_dloadmgr.h	\
 	vsnet_dloadenum.cpp	\
@@ -24,16 +17,24 @@ libnetlowlevel_a_SOURCES = \
 	vsnet_clientstate.h		\
 	vsnet_cmd.cpp		\
 	vsnet_cmd.h		\
+	vsnet_parsecmd.cpp		\
+	vsnet_parsecmd.h		\
 	vsnet_err.h		\
 	vsnet_pipe.cpp		\
 	vsnet_pipe.h		\
 	vsnet_queue.h		\
+	vsnet_oss.cpp		\
+	vsnet_oss.h		\
+	vsnet_socketflags.cpp		\
+	vsnet_socketflags.h	    \
 	vsnet_serversocket.cpp		\
 	vsnet_serversocket.h		\
-	vsnet_socket.cpp		\
-	vsnet_socket.h		\
 	vsnet_socketset.cpp		\
 	vsnet_socketset.h		\
+	vsnet_socket.cpp		\
+	vsnet_socket.h          \
+	vsnet_socketbase.cpp		\
+	vsnet_socketbase.h		\
 	vsnet_sockettcp.cpp		\
 	vsnet_sockettcp.h		\
 	vsnet_socketudp.cpp		\

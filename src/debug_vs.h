@@ -22,8 +22,8 @@ void VS_DEBUG_ERROR();
 
 #error
 #include "hashtable.h"
-extern Hashtable <long,char,char[65535]> constructed;
-extern Hashtable <long,char,char[65535]> destructed;
+extern Hashtable <long,char,65535> constructed;
+extern Hashtable <long,char,65535> destructed;
 #define VSCONST(a) if (constructed.Get((long)this)!=NULL) VS_DEBUG_ERROR (); if (destructed.Get((long)this)!=NULL) destructed.Delete((long)this); if (destructed.Get((long)this)!=NULL) VS_DEBUG_ERROR(); constructed.Put((long)this,(char *)a);
 
 #define VSDEST if (constructed.Get((long)this)==NULL) VS_DEBUG_ERROR (); else constructed.Delete((long)this); if (constructed.Get((long)this)!=NULL) VS_DEBUG_ERROR(); if (destructed.Get((long)this)!=NULL) VS_DEBUG_ERROR();   destructed.Put((long)this,(char *)this);

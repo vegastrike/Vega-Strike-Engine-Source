@@ -42,7 +42,7 @@
 #include "xml_support.h"
 
 #include "vegastrike.h"
-#include "vs_path.h"
+#include "vsfilesystem.h"
 #include "lin_time.h"
 #include "cmd/unit_generic.h"
 
@@ -62,7 +62,7 @@
 #include "flightgroup.h"
 #include "gldrv/winsys.h"
 #include "python/python_class.h"
-#ifdef USE_BOOST_129
+#ifndef USE_BOOST_128
 #include <boost/python/class.hpp>
 #else
 #include <boost/python/detail/extension_class.hpp>
@@ -70,13 +70,22 @@
 #include "gfx/cockpit_generic.h"
 //#include "vegastrike.h"
 
-extern bool have_yy_error;
 /* *********************************************************** */
 //ADD_FROM_PYTHON_FUNCTION(pythonMission)
 void Mission::DirectorLoop(){
-  if (runtime.pymissions)
-    runtime.pymissions->Execute();
-  BriefingLoop();
+   try {
+      if (runtime.pymissions)
+         runtime.pymissions->Execute();
+      BriefingLoop();
+   }catch (...) {
+      if (PyErr_Occurred()) {
+         PyErr_Print();
+         PyErr_Clear();
+         fflush(stderr);         
+         fflush(stdout);
+      }
+      throw;
+   }
   if(director==NULL){
     return;
   }
@@ -104,7 +113,6 @@ void Mission::DirectorLoop(){
   RunDirectorScript("gameloop");
 
 }
-extern std::string HOMESUBDIR;
 void Mission::DirectorEnd(){
   if(director==NULL){
     return;
@@ -118,7 +126,7 @@ void Mission::DirectorEnd(){
   pwent=getpwuid(getuid());
   //  printf("home save dir: %s\n",pwent->pw_dir);
 
-  string var_file=string(pwent->pw_dir)+string(DELIMSTR)+HOMESUBDIR+string(DELIMSTR)+string("default-player.variables");
+  string var_file=string(pwent->pw_dir)+string(DELIMSTR)+VSFileSystem::HOMESUBDIR+string(DELIMSTR)+string("default-player.variables");
   //var_out.open("/tmp/default-player.variables");
   var_out.open(var_file.c_str());
 #endif

@@ -1,6 +1,6 @@
 #include "base.h"
 #include "gldrv/winsys.h"
-#include "vs_path.h"
+#include "vsfilesystem.h"
 #include "lin_time.h"
 #include "audiolib.h"
 #include "gfx/camera.h"
@@ -14,6 +14,13 @@
 #include "save_util.h"
 #include "unit_util.h"
 #include "gfx/cockpit.h"
+#include "gfx/ani_texture.h"
+#include "music.h"
+#include "lin_time.h"
+#include "load_mission.h"
+#ifdef RENDER_FROM_TEXTURE
+#include "gfx/stream_texture.h"
+#endif
 #include "main_loop.h"
 #ifdef BASE_MAKER
  #include <stdio.h>
@@ -24,14 +31,14 @@ static char makingstate=0;
 #endif
 extern const char *mission_key; //defined in main.cpp
 bool BaseInterface::Room::BaseTalk::hastalked=false;
-
+using namespace VSFileSystem;
 #define NEW_GUI
 
 #ifdef NEW_GUI
 #include "basecomputer.h"
 #include "../gui/eventmanager.h"
 #endif
-
+std::vector<unsigned int>base_keyboard_queue;
 static void CalculateRealXAndY (int xbeforecalc, int ybeforecalc, float *x, float *y) {
 	(*x)=(((float)(xbeforecalc*2))/g_game.x_resolution)-1;
 	(*y)=-(((float)(ybeforecalc*2))/g_game.y_resolution)+1;
@@ -57,18 +64,26 @@ void BaseInterface::Room::BaseObj::Draw (BaseInterface *base) {
 //		Do nothing...
 }
 
-void BaseInterface::Room::BaseSprite::Draw (BaseInterface *base) {
-	GFXBlendMode(SRCALPHA,INVSRCALPHA);
-	GFXEnable(TEXTURE0);
-	spr.Draw();
+static FILTER BlurBases() {
+  static bool blur_bases = XMLSupport::parse_bool(vs_config->getVariable("graphics","blur_bases","true"));
+  return blur_bases?BILINEAR:NEAREST;
+}
+BaseInterface::Room::BaseVSSprite::BaseVSSprite (const char *spritefile, std::string ind) 
+  : BaseObj(ind),spr(spritefile,BlurBases(),GFXTRUE) {}
+
+void BaseInterface::Room::BaseVSSprite::Draw (BaseInterface *base) {
+  static float AlphaTestingCutoff = XMLSupport::parse_float(vs_config->getVariable("graphics","base_alpha_test_cutoff","0"));  
+  GFXAlphaTest (GREATER,AlphaTestingCutoff);
+  GFXBlendMode(SRCALPHA,INVSRCALPHA);
+  GFXEnable(TEXTURE0);
+  spr.Draw();
+  GFXAlphaTest (ALWAYS,0);
 }
 
 void BaseInterface::Room::BaseShip::Draw (BaseInterface *base) {
 	Unit *un=base->caller.GetUnit();
 	if (un) {
 		GFXHudMode (GFXFALSE);
-		GFXEnable (DEPTHTEST);
-		GFXEnable (DEPTHWRITE);
 		Vector p,q,r;
 		_Universe->AccessCamera()->GetOrientation (p,q,r);
 		int co=_Universe->AccessCamera()->getCockpitOffset();
@@ -83,9 +98,17 @@ void BaseInterface::Room::BaseShip::Draw (BaseInterface *base) {
 		newmat.p.i*=newmat.p.k;
 		newmat.p.j*=newmat.p.k;
 		MultMatrix (final,cam,newmat);
+		GFXClear(GFXFALSE);//clear the zbuf
+		GFXEnable (DEPTHTEST);
+		GFXEnable (DEPTHWRITE);
+		GFXEnable(LIGHTING);
+		int light=0;
+		GFXCreateLight(light,GFXLight(true,GFXColor(1,1,1,1),GFXColor(1,1,1,1),GFXColor(1,1,1,1),GFXColor(.1,.1,.1,1),GFXColor(1,0,0),GFXColor(1,1,1,0),24),true);
 		(un)->DrawNow(final);
+		GFXDeleteLight(light);
 		GFXDisable (DEPTHTEST);
 		GFXDisable (DEPTHWRITE);
+		GFXDisable(LIGHTING);
 		_Universe->AccessCamera()->setCockpitOffset(co);
 		_Universe->AccessCamera()->UpdateGFX();
 //		_Universe->AccessCockpit()->SetView (CP_PAN);
@@ -100,12 +123,13 @@ void BaseInterface::Room::Draw (BaseInterface *base) {
 			objs[i]->Draw(base);
 	}
 }
-static BaseInterface::Room::BaseTalk * only_one_talk=NULL;
+static std::vector<BaseInterface::Room::BaseTalk *> active_talks;
 
 BaseInterface::Room::BaseTalk::BaseTalk (std::string msg,std::string ind, bool only_one) :BaseObj(ind), curchar (0), curtime (0), message(msg) {
 	if (only_one) {
-		only_one_talk=this;
+		active_talks.clear();
 	}
+	active_talks.push_back(this);
 }
 
 void BaseInterface::Room::BaseTalk::Draw (BaseInterface *base) {
@@ -117,33 +141,33 @@ void BaseInterface::Room::BaseTalk::Draw (BaseInterface *base) {
 		GFXVertex3f(caller->x,caller->y+caller->hei,0);
 		GFXVertex3f(caller->x,caller->y,0);
 	GFXEnd();*/
-	if (only_one_talk!=NULL&&only_one_talk!=this) {
-		curchar = message.size();
-		curtime=999999;
-	}
+	
+	// FIXME: should be called from draw()
 	if (hastalked) return;
+	curtime+=GetElapsedTime()/getTimeCompression();
+	static float delay=XMLSupport::parse_float(vs_config->getVariable("graphics","text_delay",".05"));
+	if ((std::find(active_talks.begin(),active_talks.end(),this)==active_talks.end())||(curchar>=message.size()&&curtime>((delay*message.size())+2))) {
+		curtime=0;
+		BaseObj * self=this;
+		std::vector<BaseObj *>::iterator ind=std::find(base->rooms[base->curroom]->objs.begin(),
+				base->rooms[base->curroom]->objs.end(),
+				this);
+		if (ind!=base->rooms[base->curroom]->objs.end()) {
+			*ind=NULL;
+		}
+		std::vector<BaseTalk *>::iterator ind2=std::find(active_talks.begin(),active_talks.end(),this);
+		if (ind2!=active_talks.end()) {
+			*ind2=NULL;
+		}
+		base->othtext.SetText("");
+		delete this;
+		return; //do not do ANYTHING with 'this' after the previous statement...
+	}
 	if (curchar<message.size()) {
-		curtime+=GetElapsedTime()/getTimeCompression();
 		static float inbetween=XMLSupport::parse_float(vs_config->getVariable("graphics","text_speed",".025"));
 		if (curtime>inbetween) {
 			base->othtext.SetText(message.substr(0,++curchar));
 			curtime=0;
-		}
-	} else {
-		curtime+=GetElapsedTime()/getTimeCompression();
-		static float delay=XMLSupport::parse_float(vs_config->getVariable("graphics","text_delay",".05"));
-		if (curtime>((delay*message.size())+2)) {
-			curtime=0;
-			BaseObj * self=this;
-			std::vector<BaseObj *>::iterator ind=std::find(base->rooms[base->curroom]->objs.begin(),
-					base->rooms[base->curroom]->objs.end(),
-					this);
-			if (ind<base->rooms[base->curroom]->objs.end()) {
-				*ind=NULL;
-				base->othtext.SetText("");
-				delete this;
-				return; //do not do ANYTHING with 'this' after the previous statement...
-			}
 		}
 	}
 	hastalked=true;
@@ -163,8 +187,8 @@ int BaseInterface::Room::MouseOver (BaseInterface *base,float x, float y) {
 	return -1;
 }
 
-BaseInterface *BaseInterface::CurrentBase=0;
-
+BaseInterface *BaseInterface::CurrentBase=NULL;
+static BaseInterface *lastBaseDoNotDereference=NULL;
 bool RefreshGUI(void) {
 	bool retval=false;
 	if (_Universe->AccessCockpit()) {
@@ -186,6 +210,27 @@ bool RefreshGUI(void) {
 	}
 	return retval;
 }
+
+
+void base_main_loop() {
+	UpdateTime();
+	muzak->Listen();
+	GFXBeginScene();
+	if (lastBaseDoNotDereference!=BaseInterface::CurrentBase) {
+		static int i=0;
+		if (i++%4==3) {
+			lastBaseDoNotDereference=BaseInterface::CurrentBase;
+		}
+		AUDStopAllSounds();
+	}
+	if (!RefreshGUI()) {
+		restore_main_loop();
+	}else {
+		GFXEndScene();
+	}
+}
+
+
 
 void BaseInterface::Room::Click (BaseInterface* base,float x, float y, int button, int state) {
 	if (button==WS_LEFT_BUTTON) {
@@ -218,58 +263,58 @@ void BaseInterface::Room::Click (BaseInterface* base,float x, float y, int butto
 			if (ret==1) {
 				if (button==WS_RIGHT_BUTTON) {
 #ifdef _WIN32
-					FILE *fp=fopen("stdin.txt","rt");
+					FILE *fp=VSFileSystem::vs_open("stdin.txt","rt");
 #else
 					FILE *fp=stdin;
 #endif
-					fscanf(fp,"%200s",input);
+					VSFileSystem::vs_fscanf(fp,"%200s",input);
 #ifdef _WIN32
-					fclose(fp);
+					VSFileSystem::vs_close(fp);
 #endif
 				} else if (button==WS_MIDDLE_BUTTON&&makingstate==0) {
 					int i;
 #ifdef _WIN32
-					FILE *fp=fopen("stdin.txt","rt");
+					FILE *fp=VSFileSystem::vs_open("stdin.txt","rt");
 #else
 					FILE *fp=stdin;
 #endif
-	 				fscanf(fp,"%d",&rmtyp);
+	 				VSFileSystem::vs_fscanf(fp,"%d",&rmtyp);
 					switch(rmtyp) {
 					case 1:
 						links.push_back(new Goto("linkind","link"));
-						fscanf(fp,"%d",&((Goto*)links.back())->index);
+						VSFileSystem::vs_fscanf(fp,"%d",&((Goto*)links.back())->index);
 						break;
 					case 2:
 						links.push_back(new Launch("launchind","launch"));
 						break;
 					case 3:
 						links.push_back(new Comp("compind","comp"));
-						fscanf(fp,"%d",&index);
-						for (i=0;i<index&&(!feof(fp));i++) {
-							fscanf(fp,"%d",&ret);
+						VSFileSystem::vs_fscanf(fp,"%d",&index);
+						for (i=0;i<index&&(!VSFileSystem::vs_feof(fp));i++) {
+							VSFileSystem::vs_fscanf(fp,"%d",&ret);
 							((Comp*)links.back())->modes.push_back((BaseComputer::DisplayMode)ret);
 						}
 						break;
 					default:
 #ifdef _WIN32
-						fclose(fp);
+						VSFileSystem::vs_close(fp);
 						MessageBox(NULL,"warning: invalid basemaker option","Error",MB_OK);
 #endif
 						printf("warning: invalid basemaker option: %d",rmtyp);
 						return;
 					}
-					fscanf(fp,"%200s",input);
+					VSFileSystem::vs_fscanf(fp,"%200s",input);
 					input[200]=input[199]='\0';
 					links.back()->text=string(input);
 #ifdef _WIN32
-					fclose(fp);
+					VSFileSystem::vs_close(fp);
 #endif
 				}
 				if (button==WS_RIGHT_BUTTON) {
 					input[200]=input[199]='\0';
-					objs.push_back(new BaseSprite(input,"tex"));
-					((BaseSprite*)objs.back())->texfile=string(input);
-					((BaseSprite*)objs.back())->spr.SetPosition(x,y);
+					objs.push_back(new BaseVSSprite(input,"tex"));
+					((BaseVSSprite*)objs.back())->texfile=string(input);
+					((BaseVSSprite*)objs.back())->spr.SetPosition(x,y);
 				} else if (button==WS_MIDDLE_BUTTON&&makingstate==0) {
 					links.back()->x=x;
 					links.back()->y=y;
@@ -395,7 +440,7 @@ void BaseInterface::GotoLink (int linknum) {
 		drawlinkcursor=false;
 	} else {
 #ifndef BASE_MAKER
-		fprintf(stderr,"\nWARNING: base room #%d tried to go to an invalid index: #%d",curroom,linknum);
+		VSFileSystem::vs_fprintf(stderr,"\nWARNING: base room #%d tried to go to an invalid index: #%d",curroom,linknum);
 		assert(0);
 #else
 		while(rooms.size()<=linknum) {
@@ -411,10 +456,10 @@ void BaseInterface::GotoLink (int linknum) {
 
 BaseInterface::~BaseInterface () {
 #ifdef BASE_MAKER
-	FILE *fp=fopen("bases/NEW_BASE"BASE_EXTENSION,"wt");
+	FILE *fp=VSFileSystem::vs_open("bases/NEW_BASE"BASE_EXTENSION,"wt");
 	if (fp) {
 		EndXML(fp);
-		fclose(fp);
+		VSFileSystem::vs_close(fp);
 	}
 #endif
 	CurrentBase=0;
@@ -423,14 +468,24 @@ BaseInterface::~BaseInterface () {
 		delete rooms[i];
 	}
 }
-
+void base_main_loop();
+int shiftup(int);
+static void base_keyboard_cb( unsigned int  ch,unsigned int mod, bool release, int x, int y ) {
+	if (!release)
+		base_keyboard_queue.push_back (((WSK_MOD_LSHIFT==(mod&WSK_MOD_LSHIFT))||(WSK_MOD_RSHIFT==(mod&WSK_MOD_RSHIFT)))?shiftup(ch):ch);
+}
 void BaseInterface::InitCallbacks () {
+	winsys_set_keyboard_func(base_keyboard_cb);	
 	winsys_set_mouse_func(ClickWin);
 	winsys_set_motion_func(ActiveMouseOverWin);
 	winsys_set_passive_motion_func(PassiveMouseOverWin);
 	CurrentBase=this;
 //	UpgradeCompInterface(caller,baseun);
 	CallComp=false;
+	static bool simulate_while_at_base=XMLSupport::parse_bool(vs_config->getVariable("physics","simulate_while_docked","false"));
+	if (!(simulate_while_at_base||_Universe->numPlayers()>1)) {
+		GFXLoop(base_main_loop);
+	}
 }
 
 BaseInterface::Room::Talk::Talk (std::string ind,std::string pythonfile)
@@ -446,9 +501,9 @@ BaseInterface::Room::Talk::Talk (std::string ind,std::string pythonfile)
 	while (( mission->msgcenter->last(i++,last,who))) {
 		newmsg=last.message;
 		newsound="";
-		int first=newmsg.find_first_of("[");
+		string::size_type first=newmsg.find_first_of("[");
 		{
-			int last=newmsg.find_first_of("]");
+			string::size_type last=newmsg.find_first_of("]");
 			if (first!=string::npos&&(first+1)<newmsg.size()) {
 				newsound=newmsg.substr(first+1,last-first-1);
 				newmsg=newmsg.substr(0,first);
@@ -477,7 +532,7 @@ double compute_light_dot (Unit * base,Unit *un) {
 	  QVector v2 = (st->Position()-base->Position()).Normalize();
 	  double dot = v1.Dot(v2);
 	  if (dot>ret) {
-	    fprintf (stderr,"dot %lf",dot);
+	    VSFileSystem::vs_fprintf (stderr,"dot %lf",dot);
 	    ret=dot;
 	  }
 	} else {
@@ -513,6 +568,7 @@ BaseInterface::BaseInterface (const char *basefile, Unit *base, Unit*un)
 	CurrentBase=this;
 	CallComp=false;
 	caller=un;
+        curroom=0;
 	curlinkindex=0;
 	this->baseun=base;
 	float x,y;
@@ -534,7 +590,7 @@ BaseInterface::BaseInterface (const char *basefile, Unit *base, Unit*un)
 		}
 	}
 	if (!rooms.size()) {
-		fprintf(stderr,"ERROR: there are no rooms in basefile \"%s%s%s\" ...\n",basefile,compute_time_of_day(base,un),BASE_EXTENSION);
+		VSFileSystem::vs_fprintf(stderr,"ERROR: there are no rooms in basefile \"%s%s%s\" ...\n",basefile,compute_time_of_day(base,un),BASE_EXTENSION);
 		rooms.push_back(new Room ());
 		rooms.back()->deftext="ERROR: No rooms specified...";
 #ifndef BASE_MAKER
@@ -647,7 +703,7 @@ void BaseInterface::Room::Talk::Click (BaseInterface *base,float x, float y, int
 			if (soundfiles[sayindex].size()>0) {
 				int sound = AUDCreateSoundWAV (soundfiles[sayindex],false);
 				if (sound==-1) {
-					fprintf(stderr,"\nCan't find the sound file %s\n",soundfiles[sayindex].c_str());
+					VSFileSystem::vs_fprintf(stderr,"\nCan't find the sound file %s\n",soundfiles[sayindex].c_str());
 				} else {
 //					AUDAdjustSound (sound,_Universe->AccessCamera ()->GetPosition(),Vector(0,0,0));
 					AUDStartPlaying (sound);
@@ -655,7 +711,7 @@ void BaseInterface::Room::Talk::Click (BaseInterface *base,float x, float y, int
 				}
 			}
 		} else {
-			fprintf(stderr,"\nThere are no things to say...\n");
+			VSFileSystem::vs_fprintf(stderr,"\nThere are no things to say...\n");
 			assert(0);
 		}
 	}
@@ -665,7 +721,12 @@ void BaseInterface::Room::Link::Click (BaseInterface *base,float x, float y, int
 	if (state==WS_MOUSE_UP) {
 		const char * filnam=this->pythonfile.c_str();
 		if (filnam[0]) {
-			FILE *fp=fopen(filnam,"r");
+                  if (filnam[0]=='#') {
+                    ::Python::reseterrors();
+                    PyRun_SimpleString(const_cast<char*>(filnam));
+                    ::Python::reseterrors();
+                  }else {
+			FILE *fp=VSFileSystem::vs_open(filnam,"r");
 			if (fp) {
 				int length=strlen(filnam);
 				char *newfile=new char[length+1];
@@ -675,18 +736,56 @@ void BaseInterface::Room::Link::Click (BaseInterface *base,float x, float y, int
 				PyRun_SimpleFile(fp,newfile);
 				::Python::reseterrors();
 				fclose(fp);
+                                processDelayedMissions();
 			} else {
 				fprintf(stderr,"Warning:python link file '%s' not found\n",filnam);
 			}
+                  }
 		}
-	}
+	}}
+
+struct BaseColor {
+  unsigned char r,g,b,a;
+};
+static void AnimationDraw() {  
+#ifdef RENDER_FROM_TEXTURE
+  static StreamTexture T(512,256,NEAREST,NULL);
+  BaseColor (* data)[512] = reinterpret_cast<BaseColor(*)[512]>(T.Map());
+  bool counter=false;
+  srand(time(NULL));
+  for (int i=0;i<256;++i) {
+    for (int j=0;j<512;++j) {
+      data[i][j].r=rand()%255;
+      data[i][j].g=rand()%255;
+      data[i][j].b=rand()%255;
+      data[i][j].a=rand()%255;
+    }
+  }
+  T.UnMap();
+  T.MakeActive();
+  GFXEnable(TEXTURE0);
+  GFXDisable(CULLFACE);
+  GFXBegin(GFXQUAD);
+  GFXTexCoord2f(0,0);
+  GFXVertex3f(-1.0,-1.0,0.0);
+  GFXTexCoord2f(1,0);
+  GFXVertex3f(1.0,-1.0,0.0);
+  GFXTexCoord2f(1,1);
+  GFXVertex3f(1.0,1.0,0.0);
+  GFXTexCoord2f(0,1);
+  GFXVertex3f(-1.0,1.0,0.0);
+  GFXEnd();
+#endif
 }
 
 void BaseInterface::Draw () {
 	GFXColor(0,0,0,0);
 	StartGUIFrame(GFXTRUE);
+	AnimatedTexture::UpdateAllFrame();
 	Room::BaseTalk::hastalked=false;
 	rooms[curroom]->Draw(this);
+        AnimationDraw();
+
 	float x,y;
 	curtext.GetCharSize(x,y);
 	curtext.SetPos(-.99,-1+(y*1.5));
@@ -702,7 +801,7 @@ void BaseInterface::Draw () {
 	Unit *un=caller.GetUnit();
 	Unit *base=baseun.GetUnit();
 	if (un&&(!base)) {
-		fprintf(stderr,"Error: Base NULL");
+		VSFileSystem::vs_fprintf(stderr,"Error: Base NULL");
 		mission->msgcenter->add("game","all","[Computer] Docking unit destroyed. Emergency launch initiated.");
 		for (int i=0;i<un->image->dockedunits.size();i++) {
 			if (un->image->dockedunits[i]->uc.GetUnit()==base) {

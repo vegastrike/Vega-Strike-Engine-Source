@@ -1,10 +1,3 @@
-if USEBOOST128
-INCLUDES=-I$(top_srcdir)/src \
-	 -I$(top_srcdir)/src/boost
-else
-INCLUDES=-I$(top_srcdir)/src \
-	 -I$(top_srcdir)/src/boost129
-endif
 
 bin_PROGRAMS = vegastrike vegaserver accountserver
 
@@ -14,7 +7,6 @@ SUBDIRS = \
 vegastrike_LDADD =  				\
 networking/netserver_devices.o		\
 aldrv/libaldrv.a 					\
-common/libvscommon.a 				\
 networking/libnetclient.a 			\
 networking/lowlevel/libnetlowlevel.a \
 cmd/script/script_call_briefing.o 	\
@@ -32,8 +24,8 @@ networking/libnet.a 				\
 cmd/collide/libcollide.a 			\
 boost129/libboost_python.a          \
 boost/libboost_python.a             \
-gfx/nav/libnav.a 					\
--lpthread -lz
+gfx/nav/libnav.a					\
+-lz
 
 vegaserver_LDADD =  			\
 networking/netserver_devices.o	\
@@ -41,7 +33,6 @@ cmd/script/director_server.o 	\
 cmd/unit_util_generic.o 		\
 cmd/unit_util_server.o 			\
 networking/netclient.o 			\
-common/libvscommon.a 			\
 networking/libnetserver.a 		\
 networking/lowlevel/libnetlowlevel.a \
 cmd/libcmdserver.a 				\
@@ -53,10 +44,10 @@ gfx/libgfxserver.a 				\
 gldrv/libgldrvserver.a 			\
 cmd/collide/libcollide.a 		\
 boost129/libboost_python.a      \
-boost/libboost_python.a -lz
+boost/libboost_python.a	        \
+-lz
 
 accountserver_LDADD =           \
-common/libvscommon.a            \
 networking/libnetacct.a 		\
 networking/lowlevel/libnetlowlevel.a \
 -lz
@@ -104,11 +95,13 @@ libroot =		\
 	cg_global.cpp
 
 librootgeneric =				\
-	posh.cpp						\
+	vsfilesystem.cpp			\
+	vsfilesystem.h				\
+	posh.cpp					\
 	posh.h						\
 	stardate.cpp				\
 	stardate.h					\
-	star_system_xml.cpp		\
+	star_system_xml.cpp			\
 	star_system_generic.cpp 	\
 	star_system_generic.h 		\
 	universe_generic.cpp		\
@@ -143,9 +136,9 @@ librootgeneric =				\
 	savegame.cpp				\
 	savegame.h					\
 	vegastrike.h				\
-	vs_globals.cpp				\
-	vs_path.cpp					\
-	vs_path.h
+	pk3.cpp						\
+	pk3.h						\
+	vs_globals.cpp
 
 librootserver =					\
 	gfxlib_struct_server.cpp	\
@@ -155,12 +148,16 @@ librootserver =					\
 	force_feedback_server.cpp	\
 	faction_util_server.cpp
 
-vegaserver_SOURCES =			\
-	$(librootgeneric) $(librootserver) \
+vegaserver_SOURCES =					\
+	$(librootgeneric) $(librootserver)	\
 	vegaserver.cpp
 
 accountserver_SOURCES =		\
-	posh.cpp					\
+	vsfilesystem.cpp		\
+	vsfilesystem.h			\
+	pk3.cpp					\
+	pk3.h					\
+	posh.cpp				\
 	libserver.cpp			\
 	configxml.cpp			\
 	configxml.h				\
@@ -172,11 +169,10 @@ accountserver_SOURCES =		\
 	lin_time.h				\
 	endianness.cpp			\
 	endianness.h			\
-	vs_path.cpp				\
-	vs_path.h				\
-	galaxy_gen.cpp			\
-	galaxy_gen.h			\
 	accountserver.cpp
+	
+#	galaxy_gen.cpp
+#	galaxy_gen.h
 
 vegastrike_SOURCES =		\
 	$(librootgeneric) $(libroot) \

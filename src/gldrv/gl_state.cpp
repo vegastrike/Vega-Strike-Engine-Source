@@ -18,12 +18,28 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
+#define GL_STATE_CPP
 #include "gl_globals.h"
+#undef GL_STATE_CPP
 
 #include "gfxlib.h"
 #include "vegastrike.h"
 #include "vs_globals.h"
 #include <stack>
+
+#ifndef GL_CONSTANT_ALPHA
+#define GL_CONSTANT_ALPHA 0x8003
+#endif
+#ifndef GL_ONE_MINUS_CONSTANT_ALPHA
+#define GL_ONE_MINUS_CONSTANT_ALPHA 0x8004
+#endif
+#ifndef GL_ONE_MINUS_CONSTANT_COLOR
+#define GL_ONE_MINUS_CONSTANT_COLOR 0x8002
+#endif
+#ifndef GL_CONSTANT_COLOR
+#define GL_CONSTANT_COLOR 0x8001
+#endif
+
 GFXBOOL bTex[8] = {GFXTRUE,GFXTRUE,GFXTRUE,GFXTRUE};
 
 int activeTextureStage=-1;

@@ -7,6 +7,7 @@
 #include "configxml.h"
 #include "vs_globals.h"
 #include "cmd/script/flightgroup.h"
+#include "cmd/unit_util.h"
 CommunicatingAI::CommunicatingAI (int ttype, int stype,  float rank, float mood, float anger,float appeas,  float moodswingyness, float randomresp) :Order (ttype,stype),anger(anger), appease(appeas), moodswingyness(moodswingyness),randomresponse (randomresp),mood(mood),rank(rank) {
   comm_face=NULL;
   if (rank>665&&rank<667) {
@@ -42,10 +43,17 @@ void CommunicatingAI::SetParent (Unit * par) {
 int CommunicatingAI::selectCommunicationMessageMood (CommunicationMessage &c, float mood) {
 
   Unit * targ = c.sender.GetUnit();
+  float relationship=0;
+
   if (targ) {
-    mood+=(1-randomresponse)*GetEffectiveRelationship(targ);
+    relationship= GetEffectiveRelationship(targ);
+    mood+=(1-randomresponse)*relationship;
   }
-  return c.fsm->getCommMessageMood (c.curstate,mood,randomresponse);
+  //breaks stuff
+  if (!(c.curstate<c.fsm->GetUnDockNode())) {
+    c.curstate = c.fsm->getDefaultState(relationship);//hijack the current state
+  }
+  return c.fsm->getCommMessageMood (c.curstate,mood,randomresponse,relationship);
 
 }
 using std::pair;
@@ -158,12 +166,15 @@ void CommunicatingAI::UpdateContrabandSearch () {
 		}
 	}
 }
+static bool isDockedAtAll(Unit * un) {
+  return (un->docked&(Unit::DOCKED_INSIDE|Unit::DOCKED))!=0;
+}
 void CommunicatingAI::InitiateContrabandSearch (float playaprob, float targprob) {
   Unit *u= GetRandomUnit (playaprob,targprob);
   if (u) {
     Unit * un =FactionUtil::GetContraband (parent->faction);
     if (un) {
-    if (un->numCargo()>0) {
+    if (un->numCargo()>0&&UnitUtil::getUnitSystemFile(un)==UnitUtil::getUnitSystemFile(parent)&&UnitUtil::getFlightgroupName(parent)!="Base"&&!isDockedAtAll(un)) {
     Unit * v;
     if ((v=contraband_searchee.GetUnit())) {
       if (v==u) {
@@ -196,12 +207,16 @@ void CommunicatingAI::AdjustRelationTo (Unit * un, float factor) {
   FactionUtil::AdjustIntRelation (parent->faction,un->faction,factor,rank);  
   (*i).second+=factor;
   if ((*i).second<anger||(parent->Target()==NULL&&(*i).second+Order::GetEffectiveRelationship (un)<0)) {
-    parent->Target(un);//he'll target you--even if he's friendly
-    parent->TargetTurret(un);//he'll target you--even if he's friendly
+	  if (parent->Target()==NULL||(parent->getFlightgroup()==NULL||parent->getFlightgroup()->directive.find(".")==string::npos)){
+		  parent->Target(un);//he'll target you--even if he's friendly
+		  parent->TargetTurret(un);//he'll target you--even if he's friendly
+	  }
   } else if ((*i).second>appease) {
     if (parent->Target()==un) {
-      parent->Target(NULL);
-	  parent->TargetTurret(NULL);//he'll target you--even if he's friendly
+		if (parent->getFlightgroup()==NULL||parent->getFlightgroup()->directive.find(".")==string::npos) {
+			parent->Target(NULL);
+			parent->TargetTurret(NULL);//he'll target you--even if he's friendly
+		}
 
     }
   }
@@ -235,14 +250,16 @@ Unit * CommunicatingAI::GetRandomUnit (float playaprob, float targprob) {
 void CommunicatingAI::RandomInitiateCommunication (float playaprob, float targprob) {
   Unit * target = GetRandomUnit(playaprob,targprob);
   if (target!=NULL) {
-    for (std::list<CommunicationMessage *>::iterator i=messagequeue.begin();i!=messagequeue.end();i++) {   
-      Unit * un=(*i)->sender.GetUnit();
-      if (un==target) {
-	return;
+    if (UnitUtil::getUnitSystemFile(target)==UnitUtil::getUnitSystemFile(parent)&&UnitUtil::getFlightgroupName(parent)!="Base"&&!isDockedAtAll(target)) {
+      for (std::list<CommunicationMessage *>::iterator i=messagequeue.begin();i!=messagequeue.end();i++) {   
+        Unit * un=(*i)->sender.GetUnit();
+        if (un==target) {
+          return;
+        }
       }
+      //ok we're good to put a default msg in the queue as a fake message;
+      messagequeue.push_back (new CommunicationMessage (target,this->parent,comm_face,sex));
     }
-    //ok we're good to put a default msg in the queue as a fake message;
-    messagequeue.push_back (new CommunicationMessage (target,this->parent,comm_face,sex));
   }
 }
 
@@ -259,18 +276,27 @@ int CommunicatingAI::selectCommunicationMessage (CommunicationMessage &c,Unit * 
 }
 
 void CommunicatingAI::ProcessCommMessage (CommunicationMessage &c) {
+  if (messagequeue.back()->curstate<messagequeue.back()->fsm->GetUnDockNode()) {
+
   Order::ProcessCommMessage(c);
-  FSM::Node * n = c.getCurrentState ();
-  if (n) {
-     if (n->edges.size()) {
-      Unit * un = c.sender.GetUnit();
-      if (un) {
-	      int b = selectCommunicationMessage (c,un);
-		  Order * o = un->getAIState();
-		  if (o)
-			  o->Communicate (CommunicationMessage (parent,un,c,b,comm_face,sex));
+  FSM *tmpfsm = c.fsm;
+  Unit * targ = c.sender.GetUnit();
+  if (targ&&UnitUtil::getUnitSystemFile(targ)==UnitUtil::getUnitSystemFile(parent)&&!isDockedAtAll(targ)) {
+    c.fsm  =FactionUtil::GetConversation (parent->faction,targ->faction);
+    FSM::Node * n = c.getCurrentState ();
+    if (n) {
+      if (n->edges.size()) {
+        Unit * un = c.sender.GetUnit();
+        if (un) {
+          int b = selectCommunicationMessage (c,un);
+          Order * o = un->getAIState();
+          if (o)
+            o->Communicate (CommunicationMessage (parent,un,c,b,comm_face,sex));
+        }
       }
     }
+    c.fsm=tmpfsm;    
+  }
   }
 }
 CommunicatingAI::~CommunicatingAI() {

@@ -3,7 +3,7 @@
 #include "vegastrike.h"
 #include "config_xml.h"
 #include "vs_globals.h"
-#include "vs_path.h"
+#include "vsfilesystem.h"
 #include "xml_support.h"
 #ifndef M_PI
 #define M_PI 3.1415926536F

@@ -27,7 +27,9 @@
 #include "scroller.h"
 #include "painttext.h"
 
-
+#include "vs_globals.h"
+#include "config_xml.h"
+#include "xml_support.h"
 
 // Calculation for indenting children.  Use a factor times total cell height.
 static const float CHILD_INDENT_FACTOR = 0.6;
@@ -291,6 +293,7 @@ bool Picker::processCommand(const EventCommandId& command, Control* control) {
 
 // Mouse clicked down.
 bool Picker::processMouseDown(const InputEvent& event) {
+	static int zoominc = XMLSupport::parse_int (vs_config->getVariable("general","wheel_increment_lines","3"));
     if(event.code == LEFT_MOUSE_BUTTON) {
         PickerCell* cell = cellForMouse(event.loc);
         if(cell != NULL) {
@@ -301,7 +304,15 @@ bool Picker::processMouseDown(const InputEvent& event) {
             globalEventManager().pushResponder(this);
             return true;
         }
-    }
+    } else if (event.code == WHEELUP_MOUSE_BUTTON) {
+		if(hitTest(event.loc)) {
+			m_scroller->setScrollPosition(m_scroller->scrollPosition()-zoominc);
+		}
+	} else if (event.code == WHEELDOWN_MOUSE_BUTTON) {
+		if(hitTest(event.loc)) {
+			m_scroller->setScrollPosition(m_scroller->scrollPosition()+zoominc);
+		}
+	}
 
     return Control::processMouseDown(event);
 }

@@ -24,8 +24,8 @@
 //#include "gl_globals.h"
 //#include "gfx_transform_vector.h"
 
-vector <GFXMaterial> materialinfo;
-int selectedmaterial = -1;
+static vector <GFXMaterial> materialinfo;
+static int selectedmaterial = -1;
 void /*GFXDRVAPI*/ GFXSetMaterial(unsigned int &number, const GFXMaterial &material)
 {
     number = (unsigned int)-1;//intended warning for unsigned.... 
@@ -125,7 +125,7 @@ void /*GFXDRVAPI*/ GFXSelectMaterialHighlights (const unsigned int number, const
 
 void /*GFXDRVAPI*/ GFXSelectMaterial(const unsigned int number)
 {
-  if (number!=selectedmaterial){
+  if (1||number!=selectedmaterial){
 	float matvect[4];
  	matvect[0] = materialinfo[number].ar;
 	matvect[1] = materialinfo[number].ag;

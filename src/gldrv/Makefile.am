@@ -1,17 +1,10 @@
-if USEBOOST128
-INCLUDES=-I$(top_srcdir)/src \
-	 -I$(top_srcdir)/src/boost
-else
-INCLUDES=-I$(top_srcdir)/src \
-	 -I$(top_srcdir)/src/boost129
-endif
 
 noinst_LIBRARIES = libgldrv.a libgldrvserver.a
 
-libgldrv_generic = gl_vertex_list.cpp
+libgldrv_generic = gl_vertex_list.cpp 
 
 libgldrvserver_a_SOURCES =				\
-    $(libgldrv_generic)
+    $(libgldrv_generic) gl_sphere_list_server.cpp
 
 libgldrv_a_SOURCES =				\
 	gl_clip.cpp				\
@@ -35,7 +28,8 @@ libgldrv_a_SOURCES =				\
 	gl_texture.cpp				\
 	$(libgldrv_generic)		\
 	winsys.cpp				\
-	winsys.h
+	winsys.h \
+	gl_sphere_list.cpp
 
 
 

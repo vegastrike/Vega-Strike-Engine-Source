@@ -65,6 +65,24 @@ bool csCdModel::AddTriangle (const csVector3 &p1, const csVector3 &p2,
   return true;
 }
 
+csVector3 csCdModel::getVertex(unsigned int which) const{
+  unsigned int k=which/3;
+  if (m_NumTriangles==0){
+    return csVector3(0,0,0);
+  }
+  if (k>=m_NumTriangles)
+    k=m_NumTriangles-1;
+  csCdTriangle* a=&m_pTriangles[k];
+  switch (which%3) {
+  case 0:
+    return a->p1;
+  case 1:
+    return a->p2;
+  default:
+    return a->p3;
+  }
+}
+
 /*
  * There are <n> csCdTriangle structures in an array starting at <t>.
  *
@@ -81,7 +99,7 @@ bool csCdModel::BuildHierarchy ()
 
   // Allocate the boxes and set the box list globals.
   m_NumBoxesAlloced = m_NumTriangles * 2;
-  m_pBoxes = new csCdBBox [m_NumBoxesAlloced];
+  m_pBoxes = new csCdBBox [m_NumBoxesAlloced+2];
   if (!m_pBoxes) return false;
   
   // Determine initial orientation, mean point, and splitting axis.
@@ -141,12 +159,12 @@ bool csCdModel::BuildHierarchy ()
     _M.moment (Moment::stack [i]);
 
   // csVector3 _pT;
-  csMatrix3 _C;
+  csMatrix3 mac_C;
   _M.mean (&(m_pBoxes[0].m_Translation));
 
-  _M.covariance (&_C);
+  _M.covariance (&mac_C);
 
-  SortedEigen(_C, m_pBoxes[0].m_Rotation);
+  SortedEigen(mac_C, m_pBoxes[0].m_Rotation);
 
   // create the index list
   int *t = new int [m_NumTriangles];

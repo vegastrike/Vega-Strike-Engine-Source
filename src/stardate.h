@@ -16,23 +16,35 @@ using std::string;
 class StarDate
 {
 	private:
-		double			initial_star_time;
+		double *		initial_star_time;
 		double			initial_time;
 
+
+		// TREK Date stuff
+		string	ConvertTrekDate( double date);
+		string	ConvertFullTrekDate( double date);
+		double	ConvertTrekDate( string date);
+		float	GetFloatFromTrekDate( int faction=0);
 	public:
 		StarDate();
-		StarDate( string date);
-		void	Init( string date);
+		StarDate( double time);
+		void	Init( double time);
+		double	GetCurrentStarTime( int faction=0);
 
-		string	ConvertStarDate( double date);
-		string	ConvertFullStarDate( double date);
-		double	ConvertStarDate( string date);
+		// TREK Date stuff
+		void	InitTrek( string date);
+		string	GetTrekDate( int faction=0);
+		string	GetFullTrekDate( int faction=0);
 
-		double	GetCurrentStarTime();
-		string	GetCurrentStarDate();
-		string	GetFullCurrentStarDate();
+		// DAN.A StarDate
+		void	InitSDate( string date);
+		string	GetSDate( int faction=0);
+		string	GetFullSDate( int faction=0);
 
-		float	GetFloatFromDate();
+		// Between date format conversion
+		string	SDateFromTrekDate( string trekdate);
+		string	TrekDateFromSDate( string sdate);
 };
 
 #endif
+

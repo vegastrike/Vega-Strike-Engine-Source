@@ -1,6 +1,6 @@
-//#include "cmd/unit_generic.h"
+#include "cmd/unit_generic.h"
 #include "networking/networkcomm.h"
-#include "vs_path.h"
+#include "vsfilesystem.h"
 #include "vs_globals.h"
 #ifdef CRYPTO
 #include <crypto++/filters.h>
@@ -15,13 +15,13 @@
 using namespace CryptoPP;
 #endif /* CRYPTO */
 
-#ifdef NETCOMM
+//#ifdef NETCOMM
 
 #include <config.h>
 
 #include "universe_util.h"
 #include "networking/lowlevel/vsnet_dloadmgr.h"
-#ifndef NETCOMM_NOWEBCAM
+#ifdef NETCOMM_WEBCAM
 #include "networking/webcam_support.h"
 #endif /* NETCOMM_NOWEBCAM */
 #ifdef NETCOMM_JVOIP
@@ -39,6 +39,8 @@ bool use_secured;
 #include "networking/lowlevel/packet.h"
 #include <assert.h>
 #include "xml_support.h"
+
+using namespace VSFileSystem;
 
 #ifdef NETCOMM_JVOIP
 void	CheckVOIPError( int val)
@@ -133,7 +135,7 @@ int	Pa_PlayCallback( void * inputBuffer, void * outputBuffer, unsigned long fram
 
 #endif /* NETCOMM_PORTAUDIO */
 
-NetworkCommunication::NetworkCommunication()
+void NetworkCommunication::private_init()
 {
 	this->active = false;
 	this->max_messages = 25;
@@ -153,6 +155,44 @@ NetworkCommunication::NetworkCommunication()
 	this->indev = paNoDevice;
 	this->outdev = paNoDevice;
 	this->devinfo = NULL;
+#endif /* NETCOMM_PORTAUDIO */
+
+#ifdef NETCOMM_WEBCAM
+	this->Webcam = NULL;
+#endif
+}
+
+NetworkCommunication::NetworkCommunication()
+{
+    private_init( );
+}
+
+NetworkCommunication::NetworkCommunication( float minfreq, float maxfreq, bool video, bool secured, string cryptomethod)
+{
+	min_freq = minfreq;
+	max_freq = maxfreq;
+    private_init( );
+#ifdef NETCOMM_WEBCAM
+
+	if( video)
+	{
+		// Init the webcam part
+		Webcam = new WebcamSupport();
+		if( Webcam->Init() == -1)
+		{
+			delete Webcam;
+			this->Webcam = NULL;
+				cerr<<"!!! NO WEBCAM SUPPORT !!!"<<endl;
+		}
+		_downloader.reset( new VsnetDownload::Client::Manager( _sock_set ) );
+		_sock_set.addDownloadManager( _downloader );
+		_downloadServer.reset( new VsnetDownload::Server::Manager( _sock_set ) );
+		_sock_set.addDownloadManager( _downloadServer );
+	}
+
+#endif /* NETCOMM_NOWEBCAM */
+
+#ifdef NETCOMM_PORTAUDIO
 	// Initialize PortAudio lib
 	if( use_pa)
 		CheckPAError( Pa_Initialize(), "Pa_Initialize");
@@ -175,38 +215,19 @@ NetworkCommunication::NetworkCommunication()
 	this->audio_inlength = 0;
 
 #endif /* NETCOMM_PORTAUDIO */
-#ifndef NETCOMM_NOWEBCAM
 
-	this->Webcam = NULL;
-	string webcam_enable = vs_config->getVariable ("network","use_webcam","false");
-	// Init the webcam part
-	if( webcam_enable == "true")
-	{
-		Webcam = new WebcamSupport();
-		if( Webcam->Init() == -1)
-		{
-			delete Webcam;
-			this->Webcam = NULL;
-			cerr<<"!!! NO WEBCAM SUPPORT !!!"<<endl;
-		}
-	}
-    _downloader.reset( new VsnetDownload::Client::Manager( _sock_set ) );
-    _sock_set.addDownloadManager( _downloader );
-    _downloadServer.reset( new VsnetDownload::Server::Manager( _sock_set ) );
-    _sock_set.addDownloadManager( _downloadServer );
-
-#endif /* NETCOMM_NOWEBCAM */
 #ifdef CRYPTO
-	crypto_method = vs_config->getVariable( "network", "encryption_method", "");
-	pubKeyFilename = datadir+"vsnet_public_"+crypto_method+".key";
-	privKeyFilename = datadir+"vsnet_private_"+crypto_method+".key";
+	crypto_method = cryptomethod;
+	pubKeyFilename = VSFileSystem::datadir+"vsnet_public_"+crypto_method+".key";
+	privKeyFilename = VSFileSystem::datadir+"vsnet_private_"+crypto_method+".key";
 	seed = vs_config->getVariable( "network", "encryption_seed", "I love VegaStrike"); // ;)
 	// Key length is only used when we need to generate a key
 	this->key_length = XMLSupport::parse_int( vs_config->getVariable( "network", "encryption_keylength", "40"));
 	bool create_keys = false;
-	FILE * fp1 = fopen( pubKeyFilename.c_str(), "rb");
-	FILE * fp2 = fopen( privKeyFilename.c_str(), "rb");
-	if( !fp1 || !fp2)
+	VSFile f1, f2;
+	VSError err1 = f1.OpenReadOnly( pubKeyFilename, VSFileSystem::UnknownFile);
+	VSError err2 = f2.OpenReadOnly( privKeyFilename, VSFileSystem::UnknownFile);
+	if( err1>Ok || err2>Ok)
 	{
 		// There is a file we cannot open so we create keys
 		create_keys = true;
@@ -214,33 +235,13 @@ NetworkCommunication::NetworkCommunication()
 	else
 	{
 		// Read the keys in their buffers
-		fseek( fp1, 0, SEEK_END);
-		unsigned int publength = ftell( fp1);
-		fseek( fp1, 0, SEEK_SET);
-		fseek( fp2, 0, SEEK_END);
-		unsigned int privlength = ftell( fp1);
-		fseek( fp2, 0, SEEK_SET);
-
-		char * pubk = new char[publength];
-		if( fread( pubk, sizeof( char), publength, fp1)!=publength)
-		{
-			cerr<<"!!! ERROR : reading crypto public key"<<endl;
-			VSExit(1);
-		}
-		char * privk = new char[privlength];
-		if( fread( privk, sizeof( char), privlength, fp2)!=privlength)
-		{
-			cerr<<"!!! ERROR : reading crypto private key"<<endl;
-			VSExit(1);
-		}
-		this->pubkey = string( pubk);
-		this->privkey = string( privk);
-		delete pubk;
-		delete privk;
-
-		fclose( fp1);
-		fclose( fp2);
+		this->pubkey = f1.ReadFull();
+		this->privkey = f2.ReadFull();
 	}
+	if( err1<=Ok)
+		f1.Close();
+	if( err2<=Ok)
+		f2.Close();
 	if( create_keys)
 		this->GenerateKey();
 
@@ -249,7 +250,7 @@ NetworkCommunication::NetworkCommunication()
 
 char	NetworkCommunication::HasWebcam()
 {
-#ifndef NETCOMM_NOWEBCAM
+#ifdef NETCOMM_WEBCAM
 	if( this->Webcam)
 		return 1;
 	return 0;
@@ -269,7 +270,7 @@ char	NetworkCommunication::HasPortaudio()
 
 NetworkCommunication::NetworkCommunication( int nb)
 {
-	NetworkCommunication::NetworkCommunication();
+    private_init( );
 	assert( nb<65536);
 	this->max_messages = nb;
 }
@@ -279,7 +280,7 @@ void	NetworkCommunication::AddToSession( ClientPtr clt)
 	this->commClients.push_back( clt);
 	// If the client has a webcam enabled and we don't have one selected yet
 	// FIND A FIX FOR THAT TEST
-	//if( this->webcamClient && clt->webcam)
+	if( *(this->webcamClient) && clt->webcam)
 	{
 		CltPtrIterator cltit = commClients.end();
 		assert( (*cltit)==clt);
@@ -315,6 +316,7 @@ void	NetworkCommunication::SendMessage( SOCKETALT & send_sock, ObjSerial serial,
 	if( method==ServerUnicast)
 	{
 		// SEND STRNIG PARAMETER TO SERVER SO THAT HE BROADCASTS IT TO CONCERNED PLAYERS
+#ifdef CRYPTO
 		if( this->secured && use_secured)
 		{
 			encrypted = this->EncryptBuffer( message.c_str(), message.length());
@@ -322,6 +324,7 @@ void	NetworkCommunication::SendMessage( SOCKETALT & send_sock, ObjSerial serial,
 					__FILE__, PSEUDO__LINE__(244) );
 		}
 		else
+#endif
 		{
 			p.send( CMD_SECMESSAGE, serial, message.c_str(), message.length(), SENDRELIABLE, NULL, send_sock,
 					__FILE__, PSEUDO__LINE__(244) );
@@ -333,6 +336,7 @@ void	NetworkCommunication::SendMessage( SOCKETALT & send_sock, ObjSerial serial,
 		CltPtrIterator it;
 		for( it = commClients.begin(); it!=commClients.end(); it++)
 		{
+#ifdef CRYPTO
 			if( this->secured && use_secured)
 			{
 				encrypted = this->EncryptBuffer( message.c_str(), message.length());
@@ -340,6 +344,7 @@ void	NetworkCommunication::SendMessage( SOCKETALT & send_sock, ObjSerial serial,
 						__FILE__, PSEUDO__LINE__(244) );
 			}
 			else
+#endif
 			{
 				p.send( CMD_SECMESSAGE, serial, message.c_str(), message.length(), SENDRELIABLE, NULL, (*it)->sock,
 						__FILE__, PSEUDO__LINE__(244) );
@@ -364,6 +369,7 @@ void	NetworkCommunication::SendSound( SOCKETALT & sock, ObjSerial serial)
 			// SEND INPUT AUDIO BUFFER TO SERVER SO THAT HE BROADCASTS IT TO CONCERNED PLAYERS
 			Packet p;
 			// We don't need that to be reliable in UDP mode
+#ifdef CRYPTO
 			if( this->secured && use_secured)
 			{
 				encrypted = this->EncryptBufer( this->audio_inbuffer, this->audio_inlength);
@@ -371,6 +377,7 @@ void	NetworkCommunication::SendSound( SOCKETALT & sock, ObjSerial serial)
 					__FILE__, PSEUDO__LINE__(244) );
 			}
 			else
+#endif
 			{
 				p.send( CMD_SECSNDSAMPLE, serial, this->audio_inbuffer, this->audio_inlength, SENDANDFORGET, NULL, sock,
 					__FILE__, PSEUDO__LINE__(244) );
@@ -384,6 +391,7 @@ void	NetworkCommunication::SendSound( SOCKETALT & sock, ObjSerial serial)
 			{
 				if( (*it)->portaudio)
 				{
+#ifdef CRYPTO
 					if( this->secured && use_secured)
 					{
 						encrypted = this->EncryptBufer( this->audio_inbuffer, this->audio_inlength);
@@ -391,6 +399,7 @@ void	NetworkCommunication::SendSound( SOCKETALT & sock, ObjSerial serial)
 							__FILE__, PSEUDO__LINE__(244) );
 					}
 					else
+#endif
 					{
 						p.send( CMD_SECSNDSAMPLE, serial, this->audio_inbuffer, this->audio_inlength, SENDANDFORGET, NULL, (*it)->sock,
 							__FILE__, PSEUDO__LINE__(244) );
@@ -404,7 +413,7 @@ void	NetworkCommunication::SendSound( SOCKETALT & sock, ObjSerial serial)
 // Do not do anything when using JVoIP lib
 }
 
-void	NetworkCommunication::RecvSound( char * sndbuffer, int length, bool encrypted)
+void	NetworkCommunication::RecvSound( const char * sndbuffer, int length, bool encrypted)
 {
 #ifdef NETCOMM_PORTAUDIO
 	if( use_pa)
@@ -412,12 +421,14 @@ void	NetworkCommunication::RecvSound( char * sndbuffer, int length, bool encrypt
 		string decrypted;
 		assert( length<MAXBUFFER);
 		memset( audio_outbuffer, 0, MAXBUFFER);
+#ifdef CRYPTO
 		if( encrypted)
 		{
 			decrypted = DecryptBuffer( sndbuffer, length);
 			memcpy( audio_outbuffer, decrypted.c_str(), decrypted.length());
 		}
 		else
+#endif
 			memcpy( audio_outbuffer, sndbuffer, length);
 	}
 #endif
@@ -430,11 +441,13 @@ void	NetworkCommunication::RecvMessage( string message, bool encrypted)
 		this->message_history.pop_front();
 
 	string decrypted;
+#ifdef CRYPTO
 	if( encrypted)
 	{
 		decrypted = DecryptBuffer( message.c_str(), message.length());
 		message = decrypted;
 	}
+#endif
 
 	this->message_history.push_back( message);
 	// Display message
@@ -454,7 +467,7 @@ void	NetworkCommunication::RecvMessage( string message, bool encrypted)
 void	NetworkCommunication::SendImage( SOCKETALT & send_sock)
 {
 	string jpeg_str( "");
-#ifndef NETCOMM_NOWEBCAM
+#ifdef NETCOMM_WEBCAM
 	if( Webcam && Webcam->isReady())
 	{
 		//cerr<<"--- Trying to grab an image..."<<endl;
@@ -512,7 +525,7 @@ if( use_pa)
 }
 #endif /* NETCOMM_PORTAUDIO */
 
-#ifndef NETCOMM_NOWEBCAM
+#ifdef NETCOMM_WEBCAM
 	if( Webcam)
 		this->Webcam->StartCapture();
 #endif /* NETCOMM_NOWEBCAM */
@@ -545,9 +558,14 @@ if( use_pa)
 	if( this->rtpparams)
 		delete this->rtpparams;
 #endif /* NETCOMM_JVOIP */
-#ifndef NETCOMM_NOWEBCAM
+#ifdef NETCOMM_WEBCAM
 	if( this->Webcam)
 		this->Webcam->EndCapture();
+	if( bufitem)
+	{
+		delete bufitem;
+		bufitem==NULL;
+	}
 #endif /* NETCOMM_NOWEBCAM */
 
 	return 0;
@@ -570,7 +588,7 @@ if( use_pa)
 	CheckPAError( Pa_Terminate(), "Pa_Terminate");
 
 #endif /* NETCOMM_PORTAUDIO */
-#ifndef NETCOMM_NOWEBCAM
+#ifdef NETCOMM_WEBCAM
 
 	if( this->Webcam)
 	{
@@ -578,29 +596,79 @@ if( use_pa)
 		delete this->Webcam;
 		this->Webcam = NULL;
 	}
+	if( bufitem)
+		delete bufitem;
 
 #endif /* NETCOMM_NOWEBCAM */
 #ifdef CRYPTO
 #endif
 }
 
-#endif /* NETCOMM */
-
 char *	NetworkCommunication::GetWebcamCapture()
 {
-#ifdef NETCOMM
-	return Webcam->jpeg_buffer;
-#else
+#ifdef NETCOMM_WEBCAM
+	if( Webcam!=NULL)
+		return Webcam->jpeg_buffer;
+#endif
 	return NULL; // We have no choice :-/
+}
+
+char *	NetworkCommunication::GetWebcamFromNetwork( int & length)
+{
+	char * wshot=NULL;
+#ifdef NETCOMM_WEBCAM
+	if( (*webcamClient) && bufitem)
+	{
+		if( !bufitem->done())
+			return NULL;
+		else
+		{
+			// Re add the buf to get another webcam shot
+			length = bufitem->getSize();
+			wshot = new char[bufitem->getSize()+1];
+			memcpy( wshot, bufitem->getBuffer().get(), bufitem->getSize());
+			wshot[bufitem->getSize()]=0;
+			_downloader->addItem( bufitem);
+		}
+	}
+#endif
+	return wshot;
+}
+
+void	NetworkCommunication::StopWebcamTransfer()
+{
+#ifdef NETCOMM_WEBCAM
+	if( bufitem)
+	{
+		// Abort current transfer
+		// - remove from dloadmgr
+		// - delete it
+		bufitem = NULL;
+	}
+#endif
+}
+
+void	NetworkCommunication::StartWebcamTransfer()
+{
+#ifdef NETCOMM_WEBCAM
+	// To select the first webcam to display and begin transfers
+	this->SwitchWebcam();
 #endif
 }
 
 void	NetworkCommunication::SwitchWebcam()
 {
+#ifdef NETCOMM_WEBCAM
 	bool found = false;
 	CltPtrIterator it;
+	if( bufitem)
+		delete bufitem;
 	// Go through listClients from current client to the end in order to find the next webcam client
-	for( it=++webcamClient; it!=commClients.end() && !found; it++)
+	if( (*this->webcamClient))
+		it=++webcamClient;
+	else
+		it=commClients.begin();
+	for( ; it!=commClients.end() && !found; it++)
 	{
 		if( (*it)->webcam)
 			found = true;
@@ -617,6 +685,15 @@ void	NetworkCommunication::SwitchWebcam()
 		if( found)
 			webcamClient = it;
 	}
+	if( found)
+	{
+		// Should init transfer and buf with right values
+		// 1. Create a socket to the interested client
+		// 2. Init the bufitem
+		//bufitem = new VsnetDownload::Client::Buffer(...);
+		_downloader->addItem( bufitem);
+	}
+#endif
 }
 
 void	NetworkCommunication::SwitchSecured()

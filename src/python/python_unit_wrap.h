@@ -35,7 +35,7 @@
   WRAPPED0 (float,CloakVisible,false)
   voidWRAPPED1 (Cloak,bool,cloak)
   voidWRAPPED0(RemoveFromSystem)
-  WRAPPED3(QVector, PositionITTS ,QVector, local_posit, Vector, local_velocity, float, speed,QVector(0,0,0))
+  WRAPPED4(QVector, PositionITTS ,QVector, local_posit, Vector, local_velocity, float, speed,bool,steadyITTS,QVector(0,0,0))
   WRAPPED0(QVector,Position,QVector(0,0,0))
   WRAPPED0(QVector, LocalPosition,QVector(0,0,0))
 
@@ -107,6 +107,12 @@
   WRAPPED1(bool,RequestClearance,UnitWrapper,dockingunit,false)
   WRAPPED1(bool,isDocked,UnitWrapper,dockingUnit,false)
   WRAPPED1(bool,Dock,UnitWrapper,unitToDockWith,false)
+
+  voidWRAPPED1(setCombatRole,string,role)
+
+  WRAPPED0(string,getCombatRole,"INERT")
+
+
   WRAPPED1(bool,UnDock,UnitWrapper,unitToDockWith,false)
   WRAPPED0(int,DockedOrDocking,0)
   WRAPPED0(int,GetNumMounts,0)
@@ -141,14 +147,15 @@
 	EXPORT_UTIL0(float,getCredits)
 	voidEXPORT_UTIL1(addCredits,float,credits)
 	EXPORT_UTIL0(bool,isSignificant)
+	EXPORT_UTIL0(bool,isDockableUnit)
 	EXPORT_UTIL0(bool,isSun)
 	voidEXPORT_UTIL1(switchFg,string,arg)
 	EXPORT_UTIL2(int,communicateTo,UnitWrapper,other_unit,float,mood)
 	EXPORT_UTIL1(bool,commAnimation,string,anim)
 	EXPORT_UTIL1(bool,JumpTo,string,system)
 	EXPORT_UTIL0(int,isPlayerStarship )
-	voidEXPORT_UTIL1(setECM, short,NewECM)
-	EXPORT_UTIL0(short,getECM )
+	voidEXPORT_UTIL1(setECM, int,NewECM) //short fix
+	EXPORT_UTIL0(int,getECM ) //short fix
 	voidEXPORT_UTIL1(setSpeed, float,speed)
 	EXPORT_UTIL0(float,maxSpeed)
 	EXPORT_UTIL0(float,maxAfterburnerSpeed)

@@ -164,12 +164,12 @@ enum LIGHT_TARGET {
   POSITION=16,
   EMISSION=32
 };
+
 ///Holds all information for a single light object
 class GFXLight {
- protected:
+ public:
   ///physical GL light its saved in
   int target;
- public:
   ///last is w for positional, otherwise 3 for spec
   float vect[3];
   int options;
@@ -219,6 +219,11 @@ struct GFXTVertex // transformed vertex
 	float u,v;
 };
 
+
+struct GFXLightLocal {
+  GFXLight ligh;
+  bool islocal;
+};
 
 
 enum POLYTYPE {
@@ -275,7 +280,11 @@ class /*GFXDRVAPI*/ GFXQuadList {
  * to use a display list to hold information if possible 
  */
 class /*GFXDRVAPI*/ GFXVertexList {
+  friend class GFXSphereVertexList;
+protected:
   ///Num vertices allocated
+  const GFXVertex * GetVertex (int index)const;
+  const GFXColorVertex * GetColorVertex (int index)const;
   int numVertices;
   ///Vertices and colors stored
   union VDAT{
@@ -292,7 +301,8 @@ class /*GFXDRVAPI*/ GFXVertexList {
   ///Array of modes that vertices will be drawn with
   enum POLYTYPE *mode;
   ///Display list number if list is indeed active. 0 otherwise
-  int display_list;
+  int display_list;//doubles as vbo_elements
+  int vbo_data;
   ///number of different mode, drawn lists
   int numlists;
   /**
@@ -314,9 +324,9 @@ class /*GFXDRVAPI*/ GFXVertexList {
   void Init (enum POLYTYPE *poly, int numVertices, const GFXVertex * vert, const GFXColorVertex *colors, int numlists, int *offsets, bool Mutable,unsigned int * indices);
   ///Propagates modifications to the display list
   void RefreshDisplayList();
-  void Draw (enum POLYTYPE *poly, const INDEX index, const int numLists, const int *offsets);
+  virtual void Draw (enum POLYTYPE *poly, const INDEX index, const int numLists, const int *offsets);
   void RenormalizeNormals();
-
+  GFXVertexList();
 public:
   ///creates a vertex list with 1 polytype and a given number of vertices
   inline GFXVertexList(enum POLYTYPE poly, int numVertices, const GFXVertex *vertices,int numindices, bool Mutable=false, unsigned int * index=0){Init (&poly, numVertices, vertices,0, 1,&numindices, Mutable,index);}
@@ -330,38 +340,65 @@ public:
   inline GFXVertexList(enum POLYTYPE *poly, int numVertices,  const GFXColorVertex *colors, int numlists, int *offsets, bool Mutable=false, unsigned int *index=0) {
     Init(poly,numVertices,0,colors, numlists,offsets,Mutable, index);
   }
-  ~GFXVertexList();
-  const GFXVertex * GetVertex (int index)const;
-  const GFXColorVertex * GetColorVertex (int index)const;
+  virtual ~GFXVertexList();
   ///Returns number of Triangles in vertex list (counts tri strips)
-  int numTris ()const;
+  virtual int numTris ()const;
   ///Returns number of Quads in vertex list (counts quad strips)
-  int numQuads()const;
+  virtual int numQuads()const;
   ///Looks up the index in the appropriate short, char or int array
   unsigned int GetIndex (int offset) const;
   bool hasColor()const;
 	
   int GetNumVertices() const {return numVertices;}
+  virtual VDAT * Map(bool read, bool write);
+  void UnMap();
   ///Returns the array of vertices to be mutated
-  VDAT * BeginMutate (int offset);
+  virtual VDAT * BeginMutate (int offset);
   ///Ends mutation and refreshes display list
-  void EndMutate (int newsize=0);
+  virtual void EndMutate (int newsize=0);
   ///Loads the draw state (what is active) of a given vlist for mass drawing
   void LoadDrawState();
   ///Specifies array pointers and loads the draw state of a given vlist for mass drawing
-  void BeginDrawState(GFXBOOL lock=GFXTRUE);
+  virtual void BeginDrawState(GFXBOOL lock=GFXTRUE);
   ///Draws a single copy of the mass-loaded vlist
-  void Draw();
+  virtual void Draw();
   void Draw(enum POLYTYPE poly, int numV);
   void Draw(enum POLYTYPE poly, int numV, unsigned char * index);
   void Draw(enum POLYTYPE poly, int numV, unsigned short *index);
   void Draw(enum POLYTYPE poly, int numV, unsigned int *index);
   ///Loads draw state and prepares to draw only once
   void DrawOnce ();
-  void EndDrawState(GFXBOOL lock=GFXTRUE);
+  virtual void EndDrawState(GFXBOOL lock=GFXTRUE);
   ///returns a packed vertex list with number of polys and number of tries to passed in arguments. Useful for getting vertex info from a mesh
-  void GetPolys (GFXVertex **vert, int *numPolys, int * numTris);
+  virtual void GetPolys (GFXVertex **vert, int *numPolys, int * numTris);
 };
+
+
+class /*GFXDRVAPI*/ GFXSphereVertexList:public GFXVertexList {
+  ///Num vertices allocated
+protected:
+  float radius;
+  GFXVertexList * sphere;
+  virtual void Draw (enum POLYTYPE *poly, const INDEX index, const int numLists, const int *offsets);
+public:
+  ///creates a vertex list with 1 polytype and a given number of vertices
+  GFXSphereVertexList(float radius, int detail,bool insideout, bool reverse_normals);
+  ~GFXSphereVertexList();
+
+  ///Returns the array of vertices to be mutated
+  virtual VDAT * BeginMutate (int offset);
+  ///Ends mutation and refreshes display list
+  virtual void EndMutate (int newsize=0);
+  ///Loads the draw state (what is active) of a given vlist for mass drawing
+  ///Specifies array pointers and loads the draw state of a given vlist for mass drawing
+  virtual void BeginDrawState(GFXBOOL lock=GFXTRUE);
+  ///Draws a single copy of the mass-loaded vlist
+  virtual void Draw();
+  virtual void EndDrawState(GFXBOOL lock=GFXTRUE);
+  ///returns a packed vertex list with number of polys and number of tries to passed in arguments. Useful for getting vertex info from a mesh
+  virtual void GetPolys (GFXVertex **vert, int *numPolys, int * numTris);
+};
+
 
 /**
  * Stores the Draw Context that a vertex list might be drawn with.

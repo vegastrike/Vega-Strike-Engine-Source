@@ -8,7 +8,7 @@
 #include "cmd/nebula_generic.h"
 #include "gfx/camera.h"
 #include "gfx/animation.h"
-
+#include "mesh_xml.h"
 #if defined(CG_SUPPORT)
 #include "gldrv/gl_light.h"
 #include "cg_global.h"
@@ -35,9 +35,9 @@ public:
     return (*orig->Decal[0])==*b.orig->Decal[0];
   }
 };
-class MeshCloser { 
+class Meshvs_closer { 
 public:
-  MeshCloser () {}
+  Meshvs_closer () {}
   static bool FilterCompare (Mesh * a, Mesh * b) {
 	  if (a) {
 		  return a->getBlendDst()==ZERO;
@@ -59,7 +59,7 @@ typedef std::vector<OrigMeshContainer> OrigMeshVector;
 #define DAMAGE_PASS 2
 const int UNDRAWN_MESHES_SIZE= NUM_MESH_SEQUENCE*NUM_PASSES;
 OrigMeshVector undrawn_meshes[NUM_MESH_SEQUENCE][NUM_PASSES]; // lower priority means draw first
-Texture * Mesh::TempGetTexture(std::string filename, std::string factionname, GFXBOOL detail) const{
+Texture * Mesh::TempGetTexture(MeshXML * xml, std::string filename, std::string factionname, GFXBOOL detail) const{
 	static FILTER fil = XMLSupport::parse_bool(vs_config->getVariable("graphics","detail_texture_trilinear","true"))?TRILINEAR:MIPMAP;
 	Texture * ret=NULL;
 	string facplus = factionname+"_"+filename;
@@ -112,10 +112,10 @@ void Mesh::setTextureCumulativeTime(double d) {
 			Decal[i]->setTime(d);
 	}
 }
-Texture * Mesh::TempGetTexture (int index, std::string factionname)const {
+Texture * Mesh::TempGetTexture (MeshXML * xml, int index, std::string factionname)const {
     Texture *tex=NULL;
     assert (index<(int)xml->decals.size());
-    XML::ZeTexture * zt = &(xml->decals[index]);
+    MeshXML::ZeTexture * zt = &(xml->decals[index]);
     if (zt->animated_name.length()) {
         string tempani = factionname+"_"+zt->animated_name;
         tex = new AnimatedTexture (tempani.c_str(),0,BILINEAR);
@@ -163,7 +163,7 @@ AnimatedTexture * createAnimatedTexture( char const * c,int i,enum FILTER f)
 {
 	return new AnimatedTexture( c, i, f);
 }
-
+extern Hashtable<std::string, std::vector <Mesh*>, 127> bfxmHashTable;
 Mesh::~Mesh()
 {
 	if(!orig||orig==this)
@@ -174,7 +174,7 @@ Mesh::~Mesh()
 				  if (undrawn_meshes[j][k][i].orig==this) {
 					  undrawn_meshes[j][k].erase(undrawn_meshes[j][k].begin()+i);
 					  i--;
-					  fprintf (stderr,"stale mesh found in draw queue--removed!\n");
+					  VSFileSystem::vs_fprintf (stderr,"stale mesh found in draw queue--removed!\n");
 				  }
 			  }
 		  }
@@ -194,9 +194,22 @@ Mesh::~Mesh()
 	    delete forcelogos;
 	    forcelogos = NULL;
 	  }
-	  if (meshHashTable.Get(hash_name)==this)
+	  if (meshHashTable.Get(hash_name)==this){
 	    meshHashTable.Delete(hash_name);
-	  
+	  }
+          vector <Mesh *>* hashers = bfxmHashTable.Get(hash_name);
+          vector <Mesh *>::iterator finder;
+          if (hashers) {
+            for (int i=hashers->size()-1;i>=0;--i) {
+              if ((*hashers)[i]==this) {
+                hashers->erase (hashers->begin()+i);
+                if (hashers->empty()) {
+                  bfxmHashTable.Delete(hash_name);
+                  delete hashers;
+                }
+              }
+            }
+          }
 	  if(draw_queue!=NULL)
 	    delete draw_queue;
 	} else {
@@ -207,7 +220,7 @@ Mesh::~Mesh()
 	  }
 	}
 }
-void Mesh::Draw(float lod, const Matrix &m, float toofar, short cloak, float nebdist,unsigned char hulldamage, bool renormalize)
+void Mesh::Draw(float lod, const Matrix &m, float toofar, int cloak, float nebdist,unsigned char hulldamage, bool renormalize) //short fix
 {
   //  Vector pos (local_pos.Transform(m));
   MeshDrawContext c(m);
@@ -232,19 +245,19 @@ void Mesh::Draw(float lod, const Matrix &m, float toofar, short cloak, float neb
     } else {
       c.mesh_seq =2;
     }
-    if (cloak<16384) {
+    if (cloak<=2147483647/2) {
       c.cloaked|=MeshDrawContext::NEARINVIS;
     }
-    float tmp = ((float)cloak)/32767;
+    float tmp = ((float)cloak)/2147483647;
     c.CloakFX.r = (c.cloaked&MeshDrawContext::GLASSCLOAK)?tmp:1;
     c.CloakFX.g = (c.cloaked&MeshDrawContext::GLASSCLOAK)?tmp:1;
     c.CloakFX.b = (c.cloaked&MeshDrawContext::GLASSCLOAK)?tmp:1;
     c.CloakFX.a = tmp;
     /*
-    c.CloakNebFX.ambient[0]=((float)cloak)/32767;
-    c.CloakNebFX.ag=((float)cloak)/32767;
-    c.CloakNebFX.ab=((float)cloak)/32767;
-    c.CloakNebFX.aa=((float)cloak)/32767;
+    c.CloakNebFX.ambient[0]=((float)cloak)/2147483647;
+    c.CloakNebFX.ag=((float)cloak)/2147483647;
+    c.CloakNebFX.ab=((float)cloak)/2147483647;
+    c.CloakNebFX.aa=((float)cloak)/2147483647;
     */
     ///all else == defaults, only ambient
   } 
@@ -255,7 +268,7 @@ void Mesh::Draw(float lod, const Matrix &m, float toofar, short cloak, float neb
   origmesh->draw_queue->push_back(c);
   if(!(origmesh->will_be_drawn&(1<<c.mesh_seq))) {
     origmesh->will_be_drawn |= (1<<c.mesh_seq);
-    //    fprintf (stderr,"origmesh %x",origmesh);
+    //    VSFileSystem::vs_fprintf (stderr,"origmesh %x",origmesh);
 	for (unsigned int i=0;i<Decal.size()&& i < NUM_PASSES;++i) {
 		if (Decal[i]) {
 			undrawn_meshes[c.mesh_seq][i].push_back(OrigMeshContainer(origmesh,toofar-rSize()));//FIXME will not work if many of hte same mesh are blocking each other
@@ -264,7 +277,7 @@ void Mesh::Draw(float lod, const Matrix &m, float toofar, short cloak, float neb
   }
   will_be_drawn |= (1<<c.mesh_seq);
 }
-void Mesh::DrawNow(float lod,  bool centered, const Matrix &m, short cloak, float nebdist) {
+void Mesh::DrawNow(float lod,  bool centered, const Matrix &m, int cloak, float nebdist) { //short fix
   Mesh *o = getLOD (lod);
   //fixme: cloaking not delt with.... not needed for backgroudn anyway
   if (nebdist<0) {
@@ -310,7 +323,7 @@ void Mesh::DrawNow(float lod,  bool centered, const Matrix &m, short cloak, floa
   for ( i=0;i<specialfxlight.size();i++) {
     GFXDeleteLight (specialfxlight[i]);
   }
-  if (cloak>=0&&cloak<32767) {
+  if (cloak>=0&&cloak<2147483647) {
     GFXEnable (TEXTURE1);
   }
 }
@@ -329,9 +342,9 @@ void Mesh::ProcessZFarMeshes () {
   GFXDisable (DEPTHTEST);
   GFXDisable (DEPTHWRITE);
   ///sort meshes  
-  //std::sort<OrigMeshVector::iterator,MeshCloser>(undrawn_meshes[NUM_ZBUF_SEQ].begin(),undrawn_meshes[NUM_ZBUF_SEQ].end(),MeshCloser());
+  //std::sort<OrigMeshVector::iterator,Meshvs_closer>(undrawn_meshes[NUM_ZBUF_SEQ].begin(),undrawn_meshes[NUM_ZBUF_SEQ].end(),Meshvs_closer());
   for (int k=0;k<NUM_PASSES;++k) {
-	  std::sort(undrawn_meshes[NUM_ZBUF_SEQ][k].begin(),undrawn_meshes[NUM_ZBUF_SEQ][k].end(),MeshCloser());
+	  std::sort(undrawn_meshes[NUM_ZBUF_SEQ][k].begin(),undrawn_meshes[NUM_ZBUF_SEQ][k].end(),Meshvs_closer());
 	  
 	  for (OrigMeshVector::iterator i=undrawn_meshes[NUM_ZBUF_SEQ][k].begin();i!=undrawn_meshes[NUM_ZBUF_SEQ][k].end();i++) {
 		  i->orig->ProcessDrawQueue (k,NUM_ZBUF_SEQ);
@@ -412,22 +425,35 @@ void Mesh::SelectCullFace (int whichdrawqueue) {
   if (blendDst!=ZERO&&whichdrawqueue!=NUM_ZBUF_SEQ) {
     //    
     GFXDisable(DEPTHWRITE);
-    if (blendSrc!=SRCALPHA||getCullFaceForcedOn()) {
+    if (blendSrc!=SRCALPHA||getCullFaceForcedOff()) {
       GFXDisable(CULLFACE);
     }
   }
   
 }
-void SetupCloakState (char cloaked,const GFXColor & CloakFX, vector <int> &specialfxlight, unsigned char hulldamage) {
+void SetupCloakState (char cloaked,const GFXColor & CloakFX, vector <int> &specialfxlight, unsigned char hulldamage,unsigned int matnum) {
     if (cloaked&MeshDrawContext::CLOAK) {
         GFXPushBlendMode ();
+		GFXDisable(CULLFACE);
+/**/
+		GFXEnable(LIGHTING);
+		GFXEnable(TEXTURE0);
+		GFXEnable(TEXTURE1);
+		
+/**/
         if (cloaked&MeshDrawContext::GLASSCLOAK) {
             GFXDisable (TEXTURE1);
             int ligh;
             GFXCreateLight (ligh,GFXLight (true,GFXColor(0,0,0,1),GFXColor (0,0,0,1),GFXColor (0,0,0,1),CloakFX,GFXColor(1,0,0)),true);
             specialfxlight.push_back (ligh);
             GFXBlendMode (ONE,ONE);
+            GFXSelectMaterialHighlights(matnum,
+                                        GFXColor(1,1,1,1),
+                                        GFXColor(1,1,1,1),
+                                        GFXColor(1,1,1,1),
+                                        CloakFX);
         }else {
+			GFXEnable(TEXTURE1);
             if (cloaked&MeshDrawContext::NEARINVIS) {      
                 //NOT sure I like teh jump this produces	GFXDisable (TEXTURE1);
             }
@@ -542,7 +568,7 @@ void SetupSpecMapSecondPass(Texture * decal,unsigned int mat,BLENDFUNC blendsrc,
                                 GFXColor(0,0,0,0),
 				cloakFX,
                                 (envMap&&GFXMultiTexAvailable())?GFXColor (1,1,1,1):GFXColor(0,0,0,0));
-    GFXBlendMode (blendsrc,ONE);
+    GFXBlendMode (ONE,ONE);
     decal->MakeActive();
     float a,b;
     GFXGetPolygonOffset(&a,&b);
@@ -552,6 +578,14 @@ void SetupSpecMapSecondPass(Texture * decal,unsigned int mat,BLENDFUNC blendsrc,
       GFXActiveTexture(1);
       GFXTextureEnv(1,GFXMODULATETEXTURE); 
       GFXEnable(TEXTURE1);
+    }
+    else {
+      GFXSetSeparateSpecularColor(GFXFALSE);
+      GFXTextureEnv(0,GFXMODULATETEXTURE); 
+      GFXEnable(TEXTURE0);
+      GFXActiveTexture(1);
+      GFXDisable(TEXTURE1);
+
     }
 }
 void SetupGlowMapFourthPass(Texture * decal,unsigned int mat,BLENDFUNC blendsrc, const GFXColor &cloakFX, float polygon_offset) {
@@ -602,6 +636,9 @@ void RestoreSpecMapState(bool envMap, bool write_to_depthmap, float polygonoffse
     if (envMap) {
       GFXActiveTexture(1);
       GFXTextureEnv(1,GFXADDTEXTURE); //restore modulate
+    }else {
+       static bool separatespec = XMLSupport::parse_bool (vs_config->getVariable ("graphics","separatespecularcolor","false"))?GFXTRUE:GFXFALSE;
+       GFXSetSeparateSpecularColor(separatespec);
     }
     if (write_to_depthmap) {
         GFXEnable(DEPTHWRITE);
@@ -611,16 +648,16 @@ void RestoreSpecMapState(bool envMap, bool write_to_depthmap, float polygonoffse
 void Mesh::ProcessDrawQueue(int whichpass,int whichdrawqueue) {
   //  assert(draw_queue->size());
 	if (whichpass>=(int)Decal.size()) {
-		fprintf (stderr,"Fatal error: drawing ship that has a nonexistant tex");
+		VSFileSystem::vs_fprintf (stderr,"Fatal error: drawing ship that has a nonexistant tex");
 		return;
 	}
 	if (Decal[whichpass]==NULL) {
-		fprintf (stderr,"Less Fatal error: drawing ship that has a nonexistant tex");
+		VSFileSystem::vs_fprintf (stderr,"Less Fatal error: drawing ship that has a nonexistant tex");
 		return;
 	}
 
   if (draw_queue->empty()) {
-    fprintf (stderr,"cloaking queues issue! Report to hellcatv@hotmail.com\nn%d\n%s",whichdrawqueue,hash_name.c_str());
+    VSFileSystem::vs_fprintf (stderr,"cloaking queues issue! Report to hellcatv@hotmail.com\nn%d\n%s",whichdrawqueue,hash_name.c_str());
     return;
   }
   bool damagepassabort=false;
@@ -725,6 +762,8 @@ void Mesh::ProcessDrawQueue(int whichpass,int whichdrawqueue) {
     }
 	if (c.damage==0&&whichpass==DAMAGE_PASS)
 		continue;
+	if ((c.cloaked&MeshDrawContext::CLOAK)&&whichpass!=0)
+		continue;
     if (whichdrawqueue!=MESH_SPECIAL_FX_ONLY) {
       GFXLoadIdentity(MODEL);
       GFXPickLights (Vector (c.mat.p.i,c.mat.p.j,c.mat.p.k),rSize());
@@ -732,7 +771,7 @@ void Mesh::ProcessDrawQueue(int whichpass,int whichdrawqueue) {
     vector <int> specialfxlight;
     GFXLoadMatrixModel ( c.mat);
 	unsigned char damaged=((whichpass==DAMAGE_PASS)?c.damage:0);
-    SetupCloakState (c.cloaked,c.CloakFX,specialfxlight,damaged);
+    SetupCloakState (c.cloaked,c.CloakFX,specialfxlight,damaged,myMatNum);
 
     unsigned int i;
     for ( i=0;i<c.SpecialFX->size();i++) {
@@ -791,7 +830,7 @@ void Mesh::ProcessDrawQueue(int whichpass,int whichdrawqueue) {
 	  *draw_queue=tmp_draw_queue;
   }
 }
-void Mesh::CreateLogos(int faction, Flightgroup * fg) {
+void Mesh::CreateLogos(MeshXML * xml , int faction, Flightgroup * fg) {
   numforcelogo=numsquadlogo =0;
   unsigned int index;
   for (index=0;index<xml->logos.size();index++) {

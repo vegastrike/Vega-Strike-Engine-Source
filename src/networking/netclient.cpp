@@ -40,7 +40,7 @@
 #include "cmd/unit_factory.h"
 #include "gfx/matrix.h"
 #include "lin_time.h"
-#include "vs_path.h"
+#include "vsfilesystem.h"
 #include "cmd/role_bitmask.h"
 #include "gfx/cockpit_generic.h"
 #include "gldrv/winsys.h"
@@ -55,6 +55,7 @@
 #include "networking/networkcomm.h"
 #include "posh.h"
 #include "networking/prediction.h"
+#include "fileutil.h"
 
 #ifdef micro_sleep
 #undef micro_sleep
@@ -68,7 +69,7 @@ using std::cin;
 double NETWORK_ATOM;
 extern vector<string> globalsaves;
 extern vector<unorigdest *> pendingjump;
-extern Hashtable<std::string, StarSystem, char[127]> star_system_table;
+extern Hashtable<std::string, StarSystem, 127> star_system_table;
 typedef vector<Client *>::iterator VC;
 typedef vector<ObjSerial>::iterator ObjI;
 
@@ -108,21 +109,18 @@ NetClient::NetClient()
     game_unit = NULL;
     old_timestamp = 0;
     latest_timestamp = 0;
-    old_time = 0;
+    //old_time = 0;
     cur_time = 0;
     enabled = 0;
     nbclients = 0;
 	jumpok = false;
 	ingame = false;
-	current_freq = MIN_COMMFREQ;
-	selected_freq = MIN_COMMFREQ;
-
-	prediction = new CubicSplinePrediction();
-#ifdef NETCOMM
-	NetComm = new NetworkCommunication();
-#else
-    NetComm = NULL;
+#ifdef CRYPTO
+	FileUtil::use_crypto = true;
 #endif
+
+	prediction = new MixedPrediction();
+    NetComm = NULL;
 
     _downloadManagerClient.reset( new VsnetDownload::Client::Manager( _sock_set ) );
     _sock_set.addDownloadManager( _downloadManagerClient );
@@ -135,11 +133,15 @@ NetClient::NetClient()
 NetClient::~NetClient()
 {
 	if( prediction)
+    {
 		delete prediction;
-#ifdef NETCOMM
+        prediction = NULL;
+    }
 	if( NetComm!=NULL)
+    {
 		delete NetComm;
-#endif
+        NetComm = NULL;
+    }
 }
 
 /*************************************************************/
@@ -206,8 +208,8 @@ bool	NetClient::PacketLoop( Cmd command)
 int		NetClient::checkAcctMsg( )
 {
 	int len=0;
-	AddressIP	ip2;
-	Packet packeta;
+	Packet    packeta;
+    AddressIP ipadr;
 	int ret=0;
 
 	// Watch account server socket
@@ -217,12 +219,9 @@ int		NetClient::checkAcctMsg( )
 		//COUT<<"Net activity !"<<endl;
 		// Receive packet and process according to command
 
-		PacketMem mem;
-		if( (len=acct_sock.recvbuf( mem, &ip2 ))>0 )
+		if( (len=acct_sock.recvbuf( &packeta, &ipadr ))>0 )
 		{
 			ret = 1;
-			Packet p( mem );
-			packeta = p;
 			NetBuffer netbuf( packeta.getData(), packeta.getDataLength());
 			switch( packeta.getCommand())
 			{
@@ -352,14 +351,12 @@ int NetClient::checkMsg( Packet* outpacket )
     {
         ret = recvMsg( outpacket );
     }
-#ifdef NETCOMM
 	// If we have network communications enabled and webcam support enabled we grab an image
-	if( NetComm->IsActive())
+	if( NetComm!=NULL && NetComm->IsActive())
 	{
 		// Here also send samples
 		NetComm->SendSound( this->clt_sock, this->serial);
 	}
-#endif
 	
     return ret;
 }
@@ -370,11 +367,10 @@ int NetClient::checkMsg( Packet* outpacket )
 
 int NetClient::recvMsg( Packet* outpacket )
 {
+	using namespace VSFileSystem;
     ObjSerial	packet_serial=0;
 
     // Receive data
-    AddressIP sender_adr;
-	PacketMem mem;
 	Unit * un = NULL;
 	int mount_num;
 	ObjSerial mis;
@@ -383,7 +379,9 @@ int NetClient::recvMsg( Packet* outpacket )
 		local_serial = this->game_unit.GetUnit()->GetSerial();
 	Cockpit * cp;
 
-    int recvbytes = clt_sock.recvbuf( mem, &sender_adr );
+    Packet    p1;
+    AddressIP ipadr;
+    int recvbytes = clt_sock.recvbuf( &p1, &ipadr );
 
     if( recvbytes <= 0)
     {
@@ -393,19 +391,12 @@ int NetClient::recvMsg( Packet* outpacket )
     }
     else
     {
-        Packet p1( mem );
 		NetBuffer netbuf( p1.getData(), p1.getDataLength());
-	    p1.setNetwork( &sender_adr, clt_sock );
 	    if( outpacket )
 	    {
 	        *outpacket = p1;
 	    }
         packet_serial     = p1.getSerial();
-		/*
-        old_timestamp     = latest_timestamp;
-        latest_timestamp = p1.getTimestamp();
-        deltatime         = latest_timestamp - old_timestamp;
-		*/
 	    Cmd cmd           = p1.getCommand( );
 	    COUT << "Rcvd: " << cmd << " ";
         switch( cmd )
@@ -426,17 +417,19 @@ int NetClient::recvMsg( Packet* outpacket )
 				{
 					// Receive the file and write it (trunc if exists)
 					cerr<<"RECEIVING file : "<<filename<<endl;
-					fp = fopen( (datadir+filename).c_str(), "wb");
-					if (!fp)
+					VSFile f;
+					VSError err = f.OpenReadOnly(filename, ::VSFileSystem::UnknownFile);
+					if (err>Ok)
 					{
 						cerr<<"!!! ERROR : opening received file !!!"<<endl;
 						VSExit(1);
 					}
-					if( fwrite( file.c_str(), sizeof( char), file.length(), fp) != file.length())
+					if( f.Write( file) != file.length())
 					{
 						cerr<<"!!! ERROR : writing received file !!!"<<endl;
 						VSExit(1);
 					}
+					f.Close();
 				}
 				else
 				{
@@ -481,15 +474,30 @@ int NetClient::recvMsg( Packet* outpacket )
                 this->receiveLocations( &p1 );
                 break;
             case CMD_SNAPSHOT :
-                // Should update another client's position
-                //COUT<<"Received a SNAPSHOT from server"<<endl;
-                this->receivePosition( &p1 );
+                {
+                    COUT << "CMD_SNAPSHOT received" << endl;
+                    // Should update another client's position
+                    // Zone hack:
+	                // When receiving a snapshot, packet serial is considered as the
+                    // number of client updates.
+                    unsigned int numUnits  = p1.getSerial( );
+                    unsigned int timestamp = p1.getTimestamp( );
+                    double       deltatime = netbuf.getFloat( );
+
+                    COUT << "   *** #units=" << numUnits << " ts=" << timestamp << " delta-t=" << deltatime << endl;
+
+                    this->receivePositions( numUnits, timestamp, netbuf, deltatime );
+                    COUT << "   *** CMD_SNAPSHOT DONE" << endl;
+                }
                 break;
             case CMD_ENTERCLIENT :
+			{
                 COUT << ">>> " << local_serial << " >>> ENTERING CLIENT =( serial n°"
                      << packet_serial << " )= --------------------------------------" << endl;
-                this->addClient( &p1 );
-                break;
+				NetBuffer netbuf( p1.getData(), p1.getDataLength());
+                this->AddClientObject( netbuf, p1.getSerial());
+			}
+            break;
             case CMD_EXITCLIENT :
                 COUT << ">>> " << local_serial << " >>> EXITING CLIENT =( serial n°"
                      << packet_serial << " )= --------------------------------------" << endl;
@@ -500,13 +508,9 @@ int NetClient::recvMsg( Packet* outpacket )
                     COUT << ">>> " << local_serial << " >>> ADDED IN GAME =( serial n°"
                          << packet_serial << " )= --------------------------------------" << endl;
 				    // Get the zone id in the packet
-                    char flags = netbuf.getChar( );
-                    if( flags & CMD_CAN_COMPRESS ) clt_sock.allowCompress( true );
-				    this->zone = netbuf.getShort();
-				    _Universe->current_stardate.Init( netbuf.getString());
-				    cout << "WE ARE ON STARDATE "
-                         <<_Universe->current_stardate.GetFullCurrentStarDate() << endl;
-                    COUT << "Compression: " << ( (flags & CMD_CAN_COMPRESS) ? "yes" : "no" ) << endl;
+				    //this->game_unit.GetUnit()->activeStarSystem->SetZone(netbuf.getShort());
+				    //_Universe->current_stardate.InitTrek( netbuf.getString());
+                    //COUT << "Compression: " << ( (flags & CMD_CAN_COMPRESS) ? "yes" : "no" ) << endl;
 					this->game_unit.GetUnit()->SetCurPosition( netbuf.getQVector());
                     //this->getZoneData( &p1 );
                 }
@@ -529,7 +533,6 @@ int NetClient::recvMsg( Packet* outpacket )
 				mount_num = netbuf.getInt32();
 				mis = netbuf.getSerial();
 				// Find the unit
-				//Unit * un = zonemgr->getUnit( packet.getSerial(), zone);
 				if( mis==local_serial) // WE have fired and receive the broadcast
 					un = this->game_unit.GetUnit();
 				else
@@ -754,6 +757,7 @@ int NetClient::recvMsg( Packet* outpacket )
 				string newsystem = netbuf.getString();
 				ObjSerial unserial = netbuf.getSerial();
 				ObjSerial jumpserial = netbuf.getSerial();
+				unsigned short zoneid = netbuf.getShort();
 				un = this->game_unit.GetUnit();
 				// Get the pointer to the new star system sent by server
 				if( !(sts=star_system_table.Get( newsystem)))
@@ -765,7 +769,8 @@ int NetClient::recvMsg( Packet* outpacket )
 				// If unserial == un->GetSerial() -> then we are jumping otherwise it is another unit/player
 				if( unserial == un->GetSerial())
 				{
-					// If we received a CMD_JUMP with serial==player serial jump is refused because of energy
+					this->zone = zoneid;
+					// If we received a CMD_JUMP with serial==player serial jump is granted
 					if( packet_serial==un->GetSerial())
 					{
 						this->jumpok = true;
@@ -774,11 +779,11 @@ int NetClient::recvMsg( Packet* outpacket )
 					// The jump has been allowed but we don't have the good system file
 					else
 					{
-						// Here do the jump function
+						// Here really do the jump function
 						Unit * jumpun = UniverseUtil::GetUnitFromSerial( jumpserial);
 						sts->JumpTo( un, jumpun, newsystem, true);
 						string sysfile( newsystem+".system");
-						VsnetDownload::Client::NoteFile f( this->clt_sock, sysfile);
+						VsnetDownload::Client::NoteFile f( this->clt_sock, sysfile, SystemFile);
    		             	_downloadManagerClient->addItem( &f);
 						while( !f.done())
 						{
@@ -888,6 +893,7 @@ int NetClient::recvMsg( Packet* outpacket )
 				Unit * un2 = UniverseUtil::GetUnitFromSerial( p1.getSerial());
 				un2->UnDock( un);
 			}
+			break;
 			case CMD_POSUPDATE :
 			{
 				// If a client receives that it means the server want to force the client position to be updated
@@ -896,6 +902,130 @@ int NetClient::recvMsg( Packet* outpacket )
 				this->game_unit.GetUnit()->old_state.setPosition( serverpos);
 				this->game_unit.GetUnit()->curr_physical_state.position = serverpos;
 			}
+			break;
+			case CMD_CREATEUNIT :
+			{
+				Unit * newunit = NULL;
+				ObjSerial serial = netbuf.getSerial();
+				string file( netbuf.getString());
+				bool sub = netbuf.getChar();
+				int faction = netbuf.getInt32();
+				string fname( netbuf.getString());
+				string custom( netbuf.getString());
+				int fg_num = netbuf.getInt32();
+
+				cerr<<"NETCREATE UNIT : "<<file<<endl;
+
+				string facname = FactionUtil::GetFactionName( faction);
+				Flightgroup * fg = mission[0].findFlightgroup( fname, facname);
+				newunit = UnitFactory::createUnit( file.c_str(), sub, faction, custom, fg, fg_num, NULL, serial);
+				_Universe->activeStarSystem()->AddUnit( newunit);
+			}
+			break;
+			case CMD_CREATENEBULA :
+			{
+				Unit * newunit = NULL;
+				ObjSerial serial = netbuf.getSerial();
+				string file( netbuf.getString());
+				bool sub = netbuf.getChar();
+				int faction = netbuf.getInt32();
+				string fname( netbuf.getString());
+				int fg_num = netbuf.getInt32();
+
+				cerr<<"NETCREATE NEBULA : "<<file<<endl;
+
+				string facname = FactionUtil::GetFactionName( faction);
+				Flightgroup * fg = mission[0].findFlightgroup( fname, facname);
+				newunit = (Unit*) UnitFactory::createNebula( file.c_str(), sub, faction, fg, fg_num, serial);
+				_Universe->activeStarSystem()->AddUnit( newunit);
+			}
+			break;
+			case CMD_CREATEPLANET :
+			{
+				Unit * newunit = NULL;
+				ObjSerial serial = netbuf.getSerial();
+				QVector x = netbuf.getQVector();
+				QVector y = netbuf.getQVector();
+				float vely = netbuf.getFloat();
+				const Vector rotvel( netbuf.getVector());
+				float pos = netbuf.getFloat();
+				float gravity = netbuf.getFloat();
+				float radius = netbuf.getFloat();
+
+				string file( netbuf.getString());
+				char sr = netbuf.getChar();
+				char ds = netbuf.getChar();
+
+				vector<char *> dest;
+				unsigned short nbdest = netbuf.getShort();
+				int i=0;
+				for( i=0; i<nbdest; i++)
+				{
+					string tmp( netbuf.getString());
+					char * ctmp = new char[tmp.length()+1];
+					ctmp[tmp.length()] = 0;
+					memcpy( ctmp, tmp.c_str(), tmp.length());
+					dest.push_back( ctmp);
+				}
+
+				const QVector orbitcent( netbuf.getQVector());
+				un = UniverseUtil::GetUnitFromSerial( netbuf.getSerial());
+				GFXMaterial mat = netbuf.getGFXMaterial();
+				
+				vector<GFXLightLocal> lights;
+				unsigned short nblight = netbuf.getShort();
+				for( i=0; i<nblight; i++)
+					lights.push_back( netbuf.getGFXLightLocal());
+
+				int faction = netbuf.getInt32();
+				string fullname( netbuf.getString());
+				char insideout = netbuf.getChar();
+
+				cerr<<"NETCREATE PLANET : "<<file<<endl;
+
+				newunit = UnitFactory::createPlanet( x, y, vely, rotvel, pos, gravity, radius, file.c_str(), (BLENDFUNC)sr, (BLENDFUNC)ds,
+											dest, orbitcent, un, mat, lights, faction, fullname, insideout, serial);
+				_Universe->activeStarSystem()->AddUnit( newunit);
+			}
+			break;
+			case CMD_CREATEASTER :
+			{
+				Unit * newunit = NULL;
+				ObjSerial serial = netbuf.getSerial();
+				string file( netbuf.getString());
+				int faction = netbuf.getInt32();
+				string fname( netbuf.getString());
+				int fg_snumber = netbuf.getInt32();
+				float diff = netbuf.getFloat();
+
+				cerr<<"NETCREATE ASTEROID : "<<file<<endl;
+
+				string facname = FactionUtil::GetFactionName( faction);
+				Flightgroup * fg = mission[0].findFlightgroup( fname, facname);
+				newunit = (Unit *) UnitFactory::createAsteroid( file.c_str(), faction, fg, fg_snumber, diff, serial);
+				_Universe->activeStarSystem()->AddUnit( newunit);
+			}
+			case CMD_CREATEMISSILE :
+			{
+				Unit * newunit = NULL;
+				ObjSerial serial = netbuf.getSerial();
+				string file( netbuf.getString());
+				int faction = netbuf.getInt32();
+				string mods( netbuf.getString());
+				const float damage( netbuf.getFloat());
+				float phasedamage = netbuf.getFloat();
+				float time = netbuf.getFloat();
+				float radialeffect = netbuf.getFloat();
+				float radmult = netbuf.getFloat();
+				float detonation_radius = netbuf.getFloat();
+
+				cerr<<"NETCREATE MISSILE : "<<file<<endl;
+
+				const string modifs( mods);
+				newunit = (Unit *) UnitFactory::createMissile( file.c_str(), faction, modifs, damage, phasedamage, time, radialeffect, radmult, detonation_radius, serial);
+				_Universe->activeStarSystem()->AddUnit( newunit);
+			}
+			break;
             default :
                 COUT << ">>> " << local_serial << " >>> UNKNOWN COMMAND =( " << hex << cmd
                      << " )= --------------------------------------" << endl;
@@ -928,15 +1058,6 @@ void	NetClient::logout()
 }
 
 
-bool NetClient::canCompress() const
-{
-#ifdef HAVE_ZLIB_H
-    return true;
-#else
-    return false;
-#endif
-}
-
 ClientPtr NetClient::Clients::insert( int x, Client* c )
 {
     if( c != NULL )
@@ -964,5 +1085,11 @@ bool NetClient::Clients::remove( int x )
     if( s == 0 ) return false;
     return true;
     // shared_ptr takes care of delete
+}
+
+Transformation	NetClient::Interpolate( Unit * un, double addtime)
+{
+	elapsed_since_packet += addtime;
+	return prediction->Interpolate( un, this->deltatime+elapsed_since_packet);
 }
 

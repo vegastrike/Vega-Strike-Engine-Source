@@ -1,6 +1,6 @@
 #include "nebula.h"
 #include "vegastrike.h"
-#include "vs_path.h"
+#include "vsfilesystem.h"
 #include <assert.h>
 #include "config_xml.h"
 #include "vs_globals.h"

@@ -1,10 +1,3 @@
-if USEBOOST128
-INCLUDES=-I$(top_srcdir)/src \
-	 -I$(top_srcdir)/src/boost
-else
-INCLUDES=-I$(top_srcdir)/src \
-	 -I$(top_srcdir)/src/boost129
-endif
 
 noinst_LIBRARIES = libgfx.a libgfxserver.a
 SUBDIRS = nav
@@ -27,6 +20,9 @@ libgfxgeneric =  		\
 	mesh_fx.cpp			\
 	mesh_poly.cpp		\
 	mesh_xml.cpp		\
+	mesh_xml.h		\
+	mesh_bxm.cpp		\
+	mesh_bxm.h		\
 	sphere_generic.cpp	\
 	bsp.cpp				\
 	bsp.h				\
@@ -38,11 +34,16 @@ libgfxserver_a_SOURCES =	$(libgfxgeneric)	\
 	mesh_server.cpp
 
 libgfx_a_SOURCES =	$(libgfxgeneric)\
+	vsimage.h		\
+	vsimage.cpp		\
+	tex_transform.cpp	\
 	jpeg_memory.cpp	\
 	jpeg_memory.h	\
 	mesh_gfx.cpp	\
 	ani_texture.h	\
 	ani_texture.cpp	\
+	stream_texture.h \
+	stream_texture.cpp \
 	animation.cpp	\
 	animation.h		\
 	aux_logo.cpp	\
@@ -53,8 +54,6 @@ libgfx_a_SOURCES =	$(libgfxgeneric)\
 	aux_palette.h	\
 	aux_texture.cpp	\
 	aux_texture.h	\
-	png_texture.cpp	\
-	png_texture.h	\
 	background.cpp	\
 	background.h	\
 	car_assist.h 	\
@@ -83,7 +82,6 @@ libgfx_a_SOURCES =	$(libgfxgeneric)\
 	planetary_transform.h	\
 	pipelined_texture.cpp	\
 	pipelined_texture.h		\
-	png_write.cpp	\
 	point_to_cam.h	\
 	particle.cpp	\
 	particle.h		\

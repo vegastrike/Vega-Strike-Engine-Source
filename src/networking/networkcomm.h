@@ -1,13 +1,13 @@
 #ifndef __NETWORKCOMM_H
 #define __NETWORKCOMM_H
 
+#include "client.h"
 #ifdef CRYPTO
 #include <crypto++/randpool.h>
 using namespace CryptoPP;
 #endif
 
 #include "const.h"
-#include "client.h"
 #include "clientptr.h"
 #include <string>
 #include <list>
@@ -15,7 +15,7 @@ using namespace CryptoPP;
 #include "boost/shared_ptr.hpp"
 #include <config.h>
 
-#ifndef NETCOMM_NOWEBCAM
+#ifdef NETCOMM_WEBCAM
 class WebcamSupport;
 #endif
 
@@ -31,17 +31,12 @@ class JVOIPRTPTransmissionParams;
 // (MAX_PA_CPU_LOAD*100)% CPU LOAD
 #endif
 
+#include "networking/lowlevel/vsnet_dloadmgr.h"
+#include "networking/lowlevel/vsnet_notify.h"
+
 typedef list<ClientPtr>::iterator CltPtrIterator;
-namespace VsnetDownload {
-  namespace Server {
-    class Manager;
-  };
-};
-namespace VsnetDownload {
-  namespace Client {
-    class Manager;
-  };
-};
+
+class WebcamSupport;
 
 class NetworkCommunication
 {
@@ -52,17 +47,19 @@ class NetworkCommunication
 		list<ClientPtr>			commClients;			// List of client communicating on the same frequency
 		CltPtrIterator			webcamClient;			// The client we are watching the webcam
 
-		char	crypt_key[DESKEY_SIZE];		// Key used for encryption on secured channels
+		char				crypt_key[DESKEY_SIZE];		// Key used for encryption on secured channels
+		float				min_freq, max_freq;
 		float				freq;			// Current communication frequency
 		bool				active;			// Tell wether the communication system is active
 		char				secured;		// Tell wether we are on a secured channel or not
 		unsigned char		method;			// Method used to spread comms
-#ifndef NETCOMM_NOWEBCAM
+#ifdef NETCOMM_WEBCAM
 		// Webcam support
 		WebcamSupport *		Webcam;
         boost::shared_ptr<VsnetDownload::Client::Manager> _downloader;
         boost::shared_ptr<VsnetDownload::Server::Manager> _downloadServer;
-        SocketSet           _sock_set;      // Encapsulates select()
+        SocketSet                                         _sock_set;
+		VsnetDownload::Client::Buffer *					  bufitem;
 #endif
 #ifdef NETCOMM_JVOIP
 		JVOIPSession *				session;
@@ -104,6 +101,7 @@ class NetworkCommunication
 		enum	CommunicationMethod { ClientBroadcast, ServerUnicast };
 
 		NetworkCommunication();
+		NetworkCommunication( float minfreq, float maxfreq, bool video, bool secured, string method);
 		NetworkCommunication( int nb);
 		~NetworkCommunication();
 
@@ -111,7 +109,7 @@ class NetworkCommunication
 		//void	SendImage( SOCKETALT & send_sock);
 		void	SendSound( SOCKETALT & send_sock, ObjSerial serial);
 		void	SendMessage( SOCKETALT & send_sock, ObjSerial serial, string message);
-		void	RecvSound( char * sndbuffer, int length, bool encrypted=false);
+		void	RecvSound( const char * sndbuffer, int length, bool encrypted=false);
 		void	RecvMessage( string message, bool encrypted=false);
 		int		DestroySession();
 
@@ -120,6 +118,9 @@ class NetworkCommunication
 
 		bool	IsActive()	{ return active;}
 		char *	GetWebcamCapture();
+		char *	GetWebcamFromNetwork( int & length);
+		void	StartWebcamTransfer();
+		void	StopWebcamTransfer();
 
 		char	HasWebcam();
 		char	HasPortaudio();
@@ -127,6 +128,12 @@ class NetworkCommunication
 		char	IsSecured() { return secured;}
 		void	SwitchSecured();
 		void	SwitchWebcam();
+
+		float	MinFreq() { return this->min_freq; }
+		float	MaxFreq() { return this->max_freq; }
+
+    private:
+        void private_init( );
 };
 
 #endif

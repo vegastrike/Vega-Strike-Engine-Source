@@ -6,14 +6,14 @@
 void CloakFor::Execute() {
   if (time==0) {
     parent->Cloak (enable);
-    //    fprintf (stderr,"\ncloaking %f\n",maxtime);
+    //    VSFileSystem::vs_fprintf (stderr,"\ncloaking %f\n",maxtime);
   }
   time +=SIMULATION_ATOM;
   if (time>maxtime) {
     done = true;
     if (maxtime!=0) {
       parent->Cloak (!enable);
-      //    fprintf (stderr,"\ndecloaking%f\n",maxtime);
+      //    VSFileSystem::vs_fprintf (stderr,"\ndecloaking%f\n",maxtime);
     }
     return;
   }
@@ -22,7 +22,7 @@ void CloakFor::Execute() {
 }
 CloakFor::~CloakFor () {
 #ifdef ORDERDEBUG
-  fprintf (stderr,"clk%x\n",this);
+  VSFileSystem::vs_fprintf (stderr,"clk%x\n",this);
   fflush (stderr);
 #endif
   if (parent&&time<=maxtime) {

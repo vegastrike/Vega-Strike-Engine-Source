@@ -22,6 +22,9 @@
 #if defined(__APPLE__) || defined(MACOSX) 
 #include <sys/param.h> // For MAXPATHLEN
 #endif
+#ifdef __MINGW32__
+#include <dirent.h>
+#endif
 using std::string;
 using std::vector;
 #ifdef _G_RANDOM

@@ -17,8 +17,6 @@ typedef vector<Account *>::iterator VI;
  * - Returns a packet with LOGIN_ACCEPT or LOGIN_ERROR and with player name
  */
 
-typedef list<SOCKETALT>::iterator LS;
-
 /**
  * This class should also :
  * - manage accounts info (ships descriptions...)

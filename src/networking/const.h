@@ -39,10 +39,6 @@
 #define DESKEY_SIZE	64
 #define MAXBUFFER	16384
 
-// Communication freq range
-#define MIN_COMMFREQ	23.0
-#define MAX_COMMFREQ	42.0
-
 #define MAXSERIAL 0xFFFF
 #define OBJSERIAL_ToBig POSH_WriteU16ToBig
 #define INSTSERIAL_ToBig POSH_WriteU32ToBig
@@ -65,12 +61,12 @@ extern double DAMAGE_ATOM;
   #endif
 #endif
 
-#if !defined( _WIN32) || defined( __CYGWIN__)
-  #define LOCALCONST_DECL(Type,Name,Value) static const Type Name = Value;
-  #define LOCALCONST_DEF(Class,Type,Name,Value)
+#if !defined( _WIN32) || defined( __CYGWIN__) || defined( __MINGW32__)
+  #define LOCALCONST_DECL(Type,cName,Value) static const Type cName = Value;
+  #define LOCALCONST_DEF(Class,Type,cName,Value)
 #else
-  #define LOCALCONST_DECL(Type,Name,Value) static Type Name;
-  #define LOCALCONST_DEF(Class,Type,Name,Value) Type Class::Name = Value;
+  #define LOCALCONST_DECL(Type,cName,Value) static Type cName;
+  #define LOCALCONST_DEF(Class,Type,cName,Value) Type Class::cName = Value;
 #endif
 
 #if _WIN32_WINNT >= 0x0400

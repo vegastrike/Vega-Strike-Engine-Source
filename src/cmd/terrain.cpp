@@ -39,7 +39,7 @@ void Terrain::SetTransformation(const Matrix &Mat ) {
 }
 
 void Terrain::ApplyForce (Unit * un, const Vector & normal, float dist) {
-  //  fprintf (stderr,"Unit %s has collided at <%f %f %f>", un->name.c_str(),vec.i,vec.j,vec.k);
+  //  VSFileSystem::vs_fprintf (stderr,"Unit %s has collided at <%f %f %f>", un->name.c_str(),vec.i,vec.j,vec.k);
   un->ApplyForce (normal*.4*un->GetMass()*fabs(normal.Dot ((un->GetVelocity()/SIMULATION_ATOM))+fabs (dist)/(SIMULATION_ATOM)));
   un->ApplyDamage (un->Position().Cast()-normal*un->rSize(),-normal,  .5*fabs(normal.Dot(un->GetVelocity()))*mass*SIMULATION_ATOM,un,GFXColor(1,1,1,1),NULL);
 }
@@ -79,8 +79,8 @@ void Terrain::Collide () {
   }
 }
 static GFXColor getTerrainColor() {
-  float col[4];
-  vs_config->gethColor ("terrain", "terrain_ambient",col,0x000000ff);
+  float col[4]={.1f,.1f,.1f,1.0f};
+  //vs_config->gethColor ("terrain", "terrain_ambient",col,0x000000ff);
   return GFXColor (col[0],col[1],col[2],col[3]);
 }
 void Terrain::CollideAll () {

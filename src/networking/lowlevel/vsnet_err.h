@@ -41,5 +41,32 @@ inline bool vsnetEWouldBlock( )
 #endif
 }
 
+inline bool vsnetEConnAborted()
+{
+#if defined(_WIN32) && !defined(__CYGWIN__)
+    return ( WSAGetLastError() == WSAECONNABORTED );
+#else
+    return ( errno == ECONNABORTED );
+#endif
+}
+
+inline bool vsnetEConnReset()
+{
+#if defined(_WIN32) && !defined(__CYGWIN__)
+    return ( WSAGetLastError() == WSAECONNRESET );
+#else
+    return ( errno == ECONNRESET );
+#endif
+}
+
+inline int vsnetGetLastError()
+{
+#if defined(_WIN32) && !defined(__CYGWIN__)
+    return WSAGetLastError();
+#else
+    return errno;
+#endif
+}
+
 #endif /* VSNET_ERR_H */
 

@@ -1,6 +1,7 @@
 #include "gl_light.h"
 #include <queue>
 #include <list>
+#include "vsfilesystem.h"
 
 #include <vector>
 using std::priority_queue;
@@ -49,7 +50,7 @@ static void swappicked () {
 void unpicklights () {
 	for (std::list <int>::iterator i=newpicked->begin();i!=newpicked->end();i++) {
 	  if (GLLights[(*_llights)[*i].Target()].index!=*i) {
-	    	    fprintf (stderr,"uh oh");
+	    	    VSFileSystem::vs_fprintf (stderr,"uh oh");
 	    (*_llights)[*i].Target()=-1;
 	    continue;//a lengthy operation... Since picked lights may have been smashed    
 	  }
@@ -91,7 +92,7 @@ void GFXPickLights (const Vector & center, const float radius) {
     for (int j=0;j<sizeget;j++) {
 
 	  veclinecol::iterator i;
-	  //fprintf (stderr,"pixked size %d",tmppickt[j]->size());
+	  //VSFileSystem::vs_fprintf (stderr,"pixked size %d",tmppickt[j]->size());
       for (i=tmppickt[j]->begin();i!=tmppickt[j]->end();i++){
 	//warning::duplicates may Exist
 	//FIXMESPEEDHACKif (i->lc->lastchecked!=rndvar) {

@@ -15,7 +15,7 @@ KBHandler DigHatswitchBindings [MAX_JOYSTICKS][MAX_DIGITAL_HATSWITCHES][MAX_DIGI
 KBSTATE DigHatswitchState [MAX_JOYSTICKS][MAX_DIGITAL_HATSWITCHES][MAX_DIGITAL_VALUES];
 
 void DefaultJoyHandler (int key, KBSTATE newState) {
-  //  fprintf (stderr,"STATE: %d", st);
+  //  VSFileSystem::Fprintf (stderr,"STATE: %d", st);
 }
 
 void UnbindJoyKey (int joystick, int key) {

@@ -32,7 +32,7 @@ void Unit::RemoveFromSystem() {
 	EradicateCollideTable (&CollideInfo,activeStarSystem)
 #ifdef SAFE_COLLIDE_DEBUG 
 	) {
-      fprintf (stderr,"RECOVERED from (formerly) fatal, currently nonfatal error with unit deletion\n");      
+      VSFileSystem::vs_fprintf (stderr,"RECOVERED from (formerly) fatal, currently nonfatal error with unit deletion\n");      
     }
 #else
     ;
@@ -43,7 +43,7 @@ void Unit::RemoveFromSystem() {
       _Universe->pushActiveStarSystem(_Universe->star_system[i]);
     
     if (EradicateCollideTable (&CollideInfo,_Universe->star_system[i])) {
-      fprintf (stderr,"VERY BAD ERROR FATAL! 0x%lx %s",(long)((long *)(this)),this->name.c_str());
+      VSFileSystem::vs_fprintf (stderr,"VERY BAD ERROR FATAL! 0x%lx %s",(long)((long *)(this)),this->name.c_str());
     }
     _Universe->popActiveStarSystem();
     }
@@ -130,11 +130,11 @@ Vector Vabs (const Vector &in) {
 }
 
 Matrix WarpMatrixForCollisions (Unit * un, const Matrix& ctm) {
-	if (un->GetVelocity().MagnitudeSquared()*SIMULATION_ATOM*SIMULATION_ATOM<un->rSize()*un->rSize()) {
+	if (un->GetWarpVelocity().MagnitudeSquared()*SIMULATION_ATOM*SIMULATION_ATOM<un->rSize()*un->rSize()) {
 		return ctm;
 	}else {
 		Matrix k(ctm);
-		const Vector v(Vector(1,1,1)+Vabs(ctm.getR()*ctm.getR().Dot(un->GetVelocity().Scale(100*SIMULATION_ATOM/un->rSize()))));
+		const Vector v(Vector(1,1,1)+Vabs(ctm.getR()*ctm.getR().Dot(un->GetWarpVelocity().Scale(100*SIMULATION_ATOM/un->rSize()))));
 		
 /*		k.r[0]*=v.i;
 		k.r[1]*=v.i;
@@ -222,11 +222,11 @@ bool Unit::InsideCollideTree (Unit * smaller, QVector & bigpos, Vector &bigNorma
 	smalltransform.SetOrigin(smallorig.Cast());
       }
 #endif
-      if (smaller->colTrees->colTree(smaller,bigger->GetVelocity())->Collide (*bigger->colTrees->colTree(bigger,smaller->GetVelocity()),
+      if (smaller->colTrees->colTree(smaller,bigger->GetWarpVelocity())->Collide (*bigger->colTrees->colTree(bigger,smaller->GetWarpVelocity()),
 													 &smalltransform,
 													 &bigtransform)) {
 	//static int crashcount=0;
-	//      fprintf (stderr,"%s Crashez to %s %d\n", bigger->name.c_str(), smaller->name.c_str(),crashcount++);
+	//      VSFileSystem::vs_fprintf (stderr,"%s Crashez to %s %d\n", bigger->name.c_str(), smaller->name.c_str(),crashcount++);
 	csCollisionPair * mycollide = csRapidCollider::GetCollisions();
 	int numHits = csRapidCollider::numHits;
 	if (numHits) {
@@ -329,7 +329,7 @@ Unit * Unit::BeamInsideCollideTree (const QVector & start,const QVector & end, Q
 							&bigtransform)) {
       static int crashcount=0;
     
-            fprintf (stderr,"%s Beam Crashez %d\n", name.c_str(),crashcount++);
+            VSFileSystem::vs_fprintf (stderr,"%s Beam Crashez %d\n", name.c_str(),crashcount++);
       csCollisionPair * mycollide = csRapidCollider::GetCollisions();
       int numHits = csRapidCollider::numHits;
       if (numHits) {

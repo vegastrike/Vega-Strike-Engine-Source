@@ -24,7 +24,10 @@ class FireKeyboard: public Order {
   static void HeadlightKey (int,KBSTATE);
   static void SirenKey (int,KBSTATE);
 #endif
+  static void SetShieldsOneThird (int,KBSTATE);
+  static void SetShieldsTwoThird (int,KBSTATE);
   static void ToggleGlow (int,KBSTATE);
+  static void ToggleWarpDrive (int,KBSTATE);
   static void ToggleAnimation (int,KBSTATE);	
   static void PressComm1Key (int,KBSTATE);
   static void PressComm2Key (int,KBSTATE);
@@ -92,6 +95,7 @@ protected:
   unsigned int whichjoystick;
   struct FIREKEYBOARDTYPE &f();
   struct FIREKEYBOARDTYPE &j();
+  void DoSpeechAndAni(Unit * un, Unit * parent, class CommunicationMessage&c);
 public:
   virtual void ProcessCommMessage (class CommunicationMessage&c);
   FireKeyboard (unsigned int whichjoystick, unsigned int whichplayer);//weapon prefs?

@@ -5,6 +5,7 @@
 #include <map>
 #include <vector>
 #include "gfx/vec.h"
+#include "vsfilesystem.h"
 
 void ComputeSerials( std::vector<std::string> & stak);
 
@@ -17,20 +18,24 @@ public:
 };
 class StringMap : public std::map<StringWrapper, StringWrapper> {};
 class SubHeirarchy;
-class Galaxy {
-	class SubHeirarchy * subheirarchy;
+class SGalaxy {
+protected:
+  friend class Galaxy;
+  class SubHeirarchy * subheirarchy;
   StringMap data;
-	Galaxy & operator = (const Galaxy & a);
+  SGalaxy & operator = (const SGalaxy & a);
 
  public:
-  Galaxy () {subheirarchy=NULL;}
-  Galaxy(const char *configfile);
-  void writeGalaxy(const char * filename);
-  void writeSector (FILE * fp, int tabs);
+  SGalaxy () {subheirarchy=NULL;}
+  SGalaxy(const char *configfile);
+  SGalaxy( const SGalaxy & g);
+  void writeGalaxy(VSFileSystem::VSFile &f);
+  void writeSector (VSFileSystem::VSFile & f, int tabs, string sectorType, SGalaxy * planet_types);
+
   void processGalaxy(string sys);
   void processSystem(string sys,const QVector &suggested_coordinates);
-  Galaxy( const Galaxy & g);
-  ~Galaxy();
+
+  ~SGalaxy();
   string getVariable(std::vector<string> section, string name, string default_value);
   string getRandSystem(string section,string default_value);
   string getVariable(string section,string name,string defaultvalue);
@@ -44,7 +49,35 @@ class Galaxy {
 	  return data[StringWrapper(s)];
   }
 };
-class SubHeirarchy : public std::map <std::string,class Galaxy> {};
+class Galaxy: public SGalaxy {
+  SGalaxy * getInitialPlanetTypes();
+  SGalaxy *planet_types; 
+  SGalaxy & operator = (const SGalaxy & a);
+  std::map<StringWrapper,StringWrapper> initial2name;
+  std::map<StringWrapper,StringWrapper> texture2name;  
+  void setupPlanetTypeMaps();
+ public:
+  
+  string getPlanetNameFromInitial(std::string abbrev) {return initial2name[abbrev];}
+  string getPlanetNameFromTexture(std::string tex) {return texture2name[tex];}
+  string getPlanetVariable(string name,string defaultvalue);
+  string getPlanetVariable(string planet,string name,string defaultvalue);
+  void writeGalaxy(VSFileSystem::VSFile &f);
+  SGalaxy * getPlanetTypes();
+  bool setPlanetVariable(string name,string value);
+  void addPlanetSection(std::vector<string> section);
+  bool setPlanetVariable(string planet,string name,string value);
+  Galaxy () {subheirarchy=NULL;planet_types=NULL;}
+  Galaxy(const char *configfile);
+  Galaxy( const SGalaxy & g);
+
+};
+
+class SubHeirarchy : public std::map <std::string,class SGalaxy> {};
 
 }
+
+string getStarSystemFileName (string input);
+string getStarSystemName (string in);
+string getStarSystemSector (string in);
 #endif

@@ -33,6 +33,7 @@
 // this file isn't available on my system (all win32 machines?) i dun even know what it has or if we need it as I can compile without it
 #include <unistd.h>
 #endif
+#include "cmd/unit_generic.h"
 #include "cmd/unit_factory.h"
 #include <expat.h>
 #include "xml_support.h"
@@ -86,7 +87,7 @@ static Unit * getIthUnit (un_iter uiter, int i);
 
 varInst *Mission::call_unit(missionNode *node,int mode){
 #ifdef ORDERDEBUG
-  fprintf (stderr,"callun%x",this);
+  VSFileSystem::vs_fprintf (stderr,"callun%x",this);
   fflush (stderr);
 #endif
 
@@ -247,7 +248,7 @@ varInst *Mission::call_unit(missionNode *node,int mode){
 	cf.rot[i]=0.0;
       }
 #ifdef ORDERDEBUG
-  fprintf (stderr,"cunl%x",this);
+  VSFileSystem::vs_fprintf (stderr,"cunl%x",this);
   fflush (stderr);
 #endif
 	  Unit *tmp= call_unit_launch(&cf,clstyp,destinations);
@@ -256,7 +257,7 @@ varInst *Mission::call_unit(missionNode *node,int mode){
 		my_unit=tmp;
 	  }
 #ifdef ORDERDEBUG
-	  fprintf (stderr,"ecun");
+	  VSFileSystem::vs_fprintf (stderr,"ecun");
 	  fflush (stderr);
 #endif
 	  
@@ -1165,20 +1166,20 @@ varInst *Mission::call_unit(missionNode *node,int mode){
       assert(0);
     }
 #ifdef ORDERDEBUG
-  fprintf (stderr,"callundel%x",ovi);
+  VSFileSystem::vs_fprintf (stderr,"callundel%x",ovi);
   fflush (stderr);
 #endif
 
     deleteVarInst(ovi);
 #ifdef ORDERDEBUG
-  fprintf (stderr,"undel1");
+  VSFileSystem::vs_fprintf (stderr,"undel1");
   fflush (stderr);
 #endif
 
     return viret;
   }//else (objects)
 #ifdef ORDERDEBUG
-  fprintf (stderr,"endcallun%x",this);
+  VSFileSystem::vs_fprintf (stderr,"endcallun%x",this);
   fflush (stderr);
 #endif
 
@@ -1189,7 +1190,7 @@ varInst *Mission::call_unit(missionNode *node,int mode){
 extern BLENDFUNC parse_alpha (const char *);
 
 Unit * Mission::call_unit_launch(CreateFlightgroup *fg, int type, const string &destinations){
-  //  fprintf (stderr,"calling unit launch with Mission 0x%x Flightgroup 0x%x" ,this, fg);
+  //  VSFileSystem::vs_fprintf (stderr,"calling unit launch with Mission 0x%x Flightgroup 0x%x" ,this, fg);
    int faction_nr=FactionUtil::GetFaction(fg->fg->faction.c_str());
    //   printf("faction nr: %d %s\n",faction_nr,fg->faction.c_str());
    Unit **units= new Unit *[fg->nr_ships];
@@ -1217,7 +1218,7 @@ Unit * Mission::call_unit_launch(CreateFlightgroup *fg, int type, const string &
 	 d=parse_alpha (bdst);
        if (bsrc[0]!='\0') 
 	 s=parse_alpha (bsrc);
-       my_unit = UnitFactory::createPlanet (QVector(0,0,0),QVector(0,0,0),0,Vector(0,0,0), 0,0,radius,tex,s,d, ParseDestinations(destinations),QVector(0,0,0),NULL,mat,vector<GFXLightLocal>(),faction_nr,nam);
+       my_unit = UnitFactory::createPlanet (QVector(0,0,0),QVector(0,0,0),0,Vector(0,0,0), 0,0,radius,tex,s,d, ParseDestinations(destinations),QVector(0,0,0),NULL,mat,vector<GFXLightLocal>(),faction_nr,nam, getUniqueSerial());
 
        free (bsrc);
        free (bdst);
@@ -1225,7 +1226,7 @@ Unit * Mission::call_unit_launch(CreateFlightgroup *fg, int type, const string &
        free (nam);
        free (citylights);
      }else if (type==NEBULAPTR) {
-       my_unit=UnitFactory::createNebula (fg->fg->type.c_str(),false,faction_nr,fg->fg,u);
+       my_unit=UnitFactory::createNebula (fg->fg->type.c_str(),false,faction_nr,fg->fg,u, true);
      } else if (type==ASTEROIDPTR) {
        my_unit=UnitFactory::createAsteroid(fg->fg->type.c_str(),faction_nr,fg->fg,u);
      }else {

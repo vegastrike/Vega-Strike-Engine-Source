@@ -23,7 +23,7 @@
 #include "cmd/script/flightgroup.h"
 #include "gfx/ring.h"
 #include "alphacurve.h"
-#include "gfx/png_texture.h"
+#include "gfx/vsimage.h"
 extern string getCargoUnitName (const char *name);
 
 GamePlanet::GamePlanet()
@@ -38,6 +38,46 @@ GamePlanet::GamePlanet()
   terraintrans = NULL;
   SetAI(new Order()); // no behavior
 }
+
+static void SetFogMaterialColor (Mesh * thus, const GFXColor&color, const GFXColor & dcolor) {
+		GFXMaterial m;m.ar=m.ag=m.ab=m.aa=m.sr=m.sg=m.sb=m.sa=0;m.power=0;
+		static float emm=XMLSupport::parse_float (vs_config->getVariable("graphics","atmosphere_emmissive","1"));
+		static float diff=XMLSupport::parse_float (vs_config->getVariable("graphics","atmosphere_diffuse","1"));
+		m.er= emm*color.r;
+		m.eg= emm*color.g;
+		m.eb= emm*color.b;
+		m.ea= emm*color.a;
+		m.dr= diff*dcolor.r;
+		m.dg= diff*dcolor.g;
+		m.db= diff*dcolor.b;
+		m.da= diff*dcolor.a;
+		thus->SetMaterial(m);
+}
+Mesh * MakeFogMesh (const AtmosphericFogMesh & f, float radius) {
+  static int count=0;
+  count++;
+  string nam = f.meshname+XMLSupport::tostring(count)+".png";
+  if (f.min_alpha!=0||f.max_alpha!=255||f.concavity!=0 || f.focus!=.5 || f.tail_mode_start!=-1 || f.tail_mode_end!=-1) {
+    int rez=XMLSupport::parse_int (vs_config->getVariable("graphics","atmosphere_texture_resolution","512"));
+    unsigned char * tex= (unsigned char *) malloc (sizeof(char) *rez*4);
+    for (int i=0;i<rez;++i) {
+      tex[i*4]=255;
+      tex[i*4+1]=255;
+      tex[i*4+2]=255;
+      tex[i*4+3]=get_alpha(i,rez,f.min_alpha,f.max_alpha,f.focus,f.concavity,f.tail_mode_start,f.tail_mode_end);
+    }
+    // Writing in the homedir texture directory
+    VSImage image;
+    image.WriteImage( (char *)nam.c_str(), &tex[0], PngImage, rez, 1, true, 8, TextureFile);
+    
+  }  
+  vector<string> override;
+  override.push_back(nam);
+  Mesh * ret=Mesh::LoadMesh(f.meshname.c_str(),Vector(f.scale*radius,f.scale*radius,f.scale*radius),0,NULL,override);
+  SetFogMaterialColor(ret,GFXColor (f.er,f.eg,f.eb,f.ea),GFXColor(f.dr,f.dg,f.db,f.da));
+  return ret;
+}
+/*
 class FogMesh : public Mesh {
 public:
 	void SetMaterialColor (const GFXColor &color,const GFXColor & dcolor) {
@@ -60,8 +100,6 @@ public:
 		if (Decal.size()) {
 			if (Decal[0]) {
 				if (f.min_alpha!=0||f.max_alpha!=255||f.concavity!=0 || f.focus!=.5 || f.tail_mode_start!=-1 || f.tail_mode_end!=-1) {
-					changehome();
-					vschdir("backgrounds");
 					int rez=XMLSupport::parse_int (vs_config->getVariable("graphics","atmosphere_texture_resolution","512"));
 					unsigned char * tex= (unsigned char *) malloc (sizeof(char) *rez*4);
 					for (int i=0;i<rez;++i) {
@@ -73,12 +111,13 @@ public:
 					static int count=0;
 					count++;
 					string nam = f.meshname+XMLSupport::tostring(count)+".png";
-					png_write(nam.c_str(),&tex[0],rez,1,true,8);
-					delete Decal[0];
-					Decal[0]= new Texture(nam.c_str(),nam.c_str());
-					vscdup();
-					returnfromhome();
-						
+					// Writing in the homedir texture directory
+					VSImage image;
+					image.WriteImage( (char *)nam.c_str(), &tex[0], PngImage, rez, 1, true, 8, TextureFile);
+                                        if (!orig) {
+                                          delete Decal[0];
+                                          Decal[0]= new Texture(nam.c_str(),nam.c_str());
+                                        }
 				}
 			}
 		}
@@ -86,7 +125,7 @@ public:
 	}
 	virtual ~FogMesh (){}
 };
-
+*/
 class AtmosphereHalo:public GameUnit<Unit> {
 public:
 	float planetRadius;
@@ -125,7 +164,7 @@ void GamePlanet::AddFog (const std::vector <AtmosphericFogMesh> & v, bool optica
 	for (unsigned int i=0;i<v.size();++i) {
 //		static float radiusmult = XMLSupport::parse_float (vs_config->getVariable("graphics","atmosphere_size","1.01"));
 
-		Mesh *fog=new FogMesh (v[i],rSize());
+		Mesh *fog=MakeFogMesh (v[i],rSize());
 		fogs.push_back(fog);
 	}
 	Unit* fawg;
@@ -261,8 +300,15 @@ GamePlanet::GamePlanet(QVector x,QVector y,float vely, const Vector & rotvel, fl
 	  static int stacks=XMLSupport::parse_int(vs_config->getVariable ("graphics","planet_detail","24"));
 	  atmospheric=!(blendSrc==ONE&&blendDst==ZERO);
 	  meshdata.push_back(new SphereMesh(radius, stacks, stacks, textname, NULL,inside_out,blendSrc,blendDst));
+          
 	  meshdata.back()->setEnvMap(GFXFALSE);
-	  meshdata.back()->SetMaterial (ourmat);
+          if (meshdata.back()->numTextures()>1) {
+             if (meshdata.back()->texture(1)==0) {                
+                meshdata.back()->SetMaterial (ourmat);
+             }
+          }else {
+             meshdata.back()->SetMaterial (ourmat);
+          }             
 	  meshdata.push_back(NULL);
   }
 
@@ -285,14 +331,15 @@ GamePlanet::GamePlanet(QVector x,QVector y,float vely, const Vector & rotvel, fl
   tmpname +=temp;
   tmpname +=".bsp";
   
-  FILE * fp = fopen (tmpname.c_str(), "rb");
-  if (!fp) {
+  VSFile f;
+  VSError err = f.OpenReadOnly( tmpname, BSPFile);
+  if (err>Ok) {
   */
 
 
     /*
       } else {
-      fclose (fp);
+      f.Close();
       }
       bspTree = new BSPTree (tmpname.c_str());
   */
@@ -440,7 +487,7 @@ void GamePlanet::DrawTerrain() {
 
 void GamePlanet::reactToCollision(Unit * un, const QVector & biglocation, const Vector & bignormal, const QVector & smalllocation, const Vector & smallnormal, float dist) {
 #ifdef JUMP_DEBUG
-  fprintf (stderr,"%s reacting to collision with %s drive %d", name.c_str(),un->name.c_str(), un->GetJumpStatus().drive);
+  VSFileSystem::vs_fprintf (stderr,"%s reacting to collision with %s drive %d", name.c_str(),un->name.c_str(), un->GetJumpStatus().drive);
 #endif
 #ifdef FIX_TERRAIN
   if (terrain&&un->isUnit()!=PLANETPTR) {

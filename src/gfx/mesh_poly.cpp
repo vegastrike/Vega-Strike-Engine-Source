@@ -1,6 +1,6 @@
 #include "mesh.h"
 #include "aux_texture.h"
-#if !defined(_WIN32) && !defined(__CYGWIN__) && !(defined(__APPLE__) || defined(MACOSX))
+#if !defined(_WIN32) && !defined(__CYGWIN__) && !(defined(__APPLE__) || defined(MACOSX)) && !defined(BSD)
 #include <values.h>
 #endif
 #include <float.h>

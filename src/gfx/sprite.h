@@ -25,9 +25,13 @@
 
 #include "quaternion.h"
 
+namespace VSFileSystem
+{
+	class VSFile;
+};
 
-struct Texture;
-class Sprite {
+class Texture;
+class VSSprite {
 	float xcenter;
 	float ycenter;
 	float widtho2;
@@ -38,8 +42,8 @@ class Sprite {
 	Texture *surface;
 
 public:
-	Sprite (const char *file, enum FILTER texturefilter=BILINEAR, GFXBOOL force=GFXFALSE);
-	~Sprite();
+	VSSprite (const char *file, enum FILTER texturefilter=BILINEAR, GFXBOOL force=GFXFALSE);
+	~VSSprite();
 	bool LoadSuccess() {return surface!=NULL;}
 	void Draw();
 	void DrawHere (Vector &ll, Vector &lr, Vector &ur, Vector &ul);
@@ -51,7 +55,9 @@ public:
         void GetSize (float &x1, float &y1);
 	void SetRotation(const float &rot);
 	void GetRotation(float &rot);
+	void ReadTexture( VSFileSystem::VSFile * f);
 	//float &Rotation(){return rotation;};
+	Texture * getTexture(){return surface;}
 };
 
 #endif

@@ -7,7 +7,7 @@
 #include "gfx/quaternion.h"
 #include <vector>
 class GFXVertexList;
-struct Texture;
+class Texture;
 struct GFXColor;
 using std::vector;
 

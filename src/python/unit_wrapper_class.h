@@ -6,6 +6,7 @@ static char* error="\nERROR: NULL Unit used in Python script; returning default 
 #define WRAPPED1(type,name,atype,a,def) type name ( atype a ){{CHECKME def;} return me -> name ( a );}  
 #define WRAPPED2(type,name,atype,a,btype,b,def) type name ( atype a, btype b ){{CHECKME def;} return me -> name ( a , b );}  
 #define WRAPPED3(type,name,atype,a,btype,b,ctype,c,def) type name ( atype a, btype b , ctype c ){{CHECKME def;} return me -> name ( a , b , c );}  
+#define WRAPPED4(type,name,atype,a,btype,b,ctype,c,dtype,d,def) type name ( atype a, btype b , ctype c , dtype d){{CHECKME def;} return me -> name ( a , b , c , d);}
 #define voidWRAPPED0(name) void name (){{CHECKME;} me -> name ();}  
 #define voidWRAPPED1(name,atype,a) void name ( atype a){{CHECKME;} me -> name ( a );}  
 #define voidWRAPPED2(name,atype,a,btype,b) void name ( atype a, btype b ){{CHECKME;} me -> name ( a , b );}  
@@ -78,6 +79,7 @@ public:
 #undef WRAPPED1
 #undef WRAPPED2
 #undef WRAPPED3
+#undef WRAPPED4
 #undef voidWRAPPED0
 #undef voidWRAPPED1
 #undef voidWRAPPED2

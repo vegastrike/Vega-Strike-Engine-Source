@@ -1,3 +1,4 @@
+#include "cmd/unit_generic.h"
 #include "halo.h"
 #include "gfxlib.h"
 #include "vegastrike.h"

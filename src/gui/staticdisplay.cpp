@@ -26,6 +26,9 @@
 #include "guidefs.h"
 #include "scroller.h"
 
+#include "vs_globals.h"
+#include "config_xml.h"
+#include "xml_support.h"
 
 // The StaticDisplay class is used to show something on a window.
 // Right now, it only supports text, but could be expanded to support
@@ -61,7 +64,9 @@ void StaticDisplay::draw(void)
         const int lineCount = m_paintText.lineCount();
         const int visible = m_paintText.visibleLineCountStartingWith(m_scrollPosition, m_rect.size.height);
         m_scroller->setRangeValues(lineCount-1, visible);
-        m_scrollPosition = 0;
+		if (m_scrollPosition>lineCount-2&&lineCount>visible) {
+			m_scrollPosition = lineCount-1;
+		}
         m_scroller->setScrollPosition(m_scrollPosition);
         m_layoutVersion = m_paintText.layoutVersion();      // Remember layout version for next time.
     }
@@ -84,6 +89,23 @@ bool StaticDisplay::processCommand(const EventCommandId& command, Control* contr
     }
 
     return Control::processCommand(command, control);
+}
+
+// Process wheel events for scrolling.
+bool StaticDisplay::processMouseDown(const InputEvent& event) {
+	static int zoominc = XMLSupport::parse_int (vs_config->getVariable("general","wheel_increment_lines","3"));
+	if (m_scroller) {
+		if (event.code == WHEELUP_MOUSE_BUTTON) {
+			if(hitTest(event.loc)) {
+				m_scroller->setScrollPosition(m_scroller->scrollPosition()-zoominc);
+			}
+		} else if (event.code == WHEELDOWN_MOUSE_BUTTON) {
+			if(hitTest(event.loc)) {
+				m_scroller->setScrollPosition(m_scroller->scrollPosition()+zoominc);
+			}
+		}
+	}
+	return Control::processMouseDown(event);
 }
 
 // CONSTRUCTION

@@ -36,6 +36,7 @@
 
 #include "vsnet_thread.h"
 #include "vsnet_pipe.h"
+#include "vsnet_debug.h"
 
 class ServerSocket;
 class VsnetSocketBase;
@@ -108,14 +109,23 @@ private:
     void private_addset( int fd, fd_set& fds, int& maxfd );
     void private_wakeup( );
 
-    void private_test_dump_active_sets( const fd_set& read_set_select,
-                                        const fd_set& write_set_select );
+#if defined(VSNET_DEBUG) || defined(__APPLE__)
+    void private_test_dump_active_sets( int           maxfd,
+                                        const fd_set& read_before,
+                                        const fd_set& read_after,
+                                        const fd_set& write_before,
+                                        const fd_set& write_after );
+#endif
+#ifdef VSNET_DEBUG
     void private_test_dump_request_sets( timeval* timeout );
+#endif
 
 private:
     SocketSet( const SocketSet& ); // forbidden copy constructor
     SocketSet& operator=( const SocketSet& ); // forbidden assignment operator
 };
+
+std::ostream& operator<<( std::ostream& ostr, const timeval& tv );
 
 #endif /* VSNET_SOCKETSET_H */
 

@@ -19,7 +19,10 @@ extern char SERVER;
 
 Mount::Mount() {
 	static weapon_info wi(weapon_info::BEAM);
+        functionality=1;
+        maxfunctionality=1;
 	type=&wi; size=weapon_info::NOWEAP;
+        functionality=maxfunctionality=1.0f;
 	ammo=-1;
 	status= UNCHOSEN;
 	processed=Mount::PROCESSED;
@@ -51,7 +54,9 @@ float Mount::ComputeAnimatedFrame(Mesh * gun) {
 		}
 	}
 }
-Mount::Mount(const string& filename, short am,short vol, float xyscale, float zscale){
+Mount::Mount(const string& filename, int am, int vol, float xyscale, float zscale, float func,float maxfunc){ //short fix
+  functionality=func;
+  maxfunctionality=maxfunc;
   static weapon_info wi(weapon_info::BEAM);
   size = weapon_info::NOWEAP;
   static float xyscalestat=XMLSupport::parse_float (vs_config->getVariable ("graphics","weapon_xyscale","1"));
@@ -96,10 +101,10 @@ void Mount::UnFire () {
 }
 
 void Mount::SwapMounts(Mount * other) {
-	  short thisvol = volume;
-	  short othervol = other->volume;
+	  int thisvol = volume; //short fix
+	  int othervol = other->volume; //short fix
 	  //short othersize = other->size;
-	  short thissize = size;
+	  int thissize = size;
 	  Mount mnt = *this;
 	  this->size=thissize;
 	  *this=*other;
@@ -115,8 +120,10 @@ void Mount::SwapMounts(Mount * other) {
 	  other->SetMountOrientation (q);  
 }
 void Mount::ReplaceMounts (const Mount * other) {
-	short thisvol = volume;
-	short thissize = size;
+	int thisvol = volume; //short fix
+	int thissize = size;  //short fix
+        float xyscale=this->xyscale;
+        float zscale=this->zscale;
 	Quaternion q =this->GetMountOrientation();
 	Vector v = this->GetMountLocation();
 	*this=*other;
@@ -124,6 +131,8 @@ void Mount::ReplaceMounts (const Mount * other) {
 	volume=thisvol;
 	this->SetMountPosition(v);
 	this->SetMountOrientation(q);	
+        this->xyscale=xyscale;
+        this->zscale=zscale;
 	ref.gun=NULL;
 	this->ReplaceSound();
 	if (other->ammo==-1)
@@ -163,6 +172,7 @@ double Mount::Percentage (const Mount *newammo) const{
 }
 //bool returns whether to refund the cost of firing
 bool Mount::PhysicsAlignedFire(const Transformation &Cumulative, const Matrix & m, const Vector & velocity, Unit * owner, Unit *target, signed char autotrack, float trackingcone, int mount_num) {
+	using namespace VSFileSystem;
   if (time_to_lock>0) {
     target=NULL;
   }
@@ -199,10 +209,9 @@ bool Mount::PhysicsAlignedFire(const Transformation &Cumulative, const Matrix & 
 			case weapon_info::PROJECTILE:
 			{
 				static bool match_speed_with_target = XMLSupport::parse_float (vs_config->getVariable("physics","match_speed_with_target","true"));
-				string skript =string("ai/script/")+type->file+string(".xai");
-				FILE * fp = fopen (skript.c_str(),"r");
-					if (fp) {
-						fclose(fp);
+				string skript =/*string("ai/script/")+*/type->file+string(".xai");
+				VSError err = LookForFile( skript, AiFile);
+					if (err<=Ok) {
 						temp = UnitFactory::createMissile (type->file.c_str(),owner->faction,"",type->Damage,type->PhaseDamage,type->Range/type->Speed,type->Radius,type->RadialSpeed,type->PulseSpeed/*detonation_radius*/);
 						if (!match_speed_with_target) {
 							temp->GetComputerData().max_combat_speed= type->Speed+velocity.Magnitude();
@@ -219,7 +228,7 @@ bool Mount::PhysicsAlignedFire(const Transformation &Cumulative, const Matrix & 
 			  if (target&&target!=owner) {
 					temp->Target (target);
 					temp->TargetTurret(target);
-					if (fp) {
+					if (err<=Ok) {
 						temp->EnqueueAI (new AIScript ((type->file+".xai").c_str()));
 						temp->EnqueueAI (new Orders::FireAllYouGot);
 						if (match_speed_with_target)
@@ -244,8 +253,9 @@ bool Mount::PhysicsAlignedFire(const Transformation &Cumulative, const Matrix & 
 			}
 
     static bool use_separate_sound=XMLSupport::parse_bool (vs_config->getVariable ("audio","high_quality_weapon","true"));
-	static bool ai_sound=XMLSupport::parse_bool (vs_config->getVariable ("audio","ai_sound","true"));	
-	bool ips = (_Universe->isPlayerStarship(owner)!=NULL);
+	static bool ai_sound=XMLSupport::parse_bool (vs_config->getVariable ("audio","ai_sound","true"));
+	Cockpit * cp;
+	bool ips = ((cp=_Universe->isPlayerStarship(owner))!=NULL);
     if ((((!use_separate_sound)||type->type==weapon_info::BEAM)||(!ips))&&(type->type!=weapon_info::PROJECTILE)) {
 		if (ai_sound||(ips&&type->type==weapon_info::BEAM)) {
 			if (!AUDIsPlaying (sound)) {
@@ -257,7 +267,11 @@ bool Mount::PhysicsAlignedFire(const Transformation &Cumulative, const Matrix & 
     }else {
 		if (ai_sound||ips) {
 			int snd =AUDCreateSound(sound,false);
-			AUDAdjustSound(snd,tmp.position,velocity);
+                        if (ips&&cp!=NULL&&cp->GetView()<=CP_RIGHT) {
+                          AUDAdjustSound(snd,Vector(0,0,0),velocity);
+                        }else {
+                          AUDAdjustSound(snd,tmp.position,velocity);
+                        }
 			AUDStartPlaying (snd);
 			AUDDeleteSound(snd);
 		}

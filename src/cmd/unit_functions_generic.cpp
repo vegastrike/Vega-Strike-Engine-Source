@@ -13,24 +13,49 @@
 // From unit.cpp
 double interpolation_blend_factor;
 
-short cloakVal (short cloak, short cloakmin, short cloakrate, bool cloakglass) {
+int cloakVal (int cloak, int cloakmin, int cloakrate, bool cloakglass) { // Short fix ?
     if (cloak<0&&cloakrate<0) {
-      cloak=(unsigned short)32768;//intended warning should be -32768 :-) leave it be
+      cloak=-2147483647-1;//intended warning should be max neg :-) leave it be
     }
+    if (cloak<cloakmin&&cloakrate>0)
+      cloak=cloakmin;
     if ((cloak&0x1)&&!cloakglass) {
       cloak-=1;
     }
     if ((cloak&0x1)==0&&cloakglass) {
       cloak+=1;
     }
-    if (cloak<cloakmin&&cloakrate>0)
-      cloak=cloakmin;
     return cloak;
 }
 
 // From unit_customize.cpp
 Unit * CreateGameTurret (std::string tur,int faction) {
   return UnitFactory::createUnit (tur.c_str(),true,faction);
+}
+void SetShieldZero(Unit * un) {
+        switch (un->shield.number) {
+        case 8:
+         
+          un->shield.shield8.frontlefttop=
+            un->shield.shield8.frontrighttop=
+            un->shield.shield8.backlefttop=
+            un->shield.shield8.backrighttop=
+            un->shield.shield8.frontleftbottom=
+            un->shield.shield8.frontrightbottom=
+            un->shield.shield8.backleftbottom=
+            un->shield.shield8.backrightbottom=0;
+            break;
+        case 4:
+          un->shield.shield4fbrl.front=
+            un->shield.shield4fbrl.back=
+            un->shield.shield4fbrl.left=
+            un->shield.shield4fbrl.right=0;
+          break;
+        case 2:
+        default:
+          un->shield.shield2fb.front=un->shield.shield2fb.back=0;
+          break;
+        }
 }
 
 //un scored a faction kill
@@ -87,7 +112,10 @@ float getAutoRSize (Unit * orig,Unit * un, bool ignore_friend=false) {
   static float hostile_autodist =  XMLSupport::parse_float (vs_config->getVariable ("physics","hostile_auto_radius","1000"))*gamespeed;
   static int upgradefaction = FactionUtil::GetFaction("upgrades");
   static int neutral = FactionUtil::GetFaction("neutral");
-
+  if (un->isUnit()==ASTEROIDPTR) {
+    static float minasteroiddistance = XMLSupport::parse_float(vs_config->getVariable("physics","min_asteroid_distance","-100"));
+    return minasteroiddistance;
+  }
   if (un->isUnit()==PLANETPTR||(un->getFlightgroup()==orig->getFlightgroup()&&orig->getFlightgroup())) {
     //same flihgtgroup
     return orig->rSize();
@@ -112,8 +140,8 @@ bool AdjustMatrix (Matrix &mat, const Vector &vel, Unit * target, float speed, b
   if (target) {
     QVector pos (mat.p);
     Vector R (mat.getR());
-    QVector targpos (lead?target->PositionITTS (pos,vel,speed):target->Position());
-
+    QVector targpos (lead?target->PositionITTS (pos,vel,speed,false):target->Position());
+    
     Vector dir =( targpos-pos).Cast();
     dir.Normalize();
     if (dir.Dot (R)>=cone) {

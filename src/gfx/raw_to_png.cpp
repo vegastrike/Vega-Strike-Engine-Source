@@ -12,11 +12,11 @@ int coloffset=0;
 unsigned short * Rread (const char * myfile) {
   unsigned short *tm = (unsigned short *)malloc (512*512*sizeof (unsigned short));
    int i;
- FILE * fp = fopen (myfile,"rb");
+ FILE * fp = VSFileSystem::vs_open (myfile,"rb");
   if (!fp)
     return tm;
-  fread (tm,sizeof (unsigned short), 512*512,fp);
-  fclose (fp);
+  VSFileSystem::Read (tm,sizeof (unsigned short), 512*512,fp);
+  VSFileSystem::vs_close (fp);
   unsigned short *smaller = (unsigned short *)malloc (256*256*sizeof (unsigned short));
   for (i=0;i<256;i++) {
     memcpy (smaller+(i*256),tm+rowoffset+((i+coloffset)*512),sizeof (unsigned short)*256);
@@ -66,7 +66,7 @@ unsigned short * Rread (const char * myfile) {
 }
 
 void Wwrite (const char * myfile, unsigned short * data) {
-  FILE * fp = fopen (myfile, "wb");
+  FILE * fp = VSFileSystem::vs_open (myfile, "wb");
   png_structp png_ptr = png_create_write_struct
     (PNG_LIBPNG_VER_STRING, (png_voidp)NULL,NULL,NULL);
   //        user_error_fn, user_warning_fn);
@@ -81,7 +81,7 @@ void Wwrite (const char * myfile, unsigned short * data) {
     }
     if (setjmp(png_ptr->jmpbuf)) {
       png_destroy_write_struct(&png_ptr, &info_ptr);
-      fclose(fp);
+      VSFileSystem::vs_close(fp);
       return;
     }
     png_init_io(png_ptr, fp);
@@ -115,7 +115,7 @@ void Wwrite (const char * myfile, unsigned short * data) {
   // png_write_flush(png_ptr);
 
 
-  fclose (fp);
+  VSFileSystem::vs_close (fp);
   free (data);
 
   delete [] row_pointers;
