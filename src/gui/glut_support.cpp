@@ -315,7 +315,7 @@ void EndGUIFrame(void) {
   static Texture dummy ("white.bmp");
   dummy.MakeActive();
   DrawMouse(mmx,mmy);
-  GFXEndScene();
+  //  GFXEndScene();bad things...only call this once
   GFXHudMode(false);
   GFXEnable (CULLFACE);
 
