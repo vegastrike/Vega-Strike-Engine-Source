@@ -66,7 +66,7 @@ typedef vector <LineCollideStar> veclinecol;
 void GFXPickLights (const Vector & center, const float radius) {
     Vector tmp;
     void * rndvar = (void *)rand();
-    int sizeget=2;
+    const int sizeget=2;
     int lightsenabled = _GLLightsEnabled;
     LineCollide tmpcollide;
     tmp = Vector(radius,radius,radius);
@@ -78,7 +78,7 @@ void GFXPickLights (const Vector & center, const float radius) {
     swappicked();
     //FIXMESPEEDHACK    veclinecol *tmppickt[lighthuge+1];
     //FIXMESPEEDHACK    if (radius < CTACC) {
-    veclinecol *tmppickt[2];
+    veclinecol *tmppickt[sizeget];
     lighttable.Get (center, tmppickt);
 	//FIXMESPEEDHACK} else {
 	//FIXMESPEEDHACKsizeget = lighttable.Get (&tmpcollide, tmppickt); 

@@ -166,11 +166,16 @@ int AUDCreateSound (int sound,const bool LOOP=false){
 #endif
   return -1;
 }
+extern std::vector <int> soundstodelete;
 void AUDDeleteSound (int sound, bool music){
 #ifdef HAVE_AL
   if (sound>=0&&sound<(int)sounds.size()) {
     if (AUDIsPlaying (sound)) {
-      AUDStopPlaying (sound);
+      if (!music) {
+	soundstodelete.push_back(sound);
+	return;
+      } else
+	AUDStopPlaying (sound);
     }
     dirtysounds.push_back (sound);
     alDeleteSources(1,&sounds[sound].source);

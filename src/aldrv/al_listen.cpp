@@ -72,6 +72,8 @@ void AUDAddWatchedPlayed (const int sound, const Vector &pos) {
   }
 #endif
 }
+
+std::vector <int> soundstodelete;
 void AUDRefreshSounds () {
 #ifdef HAVE_AL
   for (int i=0;i<hashsize;i++) {
@@ -83,6 +85,13 @@ void AUDRefreshSounds () {
 	j--;
       }
     }
+  }
+  for (int j=soundstodelete.size()-1;j>=0;j--) {//might not get every one every time
+    int tmp = soundstodelete[j];
+    vector<int>::iterator stdel=soundstodelete.begin();
+    stdel+=j;
+    soundstodelete.erase (stdel);
+    AUDDeleteSound (tmp,false);
   }
 #endif
 }

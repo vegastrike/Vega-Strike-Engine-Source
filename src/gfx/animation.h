@@ -29,6 +29,7 @@ class Animation {
   Matrix local_transformation;
   Texture **Decal; 
   bool camup;
+  bool alphamaps;
   int numframes;
   float timeperframe;
   double cumtime;

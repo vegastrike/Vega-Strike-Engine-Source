@@ -62,13 +62,19 @@ Animation::Animation (const char * FileName, bool Rep,  float priority,enum FILT
 	float tmp;
 	//fread (&tmp, sizeof (float),1,fp);
 	fscanf (fp, "%f %f", &width, &height);
-	width = width*0.5F;
+	alphamaps = width>0;
+	width = fabs(width*0.5F);
 	//fread (&tmp, sizeof (float),1,fp);
 	height = height*0.5F;
 	for (int i=0; i<numframes;i++) //load all textures
 	{
-	  fscanf (fp,"%s %s", temp, tempalp);
-	  Decal[i] = new Texture (temp,tempalp, 0,ismipmapped, TEXTURE2D, TEXTURE_2D,alp,zeroval);
+	  if (alphamaps) {
+	    fscanf (fp,"%s %s", temp, tempalp);
+	    Decal[i] = new Texture (temp,tempalp, 0,ismipmapped, TEXTURE2D, TEXTURE_2D,alp,zeroval);
+	  } else {
+	    fscanf (fp, "%s", temp);
+	    Decal[i] = new Texture (temp, 0,ismipmapped, TEXTURE2D, TEXTURE_2D);
+	  }
 	  Decal[i]->Prioritize (priority);//standard animation priority
 	  /*int j;
 	    for (j=0; ;j++)
@@ -127,6 +133,7 @@ void Animation:: SetDimensions(float wid, float hei) {
 }
 
 void Animation::ProcessDrawQueue () {
+  bool alphamaps=true;
   GFXBlendMode (SRCALPHA,INVSRCALPHA);
   GFXDisable (LIGHTING);
   GFXEnable(TEXTURE0);
@@ -135,6 +142,10 @@ void Animation::ProcessDrawQueue () {
   GFXColor4f (1,1,1,1);//fixme, should we need this? we get som egreenie explosions
   while (!animationdrawqueue.empty()) {
     Matrix result;
+    if (alphamaps!=animationdrawqueue.top()->alphamaps) {
+      alphamaps = !alphamaps;
+      GFXBlendMode (alphamaps?SRCALPHA:ONE,alphamaps?INVSRCALPHA:ONE);
+    }
     animationdrawqueue.top()->CalculateOrientation(result);
     animationdrawqueue.top()->DrawNow(result);
     animationdrawqueue.top()->UpdateTime (GetElapsedTime());

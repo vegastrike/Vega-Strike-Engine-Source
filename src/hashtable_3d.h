@@ -125,7 +125,7 @@ public:
       maxx+=COLLIDETABLEACCURACY/2;
     if (target->Mini.j==maxy) maxy+=COLLIDETABLEACCURACY/2;
     if (target->Mini.k==maxz) maxz+=COLLIDETABLEACCURACY/2;
-    if (fabs(((maxx-minx)/HUGEOBJECT)*(maxy-miny)*(maxz-minz))>COLLIDETABLEACCURACY*COLLIDETABLEACCURACY*COLLIDETABLEACCURACY) {
+    if (fabs((maxx-minx)*(maxy-miny)*(maxz-minz))>((float)COLLIDETABLEACCURACY)*((float)COLLIDETABLEACCURACY)*((float)COLLIDETABLEACCURACY)*((float)HUGEOBJECT)) {
       target->hhuge = true;
       hugeobjects.push_back(objectToPut);
       return;
