@@ -74,7 +74,7 @@ void GFXPickLights (const Vector & center, const float radius) {
     tmpcollide.type=LineCollide::UNIT;
     swappicked();
     vector <LineCollideStar> tmppickt;
-    if (radius < .1*CTACC) {
+    if (radius < CTACC) {
 	lighttable.Get (center, tmppickt);
     } else {
 	lighttable.Get (&tmpcollide, tmppickt); 

@@ -38,6 +38,9 @@ namespace CockpitXML {
       KSHIELDL,
       KSHIELDB, 
       KENERGY,
+      KEJECT,
+      KLOCK,
+      KHULL,
       G_UP,
       G_DOWN,
       G_LEFT,
@@ -61,7 +64,10 @@ namespace CockpitXML {
     EnumMap::Pair ("ShieldL", KSHIELDL),
     EnumMap::Pair ("ShieldB", KSHIELDB),
     EnumMap::Pair ("Fuel", KFUEL),
-    EnumMap::Pair ("Energy", KENERGY)
+    EnumMap::Pair ("Energy", KENERGY),
+    EnumMap::Pair ("Eject", KEJECT),
+    EnumMap::Pair ("Lock", KLOCK),
+    EnumMap::Pair ("Hull", KHULL)
   };
   const EnumMap::Pair attribute_names[] = {
     EnumMap::Pair ("UNKNOWN", UNKNOWN),
@@ -83,7 +89,7 @@ namespace CockpitXML {
 
   };
 
-  const EnumMap element_map(element_names, 17);
+  const EnumMap element_map(element_names, 20);
   const EnumMap attribute_map(attribute_names, 16);
 }
 
@@ -141,6 +147,9 @@ void Cockpit::beginElement(const string &name, const AttributeList &attributes) 
   case KSHIELDR:
   case KSHIELDB:
   case KENERGY:
+  case KEJECT:
+  case KLOCK:
+  case KHULL:
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) { 
       switch (attribute_map.lookup((*iter).name)) {
       case XFILE:

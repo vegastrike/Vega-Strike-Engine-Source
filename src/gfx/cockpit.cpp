@@ -109,6 +109,7 @@ void Cockpit::DrawBlips (Unit * un) {
 }
 float Cockpit::LookupTargetStat (int stat, Unit *target) {
   unsigned short armordat[4];
+  Unit * tmpunit;
   switch (stat) {
   case SHIELDF:
     return target->FShieldData();
@@ -128,6 +129,15 @@ float Cockpit::LookupTargetStat (int stat, Unit *target) {
     return target->FuelData()/maxfuel;
   case ENERGY:
     return target->EnergyData();
+  case HULL:
+    return target->GetHull()/maxhull;
+  case EJECT:
+    return (((target->GetHull()/maxhull)<.25)&&(target->BShieldData()<.25||target->FShieldData()<.25))?1:0;
+  case LOCK:
+    if  ((tmpunit = target->GetComputerData().threat.GetUnit())) {
+      return (tmpunit->cosAngleTo (target,*(float*)&armordat[0],FLT_MAX,FLT_MAX)>.95);
+    }
+    return 0;
   }
   return 1;
 }
@@ -154,6 +164,7 @@ void Cockpit::SetParent (Unit * unit) {
   if (unit) {
     unit->ArmorData (StartArmor);
     maxfuel = unit->FuelData();
+    maxhull = unit->GetHull();
   }
 }
 void Cockpit::Delete () {

@@ -9,9 +9,9 @@ class Gauge;
 class Unit;
 enum VIEWSTYLE {CP_FRONT, CP_LEFT, CP_RIGHT, CP_BACK, CP_CHASE, CP_PAN};
 class Cockpit {
-  enum GAGUES {ARMORF,ARMORR,ARMORL,ARMORB,FUEL, SHIELDF,SHIELDR,SHIELDL,SHIELDB, ENERGY, NUMGAUGES};
+  enum GAGUES {ARMORF,ARMORR,ARMORL,ARMORB,FUEL, SHIELDF,SHIELDR,SHIELDL,SHIELDB, ENERGY, EJECT, LOCK, HULL, NUMGAUGES};
   unsigned short StartArmor[ARMORB+1];//and startfuel
-  float maxfuel;
+  float maxfuel, maxhull;
   UnitContainer parent;
   Sprite *Pit [4];
   Sprite *Radar;

@@ -161,7 +161,7 @@ void Unit::Init()
   computer.max_pitch=100;
   computer.max_roll=100;
   computer.NavPoint=Vector(0,0,0);
-  computer.itts = true;
+  computer.itts = false;
   //  Fire();
 }
 

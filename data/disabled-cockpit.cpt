@@ -9,4 +9,7 @@
 	<ArmorR file="armorl.spr" xcent="-.22" ycent="-.835" GaugeRight="1"/>
 	<Fuel file="fuelstat.spr"/>
 	<Energy file="blasterpower.spr" GaugeRight="1"/>
-<										/Cockpit>
+	<Lock file="locklight.spr"/>
+	<Eject file="eject.spr"/>
+	
+</Cockpit>

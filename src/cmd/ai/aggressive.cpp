@@ -87,12 +87,14 @@ bool AggressiveAI::ProcessLogic (AIEvents::ElemAttrMap & logi, bool inter) {
   std::vector <std::list <AIEvents::AIEvresult> >::iterator i = logi.result.begin();
   for (;i!=logi.result.end();i++) {
     std::list <AIEvents::AIEvresult>::iterator j;
+    bool trueit=true;
     for (j= i->begin();j!=i->end();j++) {
       if (!ProcessLogicItem(*j)) {
+	trueit=false;
 	break;
       }
     }
-    if (j==i->end()) {
+    if (trueit&&j==i->end()) {
       //do it
       if (inter) {
 	parent->getAIState()->eraseType (Order::FACING);

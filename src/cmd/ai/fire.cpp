@@ -46,7 +46,7 @@ void FireAt::ChooseTargets (int num) {
 */
 bool FireAt::ShouldFire(Unit * targ) {
   float dist;
-  float angle = parent->cosAngleTo (targ, dist,parent->GetComputerData().itts?gunspeed:FLT_MAX,parent->GetComputerData().itts?gunrange:FLT_MAX);
+  float angle = parent->cosAngleTo (targ, dist,parent->GetComputerData().itts?gunspeed:FLT_MAX,gunrange);
   targ->Threaten (parent,angle/(dist<.8?.8:dist));
   if (targ==parent->Target()) {
     distance = dist;

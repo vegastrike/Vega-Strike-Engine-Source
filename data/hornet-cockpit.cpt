@@ -8,5 +8,8 @@
 	<ArmorL file="armorl.spr" xcent="-.205" ycent="-.545" width=".027" height=".13" GaugeLeft="1"/>
 	<ArmorR file="armorl.spr" xcent="-.353" ycent="-.545" width=".027" height=".125" GaugeRight="1"/>
 	<Fuel file="fuelstat.spr" xcent=".36" ycent="-.55" width=".045" height=".3"/>
-	<Energy file="blasterpower.spr" xcent="0" ycent="-.17" width=".25" height=".09" GaugeLeft="1"/>
-<										/Cockpit>
+	<Energy file="blasterpower.spr" xcent="0" ycent="-.17" width=".25" height=".09" GaugeLeft="1"/> 
+	<Lock file="locklight.spr" xcent=".22" ycent="-.425"/>
+	<Eject file="eject.spr"/>
+
+</Cockpit>
