@@ -357,7 +357,6 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture (unsigned char *buffer, int handle,  TE
 				break;
 			int newwidth = width>2?width/2:1;
 			int newheight = height>2?height/2:1;
-			tempbuf=NULL;
 			count++;
 			unsigned char * tbuf = NULL;
 			DownSampleTexture(&tbuf,tempbuf?tempbuf:buffer,height,width,(internformat==PALETTE8?1:(internformat==RGBA32?4:3))* sizeof(unsigned char ),handle,newheight,newwidth,detail_texture?detailscale:1);
