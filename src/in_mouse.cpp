@@ -24,7 +24,7 @@
 //#include "dbg.h"
 #include "in_handler.h"
 #include "in_mouse.h"
-
+#include <stdio.h>
 #define NUM_BUTTONS 3
 KBSTATE MouseState [NUM_BUTTONS]= {RELEASE};
 static MouseHandler mouseBindings [NUM_BUTTONS];
@@ -59,6 +59,8 @@ void mouseMotion(int x, int y) {
 
 
 static void DefaultMouseHandler (KBSTATE, int x, int y, int delx, int dely) {
+
+  fprintf (stderr,"good");
   return;
 }
 

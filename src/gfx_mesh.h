@@ -70,13 +70,9 @@ class Mesh:public Primitive
 	void SetOrientation2();
 	
 	void Reflect ();
-	void ReflectMultitex ();
-	void ReflectHelp();
-
 protected:
 	Vector p,q,r;
 	Vector pp, pq, pr, ppos;
-
 public:
 	Mesh();
 	Mesh(char *);
@@ -109,7 +105,7 @@ public:
 
 	void Rotate(const Vector &torque);
 
-	void Scale(const Vector &scale) {this->scale = scale;SetOrientation();};
+  void Scale(const Vector &scale) {this->scale = scale;SetOrientation();};
 
 	bool intersects(const Vector &start, const Vector &end);
 	bool intersects(const Vector &pt);

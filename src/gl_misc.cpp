@@ -28,7 +28,9 @@ extern BOOL bTex1;
 
 BOOL /*GFXDRVAPI*/ GFXBeginScene()
 {
+#ifdef STATS_QUEUE
 	statsqueue.push(GFXStats());
+#endif
 	GFXClear();
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity(); // bad this should instead load the cached view matrix
@@ -42,14 +44,16 @@ BOOL /*GFXDRVAPI*/ GFXEndScene()
         glFlush();
 	glutSwapBuffers(); //swap the buffers
 	//char temp[128];
-	/*	sprintf(temp, "Frame stats for frame # %d: %d Tris, %d Quads, %d Points, %d total vertices drawn in %d milliseconds.\n",
+	#ifdef STATS_QUEUE
+	sprintf(temp, "Frame stats for frame # %d: %d Tris, %d Quads, %d Points, %d total vertices drawn in %d milliseconds.\n",
 		statsqueue.size(),
 		statsqueue.back().drawnTris,
 		statsqueue.back().drawnQuads,
 		statsqueue.back().drawnPoints,
 		statsqueue.back().total(),
 		statsqueue.back().elapsedTime());
-		printf(temp);*/  ///FIXME VEGASTRIKE
+	printf(temp);  ///FIXME VEGASTRIKE
+	#endif
 	return TRUE;
 }
 
@@ -70,7 +74,9 @@ BOOL /*GFXDRVAPI*/ GFXBegin(enum PRIMITIVE ptype)
 	switch(ptype)
 	{
 	case TRIANGLES:
-		statsqueue.back() += GFXStats(1, 0, 0);
+#ifdef STATS_QUEUE
+	        statsqueue.back() += GFXStats(1, 0, 0);
+#endif
 		mode = GL_TRIANGLES;
 		break;
 	case TRIANGLE_STRIP:
@@ -80,7 +86,9 @@ BOOL /*GFXDRVAPI*/ GFXBegin(enum PRIMITIVE ptype)
 		mode = GL_TRIANGLE_FAN;
 		break;
 	case QUADS:
+#ifdef STATS_QUEUE
 		statsqueue.back() += GFXStats(0, 1, 0);
+#endif
 		mode = GL_QUADS;
 		break;
 	case POLYGON:

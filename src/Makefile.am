@@ -52,6 +52,8 @@ vegastrike_SOURCES =				\
 	gfx_camera.h				\
 	gfx_hud.cpp				\
 	gfx_hud.h				\
+	gfx_location_select.cpp			\
+	gfx_location_select.h			\
 	gfx_mesh.cpp				\
 	gfx_mesh.h				\
 	gfx_primitive.cpp			\

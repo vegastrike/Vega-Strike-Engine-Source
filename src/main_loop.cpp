@@ -10,10 +10,9 @@
 #include "cmd.h"
 #include "gfx_sprite.h"
 #include "physics.h"
-
 #include "gfx_hud.h"
 #include "gfxlib.h"
-
+#include "gfx_location_select.h"
 #include <string>
 
 using namespace std;
@@ -324,6 +323,9 @@ void InitializeInput() {
 Unit *carrier=NULL;
 Unit *fighter = NULL;
 Unit *fighter2=NULL;
+
+LocationSelect *locSel=NULL;
+
 Background * bg = NULL;
 TextPlane *textplane = NULL;
 void createObjects() {
@@ -337,7 +339,9 @@ void createObjects() {
   fighter2 = new Unit("uosprey.dat");
   bg = new Background("cube");
   //HUDElement *t = new HUDElement("ucarrier.dat");
-  
+  locSel = new LocationSelect(Vector (0,0,10),
+			      Vector(.707,.707,0), 
+			      Vector (.707,-.707,0));
   //fighter->SetPosition(Vector(5.0, 5.0, 5.0));
   fighter->SetPosition(Vector(0.0, 0.0, 15.0));
   fighter->SetAI(new Orbit);
@@ -385,6 +389,7 @@ void destroyObjects() {
   //	for(a = 0; a < numf; a++)
   //	delete fighters[a];
   delete textplane;
+  delete locSel;
   //delete t;
   //delete s;
   delete carrier;
@@ -435,8 +440,10 @@ void main_loop() {
   GFXDisable(TEXTURE1);
   //textplane->TDraw();
   textplane->Yaw(PI/180);
+  
   //t->TDraw();
   //s->Yaw(PI/180);
+  locSel->Draw();
   _GFX->EndDraw();
   carrier->Rotate(Vector(0.010F,0.010F,0.000F));
   

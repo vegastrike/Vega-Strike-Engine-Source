@@ -36,5 +36,6 @@ int Stage1TextureName;
 //PFNGLMULTITEXCOORD2FARBPROC glMultiTexCoord2fARB;
 //PFNGLCLIENTACTIVETEXTUREARBPROC glClientActiveTextureARB;
 //PFNGLCLIENTACTIVETEXTUREARBPROC glActiveTextureARB;
-
+#ifdef STATS_QUEUE
 queue<GFXStats> statsqueue;
+#endif

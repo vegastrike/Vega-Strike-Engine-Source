@@ -24,6 +24,7 @@ using namespace std;
 
 #ifndef GFXSTAT
 #define GFXSTAT
+#ifdef STATS_QUEUE
 #include <time.h>
 
 struct GFXStats{
@@ -37,6 +38,7 @@ struct GFXStats{
 	int total() {return drawnTris*3+drawnQuads*4+drawnPoints;}
   int elapsedTime() {time_t t; time (&t); return (int)(t-ztime);}
 };
+#endif
 #endif
 
 #define MAX_NUM_LIGHTS 4
@@ -86,7 +88,9 @@ extern PFNGLUNLOCKARRAYSEXTPROC glUnlockArraysEXT_p;
 //extern int sharedcolortable;
 extern GLenum GFXStage0;
 extern GLenum GFXStage1;
+#ifdef STATS_QUEUE
 extern queue<GFXStats> statsqueue;
+#endif
 extern int Stage0Texture;
 extern int Stage0TextureName;
 extern int Stage1Texture;

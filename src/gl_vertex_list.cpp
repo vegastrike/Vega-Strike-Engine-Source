@@ -92,7 +92,9 @@ BOOL GFXVertexList::SwapTransformed()
 
 BOOL GFXVertexList::Draw()
 {
-	statsqueue.back() += GFXStats(numTriangles, numQuads, 0);
+#ifdef STATS_QUEUE
+  statsqueue.back() += GFXStats(numTriangles, numQuads, 0);
+#endif
 	if(g_game.Multitexture) {
 		glActiveTextureARB(GL_TEXTURE0_ARB);	
 		if(bTex0) 
@@ -106,9 +108,9 @@ BOOL GFXVertexList::Draw()
 		else
 			glDisable(GL_TEXTURE_2D);
 	}
-
+#ifdef STATS_QUEUE
 	statsqueue.back() += GFXStats(numTriangles, numQuads, 0);
-
+#endif
 	//int num3tri = numTriangles*3;
 
 	//float *texcoords = NULL;
