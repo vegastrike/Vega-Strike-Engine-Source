@@ -4,7 +4,6 @@
 #include <vector>
 
 #include "configxml.h"
-#include "netclass.h"
 #include "accountsxml.h"
 #include "packet.h"
 #include "netui.h"
