@@ -102,7 +102,7 @@ bool Unit::OneWayCollide (Unit * target, Vector & normal, float &dist) {//do eac
 
 
 bool Unit::Collide (Unit * target) {
-  if (target==this||owner==target||target->owner==this) 
+  if (target==this||owner==target||target->owner==this||target->owner==owner) 
     return false;
 
   //unit v unit? use point sampling?
