@@ -1937,18 +1937,9 @@ void Unit::AddVelocity(float difficulty) {
 		   }
 		 float multipliertemp=1;
 		 float minsizeeffect = (planet->rSize()>smallwarphack)?planet->rSize():smallwarphack;
-		 float effectiverad = autopilot_term_distance+minsizeeffect*(1.0f+UniverseUtil::getPlanetRadiusPercent())+getAutoRSize(this,this)+rSize();
-		 //double Nthoudist=warpregion1;
-		 //double Nthoudistalt=minsizeeffect*450;
-		 //Nthoudist=(Nthoudist<Nthoudistalt)?(Nthoudist):(Nthoudistalt);
-		 //double onethird=1.0/3.0;
-		 //double Nthouslow=9000/pow(Nthoudist,onethird);
+		 float effectiverad = minsizeeffect*(1.0f+UniverseUtil::getPlanetRadiusPercent())+rSize();
 		 double dist=(Position()-planet->Position()).Magnitude();
-		 //double cuberoot=pow((dist-(effectiverad)-Nthoudist),onethird);
-		 //if(dist>(effectiverad+Nthoudist)) {
-		//	 multipliertemp=warpcruisemult+(upcurvek*pow(dist-effectiverad-Nthoudist,2));
-		/* } else */
-		 if (dist>effectiverad+warpregion0){
+		 if (dist>(effectiverad+warpregion0)){
 			multipliertemp=pow((dist-effectiverad-warpregion0),curvedegree)*upcurvek;
 		 }else{
 		    multipliertemp=1;
