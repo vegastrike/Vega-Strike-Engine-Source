@@ -32,7 +32,43 @@
 #include "in_joystick.h"
 #include "config_xml.h"
 #include "in_mouse.h"
+#ifndef HAVE_SDL
+#include "gldrv/gl_include.h"
+#if (GLUT_API_VERSION >= 4 || GLUT_XLIB_IMPLEMENTATION >= 13)
+#else
+#define NO_SDL_JOYSTICK
+#endif
+#endif
 JoyStick *joystick[MAX_JOYSTICKS]; // until I know where I place it
+int num_joysticks=0;
+void modifyDeadZone(JoyStick * j) {
+    for(int a=0;a<j->nr_of_axes;a++){
+        if(fabs(j->joy_axis[a])<=j->deadzone){
+            j->joy_axis[a]=0.0;
+        }else if (j->joy_axis[a]>0) {
+            j->joy_axis[a]-=j->deadzone;
+        }else {
+            j->joy_axis[a]+=j->deadzone;
+        }
+        if (j->deadzone<.999) {
+            j->joy_axis[a]/=(1-j->deadzone);
+        }
+    }
+}
+void myGlutJoystickCallback (unsigned int buttonmask, int x, int y, int z) {
+    //printf ("joy %d x %d y %d z %d",buttonmask, x,y,z);
+    joystick[0]->joy_buttons=buttonmask;
+    unsigned int i;
+    for (i=0;i<MAX_AXES;i++) joystick[0]->joy_axis[i]=0.0;
+    if (joystick[0]->nr_of_axes>0)
+        joystick[0]->joy_axis[0]=((float)x)/1000.0;
+    if (joystick[0]->nr_of_axes>1)
+        joystick[0]->joy_axis[1]=((float)y)/1000.0;
+    if (joystick[0]->nr_of_axes>2)
+        joystick[0]->joy_axis[2]=((float)z)/1000.0;
+    modifyDeadZone(joystick[0]);
+}
+
 JoyStick::JoyStick () {
   for (int j=0;j<MAX_AXES;++j) {
     axis_axis[j]=-1;
@@ -40,7 +76,12 @@ JoyStick::JoyStick () {
     joy_axis[j]=axis_axis[j]=0;
   }
 }
-
+int JoystickPollingRate () {
+    static int i=XMLSupport::parse_int (vs_config->getVariable("joystick",
+                                                               "polling_rate",
+                                                               "0"));
+    return i;
+}
 void InitJoystick(){
   int i;
 
@@ -63,23 +104,41 @@ void InitJoystick(){
     }
   }
 
-
-#ifdef HAVE_SDL
 #ifndef NO_SDL_JOYSTICK
-  int num_joysticks=SDL_NumJoysticks() ;
+#ifdef HAVE_SDL
+  num_joysticks=SDL_NumJoysticks() ;
   printf("%i joysticks were found.\n\n", num_joysticks);
   printf("The names of the joysticks are:\n");
+#else
+  //use glut
+  if (glutDeviceGet(GLUT_HAS_JOYSTICK)) {
+      if (glutDeviceGet(GLUT_OWNS_JOYSTICK)||
+          XMLSupport::parse_bool(vs_config->getVariable("joystick",
+                                                        "force_use_of_joystick",
+                                                        "false"))) {
+          printf ("setting joystick functionality:: joystick online");
+          glutJoystickFunc (myGlutJoystickCallback,JoystickPollingRate());
+                            
+          num_joysticks=1;
+      }
+  }
 #endif
 #endif
 
   for(i=0; i < MAX_JOYSTICKS; i++ )  {
-#ifdef HAVE_SDL
 #ifndef NO_SDL_JOYSTICK
+#ifdef HAVE_SDL
     if (i<num_joysticks){
       //      SDL_EventState (SDL_JOYBUTTONDOWN,SDL_ENABLE);
       //      SDL_EventState (SDL_JOYBUTTONUP,SDL_ENABLE);
       printf("    %s\n", SDL_JoystickName(i));
     }
+#else
+      if (i<num_joysticks){
+          //      SDL_EventState (SDL_JOYBUTTONDOWN,SDL_ENABLE);
+          //      SDL_EventState (SDL_JOYBUTTONUP,SDL_ENABLE);
+          printf("Glut detects %d joystick",i+1);
+      }      
 #endif
 #endif
     joystick[i]=new JoyStick(i); // SDL_Init is done in main.cpp
@@ -110,32 +169,40 @@ JoyStick::JoyStick(int which): mouse(which==MOUSE_JOYSTICK) {
   if (which==MOUSE_JOYSTICK) {
     InitMouse(which);
   }
-#if !defined(HAVE_SDL) || defined (NO_SDL_JOYSTICK)
+#if defined (NO_SDL_JOYSTICK)
   return;
 #else
-  int num_joysticks=SDL_NumJoysticks() ;
-  if (which>=num_joysticks)
+#ifdef HAVE_SDL
+  num_joysticks=SDL_NumJoysticks() ;
+  if (which>=num_joysticks) {
+    joy_available=false;
     return;
+  }
   
   //    SDL_JoystickEventState(SDL_ENABLE);
   joy=SDL_JoystickOpen(which);  // joystick nr should be configurable
-  
-  if(joy==NULL)
-    {
+  if(joy==NULL){
       printf("warning: no joystick nr %d\n",which);
       joy_available = false;
       return;
+  }
+  joy_available=true;
+  nr_of_axes=SDL_JoystickNumAxes(joy);
+  nr_of_buttons=SDL_JoystickNumButtons(joy);
+  nr_of_hats=SDL_JoystickNumHats(joy);
+#else
+    //WE HAVE GLUT
+    if (which>0) {
+        joy_available=false;
+        return;
     }
-  
     joy_available=true;
-
-    nr_of_axes=SDL_JoystickNumAxes(joy);
-    nr_of_buttons=SDL_JoystickNumButtons(joy);
-    nr_of_hats=SDL_JoystickNumHats(joy);
-
-    printf("axes: %d buttons: %d hats: %d\n",nr_of_axes,nr_of_buttons,nr_of_hats);
-
-#endif // we have SDL
+    nr_of_axes=glutDeviceGet(GLUT_JOYSTICK_AXES);
+    nr_of_buttons=glutDeviceGet(GLUT_JOYSTICK_BUTTONS);
+    nr_of_hats=0;
+#endif // we have GLUT
+#endif
+     printf("axes: %d buttons: %d hats: %d\n",nr_of_axes,nr_of_buttons,nr_of_hats);
 }
 void JoyStick::InitMouse (int which) {
   player=0;//default to first player
@@ -190,52 +257,46 @@ void JoyStick::GetJoyStick(float &x,float &y, float &z, int &buttons)
       GetMouse (x,y,z,buttons);
       return;
     }
-#if defined(HAVE_SDL) && !defined(NO_SDL_JOYSTICK)
+    int a;
+#ifndef NO_SDL_JOYSTICK
+#if defined(HAVE_SDL)
 
     int numaxes = SDL_JoystickNumAxes (joy);
 
     Sint16 axi[MAX_AXES]={0};
-    int a;
+    
     for(a=0;a<numaxes;a++){
       axi[a] = SDL_JoystickGetAxis(joy,a);
     }
 
-    buttons=0;
+    joy_buttons=0;
     nr_of_buttons=SDL_JoystickNumButtons(joy);
 
    for(int i=0;i<nr_of_buttons;i++){
      int  butt=SDL_JoystickGetButton(joy,i);
      if(butt==1){
-       buttons|=(1<<i);
+       joy_buttons|=(1<<i);
       }
    }
-    joy_buttons = buttons;
-
-    if(debug_digital_hatswitch){
-      for(int h=0;h<nr_of_hats;h++){
-	digital_hat[h]=SDL_JoystickGetHat(joy,h);
-      }
+   if(debug_digital_hatswitch){
+       for(int h=0;h<nr_of_hats;h++){
+           digital_hat[h]=SDL_JoystickGetHat(joy,h);
+       }
+   }
+   for(a=0;a<MAX_AXES;a++)
+       joy_axis[a]=((float)axi[a]/32768.0);
+   modifyDeadZone(j);
+#else //we have glut
+    if (JoystickPollingRate()<=0) {
+        glutForceJoystickFunc();
     }
-
-    for(a=0;a<MAX_AXES;a++){
-      joy_axis[a]=((float)axi[a]/32768.0);
-      if(fabs(joy_axis[a])<=deadzone){
-	joy_axis[a]=0.0;
-      }else if (joy_axis[a]>0) {
-	joy_axis[a]-=deadzone;
-      }else {
-	joy_axis[a]+=deadzone;
-      }
-      if (deadzone<.999) {
-	joy_axis[a]/=(1-deadzone);
-      }
-    }
+#endif
     x=joy_axis[0];
     y=joy_axis[1];
     z=joy_axis[2];
+    buttons=joy_buttons;
 
-#endif // we have SDL
-    
+#endif // we have no joystick
     return;
 }
 
