@@ -83,7 +83,7 @@ void FireAt::Execute () {
   }
   if ((targ = parent->Target())) {
     shouldfire |= ShouldFire (targ);
-    if (targ->GetHullData()<0) {
+    if (targ->GetHull()<0) {
       ChooseTargets(1);
     }
   } else {
