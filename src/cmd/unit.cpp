@@ -1068,14 +1068,25 @@ void Unit::SwapInHalos() {
   }
 }
 #endif
+static bool CheckAccessory (Unit * tur) {
+  bool accessory = tur->name.find ("accessory")!=string::npos;
+  if (accessory) {
+    tur->SetAngularVelocity(tur->UpCoordinateLevel(Vector (tur->GetComputerData().max_pitch,
+							   tur->GetComputerData().max_yaw,
+							   tur->GetComputerData().max_roll)));
+  }
+  return accessory;
+}
 void Unit::SetTurretAI () {
   static bool talkinturrets = XMLSupport::parse_bool(vs_config->getVariable("AI","independent_turrets","false"));
   if (talkinturrets) {
     UnitCollection::UnitIterator iter = getSubUnits();
     Unit * un;
     while (NULL!=(un=iter.current())) {
-      un->EnqueueAIFirst (new Orders::FireAt(.2,15));
-      un->EnqueueAIFirst (new Orders::FaceTarget (false,3));
+      if (!CheckAccessory(un)) {
+	un->EnqueueAIFirst (new Orders::FireAt(.2,15));
+	un->EnqueueAIFirst (new Orders::FaceTarget (false,3));
+      }
       un->SetTurretAI ();
       iter.advance();
     }
@@ -1083,11 +1094,13 @@ void Unit::SetTurretAI () {
     UnitCollection::UnitIterator iter = getSubUnits();
     Unit * un;
     while (NULL!=(un=iter.current())) {
-      if (un->aistate) {
-	un->aistate->Destroy();
+      if (!CheckAccessory(un)) {
+	if (un->aistate) {
+	  un->aistate->Destroy();
+	}
+	un->aistate = (new Orders::TurretAI());
+	un->aistate->SetParent (un);
       }
-      un->aistate = (new Orders::TurretAI());
-      un->aistate->SetParent (un);
       un->SetTurretAI ();
       iter.advance();
     }    

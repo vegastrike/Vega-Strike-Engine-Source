@@ -25,6 +25,8 @@ libcmd_a_SOURCES =				\
 	click_list.h			\
 	unit_collide.cpp				\
 	unit_collide.h				\
+	unit_util.cpp			\
+	unit_util.h			\
 	faction_xml.cpp			\
 	music.cpp			\
 	enhancement.h			\

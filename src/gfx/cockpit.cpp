@@ -1140,6 +1140,22 @@ int Cockpit::getScrollOffset (unsigned int whichtype) {
   }
   return 0;
 }
+
+
+
+
+Unit * GetFinalTurret(Unit * baseTurret) {
+  Unit * un = baseTurret;
+  un_iter uj= un->getSubUnits();
+  Unit * tur;
+  while ((tur=uj.current())) {
+    SwitchUnits (NULL,tur);
+    un = GetFinalTurret (tur);
+    ++uj;
+  }
+  return un;
+}
+
 void Cockpit::Update () {
   if (autopilot_time!=0) {
     autopilot_time-=SIMULATION_ATOM;
@@ -1217,24 +1233,15 @@ void Cockpit::Update () {
 		}
 
 	  if (i++==index) {
-	    tmp=true;
 	    index++;
-
-	    SwitchUnitsTurret(par,un);
-	    parentturret.SetUnit(par);
-	    un_iter uj= un->getSubUnits();
-	    Unit * tur;
-	    bool switchedsuccess=false;
-	    while ((tur=uj.current())) {
-	      switchedsuccess=true;
-	      SwitchUnits (NULL,tur);
-	      this->SetParent(tur,this->unitfilename.c_str(),this->unitmodname.c_str(),savegame->GetPlayerLocation());
-	      ++uj;
+	    if (un->name.find ("accessory")==string::npos) {
+	      tmp=true;
+	      SwitchUnitsTurret(par,un);
+	      parentturret.SetUnit(par);
+	      Unit * finalunit = GetFinalTurret(un);
+	      this->SetParent(finalunit,this->unitfilename.c_str(),this->unitmodname.c_str(),savegame->GetPlayerLocation());
+	      break;
 	    }
-	    if (!switchedsuccess) {
-	      this->SetParent(un,this->unitfilename.c_str(),this->unitmodname.c_str(),savegame->GetPlayerLocation());
-	    }
-	    break;
 	  }
 	  ++ui;
 	}
