@@ -18,8 +18,6 @@
  * to shine on nearby units.
  */
 template <class T, class CTSIZ, class CTACCURACY, class CTHUGE> class Hashtable3d {
-  ///Keeps track of the minimum and maximum write of the table since the last clear
-  int minaccessx,minaccessy,minaccessz,maxaccessx,maxaccessy,maxaccessz;
   ///All objects that are too large to fit (fastly) in the collide table
   std::vector <T> hugeobjects;
   ///The hash table itself. Holds most units to be collided with
@@ -35,14 +33,6 @@ template <class T, class CTSIZ, class CTACCURACY, class CTHUGE> class Hashtable3
     hash_vec(t.i,t.j,t.k,x,y,z);
   }
 public:
-  Hashtable3d() {
-    minaccessx=COLLIDETABLESIZE-1;
-    minaccessy=COLLIDETABLESIZE-1;
-    minaccessz=COLLIDETABLESIZE-1;
-    maxaccessx=0;
-    maxaccessy=0;
-    maxaccessz=0;    
-  }
   ///Hashes a single value to a value on the collide table truncated to all 3d constraints.  Consider using a swizzle
   int hash_int (const float aye) {
     return ((int)(((aye<0)?(aye-COLLIDETABLEACCURACY):aye)/COLLIDETABLEACCURACY))%(COLLIDETABLESIZE/2)+(COLLIDETABLESIZE/2); 
@@ -50,20 +40,14 @@ public:
   ///clears entire table
   void Clear () {
     hugeobjects.clear();
-    for (int i=minaccessx;i<=maxaccessx;i++) {
-    for (int j=minaccessy;j<=maxaccessy;j++) {
-    for (int k=minaccessz;k<=maxaccessz;k++) {
+    for (int i=0;i<=COLLIDETABLESIZE-1;i++) {
+    for (int j=0;j<=COLLIDETABLESIZE-1;j++) {
+    for (int k=0;k<=COLLIDETABLESIZE-1;k++) {
       if (table[i][j][k].size())
 	table[i][j][k].clear();
     }
     }
     }
-    minaccessx=COLLIDETABLESIZE-1;
-    minaccessy=COLLIDETABLESIZE-1;
-    minaccessz=COLLIDETABLESIZE-1;
-    maxaccessx=0;
-    maxaccessy=0;
-    maxaccessz=0;
   }
   ///returns any objects residing in the sector occupied by Exact
   int Get (const Vector &Exact, std::vector <T> *retval[]) {
@@ -135,29 +119,47 @@ public:
     }
     for (float i=target->Mini.i;i<maxx;i+=COLLIDETABLEACCURACY) {
       x = hash_int(i);
-      if (x<minaccessx) minaccessx=x;
-      if (x>maxaccessx) maxaccessx=x;
       for (float j=target->Mini.j;j<maxy;j+=COLLIDETABLEACCURACY) {    
 	y = hash_int(j);
-	if (y<minaccessy) minaccessy=y;
-	if (y>maxaccessy) maxaccessy=y;
 	for (float k=target->Mini.k;k<maxz;k+=COLLIDETABLEACCURACY) {
 	  z = hash_int(k);
-	  if (z<minaccessz) minaccessz=z;
-	  if (z>maxaccessz) maxaccessz=z;
 	  table[x][y][z].push_back(objectToPut);
 	}
       }
     }
   }
+  static bool removeFromVector (std::vector <T> &myvector, T &objectToKill) {
+    bool ret=false;
+    std::vector<T>::iterator removal = myvector.begin();
+    while (removal!=myvector.end()) {
+      removal = std::find (removal,myvector.end(),objectToKill);
+      if (removal!=myvector.end()) {
+	ret = true;
+	int offset = removal-myvector.begin();
+	objectToKill=*removal;
+	myvector.erase(removal);
+	removal = myvector.begin()+offset;
+      }
+    }
+    return ret;
+  }
+  bool Eradicate (T objectToKill) {
+    bool ret=removeFromVector (hugeobjects,objectToKill);
+    for (unsigned int i=0;i<=COLLIDETABLESIZE-1;i++) {
+      for (unsigned int j=0;j<=COLLIDETABLESIZE-1;j++) {
+	for (unsigned int k=0;k<=COLLIDETABLESIZE-1;k++) {
+	  ret |= removeFromVector (table[i][j][k],objectToKill);
+	}
+      }
+    }
+    return ret;
+  }
   ///Removes objectToKill from collide table with span of Target
-  T Remove(const LineCollide* target,const T objectToKill) {
+  bool Remove(const LineCollide* target,T &objectToKill) {
     //    int minx,miny,minz,maxx,maxy,maxz;
     //    hash_vec(target->Mini,minx,miny,minz);
     //    hash_vec(target->Maxi,maxx,maxy,maxz);
     bool ret=false;
-    T retval;
-    std::vector <T>::iterator removal= hugeobjects.begin();
     int x,y,z;
     float maxx= (ceil(target->Maxi.i/COLLIDETABLEACCURACY))*COLLIDETABLEACCURACY;
     float maxy= (ceil(target->Maxi.j/COLLIDETABLEACCURACY))*COLLIDETABLEACCURACY;
@@ -172,35 +174,19 @@ public:
 	  y = hash_int(j);
 	  for (float k=target->Mini.k;k<maxz;k+=COLLIDETABLEACCURACY) {
 	    z = hash_int(k);
-	    removal = table[x][y][z].begin();
-	    while (removal!=table[x][y][z].end()) {
-	      removal = std::find (table[x][y][z].begin(),table[x][y][z].end(),objectToKill);
-	      if (removal!=table[x][y][z].end()) {
-		ret = true;
-		retval = *removal;
-		table[x][y][z].erase(removal);
-	      }
-	    }
+	    ret |= removeFromVector (table[x][y][z],objectToKill);
 	  }
 	}
       }
     }
     if (!ret&&!target->hhuge)
       {
-	fprintf (stderr, "bad things");
+	fprintf (stderr, "Nonfatal Collide Error\n");
       }
     if (!ret||target->hhuge) {
-      while (removal!=hugeobjects.end()) {
-	removal = std::find (hugeobjects.begin(),hugeobjects.end(),objectToKill);
-	if (removal!=hugeobjects.end()) {
-	  ret = true;
-	  retval = *removal;
-	  hugeobjects.erase(removal);
-	}
-      }
+      ret|=removeFromVector (hugeobjects, objectToKill);
     }
-
-    return retval;
+    return ret;
   }
 };
 

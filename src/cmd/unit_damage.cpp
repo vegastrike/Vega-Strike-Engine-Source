@@ -9,6 +9,7 @@
 #include <float.h>
 #include "audiolib.h"
 #include "images.h"
+#include "beam.h"
 static list<Unit*> Unitdeletequeue;
 void Unit::UnRef() {
   ucref--;
@@ -99,16 +100,19 @@ void Unit::Kill() {
     halos=NULL;
     numhalos=0;
   }
+  for (int beamcount=0;beamcount<nummounts;beamcount++) {
+    AUDDeleteSound(mounts[beamcount].sound);
+    if (mounts[beamcount].ref.gun&&mounts[beamcount].type.type==weapon_info::BEAM)
+      delete mounts[beamcount].ref.gun;//hope we're not killin' em twice...they don't go in gunqueue
+  }
   if (mounts) {
     delete []mounts;
     nummounts=0;
     mounts = NULL;
   }
+  //eraticate everything. naturally (see previous line) we won't erraticate beams erraticated above
+  RemoveFromSystem();
   killed = true;
-  if (CollideInfo.object.u) {
-    KillCollideTable (&CollideInfo);
-    CollideInfo.object.u=NULL;
-  }
   Target((Unit *)NULL);
   if (ucref==0)
     Unitdeletequeue.push_back(this);

@@ -256,11 +256,12 @@ bool gfx_light::RemoveFromTable(bool shouldremove, const GFXLight &t) {
   if (err)
     return false;
   tmp.lc = &coltarg;
-  tmp = lighttable.Remove ( &coltarg, tmp);
-  if (tmp.lc)
-    delete tmp.lc;
-  else
-    assert (tmp.lc);
+  if (lighttable.Remove ( &coltarg, tmp)) {
+    if (tmp.lc)
+      delete tmp.lc;
+    else
+      assert (tmp.lc);
+  }
   return true;
 }
 

@@ -337,21 +337,11 @@ Unit::Unit(const char *filename, bool xml, bool SubU, int faction,Flightgroup *f
 	vsresetdir();
 
 }
-void Unit::RemoveFromSystem() {
-  if (CollideInfo.object.u)
-    KillCollideTable (&CollideInfo);
-  CollideInfo.object.u=NULL;
-  int i;
-  for (i=0;i<nummounts;i++) {
-    if (mounts[i].type.type==weapon_info::BEAM) {
-      if (mounts[i].ref.gun) {
-	mounts[i].ref.gun->RemoveFromSystem();
-      }
-    }
-  }
-}
 Unit::~Unit()
 {
+  if ((!killed)&&(!SubUnit)) {
+    fprintf (stderr,"Assumed exit on unit %s(if not quitting, report error)\n",name.c_str());
+  }
   if (sound->engine!=-1) {
     AUDDeleteSound (sound->engine);
   }
@@ -377,7 +367,6 @@ Unit::~Unit()
     delete image->hudImage;
   delete image;
   delete sound;
-  RemoveFromSystem();
   if (bspTree)
     delete bspTree;
   if (bspShield)

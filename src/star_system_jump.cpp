@@ -78,13 +78,15 @@ void DealPossibleJumpDamage (Unit *un) {
   float speed = un->GetVelocity().Magnitude();
   float damage = un->GetJumpStatus().damage+(rand()%100<1)?(rand()%20):0;
   float dam =speed*(damage/10);
-  if (dam>1)
+  if (dam>1) {
     un->ApplyDamage (un->GetVelocity(),
 		     un->GetVelocity(), 
 		     dam,
 		     GFXColor (((float)(rand()%100))/100,
 			       ((float)(rand()%100))/100,
 			       ((float)(rand()%100))/100));
+    un->SetCurPosition (un->LocalPosition()+(((float)rand())/RAND_MAX)*dam*un->GetVelocity());
+  }
 }
 
 static void VolitalizeJumpAnimation (const unsigned int ani) {
@@ -158,7 +160,7 @@ void StarSystem::ProcessPendingJumps() {
 #ifdef JUMP_DEBUG
       fprintf (stderr,"Unit removed from star system\n");
 #endif
-
+      ///eradicating from system, leaving no trace
       un->RemoveFromSystem();
       pendingjump[kk]->dest->AddUnit (un);
       un->Target(NULL);

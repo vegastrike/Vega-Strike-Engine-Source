@@ -114,7 +114,7 @@ Beam::~Beam () {
 #ifdef PERBOLTSOUND
   AUDDeleteSound (sound);
 #endif
-  RemoveFromSystem();
+  RemoveFromSystem(true);
   delete vlist;
   beamdecals.DelTexture(decal);
 }
@@ -228,11 +228,33 @@ void Beam::ProcessDrawQueue() {
   GFXDisable (LIGHTING);
   GFXPopBlendMode();
 }
-void Beam::RemoveFromSystem() {
-  if (CollideInfo.object.b!=NULL) {
+void Beam::RemoveFromSystem(bool eradicate) {
+  if (CollideInfo.object.b!=NULL
+#ifndef SAFE_COLLIDE_DEBUG
+#ifndef UNSAFE_COLLIDE_RELEASE
+      &&!eradicate
+#endif
+#endif
+) {
     KillCollideTable (&CollideInfo);
     CollideInfo.object.b = NULL;
   }
+#ifndef UNSAFE_COLLIDE_RELEASE
+  if (eradicate) {
+#ifdef SAFE_COLLIDE_DEBUG
+    if (
+#endif
+	EradicateCollideTable (&CollideInfo)
+#ifdef SAFE_COLLIDE_DEBUG 
+	) {
+      fprintf (stderr,"RECOVERED from (formerly) fatal, currently nonfatal error with beam deletion\n");      
+    }
+#else
+    ;
+#endif
+    CollideInfo.object.b = NULL;
+  }
+#endif
 }
 void Beam::UpdatePhysics(const Transformation &trans, const Matrix m) {
   curlength += SIMULATION_ATOM*speed;
@@ -271,7 +293,7 @@ void Beam::UpdatePhysics(const Transformation &trans, const Matrix m) {
   if (curthick<=0) {
 
     curthick =0;//die die die
-    RemoveFromSystem();
+    RemoveFromSystem(false);
     
   } else {
 
@@ -289,7 +311,7 @@ void Beam::UpdatePhysics(const Transformation &trans, const Matrix m) {
 
     tmpvec = center.Max (tmpvec);
     if (TableLocationChanged (CollideInfo,tmpMini,tmpvec)||(curthick>0&&CollideInfo.object.b==NULL)) {
-      RemoveFromSystem();
+      RemoveFromSystem(false);
       CollideInfo.object.b = this;
       CollideInfo.Mini= tmpMini;
       CollideInfo.Maxi= tmpvec;
@@ -304,7 +326,7 @@ void Beam::UpdatePhysics(const Transformation &trans, const Matrix m) {
 
 bool Beam::Collide (Unit * target) {
   if (this==NULL||target==NULL){
-    fprintf (stderr,"Holy SH-- report immed! hellcatv@hotmail.com");
+    fprintf (stderr,"Recovering from nonfatal beam error when beam inactive\n");
     return false;
   }
   float distance;

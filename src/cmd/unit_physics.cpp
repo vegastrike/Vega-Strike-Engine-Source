@@ -376,13 +376,13 @@ void Unit::UpdatePhysics (const Transformation &trans, const Matrix transmat, co
     }
     //    dead &=(subunits[i]->hull<0);
   }
-  if (!SubUnit)
-    UpdateCollideQueue();
-
   if (hull<0) {
     dead&= (image->explosion==NULL);    
     if (dead)
       Kill();
+  }
+  if ((!SubUnit)&&(!killed)) {
+    UpdateCollideQueue();
   }
 }
 void Unit::SetPlanetOrbitData (PlanetaryTransform *t) {

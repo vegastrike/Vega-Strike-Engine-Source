@@ -22,6 +22,9 @@ bool TableLocationChanged (const LineCollide &lc, const Vector &minx, const Vect
 void KillCollideTable (LineCollide * lc) {
   _Universe->activeStarSystem()->collidetable->c.Remove (lc, lc);
 }
+bool EradicateCollideTable (LineCollide * lc) {
+  return _Universe->activeStarSystem()->collidetable->c.Eradicate (lc);
+}
 void AddCollideQueue (LineCollide &tmp) {
   _Universe->activeStarSystem()->collidetable->c.Put (&tmp,&tmp);
 }
@@ -31,6 +34,38 @@ void Unit::SetCollisionParent (Unit * name) {
       subunits[i]->SetCollisionParent (name);
     }
 }
+void Unit::RemoveFromSystem() {
+#if (defined SAFE_COLLIDE_DEBUG) || (defined  UNSAFE_COLLIDE_RELEASE) 
+  if (CollideInfo.object.u!=NULL) {
+    KillCollideTable (&CollideInfo);
+    CollideInfo.object.u = NULL;
+  }
+#endif
+
+#ifndef UNSAFE_COLLIDE_RELEASE
+#ifdef SAFE_COLLIDE_DEBUG
+    if (
+#endif
+	EradicateCollideTable (&CollideInfo)
+#ifdef SAFE_COLLIDE_DEBUG 
+	) {
+      fprintf (stderr,"RECOVERED from (formerly) fatal, currently nonfatal error with unit deletion\n");      
+    }
+#else
+    ;
+#endif
+#endif
+  CollideInfo.object.u=NULL;
+  int i;
+  for (i=0;i<nummounts;i++) {
+    if (mounts[i].type.type==weapon_info::BEAM) {
+      if (mounts[i].ref.gun) {
+	mounts[i].ref.gun->RemoveFromSystem(true);
+      }
+    }
+  }
+}
+
 void Unit::UpdateCollideQueue () {
   CollideInfo.lastchecked =NULL;//reset who checked it last in case only one thing keeps crashing with it;
   Vector Puffmin (Position().i-radial_size,Position().j-radial_size,Position().k-radial_size);
@@ -50,7 +85,7 @@ void Unit::UpdateCollideQueue () {
 }
 
 void Unit::CollideAll() {
-  if (SubUnit)
+  if (SubUnit||killed)
     return;
 
   vector <LineCollide*> * colQ [tablehuge+1];
@@ -64,7 +99,7 @@ void Unit::CollideAll() {
       if (tmp->lastchecked==this)
 	continue;//ignore duplicates
       tmp->lastchecked = this;//now we're the last checked.
-      //    if (colQ[i]->object.u > this||)//only compare against stuff bigger than you
+
       if ((!CollideInfo.hhuge||(CollideInfo.hhuge&&tmp->type==LineCollide::UNIT))&&((tmp->object.u>this||(!CollideInfo.hhuge&&j==0))))//the first stuffs are in the huge array
 	if (
 	    Position().i+radial_size>tmp->Mini.i&&
