@@ -16,6 +16,10 @@
 #include "lin_time.h"
 #include "animation.h"
 #include "car_assist.h"
+
+static float ffmax(float a, float b) {
+  return a>b?a:b;
+}
 void DoParticles (QVector pos, float percent, const Vector & velocity, float radial_size,float particle_size,int faction) {
   percent = 1-percent;
   int i=rand();
@@ -51,7 +55,7 @@ void DoParticles (QVector pos, float percent, const Vector & velocity, float rad
       pp.col.j=col[1];
       pp.col.k=col[2];
 	  static float sciz=XMLSupport::parse_float (vs_config->getVariable("graphics","sparklesizeenginerelative",".125"));
-      particleTrail.AddParticle(pp,rand*(velocity.Magnitude()*spread+absspeed)+velocity*sspeed,particle_size*sciz);
+      particleTrail.AddParticle(pp,rand*(ffmax(velocity.Magnitude(),absspeed)*spread+absspeed)+velocity*sspeed,particle_size*sciz);
     }
 }
   
