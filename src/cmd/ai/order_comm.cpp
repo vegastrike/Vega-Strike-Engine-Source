@@ -17,7 +17,7 @@ void Order::Communicate (const CommunicationMessage &c) {
   }
   
   Unit * un;
-  for (unsigned int i=0;i<messagequeue.size();i++) {
+  for (i=0;i<messagequeue.size();i++) {
 
     un=messagequeue[i]->sender.GetUnit();
     if (un==NULL||un==newC->sender.GetUnit()) {

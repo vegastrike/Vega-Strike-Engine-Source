@@ -131,6 +131,8 @@ private:
   Animation * GetRandAnimation(int faction);
   Animation * GetAnimation(int faction, int n);
   const char * GetFaction (int faction);
+  class Unit * GetContraband(int faction);
+  void LoadContrabandLists();
   /**
    * Returns the relationship between myfaction and theirfaction
    * 1 is happy. 0 is neutral (btw 1 and 0 will not attack)

@@ -183,7 +183,8 @@ Order* Order::findOrder(Order *ord){
   return NULL;
 }
 Order::~Order () {
-  for (unsigned int i=0;i<suborders.size();i++) {
+  unsigned int i;
+  for (i=0;i<suborders.size();i++) {
     if(suborders[i]==NULL){
       printf("ORDER: a null order\n");
       printf("this order: %s\n",getOrderDescription().c_str());
@@ -192,7 +193,7 @@ Order::~Order () {
       delete suborders[i];
     }
   }
-  for (unsigned int i=0;i<messagequeue.size();i++) {
+  for (i=0;i<messagequeue.size();i++) {
     delete messagequeue[i];
   }
   messagequeue.clear();
