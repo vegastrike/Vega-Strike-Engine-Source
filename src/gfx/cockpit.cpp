@@ -629,11 +629,10 @@ void Cockpit::SetupViewPort (bool clip) {
       Vector unpos = un->GetPlanetOrbit()?un->LocalPosition():un->Position();
       _Universe->AccessCamera()->SetPosition (unpos-_Universe->AccessCamera()->GetR()*un->rSize()*zoomfactor);
     }
-    _Universe->activeStarSystem()->AccessCamera()->UpdateGFX(clip?GFXTRUE:GFXFALSE);
-
     un->SetVisible(view>=CP_CHASE);
     
   }
- 
+  _Universe->activeStarSystem()->AccessCamera()->UpdateGFX(clip?GFXTRUE:GFXFALSE);
+    
   //  parent->UpdateHudMatrix();
 }
