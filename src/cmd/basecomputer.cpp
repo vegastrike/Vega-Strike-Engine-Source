@@ -1201,9 +1201,9 @@ void BaseComputer::hideCommitControls(void) {
 
 	// The price and "max" displays.
     StaticDisplay* totalPrice = dynamic_cast<StaticDisplay*>( window()->findControlById("TotalPrice") );
-	totalPrice->setText("");
+	if(totalPrice != NULL) totalPrice->setText("");
     StaticDisplay* maxForPlayer = dynamic_cast<StaticDisplay*>( window()->findControlById("MaxQuantity") );
-	maxForPlayer->setText("");
+	if(maxForPlayer != NULL) maxForPlayer->setText("");
 }
 
 // Update the commit controls in the Cargo screen, since we have three of them.
