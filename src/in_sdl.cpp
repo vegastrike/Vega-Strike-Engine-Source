@@ -24,6 +24,7 @@ void ProcessJoystick () {
   float x,y;
   int buttons;
   while(SDL_PollEvent(&event)){
+    fprintf (stderr,"We have event type %d\n",event.type);
     switch(event.type){
     case SDL_JOYBUTTONDOWN:
       if (event.jbutton.which<NUMJBUTTONS) {
