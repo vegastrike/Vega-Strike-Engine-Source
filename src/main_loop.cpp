@@ -515,9 +515,9 @@ void createObjects() {
     //fighters[a]->SetAI(new Orders::MoveTo(Vector(5,10,1), 1.0));
     v = Vector(1,1,-1);
     v.Normalize();
-        fighters[a]->SetAI(new Order());
-    //    fighters[a]->EnqueueAI(new Orders::ChangeHeading(v, 0.04));
-    //    fighters[a]->EnqueueAI(new Orders::MoveTo(v*10 + position, 1.75));
+    fighters[a]->SetAI(new Order());
+    fighters[a]->EnqueueAI(new Orders::ChangeHeading(v, 0.04));
+    fighters[a]->EnqueueAI(new Orders::MoveTo(v*10 + position, 1.75));
     //fighters[a]->SetPosition(0, 0, -2.0F);
   
     //fighters[a]->Pitch(PI/2);

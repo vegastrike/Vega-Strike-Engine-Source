@@ -52,18 +52,31 @@ BOOL /*GFXDRVAPI*/ GFXEndScene();
 BOOL /*GFXDRVAPI*/ GFXClear();
 
 //Light
+
 BOOL /*GFXDRVAPI*/ GFXCreateLightContext(int &con_number);
 BOOL /*GFXDRVAPI*/ GFXDeleteLightContext(int con_number);
-BOOL /*GFXDRVAPI*/ GFXEnableGlobalLight(int light);
+BOOL /*GFXDRVAPI*/ GFXSetLightContext(int con_number);
+BOOL /*GFXDRVAPI*/ GFXLightContextAmbient (const GFXColor &amb);
+
+BOOL /*GFXDRVAPI*/ GFXPickLights(const Vector& location);
+BOOL /*GFXDRVAPI*/ GFXSetSeparateSpecularColor (BOOL spec);
+BOOL /*GFXDRVAPI*/ GFXSetCutoff (float cutoff);
+BOOL /*GFXDRVAPI*/ GFXSetOptimalNumLights (int numlights);
+
+BOOL /*GFXDRVAPI*/ GFXCreateLight (int &light);
+BOOL /*GFXDRVAPI*/ GFXDeleteLight (int light);
 BOOL /*GFXDRVAPI*/ GFXEnableLight(int light);
 BOOL /*GFXDRVAPI*/ GFXDisableLight(int light);
-BOOL /*GFXDRVAPI*/ GFXDisableGlobalLight(int light);
-BOOL /*GFXDRVAPI*/ GFXPickLights(const Vector& location);
-//BOOL GFXSetPower(int light, float power);
-BOOL /*GFXDRVAPI*/ GFXSetLightPosition(int light, const Vector &position);
-BOOL /*GFXDRVAPI*/ GFXSetLightDirection(int light, const Vector &direction);
+
+BOOL /*GFXDRVAPI*/ GFXSetPower(int light, float power);
 BOOL /*GFXDRVAPI*/ GFXSetLight(int light, const GFXColor &color);
-BOOL /*GFXDRVAPI*/ GFXSetGlobalLight(int light, const GFXColor &color);
+
+
+
+
+
+
+
 
 //Materials
 BOOL /*GFXDRVAPI*/ GFXSetMaterial(int &number, const GFXMaterial &material);

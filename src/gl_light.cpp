@@ -83,7 +83,7 @@ vector <gfx_light_loc> * _llights_loc=NULL;
 vector <gfx_light_data> * _llights_dat=NULL;
 
 float intensity_cutoff=.05;//something that would normally round down
-BOOL GFXSetCutoff (float cutoff) {
+BOOL /*GFXDRVAPI*/ GFXSetCutoff (float cutoff) {
   if (cutoff<0) 
     return FALSE;
   intensity_cutoff=cutoff;
@@ -138,12 +138,19 @@ inline void SetLocalCompare (Vector x) {//does preprocessing of intensity for re
   }
 }
 
+BOOL /*GFXDRVAPI*/ GFXSetSeparateSpecularColor(BOOL spec) {
+  if (spec) {
+    glLightModeli (GL_LIGHT_MODEL_COLOR_CONTROL,GL_SEPARATE_SPECULAR_COLOR);
+  }else {
+    glLightModeli (GL_LIGHT_MODEL_COLOR_CONTROL,GL_SINGLE_COLOR);
+  }
+}
 BOOL /*GFXDRVAPI*/ GFXCreateLightContext (int & con_number) {
   static BOOL LightInit=FALSE;
   if (!LightInit) {
     LightInit = TRUE;
     glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER, 1);//don't want lighting coming from infinity....we have to take the hit due to sphere mapping matrix tweaking
-    //glLightModeli (GL_LIGHT_MODEL_COLOR_CONTROL,GL_SEPARATE_SPECULAR_COLOR);
+    //
   }
   con_number = _local_lights_loc.size();
   _currentContext= con_number;
@@ -178,7 +185,7 @@ BOOL /*GFXDRVAPI*/ GFXSetLightContext (int con_number) {
   return TRUE;
 }
 
-BOOL /*GFXDRVAPI*/ GFXLightModelAmbient (GFXColor amb) {
+BOOL /*GFXDRVAPI*/ GFXLightContextAmbient (const GFXColor &amb) {
   if (_currentContext >=_ambient_light.size())
     return FALSE;
   (_ambient_light[_currentContext])=amb;
@@ -187,6 +194,7 @@ BOOL /*GFXDRVAPI*/ GFXLightModelAmbient (GFXColor amb) {
   //  (_ambient_light[_currentContext])[3]=amb.a;
   float tmp[4]={amb.r,amb.g,amb.b,amb.a};
   glLightModelfv (GL_LIGHT_MODEL_AMBIENT,tmp);
+  return TRUE;
 }
 
 
@@ -282,7 +290,7 @@ BOOL /*GFXDRVAPI*/ GFXPickLights (const float * transform) {
     //really dumb policy that doesn't take in the optimal number of lights into account...
     //replace wiht something that should generate a bell curve around optimal based on how far over/under you are using some sort of fuzzy logic
   }
-  int light;
+  unsigned int light;
   for (i=0;i<newQsize;i++) {
     light = newQ[i];
     if ((*_llights_dat)[light].target>=0) {
@@ -628,5 +636,11 @@ BOOL /*GFXDRVAPI*/ GFXSetLightProperties(gfx_light_data &curlight,gfx_light_loc 
 BOOL /*GFXDRVAPI*/ GFXSetLight(int light, enum LIGHT_TARGET lightarg, const GFXColor & color) {
   return GFXSetLightProperties ((*_llights_dat)[light],(*_llights_loc)[light], lightarg ,color);
 }
-
+BOOL /*GFXDRVAPI*/ GFXSetPower (int light, float power) {
+  if (light < _llights_dat->size()&&light >=0) {
+    (*_llights_dat)[light].exp = power;
+  } else
+    return FALSE;
+  return TRUE;
+}
 
