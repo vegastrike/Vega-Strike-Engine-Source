@@ -85,7 +85,8 @@ void Unit::UpdateCollideQueue () {
 }
 extern bool usehuge_table();
 void Unit::CollideAll() {
-  if (isSubUnit()||killed)
+  static bool noUnitCollisions=XMLSupport::parse_bool(vs_config->getVariable("physics","no_unit_collisions","false"));
+  if (isSubUnit()||killed||noUnitCollisions)
     return;
 
   UnitCollection * colQ [tablehuge+1];
