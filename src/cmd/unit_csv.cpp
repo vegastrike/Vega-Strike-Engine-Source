@@ -42,8 +42,17 @@ CSVRow GetUnitRow(string filename, bool subu, int faction, bool readlast, bool &
 void Unit::WriteUnit (const char * modifications) {
   static bool UNITTAB = XMLSupport::parse_bool(vs_config->getVariable("physics","UnitTable","false"));
   if (UNITTAB) {
-    assert(modifications);
-    assert(strlen(modifications));
+    bool bad=false;
+    if (!modifications)bad=true;
+    if (!bad) {
+      if(!strlen(modifications)) {
+        bad=true;
+      }
+    }
+    if (bad) {
+      fprintf(stderr,"Cannot Write out unit file %s %s that has no filename\n",name.c_str(),csvRow.c_str());
+      return;
+    }
     std::string savedir = modifications;
     VSFileSystem::CreateDirectoryHome( VSFileSystem::savedunitpath+"/"+savedir);
     VSFile f;
@@ -82,8 +91,6 @@ string Unit::WriteUnitString () {
         values.push_back(csvRow);
         keys.push_back("Directory");
         values.push_back(row["Directory"]);
-        keys.push_back("SubDirectory");
-        values.push_back(row["SubDirectory"]);
         keys.push_back("Mesh");
         values.push_back(row["Mesh"]);        
         return writeCSV(keys,values);

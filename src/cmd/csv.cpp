@@ -53,8 +53,8 @@ void CSVTable::Init (VSFileSystem::VSFile&f) {
       vector<string> strs = readCSV(buffer);
       unsigned int row = table.size()/key.size();
       while (strs.size()>key.size()) {
-         strs.pop_back();
          fprintf (stderr,"error in csv, line %d: %s has no key",row+1,strs.back().c_str());
+         strs.pop_back();
       }
       while(strs.size()<key.size()) {
          strs.push_back("");
