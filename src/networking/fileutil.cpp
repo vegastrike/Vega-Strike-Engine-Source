@@ -6,7 +6,7 @@
 //#ifdef _WIN32
 //#include <winsock.h> // for ntohl
 //#endif
-extern unsigned long ntohl( unsigned long int netlong);
+extern u_long PASCAL FAR ntohl( u_long netlong);
 
 #ifdef CRYPTO
 #include <crypto++/sha.h>
