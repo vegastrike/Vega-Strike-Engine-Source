@@ -1,6 +1,10 @@
 #include <stdio.h>
+#ifdef USE_BOOST_129
+#include <boost/python/class.hpp>
+#else
 #include <boost/python/class_builder.hpp>
 #include <boost/python/detail/extension_class.hpp>
+#endif
 #include <Python.h>
 #include <compile.h>
 #include <eval.h>
