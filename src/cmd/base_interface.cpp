@@ -440,10 +440,12 @@ Base::Base (const char *basefile, Unit *base, Unit*un)
 	float x,y;
 	curtext.GetCharSize(x,y);
 	curtext.SetCharSize(x*2,y*2);
-	curtext.SetSize(2-(x*4 ),-2);
+	//	curtext.SetSize(2-(x*4 ),-2);
+	curtext.SetSize(1-.01,-2);
 	othtext.GetCharSize(x,y);
 	othtext.SetCharSize(x*2,y*2);
-	othtext.SetSize(2-(x*4),-.75);
+	//	othtext.SetSize(2-(x*4),-.75);
+	othtext.SetSize(1-.01,-.75);
 	Load(basefile, compute_time_of_day(base,un),_Universe->GetFaction(base->faction));
 	if (!rooms.size()) {
 		fprintf(stderr,"ERROR: there are no rooms in basefile \"%s%s%s\" ...\n",basefile,compute_time_of_day(base,un),BASE_EXTENSION);
