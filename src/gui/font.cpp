@@ -25,7 +25,7 @@
 
 #include "guidefs.h"
 #include "vs_globals.h"
-
+#include "config_xml.h"
 // For some reason, the cumulative width of GLUT strings is smaller than the
 //  actual width when they are painted.  If we add this factor to the reference
 //  length of every GLUT character, things work a lot better.
@@ -38,7 +38,10 @@ static const double GLUT_WIDTH_HACK = 0.6;
 // The width of the space character in the outline font is too big, so we make it a special case.
 static const char SPACE_CHAR = ' ';
 
-
+bool useStroke() {
+  static bool tmp=XMLSupport::parse_bool(vs_config->getVariable ("graphics","high_quality_font","false"));
+  return !tmp;
+}
 // Calculate the metrics for this font.
 // This does the real work, and doesn't check whether it needs to be done.
 void Font::calcMetrics(void) {
@@ -95,18 +98,22 @@ void Font::calcMetricsIfNeeded(void) const {
 // Draw a character.
 void Font::drawChar(char c) const {
     calcMetricsIfNeeded();
-
-    glutStrokeCharacter(GLUT_STROKE_ROMAN, c);
-    if(c == SPACE_CHAR) {
+    if (useStroke()) {
+      glutStrokeCharacter(GLUT_STROKE_ROMAN, c);
+      if(c == SPACE_CHAR) {
         // Need to translate back a bit -- the width of the space is too big.
         glTranslated(m_spaceCharFixup, 0.0, 0.0);
-    } else {
+      } else {
         glTranslated(m_extraCharWidth, 0.0, 0.0);
+      }
+    }else {
+      glutBitmapCharacter(GLUT_BITMAP_HELVETICA_12,c);
     }
 }
 
 // The width of a character in reference units.
 double Font::charWidth(char c) const {
+  if (useStroke()) {
     calcMetricsIfNeeded();
 
     if(c == SPACE_CHAR) {
@@ -118,6 +125,9 @@ double Font::charWidth(char c) const {
 
     const double charWidth = glutStrokeWidth(GLUT_STROKE_ROMAN, c);
     return(charWidth + m_extraCharWidth + GLUT_WIDTH_HACK);
+  }else {
+    return glutBitmapWidth(GLUT_BITMAP_HELVETICA_12,c)/(size()*2);
+  }
 }
 
 // The width of a string in reference units.

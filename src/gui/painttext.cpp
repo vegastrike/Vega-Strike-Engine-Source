@@ -26,7 +26,7 @@
 #include "vs_globals.h"
 
 const int PaintText::END_LINE = 1000000;           // Draw to the end.
-
+extern bool useStroke();
 // This function allows a number of formatting characters.  Here are the rules:
 //  -- The formatting char is "#".
 //  -- Format commands are indicated by a single character, which is case-sensitive.
@@ -206,7 +206,6 @@ static void drawChars(const string& str, int start, int end, const Font& font, c
     // Make sure the graphics state is right.
     glColor4f(color.r, color.g, color.b, color.a);
     glLineWidth(font.strokeWidth());
-
     // Draw all the characters.
     for(int charPos=start; charPos<=end; charPos++) {
         font.drawChar(str[charPos]);
@@ -247,7 +246,11 @@ void PaintText::drawLines(int start, int count) const {
         // Position at the start of the line.
         glLoadIdentity();
         glTranslatef(m_rect.origin.x+line.x, lineTop-line.baseLine, 0.0);
-        glScaled(m_horizontalScaling, m_verticalScaling, 1.0);
+        
+        if (!useStroke())
+          glRasterPos2f(0,0);
+        else
+          glScaled(m_horizontalScaling, m_verticalScaling, 1.0);
 
         // Draw each fragment.
         for(vector<TextFragment>::const_iterator frag=line.fragments.begin(); frag!=line.fragments.end(); frag++) {
@@ -262,7 +265,7 @@ void PaintText::drawLines(int start, int count) const {
         // Top of next line.
         lineTop -= line.height;
     }
-
+    glRasterPos2f(0,0);
     // Undo graphics state
     GFXPopBlendMode();
     glDisable(GL_LINE_SMOOTH);
