@@ -12,11 +12,14 @@ void VDU::DrawTargetSpr (Sprite *s, float per, float &sx, float &sy, float &w, f
   GetPosition (sx,sy);
   GetSize (w,h);
   h=-fabs (h*per);
-  w= fabs(nw*h/nh);
-  if (!s)
+
+  if (!s) {
+    w = fabs (w*per);
     return;
+  }
   s->SetPosition (sx,sy);
   s->GetSize (nw,nh);
+  w= fabs(nw*h/nh);
   s->SetSize (w,h);
   s->Draw();
   s->SetSize (nw,nh);
@@ -25,13 +28,13 @@ void VDU::DrawTargetSpr (Sprite *s, float per, float &sx, float &sy, float &w, f
 void VDU::DrawTarget(Unit * target) {
   float x,y,w,h;
   char t[32];
-  float fs = 1;//target->FShieldData();
-  float rs = 1;//target->RShieldData();
+  float fs = target->FShieldData();
+  float rs = target->RShieldData();
     
   //sprintf (t,"\n%4.1f %4.1f",target->FShieldData()*100,target->RShieldData()*100);
   tp->Draw (std::string("\n")+target->name);  
   DrawTargetSpr (target->getHudImage (),.6,x,y,w,h);
-  h=fabs(h)*.8;
+  h=fabs(h);
   w=fabs(w);
   GFXColor4f (.4,.4,1,1);
   GFXDisable (TEXTURE0);
@@ -39,9 +42,9 @@ void VDU::DrawTarget(Unit * target) {
   GFXBegin (GFXLINE);
   if (fs>.2) {
     GFXVertex3f (x-h/8,y+h/2,0);
-    GFXVertex3f (x-h/2,y+.9*h/2,0);
+    GFXVertex3f (x-h/3,y+.9*h/2,0);
     GFXVertex3f (x+h/8,y+h/2,0);
-    GFXVertex3f (x+h/2,y+.9*h/2,0);
+    GFXVertex3f (x+h/3,y+.9*h/2,0);
     GFXVertex3f (x+h/8,y+h/2,0);
     GFXVertex3f (x-h/8,y+h/2,0);
   }
@@ -49,23 +52,23 @@ void VDU::DrawTarget(Unit * target) {
     GFXVertex3f (x-h/8,y+1.1*h/2,0);
     GFXVertex3f (x+h/8,y+1.1*h/2,0);
     GFXVertex3f (x-h/8,y+1.1*h/2,0);
-    GFXVertex3f (x-h/2,y+h/2,0);
+    GFXVertex3f (x-h/3,y+h/2,0);
     GFXVertex3f (x+h/8,y+1.1*h/2,0);
-    GFXVertex3f (x+h/2,y+h/2,0);
+    GFXVertex3f (x+h/3,y+h/2,0);
   }
   if (fs>.75) {
     GFXVertex3f (x-h/8,y+1.2*h/2,0);
     GFXVertex3f (x+h/8,y+1.2*h/2,0);
     GFXVertex3f (x-h/8,y+1.2*h/2,0);
-    GFXVertex3f (x-h/2,y+1.1*h/2,0);
+    GFXVertex3f (x-h/3,y+1.1*h/2,0);
     GFXVertex3f (x+h/8,y+1.2*h/2,0);
-    GFXVertex3f (x+h/2,y+1.1*h/2,0);
+    GFXVertex3f (x+h/3,y+1.1*h/2,0);
   }
   if (rs>.2) {
     GFXVertex3f (x-h/8,y-h/2,0);
-    GFXVertex3f (x-h/2,y-.9*h/2,0);
+    GFXVertex3f (x-h/3,y-.9*h/2,0);
     GFXVertex3f (x+h/8,y-h/2,0);
-    GFXVertex3f (x+h/2,y-.9*h/2,0);
+    GFXVertex3f (x+h/3,y-.9*h/2,0);
     GFXVertex3f (x+h/8,y-h/2,0);
     GFXVertex3f (x-h/8,y-h/2,0);
   }
@@ -73,17 +76,17 @@ void VDU::DrawTarget(Unit * target) {
     GFXVertex3f (x-h/8,y-1.1*h/2,0);
     GFXVertex3f (x+h/8,y-1.1*h/2,0);
     GFXVertex3f (x-h/8,y-1.1*h/2,0);
-    GFXVertex3f (x-h/2,y-h/2,0);
+    GFXVertex3f (x-h/3,y-h/2,0);
     GFXVertex3f (x+h/8,y-1.1*h/2,0);
-    GFXVertex3f (x+h/2,y-h/2,0);
+    GFXVertex3f (x+h/3,y-h/2,0);
   }
   if (rs>.75) {
     GFXVertex3f (x-h/8,y-1.2*h/2,0);
     GFXVertex3f (x+h/8,y-1.2*h/2,0);
     GFXVertex3f (x-h/8,y-1.2*h/2,0);
-    GFXVertex3f (x-h/2,y-1.1*h/2,0);
+    GFXVertex3f (x-h/3,y-1.1*h/2,0);
     GFXVertex3f (x+h/8,y-1.2*h/2,0);
-    GFXVertex3f (x+h/2,y-1.1*h/2,0);
+    GFXVertex3f (x+h/3,y-1.1*h/2,0);
   }
   GFXEnd();
   GFXColor4f (1,1,1,1);
