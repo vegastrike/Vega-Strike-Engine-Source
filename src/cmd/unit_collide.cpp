@@ -1,6 +1,7 @@
 #include "vegastrike.h"
 #include "unit.h"
 #include "beam.h"
+#include "bolt.h"
 #include "gfx/mesh.h"
 #include "unit_collide.h"
 #include "physics.h"
@@ -139,6 +140,31 @@ bool Unit::Collide (Unit * target) {
   return true;
 }
 
+bool Bolt::Collide () {
+  vector <LineCollide *> candidates;  
+  collidetable.Get (cur_position,candidates);
+  Vector Mini ( prev_position.Min (cur_position));
+  Vector Maxi ( prev_position.Max (cur_position));
+  
+  for (vector <LineCollide *>::iterator i=candidates.begin();i!=candidates.end();i++) {
+    if ((*i)->type==LineCollide::UNIT) {
+      if (Mini.i< (*i)->Maxi.i&&
+	  Mini.j< (*i)->Maxi.j&&
+	  Mini.k< (*i)->Maxi.k&&
+	  Maxi.i> (*i)->Mini.i&&
+	  Maxi.j> (*i)->Mini.j&&
+	  Maxi.k> (*i)->Mini.k) {
+	if (this->Collide ((Unit*)(*i)->object)) {
+	  delete this;
+	  return true;
+	}
+      }
+    }
+  }
+  return false;
+}
+
+
 void Beam::CollideHuge (const LineCollide & lc) {
   vector <LineCollide *> tmp = collidetable.GetHuge();
   for (unsigned int i=0;i<tmp.size();i++) {
@@ -154,34 +180,6 @@ void Beam::CollideHuge (const LineCollide & lc) {
     }
   }
 
-}
-
-bool Beam::Collide (Unit * target) {
-  float distance;
-  Vector normal;//apply shields
-  Vector end (center+direction*curlength);
-  if (target==owner) 
-    return false;
-  
-
-
-  if ((distance = target->queryBSP(center,end,normal))) { 
-
-    curlength = distance;
-    impact|=IMPACT;
-    
-    GFXColor coltmp (Col);
-    coltmp.r+=.5;
-    coltmp.g+=.5;
-    coltmp.b+=.5;
-    if (coltmp.r>1)coltmp.r=1;
-    if (coltmp.g>1)coltmp.g=1;
-    if (coltmp.b>1)coltmp.b=1;
-    float tmp=(curlength/range); 
-    target->ApplyDamage (center+direction*curlength,normal,(damagerate*SIMULATION_ATOM*curthick/thickness)*((1-tmp)+tmp*rangepenalty),coltmp);
-    return true;
-  }
-  return false;
 }
 
 

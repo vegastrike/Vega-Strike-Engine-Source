@@ -137,6 +137,7 @@ void /*GFXDRVAPI*/ GFXSelectTexcoordSet(int stage, int texset);
 
 //primitive Begin/End 
 void /*GFXDRVAPI*/ GFXBegin(enum PRIMITIVE);
+void /*GFXDRVAPI*/ GFXColorf (const GFXColor & col); 
 void /*GFXDRVAPI*/ GFXColor4f(float r, float g, float b, float a = 1.0);
 void /*GFXDRVAPI*/ GFXTexCoord2f(float s, float t);
 void /*GFXDRVAPI*/ GFXTexCoord4f(float s, float t, float u, float v);

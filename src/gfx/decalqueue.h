@@ -15,10 +15,12 @@ class DecalQueue {
     int nullio=-1;
     if (tmpDecal) {
       for (;i<decal.size();i++) {
-	if ((*decal[i])==(*tmpDecal)) {
-	  retval = i;
-	  decalref[i]++;
-	  break;
+	if (decal[i]) {
+	  if ((*decal[i])==(*tmpDecal)) {
+	    retval = i;
+	    decalref[i]++;
+	    break;
+	  }
 	}
 	if (!decal[i]&&decalref[i]==0)
 	  nullio=i;

@@ -79,7 +79,9 @@ void /*GFXDRVAPI*/ GFXBegin(enum PRIMITIVE ptype)
 
 
 }
-
+void /*GFXDRVAPI*/ GFXColorf (const GFXColor & col) {
+  glColor4fv (&col.r);
+}
 void /*GFXDRVAPI*/ GFXColor4f(float r, float g, float b, float a)
 {
 	glColor4f(r,g,b,a);

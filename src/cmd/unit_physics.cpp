@@ -278,6 +278,8 @@ void Unit::UpdatePhysics (const Transformation &trans, const Matrix transmat, bo
       if (mounts[i].gun) {
 	mounts[i].gun->UpdatePhysics (cumulative_transformation, cumulative_transformation_matrix);
       }
+    } else {
+      mounts[i].refire+=SIMULATION_ATOM;
     }
   }
   bool dead=true;

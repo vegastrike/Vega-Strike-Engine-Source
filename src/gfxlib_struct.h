@@ -191,7 +191,8 @@ public:
   void UnlockUntransformed();
   
   GFXBOOL SetNext(GFXVertexList *vlist);
-  GFXBOOL Mutate (int offset,  const GFXVertex *vlist,int number, const GFXColor *color=NULL);
+  GFXVertex * BeginMutate (int offset) {return &myVertices[offset];}
+  void EndMutate () {RefreshDisplayList();}
   void LoadDrawState();
   void Draw();
   void DrawOnce (){LoadDrawState();Draw();}

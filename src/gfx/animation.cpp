@@ -39,7 +39,7 @@ Animation::Animation ()
 	Decal = NULL;
 }
 
-Animation::Animation (char * FileName, bool Rep,  float priority,enum FILTER ismipmapped,  bool camorient)
+Animation::Animation (const char * FileName, bool Rep,  float priority,enum FILTER ismipmapped,  bool camorient)
 {	
   repeat = Rep;
 	cumtime = 0;
@@ -96,19 +96,24 @@ Animation:: ~Animation ()
   
 }
 void Animation::SetPosition (float x,float y, float z) {
-  local_transformation.position = Vector (x,y,z);
+  local_transformation [12] = x;
+  local_transformation [13] = y;
+  local_transformation [14] = z;
 }
 void Animation::SetPosition (const Vector &k) {
-  local_transformation.position = k;
+  local_transformation [12] = k.i;
+  local_transformation [13] = k.j;
+  local_transformation [14] = k.k;  
 }
 void Animation::SetOrientation(const Vector &p, const Vector &q, const Vector &r)
 {	
-  local_transformation.orientation = Quaternion::from_vectors(p,q,r);
+  VectorAndPositionToMatrix (local_transformation, p,q,r,Vector (local_transformation[12],local_transformation[13], local_transformation[14]));
 }
 
-Vector &Animation::Position()
+//FIXME:: possibly not portable
+Vector Animation::Position()
 {
-	return local_transformation.position;
+  return Vector(local_transformation[12], local_transformation[13], local_transformation[14]);
 }
 
 void Animation:: SetDimensions(float wid, float hei) {
@@ -123,51 +128,40 @@ void Animation::ProcessDrawQueue () {
   GFXDisable(TEXTURE1);
   GFXDisable (DEPTHWRITE);
   while (!animationdrawqueue.empty()) {
-    animationdrawqueue.top()->DrawNow();
+    Matrix result;
+    animationdrawqueue.top()->CalculateOrientation(result);
+    animationdrawqueue.top()->DrawNow(result);
+    animationdrawqueue.top()->UpdateTime (GetElapsedTime());
     animationdrawqueue.pop();
   }
 }
 
-void Animation::DrawNow() {
-  Matrix orientation;
-  Vector pos = local_transformation.position;
+void Animation::CalculateOrientation (Matrix & result) {
+  Vector camp,camq,camr;
+  Camera* TempCam = _Universe->AccessCamera();
+  TempCam->GetPQR(camp,camq,camr);
+  if (!camup){
+    Vector q1 (local_transformation[1],local_transformation[5],local_transformation[9]);
+    Vector p1 ((q1.Dot(camq))*camq);
+    camq = (q1.Dot(camp))*camp+p1;			
+    Vector posit;
+    TempCam->GetPosition (posit);
+    camr.i = -local_transformation[12]+posit.i;
+    camr.j = -local_transformation[13]+posit.j;
+    camr.k = -local_transformation[14]+posit.k;
+    Normalize (camr);
+    ScaledCrossProduct (camq,camr,camp);		
+    ScaledCrossProduct (camr,camp,camq); 
+    //if the vectors are linearly dependant we're phucked :) fun fun fun
+  }
+  VectorAndPositionToMatrix (result, camp,camq,camr,Position());    
+}
 
-  local_transformation.orientation.to_matrix(orientation);
+void Animation::DrawNow(const Matrix &final_orientation) {
+ 
   int framenum = (int)(cumtime/timeperframe);
   if (!Done()) {
-
-    Vector p1,q1,r1;
-    Vector camp,camq,camr;
-    Camera* TempCam = _Universe->AccessCamera();
-    _Universe->AccessCamera()->GetPQR(camp,camq,camr);
-    if (camup)  {
-      p1=camp; q1 =  camq ; r1=camr;
-    }else{
-      q1.i = orientation[1];
-      q1.j = orientation[5];
-      q1.k = orientation[9];
-      
-      p1 = (q1.Dot(camq))*camq;
-      q1 = (q1.Dot(camp))*camp+p1;			
-      Vector posit;
-      TempCam->GetPosition (posit);
-      r1.i = -pos.i+posit.i;
-      r1.j = -pos.j+posit.j;
-      r1.k = -pos.k+posit.k;
-      Normalize (r1);
-
-      ScaledCrossProduct (q1,r1,p1);		
-      ScaledCrossProduct (r1,p1,q1); 
-      //if the vectors are linearly dependant we're phucked :) fun fun fun
-    }
-    static float ShipMat [16];
-    Matrix translation, transformation;
-    VectorToMatrix (ShipMat,p1,q1,r1);
-    Translate(translation, pos.i, pos.j, pos.k);
-    MultMatrix(transformation, translation, ShipMat);
-    
-    GFXLoadMatrix (MODEL, transformation);
-
+    GFXLoadMatrix (MODEL, final_orientation);
     Decal[framenum]->MakeActive();
     GFXBegin (QUADS);
     GFXTexCoord2f (0.00F,1.00F);
@@ -181,11 +175,14 @@ void Animation::DrawNow() {
     GFXEnd ();
    
   }
-  
-  if (GetElapsedTime()>=timeperframe)
+}
+void Animation::UpdateTime( float elapsedtime)
+{  
+  int framenum = (int)(cumtime/timeperframe);
+  if (elapsedtime>=timeperframe)
     cumtime +=timeperframe;
   else
-    cumtime += GetElapsedTime();
+    cumtime += elapsedtime;
   if (repeat&&framenum>=numframes)
     cumtime =0;
 }    

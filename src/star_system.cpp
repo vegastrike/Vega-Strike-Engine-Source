@@ -15,6 +15,7 @@
 #include "gfx/animation.h"
 #include "gfx/aux_texture.h"
 #include "gfx/star.h"
+#include "cmd/bolt.h"
 #include <expat.h>
 extern Vector mouseline;
 
@@ -104,6 +105,7 @@ StarSystem::~StarSystem() {
 	delete primaries[i];
   }
   delete [] primaries;
+  Bolt::Cleanup();
 }
 
 UnitCollection * StarSystem::getUnitList () {
@@ -149,7 +151,7 @@ void StarSystem::Draw() {
   Halo::ProcessDrawQueue();
   Beam::ProcessDrawQueue();
   Animation::ProcessDrawQueue();
-
+  Bolt::Draw();
   //  systemInputDFA->Draw();
 
 }
@@ -182,7 +184,7 @@ void StarSystem::Update() {
 	iter->advance();
       }
       delete iter;
-        
+      Bolt::UpdatePhysics();
       time -= SIMULATION_ATOM;
       firstframe = false;
     }

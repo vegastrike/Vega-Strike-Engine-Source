@@ -435,11 +435,12 @@ Texture::~Texture()
 				delete [] data;
 
 				data = NULL;
-				texHashTable.Delete (string(texfilename));
-				GFXDeleteTexture(name);
-				delete []texfilename;				
-				//glDeleteTextures(1, &name);
 			}
+			texHashTable.Delete (string(texfilename));
+			GFXDeleteTexture(name);
+			delete []texfilename;				
+				//glDeleteTextures(1, &name);
+			
 			if (palette !=NULL) {
 			  delete []palette;
 			  palette = NULL;

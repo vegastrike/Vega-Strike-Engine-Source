@@ -104,7 +104,10 @@ friend class PlanetaryOrbit;
   class Mount {
     Transformation LocalPosition;
   public:
-    Beam *gun;//only beams are actually coming out of the gun at all times...bolts, balls, etc aren't
+    union {
+      Beam *gun;//only beams are actually coming out of the gun at all times...bolts, balls, etc aren't
+      float refire;
+    };
     enum {ACTIVE, INACTIVE, DESTROYED, UNCHOSEN} status;
     short size;
     weapon_info type;

@@ -26,7 +26,7 @@
 #include "quaternion.h"
 
 class Animation {
-  Transformation local_transformation;
+  Matrix local_transformation;
   Texture **Decal; 
   bool camup;
   int numframes;
@@ -38,15 +38,17 @@ class Animation {
   void InitAnimation();
 public:
   Animation();
-  Animation(char *, bool Rep=0, float priority=.1,enum FILTER ismipmapped=MIPMAP,bool camorient=false);
+  Animation(const char *, bool Rep=0, float priority=.1,enum FILTER ismipmapped=MIPMAP,bool camorient=false);
   ~Animation();
   void Draw(const Transformation & t=identity_transformation, const float *m=identity_matrix );
-  void DrawNow();
+  void UpdateTime (float time);
+  void CalculateOrientation (Matrix &result);
+  void DrawNow(const Matrix & final_orientation);
   static void ProcessDrawQueue();
   void SetDimensions(float wid, float hei);
   bool Done();
-  Vector &Position();
-  void SetPosition (float, float, float);
+  Vector Position();
+  void SetPosition (const float, const float, const float);
   void SetPosition (const Vector &);
   void SetOrientation(const Vector &p, const Vector &q, const Vector &r);
 };

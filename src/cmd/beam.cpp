@@ -113,7 +113,7 @@ Beam::~Beam () {
   beamdecals.DelTexture(decal);
 }
 void Beam::RecalculateVertices() {
-  GFXVertex beam[32];
+  GFXVertex * beam = vlist->BeginMutate(0);
   
   float leftex = -texturespeed*(numframes*SIMULATION_ATOM+interpolation_blend_factor*SIMULATION_ATOM);
   float righttex = leftex+curlength/curthick;//how long compared to how wide!
@@ -169,7 +169,7 @@ void Beam::RecalculateVertices() {
 
 
 #undef QV
-  vlist->Mutate(0,beam,32);
+  vlist->EndMutate();
 }
 
 
@@ -265,4 +265,32 @@ void Beam::UpdatePhysics(const Transformation &trans, const Matrix m) {
     }
   }
   //Check if collide...that'll change max beam length REAL quick
+}
+
+bool Beam::Collide (Unit * target) {
+  float distance;
+  Vector normal;//apply shields
+  Vector end (center+direction*curlength);
+  if (target==owner) 
+    return false;
+  
+
+
+  if ((distance = target->queryBSP(center,end,normal))) { 
+
+    curlength = distance;
+    impact|=IMPACT;
+    
+    GFXColor coltmp (Col);
+    coltmp.r+=.5;
+    coltmp.g+=.5;
+    coltmp.b+=.5;
+    if (coltmp.r>1)coltmp.r=1;
+    if (coltmp.g>1)coltmp.g=1;
+    if (coltmp.b>1)coltmp.b=1;
+    float tmp=(curlength/range); 
+    target->ApplyDamage (center+direction*curlength,normal,(damagerate*SIMULATION_ATOM*curthick/thickness)*((1-tmp)+tmp*rangepenalty),coltmp);
+    return true;
+  }
+  return false;
 }

@@ -31,7 +31,7 @@
 
 #include "ai/order.h"
 #include "gfx/box.h"
-
+#include "bolt.h"
 #include "gfx/lerp.h"
 #include "gfx/bsp.h"
 //if the PQR of the unit may be variable...for radius size computation
@@ -267,7 +267,7 @@ Unit::~Unit()
   if (bspTree)
     delete bspTree;
   for (int beamcount=0;beamcount<nummounts;beamcount++) {
-    if (mounts[beamcount].gun)
+    if (mounts[beamcount].gun&&mounts[beamcount].type.type==weapon_info::BEAM)
       delete mounts[beamcount].gun;//hope we're not killin' em twice...they don't go in gunqueue
   }
 	if(meshdata&&nummesh>0)
@@ -716,23 +716,27 @@ bool Unit::Mount::Fire (const Transformation &Cumulative, const float * m, Unit 
       else 
 	return false;//can't fire an active beam
   }else { 
-    Transformation tmp = LocalPosition;
-    tmp.Compose (Cumulative,m);
-    switch (type.type) {
-    case weapon_info::BALL:
-      gun = NULL;
-      //new Ball (tmp, type, owner);
-      break;
-    case weapon_info::BOLT:
-      gun=NULL;
-      //new Bolt (tmp, type, owner);
-      break;
-    case weapon_info::PROJECTILE:
-      gun=NULL;
-      //new Missile (tmp, type, owner);
-      break;
-    default: 
-      break;
+    if (refire>type.Refire) {
+      refire =0;
+      Matrix mat;
+      Transformation tmp = LocalPosition;
+      tmp.Compose (Cumulative,m);
+      tmp.to_matrix (mat);
+      switch (type.type) {
+      case weapon_info::BALL:
+	new Bolt (type, mat,  owner);
+	break;
+      case weapon_info::BOLT:
+	
+	new Bolt (type,mat,  owner);
+	break;
+      case weapon_info::PROJECTILE:
+      
+	//new Missile (tmp, type, owner);
+	break;
+      default: 
+	break;
+      }
     }
   }
   return true;

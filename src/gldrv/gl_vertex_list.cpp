@@ -330,17 +330,6 @@ GFXBOOL GFXVertexList::SwapTransformed()
 	return GFXFALSE;
 }
 
-GFXBOOL GFXVertexList::Mutate (int offset, const GFXVertex *vlist, int number, const GFXColor *color){  
-  if (offset+number>numVertices)
-    return GFXFALSE;
-  memcpy (&myVertices[offset].x, vlist, number*sizeof(GFXVertex));
-  if (myColors&&color) {
-    memcpy (&myColors[offset].r,color,number*sizeof(GFXColor));
-  }
-  RefreshDisplayList();
-  return GFXTRUE;
-} 
-
 void GFXVertexList::LoadDrawState() {
 #ifdef USE_DISPLAY_LISTS
   if (display_list!=0) return;
