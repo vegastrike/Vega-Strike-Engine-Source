@@ -27,7 +27,8 @@ struct weapon_info {
   string file;
   string weapon_name;
   mutable class Mesh * gun;// requres nonconst to add to orig drawing queue when drawing
-  void init() {TextureStretch=1;role_bits=0;offset=Vector(0,0,0);size=NOWEAP;r=g=b=a=127;Length=5;Speed=10;PulseSpeed=15;RadialSpeed=1;Range=100;Radius=.5;Damage=1.8;PhaseDamage=0;Stability=60;Longrange=.5;LockTime=0;EnergyRate=18;Refire=.2;sound=-1;volume=0;} 
+  mutable class Mesh * gun1;// requres nonconst to add to orig drawing queue when drawing
+  void init() {gun=gun1=NULL;TextureStretch=1;role_bits=0;offset=Vector(0,0,0);size=NOWEAP;r=g=b=a=127;Length=5;Speed=10;PulseSpeed=15;RadialSpeed=1;Range=100;Radius=.5;Damage=1.8;PhaseDamage=0;Stability=60;Longrange=.5;LockTime=0;EnergyRate=18;Refire=.2;sound=-1;volume=0;} 
   void Type (enum WEAPON_TYPE typ) {type=typ;switch(typ) {case BOLT:file=string("");break;case BEAM:file=string("beamtexture.bmp");break;case BALL:file=string("ball.ani");break;case PROJECTILE:file=string("missile.xmesh");break;default:break;}} 
   void MntSize(enum MOUNT_SIZE size) {this->size = size;}
   weapon_info(enum WEAPON_TYPE typ) {init();Type(typ);}

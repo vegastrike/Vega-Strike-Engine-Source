@@ -56,6 +56,7 @@ public:
   void Init (const Transformation & trans, const weapon_info & clne, void * own);
   ~Beam();
   void RemoveFromSystem(bool eradicate);
+  float refireTime();
   QVector GetPosition() const {return local_transformation.position;}
   void SetPosition (const QVector &);
   void SetOrientation(const Vector &p, const Vector &q, const Vector &r);

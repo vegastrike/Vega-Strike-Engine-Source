@@ -594,10 +594,14 @@ void GameUnit<UnitType>::Draw(const Transformation &parent, const Matrix &parent
 		  mountLocation.Compose (*ct,this->WarpMatrix(*ctm));
 		  Matrix mat;
 		  mountLocation.to_matrix(mat);
-
 		  ScaleMatrix(mat,Vector(mahnt->xyscale,mahnt->xyscale,mahnt->zscale));
+		  gun->setCurrentFrame(mounts[i].ComputeAnimatedFrame(gun));		  
 		  gun->Draw(100,mat,1,cloak,(_Universe->AccessCamera()->GetNebula()==nebula&&nebula!=NULL)?-1:0,chardamage,true);//cloakign and nebula
-		  
+		  if (mahnt->type->gun1){
+			  gun = mahnt->type->gun1;
+			  gun->setCurrentFrame(mounts[i].ComputeAnimatedFrame(gun));		  
+			  gun->Draw(100,mat,1,cloak,(_Universe->AccessCamera()->GetNebula()==nebula&&nebula!=NULL)?-1:0,chardamage,true);//cloakign and nebula			  
+		  }
       }
 	 }
 	}

@@ -104,7 +104,8 @@ class Mount {
   public:
 	// Serial used to store missiles serial id before they are really created
 	ObjSerial serial;
-	float xyscale;float zscale;//for guns!	
+	float xyscale;float zscale;//for guns!
+	float ComputeAnimatedFrame(Mesh * gun);
     void SwapMounts (Mount * other);
     void ReplaceMounts (const Mount * other);
 	double Percentage (const Mount *newammo) const;

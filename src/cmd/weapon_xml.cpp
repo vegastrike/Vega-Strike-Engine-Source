@@ -490,12 +490,19 @@ weapon_info* getTemplate(const string &kkey) {
     if (!WeaponMeshCache::getCachedMutable (wi->weapon_name)) {
 		static string sharedmountdir = vs_config->getVariable("data","mountlocation","weapons");
 
-      string meshname = sharedmeshes+sharedmountdir+string ("/") + key+".xmesh"; 
-      FILE * fp = fopen (meshname.c_str(),"rb");
-      if (fp) {
-	fclose (fp);
-	WeaponMeshCache::setCachedMutable (wi->weapon_name,wi->gun=new Mesh (meshname.c_str(),Vector(1,1,1),0,NULL));
-      }
+		string meshshell=sharedmeshes+sharedmountdir+string ("/") + key;
+		string meshname=meshshell+".xmesh";
+		FILE * fp = fopen (meshname.c_str(),"rb");
+		if (fp) {
+			fclose (fp);
+			WeaponMeshCache::setCachedMutable (wi->weapon_name,wi->gun=new Mesh (meshname.c_str(),Vector(1,1,1),0,NULL));
+			meshname = meshshell+"_flare.xmesh";
+			fp = fopen (meshname.c_str(),"rb");
+			if (fp) {
+				fclose (fp);
+				WeaponMeshCache::setCachedMutable (wi->weapon_name+"_flare",wi->gun1=new Mesh (meshname.c_str(),Vector(1,1,1),0,NULL));
+			}
+		}
     }
   }
   return wi;

@@ -548,7 +548,8 @@ void RestoreGlowMapState(bool write_to_depthmap, float polygonoffset,float NOT_U
   float a,b;
     GFXGetPolygonOffset(&a,&b);
     GFXPolygonOffset (a, b+polygonoffset+NOT_USED_BUT_BY_HELPER);
-	if (write_to_depthmap) {
+	static bool force_write_to_depthmap=XMLSupport::parse_bool (vs_config->getVariable("graphics","force_glowmap_restore_write_to_depthmap","true"));
+	if (force_write_to_depthmap||write_to_depthmap) {
 		GFXEnable(DEPTHWRITE);
 	}
 	GFXEnable(TEXTURE1);

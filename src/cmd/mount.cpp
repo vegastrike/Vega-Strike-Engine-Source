@@ -14,6 +14,7 @@
 #include "force_feedback.h"
 #include "networking/netclient.h"
 #include "ai/aggressive.h"
+#include "lin_time.h"
 extern char SERVER;
 
 Mount::Mount() {
@@ -30,7 +31,26 @@ Mount::Mount() {
 	zscale=zscalestat;
 	serial = 0;
 }
-
+extern double interpolation_blend_factor;
+float Mount::ComputeAnimatedFrame(Mesh * gun) {
+	if (type->type==weapon_info::BEAM) {
+		if (ref.gun) {
+			if (ref.gun->Ready() ) {
+				return getNewTime()+type->Refire-ref.gun->refireTime()-interpolation_blend_factor*SIMULATION_ATOM;
+			}else {
+				return getNewTime()*gun->getFramesPerSecond();				
+			}
+		}else {
+			return 0;
+		}
+	}else {
+		if (ref.refire<type->Refire) {
+			return getNewTime()*gun->getFramesPerSecond();
+		}else {
+			return getNewTime()+type->Refire-ref.refire-interpolation_blend_factor*SIMULATION_ATOM;
+		}
+	}
+}
 Mount::Mount(const string& filename, short am,short vol, float xyscale, float zscale){
   static weapon_info wi(weapon_info::BEAM);
   size = weapon_info::NOWEAP;

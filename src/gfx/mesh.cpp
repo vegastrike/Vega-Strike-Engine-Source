@@ -40,6 +40,7 @@
 #include "hashtable.h"
 #include "vegastrike.h"
 #include "sphere.h"
+#include "lin_time.h"
 #if defined(__APPLE__) || defined(MACOSX)
     #include <OpenGL/gl.h>
 #else
@@ -181,13 +182,27 @@ void Mesh::SetMaterial (const GFXMaterial & mat) {
   }
 }
 
-
+int Mesh::getNumLOD()const {
+	return numlods;
+}
+void Mesh::setCurrentFrame(float which) {
+	framespersecond=which;
+}
+float Mesh::getCurrentFrame() const {
+	return framespersecond;
+}
+float Mesh::getFramesPerSecond() const {
+	return orig?orig->framespersecond:framespersecond;
+}
 Mesh * Mesh::getLOD (float lod) {
   if (!orig)
     return this;
   Mesh * retval =&orig[0];
-  if (framespersecond>.0000001) {
-	  return &orig[(int)floor(fmod (getNewTime()*framespersecond,numlods))];
+  if (getFramesPerSecond()>.0000001) {
+	  //return &orig[(int)floor(fmod (getNewTime()*getFramesPerSecond(),numlods))];
+	  unsigned int which=(int)floor(fmod(getCurrentFrame(),getNumLOD()));
+	  setCurrentFrame(getCurrentFrame()+GetElapsedTime()*getFramesPerSecond());
+	  return &orig[which%getNumLOD()];
   }else {
 	  for (int i=1;i<numlods;i++) {
 		  if (lod<orig[i].lodsize) {

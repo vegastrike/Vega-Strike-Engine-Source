@@ -21,6 +21,7 @@
 
 #include "vegastrike.h"
 #include "in_kb.h"
+static double firsttime;
 #ifdef WIN32
 #include <windows.h>
 static LONGLONG ttime;
@@ -33,6 +34,7 @@ static double dblnewtime;
 #endif /* defined( HAVE_SDL ) */
 static double newtime;
 static double lasttime;
+
 #include <sys/time.h>
 #include <sys/types.h>
 #endif
@@ -40,9 +42,9 @@ static double elapsedtime=.1;
 static double timecompression=1;
 double getNewTime() {
 #ifdef _WIN32
-	return dblnewtime;
+	return dblnewtime-firsttime;
 #else
-	return newtime;
+	return newtime-firsttime;
 #endif
 }
 
@@ -153,7 +155,7 @@ void UpdateTime() {
 	  dblnewtime = 0.;
   else
 	  dblnewtime = ((double)newtime)/((double)freq);
-
+  static double ftime = firsttime = dblnewtime;
 #elif defined(HAVE_GETTIMEOFDAY)
   struct timeval tv;
   (void) gettimeofday(&tv, NULL);
@@ -161,14 +163,15 @@ void UpdateTime() {
   lasttime = newtime;
   newtime = (double)tv.tv_sec + (double)tv.tv_usec * 1.e-6;
   elapsedtime = newtime-lasttime;
-
+  static double ftime = firsttime = newtime;
 #elif defined(HAVE_SDL)
   lasttime = newtime;
   newtime = SDL_GetTicks() * 1.e-3;
   elapsedtime = newtime-lasttime;
-
+  static double ftime = firsttime = newtime;
 #else
 # error "We have no way to determine the time on this system."
 #endif
+
   elapsedtime *=timecompression;
 }

@@ -338,6 +338,10 @@ protected:
 public:
   Mesh();
   Mesh(const Mesh &m);
+  float getFramesPerSecond()const;
+  float getCurrentFrame() const;
+  void setCurrentFrame(float);
+  int getNumLOD()const;
   virtual int MeshType() {return 0;}
   BLENDFUNC getBlendSrc() {return blendSrc;}
   BLENDFUNC getBlendDst() {return blendDst;}		
