@@ -40,7 +40,7 @@
 #include "cmd/unit.h"
 #include "in_kb.h"
 #include "in_main.h"
-#if defined(WITH_MACOSX_BUNDLE)
+#if defined(__APPLE__)
 #import <sys/param.h>
 #endif
 #include "savegame.h"
@@ -60,13 +60,13 @@ void GameUniverse::Init( int argc, char** argv, const char * galaxy)
 {
 	current_cockpit=0;
 	//Select drivers
-#if defined(WITH_MACOSX_BUNDLE)
+#if defined(__APPLE__)
     // get the current working directory so when glut trashes it we can restore.
     char pwd[MAXPATHLEN];
     getcwd (pwd,MAXPATHLEN);
 #endif
 	GFXInit(argc,argv);
-#if defined(WITH_MACOSX_BUNDLE)
+#if defined(__APPLE__)
     // Restore it
     chdir(pwd);
 #endif

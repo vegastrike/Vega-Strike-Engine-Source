@@ -150,7 +150,7 @@ int main( int argc, char *argv[] )
 	delete []parentdir;
 	}
 #if defined(WITH_MACOSX_BUNDLE)
-	
+	chdir ("../Resources/data");/* chdir to the .app's parent */
 	//chdir ("../../../");/* chdir to the .app's parent */
 #endif
 #endif
