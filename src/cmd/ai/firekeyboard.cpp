@@ -22,13 +22,14 @@ const unsigned int NUMCOMMKEYS=10;
 struct FIREKEYBOARDTYPE {
   FIREKEYBOARDTYPE() {
     commKeys[0]=commKeys[1]=commKeys[2]=commKeys[3]=commKeys[4]=commKeys[5]=commKeys[6]=commKeys[7]=commKeys[8]=commKeys[9]=UP;
-    eject=ejectcargo=firekey=missilekey=jfirekey=jtargetkey=jmissilekey=weapk=misk=cloakkey=neartargetkey=threattargetkey=picktargetkey=targetkey=nearturrettargetkey =threatturrettargetkey= pickturrettargetkey=turrettargetkey=UP;
+    eject=ejectcargo=firekey=missilekey=jfirekey=rtargetkey=jtargetkey=jmissilekey=weapk=misk=cloakkey=neartargetkey=threattargetkey=picktargetkey=targetkey=nearturrettargetkey =threatturrettargetkey= pickturrettargetkey=turrettargetkey=UP;
     doc=und=req=0;
   }
  KBSTATE firekey;
  bool doc;
  bool und;
  bool req;
+ KBSTATE rtargetkey;
  KBSTATE missilekey;
  KBSTATE jfirekey;
  KBSTATE jtargetkey;
@@ -187,6 +188,13 @@ void FireKeyboard::TargetKey(int, KBSTATE k) {
     g().targetkey = k;
   if (k==RESET) {
     g().targetkey=PRESS;
+  }
+}
+void FireKeyboard::ReverseTargetKey(int, KBSTATE k) {
+  if (g().rtargetkey!=PRESS)
+    g().rtargetkey = k;
+  if (k==RESET) {
+    g().rtargetkey=PRESS;
   }
 }
 void FireKeyboard::PickTargetKey(int, KBSTATE k) {
@@ -422,6 +430,36 @@ void FireKeyboard::PickTargets(bool Turrets){
   parent->Target(found_unit);
 
 }
+void FireKeyboard::ChooseRTargets (bool turret) {
+  Unit * targ =parent->Target();
+  Unit * oldun=NULL;
+  Unit * un=NULL;
+  un_iter i;
+  for (i=_Universe->activeStarSystem()->getUnitList().createIterator();
+       (un=*i)!=NULL;
+       ++i) {
+    if (un==targ) {
+      break;
+    }else {
+      if (un!=parent) {
+	oldun=un;
+      }
+    }
+  }
+  if (oldun==NULL) {//get us the last
+    for (i=_Universe->activeStarSystem()->getUnitList().createIterator();
+	 (un=*i)!=NULL;
+	 ++i) {
+      if (un!=parent) {
+	oldun=un;
+      }
+    }
+  }
+  parent->Target (oldun);
+  if (turret) {
+	parent->TargetTurret (un);
+  }
+}
 
 void FireKeyboard::ChooseTargets (bool turret) {
   UnitCollection::UnitIterator iter = _Universe->activeStarSystem()->getUnitList().createIterator();
@@ -609,6 +647,11 @@ void FireKeyboard::Execute () {
     ChooseTargets(false);
     refresh_target=true;
   }
+  if (f().rtargetkey==PRESS) {
+    f().rtargetkey=DOWN;
+    ChooseRTargets(false);
+    refresh_target=true;
+  }
   if(f().picktargetkey==PRESS){
     f().picktargetkey=DOWN;
     PickTargets(false);
@@ -629,21 +672,22 @@ void FireKeyboard::Execute () {
 
   if (f().turrettargetkey==PRESS) {
     f().turrettargetkey=DOWN;
-    ChooseTargets(true);
+    //    ChooseTargets(true);
+    parent->TargetTurret(parent->Target());
     refresh_target=true;
   }
   if(f().pickturrettargetkey==PRESS){
     f().pickturrettargetkey=DOWN;
-    PickTargets(true);
+    parent->TargetTurret(parent->Target());
     refresh_target=true;
   }
   if (f().nearturrettargetkey==PRESS) {
-    ChooseNearTargets (true);
+    parent->TargetTurret(parent->Target());
     f().nearturrettargetkey=DOWN;
     refresh_target=true;
   }
   if (f().threatturrettargetkey==PRESS) {
-    ChooseThreatTargets (true);
+    parent->TargetTurret(parent->Target());
     f().threatturrettargetkey=DOWN;
     refresh_target=true;
   }
