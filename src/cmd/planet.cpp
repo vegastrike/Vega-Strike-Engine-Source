@@ -15,6 +15,7 @@
 #include "gfx/planetary_transform.h"
 #include "collide/rapcol.h"
 #include "images.h"
+#include "gfx/halo.h"
 PlanetaryOrbit:: PlanetaryOrbit(Unit *p, double velocity, double initpos, const Vector &x_axis, const Vector &y_axis, const Vector & centre, Unit * targetunit) : Order(MOVEMENT), parent(p), velocity(velocity), theta(initpos), x_size(x_axis), y_size(y_axis) { 
   parent->SetResolveForces(false);
     double delta = x_size.Magnitude() - y_size.Magnitude();
@@ -133,6 +134,7 @@ Planet::Planet(Vector x,Vector y,float vely, const Vector & rotvel, float pos,fl
   }
   curr_physical_state.position = prev_physical_state.position=cumulative_transformation.position=orbitcent+x;
   Init();
+
   this->faction = faction;
   killed=false;
   while (!dest.empty()) {
@@ -196,6 +198,26 @@ Planet::Planet(Vector x,Vector y,float vely, const Vector & rotvel, float pos,fl
   meshdata[1]=NULL;
   SetAngularVelocity (rotvel);
   image->dockingports.push_back (DockingPorts (Vector(0,0,0),radius+1000,true));
+  if (ligh.size()>0) {
+    static bool drawglow = XMLSupport::parse_bool(vs_config->getVariable ("graphics","draw_star_glow","true"));
+    static bool drawstar = XMLSupport::parse_bool(vs_config->getVariable ("graphics","draw_star_body","true"));
+    if (drawglow) {
+      numhalos=1;
+      halos= new Halo *[1];
+      halos[0]=new Halo ("shine.png",
+			 //			 ligh[0].ligh.GetProperties (AMBIENT),
+			 GFXColor(ourmat.er,ourmat.eg,ourmat.eb,ourmat.ea),
+			 Vector (0,0,0),
+			 drawstar?3*radius:radius,
+			 drawstar?3*radius:radius);
+      if (!drawstar) {
+	delete meshdata[0];
+	meshdata[0]=NULL;
+	nummesh=0;
+      }
+    }
+  }
+
 }
 extern bool shouldfog;
 

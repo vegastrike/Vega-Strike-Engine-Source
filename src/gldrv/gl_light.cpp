@@ -132,6 +132,37 @@ void /*GFXDRVAPI*/ GFXLight::SetProperties(enum LIGHT_TARGET lighttarg, const GF
 }
 
 
+GFXColor /*GFXDRVAPI*/ GFXLight::GetProperties(enum LIGHT_TARGET lighttarg) const{
+  switch (lighttarg) {
+  case DIFFUSE:
+    return GFXColor (diffuse[0],
+		     diffuse[1],
+		     diffuse[2],
+		     diffuse[3]);
+  case SPECULAR:
+    return GFXColor(specular[0],
+		    specular[1],
+		    specular[2],
+		    specular[3]);
+  case AMBIENT:
+    return GFXColor (ambient[0],
+		     ambient[1],
+		     ambient[2],
+		     ambient[3]);
+  case POSITION:
+    return GFXColor (vect[0],
+		     vect[1],
+		     vect[2]);
+    break;
+  case ATTENUATE:
+    return GFXColor (
+		     attenuate[0],
+		     attenuate[1],
+		     attenuate[2]);
+  }
+}
+
+
 
 GFXBOOL /*GFXDRVAPI*/ GFXSetCutoff (const float ttcutoff) {
   if (ttcutoff<0) 
