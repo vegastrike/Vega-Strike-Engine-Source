@@ -1,3 +1,7 @@
+2002-02-03 Daniel Horn <hellcatv@hotmail.com>
+	* Added splash screens... it's a variable in vegastrike.config defaults to vega_splash.ani  found in animations/vega_splash.ani
+
+	
 2002-02-03 Alexander Rawass <alexannika@users.sourceforge.net>
 	
 	* modified easydom.cpp/h and mission.cpp/h
