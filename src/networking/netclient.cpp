@@ -47,6 +47,7 @@
 
 #include "networking/vsnet_clientstate.h"
 #include "networking/vsnet_debug.h"
+#include "networking/vsnet_dloadmgr.h"
 #include "vegastrike.h"
 #include "client.h"
 #include "networking/netbuffer.h"
@@ -716,6 +717,11 @@ int NetClient::recvMsg( Packet* outpacket )
 				}
 			}
 			break;
+            case CMD_DOWNLOAD :
+                if( _downloadManagerClient )
+                {
+                    _downloadManagerClient->processCmdDownload( clt_sock, netbuf );
+                }
             // Login failed
             case LOGIN_ERROR :
                 COUT<<">>> LOGIN ERROR =( DENIED )= ------------------------------------------------"<<endl;
@@ -1581,13 +1587,6 @@ bool	NetClient::jumpRequest( string newsystem)
 /******************************************************************************************/
 /*** COMMUNICATION STUFF                                                               ****/
 /******************************************************************************************/
-
-#ifdef NETCOMM
-bool	NetClient::IsNetcommActive()
-{
-	return this->netcomm_active;
-}
-#endif
 
 void	NetClient::startCommunication()
 {

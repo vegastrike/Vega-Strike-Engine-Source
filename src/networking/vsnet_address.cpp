@@ -13,9 +13,14 @@ void AddressIP::dump( )
     std::cout << *this << std::endl;
 }
 
-const char* AddressIP::ipadr( )
+const char* AddressIP::ipadr( ) const
 {
     return inet_ntoa( sin_addr);
+}
+
+unsigned long AddressIP::inaddr( ) const
+{
+    return sin_addr.s_addr;
 }
 
 bool operator==( const AddressIP& l, const AddressIP& r )
@@ -26,5 +31,10 @@ bool operator==( const AddressIP& l, const AddressIP& r )
 bool operator!=( const AddressIP& l, const AddressIP& r )
 {
     return memcmp( (sockaddr_in*)&l, (sockaddr_in*)&r, sizeof(sockaddr_in) );
+}
+
+bool operator<( const AddressIP& l, const AddressIP& r )
+{
+    return ( l.inaddr() < r.inaddr() );
 }
 

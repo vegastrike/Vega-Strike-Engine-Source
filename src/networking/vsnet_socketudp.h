@@ -20,6 +20,9 @@ public:
 
     virtual bool isTcp() const { return false; }
 
+    virtual int  optPayloadSize( ) const;
+    virtual int  queueLen( int pri );
+
     virtual bool isActive( );
     virtual int  sendbuf( PacketMem& packet, const AddressIP* to, int pcktflags );
     virtual int  recvbuf( PacketMem& buffer, AddressIP *from );
@@ -46,6 +49,12 @@ private:
 
     size_t _negotiated_max_size;
     char*  _recv_buf;
+
+private:
+    /** This will eventually contains the MTU size estimation in bytes.
+     *  Dummy for now.
+     */
+    int _mtu_size_estimation;
 
 private:
     VsnetUDPSocket( );

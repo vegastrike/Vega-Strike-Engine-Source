@@ -53,7 +53,7 @@ AC_TYPE_SIZE_T()
 
 
 dnl Checks for library functions.
-AC_CHECK_FUNCS(getcwd gettimeofday strdup select socket strstr access)
+AC_CHECK_FUNCS(getcwd gettimeofday strdup select socket strstr access lstat)
 
 dnl Check for non-standard floating point functions and headers
 AC_CHECK_FUNCS(finite isnan)

@@ -96,7 +96,12 @@ bool operator==( const SOCKETALT& l, const SOCKETALT& r )
     }
 }
 
-bool SOCKETALT::sameAddress( const SOCKETALT& l )
+bool SOCKETALT::CompareLt::operator()( const SOCKETALT& l, const SOCKETALT& r )
+{
+    return l.lowerAddress( r );
+}
+
+bool SOCKETALT::sameAddress( const SOCKETALT& l ) const
 {
     if( l._sock.isNull() )
     {
@@ -109,6 +114,23 @@ bool SOCKETALT::sameAddress( const SOCKETALT& l )
     else
     {
         return this->_sock->eq(*l._sock);
+    }
+}
+
+bool SOCKETALT::lowerAddress( const SOCKETALT& right ) const
+{
+    if( _sock.isNull() )
+    {
+        if( right._sock.isNull() == false ) return true;
+        return false;
+    }
+    else if( right._sock.isNull() )
+    {
+        return false;
+    }
+    else
+    {
+        return this->_sock->lt( *right._sock );
     }
 }
 
@@ -129,13 +151,26 @@ VsnetSocket::VsnetSocket( int sock, const AddressIP& remote_ip, SocketSet& sets 
     // return *this;
 // }
 
-bool VsnetSocket::eq( const VsnetSocket& r )
+bool VsnetSocket::eq( const VsnetSocket& r ) const
 {
-    const VsnetSocket* r2 = (const VsnetSocket*)&r;
-    return ( (isTcp() == r2->isTcp()) && (_fd == r2->_fd) && (_remote_ip==r2->_remote_ip) );
+    return ( (isTcp() == r.isTcp()) && (_fd == r._fd) && (_remote_ip==r._remote_ip) );
 }
 
-bool VsnetSocket::sameAddress( const VsnetSocket& r)
+bool VsnetSocket::lt( const VsnetSocket& r ) const
+{
+    if( !isTcp() && r.isTcp() ) return true;
+    if( isTcp() == r.isTcp() )
+    {
+    	if( _fd < r._fd ) return true;
+	    if( _fd == r._fd )
+	    {
+            if( _remote_ip < r._remote_ip ) return true;
+	    }
+    }
+    return false;
+}
+
+bool VsnetSocket::sameAddress( const VsnetSocket& r) const
 {
     const VsnetSocket* r2 = (const VsnetSocket*)&r;
     return ( (isTcp() == r2->isTcp()) && (_remote_ip==r2->_remote_ip) );

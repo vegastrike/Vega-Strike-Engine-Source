@@ -5,6 +5,7 @@
 
 #include "vsnet_headers.h"
 
+#include <map>
 #include <list>
 #include <queue>
 #include <vector>
@@ -29,6 +30,9 @@ public:
     virtual ~VsnetTCPSocket( );
 
     virtual bool isTcp() const { return true; }
+
+    virtual int  optPayloadSize( ) const;
+    virtual int  queueLen( int pri );
 
     virtual int  sendbuf( PacketMem& packet, const AddressIP* to, int pcktflags );
     virtual int  recvbuf( PacketMem& buffer, AddressIP *from);
@@ -131,6 +135,7 @@ private:
 
     typedef std::priority_queue<SqPair,std::vector<SqPair>,SqPairLess> SqQueue;
 
+    std::map<int,int>     _sq_count;
     SqQueue               _sq;
     std::queue<PacketMem> _sq_current;
     size_t                _sq_off;
@@ -142,6 +147,12 @@ private:
     void inner_complete_a_packet( Blob* b );
 
     void private_nothread_conditional_write( );
+
+private:
+    /** This will eventually contains the MTU size estimation in bytes.
+     *  Dummy for now.
+     */
+    int _mtu_size_estimation;
 
 private:
     VsnetTCPSocket( );

@@ -21,6 +21,7 @@ using std::endl;
  
 VsnetUDPSocket::VsnetUDPSocket( int sock, const AddressIP& remote_ip, SocketSet& socketset )
     : VsnetSocket( sock, remote_ip, socketset )
+    , _mtu_size_estimation( 1024 )
 {
     _negotiated_max_size = MAXBUFFER;
     _recv_buf            = new char[MAXBUFFER];
@@ -29,6 +30,16 @@ VsnetUDPSocket::VsnetUDPSocket( int sock, const AddressIP& remote_ip, SocketSet&
 VsnetUDPSocket::~VsnetUDPSocket( )
 {
     delete [] _recv_buf;
+}
+
+int VsnetUDPSocket::optPayloadSize( ) const
+{
+    return _mtu_size_estimation;
+}
+
+int VsnetUDPSocket::queueLen( int )
+{
+    return 0;
 }
 
 int VsnetUDPSocket::sendbuf( PacketMem& packet, const AddressIP* to, int pcktflags )

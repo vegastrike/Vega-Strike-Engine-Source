@@ -27,6 +27,7 @@
 #include <string.h>
 #include <stdlib.h>
 
+#include "boost/shared_ptr.hpp"
 #include "configxml.h"
 #include "accountsxml.h"
 #include "const.h"
@@ -45,6 +46,12 @@ typedef vector<Account *>::iterator VI;
 
 struct ServerSocket;
 class SocketSet;
+
+namespace VsnetDownload {
+  namespace Server {
+    class Manager;
+  };
+};
 
 /** Class Netserver : runs the "game server" */
 class NetServer
@@ -81,6 +88,8 @@ class NetServer
 	    };
 
         queue<WaitListEntry> waitList;
+
+        boost::shared_ptr<VsnetDownload::Server::Manager> _downloadManagerServer;
 
 		bool			updateTimestamps( ClientPtr clt, Packet & p);
 		//void			loadConfig();					// Loads configuration from server.xml

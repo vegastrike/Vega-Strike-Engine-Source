@@ -26,16 +26,28 @@
 #include <config.h>
 #include <iostream>
 #include <errno.h>
+#include <set>
+
+#include "boost/shared_ptr.hpp"
+#include "boost/weak_ptr.hpp"
+
 #include "vsnet_headers.h"
 #include "const.h"
-
-#include <set>
 
 #include "vsnet_thread.h"
 #include "vsnet_pipe.h"
 
 class ServerSocket;
 class VsnetSocketBase;
+
+namespace VsnetDownload {
+  namespace Client {
+    class Manager;
+  };
+  namespace Server {
+    class Manager;
+  };
+};
 
 class SocketSet : public VSThread
 {
@@ -58,9 +70,15 @@ class SocketSet : public VSThread
     VSMutex _blockmain_mx;
     VSCond  _blockmain_cond;
 
+    boost::weak_ptr<VsnetDownload::Client::Manager> _client_mgr;
+    boost::weak_ptr<VsnetDownload::Server::Manager> _server_mgr;
+
 public:
     SocketSet( bool blockmainthread = false );
     ~SocketSet( );
+
+    bool addDownloadManager( boost::shared_ptr<VsnetDownload::Client::Manager> mgr );
+    bool addDownloadManager( boost::shared_ptr<VsnetDownload::Server::Manager> mgr );
 
     /** Once a socket is registered using this function, setRead is
      *  automatically called for it before each select */

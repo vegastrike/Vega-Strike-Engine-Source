@@ -60,6 +60,7 @@ VsnetTCPSocket::VsnetTCPSocket( int sock, const AddressIP& remote_ip, SocketSet&
     , _incomplete_header( 0 )
     , _connection_closed( false )
     , _sq_off( 0 )
+    , _mtu_size_estimation( 1024 )
 {
 #ifdef HAVE_FIOASYNC
     _sq_fd = ::dup2( sock );
@@ -92,17 +93,13 @@ int VsnetTCPSocket::sendbuf( PacketMem& packet, const AddressIP*, int pcktflags 
      */
 
     _sq_mx.lock( );
-    if( _sq.empty() )
-    {
-        _sq.push( SqPair(idx,packet) );
-        _sq_mx.unlock( );
-        _set.wakeup( );
-    }
-    else
-    {
-        _sq.push( SqPair(idx,packet) );
-        _sq_mx.unlock( );
-    }
+    bool e = _sq.empty();
+
+    _sq.push( SqPair(idx,packet) );
+    _sq_count[idx]++;
+    _sq_mx.unlock( );
+
+    if( e ) _set.wakeup( );
     return packet.len();
 }
 
@@ -127,6 +124,19 @@ int VsnetTCPSocket::get_write_fd( ) const
     return _sq_fd;
 }
 
+int VsnetTCPSocket::optPayloadSize( ) const
+{
+    return _mtu_size_estimation;
+}
+
+int VsnetTCPSocket::queueLen( int pri )
+{
+    _sq_mx.lock( );
+    int retval = _sq_count[pri];
+    _sq_mx.unlock( );
+    return retval;
+}
+
 int VsnetTCPSocket::lower_sendbuf( )
 {
     _sq_mx.lock( );
@@ -142,6 +152,7 @@ int VsnetTCPSocket::lower_sendbuf( )
             Header h( _sq.top().second.len() );
             _sq_current.push( PacketMem( &h, sizeof(Header) ) );
             _sq_current.push( _sq.top().second );
+            _sq_count[_sq.top().first]--;
             _sq.pop( );
             _sq_off = 0;
         }

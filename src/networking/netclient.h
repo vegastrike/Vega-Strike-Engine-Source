@@ -26,6 +26,7 @@
 #include <string>
 #include <vector>
 
+#include "boost/shared_ptr.hpp"
 #include "savegame.h"
 #include "networking/const.h"
 #include "networking/vsnet_socket.h"
@@ -42,6 +43,12 @@ class Unit;
 class Client;
 class ClientState;
 class NetUI;
+
+namespace VsnetDownload {
+  namespace Client {
+    class Manager;
+  };
+};
 
 using std::vector;
 using std::string;
@@ -94,15 +101,13 @@ class	NetClient
 		Unit *				Units[MAXOBJECTS];			// Server controlled units in the same zone
 		// a vector because always accessed by their IDs
 
+		bool					netcomm_active;
 #ifdef NETCOMM
 		NetworkCommunication *	NetComm;
-		bool					netcomm_active;
-	public:
-		bool					IsNetcommActive();
-#else
-	public:
-		inline bool IsNetcommActive() const { return false; }
 #endif
+	public:
+		inline bool IsNetcommActive() const { return netcomm_active; }
+
 	private:
 
 		int					enabled;		// Bool to say network is enabled
@@ -117,6 +122,8 @@ class	NetClient
 		bool				ingame;
 		float				current_freq;
 		float				selected_freq;
+
+        boost::shared_ptr<VsnetDownload::Client::Manager> _downloadManagerClient;
 
 		void	receiveData();
 		void	readDatafiles();

@@ -6,6 +6,7 @@
 - About NetworkCommunications : assign a different freq range for each faction ?
 - NOTE : network communication system is only working when 1 local player
 - Implement a download manager -> Carsten is on that one
+- Download manager must be told that sockets have closed or timeout out
 - Use and "hand-shake" protocol between server and client
 - Interpolate orientation too ? (3 interpolations)
 - CUBIC SPLINES : interpolate time linearly with SPLINE_METHOD2

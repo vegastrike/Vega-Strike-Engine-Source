@@ -42,6 +42,7 @@
 #include "savenet_util.h"
 #include "vs_path.h"
 #include "networking/netbuffer.h"
+#include "networking/vsnet_dloadmgr.h"
 #include "cmd/ai/script.h"
 #include "cmd/ai/order.h"
 #include "cmd/ai/fire.h"
@@ -1170,6 +1171,12 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
 			}
 		}
 		break;
+        case CMD_DOWNLOAD :
+            if( _downloadManagerServer )
+            {
+                _downloadManagerServer->addCmdDownload( clt->sock, netbuf );
+            }
+            break;
 		case CMD_FIREREQUEST :
 			// Here should put a flag on the concerned mount of the concerned Unit to say we want to fire
 			// target_serial is in fact the serial of the firing unit (client itself or turret)

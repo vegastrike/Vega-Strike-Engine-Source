@@ -53,11 +53,13 @@ struct AddressIP : public sockaddr_in
     /** note that this string is temporary and should not be used for
      *  anything but debug output.
      */
-    const char* ipadr( );
+    const char*   ipadr( ) const;
+    unsigned long inaddr( ) const;
 
     friend std::ostream& operator<<( std::ostream& ostr, const AddressIP& adr );
     friend bool operator==( const AddressIP& l, const AddressIP& r );
     friend bool operator!=( const AddressIP& l, const AddressIP& r );
+    friend bool operator<( const AddressIP& l, const AddressIP& r );
 };
 
 #endif /* VSNET_ADDRESS_H */

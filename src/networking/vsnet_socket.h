@@ -103,8 +103,12 @@ public:
 
     virtual bool isTcp() const = 0;
 
-    bool eq( const VsnetSocket& r );
-    bool sameAddress( const VsnetSocket& r );
+    virtual int  optPayloadSize( ) const = 0;
+    virtual int  queueLen( int pri ) = 0;
+
+    bool eq( const VsnetSocket& r ) const;
+    bool lt( const VsnetSocket& r ) const;
+    bool sameAddress( const VsnetSocket& r ) const;
 
     virtual int  sendbuf( PacketMem& packet, const AddressIP* to, int pcktflags ) = 0;
 
@@ -154,8 +158,16 @@ public:
         return (_sock.isNull() ? false : _sock->valid());
     }
 
-    inline bool isTcp( ) {
+    inline bool isTcp( ) const {
         return (_sock.isNull() ? false : _sock->isTcp());
+    }
+
+    inline int queueLen( int pri ) {
+        return (_sock.isNull() ? -1 : _sock->queueLen(pri));
+    }
+
+    inline int optPayloadSize( ) const {
+        return (_sock.isNull() ? -1 : _sock->optPayloadSize());
     }
 
     inline bool isActive( ) {
@@ -182,10 +194,20 @@ public:
         if( !_sock.isNull() ) _sock->disconnect( s, fexit );
     }
 
-	bool sameAddress( const SOCKETALT& l);
+	bool sameAddress( const SOCKETALT& l) const;
+	bool lowerAddress( const SOCKETALT& l) const;
 
     friend std::ostream& operator<<( std::ostream& ostr, const SOCKETALT& s );
     friend bool operator==( const SOCKETALT& l, const SOCKETALT& r );
+
+    friend class CompareLt;
+
+    class CompareLt
+    {
+    public:
+        bool operator()( const SOCKETALT& l, const SOCKETALT& r );
+    };
+
 };
 
 #endif /* VSNET_SOCKET_H */

@@ -6,6 +6,7 @@
 #include "vsnet_socketset.h"
 #include "vsnet_pipe.h"
 #include "vsnet_debug.h"
+#include "vsnet_dloadmgr.h"
 #include "const.h"
 
 using namespace std;
@@ -31,6 +32,20 @@ SocketSet::~SocketSet( )
     _thread_wakeup.closeread();
     _thread_mx.unlock( );
 #endif
+}
+
+bool SocketSet::addDownloadManager( boost::shared_ptr<VsnetDownload::Client::Manager> mgr )
+{
+    if( !_client_mgr.expired() ) return false;
+    _client_mgr = mgr;
+    return true;
+}
+
+bool SocketSet::addDownloadManager( boost::shared_ptr<VsnetDownload::Server::Manager> mgr )
+{
+    if( !_server_mgr.expired() ) return false;
+    _server_mgr = mgr;
+    return true;
 }
 
 void SocketSet::set( VsnetSocketBase* s )
@@ -206,6 +221,22 @@ int SocketSet::private_select( timeval* timeout )
             _thread_wakeup.read( &c, 1 );
         }
 #endif
+    }
+    
+    {
+        boost::shared_ptr<VsnetDownload::Client::Manager> mgr( _client_mgr );
+        if( !_client_mgr.expired() && (bool)mgr )
+        {
+            mgr->lower_check_queues( );
+        }
+    }
+
+    {
+        boost::shared_ptr<VsnetDownload::Server::Manager> mgr( _server_mgr );
+        if( !_server_mgr.expired() && (bool)mgr )
+        {
+            mgr->lower_check_queues( );
+        }
     }
 
     if( _blockmain )

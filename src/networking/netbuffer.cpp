@@ -386,6 +386,13 @@ void	NetBuffer::addBuffer( unsigned char * buf, int bufsize)
 			memcpy( buffer+offset, buf, bufsize);
 			offset+=bufsize;
 		}
+unsigned char* NetBuffer::extAddBuffer( int bufsize)
+		{
+			resizeBuffer( offset+bufsize);
+            unsigned char* retval = (unsigned char*)buffer+offset;
+			offset+=bufsize;
+            return retval;
+		}
 unsigned char *	NetBuffer::getBuffer( int offt)
 		{
 			checkBuffer( offt);
