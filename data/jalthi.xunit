@@ -8,10 +8,10 @@
 	<Mount weapon="Laser" size="Light" x="15.200000" y="-1.000000" z="3.000000"/>
 	<Mount weapon="Laser" size="Light" x="-13.500000" y="-1.000000" z="3.000000"/>
 	<Mount weapon="Laser" size="Light" x="13.500000" y="-1.000000" z="3.000000"/>
-	<Mount weapon="FriendOrFoe" size="Medium-Missile" x="-15.000000" y="3.000000" z="-4.000000"/>
-	<Mount weapon="FriendOrFoe" size="Medium-Missile" x="15.000000" y="3.000000" z="-4.000000"/>
-	<Mount weapon="HeatSeeker" size="Medium-Missile" x="-0.000000" y="3.000000" z="-4.000000"/>
-	<Mount weapon="HeatSeeker" size="Medium-Missile" x="0.000000" y="3.000000" z="-4.000000"/>
+	<Mount weapon="FriendOrFoe" size="Medium-Missile" x="-15.000000" y="3.000000" z="-4.000000" ammo="1"/>
+	<Mount weapon="FriendOrFoe" size="Medium-Missile" x="15.000000" y="3.000000" z="-4.000000" ammo="1"/>
+	<Mount weapon="HeatSeeker" size="Medium-Missile" x="-0.000000" y="3.000000" z="-4.000000" ammo="1"/>
+	<Mount weapon="HeatSeeker" size="Medium-Missile" x="0.000000" y="3.000000" z="-4.000000" ammo="1"/>
 	<Thrust>
 		<Engine Afterburner="1000.000000" Forward="224.000000" Retro="196.000000" Left="112.000000" Right="112.000000" Top="112.000000" Bottom="112.000000"/>
 		<Maneuver yaw="2277.000000" pitch="2277.000000" roll="2277.000000"/>

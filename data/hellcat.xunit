@@ -11,8 +11,8 @@
 	<Mount weapon="Ion" size="Medium" x="1.400000" y="-1.400000" z="6.400000"/>
 	<Mount weapon="Particle" size="Heavy" x="-0.700000" y="-1.400000" z="5.500000"/>
 	<Mount weapon="Particle" size="Heavy" x="0.700000" y="-1.400000" z="5.500000"/>
-	<Mount weapon="ImageRecognition" size="Medium-Missile" x="-5.800000" y="0.000000" z="-2.000000"/>
-	<Mount weapon="ImageRecognition" size="Medium-Missile" x="5.800000" y="0.000000" z="-2.000000"/>
+	<Mount weapon="ImageRecognition" size="Medium-Missile" x="-5.800000" y="0.000000" z="-2.000000" smmo="3"/>
+	<Mount weapon="ImageRecognition" size="Medium-Missile" x="5.800000" y="0.000000" z="-2.000000" ammo="3"/>
 	<Thrust>
 		<Engine Afterburner="600.000000" Forward="168.000000" Retro="147.000000" Left="84.000000" Right="84.000000" Top="84.000000" Bottom="84.000000"/>
 		<Maneuver yaw="3415.500000" pitch="3415.500000" roll="3415.500000"/>
