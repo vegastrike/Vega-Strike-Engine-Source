@@ -90,9 +90,29 @@ static void ConvertPalette(unsigned char *dest, unsigned char *src)
   }
 
 }
-
+int tmp_abs (int num) {
+  return num<0?-num:num;
+}
+bool isPowerOfTwo (int num) {
+  while (tmp_abs(num)>1) {
+    if ((num/2)*2!=num) {
+      return false;
+    }
+    num/=2;
+  }
+  return true;
+}
 GFXBOOL /*GFXDRVAPI*/ GFXCreateTexture(int width, int height, TEXTUREFORMAT textureformat, int *handle, char *palette , int texturestage, enum FILTER mipmap, enum TEXTURE_TARGET texture_target)
 {
+  if (!isPowerOfTwo (width)) {
+    fprintf (stderr,"Width %d not a power of two",width);
+    assert (false);
+  }
+  if (!isPowerOfTwo (height)) {
+    fprintf (stderr,"Height %d not a power of two",height);
+    assert (false);
+    
+  }
   GFXActiveTexture(texturestage);
   //case 3:  ... 3 pass... are you insane? well look who's talking to himself! oh.. good point :)
   *handle = 0;
