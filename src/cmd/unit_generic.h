@@ -552,7 +552,12 @@ public:
   ///Applies damage to the pre-transformed area of the ship
   virtual void ApplyDamage (const Vector & pnt, const Vector & normal, float amt, Unit * affectedSubUnit, const GFXColor &,  Unit *ownerDoNotDereference, float phasedamage=0 ) {}
   ///Deals remaining damage to the hull at point and applies lighting effects
-  virtual float DealDamageToHull (const Vector &pnt, float Damage, unsigned short * targ=NULL);
+  virtual float DealDamageToHull (const Vector &pnt, float Damage, unsigned short * &targ);
+  float DealDamageToHull (const Vector &pnt, float Damage)
+  {
+	  unsigned short * nullvar = NULL;
+	  return this->DealDamageToHull( pnt, Damage, nullvar);
+  }
 
   ///Clamps thrust to the limits struct
   Vector ClampThrust(const Vector &thrust, bool afterburn);

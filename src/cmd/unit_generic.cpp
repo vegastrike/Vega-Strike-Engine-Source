@@ -1237,7 +1237,7 @@ void Unit::ProcessDeleteQueue() {
   }
 }
 
-float Unit::DealDamageToHull (const Vector & pnt, float damage, unsigned short * targ) {
+float Unit::DealDamageToHull (const Vector & pnt, float damage, unsigned short * &target) {
   float percent;
 #ifndef ISUCK
   if (hull<0) {
@@ -1246,18 +1246,18 @@ float Unit::DealDamageToHull (const Vector & pnt, float damage, unsigned short *
 #endif
   if (fabs  (pnt.k)>fabs(pnt.i)) {
     if (pnt.k>0) {
-      targ = &armor.front;
+      target = &armor.front;
     }else {
-      targ = &armor.back;
+      target = &armor.back;
     }
   }else {
     if (pnt.i>0) {
-      targ = &armor.left;
+      target = &armor.left;
     }else {
-      targ = &armor.right;
+      target = &armor.right;
     }
   }
-  percent = damage/(*targ+hull);
+  percent = damage/(*target+hull);
   return percent;
 }
 

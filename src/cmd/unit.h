@@ -265,7 +265,7 @@ public:
   ///Applies damage to the pre-transformed area of the ship
   void ApplyDamage (const Vector & pnt, const Vector & normal, float amt, Unit * affectedSubUnit, const GFXColor &,  Unit *ownerDoNotDereference, float phasedamage=0 );
   ///Deals remaining damage to the hull at point and applies lighting effects
-  float DealDamageToHull (const Vector &pnt, float Damage, unsigned short * t=NULL);
+  float DealDamageToHull (const Vector &pnt, float Damage, unsigned short * &t);
   ///applies damage from the given pnt to the shield, and returns % damage applied and applies lighitn
   float DealDamageToShield (const Vector & pnt, float &Damage);
 

@@ -346,11 +346,12 @@ void GameUnit::DamageRandSys(float dam, const Vector &vec) {
 	}
 }
 
-float GameUnit::DealDamageToHull (const Vector & pnt, float damage, unsigned short * t ) {
+float GameUnit::DealDamageToHull (const Vector & pnt, float damage, unsigned short * &t ) {
   float percent;
-  unsigned short * targ;
-  // Now damage is changed to targ in Unit::function
+  unsigned short *targ=NULL;
   percent = Unit::DealDamageToHull( pnt, damage, targ);
+  if( percent == -1)
+	  return -1;
   if (damage<*targ) {
     if (!AUDIsPlaying (sound->armor))
       AUDPlay (sound->armor,ToWorldCoordinates(pnt).Cast()+cumulative_transformation.position,Velocity,1);
