@@ -713,11 +713,16 @@ void UpgradingInfo::CommitItem (const char *inp_buf, int button, int state) {
     }  
     break;
   case MISSIONMODE:
-    LoadMission (input_buffer,false);
+
     if ((un=this->base.GetUnit())) {
       unsigned int index;
       if (NULL!=un->GetCargo(input_buffer,index)) {
-	un->RemoveCargo(index,1,true);
+	if (1==un->RemoveCargo(index,1,true)) {
+	  LoadMission (input_buffer,false);
+	  SetMode (mode,submode);
+	  SelectLastSelected();
+
+	}
       }
     }
     break;
