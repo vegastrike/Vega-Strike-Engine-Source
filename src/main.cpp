@@ -53,7 +53,10 @@
 #include "gfx/masks.h"
 #include "cmd/music.h"
 #include <time.h>
+#ifndef _WIN32
 #include <sys/signal.h>
+#endif
+
 #if defined (_MSC_VER) && defined(_DEBUG)
 #include <crtdbg.h>
 #endif
