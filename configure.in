@@ -913,6 +913,11 @@ CPPFLAGS="$saved_CPPFLAGS"
 
 
 
+dnl Check for Gtk+ define GTK_CFLAGS && GTK_LIBS
+AM_PATH_GTK(1.2.1,,
+    AC_MSG_ERROR([Cannot find GTK+ - gtk-config missing from path?]))
+
+	
 
 dnl --------------------------------------------------------------------------
 dnl Other options
@@ -937,5 +942,6 @@ CFLAGS="$CFLAGS $TR_CFLAGS"
 CXXFLAGS="$CXXFLAGS $TR_CXXFLAGS"
 LIBS="$LIBS $TR_LIBS"
 
-AC_OUTPUT(Makefile src/Makefile src/gldrv/Makefile src/aldrv/Makefile src/gfx/Makefile src/cmd/Makefile src/cmd/ai/Makefile src/cmd/collide/Makefile src/cmd/script/Makefile src/cmd/script/c_alike/Makefile src/cmd/collide/csgeom/Makefile src/python/Makefile mission/Makefile \
+AC_OUTPUT(Makefile src/Makefile src/gldrv/Makefile src/aldrv/Makefile src/gfx/Makefile src/cmd/Makefile src/cmd/ai/Makefile src/cmd/collide/Makefile src/cmd/script/Makefile src/cmd/script/c_alike/Makefile src/cmd/collide/csgeom/Makefile src/python/Makefile launcher/Makefile \
 	objconv/Makefile src/gui/Makefile )
+
