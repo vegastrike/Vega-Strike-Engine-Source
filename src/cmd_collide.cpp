@@ -143,12 +143,17 @@ void Beam::CollideHuge (const LineCollide & lc) {
 
 
 void Unit::ApplyLocalDamage (const Vector & pnt, const Vector & normal, float amt) {
-    if (meshdata[nummesh])
-      meshdata[nummesh]->LocalFX.push_back (GFXLight (true,
+  if (meshdata[nummesh]) {
+    /*      meshdata[nummesh]->LocalFX.push_back (GFXLight (true,
 						      GFXColor(pnt.i+normal.i,pnt.j+normal.j,pnt.k+normal.k),
 						      GFXColor (.3,.3,.3), GFXColor (0,0,0,1), 
-						      GFXColor (.5,.5,.5),GFXColor (1,0,.01)));
+						      GFXColor (.5,.5,.5),GFXColor (1,0,.01)));*/
+    //calculate percentage
+    float percentage = .1;
+    meshdata[nummesh]->AddDamageFX(pnt,normal,percentage);
+  }
 }
+
 void Unit::ApplyDamage (const Vector & pnt, const Vector & normal, float amt) {
   Vector localpnt (InvTransform(cumulative_transformation_matrix,pnt));
   Vector localnorm (ToLocalCoordinates (normal));

@@ -194,7 +194,7 @@ void SphereMesh::ProcessDrawQueue() {
     vector <int> specialfxlight;
     for (int i=0;i<c.SpecialFX->size();i++) {
       int ligh;
-      GFXCreateLight (ligh,(*c.SpecialFX)[i],true);
+      GFXCreateLight (ligh,(*c.SpecialFX)[i].effect,true);
       specialfxlight.push_back(ligh);
     }
     GFXLoadMatrix(MODEL, tmp2);

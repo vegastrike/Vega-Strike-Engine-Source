@@ -45,9 +45,14 @@ struct bsp_polygon {
     vector <bsp_vector> v;
 };
 
+struct MeshFX {
+  GFXLight effect;
+  float TTL;
+};
+struct MeshFX;
 struct MeshDrawContext {
   float mat[16];
-  vector <GFXLight> *SpecialFX;
+  vector <MeshFX> *SpecialFX;
   MeshDrawContext(const float m[16]) { memcpy(mat, m, sizeof(float[16])); }
 };
 using XMLSupport::EnumMap;
@@ -227,8 +232,8 @@ protected:
   string hash_name;
   void InitUnit();
   friend class OrigMeshContainer;
+  vector <MeshFX> LocalFX;
 public:
-  vector <GFXLight> LocalFX;
   Mesh();
   Mesh(const char *filename, bool xml=false);
   ~Mesh();
@@ -248,6 +253,8 @@ public:
   bool queryBoundingBox (const Vector &start,const float err);
   bool queryBoundingBox (const Vector &start, const Vector & end, const float err); 
   float rSize () {return radialSize;}
+  void UpdateFX();//based on TTL, etc
+  void AddDamageFX (const Vector &LocalPos, const Vector &LocalNorm, const float percentage, const GFXColor &color=GFXColor (1,1,1,1)); 
 
 };
 #endif

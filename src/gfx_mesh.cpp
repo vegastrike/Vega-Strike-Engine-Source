@@ -181,6 +181,13 @@ Mesh::~Mesh()
 	}
 }
 float const ooPI = 1.00F/3.1415926535F;
+void Mesh::AddDamageFX(const Vector &, const Vector &, const float, const GFXColor &) {
+  
+}
+void Mesh::UpdateFX() {
+  //adjusts lights by TTL, eventually removing them
+
+}
 
 //#include "d3d_internal.h"
 
@@ -188,6 +195,7 @@ void Mesh::Draw(const Transformation &trans, const Matrix m)
 {
   //  Vector pos (local_pos.Transform(m));
   MeshDrawContext c(m);
+  UpdateFX();
   c.SpecialFX = &LocalFX;
   //  c.mat[12]=pos.i;
   //  c.mat[13]=pos.j;
@@ -237,7 +245,7 @@ void Mesh::ProcessDrawQueue() {
     vector <int> specialfxlight;
     for (int i=0;i<c.SpecialFX->size();i++) {
       int ligh;
-      GFXCreateLight (ligh,(*c.SpecialFX)[i],true);
+      GFXCreateLight (ligh,(*c.SpecialFX)[i].effect,true);
       specialfxlight.push_back(ligh);
     }
     vlist->Draw();
