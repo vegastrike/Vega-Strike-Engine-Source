@@ -100,13 +100,13 @@ void TextPlane::Draw(const string & newText, int offset)
       col+=myFontMetrics.i;
       col+=glutBitmapWidth (fnt,*text_it)*5;
     }
-    if(col+(text_it+1!=newText.end())?glutBitmapWidth(fnt,*text_it):0/10>=myDims.i||*text_it == '\n') {
+    if(/*col+((text_it+1!=newText.end())?glutBitmapWidth(fnt,*text_it):0)>=myDims.i||*/*text_it == '\n') {
       GetPos (tmp,col);
       row -= myFontMetrics.j;
       glPopMatrix();
       glPushMatrix ();
       glTranslatef (col,row,0);
-      //      glRasterPos2f(0,0);
+      glRasterPos2f(0,0);
     }
     text_it++;
   }
