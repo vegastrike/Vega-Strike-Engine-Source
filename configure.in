@@ -1107,6 +1107,7 @@ TESTNETCOMM_PORTAUDIO="0"
 				[Enable hazardous network communications (TYPE=none (default), jvoip, portaudio)]),
 				[
     				AC_DEFINE(NETCOMM,1,[enable hazardous network communications (Webcam and VoIP)])
+					TESTNETCOMM="1"
    					TR_CPPFLAGS="$TR_CPPFLAGS -DNETCOMM"
 					case "$enableval" in
 						"n" | "none" | "no")
@@ -1215,6 +1216,7 @@ TESTNETCOMM_PORTAUDIO="0"
 			echo "Webcam support enabled."
 		else
     		TR_CPPFLAGS="$TR_CPPFLAGS -DNETCOMM_NOWEBCAM"
+			TESTNETCOMM_NOWEBCAM="1"
     		AC_DEFINE(NETCOMM_NOWEBCAM,1,[disable video with NETCOMM])
 			echo "*** Webcam support disabled."
 		fi

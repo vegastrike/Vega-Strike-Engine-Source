@@ -86,8 +86,6 @@ libnetgeneric = \
 	vsnet_thread_non.cpp		\
 	vsnet_thread_p.cpp		\
 	vsnet_thread_sdl.cpp		\
-	webcam_support.cpp		\
-	webcam_support.h		\
 	zonemgr.cpp		\
 	zonemgr.h
 
