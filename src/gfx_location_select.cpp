@@ -14,21 +14,41 @@ LocationSelect::LocationSelect (Vector start,Vector Plane1, Vector Plane2, Vecto
 extern KBSTATE keyState[KEYMAP_SIZE];
 Vector DeltaPosition(0,0,0);
 bool changed = false;
+bool vert = false;
 
-void MouseMoveHandle (KBSTATE,int x, int y, int delx, int dely, int mod) {
+//#define DELTA_MOVEMENT
+
+void MouseMoveHandle (KBSTATE kk,int x, int y, int delx, int dely, int mod) {
   if (keyState['z']==DOWN) {
-    DeltaPosition.k+=dely;
-  } else {
-    if (delx||dely) {
-      changed=true;
+#ifdef DELTA_MOVEMENT
+    if (kk==PRESS) {
+      DeltaPosition.k=dely;
+      vert = true;
+    }
+    if (dely) {
+      DeltaPosition.k=dely;
+
+    }
+#else
+    if (kk==PRESS)
+      DeltaPosition.k=y;
+    else if (delx||dely) {
       DeltaPosition.i=x;
       DeltaPosition.j=y;
+      vert = true;
+    }
+#endif
+  } else {
+    if (delx||dely) {
+      DeltaPosition.i=x;
+      DeltaPosition.j=y;
+      changed=true;
     }
   }
 }
 
 void LocationSelect::MoveLocation (Vector start,Vector Plane1, Vector Plane2) {    
-  BindKey (2,::MouseMoveHandle);
+  BindKey (1,::MouseMoveHandle);
   LocalPosition = Vector(0,0,0);
   r = Plane1.Cross(Plane2);
   Orthogonize (Plane1,Plane2,r);
@@ -39,7 +59,7 @@ void LocationSelect::MoveLocation (Vector start,Vector Plane1, Vector Plane2) {
   UpdateMatrix();
 }
 void LocationSelect::MoveLocation (Vector start,Vector Plane1, Vector Plane2, Vector Plane3) {    
-  BindKey (2,::MouseMoveHandle);
+  BindKey (1,::MouseMoveHandle);
   LocalPosition = Vector(0,10,1);
   r = Plane3;
   p = Plane1;
@@ -72,12 +92,18 @@ void LocationSelect:: Draw () {
   //GFXColor4f (parentScene->HUDColor.r, parentScene->HUDColor.g, parentScene->HUDColor.b, parentScene->HUDColor.a);
 
   GFXColor4f (0,.5,0,.3);
-
-  if (DeltaPosition.k!=0) {
-    LocalPosition.k+=.5*DeltaPosition.k;
+#ifdef DELTA_MOVEMENT
+  if (DeltaPosition.k) {
+    LocalPosition.k-=DeltaPosition.k*.3;
+    if (vert) {
+      LocalPosition.k=0;
+    }
+    vert=false;
     DeltaPosition.k=0;
   }
-  if (changed) {
+#endif
+
+  if (changed||vert) {
     float t[16];
     float m[16];
     float v[16];
@@ -97,18 +123,44 @@ void LocationSelect:: Draw () {
     Vector tR (t[8],t[9],t[10]);//the q vector of the plane being selected on
 
 
-    //when you let go of the 'z' button, the object SKIPS so that your cursor is 'under' the value...if you don't like that ...comment out the next line for now
-    tLocation+=LocalPosition.k*tR;//scale the R vector of the plane so zval is computed for the raised object instead of just the plane projection
+    if (changed&&!vert) {    //planar movement
+      ///////    tLocation+=LocalPosition.k*tR;//scale the R vector of the plane so zval is computed for the raised object instead of just the plane projection
     //the approximate distance away that the cursor is
     float zvalueXY = tLocation.k+LocalPosition.i*tP.k+LocalPosition.j*tQ.k;
-    
-    LocalPosition.i= fabs(zvalueXY)*(((2*DeltaPosition.i/g_game.x_resolution - 1)/tP.i)+(-(2*DeltaPosition.j/g_game.y_resolution - 1)/tP.j));
-    LocalPosition.j= fabs(zvalueXY)*(((2*DeltaPosition.i/g_game.x_resolution - 1)/tQ.i)+(-(2*DeltaPosition.j/g_game.y_resolution - 1)/tQ.j));
-    
-    DeltaPosition= Vector(0,0,0);
-    //    Vector TransPQR (t[0]*i+t[4]*LocalPosition.j+t[8]*LocalPosition.k+t[12],t[1]*LocalPosition.i+t[5]*LocalPosition.j+t[9]*LocalPosition.k+t[13],t[2]*LocalPosition.i+t[6]*LocalPosition.j+t[10]*LocalPosition.k+t[14]);
+    if (zvalueXY >1000)  /// zfar
+      zvalueXY = 1000;
+    if (zvalueXY<-1000)
+      zvalueXY = -1000;
+    //    fprintf (stderr, "ztr%f ",zvalueXY);
+      LocalPosition.i= fabs(zvalueXY)*(((2*DeltaPosition.i/g_game.x_resolution - 1)/tP.i)+(-(2*DeltaPosition.j/g_game.y_resolution - 1)/tP.j));
+      LocalPosition.j= fabs(zvalueXY)*(((2*DeltaPosition.i/g_game.x_resolution - 1)/tQ.i)+(-(2*DeltaPosition.j/g_game.y_resolution - 1)/tQ.j));
+      DeltaPosition= Vector(0,0,0);
+      //    Vector TransPQR (t[0]*i+t[4]*LocalPosition.j+t[8]*LocalPosition.k+t[12],t[1]*LocalPosition.i+t[5]*LocalPosition.j+t[9]*LocalPosition.k+t[13],t[2]*LocalPosition.i+t[6]*LocalPosition.j+t[10]*LocalPosition.k+t[14]);
+      changed=false;
+    }
+#ifndef DELTA_MOVEMENT 
+    else { //vertical movement
+      tLocation+=LocalPosition.k*tR;//scale the R vector of the plane so zval is computed for the raised object instead of just the plane projection
+    //the approximate distance away that the cursor is
+    float zvalueXY = tLocation.k+LocalPosition.i*tP.k+LocalPosition.j*tQ.k;
+    if (zvalueXY >1000)  /// zfar
+      zvalueXY = 1000;
+    if (zvalueXY<-1000)
+      zvalueXY = -1000;
 
-    changed=false;
+    //    fprintf (stderr, "zup%f ",zvalueXY);
+    //////////////      LocalPosition.i= fabs(zvalueXY)*((2*DeltaPosition.i/g_game.x_resolution - 1)/tP.i)/tP.j;
+    //////////////  LocalPosition.j= fabs(zvalueXY)*((2*DeltaPosition.i/g_game.x_resolution - 1)/tQ.i)/tQ.j;
+      LocalPosition.k= fabs(zvalueXY)*(/*((2*DeltaPosition.i/g_game.x_resolution - 1)/tR.i)+*/(-(2*DeltaPosition.j/g_game.y_resolution -1)/tR.j));
+      if (DeltaPosition.k) {
+	LocalPosition.k=0;
+	DeltaPosition.k=0;
+      }
+      
+      
+      vert =false;
+    }
+#endif
   }
   GFXBegin(TRIANGLES);
   if (fabs(LocalPosition.k-CrosshairSize)>CrosshairSize) {
