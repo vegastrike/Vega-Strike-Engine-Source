@@ -219,27 +219,27 @@ public:
     string ButtonText;
     switch (mod) {
     case SAVEMODE:
-      title = "Save and Load        ";
+      title = "Save/Load ";
       ButtonText="";
       break;
-    case BRIEFINGMODE:
-      title="Mission Briefings      ";
+    case BRIEFINGMODE: 
+      title="Briefings   ";
       ButtonText="End";
       break;
     case NEWSMODE:
-      title="GNN Galaxy News Network  ";
+      title="GNN News  ";
       ButtonText="ReadNews";
       break;
     case BUYMODE:
-      title = "Purchase Cargo        ";
+      title = "Buy Cargo  ";
       ButtonText= "BuyCargo";
       break;
     case SELLMODE:
-      title = "Sell Cargo          ";
+      title = "Sell Cargo  ";
       ButtonText= "SellCargo";
       break;
     case UPGRADEMODE:
-      title = "Upgrade/Repair Starship ";
+      title = "Upgrade Ship ";
       ButtonText="Upgrade";
       if (!beginswith (curcategory,"upgrades")) {
 	curcategory.clear();
@@ -247,7 +247,7 @@ public:
       }
       break;
     case ADDMODE:
-      title = "Enhance Starship    ";
+      title = "Enhance Starship ";
       ButtonText="Add Stats";
       if (!beginswith (curcategory,"upgrades")) {
 	curcategory.clear();
@@ -255,7 +255,7 @@ public:
       }
       break;
     case DOWNGRADEMODE:
-      title = "Downgrade Starship       ";
+      title = "Sell Upgrades  ";
       ButtonText= "SellPart";
       if (!beginswith (curcategory,"upgrades")) {
 	curcategory.clear();
@@ -264,7 +264,7 @@ public:
       break;
     case MISSIONMODE:
       if (title.find ("Mission BBS")==string::npos) {
-	title = "Mission BBS          ";
+	title = "Mission BBS  ";
       }
       ButtonText="Accept";
       if (!beginswith (curcategory,"missions")) {
@@ -273,7 +273,7 @@ public:
       }
       break;
     case SHIPDEALERMODE:
-      title = "Purchase Starship        ";
+      title = "Buy Starship  ";
       ButtonText="BuyShip";
       if (!beginswith (curcategory,"starships")) {
 	curcategory.clear();
@@ -297,6 +297,7 @@ public:
 	break;
       }
     }
+    
     COMMIT->ModifyName (ButtonText.c_str());
     mode = mod;
     submode = smod;
@@ -403,7 +404,28 @@ public:
       ShowColor(0,0,0,0, 1,1,1,1);
       char floatprice [100];
       sprintf(floatprice,"%.2f",_Universe->AccessCockpit()->credits);
-      ShowText(-0.98, 0.93, 2, 4, (title+ string("  Credits: ")+floatprice).c_str(), 0);
+      Unit * baseunit = this->base.GetUnit();
+      string basename;
+      if (baseunit) {
+	basename = "";
+	if (baseunit->isUnit()==PLANETPTR) {
+	  
+	  string temp =((Planet *)baseunit)->getCargoUnitName();
+	  if (temp=="m_class") {
+	    temp = "Agricultural World";
+	  }else if (temp=="Dirt") {
+	    temp = "Industrial World";
+	  }else if (temp=="university") {
+	    temp = "University Planet";
+	  }else if (temp=="carribean") {
+	    temp="Pleasure Planet";
+	  }
+	  basename +=temp;
+	}else {
+	  basename+= baseunit->name;
+	}
+      }
+      ShowText(-0.98, 0.93, 2, 4, (title+basename+string("  Credits: ")+floatprice).c_str(), 0);
       CargoList->Refresh();
       CargoInfo->Refresh();
     }

@@ -283,7 +283,7 @@ Planet::Planet(QVector x,QVector y,float vely, const Vector & rotvel, float pos,
       }
     }
   }
-  string cargounitname =getCargoUnitName (textname);
+  cargounitname =::getCargoUnitName (textname);
  
   Unit * un = UnitFactory::createUnit (cargounitname.c_str(),true,_Universe->GetFaction("planets"));
   if (un->name!=string("LOAD_FAILED")) {
