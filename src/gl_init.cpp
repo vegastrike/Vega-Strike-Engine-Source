@@ -35,8 +35,10 @@ static int glutWindow;
 
 
 
+#ifdef PFNGLLOCKARRAYSEXTPROC
 PFNGLLOCKARRAYSEXTPROC glLockArraysEXT_p;
 PFNGLUNLOCKARRAYSEXTPROC glUnlockArraysEXT_p;
+#endif
 #ifdef WIN32
 PFNGLCLIENTACTIVETEXTUREARBPROC glClientActiveTextureARB=0;
 PFNGLACTIVETEXTUREARBPROC glActiveTextureARB=0;
@@ -61,21 +63,26 @@ void init_opengl_extensions()
   //    get_gl_proc_fptr_t get_gl_proc;
 
 
+#ifdef PFNGLLOCKARRAYSEXTPROC
     if ( glutExtensionSupported( "GL_EXT_compiled_vertex_array" ) ) {
 
 	printf( "GL_EXT_compiled_vertex_array extension "
 		     "supported" );
+
 	glLockArraysEXT_p = (PFNGLLOCKARRAYSEXTPROC) 
 	    GET_GL_PROC( (GET_GL_PTR_TYP) "glLockArraysEXT" );
 	glUnlockArraysEXT_p = (PFNGLUNLOCKARRAYSEXTPROC) 
 	    GET_GL_PROC( (GET_GL_PTR_TYP) "glUnlockArraysEXT" );
+
     } else {
 	printf(  "GL_EXT_compiled_vertex_array extension "
 		     "NOT supported" );
 	//exit(1);  //recoverable error..I was wrong
 	glLockArraysEXT_p = NULL;
 	glUnlockArraysEXT_p = NULL;
+
     }
+#endif
     if (glutExtensionSupported ("GL_SGIS_multitexture")) {
       g_game.Multitexture =1;
       //glMTexCoordPointerSGIS=(PFNGLMTEXCOORDPOINTERSGISPROC)glSelectTextureSGIS=get_gl_proc ((GLubyte*) "glMTexCoordPointerSGIS");
