@@ -126,7 +126,7 @@ void Galaxy::doSection(configNode *node, enum section_t section_type){
 /* *********************************************************** */
 
 void Galaxy::checkSection(configNode *node, enum section_t section_type){
-    if(node->Name()!="section"){
+    if(node->Name()!="sector"){
       cout << "galaxy_xml: not a section" << endl;
       node->printNode(cout,0,1);
     return;
