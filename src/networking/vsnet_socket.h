@@ -84,8 +84,8 @@ class SOCKETALT
     GCPtr<VsnetSocket> _sock;
 
 public:
-    static const bool TCP = true;
-    static const bool UDP = false;
+    LOCALCONST_DECL(bool,TCP,1)
+    LOCALCONST_DECL(bool,UDP,0)
 
 public:
     SOCKETALT( );

@@ -9,8 +9,8 @@
 class PacketMem
 {
 public:
-    static const bool TakeOwnership  = true;
-    static const bool LeaveOwnership = false;
+    LOCALCONST_DECL(bool,TakeOwnership,1)
+    LOCALCONST_DECL(bool,LeaveOwnership,0)
 
 private:
     char*   _buffer;

@@ -9,7 +9,8 @@
     int     char_size = sizeof( char)*8;
 #endif
 
-static  u_int32_t microtime;
+static  unsigned int microtime;
+LOCALCONST_DEF(Packet,unsigned short,header_length,sizeof( struct Header))
 
 ostream& operator<<( ostream& ostr, PCKTFLAGS f )
 {
@@ -146,7 +147,7 @@ int Packet::send( Cmd cmd, ObjSerial nserial, char * buf, unsigned int length, e
 
 void Packet::create( Cmd cmd, ObjSerial nserial, char * buf, unsigned int length, enum PCKTFLAGS prio, const AddressIP* dst, const SOCKETALT& sock, const char* caller_file, int caller_line )
 {
-    COUT << "enter " << __FUNCTION__ << endl
+    COUT << "enter " << __PRETTY_FUNCTION__ << endl
 	 << "*** from " << caller_file << ":" << caller_line << endl
          << "*** send " << cmd << " ser=" << nserial << ", "
          << length << " bytes to socket " << sock << endl;
@@ -154,7 +155,7 @@ void Packet::create( Cmd cmd, ObjSerial nserial, char * buf, unsigned int length
     this->flags = prio;
     // Get a timestamp for packet (used for interpolation on client side)
     double curtime = getNewTime();
-    microtime = (u_int32_t) (floor(curtime*1000));
+    microtime = (unsigned int) (floor(curtime*1000));
     h.timestamp = microtime;
     h.command = cmd;
 

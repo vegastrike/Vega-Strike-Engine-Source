@@ -31,7 +31,7 @@ class Packet
         {
             unsigned char   command;
             ObjSerial       serial;
-            u_int32_t       timestamp;
+            unsigned int    timestamp;
             //unsigned int  delay;
             unsigned short  data_length;
 
@@ -39,17 +39,17 @@ class Packet
            void ntoh( const char* c );
         };
 
-        const static unsigned short header_length = sizeof(Header);
+		LOCALCONST_DECL(unsigned short,header_length,sizeof( struct Header))
 
         Header          h;
-	PacketMem       _packet;
+		PacketMem       _packet;
         // char   databuffer[MAXBUFFER];
 
         enum PCKTFLAGS  flags;
         unsigned short  nbsent;
         AddressIP*      destaddr;
         SOCKETALT       socket; // Socket to send on (in TCP mode)
-        u_int32_t       oldtimestamp;
+        unsigned int    oldtimestamp;
 
     public:
 
@@ -97,7 +97,7 @@ class Packet
         }
 
         ObjSerial       getSerial() const    { return h.serial;}
-        u_int32_t       getTimestamp() const { return h.timestamp;}
+        unsigned int    getTimestamp() const { return h.timestamp;}
         Cmd             getCommand() const   { return (Cmd)h.command;}
         enum PCKTFLAGS  getFlags() const     { return this->flags;}
         void            setFlags( enum PCKTFLAGS fl) { this->flags = fl;}

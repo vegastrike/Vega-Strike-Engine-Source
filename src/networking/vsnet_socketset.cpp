@@ -1,5 +1,9 @@
 #include <config.h>
-#include <pthread.h>
+/*
+#ifndef _WIN32
+	#include <pthread.h>
+#endif
+*/
 
 #include "vsnet_socketset.h"
 #include "const.h"
@@ -13,8 +17,7 @@
 
 int SocketSet::select( timeval* timeout )
 {
-	COUT << "t=" << pthread_self() << " enter " << __PRETTY_FUNCTION__
-	     << " fds=";
+	//COUT << "t=" << pthread_self() << " enter " << __PRETTY_FUNCTION__ << " fds=";
 	for( int i=0; i<_max_sock; i++ )
 	{
 	    if( FD_ISSET(i,&_set) ) std::cout << i << " ";

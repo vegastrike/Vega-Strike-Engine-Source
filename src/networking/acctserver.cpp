@@ -98,7 +98,8 @@ void	AccountServer::start()
 
 		Network->watchForNewConn( set, 0 );
 		// Check sockets to be watched
-		for( LS i=Socks.begin(); i!=Socks.end(); i++)
+		LS i;
+		for( i=Socks.begin(); i!=Socks.end(); i++)
 		{
 			cout << "Adding an open connection to select" << endl;
 	    	i->watch( set );
@@ -114,7 +115,7 @@ void	AccountServer::start()
 		}
 
 		// Loop for each active client and process request
-		for( LS i=Socks.begin(); i!=Socks.end(); i++)
+		for( i=Socks.begin(); i!=Socks.end(); i++)
 		{
 			if( i->isActive( set ) )
 			{

@@ -16,6 +16,9 @@ using std::endl;
   #endif
 #endif
 
+LOCALCONST_DEF(SOCKETALT,bool,TCP,1)
+LOCALCONST_DEF(SOCKETALT,bool,UDP,0)
+
 /***********************************************************************
  * VsnetUDPSocket - declaration
  ***********************************************************************/
@@ -290,23 +293,20 @@ int VsnetUDPSocket::sendbuf( PacketMem& packet, const AddressIP* to)
 
     assert( dest != NULL );
 
-#if defined(_WIN32) && !defined(__CYGWIN__)
-    // if( (numsent = sendto( fd, (char *) buffer, len, 0, (sockaddr*) dest, sizeof(struct sockaddr_in)))<0)
-    if( (numsent = sendto( fd, packet.buf(), packet.len(), 0, (sockaddr*) dest, sizeof(struct sockaddr_in)))<0)
-    {
-        if( WSAGetLastError()!=WSAEINVAL)
-            COUT << "WIN32 error : " << WSAGetLastError() << endl;
-        return -1;
-    }
-#else
     // if( (numsent = sendto( fd, buffer, len, 0, (sockaddr*) dest, sizeof(struct sockaddr_in)))<0)
     if( (numsent = sendto( fd, packet.getConstBuf(), packet.len(), 0, (sockaddr*) dest, sizeof(struct sockaddr_in)))<0)
     {
+#if defined(_WIN32) && !defined(__CYGWIN__)
+    // if( (numsent = sendto( fd, (char *) buffer, len, 0, (sockaddr*) dest, sizeof(struct sockaddr_in)))<0)
+        if( WSAGetLastError()!=WSAEINVAL)
+            cout << "WIN32 error : " << WSAGetLastError() << endl;
+        return -1;
+#else
         perror( "Error sending ");
         return -1;
 #endif
     }
-    COUT << "Sent " << numsent << " bytes" << " -> " << inet_ntoa( dest->sin_addr) << ":" <<ntohs(dest->sin_port) << endl;
+    cout<<"Sent "<<numsent<<" bytes"<<" -> "<<inet_ntoa( dest->sin_addr)<<":"<<ntohs(dest->sin_port)<<endl;
     return numsent;
 }
 
@@ -317,7 +317,7 @@ void VsnetUDPSocket::ack( )
 
 int VsnetUDPSocket::recvbuf( void *buffer, unsigned int& len, AddressIP* from)
 {
-    COUT << " enter " << __FUNCTION__ << " with buffer " << buffer
+    COUT << " enter " << __PRETTY_FUNCTION__ << " with buffer " << buffer
          << " len=" << len << endl;
 
     int       ret = 0;
@@ -333,7 +333,7 @@ int VsnetUDPSocket::recvbuf( void *buffer, unsigned int& len, AddressIP* from)
 
     // In UDP mode, always receive data on sock
     len1 = sizeof(sockaddr_in);
-    ret = recvfrom( fd, buffer, len, 0, (sockaddr*)(sockaddr_in*)from, &len1 );
+    ret = recvfrom( fd, (char *)buffer, len, 0, (sockaddr*)(sockaddr_in*)from, &len1 );
     if( ret < 0 )
     {
         COUT << " fd=" << fd << " error receiving: ";
@@ -404,8 +404,8 @@ int VsnetTCPSocket::sendbuf( PacketMem& packet, const AddressIP* to)
     }
 #endif
 
-    u_int32_t len = htonl( packet.len() );
-    if( (numsent=send( fd, &len, 4, 0 )) < 0 )
+    unsigned int len = htonl( packet.len() );
+    if( (numsent=send( fd, (char *)&len, 4, 0 )) < 0 )
     {
         perror( "\tsending TCP packet len : ");
         if( errno == EBADF) return -1;
@@ -534,7 +534,11 @@ bool VsnetTCPSocket::isActive( SocketSet& set )
                     COUT << "leave " << __FUNCTION__ << endl;
 		    return ( _complete_packets.empty() == false );
 		}
+#if !defined(_WIN32) || defined(__CYGWIN__)
 	        if( errno == EWOULDBLOCK )
+#else
+			 if( WSAGetLastError()==WSAEWOULDBLOCK)
+#endif
 		{
                     COUT << "leave " << __FUNCTION__ << endl;
 		    return ( _complete_packets.empty() == false );
@@ -549,7 +553,7 @@ bool VsnetTCPSocket::isActive( SocketSet& set )
 	    if( _incomplete_len_field == 4 )
 	    {
 	        _incomplete_len_field = 0;
-		len = ntohl( *(u_int32_t*)_len_field );
+		len = ntohl( *(unsigned int*)_len_field );
 		COUT << "Next packet to receive has length " << len << endl;
 		_incomplete_packet = new blob( len );
 	    }
@@ -567,7 +571,11 @@ bool VsnetTCPSocket::isActive( SocketSet& set )
                     COUT << "leave " << __FUNCTION__ << endl;
 		    return ( _complete_packets.empty() == false );
 		}
+#if !defined(_WIN32) || defined(__CYGWIN__)
 	        if( errno == EWOULDBLOCK )
+#else
+			 if( WSAGetLastError()==WSAEWOULDBLOCK)
+#endif
 		{
                     COUT << "leave " << __FUNCTION__ << endl;
 		    return ( _complete_packets.empty() == false );

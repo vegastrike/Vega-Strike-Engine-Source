@@ -11,6 +11,9 @@
 using std::ostream;
 using std::endl;
 
+LOCALCONST_DEF(PacketMem,bool,TakeOwnership,1)
+LOCALCONST_DEF(PacketMem,bool,LeaveOwnership,0)
+
 /***********************************************************************
  * PacketMem - definition
  ***********************************************************************/
@@ -142,22 +145,23 @@ void PacketMem::dump( ostream& ostr, size_t indent_depth ) const
     char x[LEN];
     char* buf  = _buffer;
     size_t len = _len;
+	size_t i=0;
     while( len > 0 )
     {
-        for( size_t i=0; i<indent_depth; i++ ) ostr << " ";
+        for( i=0; i<indent_depth; i++ ) ostr << " ";
 	memset( x, -1, LEN );
-	for( size_t i=0; i<LEN && len>0; i++ )
+	for( i=0; i<LEN && len>0; i++ )
 	{
 	    x[i] = *buf;
 	    buf++;
 	    len--;
 	}
-	for( size_t i=0; i<LEN; i++ )
+	for( i=0; i<LEN; i++ )
 	{
 	    ostr << " " << std::setw(2) << std::hex << (((unsigned int)x[i])&0xff);
 	}
 	ostr << "   ";
-	for( size_t i=0; i<LEN; i++ )
+	for( i=0; i<LEN; i++ )
 	{
 	    if( isprint(x[i]) ) ostr << x[i]; else ostr << "@";
 	}

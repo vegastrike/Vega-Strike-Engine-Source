@@ -91,5 +91,20 @@ public: \
 #  define ASSERT(a)
 #endif /* NDEBUG */
 
+#ifndef _WIN32
+#define LOCALCONST_DECL(Type,Name,Value) static const Type Name = Value;
+#define LOCALCONST_DEF(Class,Type,Name,Value)
+#else
+#define LOCALCONST_DECL(Type,Name,Value) static Type Name;
+#define LOCALCONST_DEF(Class,Type,Name,Value) Type Class::Name = Value;
+#endif
+
+#if !defined __PRETTY_FUNCTION__
+#define __PRETTY_FUNCTION__ "<Unknown>"
+#endif
+#if !defined __FUNCTION__
+#define __FUNCTION__ "<Unknown>"
+#endif
+
 #endif /* __CONST_H */
 
