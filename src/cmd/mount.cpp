@@ -14,6 +14,8 @@
 #include "force_feedback.h"
 #include "networking/netclient.h"
 
+extern char SERVER;
+
 Mount::Mount() {
 	static weapon_info wi(weapon_info::BEAM);
 	type=&wi; size=weapon_info::NOWEAP;
@@ -149,9 +151,6 @@ bool Mount::PhysicsAlignedFire(const Transformation &Cumulative, const Matrix & 
     if (autotrack&&NULL!=target) {
       AdjustMatrix (mat,target,type->Speed,autotrack>=2,trackingcone);
     }
-	// Only create the missile if we are non-networking
-	if( Network==NULL)
-	{
 			switch (type->type) {
 			case weapon_info::BEAM:
 			  break;
@@ -178,29 +177,6 @@ bool Mount::PhysicsAlignedFire(const Transformation &Cumulative, const Matrix & 
 			  _Universe->activeStarSystem()->AddUnit(temp);
 			  break;
 			}
-	}
-	// If we are in networking mode, we send a request to fire a missile to the server
-	else
-	{
-		// We don't need to use the owner arg here, the client serial will be used to identify
-		// the owner of that weapon ammo on every other client (and server)
-		switch( type->type) {
-		case weapon_info::BEAM :
-			Network->FireBeam();
-		break;
-		case weapon_info::BOLT :
-			Network->FireBolt( *type, mat, velocity);
-		break;
-		case weapon_info::BALL :
-			Network->FireBolt( *type, mat, velocity);
-		break;
-		case weapon_info::PROJECTILE :
-			// HAVE TO SEND THE m MATRIX TO THE FUNCTION BELOW
-			Network->FireProjectile( *type, target, m, velocity, tmp);
-		break;
-		}
-
-	}
 
     static bool use_separate_sound=XMLSupport::parse_bool (vs_config->getVariable ("audio","high_quality_weapon","true"));
     if ((((!use_separate_sound)||type->type==weapon_info::BEAM)||(!_Universe->isPlayerStarship(owner)))&&(type->type!=weapon_info::PROJECTILE)) {
@@ -228,21 +204,21 @@ bool Mount::Fire (Unit * owner, bool Missile, bool listen_to_owner) {
     return false;
   if (type->type==weapon_info::BEAM) {
     if (ref.gun==NULL) {
-      if (ammo>0)
-	ammo--;//do we want beams to have amo
-      processed=FIRED;
-      ref.gun = new Beam (Transformation(orient,pos.Cast()),*type,owner,sound);
-      ref.gun->ListenToOwner(listen_to_owner);
-      return true;
+	  if (ammo>0)
+		  ammo--;//do we want beams to have amo
+   	 processed=FIRED;
+     ref.gun = new Beam (Transformation(orient,pos.Cast()),*type,owner,sound);
+     ref.gun->ListenToOwner(listen_to_owner);
+     return true;
     } else {
       if (ref.gun->Ready()) {
-	if (ammo>0)
-	  ammo--;//ditto about beams ahving ammo
-	processed=FIRED;
-	ref.gun->Init (Transformation(orient,pos.Cast()),*type,owner);
-	return true;
+		if (ammo>0)
+		  ammo--;//ditto about beams ahving ammo
+		processed=FIRED;
+		ref.gun->Init (Transformation(orient,pos.Cast()),*type,owner);
+		return true;
       } else 
-	return true;//can't fire an active beam
+		return true;//can't fire an active beam
     }
   }else { 
     if (ref.refire>type->Refire) {

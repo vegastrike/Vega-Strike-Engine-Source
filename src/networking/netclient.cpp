@@ -1013,8 +1013,10 @@ void	NetClient::FireBeam()
 {
 }
 
-void	NetClient::FireBolt( weapon_info wi, Matrix mat, Vector velocity)
+//void	NetClient::FireBolt( weapon_info wi, Matrix mat, Vector velocity)
+void	NetClient::FireBolt()
 {
+	/*
 	NetBuffer netbuf;
 
 	netbuf.addMatrix( mat);
@@ -1023,10 +1025,14 @@ void	NetClient::FireBolt( weapon_info wi, Matrix mat, Vector velocity)
 
 	Packet p;
 	p.send( CMD_BOLT, this->serial, netbuf.getBuffer(), netbuf.getDataSize(), SENDRELIABLE, NULL, this->clt_sock, __FILE__, __LINE__);
+
+	*/
 }
 
-void	NetClient::FireProjectile( weapon_info wi, Unit * target, Matrix mat, Vector velocity, Transformation t)
+//void	NetClient::FireProjectile( weapon_info wi, Unit * target, Matrix mat, Vector velocity, Transformation t)
+void	NetClient::FireProjectile()
 {
+	/*
 	NetBuffer netbuf;
 
 	netbuf.addSerial( target->GetSerial());
@@ -1042,5 +1048,19 @@ void	NetClient::FireProjectile( weapon_info wi, Unit * target, Matrix mat, Vecto
 	
 	Packet p;
 	p.send( CMD_PROJECTILE, this->serial, netbuf.getBuffer(), netbuf.getDataSize(), SENDRELIABLE, NULL, this->clt_sock, __FILE__, __LINE__);
+	*/
 }
+
+void	NetClient::FireBeamRequest()
+{
+}
+
+void	NetClient::FireBoltRequest()
+{
+}
+
+void	NetClient::FireProjectileRequest()
+{
+}
+
 

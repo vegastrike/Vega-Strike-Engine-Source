@@ -702,6 +702,7 @@ void Unit::Fire (unsigned int weapon_type_bitmask, bool listen_to_owner) {
     for (;i!=mounts.end();++i) {
         if ((*i).type->type==weapon_info::BEAM) {
             if ((*i).type->EnergyRate*SIMULATION_ATOM>energy) {
+				// On server side send a PACKET TO ALL CLIENT TO NOTIFY UNFIRE
                 (*i).UnFire();
                 continue;
             }

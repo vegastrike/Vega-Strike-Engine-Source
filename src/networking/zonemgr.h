@@ -57,7 +57,7 @@ class ZoneMgr
 		void	removeUnit( Unit *un, int zone);
 		Unit *	getUnit( ObjSerial unserial, int zone);
 
-		bool	addClient( Client * clt);
+		bool	addClient( Client * clt, string starsys);
 		void	removeClient( Client * clt);
         void    broadcast( Client * clt, Packet * pckt );
         void    broadcastSnapshots();

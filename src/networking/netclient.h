@@ -131,9 +131,14 @@ class	NetClient
 		Unit *	getUnit() { return game_unit.GetUnit();}
 
 		/********************* Weapon stuff **********************/
+		// Functions called when we receive a firing order from the server (other clients or ai or us)
 		void	FireBeam();
-		void	FireBolt( weapon_info wi, Matrix mat, Vector velocity);
-		void	FireProjectile( weapon_info wi, Unit * target, Matrix mat, Vector velocity, Transformation t);
+		void	FireBolt();
+		void	FireProjectile();
+		// Functions to request Firing
+		void	FireBeamRequest();
+		void	FireBoltRequest();
+		void	FireProjectileRequest();
 
     private:
 		void	receiveSave( const Packet* packet );

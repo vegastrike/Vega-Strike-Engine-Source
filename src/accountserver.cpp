@@ -22,7 +22,7 @@
 #include <stdlib.h>
 #include "networking/acctserver.h"
 
-char SERVER = 1;
+char SERVER = 2;
 float simulation_atom_var = (float)1.0/10.0;
 
 int main( int argc, char **argv)

@@ -132,6 +132,11 @@ void Universe::Init( const char * gal)
 	//LoadWeapons("weapon_list.xml");
 
 	this->galaxy = new GalaxyXML::Galaxy (gal);
+	static bool firsttime=false;
+	if (!firsttime) {
+		LoadFactionXML("factions.xml");
+		firsttime=true;
+	}
 
 	script_system=NULL;
 }
@@ -173,11 +178,6 @@ void Universe::UnloadStarSystem (StarSystem * s) {
   //not sure what to do here? serialize?
 }
 StarSystem * Universe::Init (string systemfile, const Vector & centr,const string planetname) {
-	static bool firsttime=false;
-	if (!firsttime) {
-		LoadFactionXML("factions.xml");
-		firsttime=true;
-	}
   string fullname=systemfile+".system";
   return GenerateStarSystem((char *)fullname.c_str(),"",centr);
 }

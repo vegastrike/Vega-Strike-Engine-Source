@@ -196,8 +196,9 @@ void	NetServer::sendLoginAccept( Client * clt, AddressIP ipadr, int newacct)
 		cp->Init ("");
 		cout<<"-> LOADING SAVE FROM NETWORK"<<endl;
 		cp->savegame->ParseSaveGame( "", str, "", tmpvec, update, credits, savedships, clt->serial, savebuf, false);
-		// Generate the system we enter in if needed
-		zonemgr->addZone( cp->savegame->GetStarSystem());
+		// Generate the system we enter in if needed and add the client in it
+		this->addClient( clt, cp->savegame->GetStarSystem());
+
 		safevec = UniverseUtil::SafeEntrancePoint( tmpvec);
 		cout<<"\tcredits = "<<credits<<endl;
 		cout<<"\tcredits = "<<credits<<endl;
@@ -977,10 +978,11 @@ void	NetServer::processPacket( Client * clt, unsigned char cmd, const AddressIP&
         this->sendLocations( clt);
         break;
     case CMD_ADDCLIENT:
+	// SHOULD NOT BE USED ANYMORE
         // Add the client to the game
         cout<<">>> ADD REQUEST =( serial n°"<<packet.getSerial()<<" )= --------------------------------------"<<endl;
         //cout<<"Received ADDCLIENT request"<<endl;
-        this->addClient( clt);
+        //this->addClient( clt);
         cout<<"<<< ADD REQUEST --------------------------------------------------------------"<<endl;
         break;
     case CMD_POSUPDATE:
@@ -1032,6 +1034,9 @@ void	NetServer::processPacket( Client * clt, unsigned char cmd, const AddressIP&
 		break;
 	case CMD_PROJECTILE :
 	{
+		// DO NOT GET INFO FROM NETWORK - WE HAVE ALL THE INFO ON SERVER SIDE !!!
+		// SO ONLY DO WHAT IS NEEDED SO THAT IN THE NEXT STARSYSTEM UPDATE THE PROJECTILE IS "FIRED"
+		// (set processed to FIRE)
 		ObjSerial target_id = netbuf.getSerial();
 		m = netbuf.getMatrix();
 		vel = netbuf.getVector();
@@ -1080,38 +1085,29 @@ void	NetServer::processPacket( Client * clt, unsigned char cmd, const AddressIP&
 /**** Add a client in the game                             ****/
 /**************************************************************/
 
-void	NetServer::addClient( Client * clt)
+void	NetServer::addClient( Client * clt, string starsys)
 {
 	cout<<">>> SEND ENTERCLIENT =( serial n°"<<clt->serial<<" )= --------------------------------------"<<endl;
 	Packet packet2;
 	string savestr, xmlstr;
 
-	if( zonemgr->addClient( clt))
+	if( zonemgr->addClient( clt, starsys))
 	{
+		NetBuffer netbuf( packet.getData(), packet.getDataLength());
 		// If the system is loaded, there are people in it -> BROADCAST
-		ClientState	tmpcs;
-		memcpy( &tmpcs, packet.getData(), sizeof( ClientState));
-		tmpcs.netswap();
-		clt->old_state = tmpcs;
-		clt->current_state = tmpcs;
-		//memcpy( &clt->old_state, &tmpcs, sizeof(ClientState));
-		//memcpy( &clt->current_state, &tmpcs, sizeof(ClientState));
-		tmpcs.netswap();
-		// Here the other client in the same zone should be warned of a new client
-		// Should also send data about the ship !!! filename ? IDs ?
-		// maybe those thing should be managed in account.xml
-		// For now assuming a default ship on client side
+		clt->current_state = netbuf.getClientState();
+		clt->old_state = clt->current_state;
 
 		// Send savebuffer after clientstate
 		SaveNetUtil::GetSaveStrings( clt, savestr, xmlstr);
 		unsigned int buflen = sizeof(ClientState)+2*sizeof(unsigned int)+savestr.length()+xmlstr.length();
 		char * savebuf = new char[buflen];
-		memcpy( savebuf, &tmpcs, sizeof( ClientState));
+		memcpy( savebuf, &clt->current_state, sizeof( ClientState));
 		// Put the save buffer after the ClientState
 		SaveNetUtil::GetSaveBuffer( savestr, xmlstr, savebuf+sizeof( ClientState));
 		packet2.bc_create( CMD_ENTERCLIENT, clt->serial, savebuf, buflen, SENDRELIABLE, &clt->cltadr, clt->sock, __FILE__, __LINE__ );
 		delete savebuf;
-		cout<<"<<< SEND ENTERCLIENT -----------------------------------------------------------------------"<<endl;
+		cout<<"<<< SEND ENTERCLIENT TO OTHER CLIENT IN THE ZONE------------------------------------------"<<endl;
 		zonemgr->broadcast( clt, &packet2 ); // , &NetworkToClient );
 		cout<<">>> SEND ADDED YOU =( serial n°"<<clt->serial<<" )= --------------------------------------"<<endl;
 		cout<<"Serial : "<<clt->serial<<endl;
@@ -1370,3 +1366,14 @@ void	NetServer::save()
 		}
 	}
 }
+
+// WEAPON STUFF
+
+void	NetServer::BroadcastUnfire( Client * clt, int weapon_index)
+{
+}
+
+void	NetServer::BroadcastFire( Client * clt, int weapon_index)
+{
+}
+

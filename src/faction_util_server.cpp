@@ -13,11 +13,11 @@ Animation * FactionUtil::getRandAnimation (int whichfaction, std::string &which)
 std::vector <Animation *>* FactionUtil::GetAnimation (int faction, int n, unsigned char &sex) { return NULL;}
 
 Animation * FactionUtil::createAnimation( const char * anim) { return NULL;}
-Texture * FactionUtil::createTexture( const char * tex, const char * tmp, bool force=false) { return NULL;}
-Texture * FactionUtil::createTexture( const char * tex, bool force=false) { return NULL;}
+Texture * FactionUtil::createTexture( const char * tex, const char * tmp, bool force) { return NULL;}
+Texture * FactionUtil::createTexture( const char * tex, bool force) { return NULL;}
 void FactionUtil::LoadFactionPlaylists() {}
 
-Texture * FactionUtil::getForceLogo (int faction) {}
-Texture *FactionUtil::getSquadLogo (int faction) {}
-int FactionUtil::GetNumAnimation (int faction) {}
+Texture * FactionUtil::getForceLogo (int faction) { return NULL;}
+Texture *FactionUtil::getSquadLogo (int faction) { return NULL;}
+int FactionUtil::GetNumAnimation (int faction) { return NULL;}
 

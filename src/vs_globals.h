@@ -58,6 +58,8 @@ class VegaConfig;
 extern VegaConfig *vs_config;
 class NetClient;
 extern NetClient *Network;
+class NetServer;
+extern NetServer *Server;
 
 class Mission;
 extern Mission *mission;

@@ -28,10 +28,11 @@
 char SERVER = 1;
 Universe * _Universe;
 LeakVector<Mission *> active_missions;
+NetServer * Server;
 
 int main( int argc, char **argv)
 {
-	NetServer *Server = new NetServer;
+	Server = new NetServer;
 	// Fake forcefeedback
     forcefeedback=new ForceFeedback();
 
