@@ -43,7 +43,7 @@ namespace FactionXML {
 };
 
   const EnumMap element_map(element_names, 4);
-  const EnumMap attribute_map(attribute_names, 17);
+  const EnumMap attribute_map(attribute_names, 5);
 }
 
 
