@@ -24,7 +24,7 @@ protected:
 	
   virtual enum clsptr isUnit () const{return BUILDINGPTR;}
 
-  virtual void UpdatePhysics2 (const Transformation &trans, const Transformation & old_physical_state, const Vector & accel, float difficulty, const Matrix &transmat, const Vector & CumulativeVelocity, bool ResolveLast, UnitCollection *uc=NULL){GameUnit<Building>:: UpdatePhysics2 (trans, old_physical_state,  accel, difficulty, transmat, CumulativeVelocity, ResolveLast,uc);}
+  virtual void UpdatePhysics2 (const Transformation &trans, const Transformation & old_physical_state, const Vector & accel, float difficulty, const Matrix &transmat, const Vector & CumulativeVelocity, bool ResolveLast, UnitCollection *uc=NULL){Building:: UpdatePhysics2 (trans, old_physical_state,  accel, difficulty, transmat, CumulativeVelocity, ResolveLast,uc);}
 	
   bool ownz (void * parent) {return (this->parent.terrain == (Terrain *)parent);}
 

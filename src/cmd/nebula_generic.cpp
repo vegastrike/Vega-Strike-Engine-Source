@@ -168,5 +168,5 @@ void Nebula::reactToCollision(Unit * smaller, const QVector & biglocation, const
   smaller->SetNebula(this);
 }
 void Nebula::UpdatePhysics2 (const Transformation &trans, const Transformation & old_physical_state, const Vector & accel, float difficulty, const Matrix &transmat, const Vector & CumulativeVelocity, bool ResolveLast, UnitCollection *uc){
-  Unit::UpdatePhysics2 (trans,oldstate,accel,difficulty,transmat,CumulativeVelocity,ResolveLast,uc);
+  Unit::UpdatePhysics2 (trans, old_physical_state,  accel, difficulty, transmat, CumulativeVelocity, ResolveLast, uc);
 }
