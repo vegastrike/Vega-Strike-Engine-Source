@@ -1158,8 +1158,7 @@ void	NetServer::processPacket( Client * clt, unsigned char cmd, const AddressIP&
 						if( !(sts = _Universe->getStarSystem( newsystem+".system")))
 							zonemgr->addZone( newsystem+".system");
 						// And remove the player from its old starsystem and set it out of game
-						zonemgr->removeClient( clt);
-						clt->ingame = false;
+						this->removeClient( clt);
 						// Have to set new starsystem here
 						cp->savegame->SetStarSystem( newsystem);
 	
@@ -1333,6 +1332,22 @@ void	NetServer::addClient( Client * clt)
 }
 
 /***************************************************************/
+/**** Removes a client and notify other clients                */
+/***************************************************************/
+
+void	NetServer::removeClient( Client * clt)
+{
+	Packet packet2;
+	Unit * un = clt->game_unit.GetUnit();
+	clt->ingame = false;
+	// Remove the client from its current starsystem
+	zonemgr->removeClient( clt);
+	// Broadcast to other players
+	packet2.bc_create( CMD_EXITCLIENT, un->GetSerial(), NULL, 0, SENDRELIABLE, &clt->cltadr, clt->sock, __FILE__, PSEUDO__LINE__(1311));
+	zonemgr->broadcast( clt, &packet2 );
+}
+
+/***************************************************************/
 /**** Adds the client update to current client's zone snapshot */
 /***************************************************************/
 
@@ -1408,18 +1423,20 @@ void	NetServer::disconnect( Client * clt, const char* debug_from_file, int debug
 	}
 
 	// Removes the client from its starsystem
-	if( clt->zone>=0)
-		zonemgr->removeClient( clt);
+	if( clt->ingame)
+		this->removeClient( clt);
     if( clt->isTcp() )
 	{
 		clt->sock.disconnect( __PRETTY_FUNCTION__, false );
         if( un )
         {
-	        COUT << "Client " << un->GetSerial() << " disconnected" << endl;
+	        COUT << "User " << clt->callsign << " with serial "<<un->GetSerial()<<" disconnected" << endl;
         }
         else
         {
-	        COUT << "User " << clt->callsign << " disconnected" << endl;
+	        //COUT << "User " << clt->callsign << " with serial "<<un->GetSerial()<<" disconnected" << endl;
+			COUT<<"!!! ERROR : UNIT==NULL !!!"<<endl;
+			exit(1);
         }
 	    COUT << "There were "
 	         << tcpClients.size()+udpClients.size() << " clients - ";
@@ -1441,26 +1458,13 @@ void	NetServer::disconnect( Client * clt, const char* debug_from_file, int debug
         else
         {
             COUT << "Could not get Unit for " << clt->callsign << endl;
+			exit(1);
         }
 	}
-
-    if( un != NULL )
-    {
-	    // Broadcast client EXIT zone
-	    Packet p;
-	    p.bc_create( CMD_EXITCLIENT, un->GetSerial(), NULL, 0,
-	                SENDRELIABLE, &clt->cltadr, clt->sock, __FILE__,
-                    PSEUDO__LINE__(1526) );
-	    zonemgr->broadcast( clt, &p );
-    }
-	if( clt != NULL)
-	{
-		delete clt;
-		clt = NULL;
-	}
+	delete clt;
+	clt = NULL;
 	COUT << tcpClients.size()+udpClients.size() << " clients left" << endl;
 	nbclients--;
-	//exit( 1);
 }
 
 /*** Same as disconnect but do not respond to client since we assume clean exit ***/
@@ -1486,8 +1490,8 @@ void	NetServer::logout( Client * clt)
 	}
 
 	// Removes the client from its starsystem
-	if( clt->zone>=0)
-		zonemgr->removeClient( clt);
+	if( clt->ingame)
+		this->removeClient( clt);
     if( clt->isTcp() )
 	{
 		clt->sock.disconnect( __PRETTY_FUNCTION__, false );
@@ -1501,20 +1505,10 @@ void	NetServer::logout( Client * clt)
 	    COUT <<"There was "<< udpClients.size()+tcpClients.size() <<" clients - ";
 	    udpClients.remove( clt );
 	}
-	// Broadcast client EXIT zone
-	if( clt->zone>0)
-	{
-		p.bc_create( CMD_EXITCLIENT, un->GetSerial(), NULL, 0, SENDRELIABLE, &clt->cltadr, clt->sock, __FILE__, PSEUDO__LINE__(1580) );
-		zonemgr->broadcast( clt, &p );
-	}
-	if( clt != NULL)
-	{
-		delete clt;
-		clt = NULL;
-	}
+	delete clt;
+	clt = NULL;
 	COUT << udpClients.size()+tcpClients.size() <<" clients left"<<endl;
 	nbclients--;
-	//exit( 1);
 }
 
 /**************************************************************/
@@ -1688,11 +1682,15 @@ void	NetServer::sendKill( ObjSerial serial, unsigned short zone)
 		}
 	}
 	if( !found)
+	{
 		COUT<<"Killed a non client Unit = "<<serial<<endl;
+		un = zonemgr->getUnit( serial, zone);
+		zonemgr->removeUnit( un, zone);
+	}
 	else
 	{
 		COUT<<"Killed client serial = "<<serial<<endl;
-		clt->ingame = false;
+		zonemgr->removeClient( clt);
 	}
 
 	p.bc_create( CMD_KILL, serial, NULL, 0, SENDRELIABLE, NULL, acct_sock, __FILE__, PSEUDO__LINE__(1771) );

@@ -86,6 +86,7 @@ class NetServer
 		void			authenticate( Client * clt, AddressIP sernum, Packet& packet );	// Authenticate a connected client
 		void			posUpdate( Client * clt);		// Update a client position
 		void			addClient( Client * clt);		// Add the client in the game
+		void			removeClient( Client * clt);		// Remove the client from the game
 		void			checkSystem( Client * clt);		// Check if the client has the good system file
 		Client *		newConnection_udp( const AddressIP& ipadr);
 		Client *		newConnection_tcp( SocketSet& set );

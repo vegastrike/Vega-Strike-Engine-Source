@@ -224,7 +224,7 @@ void	ZoneMgr::broadcast( Client * clt, Packet * pckt )
 	{
 		un2 = (*i)->game_unit.GetUnit();
 		// Broadcast to other clients
-		if( un->GetSerial() != un2->GetSerial())
+		if( (*i)->ingame && un->GetSerial() != un2->GetSerial())
 		{
 			COUT<<"BROADCASTING "<<pckt->getCommand()<<" to client n° "<<un2->GetSerial();
 			COUT<<endl;
@@ -248,10 +248,13 @@ void	ZoneMgr::broadcast( int zone, ObjSerial serial, Packet * pckt )
 	for( LI i=lst->begin(); i!=lst->end(); i++)
 	{
 		// Broadcast to all clients including the one who did a request
+		if( (*i)->ingame /*&& un->GetSerial() != un2->GetSerial()*/ )
+		{
 			COUT<<"Sending update to client n° "<<(*i)->game_unit.GetUnit()->GetSerial();
 			COUT<<endl;
 			pckt->setNetwork( &(*i)->cltadr, (*i)->sock);
 			pckt->bc_send( );
+		}
 	}
 }
 
@@ -284,52 +287,55 @@ void	ZoneMgr::broadcastSnapshots( bool update_planets)
 			{
 			/************************* START CLIENTS BROADCAST ***************************/
 				// If we don't want to send a client its own info set nbclients to zone_clients-1 for memory saving (ok little)
-				nbclients = zone_clients[i]-1;
-				netbuf.Reset();
-				for( l=zone_list[i]->begin(); l!=zone_list[i]->end(); l++)
+				if( (*k)->ingame)
 				{
-					// Check if we are on the same client and that the client has moved !
-					if( l!=k)
+					nbclients = zone_clients[i]-1;
+					netbuf.Reset();
+					for( l=zone_list[i]->begin(); l!=zone_list[i]->end(); l++)
 					{
-						Unit * un = (*l)->game_unit.GetUnit();
-						// Create a client state with a delta time
-						ClientState cs( un);
-						// HAVE TO VERIFY WHICH DELTATIME IS TO BE SENT
-						cs.setDelay( (*l)->deltatime);
-						this->addPosition( netbuf, un, (*k)->game_unit.GetUnit(), cs);
-					}
-					// Else : always send back to clients their own info or just ignore ?
-					// Ignore for now
-				}
-			/************************* END CLIENTS BROADCAST ***************************/
-			/************************* START UNITS BROADCAST ***************************/
-				nbunits = zone_units[i];
-				cerr<<"BROADCAST SNAPSHOTS = "<<zone_units[i]<<" units in zone "<<i<<endl;
-				//netbuf.Reset();
-				for( m=zone_unitlist[i].begin(); m!=zone_unitlist[i].end(); m++)
-				{
-					// Only send planets and nebulas update when PLANET_ATOM is reached
-					if( ((*m)->isUnit()!=PLANETPTR && (*m)->isUnit()!=NEBULAPTR) || update_planets )
-					{
-						// Create a client state with a delta time too ?? WHICH ONE ???
-						ClientState cs( (*m));
-						this->addPosition( netbuf, (*m), (*k)->game_unit.GetUnit(), cs);
+						// Check if we are on the same client and that the client has moved !
+						if( l!=k && (*l)->ingame)
+						{
+							Unit * un = (*l)->game_unit.GetUnit();
+							// Create a client state with a delta time
+							ClientState cs( un);
+							// HAVE TO VERIFY WHICH DELTATIME IS TO BE SENT
+							cs.setDelay( (*l)->deltatime);
+							this->addPosition( netbuf, un, (*k)->game_unit.GetUnit(), cs);
+						}
 						// Else : always send back to clients their own info or just ignore ?
 						// Ignore for now
 					}
-				}
+			/************************* END CLIENTS BROADCAST ***************************/
+			/************************* START UNITS BROADCAST ***************************/
+					nbunits = zone_units[i];
+					cerr<<"BROADCAST SNAPSHOTS = "<<zone_units[i]<<" units in zone "<<i<<endl;
+					//netbuf.Reset();
+					for( m=zone_unitlist[i].begin(); m!=zone_unitlist[i].end(); m++)
+					{
+						// Only send planets and nebulas update when PLANET_ATOM is reached
+						if( ((*m)->isUnit()!=PLANETPTR && (*m)->isUnit()!=NEBULAPTR) || update_planets )
+						{
+							// Create a client state with a delta time too ?? WHICH ONE ???
+							ClientState cs( (*m));
+							this->addPosition( netbuf, (*m), (*k)->game_unit.GetUnit(), cs);
+							// Else : always send back to clients their own info or just ignore ?
+							// Ignore for now
+						}
+					}
 			/************************* END UNITS BROADCAST ***************************/
-				// Send snapshot to client k
-				if(netbuf.getDataLength()>0)
-				{
-					//COUT<<"\tsend update for "<<(p+j)<<" clients"<<endl;
-					pckt.send( CMD_SNAPSHOT, nbclients+nbunits, netbuf.getData(), netbuf.getDataLength(), SENDANDFORGET, &((*k)->cltadr), (*k)->sock, __FILE__,	
+					// Send snapshot to client k
+					if(netbuf.getDataLength()>0)
+					{
+						//COUT<<"\tsend update for "<<(p+j)<<" clients"<<endl;
+						pckt.send( CMD_SNAPSHOT, nbclients+nbunits, netbuf.getData(), netbuf.getDataLength(), SENDANDFORGET, &((*k)->cltadr), (*k)->sock, __FILE__,	
 #ifndef _WIN32
-					__LINE__
+						__LINE__
 #else
-					302
+						302
 #endif
-					);
+						);
+					}
 				}
 			}
 		}
@@ -403,37 +409,40 @@ void	ZoneMgr::broadcastDamage( )
 			// Loop for all the zone's clients
 			for( k=zone_list[i]->begin(); k!=zone_list[i]->end(); k++)
 			{
-			/************************* START CLIENTS BROADCAST ***************************/
-				nbclients = zone_clients[i];
-				netbuf.Reset();
-				for( l=zone_list[i]->begin(); l!=zone_list[i]->end(); l++)
+				if( (*k)->ingame)
 				{
-					// Check if there is damages on that client
-					un = (*l)->game_unit.GetUnit();
-					if( un && un->damages)
-						this->addDamage( netbuf, un);
-				}
+			/************************* START CLIENTS BROADCAST ***************************/
+					nbclients = zone_clients[i];
+					netbuf.Reset();
+					for( l=zone_list[i]->begin(); l!=zone_list[i]->end(); l++)
+					{
+						// Check if there is damages on that client
+						un = (*l)->game_unit.GetUnit();
+						if( (*l)->ingame && un && un->damages)
+							this->addDamage( netbuf, un);
+					}
 			/************************* END CLIENTS BROADCAST ***************************/
 			/************************* START UNITS BROADCAST ***************************/
-				cerr<<"BROADCAST DAMAGE = "<<zone_units[i]<<" units in zone "<<i<<endl;
-				nbunits = zone_units[i];
-				//netbuf.Reset();
-				for( m=zone_unitlist[i].begin(); m!=zone_unitlist[i].end(); m++)
-				{
-					// Check if there is damages on that unit
-					if( (*m)->damages)
-						this->addDamage( netbuf, (*m));
-				}
-				// Send snapshot to client k
-				if( netbuf.getDataLength() > 0)
-				{
-					pckt.send( CMD_SNAPDAMAGE, nbclients+nbunits, netbuf.getData(), netbuf.getDataLength(), SENDANDFORGET, &((*k)->cltadr), (*k)->sock, __FILE__,	
+					cerr<<"BROADCAST DAMAGE = "<<zone_units[i]<<" units in zone "<<i<<endl;
+					nbunits = zone_units[i];
+					//netbuf.Reset();
+					for( m=zone_unitlist[i].begin(); m!=zone_unitlist[i].end(); m++)
+					{
+						// Check if there is damages on that unit
+						if( (*m)->damages)
+							this->addDamage( netbuf, (*m));
+					}
+					// Send snapshot to client k
+					if( netbuf.getDataLength() > 0)
+					{
+						pckt.send( CMD_SNAPDAMAGE, nbclients+nbunits, netbuf.getData(), netbuf.getDataLength(), SENDANDFORGET, &((*k)->cltadr), (*k)->sock, __FILE__,	
 #ifndef _WIN32
-					__LINE__
+						__LINE__
 #else
-					429
+						429
 #endif
-					);
+						);
+					}
 				}
 			}
 		}
