@@ -181,7 +181,7 @@ void launch_mission () {
    printf ("./vegastrike %s %s",num,my_mission.c_str());
    fflush (stdout);
 #ifndef _WIN32
-   execlp ("./vegastrike","./vegastrike",num,(std::string("\"")+my_mission+"\"").c_str(),NULL);   
+   execlp ("./vegastrike","./vegastrike",num,my_mission.c_str(),NULL);   
 #else
    DWORD id;
    HANDLE hThr=CreateThread(NULL,0,DrawStartupDialog,(void *)new stupod (strdup (my_mission.c_str()),strdup (num)),0,&id);
@@ -190,7 +190,7 @@ void launch_mission () {
    printf ("./vegastrike %s",my_mission.c_str());
    fflush (stdout);
 #ifndef _WIN32
-   execlp ("./vegastrike","./vegastrike",(std::string("\"")+my_mission+"\"").c_str(),NULL);   
+   execlp ("./vegastrike","./vegastrike",my_mission.c_str(),NULL);   
 #else
    DWORD id;
    HANDLE hThr=CreateThread(NULL,0,DrawStartupDialog,(void *)new stupod (strdup (my_mission.c_str()),NULL),0,&id);
