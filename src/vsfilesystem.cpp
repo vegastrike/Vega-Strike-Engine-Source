@@ -205,194 +205,6 @@ namespace VSFileSystem
 	/**** vs_path functions                                                                      ****/
 	/************************************************************************************************/
 
-	/*
-	void vs_mkdir(const std::string &s) {
-		mkdir (s.c_str()
-#if !defined( _WIN32) || defined( __CYGWIN__)
-		   ,0xFFFFFFFF
-#endif
-		);
-	}
-
-	void changehome(bool makehomedir) {
-		  static char pw_dir[2000];
-		#ifndef _WIN32
-		  struct passwd *pwent;
-		  pwent = getpwuid (getuid());
-		  vs_setdir (pwent->pw_dir);
-		#else
-		  if (!makehomedir)
-			vs_setdir (pw_dir);
-		#endif
-		  if (makehomedir) {
-		  getcwd (pw_dir,1998);
-		#ifndef _WIN32
-		  vs_resetdir();
-		#endif
-		  vs_setdir (pw_dir);
-		  if (chdir (HOMESUBDIR.c_str())==-1) {
-			  //      system ("mkdir " HOMESUBDIR);
-			mkdir (HOMESUBDIR.c_str()
-		#if !defined(_WIN32) || defined(__CYGWIN__) 
-				  , 0xFFFFFFFF
-		#endif		  
-				  );
-			} else {
-			  chdir ("..");
-			}
-		  std::string genbsp(HOMESUBDIR +"/generatedbsp");
-			if (chdir (genbsp.c_str())==-1) {
-								mkdir (genbsp.c_str()
-		#if !defined(_WIN32) || defined(__CYGWIN__) 
-					, 0xFFFFFFFF
-		#endif
-				);
-
-				
-			}else {
-				chdir (pw_dir);
-			}
-			std::string savetmp  (HOMESUBDIR+"/save");
-			if (chdir (savetmp.c_str())==-1) {
-			  mkdir (savetmp.c_str()
-		#if !defined(_WIN32) || defined(__CYGWIN__) 
-				  , 0xFFFFFFFF
-		#endif		  
-				  );
-			  //system ("mkdir " HOMESUBDIR "/generatedbsp");
-			}else {
-			  chdir (pw_dir);
-			}
-		  }
-		  vs_chdir (HOMESUBDIR.c_str());
-		}
-		void returnfromhome() {
-		  vs_cdup();
-		  vs_resetdir();
-		}
-
-
-	void initpaths (const std::string& modname) {
-		#ifndef _WIN32
-			
-		  datadir = getdatadir();
-		  if (modname.size())
-			HOMESUBDIR = string(".")+modname;
-		  if (modname.size())
-			  datadir+=string(DELIMSTR)+modname;
-		#else
-		  if (modname.size())
-			chdir (modname.c_str());
-		  getcwd(pwd,65534);
-		  
-		  pwd[65534]=0;
-		  datadir=pwd;
-		#endif
-		  sharedsounds = datadir;
-
-		  cerr << "Data directory is " << datadir << endl;
-		  FILE *fp= VSFileSystem::vs_open (CONFIGFILE,"r");
-
-		  //check if we have a config file in home dir
-		  changehome(true);
-		  char myhomedir[8192];
-		  getcwd (myhomedir,8191);
-		  myhomedir[8191]='\0';
-		  homedir = myhomedir;
-		  FILE *fp1= VSFileSystem::vs_open (CONFIGFILE,"r");
-		  if (fp1) {
-			//  we have a config file in home directory
-			VSFileSystem::vs_close (fp1);
-			vs_config=createVegaConfig(CONFIGFILE); // move config to global or some other struct
-			cout << "using config file in home dir" << endl;
-		  }else if (fp) {
-			// we don't have a config file in home dir
-			// but we have one in the data dir
-			chdir(datadir.c_str());
-
-			VSFileSystem::vs_close (fp);
-			fp =NULL;
-			returnfromhome();
-			vs_config = createVegaConfig (CONFIGFILE);
-			cout << "using config file in data dir " << datadir << endl;
-			changehome();
-		  } else {
-
-			// no config file in home dir or data dir
-			VSFileSystem::vs_fprintf (stderr,"Could not open config file in either %s/%s\nOr in ~/.vegastrike/%s\n",datadir.c_str(),CONFIGFILE,CONFIGFILE);
-			exit (-1);
-		  }
-		  if (fp)
-			VSFileSystem::vs_close (fp);
-		  returnfromhome();
-
-		  char mycwd [256];
-		  getcwd(mycwd,255);
-		  mycwd[254]=mycwd[255]=0;
-
-		  string config_datadir = vs_config->getVariable ("data","directory",datadir);
-		  if(config_datadir!=datadir){
-			cout << "using data dir " << config_datadir << " from config file" << endl;
-			datadir=config_datadir;
-		  }
-		  vs_chdir (vs_config->getVariable ("data","sharedtextures","textures").c_str());
-		  getcwd (pwd,8191);
-		  sharedtextures = string (pwd);
-		  vs_cdup();
-		  vs_chdir (vs_config->getVariable ("data","sharedsounds","sounds").c_str());
-		  getcwd (pwd,8191);
-		  sharedsounds = string (pwd);
-		  vs_cdup();
-		  vs_chdir (vs_config->getVariable ("data","sharedmeshes","meshes").c_str());
-		  getcwd (pwd,8191);
-		  sharedmeshes = string (pwd);
-		  vs_cdup();
-		  vs_chdir (vs_config->getVariable ("data","sharedunits","units").c_str());
-		  getcwd (pwd,8191);
-		  sharedunits = string (pwd);
-
-
-		  vs_cdup();
-		  if (datadir.end()!=datadir.begin()) {
-			if (*(datadir.end()-1)!='/'&&*(datadir.end()-1)!='\\') {
-			  datadir+=DELIM;
-			}
-		  }
-		  if (sharedtextures.end()!=sharedtextures.begin()) {
-			if (*(sharedtextures.end()-1)!='/'&&*(sharedtextures.end()-1)!='\\') {
-			  sharedtextures+=DELIM;
-			}
-		  }
-		  if (sharedmeshes.end()!=sharedmeshes.begin()) {
-			if (*(sharedmeshes.end()-1)!='/'&&*(sharedmeshes.end()-1)!='\\') {
-			  sharedmeshes+=DELIM;
-			}
-		  }
-		  if (sharedunits.end()!=sharedunits.begin()) {
-			if (*(sharedunits.end()-1)!='/'&&*(sharedunits.end()-1)!='\\') {
-			  sharedunits+=DELIM;
-			}
-		  }
-		  if (sharedsounds.end()!=sharedsounds.begin()) {
-			if (*(sharedsounds.end()-1)!='/'&&*(sharedsounds.end()-1)!='\\') {
-			  sharedsounds+=DELIM;
-			}
-		  }
-		}
-		std::string GetSharedMeshPath (const std::string &name) {
-		  return sharedmeshes+"/"+name;
-		}
-		std::string GetSharedUnitPath () {
-		  return sharedunits+"/";
-		}
-		std::string GetSharedTexturePath (const std::string &name) {
-		  return sharedtextures+"/"+name;
-		}
-		std::string GetSharedSoundPath (const std::string &name) {
-		  return sharedsounds+"/"+name;
-		}
-		*/
-
 		std::string GetHashName (const std::string &name) {
 		  std::string result("");
 		  result = current_path.back()+current_directory.back()+current_subdirectory.back()+name;
@@ -444,49 +256,6 @@ namespace VSFileSystem
 			return string( "");
 		}
 
-
-		/*
-		void vs_chdir (const char *path) {
-		  if (path[0]!='\0') {
-			if (path[0]=='.'&&path[1]=='.') {
-			  vs_cdup();
-			  return;
-			}
-		  }
-		  if (chdir (path)!=-1) {
-			std::string tpath = path;
-			if (tpath.end()!=tpath.begin())
-			  if ((*(tpath.end()-1)!='/')&&((*(tpath.end()-1))!='\\'))
-			tpath+='/';
-			curdir.push_back (tpath);
-		  } else {
-			curdir.push_back (string("~"));
-		  }
-		}
-		void vs_setdir (const char * path) {
-		  getcwd (pwd,8191);
-		  savedpwd.push_back (string (pwd));
-		  savedcurdir.push_back (curdir);
-		  curdir.clear();
-		  curdir.push_back (path);
-		  chdir (path);
-		}
-		void vs_resetdir () {
-		  chdir (savedpwd.back().c_str());
-		  curdir = savedcurdir.back();
-		  savedcurdir.pop_back();
-		  savedpwd.pop_back();
-		}
-
-		void vs_cdup() {
-		  if (!curdir.empty()) {
-			if ((*curdir.back().begin())!='~') {
-			  chdir ("..");
-			}
-			curdir.pop_back ();
-		  }
-		}
-		*/
 
 	/************************************************************************************************/
 	/**** VSFileSystem wrappers to stdio function calls                                          ****/
@@ -713,8 +482,20 @@ namespace VSFileSystem
 			}
 		}
 		data_paths.clear();
+
+		// Load default VS config file
+		char * conffile = new char[config_file.length()+1];
+		conffile[config_file.length()] = 0;
+		memcpy( conffile, config_file.c_str(), config_file.length());
+		vs_config = createVegaConfig( conffile);
+		delete []conffile;
+		// Get the mods path
+		moddir = vs_config->getVariable( "data", "modpath", datadir+"/"+string( "mods"));
+		cout<<"Found MODDIR = "<<moddir<<endl;
 	}
 
+	// Config file has been loaded from data dir but now we look at the specified moddir in order
+	// to see if we should use a mod config file
 	void	LoadConfig( string subdir)
 	{
 		bool found = false;
@@ -722,11 +503,12 @@ namespace VSFileSystem
 		weapon_list = "weapon_list.xml";
 		if( subdir!="")
 		{
+			/*
 			if( DirectoryExists( homedir+"/mods/"+subdir))
 			{
 				if( FileExists( homedir+"/mods/"+subdir, config_file)>=0)
 				{
-					cout<<"CONFIGFILE - Found a config file in home directory, using : "<<(homedir+"/mods/"+subdir+"/"+config_file)<<endl;
+					cout<<"CONFIGFILE - Found a config file in home mod directory, using : "<<(homedir+"/mods/"+subdir+"/"+config_file)<<endl;
 					if( FileExists( homedir+"/mods/"+subdir, "weapon_list.xml")>=0)
 						weapon_list = "mods/"+subdir+"/weapon_list.xml";
 					config_file = "mods/"+subdir+"/"+config_file;
@@ -735,15 +517,16 @@ namespace VSFileSystem
 			}
 			else
 			{
+			*/
 				cout<<"WARNING : coudn't find a mod named '"<<subdir<<"' in homedir/mods"<<endl;
-				if( DirectoryExists( datadir+"/mods/"+subdir))
+				if( DirectoryExists( moddir+"/"+subdir))
 				{
-					if( FileExists( datadir+"/mods/"+subdir, config_file)>=0)
+					if( FileExists( moddir+"/"+subdir, config_file)>=0)
 					{
-						cout<<"CONFIGFILE - Found a config file in data directory, using : "<<(datadir+"/mods/"+subdir+"/"+config_file)<<endl;
-						if( FileExists( datadir+"/mods/"+subdir, "weapon_list.xml")>=0)
-							weapon_list = "mods/"+subdir+"/weapon_list.xml";
-						config_file = "mods/"+subdir+"/"+config_file;
+						cout<<"CONFIGFILE - Found a config file in mods directory, using : "<<(moddir+"/"+subdir+"/"+config_file)<<endl;
+						if( FileExists( moddir+"/"+subdir, "weapon_list.xml")>=0)
+							weapon_list = moddir+"/"+subdir+"/weapon_list.xml";
+						config_file = moddir+"/"+subdir+"/"+config_file;
 						found = true;
 					}
 				}
@@ -752,48 +535,50 @@ namespace VSFileSystem
 					cout<<"ERROR : coudn't find a mod named '"<<subdir<<"' in datadir/mods"<<endl;
 					exit(1);
 				}
-			}
+			//}
 		}
 		
 
 		if( !found)
 		{
-		// Next check if we have a config file in homedir if we haven't found one for mod
-		if( FileExists( homedir, config_file)>=0)
-		{
-			cerr<<"CONFIGFILE - Found a config file in home directory, using : "<<(homedir+"/"+config_file)<<endl;
-			/*
-			char * conffile = new char[homedir.length()+1+config_file.length()+1];
-			conffile[homedir.length()+1+config_file.length()] = 0;
-			memcpy( conffile, (homedir+"/"+config_file).c_str(), homedir.length()+1+config_file.length());
-			vs_config = createVegaConfig( config_file.c_str());
-			delete []conffile;
-			*/
-		}
-		else
-		{
-			cerr<<"CONFIGFILE - No config found in home : "<<(homedir+"/"+config_file)<<endl;
-			if( FileExists( datadir,  config_file)>=0)
+			// Next check if we have a config file in homedir if we haven't found one for mod
+			if( FileExists( homedir, config_file)>=0)
 			{
-				cerr<<"CONFIGFILE - No home config file found, using datadir config file : "<<(datadir+"/"+config_file)<<endl;
-				// We didn't find a config file in home_path so we load the data_path one
+				cerr<<"CONFIGFILE - Found a config file in home directory, using : "<<(homedir+"/"+config_file)<<endl;
 				/*
-				char * conffile = new char[datadir.length()+1+config_file.length()+1];
-				conffile[datadir.length()+1+config_file.length()] = 0;
-				memcpy( conffile, (datadir+"/"+config_file).c_str(), datadir.length()+1+config_file.length());
-				vs_config = createVegaConfig( conffile);
+				char * conffile = new char[homedir.length()+1+config_file.length()+1];
+				conffile[homedir.length()+1+config_file.length()] = 0;
+				memcpy( conffile, (homedir+"/"+config_file).c_str(), homedir.length()+1+config_file.length());
+				vs_config = createVegaConfig( config_file.c_str());
 				delete []conffile;
 				*/
 			}
 			else
 			{
-				cerr<<"CONFIGFILE - No config found in data dir : "<<(datadir+"/"+config_file)<<endl;
-				cerr<<"CONFIG FILE NOT FOUND !!!"<<endl;
-				VSExit(1);
+				cerr<<"CONFIGFILE - No config found in home : "<<(homedir+"/"+config_file)<<endl;
+				if( FileExists( datadir,  config_file)>=0)
+				{
+					cerr<<"CONFIGFILE - No home config file found, using datadir config file : "<<(datadir+"/"+config_file)<<endl;
+					// We didn't find a config file in home_path so we load the data_path one
+					/*
+					char * conffile = new char[datadir.length()+1+config_file.length()+1];
+					conffile[datadir.length()+1+config_file.length()] = 0;
+					memcpy( conffile, (datadir+"/"+config_file).c_str(), datadir.length()+1+config_file.length());
+					vs_config = createVegaConfig( conffile);
+					delete []conffile;
+					*/
+				}
+				else
+				{
+					cerr<<"CONFIGFILE - No config found in data dir : "<<(datadir+"/"+config_file)<<endl;
+					cerr<<"CONFIG FILE NOT FOUND !!!"<<endl;
+					VSExit(1);
+				}
 			}
 		}
-		}
 
+		// Delete the default config in order to reallocate it with the right one (if it is a mod)
+		delete vs_config;
 		char * conffile = new char[config_file.length()+1];
 		conffile[config_file.length()] = 0;
 		memcpy( conffile, config_file.c_str(), config_file.length());
@@ -801,6 +586,7 @@ namespace VSFileSystem
 		delete []conffile;
 
 		// Now check if there is a data directory specified in it
+		// NOTE : THIS IS NOT A GOOD IDEA TO HAVE A DATADIR SPECIFIED IN THE CONFIG FILE
 		string data_path( vs_config->getVariable( "data", "datadir", ""));
 		if( data_path != "")
 		{
@@ -814,24 +600,24 @@ namespace VSFileSystem
 
 	void	InitMods()
 	{
-		// Scan for mods with standard data subtree
 		string curpath;
 		struct dirent ** dirlist;
-		curmodpath = homedir+"/mods/";
-		int ret = scandir( curmodpath.c_str(), &dirlist, selectdirs, 0);
+		// Scan for mods in specified subdir
+		int ret = scandir( moddir.c_str(), &dirlist, selectdirs, 0);
 		if( ret <0)
 			return;
 		else
 		{
 			while( ret--)
 			{
-				curpath = curmodpath+dirlist[ret]->d_name;
+				curpath = moddir+"/"+dirlist[ret]->d_name;
 				cout<<"Adding mod path : "<<curpath<<endl;
 				Rootdir.push_back( curpath);
 			}
 		}
 		free( dirlist);
-		curmodpath = datadir+"/mods/";
+		// Scan for mods with standard data subtree
+		curmodpath = homedir+"/mods/";
 		ret = scandir( curmodpath.c_str(), &dirlist, selectdirs, 0);
 		if( ret <0)
 			return;
@@ -886,7 +672,6 @@ namespace VSFileSystem
 			SubDirectories.push_back( vec);
 		}
 
-		moddir = vs_config->getVariable( "data", "modpath", "mods");
 		sharedsectors = vs_config->getVariable( "data", "sectors", "sectors");
 		sharedcockpits = vs_config->getVariable( "data", "cockpits", "cockpits");
 		shareduniverse = vs_config->getVariable( "data", "universe_path", "universe");
@@ -959,7 +744,7 @@ namespace VSFileSystem
 		CreateDirectoryHome( sharedsounds);
 		CreateDirectoryHome( "save");
 		CreateDirectoryHome( "generatedbsp");
-		CreateDirectoryHome( moddir);
+		//CreateDirectoryHome( moddir);
 
 		// We will be able to automatically add mods files (set of resources or even directory structure similar to the data tree)
 		// by just adding a subdirectory named with the mod name in the subdirectory "mods"...
@@ -1040,7 +825,7 @@ namespace VSFileSystem
 	void	CreateDirectoryAbs( const char * filename)
 	{
 		int err;
-		if( chdir( filename)==-1)
+		if( !DirectoryExists( filename))
 		{
 			err = mkdir (filename
 #if !defined( _WIN32) || defined( __CYGWIN__)
@@ -1088,12 +873,15 @@ namespace VSFileSystem
 			file = filename+1;
 		else
 			file = filename;
+		if( root!="")
+			root +="/";
+
 		if( !UseVolumes[type] || !lookinvolume)
 		{
 			if( type == Unknown)
-				fullpath = root+"/"+file;
+				fullpath = root+file;
 			else
-				fullpath = root+"/"+Directories[type]+"/"+file;
+				fullpath = root+Directories[type]+"/"+file;
 
 			struct stat s;
 			if( stat( fullpath.c_str(), &s) >= 0)
@@ -1122,7 +910,7 @@ namespace VSFileSystem
 
 				// TRY TO OPEN A DATA.VOLFORMAT FILE IN THE ROOT DIRECTORY PASSED AS AN ARG
 				filestr = Directories[type]+"/"+file;
-				fullpath = root+"/data."+volume_format;
+				fullpath = root+"data."+volume_format;
 				map<string, CPK3 *>::iterator it;
 				it = pk3_opened_files.find( fullpath);
 				failed+="Looking for file in VOLUME : "+fullpath+"... ";
@@ -1163,7 +951,7 @@ namespace VSFileSystem
 				{
 					// AND THEN A VOLUME FILE BASED ON DIRECTORIES[TYPE]
 					filestr = string( file);
-					fullpath = root+"/"+Directories[type]+"."+volume_format;
+					fullpath = root+Directories[type]+"."+volume_format;
 					it = pk3_opened_files.find( fullpath);
 					failed+="Looking for file in VOLUME : "+fullpath+"... ";
 					if( it==pk3_opened_files.end())
@@ -1508,7 +1296,7 @@ namespace VSFileSystem
 
 		VSError err = Ok;
 
-		cerr<<"Loading a " << type << " :"<<endl;
+		cerr<<"Loading a " << type << " : "<<file<<endl;
 	if( type < ZoneBuffer || type==Unknown) // It is a "classic file"
 	{
 		if( !UseVolumes[type])
@@ -1524,12 +1312,30 @@ namespace VSFileSystem
 				}
 				if( found<0)
 				{
+					/*
 					filestr = homedir+"/"+file;
 					cerr<<"TRYING TO OPEN "<<filestr<<"... ";
 					if( (found = FileExists( homedir, file))<0 )
 					{
 						filestr = datadir+"/"+file;
 						found = FileExists( datadir, file);
+					}
+					*/
+					for( int ij=0; ij<Rootdir.size()&&found<0; ij++)
+					{
+						filestr = Rootdir[ij]+"/"+file;
+						found = FileExists( Rootdir[ij], file);
+						if( found<0)
+							failed += "\tRootdir : "+Rootdir[ij]+"/"+file+" NOT FOUND !\n";
+					}
+					// Look for relative (to datadir) or absolute named file
+					if( found<0)
+					{
+						filestr = string( file);
+						if( (found=FileExists( "", file))<0)
+						{
+							failed += "\tAbs or rel : "+string(file)+" NOT FOUND !\n";
+						}
 					}
 				}
 				if( found<0)
