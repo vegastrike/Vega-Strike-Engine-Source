@@ -29,7 +29,6 @@ StarSystem::StarSystem(char * filename) :
   
   currentcamera = 0;	
   systemInputDFA = new InputDFA (this);
-
   LoadXML(filename);
 //  primaries[0]->SetPosition(0,0,0);
   int i;
