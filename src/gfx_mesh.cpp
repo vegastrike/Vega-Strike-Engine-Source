@@ -228,6 +228,15 @@ void Mesh::ProcessDrawQueue() {
   }
 }
 
+bool queryBoundingBox (const Vector & start, const Vector & end) {
+  //normal = 
+
+}
+bool queryBoundingBox (const Vector & start) {
+
+
+}
+
 BoundingBox * Mesh::getBoundingBox() {
   
   BoundingBox * tbox = new BoundingBox (Vector (minSizeX,0,0)+local_pos,Vector (maxSizeX,0,0)+local_pos,

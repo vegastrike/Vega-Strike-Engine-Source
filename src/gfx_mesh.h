@@ -238,6 +238,8 @@ public:
   Vector corner_min() { return Vector(minSizeX, minSizeY, minSizeZ); }
   Vector corner_max() { return Vector(maxSizeX, maxSizeY, maxSizeZ); }
   BoundingBox * getBoundingBox();
+  bool queryBoundingBox (const Vector &start);
+  bool queryBoundingBox (const Vector &start, const Vector & end); 
   float rSize () {return radialSize;}
 
 };
