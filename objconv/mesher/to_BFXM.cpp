@@ -634,7 +634,6 @@ void endElement(const string &name, XML * xml) {
   xml->state_stack.pop_back();
   XML::Names elem = (XML::Names)XML::element_map.lookup(name);
 
-  unsigned int32bit i;
   switch(elem) {
   case XML::UNKNOWN:
     fprintf (stderr,"Unknown element end tag '%s' detected\n",name.c_str());
@@ -735,8 +734,6 @@ XML LoadXML(const char *filename, float32bit unitscale) {
 
 void xmeshToBFXM(XML memfile,FILE* Outputfile,char mode){//converts input file to BFXM creates new, or appends record based on mode
   unsigned int32bit intbuf;
-  float32bit floatbuf;
-  char8bit bytebuf;
   
   bool append=(mode=='a');
   
@@ -766,7 +763,6 @@ void xmeshToBFXM(XML memfile,FILE* Outputfile,char mode){//converts input file t
  
 int32bit writesuperheader(XML memfile, FILE* Outputfile){
   unsigned int32bit intbuf;
-  float32bit floatbuf;
   int32bit versionnumber=VSSwapHostIntToLittle(10);
   char8bit bytebuf;
   int32bit runningbytenum=0;

@@ -3,8 +3,6 @@
 
 void BFXMToXmesh(FILE* Inputfile, FILE* Outputfile){
   int32bit intbuf;
-  float32bit floatbuf;
-  char8bit bytebuf;
   int32bit word32index=0;
   union chunk32{
 	  int32bit i32val;
