@@ -908,6 +908,7 @@ void Cockpit::Draw() {
   cockpit_time+=GetElapsedTime();
   if (cockpit_time>=10000)
     InitStatic();
+  _Universe->AccessCamera()->UpdateGFX (GFXFALSE,GFXFALSE);
   GFXDisable (TEXTURE1);
   GFXLoadIdentity(MODEL);
   GFXDisable(LIGHTING);

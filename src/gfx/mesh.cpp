@@ -271,7 +271,7 @@ void Mesh::Draw(float lod, const Matrix &m, float toofar, short cloak, float neb
   if(!(origmesh->will_be_drawn&(1<<c.mesh_seq))) {
     origmesh->will_be_drawn |= (1<<c.mesh_seq);
     //    fprintf (stderr,"origmesh %x",origmesh);
-    undrawn_meshes[c.mesh_seq].push_back(OrigMeshContainer(origmesh,toofar));//FIXME will not work if many of hte same mesh are blocking each other
+    undrawn_meshes[c.mesh_seq].push_back(OrigMeshContainer(origmesh,toofar-rSize()));//FIXME will not work if many of hte same mesh are blocking each other
   }
   will_be_drawn |= (1<<c.mesh_seq);
 }
