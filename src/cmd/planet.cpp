@@ -184,7 +184,10 @@ GamePlanet::GamePlanet(QVector x,QVector y,float vely, const Vector & rotvel, fl
   bool wormhole = dest.size()!=0;
   if (wormhole ) {
 	  static std::string wormhole_unit = vs_config->getVariable ("graphics","wormhole","wormhole");
-	  string wormholename = wormhole_unit+".stable";
+	  string stab (".stable");
+	  if (rand()<RAND_MAX*.99)
+		  stab = ".unstable";
+	  string wormholename = wormhole_unit+stab;
 	  
 	  Unit * jump = UnitFactory::createUnit (wormholename.c_str(),true,faction);
 	  static int neutralfaction=FactionUtil::GetFaction("neutral");
