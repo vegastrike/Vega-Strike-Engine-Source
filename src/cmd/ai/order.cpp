@@ -158,7 +158,7 @@ bool Order::AttachOrder (Vector targetv) {
 
 void ExecuteFor::Execute() {
   if (time==0) {
-    fprintf (stderr,"begin execute for %f\n",maxtime);
+    //    fprintf (stderr,"begin execute for %f\n",maxtime);
   }
   if (child) {
     child->SetParent(parent);
@@ -166,7 +166,7 @@ void ExecuteFor::Execute() {
   }
   if (time>maxtime) {
     done = true;
-    fprintf (stderr,"finishing execute for %f\n",maxtime);
+    //    fprintf (stderr,"finishing execute for %f\n",maxtime);
     return;
   }
   time +=SIMULATION_ATOM;
