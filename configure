@@ -46,7 +46,7 @@ ac_help="$ac_help
 ac_help="$ac_help
   --enable-stencil-buffer Use if your hardware has a stencil buffer"
 ac_help="$ac_help
-  --with-data-dir=PATH    Default vegastrike data directory"
+  --with-data-dir=PATH    Default tuxracer data directory"
 
 # Initialize some variables set by options.
 # The variables have the same names as the options, with
@@ -487,7 +487,7 @@ echo > confdefs.h
 
 # A filename unique to this package, relative to the directory that
 # configure is in, which we can look for to find out if srcdir is correct.
-ac_unique_file=src/main.c
+ac_unique_file=src/vegastrike.h
 
 # Find the source files, if location was not specified.
 if test -z "$srcdir"; then

@@ -1,5 +1,5 @@
 dnl Process this file with autoconf to produce a configure script.
-AC_INIT(src/tuxracer.h)
+AC_INIT(src/vegastrike.h)
 AM_INIT_AUTOMAKE(tuxracer, "0.60.3")
 AM_CONFIG_HEADER(config.h)
 
