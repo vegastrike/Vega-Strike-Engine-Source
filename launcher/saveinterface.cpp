@@ -328,9 +328,9 @@ int main( int   argc,
     return(0);
 }
 
-
+#ifdef _WIN32
 #include <wchar.h>
-
+#endif
 char *makeasc(wchar_t *str) {
 	int i;
 	for (i=0;str[i]!='\0';i+=2) {
@@ -524,7 +524,11 @@ void copyfile ( GtkWidget        *w,
 		char *rementstr=new char [strlen(newentstr)+20];
 		sprintf(remstr,"../serialized_xml/%s/",newstr);
 		sprintf(rementstr,"../serialized_xml/%s/",newentstr);
+#ifdef _WIN32
 		mkdir(rementstr);
+#else
+		mkdir(rementstr,0xffffffff);
+#endif
 		delete []rementstr;
 		FILE *f1=NULL;
 		FILE *f2=NULL;
@@ -534,7 +538,8 @@ void copyfile ( GtkWidget        *w,
 			if (f1) {
 				int len=strlen(dirs->gl_pathv[i]);
 				char *newchr;
-				for (int j=len-1;j>=0&&dirs->gl_pathv[i][j]!='\\'&&dirs->gl_pathv[i][j]!='/';j--) {
+				int j;
+				for (j=len-1;j>=0&&dirs->gl_pathv[i][j]!='\\'&&dirs->gl_pathv[i][j]!='/';j--) {
 				}
 				newchr=dirs->gl_pathv[i]+j+1;
 				char *rementstr=new char [strlen(newentstr)+20+strlen(newchr)];
