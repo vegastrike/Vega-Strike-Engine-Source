@@ -117,7 +117,14 @@ vector <CargoColor>& GameUnit<UnitType>::FilterUpgradeList (vector <CargoColor> 
 	}
 	return FilterDowngradeList(mylist,false);
 }
-
+inline float uniformrand (float min, float max) {
+	return ((float)(rand ())/RAND_MAX)*(max-min)+min;
+}
+inline QVector randVector (float min, float max) {
+	return QVector (uniformrand(min,max),
+					uniformrand(min,max),
+					uniformrand(min,max));
+}
 extern void SwitchUnits (Unit *,Unit*);
 template<class UnitType>
 void GameUnit<UnitType>::EjectCargo (unsigned int index) {
@@ -174,7 +181,8 @@ void GameUnit<UnitType>::EjectCargo (unsigned int index) {
 		  if (tmpcontent=="eject") {
 			  cargo = UnitFactory::createUnit ("eject",false,faction);
 		  }else {
-			  cargo = UnitFactory::createUnit (tmpcontent.c_str(),false,FactionUtil::GetFaction("upgrades"));
+			  string tmpnam = tmpcontent+".cargo";
+			  cargo = UnitFactory::createUnit (tmpnam.c_str(),false,FactionUtil::GetFaction("upgrades"));
 		  }
       }
       if (cargo->name=="LOAD_FAILED") {
@@ -184,9 +192,9 @@ void GameUnit<UnitType>::EjectCargo (unsigned int index) {
       if (cargo->rSize()>=rSize()) {
 	cargo->Kill();
       }else {
-	cargo->SetPosAndCumPos (Position());
+	cargo->SetPosAndCumPos (Position()+randVector(-rSize(), rSize()));
 	cargo->SetOwner (this);
-	cargo->SetVelocity(Velocity);
+	cargo->SetVelocity(Velocity+randVector(-.25,.25).Cast());
 	cargo->mass = tmp->mass;
 	if (name.length()>0) {
 	  cargo->name=name;

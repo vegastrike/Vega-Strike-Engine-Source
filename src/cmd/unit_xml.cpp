@@ -1198,7 +1198,7 @@ using namespace UnitXML;
 	mass = parse_float((*iter).value);
 	break;
       case MOMENTOFINERTIA:
-	MomentOfInertia=parse_float((*iter).value);
+		  MomentOfInertia=parse_float((*iter).value);
 	break;
       case FUEL:
 	fuel=parse_float((*iter).value);

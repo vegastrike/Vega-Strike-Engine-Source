@@ -1650,23 +1650,56 @@ Cockpit * Unit::GetVelocityDifficultyMult(float &difficulty) const{
 
 void Unit::Rotate (const Vector &axis)
 {
+	if (!FINITE(curr_physical_state.orientation.s)||
+		!FINITE(curr_physical_state.orientation.v.i)||
+		!FINITE(curr_physical_state.orientation.v.j)||
+		!FINITE(curr_physical_state.orientation.v.k)) {
+		fprintf (stderr,"inital rotation skew\n");
+	}
+		
 	double theta = axis.Magnitude();
 	double ootheta=0;
 	if( theta==0) return;
 	ootheta = 1/theta;
+	if (!FINITE(ootheta)) {
+		fprintf (stderr,"theta is b0rked %lf",theta);
+	}
 	float s = cos (theta * .5);
 	Quaternion rot = Quaternion(s, axis * (sinf (theta*.5)*ootheta));
+	if (!FINITE(rot.s)||
+		!FINITE(rot.v.i)||
+		!FINITE(rot.v.j)||
+		!FINITE(rot.v.k)) {
+		fprintf (stderr,"rot skew\n");
+	}
+	
 	if(theta < 0.0001) {
 	  rot = identity_quaternion;
 	}
 	curr_physical_state.orientation *= rot;
+	if (!FINITE(curr_physical_state.orientation.s)||
+		!FINITE(curr_physical_state.orientation.v.i)||
+		!FINITE(curr_physical_state.orientation.v.j)||
+		!FINITE(curr_physical_state.orientation.v.k)) {
+		fprintf (stderr,"infifinal rotation skew\n");
+	}
+	
 	if (limits.limitmin>-1) {
 	  Matrix mat;
 	  curr_physical_state.orientation.to_matrix (mat);
 	  if (limits.structurelimits.Dot (mat.getR())<limits.limitmin) {
 	    curr_physical_state.orientation=prev_physical_state.orientation;
+		//fprintf (stderr,"wierd case... with an i before the e\n", mat.getR().i,mat.getR().j,mat.getR().k);
+		
 	  }
 	}
+	if (!FINITE(curr_physical_state.orientation.s)||
+		!FINITE(curr_physical_state.orientation.v.i)||
+		!FINITE(curr_physical_state.orientation.v.j)||
+		!FINITE(curr_physical_state.orientation.v.k)) {
+		fprintf (stderr,"final rotation skew\n");
+	}
+	
 }
 
 void Unit::FireEngines (const Vector &Direction/*unit vector... might default to "r"*/,
@@ -2064,11 +2097,17 @@ Vector Unit::ResolveForces (const Transformation &trans, const Matrix &transmat)
   if (NetTorque.i||NetTorque.j||NetTorque.k) {
     temp1 += InvTransformNormal(transmat,NetTorque);
   }
-  temp1=temp1/MomentOfInertia;
+  if (MomentOfInertia)
+	  temp1=temp1/MomentOfInertia;
+  else
+	  fprintf (stderr,"zero moment of inertia %s\n",name.c_str());
   Vector temp (temp1*SIMULATION_ATOM);
   /*  //FIXME  does this shit happen!
       if (FINITE(temp.i)&&FINITE (temp.j)&&FINITE(temp.k)) */
   {
+	  if (!FINITE(temp.i)||FINITE (temp.j)||FINITE(temp.k)) {
+
+	  }
     AngularVelocity += temp;
   }
   Vector temp2 = (NetLocalForce.i*p + NetLocalForce.j*q + NetLocalForce.k*r ); //acceleration
@@ -2637,7 +2676,7 @@ float Unit::DealDamageToHullReturnArmor (const Vector & pnt, float damage, unsig
       targ = &armor.right;
     }
   }
-  short biggerthan=*targ;
+  int biggerthan=*targ;
   float absdamage = damage>=0?damage:-damage;
   percent = absdamage/(*targ+hull);
 
