@@ -130,6 +130,7 @@ enum callback_module_olist_type {
     CMT_OLIST_pop_back ,
     CMT_OLIST_back ,
     CMT_OLIST_at ,
+	CMT_OLIST_erase ,
     CMT_OLIST_set ,
     CMT_OLIST_toxml ,
     CMT_OLIST_size 

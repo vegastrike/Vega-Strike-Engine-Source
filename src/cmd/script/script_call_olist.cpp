@@ -146,6 +146,24 @@ varInst *Mission::call_olist(missionNode *node,int mode){
 
       //return viret;
     }
+    else if(method_id==CMT_OLIST_erase){
+      debug(3,node,mode,"olist.erase");
+//  return  getOListObject(node,mode,ovi)->back();
+
+      missionNode *snode=getArgument(node,mode,1);
+      int index=checkIntExpr(snode,mode);
+      debug(3,snode,mode,"index is in that node");
+
+
+      viret=newVarInst(VI_TEMP);
+      viret->type=VAR_VOID;
+
+      if(mode==SCRIPT_RUN){
+        olist_t mylist=*getOListObject(node,mode,ovi);
+        mylist.erase(mylist.begin()+index);
+      }
+
+    }
     else if(method_id==CMT_OLIST_set){
       debug(3,node,mode,"olist.set");
 

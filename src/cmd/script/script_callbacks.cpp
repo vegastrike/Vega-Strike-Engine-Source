@@ -892,10 +892,10 @@ void Mission::initCallbackMaps(){
     module_olist_map["pop_back"]=CMT_OLIST_pop_back ;
     module_olist_map["back"]=CMT_OLIST_back ;
     module_olist_map["at"]=CMT_OLIST_at ;
+	module_olist_map["erase"]=CMT_OLIST_erase ;
     module_olist_map["set"]=CMT_OLIST_set ;
     module_olist_map["toxml"]=CMT_OLIST_toxml ;
     module_olist_map["size"]=CMT_OLIST_size; 
-
   module_omap_map["new"]=CMT_OMAP_new ;
     module_omap_map["delete"]=CMT_OMAP_delete ;
     module_omap_map["set"]=CMT_OMAP_set ;
