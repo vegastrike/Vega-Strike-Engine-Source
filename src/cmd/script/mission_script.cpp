@@ -75,7 +75,7 @@ void Mission::DirectorStart(missionNode *node){
     if(module==NULL){
       debug(3,node,SCRIPT_PARSE,"loading module "+import->script.name);
 
-      string filename=import->script.name+".module";
+      string filename="modules/"+import->script.name+".module";
 
       missionNode *import_top=importf->LoadXML(filename.c_str());
 
