@@ -52,7 +52,8 @@ Sprite::Sprite(const char *file, enum FILTER texturefilter,GFXBOOL force) {
   if (!fp) {
     changeup=false;
 	vscdup();
-	fp = fopen(file,"r");
+	if (file[0]!='\0')
+	  fp = fopen(file,"r");
   }
   if (fp) {
     char texture[64]={0};
