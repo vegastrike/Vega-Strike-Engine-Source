@@ -356,7 +356,6 @@ bool AggressiveAI::ProcessCurrentFgDirective(Flightgroup * fg) {
 		  Order * o = leader->getAIState();
 		  if (o)
 			  o->Communicate(c);
-	      float left= parent->getFgSubnumber()%2?1:-1;
 	      static float esc_percent= XMLSupport::parse_float(vs_config->getVariable ("AI",
 											"Targetting",
 											"EscortDistance",
@@ -365,8 +364,24 @@ bool AggressiveAI::ProcessCurrentFgDirective(Flightgroup * fg) {
 											"Targetting",
 											"TurnLeaderDist",
 											"5.0"));
-	      
-	      double dist=esc_percent*(1+parent->getFgSubnumber()/2)*left*(parent->rSize()+leader->rSize());
+	      int fgnum = parent->getFgSubnumber();
+		  if (parent->getFlightgroup()) {
+			  int tempnum=0;
+			  string nam = parent->getFlightgroup()->name;
+			  int i=nam.length()-1;
+			  for (;i>=0;--i) {
+				  char digit = nam[i];
+				  if (digit>='0'&&digit<='9') {
+					  tempnum*=10;
+					  tempnum+=digit-'0';
+				  }else
+					  break;				  
+			  }
+			  fgnum+=tempnum;
+			  
+		  }
+	      float left= fgnum%2?1:-1;		  
+	      double dist=esc_percent*(1+fgnum/2)*left*(parent->rSize()+leader->rSize());
 	      Order * ord = new Orders::FormUp(QVector(dist,0,-fabs(dist)));
 	      ord->SetParent (parent);
 	      ReplaceOrder (ord);

@@ -2385,6 +2385,12 @@ void Unit::RegenShields () {
   if (energy_before_shield) {
     RechargeEnergy();
   }
+  static float low_power_mode = XMLSupport::parse_float(vs_config->getVariable("physics","low_power_mode_energy","10"));
+  if (maxenergy-maxshield<low_power_mode) {
+	  maxenergy=maxshield+low_power_mode;
+	  if (rand()<.0025*RAND_MAX)
+		  UniverseUtil::IOmessage(0,"game","all","**Warning** Power Supply Overdrawn: downgrade shield or purchase reactor capacitance!");
+  }
   if (maxenergy>maxshield) {
     if (energy>maxenergy-maxshield) {//allow shields to absorb xtra power
       float excessenergy = energy - (maxenergy-maxshield);
