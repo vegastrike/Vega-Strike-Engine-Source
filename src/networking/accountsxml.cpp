@@ -186,7 +186,8 @@ vector<Account *> getAllAccounts() {
   return accounttable.GetAll();
 }
 
-void LoadAccounts(const char *filename) {
+void LoadAccounts(const char *filename)
+{
   const int chunk_size = 16384;
   FILE * inFile= fopen (filename,"r");
   if (!inFile) {

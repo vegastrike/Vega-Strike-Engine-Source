@@ -29,27 +29,38 @@ protected:
     int       _fd;
     AddressIP _srv_ip; // own IP address structure of this server
 
+    unsigned _noblock : 1;
+
 public:
-    ServerSocket( ) : _fd(0) { }
+    ServerSocket( )
+        : _fd(0)
+        , _noblock(0)
+    { }
 
     ServerSocket( int fd, const AddressIP& adr )
         : _fd(fd)
+        , _noblock(0)
     {
         _srv_ip = adr;
     }
 
     ServerSocket( const ServerSocket& orig )
     {
-        _fd     = orig._fd;
-        _srv_ip = orig._srv_ip;
+        _fd      = orig._fd;
+        _srv_ip  = orig._srv_ip;
+        _noblock = orig._noblock;
     }
 
     ServerSocket& operator=( const ServerSocket& orig )
     {
-        _fd     = orig._fd;
-        _srv_ip = orig._srv_ip;
+        _fd      = orig._fd;
+        _srv_ip  = orig._srv_ip;
+        _noblock = orig._noblock;
        	return *this;
     }
+
+    bool set_nonblock( );
+    bool get_nonblock( ) const;
 
     inline bool valid() const { return (_fd>0); }
     inline int  get_udp_sock( ) const { return _fd; }

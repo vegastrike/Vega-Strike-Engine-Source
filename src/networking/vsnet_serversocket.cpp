@@ -12,12 +12,13 @@ using std::hex;
 #if defined(_WIN32) && !defined(__CYGWIN__)
 	//#warning "Win32 platform"
 	#include <winsock.h>
+#else
+    #include <fcntl.h>
 #endif
 
 std::ostream& operator<<( std::ostream& ostr, const ServerSocket& s )
 {
-    ostr << "( s=" << s._fd
-	 << " l=" << s._srv_ip << " )";
+    ostr << "( s=" << s._fd << " l=" << s._srv_ip << " )";
     return ostr;
 }
 
@@ -35,6 +36,31 @@ void ServerSocket::disconnect( const char *s, bool fexit )
     COUT << s << " :\tWarning: disconnected" << strerror(errno) << endl;
     if( fexit )
         exit(1);
+}
+
+bool ServerSocket::set_nonblock( )
+{
+#if !defined(_WIN32) || defined(__CYGWIN__)
+    if( ::fcntl( _fd, F_SETFL, O_NONBLOCK) == -1)
+    {
+        ::perror( "Error fcntl : ");
+        return false;
+    }
+#else
+    unsigned long datato = 1;
+    if( ::ioctlsocket( _fd, FIONBIO, &datato ) !=0 )
+    {
+        ::perror( "Error fcntl : ");
+        return false;
+    }
+#endif
+    _noblock = 1;
+    return true;
+}
+
+bool ServerSocket::get_nonblock( ) const
+{
+    return (_noblock==1);
 }
 
 /**************************************************************/
@@ -63,23 +89,23 @@ SOCKETALT ServerSocketTCP::acceptNewConn( SocketSet& set )
       len = sizeof( struct sockaddr_in );
     if( set.is_set( _fd ) )
     {
-        int sock = accept( _fd, (sockaddr *)&remote_ip, &len );
+        int sock = ::accept( _fd, (sockaddr *)&remote_ip, &len );
         if( sock > 0 )
         {
             SOCKETALT ret( sock, SOCKETALT::TCP, remote_ip );
-	    return ret;
+	        return ret;
         }
         else
         {
             COUT << "Error accepting new conn: " << vsnetLastError() << endl;
             SOCKETALT ret( 0, SOCKETALT::TCP, remote_ip );
-	    return ret;
+	        return ret;
         }
     }
     else
     {
         SOCKETALT ret( 0, SOCKETALT::TCP, _srv_ip );
-	return ret;
+	    return ret;
     }
 }
 

@@ -40,7 +40,7 @@ class ZoneMgr
 {
 		//vector<StarSystem *> starsystems;
 		// List of clients in zones
-		vector<list<Client *> >	zone_list;
+		vector<list<Client *>*>	zone_list;
 		vector<int>				zone_clients;
 		// List of units in zones (but not Clients)
 		vector<list<Unit *> >	zone_unitlist;
@@ -55,7 +55,7 @@ class ZoneMgr
 		//~ZoneMgr();
 		// Serial is the zone id
 		StarSystem *	addZone( string starsys);
-		list<Client *>	GetZone( int serial);
+		list<Client *>*	GetZone( int serial);
 		//void	addClient( Client * clt, int zone);
 		void	addUnit( Unit * un, int zone);
 		void	removeUnit( Unit *un, int zone);

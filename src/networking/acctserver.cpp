@@ -147,13 +147,9 @@ void	AccountServer::recvMsg( SOCKETALT sock)
 	unsigned char	cmd;
 	Account *		elem = NULL;
 	int 			found=0, connected=0;
-	//char buffer[MAXBUFFER];
 
 	// Receive data from sock
-	//cout<<"Receiving on socket "<<sock.fd<<endl;
-	//len = MAXBUFFER;
 	PacketMem mem;
-	//if( (recvcount = sock.recvbuf( buffer, len, &ipadr))>0)
 	if( (recvcount = sock.recvbuf( mem, &ipadr))>0)
 	{
 		cout<<"Socket : "<<endl<<sock<<endl;
@@ -211,9 +207,9 @@ void	AccountServer::recvMsg( SOCKETALT sock)
 				cout<<"<<< LOGIN REQUEST ------------------------------------------"<<endl;
 			break;
 			case CMD_LOGOUT :
-				cout<<">>> LOGOUT REQUEST =( "<<callsign<<":"<<passwd<<" )= --------------------------------------"<<endl;
 				callsign = netbuf.getString();
 				passwd = netbuf.getString();
+				cout<<">>> LOGOUT REQUEST =( "<<callsign<<":"<<passwd<<" )= --------------------------------------"<<endl;
 				// Receive logout request containing name of player
 				for (  j=Cltacct.begin(); j!=Cltacct.end() && !found && !connected; j++)
 				{

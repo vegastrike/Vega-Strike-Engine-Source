@@ -6,12 +6,12 @@
 #include "vsnet_socket.h"
 #include "vsnet_err.h"
 
-void close_socket( int fd)
+void close_socket( int fd )
 {
 #if defined(_WIN32) && !defined(__CYGWIN__)
-	closesocket( fd);
+	closesocket( fd );
 #else
-	close( fd);
+	close( fd );
 #endif
 }
 
@@ -57,7 +57,7 @@ public:
     virtual void dump( std::ostream& ostr );
 
     virtual void watch( SocketSet& set );
-    virtual bool isActive( SocketSet& set ) { return set.is_set(fd); }
+    virtual bool isActive( SocketSet& set ) { return set.is_set(_fd); }
 };
 
 /***********************************************************************
@@ -112,20 +112,20 @@ private:
     struct Blob
     {
         char*  buf;
-	size_t present_len;
-	size_t expected_len;
+	    size_t present_len;
+	    size_t expected_len;
 
         Blob( ) : buf(0), present_len(0), expected_len(0) { }
 
         Blob( size_t len ) : present_len(0), expected_len(len)
-	{
-	    buf = new char[len];
-	}
+	    {
+	        buf = new char[len];
+	    }
 	
         ~Blob( )
-	{
-	    delete [] buf;
-	}
+	    {
+	        delete [] buf;
+        }
 
     private:
         Blob( const Blob& orig );             // forbidden
@@ -142,17 +142,17 @@ private:
     Blob*            _incomplete_packet;
 
     /** We send 4 bytes as a packet length indicator. Unfortunately, even these
-     *  4 bytes may be split by TCP. These two variables are needed for collecting
-     *  the 4 bytes.
-     *  Note: for the obvious reason that this happens rarely, the collection code
-     *        can not be considered tested.
+     *  4 bytes may be split by TCP. These two variables are needed for
+     *  collecting the 4 bytes.
+     *  Note: for the obvious reason that this happens rarely, the collection
+     *        code can not be considered tested.
      */
     int         _incomplete_len_field;
     char        _len_field[4];
 
-    /** Closed connections are noticed in isActive but evaluated by the application
-     *  after recvbuf. So, we remember the situation here until the application
-     *  notices it.
+    /** Closed connections are noticed in isActive but evaluated by the
+     *  application after recvbuf. So, we remember the situation here until
+     *  the application notices it.
      */
     bool        _connection_closed;
 
@@ -190,19 +190,19 @@ void SOCKETALT::set_fd( int sock, bool mode )
 {
     if( _sock.isNull() )
     {
-	_sock = (mode  ? (VsnetSocket*)new VsnetTCPSocket : (VsnetSocket*)new VsnetUDPSocket );
+	    _sock = (mode  ? (VsnetSocket*)new VsnetTCPSocket : (VsnetSocket*)new VsnetUDPSocket );
         _sock->set_fd( sock );
     }
     else
     {
         if( (mode==TCP && _sock->isTcp()) || (mode==UDP && !_sock->isTcp()) )
         {
-	    _sock->set_fd( sock );
+	        _sock->set_fd( sock );
         }
         else
         {
-	    _sock = (mode  ? (VsnetSocket*)new VsnetTCPSocket : (VsnetSocket*)new VsnetUDPSocket );
-	    _sock->set_fd( sock );
+	        _sock = (mode  ? (VsnetSocket*)new VsnetTCPSocket : (VsnetSocket*)new VsnetUDPSocket );
+	        _sock->set_fd( sock );
         }
     }
 }
@@ -230,7 +230,7 @@ bool operator==( const SOCKETALT& l, const SOCKETALT& r )
     }
 }
 
-bool SOCKETALT::sameAddress( const SOCKETALT& l)
+bool SOCKETALT::sameAddress( const SOCKETALT& l )
 {
     if( l._sock.isNull() )
     {
@@ -251,19 +251,22 @@ bool SOCKETALT::sameAddress( const SOCKETALT& l)
  ***********************************************************************/
 
 VsnetSocket::VsnetSocket( )
-    : fd(0)
+    : _fd(0)
+    , _noblock(0)
 {
 }
 
 VsnetSocket::VsnetSocket( int sock, const AddressIP& remote_ip )
-    : fd( sock )
+    : _fd( sock )
     , _remote_ip( remote_ip )
+    , _noblock(0)
 {
 }
 
 VsnetSocket::VsnetSocket( const VsnetSocket& orig )
-    : fd( orig.fd )
+    : _fd( orig._fd )
     , _remote_ip( orig._remote_ip )
+    , _noblock(0)
 {
 }
 
@@ -273,36 +276,62 @@ VsnetSocket::~VsnetSocket( )
 
 VsnetSocket& VsnetSocket::operator=( const VsnetSocket& orig )
 {
-    fd     = orig.fd;
+    _fd     = orig._fd;
     _remote_ip = orig._remote_ip;
     return *this;
 }
 
 int VsnetSocket::get_fd() const
 {
-    return fd;
+    return _fd;
 }
 
 void VsnetSocket::set_fd( int sock )
 {
-    fd   = sock;
+    _fd   = sock;
 }
 
 bool VsnetSocket::valid() const
 {
-    return (fd>0);
+    return (_fd>0);
 }
 
 bool VsnetSocket::eq( const VsnetSocket& r )
 {
     const VsnetSocket* r2 = (const VsnetSocket*)&r;
-    return ( (isTcp() == r2->isTcp()) && (fd == r2->fd) && (_remote_ip==r2->_remote_ip) );
+    return ( (isTcp() == r2->isTcp()) && (_fd == r2->_fd) && (_remote_ip==r2->_remote_ip) );
 }
 
 bool VsnetSocket::sameAddress( const VsnetSocket& r)
 {
     const VsnetSocket* r2 = (const VsnetSocket*)&r;
     return ( (isTcp() == r2->isTcp()) && (_remote_ip==r2->_remote_ip) );
+}
+
+bool VsnetSocket::set_nonblock( )
+{
+    assert( valid() );
+#if !defined(_WIN32) || defined(__CYGWIN__)
+    if( fcntl( _fd, F_SETFL, O_NONBLOCK) == -1)
+    {
+        perror( "Error fcntl : ");
+        return false;
+    }
+#else
+    unsigned long datato = 1;
+    if( ioctlsocket( _fd, FIONBIO, &datato ) !=0 )
+    {
+        perror( "Error fcntl : ");
+        return false;
+    }
+#endif
+    _noblock = 1;
+    return true;
+}
+
+bool VsnetSocket::get_nonblock( ) const
+{
+    return _noblock;
 }
 
 /***********************************************************************
@@ -320,7 +349,7 @@ int VsnetUDPSocket::sendbuf( PacketMem& packet, const AddressIP* to)
 
     assert( dest != NULL );
 
-    if( (numsent = sendto( fd, packet.getConstBuf(), packet.len(), 0, (sockaddr*) dest, sizeof(struct sockaddr_in)))<0)
+    if( (numsent = sendto( _fd, packet.getConstBuf(), packet.len(), 0, (sockaddr*) dest, sizeof(struct sockaddr_in)))<0)
     {
         COUT << "Error sending: " << vsnetLastError() << endl;
         return -1;
@@ -348,10 +377,10 @@ int VsnetUDPSocket::recvbuf( void *buffer, unsigned int& len, AddressIP* from)
 
     // In UDP mode, always receive data on sock
     len1 = sizeof(sockaddr_in);
-    ret = recvfrom( fd, (char *)buffer, len, 0, (sockaddr*)(sockaddr_in*)from, &len1 );
+    ret = recvfrom( _fd, (char *)buffer, len, 0, (sockaddr*)(sockaddr_in*)from, &len1 );
     if( ret < 0 )
     {
-        COUT << " fd=" << fd << " error receiving: " << vsnetLastError() << endl;
+        COUT << " fd=" << _fd << " error receiving: " << vsnetLastError() << endl;
         ret = -1;
     }
     else if( ret == 0 )
@@ -390,12 +419,12 @@ void VsnetUDPSocket::disconnect( const char *s, bool fexit )
 
 void VsnetUDPSocket::dump( std::ostream& ostr )
 {
-    ostr << "( s=" << fd << " UDP r=" << _remote_ip << " )";
+    ostr << "( s=" << _fd << " UDP r=" << _remote_ip << " )";
 }
 
 void VsnetUDPSocket::watch( SocketSet& set )
 {
-    set.setRead(fd);
+    set.setRead(_fd);
 }
 
 /***********************************************************************
@@ -407,13 +436,13 @@ VsnetTCPSocket::~VsnetTCPSocket( )
     while( !_complete_packets.empty() )
     {
         Blob* b = _complete_packets.front();
-	_complete_packets.pop_front();
-	delete b;
+	    _complete_packets.pop_front();
+	    delete b;
     }
 
     if( _incomplete_packet )
     {
-	delete _incomplete_packet;
+	    delete _incomplete_packet;
     }
 }
 
@@ -428,17 +457,17 @@ int VsnetTCPSocket::sendbuf( PacketMem& packet, const AddressIP* to)
     //
     {
         COUT << "trying to send buffer with len " << packet.len() << ": " << endl;
-	packet.dump( cout, 0 );
+	    packet.dump( cout, 0 );
     }
 #endif
 
     unsigned int len = htonl( packet.len() );
-    if( (numsent=send( fd, (char *)&len, 4, 0 )) < 0 )
+    if( (numsent=send( _fd, (char *)&len, 4, 0 )) < 0 )
     {
         perror( "\tsending TCP packet len : ");
         if( errno == EBADF) return -1;
     }
-    if( (numsent=send( fd, packet.getConstBuf(), packet.len(), 0))<0)
+    if( (numsent=send( _fd, packet.getConstBuf(), packet.len(), 0))<0)
     {
         perror( "\tsending TCP data : ");
         if( errno == EBADF) return -1;
@@ -448,7 +477,7 @@ int VsnetTCPSocket::sendbuf( PacketMem& packet, const AddressIP* to)
 
 void VsnetTCPSocket::ack( )
 {
-    /* as soon as windows have been introduced, these ACKs will get meaning again */
+    /* meaningless, TCP is reliable */
 }
 
 int VsnetTCPSocket::recvbuf( void *buffer, unsigned int& len, AddressIP* from)
@@ -462,16 +491,16 @@ int VsnetTCPSocket::recvbuf( void *buffer, unsigned int& len, AddressIP* from)
         if( len > b->present_len ) len = b->present_len;
         memcpy( buffer, b->buf, len );
         delete b;
-	assert( len > 0 );
+	    assert( len > 0 );
         return len;
     }
     else
     {
         if( _connection_closed )
-	{
-	    COUT << __PRETTY_FUNCTION__ << " connection is closed" << endl;
-	    return 0;
-	}
+	    {
+	        COUT << __PRETTY_FUNCTION__ << " connection is closed" << endl;
+	        return 0;
+	    }
         return -1;
     }
 }
@@ -480,15 +509,15 @@ int VsnetTCPSocket::recvbuf( PacketMem& buffer, AddressIP* )
 {
     if( _complete_packets.empty() == false )
     {
-	unsigned int ret;
+	    unsigned int ret;
         Blob* b = _complete_packets.front();
         _complete_packets.pop_front();
         assert( b );
         assert( b->present_len == b->expected_len );
 
-	ret = b->present_len;
-	buffer.set( b->buf, ret, PacketMem::TakeOwnership );
-	b->buf = NULL;
+	    ret = b->present_len;
+	    buffer.set( b->buf, ret, PacketMem::TakeOwnership );
+	    b->buf = NULL;
         delete b;
         return ret;
     }
@@ -496,7 +525,7 @@ int VsnetTCPSocket::recvbuf( PacketMem& buffer, AddressIP* )
     {
         if( _connection_closed )
         {
-	    fd = -1;
+	        _fd = -1;
             COUT << __PRETTY_FUNCTION__ << " connection is closed" << endl;
             return 0;
         }
@@ -506,31 +535,31 @@ int VsnetTCPSocket::recvbuf( PacketMem& buffer, AddressIP* )
 
 void VsnetTCPSocket::disconnect( const char *s, bool fexit )
 {
-    if( fd > 0 )
+    if( _fd > 0 )
     {
-        close_socket( fd );
-        fd = -1;
+        close_socket( _fd );
+        _fd = -1;
     }
     COUT << s << " :\tWarning: disconnected" << strerror(errno) << endl;
     if( fexit )
     {
         exit(1);
-}
+    }
 }
 
 void VsnetTCPSocket::dump( std::ostream& ostr )
 {
-    ostr << "( s=" << fd << " TCP r=" << _remote_ip << " )";
+    ostr << "( s=" << _fd << " TCP r=" << _remote_ip << " )";
 }
 
 void VsnetTCPSocket::watch( SocketSet& set )
 {
-    set.setRead( fd );
+    set.setRead( _fd );
     if( _complete_packets.empty() == false )
     {
-        set.setReadAlwaysTrue( fd );
+        set.setReadAlwaysTrue( _fd );
     }
-    }
+}
 
 bool VsnetTCPSocket::isActive( SocketSet& set )
 {
@@ -546,7 +575,7 @@ bool VsnetTCPSocket::isActive( SocketSet& set )
         return true;
     }
 
-    if( set.is_setRead(fd) == false )
+    if( set.is_setRead(_fd) == false )
     {
         if( _complete_packets.empty() == false )
         {
@@ -563,93 +592,77 @@ bool VsnetTCPSocket::isActive( SocketSet& set )
     bool endless   = true;
     bool gotpacket = false;
 
-#if !defined(_WIN32) || defined(__CYGWIN__)
-    int arg = fcntl( fd, F_GETFL, 0 );
-    if( arg == -1 )
-    {
-        COUT << "Can't verify blocking mode, assume blocking" << endl;
-        endless = false;
-    }
-    else if( (arg & O_NONBLOCK) == false )
-    {
-	// for some obscure reason, we forgot to set this socket non-blocking
-	COUT << "Blocking socket" << endl;
-        endless = false;
-    }
-    else
-    {
-        COUT << "Received socket status " << std::hex << arg << std::dec << endl;
-    }
-#endif
+    if( _noblock == 0 ) endless = false;
 
     do
     {
-	if( ( _incomplete_len_field > 0 ) ||
-	    ( _incomplete_len_field == 0 && _incomplete_packet == 0 ) )
-	{
-	    assert( _incomplete_packet == 0 );   // we expect a len, can not have data yet
-	    assert( _incomplete_len_field < 4 ); // len is coded in 4 bytes
-	    int len = 4 - _incomplete_len_field;
-	    int ret = recv( fd, &_len_field[_incomplete_len_field], len, 0 );
-	    assert( ret <= len );
-	    if( ret <= 0 )
+	    if( ( _incomplete_len_field > 0 ) ||
+	        ( _incomplete_len_field == 0 && _incomplete_packet == 0 ) )
 	    {
-	        if( ret == 0 )
-		{
-		    _connection_closed = true;
+	        assert( _incomplete_packet == 0 );   // we expect a len, can not have data yet
+	        assert( _incomplete_len_field < 4 ); // len is coded in 4 bytes
+	        int len = 4 - _incomplete_len_field;
+	        int ret = recv( _fd, &_len_field[_incomplete_len_field], len, 0 );
+	        assert( ret <= len );
+	        if( ret <= 0 )
+	        {
+	            if( ret == 0 )
+		        {
+		            _connection_closed = true;
                     COUT << "leave " << "isActive" << endl;
-		    return ( _complete_packets.empty() == false );
-		}
+		            return ( _complete_packets.empty() == false );
+		        }
                 if( vsnetEWouldBlock() )
-		{
+		        {
                     COUT << "leave " << "isActive"  << endl;
-		    return ( _complete_packets.empty() == false );
-		}
-		else
-		{
+		            return ( _complete_packets.empty() == false );
+		        }
+		        else
+		        {
                     COUT << "leave " << "isActive" << endl;
-	            return false;
-		}
-	    }
-	    if( ret > 0 ) _incomplete_len_field += ret;
-	    if( _incomplete_len_field == 4 )
-	    {
-	        _incomplete_len_field = 0;
-		len = ntohl( *(unsigned int*)_len_field );
-		COUT << "Next packet to receive has length " << len << endl;
+	                return false;
+		        }
+	        }
+	        if( ret > 0 ) _incomplete_len_field += ret;
+	        if( _incomplete_len_field == 4 )
+	        {
+	            _incomplete_len_field = 0;
+		        len = ntohl( *(unsigned int*)_len_field );
+		        COUT << "Next packet to receive has length " << len << endl;
                 _incomplete_packet = new Blob( len );
+	        }
 	    }
-	}
         if( _incomplete_packet != 0 )
-	{
-	    int len = _incomplete_packet->expected_len - _incomplete_packet->present_len;
-	    int ret = recv( fd, _incomplete_packet->buf, len, 0 );
-	    assert( ret <= len );
-	    if( ret <= 0 )
 	    {
-	        if( ret == 0 )
-		{
-		    _connection_closed = true;
+	        int len = _incomplete_packet->expected_len - _incomplete_packet->present_len;
+	        int ret = recv( _fd, _incomplete_packet->buf, len, 0 );
+	        assert( ret <= len );
+	        if( ret <= 0 )
+	        {
+	            if( ret == 0 )
+		        {
+		            _connection_closed = true;
                     COUT << "leave " << "isActive" << endl;
-		    return ( _complete_packets.empty() == false );
-		}
+		            return ( _complete_packets.empty() == false );
+		        }
                 if( vsnetEWouldBlock() )
-		{
+		        {
                     COUT << "leave " << "isActive" << endl;
-		    return ( _complete_packets.empty() == false );
-		}
-		else
-		{
+		            return ( _complete_packets.empty() == false );
+		        }
+		        else
+		        {
                     COUT << "leave " << "isActive" << endl;
-	            return false;
-		}
-	    }
-	    if( ret > 0 ) _incomplete_packet->present_len += len;
-	    if( ret == len )
-	    {
-		assert( _incomplete_packet->expected_len == _incomplete_packet->present_len );
-	        _complete_packets.push_back( _incomplete_packet );
-		gotpacket = true;
+	                return false;
+		        }
+	        }
+	        if( ret > 0 ) _incomplete_packet->present_len += len;
+	        if( ret == len )
+	        {
+		        assert( _incomplete_packet->expected_len ==
+                        _incomplete_packet->present_len );
+                _complete_packets.push_back( _incomplete_packet );
+		        gotpacket = true;
 #ifdef VSNET_DEBUG
                 //
                 // DEBUG block - remove soon
@@ -657,19 +670,14 @@ bool VsnetTCPSocket::isActive( SocketSet& set )
                 {
                     Blob* b = _incomplete_packet;
                     COUT << "received buffer with len " << b->present_len << ": " << endl;
-		    PacketMem m( b->buf, b->present_len, PacketMem::LeaveOwnership );
-		    m.dump( cout, 3 );
+		            PacketMem m( b->buf, b->present_len, PacketMem::LeaveOwnership );
+		            m.dump( cout, 3 );
                 }
 #endif
 
-		_incomplete_packet = 0;
-#if !defined(_WIN32) || defined(__CYGWIN__)
+		        _incomplete_packet = 0;
                 // either endless is false, or we exit with EWOULDBLOCK
-#else
-		// test not possible in VC++, exit always
-                return gotpacket;
-#endif
-	    }
+	        }
         }
     }
     while( endless );  // exit only for EWOULDBLOCK or closed socket

@@ -42,13 +42,16 @@
 #include "vsnet_socketset.h"
 #include "packetmem.h"
 
-void close_socket( int fd);
+void close_socket( int fd );
 
 class VsnetSocket
 {
 protected:
-    int       fd;
+    int       _fd;
     AddressIP _remote_ip; // IP address structure of remote server
+
+	// bits for boolean operations
+	unsigned _noblock : 1;
 
 public:
     VsnetSocket( );
@@ -71,6 +74,9 @@ public:
 
     bool eq( const VsnetSocket& r );
     bool sameAddress( const VsnetSocket& r );
+
+    bool set_nonblock( );
+    bool get_nonblock( ) const;
 
     virtual int  sendbuf( PacketMem& packet, const AddressIP* to) = 0;
 
@@ -129,6 +135,10 @@ public:
 
     inline int  sendbuf( PacketMem& packet, const AddressIP* to) {
         return ( _sock.isNull() ? -1 : _sock->sendbuf( packet, to ) );
+    }
+
+    inline bool set_nonblock( ) {
+        return ( _sock.isNull() ? false : _sock->set_nonblock() );
     }
 
     inline void ack( ) {

@@ -11,7 +11,7 @@
 #else
     //#warning "GCC platform"
     #define SOCKET_ERROR -1
-    #include <fcntl.h>
+    // #include <fcntl.h>
 #endif
 
 static void static_initNetwork( )
@@ -108,7 +108,11 @@ SOCKETALT NetUITCP::createSocket( char * host, unsigned short srv_port )
     remote_ip.sin_family = AF_INET;
 
     COUT << "Connecting to " << inet_ntoa( remote_ip.sin_addr) << " on port " << srv_port << std::endl;
-    if( connect( local_fd, (sockaddr *)&remote_ip, sizeof( struct sockaddr))==SOCKET_ERROR)
+#if defined(_WIN32) && !defined(__CYGWIN__)
+    if( ::connect( local_fd, (sockaddr *)&remote_ip, sizeof( struct sockaddr))==SOCKET_ERROR)
+#else
+    if( ::connect( local_fd, (sockaddr *)&remote_ip, sizeof( struct sockaddr)) < 0 )
+#endif
     {
         perror( "Can't connect to server ");
         close_socket( local_fd );
@@ -207,25 +211,6 @@ SOCKETALT NetUIUDP::createSocket( char * host, unsigned short srv_port )
         return ret;
     }
 
-#if !defined(_WIN32) || defined(__CYGWIN__)
-    if( fcntl( local_fd, F_SETFL, O_NONBLOCK) == -1)
-    {
-        perror( "Error fcntl : ");
-    close_socket( local_fd );
-        SOCKETALT ret( -1, SOCKETALT::UDP, remote_ip );
-        return ret;
-    }
-#else
-    unsigned long datato = 1;
-    if( ioctlsocket( local_fd, FIONBIO, &datato ) !=0 )
-    {
-        perror( "Error fcntl : ");
-    close_socket( local_fd );
-        SOCKETALT ret( -1, SOCKETALT::UDP, remote_ip );
-        return ret;
-    }
-#endif
-
     // Gets the host info for host
     struct hostent  *he = NULL;
 
@@ -233,12 +218,12 @@ SOCKETALT NetUIUDP::createSocket( char * host, unsigned short srv_port )
     {
         COUT <<"Resolving host name... ";
         if( (he = gethostbyname( host)) == NULL)
-    {
+        {
             COUT << "Could not resolve hostname" << std::endl;
-        close_socket( local_fd );
+            close_socket( local_fd );
             SOCKETALT ret( -1, SOCKETALT::UDP, remote_ip );
             return ret;
-    }
+        }
         memcpy( &remote_ip.sin_addr.s_addr, he->h_addr_list[0], he->h_length);
         COUT <<"found : "<<inet_ntoa( remote_ip.sin_addr)<<std::endl;
     }
@@ -249,12 +234,12 @@ SOCKETALT NetUIUDP::createSocket( char * host, unsigned short srv_port )
 #else           
         if( inet_aton( host, &remote_ip.sin_addr) == 0)
 #endif
-    {
+        {
             COUT << "Error inet_aton" << std::endl;
-        close_socket( local_fd );
+            close_socket( local_fd );
             SOCKETALT ret( -1, SOCKETALT::UDP, remote_ip );
             return ret;
-    }
+        }
     }
     // Store it in srv_ip struct
     remote_ip.sin_port= htons( srv_port);
@@ -267,13 +252,20 @@ SOCKETALT NetUIUDP::createSocket( char * host, unsigned short srv_port )
     // binds socket
     if( bind( local_fd, (sockaddr *)&local_ip, sizeof(struct sockaddr_in))==SOCKET_ERROR )
     {
-    perror( "Can't bind socket" );
-    close_socket( local_fd );
+        perror( "Can't bind socket" );
+        close_socket( local_fd );
         SOCKETALT ret( -1, SOCKETALT::UDP, remote_ip );
         return ret;
     }
 
     SOCKETALT ret( local_fd, SOCKETALT::UDP, remote_ip );
+
+    if( ret.set_nonblock() == false )
+    {
+        ret.disconnect( "Could not set socket to nonblocking state" );
+        SOCKETALT ret( -1, SOCKETALT::UDP, remote_ip );
+        return ret;
+    }
     COUT << "Bind on localhost, " << ret << std::endl;
     return ret;
 }
@@ -302,23 +294,6 @@ ServerSocket* NetUIUDP::createServerSocket( unsigned short port )
     return NULL;
     }
 
-#if !defined(_WIN32) || defined(__CYGWIN__)
-    if( fcntl( local_fd, F_SETFL, O_NONBLOCK) == -1)
-    {
-        perror( "Error fcntl : ");
-    close_socket( local_fd );
-        return NULL;
-    }
-#else
-    unsigned long datato = 1;
-    if( ioctlsocket( local_fd,FIONBIO,&datato ) !=0 )
-    {
-        perror( "Error fcntl : ");
-    close_socket( local_fd );
-        return NULL;
-    }
-#endif
-
     memset( &local_ip, 0, sizeof(AddressIP) );
     local_ip.sin_addr.s_addr = htonl(INADDR_ANY);
     local_ip.sin_port        = htons( port );
@@ -327,11 +302,19 @@ ServerSocket* NetUIUDP::createServerSocket( unsigned short port )
     if( bind( local_fd, (sockaddr *)&local_ip, sizeof( struct sockaddr_in ) )==SOCKET_ERROR )
     {
         perror( "Cannot bind socket");
-    close_socket( local_fd );
+        close_socket( local_fd );
         return NULL;
     }
 
     ServerSocket* ret = new ServerSocketUDP( local_fd, local_ip );
+
+    if( ret->set_nonblock() == false )
+    {
+        ret->disconnect( "Setting server socket mode to nonblocking failed" );
+        delete ret;
+        return NULL;
+    }
+
     COUT << "Bind on localhost, " << *ret << std::endl;
     return ret;
 }

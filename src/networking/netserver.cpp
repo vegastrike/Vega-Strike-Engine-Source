@@ -483,8 +483,8 @@ void	NetServer::start(int argc, char **argv)
 
 		UpdateTime();
 		// Check a key press
-		set.setRead( 0);
-		this->checkKey( set);
+		//set.setReadAlwaysTrue( 0);
+		//this->checkKey( set);
 		// Handle new connections in TCP mode
 		tcpNetwork->watchForNewConn( set, 0 );
 

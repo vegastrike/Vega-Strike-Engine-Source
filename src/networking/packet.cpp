@@ -314,12 +314,14 @@ void Packet::create( Cmd cmd, ObjSerial nserial, char * buf,
     h.flags     = prio;
 
     // buf is an allocated char * containing message
+#if 0
     if( length > MAXBUFFER)
     {
-        cout<<"Error : initializing network packet with data length > MAX (length="<<length<<")"<<endl;
-        cout<<"Command was : " << Cmd(h.command) << endl;
+        COUT << "Error : initializing network packet with data length > MAX (length="<<length<<")"<<endl;
+        COUT << "Command was : " << Cmd(h.command) << endl;
         exit(1);
     }
+#endif
     h.serial = nserial;
     
 #ifdef HAVE_ZLIB
