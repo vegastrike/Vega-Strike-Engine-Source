@@ -125,6 +125,10 @@ public: \
 #ifndef _WIN32
 #define LOCALCONST_DECL(Type,Name,Value) static const Type Name = Value;
 #define LOCALCONST_DEF(Class,Type,Name,Value)
+#else
+#define LOCALCONST_DECL(Type,Name,Value) static Type Name;
+#define LOCALCONST_DEF(Class,Type,Name,Value) Type Class::Name = Value;
+#endif
 
 #ifndef __PRETTY_FUNCTION__
 #define __PRETTY_FUNCTION__ "<Unknown>"
@@ -136,10 +140,6 @@ public: \
 
 #ifndef __LINE__
 #define __LINE__ "<Unknown>"
-#endif
-
-#define LOCALCONST_DECL(Type,Name,Value) static Type Name;
-#define LOCALCONST_DEF(Class,Type,Name,Value) Type Class::Name = Value;
 #endif
 
 #endif /* __CONST_H */
