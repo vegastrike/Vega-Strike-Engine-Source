@@ -40,7 +40,7 @@ int mousey=0;
 int getMouseButtonStatus() {
   int ret=0;
   for (int i=0;i<NUM_BUTTONS;i++) {
-    ret |= (MouseState[i]&(PRESS|DOWN))?(1<<i):0;
+    ret |= (MouseState[i]==PRESS||MouseState[i]==DOWN)?(1<<i):0;
   }
   return ret;
 }
