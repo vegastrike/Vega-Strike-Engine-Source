@@ -115,7 +115,7 @@ void Animation::ProcessFarDrawQueue (float farval) {
   //set farshit
   GFXBlendMode (SRCALPHA,INVSRCALPHA);
   GFXDisable (LIGHTING);
-//  GFXEnable(TEXTURE0);
+  GFXEnable(TEXTURE0);
   GFXDisable(TEXTURE1);
 //  GFXDisable (DEPTHWRITE);	
 
