@@ -51,6 +51,7 @@ int AUDCreateSoundWAV (const std::string &s, const bool music, const bool LOOP){
     }else {
       nam = GetSharedSoundPath (s);
       shared=true;
+
     }
     ALuint * wavbuf =NULL;
     std::string hashname;
@@ -79,16 +80,26 @@ ALint format;
 #else
 	  ALboolean looping;
 	  ALint format;
+
   	  fp = fopen ((const char *)filename,"rb");
+
 	  if (fp) {
+
 		fclose (fp);
+
 	  } else {
+
 		free (filename);
+
         alDeleteBuffers (1,wavbuf);
+
 		free (wavbuf);
+
 		return -1;
+
 	  }
       alutLoadWAVFile((char *)filename, (int*)&format, &wave, &size, &freq, &looping);
+
 
 #endif
       if(err == AL_FALSE) {
@@ -132,6 +143,9 @@ int AUDCreateSoundMP3 (const std::string &s, const bool music, const bool LOOP){
       hashname = shared?GetSharedSoundHashName(s):GetHashName (s);
       mp3buf = soundHash.Get (hashname);
     }
+#ifdef _WIN32
+	return -1;
+#endif
     if (mp3buf==NULL) {
       FILE * fp = fopen (nam.c_str(),"rb");
       if (!fp)

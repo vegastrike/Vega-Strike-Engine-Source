@@ -126,7 +126,6 @@ void Music::Listen() {
 #ifdef _WIN32
 	  if (use_external) {
 		static int firstseconds=0;
-		static float avg_time=XMLSupport::parse_float (vs_config->getVariable("audio","avg_song_time","60"));
 		//lastsonglength=0;
 		curtime+=SIMULATION_ATOM/getTimeCompression();
 		if (curtime>lastsonglength) {
