@@ -1,7 +1,11 @@
 #ifndef _IN_AI_H_
 #define _IN_AI_H_
 #include "in.h"
-#include <GL/glut.h>
+#if defined(__APPLE__) || defined(MACOSX)
+    #include <GLUT/glut.h>
+#else
+    #include <GL/glut.h>
+#endif
 #include "flybywire.h"
 
 class FlyByKeyboard: public FlyByWire {

@@ -3,8 +3,8 @@
 #include "gfxlib.h"
 #include "hashtable_3d.h"
 
-extern int GFX_MAX_LIGHTS;
-extern int GFX_OPTIMAL_LIGHTS;
+extern GLint GFX_MAX_LIGHTS;
+extern GLint GFX_OPTIMAL_LIGHTS;
 extern GFXBOOL GFXLIGHTING;
 #define GFX_ATTENUATED 1
 //#define GFX_DIFFUSE 2

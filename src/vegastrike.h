@@ -41,6 +41,7 @@ extern float simulation_atom_var;
 #   include <config.h>
 #endif
 
+#include "macosx_math.h"
 #include <math.h>
 
 
@@ -65,9 +66,15 @@ extern float simulation_atom_var;
 #include <unistd.h>
 #endif /* defined( WIN32 ) || defined( __CYGWIN__ ) */
 
-#include <GL/gl.h>
-#include <GL/glu.h>
-#include <GL/glut.h>
+#if defined(__APPLE__) || defined(MACOSX)
+    #include <OpenGL/gl.h>
+    #include <OpenGL/glu.h>
+    #include <GLUT/glut.h>
+#else
+    #include <GL/gl.h>
+    #include <GL/glu.h>
+    #include <GL/glut.h>
+#endif
 
 #ifndef PI
 #   define PI 3.14159265358979323846

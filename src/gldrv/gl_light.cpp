@@ -28,8 +28,8 @@ using std::stack;
 #include "vs_globals.h"
 #include "config_xml.h"
 
-int GFX_MAX_LIGHTS=8;
-int GFX_OPTIMAL_LIGHTS=4;
+GLint GFX_MAX_LIGHTS=8;
+GLint GFX_OPTIMAL_LIGHTS=4;
 GFXBOOL GFXLIGHTING=GFXFALSE;
 
 int _currentContext=0;

@@ -82,6 +82,32 @@ if test "x$is_win32" = "xyes" ; then
     TR_LIBS="$TR_LIBS -luser32 -lgdi32"
 fi
 
+dnl --------------------------------------------------------------------------
+dnl Check if compiling for MacOSX
+dnl --------------------------------------------------------------------------
+AC_MSG_CHECKING([for MacOSX platform])
+AC_EGREP_CPP(yes,
+[ 
+#if defined(__APPLE__) || defined(MACOSX)
+  yes
+#endif
+], is_macosx=yes, is_macosx =no )
+AC_MSG_RESULT([$is_macosx])
+
+if test "x$is_macosx" = "xyes" ; then
+    CFLAGS="$CFLAGS -I/System/Library/Frameworks/Carbon.framework/Libraries/CIncludes"
+    GL_CPPFLAGS="$GL_CPPFLAGS -framework OpenGL"
+    GLUT_CPPFLAGS="$GLUT_CPPFLAGS -framework GLUT"
+    with_gl_inc=/System/Library/Frameworks/Carbon.framework/Libraries/CIncludes
+    with_gl_libs=/System/Library/Frameworks/OpenGL.framework/Libraries
+    with_expat_libs=/sw/lib
+    with_png_libs=/sw/lib
+    with_expat_inc=/sw/include
+    with_png_inc=/sw/include
+    PYTHON_LDOPTS="-L/Library/Frameworks/Python.framework"
+    with_python_inc=/Library/Frameworks/Python.framework/Headers
+    TR_LIBS="$TR_LIBS -lobjc"
+fi
 
 dnl --------------------------------------------------------------------------
 dnl Check for SDL
@@ -202,7 +228,7 @@ if test "x$have_GL" = "xno" ; then
     AC_MSG_ERROR([Cannot find GL library])
 fi
 
-if test "x$is_win32" = "xno" ; then
+if test "x$is_win32" = "xno" -a x$is_macosx = xno; then
     dnl Make sure GL lib is up-to-date
     AC_CHECK_FUNCS( glXGetProcAddressARB, gl_up_to_date=yes, gl_up_to_date=no )
 
@@ -309,17 +335,20 @@ AC_ARG_WITH(gl-inc,   [  --with-gl-inc=DIR       OpenGL header file location])
 if test "x$with_gl_inc" = "x" ; then
     GL_CPPFLAGS=""
 else 
-    GL_CPPFLAGS="-I$with_gl_inc"
+    GL_CPPFLAGS="$GL_CPPFLAGS -I$with_gl_inc"
 fi
 
 dnl check for gl.h
 saved_CPPFLAGS="$CPPFLAGS"
-
 AC_DEFUN( CHECK_FOR_GL_H, [
     CPPFLAGS="$saved_CPPFLAGS $GL_CPPFLAGS $TR_CPPFLAGS"
 
     AC_MSG_CHECKING([for GL/gl.h])
-    AC_TRY_CPP( [ #include <GL/gl.h> ], have_gl_h=yes, have_gl_h=no )
+    if test "x$is_macosx" = "xyes" ; then
+        have_gl_h=yes
+    else
+        AC_TRY_CPP( [ #include <GL/gl.h> ], have_gl_h=yes, have_gl_h=no )
+    fi
     AC_MSG_RESULT([$have_gl_h])
 ])
 
@@ -337,8 +366,12 @@ if test "x$have_gl_h" = "xno" ; then
     AC_MSG_ERROR([Cannot find GL/gl.h])
 fi
 
-dnl Check for glext.h 
-AC_CHECK_HEADERS( "GL/glext.h", have_glext_h=yes, have_glext_h=no )
+dnl Check for glext.h
+if test "x$is_macosx" = "xyes" ; then
+    have_glext_h=yes
+else
+    AC_CHECK_HEADERS( "GL/glext.h", have_glext_h=yes, have_glext_h=no )
+fi
 
 if test "x$have_glext_h" = "xno" ; then
     AC_MSG_ERROR([
@@ -352,6 +385,7 @@ fi
 
 dnl Check that glext.h version is recent enough
 AC_MSG_CHECKING([whether glext.h is recent enough]);
+if test "x$is_macosx" = "xno" ; then
 AC_EGREP_CPP(yes,
 [
 #include <GL/glext.h>
@@ -359,6 +393,10 @@ AC_EGREP_CPP(yes,
  yes
 #endif
 ], is_glext_h_recent=yes, is_glext_h_recent=no )
+else
+    is_glext_h_recent=yes
+fi
+
 AC_MSG_RESULT([$is_glext_h_recent])
 
 if test "x$is_glext_h_recent" = "xno" ; then
@@ -381,14 +419,18 @@ dnl --------------------------------------------------------------------------
 AC_ARG_WITH(glut-libs,[  --with-glut-libs=DIR    Location of GLUT library])
 
 if test "x$with_glut_libs" = "x" ; then
-    GLUT_LDOPTS=""
+    GLUT_LDOPTS="$GLUT_LDOPTS"
 else
     GLUT_LDOPTS="-L$with_glut_libs"
 fi
 
 AC_DEFUN( CHECK_FOR_GLUT_LIB, [
     AC_MSG_CHECKING([for $GLUT_LIB_NAME library])
-    LIBS="$saved_LIBS $TR_LIBS $GLUT_LDOPTS -l$GLUT_LIB_NAME"
+    if test "x$is_macosx" = "xyes" ; then
+        LIBS="$saved_LIBS $TR_LIBS $GLUT_LDOPTS -framework GLUT"
+    else
+        LIBS="$saved_LIBS $TR_LIBS $GLUT_LDOPTS -l$GLUT_LIB_NAME"
+    fi
     AC_TRY_LINK( , , have_glut_lib=yes, have_glut_lib=no )
     AC_MSG_RESULT([$have_glut_lib])
 ]) 
@@ -410,7 +452,11 @@ if test "x$have_glut_lib" = "xno" ; then
 fi
 
 LIBS="$saved_LIBS"
-TR_LIBS="$TR_LIBS $GLUT_LDOPTS -l$GLUT_LIB_NAME"
+if test "x$is_macosx" = "xyes" ; then
+    TR_LIBS="$TR_LIBS $GLUT_LDOPTS -framework GLUT"
+else
+    TR_LIBS="$TR_LIBS $GLUT_LDOPTS -l$GLUT_LIB_NAME"
+fi
 
 
 dnl --------------------------------------------------------------------------
@@ -420,15 +466,18 @@ dnl --------------------------------------------------------------------------
 AC_ARG_WITH(glut-inc, [  --with-glut-inc=DIR     Specify GLUT header file location])
 
 if test "x$with_glut_inc" = "x" ; then
-    GLUT_CPPFLAGS=""
+    GLUT_CPPFLAGS="$GLUT_CPPFLAGS"
 else
     GLUT_CPPFLAGS="-I$with_glut_inc"
 fi
 
 saved_CPPFLAGS="$CPPFLAGS"
 CPPFLAGS="$saved_CPPFLAGS $TR_CPPFLAGS $GLUT_CPPFLAGS"
-AC_CHECK_HEADER([GL/glut.h], have_glut_h=yes, have_glut_h=no )
-
+if test "x$is_macosx" = "xyes" ; then
+    have_glut_h=yes
+else
+    AC_CHECK_HEADER([GL/glut.h], have_glut_h=yes, have_glut_h=no )
+fi
 if test "x$have_glut_h" = "xno" ; then
     AC_MSG_ERROR([Cannot find GL/glut.h])
 fi
@@ -488,7 +537,11 @@ else
 fi
 
 saved_CPPFLAGS="$CPPFLAGS"
-CPPFLAGS="$saved_CPPFLAGS $TR_CPPFLAGS $EXPAT_CPPFLAGS "
+if test "x$is_macosx" = "xyes" ; then
+    CPPFLAGS="$saved_CPPFLAGS $EXPAT_CPPFLAGS "
+else
+    CPPFLAGS="$saved_CPPFLAGS $TR_CPPFLAGS $EXPAT_CPPFLAGS "
+fi
 AC_CHECK_HEADER([expat.h], have_expat_h=yes, have_expat_h=no )
 
 if test "x$have_expat_h" = "xno" ; then
@@ -551,7 +604,11 @@ else
 fi
 
 saved_CPPFLAGS="$CPPFLAGS"
-CPPFLAGS="$saved_CPPFLAGS $TR_CPPFLAGS $PNG_CPPFLAGS "
+if test "x$is_macosx" = "xyes" ; then
+    CPPFLAGS="$saved_CPPFLAGS $PNG_CPPFLAGS "
+else
+    CPPFLAGS="$saved_CPPFLAGS $TR_CPPFLAGS $PNG_CPPFLAGS "
+fi
 AC_CHECK_HEADER([png.h], have_png_h=yes, have_png_h=no )
 
 if test "x$have_png_h" = "xno" ; then
@@ -623,7 +680,10 @@ dnl check for al.h
 saved_CPPFLAGS="$CPPFLAGS"
 
 AC_DEFUN( CHECK_FOR_AL_H, [
-    CPPFLAGS="$saved_CPPFLAGS $AL_CPPFLAGS $TR_CPPFLAGS"
+    CPPFLAGS="$saved_CPPFLAGS $AL_CPPFLAGS"
+    if test "x$is_macosx" = "xno" ; then
+        CPPFLAGS=" $TR_CPPFLAGS"
+    fi
 
     AC_MSG_CHECKING([for AL/al.h])
     AC_TRY_CPP( [ #include <AL/al.h> ], have_al_h=yes, have_al_h=no )
@@ -676,14 +736,14 @@ dnl --------------------------------------------------------------------------
 AC_ARG_WITH(python-libs,[  --with-python-libs=DIR    Location of python library])
 
 if test "x$with_python_libs" = "x" ; then
-    PYTHON_LDOPTS=""
+    PYTHON_LDOPTS="$PYTHON_LDOPTS"
 else
     PYTHON_LDOPTS="-L$with_python_libs"
 fi
 
 AC_DEFUN( CHECK_FOR_PYTHON_LIB, [
     AC_MSG_CHECKING([for $PYTHON_LIB_NAME library])
-    LIBS="$PYTHON_LDOPTS -l$PYTHON_LIB_NAME -lutil"
+    LIBS="$PYTHON_LDOPTS -l$PYTHON_LIB_NAME"
     AC_TRY_LINK( , , have_python_lib=yes, have_python_lib=no )
     AC_MSG_RESULT([$have_python_lib])
 ]) 
@@ -697,7 +757,7 @@ for PYTHON_LIB_NAME in $PYTHON_LIB_LIST ; do
 
     if test "x$have_python_lib" = "xyes" ; then
 	LIBS="$saved_LIBS"
-	TR_LIBS="$TR_LIBS $PYTHON_LDOPTS -l$PYTHON_LIB_NAME -lutil"
+	TR_LIBS="$TR_LIBS $PYTHON_LDOPTS -l$PYTHON_LIB_NAME"
         break;
     else
 	LIBS=""
@@ -753,7 +813,10 @@ dnl check for al.h
 saved_CPPFLAGS="$CPPFLAGS"
 
 AC_DEFUN( CHECK_FOR_PYTHON_H, [
-    CPPFLAGS="$saved_CPPFLAGS $PYTHON_CPPFLAGS $TR_CPPFLAGS"
+    CPPFLAGS="$saved_CPPFLAGS $PYTHON_CPPFLAGS"
+    if test "x$is_macosx" = "xno" ; then
+        CPPFLAGS="$CPPFLAGS $TR_CPPFLAGS"
+    fi
 
     have_python_h=no
     AC_MSG_CHECKING([for Python.h])
@@ -780,7 +843,10 @@ if test "x$with_boost_inc" != "x" ; then
     BOOST_CPPFLAGS="-I$with_boost_inc"
 fi
 
-    CPPFLAGS="$saved_CPPFLAGS $PYTHON_CPPFLAGS $BOOST_CPPFLAGS $TR_CPPFLAGS"
+    CPPFLAGS="$saved_CPPFLAGS $PYTHON_CPPFLAGS $BOOST_CPPFLAGS"
+    if test "x$is_macosx" = "xno" ; then
+        CPPFLAGS="CPPFLAGS $TR_CPPFLAGS"
+    fi
 
     AC_MSG_CHECKING([for <boost/python/module_builder.hpp>])
 AC_LANG_CPLUSPLUS

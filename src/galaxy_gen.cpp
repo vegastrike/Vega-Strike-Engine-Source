@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <vector>
 #include <string>
+#include "macosx_math.h"
 #include <math.h>
 #include <time.h>
 #include <assert.h>

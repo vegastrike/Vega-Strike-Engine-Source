@@ -22,6 +22,7 @@
 
 #ifndef _3DMANIP_H_
 #define _3DMANIP_H_
+#include "macosx_math.h"
 #include <math.h>
 #ifndef WIN32
 #include <iostream>

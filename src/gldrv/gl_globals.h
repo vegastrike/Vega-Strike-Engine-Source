@@ -95,7 +95,13 @@ typedef void (*PFNGLLOCKARRAYSEXTPROC)(GLint first, GLsizei count);
 typedef void (*PFNGLUNLOCKARRAYSEXTPROC)(void);
 
 #else // WIN32 || IRIX
-#include <GL/glut.h>
+    #if defined(__APPLE__) || defined(MACOSX)
+        #include <GLUT/glut.h>
+        typedef void (*PFNGLLOCKARRAYSEXTPROC)(GLint first, GLsizei count);
+        typedef void (*PFNGLUNLOCKARRAYSEXTPROC)(void);
+    #else
+        #include <GL/glut.h>
+    #endif
 #ifdef GL_EXT_compiled_vertex_array
 # ifndef PFNGLLOCKARRAYSEXTPROC
 //Somtimes they define GL_EXT_compiled_vertex_array without
@@ -103,7 +109,11 @@ typedef void (*PFNGLUNLOCKARRAYSEXTPROC)(void);
 #  undef GL_EXT_compiled_vertex_array
 # endif
 #endif
-#include <GL/glext.h>
+#if defined(__APPLE__) || defined(MACOSX)
+        #include <OpenGL/glext.h>
+    #else
+        #include <GL/glext.h>
+    #endif
 #endif
 extern PFNGLLOCKARRAYSEXTPROC glLockArraysEXT_p;
 extern PFNGLUNLOCKARRAYSEXTPROC glUnlockArraysEXT_p;
@@ -130,7 +140,11 @@ typedef struct {
   bool s3tc;
 } gl_options_t;
 extern gl_options_t gl_options;
-#include <GL/glut.h>
+#if defined(__APPLE__) || defined(MACOSX)
+    #include <GLUT/glut.h>
+#else
+    #include <GL/glut.h>
+#endif
 
 // Maximum number of things that can be returned in a pick operation
 #define MAX_PICK 2048

@@ -34,9 +34,18 @@
 #define GL_TEXTURE_CUBE_MAP_NEGATIVE_Z_EXT 0x851A
 #endif
 
+#if defined(__APPLE__) || defined(MACOSX)
+    #define GL_TEXTURE_CUBE_MAP_EXT           0x8513
+    #define GL_TEXTURE_CUBE_MAP_POSITIVE_X_EXT 0x8515
+    #define GL_TEXTURE_CUBE_MAP_NEGATIVE_X_EXT 0x8516
+    #define GL_TEXTURE_CUBE_MAP_POSITIVE_Y_EXT 0x8517
+    #define GL_TEXTURE_CUBE_MAP_NEGATIVE_Y_EXT 0x8518
+    #define GL_TEXTURE_CUBE_MAP_POSITIVE_Z_EXT 0x8519
+    #define GL_TEXTURE_CUBE_MAP_NEGATIVE_Z_EXT 0x851A
+#endif
 
 #define  MAX_TEXTURES 256
-static int MAX_TEXTURE_SIZE=256;
+static GLint MAX_TEXTURE_SIZE=256;
 
 GLenum GetUncompressedTextureFormat (TEXTUREFORMAT textureformat) {
   switch (textureformat) {
@@ -140,7 +149,7 @@ GFXBOOL /*GFXDRVAPI*/ GFXCreateTexture(int width, int height, TEXTUREFORMAT text
   //  GFXActiveTexture(0);
   return GFXTRUE;
 }
-void /*GFXDRVAPI*/ GFXPrioritizeTexture (unsigned int handle, float priority) {
+void /*GFXDRVAPI*/ GFXPrioritizeTexture (GLuint handle, float priority) {
   glPrioritizeTextures (1,&handle,&priority); 
 }
 void /*GFXDRVAPI*/ GFXAttachPalette (unsigned char *palette, int handle)

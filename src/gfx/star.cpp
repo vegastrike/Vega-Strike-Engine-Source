@@ -1,7 +1,11 @@
 #include "star.h"
 #include <assert.h>
 #include "vegastrike.h"
-#include <GL/gl.h>
+#if defined(__APPLE__) || defined(MACOSX)
+    #include <OpenGL/gl.h>
+#else
+    #include <GL/gl.h>
+#endif
 //#include "cmd/unit.h"
 #define SINX 1
 #define SINY 2

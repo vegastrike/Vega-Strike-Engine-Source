@@ -59,8 +59,13 @@ typedef void (*PFNGLLOCKARRAYSEXTPROC)(GLint first, GLsizei count);
 typedef void (*PFNGLUNLOCKARRAYSEXTPROC)(void);
 
 #elif !defined(WIN32)
-#include <GL/glut.h>
-#include <GL/glext.h>
+#if defined(__APPLE__) || defined(MACOSX)
+    #include <GLUT/glut.h>
+    #include <OpenGL/glext.h>
+#else
+    #include <GL/glut.h>
+    #include <GL/glext.h>
+#endif
 
 #if !defined(GL_GLEXT_VERSION) || GL_GLEXT_VERSION < 6
 #   error "*** You need a more recent copy of glext.h.  You can get one at http://oss.sgi.com/projects/ogl-sample/ABI/glext.h ; it goes in /usr/include/GL. ***"

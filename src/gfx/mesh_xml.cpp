@@ -8,8 +8,7 @@
 #include <float.h>
 #include <assert.h>
 #include "ani_texture.h"
-#ifdef WIN32
-#else
+#if !defined(_WIN32) && !(defined(__APPLE__) || defined(MACOSX))
 #include <values.h>
 #endif
 #include "xml_support.h"

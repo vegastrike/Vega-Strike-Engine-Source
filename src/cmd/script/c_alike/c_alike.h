@@ -25,8 +25,11 @@
 
 
 #include <stdio.h>
-#include <malloc.h>
-
+#if defined(__APPLE__) || defined(MACOSX)
+    #include <sys/malloc.h>
+#else
+    #include <malloc.h>
+#endif
 #include <vector>
 #include <string>
 

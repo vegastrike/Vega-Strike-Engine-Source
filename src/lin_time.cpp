@@ -29,7 +29,7 @@ static LONGLONG newtime = 0;
 static LONGLONG freq;
 #else
 #if defined( HAVE_SDL )
-#   include "SDL.h"
+#   include <SDL/SDL.h>
 #endif /* defined( HAVE_SDL ) */
 static double newtime;
 static double lasttime;

@@ -40,7 +40,11 @@
 #include "hashtable.h"
 #include "vegastrike.h"
 #include "sphere.h"
-#include <GL/gl.h>
+#if defined(__APPLE__) || defined(MACOSX)
+    #include <OpenGL/gl.h>
+#else
+    #include <GL/gl.h>
+#endif
 #include <float.h>
 #include <algorithm>
 using std::list;

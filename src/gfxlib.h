@@ -31,7 +31,11 @@
 #define GFXDRVAPI
 #endif
 
-#include <GL/glut.h>
+#if defined(__APPLE__) || defined(MACOSX)
+    #include <GLUT/glut.h>
+#else
+    #include <GL/glut.h>
+#endif
 #include <vector>
 #ifndef GFXBOOL
 #define GFXBOOL unsigned char
@@ -219,7 +223,7 @@ void /*GFXDRVAPI*/ GFXFrustum (float * mat, float *inv, float left,float right, 
 GFXBOOL /*GFXDRVAPI*/ GFXCreateTexture(int width, int height, TEXTUREFORMAT externaltextureformat, int *handle, char *palette = 0, int texturestage = 0, enum FILTER mipmap = MIPMAP, enum TEXTURE_TARGET texture_target = TEXTURE2D);
 
 ///Sets the priority of the texture for memory management.
-void /*GFXDRVAPI*/ GFXPrioritizeTexture (unsigned int handle, float priority);
+void /*GFXDRVAPI*/ GFXPrioritizeTexture (GLuint handle, float priority);
 
 ///Attaches a given palette to the current texture
 void /*GFXDRVAPI*/ GFXAttachPalette(unsigned char *palette, int handle);

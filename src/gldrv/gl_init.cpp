@@ -25,13 +25,19 @@
 //#include "gl_globals.h"
 
 #ifndef WIN32
-#   include <GL/glx.h>
+#if !(defined(__APPLE__) || defined(MACOSX))
+    #   include <GL/glx.h>
+#endif
 #include <stdlib.h>
 #include "gfxlib.h"
 #else
 #include <windows.h>
 #endif
-#include <GL/gl.h>
+#if defined(__APPLE__) || defined(MACOSX)
+    #include <OpenGL/gl.h>
+#else
+    #include <GL/gl.h>
+#endif
 #ifdef GL_EXT_compiled_vertex_array
 # ifndef PFNGLLOCKARRAYSEXTPROC
 #  undef GL_EXT_compiled_vertex_array
@@ -41,7 +47,11 @@
 //typedef void (APIENTRY * PFNGLLOCKARRAYSEXTPROC) (GLint first, GLsizei count);
 //typedef void (APIENTRY * PFNGLUNLOCKARRAYSEXTPROC) (void);
 
-# include <GL/glext.h>
+#if defined(__APPLE__) || defined(MACOSX)
+    #include <OpenGL/glext.h>
+#else
+    # include <GL/glext.h>
+#endif
 #endif
 
 #include <stdio.h>
@@ -76,7 +86,11 @@ typedef void (*(*get_gl_proc_fptr_t)(const GLubyte *))();
 #define GET_GL_PROC glXGetProcAddressARB
 
 #endif
-#include <GL/glut.h>
+#if defined(__APPLE__) || defined(MACOSX)
+    #include <GLUT/glut.h>
+#else
+    #include <GL/glut.h>
+#endif
 
 void init_opengl_extensions()
 {
@@ -84,10 +98,15 @@ void init_opengl_extensions()
 
 	(void) fprintf(stderr, "OpenGL Extensions supported: %s\n", extensions);
     if (glutExtensionSupported( "GL_EXT_compiled_vertex_array")&&XMLSupport::parse_bool (vs_config->getVariable ("graphics","LockVertexArrays","true"))) {
+#if defined(__APPLE__) || defined(MACOSX)
+        glLockArraysEXT_p = &glLockArraysEXT;
+        glUnlockArraysEXT_p = &glUnlockArraysEXT;
+#else
 	glLockArraysEXT_p = (PFNGLLOCKARRAYSEXTPROC) 
 	    GET_GL_PROC( (GET_GL_PTR_TYP) "glLockArraysEXT" );
 	glUnlockArraysEXT_p = (PFNGLUNLOCKARRAYSEXTPROC) 
 	    GET_GL_PROC( (GET_GL_PTR_TYP) "glUnlockArraysEXT" );
+#endif
 	(void) fprintf(stderr, "OpenGL::GL_EXT_compiled_vertex_array supported\n");
     } else {
 	glLockArraysEXT_p = NULL;
@@ -105,6 +124,8 @@ void init_opengl_extensions()
       glActiveTextureARB = (PFNGLCLIENTACTIVETEXTUREARBPROC) GET_GL_PROC((GET_GL_PTR_TYP)"glActiveTextureEXT");
     }
 #endif
+
+#ifdef GL_FOG_DISTANCE_MODE_NV
     if (glutExtensionSupported ("GL_NV_fog_distance")) {
       fprintf (stderr,"OpenGL::Accurate Fog Distance supported\n");
       int foglev=XMLSupport::parse_int (vs_config->getVariable ("graphics","fogdetail","0"));
@@ -120,8 +141,12 @@ void init_opengl_extensions()
 	break;
       }
     }else {
+#endif    
       fprintf (stderr,"OpenGL::Accurate Fog Distance unsupported\n");
+#ifdef GL_FOG_DISTANCE_MODE_NV
     }
+#endif
+
     if (glutExtensionSupported ("GL_ARB_texture_compression")) {
       fprintf (stderr,"OpenGL::Generic Texture Compression supported\n");
     }else {
