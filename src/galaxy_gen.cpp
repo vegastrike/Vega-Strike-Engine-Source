@@ -782,6 +782,7 @@ void readnames (vector <string> &entity, const char * filename) {
 }
 
 void generateStarSystem (string datapath, int seed, string sector, string system, string outputfile, float sunradius, int numstars, int numgasgiants, int numrockyplanets, int nummoons, bool nebulae, bool asteroids, int numnaturalphenomena, int numstarbases, string factions, string namelist, const vector <string> &jumplocations) {
+  systemname=system;
   ResetGlobalVariables();
   if (seed)
     seedrand (seed);
