@@ -199,8 +199,15 @@ void	ZoneMgr::removeClient( ClientPtr clt )
         cerr<<"Trying to remove client on an empty list !!"<<endl;
         exit( 1);
     }
-
-	lst->remove( clt );
+	for (ClientWeakList::iterator q = lst->begin();
+		q!=lst->end();
+		++q) {
+			ClientWeakPtr cwp = *q;
+			ClientWeakPtr ocwp (clt);
+			if ((!(cwp<ocwp))&&!(ocwp<cwp)) {
+				lst->erase(q);
+			}
+		}
 	zone_clients[zonenum]--;
 	cerr<<zone_clients[zonenum]<<" clients left in zone "<<zonenum<<endl;
 	sts = _Universe->star_system[zonenum];
