@@ -431,7 +431,7 @@ void Mesh::SelectCullFace (int whichdrawqueue) {
   }
   
 }
-void SetupCloakState (char cloaked,const GFXColor & CloakFX, vector <int> &specialfxlight, unsigned char hulldamage) {
+void SetupCloakState (char cloaked,const GFXColor & CloakFX, vector <int> &specialfxlight, unsigned char hulldamage,unsigned int matnum) {
     if (cloaked&MeshDrawContext::CLOAK) {
         GFXPushBlendMode ();
 		GFXDisable(CULLFACE);
@@ -447,6 +447,11 @@ void SetupCloakState (char cloaked,const GFXColor & CloakFX, vector <int> &speci
             GFXCreateLight (ligh,GFXLight (true,GFXColor(0,0,0,1),GFXColor (0,0,0,1),GFXColor (0,0,0,1),CloakFX,GFXColor(1,0,0)),true);
             specialfxlight.push_back (ligh);
             GFXBlendMode (ONE,ONE);
+            GFXSelectMaterialHighlights(matnum,
+                                        GFXColor(1,1,1,1),
+                                        GFXColor(1,1,1,1),
+                                        GFXColor(1,1,1,1),
+                                        CloakFX);
         }else {
 			GFXEnable(TEXTURE1);
             if (cloaked&MeshDrawContext::NEARINVIS) {      
@@ -766,7 +771,7 @@ void Mesh::ProcessDrawQueue(int whichpass,int whichdrawqueue) {
     vector <int> specialfxlight;
     GFXLoadMatrixModel ( c.mat);
 	unsigned char damaged=((whichpass==DAMAGE_PASS)?c.damage:0);
-    SetupCloakState (c.cloaked,c.CloakFX,specialfxlight,damaged);
+    SetupCloakState (c.cloaked,c.CloakFX,specialfxlight,damaged,myMatNum);
 
     unsigned int i;
     for ( i=0;i<c.SpecialFX->size();i++) {

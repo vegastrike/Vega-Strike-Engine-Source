@@ -196,9 +196,11 @@ void HaloSystem::Draw(const Matrix & trans, const Vector &scale, int halo_alpha,
     }
 #else
   if (halo_alpha>=0) {
+    halo_alpha/=2;
     if ((halo_alpha&0x1)==0) {
       halo_alpha+=1;
     }
+    
   }
   if (scale.k>0) {
     vector<MyIndHalo>::iterator i = halo.begin();
