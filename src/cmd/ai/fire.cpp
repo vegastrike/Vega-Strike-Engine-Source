@@ -75,6 +75,8 @@ FireAt::FireAt (): CommunicatingAI (WEAPON,STARGET) {
 float Priority (Unit * me, Unit * targ, float gunrange,float rangetotarget, float relationship) {
   if(relationship>=0)
     return -1;
+  if (targ->GetHull()<0)
+    return -1;
   char rolepriority = (31-ROLES::getPriority (me->combatRole())[targ->combatRole()]);//number btw 0 and 31 higher better
   if(rolepriority<=0)
     return -1;

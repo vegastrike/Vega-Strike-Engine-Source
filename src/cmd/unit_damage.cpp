@@ -88,16 +88,17 @@ void GameUnit<UnitType>::Split (int level) {
     std::vector<Mesh *> tempmeshes;
     tempmeshes.push_back (old[i]);
     SubUnits.prepend(splitsub = UnitFactory::createUnit (tempmeshes,true,faction));
+    splitsub->hull = 1000;
     splitsub->mass = mass/level;
     splitsub->image->timeexplode=.1;
     if (splitsub->meshdata[0]) {
       Vector loc = splitsub->meshdata[0]->Position();
-      static float explosion_force = XMLSupport::parse_float (vs_config->getVariable ("graphics","explosionforce",".05"));//10 seconds for auto to kick in;
-      splitsub->ApplyForce(splitsub->meshdata[0]->rSize()*explosion_force*10*mass*loc/loc.Magnitude());
+      static float explosion_force = XMLSupport::parse_float (vs_config->getVariable ("graphics","explosionforce",".5"));//10 seconds for auto to kick in;
+      splitsub->ApplyForce(splitsub->meshdata[0]->rSize()*explosion_force*10*splitsub->GetMass()*loc/loc.Magnitude());
       loc.Set (rand(),rand(),rand());
       loc.Normalize();
-      static float explosion_torque = XMLSupport::parse_float (vs_config->getVariable ("graphics","explosiontorque",".0001"));//10 seconds for auto to kick in;
-      splitsub->ApplyLocalTorque(loc*MomentOfInertia*explosion_torque*(1+rand()%(int)(1+rSize())));
+      static float explosion_torque = XMLSupport::parse_float (vs_config->getVariable ("graphics","explosiontorque",".001"));//10 seconds for auto to kick in;
+      splitsub->ApplyLocalTorque(loc*splitsub->GetMoment()*explosion_torque*(1+rand()%(int)(1+rSize())));
     }
   }
   old.clear();
@@ -294,7 +295,7 @@ bool GameUnit<UnitType>::Explode (bool drawit, float timeit) {
 	}
   }
   static float timebeforeexplodedone = XMLSupport::parse_float (vs_config->getVariable ("physics","debris_time","500"));
-  bool timealldone =(image->timeexplode>timebeforeexplodedone||isUnit()==MISSILEPTR||_Universe->AccessCockpit()->GetParent()==this);
+  bool timealldone =(image->timeexplode>timebeforeexplodedone||isUnit()==MISSILEPTR||_Universe->AccessCockpit()->GetParent()==this||this->SubUnits.empty());
   if (image->explosion) {
       image->timeexplode+=timeit;
       //Translate (tmp,meshdata[i]->Position());

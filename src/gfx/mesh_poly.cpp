@@ -83,9 +83,14 @@ void Mesh::Fork (Mesh *&x, Mesh *&y, float a, float b, float c, float d) {
     return;
   }
   x = new Mesh;
+  x->setLighting(getLighting());
+  x->setEnvMap(getEnvMap());
   x->forceCullFace(GFXFALSE);
 
   y = new Mesh;
+  y->setLighting(getLighting());
+  y->setEnvMap(getEnvMap());
+
   y->forceCullFace(GFXFALSE);
   x->forcelogos = x->squadlogos = NULL;
   x->numforcelogo = x->numsquadlogo =0;
@@ -133,8 +138,13 @@ void Mesh::Fork (Mesh *&x, Mesh *&y, float a, float b, float c, float d) {
   y->mx = ymax;
   x->orig= new Mesh[1];
   x->forceCullFace(GFXFALSE);
+  x->setLighting(getLighting());
+  x->setEnvMap(getEnvMap());
+
   y->orig= new Mesh[1];
   y->forceCullFace(GFXFALSE);
+  y->setLighting(getLighting());
+  y->setEnvMap(getEnvMap());
   x->draw_queue = new vector<MeshDrawContext>;
   y->draw_queue = new vector<MeshDrawContext>;
   *y->orig = *y;

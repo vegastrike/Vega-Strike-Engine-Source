@@ -1323,6 +1323,7 @@ void Unit::UpdatePhysics (const Transformation &trans, const Matrix &transmat, c
       su->UpdatePhysics(cumulative_transformation,cumulative_transformation_matrix,cumulative_velocity,lastframe,uc); 
       su->cloaking = (short unsigned int) cloaking;
       if (hull<0) {
+	su->Target(NULL);
 		UnFire();//don't want to go off shooting while your body's splitting everywhere
 		//DEPRECATEDsu->hull-=SIMULATION_ATOM;
       }
