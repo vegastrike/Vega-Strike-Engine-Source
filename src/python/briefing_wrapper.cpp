@@ -29,7 +29,7 @@ namespace BriefingUtil {
 		mission->BriefingEnd();
 	}
 	void setCamPosition(QVector p) {
-		mission->briefing->cam.SetPosition(p,Vector(0,0,0));
+		mission->briefing->cam.SetPosition(p,Vector(0,0,0),Vector(0,0,0));
 	}
 	void setCamOrientation(Vector p, Vector q, Vector r) {
 		mission->briefing->cam.SetOrientation(p,q,r);

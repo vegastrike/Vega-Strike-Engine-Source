@@ -33,6 +33,7 @@ class Camera{
   
 	QVector Coord;
 	Vector velocity;
+	Vector angular_velocity;
 	Matrix planetview;
 	GFXBOOL changed;
 	QVector lastpos;
@@ -71,9 +72,10 @@ public:
 	Matrix * GetPlanetGFX();
 	void UpdateGLCenter();
 
-	void SetPosition(const QVector &origin, const Vector & velocity);
+	void SetPosition(const QVector &origin, const Vector & velocity, const Vector & angular_velocity);
 	void GetPosition(QVector &vect) {vect=Coord;}
-	Vector GetVelocity ();
+	Vector GetAngularVelocity()const;
+	Vector GetVelocity ()const;
 	void GetOrientation(Vector &p, Vector &q, Vector &r) {p=P;q=Q;r=R;}
 	const QVector &GetPosition() { return Coord;}
 

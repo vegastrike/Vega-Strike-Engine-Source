@@ -95,9 +95,12 @@ void Camera::UpdateGFX(GFXBOOL clip, GFXBOOL updateFrustum, GFXBOOL centerCamera
 #endif
 	}
 }
-Vector Camera::GetVelocity() {
+Vector Camera::GetVelocity()const {
 //	return ((Coord-lastpos)*(1./SIMULATION_ATOM)).Cast();
 	return velocity;
+}
+Vector Camera::GetAngularVelocity()const {
+	return angular_velocity;
 }
 void Camera::UpdateCameraSounds() {
 #ifndef PERFRAMESOUND
@@ -191,10 +194,11 @@ void Camera::UpdateGLCenter()
 	//glMultMatrixf(view);
 }
 
-void Camera::SetPosition(const QVector &origin, const Vector & vel)
+void Camera::SetPosition(const QVector &origin, const Vector & vel,const Vector & angvel)
 {
   if (FINITE (origin.i)&&FINITE(origin.j)&&FINITE (origin.k)) {
-	velocity = vel;		
+	velocity = vel;
+	angular_velocity = angvel;
 	Coord = origin;
 	changed= GFXTRUE;
   }else {

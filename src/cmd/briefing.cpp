@@ -52,7 +52,7 @@ extern double interpolation_blend_factor;
 void Briefing::Render() {
 	AnimatedTexture::UpdateAllFrame();
 
-  cam.SetPosition(cam.GetPosition(),Vector(0,0,0));
+  cam.SetPosition(cam.GetPosition(),Vector(0,0,0),Vector(0,0,0));
   cam.UpdateGFX(GFXTRUE,GFXFALSE);
   //  glClearColor(1,0,0,1);
   //  GFXClear(GFXTRUE);
@@ -103,7 +103,7 @@ void Briefing::Ship::Destroy() {
 }
 Briefing::Briefing() {
   VSCONSTRUCT2('b')
-  cam.SetPosition(QVector(0,0,0),Vector(0,0,0));
+  cam.SetPosition(QVector(0,0,0),Vector(0,0,0),Vector(0,0,0));
   cam.SetOrientation(Vector(1,0,0),Vector(0,1,0),Vector(0,0,1));
   tp.SetPos (-1,1);
   tp.SetSize (1,-.5);

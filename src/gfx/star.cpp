@@ -261,34 +261,12 @@ void StarVlist::UpdateGraphics() {
 		lasttime=time;
 	}
 }
-void StarVlist::BeginDrawState (const QVector &center, const Vector & velocity, bool roll, bool yawpitch) {
+void StarVlist::BeginDrawState (const QVector &center, const Vector & velocity, const Vector & torque, bool roll, bool yawpitch) {
 	UpdateGraphics();
-  	Vector camq_delta(newcamq-camq);
-    Vector camr_delta(newcamr-camr);
 	Matrix rollMatrix;
-	if (roll) {
-		static float rollstreakscale= XMLSupport::parse_float (vs_config->getVariable ("graphics","roll_star_streak_scale","1"));
-		
-		float hack = (camq_delta.Magnitude()-camr_delta.Magnitude());
-		Vector roller = camq_delta-newcamr.Scale(camq_delta.Dot(newcamr));
-		hack = roller.Magnitude();
-		if (roller.Cross(newcamq).Dot(newcamr)>0) {
-			hack*=-1;
-		}
-		if (0&&hack<0)
-			roll=false;
-		else
-			RotateAxisAngle(rollMatrix,newcamr,hack*rollstreakscale);
-	}
 	static float velstreakscale= XMLSupport::parse_float (vs_config->getVariable ("graphics","velocity_star_streak_scale","5"));
 
 	Vector vel (-velocity*velstreakscale);
-//   	float temp = vel.Magnitude();
-//	if (temp>.01) {
-//		if (_Universe->AccessCockpit()->GetParent()) {
-//			vel = vel.Scale(_Universe->AccessCockpit()->GetParent()->GetVelocity().Magnitude()/temp);
-//		}
-//	}
 	GFXColorMaterial(AMBIENT|DIFFUSE);
 	GFXColorVertex * v = vlist->BeginMutate(0)->colors;
 	int numvertices = vlist->GetNumVertices();
@@ -296,18 +274,14 @@ void StarVlist::BeginDrawState (const QVector &center, const Vector & velocity, 
 	static float torquestreakscale= XMLSupport::parse_float (vs_config->getVariable ("graphics","torque_star_streak_scale","1"));
 	for (int i=0;i<numvertices-1;i+=2) {
 		Vector vpoint (v[i+1].x,v[i+1].y,v[i+1].z);
-		float scale=0;
 		Vector recenter =(vpoint-center.Cast());
-		if (yawpitch) {
-			scale= recenter.Magnitude();
-			scale*=-torquestreakscale;
-		}
 		if (roll) {
+			RotateAxisAngle(rollMatrix,torque,torque.Magnitude()*torquestreakscale*.003);			
 			vpoint = Transform(rollMatrix,recenter)+center.Cast();
 		}
-		v[i].x=vpoint.i-vel.i-camr_delta.i*scale;
-		v[i].y=vpoint.j-vel.j-camr_delta.j*scale;
-		v[i].z=vpoint.k-vel.k-camr_delta.k*scale;
+		v[i].x=vpoint.i-vel.i;
+		v[i].y=vpoint.j-vel.j;
+		v[i].z=vpoint.k-vel.k;
 	}
 	vlist->EndMutate();
 	vlist->LoadDrawState();
@@ -357,7 +331,7 @@ void Stars::Draw() {
     GFXDisable (LIGHTING);
   }
   
-  vlist.BeginDrawState(_Universe->AccessCamera()->GetR().Scale(-spread).Cast(),_Universe->AccessCamera()->GetVelocity(),false,false);
+  vlist.BeginDrawState(_Universe->AccessCamera()->GetR().Scale(-spread).Cast(),_Universe->AccessCamera()->GetVelocity(),_Universe->AccessCamera()->GetAngularVelocity(),false,false);
   _Universe->AccessCamera()->UpdateGFX(GFXFALSE,GFXFALSE,GFXFALSE);
 	
   for (int i=0;i<STARnumvlist;i++) {

@@ -67,7 +67,7 @@ varInst * Mission::call_briefing (missionNode * node, int mode) {
     }else if (method_id==CMT_BRIEFING_setCamPosition) {
       QVector p(getFloatArg (node,mode,0),getFloatArg(node,mode,1),getFloatArg(node,mode,2));
       if(mode==SCRIPT_RUN) {
-	briefing->cam.SetPosition(p,Vector(0,0,0));
+	briefing->cam.SetPosition(p,Vector(0,0,0),Vector(0,0,0));
       }
     }else if (method_id==CMT_BRIEFING_setCamOrientation) {
       Vector p(getFloatArg (node,mode,0),getFloatArg(node,mode,1),getFloatArg(node,mode,2));
