@@ -33,9 +33,25 @@ HEAD
 
 $objname = $basename;
 $texture = $default_texture = "$basename-default";
+$in_strip = 0;
+sub finish_strip {
+print "strip vertices: " . join(" ", @strip_vertices) . "\n";
+$in_strip = 0;
+@strip_vertices = ();
+}
+
 while($line = <INPUT>) {
 	$line =~ s/#.*$//;
-	if ($line =~ /mtllib +(\S+)/) {
+	if($in_strip && $line =~ /^ *q (.+)$/) {
+		chomp $line;
+		my @new_vertices = split /\s/, $line;
+		shift @new_vertices;
+		push @strip_vertices, @new_vertices;
+	} else {
+	  if($in_strip) { 
+	  	finish_strip();
+	  }
+	  if ($line =~ /mtllib +(\S+)/) {
 		open(MTL, "<$1") or die "could not open materials file $1";
 		while($linea = <MTL>) {
 			if($linea =~ /newmtl +(\S+)/) {
@@ -113,7 +129,16 @@ POINT
 			$face_output{$objname}{$texture} .= "</Quad>\n"
 		}
 		$num_polygons++;
+	} elsif($line =~ /^ *t/) {
+		$in_strip = 1;
+		chomp $line;
+		@strip_vertices = split /\s/, $line;
+		shift @strip_vertices;
 	}
+	}
+}
+if($in_strip) {
+  finish_strip();
 }
 
 for $objname (keys %encountered_points) {
