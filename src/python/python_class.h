@@ -57,7 +57,7 @@ BOOST_PYTHON_BEGIN_CONVERSION_NAMESPACE \
 PyObject* to_python(class Pointer* x) {return boost::python::python_extension_class_converters<Pointer>::smart_ptr_to_python(x);} \
 PyObject* to_python(const class Pointer* p) {return to_python(const_cast<class Pointer*>(p));} \
 BOOST_PYTHON_END_CONVERSION_NAMESPACE
-#ifdef _WIN32
+
 //		return from_python(p,boost::python::type<SuperClass &>());
 //	namespace boost{namespace python{
 //	}}
@@ -89,10 +89,6 @@ BOOST_PYTHON_BEGIN_CONVERSION_NAMESPACE \
 #else
 #define PYTHON_INIT_INHERIT_GLOBALS(name,SuperClass) PythonClass <SuperClass> *PythonClass< SuperClass >::last_instance = NULL;
 #define PYTHON_INIT_GLOBALS(name,Class)
-#endif
-#else
-#define PYTHON_INIT_INHERIT_GLOBALS(name,SuperClass) PythonClass <SuperClass> *PythonClass< SuperClass >::last_instance = NULL; 
-#define PYTHON_INIT_GLOBALS(name,Class) 
 #endif
 //These two functions purposely have opening/closing braces that don't match up
 #define PYTHON_BEGIN_MODULE(name) BOOST_PYTHON_MODULE_INIT(name) {boost::python::module_builder name(#name);

@@ -8,7 +8,7 @@ protected:
 public:
   PythonMissionBaseClass ();
   virtual void Destroy(){Destructor();}
-  ~PythonMissionBaseClass();
+  virtual ~PythonMissionBaseClass();
   virtual void Execute ();
   virtual void callFunction (std::string s);
   virtual std::string Pickle();

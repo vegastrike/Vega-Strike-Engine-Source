@@ -62,6 +62,7 @@
 #include "flightgroup.h"
 #include "gldrv/winsys.h"
 #include "python/python_class.h"
+#include <boost/python/detail/extension_class.hpp>
 //#include "vegastrike.h"
 
 extern bool have_yy_error;
@@ -106,12 +107,12 @@ void putSaveData (int whichcp, string key, unsigned int num, float val) {
 }
 
 PYTHON_INIT_INHERIT_GLOBALS(Director,PythonMissionBaseClass);
-ADD_FROM_PYTHON_FUNCTION(pythonMission)
+//ADD_FROM_PYTHON_FUNCTION(pythonMission)
 PYTHON_BEGIN_MODULE(Director)
 PYTHON_BEGIN_INHERIT_CLASS(Director,pythonMission,PythonMissionBaseClass,"Mission")
-  Class.def(&pythonMission::Pickle,"Pickle",pythonMission::default_Pickle);
-  Class.def(&pythonMission::UnPickle,"UnPickle",pythonMission::default_UnPickle);
-  Class.def(&pythonMission::Execute,"Execute",pythonMission::default_Execute);
+  Class.def(&PythonMissionBaseClass::Pickle,"Pickle",pythonMission::default_Pickle);
+  Class.def(&PythonMissionBaseClass::UnPickle,"UnPickle",pythonMission::default_UnPickle);
+  Class.def(&PythonMissionBaseClass::Execute,"Execute",pythonMission::default_Execute);
 PYTHON_END_CLASS(Director,pythonMission)
   Director.def (&putSaveData,"putSaveData");
   Director.def (&pushSaveData,"pushSaveData");
