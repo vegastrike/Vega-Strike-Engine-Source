@@ -193,13 +193,13 @@ NetworkCommunication::NetworkCommunication()
 
 #endif /* NETCOMM_NOWEBCAM */
 #ifdef CRYPTO
+	crypto_method = vs_config->getVariable( "network", "encryption_method", "");
 	pubKeyFilename = datadir+"vsnet_public_"+crypto_method+".key";
 	privKeyFilename = datadir+"vsnet_private_"+crypto_method+".key";
 	seed = vs_config->getVariable( "network", "encryption_seed", "I love VegaStrike"); // ;)
 	// Key length is only used when we need to generate a key
 	this->key_length = XMLSupport::parse_int( vs_config->getVariable( "network", "encryption_keylength", "40"));
 	bool create_keys = false;
-	crypto_method = vs_config->getVariable( "network", "encryption_method", "");
 	FILE * fp1 = fopen( pubKeyFilename.c_str(), "rb");
 	FILE * fp2 = fopen( privKeyFilename.c_str(), "rb");
 	if( !fp1 || !fp2)
