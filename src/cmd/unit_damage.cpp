@@ -92,12 +92,12 @@ void GameUnit<UnitType>::Split (int level) {
     splitsub->image->timeexplode=.1;
     if (splitsub->meshdata[0]) {
       Vector loc = splitsub->meshdata[0]->Position();
-      static float explosion_force = XMLSupport::parse_float (vs_config->getVariable ("graphics","explosionforce",".01"));//10 seconds for auto to kick in;
+      static float explosion_force = XMLSupport::parse_float (vs_config->getVariable ("graphics","explosionforce",".05"));//10 seconds for auto to kick in;
       splitsub->ApplyForce(splitsub->meshdata[0]->rSize()*explosion_force*10*mass*loc/loc.Magnitude());
       loc.Set (rand(),rand(),rand());
       loc.Normalize();
-      static float explosion_torque = XMLSupport::parse_float (vs_config->getVariable ("graphics","explosiontorque",".0005"));//10 seconds for auto to kick in;
-      splitsub->ApplyLocalTorque(loc*mass*explosion_torque*rSize()*(1+rand()%(int)(1+rSize())));
+      static float explosion_torque = XMLSupport::parse_float (vs_config->getVariable ("graphics","explosiontorque",".0001"));//10 seconds for auto to kick in;
+      splitsub->ApplyLocalTorque(loc*MomentOfInertia*explosion_torque*(1+rand()%(int)(1+rSize())));
     }
   }
   old.clear();
@@ -294,7 +294,7 @@ bool GameUnit<UnitType>::Explode (bool drawit, float timeit) {
 	}
   }
   static float timebeforeexplodedone = XMLSupport::parse_float (vs_config->getVariable ("physics","debris_time","500"));
-  bool timealldone =(image->timeexplode>timebeforeexplodedone||_Universe->AccessCockpit()->GetParent()==this);
+  bool timealldone =(image->timeexplode>timebeforeexplodedone||isUnit()==MISSILEPTR||_Universe->AccessCockpit()->GetParent()==this);
   if (image->explosion) {
       image->timeexplode+=timeit;
       //Translate (tmp,meshdata[i]->Position());
