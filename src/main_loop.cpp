@@ -37,8 +37,11 @@
 #include "gfx/background.h"
 #include "cmd/music.h"
 #include "main_loop.h"
+#include "cmd/music.h"
 
 using namespace std;
+
+static Music * muzak=NULL;
 
 #define KEYDOWN(name,key) (name[key] & 0x80)
 
@@ -83,6 +86,15 @@ const float timek = .005;
 bool _Slew = true;
 
 namespace CockpitKeys {
+
+ void SkipMusicTrack(int,KBSTATE newState) {
+   static bool flag=false;
+   if(newState==PRESS && flag==false){
+     printf("skipping\n");
+    muzak->Skip();
+    flag=true;
+   }
+ }
 
  void PitchDown(int,KBSTATE newState) {
 	static Vector Q;
@@ -312,7 +324,7 @@ void InitializeInput() {
 
 //Cockpit *cockpit;
 static Texture *tmpcockpittexture;
-static Music * muzak=NULL;
+
 void createObjects() {
   explosion= new Animation ("explosion_orange.ani",false,.1,BILINEAR,false);
   LoadWeapons("weapon_list.xml");

@@ -2,7 +2,7 @@
 #define _MAIN_LOOP_H_
 
 namespace CockpitKeys {
-
+  void SkipMusicTrack(int,KBSTATE newState);
    void  PitchDown(int,KBSTATE newState) ;
    void  PitchUp(int,KBSTATE newState) ;
    void  YawLeft(int,KBSTATE newState) ;

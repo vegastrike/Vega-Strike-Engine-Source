@@ -43,7 +43,10 @@
 #include "easydom.h"
 #include "cmd/ai/flykeyboard.h"
 #include "cmd/ai/firekeyboard.h"
+#include "cmd/music.h"
+
 #include "main_loop.h" // for CockpitKeys
+
 
 //#include "vs_globals.h"
 //#include "vegastrike.h"
@@ -149,6 +152,7 @@ void VegaConfig::initCommandMap(){
  command_map["Cockpit::SwitchRVDU"]=CockpitKeys::SwitchRVDU;
  command_map["Cockpit::Behind"]=CockpitKeys::Behind;
  command_map["Cockpit::Pan"]=CockpitKeys::Pan;
+ command_map["Cockpit::SkipMusicTrack"]=CockpitKeys::SkipMusicTrack;
 
  command_map["Cockpit::Quit"]=CockpitKeys::Quit;
 
