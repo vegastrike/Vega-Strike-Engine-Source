@@ -230,7 +230,7 @@ bool Unit::InsideCollideTree (Unit * smaller, QVector & bigpos, Vector &bigNorma
 	csCollisionPair * mycollide = csRapidCollider::GetCollisions();
 	int numHits = csRapidCollider::numHits;
 	if (numHits) {
-		printf ("%s hit %s\n",smaller->name.c_str(),bigger->name.c_str());
+//		printf ("%s hit %s\n",smaller->name.c_str(),bigger->name.c_str());
 	  smallpos.Set((mycollide[0].a1.x+mycollide[0].b1.x+mycollide[0].c1.x)/3,  
 		       (mycollide[0].a1.y+mycollide[0].b1.y+mycollide[0].c1.y)/3,  
 		       (mycollide[0].a1.z+mycollide[0].b1.z+mycollide[0].c1.z)/3);
