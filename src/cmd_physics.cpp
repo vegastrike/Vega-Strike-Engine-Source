@@ -129,7 +129,7 @@ Vector Unit::ClampThrust(const Vector &amt1){
     return max;
 }
 */
-
+//CMD_FLYBYWIRE depends on new version of Clampthrust... don't change without resolving it
 Vector Unit::ClampThrust (const Vector &amt1) {
   Vector Res=amt1;
   if (Res.i>fabs(limits.lateral))

@@ -6,9 +6,16 @@ AI * MatchVelocity::Execute () {
     desired = parent->ToLocalCoordinates (desired);
   }
   Vector velocity = parent->ToLocalCoordinates (parent->GetVelocity());
-  parent->Thrust ( parent->ClampThrust(parent->GetMass()*desired-velocity/SIMULATION_ATOM));
+  parent->Thrust ( /*parent->ClampThrust*/(parent->GetMass()*desired-velocity/SIMULATION_ATOM));//don't need to clamp thrust since the Thrust does it for you
+                 //caution might change 
   return this;
 }
+
+AI * MatchAngularVelocity::Execute () {
+
+  return this;
+}
+
 
 
 
