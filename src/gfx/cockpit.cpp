@@ -783,12 +783,26 @@ void Cockpit::Respawn (int,KBSTATE k) {
   }
 
 }
+
+static void FaceTarget (Unit * un) {
+  Unit * targ = Target();
+  if (targ) {
+    QVector dir (Target->Position()-un->Position());
+    dir.Normalize();
+    Vector p,q,r;
+    un->GetOrientation(p,q,r);
+    r=dir.Cast();
+    q = q+Vector (.001,.001,.001);
+    un->SetOrientation (q,r);
+  }
+}
 void Cockpit::Autopilot (Unit * target) {
   if (target) {
     Unit * un=NULL;
     if ((un=GetParent())) {
       if (un->AutoPilotTo(un)) {//can he even start to autopilot
 	CockpitKeys::Pan(0,PRESS);
+	FaceTarget(un);
 	AccessCamera(CP_PAN)->myPhysics.ApplyBalancedLocalTorque(_Universe->AccessCamera()->P,
 							      _Universe->AccessCamera()->R,
 							      GetElapsedTime()/100);

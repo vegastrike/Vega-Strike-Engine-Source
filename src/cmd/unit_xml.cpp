@@ -800,15 +800,18 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
       }
 
     }
-    Q.Normalize();
-    R.Normalize();
+    //    Q.Normalize();
+    //    R.Normalize();
     
-    CrossProduct (Q,R,P);
+    //    CrossProduct (Q,R,P);
     indx = xml->units.size();
     xml->units.push_back(UnitFactory::createUnit (filename.c_str(),true,faction,xml->unitModifications,NULL)); // I set here the fg arg to NULL
     xml->units.back()->SetRecursiveOwner (this);
-    xml->units[indx]->prev_physical_state= Transformation(Quaternion::from_vectors(P,Q,R),pos);
-    xml->units[indx]->curr_physical_state=xml->units[indx]->prev_physical_state;
+    xml->units[indx]->SetOrientation (Q,R);
+    R.Normalize();
+    xml->units[indx]->prev_physical_state = xml->units[indx]->curr_physical_state;
+    //    xml->units[indx]->prev_physical_state= Transformation(Quaternion::from_vectors(P,Q,R),pos);
+    //    xml->units[indx]->curr_physical_state=xml->units[indx]->prev_physical_state;
     xml->units[indx]->limits.structurelimits=R;
     xml->units[indx]->limits.limitmin=fbrltb[0];
     
