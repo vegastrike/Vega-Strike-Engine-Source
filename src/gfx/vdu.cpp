@@ -347,7 +347,7 @@ void VDU::DrawManifest (Unit * parent, Unit * target) {
   if (target!=parent) {
     retval+=string ("Tgt: ")+target->name+string("\n");
   }else {
-    retval+=string ("--------\n");
+    retval+=string ("--------\nCredits: ")+tostring((int)_Universe->AccessCockpit()->credits)+/*string(".")+tostring (((int)(_Universe->AccessCockpit()->credits*100))%100) +*/string("\n");
   }
   unsigned int numCargo =target->numCargo();
   for (unsigned int i=0;i<numCargo;i++) {
