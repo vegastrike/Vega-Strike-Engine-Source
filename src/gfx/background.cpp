@@ -242,10 +242,11 @@ void Background::Draw()
   GFXDisable (LIGHTING);
   GFXColor (1,1,1,1);
   GFXDisable (TEXTURE1);
-
+  GFXBlendMode(ONE,ONE);
   stars.BeginDrawState(QVector(0,0,0), Vector(0,0,0));
   stars.Draw();
   stars.EndDrawState();
+  GFXBlendMode(ONE,ZERO);
   GFXEnable (DEPTHTEST);
   GFXCenterCamera(false);
   //  _Universe->AccessCamera()->UpdateGFX(false);

@@ -32,11 +32,13 @@ namespace UniverseUtil {
 		Unit * un;
 		un_iter it = UniverseUtil::getUnitList();
 		// Find the unit
-		for( ; un==NULL && it.current()!=NULL; it.advance())
+		do
 		{
 			if( it.current()->GetSerial()==serial)
 				un = it.current();
+			it.advance();
 		}
+		while(un==NULL && it.current()!=NULL);
 		if( un==NULL)
 			cout<<"ERROR --> Received a fire order for non-existing UNIT"<<endl;
 		return un;

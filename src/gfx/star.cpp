@@ -81,8 +81,8 @@ Stars::Stars(int num, float spread): vlist((num/STARnumvlist)+1,spread),spread(s
   ResetPosition(QVector(0,0,0));
 }
 void Stars::SetBlend(bool blendit, bool fadeit) {
-	blend = blendit;
-	fade = fadeit;
+	blend = true;//blendit;
+	fade = true;//fadeit;
 }
 void Stars::Draw() {
   const QVector cp (_Universe->AccessCamera()->GetPosition());

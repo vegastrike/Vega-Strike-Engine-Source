@@ -137,13 +137,12 @@ public: \
 #define __PRETTY_FUNCTION__ "<Unknown>"
 #endif
 
-#ifndef __FUNCTION
+#ifndef __FUNCTION__
 #define __FUNCTION__ "<Unknown>"
 #endif
 
-#ifndef __LINE__
-#define __LINE__ "<Unknown>"
-
+#if (defined(_WIN32)&&defined(_MSC_VER)&&(_MSC_VER<1300)&&defined(_DEBUG)&&defined(USE_BOOST_129))
+//#define __LINE__ "<Unknown>"
 #define PSEUDO__LINE__(x) x
 #else
 #define PSEUDO__LINE__(x) __LINE__

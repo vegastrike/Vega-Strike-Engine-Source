@@ -24,7 +24,7 @@ collideTrees::collideTrees (const std::string &hk, BSPTree *bT, BSPTree *bS, csR
 	refcount=1;
 	unitColliders.Put (hash_key,this);
 }
-float loge2 = log(2);
+float loge2 = log(2.f);
 csRapidCollider * collideTrees::colTree(Unit * un) {
 	const float const_factor=1;
 	float speedsquared =const_factor*const_factor*un->GetVelocity().MagnitudeSquared(); 

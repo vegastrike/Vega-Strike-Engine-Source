@@ -402,6 +402,7 @@ void	NetServer::start(int argc, char **argv)
 	// Save period in seconds
 	strperiod = vs_config->getVariable( "server", "saveperiod", "7200");
 	SAVE_ATOM = atoi( strperiod.c_str());
+	period=SAVE_ATOM;
 	string strperiodrecon = vs_config->getVariable( "server", "reconnectperiod", "60");
 	periodrecon = atoi( strperiodrecon.c_str());
 	strtimeout = vs_config->getVariable( "server", "clienttimeout", "20");
