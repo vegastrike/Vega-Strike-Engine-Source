@@ -557,13 +557,14 @@ void VDU::DrawWeapon (Unit * parent, const GFXColor& c) {
 pos.i*fabs(w)/parent->rSize()*percent+x;
     pos.j=pos.k*fabs(h)/parent->rSize()*percent+y;
     pos.k=0;
+    string ammo =(parent->mounts[i].ammo>=0)?string("(")+tostring(parent->mounts[i].ammo)+string(")"):string("");
     switch (parent->mounts[i].ammo!=0?parent->mounts[i].status:127) {
     case Unit::Mount::ACTIVE:
       GFXColor4f (0,1,.2,1);
       if (parent->mounts[i].type.size<weapon_info::LIGHTMISSILE) 
-	buf+=((buf.length()==len)?string(""):string(","))+((count++%4==0)?"\n":"")+parent->mounts[i].type.weapon_name;
+	buf+=((buf.length()==len)?string(""):string(","))+((count++%4==0)?"\n":"")+parent->mounts[i].type.weapon_name+ammo;
       else
-	mbuf+=((mbuf.length()==mlen)?string(""):string(","))+((mcount++%4==0)?"\n":"")+parent->mounts[i].type.weapon_name;
+	mbuf+=((mbuf.length()==mlen)?string(""):string(","))+((mcount++%4==0)?"\n":"")+parent->mounts[i].type.weapon_name+ammo;;
       break;
     case Unit::Mount::INACTIVE:
       GFXColor4f (0,.5,0,1);
