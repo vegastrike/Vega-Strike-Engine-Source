@@ -46,7 +46,7 @@ bool Unit::RequestClearance (Unit * dockingunit) {
 }
 
 int Unit::CanDockWithMe(Unit * un) {
-  if (_Universe->GetRelation(faction,un->faction)>=0) {
+  //  if (_Universe->GetRelation(faction,un->faction)>=0) {//already clearneed
     for (unsigned int i=0;i<image->dockingports.size();i++) {
       if (un->image->dockingports.size()) {
 	for (unsigned int j=0;j<un->image->dockingports.size();j++) {
@@ -62,7 +62,7 @@ int Unit::CanDockWithMe(Unit * un) {
 	}
       }
     }
-  }
+    //  }
   return -1;
 }
 void Unit::FreeDockingPort (unsigned int i) {
