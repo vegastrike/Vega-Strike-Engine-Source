@@ -102,7 +102,7 @@ void GameUnit<UnitType>::UpdatePhysics2 (const Transformation &trans, const Tran
 		  // This may be be a bot or a unit controlled by the server
 		  if( !this->networked)
 			// Case it is a local unit
- 			curr_physical_state.position = curr_physical_state.position +  (Velocity*SIMULATION_ATOM*difficulty).Cast();
+ 			AddVelocity(difficulty);
 		  else
 		  {
 		  	// Networked unit so interpolate its position

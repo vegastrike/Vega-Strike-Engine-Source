@@ -1810,7 +1810,9 @@ void Unit::UpdatePhysics (const Transformation &trans, const Matrix &transmat, c
     UpdateCollideQueue();
   }
 }
-
+void Unit::AddVelocity(float difficulty) {
+   curr_physical_state.position = curr_physical_state.position +  (Velocity*SIMULATION_ATOM*difficulty).Cast();
+}
 void Unit::UpdatePhysics2 (const Transformation &trans, const Transformation & old_physical_state, const Vector & accel, float difficulty, const Matrix &transmat, const Vector & cum_vel,  bool lastframe, UnitCollection *uc)
 {
 	Cockpit * cp = _Universe->isPlayerStarship( this);
@@ -1825,7 +1827,8 @@ void Unit::UpdatePhysics2 (const Transformation &trans, const Transformation & o
 	// SERVERSIDE ONLY : If it is not a player, it is a unit controlled by server so compute changes
 	if( SERVER && Network!=NULL && !cp)
 	{
-		curr_physical_state.position = curr_physical_state.position +  (Velocity*SIMULATION_ATOM*difficulty).Cast();
+		AddVelocity(difficulty);
+                
 		cumulative_transformation = curr_physical_state;
 		cumulative_transformation.Compose (trans,transmat);
 		cumulative_transformation.to_matrix (cumulative_transformation_matrix);
