@@ -221,7 +221,7 @@ void BFXMToXmesh(FILE* Inputfile, FILE* Outputfile){
 			for(int32bit fref=0;fref<numframerefs;fref++){
 			  int32bit ref=VSSwapHostIntToLittle(inmemfile[word32index].i32val);//number of animation frame references
 		      word32index+=NUMFIELDSPERREFERENCEDANIMATION;
-			  fprintf(Outputfile,"<AnimationFrameIndex AnimationMeshIndex=\"%d\"/>\n",ref);
+			  fprintf(Outputfile,"<AnimationFrameIndex AnimationMeshIndex=\"%d\"/>\n",ref-1-numLODs);
 			}
 			fprintf(Outputfile,"</AnimationDefinition>\n");
 		  }
