@@ -13,6 +13,8 @@ libgfx_a_SOURCES =	\
 	aux_palette.h	\
 	aux_texture.cpp	\
 	aux_texture.h	\
+	png_texture.cpp	\
+	png_texture.h	\
 	background.cpp	\
 	background.h	\
 	bounding_box.cpp	\
@@ -55,8 +57,6 @@ libgfx_a_SOURCES =	\
 	planetary_transform.h	\
 	pipelined_texture.cpp	\
 	pipelined_texture.h	\
-	png_texture.h	\
-	png_texture.cpp	\
 	png_write.cpp	\
 	point_to_cam.h	\
 	particle.cpp	\

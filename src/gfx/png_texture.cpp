@@ -6,6 +6,13 @@
 #ifndef png_jmpbuf
 #  define png_jmpbuf(png_ptr) ((png_ptr)->jmpbuf)
 #endif
+
+#ifdef JPEG_SUPPORT
+extern "C" {
+#include "jpeglib.h"
+}
+#endif
+
 //#define PNGDEBUG
 int PNG_HAS_PALETTE =1;
 int PNG_HAS_COLOR=2;
@@ -136,6 +143,103 @@ png_cexcept_error(png_structp png_ptr, png_const_charp msg)
 
 }
 
+
+
+
+
+#ifdef JPEG_SUPPORT
+
+struct my_error_mgr
+{
+  struct jpeg_error_mgr pub;// "public" fields
+  jmp_buf setjmp_buffer;      // for return to caller
+};
+
+
+METHODDEF(void) my_error_exit(j_common_ptr cinfo)
+{
+  // cinfo->err really points to a my_error_mgr struct, so coerce pointer
+  my_error_mgr * myerr = (my_error_mgr *) cinfo->err;
+
+  // Always display the message.
+  // We could postpone this until after returning, if we chose.
+  (*cinfo->err->output_message) (cinfo);
+
+  // Return control to the setjmp point
+  longjmp(myerr->setjmp_buffer, 1);
+}
+unsigned char * readVSJpeg (FILE *fp, int & bpp, int &color_type, unsigned long &width, unsigned long &height, textureTransform * tt) {
+  bpp = 8;
+   jpeg_decompress_struct cinfo;
+
+   my_error_mgr jerr;
+   JSAMPARRAY row_pointers=NULL;// Output row buffer
+
+   cinfo.err = jpeg_std_error(&jerr.pub);
+   jerr.pub.error_exit = my_error_exit;
+   if (setjmp(jerr.setjmp_buffer)) {
+       // If we get here, the JPEG code has signaled an error.
+       // We need to clean up the JPEG object, close the input file, and return.
+     jpeg_destroy_decompress(&cinfo);
+     return NULL;
+   }
+
+   jpeg_create_decompress(&cinfo);
+
+   jpeg_stdio_src((j_decompress_ptr)&cinfo, fp);
+
+   (void) jpeg_read_header(&cinfo, TRUE);
+   width = cinfo.image_width;
+   height = cinfo.image_height;
+
+   (void) jpeg_start_decompress(&cinfo);
+
+
+   color_type = PNG_COLOR_TYPE_RGB;
+   if (cinfo.output_components == 1)
+     color_type = PNG_COLOR_TYPE_GRAY;
+   else if (cinfo.output_components==4)
+     color_type = PNG_COLOR_TYPE_RGB_ALPHA;
+   else if (cinfo.output_components== 2)
+     color_type = PNG_COLOR_TYPE_GRAY_ALPHA;
+   
+   row_pointers = (unsigned char **)malloc (sizeof (unsigned char *) * cinfo.image_height);
+
+   bpp=8;
+   int numchan =cinfo.output_components;
+
+   unsigned long stride = numchan*sizeof (unsigned char)*bpp/8;
+   unsigned char * image = (unsigned char *) malloc (stride*cinfo.image_width*cinfo.image_height);
+
+   for (unsigned int i=0;i<cinfo.image_height;i++) {
+     row_pointers[i] = &image[i*stride*cinfo.image_width];
+
+   }
+   int count=0;
+   while (count<height) {
+     count+= jpeg_read_scanlines(&cinfo,&( row_pointers[count]), height-count);
+   }
+
+
+   (void) jpeg_finish_decompress(&cinfo);
+
+   jpeg_destroy_decompress(&cinfo);
+
+   unsigned char * result=image;
+   if (tt) {
+     result = (*tt) (bpp,color_type,width,height,row_pointers);
+     free (image);
+   }
+   free (row_pointers);
+   return result;
+}
+
+#else
+unsigned char * readVSJpeg (FILE *fp, int & bpp, int &color_type, unsigned long &width, unsigned long &height, textureTransform * tt) {
+  return NULL;
+}
+#endif // JPEG_SUPPORT
+
 unsigned char * readImage (FILE *fp, int & bpp, int &color_type, unsigned long &width, unsigned long &height, unsigned char * &palette, textureTransform * tt, bool strip_16) {
   palette = NULL;
   unsigned char sig[8];
@@ -144,8 +248,10 @@ unsigned char * readImage (FILE *fp, int & bpp, int &color_type, unsigned long &
   png_infop info_ptr;
   int  interlace_type;
   fread(sig, 1, 8, fp);
-  if (!png_check_sig(sig, 8))
-       return NULL;   /* bad signature */
+  if (!png_check_sig(sig, 8)) {
+    fseek (fp,0,SEEK_SET);
+    return readVSJpeg (fp,bpp,color_type,width,height,tt);
+  }
     png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL,
       (png_error_ptr)png_cexcept_error, 
 	  (png_error_ptr)NULL);
@@ -215,7 +321,7 @@ unsigned char * readImage (FILE *fp, int & bpp, int &color_type, unsigned long &
      result = image;
    }
    free (row_pointers);
-   png_infop end_info;
+   //   png_infop end_info;
    png_read_end(png_ptr, info_ptr);
    png_destroy_read_struct(&png_ptr, &info_ptr, NULL);
 #ifdef PNGDEBUG
