@@ -42,8 +42,8 @@ class FogMesh : public Mesh {
 public:
 	void SetMaterialColor (const GFXColor &color,const GFXColor & dcolor) {
 		GFXMaterial m;m.ar=m.ag=m.ab=m.aa=m.sr=m.sg=m.sb=m.sa=0;m.power=0;
-		static float emm=XMLSupport::parse_float (vs_config->getVariable("graphics","atmosphere_emmissive",".5"));
-		static float diff=XMLSupport::parse_float (vs_config->getVariable("graphics","atmosphere_diffuse",".5"));
+		static float emm=1;//XMLSupport::parse_float (vs_config->getVariable("graphics","atmosphere_emmissive",".5"));
+		static float diff=1;//XMLSupport::parse_float (vs_config->getVariable("graphics","atmosphere_diffuse",".5"));
 		m.er= emm*color.r;
 		m.eg= emm*color.g;
 		m.eb= emm*color.b;
