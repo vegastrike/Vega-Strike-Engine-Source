@@ -571,13 +571,35 @@ static bool UnDockNow (Unit* me, Unit * targ) {
   }
   return ret;
 }
+static Unit * getAtmospheric (Unit * targ) {
+  if (targ) {
+    Unit * un;
+    for (un_iter i=_Universe->activeStarSystem()->getUnitList().createIterator();
+	 (un=*i)!=NULL;
+	 ++i) {
+      if (un->isUnit()==PLANETPTR) {
+	if ((targ->Position()-un->Position()).Magnitude()<targ->rSize()*.5) {
+	  if (!(((Planet *)un)->isAtmospheric())) {
+	    return un;
+	  }
+	}
+      }
+    }
+  }
+  return NULL;
+  
+}
 static void DoDockingOps (Unit * parent, Unit * targ,unsigned char playa, unsigned char sex) {
+  static bool nodockwithclear = XMLSupport::parse_bool (vs_config->getVariable ("physics","dock_with_clear_planets","true"));
     if (vectorOfKeyboardInput[playa].req) {
       if (targ->isUnit()==PLANETPTR) {
-	static bool nodockwithclear = XMLSupport::parse_bool (vs_config->getVariable ("physics","dock_with_clear_planets","true"));
+
 	if (((Planet * )targ)->isAtmospheric()&&nodockwithclear) {
-	  mission->msgcenter->add("game","all","[Computer] Cannot dock with insubstantial object, target another object and retry.");
-	  return;
+	  targ = getAtmospheric (targ);
+	  if (!targ) {
+	    mission->msgcenter->add("game","all","[Computer] Cannot dock with insubstantial object, target another object and retry.");
+	    return;
+	  }
 	}
       }
       //      fprintf (stderr,"request %d", targ->RequestClearance (parent));
@@ -587,6 +609,13 @@ static void DoDockingOps (Unit * parent, Unit * targ,unsigned char playa, unsign
       vectorOfKeyboardInput[playa].req=false;
     }
     if (vectorOfKeyboardInput[playa].doc) {
+      if (((Planet * )targ)->isAtmospheric()&&nodockwithclear) {
+	targ = getAtmospheric (targ);
+	if (!targ) {
+	  mission->msgcenter->add("game","all","[Computer] Cannot dock with insubstantial object, target another object and retry.");
+	  return;
+	}
+      }
       CommunicationMessage c(targ,parent,NULL,0);
 
       bool hasDock = parent->Dock(targ);
