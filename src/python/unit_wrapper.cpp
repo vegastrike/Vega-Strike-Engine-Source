@@ -29,6 +29,7 @@ using std::string;
 #define voidWRAPPED3(name,atype,a,btype,b,ctype,c) void name ( atype a, btype b, ctype c ){{CHECKME;} me -> name ( a , b , c );}  
 //End of Macro City
 class UnitWrapper : public UnitContainer{
+public:
 #include "python_unit_wrap.h"
 ///////////////////////////////MANUAL WRAP//////
   void Kill () {{CHECKME;}unit->Kill(true);}
@@ -69,14 +70,14 @@ PYTHON_BEGIN_CLASS(Unit,UnitWrapper,"Unit")
 #undef voidWRAPPED1
 #undef voidWRAPPED2
 #undef voidWRAPPED3
-#define WRAPPED0(type,name,def) Class.def(&UnitWrapper::name,#name);
+#define WRAPPED0(type,name,nada) Class.def(&UnitWrapper::name,#name);
 #define WRAPPED1(type,name,atype,a,def) WRAPPED0(type,name,def)
 #define WRAPPED2(type,name,atype,a,btype,b,def) WRAPPED0(type,name,def)
 #define WRAPPED3(type,name,atype,a,btype,b,ctype,c,def) WRAPPED0(type,name,def)
 #define voidWRAPPED0(name) WRAPPED0(void,name,0)
-#define voidWRAPPED1(name,atype,a) WRAPPED1(void,name,atype,a,0)
-#define voidWRAPPED2(name,atype,a,btype,b) WRAPPED2(void,name,atype,a,btype,b,0)
-#define voidWRAPPED3(name,atype,a,btype,b,ctype,c) WRAPPED3(void,name,atype,a,btype,b,ctype,c,0)
+#define voidWRAPPED1(name,atype,a) WRAPPED0(void,name,0)
+#define voidWRAPPED2(name,atype,a,btype,b) WRAPPED0(void,name,0)
+#define voidWRAPPED3(name,atype,a,btype,b,ctype,c) WRAPPED0(void,name,0)
 #include "python_unit_wrap.h"
 #undef WRAPPED0
 #undef WRAPPED1
