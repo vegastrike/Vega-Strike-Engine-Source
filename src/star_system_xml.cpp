@@ -102,7 +102,8 @@ namespace StarXML {
     ASTEROID,
     SCALEX,
     NUMWRAPS,
-    DIFFICULTY
+    DIFFICULTY,
+    REFLECTNOLIGHT
   };
 
   const EnumMap::Pair element_names[] = {
@@ -158,6 +159,7 @@ namespace StarXML {
     EnumMap::Pair ("Green", EMGREEN),
     EnumMap::Pair ("Blue", EMBLUE),
     EnumMap::Pair ("Alfa", EMALPHA),
+    EnumMap::Pair ("ReflectNoLight",REFLECTNOLIGHT),
     EnumMap::Pair ("faction", FACTION),
     EnumMap::Pair ("Light", LIGHT),
     EnumMap::Pair ("Mass", MASS),
@@ -167,7 +169,7 @@ namespace StarXML {
   };
 
   const EnumMap element_map(element_names, 17);
-  const EnumMap attribute_map(attribute_names, 39);
+  const EnumMap attribute_map(attribute_names, 40);
 }
 
 using XMLSupport::EnumMap;
@@ -219,6 +221,8 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
   char * nebfile;
   int faction=0;
   xml->cursun.k=0;	
+  static float yearscale = XMLSupport::parse_float (vs_config->getVariable ("physics","YearScale","10"));
+  static float dayscale = yearscale;//XMLSupport::parse_float (vs_config->getVariable ("physics","DayScale","10"));
   GFXMaterial ourmat;
   GFXGetMaterial (0,ourmat);
   vs_config->getColor ("planet_mat_ambient",&ourmat.ar);
@@ -530,6 +534,10 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
 	break;
       case EMALPHA:
 	ourmat.ea = parse_float((*iter).value);
+      case REFLECTNOLIGHT:
+	ourmat.sr=ourmat.sg=ourmat.sb=ourmat.dr=ourmat.dg=ourmat.db=
+	  ourmat.ar=ourmat.ag=ourmat.ab=0;
+	break;
       case RI:
 	R.i=parse_float((*iter).value);
 	break;
@@ -567,10 +575,14 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
 	position=parse_float((*iter).value);
 	break;
       case DAY:
-	rotvel = 2*M_PI/parse_float ((*iter).value);
+	if (fabs (parse_float ((*iter).value))>.00001) {
+	  rotvel = 2*M_PI/(dayscale*parse_float ((*iter).value));
+	}
 	break;
       case YEAR:
-	velocity=2*M_PI/parse_float((*iter).value);
+	if (fabs (parse_float ((*iter).value))>.00001) {
+	  velocity=2*M_PI/(yearscale*parse_float((*iter).value));
+	}
 	break;
       case GRAVITY:
 	gravity=parse_float((*iter).value);
@@ -666,10 +678,14 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
 	position=parse_float((*iter).value);
 	break;
       case DAY:
-	rotvel = 2*M_PI/parse_float ((*iter).value);
+	if (fabs (parse_float ((*iter).value))>.00001) {
+	  rotvel = 2*M_PI/(dayscale*parse_float ((*iter).value));
+	}
 	break;
       case YEAR:
-	velocity=2*M_PI/parse_float((*iter).value);
+	if (fabs (parse_float ((*iter).value))>.00001) {
+	  velocity=2*M_PI/(yearscale*parse_float((*iter).value));
+	}
 	break;
       }
 

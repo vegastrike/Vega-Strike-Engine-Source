@@ -1,1 +1,8 @@
-stars/white_star.png
+0     1  .2  .2 .1 stars/red_star.png
+12000  1  .8  .5 .1 stars/orange_star.png
+16000  1  1   .7 .2 sol/sun.png
+24000  1  1   .9 .1 sol/sun.png
+36500  1  1    1 .2 stars/white_star.png
+41000  1  .6  .6 .1 stars/red_star.png
+43000  .6 1   .6 .2 stars/white_star.png
+80000  1  .6  .6 .1 stars/red_star.png

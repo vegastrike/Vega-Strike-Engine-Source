@@ -3,8 +3,17 @@
 #include <vector>
 #include <string>
 #include <math.h>
+#include <time.h>
+#include <assert.h>
+
+#ifndef M_PI
+#define M_PI 3.1415926536
+#endif
 using namespace std;
 
+float mmax (float a, float b) {
+  return (a>b)?a:b;
+}
 
 
 
@@ -138,6 +147,7 @@ const int MOON=3;
 const int JUMP=4;
 int nument[5];
 vector <string> entities[5];
+vector <string> gradtex;
 int numun[2];
 vector <string> units [2];
 vector <string> background;
@@ -145,7 +155,8 @@ vector <string> names;
 const float moonofmoonprob=.01;
 string systemname;
 vector <float> radii;
-
+const float minspeed=.001;
+const float maxspeed=8;
 
 void Tab () {
   for (unsigned int i=0;i<radii.size();i++) {
@@ -156,11 +167,67 @@ void Tab () {
 vector <float> starradius;
 string faction;
 
+struct GradColor {
+  float minrad;
+  float r;
+  float g;
+  float b;
+  float variance;
+};
 
-Color StarColor (float radius) {
-  
-  return Color (grand(),grand(),grand());
+vector <GradColor> colorGradiant;
+
+void readColorGrads (vector <string> &entity,const char * file) {
+  FILE * fp = fopen (file,"r");
+  char input_buffer[1000];
+  char output_buffer[1000];
+  GradColor g;
+  while (!feof (fp)) {
+    fgets (input_buffer,999,fp);
+    if (sscanf (input_buffer,"%f %f %f %f %f %s",&g.minrad,&g.r,&g.g,&g.b,&g.variance,output_buffer)==6) {
+      colorGradiant.push_back (g);
+      entity.push_back (output_buffer);
+    }
+  }
+  fclose (fp);
 }
+
+
+float clamp01 (float a) {
+  if (a>1)
+    a=1;
+  if (a<0)
+    a=0;
+  return a;
+}
+float getcolor (float c, float var) {
+  return clamp01(c-var+2*var*grand());
+}
+GradColor whichGradColor (float r,unsigned int &j) {
+  unsigned int i;
+  for (i=1;i<colorGradiant.size();i++) {
+    if (colorGradiant[i].minrad>r) {
+      break;
+    }
+  }
+  j=i-1;
+  return colorGradiant[i-1];
+}
+
+Color StarColor (float radius, unsigned int &entityindex) {
+  GradColor gc=whichGradColor (radius,entityindex);
+  float r=getcolor(gc.r,gc.variance);
+  float g=getcolor(gc.g,gc.variance);
+  float b=getcolor(gc.b,gc.variance);
+  return Color (r,g,b);
+}
+
+float LengthOfYear (Vector r,Vector s) {
+  float a=2*M_PI*mmax (r.Mag(),s.Mag());
+  float speed = minspeed+(maxspeed-minspeed)*grand();
+  return a/speed;
+}
+
 
 void CreateLight(unsigned int i) {
   if (i==0) {
@@ -170,8 +237,9 @@ void CreateLight(unsigned int i) {
     assert (starradius.size()==i);
     starradius.push_back (starradius[0]*(.5+grand()*.5));
   }
-
-  lights.push_back (StarColor (starradius[i]));
+  unsigned int gradindex;
+  lights.push_back (StarColor (starradius[i],gradindex));
+  entities[STAR].push_back (gradtex[gradindex]);
   float h = lights.back().r;
   if (h<lights.back().g) h=lights.back().g;
   if (h<lights.back().b) h=lights.back().b;
@@ -186,9 +254,6 @@ void CreateLight(unsigned int i) {
   WriteLight (i);
 }
 
-float mmax (float a, float b) {
-  return (a>b)?a:b;
-}
 
 Vector generateCenter (float minradii) {
   Vector r;
@@ -286,6 +351,10 @@ void WriteUnit(string tag, string name, string filename, Vector r, Vector s, Vec
 
   fprintf (fp,"ri=\"%f\" rj=\"%f\" rk=\"%f\" si=\"%f\" sj=\"%f\" sk=\"%f\" ",r.i,r.j,r.k,s.i,s.j,s.k);
   fprintf (fp,"x=\"%f\" y=\"%f\" z=\"%f\" ",center.i,center.j,center.k);
+  float loy = LengthOfYear(r,s);
+  if (loy) {
+    fprintf (fp,"year= \"%f\" ",loy);
+  }
   if (destination.length()) {
     fprintf (fp, "destination=\"%s\" ",destination.c_str()); 
   } else if (faction){
@@ -461,7 +530,7 @@ void MakePlanet(float radius, int entitytype, bool forceRS, Vector R, Vector S, 
   Vector r,SS;
   if (forceRS) {
     r=R;SS=S;
-    Updateradii (max(r.Mag(),SS.Mag()),radius);
+    Updateradii (mmax(r.Mag(),SS.Mag()),radius);
   }else {
     center=generateAndUpdateRS (r,SS,radius);
   }
@@ -472,6 +541,14 @@ void MakePlanet(float radius, int entitytype, bool forceRS, Vector R, Vector S, 
   fprintf (fp,"ri=\"%f\" rj=\"%f\" rk=\"%f\" si=\"%f\" sj=\"%f\" sk=\"%f\" ",r.i,r.j,r.k,SS.i,SS.j,SS.k);
   fprintf (fp,"radius=\"%f\" ",radius);
   fprintf (fp,"x=\"%f\" y=\"%f\" z=\"%f\" ",center.i,center.j,center.k);
+  float loy = LengthOfYear(r,SS);
+  if (loy) {
+    fprintf (fp,"year= \"%f\" ",loy);
+    loy *=grand();
+    if (loy) {
+      fprintf (fp, "day=\"%f\" ",loy);
+    }
+  }
   if (entitytype==JUMP) {
     fprintf (fp, "alpha=\"ONE ONE\" destination=\"%s\" ",getJumpTo(s).c_str());
 
@@ -511,10 +588,17 @@ void beginStar (float radius, unsigned int which) {
 
   char b[2]="A";
   b[0]+=which;
-  Tab();fprintf (fp,"<Planet name=\"%s\" file=\"%s\" ",(systemname+b).c_str(),getGenericName(entities[0]).c_str());
+  Tab();fprintf (fp,"<Planet name=\"%s\" file=\"%s\" ",(systemname+b).c_str(),entities[0][which].c_str());
   fprintf (fp,"ri=\"%f\" rj=\"%f\" rk=\"%f\" si=\"%f\" sj=\"%f\" sk=\"%f\" ",r.i,r.j,r.k,s.i,s.j,s.k);
   fprintf (fp,"radius=\"%f\" x=\"0\" y=\"0\" z=\"0\" ",radius);
-
+  float loy = LengthOfYear(r,s);
+  if (loy) {
+    fprintf (fp,"year= \"%f\" ",loy);
+    loy *=grand();
+    if (loy) {
+      fprintf (fp, "day=\"%f\" ",loy);
+    }
+  }
   fprintf (fp," Red=\"%f\" Green=\"%f\" Blue=\"%f\" ReflectNoLight=\"true\" light=\"%d\">\n",lights[which].r,lights[which].g,lights[which].b,which);
 
   radii.push_back (1.5*radius);
@@ -640,7 +724,7 @@ const char * noslash (const char * in) {
 int main (int argc, char ** argv) {
 
   if (argc<9) {
-    fprintf (stderr,"Usage: starsysgen <seed> <sector>/<system> <sunradius> <numstars> <numgasgiants> <numrockyplanets> <nummoons> <numnaturalphenomena>[N][A] <numstarbases> <faction> <namelist> [OtherSystemJumpNodes]...");
+    fprintf (stderr,"Usage: starsysgen <seed> <sector>/<system> <sunradius> <numstars> <numgasgiants> <numrockyplanets> <nummoons> [N][A]<numnaturalphenomena> <numstarbases> <faction> <namelist> [OtherSystemJumpNodes]...\n");
     return 1;
   }
   int seed;
@@ -651,11 +735,10 @@ int main (int argc, char ** argv) {
     srand (seed);
   else
     srand (time(NULL));
-  readentity (entities[0],"stars.txt");
+  readColorGrads (gradtex,"stars.txt");
   readentity (entities[1],"planets.txt");
   readentity (entities[2],"gas_giants.txt");
   readentity (entities[3],"moons.txt");
-
   readentity (units[1],"smallunits.txt");
   readentity (background,"background.txt");
   readnames (names,argv[11]);

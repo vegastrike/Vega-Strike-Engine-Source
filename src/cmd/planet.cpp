@@ -107,7 +107,9 @@ void Planet::beginElement(Vector x,Vector y,float vely, const Vector & rotvel, f
       satiterator.current()->SetAI (new PlanetaryOrbit (satiterator.current(),vely,pos,x,y, Vector (0,0,0), this)) ;
       satiterator.current()->SetOwner (this);
     }else {
-      satellites.prepend(new Planet(x,y,vely,rotvel,pos,gravity,radius,filename,alpha,dest, Vector (0,0,0), this, ourmat, ligh, faction,fullname));
+      Planet * p;
+      satellites.prepend(p=new Planet(x,y,vely,rotvel,pos,gravity,radius,filename,alpha,dest, Vector (0,0,0), this, ourmat, ligh, faction,fullname));
+      p->SetOwner (this);
     }
   }
 }
