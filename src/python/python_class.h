@@ -24,12 +24,15 @@ int main (int argc,char *argv[]) {
 
 */
 
+#ifdef _WIN32
 //These two functions purposely have opening/closing braces that don't match up
 #define PYTHON_INIT_GLOBALS(name,SuperClass) PythonClass <SuperClass> *PythonClass< SuperClass >::last_instance = NULL; \
 	SuperClass & from_python(PyObject *p,boost::python::type<SuperClass &>) { \
 		return from_python(p,boost::python::type<SuperClass &>()); \
 	}
-
+#else
+#define PYTHON_INIT_GLOBALS(name,SuperClass) PythonClass <SuperClass> *PythonClass< SuperClass >::last_instance = NULL; 
+#endif
 #define PYTHON_BEGIN_MODULE(name) BOOST_PYTHON_MODULE_INIT(name) {boost::python::module_builder name(#name);
 #define PYTHON_END_MODULE(name) }
 #define PYTHON_INIT_MODULE(name) init##name()
