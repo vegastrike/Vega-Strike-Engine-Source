@@ -1104,9 +1104,9 @@ dnl AC_ARG_ENABLE(crypto, AC_HELP_STRING([--enable-crypto], [Enable crypto++ lib
 				[Enable crypto++ library support (VERSION=51 (5.1, default))]),
 				[
    					CRYPTO="1"
-					CRYPTO_VERSION="51"
-					if test "x$enableval" <> "x" ; then
-							CRYPTO_VERSION="$enableval"
+					CRYPTO_VERSION="$enableval"
+					if test "x$enableval" = "xyes" ; then
+							CRYPTO_VERSION="51"
 					fi
 				],
 				[])
