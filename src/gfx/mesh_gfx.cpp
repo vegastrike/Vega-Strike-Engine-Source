@@ -527,7 +527,7 @@ void Mesh::ProcessDrawQueue(int whichpass,int whichdrawqueue) {
 	  break;
   }
   for(unsigned int draw_queue_index=0;draw_queue_index<draw_queue->size();++draw_queue_index) {	  
-    MeshDrawContext &c ((*draw_queue)[draw_queue_index]);
+    MeshDrawContext &c =(*draw_queue)[draw_queue_index];
     if (c.mesh_seq!=whichdrawqueue) {
 		if (whichpass+1>=Decal.size()) {
 			tmp_draw_queue.push_back (c);
