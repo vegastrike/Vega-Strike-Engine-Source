@@ -17,12 +17,16 @@ public:
 
     void write (FILE * fp) const;
 };
+
 class Plane {public:
     double a,b,c,d;
     Plane (int a,int b, int c, int d): a(a),b(b),c(c),d(d){}
+    bool inFront (const Vector &) const;
+    float frontBack (const Vector &v) const {return a*v.x+b*v.y+c*v.z+d;}
 };
 class Face {
     bool Cross (Plane &)const;
+    bool inFront (const Plane &) const;
 public:
 std::vector <Index> p;
     Plane planeEqu()const;

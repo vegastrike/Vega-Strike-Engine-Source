@@ -3,11 +3,23 @@
 #include <vector>
 #include <string>
 #include <ctype.h>
-#include "trisort.h"
 #include <math.h>
+#include "trisort.h"
+
 #ifdef __APPLE__
 #define sqrtf sqrt
 #endif
+bool nearzero (double fb) {
+    const float eps = .0000001;
+    return fabs (fb) < eps||fb ==0;
+}
+bool Plane::inFront (const Vector &v) const{
+    double fb = frontBack (v);
+    if (nearzero(fb))
+        return true;
+    return (fb>0)==(c>0);
+}
+
 const int RIGHT_HANDED=1;
 bool Face::Cross (Plane & result)const {
     double size =0;
@@ -35,7 +47,13 @@ bool Face::Cross (Plane & result)const {
     return true;
 }
 
-
+bool Face::inFront (const Plane &p)const {
+    for (unsigned int i=0;i<this->p.size();i++) {
+        if (!p.inFront (this->p[i].V))
+            return false;
+    }
+    return true;
+}
 Plane Face::planeEqu() const{
     if (p.empty())
         return Plane (1,0,0,0);
@@ -48,6 +66,14 @@ Plane Face::planeEqu() const{
     return rez;
  }
 bool Face::operator < (const Face &b) const{
+    Plane bpe (b.planeEqu());
+    Plane ape (planeEqu());
+    if (inFront (bpe))
+        return true;
+    if (b.inFront (ape))
+        return false;
+    //split er up??
+    fprintf (stderr,"polygon intersection detected\n");
     return false;
 }
 
