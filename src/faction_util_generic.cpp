@@ -56,6 +56,8 @@ void FactionUtil::AdjustIntRelation(const int Myfaction, const int TheirFaction,
       if (strcmp (factions[TheirFaction]->factionname,"neutral")!=0) {
 	if (strcmp (factions[TheirFaction]->factionname,"upgrades")!=0) {
 	  factions[Myfaction]->faction[TheirFaction].relationship+=factor*rank;  
+          if (factions[Myfaction]->faction[TheirFaction].relationship>1)
+            factions[Myfaction]->faction[TheirFaction].relationship=1;
 	}
       }
     }
