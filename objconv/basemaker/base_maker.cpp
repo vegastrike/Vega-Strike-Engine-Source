@@ -514,8 +514,9 @@ public:
 			float x,y,wid,hei;
 			std::string text;
 			const std::string index;
+                  	unsigned int parentindex;
 			virtual void Click (::Base* base,float x, float y, int button, int state);
-			explicit Link (std::string ind,std::string pfile) : pythonfile(pfile),index(ind) {}
+			explicit Link (unsigned int parind, std::string ind,std::string pfile) : parentindex(parind),pythonfile(pfile),index(ind) {}
 			virtual ~Link(){} 
 #ifdef BASE_MAKER
 			virtual void EndXML(FILE *fp);
@@ -526,7 +527,7 @@ public:
 			int index;
 			virtual void Click (::Base* base,float x, float y, int button, int state);
 			virtual ~Goto () {}
-			explicit Goto (std::string ind, std::string pythonfile) : Link(ind,pythonfile) {}
+			explicit Goto (unsigned int parind, std::string ind, std::string pythonfile) : Link(parind, ind,pythonfile) {}
 #ifdef BASE_MAKER
 			virtual void EndXML(FILE *fp);
 #endif
@@ -536,7 +537,7 @@ public:
 			vector <DisplayMode> modes;
 			virtual void Click (::Base* base,float x, float y, int button, int state);
 			virtual ~Comp () {}
-			explicit Comp (std::string ind, std::string pythonfile) : Link(ind,pythonfile) {}
+			explicit Comp (unsigned int parind, std::string ind, std::string pythonfile) : Link(parind, ind,pythonfile) {}
 #ifdef BASE_MAKER
 			virtual void EndXML(FILE *fp);
 #endif
@@ -545,7 +546,7 @@ public:
 		public:
 			virtual void Click (::Base* base,float x, float y, int button, int state);
 			virtual ~Launch () {}
-			explicit Launch (std::string ind, std::string pythonfile) : Link(ind,pythonfile) {}
+			explicit Launch (unsigned int parind, std::string ind, std::string pythonfile) : Link(parind, ind,pythonfile) {}
 #ifdef BASE_MAKER
 			virtual void EndXML(FILE *fp);
 #endif
@@ -553,7 +554,7 @@ public:
 		class Bar : public Link {
 		public:
 			virtual ~Bar () {}
-			explicit Bar (std::string ind, std::string pythonfile) : Link(ind,pythonfile) {}
+			explicit Bar (unsigned int parind, std::string ind, std::string pythonfile) : Link(parind, ind,pythonfile) {}
 #ifdef BASE_MAKER
 			virtual void EndXML(FILE *fp);
 #endif
@@ -561,7 +562,7 @@ public:
 		class Weapon : public Link {
 		public:
 			virtual ~Weapon () {}
-			explicit Weapon (std::string ind, std::string pythonfile) : Link(ind,pythonfile) {}
+			explicit Weapon (unsigned int parind, std::string ind, std::string pythonfile) : Link(parind, ind,pythonfile) {}
 #ifdef BASE_MAKER
 			virtual void EndXML(FILE *fp);
 #endif
@@ -574,7 +575,7 @@ public:
 			int index;
 			int curroom;
 			virtual void Click (::Base* base,float x, float y, int button, int state);
-			explicit Talk (std::string ind, std::string pythonfile);
+			explicit Talk (unsigned int parind, std::string ind, std::string pythonfile);
 			virtual ~Talk () {}
 #ifdef BASE_MAKER
 			virtual void EndXML(FILE *fp);
@@ -584,7 +585,7 @@ public:
 		public:
 			std::string file;
 			virtual void Click (::Base* base,float x, float y, int button, int state);
-			Python(std::string ind,std::string pythonfile);
+			Python(unsigned int parind, std::string ind,std::string pythonfile);
 			virtual ~Python () {}
 #ifdef BASE_MAKER
 			virtual void EndXML(FILE *fp);
@@ -648,6 +649,7 @@ public:
 		unsigned int index;
 #ifdef BASE_MAKER
 		void EndXML(FILE *fp);
+                void PrintLinks(FILE * fp);
 #endif
 		void Draw (::Base *base);
 		void Click (::Base* base,float x, float y, int button, int state);
@@ -712,14 +714,14 @@ static void Indent(FILE *fp) {
 }
 
 void Base::Room::Link::EndXML (FILE *fp) {
-	fprintf(fp,"room, '%s', %g, %g, %g, %g, '%s'",index.c_str(),x,y,wid,hei,text.c_str());
+	fprintf(fp,"room%d, '%s', %g, %g, %g, %g, '%s'",parentindex,index.c_str(),x,y,wid,hei,text.c_str());
 }
 
 void Base::Room::Goto::EndXML (FILE *fp) {
 	Indent(fp);
 	fprintf(fp,"Base.Link (");
 	Link::EndXML(fp);
-	fprintf(fp,", room%d)\n", Goto::index+1);
+	fprintf(fp,", room%d)\n", Goto::index);
 }
 
 void Base::Room::Python::EndXML (FILE *fp) {
@@ -774,7 +776,7 @@ void Base::Room::Weapon::EndXML (FILE *fp) {
 void Base::Room::Launch::EndXML (FILE *fp) {
 	Indent(fp);
 	fprintf(fp,"Base.LaunchPython (");
-	fprintf(fp,"room, '%s', 'bases/launch_music.py', %g, %g, %g, %g, '%s'",index.c_str(),x,y,wid,hei,text.c_str());
+	fprintf(fp,"room%d, '%s', 'bases/launch_music.py', %g, %g, %g, %g, '%s'",parentindex,index.c_str(),x,y,wid,hei,text.c_str());
 	fprintf(fp,")\n");
 }
 
@@ -824,12 +826,18 @@ void Base::Room::BaseShip::EndXML (FILE *fp) {
 			,mat.getR().i,mat.getR().j,mat.getR().k
 			,mat.getQ().i,mat.getQ().j,mat.getQ().k);
 }
-
+string ridExt(string inp) {
+  string::size_type where =inp.rfind(".");
+  if (where==string::npos)
+    return inp;
+  return inp.substr(0,where);
+}
 void Base::Room::BaseVSSprite::EndXML (FILE *fp) {
 	float x,y;
 	spr.GetPosition(x,y);
 	Indent(fp);
-	fprintf(fp,"Base.Texture (room, '%s', 'bases/%s/%s'+time_of_day+'.spr', %g, %g)\n",index.c_str(),Base::CurrentBase->basefile.c_str(),texfile.c_str(),x,y);
+        string noextname=ridExt(texfile);
+	fprintf(fp,"Base.Texture (room, '%s', 'bases/%s/%s'+time_of_day+'.spr', %g, %g)\n",index.c_str(),Base::CurrentBase->basefile.c_str(),noextname.c_str(),x,y);
 }
 
 bool room1=false;
@@ -839,19 +847,26 @@ void Base::Room::EndXML (FILE *fp) {
 	Indent(fp);
 	fprintf(fp,"room = Base.Room ('%s')\n",deftext.c_str());
 	Indent(fp);
-	fprintf(fp,"room%d = room\n",index+1);
-	for (i=1;i<links.size();i++) {
-		if (links[i])
-			links[i]->EndXML(fp);
-	}
+	fprintf(fp,"room%d = room\n",index);
 	for (i=0;i<objs.size();i++) {
 		if (objs[i])
 			objs[i]->EndXML(fp);
 	}
+        /*
+	for (i=0;i<links.size();i++) {
+		if (links[i])
+			links[i]->EndXML(fp);
+	}
+        */ // lata
 	fprintf(fp,"\n");
 	fflush(fp);
 }
-
+void Base::Room::PrintLinks(FILE*  fp) {
+	for (unsigned int i=0;i<links.size();i++) {
+		if (links[i])
+			links[i]->EndXML(fp);
+	}
+}
 void Base::EndXML () {
 	chdir("bases");
 	FILE *fp=NULL;
@@ -871,11 +886,11 @@ void Base::EndXML () {
 		fprintf(fp,"def Make%s (time_of_day='_day'):\n",basefile.c_str());
 		indentlevel++;
 	} else {
-		fprintf(fp,"time_of_day='_day'\n");
+		fprintf(fp,"time_of_day=''\n");
 	}
 	Indent(fp);fprintf(fp,"bar=-1\n");
 	Indent(fp);fprintf(fp,"weap=-1\n");
-	Indent(fp);fprintf(fp,"room1=-1\n");
+	Indent(fp);fprintf(fp,"room0=-1\n");
 	Indent(fp);fprintf(fp,"plist=VS.musicAddList('%s.m3u')\n",basefile.c_str());
 	Indent(fp);fprintf(fp,"VS.musicPlayList(plist)\n");
 	Indent(fp);fprintf(fp,"dynamic_mission.CreateMissions()\n");
@@ -883,9 +898,12 @@ void Base::EndXML () {
 		room1= (i==0);
 		rooms[i]->EndXML(fp);
 	}
+	for (int i=0;i<rooms.size();i++) {
+		rooms[i]->PrintLinks(fp);
+	}
 	if (time_of_day) {
 		Indent(fp);
-		fprintf(fp,"return (room1,bar,weap)");
+		fprintf(fp,"return (room0,bar,weap)");
 	}
 	fclose(fp);
 	chdir("..");
@@ -972,8 +990,9 @@ Base::Room::~Room () {
 	}
 }
 
-typedef bool (*InputFunc) (std::string input, void *dat1, void *dat2, const void *dat3, float x, float y);
+typedef bool (*InputFunc) (std::string input, unsigned int inputroomindex, void *dat1, void *dat2, const void *dat3, float x, float y);
 
+unsigned int input_base_index_dat;
 void *input_dat1;
 void *input_dat2;
 const void *input_dat3;
@@ -1053,16 +1072,17 @@ void InputKeyUp(unsigned char key, int x, int y) {
 		if (key=='\r'||key=='\n') {
 			Output(input_prompt);
 			Output(input_string);
-			is_input=!((*input_func)(input_string, input_dat1, input_dat2, input_dat3, input_x, input_y));
+			is_input=!((*input_func)(input_string, input_base_index_dat, input_dat1, input_dat2, input_dat3, input_x, input_y));
 		}
 	}
 	glutPostRedisplay();
 }
 
-void Input(const char *prompt, InputFunc myfunction, bool cancancel, void *dat1, void *dat2, const void *dat3, float x, float y) {
+void Input(const char *prompt, InputFunc myfunction, bool cancancel, unsigned int inputroomindex, void *dat1, void *dat2, const void *dat3, float x, float y) {
 	input_dat1=dat1;
 	input_dat2=dat2;
 	input_dat3=dat3;
+        input_base_index_dat=inputroomindex;
 	input_x=x;
 	input_y=y;
 	input_func=myfunction;
@@ -1077,7 +1097,7 @@ struct MyTmpXY{
 	float y;
 } tmp_xy;
 
-bool AddRoomSprite(std::string input, void *dat1, void *dat2, const void *dat3, float x, float y) {
+bool AddRoomSprite(std::string input, unsigned int room_index, void *dat1, void *dat2, const void *dat3, float x, float y) {
 	std::vector<Base::Room::BaseObj *> * objs=(std::vector<Base::Room::BaseObj *> *)dat1;
 	if (input.empty()) {
 		// add a ship.
@@ -1150,7 +1170,8 @@ bool AddRoomSprite(std::string input, void *dat1, void *dat2, const void *dat3, 
 				fclose(fp);
 				rename(curfilename.c_str(),("sprites/"+filename).c_str());
 			}
-			AddRoomSprite(input, dat1, dat2, dat3, x, y);
+
+			AddRoomSprite(input, room_index, dat1, dat2, dat3, x, y);
 		} else {
 			Base::Room::BaseVSSprite *tmp=new Base::Room::BaseVSSprite(("bases/"+Base::CurrentBase->basefile+"/"+input+thetimes[time?0:3]+".spr").c_str(),string((char*)dat3));
 			if (tmp->spr.LoadSuccess()&&tmp->spr.getTexture()->LoadSuccess()) {
@@ -1274,7 +1295,7 @@ bool RefreshGUI(void) {
 	return true;
 }
 
-bool LinkStage3Goto(std::string input, void *dat1, void *dat2, const void *dat3, float x, float y) {
+bool LinkStage3Goto(std::string input, unsigned int unusedindexdat, void *dat1, void *dat2, const void *dat3, float x, float y) {
 	return (sscanf(input.c_str(), "%d", dat1)>=1);
 }
 
@@ -1286,7 +1307,7 @@ static inline string strtolower(const string &foo) {
   return rval;
 }
 
-bool LinkStage3Comp(std::string input, void *dat1, void *dat2, const void *dat3, float x, float y) {
+bool LinkStage3Comp(std::string input, unsigned int unused, void *dat1, void *dat2, const void *dat3, float x, float y) {
 
 	int modearg = DISPLAY_MODE_COUNT;
 	input=strtolower(input);
@@ -1305,28 +1326,28 @@ bool LinkStage3Comp(std::string input, void *dat1, void *dat2, const void *dat3,
 	return false;
 }
 
-bool LinkStage2(std::string input, void *dat1, void *dat2, const void *dat3, float x, float y) {
+bool LinkStage2(std::string input, unsigned int inputroomindex, void *dat1, void *dat2, const void *dat3, float x, float y) {
 	std::vector<Base::Room::Link *> * links = (std::vector<Base::Room::Link *> *)dat1;
 	bool ret=true;
 	input=strtolower(input);
 	if (input=="link") {
-		links->push_back(new Base::Room::Goto("my_link_id","link"));
+		links->push_back(new Base::Room::Goto(inputroomindex,"my_link_id","link"));
 		/*
 		fscanf(fp,"%d",&((Goto*)links.back())->index);
 		*/
-		Input("Which room should this go to?",&LinkStage3Goto, false,&(((Base::Room::Goto*)(links->back()))->index),NULL,NULL,0,0);
+		Input("Which room should this go to?",&LinkStage3Goto, false,inputroomindex,&(((Base::Room::Goto*)(links->back()))->index),NULL,NULL,0,0);
 		ret=false;
 	} else if (input=="launch") {
-		links->push_back(new Base::Room::Launch("my_launch_id","launch"));
+		links->push_back(new Base::Room::Launch(inputroomindex,"my_launch_id","launch"));
 		ret=true;
 	} else if (input=="bar") {
-		links->push_back(new Base::Room::Bar("bar","bar"));
+		links->push_back(new Base::Room::Bar(inputroomindex,"bar","bar"));
 		ret=true;
 	} else if (input=="weapon") {
-		links->push_back(new Base::Room::Weapon("weapon_room","weapon"));
+		links->push_back(new Base::Room::Weapon(inputroomindex,"weapon_room","weapon"));
 		ret=true;
 	} else if (input=="comp") {
-		links->push_back(new Base::Room::Comp("my_comp_id","comp"));
+		links->push_back(new Base::Room::Comp(inputroomindex,"my_comp_id","comp"));
 		/*
 		fscanf(fp,"%d",&index);
 		for (i=0;i<index&&(!feof(fp));i++) {
@@ -1334,7 +1355,7 @@ bool LinkStage2(std::string input, void *dat1, void *dat2, const void *dat3, flo
 			((Comp*)(links->back()))->modes.push_back((DisplayMode)ret);
 		}
 		*/
-		Input("What modes does it have [Cargo,Upgrade,ShipDealer,Missions,News,Info] (ESC=stop)?",&LinkStage3Comp,true, &(((Base::Room::Comp*)(links->back()))->modes),NULL,NULL,0,0);
+		Input("What modes does it have [Cargo,Upgrade,ShipDealer,Missions,News,Info] (ESC=stop)?",&LinkStage3Comp,true, inputroomindex,&(((Base::Room::Comp*)(links->back()))->modes),NULL,NULL,0,0);
 		ret=false;
 	} else {
 		input_string=string();
@@ -1354,19 +1375,19 @@ bool LinkStage2(std::string input, void *dat1, void *dat2, const void *dat3, flo
 	return ret;
 }
 
-bool LinkStage1(std::string input, void *dat1, void *dat2, const void *dat3, float x, float y) {
-	Input("What link type [comp,link,launch,bar,weapon]? ",&LinkStage2, false, dat1, strdup(input.c_str()), NULL, x, y);
+bool LinkStage1(std::string input, unsigned int inputroomindex, void *dat1, void *dat2, const void *dat3, float x, float y) {
+	Input("What link type [comp,link,launch,bar,weapon]? ",&LinkStage2, false, inputroomindex,dat1, strdup(input.c_str()), NULL, x, y);
 	return false;
 }
 
 void Base::Room::Click (Base* base,float x, float y, int button, int state) {
 	if (makingstate==2) {
-		Input("Add a sprite (ESC=cancel, blank=Ship) (No extension. file must be png or jpg format.) ", &AddRoomSprite, true, &objs, NULL, "texture", x, y);
+		Input("Add a sprite (ESC=cancel, blank=Ship) (No extension. file must be png or jpg format.) ", &AddRoomSprite, true, this->index,&objs, NULL, "texture", x, y);
 		makingstate=0;
 		return;
 	}
 	if (makingstate==1) {
-		Input("Input the title of the link (ESC=cancel)? ",&LinkStage1, true, &links, NULL, NULL, x, y);
+		Input("Input the title of the link (ESC=cancel)? ",&LinkStage1, true, this->index,&links, NULL, NULL, x, y);
 		makingstate=0;
 		return;
 	}
@@ -1498,7 +1519,7 @@ void Base::ActiveMouseOverWin (int x, int y) {
 	}
 }
 
-bool SetRoomString(std::string input, void *dat1, void *dat2, const void *dat3, float x, float y) {
+bool SetRoomString(std::string input, unsigned int room_index, void *dat1, void *dat2, const void *dat3, float x, float y) {
 	if (input.empty())
 		return false;
 	std::string *deftext=(std::string*)dat1;
@@ -1506,7 +1527,7 @@ bool SetRoomString(std::string input, void *dat1, void *dat2, const void *dat3, 
 //	if (Base::CurrentBase&&Base::CurrentBase->rooms.size()==0) {
 //		AddRoomSprite(Base::CurrentBase->basefile, &objs, NULL, "background", 0.97, -0.97);
 //	} else {
-		Input("What is the texture for this room (No extension; file must be png or jpeg format.)?", &AddRoomSprite, false, dat2, NULL, "background", 0.97, -0.97);
+		Input("What is the texture for this room (No extension; file must be png or jpeg format.)?", &AddRoomSprite, false, room_index,dat2, NULL, "background", 0.97, -0.97);
 //	}
 	return false;
 }
@@ -1524,7 +1545,7 @@ void Base::GotoLink (int linknum) {
 #else
 		while(rooms.size()<=linknum) {
 			rooms.push_back(new Room(rooms.size()));
-			Input("Input Name of Room (Shown at bottom of screen): ", &SetRoomString, false, &(rooms.back()->deftext), &(rooms.back()->objs), NULL, 0, 0);
+			Input("Input Name of Room (Shown at bottom of screen): ", &SetRoomString, false, linknum,&(rooms.back()->deftext), &(rooms.back()->objs), NULL, 0, 0);
 		}
 		GotoLink(linknum);
 #endif
@@ -1550,8 +1571,8 @@ void Base::InitCallbacks () {
 	CallComp=false;
 }
 
-Base::Room::Talk::Talk (std::string ind,std::string pythonfile)
-		: Base::Room::Link(ind,pythonfile) {
+Base::Room::Talk::Talk (unsigned int parind, std::string ind,std::string pythonfile)
+		: Base::Room::Link(parind, ind,pythonfile) {
 	index=-1;
 #ifndef BASE_MAKER
 	gameMessage last;
@@ -1576,8 +1597,8 @@ Base::Room::Talk::Talk (std::string ind,std::string pythonfile)
 	}
 #endif
 }
-Base::Room::Python::Python (std::string ind,std::string pythonfile)
-		: Base::Room::Link(ind,pythonfile) {
+Base::Room::Python::Python (unsigned int parind, std::string ind,std::string pythonfile)
+		: Base::Room::Link(parind, ind,pythonfile) {
 }
 
 Base::Base (const char *basefile)
