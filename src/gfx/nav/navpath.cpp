@@ -546,11 +546,14 @@ void PathManager::addPath() {
 }
 
 bool PathManager::removePath(NavPath * path) {
+  bool ret=false;
   for(std::vector<NavPath *>::iterator i = paths.begin(); i < paths.end(); ++i)
     if((*i)==path) {
       delete (*i);
+	  ret=true;
       paths.erase(i);
     }
+  return ret;
 }
 
 void PathManager::showAll() {
@@ -567,6 +570,7 @@ bool PathManager::updateSpecificPath(NavPath * path) {
   path->updated = true;
   path->update();
   updateDependants(path);
+  return path->updated;
 }
 
 void PathManager::updatePaths(UpdateType type) {

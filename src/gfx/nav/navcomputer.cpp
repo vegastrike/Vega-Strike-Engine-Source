@@ -1021,6 +1021,7 @@ bool NavComputer::toggleVisibility(const EventCommandId& command, Control* contr
     RestoreMouse();
 	
     GameCockpit::NavScreen(KBData(),PRESS);
+	
   }
   else {
     GameCockpit::NavScreen(KBData(),PRESS);
@@ -1036,7 +1037,9 @@ bool NavComputer::toggleVisibility(const EventCommandId& command, Control* contr
     // Simulate clicking the leftmost mode button.
     // We don't actually use the button because there isn't a button if there's only one mode.
     processWindowCommand(displayModeInfo[m_displayModes[0]].command, NULL);
+
   }
+  return m_visible;
 }
 
 // Redo the title strings for the display.
@@ -1203,6 +1206,7 @@ bool NavComputer::setCurrentNode(PathNode * source) {
     delete currentNode;
   currentNode=source;
   updateNodeDescription();
+  return true;
 }
 
 void NavComputer::updateDescription() {
