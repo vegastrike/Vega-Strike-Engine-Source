@@ -229,7 +229,7 @@ namespace BeamXML {
   int level=-1;
   void beginElement (void *userData, const XML_Char *name, const XML_Char **atts) {
     static float game_speed=XMLSupport::parse_float (vs_config->getVariable ("physics","game_speed","1"));
-    static bool adj_gun_speed=XMLSupport::parse_float (vs_config->getVariable ("physics","gun_speed_adjusted_game_speed","false"));
+    static bool adj_gun_speed=XMLSupport::parse_bool (vs_config->getVariable ("physics","gun_speed_adjusted_game_speed","false"));
     static float gun_speed= XMLSupport::parse_float (vs_config->getVariable("physics","gun_speed","1"))*(adj_gun_speed?game_speed:1);
     AttributeList attributes (atts);
     //weapon_info * debugtmp = &tmpweapon;
