@@ -493,6 +493,12 @@ bool Unit::queryBSP (const Vector &pt, float err, Vector & norm, float &dist) {
     if ((subunits[i]->queryBSP(pt,err, norm,dist)))
       return true;
   }
+  bool temp=false;
+  for (i=0;i<nummesh&&!temp;i++) {
+    temp|=meshdata[i]->queryBoundingBox (st,err);
+  }
+  if (!temp)
+    return false;
   if (!bspTree)
       return true;
   if (bspTree->intersects (st,err,norm,dist))
@@ -507,10 +513,16 @@ float Unit::queryBSP (const Vector &start, const Vector & end, Vector & norm) {
     if (tmp = subunits[i]->queryBSP(start,end,norm))
       return tmp;
   }
-  if (!bspTree)
-      return true;
   Vector st (InvTransform (cumulative_transformation_matrix,start));
   Vector ed (InvTransform (cumulative_transformation_matrix,end));
+  bool temp=false;
+  for (i=0;i<nummesh&&!temp;i++) {
+    temp |=meshdata[i]->queryBoundingBox (st,ed,0);
+  }
+  if (!temp)
+    return false;
+  if (!bspTree)
+      return true;
   if (tmp = bspTree->intersects (st,ed,norm))
       return tmp;
   return 0;

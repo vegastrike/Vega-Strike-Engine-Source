@@ -62,29 +62,29 @@ void Mesh::LoadBinary (const char * filename, Mesh * oldmesh) {
 	{
 	  
 		x[ii] = readf (fp);
-		if (x[ii]>maxSizeX)
-		  maxSizeX = x[ii];
-		if (x[ii]<minSizeX)
-		  minSizeX=x[ii];
+		if (x[ii]>mx.i)
+		  mx.i = x[ii];
+		if (x[ii]<mn.i)
+		  mn.i=x[ii];
 		y[ii] = readf (fp);
 
-		if (y[ii]>maxSizeY)
-		  maxSizeY = y[ii];
-		if (y[ii]<minSizeY)
-		  minSizeY=y[ii];
+		if (y[ii]>mx.j)
+		  mx.j = y[ii];
+		if (y[ii]<mn.j)
+		  mn.j=y[ii];
 		z[ii] = readf (fp);
 
-		if (z[ii]>maxSizeZ)
-		  maxSizeZ = z[ii];
-		if (z[ii]<minSizeZ)
-		  minSizeZ=z[ii];
+		if (z[ii]>mx.k)
+		  mx.k = z[ii];
+		if (z[ii]<mn.k)
+		  mn.k=z[ii];
 		i[ii] = -readf (fp);
 		j[ii] = -readf (fp);
 		k[ii] = -readf (fp);
 		
 	}
 	//below, the square fo teh radial size, because sqrtf will be useless l8r
-	radialSize = .5*sqrtf ((maxSizeX-minSizeX)*(maxSizeX-minSizeX)+(maxSizeY-minSizeY)*(maxSizeY-minSizeY)+(maxSizeX-minSizeZ)*(maxSizeX-minSizeZ));	
+	radialSize = .5*(mx-mn).Magnitude();	
 	NumTris = readi (fp);
 	Tris = new int [NumTris*3];
 

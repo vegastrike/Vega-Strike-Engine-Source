@@ -23,10 +23,8 @@ SphereMesh::SphereMesh(float radius, int stacks, int slices, char *texture, char
 
   insideout= Insideout;
   radialSize = radius;//MAKE SURE FRUSTUM CLIPPING IS DONE CORRECTLY!!!!!
-  minSizeX = minSizeY = minSizeZ = -radialSize;
-  maxSizeX = maxSizeY = maxSizeZ = radialSize;
-  //  minSizeX = minSizeY = minSizeZ = -radialSize*10;
-  //  maxSizeX = maxSizeY = maxSizeZ = radialSize*10;
+  mn = Vector (-radialSize,-radialSize,-radialSize);
+  mx = Vector (radialSize,radialSize,radialSize);
 
    float rho, drho, theta, dtheta;
    float x, y, z;

@@ -197,7 +197,8 @@ protected:
 
   static Hashtable<string, Mesh,char[513]> meshHashTable;
   int refcount;
-  float maxSizeX,maxSizeY,maxSizeZ,minSizeX,minSizeY,minSizeZ;
+  Vector mx;//bounding box
+  Vector mn;
   float radialSize;
   Mesh *orig;
 
@@ -235,11 +236,11 @@ public:
   static void ProcessUndrawnMeshes();
   void setEnvMap(GFXBOOL newValue) {envMap = newValue;}
   void UpdateHudMatrix();//puts an object on the hud with the matrix
-  Vector corner_min() { return Vector(minSizeX, minSizeY, minSizeZ); }
-  Vector corner_max() { return Vector(maxSizeX, maxSizeY, maxSizeZ); }
+  Vector corner_min() { return mn; }
+  Vector corner_max() { return mx; }
   BoundingBox * getBoundingBox();
-  bool queryBoundingBox (const Vector &start);
-  bool queryBoundingBox (const Vector &start, const Vector & end); 
+  bool queryBoundingBox (const Vector &start,const float err);
+  bool queryBoundingBox (const Vector &start, const Vector & end, const float err); 
   float rSize () {return radialSize;}
 
 };

@@ -95,8 +95,9 @@ void Mesh::InitUnit() {
 	blendSrc=ONE;
 	blendDst=ZERO;
 	vlist=NULL;
-	
-	radialSize=minSizeX=minSizeY=minSizeZ=maxSizeY=maxSizeZ=maxSizeX=0;
+	mn = Vector (0,0,0);
+	mx = Vector (0,0,0);
+	radialSize=0;
 	GFXVertex *alphalist;
 
 	Decal = NULL;
@@ -227,20 +228,51 @@ void Mesh::ProcessDrawQueue() {
     }
   }
 }
-
-bool queryBoundingBox (const Vector & start, const Vector & end) {
-  //normal = 
-
+enum EX_EXCLUSION {EX_X, EX_Y, EX_Z};
+inline bool OpenWithin (const Vector &query, const Vector &mn, const Vector &mx, const float err, enum EX_EXCLUSION excludeWhich) {
+  switch (excludeWhich) {
+  case EX_X:
+    return (query.j>=mn.j-err)&&(query.k>=mn.k-err)&&(query.j<=mx.j+err)&&(query.k<=mx.k+err);
+  case EX_Y:
+    return (query.i>=mn.i-err)&&(query.k>=mn.k-err)&&(query.i<=mx.i+err)&&(query.k<=mx.k+err);
+  case EX_Z:
+    return (query.j>=mn.j-err)&&(query.i>=mn.i-err)&&(query.j<=mx.j+err)&&(query.i<=mx.i+err);
+  }
+} 
+bool Mesh::queryBoundingBox (const Vector & eye, const Vector & end, const float err) {
+  Vector slope (end-eye);
+  Vector IntersectXYZ;
+  IntersectXYZ= eye + ((mn.i-eye.i)/slope.i)*slope;//(Normal dot (mn-eye)/div)*slope
+  if (OpenWithin (IntersectXYZ,mn,mx,err,EX_X))
+    return true;
+  IntersectXYZ = eye + ((mx.i-eye.i)/slope.i)*slope;
+  if (OpenWithin (IntersectXYZ,mn,mx,err,EX_X))
+    return true;
+  IntersectXYZ = eye + ((mn.j-eye.j)/slope.j)*slope;
+  if (OpenWithin (IntersectXYZ,mn,mx,err,EX_Y))
+    return true;
+  IntersectXYZ = eye + ((mx.j-eye.j)/slope.j)*slope;
+  if (OpenWithin (IntersectXYZ,mn,mx,err,EX_Y)) 
+    return true;
+  IntersectXYZ = eye + ((mn.k-eye.k)/slope.k)*slope;
+  if (OpenWithin (IntersectXYZ,mn,mx,err,EX_Z))     
+    return true;
+  IntersectXYZ = eye + ((mx.k-eye.k)/slope.k)*slope;
+  if (OpenWithin (IntersectXYZ,mn,mx,err,EX_Z)) 
+    return true;
+  
+  return false;
+  
 }
-bool queryBoundingBox (const Vector & start) {
-
-
+bool Mesh::queryBoundingBox (const Vector & start,float err) {
+  return start.i>=mn.i-err&&start.j>=mn.j-err&&start.k>=mn.k-err&&
+         start.i<=mx.i+err&&start.j<=mx.j+err&&start.k<=mx.k+err;
 }
 
 BoundingBox * Mesh::getBoundingBox() {
   
-  BoundingBox * tbox = new BoundingBox (Vector (minSizeX,0,0)+local_pos,Vector (maxSizeX,0,0)+local_pos,
-					Vector (0,minSizeY,0)+local_pos,Vector (0,maxSizeY,0)+local_pos,
-					Vector (0,0,minSizeZ)+local_pos,Vector (0,0,maxSizeZ)+local_pos);
+  BoundingBox * tbox = new BoundingBox (Vector (mn.i,0,0)+local_pos,Vector (mx.i,0,0),
+					Vector (0,mn.j,0)+local_pos,Vector (0,mx.j,0),
+					Vector (0,0,mn.k)+local_pos,Vector (0,0,mx.k));
   return tbox;
 }

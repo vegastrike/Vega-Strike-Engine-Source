@@ -262,6 +262,7 @@ bool Beam::Collide (Unit * target) {
   //  if (target->queryBoundingBox(center,direction,0)==0)
   //    return false;
   Vector normal;//apply shields
+
   if (distance = target->queryBSP(center,center+direction*curlength,normal)) { 
 
     curlength = distance;
