@@ -312,6 +312,115 @@ private:
     class NotifyConclusion;
 };
 
+/*------------------------------------------------------------*
+ * declaration VsnetDownload::Client::Notify_f
+ *------------------------------------------------------------*/
+
+class Notify_f : public Notify
+{
+public:
+    typedef void (*NotifyFunction)( std::string str, State s, Error e, int total, int offset );
+
+public:
+    Notify_f( std::string filename, NotifyFunction fun )
+        : _filename( filename )
+        , _fun( fun )
+        , _total( 0 )
+        , _offset( 0 )
+    { }
+
+    virtual ~Notify_f() { }
+
+    virtual void notify( State s, Error e ) {
+        (*_fun)( _filename, s, e, _total, _offset );
+    }
+
+    virtual void setTotalBytes( int sz ) {
+        _total = sz;
+    }
+
+    virtual void addBytes( int sz ) {
+        _offset += sz;
+    }
+
+private:
+    std::string    _filename;
+    NotifyFunction _fun;
+    int            _total;
+    int            _offset;
+};
+
+/*------------------------------------------------------------*
+ * declaration VsnetDownload::Client::Notify_fp
+ *------------------------------------------------------------*/
+
+struct Notify_fp : public NotifyPtr
+{
+    typedef void (*NotifyFunction)( std::string str, State s, Error e, int total, int offset );
+
+    Notify_fp( std::string filename, NotifyFunction fun )
+        : NotifyPtr( new Notify_f(filename,fun) )
+    { }
+};
+
+/*------------------------------------------------------------*
+ * declaration VsnetDownload::Client::Notify_t<T>
+ *------------------------------------------------------------*/
+
+template <class T> class Notify_t : public Notify
+{
+public:
+    typedef void (T::*NotifyFunction)( State s, Error e );
+
+public:
+    Notify_t( T* object, NotifyFunction fun )
+        : _object( object )
+        , _fun( fun )
+        , _total( 0 )
+        , _offset( 0 )
+    { }
+
+    virtual void notify( State s, Error e ) {
+        (_object->*_fun)( s, e );
+    }
+
+    virtual void setTotalBytes( int sz ) {
+        _total = sz;
+    }
+
+    virtual void addBytes( int sz ) {
+        _offset += sz;
+    }
+
+    inline int total( ) const {
+        return _total;
+    }
+
+    inline int offset( ) const {
+        return _offset;
+    }
+
+private:
+    T*             _object;
+    NotifyFunction _fun;
+    int            _total;
+    int            _offset;
+};
+
+/*------------------------------------------------------------*
+ * declaration VsnetDownload::Client::Notify_tp<T>
+ *------------------------------------------------------------*/
+
+template <class T> struct Notify_tp : public NotifyPtr
+{
+    typedef typename Notify_t<T>::NotifyFunction T_Function;
+    typedef Notify_t<T>                          T_Class;
+
+    Notify_tp( T* object, T_Function fun )
+        : NotifyPtr( new T_Class(object,fun) )
+    { }
+};
+
 }; // namespace Client
 
 namespace Server
