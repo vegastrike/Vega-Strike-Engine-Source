@@ -33,18 +33,23 @@ int bits=0,done=0;
 
 void errorv(char *str, va_list ap)
 {
+#ifdef HAVE_SDL
 	vfprintf(stderr,str,ap);
+
 	fprintf(stderr,": %s.\n", SDL_GetError());
+#endif
 }
 
 void cleanExit(char *str,...)
 {
+#ifdef HAVE_SDL
 	va_list ap;
 	va_start(ap, str);
 	errorv(str,ap);
 	va_end(ap);
 	Mix_CloseAudio();
 	SDL_Quit();
+#endif
 	exit(1);
 }
 
@@ -130,20 +135,25 @@ int main(int argc, char **argv)
 		// set this to any of 512,1024,2048,4096
 		// the higher it is, the more FPS shown and CPU needed
 		audio_buffers=4096;
+#ifdef HAVE_SDL
 	Uint16 audio_format;
 	// initialize SDL for audio and video
+
 	if(SDL_Init(SDL_INIT_AUDIO)<0)
 		cleanExit("SDL_Init\n");
 
 	Mix_HookMusicFinished(&music_finished); 
+#endif
 	INET_startup();
 	// initialize sdl mixer, open up the audio device
+#ifdef HAVE_SDL
 	if(Mix_OpenAudio(44100,MIX_DEFAULT_FORMAT,2,audio_buffers)<0)
 		cleanExit("Mix_OpenAudio\n");
 
 	// print out some info on the audio device and stream
 	Mix_QuerySpec(&audio_rate, &audio_format, &audio_channels);
 	bits=audio_format&0xFF;
+#endif
 	printf("Opened audio at %d Hz %d bit %s, %d bytes audio buffer\n", audio_rate,
 			bits, audio_channels>1?"stereo":"mono", audio_buffers );
 
@@ -171,7 +181,11 @@ int main(int argc, char **argv)
 					arg=INET_fgetc(mysocket);
 				}
 				printf("%s",str.c_str());
-				if ((str!=curmus)||(!Mix_PlayingMusic())) {
+				if ((str!=curmus)
+#ifdef HAVE_SDL
+				    ||(!Mix_PlayingMusic())
+#endif
+				    ) {
 					music=PlayMusic(str.c_str(),music);
 					if (music) {
 						printf("\n[PLAYING %s WITH %d FADEIN AND %d FADEOUT]\n",str.c_str(),fadein,fadeout);
@@ -223,8 +237,11 @@ int main(int argc, char **argv)
 		}
 	}
 	// free & close
-	Mix_CloseAudio();
 	INET_cleanup();
+#ifdef HAVE_SDL
+	Mix_CloseAudio();
 	SDL_Quit();
+#endif
+
 	return(0);
 }
