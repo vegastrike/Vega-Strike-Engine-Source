@@ -3,6 +3,7 @@
 #include "unit_factory.h"
 #include "gfx/mesh.h"
 #include "script/mission.h"
+#include "gfx/ani_texture.h"
 #include "gfx/matrix.h"
 Briefing::Ship::Ship (const char * filename, int faction, const Vector & position) {
   Unit * tmp  = UnitFactory::createUnit(filename,true,faction);
@@ -48,6 +49,8 @@ void SetDirection (Matrix &mat, Vector start, Vector end, const Matrix cam, bool
 }
 extern double interpolation_blend_factor;
 void Briefing::Render() {
+	AnimatedTexture::UpdateAllFrame();
+
   cam.SetPosition(cam.GetPosition());
   cam.UpdateGFX(GFXTRUE,GFXFALSE);
   //  glClearColor(1,0,0,1);
