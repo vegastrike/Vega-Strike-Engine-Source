@@ -4,6 +4,9 @@
 #include "xml_support.h"
 #include "config_xml.h"
 #include "vs_globals.h"
+
+
+//#define GFX_BUFFER_MAP_UNMAP
 static GLenum gl_error;
 GLenum PolyLookup (POLYTYPE poly) {
   switch (poly) {
@@ -255,6 +258,7 @@ GFXVertexList::~GFXVertexList() {
 }
 
 union GFXVertexList::VDAT * GFXVertexList::Map(bool read, bool write) {
+  if (GFX_BUFFER_MAP_UNMAP) {
   if (vbo_data) {
     if (display_list) {
       BindInd(display_list);
@@ -268,9 +272,12 @@ union GFXVertexList::VDAT * GFXVertexList::Map(bool read, bool write) {
       data.vertices=(GFXVertex*)ret;
     }
   }
+  }
+
   return &data;
 }
 void GFXVertexList::UnMap() {
+  if (GFX_BUFFER_MAP_UNMAP) {
   if (vbo_data) {
     if (display_list) {
       BindInd(display_list);
@@ -280,6 +287,7 @@ void GFXVertexList::UnMap() {
     (*glUnmapBufferARB_p)(GL_ARRAY_BUFFER_ARB);      
     data.colors=NULL;
     data.vertices=NULL;  
+  }
   }
 }
   ///Returns the array of vertices to be mutated
@@ -296,6 +304,8 @@ void GFXVertexList::EndMutate (int newvertexsize) {
   }
   if (!vbo_data){
     RenormalizeNormals ();
+    RefreshDisplayList();
+  }else {
     RefreshDisplayList();
   }
   if (changed&CHANGE_CHANGE) {

@@ -24,6 +24,7 @@
 #include "vegastrike.h"
 #include "vs_globals.h"
 #include <assert.h>
+#include "gl_globals.h"
 // Untransformed and transformed data 
 
 #ifndef GFX_SCALE
@@ -110,13 +111,19 @@ void GFXVertexList::Init (enum POLYTYPE *poly, int numVertices, const GFXVertex 
   this->numVertices = numVertices;
   if (numVertices) {
     if (vertices) {
-      //data.vertices = (GFXVertex*)malloc (sizeof (GFXVertex)*numVertices);
-      //memcpy(data.vertices, vertices, sizeof(GFXVertex)*numVertices);
-      data.vertices=const_cast<GFXVertex*>(vertices);//will *not* modify
+      if (!GFX_BUFFER_MAP_UNMAP) {
+        data.vertices = (GFXVertex*)malloc (sizeof (GFXVertex)*numVertices);
+        memcpy(data.vertices, vertices, sizeof(GFXVertex)*numVertices);
+      }else {
+        data.vertices=const_cast<GFXVertex*>(vertices);//will *not* modify
+      }
     } else if (colors) {
-      //data.colors = (GFXColorVertex*)malloc( sizeof (GFXColorVertex)*numVertices);
-      //memcpy (data.colors, colors, sizeof (GFXColorVertex)*numVertices);
-      data.colors=const_cast<GFXColorVertex*>(colors);
+      if (!GFX_BUFFER_MAP_UNMAP) {
+        data.colors = (GFXColorVertex*)malloc( sizeof (GFXColorVertex)*numVertices);
+        memcpy (data.colors, colors, sizeof (GFXColorVertex)*numVertices);
+      }else {
+        data.colors=const_cast<GFXColorVertex*>(colors);
+      }
     } 
   }else {
       data.vertices=NULL;
@@ -162,23 +169,25 @@ void GFXVertexList::Init (enum POLYTYPE *poly, int numVertices, const GFXVertex 
   changed |= stride;
   RenormalizeNormals ();  
   RefreshDisplayList();
-  if (!vbo_data) {
-    //backstore required
-    if (numVertices) {
-      if (vertices) {
-        data.vertices = (GFXVertex*)malloc (sizeof (GFXVertex)*numVertices);
-        memcpy(data.vertices, vertices, sizeof(GFXVertex)*numVertices);
-      } else if (colors) {
-        data.colors = (GFXColorVertex*)malloc( sizeof (GFXColorVertex)*numVertices);
-        memcpy (data.colors, colors, sizeof (GFXColorVertex)*numVertices);
-      } 
-    }    
-  }else {
-    if (index.b)
-      free(index.b);
-    index.b=NULL;
-    data.vertices=NULL;
-    data.colors=NULL;
+  if (GFX_BUFFER_MAP_UNMAP) {
+    if (!vbo_data) {
+      //backstore required
+      if (numVertices) {
+        if (vertices) {
+          data.vertices = (GFXVertex*)malloc (sizeof (GFXVertex)*numVertices);
+          memcpy(data.vertices, vertices, sizeof(GFXVertex)*numVertices);
+        } else if (colors) {
+          data.colors = (GFXColorVertex*)malloc( sizeof (GFXColorVertex)*numVertices);
+          memcpy (data.colors, colors, sizeof (GFXColorVertex)*numVertices);
+        } 
+      }    
+    }else {
+      if (index.b)
+        free(index.b);
+      index.b=NULL;
+      data.vertices=NULL;
+      data.colors=NULL;
+    }
   }
   if (Mutable)
     changed |= CHANGE_MUTABLE;//for display lists

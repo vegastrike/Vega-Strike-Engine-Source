@@ -21,7 +21,7 @@
 #ifndef _GL_GLOBALS_H_
 #define _GL_GLOBALS_H_
 #include <queue>
-
+const static bool GFX_BUFFER_MAP_UNMAP=false;
 /* Hack for multitexture on Mac, here and in gl_init, ifdefined - griff */
 // Moved this because defining GL_EXT_texture... doesn't work under Jaguar
 #ifdef __APPLE_PANTHER_GCC33_CLI__
@@ -142,6 +142,7 @@ extern PFNGLCOLORTABLEEXTPROC glColorTable_p;
 extern PFNGLLOCKARRAYSEXTPROC glLockArraysEXT_p;
 extern PFNGLUNLOCKARRAYSEXTPROC glUnlockArraysEXT_p;
 #endif /* __APPLE_PANTHER_GCC33_CLI__ */
+
 
 //extern int sharedcolortable;
 extern GLenum GFXStage0;
