@@ -115,7 +115,7 @@ public:
 			virtual void EndXML(FILE *fp);
 #endif
 			virtual ~BaseText () {}
-			BaseText (std::string texts, float posx, float posy, float wid, float hei, float charsizemult, GFXColor backcol, GFXColor forecol, std::string ind) : BaseObj(ind), text(backcol, forecol) {
+			BaseText (std::string texts, float posx, float posy, float wid, float hei, float charsizemult, GFXColor backcol, GFXColor forecol, std::string ind) : BaseObj(ind), text(forecol, backcol) {
 				text.SetPos(posx,posy);
 				text.SetSize(wid,hei);
 				float cx=0, cy=0;
