@@ -1546,7 +1546,10 @@ bool	NetClient::jumpRequest( string newsystem)
 void	NetClient::startCommunication( float freq)
 {
 #ifdef NETCOMM
+	cerr<<"Starting communication session..."<<endl;
 	NetComm->InitSession( freq);
+	cerr<<"Session started."<<endl;
+	cerr<<"Grabbing an image"<<endl;
 	NetComm->GrabImage();
 #endif
 }
@@ -1554,7 +1557,9 @@ void	NetClient::startCommunication( float freq)
 void	NetClient::stopCommunication( float freq)
 {
 #ifdef NETCOMM
+	cerr<<"Stopping communication session..."<<endl;
 	NetComm->DestroySession();
+	cerr<<"Session stopped."<<endl;
 #endif
 }
 

@@ -1117,7 +1117,7 @@ if test "$NETCOMM" = "1" ; then
 		NETCOMM_NOSOUND="1"
 		dnl SHOULD TEST FOR QUICKTIME FRAMEWORK HERE !!!!
 		if test "$is_macosx" = "yes" ; then
-    	 	TR_CPPFLAGS="$TR_CPPFLAGS -I/System/Library/Frameworks/QuickTime.framework/Headers"
+    	 	TR_CPPFLAGS="$TR_CPPFLAGS -I/System/Library/Frameworks/QuickTime.framework/Headers -I/System/Library/Frameworks/ApplicationServices.framework/Versions/A/Frameworks/QD.framework/Versions/A/Headers"
     		LIBS="$LIBS -framework QuickTime -framework Carbon -lz"
 		fi
 	else

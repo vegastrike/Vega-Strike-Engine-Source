@@ -7,6 +7,7 @@ using std::endl;
 using std::hex;
 
 #ifdef __APPLE__
+#include <Quickdraw.h>
 OSErr	ExhaustiveError(void)
 {
 	OSErr iErr;
@@ -168,7 +169,7 @@ int		WebcamSupport::Init()
 		DoError(iErr, "NewGWorld failed.\rTrying giving me more memory or use a sensible video size");
 		exit(1);
 	}
-	//LockPixels(video -> sg_world -> portPixMap);
+	LockPixels(video -> sg_world -> portPixMap);
 
 	//	open default sequence grabber
 	video -> sg_component = OpenDefaultComponent('barg', 0);
@@ -432,6 +433,8 @@ char *	WebcamSupport::CaptureImage()
 		DoError(component_error, "SGIdle failed");
 		exit(1);
 		}
+	Ptr pixmap_base = GetPixBaseAddr(video->sg_world->portPixMap);
+	cerr<<"\t\tCaptured "<<video->sg_world->portPixMap.bounds.right<<"x"<<video->sg_world->portPixMap.bounds.bottom<<" size with "<<hex<<video->sg_world->portPixMap.rowBytes<<" row bytes"<<endl;
 	/*
 	component_error = SGUpdate(video -> sg_component, ??????? );
 	if (component_error)

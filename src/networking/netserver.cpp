@@ -374,7 +374,7 @@ Client* NetServer::addNewClient( SOCKETALT sock, bool is_tcp )
 void	NetServer::start(int argc, char **argv)
 {
 	string strperiod, strtimeout, strlogintimeout, stracct, strnetatom;
-	int period, periodrecon;
+	int periodrecon;
 	keeprun = 1;
 	double	savetime=0;
 	double  reconnect_time = 0;
@@ -402,7 +402,6 @@ void	NetServer::start(int argc, char **argv)
 	// Save period in seconds
 	strperiod = vs_config->getVariable( "server", "saveperiod", "7200");
 	SAVE_ATOM = atoi( strperiod.c_str());
-	period=SAVE_ATOM;
 	string strperiodrecon = vs_config->getVariable( "server", "reconnectperiod", "60");
 	periodrecon = atoi( strperiodrecon.c_str());
 	strtimeout = vs_config->getVariable( "server", "clienttimeout", "20");
@@ -419,7 +418,7 @@ void	NetServer::start(int argc, char **argv)
 
 	InitTime();
 	UpdateTime();
-	savetime = getNewTime()+period;
+	savetime = 0;
 	reconnect_time = getNewTime()+periodrecon;
 
 	string tmp;
@@ -629,7 +628,6 @@ void	NetServer::start(int argc, char **argv)
 
 		// Check for automatic server status save time (in seconds)
 		//curtime = getNewTime();
-		// period * 60 because in minutes in the config file
 		savetime += GetElapsedTime();
 		//if( curtime - savetime > period*60)
 		if( savetime>SAVE_ATOM)

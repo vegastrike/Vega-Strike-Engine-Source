@@ -244,6 +244,10 @@ void GameVegaConfig::initCommandMap(){
   command_map["TimeDec"]=dec_time_compression;
   command_map["TimeReset"]=reset_time_compression;
   // mapping from command string to keyboard handler
+  command_map["ChangeCommStatus"]=FlyByKeyboard::ChangeCommStatus ;
+  command_map["UpFreq"]=FlyByKeyboard::UpFreq ;
+  command_map["DownFreq"]=FlyByKeyboard::DownFreq ;
+
   command_map["ThrustModeKey"]=FlyByKeyboard::KSwitchFlightMode ;
   command_map["ThrustRight"]=FlyByKeyboard::KThrustRight ;
   command_map["ThrustLeft"]=FlyByKeyboard::KThrustLeft ;

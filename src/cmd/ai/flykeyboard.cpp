@@ -158,6 +158,7 @@ void FlyByKeyboard::Execute (bool resetangvelocity) {
 	SSCK.killcomm=false;
   }
   if(SSCK.startcomm && SSCK.commchanged) {
+	printf( "Starting a NETCOMM\n\n");
     parent->StartNetworkComm( g().comm_freq);
 	SSCK.commchanged=false;
   }
@@ -384,6 +385,7 @@ if(Network!=NULL)
   if (g().dirty)g().UnDirty();
   switch (k) {
   case DOWN:
+	printf( "Pressed NETCOMM key !!!\n");
 	if(g().startcomm==true)
 		g().startcomm=false;
 	else
