@@ -609,7 +609,10 @@ float Unit::DealDamageToShield (const Vector &pnt, float &damage) {
   switch (shield.number){
   case 2:
     index = (pnt.k>0)?0:1;
-    percent = damage/shield.fb[index+2];//comparing with max
+	if( shield.fb[index+2]!=0)
+	    percent = damage/shield.fb[index+2];//comparing with max
+	else
+		percent = 0;
     shield.fb[index]-=damage;
     damage =0;
     if (shield.fb[index]<0) {
