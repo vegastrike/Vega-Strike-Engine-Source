@@ -592,21 +592,25 @@ void Unit::Init(const char *filename, bool SubU, int faction,std::string unitMod
 	if (facsd.length()!=0) {
 		factionsubdir.push_back(facsd);
 	}
+	string facstr (FactionUtil::GetFaction(faction));
 	vector<vector <string> > path;
 	path.push_back (factionsubdir);
 	path.back().push_back("neutral");path.back().push_back(my_directory);path.back().push_back(filename);
+	{
+		path.push_back(vector<string>());		
+		path.back().push_back("weapons");path.back().push_back(my_directory);path.back().push_back(filename);
+		path.push_back(factionsubdir);		
+		path.back().insert(path.back().begin(),"weapons");path.back().push_back(facstr);path.back().push_back(my_directory);path.back().push_back(filename);
+	}
 	path.push_back(vector<string>());
 	path.back().push_back(my_directory);path.back().push_back(filename);	
 	path.push_back (factionsubdir);
-	string facstr (FactionUtil::GetFaction(faction));
 	path.back().push_back(facstr);path.back().push_back(my_directory);path.back().push_back(filename);
 	if (SubU) {
-		path.push_back(vector<string>());
-		path.back().push_back("subunits");path.back().push_back("neutral");path.back().push_back(my_directory);path.back().push_back(filename);
 		path.push_back(vector<string>());		
 		path.back().push_back("subunits");path.back().push_back(my_directory);path.back().push_back(filename);
-		path.push_back(vector<string>());		
-		path.back().push_back("subunits");path.back().push_back(facstr);path.back().push_back(my_directory);path.back().push_back(filename);
+		path.push_back(factionsubdir);		
+		path.back().insert(path.back().begin(),"subunits");path.back().push_back(facstr);path.back().push_back(my_directory);path.back().push_back(filename);
 	}
 	free(my_directory);	
 	while(!path.empty()) {
@@ -618,6 +622,7 @@ void Unit::Init(const char *filename, bool SubU, int faction,std::string unitMod
 	    fprintf (stderr,"Warning: Cannot locate %s\n",filename);	  
 	    meshdata.clear();
 	    meshdata.push_back(NULL);
+		this->fullname=filename;
 	    this->name=string("LOAD_FAILED");
 	    //	    assert ("Unit Not Found"==NULL);
 	}else {

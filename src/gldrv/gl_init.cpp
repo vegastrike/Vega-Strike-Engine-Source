@@ -28,14 +28,14 @@
 #include "winsys.h"
 #include <assert.h>
 //#include "gl_globals.h"
-
+#include "gfxlib.h"
 #if !defined(_WIN32) && !defined(__CYGWIN__)
 #if !(defined(__APPLE__) || defined(MACOSX))
 
     #   include <GL/glx.h>
 #endif
 #include <stdlib.h>
-#include "gfxlib.h"
+
 #else
 #include <windows.h>
 #endif
@@ -123,7 +123,7 @@ void init_opengl_extensions()
     glMultiTexCoord2fARB_p = (PFNGLMULTITEXCOORD2FARBPROC) GET_GL_PROC((GET_GL_PTR_TYP)"glMultiTexCoord2fARB");
     glClientActiveTextureARB_p = (PFNGLCLIENTACTIVETEXTUREARBPROC) GET_GL_PROC((GET_GL_PTR_TYP)"glClientActiveTextureARB");
     glActiveTextureARB_p = (PFNGLCLIENTACTIVETEXTUREARBPROC) GET_GL_PROC((GET_GL_PTR_TYP)"glActiveTextureARB");
-    if (!glMultiTexCoord2fARB) {
+    if (!glMultiTexCoord2fARB_p) {
       glMultiTexCoord2fARB_p = (PFNGLMULTITEXCOORD2FARBPROC) GET_GL_PROC((GET_GL_PTR_TYP)"glMultiTexCoord2fEXT");
       glClientActiveTextureARB_p = (PFNGLCLIENTACTIVETEXTUREARBPROC) GET_GL_PROC((GET_GL_PTR_TYP)"glClientActiveTextureEXT");
       glActiveTextureARB_p = (PFNGLCLIENTACTIVETEXTUREARBPROC) GET_GL_PROC((GET_GL_PTR_TYP)"glActiveTextureEXT");

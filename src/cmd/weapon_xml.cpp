@@ -394,7 +394,9 @@ weapon_info* getTemplate(const string &kkey) {
   weapon_info * wi =  lookuptable.Get(strtoupper(key));
   if (wi) {
     if (!WeaponMeshCache::getCachedMutable (wi->weapon_name)) {
-      string meshname = sharedmeshes+string ("weapons/") + key+".xmesh"; 
+		static string sharedmountdir = vs_config->getVariable("data","mountlocation","weapons");
+
+      string meshname = sharedmeshes+sharedmountdir+string ("/") + key+".xmesh"; 
       FILE * fp = fopen (meshname.c_str(),"rb");
       if (fp) {
 	fclose (fp);
