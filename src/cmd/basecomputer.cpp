@@ -425,7 +425,7 @@ float PercentOperational (Unit * un, std::string name, std::string category="upg
         }
       }
     }
-  }else{
+  }else if (name.find("add_")!=0&&name.find("mult_")!=0) {
     const Unit * upgrade=getUnitFromUpgradeName(name,un->faction);    
     double percent=0;
     if (un->canUpgrade(upgrade,-1,-1,0,true,percent,makeTemplateUpgrade(un->name,un->faction),false)) {
@@ -3709,7 +3709,8 @@ bool BaseComputer::fixUpgrade(const EventCommandId& command, Control* control) {
                 }else {
 			Cargo sold;
 			const int quantity=1;
-			if (item->content.find("add_")!=0&&item->content.find("mult_")!=0) {
+                        bool notadditive=(item->content.find("add_")!=0&&item->content.find("mult_")!=0);
+			if (notadditive||item->category.find(DamagedCategory)==0) {
 				Cargo itemCopy = *item;     // Copy this because we reload master list before we need it.
                                 
 				//playerUnit->SellCargo(item->content, quantity, _Universe->AccessCockpit()->credits, sold, baseUnit);
@@ -3720,7 +3721,8 @@ bool BaseComputer::fixUpgrade(const EventCommandId& command, Control* control) {
                                   double price = RepairPrice(percentage,baseUnit->PriceCargo(item->content));
                                   if (price<=_Universe->AccessCockpit()->credits) {
                                     _Universe->AccessCockpit()->credits-=price;                                    
-                                    playerUnit->Upgrade(un,0,0,0,true,percentage,makeTemplateUpgrade(playerUnit->name,playerUnit->faction));
+                                    if (notadditive)
+                                      playerUnit->Upgrade(un,0,0,0,true,percentage,makeTemplateUpgrade(playerUnit->name,playerUnit->faction));
                                     if (item->category.find(DamagedCategory)==0) {
                                       unsigned int where;
                                       Cargo * c=playerUnit->GetCargo(item->content,where);
