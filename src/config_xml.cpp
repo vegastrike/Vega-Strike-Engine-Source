@@ -343,7 +343,9 @@ void VegaConfig::doSection(configNode *node, enum section_t section_type){
 void VegaConfig::checkSection(configNode *node, enum section_t section_type){
     if(node->Name()!="section"){
       cout << "not a section" << endl;
-    return;
+      node->printNode(cout,0,1);
+
+      return;
   }
 
     doSection(node,section_type);

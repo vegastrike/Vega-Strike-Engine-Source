@@ -1,3 +1,9 @@
+2002-03-05 Alexander Rawass <alexannika@users.sourceforge.net>
+	
+	* homepage/docu
+	  - added force feedback section
+
+	
 2002-03-04 Daniel Horn <hellcatv@hotmail.com>
 	* Added text over viewscreen
 	* Added glow to stars....
@@ -8,6 +14,7 @@
 	* Fixed Weapons info with sprite
 	* Fixed some ships being upside down (noticed when taking screenshot)
 	* Added text for weapon info
+
 	* Added docking bays to be drawn when you press SHIFT-C and have clearence
 	* Added manifest VDU screen
 	* Fixed known problems with upgrades and tradings
@@ -16,6 +23,9 @@
 	* Saved units (with upgrades) are loaded if a mission has a saved game
 	* Fixed many font issues
 	* Fixed calculation in navigation.cpp to calculate proper velocity with fixed time intervals of SIMULATION_ATOM instead of continuous time
+
+	
+2002-04-01 Corey O'Connor <oconnorc@dogheadbone.com>
 	* Added "Import" option in units...now you can import whole categories at different price from the master part list
 	
 2002-03-01 Corey O'Connor <oconnorc@dogheadbone.com>
