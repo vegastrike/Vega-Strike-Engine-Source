@@ -1,6 +1,7 @@
 #include "beam.h"
 #include "weapon_xml.h"
 #include <assert.h>
+#include "audiolib.h"
 weapon_info::weapon_info(const weapon_info &tmp) {
   *this = tmp;
 }
