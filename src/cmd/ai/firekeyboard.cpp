@@ -481,20 +481,6 @@ void FireKeyboard::Execute () {
     j().jfirekey=UP;
     parent->UnFire();
   }
-  if (f().eject==PRESS) {
-    parent->EjectCargo((unsigned int )-1);
-    f().eject=DOWN;
-  }
-  if (f().ejectcargo==PRESS) {
-    int offset = _Universe->AccessCockpit()->getScrollOffset (VDU::MANIFEST);
-    if (offset<3) {
-      offset=0;
-    }else {
-      offset-=3;
-    }
-    parent->EjectCargo(offset);
-    f().ejectcargo=DOWN;
-  }
   if (f().cloakkey==PRESS) {
     static bool toggle=true;
     f().cloakkey=DOWN;
@@ -601,5 +587,20 @@ void FireKeyboard::Execute () {
     } else {
       _Universe->AccessCockpit()->communication_choices="\nNo Communication\nLink\nEstablished";
     }
+  }
+  if (f().ejectcargo==PRESS) {
+    int offset = _Universe->AccessCockpit()->getScrollOffset (VDU::MANIFEST);
+    if (offset<3) {
+      offset=0;
+    }else {
+      offset-=3;
+    }
+    parent->EjectCargo(offset);
+    f().ejectcargo=DOWN;
+  }
+  if (f().eject==PRESS) {
+    f().eject=DOWN;
+    parent->EjectCargo((unsigned int )-1);
+    return;
   }
 }
