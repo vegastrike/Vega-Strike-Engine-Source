@@ -19,7 +19,8 @@ using namespace Orders;
 Ikarus::Ikarus ():AggressiveAI ("default.agg.xml","default.int.xml") {
     last_time=cur_time=0;
 }
-void Ikarus::ExecuteStrategy () {
+void Ikarus::ExecuteStrategy (Unit * target) {
+    WillFire(target);
     if (queryType (Order::FACING)==NULL) { //we have nothing to do now
         FaceTarget(false);
         AddReplaceLastOrder (true);//true stands for override any that are there
@@ -34,11 +35,23 @@ void Ikarus::ExecuteStrategy () {
     if (0) {
         ReplaceOrder (new AIScript ("++turntowards.xml"));	//find this list of names in script.cpp
     }
+
     cur_time+=SIMULATION_ATOM;
     if (cur_time-last_time >5) {
         //dosomething
 
         last_time=cur_time;
+    }
+}
+
+void Ikarus::WillFire (Unit * target) {
+    bool missilelockp=false;
+    if (ShouldFire (target,missilelockp)) {//this is a function from fire.cpp  you probably want to write a better one
+        parent->Fire (false);
+    }
+    if (missilelockp) {
+        parent->Fire (true);//if missiles locked fire
+        parent->ToggleWeapon(true);
     }
 }
 ///you should certainly edit this!!
@@ -68,7 +81,7 @@ void Ikarus::Execute () {
       if (isjumpable) {
           AfterburnTurnTowards(this,parent);
       }else {
-          ExecuteStrategy();
+          ExecuteStrategy(target);
       }
   }
 }

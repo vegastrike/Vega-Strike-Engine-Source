@@ -7,8 +7,8 @@ namespace Orders {
 
 class FireAt: public CommunicatingAI {
 
-  bool ShouldFire(Unit * targ,bool &missilelock);
 protected:
+  bool ShouldFire(Unit * targ,bool &missilelock);
   float missileprobability;
   float rxntime;
   float delay;
