@@ -1282,7 +1282,7 @@ using namespace StarXML;
       LightMap[0] = new Texture(bglight.c_str(), 1,MIPMAP,TEXTURE2D,TEXTURE_2D,GFXTRUE);
   }
 #endif
-  bg = new Background(xml->backgroundname.c_str(),xml->numstars,g_game.zfar*.9);
+  bg = new Background(xml->backgroundname.c_str(),xml->numstars,g_game.zfar*.9,filename);
   stars = new Stars (xml->numnearstars, xml->starsp);
   stars->SetBlend (XMLSupport::parse_bool(vs_config->getVariable ("graphics","starblend","true")),  
 		   XMLSupport::parse_bool(vs_config->getVariable ("graphics","starblend","true")));

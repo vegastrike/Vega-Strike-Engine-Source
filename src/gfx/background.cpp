@@ -29,7 +29,7 @@
 #include "config_xml.h"
 #include <float.h>
 	const float size = 100;
-Background::Background(const char *file, int numstars, float spread):Enabled (true),stars(numstars,200/*spread*/,XMLSupport::parse_bool (vs_config->getVariable("graphics","use_star_coords","true"))) {
+Background::Background(const char *file, int numstars, float spread,std::string filename):Enabled (true),stars(numstars,200/*spread*/,XMLSupport::parse_bool (vs_config->getVariable("graphics","use_star_coords","true"))?filename:"") {
 	string temp;
 	up = left = down = front=right=back=NULL;
 	static int max_cube_size =XMLSupport::parse_int (vs_config->getVariable("graphics","max_cubemap_size","1024"));

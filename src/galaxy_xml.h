@@ -35,7 +35,11 @@ class Galaxy {
   void addSection(std::vector<string> section);
   void setVariable (std::vector<string> section, string name, string value);
   SubHeirarchy & getHeirarchy();
+  std::string operator [](const std::string &s) {
+	  return data[StringWrapper(s)];
+  }
 };
 class SubHeirarchy : public std::map <std::string,class Galaxy> {};
+
 }
 #endif

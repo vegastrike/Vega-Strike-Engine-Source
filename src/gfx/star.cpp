@@ -6,6 +6,7 @@
 #include "gfx/cockpit.h"
 #include "config_xml.h"
 #include "lin_time.h"
+#include "galaxy_xml.h"
 #if defined(__APPLE__) || defined(MACOSX)
     #include <OpenGL/gl.h>
 #else
@@ -16,37 +17,143 @@
 #define SINY 2
 #define SINZ 4
 
-//extern Unit ** fighters;
-
-StarVlist::StarVlist (int num ,float spread,bool use_milky_way) {
+unsigned int NumStarsInGalaxy () {
+	unsigned int count=0;
+	map<std::string,GalaxyXML::Galaxy>::iterator i = _Universe->getGalaxy()->getHeirarchy().begin();
+	map<std::string,GalaxyXML::Galaxy>::iterator e = _Universe->getGalaxy()->getHeirarchy().end();
+	for (;i!=e;++i) {
+		count+=(*i).second.getHeirarchy().size();
+	}
+	return count;
+}
+class StarIter {
+	map<std::string,GalaxyXML::Galaxy>::iterator sector;
+	map<std::string,GalaxyXML::Galaxy>::iterator system;
+public:
+	StarIter() {
+		sector = _Universe->getGalaxy()->getHeirarchy().begin();
+		if (!Done()) {
+			system = (*sector).second.getHeirarchy().begin();
+			if (system == (*sector).second.getHeirarchy().end()){
+				++(*this);
+			}
+		}
+	}
+	void operator ++ () {
+		if (!Done()) {
+			if (system!=(*sector).second.getHeirarchy().end()) {
+				++system;
+			}
+		}
+		while (!Done()&&system==(*sector).second.getHeirarchy().end()) {
+			++sector;
+			if (!Done()) {
+				system  = (*sector).second.getHeirarchy().begin();
+			}
+		}
+	}
+	bool Done() const{
+		return (sector==_Universe->getGalaxy()->getHeirarchy().end());
+	}
+	GalaxyXML::Galaxy *Get() {
+		if (!Done()) {
+			return &(*system).second;
+		}else {
+			return NULL;
+		}
+	}
+	std::string GetSystem() {
+		if (!Done())
+			return (*system).first;
+		else
+			return "Nowhere";
+	}
+	std::string GetSector() {
+		if (!Done()){
+			return (*sector).first;
+		}else{
+			return "NoSector";
+		}
+	}
+};
+namespace StarSystemGent {
+extern GFXColor getStarColorFromRadius(float radius);
+}
+StarVlist::StarVlist (int num ,float spread,const std::string &our_system_name) {
 	lasttime=0;
 	_Universe->AccessCamera()->GetPQR(newcamr,camq,camr);
 	newcamr=camr;
 	newcamq=camq;
 	
 	this->spread=spread;
-	GFXColorVertex * tmpvertex = new GFXColorVertex[num*2];
-	memset (tmpvertex,0,sizeof(GFXVertex)*num*2);
 	static float staroverlap = XMLSupport::parse_float(vs_config->getVariable("graphics","star_overlap","1"));
 	float xyzspread = spread*2*staroverlap;
+	if (!our_system_name.empty())
+		num =NumStarsInGalaxy();
+	GFXColorVertex * tmpvertex = new GFXColorVertex[num*2];
+	memset (tmpvertex,0,sizeof(GFXVertex)*num*2);
+	StarIter si;
+	int starcount=0;
 	for (int y=0;y<num;++y) {
 		int j= 2*y;
-		tmpvertex[j].x = -.5*xyzspread+rand()*((float)xyzspread/RAND_MAX);
-		tmpvertex[j].y = -.5*xyzspread+rand()*((float)xyzspread/RAND_MAX);
-		tmpvertex[j].z = -.5*xyzspread+rand()*((float)xyzspread/RAND_MAX);
-		tmpvertex[j].r=0;
-		tmpvertex[j].g=0;
-		tmpvertex[j].b=0;
-		tmpvertex[j].i=tmpvertex[j+1].i=.57735;
-		tmpvertex[j].j=tmpvertex[j+1].j=.57735;
-		tmpvertex[j].k=tmpvertex[j+1].k=.57735;
-		tmpvertex[j+1].x =tmpvertex[j].x;//+spread*.01;
-		tmpvertex[j+1].y =tmpvertex[j].y;//;+spread*.01;
-		tmpvertex[j+1].z =tmpvertex[j].z;
+		tmpvertex[j+1].x = -.5*xyzspread+rand()*((float)xyzspread/RAND_MAX);
+		tmpvertex[j+1].y = -.5*xyzspread+rand()*((float)xyzspread/RAND_MAX);
+		tmpvertex[j+1].z = -.5*xyzspread+rand()*((float)xyzspread/RAND_MAX);
 		tmpvertex[j+1].r=1;
 		tmpvertex[j+1].g=1;
 		tmpvertex[j+1].b=1;
+		
+		tmpvertex[j+1].i=.57735;
+		tmpvertex[j+1].j=.57735;
+		tmpvertex[j+1].k=.57735;
+		if (our_system_name.size()>0&&!si.Done()) {
+
+			starcount++;
+			float xorig,yorig,zorig;
+			if (3==sscanf ((*si.Get())["xyz"].c_str(),
+						   "%f %f %f",
+						   &xorig,
+						   &yorig,
+						   &zorig)) {
+				float xcent=0,ycent=0,zcent=0;
+				sscanf (_Universe->getGalaxyProperty(our_system_name,"xyz").c_str(),
+						"%f %f %f",
+						&xcent,
+						&ycent,
+						&zcent);
+				if (xcent!=xorig) {				
+					tmpvertex[j+1].x=xorig-xcent;
+				}
+				if (ycent!=yorig) {
+					tmpvertex[j+1].y=yorig-ycent;
+				}
+				if (zcent!=zorig) {
+					tmpvertex[j+1].z=zorig-zcent;
+				}
+			}
+			std::string radstr=(*si.Get())["sun_radius"];
+			if (radstr.size()){
+				float rad = XMLSupport::parse_float(radstr);
+				GFXColor suncolor (StarSystemGent::getStarColorFromRadius(rad));
+				tmpvertex[j+1].r=suncolor.r;
+				tmpvertex[j+1].g=suncolor.g;
+				tmpvertex[j+1].b=suncolor.b;
+			}
+			++si;
+		}
+		
+   		tmpvertex[j].i=tmpvertex[j+1].i;
+		tmpvertex[j].j=tmpvertex[j+1].j;
+		tmpvertex[j].k=tmpvertex[j+1].k;
+		tmpvertex[j].x =tmpvertex[j+1].x;//+spread*.01;
+		tmpvertex[j].y =tmpvertex[j+1].y;//;+spread*.01;
+		tmpvertex[j].z =tmpvertex[j+1].z;		
+		tmpvertex[j].r=0;
+		tmpvertex[j].g=0;
+		tmpvertex[j].b=0;
+		
 	}
+	fprintf (stderr,"Read In Star Count %d\n",starcount);
 	vlist= new GFXVertexList (GFXLINE,2*num,tmpvertex, 2*num, true,0);  
 	delete []tmpvertex;
 }
@@ -120,7 +227,7 @@ void StarVlist::EndDrawState() {
 	vlist->EndDrawState();
 	GFXColorMaterial(0);
 }
-Stars::Stars(int num, float spread): vlist((num/STARnumvlist)+1,spread,false),spread(spread){
+Stars::Stars(int num, float spread): vlist((num/STARnumvlist)+1,spread,""),spread(spread){
 
   int curnum = num/STARnumvlist+1;
   fade = blend=true;

@@ -4,7 +4,7 @@
 
 #include "gfxlib_struct.h"
 const int STARnumvlist = 27;
-
+#include <string>
 
 class StarVlist {
 	GFXVertexList * vlist;
@@ -15,7 +15,7 @@ class StarVlist {
 	Vector camq;
 	double lasttime;
 public:
-	StarVlist (int num, float spread,bool use_milky_way);
+	StarVlist (int num, float spread,const class std::string &our_system_name);
 	~StarVlist();
 	void BeginDrawState(const QVector &center, const Vector & vel,bool rotate, bool yawpitch);
 	void Draw();

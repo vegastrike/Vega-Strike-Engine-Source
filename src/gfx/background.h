@@ -34,7 +34,7 @@ class Background {
   Texture *down;
   SphereMesh * SphereBackground;
 public:
-  Background(const char *file, int numstars, float spread);
+  Background(const char *file, int numstars, float spread, std::string starfilename);
   ~Background();
   void EnableBG (bool);
   void Draw();

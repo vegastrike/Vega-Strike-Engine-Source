@@ -10,7 +10,7 @@
 #include "configxml.h"
 #include "vs_globals.h"
 #include "xml_support.h"
-
+#include "gfxlib.h"
 
 #ifndef _WIN32
 #include <ctype.h>
@@ -291,6 +291,11 @@ float getcolor (float c, float var) {
 }
 GradColor whichGradColor (float r,unsigned int &j) {
   unsigned int i;
+  if (colorGradiant.empty()) {
+	  vector<string> entity;
+	  string fullpath = vs_config->getVariable("data","universe_path","universe")+"/stars.txt";
+	  readColorGrads(entity,fullpath.c_str());
+  }
   for (i=1;i<colorGradiant.size();i++) {
     if (colorGradiant[i].minrad>r) {
       break;
@@ -307,7 +312,11 @@ Color StarColor (float radius, unsigned int &entityindex) {
   float b=getcolor(gc.b,gc.variance);
   return Color (r,g,b);
 }
-
+GFXColor getStarColorFromRadius(float radius) {
+	unsigned int myint=0;
+	Color tmp = StarColor(radius,myint);
+	return GFXColor(tmp.r,tmp.g,tmp.b,1);
+}
 float LengthOfYear (Vector r,Vector s) {
   float a=2*M_PI*mmax (r.Mag(),s.Mag());
   float speed = minspeed+(maxspeed-minspeed)*grand();
