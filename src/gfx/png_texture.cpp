@@ -204,11 +204,15 @@ unsigned char * readImage (FILE *fp, int & bpp, int &color_type, unsigned int &w
    png_read_image (png_ptr,row_pointers);
    //   png_read_image(png_ptr, info_ptr, PNG_TRANSFORM_EXPAND , NULL);
    //row_pointers = png_get_rows(png_ptr, info_ptr);
-
-
-   unsigned char * result = (*tt) (bpp,color_type,width,height,row_pointers);
+   unsigned char * result;
+   if (tt) {
+     result = (*tt) (bpp,color_type,width,height,row_pointers);
+     
+     free (image);
+   }else {
+     result = image;
+   }
    free (row_pointers);
-   free (image);
    png_infop end_info;
    png_read_end(png_ptr, info_ptr);
    png_destroy_read_struct(&png_ptr, &info_ptr, NULL);

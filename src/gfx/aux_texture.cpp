@@ -228,7 +228,7 @@ Texture::Texture(const char * FileName, int stage, enum FILTER mipmap, enum TEXT
 	//	strcpy(filename, FileName);
 	int bpp;
 	int format;
-	data = readImage (fp,bpp,format,sizeX,sizeY,palette,texTransform,true);
+	data = readImage (fp,bpp,format,sizeX,sizeY,palette,NULL/*texTransform*/,true);
 	if (data) {
 	  //FIXME deal with palettes and grayscale with alpha
 	  if (!format&PNG_HAS_COLOR||(format&PNG_HAS_PALETTE)) {
@@ -364,7 +364,7 @@ Texture::Texture (const char * FileNameRGB, const char *FileNameA, int stage, en
 	int bpp;
 	int format;
 	FILE * fp1=NULL;
-	data = readImage (fp,bpp,format,sizeX,sizeY,palette,texTransform,true);
+	data = readImage (fp,bpp,format,sizeX,sizeY,palette,NULL/*texTransform*/,true);
 	if (data) {
 	  //FIXME deal with palettes and grayscale with alpha
 	  if (!format&PNG_HAS_COLOR||(format&PNG_HAS_PALETTE)) {
