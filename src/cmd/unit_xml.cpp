@@ -59,7 +59,7 @@ string MakeUnitXMLPretty (string str, Unit * un) {
 //		lookfor.insert ("Defe");
 		lookfor.insert ("Stat");
 		lookfor.insert ("Engi");
-		lookfor.insert ("Hold");
+//		lookfor.insert ("Hold");
 		lookfor.insert ("Rada");
 	}
 	int foundpos;
