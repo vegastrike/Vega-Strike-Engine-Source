@@ -170,7 +170,7 @@ float GameUnit<UnitType>::DealDamageToHullReturnArmor (const Vector & pnt, float
   percent = Unit::DealDamageToHullReturnArmor( pnt, damage, targ);
   if( percent == -1)
 	  return -1;
-  if (damage<*targ) {
+  if (damage<((float)*targ)) {
     if (!AUDIsPlaying (sound->armor))
       AUDPlay (sound->armor,ToWorldCoordinates(pnt).Cast()+cumulative_transformation.position,Velocity,1);
     else
