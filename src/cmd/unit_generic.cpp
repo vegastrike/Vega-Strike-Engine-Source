@@ -622,7 +622,7 @@ void Unit::Init(const char *filename, bool SubU, int faction,std::string unitMod
 	//if (!SubU)
 	//  _Universe->AccessCockpit()->savegame->AddUnitToSave(filename,UNITPTR,FactionUtil::GetFaction(faction),(long)this);
 	graphicOptions.SubUnit = SubU?1:0;
-	graphicOptions.Animating=true;
+	graphicOptions.Animating=1;
 	graphicOptions.RecurseIntoSubUnitsOnCollision=!isSubUnit();
 	this->faction = faction;
 	SetFg (flightgrp,fg_subnumber);
