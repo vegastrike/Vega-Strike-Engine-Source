@@ -47,10 +47,10 @@ AnimatedTexture::AnimatedTexture (FILE * fp, int stage, enum FILTER imm){
     Load (fp,stage,imm);
 }
 
-Texture *AnimatedTexture::Original() const{
+Texture *AnimatedTexture::Original(){
   return Decal[active]->Original();
-  
 }
+
 Texture *AnimatedTexture::Clone () {
   AnimatedTexture * retval = new AnimatedTexture ();
   *retval = *this;

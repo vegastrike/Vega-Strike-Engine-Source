@@ -13,7 +13,7 @@ class AnimatedTexture: public Texture {
   AnimatedTexture (FILE * openedfile, int stage, enum FILTER imm);
   void Load (FILE * openedfile, int stage, enum FILTER imm);
   void Destroy();
-  virtual Texture *Original() const;
+  virtual Texture *Original();
   ~AnimatedTexture();
   virtual Texture * Clone ();
   void MakeActive();
