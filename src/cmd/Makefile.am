@@ -95,6 +95,7 @@ libcmd_a_SOURCES =$(libcmdgeneric) 				\
 	missile.h			\
 	mount.cpp			\
 	unit_functions.cpp
+
 #	unit_jump.cpp				\
 #	unit_cargo.cpp				\
 #	unit_customize.cpp			\

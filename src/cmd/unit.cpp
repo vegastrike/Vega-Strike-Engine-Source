@@ -51,7 +51,8 @@
 #include "gfx/particle.h"
 #include "cmd/ai/aggressive.h"
 #include "cmd/base.h"
-
+//#include "unit_template.h"
+//#include "gfx/animation.h"
 
 #include "unit_jump.cpp"
 #include "unit_cargo.cpp"
@@ -61,6 +62,7 @@
 #include "unit_weapon.cpp"
 #include "unit_bsp_gfx.h"
 #include "unit_click.cpp"
+
 //if the PQR of the unit may be variable...for radius size computation
 //#define VARIABLE_LENGTH_PQR
 
@@ -151,7 +153,7 @@ Sprite * GameUnit<UnitType>::getHudImage () const{
 }
 
 template <class UnitType>
-GameUnit<UnitType>::GameUnit<UnitType> (std::vector <Mesh *>& meshes, bool SubU, int fact):Unit( meshes, SubU, fact) {
+GameUnit<UnitType>::GameUnit<UnitType> (std::vector <Mesh *>& meshes, bool SubU, int fact):UnitType( meshes, SubU, fact) {
 
 }
 extern void update_ani_cache();

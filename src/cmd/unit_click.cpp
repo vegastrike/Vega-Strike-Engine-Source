@@ -1,6 +1,7 @@
 #include "vegastrike.h"
 #include "gfx/mesh.h"
 //#include "unit.h"
+#include "unit_template.h"
 #include "gfx/bounding_box.h"
 extern Vector mouseline;
 extern vector<Vector> perplines;

@@ -1,5 +1,6 @@
 #ifndef UNIT_TEMPLATE_H_
 #define UNIT_TEMPLATE_H_
+#include "unit_generic.h"
 #include "unit.h"
 #include "asteroid_generic.h"
 #include "enhancement_generic.h"
