@@ -4,10 +4,12 @@ Goals for 0.4.2 release:
 ** Fix systems to have jump points only outside the "slow-zone"
 ** Fix a bit of the system generation code: so we can specify everything in the milky_way.xml
 ** Sparkles (particle system)
-** Ship images not appearing in cargo screen (fixed on windows...other?)
 
-* Warp:
-** Time Compression back for devels
+*Map
+we should make the overall shift-m nav screen A) bigger - make it take up the full screen B) Since it's a HUD artifact, lit independent of scene - having your nav display go all dark, while it shows off the lighting, is... odd
+the circles could deal with being, at least on the galaxy view, even a bit smaller
+(12:43:37) Jack: there needs to be some way to control which names get printed so as not to clutter the entire screen with overlapping text
+(12:44:02) Jack: there should be some color cue that highlights the jumps out of the selected system
 
 *Damage
 ** Fix System Damage so it happens with reasonable frequency
