@@ -13,6 +13,25 @@
 ///ALERT to change must change enum in class
 const std::string vdu_modes [] = {"Target","Nav","Comm","Weapon","Damage","Shield", "Manifest", "TargetManifest","View","Message"};
 
+
+
+
+string getUnitNameAndFgNoBase (Unit * target) {
+  Flightgroup* fg = target->getFlightgroup();
+  if (fg) {
+    if (fg->name!="Base"&&fg->name!="Asteroid"&&fg->name!="Nebula") {
+      return fg->name+":"+target->name;
+    }
+  }
+  if (string("neutral")!=_Universe->GetFaction(target->faction)) {
+    return string(_Universe->GetFaction(target->faction))+" "+target->name;
+  }
+
+  return target->name;
+}
+
+
+
 int vdu_lookup (char * &s) {
 #ifdef _WIN32
 #define strcasecmp stricmp
@@ -293,22 +312,18 @@ void VDU::DrawTarget(Unit * parent, Unit * target, const GFXColor &c) {
   //sprintf (t,"\n%4.1f %4.1f",target->FShieldData()*100,target->RShieldData()*100);
 
 
-  char st[256];
-  //  sprintf (st,"\n%s",target->name.c_str());
-  if (target->getFgID()==target->name.c_str()) {
-	sprintf (st,"\n%s",target->name.c_str());
-  }else {
-	sprintf (st,"\n%s:%s",target->getFgID().c_str(),target->name.c_str());
-  }
+
+  
   GFXColorf (c);
-  tp->Draw (MangleString (st,_Universe->AccessCamera()->GetNebula()!=NULL?.4:0),0);  
+  tp->Draw (MangleString ((string("\n")+getUnitNameAndFgNoBase(target)).c_str(),_Universe->AccessCamera()->GetNebula()!=NULL?.4:0),0);  
   int i=0;
+  char st[1024];
   for (i=0;i<rows&&i<128;i++) {
     st[i]='\n';
 
   }
   st[i]='\0';
-  char qr[128];
+  char qr[256];
   sprintf (qr,"Dis %.4f",(parent->Position()-target->Position()).Magnitude()-((target->isUnit()==PLANETPTR)?target->rSize():0));
   strcat (st,qr);
   tp->Draw (MangleString (st,_Universe->AccessCamera()->GetNebula()!=NULL?.4:0),0);  
@@ -334,7 +349,7 @@ void VDU::DrawMessages(Unit *target, const GFXColor & c){
 
     int nowtime_mins=(int)(nowtime/60.0);
     int nowtime_secs=(int)(nowtime - nowtime_mins*60);
-    sprintf (st,"%s:%s:%s:%2d.%02d",target->getFgID().c_str(),target->name.c_str(),ainame.c_str(),nowtime_mins,nowtime_secs);
+    sprintf (st,"\n%s:%s:%2d.%02d",getUnitNameAndFgNoBase(target).c_str(),ainame.c_str(),nowtime_mins,nowtime_secs);
   }
   else{
     sprintf(st,"no target");
@@ -349,7 +364,7 @@ void VDU::DrawMessages(Unit *target, const GFXColor & c){
   int rows_used=rows_needed+1;
 
   gameMessage *lastmsg=mc->last(0);
-  for(int i=scrolloffset<0?-scrolloffset:0;rows_used<=rows && lastmsg!=NULL;i++){
+  for(int i=scrolloffset<0?-scrolloffset:0;rows_used<rows && lastmsg!=NULL;i++){
     lastmsg=mc->last(i);
     if(lastmsg!=NULL){
       char timebuf[100];
@@ -532,11 +547,7 @@ void VDU::DrawDamage(Unit * parent, const GFXColor &c) {
   GFXDisable(TEXTURE0);
   Unit * thr = parent->Threat();
   GFXColorf (c);
-  if (parent->getFgID()==parent->name.c_str()) {
-    sprintf (st,"\n%s\nHull: %.3f",parent->name.c_str(),parent->GetHull());
-  }else {
-    sprintf (st,"\n%s:%s\nHull: %.3f",parent->getFgID().c_str(),parent->name.c_str(),parent->GetHull());
-  }
+  sprintf (st,"\n%s\nHull: %.3f",getUnitNameAndFgNoBase(parent).c_str(),parent->GetHull());
   tp->Draw (MangleString (st,_Universe->AccessCamera()->GetNebula()!=NULL?.5:0),0);  
   int k=strlen(st);
   if (k>cols)
@@ -609,7 +620,7 @@ void VDU::DrawStarSystemAgain (float x,float y,float w,float h, VIEWSTYLE viewSt
   char buf[1024];
   GFXColorf(c);
   if (target) {
-    sprintf(buf,"\n%s:%s\n",target->getFgID().c_str(),target->name.c_str());
+    sprintf(buf,"\n%s\n",getUnitNameAndFgNoBase(target).c_str());
   } else {
     sprintf (buf,"\nThis is a test of the emergencyBroadcastSystem\n");
   }
