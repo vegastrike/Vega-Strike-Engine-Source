@@ -1083,21 +1083,28 @@ void GameCockpit::Respawn (int,KBSTATE k) {
 
 }
 
-static void FaceTarget (Unit * un) {
-  Unit * targ = un->Target();
-  if (targ) {
-    QVector dir (targ->Position()-un->Position());
-    dir.Normalize();
-    Vector p,q,r;
-    un->GetOrientation(p,q,r);
-    QVector qq(q.Cast());
-    qq = qq+QVector (.001,.001,.001);
-    un->SetOrientation (qq,dir);
+static void FaceTarget (Unit * un, const QVector &ourpos, Unit * target) {
+  if (target) {
+    QVector RealPosition = target->LocalPosition();
+    if (target->isSubUnit())
+      RealPosition=target->Position();
+      Vector methem(RealPosition.Cast()-ourpos.Cast());
+      methem.Normalize();
+      Vector p,q,r;
+      un->GetOrientation(p,q,r);
+      p=methem.Cross(r);
+      if (p.MagnitudeSquared()){
+	float theta =p.Magnitude();
+	p*= (asin (theta)/theta);
+	un->Rotate(p);
+      }
   }
+  
 }
 
 // SAME AS IN COCKPIT BUT ADDS SETVIEW and ACCESSCAMERA -> ~ DUPLICATE CODE
 int GameCockpit::Autopilot (Unit * target) {
+  static bool autopan = XMLSupport::parse_bool (vs_config->getVariable ("graphics","pan_on_auto","true"));
   int retauto = 0;
   if (target) {
     if (enableautosound.sound<0) {
@@ -1108,22 +1115,25 @@ int GameCockpit::Autopilot (Unit * target) {
     Unit * un=NULL;
     if ((un=GetParent())) {
       if ((retauto = un->AutoPilotTo(un))) {//can he even start to autopilot
-	SetView (CP_PAN);
+	if (autopan)
+	  SetView (CP_PAN);
 	un->AutoPilotTo(target);
 	static bool face_target_on_auto = XMLSupport::parse_bool (vs_config->getVariable ( "physics","face_on_auto", "false"));
 	if (face_target_on_auto) {
-	  FaceTarget(un);
+	  //	  FaceTarget(un,un->LocalPosition(),un->Target());
 	}	  
 	static double averagetime = GetElapsedTime()/getTimeCompression();
 	static double numave = 1.0;
 	averagetime+=GetElapsedTime()/getTimeCompression();
 	static float autospeed = XMLSupport::parse_float (vs_config->getVariable ("physics","autospeed",".020"));//10 seconds for auto to kick in;
 	numave++;
-	AccessCamera(CP_PAN)->myPhysics.SetAngularVelocity(Vector(0,0,0));
-	AccessCamera(CP_PAN)->myPhysics.ApplyBalancedLocalTorque(_Universe->AccessCamera()->P,
-							      _Universe->AccessCamera()->R,
-							      averagetime*autospeed/(numave));
-	zoomfactor=1.5;
+	if (autopan) {
+	  AccessCamera(CP_PAN)->myPhysics.SetAngularVelocity(Vector(0,0,0));
+	  AccessCamera(CP_PAN)->myPhysics.ApplyBalancedLocalTorque(_Universe->AccessCamera()->P,
+								   _Universe->AccessCamera()->R,
+								   averagetime*autospeed/(numave));
+	  zoomfactor=1.5;
+	}
 	static float autotime = XMLSupport::parse_float (vs_config->getVariable ("physics","autotime","10"));//10 seconds for auto to kick in;
 
 	autopilot_time=autotime;
@@ -1463,6 +1473,7 @@ string GameCockpit::getsoundfile(string sound) {
 
 void GameCockpit::UpdAutoPilot()
 {
+  static bool autopan = XMLSupport::parse_bool (vs_config->getVariable ("graphics","pan_on_auto","true"));
   if (autopilot_time!=0) {
     autopilot_time-=SIMULATION_ATOM;
     if (autopilot_time<= 0) {
@@ -1471,14 +1482,16 @@ void GameCockpit::UpdAutoPilot()
 	disableautosound.loadsound(str);
       }
       disableautosound.playsound();
-      AccessCamera(CP_PAN)->myPhysics.SetAngularVelocity(Vector(0,0,0));
-      SetView(CP_FRONT);
+      if (autopan) {
+	AccessCamera(CP_PAN)->myPhysics.SetAngularVelocity(Vector(0,0,0));
+	SetView(CP_FRONT);
+      }
       autopilot_time=0;
       Unit * par = GetParent();
       if (par) {
 	Unit * autoun = autopilot_target.GetUnit();
 	autopilot_target.SetUnit(NULL);
-	if (autoun) {
+	if (autoun&&autopan) {
 	  par->AutoPilotTo(autoun);
 	}
       }
