@@ -154,6 +154,7 @@ namespace UnitUtil {
               return true;
             }
           }
+          return false;
 	}
 	int addCargo (Unit *my_unit,Cargo carg) {
 	  if (!my_unit)return 0;
