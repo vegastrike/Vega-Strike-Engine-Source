@@ -179,7 +179,7 @@ public:
 	    if (un->mounts[i].status==Unit::Mount::ACTIVE||un->mounts[i].status==Unit::Mount::INACTIVE)
 	      CargoList->AddTextItem ((tostring(i)+un->mounts[i].type->weapon_name).c_str(),un->mounts[i].type->weapon_name.c_str());
 	    else 
-	      CargoList->AddTextItem ((tostring(i)+" [Empty]").c_str(),"[Empty]");
+	      CargoList->AddTextItem ((tostring(i)+" [Empty]").c_str(),(std::string("[")+lookupMountSize(un->mounts[i].size)+std::string("]")).c_str());
 	  }
 	  break;
 	case SUBUNIT_MODE:
