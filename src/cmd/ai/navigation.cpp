@@ -252,6 +252,7 @@ void ChangeHeading::Execute() {
   char xswitch = ((local_heading.i>0)!=(last_velocity.i>0)||(!local_heading.i))&&last_velocity.i!=0?1:0;
   char yswitch = ((local_heading.j>0)!=(last_velocity.j>0)||(!local_heading.j))&&last_velocity.j!=0?1:0;
   static bool AICheat = XMLSupport::parse_bool(vs_config->getVariable ("AI","turn_cheat","true"));
+  bool cheater=false;
   if (AICheat) {
     if (xswitch||yswitch) {   
 
@@ -269,7 +270,7 @@ void ChangeHeading::Execute() {
 	  local_velocity.j=.0f;
           ang_vel.j=.0f;
       }
-      
+      cheater=true;
       parent->SetAngularVelocity(ang_vel);
     }
   }
@@ -299,7 +300,8 @@ void ChangeHeading::Execute() {
     OptimizeAngSpeed(turningspeed*parent->GetComputerData().max_yaw/*/getTimeCompression()*/,local_velocity.j,torque.j);
     torque.k  =-parent->GetMoment()*local_velocity.k/SIMULATION_ATOM;//try to counteract roll;
   }
-  parent->ApplyLocalTorque (torque);
+  if (!cheater)
+    parent->ApplyLocalTorque (torque);
 }
 ChangeHeading::~ChangeHeading() {
 #ifdef ORDERDEBUG
