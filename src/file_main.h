@@ -34,7 +34,16 @@ inline void CloseFile()
 	fclose(fpread);
 }
 
+#if defined(IRIX)
+inline float readf (FILE *fp) {
+	union { float fval; unsigned int ival; } t;
+	(void) fread (&t.fval, sizeof t.fval, 1, fp);
+	t.ival = le32_to_cpu(t.ival);
+	return t.fval;
+}
+#else
 inline float readf (FILE *fp) {float temp;	fread (&temp,sizeof(float),1,fp);return le32_to_cpu(temp);}
+#endif
 inline short reads (FILE *fp) {short temp;	fread (&temp,sizeof(short),1,fp);return le16_to_cpu(temp);}
 inline int readi (FILE * fp) {int i; fread (&i,sizeof(int),1,fp); return le32_to_cpu(i);}
 inline unsigned char readc (FILE *fp) {unsigned char temp;	fread (&temp,sizeof(char),1,fp);return temp;}
