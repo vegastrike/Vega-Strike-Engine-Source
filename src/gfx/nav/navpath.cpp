@@ -35,6 +35,7 @@
 #include <set>
 #include <map>
 #include <string>
+#include <iostream>
 
 using namespace std;
 //*******************************************************************//
@@ -304,7 +305,10 @@ bool NavPath::evaluate() {
     bool oriTurn=true;
     deque<unsigned> * front;
     unsigned visitMark;
-    
+    if (originIndex>=visited.size()||destIndex>=visited.size()) {
+      fprintf (stderr,"(previously) FATAL error with nav system, referencing value too big %d %d with visited size %d\n",(int)originIndex,(int)destIndex,(int)visited.size());
+      return false;
+    }
     oriFront.push_back(originIndex);
     visited[originIndex]=1;
     destFront.push_back(destIndex);
@@ -570,6 +574,7 @@ void PathManager::updatePaths(UpdateType type) {
   DFS();
   if(type==ALL) {
     for(std::vector<NavPath *>::iterator j = paths.begin(); j < paths.end(); ++j) {
+      std::cerr<<"Updating path: "<<(*j)->getName()<<endl;
       (*j)->update();
     }
   }
@@ -578,16 +583,20 @@ void PathManager::updatePaths(UpdateType type) {
       (*i)->updated=false;
     
     for(i = topoOrder.begin(); i != topoOrder.end(); ++i)
-      if((*i)->updated==false && (*i)->isCurrentDependant())
+      if((*i)->updated==false && (*i)->isCurrentDependant()) {
+	std::cerr<<"Updating path: "<<(*i)->getName()<<endl;
 	updateSpecificPath(*i);
+      }
   }
   else{
     for(i = topoOrder.begin(); i != topoOrder.end(); ++i)
       (*i)->updated=false;
     
     for(i = topoOrder.begin(); i != topoOrder.end(); ++i)
-      if((*i)->updated==false && (*i)->isTargetDependant())
+      if((*i)->updated==false && (*i)->isTargetDependant()) {
+	std::cerr<<"Updating path: "<<(*i)->getName()<<endl;
 	updateSpecificPath(*i);
+      }
   }
 }
 
