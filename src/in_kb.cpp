@@ -44,7 +44,7 @@ static void kbGetInput(int key, int special, int release, int x, int y){
   keyState[key] = release?UP:DOWN;
 }
 
-static void glut_keyboard_cb( unsigned char ch, int x, int y ) 
+ void glut_keyboard_cb( unsigned char ch, int x, int y ) 
 {
     kbGetInput( ch, 0, 0, x, y );
 }

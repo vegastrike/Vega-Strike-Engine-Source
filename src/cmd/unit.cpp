@@ -26,7 +26,6 @@
 
 #include "gfx/sprite.h"
 #include "lin_time.h"
-#include "hud.h"
 
 
 #include "ai/order.h"

@@ -357,10 +357,14 @@ void destroyObjects() {
   //delete fighter2;
   //delete fighter;
 }
+extern void glut_keyboard_cb( unsigned char ch, int x, int y );
+
 
 void main_loop() {
-  
+ static int tttime=0;
+ start:
 
+  tttime++;
   _Universe->StartDraw();
 
   _Universe->activeStarSystem()->Draw();
@@ -374,6 +378,10 @@ void main_loop() {
   GFXEndScene();
       
   ProcessInput();
+  glut_keyboard_cb ('-',0,0);
+  if (tttime>10000)
+    exit(0);
+  //  goto start;
 }
 
 

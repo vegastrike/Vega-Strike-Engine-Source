@@ -215,6 +215,7 @@ void StarSystem::Update() {
     UpdateTime();
   }
   interpolation_blend_factor = .333333*((3*time)/SIMULATION_ATOM+current_stage);
+  //  fprintf (stderr,"bf:%lf",interpolation_blend_factor);
   //clog << "blend factor: " << interpolation_blend_factor << "\n";
 }
 
