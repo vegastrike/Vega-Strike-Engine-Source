@@ -784,13 +784,26 @@ bool UpgradingInfo::SelectItem (const char *item, int button, int buttonstate) {
      	gameMessage last;
 	vector <std::string> who;
 	CargoInfo->ChangeTextItem ("name","");
-	who.push_back ("news");
-	if ((mission->msgcenter->last(cargonumber,last,who))) {
-	  CargoInfo->ChangeTextItem ("description",last.message.c_str(),true);
-	  static string newssong=vs_config->getVariable("audio","newssong","../music/news1.ogg");
-	  muzak->GotoSong(newssong);
-	  readnews=true;
-	} 
+	static bool news_from_cargolist=XMLSupport::parse_bool(vs_config->getVariable("cargo","news_from_cargolist","false"));
+	if (news_from_cargolist) {
+		who.push_back ("news");
+		if ((mission->msgcenter->last(cargonumber,last,who))) {
+			CargoInfo->ChangeTextItem ("description",last.message.c_str(),true);
+			static string newssong=vs_config->getVariable("audio","newssong","../music/news1.ogg");
+			muzak->GotoSong(newssong);
+			readnews=true;
+		}
+	}else {
+		const char * temp = item;
+		while (*temp!=' '&&*temp!='\0')
+			temp++;
+		if (*temp==' ')
+			temp++;
+		CargoInfo->ChangeTextItem ("description",temp,true);
+		static string newssong=vs_config->getVariable("audio","newssong","../music/news1.ogg");
+		muzak->GotoSong(newssong);
+		readnews=true;
+	}
 	CargoInfo->ChangeTextItem ("price","");
 	CargoInfo->ChangeTextItem ("mass","");
 	CargoInfo->ChangeTextItem ("volume","");
