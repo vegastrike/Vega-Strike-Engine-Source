@@ -4,13 +4,9 @@ Goals for 0.4.2 release:
 ** Fix systems to have jump points only outside the "slow-zone"
 ** Fix a bit of the system generation code: so we can specify everything in the milky_way.xml
 ** Sparkles (particle system)
-** Shields drop when jumping
-
-*BUGFIX
-** Ship images not appearing in cargo screen
+** Ship images not appearing in cargo screen (fixed on windows...other?)
 
 * Warp:
-** no weapons in warp
 ** Time Compression back for devels
 
 *Damage
@@ -18,9 +14,6 @@ Goals for 0.4.2 release:
 
 * Resource management/organization:
 ** trim redundant thrust animation images
-
-* UI:
-** Add cargo pics
 
 * AI:
 ** Fix AI range trigger happiness
@@ -38,6 +31,8 @@ Scripting Goals:
 	  the news?  If story is reported correctly, there's no problem.
 	  This means that there is actually a fleet led by a dodo, it's
 	  not wrong, just a bad simulation :-) --Dan.a
+	  -- By fix, we mean take advantage of the pending changes to script 
+	     side that will classify flightgroups in a reasonable way
 ** Get formatted date back.
 
 
@@ -56,6 +51,7 @@ Goals for 'Sometime over the rainbow'
 ** Complete histories.
 
 * UI:
+** Add more cargo pics
 ** Merge BaseComputer modes with NavScreen?
 ** radio chatter from: to:
 
