@@ -17,12 +17,13 @@
 #endif
 #ifdef _WIN32
 extern void GetRidOfConsole ();
+extern void my_sleep (int i);
 #endif
 void LoadMissionDialog (char * Filename,int i);
 void LoadSaveDialog (char *,int);
 void LoadAutoDialog (char *,int);
 #define NUM_TITLES 8
-static const char * titles [NUM_TITLES] = {"Select Mission", "New Game","Load Saved Game","Recover From Autosave","Launch Last Savegame", "Launch No Savegame","Exit","Help"};
+static const char * titles [NUM_TITLES] = {"Select Mission", "New Game","Load Saved Game","Recover From Autosave","Launch Last Savegame", "Launch No Savegame","Help","Exit Launcher"};
 std::string my_mission ("mission/exploration/explore_universe.mission");
 #define NUM_HELPS 6
 static const char * helps [NUM_HELPS] = {
@@ -89,7 +90,7 @@ int win_close( GtkWidget *w, void *)
     return FALSE;
 }
 void changehome();
-void Help (const char *title, const char *text) {
+GdkWindow * Help (const char *title, const char *text) {
     GtkWidget *window;
     window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
     gtk_window_set_default_size(GTK_WINDOW(window), 300,0);
@@ -99,6 +100,7 @@ void Help (const char *title, const char *text) {
     gtk_container_add (GTK_CONTAINER (window), label);
     gtk_widget_show (label);
     gtk_widget_show (window);
+    return (GdkWindow*)window;
 }
 
 void save_stuff(char *filename) {
@@ -222,10 +224,10 @@ void hello( GtkWidget *widget, gpointer   data ) {
       launch_mission();
       break;
     case 6:
-      gtk_main_quit();
+      help_func(NULL,-1);
       break;
     case 7:
-      help_func(NULL,-1);
+      gtk_main_quit();
       break;
     default:
       printf ("\nERROR...");
@@ -296,11 +298,11 @@ void LoadSaveFunction (char *Filename, int i, GtkSignalFunc func,const char * de
                                             (filew)->cancel_button),
                                "clicked", (GtkSignalFunc) gtk_widget_destroy,
                                GTK_OBJECT (filew));
-    if (default_thing[0]!='\0') {
-      gtk_file_selection_complete (GTK_FILE_SELECTION(filew), default_thing);
-    }else {
+//    if (default_thing[0]!='\0') {
+//      gtk_file_selection_complete (GTK_FILE_SELECTION(filew), default_thing);
+//    }else {
       gtk_file_selection_set_filename (GTK_FILE_SELECTION(filew), default_thing);
-    }
+//    }
     GtkWidget *box=gtk_hbox_new (FALSE,0);
     gtk_container_add (GTK_CONTAINER (GTK_FILE_SELECTION(filew)->button_area),box);
     gtk_box_pack_end (GTK_BOX (GTK_FILE_SELECTION(filew)->button_area),GTK_FILE_SELECTION (filew)->help_button, TRUE, TRUE, 40);
@@ -314,7 +316,7 @@ void LoadMissionDialog (char * Filename,int i) {
   char mypwd [1000];
   getcwd (mypwd,1000);
   //  fprintf (stderr,mypwd);
-  LoadSaveFunction (Filename,i,(GtkSignalFunc) file_mission_sel,/*my_mission.c_str()*/"*.mission"/*(ParentDir()+"/mission").c_str()*/);
+  LoadSaveFunction (Filename,i,(GtkSignalFunc) file_mission_sel,/*my_mission.c_str()*/"exploration/explore_universe.mission"/*(ParentDir()+"/mission").c_str()*/);
 }
 #define HOMESUBDIR ".vegastrike"
 void changehome() {
