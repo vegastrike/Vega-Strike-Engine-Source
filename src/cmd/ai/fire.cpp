@@ -161,24 +161,24 @@ void FireAt::ChooseTargets (int numtargs, bool force) {
   }
   std::sort (tbin.begin(),tbin.end());
   while ((un = iter.current())) {
-    if (un->CloakVisible()<=.8)
-      continue;//sanity check
-    float rangetotarget = UnitUtil::getDistance (parent,un);
-    float relationship = GetEffectiveRelationship (un);
-    float tmp=Priority (parent,un, gunrange,rangetotarget, relationship);
-    if (tmp>priority) {
-      mytarg = un;
-    }
-    for (vector <TurretBin>::iterator k=tbin.begin();k!=tbin.end();++k) {
-      if (rangetotarget>k->maxrange) {
-	break;
+    if (un->CloakVisible()>.8) {
+      float rangetotarget = UnitUtil::getDistance (parent,un);
+      float relationship = GetEffectiveRelationship (un);
+      float tmp=Priority (parent,un, gunrange,rangetotarget, relationship);
+      if (tmp>priority) {
+	mytarg = un;
       }
-      const char tprior=ROLES::getPriority (k->turret[0].tur->combatRole())[un->combatRole()];
-      if (relationship<0) {
-	if (tprior<16){
-	  k->listOfTargets[0].push_back (TargetAndRange (un,rangetotarget,relationship));
-	}else if (tprior<31){
-	  k->listOfTargets[1].push_back (TargetAndRange (un,rangetotarget,relationship));
+      for (vector <TurretBin>::iterator k=tbin.begin();k!=tbin.end();++k) {
+	if (rangetotarget>k->maxrange) {
+	  break;
+	}
+	const char tprior=ROLES::getPriority (k->turret[0].tur->combatRole())[un->combatRole()];
+	if (relationship<0) {
+	  if (tprior<16){
+	    k->listOfTargets[0].push_back (TargetAndRange (un,rangetotarget,relationship));
+	  }else if (tprior<31){
+	    k->listOfTargets[1].push_back (TargetAndRange (un,rangetotarget,relationship));
+	  }
 	}
       }
     }
