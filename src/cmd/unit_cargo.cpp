@@ -133,6 +133,7 @@ void Unit::SortCargo() {
       tmpmass/=un->image->cargo[i].quantity;
       tmpvolume/=un->image->cargo[i].quantity;
       un->image->cargo[i].volume=tmpvolume;
+	  un->image->cargo[i].mission = (un->image->cargo[i].mission||un->image->cargo[i+1].mission);
       un->image->cargo[i].mass=tmpmass;
       un->image->cargo.erase(un->image->cargo.begin()+(i+1));//group up similar ones
       i--;
