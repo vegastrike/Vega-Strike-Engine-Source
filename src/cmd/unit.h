@@ -227,7 +227,7 @@ public:
 		}else {
 			Matrix k(ctm);
 			
-			float speed = GetVelocity().Magnitude();
+			float speed = GetVelocity().Magnitude()*graphicOptions.WarpFieldStrength;
 			//Matrix scalar=identity_matrix;
 			
 			static float maxstretch = XMLSupport::parse_float (vs_config->getVariable("graphics","warp_stretch_max","4"));
