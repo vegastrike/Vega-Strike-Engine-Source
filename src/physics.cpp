@@ -1,0 +1,229 @@
+/*
+ * Vega Strike
+ * Copyright (C) 2001-2002 Daniel Horn
+ *
+ * http://vegastrike.sourceforge.net/
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+ */
+
+#include "lin_time.h"
+#include "physics.h"
+
+
+const float oocc = (float).0000000000000000111265005605; //   1/c^2
+const float c = (float)299792458.0;
+const float co10 = (float)29979245.8;
+
+struct Quaternion {
+	float s;
+	Vector v;
+	Quaternion(float s, Vector v) {this->s = s; this->v = v;};
+
+	Quaternion Conjugate() {return Quaternion(s, Vector(-v.i, -v.j, -v.k));};
+	float Magnitude() {return sqrtf(s*s+v.i*v.i+v.j*v.j+v.k*v.k);};
+
+	Quaternion operator* (const Quaternion &rval) { 
+	  return Quaternion(s*rval.s - DotProduct(v, rval.v), 
+			    s*rval.v + rval.s*v + v.Cross(rval.v));};
+};
+
+PhysicsSystem::PhysicsSystem(float M, float I, Vector *pos, Vector *p, Vector *q, Vector *r) : 
+  mass (M), 
+  MomentOfInertia(I),   
+  NetForce(0,0,0),
+  NetTorque(0,0,0),
+  AngularVelocity(0,0,0),
+  Velocity(0,0,0),  
+  pos(pos),
+  p(p), 
+  q(q), 
+  r(r)
+{
+	
+	NumActiveForces = 0;
+	NumActiveTorques=0;
+}
+/*
+	ActiveForces = new Force [forcemax];
+	ActiveTorques = new Force [forcemax];
+}
+PhysicsSystem:: ~PhysicsSystem()
+{
+	delete [] ActiveForces;
+	delete [] ActiveTorques;
+}*/
+void PhysicsSystem::ResistiveLiquidTorque (float ResistiveForceCoef)
+{	
+		NetTorque += ResistiveForceCoef* AngularVelocity;
+}
+void PhysicsSystem::ResistiveLiquidForce (float ResistiveForceCoef)
+{		
+		NetForce += ResistiveForceCoef*Velocity;
+}
+void PhysicsSystem::ResistiveThrust (float strength)
+{		
+		Vector V1= Velocity;
+		float mag = V1.Magnitude();
+		float t = mag / fabs(strength);
+		ApplyForce ((strength/mag)*V1,t);
+}
+void PhysicsSystem::ResistiveTorqueThrust (float strength, const Vector & Position)
+{		
+		Vector V1= AngularVelocity;
+		float mag = V1.Magnitude();
+		float t = mag / fabs(strength);
+		ApplyBalancedLocalTorque ((strength/mag)*V1,Position,t);
+}
+
+void PhysicsSystem::ResistiveTorque (float ResistiveForceCoef)
+{
+	if ((AngularVelocity.i||AngularVelocity.j||AngularVelocity.k)&&ResistiveForceCoef) {
+
+		Vector temp = AngularVelocity;
+		NetTorque += (ResistiveForceCoef* AngularVelocity*AngularVelocity)*temp.Normalize();
+	}
+}
+void PhysicsSystem::ResistiveForce (float ResistiveForceCoef)
+{
+	if ((Velocity.i||Velocity.j||Velocity.k)&&ResistiveForceCoef) {
+		Vector temp = Velocity;
+		NetForce += (ResistiveForceCoef* Velocity*Velocity)*temp.Normalize();
+	}
+}
+
+void PhysicsSystem::Update () {
+	//ResistiveForce (-10);
+	//ResistiveTorque(-10);
+	ApplyImpulses(GetElapsedTime());
+	NetForce = Vector(0,0,0);
+	NetTorque = Vector(0,0,0);
+}
+
+void PhysicsSystem::Rotate (const Vector &axis) {
+	float theta = axis.Magnitude();
+	if(theta==0.0f)
+		return;
+	float ootheta = 1/theta;
+	float s = cos (theta * .5);
+	Quaternion rot = Quaternion(s, axis * (sin (theta*.5)*ootheta));
+	Quaternion rotprime = rot.Conjugate();
+	Quaternion pquat = rot * Quaternion(0, *p) * rotprime;
+	Quaternion qquat = rot * Quaternion(0, *q) * rotprime;
+	Quaternion rquat = rot * Quaternion(0, *r) * rotprime;
+	*p = pquat.v;
+	*q = qquat.v;
+	*r = rquat.v;
+}
+
+void PhysicsSystem::JettisonReactionMass (const Vector &Direction, float speed, float mass) {
+	NetForce += Direction *(speed *mass/GetElapsedTime());
+}
+
+void PhysicsSystem::JettisonMass (const Vector &Direction, float speed, float jmass) {
+	mass -= jmass; //fuel is sent out
+	JettisonReactionMass(Direction, speed, jmass);
+}
+
+void PhysicsSystem::ApplyForce (const Vector &Vforce, float time) {
+	if (NumActiveForces<forcemax)
+	{
+
+		ActiveForces[NumActiveForces].F = Vforce;
+		ActiveForces[NumActiveForces].t = time;
+		NumActiveForces++;
+	}
+}
+
+void PhysicsSystem::ApplyTorque (const Vector &Vforce, const Vector &Location, float time) {
+	ApplyForce (Vforce, time);
+	if (NumActiveTorques< forcemax)
+	{		
+		ActiveTorques[NumActiveTorques].F = (Location-*pos).Cross (Vforce);
+		ActiveTorques[NumActiveTorques].t = time;
+		NumActiveTorques++;
+	}
+}
+
+void PhysicsSystem::ApplyLocalTorque (const Vector &Vforce, const Vector &Location, float time) {
+	ApplyForce (Vforce, time);
+	if (NumActiveTorques< forcemax)
+	{		
+		ActiveTorques[NumActiveTorques].F = Location.Cross (Vforce);
+		ActiveTorques[NumActiveTorques].t = time;
+		NumActiveTorques++;
+	}
+}
+
+void PhysicsSystem::ApplyBalancedLocalTorque (const Vector &Vforce, const Vector &Location, float time) {
+	if (NumActiveTorques< forcemax)
+	{		
+		ActiveTorques[NumActiveTorques].F = Location.Cross (Vforce);
+		ActiveTorques[NumActiveTorques].t = time;
+		NumActiveTorques++;
+	}
+}
+void PhysicsSystem::ApplyImpulses (float Time) {
+	Vector temptorque = Time*NetTorque;
+	Vector tempforce = Time*NetForce;
+	for (int i = 0; i<NumActiveTorques; i++)
+	{
+		if (Time>=ActiveTorques[i].t)
+		{
+			temptorque += ActiveTorques[i].t*ActiveTorques[i].F;
+			ActiveTorques[i].F = ActiveTorques[NumActiveTorques-1].F;
+			ActiveTorques[i].t = ActiveTorques[NumActiveTorques-1].t;
+			NumActiveTorques--;
+			i--;//so the loop goes through the active force that was just switched places with
+		}
+		else
+		{
+			temptorque+= Time*ActiveTorques[i].F;
+			ActiveTorques[i].t -= Time;
+		}
+	}
+	for (int i=0; i<NumActiveForces; i++)
+	{
+		if (Time>=ActiveForces[i].t)
+		{
+			tempforce += ActiveForces[i].t*ActiveForces[i].F;
+			ActiveForces[i].F = ActiveForces[NumActiveForces-1].F;
+			ActiveForces[i].t = ActiveForces[NumActiveForces-1].t;
+			NumActiveForces--;
+			i--;//so the loop goes through the active force that was just switched places with
+		}
+		else
+		{
+			tempforce+= Time*ActiveForces[i].F;
+			ActiveForces[i].t -= Time;
+		}
+
+
+	}
+	//Vector temp = 0.5*GetElapsedTime()*NetTorque*(1.0/MomentOfInertia);//assume force is constant throughout the time
+	temptorque = temptorque*(0.5/MomentOfInertia);
+	Rotate (AngularVelocity+0.5*temptorque);
+	AngularVelocity+= temptorque;
+	tempforce = tempforce *(0.5/mass);//acceleration
+	//now the fuck with it... add relitivity to the picture here
+	if (fabs (Velocity.i)+fabs(Velocity.j)+fabs(Velocity.k)> co10)
+	{
+		float magvel = Velocity.Magnitude();
+		float y = (1-magvel*magvel*oocc);
+		tempforce = tempforce * powf (y,1.5);
+	}
+	*pos += (Velocity+.5*tempforce);
+	Velocity +=tempforce;
+}
