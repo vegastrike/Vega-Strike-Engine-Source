@@ -280,8 +280,6 @@ struct XML {
     bool usenormals;
     bool reverse;
     bool force_texture;
-	bool recalc_norm;
-	bool shouldreflect;
 	
 	bool reflect;
 	bool lighting;
@@ -289,7 +287,6 @@ struct XML {
 	float polygon_offset;
 	int blend_src;
 	int blend_dst;
-	int point_state;
 
     GFXVertex vertex;
 	textureholder texturetemp;
