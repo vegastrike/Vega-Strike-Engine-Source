@@ -102,6 +102,7 @@ VegaConfig * createVegaConfig( char * file)
 extern void DockToSavedBases (int playernum);
 
 std::string ParseCommandLine(int argc, char ** CmdLine);
+bool cleanexit=false;
 void cleanup(void)
 {
   fprintf( stdout, "\n\nLoop average : %g\n\n", avg_loop);
@@ -112,7 +113,8 @@ void cleanup(void)
   // In network mode, we may not do the save since it is useless
   if( _Universe != NULL && Network==NULL)
 	  _Universe->WriteSaveGame(true);
-
+  while (!cleanexit) 
+    int i=1;
   if( Network!=NULL)
   {
 		cout<<"Number of players"<<_Universe->numPlayers()<<endl;

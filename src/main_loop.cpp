@@ -120,10 +120,12 @@ bool _Slew = true;
    }
  }
 static bool QuitAllow=false;
-
+extern bool cleanexit;
 namespace CockpitKeys {
+  
   void QuitNow () {
     {
+      cleanexit=true;
 	  if( Network==NULL)
 		_Universe->WriteSaveGame(true);//gotta do important stuff first
       for (unsigned int i=0;i<active_missions.size();i++) {
