@@ -930,7 +930,7 @@ void processsystems (std::vector <System> & s){
 	if (1) {
 		for (unsigned int i=0;i<s.size();++i) {
 			reName(s,s[i],getNameForFaction(s[i]["faction"]));
-			numfactions["faction"]+=1;
+			numfactions[s[i]["faction"]]+=1;
 		}
 	}
 	if (1) {
