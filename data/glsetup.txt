@@ -1,4 +1,0 @@
-fov 78.0
-aspect 1.3333333
-znear 1.00
-zfar 50000

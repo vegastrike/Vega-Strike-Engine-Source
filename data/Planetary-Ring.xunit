@@ -1,8 +1,0 @@
-<Unit>
-<Meshfile file="Planetary-Ring.xmesh"/>
-
-	<ShieldMesh file="Planetary-Ring.xmesh"/>
-	<Defense>
-	<Hull strength="100000000000000"/>
-	</Defense>
-</Unit>
