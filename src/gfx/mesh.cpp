@@ -49,11 +49,15 @@ class OrigMeshContainer {
 public:
   float d;
   Mesh * orig;
+  OrigMeshContainer(){ orig=NULL; };
   OrigMeshContainer (Mesh * tmp, float d) {
     orig = tmp;
     this->d = d;
   }
   bool operator < (const OrigMeshContainer & b) const {
+    if(orig->Decal==NULL || b.orig->Decal==NULL){
+      cout << "DEcal is nulll" << endl;
+    }
     return ((*orig->Decal) < (*b.orig->Decal));
   }
   bool operator == (const OrigMeshContainer &b) const {
@@ -125,6 +129,7 @@ bool Mesh::LoadExistant (const char * filehash) {
 
 Mesh:: Mesh(const char * filename, bool xml, int faction, bool orig):hash_name(filename)
 {
+  this->orig=NULL;
   InitUnit();
   Mesh *oldmesh;
   if (LoadExistant (filename)) {
@@ -150,7 +155,8 @@ Mesh:: Mesh(const char * filename, bool xml, int faction, bool orig):hash_name(f
   if (!orig) {
     hash_name =shared?GetSharedMeshHashName (filename):GetHashName(filename);
     meshHashTable.Put(hash_name, oldmesh);
-    oldmesh[0]=*this;
+    //oldmesh[0]=*this;
+    *oldmesh=*this;
     oldmesh->orig = NULL;
     oldmesh->refcount++;
   } else {
@@ -386,8 +392,9 @@ void Mesh::ProcessUndrawnMeshes(bool pushSpecialEffects) {
     } else {
 
     }
-    std::sort(undrawn_meshes[a].begin(),undrawn_meshes[a].end());//sort by texture address
+    //    std::sort(undrawn_meshes[a].begin(),undrawn_meshes[a].end());//sort by texture address
     if (!undrawn_meshes[a].empty()) {
+      // shouldn't the sort - if any - be placed here??
       undrawn_meshes[a].back().orig->vlist->LoadDrawState();
     }
     while(!undrawn_meshes[a].empty()) {

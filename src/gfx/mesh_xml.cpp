@@ -1201,11 +1201,17 @@ void Mesh::LoadXML(const char *filename, int faction) {
       }
     }
   }
+
+  printf("MESHXML texture name:%s:\n",xml->decal_name.c_str());
   if (xml->animated_name.length()) {
     Decal = new AnimatedTexture (xml->animated_name.c_str(),0,BILINEAR);
+    printf("ani\n");
   }else if (xml->decal_name.length()==0) {	
     Decal = NULL;
+    printf("nnull\n");
   } else {
+    printf("tex\n");
+
     if (xml->alpha_name.length()==0) {
       Decal = new Texture(xml->decal_name.c_str(), 0);    
     }else {

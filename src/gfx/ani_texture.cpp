@@ -87,6 +87,7 @@ void AnimatedTexture::Destroy() {
       delete Decal[i];
     }
     delete Decal;
+    Decal=NULL;
   }
 }
 void AnimatedTexture::Load(FILE * fp, int stage, enum FILTER ismipmapped) {

@@ -1,3 +1,9 @@
+2002-01-08 Alexander Rawass <alexannika@users.sourceforge.net>
+	
+	* vampire/drone bug fixed???
+	  - uncommented that sorting in mesh.cpp
+	
+
 2002-01-05 Alexander Rawass <alexannika@users.sourceforge.net>
 	
 	* imported data/units/drone for testing
