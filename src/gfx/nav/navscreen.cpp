@@ -593,8 +593,15 @@ void NavigationSystem::DrawMission()
 	float deltay = screenskipby4[3] - screenskipby4[2];
 	float originx = screenskipby4[0]; // left
 	float originy = screenskipby4[3]; // top
-
-	factionlist.drawdescription("Relations | Kills", (originx + (0.1*deltax)),(originy - (0.1*deltay)), 1, 1, 0, GFXColor(.3,1,.3,1));
+	vector <float> * killlist = &_Universe->AccessCockpit()->savegame->getMissionData (string("kills"));
+	string relationskills="Relations";
+	
+	if (killlist->size()>0) {
+		relationskills+=" | Kills";
+		
+	}
+	
+	factionlist.drawdescription(relationskills, (originx + (0.1*deltax)),(originy - (0.1*deltay)), 1, 1, 0, GFXColor(.3,1,.3,1));
 	factionlist.drawdescription(" ", (originx + (0.1*deltax)),(originy - (0.1*deltay)), 1, 1, 0, GFXColor(.3,1,.3,1));
 
 	factionlist.drawdescription(" ", (originx + (0.3*deltax)),(originy - (0.1*deltay)), 1, 1, 0, GFXColor(.3,1,.3,1));
@@ -606,7 +613,6 @@ void NavigationSystem::DrawMission()
 	string factionname = "factionname";
 	float relation = 0.0;
 
-	vector <float> * killlist = &_Universe->AccessCockpit()->savegame->getMissionData (string("kills"));
 	while(i < numfactions)
 	{
 		factionname = FactionUtil::GetFactionName(i);
