@@ -150,7 +150,7 @@ void VDU::DrawVDUShield (Unit * parent) {
   DrawShield (fs,rs,ls,bs,x,y,h,w);
   parent->ArmorData (armor);
   GFXColor4f (1,.6,0,1);
-  DrawShield (armor[0]/StartArmor[0],armor[2]/StartArmor[2],armor[3]/StartArmor[3],armor[1]/StartArmor[1],x,y,h/2,w/2);
+  DrawShield (armor[0]/(float)StartArmor[0],armor[2]/(float)StartArmor[2],armor[3]/(float)StartArmor[3],armor[1]/(float)StartArmor[1],x,y,h/2,w/2);
   GFXColor4f (1,1,1,1);
 }
 void VDU::DrawTarget(Unit * parent, Unit * target) {

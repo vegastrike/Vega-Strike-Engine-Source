@@ -225,6 +225,10 @@ void Cockpit::SetParent (Unit * unit) {
   parent.SetUnit (unit);
   if (unit) {
     unit->ArmorData (StartArmor);
+    if (StartArmor[0]==0) StartArmor[0]=1;
+    if (StartArmor[1]==0) StartArmor[1]=1;
+    if (StartArmor[2]==0) StartArmor[2]=1;
+    if (StartArmor[3]==0) StartArmor[3]=1;
     maxfuel = unit->FuelData();
     maxhull = unit->GetHull();
   }

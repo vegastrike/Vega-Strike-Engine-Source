@@ -86,10 +86,13 @@ void FireAt::Execute () {
     ChooseTargets(1);
   }
   if (shouldfire) {
-    if (delay>rxntime)
+    if (delay>rxntime) {
       parent->Fire(false);
-    else
+      parent->Fire(true);
+      parent->ToggleWeapon(true);//change missiles to only fire 1
+    } else {
       delay +=SIMULATION_ATOM;
+    }
   } else {
     delay =0;
     parent->UnFire();
