@@ -243,8 +243,8 @@ int main (int argc, char ** argv)
 	  } else {
 	    Tag ("Point");
 	  }
-		DrawDat.FixP[i].Vertex.x = readf(shp);
-		DrawDat.FixP[i].Vertex.y = readf(shp);
+		DrawDat.FixP[i].Vertex.x = -readf(shp);
+		DrawDat.FixP[i].Vertex.y = -readf(shp);
 		DrawDat.FixP[i].Vertex.z = readf(shp);
 		Tab(2);TextP (DrawDat.FixP[i].Vertex.x,DrawDat.FixP[i].Vertex.y,DrawDat.FixP[i].Vertex.z);
 		DrawDat.FixP[i].Normal.i = ((double)readf(shp))/10000;
