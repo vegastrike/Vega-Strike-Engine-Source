@@ -215,13 +215,13 @@ AI * ChangeHeading::Execute() {
 AI * FaceTarget::Execute() {
   Unit * target = parent->Target();
   if (target==NULL){
-    done = finish;
+    done = GFXTRUE;
     return NULL;
   }
   SetDest(target->Position());
   ChangeHeading::Execute();
   if (!finish) {
-    done=FALSE;
+    done=GFXFALSE;
     return this;
   } else{ 
     return done?NULL:this;

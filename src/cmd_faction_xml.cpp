@@ -23,15 +23,17 @@ namespace FactionXML {
 	LOGORGB,
 	LOGOA,
 	RELATION,
-	STATS
+	STATS,
+	FRIEND,
+	ENEMY
   };
 
   const EnumMap::Pair element_names[] = {
 	EnumMap::Pair ("UNKNOWN", UNKNOWN),
 	EnumMap::Pair ("Factions", FACTIONS),
 	EnumMap::Pair ("Faction", FACTION),
-//	EnumMap::Pair ("Friend", STATS),
-//	EnumMap::Pair ("Enemy", STATS),
+	EnumMap::Pair ("Friend", FRIEND),
+	EnumMap::Pair ("Enemy", ENEMY),
   	EnumMap::Pair ("Stats", STATS)
   };
   const EnumMap::Pair attribute_names[] = {
@@ -42,8 +44,10 @@ namespace FactionXML {
 	EnumMap::Pair ("relation",RELATION), 
 };
 
-  const EnumMap element_map(element_names, 4);
+
+  const EnumMap element_map(element_names, 6);
   const EnumMap attribute_map(attribute_names, 5);
+
 }
 
 
@@ -116,6 +120,8 @@ void Universe::Faction::beginElement(void *userData, const XML_Char *names, cons
 	}
 	break;
   case STATS:
+  case FRIEND:
+  case ENEMY:
 	assert (unitlevel==2);
 	unitlevel++;
 	_Universe->factions[_Universe->factions.size()-1]->faction.push_back(faction_stuff());
@@ -163,7 +169,6 @@ Universe::Faction::Faction() {
 	factionname=NULL;
 }
 Universe::Faction::~Faction() {
-	int i;
 	delete logo;
 	delete [] factionname;
 }
