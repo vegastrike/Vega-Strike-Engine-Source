@@ -35,7 +35,7 @@
 #include "gfx/cockpit.h"
 #include "gfx/aux_texture.h"
 #include "gfx/background.h"
-
+#include "cmd/music.h"
 #include "main_loop.h"
 
 using namespace std;
@@ -312,6 +312,7 @@ void InitializeInput() {
 
 //Cockpit *cockpit;
 static Texture *tmpcockpittexture;
+static Music * muzak=NULL;
 void createObjects() {
   explosion= new Animation ("explosion_orange.ani",false,.1,BILINEAR,false);
   LoadWeapons("weapon_list.xml");
@@ -373,6 +374,7 @@ void createObjects() {
   fighters[0]->EnqueueAI(new FlyByJoystick (0,"player1.kbconf"));
   fighters[0]->EnqueueAI(new FireKeyboard (0,""));
   tmpcockpittexture = new Texture ("hornet-cockpit.bmp","hornet-cockpitalp.bmp",0,NEAREST);
+  muzak = new Music ("programming.m3u",fighters[0]);
   _Universe->AccessCockpit()->Init ("hornet-cockpit.cpt");
   _Universe->AccessCockpit()->SetParent(fighters[0]);
   shipList = _Universe->activeStarSystem()->getClickList();
@@ -384,6 +386,7 @@ void destroyObjects() {
   for(int a = 0; a < numf; a++)
   	delete fighters[a];
   delete tmpcockpittexture;
+  delete muzak;
   //  delete cockpit;
   delete [] fighters;
   delete locSel;
@@ -395,12 +398,12 @@ void destroyObjects() {
   //delete fighter2;
   //delete fighter;
 }
-
+extern void micro_sleep (unsigned int n);
 void main_loop() {
   
 
   _Universe->StartDraw();
-
+  muzak->Listen();
   _Universe->activeStarSystem()->Draw();
   
   //fighters[0]->UpdateHudMatrix();
@@ -408,10 +411,11 @@ void main_loop() {
 
 
   _Universe->activeStarSystem()->Update();
-
+  micro_sleep (2000);//so we don't starve the audio thread  
   GFXEndScene();
       
   ProcessInput();
+
 }
 
 

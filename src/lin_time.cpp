@@ -33,10 +33,32 @@ static LONGLONG freq;
 #endif /* defined( HAVE_SDL ) */
 static double newtime;
 static double lasttime;
+#include <sys/time.h>
+#include <sys/types.h>
 #endif
 static double elapsedtime;
 
+#ifdef _WIN32
+#include <windows.h>
 
+void micro_sleep(unsigned int n) {
+	Sleep(n / 1000);
+
+	return;
+}
+
+#else
+
+void micro_sleep(unsigned int n) {
+	struct timeval tv = { 0, 0 };
+
+	tv.tv_usec = n;
+
+	select(0, NULL, NULL, NULL, &tv);
+
+	return;
+}
+#endif
 
 
 

@@ -59,10 +59,10 @@ int AUDCreateSoundWAV (const std::string &s, const bool music, const bool LOOP){
   return -1;
 }
 int AUDCreateSoundWAV (const std::string &s, const bool LOOP) {
-  AUDCreateSoundWAV (s,false,LOOP);
+  return AUDCreateSoundWAV (s,false,LOOP);
 }
 int AUDCreateMusicWAV (const std::string &s, const bool LOOP) {
-  AUDCreateSoundWAV (s,true,LOOP);
+  return AUDCreateSoundWAV (s,true,LOOP);
 }
 
 int AUDCreateSoundMP3 (const std::string &s, const bool music, const bool LOOP){
@@ -98,10 +98,10 @@ int AUDCreateSoundMP3 (const std::string &s, const bool music, const bool LOOP){
 }
 
 int AUDCreateSoundMP3 (const std::string &s, const bool LOOP) {
-  AUDCreateSoundMP3 (s,false,LOOP);
+  return AUDCreateSoundMP3 (s,false,LOOP);
 }
 int AUDCreateMusicMP3 (const std::string &s, const bool LOOP) {
-  AUDCreateSoundMP3 (s,true,LOOP);
+  return AUDCreateSoundMP3 (s,true,LOOP);
 }
 
 ///copies other sound loaded through AUDCreateSound
