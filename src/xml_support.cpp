@@ -64,7 +64,7 @@ namespace XMLSupport {
     return retval;
   }
   bool parse_bool (const string &str) {
-	if ((*str.begin())=='t'||(*str.begin())=='T'||(*str.begin())=='y'||(*str.begin())=='Y'||(*str.begin())=='1') {
+	if ((!str.empty())&&((*str.begin())=='t'||(*str.begin())=='T'||(*str.begin())=='y'||(*str.begin())=='Y'||(*str.begin())=='1')) {
 		return true;
 	} else {
 		return false;

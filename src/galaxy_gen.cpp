@@ -258,8 +258,20 @@ struct PlanetInfo {
   unsigned int moonlevel; // 0==top-level planet, 1==first-level moon, 2 is second-level moon... probably won't be used.
   unsigned int numstarbases; // Number of starbases allocated to orbit around this planet. Usually 1 or 0 but quite possibly more.
   unsigned int numjumps; // Number of jump points.
+  PlanetInfo()
+    : num(0),moonlevel(0),numstarbases(0),numjumps(0) {
+  }
 };
-vector <vector <PlanetInfo> > planets;
+
+struct StarInfo {
+  vector <PlanetInfo> planets;
+  unsigned int numjumps;
+  unsigned int numstarbases;
+  StarInfo()
+      : numjumps(0),numstarbases(0) {
+  }
+};
+vector <StarInfo> stars;
 unsigned int planetoffset, staroffset, moonlevel;
 
 void ResetGlobalVariables () {
@@ -274,7 +286,7 @@ void ResetGlobalVariables () {
   numstarbases=0;
   numnaturalphenomena=0;
   background.clear();
-  planets.clear();
+  stars.clear();
   planetoffset=0;
   staroffset=0;
   moonlevel=0;
@@ -513,7 +525,7 @@ void WriteUnit(const string &tag, const string &name, const string &filename, co
 }
 string getJumpTo (const string &s) {
   char tmp[1000]="";
-  if (1==sscanf (s.c_str(),"JumpTo%s",tmp)){
+  if (1==sscanf (s.c_str(),"Jump_To_%s",tmp)){
     tmp[0]=tolower(tmp[0]);
   }
   else return s;
@@ -630,8 +642,8 @@ void MakeJump(float radius, bool forceRS=false, Vector R=Vector (0,0,0), Vector 
   }
   string thisname;
   thisname = string("Jump_To_")+getStarSystemName(s);
-  if (thisname.length()>6) {
-    *(thisname.begin()+6)=toupper(*(thisname.begin()+6));
+  if (thisname.length()>8) {
+    *(thisname.begin()+8)=toupper(*(thisname.begin()+8));
   }
   Tab();
   f.Fprintf ("<Jump name=\"%s\" file=\"%s\" ",thisname.c_str(),"jump.png");
@@ -682,6 +694,16 @@ void MakeBigUnit (int callingentitytype, string name=string(),float orbitalradiu
       }
       MakeJump(size,true,r,s,center,stdloy);
 	  // We still want jumps inside asteroid fields, etcVvv.
+    }else if (1==sscanf (fullname[i].c_str(),"planet%f",&size)||1==sscanf (fullname[i].c_str(),"moon%f",&size)||1==sscanf (fullname[i].c_str(),"gas%f",&size)) {
+/*
+      if (!first) {
+	first= true;
+	center=generateAndUpdateRS (r,s,size,false);
+	stdloy=LengthOfYear (r,s);	
+      }
+      MakePlanet (size,<TYPE>,callingentitytype,true,r,s,center,stdloy);
+*/
+		//FIXME: Obsolete/not supported/too lazy to implement.
     }else if ((tmp=starin(fullname[i])).length()>0) {
       if (!first) {
 	first= true;
@@ -875,14 +897,15 @@ void MakeJumps (float callingradius, int callingentitytype, int numberofjumps) {
   }
 }
 void MakeMoons (float callingradius, int callingentitytype) {
-  while(planetoffset<planets[staroffset].size()&&planets[staroffset][planetoffset].moonlevel==moonlevel) {
-    PlanetInfo &infos=planets[staroffset][planetoffset++];
+  while(planetoffset<stars[staroffset].planets.size()&&stars[staroffset].planets[planetoffset].moonlevel==moonlevel) {
+    PlanetInfo &infos=stars[staroffset].planets[planetoffset++];
     MakePlanet((.5+.5*grand())*callingradius, callingentitytype==STAR?PLANET:MOON, infos.name, infos.num, infos.numjumps, infos.numstarbases);
   }
 }
 void beginStar () {
   float radius=starradius[staroffset];
   Vector r,s;
+  int i;
   //Vector center=generateAndUpdateRS (r,s,radius);
   planetoffset=0;
 
@@ -913,9 +936,13 @@ void beginStar () {
   if ((int)staroffset==(int)(numstarentities-staroffset)-1) {
     numu=numnaturalphenomena;
   }
-  for (int i=0;i<numu;i++) {
+  for (i=0;i<numu;i++) {
     MakeBigUnit(STAR);
   }
+  for (i=0;i<stars[staroffset].numstarbases;i++) {
+    MakeSmallUnit ();
+  }
+  MakeJumps (100+grand()*300,STAR,stars[staroffset].numjumps);
   MakeMoons (planet_size_compared_to_sun*radius,STAR);
   // Fixme: no jumps should be made around the star.
   if (!jumps.empty()) {
@@ -1075,14 +1102,22 @@ void readnames (vector <string> &entity, const char * filename) {
 
 }
 
-void readplanetentity(vector <vector<PlanetInfo> > &planetinfos, std::string planetlist, unsigned int numstars) {
+void readplanetentity(vector <StarInfo> &starinfos, std::string planetlist, unsigned int numstars) {
+  if (numstars<1) {
+    numstars=1;
+    vs_fprintf(stderr,"No stars exist in this system!\n");
+  }
   string::size_type i,j;
   unsigned int u;
-  planetinfos.reserve(numstars);
+  starinfos.reserve(numstars);
   for (u=0;u<numstars;++u)
-    planetinfos.push_back(vector<PlanetInfo> ());
+    starinfos.push_back(StarInfo());
   u--;
   while (i=planetlist.find(' '),1) {
+    if (i==0) {
+      planetlist=planetlist.substr(1);
+      continue;
+    }
     int nummoon=0;
     for (j=0;j<i&&j<planetlist.size()&&planetlist[j]=='*';++j) {
       nummoon++;
@@ -1090,30 +1125,59 @@ void readplanetentity(vector <vector<PlanetInfo> > &planetinfos, std::string pla
     if (nummoon==0)
       u++;
     if (j==string::npos||j>=planetlist.size()) break;
-    planetinfos[u%numstars].push_back(PlanetInfo());
-    planetinfos[u%numstars].back().moonlevel=nummoon;
+    starinfos[u%numstars].planets.push_back(PlanetInfo());
+    starinfos[u%numstars].planets.back().moonlevel=nummoon;
     {
       GalaxyXML::Galaxy *galaxy=_Universe->getGalaxy();
       string planetname=galaxy->getPlanetNameFromInitial(planetlist.substr(j,i==string::npos?string::npos:i-j));
       string texturename=galaxy->getPlanetVariable(planetname,"texture","No texture supplied in <planets>!");
-      planetinfos[u%numstars].back().num=rnd(XMLSupport::parse_int(galaxy->getPlanetVariable(planetname,"texture_min","0")),XMLSupport::parse_int(galaxy->getPlanetVariable(planetname,"texture_max","0")));
+      starinfos[u%numstars].planets.back().num=rnd(XMLSupport::parse_int(galaxy->getPlanetVariable(planetname,"texture_min","0")),XMLSupport::parse_int(galaxy->getPlanetVariable(planetname,"texture_max","0")));
       string ext=galaxy->getPlanetVariable(planetname,"texture_ext","png");
-      planetinfos[u%numstars].back().name=texturename+(planetinfos[u%numstars].back().num==0?"":XMLSupport::tostring(planetinfos[u%numstars].back().num))+'.'+ext;
+      starinfos[u%numstars].planets.back().name=texturename+(starinfos[u%numstars].planets.back().num==0?"":XMLSupport::tostring(starinfos[u%numstars].planets.back().num))+'.'+ext;
       // should now have texname[min-max].png
     }
-    planetinfos[u%numstars].back().numstarbases=0;
-    planetinfos[u%numstars].back().numjumps=0;
+    starinfos[u%numstars].planets.back().numstarbases=0;
+    starinfos[u%numstars].planets.back().numjumps=0;
     if (i==string::npos) break;
     planetlist=planetlist.substr(i+1);
   }
   unsigned int k;
-  for (k=0;k<jumps.size();++k) {
-    vector<PlanetInfo> &temp=planetinfos[rnd(0,planetinfos.size())];
-    temp[rnd(0,temp.size())].numjumps++;
-  }
-  for (k=0;k<numstarbases;++k) {
-    vector<PlanetInfo> &temp=planetinfos[rnd(0,planetinfos.size())];
-    temp[rnd(0,temp.size())].numstarbases++;
+  if (starinfos.size()) {
+    bool size=0;
+    for (k=0;k<starinfos.size();++k) {
+      if (starinfos[k].planets.size()) {
+        size=true;
+        break;
+      }
+    }
+    if (!size) {
+      int oldjumps=jumps.size();
+      int oldstarbases=numstarbases;
+      int newstuff;
+      for (k=starinfos.size();k>0;--k) {
+        newstuff=oldjumps/k;
+        starinfos[k-1].numjumps=newstuff;
+        oldjumps-=newstuff;
+        newstuff=oldstarbases/k;
+        starinfos[k-1].numstarbases=newstuff;
+        oldstarbases-=newstuff;
+      }
+    } else {
+      for (k=0;k<jumps.size();++k) {
+        vector<PlanetInfo> *temp; // & doesn't like me so I use *.
+        do {
+          temp=&starinfos[rnd(0,starinfos.size())].planets;
+        } while (!temp->size());
+        (*temp)[rnd(0,temp->size())].numjumps++;
+      }
+      for (k=0;k<numstarbases;++k) {
+        vector<PlanetInfo> *temp; // & appears to still have dislike for me.
+        do {
+          temp=&starinfos[rnd(0,starinfos.size())].planets;
+        } while (!temp->size());
+        (*temp)[rnd(0,temp->size())].numstarbases++;
+      }
+    }
   }
 }
 
@@ -1183,7 +1247,7 @@ void generateStarSystem(SystemInfo &si) {
   }
   faction = si.faction;
 
-  readplanetentity (planets,si.planetlist,numstarentities);
+  readplanetentity (stars,si.planetlist,numstarentities);
 
   readentity(rings,(si.ringlist).c_str());
   readnames (names,(si.names).c_str());
