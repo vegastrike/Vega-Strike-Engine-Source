@@ -135,10 +135,13 @@ namespace Orders {
     float diss =(parent->Position()-loc).MagnitudeSquared()-.1;
     bool isplanet=utdw->isUnit()==PLANETPTR;
     if (diss<=(isplanet?rad*rad:parent->rSize()*parent->rSize())) {
+      
       if (physicallyDock)
         return parent->Dock(utdw);
-      else
+      else{
+        parent->RefillWarpEnergy();
         return true;
+      }
     }else {
       if (diss <=1.2*rad*rad) {
 	timer+=SIMULATION_ATOM;
@@ -146,8 +149,10 @@ namespace Orders {
 	if (timer>=1.5*tmp) {
           if (physicallyDock)
             return parent->Dock(utdw);
-          else 
+          else {
+            parent->RefillWarpEnergy();
             return true;
+          }
 	}
       }
     }

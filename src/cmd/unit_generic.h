@@ -684,6 +684,7 @@ public:
   float EnergyData() const;
   float WarpEnergyData() const;
   float GetWarpEnergy() {return warpenergy;} //short fix
+  bool RefillWarpEnergy();
   ///Should we resolve forces on this unit (is it free to fly or in orbit)
   bool resolveforces;
   ///What's the size of this unit

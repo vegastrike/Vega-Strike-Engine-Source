@@ -4604,6 +4604,16 @@ void Unit::PerformDockingOperations () {
   }
 }
 std::set <Unit *> arrested_list_do_not_dereference;
+bool Unit::RefillWarpEnergy() {
+  float tmp=this->maxwarpenergy;
+  if (tmp<this->jump.energy)
+    tmp=this->jump.energy;
+  if (tmp>this->warpenergy){
+    this->warpenergy=tmp;
+    return true;
+  }
+  return false;
+}
 int Unit::ForceDock (Unit * utdw, int whichdockport) {
 	if (utdw->image->dockingports.size()<=whichdockport)
 		return 0;
@@ -4625,14 +4635,8 @@ int Unit::ForceDock (Unit * utdw, int whichdockport) {
 		  this->RestoreGodliness();
 	//_Universe->AccessCockpit()->RestoreGodliness();
       }
-      float tmp;
-      Unit *un=this;
-      tmp=un->maxwarpenergy;
-      if (tmp<un->jump.energy)
-        tmp=un->jump.energy;
       int cockpit=UnitUtil::isPlayerStarship(un);
-      if (tmp>un->warpenergy){
-        un->warpenergy=tmp;
+      if (this->RefillWarpEnergy()){
         if (cockpit>=0&&cockpit<_Universe->numPlayers()) {
           static float docking_fee = XMLSupport::parse_float (vs_config->getVariable("general","fuel_docking_fee","0"));
           _Universe->AccessCockpit(cockpit)->credits-=docking_fee;
