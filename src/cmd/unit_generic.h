@@ -269,7 +269,7 @@ protected:
 // Make it an array of string in AcctUnit and NetUnit and a Mesh * in Unit
  std::vector <string> meshdata_string;
 //Use that only in sub classes not in GenericUnit
-  int nummesh()const {return 0;}
+  virtual int nummesh()const {return ((int)meshdata_string.size())-1;}
 //void FixGauges();
 // Uses planet stuff to put in NetUnit
   virtual void SetPlanetOrbitData (PlanetaryTransform *trans) {}
