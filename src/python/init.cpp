@@ -240,7 +240,10 @@ PyObject* Py_CompileString(char *str, char *filename, int start)
     
     if ((d = PyModule_GetDict(m)) != NULL)
     {
-    PyEval_EvalCode(codeobj, d, d);
+    PyObject * exe=PyEval_EvalCode(codeobj, d, d);
+    if (PyCallable_Check (exe)) {
+      fprintf (stderr,"ahhh");
+    }
     }
     }
     
