@@ -228,7 +228,11 @@ Planet::Planet(Vector x,Vector y,float vely, const Vector & rotvel, float pos,fl
   */
   meshdata[1]=NULL;
   SetAngularVelocity (rotvel);
-  image->dockingports.push_back (DockingPorts (Vector(0,0,0),radius+1000,true));
+  static int numdock = XMLSupport::parse_int(vs_config->getVariable ("physics","num_planet_docking_port","4"));
+  static float planetdockportsize= XMLSupport::parse_float(vs_config->getVariable ("physics","plane_port_size","1.2"));
+  for (int pdp=0;pdp<numdock;pdp++) {
+    image->dockingports.push_back (DockingPorts (Vector(0,0,0),radius*planetdockportsize,true));
+  }
   if (ligh.size()>0) {
     static bool drawglow = XMLSupport::parse_bool(vs_config->getVariable ("graphics","draw_star_glow","true"));
 
