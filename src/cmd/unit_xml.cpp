@@ -437,41 +437,15 @@ std::vector <Mesh *> MakeMesh(unsigned int mysize) {
 
 void addShieldMesh( Unit::XML * xml, const char *filename, const float scale,int faction,class Flightgroup * fg)
 {
-  vector<Mesh *> m (Mesh::LoadMeshes(filename, Vector(scale,scale,scale),faction,fg));
-  if (m.size()>1) {
-    fprintf (stderr,"Too many textures for shield mesh. Maximum 1 texture for shield %s",filename);
-  }
-  if (!m.empty()) {
-    xml->shieldmesh = m[0];//new Mesh(filename, Vector(scale,scale,scale), faction,fg);
-    for (unsigned int i=1;i<m.size();++i)
-      delete m[i];
-  }
+  xml->shieldmesh = Mesh::LoadMesh(filename,Vector(scale,scale,scale),faction,fg);
 }
 void addRapidMesh( Unit::XML * xml, const char *filename, const float scale,int faction,class Flightgroup * fg)
 {
-  vector<Mesh *> m (Mesh::LoadMeshes(filename, Vector(scale,scale,scale),faction,fg));
-  if (m.size()>1) {
-    fprintf (stderr,"Too many textures for shield mesh. Maximum 1 texture for shield %s",filename);
-  }
-  if (!m.empty()) {
-    xml->rapidmesh = m[0];//new Mesh(filename, Vector(scale,scale,scale), faction,fg);
-    for (unsigned int i=1;i<m.size();++i)
-      delete m[i];
-  }
+  xml->rapidmesh = Mesh::LoadMesh(filename,Vector(scale,scale,scale),faction,fg);
 }
 void addBSPMesh( Unit::XML * xml, const char *filename, const float scale,int faction,class Flightgroup * fg)
 {
-
-  vector<Mesh *> m (Mesh::LoadMeshes(filename, Vector(scale,scale,scale),faction,fg));
-  if (m.size()>1) {
-    fprintf (stderr,"Too many textures for shield mesh. Maximum 1 texture for shield %s",filename);
-  }
-  if (!m.empty()) {
-    xml->bspmesh = m[0];//new Mesh(filename, Vector(scale,scale,scale), faction,fg);
-    for (unsigned int i=1;i<m.size();++i)
-      delete m[i];
-  }
-	
+  xml->bspmesh = Mesh::LoadMesh(filename,Vector(scale,scale,scale),faction,fg);	
 }
 void pushMesh( Unit::XML * xml, const char *filename, const float scale,int faction,class Flightgroup * fg, int startframe, double texturestarttime)
 {

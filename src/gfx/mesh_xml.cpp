@@ -18,6 +18,8 @@
 #include "vs_globals.h"
 #include "cmd/script/mission.h"
 #include "cmd/script/flightgroup.h"
+#include "hashtable.h"
+
 #ifdef max
 #undef max
 #endif
@@ -1152,13 +1154,44 @@ using namespace VSFileSystem;
 
 const bool USE_RECALC_NORM=true;
 const bool FLAT_SHADE=true;
+Mesh * Mesh::LoadMesh (const char * filename, const Vector & scale, int faction, Flightgroup * fg){
+  vector<Mesh *> m = LoadMeshes(filename,scale,faction,fg);
+  if (m.empty()) {
+    return 0;
+  }
+  if (m.size()>1) {
+    fprintf (stderr,"Mesh %s has %d subcomponents. Only first used!\n",filename,m.size());
+    for (unsigned int i=1;i<m.size();++i) {
+      delete m[i];
+    }
+  }
+  return m[0];
+}
+static Hashtable<std::string, std::vector <Mesh*>, 127> bfxmHashTable;
 vector <Mesh*> Mesh::LoadMeshes(const char * filename, const Vector &scale, int faction, Flightgroup * fg) {
+  /*
   if (strstr(filename,".xmesh")) {
     Mesh * m = new Mesh (filename,scale,faction,fg);
     vector <Mesh*> ret;
     ret.push_back(m);
     return ret;
+    }*/
+  string hash_name = VSFileSystem::GetHashName (filename,scale,faction);
+  vector <Mesh *>* oldmesh = bfxmHashTable.Get(hash_name);
+  if (oldmesh==0) {
+    hash_name =VSFileSystem::GetSharedMeshHashName(filename,scale,faction);
+    oldmesh = bfxmHashTable.Get(hash_name);
   }
+  if (0!=oldmesh) {
+    vector <Mesh *> ret;
+    for (unsigned int i=0;i<oldmesh->size();++i) {
+      ret.push_back(new Mesh());      
+      Mesh* m = (*oldmesh)[i];
+      ret.back()->LoadExistant(m->orig?m->orig:m);
+    }
+    return ret;
+  }
+    
   VSFile f;
   VSError err = f.OpenReadOnly( filename, MeshFile);
   if( err>Ok)
@@ -1173,7 +1206,15 @@ vector <Mesh*> Mesh::LoadMeshes(const char * filename, const Vector &scale, int 
   f.Read(&bfxm[3],1);
   if (bfxm[0]=='B'&&bfxm[1]=='F'&&bfxm[2]=='X'&&bfxm[3]=='M'){
     f.GoTo(0);
-    return LoadMeshes(f,scale,faction,fg);
+    vector <Mesh*>* newvec = new vector<Mesh*>(LoadMeshes(f,scale,faction,fg));
+    hash_name =(err==VSFileSystem::Shared)?VSFileSystem::GetSharedMeshHashName (filename,scale,faction):VSFileSystem::GetHashName(filename,scale,faction);
+    for (unsigned int i=0;i<newvec->size();++i) {
+      (*newvec)[i]->hash_name=hash_name;
+      if ((*newvec)[i]->orig)
+        (*newvec)[i]->orig->hash_name=hash_name;
+    }
+    bfxmHashTable.Put(hash_name, newvec);
+    return *newvec;
   }else {
     f.Close();
     Mesh * m = new Mesh (filename,scale,faction,fg);
