@@ -17,6 +17,7 @@ void SetStarSystemLoading (bool value) {}
 using std::string;
 
 #define activeSys _Universe->activeStarSystem() //less to write
+void ClientServerSetLightContext(int lc) {}
 
 namespace UniverseUtil {
 	void playVictoryTune(){}

@@ -169,9 +169,7 @@ void GameStarSystem::activateLightMap() {
 }
 
 GameStarSystem::~GameStarSystem() {
-  _Universe->activeStarSystem()->SwapOut();
-  //_Universe->pushActiveStarSystem(this);
-  _Universe->activeStarSystem()->SwapIn();  
+  _Universe->pushActiveStarSystem(this);
 #ifdef NV_CUBE_MAP
 
   delete LightMap[0];
@@ -187,30 +185,13 @@ GameStarSystem::~GameStarSystem() {
   delete stars;
   //delete [] name;
   delete systemInputDFA;
-  /* //FIXME  after doign so much debugging I think you shouldn't delete this
-  for (int i=0;i<numprimaries;i++) {
-	delete primaries[i];
-	}
-	delete [] primaries;
-
-  */
-
   delete bolts;
+  //  delete collidetable;//BAD BAD BAD we need this to happen later!
 
 
-  /*
-  UnitCollection::UnitIterator iter = drawList.createIterator();
-  Unit *unit;
-  while((unit = iter.current())!=NULL) {
-    unit->Kill(false);
-    iter.advance();
-  }
-  */
-  //  delete collidetable;//BAD BAD BAD we need this later!
-  _Universe->activeStarSystem()->SwapOut();
-  //  GFXDeleteLightContext (lightcontext);
-  //_Universe->popActiveStarSystem();
-  _Universe->activeStarSystem()->SwapIn();  
+  //I *think* this is legacy 012603  GFXDeleteLightContext (lightcontext);
+
+  _Universe->popActiveStarSystem();
   RemoveStarsystemFromUniverse();
   
 }

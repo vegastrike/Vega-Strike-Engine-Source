@@ -19,6 +19,9 @@ extern unsigned int AddAnimation (const QVector & pos, const float size, bool mv
 using std::string;
 
 #define activeSys _Universe->activeStarSystem() //less to write
+  void ClientServerSetLightContext (int lightcontext) {
+    GFXSetLightContext(lightcontext);
+  }
 
 namespace UniverseUtil {
 	void playVictoryTune () {

@@ -124,11 +124,12 @@ StarSystem::StarSystem(const char * filename, const Vector & centr,const float t
   //theAtmosphere = new Atmosphere(params);
   _Universe->popActiveStarSystem ();
 }
-
+extern void ClientServerSetLightContext (int lightcontext);
 StarSystem::~StarSystem() {
-  //_Universe->activeStarSystem()->SwapOut();
+  _Universe->activeStarSystem()->SwapOut();
   _Universe->pushActiveStarSystem(this);
-  //_Universe->activeStarSystem()->SwapIn();  
+  //  _Universe->activeStarSystem()->SwapIn();  
+  ClientServerSetLightContext (lightcontext);
   //delete stars;
   delete [] name;
   //delete systemInputDFA;
@@ -149,7 +150,9 @@ StarSystem::~StarSystem() {
   }
   //if the next line goes ANYWHERE else Vega Strike will CRASH!!!!!
   if (collidetable) delete collidetable;//DO NOT MOVE THIS LINE! IT MUST STAY
+  //_Universe->activeStarSystem()->SwapOut();  
   _Universe->popActiveStarSystem();
+  _Universe->activeStarSystem()->SwapIn();  
   RemoveStarsystemFromUniverse();
   
 }
