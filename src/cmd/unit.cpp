@@ -295,6 +295,11 @@ char * GetUnitDir (const char * filename) {
   }
   return retval;
 }
+
+Unit * _1800GetGod () {
+  static Unit god ("god",true,_Universe->GetFaction("upgrades"),"",NULL,0);
+  return &god;
+}
 Unit::Unit(const char *filename, bool SubU, int faction,std::string unitModifications, Flightgroup *flightgrp,int fg_subnumber) {
 
 
@@ -346,6 +351,13 @@ Unit::Unit(const char *filename, bool SubU, int faction,std::string unitModifica
 	/*Insert file loading stuff here*/
 	if(1&&fp) {
 	  name = filename;
+	  if (name.length()>=9) {
+	    int l = name.length();
+	    if (strcmp (filename+l-9,".template")==0) {
+	      double percent;
+	      Upgrade (_1800GetGod(),0,0,0,true,percent,NULL);
+	    }
+	  }
 	  LoadXML(filename,unitModifications.c_str());
 	}
 	if (1) {

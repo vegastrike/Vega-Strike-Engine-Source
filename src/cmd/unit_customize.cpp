@@ -128,7 +128,7 @@ bool Unit::UpgradeMounts (Unit *up, int mountoffset, bool touchme, bool downgrad
 		}
 		if (templ->mounts[jmod].volume!=-1) {
 		  if (up->mounts[i].ammo*up->mounts[i].type.volume>templ->mounts[jmod].volume) {
-		    up->mounts[i].ammo = templ->mounts[jmod].volume/up->mounts[i].type.volume;
+		    up->mounts[i].ammo = (templ->mounts[jmod].volume+1)/up->mounts[i].type.volume;
 		  }
 		}
 	      }
@@ -150,14 +150,14 @@ bool Unit::UpgradeMounts (Unit *up, int mountoffset, bool touchme, bool downgrad
 		  }
 		  if (templ->mounts[jmod].volume!=-1) {
 		    if (templ->mounts[jmod].volume>mounts[jmod].type.volume*tmpammo) {
-		      tmpammo=templ->mounts[jmod].volume/mounts[jmod].type.volume;
+		      tmpammo=(templ->mounts[jmod].volume+1)/mounts[jmod].type.volume;
 		    }
 		  }
 		  
 		}
 	      } 
 	      if (tmpammo*mounts[jmod].type.volume>mounts[jmod].volume) {
-		tmpammo = mounts[jmod].volume/mounts[jmod].type.volume;
+		tmpammo = (1+mounts[jmod].volume)/mounts[jmod].type.volume;
 	      }
 	      if (tmpammo>mounts[jmod].ammo) {
 		cancompletefully=true;
@@ -336,7 +336,8 @@ bool Unit::UpAndDownGrade (Unit * up, Unit * templ, int mountoffset, int subunit
   STDUPGRADE(recharge,up->recharge,templ->recharge,0);
   STDUPGRADE(image->repair_droid,up->image->repair_droid,templ->image->repair_droid,0);
   STDUPGRADE(image->cargo_volume,up->image->cargo_volume,templ->image->cargo_volume,0);
-  STDUPGRADE(image->ecm,up->image->ecm,templ->image->ecm,0);
+  image->ecm = abs(image->ecm);
+  STDUPGRADE(image->ecm,abs(up->image->ecm),abs(templ->image->ecm),0);
   STDUPGRADE(maxenergy,up->maxenergy,templ->maxenergy,0);
   STDUPGRADE(limits.yaw,up->limits.yaw,templ->limits.yaw,0);
   STDUPGRADE(limits.pitch,up->limits.pitch,templ->limits.pitch,0);
