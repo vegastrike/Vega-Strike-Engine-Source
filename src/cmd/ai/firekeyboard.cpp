@@ -5,7 +5,7 @@
 #include "in_joystick.h"
 #include "cmd/unit_generic.h"
 #include "communication.h"
-#include "gfx/cockpit_generic.h"
+#include "gfx/cockpit.h"
 #include "gfx/animation.h"
 #include "audiolib.h"
 #include "config_xml.h"
@@ -146,7 +146,6 @@ void FireKeyboard::PressComm10Key (int, KBSTATE k) {
     g().commKeys[9]=PRESS;
   }
 }
-
 
 void FireKeyboard::RequestClearenceKey(int, KBSTATE k) {
 
@@ -814,14 +813,75 @@ static Unit * getAtmospheric (Unit * targ) {
   return NULL;
   
 }
+
+//#include <cmd/music.h>
+//extern Music *muzak;
+
+void abletodock(int dock) {
+//	char dumb[2]={'\0'};
+//	dumb[0]=(dock+'0');
+//	muzak->GotoSong (string("Dockingsound #")+dumb);
+	switch (dock) {
+	case 5:{
+		static soundContainer reqsound;
+		if (reqsound.sound==-2) {
+			static string str=vs_config->getVariable("cockpitaudio","undocking_complete","undocking_complete");
+			reqsound.loadsound(str);
+		}
+		reqsound.playsound();}
+		break;
+	case 4:{
+		static soundContainer reqsound;
+		if (reqsound.sound==-2) {
+			static string str=vs_config->getVariable("cockpitaudio","undocking_failed","undocking_failed");
+			reqsound.loadsound(str);
+		}
+		reqsound.playsound();}
+		break;
+	case 3:{
+		static soundContainer reqsound;
+		if (reqsound.sound==-2) {
+			static string str=vs_config->getVariable("cockpitaudio","docking_complete","docking_complete");
+			reqsound.loadsound(str);
+		}
+		reqsound.playsound();}
+		break;
+	case 2:{
+		static soundContainer reqsound;
+		if (reqsound.sound==-2) {
+			static string str=vs_config->getVariable("cockpitaudio","docking_failed","docking_failed");
+			reqsound.loadsound(str);
+		}
+		reqsound.playsound();}
+		break;
+	case 1:{
+		static soundContainer reqsound;
+		if (reqsound.sound==-2) {
+			static string str=vs_config->getVariable("cockpitaudio","docking_granted","request_granted");
+			reqsound.loadsound(str);
+		}
+		reqsound.playsound();}
+		break;
+	case 0:{
+		static soundContainer reqsound;
+		if (reqsound.sound==-2) {
+			static string str=vs_config->getVariable("cockpitaudio","docking_denied","request_denied");
+			reqsound.loadsound(str);
+		}
+		reqsound.playsound();}
+		break;
+	}
+}
 static void DoDockingOps (Unit * parent, Unit * targ,unsigned char playa, unsigned char sex) {
   static bool nodockwithclear = XMLSupport::parse_bool (vs_config->getVariable ("physics","dock_with_clear_planets","true"));
+  bool wasdock=vectorOfKeyboardInput[playa].doc;
     if (vectorOfKeyboardInput[playa].doc) {
-      if (targ->isUnit()==PLANETPTR) {
+     if (targ->isUnit()==PLANETPTR) {
       if (((GamePlanet * )targ)->isAtmospheric()&&nodockwithclear) {
 	targ = getAtmospheric (targ);
 	if (!targ) {
 	  mission->msgcenter->add("game","all","[Computer] Cannot dock with insubstantial object, target another object and retry.");
+	  abletodock(2);
 	  return;
 	}
 	parent->Target(targ);
@@ -832,12 +892,15 @@ static void DoDockingOps (Unit * parent, Unit * targ,unsigned char playa, unsign
       bool hasDock = parent->Dock(targ);
       if (hasDock) {
 	  c.SetCurrentState (c.fsm->GetDockNode(),NULL,0);
+	  abletodock(3);
 	  vectorOfKeyboardInput[playa].req=true;
       }else {
         if (UnDockNow(parent,targ)) {
 	  c.SetCurrentState (c.fsm->GetUnDockNode(),NULL,0);
+	  abletodock(5);
         }else {
           //docking is unsuccess
+	  abletodock(2);
 	  c.SetCurrentState (c.fsm->GetFailDockNode(),NULL,0);
         }
       }
@@ -852,6 +915,7 @@ static void DoDockingOps (Unit * parent, Unit * targ,unsigned char playa, unsign
 	  targ = getAtmospheric (targ);
 	  if (!targ) {
 	    mission->msgcenter->add("game","all","[Computer] Cannot dock with insubstantial object, target another object and retry.");
+	    abletodock(0);
 	    return;
 	  }
 	  parent->Target(targ);
@@ -861,6 +925,8 @@ static void DoDockingOps (Unit * parent, Unit * targ,unsigned char playa, unsign
       CommunicationMessage c(parent,targ,NULL,sex);
       c.SetCurrentState(c.fsm->GetRequestLandNode(),NULL,sex);
       targ->getAIState()->Communicate (c);
+	  if (!wasdock)
+	    abletodock(1);
       vectorOfKeyboardInput[playa].req=false;
     }
 
@@ -868,9 +934,11 @@ static void DoDockingOps (Unit * parent, Unit * targ,unsigned char playa, unsign
       CommunicationMessage c(targ,parent,NULL,0);
       if (UnDockNow(parent,targ)) {
 	c.SetCurrentState (c.fsm->GetUnDockNode(),NULL,0);
+	abletodock(5);
       }else {
 	c.SetCurrentState (c.fsm->GetFailDockNode(),NULL,0);
-      }
+ 	abletodock(4);
+     }
       parent->getAIState()->Communicate (c);
       vectorOfKeyboardInput[playa].und=0;
     }

@@ -46,19 +46,24 @@ double getNewTime() {
 #endif
 }
 
+int timecount;
+
 void inc_time_compression (int i, KBSTATE a) {
   if (a==PRESS) {
     timecompression*=1.5;
+    timecount++;
   }
 }
 void dec_time_compression (int i, KBSTATE a) {
   if (a==PRESS) {
     timecompression/=1.5;
+    timecount--;
   }
 }
 void reset_time_compression (int i, KBSTATE a) {
   if (a==PRESS) {
     timecompression=1;
+    timecount=0;
   }
 }
 void pause_key (int i, KBSTATE a) {
@@ -66,6 +71,7 @@ void pause_key (int i, KBSTATE a) {
   if (a==PRESS) {
     if (paused==false) {
       timecompression=.0000001;
+      timecount=0;
       paused=true;
     }else {
       paused=false;
@@ -79,6 +85,7 @@ float getTimeCompression () {
 }
 void setTimeCompression(float tc){
   timecompression=tc;
+  timecount=0;//to avoid any problems with time compression sounds... use getTimeCompression() instead
 }
 
 #ifdef _WIN32

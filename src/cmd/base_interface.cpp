@@ -488,6 +488,8 @@ void BaseInterface::Terminate() {
   restore_main_loop();
   delete this;
 }
+extern void abletodock(int dock);
+#include "ai/communication.h"
 void BaseInterface::Room::Launch::Click (BaseInterface *base,float x, float y, int button, int state) {
 	if (state==WS_MOUSE_UP) {
 	  Link::Click(base,x,y,button,state);
@@ -497,6 +499,10 @@ void BaseInterface::Room::Launch::Click (BaseInterface *base,float x, float y, i
 	  Unit * playa = base->caller.GetUnit();
 	  if (playa &&bas) {
 	    playa->UnDock (bas);
+	    CommunicationMessage c(bas,playa,NULL,0);
+	    c.SetCurrentState (c.fsm->GetUnDockNode(),NULL,0);
+	    playa->getAIState()->Communicate (c);
+	    abletodock(5);
 	  }
 	  }
 	  base->Terminate();

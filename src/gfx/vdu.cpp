@@ -14,9 +14,6 @@
 ///ALERT to change must change enum in class
 const std::string vdu_modes [] = {"Target","Nav","Objectives","Comm","Weapon","Damage","Shield", "Manifest", "TargetManifest","View","Message"};
 
-
-
-
 string getUnitNameAndFgNoBase (Unit * target) {
   Flightgroup* fg = target->getFlightgroup();
   if (target->isUnit()==PLANETPTR) {

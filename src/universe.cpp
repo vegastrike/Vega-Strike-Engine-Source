@@ -35,7 +35,6 @@
 #include "vs_globals.h"
 #include "xml_support.h"
 
-
 #include "cmd/script/mission.h"
 #include "cmd/unit.h"
 #include "in_kb.h"
@@ -176,6 +175,75 @@ void CalculateCoords (unsigned int i,unsigned int size, float &x,float &y,float 
 }
 extern bool RefreshGUI();
 extern float rand01();
+extern int timecount;
+
+inline void loadsounds(const string &str,const int max,soundArray& snds,bool loop=false) {
+	char addstr[2]={'\0'};
+	snds.allocate(max);
+	for (int i=0;i<max;i++) {
+		addstr[0]='1'+i;
+		string mynewstr=str;
+//		bool foundyet=false;
+		while (1) {
+			std::string::iterator found=std::find(mynewstr.begin(),mynewstr.end(),'?');
+			if (found!=mynewstr.end()) {
+				mynewstr[found-mynewstr.begin()]=addstr[0];
+//				foundyet=true;
+			} else {
+//				if (!foundyet) {
+//					mynewstr=mynewstr+addstr;
+//				}
+				break;
+			}
+		}
+		snds.ptr[i].loadsound(mynewstr,loop);
+	}
+}
+
+static void UpdateTimeCompressionSounds() {
+	static int lasttimecompress=0;
+	static int numsnd=XMLSupport::parse_int(vs_config->getVariable("cockpitaudio","compress_max","3"));
+	if ((timecount!=lasttimecompress)&&(numsnd>0)) {
+		static bool inittimecompresssounds=false;
+		static soundArray loop_snds;
+		static soundArray burst_snds;
+		static soundArray end_snds;
+		if (inittimecompresssounds==false) {
+			string addonloop=vs_config->getVariable("cockpitaudio","compress_loop","compress?_loop");
+			string addonburst=vs_config->getVariable("cockpitaudio","compress_change","compress?_burst");
+			string addonend=vs_config->getVariable("cockpitaudio","compress_stop","compress_end");
+			loadsounds(addonloop,numsnd,loop_snds,true);
+			loadsounds(addonend,numsnd,end_snds);
+			loadsounds(addonburst,numsnd,burst_snds);
+			inittimecompresssounds=true;
+		}
+		static int compressinterval=XMLSupport::parse_int(vs_config->getVariable("cockpitaudio","compress_interval","3"));
+		int soundfile=(timecount-1)/compressinterval;
+		int lastsoundfile=(lasttimecompress-1)/compressinterval;
+		if (timecount>0&&lasttimecompress>=0) {
+			if ((soundfile+1)>=numsnd) {
+				burst_snds.ptr[numsnd-1].playsound();
+			} else {
+				if (lasttimecompress>0&&loop_snds.ptr[lastsoundfile].sound>=0&&AUDIsPlaying(loop_snds.ptr[lastsoundfile].sound))
+					AUDStopPlaying(loop_snds.ptr[lastsoundfile].sound);
+				loop_snds.ptr[soundfile].playsound();
+				burst_snds.ptr[soundfile].playsound();
+			}
+		} else if (lasttimecompress>0&&timecount==0) {
+			for (int i=0;i<numsnd;i++) {
+				if (loop_snds.ptr[i].sound>=0&&AUDIsPlaying(loop_snds.ptr[i].sound))
+					AUDStopPlaying(loop_snds.ptr[i].sound);
+			}
+			if (lastsoundfile>=numsnd) {
+				end_snds.ptr[numsnd-1].playsound();
+			} else {
+				end_snds.ptr[lastsoundfile].playsound();
+			}
+		}
+		lasttimecompress=timecount;
+	}
+}
+
 void GameUniverse::StartDraw()
 {
 #ifndef WIN32
@@ -204,6 +272,7 @@ void GameUniverse::StartDraw()
     AccessCamera()->SetSubwindow (0,0,1,1);
   }
   UpdateTime();
+  UpdateTimeCompressionSounds();
   static float nonactivesystemtime = XMLSupport::parse_float (vs_config->getVariable ("physics","InactiveSystemTime",".3"));
   static unsigned int numrunningsystems = XMLSupport::parse_int (vs_config->getVariable ("physics","NumRunningSystems","4"));
   float systime=nonactivesystemtime;

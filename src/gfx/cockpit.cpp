@@ -30,8 +30,35 @@
 #include "in_mouse.h"
 #include "gui/glut_support.h"
 #include "networking/netclient.h"
+#include "audiolib.h"
 extern float rand01();
 #define SWITCH_CONST .9
+
+static soundContainer disableautosound;
+static soundContainer enableautosound;
+
+void soundContainer::loadsound (string soundfile,bool looping) {
+	if (this->sound==-2) {
+		string sound=GameCockpit::getsoundfile(soundfile);
+		if (sound.size()) {
+			this->sound=AUDCreateSoundWAV(sound,looping);
+		} else {
+			this->sound=-1;
+		}
+	}
+}
+void soundContainer::playsound () {
+	if (sound>=0) {
+		AUDStartPlaying (sound);
+	}
+}
+soundContainer::~soundContainer () {
+	if (sound>=0) {
+		AUDStopPlaying(sound);
+		AUDDeleteSound(sound,false);
+		sound=-2;
+	}
+}
 
 void DrawRadarCircles (float x, float y, float wid, float hei, const GFXColor &col) {
 	GFXColorf(col);
@@ -57,6 +84,10 @@ void DrawRadarCircles (float x, float y, float wid, float hei, const GFXColor &c
   t = 2*sqrtf(pos.i*pos.i + pos.j*pos.j + s*s);
   s = -pos.i/t;
   t = pos.j/t;
+}
+
+void GameCockpit::SetSoundFile (string sound) {
+	soundfile=AUDCreateSoundWAV (sound, false);
 }
 
 void GameCockpit::LocalToEliteRadar (const Vector & pos, float &s, float &t,float &h){
@@ -601,7 +632,29 @@ float GameCockpit::LookupTargetStat (int stat, Unit *target) {
     }
     return target->GetHull()/maxhull;
   case UnitImages::EJECT:
-    return (((target->GetHull()/maxhull)<.25)&&(target->BShieldData()<.25||target->FShieldData()<.25))?1:0;
+    {
+    int go=(((target->GetHull()/maxhull)<.25)&&(target->BShieldData()<.25||target->FShieldData()<.25))?1:0;
+    static int overload=0;
+    if (overload!=go) {
+		if (go==0) {
+			static soundContainer ejectstopsound;
+			if (ejectstopsound.sound<0) {
+				static string str=vs_config->getVariable("cockpitaudio","overload_stopped","overload_stopped");
+				ejectstopsound.loadsound(str);
+			}
+			ejectstopsound.playsound();
+		} else {
+			static soundContainer ejectsound;
+			if (ejectsound.sound<0) {
+				static string str=vs_config->getVariable("cockpitaudio","overload","overload");
+				ejectsound.loadsound(str);
+			}
+			ejectsound.playsound();
+		}
+		overload=go;
+	}
+    return go;
+	}
   case UnitImages::LOCK:
     if  ((tmpunit = target->GetComputerData().threat.GetUnit())) {
       return (tmpunit->cosAngleTo (target,*(float*)&armordat[0],FLT_MAX,FLT_MAX)>.95);
@@ -618,10 +671,32 @@ float GameCockpit::LookupTargetStat (int stat, Unit *target) {
 	else
 		return target->GetComputerData().set_speed*3.6;
   case UnitImages::AUTOPILOT:
+    {
+    static wasautopilot=0;
+	int abletoautopilot=0;
     if (target) {
-      return (target->AutoPilotTo(target)?1:0);
+      abletoautopilot=(target->AutoPilotTo(target)?1:0);
     }
-    return 0;
+	if (abletoautopilot!=wasautopilot) {
+		if (abletoautopilot==0) {
+			static soundContainer autostopsound;
+			if (autostopsound.sound<0) {
+				static string str=vs_config->getVariable("cockpitaudio","autopilot_available","autopilot_available");
+				autostopsound.loadsound(str);
+			}
+			autostopsound.playsound();
+		} else {
+			static soundContainer autosound;
+			if (autosound.sound<0) {
+				static string str=vs_config->getVariable("cockpitaudio","autopilot_unavailable","autopilot_unavailable");
+				autosound.loadsound(str);
+			}
+			autosound.playsound();
+		}
+		wasautopilot=abletoautopilot;
+	}
+    return abletoautopilot;
+    }
   case UnitImages::COCKPIT_FPS:
     if (fpsval>=0&&fpsval<.5*FLT_MAX)
       numtimes-=.1+fpsval;
@@ -706,6 +781,11 @@ void GameCockpit::Delete () {
     delete mesh;
     mesh = NULL;
   }
+  if (soundfile>=0) {
+	  AUDStopPlaying(soundfile);
+	  AUDDeleteSound(soundfile,false);
+	  soundfile=-1;
+  }
   viewport_offset=cockpit_offset=0;
   for (i=0;i<4;i++) {
     if (Pit[i]) {
@@ -778,6 +858,7 @@ GameCockpit::GameCockpit (const char * file, Unit * parent,const std::string &pi
   targeted=GFXColor(-1,-1,-1,-1);
   targetting=GFXColor(-1,-1,-1,-1);
   planet=GFXColor(-1,-1,-1,-1);
+  soundfile=-1;
   if (friendly.r==-1) {
     vs_config->getColor ("enemy",&enemy.r);
     vs_config->getColor ("friend",&friendly.r);
@@ -904,6 +985,11 @@ static void FaceTarget (Unit * un) {
 int GameCockpit::Autopilot (Unit * target) {
   int retauto = 0;
   if (target) {
+    if (enableautosound.sound<0) {
+      static string str=vs_config->getVariable("cockpitaudio","autopilot_enabled","autopilot");
+      enableautosound.loadsound(str);
+    }
+    enableautosound.playsound();
     Unit * un=NULL;
     if ((un=GetParent())) {
       if ((retauto = un->AutoPilotTo(un))) {//can he even start to autopilot
@@ -1262,10 +1348,66 @@ Unit * GetFinalTurret(Unit * baseTurret) {
   return un;
 }
 
+string GameCockpit::getsoundending(int which) {
+	static bool gotten=false;
+	static string strs [9];
+	if (gotten==false) {
+		char tmpstr[2]={'\0'};
+		for (int i=0;i<9;i++) {
+			tmpstr[0]=i+'1';
+			string vsconfigvar=string("sounds_extension_")+tmpstr;
+			strs[i]=vs_config->getVariable("cockpitaudio",vsconfigvar,"\n");
+			if (strs[i]=="\n") {
+				strs[i]="";
+				break;
+			}
+		}
+		gotten=true;
+	}
+	return strs[which];
+}
+
+#include <algorithm>
+string GameCockpit::getsoundfile(string sound) {
+	FILE *fp=NULL;
+	int i;
+	string lastsound="";
+	for (i=0;i<9&&fp==NULL;i++) {
+		string anothertmpstr=getsoundending(i);
+		bool foundyet=false;
+		while (1) {
+			std::string::iterator found=std::find(anothertmpstr.begin(),anothertmpstr.end(),'*');
+			if (found!=anothertmpstr.end()) {
+				anothertmpstr.erase(found);
+				anothertmpstr.insert((found-anothertmpstr.begin()),sound);
+				foundyet=true;
+			} else {
+				if (!foundyet) {
+					anothertmpstr=sound+anothertmpstr;
+				}
+				break;
+			}
+		}
+		lastsound=GetSharedSoundPath (anothertmpstr);
+		fp=fopen(lastsound.c_str(),"rb");
+	}
+	if (fp) {
+		fclose(fp);
+		return lastsound;
+	} else {
+		return "";
+	}
+}
+
 void GameCockpit::Update () {
   if (autopilot_time!=0) {
     autopilot_time-=SIMULATION_ATOM;
     if (autopilot_time<= 0) {
+      if (disableautosound.sound<0) {
+	static string str=vs_config->getVariable("cockpitaudio","autopilot_disabled","autopilot_disabled");
+	disableautosound.loadsound(str);
+      }
+      disableautosound.playsound();
       AccessCamera(CP_PAN)->myPhysics.SetAngularVelocity(Vector(0,0,0));
       SetView(CP_FRONT);
       autopilot_time=0;
@@ -1428,6 +1570,10 @@ GameCockpit::~GameCockpit () {
 }
 
 void GameCockpit::VDUSwitch (int vdunum) {
+  if (soundfile>=0) {
+    //AUDPlay (soundfile, AccessCamera()->GetPosition(), Vector (0,0,0), .5);
+	AUDStartPlaying(soundfile);
+  }
   if (vdunum<(int)vdu.size()) {
     if (vdu[vdunum]) {
       vdu[vdunum]->SwitchMode();
@@ -1435,6 +1581,10 @@ void GameCockpit::VDUSwitch (int vdunum) {
   }
 }
 void GameCockpit::ScrollVDU (int vdunum, int howmuch) {
+  if (soundfile>=0) {
+    //AUDPlay (soundfile, AccessCamera()->GetPosition(), Vector (0,0,0),.5);
+	AUDStartPlaying (soundfile);
+  }
   if (vdunum<(int)vdu.size()) {
     if (vdu[vdunum]) {
       vdu[vdunum]->Scroll(howmuch);

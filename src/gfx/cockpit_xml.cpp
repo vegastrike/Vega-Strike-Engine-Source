@@ -26,6 +26,7 @@ namespace CockpitXML {
       ROWS,
       COLS,
       XFILE,
+	  SOUNDFILE,
       XCENT,
       YCENT,
       TOPY,
@@ -98,6 +99,7 @@ namespace CockpitXML {
     EnumMap::Pair ("UNKNOWN", UNKNOWN),
     EnumMap::Pair ("mesh", MESH),
     EnumMap::Pair ("file", XFILE),
+    EnumMap::Pair ("soundfile", SOUNDFILE),
     EnumMap::Pair ("font", MYFONT),
     EnumMap::Pair ("front", FRONT),
     EnumMap::Pair ("left", LEFT),
@@ -125,7 +127,7 @@ namespace CockpitXML {
   };
 
   const EnumMap element_map(element_names, 25);
-  const EnumMap attribute_map(attribute_names, 26);
+  const EnumMap attribute_map(attribute_names, 28);
 }
 
 using XMLSupport::EnumMap;
@@ -176,6 +178,9 @@ void GameCockpit::beginElement(const string &name, const AttributeList &attribut
 	break;
       case XFILE:
 	Pit[0]= new Sprite ((*iter).value.c_str(),NEAREST);
+	break;
+      case SOUNDFILE:
+	SetSoundFile((*iter).value);
 	break;
       case MESH:
 	mesh = new Mesh ((*iter).value.c_str(),1,0,NULL,false);
@@ -326,6 +331,7 @@ void GameCockpit::beginElement(const string &name, const AttributeList &attribut
 	break;
       case COLS:
 	cols = XMLSupport::parse_int ((*iter).value);
+	break;
 	break;
 
       }

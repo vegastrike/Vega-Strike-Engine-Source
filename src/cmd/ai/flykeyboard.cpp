@@ -143,6 +143,9 @@ void FlyByKeyboard::KeyboardRollRight (float v) {
 void FlyByKeyboard::Execute () {
   FlyByKeyboard::Execute (true);
 }
+
+#include <gfx/cockpit.h>
+
 void FlyByKeyboard::Execute (bool resetangvelocity) {
 #define SSCK starshipcontrolkeys[whichplayer]
   if (SSCK.setunvel) {
@@ -304,6 +307,14 @@ void FlyByKeyboard::Execute (bool resetangvelocity) {
   }
   if (SSCK.jumpkey) {
     parent->ActivateJumpDrive();
+    if (parent->GetJumpStatus().drive>=0) {
+      static soundContainer foobar;
+      if (foobar.sound==-2) {
+	static string str=vs_config->getVariable("cockpitaudio","jump_engaged","jump");
+	foobar.loadsound(str);
+      }
+      foobar.playsound();
+    }
     SSCK.jumpkey=false;
   }else {
     parent->DeactivateJumpDrive();

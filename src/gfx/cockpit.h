@@ -17,6 +17,34 @@ class Unit;
  * Gauges are used to indicate analog controls, and some diagital ones
  * The ones starting from KPS are digital with text readout
  */
+
+struct soundContainer  {//used to contain static sounds that will only be
+                        //created once and will get deleted automatically
+	int sound;
+	soundContainer () {
+		sound=-2;
+	}
+	void loadsound (string sooundfile,bool looping=false);
+	void playsound ();
+	~soundContainer ();
+};
+
+struct soundArray {
+	soundContainer *ptr;
+	soundArray() {ptr=NULL;}
+	void deallocate () {
+		if (ptr!=NULL) {
+			delete []ptr;
+			ptr=NULL;
+		}
+	}
+	void allocate (int siz) {
+		deallocate();
+		ptr=new soundContainer[siz];
+	}
+	~soundArray() {deallocate();}
+};
+
 class GameCockpit: public Cockpit {
 private:
   Camera cam[NUM_CAM];
@@ -24,6 +52,7 @@ private:
   ///saved values to compare with current values (might need more for damage)
   std::list <Matrix> headtrans;
   class Mesh * mesh;
+  int soundfile;
   Sprite *Pit [4];
   Sprite *Radar;
   ///Video Display Units (may need more than 2 in future)
@@ -71,6 +100,8 @@ private:
   ///Draws gauges
   void DrawGauges(Unit * un);
  public:
+  static string getsoundending(int which=0);
+  static string getsoundfile(string filename);
   void InitStatic ();
   void Shake (float amt);
   int Autopilot (Unit * target);
@@ -96,6 +127,8 @@ private:
   static void Respawn (int,KBSTATE);
   static void SwitchControl (int,KBSTATE);
   static void TurretControl (int, KBSTATE);
+  void SetSoundFile (std::string sound);
+  int GetSoundFile () {return soundfile;}
   void SetCommAnimation (Animation * ani);
   ///Accesses the current camera
   Camera *AccessCamera() {return &cam[currentcamera];}
