@@ -514,7 +514,7 @@ void Unit::Draw(const Transformation &parent, const Matrix parentMatrix)
 				   );
       float lod;
       if (d) {  //d can be used for level of detail shit
-	if ((lod =g_game.detaillevel*g_game.x_resolution*2*meshdata[i]->rSize()/GFXGetZPerspective(d-meshdata[i]->rSize()))>=g_game.detaillevel) {//if the radius is at least half a pixel (detaillevel is the scalar... so you gotta make sure it's above that
+	if ((lod =g_game.detaillevel*g_game.x_resolution*2*meshdata[i]->rSize()/GFXGetZPerspective((d-meshdata[i]->rSize()<g_game.znear)?g_game.znear:d-meshdata[i]->rSize()))>=g_game.detaillevel) {//if the radius is at least half a pixel (detaillevel is the scalar... so you gotta make sure it's above that
 	  meshdata[i]->Draw(lod,cumulative_transformation, cumulative_transformation_matrix,d,cloak,0);//cloakign and nebula
 	} else {
 
