@@ -1,19 +1,26 @@
+#ifdef HAVE_SDL
 #include <SDL/SDL.h>
 #include <SDL/SDL_thread.h>
 #include <SDL/SDL_mixer.h>
-#include "inet.h"
+#else
+typedef int Mix_Music;
+#endif
+
 #include <string>
 #ifdef _WIN32
 #include <direct.h>
 #include <windows.h>
 #define sleep(sec) Sleep(sec*1000);
+#else
+#include <unistd.h>
 #endif
 #include <stdarg.h>
-//#include <unistd.h>
+
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
 #include <vector>
+#include "inet.h"
 int fadeout=0, fadein=0;
 Sint16 stream[2][4096];
 int len=4096, done=0, bits=0, which=0;
@@ -61,11 +68,13 @@ void changehome (bool to) {
 	  }
   }
 }
-
+#ifdef _WIN32
 #undef main
+#endif
 bool sende=true;
 std::string curmus;
 Mix_Music * PlayMusic (const char * file, Mix_Music *oldmusic) {
+#ifdef HAVE_SDL
 	Mix_Music *music;
 	bool home=false;
 	if((music=Mix_LoadMUS(file))==NULL){
@@ -106,6 +115,9 @@ Mix_Music * PlayMusic (const char * file, Mix_Music *oldmusic) {
 //	int volume=SDL_MIX_MAXVOLUME;
 //	Mix_VolumeMusic(volume);
 	return music;
+#else
+	return NULL;
+#endif
 }
 int mysocket = -1;
 
