@@ -17,11 +17,11 @@ static void seedrand(int seed) {
 
 static unsigned int ssrand()
 {
-        starsysrandom = ( starsysrandom * 1103515245 + 12345) % ((u_long)RAND_MAX + 1);
+        starsysrandom = ( starsysrandom * 1103515245 + 12345) % ((unsigned long)RAND_MAX + 1);
         return starsysrandom;
 }
 
-int nument[5];
+
 namespace StarSystemGent {
 
 float mmax (float a, float b) {
@@ -171,6 +171,7 @@ const int JUMP=4;
 
 vector <string> entities[5];
 vector <string> gradtex;
+int nument[5];
 int numun[2];
 vector <string> units [2];
 vector <string> background;
@@ -832,7 +833,7 @@ void generateStarSystem (string datapath, int seed, string sector, string system
       entities[JUMP].push_back (jumplocations[i]);
     }
     nument[JUMP]=entities[JUMP].size();
-    ::faction = factions;
+    StarSystemGent::faction = factions;
     CreateStarSystem();
     fclose (fp);
   }
