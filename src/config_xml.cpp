@@ -23,17 +23,6 @@
   xml Configuration written by Alexander Rawass <alexannika@users.sourceforge.net>
 */
 
-#if 0
-
-#include <stdlib.h>
-#include <stdio.h>
-#include <errno.h>
-#include <time.h>
-#include <ctype.h>
-#include <unistd.h>
-
-#endif
-
 #include <expat.h>
 #include "xml_support.h"
 
@@ -57,9 +46,9 @@
 
 VegaConfig::VegaConfig(char *configfile){
 
-  easyDomFactory *domf = new easyDomFactory();
+  configNodeFactory *domf = new configNodeFactory();
 
-  easyDomNode *top=domf->LoadXML(configfile);
+  configNode *top=(configNode *)domf->LoadXML(configfile);
 
   if(top==NULL){
     cout << "Panic exit - no configuration" << endl;
@@ -71,6 +60,7 @@ VegaConfig::VegaConfig(char *configfile){
   initKeyMap();
 
   variables=NULL;
+  colors=NULL;
 
   // set hatswitches to off
   for(int h=0;h<MAX_HATSWITCHES;h++){
@@ -171,6 +161,7 @@ void VegaConfig::initCommandMap(){
   command_map["VolumeInc"]=incvol;
   command_map["VolumeDec"]=decvol;
 #endif
+
   // mapping from command string to keyboard handler
   command_map["SheltonKey"]=FlyByKeyboard::SheltonKey ;
   command_map["StartKey"]=FlyByKeyboard::StartKey ;
@@ -218,7 +209,7 @@ void VegaConfig::initCommandMap(){
 
 }
 
-bool VegaConfig::checkConfig(easyDomNode *node){
+bool VegaConfig::checkConfig(configNode *node){
   if(node->Name()!="vegaconfig"){
     cout << "this is no Vegastrike config file" << endl;
     return false;
@@ -227,24 +218,26 @@ bool VegaConfig::checkConfig(easyDomNode *node){
   vector<easyDomNode *>::const_iterator siter;
   
   for(siter= node->subnodes.begin() ; siter!=node->subnodes.end() ; siter++){
-    if((*siter)->Name()=="variables"){
-      doVariables(*siter);
+    configNode *cnode=(configNode *)(*siter);
+
+    if(cnode->Name()=="variables"){
+      doVariables(cnode);
     }
-    else if(((*siter)->Name()=="colors")){
-      doColors(*siter);
+    else if(cnode->Name()=="colors"){
+      doColors(cnode);
     }
-    else if(((*siter)->Name()=="bindings")){
-      bindings=*siter; // delay the bindings until keyboard/joystick is initialized
-      //doBindings(*siter);
+    else if(cnode->Name()=="bindings"){
+      bindings=cnode; // delay the bindings until keyboard/joystick is initialized
+      //doBindings(cnode);
     }
     else{
-      cout << "Unknown tag: " << (*siter)->Name() << endl;
+      cout << "Unknown tag: " << cnode->Name() << endl;
     }
   }
   return true;
 }
 
-void VegaConfig::doVariables(easyDomNode *node){
+void VegaConfig::doVariables(configNode *node){
   if(variables!=NULL){
     cout << "only one variable section allowed" << endl;
     return;
@@ -254,11 +247,12 @@ void VegaConfig::doVariables(easyDomNode *node){
   vector<easyDomNode *>::const_iterator siter;
   
   for(siter= node->subnodes.begin() ; siter!=node->subnodes.end() ; siter++){
-    checkSection(*siter);
+    configNode *cnode=(configNode *)(*siter);
+    checkSection(cnode,SECTION_VAR);
   }
 }
 
-void VegaConfig::checkSection(easyDomNode *node){
+void VegaConfig::checkSection(configNode *node, enum section_t section_type){
     if(node->Name()!="section"){
       cout << "not a section" << endl;
     return;
@@ -272,12 +266,18 @@ void VegaConfig::checkSection(easyDomNode *node){
   vector<easyDomNode *>::const_iterator siter;
   
   for(siter= node->subnodes.begin() ; siter!=node->subnodes.end() ; siter++){
-    checkVar(*siter);
+    configNode *cnode=(configNode *)(*siter);
+    if(section_type==SECTION_COLOR){
+      checkColor(cnode);
+    }
+    else if(section_type==SECTION_VAR){
+      checkVar(cnode);
+    }
   }
 
 }
 
-void VegaConfig::checkVar(easyDomNode *node){
+void VegaConfig::checkVar(configNode *node){
     if(node->Name()!="var"){
       cout << "not a variable" << endl;
     return;
@@ -285,12 +285,14 @@ void VegaConfig::checkVar(easyDomNode *node){
 
   string name=node->attr_value("name");
   string value=node->attr_value("value");
+
+  //  cout << "checking var " << name << " value " << value << endl;
   if(name.empty() || value.empty()){
     cout << "no name or value given for variable" << endl;
   }
 }
 
-bool VegaConfig::checkColor(easyDomNode *node){
+bool VegaConfig::checkColor(configNode *node){
   if(node->Name()!="color"){
     cout << "no color definition" << endl;
     return false;
@@ -302,6 +304,7 @@ bool VegaConfig::checkColor(easyDomNode *node){
   }
 
   vColor *color;
+
 
   if(node->attr_value("ref").empty()){
     string r=node->attr_value("r");
@@ -327,7 +330,14 @@ bool VegaConfig::checkColor(easyDomNode *node){
   else{
     float refcol[4];
 
-    getColor(node->attr_value("ref"),refcol);
+    string ref_section=node->attr_value("section");
+    if(ref_section.empty()){
+      cout << "you have to give a referenced section when referencing colors" << endl;
+      ref_section="default";
+    }
+
+    //    cout << "refsec: " << ref_section << " ref " << node->attr_value("ref") << endl;
+    getColor(ref_section,node->attr_value("ref"),refcol);
 
     color=new vColor;
 
@@ -340,36 +350,56 @@ bool VegaConfig::checkColor(easyDomNode *node){
 
   color->name=node->attr_value("name");
 
-  colors.push_back(color);
+  node->color=color;
+  //  colors.push_back(color);
 
   return true;
 }
 
-void VegaConfig::doColors(easyDomNode *node){
+
+void VegaConfig::doColors(configNode *node){
+  if(colors!=NULL){
+    cout << "only one variable section allowed" << endl;
+    return;
+  }
+  colors=node;
+
   vector<easyDomNode *>::const_iterator siter;
   
   for(siter= node->subnodes.begin() ; siter!=node->subnodes.end() ; siter++){
-    checkColor(*siter);
+    configNode *cnode=(configNode *)(*siter);
+    checkSection(cnode,SECTION_COLOR);
   }
+
+#if 0
+  vector<easyDomNode *>::const_iterator siter;
+  
+  for(siter= node->subnodes.begin() ; siter!=node->subnodes.end() ; siter++){
+    configNode *cnode=(configNode *)(*siter);
+    checkColor(cnode);
+  }
+#endif
 }
 
-void VegaConfig::doBindings(easyDomNode *node){
+void VegaConfig::doBindings(configNode *node){
   vector<easyDomNode *>::const_iterator siter;
   
   for(siter= node->subnodes.begin() ; siter!=node->subnodes.end() ; siter++){
-    if((*siter)->Name()=="bind"){
-      checkBind(*siter);
+    configNode *cnode=(configNode *)(*siter);
+
+    if((cnode)->Name()=="bind"){
+      checkBind(cnode);
     }
-    else if(((*siter)->Name()=="axis")){
-      doAxis(*siter);
+    else if(((cnode)->Name()=="axis")){
+      doAxis(cnode);
     }
     else{
-      cout << "Unknown tag: " << (*siter)->Name() << endl;
+      cout << "Unknown tag: " << (cnode)->Name() << endl;
     }
   }
 }
 
-void VegaConfig::doAxis(easyDomNode *node){
+void VegaConfig::doAxis(configNode *node){
 
   string name=node->attr_value("name");
   string joystick=node->attr_value("joystick");
@@ -421,7 +451,8 @@ void VegaConfig::doAxis(easyDomNode *node){
   
     hs_value_index=0;
     for(siter= node->subnodes.begin() ; siter!=node->subnodes.end() ; siter++){
-      checkHatswitch(nr,*siter);
+      configNode *cnode=(configNode *)(*siter);
+      checkHatswitch(nr,cnode);
     }
   }
   else{
@@ -431,7 +462,7 @@ void VegaConfig::doAxis(easyDomNode *node){
 
 }
 
-void VegaConfig::checkHatswitch(int nr,easyDomNode *node){
+void VegaConfig::checkHatswitch(int nr,configNode *node){
   if(node->Name()!="hatswitch"){
     cout << "not a hatswitch node " << endl;
     return;
@@ -453,7 +484,7 @@ void VegaConfig::checkHatswitch(int nr,easyDomNode *node){
   hs_value_index++;
 }
 
-void VegaConfig::checkBind(easyDomNode *node){
+void VegaConfig::checkBind(configNode *node){
   if(node->Name()!="bind"){
     cout << "not a bind node " << endl;
     return;
@@ -539,11 +570,12 @@ string VegaConfig::getVariable(string section,string name,string defaultval){
    vector<easyDomNode *>::const_iterator siter;
   
   for(siter= variables->subnodes.begin() ; siter!=variables->subnodes.end() ; siter++){
-    string scan_name=(*siter)->attr_value("name");
+    configNode *cnode=(configNode *)(*siter);
+    string scan_name=(cnode)->attr_value("name");
     //    cout << "scanning section " << scan_name << endl;
 
     if(scan_name==section){
-      return getVariable(*siter,name,defaultval);
+      return getVariable(cnode,name,defaultval);
     }
   }
 
@@ -552,12 +584,13 @@ string VegaConfig::getVariable(string section,string name,string defaultval){
   return defaultval;
  
 }
-string VegaConfig::getVariable(easyDomNode *section,string name,string defaultval){
+string VegaConfig::getVariable(configNode *section,string name,string defaultval){
     vector<easyDomNode *>::const_iterator siter;
   
   for(siter= section->subnodes.begin() ; siter!=section->subnodes.end() ; siter++){
-    if((*siter)->attr_value("name")==name){
-      return (*siter)->attr_value("value");
+    configNode *cnode=(configNode *)(*siter);
+    if((cnode)->attr_value("name")==name){
+      return (cnode)->attr_value("value");
     }
   }
 
@@ -567,16 +600,37 @@ string VegaConfig::getVariable(easyDomNode *section,string name,string defaultva
  
 }
 
-void VegaConfig::getColor(string name,float color[4]){
-  vector<vColor *>::const_iterator siter;
+void VegaConfig::getColor(string section, string name, float color[4]){
+   vector<easyDomNode *>::const_iterator siter;
   
-  for(siter= colors.begin() ; siter!=colors.end() ; siter++){
-    //    cout << "scanning color " << (*siter)->name << endl;
-    if((*siter)->name==name){
-      color[0]=(*siter)->r;
-      color[1]=(*siter)->g;
-      color[2]=(*siter)->b;
-      color[3]=(*siter)->a;
+  for(siter= colors->subnodes.begin() ; siter!=colors->subnodes.end() ; siter++){
+    configNode *cnode=(configNode *)(*siter);
+    string scan_name=(cnode)->attr_value("name");
+    //          cout << "scanning section " << scan_name << endl;
+
+    if(scan_name==section){
+      getColor(cnode,name,color);
+      return;
+    }
+  }
+
+  cout << "WARNING: no section named " << section << endl;
+
+  return;
+  
+}
+
+void VegaConfig::getColor(configNode *node,string name,float color[4]){
+  vector<easyDomNode *>::const_iterator siter;
+  
+  for(siter= node->subnodes.begin() ; siter!=node->subnodes.end() ; siter++){
+    configNode *cnode=(configNode *)(*siter);
+    //            cout << "scanning color " << (cnode)->attr_value("name") << endl;
+    if((cnode)->attr_value("name")==name){
+      color[0]=(cnode)->color->r;
+      color[1]=(cnode)->color->g;
+      color[2]=(cnode)->color->b;
+      color[3]=(cnode)->color->a;
       return;
     }
   }
@@ -586,7 +640,7 @@ void VegaConfig::getColor(string name,float color[4]){
   color[2]=1.0;
   color[3]=1.0;
 
-  cout << "WARNING: color " << name << " not defined, using default" << endl;
+  cout << "WARNING: color " << name << " not defined, using default (white)" << endl;
 }
 
 void VegaConfig::bindKeys(){

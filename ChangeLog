@@ -1,4 +1,12 @@
-2001-10-31 Alexander Rawass <alexannika@users.sourceforge.net>
+2001-11-01 Alexander Rawass <alexannika@users.sourceforge.net>
+	
+	* tried to match Daniel's request for color sections
+	* transformed easyDomFactory to template class
+	* modified config_xml to use configNode instead of easyDomNode
+	* modified colors to have sections
+	
+	
+2001-10-31 Daniel Horn <hellcatv@hotmail.com>
 	* happy halloween!
 	* added ship_ambient and planet_ambient into the picture
 	* of course I set them both to 0 :-)

@@ -49,7 +49,7 @@ Mission::Mission(char *configfile){
   number_of_flightgroups=0;
   number_of_ships=0;
 
-  easyDomFactory *domf = new easyDomFactory();
+  easyDomFactory<easyDomNode> *domf= new easyDomFactory<easyDomNode>();
 
   easyDomNode *top=domf->LoadXML(configfile);
 

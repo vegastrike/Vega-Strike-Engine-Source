@@ -46,12 +46,26 @@ class vColor {
   float r,g,b,a;
 };
 
+
+class configNode : public easyDomNode {
+ public:
+  vColor *color;
+};
+
+enum section_t { SECTION_COLOR,SECTION_VAR };
+
+class configNodeFactory : public easyDomFactory<configNode> {
+};
+
 class VegaConfig {
  public:
   VegaConfig(char *configfile);
 
-  void getColor(string name, float color[4]);
+  void getColor(configNode *node,string name, float color[4]);
   string getVariable(string section,string name,string defaultvalue);
+  void getColor(string section, string name, float color[4]);
+  void getColor(string name, float color[4]) { getColor("default",name,color); };
+
   void bindKeys();
 
 #define MAX_AXIS 4
@@ -74,7 +88,7 @@ class VegaConfig {
   int hatswitch_joystick[MAX_HATSWITCHES];
 
  private:
-  string getVariable(easyDomNode *section,string name,string defaultval);
+  string getVariable(configNode *section,string name,string defaultval);
 
   void initCommandMap();
   void initKeyMap();
@@ -82,23 +96,24 @@ class VegaConfig {
   CommandMap command_map;
   KeyMap     key_map;
 
-  easyDomNode *variables;
-  easyDomNode *bindings;
+  configNode *variables;
+  configNode *bindings;
+  configNode *colors;
 
   int hs_value_index;
 
-  vector<vColor *> colors;
+  //  vector<vColor *> colors;
 
-  bool checkConfig(easyDomNode *node);
-  void doVariables(easyDomNode *node);
-  void doBindings(easyDomNode *node);
-  void checkSection(easyDomNode *node);
-  void checkVar(easyDomNode *node);
-  void doColors(easyDomNode *node);
-  bool checkColor(easyDomNode *node);
-  void checkBind(easyDomNode *node);
-  void doAxis(easyDomNode *node);
-  void checkHatswitch(int nr,easyDomNode *node);
+  bool checkConfig(configNode *node);
+  void doVariables(configNode *node);
+  void doBindings(configNode *node);
+  void checkSection(configNode *node,enum section_t section_type);
+  void checkVar(configNode *node);
+  void doColors(configNode *node);
+  bool checkColor(configNode *node);
+  void checkBind(configNode *node);
+  void doAxis(configNode *node);
+  void checkHatswitch(int nr,configNode *node);
 
 
 };

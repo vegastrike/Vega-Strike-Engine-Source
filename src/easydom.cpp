@@ -42,7 +42,7 @@ void easyDomNode::set(easyDomNode *_parent,string _name, AttributeList  *_attrib
   attributes=_attributes;
 
   for(AttributeList::const_iterator iter = _attributes->begin(); iter!=_attributes->end(); iter++) {
-    //    cout <<  name << "::" << (*iter).name << endl;
+    //    cout <<  _name << "::" << (*iter).name << endl;
     //    printf("iter=%x *iter=%x\n",iter,*iter);
     //cout << " " << (*iter).name << "=\"" << (*iter).value << "\"" << endl;
     att_name.push_back((*iter).name);
@@ -91,28 +91,32 @@ void easyDomNode::walk(int level){
   cout << "</" << name << ">" << endl;
 }
 
-easyDomFactory::easyDomFactory(){
+#if 0
+template<class domNodeType> easyDomFactory<domNodeType>::easyDomFactory(){
 }
+#endif
 
-void easyDomFactory::charHandler(void *userData, const XML_Char *s,int len){
+#if 0
+
+template<class domNodeType> void easyDomFactory<domNodeType>::charHandler(void *userData, const XML_Char *s,int len){
   char buffer[2048];
   strncpy(buffer,s,len);
   // printf("XML-text: %s\n",buffer);
 }
 
-void easyDomFactory::beginElement(void *userData, const XML_Char *name, const XML_Char **atts) {
+template<class domNodeType> void easyDomFactory<domNodeType>::beginElement(void *userData, const XML_Char *name, const XML_Char **atts) {
   ((easyDomFactory*)userData)->beginElement(name, AttributeList(atts));
 }
 
-void easyDomFactory::endElement(void *userData, const XML_Char *name) {
+template<class domNodeType> void easyDomFactory<domNodeType>::endElement(void *userData, const XML_Char *name) {
   ((easyDomFactory*)userData)->endElement(name);
 }
 
 
-void easyDomFactory::beginElement(const string &name, const AttributeList &attributes) {
+template<class domNodeType> void easyDomFactory<domNodeType>::beginElement(const string &name, const AttributeList &attributes) {
   AttributeList::const_iterator iter;
 
-  easyDomNode *parent;
+  domNodeType *parent;
 
   if(nodestack.empty()){
     parent=NULL;
@@ -121,7 +125,7 @@ void easyDomFactory::beginElement(const string &name, const AttributeList &attri
     parent=nodestack.top();
   }
 
-  easyDomNode *thisnode=new easyDomNode();
+  domNodeType *thisnode=new domNodeType();
   thisnode->set(parent,name,(AttributeList *) &attributes);
 
   for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
@@ -138,9 +142,9 @@ void easyDomFactory::beginElement(const string &name, const AttributeList &attri
 
 }
 
-void easyDomFactory::endElement(const string &name) {
+template<class domNodeType> void easyDomFactory<domNodeType>::endElement(const string &name) {
 
-  easyDomNode *stacktop=nodestack.top();
+  domNodeType *stacktop=nodestack.top();
 
   if(stacktop->Name()!=name){
     cout << "error: expected " << stacktop->Name() << " , got " << name << endl;
@@ -152,8 +156,10 @@ void easyDomFactory::endElement(const string &name) {
   
 }
 
+#endif
 
-easyDomNode *easyDomFactory::LoadXML(const char *filename) {
+#if 0
+template<class domNodeType> easyDomNode * easyDomFactory<domNodeType>::LoadXML(const char *filename) {
 
   const int chunk_size = 16384;
 
@@ -186,3 +192,4 @@ easyDomNode *easyDomFactory::LoadXML(const char *filename) {
   return topnode;
 }
 
+#endif

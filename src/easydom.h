@@ -62,9 +62,9 @@ class easyDomNode {
   string name;
 };
 
-class easyDomFactory {
+template<class domNodeType> class easyDomFactory {
  public:
-  easyDomFactory();
+  easyDomFactory() {};
 
   void getColor(char *name, float color[4]);
   char *getVariable(char *section,char *name);
@@ -72,18 +72,100 @@ class easyDomFactory {
   struct easyDomFactoryXML {
   } *xml;
 
-  easyDomNode *LoadXML(const char*);
+    domNodeType *LoadXML(const char *filename) {
 
-  static void charHandler(void *userData, const XML_Char *s, int len);
-  static void beginElement(void *userData, const XML_Char *name, const XML_Char **atts);
-  static void endElement(void *userData, const XML_Char *name);
+  const int chunk_size = 16384;
 
-  void beginElement(const string &name, const AttributeList &attributes);
-  void endElement(const string &name);
+  FILE * inFile = fopen (filename, "r");
+  if(!inFile) {
+    cout << "error: could not open file: " << filename << endl;
+    assert(0);
+    return NULL;
+  }
 
-  stack<easyDomNode *> nodestack;
+  xml = new easyDomFactoryXML;
 
-  easyDomNode *topnode;
+  XML_Parser parser = XML_ParserCreate(NULL);
+  XML_SetUserData(parser, this);
+  XML_SetElementHandler(parser, &easyDomFactory::beginElement, &easyDomFactory::endElement);
+  XML_SetCharacterDataHandler(parser,&easyDomFactory::charHandler);
+  
+  do {
+    char *buf = (XML_Char*)XML_GetBuffer(parser, chunk_size);
+    int length;
+
+    length = fread (buf,1, chunk_size,inFile);
+    //length = inFile.gcount();
+    XML_ParseBuffer(parser, length, feof(inFile));
+  } while(!feof(inFile));
+
+  fclose (inFile);
+  XML_ParserFree (parser);
+
+  return (domNodeType *)topnode;
+    };
+
+  static void charHandler(void *userData, const XML_Char *s, int len){
+  char buffer[2048];
+  strncpy(buffer,s,len);
+  // printf("XML-text: %s\n",buffer);
+}
+;
+  static void beginElement(void *userData, const XML_Char *name, const XML_Char **atts){
+  ((easyDomFactory*)userData)->beginElement(name, AttributeList(atts));
+};
+  static void endElement(void *userData, const XML_Char *name){
+  ((easyDomFactory*)userData)->endElement(name);
+}
+;
+
+  void beginElement(const string &name, const AttributeList &attributes){
+  AttributeList::const_iterator iter;
+
+  domNodeType *parent;
+
+  if(nodestack.empty()){
+    parent=NULL;
+  }
+  else{
+    parent=nodestack.top();
+  }
+
+  domNodeType *thisnode=new domNodeType();
+  thisnode->set(parent,name,(AttributeList *) &attributes);
+
+  for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
+    //cout <<  name << "::" << (*iter).name << endl;
+  }
+
+  if(parent==NULL){
+    topnode=thisnode;
+  }
+  else{
+    parent->addChild(thisnode);
+  }
+  nodestack.push(thisnode);
+
 };
 
-#endif // _VEGACONFIG_H_
+  void endElement(const string &name){
+
+  domNodeType *stacktop=nodestack.top();
+
+  if(stacktop->Name()!=name){
+    cout << "error: expected " << stacktop->Name() << " , got " << name << endl;
+    exit(0);
+  }
+  else{
+    nodestack.pop();
+  }
+  
+}
+;
+
+  stack<domNodeType *> nodestack;
+
+  domNodeType *topnode;
+};
+
+#endif // _EASYDOM_H_
