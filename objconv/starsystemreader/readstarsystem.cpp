@@ -740,10 +740,10 @@ vector<System> readfile (const char * name) {
 					break;
 				}
 				factionsdata=factionsdata.substr(n+1);
-				if (vec.size()>=4) {
-					int slash=vec[3].find("/");
+				if (vec.size()>=5) {
+					int slash=vec[4].find("/");
 					if (slash!=std::string::npos) {
-						homeworlds.push_back(vec[3].substr(slash+1));
+						homeworlds.push_back(vec[4].substr(slash+1));
 					}
 				}
 			}
