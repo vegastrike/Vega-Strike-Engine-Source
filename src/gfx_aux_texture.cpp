@@ -83,6 +83,14 @@ Texture * Texture::Exists (string s) {
     return tmp;
 }
 
+bool Texture::operator < (const Texture & b) {
+  return ( (original?original:this)<(b.original?b.original:&b));
+}
+
+bool Texture::operator == (const Texture & b) {
+  return ( (original?original:this)==(b.original?b.original:&b));
+}
+
 GFXBOOL Texture::checkold(const string &s)
 {
 	Texture *oldtex;

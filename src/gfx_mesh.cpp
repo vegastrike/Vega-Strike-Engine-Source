@@ -48,10 +48,10 @@ public:
     orig = tmp;
   }
   bool operator < (const OrigMeshContainer & b) {
-    return (orig->Decal < b.orig->Decal);
+    return ((*orig->Decal) < (*b.orig->Decal));
   }
   bool operator == (const OrigMeshContainer &b) {
-    return orig->Decal==b.orig->Decal;
+    return (*orig->Decal)==*b.orig->Decal;
   }
 
 };

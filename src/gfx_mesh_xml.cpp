@@ -1120,13 +1120,10 @@ void Mesh::LoadXML(const char *filename, Mesh *oldmesh) {
     Decal = NULL;
   } else {
     if (xml->alpha_name.c_str()[0]=='\0') {
-      if ((Decal = Texture::Exists (xml->decal_name))==0) {
-	Decal = new Texture(xml->decal_name.c_str(), 0);    
-      }
+      Decal = new Texture(xml->decal_name.c_str(), 0);    
     }else {
-      if ((Decal= Texture::Exists (xml->decal_name,xml->alpha_name))==0) {
-	Decal = new Texture(xml->decal_name.c_str(), xml->alpha_name.c_str(),0);
-      }    
+      Decal = new Texture(xml->decal_name.c_str(), xml->alpha_name.c_str(),0);
+     
     }
   }
 

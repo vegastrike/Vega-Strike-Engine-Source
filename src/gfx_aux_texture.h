@@ -62,7 +62,9 @@ public:
   ~Texture();
   static Texture * Exists (string s);
   static Texture * Exists (string s, string a);
-
+  bool operator < (const Texture &b);
+  bool operator == (const Texture &b);
+  
 	int Bind();
 	void Transfer();
 	void MakeActive();
