@@ -411,7 +411,7 @@ public:
   bool SellCargo (const std::string &s, int quantity, float & creds, Cargo &carg, Unit *buyer);
   bool BuyCargo (const Cargo &carg, float & creds);
   bool IsCleared (Unit * dockignunit);
-  const vector <class DockingPorts> &DockingPortLocations();
+  const vector <struct DockingPorts> &DockingPortLocations();
   void ImportPartList (const std::string& category, float price, float pricedev,  float quantity, float quantdev);
   bool RequestClearance (Unit * dockingunit);
   bool Dock (Unit * unitToDockWith);

@@ -32,7 +32,7 @@
 
 #define _G_DEBUG		// Debug Messaging
 #define _G_ERROR		// Error Messaging (internal and external)
-//#define _G_GLIB		// use GLIB for string allocation
+#define _G_GLIB		// use GLIB for string allocation
 //#define _G_NUMBER		// Number processing
 #define _G_PATH               // Functions that deal with directories
 //#define _G_RANDOM		// Enable Random Number

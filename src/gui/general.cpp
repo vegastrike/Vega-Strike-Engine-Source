@@ -19,6 +19,13 @@
  * This allows it to be used with other programs with minimal changes */
 
 #include "general.h"
+#include <string>
+#include <vector>
+#ifdef _WIN32
+#include <glib.h>
+#endif
+using std::vector;
+using std::string;
 #if defined(__APPLE__) || defined(MACOSX) 
 #include <sys/param.h> // For MAXPATHLEN
 #endif
@@ -114,10 +121,12 @@ char *pre_chomp(char *line) {
 
 char *replace(char *line, char *search, char *replace, int LENGTH) {
 	int length, dif, calc;
-	char chr_new[LENGTH+1], current[LENGTH+1];
+	char * chr_new, * current;
 	char *ptr_new, *location;
 	calc = strlen(line) - strlen(search) + strlen(replace);
 	if (calc > LENGTH) { return line; }
+	chr_new= new char [LENGTH+1];
+	current= new char [LENGTH+1];
 	length = strlen(line);
 	strcpy(current, line);
 	while ((location = strstr(current, search)) > 0) {
@@ -132,6 +141,8 @@ char *replace(char *line, char *search, char *replace, int LENGTH) {
 		strcpy(current, chr_new); 
 	}
 	strcpy(line, current);
+	delete [] chr_new;
+	delete [] current;
 	return line;
 }
 
@@ -283,7 +294,8 @@ double pwer(double start, long end) {
 void btoa(char *dest, char *string) {
 	int max, cur, pos, new_val;
 	char *ptr_char, cur_char[1];
-	char new_string[strlen(string)+1];
+	char *new_string;
+	new_string= new char [strlen(string)+1];
 	max = 7;
 	cur = 7;
 	pos = 0;
@@ -298,6 +310,7 @@ void btoa(char *dest, char *string) {
 	}
 	new_string[pos] = '\0';
 	strcpy(dest, new_string);
+	delete [] new_string;
 	return;
 }
 
@@ -430,7 +443,6 @@ int isdir(const char *file) {
 
 // type = 0: file
 // type = 1: dirs
-
 glob_t *FindPath(char *path, int type) {
 	glob_t *FILES = new glob_t;
 	string mypath(path);
@@ -485,7 +497,6 @@ glob_t *FindPath(char *path, int type) {
 
 	return FILES;
 }
-
 glob_t *FindFiles(char *path, char *extension) { return FindPath(path, 0); }
 glob_t *FindDirs(char *path) { return FindPath(path, 1); }
 

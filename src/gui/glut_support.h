@@ -25,12 +25,16 @@
     #include <OpenGL/gl.h>
     #include <GLUT/glut.h>
 #else
+#ifdef _WIN32
+	#include <windows.h>
+#endif
     #include <GL/gl.h>
     #include <GL/glut.h>
 #endif
 #include <png.h>
 #include <stdio.h>
-#include <vector.h>
+#include <vector>
+using std::vector;
 //#include "gfx/png_texture.h"
 
 struct GUITexture {

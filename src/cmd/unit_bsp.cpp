@@ -85,7 +85,7 @@ enum INTERSECT_TYPE {
 
 
 
-typedef struct Vector VECTOR;
+typedef class Vector VECTOR;
 
 
 struct bsp_tree {

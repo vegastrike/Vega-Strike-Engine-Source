@@ -70,6 +70,9 @@
 #ifdef _G_PATH
 
 #ifdef _WIN32
+#include <stdio.h>
+#include <stdlib.h>
+#include <windows.h>
 #include <direct.h>
 #else
 #include <stdio.h>
