@@ -27,6 +27,8 @@ private:
   float energy;
   float damagerate;
   float rangepenalty;
+  float refire;
+  float refiretime;
   GFXColor Col;
   enum {
     ALIVE=0,
@@ -42,6 +44,7 @@ private:
   //static vector <int> DecalRef;
   //static vector <vector <DrawContext> > drawqueue;
 public:
+  
   Beam (const Transformation & trans, const weapon_info & clne, void * own);
   void Init (const Transformation & trans, const weapon_info & clne, void * own);
   ~Beam();
@@ -53,6 +56,7 @@ public:
   void Draw(const Transformation & =identity_transformation, const float [] = identity_matrix );
   void Destabilize () {impact=UNSTABLE;}
   bool Dissolved () {return curthick==0;} 
+  bool Ready () {return curthick==0&&refiretime>refire;}
   bool Collide (class Unit * target);
   static void ProcessDrawQueue();
 

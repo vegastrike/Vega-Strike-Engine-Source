@@ -723,7 +723,7 @@ bool Unit::Mount::Fire (const Transformation &Cumulative, const float * m, Unit 
     if (gun==NULL)
       gun = new Beam (LocalPosition,type,owner);
     else
-      if (gun->Dissolved())
+      if (gun->Ready())
 	gun->Init (LocalPosition,type,owner);
       else 
 	return false;//can't fire an active beam

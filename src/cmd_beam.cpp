@@ -75,6 +75,8 @@ void Beam::Init (const Transformation & trans, const weapon_info &cln , void * o
   energy = cln.EnergyRate;
   rangepenalty=cln.Longrange;
   damagerate = cln.Damage;
+  refiretime = 0;
+  refire = cln.Refire;
   Col.r = cln.r;
   Col.g = cln.g;
   Col.b = cln.b;
@@ -229,6 +231,15 @@ void Beam::ProcessDrawQueue() {
 }
 
 void Beam::UpdatePhysics(const Transformation &trans, const Matrix m) {
+  curlength += SIMULATION_ATOM*speed;
+  if (curlength<0)
+    curlength=0;
+  if (curlength > range)
+    curlength=range;
+  if (curthick ==0) {
+    refiretime +=SIMULATION_ATOM;
+    return;
+  }
   numframes++;
   Matrix cumulative_transformation_matrix;
   Transformation cumulative_transformation = local_transformation;
@@ -238,11 +249,6 @@ void Beam::UpdatePhysics(const Transformation &trans, const Matrix m) {
   
   if (stability&&numframes*SIMULATION_ATOM>stability)
     impact=UNSTABLE;
-  curlength += SIMULATION_ATOM*speed;
-  if (curlength<0)
-    curlength=0;
-  if (curlength > range)
-    curlength=range;
   
   curthick+=(impact==UNSTABLE)?-radialspeed*SIMULATION_ATOM:radialspeed*SIMULATION_ATOM;
   if (curthick > thickness)
