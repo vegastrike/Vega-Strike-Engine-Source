@@ -656,6 +656,9 @@ vector<Mesh*> Mesh::LoadMeshes(VSFileSystem::VSFile & Inputfile, const Vector & 
           output.push_back(new Mesh());
           *output.back()=*meshes.back().m;//use builtin
           output.back()->orig=meshes.back().m;
+          for (unsigned int i=1;i<meshes.back().sizes.size();++i) {
+            output.back()->orig[i].lodsize=meshes.back().sizes[i];
+          }
           output.back()->numlods = meshes.back().num;
           
   }
