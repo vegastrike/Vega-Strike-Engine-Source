@@ -12,6 +12,7 @@ $scale = 1;
 %encountered_points = (); # hashmap associating textures with their vertices
 %point_output = ();
 %face_output = ();
+$num_polygons = 0;
 
 if(@ARGV < 1) {
 print STDERR "Usage: obj2xml <objfile>\n";
@@ -21,7 +22,7 @@ exit;
 $inputfile = $ARGV[0];
 $scale = $ARGV[1] if (@ARGV > 1);
 $inputfile =~ /(.*)\.obj/ or die "Bad extension on $inputfile";
-$unitoutfile = ($basename = $1) . ".xml";
+$unitoutfile = ($basename = $1) . ".xunit";
 open(INPUT, "<$inputfile") or die "Could not open $inputfile";
 open(UNITOUTPUT, ">$unitoutfile") or die "Could not create $unitoutfile";
 
@@ -113,16 +114,21 @@ POINT
 		} elsif (@output_vertices==4) {
 			$face_output{$objname}{$texture} .= "</Quad>\n"
 		}
+		$num_polygons++;
 	}
 }
 
 for $objname (keys %encountered_points) {
 	print "$objname\n";
-	$subfile = "$objname.xml";
+	if($objname ne $basename) {
+	$subfile = "$objname.xnt";
 	open(SUBUNITOUTPUT, ">$subfile");
 	print SUBUNITOUTPUT "<Unit>\n";
+	} else {
+		open(SUBUNITOUTPUT, ">&UNITOUTPUT");
+	}
 	for $texture (keys %{$encountered_points{$objname}}) {
-		$meshfilename = "$objname-$texture.xml";
+		$meshfilename = "$objname-$texture.xmesh";
 		open(MESHOUTPUT, ">$meshfilename");
 		print MESHOUTPUT "<Mesh texture=\"$texture.bmp\">\n";
 		print MESHOUTPUT $point_output{$objname}{$texture};
@@ -132,11 +138,14 @@ for $objname (keys %encountered_points) {
 		print MESHOUTPUT "</Mesh>\n";
 		print SUBUNITOUTPUT "<Meshfile file=\"$meshfilename\"/>\n";
 	}
+	if($objname ne $basename) {
 	print SUBUNITOUTPUT "</Unit>\n";
 	print UNITOUTPUT "<SubUnit file=\"$subfile\"/>\n";
+	}
 }
 print UNITOUTPUT << "FOOT"
 </Unit>
 FOOT
 ;
+print "$num_polygons polygons in model\n";
 
