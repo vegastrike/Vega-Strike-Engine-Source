@@ -11,7 +11,7 @@ template <class SuperClass> class PythonClass:public SuperClass {
   PyObject * self;
   static PythonClass * last_instance;
  protected:
-  virtual void Destruct() {
+  virtual void Destructor() {
     Py_XDECREF(self);
   }
  public:
