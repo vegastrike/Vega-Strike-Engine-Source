@@ -750,7 +750,8 @@ void StarSystem::ProcessPendingJumps() {
 				float speed = dist/pendingjump[kk]->delay;
                                 bool player=(_Universe->isPlayerStarship(un)!=NULL);
                                 if (dist>10&&player) {
-                                  un->SetCurPosition(un->LocalPosition()+SIMULATION_ATOM*delta*(speed/dist));
+                                  if (un->activeStarSystem==pendingjump[kk]->orig)
+                                    un->SetCurPosition(un->LocalPosition()+SIMULATION_ATOM*delta*(speed/dist));
                                 }else if (!player){
                                   un->SetVelocity(Vector(0,0,0));
                                 }		
