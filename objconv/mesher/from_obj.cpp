@@ -258,9 +258,9 @@ void ObjToBFXM (FILE* obj, FILE * mtl, FILE * outputFile) {
         IntRef second=parsePoly(str1);        
         for (int i=2;i<splitwhite.size();++i) {
           IntRef cp = parsePoly(splitwhite[i]);
-          SetNormal(temp,xml.vertices[first.v],
+          SetNormal(temp,xml.vertices[cp.v],
                     xml.vertices[second.v],
-                    xml.vertices[cp.v]);
+                    xml.vertices[first.v]);
           if (i==2) {
             AddNormal(xml.vertices[first.v],temp);
             AddNormal(xml.vertices[second.v],temp);
@@ -284,7 +284,7 @@ void ObjToBFXM (FILE* obj, FILE * mtl, FILE * outputFile) {
         IntRef B = parsePoly(str1);        
         IntRef C = parsePoly(str2);        
         IntRef D = parsePoly(str3);        
-        SetNormal(temp,xml.vertices[A.v],xml.vertices[B.v],xml.vertices[C.v]);
+        SetNormal(temp,xml.vertices[C.v],xml.vertices[B.v],xml.vertices[A.v]);
         AddNormal(xml.vertices[A.v],temp);
         AddNormal(xml.vertices[B.v],temp);
         AddNormal(xml.vertices[C.v],temp);
@@ -339,7 +339,7 @@ void ObjToBFXM (FILE* obj, FILE * mtl, FILE * outputFile) {
         IntRef A = parsePoly(str);        
         IntRef B = parsePoly(str1);        
         IntRef C = parsePoly(str2);        
-        SetNormal(temp,xml.vertices[A.v],xml.vertices[B.v],xml.vertices[C.v]);
+        SetNormal(temp,xml.vertices[C.v],xml.vertices[B.v],xml.vertices[A.v]);
         AddNormal(xml.vertices[A.v],temp);
         AddNormal(xml.vertices[B.v],temp);
         AddNormal(xml.vertices[C.v],temp);
