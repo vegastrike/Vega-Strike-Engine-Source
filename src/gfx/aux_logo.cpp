@@ -142,6 +142,7 @@ void Logo::ProcessDrawQueue() {
 	Decal->MakeActive();
 	GFXSelectTexcoordSet(0, 0);
 	GFXSelectTexcoordSet(1, 1);
+	GFXDisable (DEPTHWRITE);
 	GFXBlendMode(SRCALPHA,INVSRCALPHA);
 	//GFXBlendMode(ONE,ZERO);
         DrawContext c = draw_queue->back();
@@ -154,7 +155,7 @@ void Logo::ProcessDrawQueue() {
 	  c.vlist->Draw();
 	  c.vlist->EndDrawState(GFXFALSE);
 	}
-
+	GFXEnable (DEPTHWRITE);
 }
 
 Logo::~Logo ()

@@ -76,6 +76,9 @@ struct MeshDrawContext {
   float mat[16];
   ///The special FX vector pointing to all active special FX
   vector <MeshFX> *SpecialFX;
+  GFXLight CloakNebFX;
+  bool cloaked;
+  char mesh_seq;
   MeshDrawContext(const float m[16]) { memcpy(mat, m, sizeof(float[16])); }
 };
 using XMLSupport::EnumMap;
@@ -329,11 +332,11 @@ public:
   ///Returns center of this mesh
   Vector &Position() {return local_pos;}
   ///Draws lod pixel wide mesh at Transformation LATER
-  void Draw(float lod, const Transformation &quat = identity_transformation, const Matrix = identity_matrix);
+  void Draw(float lod, const Transformation &quat = identity_transformation, const Matrix = identity_matrix, short cloak=-1,float nebdist=0);
   ///Draws lod pixels wide, mesh at Transformation NOW. If centered, then will center on camera and disable cull
-  void DrawNow(float lod, bool centered, const Transformation &quat = identity_transformation, const Matrix = identity_matrix);
+  void DrawNow(float lod, bool centered, const Transformation &quat = identity_transformation, const Matrix = identity_matrix, short cloak=-1,float nebdist=0);
   ///Will draw all undrawn meshes of this type
-  virtual void ProcessDrawQueue();
+  virtual void ProcessDrawQueue(int whichdrawqueue);
   ///Will draw all undrawn meshes in total If pushSpclFX, the last series of meshes will be drawn with other lighting off
   static void ProcessUndrawnMeshes(bool pushSpecialEffects=false);
   ///Sets whether or not this unit should be environment mapped

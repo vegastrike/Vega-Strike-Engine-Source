@@ -300,8 +300,11 @@ class Unit {
   Computer computer;
   ///no collision table presence.
   bool SubUnit;
+  ///-1 is not available... ranges between 0 32767 for "how invisible" unit currently is (32767 being visible)
+  short cloaking;
   ///Should draw selection box?
-  bool selected;  Box *selectionBox;
+  bool selected;  
+  Box *selectionBox;
   ///Is dead already?
   bool killed;
   ///Should not be drawn

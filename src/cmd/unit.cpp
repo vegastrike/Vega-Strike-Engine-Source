@@ -89,6 +89,7 @@ void Unit::SetResolveForces (bool ys) {
 
 void Unit::Init()
 {
+  cloaking=-1;
   sound.engine=-1;  sound.armor=-1;  sound.shield=-1;  sound.hull=-1; sound.explode=-1;
   hudImage=NULL;
   owner = NULL;
@@ -668,7 +669,7 @@ void Unit::Draw(const Transformation &parent, const Matrix parentMatrix)
 				   );
       if (d) {  //d can be used for level of detail shit
 	if ((d =g_game.x_resolution*2*meshdata[i]->rSize()/GFXGetZPerspective(d))>=1) {//if the radius is at least half a pixel
-	  meshdata[i]->Draw(d,cumulative_transformation, cumulative_transformation_matrix);
+	  meshdata[i]->Draw(d,cumulative_transformation, cumulative_transformation_matrix,cloaking,0);//cloakign and nebula
 	} else {
 
 	}
