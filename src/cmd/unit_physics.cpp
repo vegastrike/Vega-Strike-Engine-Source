@@ -140,7 +140,8 @@ void GameUnit<UnitType>::UpdatePhysics2 (const Transformation &trans, const Tran
       Explode(false,SIMULATION_ATOM);
 	
     }
-  }      
+  }
+  UnitType::UpdatePhysics2 (trans,old_physical_state,accel,difficulty,transmat, cum_vel,  lastframe,uc);
 }
 
 /****************************** ONLY SOUND/GFX STUFF LEFT IN THOSE FUNCTIONS *********************************/
