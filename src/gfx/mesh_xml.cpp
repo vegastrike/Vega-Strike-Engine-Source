@@ -1004,7 +1004,8 @@ void Mesh::LoadXML(const char *filename, float scale, int faction, Flightgroup *
   std::vector <unsigned int> ind;  
   FILE* inFile = fopen (filename, "r");
   if(!inFile) {
-    assert(0);
+    fprintf (stderr,"Cannot Open Mesh File %s\n",filename);
+    exit(0);
     return;
   }
 
