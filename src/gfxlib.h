@@ -132,6 +132,7 @@ void /*GFXDRVAPI*/ GFXEnable(const enum STATE);
 void /*GFXDRVAPI*/ GFXDisable(const enum STATE);
 void /*GFXDRVAPI*/ GFXTextureAddressMode(const ADDRESSMODE);
 void /*GFXDRVAPI*/ GFXBlendMode(const enum BLENDFUNC src, const enum BLENDFUNC dst);
+void /*GFXDRVAPI*/ GFXPointSize (const float size);
 void /*GFXDRVAPI*/ GFXPushBlendMode();
 void /*GFXDRVAPI*/ GFXPopBlendMode();
 void /*GFXDRVAPI*/ GFXActiveTexture (const int stage);
