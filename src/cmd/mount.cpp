@@ -16,7 +16,7 @@
 #include "ai/aggressive.h"
 #include "lin_time.h"
 extern char SERVER;
-
+extern bool isMissile(const weapon_info *);
 Mount::Mount() {
 	static weapon_info wi(weapon_info::BEAM);
         functionality=1;
@@ -274,7 +274,7 @@ bool Mount::PhysicsAlignedFire(const Transformation &Cumulative, const Matrix & 
 	static bool ai_sound=XMLSupport::parse_bool (vs_config->getVariable ("audio","ai_sound","true"));
 	Cockpit * cp;
 	bool ips = ((cp=_Universe->isPlayerStarship(owner))!=NULL);
-    if ((((!use_separate_sound)||type->type==weapon_info::BEAM)||((!ai_use_separate_sound)&&!ips))&&(type->type!=weapon_info::PROJECTILE)) {
+    if ((((!use_separate_sound)||type->type==weapon_info::BEAM)||((!ai_use_separate_sound)&&!ips))&&(isMissile(type)==false)) {
 		if (ai_sound||(ips&&type->type==weapon_info::BEAM)) {
 			if (!AUDIsPlaying (sound)) {
 				AUDPlay (sound,tmp.position,velocity,1);
@@ -306,7 +306,7 @@ bool Mount::Fire (Unit * owner, bool Missile, bool listen_to_owner) {
     processed=UNFIRED;
   }
   static bool reduce_beam_ammo = XMLSupport::parse_bool (vs_config->getVariable ("physics","reduce_beam_ammo","0"));
-  if (processed==FIRED||status!=ACTIVE||(Missile!=(type->type==weapon_info::PROJECTILE))||ammo==0)
+  if (processed==FIRED||status!=ACTIVE||(Missile!=(isMissile(type)))||ammo==0)
     return false;
   if (type->type==weapon_info::BEAM) {
 	  bool fireit=ref.gun==NULL;

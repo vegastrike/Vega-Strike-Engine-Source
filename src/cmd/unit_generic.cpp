@@ -89,7 +89,7 @@ void Unit::BuildBSPTree(const char *filename, bool vplane, Mesh * hull) {
  }	
 
 }
-static bool isMissile(const weapon_info *weap) {
+bool isMissile(const weapon_info *weap) {
   static bool useProjectile=XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","projectile_means_missile","false"));
   if (useProjectile&&weap->type==weapon_info::PROJECTILE)
     return true;

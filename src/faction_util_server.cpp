@@ -19,5 +19,5 @@ void FactionUtil::LoadFactionPlaylists() {}
 
 Texture * FactionUtil::getForceLogo (int faction) { return NULL;}
 Texture *FactionUtil::getSquadLogo (int faction) { return NULL;}
-int FactionUtil::GetNumAnimation (int faction) { return NULL;}
+int FactionUtil::GetNumAnimation (int faction) { return 0;}
 
