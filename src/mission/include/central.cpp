@@ -17,6 +17,8 @@
 
 #include "central.h"
 #ifdef _WIN32
+#include <windows.h>
+#include <process.h>
 #include <direct.h>
 #else
 #include <sys/dir.h>
@@ -45,12 +47,11 @@ void RunMission(void) {
 	if (DATA.path[0] == '\0') { cout << "No mission selected\n"; return; }
 	cout << "Starting " << MISSION_PROGRAM << " with mission " << DATA.path << endl;
 #ifdef _WIN32
-	char * execname = new char [strlen(DATA.path)+strlen (MISSION_PROGRAM)+200];
-	char mypath[8000];
-	getcwd (mypath,7999);
-	sprintf (execname,"vegast~1 %s",DATA.path);
-	system (execname);
-	delete [] execname;
+	char execname [2048];
+	char mypath[1500];
+	getcwd (mypath,1499);
+	sprintf (execname,"%s\\Vegastrike",mypath);
+	spawnl(P_NOWAIT,execname,execname,DATA.path,NULL);
 #else
 	execlp("./vegastrike", "./vegastrike", DATA.path, NULL);
 #endif

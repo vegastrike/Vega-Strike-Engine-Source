@@ -17,10 +17,19 @@
 
 #include "../include/central.h"
 #ifdef _WIN32
+#include <direct.h>
 #include <windows.h>
+#else
+#include <sys/dir.h>
+#include <stdio.h>
+#include <unistd.h>
 #endif
 
 int main(int argc, char *argv[]) {
+	for (int i=strlen(argv[0]);argv[0][i]!='\\'&&argv[0][i]!='/';i--) {
+	}
+	argv[0][i+1]='\0';
+	chdir(argv[0]);
 #ifdef _WIN32
 	FreeConsole();
 #endif
