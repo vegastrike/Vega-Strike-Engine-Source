@@ -157,7 +157,7 @@ void JoyStick::GetJoyStick(float &x,float &y,int &buttons)
         return;
     }
 #if defined(HAVE_SDL)
-    //    SDL_JoystickUpdate();//FIXME isn't this supposed to be called already by SDL?
+    SDL_JoystickUpdate();//FIXME isn't this supposed to be called already by SDL?
 
     Sint16 xi =  SDL_JoystickGetAxis(joy,0);
     Sint16 yi =  SDL_JoystickGetAxis(joy,1);

@@ -26,8 +26,8 @@ void ProcessJoystick () {
   float x,y;
   int buttons;
   //  SDL_PumpEvents();
+#ifdef SDLEVENTSNOW
   while(SDL_PollEvent(&event)){
-    fprintf (stderr,"We have event type %d\n",event.type);
     switch(event.type){
     case SDL_JOYBUTTONDOWN:
       if (event.jbutton.which<NUMJBUTTONS) {
@@ -63,12 +63,25 @@ void ProcessJoystick () {
       break;
     }
   }
+#endif
   for (int i=0;i<MAX_JOYSTICKS;i++) {
+    buttons=0;
     if (joystick[event.jbutton.which]->isAvailable()) {
       joystick[event.jbutton.which]->GetJoyStick (x,y,buttons);
     }
     for (int j=0;j<NUMJBUTTONS;j++) {
-      (*JoystickBindings [i][j])(JoystickState[i][j],x,y,buttons);
+      if (buttons&(1<<j)) {
+	if (JoystickState[i][j]==UP) {
+	  (*JoystickBindings [i][j])(PRESS,x,y,buttons);		  
+	  JoystickState[i][j]=DOWN;
+	}else {
+	  if (JoystickState[i][j]==DOWN) {
+	    (*JoystickBindings [i][j])(RELEASE,x,y,buttons);		    
+	  }
+	  JoystickState[i][j]=UP;
+	}
+      }
+      (*JoystickBindings [i][j])(JoystickState[i][j],x,y,buttons);	
     }
   }
 }
