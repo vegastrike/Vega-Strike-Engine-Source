@@ -4,20 +4,20 @@
 #include "cmd_collide.h"
 vector <LineCollide*> collidequeue;
 const int COLLIDETABLESIZE=20;//cube root of entries
-const float COLLIDETABLEACCURACY=200;// "1/largeness of sectors"
+const int COLLIDETABLEACCURACY=200;// "1/largeness of sectors"
 #define _USE_COLLIDE_TABLE
 class CollideTable {
   int minaccessx,minaccessy,minaccessz,maxaccessx,maxaccessy,maxaccessz;
   vector <LineCollide*> table [COLLIDETABLESIZE][COLLIDETABLESIZE][COLLIDETABLESIZE];
-  int hash_int (float i) {
-    return ((int)(i/COLLIDETABLEACCURACY))%(COLLIDETABLESIZE/2)+(COLLIDETABLESIZE/2); 
+  static int hash_int (float i) {
+    return (((int)(i<0?(i-COLLIDETABLEACCURACY):i))/COLLIDETABLEACCURACY)%(COLLIDETABLESIZE/2)+(COLLIDETABLESIZE/2); 
   }
-  inline void hash_vec (float i, float j, float k, int &x, int &y, int &z) {
+  static void hash_vec (float i, float j, float k, int &x, int &y, int &z) {
     x = hash_int(i);
     y = hash_int(j);
     z = hash_int(k);
   }
-  inline void hash_vec (const Vector & t,int &x, int&y,int&z) {
+  static void hash_vec (const Vector & t,int &x, int&y,int&z) {
     hash_vec(t.i,t.j,t.k,x,y,z);
   }
 public:
