@@ -110,6 +110,8 @@ protected:
     bool sellUpgrade(const EventCommandId& command, Control* control);
     // Buy ship from the base.
     bool buyShip(const EventCommandId& command, Control* control);
+    // Sell ship from your stock
+    bool sellShip(const EventCommandId& command, Control* control);
     // Accept a mission.
     bool acceptMission(const EventCommandId& command, Control* control);
     // Show options.

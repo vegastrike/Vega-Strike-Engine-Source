@@ -59,7 +59,8 @@ static string beautify (const std::string &input) {
 }
 
 static float usedPrice (float percentage) {
-  return .5*percentage;
+  static float shipSellback=XMLSupport::parse_float(vs_config->getVariable("economics","upgrade_sellback_price",".5"));
+  return shipSellback*percentage;
 }
 bool final_cat (const std::string &cat) {
   if (cat.empty())

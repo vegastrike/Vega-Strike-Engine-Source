@@ -180,6 +180,7 @@ const BaseComputer::WctlTableEntry BaseComputer::WctlCommandTable[] = {
     BaseComputer::WctlTableEntry ( "BuyUpgrade", "", &BaseComputer::buyUpgrade ),
     BaseComputer::WctlTableEntry ( "SellUpgrade", "", &BaseComputer::sellUpgrade ),
     BaseComputer::WctlTableEntry ( "BuyShip", "", &BaseComputer::buyShip ),
+    BaseComputer::WctlTableEntry ( "SellShip", "", &BaseComputer::sellShip ),
     BaseComputer::WctlTableEntry ( "AcceptMission", "", &BaseComputer::acceptMission ),
     BaseComputer::WctlTableEntry ( "ShowPlayerInfo", "", &BaseComputer::showPlayerInfo ),
     BaseComputer::WctlTableEntry ( "ShowShipStats", "", &BaseComputer::showShipStats ),
@@ -880,7 +881,7 @@ void BaseComputer::constructControls(void) {
         shipDealerGroup->addChild(picture);
         // Buy button.
         NewButton* buy = new NewButton;
-        buy->setRect( Rect(-.23, -.95, .22, .11) );
+        buy->setRect( Rect(-.53, -.95, .22, .11) );
         buy->setColor( GFXColor(0,1,1,.1) );
         buy->setTextColor(GUI_OPAQUE_WHITE);
 		buy->setDownColor( GFXColor(0,1,1,.4) );
@@ -892,6 +893,19 @@ void BaseComputer::constructControls(void) {
         buy->setFont(Font(.08, BOLD_STROKE));
         buy->setId("Commit");
         shipDealerGroup->addChild(buy);
+        NewButton* sell = new NewButton;
+        sell->setRect( Rect(-.23, -.95, .22, .11) );
+        sell->setColor( GFXColor(0,1,1,.1) );
+        sell->setTextColor(GUI_OPAQUE_WHITE);
+		sell->setDownColor( GFXColor(0,1,1,.4) );
+		sell->setDownTextColor( GFXColor(.2,.2,.2) );
+		sell->setVariableBorderCycleTime(1.0);
+		sell->setBorderColor( GFXColor(.2,.2,.2) );
+		sell->setEndBorderColor( GFXColor(.4,.4,.4) );
+		sell->setShadowWidth(2.0);
+        sell->setFont(Font(.08, BOLD_STROKE));
+        sell->setId("Commit10");
+        shipDealerGroup->addChild(sell);
     }
 
     {
@@ -1421,6 +1435,15 @@ void BaseComputer::updateTransactionControlsForSelection(TransactionList* tlist)
             case BUY_SHIP:
                 commitButton->setLabel("Buy");
                 commitButton->setCommand("BuyShip");
+                if(item.category.find("My_Fleet") != string::npos) {
+                  //note can only sell it if you can afford to ship it over here.
+                  NewButton* commit10Button = static_cast<NewButton*>( window()->findControlById("Commit10") );
+                  assert(commit10Button != NULL);
+                  commit10Button->setHidden(false);
+                  commit10Button->setLabel("Sell");
+                  commit10Button->setCommand("SellShip");
+
+                }
                 break;
             case SELL_CARGO:
 				configureCargoCommitControls(item, SELL_CARGO);
@@ -3164,7 +3187,37 @@ void BaseComputer::loadShipDealerControls(void) {
     // Make the title right.
     recalcTitle();
 }
-
+bool BaseComputer::sellShip(const EventCommandId& command, Control* control) {
+    Unit* playerUnit = m_player.GetUnit();
+    Cockpit * cockpit = _Universe->isPlayerStarship(playerUnit);
+    Unit* baseUnit = m_base.GetUnit();
+    Cargo* item = selectedItem();
+    if(!(playerUnit && baseUnit && item && cockpit)) {
+        return true;
+    }
+    unsigned int tempInt=1;
+    Cargo* shipCargo = baseUnit->GetCargo(item->content, tempInt);    
+    if (shipCargo==NULL) {
+      shipCargo=UniverseUtil::GetMasterPartList()->GetCargo(item->content,tempInt);
+    }
+    if (shipCargo) {
+      //now we can actually do the selling
+      for(int i=1; i < cockpit->unitfilename.size(); i+=2) {      
+        if (cockpit->unitfilename[i]==item->content) {
+          cockpit->unitfilename.erase(cockpit->unitfilename.begin()+i);
+          cockpit->unitfilename.erase(cockpit->unitfilename.begin()+i);
+          static float shipSellback=XMLSupport::parse_float(vs_config->getVariable("economics","ship_sellback_price",".5"));
+          cockpit->credits+=shipSellback*shipCargo->price;// sellback cost
+          cockpit->credits-=item->price;//transportation cost
+          break;
+        }
+      }
+      loadShipDealerControls();
+      updateTransactionControlsForSelection(NULL);
+      return true;
+    }
+    return false;
+}
 // Buy ship from the base.
 bool BaseComputer::buyShip(const EventCommandId& command, Control* control) {
     Unit* playerUnit = m_player.GetUnit();
