@@ -29,9 +29,9 @@
 #include "boost/shared_ptr.hpp"
 #include "savegame.h"
 #include "networking/const.h"
-#include "networking/vsnet_socket.h"
-#include "networking/vsnet_socketset.h"
-#include "networking/vsnet_cmd.h"
+#include "networking/lowlevel/vsnet_socket.h"
+#include "networking/lowlevel/vsnet_socketset.h"
+#include "networking/lowlevel/vsnet_cmd.h"
 #include "cmd/container.h"   // for UnitContainer
 #include "gfx/quaternion.h"  // for Transformation
 

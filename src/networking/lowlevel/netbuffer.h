@@ -6,7 +6,7 @@
 #include "gfx/vec.h"
 #include "gfx/matrix.h"
 #include "gfx/quaternion.h"
-#include "networking/vsnet_clientstate.h"
+#include "networking/lowlevel/vsnet_clientstate.h"
 #include "cmd/unit_armorshield.h"
 
 struct GFXColor;

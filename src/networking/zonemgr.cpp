@@ -1,13 +1,13 @@
-#include "networking/netbuffer.h"
-#include "networking/vsnet_debug.h"
+#include "networking/lowlevel/netbuffer.h"
+#include "networking/lowlevel/vsnet_debug.h"
 #include "universe_generic.h"
 #include "universe_util.h"
 #include "star_system_generic.h"
 #include "cmd/unit_generic.h"
 #include "gfx/cockpit_generic.h"
-#include "packet.h"
-#include "savenet_util.h"
-#include "zonemgr.h"
+#include "networking/lowlevel/packet.h"
+#include "networking/savenet_util.h"
+#include "networking/zonemgr.h"
 #include "vs_globals.h"
 #include "endianness.h"
 #include <assert.h>
@@ -19,6 +19,12 @@ ZoneMgr::ZoneMgr()
 /************************************************************************************************/
 /**** addZone                                                                               *****/
 /************************************************************************************************/
+
+void			ZoneMgr::addSystem( string & sysname, string & system)
+{
+	Systems.insert( sysname, system);
+}
+	
 
 StarSystem *	ZoneMgr::addZone( string starsys)
 {
@@ -772,6 +778,29 @@ int		ZoneMgr::displayMemory()
 	}
 	return memory_use;
 }
+
+
+std::string ZoneMgr::Systems::insert( std::string sysname, std::string system )
+{
+    if( sysname != "" && system != "" )
+        _map.insert( SystemPair( sysname, system ) );
+    return sysname;
+}
+
+std::string ZoneMgr::Systems::get( std::string sysname )
+{
+    SystemIt it = _map.find(sysname);
+    if( it == _map.end() ) return string( "");
+    return it->second;
+}
+
+bool ZoneMgr::Systems::remove( std::string sysname )
+{
+    size_t s = _map.erase( sysname );
+    if( s == 0 ) return false;
+    return true;
+}
+
 
 /*** This is a copy of GFXSphereInFrustum from gl_matrix_hack.cpp avoiding
  * linking with a LOT of unecessary stuff

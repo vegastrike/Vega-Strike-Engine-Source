@@ -1,11 +1,11 @@
 #include <config.h>
 
 #include "vs_path.h"
-#include "networking/vsnet_dloadmgr.h"
-#include "networking/vsnet_notify.h"
-#include "networking/vsnet_cmd.h"
-#include "networking/netbuffer.h"
-#include "networking/packet.h"
+#include "networking/lowlevel/vsnet_dloadmgr.h"
+#include "networking/lowlevel/vsnet_notify.h"
+#include "networking/lowlevel/vsnet_cmd.h"
+#include "networking/lowlevel/netbuffer.h"
+#include "networking/lowlevel/packet.h"
 
 using namespace std;
 

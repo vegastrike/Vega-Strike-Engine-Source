@@ -7,7 +7,6 @@
 #include "vsnet_pipe.h"
 #include "vsnet_debug.h"
 #include "vsnet_dloadmgr.h"
-#include "const.h"
 
 using namespace std;
 

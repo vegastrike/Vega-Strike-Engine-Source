@@ -34,15 +34,15 @@
 #include "universe_util.h"
 #include "cmd/unit_factory.h"
 #include "networking/client.h"
-#include "networking/packet.h"
+#include "networking/lowlevel/packet.h"
 #include "lin_time.h"
 #include "networking/netserver.h"
-#include "networking/vsnet_serversocket.h"
-#include "networking/vsnet_debug.h"
+#include "networking/lowlevel/vsnet_serversocket.h"
+#include "networking/lowlevel/vsnet_debug.h"
 #include "networking/savenet_util.h"
 #include "vs_path.h"
-#include "networking/netbuffer.h"
-#include "networking/vsnet_dloadmgr.h"
+#include "networking/lowlevel/netbuffer.h"
+#include "networking/lowlevel/vsnet_dloadmgr.h"
 #include "cmd/ai/script.h"
 #include "cmd/ai/order.h"
 #include "cmd/ai/fire.h"
@@ -65,6 +65,7 @@ char	input_buffer[MAXINPUT];
 int		nbchars;
 
 string	universe_file;
+string	universe_path;
 
 /**************************************************************/
 /**** Constructor / Destructor                             ****/
@@ -909,5 +910,10 @@ void	NetServer::closeAllSockets()
         if( cl->isTcp() )
 		    cl->sock.disconnect( __PRETTY_FUNCTION__, false );
 	}
+}
+
+void	NetServer::addSystem( string & sysname, string & system)
+{
+	zonemgr->addSystem( sysname, system);
 }
 

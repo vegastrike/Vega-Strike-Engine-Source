@@ -4,7 +4,7 @@
 #include <sys/types.h>
 #include <iostream>
 
-#include "const.h"
+#include "networking/const.h"
 
 /***********************************************************************
  * PacketMem - declaration

@@ -1,7 +1,7 @@
 #include "networking/netserver.h"
 #include "networking/clientptr.h"
-#include "networking/vsnet_debug.h"
-#include "networking/netbuffer.h"
+#include "networking/lowlevel/vsnet_debug.h"
+#include "networking/lowlevel/netbuffer.h"
 #include "vs_path.h"
 #include "cmd/unit_factory.h"
 #include "networking/fileutil.h"
@@ -152,6 +152,7 @@ void	NetServer::sendLoginAccept( ClientPtr clt, AddressIP ipadr, int newacct)
 		{
 			// We can't find the unit saved for player -> send a login error
 			this->sendLoginError( clt, ipadr);
+			cerr<<"WARNING : Unit file ("<<savedships[0]<<") not found for "<<callsign<<endl;
 			return;
 		}
 

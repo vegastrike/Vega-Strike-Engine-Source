@@ -4,7 +4,7 @@
 
 #include <list>
 
-#include "const.h"
+#include "networking/const.h"
 #include "vsnet_socketudp.h"
 #include "vsnet_err.h"
 #include "vsnet_debug.h"

@@ -5,7 +5,6 @@
 #include <sys/ioctl.h>
 #endif
 
-#include "const.h"
 #include "vsnet_socket.h"
 #include "vsnet_sockettcp.h"
 #include "vsnet_socketudp.h"

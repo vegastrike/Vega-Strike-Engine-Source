@@ -25,6 +25,7 @@ namespace FileUtil
 	int				HashCompare( string filename, unsigned char * hashdigest);
 	int				HashFileCompute( string filename, unsigned char * hashdigest);
 	int				HashCompute( const char * filename, unsigned char * digest);
+	int				HashStringCompute( std::string buffer, unsigned char * digest);
 }
 
 #endif

@@ -27,48 +27,10 @@ endif
 noinst_LIBRARIES = libnet.a libnetclient.a libnetserver.a libnetacct.a
 bin_PROGRAMS = soundserver
 
+SUBDIRS = lowlevel
+
 soundserver_LDADD = -L/usr/local/lib -lSDL -lSDL_mixer
 soundserver_SOURCES = inet.cpp inet.h soundserver.cpp
-
-liblowlevel = \
-	GCPtr.h		\
-	vsnet_dloadmgr.cpp	\
-	vsnet_dloadmgr.h	\
-	vsnet_dloadenum.cpp	\
-	vsnet_dloadenum.h	\
-	vsnet_notify.cpp	\
-	vsnet_notify.h		\
-	vsnet_clientstate.cpp		\
-	vsnet_address.cpp		\
-	vsnet_address.h		\
-	vsnet_clientstate.h		\
-	vsnet_cmd.cpp		\
-	vsnet_cmd.h		\
-	vsnet_err.h		\
-	vsnet_pipe.cpp		\
-	vsnet_pipe.h		\
-	vsnet_queue.h		\
-	vsnet_serversocket.cpp		\
-	vsnet_serversocket.h		\
-	vsnet_socket.cpp		\
-	vsnet_socket.h		\
-	vsnet_socketset.cpp		\
-	vsnet_socketset.h		\
-	vsnet_sockettcp.cpp		\
-	vsnet_sockettcp.h		\
-	vsnet_socketudp.cpp		\
-	vsnet_socketudp.h		\
-	vsnet_thread.h		\
-	vsnet_thread_non.cpp		\
-	vsnet_thread_p.cpp		\
-	vsnet_thread_sdl.cpp		\
-	netui.cpp		\
-	netui.h		\
-	packet.cpp		\
-	packet.h		\
-	packetmem.cpp		\
-	packetmem.h		\
-	netclass.h
 
 libacctserver = \
 	client.cpp		\
@@ -80,12 +42,9 @@ libacctserver = \
 	savenet_util.cpp		\
 	savenet_util.h		\
 	fileutil.h			\
-	fileutil.cpp		\
-	netbuffer.cpp		\
-	netbuffer.h
+	fileutil.cpp
 
 libnetgeneric = \
-	$(liblowlevel)   \
 	$(libacctserver) \
 	cubicsplines.cpp		\
 	cubicsplines.h		\

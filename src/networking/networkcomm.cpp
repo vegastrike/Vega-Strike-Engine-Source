@@ -1,5 +1,5 @@
 //#include "cmd/unit_generic.h"
-#include "networkcomm.h"
+#include "networking/networkcomm.h"
 #include "vs_path.h"
 #ifdef CRYPTO
 #include <crypto++/filters.h>
@@ -19,7 +19,7 @@ using namespace CryptoPP;
 #include <config.h>
 
 #include "universe_util.h"
-#include "vsnet_dloadmgr.h"
+#include "networking/lowlevel/vsnet_dloadmgr.h"
 #ifndef NETCOMM_NOWEBCAM
 #include "networking/webcam_support.h"
 #endif /* NETCOMM_NOWEBCAM */
@@ -35,7 +35,7 @@ bool use_pa;
 bool use_secured;
 
 #include "gldrv/winsys.h"
-#include "packet.h"
+#include "networking/lowlevel/packet.h"
 #include <assert.h>
 #include "xml_support.h"
 

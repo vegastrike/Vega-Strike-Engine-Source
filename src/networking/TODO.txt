@@ -1,6 +1,7 @@
 
 *** GENERAL ************************************************************
 
+- Switch to the usage of the ZoneMgr::Systems map instead of reading file on demand
 - HOW the hell can we assign serials to bases, planets and stuff and having the same on client/server sides
 - Prediction : predict when receive ClientState on server and then one time again when received on other clients
                how can I compute positions between 2 updates with interpolation ?
@@ -23,6 +24,7 @@
 
 *** GAME SERVER ********************************************************
 
+- Associate serial by replacing strings in .system files (replace "<Planet ", "<Nebula", "<Unit ")
 - Add a check just before loading a unit from xml save and loading savegame to check data files for saved ship exist
    if not just deny login and output error on stderr
 - Redo jumps :
@@ -53,6 +55,7 @@ TO LOOK AT - When receiving a packet : look at timestamp and compare it to lates
 OR
 - Maybe send extrapolated position with deltatime ahead in time
 - and when receiving position updates extrapolate only with concerned client's delay
+- Make client ask each .txt files containing planet, stars, ... textures someday
 MAYBE NOT - Make webcam capture size part of config file (and later part of server config, not client anymore)
 
 

@@ -22,7 +22,7 @@
 #include <iostream>
 #include <errno.h>
 #include <assert.h>
-#include "const.h"
+#include "networking/const.h"
 
 #include "vsnet_headers.h"
 #include "GCPtr.h"

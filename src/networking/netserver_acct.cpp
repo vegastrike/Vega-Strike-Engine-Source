@@ -1,8 +1,8 @@
 #include "networking/netserver.h"
-#include "networking/vsnet_debug.h"
+#include "networking/lowlevel/vsnet_debug.h"
 #include "vs_path.h"
 #include "networking/savenet_util.h"
-#include "networking/netbuffer.h"
+#include "networking/lowlevel/netbuffer.h"
 #include "networking/fileutil.h"
 
 extern int acct_con;

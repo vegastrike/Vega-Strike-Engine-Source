@@ -18,8 +18,8 @@
   NetClient - Network Client Interface - written by Stephane Vaxelaire <svax@free.fr>
 */
 
-#include "netclient.h"
-#include "netui.h"
+#include "networking/netclient.h"
+#include "networking/lowlevel/netui.h"
 
 #include <iostream>
 #include <stdio.h>
@@ -32,29 +32,29 @@
 #include "endianness.h"
 #include "cmd/unit_generic.h"
 #include "cmd/unit_util.h"
-#include "../config_xml.h"
-#include "client.h"
-#include "const.h"
-#include "packet.h"
+#include "configxml.h"
+#include "networking/client.h"
+#include "networking/const.h"
+#include "networking/lowlevel/packet.h"
 #include "universe_util.h"
 #include "cmd/unit_factory.h"
 #include "gfx/matrix.h"
 #include "lin_time.h"
 #include "vs_path.h"
-#include "packet.h"
 #include "cmd/role_bitmask.h"
 #include "gfx/cockpit_generic.h"
+#include "gldrv/winsys.h"
 
-#include "networking/vsnet_clientstate.h"
-#include "networking/vsnet_debug.h"
-#include "networking/vsnet_dloadmgr.h"
-#include "networking/vsnet_notify.h"
+#include "networking/lowlevel/vsnet_clientstate.h"
+#include "networking/lowlevel/vsnet_debug.h"
+#include "networking/lowlevel/vsnet_dloadmgr.h"
+#include "networking/lowlevel/vsnet_notify.h"
 #include "vegastrike.h"
-#include "client.h"
-#include "networking/netbuffer.h"
+#include "networking/client.h"
+#include "networking/lowlevel/netbuffer.h"
 #include "networking/networkcomm.h"
 #include "posh.h"
-#include "prediction.h"
+#include "networking/prediction.h"
 
 #ifdef micro_sleep
 #undef micro_sleep

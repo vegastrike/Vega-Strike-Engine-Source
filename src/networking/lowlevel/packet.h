@@ -5,7 +5,7 @@
 #include <iostream>
 #include <string.h>
 #include <list>
-#include "const.h"
+#include "networking/const.h"
 #include "vsnet_cmd.h"
 #include "vsnet_address.h"
 #include "vsnet_socket.h"

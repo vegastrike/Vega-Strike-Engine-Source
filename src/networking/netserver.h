@@ -31,13 +31,13 @@
 
 #include "boost/shared_ptr.hpp"
 #include "configxml.h"
-#include "accountsxml.h"
-#include "const.h"
-#include "netui.h"
-#include "zonemgr.h"
-#include "client.h"
+#include "networking/accountsxml.h"
+#include "networking/const.h"
+#include "networking/lowlevel/netui.h"
+#include "networking/zonemgr.h"
+#include "networking/client.h"
 #include "savegame.h"
-#include "networking/vsnet_socketset.h"
+#include "networking/lowlevel/vsnet_socketset.h"
 struct GFXColor;
 
 extern VegaConfig *vs_config;
@@ -143,6 +143,7 @@ class NetServer
 		void	sendDockDeny( ObjSerial serial, unsigned short zone);
 		void	sendUnDock( ObjSerial serial, ObjSerial utdwserial, unsigned short zone);
 
+		void	addSystem( string & sysname, string & system);
 		friend class ZoneMgr;
 
 private:

@@ -21,7 +21,7 @@
   netUI - Network Interface - written by Stephane Vaxelaire <svax@free.fr>
 */
 
-#include "const.h"
+#include "networking/const.h"
 #include "vsnet_socket.h"
 
 struct ServerSocket;

@@ -5,10 +5,10 @@
 #include <vector>
 
 #include "configxml.h"
-#include "accountsxml.h"
-#include "packet.h"
-#include "netui.h"
-#include "networking/vsnet_socketset.h"
+#include "networking/accountsxml.h"
+#include "networking/lowlevel/packet.h"
+#include "networking/lowlevel/netui.h"
+#include "networking/lowlevel/vsnet_socketset.h"
 
 typedef vector<Account *>::iterator VI;
 

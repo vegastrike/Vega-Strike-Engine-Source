@@ -1,6 +1,6 @@
 #include <config.h>
 
-#include "const.h"
+#include "networking/const.h"
 #include "netui.h"
 #include "vsnet_serversocket.h"
 #include "vsnet_debug.h"

@@ -20,7 +20,6 @@
 #include "vsnet_thread.h"
 #include "vsnet_socket.h"
 #include "vsnet_socketset.h"
-//#include "netbuffer.h"
 
 using std::map;
 using std::string;

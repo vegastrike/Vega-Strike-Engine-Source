@@ -1,9 +1,9 @@
-#include "netserver.h"
-#include "vsnet_debug.h"
-#include "netbuffer.h"
+#include "networking/netserver.h"
+#include "networking/lowlevel/vsnet_debug.h"
+#include "networking/lowlevel/netbuffer.h"
 #include "universe_util.h"
 #include "universe_generic.h"
-#include "savenet_util.h"
+#include "networking/savenet_util.h"
 
 extern QVector DockToSavedBases( int n);
 

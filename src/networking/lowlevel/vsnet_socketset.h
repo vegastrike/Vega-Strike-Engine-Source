@@ -32,7 +32,7 @@
 #include "boost/weak_ptr.hpp"
 
 #include "vsnet_headers.h"
-#include "const.h"
+#include "networking/const.h"
 
 #include "vsnet_thread.h"
 #include "vsnet_pipe.h"

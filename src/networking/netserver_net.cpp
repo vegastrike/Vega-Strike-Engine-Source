@@ -1,7 +1,7 @@
-#include "netserver.h"
-#include "vsnet_debug.h"
+#include "networking/netserver.h"
+#include "networking/lowlevel/vsnet_debug.h"
 #include "lin_time.h"
-#include "vsnet_serversocket.h"
+#include "networking/lowlevel/vsnet_serversocket.h"
 
 extern double clienttimeout;
 

@@ -1,10 +1,10 @@
-#include "networking/vsnet_debug.h"
+#include "networking/lowlevel/vsnet_debug.h"
 #include "vs_path.h"
 #include "networking/netclient.h"
 #include "cmd/unit_generic.h"
-#include "networking/netbuffer.h"
+#include "networking/lowlevel/netbuffer.h"
 #include "networking/networkcomm.h"
-#include "networking/packet.h"
+#include "networking/lowlevel/packet.h"
 #include "networking/fileutil.h"
 
 /******************************************************************************************/

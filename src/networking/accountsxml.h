@@ -27,7 +27,7 @@
 #include <stdio.h>
 #include "const.h"
 #include <assert.h>
-#include "netui.h"
+#include "networking/lowlevel/netui.h"
 
 using std::cout;
 using std::endl;

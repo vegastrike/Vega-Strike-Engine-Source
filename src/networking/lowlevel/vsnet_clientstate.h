@@ -24,8 +24,7 @@
 #include <iostream>
 #include <string.h>
 #include "gfx/quaternion.h"
-#include "const.h"
-#include "cubicsplines.h"
+#include "networking/const.h"
 #include "configxml.h"
 
 class Unit;

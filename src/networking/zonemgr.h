@@ -25,14 +25,18 @@
 #include <iostream>
 #include "gfx/quaternion.h"
 #include "cmd/unit_generic.h"
-#include "client.h"
-#include "packet.h"
+#include "networking/client.h"
+#include "networking/lowlevel/packet.h"
 #include "boost/smart_ptr.hpp"
 #include "networking/clientptr.h"
 
 using std::list;
 
 typedef list<Unit *>::iterator LUI;
+
+typedef std::map<std::string,std::string>            SystemMap;
+typedef std::pair<std::string,std::string>           SystemPair;
+typedef std::map<std::string,std::string>::iterator  SystemIt;
 
 class NetUI;
 class NetBuffer;
@@ -47,14 +51,27 @@ class ZoneMgr
 		vector<list<Unit *> >	zone_unitlist;
 		vector<int>				zone_units;
 
+	    class Systems
+	    {
+	        SystemMap _map;
+
+	    public:
+			std::string insert( std::string sysname, std::string systemxml );
+			std::string get( std::string sysname );
+	        bool        remove( std::string sysname );
+	    };
+		Systems			Systems;
+
 		void	addDamage( NetBuffer & netbuf, Unit * un);
 		void	addPosition( NetBuffer & netbuf, Unit * un, Unit * clt_unit, ClientState & un_cs);
 
 	public:
+
 		ZoneMgr();
 		//ZoneMgr( int nbzones);
 		//~ZoneMgr();
 		// Serial is the zone id
+		void	addSystem( string & sysname, string & system);
 		StarSystem* addZone( string starsys);
 		ClientWeakList* GetZone( int serial);
 		void	addUnit( Unit * un, int zone);

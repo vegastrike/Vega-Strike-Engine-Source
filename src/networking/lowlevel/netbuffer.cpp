@@ -1,5 +1,5 @@
 #include <assert.h>
-#include "networking/netbuffer.h"
+#include "networking/lowlevel/netbuffer.h"
 #include "networking/const.h"
 #include "posh.h"
 #include "gfxlib_struct.h"

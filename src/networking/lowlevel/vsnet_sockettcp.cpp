@@ -1,6 +1,6 @@
 #include <config.h>
 
-#include "const.h"
+#include "networking/const.h"
 #include "vsnet_headers.h"
 
 #include <list>

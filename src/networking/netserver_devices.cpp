@@ -1,7 +1,7 @@
-#include "netserver.h"
-#include "vsnet_debug.h"
-#include "netbuffer.h"
-#include "vsnet_debug.h"
+#include "networking/netserver.h"
+#include "networking/lowlevel/vsnet_debug.h"
+#include "networking/lowlevel/netbuffer.h"
+#include "networking/lowlevel/vsnet_debug.h"
 #include "lin_time.h"
 
 // WEAPON STUFF

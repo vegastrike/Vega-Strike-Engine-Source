@@ -1,4 +1,5 @@
 #include "fileutil.h"
+#include "networking/lowlevel/vsnet_headers.h"
 #include "vs_path.h"
 
 #ifdef _WIN32
@@ -62,6 +63,39 @@ vector<string>	FileUtil::GetSaveFromBuffer( const char * buffer)
 	return saves;
 }
 
+int		FileUtil::HashStringCompute( std::string buffer, unsigned char * digest)
+{
+#ifdef CRYPTO
+	HASHMETHOD		Hash;
+
+	const int block_size = Hash.OptimalBlockSize();
+	unsigned char * hashbuf = new unsigned char[block_size];
+	char * buf = buffer.c_str();
+	int nb=0, offset=0;
+
+	while( offset<buffer.length())
+	{
+		memcpy( hashbuf, buf+offset, block_size);
+		offset += block_size;
+		Hash.Update( hashbuf, block_size);
+	}
+	// Here offset is bigger than buffer length so we go back offset times
+	offset -= block_size;
+	if( ( nb=( buffer.length()-offset)) )
+	{
+		memcpy( hashbuf, buf+offset, nb);
+		Hash.Update( hashbuf, nb);
+	}
+
+	Hash.Final( digest);
+	delete hashbuf;
+
+	return 0;
+#else
+	return 0;
+#endif
+}
+
 int		FileUtil::HashCompute( const char * filename, unsigned char * digest)
 {
 #ifdef CRYPTO
@@ -81,13 +115,14 @@ int		FileUtil::HashCompute( const char * filename, unsigned char * digest)
 	}
 
 	const int block_size = Hash.OptimalBlockSize();
-	unsigned char buffer[block_size];
+	unsigned char * buffer = new unsigned char[block_size];
 	int nb=0;
 
 	while( (nb = fread( buffer, sizeof( unsigned char), block_size, fp)) > 0)
 		Hash.Update( buffer, nb);
 
 	Hash.Final( digest);
+	delete buffer;
 	fclose( fp);
 
 	return 0;

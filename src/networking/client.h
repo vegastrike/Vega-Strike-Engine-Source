@@ -24,12 +24,11 @@
 #include <iostream>
 #include <string.h>
 #include "gfx/quaternion.h"
-#include "const.h"
-#include "cubicsplines.h"
+#include "networking/const.h"
 #include "configxml.h"
-#include "vsnet_clientstate.h"
-#include "vsnet_address.h"
-#include "vsnet_socket.h"
+#include "networking/lowlevel/vsnet_clientstate.h"
+#include "networking/lowlevel/vsnet_address.h"
+#include "networking/lowlevel/vsnet_socket.h"
 //#include "cmd/unit_generic.h"
 #include "cmd/container.h"
 #include "savegame.h"

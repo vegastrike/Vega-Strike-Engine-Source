@@ -24,7 +24,7 @@
 */
 
 #include <iostream>
-#include "const.h"
+#include "networking/const.h"
 #include "vsnet_headers.h"
 
 struct AddressIP : public sockaddr_in
