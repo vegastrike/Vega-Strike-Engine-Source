@@ -45,8 +45,9 @@ int		md5Compute( string filename, unsigned char * md5digest);
 void	displayError( ObjSerial error_code);
 
 // Network part of a client description
-struct	Client
+class	Client
 {
+public:
 	/* Network and identification properties */
 	UnitContainer	game_unit;
 	CubicSpline		spline;
