@@ -70,7 +70,7 @@ void init_opengl_extensions()
     } else {
 	printf(  "GL_EXT_compiled_vertex_array extension "
 		     "NOT supported" );
-	exit(1);
+	//exit(1);  //recoverable error..I was wrong
 	glLockArraysEXT_p = NULL;
 	glUnlockArraysEXT_p = NULL;
     }
