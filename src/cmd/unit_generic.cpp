@@ -1813,7 +1813,12 @@ bool Unit::AutoPilotTo (Unit * target, bool ignore_energy_requirements, int recu
 		//nowhere==false&&
 
 		insys_jump_ani.length()) {
-      UniverseUtil::playAnimationGrow (insys_jump_ani,RealPosition(this),rSize()*4,.99);
+		static bool docache=true;
+		if (docache){
+			UniverseUtil::cacheAnimation (insys_jump_ani);
+			docache=false;
+		}
+		UniverseUtil::playAnimationGrow (insys_jump_ani,RealPosition(this),rSize()*4,.99);
 
 
       Vector v(GetVelocity());
