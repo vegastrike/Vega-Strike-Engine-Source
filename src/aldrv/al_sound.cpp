@@ -5,7 +5,6 @@
 #include "al_globals.h"
 #include <stdio.h>
 #include <stdlib.h>
-#include <assert.h>
 #ifdef HAVE_AL
 #include <AL/al.h>
 #include <AL/alc.h>
@@ -25,7 +24,10 @@ static int LoadSound (ALuint buffer, bool looping) {
   if (!dirtysounds.empty()) {
     i = dirtysounds.back();
     dirtysounds.pop_back();
-    assert (sounds[i].buffer==(ALuint)0);
+    //    assert (sounds[i].buffer==(ALuint)0);
+    if (sounds[i].buffer!=(ALuint)0) {
+      fprintf (stderr,"using claimed buffer %d",sounds[i].buffer);
+    }
     sounds[i].buffer= buffer;
   } else {
     i=sounds.size();
@@ -225,12 +227,16 @@ void AUDDeleteSound (int sound, bool music){
       unusedsrcs.push_back (sounds[sound].source);
       sounds[sound].source=(ALuint)0;
     }
+#ifdef SOUND_DEBUG
     if (std::find (dirtysounds.begin(),dirtysounds.end(),sound)==dirtysounds.end()) {
+#endif
       dirtysounds.push_back (sound);
+#ifdef SOUND_DEBUG
     }else {
       fprintf (stderr,"double delete of sound");
       return;
     }
+#endif
     //FIXME??
     //    alDeleteSources(1,&sounds[sound].source);
     if (music) {
