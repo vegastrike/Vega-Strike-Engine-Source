@@ -16,8 +16,14 @@
  **************************************************************************/
 
 #include "../include/central.h"
+#ifdef _WIN32
+#include <windows.h>
+#endif
 
 int main(int argc, char *argv[]) {
+#ifdef _WIN32
+	FreeConsole();
+#endif
 	gtk_init(&argc, &argv);
 	Start(1);
 	return 0;

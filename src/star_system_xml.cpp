@@ -864,7 +864,8 @@ void StarSystem::LoadXML(const char *filename, const Vector & centroid, const fl
   LightMap[4]=new Texture ((xml->backgroundname+"_front_light.bmp").c_str(),1,BILINEAR,CUBEMAP,CUBEMAP_POSITIVE_Z);
   LightMap[5]=new Texture ((xml->backgroundname+"_back_light.bmp").c_str(),1,BILINEAR,CUBEMAP,CUBEMAP_NEGATIVE_Z);
 #else
-  string bglight= MakeSharedStarSysPath (xml->backgroundname+"_light.bmp");
+  string bglight= 
+	  MakeSharedStarSysPath (xml->backgroundname+"_light.bmp");
   FILE * tempo = fopen (bglight.c_str(),"rb");
   if (!tempo) {
       EnvironmentMapGeneratorMain (xml->backgroundname.c_str(),bglight.c_str(), 0,xml->reflectivity,1);

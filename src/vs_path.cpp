@@ -57,10 +57,10 @@ void returnfromhome() {
 #endif
 }
 
-char pwd[8192];
+char pwd[65536];
 void initpaths () {
 
-  getcwd (pwd,8191);
+  getcwd (pwd,32768);
   datadir= string (pwd);
   sharedsounds = datadir;
   FILE *fp= fopen (CONFIGFILE,"r");
@@ -168,6 +168,7 @@ std::string GetSharedSoundHashName (const std::string &name) {
 std::string MakeSharedStarSysPath (const std::string &s){
   changehome();
   getcwd (pwd,8191);
+
   string newpath =getStarSystemSector (s);
  
   if (chdir (newpath.c_str())==-1) {
@@ -181,7 +182,12 @@ std::string MakeSharedStarSysPath (const std::string &s){
     chdir ("..");
   }
   returnfromhome();
-  return string(pwd)+string("/")+s;
+  return 
+#ifndef _WIN32
+	  string(pwd)+string("/")+
+#endif	  
+	  
+	  s;
 
 
 

@@ -66,11 +66,31 @@ void ScanNode (string *parent, easyDomNode *node) {
 // the parameters will be:  variable, var, alpha, beta
 void CheckVar(string parent, string current, string name, string value) {
 	char *param;
-	if (name.empty() || value.empty()) { return; }
+	int i;
+	if (name.empty() || value.empty()) {
+		return;
+	}
 	param = strdup(value.c_str());
-	if (name == "mission_name") { SetString(&DATA.name, param); }
-	if (name == "author") { SetString(&DATA.author, param); }
-	if (name == "description") { SetString(&DATA.description, param); }
-	if (name == "briefing") { SetString(&DATA.briefing, param); }
+	if (name == "mission_name") {
+		SetString(&DATA.name, param);
+	}
+	if (name == "author") {
+		SetString(&DATA.author, param);
+	}
+	if (name == "description") {
+		for (i=0;param[i]!='\0';i++) {
+			if (param[i]=='\\') {
+				param[i]='\n';
+			}
+		}
+		SetString(&DATA.description, param); }
+	if (name == "briefing") {
+		for (i=0;param[i]!='\0';i++) {
+			if (param[i]=='\\') {
+				param[i]='\n';
+			}
+		}
+		SetString(&DATA.briefing, param);
+	}
 	free(param);
 }
