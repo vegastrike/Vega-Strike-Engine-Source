@@ -287,13 +287,11 @@ void Base::GotoLink (int linknum) {
 
 Base::~Base () {
 #ifdef BASE_MAKER
-	vschdir("bases");
-	FILE *fp=fopen("NEW_BASE.xbase","wt");
+	FILE *fp=fopen("bases/NEW_BASE.xbase","wt");
 	if (fp) {
 		EndXML(fp);
 		fclose(fp);
 	}
-	vscdup();
 #endif
 	CurrentBase=0;
 	restore_main_loop();
