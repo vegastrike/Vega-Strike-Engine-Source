@@ -1,0 +1,4 @@
+#!/bin/sh
+#g++ -o soundserver -g ../lin_time.o soundserver.cpp inet.o -I../ ../../vc98/libfmod.a -framework Carbon
+g++ -o soundserver -g ../lin_time.o respawning_soundserver.cpp inet_file.cpp inet.cpp -I../ 
+g++ -o soundserver.child -g ../lin_time.o soundserver.segfault.cpp inet_file.cpp -I../ ../../vc98/libfmod.a -framework Carbon
