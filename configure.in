@@ -1,12 +1,14 @@
-dnl Process this file with autoconf to produce a configure script.
+	dnl Process this file with autoconf to produce a configure script.
 AC_INIT(src/vegastrike.h)
-AM_INIT_AUTOMAKE(vegastrike, "0.3.0")
-AM_CONFIG_HEADER(config.h)
+AC_PREREQ(2.13)
 
-dnl AC_LANG_CPLUSPLUS
-
+dnl AC_LANG_CPLUSPLUS()
 dnl Check system type
-AC_CANONICAL_HOST
+AC_CANONICAL_HOST()
+AC_CANONICAL_TARGET()
+
+AM_CONFIG_HEADER(config.h)
+AM_INIT_AUTOMAKE(vegastrike, "0.3.5")
 
 dnl Check for compilers.  We set CFLAGS and CXXFLAGS to null if unset, so
 dnl that these macros won't set them to default values that we don't want.
@@ -14,56 +16,106 @@ if test "x${CFLAGS-notset}" = "xnotset" ; then
     export CFLAGS
     CFLAGS=""
 fi
-AC_PROG_CC
+AC_PROG_CC()
+
+saved_CPPFLAGS="$CPPFLAGS"
+CPPFLAGS="-falign-loops=4"
+AC_TRY_COMPILE(, , [falign=yes], [falign=no])
+CPPFLAGS="$saved_CPPFLAGS"
 
 if test "x${CXXFLAGS-notset}" = "xnotset" ; then
     export CXXFLAGS
     CXXFLAGS=""
 fi
-AC_PROG_CXX
+AC_PROG_CXX(g++ c++ cl KCC CC cxx cc++ xlC aCC egcs gcc)
+AC_PROG_CXXCPP()
 
-dnl Check for ranlib
-AC_PROG_RANLIB
-#AC_PROG_LIBTOOL
+
+AC_PROG_INSTALL()
+AC_PROG_LN_S()
+AC_PROG_RANLIB()
 
 dnl Checks for header files.
-AC_HEADER_STDC
-AC_CHECK_HEADERS(sys/time.h unistd.h)
+AC_HEADER_STDC()
+AC_HEADER_DIRENT()
+AC_CHECK_HEADERS(fcntl.h limits.h malloc.h sys/ioctl.h sys/time.h unistd.h)
+
+
+dnl AC_CXX_HAVE_STD()
+dnl AC_CXX_HAVE_STL()
+dnl AC_CXX_PARTIAL_SPECIALIZATION()
 
 dnl Checks for typedefs, structures, and compiler characteristics.
-AC_C_CONST
-AC_HEADER_TIME
+AC_C_CONST()
+AC_HEADER_TIME()
+AC_C_INLINE()
+AC_TYPE_SIZE_T()
+
 
 dnl Checks for library functions.
-AC_CHECK_FUNCS(getcwd gettimeofday strdup)
+AC_CHECK_FUNCS(getcwd gettimeofday strdup select socket strstr)
 
 dnl Check for non-standard floating point functions and headers
 AC_CHECK_FUNCS(finite isnan)
 AC_CHECK_FUNCS(_finite _isnan)
 AC_CHECK_HEADERS(ieeefp.h)
 
+AC_FUNC_FORK()
+AC_FUNC_MMAP()
+AC_FUNC_MEMCMP()
+AC_FUNC_STRNLEN()
+
+
 dnl --------------------------------------------------------------------------
 dnl General options
 dnl --------------------------------------------------------------------------
 TR_CPPFLAGS=""
-TR_CFLAGS="-pipe -O2 -fomit-frame-pointer  -Wall -ffast-math -fexpensive-optimizations"
-TR_CXXFLAGS="-pipe -O2 -fomit-frame-pointer  -Wall -ffast-math -fexpensive-optimizations"
+TR_CFLAGS="-pipe -O3 -fexpensive-optimizations -fomit-frame-pointer -Wall -ffast-math "
+TR_CXXFLAGS="-pipe -O3 -fexpensive-optimizations -fomit-frame-pointer -Wall -ffast-math"
 TR_LIBS=""
 
+if test "x$falign" = "xyes"; then
+TR_ALIGN="-falign-loops=2 -falign-jumps=2 -falign-functions=2"
+else
+TR_ALIGN="-malign-loops=2 -malign-jumps=2 -malign-functions=2"
+fi
+
+AC_ARG_ENABLE(flags, AC_HELP_STRING([--enable-flags=opts], [Set specific flags for the compiler]), userflags=$enableval)
+
+
+if !(test "x$userflags" = "xno" || test "x$userflags" = "") ; then
+
+saved_CFLAGS="$CFLAGS"
+CFLAGS="$userflags"
+AC_TRY_COMPILE(, , [userflagged=yes], [userflagged=no])
+CFLAGS="$saved_CFLAGS"
+
+if test "x$userflagged" = "xyes"; then
+	USER_FLAGS="$userflags"
+	echo "Enabling user-specified flags: $userflags"
+else
+	echo "Invalid flags specified. Ignoring."
+fi
+fi
+
+
+
 case "$host" in
-i*86-*-*) TR_CFLAGS="$TR_CFLAGS -malign-loops=2 -malign-jumps=2 -malign-functions=2";
-          TR_CXXFLAGS="$TR_CXXFLAGS -malign-loops=2 -malign-jumps=2 -malign-functions=2";;
+i*86-*-*) TR_CFLAGS="$TR_CFLAGS $TR_FALIGN $USER_FLAGS";
+          TR_CXXFLAGS="$TR_CXXFLAGS $TR_FALIGN $USER_FLAGS";;
 esac
 
-AC_ARG_ENABLE(debug,     [  --enable-debug          Produce an executable with debugging symbols], [TR_CFLAGS="-g -Wall "; TR_CXXFLAGS="-g -Wall"])
+AC_ARG_ENABLE(debug, AC_HELP_STRING([--enable-debug], [Produce an executable with debugging symbols]), [TR_CFLAGS="-ggdb3 -Wall "; TR_CXXFLAGS="-ggdb3 -Wall"])
 
-AC_ARG_ENABLE(debug-rel,     [  --enable-debug-rel          Produce an executable with debugging symbols], [TR_CFLAGS="-g -O3 -Wall -ffast-math -fexpensive-optimizations -malign-loops=2 -malign-functions=2"; TR_CXXFLAGS="-g -Wall -O3 -ffast-math -fexpensive-optimizations -malign-loops=2 -malign-functions=2"])
+AC_ARG_ENABLE(debug-rel, AC_HELP_STRING([--enable-debug-rel], [Produce an executable with debugging symbols and optimizations]), [TR_CFLAGS="-ggdb3 -O3 -Wall -ffast-math $TR_ALIGN $USER_FLAGS"; TR_CXXFLAGS="-ggdb3 -Wall -O3 -ffast-math $TR_ALIGN $USER_FLAGS"])
 
-AC_ARG_ENABLE(profile,[  --enable-profile      Produce a profiled executable],  [TR_CFLAGS="-g -pg"; TR_CXXFLAGS="-g  -pg"])
+AC_ARG_ENABLE(profile, AC_HELP_STRING([--enable-profile], [Produce a profiled executable]),  [TR_CFLAGS="-ggdb3 -pg $USER_FLAGS"; TR_CXXFLAGS="-ggdb3  -pg $USER_FLAGS"])
 
-AC_ARG_ENABLE(pedantic,  [  --enable-pedantic       Enable -pedantic (and -ansi for C) when compiling], TR_CFLAGS="$TR_CFLAGS -ansi -pedantic"; TR_CXXFLAGS="$TR_CXXFLAGS -pedantic")
+AC_ARG_ENABLE(debug-profile, AC_HELP_STRING([--enable-debug-profile], [Produce a profiled, debuggable, and optimized executable]),  [TR_CFLAGS="-ggdb3 -O3 -Wall -ffast-math -pg $TR_ALIGN $USER_FLAGS"; TR_CXXFLAGS="-ggdb3 -O3 -Wall -ffast-math  -pg $TR_ALIGN $USER_FLAGS"])
 
-AC_ARG_ENABLE(macosx_bundle,[  --enable-macosx-bundle      Produce a MacOSX bundle executable],  [TR_CPPFLAGS="$TR_CPPFLAGS -DWITH_MACOSX_BUNDLE";])
+AC_ARG_ENABLE(pedantic, AC_HELP_STRING([--enable-pedantic], [Enable -pedantic (and -ansi for C) modes]), TR_CFLAGS="$TR_CFLAGS -ansi -pedantic"; TR_CXXFLAGS="$TR_CXXFLAGS -pedantic")
+
+AC_ARG_ENABLE(macosx_bundle, AC_HELP_STRING([--enable-macosx-bundle], [Produce a MacOSX bundle executable]),  [TR_CPPFLAGS="$TR_CPPFLAGS -DWITH_MACOSX_BUNDLE=1";])
 
 dnl --------------------------------------------------------------------------
 dnl Check if compiling for Win32
@@ -98,7 +150,7 @@ AC_EGREP_CPP(yes,
 AC_MSG_RESULT([$is_macosx])
 
 if test "x$is_macosx" = "xyes" ; then
-    CFLAGS="$CFLAGS -Wno-long-double -I/System/Library/Frameworks/Carbon.framework/Libraries/CIncludes"
+    CFLAGS="$CFLAGS -I/System/Library/Frameworks/Carbon.framework/Libraries/CIncludes"
     GL_CPPFLAGS="$GL_CPPFLAGS -framework OpenGL"
     GLUT_CPPFLAGS="$GLUT_CPPFLAGS -framework GLUT"
     with_gl_inc=/System/Library/Frameworks/Carbon.framework/Libraries/CIncludes
@@ -264,40 +316,48 @@ AC_SUBST(PYTHON_LIBS)
 dnl --------------------------------------------------------------------------
 dnl Check for car sim
 dnl --------------------------------------------------------------------------
-AC_ARG_ENABLE(car,     [  --enable-car          Produce an executable for car simulation], [TR_CPPFLAGS="$TR_CPPFLAGS -DCAR_SIM "; echo "making car simulator"])
+AC_ARG_ENABLE(car, AC_HELP_STRING([--enable-car], [Produce an executable for car simulation]), [TR_CPPFLAGS="$TR_CPPFLAGS -DCAR_SIM "; echo "making car simulator"])
 dnl --------------------------------------------------------------------------
 dnl Check for network protocol
 dnl --------------------------------------------------------------------------
 
-AC_ARG_ENABLE(tcp,[  --enable-tcp      Use TCP (defaults to UDP)],  [tcp=no])
-AC_ARG_ENABLE(udp,[  --enable-udp      Use UDP (this is default)],  [udp=no])
+AC_ARG_ENABLE(udp, AC_HELP_STRING([--disable-udp], [Default to TCP if UDP is disabled]), _udp=$enableval)
 
-if test "x$tcp$udp" = "xnono" ; then
-    echo "*** Both UDP and TCP protocol are enabled : using default UDP
-protocol"
-    TR_CPPFLAGS="$TR_CPPFLAGS -D_UDP_PROTO"
+AC_ARG_ENABLE(tcp, AC_HELP_STRING([--disable-tcp], [Default to none if both TCP and UDP are disabled]), _tcp=$enableval)
+
+if test "x$_udp" != "xno" ; then
+    echo "Configuring for UDP network protocol"
+    TR_CPPFLAGS="$TR_CPPFLAGS -D_UDP_PROTO=1"
 else
-	if test "x$tcp" = "xno" ; then
-	    TR_CPPFLAGS="$TR_CPPFLAGS -D_TCP_PROTO"
+	if test "x$_tcp" != "xno" ; then
+	    TR_CPPFLAGS="$TR_CPPFLAGS -D_TCP_PROTO=1"
 	    echo "Configuring for TCP network protocol"
-	else
-		if test "x$udp" = "xno" ; then
-		    echo "Configuring for UDP network protocol"
-		    TR_CPPFLAGS="$TR_CPPFLAGS -D_UDP_PROTO"
-		else
-		    echo "Configuring for UDP network protocol"
-		    TR_CPPFLAGS="$TR_CPPFLAGS -D_UDP_PROTO"
-		   fi
 	fi
 fi
+
+AC_ARG_ENABLE(stlport, AC_HELP_STRING([--enable-stlport], [Use STLport for compiling process]), stlport=$enableval)
+
+if !(test "x$stlport" = "xno" || test "x$stlport" = "x") ; then
+
+	if test "x$stlport" = "xyes" ; then
+	stlportdir="/usr/include/stlport"
+	else
+	stlportdir="$stlport"
+	fi
+
+	TR_CPPFLAGS="-I$stlportdir $TR_CPPFLAGS"
+	TR_CFLAGS="-I$stlportdir $TR_CFLAGS"
+	TR_CXXFLAGS="-I$stlportdir $TR_CXXFLAGS"
+	echo "Configuring for STLport support."
+fi
+
 
 
 dnl --------------------------------------------------------------------------
 dnl Check for SDL
 dnl --------------------------------------------------------------------------
-
-AC_ARG_ENABLE(sdl,[  --enable-sdl      Use SDL],  [sdl=no])
-if test "x$sdl" != "xno" ; then
+AC_ARG_ENABLE(sdl, AC_HELP_STRING([--disable-sdl], [Use GLUT instead of SDL]), _sdl=$enableval)
+if test "x$_sdl" != "xno" ; then
 
 SDL_VERSION=1.0.1
 AM_PATH_SDL($SDL_VERSION, have_SDL=yes, have_SDL=no)
@@ -319,35 +379,43 @@ if test "x$have_SDL" = "xyes" ; then
         echo "*** This version of SDL doesn't have joystick support."
         echo "*** Configuring without joystick support."
     fi
-USERSDL="1"
-AC_ARG_ENABLE(nosdl,[  --enable-nosdl Use if you do not wish to use SDL to manage mouse],USERSDL="0")
-	if test "$USERSDL" = "1" ; then
+
+AC_ARG_ENABLE(sdl-windowing, AC_HELP_STRING([--disable-sdl-windowing], [Disable SDL's window management options]), sdl_windowing=$enableval)
+	if test "x$sdl_windowing" != "xno" ; then
 		TR_CPPFLAGS="$TR_CPPFLAGS -DSDL_WINDOWING=1" 
 		echo "Using SDL Windowing System"
 	else
 		echo "Using GLUT Windowing System"
 	fi
-    dnl Check for SDL_mixer
-dnl    AC_CHECK_LIB( SDL_mixer, Mix_OpenAudio, 
-dnl                  have_SDL_mixer=yes, have_SDL_mixer=no )
+dnl Check for SDL_mixer
+    AC_CHECK_LIB( SDL_mixer, Mix_OpenAudio, 
+                  have_SDL_mixer=yes, have_SDL_mixer=no )
 
-dnl    if test "x$have_SDL_mixer" = "xyes" ; then 
-dnl	TR_CPPFLAGS="$TR_CPPFLAGS -DHAVE_SDL_MIXER=1" 
-dnl        TR_LIBS="$TR_LIBS -lSDL_mixer"
-dnl    else
-dnl        echo "*** SDL_mixer not found.  Configuring without audio support."
-dnl    fi
+    if test "x$have_SDL_mixer" = "xyes" ; then 
+	TR_CPPFLAGS="$TR_CPPFLAGS -DHAVE_SDL_MIXER=1" 
+        TR_LIBS="$TR_LIBS -lSDL_mixer"
+    else
+        echo "*** SDL_mixer not found.  Configuring without audio support."
+    fi
+
+	if (test "x$_tcp" = "xno" && test "x$_udp" = "xno"); then
+	echo "*** Configuring without networking support."
+	NET_LIBS=""
+	else
 
 dnl	Added a simple check to see if we can use libSDL_net
 	AC_CHECK_HEADER( SDL/SDL_net.h, have_SDL_net=yes, have_SDL_net=no)
-	if test "x$have_SDL_net" = "xyesBLAH" ; then
+	if test "x$have_SDL_net" = "xyes"; then
 		NET_LIBS=" -lSDL_net"
-		TR_CPPFLAGS="$TR_CPPFLAGS -DHAVE_SDLnet"
+		TR_CPPFLAGS="$TR_CPPFLAGS -DHAVE_SDLnet=1"
+		echo "Configuring with SDL Networking."
 	else
 		NET_LIBS=""
 		echo "*** SDL_net not found.  Configuring with standard sockets support."
 	fi
+	fi
 	AC_SUBST(NET_LIBS)
+
 
     LIBS="$saved_LIBS"
 else
@@ -358,25 +426,10 @@ else
 fi
 
 dnl --------------------------------------------------------------------------
-dnl Check for zlib compression library
-dnl --------------------------------------------------------------------------
-
-AC_CHECK_LIB( z, gzopen,
-  [ AC_CHECK_HEADER( zlib.h,
-    [vs_have_zlib=yes],
-    [vs_have_zlib=no])
-  ],[vs_have_zlib=no])
-
-if test "x$vs_have_zlib" = "xyes" ; then
-    AC_DEFINE(HAVE_ZLIB,1,[defined when zlib library and header are available])
-    TR_LIBS="$TR_LIBS -lz"
-fi
-
-dnl --------------------------------------------------------------------------
 dnl Check for GL library
 dnl --------------------------------------------------------------------------
-AC_ARG_WITH(gl-libs,      [  --with-gl-libs=DIR      GL/MesaGL library location])
-AC_ARG_WITH(gl-lib-name,  [  --with-gl-lib-name=NAME GL library name])
+AC_ARG_WITH(gl-libs, AC_HELP_STRING([--with-gl-libs=DIR], [GL/MesaGL library location]))
+AC_ARG_WITH(gl-lib-name, AC_HELP_STRING([--with-gl-lib-name=NAME], [GL library name]))
 
 if test "x$with_gl_libs" = "x" ; then
     GL_LDOPTS=""
@@ -467,8 +520,8 @@ LIBS="$saved_LIBS"
 dnl --------------------------------------------------------------------------
 dnl Check for GLU library
 dnl --------------------------------------------------------------------------
-AC_ARG_WITH(glu-libs,      [  --with-glu-libs=DIR      GLU/MesaGLU library location])
-AC_ARG_WITH(glu-lib-name,  [  --with-glu-lib-name=NAME GLU library name])
+AC_ARG_WITH(glu-libs, AC_HELP_STRING([--with-glu-libs=DIR], [GLU/MesaGLU library location]))
+AC_ARG_WITH(glu-lib-name, AC_HELP_STRING([--with-glu-lib-name=NAME], [GLU library name]))
 
 if test "x$with_glu_libs" = "x" ; then
     GLU_LDOPTS=""
@@ -552,7 +605,7 @@ dnl --------------------------------------------------------------------------
 dnl Check for OpenGL headers
 dnl --------------------------------------------------------------------------
 
-AC_ARG_WITH(gl-inc,   [  --with-gl-inc=DIR       OpenGL header file location])
+AC_ARG_WITH(gl-inc, AC_HELP_STRING([--with-gl-inc=DIR], [OpenGL header file location]))
 
 if test "x$with_gl_inc" = "x" ; then
     GL_CPPFLAGS=""
@@ -592,7 +645,7 @@ dnl Check for glext.h
 if test "x$is_macosx" = "xyes" ; then
     have_glext_h=yes
 else
-    AC_CHECK_HEADERS( "GL/glext.h", have_glext_h=yes, have_glext_h=no )
+    AC_CHECK_HEADERS(GL/glext.h, have_glext_h=yes, have_glext_h=no )
 fi
 
 if test "x$have_glext_h" = "xno" ; then
@@ -610,6 +663,7 @@ AC_MSG_CHECKING([whether glext.h is recent enough]);
 if test "x$is_macosx" = "xno" ; then
 AC_EGREP_CPP(yes,
 [
+#include <GL/gl.h>
 #include <GL/glext.h>
 #if defined(GL_GLEXT_VERSION) && GL_GLEXT_VERSION >= 6
  yes
@@ -638,7 +692,7 @@ TR_CPPFLAGS="$TR_CPPFLAGS $GL_CPPFLAGS"
 dnl --------------------------------------------------------------------------
 dnl Check for glut library
 dnl --------------------------------------------------------------------------
-AC_ARG_WITH(glut-libs,[  --with-glut-libs=DIR    Location of GLUT library])
+AC_ARG_WITH(glut-libs, AC_HELP_STRING([--with-glut-libs=DIR], [Location of GLUT library]))
 
 if test "x$with_glut_libs" = "x" ; then
     GLUT_LDOPTS="$GLUT_LDOPTS"
@@ -687,7 +741,7 @@ dnl --------------------------------------------------------------------------
 dnl Check for glut.h
 dnl --------------------------------------------------------------------------
 
-AC_ARG_WITH(glut-inc, [  --with-glut-inc=DIR     Specify GLUT header file location])
+AC_ARG_WITH(glut-inc, AC_HELP_STRING([--with-glut-inc=DIR], [Specify GLUT header file location]))
 
 if test "x$with_glut_inc" = "x" ; then
     GLUT_CPPFLAGS="$GLUT_CPPFLAGS"
@@ -713,7 +767,7 @@ TR_CPPFLAGS="$TR_CPPFLAGS $GLUT_CPPFLAGS"
 dnl --------------------------------------------------------------------------
 dnl Check for expat library
 dnl --------------------------------------------------------------------------
-AC_ARG_WITH(expat-libs,[  --with-expat-libs=DIR    Location of expat library])
+AC_ARG_WITH(expat-libs, AC_HELP_STRING([--with-expat-libs=DIR], [Location of expat library]))
 
 if test "x$with_expat_libs" = "x" ; then
     EXPAT_LDOPTS=""
@@ -752,7 +806,7 @@ dnl --------------------------------------------------------------------------
 dnl Check for expat.h
 dnl --------------------------------------------------------------------------
 
-AC_ARG_WITH(expat-inc, [  --with-expat-inc=DIR     Specify expat header file location])
+AC_ARG_WITH(expat-inc, AC_HELP_STRING([--with-expat-inc=DIR], [Specify expat header file location]))
 
 if test "x$with_expat_inc" = "x" ; then
     EXPAT_CPPFLAGS=""
@@ -780,7 +834,7 @@ TR_CPPFLAGS="$TR_CPPFLAGS $EXPAT_CPPFLAGS"
 dnl --------------------------------------------------------------------------
 dnl Check for png library
 dnl --------------------------------------------------------------------------
-AC_ARG_WITH(png-libs,[  --with-png-libs=DIR    Location of png library])
+AC_ARG_WITH(png-libs, AC_HELP_STRING([--with-png-libs=DIR], [Location of png library]))
 
 if test "x$with_png_libs" = "x" ; then
     PNG_LDOPTS=""
@@ -823,7 +877,7 @@ dnl --------------------------------------------------------------------------
 dnl Check for png.h
 dnl --------------------------------------------------------------------------
 
-AC_ARG_WITH(png-inc, [  --with-png-inc=DIR     Specify png header file location])
+AC_ARG_WITH(png-inc, AC_HELP_STRING([--with-png-inc=DIR], [Specify png header file location]))
 
 if test "x$with_png_inc" = "x" ; then
     PNG_CPPFLAGS=""
@@ -858,7 +912,7 @@ TR_CPPFLAGS="$TR_CPPFLAGS $PNG_CPPFLAGS"
 dnl --------------------------------------------------------------------------
 dnl Check for jpeg library
 dnl --------------------------------------------------------------------------
-AC_ARG_WITH(jpeg-libs,[  --with-jpeg-libs=DIR    Location of jpeg library])
+AC_ARG_WITH(jpeg-libs, AC_HELP_STRING([--with-jpeg-libs=DIR], [Location of jpeg library]))
 
 if test "x$with_jpeg_libs" = "x" ; then
     JPEG_LDOPTS=""
@@ -897,7 +951,7 @@ dnl --------------------------------------------------------------------------
 dnl Check for jpeg.h
 dnl --------------------------------------------------------------------------
 
-AC_ARG_WITH(jpeg-inc, [  --with-jpeg-inc=DIR     Specify jpeg header file location])
+AC_ARG_WITH(jpeg-inc, AC_HELP_STRING([--with-jpeg-inc=DIR], [Specify jpeg header file location]))
 
 if test "x$with_jpeg_inc" = "x" ; then
     JPEG_CPPFLAGS=""
@@ -930,11 +984,10 @@ TR_CPPFLAGS="$TR_CPPFLAGS $JPEG_CPPFLAGS"
 dnl --------------------------------------------------------------------------
 dnl Check for openal library
 dnl --------------------------------------------------------------------------
-USEROPENAL="1"
-AC_ARG_ENABLE(nosound,[  --enable-nosound Use if you do not wish to have sound],USEROPENAL="0")
+AC_ARG_ENABLE(sound, AC_HELP_STRING([--disable-sound], [Disable allsound support]),sdl_sound=$enableval)
 
-AC_ARG_WITH(openal-libs,[  --with-openal-libs=DIR    Location of openal library])
-if test "$USEROPENAL" = "1" ; then
+AC_ARG_WITH(openal-libs, AC_HELP_STRING([--with-openal-libs=DIR], [Location of openal library]))
+if test "x$sdl_sound" != "xno" ; then
     if test "x$with_openal_libs" = "x" ; then
         OPENAL_LDOPTS=""
     else
@@ -953,14 +1006,13 @@ if test "$USEROPENAL" = "1" ; then
     OPENAL_LIB_LIST="openal"
     
     for OPENAL_LIB_NAME in $OPENAL_LIB_LIST ; do
-
-    if test "x$is_macosx" = "xno" ; then
-        MACORPCLIBS="$OPENAL_LDOPTS -l$OPENAL_LIB_NAME"
-    else
-	MACORPCLIBS="$OPENAL_LDOPTS -framework OpenAL"
-    fi
-
         CHECK_FOR_OPENAL_LIB
+
+    if test "x$is_macosx" = "xyes" ; then
+      MACORPCLIBS="$OPENAL_LDOPTS -framework OpenAL"
+    else
+      MACORPCLIBS="$OPENAL_LDOPTS -l$OPENAL_LIB_NAME"
+    fi
     
         if test "x$have_openal_lib" = "xyes" ; then
             LIBS="$saved_LIBS"
@@ -979,7 +1031,7 @@ dnl --------------------------------------------------------------------------
 dnl Check for OpenAL headers
 dnl --------------------------------------------------------------------------
 
-AC_ARG_WITH(al-inc,   [  --with-al-inc=DIR       OpenAL header file location])
+AC_ARG_WITH(al-inc, AC_HELP_STRING([--with-al-inc=DIR], [OpenAL header file location]))
 
 if test "x$with_al_inc" = "x" ; then
     AL_CPPFLAGS=""
@@ -1022,9 +1074,9 @@ else
         echo "Error::Configuring without OpenAL support!"
     else
       dnl Check for alext.h 
-      AC_CHECK_HEADERS( "AL/alext.h", have_alext_h=yes, have_alext_h=no )
+      AC_CHECK_HEADERS(AL/alext.h, have_alext_h=yes, have_alext_h=no )
 
-      if test $USEROPENAL = "1" ; then
+      if test "x$sdl_sound" != "xno" ; then
         echo "Configuring with OpenAL support!"
         TR_CPPFLAGS="$TR_CPPFLAGS -DHAVE_AL=1" 
       else
@@ -1046,10 +1098,9 @@ TR_CPPFLAGS="$TR_CPPFLAGS $AL_CPPFLAGS"
 CPPFLAGS="$saved_CPPFLAGS" 
 
 
-USERGTKL="1"
-AC_ARG_ENABLE(nogtk,[  --enable-nogtk Use if you do not wish to have herlper apps],USERGTKL="0")
-
-if test "$USERGTKL" = "1" ; then
+AC_ARG_ENABLE(gtk, AC_HELP_STRING([--disable-gtk], [Don't use GTK for helper aps.]),gtkON=$enableval)
+if test "x$gtkON" != "xno" ; then
+   AM_PATH_GLIB(1.2.1)
    dnl Check for Gtk+ define GTK_CFLAGS && GTK_LIBS
    AM_PATH_GTK(1.2.1,,
 	AC_MSG_ERROR([Cannot find GTK+ - gtk-config missing from path?]))
@@ -1061,10 +1112,15 @@ dnl Other options
 dnl --------------------------------------------------------------------------
 
 dnl Turn use of stencil buffer on/off
-AC_ARG_ENABLE(stencil-buffer,[  --enable-stencil-buffer Use if your hardware has a stencil buffer],TR_CPPFLAGS="$TR_CPPFLAGS -DUSE_STENCIL_BUFFER")
+AC_ARG_ENABLE(stencil-buffer, AC_HELP_STRING([--enable-stencil-buffer], [Use if your hardware has a stencil buffer]),TR_CPPFLAGS="$TR_CPPFLAGS -DUSE_STENCIL_BUFFER=1")
+
+AC_ARG_ENABLE(nvidia-cg, AC_HELP_STRING([--enable-nvidia-cg],
+[Use if you have the NVidia SDK and CG compiler or compatible to get shader support (very experimental)]),
+CG_CPPFLAGS="-DCG_SUPPORT=1" CG_LIBS="-lnvparse -lCg -lCgGL -lnvsdk" TR_CPPFLAGS="$TR_CPPFLAGS $CG_CPPFLAGS" TR_LIBS="$TR_LIBS -L/usr/local/lib/nvsdk $CG_LIBS" )
+
 
 dnl Specify data directory
-AC_ARG_WITH(data-dir,[  --with-data-dir=PATH    Default vegastrike data directory],TR_CPPFLAGS="$TR_CPPFLAGS -DDATA_DIR=\\\"$withval\\\"")
+AC_ARG_WITH(data-dir, AC_HELP_STRING([--with-data-dir=PATH], [Default vegastrike data directory]),TR_CPPFLAGS="$TR_CPPFLAGS -DDATA_DIR=\\\"$withval\\\"")
 
 
 AC_SUBST(TR_CPPFLAGS)
@@ -1072,13 +1128,13 @@ AC_SUBST(TR_CFLAGS)
 AC_SUBST(TR_CXXFLAGS)
 AC_SUBST(TR_LIBS)
 AC_SUBST(PYTHON_CPPFLAGS)
-BOOST_CPPFLAGS=" -I../boost -I../../boost -I../src/boost -DUSE_BOOST_128"
+BOOST_CPPFLAGS="-I../boost -I../../boost -I../src/boost -DUSE_BOOST_128=1"
 BOOST_LIBS="../src/boost/libpython_boost.a"
 TESTUSEBOOST129="1"
-AC_ARG_ENABLE(boost-128,[  --enable-boost-128 Use if your compiler has trouble with boost-129],TESTUSEBOOST129="0")
+AC_ARG_ENABLE(boost-128, AC_HELP_STRING([--enable-boost-128], [Use if your compiler has trouble with boost-129]),TESTUSEBOOST129="0")
 
 if test "$TESTUSEBOOST129" = "1" ; then
-   BOOST_CPPFLAGS=" -I../boost129 -I../../boost129 -I../src/boost129 -DUSE_BOOST_129"
+   BOOST_CPPFLAGS="-I../boost129 -I../../boost129 -I../src/boost129 -DUSE_BOOST_129=1"
    BOOST_LIBS="../src/boost129/libpython_boost.a"
 fi
 
@@ -1089,5 +1145,8 @@ CPPFLAGS="$CPPFLAGS $TR_CPPFLAGS $PYTHON_CPPFLAGS $BOOST_CPPFLAGS "
 CFLAGS="$CFLAGS $TR_CFLAGS  -pipe "
 CXXFLAGS="$CXXFLAGS $TR_CXXFLAGS -pipe "
 LIBS="$LIBS $TR_LIBS $PYTHON_LIBS"
-AC_OUTPUT(Makefile src/Makefile src/gldrv/Makefile src/aldrv/Makefile src/gfx/Makefile src/cmd/Makefile src/cmd/ai/Makefile src/cmd/collide/Makefile src/cmd/script/Makefile src/cmd/script/c_alike/Makefile src/cmd/collide/csgeom/Makefile src/python/Makefile launcher/Makefile src/networking/Makefile src/boost/Makefile objconv/Makefile src/gui/Makefile src/common/Makefile src/boost129/Makefile src/gfx/nav/Makefile)
+dnl AC_OUTPUT(Makefile src/Makefile src/gldrv/Makefile src/aldrv/Makefile src/gfx/Makefile src/cmd/Makefile src/cmd/ai/Makefile src/cmd/collide/Makefile src/cmd/script/Makefile src/cmd/script/c_alike/Makefile src/cmd/collide/csgeom/Makefile src/python/Makefile launcher/Makefile src/networking/Makefile src/boost/Makefile objconv/Makefile src/gui/Makefile src/common/Makefile src/boost129/Makefile )
+
+AC_CONFIG_FILES(Makefile src/Makefile src/gldrv/Makefile src/aldrv/Makefile src/gfx/Makefile src/gfx/nav/Makefile src/cmd/Makefile src/cmd/ai/Makefile src/cmd/collide/Makefile src/cmd/script/Makefile src/cmd/script/c_alike/Makefile src/cmd/collide/csgeom/Makefile src/python/Makefile launcher/Makefile src/networking/Makefile src/boost/Makefile objconv/Makefile src/gui/Makefile src/common/Makefile src/boost129/Makefile)
+AC_OUTPUT
 

@@ -123,7 +123,8 @@ librootgeneric =			\
 	vegastrike.h			\
 	vs_globals.cpp			\
 	vs_path.cpp				\
-	vs_path.h
+	vs_path.h			\
+	cg_global.cpp
 
 librootserver =					\
 	gfxlib_struct_server.cpp	\
