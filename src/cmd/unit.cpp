@@ -289,8 +289,37 @@ void GameUnit<UnitType>::DrawNow (const Matrix &mato, float lod) {
       enginescale=cmas;
     Vector Scale (1,1,enginescale/(cmas));
 #endif
-    if (halos.ShouldDraw (enginescale)) 
-      halos.Draw(mat,Scale,cloak,0, this->GetHullPercent(),this->GetVelocity(),this->faction);
+  int nummounts= this->GetNumMounts();
+  for (i=0;(int)i<nummounts;i++) {
+    static bool draw_mounts = XMLSupport::parse_bool (vs_config->getVariable ("graphics","draw_weapons","false"));
+    Mount * mahnt = &this->mounts[i];
+    if (draw_mounts) {
+		
+//      Mesh * gun = WeaponMeshCache::getCachedMutable (mounts[i]->type->weapon_name);
+	 if (mahnt->xyscale!=0&&mahnt->zscale!=0) {		
+           Mesh * gun = mahnt->type->gun;	  
+           if (gun) {
+             glEnable(GL_NORMALIZE);
+             Transformation mountLocation(mahnt->GetMountOrientation(),mahnt->GetMountLocation().Cast());
+             Matrix mountmat; mountLocation.to_matrix(mountmat);
+             Matrix ct;
+             MultMatrix(ct,mat,mountmat);
+             ScaleMatrix(ct,Vector(mahnt->xyscale,mahnt->xyscale,mahnt->zscale));
+             gun->setCurrentFrame(this->mounts[i].ComputeAnimatedFrame(gun));		  
+             gun->DrawNow(100,0,ct,1,cloak);//cloakign and nebula
+             if (mahnt->type->gun1){
+               gun = mahnt->type->gun1;
+               gun->setCurrentFrame(this->mounts[i].ComputeAnimatedFrame(gun));		  
+
+               gun->DrawNow(100,0,ct,1,cloak);//cloakign and nebula			  
+             }
+             glDisable(GL_NORMALIZE);
+           }
+	 }
+    }
+  }
+  if (halos.ShouldDraw (enginescale)) 
+    halos.Draw(mat,Scale,cloak,0, this->GetHullPercent(),this->GetVelocity(),this->faction);
 }
 template <class UnitType>
 void GameUnit<UnitType>::Draw(const Transformation &parent, const Matrix &parentMatrix)
