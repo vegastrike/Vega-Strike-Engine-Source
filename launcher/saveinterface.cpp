@@ -27,7 +27,7 @@ void LoadSaveDialog (char *, char *, int);
 void LoadAutoDialog (char *, char *, int);
 #define NUM_TITLES 9
 static const char * titles [NUM_TITLES] = {"Select Mission", "New Game","Load Saved Game","Recover From Autosave","Launch Last Savegame", "Launch No Savegame","Options","Help","Exit Launcher"};
-std::string my_mission ("mission/exploration/explore_universe.mission");
+std::string my_mission ("mission/explore_universe.mission");
 #define NUM_HELPS 7
 static const char * helps [NUM_HELPS] = {
   "|SELECT MISSION BUTTON|\nThis allows you to select which mission vegastrike\nwill start the next time you press one\nof the keys below it. Most missions do not involve\nsave games and will ignore those options,\nhowever the default, in the mission/exploration folder will\nindeed ustilize the save games you specify.\nIf you ignore this option you begin in the standard\ntrading/bounty hunting mission.",
@@ -172,7 +172,13 @@ DWORD WINAPI DrawStartupDialog(LPVOID lpParameter) {
 	stupod *s= (stupod*)lpParameter;
         progress=false;
         Help ("Please wait while vegastrike loads...","Please wait while vegastrike loads...");
-        spawnl (P_WAIT,"./vegastrike","./vegastrike",s->num?s->num:(std::string("\"")+s->my_mission+"\"").c_str(),s->num?(std::string("\"")+s->my_mission+"\"").c_str():NULL,NULL);
+		int pid=spawnl(P_WAIT,"./vegastrike","./vegastrike",s->num?s->num:(std::string("\"")+s->my_mission+"\"").c_str(),s->num?(std::string("\"")+s->my_mission+"\"").c_str():NULL,NULL);
+		if (pid==-1) {
+			if (chdir("bin")==0) {
+				spawnl(P_WAIT,"./vegastrike","./vegastrike",s->num?s->num:(std::string("\"")+s->my_mission+"\"").c_str(),s->num?(std::string("\"")+s->my_mission+"\"").c_str():NULL,NULL);
+				chdir("..");
+			}
+		}
         if (s->num)
           free (s->num);
         free (s->my_mission);
@@ -353,7 +359,7 @@ int main( int   argc,
     GtkWidget *button;
     window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
     gtk_window_set_default_size(GTK_WINDOW(window), 300,350);
-    gtk_window_set_title(GTK_WINDOW(window), "Saved Game Selector");
+    gtk_window_set_title(GTK_WINDOW(window), "Vega Strike Launcher");
     GtkWidget *vbox=gtk_vbox_new(FALSE, 3);
      /* When the window is given the "delete_event" signal (this is given
       * by the window manager, usually by the "close" option, or on the
