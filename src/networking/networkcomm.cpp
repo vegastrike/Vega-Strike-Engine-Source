@@ -1,3 +1,5 @@
+#include <config.h>
+
 #include "networking/webcam_support.h"
 #include "networkcomm.h"
 #ifndef NETCOMM_NOSOUND

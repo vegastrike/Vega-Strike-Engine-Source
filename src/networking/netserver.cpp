@@ -423,7 +423,7 @@ void	NetServer::start(int argc, char **argv)
 
 	string tmp;
 	char srvip[256];
-	unsigned short tmpport;
+	unsigned short tmpport = ACCT_PORT;
 	stracct = vs_config->getVariable( "server", "useaccountserver", "");
 	acctserver = ( stracct=="true");
 

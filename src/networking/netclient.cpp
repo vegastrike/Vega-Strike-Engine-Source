@@ -26,6 +26,8 @@
 #if !defined(WIN32)
 #include <unistd.h>
 #endif
+#include <config.h>
+
 #include "vs_globals.h"
 #include "endianness.h"
 #include "cmd/unit_generic.h"

@@ -21,6 +21,8 @@
 #ifndef __NetClient_H
 #define __NetClient_H
 
+#include <config.h> // for NETCOMM
+
 #include <string>
 #include <vector>
 

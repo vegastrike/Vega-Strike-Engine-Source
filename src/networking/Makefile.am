@@ -7,7 +7,7 @@ INCLUDES=-I$(top_srcdir)/src \
 	 -I$(top_srcdir)/src/jvoiplib/thirdparty/lpc 		\
 	 -I$(top_srcdir)/src/jvoiplib/thirdparty/gsm/inc	\
 	 -I$(top_srcdir)/src/jthread \
-	 -I$(top_srcdir)/src/jrtplib
+	 -I$(top_srcdir)/src/jrtplib \
 	 -I$(top_srcdir)/src/boost
 else
 INCLUDES=-I$(top_srcdir)/src \
@@ -18,7 +18,7 @@ INCLUDES=-I$(top_srcdir)/src \
 	 -I$(top_srcdir)/src/jvoiplib/thirdparty/lpc 		\
 	 -I$(top_srcdir)/src/jvoiplib/thirdparty/gsm/inc	\
 	 -I$(top_srcdir)/src/jthread \
-	 -I$(top_srcdir)/src/jrtplib
+	 -I$(top_srcdir)/src/jrtplib \
 	 -I$(top_srcdir)/src/boost129
 endif
 

@@ -2,6 +2,7 @@
 #define __NETWORKCOMM_H
 
 #include <list>
+#include <config.h> // for NETCOMM_NOSOUND
 #include "client.h"
 
 class WebcamSupport;
