@@ -115,6 +115,9 @@ void DockToSavedBases (int playernum) {
 		iter.advance();
 	}
 	if (closestUnit) {
+		if (UnitUtil::getSignificantDistance(plr,closestUnit)>0&&closestUnit->isUnit()!=PLANETPTR) {
+			plr->SetPosAndCumPos(UniverseUtil::SafeEntrancePoint(closestUnit->Position(),plr->rSize()));
+		}
 		vector <DockingPorts> dprt=closestUnit->image->dockingports;
 		int i;
 		for (i=0;;i++) {

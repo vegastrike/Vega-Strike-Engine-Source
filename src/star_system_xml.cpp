@@ -245,7 +245,7 @@ void parse_dual_alpha (const char * alpha, BLENDFUNC & blendSrc, BLENDFUNC &blen
 float ScaleJumpRadius (float radius) {
 	    static float jump_radius_scale=parse_float (vs_config->getVariable("physics","jump_radius_scale","2"));
 	    static float game_speed = parse_float (vs_config->getVariable ("physics","game_speed","1"));
-	    radius *= jump_radius_scale*game_speed;
+	    radius *= jump_radius_scale*game_speed;//need this because sys scale doesn't affect j-point size
 	    return radius;
 }
 
@@ -305,6 +305,10 @@ using namespace StarXML;
       switch(attribute_map.lookup((*iter).name)) {
       case SCALESYSTEM:
 	xml->scale = parse_float ((*iter).value);
+	{
+		xml->scale*=parse_float (vs_config->getVariable("physics","game_speed","1"));
+		xml->scale*=parse_float (vs_config->getVariable("physics","star_system_scale","1"));
+	}	
 	break;
       case REFLECTIVITY:
 	xml->reflectivity=parse_float ((*iter).value);
