@@ -2,7 +2,7 @@
 #include <vector>
 ///Stores all the load-time vertex info in the XML struct FIXME light calculations
 #include "expat.h"
-
+#include "endianness.h"
 using std::vector;
 using std::string;
 #include "xml_support.h"
@@ -812,7 +812,7 @@ int main (int argc, char** argv) {
   XML memfile=(LoadXML(argv[1],1));
   fprintf(stderr,"number of vertices: %d\nnumber of lines: %d\nnumber of triangles: %d\nnumber of quads: %d\n",memfile.vertices.size(),memfile.lines.size(),memfile.tris.size(),memfile.quads.size());
   FILE * Outputfile=fopen(argv[2],"wb"); 
-  int intbuf;
+  unsigned int intbuf;
   float floatbuf;
   int versionnumber=1;
   unsigned char bytebuf;
@@ -828,53 +828,53 @@ int main (int argc, char** argv) {
   fwrite(&bytebuf,1,1,Outputfile);
 
   fwrite(&versionnumber,sizeof(int),1,Outputfile);// VERSION number for BinaryFormattedXMesh
-  floatbuf = memfile.scale;
+  floatbuf = VSSwapHostFloatToLittle(memfile.scale);
   fwrite(&floatbuf,sizeof(float),1,Outputfile);// Mesh Scale
-  intbuf= memfile.reverse;
+  intbuf= VSSwapHostIntToLittle(memfile.reverse);
   fwrite(&intbuf,sizeof(int),1,Outputfile);//reverse flag
-  intbuf= memfile.force_texture;
+  intbuf= VSSwapHostIntToLittle(memfile.force_texture);
   fwrite(&intbuf,sizeof(int),1,Outputfile);//Force texture flag
-  intbuf= memfile.sharevert;
+  intbuf= VSSwapHostIntToLittle(memfile.sharevert);
   fwrite(&intbuf,sizeof(int),1,Outputfile);//Share vertex flag
-  floatbuf= memfile.polygon_offset;
+  floatbuf= VSSwapHostFloatToLittle(memfile.polygon_offset);
   fwrite(&floatbuf,sizeof(float),1,Outputfile);//Polygon offset
-  intbuf= memfile.blend_src;
+  intbuf= VSSwapHostIntToLittle(memfile.blend_src);
   fwrite(&intbuf,sizeof(int),1,Outputfile);//Blend Source
-  intbuf= memfile.blend_dst;
+  intbuf= VSSwapHostIntToLittle(memfile.blend_dst);
   fwrite(&intbuf,sizeof(int),1,Outputfile);//Blend Destination
-  floatbuf= memfile.material.power;
+  floatbuf= VSSwapHostFloatToLittle(memfile.material.power);
   fwrite(&floatbuf,sizeof(float),1,Outputfile);//Material:Specular:Power
-  floatbuf= memfile.material.ar;
+  floatbuf= VSSwapHostFloatToLittle(memfile.material.ar);
   fwrite(&floatbuf,sizeof(float),1,Outputfile);//Material:Ambient:Red
-  floatbuf= memfile.material.ag;
+  floatbuf= VSSwapHostFloatToLittle(memfile.material.ag);
   fwrite(&floatbuf,sizeof(float),1,Outputfile);//Material:Ambient:Green
-  floatbuf= memfile.material.ab;
+  floatbuf= VSSwapHostFloatToLittle(memfile.material.ab);
   fwrite(&floatbuf,sizeof(float),1,Outputfile);//Material:Ambient:Blue
-  floatbuf= memfile.material.aa;
+  floatbuf= VSSwapHostFloatToLittle(memfile.material.aa);
   fwrite(&floatbuf,sizeof(float),1,Outputfile);//Material:Ambient:Alpha
-  floatbuf= memfile.material.dr;
+  floatbuf= VSSwapHostFloatToLittle(memfile.material.dr);
   fwrite(&floatbuf,sizeof(float),1,Outputfile);//Material:Diffuse:Red
-  floatbuf= memfile.material.dg;
+  floatbuf= VSSwapHostFloatToLittle(memfile.material.dg);
   fwrite(&floatbuf,sizeof(float),1,Outputfile);//Material:Diffuse:Green
-  floatbuf= memfile.material.db;
+  floatbuf= VSSwapHostFloatToLittle(memfile.material.db);
   fwrite(&floatbuf,sizeof(float),1,Outputfile);//Material:Diffuse:Blue
-  floatbuf= memfile.material.da;
+  floatbuf= VSSwapHostFloatToLittle(memfile.material.da);
   fwrite(&floatbuf,sizeof(float),1,Outputfile);//Material:Diffuse:Alpha
-  floatbuf= memfile.material.er;
+  floatbuf= VSSwapHostFloatToLittle(memfile.material.er);
   fwrite(&floatbuf,sizeof(float),1,Outputfile);//Material:Emissive:Red
-  floatbuf= memfile.material.eg;
+  floatbuf= VSSwapHostFloatToLittle(memfile.material.eg);
   fwrite(&floatbuf,sizeof(float),1,Outputfile);//Material:Emissive:Green
-  floatbuf= memfile.material.eb;
+  floatbuf= VSSwapHostFloatToLittle(memfile.material.eb);
   fwrite(&floatbuf,sizeof(float),1,Outputfile);//Material:Emissive:Blue
-  floatbuf= memfile.material.ea;
+  floatbuf= VSSwapHostFloatToLittle(memfile.material.ea);
   fwrite(&floatbuf,sizeof(float),1,Outputfile);//Material:Emissive:Alpha
-  floatbuf= memfile.material.sr;
+  floatbuf= VSSwapHostFloatToLittle(memfile.material.sr);
   fwrite(&floatbuf,sizeof(float),1,Outputfile);//Material:Specular:Red
-  floatbuf= memfile.material.sg;
+  floatbuf= VSSwapHostFloatToLittle(memfile.material.sg);
   fwrite(&floatbuf,sizeof(float),1,Outputfile);//Material:Specular:Green
-  floatbuf= memfile.material.sb;
+  floatbuf= VSSwapHostFloatToLittle(memfile.material.sb);
   fwrite(&floatbuf,sizeof(float),1,Outputfile);//Material:Specular:Blue
-  floatbuf= memfile.material.sa;
+  floatbuf= VSSwapHostFloatToLittle(memfile.material.sa);
   fwrite(&floatbuf,sizeof(float),1,Outputfile);//Material:Specular:Alpha
   
   //Incorrectly implemented 
@@ -890,66 +890,66 @@ int main (int argc, char** argv) {
 
   //END HEADER
   //GEOMETRY
-  intbuf= memfile.vertices.size();
+  intbuf= VSSwapHostIntToLittle(memfile.vertices.size());
   fwrite(&intbuf,sizeof(int),1,Outputfile);//Number of vertices
   for(int verts=0;verts<memfile.vertices.size();verts++){
-	  floatbuf=memfile.vertices[verts].x;
+	  floatbuf=VSSwapHostFloatToLittle(memfile.vertices[verts].x);
 	  fwrite(&floatbuf,sizeof(float),1,Outputfile);//vertex #vert:x
-	  floatbuf=memfile.vertices[verts].y;
+	  floatbuf=VSSwapHostFloatToLittle(memfile.vertices[verts].y);
 	  fwrite(&floatbuf,sizeof(float),1,Outputfile);//vertex #vert:y
-	  floatbuf=memfile.vertices[verts].z;
+	  floatbuf=VSSwapHostFloatToLittle(memfile.vertices[verts].z);
 	  fwrite(&floatbuf,sizeof(float),1,Outputfile);//vertex #vert:z
-	  floatbuf=memfile.vertices[verts].i;
+	  floatbuf=VSSwapHostFloatToLittle(memfile.vertices[verts].i);
 	  fwrite(&floatbuf,sizeof(float),1,Outputfile);//vertex #vert:i
-	  floatbuf=memfile.vertices[verts].j;
+	  floatbuf=VSSwapHostFloatToLittle(memfile.vertices[verts].j);
 	  fwrite(&floatbuf,sizeof(float),1,Outputfile);//vertex #vert:j
-	  floatbuf=memfile.vertices[verts].k;
+	  floatbuf=VSSwapHostFloatToLittle(memfile.vertices[verts].k);
 	  fwrite(&floatbuf,sizeof(float),1,Outputfile);//vertex #vert:k
-	  floatbuf=memfile.vertices[verts].s;
+	  floatbuf=VSSwapHostFloatToLittle(memfile.vertices[verts].s);
 	  fwrite(&floatbuf,sizeof(float),1,Outputfile);//vertex #vert:s
-	  floatbuf=memfile.vertices[verts].t;
+	  floatbuf=VSSwapHostFloatToLittle(memfile.vertices[verts].t);
 	  fwrite(&floatbuf,sizeof(float),1,Outputfile);//vertex #vert:t
   }
-  intbuf= memfile.lines.size();
+  intbuf= VSSwapHostIntToLittle(memfile.lines.size());
   fwrite(&intbuf,sizeof(int),1,Outputfile);//Number of lines
   for(int lines=0;lines<memfile.lines.size();lines++){
-	intbuf= memfile.lines[lines].flatshade;
+	intbuf= VSSwapHostIntToLittle(memfile.lines[lines].flatshade);
 	fwrite(&intbuf,sizeof(int),1,Outputfile);//Flatshade flag
 	for(int tmpcounter=0;tmpcounter<2;tmpcounter++){
-		intbuf= memfile.lines[lines].indexref[tmpcounter];
+		intbuf= VSSwapHostIntToLittle(memfile.lines[lines].indexref[tmpcounter]);
 		fwrite(&intbuf,sizeof(int),1,Outputfile);//point index
-		intbuf= memfile.lines[lines].s[tmpcounter];
-		fwrite(&intbuf,sizeof(int),1,Outputfile);//s coord
-		intbuf= memfile.lines[lines].t[tmpcounter];
-		fwrite(&intbuf,sizeof(int),1,Outputfile);//t coord
+		floatbuf= VSSwapHostFloatToLittle(memfile.lines[lines].s[tmpcounter]);
+		fwrite(&floatbuf,sizeof(float),1,Outputfile);//s coord
+		floatbuf= VSSwapHostFloatToLittle(memfile.lines[lines].t[tmpcounter]);
+		fwrite(&intbuf,sizeof(float),1,Outputfile);//t coord
 	}
   }
-  intbuf= memfile.tris.size();
+  intbuf= VSSwapHostIntToLittle(memfile.tris.size());
   fwrite(&intbuf,sizeof(int),1,Outputfile);//Number of triangles
   for(int tris=0;tris<memfile.tris.size();tris++){
-	intbuf= memfile.tris[tris].flatshade;
+	intbuf= VSSwapHostIntToLittle(memfile.tris[tris].flatshade);
 	fwrite(&intbuf,sizeof(int),1,Outputfile);//Flatshade flag
 	for(int tmpcounter=0;tmpcounter<3;tmpcounter++){
-		intbuf= memfile.tris[tris].indexref[tmpcounter];
+		intbuf= VSSwapHostIntToLittle(memfile.tris[tris].indexref[tmpcounter]);
 		fwrite(&intbuf,sizeof(int),1,Outputfile);//point index
-		intbuf= memfile.tris[tris].s[tmpcounter];
-		fwrite(&intbuf,sizeof(int),1,Outputfile);//s coord
-		intbuf= memfile.tris[tris].t[tmpcounter];
-		fwrite(&intbuf,sizeof(int),1,Outputfile);//t coord
+		floatbuf= VSSwapHostFloatToLittle(memfile.tris[tris].s[tmpcounter]);
+		fwrite(&floatbuf,sizeof(float),1,Outputfile);//s coord
+		floatbuf= VSSwapHostFloatToLittle(memfile.tris[tris].t[tmpcounter]);
+		fwrite(&floatbuf,sizeof(float),1,Outputfile);//t coord
 	}
   }
-  intbuf= memfile.quads.size();
+  intbuf= VSSwapHostIntToLittle(memfile.quads.size());
   fwrite(&intbuf,sizeof(int),1,Outputfile);//Number of Quads
   for(int quads=0;quads<memfile.quads.size();quads++){
-	intbuf= memfile.quads[quads].flatshade;
+	intbuf= VSSwapHostIntToLittle(memfile.quads[quads].flatshade);
 	fwrite(&intbuf,sizeof(int),1,Outputfile);//Flatshade flag
 	for(int tmpcounter=0;tmpcounter<4;tmpcounter++){
-		intbuf= memfile.quads[quads].indexref[tmpcounter];
+		intbuf= VSSwapHostIntToLittle(memfile.quads[quads].indexref[tmpcounter]);
 		fwrite(&intbuf,sizeof(int),1,Outputfile);//point index
-		intbuf= memfile.quads[quads].s[tmpcounter];
-		fwrite(&intbuf,sizeof(int),1,Outputfile);//s coord
-		intbuf= memfile.quads[quads].t[tmpcounter];
-		fwrite(&intbuf,sizeof(int),1,Outputfile);//t coord
+		floatbuf= VSSwapHostFloatToLittle(memfile.quads[quads].s[tmpcounter]);
+		fwrite(&intbuf,sizeof(float),1,Outputfile);//s coord
+		floatbuf= VSSwapHostFloatToLittle(memfile.quads[quads].t[tmpcounter]);
+		fwrite(&intbuf,sizeof(float),1,Outputfile);//t coord
 	}
   }
   //END GEOMETRY
