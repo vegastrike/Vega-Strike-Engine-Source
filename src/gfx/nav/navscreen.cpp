@@ -49,7 +49,7 @@
 NavigationSystem::~NavigationSystem() {
 
 	draw = 0; 
-	delete mesh; 
+	//delete mesh; 
 	delete screenoccupation;
 	delete mesh[0];
 	delete mesh[1];
@@ -887,7 +887,7 @@ void NavigationSystem::DrawSystem()
 	//**********************************
 
 
-	themaxvalue == sqrt(themaxvalue*themaxvalue + themaxvalue*themaxvalue + themaxvalue*themaxvalue);
+	themaxvalue = sqrt(themaxvalue*themaxvalue + themaxvalue*themaxvalue + themaxvalue*themaxvalue);
 
 
 	//Set Camera Distance
