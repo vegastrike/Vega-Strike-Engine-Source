@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include <assert.h>
 #include "linecollide.h"
+#include "unit.h"
 #define COLLIDETABLESIZE sizeof(CTSIZ)
 #define COLLIDETABLEACCURACY sizeof (CTACCURACY)
 ///objects that go over 16 sectors are considered huge and better to check against everything.
