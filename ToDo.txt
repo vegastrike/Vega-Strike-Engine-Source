@@ -34,6 +34,11 @@ Scripting Goals:
 
 * News
 ** Fix news to report stories depending on import (fleet lead by dodo=wrong)
+	--Is this a problem with news, or the dynamic universe that calls
+	  the news?  If story is reported correctly, there's no problem.
+	  This means that there is actually a fleet led by a dodo, it's
+	  not wrong, just a bad simulation :-) --Dan.a
+** Get formatted date back.
 
 
 Goals for 'Sometime over the rainbow'
