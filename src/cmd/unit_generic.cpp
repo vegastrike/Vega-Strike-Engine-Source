@@ -445,6 +445,7 @@ Unit::~Unit()
 void Unit::Init()
 {
 	this->networked=0;
+	this->combat_mode=true;
 #ifdef CONTAINER_DEBUG
   UncheckUnit (this);
 #endif
@@ -1120,6 +1121,15 @@ float Unit::Computer::max_speed() const {
 }
 float Unit::Computer::max_ab_speed() const {
   return max_combat_ab_speed;
+}
+void Unit::SwitchCombatFlightMode() {
+  if (computer.combat_mode)
+    computer.combat_mode=false;
+  else
+    computer.combat_mode=true;
+}
+bool CombatMode() {
+  return combat_mode;
 }
 Vector Unit::ClampVelocity (const Vector & velocity, const bool afterburn) {
   static float staticfuelclamp = XMLSupport::parse_float (vs_config->getVariable ("physics","NoFuelThrust",".9"));
