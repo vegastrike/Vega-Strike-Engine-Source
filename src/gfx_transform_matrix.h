@@ -132,19 +132,42 @@ inline void Translate(float matrix[], const Vector &v) {
  */
 inline void MultMatrix(float dest[], float m1[], float m2[])
 {
-	Zero(dest);
-	for(int rowcount = 0; rowcount<4; rowcount++)
+  dest[0] = m1[0]*m2[0] + m1[4]*m2[1] + m1[8]*m2[2] + m1[12]*m2[3];
+  dest[1] = m1[1]*m2[0] + m1[5]*m2[1] + m1[9]*m2[2] + m1[13]*m2[3];
+  dest[2] = m1[2]*m2[0] + m1[6]*m2[1] + m1[10]*m2[2] + m1[14]*m2[3];
+  dest[3] = m1[3]*m2[0] + m1[7]*m2[1] + m1[11]*m2[2] + m1[15]*m2[3];
+
+  dest[4] = m1[0]*m2[4] + m1[4]*m2[5] + m1[8]*m2[6] + m1[12]*m2[7];
+  dest[5] = m1[1]*m2[4] + m1[5]*m2[5] + m1[9]*m2[6] + m1[13]*m2[7];
+  dest[6] = m1[2]*m2[4] + m1[6]*m2[5] + m1[10]*m2[6] + m1[14]*m2[7];
+  dest[7] = m1[3]*m2[4] + m1[7]*m2[5] + m1[11]*m2[6] + m1[15]*m2[7];
+
+  dest[8] = m1[0]*m2[8] + m1[4]*m2[9] + m1[8]*m2[10] + m1[12]*m2[11];
+  dest[9] = m1[1]*m2[8] + m1[5]*m2[9] + m1[9]*m2[10] + m1[13]*m2[11];
+  dest[10] = m1[2]*m2[8] + m1[6]*m2[9] + m1[10]*m2[10] + m1[14]*m2[11];
+  dest[11] = m1[3]*m2[8] + m1[7]*m2[9] + m1[11]*m2[10] + m1[15]*m2[11];
+
+  dest[12] = m1[0]*m2[12] + m1[4]*m2[13] + m1[8]*m2[14] + m1[12]*m2[15];
+  dest[13] = m1[1]*m2[12] + m1[5]*m2[13] + m1[9]*m2[14] + m1[13]*m2[15];
+  dest[14] = m1[2]*m2[12] + m1[6]*m2[13] + m1[10]*m2[14] + m1[14]*m2[15];
+  dest[15] = m1[3]*m2[12] + m1[7]*m2[13] + m1[11]*m2[14] + m1[15]*m2[15];
+
+  /*	for(int rowcount = 0; rowcount<4; rowcount++)
 		for(int colcount = 0; colcount<4; colcount++)
 			for(int mcount = 0; mcount <4; mcount ++)
 			dest[colcount*4+rowcount] += m1[mcount*4+rowcount]*m2[colcount*4+mcount];
+  */
 }
 /**
  * Copies Matrix source into the destination Matrix 
  */ 
 inline void CopyMatrix(Matrix dest, const Matrix source)
 {
+  memcpy(dest, source, sizeof(Matrix));
+  /*
 	for(int matindex = 0; matindex<16; matindex++)
 		dest[matindex] = source[matindex];
+  */
 }
 /**
  * moves a vector in the localspace to world space through matrix t

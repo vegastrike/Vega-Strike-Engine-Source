@@ -94,7 +94,7 @@ PROGRAMS =  $(bin_PROGRAMS)
 DEFS = -DHAVE_CONFIG_H -I. -I$(srcdir) -I..
 CPPFLAGS =    -DTCL_HEADER=\<tcl.h\> -DHAVE_SDL=1 -DHAVE_SDL_MIXER=1  
 LDFLAGS = 
-LIBS =    -ltcl8.3 -L/usr/lib -Wl,-rpath,/usr/lib -lSDL -lpthread -lSDL_mixer  -lGL -lGLU  -lglut -lefence
+LIBS =    -ltcl8.3 -L/usr/lib -Wl,-rpath,/usr/lib -lSDL -lpthread -lSDL_mixer  -lGL -lGLU  -lglut 
 vegastrike_OBJECTS =  alglib.o cmd_ai.o cmd_unit.o cmd_gun.o \
 cmd_physics.o debug.o error_util.o file_util.o gauss.o gfx_aux_logo.o \
 gfx_aux_palette.o gfx_aux_texture.o gfx_background.o gfx_bounding_box.o \
@@ -110,7 +110,7 @@ gfx_click_list.o sdl_audio.o sdl_audio_data.o sdl_init.o joystick.o
 vegastrike_LDADD = $(LDADD)
 vegastrike_DEPENDENCIES = 
 vegastrike_LDFLAGS = 
-CXXFLAGS =  -g -Wall -I/usr/include/SDL -D_REENTRANT
+CXXFLAGS =  -g -Wall -I/usr/include/SDL -D_REENTRANT -ftest-coverage -fprofile-arcs -pg
 CXXCOMPILE = $(CXX) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
 CXXLD = $(CXX)
 CXXLINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) $(LDFLAGS) -o $@

@@ -23,7 +23,7 @@ void Planet::InitPlanet(FILE *fp) {
   numSatellites = 0;
   calculatePhysics=false;
 
-  double orbital_velocity, orbital_position;
+  float orbital_velocity, orbital_position;
   Vector x_axis;
   Vector y_axis;
   char texname[255];
@@ -34,8 +34,10 @@ void Planet::InitPlanet(FILE *fp) {
   fscanf(fp, "%f\n", &gravity);
   fscanf(fp, "%f %f %f\n", &x_axis.i, &x_axis.j, &x_axis.k);
   fscanf(fp, "%f %f %f\n", &y_axis.i, &y_axis.j, &y_axis.k);
-  fscanf(fp, "%lf %lf\n", &orbital_velocity, &orbital_position);
+  fscanf(fp, "%f %f\n", &orbital_velocity, &orbital_position);
   SetAI(new PlanetaryOrbit(this, orbital_velocity, orbital_position, x_axis, y_axis));
+
+  cerr << texname << " " << orbital_position << endl;
 
   fscanf(fp, "%d\n", &numSatellites);
   satellites = new Planet*[numSatellites];
@@ -46,7 +48,7 @@ void Planet::InitPlanet(FILE *fp) {
   }
   
   meshdata = new Mesh*[1];
-  meshdata[0] = new SphereMesh(radius, 8, 8, texname);
+  meshdata[0] = new SphereMesh(radius, 4, 4, texname);
   nummesh = 1;
   fpos = ftell(fp);
 }
@@ -73,7 +75,8 @@ void Planet::gravitate(UnitCollection *uc, Matrix matrix) {
   Matrix t;
   MultMatrix(t, matrix, transformation);
 
-  Iterator *iterator = uc->createIterator();
+  /*
+    Iterator *iterator = uc->createIterator();
   Unit *unit;
   Vector vec(0,0,0);
   while((unit = iterator->current())!=NULL) {
@@ -92,11 +95,12 @@ void Planet::gravitate(UnitCollection *uc, Matrix matrix) {
     iterator->advance();
   }
   delete iterator;
+  */
 
   // fake gravity
   for(int a=0; a<numSatellites; a++) {
-    satellites[a]->gravitate(uc, t);
     satellites[a]->origin = origin + pos;
+    satellites[a]->gravitate(uc, t);
   }
 }
 
