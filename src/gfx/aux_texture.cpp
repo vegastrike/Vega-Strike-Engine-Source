@@ -228,6 +228,9 @@ Texture::Texture(const char * FileName, int stage, enum FILTER mipmap, enum TEXT
 	//	strcpy(filename, FileName);
 	int bpp;
 	int format;
+	this->texfilename = new char [texfilename.length()+1];
+	strcpy(this->texfilename,texfilename.c_str());
+
 	data = readImage (fp,bpp,format,sizeX,sizeY,palette,NULL/*texTransform*/,true);
 	if (data) {
 	  //FIXME deal with palettes and grayscale with alpha
@@ -252,8 +255,6 @@ Texture::Texture(const char * FileName, int stage, enum FILTER mipmap, enum TEXT
 	  
 	  
 	  //while(1);
-	  this->texfilename = new char [texfilename.length()+1];
-	  strcpy(this->texfilename,texfilename.c_str());
 	  
 	  if(le16_to_cpu(info.biBitCount) == 24)
 	    {
@@ -364,6 +365,7 @@ Texture::Texture (const char * FileNameRGB, const char *FileNameA, int stage, en
 	int bpp;
 	int format;
 	FILE * fp1=NULL;
+	this->texfilename = new char [texfilename.length()+1];
 	data = readImage (fp,bpp,format,sizeX,sizeY,palette,NULL/*texTransform*/,true);
 	if (data) {
 	  //FIXME deal with palettes and grayscale with alpha
@@ -387,7 +389,7 @@ Texture::Texture (const char * FileNameRGB, const char *FileNameA, int stage, en
 	  sizeY = le32_to_cpu(info.biHeight);
 	  BITMAPINFOHEADER info1;
 	  
-	  this->texfilename = new char [texfilename.length()+1];
+
 	  strcpy(this->texfilename,texfilename.c_str());
 	  
 	  if (FileNameA)

@@ -224,7 +224,7 @@ int main (int argc , char ** argv) {
       data[i*4]=dat1[i*3];
       data[i*4+1]=dat1[i*3+1];
       data[i*4+2]=dat1[i*3+2];
-      data[i*4+3]=((int)dat2[i*3+2]+(int)dat2[i*3+1]+(int)dat2[i*3])/3;
+      data[i*4+3]=dat2[i*3];
     }
   }
   png_write (argv[out], data, wid1, hei1, dat2!=NULL, 8);  
