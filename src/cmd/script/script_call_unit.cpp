@@ -1079,10 +1079,10 @@ Unit *Mission::getUnitObject(missionNode *node,int mode,varInst *ovi){
 // void call_unit_launch(missionNode *node,int mode,string name,string faction,string type,string ainame,int nr_ships,Vector & pos){
 
 Unit * Mission::call_unit_launch(Flightgroup *fg, int type, const string &destinations){
-
+  //  fprintf (stderr,"calling unit launch with Mission 0x%x Flightgroup 0x%x" ,this, fg);
    int faction_nr=_Universe->GetFaction(fg->faction.c_str());
    //   printf("faction nr: %d %s\n",faction_nr,fg->faction.c_str());
-   Unit *units[20];
+   Unit **units= new Unit *[fg->nr_ships];
    int u;
    for(u=0;u<fg->nr_ships;u++){
      Unit * my_unit;
@@ -1156,9 +1156,9 @@ Unit * Mission::call_unit_launch(Flightgroup *fg, int type, const string &destin
      my_unit->Target(NULL);
    }
 
-   char buffer[200];
-   sprintf(buffer,"%s launched %s:%s %d-%d",fg->faction.c_str(),fg->name.c_str(),fg->type.c_str(),0,fg->nr_ships);
-   msgcenter->add("game","all",buffer);
+   msgcenter->add("game","all",(fg->faction+string ("launched ")+fg->name+string(":")+fg->type+string("0-")+XMLSupport::tostring(fg->nr_ships)));
+   my_unit= units[0];
+   delete [] units;
    return my_unit;
 }
 
