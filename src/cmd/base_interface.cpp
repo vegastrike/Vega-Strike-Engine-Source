@@ -118,78 +118,82 @@ void BaseInterface::Room::BaseShip::Draw (BaseInterface *base) {
 		GFXHudMode (GFXTRUE);
 	}
 }
-
 void BaseInterface::Room::Draw (BaseInterface *base) {
-   int i;
-   for (i=0;i<objs.size();i++) {
-      if (objs[i]) {
-         objs[i]->Draw(base);
-      }
-   }
-   // BEGIN Pontiac 2004.11.27-9
-   //<!-- config options in the "graphics" section -->
-   //<var name="base_enable_locationmarkers" value="true"/>
-   //<var name="base_locationmarker_sprite" value="base_locationmarker.spr"/> <!-- ="mouseover.spr" -->
-   //<var name="base_draw_locationtext" value="true"/>
-   //<var name="base_locationmarker_textoffset_x" value="0.025"/>
-   //<var name="base_locationmarker_textoffset_y" value="0.025"/>
+	int i;
+	for (i=0;i<objs.size();i++) {
+		if (objs[i]) {
+			GFXBlendMode(SRCALPHA,INVSRCALPHA);
+			objs[i]->Draw(base);
+			
+		}
+	}
+	GFXBlendMode(SRCALPHA,INVSRCALPHA);
+	// draw location markers
+	//<!-- config options in the "graphics" section -->
+	//<var name="base_enable_locationmarkers" value="true"/>
+	//<var name="base_locationmarker_sprite" value="base_locationmarker.spr"/> <!-- ="mouseover.spr" -->
+	//<var name="base_draw_locationtext" value="true"/>
+	//<var name="base_locationmarker_textoffset_x" value="0.025"/>
+	//<var name="base_locationmarker_textoffset_y" value="0.025"/>
+	static bool enable_markers = XMLSupport::parse_bool(vs_config->getVariable("graphics","base_enable_locationmarkers","false"));
+	static bool draw_text      = XMLSupport::parse_bool(vs_config->getVariable("graphics","base_draw_locationtext","false"));
+	if (enable_markers) {
+		float x, y, text_wid, text_hei;
+		float y_lower = -0.9; // shows the offset on the lower edge of the screen (for the textline there) -> Should be defined globally somewhere
+		for (int i=0; i<links.size(); i++) { //loop through all links and draw a marker for each
+			if (links[i]) {
+				/* draw marker */
+				x = (links[i]->x + (links[i]->wid / 2));   //get the center of the location
+				y = (links[i]->y + (links[i]->hei / 2));   //get the center of the location
+				static string spritefile_marker=vs_config->getVariable("graphics","base_locationmarker_sprite","");
+				if (spritefile_marker.length()) {
+					static VSSprite *spr_marker = new VSSprite(spritefile_marker.c_str());
+					float wid,hei;
+					spr_marker->GetSize(wid,hei);
+					// check if the sprite is near a screenedge and correct its position if necessary
+					if ((x + (wid / 2)) >=  1     ) {x = ( 1      - (wid / 2));}
+					if ((y + (hei / 2)) >=  1     ) {y = ( 1      - (hei / 2));}
+					if ((x - (wid / 2)) <= -1     ) {x = (-1      + (wid / 2));}
 
-   //check if markers should be written
-   static bool enable_markers=XMLSupport::parse_bool(vs_config->getVariable("graphics","base_enable_locationmarkers","false"));
-   if (enable_markers) {
-   float x, y, text_wid, text_hei;
-   float y_lower = -0.9; // shows the offset on the lower edge of the screen (for the textline there) -> Should be defined globally somewhere
-   for (int i=0; i<links.size(); i++) { //loop through all links and draw a marker for each
-      if (links[i]) {
-               /*--------------------------------------------------------*/
-               /* draw marker */
-        x=(links[i]->x + (links[i]->wid / 2));   //get the center of the location
-        y=(links[i]->y + (links[i]->hei / 2));   //get the center of the location
-        //std::string spritefile_marker;
-        static string spritefile_marker=vs_config->getVariable("graphics","base_locationmarker_sprite","");
-         if (spritefile_marker.length()) {
-           static VSSprite *spr_marker = new VSSprite(spritefile_marker.c_str());
-           float wid,hei;
-           spr_marker->GetSize(wid,hei);
-            // check if the sprite is near a screenedge and correct its position if necessary
-            if ((x + (wid / 2)) >=  1     ) {x = ( 1      - (wid / 2));}
-            if ((y + (hei / 2)) >=  1     ) {y = ( 1      - (hei / 2));}
-            if ((x - (wid / 2)) <= -1     ) {x = (-1      + (wid / 2));}
-            if ((y - (wid / 2)) <= y_lower) {x = (y_lower + (hei / 2));}
-            spr_marker->SetPosition(x,y);
-            spr_marker->Draw();
-         }
-               
-         /* draw text */
-         if (XMLSupport::parse_bool(vs_config->getVariable("graphics","base_draw_locationtext","false"))) {
-            //get offset from config;
-            static float text_offset_x = XMLSupport::parse_float(vs_config->getVariable("graphics","base_locationmarker_textoffset_x","0"));
-            static float text_offset_y = XMLSupport::parse_float(vs_config->getVariable("graphics","base_locationmarker_textoffset_y","0"));
-            float text_pos_x = x + text_offset_x; // align right
-            float text_pos_y = y + text_offset_y;
-            TextPlane text_marker;
-            text_marker.SetText(links[i]->text);
-            text_marker.GetCharSize(text_wid, text_hei); // not quite sure if i do getz the right value here
-            if ((1 - text_pos_x) >= (text_offset_x + text_wid)) { // check right screenborder
-              // align left
-              text_pos_x = (x - text_offset_x - text_wid);
-            }
-            if ((1 - text_pos_y) >= (text_offset_y + text_hei)) { // check upper screenborder
-               // align on bottom
-               text_pos_y = (y - text_offset_y - text_hei);
-            }
-            if ((y_lower + text_pos_y) >= (text_offset_y + text_hei)) { // check lower screenborder
-               // align on top
-               text_pos_y = (y - text_offset_y);
-            }
-            text_marker.SetPos(text_pos_x,text_pos_y);
-            text_marker.Draw();
-         }
-      }
-   }
-   } 
+					if ((y - (hei / 2)) <= y_lower) {y = (y_lower + (hei / 2));}
+					spr_marker->SetPosition(x,y);
+
+					GFXDisable(TEXTURE1);
+					GFXEnable(TEXTURE0);
+					spr_marker->Draw();
+				}
+
+				if (draw_text) {
+					GFXDisable(TEXTURE0);
+					//get offset from config;
+					static float text_offset_x = XMLSupport::parse_float(vs_config->getVariable("graphics","base_locationmarker_textoffset_x","0"));
+					static float text_offset_y = XMLSupport::parse_float(vs_config->getVariable("graphics","base_locationmarker_textoffset_y","0"));
+					float text_pos_x = x + text_offset_x; // align right
+					float text_pos_y = y + text_offset_y;
+					TextPlane text_marker;
+					text_marker.SetText(links[i]->text);
+					text_marker.GetCharSize(text_wid, text_hei); // not quite sure if i do get the right value for the width here
+
+					if ((text_pos_x + text_offset_x + text_wid) >= 1) { // check right screenborder
+						// align left
+						text_pos_x = (x - text_offset_x - text_wid);
+					}
+					if ((text_pos_y + text_offset_y) >= 1) { // check upper screenborder
+						// align on bottom
+						text_pos_y = (y - text_offset_y);
+					}
+					if ((text_pos_y + text_offset_y + text_hei) <= y_lower) { // check lower screenborder
+						// align on top
+						text_pos_y = (y - text_offset_y - text_hei);
+					}
+					text_marker.SetPos(text_pos_x,text_pos_y);
+					text_marker.Draw();
+					GFXEnable(TEXTURE0);
+				} // draw_text
+			}
+		}
+	} // enable_markers
 }
-
 static std::vector<BaseInterface::Room::BaseTalk *> active_talks;
 
 BaseInterface::Room::BaseTalk::BaseTalk (std::string msg,std::string ind, bool only_one) :BaseObj(ind), curchar (0), curtime (0), message(msg) {
