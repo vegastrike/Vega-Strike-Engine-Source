@@ -101,9 +101,7 @@ NetClient::~NetClient()
 
 int		NetClient::authenticate()
 {
-	cout << __FILE__ << ":" 
-	     << __LINE__
-	     << " enter " << __PRETTY_FUNCTION__ << endl;
+	COUT << " enter " << __PRETTY_FUNCTION__ << endl;
 
 	Packet	packet2;
 	string  str_callsign, str_passwd;
@@ -122,7 +120,13 @@ int		NetClient::authenticate()
 		netbuf.addString( str_callsign);
 		netbuf.addString( str_passwd);
 
-		packet2.send( CMD_LOGIN, 0, netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, NULL, this->clt_sock, __FILE__, __LINE__);
+		packet2.send( CMD_LOGIN, 0, netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, NULL, this->clt_sock, __FILE__, 
+#ifndef _WIN32
+			__LINE__
+#else
+			127
+#endif
+			);
 		COUT << "Send login for player <" << str_callsign << ">:< "<< str_passwd
 		     << "> - buffer length : " << packet2.getDataLength()
              << " (+" << packet2.getHeaderLength() << " header len" <<endl;
@@ -156,7 +160,13 @@ vector<string>	NetClient::loginLoop( string str_callsign, string str_passwd)
 	PacketMem m( netbuf.getData(), netbuf.getDataLength(), PacketMem::LeaveOwnership );
 	m.dump( cout, 3 );
 
-	packet2.send( CMD_LOGIN, 0, netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, NULL, this->clt_sock, __FILE__, __LINE__);
+	packet2.send( CMD_LOGIN, 0, netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, NULL, this->clt_sock, __FILE__, 
+#ifndef _WIN32
+			__LINE__
+#else
+			167
+#endif
+		);
 	COUT << "Sent login for player <" << str_callsign << ">:<" << str_passwd
 		 << ">" << endl
 	     << "   - buffer length : " << packet2.getDataLength() << endl
@@ -776,7 +786,13 @@ void	NetClient::sendPosition( const ClientState* cs )
 	cout<<"Sending ClientState == ";
 	(*cs).display();
 	netbuf.addClientState( (*cs));
-	pckt.send( CMD_POSUPDATE, this->serial, netbuf.getData(), netbuf.getDataLength(), SENDANDFORGET, NULL, this->clt_sock, __FILE__, __LINE__);
+	pckt.send( CMD_POSUPDATE, this->serial, netbuf.getData(), netbuf.getDataLength(), SENDANDFORGET, NULL, this->clt_sock, __FILE__, 
+#ifndef _WIN32
+			__LINE__
+#else
+			793
+#endif
+			);
 }
 
 /**************************************************************/
@@ -886,7 +902,13 @@ void	NetClient::inGame()
 	ClientState cs( this->serial, this->game_unit.GetUnit()->curr_physical_state, this->game_unit.GetUnit()->Velocity, Vector(0,0,0), 0);
 	// HERE SEND INITIAL CLIENTSTATE !!
 	netbuf.addClientState( cs);
-	packet2.send( CMD_ADDCLIENT, this->serial, netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, NULL, this->clt_sock, __FILE__, __LINE__);
+	packet2.send( CMD_ADDCLIENT, this->serial, netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, NULL, this->clt_sock, __FILE__, 
+#ifndef _WIN32
+			__LINE__
+#else
+			906
+#endif
+			);
 	cout<<"Sending ingame with serial n°"<<this->serial<<endl;
 }
 
@@ -899,7 +921,13 @@ void	NetClient::sendAlive()
     if( clt_sock.isTcp() == false )
     {
 	Packet	p;
-	p.send( CMD_PING, this->serial, NULL, 0, SENDANDFORGET, NULL, this->clt_sock, __FILE__, __LINE__);
+	p.send( CMD_PING, this->serial, NULL, 0, SENDANDFORGET, NULL, this->clt_sock, __FILE__, 
+#ifndef _WIN32
+			__LINE__
+#else
+			927
+#endif
+			);
     }
 }
 
@@ -953,7 +981,13 @@ void	NetClient::logout()
 {
 	keeprun = 0;
 	Packet p;
-	p.send( CMD_LOGOUT, this->serial, NULL, 0, SENDRELIABLE, NULL, this->clt_sock, __FILE__, __LINE__);
+	p.send( CMD_LOGOUT, this->serial, NULL, 0, SENDRELIABLE, NULL, this->clt_sock, __FILE__, 
+#ifndef _WIN32
+			__LINE__
+#else
+			987
+#endif
+			);
 	clt_sock.disconnect( "Closing connection to server", false );
 }
 
@@ -1051,7 +1085,13 @@ void	NetClient::fireRequest( ObjSerial serial, int mount_index)
 	netbuf.addInt32( mount_index);
 	netbuf.addInt32( this->zone);
 
-	p.send( CMD_FIREREQUEST, serial, netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, NULL, this->clt_sock, __FILE__, __LINE__);
+	p.send( CMD_FIREREQUEST, serial, netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, NULL, this->clt_sock, __FILE__, 
+#ifndef _WIN32
+			__LINE__
+#else
+			1097
+#endif
+			);
 }
 
 void	NetClient::unfireRequest( ObjSerial serial, int mount_index)
@@ -1063,7 +1103,13 @@ void	NetClient::unfireRequest( ObjSerial serial, int mount_index)
 	netbuf.addInt32( mount_index);
 	netbuf.addInt32( this->zone);
 
-	p.send( CMD_UNFIREREQUEST, serial, netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, NULL, this->clt_sock, __FILE__, __LINE__);
+	p.send( CMD_UNFIREREQUEST, serial, netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, NULL, this->clt_sock, __FILE__, 
+#ifndef _WIN32
+			__LINE__
+#else
+			1109
+#endif
+			);
 }
 
 

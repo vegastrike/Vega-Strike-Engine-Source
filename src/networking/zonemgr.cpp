@@ -293,7 +293,13 @@ void	ZoneMgr::broadcastSnapshots( )
 				if( j+p > 0)
 				{
 					//cout<<"\tsend update for "<<(p+j)<<" clients"<<endl;
-					pckt.send( CMD_SNAPSHOT, nbclients, netbuf.getData(), netbuf.getDataLength(), SENDANDFORGET, &((*k)->cltadr), (*k)->sock, __FILE__,	__LINE__);
+					pckt.send( CMD_SNAPSHOT, nbclients, netbuf.getData(), netbuf.getDataLength(), SENDANDFORGET, &((*k)->cltadr), (*k)->sock, __FILE__,	
+#ifndef _WIN32
+					__LINE__
+#else
+					302
+#endif
+					);
 				}
 			}
 		}
@@ -323,7 +329,13 @@ void	ZoneMgr::sendZoneClients( Client * clt)
 			// Add the save and xml strings
 			netbuf.addString( savestr);
 			netbuf.addString( xmlstr);
-			packet2.send( CMD_ENTERCLIENT, clt->serial, netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, &clt->cltadr, clt->sock, __FILE__, __LINE__);
+			packet2.send( CMD_ENTERCLIENT, clt->serial, netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, &clt->cltadr, clt->sock, __FILE__, 
+#ifndef _WIN32
+				__LINE__
+#else
+				336
+#endif
+				);
 			nbclients++;
 		}
 	}
