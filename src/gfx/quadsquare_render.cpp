@@ -31,11 +31,11 @@ static void TerrainMakeDeactive (const TerrainTexture text) {
 
 typedef std::vector <TextureIndex> vecTextureIndex;
 typedef std::vector <TerrainTexture> vecTextureStar;
-
-int	quadsquare::Render(const quadcornerdata& cd)
-// Draws the heightfield represented by this tree.
-// Returns the number of triangles rendered.
-{
+/**
+ * Draws the heightfield represented by this tree
+ * Returns teh number of triangles rendered (not including multipass 
+ */
+int	quadsquare::Render(const quadcornerdata& cd) {
   
   vertices->LoadDrawState();
   vertices->BeginDrawState (GFXTRUE);
@@ -81,19 +81,6 @@ int	quadsquare::Render(const quadcornerdata& cd)
   return totsize;
 }
 //#define DONOTDRAWBLENDEDQUADS
-/*static void swap(unsigned int & a,unsigned int & b) {
-	unsigned int baka;
-	baka=a;
-	a=b;
-	b=baka;
-}
-static void swapX(unsigned short & a,unsigned short & b) {
-	unsigned short baka;
-	baka=a;
-	a=b;
-	b=baka;
-}
-*/
 inline void RotateTriRight (unsigned int& aa, unsigned short& ta, unsigned int& bb, unsigned short& tb, unsigned int& cc, unsigned short& tc) {
 	unsigned int baki;
 	unsigned short baks;
@@ -140,18 +127,6 @@ void quadsquare::tri(unsigned int aa,unsigned short ta,unsigned int bb,unsigned 
 #endif
 
   if (!(ta==tb&&tb==tc)) {
-    /*
-    if (((*textures)[ta].blendDst==ZERO)&&((*textures)[tc].blendDst!=ZERO)) {
-      swapX(ta,tc);
-      swap(aa,cc);
-    } else if (((*textures)[tb].blendDst==ZERO)&&((*textures)[tc].blendDst!=ZERO)) {
-      swapX(tb,tc);
-      swap(bb,cc);
-	} else if (((*textures)[ta].blendDst==ZERO)&&((*textures)[tb].blendDst!=ZERO)) {
-      swapX(ta,tb);
-      swap(aa,bb);
-    }
-    */
     if (((*textures)[ta].blendDst==ZERO)&&((*textures)[tb].blendDst!=ZERO))
 		RotateTriRight(aa,ta,bb,tb,cc,tc);
 	else if (((*textures)[ta].blendDst==ZERO)&&((*textures)[tc].blendDst!=ZERO))
@@ -211,8 +186,6 @@ void	quadsquare::RenderAux(const quadcornerdata& cd,  CLIPSTATE vis)
 			// This square is completely outside the view frustum.
 			return;
 		}
-		// else vis is either NO_CLIP or SOME_CLIP.  If it's NO_CLIP, then child
-		// squares won't have to bother with the frustum check.
 	}
 	
 	int	i;
@@ -231,24 +204,6 @@ void	quadsquare::RenderAux(const quadcornerdata& cd,  CLIPSTATE vis)
 
 	if (flags == 0) return;
 
-	// Init vertex data.
-	/* DEPRECATED!!!!!!!!!!!!
-	int	half = 1 << cd.Level;
-
-
-	InitVert(0, cd.xorg + half, Vertex[0].Y, cd.zorg + half);
-	InitVert(1, cd.xorg + whole, Vertex[1].Y, cd.zorg + half);
-	InitVert(2, cd.xorg + whole, cd.Verts[0].Y, cd.zorg);
-	InitVert(3, cd.xorg + half, Vertex[2].Y, cd.zorg);
-	InitVert(4, cd.xorg, cd.Verts[1].Y, cd.zorg);
-	InitVert(5, cd.xorg, Vertex[3].Y, cd.zorg + half);
-	InitVert(6, cd.xorg, cd.Verts[2].Y, cd.zorg + whole);
-	InitVert(7, cd.xorg + half, Vertex[4].Y, cd.zorg + whole);
-	InitVert(8, cd.xorg + whole, cd.Verts[3].Y, cd.zorg + whole);
-	int	vcount = 0;
-	*/
-
-	
 // Local macro to make the triangle logic shorter & hopefully clearer.
 	//#define tri(aa,ta,bb,tb,cc,tc) (indices[ta].q.push_back (aa), indices[ta].q.push_back (bb), indices[ta].q.push_back (cc))
 #define V0 (Vertex[0].vertindex)
@@ -269,7 +224,7 @@ void	quadsquare::RenderAux(const quadcornerdata& cd,  CLIPSTATE vis)
 #define T7 (Vertex[4].GetTex())
 #define V8 (cd.Verts[3].vertindex)
 #define T8 (cd.Verts[3].GetTex())
-	
+
 	// Make the list of triangles to draw.
 	if ((EnabledFlags & 1) == 0) tri(V0,T0, V8,T8, V2,T2);
 	else {
@@ -307,13 +262,6 @@ void	quadsquare::RenderAux(const quadcornerdata& cd,  CLIPSTATE vis)
 #undef t6
 #undef T7
 #undef T8
-
-	// Draw 'em.
-	//	glDrawElements(GL_TRIANGLES, vcount, GL_UNSIGNED_BYTE, VertList);
-
-	// Count 'em.
-	//	TriCount += vcount / 3;
-
 }
 
 
