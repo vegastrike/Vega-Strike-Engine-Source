@@ -96,8 +96,7 @@ class XMLSerializer {
   XMLnode topnode; 
   XMLnode * curnode;
  public:
-  static const int MAXRANDOMDATA=1;
-  std::string randomdata[MAXRANDOMDATA];
+  std::string randomdata[1];
   XMLSerializer(const char * filename, const char * modificationname, void *mythis);
   void AddTag (const std::string &tag);
   void AddElement (const std::string &element, XMLHandler *handler, const XMLType &input);
