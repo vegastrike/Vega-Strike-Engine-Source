@@ -73,7 +73,7 @@ void		{ return(L_VOID);		}
 "->"		{ return(L_METHODCALL);		}
 ":="		{ return(L_INITVALUE);		}
 
-[ \t\n]+	{ /* return(yytext[0]); */			}
+[ \t\r\n]+	{ /* return(yytext[0]); */			}
 
 [a-zA-Z_][a-zA-Z_0-9]*		{  yylval=strdup(yytext); return(L_ID);		}
 [0-9]+		{ yylval=strdup(yytext); return(L_INTCONST);	}

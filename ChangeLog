@@ -1,3 +1,8 @@
+2002-02-23 Alexander Rawass <alexannika@users.sourceforge.net>
+
+	* updated documentation/homepage
+	* modified c_alike.lex to ignore \r (to work for win32)
+
 2002-02-21 Alexander Rawass <alexannika@users.sourceforge.net>
 
 	* updated documentation/homepage
