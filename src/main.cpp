@@ -60,6 +60,10 @@ void setup_game_data ( ){ //pass in config file l8r??
 void ParseCommandLine(int argc, char ** CmdLine);
 void cleanup(void)
 {
+  fprintf( stderr, "\n"
+	     "Graceful exit\n" );
+  printf ("Thank you for playing!\n");
+
   //    write_config_file();
   //  write_saved_games();
   destroyObjects();
@@ -69,6 +73,7 @@ void cleanup(void)
 int main( int argc, char **argv ) 
 {
 
+  
     /* Print copyright notice */
   fprintf( stderr, "Vega Strike "  " \n"
 	     "See http://www.gnu.org/copyleft/gpl.html for license details.\n\n" );

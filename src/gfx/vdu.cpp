@@ -2,7 +2,9 @@
 #include "cmd/unit.h"
 #include "hud.h"
 #include "vs_globals.h"
-VDU::VDU (const char * file, TextPlane *textp, unsigned char modes, short rwws, short clls) :Sprite (file),tp(textp),posmodes(modes),thismode(VIEW), rows(rwws), cols(clls){
+VDU::VDU (const char * file, TextPlane *textp, unsigned char modes, short rwws, short clls, unsigned short *ma, float *mh) :Sprite (file),tp(textp),posmodes(modes),thismode(VIEW), rows(rwws), cols(clls){
+  StartArmor = ma;
+  maxhull = mh;
   SwitchMode();
 
 };
@@ -14,6 +16,7 @@ void VDU::DrawTargetSpr (Sprite *s, float per, float &sx, float &sy, float &w, f
   h=-fabs (h*per);
 
   if (!s) {
+    h=-h;
     w = fabs (w*per);
     return;
   }
@@ -23,12 +26,140 @@ void VDU::DrawTargetSpr (Sprite *s, float per, float &sx, float &sy, float &w, f
   s->SetSize (w,h);
   s->Draw();
   s->SetSize (nw,nh);
+  h = fabs(h);
 }
 
+
+static void DrawShield (float fs, float rs, float ls, float bs, float x, float y, float h, float w) { 
+  GFXBegin (GFXLINE);
+  fs = ls = rs = bs = 1;
+  if (fs>.2) {
+    GFXVertex3f (x-w/8,y+h/2,0);
+    GFXVertex3f (x-w/3,y+.9*h/2,0);
+    GFXVertex3f (x+w/8,y+h/2,0);
+    GFXVertex3f (x+w/3,y+.9*h/2,0);
+    GFXVertex3f (x+w/8,y+h/2,0);
+    GFXVertex3f (x-w/8,y+h/2,0);
+  }
+  if (fs>.5) {
+    GFXVertex3f (x-w/8,y+1.1*h/2,0);
+    GFXVertex3f (x+w/8,y+1.1*h/2,0);
+    GFXVertex3f (x-w/8,y+1.1*h/2,0);
+    GFXVertex3f (x-w/3,y+h/2,0);
+    GFXVertex3f (x+w/8,y+1.1*h/2,0);
+    GFXVertex3f (x+w/3,y+h/2,0);
+  }
+  if (fs>.75) {
+    GFXVertex3f (x-w/8,y+1.2*h/2,0);
+    GFXVertex3f (x+w/8,y+1.2*h/2,0);
+    GFXVertex3f (x-w/8,y+1.2*h/2,0);
+    GFXVertex3f (x-w/3,y+1.1*h/2,0);
+    GFXVertex3f (x+w/8,y+1.2*h/2,0);
+    GFXVertex3f (x+w/3,y+1.1*h/2,0);
+  }
+  if (rs>.2) {
+    GFXVertex3f (x+1*w/2,y-h/8,0);
+    GFXVertex3f (x+.9*w/2,y-h/3,0);
+    GFXVertex3f (x+1*w/2,y+h/8,0);
+    GFXVertex3f (x+1*w/2,y-h/8,0);
+    GFXVertex3f (x+.9*w/2,y+h/3,0);
+    GFXVertex3f (x+1*w/2,y+h/8,0);
+  }
+  if (rs>.5) {
+    GFXVertex3f (x+1.1*w/2,y-h/8,0);
+    GFXVertex3f (x+1*w/2,y-h/3,0);
+    GFXVertex3f (x+1.1*w/2,y+h/8,0);
+    GFXVertex3f (x+1.1*w/2,y-h/8,0);
+    GFXVertex3f (x+1*w/2,y+h/3,0);
+    GFXVertex3f (x+1.1*w/2,y+h/8,0);
+  }
+  if (rs>.7) {
+    GFXVertex3f (x+1.2*w/2,y-h/8,0);
+    GFXVertex3f (x+1.1*w/2,y-h/3,0);
+    GFXVertex3f (x+1.2*w/2,y+h/8,0);
+    GFXVertex3f (x+1.2*w/2,y-h/8,0);
+    GFXVertex3f (x+1.1*w/2,y+h/3,0);
+    GFXVertex3f (x+1.2*w/2,y+h/8,0);
+  }
+  if (ls>.2) {
+    GFXVertex3f (x-1*w/2,y-h/8,0);
+    GFXVertex3f (x-.9*w/2,y-h/3,0);
+    GFXVertex3f (x-1*w/2,y+h/8,0);
+    GFXVertex3f (x-1*w/2,y-h/8,0);
+    GFXVertex3f (x-.9*w/2,y+h/3,0);
+    GFXVertex3f (x-1*w/2,y+h/8,0);
+  }
+  if (ls>.5) {
+    GFXVertex3f (x-1.1*w/2,y-h/8,0);
+    GFXVertex3f (x-1*w/2,y-h/3,0);
+    GFXVertex3f (x-1.1*w/2,y+h/8,0);
+    GFXVertex3f (x-1.1*w/2,y-h/8,0);
+    GFXVertex3f (x-1*w/2,y+h/3,0);
+    GFXVertex3f (x-1.1*w/2,y+h/8,0);
+  }
+  if (ls>.7) {
+    GFXVertex3f (x-1.2*w/2,y-h/8,0);
+    GFXVertex3f (x-1.1*w/2,y-h/3,0);
+    GFXVertex3f (x-1.2*w/2,y+h/8,0);
+    GFXVertex3f (x-1.2*w/2,y-h/8,0);
+    GFXVertex3f (x-1.1*w/2,y+h/3,0);
+    GFXVertex3f (x-1.2*w/2,y+h/8,0);
+  }
+  if (bs>.2) {
+    GFXVertex3f (x-w/8,y-h/2,0);
+    GFXVertex3f (x-w/3,y-.9*h/2,0);
+    GFXVertex3f (x+w/8,y-h/2,0);
+    GFXVertex3f (x+w/3,y-.9*h/2,0);
+    GFXVertex3f (x+w/8,y-h/2,0);
+    GFXVertex3f (x-w/8,y-h/2,0);
+  }
+  if (bs>.5) {
+    GFXVertex3f (x-w/8,y-1.1*h/2,0);
+    GFXVertex3f (x+w/8,y-1.1*h/2,0);
+    GFXVertex3f (x-w/8,y-1.1*h/2,0);
+    GFXVertex3f (x-w/3,y-h/2,0);
+    GFXVertex3f (x+w/8,y-1.1*h/2,0);
+    GFXVertex3f (x+w/3,y-h/2,0);
+  }
+  if (bs>.75) {
+    GFXVertex3f (x-w/8,y-1.2*h/2,0);
+    GFXVertex3f (x+w/8,y-1.2*h/2,0);
+    GFXVertex3f (x-w/8,y-1.2*h/2,0);
+    GFXVertex3f (x-w/3,y-1.1*h/2,0);
+    GFXVertex3f (x+w/8,y-1.2*h/2,0);
+    GFXVertex3f (x+w/3,y-1.1*h/2,0);
+  }
+
+  GFXEnd();
+
+}
+
+void VDU::DrawVDUShield (Unit * parent) {
+  float fs = parent->FShieldData();
+  float rs = parent->RShieldData();
+  float ls = parent->RShieldData();
+  float bs = parent->RShieldData();
+  float x,y,w,h;
+  GetPosition (x,y);
+  GetSize (w,h);
+  h=fabs (h*.6);
+  w=fabs (w*.6);
+  unsigned short armor[4];
+  GFXColor4f (.4,.4,1,1);
+  GFXDisable (TEXTURE0);
+  GFXDisable (LIGHTING);
+  DrawShield (fs,rs,ls,bs,x,y,h,w);
+  parent->ArmorData (armor);
+  GFXColor4f (1,.6,0,1);
+  DrawShield (armor[0]/StartArmor[0],armor[1]/StartArmor[1],armor[2]/StartArmor[2],armor[3]/StartArmor[3],x,y,h/2,w/2);
+  GFXColor4f (1,1,1,1);
+}
 void VDU::DrawTarget(Unit * parent, Unit * target) {
   float x,y,w,h;
   float fs = target->FShieldData();
   float rs = target->RShieldData();
+  float ls = target->RShieldData();
+  float bs = target->RShieldData();
     
   //sprintf (t,"\n%4.1f %4.1f",target->FShieldData()*100,target->RShieldData()*100);
 
@@ -46,64 +177,14 @@ void VDU::DrawTarget(Unit * parent, Unit * target) {
   sprintf (qr,"Dis %.4lf",(parent->Position()-target->Position()).Magnitude()*((target->isUnit()==PLANETPTR)?10:1));
   strcat (st,qr);
   tp->Draw (std::string(st));  
-  DrawTargetSpr (target->getHudImage (),.6,x,y,w,h);
-  h=fabs(h);
-  w=fabs(w);
+  DrawTargetSpr (target->getHudImage (),.6,x,y,h,w);
   GFXColor4f (.4,.4,1,1);
   GFXDisable (TEXTURE0);
   GFXDisable (LIGHTING);
-  GFXBegin (GFXLINE);
-  if (fs>.2) {
-    GFXVertex3f (x-h/8,y+h/2,0);
-    GFXVertex3f (x-h/3,y+.9*h/2,0);
-    GFXVertex3f (x+h/8,y+h/2,0);
-    GFXVertex3f (x+h/3,y+.9*h/2,0);
-    GFXVertex3f (x+h/8,y+h/2,0);
-    GFXVertex3f (x-h/8,y+h/2,0);
-  }
-  if (fs>.5) {
-    GFXVertex3f (x-h/8,y+1.1*h/2,0);
-    GFXVertex3f (x+h/8,y+1.1*h/2,0);
-    GFXVertex3f (x-h/8,y+1.1*h/2,0);
-    GFXVertex3f (x-h/3,y+h/2,0);
-    GFXVertex3f (x+h/8,y+1.1*h/2,0);
-    GFXVertex3f (x+h/3,y+h/2,0);
-  }
-  if (fs>.75) {
-    GFXVertex3f (x-h/8,y+1.2*h/2,0);
-    GFXVertex3f (x+h/8,y+1.2*h/2,0);
-    GFXVertex3f (x-h/8,y+1.2*h/2,0);
-    GFXVertex3f (x-h/3,y+1.1*h/2,0);
-    GFXVertex3f (x+h/8,y+1.2*h/2,0);
-    GFXVertex3f (x+h/3,y+1.1*h/2,0);
-  }
-  if (rs>.2) {
-    GFXVertex3f (x-h/8,y-h/2,0);
-    GFXVertex3f (x-h/3,y-.9*h/2,0);
-    GFXVertex3f (x+h/8,y-h/2,0);
-    GFXVertex3f (x+h/3,y-.9*h/2,0);
-    GFXVertex3f (x+h/8,y-h/2,0);
-    GFXVertex3f (x-h/8,y-h/2,0);
-  }
-  if (rs>.5) {
-    GFXVertex3f (x-h/8,y-1.1*h/2,0);
-    GFXVertex3f (x+h/8,y-1.1*h/2,0);
-    GFXVertex3f (x-h/8,y-1.1*h/2,0);
-    GFXVertex3f (x-h/3,y-h/2,0);
-    GFXVertex3f (x+h/8,y-1.1*h/2,0);
-    GFXVertex3f (x+h/3,y-h/2,0);
-  }
-  if (rs>.75) {
-    GFXVertex3f (x-h/8,y-1.2*h/2,0);
-    GFXVertex3f (x+h/8,y-1.2*h/2,0);
-    GFXVertex3f (x-h/8,y-1.2*h/2,0);
-    GFXVertex3f (x-h/3,y-1.1*h/2,0);
-    GFXVertex3f (x+h/8,y-1.2*h/2,0);
-    GFXVertex3f (x+h/3,y-1.1*h/2,0);
-  }
-  GFXEnd();
+  DrawShield (fs,rs,ls,bs,x,y,w,h);
   GFXColor4f (1,1,1,1);
 }
+
 
 void VDU::DrawNav (const Vector & nav) {
   char navdata[256];
@@ -277,6 +358,9 @@ void VDU::Draw (Unit * parent) {
     break;
   case WEAPON:
     DrawWeapon(parent);
+    break;
+  case SHIELD:
+    DrawVDUShield (parent);
     break;
   }
 

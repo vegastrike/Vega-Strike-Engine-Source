@@ -262,7 +262,7 @@ void Cockpit::beginElement(const string &name, const AttributeList &attributes) 
     }
     goto loadsprite;
   case RADAR: newsprite = &Radar;goto loadsprite;
-  case LVDU: newvdu = &vdu[0];mymodes=VDU::WEAPON|VDU::DAMAGE;goto loadsprite;
+  case LVDU: newvdu = &vdu[0];mymodes=VDU::WEAPON|VDU::DAMAGE|VDU::SHIELD;goto loadsprite;
   case RVDU: newvdu = &vdu[1];mymodes=VDU::NAV|VDU::TARGET;goto loadsprite;
   loadsprite:
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) { 
@@ -272,7 +272,7 @@ void Cockpit::beginElement(const string &name, const AttributeList &attributes) 
 	  (*newsprite) = new Sprite ((*iter).value.c_str(),NEAREST);
 	  adjsprite = *newsprite;
 	} else if (newvdu) {
-	  (*newvdu) = new VDU ((*iter).value.c_str(),text,mymodes,rows,cols);
+	  (*newvdu) = new VDU ((*iter).value.c_str(),text,mymodes,rows,cols,&StartArmor[0],&maxhull);
 	  adjsprite = *newvdu;
 	}
 	break;
