@@ -502,9 +502,11 @@ dnl Check for SDL_mixer
     if test "x$have_SDL_mixer" = "xyes" ; then 
 	VS_CPPFLAGS="${VS_CPPFLAGS} -DHAVE_SDL_MIXER=1" 
         VS_LIBS="$VS_LIBS -lSDL_mixer"
+	SDL_MIXER_LIBS="-lSDL_mixer"
     else
         echo "*** SDL_mixer not found.  Configuring without audio support."
     fi
+    AC_SUBST(SDL_MIXER_LIBS)
 
     LIBS="$saved_LIBS"
 else

@@ -20,7 +20,7 @@ endif
 noinst_LIBRARIES = libnet.a libnetclient.a libnetserver.a libnetacct.a
 bin_PROGRAMS = soundserver
 
-soundserver_LDADD = -L/usr/local/lib $(SDL_LIBS) -lSDL_mixer
+soundserver_LDADD = -L/usr/local/lib $(SDL_LIBS) $(SDL_MIXER_LIBS)
 
 SUBDIRS = lowlevel
 
