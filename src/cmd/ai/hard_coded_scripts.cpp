@@ -17,7 +17,10 @@ extern PyObject *to_python (Unit *x);
 #endif
 
 BOOST_PYTHON_END_CONVERSION_NAMESPACE
-
+bool useAfterburner () {
+	static bool useafterburner = XMLSupport::parse_float(vs_config->getVariable("physics","use_afterburner","true"));
+	return useafterburner;
+}
 void AddOrd (Order *aisc, Unit * un, Order * ord) {
   ord->SetParent (un);
   aisc->EnqueueOrder (ord);
@@ -49,6 +52,7 @@ void FireAt::FaceTargetITTS (bool end) {
 	lastOrder  = new Orders::FaceTargetITTS(end,4);
 }
 void FireAt::MatchLinearVelocity(bool terminate, Vector vec, bool afterburn, bool local) {
+	afterburn =afterburn&&useAfterburner();
 	lastOrder  = new Orders::MatchLinearVelocity(parent->ClampVelocity(vec,afterburn),local,afterburn,terminate);
 }
 void FireAt::MatchAngularVelocity(bool terminate, Vector vec, bool local) {
@@ -61,9 +65,11 @@ void FireAt::ChangeLocalDirection(Vector vec) {
 	lastOrder  = new Orders::ChangeHeading (((parent->Position().Cast())+parent->ToWorldCoordinates(vec)).Cast(),3);
 }
 void FireAt::MoveTo(QVector vec, bool afterburn) {
+	afterburn = afterburn&&useAfterburner();
 	lastOrder  = new Orders::MoveTo(vec,afterburn,3);
 }
 void FireAt::MatchVelocity(bool terminate, Vector vec, Vector angvel, bool afterburn, bool local) {
+	afterburn =afterburn&&useAfterburner();	
 	lastOrder  = new Orders::MatchVelocity(parent->ClampVelocity(vec,afterburn),parent->ClampAngVel(angvel),local,afterburn,terminate);
 }
 void FireAt::Cloak(bool enable,float seconds) {
@@ -84,14 +90,17 @@ void FireAt::LastPythonScript () {
 
 void AfterburnTurnTowards (Order * aisc, Unit * un) {
   Vector vec (0,0,10000);
-  Order * ord = new Orders::MatchLinearVelocity(un->ClampVelocity(vec,true),true,true,false);
+  bool afterburn = useAfterburner();
+  Order * ord = new Orders::MatchLinearVelocity(un->ClampVelocity(vec,afterburn),true,afterburn,false);
   AddOrd (aisc,un,ord);
   ord =       (new Orders::FaceTarget(false, 3));
   AddOrd (aisc,un,ord);    
 }
 void AfterburnTurnTowardsITTS (Order * aisc, Unit * un) {
   Vector vec (0,0,10000);
-  Order * ord = new Orders::MatchLinearVelocity(un->ClampVelocity(vec,true),true,true,false);
+
+  bool afterburn = useAfterburner();
+  Order * ord = new Orders::MatchLinearVelocity(un->ClampVelocity(vec,afterburn),true,afterburn,false);
   AddOrd (aisc,un,ord);
   ord =       (new Orders::FaceTargetITTS(false, 3));
   AddOrd (aisc,un,ord);    
@@ -115,8 +124,9 @@ void BarrelRoll (Order * aisc, Unit*un) {
 		}		
 		broll->Right(per);
 	}
-	broll->MatchSpeed(Vector(0,0,un->GetComputerData().max_ab_speed()));
-	broll->Afterburn(1);
+	bool afterburn = useAfterburner();
+	broll->MatchSpeed(Vector(0,0,afterburn?un->GetComputerData().max_ab_speed():un->GetComputerData().max_speed()));
+	broll->Afterburn(afterburn);
 }
 
 namespace Orders{
@@ -150,19 +160,23 @@ public:
 		if (targ) {
 			Vector relloc = parent->Position()-targ->Position();
 			Vector r =targ->cumulative_transformation_matrix.getR();
+			bool afterburn = useAfterburner();
 			if (r.Dot(relloc) <0) {
 				FaceTargetITTS::Execute();
-				m.SetAfterburn (true);
+				m.SetAfterburn (afterburn);
 				m.Execute(parent,targ->Position()-r.Scale(2*parent->rSize()+targ->rSize()));
 			}else {
 				done=false;
-				m.SetAfterburn (targ->GetVelocity().MagnitudeSquared()>parent->GetComputerData().max_speed());
+				if (afterburn)
+					m.SetAfterburn (targ->GetVelocity().MagnitudeSquared()>parent->GetComputerData().max_speed());
+				else
+					m.SetAfterburn(0);
 				Vector scala=targ->cumulative_transformation_matrix.getQ().Scale(qq*(parent->rSize()+targ->rSize()))+targ->cumulative_transformation_matrix.getP().Scale(rr*(parent->rSize()+targ->rSize()));								
 				QVector dest =targ->Position()+scala;
 				if (aggressive){
-					SetDest(dest);
 					FaceTargetITTS::Execute();
 				}else{
+					SetDest(dest);					
 					ChangeHeading::Execute();
 				}
 				m.Execute(parent,dest+scala);
@@ -190,11 +204,12 @@ void Evade(Order * aisc, Unit * un) {
   }
   Order *ord = new Orders::ChangeHeading ((200*(v-u)) + v,3);
   AddOrd (aisc,un,ord);
-  ord = new Orders::MatchLinearVelocity(un->ClampVelocity(Vector (-10000,0,10000),true),false,true,true);
+  bool afterburn = useAfterburner();
+  ord = new Orders::MatchLinearVelocity(un->ClampVelocity(Vector (-10000,0,10000),afterburn),false,afterburn,true);
   AddOrd (aisc,un,ord);
   ord = new Orders::FaceTargetITTS(false,3);
   AddOrd (aisc,un,ord);
-  ord = new Orders::MatchLinearVelocity(un->ClampVelocity(Vector (10000,0,10000),true),false, true,true);  
+  ord = new Orders::MatchLinearVelocity(un->ClampVelocity(Vector (10000,0,10000),afterburn),false, afterburn,true);  
   AddOrd (aisc,un,ord);
 }
 void MoveTo(Order * aisc, Unit * un) {
@@ -268,7 +283,9 @@ void SheltonSlide(Order * aisc, Unit * un) {
   perp.Normalize();
   perp=perp*(targetv.Dot(difference*-1./(difference.Magnitude())));
   perp =(perp+difference)*10000.;
-  Order * ord = new Orders::MatchLinearVelocity(un->ClampVelocity(perp.Cast(),true),false,true,true);  
+
+  bool afterburn=useAfterburner();
+  Order * ord = new Orders::MatchLinearVelocity(un->ClampVelocity(perp.Cast(),afterburn),false,afterburn,true);  
   AddOrd (aisc,un,ord);
   ord =       (new Orders::FaceTargetITTS(false, 3));
   AddOrd (aisc,un,ord);
@@ -285,7 +302,8 @@ void AfterburnerSlide(Order * aisc, Unit * un) {
   perp.Normalize();
   perp=perp*(targetv.Dot(difference*-1./(difference.Magnitude())));
   perp =(perp+difference)*1000;
-  Order * ord = new Orders::MatchLinearVelocity(un->ClampVelocity(perp.Cast(),true),false,true,true);  
+  bool afterburn=useAfterburner();
+  Order * ord = new Orders::MatchLinearVelocity(un->ClampVelocity(perp.Cast(),afterburn),false,afterburn,true);  
   AddOrd (aisc,un,ord);
   ord = new ExecuteFor (new Orders::ChangeHeading (perp+un->Position(),3),1.5);
   AddOrd (aisc,un,ord);
@@ -305,9 +323,9 @@ void SkilledABSlide (Order * aisc, Unit * un) {
   Perp = Perp+.5*ndifference;
   Perp = Perp *10000;
 
+  bool afterburn=useAfterburner();
 
-
-  Order * ord = new Orders::MatchLinearVelocity(un->ClampVelocity(Perp.Cast(),true),false,true,true);  
+  Order * ord = new Orders::MatchLinearVelocity(un->ClampVelocity(Perp.Cast(),afterburn),false,afterburn,true);  
   AddOrd (aisc,un,ord);
   ord = new ExecuteFor (new Orders::ChangeHeading (Perp+un->Position(),3),.5);
   AddOrd (aisc,un,ord);
@@ -327,7 +345,8 @@ void TurnAway(Order * aisc, Unit * un) {
   if (targ) {
     u=targ->Position();
   }
-  Order * ord = new Orders::MatchLinearVelocity(un->ClampVelocity(200*(v-u).Cast(),true),false,true,false);
+  bool afterburn = useAfterburner();
+  Order * ord = new Orders::MatchLinearVelocity(un->ClampVelocity(200*(v-u).Cast(),afterburn),false,afterburn,false);
   AddOrd (aisc,un,ord);
   ord = new Orders::ChangeHeading ((200*(v-u)) + v,3);
   AddOrd (aisc,un,ord);
@@ -347,7 +366,8 @@ void FlyStraight(Order * aisc, Unit * un) {
 }
 void FlyStraightAfterburner(Order * aisc, Unit * un) {
   Vector vec (0,0,10000);
-  Order * ord = new Orders::MatchVelocity(un->ClampVelocity(vec,false),Vector(0,0,0),true,true,false);
+  bool afterburn=useAfterburner();
+  Order * ord = new Orders::MatchVelocity(un->ClampVelocity(vec,afterburn),Vector(0,0,0),true,afterburn,false);
   AddOrd (aisc,un,ord);
 }
 void CloakForScript(Order * aisc, Unit * un) {
