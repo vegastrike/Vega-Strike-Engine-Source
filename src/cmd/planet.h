@@ -53,6 +53,9 @@ class Planet : public Unit {
  private:
   Atmosphere * atmosphere;
   ContinuousTerrain *terrain;
+  Vector TerrainUp;
+  Vector TerrainH;
+  bool inside;
   float radius;
   float gravity;
   vector <char *> destination;
@@ -75,7 +78,7 @@ class Planet : public Unit {
   ContinuousTerrain * getTerrain() {return terrain;}
   void setAtmosphere (Atmosphere *);
   Atmosphere * getAtmosphere () {return atmosphere;}
-  
+  void reactToCollision(Unit * smaller, const Vector & normal, float dist);
   void gravitate(UnitCollection *units);
 
   class PlanetIterator : public Iterator {

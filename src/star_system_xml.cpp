@@ -365,8 +365,11 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
 	  if (xml->unitlevel>2) {
 	    assert(xml->moons.size()!=0);
 	    Planet * p =xml->moons.back()->GetTopPlanet(xml->unitlevel-1);
-	    if (p)
+	    if (p) {
+	      xml->ct->DisableDraw();
 	      p->setTerrain (xml->ct);
+
+	    }
 	  } 
 	}
       }

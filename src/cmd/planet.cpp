@@ -105,11 +105,13 @@ void Planet::beginElement(Vector x,Vector y,float vely,float pos,float gravity,f
 const float densityOfRock = .01; // 1 cm of durasteel equiv per cubic meter
 
 Planet::Planet()  : Unit(),  atmosphere (NULL), terrain (NULL), radius(0.0f), satellites() {
+  inside=false;
   Init();
   SetAI(new Order()); // no behavior
 }
 
 Planet::Planet(Vector x,Vector y,float vely, float pos,float gravity,float radius,char * textname,char * alpha,vector <char *> dest, const Vector & orbitcent, Unit * parent, const GFXMaterial & ourmat, const std::vector <GFXLightLocal> &ligh, int faction) : Unit(), atmosphere(NULL), terrain(NULL), radius(0.0f),  satellites() {
+  inside =false;
   for (unsigned int i=0;i<ligh.size();i++) {
     int l;
     GFXCreateLight (l,ligh[i].ligh,!ligh[i].islocal);
@@ -156,12 +158,51 @@ Planet::Planet(Vector x,Vector y,float vely, float pos,float gravity,float radiu
 }
 void Planet::Draw(const Transformation & quat, const Matrix m) {
   //Do lighting fx
+  Vector t (_Universe->AccessCamera()->GetPosition()-quat.position);
+  if (t.Dot(t)<radius*radius) {
+    //no planet mode...disabel terrain
+  } else {
+    if (!inside) {
+      TerrainUp = t;
+      Normalize(TerrainUp);
+      TerrainH = TerrainUp.Cross (Vector (-TerrainUp.i+.25, TerrainUp.j-.24,-TerrainUp.k+.24));
+      Normalize (TerrainH);
+      inside =true;
+      if (terrain)
+	terrain->EnableDraw();
+    }
+  }
+  if (inside) {
+    if (t.Dot (TerrainH)>radius*1.2) {
+      inside=false;
+      ///somehow warp unit to reasonable place outisde of planet
+      if (terrain) {
+	
+	terrain->DisableDraw();
+      }
+    }
+  }
+  if (inside&&terrain) {
+    Matrix tmp;
+    Vector p(-TerrainH.Cross (TerrainUp));
+    VectorAndPositionToMatrix (tmp,p,TerrainUp,TerrainH,quat.position);
+    terrain->SetTransformation (tmp);
+  }
+  // if cam inside don't draw?
   Unit::Draw(quat,m);
   GFXLoadIdentity (MODEL);
   for (unsigned int i=0;i<lights.size();i++) {
     GFXSetLight (lights[i], POSITION,GFXColor (cumulative_transformation.position));
   }
 }
+
+
+
+void Planet::reactToCollision (Unit *, const Vector & normal, float dist) {
+  //nothing happens...you fail to do anythign :-)
+  //maybe air reisstance here? or swithc dynamics to atmos mode
+}
+
 void Planet::EnableLights () {
   for (unsigned int i=0;i<lights.size();i++) {
     GFXEnableLight (lights[i]);

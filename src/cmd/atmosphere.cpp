@@ -94,7 +94,7 @@ void Atmosphere::Update(const Vector &position, const Matrix tmatrix)
 		float rho=acos(rho1)/(PI/2)-0.1;
 		float radius = user_params.radius;
 		/* index 0 is the top color, index 1 is the bottom color */
-		GFXLight light0 = GFXLight();
+		GFXLight light0 = GFXLight(true,Vector(0,0,0));
 		setArray(light0.ambient, rho*user_params.high_ambient_color[0] + (1-rho)*user_params.low_ambient_color[0]);
 		setArray(light0.diffuse, rho*user_params.high_color[0] + (1-rho)*user_params.low_color[0]);
 		setArray(light0.attenuate, GFXColor(0,0.5,0));
@@ -102,7 +102,7 @@ void Atmosphere::Update(const Vector &position, const Matrix tmatrix)
 
 		/* do a linear interpolation between this and the next one */
 		
-		GFXLight light1 = GFXLight();
+		GFXLight light1 = GFXLight(true,Vector (0,0,0));
 		setArray(light1.ambient, (1-rho)*user_params.high_ambient_color[1] + rho*user_params.low_ambient_color[1]);
 		setArray(light1.diffuse, (1-rho)*user_params.high_color[1] + rho*user_params.low_color[1]);
 		setArray(light1.attenuate, GFXColor(0,0,0.5));
@@ -118,15 +118,18 @@ void Atmosphere::Update(const Vector &position, const Matrix tmatrix)
 		float sradius = 1.1 * radius;
 		setArray(light2.vect, GFXColor(sradius * r.i,sradius * r.j,sradius * r.k,1));
 
-		//GFXCreateLight(l0,light0,true);
-		//GFXCreateLight(l1,light1,true);
-		//GFXCreateLight(l2,light2,true);
+		GFXCreateLight(l0,light0,true);
+		GFXCreateLight(l1,light1,true);
+		GFXCreateLight(l2,light2,true);
 	}
 }
 
 void Atmosphere::Draw(const Vector &position, const Matrix tmatrix)
 {
   GFXDisable (TEXTURE1);
+  GFXDisable (DEPTHWRITE);
+  GFXEnable (TEXTURE0);
+  GFXEnable (LIGHTING);
 	Update(position,tmatrix);
 	GFXLoadMatrix(MODEL,tmatrix);
 
@@ -150,9 +153,9 @@ void Atmosphere::Draw(const Vector &position, const Matrix tmatrix)
 	dome->DrawNow(10,GFXTRUE,identity_transformation,rot1);
 	//GFXEnable(DEPTHWRITE);
 
-	//GFXDeleteLight(l0);
-	//GFXDeleteLight(l1);
-	//GFXDeleteLight(l2);
+	GFXDeleteLight(l0);
+	GFXDeleteLight(l1);
+	GFXDeleteLight(l2);
 }
 
 void Atmosphere::DrawAtmospheres()

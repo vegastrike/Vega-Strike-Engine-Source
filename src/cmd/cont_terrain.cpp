@@ -105,7 +105,7 @@ void ContinuousTerrain::DisableDraw () {
 }
 void ContinuousTerrain::EnableDraw () {
   for (int i=0;i<numcontterr;i++) {
-    data[i]->DisableDraw();
+    data[i]->EnableDraw();
   }
 }
 

@@ -143,13 +143,17 @@ bool Unit::Collide (Unit * target) {
     if (normal.i||normal.j||normal.k)
       normal.Normalize();
   }
+  bigger->reactToCollision (smaller,normal,dist);
   //NOT USED BUT GOOD  Vector farce = normal*smaller->GetMass()*fabs(normal.Dot ((smaller->GetVelocity()-bigger->GetVelocity()/SIMULATION_ATOM))+fabs (dist)/(SIMULATION_ATOM*SIMULATION_ATOM));
-  smaller->ApplyForce (normal*.4*smaller->GetMass()*fabs(normal.Dot (((smaller->GetVelocity()-bigger->GetVelocity())/SIMULATION_ATOM))+fabs (dist)/(SIMULATION_ATOM*SIMULATION_ATOM)));
-  bigger->ApplyForce (normal*.4*(smaller->GetMass()*smaller->GetMass()/bigger->GetMass())*-fabs(normal.Dot ((smaller->GetVelocity()-bigger->GetVelocity()/SIMULATION_ATOM))+fabs (dist)/(SIMULATION_ATOM*SIMULATION_ATOM)));
-  smaller->ApplyDamage (bigger->Position(),-normal,  .5*fabs(normal.Dot(smaller->GetVelocity()-bigger->GetVelocity()))*bigger->mass*SIMULATION_ATOM,GFXColor(1,1,1,1));
-  bigger->ApplyDamage (smaller->Position(),normal, .5*fabs(normal.Dot(smaller->GetVelocity()-bigger->GetVelocity()))*smaller->mass*SIMULATION_ATOM,GFXColor(1,1,1,1));
-  //each mesh with each mesh? naw that should be in one way collide
   return true;
+}
+void Unit::reactToCollision(Unit * smalle, const Vector & normal, float dist) {
+  smalle->ApplyForce (normal*.4*smalle->GetMass()*fabs(normal.Dot (((smalle->GetVelocity()-this->GetVelocity())/SIMULATION_ATOM))+fabs (dist)/(SIMULATION_ATOM*SIMULATION_ATOM)));
+  this->ApplyForce (normal*.4*(smalle->GetMass()*smalle->GetMass()/this->GetMass())*-fabs(normal.Dot ((smalle->GetVelocity()-this->GetVelocity()/SIMULATION_ATOM))+fabs (dist)/(SIMULATION_ATOM*SIMULATION_ATOM)));
+  smalle->ApplyDamage (this->Position(),-normal,  .5*fabs(normal.Dot(smalle->GetVelocity()-this->GetVelocity()))*this->mass*SIMULATION_ATOM,GFXColor(1,1,1,1));
+  this->ApplyDamage (smalle->Position(),normal, .5*fabs(normal.Dot(smalle->GetVelocity()-this->GetVelocity()))*smalle->mass*SIMULATION_ATOM,GFXColor(1,1,1,1));
+  //each mesh with each mesh? naw that should be in one way collide
+
 }
 
 

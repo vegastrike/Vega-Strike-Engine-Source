@@ -473,7 +473,8 @@ public:
   ///Sets the AI to be a specific order
   void SetAI(Order *newAI, int subun);
   ///Enqueues an order to the unit's order queue
-  void EnqueueAI(Order *newAI, int subun); 
+  void EnqueueAI(Order *newAI, int subun);
+  virtual void reactToCollision(Unit * bigger, const Vector & normal, float dist);
   ///Does a one way collision between smaller target and this
   bool OneWayCollide (Unit *target, Vector & normal, float &dist);
   ///Does a collision between this and another unit

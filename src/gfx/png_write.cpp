@@ -25,6 +25,38 @@ unsigned short * Rread (const char * myfile) {
       smaller[i*256]=tm[rowoffset+-1+((i+coloffset)*512)];
     }
   }
+  for (int i=0;i<64*256;i++) {
+    int count=0;
+    int j;
+    smaller[i]=256;
+  }
+
+  for (int i=0;i<256;i++) {
+    for (int j=0;j<64;j++) {
+      smaller[i*256+j]=256;
+    }
+  }
+    /*
+    while (count<256) {
+      for (j=0;j<16;j++,count++) {
+	if (smaller[i*256+count]!=0)
+	  j=0;
+	if (count==256)
+	  break;
+      }
+      if (j>5&&count>0) {
+	for (int k=count-1;k>=0;k--) {
+	  if (smaller[i*256+count]==0) {
+	    smaller[i*256+count]=05;
+	  }else {
+	    break;
+	  }
+	}
+      }
+    }
+    */
+
+  
   if (coloffset) {
     memcpy (smaller,tm+rowoffset+(coloffset-1)*512,sizeof(unsigned short)*256);
   }
