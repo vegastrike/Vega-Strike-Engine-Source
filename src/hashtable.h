@@ -62,7 +62,7 @@ public:
 	{
 	  vector <VALUE *> retval;
 	  for (unsigned int hashval=0;hashval<sizeof(SIZ);hashval++) {
-	    list<HashElement>::const_iterator iter = table[hashval].begin(), end = table[hashval].end();
+	    typename list<HashElement>::const_iterator iter = table[hashval].begin(), end = table[hashval].end();
 	    for(;iter!=end;iter++) {
 	      retval.push_back ((*iter).value);
 	    }
@@ -72,7 +72,7 @@ public:
 	VALUE *Get(const KEY &key) const
 	{
 		int hashval = hash(key);
-		list<HashElement>::const_iterator iter = table[hashval].begin(), end = table[hashval].end();
+		typename list<HashElement>::const_iterator iter = table[hashval].begin(), end = table[hashval].end();
 
 		for(;iter!=end;iter++)
 			if((*iter).key == key)
@@ -92,7 +92,7 @@ public:
 	void Delete(const KEY &key)
 	{
 		int hashval = hash(key);
-		list<HashElement>::iterator iter = table[hashval].begin(), end = table[hashval].end();
+		typename list<HashElement>::iterator iter = table[hashval].begin(), end = table[hashval].end();
 
 		for(;iter!=end;iter++)
 			if((*iter).key == key)

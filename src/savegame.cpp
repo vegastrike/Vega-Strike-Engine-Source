@@ -192,8 +192,8 @@ QVector SaveGame::GetPlayerLocation () {
   return PlayerLocation;
 }
 
-Hashtable<int,SavedUnits,char[47]> SaveGame::savedunits;
-void SaveGame::RemoveUnitFromSave (int address) {
+Hashtable<long,SavedUnits,char[47]> SaveGame::savedunits;
+void SaveGame::RemoveUnitFromSave (long address) {
   SavedUnits *tmp;
   if (NULL!=(tmp =savedunits.Get (address))) {
     savedunits.Delete (address);
@@ -254,7 +254,7 @@ void SaveGame::ReadNewsData (FILE * fp) {
     }
   }
 }
-void SaveGame::AddUnitToSave (const char * filename, enum clsptr type, const char * faction, int address) {
+void SaveGame::AddUnitToSave (const char * filename, enum clsptr type, const char * faction, long address) {
   string s = vs_config->getVariable ("physics","Drone","drone");
   if (0==strcmp (s.c_str(),filename)/*||type==ENHANCEMENTPTR*/) {
     RemoveUnitFromSave (address);

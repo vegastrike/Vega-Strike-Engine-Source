@@ -24,7 +24,7 @@ class SaveGame {
   QVector PlayerLocation;
   std::string outputsavegame;
   std::string originalsystem;
-  static Hashtable<int,SavedUnits,char[47]> savedunits;
+  static Hashtable<long,SavedUnits,char[47]> savedunits;
   std::string callsign;
   void WriteMissionData(FILE * fp);
   void WriteNewsData (FILE * fp);
@@ -43,9 +43,9 @@ class SaveGame {
   string GetStarSystem();
   void WriteSavedUnit (FILE *, SavedUnits *su);
   void WriteSaveGame (const char * systemname, const class QVector &Pos,float credits, std::string unitname, int player_num);
-  ///cast address to int
-  void AddUnitToSave (const char * unitname, enum clsptr type, const char * faction, int address);
-  void RemoveUnitFromSave (int address);//cast it to an int
+  ///cast address to long (for 64 bits compatibility)
+  void AddUnitToSave (const char * unitname, enum clsptr type, const char * faction, long address);
+  void RemoveUnitFromSave (long address);//cast it to an long
   vector<SavedUnits> ParseSaveGame (string filename, string &ForceStarSystem, string originalstarsystem, QVector & pos, bool &shouldupdatedfighter0pos, float &credits, string &originalunit, int player_num);
 };
 void WriteSaveGame (class Cockpit * cp, bool auto_save);

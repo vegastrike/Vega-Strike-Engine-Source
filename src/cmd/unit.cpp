@@ -377,7 +377,7 @@ Unit::Unit(const char *filename, bool SubU, int faction,std::string unitModifica
 	Init();
 	update_ani_cache();
 	if (!SubU)
-	  _Universe->AccessCockpit()->savegame->AddUnitToSave(filename,UNITPTR,_Universe->GetFaction(faction),(int)this);
+	  _Universe->AccessCockpit()->savegame->AddUnitToSave(filename,UNITPTR,_Universe->GetFaction(faction),(long)this);
 	SubUnit = SubU;
 	this->faction = faction;
 	SetFg (flightgrp,fg_subnumber);

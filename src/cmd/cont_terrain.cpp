@@ -274,10 +274,10 @@ void ContinuousTerrain::Collide (Unit * un, Matrix t) {
       bool autocol=false;
       QVector diff=InvScaleTransform(t,un->Position());    
       if (diff.j<0) autocol=true;
-      diff.i = fmod (diff.i,sizeX*width);
+      diff.i = fmod ((double) diff.i,(double) sizeX*width);
       if (diff.i<0)
 	diff.i+=sizeX*width;
-      diff.k = fmod (diff.k,sizeZ*width);
+      diff.k = fmod ((double) diff.k,(double) sizeZ*width);
       if (diff.k<0)
 	diff.k+=sizeZ*width;
       if (!rand()%10)

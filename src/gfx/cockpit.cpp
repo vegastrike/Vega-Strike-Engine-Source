@@ -36,7 +36,7 @@ void DrawRadarCircles (float x, float y, float wid, float hei, const GFXColor &c
 	GFXCircle (x,y,wid/2,hei/2);
 	GFXCircle (x,y,wid/2.4,hei/2.4);
 	GFXCircle (x,y,wid/6,hei/6);
-	const float sqrt2=sqrt(2)/2;
+	const float sqrt2=sqrt( (double)2)/2;
 	GFXBegin(GFXLINE);
 		GFXVertex3f(x+(wid/6)*sqrt2,y+(hei/6)*sqrt2,0);
 		GFXVertex3f(x+(wid/2.4)*sqrt2,y+(hei/2.4)*sqrt2,0);

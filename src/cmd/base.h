@@ -113,15 +113,12 @@ class Base {
 		~Room ();
 	};
 	int curlinkindex;
-	friend Room;
 	bool drawlinkcursor;
 	TextPlane curtext;
 	int curroom;
 	int unitlevel;
 	std::vector <Room*> rooms;
 	TextPlane othtext;
-	friend Room::Talk;
-	friend Room::BaseTalk;
 public:
 	static Base *CurrentBase;
 	static bool CallComp;

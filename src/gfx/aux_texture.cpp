@@ -254,6 +254,7 @@ Texture::Texture(const char * FileName, int stage, enum FILTER mipmap, enum TEXT
 	this->texfilename = new char [texfilename.length()+1];
 	strcpy(this->texfilename,texfilename.c_str());
 
+	 printf( "Width0 : %d - Height0 : %d", sizeX, sizeY);	  
 	data = readImage (fp,bpp,format,sizeX,sizeY,palette,NULL/*texTransform*/,true);
 	if (data) {
 	  //FIXME deal with palettes and grayscale with alpha
@@ -297,6 +298,7 @@ Texture::Texture(const char * FileName, int stage, enum FILTER mipmap, enum TEXT
 	  fread(&info, SIZEOF_BITMAPINFOHEADER,1,fp);
 	  sizeX = le32_to_cpu(info.biWidth);	
 	  sizeY = le32_to_cpu(info.biHeight);
+	  printf( "Width : %d - Height : %d || Width2 : %d - Height2 : %d", info.biWidth, info.biHeight, sizeX, sizeY);	  
 	  
 	  
 	  //while(1);

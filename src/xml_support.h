@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <string>
 #ifndef WIN32
-#include <strstream>
+#include <sstream>
 #endif
 #include "hashtable.h"
 #include <vector>
@@ -15,9 +15,6 @@
 #define ARRAY_LENGTH(a) (sizeof(a)/sizeof(a[0]))
 
 using std::string;
-#ifndef WIN32
-using std::ostrstream;
-#endif
 
 string strtoupper(const string &foo);
 
@@ -70,6 +67,11 @@ namespace XMLSupport {
   string inline tostring (int num) {
 	char tmp[256];
 	sprintf (tmp,"%d",num);
+	return string(tmp);
+  }
+  string inline tostring (long num) {
+	char tmp[256];
+	sprintf (tmp,"%ld",num);
 	return string(tmp);
   }
   string inline tostring (float num) {
