@@ -2,6 +2,7 @@
 #include <iostream.h>
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
 char FileName[256];
 struct LVector {
   float i;
@@ -776,6 +777,9 @@ int main (int argc, char ** argv)
 	}
 	for (i=0;i<Stat.NumMissiles;i++) {
 	  for (int j=-1;j<=1;j+=2) {
+	    int ammo = (j==-1?ceil:floor)(((float)Stat.MissileAmmo[i])/2);
+	    if (!ammo)
+	      continue;
 	    Tab();
 	    StrWrite ("<Mount weapon=\"");
 	    switch (Stat.MissileType[i]) {
@@ -818,6 +822,8 @@ int main (int argc, char ** argv)
 	    TextF (Stat.MissileOffset[i].j*scl);
 	    StrWrite (" z=");
 	    TextF (Stat.MissileOffset[i].k*scl);
+	    StrWrite (" ammo=");
+	    TextI (ammo);
 	    StrWrite ("/>\n");
 	  }
 	}
