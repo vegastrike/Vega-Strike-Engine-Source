@@ -542,8 +542,6 @@ void Unit::LoadRow(CSVRow &row,string modification, string * netxml) {
                         two.shield2fb.front,four.shield4fbrl.front,eight.shield8.frontrighttop);
   shieldcount+=AssignIf(row["Shield_Front_Top_Left"],
                         two.shield2fb.front,four.shield4fbrl.front,eight.shield8.frontlefttop);
-  shieldcount+=AssignIf(row["Shield_Front_Top_Right"],
-                        two.shield2fb.front,four.shield4fbrl.front,eight.shield8.frontrighttop);
   shieldcount+=AssignIf(row["Shield_Back_Top_Left"],
                         two.shield2fb.back,four.shield4fbrl.back,eight.shield8.backlefttop);
   shieldcount+=AssignIf(row["Shield_Back_Top_Right"],
