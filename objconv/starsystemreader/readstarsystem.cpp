@@ -165,6 +165,7 @@ public:
 		}
 		(*this)["sun_radius"]=ftostr(rad);
 		(*this)["data"]=itostr(rand());
+		(*this)["faction"]="neutral";
 		lifeprob*=1;
 		habitable=false;
 		if (rand()<RAND_MAX*lifeprob) {
@@ -336,6 +337,12 @@ vector<System> readfile (const char * name) {
 		*i = strtoupper(*i);
 	}
 	while(true) {
+		int n=line.find("\n");
+		if (n==std::string::npos) {
+			break;
+		}
+		line=line.substr(n+1);
+		
 		System in;
 		std::vector <string> content = readCSV(line);
 		for (int i = 0;i<content.size();++i) {
@@ -374,13 +381,6 @@ vector<System> readfile (const char * name) {
 
 		in.computeXYZ();
 		systems.push_back(in);
-		
-		int r=line.find("\r");
-		int n=line.find("\n");
-		if (r==std::string::npos&&n==std::string::npos) {
-			break;
-		}
-		line=line.substr(r>n?r+1:n+1);
 		
 	}
 	std::sort (systems.begin(),systems.end(),AlphaOnlySort());
@@ -452,7 +452,6 @@ void writesystems(FILE * fp, std::vector<System> s) {
 		for (std::map<string,string>::iterator j = (*i).begin();j!=(*i).end();++j) {
 			fprintf (fp, "\t\t\t<var name=\"%s\" value=\"%s\"/>\n",(*j).first.c_str(),(*j).second.c_str());			
 		}
-		fprintf (fp,"\t\t\t<var name=\"faction\" value=\"confed\"/>\n");
 		fprintf (fp,"\t\t\t<var name=\"jumps\" value=\"");
 		if ((*i).jumps.size()) {
 			fprintf(fp,"%s",(*i).jumps[0].c_str());
@@ -469,6 +468,74 @@ void writesystems(FILE * fp, std::vector<System> s) {
 	}	
 	fprintf(fp,"\t</sector>\n</systems></galaxy>\n");
 	
+}
+
+
+class FactionInfo {
+	unsigned maxsystems;
+	float takeoverprob;
+	string name;
+	unsigned turn;
+	unsigned numsystems;
+public:
+	FactionInfo(vector<string> stuff)
+			: turn(0) {
+		if (stuff.size()<3) {
+			if (stuff.size()<2) {
+				if (stuff.size()<1) {
+					stuff.push_back("");
+				}
+				stuff.push_back("");
+			}
+			stuff.push_back("");
+		}
+		name=stuff[2];
+		takeoverprob=atof(stuff[1].c_str());
+		maxsystems=atoi(stuff[0].c_str());
+	}
+	FactionInfo(string nam, float prob, int max)
+			: name(nam), takeoverprob(prob), maxsystems(max) {
+	}
+	void simulateTurn (unsigned int totalturn) {
+		++turn;
+		++numsystems;
+	}
+	bool active() {
+		return (numsystems<maxsystems);
+	}
+};
+
+std::vector<FactionInfo> readFactions() {
+	std::vector<FactionInfo> ret;
+	std::string file = readfiledata("factions.csv");
+	while (true) {
+		ret.push_back(FactionInfo(readCSV(file)));
+		int r=file.find("\r");
+		int n=file.find("\n");
+		if (r==std::string::npos&&n==std::string::npos) {
+			break;
+		}
+		file=file.substr(r>n?r+1:n+1);
+	}
+	return ret;
+}
+
+
+void simulateFactionTurns () {
+	std::vector<FactionInfo> factions=readFactions();
+	for (unsigned turn=0;;turn++) {
+		int num_inactive=0;
+		for (unsigned i=0;i<factions.size();i++) {
+			if (factions[i].active()) {
+				printf("");
+				factions[i].simulateTurn(turn);
+			} else {
+				num_inactive++;
+			}
+		}
+		if (num_inactive>=factions.size())
+			break;
+	}
 }
 
 class SectorInfo {
@@ -650,6 +717,7 @@ void processsystems (std::vector <System> & s){
 			}
 		}
 	}
+	simulateFactionTurns(); // Simulates the factions starting with one homeworld, and expands their territories.x
 }
 int main (int argc, char ** argv) {
 	if (argc<3) {
