@@ -45,6 +45,8 @@ vegastrike_SOURCES =				\
 	gl_vertex_list.cpp			\
 	hash.c					\
 	hash.h					\
+	hashtable.h				\
+	hashtable.cpp				\
 	in_kb.cpp				\
 	in_kb.h					\
 	in_mouse.cpp				\

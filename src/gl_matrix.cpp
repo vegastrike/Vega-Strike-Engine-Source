@@ -84,11 +84,11 @@ Vector CrossProduct(const Vector& v1, const Vector& v2)
     result.k = v1.i * v2.j  - v1.j * v2.i;     
 	return result;
 }
-
+/*
 Vector operator*(float left, const Vector &right)
 {
 	return Vector(right.i*left, right.j*left, right.k*left);
-}
+}*/
 
 float DotProduct(Vector &a, Vector &b)
 {

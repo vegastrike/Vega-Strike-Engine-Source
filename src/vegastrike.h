@@ -58,7 +58,9 @@ extern "C"
 #endif
 
 #include TCL_HEADER
-
+#ifndef PI
+#   define PI 3.14159265358979323846F
+#endif
 #ifndef M_PI
 #   define M_PI 3.1415926535
 #endif

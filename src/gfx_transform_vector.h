@@ -1,7 +1,7 @@
 #ifndef _3DMANIP_H_
 #define _3DMANIP_H_
 #include <math.h>
-#define PI 3.14159265358979323846F
+
 class Vector;
 void Normalize(Vector &);
 float DotProduct(const Vector &,const Vector &);

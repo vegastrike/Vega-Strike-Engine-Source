@@ -32,7 +32,7 @@
 typedef int BOOL;
 #define TRUE 1
 #define FALSE 0
-#define PI 3.1415926536
+
 
 
 #include "gfx_transform_vector.h"
