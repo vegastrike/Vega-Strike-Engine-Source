@@ -19,7 +19,8 @@
  */
 
 #ifdef __cplusplus
-
+#include <assert.h>
+//prevents windoze annoyance
 #include "universe.h"
 extern Universe * _Universe;
 extern "C"
