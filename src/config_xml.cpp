@@ -196,6 +196,7 @@ void VegaConfig::initKeyMap(){
 
 /* *********************************************************** */
 extern void  inc_time_compression (int i, KBSTATE a);
+extern void  SuicideKey (int i, KBSTATE a);
 extern void pause_key (int i, KBSTATE a);
 extern void dec_time_compression(int i, KBSTATE a);
 extern void reset_time_compression(int i, KBSTATE a);
@@ -257,6 +258,7 @@ void VegaConfig::initCommandMap(){
   command_map["Comm10Key"]=FireKeyboard::PressComm10Key ;
   command_map["EjectCargoKey"]=FireKeyboard::EjectCargoKey ;  
   command_map["EjectKey"]=FireKeyboard::EjectKey ;
+  command_map["SuicideKey"]=SuicideKey ;
   command_map["DockKey"]=FireKeyboard::DockKey ;
   command_map["UnDockKey"]=FireKeyboard::UnDockKey ;
   command_map["RequestClearenceKey"]=FireKeyboard::RequestClearenceKey ;

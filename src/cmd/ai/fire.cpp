@@ -58,14 +58,15 @@ void FireAt::ChooseTargets (int num) {
 }
 
 */
-bool FireAt::ShouldFire(Unit * targ) {
+bool FireAt::ShouldFire(Unit * targ, bool &missilelock) {
   float dist;
   float angle = parent->cosAngleTo (targ, dist,parent->GetComputerData().itts?gunspeed:FLT_MAX,gunrange);
+  missilelock=false;
   targ->Threaten (parent,angle/(dist<.8?.8:dist));
   if (targ==parent->Target()) {
     distance = dist;
   }
-  return (dist<agg&&angle>1/agg);
+  return (dist<agg&&angle>1/agg)||(parent->TrackingGuns(missilelock)&&dist<agg&&angle>0);
 }
 
 FireAt::~FireAt() {
@@ -91,11 +92,18 @@ bool FireAt::DealWithMultipleTargets () {
   return false;
 }
 #endif
-void FireAt::FireWeapons(bool shouldfire) {
+void FireAt::FireWeapons(bool shouldfire, bool lockmissile) {
+  if (lockmissile) {
+    parent->Fire (true);
+    parent->ToggleWeapon(true);
+  }
   if (shouldfire) {
     if ((float(rand())/RAND_MAX)<missileprobability*SIMULATION_ATOM) {
-      parent->Fire(true);
-      parent->ToggleWeapon(true);//change missiles to only fire 1
+      int locked = parent->LockMissile();
+      if (locked==-1) {
+	parent->Fire(true);
+	parent->ToggleWeapon(true);//change missiles to only fire 1
+      }
     }
     if (delay>rxntime) {
       parent->Fire(false);
@@ -108,6 +116,7 @@ void FireAt::FireWeapons(bool shouldfire) {
   }
 }
 void FireAt::Execute () {
+  bool missilelock=false;
   bool tmp = done;
   Order::Execute();	
   if (gunspeed==float(.0001)) {
@@ -148,7 +157,7 @@ void FireAt::Execute () {
     }
     if (targ->CloakVisible()>.8&&targ->GetHull()>=0) {
       if (!istargetjumpableplanet)
-	shouldfire |= ShouldFire (targ);
+	shouldfire |= ShouldFire (targ,missilelock);
     }else {
       ChooseTargets(1,true);
     }
@@ -170,6 +179,6 @@ void FireAt::Execute () {
   } else {
     ChooseTargets(1,false);
   }
-  FireWeapons (shouldfire);
+  FireWeapons (shouldfire,missilelock);
 }
 

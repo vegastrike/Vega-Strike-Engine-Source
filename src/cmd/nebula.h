@@ -15,7 +15,11 @@ private:
 	bool fogme;
 	void LoadXML(const char * filename);
 	void beginElem(const std::string&,const AttributeList&);
+	float lastfadein;
+	float fadeinvalue;
 public:
+	float getFade() {return fadeinvalue;}
+	void PutInsideCam(int);
 	virtual enum clsptr isUnit() {return NEBULAPTR;}
 	virtual void reactToCollision(Unit * smaller, const Vector & biglocation, const Vector & bignormal, const Vector & smalllocation, const Vector & smallnormal, float dist);
   

@@ -617,6 +617,34 @@ void Unit::getAverageGunSpeed(float & speed, float &range) const {
    }
   
 }
+
+float Unit::TrackingGuns(bool &missilelock) {
+  float trackingcone = 0;
+  missilelock=false;
+  for (int i=0;i<nummounts;i++) {
+    if (mounts[i].status==Mount::ACTIVE&&(mounts[i].size&weapon_info::AUTOTRACKING)) {
+      trackingcone= computer.radar.trackingcone;
+    }
+    if (mounts[i].status==Mount::ACTIVE&&mounts[i].type->LockTime>0&&mounts[i].time_to_lock<=0) {
+      missilelock=true;
+    }
+  }
+  return trackingcone;
+}
+int Unit::LockMissile() {
+  bool missilelock=false;
+  bool dumblock=false;
+  for (int i=0;i<nummounts;i++) {
+    if (mounts[i].status==Mount::ACTIVE&&mounts[i].type->LockTime>0&&mounts[i].time_to_lock<=0&&mounts[i].type->type==weapon_info::PROJECTILE) {
+      missilelock=true;
+    }else {
+      if (mounts[i].status==Mount::ACTIVE&&mounts[i].type->LockTime==0&&mounts[i].type->type==weapon_info::PROJECTILE&&mounts[i].time_to_lock<=0) {
+	dumblock=true;
+      }
+    }    
+  }
+  return (missilelock?1:(dumblock?-1:0));
+}
 Vector Unit::PositionITTS (const Vector & posit, float speed) const{
   Vector retval = Position()-posit;
   speed = retval.Magnitude()/speed;//FIXME DIV/0 POSSIBLE

@@ -775,7 +775,9 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
 	  un->SetAI(new PlanetaryOrbit (un,velocity,position,R,S, Vector (0,0,0), plan));
 
 	  //     xml->moons[xml->moons.size()-1]->Planet::beginElement(R,S,velocity,position,gravity,radius,filename,NULL,vector <char *>(),xml->unitlevel-((xml->parentterrain==NULL&&xml->ct==NULL)?1:2),ourmat,curlights,true,faction);
-	  un->SetTurretAI ();
+	  if (elem==UNIT) {
+	    un->SetTurretAI ();
+	  }
 	  un->SetAngularVelocity (ComputeRotVel (rotvel,R,S));
     } else {
       if ((elem==BUILDING||elem==VEHICLE)&&xml->ct==NULL&&xml->parentterrain!=NULL) {
@@ -822,7 +824,9 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
 	    xml->moons.back()->SetAI(new PlanetaryOrbit(xml->moons[xml->moons.size()-1],velocity,position,R,S,xml->cursun+xml->systemcentroid, NULL));
 
 	    xml->moons.back()->SetPosAndCumPos(R+S+xml->cursun+xml->systemcentroid);
+	    if (elem==UNIT) {
 	      xml->moons.back()->SetTurretAI ();
+	    }
 
       }
     }

@@ -383,7 +383,7 @@ void Cockpit::DrawBlips (Unit * un) {
   while ((target = iter.current())!=NULL) {
     if (target!=un) {
       Vector localcoord;
-      if (!un->InRange (target,localcoord)) {
+      if (!un->InRange (target,localcoord,makeBigger==target)) {
 	if (makeBigger==target) {
 	  un->Target(NULL);
 	}
@@ -436,7 +436,8 @@ void Cockpit::DrawEliteBlips (Unit * un) {
   while ((target = iter.current())!=NULL) {
     if (target!=un) {
       Vector localcoord;
-      if (!un->InRange (target,localcoord)) {
+
+      if (!un->InRange (target,localcoord,(makeBigger==target))) {
 	if (makeBigger==target) {
 	  un->Target(NULL);
 	}
@@ -744,6 +745,7 @@ void Cockpit::SelectProperCamera () {
 static vector <int> respawnunit;
 static vector <int> switchunit;
 static vector <int> turretcontrol;
+static vector <int> suicide;
 void Cockpit::SwitchControl (int,KBSTATE k) {
   if (k==PRESS) {
     while (switchunit.size()<=_Universe->CurrentCockpit())
@@ -751,6 +753,14 @@ void Cockpit::SwitchControl (int,KBSTATE k) {
     switchunit[_Universe->CurrentCockpit()]=1;
   }
 
+}
+void SuicideKey (int, KBSTATE k) {
+  if (k==PRESS) {
+    while (suicide.size()<=_Universe->CurrentCockpit())
+      suicide.push_back(0);
+    suicide[_Universe->CurrentCockpit()]=1;
+  }
+  
 }
 void Cockpit::TurretControl (int,KBSTATE k) {
   if (k==PRESS) {
@@ -1192,6 +1202,17 @@ void Cockpit::Update () {
     if (un) {
       un->EjectCargo((unsigned int)-1);
     }
+  }else {
+  if (suicide.size()>_Universe->CurrentCockpit()) {
+    if (suicide[_Universe->CurrentCockpit()]) {
+      Unit * un=NULL;
+      if ((un = parent.GetUnit())) {
+	un->DealDamageToHull(Vector(0,0,.1),un->GetHull()+1);
+      }
+      suicide[_Universe->CurrentCockpit()]=0;
+    }
+
+  }
   }
 
 }

@@ -405,8 +405,6 @@ class Unit
   void calculate_extent(bool update_collide_queue);
   ///applies damage from the given pnt to the shield, and returns % damage applied and applies lighitn
   float DealDamageToShield (const Vector & pnt, float &Damage);
-  ///Deals remaining damage to the hull at point and applies lighting effects
-  float DealDamageToHull (const Vector &pnt, float Damage);
   ///Sets the parent to be this unit. Unit never dereferenced for this operation
   void SetCollisionParent (Unit *name);
   ///If the shields are up from this position
@@ -421,6 +419,9 @@ class Unit
   //0 in additive is reaplce  1 is add 2 is mult
   bool UpAndDownGrade (Unit * up, Unit * templ, int mountoffset, int subunitoffset, bool touchme, bool downgrade, int additive, bool forcetransaction, double &percentage);
 public:
+  int LockMissile();//-1 is no lock necessary 1 is locked
+  float TrackingGuns(bool &missileLock);
+
   void EjectCargo (unsigned int index);
   void FixGauges();
   bool CanAddCargo (const Cargo &carg) const;
@@ -529,10 +530,10 @@ public:
   ///explodes then deletes
   void Destroy();
   const LineCollide &GetCollideInfo () {return CollideInfo;}
-  bool InRange (Unit *target, Vector &localcoord) const{
+  bool InRange (Unit *target, Vector &localcoord, bool cone=true) const{
     localcoord =Vector(ToLocalCoordinates(target->Position()-Position()));
     float mm= localcoord.Magnitude();
-    if (owner==target||this==target||((mm-rSize()-target->rSize())>computer.radar.maxrange&&target->isUnit()!=PLANETPTR)||(localcoord.k/mm)<computer.radar.maxcone||target->CloakVisible()<.8||target->rSize()<computer.radar.mintargetsize) {
+    if (owner==target||this==target||((mm-rSize()-target->rSize())>computer.radar.maxrange&&target->isUnit()!=PLANETPTR)||((localcoord.k/mm)<computer.radar.maxcone&&cone)||target->CloakVisible()<.8||target->rSize()<computer.radar.mintargetsize) {
       return false;
     }
     return true;
@@ -705,6 +706,9 @@ public:
   void ApplyLocalDamage (const Vector &pnt, const Vector & normal, float amt, Unit * affectedSubUnit, const GFXColor &, float phasedamage=0);
   ///Applies damage to the pre-transformed area of the ship
   void ApplyDamage (const Vector & pnt, const Vector & normal, float amt, Unit * affectedSubUnit, const GFXColor &,  Unit *ownerDoNotDereference, float phasedamage=0 );
+  ///Deals remaining damage to the hull at point and applies lighting effects
+  float DealDamageToHull (const Vector &pnt, float Damage);
+
   ///Clamps thrust to the limits struct
   Vector ClampThrust(const Vector &thrust, bool afterburn);
   ///Takes a unit vector for direction of thrust and scales to limits
