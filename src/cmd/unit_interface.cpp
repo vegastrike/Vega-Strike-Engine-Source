@@ -425,7 +425,20 @@ void UpgradingInfo::SetupCargoList () {
 		  } else {
 			  (*CurrentList)[i].color=nomoney;
 		  }
-			  CargoList->AddTextItem ((tostring((int)i)+ string(" ")+(*CurrentList)[i].cargo.content).c_str() ,(beautify((*CurrentList)[i].cargo.content)+"("+tostring((*CurrentList)[i].cargo.quantity)+")").c_str(),NULL,(*CurrentList)[i].color);
+			  string printstr;
+			  if (mode==MISSIONMODE) {
+				  string tmpstr ((*CurrentList)[i].cargo.content);
+				  int pos=tmpstr.rfind("/",tmpstr.size()-2);
+				  if (pos!=string::npos) {
+					  tmpstr=tmpstr.substr(pos+1,tmpstr.size()-(pos+1));
+					  tmpstr[0]=toupper(tmpstr[0]);
+				  }
+				  printstr=beautify(tmpstr);
+			  } else {
+				  printstr=beautify((*CurrentList)[i].cargo.content);
+			  }
+			  printstr+="("+tostring((*CurrentList)[i].cargo.quantity)+")";
+			  CargoList->AddTextItem ((tostring((int)i)+ string(" ")+(*CurrentList)[i].cargo.content).c_str() ,printstr.c_str(),NULL,(*CurrentList)[i].color);
 			  addedsomething=true;
 	    }
 	  }
