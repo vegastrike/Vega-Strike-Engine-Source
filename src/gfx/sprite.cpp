@@ -48,6 +48,12 @@ Sprite::Sprite(const char *file, enum FILTER texturefilter,GFXBOOL force) {
   if (file[0]!='\0') {
     fp = fopen(file, "r");
   }
+  bool changeup=true;
+  if (!fp) {
+    changeup=false;
+	vscdup();
+	fp = fopen(file,"r");
+  }
   if (fp) {
     char texture[64]={0};
     char texturea[64]={0};
@@ -75,7 +81,9 @@ Sprite::Sprite(const char *file, enum FILTER texturefilter,GFXBOOL force) {
     widtho2 = heighto2 = 0;
     xcenter = ycenter = 0;
   }
-  vscdup();
+  if (changeup) {
+	  vscdup();
+  } 
 }	
 
 Sprite::~Sprite()

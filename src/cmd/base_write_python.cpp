@@ -4,7 +4,7 @@
 #include <stdio.h>
 
 void Base::Room::Link::EndXML (FILE *fp) {
-	fprintf(fp,"room, '%s', %g, %g, %g, %g, '%s'",index,x,y,wid,hei,text);
+	fprintf(fp,"room, '%s', %g, %g, %g, %g, '%s'",index.c_str(),x,y,wid,hei,text.c_str());
 }
 
 void Base::Room::Goto::EndXML (FILE *fp) {
