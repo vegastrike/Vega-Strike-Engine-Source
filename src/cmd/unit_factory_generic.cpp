@@ -24,7 +24,6 @@ Unit* UnitFactory::getMasterPartList( )
 
     if( _masterPartList == NULL )
     {
-		std::string mpl=getMasterPartListUnitName();
                 _masterPartList = Unit::makeMasterPartList();
         
     }
