@@ -250,7 +250,7 @@ static vector<SubUnitStruct> GetSubUnits(std::string subunits) {
   }
   return ret;
 }
-static void AddSubUnits (Unit *thus, Unit::XML &xml, std::string subunits, int faction) {
+static void AddSubUnits (Unit *thus, Unit::XML &xml, std::string subunits, int faction, std::string modification) {
   vector<SubUnitStruct> su=GetSubUnits(subunits);
   for (vector<SubUnitStruct>::iterator i=su.begin();i!=su.end();++i) {
     string filename=(*i).filename;
@@ -258,7 +258,7 @@ static void AddSubUnits (Unit *thus, Unit::XML &xml, std::string subunits, int f
     QVector Q= (*i).Q;
     QVector R= (*i).R;
     double restricted=(*i).restricted;
-    xml.units.push_back(UnitFactory::createUnit (filename.c_str(),true,faction,xml.unitModifications,NULL)); // I set here the fg arg to NULL
+    xml.units.push_back(UnitFactory::createUnit (filename.c_str(),true,faction,modification.c_str(),NULL)); // I set here the fg arg to NULL
     if (xml.units.back()->name=="LOAD_FAILED") {
       xml.units.back()->limits.yaw=0;
       xml.units.back()->limits.pitch=0;
@@ -444,7 +444,7 @@ float getFuelConversion(){
 
 void Unit::LoadRow(CSVRow &row,string modification, string * netxml) {
   Unit::XML xml;
-
+  xml.unitModifications=modification.c_str();
   string tmpstr;
   csvRow = row[0];
   //
@@ -464,7 +464,7 @@ void Unit::LoadRow(CSVRow &row,string modification, string * netxml) {
   image->unitscale=xml.unitscale;
   AddMeshes(xml,row["Mesh"],faction,getFlightgroup());
   AddDocks(this,xml,row["Dock"]);
-  AddSubUnits(this,xml,row["Sub_Units"],faction);
+  AddSubUnits(this,xml,row["Sub_Units"],faction,modification);
   meshdata= xml.meshes;
   meshdata.push_back(NULL);
   corner_min = Vector(FLT_MAX, FLT_MAX, FLT_MAX);
@@ -496,6 +496,9 @@ void Unit::LoadRow(CSVRow &row,string modification, string * netxml) {
   Shield two;
   Shield four;
   Shield eight;
+  memset(&two,0,sizeof(Shield));
+  memset(&four,0,sizeof(Shield));
+  memset(&eight,0,sizeof(Shield));
   shieldcount+=AssignIf(row["Shield_Front_Top_Right"],
                         two.shield2fb.front,four.shield4fbrl.front,eight.shield8.frontrighttop);
   shieldcount+=AssignIf(row["Shield_Front_Top_Left"],
