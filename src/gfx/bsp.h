@@ -59,7 +59,7 @@ public:
 	bool intersects(const Vector &pt,const float err, Vector & norm, float &dist) const;
 	bool intersects(const BSPTree *t1) const;
 };
-
+bool CheckBSP (const char *filename);
 class BSPTree {
 	BSPNode *root;
 public:

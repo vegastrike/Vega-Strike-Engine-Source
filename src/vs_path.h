@@ -24,7 +24,9 @@ std::string GetSharedUnitPath ();
 ///sets up the data dir and loads VS config
 void initpaths();
 ///Changes to the users home directory in an OS independent way
-void changehome();
+void changehome(bool makehomedir=false);
+///Returns from home directory to calling directory
+void returnfromhome();
 //changes the directory and changes the current path to reflect it. Note may only change ONE level of directory or it breaks!
 void vschdir (const char *path);
 //Goes up one level, and changes the directory accordingly

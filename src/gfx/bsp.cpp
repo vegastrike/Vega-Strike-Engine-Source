@@ -22,6 +22,7 @@
 #include "bsp.h"
 #include "file_main.h"
 #include <float.h>
+#include "vs_path.h"
 //All or's are coded with the assumption that the inside of the object has a much bigger impact than the outside of the object when both need to be analyzed
 
 BSPNode::BSPNode(BSPDiskNode **input) {
@@ -135,9 +136,24 @@ BSPTree::BSPTree(BSPDiskNode *input) {
   root = new BSPNode(&inp);
 }
 
-BSPTree::BSPTree(const char *filename) {
+bool CheckBSP (const char * filename) {
+  changehome();
+  vschdir ("generatedbsp");
   FILE *fp = fopen(filename, "rb");
-
+  vscdup();
+  returnfromhome();
+  if (fp!=NULL) {
+    fclose (fp);
+    return true;
+  }
+  return false;
+}
+BSPTree::BSPTree(const char *filename) {
+  changehome();
+  vschdir ("generatedbsp");
+  FILE *fp = fopen(filename, "rb");
+  vscdup();
+  returnfromhome();
   fseek(fp, 0, SEEK_END);
   int size = ftell(fp);
   int numRecords = size / (sizeof(float)*4+2);

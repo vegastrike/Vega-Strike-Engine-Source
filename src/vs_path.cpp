@@ -20,12 +20,22 @@ std::string sharedsounds;
 std::string sharedmeshes;
 std::string datadir;
 std::vector <std::string> curdir;//current dir starting from datadir
-void changehome() {
+void changehome(bool makehomedir) {
 #ifndef _WIN32
   struct passwd *pwent;
   pwent = getpwuid (getuid());
-  chdir (pwent->pw_dir);
-  chdir (HOMESUBDIR);
+  vssetdir (pwent->pw_dir);
+  if (makehomedir) {
+    system ("mkdir " HOMESUBDIR);
+    system ("mkdir " HOMESUBDIR "/generatedbsp");
+  }
+  vschdir (HOMESUBDIR);
+#endif
+}
+void returnfromhome() {
+#ifndef _WIN32
+  vscdup();
+  vsresetdir();
 #endif
 }
 
@@ -36,7 +46,7 @@ void initpaths () {
   datadir= string (pwd);
   sharedsounds = datadir;
   FILE *fp= fopen (CONFIGFILE,"r");
-  changehome();
+  changehome(true);
   FILE *fp1= fopen (CONFIGFILE,"r");
   if (fp1) {
     fclose (fp1);
@@ -52,6 +62,7 @@ void initpaths () {
   }
   if (fp)
     fclose (fp);
+  returnfromhome();
   datadir = vs_config->getVariable ("data","directory",sharedsounds);
   chdir (datadir.c_str());
   chdir (vs_config->getVariable ("data","sharedtextures","textures").c_str());

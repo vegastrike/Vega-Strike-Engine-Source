@@ -61,10 +61,10 @@ namespace StarXML {
     SYSTEM,
     PLANET,
     UNIT,
-    EMR,
-    EMG,
-    EMB,
-    EMA,
+    EMRED,
+    EMGREEN,
+    EMBLUE,
+    EMALPHA,
     BACKGROUND,
     STARS,
     STARSPREAD,
@@ -121,10 +121,10 @@ namespace StarXML {
     EnumMap::Pair ("gravity", GRAVITY),
     EnumMap::Pair ("velocity", VELOCITY),
     EnumMap::Pair ("position", PPOSITION),
-    EnumMap::Pair ("Red", EMR),
-    EnumMap::Pair ("Green", EMG),
-    EnumMap::Pair ("Blue", EMB),
-    EnumMap::Pair ("Alpha", EMA),
+    EnumMap::Pair ("Red", EMRED),
+    EnumMap::Pair ("Green", EMGREEN),
+    EnumMap::Pair ("Blue", EMBLUE),
+    EnumMap::Pair ("Alpha", EMALPHA),
     EnumMap::Pair ("faction", FACTION),
     EnumMap::Pair ("Light", LIGHT)
   };
@@ -252,16 +252,16 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
     xml->unitlevel++;
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(attribute_map.lookup((*iter).name)) {
-      case EMR:
+      case EMRED:
 	tmpcol.r=parse_float ((*iter).value);
 	break;
-      case EMG:
+      case EMGREEN:
 	tmpcol.g=parse_float ((*iter).value);
 	break;
-      case EMB:
+      case EMBLUE:
 	tmpcol.b=parse_float ((*iter).value);
 	break;
-      case EMA:
+      case EMALPHA:
 	tmpcol.a=parse_float ((*iter).value);
 	break;
       }
@@ -301,16 +301,16 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
       case FACTION:
 	faction = _Universe->GetFaction ((*iter).value.c_str());
 	break;
-      case EMR:
+      case EMRED:
 	ourmat.er = parse_float((*iter).value);
 	break;
-      case EMG:
+      case EMGREEN:
 	ourmat.eg = parse_float((*iter).value);
 	break;
-      case EMB:
+      case EMBLUE:
 	ourmat.eb = parse_float((*iter).value);
 	break;
-      case EMA:
+      case EMALPHA:
 	ourmat.ea = parse_float((*iter).value);
       case RI:
 	R.i=parse_float((*iter).value);
