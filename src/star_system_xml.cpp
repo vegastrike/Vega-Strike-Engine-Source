@@ -242,7 +242,12 @@ void parse_dual_alpha (const char * alpha, BLENDFUNC & blendSrc, BLENDFUNC &blen
       free (d);
     }
 }
-
+float ScaleJumpRadius (float radius) {
+	    static float jump_radius_scale=parse_float (vs_config->getVariable("physics","jump_radius_scale","2"));
+	    static float game_speed = parse_float (vs_config->getVariable ("physics","game_speed","1"));
+	    radius *= jump_radius_scale*game_speed;
+	    return radius;
+}
 
 void GameStarSystem::beginElement(const string &name, const AttributeList &attributes) {
 using namespace StarXML;
@@ -751,9 +756,7 @@ using namespace StarXML;
 	radius=parse_float((*iter).value);
 	{
 	  if (elem==JUMP) {
-	    static float jump_radius_scale=parse_float (vs_config->getVariable("physics","jump_radius_scale","2"));
-	    static float game_speed = parse_float (vs_config->getVariable ("physics","game_speed","1"));
-	    radius *= jump_radius_scale*game_speed;
+	    radius = ScaleJumpRadius (radius);
 	  }
 	}
 	break;
