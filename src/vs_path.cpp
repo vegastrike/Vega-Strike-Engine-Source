@@ -196,13 +196,13 @@ std::string GetHashName (const std::string &name) {
   result+=name;
   return result;
 }
-std::string GetHashName (const std::string &name, float scale) {
+std::string GetHashName (const std::string &name, float scale, int faction) {
   std::string result("");
   for (unsigned int i=0;i<curdir.size();i++) {
     result+=curdir[i];
   }
   result+=name;
-  result+=XMLSupport::tostring(scale);
+  result+=XMLSupport::tostring(scale)+"|"+XMLSupport::tostring(faction);
   return result;
 }
 
@@ -213,8 +213,8 @@ std::string GetSharedMeshPath (const std::string &name) {
 std::string GetSharedUnitPath () {
   return sharedunits;
 }
-std::string GetSharedMeshHashName (const std::string &name,float radius) {
-  return (string ("#")+XMLSupport::tostring(radius)+ string("#")+name);
+std::string GetSharedMeshHashName (const std::string &name,float radius, int faction) {
+    return (string ("#")+XMLSupport::tostring(radius)+ string("#")+name+string("#")+XMLSupport::tostring(faction));
 }
 
 std::string GetSharedTexturePath (const std::string &name) {
