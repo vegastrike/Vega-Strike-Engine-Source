@@ -60,7 +60,7 @@ UnitCollection * ClickList::requestIterator (int minX,int minY, int maxX, int ma
     Unit * un;
     while ((un=myParent->current())) {
       if (un->queryFrustum(frustum)) {
-	UAye->insert (un);
+	UAye->preinsert (un);
       }
       myParent->advance(); 
     }
@@ -78,7 +78,7 @@ UnitCollection * ClickList::requestIterator (int mouseX, int mouseY) {
     Unit * un;
     while ((un = myParent->current())) {
 	if (queryShip(mouseX,mouseY,un))
-	  UAye->insert (un);
+	  UAye->preinsert (un);
 	myParent->advance();
     }
     delete myParent;

@@ -22,6 +22,9 @@ void Iterate (UnitCollection &c) {
       cachunk=true;
       unit->Kill();
     }    
+	if (rand()<RAND_MAX/102) {
+	  ui.remove();
+	}
 
     if (rand()<RAND_MAX/100) {
       Iterate(c);
@@ -49,6 +52,10 @@ int main () {
 	if (rand()<RAND_MAX/200) {
 	  u[i]->Kill();
 	}
+	if (rand()<RAND_MAX/102) {
+
+	  
+	}
       }
     }
     for (unsigned int i=0;i<10;i++) {
@@ -63,6 +70,10 @@ int main () {
 	if (rand()<RAND_MAX/400) {
 	  unit->Kill();
 	}
+	if (rand()<RAND_MAX/102) {
+	  iter.remove();
+	}
+
 	//    printf ("%d %d %d", i,unit->ucref,unit->zapped);
 	iter.advance();
 	i++;

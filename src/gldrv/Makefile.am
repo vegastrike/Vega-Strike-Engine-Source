@@ -8,6 +8,7 @@ libgldrv_a_SOURCES =				\
 	gl_clip.cpp				\
 	gl_globals.cpp				\
 	gl_globals.h				\
+	hashtable_3d.h				\
 	gl_fog.cpp				\
 	gl_init.cpp				\
 	gl_init.h				\

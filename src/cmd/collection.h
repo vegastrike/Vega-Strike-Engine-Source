@@ -38,7 +38,7 @@ class UnitCollection {
   UnitCollection() : u(NULL) {init();}
   ///destroys the list permanently
   ~UnitCollection() {destr();}
-  class UnitIterator : public Iterator {
+  class UnitIterator{
 #ifdef _TEST_
   friend void Iterate (UnitCollection &c);
 #endif
@@ -61,8 +61,11 @@ class UnitCollection {
     Unit *current(){return pos->next->unit;}
     ///advances the counter
     void advance() {pos = pos->next;GetNextValidUnit();}
+    inline Unit * operator ++(int) {Unit * un = current();advance();return un;}
+    inline Unit * operator ++() {advance();return current();}
+    inline Unit * operator * () {return current();}
   };
-  class ConstIterator:public ConstantIterator {
+  class ConstIterator {
     private:
     const UnitListNode *pos;
     void GetNextValidUnit();
@@ -73,9 +76,12 @@ class UnitCollection {
     }
     const Unit *current() const  {return pos->next->unit;}
     void advance() {pos = pos->next;GetNextValidUnit();}
+    inline const Unit * operator ++() {advance();return current();}
+    inline const Unit * operator ++(int) {const Unit * un=current();advance();return un;}
+    inline const Unit * operator * ()const {return current();}
   };
 
-  class ConstFastIterator:public ConstantIterator{
+  class ConstFastIterator{
     private:
     const UnitListNode *pos;
   public:
@@ -83,8 +89,11 @@ class UnitCollection {
     ConstFastIterator(const UnitListNode *start):pos(start) {}
     const Unit *current()const {return pos->next->unit;}
     void advance() {pos = pos->next;}
+    inline const Unit * operator ++() {advance();return current();}
+    inline const Unit * operator ++(int) {const Unit * un=current();advance();return un;}
+    inline const Unit * operator * ()const {return current();}
   };
-  class FastIterator: public Iterator{
+  class FastIterator {
     private:
     UnitListNode *pos;
   public:
@@ -99,6 +108,10 @@ class UnitCollection {
     FastIterator(UnitListNode *start):pos(start) {}
     Unit *current() {return pos->next->unit;}
     void advance() {pos = pos->next;}
+    inline Unit * operator ++(int) {Unit * un = current();advance();return un;}
+    inline Unit * operator ++() {advance();return current();}
+    inline Unit * operator * () {return current();}
+
   };
   static void FreeUnusedNodes();//not allowed to happen if any lists are traversing    
   static void * PushUnusedNode(UnitListNode * node);
@@ -111,9 +124,9 @@ class UnitCollection {
   FastIterator fastIterator() {return FastIterator (&u);}
   ConstFastIterator constFastIterator () const{return ConstFastIterator(&u);}
   void prepend(Unit *unit) {u.next= new UnitListNode (unit,u.next);}
-  void prepend(Iterator *iter);
+  void prepend(UnitIterator *iter);
   void append(Unit *unit);
-  void append(Iterator *iter);
+  void append(UnitIterator *iter);
   void clear () {destr();init();}
   UnitCollection (const UnitCollection &c);
   const UnitCollection & operator = (const UnitCollection &c);

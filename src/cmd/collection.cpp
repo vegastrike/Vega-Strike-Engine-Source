@@ -54,7 +54,7 @@ void UnitCollection::FreeUnusedNodes () {
     dogpile->pop_back ();
   }
 }
-void UnitCollection::prepend(Iterator *iter) {
+void UnitCollection::prepend(UnitIterator *iter) {
   UnitListNode *n = &u;
   Unit * tmp;
   while((tmp=iter->current())) {//iter->current checks for killed()
@@ -62,7 +62,7 @@ void UnitCollection::prepend(Iterator *iter) {
     iter->advance();
   }
 }
-void UnitCollection::append(Iterator *iter) {
+void UnitCollection::append(UnitIterator *iter) {
   UnitListNode *n = &u;
   while(n->next->unit!=NULL) n = n->next;
   Unit * tmp;

@@ -915,7 +915,11 @@ void StarSystem::LoadXML(const char *filename, const Vector & centroid, const fl
   for (i =0;i<xml->moons.size();i++) {
     if (xml->moons[i]->isUnit()==PLANETPTR) {
       iter = ((Planet*)xml->moons[i])->createIterator();
-      drawList.prepend(iter);
+      Unit * un;
+      while ((un = iter->current())) {
+	drawList.prepend(un);
+	iter->advance();
+      }
       delete iter;
     } else {
       drawList.prepend (xml->moons[i]);

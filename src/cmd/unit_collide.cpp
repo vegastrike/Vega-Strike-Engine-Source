@@ -46,13 +46,26 @@ bool TableLocationChanged (const LineCollide &lc, const Vector &minx, const Vect
   return TableLocationChanged (lc.Mini,minx) || TableLocationChanged (lc.Maxi,maxx);
 }
 void KillCollideTable (LineCollide * lc,StarSystem * ss) {
-  ss->collidetable->c.Remove (lc, lc);
+  if (lc->type==LineCollide::UNIT) {
+    ss->collidetable->c.Remove ( lc,lc->object.u);
+  } else {
+    printf ("such collide types as %d not allowed",lc->type);
+  }
 }
 bool EradicateCollideTable (LineCollide * lc, StarSystem * ss) {
-  return ss->collidetable->c.Eradicate (lc);
+  if (lc->type==LineCollide::UNIT) { 
+    return ss->collidetable->c.Eradicate (lc->object.u);
+  } else {
+    printf ("such collide types as %d not allowed",lc->type);
+    return false;
+  }
 }
 void AddCollideQueue (LineCollide &tmp,StarSystem * ss) {
-  ss->collidetable->c.Put (&tmp,&tmp);
+  if (tmp.type==LineCollide::UNIT) { 
+    ss->collidetable->c.Put (&tmp,tmp.object.u);
+  } else {
+    printf ("such collide types as %d not allowed",tmp.type);
+  }
 }
 void Unit::SetCollisionParent (Unit * name) {
   assert (0); //deprecated... many less collisions with subunits out of the table
@@ -64,6 +77,7 @@ void Unit::SetCollisionParent (Unit * name) {
 #endif
 }
 void Unit::RemoveFromSystem() {
+#define UNSAFE_COLLIDE_RELEASE
 #if (defined SAFE_COLLIDE_DEBUG) || (defined  UNSAFE_COLLIDE_RELEASE) 
   if (CollideInfo.object.u!=NULL) {
     KillCollideTable (&CollideInfo,activeStarSystem);
@@ -89,7 +103,7 @@ void Unit::RemoveFromSystem() {
       _Universe->pushActiveStarSystem(_Universe->star_system[i]);
     
     if (EradicateCollideTable (&CollideInfo,_Universe->star_system[i])) {
-      fprintf (stderr,"VERY BAD ERROR FATAL! 0x%x %s",this,this->name.c_str());
+      fprintf (stderr,"VERY BAD ERROR FATAL! 0x%x %s",(int)((int *)(this)),this->name.c_str());
     }
     _Universe->popActiveStarSystem();
     }
@@ -133,45 +147,30 @@ void Unit::CollideAll() {
   if (SubUnit||killed)
     return;
 
-  vector <LineCollide*> * colQ [tablehuge+1];
+  UnitCollection * colQ [tablehuge+1];
   int sizecolq = _Universe->activeStarSystem()->collidetable->c.Get (&CollideInfo,colQ);
   int j = 0;
   for (;j<sizecolq;j++) {
-    for (unsigned int i=0;i<colQ[j]->size();i++) {//warning CANNOT use iterator
-      //UNITS MAY BE DELETED FROM THE CURRENT POINTED TO colQ IN THE PROCESS OF THEIR REMOVAL!!!! 
-      //BUG TERMINATED!
-      LineCollide * tmp = (*colQ[j])[i];
+    Unit *un;
+    for (un_iter i=colQ[j]->createIterator();(un=(*i))!=NULL;++i) {//warning CANNOT use iterator (except for this sort of collide queue now that I fixed the list
+      //UNITS MAY BE DELETED FROM THE CURRENT POINTED TO colQ IN THE PROCESS OF THEIR REMOVAL!!!!       //BUG TERMINATED!
+      LineCollide * tmp = &un->CollideInfo;
       if (tmp->lastchecked==this)
 	continue;//ignore duplicates
       tmp->lastchecked = this;//now we're the last checked.
 
       if ((!CollideInfo.hhuge||(CollideInfo.hhuge&&tmp->type==LineCollide::UNIT))&&((tmp->object.u>this||(!CollideInfo.hhuge&&j==0))))//the first stuffs are in the huge array
-	if (
-	    Position().i+radial_size>tmp->Mini.i&&
+	if (Position().i+radial_size>tmp->Mini.i&&
 	    Position().i-radial_size<tmp->Maxi.i&&
 	    Position().j+radial_size>tmp->Mini.j&&
 	    Position().j-radial_size<tmp->Maxi.j&&
 	    Position().k+radial_size>tmp->Mini.k&&
 	    Position().k-radial_size<tmp->Maxi.k) {
-      //continue;
-	  switch (tmp->type) {
-	  case LineCollide::UNIT://other units!!!
-	    (tmp->object.u)->Collide(this);
-	    break;
-	  case LineCollide::BEAM:
-	    (tmp->object.b)->Collide(this);
-	    break;
-	  case LineCollide::BALL:
-	    break;
-	  case LineCollide::BOLT:
-	    break;
-	  case LineCollide::PROJECTILE:
-	    break;
-	  }
+	  un->Collide(this);
 	}
+    
     }
   }
-#undef COLQ
 }
 
 bool Unit::Inside (const Vector &target, const float radius, Vector & normal, float &dist) {//do each of these bubbled subunits collide with the other unit?
@@ -484,34 +483,6 @@ void Unit::Destroy() {
 }
 
 
-
-
-
-bool Bolt::Collide () {
-  vector <LineCollide *> *candidates[2];  
-  _Universe->activeStarSystem()->collidetable->c.Get (cur_position,candidates);
-  Vector Mini ( prev_position.Min (cur_position));
-  Vector Maxi ( prev_position.Max (cur_position));
-  for (unsigned int j=0;j<2;j++) {
-    for (vector <LineCollide *>::iterator i=candidates[j]->begin();i!=candidates[j]->end();i++) {
-      if ((*i)->type==LineCollide::UNIT) {
-	if (Mini.i< (*i)->Maxi.i&&
-	    Mini.j< (*i)->Maxi.j&&
-	    Mini.k< (*i)->Maxi.k&&
-	    Maxi.i> (*i)->Mini.i&&
-	    Maxi.j> (*i)->Mini.j&&
-	    Maxi.k> (*i)->Mini.k) {
-	  if (this->Collide ((*i)->object.u)) {
-	    delete this;
-	    return true;
-	  }
-	}
-      }
-    }
-  }
-  return false;
-}
-
 static bool lcwithin (const LineCollide & lc, const LineCollide&tmp) {
   return (lc.Mini.i< tmp.Maxi.i&&
 	  lc.Mini.j< tmp.Maxi.j&&
@@ -520,17 +491,39 @@ static bool lcwithin (const LineCollide & lc, const LineCollide&tmp) {
 	  lc.Maxi.j> tmp.Mini.j&&
 	  lc.Maxi.k> tmp.Mini.k);
 }
+
+bool Bolt::Collide () {
+  UnitCollection *candidates[2];  
+  _Universe->activeStarSystem()->collidetable->c.Get (cur_position,candidates);
+  LineCollide minimaxi;//might as well have this so we can utilize common function
+  minimaxi.Mini= ( prev_position.Min (cur_position));
+  minimaxi.Maxi= ( prev_position.Max (cur_position));
+  for (unsigned int j=0;j<2;j++) {
+    Unit * un;
+    for (un_iter i=candidates[j]->createIterator();(un=*i)!=NULL;++i) {
+      
+      if (lcwithin (minimaxi,un->GetCollideInfo ())) {
+	if (this->Collide (un)) {
+	  delete this;
+	  return true;
+	}
+	
+      }
+    }
+  }
+  return false;
+}
+
 void Beam::CollideHuge (const LineCollide & lc) {
-  vector <LineCollide *> *colQ [tablehuge+1];
+  UnitCollection *colQ [tablehuge+1];
   if (!lc.hhuge) {
     int sizecolq = _Universe->activeStarSystem()->collidetable->c.Get (&lc,colQ);
     for (int j=0;j<sizecolq;j++) {
-      for (unsigned int i=0;i<colQ[j]->size();i++) {
-	LineCollide * tmp = (*colQ[j])[i];
-	if (tmp->type==LineCollide::UNIT) {
-	  if (lcwithin(lc,*tmp)) {
-	    this->Collide ((Unit*)tmp->object.u);
-	  }
+      Unit *un;
+      for (un_iter i=colQ[j]->createIterator();(un=(*i))!=NULL;++i) {
+
+	if (lcwithin(lc,	un->GetCollideInfo())) {
+	  this->Collide (un);
 	}
       }
     }

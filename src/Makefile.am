@@ -17,7 +17,6 @@ vegastrike_SOURCES =				\
 	gfxlib_struct.h				\
 	hashtable.h				\
 	hashtable.cpp				\
-	hashtable_3d.h				\
 	linecollide.h				\
 	in.h					\
 	in_joystick.cpp				\
