@@ -23,7 +23,7 @@
 
 #include "star.h"
 class SphereMesh;
-class Texture;
+struct Texture;
 class Background : public Stars{
 	Texture *up;
 	Texture *left;
@@ -40,3 +40,4 @@ public:
 };
 
 #endif
+

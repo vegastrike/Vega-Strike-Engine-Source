@@ -69,7 +69,7 @@ void GFXPickLights (const Vector & center, const float radius) {
     tmp = Vector(radius,radius,radius);
     tmpcollide.Mini = center-tmp;
     tmpcollide.Maxi = center+tmp;
-    tmpcollide.huge=false;
+    tmpcollide.hhuge=false;
     tmpcollide.object=NULL;
     tmpcollide.type=LineCollide::UNIT;
     swappicked();

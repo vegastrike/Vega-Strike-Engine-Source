@@ -1,4 +1,5 @@
 #include "star.h"
+#include <assert.h>
 #include "vegastrike.h"
 #include <GL/gl.h>
 //#include "cmd/unit.h"

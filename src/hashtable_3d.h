@@ -13,10 +13,10 @@ struct LineCollide {
   Vector Mini;
   Vector Maxi;
   enum collidables {UNIT, BEAM,BALL,BOLT,PROJECTILE} type;
-  bool huge;
-  LineCollide(){}
-  LineCollide (void * objec, enum collidables typ,const Vector &st, const Vector &en) {this->object=objec;this->type=typ;this->Mini=st;this->Maxi=en;}
-  LineCollide (const LineCollide &l) {object=l.object; type=l.type; Mini=l.Mini;Maxi=l.Maxi;}      
+  bool hhuge;
+  LineCollide(){hhuge=false;}
+  LineCollide (void * objec, enum collidables typ,const Vector &st, const Vector &en) {this->object=objec;this->type=typ;this->Mini=st;this->Maxi=en;hhuge=false;}
+  LineCollide (const LineCollide &l) {object=l.object; type=l.type; Mini=l.Mini;Maxi=l.Maxi;hhuge=l.hhuge;}      
 };
 
 
@@ -82,7 +82,7 @@ public:
     if (target->Mini.j==maxy) maxy+=COLLIDETABLEACCURACY/2;
     if (target->Mini.k==maxz) maxz+=COLLIDETABLEACCURACY/2;
     retval = hugeobjects;
-    if (target->huge) {
+    if (target->hhuge) {
       return;//we can't get _everything
     } 
     for (float i=target->Mini.i;i<maxx;i+=COLLIDETABLEACCURACY) {
@@ -124,11 +124,11 @@ public:
     if (target->Mini.j==maxy) maxy+=COLLIDETABLEACCURACY/2;
     if (target->Mini.k==maxz) maxz+=COLLIDETABLEACCURACY/2;
     if (fabs((maxx-minx)*(maxy-miny)*(maxz-minz))>COLLIDETABLEACCURACY*COLLIDETABLEACCURACY*COLLIDETABLEACCURACY*HUGEOBJECT) {
-      target->huge = true;
+      target->hhuge = true;
       hugeobjects.push_back(objectToPut);
       return;
     }else {
-      target->huge=false;
+      target->hhuge=false;
     }
     for (float i=target->Mini.i;i<maxx;i+=COLLIDETABLEACCURACY) {
       x = hash_int(i);
@@ -161,7 +161,7 @@ public:
     if (target->Mini.j==maxy) maxy+=COLLIDETABLEACCURACY/2;
     if (target->Mini.k==maxz) maxz+=COLLIDETABLEACCURACY/2;
 
-    if (target->huge) {
+    if (target->hhuge) {
       while (removal!=hugeobjects.end()) {
 		  removal = std::find (hugeobjects.begin(),hugeobjects.end(),objectToKill);
 	if (removal!=hugeobjects.end()) {

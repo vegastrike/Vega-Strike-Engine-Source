@@ -53,7 +53,7 @@ void Unit::CollideAll() {
   collidetable.Get (&CollideInfo,colQ);
   for (i=0;i<COLQ.size();i++) {
     //    if (colQ[i]->object > this||)//only compare against stuff bigger than you
-    if ((!CollideInfo.huge||(CollideInfo.huge&&COLQ[i]->type==LineCollide::UNIT))&&((COLQ[i]->object>this||(!CollideInfo.huge&&i<collidetable.GetHuge().size()))))//the first stuffs are in the huge array
+    if ((!CollideInfo.hhuge||(CollideInfo.hhuge&&COLQ[i]->type==LineCollide::UNIT))&&((COLQ[i]->object>this||(!CollideInfo.hhuge&&i<collidetable.GetHuge().size()))))//the first stuffs are in the huge array
       if (
 	  Position().i+radial_size>COLQ[i]->Mini.i&&
 	  Position().i-radial_size<COLQ[i]->Maxi.i&&
@@ -181,4 +181,5 @@ bool Beam::Collide (Unit * target) {
   }
   return false;
 }
+
 
