@@ -64,7 +64,9 @@ string easyDomNode::attr_value(string search_name){
     }
   }
 
-  return NULL;
+  string dummy;
+
+  return dummy;
 }
 
 void easyDomNode::walk(int level){

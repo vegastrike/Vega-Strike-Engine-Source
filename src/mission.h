@@ -20,11 +20,11 @@
  */
 
 /*
-  xml Configuration written by Alexander Rawass <alexannika@users.sourceforge.net>
+  xml Mission written by Alexander Rawass <alexannika@users.sourceforge.net>
 */
 
-#ifndef _VEGACONFIG_H_
-#define _VEGACONFIG_H_
+#ifndef _MISSION_H_
+#define _MISSION_H_
 
 #include <expat.h>
 #include <string>
@@ -35,33 +35,22 @@ using std::string;
 
 using XMLSupport::AttributeList;
 
-class vColor {
+class Mission {
  public:
-  string name;
-  float r,g,b,a;
-};
-
-class VegaConfig {
- public:
-  VegaConfig(char *configfile);
-
-  void getColor(string name, float color[4]);
-  string getVariable(string section,string name,string defaultvalue);
+  Mission(char *configfile);
 
  private:
-  string getVariable(easyDomNode *section,string name,string defaultval);
+  //  string getVariable(easyDomNode *section,string name,string defaultval);
 
   easyDomNode *variables;
-  vector<vColor *> colors;
 
-  bool checkConfig(easyDomNode *node);
+  bool checkMission(easyDomNode *node);
   void doVariables(easyDomNode *node);
-  void doBindings(easyDomNode *node);
-  void checkSection(easyDomNode *node);
   void checkVar(easyDomNode *node);
-  void doColors(easyDomNode *node);
-  bool checkColor(easyDomNode *node);
-  void checkBind(easyDomNode *node);
+  void doFlightgroups(easyDomNode *node);
+  void checkFlightgroup(easyDomNode *node);
+  bool doPosition(easyDomNode *node,float pos[3]);
+  bool doRotation(easyDomNode *node,float rot[3]);
 };
 
-#endif // _VEGACONFIG_H_
+#endif // _MISSION_H_

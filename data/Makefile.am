@@ -219,7 +219,9 @@ pkgdata_DATA = \
 ./hornet-cockpitalp.bmp \
 ./hornet-top.alp \
 ./hornet-top.bmp \
-./hornet-top.spr
+./hornet-top.spr \
+./test1.mission
+
 
 EXTRA_DIST = $(pkgdata_DATA)
 

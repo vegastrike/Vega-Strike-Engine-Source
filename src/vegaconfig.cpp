@@ -53,7 +53,9 @@ VegaConfig::VegaConfig(char *configfile){
     exit(0);
   }
   //top->walk(0);
- 
+
+  variables=NULL;
+
   checkConfig(top);
 }
 
@@ -128,10 +130,105 @@ void VegaConfig::checkVar(easyDomNode *node){
   }
 }
 
+bool VegaConfig::checkColor(easyDomNode *node){
+  if(node->Name()!="color"){
+    cout << "no color definition" << endl;
+    return false;
+  }
+
+  if(node->attr_value("name").empty()){
+    cout << "no color name given" << endl;
+    return false;
+  }
+
+  vColor *color;
+
+  if(node->attr_value("ref").empty()){
+    string r=node->attr_value("r");
+    string g=node->attr_value("g");
+    string b=node->attr_value("b");
+    string a=node->attr_value("a");
+    if(r.empty() || g.empty() || b.empty() || a.empty()){
+      cout << "neither name nor r,g,b given for color " << node->Name() << endl;
+      return false;
+    }
+    float rf=atof(r.data());
+    float gf=atof(g.data());
+    float bf=atof(b.data());
+    float af=atof(a.data());
+
+    color=new vColor;
+
+    color->r=rf;
+    color->g=gf;
+    color->b=bf;
+    color->a=af;
+  }
+  else{
+    float refcol[4];
+
+    getColor(node->attr_value("ref"),refcol);
+
+    color=new vColor;
+
+    color->r=refcol[0];
+    color->g=refcol[1];
+    color->b=refcol[2];
+    color->a=refcol[3];
+
+  }
+
+  color->name=node->attr_value("name");
+
+  colors.push_back(color);
+
+  return true;
+}
+
 void VegaConfig::doColors(easyDomNode *node){
+  vector<easyDomNode *>::const_iterator siter;
+  
+  for(siter= node->subnodes.begin() ; siter!=node->subnodes.end() ; siter++){
+    checkColor(*siter);
+  }
 }
 
 void VegaConfig::doBindings(easyDomNode *node){
+  vector<easyDomNode *>::const_iterator siter;
+  
+  for(siter= node->subnodes.begin() ; siter!=node->subnodes.end() ; siter++){
+    checkBind(*siter);
+  }
+}
+
+void VegaConfig::checkBind(easyDomNode *node){
+  if(node->Name()!="bind"){
+    cout << "not a bind node " << endl;
+    return;
+  }
+
+  if(!(node->attr_value("key").empty())){
+      // now map the command to a callback function and bind it
+    
+  }
+  else if(!(node->attr_value("button").empty())){
+    if(!(node->attr_value("button").empty())){
+      int button_nr=atoi(node->attr_value("button").data());
+      int joystick_nr=atoi(node->attr_value("joystick").data());
+
+      // now map the command to a callback function and bind it
+    }
+    else{
+      cout << "you must specify the joystick nr. to use" << endl;
+      return;
+    }
+  }
+  else{
+    cout << "no key or joystick binding found" << endl;
+    return;
+  }
+
+
 }
 
 string VegaConfig::getVariable(string section,string name,string defaultval){
@@ -166,3 +263,24 @@ string VegaConfig::getVariable(easyDomNode *section,string name,string defaultva
  
 }
 
+void VegaConfig::getColor(string name,float color[4]){
+  vector<vColor *>::const_iterator siter;
+  
+  for(siter= colors.begin() ; siter!=colors.end() ; siter++){
+    //    cout << "scanning color " << (*siter)->name << endl;
+    if((*siter)->name==name){
+      color[0]=(*siter)->r;
+      color[1]=(*siter)->g;
+      color[2]=(*siter)->b;
+      color[3]=(*siter)->a;
+      return;
+    }
+  }
+
+  color[0]=1.0;
+  color[1]=1.0;
+  color[2]=1.0;
+  color[3]=1.0;
+
+  cout << "WARNING: color " << name << " not defined, using default" << endl;
+}

@@ -27,7 +27,7 @@
 #include "lin_time.h"
 #include "main_loop.h"
 #include "vegaconfig.h"
-
+#include "mission.h"
 
 /*
  * Globals 
@@ -86,12 +86,26 @@ int main( int argc, char **argv )
     // preliminary for me to test
     VegaConfig *config=new VegaConfig("vegastrike.config"); // move config to global or some other struct
 
+    float dummycolor[4];
+
     cout << "test1 " << config->getVariable("graphics","fov","73.0") << endl;
     cout << "test2 " << config->getVariable("player","email","none") << endl;
+
+#define colout(_name)    cout << _name << " " << dummycolor[0] << " " << dummycolor[1]<< " " << dummycolor[2] << " " << dummycolor[3] << endl;
+
+    config->getColor("red",dummycolor); colout("col1");
+    config->getColor("friend",dummycolor); colout("col2");
+
 
     // these should fail
     cout << "test3 " << config->getVariable("hardware","cpu","6502") << endl;
     cout << "test4 " << config->getVariable("player","adress","none") << endl;
+    config->getColor("snappy",dummycolor); colout("col3");
+    config->getColor("bogus",dummycolor); colout("col4");
+
+    Mission *mission=new Mission("test1.mission");
+
+    //    exit(0);
 
     //read_config_file();
     //init_debug("");

@@ -1,9 +1,8 @@
-#SUBDIRS = gldrv
 
 bindir = $(prefix)/games/@PACKAGE@/bin
 
 bin_PROGRAMS = vegastrike
-SUBDIRS = cmd gfx gldrv aldrv
+SUBDIRS = cmd gfx gldrv  aldrv
 vegastrike_LDADD = cmd/libcmd.a cmd/ai/libai.a gfx/libgfx.a gldrv/libgldrv.a aldrv/libaldrv.a
 
 vegastrike_SOURCES =				\
@@ -43,6 +42,8 @@ vegastrike_SOURCES =				\
 	xml_support.cpp				\
 	vegaconfig.cpp				\
 	vegaconfig.h				\
+	mission.cpp				\
+	mission.h				\
 	easydom.cpp				\
 	easydom.h				\
 	profile.h 				\

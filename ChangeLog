@@ -1,3 +1,15 @@
+2001-10-19 Alexander Rawass <alexannika@users.sourceforge.net>
+
+	* added colors and bindings to vegaconfig
+	  - the bindings are parsed but not yet bound
+	* added src/mission.{cpp,h}
+	  - the mission is parsed but not yet used
+	* modified src/Makefile.am (added mission)
+	* added data/test1.mission
+	* modified data/Makefile.am (added test1.mission)
+	* added call to Mission to main.cpp (preliminary)
+	
+
 2001-10-18 Alexander Rawass <alexannika@users.sourceforge.net>
 	
 	* added easydom.{cpp,h}
