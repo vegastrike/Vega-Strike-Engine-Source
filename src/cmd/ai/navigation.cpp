@@ -319,7 +319,7 @@ void FaceTargetITTS::Execute() {
 		  speed = FLT_MAX;
 	  }
   }
-  SetDest(useitts?target->PositionITTS(parent->Position(),parent->cumulative_velocity,speed):target->Position());
+  SetDest(useitts?target->PositionITTS(parent->Position(),parent->cumulative_velocity,speed,false):target->Position());
   ChangeHeading::Execute();
   if (!finish) {
     ResetDone();

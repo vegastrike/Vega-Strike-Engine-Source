@@ -72,6 +72,8 @@ private:
   bool draw_line_to_itts;
   ///flag to tell wheter to draw the itts, even if the ship has none
   bool always_itts;
+  ///flag controlling whether to use old school, less jumpy (and less accurate) itts // ** jay
+  bool steady_itts;
   // colors of blips/targetting boxes
   GFXColor friendly,enemy,neutral,targeted,targetting,planet;
   // gets the color by relation

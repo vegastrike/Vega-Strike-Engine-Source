@@ -31,6 +31,7 @@ void EXP_UN (boost::python::class_builder <UnitWrapper> &Class) {
 #undef WRAPPED1
 #undef WRAPPED2
 #undef WRAPPED3
+#undef WRAPPED4
 #undef voidWRAPPED0
 #undef voidWRAPPED1
 #undef voidWRAPPED2
@@ -50,6 +51,7 @@ void EXP_UN (boost::python::class_builder <UnitWrapper> &Class) {
 #define WRAPPED1(type,name,atype,a,def) WRAPPED0(type,name,def)
 #define WRAPPED2(type,name,atype,a,btype,b,def) WRAPPED0(type,name,def)
 #define WRAPPED3(type,name,atype,a,btype,b,ctype,c,def) WRAPPED0(type,name,def)
+#define WRAPPED4(type,name,atype,a,btype,b,ctype,c,dtype,d,def) WRAPPED0(type,name,def)
 #define voidWRAPPED0(name) WRAPPED0(void,name,0)
 #define voidWRAPPED1(name,atype,a) WRAPPED0(void,name,0)
 #define voidWRAPPED2(name,atype,a,btype,b) WRAPPED0(void,name,0)

@@ -1261,7 +1261,7 @@ void Unit::getAverageGunSpeed(float & speed, float &grange, float &mrange) const
   }
 }
 
-QVector Unit::PositionITTS (const QVector& absposit,Vector velocity, float speed) const{
+QVector Unit::PositionITTS (const QVector& absposit,Vector velocity, float speed, bool steady_itts) const{
 	if (speed==FLT_MAX)
 		return this->Position();
 	float difficultyscale=1;
@@ -1275,7 +1275,12 @@ QVector Unit::PositionITTS (const QVector& absposit,Vector velocity, float speed
 		if(speed>0.001){
 			time = curguess.Magnitude()/speed;
 		}	 
-		curguess = posit+velocity.Scale(time).Cast();
+		if (steady_itts) {
+			curguess = posit+GetVelocity().Cast().Scale(time); // ** jay
+		}
+		else {
+			curguess = posit+velocity.Scale(time).Cast();
+		}
 	}
 	return curguess+absposit;
 }
@@ -1304,7 +1309,7 @@ float Unit::cosAngleTo (Unit * targ, float &dist, float speed, float range) cons
    //   if (range!=FLT_MAX) {
    //     getAverageGunSpeed(speed,range);
    //   }
-   QVector totarget (targ->PositionITTS(cumulative_transformation.position,cumulative_velocity, speed));
+   QVector totarget (targ->PositionITTS(cumulative_transformation.position,cumulative_velocity, speed,false));
    totarget = totarget-cumulative_transformation.position;
    double tmpcos = Normal.Cast().Dot (totarget);
    dist = totarget.Magnitude();
@@ -1340,7 +1345,7 @@ float Unit::cosAngleFromMountTo (Unit * targ, float & dist) const{
     finaltrans.to_matrix (mat);
     Vector Normal (mat.getR());
     
-    QVector totarget (targ->PositionITTS(finaltrans.position,cumulative_velocity, mounts[i].type->Speed));
+    QVector totarget (targ->PositionITTS(finaltrans.position,cumulative_velocity, mounts[i].type->Speed,false));
     
     tmpcos = Normal.Dot (totarget.Cast());
     tmpdist = totarget.Magnitude();

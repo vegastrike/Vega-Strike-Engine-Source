@@ -886,7 +886,7 @@ public:
   ///Gets the average gun speed of the unit::caution SLOW
   void getAverageGunSpeed (float & speed, float & grange, float & mrange) const;
   ///Finds the position from the local position if guns are aimed at it with speed
-  QVector PositionITTS (const QVector &firingposit, Vector firingvelocity, float gunspeed) const;
+  QVector PositionITTS (const QVector &firingposit, Vector firingvelocity, float gunspeed, bool smooth_itts) const;
   ///returns percentage of course deviation for contraband searches.  .5 causes error and 1 causes them to get mad 
   float FShieldData() const;  float RShieldData() const;  float LShieldData() const;  float BShieldData() const;
   void ArmorData(float armor[8])const; //short fix

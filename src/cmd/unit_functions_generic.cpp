@@ -137,8 +137,8 @@ bool AdjustMatrix (Matrix &mat, const Vector &vel, Unit * target, float speed, b
   if (target) {
     QVector pos (mat.p);
     Vector R (mat.getR());
-    QVector targpos (lead?target->PositionITTS (pos,vel,speed):target->Position());
-
+    QVector targpos (lead?target->PositionITTS (pos,vel,speed,false):target->Position());
+    
     Vector dir =( targpos-pos).Cast();
     dir.Normalize();
     if (dir.Dot (R)>=cone) {
