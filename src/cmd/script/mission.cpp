@@ -28,6 +28,7 @@
 #include <errno.h>
 #include <time.h>
 #include <ctype.h>
+#include <python.h>
 #ifndef WIN32
 // this file isn't available on my system (all win32 machines?) i dun even know what it has or if we need it as I can compile without it
 #include <unistd.h>
@@ -41,6 +42,10 @@
 #include "mission.h"
 #include "flightgroup.h"
 #include "gldrv/winsys.h"
+#ifdef HAVE_PYTHON
+#include "Python.h"
+#endif
+#include "python/python_class.h"
 //#include "easydom.h"
 
 //#include "msgcenter.h"
@@ -133,8 +138,28 @@ bool Mission::checkMission(easyDomNode *node, bool loadscripts){
       if (loadscripts) {
 	DirectorStart((missionNode *)*siter);
       }
-    }
-    else{
+    } else if (((*siter)->Name()=="python")){ //I need to get rid of an extra whitespace at the end that expat may have added... Python is VERY strict about that... :(
+      Python::reseterrors(); //print any previous errors so that they don't get overwritten
+      const char *constdumbstr=(*siter)->attr_value(textAttr).c_str(); //get the text XML attribute
+      int i=strlen(constdumbstr); //constdumbstr is the string I wish to copy... i is its length.
+      char *dumbstr=new char [i+2]; //allocate 2 extra bytes for a double-null-terminated string.
+      strncpy(dumbstr,constdumbstr,i); //i copy constdumbstr to dumbstr.
+      dumbstr[i]='\0'; //I make sure that it has 2 null bytes at the end.
+      dumbstr[i+1]='\0'; //I am allowed to use i+1 because I allocated 2 extra bytes
+      for (i-=1;i>=0;i--) { //start from the end-1, or i-1 and set i to that value(i-=1)
+        if (dumbstr[i]=='\t'||dumbstr[i]==' '||dumbstr[i]=='\r'||dumbstr[i]=='\n') { //I check if dumbstr[i] contains whitespace
+          dumbstr[i]='\0'; //if so, I truncate the string
+        } else {
+          dumbstr[i+1]='\n'; //otherwise I add a new line (python sometimes gets mad...)
+          dumbstr[i+2]='\0'; //and add a null byte (If i is at the end of the allocated memory, I will use the extra byte
+          break; //get out of the loop so that it doesn't endlessly delete the newlines that I added.
+        }
+      }
+      PyRun_SimpleString(dumbstr); //run it!
+      delete [] dumbstr; //delete the allocated memory
+      Python::reseterrors(); //print the errors (if any)
+      fflush(stdout); //if the program's init printed anything...
+    } else{
       cout << "warning: Unknown tag: " << (*siter)->Name() << endl;
     }
   }

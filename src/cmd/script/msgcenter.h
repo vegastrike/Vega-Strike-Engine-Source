@@ -44,7 +44,7 @@
 #include "vegastrike.h"
 
 #include "mission.h"
-#include "easydom.h"
+//#include "easydom.h"
 
 
 //#include "vs_globals.h"

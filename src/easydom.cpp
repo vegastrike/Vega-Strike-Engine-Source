@@ -92,3 +92,5 @@ void easyDomNode::printNode(ostream& out,int recurse_level,int level){
   }
 }
 
+const char * textAttr="Text_Attr";
+

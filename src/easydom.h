@@ -31,6 +31,7 @@
 #include <vector>
 #include <stack>
 #include <map>
+#include <stdlib.h>
 #include "xml_support.h"
 
 using std::string;
@@ -94,6 +95,8 @@ class tagDomNode : public easyDomNode {
 };
 
 
+extern const char * textAttr;  //should be a static const inside easyDomFactory...
+
 template<class domNodeType> class easyDomFactory {
  public:
   easyDomFactory() {};
@@ -104,9 +107,15 @@ template<class domNodeType> class easyDomFactory {
   void c_alike_to_xml(const char *filename);
 
   struct easyDomFactoryXML {
+    int currentindex;
+    char *buffer;
+    easyDomFactoryXML(){
+      buffer=0;
+      currentindex=0;
+    }
   } *xml;
 
-    domNodeType *LoadXML(const char *filename) {
+domNodeType *LoadXML(const char *filename) {
 
   const int chunk_size = 16384;
 
@@ -143,16 +152,20 @@ template<class domNodeType> class easyDomFactory {
 
   fclose (inFile);
   XML_ParserFree (parser);
-
+  delete xml;
   return (domNodeType *)topnode;
-    };
-
-  static void charHandler(void *userData, const XML_Char *s, int len){
-  char buffer[2048];
-  strncpy(buffer,s,len);
-  // printf("XML-text: %s\n",buffer);
 }
-;
+
+static void charHandler(void *userData, const XML_Char *s, int len){
+  easyDomFactoryXML *xml=((easyDomFactory<domNodeType>*)userData)->xml;
+  if (!xml->buffer) {
+    xml->buffer=(char*)malloc(sizeof(char)*(len+1));
+  } else {
+    xml->buffer=(char*)realloc(xml->buffer,sizeof(char)*(len+1+xml->currentindex));
+  }
+  strncpy(xml->buffer+xml->currentindex,s,len);
+  xml->currentindex+=len;
+}
 
 
 domNodeType *LoadCalike(const char *filename) {
@@ -208,12 +221,9 @@ domNodeType *LoadCalike(const char *filename) {
   } while(!is_final);
 
   XML_ParserFree (parser);
-
+  delete xml;
   return (domNodeType *)topnode;
-    };
-
-
-
+}
 
   static void beginElement(void *userData, const XML_Char *name, const XML_Char **atts){
   ((easyDomFactory*)userData)->beginElement(name,atts);
@@ -224,11 +234,24 @@ domNodeType *LoadCalike(const char *filename) {
 ;
 
   //  void beginElement(const string &name, const AttributeList &attributes){
-  void beginElement(const string &name, const XML_Char **atts ){
+void doTextBuffer() {
+  if (!nodestack.size())
+	  return;
+  domNodeType *stacktop=nodestack.top();
+  if (xml->buffer) {
+    xml->buffer[xml->currentindex]='\0';
+    stacktop->set_attribute(textAttr,(stacktop->attr_value(textAttr))+(xml->buffer));
+    free(xml->buffer);
+  }
+  xml->buffer=0;
+  xml->currentindex=0;
+}
+
+void beginElement(const string &name, const XML_Char **atts ){
     //  AttributeList::const_iterator iter;
 
+  doTextBuffer();
   domNodeType *parent;
-
   if(nodestack.empty()){
     parent=NULL;
   }
@@ -238,7 +261,6 @@ domNodeType *LoadCalike(const char *filename) {
 
   domNodeType *thisnode=new domNodeType();
   thisnode->set(parent,name,atts);
-
 
   if(parent==NULL){
     topnode=thisnode;
@@ -250,20 +272,19 @@ domNodeType *LoadCalike(const char *filename) {
 
 };
 
-  void endElement(const string &name){
+void endElement(const string &name){
 
+  doTextBuffer();
   domNodeType *stacktop=nodestack.top();
-
   if(stacktop->Name()!=name){
     cout << "error: expected " << stacktop->Name() << " , got " << name << endl;
-    exit(0);
+    exit(1);
   }
   else{
     nodestack.pop();
   }
   
 }
-;
 
   stack<domNodeType *> nodestack;
 

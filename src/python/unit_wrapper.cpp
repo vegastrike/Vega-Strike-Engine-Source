@@ -282,6 +282,8 @@ void InitVS() {
 #define voidWRAPPED5(name,atype,a,btype,b,ctype,c,dtype,d,etype,e) def name(self,a,b,c,d,e): ~    MYPRINT(name)
 #define voidEXPORT_UTIL(name) def name(a=None,b=None,c=None,d=None,e=None,f=None,g=None,h=None,i=None,j=None): ~    MYPRINT(name)
 #define EXPORT_UTIL(name,aff) voidEXPORT_UTIL(name) ~    return aff
+#define Vector
+#define QVector
 voidEXPORT_UTIL(pushSystem)
 voidEXPORT_UTIL(popSystem)
 EXPORT_UTIL(getFileName,"")
@@ -312,7 +314,7 @@ voidEXPORT_UTIL(playAnimation)
 voidEXPORT_UTIL(terminateMission)
 EXPORT_UTIL(getPlayer,Unit())
 EXPORT_UTIL(getPlayerX,Unit())
-EXPORT_UTIL(int getNumPlayers (),1)
+EXPORT_UTIL(getNumPlayers,1)
 
 def string ():
   return ''
