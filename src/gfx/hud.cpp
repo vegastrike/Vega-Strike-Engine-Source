@@ -29,6 +29,49 @@
 #include "config_xml.h"
 #include "xml_support.h"
 //#include "glut.h"
+void * getFont() {
+  static std::string whichfont=vs_config->getVariable("graphics","font","helvetica12");
+  void * retval=NULL;
+  if (retval==NULL) {
+    if (whichfont=="helvetica10")
+      retval=GLUT_BITMAP_HELVETICA_10;
+    else if (whichfont=="helvetica18")
+      retval=GLUT_BITMAP_HELVETICA_18;
+    else if (whichfont=="times24")
+      retval=GLUT_BITMAP_TIMES_ROMAN_24;
+    else if (whichfont=="times10")
+      retval=GLUT_BITMAP_TIMES_ROMAN_10;
+    else if (whichfont=="fixed13")
+      retval=GLUT_BITMAP_8_BY_13;
+    else if (whichfont=="fixed15")
+      retval=GLUT_BITMAP_9_BY_15;
+    else
+      retval=GLUT_BITMAP_HELVETICA_12;
+  }
+  return retval;            
+}
+float getFontHeight() {
+  static std::string whichfont=vs_config->getVariable("graphics","font","helvetica12");
+  static float point=0;
+  if (point==0) {
+    if (whichfont=="helvetica10")
+      point=22;
+    else if (whichfont=="helvetica18")
+      point=40;
+    else if (whichfont=="times24")
+      point=50;
+    else if (whichfont=="times10")
+      point=22;
+    else if (whichfont=="fixed13")
+      point=30;
+    else if (whichfont=="fixed15")
+      point=34;
+    else
+      point=26;      
+  }
+  return point/g_game.y_resolution;            
+}
+
 
 TextPlane::TextPlane(const GFXColor & c, const GFXColor & bgcol) {
   col=c;
@@ -45,7 +88,7 @@ int TextPlane::Draw (int offset) {
 
 static char * CreateLists() {
   static char lists[256]={0};
-  void * fnt = g_game.x_resolution>=800?GLUT_BITMAP_HELVETICA_12:GLUT_BITMAP_HELVETICA_10;
+  void * fnt = getFont();
   static bool use_bit = XMLSupport::parse_bool(vs_config->getVariable ("graphics","high_quality_font","false"));
   bool use_display_lists = XMLSupport::parse_bool (vs_config->getVariable ("graphics","text_display_lists","true"));
   if (use_display_lists) {
@@ -94,7 +137,7 @@ void DrawSquare(float left,float right, float top, float bot) {
 }
 float charWidth (char c, float myFontMetrics) {
   static bool use_bit = XMLSupport::parse_bool(vs_config->getVariable ("graphics","high_quality_font","false"));
-  void * fnt = use_bit?(g_game.x_resolution>=800?GLUT_BITMAP_HELVETICA_12:GLUT_BITMAP_HELVETICA_10):GLUT_STROKE_ROMAN;  
+  void * fnt = use_bit?getFont():GLUT_STROKE_ROMAN;  
   float charwid = use_bit?glutBitmapWidth(fnt,c):glutStrokeWidth(fnt,c);
   float dubyawid = use_bit?glutBitmapWidth(fnt,'W'):glutStrokeWidth(fnt,'W');
   return charwid*myFontMetrics/dubyawid;
@@ -126,7 +169,7 @@ int TextPlane::Draw(const string & newText, int offset,bool startlower, bool for
   static bool use_bit = force_highquality||XMLSupport::parse_bool(vs_config->getVariable ("graphics","high_quality_font","false"));
   static float font_point = XMLSupport::parse_float (vs_config->getVariable ("graphics","font_point","16"));
   static bool font_antialias = XMLSupport::parse_bool (vs_config->getVariable ("graphics","font_antialias","true"));
-  void * fnt = g_game.x_resolution>=800?GLUT_BITMAP_HELVETICA_12:GLUT_BITMAP_HELVETICA_10;
+  void * fnt = getFont();
   static float std_wid=glutStrokeWidth (GLUT_STROKE_ROMAN,'W');
   myFontMetrics.i=font_point*std_wid/(119.05+33.33);
   if (use_bit)
@@ -138,7 +181,7 @@ int TextPlane::Draw(const string & newText, int offset,bool startlower, bool for
   float origcol,origrow;
   GetPos (row,col);
   GetPos(row,origcol);
-  float rowheight=(use_bit)?((fnt==GLUT_BITMAP_HELVETICA_12)?(26./g_game.y_resolution):(22./g_game.y_resolution)):(myFontMetrics.j);
+  float rowheight=use_bit?getFontHeight():myFontMetrics.j;
   myFontMetrics.j=rowheight;
 
 	  

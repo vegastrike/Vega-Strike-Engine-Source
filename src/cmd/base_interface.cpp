@@ -45,8 +45,8 @@ static void CalculateRealXAndY (int xbeforecalc, int ybeforecalc, float *x, floa
 }
 #define mymin(a,b) (((a)<(b))?(a):(b))
 static void SetupViewport() {
-        static int base_max_width=XMLSupport::parse_float(vs_config->getVariable("graphics","base_max_width","0"));
-        static int base_max_height=XMLSupport::parse_float(vs_config->getVariable("graphics","base_max_height","0"));
+        static int base_max_width=XMLSupport::parse_int(vs_config->getVariable("graphics","base_max_width","0"));
+        static int base_max_height=XMLSupport::parse_int(vs_config->getVariable("graphics","base_max_height","0"));
         if (base_max_width&&base_max_height) {
           int xrez = mymin(g_game.x_resolution,base_max_width);
           int yrez = mymin(g_game.y_resolution,base_max_height);
@@ -255,7 +255,19 @@ BaseInterface::Room::BaseTalk::BaseTalk (std::string msg,std::string ind, bool o
 }
 
 void BaseInterface::Room::BaseText::Draw (BaseInterface *base) {
-	text.Draw();
+  int tmpx=g_game.x_resolution;
+  int tmpy=g_game.y_resolution;
+  static int base_max_width=XMLSupport::parse_int(vs_config->getVariable("graphics","base_max_width","0"));
+  static int base_max_height=XMLSupport::parse_int(vs_config->getVariable("graphics","base_max_height","0"));
+  if (base_max_width&&base_max_height) {
+    if (base_max_width<tmpx)
+      g_game.x_resolution=base_max_width;
+    if (base_max_height<tmpy)
+      g_game.y_resolution=base_max_height;
+  }
+  text.Draw();
+  g_game.x_resolution=tmpx;
+  g_game.y_resolution=tmpy;
 }
 
 void RunPython(const char *filnam) {
