@@ -249,8 +249,8 @@ void TextArea::RenderTextItem(TextAreaItem *current, int level) {
 		RenderTextItem(current->child[cur], level+1);
 	}
 }
-void TextArea::AddTextItem(char *name, const char *description) {AddTextItem(name, description, NULL); }
-void TextArea::AddTextItem(char *name, const char *description, char *parent_name) {
+void TextArea::AddTextItem(const char *name, const char *description) {AddTextItem(name, description, NULL); }
+void TextArea::AddTextItem(const char *name, const char *description, const char *parent_name) {
 	TextAreaItem *master;
 	master = ItemList->FindChild(parent_name);
 	item_count++;
@@ -258,7 +258,7 @@ void TextArea::AddTextItem(char *name, const char *description, char *parent_nam
 	else { master->AddChild(name, description); }
 }
 
-void TextArea::ChangeTextItem(char *name, const char *description) {
+void TextArea::ChangeTextItem(const char *name, const char *description) {
 	TextAreaItem *search;
 	search = ItemList->FindChild(name);
 	if (search == 0) { return; }
@@ -266,16 +266,20 @@ void TextArea::ChangeTextItem(char *name, const char *description) {
 	search->description = strdup(description);
 }
 
-void TextArea::SetText(char *text) {
+void TextArea::ClearList(void) {
 	// Wipe the list clean
 	if (ItemList != NULL) { delete ItemList; }
-	do_highlight = 0;
-	do_multiline = 1;
 	item_count = 0;
 	cur_selected = 0;
 	top_item_number = 0;
 	ItemList = new TextAreaItem("", "", NULL);
-	ChompIntoItems(text, NULL);
+}
+
+void TextArea::SetText(const char *text) {
+  do_highlight = 0;
+  do_multiline = 1;
+  ClearList();
+  ChompIntoItems(text, NULL);
 }
 
 char *TextArea::GetSelectedItemName(void) {
@@ -513,34 +517,37 @@ void TextArea::DisplayScrollbar(void) {
 	}
 }
 
-void TextArea::ChompIntoItems(char *text, char *parent) {
-	char *cur = text, chr = '\0';
-	int i = 0, max = strlen(text);
+void TextArea::ChompIntoItems(const char *text, const char *parent) {
+
+	char * temp = strdup (text);
+	char *cur = temp, chr = '\0';
+	int i = 0, max = strlen(temp);
 	float cur_width = 0, wid = 0, end = glutStrokeWidth(GLUT_STROKE_ROMAN, 'A');
 	end /= 2500;
 	wid = end;
 	for (i = 0; i <= max; i++) {
-		if (text[i] == '\r') { continue; }
-		cur_width = WidthOfChar(text[i]);
-		if (wid + cur_width > width[5] || text[i] == '\n') {
-			chr = text[i];
-			text[i] = '\0';
+		if (temp[i] == '\r') { continue; }
+		cur_width = WidthOfChar(temp[i]);
+		if (wid + cur_width > width[5] || temp[i] == '\n') {
+			chr = temp[i];
+			temp[i] = '\0';
 			AddTextItem("content", cur, parent);
-			text[i] = chr;
-			cur = &text[i];
+			temp[i] = chr;
+			cur = &temp[i];
 			if (cur[0] == '\n') { cur++; }
 			wid = end;
 		}
 		else { wid += cur_width; }
 	}
-	if (text[i] != '\0') { AddTextItem("content", cur, parent); }
+	if (temp[i] != '\0') { AddTextItem("content", cur, parent); }
+	free (temp);
 }
 
 TextAreaItem::TextAreaItem(void) {
 	TextAreaItem("blank","", NULL);
 }
 
-TextAreaItem::TextAreaItem(char *new_name, const char *desc, TextAreaItem *parent_class) {
+TextAreaItem::TextAreaItem(const char *new_name, const char *desc, TextAreaItem *parent_class) {
 	if (new_name != 0 ) { name = strdup(new_name); }
 	else { name = 0; }
 	if (desc != 0 ) { description = strdup(desc); }
@@ -563,7 +570,7 @@ TextAreaItem::~TextAreaItem(void) {
 	if (child != NULL) { delete child; }
 }
 
-TextAreaItem *TextAreaItem::FindChild(char *search_name) {
+TextAreaItem *TextAreaItem::FindChild(const char *search_name) {
 	int cur = 0;
 	//int max = child_count_multiplier * 10;
 	TextAreaItem *match;
@@ -608,7 +615,7 @@ TextAreaItem *TextAreaItem::FindCount(int count, int cur) {
 
 typedef TextAreaItem * TextAreaItemStr;
 
-void TextAreaItem::AddChild(char *new_name, const char *desc) {
+void TextAreaItem::AddChild(const char *new_name, const char *desc) {
 	TextAreaItem **newlist;
 	int cur = 0;
 	child_count++;

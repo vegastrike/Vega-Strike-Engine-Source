@@ -27,6 +27,11 @@ void Unit::ImportPartList (const std::string& category, float price, float price
   }
 
 }
+
+
+UnitImages &Unit::GetImageInformation() {
+  return *image;
+}
 using XMLSupport::tostring;
 using namespace std;
 std::string CargoToString (const Cargo& cargo) {

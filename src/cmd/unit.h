@@ -402,7 +402,7 @@ public:
   float PriceCargo (const std::string &s);
   void SwapOutHalos();
   void SwapInHalos();
-
+  UnitImages &GetImageInformation();
   Cargo & GetCargo (unsigned int i);
   ///below function returns NULL if not found
   Cargo * GetCargo (const std::string &s, unsigned int &i);

@@ -90,10 +90,11 @@ public:
 	void DoMultiline(int yes);	// DoMultiline(1) to enable multi-line entries
 	void Refresh(void);
 	void RenderText(void);
-	void AddTextItem(char *name, const char *description);
-	void AddTextItem(char *name, const char *description, char *parent_name);
-	void ChangeTextItem(char *name, const char *description);
-	void SetText(char *text);	// Sets the text. Enables Multiline and disables highlighting
+	void AddTextItem(const char *name, const char *description);
+	void AddTextItem(const char *name, const char *description, const char *parent_name);
+	void ChangeTextItem(const char *name, const char *description);
+	void SetText(const char *text);	// Sets the text. Enables Multiline and disables highlighting
+	void ClearList(void);
 	// Returns the char of the currently selected item. NULL if nothing is selected
 	char *GetSelectedItemName(void);
 	char *GetSelectedItemDesc(void);
@@ -195,7 +196,7 @@ private:
 	char *GetSelectedItem(int type);
 
 	// Takes a line and puts them in as seperate items (line wrapping)
-	void ChompIntoItems(char *text, char *parent);
+	void ChompIntoItems(const char *text, const char *parent);
 };
 
 // Keep everything public so the TextArea class can get faster access to the elements in this class
@@ -203,15 +204,15 @@ class TextAreaItem {
 public:
 	TextAreaItem(void);
 	// parent_class is NULL for the master TextAreaItem
-	TextAreaItem(char *new_name, const char *desc, TextAreaItem *parent_class);
+	TextAreaItem(const char *new_name, const char *desc, TextAreaItem *parent_class);
 	~TextAreaItem(void);
 
 	// A recursive function. This function will be called to all the children until one of them matches the search_name
 	// If no match is found, it will use the main tree.
-	TextAreaItem *FindChild(char *search_name);
+	TextAreaItem *FindChild(const char *search_name);
 	TextAreaItem *FindCount(int count, int cur);
 
-	void AddChild(char *new_name, const char *desc);
+	void AddChild(const char *new_name, const char *desc);
 	void ExpandTree(void);
 	void Sort(void);
 

@@ -4,22 +4,52 @@
 #include "vs_globals.h"
 #include "in_kb.h"
 #include "main_loop.h"
+#include "images.h"
+#include <algorithm>
 #ifdef _WIN32
 #define strcasecmp stricmp
 #endif
 
 
+
 extern void SwitchUnits (Unit * ol, Unit * nw);
 extern Cargo * GetMasterPartList(const char *input_buffer);
-
+extern Unit&GetUnitMasterPartList();
 struct UpgradingInfo {
   TextArea *CargoList, *CargoInfo;
   Button *OK, *COMMIT;
   UnitContainer base;
   UnitContainer buyer;
+  void ProcessMouse(int type, int x, int y, int button, int state);
+  int level;
+  vector <Cargo> TempCargo;//used to store cargo list
+  vector <Cargo> * CurrentList;
   enum BaseMode {BUYMODE,SELLMODE,MISSIONMODE,UPGRADEMODE,ADDMODE,DOWNGRADEMODE,SHIPDEALERMODE, MAXMODE} mode;
   Button *Modes[MAXMODE];
   string title;
+  string curcategory;
+  vector <Cargo>&FilterCargo(Unit *un, const string filterthis, bool inv);
+  vector <Cargo>&GetCargoFor(Unit *un);
+  vector <Cargo>&GetCargoList ();
+  void SetupCargoList() {
+    CurrentList = &GetCargoList();
+    std::sort (CurrentList->begin(),CurrentList->end());
+    CargoList->ClearList();
+    if (curcategory.length()!=0) {
+      for (int i=0;i<CurrentList->size();i++) {
+	if ((*CurrentList)[i].category==curcategory)
+	  CargoList->AddTextItem ((tostring(i)+ string(" ")+(*CurrentList)[i].content).c_str() ,(*CurrentList)[i].content.c_str());
+      }
+    } else {
+      string curcat=("");
+      for (int i=0;i<CurrentList->size();i++) {
+	if ((*CurrentList)[i].category!=curcat) {
+	  CargoList->AddTextItem ((*CurrentList)[i].category.c_str(),(*CurrentList)[i].category.c_str());
+	  curcat =((*CurrentList)[i].category);
+	}
+      }      
+    }
+  }
   void SetMode (enum BaseMode mod) {
     string ButtonText;
     switch (mod) {
@@ -54,6 +84,7 @@ struct UpgradingInfo {
     }
     COMMIT->ModifyName (ButtonText.c_str());
     mode = mod;
+    SetupCargoList();
   }
   UpgradingInfo(Unit * un, Unit * base):base(base),buyer(un),mode(BUYMODE),title("Buy Cargo"){
 	CargoList = new TextArea(-1, 0.9, 1, 1.7, 1);
@@ -62,6 +93,8 @@ struct UpgradingInfo {
 	//	CargoList->AddTextItem("b","And another just to be sure");
 	CargoInfo->AddTextItem("name", "");
 	CargoInfo->AddTextItem("price", "");
+	CargoInfo->AddTextItem("mass", "");
+	CargoInfo->AddTextItem("volume", "");
 	OK = new Button(-0.94, -0.85, 0.15, 0.1, "Done");
 	COMMIT = new Button(-0.75, -0.85, 0.25, 0.1, "Buy");
 	const char  MyButtonModes[][128] = {"BuyMode","SellMode","MissionBBS","UpgradeShip","Unimplemented","Downgrade", "ShipDealer"};
@@ -111,24 +144,24 @@ struct UpgradingInfo {
   }
 } *upgr=NULL;
 
-static void ProcessMouse(int type, int x, int y, int button, int state);
+
 static void RefreshGUI(void) {
   upgr->Render();
 }
 
 static void ProcessMouseClick(int button, int state, int x, int y) {
   SetSoftwareMousePosition (x,y);
-	ProcessMouse(1, x, y, button, state);
+  upgr->ProcessMouse(1, x, y, button, state);
 }
 
 static void ProcessMouseActive(int x, int y) {
   SetSoftwareMousePosition (x,y);
-  ProcessMouse(2, x, y, 0, 0);
+  upgr->ProcessMouse(2, x, y, 0, 0);
 }
 
 static void ProcessMousePassive(int x, int y) {
   SetSoftwareMousePosition(x,y);
-  ProcessMouse(3, x, y, 0, 0);
+  upgr->ProcessMouse(3, x, y, 0, 0);
 }
 void Unit::UpgradeInterface(Unit * base) {
   printf("Starting docking\n");
@@ -143,7 +176,7 @@ void Unit::UpgradeInterface(Unit * base) {
 // type=1 is mouse click
 // type=2 is mouse drag
 // type=3 is mouse movement
-static void ProcessMouse(int type, int x, int y, int button, int state) {
+void UpgradingInfo::ProcessMouse(int type, int x, int y, int button, int state) {
 	int ours = 0;
 	float cur_x = 0, cur_y = 0, new_x = x, new_y = y;
 	char *buy_name;
@@ -151,17 +184,22 @@ static void ProcessMouse(int type, int x, int y, int button, int state) {
 	cur_x = ((new_x / g_game.x_resolution) * 2) - 1;
 	cur_y = ((new_y / g_game.y_resolution) * -2) + 1;
 
-	ours = upgr->CargoList->DoMouse(type, cur_x, cur_y, button, state);
+	ours = CargoList->DoMouse(type, cur_x, cur_y, button, state);
 	if (ours == 1 && type == 1) {
-		buy_name = upgr->CargoList->GetSelectedItemName();
-		if (buy_name != 0 && buy_name[0] != '\0') { upgr->CargoInfo->ChangeTextItem("name", (string("name: ")+buy_name).c_str()); }
-		else { upgr->CargoInfo->ChangeTextItem("name",""); }
-		upgr->CargoInfo->ChangeTextItem("price", "Price: Random. Hah.");
+		buy_name = CargoList->GetSelectedItemName();
+		if (curcategory.length()!=0) {
+		  if (buy_name != 0 && buy_name[0] != '\0') { CargoInfo->ChangeTextItem("name", (string("name: ")+buy_name).c_str()); }
+		  else { CargoInfo->ChangeTextItem("name",""); }
+		  CargoInfo->ChangeTextItem("price", "Price: Random. Hah.");
+		}else {
+		  curcategory=buy_name;
+		  SetupCargoList();
+		}
 	}
 	// Commented out because they don't need to use the mouse with CargoInfo
 	//if (ours == 0) { ours = CargoInfo->DoMouse(type, cur_x, cur_y, button, state); }
 	if (ours == 0) {
-		ours = upgr->OK->DoMouse(type, cur_x, cur_y, button, state);
+		ours = OK->DoMouse(type, cur_x, cur_y, button, state);
 		if (ours == 1 && type == 1) {
 			restore_main_loop();
 			cout << "You clicked done\n";
@@ -170,22 +208,21 @@ static void ProcessMouse(int type, int x, int y, int button, int state) {
 		}
 	}	
 	if (ours == 0) {
-		ours = upgr->COMMIT->DoMouse(type, cur_x, cur_y, button, state);
+		ours = COMMIT->DoMouse(type, cur_x, cur_y, button, state);
 		if (ours == 1 && type == 1) {
-			buy_name = upgr->CargoList->GetSelectedItemName();
+			buy_name = CargoList->GetSelectedItemName();
 			cout << "You are buying the " << buy_name << endl;
 		}
 	}
 	for (int i=0;i<UpgradingInfo::MAXMODE&&ours==0;i++) {
-	  ours = upgr->Modes[i]->DoMouse(type,cur_x,cur_y,button,state);
+	  ours = Modes[i]->DoMouse(type,cur_x,cur_y,button,state);
 	  if (ours==1&&type==1) {
 
-	    upgr->SetMode ((UpgradingInfo::BaseMode)i);
+	    SetMode ((UpgradingInfo::BaseMode)i);
 	  }
 
 	}
 }
-
 
 
 
@@ -364,3 +401,70 @@ void Unit::UpgradeInterface (Unit * base) {
   
 }
 */
+
+
+
+
+
+
+
+
+
+
+
+
+vector <Cargo>&UpgradingInfo::FilterCargo(Unit *un, const string filterthis, bool inv){
+    for (unsigned int i=0;i<un->numCargo();i++) {
+      
+      if ((un->GetCargo(i).category==filterthis)==inv) {
+	TempCargo.push_back (un->GetCargo(i));
+      }
+    }
+    return TempCargo;
+  }
+
+vector <Cargo>&UpgradingInfo::GetCargoFor(Unit *un) {//un !=NULL
+    switch (mode) {
+    case BUYMODE:
+    case SELLMODE:
+      curcategory=string("");
+      return FilterCargo (un,"missions",false);//anything but a mission
+    case UPGRADEMODE:
+    case DOWNGRADEMODE:
+    case ADDMODE:
+      curcategory=string("upgrades");
+      return FilterCargo (un,"upgrades",true);
+    case SHIPDEALERMODE:
+      curcategory=string("starships");
+      return FilterCargo (un,"starships",true);
+    case MISSIONMODE:
+      curcategory=string("missions");
+      return FilterCargo (un,"missions",true);
+    }
+    fprintf (stderr,"Error in picking cargo lists");
+    return TempCargo;
+  }
+vector <Cargo>&UpgradingInfo::GetCargoList () {
+    static vector <Cargo> Nada;//in case the units got k1ll3d.
+    Unit * relevant;
+    switch (mode) {
+    case BUYMODE:
+    case UPGRADEMODE:
+    case ADDMODE:
+    case SHIPDEALERMODE:
+    case MISSIONMODE://gotta transform the missions into cargo
+      relevant = base.GetUnit();
+      break;
+    case SELLMODE:
+      relevant = buyer.GetUnit();
+      break;
+    case DOWNGRADEMODE:
+      relevant = &GetUnitMasterPartList();
+      break;
+    }
+    if (relevant) {
+      return GetCargoFor (relevant);
+    }else {
+      return Nada;
+    }
+  }
