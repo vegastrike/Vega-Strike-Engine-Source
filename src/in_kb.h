@@ -26,19 +26,11 @@
 //const int KEYMAP_SIZE =SDLK_LAST;
 //const int KEY_SPECIAL_OFFSET=0;
 //#else
-const int KEYMAP_SIZE =256;
-const int KEY_SPECIAL_OFFSET=128;
+#include "gldrv/winsys.h"
+#include "in.h"
+const int KEYMAP_SIZE =WSK_LAST;
 //#endif
 
-enum KBSTATE {
-	UP,
-	DOWN,
-	PRESS,
-	RELEASE,
-	RESET
-};
-
-typedef void (*KBHandler)(int, KBSTATE);
 
 void ProcessKB(unsigned int player);
 void BindKey(int key, unsigned int player, KBHandler handler);

@@ -40,6 +40,7 @@
 #include <assert.h>
 #include "mission.h"
 #include "flightgroup.h"
+#include "gldrv/winsys.h"
 //#include "easydom.h"
 
 //#include "msgcenter.h"
@@ -63,7 +64,7 @@ Mission::Mission(char *configfile){
  static bool dontpanic=false;
   if(top==NULL&&!dontpanic){
     cout << "Panic exit - mission file " << configfile << " not found" << endl;
-    exit(0);
+    winsys_exit(0);
   } else {
     dontpanic=true;
   }

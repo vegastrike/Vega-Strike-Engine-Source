@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include "vegastrike.h"
 #include "file_main.h"
+#include "gldrv/winsys.h"
 void Mesh::LoadBinary (const char * filename, int faction) {
   GFXBOOL objtex;
   int TexNameLength;
@@ -28,7 +29,7 @@ void Mesh::LoadBinary (const char * filename, int faction) {
 	if (!fp)
 	{
 	  fprintf (stderr,"Failed to load file %s",filename);
-	  exit(1);
+	  winsys_exit(1);
 	}
 		
 	TexNameLength = readi(fp);

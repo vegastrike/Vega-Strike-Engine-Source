@@ -23,7 +23,9 @@ libgldrv_a_SOURCES =				\
 	gl_quad_list.cpp			\
 	gl_state.cpp				\
 	gl_texture.cpp				\
-	gl_vertex_list.cpp			
+	gl_vertex_list.cpp			\
+	winsys.cpp				\
+	winsys.h
 
 
 

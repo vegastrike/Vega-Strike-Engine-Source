@@ -38,6 +38,8 @@
 
 #include "cmd/script/mission.h"
 #include "cmd/unit.h"
+#include "in_kb.h"
+#include "in_main.h"
 #if defined(WITH_MACOSX_BUNDLE)
 #import <sys/param.h>
 #endif

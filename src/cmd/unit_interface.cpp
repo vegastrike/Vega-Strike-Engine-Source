@@ -11,6 +11,7 @@
 #include "savegame.h"
 #include "cmd/script/mission.h"
 #include "gfx/hud.h"
+#include "gldrv/winsys.h"
 #ifdef _WIN32
 #define strcasecmp stricmp
 #endif
@@ -457,9 +458,9 @@ void Unit::UpgradeInterface(Unit * base) {
     }
   }
   printf("Starting docking\n");
-  glutMouseFunc(ProcessMouseClick);
-  glutMotionFunc(ProcessMouseActive);
-  glutPassiveMotionFunc(ProcessMousePassive);
+  winsys_set_mouse_func(ProcessMouseClick);
+  winsys_set_motion_func(ProcessMouseActive);
+  winsys_set_passive_motion_func(ProcessMousePassive);
   //(x, y, width, height, with scrollbar)
   upgr.push_back( new UpgradingInfo (this,base));
   player_upgrading.push_back(_Universe->CurrentCockpit());

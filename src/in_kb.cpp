@@ -25,6 +25,7 @@
 #include "vegastrike.h"
 #include "in_kb.h"
 #include "in_handler.h"
+#include "gldrv/winsys.h"
 //#include "cmd_unit.h"
 /*
 extern queue<InputListener*> activationreqqueue;
@@ -33,11 +34,11 @@ extern list<InputListener*> listeners;
 extern InputListener* activelistener;
 */
 
-static KBHandler keyBindings [KEYMAP_SIZE];
-static unsigned int playerBindings [KEYMAP_SIZE];
-KBSTATE keyState [KEYMAP_SIZE];
+static KBHandler keyBindings [WSK_LAST];
+static unsigned int playerBindings [WSK_LAST];
+KBSTATE keyState [WSK_LAST];
 
-static void kbGetInput(int key, int special, int release, int x, int y){
+static void kbGetInput(int key, bool release, int x, int y){
   int i=_Universe->CurrentCockpit();
   _Universe->SetActiveCockpit(playerBindings[key]);
   if ((keyState[key]==RESET||keyState[key]==UP)&&!release)
@@ -48,12 +49,15 @@ static void kbGetInput(int key, int special, int release, int x, int y){
   _Universe->SetActiveCockpit(i);
 }
 
- void glut_keyboard_cb( unsigned char ch, int x, int y ) 
+ void glut_keyboard_cb( unsigned int  ch,bool special, bool release, int x, int y ) 
 {
   //  fprintf (stderr,"keyboard  %d",ch);
-    kbGetInput( ch, 0, 0, x, y );
+  if (ch=='`') {
+    fprintf (stderr,"%d %d\n", special,release);
+  }
+    kbGetInput( ch, release, x, y );
 }
-
+/*
 static void glut_special_cb( int key, int x, int y ) 
 {
   //  fprintf (stderr,"keyboard s %d",key);
@@ -71,12 +75,9 @@ static void glut_special_up_cb( int key, int x, int y )
   //  fprintf (stderr,"keyboard s up %d",key);
     kbGetInput( 128+key, 1, 1, x, y );
 }
+*/
 void RestoreKB() {
-  glutKeyboardFunc( glut_keyboard_cb );
-
-  glutKeyboardUpFunc( glut_keyboard_up_cb );
-  glutSpecialFunc( glut_special_cb );
-  glutSpecialUpFunc( glut_special_up_cb );
+  winsys_set_keyboard_func( glut_keyboard_cb );
 }
 
 void InitKB()

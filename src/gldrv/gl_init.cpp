@@ -22,6 +22,7 @@
 #include "vs_globals.h"
 #include "xml_support.h"
 #include "config_xml.h"
+#include "winsys.h"
 //#include "gl_globals.h"
 
 #ifndef WIN32
@@ -85,11 +86,6 @@ typedef void (*(*get_gl_proc_fptr_t)(const GLubyte *))();
     typedef GLubyte * GET_GL_PTR_TYP;
 #define GET_GL_PROC glXGetProcAddressARB
 
-#endif
-#if defined(__APPLE__) || defined(MACOSX)
-    #include <GLUT/glut.h>
-#else
-    #include <GL/glut.h>
 #endif
 
 void init_opengl_extensions()
@@ -201,53 +197,25 @@ void init_opengl_extensions()
 static void Reshape (int x, int y) {
   g_game.x_resolution = x;
   g_game.y_resolution = y;
-
+  fprintf (stderr,"Reshaping %d %d", x,y);
   
 }
 extern void GFXInitTextureManager();
 void GFXInit (int argc, char ** argv){
-    glutInit( &argc, argv );
-    g_game.x_resolution = XMLSupport::parse_int (vs_config->getVariable ("graphics","x_resolution","1024"));     
-    g_game.y_resolution = XMLSupport::parse_int (vs_config->getVariable ("graphics","y_resolution","768"));     
+  winsys_init (&argc,argv,"Vega Strike","vega.ico");
+    /* Ingore key-repeat messages */
+  winsys_enable_key_repeat(false);
+    glViewport (0, 0, g_game.x_resolution,g_game.y_resolution);
+    float clearcol[4];
     gl_options.mipmap = XMLSupport::parse_int (vs_config->getVariable ("graphics","mipmapdetail","2"));     
     gl_options.compression = XMLSupport::parse_int (vs_config->getVariable ("graphics","texture_compression","0"));
     gl_options.Multitexture = XMLSupport::parse_bool (vs_config->getVariable ("graphics","reflection","true"));
-    gl_options.fullscreen = XMLSupport::parse_bool (vs_config->getVariable ("graphics","fullscreen","false"));
-    gl_options.color_depth = XMLSupport::parse_int (vs_config->getVariable ("graphics","colordepth","16"));
     gl_options.display_lists = XMLSupport::parse_bool (vs_config->getVariable ("graphics","displaylists","false"));
     gl_options.s3tc = XMLSupport::parse_bool (vs_config->getVariable ("graphics","s3tc","true"));
-#ifdef USE_STENCIL_BUFFER
-    glutInitDisplayMode( GLUT_RGBA | GLUT_DEPTH | GLUT_DOUBLE | GLUT_STENCIL );
-#else
-    glutInitDisplayMode( GLUT_RGBA | GLUT_DEPTH | GLUT_DOUBLE );
-#endif
 
-      char str [1024];
-      sprintf (str, "%dx%d:%d",g_game.x_resolution,g_game.y_resolution,gl_options.color_depth); 
-      glutGameModeString(str);
-
-    /* Create a window */
-      if (gl_options.fullscreen&&(glutGameModeGet(GLUT_GAME_MODE_POSSIBLE)!=-1)) {
-	
-	glutInitWindowPosition( 0, 0 );
-	glutEnterGameMode();
-    } else {
-	/* Set the initial window size */
-	glutInitWindowSize(g_game.x_resolution, g_game.y_resolution);
-	glutInitWindowPosition(0, 0);
-	glutWindow = glutCreateWindow("Vegastrike");
-	if (glutWindow == 0) {
-	    (void) fprintf(stderr, "Couldn't create a window.\n");
-	    exit(1);
-	} 
-    }
-    /* Ingore key-repeat messages */
-    glutIgnoreKeyRepeat(1);
-    glViewport (0, 0, g_game.x_resolution,g_game.y_resolution);
-    float clearcol[4];
     vs_config->getColor ("space_background",clearcol);
     glClearColor (clearcol[0],clearcol[1],clearcol[2],clearcol[3]);
-    glutReshapeFunc (Reshape);
+    winsys_set_reshape_func (Reshape);
     initfov();
     glShadeModel (GL_SMOOTH);
     glEnable (GL_CULL_FACE);
@@ -336,7 +304,8 @@ void GFXInit (int argc, char ** argv){
     glDisable(GL_NORMALIZE);
     int con;
     GFXCreateLightContext(con);
-    glutSetCursor(GLUT_CURSOR_NONE);
+    //    glutSetCursor(GLUT_CURSOR_NONE);
+    winsys_show_cursor(false);
 }
 
 #if defined(IRIX)
@@ -374,15 +343,21 @@ void GFXLoop(void (*main_loop)(void)) {
 #else
 
 void GFXLoop(void main_loop()) {
-  glutDisplayFunc(main_loop);
-  glutIdleFunc (main_loop);
+  winsys_set_display_func (main_loop);
+  winsys_set_idle_func (main_loop);
+
+  //  glutDisplayFunc(main_loop);
+  //  glutIdleFunc (main_loop);
   static bool are_we_looping=false;
   /// so we can call this function multiple times to change the display and idle functions
   if (!are_we_looping) {
     are_we_looping=true;
-    glutMainLoop();
-  }
+    winsys_process_events();
+#define CODE_NOT_REACHED 0
+  assert(CODE_NOT_REACHED);
   //never make it here;
+  }
+
 
 }
 #endif
@@ -393,7 +368,7 @@ void GFXShutdown () {
   GFXDestroyAllTextures();
   GFXDestroyAllLights();
   if ( gl_options.fullscreen ) {
-    glutLeaveGameMode();
+    winsys_shutdown();
   }
 }
 

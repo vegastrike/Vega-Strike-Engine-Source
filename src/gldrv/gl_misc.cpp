@@ -25,6 +25,7 @@
 #include "vs_globals.h"
 #include "gl_light.h"
 #include "config_xml.h"
+#include "winsys.h"
 extern GFXBOOL bTex0;
 extern GFXBOOL bTex1;
 
@@ -52,7 +53,7 @@ void /*GFXDRVAPI*/ GFXBeginScene()
 void /*GFXDRVAPI*/ GFXEndScene()
 {
         glFlush();
-	glutSwapBuffers(); //swap the buffers
+	winsys_swap_buffers(); //swap the buffers
 	
 }
 

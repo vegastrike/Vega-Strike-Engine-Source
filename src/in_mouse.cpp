@@ -28,6 +28,7 @@
 #include "vs_globals.h"
 #include "config_xml.h"
 #include "in_joystick.h"
+#include "gldrv/winsys.h"
 using std::deque;
 #define NUM_BUTTONS 15
 
@@ -60,31 +61,93 @@ struct MouseEvent {
 
 static deque<MouseEvent> eventQueue;
 void mouseClickQueue(int button, int state, int x, int y) {
-  int mod = glutGetModifiers();
+  int mod = 0;
+  //glutGetModifiers();
   eventQueue.push_back(MouseEvent(MouseEvent::CLICK, button, state, mod, x, y));
 }
+int delx=0;
+int dely=0;
+void AddDelta (int dx, int dy) {
+  delx+=dx;
+  dely+=dy;
+}
+void DealWithWarp (int x, int y) {
+  static bool warp_pointer = XMLSupport::parse_bool(vs_config->getVariable ("joystick","warp_mouse","false"));
+  static int mouse_warp_zone = XMLSupport::parse_int(vs_config->getVariable ("joystick","warp_mouse_zone","100"));
+ if (warp_pointer) {
+   if (joystick[MOUSE_JOYSTICK]->player<_Universe->numPlayers()) {
+    if (x<mouse_warp_zone||y<mouse_warp_zone||x>g_game.x_resolution-mouse_warp_zone||y>g_game.y_resolution-mouse_warp_zone) {
+      //fprintf (stderr,"warped from %d %d to %d %d",mousex,mousey, g_game.x_resolution/2,g_game.y_resolution/2);
+      
+      int delx = -x+g_game.x_resolution/2;
+      int dely = -y+g_game.y_resolution/2;
+      mousex+=delx;
+      mousey+=dely;
+      deque<MouseEvent>::iterator i;
+      for (i=eventQueue.begin();i!=eventQueue.end();i++) {
+	i->x+=delx;
+	i->y+=dely;
+      }
+
+      winsys_warp_pointer(g_game.x_resolution/2,g_game.y_resolution/2);
+    }
+   }
+  }
+
+}
+
 void mouseDragQueue(int x, int y) {
   eventQueue.push_back(MouseEvent(MouseEvent::DRAG, -1, -1, -1, x, y));
+  DealWithWarp(x,y);
 }
+
 void mouseMotionQueue(int x, int y) {
+  
   eventQueue.push_back(MouseEvent(MouseEvent::MOTION, -1, -1, -1, x, y));
-}
+  DealWithWarp(x,y);
 
+
+
+}
+/*
 void mouseClick( int button, int state, int x, int y ) {
-  int mod = glutGetModifiers();
+  int mod = 0;//glutGetModifiers();
   if(button>=NUM_BUTTONS) return;
-  mousex = x;
-  mousey = y;
-  mouseBindings[button](state==GLUT_DOWN?PRESS:RELEASE,x,y,0,0,mod);
-  MouseState[button]=(state==GLUT_DOWN)?DOWN:UP;
-}
 
-void mouseClick0( int button, int state, int mod, int x, int y ) {
-  if(button>=NUM_BUTTONS) return;
   mousex = x;
   mousey = y;
-  mouseBindings[button](state==GLUT_DOWN?PRESS:RELEASE,x,y,0,0,mod);
-  MouseState[button]=(state==GLUT_DOWN)?DOWN:UP;
+  mouseBindings[button](state==WS_MOUSE_DOWN?PRESS:RELEASE,x,y,0,0,mod);
+  MouseState[button]=(state==WS_MOUSE_DOWN)?DOWN:UP;
+}
+*/
+int lookupMouseButton(int b) {
+  switch (b) {
+  case WS_LEFT_BUTTON:
+    return 0;
+  case WS_RIGHT_BUTTON:
+    return 2;
+  case WS_MIDDLE_BUTTON:
+    return 1;
+  }
+  return 0;
+}
+void mouseClick0( int button, int state, int mod, int x, int y ) {
+  button = lookupMouseButton(button);
+  if(button>=NUM_BUTTONS) return;
+  AddDelta(x-mousex,y-mousey);
+  mousex = x;
+  mousey = y;
+  mouseBindings[button](state==WS_MOUSE_DOWN?PRESS:RELEASE,x,y,0,0,mod);
+  MouseState[button]=(state==WS_MOUSE_DOWN)?DOWN:UP;
+}
+void SetDelta (int dx, int dy) {
+  delx=dx;
+  dely=dy;
+}
+void GetMouseDelta (int &dx, int & dy) {
+  dx = delx;
+  dy = dely;
+  delx=dely=0;
 }
 
 void  mouseDrag( int x, int y ) {
@@ -92,40 +155,18 @@ void  mouseDrag( int x, int y ) {
   for (int i=0;i<NUM_BUTTONS+1;i++) {
     mouseBindings[i](MouseState[i],x,y,x-mousex,y-mousey,0);
   }
-
+  AddDelta(x-mousex,y-mousey);
   mousex = x;
   mousey = y;
   
 }	
-bool warpedmouse=true;
+
 void mouseMotion(int x, int y) {
-  static bool warp_pointer = XMLSupport::parse_bool(vs_config->getVariable ("joystick","warp_mouse","false"));
-  static int mouse_warp_zone = XMLSupport::parse_int(vs_config->getVariable ("joystick","warp_mouse_zone","100"));
   //  int mod =glutGetModifiers();
   for (int i=0;i<NUM_BUTTONS+1;i++) {
     mouseBindings[i](MouseState[i],x,y,x-mousex,y-mousey,0);
   }
- if (warp_pointer) {
-   if (joystick[MOUSE_JOYSTICK]->player<_Universe->numPlayers()) {
-    if (x<mouse_warp_zone||y<mouse_warp_zone||x>g_game.x_resolution-mouse_warp_zone||y>g_game.y_resolution-mouse_warp_zone) {
-      warpMousePointer(g_game.x_resolution/2,g_game.y_resolution/2);
-      static int warpx=0;
-      static int warpy=0;
-      if (!warpedmouse) {
-	warpedmouse=true;
-	x= x-mousex+g_game.x_resolution/2;
-	y= y-mousey+g_game.y_resolution/2;
-	warpx=x-mousex;
-	warpy=y-mousey;
-      }else {
-	x=x+warpx;
-	y=y+warpy;
-
-      }
-
-    }
-   }
-  }
+  AddDelta(x-mousex,y-mousey);
  mousex = x;
  mousey = y;
 
@@ -150,29 +191,20 @@ void UnbindMouse (int key) {
   mouseBindings[key]=DefaultMouseHandler;
 
 }
-void warpMousePointer(int x, int y) {
-  glutWarpPointer(x,y);
-}
 void BindKey (int key, MouseHandler handler) {
   mouseBindings[key]=handler;
   handler (RESET,mousex,mousey,0,0,0);
 }
 void RestoreMouse() {
-  glutMouseFunc(mouseClickQueue);
-  glutMotionFunc(mouseDragQueue);
-  glutPassiveMotionFunc(mouseMotionQueue);
-
+  winsys_set_mouse_func (mouseClickQueue);
+  winsys_set_motion_func (mouseDragQueue);
+  winsys_set_passive_motion_func(mouseMotionQueue);
 }
 
 void InitMouse(){
   for (int a=0;a<NUM_BUTTONS+1;a++) {
     UnbindMouse (a);
   }
-  /*
-  glutMouseFunc(mouseClick);
-  glutMotionFunc(mouseDrag);
-  glutPassiveMotionFunc(mouseMotion);
-  */
   RestoreMouse();
 }
 				

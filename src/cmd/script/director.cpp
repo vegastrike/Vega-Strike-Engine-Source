@@ -59,6 +59,7 @@
 #include "Python.h"
 #endif
 #include "flightgroup.h"
+#include "gldrv/winsys.h"
 //#include "vegastrike.h"
 
 extern bool have_yy_error;
@@ -317,7 +318,7 @@ void Mission::DirectorBenchmark(){
 
   if(benchmark>0.0 && benchmark<gametime){
     cout << "Game was running for " << gametime << " secs,   av. framerate " << ((double)total_nr_frames)/gametime << endl;
-    exit(0);
+    winsys_exit(0);
   }
 }
 

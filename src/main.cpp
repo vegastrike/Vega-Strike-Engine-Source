@@ -43,6 +43,7 @@
 #include "savegame.h"
 #include "force_feedback.h"
 #include "gfx/hud.h"
+#include "gldrv/winsys.h"
 /*
  * Globals 
  */
@@ -169,7 +170,7 @@ int main( int argc, char *argv[] )
     // && defined(HAVE_SDL_MIXER)
   if (  SDL_InitSubSystem( SDL_INIT_JOYSTICK )) {
         fprintf(stderr, "Couldn't initialize SDL: %s\n", SDL_GetError());
-        exit(1);
+        winsys_exit(1);
     }
 
 #endif
@@ -181,9 +182,7 @@ int main( int argc, char *argv[] )
     AUDInit();
 
     /* Set up a function to clean up when program exits */
-    if ( atexit( cleanup ) != 0 ) {
-	perror( "atexit" );
-    }
+    winsys_atexit( cleanup );
     /*
 #if defined(HAVE_SDL) && defined(HAVE_SDL_MIXER)
 

@@ -2,6 +2,7 @@
 #include "loc_select.h"
 #include "coord_select.h"
 #include "vs_globals.h"
+#include "in_kb.h"
 int CoordinateSelectChange =0;
 int  CoordinateSelectmousex ;
 int  CoordinateSelectmousey ;

@@ -182,7 +182,7 @@ namespace CockpitKeys {
 	    }
 	  }
 	  delete forcefeedback;
-	  exit(0);
+	  winsys_exit(0);
 	}
    
   }
@@ -629,7 +629,7 @@ int getmicrosleep () {
 
 void restore_main_loop() {
   RestoreKB();
-  glutSetCursor(GLUT_CURSOR_NONE);
+  //  winsys_show_cursor(false);
   RestoreMouse();
   GFXLoop (main_loop);
 

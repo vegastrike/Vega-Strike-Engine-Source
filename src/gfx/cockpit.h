@@ -10,8 +10,8 @@ class TextPlane;
 class Sprite;
 class Gauge;
 class Unit;
+#include "in.h"
 #include "vdu.h"
-#include "in_kb.h"
 #include "camera.h"
 #define MAXVDUS 10
 #define NUM_CAM		12

@@ -16,7 +16,7 @@
  ***************************************************************************/
 
 #include "text_area.h"
-
+#include "gldrv/winsys.h"
 // Array of textures for the text area
 GUITexture *Images;
 
@@ -304,14 +304,14 @@ void TextArea::SortList(void) {
 // The button checks assume that the scroll buttons and scrollbar are on the same x axis
 // If you change the position of the buttons, you'll need to add more checks here
 int TextArea::MouseClick(int button, int state, float x, float y) {
-	if (button != GLUT_LEFT_BUTTON) { return 1; } 	// Don't have anything to do with the middle and right button
-	if (state == GLUT_UP && scroll_start != 0) { scroll_cur = 0; scroll_start = 0; return 1; }
+	if (button != WS_LEFT_BUTTON) { return 1; } 	// Don't have anything to do with the middle and right button
+	if (state == WS_MOUSE_UP && scroll_start != 0) { scroll_cur = 0; scroll_start = 0; return 1; }
 	if (Inside(x,y,0) == 0) { return 0; }
 	// Check to see if the cursor is in the same x axis as the buttons and scrollbar
 	if (x > xcoord[1] && x < (xcoord[1] + width[1])) {
 		// Find out if the click is on a button, the scrollbar, or nowhere
 		if (y < ycoord[1] && y > (ycoord[1] - height[1])) {
-			if (state == GLUT_UP) {
+			if (state == WS_MOUSE_UP) {
 				ShowImage(xcoord[1], ycoord[1], width[1], height[1], Images[IMG_BUTTON_UP], 0, 0);
 				button_pressed = 0;
 			}
@@ -325,7 +325,7 @@ int TextArea::MouseClick(int button, int state, float x, float y) {
 			}
 		}
 		if (y < ycoord[2] && y > (ycoord[2] - height[2])) {
-			if (state == GLUT_UP) {
+			if (state == WS_MOUSE_UP) {
 				ShowImage(xcoord[2], ycoord[2], width[2], height[2], Images[IMG_BUTTON_DOWN], 0, 0);
 				button_pressed = 0;
 			}
@@ -352,7 +352,7 @@ int TextArea::MouseClick(int button, int state, float x, float y) {
 		cur_selected = LocateCount(y) + top_item_number;
 	}
 	if (Inside(x,y,3) != 0 && Inside(x,y,4) == 0) {
-		if (state != GLUT_UP) { return 1; }
+		if (state != WS_MOUSE_UP) { return 1; }
 		// We're outside the active scroll bar, but in the passive area. The active scrollbar is only for MouseMoveClick
 		if (y > ycoord[4]) {
 			// Top area
