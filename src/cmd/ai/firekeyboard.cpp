@@ -377,8 +377,9 @@ static void DoDockingOps (Unit * parent, Unit * targ,unsigned char playa, unsign
       vectorOfKeyboardInput[playa].req=false;
     }
     if (vectorOfKeyboardInput[playa].doc) {
-      fprintf (stderr,"dock %d", parent->Dock(targ));
-      vectorOfKeyboardInput[playa].doc=0;
+      if (!parent->Dock(targ))
+	parent->UnDock(targ);
+      vectorOfKeyboardInput[playa].doc=false;
     }
     if (vectorOfKeyboardInput[playa].und) {
       fprintf (stderr,"udock %d", parent->UnDock(targ));

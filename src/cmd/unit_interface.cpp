@@ -207,6 +207,7 @@ struct UpgradingInfo {
     }
   }
   void Render(){
+    GFXSubwindow (0,0,g_game.x_resolution,g_game.y_resolution);
     Unit * un = buyer.GetUnit(); 
     if (un) {
       Cockpit * cp = _Universe->isPlayerStarship(un);
