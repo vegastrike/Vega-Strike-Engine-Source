@@ -10,6 +10,7 @@ libpython_a_SOURCES =				\
 	python_class.h	\
 	python_compile.h	\
 	python_compile.cpp	\
-	unit_wrapper.cpp	
+	unit_wrapper.cpp	\
+	briefing_wrapper.cpp	
 
 
