@@ -366,6 +366,7 @@ Texture::Texture (const char * FileNameRGB, const char *FileNameA, int stage, en
 	int format;
 	FILE * fp1=NULL;
 	this->texfilename = new char [texfilename.length()+1];
+	strcpy(this->texfilename,texfilename.c_str());
 	data = readImage (fp,bpp,format,sizeX,sizeY,palette,NULL/*texTransform*/,true);
 	if (data) {
 	  //FIXME deal with palettes and grayscale with alpha
@@ -390,7 +391,7 @@ Texture::Texture (const char * FileNameRGB, const char *FileNameA, int stage, en
 	  BITMAPINFOHEADER info1;
 	  
 
-	  strcpy(this->texfilename,texfilename.c_str());
+
 	  
 	  if (FileNameA)
 	    {
