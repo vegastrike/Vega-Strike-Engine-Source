@@ -631,10 +631,11 @@ void destroyObjects() {
 }
 
 
-extern double gametime;
+//extern double gametime;
 
-double gametime=0.0;
-int total_nr_frames=0;
+//double gametime=0.0;
+//int total_nr_frames=0;
+
 int getmicrosleep () {
   static int microsleep = XMLSupport::parse_int (vs_config->getVariable ("audio","threadtime","2000"));
   return microsleep;
@@ -653,17 +654,8 @@ void main_loop() {
       
   ProcessInput();
 
-  double elapsed=GetElapsedTime();
+  mission->DirectorBenchmark();
 
-  gametime+=elapsed;
-  total_nr_frames++;
-
-  //cout << "elapsed= " << elapsed << " fps= " << 1.0/elapsed << " average= " << ((double)total_nr_frames)/gametime << " in " << gametime << " seconds" << endl;
-
-  if(benchmark>0.0 && benchmark<gametime){
-    cout << "Game was running for " << gametime << " secs,   av. framerate " << ((double)total_nr_frames)/gametime << endl;
-    exit(0);
-  }
 #ifdef UPDATEDEBUG
   fprintf (stderr,"dl");
   fflush (stderr);

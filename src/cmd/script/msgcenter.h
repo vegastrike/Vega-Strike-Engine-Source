@@ -61,7 +61,7 @@ class gameMessage {
 class MessageCenter {
  public:
   gameMessage *last(unsigned int n);
-  void add(string from,string to,string message);
+  void add(string from,string to,string message,double delay=0.0);
 
  private:
   vector<gameMessage *> messages;

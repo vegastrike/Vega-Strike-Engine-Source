@@ -79,7 +79,7 @@ class tagDomNode : public easyDomNode {
   void Tag(tagMap *tagmap) { 
     tag=(*tagmap)[Name()];
     if(tag==0){
-      cout << "cannot translate tag " << Name() << endl;
+      //     cout << "cannot translate tag " << Name() << endl;
     }
 
     vector<easyDomNode *>::const_iterator siter;

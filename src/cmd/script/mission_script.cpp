@@ -637,7 +637,7 @@ void Mission::deleteVarInst(varInst *vi,bool del_local){
     debug(2,NULL,0,"reqested to delete vi_error\n");
   }
   else if(del_local==false && vi->scopetype==VI_IN_OBJECT){
-    debug(2,NULL,0,"reqested to delete vi in object\n");
+    //debug(2,NULL,0,"reqested to delete vi in object\n");
   }
   else if(vi->scopetype==VI_CONST){
     debug(12,NULL,0,"reqested to delete const vi\n");

@@ -41,6 +41,7 @@
 #include "xml_support.h"
 
 #include "vegastrike.h"
+#include "lin_time.h"
 
 #include "mission.h"
 #include "easydom.h"
@@ -84,7 +85,7 @@ start_game=XMLSupport::parse_bool(vs_config->getVariable("interpreter","startgam
 
   director=NULL;
 
-  msgcenter->add("game","all","parsing programmed mission");
+  //  msgcenter->add("game","all","parsing programmed mission");
 
   cout << "parsing declarations for director" << endl;
 
@@ -142,7 +143,7 @@ void Mission::DirectorInitgame(){
     runtime.cur_thread->classid_stack.pop_back();
   }
 
-  msgcenter->add("game","all","initialization of programmed missions done");
+  //  msgcenter->add("game","all","initialization of programmed missions done");
 
   if(debuglevel>=1 && start_game==false){
     while(true){
@@ -363,4 +364,23 @@ void Mission::runScript(string modulename,string scriptname,unsigned int classid
 
   runtime.cur_thread->classid_stack.pop_back();
   runtime.cur_thread->module_stack.pop_back();
+}
+
+
+void Mission::DirectorBenchmark(){
+  double elapsed=GetElapsedTime();
+
+  gametime+=elapsed;
+  total_nr_frames++;
+
+  //cout << "elapsed= " << elapsed << " fps= " << 1.0/elapsed << " average= " << ((double)total_nr_frames)/gametime << " in " << gametime << " seconds" << endl;
+
+  if(benchmark>0.0 && benchmark<gametime){
+    cout << "Game was running for " << gametime << " secs,   av. framerate " << ((double)total_nr_frames)/gametime << endl;
+    exit(0);
+  }
+}
+
+double Mission::getGametime(){
+  return gametime;
 }

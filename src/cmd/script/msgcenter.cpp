@@ -47,7 +47,7 @@
 //#include "vs_globals.h"
 //#include "vegastrike.h"
 
-void MessageCenter::add(string from,string to,string message){
+void MessageCenter::add(string from,string to,string message,double delay){
   gameMessage *msg=new gameMessage();
   
   msg->from=from;
@@ -57,7 +57,7 @@ void MessageCenter::add(string from,string to,string message){
   msg->ufrom=NULL;
   msg->uto=NULL;
 
-  //  msg->time=gametime;
+  msg->time=mission->getGametime()+delay;
 
   messages.push_back(msg);
 }

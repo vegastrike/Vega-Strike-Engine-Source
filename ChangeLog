@@ -1,3 +1,12 @@
+2002-02-06 Alexander Rawass <alexannika@users.sourceforge.net>
+	
+	* various improvements on missions:
+	  - moved benchmarking/gametime from main_loop.cpp to director
+	  - message display shows the time when the message came
+	  - added a delay to the messages
+	* modified my systems to use new texture dirs
+
+	
 2002-02-03 Daniel Horn <hellcatv@hotmail.com>
 	* Added splash screens... it's a variable in vegastrike.config defaults to vega_splash.ani  found in animations/vega_splash.ani
 

@@ -296,8 +296,10 @@ varInst *Mission::call_io_message(missionNode *node,int mode){
   varInst *args_vi[3];
   string args_str[3];
 
+  int delay=getIntArg(node,mode,0);
+
   for(int i=0;i<3;i++){
-    args[i]=getArgument(node,mode,i);
+    args[i]=getArgument(node,mode,i+1);
     args_vi[i]=checkObjectExpr(args[i],mode);
     if(mode==SCRIPT_RUN){
       args_str[i]=call_string_getstring(node,mode,args_vi[i]);
@@ -306,7 +308,7 @@ varInst *Mission::call_io_message(missionNode *node,int mode){
    }
 
   if(mode==SCRIPT_RUN){
-    msgcenter->add(args_str[0],args_str[1],args_str[2]);
+    msgcenter->add(args_str[0],args_str[1],args_str[2],delay);
   }
 
   varInst *viret=newVarInst(VI_TEMP);

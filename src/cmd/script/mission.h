@@ -207,6 +207,7 @@ typedef vector<varInst *> olist_t;
 class Mission {
  public:
   Mission(char *configfile);
+  void initMission();
 
   int number_of_flightgroups,number_of_ships;
 
@@ -224,6 +225,9 @@ class Mission {
   void DirectorStart(missionNode *node);
   void DirectorInitgame();
   void DirectorEnd();
+  void DirectorBenchmark();
+  double getGametime();
+
   void  loadMissionModules();
  void  loadModule(string modulename);
 void addModule(string modulename);
@@ -243,6 +247,8 @@ void  deleteVarInst(varInst *vi,bool del_local=false);
  private:
   //  string getVariable(easyDomNode *section,string name,string defaultval);
 
+ missionNode *top;
+ 
   easyDomNode *variables;
   easyDomNode *origin_node;
 
@@ -252,6 +258,9 @@ void  deleteVarInst(varInst *vi,bool del_local=false);
 
   int debuglevel;
   bool start_game;
+
+  double gametime;
+  int total_nr_frames;
 
   ofstream var_out;
 

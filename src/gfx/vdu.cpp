@@ -303,16 +303,23 @@ void VDU::DrawMessages(Unit *target){
     lastmsg=mc->last(i);
     if(lastmsg!=NULL){
       char timebuf[100];
-      sprintf(timebuf,"-%d ",i);
+      double sendtime=lastmsg->time;
+      double nowtime=mission->getGametime();
+      if(sendtime<=nowtime){
+	int sendtime_mins=(int)(sendtime/60.0);
+	int sendtime_secs=(int)(sendtime - sendtime_mins*60);
 
-      string mymsg=timebuf+lastmsg->message;
-      int msglen=mymsg.size();
-      int rows_needed=msglen/cols;
-      fullstr=mymsg+"\n"+fullstr;
-      //fullstr=fullstr+mymsg+"\n";
+	sprintf(timebuf,"%2d.%02d ",sendtime_mins,sendtime_secs);
 
-      rows_used+=rows_needed+1;
-      //      cout << "nav  " << mymsg << " rows " << rows_needed << endl;
+	string mymsg=timebuf+lastmsg->message;
+	int msglen=mymsg.size();
+	int rows_needed=msglen/cols;
+	fullstr=mymsg+"\n"+fullstr;
+	//fullstr=fullstr+mymsg+"\n";
+
+	rows_used+=rows_needed+1;
+	//      cout << "nav  " << mymsg << " rows " << rows_needed << endl;
+      }
     }
   }
 

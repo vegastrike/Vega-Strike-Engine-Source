@@ -173,6 +173,9 @@ void bootstrap_main_loop () {
   if (LoadMission) {
     LoadMission=false;
     mission=new Mission(mission_name);
+
+    mission->initMission();
+
     SplashScreen = new Animation (mission->getVariable ("splashscreen",vs_config->getVariable ("graphics","splash_screen","vega_splash.ani")).c_str(),0);
     bootstrap_draw (SplashScreen);
     bootstrap_draw (SplashScreen);

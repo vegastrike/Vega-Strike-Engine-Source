@@ -52,16 +52,11 @@
 Mission::Mission(char *configfile){
   number_of_flightgroups=0;
   number_of_ships=0;
-#if 0
-  easyDomFactory<easyDomNode> *domf= new easyDomFactory<easyDomNode>();
 
-  easyDomNode *top=domf->LoadXML(configfile);
-#else
   easyDomFactory<missionNode> *domf= new easyDomFactory<missionNode>();
 
-  missionNode *top=domf->LoadXML(configfile);
+ top=domf->LoadXML(configfile);
 
-#endif
   if(top==NULL){
     cout << "Panic exit - mission file not found" << endl;
     exit(0);
@@ -74,13 +69,20 @@ Mission::Mission(char *configfile){
 #ifndef VS_MIS_SEL
   director=NULL;
 
+  gametime=0.0;
+  total_nr_frames=0;
+
   initTagMap();
 
   top->Tag(&tagmap);
 
+#endif
+
+}
+
+void Mission::initMission(){
   msgcenter=new MessageCenter();
   msgcenter->add("game","all","Welcome to Vegastrike");
-#endif
 
   checkMission(top);
 }
