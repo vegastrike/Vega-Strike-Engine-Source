@@ -545,7 +545,7 @@ void BaseComputer::constructControls(void) {
 
         // Description box.
         StaticDisplay* ms = new StaticDisplay;
-        ms->setRect( Rect(-.96, -.95, 1.87, .5) );
+        ms->setRect( Rect(-96+.48*.75, -.95, 1.9-.47*.666, .5) );
         ms->setColor( GFXColor(color.r,color.g,color.b,.1) );
 		ms->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY);
         ms->setFont( Font(.06) );
@@ -554,9 +554,14 @@ void BaseComputer::constructControls(void) {
         ms->setTextMargins(Size(.02,.01));
         ms->setId("Description");
         ms->setScroller(descScroller);
+        StaticImageDisplay * picture = new StaticImageDisplay;
+        picture->setRect(Rect(-.96,-.45,.46*.75,-.47));
+        picture->setTexture("blackclear.png");
+        picture->setId("DescriptionImage");
         cargoGroup->addChild(ms);
 
         cargoGroup->addChild(descScroller);		// Want this "over" the description.
+        cargoGroup->addChild(picture);
     }
 
     {
@@ -1452,6 +1457,21 @@ void BaseComputer::updateTransactionControlsForSelection(TransactionList* tlist)
     }
 
     // Change the description control.
+    unsigned int pic;
+    StaticImageDisplay* descimage = dynamic_cast<StaticImageDisplay*>( window()->findControlById("DescriptionImage") );
+    if (descimage)
+       descimage->setTexture("blackclear.png");
+    if ((pic=descString.find("@"))!=string::npos){
+       std::string texture = descString.substr(pic+1);
+       descString = descString.substr(0,pic);
+       unsigned int picend = texture.find("@");
+       if (picend!=string::npos) {
+          descString+=texture.substr(picend+1);
+          texture = texture.substr(0,picend);          
+       }              
+       if (descimage)
+          descimage->setTexture(texture);
+    }
     desc->setText(descString);
 }
 
