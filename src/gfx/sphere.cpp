@@ -40,7 +40,7 @@ SphereMesh::SphereMesh(float radius, int stacks, int slices, char *texture, char
       odq = draw_queue;
     //    stacks = origst/(l+1);
     //slices = origsl/(l+1);
-    if (stacks>8) {
+    if (stacks>12) {
       stacks -=4;
       slices-=4;
     } else {
@@ -146,8 +146,16 @@ SphereMesh::SphereMesh(float radius, int stacks, int slices, char *texture, char
       Mesh * oldorig = orig;
       refcount=1;
       orig=NULL;
-      if (l>=1)
+      if (l>=1) {
 	lodsize=(numspheres+1-l)*pixelscalesize;
+	if (l==1) {
+	  lodsize*=2;
+	}else if (l==2) {
+	  lodsize*=1.75;
+	} else if (l==3) {
+	  lodsize*=1.5;
+	}
+      }
       oldmesh[l]=*this;
       refcount =0;
       orig = oldorig;
