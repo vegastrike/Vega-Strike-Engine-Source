@@ -616,6 +616,7 @@ void Cockpit::Draw() {
 		text->SetSize(1,-1);
 		float x; float y;
 		if (dietime==0) {
+			respawnunit=0;
 			text->GetCharSize (x,y);
 			text->SetCharSize (x*4,y*4);
 			text->SetPos (0-(x*2*14),0-(y*2));
@@ -627,6 +628,7 @@ void Cockpit::Draw() {
 	SetView (CP_PAN);
 	zoomfactor=dietime*10;
 	if (respawnunit){
+   	  zoomfactor=1;
 	  respawnunit=0;
 	  Unit * un = new Unit (unitfilename.c_str(),true,false,this->unitfaction,NULL,0);
 	  un->SetCurPosition (unitlocation);
@@ -677,6 +679,7 @@ void Cockpit::Draw() {
     }
   }
   if (switchunit) {
+    zoomfactor=1;
     static int index=0;
     switchunit=0;
     un_iter ui= _Universe->activeStarSystem()->getUnitList()->createIterator();
