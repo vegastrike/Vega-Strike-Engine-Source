@@ -221,7 +221,7 @@ BaseComputer::BaseComputer(Unit* player, Unit* base, const std::vector<DisplayMo
 {
     // Make sure we get this color loaded.
     if(isClear(NO_MONEY_COLOR)) {
-		float color[4]={1,0,0,1};           // Default = light red.
+		float color[4]={1,.3,.3,1};           // Default = light red.
 		vs_config->getColor(std::string("default"), "no_money", color, true);
 		NO_MONEY_COLOR = GFXColor(color[0], color[1], color[2], color[3]);
         assert(!isClear(NO_MONEY_COLOR));
@@ -367,7 +367,7 @@ void BaseComputer::constructControls(void) {
         ipick->setFont( Font(.07) );
         ipick->setTextMargins(Size(0.02,0.01));
         ipick->setSelectionColor(GFXColor(0,.6,0,.8));
-        ipick->setHighlightColor(GFXColor(0,.5,0,.5));
+        ipick->setHighlightColor(GFXColor(0,.6,0,.35));
         ipick->setHighlightTextColor(GUI_OPAQUE_WHITE);
         ipick->setId("PlayerCargo");
         ipick->setScroller(invScroller);
@@ -407,7 +407,7 @@ void BaseComputer::constructControls(void) {
         ms->setScroller(descScroller);
         cargoGroup->addChild(ms);
 
-        cargoGroup->addChild(descScroller);		// Want this "over the description.
+        cargoGroup->addChild(descScroller);		// Want this "over" the description.
     }
 
     {
@@ -436,44 +436,54 @@ void BaseComputer::constructControls(void) {
         // Scroller for seller.
         Scroller* sellerScroller = new Scroller;
         sellerScroller->setRect( Rect(-.20, -.4, .05, 1) );
-        sellerScroller->setColor( GFXColor(.3,.3,1) );
+        sellerScroller->setColor( GFXColor(0,1,0,.1) );
+        sellerScroller->setThumbColor( GFXColor(0,.4,0), GUI_OPAQUE_WHITE );
+        sellerScroller->setButtonColor( GFXColor(0,.4,0) );
         sellerScroller->setTextColor(GUI_OPAQUE_WHITE);
-        upgradeGroup->addChild(sellerScroller);
+		sellerScroller->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY);
 
         // Seller picker.
         SimplePicker* sellpick = new SimplePicker;
         sellpick->setRect( Rect(-.96, -.4, .76, 1) );
-        sellpick->setColor( GFXColor(0,0,.4) );
+        sellpick->setColor( GFXColor(0,1,0,.1) );
+		sellpick->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY);
         sellpick->setTextColor(GUI_OPAQUE_WHITE);
         sellpick->setFont( Font(.07) );
         sellpick->setTextMargins(Size(0.02,0.01));
-        sellpick->setSelectionColor(GFXColor(.4,.6,.4));
-        sellpick->setHighlightColor(GFXColor(.2,.2,.2));
+        sellpick->setSelectionColor(GFXColor(0,.6,0,.8));
+        sellpick->setHighlightColor(GFXColor(0,.6,0,.35));
         sellpick->setHighlightTextColor(GUI_OPAQUE_WHITE);
         sellpick->setId("BaseUpgrades");
         sellpick->setScroller(sellerScroller);
         upgradeGroup->addChild(sellpick);
 
+        upgradeGroup->addChild(sellerScroller);		// Want this "over" the picker.
+
         // Scroller for inventory.
         Scroller* invScroller = new Scroller;
         invScroller->setRect( Rect(.91, -.4, .05, 1) );
-        invScroller->setColor( GFXColor(.3,.3,1) );
+        invScroller->setColor( GFXColor(0,1,0,.1) );
+        invScroller->setThumbColor( GFXColor(0,.4,0), GUI_OPAQUE_WHITE );
+        invScroller->setButtonColor( GFXColor(0,.4,0) );
         invScroller->setTextColor(GUI_OPAQUE_WHITE);
-        upgradeGroup->addChild(invScroller);
+		invScroller->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY);
 
         // Inventory picker.
         SimplePicker* ipick = new SimplePicker;
         ipick->setRect( Rect(.15, -.4, .76, 1) );
-        ipick->setColor( GFXColor(0,0,.4) );
+        ipick->setColor( GFXColor(0,1,0,.1) );
+		ipick->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY);
         ipick->setTextColor(GUI_OPAQUE_WHITE);
+        ipick->setSelectionColor(GFXColor(0,.6,0,.8));
+        ipick->setHighlightColor(GFXColor(0,.6,0,.35));
+        ipick->setHighlightTextColor(GUI_OPAQUE_WHITE);
         ipick->setFont( Font(.07) );
         ipick->setTextMargins(Size(0.02,0.01));
-        ipick->setSelectionColor(GFXColor(.4,.6,.4));
-        ipick->setHighlightColor(GFXColor(.2,.2,.2));
-        ipick->setHighlightTextColor(GUI_OPAQUE_WHITE);
         ipick->setId("PlayerUpgrades");
         ipick->setScroller(invScroller);
         upgradeGroup->addChild(ipick);
+
+        upgradeGroup->addChild(invScroller);		// Want this "over" picker.
 
         // Buy button.
         NewButton* buy = new NewButton;
@@ -488,14 +498,17 @@ void BaseComputer::constructControls(void) {
         // Scroller for description.
         Scroller* descScroller = new Scroller;
         descScroller->setRect( Rect(.91, -.95, .05, .5) );
-        descScroller->setColor( GFXColor(.3,.3,1) );
+        descScroller->setColor( GFXColor(0,1,0,.1) );
+        descScroller->setThumbColor( GFXColor(0,.4,0), GUI_OPAQUE_WHITE );
+        descScroller->setButtonColor( GFXColor(0,.4,0) );
         descScroller->setTextColor(GUI_OPAQUE_WHITE);
-        upgradeGroup->addChild(descScroller);
+		descScroller->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY);
 
         // Description box.
         StaticDisplay* ms = new StaticDisplay;
         ms->setRect( Rect(-.96, -.95, 1.87, .5) );
-        ms->setColor( GFXColor(.2,.4,.8) );
+        ms->setColor( GFXColor(0,1,0,.1) );
+		ms->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY);
         ms->setFont( Font(.06) );
         ms->setMultiLine(true);
         ms->setTextColor(GUI_OPAQUE_WHITE);
@@ -503,6 +516,8 @@ void BaseComputer::constructControls(void) {
         ms->setId("Description");
         ms->setScroller(descScroller);
         upgradeGroup->addChild(ms);
+
+        upgradeGroup->addChild(descScroller);	// Want this "over" description box.
     }
 
     {
@@ -514,35 +529,43 @@ void BaseComputer::constructControls(void) {
         // Scroller for picker.
         Scroller* pickScroller = new Scroller;
         pickScroller->setRect( Rect(.91, 0, .05, .65) );
-        pickScroller->setColor( GFXColor(.3,.3,1) );
+        pickScroller->setColor( GFXColor(1,0,1,.1) );
+        pickScroller->setThumbColor( GFXColor(.4,0,.4), GUI_OPAQUE_WHITE );
+        pickScroller->setButtonColor( GFXColor(.4,0,.4) );
         pickScroller->setTextColor(GUI_OPAQUE_WHITE);
-        newsGroup->addChild(pickScroller);
+		pickScroller->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY);
 
         // News picker.
         SimplePicker* pick = new SimplePicker;
         pick->setRect( Rect(-.96, 0, 1.87, .65) );
-        pick->setColor( GFXColor(0,0,.4) );
+        pick->setColor( GFXColor(1,0,1,.1) );
+		pick->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY);
         pick->setTextColor(GUI_OPAQUE_WHITE);
+        pick->setSelectionColor(GFXColor(0,.6,0,.8));
+        pick->setHighlightColor(GFXColor(0,.6,0,.35));
+        pick->setHighlightTextColor(GUI_OPAQUE_WHITE);
         pick->setFont( Font(.07) );
         pick->setTextMargins(Size(0.02,0.01));
-        pick->setSelectionColor(GFXColor(.4,.6,.4));
-        pick->setHighlightColor(GFXColor(.2,.2,.2));
-        pick->setHighlightTextColor(GUI_OPAQUE_WHITE);
         pick->setId("NewsPicker");
         pick->setScroller(pickScroller);
         newsGroup->addChild(pick);
 
+        newsGroup->addChild(pickScroller);		// Want scroller "over" picker.
+
         // Scroller for description.
         Scroller* descScroller = new Scroller;
         descScroller->setRect( Rect(.91, -.95, .05, .90) );
-        descScroller->setColor( GFXColor(.3,.3,1) );
+        descScroller->setColor( GFXColor(1,0,1,.1) );
+        descScroller->setThumbColor( GFXColor(.4,0,.4), GUI_OPAQUE_WHITE );
+        descScroller->setButtonColor( GFXColor(.4,0,.4) );
         descScroller->setTextColor(GUI_OPAQUE_WHITE);
-        newsGroup->addChild(descScroller);
+		descScroller->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY);
 
         // Description box.
         StaticDisplay* ms = new StaticDisplay;
         ms->setRect( Rect(-.96, -.95, 1.87, .90) );
-        ms->setColor( GFXColor(.2,.4,.8) );
+        ms->setColor( GFXColor(1,0,1,.1) );
+		ms->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY);
         ms->setFont( Font(.07) );
         ms->setMultiLine(true);
         ms->setTextColor(GUI_OPAQUE_WHITE);
@@ -550,6 +573,8 @@ void BaseComputer::constructControls(void) {
         ms->setId("Description");
         ms->setScroller(descScroller);
         newsGroup->addChild(ms);
+
+        newsGroup->addChild(descScroller);	// Want scroller "over" description box.
     }
     {
         // MISSIONS group control.
@@ -560,35 +585,43 @@ void BaseComputer::constructControls(void) {
         // Scroller for picker.
         Scroller* pickScroller = new Scroller;
         pickScroller->setRect( Rect(-.20, -.8, .05, 1.45) );
-        pickScroller->setColor( GFXColor(.3,.3,1) );
+        pickScroller->setColor( GFXColor(1,0,0,.1) );
+        pickScroller->setThumbColor( GFXColor(.4,0,0), GUI_OPAQUE_WHITE );
+        pickScroller->setButtonColor( GFXColor(.4,0,0) );
         pickScroller->setTextColor(GUI_OPAQUE_WHITE);
-        missionsGroup->addChild(pickScroller);
+		pickScroller->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY);
 
         // Picker.
-        SimplePicker* picker = new SimplePicker;
-        picker->setRect( Rect(-.96, -.8, .76, 1.45) );
-        picker->setColor( GFXColor(0,0,.4,1) );
-        picker->setTextColor(GUI_OPAQUE_WHITE);
-        picker->setFont( Font(.07) );
-        picker->setTextMargins(Size(0.02,0.01));
-        picker->setSelectionColor(GFXColor(.4,.6,.4));
-        picker->setHighlightColor(GFXColor(.2,.2,.2));
-        picker->setHighlightTextColor(GUI_OPAQUE_WHITE);
-        picker->setId("Missions");
-        picker->setScroller(pickScroller);
-        missionsGroup->addChild(picker);
+        SimplePicker* pick = new SimplePicker;
+        pick->setRect( Rect(-.96, -.8, .76, 1.45) );
+        pick->setColor( GFXColor(1,0,0,.1) );
+		pick->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY);
+        pick->setTextColor(GUI_OPAQUE_WHITE);
+        pick->setSelectionColor(GFXColor(0,.6,0,.8));
+        pick->setHighlightColor(GFXColor(0,.6,0,.35));
+        pick->setHighlightTextColor(GUI_OPAQUE_WHITE);
+        pick->setFont( Font(.07) );
+        pick->setTextMargins(Size(0.02,0.01));
+        pick->setId("Missions");
+        pick->setScroller(pickScroller);
+        missionsGroup->addChild(pick);
+
+        missionsGroup->addChild(pickScroller);		// Want scroller "over" picker.
 
         // Scroller for description.
         Scroller* descScroller = new Scroller;
         descScroller->setRect( Rect(.91, -.8, .05, 1.45) );
-        descScroller->setColor( GFXColor(.3,.3,1) );
+        descScroller->setColor( GFXColor(1,0,0,.1) );
+        descScroller->setThumbColor( GFXColor(.4,0,0), GUI_OPAQUE_WHITE );
+        descScroller->setButtonColor( GFXColor(.4,0,0) );
         descScroller->setTextColor(GUI_OPAQUE_WHITE);
-        missionsGroup->addChild(descScroller);
+		descScroller->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY);
 
         // Description box.
         StaticDisplay* ms = new StaticDisplay;
         ms->setRect( Rect(-.10, -.8, 1.01, 1.45) );
-        ms->setColor( GFXColor(.2,.4,.8) );
+        ms->setColor( GFXColor(1,0,0,.1) );
+		ms->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY);
         ms->setFont( Font(.06) );
         ms->setMultiLine(true);
         ms->setTextColor(GUI_OPAQUE_WHITE);
@@ -596,6 +629,8 @@ void BaseComputer::constructControls(void) {
         ms->setId("Description");
         ms->setScroller(descScroller);
         missionsGroup->addChild(ms);
+
+        missionsGroup->addChild(descScroller);		// Want scroller "over" description box.
 
         // Accept button.
         NewButton* accept = new NewButton;
@@ -606,8 +641,8 @@ void BaseComputer::constructControls(void) {
         accept->setFont(Font(.08, BLACK_STROKE));
         accept->setId("Commit");
         missionsGroup->addChild(accept);
-   }
-    {
+	}
+	{
         // SHIP_DEALER group control.
         GroupControl* shipDealerGroup = new GroupControl;
         shipDealerGroup->setId("ShipDealerGroup");
@@ -616,35 +651,43 @@ void BaseComputer::constructControls(void) {
         // Scroller for picker.
         Scroller* pickScroller = new Scroller;
         pickScroller->setRect( Rect(-.20, -.8, .05, 1.45) );
-        pickScroller->setColor( GFXColor(.3,.3,1) );
+        pickScroller->setColor( GFXColor(1,1,0,.1) );
+        pickScroller->setThumbColor( GFXColor(.4,.4,0), GUI_OPAQUE_WHITE );
+        pickScroller->setButtonColor( GFXColor(.4,.4,0) );
         pickScroller->setTextColor(GUI_OPAQUE_WHITE);
-        shipDealerGroup->addChild(pickScroller);
+		pickScroller->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY);
 
         // Picker.
-        SimplePicker* picker = new SimplePicker;
-        picker->setRect( Rect(-.96, -.8, .76, 1.45) );
-        picker->setColor( GFXColor(0,0,.4,1) );
-        picker->setTextColor(GUI_OPAQUE_WHITE);
-        picker->setFont( Font(.07) );
-        picker->setTextMargins(Size(0.02,0.01));
-        picker->setSelectionColor(GFXColor(.4,.6,.4));
-        picker->setHighlightColor(GFXColor(.2,.2,.2));
-        picker->setHighlightTextColor(GUI_OPAQUE_WHITE);
-        picker->setId("Ships");
-        picker->setScroller(pickScroller);
-        shipDealerGroup->addChild(picker);
+        SimplePicker* pick = new SimplePicker;
+        pick->setRect( Rect(-.96, -.8, .76, 1.45) );
+        pick->setColor( GFXColor(1,1,0,.1) );
+		pick->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY);
+        pick->setTextColor(GUI_OPAQUE_WHITE);
+        pick->setSelectionColor(GFXColor(0,.6,0,.8));
+        pick->setHighlightColor(GFXColor(0,.6,0,.35));
+        pick->setHighlightTextColor(GUI_OPAQUE_WHITE);
+        pick->setFont( Font(.07) );
+        pick->setTextMargins(Size(0.02,0.01));
+        pick->setId("Ships");
+        pick->setScroller(pickScroller);
+        shipDealerGroup->addChild(pick);
+
+        shipDealerGroup->addChild(pickScroller);		// Want scroller to be "over" picker.
 
         // Scroller for description.
         Scroller* descScroller = new Scroller;
         descScroller->setRect( Rect(.91, -.8, .05, 1.45) );
-        descScroller->setColor( GFXColor(.3,.3,1) );
+        descScroller->setColor( GFXColor(1,1,0,.1) );
+        descScroller->setThumbColor( GFXColor(.4,.4,0), GUI_OPAQUE_WHITE );
+        descScroller->setButtonColor( GFXColor(.4,.4,0) );
         descScroller->setTextColor(GUI_OPAQUE_WHITE);
-        shipDealerGroup->addChild(descScroller);
+		descScroller->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY);
 
         // Description box.
         StaticDisplay* ms = new StaticDisplay;
         ms->setRect( Rect(-.10, -.8, 1.01, 1.45) );
-        ms->setColor( GFXColor(.2,.4,.8) );
+        ms->setColor( GFXColor(1,1,0,.1) );
+		ms->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY);
         ms->setFont( Font(.06) );
         ms->setMultiLine(true);
         ms->setTextColor(GUI_OPAQUE_WHITE);
@@ -652,6 +695,8 @@ void BaseComputer::constructControls(void) {
         ms->setId("Description");
         ms->setScroller(descScroller);
         shipDealerGroup->addChild(ms);
+
+        shipDealerGroup->addChild(descScroller);	// Want scroller "over" description box.
 
         // Buy button.
         NewButton* buy = new NewButton;
