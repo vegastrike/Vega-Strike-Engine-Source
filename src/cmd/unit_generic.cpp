@@ -89,6 +89,14 @@ void Unit::BuildBSPTree(const char *filename, bool vplane, Mesh * hull) {
  }	
 
 }
+static bool isMissile(const weapon_info *weap) {
+  static bool useProjectile=XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","projectile_means_missile","false"));
+  if (useProjectile&&weap->type==weapon_info::PROJECTILE)
+    return true;
+  if (useProjectile==false&&weap->size>=weapon_info::LIGHTMISSILE)
+    return true;
+  return false;  
+}
 
 bool flickerDamage (Unit * un, float hullpercent) {
 	#define damagelevel hullpercent
@@ -1099,7 +1107,7 @@ void Unit::Fire (unsigned int weapon_type_bitmask, bool listen_to_owner) {
 					continue;
 			}
 
-			const bool mis = (*i).type->type==weapon_info::PROJECTILE;
+			const bool mis = isMissile((*i).type);
 			const bool locked_on = (*i).time_to_lock<=0;
 			const bool lockable_weapon = (*i).type->LockTime>0;
 			const bool autotracking_gun =(!mis)&&0!=((*i).size&weapon_info::AUTOTRACKING)&&locked_on;
@@ -1241,7 +1249,7 @@ void Unit::getAverageGunSpeed(float & speed, float &grange, float &mrange) const
 	// this breaks the name, but... it _is_ more useful.
     for (int i=0;i<GetNumMounts();i++) {
 	 if (mounts[i].status==Mount::ACTIVE||mounts[i].status==Mount::INACTIVE) {
-      if (mounts[i].type->type!=weapon_info::PROJECTILE) {
+      if (isMissile(mounts[i].type)==false) {
 	    if (mounts[i].type->Range > grange) {
 	      grange=mounts[i].type->Range;
 		}
@@ -1252,7 +1260,7 @@ void Unit::getAverageGunSpeed(float & speed, float &grange, float &mrange) const
 			beam&= (mounts[i].type->type==weapon_info::BEAM);		
 		}
 	  }
-	  else if(mounts[i].type->type==weapon_info::PROJECTILE){
+	  else if(isMissile(mounts[i].type)){
 		  if(mounts[i].type->Range > mrange) {
 			  mrange=mounts[i].type->Range;
 		  }
@@ -1854,7 +1862,7 @@ void Unit::UpdatePhysics (const Transformation &trans, const Matrix &transmat, c
 		  if (mounts[i].ammo>=0)
 			  mounts[i].ammo++;
 	  }
-      if (mounts[i].ammo==0&&mounts[i].type->type==weapon_info::PROJECTILE, i) {
+      if (mounts[i].ammo==0&&isMissile(mounts[i].type), i) {
 //		  if (isPlayerStarship(this))
 //			  ToggleWeapon (true);
       }
@@ -4070,6 +4078,21 @@ void Unit::SelectAllWeapon (bool Missile) {
   }
 }
 
+void Mount::Activate (bool Missile) {
+  if ((isMissile(type))==Missile) {
+    if (status==INACTIVE)
+      status = ACTIVE;
+  }
+}
+///Sets this gun to inactive, unless unchosen or destroyed
+void Mount::DeActive (bool Missile) {
+  if ((isMissile(type))==Missile) {
+    if (status==ACTIVE)
+      status = INACTIVE;
+  }
+}
+
+
 void Unit::UnFire () {
   for (int i=0;i<GetNumMounts();i++) {
     mounts[i].UnFire();//turns off beams;
@@ -4081,7 +4104,7 @@ void Unit::ActivateGuns (const weapon_info * sz, bool ms) {
   for (int j=0;j<2;j++) {
     for (int i=0;i<GetNumMounts();i++) {
       if (mounts[i].type==sz) {
-	if (mounts[i].status<Mount::DESTROYED&&mounts[i].ammo!=0&&(mounts[i].type->type==weapon_info::PROJECTILE)==ms) {
+	if (mounts[i].status<Mount::DESTROYED&&mounts[i].ammo!=0&&(isMissile(mounts[i].type)==ms)) {
 	  mounts[i].Activate(ms);
 	}else {
 	  sz = mounts[(i+1)%GetNumMounts()].type;
@@ -4117,7 +4140,7 @@ public:
 	typedef std::set<WeaponGroup, WeaponComparator<FORWARD> > WeaponGroupSet;
 
 	static bool checkmount(Unit *un, int i, bool missile) {
-		return (un->mounts[i].status<Mount::DESTROYED&&((un->mounts[i].type->type==weapon_info::PROJECTILE)==missile)&&un->mounts[i].ammo!=0);
+		return (un->mounts[i].status<Mount::DESTROYED&&((isMissile(un->mounts[i].type))==missile)&&un->mounts[i].ammo!=0);
 	}
 
 	static bool isSpecial(const Mount &mount) {
@@ -4346,10 +4369,10 @@ int Unit::LockMissile() const{
   bool missilelock=false;
   bool dumblock=false;
   for (int i=0;i<GetNumMounts();i++) {
-    if (mounts[i].status==Mount::ACTIVE&&mounts[i].type->LockTime>0&&mounts[i].time_to_lock<=0&&mounts[i].type->type==weapon_info::PROJECTILE) {
+    if (mounts[i].status==Mount::ACTIVE&&mounts[i].type->LockTime>0&&mounts[i].time_to_lock<=0&&isMissile(mounts[i].type)) {
       missilelock=true;
     }else {
-      if (mounts[i].status==Mount::ACTIVE&&mounts[i].type->LockTime==0&&mounts[i].type->type==weapon_info::PROJECTILE&&mounts[i].time_to_lock<=0) {
+      if (mounts[i].status==Mount::ACTIVE&&mounts[i].type->LockTime==0&&isMissile(mounts[i].type)&&mounts[i].time_to_lock<=0) {
 	dumblock=true;
       }
     }    

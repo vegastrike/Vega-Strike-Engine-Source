@@ -135,20 +135,8 @@ class Mount {
     Mount();
     Mount(const std::string& name, int ammo, int volume, float xyscale, float zscale, float functionality, float maxfunctionality); //short fix
 
-	void Activate (bool Missile) {
-	  if ((type->type==weapon_info::PROJECTILE)==Missile) {
-		if (status==INACTIVE)
-		  status = ACTIVE;
-	  }
-	}
-	///Sets this gun to inactive, unless unchosen or destroyed
-	void DeActive (bool Missile) {
-	  if ((type->type==weapon_info::PROJECTILE)==Missile) {
-		if (status==ACTIVE)
-		  status = INACTIVE;
-	  }
-	}
-
+    void Activate (bool Missile);
+    void DeActive (bool Missile);
     ///Sets this gun's position on the mesh
     void SetMountPosition (const Vector & v) {pos=v;}
 	void SetMountOrientation(const Quaternion &t) {orient = t;}
