@@ -450,7 +450,7 @@ string Planet::getHumanReadablePlanetType () const{
   	  string temp =getCargoUnitName();
 	  if (temp=="m_class") {
 	    temp = "Agricultural";
-	  }else if (temp=="Dirt") {
+	  }else if (temp=="Dirt"||temp=="newdetroit"||temp=="earth") {
 	    temp = "Industrial";
 	  }else if (temp=="university") {
 	    temp = "University";
@@ -458,6 +458,8 @@ string Planet::getHumanReadablePlanetType () const{
 	    temp = "Ice Colony";
 	  }else if (temp=="carribean") {
 	    temp="Pleasure";
+	  }else {
+	    temp="";
 	  }
 	  return temp;
 }

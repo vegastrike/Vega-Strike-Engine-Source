@@ -28,7 +28,10 @@ string getUnitNameAndFgNoBase (Unit * target) {
     return string(_Universe->GetFaction(target->faction))+" "+target->name;
   }
   if (target->isUnit()==PLANETPTR) {
-    return (((Planet *)target)->getHumanReadablePlanetType())+string(":")+target->name;
+    string hr = ((Planet *)target)->getHumanReadablePlanetType();
+    if (!hr.empty()) {
+      return hr+string(":")+target->name;
+    }
   }
   return target->name;
 }
