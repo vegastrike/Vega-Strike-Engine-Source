@@ -18,7 +18,14 @@ using namespace std;
 std::string CargoToString (const Cargo& cargo) {
   return string ("\t\t\t<Cargo mass=\"")+XMLSupport::tostring((float)cargo.mass)+string("\" price=\"") +XMLSupport::tostring((float)cargo.price)+ string("\" volume=\"")+XMLSupport::tostring((float)cargo.volume)+string("\" quantity=\"")+XMLSupport::tostring((int)cargo.quantity)+string("\" file=\"")+cargo.content+string("\"/>\n");
 }
-
+std::string Unit::massSerializer (const XMLType &input, void *mythis) {
+  Unit * un = (Unit *)mythis;
+  float mass = un->mass;
+  for (unsigned int i=0;i<un->image->cargo.size();i++) {
+    mass-=un->image->cargo[i].mass*un->image->cargo[i].quantity;
+  }
+  return XMLSupport::tostring((float)mass);
+}
 std::string Unit::cargoSerializer (const XMLType &input, void * mythis) {
   Unit * un= (Unit *)mythis;
   if (un->image->cargo.size()==0) {

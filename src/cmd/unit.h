@@ -665,6 +665,7 @@ public:
   string target_fgid[3];
 
  protected:
+  static std::string massSerializer(const struct XMLType &input, void*mythis);
   static std::string cargoSerializer(const struct XMLType &input, void*mythis);
   static std::string mountSerializer(const struct XMLType &input, void*mythis);
   static std::string shieldSerializer(const struct XMLType &input, void*mythis);

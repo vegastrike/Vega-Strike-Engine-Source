@@ -1397,7 +1397,7 @@ void Unit::LoadXML(const char *filename, const char * modifications)
   }
   {
     image->unitwriter->AddTag ("Stats");    
-    image->unitwriter->AddElement("mass",floatStarHandler,XMLType(&mass));
+    image->unitwriter->AddElement("mass",massSerializer,XMLType(&mass));
     image->unitwriter->AddElement("momentofinertia",floatStarHandler,XMLType(&MomentOfInertia));
     image->unitwriter->AddElement("fuel",floatStarHandler,XMLType(&fuel));
     image->unitwriter->EndTag ("Stats");    
