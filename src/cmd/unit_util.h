@@ -11,6 +11,7 @@ namespace UnitUtil {
 	void setFactionIndex (Unit *my_unit,int factionname);
 	void setFactionName (Unit *my_unit,string factionname);
 	string getName(Unit *my_unit);
+	void setName(Unit *my_unit,string name);
     string getFlightgroupName(Unit *my_unit);
 	Unit *getFlightgroupLeader (Unit *my_unit);
 	bool setFlightgroupLeader (Unit *my_unit, Unit *un);

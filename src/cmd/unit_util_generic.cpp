@@ -28,6 +28,10 @@ namespace UnitUtil {
 		if (!my_unit)return "";
 		return my_unit->name;
 	}
+	void setName(Unit *my_unit,string name){
+		if (!my_unit)return;
+		my_unit->name=name;
+	}
 	float getCredits(Unit *my_unit) {
 		if (!my_unit)return 0;
 		Cockpit * tmp;

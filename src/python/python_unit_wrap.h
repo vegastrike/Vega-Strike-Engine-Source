@@ -116,6 +116,7 @@
 	voidEXPORT_UTIL1(setFactionIndex,int,factionname)
 	voidEXPORT_UTIL1(setFactionName,string,factionname)
 	EXPORT_UTIL0(string,getName)
+	voidEXPORT_UTIL1(setName,string,name)
     EXPORT_UTIL0(string,getFlightgroupName)
 	EXPORT_UTIL0(UnitWrapper,getFlightgroupLeader)
 	EXPORT_UTIL1(bool,setFlightgroupLeader,UnitWrapper,un)
