@@ -860,7 +860,7 @@ void BaseComputer::constructControls(void) {
         // Description box.
         StaticDisplay* ms = new StaticDisplay;
         StaticImageDisplay * picture = new StaticImageDisplay;
-        picture->setRect(Rect(-.10,-.9,.5*.75,-.5));
+        picture->setRect(Rect(-.10,-.51,.48*.75,-.48));
         picture->setTexture("blackclear.png");
         picture->setId("DescriptionImage");
         ms->setRect( Rect(-.10, -.5, 1.01, 1.15) );
@@ -2966,7 +2966,7 @@ string buildShipDescription(Cargo &item,std::string & texturedescription) {
                  if (shipname.find(".png")!=string::npos||shipname.find(".jpg")!=string::npos) {
                     hudimage = hudimage.substr(0,doublepng+4-shipname.length());
                     unsigned int ship = hudimage.rfind(item.content);
-                    if (ship!=string::npos) {
+                    if (1||ship!=string::npos) {
                        texturedescription="../units/"+item.content+"/"+shipname;
                     }else {
                        texturedescription=shipname;
