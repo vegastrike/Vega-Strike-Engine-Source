@@ -210,6 +210,7 @@ private:
     int point_state;
     int vertex_state;
     float scale;
+    float lodscale;
     string decal_name;
     string alpha_name;
     string animated_name;

@@ -644,7 +644,7 @@ void Mesh::beginElement(const string &name, const AttributeList &attributes) {
       case XML::UNKNOWN:
 	break;
       case XML::LODFILE:
-	xml->lod.push_back(new Mesh ((*iter).value.c_str(),true,xml->faction,xml->fg,true));//make orig mesh
+	xml->lod.push_back(new Mesh ((*iter).value.c_str(),xml->lodscale,xml->faction,xml->fg,true));//make orig mesh
 	break;
       case XML::SIZE:
 	flotsize = XMLSupport::parse_float ((*iter).value);
@@ -1016,6 +1016,7 @@ void Mesh::LoadXML(const char *filename, float scale, int faction, Flightgroup *
   xml->load_stage = 0;
   xml->recalc_norm=false;
   xml->scale=scale;
+  xml->lodscale=scale;
   XML_Parser parser = XML_ParserCreate(NULL);
   XML_SetUserData(parser, this);
   XML_SetElementHandler(parser, &Mesh::beginElement, &Mesh::endElement);
