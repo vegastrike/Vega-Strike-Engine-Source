@@ -153,6 +153,7 @@ bool Unit::UnDock (Unit * utdw) {
       invisible=false;
       docked&=(~(DOCKED_INSIDE|DOCKED));
       image->DockedTo.SetUnit (NULL);
+      Velocity=utdw->Velocity;
       return true;
     }
   }
