@@ -5,7 +5,7 @@
 #include "config_xml.h"
 #include "xml_support.h"
 #include "vs_globals.h"
-#include "gfx/cockpit_generic.h" 
+#include "gfx/cockpit.h" 
 #include "networking/netclient.h"
 
 struct StarShipControlKeyboard {
@@ -147,8 +147,6 @@ void FlyByKeyboard::KeyboardRollRight (float v) {
 void FlyByKeyboard::Execute () {
   FlyByKeyboard::Execute (true);
 }
-
-#include <gfx/cockpit.h>
 
 void FlyByKeyboard::Execute (bool resetangvelocity) {
 #define SSCK starshipcontrolkeys[whichplayer]
