@@ -109,18 +109,19 @@ void Background::Draw()
 {
   GFXClear (Enabled?GFXFALSE:GFXTRUE);
   if (Enabled) {
+    GFXBlendMode (ONE,ZERO);
     GFXDisable(LIGHTING);
     GFXDisable(DEPTHWRITE);
     GFXDisable(DEPTHTEST);
     GFXEnable (TEXTURE0);
     GFXDisable (TEXTURE1);
-    
     GFXColor (1,1,1,1);
     if (SphereBackground) {
       SphereBackground->DrawNow(FLT_MAX,true);
       //    Mesh::ProcessUndrawnMeshes();//background must be processed...dumb but necessary--otherwise might collide with other mehses
     } else {
       GFXCenterCamera(true);
+      GFXLoadMatrix (MODEL,identity_matrix);
       //GFXLoadIdentity(MODEL);
 	  //	  GFXTranslate (MODEL,_Universe->AccessCamera()->GetPosition()); 
 
