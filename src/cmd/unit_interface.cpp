@@ -806,7 +806,13 @@ void UpgradingInfo::CompleteTransactionConfirm () {
       price =(float)(part.price*(1-usedPrice(percentage)));
       if ((_Universe->AccessCockpit()->credits>price)) {
 	_Universe->AccessCockpit()->credits-=price;
-	un->Upgrade (NewPart,mountoffset,subunitoffset,mode==ADDMODE,true,percentage,templ);
+	int addmultmode = 0;
+	if (mode==ADDMODE)
+	  addmultmode=1;
+	if (multiplicitive==true)
+	  addmultmode=2;
+
+	un->Upgrade (NewPart,mountoffset,subunitoffset,addmultmode,true,percentage,templ);
 	unsigned int removalindex;
 	if ((bas=base.GetUnit())) {
 	Cargo * tmp = bas->GetCargo (part.content,removalindex);
