@@ -26,6 +26,9 @@
 #include "guidefs.h"
 #include "scroller.h"
 
+#include "vs_globals.h"
+#include "config_xml.h"
+#include "xml_support.h"
 
 // The StaticDisplay class is used to show something on a window.
 // Right now, it only supports text, but could be expanded to support

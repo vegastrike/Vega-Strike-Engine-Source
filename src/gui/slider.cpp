@@ -25,6 +25,9 @@
 
 #include "eventmanager.h"
 
+#include "vs_globals.h"
+#include "config_xml.h"
+#include "xml_support.h"
 
 // The Slider class controls the setting for a simple integer range.
 

@@ -27,7 +27,9 @@
 #include "scroller.h"
 #include "painttext.h"
 
-
+#include "vs_globals.h"
+#include "config_xml.h"
+#include "xml_support.h"
 
 // Calculation for indenting children.  Use a factor times total cell height.
 static const float CHILD_INDENT_FACTOR = 0.6;
