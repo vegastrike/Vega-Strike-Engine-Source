@@ -4257,7 +4257,7 @@ bool Unit::UpAndDownGrade (const Unit * up, const Unit * templ, int mountoffset,
   
 #define STDUPGRADE(my,oth,temp,noth) STDUPGRADE_SPECIFY_DEFAULTS (my,oth,temp,noth,downgradelimit->my,blankship->my,false,this->my)
 
-#define STDUPGRADECLAMP(my,oth,temp,noth) STDUPGRADE_SPECIFY_DEFAULTS (my,oth,temp,noth,downgradelimit->my,blankship->my,true,this->my)
+#define STDUPGRADECLAMP(my,oth,temp,noth) STDUPGRADE_SPECIFY_DEFAULTS (my,oth,temp,noth,downgradelimit->my,blankship->my,!force_change_on_nothing,this->my)
 
   STDUPGRADE(armor.front,up->armor.front,templ->armor.front,0);
   STDUPGRADE(armor.back,up->armor.back,templ->armor.back,0);
@@ -4293,12 +4293,14 @@ bool Unit::UpAndDownGrade (const Unit * up, const Unit * templ, int mountoffset,
   STDUPGRADE(computer.max_pitch,tmax_pitch,templ->computer.max_pitch,0);
   STDUPGRADE(computer.max_roll,tmax_roll,templ->computer.max_roll,0);
   STDUPGRADE(fuel,up->fuel,templ->fuel,0);
-
-  for (unsigned int upgr=0;upgr<UnitImages::NUMGAUGES+1+MAXVDUS;upgr++) {
-	STDUPGRADE(image->cockpit_damage[upgr],up->image->cockpit_damage[upgr],templ->image->cockpit_damage[upgr],1);
-	if (image->cockpit_damage[upgr]>1) {
-	  image->cockpit_damage[upgr]=1;//keep it real
-	}
+  static bool UpgradeCockpitDamage = XMLSupport::parse_bool (vs_config->getVariable("physics","upgrade_cockpit_damage","false"));
+  if (UpgradeCockpitDamage){
+	  for (unsigned int upgr=0;upgr<UnitImages::NUMGAUGES+1+MAXVDUS;upgr++) {
+		  STDUPGRADE(image->cockpit_damage[upgr],up->image->cockpit_damage[upgr],templ->image->cockpit_damage[upgr],1);
+		  if (image->cockpit_damage[upgr]>1) {
+			  image->cockpit_damage[upgr]=1;//keep it real
+		  }
+	  }
   }
   if (shield.number==up->shield.number) {
     switch (shield.number) {

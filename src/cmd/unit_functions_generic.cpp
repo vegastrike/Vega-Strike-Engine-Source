@@ -187,3 +187,12 @@ void DealPossibleJumpDamage (Unit *un) {
     un->SetCurPosition (un->LocalPosition()+(((float)rand())/RAND_MAX)*dam*un->GetVelocity().Cast());
   }
 }
+void RecomputeUnitUpgrades (Unit * un) {
+	un->ReduceToTemplate();
+	for (unsigned int i=0;i<un->numCargo();++i) {
+		Cargo * c = &un->GetCargo(i);
+		if (c->category.find("upgrades"==0)) {
+			un->Upgrade(c->content,0,0,true,false);
+		}
+	}
+}

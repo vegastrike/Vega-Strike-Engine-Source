@@ -1391,6 +1391,7 @@ void BaseComputer::updateTransactionControls(const Cargo& item, bool skipFirstCa
 }
 
 // Buy an item from the cargo list.
+extern RecomputeUnitUpgrades (Unit * un);
 bool BaseComputer::buyCargo(const EventCommandId& command, Control* control) {
     Unit* playerUnit = m_player.GetUnit();
     Unit* baseUnit = m_base.GetUnit();
@@ -1403,6 +1404,9 @@ bool BaseComputer::buyCargo(const EventCommandId& command, Control* control) {
     if(item) {
         Cargo itemCopy = *item;     // Copy this because we reload master list before we need it.
         playerUnit->BuyCargo(item->content, quantity, baseUnit, _Universe->AccessCockpit()->credits);
+		static bool ComponentBasedUpgrades = XMLSupport::parse_bool (vs_config->getVariable("physics","component_based_upgrades","false"));
+		if (ComponentBasedUpgrades)
+			RecomputeUnitUpgrades(playerUnit);
         // Reload the UI -- inventory has changed.  Because we reload the UI, we need to 
         //  find, select, and scroll to the thing we bought.  The item might be gone from the
         //  list (along with some categories) after the transaction.
@@ -1427,6 +1431,10 @@ bool BaseComputer::sellCargo(const EventCommandId& command, Control* control) {
         Cargo itemCopy = *item;     // Not sure what "sold" has in it.  Need copy of sold item.
  	Cargo sold;
         playerUnit->SellCargo(item->content, quantity, _Universe->AccessCockpit()->credits, sold, baseUnit);
+		static bool ComponentBasedUpgrades = XMLSupport::parse_bool (vs_config->getVariable("physics","component_based_upgrades","false"));
+		if (ComponentBasedUpgrades)
+			RecomputeUnitUpgrades(playerUnit);
+
         // Reload the UI -- inventory has changed.  Because we reload the UI, we need to 
         //  find, select, and scroll to the thing we bought.  The item might be gone from the
         //  list (along with some categories) after the transaction.
