@@ -346,11 +346,20 @@ bool FireAt::isJumpablePlanet(Unit * targ) {
     }
     return istargetjumpableplanet;
 }
+using std::string;
 void FireAt::PossiblySwitchTarget(bool unused) {
   static float targetswitchprobability = XMLSupport::parse_float (vs_config->getVariable ("AI","Targetting","TargetSwitchProbability",".01"));
   static float targettime = XMLSupport::parse_float (vs_config->getVariable ("AI","Targetting","TimeUntilSwitch","20"));
   if (lastchangedtarg+targettime<0) {
-    ChooseTarget();
+	  bool ct= true;
+	  Flightgroup * fg;	  
+	  if ((fg = parent->getFlightgroup())) {
+		  if (fg->directive.find(".")!=string::npos) {
+			  ct=(parent->Target()==NULL);
+		  }
+	  }
+	  if (ct)
+		  ChooseTarget();
   }
 }
 void FireAt::Execute () {
