@@ -1365,7 +1365,10 @@ void GameCockpit::Draw() {
   GFXColor4f(1,1,1,1);
 	bool die=true;
   if ((un = parent.GetUnit())) {
-    if (view==CP_FRONT) {//only draw crosshairs for front view
+    static bool drawF5VDU (XMLSupport::parse_bool(vs_config->getVariable("graphics","draw_vdus_from_chase_cam","false")));
+    static bool drawF6VDU (XMLSupport::parse_bool(vs_config->getVariable("graphics","draw_vdus_from_panning_cam","false")));
+    static bool drawF7VDU (XMLSupport::parse_bool(vs_config->getVariable("graphics","draw_vdus_from_target_cam","false")));
+    if (view==CP_FRONT||(view==CP_CHASE&&drawF5VDU)||(view==CP_PAN&&drawF6VDU)||(view==CP_TARGET&&drawF7VDU)) {//only draw crosshairs for front view
       if (Radar) {
 	//Radar->Draw();
 	if(radar_type=="Elite"){
@@ -1707,7 +1710,7 @@ void GameCockpit::SetupViewPort (bool clip) {
       _Universe->AccessCamera(CP_VIEWTARGET)->SetOrientation(tmp,q,r);
       _Universe->AccessCamera(CP_TARGET)->SetOrientation(tmp,q,r);
       //      _Universe->AccessCamera(CP_PANTARGET)->SetOrientation(tmp,q,r);
-      ShoveCamBehindUnit (CP_TARGET,tgt,zoomfactor);
+      ShoveCamBehindUnit (CP_TARGET,un,zoomfactor);
       ShoveCamBehindUnit (CP_PANTARGET,tgt,zoomfactor);
     }else {
       un->UpdateHudMatrix (CP_VIEWTARGET);
