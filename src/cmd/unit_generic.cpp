@@ -40,7 +40,7 @@
 #include "config.h"
 using namespace Orders;
 
-bool verify_path (const vector<string> &path, bool allowmpl=false);
+bool verify_path (const vector<string> &path, bool allowmpl);
 void vschdirs (const vector<string> &path);
 void vscdups (const vector<string> &path);
 vector<vector <string> > lookforUnit( const char * filename, int faction, bool SubU);

@@ -37,7 +37,7 @@
 #include "unit_util.h"
 #include "universe_util.h"
 #include "cmd/script/mission.h"
-#include "networking/vsnet_clientstate.h"
+#include "networking/lowlevel/vsnet_clientstate.h"
 #include "networking/netclient.h"
 //#endif
 extern float copysign (float x, float y);

@@ -25,6 +25,8 @@
 
 #include <expat.h>
 #include "xml_support.h"
+#include "vs_path.h"
+#include "vs_globals.h"
 
 #include "galaxy_xml.h"
 #include "galaxy_gen.h"
@@ -33,6 +35,85 @@
 #endif
 #include <float.h>
 using namespace XMLSupport;
+extern std::string universe_path;
+#include "networking/netserver.h"
+
+void	GalaxyXML::Galaxy::ComputeSerials( std::vector<std::string> & stak)
+{
+	static string sys = vs_config->getVariable("data","sectors","sectors");
+	for( std::vector<std::string>::iterator si=stak.begin(); si!=stak.end(); si++)
+	{
+		string relpath( universe_path+sys+"/"+(*si)+".system");
+		string systempath( datadir+relpath);
+		cout<<"Generating random serial numbers :"<<endl;
+		cout<<"\t\tcomputing serials for "<<systempath<<"...";
+		
+		// Read the file
+		FILE * fp = fopen( systempath.c_str(), "rb");
+		if( !fp)
+		{
+			cerr<<"!!! ERROR : cannot open system file : "<<systempath<<endl;
+			exit(1);
+		}
+		fseek( fp, 0, SEEK_END);
+		int readsize = 0;
+		int file_size = ftell( fp);
+		fseek( fp, 0, SEEK_SET);
+		char * systembuf = new char[file_size+1];
+        readsize = fread( systembuf, sizeof( char), file_size, fp);
+        if( readsize!=file_size)
+        {
+            cout<<"Error reading system file : "<<systempath<<" read ("<<readsize<<") -  to be read("<<file_size<<")"<<endl;
+            exit( 1);
+        }
+		systembuf[file_size] = 0;
+		string system( systembuf);
+
+		// Now looking for "<planet ", "<Planet ", "<PLANET ", "<unit ", "<Unit ", "<UNIT ", same for nebulas
+		std::vector<std::string> search_patterns;
+		search_patterns.push_back( "<planet ");
+		search_patterns.push_back( "<Planet ");
+		search_patterns.push_back( "<PLANET ");
+		search_patterns.push_back( "<unit ");
+		search_patterns.push_back( "<Unit ");
+		search_patterns.push_back( "<UNIT ");
+		search_patterns.push_back( "<nebula ");
+		search_patterns.push_back( "<Nebula ");
+		search_patterns.push_back( "<NEBULA ");
+
+		for( std::vector<std::string>::iterator ti=search_patterns.begin(); ti!=search_patterns.end(); ti++)
+		{
+			std::string search( (*ti));
+			std::string::size_type search_length = (*ti).length();
+			std::string::size_type curpos = 0;
+			while( (curpos = system.find( "<planet ", curpos))!=std::string::npos)
+			{
+				ObjSerial new_serial = getUniqueSerial();
+				std::string serial_str( (*ti)+"serial="+XMLSupport::tostring( new_serial)+" ");
+				system.replace( curpos, search_length, serial_str);
+			}
+		}
+
+		// Add the system xml string to the server
+		Server->addSystem( relpath, system);
+
+		/*
+		std::vector<std::string> data;
+		data.clear(); // clear the vector first.
+		std::ifstream f(file);
+		char buf[4096]; // assume no line is longer than 4095 chars.
+
+		while (f.getline(buf,sizeof(buf)))
+		{
+			data.push_back(buf);
+			if (! f.ignore(4096,'\n'))
+				break; // ignore the newline.
+		}
+		*/
+		delete systembuf;
+	}
+}
+
 namespace GalaxyXML {
 enum GalaxyNames {
 	UNKNOWN,
@@ -237,6 +318,9 @@ Galaxy::Galaxy(const char *configfile){
 	  }while (!feof(fp));
 	  fclose (fp);
 	  XML_ParserFree(parser);
+
+	  if(SERVER)
+		this->ComputeSerials( x.stak);
   }
 }
 SubHeirarchy & Galaxy::getHeirarchy() {

@@ -3,6 +3,7 @@
 
 #include <string>
 #include <map>
+#include <vector>
 #include "gfx/vec.h"
 namespace GalaxyXML {
 using std::string;
@@ -17,6 +18,8 @@ class Galaxy {
 	class SubHeirarchy * subheirarchy;
   StringMap data;
 	Galaxy & operator = (const Galaxy & a);
+
+	void ComputeSerials( std::vector<std::string> & stak);
  public:
   Galaxy () {subheirarchy=NULL;}
   Galaxy(const char *configfile);

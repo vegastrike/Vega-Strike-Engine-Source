@@ -16,6 +16,7 @@ networking/netserver_devices.o		\
 aldrv/libaldrv.a 					\
 common/libvscommon.a 				\
 networking/libnetclient.a 			\
+networking/lowlevel/libnetlowlevel.a \
 cmd/script/script_call_briefing.o 	\
 cmd/script/libscript.a 				\
 cmd/script/c_alike/libc_alike.a 	\
@@ -42,6 +43,7 @@ cmd/unit_util_server.o 			\
 networking/netclient.o 			\
 common/libvscommon.a 			\
 networking/libnetserver.a 		\
+networking/lowlevel/libnetlowlevel.a \
 cmd/libcmdserver.a 				\
 cmd/script/libscriptserver.a 	\
 cmd/ai/libaiserver.a 			\
@@ -55,7 +57,9 @@ boost/libboost_python.a -lz
 
 accountserver_LDADD =           \
 common/libvscommon.a            \
-networking/libnetacct.a -lz
+networking/libnetacct.a 		\
+networking/lowlevel/libnetlowlevel.a \
+-lz
 
 
 libroot =		\

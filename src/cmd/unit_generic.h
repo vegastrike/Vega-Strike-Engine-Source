@@ -49,7 +49,7 @@ void UncheckUnit (class Unit * un);
 #include "faction_generic.h"
 #include "star_system_generic.h"
 #include "networking/const.h"
-#include "networking/vsnet_clientstate.h"
+#include "networking/lowlevel/vsnet_clientstate.h"
 #include "gfx/cockpit_generic.h"
 using std::string;
 
