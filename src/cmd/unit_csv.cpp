@@ -791,6 +791,7 @@ void Unit::LoadRow(CSVRow &row,string modification, string * netxml) {
       }
     }
   }
+  CheckAccessory(this);//turns on the ceerazy rotation for any accessories
 }
 CSVRow GetUnitRow(string filename, bool subu, int faction, bool readlast, bool &rread) {
   std::string hashname = filename+"__"+FactionUtil::GetFactionName(faction);
