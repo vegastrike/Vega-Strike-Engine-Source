@@ -2,7 +2,7 @@
 
 <HTML>
 <HEAD>
-        <TITLE>Vega Strike</TITLE>
+	<TITLE>Vega Strike</TITLE>
 </HEAD>
 <BODY  bgcolor="#000000" text="#C0C0C0" link="#00BB5E" vlink="#008040" alink="#00FF00" STYLE="margin-top: 0px; margin-left: 0px;" marginheight=0 marginwidth=0>
 <table width="700"><tr><td align="left">
@@ -38,8 +38,81 @@ d.images?r=d.im.width:z=0;pr("z")//-->
 height=1 width=1></noscript>
 <br><A HREF = "pics/NovaSol.jpg"><img SRC="pics/NovaSol-sml.jpg" BORDER=0 height=158 width=243></A><A HREF = "pics/voidspace.gif"><img SRC="pics/voidspace.jpg" BORDER=0 height=158 width=243></A>
 <br><a href="main.html">Info</a> || <a href="pics.html">Screen Shots</a>
-|| <a href="download.html">Download</a> || <a href="http://sourceforge.net/projects/vegastrike/">SourceforgeProject</a> || <a href = "http://cvs.sourceforge.net/cgi-bin/viewcvs.cgi/vegastrike/vegastrike/src/">Working Logs</a> || <A HREF="http://lists.sourceforge.net/mailman/listinfo/vegastrike-users">Mailing List</a> || <a href="credits.html">Credits</a> || <a href="email.html">E-mail</a>
-|| <a href="links.html">Links</a> || <a href="http://hkn.eecs.berkeley.edu/~ashieh/184/">CS 184 Project</a></center> 
+|| <a href="download.html">Download</a> || <a href="http://sourceforge.net/projects/vegastrike/">SourceforgeProject</a> || <a href = "http://cvs.sourceforge.net/cgi-bin/viewcvs.cgi/vegastrike/vegastrike/src/">Working Logs</a> || <A HREF="http://lists.sourceforge.net/mailman/listinfo/vegastrike-users">Mailing List</a> || <a href="credits.html">Credits</a> || <a href="email.html">E-mail</a>|| <a href="http://hkn.eecs.berkeley.edu/~ashieh/184/">CS 184 Project</a></center> 
+<table WIDTH="100%" >
+<tr>
+<td BGCOLOR="#393939"><b><font face="Arial"><font size=-1><font color="#FFFFFF"\
+>&nbsp;&nbsp;
+Update! </font><font color="#006834">Feburary 2, 2001</font></font></font></b></td\
+>
+</tr>
+</table>
+<ul> 
+<li> I have completed nebulas in vegastrike! Now you can explore systems that have nebulas in certain regions of space!
+<li> DMJC, has contributed an excellent <a href="pics/foggyoutsideneb.jpg">nebula model</a>.
+<li> I have added fogging when <a href="pics/foggy.jpg">inside</a> the nebula.  Watch your spaceship <a href="pics/foggyneb.jpg">fade </a>out!
+<li> The nebula scrambles your radar and screws with your targetting equipment.
+<li> Also it reduces shield regeneration (or completely turns off your shields if you set that option in vegastrike.config)
+<li> Combat within a nebula is hair raising and difficult... not only can you not see your target in radar, but your enemy can sneak out of the gassy clouds and suddenly blow you out of the water^H^H^H^H^Hgas!
+</ul>
+
+<table WIDTH="100%" >
+<tr>
+<td BGCOLOR="#393939"><b><font face="Arial"><font size=-1><font color="#FFFFFF"\
+>&nbsp;&nbsp;
+Update! </font><font color="#006834">January 25, 2001</font></font></font></b></td\
+>
+</tr>
+</table>
+<ul> 
+<li> I made the jump animation slowly close upon the jumping starship so that it reaches it in time 'd' where d is the delay in the specific jump drive!
+<li> DMJC, has contributed the perfect jump animation!.  It looks so awesome when the starships pass through the jump gates! It's a very unique style of jump gate, and it matches what I imagined to the nth degree ;-)
+<li> Watch as I line up with a <a href="pics/jumping.jpg">jump</a> portal <a href="pics/jumpbegin.jpg">Engage</a> the <a href="pics/jumpstar.jpg">drive</a> and <a href="pics/jumpout.jpg">arrive</a>! These pictures were shot with amazing timing...very difficult to reproduce ;-)  But enjoy! Soon you, too will be able to explore the whole galaxy!
+</ul>
+
+<table WIDTH="100%" >
+<tr>
+<td BGCOLOR="#393939"><b><font face="Arial"><font size=-1><font color="#FFFFFF"\
+>&nbsp;&nbsp;
+Update! </font><font color="#006834">January 25, 2001</font></font></font></b></td\
+>
+</tr>
+</table>
+<ul> 
+<li> I have spent the past 3 days working on an intense multi-system engine.
+<li> Now any number of systems can be simulated in parallel with teh one you are in.
+<li> So naturally I had to make warp gates between the parallel systems.  They are small blue transparent balls, and when you get inside and activate your stardrive, you can immediately teleport to the connected star system.
+<li> However, do not feel so safe once you have jumped.  If the enemy has a jump drive, he/she will pursue you to your death :-)
+<li> I am in need or a nice jump animation to put int for the jumping effect.
+<li> DMJC, darkmage, the head of the WCU page has figured out how to compile vegastrike! This means that we may see many more releases coming up. I'm always too swamped to reboot to windows, and I'm not even sure ALex has windows. It's great to have another helper on board who can churn out some windows binaries for all the loyal Gates sla... I mean Windows People out there :-)
+<li> Expect a release relatively shortly with all these new features!
+</ul>
+
+<table WIDTH="100%" >
+<tr>
+<td BGCOLOR="#393939"><b><font face="Arial"><font size=-1><font color="#FFFFFF"\
+>&nbsp;&nbsp;
+Update! </font><font color="#006834">January 22, 2001</font></font></font></b></td\
+>
+</tr>
+</table>
+<ul> 
+<li> Work on Vegastrike has been marching forward.  Alex has made major progress on a mission scripting system so powerful that it can be used to write entire AI modules and make starships warp in, etc all in one package.  It should be relatively simple for veteran C programmers to adapt to this system of scripting.
+<li> I have rewritten the collision system to use <a href="http://crystal.sourceforge.net">crystal space</a>'s RAPID collision system.  Instead of seeing if the mesh is inside, it only checks against the skin of the starship. This means it checks against each and every polygon of each mesh, making for very accuract capship to capship or fighter to fighter collisions.  The most beautiful thing is that when crystal space modifies its collision system, I can update my own with their source since I copied their GPL-licensed code directly instead of forking and making vegastrike compatible.  The code is a little longer, but it's just as fast.
+<li> I have completely redone planets so that the terrain stays flush with the planet surface.  It's amazing to fly across the planet and see the sunrise on the land!  It was challenging to get vehicles to drive on this terrain, and I believe that currently vehicles are rather hacked into the system--but at least they work.
+<li> I have added some fog spheres so that in certain areas fog is triggered. 
+<li> Daniel Aleksandrow has worked on adding some nice backgrounds
+<li> A wonderful mesh was added by f109avampire (named for him). It also helped me track down a number of explosion-related bugs that are now purged :-).
+<li> Reliant has put together a really cool ship builder that will let future privateers build their own starships out of the component pieces. Go Reliant!
+<li> Png support has been added so that vegastrike accepts png as well as bitmap files.  They load up about three times as fast as the .bmps.
+<li> Time compression has been added to let users speed up or decrease the time (for autopilot-like maneuvers)
+<li> Rotation has been added for orbital objects around their own axis...right now it's global...but soon it will be on a per-planet basis
+<li> A text output display has been hacked in by Alex...and an elite style radar also has been added to the cockpit displays.
+<li> A starbase has been added by James Carthew for collision testing among other things. It looks really cool.
+
+
+</ul>
+
 
 <table WIDTH="100%" >
 <tr>
