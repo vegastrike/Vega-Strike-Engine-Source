@@ -35,8 +35,13 @@
 	* added TargetNearest and TargetThreat commands
 	* fixed some problems near the end of the range of the zbuffer....
 	* fixed AI to target near starships and to change targets every now and then for inaccessible stuff (eg missiles)
+<<<<<<< ChangeLog
+	* turrets now cloak along with theri parents
+	
+=======
 
 
+>>>>>>> 1.41
 2001-11-07 Daniel Horn <hellcatv@hotmail.com>
 	
 	* made convex objects be allowed to be farther than zfar away
