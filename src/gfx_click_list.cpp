@@ -16,7 +16,8 @@ bool queryShip (int mouseX, int mouseY,Unit *ship,Matrix vw) {
   pos = Transform (vw,pos);//transforming pos into camspace
   //make pos into the position of the mouse cursor at the time;
   pos = MouseCoordinate (mouseX,mouseY,pos.k);
-  return ship->querySphere(vw,pos,0)||ship->queryBoundingBox(vw,pos,0);  
+  //changed from || to && so it has to be first in the sphere then in the box... FIXME to maybe be one or the other!!!
+  return ship->querySphere(vw,pos,0)&&ship->queryBoundingBox(vw,pos,0);  
 }
 
 ClickList::ClickList (UnitCollection *parIter) {
