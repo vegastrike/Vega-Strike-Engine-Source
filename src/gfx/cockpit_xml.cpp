@@ -29,6 +29,9 @@ namespace CockpitXML {
       XSIZE,
       YSIZE,
       MYFONT,
+      RED,
+      GREEN,
+      BLUE,
       COCKPITOFFSET,
       VIEWOFFSET,
       FRONT,
@@ -102,12 +105,16 @@ namespace CockpitXML {
     EnumMap::Pair ("GaugeLeft",G_LEFT),
     EnumMap::Pair ("GaugeRight",G_RIGHT),
     EnumMap::Pair ("TextRows", ROWS),
-    EnumMap::Pair ("TextCols", COLS)
-    
+    EnumMap::Pair ("TextCols", COLS),
+    EnumMap::Pair ("r", RED),
+    EnumMap::Pair ("g", GREEN),
+    EnumMap::Pair ("b", BLUE)
+
+
   };
 
   const EnumMap element_map(element_names, 22);
-  const EnumMap attribute_map(attribute_names, 21);
+  const EnumMap attribute_map(attribute_names, 24);
 }
 
 using XMLSupport::EnumMap;
@@ -146,6 +153,15 @@ void Cockpit::beginElement(const string &name, const AttributeList &attributes) 
       switch (attr) {
       case MYFONT:
 	myfont = (*iter).value;
+	break;
+      case RED:
+	textcol.r = parse_float ((*iter).value);
+	break;
+      case GREEN:
+	textcol.g = parse_float ((*iter).value);
+	break;
+      case BLUE:
+	textcol.b = parse_float ((*iter).value);
 	break;
       case VIEWOFFSET:
 		  viewport_offset = XMLSupport::parse_float ((*iter).value);

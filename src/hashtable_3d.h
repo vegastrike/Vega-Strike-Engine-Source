@@ -6,32 +6,54 @@
 #include <stdio.h>
 #define COLLIDETABLESIZE sizeof(CTSIZ)
 #define COLLIDETABLEACCURACY sizeof (CTACCURACY)
+///objects that go over 16 sectors are considered huge and better to check against everything.
+const int HUGEOBJECT=12; 
 
-const int HUGEOBJECT=12; //objects that go over 16 sectors are considered huge and better to check against everything.
-
+/**
+ * Line Collide provides a complete container for a unit that is put in a collide hashtable
+ * For collisions. The mini, maxi vectors of the line collide are taken
+ */
 struct LineCollide {
+  ///The object that this LineCollide approximates
   void * object;
+  ///The minimum x,y,z that this object has
   Vector Mini;
+  ///The maximum x,y,z that this object has
   Vector Maxi;
-  void * lastchecked;//to prevent duplicate selection
+  /**
+   * The last item that checked this for collisions
+   * to prevent duplicate selection 
+   */
+  void * lastchecked;
+  ///Which type of unit it is. Used for subsequently calling object's Accurate collide func
   enum collidables {UNIT, BEAM,BALL,BOLT,PROJECTILE} type;
+  ///If this object was saved as a huge object (hhuge for dos oddities)
   bool hhuge;
   LineCollide():  object(NULL),Mini(0,0,0), Maxi(0,0,0), type(UNIT){hhuge=false;lastchecked=NULL;}
   LineCollide (void * objec, enum collidables typ,const Vector &st, const Vector &en) {this->object=objec;this->type=typ;this->Mini=st;this->Maxi=en;hhuge=false; lastchecked=NULL;}
   LineCollide (const LineCollide &l) {object=l.object; type=l.type; Mini=l.Mini;Maxi=l.Maxi;hhuge=l.hhuge; lastchecked=NULL;}      
 };
 
-
+/**
+ * Hashtable3d is a 3d datastructure that holds various starships that are
+ * near enough to crash into each other (or also lights that are big enough
+ * to shine on nearby units.
+ */
 template <class T, class CTSIZ, class CTACCURACY> class Hashtable3d {
+  ///Keeps track of the minimum and maximum write of the table since the last clear
   int minaccessx,minaccessy,minaccessz,maxaccessx,maxaccessy,maxaccessz;
+  ///All objects that are too large to fit (fastly) in the collide table
   std::vector <T> hugeobjects;
+  ///The hash table itself. Holds most units to be collided with
   std::vector <T> table [COLLIDETABLESIZE][COLLIDETABLESIZE][COLLIDETABLESIZE];
-  void hash_vec (float i, float j, float k, int &x, int &y, int &z) {
+  ///hashes 3 values into the appropriate spot in the hash table
+  static void hash_vec (float i, float j, float k, int &x, int &y, int &z) {
     x = hash_int(i);
     y = hash_int(j);
     z = hash_int(k);
   }
-  void hash_vec (const Vector & t,int &x, int&y,int&z) {
+  ///hashes 3 vals into the appropriate place in hash table
+  static void hash_vec (const Vector & t,int &x, int&y,int&z) {
     hash_vec(t.i,t.j,t.k,x,y,z);
   }
 public:
@@ -43,9 +65,11 @@ public:
     maxaccessy=0;
     maxaccessz=0;    
   }
+  ///Hashes a single value to a value on the collide table truncated to all 3d constraints.  Consider using a swizzle
   int hash_int (const float aye) {
     return ((int)(((aye<0)?(aye-COLLIDETABLEACCURACY):aye)/COLLIDETABLEACCURACY))%(COLLIDETABLESIZE/2)+(COLLIDETABLESIZE/2); 
   }
+  ///clears entire table
   void Clear () {
     hugeobjects.clear();
     for (int i=minaccessx;i<=maxaccessx;i++) {
@@ -63,6 +87,7 @@ public:
     maxaccessy=0;
     maxaccessz=0;
   }
+  ///returns any objects residing in the sector occupied by Exact
   int Get (const Vector &Exact, std::vector <T> *retval[]) {
     retval[1]=&table[hash_int(Exact.i)][hash_int(Exact.j)][hash_int(Exact.k)];
     //retval+=hugeobjects;
@@ -70,9 +95,11 @@ public:
     retval[0]=&hugeobjects;
     return 2;
   }
+  ///Returns all objects too big to be conveniently fit in the array
   std::vector <T> & GetHuge () {
     return hugeobjects;
   }
+  ///Returns all objects within sector(s) occupied by target
   int Get (const LineCollide* target, std::vector <T> *retval[]) {    
     int sizer =1;
     //int minx,miny,minz,maxx,maxy,maxz;
@@ -107,6 +134,7 @@ public:
     assert (sizer<=HUGEOBJECT+1);//make sure we didn't overrun our array
     return sizer;
   }
+  ///Adds objectToPut into collide table with limits specified by target.
   void Put(LineCollide* target,const T objectToPut) {
     int x,y,z;
     float maxx= (ceil(target->Maxi.i/COLLIDETABLEACCURACY))*COLLIDETABLEACCURACY;
@@ -145,6 +173,7 @@ public:
       }
     }
   }
+  ///Removes objectToKill from collide table with span of Target
   T Remove(const LineCollide* target,const T objectToKill) {
     //    int minx,miny,minz,maxx,maxy,maxz;
     //    hash_vec(target->Mini,minx,miny,minz);

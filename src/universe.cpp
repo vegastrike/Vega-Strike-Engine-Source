@@ -33,17 +33,11 @@
 
 Universe::Universe(int argc, char** argv)
 {
-  //currentcamera = 0;
-	numlights = NUM_LIGHT; 
-	active = GFXFALSE;
-
 	//Select drivers
 	
 
 	GFXInit(argc,argv);
 
-	ForceLogo = new Texture ("TechPriRGB.bmp","TechPriA.bmp");
-	SquadLogo = new Texture ("TechSecRGB.bmp","TechSecA.bmp");
 	StartGFX();
 	InitInput();
 
@@ -64,8 +58,6 @@ Universe::~Universe()
     delete factions[i];
   }
   delete cockpit;
-  delete ForceLogo;
-  delete SquadLogo;
   GFXShutdown();
 	//delete mouse;
 }

@@ -204,6 +204,9 @@ void Universe::Faction::ParseAllAllies(Universe * thisuni) {
 		thisuni->factions[i]->ParseAllies(thisuni);
 		
 	}
+	for (unsigned int i=0;i<thisuni->factions.size();i++) {
+	  thisuni->factions[i]->faction[i].relationship=1;
+	}
 }
 void Universe::Faction::ParseAllies (Universe * thisuni) {
 	unsigned int i,j;

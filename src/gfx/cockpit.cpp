@@ -155,6 +155,7 @@ void Cockpit::DrawGauges(Unit * un) {
     }
   }
   text->SetSize (2,-2);
+  GFXColorf (textcol);
   for (i=KPS;i<NUMGAUGES;i++) {
     if (gauges[i]) {
       float sx,sy,px,py;
@@ -168,6 +169,7 @@ void Cockpit::DrawGauges(Unit * un) {
       text->Draw (string (ourchar));
     }
   }
+  GFXColor4f (1,1,1,1);
 }
 void Cockpit::Init (const char * file) {
   Delete();
@@ -224,8 +226,7 @@ void Cockpit::Delete () {
   }
   Panel.clear();
 }
-Cockpit::Cockpit (const char * file, Unit * parent): parent (parent),cockpit_offset(0), viewport_offset(0), view(CP_FRONT), zoomfactor (1.2) {
-  text=NULL;
+Cockpit::Cockpit (const char * file, Unit * parent): parent (parent),textcol (1,1,1,1),text(NULL),cockpit_offset(0), viewport_offset(0), view(CP_FRONT), zoomfactor (1.2) {
   vdu[0]=vdu[1]=NULL;
   Radar=Pit[0]=Pit[1]=Pit[2]=Pit[3]=NULL;
   for (int i=0;i<NUMGAUGES;i++) {

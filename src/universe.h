@@ -26,105 +26,120 @@
 #define NUM_FORCES	64
 
 #include "gfx/camera.h"
-//#include "in_main.h"
 #include "star_system.h"
 
-/*
-struct Light{
-	Vector direction;
-
-	float r,g,b;
-	BOOL enabled;
-	Light()
-	{
-		r = 0;
-		g = 0;
-		b = 0;
-		enabled = GFXFALSE;
-	}
-	Light(Vector dir, float r, float g, float b)
-	{
-		this->direction = dir;
-		this->r = r;
-		this->g = g;
-		this->b = b;
-	}
-};
-*/
-
-//extern StarSystem star_system;
 class Cockpit;
+
+/**
+ * Class Universe Deals with universal constants. It is a global, 
+ * accessed from anywhere as _Universe. Universe may be queried for 
+ * Relationships, the current star system rendering is taking place in
+ * etc.  It acts as a wrapper to the active Star System.
+ * Additionally it handles beginning and ending the main loop.
+ * And starting and ending graphics. (incl the task of wiping temp lights)
+ * Deprecated: loaded dynamic gldrv module
+ */
 class Universe {
 protected:
-
-	char * hPalette;
-	GFXBOOL  done;
-	Cockpit * cockpit;
-	Camera hud_camera;
-
-	void StartGL();
-	GFXBOOL active;
-        StarSystem * star_system;
-	//	Light lights[NUM_LIGHT];
-	int numlights;
-	//Mouse *mouse;
-        Texture *ForceLogo;
-        Texture *SquadLogo;
+  ///The users cockpit
+  Cockpit * cockpit;
+  ///a generic camera facing the HUD
+  Camera hud_camera;
+  ///init proc
+  void StartGL();
+  ///currently only 1 star system is stored
+  StarSystem * star_system;
 	
 private:
+  /**
+   * Class Faction holds the relationship between one faction and another
+   * All factions are indexed in a vector. Each has a name and a logo.
+   * In addition each has a list of other factions and the relationship to them
+   */
 	class Faction {
 	public:
+	  /**
+	   * Faction_stuff holds the index and relationship of each and every
+	   * Other faction.  After it has been properly processed when calling
+	   * LoadXML, it will hold an ordered list containing all factions.
+	   * myfaction.faction[theirfaction].relationship will contain my 
+	   * attitude to theirfaction
+	   */
 		struct faction_stuff {
+		  ///for internal purposes only.
 			union faction_name {
 				int index;
 				char * name;
 			} stats;
+	  ///A value between 0 and 1 indicating my attitude towards index
 			float relationship;
 		};		
 	public:
+		/**
+		 * holds the relationships to all _other_ factions loaded 
+		 * hold misguided info for self FIXME
+		 */
 		vector <faction_stuff> faction;
-		Texture * logo; //the logos
-		char * factionname; //char * of the name
+		///Logos used by the ships of that faction
+		Texture * logo;
+		///char * of the name
+		char * factionname; 
+		///Figures out the relationships of each faction with each other
 		static void ParseAllAllies(Universe * thisuni);
 		void ParseAllies(Universe * thisuni);
 	
-	
-		static void LoadXML(const char * factionfile, Universe * thisuni);  //load the xml
+		static void LoadXML(const char * factionfile, Universe * thisuni);  
 		static void beginElement(void *userData, const XML_Char *name, const XML_Char **atts);
 		static void endElement(void *userData, const XML_Char *name);
-//		void beginElement(const string &name, const AttributeList &attributes);
-//		void endElement(const string &name);
 		Faction(); //constructor
 		~Faction(); //destructor
 	};
+	///A list of all factions 
+	vector <Faction *> factions; //the factions
+
  public:
+	///Loads and parses factions
 	void LoadFactionXML (const char * factfile) {
 	  Faction::LoadXML (factfile,this);
 	}
+	///returns the index of the faction with that name
 	int GetFaction (const char *factionname);
+	/**
+	* Returns the relationship between myfaction and theirfaction
+	* 1 is happy. 0 is neutral (btw 1 and 0 will not attack)
+	* -1 is mad. <0 will attack
+	*/
 	float GetRelation (const int myfaction, const int theirfaction);
 	void activateLightMap();
+	///Returns force logo
 	Texture * getForceLogo (int faction);
+	///Returns force logo FIXME should return squad logo!
 	Texture * getSquadLogo (int faction);
+	///inits graphics with args
 	Universe(int argc, char **argv);
 	~Universe();
-
+	///Loads Defaults in Graphics Drivers
 	void StartGFX();
+	///Should load the Universe data file. Now just inits system with test.xml
 	void Init();
+	///Begins a scene
 	void StartDraw();
+	///Runs the main loop
         void Loop(void main_loop());
+	///returns active star system
 	StarSystem* activeStarSystem() {
 	  return star_system;
 	}
+	///Wrapper function for Star System
 	void SelectCamera(int cam)
 	{
 	  if (star_system!=NULL) {
 	    star_system->SelectCamera(cam);
 	  }
-	  //if(cam<NUM_CAM&&cam>=0)
-	  //	currentcamera = cam;
 	}
+	///Accessor to cockpit
 	Cockpit *AccessCockpit() {return cockpit;}
+	///Wrapper function for Star System
 	Camera *AccessCamera(int num)
 	{
 	  if (star_system!=NULL) {
@@ -132,7 +147,7 @@ private:
 	  } else
 	    return NULL;
 	}
-
+	///Wrapper function for star system
 	Camera *AccessCamera()
 	{
 	  if (star_system!=NULL) {
@@ -140,16 +155,15 @@ private:
 	  } else
 	    return NULL;
 	}
+	///Returns the current hud cam
 	Camera *AccessHudCamera() { return &hud_camera; }
-
+	///Wrapper function for star system
 	void SetViewport()
 	{
 	  	  if (star_system!=NULL) {
 		    star_system->SetViewport();
 		  }
-		  //		cam[currentcamera].UpdateGFX(); //sets the cam to the current matrix
 	}
-	vector <Faction *> factions; //the factions
 
 };
 

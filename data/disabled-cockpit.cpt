@@ -1,8 +1,8 @@
 <Cockpit>
 	<Crosshairs file="crosshairs.spr" xcent="0" ycent="0"/>
 	<Radar file="radar.spr"/>
-	<Speed file="radar.spr" xcent="-.3" ycent="-.65" width=".02" height=".04"/>
-	<SetSpeed file="radar.spr" xcent=".23" ycent="-.65" width=".02" height=".04"/>
+	<Speed file="radar.spr" xcent="-.3" ycent="-.65" width=".018" height=".036"/>
+	<SetSpeed file="radar.spr" xcent=".23" ycent="-.65" width=".018" height=".036"/>
 	<ShieldF file="shieldf.spr"/>
 	<ShieldB file="shieldf.spr" xcent="-.3" ycent="-.92" GaugeDown="1"/>
 	 <ArmorF file="armorf.spr" />

@@ -1,0 +1,36 @@
+-------------------------------
+Vegastrike 0.0.9 Documentation
+-------------------------------
+
+Basic Organization of Vegastrike
+
+As directories might imply, vegastrike is divided into 3 "layers"
+gldrv/
+Low Level Graphics (OpenGL right now...replace with what API you like)
+gfx/
+High Level Graphics (Object Oriented, reference counts, etc)
+cmd/
+Physics Level Things. Objects the interact.
+
+
+---General Idea---
+In general these layers are supposed to be separate and independent.
+gfx should only call gldrv and nothing in cmd.
+Likewise cmd should only call gfx primitives and nothing in gldrv
+
+---Exceptions---
+Unfortunately there are some gaps in that logic
+For instance gfx/cockpit.cpp needs to look at cmd/unit.h stats
+Likewise cmd/beam.cpp and cmd/bolt.cpp call graphics primitives directly to speed their graphics operations up.
+
+
+The only "legit" exceptions to this rule are all located in the root directory:
+universe.cpp and star_system.cpp
+Universe deals mostly with binding various star systems together, and keeping graphics on track.
+Star System deals with the current cameras, and the current lights, and keeping order when the scene may be changed (swithcing to a cam in a different star system for instance).
+
+
+Units are accessed through a UnitContainer or a UnitCollection depending on the number.  These structures keep reference counts and remove any "dead" units from them when accessed. Star system has the complete list of units and cycles through them to accomplish physics, etc.
+
+
+For more Details please see the doxygen Documentation.
