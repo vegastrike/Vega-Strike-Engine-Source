@@ -203,7 +203,7 @@ then
         then
 	    echo "$i/libpython${PYTHON_SHORT}.so yes"
 	    PYTHON_CFLAGS="-I${PYTHON_incdir}"
-	    PYTHON_LIBS="-lpython${PYTHON_SHORT}"
+	    PYTHON_LIBS="-lpython${PYTHON_SHORT} -Xlinker -export-dynamic"
             FOUND_LIBPYTHON_SO=yes
             break
 	else
@@ -211,7 +211,7 @@ then
 	  then
             echo "$i/libpython${PYTHON_SHORT}.a yes"
     	    PYTHON_CFLAGS="-I${PYTHON_incdir}"
-	    PYTHON_LIBS="$i/libpython${PYTHON_SHORT}.a"
+	    PYTHON_LIBS="$i/libpython${PYTHON_SHORT}.a  -Xlinker -export-dynamic"
             FOUND_LIBPYTHON_SO=yes
 	    break
           else

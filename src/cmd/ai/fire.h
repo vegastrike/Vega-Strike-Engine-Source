@@ -26,6 +26,8 @@ public:
   FireAt (float reaction_time, float aggressivitylevel);//weapon prefs?
   FireAt();
   virtual void Execute();
+  virtual std::string Pickle() {return std::string();}//these are to serialize this AI
+  virtual void UnPickle(std::string) {}
   virtual ~FireAt();
 };
 

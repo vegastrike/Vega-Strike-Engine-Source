@@ -326,11 +326,12 @@ varInst *Mission::terminateMission(missionNode *node,int mode){
   //  varInst *ovi=getObjectArg(node,mode);
   getBoolArg(node,mode,0);
   if (mode==SCRIPT_RUN) {
-    vector<Mission *>::iterator f = std::find (active_missions.begin(),active_missions.end(),this);
-    if (f!=active_missions.end()) {
-      active_missions.erase (f);
+    vector<Mission *> *active_missions = ::active_missions.Get();
+    vector<Mission *>::iterator f = std::find (active_missions->begin(),active_missions->end(),this);
+    if (f!=active_missions->end()) {
+      active_missions->erase (f);
     }
-    if (this!=active_missions[0]) {
+    if (this!=(*active_missions)[0]) {
       Mission_delqueue.push_back(this);//only delete if we arent' the base mission
     }
   }

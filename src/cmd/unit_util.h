@@ -177,6 +177,48 @@ namespace UnitUtil {
 		my_unit->SetTurretAI();
 		return percentage;
 	}
+	int addCargo (Cargo carg) {
+	  int i;
+	  for (i=carg.quantity;i>0&&!my_unit->CanAddCargo(carg);i--) {
+	    carg.quantity=i;
+	  }
+	  if (i>0) {
+	    carg.quantity=i;
+	    my_unit->AddCargo(carg);
+	  }else {
+	    carg.quantity=0;
+	  }
+	  return carg.quantity; 
+	}
+	Cargo getRandCargo(int quantity, std::string category) {
+	  Cargo *ret=NULL;
+	  Unit *mpl = &GetUnitMasterPartList();
+	  unsigned int max=mpl->numCargo();
+	  if (!category.empty()) {
+	    vector <Cargo> cat;
+	    mpl->GetCargoCat (category,cat);
+	    if (!cat.empty()) {
+	      unsigned int i;
+	      ret = mpl->GetCargo(cat[rand()%cat.size()].content,i);
+	    }
+	  }else {
+	    if (mpl->numCargo()) {
+	      for (unsigned int i=0;i<500;i++) {
+		ret = &mpl->GetCargo(rand()%max);  
+		if (ret->content.find("mission")==string::npos) {
+		  break;
+		}
+	      }
+	    }		  
+	  }
+	  if (ret) {
+	    return *ret;//uses copy
+	  }else {
+	    Cargo newret();
+	    newret.quantity=0;
+	    return newret;
+	  }
+	}
 	bool incrementCargo(Unit *my_unit,float percentagechange,int quantity){
 		if (my_unit->numCargo()>0) {
 			unsigned int index;

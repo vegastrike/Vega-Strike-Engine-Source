@@ -11,6 +11,98 @@
 #include "cmd/ai/script.h"
 #include "cmd/ai/missionscript.h"
 #include "cmd/script/flightgroup.h"
+#include "python/python_class.h"
+#include "savegame.h"
+std::string PickledDataSansMissionName (std::string pickled) {
+  unsigned int newline = pickled.find ("\n");
+  if (newline!=string::npos)
+    return pickled.substr(newline+1,pickled.length()-(newline+1));
+  else
+    return pickled;
+}
+std::string PickledDataOnlyMissionName (std::string pickled) {
+  unsigned int newline = pickled.find ("\n");
+  return pickled.substr (0,newline);  
+}
+void SaveGame::ReloadPickledData () {
+  if (!last_pickled_data.empty()) {
+    if (active_missions.size()>0) {
+      active_missions[0]->UnPickle(PickledDataSansMissionName(last_pickled_data));
+    }
+  }
+}
+void UnpickleMission (std::string pickled) {
+
+  std::string file= PickledDataOnlyMissionName(pickled);
+  pickled = PickledDataSansMissionName(pickled);
+  if (pickled.length()) {
+    active_missions.push_back (new Mission("generic.mission"));
+    active_missions.back()->initMission();
+    if (active_missions.back()->runtime.threads.empty()) {
+      active_missions.back()->runtime.threads.push_back (NULL);
+    }else {
+      delete active_missions.back()->runtime.threads.back();
+    }
+    active_missions.back()->runtime.threads.back()= PythonClass<missionThread>::Factory (file);
+    active_missions.back()->UnPickle (pickled);
+  }
+}
+std::string lengthify (std::string tp) {
+    int len = tp.length();
+    tp = XMLSupport::tostring(len)+" "+tp;
+    return tp;
+}
+std::string PickleAllMissions () {
+  std::string res;
+  int count =0;
+  for (unsigned int i=0;i<active_missions.size();i++) {
+    string tmp = active_missions[i]->Pickle();
+    if (tmp.length()||i==0) {
+      count++;
+      res+= lengthify(tmp);
+    }
+  }
+  return XMLSupport::tostring(count)+" "+res;
+}
+int ReadIntSpace (FILE * fp) {
+  std::string myint;
+  bool toggle=false;
+  while (!feof(fp)) {
+    char c[2]={0,0};
+    if (1==fread (&c[0],sizeof(char),1,fp)) {
+      if (c[0]!=' ') {
+	toggle=true;
+	myint+=c;
+      }else {
+	if (toggle) {
+	  break;
+	}
+      }
+    }
+  }
+  return XMLSupport::parse_int (myint);
+}
+std::string UnpickleAllMissions (FILE * fp) {
+  std::string retval;
+  unsigned int nummissions = ReadIntSpace(fp);
+  for (unsigned int i=0;i<nummissions;i++) {
+    unsigned int picklelength = ReadIntSpace(fp);
+    char * temp = (char *)malloc (sizeof(char)*(1+picklelength));
+    temp[0]=0;
+    temp[picklelength]=0;
+    fread (temp,picklelength,1,fp);
+    if (i==0) {
+      retval = temp;
+    }
+    if (i<active_missions.size()) {
+      active_missions[i]->UnPickle (PickledDataSansMissionName(temp));
+    }else {
+      UnpickleMission(temp);
+    }
+    free(temp);
+  }
+  return retval;
+}
 void LoadMission (const char * mission_name, bool loadFirstUnit) {
   char * tmp = strdup (mission_name);
   active_missions.push_back (new Mission(tmp));

@@ -37,6 +37,7 @@
 
   WRAPPED0(UnitWrapper, Threat,UnitWrapper(0))
   voidWRAPPED1( TargetTurret ,UnitWrapper,targ)
+  WRAPPED0(UnitCollection::UnitIterator, getSubUnits,0)
   voidWRAPPED2( Threaten ,UnitWrapper,targ, float,danger)
   voidWRAPPED0( ResetThreatLevel)
   voidWRAPPED1( Fire,bool,Missile)

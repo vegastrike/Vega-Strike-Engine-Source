@@ -272,7 +272,7 @@ varInst *Mission::call_unit(missionNode *node,int mode){
 
     return viret;
   }   
-  else if(method_id==CMT_UNIT_getRandCargo){//<>
+  else if(method_id==CMT_UNIT_getRandCargo){
     int quantity=getIntArg(node,mode,0);
     string category;
     if (node->subnodes.size()>1) {
@@ -976,7 +976,7 @@ varInst *Mission::call_unit(missionNode *node,int mode){
       viret->type=VAR_INT;
       viret->int_val = quantity;
     }
-    else if(method_id==CMT_UNIT_addCargo){//<>
+    else if(method_id==CMT_UNIT_addCargo){
       Cargo carg;
       carg.content = getStringArgument (node,mode,1);
       carg.category = getStringArgument (node,mode,2);
@@ -1036,7 +1036,7 @@ varInst *Mission::call_unit(missionNode *node,int mode){
       viret->float_val=percentage;
       
     }
-    else if(method_id==CMT_UNIT_incrementCargo){//<>
+    else if(method_id==CMT_UNIT_incrementCargo){
       float percentagechange= getFloatArg(node,mode,1);
       int quantity= getIntArg(node,mode,2);
       if(mode==SCRIPT_RUN){
@@ -1054,7 +1054,7 @@ varInst *Mission::call_unit(missionNode *node,int mode){
       viret=newVarInst(VI_TEMP);
       viret->type=VAR_VOID;
     }
-    else if(method_id==CMT_UNIT_decrementCargo){//<>
+    else if(method_id==CMT_UNIT_decrementCargo){
       float percentagechange;
       percentagechange= getFloatArg(node,mode,1);
       if(mode==SCRIPT_RUN){

@@ -95,9 +95,12 @@ void Mission::DirectorStart(missionNode *node){
     static bool init=false;
     if (!init) {
       init=true;
+      Python::reseterrors();
       PYTHON_INIT_MODULE(Director);
+      Python::reseterrors();
     }
     main_thread = PythonClass <missionThread>::Factory (python);
+    Python::reseterrors();
   }
   if (main_thread==NULL) {
     returnnow=false;
@@ -210,7 +213,17 @@ void Mission::DirectorEnd(){
   var_out.close();
 
 }
-
+std::string Mission::Pickle () {
+  if (runtime.threads.empty()) {
+    return "";
+  }else {
+    return runtime.threads[0]->Pickle();
+  }
+}
+void Mission::UnPickle (string pickled) {
+  if (!runtime.threads.empty())
+    runtime.threads[0]->UnPickle(pickled);  
+}
 void Mission::loadModule(string modulename){
   missionNode *node=director;
 

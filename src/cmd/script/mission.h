@@ -379,6 +379,8 @@ class missionThread {
   vector<unsigned int>  classid_stack;
   virtual void Execute() {}
   virtual void Destroy () {Destructor();}
+  virtual std::string Pickle() {return std::string();}
+  virtual void UnPickle(std::string) {}
 };
 
 /* *********************************************************** */
@@ -420,6 +422,8 @@ class Mission {
   class Briefing * briefing;
  public:
   Mission(char *configfile, bool loadscripts=true);
+  std::string Pickle ();//returns filename\npickleddata
+  void UnPickle (std::string pickled);//takes in pickeddata
   void AddFlightgroup(Flightgroup * fg);
   void initMission(bool loadscripts=true);
   ///alex Please help me make this function...this is called between mission loops
@@ -511,7 +515,7 @@ void  deleteVarInst(varInst *vi,bool del_local=false);
     varInstVec global_varvec;
     //    vector<const void *()> callbacks;
   } runtime;
-
+  friend void UnpickleMission (std::string pickled);
   // used only for parsing
   vector<missionNode *> scope_stack;
   missionNode *current_module;

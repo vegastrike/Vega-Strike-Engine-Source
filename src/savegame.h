@@ -22,6 +22,8 @@ class SaveGame {
   };
   std::string ForceStarSystem ;
   QVector PlayerLocation;
+  std::string last_pickled_data;
+  std::string last_written_pickled_data;
   std::string outputsavegame;
   std::string originalsystem;
   static Hashtable<long,SavedUnits,char[47]> savedunits;
@@ -33,6 +35,7 @@ class SaveGame {
   vector <SavedUnits> ReadSavedUnits (FILE * fp);
   vector <MissionDat> mission_data;
  public:
+  void ReloadPickledData();
   olist_t &getMissionData(const std::string &magic_number);
   SaveGame(const std::string &pilotname);
   float GetSavedCredits();

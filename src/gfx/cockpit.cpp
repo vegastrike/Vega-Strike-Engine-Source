@@ -1188,12 +1188,14 @@ void Cockpit::Update () {
 	Unit * un = UnitFactory::createUnit (unitfilename.c_str(),false,this->unitfaction,unitmodname);
 	un->SetCurPosition (LaunchUnitNear (savegame->GetPlayerLocation()));
 	ss->AddUnit (un);
+
 	this->SetParent(un,unitfilename.c_str(),unitmodname.c_str(),savegame->GetPlayerLocation());
 	//un->SetAI(new FireKeyboard ())
 	SwitchUnits (NULL,un);
 	credits = savegame->GetSavedCredits();
 	CockpitKeys::Pan(0,PRESS);
 	CockpitKeys::Inside(0,PRESS);
+	savegame->ReloadPickledData();
 	_Universe->popActiveStarSystem();
       }
   }

@@ -76,9 +76,11 @@ void setup_game_data ( ){ //pass in config file l8r??
   g_game.MouseSensitivityY=4;
 
 }
+bool STATIC_VARS_DESTROYED=false;
 void ParseCommandLine(int argc, char ** CmdLine);
 void cleanup(void)
 {
+  STATIC_VARS_DESTROYED=true;
   printf ("Thank you for playing!\n");
   _Universe->WriteSaveGame(true);
   winsys_shutdown();
@@ -94,7 +96,7 @@ void cleanup(void)
 
 VegaConfig *vs_config;
 Mission *mission;
-vector <Mission *> active_missions;
+LeakVector<Mission *> active_missions;
 double benchmark=-1.0;
 
 char mission_name[1024];

@@ -48,7 +48,7 @@ class UnitCollection {
     ///Finds the next unit (or NULL) that isn't Killed()
     inline void GetNextValidUnit();
   public:
-    UnitIterator(){}
+    UnitIterator(){pos=NULL;}
     ///Creates this unit iterator
     UnitIterator(UnitListNode *start) : pos(start) {GetNextValidUnit();}
     ///removes something after pos.  eg the first valid unit. or current()

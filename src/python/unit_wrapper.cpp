@@ -3,6 +3,7 @@
 #include <string>
 #include "gfx/vec.h"
 #include "cmd/unit.h"
+#include "cmd/images.h"
 #include "python_class.h"
 #include <boost/python/objects.hpp>
 
@@ -15,6 +16,7 @@ PyObject *to_python (Vector vec) {
 PyObject *to_python (QVector vec) {
 	return to_python(boost::python::tuple((double)vec.i,(double)vec.j,(double)vec.k));
 }
+
 Vector from_python(PyObject *p,boost::python::type<Vector>) {
 	Vector vec(0,0,0);
 	PyArg_ParseTuple(p,"fff",&vec.i,&vec.j,&vec.k);
@@ -55,8 +57,8 @@ public:
   boost::python::tuple cosAngleTo (UnitWrapper target) {{CHECKME boost::python::tuple(0,0);}float dist; float ret=unit->cosAngleTo(target,dist);return boost::python::tuple (ret,dist);}
   boost::python::tuple cosAngleFromMountTo (UnitWrapper target) {{CHECKME boost::python::tuple(0,0);}float dist; float ret=unit->cosAngleFromMountTo(target,dist);return boost::python::tuple (ret,dist);}
   boost::python::tuple getAverageGunSpeed () {{CHECKME boost::python::tuple(0,0);}float speed, range;unit->getAverageGunSpeed(speed,range);return boost::python::tuple(speed,range);}
-  boost::python::tuple InsideCollideTree (UnitWrapper smaller) {{CHECKME boost::python::tuple(QVector(0,0,0),Vector(0,0,0),QVector(0,0,0),Vector(0,0,0));}QVector bigpos, smallpos; Vector bigNormal, smallNormal; bool ret=unit->InsideCollideTree(smaller,bigpos,bigNormal,smallpos,smallNormal); boost::python::tuple tup (bigpos,bigNormal,smallpos,smallNormal); return tup;}
-  UnitWrapper getSubUnit(int which) {{CHECKME 0;}un_iter it=unit->getSubUnits(); for (int i=0;i<which;i++) {it.advance();}return it.current();}
+  boost::python::tuple InsideCollideTree (UnitWrapper smaller) {{CHECKME boost::python::tuple(QVector(0,0,0),Vector(0,0,0),QVector(0,0,0),Vector(0,0,0));}QVector bigpos, smallpos; Vector bigNormal, smallNormal; if(!unit->InsideCollideTree(smaller,bigpos,bigNormal,smallpos,smallNormal)){bigpos=smallpos=QVector(0,0,0);} boost::python::tuple tup (bigpos,bigNormal,smallpos,smallNormal); return tup;}
+//  UnitWrapper getSubUnit(int which) {{CHECKME 0;}un_iter it=unit->getSubUnits(); for (int i=0;i<which;i++) {it.advance();}return it.current();}
   UnitWrapper getFlightgroupLeader () {{CHECKME 0;}Flightgroup *group=unit->getFlightgroup();if (group) return group->leader; else return 0;}
   float GetVelocityDifficultyMult() {{CHECKME 0;}float diff=1;unit->GetVelocityDifficultyMult(diff);return diff;}
   int GetJumpStatus(){{CHECKME -1;} return unit->GetJumpStatus().drive;}
@@ -77,7 +79,26 @@ public:
   operator Unit* () {return unit;}
   bool isNull () {return GetUnit()==0;}
 };
+
 PYTHON_BEGIN_MODULE(VS)
+PYTHON_BASE_BEGIN_CLASS(VS,Cargo,"Cargo")
+Class.def(boost::python::constructor<std::string,std::string,float,int,float,float>());
+Class.def (&Cargo::SetPrice,"SetPrice");
+Class.def (&Cargo::GetPrice,"GetPrice");
+Class.def (&Cargo::SetMass,"SetMass");
+Class.def (&Cargo::GetMass,"GetMass");
+Class.def (&Cargo::SetVolume,"SetVolume");
+Class.def (&Cargo::GetVolume,"GetVolume");
+Class.def (&Cargo::SetQuantity,"SetQuantity");
+Class.def (&Cargo::GetQuantity,"GetQuantity");
+Class.def (&Cargo::SetContent,"SetContent");
+Class.def (&Cargo::GetContent,"GetContent");
+Class.def (&Cargo::SetCategory,"SetCategory");
+Class.def (&Cargo::GetCategory,"GetCategory");
+Class.def (&Cargo::GetDescription,"GetDescription");
+
+
+PYTHON_END_CLASS(VS,Cargo)
 PYTHON_BEGIN_CLASS(VS,UnitWrapper,"Unit")
 //WARNING: Macro City 2 ahead.  Please skip this section, also if you don't like macros.
 #undef CHECKME
@@ -121,14 +142,41 @@ PYTHON_BEGIN_CLASS(VS,UnitWrapper,"Unit")
   Class.def(&UnitWrapper::cosAngleFromMountTo,"cosAngleFromMountTo");
   Class.def(&UnitWrapper::getAverageGunSpeed,"getAverageGunSpeed");
   Class.def(&UnitWrapper::InsideCollideTree,"InsideCollideTree");
-  Class.def(&UnitWrapper::getSubUnit,"getSubUnit");
   Class.def(&UnitWrapper::getFlightgroupLeader,"getFlightgroupLeader");
   Class.def(&UnitWrapper::GetVelocityDifficultyMult,"GetVelocityDifficultyMult");
   Class.def(&UnitWrapper::GetJumpStatus,"GetJumpStatus");
   Class.def(&UnitWrapper::ApplyDamage,"ApplyDamage");
 PYTHON_END_CLASS(VS,UnitWrapper)
+PYTHON_BEGIN_CLASS(VS,UnitCollection::UnitIterator,"un_iter")
+  Class.def (&UnitCollection::UnitIterator::current,"current");
+  Class.def (&UnitCollection::UnitIterator::advance,"advance");
+  Class.def (&UnitCollection::UnitIterator::remove,"remove");
+  Class.def (&UnitCollection::UnitIterator::preinsert,"preinsert");
+PYTHON_END_CLASS(VS,UnitCollection::UnitIterator)
 PYTHON_END_MODULE(VS)
 TO_PYTHON_SMART_POINTER(UnitWrapper);
+TO_PYTHON_SMART_POINTER(Cargo);
+PyObject *to_python(Unit * un) {
+  return to_python (UnitWrapper(un));
+}
+
+Unit * from_python(PyObject *p,boost::python::type<Unit *>) {
+  UnitWrapper uw =from_python (p,boost::python::type<UnitWrapper >());
+  return uw.GetUnit();
+}
+
+
+
+
+
+
+
+
+
+
+///////////////////////////////////////////////
+// END C++
+///////////////////////////////////////////////
 //below replace ~ with enter
 #else
 #define MYPRINT(nam) print #nam

@@ -8,6 +8,7 @@
 #include "vs_globals.h"
 #include "config_xml.h"
 #include "savegame.h"
+#include "load_mission.h"
 #include <algorithm>
 using namespace std;
  std::string GetHelperPlayerSaveGame (int num) {
@@ -323,6 +324,8 @@ vector <SavedUnits> SaveGame::ReadSavedUnits (FILE * fp) {
       _Universe->LoadSerializedFaction(fp);
     }else if (a==0&&0==strcmp(unitname,"mission")&&0==strcmp(factname,"data")) {
       ReadMissionData(fp);
+    }else if (a==0&&0==strcmp(unitname,"python")&&0==strcmp(factname,"data")) {
+      last_written_pickled_data=last_pickled_data=UnpickleAllMissions(fp);
     }else if (a==0&&0==strcmp(unitname,"news")&&0==strcmp(factname,"data")) {
       ReadNewsData(fp);
     }else {
@@ -334,6 +337,7 @@ vector <SavedUnits> SaveGame::ReadSavedUnits (FILE * fp) {
 void SaveGame::WriteSavedUnit (FILE * fp, SavedUnits* su) {
   fprintf (fp,"\n%d %s %s",su->type, su->filename.c_str(),su->faction.c_str());
 }
+ extern bool STATIC_VARS_DESTROYED;
 void SaveGame::WriteSaveGame (const char *systemname, const QVector &FP, float credits, std::string unitname, int player_num) {
   vector<SavedUnits *> myvec = savedunits.GetAll();
   if (outputsavegame.length()!=0) {
@@ -354,12 +358,18 @@ void SaveGame::WriteSaveGame (const char *systemname, const QVector &FP, float c
     }
     fprintf (fp,"\n%d %s %s",0,"mission","data ");
     WriteMissionData(fp);
+    if (!STATIC_VARS_DESTROYED)
+      last_written_pickled_data=PickleAllMissions(); 
+
+    fprintf (fp,"\n%d %s %s %s ",0,"python","data",last_written_pickled_data.c_str());
+
     fprintf (fp,"\n%d %s %s",0,"news","data ");
     WriteNewsData(fp);
     fprintf (fp,"\n%d %s %s",0,"factions","begin ");
     _Universe->SerializeFaction(fp);
     fclose (fp);
     if (player_num!=-1) {
+      last_pickled_data =last_written_pickled_data;
       FileCopy (outputsavegame.c_str(),GetWritePlayerSaveGame(player_num).c_str());
     }
     vscdup();

@@ -31,7 +31,21 @@ extern VegaConfig *vs_config;
 
 class Mission;
 extern Mission *mission;
-extern std::vector <Mission *>active_missions;
+template <class MyType> class LeakVector {
+  std::vector <MyType> *active_missions;
+ public:
+  bool empty()const {return active_missions->empty();}
+  void push_back (MyType mis) {active_missions->push_back (mis);}
+  MyType back() {return active_missions->back();}
+  LeakVector () {active_missions = new std::vector <MyType>();}
+
+  unsigned int size ()const  {return (active_missions)->size();}
+  MyType  operator [] (unsigned int i) {return (*active_missions)[i];}
+  ~LeakVector () {/* DO NOTHING OR DIE INTENTIONAL LEAK We need this data after Exit*/}
+  std::vector <MyType> * Get() {return active_missions;}
+};
+
+extern LeakVector<Mission *> active_missions;
 class ForceFeedback;
 extern ForceFeedback *forcefeedback;
 

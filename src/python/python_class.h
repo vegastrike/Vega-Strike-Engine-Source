@@ -80,6 +80,8 @@ BOOST_PYTHON_END_CONVERSION_NAMESPACE
 #define PYTHON_BEGIN_INHERIT_CLASS(name,SuperClass,myclass) { \
     boost::python::class_builder <SuperClass,PythonClass< SuperClass > > Class (name,myclass); \
     Class.def (boost::python::constructor<>()); \
+    Class.def (&SuperClass::Pickle,"Pickle",PythonClass< SuperClass >::default_Pickle); \
+    Class.def (&SuperClass::UnPickle,"UnPickle",PythonClass< SuperClass >::default_UnPickle); \
     Class.def (&SuperClass::Execute,"Execute",PythonClass< SuperClass >::default_Execute);
 #define PYTHON_BASE_BEGIN_CLASS(name,CLASS,myclass) { \
     boost::python::class_builder <CLASS> Class (name,myclass);
@@ -106,8 +108,18 @@ template <class SuperClass> class PythonClass:public SuperClass {
   virtual void Execute () {
     boost::python::callback <void>::call_method (self,"Execute");
   }
+  virtual std::string Pickle() { return boost::python::callback <std::string>::call_method (self,"Pickle");}
+  virtual void UnPickle(std::string s)  {
+    boost::python::callback<void>::call_method(self,"UnPickle",s);
+  }
   static void default_Execute(SuperClass & self_) {
     (self_).SuperClass::Execute();
+  }
+  static std::string default_Pickle(SuperClass & self_) {
+    return (self_).SuperClass::Pickle();
+  }
+  static void default_UnPickle(SuperClass & self_, std::string str) {
+    (self_).SuperClass::UnPickle(str);
   }
   static PythonClass * LastPythonClass(){
     PythonClass * myclass = last_instance;

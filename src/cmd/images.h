@@ -53,6 +53,19 @@ public:
 	volume=vv;
 	description=NULL;
   }
+  void SetPrice (float price) {this->price=price;}
+  void SetMass (float mass) {this->mass=mass;}
+  void SetVolume (float vol) {this->volume=vol;}
+  void SetQuantity (int quantity) {this->quantity=quantity;}
+  void SetContent (std::string content) {this->content = content;}
+  void SetCategory (std::string category) {this->category = category;}
+  std::string GetCategory () {return category;}
+  std::string GetContent () {return content;}
+  int GetQuantity() {return quantity;}
+  float GetVolume () {return volume;}
+  float GetMass() {return mass;}
+  float GetPrice () {return price;}
+  std::string GetDescription() {if (description!=NULL) {return description;}return std::string("");}
   bool operator == (const Cargo & other) const {
     return content==other.content;
   }
