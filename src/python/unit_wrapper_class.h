@@ -61,7 +61,7 @@ public:
   UnitWrapper(UnitContainer cont) : UnitContainer(cont){}
   UnitWrapper(Unit *un=0) : UnitContainer(un){}
   operator Unit* () {return GetUnit();}
-  bool isNull () {return GetUnit()==0;}
+  bool isNull () {Unit * un=GetUnit(); if (un) {if (un->GetHull()<=0) {return true;}}return un==0; }
   bool notNull () {return !isNull();}
   void setNull () {SetUnit(0);}
   bool equal (UnitWrapper oth) {
