@@ -521,7 +521,8 @@ float Unit::DealDamageToShield (const Vector &pnt, float &damage) {
 void Unit::ApplyLocalDamage (const Vector & pnt, const Vector & normal, float amt, Unit * affectedUnit,const GFXColor &color) {
   static float nebshields=XMLSupport::parse_float(vs_config->getVariable ("physics","nebula_shield_recharge",".5"));
   if (affectedUnit!=this) {
-    return affectedUnit->ApplyLocalDamage (pnt,normal,amt,affectedUnit,color);
+    affectedUnit->ApplyLocalDamage (pnt,normal,amt,affectedUnit,color);
+    return;
   }
   float leakamt = amt*.01*shield.leak;
   amt *= 1-.01*shield.leak;
