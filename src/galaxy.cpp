@@ -252,9 +252,66 @@ void MakeStarSystem (string file, Galaxy *galaxy, string origin, int forcerandom
   }
   MyLoadSystem (si);
 }
+#ifdef _WIN32
+#include <windows.h>
+static HWND hWnd;
+static HINSTANCE hInst;								// current instance
+LRESULT CALLBACK DLOG_start(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam) {
+	switch (message) {
+	case WM_INITDIALOG:
+		return TRUE;
+	case WM_CLOSE:
+		DestroyWindow(hWnd);
+		return TRUE;
+	case WM_DESTROY:
+		return FALSE;
+	}
+    return FALSE;
+}
+#include "../resource.h"
+
+
+volatile HANDLE hMutex; // Global hMutex Object
+DWORD WINAPI DrawStartupDialog(
+  LPVOID lpParameter   // thread data
+  ) {
+	int dumbi;
+	MSG msg;
+
+	hWnd=CreateDialogParam(hInst, MAKEINTRESOURCE(IDD_START),NULL, (DLGPROC)DLOG_start, 0);
+	ShowWindow(hWnd, SW_SHOW);
+	for (dumbi=0;dumbi<6;dumbi++) {
+		if (PeekMessage(&msg, NULL, 0, 0, PM_NOREMOVE)) {
+
+			if(GetMessage(&msg, NULL, 0, 0)) {
+				DispatchMessage(&msg);
+			} else {
+				break;
+			}
+		}
+		Sleep(100);
+	}
+	WaitForSingleObject(hMutex,INFINITE); // wait for ownership
+	DestroyWindow(hWnd);
+	return 0;
+}
+#endif
 
 
 StarSystem * Universe::GenerateStarSystem (const char * file, const char * jumpback, Vector center) {
+#ifdef _WIN32
+  hMutex=CreateMutex(NULL,FALSE,NULL); // nameless mutex object
+  WaitForSingleObject(hMutex,INFINITE); // wait for ownership + print
+  DWORD id;
+  HANDLE hThr=CreateThread(NULL,  // pointer to security attributes
+		0,                         // initial thread stack size
+	    DrawStartupDialog,     // pointer to thread function
+        NULL,                        // argument for new thread
+        0,                     // creation flags
+        &id                         // pointer to receive thread ID
+         );
+//	DialogBox (hInst,(LPCTSTR)IDD_START,hWnd,(DLGPROC)DLOG_start);
+#endif
   int count=0;
   while (GetCorrectStarSysPath (file).length()==0) {
     MakeStarSystem(file, galaxy,RemoveDotSystem (jumpback),count);
@@ -269,6 +326,10 @@ StarSystem * Universe::GenerateStarSystem (const char * file, const char * jumpb
     ss->SwapOut();
     activeStarSystem()->SwapIn();
   }
+#ifdef _WIN32
+  ReleaseMutex(hMutex);
+#endif
+
   return ss;
 
 }
