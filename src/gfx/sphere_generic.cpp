@@ -179,6 +179,7 @@ void SphereMesh::InitSphere(float radius, int stacks, int slices, const char *te
 	    Decal[count] = createTexture (thistex.c_str(),0,mipmap,TEXTURE2D,TEXTURE_2D,(Insideout||g_game.use_planet_textures)?GFXTRUE:GFXFALSE);
 	  }
 	}
+	count++;
       }
       Insideout?setEnvMap(GFXFALSE):setEnvMap(envMapping);
       
