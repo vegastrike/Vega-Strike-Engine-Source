@@ -29,8 +29,10 @@ class Face {
     bool inFront (const Plane &) const;
 public:
 std::vector <Index> p;
+    int id;
     Plane planeEqu()const;
     bool operator < (const class Face &) const;
+    Face () {static int temp=0; id = temp++;}
 };
 class Mesh {
     void processline (char * line);

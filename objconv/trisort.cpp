@@ -15,7 +15,7 @@ bool nearzero (double fb) {
 }
 bool Plane::inFront (const Vector &v) const{
     double fb = frontBack (v);
-    if (nearzero(fb))
+    if (nearzero(fb)||nearzero(c))
         return true;
     return (fb>0)==(c>0);
 }
@@ -66,21 +66,32 @@ Plane Face::planeEqu() const{
     return rez;
  }
 bool Face::operator < (const Face &b) const{
+    //printf ("comparing %d %d\n",id,b.id);
     Plane bpe (b.planeEqu());
     Plane ape (planeEqu());
-    if (inFront (bpe))
-        return true;
-    if (b.inFront (ape))
+    bool bfronta = inFront (bpe);
+    bool afrontb = b.inFront (ape);
+    if (bfronta&&afrontb) {
         return false;
-    //split er up??
-    fprintf (stderr,"polygon intersection detected\n");
+        return (this->id<b.id);
+    }else if (afrontb!=bfronta) {
+        return afrontb;
+    }
+    static int errcount =0;
+    errcount++;
+    if (errcount<10||errcount%50==0) {
+        fprintf (stderr,"polygon intersection detected %d\n",errcount);
+       
+    }
     return false;
+    return id < b.id;
 }
 
 void Mesh::sort () {
 std::sort (f.begin(),f.end());
 }
 void Index::write (FILE * fp) const{
+    printf ("G: %lf\n",V.z);
     fprintf (fp,"%d/",p);
     if (n!=-1)
         fprintf (fp,"%d",n);
@@ -172,7 +183,7 @@ Face Mesh::processface (char * line) const{
         }
     }
     if (f.p.size()<3)
-        printf ("%s",ln);
+        printf ("bleh!!||| %s\n",ln);
     return f;
 }
 void Mesh::processline (char * line) {
