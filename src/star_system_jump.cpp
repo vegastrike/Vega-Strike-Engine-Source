@@ -83,7 +83,7 @@ void StarSystem::DrawJumpStars() {
     if (un) {
       Vector p,q,r;
       un->GetOrientation (p,q,r);
-      JumpAnimations[k]->SetPosition (un->Position()+r*un->rSize()*pendingjump[kk]->delay);
+      JumpAnimations[k]->SetPosition (un->Position()+r*un->rSize()*(pendingjump[kk]->delay+.25));
     }
   }
   unsigned int i;
@@ -188,7 +188,7 @@ bool StarSystem::JumpTo (Unit * un, Planet * jumppoint, const std::string &syste
   if(ss) {
     Vector p,q,r;
     un->GetOrientation (p,q,r);
-    pendingjump.push_back (new unorigdest (un,jumppoint, this,ss,un->GetJumpStatus().delay,    AddJumpAnimation (un->Position()+r*un->rSize()*un->GetJumpStatus().delay, 10*un->rSize())));
+    pendingjump.push_back (new unorigdest (un,jumppoint, this,ss,un->GetJumpStatus().delay,    AddJumpAnimation (un->Position()+r*un->rSize()*(un->GetJumpStatus().delay+.25), 10*un->rSize())));
   } else {
     return false;
   }
