@@ -23,7 +23,10 @@ cmd/ai/libaigeneric.a cmd/ai/libai.a \
 gldrv/libgldrv.a \
 gui/libgui.a \
 networking/libnet.a \
--lpthread
+-lpthread \
+\
+libroot.a librootgeneric.a aldrv/libaldrv.a cmd/collide/libcollide.a common/libvscommon.a networking/libnetclient.a  cmd/script/libscript.a cmd/script/libscriptgeneric.a cmd/script/c_alike/libc_alike.a  cmd/libcmd.a cmd/libcmdgeneric.a python/libpython.a python/libpythongeneric.a boost/libboost_python.a gfx/libgfx.a gfx/libgfxgeneric.a cmd/ai/libaigeneric.a cmd/ai/libai.a gldrv/libgldrv.a gui/libgui.a networking/libnet.a
+#and again we paste the same line and it werx magically
 
 vegaserver_LDADD =  \
 networking/libnetserver.a \
@@ -34,7 +37,10 @@ cmd/script/c_alike/libc_alike.a \
 gfx/libgfxgeneric.a \
 python/libpython.a python/libpythongeneric.a \
 boost/libboost_python.a \
-librootserver.a librootgeneric.a
+librootserver.a librootgeneric.a 
+
+
+
 
 accountserver_LDADD =  \
 networking/libnetserver.a
