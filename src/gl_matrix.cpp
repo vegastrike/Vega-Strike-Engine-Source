@@ -232,7 +232,7 @@ static void gl_Frustum(
    b = (top+bottom) / (top-bottom);
    c = -(farval+nearval) / ( farval-nearval);
    d = -(((float)2.0)*farval*nearval) / (farval-nearval);  /* error? */
-   fprintf (stderr,"x:%f y:%f a:%f b:%f c:%f d:%f",x,y,a,b,c,d);
+
 #define M(row,col)  m[col*4+row]
    M(0,0) = x;     M(0,1) = 0.0F;  M(0,2) = a;      M(0,3) = 0.0F;
    M(1,0) = 0.0F;  M(1,1) = y;     M(1,2) = b;      M(1,3) = 0.0F;
@@ -251,10 +251,10 @@ BOOL /*GFXDRVAPI*/ GFXPerspective(float fov, float aspect, float znear, float zf
 {
    float xmin, xmax, ymin, ymax;
 
-   fprintf (stderr, "fov: %f, aspect %f, znear %f",fov,aspect,znear);
+
 
    ymax = znear * tanf( fov * PI / ((float)360.0) ); //78.0 --> 4.7046
-   fprintf (stderr, "ymax: %f",ymax);
+
    ymin = -ymax; //-4.7046
 
    xmin = ymin * aspect;//-6.2571
