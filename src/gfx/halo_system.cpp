@@ -35,6 +35,11 @@ void DoParticles (QVector pos, float percent, const Vector & velocity, float rad
 								       "sparklespread",
 								       
 								       ".04"));
+  static float absspeed = XMLSupport::parse_float (vs_config->getVariable("graphics",
+								       "sparkleabsolutespeed",
+								       
+								       ".04"));
+
   if (i<(RAND_MAX*percent)*(GetElapsedTime()*scale)) {
       ParticlePoint pp;
       float r1 = rand()/((float)RAND_MAX*.5)-1;
@@ -46,7 +51,7 @@ void DoParticles (QVector pos, float percent, const Vector & velocity, float rad
       pp.col.j=col[1];
       pp.col.k=col[2];
 	  static float sciz=XMLSupport::parse_float (vs_config->getVariable("graphics","sparklesizeenginerelative",".125"));
-      particleTrail.AddParticle(pp,rand*velocity.Magnitude()*spread+velocity*sspeed,particle_size*sciz);
+      particleTrail.AddParticle(pp,rand*(velocity.Magnitude()*spread+absspeed)+velocity*sspeed,particle_size*sciz);
     }
 }
   
