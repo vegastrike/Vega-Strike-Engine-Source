@@ -241,6 +241,31 @@ fi
 AC_SUBST(PYTHON_LIBS)
 
 
+dnl --------------------------------------------------------------------------
+dnl Check for network protocol
+dnl --------------------------------------------------------------------------
+
+AC_ARG_ENABLE(tcp,[  --enable-tcp      Use TCP (defaults to UDP)],  [tcp=no])
+AC_ARG_ENABLE(udp,[  --enable-udp      Use UDP (this is default)],  [udp=no])
+
+if test "x$tcp$udp" = "xnono" ; then
+    echo "*** Both UDP and TCP protocol are enabled : using default UDP
+protocol"
+    TR_CPPFLAGS="$TR_CPPFLAGS -D_UDP_PROTO"
+else
+	if test "x$tcp" = "xno" ; then
+	    TR_CPPFLAGS="$TR_CPPFLAGS -D_TCP_PROTO"
+	    echo "Configuring for TCP network protocol"
+	else
+		if test "x$udp" = "xno" ; then
+		    echo "Configuring for UDP network protocol"
+		    TR_CPPFLAGS="$TR_CPPFLAGS -D_UDP_PROTO"
+		else
+		    echo "Configuring for UDP network protocol"
+		    TR_CPPFLAGS="$TR_CPPFLAGS -D_UDP_PROTO"
+		   fi
+	fi
+fi
 
 
 dnl --------------------------------------------------------------------------
@@ -288,6 +313,17 @@ dnl        TR_LIBS="$TR_LIBS -lSDL_mixer"
 dnl    else
 dnl        echo "*** SDL_mixer not found.  Configuring without audio support."
 dnl    fi
+
+dnl	Added a simple check to see if we can use libSDL_net
+	AC_CHECK_HEADER( SDL/SDL_net.h, have_SDL_net=yes, have_SDL_net=no)
+	if test "x$have_SDL_net" = "xyes" ; then
+		NET_LIBS=" -lSDL_net"
+		TR_CPPFLAGS="$TR_CPPFLAGS -DHAVE_SDLnet"
+	else
+		NET_LIBS=""
+		echo "*** SDL_net not found.  Configuring with standard sockets support."
+	fi
+	AC_SUBST(NET_LIBS)
 
     LIBS="$saved_LIBS"
 else
