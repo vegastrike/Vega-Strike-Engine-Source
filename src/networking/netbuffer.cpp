@@ -60,7 +60,7 @@ void	NetBuffer::checkBuffer( int len)
 #ifndef NDEBUG
 	if( offset+len > size)
 	{
-		cerr<<"!!! ERROR : trying to read more data than buffer size !!!"<<endl;
+		cerr<<"!!! ERROR : trying to read more data than buffer size (offset="<<offset<<" - size="<<size<<" - to read="<<len<<") !!!"<<endl;
 		exit(1);
 	}
 #endif
