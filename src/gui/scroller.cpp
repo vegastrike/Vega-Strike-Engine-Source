@@ -132,8 +132,8 @@ void Scroller::setTextColor(const GFXColor& c) {
 class ScrollerButton : public NewButton
 {
 public:
-    // Draw the button. Return true if anything is drawn.
-    virtual bool draw(void);
+    // Draw the button.
+    virtual void draw(void);
 
     // Which way the arrow points.
     enum ButtonArrow {
@@ -158,11 +158,11 @@ protected:
 
 
 // Draw the scroller button.
-bool ScrollerButton::draw(void)
+void ScrollerButton::draw(void)
 {
     // Draw the other stuff first, so our stuff goes on top.
     assert(label().empty());            // We are assuming it won't paint text on itself.
-    const bool temp = NewButton::draw();
+    NewButton::draw();
 
     static const float ARROW_POINT = .012;      // From center to point of arrow.
     static const float ARROW_WIDTH = .01;       // From center to side points.
@@ -195,8 +195,6 @@ bool ScrollerButton::draw(void)
     }
 
     drawFilledPolygon(coords, textColor());
-
-    return true;
 }
 
 
@@ -276,8 +274,8 @@ void Scroller::createControls(void) {
     addChild(slider);
 }
 
-// Draw the control. Return true if anything is drawn.
-bool Scroller::draw(void)
+// Draw the control.
+void Scroller::draw(void)
 {
 	drawBackground();
 
@@ -285,7 +283,7 @@ bool Scroller::draw(void)
         calcLayout();
     }
 
-    return GroupControl::draw();
+    GroupControl::draw();
 }
 
 // Process a command event.

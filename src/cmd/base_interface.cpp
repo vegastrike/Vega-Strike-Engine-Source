@@ -171,7 +171,8 @@ bool RefreshGUI(void) {
 			if (_Universe->AccessCockpit()->GetParent()==BaseInterface::CurrentBase->caller.GetUnit()){
 				if (BaseInterface::CurrentBase->CallComp) {
 #ifdef NEW_GUI
-					return globalWindowManager().draw();
+					globalWindowManager().draw();
+					return true;
 #else
 					return RefreshInterface ();
 #endif

@@ -75,8 +75,8 @@ public:
     virtual WindowController* controller(void) { return m_controller; };
     virtual void setController(WindowController* controller) { m_controller = controller; } ;
 
-    // Draw the window.  Return true if *anything* gets drawn.
-    virtual bool draw(void);
+    // Draw the window.
+    virtual void draw(void);
 
     // Read window properties and controls from an XML file.
     virtual void readFromXml(const std::string& fileName);
@@ -101,7 +101,7 @@ public:
     // INTERNAL IMPLEMENTATION
 protected:
     // Draw window background.
-    bool drawBackground(void);
+    void drawBackground(void);
 
     // VARIABLES
 protected:
@@ -120,8 +120,8 @@ class WindowManager
 public:
     friend class Window;                  // Most operations here are done only by windows.
 
-    // Draw all visible windows.  Return true if anything is drawn.
-    bool draw();
+    // Draw all visible windows.
+    void draw();
 
     // Shut down all windows.
     void shutDown(void);

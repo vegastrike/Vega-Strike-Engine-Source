@@ -118,8 +118,8 @@ public:
 
     // Draw the text.
 	static const int END_LINE;
-    virtual bool drawLines(int start, int count = END_LINE) const;
-    bool draw(void) const { return drawLines(0); };
+    virtual void drawLines(int start, int count = END_LINE) const;
+    void draw(void) const { drawLines(0); };
 
 
     // CONSTRUCTION

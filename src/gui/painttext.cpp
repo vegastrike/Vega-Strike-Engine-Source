@@ -214,12 +214,12 @@ static void drawChars(const string& str, int start, int end, const Font& font, c
 }
 
 // Draw specified lines of text.
-bool PaintText::drawLines(int start, int count) const {
+void PaintText::drawLines(int start, int count) const {
     // Make sure we hav a display list.
     calcLayoutIfNeeded();
     // Make sure we have something to do.
     if(m_lines.empty()) {
-        return false;
+        return;
     }
 
     // Initialize the graphics state.
@@ -268,8 +268,6 @@ bool PaintText::drawLines(int start, int count) const {
     glDisable(GL_LINE_SMOOTH);
     glPopMatrix();
     glEnable(GL_TEXTURE_2D);
-
-    return true;
 }
 
 // Get a floating-point argument for a PaintText format command.

@@ -52,7 +52,7 @@ public:
 
     // OVERRIDES
 
-    virtual bool draw(void);
+    virtual void draw(void);
     virtual void setRect(const Rect& r);
     virtual void setColor(const GFXColor& c);
 

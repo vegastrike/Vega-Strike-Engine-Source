@@ -37,15 +37,13 @@ bool Control::hitTest(const Point& p) {
 }
 
 // Draw window background.
-bool Control::drawBackground(void) {
+void Control::drawBackground(void) {
     if(!isClear(m_color)) {
         drawRect(m_rect, m_color);
     }
 	if(!isClear(m_outlineColor)) {
 		drawRectOutline(m_rect, m_outlineColor, DEFAULT_OUTLINE_LINE_WIDTH);
 	}
-
-    return true;
 }
 
 // CONSTRUCTION

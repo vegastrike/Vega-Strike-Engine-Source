@@ -65,8 +65,8 @@ public:
     virtual void setShadowWidth(float width) { m_shadowWidth = width; };
     virtual float shadowWidth(void) { return m_shadowWidth; };
 
-    // Draw the button. Return true if anything is drawn.
-    virtual bool draw(void);
+    // Draw the button.
+    virtual void draw(void);
 
     // OVERRIDES
     virtual bool processMouseDown(const InputEvent& event);

@@ -72,9 +72,9 @@ public:
     // The list of controls "grouped" into this control.
     virtual bool hasGroupChildren(void) { return false; };
 
-    // Draw the control.  Return true if anything is drawn.
+    // Draw the control.
     // This should not draw outside its rectangle!
-    virtual bool draw(void) = 0;
+    virtual void draw(void) = 0;
 
     // CONSTRUCTION
 public:
@@ -85,7 +85,7 @@ protected:
     // INTERNAL IMPLEMENTATION
 
     // Draw background.
-    virtual bool drawBackground(void);
+    virtual void drawBackground(void);
 
     // VARIABLES
 protected:

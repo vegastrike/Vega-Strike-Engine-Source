@@ -78,21 +78,18 @@ Control* Window::findControlById(const std::string& id) {
 }
 
 // Draw/redraw the whole window.
-bool Window::draw(void) {
-    bool r1 = drawBackground();
-    bool r2 = m_controls->draw();
-    return( r1 || r2 );
+void Window::draw(void) {
+    drawBackground();
+    m_controls->draw();
 }
 
 // Draw window background.
-bool Window::drawBackground(void) {
+void Window::drawBackground(void) {
 	m_texture.draw(m_rect);
 
     if(!isClear(m_color)) {
         drawRect(m_rect, m_color);
     }
-
-    return true;
 }
 
 // Read window properties and controls from an XML file.
@@ -173,9 +170,8 @@ Window::~Window(void) {
 ///////////////////  WINDOW MANAGER  /////////////////////////
 
 
-// Draw all visible windows.  Return true if anything is drawn.
-bool WindowManager::draw() {
-    bool result = false;
+// Draw all visible windows.
+void WindowManager::draw() {
     vector <Window*>::iterator iter;
 
     GFXHudMode(true);              // Load identity matrices.
@@ -197,7 +193,7 @@ bool WindowManager::draw() {
     // FIXME mbyron -- I think the event manager needs to get involved with window z-order.
     //   (Mouse events should go to windows in zorder, shouldn't they?)
     for(iter = m_windows.begin() ; iter != m_windows.end() ; iter++ ) {
-        if((*iter)->draw()) result = true;
+        (*iter)->draw();
     }
 
     // Emulate EndGUIFrame.
@@ -222,8 +218,6 @@ bool WindowManager::draw() {
 
     GFXHudMode(false);
     GFXEnable(CULLFACE);
-
-    return true;            // Have to return true because we drew the cursor.
 }
 
 // A new window has been created and is ready to be drawn.

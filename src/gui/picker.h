@@ -80,8 +80,8 @@ public:
 class Picker : public Control
 {
 public:
-    // Draw the list. Return true if anything is drawn.
-    virtual bool draw(void);
+    // Draw the list.
+    virtual void draw(void);
 
     // Get cell collection.
     virtual PickerCells* cells(void) { return m_cells; };

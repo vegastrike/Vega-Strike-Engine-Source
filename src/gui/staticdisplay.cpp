@@ -50,8 +50,8 @@ void StaticDisplay::setRect(const Rect& r) {
     setPaintTextRect();
 }
 
-// Draw the control. Return true if anything is drawn.
-bool StaticDisplay::draw(void)
+// Draw the control.
+void StaticDisplay::draw(void)
 {
     // Draw the background.
     drawBackground();
@@ -67,8 +67,6 @@ bool StaticDisplay::draw(void)
     }
 
     m_paintText.drawLines(m_scrollPosition);
-
-    return true;
 }
 
 // Set the object that takes care of scrolling.

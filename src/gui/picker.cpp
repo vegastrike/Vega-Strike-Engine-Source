@@ -54,7 +54,7 @@ PickerCell* PickerCells::cellWithId(const std::string& id) {
 }
 
 // Draw the picker
-bool Picker::draw(void)
+void Picker::draw(void)
 {
     // If we need to change the displayed cells, do that first.
     if(m_needRecalcDisplay) {
@@ -116,8 +116,6 @@ bool Picker::draw(void)
 
         rect.origin.y -= cellHeight;
     }
-
-    return true;
 }
 
 // Return the index of the current selected cell in the list of cells.

@@ -31,8 +31,8 @@
 // pressed by the mouse, and, by default, send a command out when
 // it is pressed.
 
-// Draw the button. Return true if anything is drawn.
-bool NewButton::draw(void)
+// Draw the button.
+void NewButton::draw(void)
 {
     const float lineWidth = shadowWidth();
 
@@ -65,8 +65,6 @@ bool NewButton::draw(void)
     m_paintText.setColor(textColor());
     m_paintText.setJustification(CENTER_JUSTIFY);
     m_paintText.draw();
-
-    return true;
 }
 
 // Set the button drawing state.  If the state changes, it will redraw.

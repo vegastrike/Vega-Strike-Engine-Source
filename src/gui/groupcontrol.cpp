@@ -102,9 +102,9 @@ Control* GroupControl::findControlById(const std::string& id) {
     return NULL;
 }
 
-// Draw the control.  Return true if anything is drawn.
+// Draw the control.
 // This should not draw outside its rectangle!
-bool GroupControl::draw(void) {
+void GroupControl::draw(void) {
     std::vector<Control*>::iterator iter;
     for(iter = m_controls.begin() ; iter != m_controls.end() ; iter++ ) {
         Control* currentControl = *iter;
@@ -113,8 +113,6 @@ bool GroupControl::draw(void) {
             currentControl->draw();
         }
     }
-
-    return true;
 }
 
 // OVERRIDES

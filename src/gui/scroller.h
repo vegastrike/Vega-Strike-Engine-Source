@@ -51,8 +51,8 @@ public:
 	// The background color of the buttons.
     void setButtonColor(const GFXColor& c);
 
-    // Draw the control. Return true if anything is drawn.
-    virtual bool draw(void);
+    // Draw the control.
+    virtual void draw(void);
 
     // OVERRIDES
 

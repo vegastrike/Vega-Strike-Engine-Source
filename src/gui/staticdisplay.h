@@ -38,8 +38,8 @@ class Scroller;
 class StaticDisplay : public Control
 {
 public:
-    // Draw the control. Return true if anything is drawn.
-    virtual bool draw(void);
+    // Draw the control.
+    virtual void draw(void);
 
     // Text that appears on the control.
     virtual std::string text(void) { return m_paintText.text(); };

@@ -56,9 +56,9 @@ public:
     // A control in this group.
     Control* childAt(int index) { return m_controls[index]; };
 
-    // Draw the control.  Return true if anything is drawn.
+    // Draw the control.
     // This should not draw outside its rectangle!
-    virtual bool draw(void);
+    virtual void draw(void);
 
     // OVERRIDES
     virtual bool processMouseDown(const InputEvent& event);

@@ -151,8 +151,8 @@ void Slider::setColor(const GFXColor& c) {
     Control::setColor(c);
 }
 
-// Draw the control. Return true if anything is drawn.
-bool Slider::draw(void)
+// Draw the control.
+void Slider::draw(void)
 {
     // Draw the background.
 	drawBackground();
@@ -180,8 +180,6 @@ bool Slider::draw(void)
         drawRect(thumbRect, m_thumbColor);
         drawRectOutline(thumbRect, m_thumbOutlineColor, 1.0);
     }
-
-    return true;
 }
 
 bool Slider::processMouseDown(const InputEvent& event) {
