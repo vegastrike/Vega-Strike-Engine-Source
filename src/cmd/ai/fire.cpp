@@ -255,7 +255,7 @@ void FireAt::Execute () {
   bool tmp = done;
   Order::Execute();	
   if (gunspeed==float(.0001)) {
-    parent->getAverageGunSpeed (gunspeed,gunrange);  
+    ChooseTarget();//starting condition
   }
   done = tmp;
   Unit * targ;
