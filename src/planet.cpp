@@ -19,7 +19,7 @@ AI *PlanetaryOrbit::Execute() {
 
 void Planet::InitPlanet(FILE *fp) {
   InitUnit();
-  envMap = FALSE;
+  envMap = TRUE;
   satellites = NULL;
   numSatellites = 0;
   calculatePhysics=false;
@@ -49,8 +49,8 @@ void Planet::InitPlanet(FILE *fp) {
   }
   
   meshdata = new Mesh*[1];
-  meshdata[0] = new SphereMesh(radius, 4, 4, texname);
-  //meshdata[0]->setEnvMap(FALSE);
+  meshdata[0] = new SphereMesh(radius, 16, 16, texname);
+  meshdata[0]->setEnvMap(TRUE);
   nummesh = 1;
   fpos = ftell(fp);
 }
