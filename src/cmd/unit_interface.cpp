@@ -12,6 +12,21 @@
 #ifdef _WIN32
 #define strcasecmp stricmp
 #endif
+int GetModeFromName (const char * input_buffer) {
+      if (strlen (input_buffer)>3) {
+	if (input_buffer[0]=='a'&&
+	    input_buffer[1]=='d'&&
+	    input_buffer[2]=='d') {
+	  return 1;
+	}
+	if (input_buffer[0]=='m'&&
+	    input_buffer[1]=='u'&&
+	    input_buffer[2]=='l') {
+	  return 2;
+	}
+      }
+      return 0;
+}
 
 static float usedPrice (float percentage) {
   return .66*percentage;
@@ -40,6 +55,7 @@ struct UpgradingInfo {
   vector <Cargo> * CurrentList;
   enum SubMode {NORMAL,MOUNT_MODE,SUBUNIT_MODE, CONFIRM_MODE}submode;
   enum BaseMode {BUYMODE,SELLMODE,MISSIONMODE,UPGRADEMODE,ADDMODE,DOWNGRADEMODE,SHIPDEALERMODE, MAXMODE} mode;
+  bool multiplicitive;
   Button *Modes[MAXMODE];
   string title;
   string curcategory;
@@ -336,6 +352,7 @@ void UpgradingInfo::SelectItem (const char *item, int button, int buttonstate) {
   }
 
 }
+
 void UpgradingInfo::CommitItem (const char *inp_buf, int button, int state) {
   Unit * un;
   Unit * base;
@@ -356,15 +373,6 @@ void UpgradingInfo::CommitItem (const char *inp_buf, int button, int state) {
   case DOWNGRADEMODE:    
   case SHIPDEALERMODE:
     {
-      if (mode==UPGRADEMODE) {
-	if (strlen (input_buffer)>3) {
-	  if (input_buffer[0]=='a'&&
-	      input_buffer[1]=='d'&&
-	      input_buffer[2]=='d') {
-	    mode=ADDMODE;
-	  }
-	}
-      }
       Unit * temprate= new Unit ((un->name+string(".template")).c_str(),false,un->faction);
       if (temprate->name!=string("LOAD_FAILED")) {
 	templ=temprate;
@@ -376,6 +384,14 @@ void UpgradingInfo::CommitItem (const char *inp_buf, int button, int state) {
     switch(submode) {
     case NORMAL:
       {
+	multiplicitive=false;
+	int mod=GetModeFromName(input_buffer);
+	if (mod==1&&mode==UPGRADEMODE)
+	  mode=ADDMODE;
+	if (mod==2) {
+	  multiplicitive=true;
+	}
+
 	Cargo *part = base->GetCargo (string(input_buffer), offset);
        	if ((part?part->quantity:0) ||
 	    (mode==DOWNGRADEMODE&&(part=GetMasterPartList(input_buffer))!=NULL)) {
@@ -496,11 +512,17 @@ void UpgradingInfo::CompleteTransactionAfterTurretSelect() {
   bool canupgrade=false;
   double percentage;
   Unit * un;
+  int addmultmode=0;
+  if (mode==ADDMODE)
+    addmultmode=1;
+  if (multiplicitive=true)
+    addmultmode=2;
   if ((un=buyer.GetUnit())) {
     switch (mode) {
     case UPGRADEMODE:
     case ADDMODE:
-      canupgrade = un->canUpgrade (NewPart,mountoffset,subunitoffset,mode==ADDMODE,false,percentage,templ);
+    
+      canupgrade = un->canUpgrade (NewPart,mountoffset,subunitoffset,addmultmode,false,percentage,templ);
       break;
     case DOWNGRADEMODE:
       canupgrade = un->canDowngrade (NewPart,mountoffset,subunitoffset,percentage);

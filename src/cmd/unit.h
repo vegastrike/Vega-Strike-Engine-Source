@@ -410,7 +410,8 @@ class Unit {
   void PerformDockingOperations ();
   void FreeDockingPort(unsigned int whichport);
   void SetRecursiveOwner(Unit *target);
-  bool UpAndDownGrade (Unit * up, Unit * templ, int mountoffset, int subunitoffset, bool touchme, bool downgrade, bool additive, bool forcetransaction, double &percentage);
+  //0 in additive is reaplce  1 is add 2 is mult
+  bool UpAndDownGrade (Unit * up, Unit * templ, int mountoffset, int subunitoffset, bool touchme, bool downgrade, int additive, bool forcetransaction, double &percentage);
 public:
   void EjectCargo (unsigned int index);
   void FixGauges();
@@ -448,8 +449,8 @@ public:
   ///The faction of this unit
   int faction;
   void SetFaction (int faction);
-  bool canUpgrade (Unit * upgrador, int mountoffset,  int subunitoffset, bool additive, bool force,  double & percentage, Unit * templ=NULL);
-  bool Upgrade (Unit * upgrador, int mountoffset,  int subunitoffset, bool additive, bool force,  double & percentage, Unit * templ=NULL);
+  bool canUpgrade (Unit * upgrador, int mountoffset,  int subunitoffset, int additive, bool force,  double & percentage, Unit * templ=NULL);
+  bool Upgrade (Unit * upgrador, int mountoffset,  int subunitoffset, int additive, bool force,  double & percentage, Unit * templ=NULL);
   bool canDowngrade (Unit *downgradeor, int mountoffset, int subunitoffset, double & percentage);
   bool Downgrade (Unit * downgradeor, int mountoffset, int subunitoffset,  double & percentage);
   vector <struct Cargo>& FilterDowngradeList (vector <struct Cargo> & mylist);

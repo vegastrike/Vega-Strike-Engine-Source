@@ -65,6 +65,9 @@ bool GreaterZero (double a, double b) {
 double AddUp (double a, double b) {
   return a+b;
 }
+double MultUp (double a, double b) {
+  return a*b;
+}
 double GetsB (double a, double b) {
   return b;
 }
@@ -93,6 +96,7 @@ double computeWorsePercent (double old,double upgrade, double isnew) {
     return 1;
 }
 double computeAdderPercent (double a,double b, double c) {return 0;}
+double computeMultPercent (double a,double b, double c) {return 0;}
 double computeDowngradePercent (double old, double upgrade, double isnew) {
   if (upgrade) {
     return (old-isnew)/upgrade;
@@ -236,10 +240,10 @@ static bool UpgradeFloat (double &result,double tobeupgraded, double upgrador, d
     return NOTTHERE;
   }
 }
-bool Unit::canUpgrade (Unit * upgrador, int mountoffset,  int subunitoffset, bool additive, bool force,  double & percentage, Unit * templ){
+bool Unit::canUpgrade (Unit * upgrador, int mountoffset,  int subunitoffset, int additive, bool force,  double & percentage, Unit * templ){
   return UpAndDownGrade(upgrador,templ,mountoffset,subunitoffset,false,false,additive,force,percentage);
 }
-bool Unit::Upgrade (Unit * upgrador, int mountoffset,  int subunitoffset, bool additive, bool force,  double & percentage, Unit * templ) {
+bool Unit::Upgrade (Unit * upgrador, int mountoffset,  int subunitoffset, int additive, bool force,  double & percentage, Unit * templ) {
   return UpAndDownGrade(upgrador,templ,mountoffset,subunitoffset,true,false,additive,force,percentage);
 }
 bool Unit::canDowngrade (Unit *downgradeor, int mountoffset, int subunitoffset, double & percentage){
@@ -248,7 +252,7 @@ bool Unit::canDowngrade (Unit *downgradeor, int mountoffset, int subunitoffset, 
 bool Unit::Downgrade (Unit * downgradeor, int mountoffset, int subunitoffset,  double & percentage){
   return UpAndDownGrade(downgradeor,NULL,mountoffset,subunitoffset,true,true,false,true,percentage);
 }
-bool Unit::UpAndDownGrade (Unit * up, Unit * templ, int mountoffset, int subunitoffset, bool touchme, bool downgrade, bool additive, bool forcetransaction, double &percentage) {
+bool Unit::UpAndDownGrade (Unit * up, Unit * templ, int mountoffset, int subunitoffset, bool touchme, bool downgrade, int additive, bool forcetransaction, double &percentage) {
   percentage=0;
   int numave=0;
   bool cancompletefully=UpgradeMounts(up,mountoffset,touchme,downgrade,numave,templ,percentage);
@@ -264,9 +268,12 @@ bool Unit::UpAndDownGrade (Unit * up, Unit * templ, int mountoffset, int subunit
     Percenter=&computeDowngradePercent;
     Comparer = &GreaterZero;
   } else{
-    if (additive) {
+    if (additive==1) {
       Adder=&AddUp;
       Percenter=&computeAdderPercent;
+    }else if (additive==2) {
+      Adder=&MultUp;
+      Percenter=&computeMultPercent;
     }else {
       Adder=&GetsB;
       Percenter=&computePercent;
