@@ -217,7 +217,7 @@ public:
 
   bool canUpgrade (Unit * upgrador, int mountoffset,  int subunitoffset, int additive, bool force,  double & percentage, Unit * templ=NULL);
   bool Upgrade (Unit * upgrador, int mountoffset,  int subunitoffset, int additive, bool force,  double & percentage, Unit * templ=NULL);
-  double Upgrade (const std::string &file,int mountoffset, int subunitoffset, bool force, bool loop_through_mounts) { return 1;}
+  virtual double Upgrade (const std::string &file,int mountoffset, int subunitoffset, bool force, bool loop_through_mounts) { return 1;}
   bool canDowngrade (Unit *downgradeor, int mountoffset, int subunitoffset, double & percentage);
   bool Downgrade (Unit * downgradeor, int mountoffset, int subunitoffset,  double & percentage);
 
