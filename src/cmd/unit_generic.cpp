@@ -721,25 +721,32 @@ float Unit::TrackingGuns(bool &missilelock) {
 }
 
 void Unit::getAverageGunSpeed(float & speed, float &range) const {
-   if (GetNumMounts()) {
-     range=0;
-     speed=0;
-     int nummt = GetNumMounts();
-     for (int i=0;i<GetNumMounts();i++) {
-       if (mounts[i]->type->type!=weapon_info::PROJECTILE) {
-	 if (mounts[i]->type->Range > range) {
-	   range=mounts[i]->type->Range;
-	 }
-	 speed+=mounts[i]->type->Speed;
-       } else {
-	 nummt--;
-       }
-     }
-     if (nummt) {
-       speed/=nummt;
-     }
-   }
-  
+  float mrange=-1;
+  range=-1;
+  speed=-1;
+  if (GetNumMounts()) {
+    range=0;
+    speed=0;
+	mrange=0;
+	int nummt = GetNumMounts();
+	// this breaks the name, but... it _is_ more useful.
+    for (int i=0;i<GetNumMounts();i++) {
+      if (mounts[i]->type->type!=weapon_info::PROJECTILE) {
+	    if (mounts[i]->type->Range > range) {
+	      range=mounts[i]->type->Range;
+		}
+	    speed+=mounts[i]->type->Speed;
+      } else if(mounts[i]->type->type==weapon_info::PROJECTILE){
+		if(mounts[i]->type->Range > mrange) {
+	      mrange=mounts[i]->type->Range;
+		}
+	    nummt--;
+      }
+    }
+	if(nummt){
+	  speed = speed/nummt;
+	}
+  }
 }
 
 QVector Unit::PositionITTS (const QVector & posit, float speed) const{
@@ -1565,7 +1572,7 @@ float Unit::ApplyLocalDamage (const Vector & pnt, const Vector & normal, float a
     percentage = DealDamageToShield (pnt,amt);
   }
   if (aistate)
-    aistate->ChooseTarget();
+   aistate->ChooseTarget();
   return percentage;
 }
 
