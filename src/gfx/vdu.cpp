@@ -135,8 +135,6 @@ VDU::VDU (const char * file, TextPlane *textp, unsigned short modes, short rwws,
 };
 static void DrawTargetShield (VDU * thus, VSSprite* s, float per, float &sx, float &sy, float & w, float & h, bool drawsprite) {
   static bool HighQTargetVSSprites = XMLSupport::parse_bool(vs_config->getVariable("graphics","high_quality_sprites","false"));
-  static bool drawweapsprite = XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","draw_weapon_sprite","false"));
-
   float nw,nh;
   thus->GetPosition (sx,sy);
   thus->GetSize (w,h);
@@ -163,7 +161,7 @@ static void DrawTargetShield (VDU * thus, VSSprite* s, float per, float &sx, flo
 	  s->GetSize (nw,nh);
 	  w= fabs(nw*h/nh);
 	  s->SetSize (w,h);
-	  if (drawweapsprite&&drawsprite) 
+	  if (drawsprite) 
 		  s->Draw();
 	  s->SetSize (nw,nh);
 	  h = fabs(h);
@@ -730,6 +728,8 @@ void VDU::DrawStarSystemAgain (float x,float y,float w,float h, VIEWSTYLE viewSt
   GFXEnable (DEPTHTEST);
   GFXEnable (DEPTHWRITE);
   VIEWSTYLE which=viewStyle;
+  float tmpaspect=g_game.aspect;
+  g_game.aspect=w/h;
   _Universe->AccessCamera(which)->SetSubwindow (x,y,w,h);
   _Universe->SelectCamera(which);
   VIEWSTYLE tmp = _Universe->AccessCockpit()->GetView ();
@@ -739,6 +739,7 @@ void VDU::DrawStarSystemAgain (float x,float y,float w,float h, VIEWSTYLE viewSt
   GFXClear (GFXFALSE);
   GFXColor4f(1,1,1,1);
   _Universe->activeStarSystem()->Draw(false);
+  g_game.aspect=tmpaspect;
   _Universe->AccessCamera (which)->SetSubwindow (0,0,1,1);
   _Universe->AccessCockpit()->SetView (tmp);
   _Universe->AccessCockpit()->SelectProperCamera();
@@ -776,11 +777,12 @@ void VDU::DrawStarSystemAgain (float x,float y,float w,float h, VIEWSTYLE viewSt
     GetSize (w,h);
     static bool draw_vdu_target_info=XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","draw_vdu_view_shields","true"));
     if (target&&draw_vdu_target_info){
-      if (viewStyle==CP_PANTARGET||viewStyle==CP_TARGET)
+      if (viewStyle==CP_PANTARGET) {
         DrawTargetShield(this,getSunImage(),1,x,y,w,h,false);
         h=fabs (h*.6);
         w=fabs (w*.6);
         DrawShield(target->FShieldData(),target->RShieldData(),target->LShieldData(),target->BShieldData(),x,y,w,h);
+      }
     }
     GFXColor4f (1,1,1,1);
   }else {

@@ -1247,19 +1247,9 @@ int GameCockpit::Autopilot (Unit * target) {
 		if (face_target_on_auto) {
 			//	  FaceTarget(un,un->LocalPosition(),un->Target());
 		}	  
-		static double averagetime = GetElapsedTime()/getTimeCompression();
+
 		static double numave = 1.0;
-		averagetime+=GetElapsedTime()/getTimeCompression();
-		static float autospeed = XMLSupport::parse_float (vs_config->getVariable ("physics","autospeed",".020"));//10 seconds for auto to kick in;
-		numave++;
-		if (autopan) {
-		  AccessCamera(CP_PAN)->myPhysics.SetAngularVelocity(Vector(0,0,0));
-		  AccessCamera(CP_PAN)->myPhysics.ApplyBalancedLocalTorque(_Universe->AccessCamera()->P,
-								   _Universe->AccessCamera()->R,
-								   averagetime*autospeed/(numave));
-		  static float initialzoom=XMLSupport::parse_float(vs_config->getVariable("graphics","inital_zoom_factor","2.25"));
-		  zoomfactor=initialzoom;
-		}
+		
 		static float autotime = XMLSupport::parse_float (vs_config->getVariable ("physics","autotime","10"));//10 seconds for auto to kick in;
 
 		autopilot_time=autotime;
@@ -1622,7 +1612,32 @@ void GameCockpit::UpdAutoPilot()
   static bool autopan = XMLSupport::parse_bool (vs_config->getVariable ("graphics","pan_on_auto","true"));
   if (autopilot_time!=0) {
     autopilot_time-=SIMULATION_ATOM;
+    {
+      static float autospeed = XMLSupport::parse_float (vs_config->getVariable ("physics","autospeed",".020"));//10 seconds for auto to kick in;
+      if (autopan) {
+        Vector origR=Vector(0,0,1);
+        Vector origP=Vector(1,0,0);
+        
+        static float rotspd=XMLSupport::parse_float(vs_config->getVariable("graphics","autopilot_rotation_speed",".15"));
+
+        static float curtime=0;
+        curtime+=SIMULATION_ATOM;
+        float ang = curtime*rotspd;
+        origR.Yaw(ang);
+        origP.Yaw(ang);
+        Vector origQ = Vector(0,1,0);
+        origP.Normalize();
+        origQ.Normalize();
+        origR.Normalize();
+        AccessCamera(CP_PAN)->myPhysics.SetAngularVelocity(Vector(0,0,0));//hack
+        AccessCamera(CP_PAN)->SetOrientation(origP,origQ,origR);
+        static float initialzoom=XMLSupport::parse_float(vs_config->getVariable("graphics","inital_zoom_factor","2.25"));
+        zoomfactor=initialzoom;
+      }
+
+    }
     if (autopilot_time<= 0) {
+      AccessCamera(CP_PAN)->myPhysics.SetAngularVelocity(Vector(0,0,0));
       if (disableautosound.sound<0) {
 	static string str=vs_config->getVariable("cockpitaudio","autopilot_disabled","autopilot_disabled");
 	disableautosound.loadsound(str);
