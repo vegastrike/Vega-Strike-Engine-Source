@@ -150,6 +150,17 @@ namespace UniverseUtil {
 ///this gets the number of active players
 	int getNumPlayers ();
 	int maxMissions ();
+	double timeofday ();
+	double sqrt (double);
+	double log (double);
+	double exp (double);
+	double cos (double);
+	double sin (double);
+	double acos (double);
+	double asin (double);
+	double atan (double);
+	double tan (double);
+
 }
 
 #undef activeSys

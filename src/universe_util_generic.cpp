@@ -1,3 +1,5 @@
+#include <math.h>
+#include "lin_time.h"
 #include "cmd/script/mission.h"
 #include "universe_util.h"
 #include "universe_generic.h"
@@ -357,6 +359,16 @@ namespace UniverseUtil {
 		}
 		return _Universe->AccessCockpit(which)->GetParent();
 	}
+  double timeofday () {return getNewTime();}
+  double sqrt (double x) {return ::sqrt (x);}
+  double log (double x) {return ::log (x);}
+  double exp (double x) {return ::exp (x);}
+  double cos (double x) {return ::cos (x);}
+  double sin (double x) {return ::sin (x);}
+  double acos (double x) {return ::acos (x);}
+  double asin (double x) {return ::asin (x);}
+  double atan (double x) {return ::atan (x);}
+  double tan (double x) {return ::tan (x);}
 }
 
 #undef activeSys

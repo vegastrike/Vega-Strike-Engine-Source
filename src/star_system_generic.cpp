@@ -28,6 +28,7 @@
 #include "in_kb.h"
 #include "cmd/script/flightgroup.h"
 #include "load_mission.h"
+#include "lin_time.h"
 //#include "gfx/particle.h"
 //extern Music *muzak;
 //extern Vector mouseline;
@@ -151,6 +152,46 @@ StarSystem::~StarSystem() {
   RemoveStarsystemFromUniverse();
   
 }
+extern std::vector <unorigdest *>pendingjump;
+void StarSystem::ProcessPendingJumps() {
+  for (unsigned int kk=0;kk<pendingjump.size();kk++) {
+    if (pendingjump[kk]->delay>=0) {
+      pendingjump[kk]->delay-=GetElapsedTime();
+      continue;
+    } else {
+#ifdef JUMP_DEBUG
+  fprintf (stderr,"Volitalizing pending jump animation.\n");
+#endif
+      _Universe->activeStarSystem()->VolitalizeJumpAnimation (pendingjump[kk]->animation);
+    }
+    Unit * un=pendingjump[kk]->un.GetUnit();
+    
+    if (un==NULL||!_Universe->StillExists (pendingjump[kk]->dest)||!_Universe->StillExists(pendingjump[kk]->orig)) {
+#ifdef JUMP_DEBUG
+      fprintf (stderr,"Adez Mon! Unit destroyed during jump!\n");
+#endif
+      delete pendingjump[kk];
+      pendingjump.erase (pendingjump.begin()+kk);
+      kk--;
+      continue;
+    }
+    StarSystem * savedStarSystem = _Universe->activeStarSystem();
+    bool dosightandsound = ((pendingjump[kk]->dest==savedStarSystem)||_Universe->isPlayerStarship(un));
+    _Universe->setActiveStarSystem (pendingjump[kk]->orig);
+    un->TransferUnitToSystem (kk, savedStarSystem,dosightandsound);
+    if (dosightandsound) {
+      _Universe->activeStarSystem()->DoJumpingSightAndSound(un);
+    }
+    delete pendingjump[kk];
+    pendingjump.erase (pendingjump.begin()+kk);
+    kk--;
+    _Universe->setActiveStarSystem(savedStarSystem);
+  }
+
+}
+
+
+
 /********* FROM STAR SYSTEM XML *********/
 void setStaticFlightgroup (vector<Flightgroup *> &fg, const std::string &nam,int faction) {
   while (faction>=(int)fg.size()) {

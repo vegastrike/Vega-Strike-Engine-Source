@@ -61,7 +61,7 @@ static unsigned int AddJumpAnimation (const QVector & pos, const float size, boo
   return AddAnimation (pos,size,mvolatile,vs_config->getVariable("graphics","jumpgate","warp.ani"),.95);
 }
 
-static void VolitalizeJumpAnimation (const int ani) {
+void GameStarSystem::VolitalizeJumpAnimation (const int ani) {
   if (ani !=-1) {
     static float VolAnimationPer = XMLSupport::parse_float (vs_config->getVariable ("graphics","jumpanimationshrink",".95"));
     VolatileJumpAnimations.push_back (ResizeAni(JumpAnimations[ani].a,VolAnimationPer));
@@ -109,48 +109,12 @@ void GameStarSystem::DrawJumpStars() {
 }
 
 
-void GameStarSystem::ProcessPendingJumps() {
-  for (unsigned int kk=0;kk<pendingjump.size();kk++) {
-    if (pendingjump[kk]->delay>=0) {
-      pendingjump[kk]->delay-=GetElapsedTime();
-      continue;
-    } else {
-#ifdef JUMP_DEBUG
-  fprintf (stderr,"Volitalizing pending jump animation.\n");
-#endif
-
-      VolitalizeJumpAnimation (pendingjump[kk]->animation);
-    }
-    
-
-    Unit * un=pendingjump[kk]->un.GetUnit();
-    
-    if (un==NULL||!_Universe->StillExists (pendingjump[kk]->dest)||!_Universe->StillExists(pendingjump[kk]->orig)) {
-#ifdef JUMP_DEBUG
-      fprintf (stderr,"Adez Mon! Unit destroyed during jump!\n");
-#endif
-      delete pendingjump[kk];
-      pendingjump.erase (pendingjump.begin()+kk);
-      kk--;
-      continue;
-    }
-    StarSystem * savedStarSystem = _Universe->activeStarSystem();
-    bool dosightandsound = ((pendingjump[kk]->dest==savedStarSystem)||un==_Universe->AccessCockpit()->GetParent());
-    _Universe->setActiveStarSystem (pendingjump[kk]->orig);
-    un->TransferUnitToSystem (kk, savedStarSystem,dosightandsound);
-    static float JumpStarSize = XMLSupport::parse_float (vs_config->getVariable ("graphics","jumpgatesize","1.75"));
-    if (dosightandsound) {
+void GameStarSystem::DoJumpingSightAndSound (Unit * un) {
+      static float JumpStarSize = XMLSupport::parse_float (vs_config->getVariable ("graphics","jumpgatesize","1.75"));
       Vector p,q,r;
       un->GetOrientation (p,q,r);
       unsigned int myani = AddJumpAnimation (un->LocalPosition(),un->rSize()*JumpStarSize,true);
       VolatileJumpAnimations[myani].a->SetOrientation (p,q,r);
-    }
-    delete pendingjump[kk];
-    pendingjump.erase (pendingjump.begin()+kk);
-    kk--;
-    _Universe->setActiveStarSystem(savedStarSystem);
-  }
-
 }
 void TentativeJumpTo (StarSystem * ss, Unit * un, Unit * jumppoint, const std::string &system) {
   for (unsigned int i=0;i<pendingjump.size();i++) {

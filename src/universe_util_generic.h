@@ -105,7 +105,15 @@ namespace UniverseUtil {
 	void SetAutoStatus (int global_auto, int player_auto);
 	void LoadMission (string missionname);
 	QVector SafeEntrancePoint (QVector,float radial_size=-1);
-
+	double sqrt (double);
+	double log (double);
+	double exp (double);
+	double cos (double);
+	double sin (double);
+	double acos (double);
+	double asin (double);
+	double atan (double);
+	double tan (double);
 }
 
 #undef activeSys

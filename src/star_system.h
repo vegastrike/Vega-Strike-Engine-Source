@@ -84,8 +84,8 @@ class GameStarSystem: public StarSystem {
   ///Disables included lights and terrains
   void SwapOut ();
   bool JumpTo (Unit * unit, Unit * jumppoint, const std::string &system);
-  static void ProcessPendingJumps ();
-
+  virtual void VolitalizeJumpAnimation (const int ani);
+  virtual void DoJumpingSightAndSound (Unit * un);
   friend class Atmosphere;
 };
 
