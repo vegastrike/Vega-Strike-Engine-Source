@@ -30,7 +30,7 @@ Box::Box(const Vector &corner1, const Vector &corner2) : corner_min(corner1), co
     }
   int a=0;
   GFXVertex *vertices = new GFXVertex[18];
-#define VERTEX(i,j,k) { vertices[a].x = i; vertices[a].y = j; vertices[a].z = k;a++;}
+#define VERTEX(i,j,k) { vertices[a].x = i; vertices[a].y = j; vertices[a].z = k;vertices[a].i=i;vertices[a].j=j;vertices[a].k=k;vertices[a].s=0;vertices[a].t=0;a++;}
 
   VERTEX(corner_max.i,corner_min.j,corner_max.k);
   VERTEX(corner_min.i,corner_min.j,corner_max.k);
