@@ -14,7 +14,7 @@ struct LineCollide {
   Vector Maxi;
   enum collidables {UNIT, BEAM,BALL,BOLT,PROJECTILE} type;
   bool hhuge;
-  LineCollide(){hhuge=false;}
+  LineCollide() Mini(0,0,0), Maxi(0,0,0), type(UNIT), object(NULL){hhuge=false;}
   LineCollide (void * objec, enum collidables typ,const Vector &st, const Vector &en) {this->object=objec;this->type=typ;this->Mini=st;this->Maxi=en;hhuge=false;}
   LineCollide (const LineCollide &l) {object=l.object; type=l.type; Mini=l.Mini;Maxi=l.Maxi;hhuge=l.hhuge;}      
 };

@@ -81,6 +81,9 @@ void Unit::Init()
   resolveforces=true;
   CollideInfo.object = NULL;
   CollideInfo.type = LineCollide::UNIT;
+  CollideInfo.Mini.Set (0,0,0);
+  CollideInfo.Maxi.Set (0,0,0);
+  
   bspShield = bspTree = NULL;
 
   invisible=false;

@@ -26,7 +26,7 @@ StarSystem::StarSystem(char * filename) :
 //  primaries(primaries), 
   drawList(new UnitCollection),//what the hell is this...maybe FALSE FIXME
   units(new UnitCollection), 
-  missiles(new UnitCollection), tp(new TextPlane("9x12.fon")) {
+  missiles(new UnitCollection) {
   
   currentcamera = 0;	
   systemInputDFA = new InputDFA (this);
@@ -48,7 +48,7 @@ StarSystem::StarSystem(char * filename) :
   //earth=iter->current();
   //delete iter;
 
-  tp->SetPosition(0.5,0.5,1);
+
 
   // Calculate movement arcs; set behavior of primaries to follow these arcs
   //Iterator *primary_iterator = primaries->createIterator(); 
