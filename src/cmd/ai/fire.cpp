@@ -130,9 +130,9 @@ void FireAt::ChooseTargets (int numtargs, bool force) {
       }
     }
   }
-
+  float mrange;
   lastchangedtarg=0;
-  parent->getAverageGunSpeed (gunspeed,gunrange);  
+  parent->getAverageGunSpeed (gunspeed,gunrange,mrange);  
 
   UnitCollection::UnitIterator iter (_Universe->activeStarSystem()->getUnitList().createIterator());
   Unit * un=NULL;
@@ -151,8 +151,8 @@ void FireAt::ChooseTargets (int numtargs, bool force) {
     if (bnum>=tbin.size()) {
       tbin.push_back (TurretBin());
     }
-    float gspeed, grange;
-    su->getAIState()->getAverageGunSpeed (gspeed,grange);  //FIXME Slow as a pig in mud
+    float gspeed, grange, mrange;
+    su->getAIState()->getAverageGunSpeed (gspeed,grange,mrange);  //FIXME Slow as a pig in mud
     if (tbin [bnum].maxrange<grange) {
       tbin [bnum].maxrange=grange;
     }

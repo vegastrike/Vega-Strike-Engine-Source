@@ -292,8 +292,9 @@ void FaceTargetITTS::Execute() {
     done = finish;
     return;
   }
+  float mrange;
   if (speed == float(.00001)) {
-    parent->getAverageGunSpeed(speed,range);
+    parent->getAverageGunSpeed(speed,range,mrange);
     if (speed ==float (.00001)) {
       speed = range=FLT_MAX;
     }

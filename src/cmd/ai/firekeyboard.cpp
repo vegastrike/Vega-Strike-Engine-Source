@@ -792,8 +792,9 @@ FireKeyboard::~FireKeyboard () {
 }
 bool FireKeyboard::ShouldFire(Unit * targ) {
   float dist=FLT_MAX;
+  float mrange;
   if (gunspeed==.0001) {
-    parent->getAverageGunSpeed (gunspeed,gunrange);
+    parent->getAverageGunSpeed (gunspeed,gunrange,mrange);
   }
   float angle = parent->cosAngleTo (targ, dist,gunspeed,gunrange);
   targ->Threaten (parent,angle/(dist<.8?.8:dist));

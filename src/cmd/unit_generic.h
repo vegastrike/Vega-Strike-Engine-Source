@@ -719,7 +719,7 @@ public:
   ///Selects all weapons
   void SelectAllWeapon (bool Missile);
   ///Gets the average gun speed of the unit::caution SLOW
-  void getAverageGunSpeed (float & speed, float & range) const;
+  void getAverageGunSpeed (float & speed, float & grange, float & mrange) const;
   ///Finds the position from the local position if guns are aimed at it with speed
   QVector PositionITTS (const QVector & local_posit, float speed) const;
   ///returns percentage of course deviation for contraband searches.  .5 causes error and 1 causes them to get mad 

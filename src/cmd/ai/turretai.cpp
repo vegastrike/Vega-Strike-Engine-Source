@@ -8,21 +8,22 @@ TurretAI::TurretAI ():FaceTarget (false) {
   type|=WEAPON;
   range=-1;
 }
-void TurretAI::getAverageGunSpeed (float &speed, float & range) const {
-  speed=this->speed;range=this->range;
+void TurretAI::getAverageGunSpeed (float &speed, float & range, float &mrange) const {
+  speed=this->speed;range=this->range;mrange=this->mrange;
 }
 extern unsigned int FireBitmask (Unit * parent, bool shouldfire, float missileprob);
 void TurretAI::Execute () {
   Unit * targ = parent->Target();
   if (range==-1) {
-    parent->getAverageGunSpeed (speed, range);
-    float tspeed, trange;
+	float mrange;
+    parent->getAverageGunSpeed (speed, range,mrange);
+    float tspeed, trange,tmrange;
     Unit * gun;
     if (parent->GetNumMounts()==0){
       speed=1;range=1;//not much
     }
     for (un_iter i=parent->getSubUnits();(gun=*i)!=NULL;++i) {
-      (*i)->getAverageGunSpeed(tspeed,trange);
+      (*i)->getAverageGunSpeed(tspeed,trange,tmrange);
       if (trange>range) {
 	speed=tspeed;
 	range=trange;

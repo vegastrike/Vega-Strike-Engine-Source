@@ -720,20 +720,20 @@ float Unit::TrackingGuns(bool &missilelock) {
   return trackingcone;
 }
 
-void Unit::getAverageGunSpeed(float & speed, float &range) const {
-  float mrange=-1;
-  range=-1;
+void Unit::getAverageGunSpeed(float & speed, float &grange, float &mrange) const {
+  mrange=-1;
+  grange=-1;
   speed=-1;
   if (GetNumMounts()) {
-    range=0;
+    grange=0;
     speed=0;
 	mrange=0;
 	int nummt = GetNumMounts();
 	// this breaks the name, but... it _is_ more useful.
     for (int i=0;i<GetNumMounts();i++) {
       if (mounts[i]->type->type!=weapon_info::PROJECTILE) {
-	    if (mounts[i]->type->Range > range) {
-	      range=mounts[i]->type->Range;
+	    if (mounts[i]->type->Range > grange) {
+	      grange=mounts[i]->type->Range;
 		}
 	    speed+=mounts[i]->type->Speed;
       } else if(mounts[i]->type->type==weapon_info::PROJECTILE){
@@ -751,7 +751,10 @@ void Unit::getAverageGunSpeed(float & speed, float &range) const {
 
 QVector Unit::PositionITTS (const QVector & posit, float speed) const{
   QVector retval = Position()-posit;
-  speed = retval.Magnitude()/speed;//FIXME DIV/0 POSSIBLE
+  if(speed==0){
+    speed=0.000000001;  //FIX ME Krufty and ugly 
+  }
+  speed = retval.Magnitude()/speed;
   retval = Position()+GetVelocity().Cast().Scale(speed);
   return retval;
 }

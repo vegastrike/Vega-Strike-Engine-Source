@@ -96,7 +96,7 @@ class Order {
   /// this function calls the destructor (needs to be overridden for python;
 
  public:
-  virtual void getAverageGunSpeed (float & speed, float & range) const;
+  virtual void getAverageGunSpeed (float & speed, float & range, float & mrange) const;
   virtual float GetEffectiveRelationship (const Unit * target) const;
   virtual void ChooseTarget() {/*not implemented see fire.cpp*/}
   ///clears the messasges of this order

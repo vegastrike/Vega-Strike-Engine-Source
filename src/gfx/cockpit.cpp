@@ -436,7 +436,8 @@ void GameCockpit::DrawTargetBox () {
   DrawOneTargetBox (Loc, target->rSize(), CamP, CamQ, CamR,computeLockingSymbol(un),un->TargetLocked());
   DrawDockingBoxes(un,target,CamP,CamQ,CamR);
   if (always_itts || un->GetComputerData().itts) {
-    un->getAverageGunSpeed (speed,range);
+	float mrange;
+    un->getAverageGunSpeed (speed,range,mrange);
     float err = (.01*(1-un->CloakVisible()));
    QVector iLoc = target->PositionITTS (un->Position(),speed)-_Universe->AccessCamera()->GetPosition()+10*err*QVector (-.5*.25*un->rSize()+rand()*.25*un->rSize()/RAND_MAX,-.5*.25*un->rSize()+rand()*.25*un->rSize()/RAND_MAX,-.5*.25*un->rSize()+rand()*.25*un->rSize()/RAND_MAX);
     
