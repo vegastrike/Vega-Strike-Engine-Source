@@ -12,7 +12,7 @@ void Asteroid::reactToCollision(Unit * smaller, const Vector & biglocation, cons
     break;
   }
 }
-Asteroid::Asteroid(const char * filename, int faction, Flightgroup* fg=NULL, int fg_snumber, float difficulty):Unit (filename,true, false, faction,fg,fg_snumber) {
+Asteroid::Asteroid(const char * filename, int faction, Flightgroup* fg, int fg_snumber, float difficulty):Unit (filename,true, false, faction,fg,fg_snumber) {
   for (int i=0;i<numsubunit;i++) {
     float x=2*difficulty*((float)rand())/RAND_MAX -difficulty;
     float y=2*difficulty*((float)rand())/RAND_MAX-difficulty;
