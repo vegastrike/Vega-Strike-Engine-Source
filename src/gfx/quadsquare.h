@@ -47,7 +47,11 @@ struct quadcornerdata {
 	VertInfo	Verts[4];	// ne, nw, sw, se
 };
 
-
+/**
+ * A node in the quad tree
+ * holds its own relevant vertex data (middle and either even or odd 4 sets of data (corners or diagonals
+ * Keeps track of its errors and children as well
+ */
 class quadsquare {
  public:
 	quadsquare*	Child[4];
