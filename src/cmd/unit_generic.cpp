@@ -2356,7 +2356,7 @@ float Unit::ApplyLocalDamage (const Vector & pnt, const Vector & normal, float a
     }
   }
   //  #endif
-  //float absamt= amt>=0?amt:-amt;  
+  float absamt= amt>=0?amt:-amt;  
   float ppercentage=0;
   // Only check docking if on server side or non-networking mode
   if( SERVER || Network==NULL)
@@ -2383,9 +2383,9 @@ float Unit::ApplyLocalDamage (const Vector & pnt, const Vector & normal, float a
   if (GetNebula()==NULL||(nebshields>0)) {
 	// Only in non-networking or on server side
 	if( Network==NULL || SERVER)
-		spercentage = DealDamageToShield (pnt,amt);
+		spercentage = DealDamageToShield (pnt,absamt);
     //percentage = DealDamageToShield (pnt,absamt);
-	//amt = amt>=0?absamt:-absamt;
+	amt = amt>=0?absamt:-absamt;
     if (meshdata.back()&&spercentage>0&&amt==0) {//shields are up
       /*      meshdata[nummesh]->LocalFX.push_back (GFXLight (true,
 	      GFXColor(pnt.i+normal.i,pnt.j+normal.j,pnt.k+normal.k),
@@ -2397,7 +2397,7 @@ float Unit::ApplyLocalDamage (const Vector & pnt, const Vector & normal, float a
     }
   }
   // If shields failing or... => WE COMPUTE DAMAGE TO HULL
-  if (shield.leak>0||!meshdata.back()||spercentage==0||amt>0||phasedamage) {
+  if (shield.leak>0||!meshdata.back()||spercentage==0||absamt>0||phasedamage) {
 	// ONLY in server or in non-networking
 	if( Network==NULL || SERVER)
 		ppercentage = DealDamageToHull (pnt, leakamt+amt);
