@@ -84,7 +84,7 @@ GFXBOOL /*GFXDRVAPI*/ GFXCreateTexture(int width, int height, TEXTUREFORMAT text
   glTexParameteri(textures[*handle].targets, GL_TEXTURE_WRAP_T, WrapMode);
   if (textures[*handle].mipmapped&(TRILINEAR|MIPMAP)&&g_game.mipmap>=2) {
     glTexParameteri (textures[*handle].targets, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    if (textures[*handle].mipmapped&TRILINEAR) {
+    if (textures[*handle].mipmapped&TRILINEAR&&g_game.mipmap>=3) {
       glTexParameteri (textures[*handle].targets, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
     }else {
       glTexParameteri (textures[*handle].targets, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
@@ -224,7 +224,7 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture (unsigned char *buffer, int handle,  en
 	  free(tempbuf);
 	return GFXFALSE;
       }
-      if (textures[handle].mipmapped&&g_game.mipmap>1)
+      if (textures[handle].mipmapped&&g_game.mipmap>=2)
 	gluBuild2DMipmaps(image2D, GL_COLOR_INDEX8_EXT, textures[handle].width, textures[handle].height, GL_COLOR_INDEX, GL_UNSIGNED_BYTE, buffer);
       else
 	glTexImage2D(image2D, 0, GL_COLOR_INDEX8_EXT, textures[handle].width, textures[handle].height, 0, GL_COLOR_INDEX, GL_UNSIGNED_BYTE, buffer);
@@ -248,7 +248,7 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture (unsigned char *buffer, int handle,  en
 	  tbuf[i+3]= textures[handle].palette[4*buffer[j]+3];//used to be 255
 	  j ++;
 	}
-      if (textures[handle].mipmapped&&g_game.mipmap)
+      if (textures[handle].mipmapped&&g_game.mipmap>=2)
 	gluBuild2DMipmaps(image2D, 4, textures[handle].width, textures[handle].height, GL_RGBA, GL_UNSIGNED_BYTE, tbuf);
       else
 	glTexImage2D(image2D, 0, 4, textures[handle].width, textures[handle].height, 0, GL_RGBA, GL_UNSIGNED_BYTE, tbuf);
