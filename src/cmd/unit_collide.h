@@ -102,11 +102,11 @@ public:
     if (target->hhuge) {
       return sizer;//we can't get _everything
     } 
-    for (double i=target->Mini.i;i<maxx;i+=COLLIDETABLEACCURACY) {
+    for (double i=target->Mini.i;i<=maxx;i+=COLLIDETABLEACCURACY) {
       x = hash_int (i);
-      for (double j=target->Mini.j;j<maxy;j+=COLLIDETABLEACCURACY) {   
+      for (double j=target->Mini.j;j<=maxy;j+=COLLIDETABLEACCURACY) {   
 	y = hash_int(j);
-	for (double k=target->Mini.k;k<maxz;k+=COLLIDETABLEACCURACY) {
+	for (double k=target->Mini.k;k<=maxz;k+=COLLIDETABLEACCURACY) {
 	  z = hash_int(k);
 	  if (!table[x][y][z].empty()) {
 	    retval[sizer] = &table[x][y][z];
