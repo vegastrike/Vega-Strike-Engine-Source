@@ -43,6 +43,20 @@ class MatchAngularVelocity : public Order {
   virtual ~MatchAngularVelocity();
   virtual std::string getOrderDescription() { return "mav"; };
 };
+class MatchRoll:public Order {
+  float desired_roll;
+  bool willfinish;
+  
+public:
+  MatchRoll(float desired,bool finish):Order(Order::CLOAKING,SLOCATION) {
+    this->desired_roll=desired;
+    this->willfinish=finish;
+  }
+  virtual void Execute();
+  void SetRoll(float roll) {desired_roll=roll;}
+  float GetRoll() {return desired_roll;}
+  virtual std::string getOrderDescription() { return "roll"; };
+};
 /**
  * This class matches both angular and linear velocity.
  * It cannot have multiple inheritance because

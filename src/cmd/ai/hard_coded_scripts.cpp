@@ -207,6 +207,14 @@ void AggressiveLoopAround(Order* aisc, Unit * un) {
 	AddOrd(aisc,un,broll);
 	
 }
+void RollLeft(Order *aisc, Unit* un) {
+  if (un->aistate)
+    AddOrd(un->aistate,un,new ExecuteFor(new Orders::MatchRoll(un->GetComputerData().max_roll,false),1.0f));
+}
+void RollRight(Order *aisc, Unit* un) {
+  if (un->aistate)
+    AddOrd(un->aistate,un,new ExecuteFor(new Orders::MatchRoll(-un->GetComputerData().max_roll,false),1.0f));
+}
 void LoopAroundFast(Order* aisc, Unit * un) {
 	Order* broll = new Orders::LoopAround(false,true,true,(int)un);
 	AddOrd(aisc,un,broll);

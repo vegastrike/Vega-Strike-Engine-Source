@@ -64,7 +64,18 @@ MatchLinearVelocity::~MatchLinearVelocity () {
 #endif
 }
 
-
+void Orders::MatchRoll::Execute() {
+  bool temp=done;
+  Order::Execute();
+  done=temp;
+  Vector angvel(parent->UpCoordinateLevel(parent->GetAngularVelocity())); 
+  if (willfinish) {
+    if (fabs(desired_roll-angvel.k)<VELTHRESHOLD ) {
+      return;
+    }
+  }
+  parent->ApplyLocalTorque (parent->GetMoment()*Vector(0,0,desired_roll-angvel.k)/SIMULATION_ATOM);
+}
 /*  //deprecated: now inherits from MatchAngVelocity and uses LinVel macros
 
 #define MATCHANGVELOCITYSETUP() \
