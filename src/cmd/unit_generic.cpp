@@ -5107,10 +5107,7 @@ bool Unit::UpgradeMounts (const Unit *up, int mountoffset, bool touchme, bool do
 		  }
 		}
 	      }
-              if (mounts[jmod].status==Mount::DESTROYED||mounts[jmod].status==Mount::UNCHOSEN)
-                percentage+=1;//full value to destroyed mounts
-              else
-                percentage+=mounts[jmod].Percentage(&upmount);//compute here
+              percentage+=mounts[jmod].Percentage(&upmount);//compute here
 	      if (touchme) {//if we wish to modify the mounts
 		mounts[jmod].ReplaceMounts (&upmount);//switch this mount with the upgrador mount
 	      }

@@ -148,32 +148,43 @@ void Mount::ReplaceMounts (const Mount * other) {
 	}
 }
 double Mount::Percentage (const Mount *newammo) const{
-	  float percentage=0;
+	  float percentage=1./1024;
 	  int thingstocompare=0;
 	  if (status==UNCHOSEN||status==DESTROYED)
-		return 0;
+            return percentage;
 	  if (newammo->ammo==-1) {
 		if (ammo!=-1) {
 		  thingstocompare++;
-		}
+		}else {
+                  if (newammo->type->Range==type->Range&&newammo->type->Damage==type->Damage&&newammo->type->PhaseDamage==type->PhaseDamage)
+                    return 1;
+                  if (newammo->type->weapon_name==type->weapon_name)
+                    return 1;             
+                }
 	  } else {
 		if (newammo->ammo>0) {
-		  percentage+=ammo/newammo->ammo;
+		  percentage+=.25;
 		  thingstocompare++;
+                  if (ammo>0) {
+                    if (newammo->type->Range==type->Range&&newammo->type->Damage==type->Damage&&newammo->type->PhaseDamage==type->PhaseDamage)
+                      return 1;
+                    if (newammo->type->weapon_name==type->weapon_name)
+                      return 1;                                 
+                  }
 		}
 	  }
 	  if (newammo->type->Range) {
-		percentage+= type->Range/newammo->type->Range;
+            if (type->Range>newammo->type->Range)percentage+= .25;
 		thingstocompare++;
 	  }
 	  if (newammo->type->Damage+100*newammo->type->PhaseDamage) {
-		percentage += (type->Damage+100*type->PhaseDamage)/(newammo->type->Damage+100*newammo->type->PhaseDamage);
+                if (type->Damage+100*type->PhaseDamage>newammo->type->Damage+100*newammo->type->PhaseDamage) percentage+=.75;
 		thingstocompare++;
 	  }
 	  if (thingstocompare) {
 		return percentage/thingstocompare;
 	  }else {
-		return 0;
+		return 1./1024;
 	  }
 }
 //bool returns whether to refund the cost of firing

@@ -133,7 +133,7 @@
 	EXPORT_UTIL1(bool,setFgDirective,string,inp)
 //	EXPORT_UTIL0(int,getFgSubnumber)
 	EXPORT_UTIL3(int,removeCargo,string,s, int,quantity, bool, erasezero)
-	EXPORT_UTIL3(bool,removeWeapon,string,name, int,offset, bool, loop)
+	EXPORT_UTIL3(int,removeWeapon,string,name, int,offset, bool, loop)
 	EXPORT_UTIL5(float,upgrade,string,file,int,mountoffset,int, subunitoffset, bool, force,bool, loop_through_mounts)
 	EXPORT_UTIL1(int, addCargo, Cargo, carg)
 	EXPORT_UTIL1(int, forceAddCargo, Cargo, carg)

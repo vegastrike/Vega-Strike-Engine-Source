@@ -143,18 +143,18 @@ namespace UnitUtil {
 		my_unit->SetTurretAI();
 		return percentage;
 	}
-	bool removeWeapon(Unit * my_unit, string weapon_name, int mountoffset, bool loop) {
-          if (!my_unit)return 0;
+	int removeWeapon(Unit * my_unit, string weapon_name, int mountoffset, bool loop) {
+          if (!my_unit)return -1;
           int maxmount=my_unit->mounts.size();
           int max=maxmount+mountoffset;
           for (int i=mountoffset;i<max;++i) {
             int index=i%maxmount;
             if (my_unit->mounts[i].type->weapon_name==weapon_name&&(my_unit->mounts[i].status==Mount::ACTIVE||my_unit->mounts[i].status==Mount::INACTIVE)) {
               my_unit->mounts[i].status=Mount::UNCHOSEN;
-              return true;
+              return i;
             }
           }
-          return false;
+          return -1;
 	}
 	int addCargo (Unit *my_unit,Cargo carg) {
 	  if (!my_unit)return 0;
