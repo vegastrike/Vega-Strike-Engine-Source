@@ -397,38 +397,31 @@ bool Quit (const char *input_buffer) {
 }
 extern void SwitchUnits (Unit * ol, Unit * nw);
 extern Cargo * GetMasterPartList(const char *input_buffer);
-
-TextArea *CargoList, *CargoInfo;
-Button *OK, *BUY;
-
-void Unit::UpgradeInterface(Unit * base) {
-cout << "Starting docking\n";
-	glutMouseFunc(ProcessMouseClick);
-	glutMotionFunc(ProcessMouseActive);
-	glutPassiveMotionFunc(ProcessMousePassive);
-	//	glutDisplayFunc(RefreshGUI);
-
-	                      //(x, y, width, height, with scrollbar)
+struct UpgradingInfo {
+  TextArea *CargoList, *CargoInfo;
+  Button *OK, *BUY, *BUYMODE, *SELLMODE, *UPGRADEMODE, *DOWNGRADEMODE, *SHIPDEALER;
+  UnitContainer base;
+  UnitContainer buyer;
+  string mode;
+  UpgradingInfo():base(NULL),buyer(NULL){
 	CargoList = new TextArea(-1, 0.9, 1, 1.7, 1);
 	CargoInfo = new TextArea(0, 0.9, 1, 1.7, 0);
-
-	CargoList->AddTextItem("a","Just a test item");
-	CargoList->AddTextItem("b","And another just to be sure");
-
+	//	CargoList->AddTextItem("a","Just a test item");
+	//	CargoList->AddTextItem("b","And another just to be sure");
 	CargoInfo->AddTextItem("name", "");
 	CargoInfo->AddTextItem("price", "");
-
 	OK = new Button(-0.94, -0.85, 0.15, 0.1, "Done");
 	BUY = new Button(-0.75, -0.85, 0.15, 0.1, "Buy");
-
 	CargoList->RenderText();
-	CargoInfo->RenderText();
-
-	GFXLoop (RefreshGUI);
-	//	glutMainLoop();
-}
-
-void RefreshGUI(void) {
+	CargoInfo->RenderText();	
+  }
+  ~UpgradingInfo() {
+    delete CargoList;
+    delete CargoInfo;
+    delete OK;
+    delete BUY;
+  }
+  void Render(){
 	StartFrame();
 	// Black background
 	ShowColor(-1,-1,2,2, 0,0,0,1);
@@ -439,6 +432,25 @@ void RefreshGUI(void) {
 	OK->Refresh();
 	BUY->Refresh();
 	EndFrame();
+  }
+} *upgr=NULL;
+
+void Unit::UpgradeInterface(Unit * base) {
+cout << "Starting docking\n";
+	glutMouseFunc(ProcessMouseClick);
+	glutMotionFunc(ProcessMouseActive);
+	glutPassiveMotionFunc(ProcessMousePassive);
+	//	glutDisplayFunc(RefreshGUI);
+
+	                      //(x, y, width, height, with scrollbar)
+
+	upgr = new UpgradingInfo;
+	GFXLoop (RefreshGUI);
+	//	glutMainLoop();
+}
+
+void RefreshGUI(void) {
+  upgr->Render();
 }
 static int mmx=0;
 static int mmy=0;
@@ -506,26 +518,28 @@ void ProcessMouse(int type, int x, int y, int button, int state) {
 	cur_x = ((new_x / g_game.x_resolution) * 2) - 1;
 	cur_y = ((new_y / g_game.y_resolution) * -2) + 1;
 
-	ours = CargoList->DoMouse(type, cur_x, cur_y, button, state);
+	ours = upgr->CargoList->DoMouse(type, cur_x, cur_y, button, state);
 	if (ours == 1 && type == 1) {
-		buy_name = CargoList->GetSelectedItemName();
-		if (buy_name != 0 && buy_name[0] != '\0') { CargoInfo->ChangeTextItem("name", (string("name: ")+buy_name).c_str()); }
-		else { CargoInfo->ChangeTextItem("name",""); }
-		CargoInfo->ChangeTextItem("price", "Price: Random. Hah.");
+		buy_name = upgr->CargoList->GetSelectedItemName();
+		if (buy_name != 0 && buy_name[0] != '\0') { upgr->CargoInfo->ChangeTextItem("name", (string("name: ")+buy_name).c_str()); }
+		else { upgr->CargoInfo->ChangeTextItem("name",""); }
+		upgr->CargoInfo->ChangeTextItem("price", "Price: Random. Hah.");
 	}
 	// Commented out because they don't need to use the mouse with CargoInfo
 	//if (ours == 0) { ours = CargoInfo->DoMouse(type, cur_x, cur_y, button, state); }
 	if (ours == 0) {
-		ours = OK->DoMouse(type, cur_x, cur_y, button, state);
+		ours = upgr->OK->DoMouse(type, cur_x, cur_y, button, state);
 		if (ours == 1 && type == 1) {
 			restore_main_loop();
 			cout << "You clicked done\n";
+			delete upgr;
+			upgr=NULL;
 		}
 	}	
 	if (ours == 0) {
-		ours = BUY->DoMouse(type, cur_x, cur_y, button, state);
+		ours = upgr->BUY->DoMouse(type, cur_x, cur_y, button, state);
 		if (ours == 1 && type == 1) {
-			buy_name = CargoList->GetSelectedItemName();
+			buy_name = upgr->CargoList->GetSelectedItemName();
 			cout << "You are buying the " << buy_name << endl;
 		}
 	}
