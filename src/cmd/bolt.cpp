@@ -140,7 +140,7 @@ void Bolt::Draw () {
   GFXDisable(DEPTHWRITE);
   GFXDisable(TEXTURE1);
   GFXEnable (TEXTURE0);
-
+  GFXAlphaTest (GREATER,.1);
   vector <vector <Bolt *> >::iterator i;
   vector <Bolt *>::iterator j;
   vector <Animation *>::iterator k = q->animations.begin();
@@ -172,7 +172,13 @@ void Bolt::Draw () {
     }
     //    cur->UpdateTime (GetElapsedTime());//update the time of the animation;
   }
-  GFXDisable(DEPTHWRITE);  
+  GFXAlphaTest (ALWAYS,0);
+  GFXDisable(DEPTHWRITE);
+  if (blendbeams==true) {
+    GFXBlendMode (ONE,ONE);
+  }else {
+    GFXBlendMode (ONE,ZERO);
+  }
   if (q->boltmesh) {
     q->boltmesh->LoadDrawState();
     q->boltmesh->BeginDrawState();
