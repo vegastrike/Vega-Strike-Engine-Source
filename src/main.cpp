@@ -79,7 +79,7 @@ void ParseCommandLine(int argc, char ** CmdLine);
 void cleanup(void)
 {
   printf ("Thank you for playing!\n");
-  _Universe->WriteSaveGame();
+  _Universe->WriteSaveGame(true);
   winsys_shutdown();
   //    write_config_file();
   AUDDestroy();
@@ -332,7 +332,7 @@ void bootstrap_main_loop () {
 		  _Universe->cockpit[0]->savegame->SetStarSystem(st);
 		}
       }
-      vector <SavedUnits> saved=_Universe->cockpit[k]->savegame->ParseSaveGame (savegamefile,mysystem,mysystem,pos,setplayerXloc,credits,psu);
+      vector <SavedUnits> saved=_Universe->cockpit[k]->savegame->ParseSaveGame (savegamefile,mysystem,mysystem,pos,setplayerXloc,credits,psu,k);
       playersaveunit.push_back(psu);
       _Universe->cockpit[k]->credits=credits;
   	  ss.push_back (_Universe->Init (mysystem,Vector(0,0,0),planetname));

@@ -140,7 +140,7 @@ private:
     Faction::LoadXML (factfile,this);
   }
   void SetupCockpits (std::vector <std::string> players);
-  void WriteSaveGame();
+  void WriteSaveGame(bool auto_save);
   ///returns the index of the faction with that name
   int GetFaction (const char *factionname);
   int GetNumAnimation(int faction);

@@ -681,14 +681,14 @@ void Unit::ApplyLocalDamage (const Vector & pnt, const Vector & normal, float am
 //un scored a faction kill
 void ScoreKill (Cockpit * cp, Unit * un, int faction) {
   static float KILL_FACTOR=-XMLSupport::parse_float(vs_config->getVariable("AI","kill_factor",".2"));
-  _Universe->AdjustRelation(un->faction,faction,KILL_FACTOR,1);
+  _Universe->AdjustRelation(faction,un->faction,KILL_FACTOR,1);
   static float FRIEND_FACTOR=-XMLSupport::parse_float(vs_config->getVariable("AI","friend_factor",".1"));
   for (unsigned int i=0;i<_Universe->GetNumFactions();i++) {
     float relation;
-    if (faction!=i) {
-      relation=_Universe->GetRelation(faction,i);
+    if (faction!=i&&un->faction!=i) {
+      relation=_Universe->GetRelation(i,faction);
       if (relation)
-        _Universe->AdjustRelation(un->faction,i,FRIEND_FACTOR*relation,1);
+        _Universe->AdjustRelation(i,un->faction,FRIEND_FACTOR*relation,1);
     }
   }
   olist_t * killlist = &cp->savegame->getMissionData (string("kills"));

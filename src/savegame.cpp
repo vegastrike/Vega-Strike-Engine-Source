@@ -10,8 +10,60 @@
 #include "savegame.h"
 #include <algorithm>
 using namespace std;
+ std::string GetPlayerSaveGame (int num) {
+  static string *res=NULL;
+  if (res==NULL) {
+    res = new std::string;
+    changehome(false);
+    char c[2]={'\0','\0'};
+    FILE * fp = fopen (("save.txt"),"r");
+    if (fp) {
+    while (!feof (fp)) {
+      c[0]=fgetc (fp);
+      if (!feof(fp)) {
+        if (c[0]!='\0') {
+          (*res)+=c;
+        }
+      }else {
+        break;
+      }
+    }
+    fclose (fp);
+    }
+#if 0
+    fp = fopen (("save.txt"),"w");
+    if (fp) {
+      fputc('\0',fp);
+      fclose (fp);
+    }
+#endif
+    returnfromhome();
+  }
+  if (num==0||res->empty()) {
+    return (*res);  
+  }
+  return (*res)+XMLSupport::tostring(num);
+}
+void FileCopy (const char * src, const char * dst) {
+  if (dst[0]!='\0'&&src[0]!='\0') {
 
-
+  FILE * fp = fopen (src,"r");
+  if (fp) {
+      fseek(fp,0,SEEK_END);
+      long length = ftell (fp);
+      fseek(fp,0,SEEK_SET);
+      char * info = new char [length];
+      fread(info,length,sizeof(char),fp);
+      fclose (fp);
+      fp = fopen (dst,"w");
+      if (fp) {
+        fwrite (info,length,sizeof(char),fp);
+        fclose(fp);
+      }
+      delete [] info;
+  }
+  }
+}
 QVector LaunchUnitNear (QVector pos) {
   static double def_un_size = XMLSupport::parse_float (vs_config->getVariable ("physics","respawn_unit_size","400"));
   for (unsigned int k=0;k<10;k++) {
@@ -104,8 +156,8 @@ void SaveGame::WriteNewsData (FILE * fp) {
     free (msg);
   }
 }
-void WriteSaveGame (Cockpit * cp) {
-
+void WriteSaveGame (Cockpit * cp,bool auto_save) {
+  int player_num= cp-_Universe->AccessCockpit(0);
   Unit * un = cp->GetSaveParent();
   if (!un) {
     return;
@@ -113,8 +165,11 @@ void WriteSaveGame (Cockpit * cp) {
   cp->savegame->SetSavedCredits (_Universe->AccessCockpit()->credits);
   cp->savegame->SetStarSystem(cp->activeStarSystem->getFileName());
   if (un->GetHull()>0) {
-    cp->savegame->WriteSaveGame (cp->activeStarSystem->getFileName().c_str(),un->LocalPosition(),cp->credits,cp->GetUnitFileName().c_str());
+    cp->savegame->WriteSaveGame (cp->activeStarSystem->getFileName().c_str(),un->LocalPosition(),cp->credits,cp->GetUnitFileName().c_str(),auto_save?-1:player_num);
     un->WriteUnit(cp->GetUnitModifications().c_str());
+    if (GetPlayerSaveGame(player_num).length()&&!auto_save) {
+      un->WriteUnit(GetPlayerSaveGame(player_num).c_str());
+    }
     cp->savegame->SetPlayerLocation(un->LocalPosition());    
   }
 
@@ -210,15 +265,13 @@ vector <SavedUnits> SaveGame::ReadSavedUnits (FILE * fp) {
 void SaveGame::WriteSavedUnit (FILE * fp, SavedUnits* su) {
   fprintf (fp,"\n%d %s %s",su->type, su->filename.c_str(),su->faction.c_str());
 }
-void SaveGame::WriteSaveGame (const char *systemname, const QVector &FP, float credits, std::string unitname) {
+void SaveGame::WriteSaveGame (const char *systemname, const QVector &FP, float credits, std::string unitname, int player_num) {
   vector<SavedUnits *> myvec = savedunits.GetAll();
   if (outputsavegame.length()!=0) {
     printf ("Writing Save Game %s",outputsavegame.c_str());
     changehome();
     vschdir ("save");
     FILE * fp = fopen (outputsavegame.c_str(),"w");
-    vscdup();
-    returnfromhome();
     QVector FighterPos= PlayerLocation-FP;
 //    if (originalsystem!=systemname) {
       FighterPos=FP;
@@ -237,6 +290,12 @@ void SaveGame::WriteSaveGame (const char *systemname, const QVector &FP, float c
     fprintf (fp,"\n%d %s %s",0,"factions","begin ");
     _Universe->SerializeFaction(fp);
     fclose (fp);
+    if (player_num!=-1) {
+      FileCopy (outputsavegame.c_str(),GetPlayerSaveGame(player_num).c_str());
+    }
+    vscdup();
+    returnfromhome();
+
   }
 }
 static float savedcredits=0;
@@ -248,7 +307,7 @@ void SaveGame::SetSavedCredits (float c) {
 }
 
 
-vector<SavedUnits> SaveGame::ParseSaveGame (string filename, string &FSS, string originalstarsystem, QVector &PP, bool & shouldupdatepos,float &credits, string &savedstarship) {
+vector<SavedUnits> SaveGame::ParseSaveGame (string filename, string &FSS, string originalstarsystem, QVector &PP, bool & shouldupdatepos,float &credits, string &savedstarship, int player_num) {
   if (filename.length()>0)
     filename=callsign+filename;
   vector <SavedUnits> mysav;
@@ -257,8 +316,13 @@ vector<SavedUnits> SaveGame::ParseSaveGame (string filename, string &FSS, string
   changehome();
   vschdir ("save");
   FILE * fp = NULL;
-  if (filename.length()>0)
+  if (filename.length()>0) {
+    if (GetPlayerSaveGame(player_num).length()) {
+          fp = fopen (GetPlayerSaveGame(player_num).c_str(),"r");
+    }else {
 	  fp = fopen (filename.c_str(),"r");
+    }
+  }
   vscdup();
   returnfromhome();
   if (fp) {

@@ -295,11 +295,11 @@ void Universe::StartDraw()
 
 }
 
-void Universe::WriteSaveGame () 
+void Universe::WriteSaveGame (bool auto_save) 
 {
   for (unsigned int i=0;i<cockpit.size();i++) {
     if (AccessCockpit(i)) {
-     ::WriteSaveGame (AccessCockpit(i));
+     ::WriteSaveGame (AccessCockpit(i),auto_save);
 #if 0
       if (AccessCockpit(i)->GetParent()) {
 	if(AccessCockpit(i)->GetParent()->GetHull()>0) {  

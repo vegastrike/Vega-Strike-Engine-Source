@@ -1527,7 +1527,7 @@ void Unit::WriteUnit (const char * modifications) {
     (*ui)->WriteUnit(modifications);
   } 
 }
-
+extern std::string GetPlayerSaveGame (int);
 void Unit::LoadXML(const char *filename, const char * modifications)
 {
   shield.number=0;
@@ -1540,7 +1540,12 @@ void Unit::LoadXML(const char *filename, const char * modifications)
       changehome();
       static std::string savedunitpath=vs_config->getVariable ("data","serialized_xml","serialized_xml");
       vschdir (savedunitpath.c_str());
-      vschdir (modifications);
+      string nonautosave=GetPlayerSaveGame(_Universe->AccessCockpit()-_Universe->AccessCockpit(0));
+      if (nonautosave.empty()) {
+        vschdir (modifications);
+      }else {
+        vschdir (nonautosave.c_str());
+      }
       inFile = fopen (filename,"r");
       vscdup();
       vscdup();

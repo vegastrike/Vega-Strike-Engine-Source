@@ -176,7 +176,7 @@ namespace CockpitKeys {
     }
     */
 	if(newState==PRESS||newState==DOWN) {
-	  _Universe->WriteSaveGame();//gotta do important stuff first
+	  _Universe->WriteSaveGame(true);//gotta do important stuff first
 	  for (unsigned int i=0;i<active_missions.size();i++) {
 	    if (active_missions[i]) {
 	      active_missions[i]->DirectorEnd();

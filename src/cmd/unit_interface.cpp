@@ -529,7 +529,7 @@ void UpgradingInfo::SelectItem (const char *item, int button, int buttonstate) {
       Cockpit * cp = _Universe->isPlayerStarship(buy);
       if (cp) {
        if (item[0]=='S') {
-           WriteSaveGame(cp);
+           WriteSaveGame(cp,false);
        }else if (item[0]=='L') {
         buy->Kill();
         RespawnNow(cp);
@@ -698,7 +698,7 @@ void UpgradingInfo::CommitItem (const char *inp_buf, int button, int state) {
 		base->RequestClearance(NewPart);
 		NewPart->Dock(base);
 		buyer.SetUnit(NewPart);
-		WriteSaveGame (_Universe->AccessCockpit());
+		WriteSaveGame (_Universe->AccessCockpit(),true);
 		NewPart=NULL;
 		un->Kill();
 		return;
