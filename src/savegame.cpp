@@ -62,8 +62,10 @@ void SaveGame::WriteNewsData (FILE * fp) {
 }
 void SaveGame::ReadNewsData (FILE * fp) {
   int numnews;
-  fscanf (fp,"%d\n",&numnews);
+
   char news [1024];
+  fgets (news,1023,fp);
+  sscanf (news,"%d\n",&numnews);
   for (unsigned int i=0;i<numnews;i++) {
     fgets (news,1023,fp);
     news[1023]='\0';
