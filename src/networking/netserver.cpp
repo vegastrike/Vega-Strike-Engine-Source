@@ -19,8 +19,12 @@
 */
 
 #include <time.h>
-#include <unistd.h>
 #include <math.h>
+#if !defined( _WIN32) || defined( __CYGWIN__)
+	#include <unistd.h>
+#else
+	#include <io.h>
+#endif
 
 #include "cmd/unit_generic.h"
 #include "cmd/unit_util.h"
@@ -641,7 +645,7 @@ void	NetServer::checkKey( SocketSet & set)
 		{
 			if( !strncmp( input_buffer, "quit", 4) || !strncmp( input_buffer, "QUIT", 4))
 			{
-				cleanup;
+				cleanup();
 			}
 			else if( !strncmp( input_buffer, "stats", 4) || !strncmp( input_buffer, "STATS", 4))
 			{
