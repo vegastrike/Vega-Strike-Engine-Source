@@ -796,7 +796,11 @@ void VDU::DrawVDUObjectives (Unit *parent) {
 void VDU::Draw (Unit * parent, const GFXColor & color) {
   tp->col=color;
   GFXDisable(LIGHTING);
+      GFXBlendMode(SRCALPHA,INVSRCALPHA);
+      GFXEnable(TEXTURE0);
+      GFXDisable(TEXTURE1);
   Sprite::Draw();
+  //glDisable( GL_ALPHA_TEST);
   if (!parent) {
     return;
   }
