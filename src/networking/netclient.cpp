@@ -593,7 +593,9 @@ int NetClient::recvMsg( char* netbuffer, Packet* outpacket )
 	Unit * un = NULL;
 	int mount_num;
 	ObjSerial mis;
-	ObjSerial local_serial = this->game_unit.GetUnit()->GetSerial();
+	ObjSerial local_serial;
+	if( this->game_unit.GetUnit() != NULL)
+		local_serial = this->game_unit.GetUnit()->GetSerial();
 	Cockpit * cp;
 
     int recvbytes = clt_sock.recvbuf( mem, &sender_adr );
@@ -627,7 +629,7 @@ int NetClient::recvMsg( char* netbuffer, Packet* outpacket )
 				Packet pckt;
                 COUT << ">>> LOGIN ACCEPTED =( serial n°" << packet_serial << " )= --------------------------------------" << endl;
                 // Should receive player's data (savegame) from server if there is a save
-                this->game_unit.GetUnit()->SetSerial( packet_serial);;
+                this->serial = packet_serial;
                 localSerials.push_back( packet_serial);
 				globalsaves.push_back( netbuf.getString());
 				globalsaves.push_back( netbuf.getString());
@@ -1293,14 +1295,15 @@ void	NetClient::inGame()
 	//ClientState cs( this->serial, this->game_unit.GetUnit()->curr_physical_state, this->game_unit.GetUnit()->Velocity, Vector(0,0,0), 0);
 	// HERE SEND INITIAL CLIENTSTATE !! NOT NEEDED ANYMORE -> THE SERVER ALREADY KNOWS
 	//netbuf.addClientState( cs);
-	packet2.send( CMD_ADDCLIENT, this->game_unit.GetUnit()->GetSerial(), NULL, 0, SENDRELIABLE, NULL, this->clt_sock, __FILE__, 
+	packet2.send( CMD_ADDCLIENT, this->serial, NULL, 0, SENDRELIABLE, NULL, this->clt_sock, __FILE__, 
 #ifndef _WIN32
 			__LINE__
 #else
 			906
 #endif
 			);
-	COUT<<"Sending ingame with serial n°"<<this->game_unit.GetUnit()->GetSerial()<<endl;
+	this->game_unit.GetUnit()->SetSerial( this->serial);
+	COUT<<"Sending ingame with serial n°"<<this->serial<<endl;
 	this->ingame = true;
 }
 

@@ -51,7 +51,7 @@ class	NetClient
 		SOCKETALT			acct_sock;		// Connection socket for account server
         SocketSet           _sock_set;      // Encapsulates select()
 		SaveGame			save;
-		//ObjSerial			serial;			// Serial # of client
+		ObjSerial			serial;			// Serial # of client
 		int					nbclients;		// Number of clients in the zone
 		int					zone;			// Zone id in universe
 		char				keeprun;		// Bool to test client stop
