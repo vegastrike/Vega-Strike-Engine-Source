@@ -13,9 +13,12 @@ SUBDIRS = \
 
 if NETCOMM_JVOIP
 extraldadd = -ljvoip -ljrtp -ljthread
-endif
-if NETCOMM_PORTAUDIO
-extraldadd = -lportaudio
+else
+	if NETCOMM_PORTAUDIO
+	extraldadd = -lportaudio
+	else
+	extraldadd =
+	endif
 endif
 
 vegastrike_LDADD =  				\
