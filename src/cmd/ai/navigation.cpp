@@ -202,13 +202,18 @@ MoveTo::~MoveTo () {
 #endif
 }
 
-bool ChangeHeading::OptimizeAngSpeed (float optimal_speed,float v, float &a) {
+bool ChangeHeading::OptimizeAngSpeed (float optimal_speed_pos, float optimal_speed_neg,float v, float &a) {
   v += (a/parent->GetMoment())*SIMULATION_ATOM;
-  if (!optimal_speed||fabs(v)<=optimal_speed) {
+  if ((optimal_speed_pos==0&&optimal_speed_neg==0)||(v>=-optimal_speed_neg&&v<=optimal_speed_pos)) {
     return true;
   }
-  float deltaa = parent->GetMoment()*(fabs(v)-optimal_speed)/SIMULATION_ATOM;//clamping should take care of it
-  a += (v>0) ? -deltaa : deltaa;
+  if (v>0) {
+    float deltaa = parent->GetMoment()*(v-optimal_speed_pos)/SIMULATION_ATOM;//clamping should take care of it
+    a-=deltaa;
+  }else {
+    float deltaa = parent->GetMoment()*(-v-optimal_speed_neg)/SIMULATION_ATOM;//clamping should take care of it
+    a+=deltaa;
+  }
   return false;
 }
 
@@ -294,11 +299,17 @@ void ChangeHeading::Execute() {
     torque= (-parent->GetMoment()/SIMULATION_ATOM)*local_velocity;
   } else {
     TurnToward (atan2(local_heading.j, local_heading.k),local_velocity.i,torque.i);// find angle away from axis 0,0,1 in yz plane
-    OptimizeAngSpeed(turningspeed*parent->GetComputerData().max_pitch/*/getTimeCompression()*/,local_velocity.i,torque.i);
+    OptimizeAngSpeed(turningspeed*parent->GetComputerData().max_pitch_up,
+                     turningspeed*parent->GetComputerData().max_pitch_down,
+                     local_velocity.i,
+                     torque.i);
     
     TurnToward (atan2 (local_heading.i, local_heading.k), -local_velocity.j, torque.j);
     torque.j=-torque.j;
-    OptimizeAngSpeed(turningspeed*parent->GetComputerData().max_yaw/*/getTimeCompression()*/,local_velocity.j,torque.j);
+    OptimizeAngSpeed(turningspeed*parent->GetComputerData().max_yaw_right,
+                     turningspeed*parent->GetComputerData().max_yaw_left,
+                     local_velocity.j,
+                     torque.j);
     torque.k  =-parent->GetMoment()*local_velocity.k/SIMULATION_ATOM;//try to counteract roll;
   }
   if (!cheater)

@@ -74,7 +74,7 @@ class ChangeHeading : public Order {
   Vector last_velocity;
   QVector final_heading;
   bool terminating;
-  bool OptimizeAngSpeed(float limit, float v, float &a);
+  bool OptimizeAngSpeed(float limitpos,float limitneg, float v, float &a);
   bool Done (const Vector &);
   void TurnToward (float angle, float ang_vel, float &torque);
 protected:

@@ -1522,16 +1522,16 @@ using namespace UnitXML;
 	ADDELEM(speedStarHandler,XMLType(&computer.max_combat_ab_speed));
 	break;
       case YAW:
-	computer.max_yaw=parse_float((*iter).value)*(VS_PI/180);
-	ADDELEM (angleStarHandler, XMLType(&computer.max_yaw));
+	computer.max_yaw_left=computer.max_yaw_right=parse_float((*iter).value)*(VS_PI/180);
+	ADDELEM (angleStarHandler, XMLType(&computer.max_yaw_left));
 	break;
       case PITCH:
-	computer.max_pitch=parse_float((*iter).value)*(VS_PI/180);
-	ADDELEM (angleStarHandler,XMLType(&computer.max_pitch));
+	computer.max_pitch_down=computer.max_pitch_up=parse_float((*iter).value)*(VS_PI/180);
+	ADDELEM (angleStarHandler,XMLType(&computer.max_pitch_down));
 	break;
       case ROLL:
-	computer.max_roll=parse_float((*iter).value)*(VS_PI/180);
-	ADDELEM (angleStarHandler,XMLType(&computer.max_roll));
+	computer.max_roll_left=computer.max_roll_right=parse_float((*iter).value)*(VS_PI/180);
+	ADDELEM (angleStarHandler,XMLType(&computer.max_roll_left));
 	break;
       case SLIDE_START:
 	computer.slide_start = parse_int ((*iter).value);

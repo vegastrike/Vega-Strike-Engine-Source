@@ -490,7 +490,12 @@ public:
     float max_combat_speed; float max_combat_ab_speed;
     float max_speed () const; float max_ab_speed() const;
     ///Computer's restrictions of YPR to limit space combat maneuvers
-    float max_yaw; float max_pitch; float max_roll;
+    float max_yaw_left; 
+    float max_yaw_right; 
+    float max_pitch_down; 
+    float max_pitch_up; 
+    float max_roll_left; 
+    float max_roll_right;
     ///Whether or not an 'lead' indicator appears in front of target
     unsigned char slide_start;
     unsigned char slide_end;
@@ -500,7 +505,7 @@ public:
 
     Computer() : NavPoint(0,0,0) , threatlevel(0) , set_speed(0)
         , max_combat_speed(0) , max_combat_ab_speed(0)
-        , max_yaw(0) , max_pitch(0) , max_roll(0) , slide_start(0) , slide_end(0)
+        , max_yaw_left(0) ,max_yaw_right(0), max_pitch_down(0), max_pitch_up(0), max_roll_left(0) ,max_roll_right(0), slide_start(0) , slide_end(0)
         , itts(false) , combat_mode(false) { }
   };
   Computer computer;

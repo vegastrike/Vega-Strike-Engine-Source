@@ -181,7 +181,7 @@ void FlyByWire::Stop (float per) {
 
 void FlyByWire::Right (float per) {
 
-  desired_ang_velocity += (-per*parent->GetComputerData().max_yaw/getTimeCompression())*Vector (0,1,0);
+  desired_ang_velocity += (-per*(per>0?parent->GetComputerData().max_yaw_right:parent->GetComputerData().max_yaw_left)/getTimeCompression())*Vector (0,1,0);
 
 }
 
@@ -189,7 +189,7 @@ void FlyByWire::Right (float per) {
 
 void FlyByWire::Up (float per) {
 
-  desired_ang_velocity += (-per*parent->GetComputerData().max_pitch/getTimeCompression())*Vector (1,0,0);
+  desired_ang_velocity += (-per*(per>0?parent->GetComputerData().max_pitch_up:parent->GetComputerData().max_pitch_down)/getTimeCompression())*Vector (1,0,0);
 
 }
 
@@ -197,7 +197,7 @@ void FlyByWire::Up (float per) {
 
 void FlyByWire::RollRight (float per) {
 
-  desired_ang_velocity += (-per*parent->GetComputerData().max_roll/getTimeCompression())*Vector (0,0,1);
+  desired_ang_velocity += (-per*(per>0?parent->GetComputerData().max_roll_right:parent->GetComputerData().max_roll_left)/getTimeCompression())*Vector (0,0,1);
 
 }
 

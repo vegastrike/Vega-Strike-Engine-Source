@@ -718,9 +718,10 @@ void Unit::Init()
   computer.set_speed=0;
   computer.max_combat_speed=1;
   computer.max_combat_ab_speed=1;
-  computer.max_yaw=1;
-  computer.max_pitch=1;
-  computer.max_roll=1;
+  computer.max_yaw_left=computer.max_yaw_right=1;
+
+  computer.max_pitch_up=computer.max_pitch_down=1;
+  computer.max_roll_left=computer.max_roll_right=1;
   computer.NavPoint=Vector(0,0,0);
   computer.itts = false;
   computer.radar.maxrange=rr;
@@ -1161,9 +1162,9 @@ void Unit::Fire (unsigned int weapon_type_bitmask, bool listen_to_owner) {
 bool CheckAccessory (Unit * tur) {
   bool accessory = tur->name.find ("accessory")!=string::npos;
   if (accessory) {
-    tur->SetAngularVelocity(tur->DownCoordinateLevel(Vector (tur->GetComputerData().max_pitch,
-							   tur->GetComputerData().max_yaw,
-							   tur->GetComputerData().max_roll)));
+    tur->SetAngularVelocity(tur->DownCoordinateLevel(Vector (tur->GetComputerData().max_pitch_down,
+							   tur->GetComputerData().max_yaw_left,
+							   tur->GetComputerData().max_roll_left)));
   }
   return accessory;
 }
@@ -2462,14 +2463,32 @@ void Unit::ClearMounts() {
 
 Vector Unit::ClampAngVel (const Vector & velocity) {
   Vector res (velocity);
-  if (fabs (res.i)>computer.max_pitch) {
-    res.i = copysign (computer.max_pitch,res.i);
+  if (res.i>=0) {
+    if (res.i>computer.max_pitch_up) {
+      res.i = computer.max_pitch_up;
+    }
+  }else {
+    if (-res.i>computer.max_pitch_down) {
+      res.i = -computer.max_pitch_down;
+    }    
   }
-  if (fabs (res.j)>computer.max_yaw) {
-    res.j = copysign (computer.max_yaw,res.j);
+  if (res.j>=0){
+    if (res.j>computer.max_yaw_right) {
+      res.j = computer.max_yaw_right;
+    }
+  }else {
+    if (-res.j>computer.max_yaw_left) {
+      res.j = -computer.max_yaw_left;
+    }    
   }
-  if (fabs (res.k)>computer.max_roll) {
-    res.k = copysign (computer.max_roll,res.k);
+  if (res.k>=0){
+    if (res.k>computer.max_roll_right) {
+      res.k = computer.max_roll_right;
+    }
+  }else {
+    if (-res.k>computer.max_roll_left) {
+      res.k = -computer.max_roll_left;
+    }    
   }
   return res;
 }
@@ -3172,6 +3191,7 @@ void Unit::DamageRandSys(float dam, const Vector &vec, float randnum, float degr
 	//float randnum=rand01();
 	//float degrees=deg;
 	randnum=rand01();
+
 	degrees=deg;
 	if (degrees>180) {
 		degrees=360-degrees;
@@ -3260,23 +3280,30 @@ void Unit::DamageRandSys(float dam, const Vector &vec, float randnum, float degr
 	}
 	if (degrees>=60&&degrees<90) {
 		//DAMAGE ROLL/YAW/PITCH/THRUST
-		if (randnum>=.8) {
-			computer.max_pitch*=dam;
-		} else if (randnum>=.6) {
-			computer.max_yaw*=dam;
-		} else if (randnum>=.55) {
-			computer.max_roll*=dam;
-		} else if (randnum>=.5) {
-			limits.roll*=dam;
-		} else if (randnum>=.3) {
-			limits.yaw*=dam;
-		} else if (randnum>=.1) {
-			limits.pitch*=dam;
-		} else {
-			limits.lateral*=dam;
-		}
-		damages &= LIMITS_DAMAGED;
-		return;
+          float orandnum=rand01()*.5+.5;
+          if (randnum>=.9) {
+            computer.max_pitch_down*=orandnum;
+          } else if (randnum>=.8) {
+            computer.max_yaw_left*=orandnum;
+          } else if (randnum>=.7) {
+            computer.max_yaw_right*=orandnum;
+          } else if (randnum>=.6) {
+            computer.max_pitch_up*=orandnum;
+          } else if (randnum>=.57) {
+            computer.max_roll_left*=orandnum;
+          } else if (randnum>=.53) {
+            computer.max_roll_right*=orandnum;
+          }else if (randnum>=.5) {
+            limits.roll*=dam;
+          } else if (randnum>=.3) {
+            limits.yaw*=dam;
+          } else if (randnum>=.1) {
+            limits.pitch*=dam;
+          } else {
+            limits.lateral*=dam;
+          }
+          damages &= LIMITS_DAMAGED;
+          return;
 	}
 	if (degrees>=90&&degrees<120) {
 		//DAMAGE Shield
@@ -5342,9 +5369,12 @@ bool Unit::UpAndDownGrade (const Unit * up, const Unit * templ, int mountoffset,
   
   float tmax_speed = up->computer.max_combat_speed;
   float tmax_ab_speed = up->computer.max_combat_ab_speed;
-  float tmax_yaw = up->computer.max_yaw;
-  float tmax_pitch = up->computer.max_pitch;
-  float tmax_roll = up->computer.max_roll;
+  float tmax_yaw_left = up->computer.max_yaw_left;
+  float tmax_yaw_right = up->computer.max_yaw_right;
+  float tmax_pitch_down = up->computer.max_pitch_down;
+  float tmax_pitch_up = up->computer.max_pitch_up;
+  float tmax_roll_left = up->computer.max_roll_left;
+  float tmax_roll_right = up->computer.max_roll_right;
   float tlimits_yaw=up->limits.yaw;
   float tlimits_roll=up->limits.roll;
   float tlimits_pitch=up->limits.pitch;
@@ -5366,9 +5396,12 @@ bool Unit::UpAndDownGrade (const Unit * up, const Unit * templ, int mountoffset,
       Percenter=&computeMultPercent;
       tmax_speed = XMLSupport::parse_float (speedStarHandler (XMLType (&tmax_speed),NULL));
       tmax_ab_speed = XMLSupport::parse_float (speedStarHandler (XMLType (&tmax_ab_speed),NULL));
-      tmax_yaw = XMLSupport::parse_float (angleStarHandler (XMLType (&tmax_yaw),NULL));
-      tmax_pitch = XMLSupport::parse_float (angleStarHandler (XMLType (&tmax_pitch),NULL));
-      tmax_roll = XMLSupport::parse_float (angleStarHandler (XMLType (&tmax_roll),NULL));
+      tmax_yaw_left = XMLSupport::parse_float (angleStarHandler (XMLType (&tmax_yaw_left),NULL));
+      tmax_yaw_right = XMLSupport::parse_float (angleStarHandler (XMLType (&tmax_yaw_right),NULL));
+      tmax_pitch_down = XMLSupport::parse_float (angleStarHandler (XMLType (&tmax_pitch_down),NULL));
+      tmax_pitch_up = XMLSupport::parse_float (angleStarHandler (XMLType (&tmax_pitch_up),NULL));
+      tmax_roll_left = XMLSupport::parse_float (angleStarHandler (XMLType (&tmax_roll_left),NULL));
+      tmax_roll_right = XMLSupport::parse_float (angleStarHandler (XMLType (&tmax_roll_right),NULL));
 
       tlimits_yaw = XMLSupport::parse_float (angleStarHandler (XMLType (&tlimits_yaw),NULL));
       tlimits_pitch = XMLSupport::parse_float (angleStarHandler (XMLType (&tlimits_pitch),NULL));
@@ -5435,9 +5468,12 @@ bool Unit::UpAndDownGrade (const Unit * up, const Unit * templ, int mountoffset,
   STDUPGRADECLAMP(computer.radar.maxrange,up->computer.radar.maxrange,use_template_maxrange?templ->computer.radar.maxrange:FLT_MAX,0);
   STDUPGRADE(computer.max_combat_speed,tmax_speed,templ->computer.max_combat_speed,0);
   STDUPGRADE(computer.max_combat_ab_speed,tmax_ab_speed,templ->computer.max_combat_ab_speed,0);
-  STDUPGRADE(computer.max_yaw,tmax_yaw,templ->computer.max_yaw,0);
-  STDUPGRADE(computer.max_pitch,tmax_pitch,templ->computer.max_pitch,0);
-  STDUPGRADE(computer.max_roll,tmax_roll,templ->computer.max_roll,0);
+  STDUPGRADE(computer.max_yaw_left,tmax_yaw_left,templ->computer.max_yaw_left,0);
+  STDUPGRADE(computer.max_yaw_right,tmax_yaw_right,templ->computer.max_yaw_right,0);
+  STDUPGRADE(computer.max_pitch_up,tmax_pitch_up,templ->computer.max_pitch_up,0);
+  STDUPGRADE(computer.max_pitch_down,tmax_pitch_down,templ->computer.max_pitch_down,0);
+  STDUPGRADE(computer.max_roll_right,tmax_roll_right,templ->computer.max_roll_right,0);
+  STDUPGRADE(computer.max_roll_left,tmax_roll_left,templ->computer.max_roll_left,0);
   STDUPGRADE(fuel,up->fuel,templ->fuel,0);
 
   static bool UpgradeCockpitDamage = XMLSupport::parse_bool (vs_config->getVariable("physics","upgrade_cockpit_damage","false"));

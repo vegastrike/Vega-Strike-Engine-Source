@@ -4,6 +4,8 @@ g++ -o replace ../objconv/replace.cpp
 #mv cmd/libcmd.bak cmd/libcmd.a
 ./replace __ZNSs6assignEPKcm __ZNSs6assi6nEPKcm cmd/ai/libai.a cmd/ai/libai.a
 ./replace __ZNSs6assignEPKcm __ZNSs6assi7nEPKcm cmd/libcmd.a cmd/libcmd.a
+./replace _png_get_uint_31 _png_get_uiNt_31 /Users/daniel/Install/libpng/libpng.a /Users/daniel/Install/libpng/libpng.a 
+ranlib /Users/daniel/Install/libpng/libpng.a 
 ranlib cmd/ai/libai.a >&/dev/null
 ranlib cmd/libcmd.a >&/dev/null
 export MACOSX_DEPLOYMENT_TARGET=10.1
