@@ -1444,7 +1444,34 @@ bool Unit::AutoPilotTo (Unit * target, bool ignore_friendlies, int recursive_lev
   }
   if (this!=target) {
     warpenergy-=insys_jump_cost*totpercent*jump.energy;
-    QVector sep = AutoSafeEntrancePoint (end,(RealPosition(target)-end).Magnitude()-target->rSize(),target);
+    QVector sep (UniverseUtil::SafeEntrancePoint(end,rSize()));
+    if ((sep-end).MagnitudeSquared()>16*rSize()*rSize()) {
+      sep = AutoSafeEntrancePoint (end,(RealPosition(target)-end).Magnitude()-target->rSize(),target);
+    }
+    static bool auto_turn_towards =XMLSupport::parse_bool(vs_config->getVariable ("physics","auto_turn_towards","true"));
+    if (auto_turn_towards) {
+      Vector methem(RealPosition(target).Cast()-sep.Cast());
+      methem.Normalize();
+      Vector p,q,r;
+      GetOrientation(p,q,r);
+      p=methem.Cross(r);
+      if (p.MagnitudeSquared()){
+	float theta =p.Magnitude();
+	p*= (asin (theta)/theta);
+	Rotate(p);
+      }
+    }
+    static string insys_jump_ani = vs_config->getVariable ("graphics","insys_jump_animation","warp.ani");
+    if (insys_jump_ani.length()) {
+      UniverseUtil::playAnimationGrow (insys_jump_ani,RealPosition(this),rSize()*4,.99);
+
+
+      Vector v(GetVelocity());
+      v.Normalize();
+      Vector p,q,r;GetOrientation(p,q,r);
+      UniverseUtil::playAnimationGrow (insys_jump_ani,sep+v*rSize(),rSize()*8,.97);
+      UniverseUtil::playAnimationGrow (insys_jump_ani,sep+2*v*rSize()+r*4*rSize(),rSize()*16,.97);
+    }
     //    sep =UniverseUtil::SafeEntrancePoint (sep);
     SetCurPosition(sep);
     if (_Universe->isPlayerStarship (this)&&getFlightgroup()!=NULL) {

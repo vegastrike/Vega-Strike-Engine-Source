@@ -1009,6 +1009,7 @@ void FireKeyboard::Execute () {
   }
   if (f().missilekey==DOWN||f().missilekey==PRESS||j().jmissilekey==PRESS||j().jmissilekey==DOWN) {
     if (!_Universe->AccessCockpit()->CanDrawNavSystem())
+      UnitUtil::performDockingOperations(parent,parent->Target());
       parent->Fire(ROLES::FIRE_MISSILES|ROLES::EVERYTHING_ELSE,false);
     if (f().missilekey==PRESS)
       f().missilekey = DOWN;

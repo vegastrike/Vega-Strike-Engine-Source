@@ -16,6 +16,8 @@
 #include "lin_time.h"
 #include "faction_generic.h"
 #include "cmd/role_bitmask.h"
+#include "cmd/unit_util.h"
+#include "warpto.h"
 using namespace Orders;
 using std::map;
 const EnumMap::Pair element_names[] = {
@@ -420,13 +422,47 @@ void AggressiveAI::ReCommandWing(Flightgroup * fg) {
     }
   }
 }
+void AggressiveAI::AfterburnerJumpTurnTowards (Unit * target) {
+  AfterburnTurnTowards(this,parent);
+  if (jump_time_check==0) {
+    float dist = (target->Position()- parent->Position()).MagnitudeSquared();
+    if (last_jump_distance<dist) {
+      //force jump
+      if (target->GetDestinations().size()) {
+	string dest= target->GetDestinations()[0];
+	UnitUtil::JumpTo(parent,dest);
+      }
+    }else {
+      last_jump_distance = dist;
+    }
+  }
+  
+}
 void AggressiveAI::Execute () {  
+  jump_time_check++;//just so we get a nicely often wrapping var;
   Flightgroup * fg=parent->getFlightgroup();
   //ReCommandWing(fg);
   FireAt::Execute();
   if (!ProcessCurrentFgDirective (fg)) {
   Unit * target = parent->Target();
-  bool isjumpable = target?((!target->GetDestinations().empty())&&parent->GetJumpStatus().drive>=0):false;
+  bool isjumpable = target?(!target->GetDestinations().empty()):false;
+  if (parent->GetJumpStatus().drive<0) {
+    parent->ActivateJumpDrive(0);
+    if (parent->GetJumpStatus().drive==-2) {
+      static bool AIjumpCheat=XMLSupport::parse_bool (vs_config->getVariable ("AI","always_have_jumpdrive_cheat","false"));
+      if (AIjumpCheat) {
+	parent->GetJumpStatus().drive==-1;
+      }else {
+	fprintf (stderr,"warning ship not equipped to jump");
+	parent->Target(NULL);
+      }
+    }else if (parent->GetJumpStatus().drive<0){
+      static bool AIjumpCheat=XMLSupport::parse_bool (vs_config->getVariable ("AI","jump_cheat","true"));
+      if (AIjumpCheat) {
+	parent->jump.drive=0;
+      }
+    }
+  }
   if (!isjumpable &&(
 #if 1
       curinter==INTRECOVER||//this makes it so only interrupts may not be interrupted
@@ -442,8 +478,9 @@ void AggressiveAI::Execute () {
 
   if (queryType (Order::FACING)==NULL&&queryType (Order::MOVEMENT)==NULL) { 
     if (isjumpable) {
-      AfterburnTurnTowards(this,parent);
+      AfterburnerJumpTurnTowards (target);
     }else {
+      last_jump_distance=FLT_MAX;
       if (target) {
 	ProcessLogic(*logic);
 	curinter=(curinter==INTERR)?INTRECOVER:INTNORMAL;
@@ -458,6 +495,7 @@ void AggressiveAI::Execute () {
     }
   } else {
     if (target) {
+    WarpToP(parent,target);
     logiccurtime-=SIMULATION_ATOM;
     if (logiccurtime<=0) {
       curinter=(curinter==INTERR)?INTRECOVER:INTNORMAL;
@@ -466,8 +504,9 @@ void AggressiveAI::Execute () {
       eraseType (Order::FACING);
       eraseType (Order::MOVEMENT);
       if (isjumpable ) {
-	AfterburnTurnTowards(this,parent);
+	AfterburnerJumpTurnTowards (target);
       }else {
+	last_jump_distance=FLT_MAX;
 	ProcessLogic (*logic);
       }
       logiccurtime = logic->maxtime;      

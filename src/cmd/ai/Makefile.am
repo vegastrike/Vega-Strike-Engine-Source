@@ -35,7 +35,9 @@ libaigeneric =	\
 	tactics.h	\
 	tactics.cpp	\
 	turretai.cpp 		\
-	turretai.h
+	turretai.h	\
+	warpto.cpp	\
+	warpto.h
 
 
 #	pythonai.cpp		

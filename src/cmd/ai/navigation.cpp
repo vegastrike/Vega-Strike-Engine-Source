@@ -10,6 +10,7 @@ using namespace Orders;
 #include "cmd/script/flightgroup.h"
 #include "config_xml.h"
 #include "vs_globals.h"
+#include "warpto.h"
 /**
  * the time we need to start slowing down from now calculation (if it's in this frame we'll only accelerate for partial
  * vslowdown - decel * t = 0               t = vslowdown/decel
@@ -405,6 +406,8 @@ void FormUp::Execute() {
   Unit * targ = group.GetUnit();
   if (targ) {
     MoveTo::SetDest (Transform (targ->GetTransformation(),Pos));
+    if (rand()%64==0)
+      WarpToP(parent,targ);
   }
   MoveTo::Execute();
 }

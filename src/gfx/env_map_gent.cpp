@@ -298,9 +298,12 @@ static bool LoadTex(char * FileName, unsigned char scdata [lmwid][lmwid][3]){
 	  float scaledconstY = sizeY/lmwid;
 	  for (int t=0; t<lmwid; t++)
 	    {
+	      int ii = (t*sizeY)/lmwid;
 	      for (int s=0; s<lmwid;s++)
 		{
-		  int index = (int) (scaledconstX*3*s)+(scaledconstY*3*t*sizeX);
+		  int jj =(s*sizeX)/lmwid;
+		  int bpp = 3;
+		  int index = (ii*sizeX+jj)*bpp;
 		  
 		  
 		  scdata[t][s][0] = data[index];

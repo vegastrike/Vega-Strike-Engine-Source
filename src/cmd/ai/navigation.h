@@ -32,6 +32,13 @@ class MoveTo : public Order {
   bool Done (const Vector &);
   bool selfterminating;
 public:
+  void SetAfterburn(bool tf) {
+    if (tf) {
+      afterburnAndSwitchbacks|=1;
+    }else {
+      afterburnAndSwitchbacks&= (~1);
+    }
+  }
   ///takes in the destination target, whether afterburners should be applied, and the ammount of accuracy (how many times it shoudl miss destination and come back) should be used
   MoveTo(const QVector &target, bool aft, unsigned char numswitchbacks, bool terminating=true) : Order(MOVEMENT,SLOCATION), afterburnAndSwitchbacks(aft+(numswitchbacks<<1)),terminatingX(0), terminatingY(0), terminatingZ(0), last_velocity(0,0,0), selfterminating(terminating) {
     targetlocation = target;

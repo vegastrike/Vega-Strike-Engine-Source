@@ -8,6 +8,8 @@ class AggressiveAI: public FireAt {
   enum INTERCUR {INTERR,INTNORMAL,INTRECOVER} curinter;
   bool obedient;//am I currently obedient
   bool last_time_insys;
+  char jump_time_check;
+  float last_jump_distance;
 protected:
   void SignalChosenTarget();
   AIEvents::ElemAttrMap *logic;
@@ -26,6 +28,7 @@ public:
   AggressiveAI (const char *file, const char * interruptename, Unit * target=NULL);
   void Execute ();
   virtual string getOrderDescription() { return "aggressive"; };
+  void AfterburnerJumpTurnTowards(Unit * target);
 };
 }
 

@@ -532,6 +532,7 @@ public:
   ///Returns the current ammt of energy left
   float EnergyData() const;
   float WarpEnergyData() const;
+  unsigned short GetWarpEnergy() {return warpenergy;}
   ///Should we resolve forces on this unit (is it free to fly or in orbit)
   bool resolveforces;
   ///What's the size of this unit

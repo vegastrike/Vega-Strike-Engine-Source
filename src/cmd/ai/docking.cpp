@@ -2,6 +2,7 @@
 #include "xml_support.h"
 #include "config_xml.h"
 #include "cmd/unit_generic.h"
+#include "warpto.h"
 namespace Orders {
   DockingOps::DockingOps (Unit * unitToDockWith, Order * ai): MoveTo (QVector (0,0,1),
 								      false,
@@ -113,8 +114,13 @@ namespace Orders {
     }
     const QVector loc (Transform (utdw->GetTransformation(),utdw->DockingPortLocations()[port].pos.Cast()));
     SetDest (loc);
-    MoveTo::Execute();
+    SetAfterburn (DistanceWarrantsTravelTo(parent,(loc-parent->Position()).Magnitude()));
     
+    MoveTo::Execute();
+    if (rand()%256==0){
+      WarpToP(parent,utdw);
+      
+    }
     float rad = utdw->DockingPortLocations()[port].radius+parent->rSize();
     float diss =(parent->Position()-loc).MagnitudeSquared()-.1;
     if (diss<=parent->rSize()*parent->rSize()) {
