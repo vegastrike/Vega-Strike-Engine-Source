@@ -977,7 +977,7 @@ int main (int argc, char** argv) {
 		floatbuf= VSSwapHostFloatToLittle(memfile.lines[lines].s[tmpcounter]);
 		fwrite(&floatbuf,sizeof(float),1,Outputfile);//s coord
 		floatbuf= VSSwapHostFloatToLittle(memfile.lines[lines].t[tmpcounter]);
-		fwrite(&intbuf,sizeof(float),1,Outputfile);//t coord
+		fwrite(&floatbuf,sizeof(float),1,Outputfile);//t coord
 	}
   }
   intbuf= VSSwapHostIntToLittle(memfile.tris.size());
@@ -1003,9 +1003,9 @@ int main (int argc, char** argv) {
 		intbuf= VSSwapHostIntToLittle(memfile.quads[quads].indexref[tmpcounter]);
 		fwrite(&intbuf,sizeof(int),1,Outputfile);//point index
 		floatbuf= VSSwapHostFloatToLittle(memfile.quads[quads].s[tmpcounter]);
-		fwrite(&intbuf,sizeof(float),1,Outputfile);//s coord
+		fwrite(&floatbuf,sizeof(float),1,Outputfile);//s coord
 		floatbuf= VSSwapHostFloatToLittle(memfile.quads[quads].t[tmpcounter]);
-		fwrite(&intbuf,sizeof(float),1,Outputfile);//t coord
+		fwrite(&floatbuf,sizeof(float),1,Outputfile);//t coord
 	}
   }
   intbuf= VSSwapHostIntToLittle(memfile.linestrips.size());
@@ -1019,9 +1019,9 @@ int main (int argc, char** argv) {
 		intbuf= VSSwapHostIntToLittle(memfile.linestrips[ls].points[tmpcounter].indexref);
 		fwrite(&intbuf,sizeof(int),1,Outputfile);//point index
 		floatbuf= VSSwapHostFloatToLittle(memfile.linestrips[ls].points[tmpcounter].s);
-		fwrite(&intbuf,sizeof(float),1,Outputfile);//s coord
+		fwrite(&floatbuf,sizeof(float),1,Outputfile);//s coord
 		floatbuf= VSSwapHostFloatToLittle(memfile.linestrips[ls].points[tmpcounter].t);
-		fwrite(&intbuf,sizeof(float),1,Outputfile);//t coord
+		fwrite(&floatbuf,sizeof(float),1,Outputfile);//t coord
 	}
   }
   intbuf= VSSwapHostIntToLittle(memfile.linestrips.size());
@@ -1035,9 +1035,9 @@ int main (int argc, char** argv) {
 		intbuf= VSSwapHostIntToLittle(memfile.linestrips[ts].points[tmpcounter].indexref);
 		fwrite(&intbuf,sizeof(int),1,Outputfile);//point index
 		floatbuf= VSSwapHostFloatToLittle(memfile.linestrips[ts].points[tmpcounter].s);
-		fwrite(&intbuf,sizeof(float),1,Outputfile);//s coord
+		fwrite(&floatbuf,sizeof(float),1,Outputfile);//s coord
 		floatbuf= VSSwapHostFloatToLittle(memfile.linestrips[ts].points[tmpcounter].t);
-		fwrite(&intbuf,sizeof(float),1,Outputfile);//t coord
+		fwrite(&floatbuf,sizeof(float),1,Outputfile);//t coord
 	}
   }
   intbuf= VSSwapHostIntToLittle(memfile.linestrips.size());
@@ -1051,9 +1051,9 @@ int main (int argc, char** argv) {
 		intbuf= VSSwapHostIntToLittle(memfile.linestrips[tf].points[tmpcounter].indexref);
 		fwrite(&intbuf,sizeof(int),1,Outputfile);//point index
 		floatbuf= VSSwapHostFloatToLittle(memfile.linestrips[tf].points[tmpcounter].s);
-		fwrite(&intbuf,sizeof(float),1,Outputfile);//s coord
+		fwrite(&floatbuf,sizeof(float),1,Outputfile);//s coord
 		floatbuf= VSSwapHostFloatToLittle(memfile.linestrips[tf].points[tmpcounter].t);
-		fwrite(&intbuf,sizeof(float),1,Outputfile);//t coord
+		fwrite(&floatbuf,sizeof(float),1,Outputfile);//t coord
 	}
   }
   intbuf= VSSwapHostIntToLittle(memfile.linestrips.size());
@@ -1067,9 +1067,9 @@ int main (int argc, char** argv) {
 		intbuf= VSSwapHostIntToLittle(memfile.linestrips[qs].points[tmpcounter].indexref);
 		fwrite(&intbuf,sizeof(int),1,Outputfile);//point index
 		floatbuf= VSSwapHostFloatToLittle(memfile.linestrips[qs].points[tmpcounter].s);
-		fwrite(&intbuf,sizeof(float),1,Outputfile);//s coord
+		fwrite(&floatbuf,sizeof(float),1,Outputfile);//s coord
 		floatbuf= VSSwapHostFloatToLittle(memfile.linestrips[qs].points[tmpcounter].t);
-		fwrite(&intbuf,sizeof(float),1,Outputfile);//t coord
+		fwrite(&floatbuf,sizeof(float),1,Outputfile);//t coord
 	}
   }
   //END GEOMETRY
