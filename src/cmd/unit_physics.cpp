@@ -306,11 +306,16 @@ float Unit::MaxShieldVal() const{
   }
   return maxshield;
 }
-
+void Unit::RechargeEnergy() {
+    energy +=apply_float_to_short (recharge *SIMULATION_ATOM);
+}
 void Unit::RegenShields () {
   int rechargesh=1;
   float maxshield=MaxShieldVal();
-
+  static bool energy_before_shield=XMLSupport::parse_bool(vs_config->getVariable ("physics","engine_energy_priority","true"));
+  if (!energy_before_shield) {
+    RechargeEnergy();
+  }
   float rec = shield.recharge*SIMULATION_ATOM>energy?energy:shield.recharge*SIMULATION_ATOM;
   if (_Universe->isPlayerStarship(this)==NULL) {
     rec*=g_game.difficulty;
@@ -357,13 +362,15 @@ void Unit::RegenShields () {
   }
   if (rechargesh==0)
     energy-=(short unsigned int)rec;
+  if (energy_before_shield) {
+    RechargeEnergy();
+  }
   if (maxenergy>maxshield) {
     if (energy>maxenergy-maxshield)//allow shields to absorb xtra power
       energy=maxenergy-maxshield;  
   }else {
     energy=0;
   }
-  energy +=apply_float_to_short (recharge *SIMULATION_ATOM);
 
 }
 
