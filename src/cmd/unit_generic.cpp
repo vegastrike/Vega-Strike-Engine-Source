@@ -2051,6 +2051,8 @@ bool Unit::AutoPilotTo (Unit * target, bool ignore_energy_requirements, int recu
     return false;
   }
   static float autopilot_term_distance = XMLSupport::parse_float (vs_config->getVariable ("physics","auto_pilot_termination_distance","6000"));
+  static float atd_no_enemies=XMLSupport::parse_float(vs_config->getVariable ("physics","auto_pilot_termination_distance_no_enemies",vs_config->getVariable ("physics","auto_pilot_termination_distance","6000")));
+  static float autopilot_no_enemies_multiplier=XMLSupport::parse_float(vs_config->getVariable ("physics","auto_pilot_no_enemies_distance_multiplier","4"));
 //  static float autopilot_p_term_distance = XMLSupport::parse_float (vs_config->getVariable ("physics","auto_pilot_planet_termination_distance","60000"));
   if (isSubUnit()) {
     return false;//we can't auto here;
@@ -2074,11 +2076,21 @@ bool Unit::AutoPilotTo (Unit * target, bool ignore_energy_requirements, int recu
 		totallength=(start-end).Magnitude();
 	}
   }
+  QVector endne(end);
+
   float totpercent=1;
   if (totallength>1) {
     //    float apt = (target->isUnit()==PLANETPTR&&target->GetDestinations().empty())?autopilot_p_term_distance:autopilot_term_distance;
-	  float apt = (target->isUnit()==PLANETPTR)?(autopilot_term_distance+target->rSize()*UniverseUtil::getPlanetRadiusPercent()):autopilot_term_distance;
+    float apt = (target->isUnit()==PLANETPTR)?(autopilot_term_distance+target->rSize()*UniverseUtil::getPlanetRadiusPercent()):autopilot_term_distance;
+    float aptne=(target->isUnit()==PLANETPTR)?(atd_no_enemies+target->rSize()*UniverseUtil::getPlanetRadiusPercent()):atd_no_enemies;
     float percent = (getAutoRSize(this,this)+rSize()+target->rSize()+apt)/totallength;
+    float percentne = (getAutoRSize(this,this)+rSize()+target->rSize()+aptne)/totallength;
+    if (percentne>1){
+      endne=start;
+      
+    }else {
+      endne=start*percentne+end*(1-percentne);
+    }
     if (percent>1) {
       end=start;
       totpercent=0;
@@ -2088,19 +2100,28 @@ bool Unit::AutoPilotTo (Unit * target, bool ignore_energy_requirements, int recu
     }
   }
   bool ok=true;
+  
   static bool teleport_autopilot= XMLSupport::parse_bool(vs_config->getVariable("physics","teleport_autopilot","true"));
+  bool unsafe=false;
   if ((!teleport_autopilot)&&(!nanspace)) {
   if (Guaranteed==Mission::AUTO_NORMAL&&CloakVisible()>.5) {
 	  bool ignore_friendlies=true;
     for (un_iter i=ss->getUnitList().createIterator(); (un=*i)!=NULL; ++i) {
       static bool canflythruplanets= XMLSupport::parse_bool(vs_config->getVariable("physics","can_auto_through_planets","true"));
       if ((!(un->isUnit()==PLANETPTR&&canflythruplanets))&&un->isUnit()!=NEBULAPTR && (!UnitUtil::isSun(un))) {
-		if (un!=this&&un!=target) {
-    	  if ((start-un->Position()).Magnitude()-getAutoRSize (this,this,ignore_friendlies)-rSize()-un->rSize()-getAutoRSize(this,un,ignore_friendlies)<=0) {
+        if (un!=this&&un!=target) {
+          float tdis=(start-un->Position()).Magnitude()-rSize()-un->rSize();
+          float nedis=(end-un->Position()).Magnitude()-rSize()-un->rSize();
+          float trad=getAutoRSize(this,un,ignore_friendlies)+getAutoRSize (this,this,ignore_friendlies);
+    	  if (tdis<=trad) {
 	    return false;
 	  }
+          if ((nedis<trad*autopilot_no_enemies_multiplier||tdis<=trad*autopilot_no_enemies_multiplier)&&un->getRelation(this)<0){
+            unsafe =true;
+          }
 	  float intersection = un->querySphere (start,end,getAutoRSize (this,un,ignore_friendlies));
 	  if (intersection>0) {
+            unsafe=true;
 	    end = start+ (end-start)*intersection;
 	    totpercent*=intersection;
 	    ok=false;
@@ -2126,6 +2147,8 @@ bool Unit::AutoPilotTo (Unit * target, bool ignore_energy_requirements, int recu
 	
   if (this!=target) {
     warpenergy-=totpercent*jump.insysenergy;
+    if (unsafe==false&&totpercent==0)
+      end=endne;
     QVector sep (UniverseUtil::SafeEntrancePoint(end,rSize()));
     if ((sep-end).MagnitudeSquared()>16*rSize()*rSize()) {
       sep = AutoSafeEntrancePoint (end,(RealPosition(target)-end).Magnitude()-target->rSize(),target);
