@@ -213,13 +213,9 @@ bool Mesh::Collide (Unit * target, const Transformation &cumtrans, Matrix cumtra
 */
 bool Unit::OneWayCollide (Unit * target, Vector & normal, float &dist) {//do each of these bubbled subunits collide with the other unit?
   int i;
-
-  for (i=0;i<nummesh;i++) {
-  //query-sphery
-  }
+  if (!querySphere(target->Position(),target->rSize()))
+    return false;;
   if (queryBSP(target->Position(), target->rSize(), normal,dist)) {
-    //    target->ApplyForce (normal*fabs(target->GetMass()*normal.Dot(GetVelocity()-target->GetVelocity())/SIMULATION_ATOM));
-    //    ApplyForce (normal*fabs(GetMass()*normal.Dot(target->GetVelocity()-GetVelocity())/SIMULATION_ATOM));
     normal = ToWorldCoordinates (normal);
     return true;
   }
@@ -259,8 +255,6 @@ bool Unit::Collide (Unit * target) {
   //deal damage similarly to beam damage!!  Apply some sort of repel force
   smaller->ApplyForce (normal*smaller->GetMass()*fabs(normal.Dot ((smaller->GetVelocity()-bigger->GetVelocity()/SIMULATION_ATOM))+fabs (dist)/(SIMULATION_ATOM*SIMULATION_ATOM)));
   bigger->ApplyForce (normal*(smaller->GetMass()*smaller->GetMass()/bigger->GetMass())*-fabs(normal.Dot ((smaller->GetVelocity()-bigger->GetVelocity()/SIMULATION_ATOM))+fabs (dist)/(SIMULATION_ATOM*SIMULATION_ATOM)));
-  fprintf (stderr,"***MESH %s DELIVERS DAMAGE TO %s\n",bigger->name.c_str(),smaller->name.c_str());
-  
   //each mesh with each mesh? naw that should be in one way collide
   return true;
 }
@@ -272,17 +266,13 @@ bool Beam::Collide (Unit * target) {
     return false;
   float distance = target->querySphere (center,direction,0);
   if (distance<0||distance>curlength+target->rSize()) {
-    //test0808 return false;
   }
-  //  if (target->queryBoundingBox(center,direction,0)==0)
-  //    return false;
   Vector normal;//apply shields
 
   if (distance = target->queryBSP(center,center+direction*curlength,normal)) { 
 
     curlength = distance;
     impact|=IMPACT;
-    fprintf (stderr,"BEAM DELIVERS DAMAGE TO %s\n",target->name.c_str());
     
     //deliver float tmp=(curlength/range)); (damagerate*SIMULATION_ATOM*curthick/thickness)*((1-tmp)+tmp*rangepenalty);
     return true;
