@@ -1,8 +1,7 @@
 bin_PROGRAMS = vegastrike vegaserver accountserver
 
 SUBDIRS = cmd gfx gldrv aldrv python gui networking boost common boost129
-vegastrike_LDADD =  \
-$BOOST_LIBS	\
+vegastrike_LDADD =   \
 aldrv/libaldrv.a \
 common/libvscommon.a \
 networking/libnetclient.a \
@@ -20,10 +19,10 @@ gldrv/libgldrv.a \
 gui/libgui.a \
 networking/libnet.a \
 cmd/collide/libcollide.a \
+boost/libboost_python.a \
 -lpthread 
 
 vegaserver_LDADD =  \
-$BOOST_LIBS	\
 cmd/script/director_server.o \
 cmd/unit_util_generic.o \
 cmd/unit_util_server.o \
@@ -35,7 +34,8 @@ cmd/ai/libaiserver.a \
 cmd/script/c_alike/libc_alike.a \
 python/libpythonserver.a \
 gfx/libgfxserver.a \
-gldrv/libgldrvserver.a 
+gldrv/libgldrvserver.a \
+boost/libboost_python.a
 
 accountserver_LDADD =  \
 networking/libnetacct.a
