@@ -78,7 +78,7 @@ void GameUnit<UnitType>::UpdatePhysics2 (const Transformation &trans, const Tran
 	  player= _Universe->whichPlayerStarship( this);
 	  if( player>=0 /* && this->networked */ )
 	  {
-		  cout<<"Player number : "<<player<<endl;
+		  //cout<<"Player number : "<<player<<endl;
 		  // (NetForce + Transform (ship_matrix,NetLocalForce) )/mass = GLOBAL ACCELERATION
 		  curr_physical_state.position = curr_physical_state.position +  (Velocity*SIMULATION_ATOM*difficulty).Cast();
 		  // If we want to inter(extra)polate sent position, DO IT HERE

@@ -100,6 +100,7 @@ Unit * getNetworkUnit( ObjSerial cserial)
 NetClient::NetClient()
     : save("")
 {
+	webcam_support = false;
     game_unit = NULL;
     old_timestamp = 0;
     current_timestamp = 0;
@@ -111,6 +112,9 @@ NetClient::NetClient()
     for( int i=0; i<MAXCLIENTS; i++)
         Clients[i] = NULL;
 	ingame = false;
+#ifdef NETCOMM
+	NetComm = new NetworkCommunication();
+#endif
 }
 
 NetClient::~NetClient()
@@ -122,6 +126,10 @@ NetClient::~NetClient()
             delete Clients[i];
     }
 	*/
+#ifdef NETCOM
+	if( NetComm!=NULL)
+		delete NetComm;
+#endif
 }
 
 /*************************************************************/
@@ -568,6 +576,18 @@ int		NetClient::isTime()
 // void	NetClient::sendMsg()
 // {
 // }
+
+/**************************************************************/
+/**** Check if we have to send a webcam picture            ****/
+/**************************************************************/
+
+void	NetClient::sendWebcamPicture()
+{
+	// Check if time for webcam
+	if( webcam_support)
+	{
+	}
+}
 
 /**************************************************************/
 /**** Check if server has sent something                   ****/
@@ -1561,5 +1581,17 @@ bool	NetClient::jumpRequest( string newsystem)
 	jumpok = false;
 
 	return ret;
+}
+
+/******************************************************************************************/
+/*** COMMUNICATION STUFF                                                               ****/
+/******************************************************************************************/
+
+void	NetClient::startCommunication( float freq)
+{
+}
+
+void	NetClient::stopCommunication( float freq)
+{
 }
 

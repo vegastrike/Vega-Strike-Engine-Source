@@ -1,9 +1,10 @@
 #ifndef __WEBCAM_SUPPORT_H
 #define __WEBCAM_SUPPORT_H
 
-#ifndef _WIN32
+#ifdef _LINUX
 #include "bgrab.h"
-#else
+#endif
+#if defined( _WIN32) && !defined( __CYGWIN__)
 #include <vfw.h>
 #endif
 
@@ -20,29 +21,44 @@
  *
  */
 
-class	WebcamCapture
+class	WebcamSupport
 {
 	private:
 #ifndef _WIN32 // Does not work under Cygwin
-		struct fgdevice fg;
-		struct xwinbuffer xwin;
+		struct	fgdevice fg;
 
-		int region=0;
-		int channel=1;
-		int oldchannel=1;
-		char channeltext[128];
+		int		region;
+		int		channel;
+		int		oldchannel;
+		char	channeltext[128];
 #else
 #endif
+		int		width;
+		int		height;
+		int		depth;
+		int		fps;
+		double	last_time;
+		double	period;
+		bool	grabbing;
+
+		char *	image_buffer;
+
 	public:
 		WebcamSupport();
+		WebcamSupport( int f, int w, int h);
 
-		void	Init();
+		int		Init();
 		void	Shutdown();
 		void	GetInfo();
+		int		GetFps() { return this->fps;}
+		bool	isReady();
 
-		void	StartCapture( int fps);
+		void	StartCapture();
 		void	EndCapture();
-		void	CaptureImage();
+		char *	CaptureImage();
+		int		GetCapturedSize();
+
+		void	CopyImage();
 };
 
 #endif

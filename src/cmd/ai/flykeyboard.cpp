@@ -6,6 +6,7 @@
 #include "xml_support.h"
 #include "vs_globals.h"
 #include "gfx/cockpit_generic.h" 
+
 struct StarShipControlKeyboard {
   bool switchmode;
   bool setunvel;
@@ -42,7 +43,10 @@ struct StarShipControlKeyboard {
   bool switch_combat_mode;
   bool terminateauto;
   bool realauto;
-  void UnDirty() {sheltonpress=sheltonrelease=uppress=uprelease=downpress=downrelease=leftpress=leftrelease=rightpress=rightrelease=ABpress=ABrelease=accelpress=accelrelease=decelpress=decelrelease=rollrightpress=rollrightrelease=rollleftpress=rollleftrelease=0;jumpkey=startpress=stoppress=autopilot=dirty=switch_combat_mode=terminateauto=setunvel=switchmode=setnulvel=realauto=matchspeed=false;axial=vertical=horizontal=0;}
+  bool startcomm;
+  bool commchanged;
+  float comm_freq;
+  void UnDirty() {sheltonpress=sheltonrelease=uppress=uprelease=downpress=downrelease=leftpress=leftrelease=rightpress=rightrelease=ABpress=ABrelease=accelpress=accelrelease=decelpress=decelrelease=rollrightpress=rollrightrelease=rollleftpress=rollleftrelease=0;jumpkey=startpress=stoppress=autopilot=dirty=switch_combat_mode=terminateauto=setunvel=switchmode=setnulvel=realauto=matchspeed=false;axial=vertical=horizontal=0;commchanged=startcomm=false;comm_freq=MIN_COMMFREQ;}
   StarShipControlKeyboard() {UnDirty();}
 };
 static vector <StarShipControlKeyboard> starshipcontrolkeys;
@@ -148,6 +152,14 @@ void FlyByKeyboard::Execute () {
 
 void FlyByKeyboard::Execute (bool resetangvelocity) {
 #define SSCK starshipcontrolkeys[whichplayer]
+  if(SSCK.startcomm && SSCK.commchanged) {
+    parent->StartNetworkComm( g().comm_freq);
+	SSCK.commchanged=false;
+  }
+  if(!SSCK.startcomm && SSCK.commchanged) {
+    parent->StopNetworkComm( g().comm_freq);
+	SSCK.commchanged=false;
+  }
   if (SSCK.setunvel) {
     SSCK.setunvel=false;
     parent->VelocityReference (parent->Target());
@@ -327,6 +339,49 @@ void FlyByKeyboard::Execute (bool resetangvelocity) {
 }
 
 
+void FlyByKeyboard::DownFreq (int,KBSTATE k) {
+  if (g().dirty)g().UnDirty();
+  switch (k) {
+  case DOWN: if( g().comm_freq==MIN_COMMFREQ) g().comm_freq=MAX_COMMFREQ; else g().comm_freq -= .1;
+    break;
+  case UP:
+  case PRESS:
+  case RELEASE:
+  case RESET:
+    break;
+  }
+}
+
+void FlyByKeyboard::UpFreq (int,KBSTATE k) {
+  if (g().dirty)g().UnDirty();
+  switch (k) {
+  case DOWN: if( g().comm_freq==MAX_COMMFREQ) g().comm_freq=MIN_COMMFREQ; else g().comm_freq += .1;
+    break;
+  case UP:
+  case PRESS:
+  case RELEASE:
+  case RESET:
+    break;
+  }
+}
+
+void FlyByKeyboard::ChangeCommStatus (int,KBSTATE k) {
+  if (g().dirty)g().UnDirty();
+  switch (k) {
+  case DOWN:
+	if(g().startcomm==true)
+		g().startcomm=false;
+	else
+		g().startcomm=true;
+	g().commchanged=true;
+    break;
+  case UP:
+  case PRESS:
+  case RELEASE:
+  case RESET:
+    break;
+  }
+}
 
 void FlyByKeyboard::SetVelocityRefKey(int, KBSTATE k) {
   if (g().dirty) g().UnDirty();

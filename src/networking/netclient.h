@@ -32,6 +32,8 @@
 #include "cmd/container.h"   // for UnitContainer
 #include "gfx/quaternion.h"  // for Transformation
 
+#include "networking/networkcomm.h"
+
 class Packet;
 class Unit;
 class Client;
@@ -60,6 +62,10 @@ class	NetClient
 		Unit *				Units[MAXOBJECTS];			// Server controlled units in the same zone
 		// a vector because always accessed by their IDs
 
+#ifdef NETCOMM
+		NetworkCommunication *	NetComm;
+#endif
+
 		int					enabled;		// Bool to say network is enabled
 		// Time used for refresh - not sure still used
 		int					old_time;
@@ -70,6 +76,7 @@ class	NetClient
 		unsigned int		deltatime;
 		bool				jumpok;
 		bool				ingame;
+		bool				webcam_support;
 
 		void	receiveData();
 		void	readDatafiles();
@@ -77,6 +84,13 @@ class	NetClient
 		int		recvMsg( Packet* outpacket );
 		void	disconnect();
 		int		checkAcctMsg( );
+
+		void	receiveSave( const Packet* packet );
+		void	receiveLocations( const Packet* packet );
+		void	getZoneData( const Packet* packet );
+		void	receivePosition( const Packet* packet );
+		void	addClient( const Packet* packet );
+		void	removeClient( const Packet* packet );
 
 	public:
 		NetClient();
@@ -90,6 +104,12 @@ class	NetClient
 		SOCKETALT	init_acct( char * addr, unsigned short port);
 		void	start( char * addr, unsigned short port);
 		void	checkKey();
+
+		void	setCallsign( char * calls) { this->callsign = string( calls);}
+		void	setCallsign( string calls) { this->callsign = calls;}
+		string	getCallsign() {return this->callsign;}
+		void	setUnit( Unit * un) { game_unit.SetUnit( un);}
+		Unit *	getUnit() { return game_unit.GetUnit();}
 
 		/********************* Network stuff **********************/
 		// Get the lag time between us and the server
@@ -116,12 +136,6 @@ class	NetClient
 		void			init_interpolation( ObjSerial clientid);
 		Transformation	spline_interpolate( ObjSerial clientid, double blend);
 
-		void	setCallsign( char * calls) { this->callsign = string( calls);}
-		void	setCallsign( string calls) { this->callsign = calls;}
-		string	getCallsign() {return this->callsign;}
-		void	setUnit( Unit * un) { game_unit.SetUnit( un);}
-		Unit *	getUnit() { return game_unit.GetUnit();}
-
 		/********************* Weapon stuff **********************/
 		// Functions called when we receive a firing order from the server (other clients or ai or us)
 		void	scanRequest( Unit * target);
@@ -130,13 +144,12 @@ class	NetClient
 
 		bool	jumpRequest( string newsystem);
 
-    private:
-		void	receiveSave( const Packet* packet );
-		void	receiveLocations( const Packet* packet );
-		void	getZoneData( const Packet* packet );
-		void	receivePosition( const Packet* packet );
-		void	addClient( const Packet* packet );
-		void	removeClient( const Packet* packet );
+		/********************* Communication stuff **********************/
+	private:
+	public:
+		void	startCommunication( float freq);
+		void	stopCommunication( float freq);
+		void	sendWebcamPicture();
 };
 
 #endif

@@ -39,6 +39,15 @@
 #include "config.h"
 using namespace Orders;
 
+void	Unit::StartNetworkComm( float commfreq)
+{
+	Network[_Universe->whichPlayerStarship(this)].startCommunication(commfreq);
+}
+void	Unit::StopNetworkComm( float commfreq)
+{
+	Network[_Universe->whichPlayerStarship(this)].stopCommunication(commfreq);
+}
+
 bool flickerDamage (Unit * un, float hullpercent) {
 	#define damagelevel hullpercent
 		  static double counter=getNewTime();

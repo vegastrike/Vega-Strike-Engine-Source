@@ -65,11 +65,26 @@ libnet_a_SOURCES =	\
 	inet.cpp		\
 	inet.h
 
-libnetclient_a_SOURCES = $(libnetclientserver) 
+if NETCOMM
+libnetclient_a_SOURCES = $(libnetclientserver) \
+	networkcomm.cpp		\
+	networkcomm.h		\
+	webcam_support.cpp	\
+	webcam_support.h	\
+	bgrab.c				\
+	bgrab.h
+else
+libnetclient_a_SOURCES = $(libnetclientserver)
+endif
 
 libnetacct_a_SOURCES = $(libnetgeneric) \
 	acctserver.cpp \
 	acctserver.h
 
+if NETCOMM
+libnetserver_a_SOURCES = $(libnetclientserver) \
+	networkcomm_server.cpp
+else
 libnetserver_a_SOURCES = $(libnetclientserver)
+endif
 
