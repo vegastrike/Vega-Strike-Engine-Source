@@ -17,7 +17,7 @@ int		NetworkCommunication::InitSession( float frequency)
 	// Init the VoIP session
 	this->session = new JVOIPSession;
 	this->params = new JVOIPSessionParams;
-	this->rtpparams = new JVOIPRTPTransmissionParams
+	this->rtpparams = new JVOIPRTPTransmissionParams;
 
 	// Init the webcam part
 	int	ret = 0;
@@ -38,7 +38,9 @@ int		NetworkCommunication::DestroySession()
 	if( this->rtpparams)
 		delete this->rtpparams;
 	if( this->Webcam)
-		delete this->webcam;
+		delete this->Webcam;
+
+	return 0;
 }
 
 NetworkCommunication::~NetworkCommunication()
@@ -50,6 +52,6 @@ NetworkCommunication::~NetworkCommunication()
 	if( this->rtpparams)
 		delete this->rtpparams;
 	if( this->Webcam)
-		delete this->webcam;
+		delete this->Webcam;
 }
 

@@ -24,15 +24,7 @@
 #include <assert.h>
 #include "const.h"
 
-#if defined(_WIN32) && !defined(__CYGWIN__)
-	//#warning "Win32 platform"
-	#define in_addr_t unsigned long
-	#include <winsock.h>
-#else
-	#include <sys/socket.h>
-	#include <unistd.h>
-#endif
-
+#include "vsnet_headers.h"
 #include "GCPtr.h"
 #include "vsnet_address.h"
 #include "vsnet_socketset.h"

@@ -4,16 +4,7 @@
 #include "netui.h"
 #include "vsnet_serversocket.h"
 #include "vsnet_debug.h"
-
-#if defined(_WIN32) && !defined(__CYGWIN__)
-    //#warning "Win32 platform"
-    #define in_addr_t unsigned long
-    #include <winsock.h>
-#else
-    //#warning "GCC platform"
-    #define SOCKET_ERROR -1
-    // #include <fcntl.h>
-#endif
+#include "vsnet_headers.h"
 
 static void static_initNetwork( )
 {

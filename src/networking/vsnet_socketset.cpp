@@ -1,9 +1,7 @@
 #include <config.h>
 #include <sstream>
 
-#ifdef _WIN32
-#include <winsock.h>
-#endif
+#include "vsnet_headers.h"
 #include "vsnet_socket.h"
 #include "vsnet_socketset.h"
 #include "vsnet_pipe.h"

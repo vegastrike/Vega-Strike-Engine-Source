@@ -1,14 +1,7 @@
 #ifndef VSNET_SOCKET_UDP_H
 #define VSNET_SOCKET_UDP_H
 
-#include <config.h>
-
-#if defined(_WIN32) && !defined(__CYGWIN__)
-    //#warning "Win32 platform"
-    #include <winsock.h>
-#else
-    #include <sys/ioctl.h>
-#endif
+#include "vsnet_headers.h"
 #include <queue>
 
 #include "vsnet_socket.h"

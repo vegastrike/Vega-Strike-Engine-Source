@@ -45,8 +45,9 @@ struct StarShipControlKeyboard {
   bool realauto;
   bool startcomm;
   bool commchanged;
+  bool killcomm;
   float comm_freq;
-  void UnDirty() {sheltonpress=sheltonrelease=uppress=uprelease=downpress=downrelease=leftpress=leftrelease=rightpress=rightrelease=ABpress=ABrelease=accelpress=accelrelease=decelpress=decelrelease=rollrightpress=rollrightrelease=rollleftpress=rollleftrelease=0;jumpkey=startpress=stoppress=autopilot=dirty=switch_combat_mode=terminateauto=setunvel=switchmode=setnulvel=realauto=matchspeed=false;axial=vertical=horizontal=0;commchanged=startcomm=false;comm_freq=MIN_COMMFREQ;}
+  void UnDirty() {sheltonpress=sheltonrelease=uppress=uprelease=downpress=downrelease=leftpress=leftrelease=rightpress=rightrelease=ABpress=ABrelease=accelpress=accelrelease=decelpress=decelrelease=rollrightpress=rollrightrelease=rollleftpress=rollleftrelease=0;jumpkey=startpress=stoppress=autopilot=dirty=switch_combat_mode=terminateauto=setunvel=switchmode=setnulvel=realauto=matchspeed=false;axial=vertical=horizontal=0;commchanged=startcomm=killcomm=false;comm_freq=MIN_COMMFREQ;}
   StarShipControlKeyboard() {UnDirty();}
 };
 static vector <StarShipControlKeyboard> starshipcontrolkeys;
@@ -152,6 +153,10 @@ void FlyByKeyboard::Execute () {
 
 void FlyByKeyboard::Execute (bool resetangvelocity) {
 #define SSCK starshipcontrolkeys[whichplayer]
+  if(SSCK.killcomm) {
+    parent->StopNetworkComm( g().comm_freq);
+	SSCK.killcomm=false;
+  }
   if(SSCK.startcomm && SSCK.commchanged) {
     parent->StartNetworkComm( g().comm_freq);
 	SSCK.commchanged=false;
@@ -345,6 +350,7 @@ if(Network!=NULL)
   if (g().dirty)g().UnDirty();
   switch (k) {
   case DOWN: if( g().comm_freq==MIN_COMMFREQ) g().comm_freq=MAX_COMMFREQ; else g().comm_freq -= .1;
+			 g().killcomm = true;
     break;
   case UP:
   case PRESS:
@@ -361,6 +367,7 @@ if(Network!=NULL)
   if (g().dirty)g().UnDirty();
   switch (k) {
   case DOWN: if( g().comm_freq==MAX_COMMFREQ) g().comm_freq=MIN_COMMFREQ; else g().comm_freq += .1;
+			 g().killcomm = true;
     break;
   case UP:
   case PRESS:

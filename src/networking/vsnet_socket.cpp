@@ -1,10 +1,8 @@
 #include <config.h>
 
-#if defined(_WIN32) && !defined(__CYGWIN__)
-    //#warning "Win32 platform"
-    #include <winsock.h>
-#else
-    #include <sys/ioctl.h>
+#include "vsnet_headers.h"
+#if !defined(_WIN32) || defined(__CYGWIN__)
+#include <sys/ioctl.h>
 #endif
 
 #include "const.h"
@@ -56,12 +54,12 @@ SOCKETALT::SOCKETALT( )
 {
 }
 
-SOCKETALT::SOCKETALT( int sock, bool mode, const AddressIP& remote_ip, SocketSet& set )
+SOCKETALT::SOCKETALT( int sock, bool mode, const AddressIP& remote_ip, SocketSet& sets )
 {
     if( mode == TCP )
-        _sock = new VsnetTCPSocket( sock, remote_ip, set );
+        _sock = new VsnetTCPSocket( sock, remote_ip, sets );
     else
-        _sock = new VsnetUDPSocket( sock, remote_ip, set );
+        _sock = new VsnetUDPSocket( sock, remote_ip, sets );
 }
 
 SOCKETALT::SOCKETALT( const SOCKETALT& orig )
@@ -118,8 +116,8 @@ bool SOCKETALT::sameAddress( const SOCKETALT& l )
  * VsnetSocket - definition
  ***********************************************************************/
 
-VsnetSocket::VsnetSocket( int sock, const AddressIP& remote_ip, SocketSet& set )
-    : VsnetSocketBase( sock, set )
+VsnetSocket::VsnetSocket( int sock, const AddressIP& remote_ip, SocketSet& sets )
+    : VsnetSocketBase( sock, sets )
     , _remote_ip( remote_ip )
 {
 }
@@ -147,12 +145,12 @@ bool VsnetSocket::sameAddress( const VsnetSocket& r)
  * VsnetSocketBase - definition
  ***********************************************************************/
 
-VsnetSocketBase::VsnetSocketBase( int fd, SocketSet& set )
+VsnetSocketBase::VsnetSocketBase( int fd, SocketSet& sets )
     : _fd( fd )
-    , _set( set )
+    , _set( sets )
 {
     set_block( );
-    set.set( this );
+    sets.set( this );
 }
 
 VsnetSocketBase::~VsnetSocketBase( )

@@ -1,10 +1,7 @@
 #ifndef VSNET_PIPE_H
 #define VSNET_PIPE_H
 
-#ifdef _WIN32
-#include <winsock.h>
-#include <windows.h>
-#endif
+#include "vsnet_headers.h"
 
 
 class VSPipe

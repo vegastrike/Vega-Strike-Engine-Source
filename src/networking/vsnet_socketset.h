@@ -25,18 +25,7 @@
 
 #include <iostream>
 #include <errno.h>
-#if defined(_WIN32) && !defined(__CYGWIN__)
-	//#warning "Win32 platform"
-	#include <winsock.h>
-#else
-	#include <sys/socket.h>
-	#include <sys/time.h>
-#endif
-#ifdef __APPLE__
-#include <sys/types.h>
-#include <sys/time.h>
-#include <unistd.h>
-#endif
+#include "vsnet_headers.h"
 #include "const.h"
 
 #include <set>

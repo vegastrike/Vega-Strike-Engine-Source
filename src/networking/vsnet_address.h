@@ -25,20 +25,7 @@
 
 #include <iostream>
 #include "const.h"
-
-#if defined(_WIN32) && !defined(__CYGWIN__)
-	//#warning "Win32 platform"
-	#define in_addr_t unsigned long
-	#include <winsock.h>
-#else
-	#include <netdb.h>
- 	#include <string.h>
-	#include <sys/socket.h>
-	#include <netinet/in.h>
-	#include <arpa/inet.h>
-	#include <unistd.h>
-#endif
-	#include <stdlib.h>
+#include "vsnet_headers.h"
 
 struct AddressIP : public sockaddr_in
 {

@@ -1,6 +1,6 @@
 #if defined(_WIN32)
 #define in_addr_t unsigned long
-#include <winsock.h>
+#include <windows.h>
 #else
 #define SOCKET_ERROR -1
 #include <sys/time.h>
