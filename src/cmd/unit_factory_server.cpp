@@ -6,8 +6,13 @@
 #include "asteroid_generic.h"
 #include "missile_generic.h"
 #include "enhancement_generic.h"
-#ifdef _WIN32
+#if defined( _WIN32) && !defined( __CYGWIN__)
 #include <direct.h>
+#else
+#include <unistd.h>
+#include <pwd.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 #endif
 
 extern Unit * _masterPartList;
