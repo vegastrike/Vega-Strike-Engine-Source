@@ -320,6 +320,7 @@ void Unit::UpdatePhysics (const Transformation &trans, const Matrix transmat, co
     }
     if (!tmp&&hull<0) {
       Explode(false,SIMULATION_ATOM);
+	
     }
   }      
   for (i=0;i<nummounts;i++) {
@@ -348,7 +349,7 @@ void Unit::UpdatePhysics (const Transformation &trans, const Matrix transmat, co
       UnFire();//don't want to go off shooting while your body's splitting everywhere
       subunits[i]->hull-=SIMULATION_ATOM;
     }
-    dead &=subunits[i]->Killed();
+    //    dead &=(subunits[i]->hull<0);
   }
   if (!SubUnit)
     UpdateCollideQueue();

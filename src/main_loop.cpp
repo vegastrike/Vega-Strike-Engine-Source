@@ -427,7 +427,7 @@ void createObjects() {
 
 	    fighters[a]->EnqueueAI( new Orders::AggressiveAI (ai_agg_c, ai_int_c));
 	    
-SetTurretAI (fighters[a]);
+	    SetTurretAI (fighters[a]);
 	  }
 	  _Universe->activeStarSystem()->AddUnit(fighters[a]);
 	  a++;
@@ -448,10 +448,6 @@ SetTurretAI (fighters[a]);
   fighters[0]->EnqueueAI(new FlyByJoystick (0,"player1.kbconf"));
   fighters[0]->EnqueueAI(new FireKeyboard (0,""));
   
-  for (int kk=0;kk<fighters[0]->getNumSubUnits();kk++) {
-    fighters[0]->EnqueueAI (new Orders::FireAt(.2,15),kk);
-    fighters[0]->EnqueueAI (new Orders::FaceTarget (false,3),kk);
-  }
   
 #endif
   vschdir ("hornet-cockpit.cpt");
@@ -466,6 +462,7 @@ SetTurretAI (fighters[a]);
   _Universe->AccessCockpit()->SetParent(fighters[0]->getSubUnit(0));
 #else
   _Universe->AccessCockpit()->SetParent(fighters[0]);
+  SetTurretAI (fighters[0]);
 #endif
   shipList = _Universe->activeStarSystem()->getClickList();
   locSel = new CoordinateSelect (Vector (0,0,5));

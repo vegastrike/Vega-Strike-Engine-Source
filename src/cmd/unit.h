@@ -400,7 +400,7 @@ public:
   ///Highest cosine from given mounts to target. Returns distance and cosine
   float cosAngleFromMountTo (Unit * target, float & distance);
   ///won't collide with owner
-  void SetOwner(Unit *target) {owner=target;}
+  void SetOwner(Unit *target);
   Unit *Target(){return computer.target.GetUnit();}
   Unit *Threat(){return computer.threat.GetUnit();}
   void Target (Unit * targ);

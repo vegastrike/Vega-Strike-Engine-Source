@@ -240,6 +240,12 @@ void Unit::Target (Unit *targ) {
     subunits[i]->Target (targ);
   }
 }
+void Unit::SetOwner(Unit *target) {
+  owner=target;
+  for (int i=0;i<numsubunit;i++) {
+    subunits[i]->SetOwner (target);
+  }  
+}
 
 void Unit::Cloak (bool loak) {
   if (loak) {
