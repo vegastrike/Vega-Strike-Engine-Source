@@ -202,6 +202,7 @@ const int JUMP=4;
 
 
 vector <string> entities[5];
+vector <string> planet_entities;
 vector <string> gradtex;
 int nument[5];
 int numun[2];
@@ -228,6 +229,7 @@ vector <GradColor> colorGradiant;
     entities[STAR].clear();
     entities[GAS].clear();
     entities[PLANET].clear();entities[MOON].clear();
+	planet_entities.clear();
     entities[JUMP].clear();
     background.clear();
     names.clear();
@@ -716,6 +718,9 @@ void MakePlanet(float radius, int entitytype, bool forceRS, Vector R, Vector S, 
     cname = GetWrapXY(cname,wrapx,wrapy);
     Tab();fprintf (fp,"<CityLights file=\"%s\" wrapx=\"%d\" wrapy=\"%d\"/>\n",cname.c_str(),wrapx,wrapy);
   }
+  if (entitytype==PLANET) {
+	  entities[PLANET]=planet_entities;//this will make it so that while you have at least one habitable planet, not all ma
+  }
   if ((entitytype==PLANET&&temprandom<.1)||(!atmosphere.empty())) {
     if (atmosphere.empty()) {
       atmosphere="sol/earthcloudmaptrans.png";
@@ -726,23 +731,20 @@ void MakePlanet(float radius, int entitytype, bool forceRS, Vector R, Vector S, 
 	if (doalphaatmosphere) 
 		Tab();fprintf (fp,"<Atmosphere file=\"%s\" alpha=\"SRCALPHA INVSRCALPHA\" radius=\"%f\"/>\n",atmosphere.c_str(),radius*1.03);
 
-	float r=.5,g=.5,b=.5,a=.5;
-	float dr=.5,dg=.5,db=.5,da=.5;
+	float r=.9,g=.9,b=1,a=1;
+	float dr=.9,dg=.9,db=1,da=1;
 	if (!doalphaatmosphere) {
 		if (temprandom>.26||temprandom<.09) {
-			r=.25;g=.6;b=.25;
+			r=.5;g=1;b=.5;
 		}else if (temprandom>.24||temprandom<.092) {
-			r=.7;g=.3;b=.2;
+			r=1;g=.6;b=.5;
 		}
 	}
-	static float concavity = XMLSupport::parse_float (vs_config->getVariable ("graphics","fog","concavity","0"));
-	static float focus = XMLSupport::parse_float (vs_config->getVariable ("graphics","fog","focus",".5"));
+//	static float concavity = XMLSupport::parse_float (vs_config->getVariable ("graphics","fog","concavity","0"));
+//	static float focus = XMLSupport::parse_float (vs_config->getVariable ("graphics","fog","focus",".5"));
 	Tab();fprintf (fp,"<Fog>\n");
-	Tab();Tab();fprintf (fp,"<FogElement file=\"sphereatm.xmesh\" ScaleAtmosphereHeight=\"1.01\"  red=\"%f\" blue=\"%f\" green=\"%f\" alpha=\"%f\" dired=\"%f\" diblue=\"%f\" digreen=\"%f\" dialpha=\"%f\" concavity=\"%f\" focus=\"%f\" minalpha=\"0\" maxalpha=\"1\"/>\n",r,g,b,a,dr,dg,db,da,concavity,focus);
-	Tab();Tab();fprintf (fp,"<FogElement file=\"sphereatm.xmesh\" ScaleAtmosphereHeight=\"1.0175\"  red=\"%f\" blue=\"%f\" green=\"%f\" alpha=\"%f\" dired=\"%f\" diblue=\"%f\" digreen=\"%f\" dialpha=\"%f\" concavity=\"%f\" focus=\"%f\" minalpha=\"0\" maxalpha=\"1\"/>\n",r,g,b,a,dr,dg,db,da,concavity,focus);
-	Tab();Tab();fprintf (fp,"<FogElement file=\"sphereatm.xmesh\" ScaleAtmosphereHeight=\"1.025\"  red=\"%f\" blue=\"%f\" green=\"%f\" alpha=\"%f\" dired=\"%f\" diblue=\"%f\" digreen=\"%f\" dialpha=\"%f\" concavity=\"%f\" focus=\"%f\" minalpha=\"0\" maxalpha=\"1\"/>\n",r,g,b,a,dr,dg,db,da,concavity,focus);
-	Tab();Tab();fprintf (fp,"<FogElement file=\"sphereatm.xmesh\" ScaleAtmosphereHeight=\"1.0325\"  red=\"%f\" blue=\"%f\" green=\"%f\" alpha=\"%f\" dired=\"%f\" diblue=\"%f\" digreen=\"%f\" dialpha=\"%f\" concavity=\"%f\" focus=\"%f\" minalpha=\"0\" maxalpha=\"1\"/>\n",r,g,b,a,dr,dg,db,da,concavity,focus);
-	Tab();Tab();fprintf (fp,"<FogElement file=\"sphereatm.xmesh\" ScaleAtmosphereHeight=\"1.04\"  red=\"%f\" blue=\"%f\" green=\"%f\" alpha=\"%f\" dired=\"%f\" diblue=\"%f\" digreen=\"%f\" dialpha=\"%f\" concavity=\"%f\" focus=\"%f\" minalpha=\"0\" maxalpha=\"1\"/>\n",r,g,b,a,dr,dg,db,da,concavity,focus);		
+	Tab();Tab();fprintf (fp,"<FogElement file=\"atmXatm.xmesh\" ScaleAtmosphereHeight=\"1.0\"  red=\"%f\" blue=\"%f\" green=\"%f\" alpha=\"%f\" dired=\"%f\" diblue=\"%f\" digreen=\"%f\" dialpha=\"%f\" concavity=\".3\" focus=\".6\" minalpha=\"0\" maxalpha=\"0.7\"/>\n",r,g,b,a,dr,dg,db,da);
+	Tab();Tab();fprintf (fp,"<FogElement file=\"atmXhalo.xmesh\" ScaleAtmosphereHeight=\"1.0\"  red=\"%f\" blue=\"%f\" green=\"%f\" alpha=\"%f\" dired=\"%f\" diblue=\"%f\" digreen=\"%f\" dialpha=\"%f\" concavity=\"1\" focus=\".6\" minalpha=\"0\" maxalpha=\"0.7\"/>\n",r,g,b,a,dr,dg,db,da);		
 	Tab();fprintf (fp,"</Fog>\n");
 	}
   }
@@ -1058,7 +1060,10 @@ void generateStarSystem (string datapath, int seed, string sector, string system
   fprintf (stderr,"star %d gas %d plan %d moon %d, natural %d, bases %d",nument[0],nument[1],nument[2],nument[3],numun[0],numun[1]); 
   starradius.push_back (sunradius);
   readColorGrads (gradtex,(datapath+starlist).c_str());
-  readentity (entities[2],(datapath+planetlist).c_str());
+  readentity (entities[PLANET],(datapath+planetlist).c_str());
+  planet_entities=entities[PLANET];
+  string desolate=(string(datapath)+"planets.desolate.txt");
+  readentity (planet_entities,desolate.c_str());
   readentity (entities[1],(datapath+gasgiantlist).c_str());
   readentity (entities[3],(datapath+moonlist).c_str());
   readentity (units[1],(datapath+smallunitlist).c_str());

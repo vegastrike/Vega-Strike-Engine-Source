@@ -83,9 +83,13 @@ void MyLoadSystem (SystemInfo si) {
 
 }
 string getVarEitherSectionOrSub (Galaxy *galaxy, string section, string subsection, string variable, string defaultst) {
-  return galaxy->getVariable (section,subsection,variable,
-			      galaxy->getVariable (section,variable,defaultst));
-  
+  string d3fault = galaxy->getVariable (section,subsection,variable,
+										galaxy->getVariable (section,variable,defaultst));
+  if (d3fault.length()==0)
+	  d3fault = galaxy->getVariable(section,variable,defaultst);
+  if (d3fault.length()==0)
+	  return defaultst;
+  return d3fault;//this code will prevent the empty planet lists from interfering
 }
 
 void ClampIt (float & prop, float min, float max) {
