@@ -591,10 +591,10 @@ public:
   ///won't collide with owner
   void SetOwner(Unit *target);
   bool InCorrectStarSystem (StarSystem *active) {return active==activeStarSystem;}
-  Unit *GetTarget() {return computer.target.GetUnit(); }
+  Unit *Target() {return computer.target.GetUnit(); }
   Unit *VelocityReference() {return computer.velocity_ref.GetUnit(); }
   Unit *Threat() {return computer.threat.GetUnit(); }
-  void SetTarget (Unit * targ);
+  void Target (Unit * targ);
   void VelocityReference (Unit *targ);
   void TargetTurret (Unit * targ);
   ///Threatens this unit with "targ" as aggressor. Danger should be cos angle to target

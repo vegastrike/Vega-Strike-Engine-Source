@@ -300,7 +300,7 @@ void Unit::TargetTurret (Unit * targ) {
 	}
 
 }
-void Unit::SetTarget (Unit *targ) {
+void Unit::Target (Unit *targ) {
   if (targ==this) {
     return;
   }

@@ -33,6 +33,9 @@ public:
 #include "python_unit_wrap.h"
 ///////////////////////////////MANUAL WRAP//////
   void Kill () {{CHECKME;}unit->Kill(true);}
+  UnitWrapper GetTarget () {{CHECKME(0);}return unit->GetTarget();}
+  void SetTarget (UnitWrapper targ) {{CHECKME;}unit->SetTarget(targ);}
+  voidWRAPPED1( SetTarget ,UnitWrapper, targ)
   boost::python::tuple GetOrientation() {{CHECKME (boost::python::tuple());}Vector p,q,r; unit->GetOrientation(p,q,r); return boost::python::tuple(p,q,r);}
   boost::python::tuple queryBSP (bool ShieldBSP) {{CHECKME (boost::python::tuple());}float dist; UnitWrapper un; QVector st,en; Vector nml; un=unit->queryBSP(st,en,nml,dist,ShieldBSP); boost::python::tuple ret (un,st,en,nml); ret.set_item(4,dist); return ret;}
   boost::python::tuple cosAngleTo (UnitWrapper target, float speed, float range) {{CHECKME (boost::python::tuple());}float dist; float ret=unit->cosAngleTo(target,dist,speed,range);return boost::python::tuple (ret,dist);}
@@ -89,6 +92,8 @@ PYTHON_BEGIN_CLASS(Unit,UnitWrapper,"Unit")
 #undef voidWRAPPED3
 //End of Macro City 2
   Class.def(&UnitWrapper::Kill,"Kill");
+  Class.def(&UnitWrapper::SetTarget,"SetTarget");
+  Class.def(&UnitWrapper::GetTarget,"GetTarget");
   Class.def(&UnitWrapper::GetOrientation,"GetOrientation");
   Class.def(&UnitWrapper::queryBSP,"queryBSP");
   Class.def(&UnitWrapper::cosAngleTo,"cosAngleTo");
