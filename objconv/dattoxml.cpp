@@ -306,7 +306,7 @@ int main (int argc, char ** argv)
 		DrawDat.Hexs[i][j] = readf(shp);	
 
 	    revpnts = new int [DrawDat.NumPoints];
-	    for (int i=0;i<DrawDat.NumPoints;i++) {
+	    for (i=0;i<DrawDat.NumPoints;i++) {
 	      revpnts[i]=-1;
 	    }
 	
@@ -349,7 +349,7 @@ int main (int argc, char ** argv)
 	      }
 	    int maxrev=0;
 	    StrWrite ("<!-- BeginReversePoints -->\n");
-	    for (int i=0;i<DrawDat.NumPoints;i++) {
+	    for (i=0;i<DrawDat.NumPoints;i++) {
 	      if (revpnts[i]==1) {
 
 		revpnts[i]=maxrev;//so now we have a lookup into revpnts
@@ -530,13 +530,13 @@ int main (int argc, char ** argv)
 
 	    const float oo255 = 1./255;
 	    Tag ("Polygons");
-	    for (int i=0;i<DrawDat.NumLines;i++) {
+	    for (i=0;i<DrawDat.NumLines;i++) {
 	      Tag ("Line");
 	      Vert (DrawDat.Lins[i][0],0,0);
 	      Vert (DrawDat.Lins[i][1],0,0);
 	      ETag ("Line");
 	    }
-	    for (int i=0;i<DrawDat.NumTris;i++) {
+	    for (i=0;i<DrawDat.NumTris;i++) {
 	      Tag("Tri");
 	      Vert (DrawDat.Tris[i][2],
 		    DrawDat.TriTexture[i][4]*oo255,
@@ -550,7 +550,7 @@ int main (int argc, char ** argv)
 
 	      ETag ("Tri");
 	    }	
-	    for (int i=0;i<DrawDat.NumRevTris;i++) {
+	    for (i=0;i<DrawDat.NumRevTris;i++) {
 	      Tag("Tri");
 	      Vert (revpnts[DrawDat.RevTris[i][2]]+DrawDat.NumPoints,
 		    DrawDat.TriTexture[i+DrawDat.NumTris][4]*oo255,
@@ -564,7 +564,7 @@ int main (int argc, char ** argv)
 
 	      ETag ("Tri");
 	    }	
-	    for (int i=0;i<DrawDat.NumPents;i++) {
+	    for (i=0;i<DrawDat.NumPents;i++) {
 	      Tag("Tri");
 	      Vert (DrawDat.Pents[i][2],
 		    DrawDat.PentTexture[i][4]*oo255,
@@ -578,7 +578,7 @@ int main (int argc, char ** argv)
 
 	      ETag ("Tri");
 	    }	
-	    for (int i=0;i<DrawDat.NumRevPents;i++) {
+	    for (i=0;i<DrawDat.NumRevPents;i++) {
 	      Tag("Tri");
 	      Vert (revpnts[DrawDat.RevPents[i][2]]+DrawDat.NumPoints,
 		    DrawDat.PentTexture[i+DrawDat.NumPents][4]*oo255,
@@ -592,7 +592,7 @@ int main (int argc, char ** argv)
 
 	      ETag ("Tri");
 	    }	
-	    for (int i=0;i<DrawDat.NumQuads;i++) {
+	    for (i=0;i<DrawDat.NumQuads;i++) {
 	      Tag("Quad");
 	      Vert (DrawDat.Quads[i][3],
 		    DrawDat.QuadTexture[i][6]*oo255,
@@ -609,7 +609,7 @@ int main (int argc, char ** argv)
 
 	      ETag ("Quad");
 	    }	
-	    for (int i=0;i<DrawDat.NumRevQuads;i++) {
+	    for (i=0;i<DrawDat.NumRevQuads;i++) {
 	      Tag("Quad");
 	      Vert (revpnts[DrawDat.RevQuads[i][3]]+DrawDat.NumPoints,
 		    DrawDat.QuadTexture[i+DrawDat.NumQuads][6]*oo255,
@@ -626,7 +626,7 @@ int main (int argc, char ** argv)
 
 	      ETag ("Quad");
 	    }	
-	    for (int i=0;i<DrawDat.NumPents;i++) {
+	    for (i=0;i<DrawDat.NumPents;i++) {
 	      Tag("Quad");
 	      Vert (DrawDat.Pents[i][4],
 		    DrawDat.PentTexture[i][8]*oo255,
@@ -646,7 +646,7 @@ int main (int argc, char ** argv)
 
 	      ETag ("Quad");
 	    }	
-	    for (int i=0;i<DrawDat.NumRevPents;i++) {
+	    for (i=0;i<DrawDat.NumRevPents;i++) {
 	      Tag("Quad");
 	      Vert (revpnts[DrawDat.RevPents[i][4]]+DrawDat.NumPoints,
 		    DrawDat.PentTexture[i+DrawDat.NumPents][8]*oo255,
@@ -666,7 +666,7 @@ int main (int argc, char ** argv)
 
 
 
-	    for (int i=0;i<DrawDat.NumHexs;i++) {
+	    for (i=0;i<DrawDat.NumHexs;i++) {
 	      Tag("Quad");
 	      Vert (DrawDat.Hexs[i][3],
 		    DrawDat.HexTexture[i][6]*oo255,
@@ -705,7 +705,7 @@ int main (int argc, char ** argv)
 
 	    }	
 
-	    for (int i=0;i<DrawDat.NumRevHexs;i++) {
+	    for (i=0;i<DrawDat.NumRevHexs;i++) {
 	      Tag("Quad");
 	      Vert (revpnts[DrawDat.RevHexs[i][3]]+DrawDat.NumPoints,
 		    DrawDat.HexTexture[i+DrawDat.NumHexs][6]*oo255,
@@ -1057,9 +1057,10 @@ int main (int argc, char ** argv)
 	Tab();fprintf (fp,"<Stats mass=\"%f\" momentofinertia=\"%f\" fuel=\"%d\"></Stats>\n",Stat.Mass,Stat.Mass,20000);
 	Tab();fprintf (fp,"<Computer yaw=\"%f\" pitch=\"%f\" roll=\"%f\" afterburner=\"%f\" maxspeed=\"%f\"/>\n",ypr.i,ypr.j,ypr.k,abspeed,nspeed);
 	Tab();Tag("Energy");
-	Tab(2);fprintf (fp,"<Reactor recharge=\"%d\" limit=\"%d\"/>\n",10,100);
+	Tab(2);fprintf (fp,"<Reactor recharge=\"%d\" limit=\"%d\"/>\n",40,100);
 	Tab();ETag("Energy");
 	Tab();fprintf (fp,"<Jump delay=\"%d\" jumpenergy=\"%d\"/>\n",1,80);
+	Tab();fprintf (fp,"<Cockpit file=\"hornet-cockpit.cpt\" x=\"%d\" y=\"%d\" z=\"%d\"/>",0,0,0);
 	ETag ("Unit");
 	fclose (fp);
 
