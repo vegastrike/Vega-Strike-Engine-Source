@@ -4,14 +4,17 @@ Goals for 0.4.2 release:
 ** Fix systems to have jump points only outside the "slow-zone"
 ** Fix a bit of the system generation code: so we can specify everything in the milky_way.xml
 ** Sparkles (particle system)
+** Shields drop when jumping
+
+*BUGFIX
+** Ship images not appearing in cargo screen
 
 * Warp:
-** Warp energy use
 ** no weapons in warp
 ** Time Compression back for devels
 
-*Jump
-** Shields drop when jumping
+*Damage
+** Fix System Damage so it happens with reasonable frequency
 
 * Resource management/organization:
 ** trim redundant thrust animation images
