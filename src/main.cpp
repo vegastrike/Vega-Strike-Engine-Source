@@ -30,6 +30,8 @@
 #include "mission.h"
 #include "audiolib.h"
 #include "vs_path.h"
+
+#include "python/init.h"
 /*
  * Globals 
  */
@@ -92,6 +94,9 @@ int main( int argc, char *argv[] )
 
     // loads the configuration file .vegastrikerc from home dir if such exists
     initpaths();
+#ifdef HAVE_PYTHON
+	Python::init();
+#endif
 
     float col[4];
     vs_config->getColor("default","testcolor",col,0xff00ff);
