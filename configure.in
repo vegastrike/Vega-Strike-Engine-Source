@@ -555,6 +555,67 @@ TR_CPPFLAGS="$TR_CPPFLAGS $GLUT_CPPFLAGS"
 
 
 dnl --------------------------------------------------------------------------
+dnl Check for expat library
+dnl --------------------------------------------------------------------------
+AC_ARG_WITH(expat-libs,[  --with-expat-libs=DIR    Location of expat library])
+
+if test "x$with_expat_libs" = "x" ; then
+    EXPAT_LDOPTS=""
+else
+    EXPAT_LDOPTS="-L$with_expat_libs"
+fi
+
+AC_DEFUN( CHECK_FOR_EXPAT_LIB, [
+    AC_MSG_CHECKING([for $EXPAT_LIB_NAME library])
+    LIBS="$EXPAT_LDOPTS -l$EXPAT_LIB_NAME"
+    AC_TRY_LINK( , , have_expat_lib=yes, have_expat_lib=no )
+    AC_MSG_RESULT([$have_expat_lib])
+]) 
+
+saved_LIBS="$LIBS"
+
+EXPAT_LIB_LIST="expat"
+
+for EXPAT_LIB_NAME in $EXPAT_LIB_LIST ; do
+    CHECK_FOR_EXPAT_LIB
+
+    if test "x$have_expat_lib" = "xyes" ; then
+        break;
+    fi
+done
+
+if test "x$have_expat_lib" = "xno" ; then
+    AC_MSG_ERROR([Expat library not found])
+fi
+
+LIBS="$saved_LIBS"
+TR_LIBS="$TR_LIBS $EXPAT_LDOPTS -l$EXPAT_LIB_NAME"
+
+
+dnl --------------------------------------------------------------------------
+dnl Check for expat.h
+dnl --------------------------------------------------------------------------
+
+AC_ARG_WITH(expat-inc, [  --with-expat-inc=DIR     Specify expat header file location])
+
+if test "x$with_expat_inc" = "x" ; then
+    EXPAT_CPPFLAGS=""
+else
+    EXPAT_CPPFLAGS="-I$with_expat_inc"
+fi
+
+saved_CPPFLAGS="$CPPFLAGS"
+CPPFLAGS="$saved_CPPFLAGS $TR_CPPFLAGS $EXPAT_CPPFLAGS"
+AC_CHECK_HEADER([expat.h], have_expat_h=yes, have_expat_h=no )
+
+if test "x$have_expat_h" = "xno" ; then
+    AC_MSG_ERROR([Cannot find expat.h])
+fi
+
+CPPFLAGS="$saved_CPPFLAGS"
+TR_CPPFLAGS="$TR_CPPFLAGS $EXPAT_CPPFLAGS"
+
+dnl --------------------------------------------------------------------------
 dnl Other options
 dnl --------------------------------------------------------------------------
 
