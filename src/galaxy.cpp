@@ -1,4 +1,5 @@
 #include "star_system.h"
+#include "cmd/script/mission.h"
 #include "universe.h"
 #include "galaxy_xml.h"
 #include "galaxy_gen.h"
@@ -322,7 +323,17 @@ StarSystem * Universe::GenerateStarSystem (const char * file, const char * jumpb
   }
 
   StarSystem * ss = new StarSystem (file,center);
+
   LoadStarSystem (ss);
+  pushActiveStarSystem(ss);
+  // notify the director that a new system is loaded (gotta have at least one active star system)
+  StarSystem *old_script_system=script_system;
+
+  script_system=ss;
+  mission->DirectorStartStarSystem(ss);
+
+  script_system=old_script_system;
+  popActiveStarSystem();
   if (active_star_system.empty()) {
     pushActiveStarSystem (ss);
   } else {

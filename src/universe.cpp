@@ -73,13 +73,6 @@ Universe::Universe(int argc, char** argv, const char * galaxy)
 void Universe::LoadStarSystem(StarSystem * s) {
   star_system.push_back (s);
   
-  // notify the director that a new system is loaded
-  StarSystem *old_script_system=script_system;
-
-  script_system=s;
-  mission->DirectorStartStarSystem(s);
-
-  script_system=old_script_system;
 }
 bool Universe::StillExists (StarSystem * s) {
   return std::find (star_system.begin(),star_system.end(),s)!=star_system.end();
