@@ -793,7 +793,7 @@ void UnitEndElement(const string &name, XML * xml) {
   }  
   if (xeq (name,"energy")){
       fprintf (xml->tfp,"<Upgrade file=\"engine%s\"/>\n<Upgrade file=\"mult_gun_cooler\"/>\n",LookUp (engineLookup (),xml->energy_recharge).c_str());
-      fprintf (xml->bfp,"<Upgrade file=\"engine_level_0\"/>\n");
+      fprintf (xml->bfp,"<Upgrade file=\"reactor_level_0\"/>\n");
   }
 }
 void beginElement(const string &name, const AttributeList &attributes, XML * xml) {
