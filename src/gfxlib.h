@@ -248,6 +248,8 @@ void /*GFXDRVAPI*/ GFXTextureAddressMode(const ADDRESSMODE);
 ///Sets the current blend mode to src,dst
 void /*GFXDRVAPI*/ GFXBlendMode(const enum BLENDFUNC src, const enum BLENDFUNC dst);
 
+void /*GFXDRVAPI*/ GFXColorMaterial (int LIGHTTARG);
+
 ///Sets the size in pixels of a GFXPOINT
 void /*GFXDRVAPI*/ GFXPointSize (const float size);
 

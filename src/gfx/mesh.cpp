@@ -224,11 +224,12 @@ void Mesh::Draw(float lod, const Transformation &trans, const Matrix m, float to
     if (cloak<16384) {
       c.cloaked|=MeshDrawContext::NEARINVIS;
     }
-    c.mesh_seq=MESH_SPECIAL_FX_ONLY;//draw near the end with lights
+    c.mesh_seq =2;
+    //c.mesh_seq=MESH_SPECIAL_FX_ONLY;//draw near the end with lights
     float tmp = ((float)cloak)/32767;
-    c.CloakFX.r = tmp;
-    c.CloakFX.g = tmp;
-    c.CloakFX.b = tmp;
+    c.CloakFX.r = 1;
+    c.CloakFX.g = 1;
+    c.CloakFX.b = 1;
     c.CloakFX.a = tmp;
     /*
     c.CloakNebFX.ambient[0]=((float)cloak)/32767;
@@ -417,12 +418,20 @@ void Mesh::ProcessDrawQueue(int whichdrawqueue) {
       GFXBlendColor (c.CloakFX);
       GFXBlendMode (CONSTCOLOR,INVCONSTCOLOR);
 #else
-      //      if (c.cloaked&MeshDrawContext::NEARINVIS)
+#if 0
 	GFXDisable (TEXTURE1);
       int ligh;
       GFXCreateLight (ligh,GFXLight (true,GFXColor(0,0,0,1),GFXColor (0,0,0,1),GFXColor (0,0,0,1),c.CloakFX,GFXColor(1,0,0)),true);
       specialfxlight.push_back (ligh);
       GFXBlendMode (ONE,ONE);
+#else
+      if (c.cloaked&MeshDrawContext::NEARINVIS) {      
+	//NOT sure I like teh jump this produces	GFXDisable (TEXTURE1);
+      }
+      GFXBlendMode (SRCALPHA, INVSRCALPHA);
+      GFXColorMaterial (AMBIENT|DIFFUSE);
+      GFXColorf(c.CloakFX);
+#endif
 #endif
     }
 
@@ -441,6 +450,8 @@ void Mesh::ProcessDrawQueue(int whichdrawqueue) {
     if (c.cloaked&MeshDrawContext::CLOAK) {
 #if 0
       GFXBlendColor (GFXColor(1,1,1,1));
+#else
+      GFXColorMaterial (0);
 #endif
       if (envMap)
       	GFXEnable (TEXTURE1);

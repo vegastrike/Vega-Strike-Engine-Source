@@ -236,6 +236,33 @@ void GFXPopBlendMode()
     }
 }
 
+void GFXColorMaterial (int LIGHTTARG) {
+  if (LIGHTTARG) {
+   glEnable (GL_COLOR_MATERIAL);
+   switch (LIGHTTARG) {
+   case EMISSION:
+     glColorMaterial (GL_FRONT_AND_BACK,GL_EMISSION);
+     break;
+   case AMBIENT:
+     glColorMaterial (GL_FRONT_AND_BACK,GL_AMBIENT);
+     break;
+   case DIFFUSE:
+     glColorMaterial (GL_FRONT_AND_BACK,GL_DIFFUSE);
+     break;
+   case (AMBIENT|DIFFUSE):
+     glColorMaterial (GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
+     break;
+   case SPECULAR:
+     glColorMaterial (GL_FRONT_AND_BACK, GL_SPECULAR);
+     break;
+   }
+  }else {
+    glDisable (GL_COLOR_MATERIAL);
+  }
+
+}
+
+
 void GFXDepthFunc(enum DEPTHFUNC dfunc)
 {
 	switch (dfunc)

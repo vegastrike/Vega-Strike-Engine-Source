@@ -115,6 +115,7 @@ enum LIGHT_TARGET {
   SPECULAR=4,
   AMBIENT=8,
   POSITION=16,
+  EMISSION=32
 };
 ///Holds all information for a single light object
 class GFXLight {
