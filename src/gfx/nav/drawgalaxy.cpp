@@ -144,6 +144,7 @@ public:
 			float col2[4]={1,1,.7,1};
 			vs_config->getColor("nav", "highlighted_text_on_tail", col2, true);
 			highlighted_tail_text=GFXColor(col2[0],col2[1],col2[2],col2[3]);
+			inited=true;
 		}
 
 
@@ -349,10 +350,11 @@ void NavigationSystem::DrawGalaxy()
 	TextPlane systemname;	//	will be used to display shits names
 	string systemnamestring = "Current System : " + csystem + " in the " + csector;
 
-	int length = systemnamestring.size();
-	float offset = (float(length)*0.005);
+//	int length = systemnamestring.size();
+//	float offset = (float(length)*0.005);
 	systemname.col = GFXColor(1, 1, .7, 1);
-	systemname.SetPos( (((screenskipby4[0]+screenskipby4[1])/2)-offset) , screenskipby4[3]);
+	systemname.SetPos(screenskipby4[0] , screenskipby4[3]); // Looks ugly when name is too long and goes off the edge.
+//	systemname.SetPos( (((screenskipby4[0]+screenskipby4[1])/2)-offset) , screenskipby4[3]);
 	systemname.SetText(systemnamestring);
 //	systemname.SetCharSize(1, 1);
 	systemname.Draw();
