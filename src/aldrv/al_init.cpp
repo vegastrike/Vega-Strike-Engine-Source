@@ -14,7 +14,6 @@ static void fixup_function_pointers(void) {
   alutLoadMP3p = (mp3Loader *) alGetProcAddress((ALubyte *)"alutLoadMP3_LOKI");
   if(alutLoadMP3p == NULL) {
     fprintf(stderr, "Could not GetProc %s\n","alutLoadMP3_LOKI");
-    exit(-4);
   }
 
 
