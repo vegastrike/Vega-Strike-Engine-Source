@@ -20,7 +20,7 @@
 #ifdef max
 #undef max
 #endif
-
+#include "gldrv/winsys.h"
 static inline float max(float x, float y) {
 
   if(x>y) return x;
@@ -1005,7 +1005,7 @@ void Mesh::LoadXML(const char *filename, float scale, int faction, Flightgroup *
   FILE* inFile = fopen (filename, "r");
   if(!inFile) {
     fprintf (stderr,"Cannot Open Mesh File %s\n",filename);
-    exit(0);
+    winsys_exit(0);
     return;
   }
 
