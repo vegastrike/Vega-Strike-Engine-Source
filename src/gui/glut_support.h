@@ -52,9 +52,11 @@ unsigned char *readImage (FILE *fp, int & bpp, int &color_type, unsigned int &wi
 
 void ShowColor(float x, float y, float wid, float hei, float red, float green, float blue, float alpha);
 void ShowImage(float x, float y, float wid, float hei, struct GUITexture image, int tile_h, int tile_w);
-void ShowText(float x, float y, float wid, int size, char *string, int no_end);
+void ShowText(float x, float y, float wid, int size, const char *string, int no_end);
 float WidthOfChar(char chr);
-
+void SetSoftwareMousePosition (int x, int y);
+void StartGUIFrame();
+void EndGUIFrame();
 extern int HAS_ALPHA;
 
 #endif    // GLUT_SUPPORT_H

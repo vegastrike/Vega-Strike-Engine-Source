@@ -16,7 +16,9 @@
  ***************************************************************************/
 
 #include "glut_support.h"
-
+#include "gfx/sprite.h"
+#include "vs_globals.h"
+#include "gfx/aux_texture.h"
 float colors[] = {1, 1, 1, 1};
 
 GUITexture ReadTex(char *texfile) {
@@ -226,7 +228,7 @@ void ShowImage(float x, float y, float wid, float hei, GUITexture image, int til
 	glDisable(GL_TEXTURE_2D);
 }
 
-void ShowText(float x, float y, float wid, int size, char *string, int no_end) {
+void ShowText(float x, float y, float wid, int size, const char *str, int no_end) {
         int cur;
         float font_size = size;
 	float width = 0;
@@ -244,15 +246,15 @@ void ShowText(float x, float y, float wid, int size, char *string, int no_end) {
 	end /= 2500;
 	if (no_end == 1) { end = 0; }
 
-        for (cur = 0; string[cur] != '\0'; cur++) {
-		cur_width = glutStrokeWidth(GLUT_STROKE_ROMAN, string[cur]);
+        for (cur = 0; str[cur] != '\0'; cur++) {
+		cur_width = glutStrokeWidth(GLUT_STROKE_ROMAN, str[cur]);
 		cur_width /= 2500;
 		width += cur_width;
-		if (width+end > wid && string[cur+1] != '\0' && no_end == 0) {
+		if (width+end > wid && str[cur+1] != '\0' && no_end == 0) {
 			for (int i = 1; i <= 3; i++) { glutStrokeCharacter(GLUT_STROKE_ROMAN, '.'); }
 			break;
 		}
-		glutStrokeCharacter(GLUT_STROKE_ROMAN, string[cur]);
+		glutStrokeCharacter(GLUT_STROKE_ROMAN, str[cur]);
         }
 	glLoadIdentity();
 	glDisable(GL_LINE_SMOOTH);
@@ -262,4 +264,49 @@ float WidthOfChar(char chr) {
 	float width = glutStrokeWidth(GLUT_STROKE_ROMAN, chr);
 	width /= 2500;
 	return width;
+}
+
+
+
+static int mmx=0;
+static int mmy=0;
+void SetSoftwareMousePosition (int x, int y) {
+  mmx = x;
+  mmy = y;
+}
+/** Starts a Frame of OpenGL with proper parameters and mouse
+ */
+void StartGUIFrame(void) {
+  //  glutSetCursor(GLUT_CURSOR_INHERIT);
+  GFXViewPort (0,0,g_game.x_resolution,g_game.y_resolution);
+  GFXHudMode (true);
+  GFXColor4f (1,1,1,1);
+
+  GFXDisable (DEPTHTEST);
+  GFXDisable (DEPTHWRITE);
+  GFXDisable (LIGHTING);
+  GFXDisable (CULLFACE);
+  GFXClear (GFXTRUE);
+  GFXBlendMode (SRCALPHA,INVSRCALPHA);
+  GFXDisable (TEXTURE1);
+  GFXEnable (TEXTURE0);
+}
+static void DrawMouse(int mousex, int mousey) {
+  static Sprite MouseSprite ("mouse.spr",BILINEAR);
+  GFXColor4f (1,1,1,1);
+  GFXBlendMode (ONE,ONE);
+  float sizex,sizey;
+  MouseSprite.GetSize(sizex,sizey);
+  MouseSprite.SetPosition(-1+.5*sizex+float(mousex)/(.5*g_game.x_resolution),1+.5*sizey-float(mousey)/(.5*g_game.y_resolution));
+  MouseSprite.Draw();
+}
+
+void EndGUIFrame(void) {
+  static Texture dummy ("white.bmp");
+  dummy.MakeActive();
+  DrawMouse(mmx,mmy);
+  GFXEndScene();
+  GFXHudMode(false);
+  GFXEnable (CULLFACE);
+
 }

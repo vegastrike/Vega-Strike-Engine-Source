@@ -34,6 +34,7 @@ libcmd_a_SOURCES =				\
 	unit_customize.cpp		\
 	unit_damage.cpp			\
 	unit_dock.cpp			\
+	unit_interface.cpp		\
 	unit_xml.cpp  			\
 	unit_click.cpp			\
 	unit_physics.cpp				\

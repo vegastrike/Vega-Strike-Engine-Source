@@ -760,13 +760,6 @@ inline Unit * UnitContainer::GetUnit() {
   return unit;
 }
 
-void RefreshGUI(void);
-void StartFrame(void);
-void EndFrame(void);
-void ProcessMouseClick(int button, int state, int x, int y);
-void ProcessMouseActive(int x, int y);
-void ProcessMousePassive(int x, int y);
-void ProcessMouse(int type, int x, int y, int button, int state);
 
 #endif
 
