@@ -140,8 +140,8 @@ void JoyStick::GetMouse (float &x, float &y, float &z, int &buttons) {
       savex =g_game.x_resolution/2;
       savey =g_game.x_resolution/2;
     }
-    joy_axis[0]=x=(float(mousex-savex))/(g_game.x_resolution/mouse_sensitivity);
-    joy_axis[1]=y = (float(mousey-savey))/(g_game.y_resolution/mouse_sensitivity);
+    joy_axis[0]=x=(float(mousex-savex))/(g_game.x_resolution/(100*mouse_sensitivity));
+    joy_axis[1]=y = (float(mousey-savey))/(g_game.y_resolution/(100*mouse_sensitivity));
     savex=mousex;
     savey=mousey;
   }else {
