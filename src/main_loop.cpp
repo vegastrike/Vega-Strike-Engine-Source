@@ -432,6 +432,7 @@ Animation * s;
 
 void createObjects() {
 
+  cerr.form("Unit size: %d\nMesh size: %d\n", sizeof(Unit), sizeof(Mesh));
   //SetPriorityClass(GetCurrentProcess(), REALTIME_PRIORITY_CLASS);
   //SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_IDLE);
 

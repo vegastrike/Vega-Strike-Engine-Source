@@ -31,7 +31,7 @@ static float *mview = NULL;
 
 Sprite::Sprite(char *file, bool trackzoom):Mesh(), track_zoom(trackzoom)
 {
-  local_transformation.position = Vector(0,0,1.00001);
+  local_transformation.position = Vector(0,0,1.0001);
 
   xcenter = 0;
   ycenter = 0;
@@ -73,23 +73,22 @@ Sprite::~Sprite()
 
 
 void Sprite::UpdateHudMatrix() {
-  //FIXME
-  Matrix tmatrix;
-  Vector camp,camq,camr;
-  _GFX->AccessCamera()->GetPQR(camp,camq,camr);
-  
-	//GFXIdentity(MODEL);
-	//Identity (tmatrix);
-	//	Translate (tmatrix,_GFX->AccessCamera()->GetPosition());
-	//	GFXLoadMatrix(MODEL,tmatrix);
-  //VectorAndPositionToMatrix (tmatrix,-camp,camq,camr,_GFX->AccessCamera()->GetPosition()+1.23*camr);//FIXME!!! WHY 1.25 
-  VectorAndPositionToMatrix (tmatrix,camp,camq,camr,_GFX->AccessCamera()->GetPosition());
-  Transformation t = identity_transformation;
+  assert(0);
 }
 
 void Sprite::Draw(const Transformation &dtrans, const Matrix m)
 {
-  GFXLoadMatrix(MODEL, m);
+  Matrix tmatrix;
+
+  Vector camp,camq,camr;
+  _GFX->AccessCamera()->GetPQR(camp,camq,camr);
+  VectorAndPositionToMatrix (tmatrix,camp,camq,camr,
+			     _GFX->AccessCamera()->GetPosition() +
+			     camp * local_transformation.position.i +
+			     camq * local_transformation.position.j +
+			     camr * local_transformation.position.k);
+  GFXLoadMatrix(MODEL, tmatrix);
+  
 	if(surface!=NULL)
 	{
 
@@ -97,15 +96,13 @@ void Sprite::Draw(const Transformation &dtrans, const Matrix m)
 		GFXDisable(DEPTHWRITE);
 		GFXDisable(DEPTHTEST);
 		GFXPushBlendMode();
+		GFXColor4f (1,1,1,1);
+		//GFXBlendMode(SRCALPHA, INVSRCALPHA);
 		GFXBlendMode(ONE, ONE);
-		UpdateHudMatrix();
-		//GFXColor4f (1,0,0,1);
 		GFXEnable(TEXTURE0);
 		GFXDisable(TEXTURE1);
 		surface->MakeActive();
 
-		GFXPushBlendMode();
-		GFXBlendMode(ONE, ONE);
 
 		//GFXVertex(Vector(0.00F, 0.00F, 1.00F), Vector(0.00F, 0.00F, 0.00F), 0.00F, 0.00F),
 		//GFXVertex(Vector(xsize, 0.00F, 1.00F), Vector(0.00F, 0.00F, 0.00F), 1.00F, 0.00F),
@@ -125,12 +122,10 @@ void Sprite::Draw(const Transformation &dtrans, const Matrix m)
 		GFXVertex3f(left, bottom, 0.00f);
 
 		GFXEnd();
-		GFXPopBlendMode();
 		GFXEnable(LIGHTING);
 		GFXEnable(DEPTHWRITE);
 		GFXEnable(DEPTHTEST);
 
-		GFXPopBlendMode();
 	}
 }
 

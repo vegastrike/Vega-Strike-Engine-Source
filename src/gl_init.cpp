@@ -200,15 +200,16 @@ BOOL GFXInit (int argc, char ** argv){
       glEnable(GL_TEXTURE_2D);
       glTexGenf(GL_S,GL_TEXTURE_GEN_MODE,GL_SPHERE_MAP);
       glTexGenf(GL_T,GL_TEXTURE_GEN_MODE,GL_SPHERE_MAP);
-      glEnable(GL_TEXTURE_GEN_S);
-      glEnable(GL_TEXTURE_GEN_T);
+      //glEnable(GL_TEXTURE_GEN_S);
+      //glEnable(GL_TEXTURE_GEN_T);
 #endif
     }
     glClearDepth(1);
     glEnable (GL_BLEND);
     glDisable (GL_ALPHA_TEST);
     //glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    GFXBlendMode (SRCALPHA, INVSRCALPHA);
+    //GFXBlendMode (SRCALPHA, INVSRCALPHA);
+    GFXBlendMode (ONE, ZERO);
     
     glColor3f(0,0,0);
     glMatrixMode (GL_MODELVIEW);

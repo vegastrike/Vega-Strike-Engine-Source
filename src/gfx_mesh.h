@@ -172,8 +172,10 @@ protected:
 	// Support for reorganized rendering
 	bool will_be_drawn;
 	struct DrawContext {
-	  Transformation transformation;
-	  DrawContext(const Transformation &trans) : transformation(trans) { }
+	  //Transformation transformation;
+	  //DrawContext(const Transformation &trans) : transformation(trans) { }
+	  Matrix mat;
+	  DrawContext(Matrix m) { memcpy(mat, m, sizeof(Matrix)); }
 	};
 	vector<DrawContext> *draw_queue;
 	int draw_sequence;

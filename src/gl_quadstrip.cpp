@@ -26,7 +26,7 @@
 extern BOOL bTex0;
 extern BOOL bTex1;
 
-#define USE_DISPLAY_LISTS
+//#define USE_DISPLAY_LISTS
 GFXQuadstrip::GFXQuadstrip(int numVertices,GFXVertex *vertices): numVertices(numVertices), display_list(0)
 {
   // error check # of vertices

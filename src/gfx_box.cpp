@@ -87,9 +87,7 @@ void Box::ProcessDrawQueue() {
   while(draw_queue->size()) {
     DrawContext c = draw_queue->back();
     draw_queue->pop_back();
-    Matrix m;
-    c.transformation.to_matrix(m);
-    GFXLoadMatrix(MODEL, m);
+    GFXLoadMatrix(MODEL, c.mat);
 
 
   GFXBegin(QUADS);

@@ -728,9 +728,9 @@ void Mesh::Draw(const Transformation &trans, const Matrix m)
   //Matrix cumulative_transformation_matrix;
   cumulative_transformation = local_transformation;
   cumulative_transformation.Compose(trans, m);
-  //cumulative_transformation.to_matrix(cumulative_transformation_matrix);
+  cumulative_transformation.to_matrix(cumulative_transformation_matrix);
 
-  DrawContext c(cumulative_transformation);
+  DrawContext c(cumulative_transformation_matrix);
   orig->draw_queue->push_back(c);
   if(!orig->will_be_drawn) {
     orig->will_be_drawn = true;
@@ -767,10 +767,7 @@ void Mesh::ProcessDrawQueue() {
     DrawContext c = draw_queue->back();
     draw_queue->pop_back();
 
-    Matrix m;
-    c.transformation.to_matrix(m);
-    
-    GFXLoadMatrix(MODEL, m);
+    GFXLoadMatrix(MODEL, c.mat);
     vlist->Draw();
     if(quadstrips!=NULL) {
       for(int a=0; a<numQuadstrips; a++)

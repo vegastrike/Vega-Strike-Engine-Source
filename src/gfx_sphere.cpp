@@ -154,10 +154,7 @@ void SphereMesh::ProcessDrawQueue() {
     DrawContext c = draw_queue->back();
     draw_queue->pop_back();
 
-    Matrix m;
-    c.transformation.to_matrix(m);
-
-    GFXLoadMatrix(MODEL, m);
+    GFXLoadMatrix(MODEL, c.mat);
 	vlist->Draw();
 	if(quadstrips!=NULL) {
 	  for(int a=0; a<numQuadstrips; a++)
