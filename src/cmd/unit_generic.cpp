@@ -3465,14 +3465,14 @@ void Unit::ProcessDeleteQueue() {
   }
 }
 bool DestroySystem (float hull, float maxhull, float numhits) {
-	static float damage_chance=XMLSupport::parse_float(vs_config->getVariable ("physics","damage_chance",".001"));
+	static float damage_chance=XMLSupport::parse_float(vs_config->getVariable ("physics","damage_chance",".005"));
 	float chance = 1-(damage_chance*(maxhull-hull)/maxhull);
 	if (numhits>1)
 		chance=pow (chance,numhits);
 	return (rand01()>chance);
 }
 bool DestroyPlayerSystem (float hull, float maxhull, float numhits) {
-	static float damage_chance=XMLSupport::parse_float(vs_config->getVariable ("physics","damage_player_chance",".1"));
+	static float damage_chance=XMLSupport::parse_float(vs_config->getVariable ("physics","damage_player_chance",".5"));
 	float chance = 1-(damage_chance*(maxhull-hull)/maxhull);
 	if (numhits>1)
 		chance=pow (chance,numhits);
