@@ -1,4 +1,4 @@
-#define HAVE_BOOST
+//#define HAVE_BOOST
 #ifdef HAVE_BOOST
 #include <stdio.h>
 #include <Python.h>
