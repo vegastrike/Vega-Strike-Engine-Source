@@ -80,6 +80,10 @@ void FactionUtil::AdjustIntRelation(const int Myfaction, const int TheirFaction,
               if (factions[Myfaction]->faction[TheirFaction].relationship>1&&capped) {
                 factions[Myfaction]->faction[TheirFaction].relationship=1;
               }
+              static float min_relationship = XMLSupport::parse_float(vs_config->getVariable("AI","min_relationship","-20"));
+              if (factions[Myfaction]->faction[TheirFaction].relationship<min_relationship) {
+                factions[Myfaction]->faction[TheirFaction].relationship=min_relationship;
+              }
               if (!allow_nonplayer_adjustments) {
                 factions[TheirFaction]->faction[Myfaction].relationship=factions[Myfaction]->faction[TheirFaction].relationship;//reflect if player
               }
