@@ -1958,6 +1958,9 @@ void Unit::AddVelocity(float difficulty) {
 		   minmultiplier=warpMultiplierMax; //SOFT LIMIT
 	   }
 	   minmultiplier*=rampmult;
+	   if (minmultiplier < 1){
+		   minmultiplier=1;
+	   }
 	   v*=minmultiplier;
 	   float vmag=sqrt(v.i*v.i+v.j*v.j+v.k*v.k);
 	   if(vmag>warpMaxEfVel){
