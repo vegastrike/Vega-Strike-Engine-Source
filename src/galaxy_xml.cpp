@@ -141,6 +141,8 @@ const EnumMap attribute_map(attribute_names, 3);
 			break;
 		case SECTOR:
 		case SYSTEM:
+                case PLANETS:
+                case PLANET:
 			xml->stak.pop_back();
 			break;
 		default:break;
@@ -453,9 +455,44 @@ SGalaxy*Galaxy::getInitialPlanetTypes() {
   }
   return NULL;
 }
+void Galaxy::setupPlanetTypeMaps() {
+  if (planet_types) {
+    std::map<std::string,SGalaxy>::iterator i=planet_types->getHeirarchy().begin();
+    for(;i!=planet_types->getHeirarchy().end();++i) {
+      string name = (*i).first;
+      string val = (*i).second["texture"];
+      
+      if (texture2name.find(val)!=texture2name.end()) {
+        printf ("name conflict %s has texture %s and %s has texture %s\n",
+                name.c_str(),
+                val.c_str(),
+                texture2name[val].c_str(),
+                val.c_str());
+      }else {
+        texture2name[val]=name;
+      }
+      val = (*i).second["initial"];
+      if (initial2name.find(val)!=initial2name.end()) {
+        printf ("name conflict %s has initial %s and %s has initial %s\n",
+                name.c_str(),
+                val.c_str(),
+                initial2name[val].c_str(),
+                val.c_str());
+      }else {
+        initial2name[val]=name;
+      }
+
+    }
+  }
+  if (initial2name.empty()||texture2name.empty()) {
+    fprintf (stderr,"Warning, galaxy contains no overarching planet info\n");
+  }
+}
 Galaxy::Galaxy (const SGalaxy & g):SGalaxy(g) {
   planet_types=getInitialPlanetTypes();
+  setupPlanetTypeMaps();
 }
 Galaxy::Galaxy(const char * configfile):SGalaxy(configfile) {
   planet_types=getInitialPlanetTypes();
+  setupPlanetTypeMaps();
 }

@@ -51,9 +51,15 @@ protected:
 };
 class Galaxy: public SGalaxy {
   SGalaxy * getInitialPlanetTypes();
-  SGalaxy *planet_types; // will be null unless top level
+  SGalaxy *planet_types; 
   SGalaxy & operator = (const SGalaxy & a);
+  std::map<StringWrapper,StringWrapper> initial2name;
+  std::map<StringWrapper,StringWrapper> texture2name;  
+  void setupPlanetTypeMaps();
  public:
+  
+  string getNameFromInitial(std::string abbrev) {return initial2name[abbrev];}
+  string getNameFromTexture(std::string tex) {return texture2name[tex];}
   string getPlanetVariable(string name,string defaultvalue);
   string getPlanetVariable(string planet,string name,string defaultvalue);
   void writeGalaxy(VSFileSystem::VSFile &f);
