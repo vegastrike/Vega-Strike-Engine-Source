@@ -405,6 +405,30 @@ void SetupSpecMapSecondPass(Texture * decal,unsigned int mat,BLENDFUNC blendsrc,
       GFXEnable(TEXTURE1);
     }
 }
+void SetupGlowMapThirdPass(Texture * decal,unsigned int mat,BLENDFUNC blendsrc, const GFXColor &cloakFX) {
+    GFXSelectMaterialHighlights(mat,
+                                GFXColor(0,0,0,0),
+                                GFXColor(0,0,0,0),
+								GFXColor(0,0,0,0),
+                                cloakFX);
+    GFXBlendMode (blendsrc,ONE);
+    decal->MakeActive();
+    float a,b;
+    GFXGetPolygonOffset(&a,&b);
+    GFXPolygonOffset (a, b-2);
+    GFXDisable(DEPTHWRITE);
+	GFXDisable(TEXTURE1);
+}
+void RestoreGlowMapState(bool write_to_depthmap) { 
+  float a,b;
+    GFXGetPolygonOffset(&a,&b);
+    GFXPolygonOffset (a, b+2);
+	if (write_to_depthmap) {
+		GFXEnable(DEPTHWRITE);
+	}
+	GFXEnable(TEXTURE1);
+}
+
 void RestoreSpecMapState(bool envMap, bool write_to_depthmap) { 
   float a,b;
     GFXGetPolygonOffset(&a,&b);
@@ -481,15 +505,28 @@ void Mesh::ProcessDrawQueue(int whichdrawqueue) {
       specialfxlight.push_back(ligh);
     }
     SetupFogState(c.cloaked);
-    bool SpecMap = SetupSpecMapFirstPass (Decal,myMatNum,getEnvMap());
+    const bool SpecMap = SetupSpecMapFirstPass (Decal,myMatNum,getEnvMap());
+	bool GlowMap = Decal.size()>2;
+	if (GlowMap)
+		GlowMap = Decal[2]!=NULL;
     vlist->Draw();
+	if (SpecMap||GlowMap) {
+		GFXPushBlendMode();
+	}
     if (SpecMap) {
-      GFXPushBlendMode();
         SetupSpecMapSecondPass(Decal[1],myMatNum,blendSrc,getEnvMap(), c.CloakFX);
 	        vlist->Draw();
         RestoreSpecMapState(getEnvMap(),write_to_depthmap);
-	GFXPopBlendMode();
+
     }
+	if (GlowMap) {
+		SetupGlowMapThirdPass (Decal[2],myMatNum,ONE,c.CloakFX);
+			vlist->Draw();
+		RestoreGlowMapState(write_to_depthmap);
+	}
+	if (SpecMap||GlowMap) {
+		GFXPopBlendMode();
+	}
     for ( i=0;i<specialfxlight.size();i++) {
       GFXDeleteLight (specialfxlight[i]);
     }
