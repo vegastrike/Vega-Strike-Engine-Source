@@ -335,26 +335,6 @@ if test "x$have_gl_h" = "xno" ; then
     AC_MSG_ERROR([Cannot find GL/gl.h])
 fi
 
-if test "x$is_win32" = "xno" ; then 
-
-    dnl Check for glx.h
-    AC_CHECK_HEADERS([GL/glx.h], have_glx_h=yes, have_glx_h=no )
-
-    if test "x$have_glx_h" = "xno" ; then
-	AC_MSG_ERROR([Cannot find GL/glx.h])
-    fi
-
-    dnl Check that glXGetProcAddressARB is defined in glx.h
-    AC_MSG_CHECKING([whether glx.h defines glXGetProcAddressARB]);
-    AC_TRY_COMPILE( [#include <GL/glx.h>], [ char *foo = (char*) glXGetProcAddressARB; ],
-                    glx_h_up_to_date=yes, glx_h_up_to_date=no )
-    AC_MSG_RESULT([$glx_h_up_to_date])
-
-    if test "x$glx_h_up_to_date" = "xno" ; then
-        AC_MSG_ERROR([Your copy of glx.h is out of date.  You can get a more recent copy from the latest Mesa distribution (http://mesa3d.sourceforge.net).])
-    fi
-fi
-
 dnl Check for glext.h 
 AC_CHECK_HEADERS( "GL/glext.h", have_glext_h=yes, have_glext_h=no )
 
