@@ -3166,16 +3166,22 @@ bool Unit::UpAndDownGrade (const Unit * up, const Unit * templ, int mountoffset,
       if (touchme) {cloaking=up->cloaking;cloakmin=up->cloakmin;image->cloakrate=up->image->cloakrate; image->cloakglass=up->image->cloakglass;image->cloakenergy=up->image->cloakenergy;}
       numave++;
 
+    }else if (cloaking!=-1&& up->cloaking!=-1) {
+      cancompletefully=false;
     }
     
     if (afterburnenergy>up->afterburnenergy&&up->afterburnenergy>0) {
       numave++;
       if (touchme) afterburnenergy=up->afterburnenergy;
+    }else if (afterburnenergy<=up->afterburnenergy&&afterburnenergy>0&&up->afterburnenergy>0&&up->afterburnenergy<65535) {
+      cancompletefully=false;
     }
     
     if (jump.drive==-2&&up->jump.drive>=-1) {
       if (touchme) {jump.drive = up->jump.drive;jump.energy=up->jump.energy;jump.delay=up->jump.delay; jump.damage=0;}
       numave++;
+    }else if (jump.drive>=-1&&up->jump.drive>=-1) {
+      cancompletefully=false;
     }
   }
   if (numave)
