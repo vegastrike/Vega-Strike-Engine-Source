@@ -35,6 +35,7 @@ namespace XMLSupport {
     AttributeList(const XML_Char **atts);
   };
   double parse_float(const string &str);
+  string replace_space(const string &str);
   int parse_int(const string &str);
   bool parse_bool (const string &str);
 

@@ -16,6 +16,12 @@ void Unit::Repair() {
 	int whichmount = rand()%nummounts;
 	mounts[whichmount].size |=(1>>(rand()%(8*sizeof(short))));
       }
+      if (rand01()<workunit) {
+	int whichmount= rand()%nummounts;
+	if (mounts[whichmount].ammo>0) {
+	  mounts[whichmount].volume++;
+	}
+      }
     }
     if (computer.max_speed<60) 
       computer.max_speed+=workunit;

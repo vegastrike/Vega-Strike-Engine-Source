@@ -401,7 +401,7 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(attribute_map.lookup((*iter).name)) {
       case XFILE:
-	xml->cargo_category = (*iter).value;
+	xml->cargo_category = XMLSupport::replace_space((*iter).value);
 	break;
       }
     }
@@ -426,7 +426,7 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
 	carg.price=parse_float ((*iter).value);
 	break;
       case XFILE:
-	carg.content = ((*iter).value);
+	carg.content = XMLSupport::replace_space((*iter).value);
 	break;
       }
     }

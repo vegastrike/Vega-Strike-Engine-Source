@@ -481,9 +481,19 @@ float Unit::DealDamageToHull (const Vector & pnt, float damage ) {
 
   }
   if (hull <0) {
-    static float autoejectpercent = XMLSupport::parse_float(vs_config->getVariable ("physics","autoeject_percent",".5"));
-    if (!SubUnit&&rand()<(RAND_MAX*autoejectpercent)) {
-      EjectCargo ((unsigned int)-1);
+      static float hulldamtoeject = XMLSupport::parse_float(vs_config->getVariable ("physics","hull_damage_to_eject","100"));
+    if (!SubUnit&&hull>-hulldamtoeject) {
+      static float autoejectpercent = XMLSupport::parse_float(vs_config->getVariable ("physics","autoeject_percent",".5"));
+
+      static float cargoejectpercent = XMLSupport::parse_float(vs_config->getVariable ("physics","eject_cargo_percent",".25"));
+      if (rand()<(RAND_MAX*autoejectpercent)) {
+	EjectCargo ((unsigned int)-1);
+      }
+      for (unsigned int i=0;i<numCargo();i++) {
+	if (rand()<(RAND_MAX*cargoejectpercent)) {
+	  EjectCargo(i);
+	}
+      }
     }
     Destroy();
     SetAI (new Order());
