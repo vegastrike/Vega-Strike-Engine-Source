@@ -71,6 +71,7 @@ void ProcessJoystick () {
     joystick[i]->GetJoyStick (x,y,z,buttons);
     for (int j=0;j<NUMJBUTTONS;j++) {
       if (buttons&(1<<j)) {
+	fprintf (stderr,"Button success %d",j);
 	if (JoystickState[i][j]==UP) {
 	  (*JoystickBindings [i][j])(PRESS,x,y,buttons);		  
 	  JoystickState[i][j]=DOWN;
