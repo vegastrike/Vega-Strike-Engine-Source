@@ -36,7 +36,7 @@ class Logo{
 	GFXVertexList *vlist;
 	Texture* Decal;
 
-	static Hashtable<string, Logo> decalHash;
+	static Hashtable<int, Logo> decalHash;
 	Logo() { }
  protected:
 	friend class Mesh;

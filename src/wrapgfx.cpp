@@ -62,7 +62,7 @@ WrapGFX::WrapGFX(int argc, char** argv)
 	
 
 	GFXInit(argc,argv);
-	//if(TRUE)
+
 	ForceLogo = new Texture ("TechPriRGB.bmp","TechPriA.bmp");
 	SquadLogo = new Texture ("TechSecRGB.bmp","TechSecA.bmp");
 #ifdef NV_CUBE_MAP

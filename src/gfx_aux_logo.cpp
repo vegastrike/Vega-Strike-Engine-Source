@@ -26,7 +26,7 @@
 #include "gfxlib.h"
 
 list<Logo*> undrawn_logos;
-Hashtable<string, Logo> Logo::decalHash;
+Hashtable<int, Logo> Logo::decalHash;
 
 Logo::Logo(int numberlogos,  Vector* center,Vector* normal, float* size, float* rotation, float offset,Texture* Dec, Vector * Ref)
 {
@@ -93,14 +93,14 @@ void Logo::SetDecal(Texture *decal)
   Decal = decal;
   //Check which draw_queue to use:
   Logo *l;
-  if((l=decalHash.Get(string(decal->filename)))!=NULL) {
+  if((l=decalHash.Get(decal->name))!=NULL) {
     draw_queue = l->draw_queue;
     owner_of_draw_queue = l;
     l->refcount++;
   } else {
     l = (Logo*)malloc (sizeof (Logo));
     memcpy (l,this,sizeof(Logo));
-    decalHash.Put(string(decal->filename), l);
+    decalHash.Put(decal->name, l);
     draw_queue = l->draw_queue = new vector<DrawContext>();
     owner_of_draw_queue = l->owner_of_draw_queue = l;
     l->refcount = 1;
@@ -168,7 +168,7 @@ Logo::~Logo ()
 	}
 	if(owner_of_draw_queue == this) {
 	  assert(refcount == 0);
-	  decalHash.Delete(string(Decal->filename));
+	  decalHash.Delete(Decal->name);
 	  delete draw_queue;
 	}
 }

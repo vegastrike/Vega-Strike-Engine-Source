@@ -703,6 +703,8 @@ void Mesh::ProcessDrawQueue() {
     vlist->Draw();
     if(0!=forcelogos) {
       forcelogos->Draw(c.mat);
+    }
+    if (0!=squadlogos){
       squadlogos->Draw(c.mat);
     }
   }

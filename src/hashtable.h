@@ -39,7 +39,9 @@ template<class KEY, class VALUE> class Hashtable {
 		HashElement(KEY k, VALUE *v) {key = k; value = v;}
 	};
 	list<HashElement> table[hashsize];
-
+  static int hash(const int key) {
+    return key%hashsize;
+  }
 	static int hash(const string &key) {
 		int k = 0;
 		char *start = (char*)key.c_str();

@@ -1089,7 +1089,9 @@ void Mesh::CreateLogos(float x_center, float y_center, float z_center) {
   unsigned int nfl=numforcelogo;
   Logo ** tmplogo;
   Texture * Dec;
-  for (index=0,nfl=numforcelogo,tmplogo=&forcelogos,Dec=_GFX->getForceLogo();index<2;index++,nfl+=numsquadlogo,tmplogo=&squadlogos,Dec=_GFX->getSquadLogo()) {
+  for (index=0,nfl=numforcelogo,tmplogo=&forcelogos,Dec=_GFX->getForceLogo();index<2;index++,nfl=numsquadlogo,tmplogo=&squadlogos,Dec=_GFX->getSquadLogo()) {
+    if (nfl==0)
+      continue;
     Vector *PolyNormal = new Vector [nfl];
     Vector *center = new Vector [nfl];
     float *sizes = new float [nfl];
