@@ -1,5 +1,14 @@
 2002-02-12 Alexander Rawass <alexannika@users.sourceforge.net>
 
+	* first tutorial mission
+	* gave the hornet cockpit a message display
+	* moved the defines for HOMESUBDIR,CONFIGFILE and DELIM
+	  from vs_path.cpp to vs_path.h
+	* changed saving of variables to ~/.vegastrike/default-player.variables
+
+	
+2002-02-12 Alexander Rawass <alexannika@users.sourceforge.net>
+
 	* updated the homepage/doc directory:
 	  - changed the menu from java to simple text-links
 	  - added Sabarok to the credits page (and removed James T. Richardson)

@@ -3,6 +3,12 @@
 
 #include <string>
 #include <vector>
+
+#define CONFIGFILE "vegastrike.config"
+#define HOMESUBDIR ".vegastrike"
+#define DELIM '/'
+#define DELIMSTR "/"
+
 extern std::vector <std::string> curdir;//current dir starting from datadir
 extern std::vector <std::string> savedpwd;
 extern std::string sharedtextures;

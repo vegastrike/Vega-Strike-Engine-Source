@@ -277,6 +277,7 @@ void VDU::DrawMessages(Unit *target){
 
   char st[256];
   //  sprintf (st,"\n%s",target->name.c_str());
+    double nowtime=mission->getGametime();
   if(target){
     string ainame;
     if(target->getFlightgroup()){
@@ -285,7 +286,10 @@ void VDU::DrawMessages(Unit *target){
     else{
       ainame="unknown";
     }
-    sprintf (st,"%s:%s:%s",target->getFgID().c_str(),target->name.c_str(),ainame.c_str());
+
+    int nowtime_mins=(int)(nowtime/60.0);
+    int nowtime_secs=(int)(nowtime - nowtime_mins*60);
+    sprintf (st,"%s:%s:%s:%2d.%02d",target->getFgID().c_str(),target->name.c_str(),ainame.c_str(),nowtime_mins,nowtime_secs);
   }
   else{
     sprintf(st,"no target");
@@ -304,7 +308,6 @@ void VDU::DrawMessages(Unit *target){
     if(lastmsg!=NULL){
       char timebuf[100];
       double sendtime=lastmsg->time;
-      double nowtime=mission->getGametime();
       if(sendtime<=nowtime){
 	int sendtime_mins=(int)(sendtime/60.0);
 	int sendtime_secs=(int)(sendtime - sendtime_mins*60);

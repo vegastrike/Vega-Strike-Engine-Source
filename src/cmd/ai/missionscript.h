@@ -57,7 +57,7 @@ class AIFlyToWaypoint : public AImissionScript {
 
 class AIPatrol : public AImissionScript {
  public:
-  AIPatrol(int mode,Vector area,float range,Unit *around_unit);
+  AIPatrol(int mode,Vector area,float range,Unit *around_unit,float patrol_speed);
 };
 
 class AISuperiority : public AImissionScript {

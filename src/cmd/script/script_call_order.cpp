@@ -369,14 +369,15 @@ varInst *Mission::call_order(missionNode *node,int mode){
     varInst *unit_vi=checkObjectExpr(unit_node,mode);
     Unit *around_unit=getUnitObject(unit_node,mode,unit_vi);
 
+    float patrol_speed=getFloatArg(node,mode,4);
 
     Order *my_order=NULL;
 
     if(mode==SCRIPT_RUN){
       Vector des3=call_olist_tovector(des_node,mode,des_vi);
-      //      printf("mode=%d,range=%f\n",patrol_mode,range);
+            printf("mode=%d,range=%f speed=%f\n",patrol_mode,range,patrol_speed);
 
-      my_order=new AIPatrol(patrol_mode,des3,range,around_unit);
+      my_order=new AIPatrol(patrol_mode,des3,range,around_unit,patrol_speed);
     }
 
     viret=newVarInst(VI_TEMP);

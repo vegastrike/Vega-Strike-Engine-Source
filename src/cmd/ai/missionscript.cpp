@@ -113,7 +113,7 @@ AIFlyToWaypoint::AIFlyToWaypoint(Vector wp,float velo,bool afburn,float rng) : A
   vi_vel->float_val=vel;
 
   varInst *vi_aburn=mission->lookupClassVariable(modulename,"afterburner",classid);
-  vi_vel->bool_val=aburn;
+  vi_aburn->bool_val=aburn;
 
 
 }
@@ -124,13 +124,16 @@ AISuperiority::AISuperiority() : AImissionScript("ai_superiority") {
 
 }
 
-AIPatrol::AIPatrol(int mode,Vector area,float range,Unit *around_unit) : AImissionScript("ai_patrol") {
+AIPatrol::AIPatrol(int mode,Vector area,float range,Unit *around_unit,float patrol_speed) : AImissionScript("ai_patrol") {
 
   varInst *vi_wp=mission->lookupClassVariable(modulename,"area",classid);
   mission->call_vector_into_olist(vi_wp,area);
 
   varInst *vi_range=mission->lookupClassVariable(modulename,"range",classid);
   vi_range->float_val=range;
+
+  varInst *vi_speed=mission->lookupClassVariable(modulename,"patrol_speed",classid);
+  vi_speed->float_val=patrol_speed;
 
   varInst *vi_mode=mission->lookupClassVariable(modulename,"patrol_mode",classid);
   vi_mode->int_val=mode;

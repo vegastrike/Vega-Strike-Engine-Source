@@ -14,9 +14,6 @@
 
 float simulation_atom_var=(float)(1.0/10.0);
 
-#define CONFIGFILE "vegastrike.config"
-#define HOMESUBDIR ".vegastrike"
-#define DELIM '/'
 std::vector <std::string> savedpwd;
 std::string sharedtextures;
 std::string sharedunits;

@@ -32,6 +32,7 @@
 #ifndef WIN32
 // this file isn't available on my system (all win32 machines?) i dun even know what it has or if we need it as I can compile without it
 #include <unistd.h>
+#include <pwd.h>
 #endif
 
 #include <expat.h>
@@ -41,6 +42,7 @@
 #include "xml_support.h"
 
 #include "vegastrike.h"
+#include "vs_path.h"
 #include "lin_time.h"
 
 #include "mission.h"
@@ -241,7 +243,13 @@ void Mission::DirectorEnd(){
 #ifdef WIN32
   var_out.open("c:\\tmp\\default-player.variables");
 #else
-  var_out.open("/tmp/default-player.variables");
+  struct passwd *pwent;
+  pwent=getpwuid(getuid());
+  printf("home save dir: %s\n",pwent->pw_dir);
+
+  string var_file=string(pwent->pw_dir)+string(DELIMSTR)+string(HOMESUBDIR)+string(DELIMSTR)+string("default-player.variables");
+  //var_out.open("/tmp/default-player.variables");
+  var_out.open(var_file.c_str());
 #endif
 
   if(!var_out){
