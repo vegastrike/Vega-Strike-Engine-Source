@@ -23,6 +23,7 @@ class Cockpit {
   void beginElement(const string &name, const AttributeList &attributes);
   void endElement(const string &name);
   void Delete();
+  void DrawTargetBox ();
   void DrawBlips(Unit * un);
  public:
   float zoomfactor;

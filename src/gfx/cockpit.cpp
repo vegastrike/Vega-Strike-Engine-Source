@@ -7,21 +7,46 @@
 #include "cmd/unit.h"
 #include "cmd/iterator.h"
 #include "cmd/collection.h"
-void LocalToRadar (const Vector & pos, float &s, float &t) {
+static void LocalToRadar (const Vector & pos, float &s, float &t) {
   s = (pos.k>0?pos.k:0)+1;
   t = 2*sqrtf(pos.i*pos.i + pos.j*pos.j + s*s);
   s = -pos.i/t;
   t = pos.j/t;
 }
 
-GFXColor relationToColor (float relation) {
+static GFXColor relationToColor (float relation) {
   return 
     (relation>=0)?
-    GFXColor (1-relation,1-relation,1,1)
+    GFXColor (1-relation,1-relation,1,.5)
     :
-    GFXColor (1,relation+1,relation+1,1);
+    GFXColor (1,relation+1,relation+1,.5);
 }
-
+void Cockpit::DrawTargetBox () {
+  Unit * un = parent.GetUnit();
+  if (!un)
+    return;
+  Unit *target = un->Target();
+  if (!target)
+    return;
+  Vector CamP,CamQ,CamR;
+  _Universe->AccessCamera()->GetPQR(CamP,CamQ,CamR);
+  //Vector Loc (un->ToLocalCoordinates(target->Position()-un->Position()));
+  Vector Loc(target->Position());
+  GFXDisable (TEXTURE0);
+  GFXBlendMode (SRCALPHA,INVSRCALPHA);
+  GFXDisable (LIGHTING);
+  if (Loc.k>0) {
+    GFXColorf (relationToColor(_Universe->GetRelation(un->faction,target->faction)));
+    GFXBegin (GFXLINESTRIP); 
+    GFXVertexf (Loc+(CamP+CamQ)*un->rSize());
+    GFXVertexf (Loc+(CamP-CamQ)*un->rSize());
+    GFXVertexf (Loc+(-CamP-CamQ)*un->rSize());
+    GFXVertexf (Loc+(CamQ-CamP)*un->rSize());
+    GFXVertexf (Loc+(CamP+CamQ)*un->rSize());
+    GFXEnd();
+  }
+  GFXEnable (TEXTURE0);
+}
 void Cockpit::DrawBlips (Unit * un) {
   UnitCollection * drawlist = _Universe->activeStarSystem()->getUnitList();
   Iterator * iter = drawlist->createIterator();
@@ -37,10 +62,10 @@ void Cockpit::DrawBlips (Unit * un) {
   GFXBegin(GFXPOINT);
   while ((target = iter->current())!=NULL) {
     if (target!=un) {
-      LocalToRadar (un->ToLocalCoordinates(target->Position()-un->Position()),s,t);
-      GFXColorf (relationToColor (_Universe->GetRelation(un->faction,target->faction)));
-
-      
+      Vector localcoord (un->ToLocalCoordinates(target->Position()-un->Position()));
+      LocalToRadar (localcoord,s,t);
+      GFXColor localcol (relationToColor (_Universe->GetRelation(un->faction,target->faction)));
+      GFXColorf (localcol);
       if (target==makeBigger) {
 	GFXEnd();
 	GFXPointSize(4);
@@ -115,6 +140,7 @@ Cockpit::Cockpit (const char * file, Unit * parent): parent (parent),Crosshairs(
   Init (file);
 }
 void Cockpit::Draw() {
+  DrawTargetBox();
   GFXHudMode (true);
   GFXColor4f (1,1,1,1);
   GFXBlendMode (ONE,ONE);
