@@ -31,7 +31,7 @@ GameNebula::GameNebula(const char * unitfile, bool SubU, int faction,
 {
 	  Nebula::InitNebula( unitfile, SubU, faction, fg, fg_snumber);
 }
-void Nebula::UpdatePhysics2 (const Transformation &trans, const Transformation & old_physical_state, const Vector & accel, float difficulty, const Matrix &transmat, const Vector & CumulativeVelocity, bool ResolveLast, UnitCollection *uc=NULL){
+void Nebula::UpdatePhysics2 (const Transformation &trans, const Transformation & old_physical_state, const Vector & accel, float difficulty, const Matrix &transmat, const Vector & CumulativeVelocity, bool ResolveLast, UnitCollection *uc){
   static float nebdelta= XMLSupport::parse_float (vs_config->getVariable ("graphics","fog_time",".01"));
   lastfadein = fadeinvalue;
   fadeinvalue-=nebdelta*SIMULATION_ATOM;
