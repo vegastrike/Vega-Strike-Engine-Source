@@ -346,10 +346,10 @@ void GameUnit::DamageRandSys(float dam, const Vector &vec) {
 	}
 }
 
-float GameUnit::DealDamageToHull (const Vector & pnt, float damage, unsigned short * &t ) {
+float GameUnit::DealDamageToHullReturnArmor (const Vector & pnt, float damage, unsigned short * &t ) {
   float percent;
   unsigned short *targ=NULL;
-  percent = Unit::DealDamageToHull( pnt, damage, targ);
+  percent = Unit::DealDamageToHullReturnArmor( pnt, damage, targ);
   if( percent == -1)
 	  return -1;
   if (damage<*targ) {

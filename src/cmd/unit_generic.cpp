@@ -1237,7 +1237,7 @@ void Unit::ProcessDeleteQueue() {
   }
 }
 
-float Unit::DealDamageToHull (const Vector & pnt, float damage, unsigned short * &target) {
+float Unit::DealDamageToHullReturnArmor (const Vector & pnt, float damage, unsigned short * &target) {
   float percent;
 #ifndef ISUCK
   if (hull<0) {
