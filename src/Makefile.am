@@ -73,12 +73,12 @@ gldrv/libgldrvserver.a 			\
 cmd/collide/libcollide.a 		\
 boost129/libboost_python.a      \
 boost/libboost_python.a	        \
-jthread/libjthread.a
+jthread/libjthread.a -lz
 
 accountserver_LDADD =           \
 common/libvscommon.a            \
 networking/libnetacct.a	        \
-jthread/libjthread.a
+jthread/libjthread.a -lz
 
 
 libroot =		\
