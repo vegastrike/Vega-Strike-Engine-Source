@@ -67,14 +67,14 @@ struct GFXStats{
 #else
     #include <GL/glut.h>
     #include <GL/glext.h>
-#endi
-
+#endif
+#ifdef _WIN32
 #ifdef GL_EXT_compiled_vertex_array
 # ifndef PFNGLLOCKARRAYSEXTPROC
 #  undef GL_EXT_compiled_vertex_array
 # endif	// PFNGLLOCKARRAYSEXTPROC
 #endif // GL_EXT_compiled_vertex_array
-
+#ifdef _WIN32
 #define GL_TEXTURE0_ARB 0x84C0
 #define GL_TEXTURE1_ARB 0x84C1
 #define GL_TEXTURE_CUBE_MAP_ARB           0x8513
@@ -102,6 +102,7 @@ extern PFNGLMULTITEXCOORD2FARBPROC glMultiTexCoord2fARB;
 extern PFNGLCLIENTACTIVETEXTUREARBPROC glClientActiveTextureARB;
 extern PFNGLCLIENTACTIVETEXTUREARBPROC glActiveTextureARB;
 extern PFNGLCOLORTABLEEXTPROC glColorTable;
+#endif
 /*
 #if defined(IRIX)
 #include <GL/gl.h>
