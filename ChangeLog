@@ -1,3 +1,9 @@
+2002-03-07 Daniel Horn <hellcatv@hotmail.com>
+	* also had to add gui to src/Makefile.am...strange
+	* added gui to configure.in
+	* Switched stars to use animations instead of lights so they will not appear 'through' other objects
+	* switched any strange OpenGL state vs was setting for the GUI
+
 2002-03-07 Alexander Rawass <alexannika@users.sourceforge.net>
 	
 	* ai_orderlist now basically working
