@@ -112,9 +112,9 @@ void MoveTo::Execute(){
 
   Vector local_vel (parent->UpCoordinateLevel(parent->GetVelocity()));
   //local location is ued for storing the last velocity;
-  terminatingX += (copysign(1.0F,local_vel.i)!=copysign(1.0F,last_velocity.i)||(!local_vel.i));
-  terminatingY += (copysign(1.0F,local_vel.j)!=copysign(1.0F,last_velocity.j)||(!local_vel.j));
-  terminatingZ += (copysign(1.0F,local_vel.k)!=copysign(1.0F,last_velocity.k)||(!local_vel.k));
+  terminatingX += ((local_vel.i>0)!=(last_velocity.i>0)||(!local_vel.i));
+  terminatingY += ((local_vel.j>0)!=(last_velocity.j>0)||(!local_vel.j));
+  terminatingZ += ((local_vel.k>0)!=(last_velocity.k>0)||(!local_vel.k));
 
   last_velocity = local_vel;
   Vector heading = parent->ToLocalCoordinates((targetlocation-parent->Position()).Cast());
@@ -217,8 +217,8 @@ void ChangeHeading::Execute() {
   Vector local_velocity (parent->UpCoordinateLevel(ang_vel));
   Vector local_heading (parent->ToLocalCoordinates ((final_heading-parent->Position()).Cast()));
   //Vector local_heading (parent->UpCoordinateLevel(ang_vel));
-  char xswitch = (copysign(1.0F,local_heading.i)!=copysign(1.0F,last_velocity.i)||(!local_heading.i))?1:0;
-  char yswitch = (copysign(1.0F,local_heading.j)!=copysign(1.0F,last_velocity.j)||(!local_heading.j))?1:0;
+  char xswitch = ((local_heading.i>0)!=(last_velocity.i>0)||(!local_heading.i))?1:0;
+  char yswitch = ((local_heading.j>0)!=(last_velocity.j>0)||(!local_heading.j))?1:0;
   static bool AICheat = XMLSupport::parse_bool(vs_config->getVariable ("AI","turn_cheat","true"));
   if (AICheat) {
     if (xswitch||yswitch) {   
