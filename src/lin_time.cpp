@@ -137,6 +137,7 @@ void UpdateTime() {
   QueryPerformanceCounter((LARGE_INTEGER*)&newtime);
   elapsedtime = ((double)(newtime-ttime))/freq;
   ttime = newtime;
+  newtime = newtime/freq;
 
 #elif defined(HAVE_GETTIMEOFDAY)
   struct timeval tv;

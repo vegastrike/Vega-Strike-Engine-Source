@@ -28,6 +28,8 @@
 void InitTime();
 double GetElapsedTime();
 void UpdateTime();
+void micro_sleep( unsigned int n);
+double getNewTime();
 
 extern float getTimeCompression();
 extern void setTimeCompression(float tc);
