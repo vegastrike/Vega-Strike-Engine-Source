@@ -64,6 +64,7 @@ namespace StarXML {
       STARS,
       STARSPREAD,
       NEARSTARS,
+      FADESTARS,
       REFLECTIVITY,
       ALPHA,
       DESTINATION,
@@ -83,6 +84,7 @@ namespace StarXML {
     EnumMap::Pair ("background", BACKGROUND), 
     EnumMap::Pair ("stars", STARS),
     EnumMap::Pair ("nearstars", NEARSTARS),
+    EnumMap::Pair ("fadestars", FADESTARS),
     EnumMap::Pair ("starspread", STARSPREAD), 
     EnumMap::Pair ("reflectivity", REFLECTIVITY), 
     EnumMap::Pair ("file", XFILE),
@@ -163,6 +165,9 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
 	break;
       case STARSPREAD:
 	xml->starsp = parse_float ((*iter).value);
+	break;
+      case FADESTARS:
+	xml->fade = parse_bool ((*iter).value);
 	break;
    case NAME:
 	this->name = new char [strlen((*iter).value.c_str())+1];
@@ -403,8 +408,9 @@ void StarSystem::LoadXML(const char *filename) {
   }
 
   xml = new StarXML;
+  xml->fade = true;
   xml->starsp = 150;
-  xml->numnearstars=4000;
+  xml->numnearstars=400;
   xml->numstars=800;
   xml->backgroundname = string("cube");
   xml->reflectivity=.7;
@@ -441,6 +447,7 @@ void StarSystem::LoadXML(const char *filename) {
 #endif
   bg = new Background(xml->backgroundname.c_str(),xml->numstars,g_game.zfar*.9);
   stars = new Stars (xml->numnearstars, xml->starsp);
+  stars->SetBlend (xml->fade,xml->fade);
   delete xml;
 }
 

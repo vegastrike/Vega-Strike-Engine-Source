@@ -32,7 +32,6 @@ void VDU::DrawTargetSpr (Sprite *s, float per, float &sx, float &sy, float &w, f
 
 static void DrawShield (float fs, float rs, float ls, float bs, float x, float y, float h, float w) { 
   GFXBegin (GFXLINE);
-  fs = ls = rs = bs = 1;
   if (fs>.2) {
     GFXVertex3f (x-w/8,y+h/2,0);
     GFXVertex3f (x-w/3,y+.9*h/2,0);
@@ -137,8 +136,8 @@ static void DrawShield (float fs, float rs, float ls, float bs, float x, float y
 void VDU::DrawVDUShield (Unit * parent) {
   float fs = parent->FShieldData();
   float rs = parent->RShieldData();
-  float ls = parent->RShieldData();
-  float bs = parent->RShieldData();
+  float ls = parent->LShieldData();
+  float bs = parent->BShieldData();
   float x,y,w,h;
   GetPosition (x,y);
   GetSize (w,h);
@@ -151,15 +150,15 @@ void VDU::DrawVDUShield (Unit * parent) {
   DrawShield (fs,rs,ls,bs,x,y,h,w);
   parent->ArmorData (armor);
   GFXColor4f (1,.6,0,1);
-  DrawShield (armor[0]/StartArmor[0],armor[1]/StartArmor[1],armor[2]/StartArmor[2],armor[3]/StartArmor[3],x,y,h/2,w/2);
+  DrawShield (armor[0]/StartArmor[0],armor[2]/StartArmor[2],armor[3]/StartArmor[3],armor[1]/StartArmor[1],x,y,h/2,w/2);
   GFXColor4f (1,1,1,1);
 }
 void VDU::DrawTarget(Unit * parent, Unit * target) {
   float x,y,w,h;
   float fs = target->FShieldData();
   float rs = target->RShieldData();
-  float ls = target->RShieldData();
-  float bs = target->RShieldData();
+  float ls = target->LShieldData();
+  float bs = target->BShieldData();
     
   //sprintf (t,"\n%4.1f %4.1f",target->FShieldData()*100,target->RShieldData()*100);
 
@@ -188,7 +187,7 @@ void VDU::DrawTarget(Unit * parent, Unit * target) {
 
 void VDU::DrawNav (const Vector & nav) {
   char navdata[256];
-  sprintf (navdata,"\nNavigation\n----------\nRelativeLocation\nx: %.4f\ny:%.4f\nz:%.4f\nDistance:\n%f",nav.i,nav.j,nav.k,nav.Magnitude());
+  sprintf (navdata,"\nNavigation\n----------\nRelativeLocation\nx: %.4f\ny:%.4f\nz:%.4f\nDistance:\n%f",nav.i,nav.j,nav.k,10*nav.Magnitude());
   tp->Draw (std::string(navdata));  
 }
 static void DrawGun (Vector  pos, float w, float h, weapon_info::MOUNT_SIZE sz) {

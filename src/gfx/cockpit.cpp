@@ -9,6 +9,7 @@
 #include "cmd/collection.h"
 #include "hud.h"
 #include "vdu.h"
+#include "lin_time.h"//for fps
 static void LocalToRadar (const Vector & pos, float &s, float &t) {
   s = (pos.k>0?pos.k:0)+1;
   t = 2*sqrtf(pos.i*pos.i + pos.j*pos.j + s*s);
@@ -138,6 +139,9 @@ void Cockpit::DrawBlips (Unit * un) {
   delete iter;
 }
 float Cockpit::LookupTargetStat (int stat, Unit *target) {
+  static float fpsval=0;
+  const float fpsmax=1;
+  static float numtimes=fpsmax;
   unsigned short armordat[4];
   Unit * tmpunit;
   switch (stat) {
@@ -172,6 +176,14 @@ float Cockpit::LookupTargetStat (int stat, Unit *target) {
     return (target->GetVelocity().Magnitude())*10;
   case SETKPS:
     return target->GetComputerData().set_speed*10;
+  case FPS:
+    if (fpsval>=0&&fpsval<.5*FLT_MAX)
+      numtimes-=.1+fpsval;
+    if (numtimes<=0) {
+      numtimes = fpsmax;
+      fpsval = GetElapsedTime();
+    }
+    return 1./fpsval;
   }
   return 1;
 }

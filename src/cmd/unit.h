@@ -194,7 +194,7 @@ class Unit {
   void ActivateGuns (weapon_info::MOUNT_SIZE, bool Missile);
   ///Armor values: how much damage armor can withhold before internal damage accrues
   struct {
-    unsigned short right, left, front, back;
+    unsigned short front, back, right, left;
   } armor;
   ///Shielding Struct holding values of current shields
   struct {

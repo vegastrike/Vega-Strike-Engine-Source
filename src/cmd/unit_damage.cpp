@@ -133,8 +133,13 @@ float Unit::FShieldData() {
   return 0;
 }
 void Unit::ArmorData (unsigned short armor[4]) {
-  memcpy (&armor[0],&this->armor.right,sizeof (unsigned short)*4);
+  //  memcpy (&armor[0],&this->armor.front,sizeof (unsigned short)*4);
+  armor[0]=this->armor.front;
+  armor[1]=this->armor.back;
+  armor[2]=this->armor.right;
+  armor[3]=this->armor.left;
 }
+
 float Unit::FuelData () {
   return fuel;
 }
@@ -152,7 +157,7 @@ float Unit::BShieldData() {
 }
 float Unit::LShieldData() {
   switch (shield.number) {
-  case 2: return 1;//no data, captain
+  case 2: return 0;//no data, captain
   case 4: return ((float)shield.fbrl.left)/shield.fbrl.leftmax;
   case 6: return ((float)shield.fbrltb.v[3])/shield.fbrltb.rltbmax;
   }
@@ -160,7 +165,7 @@ float Unit::LShieldData() {
 }
 float Unit::RShieldData() {
   switch (shield.number) {
-  case 2: return 1;//don't react to stuff we have no data on
+  case 2: return 0;//don't react to stuff we have no data on
   case 4: return ((float)shield.fbrl.right)/shield.fbrl.rightmax;
   case 6: return ((float)shield.fbrltb.v[2])/shield.fbrltb.rltbmax;
   }

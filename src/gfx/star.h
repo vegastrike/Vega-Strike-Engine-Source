@@ -8,11 +8,12 @@ private:
   Vector pos[STARnumvlist];
   float spread;
   bool blend;
+  bool fade;
   void ResetPosition(const Vector & cent);
   void UpdatePosition(const Vector & cp);
 public:
   Stars (int num, float spread);
-  void SetBlend(bool blendit);
+  void SetBlend(bool blendit, bool fadeit);
   ~Stars ();
   void Draw();
 };

@@ -8,7 +8,7 @@
 #endif
 
 using XMLSupport::tostring;
-const int pixelscalesize=50;
+const int pixelscalesize=30;
 SphereMesh::SphereMesh(float radius, int stacks, int slices, char *texture, char *alpha,bool Insideout,  const BLENDFUNC a, const BLENDFUNC b, bool envMapping) : Mesh() {
   int numspheres = (stacks+slices)/8;
   if (numspheres<1)

@@ -40,6 +40,7 @@ class StarSystem {
     float reflectivity;
     int numnearstars;
     int numstars;
+    bool fade;
     float starsp;
   } *xml;
   /// Everything to be drawn. Folded missiles in here oneday

@@ -19,9 +19,9 @@ enum VIEWSTYLE {CP_FRONT, CP_LEFT, CP_RIGHT, CP_BACK, CP_CHASE, CP_PAN};
  * The ones starting from KPS are digital with text readout
  */
 class Cockpit {
-  enum GAGUES {ARMORF,ARMORR,ARMORL,ARMORB,FUEL, SHIELDF,SHIELDR,SHIELDL,SHIELDB, ENERGY, EJECT, LOCK, HULL, KPS, SETKPS, NUMGAUGES};
+  enum GAGUES {ARMORF,ARMORB,ARMORR,ARMORL,FUEL, SHIELDF,SHIELDR,SHIELDL,SHIELDB, ENERGY, EJECT, LOCK, HULL, KPS, SETKPS, FPS, NUMGAUGES};
   /// 4 armor vals and 1 for startfuel
-  unsigned short StartArmor[ARMORB+1];
+  unsigned short StartArmor[5];
   ///saved values to compare with current values (might need more for damage)
   float maxfuel, maxhull;
   ///this is the parent that Cockpit will read data from
