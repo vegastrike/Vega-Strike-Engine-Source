@@ -66,13 +66,13 @@ public:
   UnitWrapper GetVelocityReference() {{CHECKME 0;}return unit->VelocityReference();}
   void SetVelocityReference(UnitWrapper targ) {{CHECKME;}unit->VelocityReference(targ);}
   void SetTarget (UnitWrapper targ) {{CHECKME;}unit->Target(targ);}
-  boost::python::tuple GetOrientation() {{CHECKME boost::python::tuple(Vector(0,0,0),Vector(0,0,0),Vector(0,0,0));}Vector p,q,r; unit->GetOrientation(p,q,r); return boost::python::tuple(p,q,r);}
-  boost::python::tuple queryBSP (QVector st, QVector en, bool ShieldBSP) {{CHECKME boost::python::tuple(0,Vector(0,0,1),0);}float dist; UnitWrapper un; Vector nml; un=unit->queryBSP(st,en,nml,dist,ShieldBSP); boost::python::tuple ret (un,nml,dist); return ret;}
-  boost::python::tuple cosAngleToITTS (UnitWrapper target, float speed, float range) {{CHECKME boost::python::tuple(0,0);}float dist; float ret=unit->cosAngleTo(target,dist,speed,range);return boost::python::tuple (ret,dist);}
-  boost::python::tuple cosAngleTo (UnitWrapper target) {{CHECKME boost::python::tuple(0,0);}float dist; float ret=unit->cosAngleTo(target,dist);return boost::python::tuple (ret,dist);}
-  boost::python::tuple cosAngleFromMountTo (UnitWrapper target) {{CHECKME boost::python::tuple(0,0);}float dist; float ret=unit->cosAngleFromMountTo(target,dist);return boost::python::tuple (ret,dist);}
-  boost::python::tuple getAverageGunSpeed () {{CHECKME boost::python::tuple(0,0);}float speed, range;unit->getAverageGunSpeed(speed,range);return boost::python::tuple(speed,range);}
-  boost::python::tuple InsideCollideTree (UnitWrapper smaller) {{CHECKME boost::python::tuple(QVector(0,0,0),Vector(0,0,0),QVector(0,0,0),Vector(0,0,0));}QVector bigpos, smallpos; Vector bigNormal, smallNormal; if(!unit->InsideCollideTree(smaller,bigpos,bigNormal,smallpos,smallNormal)){bigpos=smallpos=QVector(0,0,0);} boost::python::tuple tup (bigpos,bigNormal,smallpos,smallNormal); return tup;}
+  boost::python::tuple GetOrientation() {{CHECKME VS_BOOST_MAKE_TUPLE(VS_BOOST_MAKE_TUPLE(0,0,0),VS_BOOST_MAKE_TUPLE(0,0,0),VS_BOOST_MAKE_TUPLE(0,0,0));}Vector p,q,r; unit->GetOrientation(p,q,r); return VS_BOOST_MAKE_TUPLE(VS_BOOST_MAKE_TUPLE(p.i,p.j,p.k),VS_BOOST_MAKE_TUPLE(q.i,q.j,q.k),VS_BOOST_MAKE_TUPLE(r.i,r.j,r.k));}
+  boost::python::tuple queryBSP (QVector st, QVector en, bool ShieldBSP) {{CHECKME VS_BOOST_MAKE_TUPLE(0,VS_BOOST_MAKE_TUPLE(0,0,1),0);}float dist; UnitWrapper un; Vector nml; un=unit->queryBSP(st,en,nml,dist,ShieldBSP); boost::python::tuple ret =VS_BOOST_MAKE_TUPLE(un,nml,dist); return ret;}
+  boost::python::tuple cosAngleToITTS (UnitWrapper target, float speed, float range) {{CHECKME VS_BOOST_MAKE_TUPLE_2(0,0);}float dist; float ret=unit->cosAngleTo(target,dist,speed,range);return VS_BOOST_MAKE_TUPLE_2 (ret,dist);}
+  boost::python::tuple cosAngleTo (UnitWrapper target) {{CHECKME VS_BOOST_MAKE_TUPLE_2(0,0);}float dist; float ret=unit->cosAngleTo(target,dist);return VS_BOOST_MAKE_TUPLE_2 (ret,dist);}
+  boost::python::tuple cosAngleFromMountTo (UnitWrapper target) {{CHECKME VS_BOOST_MAKE_TUPLE_2(0,0);}float dist; float ret=unit->cosAngleFromMountTo(target,dist);return VS_BOOST_MAKE_TUPLE_2 (ret,dist);}
+  boost::python::tuple getAverageGunSpeed () {{CHECKME VS_BOOST_MAKE_TUPLE_2 (0,0);}float speed, range;unit->getAverageGunSpeed(speed,range);return VS_BOOST_MAKE_TUPLE_2(speed,range);}
+  boost::python::tuple InsideCollideTree (UnitWrapper smaller) {{CHECKME VS_BOOST_MAKE_TUPLE(VS_BOOST_MAKE_TUPLE(0,0,0),VS_BOOST_MAKE_TUPLE(0,0,0),VS_BOOST_MAKE_TUPLE(0,0,0),VS_BOOST_MAKE_TUPLE(0,0,0));}QVector bigpos, smallpos; Vector bigNormal, smallNormal; if(!unit->InsideCollideTree(smaller,bigpos,bigNormal,smallpos,smallNormal)){bigpos=smallpos=QVector(0,0,0);} boost::python::tuple tup= VS_BOOST_MAKE_TUPLE(VS_BOOST_MAKE_TUPLE(bigpos.i,bigpos.j,bigpos.k),VS_BOOST_MAKE_TUPLE(bigNormal.i,bigNormal.j,bigNormal.k),VS_BOOST_MAKE_TUPLE(smallpos.i,smallpos.j,smallpos.k),VS_BOOST_MAKE_TUPLE(smallNormal.i,smallNormal.j,smallNormal.k)); return tup;}
 //  UnitWrapper getSubUnit(int which) {{CHECKME 0;}un_iter it=unit->getSubUnits(); for (int i=0;i<which;i++) {it.advance();}return it.current();}
   UnitWrapper getFlightgroupLeader () {{CHECKME 0;}Flightgroup *group=unit->getFlightgroup();if (group) return group->leader; else return 0;}
   void setFlightgroupLeader (Unit * un) {{CHECKME;}Flightgroup *group=unit->getFlightgroup();if (group) group->leader.SetUnit(un);}
@@ -86,16 +86,22 @@ public:
 /*
   WRAPPED1(bool,TransferUnitToSystem,class StarSystem *,NewSystem,false)
   bool InCorrectStarSystem (StarSystem *active)
-//  Class.def(&TransferUnitToSystem(unsigned int whichJumpQueue, class StarSystem * previouslyActiveStarSystem, bool DoSightAndSound) {{CHECKME 0;}class StarSystem * othActiveStarSystem=previouslyActiveStarSystem; unit->TransferUnitToSystem(whichJumpQueue,othActiveStarSystem,DoSightAndSound); return othActiveStarSystem;}
+//  PYTHON_DEFINE_METHOD(Class,&TransferUnitToSystem(unsigned int whichJumpQueue, class StarSystem * previouslyActiveStarSystem, bool DoSightAndSound) {{CHECKME 0;}class StarSystem * othActiveStarSystem=previouslyActiveStarSystem; unit->TransferUnitToSystem(whichJumpQueue,othActiveStarSystem,DoSightAndSound); return othActiveStarSystem;}
 //  class StarSystem * TransferUnitToSystem(unsigned int whichJumpQueue, class StarSystem * previouslyActiveStarSystem, bool DoSightAndSound) {{CHECKME 0;}class StarSystem * othActiveStarSystem=previouslyActiveStarSystem; unit->TransferUnitToSystem(whichJumpQueue,othActiveStarSystem,DoSightAndSound); return othActiveStarSystem;}
 */
 /////////////////////////////////NO WRAP//////
   UnitWrapper(UnitContainer cont) : UnitContainer(cont){}
   UnitWrapper(Unit *un=0) : UnitContainer(un){}
-  operator Unit* () {return unit;}
+  operator Unit* () {return GetUnit();}
   bool isNull () {return GetUnit()==0;}
   bool notNull () {return !isNull();}
   void setNull () {SetUnit(0);}
+  bool equal (UnitWrapper oth) {
+    return (this->operator==(oth));
+  }
+  bool notequal (UnitWrapper oth) {
+    return (this->operator!=(oth));
+  }
 };
 PYTHON_INIT_INHERIT_GLOBALS(VS,FireAt);
 PYTHON_BEGIN_MODULE(VS)
@@ -173,27 +179,29 @@ EXPORT_UTIL(GetMasterPartList,Unit())
 #undef EXPORT_FACTION
 #undef voidEXPORT_FACTION
 
-PYTHON_BEGIN_CLASS(VS,UnitWrapper,"Unit")
 PYTHON_BASE_BEGIN_CLASS(VS,Cargo,"Cargo")
+#ifdef USE_BOOST_129
+, boost::python::init<std::string,std::string,float,int,float,float>());
+#else
 Class.def(boost::python::constructor<std::string,std::string,float,int,float,float>());
-Class.def (&Cargo::SetPrice,"SetPrice");
-Class.def (&Cargo::GetPrice,"GetPrice");
-Class.def (&Cargo::SetMass,"SetMass");
-Class.def (&Cargo::GetMass,"GetMass");
-Class.def (&Cargo::SetVolume,"SetVolume");
-Class.def (&Cargo::GetVolume,"GetVolume");
-Class.def (&Cargo::SetQuantity,"SetQuantity");
-Class.def (&Cargo::GetQuantity,"GetQuantity");
-Class.def (&Cargo::SetContent,"SetContent");
-Class.def (&Cargo::GetContent,"GetContent");
-Class.def (&Cargo::SetCategory,"SetCategory");
-Class.def (&Cargo::GetCategory,"GetCategory");
-Class.def (&Cargo::SetMissionFlag,"SetMissionFlag");
-Class.def (&Cargo::GetMissionFlag,"GetMissionFlag");
-Class.def (&Cargo::GetDescription,"GetDescription");
-
-
+#endif
+PYTHON_DEFINE_METHOD(Class,&Cargo::SetPrice,"SetPrice");
+PYTHON_DEFINE_METHOD(Class,&Cargo::GetPrice,"GetPrice");
+PYTHON_DEFINE_METHOD(Class,&Cargo::SetMass,"SetMass");
+PYTHON_DEFINE_METHOD(Class,&Cargo::GetMass,"GetMass");
+PYTHON_DEFINE_METHOD(Class,&Cargo::SetVolume,"SetVolume");
+PYTHON_DEFINE_METHOD(Class,&Cargo::GetVolume,"GetVolume");
+PYTHON_DEFINE_METHOD(Class,&Cargo::SetQuantity,"SetQuantity");
+PYTHON_DEFINE_METHOD(Class,&Cargo::GetQuantity,"GetQuantity");
+PYTHON_DEFINE_METHOD(Class,&Cargo::SetContent,"SetContent");
+PYTHON_DEFINE_METHOD(Class,&Cargo::GetContent,"GetContent");
+PYTHON_DEFINE_METHOD(Class,&Cargo::SetCategory,"SetCategory");
+PYTHON_DEFINE_METHOD(Class,&Cargo::GetCategory,"GetCategory");
+PYTHON_DEFINE_METHOD(Class,&Cargo::SetMissionFlag,"SetMissionFlag");
+PYTHON_DEFINE_METHOD(Class,&Cargo::GetMissionFlag,"GetMissionFlag");
+PYTHON_DEFINE_METHOD(Class,&Cargo::GetDescription,"GetDescription");
 PYTHON_END_CLASS(VS,Cargo)
+PYTHON_BEGIN_CLASS(VS,UnitWrapper,"Unit")
 //WARNING: Macro City 2 ahead.  Please skip this section, also if you don't like macros.
 #undef CHECKME
 #undef WRAPPED0
@@ -205,7 +213,7 @@ PYTHON_END_CLASS(VS,Cargo)
 #undef voidWRAPPED2
 #undef voidWRAPPED3
 #undef voidWRAPPED5
-#define WRAPPED0(type,name,nada) Class.def(&UnitWrapper::name,#name);
+#define WRAPPED0(type,name,nada) PYTHON_DEFINE_METHOD(Class,&UnitWrapper::name,#name);
 #define WRAPPED1(type,name,atype,a,def) WRAPPED0(type,name,def)
 #define WRAPPED2(type,name,atype,a,btype,b,def) WRAPPED0(type,name,def)
 #define WRAPPED3(type,name,atype,a,btype,b,ctype,c,def) WRAPPED0(type,name,def)
@@ -214,7 +222,7 @@ PYTHON_END_CLASS(VS,Cargo)
 #define voidWRAPPED2(name,atype,a,btype,b) WRAPPED0(void,name,0)
 #define voidWRAPPED3(name,atype,a,btype,b,ctype,c) WRAPPED0(void,name,0)
 #define voidWRAPPED5(name,atype,a,btype,b,ctype,c,dtype,d,etype,e) WRAPPED0(void,name,0)
-#define EXPORT_UTIL(name,aff) Class.def(&UnitUtil::name,#name);
+#define EXPORT_UTIL(name,aff) PYTHON_DEFINE_METHOD(Class,&UnitUtil::name,#name);
 #define voidEXPORT_UTIL(name) EXPORT_UTIL(name,0)
 #include "python_unit_wrap.h"
 #undef WRAPPED0
@@ -229,59 +237,70 @@ PYTHON_END_CLASS(VS,Cargo)
 #undef EXPORT_UTIL
 #undef voidEXPORT_UTIL
 //End of Macro City 2
-  Class.def(boost::python::operators< (boost::python::op_eq | boost::python::op_ne) >(), boost::python::right_operand<UnitWrapper>());
-  Class.def(&UnitWrapper::setNull,"setNull");
-  Class.def(&UnitWrapper::isNull,"isNull");
-  Class.def(&UnitWrapper::notNull,"__nonzero__");
-  Class.def(&UnitWrapper::Kill,"Kill");
-  Class.def(&UnitWrapper::SetTarget,"SetTarget");
-  Class.def(&UnitWrapper::GetTarget,"GetTarget");
-  Class.def(&UnitWrapper::SetVelocityReference,"SetVelocityReference");
-  Class.def(&UnitWrapper::GetVelocityReference,"GetVelocityReference");
-  Class.def(&UnitWrapper::GetOrientation,"GetOrientation");
-  Class.def(&UnitWrapper::queryBSP,"queryBSP");
-  Class.def(&UnitWrapper::cosAngleTo,"cosAngleTo");
-  Class.def(&UnitWrapper::cosAngleToITTS,"cosAngleToITTS");
-  Class.def(&UnitWrapper::cosAngleFromMountTo,"cosAngleFromMountTo");
-  Class.def(&UnitWrapper::getAverageGunSpeed,"getAverageGunSpeed");
-  Class.def(&UnitWrapper::InsideCollideTree,"InsideCollideTree");
-  Class.def(&UnitWrapper::getFlightgroupLeader,"getFlightgroupLeader");
-  Class.def(&UnitWrapper::setFlightgroupLeader,"setFlightgroupLeader");
-  Class.def(&UnitWrapper::GetVelocityDifficultyMult,"GetVelocityDifficultyMult");
-  Class.def(&UnitWrapper::GetJumpStatus,"GetJumpStatus");
-  Class.def(&UnitWrapper::ApplyDamage,"ApplyDamage");
+#ifdef USE_BOOST_129
+  PYTHON_DEFINE_METHOD(Class,&UnitWrapper::equal,"__eq__");
+  PYTHON_DEFINE_METHOD(Class,&UnitWrapper::notequal,"__ne__");
+#else
+  Class.def (boost::python::operators< (boost::python::op_eq | boost::python::op_ne) >(), boost::python::right_operand<UnitWrapper>());
+#endif
+  PYTHON_DEFINE_METHOD(Class,&UnitWrapper::setNull,"setNull");
+  PYTHON_DEFINE_METHOD(Class,&UnitWrapper::isNull,"isNull");
+  PYTHON_DEFINE_METHOD(Class,&UnitWrapper::notNull,"__nonzero__");
+  PYTHON_DEFINE_METHOD(Class,&UnitWrapper::Kill,"Kill");
+  PYTHON_DEFINE_METHOD(Class,&UnitWrapper::SetTarget,"SetTarget");
+  PYTHON_DEFINE_METHOD(Class,&UnitWrapper::GetTarget,"GetTarget");
+  PYTHON_DEFINE_METHOD(Class,&UnitWrapper::SetVelocityReference,"SetVelocityReference");
+  PYTHON_DEFINE_METHOD(Class,&UnitWrapper::GetVelocityReference,"GetVelocityReference");
+  PYTHON_DEFINE_METHOD(Class,&UnitWrapper::GetOrientation,"GetOrientation");
+  PYTHON_DEFINE_METHOD(Class,&UnitWrapper::queryBSP,"queryBSP");
+  PYTHON_DEFINE_METHOD(Class,&UnitWrapper::cosAngleTo,"cosAngleTo");
+  PYTHON_DEFINE_METHOD(Class,&UnitWrapper::cosAngleToITTS,"cosAngleToITTS");
+  PYTHON_DEFINE_METHOD(Class,&UnitWrapper::cosAngleFromMountTo,"cosAngleFromMountTo");
+  PYTHON_DEFINE_METHOD(Class,&UnitWrapper::getAverageGunSpeed,"getAverageGunSpeed");
+  PYTHON_DEFINE_METHOD(Class,&UnitWrapper::InsideCollideTree,"InsideCollideTree");
+  PYTHON_DEFINE_METHOD(Class,&UnitWrapper::getFlightgroupLeader,"getFlightgroupLeader");
+  PYTHON_DEFINE_METHOD(Class,&UnitWrapper::setFlightgroupLeader,"setFlightgroupLeader");
+  PYTHON_DEFINE_METHOD(Class,&UnitWrapper::GetVelocityDifficultyMult,"GetVelocityDifficultyMult");
+  PYTHON_DEFINE_METHOD(Class,&UnitWrapper::GetJumpStatus,"GetJumpStatus");
+  PYTHON_DEFINE_METHOD(Class,&UnitWrapper::ApplyDamage,"ApplyDamage");
 PYTHON_END_CLASS(VS,UnitWrapper)
+
 PYTHON_BEGIN_CLASS(VS,UnitCollection::UnitIterator,"un_iter")
-  Class.def (&UnitCollection::UnitIterator::current,"current");
-  Class.def (&UnitCollection::UnitIterator::advance,"advance");
-  Class.def (&UnitCollection::UnitIterator::remove,"remove");
-  Class.def (&UnitCollection::UnitIterator::preinsert,"preinsert");
+  PYTHON_DEFINE_METHOD(Class,&UnitCollection::UnitIterator::current,"current");
+  PYTHON_DEFINE_METHOD(Class,&UnitCollection::UnitIterator::advance,"advance");
+  PYTHON_DEFINE_METHOD(Class,&UnitCollection::UnitIterator::remove,"remove");
+  PYTHON_DEFINE_METHOD(Class,&UnitCollection::UnitIterator::preinsert,"preinsert");
 PYTHON_END_CLASS(VS,UnitCollection::UnitIterator)
 typedef PythonAI<FireAt> PythonAIFireAt;
 PYTHON_BEGIN_INHERIT_CLASS(VS,PythonAIFireAt ,FireAt,"PythonAI")
-  Class.def (&FireAt::Execute,"Execute",PythonAI< FireAt >::default_Execute);
-  Class.def (&FireAt::ChooseTarget,"ChooseTarget",PythonAI< FireAt >::default_ChooseTarget);
-  Class.def (&FireAt::SetParent,"init",PythonAI< FireAt >::default_SetParent);
-  Class.def (&FireAt::GetParent,"GetParent");
-  Class.def (&FireAt::AddReplaceLastOrder,"AddReplaceLastOrder");
-  Class.def (&FireAt::ExecuteLastScriptFor,"ExecuteLastScriptFor");
-  Class.def (&FireAt::FaceTarget,"FaceTarget");
-  Class.def (&FireAt::FaceTargetITTS,"FaceTargetITTS");
-  Class.def (&FireAt::MatchLinearVelocity,"MatchLinearVelocity");
-  Class.def (&FireAt::MatchAngularVelocity,"MatchAngularVelocity");
-  Class.def (&FireAt::ChangeHeading,"ChangeHeading");
-  Class.def (&FireAt::ChangeLocalDirection,"ChangeLocalDirection");
-  Class.def (&FireAt::MoveTo,"MoveTo");
-  Class.def (&FireAt::MatchVelocity,"MatchVelocity");
-  Class.def (&FireAt::Cloak,"Cloak");
-  Class.def (&FireAt::FormUp,"FormUp");
-  Class.def (&FireAt::FaceDirection,"FaceDirection");
-  Class.def (&FireAt::XMLScript,"XMLScript");
-  Class.def (&FireAt::LastPythonScript,"LastPythonScript");
+  PYTHON_DEFINE_METHOD(Class,&FireAt::Execute,"Execute",PythonAI< FireAt >::default_Execute);
+  PYTHON_DEFINE_METHOD(Class,&FireAt::ChooseTarget,"ChooseTarget",PythonAI< FireAt >::default_ChooseTarget);
+  PYTHON_DEFINE_METHOD(Class,&FireAt::SetParent,"init",PythonAI< FireAt >::default_SetParent);
+  PYTHON_DEFINE_METHOD(Class,&FireAt::GetParent,"GetParent");
+  PYTHON_DEFINE_METHOD(Class,&FireAt::AddReplaceLastOrder,"AddReplaceLastOrder");
+  PYTHON_DEFINE_METHOD(Class,&FireAt::ExecuteLastScriptFor,"ExecuteLastScriptFor");
+  PYTHON_DEFINE_METHOD(Class,&FireAt::FaceTarget,"FaceTarget");
+  PYTHON_DEFINE_METHOD(Class,&FireAt::FaceTargetITTS,"FaceTargetITTS");
+  PYTHON_DEFINE_METHOD(Class,&FireAt::MatchLinearVelocity,"MatchLinearVelocity");
+  PYTHON_DEFINE_METHOD(Class,&FireAt::MatchAngularVelocity,"MatchAngularVelocity");
+  PYTHON_DEFINE_METHOD(Class,&FireAt::ChangeHeading,"ChangeHeading");
+  PYTHON_DEFINE_METHOD(Class,&FireAt::ChangeLocalDirection,"ChangeLocalDirection");
+  PYTHON_DEFINE_METHOD(Class,&FireAt::MoveTo,"MoveTo");
+  PYTHON_DEFINE_METHOD(Class,&FireAt::MatchVelocity,"MatchVelocity");
+  PYTHON_DEFINE_METHOD(Class,&FireAt::Cloak,"Cloak");
+  PYTHON_DEFINE_METHOD(Class,&FireAt::FormUp,"FormUp");
+  PYTHON_DEFINE_METHOD(Class,&FireAt::FaceDirection,"FaceDirection");
+  PYTHON_DEFINE_METHOD(Class,&FireAt::XMLScript,"XMLScript");
+  PYTHON_DEFINE_METHOD(Class,&FireAt::LastPythonScript,"LastPythonScript");
 PYTHON_END_CLASS(VS,FireAt)
 
 
 PYTHON_END_MODULE(VS)
+#ifdef USE_BOOST_129
+BOOST_PYTHON_BEGIN_CONVERSION_NAMESPACE
+BOOST_PYTHON_TO_PYTHON_BY_VALUE(Unit*,to_python_value <UnitWrapper> ()(UnitWrapper(x)));
+BOOST_PYTHON_END_CONVERSION_NAMESPACE
+#else
 TO_PYTHON_SMART_POINTER(UnitWrapper);
 TO_PYTHON_SMART_POINTER(Cargo);
 
@@ -295,6 +314,7 @@ Unit * from_python(PyObject *p,boost::python::type<Unit *>) {
   return uw.GetUnit();
 }
 BOOST_PYTHON_END_CONVERSION_NAMESPACE
+#endif
 
 void InitVS() {
 	Python::reseterrors();

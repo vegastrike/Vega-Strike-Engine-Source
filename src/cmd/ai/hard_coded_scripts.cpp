@@ -11,7 +11,10 @@ using Orders::FireAt;
 
 BOOST_PYTHON_BEGIN_CONVERSION_NAMESPACE
 
+#ifdef USE_BOOST_129
+#else
 extern PyObject *to_python (Unit *x);
+#endif
 
 BOOST_PYTHON_END_CONVERSION_NAMESPACE
 

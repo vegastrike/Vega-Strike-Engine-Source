@@ -5,7 +5,11 @@
 #include "base.h"
 #include "base_util.h"
 #include "vs_path.h"
+#ifdef USE_BOOST_129
+#include <boost/python/object.hpp>
+#else
 #include <boost/python/objects.hpp>
+#endif
 
 static FILE * withAndWithout (std::string filename, std::string time_of_day_hint) {
   string with (filename+"_"+time_of_day_hint+BASE_EXTENSION);

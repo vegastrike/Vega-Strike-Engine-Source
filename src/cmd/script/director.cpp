@@ -62,7 +62,11 @@
 #include "flightgroup.h"
 #include "gldrv/winsys.h"
 #include "python/python_class.h"
+#ifdef USE_BOOST_129
+#include <boost/python/class.hpp>
+#else
 #include <boost/python/detail/extension_class.hpp>
+#endif
 #include "gfx/cockpit_generic.h"
 //#include "vegastrike.h"
 
@@ -110,14 +114,14 @@ void putSaveData (int whichcp, string key, unsigned int num, float val) {
 //ADD_FROM_PYTHON_FUNCTION(pythonMission)
 PYTHON_BEGIN_MODULE(Director)
 PYTHON_BEGIN_INHERIT_CLASS(Director,pythonMission,PythonMissionBaseClass,"Mission")
-  Class.def(&PythonMissionBaseClass::Pickle,"Pickle",pythonMission::default_Pickle);
-  Class.def(&PythonMissionBaseClass::UnPickle,"UnPickle",pythonMission::default_UnPickle);
-  Class.def(&PythonMissionBaseClass::Execute,"Execute",pythonMission::default_Execute);
+  PYTHON_DEFINE_METHOD(Class,&PythonMissionBaseClass::Pickle,"Pickle",pythonMission::default_Pickle);
+  PYTHON_DEFINE_METHOD(Class,&PythonMissionBaseClass::UnPickle,"UnPickle",pythonMission::default_UnPickle);
+  PYTHON_DEFINE_METHOD(Class,&PythonMissionBaseClass::Execute,"Execute",pythonMission::default_Execute);
 PYTHON_END_CLASS(Director,pythonMission)
-  Director.def (&putSaveData,"putSaveData");
-  Director.def (&pushSaveData,"pushSaveData");
-  Director.def (&getSaveData,"getSaveData");
-  Director.def (&getSaveDataLength,"getSaveDataLength");
+  PYTHON_DEFINE_GLOBAL(Director,&putSaveData,"putSaveData");
+  PYTHON_DEFINE_GLOBAL(Director,&pushSaveData,"pushSaveData");
+  PYTHON_DEFINE_GLOBAL(Director,&getSaveData,"getSaveData");
+  PYTHON_DEFINE_GLOBAL(Director,&getSaveDataLength,"getSaveDataLength");
 PYTHON_END_MODULE(Director)
 
 void InitDirector() {

@@ -104,20 +104,41 @@ BOOST_PYTHON_BEGIN_CONVERSION_NAMESPACE \
 #ifdef USE_BOOST_129
 #define PYTHON_BEGIN_MODULE(name) BOOST_PYTHON_MODULE(name) {
 #define PYTHON_DEFINE_GLOBAL(modul,fun,funname) boost::python::def (funname,fun)
+#define VS_BOOST_MAKE_TUPLE(a,b,c) boost::python::make_tuple(a,b,c)
+#define VS_BOOST_MAKE_TUPLE_2(a,b) boost::python::make_tuple(a,b)
 #else
 #define PYTHON_BEGIN_MODULE(name) BOOST_PYTHON_MODULE_INIT(name) {boost::python::module_builder name(#name);
 #define PYTHON_DEFINE_GLOBAL(modul,fun,funname) modul.def (fun,funname)
+#define VS_BOOST_MAKE_TUPLE(a,b,c) boost::python::tuple(a,b,c)
+#define VS_BOOST_MAKE_TUPLE_2(a,b) boost::python::tuple(a,b)
 #endif
 #define PYTHON_END_MODULE(name) }
 #define PYTHON_INIT_MODULE(name) init##name()
+#ifdef USE_BOOST_129
+
+#define PYTHON_BASE_BEGIN_INHERIT_CLASS(name,NewClass,SuperClass,myclass) { \
+boost::python::class_builder <SuperClass, NewClass, boost::noncopyable > Class (myclass
+#define PYTHON_BEGIN_INHERIT_CLASS(name,NewClass,SuperClass,myclass) PYTHON_BASE_BEGIN_INHERIT_CLASS(name,NewClass,SuperClass,myclass) \
+,boost::python::no_init);
+
+#define PYTHON_BASE_BEGIN_CLASS(name,CLASS,myclass) { \
+    boost::python::class_builder <CLASS> Class (myclass
+#define PYTHON_BEGIN_CLASS(name,CLASS,myclass) PYTHON_BASE_BEGIN_CLASS(name,CLASS,myclass) \
+);
+#define PYTHON_DEFINE_METHOD(modul,fun,funname) modul.def (funname,fun)
+#else
+
 #define PYTHON_BASE_BEGIN_INHERIT_CLASS(name,NewClass,SuperClass,myclass) { \
     boost::python::class_builder <SuperClass ,NewClass> Class (name,myclass);
 #define PYTHON_BEGIN_INHERIT_CLASS(name,NewClass,SuperClass,myclass) PYTHON_BASE_BEGIN_INHERIT_CLASS(name,NewClass,SuperClass,myclass) \
     Class.def (boost::python::constructor<>());
+
 #define PYTHON_BASE_BEGIN_CLASS(name,CLASS,myclass) { \
     boost::python::class_builder <CLASS> Class (name,myclass);
 #define PYTHON_BEGIN_CLASS(name,CLASS,myclass) PYTHON_BASE_BEGIN_CLASS(name,CLASS,myclass) \
     Class.def (boost::python::constructor<>());
+#define PYTHON_DEFINE_METHOD(modul,fun,funname) modul.def (fun,funname)
+#endif
 #define PYTHON_END_CLASS(name,SuperClass) }
 /*    BaseClass.def (&PythonClass<SuperClass>::IncRef,"IncRef"); \
       boost::python::class_builder <SuperClass> TempClass (name,"SuperClass"); */

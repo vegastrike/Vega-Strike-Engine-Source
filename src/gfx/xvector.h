@@ -87,6 +87,7 @@ class XVector {
 		  (j>other.j)?j:other.j,
 		  (k>other.k)?k:other.k);
   }
+  XVector (struct _object *);
 };
 
 

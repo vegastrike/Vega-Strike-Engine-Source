@@ -23,6 +23,16 @@
 #include "vegastrike.h"
 #include <math.h>
 #include "vec.h"
+#ifdef USE_BOOST_129
+#include <boost/python/class.hpp>
+#include <boost/python/to_python_converter.hpp>
+#include <boost/python/to_python_indirect.hpp>
+#include <boost/python/to_python_value.hpp>
+#include <boost/python/converter/builtin_converters.hpp>
+#include <boost/python.hpp>
+#else
+#include <boost/python/detail/extension_class.hpp>
+#endif
 //#include "glob_externs.h"
 #define _CZ 761.465325527
 //extern Vector	_LightVector;
@@ -38,8 +48,16 @@
 //extern float _CamTransConst;
 
 
-
-
+Vector::Vector (PyObject * p) {
+	Vector vec(0,0,0);
+	PyArg_ParseTuple(p,"fff",&vec.i,&vec.j,&vec.k);
+	*this=vec;
+}
+QVector::QVector (PyObject * p) {
+	QVector vec(0,0,0);
+ 	PyArg_ParseTuple(p,"ddd",&vec.i,&vec.j,&vec.k);
+	*this=vec;
+}
 
 
 /////////////////////////////////////////////////////////////

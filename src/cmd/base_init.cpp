@@ -3,7 +3,11 @@
 #include "base.h"
 #include "base_util.h"
 #include "vs_path.h"
+#ifdef USE_BOOST_129
+#include <boost/python/object.hpp>
+#else
 #include <boost/python/objects.hpp>
+#endif
 
 static boost::python::tuple GetRandomBarMessage () {
 	gameMessage * last;
