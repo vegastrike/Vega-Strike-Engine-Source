@@ -49,11 +49,6 @@ struct GFXStats{
 
 //extern Matrix model;
 //extern Matrix view;
-#if defined(__APPLE__) || defined(MACOSX)
-    #include <GLUT/glut.h>
-#else
-    #include <GL/glut.h>
-#endif
 #if defined(__CYGWIN__)
 #define GL_EXT_color_subtable 1
 #endif
@@ -151,11 +146,6 @@ typedef struct {
   bool s3tc;
 } gl_options_t;
 extern gl_options_t gl_options;
-#if defined(__APPLE__) || defined(MACOSX)
-    #include <GLUT/glut.h>
-#else
-    #include <GL/glut.h>
-#endif
 
 // Maximum number of things that can be returned in a pick operation
 #define MAX_PICK 2048
