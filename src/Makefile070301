@@ -4,7 +4,7 @@ CC=g++
 
 CFLAGS= -DUNIX -Wall -g  -DHAVE_FINITE -DHAVE_GETTIMEOFDAY
 
-INCLUDES= 
+INCLUDES= -I/usr/X11R6/include 
 
 LFLAGS=  -L/usr/X11R6/lib -lGL -lGLU -lglut -lexpat -lefence
 
