@@ -4,6 +4,9 @@
 #include "lin_time.h"
 #include "hashtable.h"
 #include "gfx/animation.h"
+#include "vs_globals.h"
+#include "config_xml.h"
+#include "cmd/container.h"
 static Hashtable<std::string, StarSystem ,char [127]> star_system_table;
 inline bool CompareDest (Planet * un, StarSystem * origin) {
   for (unsigned int i=0;i<un->GetDestinations().size();i++) {
@@ -34,82 +37,125 @@ inline std::vector <Unit *> ComparePrimaries (Unit * primary, StarSystem *origin
 
 extern Unit ** fighters;
 struct unorigdest {
-  Unit * un;
-  Planet * jumppoint;
+  UnitContainer un;
+  UnitContainer jumppoint;
   StarSystem * orig;
   StarSystem * dest;
   float delay;
-  unorigdest (Unit * un, Planet * jumppoint, StarSystem * orig, StarSystem * dest, float delay):un(un),jumppoint(jumppoint),orig(orig),dest(dest), delay(delay){}
+  unsigned int animation;
+  unorigdest (Unit * un, Planet * jumppoint, StarSystem * orig, StarSystem * dest, float delay,  unsigned int ani):un(un),jumppoint(jumppoint),orig(orig),dest(dest), delay(delay), animation(ani){}
 };
 
 
-static std::vector <unorigdest> pendingjump;
+static std::vector <unorigdest *> pendingjump;
+static std::vector <unsigned int> AnimationNulls;
 static std::vector <Animation *>JumpAnimations;
-static void AddJumpAnimation (const Vector & pos, const float size ) {
-  JumpAnimations.push_back (new Animation ("explosion_orange.ani",false,.1,MIPMAP,true));
-  JumpAnimations.back()->SetDimensions(10*size,10*size);
-  JumpAnimations.back()->SetPosition (pos);
-
+static std::vector <Animation *>VolatileJumpAnimations;
+static unsigned int AddJumpAnimation (const Vector & pos, const float size, bool mvolatile=false ) {
+  std::vector <Animation *> *ja= mvolatile?&VolatileJumpAnimations:&JumpAnimations;
+  Animation * ani=new Animation ("explosion_orange.ani",true,.1,MIPMAP,true);
+  unsigned int i;
+  if (mvolatile||AnimationNulls.empty()){
+    i = ja->size();
+    ja->push_back(ani);
+  }else {
+    assert (JumpAnimations[AnimationNulls.back()]==NULL);
+    JumpAnimations[AnimationNulls.back()]= ani;
+    i = AnimationNulls.back();
+    AnimationNulls.pop_back();
+  }
+  (*ja)[i]->SetDimensions(size,size);
+  (*ja)[i]->SetPosition (pos);
+  return i;
 }
+static void VolitalizeJumpAnimation (const unsigned int ani) {
+  VolatileJumpAnimations.push_back (JumpAnimations[ani]);
+  JumpAnimations[ani]=NULL;
+  AnimationNulls.push_back (ani);
+} 
 void StarSystem::AddStarsystemToUniverse(const string &mname) {
   star_system_table.Put (mname,this);
 }
 void StarSystem::DrawJumpStars() {
-  for (unsigned int i=0;i<JumpAnimations.size();i++) {
-    JumpAnimations[i]->Draw();
-    if (JumpAnimations[i]->Done()) {
-      delete JumpAnimations[i];
-      JumpAnimations.erase (JumpAnimations.begin()+i);
-      i--;
+  for (unsigned int kk=0;kk<pendingjump.size();kk++) { 
+    unsigned int k=pendingjump[kk]->animation;
+    Unit * un = pendingjump[kk]->un.GetUnit();
+    if (un) {
+      Vector p,q,r;
+      un->GetOrientation (p,q,r);
+      JumpAnimations[k]->SetPosition (un->Position()+r*un->rSize()*pendingjump[kk]->delay);
+    }
+  }
+  unsigned int i;
+  for (i=0;i<JumpAnimations.size();i++) {
+    if (JumpAnimations[i])
+      JumpAnimations[i]->Draw();
+  }
+  for (i=0;i<VolatileJumpAnimations.size();i++) {
+    if (VolatileJumpAnimations[i]) {
+      VolatileJumpAnimations[i]->Draw();
+      if (VolatileJumpAnimations[i]->Done()) {
+	delete VolatileJumpAnimations[i];
+	VolatileJumpAnimations.erase (VolatileJumpAnimations.begin()+i);
+	i--;
+      }
     }
   }
 }
 
 void StarSystem::ProcessPendingJumps() {
   for (unsigned int kk=0;kk<pendingjump.size();kk++) {
-    if (pendingjump[kk].delay>=0) {
-      pendingjump[kk].delay-=GetElapsedTime();
+    if (pendingjump[kk]->delay>=0) {
+      pendingjump[kk]->delay-=GetElapsedTime();
       continue;
+    } else {
+      VolitalizeJumpAnimation (pendingjump[kk]->animation);
     }
     StarSystem * savedStarSystem = _Universe->activeStarSystem();
-    _Universe->setActiveStarSystem (pendingjump[kk].orig);
-    if (pendingjump[kk].orig->RemoveUnit (pendingjump[kk].un)) {
-      pendingjump[kk].un->RemoveFromSystem();
-      pendingjump[kk].dest->AddUnit (pendingjump[kk].un);
-      pendingjump[kk].un->Target(NULL);
-      Iterator * iter = pendingjump[kk].orig->drawList->createIterator();
+    Unit * un=pendingjump[kk]->un.GetUnit();
+    if (un==NULL) {
+      delete pendingjump[kk];
+      pendingjump.erase (pendingjump.begin()+kk);
+      kk--;
+      continue;
+    }
+    _Universe->setActiveStarSystem (pendingjump[kk]->orig);
+    if (pendingjump[kk]->orig->RemoveUnit (un)) {
+      un->RemoveFromSystem();
+      pendingjump[kk]->dest->AddUnit (un);
+      un->Target(NULL);
+      Iterator * iter = pendingjump[kk]->orig->drawList->createIterator();
       Unit * unit;
       while((unit = iter->current())!=NULL) {
-	if (unit->Target()==pendingjump[kk].un) {
-	  unit->Target (pendingjump[kk].jumppoint);
+	if (unit->Target()==un) {
+	  unit->Target (pendingjump[kk]->jumppoint.GetUnit());
 	  unit->ActivateJumpDrive (0);
 	}
 	iter->advance();
       }
       delete iter;
-      if (pendingjump[kk].un==fighters[0]) {
+      if (un==fighters[0]) {
 	savedStarSystem->SwapOut();
-	savedStarSystem = pendingjump[kk].dest;
-	pendingjump[kk].dest->SwapIn();
+	savedStarSystem = pendingjump[kk]->dest;
+	pendingjump[kk]->dest->SwapIn();
       }
-      _Universe->setActiveStarSystem(pendingjump[kk].dest);
+      _Universe->setActiveStarSystem(pendingjump[kk]->dest);
       vector <Unit *> possibilities;
-      for (int i=0;i<pendingjump[kk].dest->numprimaries;i++) {
+      for (int i=0;i<pendingjump[kk]->dest->numprimaries;i++) {
 	vector <Unit *> tmp;
-	tmp = ComparePrimaries (pendingjump[kk].dest->primaries[i],pendingjump[kk].orig);
+	tmp = ComparePrimaries (pendingjump[kk]->dest->primaries[i],pendingjump[kk]->orig);
 	if (!tmp.empty()) {
 	  possibilities.insert (possibilities.end(),tmp.begin(), tmp.end());
 	}
       }
       if (!possibilities.empty()) {
 	static int jumpdest=235034;
-	pendingjump[kk].un->SetCurPosition(possibilities[jumpdest%possibilities.size()]->Position());
+	un->SetCurPosition(possibilities[jumpdest%possibilities.size()]->Position());
 	jumpdest+=23231;
       }
     }
-    Vector p,q,r;
-    pendingjump[kk].un->GetOrientation(p,q,r);
-    AddJumpAnimation (pendingjump[kk].un->Position()+pendingjump[kk].un->rSize()*r+pendingjump[kk].un->GetJumpStatus().delay*.5*pendingjump[kk].un->GetVelocity(), pendingjump[kk].un->rSize()*10);
+    AddJumpAnimation (un->Position(),un->rSize()*10,true);
+    delete pendingjump[kk];
     pendingjump.erase (pendingjump.begin()+kk);
     kk--;
     _Universe->setActiveStarSystem(savedStarSystem);
@@ -140,8 +186,9 @@ bool StarSystem::JumpTo (Unit * un, Planet * jumppoint, const std::string &syste
     }
   }
   if(ss) {
-    AddJumpAnimation (un->Position()+un->GetVelocity()*un->GetJumpStatus().delay, un->rSize()*5);
-    pendingjump.push_back (unorigdest (un,jumppoint, this,ss,un->GetJumpStatus().delay));
+    Vector p,q,r;
+    un->GetOrientation (p,q,r);
+    pendingjump.push_back (new unorigdest (un,jumppoint, this,ss,un->GetJumpStatus().delay,    AddJumpAnimation (un->Position()+r*un->rSize()*un->GetJumpStatus().delay, 10*un->rSize())));
   } else {
     return false;
   }
