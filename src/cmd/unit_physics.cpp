@@ -532,9 +532,10 @@ void Unit::UpdatePhysics (const Transformation &trans, const Matrix transmat, co
 	  }
 
 	}
+      
+      }else {
+	mounts[i].time_to_lock=mounts[i].type->LockTime;
       }
-    }else {
-      mounts[i].time_to_lock=mounts[i].type->LockTime;
     }
     if (mounts[i].type->type==weapon_info::BEAM) {
       if (mounts[i].ref.gun) {
