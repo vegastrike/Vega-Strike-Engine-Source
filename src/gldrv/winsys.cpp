@@ -333,7 +333,7 @@ void winsys_process_events()
 		    SDL_GetMouseState( &x, &y );
 		    key = event.key.keysym.sym; 
 		    (*keyboard_func)( key,
-				      key >= 256,
+				      event.key.keysym.mod,
 				      false,
 				      x, y );
 		}
@@ -344,7 +344,7 @@ void winsys_process_events()
 		    SDL_GetMouseState( &x, &y );
 		    key = event.key.keysym.sym; 
 		    (*keyboard_func)( key,
-				      key >= 256,
+				      event.key.keysym.mod,
 				      true,
 				      x, y );
 		}
@@ -518,29 +518,30 @@ void winsys_set_reshape_func( winsys_reshape_func_t func )
 /* Keyboard callbacks */
 static void glut_keyboard_cb( unsigned char ch, int x, int y ) 
 {
+  
     if ( keyboard_func ) {
-	(*keyboard_func)( ch, false, false, x, y );
+	(*keyboard_func)( ch, glutGetModifiers(), false, x, y );
     }
 }
 
 static void glut_special_cb( int key, int x, int y ) 
 {
     if ( keyboard_func ) {
-	(*keyboard_func)( key, true, false, x, y );
+	(*keyboard_func)( key+128, glutGetModifiers(), false, x, y );
     }
 }
 
 static void glut_keyboard_up_cb( unsigned char ch, int x, int y ) 
 {
     if ( keyboard_func ) {
-	(*keyboard_func)( ch, false, true, x, y );
+	(*keyboard_func)( ch, glutGetModifiers(), true, x, y );
     }
 }
 
 static void glut_special_up_cb( int key, int x, int y ) 
 {
     if ( keyboard_func ) {
-	(*keyboard_func)( key, true, true, x, y );
+	(*keyboard_func)( key+128, glutGetModifiers(), true, x, y );
     }
 }
 
