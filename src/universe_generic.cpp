@@ -172,6 +172,7 @@ Universe::~Universe()
 }
 
 void Universe::LoadStarSystem(StarSystem * s) {
+  cerr<<"Loading a starsystem"<<endl;
   star_system.push_back (s);
   SortStarSystems(star_system,s);//dont' want instadie
 }

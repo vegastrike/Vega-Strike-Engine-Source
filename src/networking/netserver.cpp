@@ -226,7 +226,7 @@ void	NetServer::start(int argc, char **argv)
 	_Universe = new Universe( argc, argv, universe_file.c_str(), true);
 	cout<<"Universe LOADED"<<endl;
 	string strmission = vs_config->getVariable( "server", "missionfile", "networking.mission");
-	mission = new Mission( strmission.c_str());
+	active_missions.push_back( mission = new Mission( strmission.c_str()));
 	mission->initMission( false);
 
 	/*

@@ -188,6 +188,9 @@ void	NetServer::sendLoginAccept( ClientPtr clt, AddressIP ipadr, int newacct)
 		static string sys = vs_config->getVariable("data","sectors","sectors");
 		string relsys = sys+"/"+cp->savegame->GetStarSystem()+".system";
 		netbuf.addString( relsys);
+
+		// Generate the starsystem before addclient so that it already contains serials
+		zonemgr->addZone( cp->savegame->GetStarSystem());
 #ifdef CRYPTO
 		FileUtil::HashFileCompute( relsys, digest);
 		netbuf.addBuffer( digest, FileUtil::Hash.DigestSize());

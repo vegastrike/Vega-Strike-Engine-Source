@@ -124,20 +124,9 @@ StarSystem *	ZoneMgr::addClient( ClientWeakPtr cltw, string starsys, unsigned sh
 	*/
 	StarSystem * sts=NULL;
 	StarSystem * ret=NULL;
-	//Cockpit * cp = _Universe->isPlayerStarship( cltw->game_unit.GetUnit());
-	//string starsys = cp->savegame->GetStarSystem();
-	// TO BE DONE IN JUMP HANDLING !!!
-	/*
-	if( starsys!=oldstarsys)
-	{
-		// Remove the player from the old starsystem
-		sts = _Universe->getStarSystem( oldstarsys);
-		sts->RemoveUnit( ClientPtr(cltw)->game_unit);
 
-		// SOMEDAY TEST IF THE STARSYSTEM WE WANT TO GO IN IS REACHABLE FROM THE OLD ONE
-	}
-	*/
-	if( !(ret = sts = _Universe->getStarSystem( starsys+".system")))
+	if( !(ret = sts = _Universe->getStarSystem( starsys)))
+	//if( !(ret = sts = GetLoadedStarSystem( starsys)))
 	{
 		// Add a network zone (StarSystem equivalent) and create the new StarSystem
 		// StarSystem is not loaded so we generate it
@@ -148,8 +137,11 @@ StarSystem *	ZoneMgr::addClient( ClientWeakPtr cltw, string starsys, unsigned sh
 		num_zone = _Universe->star_system.size()-1;
 	}
 	else
-	// Get the index of the existing star_system as it represents the zone number
+	{
+		// Get the index of the existing star_system as it represents the zone number
 		num_zone = _Universe->StarSystemIndex( sts);
+		cerr<<"--== STAR SYSTEM ALREADY EXISTS ==--"<<endl;
+	}
 
 	COUT<<">> ADDING CLIENT IN ZONE # "<<num_zone<<endl;
 	// Adds the client in the zone

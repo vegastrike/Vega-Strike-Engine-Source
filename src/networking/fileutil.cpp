@@ -107,7 +107,7 @@ int		FileUtil::HashCompute( const char * filename, unsigned char * digest)
 			return 1;
 		else
 		{
-			cout<<"!!! ERROR = couldn't compute hash digest on "<<filename<<" file !!!"<<endl;
+			cerr<<"!!! ERROR = couldn't compute hash digest on "<<filename<<" file !!!"<<endl;
 			exit(1);
 			//return -1;
 		}
@@ -146,10 +146,12 @@ int		FileUtil::HashCompare( string filename, unsigned char * hashdigest)
 	}
 	if( memcmp( hashdigest, local_digest, Hash.DigestSize()))
 	{
-		cout<<"HashDigest does not match : "<<hashdigest<<" != "<<local_digest<<endl;
+		cerr<<"HashDigest does not match : '"<<hashdigest<<"' != '"<<local_digest<<"' for file "<<full_univ_path<<endl;
 		delete local_digest;
 		return 0;
 	}
+	cerr<<"HashDigest MATCH : '"<<hashdigest<<"' == '"<<local_digest<<"' for file "<<full_univ_path<<endl;
+
 	delete local_digest;
 	return 1;
 #else

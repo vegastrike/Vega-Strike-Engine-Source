@@ -1,6 +1,7 @@
 #include "networking/lowlevel/vsnet_debug.h"
 #include "cmd/unit_generic.h"
 #include "vs_globals.h"
+#include "vs_path.h"
 #include "networking/netclient.h"
 #include "savegame.h"
 #include "networking/lowlevel/netbuffer.h"
@@ -208,7 +209,7 @@ void	NetClient::loginAccept( Packet & p1)
 	unsigned char * digest;
 #ifdef CRYPTO
 	digest = netbuf.getBuffer( FileUtil::Hash.DigestSize());
-	cerr<<"Initial system = "<<univfile<<" - File Hash = "<<digest<<endl;
+	cerr<<"Initial system = "<<datadir+univfile<<" - File Hash = "<<digest<<endl;
 #endif
 	// Compare to local hash and ask for the good file if we don't have it or bad version
 	if( !FileUtil::HashCompare( univfile, digest))
@@ -226,7 +227,7 @@ void	NetClient::loginAccept( Packet & p1)
 	string sysfile = netbuf.getString();
 #ifdef CRYPTO
 	digest = netbuf.getBuffer( FileUtil::Hash.DigestSize());
-	cerr<<"Initial system = "<<sysfile<<" - File Hash = "<<digest<<endl;
+	cerr<<"Initial system = "<<datadir+sysfile<<" - File Hash = "<<digest<<endl;
 #endif
 	if( !FileUtil::HashCompare( sysfile, digest))
 	{

@@ -47,7 +47,7 @@ void	NetServer::addClient( ClientPtr clt, char flags )
 	// If we return an existing starsystem we broadcast our info to others
 	sts=zonemgr->addClient( clt, starsys, zoneid);
 
-	st2 = _Universe->getStarSystem( starsys+".system");
+	st2 = _Universe->getStarSystem( starsys);
 
 	// On server side this is not done in Cockpit::SetParent()
 	cp->activeStarSystem = st2;
@@ -244,7 +244,7 @@ void	NetServer::disconnect( ClientPtr clt, const char* debug_from_file, int debu
         }
 	}
 	// Removes the client from its starsystem
-	if( clt->ingame )
+	if( clt->ingame==true )
 		this->removeClient( clt );
 	// Say true as 2nd arg because we don't want the server to broadcast since player is leaving hte game
 	un->Kill( true, true);
@@ -289,7 +289,7 @@ void	NetServer::logout( ClientPtr clt )
 	    allClients.remove( clt );
 	}
 	// Removes the client from its starsystem
-	if( clt->ingame)
+	if( clt->ingame==true)
 		this->removeClient( clt );
 	// Say true as 2nd arg because we don't want the server to broadcast since player is leaving hte game
 	un->Kill( true, true);
