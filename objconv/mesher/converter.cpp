@@ -43,7 +43,14 @@ int main (int argc, char** argv) {
   } else if(createxmeshesfromBFXM){
 	FILE* Inputfile=fopen(argv[1],"rb");
 	Outputfile=fopen(argv[2],"w+"); //create file for text output
-	BFXMToXmesh(Inputfile,Outputfile);
+        string tmp = argv[2];
+        int where=where=tmp.find_last_of(".");
+        tmp = tmp.substr(0,where);
+        string obj = tmp+".obj";
+        string mtl = tmp+".mtl";
+        FILE * OutputObj = fopen (obj.c_str(),"w");
+        FILE * OutputMtl = fopen (mtl.c_str(),"w");
+	BFXMToXmesh(Inputfile,Outputfile,OutputObj,OutputMtl,tmp);
   } else if(createOBJfromBFXM||createOBJfromxmesh||createBFXMfromOBJ||createxmeshesfromOBJ){
 	fprintf(stderr,"OBJ functions not yet supported: - aborting\n");
 	exit(-1);

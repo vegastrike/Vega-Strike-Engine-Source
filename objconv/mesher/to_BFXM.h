@@ -1,3 +1,5 @@
+#ifndef _TO_BFXM_H_
+#define _TO_BFXM_H_
 #include <string>
 #include <vector>
 ///Stores all the load-time vertex info in the XML struct FIXME light calculations
@@ -309,3 +311,4 @@ int writesuperheader(XML memfile, FILE* Outputfile); //Writes superheader to fil
 int appendrecordfromxml(XML memfile, FILE* Outputfile); // Append a record specified in memfile to the output file and return number of bytes written. Assumes Outputfile is appropriately positioned at the end of the file.
 int appendmeshfromxml(XML memfile, FILE* Outputfile); // Append a mesh specified in memfile to the output file and return number of bytes written. Assumes Outputfile is appropriately positioned at the end of the file.
 
+#endif
