@@ -39,7 +39,7 @@
 #include "cmd/unit_factory.h"
 #include "gui/modaldialog.h"
 #include "main_loop.h"              // For QuitNow().
-
+#include "lin_time.h"
 // FIXME mbyron -- Hack instead of reading XML.
 #include "gui/newbutton.h"
 #include "gui/staticdisplay.h"
@@ -109,9 +109,16 @@ public:
 			}
 		}
 		keyboard_queue->clear();
-		if (reset)
-			this->setText(text);
+		{
+                  unsigned int x= (unsigned int)getNewTime();
+                  string text1=text;
+                  if (x%2) {
+                    text1+="|";
+                  }
+                  this->setText(text1);
+                }
 		this->StaticDisplay::draw();
+                this->setText(text);
 	}
 };
 
