@@ -5,6 +5,7 @@
 #include "cmd/unit.h"
 #include "order.h"
 #include "gfx/coord_select.h"
+#include "vs_globals.h"
 //needed as functions bound to keys may not be class member functions--Context switch handles it
 InputDFA *CurDFA=NULL;
 
@@ -12,6 +13,14 @@ InputDFA *CurDFA=NULL;
 #define ACTIVE_CTRL                2
 #define ACTIVE_ALT                 4
 OrderFactory *orderbindings [KEYMAP_SIZE]={NULL};
+
+static float GetX (float x) {
+  return ((float)2*x)/g_game.x_resolution-1;
+}
+static float GetY (float x) {
+  return ((float)2*x)/g_game.y_resolution-1;
+}
+
 void InputDFA::OrderHandler (int key, KBSTATE k) {
   if (k==PRESS) {
     if (k<='Z'&&k>='A')
@@ -65,6 +74,7 @@ void InputDFA::SetOrder (OrderFactory *ofac) {
 void InputDFA::TargetSelect (KBSTATE k,int x,int y, int delx, int dely, int mod) {
   if (k==RESET)
     return;///little hack to prevent the function from being 'primed' with reset and continuing on an infinite loop again and again and again
+  y = g_game.y_resolution-y;
   CurDFA->state=TARGET_SELECT;//to fool the Noneselect function into using targets
   //don't bind keys above...."quiet state update"
   if (mod&ACTIVE_CTRL) {
@@ -99,7 +109,9 @@ void InputDFA::TargetSelect (KBSTATE k,int x,int y, int delx, int dely, int mod)
 void InputDFA::LocSelect (KBSTATE k, int x, int y, int delx, int dely, int mod) {
   if (k==RESET)
     return;///little hack to prevent the function from being 'primed' with reset and continuing on an infinite loop again and again and again
+  y = g_game.y_resolution-y;
   CoordinateSelect::MouseMoveHandle(k,x,y,delx,dely,mod);
+
   if (k==PRESS) {
     
       UnitCollection::UnitIterator * tmp = CurDFA->selected->createIterator();
@@ -128,8 +140,11 @@ void InputDFA::LocSelect (KBSTATE k, int x, int y, int delx, int dely, int mod) 
 
 void InputDFA::ClickSelect (KBSTATE k, int x, int y, int delx, int dely, int mod) {
   static int kmod;
-  Vector v = GFXDeviceToEye(x,y);
-  CurDFA->MouseArrow.SetPosition (v.i, v.j);
+  //  Vector v = GFXDeviceToEye(x,y);
+  float xs,ys;
+  y = g_game.y_resolution-y;
+  CurDFA->MouseArrow.GetSize (xs,ys);
+  CurDFA->MouseArrow.SetPosition (.5*xs+GetX(x), .5*ys+GetY(y));
 
   if (k==RESET)
     return;///little hack to prevent the function from being 'primed' with reset and continuing on an infinite loop again and again and again
@@ -167,7 +182,7 @@ void InputDFA::ClickSelect (KBSTATE k, int x, int y, int delx, int dely, int mod
   if (k==PRESS){
 
   Vector v = GFXDeviceToEye(x,y);
-  CurDFA->SelectBox.SetPosition (v.i, v.j);
+  CurDFA->SelectBox.SetPosition (GetX(x), GetY(y));
     Unit * sel = CurDFA->clickList->requestShip(x,y);
     if (sel!=NULL) {
       UnitCollection *tmpcollection=new UnitCollection();
@@ -191,8 +206,13 @@ void InputDFA::ClickSelect (KBSTATE k, int x, int y, int delx, int dely, int mod
   }
   if (k==DOWN) {
     if (delx||dely) {
-      Vector v = GFXDeviceToEye(x-CurDFA->prevx, y-CurDFA->prevy) - GFXDeviceToEye(0,0);
-      CurDFA->SelectBox.SetSize (v.i, v.j);
+      Vector v = GFXDeviceToEye(x-CurDFA->prevx, y-CurDFA->prevy);// - GFXDeviceToEye(0,0);
+      float dumbx,dumby;
+      dumbx = -GetX(x)+GetX(CurDFA->prevx);
+      dumby = -GetY(y)+GetY(CurDFA->prevy);
+      CurDFA->SelectBox.SetSize (-dumbx,-dumby); 
+      CurDFA->SelectBox.SetPosition (GetX(CurDFA->prevx)+.5*(GetX(x)-GetX(CurDFA->prevx)), GetY(CurDFA->prevy)+.5*(GetY(y)-GetY(CurDFA->prevy)));
+
       CurDFA->Selecting=true;
       if (mod&ACTIVE_SHIFT) {
 	//do clickb0x0rz on both CurDFA->selection && tmpcol FIXME
@@ -226,7 +246,11 @@ void InputDFA::ClickSelect (KBSTATE k, int x, int y, int delx, int dely, int mod
 //this function is bound in the NONE state...
 void InputDFA::NoneSelect (KBSTATE k,int x, int y, int delx, int dely, int mod) {
   Vector v = GFXDeviceToEye(x,y);
-  CurDFA->MouseArrow.SetPosition (v.i, v.j);
+  float xs,ys;
+  y = g_game.y_resolution-y;
+  CurDFA->MouseArrow.GetSize (xs,ys);
+  CurDFA->MouseArrow.SetPosition (.5*xs+GetX(x), .5*ys+GetY(y));
+
   static int kmod;
   if (k==RESET)
     return;///little hack to prevent the function from being 'primed' with reset and continuing on an infinite loop again and again and again
@@ -234,7 +258,7 @@ void InputDFA::NoneSelect (KBSTATE k,int x, int y, int delx, int dely, int mod) 
     return; //you don't want control pressed
   if (k==PRESS) {
     Vector v = GFXDeviceToEye(x,y);
-    CurDFA->SelectBox.SetPosition (v.i, v.j);
+    CurDFA->SelectBox.SetPosition (GetX(x), GetY(y));
     CurDFA->Selecting=false;
     kmod = mod;
     CurDFA->prevx=x;
@@ -258,7 +282,11 @@ void InputDFA::NoneSelect (KBSTATE k,int x, int y, int delx, int dely, int mod) 
   if (k==DOWN) {
     if (delx||dely) {
       Vector v = GFXDeviceToEye(x-CurDFA->prevx, y-CurDFA->prevy) - GFXDeviceToEye(0,0);
-      CurDFA->SelectBox.SetSize (v.i, v.j);
+      float dumbx,dumby;
+      dumbx = -GetX(x)+GetX(CurDFA->prevx);
+      dumby = -GetY(y)+GetY(CurDFA->prevy);
+      CurDFA->SelectBox.SetSize (-dumbx,-dumby); 
+      CurDFA->SelectBox.SetPosition (GetX(CurDFA->prevx)+.5*(GetX(x)-GetX(CurDFA->prevx)), GetY(CurDFA->prevy)+.5*(GetY(y)-GetY(CurDFA->prevy)));
       CurDFA->Selecting=true;
     }
   }
