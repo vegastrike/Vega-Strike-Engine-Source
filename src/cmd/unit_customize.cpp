@@ -23,7 +23,8 @@ extern Unit * CreateGameTurret (std::string tur,int faction);
 template <class UnitType>
 bool GameUnit<UnitType>::UpgradeSubUnits (const Unit * up, int subunitoffset, bool touchme, bool downgrade, int &numave, double &percentage)  {
   bool bl = this->UpgradeSubUnitsWithFactory( up, subunitoffset, touchme, downgrade, numave, percentage,&CreateGameTurret);
-  this->DisableTurretAI();
+  if (!up->SubUnits.empty())
+    this->DisableTurretAI();
   return bl;
 }
 extern char * GetUnitDir (const char *);
