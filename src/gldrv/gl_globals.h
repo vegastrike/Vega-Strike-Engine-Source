@@ -63,6 +63,9 @@ struct GFXStats{
 #endif
 #if defined(__APPLE__) || defined(MACOSX)
     #include <GLUT/glut.h>
+#ifdef GL_INIT_CPP
+#define GL_GLEXT_PROTOTYPES
+#endif
     #include <OpenGL/glext.h>
 #else
     #include <GL/glut.h>
@@ -92,12 +95,12 @@ struct GFXStats{
 #define GL_TEXTURE_CUBE_MAP_NEGATIVE_Z_EXT 0x851A
 #define GL_PROXY_TEXTURE_CUBE_MAP_EXT     0x851B
 #define GL_MAX_CUBE_MAP_TEXTURE_SIZE_EXT  0x851C
-
-extern PFNGLMULTITEXCOORD2FARBPROC glMultiTexCoord2fARB;
-extern PFNGLCLIENTACTIVETEXTUREARBPROC glClientActiveTextureARB;
-extern PFNGLCLIENTACTIVETEXTUREARBPROC glActiveTextureARB;
-extern PFNGLCOLORTABLEEXTPROC glColorTable;
 #endif
+
+extern PFNGLMULTITEXCOORD2FARBPROC glMultiTexCoord2fARB_p;
+extern PFNGLCLIENTACTIVETEXTUREARBPROC glClientActiveTextureARB_p;
+extern PFNGLCLIENTACTIVETEXTUREARBPROC glActiveTextureARB_p;
+extern PFNGLCOLORTABLEEXTPROC glColorTable_p;
 extern PFNGLLOCKARRAYSEXTPROC glLockArraysEXT_p;
 extern PFNGLUNLOCKARRAYSEXTPROC glUnlockArraysEXT_p;
 

@@ -18,7 +18,9 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
+#define GL_INIT_CPP
 #include "gl_globals.h"
+#undef GL_INIT_CPP
 #include "gl_include.h"
 #include "vs_globals.h"
 #include "xml_support.h"
@@ -69,23 +71,13 @@
 #include "cg_global.h"
 #endif
 
-#ifdef _WIN32
-PFNGLCLIENTACTIVETEXTUREARBPROC glClientActiveTextureARB=0;
-PFNGLCLIENTACTIVETEXTUREARBPROC glActiveTextureARB=0;
-PFNGLCOLORTABLEEXTPROC glColorTable=0;
-PFNGLMULTITEXCOORD2FARBPROC glMultiTexCoord2fARB = 0;
-// the following two lines were not defined for WIN32... any particular reason?
-PFNGLLOCKARRAYSEXTPROC glLockArraysEXT_p;
-PFNGLUNLOCKARRAYSEXTPROC glUnlockArraysEXT_p;
-//PFNGLSELECTTEXTURESGISPROC glSelectTextureSGIS ;
-//PFNGLMULTITEXCOORD2FSGISPROC glMultiTexCoord2fSGIS ;
-//PFNGLMTEXCOORDPOINTERSGISPROC glMTexCoordPointerSGIS ;
-#include "gfxlib.h"
-#else
+PFNGLCLIENTACTIVETEXTUREARBPROC glClientActiveTextureARB_p=0;
+PFNGLCLIENTACTIVETEXTUREARBPROC glActiveTextureARB_p=0;
+PFNGLCOLORTABLEEXTPROC glColorTable_p=0;
+PFNGLMULTITEXCOORD2FARBPROC glMultiTexCoord2fARB_p = 0;
 PFNGLLOCKARRAYSEXTPROC glLockArraysEXT_p;
 PFNGLUNLOCKARRAYSEXTPROC glUnlockArraysEXT_p;
 
-#endif
 typedef void (*(*get_gl_proc_fptr_t)(const GLubyte *))(); 
 #ifdef _WIN32
     typedef char * GET_GL_PTR_TYP;
@@ -94,7 +86,6 @@ typedef void (*(*get_gl_proc_fptr_t)(const GLubyte *))();
 #else
     typedef GLubyte * GET_GL_PTR_TYP;
 #define GET_GL_PROC glXGetProcAddressARB
-
 #endif
 
 #if defined(CG_SUPPORT)
@@ -106,38 +97,38 @@ void init_opengl_extensions()
 	const unsigned char * extensions = glGetString(GL_EXTENSIONS);
 
 	(void) fprintf(stderr, "OpenGL Extensions supported: %s\n", extensions);
-#if !defined(IRIX)
     if (glutExtensionSupported( "GL_EXT_compiled_vertex_array")&&XMLSupport::parse_bool (vs_config->getVariable ("graphics","LockVertexArrays","true"))) {
-#if defined(__APPLE__) || defined(MACOSX)
+#ifdef __APPLE__
         glLockArraysEXT_p = &glLockArraysEXT;
         glUnlockArraysEXT_p = &glUnlockArraysEXT;
 #else
 	glLockArraysEXT_p = (PFNGLLOCKARRAYSEXTPROC) 
 	    GET_GL_PROC( (GET_GL_PTR_TYP) "glLockArraysEXT" );
 	glUnlockArraysEXT_p = (PFNGLUNLOCKARRAYSEXTPROC) 
-	    GET_GL_PROC( (GET_GL_PTR_TYP) "glUnlockArraysEXT" );
+	    GET_GL_PROC( (GET_GL_PTR_TYP) "glUnlockArraysEXT" );	
 #endif
 	(void) fprintf(stderr, "OpenGL::GL_EXT_compiled_vertex_array supported\n");
-    } else {
+    } else {    
+		glLockArraysEXT_p = NULL;
+		glUnlockArraysEXT_p = NULL;
+		(void) fprintf(stderr, "OpenGL::GL_EXT_compiled_vertex_array unsupported\n");
+    }
+#ifdef __APPLE__
+	glColorTable_p = &glColorTableEXT;
+	glMultiTexCoord2fARB_p = &glMultiTexCoord2fARB;
+	glClientActiveTextureARB_p = &glClientActiveTextureARB;
+	glActiveTextureARB_p = &glActiveTextureARB;		
 #else
-    {
-#endif
-	glLockArraysEXT_p = NULL;
-	glUnlockArraysEXT_p = NULL;
-	(void) fprintf(stderr, "OpenGL::GL_EXT_compiled_vertex_array unsupported\n");
-    }
-#ifdef _WIN32
-    glColorTable = (PFNGLCOLORTABLEEXTPROC ) GET_GL_PROC((GET_GL_PTR_TYP)"glColorTableEXT");
-    glMultiTexCoord2fARB = (PFNGLMULTITEXCOORD2FARBPROC) GET_GL_PROC((GET_GL_PTR_TYP)"glMultiTexCoord2fARB");
-    glClientActiveTextureARB = (PFNGLCLIENTACTIVETEXTUREARBPROC) GET_GL_PROC((GET_GL_PTR_TYP)"glClientActiveTextureARB");
-    glActiveTextureARB = (PFNGLCLIENTACTIVETEXTUREARBPROC) GET_GL_PROC((GET_GL_PTR_TYP)"glActiveTextureARB");
+    glColorTable_p = (PFNGLCOLORTABLEEXTPROC ) GET_GL_PROC((GET_GL_PTR_TYP)"glColorTableEXT");
+    glMultiTexCoord2fARB_p = (PFNGLMULTITEXCOORD2FARBPROC) GET_GL_PROC((GET_GL_PTR_TYP)"glMultiTexCoord2fARB");
+    glClientActiveTextureARB_p = (PFNGLCLIENTACTIVETEXTUREARBPROC) GET_GL_PROC((GET_GL_PTR_TYP)"glClientActiveTextureARB");
+    glActiveTextureARB_p = (PFNGLCLIENTACTIVETEXTUREARBPROC) GET_GL_PROC((GET_GL_PTR_TYP)"glActiveTextureARB");
     if (!glMultiTexCoord2fARB) {
-      glMultiTexCoord2fARB = (PFNGLMULTITEXCOORD2FARBPROC) GET_GL_PROC((GET_GL_PTR_TYP)"glMultiTexCoord2fEXT");
-      glClientActiveTextureARB = (PFNGLCLIENTACTIVETEXTUREARBPROC) GET_GL_PROC((GET_GL_PTR_TYP)"glClientActiveTextureEXT");
-      glActiveTextureARB = (PFNGLCLIENTACTIVETEXTUREARBPROC) GET_GL_PROC((GET_GL_PTR_TYP)"glActiveTextureEXT");
-    }
+      glMultiTexCoord2fARB_p = (PFNGLMULTITEXCOORD2FARBPROC) GET_GL_PROC((GET_GL_PTR_TYP)"glMultiTexCoord2fEXT");
+      glClientActiveTextureARB_p = (PFNGLCLIENTACTIVETEXTUREARBPROC) GET_GL_PROC((GET_GL_PTR_TYP)"glClientActiveTextureEXT");
+      glActiveTextureARB_p = (PFNGLCLIENTACTIVETEXTUREARBPROC) GET_GL_PROC((GET_GL_PTR_TYP)"glActiveTextureEXT");
 #endif
-
+	  
 #ifdef GL_FOG_DISTANCE_MODE_NV
     if (glutExtensionSupported ("GL_NV_fog_distance")) {
       fprintf (stderr,"OpenGL::Accurate Fog Distance supported\n");
