@@ -1119,6 +1119,13 @@ if test "$NETCOMM" = "1" ; then
 fi
 
 dnl --------------------------------------------------------------------------
+dnl Check for win32 winsock 2 support
+dnl --------------------------------------------------------------------------
+if test "$WIN32" = "1" ; then
+AC_ARG_ENABLE(netcomm, AC_HELP_STRING([--enable-winsock2], [Enable winsock2 support instead of winsock1 under win32]), [TR_CFLAGS="$TR_CFLAGS -DUSE_WINSOCK2"; echo "Using winsock 2 support"])
+fi
+
+dnl --------------------------------------------------------------------------
 dnl Other options
 dnl --------------------------------------------------------------------------
 
