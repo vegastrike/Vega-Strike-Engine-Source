@@ -48,7 +48,7 @@ Unit* UnitFactory::createUnit( const char *filename,
 		               int         faction,
 		               std::string customizedUnit,
 		               Flightgroup *flightgroup,
-		               int         fg_subnumber, string netxml)
+		               int         fg_subnumber, string * netxml)
 {
     return new Unit( filename,
                      SubUnit,

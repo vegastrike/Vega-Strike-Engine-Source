@@ -241,7 +241,7 @@ public:
        int         faction,
        std::string customizedUnit=string(""),
        Flightgroup *flightgroup=NULL,
-       int         fg_subnumber=0, string netxml="");
+       int         fg_subnumber=0, string * netxml=NULL);
   ///Initialize many of the defaults inherant to the constructor
   void Init();
   void Init( const char *filename,
@@ -249,7 +249,7 @@ public:
        int         faction,
        std::string customizedUnit=string(""),
        Flightgroup *flightgroup=NULL,
-       int         fg_subnumber=0, string netxml="");
+       int         fg_subnumber=0, string * netxml=NULL);
   friend class UnitFactory;
 
 public:    
@@ -521,7 +521,7 @@ public:
   void WriteUnit(const char * modificationname="");
   string WriteUnitString();
   ///Loads a unit from an xml file into a complete datastructure
-  void LoadXML(const char *filename, const char * unitModifications="", string xmlbuffer="");
+  void LoadXML(const char *filename, const char * unitModifications="", string * xmlbuffer=NULL);
 
 /***************************************************************************************/
 /**** PHYSICS STUFF                                                                 ****/

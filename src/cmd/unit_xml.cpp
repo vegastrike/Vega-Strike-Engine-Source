@@ -1648,7 +1648,7 @@ string Unit::WriteUnitString () {
 
 extern std::string GetReadPlayerSaveGame (int);
 
-void Unit::LoadXML(const char *filename, const char * modifications, string xmlbuffer)
+void Unit::LoadXML(const char *filename, const char * modifications, string * xmlbuffer)
 {
   shield.number=0;
   RecurseIntoSubUnitsOnCollision=!isSubUnit();
@@ -1659,7 +1659,7 @@ void Unit::LoadXML(const char *filename, const char * modifications, string xmlb
   cout<<endl;
   //cout<<"Loading XML unit : "<<filename<<" in "<<curdir[0]<<endl;
   cout<<endl;
-  if( xmlbuffer=="")
+  if( xmlbuffer==NULL)
   {
 	  if (modifications) {
 		if (strlen(modifications)!=0) {
@@ -1822,9 +1822,9 @@ void Unit::LoadXML(const char *filename, const char * modifications, string xmlb
   XML_SetUserData(parser, this);
   XML_SetElementHandler(parser, &Unit::beginElement, &Unit::endElement);
   
-  if( xmlbuffer!="")
+  if( xmlbuffer!=NULL)
   {
-	XML_Parse (parser,xmlbuffer.c_str(),xmlbuffer.length(),1);
+	XML_Parse (parser,xmlbuffer->c_str(),xmlbuffer->length(),1);
   }
   else
   {

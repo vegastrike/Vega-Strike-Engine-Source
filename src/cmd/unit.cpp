@@ -156,7 +156,7 @@ GameUnit<UnitType>::GameUnit<UnitType> (std::vector <Mesh *>& meshes, bool SubU,
 }
 extern void update_ani_cache();
 template <class UnitType>
-GameUnit<UnitType>::GameUnit<UnitType>(const char *filename, bool SubU, int faction,std::string unitModifications, Flightgroup *flightgrp,int fg_subnumber, string netxml) {
+GameUnit<UnitType>::GameUnit<UnitType>(const char *filename, bool SubU, int faction,std::string unitModifications, Flightgroup *flightgrp,int fg_subnumber, string * netxml) {
 	Unit::Init( filename, SubU, faction, unitModifications, flightgrp, fg_subnumber, netxml);
 }
 /*

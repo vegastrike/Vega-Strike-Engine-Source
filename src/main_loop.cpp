@@ -634,7 +634,7 @@ void createObjects(std::vector <std::string> &fighter0name, std::vector <StarSys
 			{
 				cout<<"CREATING A NETWORK PLAYER : "<<fightername<<endl;
 				//modifications = modifications+".xml";
-				fighters[a] = UnitFactory::createUnit(fightername, false,tmptarget[a],"",fg,s, savefiles[squadnum][1]);
+				fighters[a] = UnitFactory::createUnit(fightername, false,tmptarget[a],"",fg,s, &savefiles[squadnum][1]);
 				// Set the faction we have in the save file instead of the mission file (that is to be ignored in networking mode)
 				fighters[a]->faction = FactionUtil::GetFactionIndex( cp->savegame->GetPlayerFaction());
 				

@@ -311,7 +311,7 @@ Unit::Unit (std::vector <Mesh *> & meshes, bool SubU, int fact) {
 }
 
 extern void update_ani_cache();
-Unit::Unit(const char *filename, bool SubU, int faction,std::string unitModifications, Flightgroup *flightgrp,int fg_subnumber, string netxml) {
+Unit::Unit(const char *filename, bool SubU, int faction,std::string unitModifications, Flightgroup *flightgrp,int fg_subnumber, string * netxml) {
   image = new UnitImages;
   sound = new UnitSounds;
   aistate=NULL;
@@ -588,7 +588,7 @@ void vscdups (const vector<string> &path) {
 	}
 }
 
-void Unit::Init(const char *filename, bool SubU, int faction,std::string unitModifications, Flightgroup *flightgrp,int fg_subnumber, string netxml)
+void Unit::Init(const char *filename, bool SubU, int faction,std::string unitModifications, Flightgroup *flightgrp,int fg_subnumber, string * netxml)
 {
 	this->Unit::Init();
 	update_ani_cache();
@@ -644,7 +644,7 @@ void Unit::Init(const char *filename, bool SubU, int faction,std::string unitMod
 	}else {
 	  path.back().pop_back();vschdirs(path.back());
 	  name = filename;
-	  if( netxml=="")
+	  if( netxml==NULL)
 		Unit::LoadXML(filename,unitModifications.c_str());
 	  else
 		Unit::LoadXML( filename, "", netxml);

@@ -1134,7 +1134,7 @@ void	NetClient::addClient( const Packet* packet )
 							 FactionUtil::GetFaction( PLAYER_FACTION_STRING.c_str()),
 							 string(""),
 							 Flightgroup::newFlightgroup ( callsign,savedships[0],PLAYER_FACTION_STRING,"default",1,1,"","",mission),
-							 0, saves[1]);
+							 0, &saves[1]);
 		clt->game_unit.SetUnit( un);
 		// Set all weapons to inactive
 		vector <Mount>

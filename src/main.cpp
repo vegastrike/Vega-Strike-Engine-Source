@@ -525,7 +525,7 @@ void bootstrap_main_loop () {
 		// Initiate the network if in networking play mode for each local player
 		if( srvip != "")
 		{
-			string srvport = vs_config->getVariable("network","server_port", "6779");
+			string srvport = vs_config->getVariable("network","server_port", "6778");
 			// Get the number of local players
 			Network = new NetClient[_Universe->numPlayers()];
 

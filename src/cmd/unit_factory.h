@@ -51,7 +51,7 @@ public:
                              int         faction,
                              std::string customizedUnit=string(""),
                              Flightgroup *flightgroup=NULL,
-                             int         fg_subnumber=0, string netxml="");
+                             int         fg_subnumber=0, string * netxml=NULL);
 
     static Unit* createServerSideUnit( const char *filename,
                              bool        SubUnit,

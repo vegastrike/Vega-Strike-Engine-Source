@@ -209,7 +209,7 @@ void	NetServer::sendLoginAccept( Client * clt, AddressIP ipadr, int newacct)
                              FactionUtil::GetFaction( PLAYER_FACTION_STRING.c_str()),
                              string(""),
                              Flightgroup::newFlightgroup (PLAYER_CALLSIGN,PLAYER_SHIPNAME,PLAYER_FACTION_STRING,"default",1,1,"","",mission),
-                             0, saves[1]);
+                             0, &saves[1]);
 		COUT<<"\tAFTER UNIT FACTORY WITH XML"<<endl;
 		clt->game_unit.SetUnit( un);
 		// Assign its serial to client*
