@@ -840,7 +840,10 @@ public:
       if (_Universe->AccessCockpit()->autoInProgress()&&(!_Universe->AccessCockpit()->unitInAutoRegion(parent))&&(un =ChooseNearNavPoint(parent,targetlocation,0))!=NULL) {
         WarpToP(parent,un);
       }else {
-        WarpToP(parent,targetlocation,0);
+        Unit* playa=_Universe->AccessCockpit()->GetParent();
+        if (playa==NULL||playa->Target()!=parent) {
+          WarpToP(parent,targetlocation,0);
+        }
       }
     }
   }
