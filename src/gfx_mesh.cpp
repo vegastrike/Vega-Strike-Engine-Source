@@ -88,7 +88,7 @@ Mesh::Mesh():Primitive()
 	InitUnit();
 }
 
-Mesh:: Mesh(char * filename, bool xml):Primitive()
+Mesh:: Mesh(const char * filename, bool xml):Primitive()
 {
 	int TexNameLength;
 	char *TexName=NULL;
@@ -125,7 +125,7 @@ Mesh:: Mesh(char * filename, bool xml):Primitive()
 
 	strcpy(name, filename);
 	if(xml) {
-	  LoadXML(filename);
+	  LoadXML(filename, oldmesh);
 	  return;
 	}
 

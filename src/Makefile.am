@@ -9,6 +9,8 @@ bin_PROGRAMS = vegastrike
 #	gfx_hud.h				\
 #	gfx_light.cpp				\
 #	gfx_light.h				\
+#	quadgeom.cpp				\
+#	quadgeom.hpp				\
 
 
 
@@ -140,4 +142,5 @@ vegastrike_SOURCES =				\
 	joystick.h				\
 	gfx_mesh_xml.cpp 			\
 	xml_support.h  				\
-	xml_support.cpp
+	xml_support.cpp				\
+	cmd_unit_xml.cpp

@@ -53,8 +53,8 @@ struct Texture{
   }
 public:
 
-	Texture(char *,char *, int stage = 0, enum TEXTURE_TARGET target=TEXTURE2D, enum TEXTURE_IMAGE_TARGET imagetarget=TEXTURE_2D, float alpha=1, int zeroval=0);
-	Texture(char * FileName, int stage = 0, enum TEXTURE_TARGET target=TEXTURE2D, enum TEXTURE_IMAGE_TARGET imagetarget=TEXTURE_2D);
+	Texture(const char *,const char *, int stage = 0, enum TEXTURE_TARGET target=TEXTURE2D, enum TEXTURE_IMAGE_TARGET imagetarget=TEXTURE_2D, float alpha=1, int zeroval=0);
+	Texture(const char * FileName, int stage = 0, enum TEXTURE_TARGET target=TEXTURE2D, enum TEXTURE_IMAGE_TARGET imagetarget=TEXTURE_2D);
 	~Texture()
 	{
 		if(original == NULL)

@@ -98,7 +98,7 @@ void Texture::setold()
 	original->refcount++;
 }
 
-Texture::Texture(char * FileName, int stage, enum TEXTURE_TARGET target, enum TEXTURE_IMAGE_TARGET imagetarget)
+Texture::Texture(const char * FileName, int stage, enum TEXTURE_TARGET target, enum TEXTURE_IMAGE_TARGET imagetarget)
 {
   InitTexture();
   palette = NULL;
@@ -193,7 +193,7 @@ Texture::Texture(char * FileName, int stage, enum TEXTURE_TARGET target, enum TE
 	setold();
 }
 
-Texture::Texture (char * FileNameRGB, char *FileNameA, int stage, enum TEXTURE_TARGET target, enum TEXTURE_IMAGE_TARGET imagetarget, float alpha, int zeroval)
+Texture::Texture (const char * FileNameRGB, const char *FileNameA, int stage, enum TEXTURE_TARGET target, enum TEXTURE_IMAGE_TARGET imagetarget, float alpha, int zeroval)
 {
   InitTexture();
   palette = NULL;

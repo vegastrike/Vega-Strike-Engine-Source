@@ -1,4 +1,5 @@
 #include <string.h>
+#include <stdlib.h>
 #include <strstream.h>
 #include <ctype.h>
 #include <assert.h>
@@ -38,5 +39,23 @@ namespace XMLSupport {
     for(;*atts!=NULL;atts+=2) {
       push_back(Attribute(atts[0], atts[1]));
     }
+  }
+
+  double parse_float(const string &str) {
+    double result;
+    const char *dat = str.c_str();
+    char *dat1;
+    result = strtod(dat, &dat1);
+    assert(dat!=dat1);
+    return result;
+  }
+
+  int parse_int(const string &str) {
+    int result;
+    const char *dat = str.c_str();
+    char *dat1;
+    result = strtol(dat, &dat1, 10);
+    assert(dat!=dat1);
+    return result;
   }
 }

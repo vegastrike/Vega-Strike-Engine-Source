@@ -320,6 +320,7 @@ SphereMesh *bg2=NULL;
 TextPlane *textplane = NULL;
 
 ClickList *shipList =NULL;
+Unit *midway = NULL;
 /*
 int oldx =0;
 int  oldy=0;
@@ -509,7 +510,9 @@ void createObjects() {
   shipList = _GFX->activeStarSystem()->getClickList();
     //BindKey (1,startselect);
     //BindKey (0,clickhandler);
-  //Mesh *foo = new Mesh("mid-20038.xml", true);
+  midway = new Unit("b_midway.xml", true);
+  midway->SetPosition(1,1, 10);
+  _GFX->activeStarSystem()->AddUnit(midway);
   //exit(0);
 }
 
@@ -566,8 +569,8 @@ void main_loop() {
 
 
   _GFX->activeStarSystem()->Draw();
-  s->Draw();
-
+  //s->Draw();
+  //fihneCarriah->Draw();
   _GFX->activeStarSystem()->Update();
   ProcessKB();
   //ProcessMouse();  

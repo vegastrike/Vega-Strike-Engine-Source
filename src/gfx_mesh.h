@@ -48,20 +48,75 @@ using XMLSupport::AttributeList;
 class Mesh:public Primitive
 {
 private:
-  enum ElementNames {
-    UNKNOWN, MESH, POINTS, POINT, LOCATION, NORMAL, POLYGONS, TRI, QUAD, VERTEX
-  };
-  vector<ElementNames> xml_state;
-  static const EnumMap::Pair element_names[];
-  static const EnumMap element_map;
+  struct XML {
+    enum Names {
+      //elements
+      UNKNOWN, 
+      MESH, 
+      POINTS, 
+      POINT, 
+      LOCATION, 
+      NORMAL, 
+      POLYGONS, 
+      TRI, 
+      QUAD, 
+      VERTEX,
+      //attributes
+      TEXTURE,
+      X,
+      Y,
+      Z,
+      I,
+      J,
+      K,
+      S,
+      T
+    };
+    enum PointState {
+      P_X = 0x1,
+      P_Y = 0x2,
+      P_Z = 0x4,
+      P_I = 0x8,
+      P_J = 0x10,
+      P_K = 0x20
+    };
+    enum VertexState {
+      V_POINT = 0x1,
+      V_S = 0x2,
+      V_T = 0x4
+    };
 
-  void LoadXML(char *filename);
+    static const EnumMap::Pair element_names[];
+    static const EnumMap::Pair attribute_names[];
+    static const EnumMap element_map;
+    static const EnumMap attribute_map;
+
+    vector<Names> state_stack;
+    int load_stage;
+    int point_state;
+    int vertex_state;
+
+    string decal_name;
+
+    int num_vertices;
+    vector<GFXVertex> vertices;
+    vector<GFXVertex> tris;
+    vector<GFXVertex> quads;
+
+    vector<GFXVertex> &active_list;
+    GFXVertex vertex;
+    
+    XML() : active_list(tris)
+    { }
+  } *xml;
+
+  void LoadXML(const char *filename, Mesh *oldmesh);
 
   static void beginElement(void *userData, const XML_Char *name, const XML_Char **atts);
   static void endElement(void *userData, const XML_Char *name);
   
-  void beginElement(const string &name, const AttributeList &attributes);
-  void endElement(const string &name);
+  virtual void beginElement(const string &name, const AttributeList &attributes);
+  virtual void endElement(const string &name);
 
 protected:
 	int refcount;
@@ -114,7 +169,7 @@ protected:
 	Vector pp, pq, pr, ppos;
 public:
 	Mesh();
-	Mesh(char *filename,  bool xml=false);
+	Mesh(const char *filename,  bool xml=false);
 	~Mesh();
 
 	virtual void Draw();

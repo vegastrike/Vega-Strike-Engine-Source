@@ -10,8 +10,8 @@ namespace XMLSupport {
 
   struct Attribute {
     string name;
-    string attribute;
-    Attribute(string name, string attribute) : name(name), attribute(attribute)
+    string value;
+    Attribute(string name, string value) : name(name), value(value)
     {};
   };
 
@@ -36,5 +36,7 @@ namespace XMLSupport {
     const string &lookup(int val) const;
   };
 
+  double parse_float(const string &str);
+  int parse_int(const string &str);
 }
 #endif

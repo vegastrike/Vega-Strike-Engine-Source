@@ -65,12 +65,16 @@ Unit::Unit()
 {
 	Init();
 }
-Unit::Unit(char *filename):Mesh()
+Unit::Unit(char *filename, bool xml):Mesh()
 {
 	Init();
 
 	strcpy(name, (filename + string(" - Unit")).c_str());
 	/*Insert file loading stuff here*/
+	if(xml) {
+	  LoadXML(filename);
+	  return;
+	}
 	LoadFile(filename);
 
 	ReadInt(nummesh);
