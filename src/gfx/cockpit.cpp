@@ -241,6 +241,7 @@ void Cockpit::DrawBlips (Unit * un) {
       }
       LocalToRadar (localcoord,s,t);
       GFXColor localcol (radarl->color?unitToColor (un,target):GFXColor(1,1,1,1));
+
       GFXColorf (localcol);
       if (target==makeBigger) {
 	GFXEnd();

@@ -29,6 +29,7 @@
 #include "hashtable.h"
 #include "cmd/nebula.h"
 #include "galaxy_gen.h"
+#include "in_kb.h"
 extern Music *muzak;
 extern Vector mouseline;
 
@@ -36,7 +37,7 @@ vector<Vector> perplines;
 //static SphereMesh *foo;
 //static Unit *earth;
 
-
+extern void reset_time_compression (int,KBSTATE);
 
 Atmosphere *theAtmosphere;
 
@@ -569,7 +570,16 @@ void StarSystem::Update(float priority ) {
   fprintf (stderr,"unphi");
   fflush (stderr);
 #endif
-	while((unit = iter.current())!=NULL) {
+      Unit * owner = _Universe->AccessCockpit()->GetParent();
+      while((unit = iter.current())!=NULL) {
+	if (owner) 
+	  if (_Universe->GetRelation(owner->faction,unit->faction)<0) {
+	    static float neardist =XMLSupport::parse_float(vs_config->getVariable("physics","autodist","4000"));
+	    Vector diff (owner->Position()-unit->Position());
+	    if (diff.Dot(diff)<neardist*neardist) {
+	      reset_time_compression(0,PRESS);
+	    }
+	  }
 	  unit->UpdatePhysics(identity_transformation,identity_matrix,Vector (0,0,0),firstframe,units);
 	  iter.advance();
 	}
