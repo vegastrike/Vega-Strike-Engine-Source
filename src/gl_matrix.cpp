@@ -23,6 +23,7 @@
 //typedef float GLdouble;
 #include <math.h>
 #include <string.h>
+//#include <GL/glu.h>
 const float PI=3.1415926536;
 inline void Zero(float matrix[])
 {
@@ -114,12 +115,29 @@ inline void CopyMatrix(Matrix dest, const Matrix source)
 static Matrix model, view, projection, invprojection;
 
 Vector eye, center, up;
-void getInverseProjection (float * inv) {
+void getInverseProjection (float *& inv) {
   inv = invprojection;
 }
-void getProjection (float * proj) {
-  proj = projection;
+
+/**
+ * GFXGetXPerspective () returns the number that x/z is multiplied by to 
+ * land a pixel on the screen.  
+ * | xs 0  a 0 |[x]   [xs + az]          [1/xs 0   0  a/xs][x]   [x/xs+ aw/xs]
+ * | 0  ys b 0 |[y] = [ys + bz]    ^-1   [ 0  1/ys 0  b/ys][y] = [y/ys+ bw/ys]
+ * | 0  0  c d |[z]   [cz + dw]          [ 0   0   0  -1  ][z]   [0          ]
+ * | 0  0 -1 0 |[w]   [-w     ]          [ 0   0  1/d c/d ][w]   [z/d + cw/d ]
+ * therefore   return 1/(xs *d) and 1/(ys * d) 
+ * I'm not good with matrix math...tell me if I should ret 1/xs+c/d instead
+ * for test cases I can think of, it doesn't matter--- */
+
+float GFXGetXInvPerspective () {
+  return /*invprojection[11]*  */invprojection[0];//invprojection[15];//should be??  c/d == invproj[15]
 }
+
+float GFXGetYInvPerspective() {
+  return /*invprojection[11]*  */invprojection[5];//invprojection[15];//should be??  c/d == invproj[15]
+}
+
 BOOL /*GFXDRVAPI*/ GFXMultMatrix(MATRIXMODE mode, Matrix matrix)
 {
 	Matrix t;
@@ -249,6 +267,10 @@ static void gl_Frustum(
 
 BOOL /*GFXDRVAPI*/ GFXPerspective(float fov, float aspect, float znear, float zfar)
 {
+
+  //  gluPerspective (fov,aspect,znear,zfar);
+
+
    float xmin, xmax, ymin, ymax;
 
 

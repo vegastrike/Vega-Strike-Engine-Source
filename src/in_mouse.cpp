@@ -26,8 +26,13 @@
 #include "in_mouse.h"
 
 #define NUM_BUTTONS 3
-KBSTATE MouseState [NUM_BUTTONS]= {RELEASE};
-static MouseHandler mouseBindings [NUM_BUTTONS];
+
+/** Gets the button number of the function used to draw the mouse*/
+int getMouseDrawFunc() {
+  return NUM_BUTTONS;
+}
+KBSTATE MouseState [NUM_BUTTONS+1]= {RELEASE};
+static MouseHandler mouseBindings [NUM_BUTTONS+1];
 int mousex=0;
 int mousey=0;
 
@@ -41,7 +46,7 @@ void mouseClick( int button, int state, int x, int y ) {
 
 void  mouseDrag( int x, int y ) {
   //  int mod =glutGetModifiers();
-  for (int i=0;i<NUM_BUTTONS;i++) {
+  for (int i=0;i<NUM_BUTTONS+1;i++) {
     mouseBindings[i](MouseState[i],x,y,x-mousex,y-mousey,0);
   }
 
@@ -52,7 +57,7 @@ void  mouseDrag( int x, int y ) {
 
 void mouseMotion(int x, int y) {
   //  int mod =glutGetModifiers();
-  for (int i=0;i<NUM_BUTTONS;i++) {
+  for (int i=0;i<NUM_BUTTONS+1;i++) {
     mouseBindings[i](MouseState[i],x,y,x-mousex,y-mousey,0);
   }
   mousex = x;
@@ -83,7 +88,7 @@ void BindKey (int key, MouseHandler handler) {
   handler (RESET,mousex,mousey,0,0,0);
 }
 void InitMouse(){
-  for (int a=0;a<NUM_BUTTONS;a++) {
+  for (int a=0;a<NUM_BUTTONS+1;a++) {
     UnbindMouse (a);
   }
   glutMouseFunc(mouseClick);
@@ -91,7 +96,7 @@ void InitMouse(){
   glutPassiveMotionFunc(mouseMotion);
 }				
 void ProcessMouse () {
-  for (int a=0;a<NUM_BUTTONS;a++) {
+  for (int a=0;a<NUM_BUTTONS+1;a++) {
     mouseBindings[a](MouseState[a],mousex,mousey,0,0,0);
   }
 

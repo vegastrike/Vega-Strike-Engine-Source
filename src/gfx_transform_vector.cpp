@@ -198,6 +198,13 @@ void ResetVectors (Vector &p, Vector &q, Vector &r)
 	p.j = p.k= q.i = q.k = r.i = r.j = 0;
 }
 
+void MakeRVector (Vector &p,Vector &q, Vector &r) {
+  ScaledCrossProduct (p,q,r);
+  ScaledCrossProduct (r,p,q);
+  Normalize (p);
+fprintf (stderr,"p:<%f,%f,%f>",p.i,p.j,p.k);
+
+}
 void Orthogonize(Vector &p, Vector &q, Vector &r)
 {
 	Normalize(r);

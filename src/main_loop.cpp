@@ -339,9 +339,15 @@ void createObjects() {
   fighter2 = new Unit("uosprey.dat");
   bg = new Background("cube");
   //HUDElement *t = new HUDElement("ucarrier.dat");
-  locSel = new LocationSelect(Vector (0,0,5),
-			      Vector(.707,.707,0), 
-			      Vector (.707,-.707,0));
+  /*************
+		locSel = new LocationSelect(Vector (0,-1,5),
+		Vector(1,0,0), 
+		Vector (0,-.4,-1));
+//GOOD!!
+  *************/
+  locSel = new LocationSelect (Vector (0,-1,5),
+			       Vector (1,0,0),
+			       Vector (0,-.35,-1));
   //fighter->SetPosition(Vector(5.0, 5.0, 5.0));
   fighter->SetPosition(Vector(0.0, 0.0, 15.0));
   fighter->SetAI(new Orbit);

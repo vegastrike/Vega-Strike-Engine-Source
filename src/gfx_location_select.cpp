@@ -2,7 +2,7 @@
 #include "gfxlib.h"
 #include "in.h"
 #include "vegastrike.h"
-
+#include <stdio.h>
 LocationSelect::LocationSelect (Vector start, Vector Plane1, Vector Plane2/*, System * par */): Primitive() {
   //  parentScene = par;
   MoveLocation (start,Plane1,Plane2);
@@ -15,8 +15,10 @@ extern KBSTATE keyState[KEYMAP_SIZE];
 Vector DeltaPosition(0,0,0);
 bool changed = false;
 bool vert = false;
+float MouseSensitivityX=2;
+float MouseSensitivityY=4;
+#define DELTA_MOVEMENT
 
-//#define DELTA_MOVEMENT
 
 void MouseMoveHandle (KBSTATE kk,int x, int y, int delx, int dely, int mod) {
   if (keyState['z']==DOWN) {
@@ -30,8 +32,9 @@ void MouseMoveHandle (KBSTATE kk,int x, int y, int delx, int dely, int mod) {
 
     }
 #else
-    if (kk==PRESS)
+    if (kk==PRESS){
       DeltaPosition.k=y;
+    }
     else if (delx||dely) {
       DeltaPosition.i=x;
       DeltaPosition.j=y;
@@ -49,18 +52,22 @@ void MouseMoveHandle (KBSTATE kk,int x, int y, int delx, int dely, int mod) {
 
 void LocationSelect::MoveLocation (Vector start,Vector Plane1, Vector Plane2) {    
   BindKey (1,::MouseMoveHandle);
+  UnbindMouse (getMouseDrawFunc()); //don't draw the mouse
+  //BindKey (']',::incConstant);
+  //BindKey ('[',::decConstant);
   LocalPosition = Vector(0,0,0);
-  r = Plane1.Cross(Plane2);
-  Orthogonize (Plane1,Plane2,r);
+  MakeRVector (Plane1,Plane2,r);
   p = Plane1;
   q = Plane2;
-  r = r;
+
+
   pos= start;
   UpdateMatrix();
 }
 void LocationSelect::MoveLocation (Vector start,Vector Plane1, Vector Plane2, Vector Plane3) {    
   BindKey (1,::MouseMoveHandle);
-  LocalPosition = Vector(0,10,1);
+  UnbindMouse (getMouseDrawFunc());
+  LocalPosition = Vector(0,0,0);
   r = Plane3;
   p = Plane1;
   q = Plane2;
@@ -93,12 +100,14 @@ void LocationSelect:: Draw () {
 
   GFXColor4f (0,.5,0,.3);
 #ifdef DELTA_MOVEMENT
+  if (vert) {
+    LocalPosition.k=0;
+    
+  }
+  vert=false;
+
   if (DeltaPosition.k) {
     LocalPosition.k-=DeltaPosition.k*.3;
-    if (vert) {
-      LocalPosition.k=0;
-    }
-    vert=false;
     DeltaPosition.k=0;
   }
 #endif
@@ -109,6 +118,7 @@ void LocationSelect:: Draw () {
     float v[16];
 
     GFXGetMatrix (VIEW,v);
+
     GFXGetMatrix (MODEL,m);
     MultMatrix(t,v,m);
 
@@ -121,51 +131,50 @@ void LocationSelect:: Draw () {
     Vector tP (t[0],t[1],t[2]);//the p vector of the plane being selected on
     Vector tQ (t[4],t[5],t[6]);//the q vector of the plane being selected on
     Vector tR (t[8],t[9],t[10]);//the q vector of the plane being selected on
-
+    //fprintf (stderr,"<%f,%f,%f>",t[0],t[1],t[2]);
+    //fprintf (stderr,"<%f,%f,%f>",t[4],t[5],t[6]);
+    //fprintf (stderr,"<%f,%f,%f>",t[8],t[9],t[10]);
+#ifdef DELTA_MOVEMENT
+    float zvalueXY = tLocation.k+LocalPosition.i*tP.k+LocalPosition.j*tQ.k; // z val of the parallelogram
+#else
+    float zvalueXY = tLocation.k+LocalPosition.i*tP.k+LocalPosition.j*tQ.k+LocalPosition.k*tR.k; //zvalue of the cursor
+#endif
 
     if (changed&&!vert) {    //planar movement
-      ///////    tLocation+=LocalPosition.k*tR;//scale the R vector of the plane so zval is computed for the raised object instead of just the plane projection
-    //the approximate distance away that the cursor is
-    float zvalueXY = tLocation.k+LocalPosition.i*tP.k+LocalPosition.j*tQ.k;
+    
     if (zvalueXY >1000)  /// zfar
       zvalueXY = 1000;
     if (zvalueXY<-1000)
       zvalueXY = -1000;
-    //    fprintf (stderr, "ztr%f ",zvalueXY);
-      LocalPosition.i= fabs(zvalueXY)*(((2*DeltaPosition.i/g_game.x_resolution - 1)/tP.i)+(-(2*DeltaPosition.j/g_game.y_resolution - 1)/tP.j));
-      LocalPosition.j= fabs(zvalueXY)*(((2*DeltaPosition.i/g_game.x_resolution - 1)/tQ.i)+(-(2*DeltaPosition.j/g_game.y_resolution - 1)/tQ.j));
+
+      LocalPosition.i= fabs(zvalueXY)*(((2*DeltaPosition.i/g_game.x_resolution - 1)*MouseSensitivityX*GFXGetXInvPerspective()*tP.i)-((2*DeltaPosition.j/g_game.y_resolution - 1)*MouseSensitivityY*GFXGetYInvPerspective()*tP.j));
+      LocalPosition.j= fabs(zvalueXY)*(((2*DeltaPosition.i/g_game.x_resolution - 1)*MouseSensitivityX*GFXGetXInvPerspective()*tQ.i)-((2*DeltaPosition.j/g_game.y_resolution - 1)*tQ.j*MouseSensitivityY*GFXGetYInvPerspective()));
       DeltaPosition= Vector(0,0,0);
       //    Vector TransPQR (t[0]*i+t[4]*LocalPosition.j+t[8]*LocalPosition.k+t[12],t[1]*LocalPosition.i+t[5]*LocalPosition.j+t[9]*LocalPosition.k+t[13],t[2]*LocalPosition.i+t[6]*LocalPosition.j+t[10]*LocalPosition.k+t[14]);
       changed=false;
     }
 #ifndef DELTA_MOVEMENT 
     else { //vertical movement
-      tLocation+=LocalPosition.k*tR;//scale the R vector of the plane so zval is computed for the raised object instead of just the plane projection
-    //the approximate distance away that the cursor is
-    float zvalueXY = tLocation.k+LocalPosition.i*tP.k+LocalPosition.j*tQ.k;
+
     if (zvalueXY >1000)  /// zfar
       zvalueXY = 1000;
     if (zvalueXY<-1000)
       zvalueXY = -1000;
 
-    //    fprintf (stderr, "zup%f ",zvalueXY);
-    //////////////      LocalPosition.i= fabs(zvalueXY)*((2*DeltaPosition.i/g_game.x_resolution - 1)/tP.i)/tP.j;
-    //////////////  LocalPosition.j= fabs(zvalueXY)*((2*DeltaPosition.i/g_game.x_resolution - 1)/tQ.i)/tQ.j;
-      LocalPosition.k= fabs(zvalueXY)*(/*((2*DeltaPosition.i/g_game.x_resolution - 1)/tR.i)+*/(-(2*DeltaPosition.j/g_game.y_resolution -1)/tR.j));
+      LocalPosition.k= fabs(zvalueXY)*(((2*DeltaPosition.i/g_game.x_resolution - 1)*MouseSensitivityX*GFXGetXInvPerspective()*tR.i)-((2*DeltaPosition.j/g_game.y_resolution -1)*MouseSensitivityY*GFXGetYInvPerspective()*tR.j));
       if (DeltaPosition.k) {
 	LocalPosition.k=0;
 	DeltaPosition.k=0;
       }
-      
-      
       vert =false;
+      changed=false;
     }
 #endif
   }
   GFXBegin(TRIANGLES);
   if (fabs(LocalPosition.k-CrosshairSize)>CrosshairSize) {
     int tmp;
-    if (LocalPosition.k>0)
+    if (LocalPosition.k>=0)
       tmp =1;
     else
       tmp =-1;
@@ -323,6 +332,7 @@ void LocationSelect:: Draw () {
 
   GFXEnd();
   //  GFXPopBlendMode();
+
 }
 
 

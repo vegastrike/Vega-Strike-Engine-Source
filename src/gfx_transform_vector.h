@@ -145,6 +145,7 @@ void Yaw (float rad, Vector &p,Vector &q, Vector &r);
 void Pitch (float rad,Vector &p, Vector &q, Vector &r);
 void Roll (float rad,Vector &p, Vector &q, Vector &r);
 void ResetVectors (Vector &p, Vector &q, Vector &r);
+void MakeRVector (Vector &p, Vector &q, Vector &r);
 void Orthogonize(Vector &p, Vector &q, Vector &r);;
 #endif
 #endif
