@@ -28,10 +28,11 @@ void Unit::UnRef() {
 }
 
 void Unit::Upgrade (Unit * up) {
+#if 0
   if (up->nummounts>nummounts) {
     Mount * mnt = mounts;
     mounts = up->mounts;
-    mounts = mnt;
+    up->mounts = mnt;
     if (nummounts) {
       for (int i=nummounts;i<up->nummounts;i++) {
 	Transformation t = (mnt[i%nummounts].GetMountLocation());
@@ -43,18 +44,17 @@ void Unit::Upgrade (Unit * up) {
       nummounts = up->nummounts;
       up->nummounts=tmp;
     }
-  }else for (int i=0;i<up->nummounts&&i<nummounts;i++) {
-    Mount * mnt = (Mount *) malloc (sizeof (Mount));
-    memcpy (mnt,&mounts[i],sizeof (Mount));
-    memcpy (&mounts[i],&up->mounts[i],sizeof (Mount));
-    memcpy (&up->mounts[i],mnt,sizeof (Mount));
-    free (mnt);
-  }
-  int i;
-  for (i=0;i<nummounts&&i<up->nummounts;i++) {
-    Transformation t =up->mounts[i].GetMountLocation();
-    mounts[i].SetMountPosition(up->mounts[i].GetMountLocation());
-    up->mounts[i].SetMountPosition (t);
+#endif
+  for (int i=0;i<up->nummounts&&i<nummounts;i++) {
+    if (up->mounts[i].status==Mount::ACTIVE||up->mounts[i].status==Mount::INACTIVE) {
+      Mount mnt = mounts[i];
+
+      mounts[i]=up->mounts[i];
+      up->mounts[i]=mnt;
+      Transformation t =mounts[i].GetMountLocation();
+      mounts[i].SetMountPosition(up->mounts[i].GetMountLocation());
+      up->mounts[i].SetMountPosition (t);
+    }
   }
   armor.front+=up->armor.front;
   armor.back+=up->armor.back;

@@ -639,6 +639,8 @@ public:
   string target_fgid[3];
 
  protected:
+  static std::string mountSerializer(const union XMLType &input, void*mythis);
+  static std::string subunitSerializer(const union XMLType &input, void*mythis);
   ///if the unit is a planet, this contains the long-name 'mars-station'
   string fullname;
  public:

@@ -49,6 +49,8 @@ vegastrike_SOURCES =				\
 	universe.h				\
 	xml_support.h  				\
 	xml_support.cpp				\
+	xml_serializer.cpp			\
+	xml_serializer.h			\
 	config_xml.cpp				\
 	config_xml.h				\
 	easydom.cpp				\

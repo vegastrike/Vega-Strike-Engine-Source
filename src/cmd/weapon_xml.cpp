@@ -163,6 +163,7 @@ namespace BeamXML {
 	  break;
 	case NAME:
 	  curname = (*iter).value;
+	  tmpweapon.weapon_name=curname;
 	  break;
 	case WEAPSIZE:
 	  tmpweapon.MntSize (lookupMountSize ((*iter).value.c_str()));
@@ -362,6 +363,48 @@ void LoadWeapons(const char *filename) {
   } while(!feof(inFile));
  fclose (inFile);
  XML_ParserFree (parser);
+}
+std::string lookupMountSize (int s) {
+  std::string result;
+  if (s&weapon_info::LIGHT) {
+    result+="LIGHT ";
+  }
+  if (s&weapon_info::MEDIUM) {
+    result+="MEDIUM ";
+  }
+  if (s&weapon_info::HEAVY) {
+    result+="HEAVY ";
+  }
+  if (s&weapon_info::CAPSHIPLIGHT) {
+    result+="CAPSHIP-LIGHT ";
+  }
+  if (s&weapon_info::CAPSHIPHEAVY) {
+    result+="CAPSHIP-HEAVY ";
+  }
+  if (s&weapon_info::SPECIAL) {
+    result+="SPECIAL ";
+  }
+  if (s&weapon_info::LIGHTMISSILE) {
+    result+="LIGHT-MISSILE ";
+  }
+  if (s&weapon_info::MEDIUMMISSILE) {
+    result+="MEDIUM-MISSILE ";
+  }
+  if (s&weapon_info::HEAVYMISSILE) {
+    result+="HEAVY-MISSILE ";
+  }
+  if (s&weapon_info::CAPSHIPLIGHTMISSILE) {
+    result+="LIGHT-CAPSHIP-MISSILE ";
+  }
+  if (s&weapon_info::CAPSHIPHEAVYMISSILE) {
+    result+="HEAVY-CAPSHIP-MISSILE ";
+  }
+  if (s&weapon_info::SPECIALMISSILE) {
+    result+="SPECIAL-MISSILE ";
+  }
+  return result;
+
+
 }
 enum weapon_info::MOUNT_SIZE lookupMountSize (const char * str) {
   int i;

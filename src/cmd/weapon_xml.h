@@ -17,6 +17,7 @@ struct weapon_info {
   } type;
   enum MOUNT_SIZE {NOWEAP=0x0,LIGHT=0x1,MEDIUM=0x2,HEAVY=0x4,CAPSHIPLIGHT=0x8,CAPSHIPHEAVY=0x10,SPECIAL=0x20, LIGHTMISSILE=0x40,MEDIUMMISSILE=0x80,HEAVYMISSILE=0x100,CAPSHIPLIGHTMISSILE=0x200, CAPSHIPHEAVYMISSILE=0x400,SPECIALMISSILE=0x800} size;
   string file;
+  string weapon_name;
   int sound;
   float r,g,b,a;
   float Speed,PulseSpeed,RadialSpeed,Range,Radius, Length;
@@ -30,6 +31,7 @@ struct weapon_info {
   void MntSize(enum MOUNT_SIZE size) {this->size = size;}
 };
 enum weapon_info::MOUNT_SIZE lookupMountSize (const char * str);
+std::string lookupMountSize (int size);
 void LoadWeapons(const char *filename);
 weapon_info * getTemplate(const string &key);
 
