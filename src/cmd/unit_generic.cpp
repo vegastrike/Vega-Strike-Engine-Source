@@ -2894,7 +2894,10 @@ void Unit::ProcessDeleteQueue() {
 
   }
 }
-
+bool DestroySystem (float hull, float maxhull) {
+	static float damage_chance=XMLSupport::parse_float(vs_config->getVariable ("physics","damage_chance",".001"));
+	return (rand01()<damage_chance*(maxhull-hull)/maxhull);
+}
 float Unit::DealDamageToHullReturnArmor (const Vector & pnt, float damage, unsigned short * &targ) {
   float percent;
 #ifndef ISUCK
@@ -2933,8 +2936,11 @@ float Unit::DealDamageToHullReturnArmor (const Vector & pnt, float damage, unsig
 			damage= damage>=0?absdamage:-absdamage;
 			*targ= 0;
 			if (_Universe->AccessCockpit()->GetParent()!=this||_Universe->AccessCockpit()->godliness<=0||hull>damage) {//hull > damage is similar to hull>absdamage|| damage<0
-			  static float system_failure=XMLSupport::parse_float(vs_config->getVariable ("physics","indiscriminate_system_destruction",".25"));
-			  DamageRandSys(system_failure*rand01()+(1-system_failure)*(1-(absdamage/hull)),pnt);
+				if (DestroySystem(hull,maxhull)) {
+					static float system_failure=XMLSupport::parse_float(vs_config->getVariable ("physics","indiscriminate_system_destruction",".25"));
+					
+					DamageRandSys(system_failure*rand01()+(1-system_failure)*(1-(absdamage/hull)),pnt);
+				}
 			  if (damage>0) {
 				  hull -=damage;//FIXME
 			  }else {
@@ -2947,7 +2953,9 @@ float Unit::DealDamageToHullReturnArmor (const Vector & pnt, float damage, unsig
 			  }
 			}else {
 			  _Universe->AccessCockpit()->godliness-=absdamage;
-			  DamageRandSys(rand01()*.5+.2,pnt);//get system damage...but live!
+			  if (DestroySystem(hull,maxhull)) {
+				  DamageRandSys(rand01()*.5+.2,pnt);//get system damage...but live!
+			  }
 			}
 		  }
 		  if (*targ>biggerthan)

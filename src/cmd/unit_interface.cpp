@@ -36,7 +36,7 @@ extern void putSaveString (int whichcp, string key, unsigned int num,std::string
 static const char *miss_script="mission_scripts";
 static const char *miss_name="mission_names";
 static const char *miss_desc="mission_descriptions";
-
+static const char *news_name="news";
 using std::string;
 extern const Unit * makeFinalBlankUpgrade (string name, int faction);
 extern const Unit * makeTemplateUpgrade (string name, int faction);
@@ -426,12 +426,24 @@ void UpgradingInfo::SetupCargoList () {
         CargoList->AddTextItem ("Load","Load");
       }else
       if (mode==NEWSMODE) {
-	gameMessage last;
-	int i=0;
-	vector <std::string> who;
-	who.push_back ("news");
-	while ((mission->msgcenter->last(i++,last,who))) {
-		CargoList->AddTextItem ((tostring(i-1)+" "+last.message).c_str(),last.message.c_str());
+	static bool news_from_cargolist=XMLSupport::parse_bool(vs_config->getVariable("cargo","news_from_cargolist","true"));
+	if (news_from_cargolist) {
+		gameMessage last;
+		int i=0;
+		vector <std::string> who;
+		who.push_back ("news");
+		while ((mission->msgcenter->last(i++,last,who))) {
+			CargoList->AddTextItem ((tostring(i-1)+" "+last.message).c_str(),last.message.c_str());
+		}
+	}else {
+		int playernum=UnitUtil::isPlayerStarship(buyer.GetUnit());
+		unsigned int len=getSaveStringLength(playernum,news_name);
+		for (unsigned int i=0;i<len;i++) {
+			string tmp = tostring(i)+" "+getSaveString(playernum,news_name,i);
+			CargoList->AddTextItem(tmp.c_str(),getSaveString(playernum,news_name,i).c_str());
+			
+		}
+
 	}
 
       }else {
@@ -649,7 +661,7 @@ void CargoToMission (const char * item,TextArea * ta, Unit *buyer) {
 	char * item1 = strdup (item);
 	int tmp;
 	sscanf (item,"%d %s",&tmp,item1);
-	static bool miss_from_cargolist=XMLSupport::parse_bool(vs_config->getVariable("cargo","missions_from_cargolist","true"));
+	static bool miss_from_cargolist=XMLSupport::parse_bool(vs_config->getVariable("cargo","missions_from_cargolist","false"));
 	if (!miss_from_cargolist) {
 		std::string mydesc, myname;
 		int playernum=UnitUtil::isPlayerStarship(buyer);
@@ -1406,7 +1418,7 @@ public:
 	}
 };
 vector <CargoColor>&UpgradingInfo::MakeMissionsFromSavegame(Unit *base) {
-  static bool miss_from_cargolist=XMLSupport::parse_bool(vs_config->getVariable("cargo","missions_from_cargolist","true"));
+  static bool miss_from_cargolist=XMLSupport::parse_bool(vs_config->getVariable("cargo","missions_from_cargolist","false"));
   if (miss_from_cargolist) {
     return FilterCargo (base,"missions",true,true);
   }
