@@ -120,6 +120,12 @@ struct GFXStats{
 #define glLockArraysEXT_p glLockArraysEXT
 #define glUnlockArraysEXT_p glUnlockArraysEXT
 #else
+extern PFNGLBINDBUFFERARBPROC glBindBufferARB_p;
+extern PFNGLGENBUFFERSARBPROC glGenBuffersARB_p;
+extern PFNGLDELETEBUFFERSARBPROC glDeleteBuffersARB_p;
+extern PFNGLBUFFERDATAARBPROC glBufferDataARB_p;
+extern PFNGLMAPBUFFERARBPROC  glMapBufferARB_p;
+extern PFNGLUNMAPBUFFERARBPROC  glUnmapBufferARB_p;
 extern PFNGLMULTITEXCOORD2FARBPROC glMultiTexCoord2fARB_p;
 extern PFNGLCLIENTACTIVETEXTUREARBPROC glClientActiveTextureARB_p;
 extern PFNGLCLIENTACTIVETEXTUREARBPROC glActiveTextureARB_p;

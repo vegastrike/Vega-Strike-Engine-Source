@@ -63,6 +63,27 @@ void GFXNormalizeVert (GFXVertex *v) {
     v->k/=mag;
   }
 }
+
+  ///Returns the array of vertices to be mutated
+union GFXVertexList::VDAT * GFXVertexList::BeginMutate (int offset) {
+  return &data;
+}
+///Ends mutation and refreshes display list
+void GFXVertexList::EndMutate (int newvertexsize) {
+  if (!(changed&CHANGE_MUTABLE)) {
+    changed |= CHANGE_CHANGE;
+  }
+  RenormalizeNormals ();
+  RefreshDisplayList();
+  if (changed&CHANGE_CHANGE) {
+    changed&=(~CHANGE_CHANGE);
+  }
+  if (newvertexsize) {
+    numVertices = newvertexsize;
+  }
+
+
+}
 void GFXOptimizeList (GFXVertex * old, int numV, GFXVertex ** nw, int * nnewV, unsigned int **ind) {
   unsigned int *ijk = (unsigned int *)malloc (sizeof (unsigned int)*numV);
   *ind = (unsigned int *)malloc (sizeof (unsigned int) * numV);
@@ -94,7 +115,7 @@ void GFXOptimizeList (GFXVertex * old, int numV, GFXVertex ** nw, int * nnewV, u
 
 
 void GFXVertexList::Init (enum POLYTYPE *poly, int numVertices, const GFXVertex *vertices, const GFXColorVertex * colors, int numlists, int *offsets, bool Mutable, unsigned int * indices) {
-  VSCONSTRUCT1('v')
+  vbo_data=0;
   int stride=0;
   changed = HAS_COLOR*((colors!=NULL)?1:0);
   if (numlists>0) {
@@ -200,47 +221,10 @@ int GFXVertexList::numQuads () const{
     }
     return tot;
 }
-  ///Returns the array of vertices to be mutated
-union GFXVertexList::VDAT * GFXVertexList::BeginMutate (int offset) {
-  return &data;
-}
-///Ends mutation and refreshes display list
-void GFXVertexList::EndMutate (int newvertexsize) {
-  if (!(changed&CHANGE_MUTABLE)) {
-    changed |= CHANGE_CHANGE;
-  }
-  RenormalizeNormals ();
-  RefreshDisplayList();
-  if (changed&CHANGE_CHANGE) {
-    changed&=(~CHANGE_CHANGE);
-  }
-  if (newvertexsize) {
-    numVertices = newvertexsize;
-  }
-
-}
 
 
 
 
-GFXVertexList::~GFXVertexList() {
-  VSDESTRUCT1
-  if (display_list)
-    GFXDeleteList (display_list); //delete dis
-  if (offsets)
-    delete [] offsets;
-  if (mode)
-    delete [] mode;
-  if(changed&HAS_COLOR) {
-    if (data.colors) {
-      free (data.colors);
-    }
-  } else {
-    if (data.vertices) {
-      free (data.vertices);
-    }
-  }
-}
 
 void GFXVertexList::VtxCopy (GFXVertexList * thus, GFXVertex *dst, int offset, int howmany) {
   memcpy (dst,&thus->data.vertices[offset],sizeof (GFXVertex)*howmany);
@@ -255,7 +239,8 @@ void GFXVertexList::ColVtxCopy (GFXVertexList * thus, GFXVertex *dst, int offset
 }
 
 void GFXVertexList::RenormalizeNormals () {
-
+  if (data.colors==0&&data.vertices==0)
+    return;//
   if (numVertices>0) {
     Vector firstNormal;
     if (changed&HAS_COLOR) {
@@ -328,10 +313,13 @@ const GFXColorVertex * GFXVertexList::GetColorVertex (int index) const{
   return data.colors+index;
 }
 
-
 void GFXVertexList::GetPolys (GFXVertex **vert, int *numpolys, int *numtris) {
+  if (data.colors==0&&data.vertices==0){
+    *numpolys=0;
+    *numtris=0;
+    return;
+  }
   void (*vtxcpy) (GFXVertexList *thus, GFXVertex *dst,int offset, int howmany);
-
   vtxcpy = (changed&HAS_COLOR)
     ? ((changed&HAS_INDEX)
        ?ColIndVtxCopy

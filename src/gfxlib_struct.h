@@ -299,7 +299,8 @@ protected:
   ///Array of modes that vertices will be drawn with
   enum POLYTYPE *mode;
   ///Display list number if list is indeed active. 0 otherwise
-  int display_list;
+  int display_list;//doubles as vbo_elements
+  int vbo_data;
   ///number of different mode, drawn lists
   int numlists;
   /**

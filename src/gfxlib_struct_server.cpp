@@ -1,5 +1,5 @@
 #include "gfxlib_struct.h"
-
+#include <stdlib.h>
 GFXLight::GFXLight (const bool enabled, const GFXColor &vect, const GFXColor &diffuse, const GFXColor &specular, const GFXColor &ambient, const GFXColor&attenuate, const GFXColor &direction, float exp, float cutoff) {}
 void GFXVertexList::RefreshDisplayList () {}
 
@@ -33,3 +33,18 @@ extern int /*GFXDRVAPI*/ GFXCreateList() { return 0;}
 extern GFXBOOL /*GFXDRVAPI*/ GFXEndList() { return GFXFALSE;}
 ///Removes a display list from application memory
 extern void /*GFXDRVAPI*/ GFXDeleteList (int list) {}
+GFXVertexList::~GFXVertexList() {
+  if (offsets)
+    delete [] offsets;
+  if (mode)
+    delete [] mode;
+  if(changed&HAS_COLOR) {
+    if (data.colors) {
+      free (data.colors);
+    }
+  } else {
+    if (data.vertices) {
+      free (data.vertices);
+    }
+  }
+}
