@@ -66,6 +66,7 @@ struct dirent { char d_name[1]; };
 #endif
 #include <sys/stat.h>
 //end for directory thing
+extern std::string CurrentSaveGameName;
 
 
 extern vector<unsigned int > base_keyboard_queue;
@@ -2232,6 +2233,67 @@ bool BaseComputer::newsPickerChangedSelection(const EventCommandId& command, Con
 //	}
     return true;
 }
+static std::string simplePrettySystem(std::string system) {
+  std::string::size_type where=system.find("/");
+  return std::string("Sector: ")+system.substr(0,where)+" System: "+(where==string::npos?system:system.substr(where+1));
+}
+static std::string simplePrettyShip(std::string ship) {
+  if (ship.length()>0) {
+    ship[0]=toupper(ship[0]);
+  }
+  std::string::size_type where = ship.find(".");
+  if (where!=string::npos) {
+    ship=ship.substr(0,where);
+    ship="Refurbished "+ship;
+  }
+  return ship;
+}
+static std::string GarnerInfoFromSaveGame(string text) {
+  static SaveGame savegame("");
+  std::string system;
+  QVector pos(0,0,0);
+  bool updatepos=false;
+  float creds;
+  vector<std::string> Ships;
+  std::string sillytemp=CurrentSaveGameName;
+  CurrentSaveGameName=text;
+  savegame.ParseSaveGame(text,system,"Gemini/troy",pos,updatepos,creds,Ships,_Universe->CurrentCockpit(),"",true);
+  CurrentSaveGameName=sillytemp;
+  text="Savegame: "+text+"#n#_________________#n#";  
+  text+="Credits: "+tostring((int)creds)+"."+tostring(((int)(creds*100))%100)+"#n#";
+  text+=simplePrettySystem(system)+"#n#";
+  if (Ships.size()) {
+    text+="Starship: "+simplePrettyShip(Ships[0])+"#n#";
+    if (Ships.size()>2){
+      text+="Fleet:#n#";
+      for (int i=2;i<Ships.size();i+=2){
+        text+=simplePrettyShip(Ships[i-1])+"#n#  Located At: "+simplePrettySystem(Ships[i])+"#n#";
+      }
+    }
+  }
+  static string campaign_score=vs_config->getVariable("physics","campaigns","privateer_campaign vegastrike_campaign");
+  string score=campaign_score;
+  bool hit=false;
+  string::size_type where;
+  while (score.length()) {
+    where=score.find(" ");
+    string var = score.substr(0,where);
+    if (where!=string::npos) {
+      score = score.substr(where+1);
+    }else score="";
+    unsigned int curscore=savegame.getMissionData(var).size()+savegame.getMissionStringData(var).size();
+    if (curscore>0) {
+      hit =true;
+      if (var.length()>0)
+        var[0]=toupper(var[0]);
+      text+=var.substr(0,var.find("_"))+" Campaign Score: "+tostring(curscore)+"#n#";
+    }
+  }
+  if (!hit) {
+    text+="Campaign Score: 0#n#";
+  }
+  return text;
+}
 // The selection in the News picker changed.
 bool BaseComputer::loadSavePickerChangedSelection(const EventCommandId& command, Control* control) {
     assert(control != NULL);
@@ -2246,7 +2308,7 @@ bool BaseComputer::loadSavePickerChangedSelection(const EventCommandId& command,
         // No selection.  Clear desc.  (Not sure how this can happen, but it's easy to cover.)
         desc->setText("");
     } else {
-      desc->setText(cell->text());
+      desc->setText(GarnerInfoFromSaveGame(cell->text()));
       if (inputbox!=NULL)
         inputbox->setText(cell->text());
       
@@ -4738,7 +4800,6 @@ bool BaseComputer::showShipStats(const EventCommandId& command, Control* control
 namespace CockpitKeys {
 	void QuitNow();
 }
-extern std::string CurrentSaveGameName;
 
 // Create the window and controls for the Options Menu.
 void BaseComputer::LoadSaveQuitConfirm::init(void) {
