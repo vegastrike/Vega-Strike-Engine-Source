@@ -9,6 +9,7 @@
 #endif /* NETCOMM_JVOIP */
 
 #define VOIP_PORT	5000
+extern bool cleanexit;
 
 #include "networkcomm.h"
 
@@ -19,21 +20,92 @@ void	CheckVOIPError( int val)
 		return;
 	string error = JVOIPGetErrorString( val);
 	cerr<<"!!! JVOIP ERROR : "<<error<<endl;
-	exit(1);
+	cleanexit = true;
+	winsys_exit(1);
 }
 #endif /* NETCOMM_JVOIP */
+#ifdef NETCOMM_PORTAUDIO
+void	CheckPAError( PaError err)
+{
+	if( err==paNoError)
+		return;
+	cerr<<"!!! PORTAUDIO ERROR : "<<Pa_GetErrorText( err)<<end;
+	if( err==paHostError)
+		cerr<<"!!! PA HOST ERROR : "<<Pa_GetHostError()<<" - "<<Pa_GetErrorText( Pa_GetHostError())<<endl;
+	cleanexit = true;
+	winsys_exit(1);
+}
+
+void	Pa_DisplayInfo( PaDeviceId id)
+{
+	PaDeviceInfo * info = Pa_GetDeviceInfo( id);
+
+	cout<<"PORTAUDIO Device "<<id<<"---------------"<<endl;
+	cout<<"\tName : "<<info->name<<endl;
+	cout<<"\tStructure version : "<<info->structVersion<<endl;
+	cout<<"\tmaxInputChannels : "<<info->maxInputChannels<<endl;
+	cout<<"\tmaxOutputChannels : "<<info->maxOutputChannels<<endl;
+	cout<<"\tnativeSampleFormats : ";
+	switch( info->nativeSampleFormats)
+	{
+		case (1<<0) :
+			cout<<"paFloat32"<<endl; break;
+		case (1<<1) :
+			cout<<"paInt16"<<endl; break;
+		case (1<<2) :
+			cout<<"paInt32"<<endl; break;
+		case (1<<3) :
+			cout<<"paInt24"<<endl; break;
+		case (1<<4) :
+			cout<<"paPackedInt24"<<endl; break;
+		case (1<<5) :
+			cout<<"paInt8"<<endl; break;
+		case (1<<6) :
+			cout<<"paUInt8"<<endl; break;
+		case (1<<16) :
+			cout<<"paCustomFormat"<<endl; break;
+		
+	}
+	cout<<"\tnumSampleRates : "<<info->numSampleRates<<endl;
+	for( int i=0; i<info->numSampleRates; i++)
+		cout<<"\t\tRate "<<i<<" = "<<info->sampleRates[i];
+}
+#endif /* NETCOMM_PORTAUDIO */
 
 NetworkCommunication::NetworkCommunication()
 {
 	this->active = false;
 	this->max_messages = 25;
 	this->method = 1;
+
 #ifdef NETCOMM_JVOIP
+
 	this->session = NULL;
 	this->params = NULL;
 	this->rtpparams = NULL;
+
 #endif /* NETCOMM_JVOIP */
+#ifdef NETCOMM_PORTAUDIO
+
+	this->dev = paNoDevice;
+	this->devinfo = NULL;
+	// Initialize PortAudio lib
+	CheckPAError( Pa_Initialize());
+
+	// Testing purpose : list devices and display info about them
+	PaDeviceInfo * info;
+	int nbdev = Pa_CountDevices();
+	for( int i=0; i<nbdev; i++)
+		Pa_DisplayInfo( i);
+
+	// Get the default devices for input and output streams
+	this->indev = Pa_GetDefaultInputDeviceID();
+	this->outdev = Pa_GetDefaultOutputDeviceID();
+	this->samplerate = 11025;
+
+#endif /* NETCOMM_PORTAUDIO */
 #ifndef NETCOMM_NOWEBCAM
+
 	this->Webcam = NULL;
 	string webcam_enable = vs_config->getVariable ("network","use_webcam","false");
 	// Init the webcam part
@@ -46,6 +118,7 @@ NetworkCommunication::NetworkCommunication()
 			this->Webcam = NULL;
 		}
 	}
+
 #endif /* NETCOMM_NOWEBCAM */
 }
 
@@ -131,6 +204,7 @@ int		NetworkCommunication::InitSession( float frequency)
 {
 	// Init the VoIP session
 #ifdef NETCOMM_JVOIP
+
 	this->session = new JVOIPSession;
 	this->session->SetSampleInterval(100);
 
@@ -138,7 +212,17 @@ int		NetworkCommunication::InitSession( float frequency)
 	this->rtpparams = new JVOIPRTPTransmissionParams;
 
 	CheckVOIPError( this->session->Create( *(this->params)));
+
 #endif /* NETCOMM_JVOIP */
+#ifdef NETCOMM_PORTAUDIO
+
+	CheckPAError( Pa_OpenDefaultStream( &this->stream,
+								 this->indev, 1, paInt16, NULL,
+								 this->outdev, 2, paInt16, NULL,
+								 this->samplerate, 256, 0, paNoFlag,
+								 Pa_Callback, (void *)this));
+
+#endif /* NETCOMM_PORTAUDIO */
 
 #ifndef NETCOMM_NOWEBCAM
 	if( Webcam)
@@ -174,20 +258,29 @@ int		NetworkCommunication::DestroySession()
 NetworkCommunication::~NetworkCommunication()
 {
 #ifdef NETCOMM_JVOIP
+
 	if( this->session)
 		delete this->session;
 	if( this->params)
 		delete this->params;
 	if( this->rtpparams)
 		delete this->rtpparams;
+
 #endif /* NETCOMM_JVOIP */
+#ifdef NETCOMM_PORTAUDIO
+
+	CheckPAError( Pa_Terminate());
+
+#endif /* NETCOMM_PORTAUDIO */
 #ifndef NETCOMM_NOWEBCAM
+
 	if( this->Webcam)
 	{
 		this->Webcam->Shutdown();
 		delete this->Webcam;
 		this->Webcam = NULL;
 	}
+
 #endif /* NETCOMM_NOWEBCAM */
 }
 

@@ -41,6 +41,14 @@ class NetworkCommunication
 		JVOIPSessionParams *		params;
 		JVOIPRTPTransmissionParams* rtpparams;
 #endif
+#ifdef NETCOMM_PORTAUDIO
+		PaDeviceID			indev;
+		PaDeviceID			outdev;
+		PaDeviceInfo *		devinfo;
+		PortAudioStream *	stream;
+
+		double				sample_rate;
+#endif
 
 	public:
 		NetworkCommunication();
