@@ -278,10 +278,10 @@ void RecomputeUnitUpgrades (Unit * un) {
 
 void Enslave (Unit* parent, bool enslave) {
   bool free=!enslave;
-  unsigned int i;
+  int i;
   vector<Cargo> ToBeChanged;
   unsigned int numcargo=parent->numCargo();
-  for (i=0;i<numcargo;++i) {
+  for (i=numcargo-1;i>=0;--i) {
     Cargo * carg= &parent->GetCargo(i);
     if (enslave) {
       if (carg->category.find("Passengers")!=string::npos&&carg->content!="Hitchhiker") {
@@ -289,13 +289,14 @@ void Enslave (Unit* parent, bool enslave) {
         parent->RemoveCargo(i,carg->quantity,true);
       }
     }else {
-      if (carg->content.find("Slave")!=string::npos||carg->content=="Pilot") {
+      if (carg->content=="Slaves"||carg->content=="Pilot") {
         ToBeChanged.push_back(*carg);
         parent->RemoveCargo(i,carg->quantity,true);
       }
     }
   }
-  Cargo *newCarg  = UniverseUtil::GetMasterPartList()->GetCargo(enslave?"Slaves":"Hitchhiker",i);
+  unsigned int dummy;
+  Cargo *newCarg  = UniverseUtil::GetMasterPartList()->GetCargo(enslave?"Slaves":"Hitchhiker",dummy);
   if (newCarg) {
     Cargo slave=*newCarg;
     for (i=0;i<ToBeChanged.size();++i) {
@@ -303,8 +304,10 @@ void Enslave (Unit* parent, bool enslave) {
       while (parent->CanAddCargo(slave)==false&&(--slave.quantity)>0){
         
       }
-      if (parent->CanAddCargo(slave)) {
-        parent->AddCargo(slave,true);
+      if (slave.quantity){
+        if (parent->CanAddCargo(slave)) {
+          parent->AddCargo(slave,true);
+        }
       }
     }
   }
