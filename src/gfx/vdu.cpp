@@ -324,7 +324,8 @@ void VDU::DrawTarget(Unit * parent, Unit * target, const GFXColor &c) {
   }
   st[i]='\0';
   char qr[256];
-  sprintf (qr,"Dis %.4f",(parent->Position()-target->Position()).Magnitude()-((target->isUnit()==PLANETPTR)?target->rSize():0));
+  static float game_speed = XMLSupport::parse_float (vs_config->getVariable("physics","game_speed","1"));
+  sprintf (qr,"Dis %.4f",((parent->Position()-target->Position()).Magnitude()-((target->isUnit()==PLANETPTR)?target->rSize():0))*10./game_speed);
   strcat (st,qr);
   tp->Draw (MangleString (st,_Universe->AccessCamera()->GetNebula()!=NULL?.4:0),0,true);  
   GFXColor4f (.4,.4,1,1);
@@ -409,8 +410,8 @@ void VDU::DrawNav (const Vector & nav, const GFXColor & c) {
   Unit * you = _Universe->AccessCockpit()->GetParent();
   Unit * targ = you!=NULL?you->Target():NULL;
   char *navdata=new char [1024+(_Universe->activeStarSystem()->getName().length()+(targ?targ->name.length():0))];
-
-  sprintf (navdata,"Navigation\n----------\n%s\nTarget:\n  %s\nRelativeLocation\nx: %.4f\ny:%.4f\nz:%.4f\nDistance:\n%f",_Universe->activeStarSystem()->getName().c_str(),targ?targ->name.c_str():nothing,nav.i,nav.j,nav.k,10*nav.Magnitude());
+  static float game_speed = XMLSupport::parse_float (vs_config->getVariable("physics","game_speed","1"));
+  sprintf (navdata,"Navigation\n----------\n%s\nTarget:\n  %s\nRelativeLocation\nx: %.4f\ny:%.4f\nz:%.4f\nDistance:\n%f",_Universe->activeStarSystem()->getName().c_str(),targ?targ->name.c_str():nothing,nav.i,nav.j,nav.k,10*nav.Magnitude()/game_speed);
   GFXColorf (c);
   tp->Draw (MangleString (navdata,_Universe->AccessCamera()->GetNebula()!=NULL?.4:0),scrolloffset,true,true);  
   delete [] navdata;
