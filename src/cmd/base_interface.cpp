@@ -424,10 +424,12 @@ Base::Base (const char *basefile, Unit *base, Unit*un) {
 		fprintf(stderr,"ERROR: there are no rooms in basefile \"%s%s%s\" ...\n",basefile,compute_time_of_day(base,un),BASE_EXTENSION);
 		rooms.push_back(new Room ());
 		rooms.back()->deftext="ERROR: No rooms specified...";
+#ifndef BASE_MAKER
 		rooms.back()->objs.push_back(new Room::BaseShip (-1,0,0,0,0,-1,0,1,0,QVector(0,0,75),"default room"));
 		BaseUtil::Launch(0,"default room",-1,-1,1,2,"ERROR: No rooms specified... - Launch");
 		BaseUtil::Comp(0,"default room",0,-1,1,2,"ERROR: No rooms specified... - Computer",
 				"BUYMODE SELLMODE UPGRADEMODE DOWNGRADEMODE NEWSMODE SHIPMODE MISSIONMODE BRIEFINGMODE");
+#endif
 	}
 	GotoLink(0);
 }
