@@ -42,6 +42,7 @@ struct GFXMaterial;
 const EnumMap::Pair Mesh::XML::element_names[] = {
   EnumMap::Pair("UNKNOWN", XML::UNKNOWN),
   EnumMap::Pair("Material", XML::MATERIAL),
+  EnumMap::Pair("LOD", XML::LOD),
   EnumMap::Pair("Ambient", XML::AMBIENT),
   EnumMap::Pair("Diffuse", XML::DIFFUSE),
   EnumMap::Pair("Specular", XML::SPECULAR),
@@ -92,10 +93,11 @@ const EnumMap::Pair Mesh::XML::attribute_names[] = {
   EnumMap::Pair("Weight", XML::WEIGHT),
   EnumMap::Pair("Size", XML::SIZE),
   EnumMap::Pair("Offset",XML::OFFSET),
+  EnumMap::Pair("meshfile",XML::LODFILE)
 };
 
-const EnumMap Mesh::XML::element_map(XML::element_names, 22);
-const EnumMap Mesh::XML::attribute_map(XML::attribute_names, 26);
+const EnumMap Mesh::XML::element_map(XML::element_names, 23);
+const EnumMap Mesh::XML::attribute_map(XML::attribute_names, 27);
 
 void Mesh::beginElement(void *userData, const XML_Char *name, const XML_Char **atts) {
   ((Mesh*)userData)->beginElement(name, AttributeList(atts));
@@ -168,7 +170,7 @@ will be no need for this sort of checking
 void Mesh::beginElement(const string &name, const AttributeList &attributes) {
   //static bool flatshadeit=false;
   AttributeList::const_iterator iter;
-
+  int size=1;
   XML::Names elem = (XML::Names)XML::element_map.lookup(name);
   XML::Names top;
   if(xml->state_stack.size()>0) top = *xml->state_stack.rbegin();
@@ -603,6 +605,23 @@ void Mesh::beginElement(const string &name, const AttributeList &attributes) {
       }
     }
     break;
+  case XML::LOD: 
+    for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
+      switch(XML::attribute_map.lookup((*iter).name)) {
+      case XML::UNKNOWN:
+	break;
+      case XML::LODFILE:
+	xml->lod.push_back(new Mesh ((*iter).value.c_str(),true,xml->faction,true));//make orig mesh
+	break;
+      case XML::SIZE:
+	size = parse_float ((*iter).value);
+	break;
+      }
+    }
+    if (xml->lodsize.size()!=xml->lod.size()) {
+      xml->lodsize.push_back (size);
+    }
+    break;
   case XML::VERTEX:
     assert(top==XML::TRI || top==XML::QUAD || top==XML::LINE ||top ==XML::TRISTRIP || top ==XML::TRIFAN||top ==XML::QUADSTRIP || top==XML::LINESTRIP);
     assert(xml->load_stage==4);
@@ -950,6 +969,7 @@ void Mesh::LoadXML(const char *filename, int faction) {
   }
 
   xml = new XML;
+  xml->faction = faction;
   GFXGetMaterial (0, xml->material);//by default it's the default material;
   xml->load_stage = 0;
   xml->recalc_norm=false;
@@ -1303,6 +1323,13 @@ void Mesh::LoadXML(const char *filename, int faction) {
 
   delete [] vertexlist;
   delete []poly_offsets;
+  numlods=xml->lod.size()+1;
+  orig = new Mesh [numlods];
+  for (int i=0;i<xml->lod.size();i++) {
+    orig[i+1] = *xml->lod[i];
+    orig[i+1].lodsize=xml->lodsize[i];
+  }
+
   delete xml;
 }
 

@@ -39,6 +39,7 @@
 #include "vegastrike.h"
 
 #include <GL/gl.h>
+#include <float.h>
 using std::list;
 Hashtable<string, Mesh, char [127]> Mesh::meshHashTable;
 class OrigMeshContainer {
@@ -65,6 +66,8 @@ Vector mouseline;
 
 
 void Mesh::InitUnit() {
+  numlods=1;
+  lodsize=FLT_MAX;
 	forcelogos = NULL;
 	squadlogos = NULL;
 
@@ -110,28 +113,32 @@ bool Mesh::LoadExistant (const char * filehash) {
   return false;
 }
 
-Mesh:: Mesh(const char * filename, bool xml, int faction):hash_name(filename)
+Mesh:: Mesh(const char * filename, bool xml, int faction, bool orig):hash_name(filename)
 {
   InitUnit();
   Mesh *oldmesh;
   if (LoadExistant (filename)) {
     return;
   }
-  oldmesh = new Mesh();
-  meshHashTable.Put(string(filename), oldmesh);
-  draw_queue = new vector<MeshDrawContext>;
-  
+
+
   if(xml) {
     LoadXML(filename,faction);
+    oldmesh = this->orig;
   } else {
     this->xml= NULL;
     LoadBinary(filename,faction);
+    oldmesh = new Mesh[1];
   }
-  this->orig = oldmesh;
-  *oldmesh=*this;
-  oldmesh->orig = NULL;
-  oldmesh->refcount++;
-
+  draw_queue = new vector<MeshDrawContext>;
+  if (!orig) {
+    meshHashTable.Put(string(filename), oldmesh);
+    oldmesh[0]=*this;
+    oldmesh->orig = NULL;
+    oldmesh->refcount++;
+  } else {
+    this->orig=NULL;
+  }
 }
 
 Mesh::~Mesh()
@@ -158,8 +165,9 @@ Mesh::~Mesh()
 	} else {
 	  orig->refcount--;
 	  //printf ("orig refcount: %d",refcount);
-	  if(orig->refcount == 0)
-	    delete orig;
+	  if(orig->refcount == 0) {
+	    delete [] orig;	      
+	  }
 	}
 }
 float const ooPI = 1.00F/3.1415926535F;
@@ -168,23 +176,35 @@ float const ooPI = 1.00F/3.1415926535F;
 
 void Mesh::SetMaterial (const GFXMaterial & mat) {
   GFXSetMaterial (myMatNum,mat);
-  if (orig)
-    orig->myMatNum = myMatNum;
+  if (orig) {
+    for (int i=0;i<numlods;i++) {
+      orig[i].myMatNum = myMatNum;
+    }
+  }
 }
 
-void Mesh::Draw(const Transformation &trans, const Matrix m)
+void Mesh::Draw(float lod, const Transformation &trans, const Matrix m)
 {
   //  Vector pos (local_pos.Transform(m));
+  int i;
   MeshDrawContext c(m);
   UpdateFX(GetElapsedTime());
   c.SpecialFX = &LocalFX;
   //  c.mat[12]=pos.i;
   //  c.mat[13]=pos.j;
   //  c.mat[14]=pos.k;//to translate to local_pos which is now obsolete!
-  orig->draw_queue->push_back(c);
-  if(!orig->will_be_drawn) {
-    orig->will_be_drawn = GFXTRUE;
-    undrawn_meshes[draw_sequence].push_back(OrigMeshContainer(orig));
+  Mesh *origmesh = &orig[0];
+  for (i=1;i<numlods;i++) {
+    if (lod<orig[i].lodsize) {
+      origmesh = &orig[i];
+    } else {
+      break;
+    }
+  }
+  origmesh->draw_queue->push_back(c);
+  if(!origmesh->will_be_drawn) {
+    origmesh->will_be_drawn = GFXTRUE;
+    undrawn_meshes[draw_sequence].push_back(OrigMeshContainer(origmesh));
   }
   will_be_drawn=GFXTRUE;
 }

@@ -87,6 +87,7 @@ void Unit::SetResolveForces (bool ys) {
 
 void Unit::Init()
 {
+  hudImage=NULL;
   owner = NULL;
   faction =0;
   resolveforces=true;
@@ -256,6 +257,8 @@ Unit::Unit(const char *filename, bool xml, bool SubU, int faction) {
 
 Unit::~Unit()
 {
+  if (hudImage )
+    delete hudImage;
   if (CollideInfo.object)
     KillCollideTable (&CollideInfo);
   if (bspTree)
@@ -615,8 +618,8 @@ void Unit::Draw(const Transformation &parent, const Matrix parentMatrix)
 #endif 
 				   );
       if (d) {  //d can be used for level of detail shit
-	if (g_game.x_resolution*meshdata[i]->rSize()/GFXGetZPerspective(d)>=1) {//if the radius is at least half a pixel
-	  meshdata[i]->Draw(cumulative_transformation, cumulative_transformation_matrix);
+	if ((d =g_game.x_resolution*2*meshdata[i]->rSize()/GFXGetZPerspective(d))>=1) {//if the radius is at least half a pixel
+	  meshdata[i]->Draw(d,cumulative_transformation, cumulative_transformation_matrix);
 	} else {
 
 	}
@@ -627,7 +630,7 @@ void Unit::Draw(const Transformation &parent, const Matrix parentMatrix)
       subunits[subcount]->Draw(cumulative_transformation, cumulative_transformation_matrix);
     }
     if(selected) {
-      selectionBox->Draw(cumulative_transformation, cumulative_transformation_matrix);
+      selectionBox->Draw(g_game.x_resolution,cumulative_transformation, cumulative_transformation_matrix);
     }
   } else {
     //        UpdateHudMatrix();

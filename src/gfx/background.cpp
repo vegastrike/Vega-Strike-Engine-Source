@@ -108,7 +108,7 @@ void Background::Draw()
 {
   GFXColor (1,1,1,1);
   if (SphereBackground) {
-    SphereBackground->Draw();
+    SphereBackground->Draw(10000000000);
     Mesh::ProcessUndrawnMeshes();//background must be processed...dumb but necessary--otherwise might collide with other mehses
   } else {
     GFXDisable(LIGHTING);

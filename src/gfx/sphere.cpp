@@ -20,7 +20,9 @@ SphereMesh::SphereMesh(float radius, int stacks, int slices, char *texture, char
   if (LoadExistant (hash_name.c_str())) {
     return;
   }
-  oldmesh = new SphereMesh();
+  oldmesh = new SphereMesh[1];
+  numlods=1;
+  
   meshHashTable.Put (hash_name, oldmesh);
   draw_queue = new vector<MeshDrawContext>;
   
@@ -131,7 +133,7 @@ SphereMesh::SphereMesh(float radius, int stacks, int slices, char *texture, char
   oldmesh->orig = NULL;
   oldmesh->refcount++;
 }
-void SphereMesh::Draw(const Transformation &transform /*= identity_transformation*/, const Matrix m) {
+void SphereMesh::Draw(float lod, const Transformation &transform /*= identity_transformation*/, const Matrix m) {
   if (centered) {
     float m1[16];
     memcpy (m1,m,sizeof (float)*16);
@@ -141,9 +143,9 @@ void SphereMesh::Draw(const Transformation &transform /*= identity_transformatio
     m1[14]=pos.k;
     Transformation tmp = transform;
     tmp.position = pos;
-    Mesh::Draw (tmp,m1);
+    Mesh::Draw (lod,tmp,m1);
   } else {	
-    Mesh::Draw(transform,m);
+    Mesh::Draw(lod,transform,m);
   } 
 }
 

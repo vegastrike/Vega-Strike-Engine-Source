@@ -9,6 +9,7 @@
 #include "gfx/mesh.h"
 #include "gfx/sphere.h"
 #include "gfx/bsp.h"
+#include "gfx/sprite.h"
 #define VS_PI 3.1415926536
 void Unit::beginElement(void *userData, const XML_Char *name, const XML_Char **atts) {
   ((Unit*)userData)->beginElement(name, AttributeList(atts));
@@ -82,7 +83,8 @@ namespace UnitXML {
       AFTERBURNER,
       SHIELDTIGHT,
       ITTS,
-      AMMO
+      AMMO,
+      HUDIMAGE
     };
 
   const EnumMap::Pair element_names[] = {
@@ -109,7 +111,6 @@ namespace UnitXML {
     EnumMap::Pair ("Pitch", PITCH),
     EnumMap::Pair ("Roll", ROLL),
     EnumMap::Pair ("Mount", MOUNT)
-
   };
   const EnumMap::Pair attribute_names[] = {
     EnumMap::Pair ("UNKNOWN", UNKNOWN),
@@ -154,11 +155,12 @@ namespace UnitXML {
     EnumMap::Pair ("afterburner", AFTERBURNER),
     EnumMap::Pair ("tightness",SHIELDTIGHT),
     EnumMap::Pair ("itts",ITTS),
-    EnumMap::Pair ("ammo", AMMO)
+    EnumMap::Pair ("ammo", AMMO),
+    EnumMap::Pair ("HudImage",HUDIMAGE)
 };
 
   const EnumMap element_map(element_names, 23);
-  const EnumMap attribute_map(attribute_names, 43);
+  const EnumMap attribute_map(attribute_names, 44);
 }
 
 using XMLSupport::EnumMap;
@@ -673,6 +675,16 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
   case DEFENSE:
     assert (xml->unitlevel==1);
     xml->unitlevel++;
+    for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
+      switch(attribute_map.lookup((*iter).name)) {
+      case HUDIMAGE:
+	hudImage = new Sprite ((*iter).value.c_str());
+	break;
+      default:
+	break;
+      }
+    }
+
     break;
 
   case THRUST:

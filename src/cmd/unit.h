@@ -38,7 +38,7 @@ class Beam;
 class Animation;
 using namespace XMLSupport;
 
-
+class Sprite;
 class Order;
 class Box;
 class Mesh;
@@ -93,6 +93,7 @@ friend class PlanetaryOrbit;
   Transformation cumulative_transformation;
   LineCollide CollideInfo;
   Animation *explosion;
+  Sprite *hudImage;
   float timeexplode;  
   int nummesh;
   Mesh **meshdata;
@@ -214,6 +215,7 @@ public:
   int faction;
   bool resolveforces;
   float rSize () {return radial_size;}
+  Sprite * getHudImage (){return hudImage;}
   //no default constructor; dymanically allocated arrays are evil, gotta do it java style to make it more sane
 
   Unit();

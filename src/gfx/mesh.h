@@ -86,8 +86,10 @@ private:
       NORMAL, 
       POLYGONS,
       LINE,
+      LOD,
       TRI, 
       QUAD,
+      LODFILE,
       LINESTRIP,
       TRISTRIP,
       TRIFAN,
@@ -194,8 +196,11 @@ private:
     vector<int> *active_shade;
     vector<GFXVertex> *active_list;
     vector<int> *active_ind;
+    vector <Mesh *> lod;
+    vector <int> lodsize;
     GFXVertex vertex;
     GFXMaterial material;
+    int faction;
   } *xml;
   void LoadXML(const char *filename, int faction);
   void LoadBinary (const char * filename, int faction);
@@ -215,8 +220,9 @@ protected:
   Vector mx;//bounding box
   Vector mn;
   float radialSize;
+  int numlods;
   Mesh *orig;
-
+  float lodsize;
   Logo *forcelogos;
   int numforcelogo;
 
@@ -240,7 +246,7 @@ protected:
   vector <MeshFX> LocalFX;
 public:
   Mesh();
-  Mesh(const char *filename, bool xml, int faction);
+  Mesh(const char *filename, bool xml, int faction, bool orig=false);
   void Fork (Mesh * &one, Mesh * &two, float a, float b, float c, float d);
   virtual ~Mesh();
   unsigned int numFX () {return LocalFX.size();}
@@ -252,7 +258,7 @@ public:
   //  void SetPosition (const Vector&);
   Vector &Position() {return local_pos;}
   //  const char *get_name(){return name}
-  void Draw(const Transformation &quat = identity_transformation, const Matrix = identity_matrix);
+  void Draw(float lod, const Transformation &quat = identity_transformation, const Matrix = identity_matrix);
   virtual void ProcessDrawQueue();
   static void ProcessUndrawnMeshes(bool pushSpecialEffects=false);
   void setEnvMap(GFXBOOL newValue) {envMap = newValue;}

@@ -83,12 +83,13 @@ void Mesh::Fork (Mesh *&x, Mesh *&y, float a, float b, float c, float d) {
     return;
   }
   x = new Mesh;
+  y = new Mesh;
 
   x->forcelogos = x->squadlogos = NULL;
   x->numforcelogo = x->numsquadlogo =0;
   x->Decal = new Texture (Decal);
 
-  y = new Mesh;
+
   y->squadlogos=y->forcelogos = NULL;
   y->numforcelogo = y->numsquadlogo = 0;
   y->Decal = new Texture (Decal);//use copy constructor;
@@ -122,8 +123,9 @@ void Mesh::Fork (Mesh *&x, Mesh *&y, float a, float b, float c, float d) {
   x->mx = xmax;
   y->mn = ymin;
   y->mx = ymax;
-  x->orig= new Mesh();
-  y->orig= new Mesh();
+  x->orig= new Mesh[1];
+  y->orig= new Mesh[1];
+
   x->draw_queue = new vector<MeshDrawContext>;
   y->draw_queue = new vector<MeshDrawContext>;
   *y->orig = *y;
