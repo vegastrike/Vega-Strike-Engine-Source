@@ -205,7 +205,9 @@ struct UpgradingInfo {
 	// Black background
 	ShowColor(-1,-1,2,2, 0,0,0,1);
 	ShowColor(0,0,0,0, 1,1,1,1);
-	ShowText(-0.98, 0.93, 2, 4, (title+ string(" Credits: ")+tostring (_Universe->AccessCockpit()->credits)).c_str(), 0);
+	char floatprice [100];
+	sprintf(floatprice,"%g",_Universe->AccessCockpit()->credits);
+	ShowText(-0.98, 0.93, 2, 4, (title+ string(" Credits: ")+floatprice).c_str(), 0);
 	CargoList->Refresh();
 	CargoInfo->Refresh();
 	OK->Refresh();
@@ -266,6 +268,7 @@ void CargoToMission (const char * item,TextArea * ta) {
 }
 
 void UpgradingInfo::SelectItem (const char *item, int button, int buttonstate) {
+	char floatprice [100];
   switch (mode) {
   case BUYMODE:
   case SELLMODE:
@@ -279,7 +282,8 @@ void UpgradingInfo::SelectItem (const char *item, int button, int buttonstate) {
 	int cargonumber;
 	sscanf (item,"%d",&cargonumber);
 	CargoInfo->ChangeTextItem ("name",(*CurrentList)[cargonumber].content.c_str());
-	CargoInfo->ChangeTextItem ("price",(tostring((*CurrentList)[cargonumber].price)).c_str());
+	sprintf(floatprice,"%g",(*CurrentList)[cargonumber].price);
+	CargoInfo->ChangeTextItem ("price",floatprice);
       }
       break;
     default:
