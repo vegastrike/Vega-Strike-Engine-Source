@@ -378,13 +378,13 @@ static void Spherize (CubeCoord Tex [lmwid][lmwid],CubeCoord gluSph [lmwid][lmwi
 				g /= avg;
 				b/= avg;
 			}
-			unsigned int rr=r;
-			unsigned int gg=g;
-			unsigned int bb=b;
+			unsigned int rr=(unsigned int)r;
+			unsigned int gg=(unsigned int)g;
+			unsigned int bb=(unsigned int)b;
 			if (affine!=0||multiplicitive!=1||power!=1) {
-			  rr = affine + ((pow ((float)r,power)) * multiplicitive);
-			  gg = affine + ((pow ((float)g,power)) * multiplicitive);
-			  bb = affine + ((pow ((float)b,power)) * multiplicitive);
+			  rr = (unsigned int)(affine + ((pow ((float)r,power)) * multiplicitive));
+			  gg = (unsigned int)(affine + ((pow ((float)g,power)) * multiplicitive));
+			  bb = (unsigned int)(affine + ((pow ((float)b,power)) * multiplicitive));
 			}
 			if (rr>255) rr= 255;
 			if (gg>255) gg=255;

@@ -46,7 +46,7 @@ void GFXVertexList::RefreshDisplayList () {
   }
   if (vbo_data) {
     BindBuf(vbo_data);
-    (*glBufferDataARB_p)(GL_ARRAY_BUFFER_ARB, numVertices*((changed&HAS_COLOR)?sizeof(GFXColorVertex):sizeof(GFXVertex)), data.vertices, GL_STATIC_DRAW_ARB);
+    (*glBufferDataARB_p)(GL_ARRAY_BUFFER_ARB, numVertices*((changed&HAS_COLOR)?sizeof(GFXColorVertex):sizeof(GFXVertex)), data.vertices, (changed&CHANGE_MUTABLE)?GL_DYNAMIC_DRAW_ARB:GL_STATIC_DRAW_ARB);
     if (changed&HAS_INDEX) {
       BindInd(display_list);
       unsigned int tot=0;
@@ -58,7 +58,7 @@ void GFXVertexList::RefreshDisplayList () {
         : ((changed & INDEX_SHORT) 
            ? sizeof (unsigned short) 
            : sizeof(unsigned int));
-      (*glBufferDataARB_p)(GL_ELEMENT_ARRAY_BUFFER_ARB, tot*indexsize, &index.b[0], GL_STATIC_DRAW_ARB);      
+      (*glBufferDataARB_p)(GL_ELEMENT_ARRAY_BUFFER_ARB, tot*indexsize, &index.b[0], (changed&CHANGE_MUTABLE)?GL_DYNAMIC_DRAW_ARB:GL_STATIC_DRAW_ARB);      
     }
     return;
   }
@@ -259,4 +259,58 @@ GFXVertexList::~GFXVertexList() {
       free (data.vertices);
     }
   }
+}
+
+union GFXVertexList::VDAT * GFXVertexList::Map(bool read, bool write) {
+  if (vbo_data) {
+    if (display_list) {
+      BindInd(display_list);
+      index.b=(unsigned char*)(*glMapBufferARB_p)(GL_ELEMENT_ARRAY_BUFFER_ARB,read?(write?GL_READ_WRITE_ARB:GL_READ_ONLY_ARB):GL_WRITE_ONLY_ARB);
+    }
+    BindBuf(vbo_data);
+    void * ret=(*glMapBufferARB_p)(GL_ARRAY_BUFFER_ARB,read?(write?GL_READ_WRITE_ARB:GL_READ_ONLY_ARB):GL_WRITE_ONLY_ARB);    
+    if (changed&HAS_COLOR) {
+      data.colors=(GFXColorVertex*)ret;
+    }else{
+      data.vertices=(GFXVertex*)ret;
+    }
+  }
+  return &data;
+}
+void GFXVertexList::UnMap() {
+  if (vbo_data) {
+    if (display_list) {
+      BindInd(display_list);
+      (*glUnmapBufferARB_p)(GL_ELEMENT_ARRAY_BUFFER_ARB);        
+    }
+    BindBuf(vbo_data);
+    (*glUnmapBufferARB_p)(GL_ARRAY_BUFFER_ARB);      
+    data.colors=NULL;
+    data.vertices=NULL;  
+  }
+}
+  ///Returns the array of vertices to be mutated
+union GFXVertexList::VDAT * GFXVertexList::BeginMutate (int offset) {
+  this->Map(false,true);
+  return &data;
+}
+
+///Ends mutation and refreshes display list
+void GFXVertexList::EndMutate (int newvertexsize) {
+  this->UnMap();
+  if (!(changed&CHANGE_MUTABLE)) {
+    changed |= CHANGE_CHANGE;
+  }
+  if (!vbo_data){
+    RenormalizeNormals ();
+    RefreshDisplayList();
+  }
+  if (changed&CHANGE_CHANGE) {
+    changed&=(~CHANGE_CHANGE);
+  }
+  if (newvertexsize) {
+    numVertices = newvertexsize;
+  }
+
+
 }

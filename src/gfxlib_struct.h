@@ -350,6 +350,8 @@ public:
   bool hasColor()const;
 	
   int GetNumVertices() const {return numVertices;}
+  virtual VDAT * Map(bool read, bool write);
+  void UnMap();
   ///Returns the array of vertices to be mutated
   virtual VDAT * BeginMutate (int offset);
   ///Ends mutation and refreshes display list

@@ -16,6 +16,32 @@ void GFXVertexList::Draw (enum POLYTYPE poly, int numV, unsigned short *index) {
 }
 void GFXVertexList::Draw (enum POLYTYPE poly, int numV, unsigned int *index) {
 }
+GFXVertexList::VDAT * GFXVertexList::Map(bool read, bool write) {
+  return &data;
+}
+void GFXVertexList::UnMap() {
+
+}
+  ///Returns the array of vertices to be mutated
+union GFXVertexList::VDAT * GFXVertexList::BeginMutate (int offset) {
+  return &data;
+}
+///Ends mutation and refreshes display list
+void GFXVertexList::EndMutate (int newvertexsize) {
+  if (!(changed&CHANGE_MUTABLE)) {
+    changed |= CHANGE_CHANGE;
+  }
+  RenormalizeNormals ();
+  RefreshDisplayList();
+  if (changed&CHANGE_CHANGE) {
+    changed&=(~CHANGE_CHANGE);
+  }
+  if (newvertexsize) {
+    numVertices = newvertexsize;
+  }
+
+
+}
 
 void GFXVertexList::DrawOnce (){}
 
