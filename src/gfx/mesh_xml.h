@@ -164,3 +164,4 @@ struct MeshXML {
     int faction;
     Mesh * mesh;
 };
+

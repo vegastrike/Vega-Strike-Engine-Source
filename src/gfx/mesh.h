@@ -197,7 +197,7 @@ public:
 //public:
 	static Mesh* LoadMesh(const char * filename, const Vector & scalex, int faction, class Flightgroup * fg);
   static vector<Mesh*> LoadMeshes(const char * filename, const Vector & scalex, int faction, class Flightgroup * fg);
-  static vector<Mesh*> LoadMeshes(VSFileSystem::VSFile & f, const Vector & scalex, int faction, class Flightgroup * fg);
+  static vector<Mesh*> LoadMeshes(VSFileSystem::VSFile & f, const Vector & scalex, int faction, class Flightgroup * fg, std::string hash_name);
 
   ///Forks the mesh across the plane a,b,c,d into two separate meshes...upon which this may be deleted
   void Fork (Mesh * &one, Mesh * &two, float a, float b, float c, float d);

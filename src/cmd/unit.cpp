@@ -408,13 +408,15 @@ void GameUnit<UnitType>::Draw(const Transformation &parent, const Matrix &parent
 		float currentFrame = meshdata[i]->getCurrentFrame();
 		meshdata[i]->Draw(lod,this->WarpMatrix(*ctm),d,i==meshdata.size()-1?-1:cloak,(_Universe->AccessCamera()->GetNebula()==nebula&&nebula!=NULL)?-1:0,chardamage);//cloakign and nebula		
 		On_Screen=true;
-		if (meshdata[i]->getFramesPerSecond()) {
-			float currentprogress=floor(meshdata[i]->getCurrentFrame()*numKeyFrames/meshdata[i]->getNumLOD());
+                unsigned int numAnimFrames=0;
+		if (meshdata[i]->getFramesPerSecond()&&
+                    (numAnimFrames=meshdata[i]->getNumAnimationFrames(""))) {
+			float currentprogress=floor(meshdata[i]->getCurrentFrame()*numKeyFrames/numAnimFrames);
 			if (numKeyFrames&&
-				floor(currentFrame*numKeyFrames/meshdata[i]->getNumLOD())   !=
+				floor(currentFrame*numKeyFrames/numAnimFrames)   !=
 				currentprogress) {
 				graphicOptions.Animating=0;
-				meshdata[i]->setCurrentFrame(.1+currentprogress*meshdata[i]->getNumLOD()/numKeyFrames);
+				meshdata[i]->setCurrentFrame(.1+currentprogress*numAnimFrames/numKeyFrames);
 			}else if (!graphicOptions.Animating) {
 				meshdata[i]->setCurrentFrame(currentFrame);//dont' budge
 			}

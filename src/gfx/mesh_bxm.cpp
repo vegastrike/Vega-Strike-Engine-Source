@@ -122,7 +122,7 @@ struct OrigMeshLoader{
 void Mesh::BFXMToXmesh(FILE* Inputfile, FILE* Outputfile, vector<Mesh*>&output, Vector overallscale,int fac){
   Flightgroup * fg=0;
 #else
-vector<Mesh*> Mesh::LoadMeshes(VSFileSystem::VSFile & Inputfile, const Vector & scalex, int faction, class Flightgroup * fg){
+vector<Mesh*> Mesh::LoadMeshes(VSFileSystem::VSFile & Inputfile, const Vector & scalex, int faction, class Flightgroup * fg,std::string hash_name){
   Vector overallscale=scalex;
   int fac=faction;
   FILE * Outputfile=0;
@@ -408,7 +408,6 @@ vector<Mesh*> Mesh::LoadMeshes(VSFileSystem::VSFile & Inputfile, const Vector & 
 				  fprintf(Outputfile,"<Frame FrameMeshName=\"%d_%d.xmesh\"/>\n",recordindex,framecount);
 			  }
 		  }
-                  assert(numanimdefs==0);
 		  for(int32bit anim=0;anim<numanimdefs;anim++){
 			int32bit animnamelen=VSSwapHostIntToLittle(inmemfile[word32index].i32val);//length of name
 			word32index+=1;
@@ -424,6 +423,8 @@ vector<Mesh*> Mesh::LoadMeshes(VSFileSystem::VSFile & Inputfile, const Vector & 
 			}
 			float32bit FPS=VSSwapHostFloatToLittle(inmemfile[word32index].f32val);//FPS
 			fprintf(Outputfile,"<AnimationDefinition AnimationName=\"%s\" FPS=\"%f\">\n",animname.c_str(),FPS);
+
+                        vector <int> *framerefs = new vector<int>;
                         mesh->framespersecond=FPS;
 			word32index+=NUMFIELDSPERANIMATIONDEF;
 			int32bit numframerefs=VSSwapHostIntToLittle(inmemfile[word32index].i32val);//number of animation frame references
@@ -432,7 +433,9 @@ vector<Mesh*> Mesh::LoadMeshes(VSFileSystem::VSFile & Inputfile, const Vector & 
 			  int32bit ref=VSSwapHostIntToLittle(inmemfile[word32index].i32val);//number of animation frame references
 		      word32index+=NUMFIELDSPERREFERENCEDANIMATION;
 			  fprintf(Outputfile,"<AnimationFrameIndex AnimationMeshIndex=\"%d\"/>\n",ref-1-numLODs);
+                          framerefs->push_back(ref);
 			}
+                        animationSequences.Put(hash_name+animname,framerefs);
 			fprintf(Outputfile,"</AnimationDefinition>\n");
 		  }
 		  //End AnimationDefinitions
