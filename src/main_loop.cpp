@@ -118,9 +118,22 @@ bool _Slew = true;
      }
    }
  }
+static bool QuitAllow=false;
 
 namespace CockpitKeys {
-
+  void QuitNow () {
+    {
+      _Universe->WriteSaveGame(true);//gotta do important stuff first
+      for (unsigned int i=0;i<active_missions.size();i++) {
+	if (active_missions[i]) {
+	  active_missions[i]->DirectorEnd();
+	}
+      }
+      delete forcefeedback;
+      winsys_exit(0);
+    }
+    
+  }
  void SkipMusicTrack(int,KBSTATE newState) {
    if(newState==PRESS){
      printf("skipping\n");
@@ -133,6 +146,9 @@ namespace CockpitKeys {
 	static Vector R;
 	for (int i=0;i<NUM_CAM;i++) {
 	if(newState==PRESS) {
+	  if (QuitAllow) {
+	    QuitNow();
+	  }
 		Q = _Universe->AccessCockpit()->AccessCamera(i)->Q;
 		R = _Universe->AccessCockpit()->AccessCamera(i)->R;
 		_Universe->AccessCockpit()->AccessCamera(i)->myPhysics.ApplyBalancedLocalTorque(-Q, R,timek);
@@ -150,6 +166,10 @@ namespace CockpitKeys {
 	static Vector R;
 	for (int i=0;i<NUM_CAM;i++) {
 	if(newState==PRESS) {
+	  if (QuitAllow) {
+	    QuitNow();
+	  }
+
 		Q = _Universe->AccessCockpit()->AccessCamera(i)->Q;
 		R = _Universe->AccessCockpit()->AccessCamera(i)->R;
 		_Universe->AccessCockpit()->AccessCamera(i)->myPhysics.ApplyBalancedLocalTorque(Q, R,timek);
@@ -166,6 +186,10 @@ namespace CockpitKeys {
 	static Vector R;
 	for (int i=0;i<NUM_CAM;i++) {
 	if(newState==PRESS) {
+	  if (QuitAllow) {
+	    QuitNow();
+	  }
+
 		P = _Universe->AccessCockpit()->AccessCamera(i)->P;
 		R = _Universe->AccessCockpit()->AccessCamera(i)->R;
 		_Universe->AccessCockpit()->AccessCamera(i)->myPhysics.ApplyBalancedLocalTorque(-P, R,timek);
@@ -182,6 +206,9 @@ namespace CockpitKeys {
 	static Vector P;
 	static Vector R;
 	if(newState==PRESS) {
+	  if (QuitAllow) {
+	    QuitNow();
+	  }
 		P = _Universe->AccessCockpit()->AccessCamera(i)->P;
 		R = _Universe->AccessCockpit()->AccessCamera(i)->R;
 		_Universe->AccessCockpit()->AccessCamera(i)->myPhysics.ApplyBalancedLocalTorque(P, R,timek);
@@ -199,18 +226,25 @@ namespace CockpitKeys {
       ouch = (!ouch);
     }
     */
-	if(newState==PRESS||newState==DOWN) {
-	  _Universe->WriteSaveGame(true);//gotta do important stuff first
-	  for (unsigned int i=0;i<active_missions.size();i++) {
-	    if (active_missions[i]) {
-	      active_missions[i]->DirectorEnd();
-	    }
+	if(newState==PRESS) {
+	  if (QuitAllow) {
+	    UniverseUtil::IOmessage(0,"game","all","");
+	    UniverseUtil::IOmessage(0,"game","all","");
+	    UniverseUtil::IOmessage(0,"game","all","#ffff00Quit Mode cancelled, Camera Keys restored to former function.");
+	    UniverseUtil::IOmessage(0,"game","all","#00ff00Press Esc and then q to Quit at a later point.");
+	  }else {
+	    UniverseUtil::IOmessage(0,"game","all","");
+	    UniverseUtil::IOmessage(0,"game","all","");
+	    UniverseUtil::IOmessage(0,"game","all","#ff0000You have pressed the quit key.");
+	    UniverseUtil::IOmessage(0,"game","all","#00ffffIf you hit q,z,s or f, the Camera Keys, the game will quit.");
+	    UniverseUtil::IOmessage(0,"game","all","#00ff55Pressing ESC again will cancel quit confirm mode.");
+	    
 	  }
-	  delete forcefeedback;
-	  winsys_exit(0);
+	  QuitAllow = !QuitAllow;
 	}
-   
+
   }
+
 bool cockpitfront=true;
   void Inside(int,KBSTATE newState) {
     {
