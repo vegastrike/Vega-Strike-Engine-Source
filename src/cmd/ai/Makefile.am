@@ -24,8 +24,6 @@ libaigeneric =	\
 	order.h		\
 	aggressive.cpp		\
 	aggressive.h	\
-	pythonai.cpp		\
-	pythonai.h			\
 	script.cpp			\
 	script.h			\
 	missionscript.cpp	\
@@ -34,6 +32,10 @@ libaigeneric =	\
 	tactics.cpp	\
 	turretai.cpp 		\
 	turretai.h
+
+
+#	pythonai.cpp		
+#	pythonai.h			
 
 libaiserver_a_SOURCES = $(libaigeneric)
 
