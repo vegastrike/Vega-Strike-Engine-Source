@@ -56,6 +56,7 @@ Logo * createLogo(int numberlogos,Vector* center, Vector* normal, float* sizes, 
 	return NULL;
 }
 
+extern Hashtable<std::string, std::vector <Mesh*>, 127> bfxmHashTable;
 Mesh::~Mesh()
 {
 	if(!orig||orig==this)
@@ -63,6 +64,19 @@ Mesh::~Mesh()
 	  delete vlist;
 	  if (meshHashTable.Get(hash_name)==this)
 	    meshHashTable.Delete(hash_name);
+          vector <Mesh *>* hashers = bfxmHashTable.Get(hash_name);
+          vector <Mesh *>::iterator finder;
+          if (hashers) {
+            for (int i=hashers->size()-1;i>=0;--i) {
+              if ((*hashers)[i]==this) {
+                hashers->erase (hashers->begin()+i);
+                if (hashers->empty()) {
+                  bfxmHashTable.Delete(hash_name);
+                  delete hashers;
+                }
+              }
+            }
+          }
 	  
 	  orig->refcount--;
 	  //printf ("orig refcount: %d",refcount);

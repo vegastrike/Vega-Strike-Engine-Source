@@ -200,13 +200,14 @@ Mesh::~Mesh()
           vector <Mesh *>* hashers = bfxmHashTable.Get(hash_name);
           vector <Mesh *>::iterator finder;
           if (hashers) {
-            while ((finder=hashers->find(this)!=hashers.end())) {
-              hashers->erase (finder);
-              if (hashers.empty()) {
-                bfxmHashTable.Delete(hash_name);
-                delete hashers;
+            for (int i=hashers->size()-1;i>=0;--i) {
+              if ((*hashers)[i]==this) {
+                hashers->erase (hashers->begin()+i);
+                if (hashers->empty()) {
+                  bfxmHashTable.Delete(hash_name);
+                  delete hashers;
+                }
               }
-                
             }
           }
 	  if(draw_queue!=NULL)
