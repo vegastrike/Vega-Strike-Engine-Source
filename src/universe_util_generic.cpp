@@ -212,9 +212,9 @@ namespace UniverseUtil {
 	
 	
 	bool systemInMemory(string nam) {
-	  unsigned int nass = _Universe->getNumActiveStarSystem();
+	  unsigned int nass = _Universe->star_system.size();;
 	  for (unsigned int i=0;i<nass;i++) {
-	    if (_Universe->getActiveStarSystem(i)->getFileName()==nam)
+	    if (_Universe->star_system[i]->getFileName()==nam)
 	      return true;
 	  }
 	  return false;
