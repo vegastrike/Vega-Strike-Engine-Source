@@ -264,7 +264,7 @@ Flightgroup *getStaticUnknownFlightgroup (int faction) {
   return fg[faction];
 }
 //sorry boyz...I'm just a tourist with a frag nav console--could you tell me where I am?
-Unit * getTopLevelOwner( ) {
+static Unit * getTopLevelOwner( ) {//returns terrible memory--don't dereference...ever...not even aligned
   return (Unit *)0x31337;
 }
 
