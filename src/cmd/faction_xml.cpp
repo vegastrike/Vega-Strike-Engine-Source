@@ -376,7 +376,7 @@ Universe::Faction::Faction() {
 Universe::Faction::~Faction() {
   for (unsigned int i=0;i<faction.size();i++) {
     //    delete faction[i].conversation;
-    getFSM ("FREE_THIS_LOAD");
+//    getFSM ("FREE_THIS_LOAD");
   }
   delete logo;
   delete [] factionname;

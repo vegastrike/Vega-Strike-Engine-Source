@@ -6,6 +6,12 @@
 #include <math.h>
 #include <time.h>
 #include <assert.h>
+
+#include "config_xml.h"
+#include "vs_globals.h"
+#include "xml_support.h"
+
+
 #ifndef _WIN32
 #include <ctype.h>
 #endif
@@ -211,11 +217,13 @@ void Tab () {
   }
 
 }
-
+ 
 
 
 void readColorGrads (vector <string> &entity,const char * file) {
   FILE * fp = fopen (file,"r");
+  static float radiusscale= XMLSupport::parse_float (vs_config->getVariable("galaxy","StarRadiusScale","50"));
+
   if (!fp) {
     printf ("Failed to load %s",file);
     GradColor (g);
@@ -232,7 +240,8 @@ void readColorGrads (vector <string> &entity,const char * file) {
   while (!feof (fp)) {
     fgets (input_buffer,999,fp);
     if (sscanf (input_buffer,"%f %f %f %f %f %s",&g.minrad,&g.r,&g.g,&g.b,&g.variance,output_buffer)==6) {
-      colorGradiant.push_back (g);
+      g.minrad *=radiusscale;
+	  colorGradiant.push_back (g);
       entity.push_back (output_buffer);
     }
   }
@@ -616,8 +625,11 @@ void MakePlanet(float radius, int entitytype, bool forceRS, Vector R, Vector S, 
     for (int i=0;i<numu;i++) {
       MakeSmallUnit ();
     }
-    MakeMoons ((entitytype!=JUMP&&entitytype!=MOON)?.4*radius:.8*radius,MOON,entitytype,entitytype==JUMP||entitytype==MOON);
-    MakeMoons ((entitytype!=JUMP&&entitytype!=MOON)?.2*radius:.5*radius,JUMP,entitytype,entitytype==JUMP||entitytype==MOON);
+  static float moon_size_compared_to_planet = XMLSupport::parse_float (vs_config->getVariable ("galaxy","MoonRelativeToPlanet",".4"));
+  static float moon_size_compared_to_moon = XMLSupport::parse_float (vs_config->getVariable ("galaxy","MoonRelativeToMoon",".8"));
+	
+    MakeMoons ((entitytype!=JUMP&&entitytype!=MOON)?moon_size_compared_to_planet*radius:moon_size_compared_to_moon*radius,MOON,entitytype,entitytype==JUMP||entitytype==MOON);
+    MakeMoons (100+grand()*300,JUMP,entitytype,entitytype==JUMP||entitytype==MOON);
   }
   radii.pop_back();
   if (entitytype==PLANET&&temprandom<.1) {
@@ -660,8 +672,11 @@ void beginStar (float radius, unsigned int which) {
   fprintf (fp," Red=\"%f\" Green=\"%f\" Blue=\"%f\" ReflectNoLight=\"true\" light=\"%d\">\n",lights[which].r,lights[which].g,lights[which].b,which);
 
   radii.push_back (1.5*radius);
-  MakeMoons (.3*radius,PLANET,STAR);
-  MakeMoons (.6*radius,GAS,STAR);
+  static float planet_size_compared_to_sun = XMLSupport::parse_float (vs_config->getVariable ("galaxy","RockyRelativeToPrinary",".05"));
+  static float gas_size_compared_to_sun = XMLSupport::parse_float (vs_config->getVariable ("galaxy","GasRelativeToPrinary",".2"));
+
+  MakeMoons (planet_size_compared_to_sun*radius,PLANET,STAR);
+  MakeMoons (gas_size_compared_to_sun*radius,GAS,STAR);
   int numu;
   if (nument[0]) {
     numu= numun[0]/nument[0]+(grand()<float(numun[0]%nument[0])/nument[0]);
@@ -819,8 +834,11 @@ void readnames (vector <string> &entity, const char * filename) {
 
 void generateStarSystem (string datapath, int seed, string sector, string system, string outputfile, float sunradius, float compac,  int numstars, int numgasgiants, int numrockyplanets, int nummoons, bool nebulae, bool asteroids, int numnaturalphenomena, int numstarbases, string factions, const vector <string> &jumplocations, string namelist, string starlist, string planetlist, string gasgiantlist, string moonlist, string smallunitlist, string nebulaelist, string asteroidlist,string backgroundlist) {
   ResetGlobalVariables();
+  static float radiusscale= XMLSupport::parse_float (vs_config->getVariable("galaxy","StarRadiusScale","50"));
+  sunradius *=radiusscale;
   systemname=system;
-  compactness = compac;
+  static float compactness_scale = XMLSupport::parse_float (vs_config->getVariable("galaxy","CompactnessScale","100"));
+  compactness = compac*compactness_scale;
   if (seed)
     seedrand (seed);
   else

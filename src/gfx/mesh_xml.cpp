@@ -715,11 +715,12 @@ void Mesh::beginElement(const string &name, const AttributeList &attributes) {
     xml->active_list->push_back(xml->vertex);
     xml->active_ind->push_back(index);
     if (xml->reverse) {
-      for (unsigned int i=xml->active_ind->size()-1;i>0;i--) {
+	  unsigned int i;
+      for (i=xml->active_ind->size()-1;i>0;i--) {
 	(*xml->active_ind)[i]=(*xml->active_ind)[i-1];
       }
       (*xml->active_ind)[0]=index;
-      for (unsigned int i=xml->active_list->size()-1;i>0;i--) {
+      for ( i=xml->active_list->size()-1;i>0;i--) {
 	(*xml->active_list)[i]=(*xml->active_list)[i-1];
       }
       (*xml->active_list)[0]=xml->vertex;

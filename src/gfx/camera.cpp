@@ -80,7 +80,7 @@ void Camera::UpdateGFX(GFXBOOL clip, GFXBOOL updateFrustum)
 		  GFXParallel(g_game.aspect*-zoom,g_game.aspect*zoom,-zoom,zoom,-g_game.zfar*(clip?1:ZFARCONST),g_game.zfar*(clip?1:ZFARCONST));
 		  break;
 		}
-		GFXLookAt (Coord-R, Coord, Q);
+		GFXLookAt (-R, Coord, Q);
 		if (updateFrustum) GFXCalculateFrustum();
 
 #ifdef PERFRAMESOUND		

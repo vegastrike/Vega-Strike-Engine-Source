@@ -411,9 +411,9 @@ static void LookAtHelper( float eyex, float eyey, float eyez,
    /* Make rotation matrix */
 
    /* Z vector */
-   z[0] = eyex - centerx;
-   z[1] = eyey - centery;
-   z[2] = eyez - centerz;
+   z[0] = eyex;
+   z[1] = eyey;
+   z[2] = eyez;
    mag = sqrtf( z[0]*z[0] + z[1]*z[1] + z[2]*z[2] );
    if (mag) {  /* mpichler, 19950515 */
       z[0] /= mag;
@@ -482,11 +482,11 @@ static void LookAtHelper( float eyex, float eyey, float eyez,
 
 #define M(row,col)  tm[col*4+row]
    M(0,0) = 1.0;
-   M(0,3) = -eyex;
+   M(0,3) = -centerx-eyex;
    M(1,1) = 1.0;
-   M(1,3) = -eyey;
+   M(1,3) = -centery-eyey;
    M(2,2) = 1.0;
-   M(2,3) = -eyez;
+   M(2,3) = -centerz-eyez;
    M(3,3) = 1.0;
 #undef M
 
@@ -520,11 +520,11 @@ static void LookAtHelper( float eyex, float eyey, float eyez,
 	GFXActiveTexture (1);
 	glMatrixMode (GL_TEXTURE);	
 	glLoadIdentity();
-	
+#error
 
    //   Vector (centerx,centery,centerz).Cross (Vector (1,0,0));  DID NOT TRANSFORM THE ORIENTATION VECTOR TO REVERSE CAMERASPACE
    Vector axis (centerx,centery,centerz);
-   Vector cubemapincamspace(eyex,eyey,eyez);
+   Vector cubemapincamspace(eyex+centerx,eyey+centery,eyez+centerz);
    cubemapincamspace.Normalize();
    axis.Normalize();
    //   float theta = arcsinf (Vector (centerx,centery,centerz).Normalize().Dot (Vector (1,0,0)));  DID NOT TRANSFORM THE ORIENTATION VECTOR TO REVERSE CAMERASPACE

@@ -95,7 +95,7 @@ public:
 };
 */
 
-const float timek = .005;
+const float timek = .001;
 bool _Slew = true;
 
 namespace CockpitKeys {
