@@ -388,9 +388,9 @@ namespace BeamXML {
 }
 
 using namespace BeamXML;
-
-weapon_info* getTemplate(const string &key) {
- 
+extern string strtolower(const string &foo);
+weapon_info* getTemplate(const string &kkey) {
+  string key =strtolower(kkey);
   weapon_info * wi =  lookuptable.Get(strtoupper(key));
   if (wi) {
     if (!WeaponMeshCache::getCachedMutable (wi->weapon_name)) {

@@ -11,6 +11,13 @@ string strtoupper(const string &foo) {
   while(src!=foo.end()) rval += toupper(*src++);
   return rval;
 }
+string strtolower(const string &foo) {
+	
+  string rval;
+  string::const_iterator src = foo.begin();
+  while(src!=foo.end()) rval += tolower(*src++);
+  return rval;
+}
 namespace XMLSupport {
   /*
   string tostring(int num) {

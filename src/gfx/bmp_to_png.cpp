@@ -77,10 +77,10 @@ static unsigned char *  LoadTex(char * FileName, int &sizeX, int &sizeY){
 	  long temp;
 	  BITMAPINFOHEADER info;
 	  fread(&info, SIZEOF_BITMAPINFOHEADER,1,fp);
-	  sizeX = info.biWidth;
-	  sizeY = info.biHeight;
+	  sizeX = le32_to_cpu (info.biWidth);
+	  sizeY = le32_to_cpu(info.biHeight);
 
-	  if(info.biBitCount == 24)
+	  if(le32_to_cpu(info.biBitCount) == 24)
 	    {
 	      data = NULL;
 	      data= new unsigned char [3*sizeY*sizeX];
@@ -102,7 +102,7 @@ static unsigned char *  LoadTex(char * FileName, int &sizeX, int &sizeY){
 		    }
 		}
 	    }
-	  else if(info.biBitCount == 8)
+	  else if(le32_to_cpu(info.biBitCount) == 8)
 	    {
 	      data = NULL;
 	      data= new unsigned char [sizeY*sizeX*3];

@@ -21,10 +21,8 @@ Mount::Mount(const string& filename, short am,short vol, float xyscale, float zs
   }
   */
 }
-
 void Mount::ReplaceSound () {
 }
-
 void Mount::PhysicsAlignedUnfire() {}
 bool Mount::PhysicsAlignedFire (const Transformation &Cumulative, const Matrix & mat, const Vector & Velocity, Unit *owner,  Unit *target, signed char autotrack, float trackingcone) { return false;}
 bool Mount::Fire (Unit *owner, bool Missile, bool beams_follow_owner) {return false;}

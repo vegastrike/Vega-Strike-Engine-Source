@@ -27,6 +27,7 @@ libcmdgeneric =			\
 	images.h						\
 	collection.h					\
 	collection.cpp					\
+	mount_generic.cpp				\
 	container.h						\
 	container.cpp	\
 	unit_const_cache.cpp \
