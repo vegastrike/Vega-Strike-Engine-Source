@@ -31,11 +31,3 @@ Client::Client( SOCKETALT& s, bool tcp )
 	Client::Client();
 }
 
-inline bool Client::isTcp( ) const {
-    return is_tcp;
-}
-
-inline bool Client::isUdp( ) const {
-    return !is_tcp;
-}
-

@@ -83,8 +83,8 @@ public:
 	Client( Prediction * pred);
 	Client( SOCKETALT& s, bool tcp );
 
-	inline bool isTcp( ) const;
-	inline bool isUdp( ) const;
+	inline bool isTcp( ) const { return is_tcp; }
+	inline bool isUdp( ) const { return !is_tcp; }
 	friend std::ostream& operator<<( std::ostream& ostr, const Client& c );
 
 private:

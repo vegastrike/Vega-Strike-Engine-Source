@@ -15,6 +15,8 @@ libgfxgeneric =  		\
 	matrix.h			\
 	vec.h				\
 	vec.cpp				\
+	lerp.cpp			\
+	lerp.h				\
 	quaternion.cpp		\
 	quaternion.h		\
 	bounding_box.cpp	\
@@ -75,8 +77,6 @@ libgfx_a_SOURCES =	$(libgfxgeneric)\
 	halo.h			\
 	hud.cpp			\
 	hud.h			\
-	lerp.cpp		\
-	lerp.h			\
 	loc_select.cpp	\
 	loc_select.h	\
 	nonlinear_transform.h	\
