@@ -57,6 +57,7 @@ public:
 	void GetRotation(float &rot);
 	void ReadTexture( VSFileSystem::VSFile * f);
 	//float &Rotation(){return rotation;};
+	Texture * getTexture(){return surface;}
 };
 
 #endif

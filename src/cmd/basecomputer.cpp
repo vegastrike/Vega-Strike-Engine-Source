@@ -47,8 +47,8 @@
 #include "gui/groupcontrol.h"
 #include "gui/scroller.h"
 #include "unit_xml.h"
-
-
+#include "gfx/sprite.h"
+#include "gfx/aux_texture.h"
 using namespace std;
 
 
@@ -119,7 +119,7 @@ extern void RespawnNow(Cockpit* cockpit);
 //add to text a nicely-formated description of the unit and its subunits
 void showUnitStats(Unit * playerUnit,string &text,int subunitlevel,int mode, Cargo &item);
 //build the previous description from a cargo item
-string buildShipDescription(Cargo &item);
+string buildShipDescription(Cargo &item,string &descriptiontexture);
 //put in buffer a pretty prepresentation of the POSITIVE float f (ie 4,732.17)
 void prettyPrintFloat(char * buffer,float f, int digitsBefore, int digitsAfter);
 string buildUpgradeDescription(Cargo &item);
@@ -850,7 +850,7 @@ void BaseComputer::constructControls(void) {
 
         // Scroller for description.
         Scroller* descScroller = new Scroller;
-        descScroller->setRect( Rect(.91, -.8, .05, 1.45) );
+        descScroller->setRect( Rect(.91, -.5, .05, 1.15) );
         descScroller->setColor( GFXColor(color.r,color.g,color.b,.1) );
         descScroller->setThumbColor( GFXColor(color.r*.4,color.g*.4,color.b*.4), GUI_OPAQUE_WHITE );
         descScroller->setButtonColor( GFXColor(color.r*.4,color.g*.4,color.b*.4) );
@@ -860,10 +860,10 @@ void BaseComputer::constructControls(void) {
         // Description box.
         StaticDisplay* ms = new StaticDisplay;
         StaticImageDisplay * picture = new StaticImageDisplay;
-        picture->setRect(Rect(-.96,-.45,.46*.75,-.47));
+        picture->setRect(Rect(-.10,-.9,.5*.75,-.5));
         picture->setTexture("blackclear.png");
         picture->setId("DescriptionImage");
-        ms->setRect( Rect(-.6, -.95, 1.51, .5) );
+        ms->setRect( Rect(-.10, -.5, 1.01, 1.15) );
         ms->setColor( GFXColor(color.r,color.g,color.b,.1) );
 		ms->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY);
         ms->setFont( Font(.06) );
@@ -1318,13 +1318,14 @@ void BaseComputer::configureCargoCommitControls(const Cargo& item, TransactionTy
 	}
 }
 
-string buildShipDescription(Cargo &item);
+string buildShipDescription(Cargo &item,string & descriptiontexture);
 // Update the controls when the selection for a transaction changes.
 void BaseComputer::updateTransactionControlsForSelection(TransactionList* tlist) {
     // Get the controls we need.
     NewButton* commitButton = dynamic_cast<NewButton*>( window()->findControlById("Commit") );
     assert(commitButton != NULL);
     StaticDisplay* desc = dynamic_cast<StaticDisplay*>( window()->findControlById("Description") );
+    std::string descriptiontexture;
     assert(desc != NULL);
 
     if(!tlist) {
@@ -1430,7 +1431,7 @@ void BaseComputer::updateTransactionControlsForSelection(TransactionList* tlist)
 				}
                 break;
             case BUY_SHIP:
-		if (item.description=="") item.description=buildShipDescription(item);
+		if (item.description=="") item.description=buildShipDescription(item,descriptiontexture);
                 if(item.category.find("My_Fleet") != string::npos) {
                     // This ship is in my fleet -- the price is just the transport cost to get it to
                     //  the current base.  "Buying" this ship makes it my current ship.
@@ -1469,8 +1470,6 @@ void BaseComputer::updateTransactionControlsForSelection(TransactionList* tlist)
     // Change the description control.
     unsigned int pic;
     StaticImageDisplay* descimage = dynamic_cast<StaticImageDisplay*>( window()->findControlById("DescriptionImage") );
-    if (descimage)
-       descimage->setTexture("blackclear.png");
     if ((pic=descString.find("@"))!=string::npos){
        std::string texture = descString.substr(pic+1);
        descString = descString.substr(0,pic);
@@ -1481,6 +1480,11 @@ void BaseComputer::updateTransactionControlsForSelection(TransactionList* tlist)
        }              
        if (descimage)
           descimage->setTexture(texture);
+    }else {
+      if (descimage&&descriptiontexture=="") 
+        descimage->setTexture("blackclear.png");
+      else
+        descimage->setTexture(descriptiontexture);
     }
     desc->setText(descString);
 }
@@ -2938,7 +2942,7 @@ void SwapInNewShipName(Cockpit* cockpit, const std::string& newFileName, int swa
 }
 
 
-string buildShipDescription(Cargo &item) {
+string buildShipDescription(Cargo &item,std::string & texturedescription) {
 	//load the Unit
       	string newModifications;
       	if(item.category.find("My_Fleet") != string::npos) {
@@ -2951,7 +2955,30 @@ string buildShipDescription(Cargo &item) {
       	Unit* newPart = UnitFactory::createUnit(item.content.c_str(), false, 0, newModifications,
 					      flightGroup,fgsNumber);
 		current_unit_load_mode=DEFAULT;
-	string str;
+	string hudimage;
+        if (newPart->getHudImage()) {
+           if (newPart->getHudImage()->getTexture()) {
+              hudimage = newPart->getHudImage()->getTexture()->texfilename;
+              unsigned int doublepng = hudimage.find(".png");
+              if (doublepng==string::npos) doublepng=hudimage.find(".jpg");
+              if (doublepng!=string::npos) {
+                 std::string shipname= hudimage.substr(doublepng+4);
+                 if (shipname.find(".png")!=string::npos||shipname.find(".jpg")!=string::npos) {
+                    hudimage = hudimage.substr(0,doublepng+4-shipname.length());
+                    unsigned int ship = hudimage.rfind(item.content);
+                    if (ship!=string::npos) {
+                       texturedescription="../units/"+item.content+"/"+shipname;
+                    }else {
+                       texturedescription=shipname;
+                    }                    
+                 }
+              }else {
+                 texturedescription = hudimage.substr(hudimage.find(item.content));
+                 
+              }
+           }
+        }
+        std::string str;
 	showUnitStats(newPart,str,0,0,item);
 	delete newPart;
 	return str;	
