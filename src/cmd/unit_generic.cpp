@@ -1815,7 +1815,7 @@ void Unit::AddVelocity(float difficulty) {
    if(graphicOptions.InWarp==1){
 	   static float fmultiplier=XMLSupport::parse_float(vs_config->getVariable("physics","hyperspace_multiplier","100000"));
 	   static float autopilot_term_distance = XMLSupport::parse_float (vs_config->getVariable ("physics","auto_pilot_termination_distance","6000"));     
-	   static float smallwarphack = XMLSupport::parse_float (vs_config->getVariable ("physics","minwarpeffectsize","20000"));     
+	   static float smallwarphack = XMLSupport::parse_float (vs_config->getVariable ("physics","minwarpeffectsize","15000"));     
 	   float minmultiplier=fmultiplier;
 	   Unit * planet;
 	   for (un_iter iter = _Universe->activeStarSystem()->gravitationalUnits().createIterator();(planet=*iter);++iter) {
@@ -1837,7 +1837,7 @@ void Unit::AddVelocity(float difficulty) {
 		 }
 		 minmultiplier=(multipliertemp<minmultiplier)?multipliertemp:minmultiplier;
 	   }
-	   if(minmultiplier<1) {minmultiplier=1;}
+	   if(minmultiplier<PI*PI) {minmultiplier=PI*PI;}
 	   if(minmultiplier>fmultiplier) {
 		   minmultiplier=fmultiplier; //SOFT LIMIT
 	   }
@@ -2510,9 +2510,15 @@ void Unit::RegenShields () {
   }
   bool velocity_discharge=false;
   static float speed_leniency = XMLSupport::parse_float (vs_config->getVariable("physics","speed_shield_drain_leniency","1.18"));
+  /*
   if ((computer.max_combat_ab_speed>4)&&(GetVelocity().MagnitudeSquared()>(computer.max_combat_ab_speed*speed_leniency*computer.max_combat_ab_speed*speed_leniency))) {
-    rec=0;
-    velocity_discharge=true;
+      rec=0;
+      velocity_discharge=true;
+  }
+  */
+  if (graphicOptions.InWarp) {
+      rec=0;
+      velocity_discharge=true;
   }
   if ((image->ecm>0)) {
     static float ecmadj = XMLSupport::parse_float(vs_config->getVariable ("physics","ecm_energy_cost",".05"));
@@ -2598,6 +2604,24 @@ void Unit::RegenShields () {
 		  if (rand()<.00005*RAND_MAX)
 			  UniverseUtil::IOmessage(0,"	game","all","**Warning** Power Supply Overdrawn: downgrade shield or purchase reactor capacitance!");
   }
+  static int modcounter=0;
+  static int warpfractional = XMLSupport::parse_int(vs_config->getVariable("physics","warpfractional","10"));  
+  modcounter++;
+  modcounter%=warpfractional;
+
+  if(graphicOptions.InWarp){ //FIXME FIXME FIXME
+	  static float bleedfactor = XMLSupport::parse_float(vs_config->getVariable("physics","warpbleed","10"));
+	  float truebleed=bleedfactor*SIMULATION_ATOM;
+	  short bleed=apply_float_to_short(truebleed);
+	  if(warpenergy>bleed){
+		  if(modcounter==0){
+		    warpenergy-=bleed;
+		  }
+	  } else {
+		  graphicOptions.InWarp=0;
+	  }
+  }
+
   if (menergy>maxshield) {
     if (energy>menergy-maxshield) {//allow shields to absorb xtra power
       float excessenergy = energy - (menergy-maxshield);
@@ -2613,7 +2637,7 @@ void Unit::RegenShields () {
     }
   }else {
     energy=0;
-}
+  }
 }
 
 Vector Unit::ResolveForces (const Transformation &trans, const Matrix &transmat) {
