@@ -11,23 +11,13 @@
 
 /*
 
-About the collisions, here's how they are defined in WCP:
-
-Fighter/fighter: Sphere collision
-Capship/capship: Sphere collision
-Capship/asteroid(or corvette): Not defined! That's why you see that
-asteroid going through the Kraken in that WCP recon mission:)
-Fighter/capship: BSP Tree
-
 The whole concept of a BSP Tree is that any plane (since it has an
 infinite surface) divides the space in two parts: "in front" of the
 plane and "behind" the plane (in fact BSP stands for Binary Space
 Partition). So a BSP Tree's node, which has the values A,B,C and D of
 the plane equation (Ax+By+Cz+d=0), a flag ("in front","behind" or
 "undetermined" and two pointers (for the two sub-trees), the left
-pointer and the right pointer. TIP: I always use the face normals as the
-plane normal.. this way you know the plane equation always has the
-correct value:)
+pointer and the right pointer. 
 
 To build a BSP tree, you start with an empty tree (NULL). Then calculate
 a plane (from a poly) and put it in the tree. After this you must add
@@ -65,7 +55,13 @@ understand, e-mail me back and i'll try to explain things a bit better:)
 Seeya!:)
 */
 
-
+#define BSPG_THRESHOLD .00001
+enum INTERSECT_TYPE {
+    BSPG_BACK =-1,
+    BSPG_INTERSECT =0,
+    BSPG_FRONT =1,
+    BSPG_COPLANAR =2
+};
 
 struct bsp_vector
         {
@@ -80,30 +76,18 @@ struct bsp_polygon
         vector <bsp_vector> v;
         };
 
-struct bsp_plane {
-  float a,b,c,d;
-};
+
 struct bsp_tree {
     float a,b,c,d;
     vector <bsp_polygon> tri;
-    vector <bsp_plane> triplane;
+    vector <bsp_tree> triplane;
     struct bsp_tree * left;
     struct bsp_tree * right;
- bsp_tree operator = (bsp_plane p) {
-     a=p.a;
-     b = p.b;
-     c = p.c;
-     d = p.d;
-     return *this;
- } 
+  bsp_tree(): tri(), triplane() {left = right = NULL;}
 };
 
 
-
-
-
-
-static void Cross (const bsp_polygon &x, bsp_plane &result) {
+static void Cross (const bsp_polygon &x, bsp_tree &result) {
   Vector v1 (x.v[2].x-x.v[0].x,x.v[2].y-x.v[0].y,x.v[2].z-x.v[0].z);
   Vector v2 (x.v[1].x-x.v[0].x,x.v[1].y-x.v[0].y,x.v[1].z-x.v[0].z);
     result.a = v1.j * v2.k - v1.k * v2.j;
@@ -116,28 +100,21 @@ static void Cross (const bsp_polygon &x, bsp_plane &result) {
     result.c *=size;
 }
 
-
 float Dot (const bsp_vector & A, const bsp_vector & B) {
     return A.x *B.x + A.y*B.y+A.z*B.z;
 }
 
-
 static FILE * o;
-int highestlevel=0;
+static int highestlevel=0;
 //ax + by + cz =0;  A.x + (B.x - A.x)k = x;A.y + (B.y - A.y)k = y;A.z + (B.z - A.z)k = z;
 // x*A.x + b*B.y + c*C.z + d + k*(a*B.x - a*A.x + b*B.y - b&A.y + c*B.z - c*A.z) = 0;
 // k = (A * n + d) / (A * n - B * n) 
 //
-enum INTERSECT_TYPE {
-    BSPG_BACK =-1,
-    BSPG_INTERSECT =0,
-    BSPG_FRONT =1 
-};
-bool intersectionPoint (const bsp_plane &n, const bsp_vector & A, const bsp_vector & B, bsp_vector & res) {
+bool intersectionPoint (const bsp_tree &n, const bsp_vector & A, const bsp_vector & B, bsp_vector & res) {
     float k = A.x*n.a + A.y*n.b+A.z*n.c;
     k = (k + n.d ) / (k - (B.x * n.a + B.y * n.b + B.z * n.c)); 
     //assume magnitude (n.a,n.b,n.c) == 1
-    if (k<0||k>1) {//lies outside the segment
+    if (k<BSPG_THRESHOLD||k>1-BSPG_THRESHOLD) {//lies outside the segment
 	return false;
     }
     res.x = A.x + k*(B.x - A.x);
@@ -146,23 +123,22 @@ bool intersectionPoint (const bsp_plane &n, const bsp_vector & A, const bsp_vect
     return true;
 }
 
-enum INTERSECT_TYPE whereIs (const VECTOR & v, const bsp_plane & temp_node) {
+enum INTERSECT_TYPE whereIs (const VECTOR & v, const bsp_tree & temp_node) {
      float tmp = ((temp_node.a)*(v.x))+((temp_node.b)*(v.y))+((temp_node.c)*(v.z))+(temp_node.d);
-     if (tmp < 0) {
+     if (tmp < -BSPG_THRESHOLD) {
 	 return BSPG_BACK;
-     }else if (tmp >0) {
+     }else if (tmp >BSPG_THRESHOLD) {
 	 return BSPG_FRONT;
      }else return BSPG_INTERSECT;
 }
 
-static bsp_tree * put_plane_in_tree(bsp_tree * bsp,bsp_tree * temp_node,bsp_polygon * temp_poly3);
-static enum INTERSECT_TYPE where_is_poly(bsp_tree * temp_node,bsp_polygon * temp_poly3);
-
+static enum INTERSECT_TYPE where_is_poly(const bsp_tree &temp_node,const bsp_polygon &temp_poly3);
+static void bsp_stats (bsp_tree * tree);
 static void display_bsp_tree(bsp_tree * tree);
 static void write_bsp_tree (bsp_tree *tree,int level=0);//assume open file
 
 //can divide 3 or 4 sized planes
-void dividePlane (const bsp_polygon & tri, const bsp_plane &unificator, bsp_polygon &back, bsp_polygon &front) {
+void dividePlane (const bsp_polygon & tri, const bsp_tree &unificator, bsp_polygon &back, bsp_polygon &front) {
     enum INTERSECT_TYPE oldflag;
     enum INTERSECT_TYPE flag;
     bsp_vector int_point;
@@ -196,14 +172,6 @@ void dividePlane (const bsp_polygon & tri, const bsp_plane &unificator, bsp_poly
 	back.v.push_back (int_point);
     }
 }
-void dividePlane (const bsp_polygon & tri, const bsp_tree &unificator, bsp_polygon &back, bsp_polygon &front) {
-    bsp_plane tmp;
-    tmp.a  = unificator.a;
-    tmp.b  = unificator.b;
-    tmp.c  = unificator.c;
-    tmp.d  = unificator.d;
-    dividePlane (tri,tmp,back,front);
-}
 
 void FreeBSP (bsp_tree ** tree) {
   if ((*tree)->right)
@@ -214,21 +182,21 @@ void FreeBSP (bsp_tree ** tree) {
   *tree = NULL;
 }
 
-static bsp_tree * buildbsp(bsp_tree * bsp,vector <bsp_polygon>&, vector <bsp_plane>&);
+static bsp_tree * buildbsp(bsp_tree * bsp,vector <bsp_polygon>&, vector <bsp_tree>&);
 void Mesh::BuildBSPTree(const char *filename)
 
 {
-  o = fopen (filename, "w+b");
+
   bsp_tree * bsp=NULL;
 unsigned int i;
 
-bsp_plane temp_node;
+bsp_tree temp_node;
 
 bsp_polygon temp_poly3;
 bsp_polygon temp_poly4;
  vector <int> tris;
  vector <bsp_polygon> tri;
- vector <bsp_plane> triplane;
+ vector <bsp_tree> triplane;
  int nums;
  vector <int> quads;
  vector <int> * curs;
@@ -270,22 +238,27 @@ bsp_polygon temp_poly4;
      curs = &quads;
  }
  bsp = buildbsp (bsp,tri,triplane);
+ o = fopen (filename, "w+b");
  write_bsp_tree(bsp,0);
  fclose (o);
+ bsp_stats (bsp);
  FreeBSP (&bsp);
  fprintf (stderr,"HighestLevel, BSP Tree %d",highestlevel);
 }
-
-static bsp_tree * buildbsp(bsp_tree * bsp,vector <bsp_polygon> &tri, vector <bsp_plane> &triplane) {
-
+static int select_plane (const vector <bsp_polygon> &tri, const vector <bsp_tree> &triplane);
+static bsp_tree * buildbsp(bsp_tree * bsp,vector <bsp_polygon> &tri, vector <bsp_tree> &triplane) {
+  assert (tri.size()==triplane.size());
+  if (tri.size()==0) {
+    return NULL;
+  }
   bsp_tree * temp;
   vector <bsp_polygon> trileft;
-  vector <bsp_plane> triplaneleft;
+  vector <bsp_tree> triplaneleft;
   vector <bsp_polygon> triright;
-  vector <bsp_plane> triplaneright;
+  vector <bsp_tree> triplaneright;
   bsp_polygon left_int;
   bsp_polygon right_int;
-  unsigned int select = rand ()%(tri.size());
+  unsigned int select = select_plane (tri, triplane);
   if (select >=tri.size()) {
       fprintf (stderr,"Error Selecting tri for splittage");
       return NULL;
@@ -298,7 +271,9 @@ static bsp_tree * buildbsp(bsp_tree * bsp,vector <bsp_polygon> &tri, vector <bsp
   
   unsigned int i;
   for (i=0;i<tri.size();i++) {
-    enum INTERSECT_TYPE flag = where_is_poly(temp,&tri[i]);    
+    if (i==select) 
+      continue;//don't add plane that's there...though it should fall into bspg_coplanar since mag > 1
+    enum INTERSECT_TYPE flag = where_is_poly(*temp,tri[i]);    
     switch (flag) {
     case BSPG_BACK:
 	trileft.push_back (tri[i]);
@@ -308,6 +283,12 @@ static bsp_tree * buildbsp(bsp_tree * bsp,vector <bsp_polygon> &tri, vector <bsp
 	triright.push_back (tri[i]);
 	triplaneright.push_back(triplane[i]);
         break;
+    case BSPG_COPLANAR:
+      if (triplane[i].a*temp->a+ triplane[i].b*temp->b+triplane[i].c*temp->c <0) {//if they face opposite directions, then it is behind the thing, otherwise, ignored!
+	trileft.push_back (tri[i]);
+	triplaneleft.push_back (triplane[i]);
+      }
+      break;
     case BSPG_INTERSECT:
 	dividePlane(tri[i],*temp,left_int,right_int);
 	if (left_int.v.size()>2) {
@@ -321,31 +302,84 @@ static bsp_tree * buildbsp(bsp_tree * bsp,vector <bsp_polygon> &tri, vector <bsp
 	break;
     }
   }
- 
+  assert (triplane.size()==tri.size()); 
   tri = vector <bsp_polygon>();
-  triplane=vector<bsp_plane>();
+  triplane=vector<bsp_tree>();
   temp->left = buildbsp (NULL,trileft,triplaneleft);
   temp->right= buildbsp (NULL,triright,triplaneright);
   return temp;
 }
 
 
-enum INTERSECT_TYPE where_is_poly(bsp_tree * temp_node,bsp_polygon * temp_poly3)
+static int select_plane (const vector <bsp_polygon> &tri, const vector <bsp_tree> &triplane) {
+  assert (triplane.size()==tri.size());
+  float splits=0;
+  int front = 0;
+  int back = 0;
+  unsigned int retval= 0;
+  float least_penalty = FLT_MAX;
+  const float size_factor = .3333333;
+  const float balance_factor = 1;
+  const float  split_factor = .1;
+  const unsigned int toobig=100;
+  const int RANDOM_BSP = 1;
+  const unsigned int samplesize = 10;
+  unsigned int n = RANDOM_BSP?((samplesize>tri.size())?tri.size():samplesize):tri.size();
+  unsigned int jj;
+  for (unsigned int i=0;i<triplane.size();i++) {
+    splits = front = back =0;
+    splits = size_factor*(-((float)tri[i].v.size())+3);//start off somewhat negative
+    if (tri[i].v.size()>toobig) {
+      return i;
+    }
+    for (unsigned int j=0;j<n;j++) {
+      jj = RANDOM_BSP?rand()%tri.size():j;
+      if (jj==i) continue;
+      switch (where_is_poly(triplane[i],tri[jj])) {
+      case BSPG_COPLANAR:
+	break;
+      case BSPG_BACK:
+	back++;
+	break;
+      case BSPG_FRONT:
+	front++;
+	break;
+      case BSPG_INTERSECT:
+	splits+=size_factor*tri[jj].v.size();//more penalty for splitting bigger polygons 
+	break;
+      }    
+    
+    }
+    float balance_penalty = ((float)fabs (front+splits-back))/(float)n;
+    // split_penalty is 0 for a very good tree with regards to splitting
+    // and 1 for a very bad one.
+    float split_penalty = (float)splits/(float)n;
+    // Total penalty is a combination of both penalties. 0 is very good,
+    float penalty = balance_factor * balance_penalty + split_factor * split_penalty;
+    if (penalty < least_penalty) {
+      least_penalty = penalty;
+      retval = i;
+    }
+  }
+  return retval;
+}
+
+enum INTERSECT_TYPE where_is_poly(const bsp_tree & temp_node,const bsp_polygon & temp_poly3)
 
 {
     INTERSECT_TYPE last = BSPG_INTERSECT;
     float cur;
     INTERSECT_TYPE icur;
-    for (unsigned int i=0;i<temp_poly3->v.size();i++) {
-	cur = ((temp_node->a)*(temp_poly3->v[i].x))+((temp_node->b)*(temp_poly3->v[i].y))+((temp_node->c)*(temp_poly3->v[i].z))+(temp_node->d);
-	if (cur>0)
+    for (unsigned int i=0;i<temp_poly3.v.size();i++) {
+	cur = ((temp_node.a)*(temp_poly3.v[i].x))+((temp_node.b)*(temp_poly3.v[i].y))+((temp_node.c)*(temp_poly3.v[i].z))+(temp_node.d);
+	if (cur>BSPG_THRESHOLD)
 	    icur = BSPG_FRONT;
-	else if (cur <0) 
+	else if (cur <BSPG_THRESHOLD) 
 	    icur = BSPG_BACK;
 	else {
 	    icur = BSPG_INTERSECT;//no effect
-	    if (i==temp_poly3->v.size()-1) {
-		return BSPG_BACK;  //don't intersect if the planes are on top of each other
+	    if (i==temp_poly3.v.size()-1) {
+		return BSPG_COPLANAR;  //don't intersect if the planes are on top of each other
 	    }
 	    continue;
 	}
@@ -360,7 +394,60 @@ enum INTERSECT_TYPE where_is_poly(bsp_tree * temp_node,bsp_polygon * temp_poly3)
     }
     return last;
 }
+static unsigned int maxheight;
+static unsigned int minheight;
+static double average_height;
+//static float almost_av_height;
+static unsigned int numends;
+static unsigned int numnodes;
 
+static void explore (bsp_tree * tree, unsigned int hgt) {
+  if (tree->left==NULL) {
+    if (hgt>maxheight) {
+      maxheight = hgt;
+    } else {
+      if (minheight < hgt) {
+	minheight = hgt;
+      }else {
+	//	almost_av_height +=hgt;
+      }
+    }
+    average_height +=hgt;
+    numends +=1;
+  } else {
+    explore (tree->left,hgt+1);
+  }
+  if (tree->right==NULL) {
+    if (hgt>maxheight) {
+      maxheight = hgt;
+    } else {
+      if (minheight < hgt) {
+	minheight = hgt;
+      }else {
+	//almost_av_height +=hgt;
+      }
+    }
+    average_height +=hgt;
+    numends+=1;
+  } else {
+    explore (tree->right,hgt+1);
+  }
+  numnodes++;
+
+}
+
+static void bsp_stats (bsp_tree * tree) {
+  average_height = numends = numnodes = maxheight= 0;
+  minheight = 10000000;// 0xffffffffffffffffffffffffff
+  if (tree!=NULL) {
+    explore (tree,0);
+    if (numends>0)
+      average_height /=numends;
+  }
+  fprintf (stderr,"Num Nodes: %d, NumEnds: %d\n", numnodes,numends);
+  fprintf (stderr,"Min Height: %d, Max Height: %d\n",minheight, maxheight);
+  fprintf (stderr,"Average Height %f,  /*Average excl max Height: */\n", average_height);
+}
 
 static void display_bsp_tree(bsp_tree * tree)
 
@@ -551,8 +638,9 @@ static bsp_tree * put_plane_in_tree(bsp_tree * bsp,bsp_tree * temp_node,bsp_poly
 	
         return temp;
     } else {
-        flag = where_is_poly(aux,temp_poly3);
+        flag = where_is_poly(*aux,*temp_poly3);
 	switch (flag) {
+	case BSPG_COPLANAR:
 	case BSPG_BACK:
 	    aux->left = put_plane_in_tree(aux->left,temp_node,temp_poly3);
 	    return aux;
