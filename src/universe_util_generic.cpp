@@ -58,6 +58,10 @@ namespace UniverseUtil {
 			cout<<"ERROR --> Received a fire order for non-existing UNIT"<<endl;
 		return un;
 	}
+	std::string vsConfig(std::string category,std::string option,std::string def){
+		return vs_config->getVariable(category,option,def);
+	}
+
 	Unit *launchJumppoint(string name_string,
 			string faction_string,
 			string type_string,

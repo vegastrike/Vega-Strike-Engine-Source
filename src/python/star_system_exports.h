@@ -22,6 +22,7 @@ EXPORT_UTIL(addObjective,0)
 voidEXPORT_UTIL(setObjective)
 voidEXPORT_UTIL(setCompleteness)
 EXPORT_UTIL(getCompleteness,0)
+EXPORT_UTIL(vsConfig,"")
 
 EXPORT_UTIL(sqrt,1)
 EXPORT_UTIL(log,0)
