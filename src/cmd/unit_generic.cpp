@@ -512,7 +512,6 @@ void Unit::Init()
   image->forcejump=false;
   sound->engine=-1;  sound->armor=-1;  sound->shield=-1;  sound->hull=-1; sound->explode=-1;
   sound->cloak=-1;
-  sound->jump=-1;
   image->hudImage=NULL;
   owner = NULL;
   faction =0;
@@ -664,6 +663,7 @@ void vscdups (const vector<string> &path) {
 void Unit::Init(const char *filename, bool SubU, int faction,std::string unitModifications, Flightgroup *flightgrp,int fg_subnumber, string * netxml)
 {
 	this->Unit::Init();
+	update_ani_cache();
 	//if (!SubU)
 	//  _Universe->AccessCockpit()->savegame->AddUnitToSave(filename,UNITPTR,FactionUtil::GetFaction(faction),(long)this);
 	graphicOptions.SubUnit = SubU?1:0;
@@ -3108,17 +3108,6 @@ bool DestroySystem (float hull, float maxhull, float numhits) {
 		chance=pow (chance,numhits);
 	return (rand01()>chance);
 }
-bool DestroyPlayerSystem (float hull, float maxhull, float numhits) {
-	static float damage_chance=XMLSupport::parse_float(vs_config->getVariable ("physics","damage_player_chance",".1"));
-	float chance = 1-(damage_chance*(maxhull-hull)/maxhull);
-	if (numhits>1)
-		chance=pow (chance,numhits);
-	bool ret = (rand01()>chance);
-	if (ret) {
-//		printf("DAAAAAAMAGED!!!!\n");
-	}
-	return ret;
-}
 static const char * DamagedCategory="upgrades/Damaged/";
 float Unit::DealDamageToHullReturnArmor (const Vector & pnt, float damage, unsigned short * &targ) {
   float percent;
@@ -3166,13 +3155,11 @@ float Unit::DealDamageToHullReturnArmor (const Vector & pnt, float damage, unsig
 					}
 				}
 			}
-			bool isplayer = _Universe->isPlayerStarship(this);
-			if ((!isplayer)||_Universe->AccessCockpit()->godliness<=0||hull>damage) {//hull > damage is similar to hull>absdamage|| damage<0	
-				static float system_failure=XMLSupport::parse_float(vs_config->getVariable ("physics","indiscriminate_system_destruction",".25"));
-				if ((!isplayer)&&DestroySystem(hull,maxhull,1)) {
+			
+			if (_Universe->AccessCockpit()->GetParent()!=this||_Universe->AccessCockpit()->godliness<=0||hull>damage) {//hull > damage is similar to hull>absdamage|| damage<0
+				if (DestroySystem(hull,maxhull,1)) {
+					static float system_failure=XMLSupport::parse_float(vs_config->getVariable ("physics","indiscriminate_system_destruction",".25"));
 					
-					DamageRandSys(system_failure*rand01()+(1-system_failure)*(1-(absdamage/hull)),pnt);
-				}else if (isplayer&&DestroyPlayerSystem(hull,maxhull,1)) {
 					DamageRandSys(system_failure*rand01()+(1-system_failure)*(1-(absdamage/hull)),pnt);
 				}
 			  if (damage>0) {
@@ -3187,7 +3174,7 @@ float Unit::DealDamageToHullReturnArmor (const Vector & pnt, float damage, unsig
 			  }
 			}else {
 			  _Universe->AccessCockpit()->godliness-=absdamage;
-			  if (DestroyPlayerSystem(hull,maxhull,1)) {
+			  if (DestroySystem(hull,maxhull,1)) {
 				  DamageRandSys(rand01()*.5+.2,pnt);//get system damage...but live!
 			  }
 			}
@@ -4854,10 +4841,6 @@ const Unit * loadUnitByCache(std::string name,int faction) {
 	  return temprate;
 }
 bool Unit::ReduceToTemplate() {
-	vector <Cargo> savedCargo;
-	savedCargo.swap(image->cargo);
-	vector <Mount> savedWeap;
-	savedWeap.swap(mounts);
 	int upfac = FactionUtil::GetFaction("upgrades");
 	const Unit * temprate = makeFinalBlankUpgrade (name,faction);
     bool success=false;
@@ -4867,8 +4850,6 @@ bool Unit::ReduceToTemplate() {
 	if (pct>0)
 	  success=true;
     }
-	savedCargo.swap(image->cargo);
-	savedWeap.swap(mounts);
     return success;
 }
 
@@ -4887,10 +4868,6 @@ int Unit::RepairCost () {
 	return cost;
 }
 int Unit::RepairUpgrade () {
-	vector <Cargo> savedCargo;
-	savedCargo.swap(image->cargo);
-	vector <Mount> savedWeap;
-	savedWeap.swap(mounts);
 	int upfac = FactionUtil::GetFaction("upgrades");
 	const Unit * temprate = makeFinalBlankUpgrade (name,faction);
     int success=0;
@@ -4900,8 +4877,6 @@ int Unit::RepairUpgrade () {
 	if (pct>0)
 	  success=1;
     }
-	savedCargo.swap(image->cargo);
-	savedWeap.swap(mounts);
     UnitImages * im= &GetImageInformation();
     for (int i=0;i < 1+MAXVDUS+UnitImages::NUMGAUGES;i++) {
         if (im->cockpit_damage[i]!=1) {

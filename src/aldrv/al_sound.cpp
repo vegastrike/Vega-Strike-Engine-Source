@@ -294,7 +294,7 @@ void AUDAdjustSound (const int sound, const QVector &pos, const Vector &vel){
 }
 void AUDSoundGain (const int sound, const float gain) {
 #ifdef HAVE_AL
-  if (sound>=0&&sound<(int)sounds.size()&&sounds[sound].source) {
+  if (sound>=0&&sound<(int)sounds.size()) {
     alSourcef(sounds[sound].source,AL_GAIN,gain);
     //    alSourcefv(sounds[sound].source,AL_VELOCITY,v);
   }
@@ -308,13 +308,10 @@ bool starSystemOK( ) {
 
 }
 void AUDStopAllSounds () {
-#ifdef HAVE_AL
-	unsigned int s = ::sounds.size();
-	for (unsigned int i=0;i < s;++i) {
+	for (unsigned int i=0;i<sounds.size();++i) {
 		if (AUDIsPlaying(i))
 			AUDStopPlaying(i);
 	}
-#endif
 }
 bool AUDIsPlaying (const int sound){
 #ifdef HAVE_AL
@@ -347,7 +344,7 @@ void AUDStopPlaying (const int sound){
 static bool AUDReclaimSource (const int sound) {
 #ifdef HAVE_AL
   if (sounds[sound].source==(ALuint)0) {
-    if (unusedsrcs.empty()||(!sounds[sound].buffer))
+    if (unusedsrcs.empty())
       return false;
     sounds[sound].source = unusedsrcs.back();
     unusedsrcs.pop_back();

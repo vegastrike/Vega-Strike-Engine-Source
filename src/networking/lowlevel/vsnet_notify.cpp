@@ -119,11 +119,6 @@ int Item::get_fd() const
     return _sock.get_fd( );
 }
 
-void Item::protected_replace_notifier( NotifyPtr ptr )
-{
-   _notify = ptr;
-}
-
 /*------------------------------------------------------------*
  * definition VsnetDownload::Client::File
  *------------------------------------------------------------*/
@@ -187,21 +182,13 @@ void File::childAppend( unsigned char* buffer, int bufsize )
 NoteFile::NoteFile( SOCKETALT          sock,
                     const std::string& filename,
                     std::string        localbasepath )
-    : File( sock, filename, localbasepath, NotifyPtr() )
-    , _me( new NotifyMe )
+    : File( sock, filename, localbasepath, NotifyPtr(this) )
 {
-    protected_replace_notifier( _me );
 }
 
 NoteFile::NoteFile( SOCKETALT          sock,
                     const std::string& filename )
-    : File( sock, filename, datadir, NotifyPtr() )
-    , _me( new NotifyMe )
-{
-    protected_replace_notifier( _me );
-}
-
-NoteFile::~NoteFile( )
+    : File( sock, filename, datadir, NotifyPtr(this) )
 {
 }
 

@@ -76,15 +76,14 @@ float FlyByKeyboard::clamp_axis (float v) {
   if (as==0) {
     as = axis_scale;
   }
-  if (as) {
-	v/=as;
-	if (v>1){
-	 return 1;
-	}
-	if (v<-1) {
-		return -1;
-	}
+  v/=as;
+  if (v>1){
+    return 1;
   }
+  if (v<-1) {
+    return -1;
+  }
+  
   return v;
 }
 float FlyByKeyboard::reduce_axis (float v) {
@@ -93,7 +92,7 @@ float FlyByKeyboard::reduce_axis (float v) {
   if (as==0) {
     as = axis_scale;
   }
-  if (as&&fabs(v)>as) {
+  if (fabs(v)>as) {
     if (v>0) {
       v-=as;
     }else {

@@ -361,7 +361,7 @@ void bootstrap_draw (const std::string &message, Animation * newSplashScreen) {
   Matrix tmp;
   Identity (tmp);
   BootstrapMyStarSystemLoading=false;
-  static Texture dummy ("white.bmp",0,MIPMAP,TEXTURE2D,TEXTURE_2D, 1 );
+  static Texture dummy ("white.bmp");
   BootstrapMyStarSystemLoading=true;
   dummy.MakeActive();
   GFXDisable(LIGHTING);
