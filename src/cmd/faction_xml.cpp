@@ -9,12 +9,33 @@
 #include "ai/communication.h"
 #include "gfx/animation.h"
 #include "unit_factory.h"
+#include <map>
 static int unitlevel;
 using namespace XMLSupport;
 using XMLSupport::EnumMap;
 using XMLSupport::Attribute;
 using XMLSupport::AttributeList;
 using std::sort;
+using std::map;
+static FSM * getFSM (const std::string &value) {
+  static map <const std::string, FSM *> fsms;
+  map<const std::string,FSM*>::iterator i = fsms.find (value);
+  if (i!=fsms.end()) {
+    return (*i).second;
+  }else {
+    if (value!="FREE_THIS_LOAD") {
+      FSM * retval = new FSM (value.c_str());
+      fsms.insert (pair<const std::string,FSM *>(value,retval));
+      return retval;
+    }else {
+      for (i=fsms.begin();i!=fsms.end();i++) {
+	delete ((*i).second);
+      }
+      return NULL;
+    }
+  }
+}
+
 namespace FactionXML {
   enum Names {
 	UNKNOWN,
@@ -220,7 +241,7 @@ void Universe::Faction::beginElement(void *userData, const XML_Char *names, cons
 	thisuni->factions[thisuni->factions.size()-1]->faction[thisuni->factions[thisuni->factions.size()-1]->faction.size()-1].relationship=parse_float((*iter).value);
 	break;
       case CONVERSATION:
-	thisuni->factions[thisuni->factions.size()-1]->faction[thisuni->factions[thisuni->factions.size()-1]->faction.size()-1].conversation=new FSM ((*iter).value.c_str());
+	thisuni->factions[thisuni->factions.size()-1]->faction[thisuni->factions[thisuni->factions.size()-1]->faction.size()-1].conversation=getFSM ((*iter).value);
 	break;
 	
       }
@@ -354,7 +375,8 @@ Universe::Faction::Faction() {
 }
 Universe::Faction::~Faction() {
   for (unsigned int i=0;i<faction.size();i++) {
-    delete faction[i].conversation;
+    //    delete faction[i].conversation;
+    getFSM ("FREE_THIS_LOAD");
   }
   delete logo;
   delete [] factionname;
@@ -471,7 +493,7 @@ void Universe::Faction::LoadXML(const char * filename, Universe * thisuni) {
   for (unsigned int i=0;i<thisuni->factions.size();i++) {
     for (unsigned int j=0;j<thisuni->factions[i]->faction.size();j++) {
       if (thisuni->factions[i]->faction[j].conversation==NULL){
-	thisuni->factions[i]->faction[j].conversation=new FSM ("communications/neutral.xml");
+	thisuni->factions[i]->faction[j].conversation=getFSM ("communications/neutral.xml");
       }
     }
   }
