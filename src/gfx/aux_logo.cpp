@@ -180,7 +180,7 @@ void Logo::Draw(const Matrix &m)
 }
 
 void Logo::ProcessDrawQueue() {
-  if (!g_game.use_logos) {
+  if (!g_game.use_logos||draw_queue->empty()) {
     return;
   }
   static float offs = XMLSupport::parse_float (vs_config->getVariable ("graphics","LogoOffset","-4")); 

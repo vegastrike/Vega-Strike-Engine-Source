@@ -47,7 +47,9 @@ template<class KEY, class VALUE, int SIZ> class Hashtable {
 	std::vector<HashElement> table[SIZ];
 
 	static int hash(const int key) {
-	  return key%SIZ;
+		unsigned int k = key;
+		k%=SIZ;
+		return k;
 	}
 	static int hash(const std::string &key) {
 		unsigned int k = 0;

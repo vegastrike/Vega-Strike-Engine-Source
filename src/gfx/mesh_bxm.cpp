@@ -659,7 +659,7 @@ vector<Mesh*> Mesh::LoadMeshes(VSFileSystem::VSFile & Inputfile, const Vector & 
           for (unsigned int i=1;i<meshes.back().sizes.size();++i) {
             output.back()->orig[i].lodsize=meshes.back().sizes[i];
           }
-          output.back()->numlods = meshes.back().num;
+          output.back()->numlods=output.back()->orig->numlods = meshes.back().num;
           
   }
 #ifndef STANDALONE
