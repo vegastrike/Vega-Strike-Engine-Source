@@ -20,21 +20,23 @@ void Quaternion::to_matrix(Matrix mat) const {
   float zz      = Z * Z;
   float zw      = Z * W;
 
-  mat[0]  = 1 - 2 * ( yy + zz );
-  mat[1]  =     2 * ( xy + zw );
-  mat[2]  =     2 * ( xz - yw );
+#define M(B,A) mat[B*4+A]
+  M(0,0)  = 1 - 2 * ( yy + zz );
+  M(1,0)  =     2 * ( xy + zw );
+  M(2,0)  =     2 * ( xz - yw );
 
-  mat[4]  =     2 * ( xy - zw );
-  mat[5]  = 1 - 2 * ( xx + zz );
-  mat[6]  =     2 * ( yz + xw );
+  M(0,1)  =     2 * ( xy - zw );
+  M(1,1)  = 1 - 2 * ( xx + zz );
+  M(2,1)  =     2 * ( yz + xw );
 
-  mat[8]  =     2 * ( xz + yw );
-  mat[9]  =     2 * ( yz - xw );
-  mat[10] = 1 - 2 * ( xx + yy );
+  M(0,2)  =     2 * ( xz + yw );
+  M(1,2)  =     2 * ( yz - xw );
+  M(2,2) = 1 - 2 * ( xx + yy );
 
-  mat[3]  = mat[7] = mat[11] = mat[12] = mat[13] = mat[14] = 0;
-  mat[15] = 1;
+  M(3,0)  = M(3,1) = M(3,2) = M(0,3) = M(1,3) = M(2,3) = 0;
+  M(3,3) = 1;
 
+#undef M
   /*
   clog << "Quaternion " << *this << " converted to matrix: \n";
   float *temp = mat;

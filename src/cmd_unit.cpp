@@ -85,13 +85,13 @@ void Unit::Init()
 	selected = false;
 	selectionBox = NULL;
 
-	limits.yaw = 5;
-	limits.pitch = 5;
-	limits.roll = 5;
+	limits.yaw = 0.15;
+	limits.pitch = 0.15;
+	limits.roll = 0.15;
 	
 	limits.lateral = 0.1;
 	limits.vertical = 0.1;
-	limits.longitudinal = 5;
+	limits.longitudinal = 1;
 }
 
 Unit::Unit()

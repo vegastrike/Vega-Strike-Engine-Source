@@ -143,7 +143,7 @@ BOOL /*GFXDRVAPI*/ GFXCreateLightContext (int & con_number) {
   if (!LightInit) {
     LightInit = TRUE;
     glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER, 1);//don't want lighting coming from infinity....we have to take the hit due to sphere mapping matrix tweaking
-    glLightModeli (GL_LIGHT_MODEL_COLOR_CONTROL,GL_SEPARATE_SPECULAR_COLOR);
+    //glLightModeli (GL_LIGHT_MODEL_COLOR_CONTROL,GL_SEPARATE_SPECULAR_COLOR);
   }
   con_number = _local_lights_loc.size();
   _currentContext= con_number;

@@ -162,9 +162,13 @@ class ChangeHeading : public Order {
  public:
   ChangeHeading(const Vector &final_heading, float limit) : state(0), final_heading(final_heading), optimal_speed(limit), braking(false) { type = 1;}
   AI *Execute() {
+    if(done) return NULL;
     Vector local_heading = parent->ToLocalCoordinates(final_heading);
     Vector ang_vel = parent->ToLocalCoordinates(parent->GetAngularVelocity());
     Vector torque(0,0,0);
+
+    Vector p,q,r;
+    parent->GetOrientation(p,q,r);
     
     cerr << "local heading: " << local_heading << endl;
 
@@ -177,7 +181,7 @@ class ChangeHeading : public Order {
     // 2. apply impulse that will reorient r towards the destination
     // if this does not contradict #1, ie must thrust at less than 90
     // degrees off of the original direction
-
+    /*
     if(ang_speed > THRESHOLD) {
       ang_vel_norm = ang_vel_norm / ang_speed;
       ang_vel = ang_vel - local_heading * (ang_vel * local_heading);
@@ -185,12 +189,36 @@ class ChangeHeading : public Order {
       
       cerr << "Torque for converting to pure roll " << torque << endl;
     }
-    
+    */
     Vector turning;
     CrossProduct(local_heading, Vector(0,0,1), turning);
     cerr << "turning: " << turning << endl;
     float angle = asin(turning.Magnitude());
-    if(angle < THRESHOLD) {
+
+    if(fabs(angle) < THRESHOLD) { // handle case where we're really close to the target (or 180 degrees away)
+      // for now, pick fastest pure axis
+      turning = Vector(parent->Limits().pitch,0,0);
+      float max = parent->Limits().pitch;
+      if(parent->Limits().yaw > max) {
+	turning = Vector(0,parent->Limits().yaw,0);
+	max = parent->Limits().yaw;
+      }
+      if(parent->Limits().roll > max) {
+	turning = Vector(0,0,parent->Limits().roll);
+	max = parent->Limits().roll;
+      }
+    }
+
+    if(local_heading * Vector(0,0,1) < 0) { // sin alone is not capable of determining the spin
+      if(angle >= 0) {
+	angle = PI - angle;
+      }
+      else if(angle < 0) {
+	angle = -PI - angle;
+      }
+    }
+    cerr << "angle: " << angle << endl;
+    if(fabs(angle) > THRESHOLD) {
       Vector turning_norm = turning;
       turning_norm.Normalize();
       /*
@@ -205,19 +233,67 @@ class ChangeHeading : public Order {
       angular_velocity = angular_velocity - torque / parent->GetMoment() * SIMULATION_ATOM;
 
       float angular_speed = angular_velocity * turning_norm;
+      cerr << "Current angular speed: " << angular_speed << endl;
       angular_velocity = turning_norm * (angular_speed);
-      angle = angle - angular_speed * SIMULATION_ATOM;
-      angle /= SIMULATION_ATOM * SIMULATION_ATOM; // get the angular velocity
-      Vector more_torque = turning_norm * (angle * parent->GetMoment());
-      cerr << "Torque for turning towards target " << torque << endl;
+      angle = angle - angular_speed * SIMULATION_ATOM; // how much we want to try to conver in the next frame
+      cerr << "angle after adjustment: " << angle << endl;
+
+      float max_accel = parent->MaxTorque(turning_norm).Magnitude()/parent->GetMoment();
+      Vector max_retro_torque = parent->MaxTorque(-turning_norm);
+      Vector max_positive_torque = parent->MaxTorque(turning_norm);
+      float max_accel_distance = max_positive_torque.Magnitude()/(parent->GetMoment());
+      float retro_torque = max_retro_torque.Magnitude();
+      
+      if(angle > 0) {
+     	// Figure out maximum torque in deceleration direction
+	cerr << "max accel distance: " << max_accel_distance << endl;
+	int n = fabs(floor(angular_speed / (retro_torque/parent->GetMoment()))); // n = # of turns needed to kill all speed
+	float braking_distance = fabs(max_accel_distance) * (((n+1)*(n)/2) );
+	cerr << "Need " << n << " turns to kill all speed, distance of " << braking_distance << "\n";
+	// n*(n+1)/2
+      // figure out how far we can get while braking (discrete
+	// summation since everything is done with impulses
+	if(n<0) {
+	  cerr << "overbraked\n";
+	  braking = false;
+	} else if(!braking && braking_distance > fabs(angle)) {
+	// start braking
+	  braking = true;
+	  cerr << "Starting to brake\n";
+	} else if(!braking && braking_distance > fabs(angle - max_accel_distance)) { // prevent this turn from doing the full acceleration
+	  angle -= braking_distance;
+	}
+      }
+      if(braking && (angular_speed > THRESHOLD && fabs(angle) > max_accel_distance)) { // max brake if positive angle and braking flag is set and we are still moving
+	cerr << "Braking\n";
+	// apply maximum braking power
+	angle = - angular_speed / SIMULATION_ATOM;
+	angular_speed = 0;
+      }
+      float delta_v = angle / SIMULATION_ATOM; // get the angular velocity needed to
+                                // cover this distance
+      delta_v -= angular_speed; // adjust speed downward
+      Vector more_torque = turning_norm * (delta_v / SIMULATION_ATOM * parent->GetMoment());
+      cerr << "Torque for turning towards target " << more_torque << endl;
+      cerr << "clamped torque " << parent->ClampTorque(more_torque) << endl;
       torque += more_torque;
+    } else {
+      // Kill angular momentum
+      Vector angular_velocity = parent->GetAngularVelocity();
+      Vector more_torque = Vector(-angular_velocity.i, -angular_velocity.j, 0);
+      more_torque = more_torque * parent->GetMoment() / SIMULATION_ATOM;
+      cerr << "Killing angular momentum " << more_torque << endl;
+      torque += more_torque;
+      if(torque.Magnitude() < THRESHOLD) {
+	done = true;
+      }
     }
 
-    if(ang_vel.Magnitude() < THRESHOLD && (local_heading * Vector(0,0,1)) > 1-THRESHOLD) {
-      done = false;
-    }
-    else {
-      parent->ApplyLocalTorque(torque);
+    parent->ApplyLocalTorque(torque);
+
+    if(ang_vel.Magnitude() < THRESHOLD && angle < THRESHOLD) {
+      done = true;
+      cerr << "Done\n";
     }
   }
 };
