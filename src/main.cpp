@@ -17,14 +17,9 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-//#define VERSION "0.0.3"
 #include "vs_globals.h"
 #include "gfxlib.h"
 #include "in_kb.h"
-//#include "sdl_audio_data.h"
-//#include "sdl_audio.h"
-//#include "sdl_init.h"
-//#include "joystick.h"
 #include "lin_time.h"
 #include "main_loop.h"
 
@@ -49,8 +44,8 @@ void setup_game_data ( ){ //pass in config file l8r??
   g_game.capture_mouse=GFXFALSE;
   g_game.fullscreen = 0;
   g_game.color_depth = 16;
-  g_game.y_resolution = 480;
-  g_game.x_resolution = 640;
+  g_game.y_resolution = 600;
+  g_game.x_resolution = 800;
   g_game.fov=78;
   g_game.PaletteExt=1;
   g_game.cubemap=0;
@@ -92,8 +87,6 @@ int main( int argc, char **argv )
     if ( atexit( cleanup ) != 0 ) {
 	perror( "atexit" );
     }
-    //init_textures();
-    //init_fonts();
     /*
 #if defined(HAVE_SDL) && defined(HAVE_SDL_MIXER)
 
@@ -105,8 +98,6 @@ int main( int argc, char **argv )
     */
     _Universe= new Universe(argc,argv);   
 	_Universe->Init ();
-    //    glutSetCursor(GLUT_CURSOR_NONE); 
-    
     createObjects();
 
        InitializeInput();
@@ -140,6 +131,13 @@ void ParseCommandLine(int argc, char ** lpCmdLine) {
 	break;
       case '1':
 	g_game.color_depth = 16;
+	break;
+      case '3':
+	g_game.color_depth = 32;
+	break; 
+      case 'f':
+      case 'F':
+	g_game.fullscreen =1;
 	break;
       case 'L':
       case 'l'://low rez

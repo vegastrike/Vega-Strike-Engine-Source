@@ -244,8 +244,8 @@ public:
   bool querySphere (const Vector &pnt, float err);//for weapons
   float querySphere (const Vector &start, const Vector & end);//for beams
   float querySphere (const Vector &st, const Vector &dir, float err);//for click list
-  float queryBSP (const Vector &st, const Vector & end, Vector & normal);
-  bool queryBSP (const Vector &pnt, float err, Vector & normal, float &dist);
+  float queryBSP (const Vector &st, const Vector & end, Vector & normal, bool ShieldBSP=true);
+  bool queryBSP (const Vector &pnt, float err, Vector & normal, float &dist, bool ShieldBSP);
   bool queryFrustum (float frustum[6][4]);
 
   /**Queries the bounding box with a ray.  1 if ray hits in front... -1 if ray

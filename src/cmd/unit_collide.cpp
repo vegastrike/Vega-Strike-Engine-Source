@@ -19,7 +19,7 @@ bool TableLocationChanged (const LineCollide &lc, const Vector &minx, const Vect
 void KillCollideTable (LineCollide * lc) {
   collidetable.Remove (lc, lc);
 }
-void AddCollideQueue (const LineCollide &tmp) {
+void AddCollideQueue (LineCollide &tmp) {
   collidetable.Put (&tmp,&tmp);
 }
 void Unit::SetCollisionParent (Unit * name) {
@@ -50,10 +50,10 @@ void Unit::CollideAll() {
   unsigned int i;
 #define COLQ colQ
   vector <const LineCollide*> colQ;
-  bool hhuge = collidetable.Get (CollideInfo.Mini,CollideInfo.Maxi,colQ);
+  collidetable.Get (&CollideInfo,colQ);
   for (i=0;i<COLQ.size();i++) {
     //    if (colQ[i]->object > this||)//only compare against stuff bigger than you
-    if ((!hhuge||(hhuge&&COLQ[i]->type==LineCollide::UNIT))&&((COLQ[i]->object>this||(!hhuge&&i<collidetable.GetHuge().size()))))//the first stuffs are in the huge array
+    if ((!CollideInfo.huge||(CollideInfo.huge&&COLQ[i]->type==LineCollide::UNIT))&&((COLQ[i]->object>this||(!CollideInfo.huge&&i<collidetable.GetHuge().size()))))//the first stuffs are in the huge array
       if (
 	  Position().i+radial_size>COLQ[i]->Mini.i&&
 	  Position().i-radial_size<COLQ[i]->Maxi.i&&
@@ -85,7 +85,7 @@ bool Unit::OneWayCollide (Unit * target, Vector & normal, float &dist) {//do eac
   int i;
   if (!querySphere(target->Position(),target->rSize()))
     return false;;
-  if (queryBSP(target->Position(), target->rSize(), normal,dist)) {
+  if (queryBSP(target->Position(), target->rSize(), normal,dist,false)) {
 
     return true;
   }

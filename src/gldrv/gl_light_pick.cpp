@@ -65,16 +65,21 @@ static inline bool picklight (const LineCollide& light, const Vector & center, c
 void GFXPickLights (const Vector & center, const float radius) {
     Vector tmp;
     int lightsenabled = _GLLightsEnabled;
+    LineCollide tmpcollide;
+    tmp = Vector(radius,radius,radius);
+    tmpcollide.Mini = center-tmp;
+    tmpcollide.Maxi = center+tmp;
+    tmpcollide.huge=false;
+    tmpcollide.object=NULL;
+    tmpcollide.type=LineCollide::UNIT;
     swappicked();
     vector <LineCollideStar> tmppickt;
     if (radius < .1*CTACC) {
 	lighttable.Get (center, tmppickt);
     } else {
-	tmp = Vector(radius,radius,radius);
-	if (lighttable.Get (center-tmp,center+tmp, tmppickt)) 
-	  lighttable.Get (center,tmppickt);//FIXME (shouldn't get small loc)
+	lighttable.Get (&tmpcollide, tmppickt); 
     }
-    for (int i=0;i<tmppickt.size();i++){
+    for (unsigned int i=0;i<tmppickt.size();i++){
       if (picklight (*tmppickt[i].lc,center,radius,lightsenabled)) {
 	newpicked->push_back (tmppickt[i].GetIndex());
 	lightsenabled++;

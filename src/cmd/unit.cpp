@@ -66,9 +66,12 @@ void Unit::calculate_extent() {
   float tmp2 = corner_max.Magnitude();
   radial_size = tmp1>tmp2?tmp1:tmp2;
 }
-
+//FIXME Daughter units should be able to be turrets (have y/p/r)
 void Unit::SetResolveForces (bool ys) {
   resolveforces = ys;
+  for (int i=0;i<numsubunit;i++) {
+    subunits[i]->SetResolveForces (ys);
+  }
 }
 
 void Unit::Init()
@@ -436,10 +439,10 @@ void Unit::Destroy() {
 }
 
 
-bool Unit::queryBSP (const Vector &pt, float err, Vector & norm, float &dist) {
+bool Unit::queryBSP (const Vector &pt, float err, Vector & norm, float &dist, bool ShieldBSP) {
   int i;
   for (i=0;i<numsubunit;i++) {
-    if ((subunits[i]->queryBSP(pt,err, norm,dist)))
+    if ((subunits[i]->queryBSP(pt,err, norm,dist,ShieldBSP)))
       return true;
   }
   Vector st (InvTransform (cumulative_transformation_matrix,pt));
@@ -451,6 +454,9 @@ bool Unit::queryBSP (const Vector &pt, float err, Vector & norm, float &dist) {
   if (!temp)
     return false;
   BSPTree ** tmpBsp = ShieldUp(st)?&bspShield:&bspTree;
+  if (bspTree&&!ShieldBSP) {
+    tmpBsp= &bspTree;
+  }
   if (!(*tmpBsp)) {
     dist = (st - meshdata[i-1]->Position()).Magnitude()-err-meshdata[i-1]->rSize();
     return true;
@@ -462,16 +468,19 @@ bool Unit::queryBSP (const Vector &pt, float err, Vector & norm, float &dist) {
   return false;
 }
 
-float Unit::queryBSP (const Vector &start, const Vector & end, Vector & norm) {
+float Unit::queryBSP (const Vector &start, const Vector & end, Vector & norm, bool ShieldBSP) {
   int i;
   float tmp;
 
   for (i=0;i<numsubunit;i++) {
-    if ((tmp = subunits[i]->queryBSP(start,end,norm))!=0)
+    if ((tmp = subunits[i]->queryBSP(start,end,norm,ShieldBSP))!=0)
       return tmp;
   }
   Vector st (InvTransform (cumulative_transformation_matrix,start));
   BSPTree ** tmpBsp = ShieldUp(st)?&bspShield:&bspTree;
+  if (bspTree&&!ShieldBSP) {
+    tmpBsp= &bspTree;
+  }
   if (!(*tmpBsp)) {
     tmp = querySphere (start,end);
     norm = (tmp * (start-end));

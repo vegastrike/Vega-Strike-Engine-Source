@@ -3,7 +3,7 @@
 #include "gfx/vec.h"
 #include "hashtable_3d.h"
 
-void AddCollideQueue(const LineCollide & );
+void AddCollideQueue(LineCollide & );
 bool TableLocationChanged (const Vector &, const Vector &);
 bool TableLocationChanged (const LineCollide &, const Vector &, const Vector &);
 void KillCollideTable (LineCollide* lc);

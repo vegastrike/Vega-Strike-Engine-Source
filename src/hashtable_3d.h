@@ -6,13 +6,14 @@
 #define COLLIDETABLESIZE sizeof(CTSIZ)
 #define COLLIDETABLEACCURACY sizeof (CTACCURACY)
 
-const int HUGEOBJECT=160; //objects that go over 16 sectors are considered huge and better to check against everything.
+const int HUGEOBJECT=12; //objects that go over 16 sectors are considered huge and better to check against everything.
 
 struct LineCollide {
   void * object;
-  enum collidables {UNIT, BEAM,BALL,BOLT,PROJECTILE} type;
   Vector Mini;
   Vector Maxi;
+  enum collidables {UNIT, BEAM,BALL,BOLT,PROJECTILE} type;
+  bool huge;
   LineCollide(){}
   LineCollide (void * objec, enum collidables typ,const Vector &st, const Vector &en) {this->object=objec;this->type=typ;this->Mini=st;this->Maxi=en;}
   LineCollide (const LineCollide &l) {object=l.object; type=l.type; Mini=l.Mini;Maxi=l.Maxi;}      
@@ -59,16 +60,6 @@ public:
     maxaccessx=0;
     maxaccessy=0;
     maxaccessz=0;
-    /*
-    for (int l=0;l<COLLIDETABLESIZE;l++) {
-      for (int m=0;m<COLLIDETABLESIZE;m++) {
-	for (int n=0;n<COLLIDETABLESIZE;n++) {
-	  if (table[l][m][n].size()!=0)
-	    fprintf (stderr,"ERROR!!! SIZE: %d\n\n\n",table[l][m][n].size());
-	}
-      }
-
-      }*/
   }
   void Get (const Vector &Exact, std::vector <T> &retval) {
     retval = table[hash_int(Exact.i)][hash_int(Exact.j)][hash_int(Exact.k)];
@@ -79,28 +70,26 @@ public:
   std::vector <T>& GetHuge () {
     return hugeobjects;
   }
-  bool Get (const Vector &Min, const Vector & Max, std::vector <T> &retval) {    
+  void Get (const LineCollide* target, std::vector <T> &retval) {    
     //int minx,miny,minz,maxx,maxy,maxz;
     //    hash_vec(Min,minx,miny,minz);
     //    hash_vec(Max,maxx,maxy,maxz);
-    float maxx= (ceil(Max.i/COLLIDETABLEACCURACY))*COLLIDETABLEACCURACY;
-    float maxy= (ceil(Max.j/COLLIDETABLEACCURACY))*COLLIDETABLEACCURACY;
-    float maxz= (ceil(Max.k/COLLIDETABLEACCURACY))*COLLIDETABLEACCURACY;
+    float maxx= (ceil(target->Maxi.i/COLLIDETABLEACCURACY))*COLLIDETABLEACCURACY;
+    float maxy= (ceil(target->Maxi.j/COLLIDETABLEACCURACY))*COLLIDETABLEACCURACY;
+    float maxz= (ceil(target->Maxi.k/COLLIDETABLEACCURACY))*COLLIDETABLEACCURACY;
     int x,y,z;
-    if (Min.i==maxx) maxx+=COLLIDETABLEACCURACY/2;
-    if (Min.j==maxy) maxy+=COLLIDETABLEACCURACY/2;
-    if (Min.k==maxz) maxz+=COLLIDETABLEACCURACY/2;
-    if (fabs((maxx-Min.i)*(maxy-Min.j)*(maxz-Min.k))>COLLIDETABLEACCURACY*COLLIDETABLEACCURACY*COLLIDETABLEACCURACY*HUGEOBJECT) {
-      retval = hugeobjects;
-      return true;
-    } else {
-      retval = hugeobjects;
-    }
-    for (float i=Min.i;i<maxx;i+=COLLIDETABLEACCURACY) {
+    if (target->Mini.i==maxx) maxx+=COLLIDETABLEACCURACY/2;
+    if (target->Mini.j==maxy) maxy+=COLLIDETABLEACCURACY/2;
+    if (target->Mini.k==maxz) maxz+=COLLIDETABLEACCURACY/2;
+    retval = hugeobjects;
+    if (target->huge) {
+      return;//we can't get _everything
+    } 
+    for (float i=target->Mini.i;i<maxx;i+=COLLIDETABLEACCURACY) {
       x = hash_int (i);
-      for (float j=Min.j;j<maxy;j+=COLLIDETABLEACCURACY) {   
+      for (float j=target->Mini.j;j<maxy;j+=COLLIDETABLEACCURACY) {   
 	y = hash_int(j);
-	for (float k=Min.k;k<maxz;k+=COLLIDETABLEACCURACY) {
+	for (float k=target->Mini.k;k<maxz;k+=COLLIDETABLEACCURACY) {
 	  z = hash_int(k);
 	  //	  table[i][j][k].push_back(target);
 	  for (unsigned int l=0;l<table[x][y][z].size();l++) {
@@ -116,9 +105,8 @@ public:
 	}
       }
     }
-    return false;
   }
-  void Put(const LineCollide* target,const T objectToPut) {
+  void Put(LineCollide* target,const T objectToPut) {
     //    int minx,miny,minz,maxx,maxy,maxz;
     //    hash_vec(target->Mini,minx,miny,minz);
     //    hash_vec(target->Maxi,maxx,maxy,maxz);
@@ -126,12 +114,21 @@ public:
     float maxx= (ceil(target->Maxi.i/COLLIDETABLEACCURACY))*COLLIDETABLEACCURACY;
     float maxy= (ceil(target->Maxi.j/COLLIDETABLEACCURACY))*COLLIDETABLEACCURACY;
     float maxz= (ceil(target->Maxi.k/COLLIDETABLEACCURACY))*COLLIDETABLEACCURACY;
-    if (target->Mini.i==maxx) maxx+=COLLIDETABLEACCURACY/2;
+    //for huge calculation...not sure it's necessary
+    float minx= (floor(target->Mini.i/COLLIDETABLEACCURACY))*COLLIDETABLEACCURACY;
+    float miny= (floor(target->Mini.j/COLLIDETABLEACCURACY))*COLLIDETABLEACCURACY;
+    float minz= (floor(target->Mini.k/COLLIDETABLEACCURACY))*COLLIDETABLEACCURACY;
+
+    if (target->Mini.i==maxx) 
+      maxx+=COLLIDETABLEACCURACY/2;
     if (target->Mini.j==maxy) maxy+=COLLIDETABLEACCURACY/2;
     if (target->Mini.k==maxz) maxz+=COLLIDETABLEACCURACY/2;
-    if (fabs((maxx-target->Mini.i)*(maxy-target->Mini.j)*(maxz-target->Mini.k))>COLLIDETABLEACCURACY*COLLIDETABLEACCURACY*COLLIDETABLEACCURACY*HUGEOBJECT) {
+    if (fabs((maxx-minx)*(maxy-miny)*(maxz-minz))>COLLIDETABLEACCURACY*COLLIDETABLEACCURACY*COLLIDETABLEACCURACY*HUGEOBJECT) {
+      target->huge = true;
       hugeobjects.push_back(objectToPut);
       return;
+    }else {
+      target->huge=false;
     }
     for (float i=target->Mini.i;i<maxx;i+=COLLIDETABLEACCURACY) {
       x = hash_int(i);
@@ -164,7 +161,7 @@ public:
     if (target->Mini.j==maxy) maxy+=COLLIDETABLEACCURACY/2;
     if (target->Mini.k==maxz) maxz+=COLLIDETABLEACCURACY/2;
 
-    if (fabs((maxx-target->Mini.i)*(maxy-target->Mini.j)*(maxz-target->Mini.k))>COLLIDETABLEACCURACY*COLLIDETABLEACCURACY*COLLIDETABLEACCURACY*HUGEOBJECT) {
+    if (target->huge) {
       while (removal!=hugeobjects.end()) {
 		  removal = std::find (hugeobjects.begin(),hugeobjects.end(),objectToKill);
 	if (removal!=hugeobjects.end()) {
