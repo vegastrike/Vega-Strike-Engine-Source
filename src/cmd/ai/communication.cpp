@@ -13,10 +13,11 @@ FSM::FSM (const char * filename) {
   nodes.push_back (Node("Request Clearence To Land.",0));
   nodes.push_back (Node("*hit*",-.2));
   vector <unsigned int> edges;
-  for (unsigned int i=0;i<nodes.size()-2;i++) {
+  unsigned int i;
+  for (i=0;i<nodes.size()-2;i++) {
     edges.push_back (i);
   }
-  for (unsigned int i=0;i<nodes.size();i++) {
+  for (i=0;i<nodes.size();i++) {
     nodes[i].edges = edges;
   }
   
