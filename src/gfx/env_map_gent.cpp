@@ -210,15 +210,9 @@ static void TexMap (CubeCoord & Tex, Vector Normal)
 	const float CubeSize = 128; //half of the length of any of the cube's sides
 		r[0] = CubeSize / Normal.k; // find what you need to multiply to get to the cube
 		r[1] = -r[0];
-		if( Normal.i<=0)
-			r[2] = 0;
-		else
-			r[2] = CubeSize / Normal.i; // find what you need to multiply to get to the cube
+		r[2] = CubeSize / Normal.i; // find what you need to multiply to get to the cube
 		r[3] = -r[2];
-		if( Normal.j<=0)
-			r[4] = 0;
-		else
-			r[4] = CubeSize / Normal.j; // find what you need to multiply to get to the cube
+		r[4] = CubeSize / Normal.j; // find what you need to multiply to get to the cube
 		r[5] = -r[4];
 		if (!Normal.k)
 			r[0] = r[1] = CubeSize*1000;
@@ -256,16 +250,16 @@ static void TexMap (CubeCoord & Tex, Vector Normal)
 		Tex.t = 128 - rf*Normal.j;
 		break;
 	case 3:
-		Tex.s = 128 + rf*Normal.k;
-		Tex.t = 128 - rf*Normal.j;
+	  Tex.s = 128 + rf*Normal.k;
+	    Tex.t = 128 - rf*Normal.j;
 		break;
 	case 4:
 		Tex.t = 128 -rf*Normal.i;
 		Tex.s = 128 + rf*Normal.k;
 		break;
 	case 5:
-		Tex.t = 128 + rf*Normal.i;
-		Tex.s = 128 - rf*Normal.k;
+	  Tex.t = 128 + rf*Normal.i;
+	    Tex.s = 128 - rf*Normal.k;
 		break;
 
 
@@ -397,7 +391,7 @@ static void Spherize (CubeCoord Tex [256][256],CubeCoord gluSph [256][256],unsig
 	bool sphere = false;
 	Data = new Texmp[6];
 	if (!Data) 
-		return;
+	  return;//borken down and down Data[5], right Data[3]
 	char *tmp= (char *)malloc (strlen (InputName)+60);;
 	if (!(LoadTex (strcat (strcpy(tmp,InputName),"_front.bmp"),Data[0].D)&&LoadTex (strcat (strcpy(tmp,InputName),"_back.bmp"),Data[1].D)&&LoadTex (strcat (strcpy(tmp,InputName),"_left.bmp"),Data[2].D)&&LoadTex (strcat (strcpy(tmp,InputName),"_right.bmp"),Data[3].D)&&LoadTex (strcat (strcpy(tmp,InputName),"_up.bmp"),Data[4].D)&&LoadTex (strcat (strcpy(tmp,InputName),"_down.bmp"),Data[5].D))) {
 	  if (!LoadTex (strcat (strcpy(tmp,InputName),"_sphere.bmp"),Data[0].D )) {
