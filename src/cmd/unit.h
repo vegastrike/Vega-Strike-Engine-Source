@@ -82,6 +82,16 @@ class Unit {
    * of space combat
    */
   struct Computer {
+    struct RADARLIM {
+      ///the max range the radar can handle
+      float maxrange;
+      ///the dot with (0,0,1) indicating the farthest to the side the radar can handle.
+      float maxcone;
+      ///the number of normalized pixels off this radar might be (fuzzes between)
+      float error;
+      ///does this radar support IFF?
+      bool color;
+    } radar;
     ///The nav point the unit may be heading for
     Vector NavPoint;
     ///The target that the unit has in computer
@@ -225,6 +235,7 @@ class Unit {
   void RegenShields();
   ///The structual integ of the current unit
   float hull;
+  ///The radar limits (range, cone range, etc) 
   ///the current order
   Order *aistate;
   ///how much the energy recharges per second

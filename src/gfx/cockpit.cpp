@@ -84,7 +84,7 @@ void Cockpit::DrawTargetBox () {
   GFXBlendMode (SRCALPHA,INVSRCALPHA);
   GFXDisable (LIGHTING);
   DrawNavigationSymbol (un->GetComputerData().NavPoint,CamP,CamQ, CamR.Dot(un->GetComputerData().NavPoint-un->Position()));
-  GFXColorf (relationToColor(_Universe->GetRelation(un->faction,target->faction)));
+  GFXColorf (un->GetComputerData().radar.color?relationToColor(_Universe->GetRelation(un->faction,target->faction)):GFXColor(1,1,1,1));
   GFXBegin (GFXLINESTRIP); 
   GFXVertexf (Loc+(CamP+CamQ)*target->rSize());
   GFXVertexf (Loc+(CamP-CamQ)*target->rSize());
@@ -94,14 +94,14 @@ void Cockpit::DrawTargetBox () {
   GFXEnd();
   if (un->GetComputerData().itts) {
     un->getAverageGunSpeed (speed,range);
-    Loc = target->PositionITTS (un->Position(),speed);
+    Loc = target->PositionITTS (un->Position(),speed)+10*un->GetComputerData().radar.error*Vector (-.5*.25*un->rSize()+rand()*.25*un->rSize()/RAND_MAX,-.5*.25*un->rSize()+rand()*.25*un->rSize()/RAND_MAX,-.5*.25*un->rSize()+rand()*.25*un->rSize()/RAND_MAX);
     
     GFXBegin (GFXLINESTRIP);
-    GFXVertexf (Loc+(CamP)*un->rSize());
-    GFXVertexf (Loc+(-CamQ)*un->rSize());
-    GFXVertexf (Loc+(-CamP)*un->rSize());
-    GFXVertexf (Loc+(CamQ)*un->rSize());
-    GFXVertexf (Loc+(CamP)*un->rSize());
+    GFXVertexf (Loc+(CamP)*.25*un->rSize());
+    GFXVertexf (Loc+(-CamQ)*.25*un->rSize());
+    GFXVertexf (Loc+(-CamP)*.25*un->rSize());
+    GFXVertexf (Loc+(CamQ)*.25*un->rSize());
+    GFXVertexf (Loc+(CamP)*.25*un->rSize());
     GFXEnd();
   }
   GFXEnable (TEXTURE0);
@@ -110,6 +110,7 @@ void Cockpit::DrawTargetBox () {
 
 }
 void Cockpit::DrawBlips (Unit * un) {
+  Unit::Computer::RADARLIM * radarl = &un->GetComputerData().radar;
   UnitCollection * drawlist = _Universe->activeStarSystem()->getUnitList();
   Iterator * iter = drawlist->createIterator();
   Unit * target;
@@ -127,15 +128,20 @@ void Cockpit::DrawBlips (Unit * un) {
   while ((target = iter->current())!=NULL) {
     if (target!=un) {
       Vector localcoord (un->ToLocalCoordinates(target->Position()-un->Position()));
+      float mm= localcoord.Magnitude();
+      if (mm>radarl->maxrange||(localcoord.k/mm)<radarl->maxcone) {
+	iter->advance();	
+	continue;
+      }
       LocalToRadar (localcoord,s,t);
-      GFXColor localcol (relationToColor (_Universe->GetRelation(un->faction,target->faction)));
+      GFXColor localcol (radarl->color?relationToColor (_Universe->GetRelation(un->faction,target->faction)):GFXColor(1,1,1,1));
       GFXColorf (localcol);
       if (target==makeBigger) {
 	GFXEnd();
 	GFXPointSize(4);
 	GFXBegin (GFXPOINT);
       }
-      GFXVertex3f (xcent+xsize*s,ycent+ysize*t,0);
+      GFXVertex3f (xcent+xsize*(s-.5*radarl->error+(radarl->error*rand())/RAND_MAX),ycent+ysize*(t+-.5*radarl->error+(radarl->error*rand())/RAND_MAX),0);
       if (target==makeBigger) {
 	GFXEnd();
 	GFXPointSize (2);

@@ -163,6 +163,10 @@ void Unit::Init()
   computer.max_roll=100;
   computer.NavPoint=Vector(0,0,0);
   computer.itts = false;
+  computer.radar.maxrange=10000;
+  computer.radar.maxcone=-1;
+  computer.radar.error=0;
+  computer.radar.color=true;
   //  Fire();
 }
 

@@ -86,7 +86,12 @@ namespace UnitXML {
       ITTS,
       AMMO,
       HUDIMAGE,
-      SOUND
+      SOUND,
+      EEERROR,
+      MAXCONE,
+      RANGE,
+      ISCOLOR,
+      RADAR
     };
 
   const EnumMap::Pair element_names[] = {
@@ -113,7 +118,8 @@ namespace UnitXML {
     EnumMap::Pair ("Yaw", YAW),
     EnumMap::Pair ("Pitch", PITCH),
     EnumMap::Pair ("Roll", ROLL),
-    EnumMap::Pair ("Mount", MOUNT)
+    EnumMap::Pair ("Mount", MOUNT),
+    EnumMap::Pair ("Radar", RADAR)
   };
   const EnumMap::Pair attribute_names[] = {
     EnumMap::Pair ("UNKNOWN", UNKNOWN),
@@ -160,11 +166,15 @@ namespace UnitXML {
     EnumMap::Pair ("itts",ITTS),
     EnumMap::Pair ("ammo", AMMO),
     EnumMap::Pair ("HudImage",HUDIMAGE),
-    EnumMap::Pair ("Engine",ENGINE)
+    EnumMap::Pair ("Engine",MAXCONE),
+    EnumMap::Pair ("Error",EEERROR),
+    EnumMap::Pair ("Range",RANGE),
+    EnumMap::Pair ("Color",ISCOLOR)
+
 };
 
-  const EnumMap element_map(element_names, 24);
-  const EnumMap attribute_map(attribute_names, 45);
+  const EnumMap element_map(element_names, 25);
+  const EnumMap attribute_map(attribute_names, 48);
 }
 
 using XMLSupport::EnumMap;
@@ -606,13 +616,32 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
       case ROLL:
 	computer.max_roll=parse_float((*iter).value)*(VS_PI/180);
 	break;
-      case ITTS:
-	computer.itts=parse_bool ((*iter).value);
       }
     }
     break;
-
-
+  case RADAR:
+    assert (xml->unitlevel==2);
+    xml->unitlevel++;
+    for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
+      switch(attribute_map.lookup((*iter).name)) {
+      case ITTS:
+	computer.itts=parse_bool ((*iter).value);
+	break;
+      case EEERROR:
+	computer.radar.error=parse_float ((*iter).value);
+	break;
+      case MAXCONE:
+	computer.radar.maxcone = parse_float ((*iter).value);
+	break;
+      case RANGE:
+	computer.radar.maxrange = parse_float ((*iter).value);
+	break;
+      case ISCOLOR:
+	computer.radar.color=parse_bool ((*iter).value);
+	break;
+      }
+    }
+    break;
   case REACTOR:
 	assert (xml->unitlevel==2);
 	xml->unitlevel++;
