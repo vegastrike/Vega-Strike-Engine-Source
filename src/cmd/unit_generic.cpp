@@ -1662,7 +1662,7 @@ void Unit::DisableTurretAI () {
 
 extern signed char  ComputeAutoGuarantee ( Unit * un);
 extern float getAutoRSize (Unit * orig,Unit * un, bool ignore_friend=false);
-
+extern void SetShieldZero(Unit*);
 void Unit::UpdatePhysics (const Transformation &trans, const Matrix &transmat, const Vector & cum_vel,  bool lastframe, UnitCollection *uc) {
   static float VELOCITY_MAX=XMLSupport::parse_float(vs_config->getVariable ("physics","velocity_max","10000"));
 
@@ -1677,6 +1677,7 @@ void Unit::UpdatePhysics (const Transformation &trans, const Matrix &transmat, c
     if (image->cloakenergy*SIMULATION_ATOM>warpenergy) {
       Cloak(false);//Decloak
     } else {
+      SetShieldZero(this);
       if (image->cloakrate>0||cloaking==cloakmin) {
 		warpenergy-=(SIMULATION_ATOM*image->cloakenergy);
       }
@@ -1692,7 +1693,7 @@ void Unit::UpdatePhysics (const Transformation &trans, const Matrix &transmat, c
 	    }
 	    if (cloaking<0&&image->cloakrate<0) {
 	      //AUDStopPlaying (sound->cloak);
-	      cloaking=-2147483648;//wraps short fix
+	      cloaking=-2147483647-1;//wraps short fix
 	    }
       }
     }
@@ -3870,7 +3871,7 @@ void Unit::Cloak (bool loak) {
   if (loak) {
     if (image->cloakenergy<warpenergy) {
       image->cloakrate =(image->cloakrate>=0)?image->cloakrate:-image->cloakrate; 
-      if (cloaking==-2147483648) { //short fix
+      if (cloaking==(-2147483647-1)) { //short fix
 	cloaking=2147483647; //short fix
       } else {
        

@@ -70,6 +70,7 @@ void GameStarSystem::VolitalizeJumpAnimation (const int ani) {
     AnimationNulls.push_back (ani);
   }
 }
+extern void SetShieldZero(Unit*);
 
 void GameStarSystem::DrawJumpStars() {
   for (unsigned int kk=0;kk<pendingjump.size();kk++) { 
@@ -79,28 +80,7 @@ void GameStarSystem::DrawJumpStars() {
       if (un) {
 	Vector p,q,r;
 	un->GetOrientation (p,q,r);
-        switch (un->shield.number) {
-        case 8:
-          un->shield.shield8.frontlefttop=
-            un->shield.shield8.frontrighttop=
-            un->shield.shield8.backlefttop=
-            un->shield.shield8.backrighttop=
-            un->shield.shield8.frontleftbottom=
-            un->shield.shield8.frontrightbottom=
-            un->shield.shield8.backleftbottom=
-            un->shield.shield8.backrightbottom=0;
-            break;
-        case 4:
-          un->shield.shield4fbrl.front=
-            un->shield.shield4fbrl.back=
-            un->shield.shield4fbrl.left=
-            un->shield.shield4fbrl.right=0;
-          break;
-        case 2:
-        default:
-          un->shield.shield2fb.front=un->shield.shield2fb.back=0;
-          break;
-        }
+        SetShieldZero(un);
 	JumpAnimations[k].a->SetPosition (un->Position()+r.Cast()*un->rSize()*(pendingjump[kk]->delay+.25));
 	JumpAnimations[k].a->SetOrientation (p,q,r);
 	static float JumpStarSize = XMLSupport::parse_float (vs_config->getVariable ("graphics","jumpgatesize","1.75"));
