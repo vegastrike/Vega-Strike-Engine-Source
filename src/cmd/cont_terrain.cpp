@@ -153,3 +153,7 @@ void ContinuousTerrain::AdjustTerrain(StarSystem * ss) {
     }
   }
 }
+
+Vector ContinuousTerrain::GetUpVector (const Vector & pos) {
+	return data[0]->GetUpVector(pos);
+}

@@ -263,7 +263,7 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
 	  break;
 	}
       }  
-      Atmosphere * a = new Atmosphere();
+      Atmosphere * a = NULL /* new Atmosphere(); */;
       if (xml->unitlevel>2) {
 	assert(xml->moons.size()!=0);
 	Planet * p =xml->moons.back()->GetTopPlanet(xml->unitlevel-1);

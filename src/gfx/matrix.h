@@ -300,4 +300,28 @@ inline Vector InvScaleTransform (Matrix trans,  Vector pos) {
 }
 
 
+inline void Rotate (Matrix tmp, const Vector &axis, float angle) {
+                double c = cos (angle);
+                double s = sin (angle);
+//Row, COl
+#define M(a,b) (tmp[b*4+a])
+                M(0,0)=axis.i*axis.i*(1-c)+c;
+                M(0,1)=axis.i*axis.j*(1-c)-axis.k*s;
+                M(0,2)=axis.i*axis.k*(1-c)+axis.j*s;
+          M(0,3)=0;
+                M(1,0)=axis.j*axis.i*(1-c)+axis.k*s;
+                M(1,1)=axis.j*axis.j*(1-c)+c;
+                M(1,2)=axis.j*axis.k*(1-c)-axis.i*s;
+                M(1,3)=0;
+                M(2,0)=axis.i*axis.k*(1-c)-axis.j*s;
+                M(2,1)=axis.j*axis.k*(1-c)+axis.i*s;
+                M(2,2)=axis.k*axis.k*(1-c)+c;
+                M(2,3)=0;
+                M(3,0)=0;
+                M(3,1)=0;
+                M(3,2)=0;
+                M(3,3)=1;
+#undef M
+}
+
 #endif

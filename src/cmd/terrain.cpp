@@ -115,3 +115,6 @@ void Terrain::UpdateAll (int resolution ) {
   
 
 }
+Vector Terrain::GetUpVector (const Vector & pos) {
+	return GetNormal (pos,Vector (0,1,0));	
+}

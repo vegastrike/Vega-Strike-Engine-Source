@@ -26,5 +26,6 @@ class Terrain : public QuadTree {
   static void UpdateAll (int resolution);
   void DisableDraw();
   void EnableDraw();
+  Vector GetUpVector (const Vector &pos);
 };
 #endif

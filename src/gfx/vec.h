@@ -73,6 +73,7 @@ class Vector {
 		  m1[1] * i + m1[5] * j + m1[9] * k + m1[13],
 		  m1[2] * i + m1[6] * j + m1[10] * k + m1[14]);
   }
+
   Vector Min(const Vector &other) {
     return Vector((i<other.i)?i:other.i,
 		  (j<other.j)?j:other.j,

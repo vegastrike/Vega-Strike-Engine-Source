@@ -198,3 +198,7 @@ void	QuadTree::LoadData()
 	delete [] hm.Data;
 }
 
+
+Vector QuadTree::GetNormal(const Vector &position,const Vector & norm) {
+	return TransformNormal (transformation,nonlinear_transform->TransformNormal(position,norm));
+}

@@ -19,7 +19,7 @@ struct Texture;
 class Background;
 class Terrain;
 class ContinuousTerrain;
-
+class Atmosphere;
 /**
  * Star System
  * Scene management for a star system
@@ -114,6 +114,7 @@ class StarSystem {
   ///Disables included lights and terrains
   void SwapOut ();
 
+  friend Atmosphere;
 };
 
 #endif

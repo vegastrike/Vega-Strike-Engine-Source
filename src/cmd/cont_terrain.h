@@ -23,4 +23,5 @@ class ContinuousTerrain {
   void DisableDraw();
   void EnableDraw();
   Vector GetGroundPos(Vector ShipPos, Vector & norm);
+  Vector GetUpVector (const Vector & pos);
 };

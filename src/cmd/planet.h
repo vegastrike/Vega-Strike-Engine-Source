@@ -118,6 +118,9 @@ class Planet : public Unit {
   };
   Iterator *createIterator() { return new PlanetIterator(this);}
 
+  bool hasLights() { return !lights.empty(); }
+  const std::vector <int> & activeLights() { return lights; }
+
   friend class Planet::PlanetIterator;
   friend class PlanetaryOrbit;
 };

@@ -69,7 +69,7 @@ void Wwrite (const char * myfile, unsigned short * data) {
   
   png_write_info(png_ptr, info_ptr);
   png_set_swap(png_ptr);
-  png_byte *row_pointers[height];
+  png_byte **row_pointers = new png_byte*[height];
   for (unsigned int i=0;i<height;i++) {
     row_pointers[i]= (png_byte *)&data[i*width];
   }
@@ -84,6 +84,7 @@ void Wwrite (const char * myfile, unsigned short * data) {
 
   fclose (fp);
   free (data);
+  delete [] row_pointers;
 }
 
 

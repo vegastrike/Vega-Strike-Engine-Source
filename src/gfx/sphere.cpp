@@ -10,7 +10,7 @@
 
 using XMLSupport::tostring;
 const int pixelscalesize=30;
-SphereMesh::SphereMesh(float radius, int stacks, int slices, char *texture, char *alpha,bool Insideout,  const BLENDFUNC a, const BLENDFUNC b, bool envMapping) : Mesh() {
+SphereMesh::SphereMesh(float radius, int stacks, int slices, char *texture, char *alpha,bool Insideout,  const BLENDFUNC a, const BLENDFUNC b, bool envMapping, float rho_min, float rho_max, float theta_min, float theta_max) : Mesh() {
   int numspheres = (stacks+slices)/8;
   if (numspheres<1)
     numspheres =1;
@@ -19,7 +19,7 @@ SphereMesh::SphereMesh(float radius, int stacks, int slices, char *texture, char
   ab[2]='\0';
   ab[1]=a+'0';
   ab[2]=a+'0';
-  hash_name = string("@@Sphere") + "#" + tostring(radius) + "#" + texture + "#" + tostring(stacks) + "#" + tostring(slices) +  ab;
+  hash_name = string("@@Sphere") + "#" + tostring(radius) + "#" + texture + "#" + tostring(stacks) + "#" + tostring(slices) +  ab + "#" + tostring(rho_min) + "#" + tostring(rho_max);
   if (LoadExistant (hash_name.c_str())) {
     return;
   }
@@ -55,8 +55,8 @@ SphereMesh::SphereMesh(float radius, int stacks, int slices, char *texture, char
     int sec=1;//Insideout?0:1;
     vlist = NULL;
     /* Code below adapted from gluSphere */
-    drho = M_PI / (GLfloat) stacks;
-    dtheta = 2.0 * M_PI / (GLfloat) slices;
+    drho = (rho_max-rho_min)/ (GLfloat) stacks;
+    dtheta = (theta_max-theta_min)/ (GLfloat) slices;
     
     ds = 1.0 / slices;
     dt = 1.0 / stacks;
@@ -82,11 +82,11 @@ SphereMesh::SphereMesh(float radius, int stacks, int slices, char *texture, char
       
       for (i = imin; i < imax; i++) {
 	GFXVertex *vertexlist = vl + (i * (slices+1)*2);
-	rho = i * drho;
+	rho = i * drho + rho_min;
 	
 	s = 0.0;
 	for (j = 0; j <= slices; j++) {
-	  theta = (j == slices) ? 0.0 : j * dtheta;
+	  theta = (j == slices) ? theta_min * 2 * M_PI : j * dtheta;
 	  x = -sin(theta) * sin(rho);
 	  y = cos(theta) * sin(rho);
 	  z = nsign * cos(rho);

@@ -56,6 +56,7 @@ struct GFXColor
 	float g;
 	float b;
 	float a;
+	GFXColor() { }
  GFXColor (const Vector &v, float a=1.0) {
     this->r = v.i;
     this->g = v.j;
@@ -77,6 +78,15 @@ struct GFXColor
   }
 };
 
+inline const GFXColor &operator*(float s, const GFXColor&c) {
+	return GFXColor(s *c.r, s*c.g, s*c.b, s*c.a);
+}
+inline const GFXColor &operator*(const GFXColor&c, float s) {
+	return GFXColor(s *c.r, s*c.g, s*c.b, s*c.a);
+}
+inline const GFXColor &operator+(const GFXColor&c0, const GFXColor&c1) {
+	return GFXColor(c0.r+c1.r,c0.g+c1.g,c0.b+c1.b,c0.a+c1.a);
+}
 
 ///This vertex is used for the interleaved array argument for color based arrays T2F_C4F_N3F_V3F 
 struct GFXColorVertex  {
@@ -123,6 +133,7 @@ class GFXLight {
  protected:
   ///physical GL light its saved in
   int target;
+ public:
   ///last is w for positional, otherwise 3 for spec
   float vect[3];
   int options;
@@ -130,6 +141,9 @@ class GFXLight {
   float specular[4];
   float ambient[4];
   float attenuate[3];
+  float direction[3];
+  float exp;
+  float cutoff;
  public:
   GFXLight() {
     //   vect[0]=vect[1]=vect[2]=vect[3]=0;
@@ -140,9 +154,13 @@ class GFXLight {
     ambient[0]=ambient[1]=ambient[2]=options=0;
     diffuse[3]=specular[3]=ambient[3]=1;
     target =-1;//physical GL light its saved in
+
+	direction[0]=direction[1]=direction[2] = 0.0;
+	exp=0.0;
+	cutoff=180.0;
   }
 
-  GFXLight (const bool enabled, const GFXColor &vect, const GFXColor &diffuse= GFXColor (0,0,0,1), const GFXColor &specular=GFXColor (0,0,0,1), const GFXColor &ambient=GFXColor(0,0,0,1), const GFXColor&attenuate=GFXColor(1,0,0));
+  GFXLight (const bool enabled, const GFXColor &vect, const GFXColor &diffuse= GFXColor (0,0,0,1), const GFXColor &specular=GFXColor (0,0,0,1), const GFXColor &ambient=GFXColor(0,0,0,1), const GFXColor&attenuate=GFXColor(1,0,0), const GFXColor &direction=GFXColor(0,0,0), float exp=0.0, float cutoff=180.0);
   
   void SetProperties (enum LIGHT_TARGET, const GFXColor & color);
   void disable ();

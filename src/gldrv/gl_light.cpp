@@ -70,7 +70,8 @@ GFXBOOL /*GFXDRVAPI*/ GFXPopGlobalEffects() {
   return true;
 }	
 
-GFXLight::GFXLight (const bool enabled,const GFXColor &vect, const GFXColor &diffuse, const GFXColor &specular, const GFXColor &ambient, const GFXColor &attenuate) {
+GFXLight::GFXLight (const bool enabled,const GFXColor &vect, const GFXColor &diffuse, const GFXColor &specular, const GFXColor &ambient, const GFXColor &attenuate,
+					const GFXColor &direction, float exp, float cutoff) {
   target = -1;
   options = 0;
   memcpy (this->vect,&vect,sizeof(float)*3);
@@ -78,6 +79,9 @@ GFXLight::GFXLight (const bool enabled,const GFXColor &vect, const GFXColor &dif
   memcpy (this->specular,&specular,sizeof(float)*4);
   memcpy (this->ambient,&ambient,sizeof(float)*4);
   memcpy (this->attenuate,&attenuate,sizeof(float)*3);
+  memcpy (this->direction,&direction,sizeof(this->direction));
+  this->exp=exp;
+  this->cutoff=cutoff;
   apply_attenuate (attenuated());
   if (enabled)
     this->enable();
