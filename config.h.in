@@ -36,6 +36,9 @@
 /* Define if you have the strdup function.  */
 #undef HAVE_STRDUP
 
+/* Define if you have the <AL/alext.h> header file.  */
+#undef HAVE_AL_ALEXT_H
+
 /* Define if you have the <GL/glext.h> header file.  */
 #undef HAVE_GL_GLEXT_H
 

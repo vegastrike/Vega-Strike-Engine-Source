@@ -546,9 +546,6 @@ for OPENAL_LIB_NAME in $OPENAL_LIB_LIST ; do
     fi
 done
 
-if test "x$have_openal_lib" = "xno" ; then
-    AC_MSG_ERROR([Openal library not found])
-fi
 
 LIBS="$saved_LIBS"
 TR_LIBS="$TR_LIBS $OPENAL_LDOPTS -l$OPENAL_LIB_NAME"
@@ -586,15 +583,18 @@ if test "x$have_al_h" = "xno" -a "x$AL_CPPFLAGS" = "x" ; then
     AL_CPPFLAGS="-I/usr/local/include"
     CHECK_FOR_AL_H
 fi
-
-if test "x$have_al_h" = "xno" ; then
-    echo "Cannot find AL/al.h"
+if test "x$have_openal_lib" = "xno" ; then
+    echo "Cannot find openal library"
     echo "Error::Configuring without OpenAL support!"
 else
-    echo "Configuring with OpenAL support!"
-    TR_CPPFLAGS="$TR_CPPFLAGS -DHAVE_AL=1"    
+    if test "x$have_al_h" = "xno" ; then
+        echo "Cannot find AL/al.h"
+        echo "Error::Configuring without OpenAL support!"
+    else
+        echo "Configuring with OpenAL support!"
+        TR_CPPFLAGS="$TR_CPPFLAGS -DHAVE_AL=1"    
+    fi
 fi
-
 dnl Check for alext.h 
 AC_CHECK_HEADERS( "AL/alext.h", have_alext_h=yes, have_alext_h=no )
 
