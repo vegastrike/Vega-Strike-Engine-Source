@@ -27,6 +27,7 @@ class Missile:public Unit {
   float radial_multiplier;
   float detonation_radius;
   bool discharged;
+  signed char retarget;
  public:
   void Discharge();
   virtual enum clsptr isUnit() {return MISSILEPTR;}
@@ -50,6 +51,7 @@ protected:
         , radial_multiplier (radmult)
         , detonation_radius(detonation_radius)
         , discharged(false)
+        , retarget (-1)
     { }
 
   friend class UnitFactory;

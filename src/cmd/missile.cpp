@@ -65,13 +65,47 @@ void Missile::reactToCollision (Unit * smaller, const QVector & biglocation, con
     DealDamageToHull (smalllocation.Cast(),hull+1);//should kill, applying addmissile effect
   
 }
-
+static Unit * getNearestTarget (Unit *me) {
+  QVector pos (me->Position());
+  Unit * un=NULL;
+  Unit * targ=NULL;
+  double minrange=FLT_MAX;
+  for (un_iter i=_Universe->activeStarSystem()->getUnitList().createIterator();
+       (un=(*i));
+       ++i) {
+         if (un==me)
+           continue;
+         if (un->isUnit()!=UNITPTR) {
+            continue;     
+         }
+         double temp= (un->Position()-pos).Magnitude()-un->rSize();
+         if (targ==NULL) {
+            targ = un;
+            minrange = temp;
+         }else {
+           if (temp<minrange) {
+              targ = un;
+           }
+         }
+       }
+    return targ;
+}
 void Missile::UpdatePhysics (const Transformation &trans, const Matrix &transmat, const Vector & CumulativeVelocity, bool ResolveLast, UnitCollection *uc){
     Unit * targ;
     if ((targ=Target())) {
       if (rand()/((float)RAND_MAX)<((float)targ->GetImageInformation().ecm)*SIMULATION_ATOM/32768){
 	Target (this);//go wild
       }
+    }
+    if (retarget==-1){
+      if (targ) {
+        retarget=1;
+      }else {
+        retarget=0;
+      }
+    }
+    if (retarget&&targ==NULL) {
+      Target (getNearestTarget (this));
     }
     Unit::UpdatePhysics (trans, transmat, CumulativeVelocity, ResolveLast, uc);
     this->time-=SIMULATION_ATOM;

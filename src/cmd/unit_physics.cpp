@@ -503,7 +503,10 @@ void Unit::UpdatePhysics (const Transformation &trans, const Matrix &transmat, c
   bool locking=false;
   bool touched=false;
   for (i=0;i<nummounts;i++) {
-    if (mounts[i].status==Mount::ACTIVE&&cloaking<0&&mounts[i].ammo!=0) {
+//    if (increase_locking&&cloaking<0) {
+//      mounts[i].time_to_lock-=SIMULATION_ATOM;
+//    }
+    if (mounts[i].status==Mount::ACTIVE&&cloaking<0) {
       if (player_cockpit) {
 	  touched=true;
       }
@@ -512,7 +515,7 @@ void Unit::UpdatePhysics (const Transformation &trans, const Matrix &transmat, c
 	static bool ai_lock_cheat=XMLSupport::parse_bool(vs_config->getVariable ("physics","ai_lock_cheat","true"));	
 	if (!player_cockpit) {
 	  if (ai_lock_cheat) {
-	    mounts[i].time_to_lock=0;
+	    mounts[i].time_to_lock=-1;
 	  }
 	}else {
 
