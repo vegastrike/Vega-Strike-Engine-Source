@@ -9,6 +9,11 @@
 #include <float.h>
 #include <assert.h>
 #include "ani_texture.h"
+#ifndef _WIN32
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+#endif
 #if !defined(_WIN32) && !(defined(__APPLE__) || defined(MACOSX)) && !defined(BSD)
 #include <values.h>
 #endif
@@ -1151,7 +1156,100 @@ void updateMax (Vector &mn, Vector & mx, const GFXVertex &ver) {
 }
 
 using namespace VSFileSystem;
+void LaunchConverter(const char * input, const char * output, const char* args="obc") {
+#ifndef _WIN32
+    int pid=fork();
+    if (!pid) {
+      string soundserver_path = VSFileSystem::datadir+"/mesher";
+      pid=execlp(soundserver_path.c_str() , soundserver_path.c_str(),input,output,args,NULL);
+      soundserver_path = VSFileSystem::datadir+"/bin/mesher";
+      pid=execlp(soundserver_path.c_str() , soundserver_path.c_str(),input,output,args,NULL);
+      VSFileSystem::vs_fprintf(stderr,"Unable to spawn converter\n");
+      exit (-1);
+    } else {
+      if (pid==-1) {
+        VSFileSystem::vs_fprintf(stderr,"Unable to spawn converter\n");
+        exit (-1);        
+      }
+      int mystat=0;
+      waitpid(pid,&mystat,0);
+    }
+#else
+  string ss_path = VSFileSystem::datadir+"/mesher.exe";
+  int pid=spawnl(P_WAIT,ss_path.c_str(),ss_path.c_str(),input,output,args,NULL);
+  if (pid==-1) {
+    ss_path = VSFileSystem::datadir+"/bin/mesher.exe";
+    int pid=spawnl(P_WAIT,ss_path.c_str(),ss_path.c_str(),input,output,args,NULL);
+    if (pid==-1) {
+      VSFileSystem::vs_fprintf(stderr,"Unable to spawn obj converter Error (%d)\n",pid);
+    }
+  }
+#endif
+}
+bool isBFXM(VSFile & f) {
+  char bfxm[4];
+  f.Read(&bfxm[0],1);
+  f.Read(&bfxm[1],1);
+  f.Read(&bfxm[2],1);
+  f.Read(&bfxm[3],1);
+  f.GoTo(0);
+  return (bfxm[0]=='B'&&bfxm[1]=='F'&&bfxm[2]=='X'&&bfxm[3]=='M');
+}
+void CopyFile (VSFile &src, VSFile &dst) {
+  size_t hm;
+  size_t srcstruct;
+  size_t * srcptr = &srcstruct;
+  while (hm = src.Read(srcptr,sizeof(srcstruct))) {
+    dst.Write(srcptr,hm);
+  }
+}
+bool loadObj(VSFile &f, std::string str) {
+  string fullpath = f.GetFullPath();
+  VSFile output;
+  output.OpenCreateWrite("output.bfxm",BSPFile);
+  output.Close();
+  output.OpenReadOnly("output.bfxm",BSPFile);
+  string outputpath = output.GetFullPath();
+  output.Close();
+  LaunchConverter(fullpath.c_str(),outputpath.c_str());
+  output.OpenReadOnly("output.bfxm",BSPFile);
+  if (isBFXM(output)) {
+    output.Close();
+    f.Close();
+    f.OpenReadOnly("output.bfxm",BSPFile);
+    return true;
+  }else {
+    output.Close();
+  }
+  VSFile input;
+  input.OpenCreateWrite("input.obj",BSPFile);
+  f.GoTo(0);
+  CopyFile(f,input);
+  input.Close();
+  input.OpenReadOnly("input.obj",BSPFile);
+  string inputpath = input.GetFullPath();  
+  input.Close();
 
+  f.Close();
+  int where = str.find_last_of(".");
+  str = str.substr(0,where)+".mtl";
+  f.OpenReadOnly(str,MeshFile);
+  VSFile inputmtl;
+  inputmtl.OpenCreateWrite("input.mtl",BSPFile);
+  CopyFile(f,inputmtl);
+  f.Close();
+  inputmtl.Close();
+  LaunchConverter(inputpath.c_str(),outputpath.c_str());  
+  output.OpenReadOnly("output.bfxm",BSPFile);
+  if (isBFXM(output)) {
+    output.Close();
+    f.OpenReadOnly("output.bfxm",BSPFile);
+    return true;
+  }else {
+    output.Close();
+  }
+  return false;
+}
 const bool USE_RECALC_NORM=true;
 const bool FLAT_SHADE=true;
 Mesh * Mesh::LoadMesh (const char * filename, const Vector & scale, int faction, Flightgroup * fg){
@@ -1205,7 +1303,16 @@ vector <Mesh*> Mesh::LoadMeshes(const char * filename, const Vector &scale, int 
   f.Read(&bfxm[1],1);
   f.Read(&bfxm[2],1);
   f.Read(&bfxm[3],1);
-  if (bfxm[0]=='B'&&bfxm[1]=='F'&&bfxm[2]=='X'&&bfxm[3]=='M'){
+  bool isbfxm = (bfxm[0]=='B'&&bfxm[1]=='F'&&bfxm[2]=='X'&&bfxm[3]=='M');
+  if (isbfxm||strstr(filename,".obj")){    
+    if (!isbfxm) {
+      if (!loadObj(f,filename)) {
+	VSFileSystem::vs_fprintf (stderr,"Cannot Open Mesh File %s\n",filename);
+	cleanexit=1;
+	winsys_exit(1);
+	return vector<Mesh*>();        
+      }
+    }
     f.GoTo(0);
     hash_name =(err==VSFileSystem::Shared)?VSFileSystem::GetSharedMeshHashName (filename,scale,faction):VSFileSystem::GetHashName(filename,scale,faction);
     vector <Mesh*> retval (LoadMeshes(f,scale,faction,fg,hash_name));
