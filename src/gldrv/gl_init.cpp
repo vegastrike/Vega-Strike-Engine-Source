@@ -183,26 +183,15 @@ void init_opengl_extensions()
 #if defined(CG_SUPPORT)
 	if(! glh_init_extensions(CG_REQUIRED_EXTENSIONS))
 	{
-		cerr << "Necessary OpenGL extensions were not supported:" << endl
+		cerr << "Necessary OpenGL extensions for Cg were not supported:" << endl
 			 << glh_get_unsupported_extensions() << endl << endl
 			 << "Press <enter> to quit." << endl;
 		char buff[10];
 		cin.getline(buff, 10);
 		winsys_exit(0);
 	}
-    if (cgGLIsProfileSupported(CG_PROFILE_VP30))
-        cloak_cg->vertexProfile = CG_PROFILE_VP30;
-    else if (cgGLIsProfileSupported(CG_PROFILE_ARBVP1))
-        cloak_cg->vertexProfile = CG_PROFILE_ARBVP1;
-    else if (cgGLIsProfileSupported(CG_PROFILE_VP20))
-        cloak_cg->vertexProfile = CG_PROFILE_VP20;
-    else
-    {
-        printf("Vertex programming extensions (GL_ARB_vertex_program or "
-               "GL_NV_vertex_program) not supported, exiting...\n");
-        winsys_exit(0);
-    }
 
+cloak_cg->vertexProfile = CG_PROFILE_ARBVP1;
 cloak_cg->shaderContext = cgCreateContext();
 cloak_cg->cgLoadMedia("programs/cloaking_effect", "vertex.cg");
 #endif
