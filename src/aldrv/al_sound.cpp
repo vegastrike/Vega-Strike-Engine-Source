@@ -301,7 +301,7 @@ void AUDAdjustSound (const int sound, const QVector &pos, const Vector &vel){
   }
 #endif
 }
-void AUDSoundGain (const int sound, const float gain) {
+void AUDSoundGain (int sound, float gain) {
 #ifdef HAVE_AL
   if (sound>=0&&sound<(int)sounds.size()&&sounds[sound].source) {
     alSourcef(sounds[sound].source,AL_GAIN,gain);
