@@ -1,3 +1,8 @@
+2002-02-08 Daniel Horn <hellcatv@hotmail.com>
+	* Added Day/Year tag to system
+	* Removed velocity tag from system (besides it should have been speed...misleading)
+	* Added ability to slow down simulations in other star systems so they won't bog down the game
+	
 2002-02-07 Daniel Horn <hellcatv@hotmail.com>
 	* Completed VIEW VDU segment
 	* Completed Asteroids that don't crash with anything but units
