@@ -26,7 +26,8 @@ vector <char *> ParseDestinations (const string &value) {
 			tmp[tmp.size()-1][k]=value[k+j-i];
 		}
 		tmp[tmp.size()-1][i]='\0';
-		j++;
+		if (value[j]!=0)
+			j++;
 	}
 	return tmp;
 }
@@ -386,3 +387,4 @@ void StarSystem::LoadXML(const char *filename) {
 
   delete xml;
 }
+
