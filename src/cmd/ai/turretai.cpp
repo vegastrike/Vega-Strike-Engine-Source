@@ -45,7 +45,8 @@ void TurretAI::Execute () {
       double mag = Pos.Magnitude();
       Pos=Pos/mag;
       float dot = R.Dot (Pos.Cast());
-      bool shouldfire = ((mag-targ->rSize()-parent->rSize()<range&&dot>dot_cutoff)&&(GetEffectiveRelationship(targ)<0||targ->getRelation(parent)<0));
+      static int neu=FactionUtil::GetFaction("neutral");
+      bool shouldfire = ((mag-targ->rSize()-parent->rSize()<range&&dot>dot_cutoff)&&(GetEffectiveRelationship(targ)<0||targ->getRelation(parent)<0)&&targ->faction!=neu);
       parent->Fire(FireBitmask(parent,shouldfire,missile_prob),true);
       if (!shouldfire)
 	parent->UnFire();
