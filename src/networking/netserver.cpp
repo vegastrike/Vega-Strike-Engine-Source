@@ -145,10 +145,7 @@ void	NetServer::sendLoginAccept( Client * clt, AddressIP ipadr, int newacct)
 	memcpy( &clt->cltadr, &ipadr, sizeof( AddressIP));
 	clt->callsign = callsign;
 	clt->passwd = passwd;
-	if( !acctserver)
-		cltserial = getUniqueSerial();
-	else
-		cltserial = packeta.getSerial();
+	cltserial = getUniqueSerial();
 
 	COUT << "LOGIN REQUEST SUCCESS for <" << callsign << ">" << endl;
 	// Verify that client already has a character
@@ -598,8 +595,8 @@ void	NetServer::start(int argc, char **argv)
 		  static unsigned int numrunningsystems = XMLSupport::parse_int (vs_config->getVariable ("physics","NumRunningSystems","4"));
 		  float systime=nonactivesystemtime;
 		  
-			for (i=0;i<_Universe->star_system.size()&&i<numrunningsystems;i++) {
-			_Universe->star_system[i]->Update((i==0)?1:systime/i,true);
+		  for (i=0;i<_Universe->star_system.size()&&i<numrunningsystems;i++) {
+			//_Universe->star_system[i]->Update((i==0)?1:systime/i,true);
 		  }
 		  StarSystem::ProcessPendingJumps();
 		/****************************** VS STUFF TO DO ************************************/
@@ -1174,6 +1171,7 @@ void	NetServer::addClient( Client * clt)
 	string savestr, xmlstr;
 	NetBuffer netbuf;
 	StarSystem * sts;
+	StarSystem * st2;
 
 	QVector safevec;
 	Cockpit * cp = _Universe->isPlayerStarship( un);
@@ -1184,8 +1182,11 @@ void	NetServer::addClient( Client * clt)
 	// If we return an existing starsystem we broadcast our info to others
 	sts=zonemgr->addClient( clt, starsys, zoneid);
 
+	st2 = _Universe->getStarSystem( starsys+".system");
+	// On server side this is not done in Cockpit::SetParent()
+	cp->activeStarSystem = st2;
 	// Cannot use sts pointer since it may be NULL if the system was just created
-	safevec = UniverseUtil::SafeStarSystemEntrancePoint( _Universe->getStarSystem( starsys+".system"), cp->savegame->GetPlayerLocation(), clt->game_unit.GetUnit()->radial_size);
+	safevec = UniverseUtil::SafeStarSystemEntrancePoint( st2, cp->savegame->GetPlayerLocation(), clt->game_unit.GetUnit()->radial_size);
 	cout<<"\tposition : x="<<safevec.i<<" y="<<safevec.j<<" z="<<safevec.k<<endl;
 	cp->savegame->SetPlayerLocation( safevec);
 	// UPDATE THE CLIENT Unit's state
@@ -1288,7 +1289,7 @@ void	NetServer::disconnect( Client * clt, const char* debug_from_file, int debug
 	if( acctserver)
 	{
 		// Send a disconnection info to account server
-		netbuf.addString( clt->name);
+		netbuf.addString( clt->callsign);
 		netbuf.addString( clt->passwd);
 		Packet p2;
 		if( p2.send( CMD_LOGOUT, un->GetSerial(), netbuf.getData(), netbuf.getDataLength(),
@@ -1363,8 +1364,9 @@ void	NetServer::logout( Client * clt)
 	if( acctserver)
 	{
 		// Send a disconnection info to account server
-		netbuf.addString( clt->name);
+		netbuf.addString( clt->callsign);
 		netbuf.addString( clt->passwd);
+		cout<<"Loggin out "<<clt->name<<":"<<clt->passwd<<endl;
 		Packet p2;
 		if( p2.send( CMD_LOGOUT, un->GetSerial(), netbuf.getData(), netbuf.getDataLength(),
 		             SENDRELIABLE, NULL, acct_sock, __FILE__,

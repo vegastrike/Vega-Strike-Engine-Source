@@ -27,6 +27,7 @@ StarSystem *	ZoneMgr::addZone( string starsys)
 {
 	cout<<">>> ADDING A NEW ZONE = "<<starsys<<" - # OF ZONES = "<<_Universe->star_system.size()<<endl;
 	list<Client *> lst;
+	list<Unit *> ulst;
 	StarSystem * sts=NULL;
 	// Generate the StarSystem
 	string starsysfile = starsys+".system";
@@ -36,8 +37,10 @@ StarSystem *	ZoneMgr::addZone( string starsys)
 	//_Universe->pushActiveStarSystem( sts);
 	// Add an empty list of clients to the zone_list vector
 	zone_list.push_back( lst);
+	zone_unitlist.push_back( ulst);
 	// Add zero as number of clients in zone since we increment in ZoneMgr::addClient()
 	zone_clients.push_back( 0);
+	zone_units.push_back( 0);
 	cout<<"<<< NEW ZONE ADDED - # OF ZONES = "<<_Universe->star_system.size()<<endl;
 	return sts;
 }

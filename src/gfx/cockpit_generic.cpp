@@ -92,7 +92,8 @@ void Cockpit::SetParent (Unit * unit, const char * filename, const char * unitmo
   if (unit->getFlightgroup()!=NULL) {
     fg = unit->getFlightgroup();
   }
-  activeStarSystem= _Universe->activeStarSystem();//cannot switch to units in other star systems.
+  if( !SERVER)
+  	activeStarSystem= _Universe->activeStarSystem();//cannot switch to units in other star systems.
   parent.SetUnit (unit);
   savegame->SetPlayerLocation(pos);
   if (filename[0]!='\0') {

@@ -383,7 +383,8 @@ void	AccountServer::recvMsg( SOCKETALT sock)
 void	AccountServer::sendAuthorized( SOCKETALT sock, Account * acct)
 {
 	// Get a serial for client
-	ObjSerial serial = getUniqueSerial();
+	//ObjSerial serial = getUniqueSerial();
+	ObjSerial serial = 0;
 	acct->setSerial( serial);
 	cout<<"\tLOGIN REQUEST SUCCESS for <"<<acct->callsign<<">:<"<<acct->passwd<<">"<<endl;
 	// Store socket as a game server id

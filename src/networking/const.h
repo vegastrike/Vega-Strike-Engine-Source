@@ -129,18 +129,19 @@ public: \
 #else
 #define LOCALCONST_DECL(Type,Name,Value) static Type Name;
 #define LOCALCONST_DEF(Class,Type,Name,Value) Type Class::Name = Value;
-#endif
 
-#ifndef __PRETTY_FUNCTION__
+#ifndef __PRETTY_FUNCTION
 #define __PRETTY_FUNCTION__ "<Unknown>"
 #endif
 
-#ifndef __FUNCTION__
+#ifndef __FUNCTION
 #define __FUNCTION__ "<Unknown>"
 #endif
 
 #ifndef __LINE__
 #define __LINE__ "<Unknown>"
+#endif
+
 #endif
 
 #endif /* __CONST_H */
