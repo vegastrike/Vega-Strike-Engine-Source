@@ -254,7 +254,7 @@ void VDU::DrawVDUShield (Unit * parent, const GFXColor &c) {
   DrawShield (armor[0]/(float)StartArmor[0],armor[2]/(float)StartArmor[2],armor[3]/(float)StartArmor[3],armor[1]/(float)StartArmor[1],x,y,h/2,w/2);
   GFXColor4f (1,1,1,1);
   GFXEnable (TEXTURE0);
-  GFXColor4f (0,parent->GetHull()/(*maxhull),.5*parent->GetHull()/(*maxhull),1);
+  GFXColor4f (1-parent->GetHull()/(*maxhull),.5*parent->GetHull()/(*maxhull),0,1);
   DrawTargetSpr (parent->getHudImage (),.25,x,y,w,h);
 
 }
@@ -495,7 +495,7 @@ void VDU::DrawDamage(Unit * parent, const GFXColor &c) {
     strncat (st,qr,128);
   }
   tp->Draw (MangleString (st+k,_Universe->AccessCamera()->GetNebula()!=NULL?.5:0),0);  
-  GFXColor4f (parent->GetHull()/ (*maxhull),1,parent->GetHull()/(*maxhull),1);
+  GFXColor4f (1,parent->GetHull()/ (*maxhull),parent->GetHull()/(*maxhull),1);
   GFXEnable (TEXTURE0);
   DrawTargetSpr (parent->getHudImage (),.6,x,y,w,h);
 
