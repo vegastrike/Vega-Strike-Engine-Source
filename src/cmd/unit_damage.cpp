@@ -22,7 +22,7 @@
 #include "cmd/script/flightgroup.h"
 #include "music.h"
 //#define DESTRUCTDEBUG
-
+#include "base.h"
 extern unsigned short apply_float_to_short (float tmp);
 
 static list<Unit*> Unitdeletequeue;
@@ -398,11 +398,12 @@ bool GameUnit::Explode (bool drawit, float timeit) {
 			static float badrel=XMLSupport::parse_float(vs_config->getVariable("sound","loss_relationship","-.1"));
 			static float goodrel=XMLSupport::parse_float(vs_config->getVariable("sound","victory_relationship",".5"));
 			float rel=un->getRelation(this);
-			if (rel>goodrel) {
-			  muzak->SkipRandSong(Music::LOSSLIST);
-			} else if (rel < badrel) {
-			  muzak->SkipRandSong(Music::VICTORYLIST);
-			}
+			if (!Base::CurrentBase)
+			  if (rel>goodrel) {
+			    muzak->SkipRandSong(Music::LOSSLIST);
+			  } else if (rel < badrel) {
+			    muzak->SkipRandSong(Music::VICTORYLIST);
+			  }
 		  } else {
 			muzak->SkipRandSong(Music::LOSSLIST);
 		  }
