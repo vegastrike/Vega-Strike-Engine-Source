@@ -161,7 +161,7 @@ void StarSystem::ProcessPendingJumps() {
       kk--;
       continue;
     }
-    bool dosightandsound = ((pendingjump[kk]->orig==savedStarSystem)||un==_Universe->AccessCockpit()->GetParent());
+    bool dosightandsound = ((pendingjump[kk]->dest==savedStarSystem)||un==_Universe->AccessCockpit()->GetParent());
     _Universe->setActiveStarSystem (pendingjump[kk]->orig);
     if (pendingjump[kk]->orig->RemoveUnit (un)) {
 #ifdef JUMP_DEBUG
