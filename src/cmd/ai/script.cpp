@@ -13,7 +13,7 @@
 
 
 typedef std::map<string,CCScript *> HardCodedMap;
-HardCodedMap MakeHardCodedScripts() {
+static HardCodedMap MakeHardCodedScripts() {
   HardCodedMap tmp;
   typedef pair<string, CCScript *> MyPair;
   tmp.insert (MyPair ("loop around fast",&LoopAroundFast));
@@ -56,6 +56,9 @@ HardCodedMap MakeHardCodedScripts() {
 }
 
 static HardCodedMap hard_coded_scripts= MakeHardCodedScripts(); 
+bool validateHardCodedScript(std::string s) {
+  return hard_coded_scripts.find(s)!=hard_coded_scripts.end();
+}
 struct AIScriptXML {
   int unitlevel;
   int acc;

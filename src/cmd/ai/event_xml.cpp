@@ -10,6 +10,7 @@
 #include "vsfilesystem.h"
 #include "vs_globals.h"
 #include "configxml.h"
+extern bool validateHardCodedScript(std::string s);
 //serves to run through a XML file that nests things for "and". 
 
 
@@ -32,6 +33,16 @@ namespace AIEvents {
 
 	 this->script = aiscript;
 
+         if (!validateHardCodedScript(this->script)) {
+           static int aidebug = XMLSupport::parse_int(vs_config->getVariable("AI","debug_level","0"));
+           if (aidebug) {
+             for (int i=0;i<10;++i) {               
+               printf ("SERIOUS WARNING %s\n",this->script.c_str());
+               fprintf (stderr,"SERIOUS WARNING: %s\n",this->script.c_str());
+             }
+           }
+           printf ("SERIOUS WARNING in AI script: no fast method to perform %s\nwhen type %d is at least %f and at most %f with priority %f for %f time\n",this->script.c_str(),type,min,max,priority,timetofinish);
+         }
   }
 
   const int  AIUNKNOWN=0;
