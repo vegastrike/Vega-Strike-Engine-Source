@@ -1613,7 +1613,7 @@ void GameCockpit::RestoreViewPort() {
 
 static void ShoveCamBehindUnit (int cam, Unit * un, float zoomfactor) {
   QVector unpos = un->GetPlanetOrbit()?un->LocalPosition():un->Position();
-  _Universe->AccessCamera(cam)->SetPosition(unpos-_Universe->AccessCamera()->GetR().Cast()*un->rSize()*zoomfactor);
+  _Universe->AccessCamera(cam)->SetPosition(unpos-_Universe->AccessCamera()->GetR().Cast()*un->rSize()*zoomfactor,un->GetVelocity());
 }
 void GameCockpit::SetupViewPort (bool clip) {
   _Universe->AccessCamera()->RestoreViewPort (0,(view==CP_FRONT?viewport_offset:0));

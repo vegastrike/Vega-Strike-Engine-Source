@@ -44,10 +44,15 @@ void StarVlist::BeginDrawState (const QVector &center, const Vector & velocity) 
 	Vector newcamr = _Universe->AccessCamera()->GetR();
     Vector camr_delta(newcamr-camr);
 	camr = newcamr;
-	static float velstreakscale= XMLSupport::parse_float (vs_config->getVariable ("graphics","velocity_star_streak_scale","100"));
+	static float velstreakscale= XMLSupport::parse_float (vs_config->getVariable ("graphics","velocity_star_streak_scale","5"));
 
 	Vector vel (-velocity*velstreakscale);
-   	
+//   	float temp = vel.Magnitude();
+//	if (temp>.01) {
+//		if (_Universe->AccessCockpit()->GetParent()) {
+//			vel = vel.Scale(_Universe->AccessCockpit()->GetParent()->GetVelocity().Magnitude()/temp);
+//		}
+//	}
 	GFXColorMaterial(AMBIENT|DIFFUSE);
 	GFXColorVertex * v = vlist->BeginMutate(0)->colors;
 	int numvertices = vlist->GetNumVertices();
@@ -109,7 +114,7 @@ void Stars::Draw() {
     GFXDisable (LIGHTING);
   }
   QVector newcampos =_Universe->AccessCamera()->GetPosition();
-  vlist.BeginDrawState(_Universe->AccessCamera()->GetR().Scale(-spread).Cast(),(newcampos-campos).Cast());
+  vlist.BeginDrawState(_Universe->AccessCamera()->GetR().Scale(-spread).Cast(),_Universe->AccessCamera()->GetVelocity());
   campos = newcampos;
   for (int i=0;i<STARnumvlist;i++) {
     if (i>=1)

@@ -32,6 +32,7 @@ class Nebula;
 class Camera{
   
 	QVector Coord;
+	Vector velocity;
 	Matrix planetview;
 	GFXBOOL changed;
 	QVector lastpos;
@@ -70,7 +71,7 @@ public:
 	Matrix * GetPlanetGFX();
 	void UpdateGLCenter();
 
-	void SetPosition(const QVector &origin);
+	void SetPosition(const QVector &origin, const Vector & velocity);
 	void GetPosition(QVector &vect) {vect=Coord;}
 	Vector GetVelocity ();
 	void GetOrientation(Vector &p, Vector &q, Vector &r) {p=P;q=Q;r=R;}

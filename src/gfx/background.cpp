@@ -237,17 +237,19 @@ void Background::Draw()
   //  GFXLoadIdentity(MODEL);
   //GFXTranslate (MODEL,_Universe->AccessCamera()->GetPosition()); 
   GFXCenterCamera (true);
-  GFXEnable(DEPTHWRITE);
+//  GFXEnable(DEPTHWRITE);
   GFXDisable (TEXTURE0);
   GFXDisable (LIGHTING);
   GFXColor (1,1,1,1);
   GFXDisable (TEXTURE1);
+  GFXDisable(DEPTHWRITE);
   GFXBlendMode(ONE,ONE);
   stars.BeginDrawState(QVector(0,0,0), Vector(0,0,0));
   stars.Draw();
   stars.EndDrawState();
   GFXBlendMode(ONE,ZERO);
   GFXEnable (DEPTHTEST);
+  GFXEnable(DEPTHWRITE);
   GFXCenterCamera(false);
   //  _Universe->AccessCamera()->UpdateGFX(false);
 
