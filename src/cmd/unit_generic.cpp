@@ -1839,8 +1839,9 @@ bool Unit::AutoPilotTo (Unit * target, bool ignore_energy_requirements, int recu
       Vector v(GetVelocity());
       v.Normalize();
       Vector p,q,r;GetOrientation(p,q,r);
-      UniverseUtil::playAnimationGrow (insys_jump_ani,sep+v*rSize(),rSize()*8,.97);
-      UniverseUtil::playAnimationGrow (insys_jump_ani,sep+2*v*rSize()+r*4*rSize(),rSize()*16,.97);
+	  float sec = XMLSupport::parse_float(vs_config->getVariable("graphics","insys_jump_ani_second_ahead","1.5"));
+      UniverseUtil::playAnimationGrow (insys_jump_ani,sep+GetVelocity()*sec+v*rSize(),rSize()*8,.97);
+      UniverseUtil::playAnimationGrow (insys_jump_ani,sep+GetVelocity()*sec+2*v*rSize()+r*4*rSize(),rSize()*16,.97);
     }
     static bool warptrail = XMLSupport::parse_bool (vs_config->getVariable ("graphics","warp_trail","true"));
     if (warptrail&&(!nowhere)) {
@@ -2424,12 +2425,35 @@ Vector Unit::ResolveForces (const Transformation &trans, const Matrix &transmat)
   if (!(FINITE(temp2.i)&&FINITE(temp2.j)&&FINITE(temp2.k))) {
 	  cout << "NetForce transform skrewed";
   }
-
+  float oldmagsquared = Velocity.MagnitudeSquared();
   /*if (FINITE(temp.i)&&FINITE (temp.j)&&FINITE(temp.k)) */{	//FIXME
     Velocity += temp;
   }
-    static float air_res_coef =XMLSupport::parse_float (active_missions[0]->getVariable ("air_resistance","0"));
-    static float lateral_air_res_coef =XMLSupport::parse_float (active_missions[0]->getVariable ("lateral_air_resistance","0"));
+  float newmagsquared = Velocity.MagnitudeSquared();
+  static float warpstretchcutoff= XMLSupport::parse_float (vs_config->getVariable( "graphics","warp_stretch_cutoff","500000"));
+  static float cutsqr = warpstretchcutoff*warpstretchcutoff;
+  bool oldbig = oldmagsquared>cutsqr;
+  bool newbig = newmagsquared>cutsqr;
+  if (oldbig!=newbig) {
+	  static string insys_jump_ani = vs_config->getVariable ("graphics","insys_jump_animation","warp.ani");
+	  static bool docache=true;
+	  if (docache){
+		  UniverseUtil::cacheAnimation (insys_jump_ani);
+		  docache=false;
+	  }
+
+      Vector v(GetVelocity());
+      v.Normalize();
+      Vector p,q,r;GetOrientation(p,q,r);
+	  static float sec = XMLSupport::parse_float(vs_config->getVariable("graphics","insys_jump_ani_second_ahead",".5"));
+      UniverseUtil::playAnimationGrow (insys_jump_ani,RealPosition(this).Cast()+GetVelocity()*sec+v*rSize(),rSize()*8,1);
+//      UniverseUtil::playAnimationGrow (insys_jump_ani,RealPosition(this).Cast()+GetVelocity()*sec+2*v*rSize()+r*4*rSize(),rSize()*16,.97);
+	  
+	  
+  }
+  
+  static float air_res_coef =XMLSupport::parse_float (active_missions[0]->getVariable ("air_resistance","0"));
+  static float lateral_air_res_coef =XMLSupport::parse_float (active_missions[0]->getVariable ("lateral_air_resistance","0"));
     
     if (air_res_coef||lateral_air_res_coef) {
       float velmag = Velocity.Magnitude();
