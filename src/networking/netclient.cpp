@@ -142,6 +142,62 @@ int		NetClient::authenticate()
 }
 
 /*************************************************************/
+/**** Packet recpetion loop                               ****/
+/*************************************************************/
+
+bool	NetClient::PacketLoop( Cmd command)
+{
+	Packet packet;
+	bool timeout = false;
+	bool recv = false;
+
+	cout<<"Enter NetClient::PacketLoop"<<endl;
+
+	string packet_tostr = vs_config->getVariable( "network", "packettimeout", "10" );
+	int packet_to = atoi( packet_tostr.c_str());
+
+	double initial = getNewTime();
+	double newtime=0;
+	double elapsed=0;
+	int ret;
+	while( !timeout && !recv)
+	{
+		// If we have no response in "login_to" seconds -> fails
+		UpdateTime();
+		newtime = getNewTime();
+		elapsed = newtime-initial;
+		//cout<<elapsed<<" seconds since login request"<<endl;
+		if( elapsed > packet_to)
+		{
+			cout<<"Timed out"<<endl;
+			timeout = true;
+		}
+		ret=this->checkMsg( NULL, &packet );
+		if( ret>0)
+		{
+			if( packet.getCommand() == command)
+				cout<<"Got a response with corresponding command"<<endl;
+			else
+			{
+				cout<<"Got a response with unexpected command : ";
+				displayCmd( packet.getCommand());
+				cout<<endl<<"!!! PROTOCOL ERROR -> EXIT !!!"<<endl;
+				cleanup();
+			}
+			recv = true;
+		}
+		else if( ret<0)
+		{
+			cout<<"!!! Error, dead connection to server -> EXIT !!!"<<endl;
+			cleanup();
+		}
+
+		micro_sleep( 40000);
+	}
+	return recv;
+}
+
+/*************************************************************/
 /**** Login loop                                          ****/
 /*************************************************************/
 
@@ -517,7 +573,10 @@ int NetClient::recvMsg( char* netbuffer, Packet* outpacket )
 				mis = netbuf.getSerial();
 				// Find the unit
 				//Unit * un = zonemgr->getUnit( packet.getSerial(), zone);
-				un = UniverseUtil::GetUnitFromSerial( p1.getSerial());
+				if( mis==this->serial) // WE have fired and receive the broadcast
+					un = this->game_unit.GetUnit();
+				else
+					un = UniverseUtil::GetUnitFromSerial( p1.getSerial());
 				if( un!=NULL)
 				{
 					// Set the concerned mount as ACTIVE and others as INACTIVE
@@ -535,6 +594,8 @@ int NetClient::recvMsg( char* netbuffer, Packet* outpacket )
 					else
 						un->Fire(ROLES::EVERYTHING_ELSE|ROLES::FIRE_GUNS,false);
 				}
+				else
+					cout<<"!!! Problem -> CANNOT FIRE UNIT NOT FOUND !!!"<<endl;
 
 			break;
 			case CMD_UNFIREREQUEST :
@@ -559,6 +620,8 @@ int NetClient::recvMsg( char* netbuffer, Packet* outpacket )
 					else
 						un->Fire(ROLES::EVERYTHING_ELSE|ROLES::FIRE_GUNS,false);
 				}
+				else
+					cout<<"!!! Problem -> CANNOT UNFIRE UNIT NOT FOUND !!!"<<endl;
 
 			break;
 			case CMD_SCAN :
@@ -579,10 +642,15 @@ int NetClient::recvMsg( char* netbuffer, Packet* outpacket )
 				Vector normal = netbuf.getVector();
 				GFXColor col = netbuf.getColor();
 				un = UniverseUtil::GetUnitFromSerial( p1.getSerial());
-				un->shield = netbuf.getShield();
-				un->armor = netbuf.getArmor();
-				// Apply the damage
-				un->ApplyNetDamage( pnt, normal, amt, ppercentage, spercentage, col);
+				if( un)
+				{
+					un->shield = netbuf.getShield();
+					un->armor = netbuf.getArmor();
+					// Apply the damage
+					un->ApplyNetDamage( pnt, normal, amt, ppercentage, spercentage, col);
+				}
+				else
+					cout<<"!!! Problem -> CANNOT APPLY DAMAGE UNIT NOT FOUND !!!"<<endl;
 			}
 			break;
 			case CMD_DAMAGE1 :
@@ -600,7 +668,10 @@ int NetClient::recvMsg( char* netbuffer, Packet* outpacket )
 			break;
 			case CMD_KILL :
 				un = UniverseUtil::GetUnitFromSerial( p1.getSerial());
-				un->Kill();
+				if( un)
+					un->Kill();
+				else
+					cout<<"!!! Problem -> CANNOT KILL UNIT NOT FOUND !!!"<<endl;
 			break;
             default :
                 cout << ">>> " << this->serial << " >>> UNKNOWN COMMAND =( " << hex << cmd

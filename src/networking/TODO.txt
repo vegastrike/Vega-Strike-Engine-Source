@@ -1,6 +1,11 @@
 
 *** GENERAL ************************************************************
 
+- Take a look at RegenShield() and RegenArmor and network enable them
+- When client starts server send galaxy filename with md5sum
+	if client has the file and the same md5 -> ok
+	if not server sends the file content and client writes it
+- Do the same for starsystems at enter time on clients side (even if  starsystem has already been loaded once to check for manual changes)
 - Use and "hand-shake" protocol between server and client
 - Interpolate orientation too ? (3 interpolations)
 - CUBIC SPLINES : interpolate time linearly with SPLINE_METHOD2

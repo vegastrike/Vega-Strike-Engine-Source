@@ -26,6 +26,7 @@
 
 #include "networking/const.h"
 #include "networking/vsnet_socket.h"
+#include "networking/vsnet_cmd.h"
 #include "gfx/quaternion.h"  // for Transformation
 #include "cmd/container.h"
 #include "cmd/weapon_xml.h"
@@ -91,6 +92,7 @@ class	NetClient
 		~NetClient();
 
 		int		authenticate();
+		bool	PacketLoop( Cmd command);
 		vector<string>	loginLoop( string str_callsign, string str_passwd); // Loops until receiving login response
 		SOCKETALT	init( char * addr, unsigned short port);
 		void	start( char * addr, unsigned short port);
