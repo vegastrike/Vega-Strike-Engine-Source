@@ -38,7 +38,7 @@ public:
   if (!killed)
     DealDamageToHull (smalllocation.Cast(),hull+1);//should kill, applying addmissile effect
   }
-  virtual void UpdatePhysics (const Transformation &trans, const Matrix &transmat, const Vector & CumulativeVelocity, bool ResolveLast, UnitCollection *uc=NULL){
+  virtual void UpdatePhysics2 (const Transformation &trans, const Transformation &transmat, const Vector & CumulativeVelocity, bool ResolveLast, UnitCollection *uc=NULL){
     Unit * targ;
 	if ((targ=(Unit::Target()))) {
       if (rand()/((float)RAND_MAX)<((float)targ->GetImageInformation().ecm)*SIMULATION_ATOM/32768){
@@ -55,7 +55,7 @@ public:
     if (retarget&&targ==NULL) {
       Target (getNearestTarget (this));
     }
-    GameUnit<Missile>::UpdatePhysics (trans, transmat, CumulativeVelocity, ResolveLast, uc);
+    GameUnit<Missile>::UpdatePhysics2 (trans, transmat, CumulativeVelocity, ResolveLast, uc);
     this->time-=SIMULATION_ATOM;
     if (NULL!=targ) {
 	  float checker = targ->querySphere (Position()-(SIMULATION_ATOM*GetVelocity()),Position(),rSize());

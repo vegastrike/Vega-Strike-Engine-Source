@@ -12,7 +12,7 @@ protected:
   friend class UnitFactory;
 
  public:
-  virtual void UpdatePhysics (const Transformation &trans, const Matrix &transmat, const Vector & CumulativeVelocity, bool ResolveLast, UnitCollection *uc=NULL);
+  virtual void UpdatePhysics2 (const Transformation &trans, const Transformation &transmat, const Vector & CumulativeVelocity, bool ResolveLast, UnitCollection *uc=NULL);
 
 protected:
     /// default constructor forbidden

@@ -13,7 +13,7 @@ GameBuilding::GameBuilding (Terrain * parent, bool vehicle, const char *filename
   this->parent.terrain = parent;
 }
 
-void GameBuilding::UpdatePhysics (const Transformation &trans, const Matrix &transmat, const Vector & cum_vel,  bool lastframe, UnitCollection *uc){
+void GameBuilding::UpdatePhysics2 (const Transformation &trans, const Transfromation &transmat, const Vector & cum_vel,  bool lastframe, UnitCollection *uc){
   if (GetPlanetOrbit()) {
     SetPlanetOrbitData(GetPlanetOrbit());//makes it dirty
   }

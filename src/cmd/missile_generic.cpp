@@ -101,7 +101,7 @@ Unit * getNearestTarget (Unit *me) {
        }
     return targ;
 }
-void Missile::UpdatePhysics (const Transformation &trans, const Matrix &transmat, const Vector & CumulativeVelocity, bool ResolveLast, UnitCollection *uc){
+void Missile::UpdatePhysics2 (const Transformation &trans, const Transformation &transmat, const Vector & CumulativeVelocity, bool ResolveLast, UnitCollection *uc){
     Unit * targ;
 	if ((targ=(Unit::Target()))) {
       if (rand()/((float)RAND_MAX)<((float)targ->GetImageInformation().ecm)*SIMULATION_ATOM/32768){
@@ -118,7 +118,7 @@ void Missile::UpdatePhysics (const Transformation &trans, const Matrix &transmat
     if (retarget&&targ==NULL) {
       Target (getNearestTarget (this));
     }
-    Unit::UpdatePhysics (trans, transmat, CumulativeVelocity, ResolveLast, uc);
+    Unit::UpdatePhysics2 (trans, transmat, CumulativeVelocity, ResolveLast, uc);
     this->time-=SIMULATION_ATOM;
 	float checker = targ->querySphere (Position()-(SIMULATION_ATOM*GetVelocity()),Position(),rSize());
     if (NULL!=targ) {

@@ -216,7 +216,7 @@ public:
   //bool AutoPilotTo(Unit * un, bool ignore_friendlies=false);
 
   ///Updates physics given unit space transformations and if this is the last physics frame in the current gfx frame
-  virtual void UpdatePhysics2 (const Transformation &trans, Transformation & old_physical_state, Vector & accel, float & difficulty, const Matrix &transmat, const Vector & CumulativeVelocity, bool ResolveLast, UnitCollection *uc=NULL);
+  virtual void UpdatePhysics2 (const Transformation &trans, const Transformation & old_physical_state, Vector & accel, float & difficulty, const Matrix &transmat, const Vector & CumulativeVelocity, bool ResolveLast, UnitCollection *uc=NULL);
   //class Cockpit * GetVelocityDifficultyMult(float &) const;
   ///Thrusts by ammt and clamps accordingly (afterburn or not)
   void Thrust(const Vector &amt,bool afterburn = false);

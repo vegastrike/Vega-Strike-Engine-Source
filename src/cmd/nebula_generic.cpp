@@ -168,6 +168,6 @@ void Nebula::reactToCollision(Unit * smaller, const QVector & biglocation, const
   smaller->SetNebula(this);
 }
 
-void Nebula::UpdatePhysics (const Transformation &trans, const Matrix transmat, const Vector & CumulativeVelocity, bool ResolveLast, UnitCollection *uc) {
-  Unit::UpdatePhysics (trans,transmat,CumulativeVelocity,ResolveLast,uc);
+void Nebula::UpdatePhysics2 (const Transformation &trans, Transformation &oldstate, const Vector & CumulativeVelocity, bool ResolveLast, UnitCollection *uc) {
+  Unit::UpdatePhysics2 (trans,oldstate,CumulativeVelocity,ResolveLast,uc);
 }
