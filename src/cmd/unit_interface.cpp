@@ -749,6 +749,14 @@ bool UpgradingInfo::SelectItem (const char *item, int button, int buttonstate) {
         if (bas) {
 	int cargonumber;
 	sscanf (item,"%d",&cargonumber);
+	if (cargonumber>=CurrentList->size()) {
+		if (CurrentList->size()==1)
+			cargonumber=0;
+		else if (CurrentList->size()>1)
+			cargonumber=1;
+		else
+			break;
+	}
 	CargoInfo->ChangeTextItem ("name",(*CurrentList)[cargonumber].cargo.content.c_str());
 	float oldprice=(*CurrentList)[cargonumber].cargo.price;
 	if ((*CurrentList)[cargonumber].cargo.category.find("My_Fleet")==std::string::npos) {
