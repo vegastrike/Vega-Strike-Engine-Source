@@ -9,6 +9,10 @@ int GetMaxVolume();
 extern "C" {
 #include "../fmod.h"
 }
+#include <queue>
+#include <list>
+using std::list;
+using std::queue;
 bool e_already_sent=false;
 void music_finished();
 signed char endcallback (FSOUND_STREAM * stream, void * buf, int len, int param) {
@@ -27,7 +31,16 @@ struct Music {
         if (m) FSOUND_Stream_Stop(m);
     }
     void Free () {
-        if (m) FSOUND_Stream_Close(m);
+        if (m) {
+	  const float ram_limit=47;
+	  static list <FSOUND_STREAM *> q;
+	  q.push_back (m);
+	  if (q.size()>ram_limit) {
+	    FSOUND_Stream_Close(q.front());
+	    q.pop_front();
+	    
+	  }
+	}
         m=NULL;
     }
     bool Load(const char * file) {
@@ -40,8 +53,8 @@ struct Music {
         if (!m) return;
         FSOUND_Stream_SetEndCallback(m,endcallback,0);
         channel = FSOUND_Stream_PlayEx(FSOUND_FREE, m, NULL, 1);
-        FSOUND_SetPaused(channel, 0);
         SetVolume(0);
+        FSOUND_SetPaused(channel, 0);
         if (fadeout*100>1) {
             for (unsigned int i=0;i<fadeout*100;i++) {
                 SetVolume(i/(float)fadeout);
