@@ -25,7 +25,7 @@ void setArray1(float c0[3], const GFXColor&c1) {
 Atmosphere::Atmosphere(const Parameters &params) : user_params(params) {
 	dome = new SphereMesh(params.radius, divisions, divisions, "white.bmp", 
 					NULL,true,ONE,ZERO,false,
-					0,M_PI);
+					0,M_PI/2);
 }
 
 Atmosphere::~Atmosphere() {
@@ -63,7 +63,8 @@ void Atmosphere::Update(const Vector &position, const Matrix tmatrix)
 			(currPlanet = (Planet*)system->primaries[a])->hasLights()) {
 			const std::vector <int> & lights = currPlanet->activeLights();
 			/* for now just assume all planets with lights are really bright */
-			Vector direction = currPlanet->Position()-position;
+			Vector direction = (currPlanet->Position()-position);
+			direction.Normalize();
 			float rho = direction * TransformNormal(tmatrix,Vector(0,1,0));
 			if(rho > 0) { /* above the horizon */
 				Vector localDirection = InvTransformNormal(tmatrix,direction);
@@ -116,9 +117,9 @@ void Atmosphere::Update(const Vector &position, const Matrix tmatrix)
 		float sradius = 1.1 * radius;
 		setArray(light2.vect, GFXColor(sradius * r.i,sradius * r.j,sradius * r.k,1));
 
-		GFXCreateLight(l0,light0,true);
-		GFXCreateLight(l1,light1,true);
-		GFXCreateLight(l2,light2,true);
+		//GFXCreateLight(l0,light0,true);
+		//GFXCreateLight(l1,light1,true);
+		//GFXCreateLight(l2,light2,true);
 	}
 }
 
@@ -136,19 +137,20 @@ void Atmosphere::Draw(const Vector &position, const Matrix tmatrix)
 		0, 0, -1, 0,
 		0, 1, 0, 0,
 		0, 0, 0, 1};
-	GFXMultMatrix(MODEL,rot);
+	Matrix rot1;
+	MultMatrix(rot1,tmatrix,rot);
 	GFXMaterial a = {0,0,0,0,
-					1,1,1,1,
+					.01,.01,.01,1,
 					0,0,0,0,
-					0,0,0,0,
+					0.5,0.5,0.5,1,
 					0};
 	GFXDisable(DEPTHWRITE);
-	dome->DrawNow(10,TRUE,identity_transformation,tmatrix);
-	GFXEnable(DEPTHWRITE);
+	dome->DrawNow(10,TRUE,identity_transformation,rot1);
+	//GFXEnable(DEPTHWRITE);
 
-	GFXDeleteLight(l0);
-	GFXDeleteLight(l1);
-	GFXDeleteLight(l2);
+	//GFXDeleteLight(l0);
+	//GFXDeleteLight(l1);
+	//GFXDeleteLight(l2);
 }
 
 void Atmosphere::DrawAtmospheres()

@@ -87,13 +87,13 @@ StarSystem::StarSystem(char * filename, const Vector & centr,const string planet
   time = 0;
 
   Atmosphere::Parameters params;
-  params.radius = 10;
-  params.low_color[0] = GFXColor(241.0/255.0,123.0/255.0,67.0/255.0);
-  params.low_color[1] = GFXColor(253.0/255.0,65.0/255.0,55.0/255.0);
+  params.radius = 50000;
+  params.low_color[0] = 0.25*GFXColor(241.0/255.0,123.0/255.0,67.0/255.0);
+  params.low_color[1] = 0.25*GFXColor(253.0/255.0,65.0/255.0,55.0/255.0);
   params.low_ambient_color[0] = GFXColor(0.0/255.0,0.0/255.0,0.0/255.0);
   params.low_ambient_color[1] = GFXColor(0.0/255.0,0.0/255.0,0.0/255.0);
-  params.high_color[0] = GFXColor(60.0/255.0,102.0/255.0,249.0/255.0,1.0/255.0);
-  params.high_color[1] = GFXColor(57.0/255.0,188.0/255.0,251.0/255.0);
+  params.high_color[0] = 0.25*GFXColor(60.0/255.0,102.0/255.0,249.0/255.0,1.0/255.0);
+  params.high_color[1] = 0.25*GFXColor(57.0/255.0,188.0/255.0,251.0/255.0);
   params.high_ambient_color[0] = GFXColor(0,0,0);
   params.high_ambient_color[1] = GFXColor(0,0,0);
   params.scattering = 5;
