@@ -175,11 +175,16 @@ void NavigationSystem::DrawSystem()
 
 	//Set Camera Distance
 	//**********************************
-	camera_z = zoom * sqrt( 
-				   ( (0.5*(max_x - min_x)) * (0.5*(max_x - min_x)) ) 
-				+  ( (0.5*(max_y - min_y)) * (0.5*(max_y - min_y)) )
-				+  ( (0.5*(max_z - min_z)) * (0.5*(max_z - min_z)) )
-				);
+
+	{
+		float half_x=(0.5*(max_x - min_x));
+		float half_y=(0.5*(max_y - min_y));
+		float half_z=(0.5*(max_z - min_z));
+	
+		camera_z = sqrt( ( half_x * half_x ) + ( half_y * half_y ) + ( half_z * half_z ));
+	
+	}
+
 	//**********************************
 
 	DrawOriginOrientationTri(center_nav_x, center_nav_y);
@@ -351,26 +356,33 @@ void NavigationSystem::DrawSystem()
 			insert_size = navambiguoussize;
 		}
 		
-
-
 		if(system_item_scale_temp > (system_item_scale * 3))
 		{
 			system_item_scale_temp = (system_item_scale * 3);
 		}
 
+		insert_size*=system_item_scale_temp;
 
 		if (_Universe->AccessCockpit()->GetParent()->Target()==(*blah))
 		{
-			DrawTargetCorners(the_x, the_y, (insert_size*system_item_scale_temp), GFXColor(1, 0.3, 0.3, 0.8));
+			// Get a color from the config
+			static float col[4]={1, 0.3, 0.3, 0.8};
+			static bool init = false;
+			if (!init) {
+				vs_config->getColor("nav", "targeted_unit", col, true);
+				init=true;
+			}
+
+			DrawTargetCorners(the_x, the_y, insert_size, GFXColor(col[0],col[1],col[2],col[3]));
 		}
 
 
 
 
-		if (TestIfInRangeRad(the_x, the_y, insert_size*system_item_scale_temp, (-1+float(mousex)/(.5*g_game.x_resolution)), (1+float(-1*mousey)/(.5*g_game.y_resolution))) )
-			mouselist.insert(insert_type, insert_size*system_item_scale_temp, the_x, the_y, (*blah));
+		if (TestIfInRangeRad(the_x, the_y, insert_size, (-1+float(mousex)/(.5*g_game.x_resolution)), (1+float(-1*mousey)/(.5*g_game.y_resolution))) )
+			mouselist.insert(insert_type, insert_size, the_x, the_y, (*blah));
 		else
-			mainlist.insert(insert_type, insert_size*system_item_scale_temp, the_x, the_y, (*blah));
+			mainlist.insert(insert_type, insert_size, the_x, the_y, (*blah));
 
 
 

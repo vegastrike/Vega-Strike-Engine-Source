@@ -1,12 +1,20 @@
 #include "gui/glut_support.h"
+
 #include "gfx/hud.h"
+
 #include "cmd/unit_generic.h" 
+
 #include "gui/glut_support.h"
+
 #include "universe_util.h"
+
+#include "config_xml.h"
 
 
 #include "drawlist.h"
 #include "gfx/masks.h"
+
+
 
 
 navdrawnode::navdrawnode()	//	new undefined node, check for these values if wondering if assignment didnt happen.
@@ -18,6 +26,7 @@ navdrawnode::navdrawnode()	//	new undefined node, check for these values if wond
 	nextitem = NULL;
 	source = NULL;
 }
+
 
 
 navdrawnode::navdrawnode(int type_, float size_, float x_, float y_, navdrawnode* nextitem_)	//	new node into list
@@ -35,6 +44,9 @@ navdrawnode::navdrawnode(int type_, float size_, float x_, float y_, navdrawnode
 
 
 
+
+
+
 navdrawnode::navdrawnode(int type_, float size_, float x_, float y_, Unit* source_, navdrawnode* nextitem_)	//	new node into list
 {
 	type = type_;
@@ -47,6 +59,8 @@ navdrawnode::navdrawnode(int type_, float size_, float x_, float y_, Unit* sourc
 
 
 
+
+
 navdrawlist::navdrawlist(bool mouse, navscreenoccupied* screenoccupation_, GFXColor* factioncolours_)	//	start list with a 'mouselist' flag
 {
 	inmouserange = mouse;
@@ -56,8 +70,10 @@ navdrawlist::navdrawlist(bool mouse, navscreenoccupied* screenoccupation_, GFXCo
 	screenoccupation = screenoccupation_;
 	localcolours = 0;
 	factioncolours = factioncolours_;
+
 	unselectedalpha = 0.8;
 }
+
 
 
 navdrawlist::~navdrawlist()	//	destroy list
@@ -87,6 +103,16 @@ navdrawlist::~navdrawlist()	//	destroy list
 
 
 
+
+
+
+
+
+
+
+
+
+
 int navdrawlist::get_n_contents()	//	return the amount of items in the list
 {
 	return n_contents;
@@ -96,8 +122,12 @@ int navdrawlist::get_n_contents()	//	return the amount of items in the list
 
 
 
+
+
+
 void navdrawlist::insert(int type, float size, float x, float y)	//	insert iteam at head of list
 {
+
 
 	if(head == NULL)
 	{
@@ -105,10 +135,12 @@ void navdrawlist::insert(int type, float size, float x, float y)	//	insert iteam
 		tail = head;
 	}
 
+
 	else
 	{
 		head = new navdrawnode(type, size, x, y, head);
 	}
+
 
 
 	n_contents += 1;
@@ -116,8 +148,11 @@ void navdrawlist::insert(int type, float size, float x, float y)	//	insert iteam
 
 
 
+
+
 void navdrawlist::insert(int type, float size, float x, float y, Unit* source)	//	insert iteam at head of list
 {
+
 
 	if(head == NULL)
 	{
@@ -125,14 +160,19 @@ void navdrawlist::insert(int type, float size, float x, float y, Unit* source)	/
 		tail = head;
 	}
 
+
 	else
 	{
 		head = new navdrawnode(type, size, x, y, source, head);
 	}
 
 
+
 	n_contents += 1;
 }
+
+
+
 
 
 
@@ -151,9 +191,13 @@ void navdrawlist::wipe()	//	whipe the list clean
 	}
 
 
+
 	head = NULL;
 	n_contents = 0;
 }
+
+
+
 
 
 
@@ -176,42 +220,20 @@ void navdrawlist::rotate()	//	take the head and stick it in the back
 
 
 
+
+
+
 void navdrawlist::drawdescription(Unit* source, float x_, float y_, float size_x, float size_y, bool ignore_occupied_areas, const GFXColor &col)	//	take the head and stick it in the back
 {
 	if(source == NULL)
 		return;
 
+	drawdescription(source->name,x_,y_,size_x,size_y,ignore_occupied_areas,col);
 	
-	if(source->name.size() == 0)
-		return;
-
-	TextPlane displayname;	//	will be used to display shits names
-
-
-	displayname.col = col;
-
-
-	int length = source->name.size();
-	float offset = (float(length)*0.005);
-
-
-	if(ignore_occupied_areas)
-	{
-		displayname.SetPos((x_-offset), y_);
-		displayname.SetText(source->name);
-		displayname.SetCharSize(size_x, size_y);
-		displayname.Draw();
-	}
-
-	else
-	{
-		float new_y = screenoccupation->findfreesector(x_, y_);
-		displayname.SetPos((x_-offset), new_y);
-		displayname.SetText(source->name);
-		displayname.SetCharSize(size_x, size_y);
-		displayname.Draw();
-	}
 }
+
+
+
 
 
 
@@ -222,13 +244,18 @@ void navdrawlist::drawdescription(string text, float x_, float y_, float size_x,
 	if(text.size() == 0)
 		return;
 
+
 	TextPlane displayname;	//	will be used to display shits names
+
 
 	displayname.col = col;
 
 
+
 	int length = text.size();
 	float offset = (float(length)*0.005);
+
+
 
 
 	if(ignore_occupied_areas)
@@ -239,6 +266,7 @@ void navdrawlist::drawdescription(string text, float x_, float y_, float size_x,
 		displayname.Draw();
 	}
 
+
 	else
 	{
 		float new_y = screenoccupation->findfreesector(x_, y_);
@@ -248,6 +276,12 @@ void navdrawlist::drawdescription(string text, float x_, float y_, float size_x,
 		displayname.Draw();
 	}
 }
+
+
+
+
+
+
 
 
 
@@ -267,6 +301,31 @@ Unit* navdrawlist::gettailunit()
 
 
 
+#define INIT_COL_ARRAY(col,r,g,b,a) col[0]=r;col[1]=g;col[2]=b;col[3]=a
+
+
+
+
+static GFXColor getUnitTypeColor (std::string name, bool text, float col[4], float unselectedalpha) {
+	vs_config->getColor("nav", (std::string("unhighlighted_")+name)+(text?"_text":""), col, true);
+	if (col[3]==0) {
+		if (name!="unit"&&col[0]==0&&col[1]==0&&col[2]==0) {
+			if (!text) {
+				INIT_COL_ARRAY(col,1,1,.7,1);
+				return getUnitTypeColor("unit", text, col,unselectedalpha);
+			} else {
+				INIT_COL_ARRAY(col,.2, 1, .5, 0);
+				GFXColor temp=getUnitTypeColor("unit", text, col,unselectedalpha);
+				temp.a=unselectedalpha;
+				return temp;
+			}
+		}
+		col[3]=unselectedalpha;
+	}
+	return GFXColor(col[0],col[1],col[2],col[3]);
+}
+
+
 
 
 
@@ -278,14 +337,108 @@ void navdrawlist::draw()	//	Draw the items in the list
 		return;
 
 
+
+
 	else
 	{
-		navdrawnode* current = head;
-		float relation = 0.0;
+			navdrawnode* current = head;
+
+
+			float relation = 0.0;
+			static GFXColor unhighlighted_sun_col;
+			static GFXColor unhighlighted_sun_text;
+			static GFXColor unhighlighted_planet_text;
+			static GFXColor unhighlighted_c_player_col;
+			static GFXColor unhighlighted_c_player_text;
+			static GFXColor unhighlighted_player_col;
+			static GFXColor unhighlighted_player_text;
+			static GFXColor unhighlighted_asteroid_col;
+			static GFXColor unhighlighted_asteroid_text;
+			static GFXColor unhighlighted_nebula_col;
+			static GFXColor unhighlighted_nebula_text;
+			static GFXColor unhighlighted_jump_col;
+			static GFXColor unhighlighted_jump_text;
+			static GFXColor unhighlighted_station_text;
+			static GFXColor unhighlighted_fighter_text;
+			static GFXColor unhighlighted_unit_text;
+			static GFXColor highlighted_tail_col;
+			static GFXColor highlighted_tail_text;
+			static GFXColor highlighted_untail_col;
+			static GFXColor unhighlighted_capship_text;
+			static bool init = false;
+			if (!init) {
+				// Get a color from the config
+				float col[4];
+
+				INIT_COL_ARRAY(col,1,.3,.3,.8);
+				vs_config->getColor("nav", "highlighted_unit_on_tail", col, true);
+				highlighted_tail_col=GFXColor(col[0],col[1],col[2],col[3]);
+
+				INIT_COL_ARRAY(col,1,1,.7,1);
+				vs_config->getColor("nav", "highlighted_text_on_tail", col, true);
+				highlighted_tail_text=GFXColor(col[0],col[1],col[2],col[3]);
+
+				INIT_COL_ARRAY(col,1,1,1,.8);
+				vs_config->getColor("nav", "highlighted_unit_off_tail", col, true);
+				highlighted_untail_col=GFXColor(col[0],col[1],col[2],col[3]);
+
+				INIT_COL_ARRAY(col,0,0,0,0); // If not found, use defaults
+				unhighlighted_sun_col=getUnitTypeColor("sun", false, col,unselectedalpha);
+				INIT_COL_ARRAY(col,0,0,0,0);
+				unhighlighted_sun_text=getUnitTypeColor("sun", true, col,unselectedalpha);
+				
+				// Planet color is the relation color, so is not defined here.
+				INIT_COL_ARRAY(col,0,0,0,0);
+				unhighlighted_planet_text=getUnitTypeColor("planet", true, col,unselectedalpha);
+
+				INIT_COL_ARRAY(col,.3,.3,1,.8); // If not found, use defaults
+				unhighlighted_c_player_col=getUnitTypeColor("curplayer", false, col,.8);
+				INIT_COL_ARRAY(col,.3,.3,1,0);
+				unhighlighted_c_player_text=getUnitTypeColor("curplayer", true, col,unselectedalpha);
+
+				INIT_COL_ARRAY(col,.3,.3,1,.8); // If not found, use defaults
+				unhighlighted_player_col=getUnitTypeColor("player", false, col,.8);
+				INIT_COL_ARRAY(col,.3,.3,1,0);
+				unhighlighted_player_text=getUnitTypeColor("player", true, col,unselectedalpha);
+
+				INIT_COL_ARRAY(col,.3,.3,1,.8); // If not found, use defaults
+				unhighlighted_player_col=getUnitTypeColor("player", false, col,.8);
+				INIT_COL_ARRAY(col,.3,.3,1,0);
+				unhighlighted_player_text=getUnitTypeColor("player", true, col,unselectedalpha);
+
+				INIT_COL_ARRAY(col,1,.8,.8,.6); // If not found, use defaults
+				unhighlighted_asteroid_col=getUnitTypeColor("asteroid", false, col,.6);
+				INIT_COL_ARRAY(col,0,0,0,0);
+				unhighlighted_asteroid_text=getUnitTypeColor("asteroid", true, col,unselectedalpha);
+
+				INIT_COL_ARRAY(col,1,.5,1,.6); // If not found, use defaults
+				unhighlighted_nebula_col=getUnitTypeColor("nebula", false, col,.6);
+				INIT_COL_ARRAY(col,0,0,0,0);
+				unhighlighted_nebula_text=getUnitTypeColor("nebula", true, col,unselectedalpha);
+
+				INIT_COL_ARRAY(col,.5, .9, .9, .6); // If not found, use defaults
+				unhighlighted_jump_col=getUnitTypeColor("jump", false, col,.6);
+				INIT_COL_ARRAY(col,.3, 1, .8,0);
+				unhighlighted_jump_text=getUnitTypeColor("jump", true, col,unselectedalpha);
+
+				
+				// Basic unit types:
+				INIT_COL_ARRAY(col,0,0,0,0);
+				unhighlighted_station_text=getUnitTypeColor("station", true, col,unselectedalpha);
+				INIT_COL_ARRAY(col,0,0,0,0);
+				unhighlighted_fighter_text=getUnitTypeColor("fighter", true, col,unselectedalpha);
+				INIT_COL_ARRAY(col,0,0,0,0);
+				unhighlighted_capship_text=getUnitTypeColor("capship", true, col,unselectedalpha);
+				INIT_COL_ARRAY(col,0,0,0,0);
+				unhighlighted_unit_text=getUnitTypeColor("unit", true, col,unselectedalpha);
+
+				init=true;
+			}
 
 
 			while(current != NULL)
 			{
+
 
 //				if(current->source != NULL)
 //					relation = 	FactionUtil::GetIntRelation( ( UniverseUtil::getPlayerX(UniverseUtil::getCurrentPlayer()) )->faction ,current->source->faction);
@@ -293,12 +446,17 @@ void navdrawlist::draw()	//	Draw the items in the list
 //					relation = 0;
 
 
+
+
 				//	the realtime relationship
 				if(current->source != NULL)
 					relation = current->source->getRelation( UniverseUtil::getPlayerX(UniverseUtil::getCurrentPlayer()) ) ;
 
+
 				else
 					relation = 0;
+
+
 
 
 
@@ -307,103 +465,141 @@ void navdrawlist::draw()	//	Draw the items in the list
 
 
 
+				// to avoid duplicate code
+				GFXColor relColor((1.0-relation),relation,(1.0-(2.0*Delta(relation, 0.5))),.7);
+
+
 
 
 	//			GFXColor((1.0-relation),relation,(1.0-(2.0*Delta(relation, 0.5))),1)
+
+
 
 
 				if(current->type == navsun)
 				{
 					if(!inmouserange)
 					{
-						NavigationSystem::DrawCircle(current->x, current->y, current->size, GFXColor(1,1,.7,1));
-						drawdescription(current->source, current->x, current->y, 1.0, 1.0, 0, GFXColor(.2, 1, .5, unselectedalpha));
+						NavigationSystem::DrawCircle(current->x, current->y, current->size, unhighlighted_sun_col);
+						drawdescription(current->source, current->x, current->y, 1.0, 1.0, 0, unhighlighted_sun_text);
 					}
+
 
 					else
 					{
 						if(current == tail)
-							NavigationSystem::DrawCircle(current->x, current->y, current->size, GFXColor(1,.3,.3,.8));
+							NavigationSystem::DrawCircle(current->x, current->y, current->size, highlighted_tail_col);
 						else
-							NavigationSystem::DrawCircle(current->x, current->y, current->size, GFXColor(1,1,1,.8));
+							NavigationSystem::DrawCircle(current->x, current->y, current->size, highlighted_untail_col);
 					}
 				}
+
+
 
 
 
 				else if (current->type == navplanet)
 				{
 
+
 					if(!inmouserange)
 					{
-						NavigationSystem::DrawPlanet(current->x, current->y, current->size, GFXColor((1.0-relation),relation,(1.0-(2.0*Delta(relation, 0.5))),.7));
-						drawdescription(current->source, current->x, current->y, 1.0, 1.0, 0, GFXColor(.2, 1, .5, unselectedalpha));
+						NavigationSystem::DrawPlanet(current->x, current->y, current->size, relColor);
+						drawdescription(current->source, current->x, current->y, 1.0, 1.0, 0, unhighlighted_planet_text);
 					}
+
 
 					else
 					{
 						if(current == tail)
-							NavigationSystem::DrawPlanet(current->x, current->y, current->size, GFXColor(1,.3,.3,.8));
+							NavigationSystem::DrawPlanet(current->x, current->y, current->size, highlighted_tail_col);
 						else
-							NavigationSystem::DrawPlanet(current->x, current->y, current->size, GFXColor(1,1,1,.8));
+							NavigationSystem::DrawPlanet(current->x, current->y, current->size, highlighted_untail_col);
 					}
 				}
+
+
 
 
 
 				else if (current->type == navcurrentplayer)
+
 				{
+
 					if(!inmouserange)
+
 					{
-						NavigationSystem::DrawHalfCircleTop(current->x, current->y, current->size, GFXColor(.3,.3,1,.8));
-						drawdescription(current->source, current->x, current->y, 1.0, 1.0, 0, GFXColor(.3, .3, 1, unselectedalpha));
+
+						NavigationSystem::DrawHalfCircleTop(current->x, current->y, current->size, unhighlighted_c_player_col);
+
+						drawdescription(current->source, current->x, current->y, 1.0, 1.0, 0, unhighlighted_c_player_text);
+
 					}
 
+
 					else
+
 					{
+
 						if(current == tail)
-							NavigationSystem::DrawHalfCircleTop(current->x, current->y, current->size, GFXColor(1,.3,.3,.8));
+
+							NavigationSystem::DrawHalfCircleTop(current->x, current->y, current->size, highlighted_tail_col);
 						else
-							NavigationSystem::DrawHalfCircleTop(current->x, current->y, current->size, GFXColor(1,1,1,.8));
+
+							NavigationSystem::DrawHalfCircleTop(current->x, current->y, current->size, highlighted_untail_col);
 					}
+
 				}
+
+
 
 
 
 				else if (current->type == navplayer)
+
 				{
+
 					if(!inmouserange)
+
 					{
-						NavigationSystem::DrawHalfCircleTop(current->x, current->y, current->size, GFXColor(.3,.3,1,.8));
-						drawdescription(current->source, current->x, current->y, 1.0, 1.0, 0, GFXColor(.3, .3, .8, unselectedalpha));
+
+						NavigationSystem::DrawHalfCircleTop(current->x, current->y, current->size, unhighlighted_player_col);
+
+						drawdescription(current->source, current->x, current->y, 1.0, 1.0, 0, unhighlighted_player_col);
+
 					}
+
 
 					else
 					{
 						if(current == tail)
-							NavigationSystem::DrawHalfCircleTop(current->x, current->y, current->size, GFXColor(1,.3,.3,.8));
+							NavigationSystem::DrawHalfCircleTop(current->x, current->y, current->size, highlighted_tail_col);
 						else
-							NavigationSystem::DrawHalfCircleTop(current->x, current->y, current->size, GFXColor(1,1,1,.8));
+							NavigationSystem::DrawHalfCircleTop(current->x, current->y, current->size, highlighted_untail_col);
 					}
 				}
+
 
 
 				else if (current->type == navstation)
 				{
 					if(!inmouserange)
 					{
-						NavigationSystem::DrawStation(current->x, current->y, current->size, GFXColor((1.0-relation),relation,(1.0-(2.0*Delta(relation, 0.5))),.7));
-						drawdescription(current->source, current->x, current->y, 1.0, 1.0, 0, GFXColor(.2, 1, .5, unselectedalpha));
+						NavigationSystem::DrawStation(current->x, current->y, current->size, relColor);
+						drawdescription(current->source, current->x, current->y, 1.0, 1.0, 0, unhighlighted_station_text);
 					}
+
 
 					else
 					{
 						if(current == tail)
-							NavigationSystem::DrawStation(current->x, current->y, current->size, GFXColor(1,.3,.3,.8));
+							NavigationSystem::DrawStation(current->x, current->y, current->size, highlighted_tail_col);
 						else
-							NavigationSystem::DrawStation(current->x, current->y, current->size, GFXColor(1,1,1,.8));
+							NavigationSystem::DrawStation(current->x, current->y, current->size, highlighted_untail_col);
 					}
 				}
+
+
 
 
 
@@ -413,13 +609,15 @@ void navdrawlist::draw()	//	Draw the items in the list
 					{
 						if(factioncolours == NULL)
 						{
-							NavigationSystem::DrawHalfCircleTop(current->x, current->y, current->size, GFXColor((1.0-relation),relation,(1.0-(2.0*Delta(relation, 0.5))),.7));
-							drawdescription(current->source, current->x, current->y, 1.0, 1.0, 0, GFXColor(.2, 1, .5, unselectedalpha));
+							NavigationSystem::DrawHalfCircleTop(current->x, current->y, current->size, relColor);
+							drawdescription(current->source, current->x, current->y, 1.0, 1.0, 0, unhighlighted_fighter_text);
 						}
 						else
 						{
-							NavigationSystem::DrawHalfCircleTop(current->x, current->y, current->size, GFXColor((1.0-relation),relation,(1.0-(2.0*Delta(relation, 0.5))),.7));
+							NavigationSystem::DrawHalfCircleTop(current->x, current->y, current->size, relColor);
+
 							GFXColor thecolor = factioncolours[current->source->faction];
+
 							thecolor.a = unselectedalpha;
 							drawdescription(current->source, current->x, current->y, 1.0, 1.0, 0, thecolor);
 						}
@@ -427,11 +625,13 @@ void navdrawlist::draw()	//	Draw the items in the list
 					else
 					{
 						if(current == tail)
-							NavigationSystem::DrawHalfCircleTop(current->x, current->y, current->size, GFXColor(1,.3,.3,.8));
+							NavigationSystem::DrawHalfCircleTop(current->x, current->y, current->size, highlighted_tail_col);
 						else
-							NavigationSystem::DrawHalfCircleTop(current->x, current->y, current->size, GFXColor(1,1,1,.8));
+							NavigationSystem::DrawHalfCircleTop(current->x, current->y, current->size, highlighted_untail_col);
 					}
 				}
+
+
 
 
 				else if (current->type == navcapship)
@@ -440,93 +640,103 @@ void navdrawlist::draw()	//	Draw the items in the list
 					{
 						if(factioncolours == NULL)
 						{
-							NavigationSystem::DrawCircle(current->x, current->y, current->size, GFXColor((1.0-relation),relation,(1.0-(2.0*Delta(relation, 0.5))),.7));
-							drawdescription(current->source, current->x, current->y, 1.0, 1.0, 0, GFXColor(.2, 1, .5, unselectedalpha));
+							NavigationSystem::DrawCircle(current->x, current->y, current->size, relColor);
+							drawdescription(current->source, current->x, current->y, 1.0, 1.0, 0, unhighlighted_capship_text);
 						}
 						else
 						{
-							NavigationSystem::DrawCircle(current->x, current->y, current->size, GFXColor((1.0-relation),relation,(1.0-(2.0*Delta(relation, 0.5))),.7));
+							NavigationSystem::DrawCircle(current->x, current->y, current->size, relColor);
 							GFXColor thecolor = factioncolours[current->source->faction];
+
 							thecolor.a = unselectedalpha;
+
 							drawdescription(current->source, current->x, current->y, 1.0, 1.0, 0, thecolor);
 						}
 					}
 					else
 					{
 						if(current == tail)
-							NavigationSystem::DrawCircle(current->x, current->y, current->size, GFXColor(1,.3,.3,.8));
+							NavigationSystem::DrawCircle(current->x, current->y, current->size, highlighted_tail_col);
 						else
-							NavigationSystem::DrawCircle(current->x, current->y, current->size, GFXColor(1,1,1,.8));
+							NavigationSystem::DrawCircle(current->x, current->y, current->size, highlighted_untail_col);
 					}
 				}
+
+
 
 
 				else if (current->type == navmissile)
 				{
 					if(!inmouserange)
 					{
-						NavigationSystem::DrawMissile(current->x, current->y, current->size, GFXColor((1.0-relation),relation,(1.0-(2.0*Delta(relation, 0.5))),.7));
+						NavigationSystem::DrawMissile(current->x, current->y, current->size, relColor);
 						drawdescription(current->source, current->x, current->y, 1.0, 1.0, 0, GFXColor(.2, 1, .5, unselectedalpha));
 					}
 					else
 					{
 						if(current == tail)
-							NavigationSystem::DrawMissile(current->x, current->y, current->size, GFXColor(1,.3,.3,.8));
+							NavigationSystem::DrawMissile(current->x, current->y, current->size, highlighted_tail_col);
 						else
-							NavigationSystem::DrawMissile(current->x, current->y, current->size, GFXColor(1,1,1,.8));
+							NavigationSystem::DrawMissile(current->x, current->y, current->size, highlighted_untail_col);
 					}
 				}
+
+
 
 
 				else if (current->type == navasteroid)
 				{
 					if(!inmouserange)
 					{
-						NavigationSystem::DrawCircle(current->x, current->y, current->size, GFXColor(1,.8,.8,.6));
-						drawdescription(current->source, current->x, current->y, 1.0, 1.0, 0, GFXColor(.2, 1, .5, unselectedalpha));
+						NavigationSystem::DrawCircle(current->x, current->y, current->size, unhighlighted_asteroid_col);
+						drawdescription(current->source, current->x, current->y, 1.0, 1.0, 0, unhighlighted_asteroid_text);
 					}
 					else
 					{
 						if(current == tail)
-							NavigationSystem::DrawCircle(current->x, current->y, current->size, GFXColor(1,.3,.3,.8));
+							NavigationSystem::DrawCircle(current->x, current->y, current->size, highlighted_tail_col);
 						else
-							NavigationSystem::DrawCircle(current->x, current->y, current->size, GFXColor(1,1,1,.8));
+							NavigationSystem::DrawCircle(current->x, current->y, current->size, highlighted_untail_col);
 					}
 				}
+
 
 
 				else if (current->type == navnebula)
 				{
 					if(!inmouserange)
 					{
-						NavigationSystem::DrawCircle(current->x, current->y, current->size, GFXColor(1,.5,1,.6));
-						drawdescription(current->source, current->x, current->y, 1.0, 1.0, 0, GFXColor(.2, 1, .5, unselectedalpha));
+						NavigationSystem::DrawCircle(current->x, current->y, current->size, unhighlighted_nebula_col);
+						drawdescription(current->source, current->x, current->y, 1.0, 1.0, 0, unhighlighted_nebula_text);
 					}
 					else
 					{
 						if(current == tail)
-							NavigationSystem::DrawCircle(current->x, current->y, current->size, GFXColor(1,.3,.3,.8));
+							NavigationSystem::DrawCircle(current->x, current->y, current->size, highlighted_tail_col);
 						else
-							NavigationSystem::DrawCircle(current->x, current->y, current->size, GFXColor(1,1,1,.8));
+							NavigationSystem::DrawCircle(current->x, current->y, current->size, highlighted_untail_col);
 					}
 				}
+
+
 
 
 				else if (current->type == navjump)
 				{
 					if(!inmouserange)
 					{
-						NavigationSystem::DrawJump(current->x, current->y, current->size, GFXColor(.5, .9, .9, .6));
-						drawdescription(current->source, current->x, current->y, 1.0, 1.0, 0, GFXColor(.3, 1, .8, unselectedalpha));
+						NavigationSystem::DrawJump(current->x, current->y, current->size, unhighlighted_jump_col);
+						drawdescription(current->source, current->x, current->y, 1.0, 1.0, 0, unhighlighted_jump_text);
 					}
 					else
 					{
 						if(current == tail)
-							NavigationSystem::DrawJump(current->x, current->y, current->size, GFXColor(1,.3,.3,.8));
+							NavigationSystem::DrawJump(current->x, current->y, current->size, highlighted_tail_col);
 						else
-							NavigationSystem::DrawJump(current->x, current->y, current->size, GFXColor(1,1,1,.8));
+							NavigationSystem::DrawJump(current->x, current->y, current->size, highlighted_untail_col);
 					}
 				}
+
 
 
 				else
@@ -534,16 +744,18 @@ void navdrawlist::draw()	//	Draw the items in the list
 					if(!inmouserange)
 					{
 						NavigationSystem::DrawCircle(current->x, current->y, current->size, GFXColor((1.0-relation),relation,(1.0-(2.0*Delta(relation, 0.5))),.6));
-						drawdescription(current->source, current->x, current->y, 1.0, 1.0, 0, GFXColor(.2, 1, .5, unselectedalpha));
+						drawdescription(current->source, current->x, current->y, 1.0, 1.0, 0, unhighlighted_unit_text);
 					}
 					else
 					{
 						if(current == tail)
-							NavigationSystem::DrawCircle(current->x, current->y, current->size, GFXColor(1,.3,.3,.8));
+							NavigationSystem::DrawCircle(current->x, current->y, current->size, highlighted_tail_col);
 						else
-							NavigationSystem::DrawCircle(current->x, current->y, current->size, GFXColor(1,1,1,.8));
+							NavigationSystem::DrawCircle(current->x, current->y, current->size, highlighted_untail_col);
 					}
 				}
+
+
 
 
 
@@ -557,4 +769,5 @@ void navdrawlist::draw()	//	Draw the items in the list
 			}
 	}
 }
+
 

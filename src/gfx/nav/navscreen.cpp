@@ -1443,18 +1443,19 @@ float NavigationSystem::CalculatePerspectiveAdjustment(float &zscale, float &zdi
 
 	//CALCULATE PRESPECTIVE ADJUSTMENT
 	//**********************************
-	zdistance = sqrt( (pos.i * pos.i) + (pos.j * pos.j) + ( (camera_z - pos.k) * (camera_z - pos.k) ) );
+	double real_z=(camera_z - pos.k);
+	zdistance = sqrt( (pos.i * pos.i) + (pos.j * pos.j) + ( real_z * real_z ) );
 	zscale = ( zdistance / (2.0*camera_z) ) * zshiftmultiplier;
-
 	//zscale = 1.0;
+	
+	double real_zoom = ( (1-(((zoom-0.5*MAXZOOM)/MAXZOOM)*(0.85))) / zscale );
+	pos.i *= real_zoom;
+	pos.j *= real_zoom;
+	pos.k *= real_zoom;
 
-	pos.i = pos.i * ( (1-(((zoom-0.5*MAXZOOM)/MAXZOOM)*(0.85))) / zscale );
-	pos.j = pos.j * ( (1-(((zoom-0.5*MAXZOOM)/MAXZOOM)*(0.85))) / zscale );
-	pos.k = pos.k * ( (1-(((zoom-0.5*MAXZOOM)/MAXZOOM)*(0.85))) / zscale );
-
-	pos_flat.i = pos_flat.i * ( (1-(((zoom-0.5*MAXZOOM)/MAXZOOM)*(0.85))) / zscale );
-	pos_flat.j = pos_flat.j * ( (1-(((zoom-0.5*MAXZOOM)/MAXZOOM)*(0.85))) / zscale );
-	pos_flat.k = pos_flat.k * ( (1-(((zoom-0.5*MAXZOOM)/MAXZOOM)*(0.85))) / zscale );
+	pos_flat.i *= real_zoom;
+	pos_flat.j *= real_zoom;
+	pos_flat.k *= real_zoom;
 				
 
 	float itemscale =  ( ((camera_z*item_zscalefactor)-zdistance) / (camera_z*item_zscalefactor) );	

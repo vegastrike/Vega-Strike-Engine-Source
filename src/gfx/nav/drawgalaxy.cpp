@@ -54,6 +54,10 @@ void Beautify (string systemfile, string & sector, string & system) {
 		sector = systemfile.substr(0,slash);
 		system = systemfile.substr(slash+1);
 	}
+	if (sector.size())
+		sector[0]=toupper(sector[0]);
+	if (system.size())
+		system[0]=toupper(system[0]);
 }
 
 float SYSTEM_DEFAULT_SIZE=.05;
@@ -119,11 +123,30 @@ public:
 		}
 	}
 
-	void draw()const {
+	void draw(bool mouseover=false, bool willclick=false)const {
 		if (moused)
 			return;
-	   
+		if (willclick==true&&mouseover==false) {
+			// Perhaps some key binding or mouseclick will be set in the future to do this.
+			mouseover=true;
+		}
 		GFXColor race(GetColor (source));
+
+
+		static bool inited=false;
+		static GFXColor highlighted_tail_col;
+		static GFXColor highlighted_tail_text;
+		if (!inited) {
+			float col1[4]={1,.3,.3,.8};
+			vs_config->getColor("nav", "highlighted_unit_on_tail", col1, true);
+			highlighted_tail_col=GFXColor(col1[0],col1[1],col1[2],col1[3]);
+
+			float col2[4]={1,1,.7,1};
+			vs_config->getColor("nav", "highlighted_text_on_tail", col2, true);
+			highlighted_tail_text=GFXColor(col2[0],col2[1],col2[2],col2[3]);
+		}
+
+
 		if (color=='m') {
 			race.r=.5;
 			race.g=.5;
@@ -131,12 +154,28 @@ public:
 			race.a=.5;
 				
 		}
+		if (mouseover) {
+			if (willclick) {
+				race=highlighted_tail_col;
+			} else {
+				// Leave just a faint resemblence of the original color,
+				// but also make it look whiteish.
+				race.r+=.75;
+				race.g+=.75;
+				race.b+=.75;
+			}
+		}
 //		race=GFXColor (1,1,1,1);
 		NavigationSystem::DrawCircle(x, y, size, race);
-		string blah,nam;
-		Beautify (source,blah,nam);
-		
-		drawdescription (nam,x,y,1.0,1.0,0,race);
+		if ((!mouseover)||(willclick)) {
+			if (willclick) {
+				race=highlighted_tail_text;
+			}
+			string blah,nam;
+			Beautify (source,blah,nam);
+			
+			drawdescription (nam,x,y,1.0,1.0,0,race);
+		}
 	}
 };
 
@@ -381,21 +420,28 @@ void NavigationSystem::DrawGalaxy()
 	center_z = (min_z + max_z)/2;
 	//**********************************
 
-#define SQRT3 1.7320508
-//	themaxvalue = sqrt(themaxvalue*themaxvalue + themaxvalue*themaxvalue + themaxvalue*themaxvalue);
-	themaxvalue = SQRT3*themaxvalue;
-
 
 	//Set Camera Distance
 	//**********************************
-	camera_z = zoom * sqrt( 
-				   ( (0.5*(max_x - min_x)) * (0.5*(max_x - min_x)) ) 
-				+  ( (0.5*(max_y - min_y)) * (0.5*(max_y - min_y)) )
-				+  ( (0.5*(max_z - min_z)) * (0.5*(max_z - min_z)) )
-				);
+
+	{
+		float half_x=(0.5*(max_x - min_x));
+		float half_y=(0.5*(max_y - min_y));
+		float half_z=(0.5*(max_z - min_z));
+	
+		camera_z = sqrt( ( half_x * half_x ) + ( half_y * half_y ) + ( half_z * half_z ));
+	
+	}
+
+//	camera_z=  zoom * themaxvalue;
+
 	//**********************************
 
 	DrawOriginOrientationTri(center_nav_x, center_nav_y);
+
+#define SQRT3 1.7320508
+//	themaxvalue = sqrt(themaxvalue*themaxvalue + themaxvalue*themaxvalue + themaxvalue*themaxvalue);
+	themaxvalue = SQRT3*themaxvalue;
 
 
 	//	Enlist the items and attributes
@@ -435,14 +481,28 @@ void NavigationSystem::DrawGalaxy()
 			system_item_scale_temp = (system_item_scale * 3);
 		}
 
+		insert_size *= system_item_scale_temp;
+
+		if (currentsystem==temp)
+		{
+			// Get a color from the config
+			static float col[4]={1, 0.3, 0.3, 0.8};
+			static bool init = false;
+			if (!init) {
+				vs_config->getColor("nav", "current_system", col, true);
+				init=true;
+			}
+
+			DrawTargetCorners(the_x, the_y, (insert_size), GFXColor(col[0],col[1],col[2],col[3]));
+		}
 
 		bool moused = false;
-		if (TestIfInRangeRad(the_x, the_y, insert_size*system_item_scale_temp, (-1+float(mousex)/(.5*g_game.x_resolution)), (1+float(-1*mousey)/(.5*g_game.y_resolution))) ) {
-			mouselist.push_back(systemdrawnode(insert_type, insert_size*system_item_scale_temp, the_x, the_y, (*systemIter),screenoccupation,false));
+		if (TestIfInRangeRad(the_x, the_y, insert_size, (-1+float(mousex)/(.5*g_game.x_resolution)), (1+float(-1*mousey)/(.5*g_game.y_resolution))) ) {
+			mouselist.push_back(systemdrawnode(insert_type, insert_size, the_x, the_y, (*systemIter),screenoccupation,false));
 			moused=true;
 		}
 			
-		mainlist.insert(systemdrawnode(insert_type, insert_size*system_item_scale_temp, the_x, the_y, (*systemIter),screenoccupation,moused));
+		mainlist.insert(systemdrawnode(insert_type, insert_size, the_x, the_y, (*systemIter),screenoccupation,moused));
 
 
 
@@ -544,7 +604,7 @@ void NavigationSystem::DrawGalaxy()
 	//	**********************************
 	{
 	for (systemdrawlist::iterator it = mouselist.begin();it!=mouselist.end();++it) {
-		(*it).draw();
+		(*it).draw(true, &(*it)==&mouselist.back());
 		
 	}
 	}
