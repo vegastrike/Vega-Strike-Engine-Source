@@ -101,11 +101,15 @@ class	NetClient
 		Unit *				Units[MAXOBJECTS];			// Server controlled units in the same zone
 		// a vector because always accessed by their IDs
 
-#ifdef NETCOMM
-		NetworkCommunication *	NetComm;
-#endif
+	class NetworkCommunication *	NetComm;// DO NOT use #defines in class defn's -- Daniel
 	public:
-		inline bool IsNetcommActive() const { return this->NetComm->IsActive(); }
+		inline bool IsNetcommActive() const {
+#ifdef NETCOMM
+			return this->NetComm->IsActive();
+#else
+			return false;
+#endif
+		}
 
 	private:
 
