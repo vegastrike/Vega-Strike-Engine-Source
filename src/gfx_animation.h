@@ -31,7 +31,7 @@ class Animation:public Primitive {
   bool camup;
   int numframes;
   float timeperframe;
-  scalar_t cumtime;
+  double cumtime;
   float height; //half the height so you can do fancy vector translatons to campspace
   float width;
   bool repeat;

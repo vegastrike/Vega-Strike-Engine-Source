@@ -45,7 +45,6 @@ extern "C"
 #include <string.h>
 #include <limits.h>
 #include <stdarg.h>
-#include "vs_types.h"
 #if defined( WIN32 ) || defined( __CYGWIN__ )
     /* Note that this will define WIN32 for us, if it isn't defined already
      */
@@ -68,8 +67,6 @@ extern "C"
 #ifndef M_PI
 #   define M_PI 3.1415926535
 #endif
-#define TRUE 1
-#define FALSE 0
 
 #define PROG_NAME "vegastrike"
 

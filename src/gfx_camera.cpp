@@ -33,7 +33,7 @@ Camera::Camera(ProjectionType proj) : projectionType(proj), myPhysics(0.1,0.075,
 	Coord.j = 0;
 	Coord.k = -1;
 
-	changed = TRUE;
+	changed = GFXTRUE;
 	//SetPosition();
 	//SetOrientation();
 	Identity(view);
@@ -109,7 +109,7 @@ void Camera::UpdateGLCenter()
 
 		GFXSubwindow(x,y,xsize,ysize);
 		GFXLookAt (-R, Vector(0,0,0), Q);
-		//changed = FALSE;
+		//changed = GFXFALSE;
 	}
 	//glMultMatrixf(view);
 }
@@ -117,7 +117,7 @@ void Camera::UpdateGLCenter()
 void Camera::SetPosition(const Vector &origin)
 {
 	Coord = origin;
-	changed= TRUE;
+	changed= GFXTRUE;
 }
 
 void Camera::GetPosition(Vector &vect)
@@ -147,7 +147,7 @@ void Camera::LookAt(const Vector &loc, const Vector &up) {
   Q = up;
   Q.Normalize();
   CrossProduct(P,Q,R);
-  changed = TRUE;
+  changed = GFXTRUE;
 }
 
 void Camera::SetOrientation(const Vector &p, const Vector &q, const Vector &r)
@@ -155,7 +155,7 @@ void Camera::SetOrientation(const Vector &p, const Vector &q, const Vector &r)
 	P = p;
 	Q = q;
 	R = r;
-	changed = TRUE;
+	changed = GFXTRUE;
 }
 
 void Camera::SetSubwindow(float x, float y, float xsize, float ysize) {
@@ -163,7 +163,7 @@ void Camera::SetSubwindow(float x, float y, float xsize, float ysize) {
   this->y = y;
   this->xsize = xsize;
   this->ysize = ysize;
-  changed = TRUE;
+  changed = GFXTRUE;
 }
 
 void Camera::SetProjectionType(ProjectionType t) {
@@ -181,30 +181,30 @@ float Camera::GetZoom() {
 void Camera::Yaw(float rad)
 {
 	::Yaw(rad,P,Q,R);
-	changed= TRUE;
+	changed= GFXTRUE;
 }
 void Camera::Pitch(float rad)
 {
 	::Pitch(rad,P,Q,R);
-	changed= TRUE;
+	changed= GFXTRUE;
 }
 void Camera::Roll(float rad)
 {
 	::Roll(rad,P,Q,R);
-	changed= TRUE;
+	changed= GFXTRUE;
 }
 void Camera::XSlide(float factor)
 {
 	Coord += P * factor;
-	changed = TRUE;
+	changed = GFXTRUE;
 }
 void Camera::YSlide(float factor)
 {
 	Coord += Q * factor;
-	changed = TRUE;
+	changed = GFXTRUE;
 }
 void Camera::ZSlide(float factor)
 {
 	Coord += R * factor;
-	changed = TRUE;
+	changed = GFXTRUE;
 }

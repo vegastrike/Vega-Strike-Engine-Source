@@ -21,7 +21,7 @@
 
 
 #include "vegastrike.h"
-#include "vs_types.h"
+
 #ifdef WIN32
 #include <windows.h>
 static LONGLONG ttime;
@@ -31,10 +31,10 @@ static LONGLONG freq;
 #if defined( HAVE_SDL )
 #   include "SDL.h"
 #endif /* defined( HAVE_SDL ) */
-static scalar_t newtime;
-static scalar_t lasttime;
+static double newtime;
+static double lasttime;
 #endif
-static scalar_t elapsedtime;
+static double elapsedtime;
 
 
 
@@ -42,14 +42,14 @@ static scalar_t elapsedtime;
 
 
 
-scalar_t get_clock_time()
+double get_clock_time()
 {
 #if defined( HAVE_GETTIMEOFDAY )
 
     struct timeval tv;
     gettimeofday( &tv, NULL );
 
-    return (scalar_t) tv.tv_sec + (scalar_t) tv.tv_usec * 1.e-6;
+    return (double) tv.tv_sec + (double) tv.tv_usec * 1.e-6;
 #elif defined (WIN32)
 	return 0;
 	//We're cool
@@ -74,7 +74,7 @@ void InitTime () {
 #endif
   elapsedtime = .001;
 }
-scalar_t GetElapsedTime() {
+double GetElapsedTime() {
   return elapsedtime;
 }
 void UpdateTime() {

@@ -35,7 +35,7 @@ void /*GFXDRVAPI*/ GFXEnable (STATE state)
 	{
 	case LIGHTING:
 	  glEnable(GL_LIGHTING);
-	  GFXLIGHTING = TRUE;
+	  GFXLIGHTING = GFXTRUE;
 	  break;
 	case DEPTHTEST:
 	  glEnable(GL_DEPTH_TEST);
@@ -46,13 +46,13 @@ void /*GFXDRVAPI*/ GFXEnable (STATE state)
 	  glDepthMask(1);
 	  break;
 	case TEXTURE0:
-	  bTex0 = TRUE;
+	  bTex0 = GFXTRUE;
 	  GFXActiveTexture(0);	
 	  glEnable (GL_TEXTURE_2D);		
 	  break;
 	case TEXTURE1:
 	  if (g_game.Multitexture) {
-		bTex1 = TRUE;
+		bTex1 = GFXTRUE;
 		GFXActiveTexture (1);
 #ifdef NV_CUBE_MAP
 		glEnable (GL_TEXTURE_CUBE_MAP_EXT);
@@ -74,7 +74,7 @@ void /*GFXDRVAPI*/ GFXDisable (STATE state)
 	{
 	case LIGHTING:
 	  glDisable(GL_LIGHTING);
-	  GFXLIGHTING = FALSE;
+	  GFXLIGHTING = GFXFALSE;
 	  break;
 	case DEPTHTEST:
 	  glDisable(GL_DEPTH_TEST);
@@ -83,14 +83,14 @@ void /*GFXDRVAPI*/ GFXDisable (STATE state)
 	  glDepthMask(0);
 	  break;
 	case TEXTURE0:
-	  bTex0 = FALSE;
+	  bTex0 = GFXFALSE;
 	  GFXActiveTexture(0);	
 	  glDisable (GL_TEXTURE_2D);		
 	  break;
 	case TEXTURE1:
 	  if (g_game.Multitexture) {
-		bTex1 = FALSE;
-		bTex1 = TRUE;
+		bTex1 = GFXFALSE;
+		bTex1 = GFXTRUE;
 		GFXActiveTexture (1);
 #ifdef NV_CUBE_MAP
 		glDisable (GL_TEXTURE_CUBE_MAP_EXT);

@@ -120,7 +120,7 @@ SphereMesh::SphereMesh(float radius, int stacks, int slices, char *texture, char
 		Decal = new Texture (texture);
    }
    
-   centered?envMap = FALSE:envMap=envMapping;
+   centered?envMap = GFXFALSE:envMap=envMapping;
    
    if(centered) {
      draw_sequence=0;

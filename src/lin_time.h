@@ -26,7 +26,7 @@
 
 
 void InitTime();
-scalar_t GetElapsedTime();
+double GetElapsedTime();
 void UpdateTime();
 
 

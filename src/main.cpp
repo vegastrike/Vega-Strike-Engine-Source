@@ -46,7 +46,7 @@ void setup_game_data ( ){ //pass in config file l8r??
   g_game.sound_volume=1;
   g_game.music_volume=1;
   g_game.warning_level=20;
-  g_game.capture_mouse=False;
+  g_game.capture_mouse=GFXFALSE;
   g_game.fullscreen = 0;
   g_game.color_depth = 16;
   g_game.y_resolution = 480;
