@@ -63,12 +63,24 @@ void Order::Execute () {
 }
 
 Order * Order::queryType (int type) {
-  for (int i=0;i<suborders.size();i++) {
+  for (unsigned int i=0;i<suborders.size();i++) {
     if ((suborders[i]->type&type)==type) {
       return suborders[i];
     }
   }
   return NULL;
+}
+
+
+void Order::eraseType (int type) {
+  for (unsigned int i=0;i<suborders.size();i++) {
+    if ((suborders[i]->type&type)==type) {
+      delete suborders[i];
+      vector <Order *>::iterator j= suborders.begin()+i;
+      suborders.erase(j);
+      i--;
+    }
+  }
 }
 
 Order* Order::EnqueueOrder (Order *ord) {

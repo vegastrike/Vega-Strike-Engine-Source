@@ -48,6 +48,7 @@ public:
   virtual ~Order () {}
   virtual void Execute();
   Order* queryType (int type);
+  void eraseType (int type);
   bool AttachOrder (UnitCollection *targets);
   bool AttachOrder (Vector target);
   bool AttachSelfOrder (UnitCollection *targets=NULL);

@@ -31,12 +31,9 @@ AggressiveAI::AggressiveAI (const char * filename, Unit * target=NULL):FireAt(.2
   AIEvents::LoadAI (filename,logic);
 }
 
-void AggressiveAI::ExecuteLogicItem (const AIEvents::AIEvresult &item, bool force) {
+void AggressiveAI::ExecuteLogicItem (const AIEvents::AIEvresult &item) {
   Order * tmp = new AIScript (item.script.c_str());	
-  if (force)
-    parent->SetAI (tmp);
-  else
-    parent->EnqueueAI (tmp);
+  parent->EnqueueAI (tmp);
 }
 
 bool AggressiveAI::ProcessLogicItem (const AIEvents::AIEvresult &item) {
@@ -74,7 +71,7 @@ bool AggressiveAI::ProcessLogicItem (const AIEvents::AIEvresult &item) {
   return item.Eval(value);
 }
 
-void AggressiveAI::ProcessLogic (bool force) {
+void AggressiveAI::ProcessLogic () {
   //go through the logic. 
   Unit * tmp = parent->Target();
   distance = tmp? (tmp->Position()-parent->Position()).Magnitude() : FLT_MAX;
@@ -88,7 +85,7 @@ void AggressiveAI::ProcessLogic (bool force) {
     }
     if (j==i->end()&&(!i->empty())) {
       //do it
-      ExecuteLogicItem (i->front(),force);
+      ExecuteLogicItem (i->front());
       AIEvents::AIEvresult tmp = i->front();
       i->erase(i->begin());
       i->push_back (tmp);
@@ -100,11 +97,14 @@ void AggressiveAI::ProcessLogic (bool force) {
 void AggressiveAI::Execute () {  
   const int maxcount=10;//num sec before it rechecks AI	
   FireAt::Execute();
-  if (parent->getAIState()->queryType (FACING)==NULL||parent->getAIState()->queryType (MOVEMENT)==NULL) {
-    ProcessLogic(false);
+  if (parent->getAIState()->queryType (FACING)==NULL&&parent->getAIState()->queryType (MOVEMENT)==NULL) {//not sure if this is necessary for well-crafted AI 
+    ProcessLogic();
   } else {
     if ( (--count)==0) {
-      ProcessLogic (true);
+      parent->getAIState()->eraseType (FACING);
+      parent->getAIState()->eraseType (MOVEMENT);
+      
+      ProcessLogic ();
       count +=(short)(maxcount/SIMULATION_ATOM);      
     }
   }
