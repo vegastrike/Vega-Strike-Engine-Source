@@ -146,7 +146,8 @@ enum callback_module_briefing_type {
   CMT_BRIEFING_getShipPosition,
   CMT_BRIEFING_terminate,
   CMT_BRIEFING_setCamPosition,
-  CMT_BRIEFING_setCamOrientation
+  CMT_BRIEFING_setCamOrientation,
+  CMT_BRIEFING_setCloak
 };
 enum callback_module_olist_type {
   CMT_OLIST_UNKNOWN=0,

@@ -6,6 +6,7 @@ Briefing::Ship::Ship (const char * filename, int faction, const Vector & positio
   Unit * tmp  = new Unit (filename,true,faction);
   meshdata = tmp->StealMeshes();
   tmp->Kill();
+  cloak=1;
   SetPosition(position);
 }
 bool UpdatePosition (Vector & res, Vector cur, Vector fin, float speed) {
@@ -19,7 +20,7 @@ bool UpdatePosition (Vector & res, Vector cur, Vector fin, float speed) {
     res= direction+cur;
     return ret;
 }
-void SetDirection (Matrix mat, Vector start, Vector end, const Matrix cam) {
+void SetDirection (Matrix mat, Vector start, Vector end, const Matrix cam, bool updatepos) {
   end = end-start;
   if (end.MagnitudeSquared()>.000001) {
     Vector p;
@@ -41,26 +42,33 @@ void SetDirection (Matrix mat, Vector start, Vector end, const Matrix cam) {
 extern double interpolation_blend_factor;
 void Briefing::Render() {
   cam.UpdateGFX(GFXTRUE,GFXFALSE);
+  glClearColor(1,0,0,1);
+  GFXClear(GFXTRUE);
   for (unsigned int i=0;i<starships.size();i++) {
     starships[i]->Render(identity_matrix,interpolation_blend_factor);
   }
+  Mesh::ProcessUndrawnMeshes();
   _Universe->AccessCamera()->UpdateGFX(GFXTRUE,GFXFALSE);
+  glClearColor(0,0,0,0);
 }
 void Briefing::Ship::Render (const Matrix cam, double interpol) {
   Matrix final;
   Identity(final);
+  Vector pos(Position());
+  Vector dir = Position()+Vector (1,0,0);
   if (!orders.empty()) {
-    Vector pos;
     UpdatePosition(pos,Position(),orders.front().vec,orders.front().speed*interpol);
-    SetDirection (final,Position(),orders.front().vec,cam);
-    final[12]=pos.i;
-    final[13]=pos.j;
-    final[14]=pos.k;
+    dir = orders.front().vec;
   }
+  SetDirection (final,pos,dir,cam,!orders.empty());
+  final[12]=pos.i;
+  final[13]=pos.j;
+  final[14]=pos.k;
+  
   Matrix camfinal;
   MultMatrix (camfinal,cam,final);
   for (unsigned int i=0;i<meshdata.size();i++) {
-    meshdata[i]->Draw(1,camfinal,1,short(cloak*32767));
+    meshdata[i]->Draw(1,camfinal,1,cloak>.99?-1:short(cloak*32767));
   }
 }
 Briefing::Ship::~Ship() {
