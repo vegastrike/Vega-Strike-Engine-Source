@@ -34,6 +34,7 @@ Halo::~Halo () {
     halodrawqueue[decal]=NULL;
   }
 }
+float kkkk=3;
 void Halo::Draw (const Transformation &quat, const Matrix m, float alpha) {
   Vector pos,p,q,r, offset;
   static float HaloOffset = XMLSupport::parse_float(vs_config->getVariable ("graphics","HaloOffset",".1"));
@@ -45,12 +46,12 @@ void Halo::Draw (const Transformation &quat, const Matrix m, float alpha) {
   float hei = sizey;
   float rad =(wid>hei?wid:hei);
   offset*=1./offmag;
-  if (offmag<rad+.5*g_game.zfar) {
+  if (offmag<rad+.4*g_game.zfar) {
     offset*=HaloOffset*rad;
   }else {
     offset *= (offmag-2*g_game.znear);//-rad-.4*g_game.zfar);
-    wid/=((offmag)/(4*g_game.znear));//it's 1 time away from znear 
-    hei/=((offmag)/(4*g_game.znear));
+    wid/=((offmag)/(kkkk*g_game.znear));//it's 1 time away from znear 
+    hei/=((offmag)/(kkkk*g_game.znear));
   }
   _Universe->AccessCamera()->GetPQR(p,q,r);
   p=p*wid;
