@@ -835,11 +835,13 @@ public:
   virtual void Execute() {
     MoveTo::Execute();
     Unit * un=NULL;
-    static float mintime=XMLSupport::parse_float(vs_config->getVariable("AI","min_time_to_auto","20"));
-    if (_Universe->AccessCockpit()->autoInProgress()&&getNewTime()-creationtime>mintime&&(!_Universe->AccessCockpit()->unitInAutoRegion(parent))&&(un =ChooseNearNavPoint(parent,targetlocation,0))!=NULL) {
-      WarpToP(parent,un);
-    }else {
-      WarpToP(parent,targetlocation,0);
+    static float mintime=XMLSupport::parse_float(vs_config->getVariable("AI","min_time_to_auto","25"));
+    if (getNewTime()-creationtime>mintime) {
+      if (_Universe->AccessCockpit()->autoInProgress()&&(!_Universe->AccessCockpit()->unitInAutoRegion(parent))&&(un =ChooseNearNavPoint(parent,targetlocation,0))!=NULL) {
+        WarpToP(parent,un);
+      }else {
+        WarpToP(parent,targetlocation,0);
+      }
     }
   }
 };
@@ -849,7 +851,7 @@ static Vector randVector() {
 static void GoTo(AggressiveAI * ai, Unit * parent, const QVector &nav, float creationtime) {
   static bool can_afterburn = XMLSupport::parse_bool(vs_config->getVariable("AI","afterburn_to_no_enemies","true")); 
   Order * mt=new FlyTo(nav,can_afterburn,true,creationtime);
-  Order * ch=new Orders::ChangeHeading(nav,16,.1f,true);
+  Order * ch=new Orders::ChangeHeading(nav,32,.25f,true);
   mt->SetParent(parent);
   ch->SetParent(parent);
   ai->ReplaceOrder(mt);
@@ -860,11 +862,12 @@ void AggressiveAI::ExecuteNoEnemies() {
     Unit * dest=ChooseNavPoint (parent);
     if (dest) {
       static bool can_warp_to=XMLSupport::parse_bool(vs_config->getVariable("AI","warp_to_no_enemies","true"));      
-      if (can_warp_to) {
-        WarpToP(parent,dest);
-      }else if (_Universe->AccessCockpit()->autoInProgress()&&!_Universe->AccessCockpit()->unitInAutoRegion(parent)) {
-        static float mintime=XMLSupport::parse_float(vs_config->getVariable("AI","min_time_to_auto","20"));
-        if (getNewTime()-creationtime>mintime) {
+      static float mintime=XMLSupport::parse_float(vs_config->getVariable("AI","min_time_to_auto","25"));
+      if (getNewTime()-creationtime>mintime) {
+        if (can_warp_to) {
+          WarpToP(parent,dest);
+        }else if (_Universe->AccessCockpit()->autoInProgress()&&!_Universe->AccessCockpit()->unitInAutoRegion(parent)) {
+          
           WarpToP(parent,dest);
         }
       }

@@ -28,7 +28,7 @@ class MoveToParent {
   unsigned char terminatingY;
   unsigned char terminatingZ;
   Vector last_velocity;
-  bool OptimizeSpeed (Unit * parent, float v, float &a);
+  bool OptimizeSpeed (Unit * parent, float v, float &a, float max_speed);
   bool Done (const Vector &);
   bool selfterminating;
 public:
