@@ -193,8 +193,9 @@ void FlyByKeyboard::Execute (bool resetangvelocity) {
     static int neu=FactionUtil::GetFaction("neutral");
     static int upg=FactionUtil::GetFaction("upgrades");   
     static bool allowanyreference=XMLSupport::parse_bool(vs_config->getVariable("AI","AllowAnySpeedReference","false"));
+    static bool onlyupgraderef=XMLSupport::parse_bool(vs_config->getVariable("AI","OnlyUpgradeReference","false"));
     if (t)
-      if (t->getRelation(parent)>=0||t->faction==neu||t->faction==upg||allowanyreference)
+      if ((t->getRelation(parent)>=0&&!onlyupgraderef)||t->faction==neu||t->faction==upg||allowanyreference)
         parent->VelocityReference (parent->Target());
   }
   if (SSCK.setnulvel) {
