@@ -1,0 +1,87 @@
+0. LICENSING AND DISTRIBUTION
+
+xmesh_import.py | Python Script for Blender3D | imports a VegaStrike .xmesh
+Copyright (C)2005 Alex Feterman
+
+This program is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation; either version 2
+of the License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+
+(In a nutshell: you're free to contribute and distribute, but
+never to profit from this utility.)
+
+
+1. FILE DATA
+
+Filename	: xmesh_import.py
+Description	: Python script imports a VegaStrike .xmesh into Blender3D
+Author		: Alex 'CubOfJudahsLion' Feterman
+Version		: 0.1
+
+
+2. INSTALLING
+
+Drop the xmesh_import.py files into your blender scripts directory. This is normally
+?:\ ... \Blender\.blender\scripts in Windows and $HOME/.blender/scripts in Un*x, but
+the actual location may vary according to the parameters given during installation of
+Blender3D.
+
+
+3. USAGE
+
+3.1 Once installed, start Blender3D and select File->Import->VegaStrike (.xmesh)
+
+3.2 Select a .xmesh file from <VegaStrikeDataRoot>/units/<shipName>/*.xmesh
+    (replace the names between angle brackets with the proper names)
+
+3.3 Gaze upon the m4d modeling 5k|11z of the VegaStrike 3d art dudes ;) Oh, and you
+    can render to your heart's content as well (don't forget about the GNU licensing, tho.)
+
+
+4. RELEASE LOG
+
+* V0.1.1
+	Fixed:
+	- Texturing now "activates" correctly, and it's applied to mesh.
+	Known Issues: 
+	- No search/loading of alternate image directory
+	- Multiple-mesh needs to be done manually
+	- Duplicate points not automatically removed
+	- No subunits loaded
+	To do:
+	- Parse <Unit /> (including subunits)
+	- Parse BFXM
+	- Load&apply logos?
+	- Load images from alter dirs
+	- Remove duplicate points?
+	- Load subunits
+
+* V0.1
+	Known Issues:
+	- Texturing works, but somehow it still requires the user to "activate it".
+	  Click in "OB" in the material buttons for it to work.
+	- The script doesn't know to look for images that are not in the same directory
+	  as the .xmesh file, and they will cause an incomplete load of the model
+	- Multiple meshes not loaded. Self-illuminating meshes and lights need to be loaded
+	  manually
+	- Duplicate points need to be removed manually
+	- No subunits loaded
+	To do:
+	- Fix texture application bug
+	- Direct Parsing of <Unit /> files (.blank, .template)
+	- Parse BFXM (a better method, since <Unit/> now refers to BFXM almost exclusively.)
+	- Load Images from ../../textures directory when not present in current
+	- Load and apply logos. Probably never to be implemented--Blender only handles ONE set
+	  of UV coordinates per model, AFAIK.
+	- Remove duplicate points
+	- Load subunits
