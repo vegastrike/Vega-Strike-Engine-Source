@@ -1,3 +1,4 @@
+
 #include "audiolib.h"
 #include "hashtable.h"
 #include "vsfilesystem.h"
@@ -17,10 +18,7 @@
 #include <sys/stat.h>
 //their LoadWav is b0rken seriously!!!!!!
 
-bool MacFixedLoadWAVFile(VSFileSystem::VSFile & f,ALenum *format,ALvoid **data,ALsizei *size,ALsizei *freq){
-	long length = f.Size();
-    char * buf = (char *) malloc (length);
-    f.Read(buf,length);
+bool MacFixedLoadWAVFile(char * buf, ALenum *format,ALvoid **data,ALsizei *size,ALsizei *freq){
     ALboolean bleh=false;
     alutLoadWAVMemory((ALbyte*)buf,format,data,size,freq,&bleh);
     free(buf);
@@ -37,11 +35,139 @@ bool MacFixedLoadWAVFile(VSFileSystem::VSFile & f,ALenum *format,ALvoid **data,A
 #include <vector>
 #include "vs_globals.h"
 #include <algorithm>
+#include <stdio.h>
 #ifdef HAVE_AL
+#ifdef HAVE_OGG
+
+#include <vorbis/vorbisfile.h>
+#endif
 std::vector <unsigned int> dirtysounds;
 std::vector <OurSound> sounds;
 std::vector <ALuint> buffers;
 
+static void convertToLittle(unsigned int tmp, char * data){
+  data[0]=(char)(tmp%256);
+  data[1]=(char)((tmp/256)%256);
+  data[2]=(char)((tmp/65536)%256);
+  data[3]=(char)((tmp/65536)/256);  
+}
+static void ConvertFormat (vector<char>& ogg ) {
+  vector<char> converted;
+
+  if (ogg.size()>4) {
+    if (ogg[0]=='O'&&ogg[1]=='g'&&ogg[2]=='g'&&ogg[3]=='S') {
+#ifdef HAVE_OGG
+      OggVorbis_File vf;
+      ov_callbacks callbacks;
+      vorbis_info *info;       
+      int bitstream = -1;
+      long samplesize;
+      long samples;
+      int read, to_read;
+      int must_close = 1;
+      int was_error = 1;
+      FILE * tmpf=tmpfile();
+      fwrite(&ogg[0],ogg.size(),1,tmpf);
+      fseek(tmpf,0,SEEK_SET);
+      if (ov_open(tmpf,&vf,NULL,0) ){
+        ogg.clear();
+      }else {        
+        int bigendian=0;
+        long bytesread=0;
+        vorbis_info *info=ov_info(&vf,-1);
+        //ogg_int64_t totalsize=ov_pcm_total(&vf,-1);
+        //long num_streams=ov_streams(&vf);
+        const int segmentsize=16384;
+        const int samples=16;
+        converted.push_back('R');
+        converted.push_back('I');
+        converted.push_back('F');
+        converted.push_back('F');
+        converted.push_back(0);
+        converted.push_back(0);
+        converted.push_back(0);
+        converted.push_back(0);//fill in with weight;
+        converted.push_back('W');
+        converted.push_back('A');
+        converted.push_back('V');
+        converted.push_back('E');
+        converted.push_back('f');
+        converted.push_back('m');
+        converted.push_back('t');
+        converted.push_back(' ');
+
+        converted.push_back(16);//size of header (16 bytes)
+        converted.push_back(0);
+        converted.push_back(0);
+        converted.push_back(0);
+        
+        converted.push_back(1);//compression code
+        converted.push_back(0);
+
+        converted.push_back((char)(info->channels%256));//num channels;
+        converted.push_back((char)(info->channels/256));
+        
+        converted.push_back(0);//sample rate
+        converted.push_back(0);//sample rate
+        converted.push_back(0);//sample rate
+        converted.push_back(0);//sample rate
+        convertToLittle(info->rate,&converted[converted.size()-4]);
+
+        long byterate = info->rate*info->channels*samples/8;
+        converted.push_back(0);//bytes per second rate
+        converted.push_back(0);
+        converted.push_back(0);
+        converted.push_back(0);
+        convertToLittle(byterate,&converted[converted.size()-4]);
+
+        converted.push_back((char)((info->channels*samples/8)%256));//num_channels*16 bits/8
+        converted.push_back((char)((info->channels*samples/8)/256));        
+        
+        converted.push_back(samples);// 16 bit samples
+        converted.push_back(0);
+
+
+        // PCM header
+        converted.push_back('d');
+        converted.push_back('a');
+        converted.push_back('t');
+        converted.push_back('a');
+
+
+        converted.push_back(0);        
+        converted.push_back(0);
+        converted.push_back(0);
+        converted.push_back(0);
+        ogg_int64_t pcmsizestart=converted.size();
+        converted.resize(converted.size()+segmentsize);
+        int signedvalue=1;
+        int bitstream=0;
+        while ((bytesread=ov_read(&vf,&converted[converted.size()-segmentsize], segmentsize, 0, samples/8, signedvalue, &bitstream))>0){
+          if (bytesread<segmentsize) {
+            int numtoerase=segmentsize-bytesread;
+            converted.erase(converted.end()-numtoerase,converted.end());
+          }
+          
+          
+          converted.resize(converted.size()+segmentsize);
+        }
+        converted.erase(converted.end()-segmentsize,converted.end());
+        convertToLittle(converted.size()-8,&converted[4]);
+        convertToLittle(converted.size()-pcmsizestart-8,&converted[pcmsizestart-4]);
+#if 0
+        FILE * tmp = fopen("/tmp/bleh","wb");
+        fwrite(&converted[0],converted.size(),1,tmp);
+        fclose(tmp);
+#endif
+        converted.swap(ogg);
+      }
+      ov_clear(&vf);
+#else
+      ogg.clear();
+#endif
+    }
+  }
+}
 static int LoadSound (ALuint buffer, bool looping) {
   unsigned int i;
   if (!dirtysounds.empty()) {
@@ -115,29 +241,31 @@ int AUDCreateSoundWAV (const std::string &s, const bool music, const bool LOOP){
 	      void *wave;
 		  ALboolean looping;
 	      ALboolean err=AL_TRUE;
+              vector <char> dat;
+              dat.resize(f.Size());
+              f.Read( &dat[0], f.Size());
+              ConvertFormat(dat);
+              if (dat.size()==0)//conversion messed up
+                return -1;
 #ifndef WIN32
 #ifdef __APPLE__
 		  ALint format;
 		  // MAC OS X
 		  err = false;
 		  if( error<=Ok)
-			err=MacFixedLoadWAVFile( f, &format, &wave, &size, &freq);
+			err=MacFixedLoadWAVFile( &dat[0], &format, &wave, &size, &freq);
 #else
 		  // LINUX
 		  ALsizei format;
-	  	  char * dat = new char[f.Size()];
-	  	  f.Read( dat, f.Size());
-      	  alutLoadWAVMemory((ALbyte *)dat, &format, &wave, &size, &freq, &looping);
-	  	  delete []dat;
+                  alutLoadWAVMemory((ALbyte *)&dat[0], &format, &wave, &size, &freq, &looping);
 #endif
 #else
 		  ALint format;
 	  	  // WIN32
-	  	  char * dat = new char[f.Size()];
 	  	  f.Read( dat, f.Size());
-      	  alutLoadWAVMemory(dat, (int*)&format, &wave, &size, &freq, &looping);
-	  	  delete []dat;
+                  alutLoadWAVMemory(&dat[0], (int*)&format, &wave, &size, &freq, &looping);
 #endif
+
       	  if(err == AL_FALSE)
 		  {
 			alDeleteBuffers (1,wavbuf);
@@ -145,7 +273,7 @@ int AUDCreateSoundWAV (const std::string &s, const bool music, const bool LOOP){
 			return -1;
       	  }
       	  alBufferData( *wavbuf, format, wave, size, freq );
-      	  free(wave);
+          alutUnloadWAV(format,wave,size,freq);
       	  if (!music)
 		  {
 			soundHash.Put (hashname,wavbuf);
