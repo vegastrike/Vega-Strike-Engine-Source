@@ -246,6 +246,7 @@ void Python::init() {
   isinit=true;
 // initialize python library
   Py_Initialize();
+  initpaths();
 	InitBriefing ();
 	InitVS ();
 	fprintf (stderr,"testing VS random");
