@@ -56,6 +56,7 @@ std::string ftostr(double i) {
 	return test;
 }
 char * milky_way="../../../data/universe/milky_way.xml";
+char * path_to_universe="../../../data4.x/universe";
 class vec3 {
 public:
 	double x,y,z;
@@ -842,7 +843,20 @@ string getNameForFaction (std::string faction) {
 	}
 	return "";
 }
-
+void planetsIn (System &which, std::string faction) {
+	if (which["planetlist"].empty()) {
+		string filename=string(path_to_universe)+"/planets."+faction+".txt";
+		FILE * fp=fopen (filename.c_str(),"r");
+		if (fp) {
+			which["planetlist"]="planets."+faction+".txt";
+			fclose(fp);
+		}else if (faction=="pirates"||faction=="luddites"||faction=="uln") {
+			which["planetlist"]="planets.fringe.txt";
+			which["unitlist"]="smallunits.pirates.txt";
+		}
+		
+	}
+}
 void reName (std::vector<System>&s, System &which, std::string newname) {
 	if (newname.empty())
 		return;
@@ -929,7 +943,39 @@ void processsystems (std::vector <System> & s){
 	simulateFactionTurns(s); // Simulates the factions starting with one homeworld, and expands their territories.x
 	if (1) {
 		for (unsigned int i=0;i<s.size();++i) {
+			if (s[i]["faction"]!="aera"&&s[i]["faction"]!="rlaan") {
+				float mult = 1;
+				if (!s[i].habitable) {
+					mult=20;
+				}
+				if (rand()<RAND_MAX*mult*.007) {
+					s[i]["faction"]="pirates";
+				}
+				if (rand()<RAND_MAX*mult*.003) {
+					s[i]["faction"]="luddites";
+				}
+				if (rand()<RAND_MAX*mult*.005){
+					s[i]["faction"]="ISO";//also represented elsewhere
+				}
+			}
+			/*
+			if (s[i]["faction"]=="confed") {
+				FILE * fp = fopen (fp);
+				int siz=  fseek (fp,0,SEEK_END);				
+				char * buf = (char *)malloc (siz+1);
+				buf[siz]=0;
+				while (fgets(buf,siz,fp)){
+					vector<string> facsec=readCSV (buf);
+					
+					
+				}
+				
+				//now choose which subconfed faction this is
+				
+			}
+			*/
 			reName(s,s[i],getNameForFaction(s[i]["faction"]));
+			planetsIn(s[i],s[i]["faction"]);
 			numfactions[s[i]["faction"]]+=1;
 		}
 	}
