@@ -282,7 +282,7 @@ class	WebcamSupport
 		int		CopyImage();
 		void	DoError( long code, char * msg);
 };
-
+/*
 // Windows specific stuff to convert BMP to JPEG
 #if defined( _WIN32) && !defined( __CYGWIN__)
 #ifndef HAVE_BOOLEAN
@@ -295,12 +295,15 @@ typedef unsigned char boolean;
 #define XMD_H
 typedef int INT32;
 #endif
+*/
 #ifdef _WIN32
 #include <windows.h>
 #endif
 #include <string>
 
 extern "C" { 
+#include "jconfig.h"
+#include "jmorecfg.h"
 #include "jpeglib.h" 
 }
 

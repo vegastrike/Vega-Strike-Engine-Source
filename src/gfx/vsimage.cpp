@@ -24,9 +24,6 @@ typedef int INT32;
 #define XMD_H
 #endif
 
-extern "C" {
-#include <jpeglib.h>
-}
 #include "gfx/jpeg_memory.h"
 
 using namespace VSFileSystem;

@@ -5,7 +5,7 @@
 
 #include <stdio.h>
 #include <string.h>
-
+/* BAD BAD!!
 #if defined( _WIN32) && !defined( __CYGWIN__)
 #ifndef HAVE_BOOLEAN
 #define HAVE_BOOLEAN
@@ -18,13 +18,16 @@ typedef unsigned char boolean;
 typedef int INT32;
 #endif
 #endif
-
+*/
 #if defined( _WIN32) && !defined( __CYGWIN__)
 #include <windows.h>
 #endif
 #include "vsfilesystem.h"
 
-extern "C" { 
+extern "C" {
+#define XMD_H
+#include <jconfig.h>
+#include <jmorecfg.h>
 #include <jpeglib.h>
 }
 
