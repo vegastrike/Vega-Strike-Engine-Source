@@ -17,12 +17,46 @@
 #include "quadsquare.h"
 #include "gfxlib.h"
 
+
+Vector IdentityTransform::Transform (const Vector & v) {
+  return v;
+}
+
+void IdentityTransform::TransformBox (Vector &min, Vector & max) {
+  
+}
+
+Vector IdentityTransform::InvTransform (const Vector &v) {
+  return v;
+}
+
 unsigned int * quadsquare::VertexAllocated;
 unsigned int *quadsquare::VertexCount;
 GFXVertexList *quadsquare::vertices;
 std::vector <unsigned int> quadsquare::indices;
 std::vector <unsigned int> *quadsquare::unusedvertices;
+IdentityTransform *quadsquare::nonlinear_trans;
 
+
+unsigned int quadsquare::SetVertices (GFXVertex * vertexs, const quadcornerdata &pcd) {
+	unsigned int half= 1<<pcd.Level;
+	Vector v[5];
+	v[0].i = pcd.xorg + half;
+	v[0].k = pcd.zorg + half;
+	v[1].i = pcd.xorg + half*2; 
+	v[1].k = pcd.zorg + half;
+	v[2].i = pcd.xorg + half;   
+	v[2].k = pcd.zorg;
+	v[3].i = pcd.xorg; 
+	v[3].k = pcd.zorg + half;
+	v[4].i = pcd.xorg + half; 
+	v[4].k = pcd.zorg + half*2;
+	for (unsigned int i=0;i<5;i++) {
+	  v[i].j = Vertex[i].Y;
+	  vertexs[Vertex[i].vertindex].SetVertex (nonlinear_trans->Transform(v[i]));
+	}
+	return half;  
+}
 
 quadsquare::quadsquare(quadcornerdata* pcd) {
 
@@ -44,7 +78,7 @@ quadsquare::quadsquare(quadcornerdata* pcd) {
 	for (i = 0; i < 2; i++) {
 		SubEnabledCount[i] = 0;
 	}
-	
+
 	// Set default vertex positions by interpolating from given corners.
 	// Just bilinear interpolation.
 	Vertex[0].Y = 0.25 * (pcd->Verts[0].Y + pcd->Verts[1].Y + pcd->Verts[2].Y + pcd->Verts[3].Y);
@@ -67,7 +101,7 @@ quadsquare::quadsquare(quadcornerdata* pcd) {
 		if (y < MinY) MinY = (unsigned short)y;
 		if (y > MaxY) MaxY = (unsigned short)y;
 	}
-	int half= 1<<pcd->Level;
+
 	GFXVertex ** vertexs = &(vertices->BeginMutate(0)->vertices);
 	GFXVertex v[5];
 	v[0].SetNormal (((*vertexs)[pcd->Verts[0].vertindex].GetNormal() + (*vertexs)[pcd->Verts[1].vertindex].GetNormal() + (*vertexs)[pcd->Verts[2].vertindex].GetNormal() + (*vertexs)[pcd->Verts[3].vertindex].GetNormal()).Normalize());
@@ -75,20 +109,11 @@ quadsquare::quadsquare(quadcornerdata* pcd) {
 	v[2].SetNormal (((*vertexs)[pcd->Verts[0].vertindex].GetNormal() + (*vertexs)[pcd->Verts[1].vertindex].GetNormal()).Normalize());
 	v[3].SetNormal (((*vertexs)[pcd->Verts[1].vertindex].GetNormal() + (*vertexs)[pcd->Verts[2].vertindex].GetNormal()).Normalize());
 	v[4].SetNormal (((*vertexs)[pcd->Verts[2].vertindex].GetNormal() + (*vertexs)[pcd->Verts[3].vertindex].GetNormal()).Normalize());
-	v[0].x = pcd->xorg + half;
-	v[0].z = pcd->zorg + half;
-	v[1].x = pcd->xorg + half*2; 
-	v[1].z = pcd->zorg + half;
-	v[2].x = pcd->xorg + half;   
-	v[2].z = pcd->zorg;
-	v[3].x = pcd->xorg; 
-	v[3].z = pcd->zorg + half;
-	v[4].x = pcd->xorg + half; 
-	v[4].z = pcd->zorg + half*2;
+
 	//FIXME fill in st!
 
 	for (int i=0;i<5;i++) {
-	  v[i].y= Vertex[i].Y;	  
+	  //	  v[i].y= Vertex[i].Y;	  
 	  if (unusedvertices->size()) {
 	    (*vertexs)[unusedvertices->back()]= v[i];
 	    Vertex[i].vertindex = unusedvertices->back();
@@ -103,6 +128,7 @@ quadsquare::quadsquare(quadcornerdata* pcd) {
 	    (*VertexCount)++;
 	  }
 	}
+	SetVertices (*vertexs, *pcd);
 	vertices->EndMutate (*VertexCount);
 	//interpolate from other vertices;
 }
@@ -250,8 +276,8 @@ quadsquare*	quadsquare::GetNeighbor(int dir, const quadcornerdata& cd)
 }
 
 
-Vector	MakeLightness(float xslope, float zslope) {
-  return (Vector(xslope, 1, zslope)).Normalize();
+Vector	quadsquare::MakeLightness(float xslope, float zslope) {
+  return nonlinear_trans->Transform ((Vector(xslope, 1, zslope)).Normalize());
 }
 
   /**
@@ -685,7 +711,7 @@ void	quadsquare::Update(const quadcornerdata& cd, const Vector & ViewerLocation,
 {
 	DetailThreshold = Detail * VERTICAL_SCALE;
 	
-	UpdateAux(cd, ViewerLocation, 0);
+	UpdateAux(cd, nonlinear_trans->InvTransform(ViewerLocation), 0);
 }
 
 
@@ -828,6 +854,7 @@ void	quadsquare::RenderAux(const quadcornerdata& cd,  CLIPSTATE vis)
 		max.i = cd.xorg + whole;
 		max.j = MaxY * VERTICAL_SCALE;
 		max.k = cd.zorg + whole;
+		nonlinear_trans->TransformBox(min,max);
 		vis = GFXBoxInFrustum(min, max);
 		if (vis == GFX_NOT_VISIBLE) {
 			// This square is completely outside the view frustum.
@@ -992,11 +1019,12 @@ void	quadsquare::SetupCornerData(quadcornerdata* q, const quadcornerdata& cd, in
 		break;
 	}	
 }
-void quadsquare::SetCurrentTerrain (unsigned int *VertexAllocated, unsigned int *VertexCount, GFXVertexList *vertices, std::vector <unsigned int> *unvert ) {
+void quadsquare::SetCurrentTerrain (unsigned int *VertexAllocated, unsigned int *VertexCount, GFXVertexList *vertices, std::vector <unsigned int> *unvert, IdentityTransform * nlt ) {
   quadsquare::VertexAllocated = VertexAllocated;
   quadsquare::VertexCount = VertexCount;
   quadsquare::vertices = vertices;
   quadsquare::unusedvertices = unvert;
+  nonlinear_trans = nlt;
 }
 
 void	quadsquare::AddHeightMap(const quadcornerdata& cd, const HeightMapInfo& hm)
@@ -1044,46 +1072,36 @@ void	quadsquare::AddHeightMap(const quadcornerdata& cd, const HeightMapInfo& hm)
 	s[2] = hm.Sample(cd.xorg + half, cd.zorg);
 	s[3] = hm.Sample(cd.xorg, cd.zorg + half);
 	s[4] = hm.Sample(cd.xorg + half, cd.zorg + half*2);
-#if 0	
-	// Deviate vertex heights based on data sampled from heightmap.
-	Vector v[5];
-	v[0].i = cd.xorg + half;
-	v[0].k = cd.zorg + half;
-	v[0].j = hm.Sample(v[0].i, v[0].k);
-	v[1].i = cd.xorg + half*2; v[1].k = cd.zorg + half;
-	v[1].j = hm.Sample(v[1].i, v[1].k);
-	v[2].i = cd.xorg + half;   v[2].k = cd.zorg;
-	v[2].j = hm.Sample(v[2].i, v[2].k);
-	v[3].i = cd.xorg; v[3].k = cd.zorg + half;
-        v[3].j = hm.Sample(v[3].i, v[3].k);
-	v[4].i = cd.xorg + half; v[4].k = cd.zorg + half*2;
-	v[4].j = hm.Sample(v[4].i, v[4].k);
-#endif
 	// Modify the vertex heights if necessary, and set the dirty
 	// flag if any modifications occur, so that we know we need to
 	// recompute error data later.
-	GFXVertex * vertexs = vertices->BeginMutate(0)->vertices;
+
 	
 	for (i = 0; i < 5; i++) {
 		if (s[i] != 0) {
 			Dirty = true;
 			Vertex[i].Y += s[i];
-       			(vertexs)[Vertex[i].vertindex].y = Vertex[i].Y;
+       			
 			//			vertices[Vertex[i].vertindex].x = v[i].i;//FIXME are we necessary?
 			//vertices[Vertex[i].vertindex].z = v[i].k;
 
 		}
 	}
-	vertices->EndMutate();
-	if (!Dirty) {
-		// Check to see if any child nodes are dirty, and set the dirty flag if so.
-		for (i = 0; i < 4; i++) {
-			if (Child[i] && Child[i]->Dirty) {
-				Dirty = true;
-				break;
-			}
-		}
-	}
+	if (Dirty) {
+	  GFXVertex * vertexs = vertices->BeginMutate(0)->vertices;
+	  SetVertices (vertexs,cd);
+	  vertices->EndMutate();
+	}else {
+	  // Check to see if any child nodes are dirty, and set the dirty flag if so.
+	  for (i = 0; i < 4; i++) {
+	    if (Child[i] && Child[i]->Dirty) {
+	      Dirty = true;
+	      break;
+	    }
+	  }
+	} 
+
+
 
 	if (Dirty) SetStatic(cd);
 }

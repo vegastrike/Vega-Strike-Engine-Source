@@ -25,6 +25,19 @@ struct HeightMapInfo {
 	float	Sample(int x, int z) const;
 };
 
+/**
+ * We could make it virtual and ahve a sphere-map or cube-map version of this
+ *
+ */
+class IdentityTransform {
+ public:
+  ///Transforms in a possibly nonlinear way the vector to some new space
+  virtual Vector Transform (const Vector &);
+  ///Transforms in reverse the vector into quadsquare space
+  virtual Vector InvTransform (const Vector &);
+  ///Transforms a min and a max vector and figures out what is bigger
+  virtual void TransformBox (Vector &min, Vector &max);
+};
 
 struct	VertInfo {
   float	Y;
@@ -77,9 +90,12 @@ class quadsquare {
 	int	Render(const quadcornerdata& cd);
 
 	float	GetHeight(const quadcornerdata& cd, float x, float z);
-  static void SetCurrentTerrain (unsigned int * VertexAllocated, unsigned int * VertexCount, GFXVertexList *vertices, std::vector <unsigned int> *unusedvertices );
+	static Vector MakeLightness (float xslope, float zslope);
+  static void SetCurrentTerrain (unsigned int * VertexAllocated, unsigned int * VertexCount, GFXVertexList *vertices, std::vector <unsigned int> *unusedvertices, IdentityTransform * transform );
 	
 private:
+  ///Sets the 5 vertices in vertexs array in 3space from a quadcornerdata and return half of the size
+  unsigned int SetVertices (GFXVertex * vertexs, const quadcornerdata &pcd);
 	void	EnableEdgeVertex(int index, bool IncrementCount, const quadcornerdata& cd);
 	quadsquare*	EnableDescendant(int count, int stack[], const quadcornerdata& cd);
 	void	EnableChild(int index, const quadcornerdata& cd);
@@ -95,11 +111,12 @@ private:
 	void	UpdateAux(const quadcornerdata& cd, const Vector &ViewerLocation, float CenterError);
 	void	RenderAux(const quadcornerdata& cd, CLIPSTATE vis);
 	void	SetStatic(const quadcornerdata& cd);
-  static unsigned int * VertexAllocated;
-  static unsigned int * VertexCount;
-  static GFXVertexList *vertices;
-  static std::vector <unsigned int> *unusedvertices;
-  static std::vector <unsigned int> indices;
+	static IdentityTransform * nonlinear_trans;
+	static unsigned int * VertexAllocated;
+	static unsigned int * VertexCount;
+	static GFXVertexList *vertices;
+	static std::vector <unsigned int> *unusedvertices;
+	static std::vector <unsigned int> indices;
 };
 
 

@@ -10,6 +10,7 @@ const GFXVertex InitialVertices [4]= { GFXVertex (Vector(0,0,0),Vector (0,1,0), 
  
 QuadTree::QuadTree ():vertices (GFXTRI,4,InitialVertices,4,true) {
   Identity (transformation);
+  nonlinear_transform = new IdentityTransform;
   RootCornerData.Parent = NULL;
   RootCornerData.Square = NULL;
   RootCornerData.ChildIndex = 0;
@@ -22,7 +23,7 @@ QuadTree::QuadTree ():vertices (GFXTRI,4,InitialVertices,4,true) {
   RootCornerData.Verts[3].Y = 0;   RootCornerData.Verts[3].vertindex=3;
   VertexAllocated = VertexCount = 4;
   
-  quadsquare::SetCurrentTerrain (&VertexAllocated, &VertexCount, &vertices, &unusedvertices);
+  quadsquare::SetCurrentTerrain (&VertexAllocated, &VertexCount, &vertices, &unusedvertices, nonlinear_transform);
   root = new quadsquare (&RootCornerData);
   LoadData();
 }
@@ -31,7 +32,7 @@ QuadTree::QuadTree ():vertices (GFXTRI,4,InitialVertices,4,true) {
 
 QuadTree::~QuadTree () {
   delete root;
-  
+  delete nonlinear_transform;
   
 }
 float QuadTree::GetHeight (float x, float z) {
@@ -49,7 +50,7 @@ void QuadTree::Render () {
   GFXDisable (TEXTURE0);
   GFXEnable (LIGHTING);
   GFXBlendMode (ONE,ZERO);
-  quadsquare::SetCurrentTerrain (&VertexAllocated, &VertexCount, &vertices, &unusedvertices);
+  quadsquare::SetCurrentTerrain (&VertexAllocated, &VertexCount, &vertices, &unusedvertices, nonlinear_transform);
   root->Render (RootCornerData);
 }
 void	QuadTree::LoadData()

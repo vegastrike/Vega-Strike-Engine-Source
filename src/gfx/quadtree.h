@@ -8,6 +8,7 @@
  * and having posession of the static vars that get set
  */
 class QuadTree {
+  IdentityTransform * nonlinear_transform;
   Matrix transformation;
   quadcornerdata RootCornerData;
   quadsquare *root;
