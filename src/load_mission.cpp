@@ -213,7 +213,7 @@ void LoadMission (const char * mn, bool loadFirstUnit) {
 void LoadMission (const char * nission_name, const std::string &script, bool loadFirstUnit) {
 	string mission_name(nission_name);
 	if (mission_name.empty()) {
-		static std::string mission_name_def=vs_config->getVariable("general","empty_mission","mission/default.mission");
+		static std::string mission_name_def=vs_config->getVariable("general","empty_mission","mission/internal.mission");
 		mission_name=mission_name_def;
 	}
   FILE * fp = fopen (mission_name.c_str(),"r");
