@@ -15,7 +15,7 @@ void UnbindJoyKey (int joystick, int key) {
   JoystickBindings[joystick][key]=DefaultJoyHandler;
   JoystickState[joystick][key]=UP;
 }
-void BindJoyKey (int key, int joystick, JoyHandler handler) {
+void BindJoyKey (int joystick, int key, JoyHandler handler) {
   assert (key<NUMJBUTTONS&&joystick<MAX_JOYSTICKS);
   JoystickBindings[joystick][key]=handler;
   handler (RESET,0,0,0);
