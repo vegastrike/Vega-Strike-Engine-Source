@@ -193,7 +193,9 @@ bool cockpitfront=true;
     }else {
       _Universe->AccessCockpit()->Init ("disabled-cockpit.cpt");
     }
-    _Universe->activeStarSystem()->getBackground()->EnableBG(!(tmp&backgroundoff));
+	static int i=1;
+	if (i--==1)
+	    _Universe->activeStarSystem()->getBackground()->EnableBG(!(tmp&backgroundoff));
     tmp--;
     if (tmp<0) tmp=max-1;
   }

@@ -6,7 +6,7 @@
 #include <stdlib.h>
 #include "gfx/cockpit.h"
 #include "savegame.h"
-
+#include "main_loop.h"
 #include "gui/text_area.h"
 #include "gui/button.h"
 #include "vs_globals.h"
@@ -499,11 +499,11 @@ void ProcessMouse(int type, int x, int y, int button, int state) {
 
 	ours = CargoList->DoMouse(type, cur_x, cur_y, button, state);
 	if (ours == 0) { ours = CargoInfo->DoMouse(type, cur_x, cur_y, button, state); }
-	if (ours == 0) { ours = OK->DoMouse(type, cur_x, cur_y, button, state); }
-	if (ours == 1 && type == 1) {
-		// done button was clicked
+	if (ours == 0) { ours = OK->DoMouse(type, cur_x, cur_y, button, state); 	if (ours == 1 && type == 1) {
+		restore_main_loop();
 		cout << "You clicked done\n";
-	}
+	}}
+
 }
 
 /*
