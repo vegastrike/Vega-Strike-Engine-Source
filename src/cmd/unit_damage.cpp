@@ -260,15 +260,23 @@ bool GameUnit<UnitType>::Explode (bool drawit, float timeit) {
 		  if (un ) {
 			static float badrel=XMLSupport::parse_float(vs_config->getVariable("sound","loss_relationship","-.1"));
 			static float goodrel=XMLSupport::parse_float(vs_config->getVariable("sound","victory_relationship",".5"));
+			static float timelapse=XMLSupport::parse_float(vs_config->getVariable("sound","time_between_music","180"));
 			float rel=un->getRelation(this);
-			if (!BaseInterface::CurrentBase)
-			  if (rel>goodrel) {
-			    muzak->SkipRandSong(Music::LOSSLIST);
-			  } else if (rel < badrel) {
-			    muzak->SkipRandSong(Music::VICTORYLIST);
-			  }
+			if (!BaseInterface::CurrentBase) {
+				static float lasttime = 0;
+				float newtime=getNewTime();
+				if (newtime-lasttime>timelapse) {
+					if (rel>goodrel) {
+						lasttime=newtime;
+						muzak->SkipRandSong(Music::LOSSLIST);
+					} else if (rel < badrel) {
+						lasttime=newtime;
+						muzak->SkipRandSong(Music::VICTORYLIST);
+					}
+				}
+			}  
 		  } else {
-			muzak->SkipRandSong(Music::LOSSLIST);
+			//muzak->SkipRandSong(Music::LOSSLIST);
 		  }
 	  }
 	}
