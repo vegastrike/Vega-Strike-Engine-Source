@@ -162,21 +162,8 @@ void Unit::Init()
   //  Fire();
 }
 
-void Unit::SetCameraToCockpit() {
-  invisible=true;
-  /*  cumulative_transformation = linear_interpolate(prev_physical_state, curr_physical_state, interpolation_blend_factor);
-  cumulative_transformation.Compose(parent, parentMatrix);
-  cumulative_transformation.to_matrix(cumulative_transformation_matrix);
-  _Universe->AccessCamera()->SetOrientation(Vector (cumulative_transformation_matrix[0],
-						    cumulative_transformation_matrix[1],
-						    cumulative_transformation_matrix[2]),
-					    Vector (cumulative_transformation_matrix[4],
-						    cumulative_transformation_matrix[5],
-						    cumulative_transformation_matrix[6]),
-					    Vector (cumulative_transformation_matrix[8],
-						    cumulative_transformation_matrix[9],
-						    cumulative_transformation_matrix[10]));
-						    _Universe->AccessCamera()->SetPosition (cumulative_transformation.position);*/
+void Unit::SetVisible(bool invis) {
+  invisible=!invis;
 }
 
 Unit::Unit() {

@@ -30,7 +30,7 @@ void Cockpit::Delete () {
     Crosshairs = NULL;
   }
 }
-Cockpit::Cockpit (const char * file, Unit * parent): parent (parent), Pit(NULL),Crosshairs(NULL),cockpit_offset(0), viewport_offset(0) {
+Cockpit::Cockpit (const char * file, Unit * parent): parent (parent), Pit(NULL),Crosshairs(NULL),cockpit_offset(0), viewport_offset(0), view(CP_INSIDE), zoomfactor (1.2) {
   Init (file);
 }
 void Cockpit::Draw() {
@@ -50,6 +50,11 @@ void Cockpit::Draw() {
 Cockpit::~Cockpit () {
   Delete();
 }
+
+void Cockpit::SetView (const enum VIEWSTYLE tmp) {
+  view = tmp;
+}
+
 void Cockpit::RestoreViewPort() {
   GFXViewPort (0, 0, g_game.x_resolution,g_game.y_resolution);
 }
@@ -57,9 +62,18 @@ void Cockpit::SetupViewPort () {
     GFXViewPort (0,(int)(viewport_offset*g_game.y_resolution), g_game.x_resolution,g_game.y_resolution);
   _Universe->activeStarSystem()->AccessCamera()->setCockpitOffset (cockpit_offset);
   Unit * un;
-  if (un = parent.GetUnit()) {
-    un->UpdateHudMatrix();
+  if ((un = parent.GetUnit())) {
+    if (view!=CP_PAN) {
+      un->UpdateHudMatrix();
+      if (view==CP_BEHIND) {
+	_Universe->AccessCamera()->SetPosition(_Universe->AccessCamera()->GetPosition()-_Universe->AccessCamera()->GetR()*un->rSize()*zoomfactor);
+     }
+    }else {
+      _Universe->AccessCamera()->SetPosition (un->Position()-_Universe->AccessCamera()->GetR()*un->rSize()*zoomfactor);
+    }
     _Universe->activeStarSystem()->SetViewport();
+    un->SetVisible(view!=CP_INSIDE);
+    
   }
  
   //  parent->UpdateHudMatrix();

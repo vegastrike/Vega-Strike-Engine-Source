@@ -276,7 +276,7 @@ public:
   Vector LocalPosition(){return curr_physical_state.position;};
   void SetPosition(const Vector &pos) {prev_physical_state.position = curr_physical_state.position = pos;}
   void SetPosition(float x, float y, float z) {SetPosition (Vector (x,y,z));}
-  void SetCameraToCockpit();
+  void SetVisible(bool isvis);
 
   void Rotate(const Vector &axis);
   void FireEngines (const Vector &Direction, /*unit vector... might default to "r"*/

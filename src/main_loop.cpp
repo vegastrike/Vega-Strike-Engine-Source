@@ -146,6 +146,33 @@ static void Quit(int,KBSTATE newState) {
 		exit(0);
 	}
 }
+static void Inside(int,KBSTATE newState) {
+	if(newState==PRESS||newState==DOWN) {
+	  _Universe->AccessCockpit()->SetView (CP_INSIDE);
+	}
+}
+static void Behind(int,KBSTATE newState) {
+	if(newState==PRESS||newState==DOWN) {
+	  _Universe->AccessCockpit()->SetView (CP_BEHIND);
+	}
+}
+static void Pan(int,KBSTATE newState) {
+	if(newState==PRESS||newState==DOWN) {
+	  _Universe->AccessCockpit()->SetView (CP_PAN);
+	}
+}
+
+static void Hornet(int,KBSTATE newState) {
+	if(newState==PRESS||newState==DOWN) {
+	  _Universe->AccessCockpit()->Init ("hornet-cockpit.cpt");
+	}
+}
+static void Blank(int,KBSTATE newState) {
+	if(newState==PRESS||newState==DOWN) {
+	  _Universe->AccessCockpit()->Init ("");
+	}
+}
+
 
 Unit *carrier=NULL;
 Unit *fighter = NULL;
@@ -194,6 +221,12 @@ void clickhandler (KBSTATE k, int x, int y, int delx, int dely, int mod) {
 */
 
 void InitializeInput() {
+	BindKey(GLUT_KEY_F1, Inside);
+	BindKey(GLUT_KEY_F2, Hornet);
+	BindKey(GLUT_KEY_F3, Blank);
+	BindKey(GLUT_KEY_F5, Behind);
+	BindKey(GLUT_KEY_F6, Pan);
+
 	BindKey('w', PitchDown);
 	BindKey('z', PitchUp);
 	BindKey('a', YawLeft);
@@ -258,7 +291,7 @@ void createObjects() {
   fighters[0]->EnqueueAI(new AIScript("aitest.xml"));
   fighters[0]->EnqueueAI(new FlyByKeyboard ());
   fighters[0]->EnqueueAI(new FireKeyboard ());
-  _Universe->AccessCockpit()->Init ("");
+  _Universe->AccessCockpit()->Init ("hornet-cockpit.cpt");
   _Universe->AccessCockpit()->SetParent(fighters[0]);
   shipList = _Universe->activeStarSystem()->getClickList();
   locSel = new CoordinateSelect (Vector (0,0,5));
@@ -282,7 +315,6 @@ void destroyObjects() {
 void main_loop() {
   
 
-  fighters[0]->SetCameraToCockpit();
   _Universe->StartDraw();
 
   _Universe->activeStarSystem()->Draw();
