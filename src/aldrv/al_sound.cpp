@@ -51,6 +51,73 @@ static void convertToLittle(unsigned int tmp, char * data){
   data[2]=(char)((tmp/65536)%256);
   data[3]=(char)((tmp/65536)/256);  
 }
+struct fake_file{
+  char * data;
+  size_t size;
+  size_t loc;
+};
+size_t mem_read(void * ptr, size_t size, size_t nmemb, void * datasource) {
+  fake_file * fp = (fake_file*)datasource;
+  if (fp->loc+size>fp->size) {
+    size_t tmp=fp->size-fp->loc;
+    if (tmp)
+      memcpy (ptr,fp->data+fp->loc,tmp);
+    fp->loc=fp->size;
+    return tmp;
+  }else {
+    memcpy(ptr,fp->data+fp->loc,size);
+    fp->loc+=size;
+    return size;
+  }
+}
+int mem_close(void*) {
+  return 0;
+}
+
+long   mem_tell  (void *datasource){
+ fake_file * fp = (fake_file*)datasource; 
+ return (long)fp->loc;
+}
+int cant_seek (void * datasource, ogg_int64_t offset, int whence) {
+  return -1;
+}
+int mem_seek (void * datasource, ogg_int64_t offset, int whence) {
+ fake_file * fp = (fake_file*)datasource; 
+ if (whence==SEEK_END) {
+   if (offset<0) {
+     if (fp->size<(size_t)-offset) {
+       return -1;
+     }else {
+       fp->loc = fp->size+offset;
+       return 0;
+     }
+   }else if (offset==0) {
+     fp->loc=fp->size;
+   }else return -1;
+ }else if (whence==SEEK_CUR) {
+   if (offset<0) {
+     if (fp->loc<(size_t)-offset)
+       return -1;
+     else {
+       fp->loc+=offset;
+       return 0;
+     }
+   }else {
+     if (fp->loc+offset>fp->size) {
+       return -1;
+     }else {
+       fp->loc+=offset;
+       return 0;
+     }
+   }
+ }else if (whence==SEEK_SET) {
+   if (offset>fp->size) 
+     return -1;
+   fp->loc = offset;
+   return 0;
+ }
+ return -1;
+}
 static void ConvertFormat (vector<char>& ogg ) {
   vector<char> converted;
 
@@ -66,10 +133,18 @@ static void ConvertFormat (vector<char>& ogg ) {
       int read, to_read;
       int must_close = 1;
       int was_error = 1;
-      FILE * tmpf=tmpfile();
-      fwrite(&ogg[0],ogg.size(),1,tmpf);
-      fseek(tmpf,0,SEEK_SET);
-      if (ov_open(tmpf,&vf,NULL,0) ){
+      //FILE * tmpf=tmpfile();
+      //fwrite(&ogg[0],ogg.size(),1,tmpf);
+      //fseek(tmpf,0,SEEK_SET);
+      fake_file ff;
+      ff.data=&ogg[0];
+      ff.loc=0;
+      ff.size=ogg.size();
+      callbacks.read_func=&mem_read;
+      callbacks.seek_func=&mem_seek;
+      callbacks.close_func=&mem_close;
+      callbacks.tell_func=&mem_tell;
+      if (ov_open_callbacks(&ff,&vf,NULL,0,callbacks) ){
         ogg.clear();
       }else {        
         int bigendian=0;
