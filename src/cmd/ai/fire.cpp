@@ -371,7 +371,8 @@ bool FireAt::ShouldFire(Unit * targ, bool &missilelock) {
   }
   static float firewhen = XMLSupport::parse_float (vs_config->getVariable ("AI","Firing","InWeaponRange","1.2"));
   bool temp=parent->TrackingGuns(missilelock);
-  return (dist<firewhen&&angle>1/agg)||(temp&&dist<firewhen&&angle>0);
+  bool isjumppoint=targ->isUnit()==PLANETPTR&&!(Planet*)targ)->GetDestinations().empty();
+  return ((dist<firewhen&&angle>1/agg)||(temp&&dist<firewhen&&angle>0))&&!isjumppoint;
 }
 
 FireAt::~FireAt() {
