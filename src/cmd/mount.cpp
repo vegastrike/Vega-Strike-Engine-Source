@@ -122,6 +122,8 @@ void Mount::SwapMounts(Mount * other) {
 void Mount::ReplaceMounts (const Mount * other) {
 	int thisvol = volume; //short fix
 	int thissize = size;  //short fix
+        float xyscale=this->xyscale;
+        float zscale=this->zscale;
 	Quaternion q =this->GetMountOrientation();
 	Vector v = this->GetMountLocation();
 	*this=*other;
@@ -129,6 +131,8 @@ void Mount::ReplaceMounts (const Mount * other) {
 	volume=thisvol;
 	this->SetMountPosition(v);
 	this->SetMountOrientation(q);	
+        this->xyscale=xyscale;
+        this->zscale=zscale;
 	ref.gun=NULL;
 	this->ReplaceSound();
 	if (other->ammo==-1)
