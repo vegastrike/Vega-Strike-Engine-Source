@@ -7,8 +7,9 @@
 #ifdef __APPLE__
 #include <al.h>
 #include <alc.h>
+#define KeyMap AppleKeyMap 
 #include <alut.h>
-
+#undef KeyMap
 #else
 #include <AL/al.h>
 #include <AL/alc.h>
