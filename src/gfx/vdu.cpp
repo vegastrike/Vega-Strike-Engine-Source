@@ -196,6 +196,7 @@ static void DrawHUDSprite (VDU * thus, VSSprite* s, float per, float &sx, float 
 	  s->SetSize (w,invertsprite?-h:h);
 	  if (drawsprite) {
   		static const float middle_point = XMLSupport::parse_float(vs_config->getVariable("graphics","hud","armor_hull_size",".55"));
+                static bool top_view = XMLSupport::parse_float(vs_config->getVariable("graphics","hud","top_view","false"));
   		float middle_point_small=1-middle_point;
   		Vector ll,lr,ur,ul,mll,mlr,mur,mul;
   		s->getTexture()->MakeActive();
@@ -207,7 +208,7 @@ static void DrawHUDSprite (VDU * thus, VSSprite* s, float per, float &sx, float 
   		mul=middle_point*ul+middle_point_small*lr;
 		bool tmax=1;
   		GFXBegin(GFXQUAD);
-		GFXColorf(getDamageColor(aleft));
+		GFXColorf(getDamageColor(top_view?aup:aleft));
   		GFXTexCoord2f(0, 0);
   		GFXVertexf(ul);
 		GFXColorf(getDamageColor(aup));		
@@ -219,7 +220,7 @@ static void DrawHUDSprite (VDU * thus, VSSprite* s, float per, float &sx, float 
 		GFXColorf(getDamageColor(hull,true));		
   		GFXTexCoord2f(middle_point_small, middle_point_small);
   		GFXVertexf(mul);
-		GFXColorf(getDamageColor(aup));
+		GFXColorf(getDamageColor(top_view?aright:aup));
   		GFXTexCoord2f(1, 0);
   		GFXVertexf(ur);
 		GFXColorf(getDamageColor(aright));
@@ -231,7 +232,7 @@ static void DrawHUDSprite (VDU * thus, VSSprite* s, float per, float &sx, float 
 		GFXColorf(getDamageColor(hull,true));				
   		GFXTexCoord2f(middle_point, middle_point_small);
   		GFXVertexf(mur);
-		GFXColorf(getDamageColor(aright));
+		GFXColorf(getDamageColor(top_view?adown:aright));
   		GFXTexCoord2f(1, 1);
   		GFXVertexf(lr);
 		GFXColorf(getDamageColor(adown));		
@@ -243,7 +244,7 @@ static void DrawHUDSprite (VDU * thus, VSSprite* s, float per, float &sx, float 
 		GFXColorf(getDamageColor(hull,true));				
   		GFXTexCoord2f(middle_point, middle_point);
   		GFXVertexf(mlr);
-		GFXColorf(getDamageColor(adown));
+		GFXColorf(getDamageColor(top_view?aleft:adown));
   		GFXTexCoord2f(0, 1);
   		GFXVertexf(ll);
 		GFXColorf(getDamageColor(aleft));		
