@@ -7,7 +7,7 @@
 
 using std::vector;
 
-class Beam: public Primitive {
+class Beam {
 private:
   Transformation local_transformation;
   unsigned int decal;

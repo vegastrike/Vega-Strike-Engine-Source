@@ -295,6 +295,7 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
     indx = xml->mountz.size();
     xml->mountz.push_back(new Mount (filename.c_str()));
     xml->mountz[indx]->SetMountPosition(Transformation(Quaternion::from_vectors(P,Q,R),pos));
+    //xml->mountz[indx]->Activate();
     if (tempbool)
       xml->mountz[indx]->size=mntsiz;
     else

@@ -709,14 +709,14 @@ void Unit::Fire () {
       if (mounts[i].type.EnergyConsumption>energy) 
 	continue;
     }
-    ///FIXME!!    if (mounts[i].Fire(cumulative_transformation,cumulative_transformation_matrix,this)) {
-    ///      energy -= mounts[i].type==BEAM?mounts[i].type.EnergyRate*SIMULATION_ATOM:mounts[i].type.EnergyConsumption;
-    ///}//unfortunately cumulative transformation not generated in physics atom
-    mounts[i].gun = new Beam(identity_transformation,mounts[i].type,this);
+    if (mounts[i].Fire(cumulative_transformation,cumulative_transformation_matrix,this)) {
+    energy -= mounts[i].type.type==weapon_info::BEAM?mounts[i].type.EnergyRate*SIMULATION_ATOM:mounts[i].type.EnergyConsumption;
+    }//unfortunately cumulative transformation not generated in physics atom
   }
   
 }
-bool Unit::Mount::Fire (const Transformation &Cumulative, const float * m,  Unit * owner) {
+
+bool Unit::Mount::Fire (const Transformation &Cumulative, const float * m, Unit * owner) {
   if (status!=ACTIVE) 
     return false;
   if (type.type==weapon_info::BEAM) {
