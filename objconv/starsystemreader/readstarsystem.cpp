@@ -805,7 +805,7 @@ vector<System> readfile (const char * name) {
 			if (systems[i].habitable) {
 				hc +=1;
 				if (systems[i].interesting==false) {
-					systems[i].name = recomputeName();
+					//systems[i].name = recomputeName();
 				}
 			}else {
 				bc+=1;
@@ -911,8 +911,15 @@ void planetsIn (System &which, std::string faction) {
 	}
 }
 void reName (std::vector<System>&s, System &which, std::string newname) {
-	if (newname.empty())
+	if (newname.empty()){
+		if (which.interesting==false){
+			string rec=recomputeName();
+			if (!rec.empty()) {
+				reName(s,which,rec);
+			}
+		}
 		return;
+	}
 	string sector = which.sector;
 	string oldname = which.name;
 	string fullname = which.sector+"/"+which.name;
