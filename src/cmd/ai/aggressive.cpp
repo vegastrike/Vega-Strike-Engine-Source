@@ -306,17 +306,18 @@ void AggressiveAI::ReCommandWing(Flightgroup * fg) {
     Unit* lead;
     if (overridable (fg->directive)) {//computer won't override capital orders
       if (NULL!=(lead=fg->leader.GetUnit())) {
-	if (lead->getFgSubnumber()>=parent->getFgSubnumber()) {
 	  if (float(rand())/RAND_MAX<SIMULATION_ATOM/time_to_recommand_wing) {
-	    if ((parent->FShieldData()<.2||parent->RShieldData()<.2)){
+	    if (parent->Threat()&&(parent->FShieldData()<.2||parent->RShieldData()<.2)){
 	      fg->directive = string("h");
 	      LeadMe (parent,"h","I need help here!");
+	      fprintf (stderr,"he needs help %s",parent->name.c_str());
 	    }else {
-	      fg->directive = string("b");
-	      LeadMe (parent,"h","I'm taking over this wing. Break and attack");
+	      if (lead->getFgSubnumber()>=parent->getFgSubnumber()) {	
+		fg->directive = string("b");
+		LeadMe (parent,"b","I'm taking over this wing. Break and attack");
+	      }
 	    }
 	  }
-	}
       }
     }
   }

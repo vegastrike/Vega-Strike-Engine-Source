@@ -712,7 +712,7 @@ void Unit::ApplyDamage (const Vector & pnt, const Vector & normal, float amt, Un
       CommunicationMessage c(ownerDoNotDereference,this,NULL,0);
       c.SetCurrentState(c.fsm->GetHitNode(),NULL,0);
       this->getAIState()->Communicate (c);      
-    
+      Threaten (ownerDoNotDereference,10);//the dark danger is real!
   }
   bool mykilled = hull<0;
   Vector localpnt (InvTransform(cumulative_transformation_matrix,pnt));
