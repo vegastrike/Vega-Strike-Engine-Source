@@ -26,8 +26,6 @@ $unitoutfile = ($basename = $1) . ".xunit";
 open(INPUT, "<$inputfile") or die "Could not open $inputfile";
 open(UNITOUTPUT, ">$unitoutfile") or die "Could not create $unitoutfile";
 
-binmode(TEXTUREINPUT);
-
 print UNITOUTPUT << 'HEAD' 
 <Unit>
 HEAD
@@ -121,7 +119,7 @@ POINT
 for $objname (keys %encountered_points) {
 	print "$objname\n";
 	if($objname ne $basename) {
-	$subfile = "$objname.xnt";
+	$subfile = "$objname.xunit";
 	open(SUBUNITOUTPUT, ">$subfile");
 	print SUBUNITOUTPUT "<Unit>\n";
 	} else {
