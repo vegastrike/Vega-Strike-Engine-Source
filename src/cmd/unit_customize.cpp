@@ -436,7 +436,7 @@ void StartFrame(void) {
   GFXDisable (DEPTHTEST);
   GFXDisable (DEPTHWRITE);
   GFXDisable (LIGHTING);
-
+  GFXDisable (CULLFACE);
   GFXClear (GFXTRUE);
   GFXBlendMode (SRCALPHA,INVSRCALPHA);
   GFXDisable (TEXTURE1);
