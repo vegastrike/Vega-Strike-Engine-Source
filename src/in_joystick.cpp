@@ -83,7 +83,7 @@ JoyStick::JoyStick(int which): mouse(which==MOUSE_JOYSTICK) {
   player=which;//by default bind players to whichever joystick it is
   debug_digital_hatswitch=XMLSupport::parse_bool(vs_config->getVariable("joystick","debug_digital_hatswitch","false"));
   if (which!=MOUSE_JOYSTICK)
-    deadzone=atoi(vs_config->getVariable("joystick","deadband","0.05").c_str());
+    deadzone=XMLSupport::parse_float(vs_config->getVariable("joystick","deadband","0.05"));
   else
     deadzone=0;
   joy_available = 0;
