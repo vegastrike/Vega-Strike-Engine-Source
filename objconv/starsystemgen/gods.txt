@@ -1,0 +1,4 @@
+#hindu
+
+
+hindu: vishnu, brahma, krishna, rama, ganesh, shiva, kali, lakshmi

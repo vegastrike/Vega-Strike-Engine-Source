@@ -1,1 +1,1 @@
-MiningBase2 MiningBase3 MiningBase ConfedHq station Refinery drydock ConfedHq station Refinery drydock ConfedHq station Refinery drydock ConfedHq station Refinery drydock ConfedHq station Refinery drydock Refinery drydock Refinery drydock
+UMiningBase2 UMiningBase3 UMiningBase UConfedHq Ustation URefinery Udrydock UConfedHq Ustation URefinery Udrydock UConfedHq Ustation URefinery Udrydock UConfedHq Ustation URefinery Udrydock UConfedHq Ustation URefinery Udrydock URefinery Udrydock URefinery Udrydock

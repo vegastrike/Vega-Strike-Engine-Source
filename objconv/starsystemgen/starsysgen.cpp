@@ -242,9 +242,13 @@ vector <string> parseBigUnit (string input) {
 }
 
 
-void WriteUnit(string name, string filename, Vector r, Vector s, Vector center, string destination, bool faction) {
+void WriteUnit(string tag, string name, string filename, Vector r, Vector s, Vector center, string nebfile, string destination, bool faction) {
   Tab();
-  fprintf (fp,"<Unit name=\"%s\" file=\"%s\" ",name.c_str(),filename.c_str());
+  fprintf (fp,"<%s name=\"%s\" file=\"%s\" ",tag.c_str(),name.c_str(),filename.c_str());
+  if (nebfile.length()>0) {
+    fprintf (fp,"nebfile=\"%s\" ",nebfile.c_str());
+  }
+
   fprintf (fp,"ri=\"%f\" rj=\"%f\" rk=\"%f\" si=\"%f\" sj=\"%f\" sk=\"%f\" ",r.i,r.j,r.k,s.i,s.j,s.k);
   fprintf (fp,"x=\"%f\" y=\"%f\" z=\"%f\" ",center.i,center.j,center.k);
   if (destination.length()) {
@@ -277,6 +281,52 @@ string starin (string input) {
   return string ("");
 }
 
+string GetNebFile (string &input) {
+  string ip = input.c_str();
+  char * ptr = strdup(ip.c_str());
+  for (unsigned int i=0;ptr[i]!='\0';i++) {
+    if (ptr[i]=='^') {
+      ptr[i]='\0';
+      string ans (ptr);
+      input = ptr+i+1;
+      free (ptr);
+      return ans;
+    }
+  }
+  free (ptr);
+  return string ("");
+}
+
+
+string AnalyzeType (string &input, string &nebfile) {
+  if (input.empty())
+    return "";
+  string ip = input.c_str();
+  const char * ptr = ip.c_str();
+  string retval;
+  switch (*ptr) {
+  case 'N':
+    input =ptr+1;
+    nebfile=GetNebFile(input);
+    retval="Nebula";
+    break;
+  case 'A':
+    input=ptr+1;
+    retval="Asteroid";
+    break;
+  case 'B':
+    input=ptr+1;
+    retval="Building";
+    break;
+  case 'U':
+  input = ptr+1;
+  default:
+    retval="Unit";
+
+  }
+  return retval;
+
+}
 void MakeSmallUnit () {
   Vector r,S;
   Vector center=generateAndUpdateRS(r,S,300);
@@ -294,7 +344,9 @@ void MakeSmallUnit () {
       break;
     }
   }
-  WriteUnit (nam,nam,r,S,center,s,true);
+  string nebfile ("");
+  string type = AnalyzeType(nam,nebfile);
+  WriteUnit (type,nam,nam,r,S,center,nebfile,s,true);
 
 }
 
@@ -319,6 +371,7 @@ void MakeBigUnit (string name=string (""),float orbitalradius=0) {
 
   float size;
   string tmp;
+  string nebfile("");
   for (unsigned int i=0;i<fullname.size();i++) {
     if (1==sscanf (fullname[i].c_str(),"jump%f",&size)) {
       MakePlanet(size,JUMP,true,r,s,center);
@@ -331,10 +384,12 @@ void MakeBigUnit (string name=string (""),float orbitalradius=0) {
     }else if ((tmp=starin(fullname[i])).length()>0) {
       string S = getRandName (entities[JUMP]);
       if (S.length()>0) {
-	WriteUnit (S,tmp,r,s,center,getJumpTo(S),false);
+	string type = AnalyzeType(tmp,nebfile);
+	WriteUnit (type, S,tmp,r,s,center,nebfile,getJumpTo(S),false);
       }
     } else {
-      WriteUnit(fullname[i],fullname[i],r,s,center,string(""),i!=0);
+      string type = AnalyzeType(fullname[i],nebfile);
+      WriteUnit(type,fullname[i],fullname[i],r,s,center,nebfile,string(""),i!=0);
     }
   }
 
@@ -474,6 +529,30 @@ void readentity (vector <string> & entity,const char * filename) {
   }
   fclose (fp);
 }
+
+
+void readnames (vector <string> &entity, const char * filename) {
+  FILE * fp= fopen (filename,"r");
+  if (!fp) {
+    return;
+  }
+  ///warning... obvious vulnerability
+  char input_buffer[1000];
+  while (!feof (fp)) {
+    fgets (input_buffer,999,fp);
+    if (input_buffer[0]=='\0'||input_buffer[0]=='\n')
+      continue;
+    for (unsigned int i=0;input_buffer[i]!='\0';i++) {
+      if (input_buffer[i]=='\n') {
+	input_buffer[i]='\0';
+	break;
+      }
+    }
+    entity.push_back (input_buffer);
+  }
+  fclose (fp);
+
+}
 const char * noslash (const char * in) {
   const char * tmp=in;
   while (*tmp!='\0'&&*tmp!='/') {
@@ -493,11 +572,19 @@ const char * noslash (const char * in) {
     return tmp;
 }
 int main (int argc, char ** argv) {
-  srand (5235);
+
   if (argc<9) {
     fprintf (stderr,"Not enough arguments");
     return -1;
   }
+  int seed;
+  if (1!=sscanf (argv[1],"%d",&seed)) {
+    return -1;
+  }
+  if (seed)
+    srand (seed);
+  else
+    srand (time(NULL));
   readentity (entities[0],"stars.txt");
   readentity (entities[1],"planets.txt");
   readentity (entities[2],"gas_giants.txt");
@@ -505,34 +592,34 @@ int main (int argc, char ** argv) {
   readentity (units[0],"bigunits.txt");
   readentity (units[1],"smallunits.txt");
   readentity (background,"background.txt");
-  readentity (names,"names.txt");
-  char *filename=(char *)malloc (strlen(argv[1])+100);
-  strcpy (filename,argv[1]);
+  readnames (names,"names.txt");
+  char *filename=(char *)malloc (strlen(argv[2])+100);
+  strcpy (filename,argv[2]);
   strcat (filename,".system");
   fp = fopen (filename,"w");
-  strcpy (filename,noslash (argv[1]));
+  strcpy (filename,noslash (argv[2]));
   filename[0]= toupper (filename[0]);
   systemname=string(filename);
   free(filename);
-  if (1!=sscanf (argv[2],"%f",&starradius)) {
+  if (1!=sscanf (argv[3],"%f",&starradius)) {
     return -1;
   }
-  if (1!=sscanf(argv[3],"%d",&nument[0])) {
+  if (1!=sscanf(argv[4],"%d",&nument[0])) {
     return -1;
   }
-  if (1!=sscanf(argv[4],"%d",&nument[1])) {
+  if (1!=sscanf(argv[5],"%d",&nument[1])) {
     return -1;
   }
-  if (1!=sscanf(argv[5],"%d",&nument[2])) {
+  if (1!=sscanf(argv[6],"%d",&nument[2])) {
     return -1;
   }
-  if (1!=sscanf(argv[6],"%d",&nument[3])) {
+  if (1!=sscanf(argv[7],"%d",&nument[3])) {
     return -1; 
   }
-  if (1!=sscanf(argv[7],"%d",&numun[0])) {
+  if (1!=sscanf(argv[8],"%d",&numun[0])) {
     return -1;
   }
-  if (1!=sscanf(argv[8],"%d",&numun[1])) {
+  if (1!=sscanf(argv[9],"%d",&numun[1])) {
     return -1;
   }
   faction=argv[10];
