@@ -35,6 +35,7 @@
 
 #define q(x)	("\""+x+"\"")
 
+extern string parseCalike(char const *filename);
 extern int yyerror(char *);
 extern int yywrap();
 extern int yylex();

@@ -71,6 +71,7 @@
 
 #define q(x)	("\""+x+"\"")
 
+extern string parseCalike(char const *filename);
 extern int yyerror(char *);
 extern int yywrap();
 extern int yylex();
@@ -184,16 +185,16 @@ static const short yyrhs[] = {     9,
 
 #if YYDEBUG != 0
 static const short yyrline[] = { 0,
-    68,    72,    73,    76,    76,    76,    76,    78,    81,    82,
-    85,    86,    89,    89,    90,    90,    91,    93,    94,    95,
-    96,    97,    98,   103,   106,   109,   113,   131,   132,   136,
-   139,   142,   143,   145,   146,   148,   150,   154,   158,   160,
-   163,   164,   165,   166,   167,   168,   169,   170,   172,   175,
-   179,   182,   191,   194,   197,   198,   200,   201,   205,   206,
-   209,   214,   217,   220,   223,   226,   229,   229,   230,   231,
-   234,   236,   237,   238,   240,   243,   246,   250,   253,   256,
-   257,   260,   263,   264,   266,   268,   270,   272,   274,   277,
-   279,   281,   283,   285,   287,   289,   291
+    69,    73,    74,    77,    77,    77,    77,    79,    82,    83,
+    86,    87,    90,    90,    91,    91,    92,    94,    95,    96,
+    97,    98,    99,   104,   107,   110,   114,   132,   133,   137,
+   140,   143,   144,   146,   147,   149,   151,   155,   159,   161,
+   164,   165,   166,   167,   168,   169,   170,   171,   173,   176,
+   180,   183,   192,   195,   198,   199,   201,   202,   206,   207,
+   210,   215,   218,   221,   224,   227,   230,   230,   231,   232,
+   235,   237,   238,   239,   241,   244,   247,   251,   254,   257,
+   258,   261,   264,   265,   267,   269,   271,   273,   275,   278,
+   280,   282,   284,   286,   288,   290,   292
 };
 #endif
 
@@ -895,132 +896,132 @@ yyreduce:
   switch (yyn) {
 
 case 1:
-#line 68 "c_alike.yacc"
+#line 69 "c_alike.yacc"
 {
 	string module="<module name=" + q(yyvsp[-3]) + " >\n"+yyvsp[-1]+"\n</module>\n";
 	module_string=module;
 ;
     break;}
 case 2:
-#line 72 "c_alike.yacc"
+#line 73 "c_alike.yacc"
 { yyval=""; ;
     break;}
 case 3:
-#line 73 "c_alike.yacc"
+#line 74 "c_alike.yacc"
 {
 	yyval=yyvsp[-2]+"\n"+yyvsp[-1];
 ;
     break;}
 case 4:
-#line 76 "c_alike.yacc"
+#line 77 "c_alike.yacc"
 { yyval=yyvsp[0]; ;
     break;}
 case 5:
-#line 76 "c_alike.yacc"
+#line 77 "c_alike.yacc"
 {yyval=yyvsp[0];
     break;}
 case 6:
-#line 76 "c_alike.yacc"
+#line 77 "c_alike.yacc"
 { yyval=yyvsp[0] ;
     break;}
 case 7:
-#line 76 "c_alike.yacc"
+#line 77 "c_alike.yacc"
 { yyval=yyvsp[0]; ;
     break;}
 case 8:
-#line 78 "c_alike.yacc"
+#line 79 "c_alike.yacc"
 {
 	yyval="<globals>\n"+yyvsp[-1]+"\n</globals>\n";
 ;
     break;}
 case 9:
-#line 81 "c_alike.yacc"
+#line 82 "c_alike.yacc"
 { yyval=""; ;
     break;}
 case 10:
-#line 82 "c_alike.yacc"
+#line 83 "c_alike.yacc"
 {
 	yyval=yyvsp[-2]+"\n"+yyvsp[-1];
 ;
     break;}
 case 11:
-#line 85 "c_alike.yacc"
+#line 86 "c_alike.yacc"
 { yyval=yyvsp[0]; ;
     break;}
 case 12:
-#line 86 "c_alike.yacc"
+#line 87 "c_alike.yacc"
 {
 	yyval="<import name="+q(yyvsp[0])+"/>";
  ;
     break;}
 case 13:
-#line 89 "c_alike.yacc"
+#line 90 "c_alike.yacc"
 {yyval=yyvsp[0];;
     break;}
 case 14:
-#line 89 "c_alike.yacc"
+#line 90 "c_alike.yacc"
 {yyval=yyvsp[0];;
     break;}
 case 15:
-#line 90 "c_alike.yacc"
+#line 91 "c_alike.yacc"
 {yyval=yyvsp[0];;
     break;}
 case 16:
-#line 90 "c_alike.yacc"
+#line 91 "c_alike.yacc"
 {yyval=yyvsp[0];
     break;}
 case 17:
-#line 91 "c_alike.yacc"
+#line 92 "c_alike.yacc"
 { yyval=yyvsp[0];;
     break;}
 case 18:
-#line 93 "c_alike.yacc"
+#line 94 "c_alike.yacc"
 { yyval="int" ;
     break;}
 case 19:
-#line 94 "c_alike.yacc"
+#line 95 "c_alike.yacc"
 { yyval="float";
     break;}
 case 20:
-#line 95 "c_alike.yacc"
+#line 96 "c_alike.yacc"
 {  yyval="bool";
     break;}
 case 21:
-#line 96 "c_alike.yacc"
+#line 97 "c_alike.yacc"
 { yyval="object";
     break;}
 case 22:
-#line 97 "c_alike.yacc"
+#line 98 "c_alike.yacc"
 { yyval="void";
     break;}
 case 23:
-#line 98 "c_alike.yacc"
+#line 99 "c_alike.yacc"
 {
 	yyval="<defvar name="+q(yyvsp[0])+" type="+q(yyvsp[-1])+"/>\n";
 //	printf("DEVFAR %s\n",$2.c_str());
 ;
     break;}
 case 24:
-#line 103 "c_alike.yacc"
+#line 104 "c_alike.yacc"
 {
 	yyval="<defvar name="+q(yyvsp[-2])+" type="+q(yyvsp[-3])+" initvalue="+q(yyvsp[0])+" />\n";
 ;
     break;}
 case 25:
-#line 106 "c_alike.yacc"
+#line 107 "c_alike.yacc"
 {
 	yyval="<defvar name="+q(yyvsp[-2])+" type="+q(yyvsp[-3])+" />\n"+"<setvar name="+q(yyvsp[-2])+" >\n"+yyvsp[0]+"\n</setvar>";
 ;
     break;}
 case 26:
-#line 109 "c_alike.yacc"
+#line 110 "c_alike.yacc"
 {
 	yyval="<defvar name="+q(yyvsp[0])+" type="+q(yyvsp[-1])+"/>\n";
 //	printf("DEVFAR %s\n",$2.c_str());
 ;
     break;}
 case 27:
-#line 113 "c_alike.yacc"
+#line 114 "c_alike.yacc"
 {
 
 	string allvars="";
@@ -1041,121 +1042,121 @@ case 27:
 ;
     break;}
 case 28:
-#line 131 "c_alike.yacc"
+#line 132 "c_alike.yacc"
 { yyval=yyvsp[0];;
     break;}
 case 29:
-#line 132 "c_alike.yacc"
+#line 133 "c_alike.yacc"
 {
 	yyval=yyvsp[-2]+" "+yyvsp[0];
 ;
     break;}
 case 30:
-#line 136 "c_alike.yacc"
+#line 137 "c_alike.yacc"
 {
 	yyval=yyvsp[-3]+"\n"+yyvsp[-1]+"\n</script>\n";
 ;
     break;}
 case 31:
-#line 139 "c_alike.yacc"
+#line 140 "c_alike.yacc"
 {
 	yyval="<script name="+q(yyvsp[-3])+" return="+q(yyvsp[-4])+" >\n"+"<arguments>\n"+yyvsp[-1]+"\n</arguments>\n";
 ;
     break;}
 case 32:
-#line 142 "c_alike.yacc"
+#line 143 "c_alike.yacc"
 { printf("var_or_voidtype\n"); yyval=yyvsp[0];;
     break;}
 case 33:
-#line 143 "c_alike.yacc"
+#line 144 "c_alike.yacc"
 {yyval=yyvsp[0];;
     break;}
 case 34:
-#line 145 "c_alike.yacc"
+#line 146 "c_alike.yacc"
 { yyval="\n"; ;
     break;}
 case 35:
-#line 146 "c_alike.yacc"
+#line 147 "c_alike.yacc"
 { yyval=yyvsp[0];;
     break;}
 case 36:
-#line 149 "c_alike.yacc"
+#line 150 "c_alike.yacc"
 { yyval=yyvsp[0];;
     break;}
 case 37:
-#line 150 "c_alike.yacc"
+#line 151 "c_alike.yacc"
 {
 	yyval=yyvsp[-2]+"\n"+yyvsp[0];
 ;
     break;}
 case 38:
-#line 154 "c_alike.yacc"
+#line 155 "c_alike.yacc"
 {
 	yyval=yyvsp[0];
 ;
     break;}
 case 39:
-#line 159 "c_alike.yacc"
+#line 160 "c_alike.yacc"
 { yyval=""; ;
     break;}
 case 40:
-#line 160 "c_alike.yacc"
+#line 161 "c_alike.yacc"
 {
 	yyval=yyvsp[-1]+"\n"+yyvsp[0];
 ;
     break;}
 case 41:
-#line 163 "c_alike.yacc"
-{ yyval=yyvsp[0]; ;
-    break;}
-case 42:
 #line 164 "c_alike.yacc"
 { yyval=yyvsp[0]; ;
     break;}
-case 43:
+case 42:
 #line 165 "c_alike.yacc"
-{ yyval=yyvsp[-1]; ;
+{ yyval=yyvsp[0]; ;
     break;}
-case 44:
+case 43:
 #line 166 "c_alike.yacc"
 { yyval=yyvsp[-1]; ;
     break;}
-case 45:
+case 44:
 #line 167 "c_alike.yacc"
 { yyval=yyvsp[-1]; ;
     break;}
-case 46:
+case 45:
 #line 168 "c_alike.yacc"
+{ yyval=yyvsp[-1]; ;
+    break;}
+case 46:
+#line 169 "c_alike.yacc"
 { yyval=yyvsp[0]; ;
     break;}
 case 47:
-#line 169 "c_alike.yacc"
+#line 170 "c_alike.yacc"
 { yyval=yyvsp[-1]; ;
     break;}
 case 48:
-#line 170 "c_alike.yacc"
+#line 171 "c_alike.yacc"
 { yyval=" ";;
     break;}
 case 49:
-#line 172 "c_alike.yacc"
+#line 173 "c_alike.yacc"
 {
 	yyval="<return/>\n";
 ;
     break;}
 case 50:
-#line 175 "c_alike.yacc"
+#line 176 "c_alike.yacc"
 {
 	yyval="<return>\n"+yyvsp[0]+"\n</return>\n";
 ;
     break;}
 case 51:
-#line 179 "c_alike.yacc"
+#line 180 "c_alike.yacc"
 {
 	yyval="<while>\n"+yyvsp[-1]+"\n"+yyvsp[0]+"\n</while>\n";
 ;
     break;}
 case 52:
-#line 182 "c_alike.yacc"
+#line 183 "c_alike.yacc"
 {
 	if(yyvsp[-6][0]=='_'){
 		yyval="<call module="+q(yyvsp[-6])+" name="+q(yyvsp[-4])+" "+yyvsp[-2]+" >\n"+yyvsp[-1]+"\n</call>\n";
@@ -1166,219 +1167,219 @@ case 52:
 ;
     break;}
 case 53:
-#line 191 "c_alike.yacc"
+#line 192 "c_alike.yacc"
 {
 		yyval="<call object="+q(yyvsp[-6])+" name="+q(yyvsp[-4])+" "+yyvsp[-2]+" >\n"+yyvsp[-1]+"\n</call>\n";
 ;
     break;}
 case 54:
-#line 194 "c_alike.yacc"
+#line 195 "c_alike.yacc"
 {
 	yyval="<exec name="+q(yyvsp[-3])+" >\n"+yyvsp[-1]+"\n</exec>\n";
 ;
     break;}
 case 55:
-#line 197 "c_alike.yacc"
+#line 198 "c_alike.yacc"
 { yyval="\n"; ;
     break;}
 case 56:
-#line 198 "c_alike.yacc"
+#line 199 "c_alike.yacc"
 { yyval=yyvsp[0];;
     break;}
 case 57:
-#line 200 "c_alike.yacc"
+#line 201 "c_alike.yacc"
 {yyval=yyvsp[0];;
     break;}
 case 58:
-#line 201 "c_alike.yacc"
+#line 202 "c_alike.yacc"
 {
 	yyval=yyvsp[-2]+"\n"+yyvsp[0];
 ;
     break;}
 case 59:
-#line 205 "c_alike.yacc"
+#line 206 "c_alike.yacc"
 { yyval=" "; ;
     break;}
 case 60:
-#line 206 "c_alike.yacc"
+#line 207 "c_alike.yacc"
 {
 	yyval=yyvsp[-2]+" "+yyvsp[-1];
 ;
     break;}
 case 61:
-#line 209 "c_alike.yacc"
+#line 210 "c_alike.yacc"
 {
 	yyval=yyvsp[-2]+"="+yyvsp[0]+" ";
 ;
     break;}
 case 62:
-#line 214 "c_alike.yacc"
+#line 215 "c_alike.yacc"
 {
 	yyval="<setvar name="+q(yyvsp[-2])+" >\n"+yyvsp[0]+"\n</setvar>\n";
 ;
     break;}
 case 63:
-#line 217 "c_alike.yacc"
+#line 218 "c_alike.yacc"
 {
 	yyval="<if>\n"+yyvsp[-4]+"\n"+yyvsp[-2]+"\n"+yyvsp[0]+"\n</if>\n";
 ;
     break;}
 case 64:
-#line 220 "c_alike.yacc"
+#line 221 "c_alike.yacc"
 {
 	yyval="<if>\n"+yyvsp[-4]+"\n"+yyvsp[-2]+"\n"+yyvsp[0]+"\n</if>\n";
 ;
     break;}
 case 65:
-#line 223 "c_alike.yacc"
+#line 224 "c_alike.yacc"
 {
 	yyval="<if>\n"+yyvsp[-2]+"\n"+yyvsp[0]+"\n"+"<block></block>"+"\n</if>\n";
 ;
     break;}
 case 66:
-#line 226 "c_alike.yacc"
+#line 227 "c_alike.yacc"
 {
 	yyval="<block>\n"+yyvsp[-1]+"\n</block>\n";
 ;
     break;}
 case 67:
-#line 229 "c_alike.yacc"
+#line 230 "c_alike.yacc"
 { yyval=yyvsp[0]; ;
     break;}
 case 68:
-#line 229 "c_alike.yacc"
+#line 230 "c_alike.yacc"
 { yyval=yyvsp[0]; ;
     break;}
 case 69:
-#line 230 "c_alike.yacc"
+#line 231 "c_alike.yacc"
 {yyval=yyvsp[0];;
     break;}
 case 70:
-#line 231 "c_alike.yacc"
+#line 232 "c_alike.yacc"
 {
 	yyval="<const type=\"object\" object=\"string\" value="+yyvsp[0]+" />\n";
 ;
     break;}
 case 71:
-#line 234 "c_alike.yacc"
+#line 235 "c_alike.yacc"
 {yyval=yyvsp[0];;
     break;}
 case 72:
-#line 236 "c_alike.yacc"
-{yyval=yyvsp[0];;
-    break;}
-case 73:
 #line 237 "c_alike.yacc"
 {yyval=yyvsp[0];;
     break;}
-case 74:
+case 73:
 #line 238 "c_alike.yacc"
 {yyval=yyvsp[0];;
     break;}
+case 74:
+#line 239 "c_alike.yacc"
+{yyval=yyvsp[0];;
+    break;}
 case 75:
-#line 240 "c_alike.yacc"
+#line 241 "c_alike.yacc"
 {
 	 yyval="true";
  ;
     break;}
 case 76:
-#line 243 "c_alike.yacc"
+#line 244 "c_alike.yacc"
 {
 	 yyval="false";
 ;
     break;}
 case 77:
-#line 246 "c_alike.yacc"
+#line 247 "c_alike.yacc"
 {
 	 yyval="<const type=\"bool\" value="+q(yyvsp[0])+" />\n";
  ;
     break;}
 case 78:
-#line 250 "c_alike.yacc"
+#line 251 "c_alike.yacc"
 {
 	 yyval="<const type=\"float\" value="+q(yyvsp[0])+" />\n";
  ;
     break;}
 case 79:
-#line 253 "c_alike.yacc"
+#line 254 "c_alike.yacc"
 {
 	 yyval="<const type=\"int\" value="+q(yyvsp[0])+" />\n";
 ;
     break;}
 case 80:
-#line 256 "c_alike.yacc"
+#line 257 "c_alike.yacc"
 { yyval=yyvsp[0]; ;
     break;}
 case 81:
-#line 257 "c_alike.yacc"
+#line 258 "c_alike.yacc"
 {
 	yyval="<var name="+q(yyvsp[0])+" />\n";
 ;
     break;}
 case 82:
-#line 260 "c_alike.yacc"
+#line 261 "c_alike.yacc"
 {
 	yyval="<var module="+q(yyvsp[-2])+" name="+q(yyvsp[-1])+" />\n";
 ;
     break;}
 case 83:
-#line 263 "c_alike.yacc"
+#line 264 "c_alike.yacc"
 { yyval=yyvsp[0]; ;
     break;}
 case 84:
-#line 265 "c_alike.yacc"
+#line 266 "c_alike.yacc"
 { yyval="<test test=\"eq\" >\n"+yyvsp[-2]+"\n"+yyvsp[0]+"\n</test>\n"; ;
     break;}
 case 85:
-#line 267 "c_alike.yacc"
+#line 268 "c_alike.yacc"
 { yyval="<test test=\"ne\" >\n"+yyvsp[-2]+"\n"+yyvsp[0]+"\n</test>\n"; ;
     break;}
 case 86:
-#line 269 "c_alike.yacc"
+#line 270 "c_alike.yacc"
 { yyval="<test test=\"le\" >\n"+yyvsp[-2]+"\n"+yyvsp[0]+"\n</test>\n"; ;
     break;}
 case 87:
-#line 271 "c_alike.yacc"
+#line 272 "c_alike.yacc"
 { yyval="<test test=\"ge\" >\n"+yyvsp[-2]+"\n"+yyvsp[0]+"\n</test>\n"; ;
     break;}
 case 88:
-#line 273 "c_alike.yacc"
+#line 274 "c_alike.yacc"
 { yyval="<test test=\"lt\" >\n"+yyvsp[-2]+"\n"+yyvsp[0]+"\n</test>\n"; ;
     break;}
 case 89:
-#line 275 "c_alike.yacc"
+#line 276 "c_alike.yacc"
 { yyval="<test test=\"gt\" >\n"+yyvsp[-2]+"\n"+yyvsp[0]+"\n</test>\n"; ;
     break;}
 case 90:
-#line 278 "c_alike.yacc"
+#line 279 "c_alike.yacc"
 { yyval="<fmath math=\"*\" >\n"+yyvsp[-2]+"\n"+yyvsp[0]+"\n</fmath>\n"; ;
     break;}
 case 91:
-#line 280 "c_alike.yacc"
+#line 281 "c_alike.yacc"
 { yyval="<fmath math=\"/\" >\n"+yyvsp[-2]+"\n"+yyvsp[0]+"\n</fmath>\n"; ;
     break;}
 case 92:
-#line 282 "c_alike.yacc"
+#line 283 "c_alike.yacc"
 { yyval="<fmath math=\"-\" >\n"+yyvsp[-2]+"\n"+yyvsp[0]+"\n</fmath>\n"; ;
     break;}
 case 93:
-#line 284 "c_alike.yacc"
+#line 285 "c_alike.yacc"
 { yyval="<fmath math=\"+\" >\n"+yyvsp[-2]+"\n"+yyvsp[0]+"\n</fmath>\n"; ;
     break;}
 case 94:
-#line 286 "c_alike.yacc"
+#line 287 "c_alike.yacc"
 { yyval="<and>\n"+yyvsp[-2]+"\n"+yyvsp[0]+"\n</and>\n"; ;
     break;}
 case 95:
-#line 288 "c_alike.yacc"
+#line 289 "c_alike.yacc"
 { yyval="<or>\n"+yyvsp[-2]+"\n"+yyvsp[0]+"\n</or>\n"; ;
     break;}
 case 96:
-#line 290 "c_alike.yacc"
+#line 291 "c_alike.yacc"
 { yyval="<not>\n"+yyvsp[0]+"\n</not>\n";		;
     break;}
 case 97:
-#line 292 "c_alike.yacc"
+#line 293 "c_alike.yacc"
 { yyval=yyvsp[-1]; ;
     break;}
 }
@@ -1603,7 +1604,7 @@ yyerrhandle:
     }
   return 1;
 }
-#line 294 "c_alike.yacc"
+#line 295 "c_alike.yacc"
 
 
 /* nothing */

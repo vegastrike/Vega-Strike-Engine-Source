@@ -1,5 +1,10 @@
 2001-12-13 Alexander Rawass <alexannika@users.sourceforge.net>
 
+	* fix for Patrick's parseCalike problem?
+
+	
+2001-12-13 Alexander Rawass <alexannika@users.sourceforge.net>
+
 	* added strings to c_alike.yacc
 	* added string callbacks src/cmd/script/script_call_string.cpp
 	* made Unit remember the Flightgroup & nr
