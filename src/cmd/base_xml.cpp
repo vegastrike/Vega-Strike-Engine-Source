@@ -56,9 +56,25 @@ void InitBase() {
 	PYTHON_INIT_MODULE(Base);
 	Python::reseterrors();
 }
+static FILE * withAndWithout (std::string filename, std::string time_of_day_hint) {
+  string with (filename+"_"+time_of_day_hint+BASE_EXTENSION);
+  FILE * fp = fopen (with.c_str(),"r");
+  if (!fp) {
+    string without (filename+BASE_EXTENSION);
+    fp = fopen (without.c_str(),"r");
+  }
+  return fp;
+}
+static FILE * getFullFile (std::string filename, std::string time_of_day_hint,std::string faction) {
+  FILE * fp = withAndWithout (filename+"_"+faction,time_of_day_hint);
+  if (!fp) {
+    fp = withAndWithout (filename,time_of_day_hint);
+  }
+  return fp;
+}
+void Base::Load(const char * filename,const char * time_of_day_hint, const char * faction) {
+#if 0
 
-void Base::Load(const char * filename,const char * time_of_day_hint) {
-  const int chunk_size = 16384;
   std::string full_filename = string("bases/") + filename;
   std::string daynight_filename = full_filename + "_"+string(time_of_day_hint);
   full_filename+=BASE_EXTENSION;
@@ -94,14 +110,29 @@ void Base::Load(const char * filename,const char * time_of_day_hint) {
 	if (!inFile)
       return;
   }
+#else
+  FILE * inFile = getFullFile (string("bases/")+filename,time_of_day_hint,faction);
+  if (!inFile){
+    bool planet=false;
+    Unit *baseun=this->baseun.GetUnit();
+    if (baseun) {
+      planet = (baseun->isUnit()==PLANETPTR);
+    }
+    string basestring ("bases/unit");
+    if (planet) {
+      basestring = "bases/planet";
+    }
+    inFile = getFullFile (basestring,time_of_day_hint,faction);
+    if (!inFile)
+      return;
+  }
+#endif
   //now that we have a FILE * named inFile and a std::string named newfile we can finally begin the python
-  const char *filnam=newfile.c_str();
-  int length=strlen(filnam);
-  char *pyfile=new char[length+1];
-  strncpy(pyfile,filnam,length);
-  pyfile[length]='\0';
+  string compilefile = string(filename)+time_of_day_hint+string(faction)+BASE_EXTENSION;
+  char *pyfile=strdup(compilefile.c_str());
   Python::reseterrors();
   PyRun_SimpleFile(inFile,pyfile);
   Python::reseterrors();
+  free (pyfile);
   fclose(inFile);
 }
