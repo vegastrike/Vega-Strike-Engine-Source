@@ -690,7 +690,7 @@ int main (int argc, char ** argv)
 	for (i=0;i<Stat.NumGuns;i++)
 	{
 		Stat.GunOffset[i].i = readf(shp);
-		Stat.GunOffset[i].j = -readf(shp);
+		Stat.GunOffset[i].j = readf(shp);
 		Stat.GunOffset[i].k = readf(shp);
 	}
 
