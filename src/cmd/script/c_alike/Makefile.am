@@ -8,7 +8,7 @@ libc_alike_a_SOURCES =				\
 AM_CXXFLAGS = -DBISON
 
 c_alike.tab.cpp: c_alike.yacc
-	bison -d -o c_alike.tab.cpp c_alike.yacc
+#	bison -d -o c_alike.tab.cpp c_alike.yacc
 
 lex.yy.cpp: c_alike.lex
 	flex -o lex.yy.cpp c_alike.lex 
