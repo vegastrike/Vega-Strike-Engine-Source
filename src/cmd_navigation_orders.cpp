@@ -92,7 +92,7 @@ bool MoveTo::Done(const Vector & local_heading, const Vector & ang_vel) {
 
 
 AI* MoveTo::Execute(){
-  Vector local_location = targetlocation - parent->GetPosition();
+  Vector local_location = targetlocation - parent->Position();
   Vector heading = parent->ToLocalCoordinates(local_location);
   Vector velocity = parent->UpCoordinateLevel(parent->GetVelocity());
   Vector thrust (parent->Limits().lateral, parent->Limits().vertical,afterburn?parent->Limits().afterburn:parent->Limits().forward);
@@ -207,3 +207,18 @@ AI * ChangeHeading::Execute() {
   return this;
 }
 
+AI * FaceTarget::Execute() {
+  Unit * target = parent->Target();
+  if (target==NULL){
+    done = finish;
+    return NULL;
+  }
+  SetDest(target->Position());
+  ChangeHeading::Execute();
+  if (!finish) {
+    done=FALSE;
+    return this;
+  } else{ 
+    return done?NULL:this;
+  }
+}

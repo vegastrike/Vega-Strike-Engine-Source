@@ -5,9 +5,11 @@
 vector <LineCollide*> collidequeue;
 const int COLLIDETABLESIZE=20;//cube root of entries
 const int COLLIDETABLEACCURACY=200;// "1/largeness of sectors"
+const int HUGEOBJECT=16; //objects that go over 16 sectors are considered huge and better to check against everything.
 #define _USE_COLLIDE_TABLE
 class CollideTable {
   int minaccessx,minaccessy,minaccessz,maxaccessx,maxaccessy,maxaccessz;
+  vector <LineCollide*> hugeobjects;
   vector <LineCollide*> table [COLLIDETABLESIZE][COLLIDETABLESIZE][COLLIDETABLESIZE];
   static int hash_int (float i) {
     return (((int)(i<0?(i-COLLIDETABLEACCURACY):i))/COLLIDETABLEACCURACY)%(COLLIDETABLESIZE/2)+(COLLIDETABLESIZE/2); 
@@ -30,7 +32,7 @@ public:
     maxaccessz=0;    
   }
   void Clear () {
-
+    hugeobjects = vector <LineCollide*>();
     for (int i=minaccessx;i<=maxaccessx;i++) {
     for (int j=minaccessy;j<=maxaccessy;j++) {
     for (int k=minaccessz;k<=maxaccessz;k++) {
@@ -57,8 +59,7 @@ public:
       }*/
 
   }
-  void Get (const Vector &Min, const Vector & Max, vector <LineCollide*> &retval) {    
-
+  bool Get (const Vector &Min, const Vector & Max, vector <LineCollide*> &retval) {    
     //int minx,miny,minz,maxx,maxy,maxz;
     //    hash_vec(Min,minx,miny,minz);
     //    hash_vec(Max,maxx,maxy,maxz);
@@ -69,6 +70,12 @@ public:
     if (Min.i==maxx) maxx+=COLLIDETABLEACCURACY/2;
     if (Min.j==maxy) maxy+=COLLIDETABLEACCURACY/2;
     if (Min.k==maxz) maxz+=COLLIDETABLEACCURACY/2;
+    if (fabs((maxx-Min.i)*(maxy-Min.j)*(maxz-Min.k))>COLLIDETABLEACCURACY*COLLIDETABLEACCURACY*COLLIDETABLEACCURACY*HUGEOBJECT) {
+      retval = collidequeue;
+      return true;
+    } else {
+      retval = hugeobjects;
+    }
     for (float i=Min.i;i<maxx;i+=COLLIDETABLEACCURACY) {
       x = hash_int (i);
       for (float j=Min.j;j<maxy;j+=COLLIDETABLEACCURACY) {   
@@ -89,13 +96,17 @@ public:
 	}
       }
     }
-    
+    return false;
   }
   
-  void Put(LineCollide* target) {
+  void Put(LineCollide* target, bool huge) {
     //    int minx,miny,minz,maxx,maxy,maxz;
     //    hash_vec(target->Mini,minx,miny,minz);
     //    hash_vec(target->Maxi,maxx,maxy,maxz);
+    if (huge) {
+      hugeobjects.push_back(target);
+      return;
+    }
     int x,y,z;
     float maxx= (ceil(target->Maxi.i/COLLIDETABLEACCURACY))*COLLIDETABLEACCURACY;
     float maxy= (ceil(target->Maxi.j/COLLIDETABLEACCURACY))*COLLIDETABLEACCURACY;
@@ -123,11 +134,11 @@ public:
   }
 } collidetable;
 
-void AddCollideQueue (const LineCollide &tmp) {
+void AddCollideQueue (const LineCollide &tmp, bool huge) {
   int size = collidequeue.size();
   collidequeue.push_back (new LineCollide(tmp));
 #ifdef _USE_COLLIDE_TABLE
-  collidetable.Put (collidequeue[size]);
+  collidetable.Put (collidequeue[size],huge);
 #endif
 
   
@@ -144,13 +155,14 @@ void ClearCollideQueue() {
 
 void Unit::CollideAll() {
   unsigned int i;
+  bool huge = false;
   Vector minx (Position().i-radial_size,Position().j-radial_size,Position().k-radial_size);
   Vector maxx(Position().i+radial_size,Position().j+radial_size,Position().k+radial_size);
   //target->curr_physical_state.position;, rSize();
 #ifdef _USE_COLLIDE_TABLE
   #define COLQ colQ
   vector <LineCollide*> colQ;
-  collidetable.Get (minx,maxx,colQ);
+  huge = collidetable.Get (minx,maxx,colQ);
 #else
   #define COLQ collidequeue
 #endif
@@ -179,7 +191,7 @@ void Unit::CollideAll() {
     }
   }
   //add self to the queue??? using prev and cur physical state as an UNKNOWN
-  AddCollideQueue (LineCollide(this,LineCollide::UNIT,minx,maxx));
+  AddCollideQueue (LineCollide(this,LineCollide::UNIT,minx,maxx),huge);
 #undef COLQ
 }
 

@@ -267,7 +267,7 @@ void Beam::UpdatePhysics(const Transformation &trans, const Matrix m) {
   direction = TransformNormal (cumulative_transformation_matrix,Vector(0,0,1));
   Vector tmpvec = center + direction*curlength;
 
-  AddCollideQueue (LineCollide (this,LineCollide::BEAM,center.Min(tmpvec),center.Max(tmpvec)));
+  AddCollideQueue (LineCollide (this,LineCollide::BEAM,center.Min(tmpvec),center.Max(tmpvec)),false);
 				       
   //Check if collide...that'll change max beam length REAL quick
 }

@@ -21,8 +21,9 @@
 #include "cmd_unit.h"
 #include "cmd_order.h"
 #include "UnitCollection.h"
+#include "physics.h"
 AI * Order::Execute () {
-  int completed=0;
+  //  int completed=0;
   if(suborders.size()) {
     vector<AI*>::iterator ord = suborders.begin();
     (*ord)->Execute();
@@ -121,6 +122,19 @@ bool Order::AttachOrder (Vector targetv) {
   targetlocation = targetv;
   return true;
 }
+
+AI * ExecuteFor::Execute() {
+  child->SetParent(parent);
+  type = child->getType();
+  if (time>maxtime) {
+    done = true;
+    return NULL;
+  }
+  time +=SIMULATION_ATOM;
+  child = child->Execute();
+  return this;
+}
+
 
 //Doesn't work anymore (as if it ever did)
 AI* FlyStraight::Execute() {

@@ -9,7 +9,7 @@ struct LineCollide {
   LineCollide (const LineCollide &l) {object=l.object; type=l.type; Mini=l.Mini;Maxi=l.Maxi;}      
 };
 
-void AddCollideQueue(const LineCollide &);
+void AddCollideQueue(const LineCollide &, bool huge);
 void ClearCollideQueue();
 
 

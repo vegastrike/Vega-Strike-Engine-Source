@@ -61,6 +61,16 @@ public:
   virtual Order * newOrder() {return new Order;}
 };
 
+class ExecuteFor:  public Order {
+  AI * child;
+  float time;
+  float maxtime;
+ public:
+  ExecuteFor (AI * chld, float seconds): Order(),child(chld),time(0),maxtime(seconds) {}
+  AI * Execute ();
+  ~ExecuteFor () {delete child;}
+};
+
 
 class FlyStraight:public AI{
 	float speed;

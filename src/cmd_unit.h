@@ -303,7 +303,7 @@ public:
   Vector ToWorldCoordinates(const Vector &v) const;
   const Vector &GetAngularVelocity() const { return AngularVelocity; }
   const Vector &GetVelocity() const { return Velocity; }
-  const Vector &GetPosition() const { return curr_physical_state.position; }
+
   float GetMoment() const { return MomentOfInertia; }
   float GetMass() const { return mass; }
   const Limits &Limits() const { return limits; }

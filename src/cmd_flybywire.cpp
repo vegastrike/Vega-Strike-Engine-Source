@@ -1,36 +1,50 @@
 #include "cmd_flybywire.h"
 #include "physics.h"
+#define VELTHRESHOLD .05
 AI * MatchLinearVelocity::Execute () {
   Vector desired (desired_velocity);
   if (!LocalVelocity) {
     desired = parent->UpCoordinateLevel (desired);
   }
   Vector velocity (parent->UpCoordinateLevel(parent->GetVelocity()));
+  if (willfinish) {
+    done = fabs(desired.i-velocity.i)<VELTHRESHOLD&&fabs(desired.j-velocity.j)<VELTHRESHOLD&&fabs(desired.k-velocity.k)<VELTHRESHOLD;
+    if (done) 
+      return NULL;
+  }
   parent->Thrust ( /*parent->ClampThrust*/(parent->GetMass()*(desired-velocity)/SIMULATION_ATOM), desired.i>parent->GetComputerData().max_speed);//don't need to clamp thrust since the Thrust does it for you
                  //caution might change 
   return this;
 }
 
-#define MATCHANGVELOCITYEXECUTE() Vector desired (desired_ang_velocity); \
+#define MATCHANGVELOCITYSETUP() \
+  Vector desired (desired_ang_velocity); \
+  Vector angvel(parent->UpCoordinateLevel(parent->GetAngularVelocity())); \
   if (!LocalAng)\
-    desired = parent->ToLocalCoordinates (desired);\
+    desired = parent->ToLocalCoordinates (desired);
+#define MATCHANGVELOCITYEXECUTE() \
   parent->ApplyLocalTorque (parent->GetMoment()*(desired-parent->UpCoordinateLevel(parent->GetAngularVelocity()))/SIMULATION_ATOM); 
 
 
 AI * MatchAngularVelocity::Execute () {
+  MATCHANGVELOCITYSETUP();
+  if (willfinish) {
+    done = fabs(desired.i-angvel.i)<VELTHRESHOLD&&fabs(desired.j-angvel.j)<VELTHRESHOLD&&fabs(desired.k-angvel.k)<VELTHRESHOLD;
+    if (done) return NULL;
+  }
   MATCHANGVELOCITYEXECUTE();
-  //  Vector desired (desired_ang_velocity);
-  //  if (!LocalAng)
-  //    desired = parent->ToLocalCoordinates (desired);
-  //  //parent->GetAngularVelocity();//local coords
-  //  parent->ApplyLocalTorque (parent->GetMoment()*(desired-parent->GetAngularVelocity())/SIMULATION_ATOM);
-  
   return this;
 }
 
 AI * MatchVelocity::Execute () {
-  MATCHANGVELOCITYEXECUTE();
+  
   MatchLinearVelocity::Execute();
+  MATCHANGVELOCITYSETUP()
+  if (willfinish) {
+    done = done&&fabs(desired.i-angvel.i)<VELTHRESHOLD&&fabs(desired.j-angvel.j)<VELTHRESHOLD&&fabs(desired.k-angvel.k)<VELTHRESHOLD;
+    if (done) return NULL;
+  }
+  MATCHANGVELOCITYEXECUTE();
   //  Vector desired (desired_ang_velocity);
   //  if (!LocalAng)
   //    desired = parent->ToLocalCoordinates (desired);
@@ -46,7 +60,7 @@ AI * MatchVelocity::Execute () {
 
 
 
-FlyByWire::FlyByWire (): MatchVelocity(Vector(0,0,0),Vector(0,0,0),true){
+FlyByWire::FlyByWire (): MatchVelocity(Vector(0,0,0),Vector(0,0,0),true,false){
 
 }
 void FlyByWire::Stop (float per) {

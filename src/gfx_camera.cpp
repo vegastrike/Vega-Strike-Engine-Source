@@ -26,7 +26,7 @@
   const float fov = 78;
   const float aspect = 1.33F;
   const float znear = 1.00F;
-  const float zfar = 100.00F;
+  const float zfar = 500000.00F;
 
 //const float PI=3.1415926536;
 Camera::Camera(ProjectionType proj) : projectionType(proj), myPhysics(0.1,0.075,&Coord,&P,&Q,&R)

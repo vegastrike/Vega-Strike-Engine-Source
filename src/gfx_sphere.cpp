@@ -109,6 +109,10 @@ SphereMesh::SphereMesh(float radius, int stacks, int slices, char *texture, bool
    if(centered) {
      draw_sequence=0;
    }
+   SetOrientation(Vector(1,0,0),
+		    Vector(0,0,-1),
+		    Vector(0,1,0));//that's the way prop
+   
    meshHashTable.Put(hash_key, this);
    orig = this;
    refcount++;
@@ -159,7 +163,7 @@ void SphereMesh::ProcessDrawQueue() {
     Matrix tmp2;
     Identity (tmp);
     if (!centered){
-      VectorToMatrix (tmp,Vector (cos (theta),0,sin(theta)), Vector (0,1,0), Vector (-sin (theta),0,cos(theta)));
+        VectorToMatrix (tmp,Vector (cos (theta),sin(theta),0), Vector (-sin (theta),cos(theta),0),Vector(0,0,1));
     }
     MultMatrix (tmp2, c.mat, tmp);
     GFXLoadMatrix(MODEL, tmp2);

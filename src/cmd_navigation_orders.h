@@ -36,6 +36,12 @@ class ChangeHeading : public Order {
   void SetDest (const Vector&);
   AI *Execute();
 };
+class FaceTarget : public ChangeHeading {
+  float finish;
+  FaceTarget (bool fini):ChangeHeading(Vector(0,0,1)),finish(fini=false) {}
+  AI * Execute();
+};
+
 }
 #endif
 

@@ -42,9 +42,9 @@ Background::Background(const char *file)
 	  strcpy (temp,file);
 	  SphereBackground = new SphereMesh (20,8,8,strcat (temp,"_sphere.bmp"),true,true);
 	  //SphereBackground->Pitch(PI*.5);//that's the way prophecy's textures are set up
-	  SphereBackground->SetOrientation(Vector(1,0,0),
-					   Vector(0,0,-1),
-					   Vector(0,1,0));//that's the way prophecy's textures are set up
+	  //SphereBackground->SetOrientation(Vector(1,0,0),
+	  //			   Vector(0,0,-1),
+	  //			   Vector(0,1,0));//that's the way prophecy's textures are set up
 	  delete up;
 	  up = NULL;
 	}else {

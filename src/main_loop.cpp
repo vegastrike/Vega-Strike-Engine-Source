@@ -32,7 +32,7 @@ using namespace std;
 
 extern Texture *logo;
 
-GFXBOOL capture;
+ GFXBOOL capture;
 GFXBOOL quit = GFXFALSE;
 
 /*11-7-98
@@ -532,6 +532,7 @@ void createObjects() {
     fighters[a]->EnqueueAI(new Orders::ChangeHeading(v));
     fighters[a]->EnqueueAI(new Orders::MoveTo(Vector (-5,-10,10),true));
     fighters[a]->EnqueueAI(new Orders::ChangeHeading(-v));
+    fighters[a]->EnqueueAI(new MatchVelocity(Vector(0,0,-1),Vector (0,0,.4),true,true));
     fighters[a]->EnqueueAI(new FlyByKeyboard ());
     //fighters[a]->EnqueueAI(new Orders::ChangeHeading(Vector (.86,.86,0).Normalize(), 0.04));
     //fighters[a]->SetPosition(0, 0, -2.0F);
@@ -578,24 +579,16 @@ void destroyObjects() {
 }
 
 void main_loop() {
-  static int state = 0;
-  static bool midcachunk=false;
   _Universe->StartDraw();
-  
-  //bg2->Draw();
   GFXBlendMode (ONE,ZERO);
-  //GFXDisable(TEXTURE1);
   _Universe->activeStarSystem()->Draw();
-  _Universe->activeStarSystem()->Update();
-  
     GFXDisable(TEXTURE1);
-  //  GFXBlendMode(ONE,ONE);
     locSel->Draw();
-  //  DABEAM->Draw(identity_transformation,identity_matrix);
   DABEAM->Draw (identity_transformation,identity_matrix);
   Halo::ProcessDrawQueue();
   Beam::ProcessDrawQueue();
 
+  _Universe->activeStarSystem()->Update();
 
   GFXEndScene();
       
