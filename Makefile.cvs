@@ -1,4 +1,6 @@
-aclocal
-autoheader -f
-autoconf -f
-automake -acf
+all:
+	@aclocal
+	@autoheader -f
+	@autoconf -f
+	@automake -acf
+	@echo "Files regenerated. Use ./configure."
