@@ -383,7 +383,7 @@ void Base::Room::Link::Click (Base *base,float x, float y, int button, int state
 void Base::Room::Comp::Click (Base *base,float x, float y, int button, int state) {
 	if (state==WS_MOUSE_UP) {
 		Unit *un=base->caller.GetUnit();
-		Unit *baseun=base->caller.GetUnit();
+		Unit *baseun=base->baseun.GetUnit();
 		if (un&&baseun) {
 			Base::CallComp=true;
 			UpgradeCompInterface(un,baseun,modes);
