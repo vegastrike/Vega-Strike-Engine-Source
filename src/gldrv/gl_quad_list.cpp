@@ -104,7 +104,9 @@ int GFXQuadList::AddQuad (const GFXVertex *vertices, const GFXColorVertex * colo
       }
     }
 
-  fprintf (stderr,"Error adding quads");
+  fprintf (stderr,"Fatal Error adding quads");
+  //should NOT get here!
+  return -1;
 }
 void GFXQuadList::DelQuad (int which ) {
   if (quadassignments[which]>=numQuads) {

@@ -228,7 +228,7 @@ static unsigned int calculatestage (unsigned int numstages, unsigned int whichst
 /// in areas which need to be interpolated.
 void	quadsquare::Update(const quadcornerdata& cd, const Vector & ViewerLocation, float Detail, unsigned short numstages, unsigned short whichstage) {
   DetailThreshold = Detail;
-  UpdateAux(cd, nonlinear_trans->InvTransform(ViewerLocation), 0,calculatestage (numstages,whichstage));
+  UpdateAux(cd, ViewerLocation, 0,calculatestage (numstages,whichstage));
 
 }
 
@@ -328,9 +328,9 @@ inline Vector Normalise (const Vector & vec, const float scale) {
   return vec*(scale/vec.Magnitude());
 }
 Vector	quadsquare::MakeLightness(float xslope, float zslope) {
-  Vector tmp (xslope, 1, zslope);
+  Vector tmp (nonlinear_trans->TransformNormal(Vector (xslope, 1, zslope)));
   tmp.Normalize();
-  return (nonlinear_trans->Transform (Vector (tmp.i*normalscale.i,tmp.j*normalscale.j,tmp.k*normalscale.k)));
+  return (Vector (tmp.i*normalscale.i,tmp.j*normalscale.j,tmp.k*normalscale.k));
 }
 
 

@@ -247,7 +247,7 @@ void /*GFXDRVAPI*/ GFXDeleteLightContext(int con_number) {
   _local_lights_dat[con_number]=vector <gfx_light>();
 }
 
-void /*GFXDRVAPI*/ GFXSetLightContext (int con_number) {
+void /*GFXDRVAPI*/ GFXSetLightContext (const int con_number) {
   int GLLindex=0;
   unsigned int i;
   lighttable.Clear();

@@ -107,7 +107,7 @@ GFXBOOL /*GFXDRVAPI*/ GFXEnableLight(const int light);
 GFXBOOL /*GFXDRVAPI*/ GFXDisableLight(const int light);
 
 ///Modifies the parameters of the given light
-GFXBOOL /*GFXDRVAPI*/ GFXSetLight(int light, enum LIGHT_TARGET, const GFXColor &color);
+GFXBOOL /*GFXDRVAPI*/ GFXSetLight(const int light, enum LIGHT_TARGET, const GFXColor &color);
 
 /**
  * In the case of shields and other T&L based effects, the global lights
@@ -263,7 +263,7 @@ void /*GFXDRVAPI*/ GFXPopBlendMode();
 void /*GFXDRVAPI*/ GFXActiveTexture (const int stage);
 
 ///Selects which texture coordinates should go with which texture in multitex
-void /*GFXDRVAPI*/ GFXSelectTexcoordSet(int stage, int texset);
+void /*GFXDRVAPI*/ GFXSelectTexcoordSet(const int stage, const int texset);
 
 ///Turns on alpha testing mode (or turns if off if DEPTHFUNC is set to ALWAYS
 void /*GFXDRVALP*/ GFXAlphaTest (const enum DEPTHFUNC,const float ref);

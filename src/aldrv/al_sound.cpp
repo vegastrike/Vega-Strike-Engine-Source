@@ -275,7 +275,8 @@ static bool AUDReclaimSource (const int sound) {
     alSourcei(sounds[sound].source, AL_LOOPING, sounds[sound].looping);    
   }
   return true;
-#endif			 
+#endif		
+  return false;//silly
 }
 void AUDStartPlaying (const int sound){
 #ifdef HAVE_AL

@@ -95,8 +95,7 @@ static Vector InvScaleTransform (Matrix trans,  Vector pos) {
 float QuadTree::GetHeight (Vector Location, Vector & normal) {
   Location = nonlinear_transform->InvTransform (InvScaleTransform (transformation,Location));
   float tmp =  Location.j-root->GetHeight (RootCornerData,Location.i,Location.k,  normal);
-  normal = nonlinear_transform->TransformNormal (normal);
-  normal = Transform (transformation,normal);
+  normal = Transform (transformation,nonlinear_transform->TransformNormal (normal));
   normal.Normalize();
   return tmp;
 }
@@ -104,7 +103,7 @@ float QuadTree::GetHeight (Vector Location, Vector & normal) {
 
 void QuadTree::Update (unsigned short numstages, unsigned short whichstage) {
   //GetViewerPosition
-  root->Update (RootCornerData,InvScaleTransform (transformation,_Universe->AccessCamera()->GetPosition()),detail,numstages,whichstage);
+  root->Update (RootCornerData,nonlinear_transform->InvTransform (InvScaleTransform (transformation,_Universe->AccessCamera()->GetPosition())),detail,numstages,whichstage);
 }
 
 void QuadTree::SetTransformation(const Matrix mat) {

@@ -27,14 +27,14 @@ vector <GFXMaterial> materialinfo;
 int selectedmaterial = -1;
 void /*GFXDRVAPI*/ GFXSetMaterial(unsigned int &number, const GFXMaterial &material)
 {
-    number = -1;//warning unsigned.... 
+    number = (unsigned int)-1;//intended warning for unsigned.... 
   for (unsigned int i=0;i<materialinfo.size();i++){
     if (memcmp (&materialinfo[i],&material,sizeof(GFXMaterial))==0) {
       number = i;
       break;
     }
   }
-  if (number==-1) {
+  if (number==(unsigned int)(-1)) {//another intended warning
     number = materialinfo.size();
     materialinfo.push_back (material);
   }
@@ -46,7 +46,7 @@ void /*GFXDRVAPI*/ GFXModifyMaterial (const unsigned int number, const GFXMateri
 }
 GFXBOOL /*GFXDRVAPI*/ GFXGetMaterial(const unsigned int number, GFXMaterial &material)
 {
-  if (number<0||number>=materialinfo.size())
+  if ((number==(unsigned int)-1)||number>=materialinfo.size())
     return GFXFALSE;
   material = materialinfo[number];
   return GFXTRUE;

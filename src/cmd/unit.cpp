@@ -505,7 +505,7 @@ void Unit::Draw(const Transformation &parent, const Matrix parentMatrix)
   if (cloaking>cloakmin) {
     cloak = cloaking-interpolation_blend_factor*cloakrate;
     if (cloak<0&&cloakrate<0) {
-      cloak=32768;
+      cloak=(unsigned short)32768;//intended warning should be -32768 :-) leave it be
     }
     if (cloak<cloakmin&&cloakrate>0)
       cloak=cloakmin;

@@ -107,7 +107,7 @@ void /*GFXDRVAPI*/ GFXDisable (const STATE state)
 
 }
 
-void GFXTextureAddressMode(ADDRESSMODE mode)
+void GFXTextureAddressMode(const ADDRESSMODE mode)
 {
 	float BColor [4] = {0,0,0,0};//set border color to clear... dunno if we wanna change?
 	switch(mode)

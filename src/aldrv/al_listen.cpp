@@ -114,7 +114,7 @@ void AUDListener (const Vector & pos, const Vector & vel) {
   //  printf ("(%f,%f,%f) <%f %f %f>\n",pos.i,pos.j,pos.k,vel.i,vel.j,vel.k);
 #endif
 }
-void AUDListenerSize (float rSize) {
+void AUDListenerSize (const float rSize) {
 #ifdef HAVE_AL
   mylistener.rsize = rSize*rSize;
 #endif  
