@@ -10,6 +10,9 @@
 #include "audiolib.h"
 #include "images.h"
 #include "beam.h"
+#include "config_xml.h"
+#include "vs_globals.h"
+#include "xml_support.h"
 static list<Unit*> Unitdeletequeue;
 void Unit::UnRef() {
   ucref--;
@@ -218,6 +221,9 @@ void Unit::RegenShields () {
   int rechargesh=1;
   energy +=apply_float_to_short (recharge*SIMULATION_ATOM);
   float rec = shield.recharge*SIMULATION_ATOM>energy?energy:shield.recharge*SIMULATION_ATOM;
+  static float nebshields=XMLSupport::parse_float(vs_config->getVariable ("physics","nebula_shield_recharge",".5"));
+  if (Getnebula()!=NULL)
+    rec *=nebshields;
   switch (shield.number) {
   case 2:
     shield.fb[0]+=rec;
@@ -292,7 +298,8 @@ float Unit::DealDamageToHull (const Vector & pnt, float damage ) {
 bool Unit::ShieldUp (const Vector &pnt) const{
   const int shieldmin=5;
   int index;
-  if (nebula!=NULL)
+  static float nebshields=XMLSupport::parse_float(vs_config->getVariable ("physics","nebula_shield_recharge",".5"));
+  if (nebula!=NULL||nebshields>0)
     return false;
   switch (shield.number){
   case 2:
@@ -422,10 +429,11 @@ float Unit::DealDamageToShield (const Vector &pnt, float &damage) {
   return percent;
 }
 void Unit::ApplyLocalDamage (const Vector & pnt, const Vector & normal, float amt, const GFXColor &color) {
+  static float nebshields=XMLSupport::parse_float(vs_config->getVariable ("physics","nebula_shield_recharge",".5"));
   float leakamt = amt*.01*shield.leak;
   amt *= 1-.01*shield.leak;
   float percentage=0;
-  if (Getnebula()==NULL) {
+  if (Getnebula()==NULL||(nebshields>0)) {
     percentage = DealDamageToShield (pnt,amt);
     if (meshdata[nummesh]&&percentage>0&&amt==0) {//shields are up
       /*      meshdata[nummesh]->LocalFX.push_back (GFXLight (true,
@@ -433,7 +441,8 @@ void Unit::ApplyLocalDamage (const Vector & pnt, const Vector & normal, float am
 	      GFXColor (.3,.3,.3), GFXColor (0,0,0,1), 
 	      GFXColor (.5,.5,.5),GFXColor (1,0,.01)));*/
       //calculate percentage
-      meshdata[nummesh]->AddDamageFX(pnt,shieldtight?shieldtight*normal:Vector(0,0,0),percentage,color);
+      if (Getnebula()==NULL) 
+	meshdata[nummesh]->AddDamageFX(pnt,shieldtight?shieldtight*normal:Vector(0,0,0),percentage,color);
     }
   }
   if (shield.leak>0||!meshdata[nummesh]||percentage==0||amt>0) {
