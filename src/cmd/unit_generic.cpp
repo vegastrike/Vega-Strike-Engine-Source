@@ -28,10 +28,12 @@
 #include "role_bitmask.h"
 #include "unit_const_cache.h"
 #include "gfx/warptrail.h"
+
+
 #ifdef _WIN32
 #define strcasecmp stricmp
 #endif
-
+#include "config.h"
 using namespace Orders;
 
 bool flickerDamage (Unit * un, float hullpercent) {
@@ -101,8 +103,12 @@ void Unit::reactToCollision(Unit * smalle, const QVector & biglocation, const Ve
 
 	Vector smforce =(bignormal*.4*smalle->GetMass()*fabs(bignormal.Dot (((smalle->GetVelocity()-this->GetVelocity())/SIMULATION_ATOM))+fabs (dist)/(SIMULATION_ATOM*SIMULATION_ATOM)));
 	Vector thisforce=(smallnormal*.4*GetMass()*fabs(smallnormal.Dot ((smalle->GetVelocity()-this->GetVelocity()/SIMULATION_ATOM))+fabs (dist)/(SIMULATION_ATOM*SIMULATION_ATOM)));
-	smforce = (smforce/smforce.Magnitude())*(large_damage+small_damage)*INVERSEFORCEDISTANCE*bouncepercent;
-	thisforce = (thisforce/thisforce.Magnitude())*(large_damage+small_damage)*INVERSEFORCEDISTANCE*bouncepercent;
+	float smag = smforce.Magnitude();
+	float tmag= thisforce.Magnitude();
+	if (smag>.000001)
+		smforce = (smforce/smag)*(large_damage+small_damage)*INVERSEFORCEDISTANCE*bouncepercent;
+	if (tmag>.000001)
+		thisforce = (thisforce/tmag)*(large_damage+small_damage)*INVERSEFORCEDISTANCE*bouncepercent;
 	//UniverseUtil::IOmessage(0,"game","all",string("damaging collision ")+XMLSupport::tostring(smforce.i)+string(",")+XMLSupport::tostring(smforce.j)+string(",")+XMLSupport::tostring(smforce.k)+string(" resultantkinetic ")+XMLSupport::tostring(FinalInelasticKE)+string(" resultant damages ")+XMLSupport::tostring(small_damage)+string(" ")+XMLSupport::tostring(large_damage)+string(" bouncepercent ")+XMLSupport::tostring(bouncepercent)); 
     
 	if(smalle->isUnit()!=MISSILEPTR){ 
@@ -1680,15 +1686,27 @@ void Unit::FireEngines (const Vector &Direction/*unit vector... might default to
 }
 void Unit::ApplyForce(const Vector &Vforce) //applies a force for the whole gameturn upon the center of mass
 {
-	NetForce += Vforce;
+	if (FINITE (Vforce.i)&&FINITE(Vforce.j)&&FINITE(Vforce.k)) {
+		NetForce += Vforce;
+	}else {
+		fprintf (stderr,"fatal force");
+	}
 }
 void Unit::ApplyLocalForce(const Vector &Vforce) //applies a force for the whole gameturn upon the center of mass
 {
-	NetLocalForce += Vforce;
+	if (FINITE (Vforce.i)&&FINITE(Vforce.j)&&FINITE(Vforce.k)) {
+		NetLocalForce += Vforce;
+	}else {
+		fprintf (stderr,"fatal local force");
+	}
 }
 void Unit::Accelerate(const Vector &Vforce)
 {
-  NetForce += Vforce * mass;
+	if (FINITE (Vforce.i)&&FINITE(Vforce.j)&&FINITE(Vforce.k)) {	
+		NetForce += Vforce * mass;
+	}else {
+		fprintf (stderr,"fatal force");
+	}
 }
 
 void Unit::ApplyTorque (const Vector &Vforce, const QVector &Location)
@@ -2053,11 +2071,19 @@ Vector Unit::ResolveForces (const Transformation &trans, const Matrix &transmat)
     AngularVelocity += temp;
   }
   Vector temp2 = (NetLocalForce.i*p + NetLocalForce.j*q + NetLocalForce.k*r ); //acceleration
+  if (!(FINITE(NetForce.i)&&FINITE(NetForce.j)&&FINITE(NetForce.k))) {
+	  cout << "NetForce skrewed";
+  }
+
   if (NetForce.i||NetForce.j||NetForce.k) {
     temp2+=InvTransformNormal(transmat,NetForce);
   }
+  
   temp2=temp2/mass;
   temp = temp2*SIMULATION_ATOM;
+  if (!(FINITE(temp2.i)&&FINITE(temp2.j)&&FINITE(temp2.k))) {
+	  cout << "NetForce transform skrewed";
+  }
 
   /*if (FINITE(temp.i)&&FINITE (temp.j)&&FINITE(temp.k)) */{	//FIXME
     Velocity += temp;

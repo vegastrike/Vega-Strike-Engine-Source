@@ -104,8 +104,11 @@ void GameUnit<UnitType>::Split (int level) {
     if (splitsub->meshdata[0]) {
       Vector loc = splitsub->meshdata[0]->Position();
       static float explosion_force = XMLSupport::parse_float (vs_config->getVariable ("graphics","explosionforce",".5"));//10 seconds for auto to kick in;
-      splitsub->ApplyForce(splitsub->meshdata[0]->rSize()*explosion_force*10*splitsub->GetMass()*loc/loc.Magnitude());
-      loc.Set (rand(),rand(),rand());
+	  float locm=loc.Magnitude();
+	  if (locm<.0001)
+		  locm=1;
+      splitsub->ApplyForce(splitsub->meshdata[0]->rSize()*explosion_force*10*splitsub->GetMass()*loc/locm);
+      loc.Set (rand(),rand(),rand()+.1);
       loc.Normalize();
       static float explosion_torque = XMLSupport::parse_float (vs_config->getVariable ("graphics","explosiontorque",".001"));//10 seconds for auto to kick in;
       splitsub->ApplyLocalTorque(loc*splitsub->GetMoment()*explosion_torque*(1+rand()%(int)(1+rSize())));
