@@ -587,6 +587,11 @@ void AggressiveAI::Execute () {
     parent->SetVelocity(parent->GetVelocity()*(mag*parent->GetComputerData().max_speed()/getTimeCompression()));
 	parent->NetLocalForce=parent->NetForce=Vector(0,0,0);
   }
+  if (!isjumpable) {
+     if (parent->GetJumpStatus().drive>=0) {
+        parent->ActivateJumpDrive(-1);
+     }     
+  }
 }  
 
 

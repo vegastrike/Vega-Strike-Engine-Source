@@ -360,6 +360,9 @@ public:
 
   std::vector <Mesh *> meshdata;
   unsigned char combatRole() const {return combat_role;}
+  void combatRole(unsigned char c){combat_role=c;}
+  void setCombatRole(std::string s);
+  std::string getCombatRole()const;
 protected:
   unsigned char combat_role;
   Nebula * nebula;

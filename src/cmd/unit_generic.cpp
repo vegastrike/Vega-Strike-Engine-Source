@@ -5920,6 +5920,12 @@ std::string Unit::subunitSerializer (const XMLType &input, void * mythis) {
   }
   return string("destroyed_turret");
 }
+void Unit::setCombatRole(std::string s) {
+   combatRole(ROLES::getRole(s));
+}
+std::string Unit::getCombatRole() const{
+   return ROLES::getRole(combatRole());
+}
 
 void Unit::SortCargo() {
   Unit *un=this;

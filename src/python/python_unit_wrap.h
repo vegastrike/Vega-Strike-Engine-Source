@@ -107,6 +107,9 @@
   WRAPPED1(bool,RequestClearance,UnitWrapper,dockingunit,false)
   WRAPPED1(bool,isDocked,UnitWrapper,dockingUnit,false)
   WRAPPED1(bool,Dock,UnitWrapper,unitToDockWith,false)
+  voidWRAPPED1(setCombatRole,string,role)
+  WRAPPED0(string,getCombatRole,"INERT")
+
   WRAPPED1(bool,UnDock,UnitWrapper,unitToDockWith,false)
   WRAPPED0(int,DockedOrDocking,0)
   WRAPPED0(int,GetNumMounts,0)

@@ -56,6 +56,14 @@ namespace ROLES {
 		}
 		return 0;
 	}
+	std::string InternalGetStrRole (unsigned char c) {
+	   std::map<string,int>::iterator i = rolemap.begin();
+	   for (;i!=rolemap.end();++i) {
+              if ((*i).second==c)
+                 return (*i).first;
+           }
+           return rolemap.size()?(*rolemap.begin()).first:std::string("");
+	}
 	vector < vector <string > > buildscripts() {
 	  vector<vector <string> > scripts;
 	  getAllRolePriorities ();
@@ -161,6 +169,10 @@ namespace ROLES {
 	unsigned char getRole (const std::string &s) {
 		//int temp = maxRoleValue();
 		return InternalGetRole(s);
+	}
+	std::string getRole (unsigned char c) {
+		//int temp = maxRoleValue();
+		return InternalGetStrRole(c);
 	}
 	unsigned int readBitmask (const std::string &ss){
 		string s= ss;
