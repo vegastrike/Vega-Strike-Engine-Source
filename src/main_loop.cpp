@@ -121,7 +121,7 @@ bool _Slew = true;
      }
    }
  }
-static bool QuitAllow=false;
+bool QuitAllow=false;
 extern bool cleanexit;
 namespace CockpitKeys {
   
@@ -173,9 +173,6 @@ namespace CockpitKeys {
 	static Vector R;
 	for (int i=0;i<NUM_CAM;i++) {
 	if(newState==PRESS) {
-	  if (QuitAllow) {
-	    QuitNow();
-	  }
 
 		Q = _Universe->AccessCockpit()->AccessCamera(i)->Q;
 		R = _Universe->AccessCockpit()->AccessCamera(i)->R;
@@ -193,9 +190,6 @@ namespace CockpitKeys {
 	static Vector R;
 	for (int i=0;i<NUM_CAM;i++) {
 	if(newState==PRESS) {
-	  if (QuitAllow) {
-	    QuitNow();
-	  }
 
 		P = _Universe->AccessCockpit()->AccessCamera(i)->P;
 		R = _Universe->AccessCockpit()->AccessCamera(i)->R;
@@ -213,9 +207,6 @@ namespace CockpitKeys {
 	static Vector P;
 	static Vector R;
 	if(newState==PRESS) {
-	  if (QuitAllow) {
-	    QuitNow();
-	  }
 		P = _Universe->AccessCockpit()->AccessCamera(i)->P;
 		R = _Universe->AccessCockpit()->AccessCamera(i)->R;
 		_Universe->AccessCockpit()->AccessCamera(i)->myPhysics.ApplyBalancedLocalTorque(P, R,timek);
@@ -228,22 +219,13 @@ namespace CockpitKeys {
 }
 
   void Quit(int,KBSTATE newState) {
-    /*
-    if (newState==PRESS) {
-      ouch = (!ouch);
-    }
-    */
 	if(newState==PRESS) {
 	  if (QuitAllow) {
-	    UniverseUtil::IOmessage(0,"game","all","");
-	    UniverseUtil::IOmessage(0,"game","all","");
 	    UniverseUtil::IOmessage(0,"game","all","#ffff00Quit Mode cancelled, Camera Keys restored to former function.");
 	    UniverseUtil::IOmessage(0,"game","all","#00ff00Press Esc and then q to Quit at a later point.");
 	  }else {
-	    UniverseUtil::IOmessage(0,"game","all","");
-	    UniverseUtil::IOmessage(0,"game","all","");
 	    UniverseUtil::IOmessage(0,"game","all","#ff0000You have pressed the quit key.");
-	    UniverseUtil::IOmessage(0,"game","all","#00ffffIf you hit q,z,s or f, the Camera Keys, the game will quit.");
+	    UniverseUtil::IOmessage(0,"game","all","#00ffffIf you hit q, the game will quit.");
 	    UniverseUtil::IOmessage(0,"game","all","#00ff55Pressing ESC again will cancel quit confirm mode.");
 	    
 	  }

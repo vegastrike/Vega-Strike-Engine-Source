@@ -1301,7 +1301,7 @@ static void DrawCrosshairs (float x, float y, float wid, float hei, const GFXCol
 	GFXEnd();
 	GFXEnable(TEXTURE0);
 }
-
+extern bool QuitAllow;
 void GameCockpit::Draw() { 
   cockpit_time+=GetElapsedTime();
   if (cockpit_time>=100000)
@@ -1538,6 +1538,10 @@ void GameCockpit::Draw() {
 	SetView (CP_PAN);
 	zoomfactor=dietime*10;
 	}
+  }
+  if (QuitAllow) {
+	  static VSSprite QuitSprite("quit.spr",BILINEAR,GFXTRUE);
+	  QuitSprite.Draw();	  
   }
   GFXAlphaTest (ALWAYS,0);  
   GFXHudMode (false);
