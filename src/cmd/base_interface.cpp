@@ -69,6 +69,7 @@ void BaseInterface::Room::BaseShip::Draw (BaseInterface *base) {
 		(un)->DrawNow(final);
 		GFXDisable (DEPTHTEST);
 		GFXDisable (DEPTHWRITE);
+		_Universe->AccessCockpit()->SetView (CP_PAN);
 		GFXHudMode (GFXTRUE);
 	}
 }
