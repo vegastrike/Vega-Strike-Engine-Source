@@ -1,6 +1,3 @@
-#ifndef _WIN32
-#include <netinet/in.h>
-#endif
 #include "fileutil.h"
 #include "networking/lowlevel/vsnet_headers.h"
 #include "vs_path.h"

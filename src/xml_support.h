@@ -63,6 +63,11 @@ namespace XMLSupport {
     string tostring(float num);
   */
 //#ifdef WIN32
+  string inline tostring5 (unsigned short num) {
+	char tmp[256];
+	sprintf (tmp,"%.5d",num);
+	return string(tmp);
+  }
   string inline tostring (int num) {
 	char tmp[256];
 	sprintf (tmp,"%d",num);

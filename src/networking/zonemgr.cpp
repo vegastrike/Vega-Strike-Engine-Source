@@ -35,10 +35,6 @@ StarSystem *	ZoneMgr::addZone( string starsys)
 	// Generate the StarSystem
 	string starsysfile = starsys+".system";
 	sts = _Universe->GenerateStarSystem (starsysfile.c_str(),"",Vector(0,0,0));
-	// Add it in the star_system vector
-	//_Universe->star_system.push_back( sts);
-	//_Universe->pushActiveStarSystem( sts);
-	// Add an empty list of clients to the zone_list vector
 	zone_list.push_back( lst);
 	zone_unitlist.push_back( ulst);
 	// Add zero as number of clients in zone since we increment in ZoneMgr::addClient()

@@ -49,7 +49,7 @@ void	GalaxyXML::Galaxy::ComputeSerials( std::vector<std::string> & stak)
 		cout<<"\t\tcomputing serials for "<<systempath<<"...";
 		
 		// Read the file
-		FILE * fp = fopen( systempath.c_str(), "rb");
+		FILE * fp = fopen( systempath.c_str(), "w+b");
 		if( !fp)
 		{
 			cerr<<"!!! ERROR : cannot open system file : "<<systempath<<endl;
@@ -71,6 +71,13 @@ void	GalaxyXML::Galaxy::ComputeSerials( std::vector<std::string> & stak)
 
 		// Now looking for "<planet ", "<Planet ", "<PLANET ", "<unit ", "<Unit ", "<UNIT ", same for nebulas
 		std::vector<std::string> search_patterns;
+
+		bool newserials = true;
+		if( system.find( "serial=", 0) != std::string::npos)
+		{
+			newserials = false;
+			cout<<"Found serial in system file : replacing serials..."<<endl;
+		}
 		search_patterns.push_back( "<planet ");
 		search_patterns.push_back( "<Planet ");
 		search_patterns.push_back( "<PLANET ");
@@ -89,13 +96,26 @@ void	GalaxyXML::Galaxy::ComputeSerials( std::vector<std::string> & stak)
 			while( (curpos = system.find( "<planet ", curpos))!=std::string::npos)
 			{
 				ObjSerial new_serial = getUniqueSerial();
-				std::string serial_str( (*ti)+"serial="+XMLSupport::tostring( new_serial)+" ");
-				system.replace( curpos, search_length, serial_str);
+				std::string serial_str( (*ti)+"serial="+XMLSupport::tostring5( new_serial)+" ");
+				// If there are already serial in the file we replace that kind of string : <planet serial="XXXXX"
+				// of length search_length + 14 (length of serial="XXXXX")
+				if( newserials)
+					system.replace( curpos, search_length, serial_str);
+				else
+					system.replace( curpos, search_length+14, serial_str);
 			}
 		}
 
 		// Add the system xml string to the server
-		Server->addSystem( relpath, system);
+		Server->addSystem( (*si), system);
+
+		// Overwrite the system files with the buffer containing serials
+		fseek( fp, 0, SEEK_SET);
+		if( fwrite( system.c_str(), 1, system.length(), fp) != system.length() )
+		{
+			cerr<<"!!! ERROR : writing system file"<<endl;
+			exit(1);
+		}
 
 		/*
 		std::vector<std::string> data;
@@ -110,6 +130,7 @@ void	GalaxyXML::Galaxy::ComputeSerials( std::vector<std::string> & stak)
 				break; // ignore the newline.
 		}
 		*/
+		cout<<" OK !"<<endl;
 		delete systembuf;
 	}
 }
