@@ -690,7 +690,7 @@ void Unit::SetAI(AI *newAI)
 void Unit::EnqueueAI(AI *newAI) {
   newAI->SetParent(this);
   if (aistate) {
-    aistate = aistate->ReplaceOrder (newAI);
+    aistate = aistate->EnqueueOrder (newAI);
   }else {
     aistate = newAI;
   }
