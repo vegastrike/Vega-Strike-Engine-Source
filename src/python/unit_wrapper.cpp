@@ -131,6 +131,7 @@ voidEXPORT_UTIL(setCompleteness)
 EXPORT_UTIL(getCompleteness,0)
 voidEXPORT_UTIL(setOwner)
 EXPORT_UTIL(getOwner,0)
+voidEXPORT_UTIL(IOmessage)
 #undef EXPORT_UTIL
 #undef voidEXPORT_UTIL
 PYTHON_BEGIN_CLASS(VS,UnitWrapper,"Unit")
@@ -327,7 +328,7 @@ voidEXPORT_UTIL(setCompleteness)
 EXPORT_UTIL(getCompleteness,0)
 voidEXPORT_UTIL(setOwner)
 EXPORT_UTIL(getOwner,Unit())
-
+voidEXPORT_UTIL(IOmessage)
 def string ():
   return ''
 class Unit:

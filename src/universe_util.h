@@ -53,6 +53,7 @@ namespace UniverseUtil {
 	float getCompleteness(int which);
 	void setOwner(int which,Unit *owner);
 	Unit* getOwner(int which);
+    void IOmessage(int delay,string from,string to,string message);
 }
 
 #undef activeSys
