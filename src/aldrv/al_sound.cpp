@@ -331,7 +331,7 @@ void AUDPlay (const int sound, const QVector &pos, const Vector & vel, const flo
   }
   if ((tmp=AUDQueryAudability (sound,pos.Cast(),vel,gain))!=0) {
     if (AUDReclaimSource (sound)) {
-      ALfloat p [3] = {pos.i,pos.j,pos.k};
+      //ALfloat p [3] = {pos.i,pos.j,pos.k};
       AUDAdjustSound (sound,pos,vel);
       alSourcef(sounds[sound].source,AL_GAIN,gain);    
       if (tmp!=2){

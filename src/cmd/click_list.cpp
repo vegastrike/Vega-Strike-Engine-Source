@@ -1,8 +1,9 @@
 #include "gfxlib.h"
 #include "click_list.h"
-#include "unit.h"
+#include "unit_generic.h"
 #include "vegastrike.h"
 #include "vs_globals.h"
+#include "gfx/camera.h"
 extern Vector mouseline;
 extern vector<Vector> perplines;
 

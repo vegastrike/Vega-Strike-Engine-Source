@@ -40,7 +40,7 @@
 #include "vegastrike.h"
 #include "cmd/collection.h"
 #include "cmd/iterator.h"
-#include "cmd/unit.h"
+#include "cmd/unit_generic.h"
 #include "cmd/ai/order.h"
 #include "cmd/ai/aggressive.h"
 #include "cmd/ai/navigation.h"

@@ -147,7 +147,7 @@ varInst *Mission::call_unit(missionNode *node,int mode){
 
     if(mode==SCRIPT_RUN){
       int j=0;
-      for (unsigned int i=0;i<_Universe->numPlayers();i++) {
+      for (unsigned int i=0;(int)i<_Universe->numPlayers();i++) {
 	Unit * un;
 	if (NULL!=(un=_Universe->AccessCockpit(i)->GetParent())) {
 	  if (j==which) {
@@ -194,13 +194,13 @@ varInst *Mission::call_unit(missionNode *node,int mode){
     string logo_tex;
     string logo_alp;
     if (method_id==CMT_UNIT_launchJumppoint) {
-      missionNode *destination_node=getArgument(node,mode,6);
+      //missionNode *destination_node=getArgument(node,mode,6);
       destination_vi=checkObjectExpr(faction_node,mode);
       if (mode==SCRIPT_RUN) {
 	destinations = *((string*)destination_vi->object);
       }
     }
-    missionNode *pos_node[3];
+    //missionNode *pos_node[3];
     QVector pos (getFloatArg (node,mode,6),
 		getFloatArg (node,mode,7),
 		getFloatArg (node,mode,8));
@@ -279,7 +279,7 @@ varInst *Mission::call_unit(missionNode *node,int mode){
     if (node->subnodes.size()>1) {
       category = getStringArgument(node,mode,1);
     }
-    Unit *my_unit=NULL;
+    //Unit *my_unit=NULL;
     varInst *vireturn=NULL;
     vireturn=call_olist_new(node,mode);
     if(mode==SCRIPT_RUN){
@@ -535,7 +535,7 @@ varInst *Mission::call_unit(missionNode *node,int mode){
       Unit *other_unit=getUnitArg(node,mode,1);
 
 	float angle=0.0;
-	float dist=0.0;
+	//float dist=0.0;
 	if(mode==SCRIPT_RUN){
 	  Vector p,q,r;
 	  QVector vectothem=QVector(other_unit->Position() - my_unit->Position()).Normalize();
@@ -553,7 +553,7 @@ varInst *Mission::call_unit(missionNode *node,int mode){
       QVector other_pos=getVec3Arg(node,mode,1);
 
 	double angle=0.0;
-	double dist=0.0;
+	//double dist=0.0;
 	if(mode==SCRIPT_RUN){
 	  Vector p,q,r;
 	  QVector vectothem=QVector(other_pos - my_unit->Position()).Normalize();
@@ -644,7 +644,7 @@ varInst *Mission::call_unit(missionNode *node,int mode){
       if(mode==SCRIPT_RUN){
 	res=my_unit->isPlanet();
 	if (res) {
-	  res = !(((Planet *)my_unit)->hasLights());
+	  res = !(((GamePlanet *)my_unit)->hasLights());
 	}
       }
       viret=newVarInst(VI_TEMP);
@@ -657,7 +657,7 @@ varInst *Mission::call_unit(missionNode *node,int mode){
 	clsptr typ = my_unit->isUnit();
 	string s=  my_unit->getFlightgroup()?my_unit->getFlightgroup()->name:"";
 	
-	res=(typ==PLANETPTR&&!((Planet *)my_unit)->hasLights())||typ==ASTEROIDPTR||typ==NEBULAPTR||s=="Base";
+	res=(typ==PLANETPTR&&!((GamePlanet *)my_unit)->hasLights())||typ==ASTEROIDPTR||typ==NEBULAPTR||s=="Base";
       }
       viret=newVarInst(VI_TEMP);
       viret->type=VAR_BOOL;
@@ -668,7 +668,7 @@ varInst *Mission::call_unit(missionNode *node,int mode){
       if(mode==SCRIPT_RUN){
 	res=my_unit->isPlanet();
 	if (res) {
-	  res = ((Planet *)my_unit)->hasLights();
+	  res = ((GamePlanet *)my_unit)->hasLights();
 	}
       }
       viret=newVarInst(VI_TEMP);
@@ -965,7 +965,7 @@ varInst *Mission::call_unit(missionNode *node,int mode){
       int quantity= getIntArg(node,mode,2);
       bool erasezero= getBoolArg(node,mode,3);
       if(mode==SCRIPT_RUN){
-	int numret=0;
+	//int numret=0;
 	unsigned int index;
 	if (my_unit->GetCargo(s,index)) {
 	  quantity = my_unit->RemoveCargo (index,quantity,erasezero);
@@ -1208,7 +1208,7 @@ Unit * Mission::call_unit_launch(CreateFlightgroup *fg, int type, const string &
        bsrc[0]='\0';//have at least 1 char
        bdst[0]='\0';
        citylights[0]='\0';
-       int ret =sscanf (fg->fg->type.c_str(),"%f %s %s %s",&radius,tex,bsrc,bdst);
+       //int ret =sscanf (fg->fg->type.c_str(),"%f %s %s %s",&radius,tex,bsrc,bdst);
        GFXMaterial mat;
        GFXGetMaterial (0,mat);
       

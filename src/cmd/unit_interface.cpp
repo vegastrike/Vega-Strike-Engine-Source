@@ -1,4 +1,5 @@
 #include "unit.h"
+//#include "cmd/images.h"
 #include "unit_factory.h"
 #include "universe_util.h"
 #include "gui/text_area.h"
@@ -142,7 +143,7 @@ UpgradingInfo::UpgradingInfo(Unit * un, Unit * base, vector<BaseMode> modes):bas
 	int i;
 	modes.push_back(SAVEMODE);
 	availmodes=modes;
-	for (i=0;i<(modes.size());i++) {
+	for (i=0;(unsigned int)i<(modes.size());i++) {
 		if (modes[i]!=SAVEMODE) {
 			if (modes[i]!=ADDMODE) {
 /*				if (i<(modes.size()-1)/2) {
@@ -155,7 +156,7 @@ UpgradingInfo::UpgradingInfo(Unit * un, Unit * base, vector<BaseMode> modes):bas
 					Modes[i]= new Button (lastx,-0.85,sizes,0.1,MyButtonModes[modes[i]]);
 					lastx+=sizes+.04;
 				} else {
-					if (i<(modes.size()-1)/2) {
+					if ((unsigned int)i<(modes.size()-1)/2) {
 						Modes[i]= new Button (lastx,-.82,sizeb,0.07,MyButtonModes[modes[i]]);
 						lastx+=sizeb+.04;
 					}else {
@@ -468,7 +469,7 @@ void UpgradingInfo::SetupCargoList () {
 	switch (submode) {
 	case MOUNT_MODE:
 	  for (;i<un->GetNumMounts();i++) {
-	    if (un->mounts[i]->status==Unit::Mount::ACTIVE||un->mounts[i]->status==Unit::Mount::INACTIVE)
+	    if (un->mounts[i]->status==Mount::ACTIVE||un->mounts[i]->status==Mount::INACTIVE)
 	      CargoList->AddTextItem ((tostring(i)+un->mounts[i]->type->weapon_name).c_str(),un->mounts[i]->type->weapon_name.c_str());
 	    else 
 	      CargoList->AddTextItem ((tostring(i)+" [Empty]").c_str(),(std::string("[")+lookupMountSize(un->mounts[i]->size)+std::string("]")).c_str());
@@ -589,7 +590,7 @@ bool UpgradingInfo::SelectItem (const char *item, int button, int buttonstate) {
         buy->Kill();
         RespawnNow(cp);
         DoDone();
-	Base::CurrentBase->Terminate();
+	BaseInterface::CurrentBase->Terminate();
 	return true;
       }
      }
@@ -666,8 +667,8 @@ bool UpgradingInfo::SelectItem (const char *item, int button, int buttonstate) {
   return false;
 }
 void UpgradingInfo::DoDone() {
-	Base::CurrentBase->InitCallbacks();
-	Base::CallComp=false;
+	BaseInterface::CurrentBase->InitCallbacks();
+	BaseInterface::CallComp=false;
 	if (upgr==this) {
 		delete upgr;
 		upgr=NULL;
@@ -736,7 +737,7 @@ void UpgradingInfo::CommitItem (const char *inp_buf, int button, int state) {
 	      NewPart=NULL;
 	      un->Kill();
 	      DoDone();
-	      Base::CurrentBase->Terminate();
+	      BaseInterface::CurrentBase->Terminate();
 	      return;
 	    }
 	  }

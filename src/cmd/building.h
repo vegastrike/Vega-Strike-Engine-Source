@@ -1,31 +1,26 @@
-#include "unit.h"
-class Terrain;
-class ContinuousTerrain;
-class Flightgroup;
-class Building : public GameUnit {
-  union Buildingparent{
-    Terrain * terrain;
-    ContinuousTerrain * plane;
-  } parent;
-  bool continuous;
-  bool vehicle;
+#ifndef __BUILDING_H
+#define __BUILDING_H
 
+#include "unit.h"
+#include "building_generic.h"
+
+class GameBuilding : public GameUnit<Building> {
 protected:
-  Building (ContinuousTerrain * parent, bool vehicle, const char * filename, bool SubUnit, int faction, const std::string &unitModifications=std::string(""),Flightgroup * fg=NULL);
-  Building (Terrain * parent, bool vehicle, const char *filename, bool SubUnit, int faction, const std::string &unitModifications=std::string(""),Flightgroup * fg=NULL);
+  GameBuilding (ContinuousTerrain * parent, bool vehicle, const char * filename, bool SubUnit, int faction, const std::string &unitModifications=std::string(""),Flightgroup * fg=NULL);
+  GameBuilding (Terrain * parent, bool vehicle, const char *filename, bool SubUnit, int faction, const std::string &unitModifications=std::string(""),Flightgroup * fg=NULL);
 
   friend class UnitFactory;
 
  public:
-  virtual enum clsptr isUnit () {return BUILDINGPTR;}
   virtual void UpdatePhysics (const Transformation &trans, const Matrix &transmat, const Vector & CumulativeVelocity, bool ResolveLast, UnitCollection *uc=NULL);
-  bool ownz (void * parent) {return (this->parent.terrain == (Terrain *)parent);}
 
-private:
+protected:
     /// default constructor forbidden
-    Building( );
+    GameBuilding( );
     /// copy constructor forbidden
-    Building( const Building& );
+    GameBuilding( const Building& );
     /// assignment operator forbidden
-    Building& operator=( const Building& );
+    GameBuilding& operator=( const Building& );
 };
+
+#endif

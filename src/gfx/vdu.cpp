@@ -1,5 +1,5 @@
 #include "vdu.h"
-#include "cmd/unit.h"
+#include "cmd/unit_generic.h"
 #include "hud.h"
 #include "vs_globals.h"
 #include "cockpit.h"
@@ -412,7 +412,7 @@ void VDU::DrawMessages(Unit *target){
 		mymsg=string(timebuf)+": "+lastmsg->message;
 	}
 	int msglen=mymsg.size();
-	int rows_needed=msglen/(1.6*cols);
+	int rows_needed=(int)(msglen/(1.6*cols));
 	fullstr=mymsg+"\n"+fullstr;
 	//fullstr=fullstr+mymsg+"\n";
 
@@ -609,7 +609,7 @@ void VDU::DrawDamage(Unit * parent) {
   char qr[256];
   if (thr) {
     GFXColor4f (1,0,0,1);
-    sprintf (qr, "%s\n%6s\nThreat:%4.4lf",ecmstatus,thr->name.c_str(),thr->cosAngleTo (parent,th,100000000,10000000));
+    sprintf (qr, "%s\n%6s\nThreat:%4.4f",ecmstatus,thr->name.c_str(),thr->cosAngleTo (parent,th,100000000,10000000));
     strncat (st,qr,128);
   }else {
     if (parent->GetImageInformation().ecm!=0) {
@@ -689,20 +689,20 @@ pos.i*fabs(w)/parent->rSize()*percent+x;
     pos.k=0;
     string ammo =(parent->mounts[i]->ammo>=0)?string("(")+tostring(parent->mounts[i]->ammo)+string(")"):string("");
     switch (parent->mounts[i]->ammo!=0?parent->mounts[i]->status:127) {
-    case Unit::Mount::ACTIVE:
+    case Mount::ACTIVE:
       GFXColor4f (0,1,.2,1);
       if (parent->mounts[i]->type->size<weapon_info::LIGHTMISSILE) 
-	buf+=((buf.length()==len)?string(""):string(","))+((count++%2==0)?"\n":"")+parent->mounts[i]->type->weapon_name+ammo;
+	buf+=((buf.length()==(unsigned int)len)?string(""):string(","))+((count++%2==0)?"\n":"")+parent->mounts[i]->type->weapon_name+ammo;
       else
-	mbuf+=((mbuf.length()==mlen)?string(""):string(","))+((mcount++%4==0)?"\n":"")+parent->mounts[i]->type->weapon_name+ammo;;
+	mbuf+=((mbuf.length()==(unsigned int)mlen)?string(""):string(","))+((mcount++%4==0)?"\n":"")+parent->mounts[i]->type->weapon_name+ammo;;
       break;
-    case Unit::Mount::INACTIVE:
+    case Mount::INACTIVE:
       GFXColor4f (0,.5,0,1);
       break;
-    case Unit::Mount::DESTROYED:
+    case Mount::DESTROYED:
       GFXColor4f (.2,.2,.2,1);
       break;
-    case Unit::Mount::UNCHOSEN:
+    case Mount::UNCHOSEN:
       GFXColor4f (1,1,1,1);
       break;
     case 127:
@@ -712,7 +712,7 @@ pos.i*fabs(w)/parent->rSize()*percent+x;
     DrawGun (pos,w,h,parent->mounts[i]->type->size);
   }
   GFXColor4f(0,1,.2,1);
-  if (mbuf.length()!=mlen) {
+  if (mbuf.length()!=(unsigned int)mlen) {
     buf+=mbuf;
   }
   tp->Draw (buf,0,true);

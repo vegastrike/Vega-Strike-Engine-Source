@@ -4,7 +4,7 @@
 #include "gfx/matrix.h"
 #include "vegastrike.h"
 #include "gfx/mesh.h"
-#include "unit.h"
+#include "unit_generic.h"
 #include "collide/rapcol.h"
 #include "collide/csgeom/transfrm.h"
 #include "collide/collider.h"

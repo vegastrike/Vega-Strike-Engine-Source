@@ -178,9 +178,7 @@ void JoyStick::GetMouse (float &x, float &y, float &z, int &buttons) {
 }
 void JoyStick::GetJoyStick(float &x,float &y, float &z, int &buttons)
 {
-
-    int status;
-    
+    //int status;
     if(joy_available==false){
       for(int a=0;a<MAX_AXES;a++){
         joy_axis[a]=0;

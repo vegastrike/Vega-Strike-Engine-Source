@@ -25,6 +25,8 @@ libcmd_a_SOURCES =				\
 	atmosphere.cpp			\
 	asteroid.cpp			\
 	asteroid.h			\
+	asteroid_generic.cpp			\
+	asteroid_generic.h			\
 	base.h				\
 	base_interface.cpp		\
 	base_init.cpp			\
@@ -41,11 +43,12 @@ libcmd_a_SOURCES =				\
 	bolt.cpp				\
 	building.h			\
 	building.cpp			\
+	building_generic.h			\
+	building_generic.cpp			\
 	cont_terrain.cpp		\
 	cont_terrain.h		\
 	click_list.cpp			\
 	click_list.h			\
-	unit_collide.cpp				\
 	unit_collide.h				\
 	unit_util.h			\
 	unit_util.cpp			\
@@ -56,28 +59,23 @@ libcmd_a_SOURCES =				\
 	music.h				\
 	nebula.cpp			\
 	nebula.h			\
+	nebula_generic.cpp			\
+	nebula_generic.h			\
 	terrain.cpp			\
 	terrain.h			\
 	unit_generic.h				\
 	unit_generic.cpp				\
 	unit.h				\
-	unit.cpp				\
-	unit_bsp.cpp			\
-	unit_cargo.cpp			\
-	unit_customize.cpp		\
-	unit_damage.cpp			\
 	unit_interface.cpp		\
-	unit_xml.cpp  			\
-	unit_click.cpp			\
-	unit_physics.cpp		\
-	unit_repair.cpp			\
-	unit_weapon.cpp			\
+	unit_bsp.cpp		\
 	unit_factory.cpp		\
 	unit_factory_generic.cpp		\
 	weapon_xml.cpp			\
 	weapon_xml.h			\
 	planet.h 				\
 	planet.cpp 				\
+	planet_generic.h 				\
+	planet_generic.cpp 				\
 	iterator.h				\
 	images.h		\
 	collection.h			\
@@ -85,7 +83,13 @@ libcmd_a_SOURCES =				\
 	container.h				\
 	container.cpp			\
 	missile.h			\
-	missile.cpp			\
+	missile_generic.h			\
+	missile_generic.cpp			\
 	unit_const_cache.cpp \
-	unit_const_cache.h
+	unit_const_cache.h	\
+	unit_functions.cpp	\
+	mount.cpp		\
+	mount.h			\
+	collide.h		\
+	collide.cpp
 

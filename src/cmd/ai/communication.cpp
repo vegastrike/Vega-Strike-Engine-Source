@@ -99,9 +99,9 @@ int FSM::getCommMessageMood (int curstate, float mood, float randomresponse) con
     mood+=-randomresponse+2*randomresponse*((float)rand())/RAND_MAX;
   
   int choice=0;
+#if 0
   float bestchoice=4;
   bool fitmood=false;
-#if 0
   for (unsigned i=0;i<n->edges.size();i++) {
     float md = nodes[n->edges[i]].messagedelta;
     bool newfitmood=nonneg(mood)==nonneg(md);

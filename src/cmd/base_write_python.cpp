@@ -3,23 +3,23 @@
 //#ifndef BASE_XML
 #include <stdio.h>
 
-void Base::Room::Link::EndXML (FILE *fp) {
+void BaseInterface::Room::Link::EndXML (FILE *fp) {
 	fprintf(fp,"room, '%s', %g, %g, %g, %g, '%s'",index.c_str(),x,y,wid,hei,text.c_str());
 }
 
-void Base::Room::Goto::EndXML (FILE *fp) {
+void BaseInterface::Room::Goto::EndXML (FILE *fp) {
 	fprintf(fp,"Base.Link (");
 	Link::EndXML(fp);
 	fprintf(fp,", %d)\n", Goto::index);
 }
 
-void Base::Room::Python::EndXML (FILE *fp) {
+void BaseInterface::Room::Python::EndXML (FILE *fp) {
 	fprintf(fp,"Base.Python (");
 	Link::EndXML(fp);
 	fprintf(fp,", '%s')\n",file.c_str());
 }
 
-void Base::Room::Talk::EndXML (FILE *fp) {
+void BaseInterface::Room::Talk::EndXML (FILE *fp) {
 	char randstr[100];
 	sprintf(randstr,"NEW_SCRIPT_%d.py",(int)(rand()));
 	fprintf(fp,"Base.Python (");
@@ -43,13 +43,13 @@ void Base::Room::Talk::EndXML (FILE *fp) {
 	//obolete... creates a file that uses the Python function instead.
 }
 
-void Base::Room::Launch::EndXML (FILE *fp) {
+void BaseInterface::Room::Launch::EndXML (FILE *fp) {
 	fprintf(fp,"Base.Launch (");
 	Link::EndXML(fp);
 	fprintf(fp,")\n");
 }
 
-void Base::Room::Comp::EndXML (FILE *fp) {
+void BaseInterface::Room::Comp::EndXML (FILE *fp) {
 	fprintf(fp,"Base.Comp (");
 	Link::EndXML(fp);
 	fwrite(", '",3,1,fp);
@@ -89,24 +89,24 @@ void Base::Room::Comp::EndXML (FILE *fp) {
 	fprintf(fp,")\n");
 }
 
-void Base::Room::BaseObj::EndXML (FILE *fp) {
+void BaseInterface::Room::BaseObj::EndXML (FILE *fp) {
 //		Do nothing
 }
 
-void Base::Room::BaseShip::EndXML (FILE *fp) {
+void BaseInterface::Room::BaseShip::EndXML (FILE *fp) {
 	fprintf(fp,"Base.Ship (room, '%s', (%lg,%lg,%lg), (%g, %g, %g), (%g, %g, %g))\n",index.c_str()
 			,mat.p.i,mat.p.j,mat.p.k
 			,mat.getR().i,mat.getR().j,mat.getR().k
 			,mat.getQ().i,mat.getQ().j,mat.getQ().k);
 }
 
-void Base::Room::BaseSprite::EndXML (FILE *fp) {
+void BaseInterface::Room::BaseSprite::EndXML (FILE *fp) {
 	float x,y;
 	spr.GetPosition(x,y);
 	fprintf(fp,"Base.Texture (room, '%s', '%s', %g, %g)\n",index.c_str(),texfile.c_str(),x,y);
 }
 
-void Base::Room::EndXML (FILE *fp) {
+void BaseInterface::Room::EndXML (FILE *fp) {
 	int i;
 	i=fprintf(fp,"room = Base.Room ('%s')\n",deftext.c_str());
 	for (i=0;i<links.size();i++) {
@@ -121,7 +121,7 @@ void Base::Room::EndXML (FILE *fp) {
 	fflush(fp);
 }
 
-void Base::EndXML (FILE *fp) {
+void BaseInterface::EndXML (FILE *fp) {
 	fprintf(fp,"import Base\n\n");
 	for (int i=0;i<rooms.size();i++) {
 		rooms[i]->EndXML(fp);

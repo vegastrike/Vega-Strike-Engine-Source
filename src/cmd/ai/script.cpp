@@ -7,7 +7,7 @@
 #include <stack>
 #include "vs_path.h"
 #include "tactics.h"
-#include "cmd/unit.h"
+#include "cmd/unit_generic.h"
 #include "hard_coded_scripts.h"
 
 
@@ -206,9 +206,9 @@ namespace AiXml {
 using XMLSupport::EnumMap;
 using XMLSupport::Attribute;
 using XMLSupport::AttributeList;
-using namespace AiXml;
 //#define BIDBG to do expat
 void AIScript::beginElement(const string &name, const AttributeList &attributes) {
+using namespace AiXml;
   xml->itts=false;
   Unit * tmp;
 #ifdef AIDBG
@@ -504,6 +504,7 @@ void AIScript::beginElement(const string &name, const AttributeList &attributes)
 }
 
 void AIScript::endElement(const string &name) {
+using namespace AiXml;
   QVector temp (0,0,0);
   Names elem = (Names)element_map.lookup(name);
   Unit * tmp;
@@ -707,6 +708,7 @@ void AIScript::endElement(const string &name) {
 
 
 void AIScript::LoadXML() {
+using namespace AiXml;
   string full_filename;
   HardCodedMap::const_iterator iter =  hard_coded_scripts.find (filename);
   if (iter!=hard_coded_scripts.end()) {

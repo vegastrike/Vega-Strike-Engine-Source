@@ -1,3 +1,6 @@
+#ifndef __PLANETARY_TRANSFORM_H
+#define __PLANETARY_TRANSFORM_H
+
 #include "nonlinear_transform.h"
 #include "matrix.h"
 #include "quaternion.h"
@@ -98,3 +101,5 @@ struct PlanetaryOrbitData {
   ///Has this starship collided with a planet any more 
   bool dirty;
 };
+
+#endif

@@ -1,3 +1,6 @@
+#ifndef __HALO_H
+#define __HALO_H
+
 #include "gfxlib.h"
 #include "vec.h"
 #include "quaternion.h"
@@ -22,3 +25,5 @@ class Halo {
   void GetDimensions (float &wid, float &hei) {wid=sizex;hei=sizey;}
 
 };
+
+#endif

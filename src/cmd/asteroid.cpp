@@ -1,30 +1,7 @@
 #include "cmd/asteroid.h"
-void Asteroid::reactToCollision(Unit * smaller, const QVector & biglocation, const Vector & bignormal, const QVector & smalllocation, const Vector & smallnormal, float dist) {
-  Unit * t=this;
-  switch (smaller->isUnit()) {
-  case ASTEROIDPTR:
-  case ENHANCEMENTPTR:
-    break;
-  case NEBULAPTR:
-    smaller->reactToCollision(t,smalllocation,smallnormal,biglocation,bignormal,dist);
-    break;
-  default:
-    GameUnit::reactToCollision (smaller,biglocation,bignormal,smalllocation,smallnormal,dist);
-    break;
-  }
+GameAsteroid::GameAsteroid(const char * filename, int faction, Flightgroup* fg, int fg_snumber, float difficulty):GameUnit<Asteroid> (filename,false, faction,string(""),fg,fg_snumber) {
+	this->Asteroid::Init( difficulty);
 }
-Asteroid::Asteroid(const char * filename, int faction, Flightgroup* fg, int fg_snumber, float difficulty):GameUnit (filename,false, faction,string(""),fg,fg_snumber) {
-  UnitCollection::UnitIterator iter = getSubUnits();
-  Unit *unit;
-  while((unit = iter.current())!=NULL) {
-    float x=2*difficulty*((float)rand())/RAND_MAX -difficulty;
-    float y=2*difficulty*((float)rand())/RAND_MAX-difficulty;
-    float z=2*difficulty*((float)rand())/RAND_MAX-difficulty;
-    unit->SetAngularVelocity(Vector(x,y,z));
-    iter.advance();
-  }
-
-}
-void Asteroid::UpdatePhysics (const Transformation &trans, const Matrix &transmat, const Vector & CumulativeVelocity, bool ResolveLast, UnitCollection *uc) {
-  GameUnit::UpdatePhysics (trans,transmat, CumulativeVelocity,ResolveLast,uc);
+void GameAsteroid::UpdatePhysics (const Transformation &trans, const Matrix &transmat, const Vector & CumulativeVelocity, bool ResolveLast, UnitCollection *uc) {
+  GameUnit<Asteroid>::UpdatePhysics (trans,transmat, CumulativeVelocity,ResolveLast,uc);
 }

@@ -177,7 +177,6 @@ namespace StarXML {
 using XMLSupport::EnumMap;
 using XMLSupport::Attribute;
 using XMLSupport::AttributeList;
-using namespace StarXML;
 
 static Vector ComputeRotVel (float rotvel, const QVector &r, const QVector & s) {
   if ((r.i||r.j||r.k)&&(s.i||s.j||s.k)) {
@@ -286,6 +285,7 @@ void parse_dual_alpha (const char * alpha, BLENDFUNC & blendSrc, BLENDFUNC &blen
 
 
 void GameStarSystem::beginElement(const string &name, const AttributeList &attributes) {
+using namespace StarXML;
   static int neutralfaction=FactionUtil::GetFaction("neutral");
   static float asteroiddiff = XMLSupport::parse_float (vs_config->getVariable ("physics","AsteroidDifficulty",".4"));
   std::string myfile;
@@ -1010,6 +1010,7 @@ void GameStarSystem::beginElement(const string &name, const AttributeList &attri
 }
 
 void GameStarSystem::endElement(const string &name) {
+using namespace StarXML;
   Names elem = (Names)element_map.lookup(name);
 
   switch(elem) {
@@ -1036,6 +1037,7 @@ void GameStarSystem::endElement(const string &name) {
 
 
 void GameStarSystem::LoadXML(const char *filename, const Vector & centroid, const float timeofyear) {
+using namespace StarXML;
   //  shield.number=0;
   const int chunk_size = 16384;
   // rrestricted=yrestricted=prestricted=false;

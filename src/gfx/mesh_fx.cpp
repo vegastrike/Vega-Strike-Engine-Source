@@ -30,7 +30,7 @@ void MeshFX::MergeLights (const MeshFX & other) {
     vec*=.5;
     Vector othervec (other.vect[0],other.vect[1],other.vect[2]);
     othervec*=.5;
-    float distsqr = ((vec-othervec)).Dot ((vec-othervec));
+    //float distsqr = ((vec-othervec)).Dot ((vec-othervec));
     options |= other.options;
     vec = vec+othervec;
     vect[0]=vec.i;
@@ -89,7 +89,7 @@ void Mesh::AddDamageFX(const Vector & pnt, const Vector &norm,  const float dama
 }
 void Mesh::UpdateFX(float howmuchtime) {
   //adjusts lights by TTL, eventually removing them
-  for (int i=0;i<LocalFX.size();i++) {
+  for (unsigned int i=0;i<LocalFX.size();i++) {
     if (!LocalFX[i].Update(howmuchtime)) {
       vector <MeshFX>::iterator er = LocalFX.begin();
       er+=i;

@@ -1,5 +1,5 @@
 #include "faction.h"
-#include "cmd/unit.h"
+#include "cmd/unit_generic.h"
 #include "vs_globals.h"
 #include "gfx/aux_texture.h"
 #include "gfx/animation.h"

@@ -2,7 +2,7 @@
 #include <vector>
 #include "beam.h"
 #include "unit.h"
-#include "unit_collide.h"
+//#include "unit_collide.h"
 #include "gfx/aux_texture.h"
 #include "gfx/decalqueue.h"
 using std::vector;
@@ -178,7 +178,7 @@ void Beam::RecalculateVertices() {
   vlist->EndMutate();
 }
 
-void AdjustMatrixToTrackTarget (Matrix &mat,Unit * target, float speed, bool lead, float cone);
+extern void AdjustMatrixToTrackTarget (Matrix &mat,Unit * target, float speed, bool lead, float cone);
 
 void Beam::Draw (const Transformation &trans, const Matrix &m, Unit * targ, float tracking_cone) {//hope that the correct transformation is on teh stack
   if (curthick==0) 

@@ -1,4 +1,4 @@
-#include "unit.h"
+//#include "unit.h"
 #include "images.h"
 #include "xml_serializer.h"
 #include <algorithm>
@@ -12,7 +12,8 @@
 static const GFXColor disable (1,0,0,1);
 
 extern int GetModeFromName (const char *);
-vector <CargoColor>& GameUnit::FilterDowngradeList (vector <CargoColor> & mylist, bool downgrade)
+template<class UnitType>
+vector <CargoColor>& GameUnit<UnitType>::FilterDowngradeList (vector <CargoColor> & mylist, bool downgrade)
 {
   static bool staticrem =XMLSupport::parse_bool (vs_config->getVariable ("general","remove_impossible_downgrades","true"));
   static float MyPercentMin = XMLSupport::parse_float (vs_config->getVariable("general","remove_downgrades_less_than_percent",".9"));
@@ -84,7 +85,8 @@ vector <CargoColor>& GameUnit::FilterDowngradeList (vector <CargoColor> & mylist
   return mylist;
 }
 
-vector <CargoColor>& GameUnit::FilterUpgradeList (vector <CargoColor> & mylist) {
+template<class UnitType>
+vector <CargoColor>& GameUnit<UnitType>::FilterUpgradeList (vector <CargoColor> & mylist) {
 	static bool filtercargoprice = XMLSupport::parse_bool (vs_config->getVariable ("cargo","filter_expensive_cargo","false"));
 	if (filtercargoprice) {
 	Cockpit * cp = _Universe->isPlayerStarship (this);
@@ -101,13 +103,9 @@ vector <CargoColor>& GameUnit::FilterUpgradeList (vector <CargoColor> & mylist) 
 	return FilterDowngradeList(mylist,false);
 }
 
-
-
-
-
-
 extern void SwitchUnits (Unit *,Unit*);
-void GameUnit::EjectCargo (unsigned int index) {
+template<class UnitType>
+void GameUnit<UnitType>::EjectCargo (unsigned int index) {
   Cargo * tmp=NULL;
   Cargo ejectedPilot;
   string name;
@@ -197,6 +195,3 @@ void GameUnit::EjectCargo (unsigned int index) {
 
   }
 }
-
-
-

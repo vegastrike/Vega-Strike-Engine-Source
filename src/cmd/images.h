@@ -1,6 +1,11 @@
 #ifndef _IMAGES_H
 #define _IMAGES_H
 
+#include <string>
+#include <vector>
+#include "gfx/vec.h"
+#include "container.h"
+
 struct DockingPorts {
   ///Center
   Vector pos;
@@ -79,15 +84,6 @@ public:
     return (category==other.category)?(content<other.content):(category<other.category);
   }
 };
-#include "gfxlib.h"
-struct CargoColor {
-  Cargo cargo;
-  GFXColor color;
-  CargoColor () 
-    : cargo(), color(1,1,1,1) {
-  }
-};//A stupid struct that is only for grouping 2 different types of variables together in one return value
-
 class Box;
 class Sprite;
 class Animation;
@@ -143,6 +139,19 @@ struct UnitSounds {
   int explode;
   int cloak;
   int jump;
+};
+
+// From star_system_jump.cpp
+class StarSystem;
+struct unorigdest {
+  UnitContainer un;
+  UnitContainer jumppoint;
+  StarSystem * orig;
+  StarSystem * dest;
+  float delay;
+  int animation;
+  bool justloaded;
+  unorigdest (Unit * un,Unit * jumppoint, StarSystem * orig, StarSystem * dest, float delay,  int ani, bool justloaded):un(un),jumppoint(jumppoint),orig(orig),dest(dest), delay(delay), animation(ani),justloaded(justloaded){}
 };
 
 #endif

@@ -41,7 +41,7 @@ float Unit::computeLockingPercent() {
   float most=-1024;
   for (int i=0;i<GetNumMounts();i++) {
     if (mounts[i]->type->type==weapon_info::PROJECTILE||(mounts[i]->type->size&(weapon_info::SPECIALMISSILE|weapon_info::LIGHTMISSILE|weapon_info::MEDIUMMISSILE|weapon_info::HEAVYMISSILE|weapon_info::CAPSHIPLIGHTMISSILE|weapon_info::CAPSHIPHEAVYMISSILE|weapon_info::SPECIAL))) {
-      if (mounts[i]->status==Unit::Mount::ACTIVE&&mounts[i]->type->LockTime>0) {
+      if (mounts[i]->status==Mount::ACTIVE&&mounts[i]->type->LockTime>0) {
 	float rat = mounts[i]->time_to_lock/mounts[i]->type->LockTime;
 	if (rat<.99) {
 	  if (rat>most) {
@@ -99,7 +99,7 @@ void Cockpit::SetParent (Unit * unit, const char * filename, const char * unitmo
   }
 }
 void Cockpit::Delete () {
-  int i;
+  //int i;
   viewport_offset=cockpit_offset=0;
 }
 void Cockpit::RestoreGodliness() {
@@ -116,7 +116,7 @@ void Cockpit::InitStatic () {
 
 Cockpit::Cockpit (const char * file, Unit * parent,const std::string &pilot_name): parent (parent),cockpit_offset(0), viewport_offset(0), view(CP_FRONT), zoomfactor (1.5),savegame (new SaveGame(pilot_name)) {
   static int headlag = XMLSupport::parse_int (vs_config->getVariable("graphics","head_lag","10"));
-  int i;
+  //int i;
   fg=NULL;
   /*
   for (i=0;i<headlag;i++) {

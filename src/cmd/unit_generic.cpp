@@ -1,5 +1,5 @@
 #include "configxml.h"
-#include "cmd/unit_generic.h"
+#include "unit_generic.h"
 #include "lin_time.h"
 #include "xml_serializer.h"
 #include "vs_path.h"
@@ -17,12 +17,94 @@
 #include "cmd/ai/aggressive.h"
 #include "python/python_class.h"
 #include "cmd/unit_factory.h"
+#include "gfx/cockpit_generic.h"
 #include <algorithm>
 #ifdef _WIN32
 #define strcasecmp stricmp
 #endif
 
 using namespace Orders;
+
+void Unit::reactToCollision(Unit * smalle, const QVector & biglocation, const Vector & bignormal, const QVector & smalllocation, const Vector & smallnormal,  float dist) {
+  clsptr smltyp = smalle->isUnit();
+  if (smltyp==ENHANCEMENTPTR||smltyp==MISSILEPTR) {
+    if (isUnit()!=ENHANCEMENTPTR&&isUnit()!=MISSILEPTR) {
+      smalle->reactToCollision (this,smalllocation,smallnormal,biglocation,bignormal,dist);
+      return;
+    }
+  }	       
+  //don't bounce if you can Juuuuuuuuuuuuuump
+  if (!jumpReactToCollision(smalle)) {
+#ifdef NOBOUNCECOLLISION
+#else
+    static float bouncepercent = XMLSupport::parse_float (vs_config->getVariable ("physics","BouncePercent",".1"));
+    smalle->ApplyForce (bignormal*.4*bouncepercent*smalle->GetMass()*fabs(bignormal.Dot (((smalle->GetVelocity()-this->GetVelocity())/SIMULATION_ATOM))+fabs (dist)/(SIMULATION_ATOM*SIMULATION_ATOM)));
+    this->ApplyForce (smallnormal*.4*bouncepercent*GetMass()*fabs(smallnormal.Dot ((smalle->GetVelocity()-this->GetVelocity()/SIMULATION_ATOM))+fabs (dist)/(SIMULATION_ATOM*SIMULATION_ATOM)));
+    float m1=smalle->GetMass(),m2=GetMass();
+    //Vector Elastic_dvl = (m1-m2)/(m1+m2)*smalle->GetVelocity() + smalle->GetVelocity()*2*m2/(m1+m2);
+    //Vector Elastic_dvs = (m2-m1)/(m1+m2)*smalle->GetVelocity() + smalle->GetVelocity()*2*m1/(m1+m2);
+    Vector Inelastic_vf = (m1/(m1+m2))*smalle->GetVelocity() + (m2/(m1+m2))*GetVelocity();
+    float LargeKE = (0.5)*m2*GetVelocity().MagnitudeSquared();
+    float SmallKE = (0.5)*m1*smalle->GetVelocity().MagnitudeSquared();
+    float FinalInelasticKE = Inelastic_vf.MagnitudeSquared()*(0.5)*(m1+m2);
+	float InelasticDeltaKE = LargeKE +SmallKE - FinalInelasticKE;
+    static float kilojoules_per_damage = XMLSupport::parse_float (vs_config->getVariable ("physics","kilojoules_per_unit_damage","5400"));
+    static float inelastic_scale = XMLSupport::parse_float (vs_config->getVariable ("physics","inelastic_scale","1"));
+	float large_damage=inelastic_scale*(InelasticDeltaKE *(1.0/4.0 + (0.5*m2/(m1+m2))) )/kilojoules_per_damage;
+    float small_damage=inelastic_scale*(InelasticDeltaKE *(1.0/4.0 + (0.5*m1/(m1+m2))) )/kilojoules_per_damage;
+    smalle->ApplyDamage (biglocation.Cast(),bignormal,small_damage,smalle,GFXColor(1,1,1,2),NULL);
+    this->ApplyDamage (smalllocation.Cast(),smallnormal,large_damage,this,GFXColor(1,1,1,2),NULL);
+
+    //OLDE METHODE
+    //    smalle->ApplyDamage (biglocation.Cast(),bignormal,.33*g_game.difficulty*(  .5*fabs((smalle->GetVelocity()-this->GetVelocity()).MagnitudeSquared())*this->mass*SIMULATION_ATOM),smalle,GFXColor(1,1,1,2),NULL);
+    //    this->ApplyDamage (smalllocation.Cast(),smallnormal, .33*g_game.difficulty*(.5*fabs((smalle->GetVelocity()-this->GetVelocity()).MagnitudeSquared())*smalle->mass*SIMULATION_ATOM),this,GFXColor(1,1,1,2),NULL);
+
+#endif
+  //each mesh with each mesh? naw that should be in one way collide
+  }
+}
+
+static Unit * getFuelUpgrade () {
+  return UnitFactory::createUnit("add_fuel",true,FactionUtil::GetFaction("upgrades"));
+}
+static float getFuelAmt () {
+  Unit * un = getFuelUpgrade();
+  float ret = un->FuelData();
+  un->Kill();
+  return ret;
+}
+static float GetJumpFuelQuantity() {
+  static float f= getFuelAmt();
+  return f;
+}
+
+void Unit::ActivateJumpDrive (int destination) {
+  //const int jumpfuelratio=1;
+  if (((docked&(DOCKED|DOCKED_INSIDE))==0)&&jump.drive!=-2) {
+  if ((energy>jump.energy&&(jump.energy>=0||fuel>(-jump.energy*GetJumpFuelQuantity()/100.)))) {
+    jump.drive = destination;
+    //float fuel_used=0;
+    if (jump.energy>0)
+      energy-=jump.energy;
+    else
+      fuel -= jump.energy*GetJumpFuelQuantity()/100.;
+  }else {
+    if (abs(jump.energy)<32000) {
+      static float jfuel = XMLSupport::parse_float(vs_config->getVariable("physics","jump_fuel_cost",".5"));
+      if (fuel>jfuel*GetJumpFuelQuantity()) {
+       fuel-=jfuel*GetJumpFuelQuantity();
+       jump.drive=destination;
+     }
+    }
+  }
+  }
+}
+
+void Unit::DeactivateJumpDrive () {
+  if (jump.drive>=0) {
+    jump.drive=-1;
+  }
+}
 
 float copysign (float x, float y) {
 	if (y>0)
@@ -238,7 +320,7 @@ Unit::Unit(const char *filename, bool SubU, int faction,std::string unitModifica
 		int meshtype;
 		ReadInt(meshtype);
 		char meshfilename[64];
-		float x,y,z;
+		//float x,y,z;
 		//ReadMesh(meshfilename, x,y,z);
 		meshdata_string.push_back(meshfilename);
 
@@ -314,8 +396,6 @@ Unit::~Unit()
   fprintf (stderr,"%d %x\n", 2,image->hudImage);
   fflush (stderr);
 #endif
-  if (image->hudImage )
-    delete image->hudImage;
   if (image->unitwriter)
     delete image->unitwriter;
   unsigned int i;
@@ -712,7 +792,7 @@ float Unit::GetElasticity() {return .5;}
 /**** UNIT AI STUFF                                                                */
 /***********************************************************************************/
 void Unit::LoadAIScript(const std::string & s) {
-  static bool init=false;
+  //static bool init=false;
   //  static bool initsuccess= initPythonAI();
   if (s.find (".py")!=string::npos) {
     Order * ai = PythonClass <FireAt>::Factory (s);
@@ -1428,7 +1508,7 @@ void Unit::DamageRandSys(float dam, const Vector &vec) {
 		} else if (GetNumMounts()) {
 			unsigned int whichmount=rand()%GetNumMounts();
 			if (randnum>=.9) {
-				mounts[whichmount]->status=GameUnit::GameMount::DESTROYED;
+				mounts[whichmount]->status=Mount::DESTROYED;
 			}else if (mounts[whichmount]->ammo>0&&randnum>=.4) {
 			  mounts[whichmount]->ammo*=dam;
 			} else if (randnum>=.1) {
@@ -1891,8 +1971,8 @@ bool Unit::ShieldUp (const Vector &pnt) const{
 /**** UNIT_WEAPON STUFF                                                            */
 /***********************************************************************************/
 
-Unit::Mount::Mount (){static weapon_info wi(weapon_info::BEAM); type=&wi; size=weapon_info::NOWEAP; ammo=-1;status= UNCHOSEN; processed=Mount::PROCESSED;sound=-1;}
-Unit::Mount::Mount(const string& filename, short am,short vol): size(weapon_info::NOWEAP),ammo(am),sound(-1){
+Mount::Mount (){static weapon_info wi(weapon_info::BEAM); type=&wi; size=weapon_info::NOWEAP; ammo=-1;status= UNCHOSEN; processed=Mount::PROCESSED;sound=-1;}
+Mount::Mount(const string& filename, short am,short vol): size(weapon_info::NOWEAP),ammo(am),sound(-1){
   static weapon_info wi(weapon_info::BEAM);
   type = &wi;
   this->volume=vol;
@@ -1936,14 +2016,14 @@ void Unit::Cloak (bool loak) {
   }
 }
 
-void Unit::Mount::Activate (bool Missile) {
+void Mount::Activate (bool Missile) {
   if ((type->type==weapon_info::PROJECTILE)==Missile) {
     if (status==INACTIVE)
       status = ACTIVE;
   }
 }
 ///Sets this gun to inactive, unless unchosen or destroyed
-void Unit::Mount::DeActive (bool Missile) {
+void Mount::DeActive (bool Missile) {
   if ((type->type==weapon_info::PROJECTILE)==Missile) {
     if (status==ACTIVE)
       status = INACTIVE;
@@ -2141,7 +2221,7 @@ void Unit::PerformDockingOperations () {
       i--;
       continue;
     }
-    Transformation t = un->prev_physical_state;
+    //Transformation t = un->prev_physical_state;
     un->prev_physical_state=un->curr_physical_state;
     un->curr_physical_state =HoldPositionWithRespectTo (un->curr_physical_state,prev_physical_state,curr_physical_state);
     un->NetForce=Vector(0,0,0);
@@ -2363,7 +2443,7 @@ static int UpgradeFloat (double &result,double tobeupgraded, double upgrador, do
   }
 }
 
-void Unit::Mount::ReplaceMounts (const Unit::Mount *other) {
+void Mount::ReplaceMounts (const Mount *other) {
   short thisvol = volume;
   short thissize = size;
   Transformation t =this->GetMountLocation();
@@ -2374,10 +2454,10 @@ void Unit::Mount::ReplaceMounts (const Unit::Mount *other) {
   ref.gun=NULL;
 }
 
-void Unit::Mount::SwapMounts (Unit::Mount * other) {
+void Mount::SwapMounts (Mount * other) {
   short thisvol = volume;
   short othervol = other->volume;
-  short othersize = other->size;
+  //short othersize = other->size;
   short thissize = size;
   Mount mnt = *this;
   this->size=thissize;
@@ -2423,7 +2503,7 @@ bool Quit (const char *input_buffer) {
 	return false;
 }
 
-double Unit::Mount::Percentage (const Unit::Mount *newammo) const{
+double Mount::Percentage (const Mount *newammo) const{
   float percentage=0;
   int thingstocompare=0;
   if (status==UNCHOSEN||status==DESTROYED)
@@ -3334,7 +3414,7 @@ float Unit::CourseDeviation (const Vector &OriginalCourse, const Vector &FinalCo
 /*** STAR SYSTEM JUMP STUFF                                                          ***/
 /***************************************************************************************/
 
-bool GameUnit::TransferUnitToSystem (StarSystem * Current) {
+bool Unit::TransferUnitToSystem (StarSystem * Current) {
   if (activeStarSystem->RemoveUnit (this)) {
     this->RemoveFromSystem();  
     this->Target(NULL);

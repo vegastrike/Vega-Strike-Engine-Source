@@ -19,7 +19,7 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 #include "vegastrike.h"
-#include "cmd/unit.h"
+#include "cmd/unit_generic.h"
 #include "order.h"
 #include "cmd/collection.h"
 #include "communication.h"

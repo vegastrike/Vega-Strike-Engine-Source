@@ -175,7 +175,7 @@ namespace UnitUtil {
   
 	Cargo GetCargoIndex (Unit *my_unit, int index) {
 	  if (my_unit) {
-	    if (index>=0&&index<my_unit->numCargo()) {
+	    if (index>=0&&(unsigned int)index<my_unit->numCargo()) {
 	      return my_unit->GetCargo(index);
 	    }
 	  }

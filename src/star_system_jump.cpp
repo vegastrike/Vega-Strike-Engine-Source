@@ -15,22 +15,12 @@
 #include "cmd/script/flightgroup.h"
 extern Unit ** fighters;
 extern Hashtable<std::string, StarSystem ,char [127]> star_system_table;
-struct unorigdest {
-  UnitContainer un;
-  UnitContainer jumppoint;
-  StarSystem * orig;
-  StarSystem * dest;
-  float delay;
-  int animation;
-  bool justloaded;
-  unorigdest (Unit * un,Unit * jumppoint, StarSystem * orig, StarSystem * dest, float delay,  int ani, bool justloaded):un(un),jumppoint(jumppoint),orig(orig),dest(dest), delay(delay), animation(ani),justloaded(justloaded){}
-};
 void CacheJumpStar (bool destroy) {
   static Animation * cachedani=new Animation (vs_config->getVariable ("graphics","jumpgate","explosion_orange.ani").c_str(),true,.1,MIPMAP,false);
   if (destroy)
     delete cachedani;
 }
-static std::vector <unorigdest *> pendingjump;
+std::vector <unorigdest *> pendingjump;
 static std::vector <unsigned int> AnimationNulls;
 class ResizeAni {
 public:
@@ -71,23 +61,6 @@ static unsigned int AddJumpAnimation (const QVector & pos, const float size, boo
   return AddAnimation (pos,size,mvolatile,vs_config->getVariable("graphics","jumpgate","warp.ani"),.95);
 }
 
-void DealPossibleJumpDamage (Unit *un) {
-  float speed = un->GetVelocity().Magnitude();
-  float damage = un->GetJumpStatus().damage+(rand()%100<1)?(rand()%20):0;
-  float dam =speed*(damage/10);
-  if (dam>100) dam=100;
-  if (dam>1) {
-    un->ApplyDamage ((un->Position()+un->GetVelocity().Cast()).Cast(),
-		     un->GetVelocity(), 
-		     dam,
-		     un,
-		     GFXColor (((float)(rand()%100))/100,
-			       ((float)(rand()%100))/100,
-			       ((float)(rand()%100))/100),NULL);
-    un->SetCurPosition (un->LocalPosition()+(((float)rand())/RAND_MAX)*dam*un->GetVelocity().Cast());
-  }
-}
-
 static void VolitalizeJumpAnimation (const int ani) {
   if (ani !=-1) {
     static float VolAnimationPer = XMLSupport::parse_float (vs_config->getVariable ("graphics","jumpanimationshrink",".95"));
@@ -95,135 +68,6 @@ static void VolitalizeJumpAnimation (const int ani) {
 
     JumpAnimations[ani].a=NULL;
     AnimationNulls.push_back (ani);
-  }
-}
-inline bool CompareDest (Unit * un, StarSystem * origin) {
-  for (unsigned int i=0;i<un->GetDestinations().size();i++) {
-    if ((origin==star_system_table.Get (string(un->GetDestinations()[i])))||(origin==star_system_table.Get (string(un->GetDestinations()[i])+string (".system")))) 
-      return true;
-  }
-  return false;
-}
-inline std::vector <Unit *> ComparePrimaries (Unit * primary, StarSystem *origin) {
-  std::vector <Unit *> myvec;
-  if (CompareDest (primary, origin))
-    myvec.push_back (primary);
-  /*
-  if (primary->isUnit()==PLANETPTR) {
-    Iterator *iter = ((Planet *)primary)->createIterator();
-    Unit * unit;
-    while((unit = iter->current())!=NULL) {
-      if (unit->isUnit()==PLANETPTR)
-	if (CompareDest ((Planet*)unit,origin)) {
-	  myvec.push_back (unit);
-	}
-      iter->advance();
-    }
-    delete iter;
-  }
-  */
-  return myvec;
-}
-
-void GameUnit::TransferUnitToSystem (unsigned int kk, StarSystem * &savedStarSystem, bool dosightandsound) {
-  if (pendingjump[kk]->orig==activeStarSystem||activeStarSystem==NULL) {
-    if (TransferUnitToSystem (pendingjump[kk]->dest)) {
-#ifdef JUMP_DEBUG
-      fprintf (stderr,"Unit removed from star system\n");
-#endif
-
-      ///eradicating from system, leaving no trace
-      TransferUnitToSystem(pendingjump[kk]->dest);
-
-
-      UnitCollection::UnitIterator iter = pendingjump[kk]->orig->getUnitList().createIterator();
-      Unit * unit;
-      while((unit = iter.current())!=NULL) {
-	if (unit->Threat()==this) {
-	  unit->Threaten (NULL,0);
-	}
-	if (unit->VelocityReference()==this) {
-	  unit->VelocityReference(NULL);
-	}
-	if (unit->Target()==this) {
-	  unit->Target (pendingjump[kk]->jumppoint.GetUnit());
-	  unit->ActivateJumpDrive (0);
-	}else {
-	  Flightgroup * ff = unit->getFlightgroup();
-	  if (ff) {
-		  if (this==ff->leader.GetUnit()&&(ff->directive=="f"||ff->directive=="F")) {
-			unit->Target (pendingjump[kk]->jumppoint.GetUnit());
-			unit->getFlightgroup()->directive="F";
-			unit->ActivateJumpDrive (0);
-		  }
-	  }
-	}
-	iter.advance();
-      }
-      Cockpit * an_active_cockpit = _Universe->isPlayerStarship(this);
-      if (an_active_cockpit!=NULL) {
-	an_active_cockpit->activeStarSystem=pendingjump[kk]->dest;
-      }
-      if (this==_Universe->AccessCockpit()->GetParent()) {
-	fprintf (stderr,"Unit is the active player character...changing scene graph\n");
-	savedStarSystem->SwapOut();
-	savedStarSystem = pendingjump[kk]->dest;
-	pendingjump[kk]->dest->SwapIn();
-      }
-      
-      _Universe->setActiveStarSystem(pendingjump[kk]->dest);
-      vector <Unit *> possibilities;
-      iter = pendingjump[kk]->dest->getUnitList().createIterator();
-      Unit * primary;
-      while ((primary = iter.current())!=NULL) {
-	vector <Unit *> tmp;
-	tmp = ComparePrimaries (primary,pendingjump[kk]->orig);
-	if (!tmp.empty()) {
-	  possibilities.insert (possibilities.end(),tmp.begin(), tmp.end());
-	}
-	iter.advance();
-      }
-      if (!possibilities.empty()) {
-	static int jumpdest=235034;
-	this->SetCurPosition(possibilities[jumpdest%possibilities.size()]->Position());
-	jumpdest+=23231;
-      }
-      DealPossibleJumpDamage (this);
-      static int jumparrive=AUDCreateSound(vs_config->getVariable ("unitaudio","jumparrive", "sfx43.wav"),false);
-      if (dosightandsound)
-	AUDPlay (jumparrive,this->LocalPosition(),this->GetVelocity(),1);
-    } else {
-#ifdef JUMP_DEBUG
-      fprintf (stderr,"Unit FAILED remove from star system\n");
-#endif
-    }
-    if (docked&DOCKING_UNITS) {
-      for (unsigned int i=0;i<image->dockedunits.size();i++) {
-	Unit * unut;
-	if (NULL!=(unut=image->dockedunits[i]->uc.GetUnit())) {
-	  unut->TransferUnitToSystem (kk,savedStarSystem,dosightandsound);
-	}
-      }
-    }
-    if (docked&(DOCKED|DOCKED_INSIDE)) {
-      Unit * un = image->DockedTo.GetUnit();
-      if (!un) {
-	docked &= (~(DOCKED|DOCKED_INSIDE));
-      }else {
-	Unit * targ=NULL;
-	for (un_iter i=pendingjump[kk]->dest->getUnitList().createIterator();
-	     (targ = (*i));
-	     ++i) {
-	  if (targ==un) {
-	    break;
-	  }
-	}
-	if (targ!=un)
-	  UnDock (un);
-      }
-    }
-  }else {
-    fprintf (stderr,"Already jumped\n");
   }
 }
 

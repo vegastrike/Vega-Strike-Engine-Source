@@ -4,7 +4,7 @@
 #ifndef _WIN32
 #include <assert.h>
 #endif
-#include "cmd/unit.h"
+#include "cmd/unit_generic.h"
 using namespace Orders;
 #include "lin_time.h"
 #include "cmd/script/flightgroup.h"

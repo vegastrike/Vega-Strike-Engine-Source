@@ -2,7 +2,7 @@
 #include "universe_util.h"
 #include "universe_generic.h"
 #include "cmd/unit_generic.h"
-#include "cmd/unit_interface.h"
+//#include "cmd/unit_interface.h"
 #include "cmd/unit_factory.h" //for UnitFactory::getMasterPartList()
 #include "cmd/collection.h"
 #include "star_system_generic.h"
@@ -10,12 +10,14 @@
 //#include "cmd/music.h"
 //#include "audiolib.h"
 //#include "gfx/animation.h"
+#include "gfx/cockpit_generic.h"
 #include "lin_time.h"
 #include "load_mission.h"
 #include "config_xml.h"
 #include "vs_globals.h"
 //extern class Music *muzak;
 //extern unsigned int AddAnimation (const QVector & pos, const float size, bool mvolatile, const std::string &name, float percentgrow );
+extern Unit&GetUnitMasterPartList();
 
 using std::string;
 
@@ -245,29 +247,29 @@ namespace UniverseUtil {
 		return mission->objectives.size()-1;
 	}
 	void setObjective(int which, string newobjective) {
-		if (which<mission->objectives.size()) {
+		if (which<(int)mission->objectives.size()) {
 			mission->objectives[which].objective=newobjective;
 		}
 	}
 	void setCompleteness(int which, float completeNess) {
-		if (which<mission->objectives.size()) {
+		if (which<(int)mission->objectives.size()) {
 			mission->objectives[which].completeness=completeNess;
 		}
 	}
 	float getCompleteness(int which) {
-		if (which<mission->objectives.size()) {
+		if (which<(int)mission->objectives.size()) {
 			return mission->objectives[which].completeness;
 		} else {
 			return 0;
 		}
 	}
 	void setOwner(int which,Unit *owner) {
-		if (which<mission->objectives.size()) {
+		if (which<(int)mission->objectives.size()) {
 			mission->objectives[which].owner=owner;
 		}
 	}
 	Unit* getOwner(int which) {
-		if (which<mission->objectives.size()) {
+		if (which<(int)mission->objectives.size()) {
 			return mission->objectives[which].owner.GetUnit();
 		} else {
 			return 0;

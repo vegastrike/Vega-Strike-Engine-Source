@@ -6,12 +6,13 @@
 #include "vs_globals.h"
 #include "config_xml.h"
 #include "xml_support.h"
-#include "cmd/unit.h"
+#include "cmd/unit_generic.h"
 #include "communication.h"
 #include "cmd/script/flightgroup.h"
 #include "flybywire.h"
 #include "hard_coded_scripts.h"
 #include "cmd/script/mission.h"
+#include "gfx/cockpit_generic.h"
 using namespace Orders;
 
 void DoSpeech (Unit * un, const string &speech) {
@@ -301,9 +302,9 @@ bool AggressiveAI::ProcessCurrentFgDirective(Flightgroup * fg) {
 	      }
 	      leader->getAIState()->Communicate(c);
 	    }else {
-	      bool targetted=false;
-	      float mindist;
-	      Unit * un=NULL;
+	      //bool targetted=false;
+	      //float mindist;
+	      //Unit * un=NULL;
 	      th= GetThreat(parent,leader);
 	      CommunicationMessage c(parent,leader,NULL,0);
 	      //fprintf (stderr,"he wnats to help out against threat %d",th);

@@ -337,7 +337,7 @@ void GameStarSystem::Draw(bool DrawCockpit) {
   fflush (stderr);
 #endif
   while((unit = iter.current())!=NULL) {
-    ((GameUnit *)unit)->Draw();
+    ((GameUnit<Unit> *)unit)->Draw();
     iter.advance();
   }
 #ifdef UPDATEDEBUG
@@ -367,7 +367,7 @@ void GameStarSystem::Draw(bool DrawCockpit) {
   GFXEnable (DEPTHTEST);
   GFXEnable (DEPTHWRITE);
   //need to wait for lights to finish
-  Planet::ProcessTerrains();
+  GamePlanet::ProcessTerrains();
   Terrain::RenderAll();
 #ifdef UPDATEDEBUG
   fprintf (stderr,"nearmsh");

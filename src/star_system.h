@@ -56,12 +56,10 @@ class GameStarSystem: public StarSystem {
   Background * bg;
   ///The Light Map corresponding for the BP for spheremapping
   Texture *LightMap[6]; 
-  vector <class MissileEffect *> dischargedMissiles;
+  //vector <class MissileEffect *> dischargedMissiles;
  public:
   GameStarSystem::GameStarSystem(const char * filename, const Vector & centr=Vector(0,0,0),const float timeofyear=0);
   ~GameStarSystem();
-  void AddMissileToQueue(class MissileEffect *);
-  void UpdateMissiles();
   void UpdateUnitPhysics(bool firstframe);
   //class CollideTable *collidetable;
   //class bolt_draw *bolts;

@@ -1,7 +1,7 @@
 #include "config_xml.h"
 #include "vs_globals.h"
 #include "turretai.h"
-#include "cmd/unit.h"
+#include "cmd/unit_generic.h"
 using namespace Orders;
 TurretAI::TurretAI ():FaceTarget (false) {
   type|=WEAPON;

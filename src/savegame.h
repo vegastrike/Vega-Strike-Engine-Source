@@ -1,4 +1,7 @@
 //#include "cmd/script/mission.h"
+#ifndef __SAVEGAME_H
+#define __SAVEGAME_H
+
 #include <vector>
 typedef vector<class varInst *> olist_t;
   struct SavedUnits {
@@ -54,4 +57,6 @@ class SaveGame {
   vector<SavedUnits> ParseSaveGame (string filename, string &ForceStarSystem, string originalstarsystem, QVector & pos, bool &shouldupdatedfighter0pos, float &credits, string &originalunit, int player_num);
 };
 void WriteSaveGame (class Cockpit * cp, bool auto_save);
+
+#endif
 

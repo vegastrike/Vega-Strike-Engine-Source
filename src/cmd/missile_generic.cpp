@@ -1,12 +1,12 @@
-#include "unit.h"
-#include "missile.h"
+#include "missile_generic.h"
+#include "unit_generic.h"
 #include "vegastrike.h"
 #include "vs_globals.h"
-#include "config_xml.h"
+#include "configxml.h"
 #include "images.h"
 #include "collection.h"
-#include "star_system.h"
-void GameStarSystem::UpdateMissiles() {
+#include "star_system_generic.h"
+void StarSystem::UpdateMissiles() {  
   if (!dischargedMissiles.empty()) {
     Unit * un;
     for (un_iter ui=getUnitList().createIterator();
@@ -43,7 +43,7 @@ float Missile::ExplosionRadius() {
   return radial_effect;
 }
 
-void GameStarSystem::AddMissileToQueue(MissileEffect * me) {
+void StarSystem::AddMissileToQueue(MissileEffect * me) {
   dischargedMissiles.push_back (me);
 }
 void Missile::Discharge() {
@@ -53,20 +53,20 @@ void Missile::Discharge() {
 }
 void Missile::Kill (bool erase) {
   Discharge();
-  GameUnit::Kill(erase);
+  Unit::Kill(erase);
 }
 void Missile::reactToCollision (Unit * smaller, const QVector & biglocation, const Vector & bignormal, const QVector & smalllocation, const Vector & smallnormal, float dist) {
   static bool doesmissilebounce  = XMLSupport::parse_bool (vs_config->getVariable("physics","missile_bounce","false"));
   if (doesmissilebounce) {
 
-    GameUnit::reactToCollision (smaller,biglocation,bignormal,smalllocation,smallnormal,dist);
+    Unit::reactToCollision (smaller,biglocation,bignormal,smalllocation,smallnormal,dist);
   }
   Discharge();
   if (!killed)
     DealDamageToHull (smalllocation.Cast(),hull+1);//should kill, applying addmissile effect
   
 }
-static Unit * getNearestTarget (Unit *me) {
+Unit * getNearestTarget (Unit *me) {
   QVector pos (me->Position());
   Unit * un=NULL;
   Unit * targ=NULL;
@@ -93,7 +93,7 @@ static Unit * getNearestTarget (Unit *me) {
 }
 void Missile::UpdatePhysics (const Transformation &trans, const Matrix &transmat, const Vector & CumulativeVelocity, bool ResolveLast, UnitCollection *uc){
     Unit * targ;
-	if (targ=Unit::Target()) {
+	if ((targ=(Unit::Target()))) {
       if (rand()/((float)RAND_MAX)<((float)targ->GetImageInformation().ecm)*SIMULATION_ATOM/32768){
 	Target (this);//go wild
       }
@@ -108,16 +108,18 @@ void Missile::UpdatePhysics (const Transformation &trans, const Matrix &transmat
     if (retarget&&targ==NULL) {
       Target (getNearestTarget (this));
     }
-    GameUnit::UpdatePhysics (trans, transmat, CumulativeVelocity, ResolveLast, uc);
+    Unit::UpdatePhysics (trans, transmat, CumulativeVelocity, ResolveLast, uc);
     this->time-=SIMULATION_ATOM;
     if (NULL!=targ) {
       if ((Position()-targ->Position()).Magnitude()-targ->rSize()-rSize()<detonation_radius) {
-	Vector norm;
-	float dist;
+	//Vector norm;
+	//float dist;
+	/*** WARNING COLLISION STUFF... TO FIX FOR SERVER SIDE SOMEDAY ***
 	if ((targ)->queryBoundingBox (Position(),detonation_radius+rSize())) {
 	  Discharge();
 	  time=-1;
 	}
+	*/
       }
     }
     if (time<0) {

@@ -1,104 +1,8 @@
-#include <stdio.h>
-#include <stdlib.h>
 #include "endianness.h"
 #include <assert.h>
-#ifndef PROPHECY
-#include "vs_path.h"
-#include "gfx/mesh.h"
-#include "unit.h"
-#else
-#include <vector>
-using std::vector;
-struct Vector {
-  double i,j,k;
-};
+#include "unit_bsp.h"
 
-struct bsp_polygon {
-  vector <bsp_vector> v;
-};
-
-#endif
-#define TRUE 1
-#define FALSE 0
-
-#define BACK -1
-#define FRONT +1
-#define INTERSECT 0
-#define VPLANE_Z 4
-#define VPLANE_Y 2
-#define VPLANE_X 1
-#define VPLANE_ALL 7
-
-/*
-
-The whole concept of a BSP Tree is that any plane (since it has an
-infinite surface) divides the space in two parts: "in front" of the
-plane and "behind" the plane (in fact BSP stands for Binary Space
-Partition). So a BSP Tree's node, which has the values A,B,C and D of
-the plane equation (Ax+By+Cz+d=0), a flag ("in front","behind" or
-"undetermined" and two pointers (for the two sub-trees), the left
-pointer and the right pointer. 
-
-To build a BSP tree, you start with an empty tree (NULL). Then calculate
-a plane (from a poly) and put it in the tree. After this you must add
-the other polys: if they are behind the plane or on the plane, take the
-left pointer. If they are in front of the plane, take the right pointer.
-If the node has a plane equation, put the flag the value of
-"undetermined", otherwise put "behind" or "front" as needed. A very
-important note: if a given plane intersects a polygon, you must add that
-poly's plane both to the left and right subtree (see the recursive
-function called put_plane_in_tree3 to see what i mean..
-put_plane_in_tree4 is the same, except it handles quadrilaters(sp?) ).
-
-After the tree is built, the game should test the tree for collisions:
-supply the ship's coordinates to the BSP Tree test routine and follow
-the appropriate paths (left or right). If you reach a "front" value,
-then there is no collision. If you reach the "behind" value, then a
-collision just occurred and VS should deal with it appropriately:)
-
-Here's a proposed form for the node:
-
-struct BSP_Node
-        {
-        char flag;
-        float a,b,c,d;
-        struct BSP_Node * left;
-        struct BSP_Node * right;
-        }
-
-
-
-I'm sending you a small BMP along with the source code to demonstrate
-how should a tree be built and tested. If there's anything you don't
-understand, e-mail me back and i'll try to explain things a bit better:)
-
-Seeya!:)
-*/
-#define RIGHT_HANDED -1
-
-enum INTERSECT_TYPE {
-    BSPG_BACK =-1,
-    BSPG_INTERSECT =0,
-    BSPG_FRONT =1,
-    BSPG_COPLANAR =2
-};
-
-
-
-typedef class Vector VECTOR;
-
-
-struct bsp_tree {
-    double a,b,c,d;
-    vector <bsp_polygon> tri;
-    vector <bsp_tree> triplane;
-    struct bsp_tree * left;
-    struct bsp_tree * right;
-  bsp_tree(): tri(), triplane() {left = right = NULL;}
-};
-
-
-static bool Cross (const bsp_polygon &x, bsp_tree &result) {
+bool Cross (const bsp_polygon &x, bsp_tree &result) {
   double size =0;
   
   for (unsigned int i=2;(!size)&&i<x.v.size();i++) {
@@ -129,7 +33,7 @@ double Dot (const bsp_vector & A, const bsp_vector & B) {
     return A.i *B.i + A.j*B.j+A.k*B.k;
 }
 */
-static FILE * o;
+FILE * o;
 //ax + by + cz =0;  A.i + (B.i - A.i)k = x;A.j + (B.j - A.j)k = y;A.k + (B.k - A.k)k = z;
 // x*A.i + b*B.j + c*C.k + d + k*(a*B.i - a*A.i + b*B.j - b&A.j + c*B.k - c*A.k) = 0;
 // k = (A * n + d) / (A * n - B * n) 
@@ -147,7 +51,7 @@ bool intersectionPoint (const bsp_tree &n, const Vector & A, const Vector & B, V
     return true;
 }
 
-enum INTERSECT_TYPE whereIs (const VECTOR & v, const bsp_tree & temp_node) {
+enum INTERSECT_TYPE whereIs (const TVECTOR & v, const bsp_tree & temp_node) {
      double tmp = ((temp_node.a)*(v.i))+((temp_node.b)*(v.j))+((temp_node.c)*(v.k))+(temp_node.d);
      if (tmp < 0) {
 	 return BSPG_BACK;
@@ -156,18 +60,16 @@ enum INTERSECT_TYPE whereIs (const VECTOR & v, const bsp_tree & temp_node) {
      }else return BSPG_INTERSECT;
 }
 
-static enum INTERSECT_TYPE where_is_poly(const bsp_tree &temp_node,const bsp_polygon &temp_poly3);
-static void bsp_stats (bsp_tree * tree);
+enum INTERSECT_TYPE where_is_poly(const bsp_tree &temp_node,const bsp_polygon &temp_poly3);
 static void display_bsp_tree(bsp_tree * tree);
-static void write_bsp_tree (bsp_tree *tree,int level=0);//assume open file
 
 //can divide 3 or 4 sized planes
 void dividePlane (const bsp_polygon & tri, const bsp_tree &unificator, bsp_polygon &back, bsp_polygon &front) {
     enum INTERSECT_TYPE oldflag;
     enum INTERSECT_TYPE flag;
     Vector int_point;
-    front.v = vector <VECTOR> ();
-    back.v = vector <VECTOR> ();
+    front.v = vector <TVECTOR> ();
+    back.v = vector <TVECTOR> ();
     for (unsigned int i=0;i<tri.v.size();i++) {
 	flag = whereIs (tri.v[i], unificator);
 	if (flag==BSPG_INTERSECT) {
@@ -208,52 +110,8 @@ void FreeBSP (bsp_tree ** tree) {
   *tree = NULL;
 }
 
-static bsp_tree * buildbsp(bsp_tree * bsp,vector <bsp_polygon>&, vector <bsp_tree>&, char Vplane);
-#ifndef PROPHECY
-void GameUnit::BuildBSPTree(const char *filename, bool vplane, Mesh * hull) {
-  bsp_tree * bsp=NULL;
-  bsp_tree temp_node;
-  vector <bsp_polygon> tri;
-  vector <bsp_tree> triplane;
-  if (hull!=NULL) {
-    hull->GetPolys (tri);
-  } else {
-    for (int j=0;j<nummesh();j++) {
-      meshdata[j]->GetPolys(tri);
-    }
-  }	
-  for (unsigned int i=0;i<tri.size();i++) {
-    if (!Cross (tri[i],temp_node)) {
-      vector <bsp_polygon>::iterator ee = tri.begin();
-      ee+=i;
-      tri.erase(ee);
-      i--;
-      continue;
-    }	
-    // Calculate 'd'
-    temp_node.d = (double) ((temp_node.a*tri[i].v[0].i)+(temp_node.b*tri[i].v[0].j)+(temp_node.c*tri[i].v[0].k));
-    temp_node.d*=-1.0;
-    triplane.push_back(temp_node);
-    //                bsp=put_plane_in_tree3(bsp,&temp_node,&temp_poly3); 
- }
- 
- bsp = buildbsp (bsp,tri,triplane, vplane?VPLANE_ALL:0);
- if (bsp) {
-   changehome();
-   vschdir ("generatedbsp");
-   o = fopen (filename, "wb");
-   vscdup();
-   returnfromhome();
-   if (o) {
-     write_bsp_tree(bsp,0);
-     fclose (o);
-     bsp_stats (bsp);
-     FreeBSP (&bsp);
-   }
- }	
-
-}
-#else
+//bsp_tree * buildbsp(bsp_tree * bsp,vector <bsp_polygon>&, vector <bsp_tree>&, char Vplane);
+#ifdef PROPHECY
 long getsize (char * name)
 
 {
@@ -419,7 +277,7 @@ int main(int argc, char * argv) {
 }
 #endif
 static int select_plane (const vector <bsp_polygon> &tri, const vector <bsp_tree> &triplane);
-static bsp_tree * buildbsp(bsp_tree * bsp,vector <bsp_polygon> &tri, vector <bsp_tree> &triplane, char vplane) {
+bsp_tree * buildbsp(bsp_tree * bsp,vector <bsp_polygon> &tri, vector <bsp_tree> &triplane, char vplane) {
   assert (tri.size()==triplane.size());
   bool VP = vplane!=0;
   if (tri.size()==0) {
@@ -634,7 +492,7 @@ static void explore (bsp_tree * tree, unsigned int hgt) {
 
 }
 
-static void bsp_stats (bsp_tree * tree) {
+void bsp_stats (bsp_tree * tree) {
   average_height = numends = numnodes = maxheight= 0;
   minheight = 10000000;// 0xffffffffffffffffffffffffff
   if (tree!=NULL) {
@@ -756,7 +614,7 @@ static void wrtf(float f) {
 static void wrtb(const bool b) { (void) fwrite (&b, sizeof(bool), 1, o); }
 
 
-static void write_bsp_tree (bsp_tree *tree,int level)//assume open file
+void write_bsp_tree (bsp_tree *tree,int level)//assume open file
 {
 	level++;
 	wrtf (tree->a);

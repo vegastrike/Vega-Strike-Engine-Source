@@ -1,5 +1,7 @@
 #ifndef _LINECOLLIDE_H_
 #define _LINECOLLIDE_H_
+
+#include <stdlib.h>
 /**
  * Line Collide provides a complete container for a unit that is put in a collide hashtable
  * For collisions. The mini, maxi vectors of the line collide are taken

@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include "cmd/unit.h"
+#include "cmd/unit_generic.h"
 #include "packet.h"
 #include "client.h"
 

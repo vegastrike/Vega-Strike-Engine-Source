@@ -1,25 +1,23 @@
 #include "building.h"
 #include "cont_terrain.h"
 #include "gfx/planetary_transform.h"
-Building::Building (ContinuousTerrain * parent, bool vehicle, const char * filename, bool SubUnit, int faction, const string &modifications, Flightgroup * fg):GameUnit (filename,SubUnit,faction,modifications,fg) {
+GameBuilding::GameBuilding (ContinuousTerrain * parent, bool vehicle, const char * filename, bool SubUnit, int faction, const string &modifications, Flightgroup * fg):GameUnit<Building> (filename,SubUnit,faction,modifications,fg) {
   this->vehicle = vehicle;
   continuous=true;
   this->parent.plane = parent;
 }
 
-Building::Building (Terrain * parent, bool vehicle, const char *filename, bool SubUnit, int faction, const string &modifications, Flightgroup * fg):GameUnit (filename,SubUnit,faction,modifications,fg) {
+GameBuilding::GameBuilding (Terrain * parent, bool vehicle, const char *filename, bool SubUnit, int faction, const string &modifications, Flightgroup * fg):GameUnit<Building> (filename,SubUnit,faction,modifications,fg) {
   this->vehicle = vehicle;
   continuous=false;
   this->parent.terrain = parent;
 }
 
-
-
-void Building::UpdatePhysics (const Transformation &trans, const Matrix &transmat, const Vector & cum_vel,  bool lastframe, UnitCollection *uc){
+void GameBuilding::UpdatePhysics (const Transformation &trans, const Matrix &transmat, const Vector & cum_vel,  bool lastframe, UnitCollection *uc){
   if (GetPlanetOrbit()) {
     SetPlanetOrbitData(GetPlanetOrbit());//makes it dirty
   }
-  GameUnit::UpdatePhysics (trans,transmat,cum_vel,lastframe,uc);
+  GameUnit<Building>::UpdatePhysics (trans,transmat,cum_vel,lastframe,uc);
   QVector tmp (LocalPosition());
   Vector p,q,r;
   GetOrientation (p,q,r);

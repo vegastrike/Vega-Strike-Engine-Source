@@ -113,12 +113,10 @@ namespace FactionXML {
 
 }
 
-
-using namespace FactionXML;
-
 static vector <std::string> contrabandlists;
 void Faction::beginElement(void *userData, const XML_Char *names, const XML_Char **atts) {
-  //Universe * thisuni = (Universe *) userData;
+ using namespace FactionXML;
+ //Universe * thisuni = (Universe *) userData;
 //	((Universe::Faction*)userData)->beginElement(name, AttributeList(atts));
   AttributeList attributes=AttributeList(atts);
   string name=names;
@@ -293,6 +291,7 @@ void Faction::beginElement(void *userData, const XML_Char *names, const XML_Char
 
 }
 void Faction::endElement(void *userData, const XML_Char *name) {
+using namespace FactionXML;
 //  ((Faction*)userData)->endElement(name);
 
 //void Faction::endElement(const string &name) {
@@ -310,6 +309,7 @@ void Faction::endElement(void *userData, const XML_Char *name) {
 
 
 void GameFaction::LoadXML(const char * filename, char * xmlbuffer, int buflength) {
+using namespace FactionXML;
   unitlevel=0;
   FILE * inFile;
   const int chunk_size = 16384;
@@ -380,7 +380,7 @@ std::vector <Animation *>* FactionUtil::GetRandAnimation(int faction, unsigned c
   }
 }
 Animation * FactionUtil::getRandAnimation (int whichfaction, std::string &which) {
-  if (whichfaction<factions.size()) {
+  if (whichfaction<(int)factions.size()) {
     if (factions[whichfaction]->explosion_name.size()) {
       int whichexp = rand()%factions[whichfaction]->explosion_name.size();
       which = factions[whichfaction]->explosion_name[whichexp];

@@ -1,4 +1,4 @@
-#include "unit.h"
+//#include "unit.h"
 #include "unit_factory.h"
 #include "ai/order.h"
 #include "gfx/animation.h"
@@ -26,14 +26,10 @@
 extern unsigned short apply_float_to_short (float tmp);
 
 static list<Unit*> Unitdeletequeue;
-static std::vector <Mesh *> MakeMesh(unsigned int mysize) {
-  std::vector <Mesh *> temp;
-  for (unsigned int i=0;i<mysize;i++) {
-    temp.push_back(NULL);
-  }
-  return temp;
-}
-void GameUnit::Split (int level) {
+extern std::vector <Mesh *> MakeMesh(unsigned int mysize);
+
+template<class UnitType>
+void GameUnit<UnitType>::Split (int level) {
   int i;
   int nm = nummesh();
   if (nm<=0) {
@@ -96,11 +92,12 @@ void GameUnit::Split (int level) {
 
 extern Music *muzak;
 
-void GameUnit::Kill(bool erasefromsave) {
+template <class UnitType>
+void GameUnit<UnitType>::Kill(bool erasefromsave) {
 
-  if (colTrees)
-    colTrees->Dec();//might delete
-  colTrees=NULL;
+  if (this->colTrees)
+    this->colTrees->Dec();//might delete
+  this->colTrees=NULL;
   //if (erasefromsave)
   //  _Universe->AccessCockpit()->savegame->RemoveUnitFromSave((long)this);
   
@@ -166,7 +163,8 @@ void GameUnit::Kill(bool erasefromsave) {
 
 extern float rand01 ();
 
-float GameUnit::DealDamageToHullReturnArmor (const Vector & pnt, float damage, unsigned short * &t ) {
+template <class UnitType>
+float GameUnit<UnitType>::DealDamageToHullReturnArmor (const Vector & pnt, float damage, unsigned short * &t ) {
   float percent;
   unsigned short *targ=NULL;
   percent = Unit::DealDamageToHullReturnArmor( pnt, damage, targ);
@@ -228,7 +226,8 @@ float GameUnit::DealDamageToHullReturnArmor (const Vector & pnt, float damage, u
     percent = 0;
   return percent;
 }
-float GameUnit::DealDamageToShield (const Vector &pnt, float &damage) {
+template <class UnitType>
+float GameUnit<UnitType>::DealDamageToShield (const Vector &pnt, float &damage) {
   float percent = Unit::DealDamageToShield( pnt, damage);
   if (percent&&!AUDIsPlaying (sound->shield))
 	AUDPlay (sound->shield,ToWorldCoordinates(pnt).Cast()+cumulative_transformation.position,Velocity,1);
@@ -238,7 +237,8 @@ float GameUnit::DealDamageToShield (const Vector &pnt, float &damage) {
   return percent;
 }
 
-float GameUnit::ApplyLocalDamage (const Vector & pnt, const Vector & normal, float amt, Unit * affectedUnit,const GFXColor &color, float phasedamage) {
+template <class UnitType>
+float GameUnit<UnitType>::ApplyLocalDamage (const Vector & pnt, const Vector & normal, float amt, Unit * affectedUnit,const GFXColor &color, float phasedamage) {
   static float nebshields=XMLSupport::parse_float(vs_config->getVariable ("physics","nebula_shield_recharge",".5"));
   //  #ifdef REALLY_EASY
   Cockpit * cpt;
@@ -280,33 +280,10 @@ float GameUnit::ApplyLocalDamage (const Vector & pnt, const Vector & normal, flo
   return 1;
 }
 
-//un scored a faction kill
-void ScoreKill (Cockpit * cp, Unit * un, int faction) {
-  static float KILL_FACTOR=-XMLSupport::parse_float(vs_config->getVariable("AI","kill_factor",".2"));
-  FactionUtil::AdjustIntRelation(faction,un->faction,KILL_FACTOR,1);
-  static float FRIEND_FACTOR=-XMLSupport::parse_float(vs_config->getVariable("AI","friend_factor",".1"));
-  for (unsigned int i=0;i<FactionUtil::GetNumFactions();i++) {
-    float relation;
-    if (faction!=i&&un->faction!=i) {
-      relation=FactionUtil::GetIntRelation(i,faction);
-      if (relation)
-        FactionUtil::AdjustIntRelation(i,un->faction,FRIEND_FACTOR*relation,1);
-    }
-  }
-  olist_t * killlist = &cp->savegame->getMissionData (string("kills"));
-  while (killlist->size()<=FactionUtil::GetNumFactions()) {
-    killlist->push_back (new varInst (VI_IN_OBJECT));
-    killlist->back()->type=VAR_FLOAT;
-    killlist->back()->float_val=0;
-  }
-  if (killlist->size()>faction) {
-    (*killlist)[faction]->float_val++;
-  }
-  killlist->back()->float_val++;
-}
+extern void ScoreKill (Cockpit * cp, Unit * un, int faction);
 
-
-void GameUnit::ApplyDamage (const Vector & pnt, const Vector & normal, float amt, Unit * affectedUnit, const GFXColor & color, Unit * ownerDoNotDereference, float phasedamage) {
+template <class UnitType>
+void GameUnit<UnitType>::ApplyDamage (const Vector & pnt, const Vector & normal, float amt, Unit * affectedUnit, const GFXColor & color, Unit * ownerDoNotDereference, float phasedamage) {
   Cockpit * cp = _Universe->isPlayerStarship (ownerDoNotDereference);
 
   if (cp) {
@@ -333,7 +310,8 @@ extern unsigned int AddAnimation (const QVector &, const float, bool, const std:
 
 extern Animation * getRandomCachedAni() ;
 extern std::string getRandomCachedAniString() ;
-bool GameUnit::Explode (bool drawit, float timeit) {
+template <class UnitType>
+bool GameUnit<UnitType>::Explode (bool drawit, float timeit) {
 
   if (image->explosion==NULL&&image->timeexplode==0) {	//no explosion in unit data file && explosions haven't started yet
 
@@ -398,7 +376,7 @@ bool GameUnit::Explode (bool drawit, float timeit) {
 			static float badrel=XMLSupport::parse_float(vs_config->getVariable("sound","loss_relationship","-.1"));
 			static float goodrel=XMLSupport::parse_float(vs_config->getVariable("sound","victory_relationship",".5"));
 			float rel=un->getRelation(this);
-			if (!Base::CurrentBase)
+			if (!BaseInterface::CurrentBase)
 			  if (rel>goodrel) {
 			    muzak->SkipRandSong(Music::LOSSLIST);
 			  } else if (rel < badrel) {

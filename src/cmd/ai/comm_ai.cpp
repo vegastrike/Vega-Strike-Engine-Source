@@ -67,7 +67,7 @@ static void AllUnitsCloseAndEngage(Unit * un, int faction) {
 	for (un_iter i=_Universe->activeStarSystem()->getUnitList().createIterator();
 		(ally = *i)!=NULL;
 		++i) {
-		Vector loc;
+		//Vector loc;
 
 		if (ally->faction==faction) {
 			//if (ally->InRange (un,loc,true)) {

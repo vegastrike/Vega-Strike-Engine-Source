@@ -1,4 +1,4 @@
-#include "cmd/unit.h"
+#include "cmd/unit_generic.h"
 #include "hashtable.h"
 #include <float.h>
 #include "vs_path.h"
@@ -11,6 +11,7 @@
 #include "load_mission.h"
 #include <algorithm>
 #include "cmd/script/mission.h"
+#include "gfx/cockpit_generic.h"
 using namespace std;
  std::string GetHelperPlayerSaveGame (int num) {
 
@@ -19,7 +20,7 @@ using namespace std;
   if (res==NULL) {
     res = new std::string;
     changehome(false);
-    char c[2]={'\0','\0'};
+    //char c[2]={'\0','\0'};
     FILE * fp = fopen (("save.txt"),"r");
     if (fp) {
       fseek (fp,0,SEEK_END);
@@ -150,7 +151,7 @@ string SaveGame::GetStarSystem () {
 }
 
 void SaveGame::SetPlayerLocation (const QVector &v) {
-  fprintf (stderr,"Set Location %lf %lf %lf",v.i,v.j,v.k);
+  fprintf (stderr,"Set Location %f %f %f",v.i,v.j,v.k);
   if ((FINITE (v.i)&&FINITE(v.j)&&FINITE(v.k))) {
     PlayerLocation =v;
   }else {
@@ -216,7 +217,7 @@ void SaveGame::ReadNewsData (FILE * fp) {
   char news [1024];
   fgets (news,1023,fp);
   sscanf (news,"%d\n",&numnews);
-  for (unsigned int i=0;i<numnews;i++) {
+  for (int i=0;i<numnews;i++) {
     fgets (news,1023,fp);
     news[1023]='\0';
     if (news[0]!='\r'&&news[0]!='\n') {
@@ -267,12 +268,12 @@ std::string scanInString (FILE * fp) {
 void SaveGame::ReadMissionData (FILE * fp) {
   int mdsize;
   fscanf (fp," %d ",&mdsize);
-  for( unsigned int i=0;i<mdsize;i++) {
+  for( int i=0;i<mdsize;i++) {
     int md_i_size;
     string mag_num(scanInString (fp));
     fscanf (fp,"%d ",&md_i_size);
     mission_data.push_back (MissionDat(mag_num));
-    for (unsigned int j=0;j<md_i_size;j++) {
+    for (int j=0;j<md_i_size;j++) {
       varInst * vi = new varInst (VI_IN_OBJECT);//not belong to a mission...not sure should inc counter
       vi->type = VAR_FLOAT;
       fscanf (fp,"%lf ",&vi->float_val);
@@ -315,7 +316,7 @@ void SaveGame::WriteSaveGame (const char *systemname, const QVector &FP, float c
 //    if (originalsystem!=systemname) {
       FighterPos=FP;
 //    }
-    fprintf (fp,"%s^%f^%s %lf %lf %lf",systemname,credits,unitname.c_str(),FighterPos.i,FighterPos.j,FighterPos.k);
+    fprintf (fp,"%s^%f^%s %f %f %f",systemname,credits,unitname.c_str(),FighterPos.i,FighterPos.j,FighterPos.k);
     SetSavedCredits (credits);
     while (myvec.empty()==false) {
       WriteSavedUnit (fp,myvec.back());

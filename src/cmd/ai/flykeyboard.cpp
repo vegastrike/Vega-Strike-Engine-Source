@@ -1,10 +1,11 @@
 #include "in_joystick.h"
 #include "flykeyboard.h"
-#include "cmd/unit.h"
+#include "cmd/unit_generic.h"
 #include "navigation.h"
 #include "config_xml.h"
 #include "xml_support.h"
 #include "vs_globals.h"
+#include "gfx/cockpit_generic.h" 
 struct StarShipControlKeyboard {
   bool switchmode;
   bool setunvel;

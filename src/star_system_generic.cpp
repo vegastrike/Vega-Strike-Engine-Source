@@ -40,23 +40,6 @@
 
 //Atmosphere *theAtmosphere;
 
-/********* FROM STAR SYSTEM XML *********/
-void StarSystem::beginElement(void *userData, const XML_Char *name, const XML_Char **atts) {
-  ((StarSystem*)userData)->beginElement(name, AttributeList(atts));
-}
-
-void StarSystem::endElement(void *userData, const XML_Char *name) {
-  ((StarSystem*)userData)->endElement(name);
-}
-
-extern string RemoveDotSystem (const char *input);
-string StarSystem::getFileName() {
-  return getStarSystemSector (filename)+string("/")+RemoveDotSystem(getStarSystemName (filename).c_str());
-}
-string StarSystem::getName () {
-  return string(name);
-}
-
 StarSystem::StarSystem() {
   stars = NULL;
   bolts = NULL;
@@ -77,7 +60,6 @@ StarSystem::StarSystem() {
   //_Universe->popActiveStarSystem ();
 }
 StarSystem::StarSystem(const char * filename, const Vector & centr,const float timeofyear) {
-
   no_collision_time=0;//(int)(1+2.000/SIMULATION_ATOM);
   ///adds to jumping table;
   name = NULL;
@@ -86,23 +68,17 @@ StarSystem::StarSystem(const char * filename, const Vector & centr,const float t
   //bolts = new bolt_draw;
   //collidetable = new CollideTable(this);
   //  cout << "origin: " << centr.i << " " << centr.j << " " << centr.k << " " << planetname << endl;
-
   current_stage=PHY_AI;
-
   //systemInputDFA = new InputDFA (this);
-
   LoadXML(filename,centr,timeofyear);
   if (!name)
     name =strdup (filename);
   AddStarsystemToUniverse(filename);
 //  primaries[0]->SetPosition(0,0,0);
-
   //iter = primaries->createIterator();
   //iter->advance();
   //earth=iter->current();
   //delete iter;
-
-
 
   // Calculate movement arcs; set behavior of primaries to follow these arcs
   //Iterator *primary_iterator = primaries->createIterator(); 
@@ -114,7 +90,6 @@ StarSystem::StarSystem(const char * filename, const Vector & centr,const float t
   //cam[1].LookAt(Vector(0,0,0), Vector(0,0,1));
   //cam[1].SetPosition(Vector(0,5,-2.5));
   //cam[1].SetSubwindow(0,0,1,1);
-
   //cam[2].SetProjectionType(Camera::PARALLEL);
   //cam[2].SetZoom(10.0);
   //cam[2].SetPosition(Vector(5,0,0));
@@ -124,54 +99,29 @@ StarSystem::StarSystem(const char * filename, const Vector & centr,const float t
   //UpdateTime();
   time = 0;
 
-
 /*
   Atmosphere::Parameters params;
-
   params.radius = 40000;
-
-
   params.low_color[0] = GFXColor(0,0.5,0.0);
-
   params.low_color[1] = GFXColor(0,1.0,0.0);
-
   params.low_ambient_color[0] = GFXColor(0.0/255.0,0.0/255.0,0.0/255.0);
-
   params.low_ambient_color[1] = GFXColor(0.0/255.0,0.0/255.0,0.0/255.0);
-
   params.high_color[0] = GFXColor(0.5,0.0,0.0);
-
   params.high_color[1] = GFXColor(1.0,0.0,0.0);
-
   params.high_ambient_color[0] = GFXColor(0,0,0);
-
   params.high_ambient_color[1] = GFXColor(0,0,0);
-*/
-  /*
-
   params.low_color[0] = GFXColor(241.0/255.0,123.0/255.0,67.0/255.0);
-
   params.low_color[1] = GFXColor(253.0/255.0,65.0/255.0,55.0/255.0);
-
   params.low_ambient_color[0] = GFXColor(0.0/255.0,0.0/255.0,0.0/255.0);
-
   params.low_ambient_color[1] = GFXColor(0.0/255.0,0.0/255.0,0.0/255.0);
-
   params.high_color[0] = GFXColor(60.0/255.0,102.0/255.0,249.0/255.0);
-
   params.high_color[1] = GFXColor(57.0/255.0,188.0/255.0,251.0/255.0);
-
   params.high_ambient_color[0] = GFXColor(0,0,0);
-
   params.high_ambient_color[1] = GFXColor(0,0,0);
-
   */
-
   //params.scattering = 5;
-
   //theAtmosphere = new Atmosphere(params);
   _Universe->popActiveStarSystem ();
-
 }
 
 StarSystem::~StarSystem() {
@@ -201,6 +151,23 @@ StarSystem::~StarSystem() {
   RemoveStarsystemFromUniverse();
   
 }
+/********* FROM STAR SYSTEM XML *********/
+void StarSystem::beginElement(void *userData, const XML_Char *name, const XML_Char **atts) {
+  ((StarSystem*)userData)->beginElement(name, AttributeList(atts));
+}
+
+void StarSystem::endElement(void *userData, const XML_Char *name) {
+  ((StarSystem*)userData)->endElement(name);
+}
+
+extern string RemoveDotSystem (const char *input);
+string StarSystem::getFileName() {
+  return getStarSystemSector (filename)+string("/")+RemoveDotSystem(getStarSystemName (filename).c_str());
+}
+string StarSystem::getName () {
+  return string(name);
+}
+
 
 
 void StarSystem::AddUnit(Unit *unit) {

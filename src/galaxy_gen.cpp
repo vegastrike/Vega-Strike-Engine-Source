@@ -723,7 +723,7 @@ void MakePlanet(float radius, int entitytype, bool forceRS, Vector R, Vector S, 
       }
       ringname = GetWrapXY(ringname,wrapx,wrapy);
       if (ringrand<(1-dualringprob)) {
-	fprintf (fp,"<Ring file=\"%s\" innerradius=\"%lf\" outerradius=\"%lf\"  wrapx=\"%d\" wrapy=\"%d\" />\n",ringname.c_str(),inner_rad,outer_rad,wrapx, wrapy);
+	fprintf (fp,"<Ring file=\"%s\" innerradius=\"%f\" outerradius=\"%f\"  wrapx=\"%d\" wrapy=\"%d\" />\n",ringname.c_str(),inner_rad,outer_rad,wrapx, wrapy);
       }
       if (ringrand<dualringprob||ringrand>=(ringprob-dualringprob)){
 	Vector r,s;
@@ -742,7 +742,7 @@ void MakePlanet(float radius, int entitytype, bool forceRS, Vector R, Vector S, 
 	inner_rad *= (1-.5*second_ring_move)+second_ring_move*movable;
 	outer_rad *= (1-.5*second_ring_move)+second_ring_move*movable;
 
-	fprintf (fp,"<Ring file=\"%s\" ri=\"%f\" rj=\"%f\" rk=\"%f\" si=\"%f\" sj=\"%f\" sk=\"%f\" innerradius=\"%lf\" outerradius=\"%lf\" wrapx=\"%d\" wrapy=\"%d\" />",ringname.c_str(),r.i,r.j,r.k,s.i,s.j,s.k,inner_rad,outer_rad, wrapx, wrapy);
+	fprintf (fp,"<Ring file=\"%s\" ri=\"%f\" rj=\"%f\" rk=\"%f\" si=\"%f\" sj=\"%f\" sk=\"%f\" innerradius=\"%f\" outerradius=\"%f\" wrapx=\"%d\" wrapy=\"%d\" />",ringname.c_str(),r.i,r.j,r.k,s.i,s.j,s.k,inner_rad,outer_rad, wrapx, wrapy);
       }
     }
     //    WriteUnit ("unit","","planetary-ring",Vector (0,0,0), Vector (0,0,0), Vector (0,0,0), string (""), string (""),false);
@@ -783,7 +783,7 @@ void MakeMoons (float radius, int entitytype, int callingentitytype, bool forceo
 }
 void beginStar (float radius, unsigned int which) {
   Vector r,s;
-  Vector center=generateAndUpdateRS (r,s,radius);
+  //Vector center=generateAndUpdateRS (r,s,radius);
 
   char b[3]=" A";
   b[1]+=which;

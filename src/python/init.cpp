@@ -15,7 +15,7 @@
 #include "init.h"
 #include "python_compile.h"
 #include "python_class.h"
-#include "cmd/unit.h"
+#include "cmd/unit_generic.h"
 #ifdef WIN32
 #include <direct.h>
 #endif

@@ -8,6 +8,7 @@ using std::string;
 #include "gfx/vec.h"
 #include "cmd/collection.h"
 class Stars;
+//#include "planet_generic.h"
 class Planet;
 class ClickList;
 class Unit;
@@ -25,6 +26,10 @@ using XMLSupport::AttributeList;
  * Per-Frame Drawing & Physics simulation
  **/
 class StarSystem {
+ public:
+  StarSystem();
+  StarSystem(const char * filename, const Vector & centroid=Vector (0,0,0), const float timeofyear=0);
+  virtual ~StarSystem();
  protected:
   ///Physics is divided into 3 stages spread over 3 frames
   enum PHYSICS_STAGE {PHY_AI,TERRAIN_BOLT_COLLIDE,MISSION_SIMULATION,PHY_COLLIDE, PHY_TERRAIN, PHY_RESOLV,PHY_NUM} current_stage;
@@ -75,10 +80,10 @@ class StarSystem {
   void AddStarsystemToUniverse(const string &filename);
   void RemoveStarsystemFromUniverse();
   int lightcontext;
-  //vector <class MissileEffect *> dischargedMissiles;
+  vector <class MissileEffect *> dischargedMissiles;
  public:
-  virtual void AddMissileToQueue(class MissileEffect *){}
-  virtual void UpdateMissiles(){}
+  virtual void AddMissileToQueue(class MissileEffect *);
+  virtual void UpdateMissiles();
   virtual void UpdateUnitPhysics(bool firstframe){}
   virtual void activateLightMap() {}
   ///activates the light map texture
@@ -108,9 +113,6 @@ class StarSystem {
   string getFileName();
   string getName();
   ///Loads the star system from an XML file
-  StarSystem();
-  StarSystem(const char * filename, const Vector & centroid=Vector (0,0,0), const float timeofyear=0);
-  virtual ~StarSystem();
   UnitCollection& getUnitList() {return drawList;}
   UnitCollection& gravitationalUnits() {return units;}
   /// returns xy sorted bounding spheres of all units in current view

@@ -64,8 +64,8 @@ void Atmosphere::Update(const QVector &position, const Matrix &tmatrix)
 
 	for(;NULL!=(primary=iter.current());iter.advance()) {
 		if(primary->isUnit()==PLANETPTR && 
-			(currPlanet = (Planet*)primary)->hasLights()) {
-			const std::vector <int> & lights = currPlanet->activeLights();
+			(currPlanet = (GamePlanet*)primary)->hasLights()) {
+			//const std::vector <int> & lights = currPlanet->activeLights();
 			/* for now just assume all planets with lights are really bright */
 			QVector direction = (currPlanet->Position()-position);
 			direction.Normalize();
@@ -83,8 +83,8 @@ void Atmosphere::Update(const QVector &position, const Matrix &tmatrix)
 				QVector lprime = localDirection;
 				lprime.k = 0;
 				lprime.Normalize();
-				float theta = atan2(lprime.i,lprime.j);
-				float size = .125;
+				//float theta = atan2(lprime.i,lprime.j);
+				//float size = .125;
 				sunboxes.push_back(new SunBox(NULL /*
 					new SphereMesh(user_params.radius, divisions, divisions, "", 
 					NULL,true,ONE,ZERO,false,

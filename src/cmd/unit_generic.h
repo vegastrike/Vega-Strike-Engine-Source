@@ -19,7 +19,7 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 
-/***** Unit is the Unit class without GFX/Sound nor AI *****/
+/***** Unit is the Unit class without GFX/Sound with AI *****/
 
 #ifndef _UNIT_H_
 #define _UNIT_H_
@@ -82,6 +82,7 @@ enum clsptr {
 	MISSILEPTR
 };
 
+class Mount;
 class VDU;
 struct UnitImages;
 struct UnitSounds;
@@ -194,14 +195,13 @@ public:
    * Warning: type has a string inside... cannot be memcpy'd
    */
 public:
-  class Mount;
   un_iter getSubUnits();
   un_kiter viewSubUnits() const;
-protected:
+public:
   vector <Mount *> mounts;
 protected:
   ///Mount may access unit
-  friend class Unit::Mount;
+  friend class Mount;
   ///no collision table presence.
   bool SubUnit;
 public:
@@ -268,7 +268,7 @@ protected:
   ///Takes out of the collide table for this system.
 // SHOULD COME BACK HERE
   virtual void RemoveFromSystem (){}
-  virtual bool InCorrectStarSystem (StarSystem *active) {return false;}
+  virtual bool InCorrectStarSystem (StarSystem *active) {return active==activeStarSystem;}
  std::vector <string> meshdata_string;
   virtual int nummesh()const {return ((int)meshdata_string.size())-1;}
 //void FixGauges();
@@ -358,7 +358,7 @@ public:
   };
   Computer computer;
 // SHOULD TRY TO COME BACK HERE
-  virtual bool TransferUnitToSystem (StarSystem *NewSystem) {return false;}
+  virtual bool TransferUnitToSystem (StarSystem *NewSystem);
   virtual void TransferUnitToSystem (unsigned int whichJumpQueue, class StarSystem *&previouslyActiveStarSystem, bool DoSightAndSound) {}
   virtual StarSystem * getStarSystem() {return NULL;}
     struct UnitJump {
@@ -380,8 +380,8 @@ public:
  public:
   virtual void scanSystem() {}
   struct Scanner *getScanner() { return &scanner; };
-  virtual void ActivateJumpDrive (int destination=0){}
-  virtual void DeactivateJumpDrive (){}
+  void ActivateJumpDrive (int destination=0);
+  void DeactivateJumpDrive ();
 
 /***************************************************************************************/
 /**** XML STUFF                                                                     ****/
@@ -421,6 +421,7 @@ private:
 protected:
   virtual float ExplosionRadius();
 public:
+  virtual void SetPlanetHackTransformation (Transformation *&ct,Matrix *&ctm) {}
   virtual bool AutoPilotTo(Unit * un, bool ignore_friendlies=false) {return false;}
   ///The owner of this unit. This may not collide with owner or units owned by owner. Do not dereference (may be dead pointer)
   Unit *owner;
@@ -872,8 +873,6 @@ public:
   // Using collision stuff -> NetUnit if possible
   virtual Unit * BeamInsideCollideTree(const QVector &start, const QVector &end, QVector & pos, Vector & norm, double & distance) {return NULL;}
 
-// Uses BSP...
-// struct collideTrees * colTrees;
   ///fils in corner_min,corner_max and radial_size
 // Uses Box stuff -> only in NetUnit and Unit
   virtual void calculate_extent(bool update_collide_queue) {}
@@ -918,10 +917,10 @@ public:
 
 
   virtual bool InsideCollideTree (Unit * smaller, QVector & bigpos, Vector & bigNormal, QVector & smallpos, Vector & smallNormal) { return false;}
-  virtual void reactToCollision(Unit * smaller, const QVector & biglocation, const Vector & bignormal, const QVector & smalllocation, const Vector & smallnormal, float dist) {}
+  virtual void reactToCollision(Unit * smaller, const QVector & biglocation, const Vector & bignormal, const QVector & smalllocation, const Vector & smallnormal, float dist);
   ///returns true if jump possible even if not taken
 // Uses Universe thing
-//  bool jumpReactToCollision (Unit *smaller);
+  virtual bool jumpReactToCollision (Unit *smaller) {return false;}
   ///Does a collision between this and another unit
   virtual bool Collide(Unit * target) {return false;}
   ///checks for collisions with all beams and other units roughly and then more carefully
@@ -970,8 +969,6 @@ public:
   ///get the full flightgroup ID (i.e 'green-4')
   const string getFgID();
 
-
-// Uses Universe stuff
   virtual vector <class CargoColor>& FilterDowngradeList (vector <class CargoColor> & mylist, bool downgrade =true) { return mylist;}
   virtual vector <class CargoColor>& FilterUpgradeList (vector <class CargoColor> & mylist) { return mylist;}
 
@@ -1019,7 +1016,7 @@ public:
 ///Holds temporary values for inter-function XML communication Saves deprecated restr info
 struct Unit::XMLstring {
   //  vector<Halo*> halos;
-  vector<Unit::Mount *> mountz;
+  vector<Mount *> mountz;
   vector<string> meshes;
   string shieldmesh;
   string bspmesh;
@@ -1041,7 +1038,7 @@ struct Unit::XMLstring {
   int damageiterator;
 };
 
-class Unit::Mount {
+class Mount {
   protected:
     ///Where is it
     Transformation LocalPosition;
@@ -1117,3 +1114,4 @@ inline Unit * UnitContainer::GetUnit() {
 
 
 #endif
+

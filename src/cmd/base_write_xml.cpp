@@ -53,7 +53,7 @@ void endtag(FILE * Fp, bool end=false) {
 	fwrite(">\n",sizeof(char)*2,1,Fp);
 }
 
-void Base::Room::Link::EndXML (FILE *fp) {
+void BaseInterface::Room::Link::EndXML (FILE *fp) {
 	midxmlchar(fp,"Text",text.c_str());
 	midxmltag(fp,"x",x);
 	midxmltag(fp,"y",y);
@@ -61,21 +61,21 @@ void Base::Room::Link::EndXML (FILE *fp) {
 	midxmltag(fp,"hei",hei);
 }
 
-void Base::Room::Python::EndXML (FILE *fp) {
+void BaseInterface::Room::Python::EndXML (FILE *fp) {
 	begintag(fp,"Python",2);
 	Link::EndXML(fp);
 	midxmlchar(fp,"pythonfile",file.c_str());
 	endtag(fp,true);
 }
 
-void Base::Room::Goto::EndXML (FILE *fp) {
+void BaseInterface::Room::Goto::EndXML (FILE *fp) {
 	begintag(fp,"Link",2);
 	Link::EndXML(fp);
 	midxmlint(fp,"index",index);
 	endtag(fp,true);
 }
 
-void Base::Room::Talk::EndXML (FILE *fp) {
+void BaseInterface::Room::Talk::EndXML (FILE *fp) {
 	begintag(fp,"Talk",2);
 	Link::EndXML(fp);
 	endtag(fp,false);
@@ -93,13 +93,13 @@ void Base::Room::Talk::EndXML (FILE *fp) {
 	endtag(fp,false);
 }
 
-void Base::Room::Launch::EndXML (FILE *fp) {
+void BaseInterface::Room::Launch::EndXML (FILE *fp) {
 	begintag(fp,"Launch",2);
 	Link::EndXML(fp);
 	endtag(fp,true);
 }
 
-void Base::Room::Comp::EndXML (FILE *fp) {
+void BaseInterface::Room::Comp::EndXML (FILE *fp) {
 	begintag(fp,"Comp",2);
 	Link::EndXML(fp);
 	for (int i=0;i<modes.size();i++) {
@@ -136,11 +136,11 @@ void Base::Room::Comp::EndXML (FILE *fp) {
 	endtag(fp,true);
 }
 
-void Base::Room::BaseObj::EndXML (FILE *fp) {
+void BaseInterface::Room::BaseObj::EndXML (FILE *fp) {
 //		Do nothing
 }
 
-void Base::Room::BaseShip::EndXML (FILE *fp) {
+void BaseInterface::Room::BaseShip::EndXML (FILE *fp) {
 	begintag(fp,"Ship",2);
 	midxmltag(fp,"x",mat.p.i);
 	midxmltag(fp,"y",mat.p.j);
@@ -154,7 +154,7 @@ void Base::Room::BaseShip::EndXML (FILE *fp) {
 	endtag(fp,true);
 }
 
-void Base::Room::BaseSprite::EndXML (FILE *fp) {
+void BaseInterface::Room::BaseSprite::EndXML (FILE *fp) {
 	float x,y;
 	begintag(fp,"Texture",2);
 	spr.GetPosition(x,y);
@@ -164,7 +164,7 @@ void Base::Room::BaseSprite::EndXML (FILE *fp) {
 	endtag(fp,true);
 }
 
-void Base::Room::EndXML (FILE *fp) {
+void BaseInterface::Room::EndXML (FILE *fp) {
 	begintag(fp,"Room",1);
 	midxmlchar(fp,"Text",deftext.c_str());
 	endtag(fp,false);
@@ -181,7 +181,7 @@ void Base::Room::EndXML (FILE *fp) {
 	endtag(fp,false);
 }
 
-void Base::EndXML (FILE *fp) {
+void BaseInterface::EndXML (FILE *fp) {
 	begintag(fp,"Base",0);
 	endtag(fp,false);
 	for (int i=0;i<rooms.size();i++) {

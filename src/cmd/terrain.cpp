@@ -3,7 +3,7 @@
 #include "vs_globals.h"
 #include "xml_support.h"
 #include "star_system.h"
-#include "unit.h"
+#include "unit_generic.h"
 #include "gfx/vec.h"
 #include "vegastrike.h"
 #include "universe.h"

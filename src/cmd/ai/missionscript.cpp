@@ -32,7 +32,7 @@
 #include <stack>
 #include "vs_path.h"
 #include "tactics.h"
-#include "cmd/unit.h"
+#include "cmd/unit_generic.h"
 
 #include "missionscript.h"
 #include "cmd/script/mission.h"
@@ -76,7 +76,7 @@ void AImissionScript::Execute () {
   mission->setCurrentAIOrder(this);
 
   if(first_run){
-    for (int i=0;
+    for (unsigned int i=0;
         (i<active_missions.size())&&
         (!(mission->runScript(modulename,"initai",classid)));
         i++) {

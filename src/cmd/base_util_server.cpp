@@ -8,7 +8,7 @@ namespace BaseUtil {
 	}
 	void Ship (int room, std::string index,QVector pos,Vector Q, Vector R) {
 	}
-	static void BaseLink (Base::Room *room,float x, float y, float wid, float hei, std::string text) {
+	static void BaseLink (BaseInterface::Room *room,float x, float y, float wid, float hei, std::string text) {
 	}
 	void Link (int room, std::string index, float x, float y, float wid, float hei, std::string text, int to) {
 		LinkPython (room, index, "",x, y,wid, hei, text, to);

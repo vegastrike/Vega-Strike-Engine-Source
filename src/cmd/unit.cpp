@@ -25,7 +25,7 @@
 #include "file_main.h"
 #include "gfx/halo.h"
 
-#include "unit.h"
+//#include "unit.h"
 #include "unit_factory.h"
 
 #include "gfx/sprite.h"
@@ -51,6 +51,7 @@
 #include "cmd/ai/missionscript.h"
 #include "gfx/particle.h"
 #include "cmd/ai/aggressive.h"
+#include "cmd/base.h"
 //if the PQR of the unit may be variable...for radius size computation
 //#define VARIABLE_LENGTH_PQR
 
@@ -58,57 +59,55 @@
 #include "beam.h"
 #include "python/init.h"
 #include "unit_const_cache.h"
-double interpolation_blend_factor;
+extern double interpolation_blend_factor;
 
-GameUnit::GameUnit( int /*dummy*/ ) {
+/**** MOVED FROM BASE_INTERFACE.CPP ****/
+extern string getCargoUnitName (const char *name);
+
+template<class UnitType>
+void GameUnit<UnitType>::UpgradeInterface(Unit * baseun) {
+	if (!BaseInterface::CurrentBase) {
+		string basename = (::getCargoUnitName(baseun->getFullname().c_str()));
+	  if (baseun->isUnit()!=PLANETPTR) {
+	    basename = baseun->name;
+	  }
+	  BaseInterface *base=new BaseInterface (basename.c_str(),baseun,this);
+	  base->InitCallbacks();
+	  SetSoftwareMousePosition(0,0);
+	}
+}
+
+template <class UnitType>
+void GameUnit<UnitType>::SetPlanetHackTransformation (Transformation *&ct,Matrix *&ctm) {
+  static Transformation planet_temp_transformation;
+  static Matrix planet_temp_matrix;
+  if (planet) {
+    if (planet->trans==_Universe->AccessCamera()->GetPlanetaryTransform()&&planet->trans!=NULL) {
+      Matrix tmp;
+      Vector p,q,r;
+      QVector c;
+      MatrixToVectors (cumulative_transformation_matrix,p,q,r,c);
+      planet->trans->InvTransformBasis(tmp,p,q,r,c);
+      MultMatrix (planet_temp_matrix,*_Universe->AccessCamera()->GetPlanetGFX(),tmp);
+      planet_temp_transformation = Transformation::from_matrix (planet_temp_matrix);
+      ct = &planet_temp_transformation;
+      *ctm = planet_temp_matrix;
+      ///warning: hack FIXME
+      cumulative_transformation=*ct;
+      CopyMatrix (cumulative_transformation_matrix,*ctm);
+    }
+  }  
+}
+
+template <class UnitType>
+GameUnit<UnitType>::GameUnit<UnitType>( int /*dummy*/ ) {
 	Init();
 }
 
 #define PARANOIA .4
 
-GameUnit::GameMount::GameMount (){static weapon_info wi(weapon_info::BEAM); type=&wi; size=weapon_info::NOWEAP; ammo=-1;status= UNCHOSEN; processed=GameMount::PROCESSED;ref.gun=NULL; sound=-1;}
-
-static Unit * getFuelUpgrade () {
-  return UnitFactory::createUnit("add_fuel",true,FactionUtil::GetFaction("upgrades"));
-}
-static float getFuelAmt () {
-  Unit * un = getFuelUpgrade();
-  float ret = un->FuelData();
-  un->Kill();
-  return ret;
-}
-static float GetJumpFuelQuantity() {
-  static float f= getFuelAmt();
-  return f;
-}
-void GameUnit::ActivateJumpDrive (int destination) {
-  const int jumpfuelratio=1;
-  if (((docked&(DOCKED|DOCKED_INSIDE))==0)&&jump.drive!=-2) {
-  if ((energy>jump.energy&&(jump.energy>=0||fuel>(-jump.energy*GetJumpFuelQuantity()/100.)))) {
-    jump.drive = destination;
-    float fuel_used=0;
-    if (jump.energy>0)
-      energy-=jump.energy;
-    else
-      fuel -= jump.energy*GetJumpFuelQuantity()/100.;
-  }else {
-    if (abs(jump.energy)<32000) {
-      static float jfuel = XMLSupport::parse_float(vs_config->getVariable("physics","jump_fuel_cost",".5"));
-      if (fuel>jfuel*GetJumpFuelQuantity()) {
-       fuel-=jfuel*GetJumpFuelQuantity();
-       jump.drive=destination;
-     }
-    }
-  }
-  }
-}
-void GameUnit::DeactivateJumpDrive () {
-  if (jump.drive>=0) {
-    jump.drive=-1;
-  }
-}
-
-void GameUnit::calculate_extent(bool update_collide_queue) {  
+template <class UnitType>
+void GameUnit<UnitType>::calculate_extent(bool update_collide_queue) {  
   int a;
   corner_min=Vector (FLT_MAX,FLT_MAX,FLT_MAX);
   corner_max=Vector (-FLT_MAX,-FLT_MAX,-FLT_MAX);
@@ -145,10 +144,11 @@ void GameUnit::calculate_extent(bool update_collide_queue) {
 }
 
 extern void UncheckUnit (Unit * un);
-void GameUnit::Init()
+template <class UnitType>
+void GameUnit<UnitType>::Init()
 {
   this->Unit::Init();
-  int numg= 1+MAXVDUS+UnitImages::NUMGAUGES;
+  unsigned int numg= 1+MAXVDUS+UnitImages::NUMGAUGES;
   image->cockpit_damage=(float*)malloc((numg)*sizeof(float));
   for (unsigned int damageiterator=0;damageiterator<numg;damageiterator++) {
 	image->cockpit_damage[damageiterator]=1;
@@ -165,19 +165,19 @@ void GameUnit::Init()
   ycur = pcur = rcur = 0;
   */
   static Vector myang(XMLSupport::parse_float (vs_config->getVariable ("general","pitch","0")),XMLSupport::parse_float (vs_config->getVariable ("general","yaw","0")),XMLSupport::parse_float (vs_config->getVariable ("general","roll","0")));
-  static float rr = XMLSupport::parse_float (vs_config->getVariable ("graphics","hud","radarRange","20000"));
-  static float minTrackingNum = XMLSupport::parse_float (vs_config->getVariable("physics",
-										  "autotracking",
-										".93"));// DO NOT CHANGE see unit_customize.cpp
-  static float lc =XMLSupport::parse_float (vs_config->getVariable ("physics","lock_cone",".8"));// DO NOT CHANGE see unit_customize.cpp
+  //static float rr = XMLSupport::parse_float (vs_config->getVariable ("graphics","hud","radarRange","20000"));
+  //static float minTrackingNum = XMLSupport::parse_float (vs_config->getVariable("physics", "autotracking", ".93"));// DO NOT CHANGE see unit_customize.cpp
+  //static float lc =XMLSupport::parse_float (vs_config->getVariable ("physics","lock_cone",".8"));// DO NOT CHANGE see unit_customize.cpp
   //  Fire();
 }
 
-Sprite * GameUnit::getHudImage () const{
+template <class UnitType>
+Sprite * GameUnit<UnitType>::getHudImage () const{
 	return image->hudImage;
 }
 
-GameUnit::GameUnit (std::vector <Mesh *>& meshes, bool SubU, int fact) {
+template <class UnitType>
+GameUnit<UnitType>::GameUnit<UnitType> (std::vector <Mesh *>& meshes, bool SubU, int fact) {
   Init ();
   this->faction = fact;
   SubUnit = SubU;
@@ -186,7 +186,8 @@ GameUnit::GameUnit (std::vector <Mesh *>& meshes, bool SubU, int fact) {
   meshdata.push_back(NULL);
   calculate_extent(false);
 }
-vector <Mesh *> GameUnit::StealMeshes() {
+template <class UnitType>
+vector <Mesh *> GameUnit<UnitType>::StealMeshes() {
   vector <Mesh *>ret;
   
   Mesh * shield = meshdata.empty()?NULL:meshdata.back();
@@ -200,7 +201,8 @@ vector <Mesh *> GameUnit::StealMeshes() {
 }
 
 extern void update_ani_cache();
-GameUnit::GameUnit(const char *filename, bool SubU, int faction,std::string unitModifications, Flightgroup *flightgrp,int fg_subnumber) {
+template <class UnitType>
+GameUnit<UnitType>::GameUnit<UnitType>(const char *filename, bool SubU, int faction,std::string unitModifications, Flightgroup *flightgrp,int fg_subnumber) {
 	Init();
 	update_ani_cache();
 	//if (!SubU)
@@ -337,8 +339,11 @@ GameUnit::GameUnit(const char *filename, bool SubU, int faction,std::string unit
 	vsresetdir();
 
 }
-GameUnit::~GameUnit()
+template <class UnitType>
+GameUnit<UnitType>::~GameUnit<UnitType>()
 {
+  if (image->hudImage )
+    delete image->hudImage;
   if (planet)
     delete planet;
   //  fprintf (stderr,"Freeing Unit %s\n",name.c_str());
@@ -372,13 +377,14 @@ GameUnit::~GameUnit()
     if (mounts[beamcount]->ref.gun&&mounts[beamcount]->type->type==weapon_info::BEAM)
       delete mounts[beamcount]->ref.gun;//hope we're not killin' em twice...they don't go in gunqueue
   }
-  for(int meshcount = 0; meshcount < meshdata.size(); meshcount++)
+  for(unsigned int meshcount = 0; meshcount < meshdata.size(); meshcount++)
     if (meshdata[meshcount])
       delete meshdata[meshcount];
   meshdata.clear();
   
 }
-StarSystem * GameUnit::getStarSystem () {
+template <class UnitType>
+StarSystem * GameUnit<UnitType>::getStarSystem () {
 
   if (activeStarSystem) {
     return activeStarSystem;
@@ -393,7 +399,8 @@ StarSystem * GameUnit::getStarSystem () {
 }
 
 
-bool GameUnit::queryFrustum(float frustum [6][4]) const{
+template <class UnitType>
+bool GameUnit<UnitType>::queryFrustum(float frustum [6][4]) const{
   int i;
 #ifdef VARIABLE_LENGTH_PQR
   Vector TargetPoint (cumulative_transformation_matrix[0],cumulative_transformation_matrix[1],cumulative_transformation_matrix[2]);
@@ -417,7 +424,7 @@ bool GameUnit::queryFrustum(float frustum [6][4]) const{
   un_fkiter iter =SubUnits.constFastIterator();
   const Unit * un;
   while ((un = iter.current())) {
-    if (((GameUnit*)un)->queryFrustum (frustum)) {
+    if (((GameUnit<UnitType>*)un)->queryFrustum (frustum)) {
       return true;
     }
     iter.advance();
@@ -426,7 +433,8 @@ bool GameUnit::queryFrustum(float frustum [6][4]) const{
 }
 
 
-void GameUnit::UpdateHudMatrix(int whichcam) {
+template <class UnitType>
+void GameUnit<UnitType>::UpdateHudMatrix(int whichcam) {
   Matrix m;
   Matrix ctm=cumulative_transformation_matrix;
   if (planet) {
@@ -443,48 +451,15 @@ void GameUnit::UpdateHudMatrix(int whichcam) {
   _Universe->AccessCamera(whichcam)->SetPosition (Transform (ctm,image->CockpitCenter.Cast()));
 }
    
-void GameUnit::SetPlanetHackTransformation (Transformation *&ct,Matrix *&ctm) {
-  static Transformation planet_temp_transformation;
-  static Matrix planet_temp_matrix;
-  if (planet) {
-    if (planet->trans==_Universe->AccessCamera()->GetPlanetaryTransform()&&planet->trans!=NULL) {
-      Matrix tmp;
-      Vector p,q,r;
-      QVector c;
-      MatrixToVectors (cumulative_transformation_matrix,p,q,r,c);
-      planet->trans->InvTransformBasis(tmp,p,q,r,c);
-      MultMatrix (planet_temp_matrix,*_Universe->AccessCamera()->GetPlanetGFX(),tmp);
-      planet_temp_transformation = Transformation::from_matrix (planet_temp_matrix);
-      ct = &planet_temp_transformation;
-      *ctm = planet_temp_matrix;
-      ///warning: hack FIXME
-      cumulative_transformation=*ct;
-      CopyMatrix (cumulative_transformation_matrix,*ctm);
-    }
-  }  
-}
-short cloakVal (short cloak, short cloakmin, short cloakrate, bool cloakglass) {
-    if (cloak<0&&cloakrate<0) {
-      cloak=(unsigned short)32768;//intended warning should be -32768 :-) leave it be
-    }
-    if ((cloak&0x1)&&!cloakglass) {
-      cloak-=1;
-    }
-    if ((cloak&0x1)==0&&cloakglass) {
-      cloak+=1;
-    }
-    if (cloak<cloakmin&&cloakrate>0)
-      cloak=cloakmin;
-    return cloak;
-    
-}
-void GameUnit::DrawNow (const Matrix & mat, float lod) {
+extern short cloakVal (short cloak, short cloakmin, short cloakrate, bool cloakglass);
+template <class UnitType>
+void GameUnit<UnitType>::DrawNow (const Matrix & mat, float lod) {
   unsigned int i;
   short cloak=cloaking;
   if (cloaking>cloakmin) {
     cloak = cloakVal (cloak,cloakmin,image->cloakrate, image->cloakglass);
   }
-  for (i=0;i<nummesh();i++) {//NOTE LESS THAN OR EQUALS...to cover shield mesh
+  for (i=0;(int)i<nummesh();i++) {//NOTE LESS THAN OR EQUALS...to cover shield mesh
     if (meshdata[i]==NULL) 
       continue;
     Vector TransformedPosition = Transform (mat,
@@ -523,7 +498,8 @@ void GameUnit::DrawNow (const Matrix & mat, float lod) {
 #endif
     halos.Draw(mat,Scale,cloak,0, GetHullPercent(),GetVelocity(),faction);
 }
-void GameUnit::Draw(const Transformation &parent, const Matrix &parentMatrix)
+template <class UnitType>
+void GameUnit<UnitType>::Draw(const Transformation &parent, const Matrix &parentMatrix)
 {
 
   cumulative_transformation = linear_interpolate(prev_physical_state, curr_physical_state, interpolation_blend_factor);
@@ -544,7 +520,7 @@ void GameUnit::Draw(const Transformation &parent, const Matrix &parentMatrix)
     cloak = cloakVal ( cloak,cloakmin,image->cloakrate,image->cloakglass);
   }
   
-  int i;
+  unsigned int i;
   if (hull <0) {
     Explode(true, GetElapsedTime());
   }
@@ -553,7 +529,7 @@ void GameUnit::Draw(const Transformation &parent, const Matrix &parentMatrix)
     for (i=0;i<meshdata.size();i++) {//NOTE LESS THAN OR EQUALS...to cover shield mesh
       if (meshdata[i]==NULL) 
 		continue;
-	  if (i==nummesh()&&(meshdata[i]->numFX()==0||hull<0)) 
+	  if ((int)i==nummesh()&&(meshdata[i]->numFX()==0||hull<0)) 
 		continue;
 	  Vector TransformedPosition = Transform (*ctm,
 					      meshdata[i]->Position());
@@ -603,7 +579,7 @@ void GameUnit::Draw(const Transformation &parent, const Matrix &parentMatrix)
     /***DEBUGGING cosAngleFromMountTo
     UnitCollection *dL = _Universe->activeStarSystem()->getUnitList();
     UnitCollection::UnitIterator *tmpiter = dL->createIterator();
-    GameUnit * curun;
+    GameUnit<UnitType> * curun;
     while (curun = tmpiter->current()) {
       if (curun->selected) {
 	float tmpdis;
@@ -617,7 +593,7 @@ void GameUnit::Draw(const Transformation &parent, const Matrix &parentMatrix)
     **/
   }
 
-  for (i=0;i<GetNumMounts();i++) {
+  for (i=0;(int)i<GetNumMounts();i++) {
     static bool draw_mounts = XMLSupport::parse_bool (vs_config->getVariable ("graphics","draw_weapons","false"));
 
     if (draw_mounts&&On_Screen) {
@@ -660,7 +636,8 @@ using Orders::FireAt;
  
 
 #if 0
-void GameUnit::SwapOutHalos() {
+template <class UnitType>
+void GameUnit<UnitType>::SwapOutHalos() {
   for (int i=0;i<numhalos;i++) {
     // float x,y;
     //halos[i]->GetDimensions (x,y);
@@ -668,7 +645,8 @@ void GameUnit::SwapOutHalos() {
     halos[i]->Draw (cumulative_transformation,cumulative_transformation_matrix,0);
   }
 }
-void GameUnit::SwapInHalos() {
+template <class UnitType>
+void GameUnit<UnitType>::SwapInHalos() {
   for (int i=0;i<numhalos;i++) {
     // float x,y;
     //halos[i]->GetDimensions (x,y);
@@ -678,7 +656,8 @@ void GameUnit::SwapInHalos() {
 #endif
 // MAYBE MOVE THAT TO UNIT TOO
 // BUT USES GETMINDIS and GETMINDIS USES meshdata which is not member of Unit for now
-void GameUnit::scanSystem(){
+template <class UnitType>
+void GameUnit<UnitType>::scanSystem(){
 
   double nowtime=mission->getGametime();
 

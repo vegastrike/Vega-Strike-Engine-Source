@@ -34,7 +34,7 @@ Unit* UnitFactory::getMasterPartList( )
 {
     if( _masterPartList == NULL )
     {
-        _masterPartList = new GameUnit( "master_part_list",
+        _masterPartList = new GameUnit<Unit>( "master_part_list",
 	                            true,
 				    FactionUtil::GetFaction("upgrades") );
     }
@@ -43,7 +43,7 @@ Unit* UnitFactory::getMasterPartList( )
 
 Unit* UnitFactory::createUnit( )
 {
-    return new GameUnit( 0 );
+    return new GameUnit<Unit>( 0 );
 }
 
 Unit* UnitFactory::createUnit( const char *filename,
@@ -53,7 +53,7 @@ Unit* UnitFactory::createUnit( const char *filename,
 		               Flightgroup *flightgroup,
 		               int         fg_subnumber )
 {
-    return new GameUnit( filename,
+    return new GameUnit<Unit>( filename,
                      SubUnit,
                      faction,
                      customizedUnit,
@@ -65,7 +65,7 @@ Unit* UnitFactory::createUnit( vector <Mesh*> & meshes,
 		               bool Subunit,
 		               int faction )
 {
-    return new GameUnit( meshes,
+    return new GameUnit<Unit>( meshes,
                      Subunit,
                      faction );
 }
@@ -76,14 +76,14 @@ Nebula* UnitFactory::createNebula( const char * unitfile,
                                    Flightgroup* fg,
                                    int fg_snumber )
 {
-    return new Nebula( unitfile,
+    return new GameNebula( unitfile,
                        SubU,
                        faction,
                        fg,
                        fg_snumber );
 }
 
-Missile* UnitFactory::createMissile( const char * filename,
+Unit* UnitFactory::createMissile( const char * filename,
                                      int faction,
                                      const string &modifications,
                                      const float damage,
@@ -93,7 +93,7 @@ Missile* UnitFactory::createMissile( const char * filename,
                                      float radmult,
                                      float detonation_radius )
 {
-    return new Missile( filename,
+    return new GameMissile( filename,
                         faction,
                         modifications,
                         damage,
@@ -106,7 +106,7 @@ Missile* UnitFactory::createMissile( const char * filename,
 
 Planet* UnitFactory::createPlanet( )
 {
-    return new Planet;
+    return new GamePlanet;
 }
 
 Planet* UnitFactory::createPlanet( QVector x,
@@ -127,7 +127,7 @@ Planet* UnitFactory::createPlanet( QVector x,
 				   string fullname ,
 				   bool inside_out)
 {
-    return new Planet( x,
+    return new GamePlanet( x,
                        y,
                        vely,
                        rotvel,
@@ -152,7 +152,7 @@ Enhancement* UnitFactory::createEnhancement( const char * filename,
 					     Flightgroup * flightgrp,
 					     int fg_subnumber )
 {
-    return new Enhancement( filename,
+    return new GameEnhancement( filename,
                             faction,
                             modifications,
                             flightgrp,
@@ -167,7 +167,7 @@ Building* UnitFactory::createBuilding( ContinuousTerrain * parent,
 				       const std::string &unitModifications,
 				       Flightgroup * fg )
 {
-    return new Building( parent,
+    return new GameBuilding( parent,
                          vehicle,
 			 filename,
 			 SubUnit,
@@ -184,7 +184,7 @@ Building* UnitFactory::createBuilding( Terrain * parent,
                                        const std::string &unitModifications,
                                        Flightgroup * fg )
 {
-    return new Building( parent,
+    return new GameBuilding( parent,
                          vehicle,
                          filename,
                          SubUnit,
@@ -199,7 +199,7 @@ Asteroid* UnitFactory::createAsteroid( const char * filename,
                                        int fg_snumber,
                                        float difficulty )
 {
-    return new Asteroid( filename,
+    return new GameAsteroid( filename,
                          faction,
                          fg,
                          fg_snumber,

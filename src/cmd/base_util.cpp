@@ -3,35 +3,35 @@
 #include "base.h"
 #include "base_util.h"
 namespace BaseUtil {
-	inline Base::Room *CheckRoom (int room) {
-		if (!Base::CurrentBase) return 0;
-		if (room<0||room>=Base::CurrentBase->rooms.size()) return 0;
-		return Base::CurrentBase->rooms[room];
+	inline BaseInterface::Room *CheckRoom (int room) {
+		if (!BaseInterface::CurrentBase) return 0;
+		if (room<0||room>=BaseInterface::CurrentBase->rooms.size()) return 0;
+		return BaseInterface::CurrentBase->rooms[room];
 	}
 	int Room (std::string text) {
-		if (!Base::CurrentBase) return -1;
-		Base::CurrentBase->rooms.push_back(new Base::Room());
-		Base::CurrentBase->rooms.back()->deftext=text;
-		return Base::CurrentBase->rooms.size()-1;
+		if (!BaseInterface::CurrentBase) return -1;
+		BaseInterface::CurrentBase->rooms.push_back(new BaseInterface::Room());
+		BaseInterface::CurrentBase->rooms.back()->deftext=text;
+		return BaseInterface::CurrentBase->rooms.size()-1;
 	}
 	void Texture(int room, std::string index, std::string file, float x, float y) {
-		Base::Room *newroom=CheckRoom(room);
+		BaseInterface::Room *newroom=CheckRoom(room);
 		if (!newroom) return;
-		newroom->objs.push_back(new Base::Room::BaseSprite(file.c_str(),index));
+		newroom->objs.push_back(new BaseInterface::Room::BaseSprite(file.c_str(),index));
 #ifdef BASE_MAKER
-		((Base::Room::BaseSprite*)newroom->objs.back())->texfile=file;
+		((BaseInterface::Room::BaseSprite*)newroom->objs.back())->texfile=file;
 #endif
-		((Base::Room::BaseSprite*)newroom->objs.back())->spr.SetPosition(x,y);
+		((BaseInterface::Room::BaseSprite*)newroom->objs.back())->spr.SetPosition(x,y);
 	}
 	void Ship (int room, std::string index,QVector pos,Vector Q, Vector R) {
-		Base::Room *newroom=CheckRoom(room);
+		BaseInterface::Room *newroom=CheckRoom(room);
 		if (!newroom) return;
 		Vector P = R.Cross(Q);
 		P.Normalize();
-		newroom->objs.push_back(new Base::Room::BaseShip(P.i,P.j,P.k,Q.i,Q.j,Q.k,R.i,R.j,R.k,pos,index));
-//		return Base::CurrentBase->rooms[Base::CurrentBase->curroom]->links.size()-1;
+		newroom->objs.push_back(new BaseInterface::Room::BaseShip(P.i,P.j,P.k,Q.i,Q.j,Q.k,R.i,R.j,R.k,pos,index));
+//		return BaseInterface::CurrentBase->rooms[BaseInterface::CurrentBase->curroom]->links.size()-1;
 	}
-	static void BaseLink (Base::Room *room,float x, float y, float wid, float hei, std::string text) {
+	static void BaseLink (BaseInterface::Room *room,float x, float y, float wid, float hei, std::string text) {
 		room->links.back()->x=x;
 		room->links.back()->y=y;
 		room->links.back()->wid=wid;
@@ -42,19 +42,19 @@ namespace BaseUtil {
 		LinkPython (room, index, "",x, y,wid, hei, text, to);
 	}
 	void LinkPython (int room, std::string index,std::string pythonfile, float x, float y, float wid, float hei, std::string text, int to) {
-		Base::Room *newroom=CheckRoom(room);
+		BaseInterface::Room *newroom=CheckRoom(room);
 		if (!newroom) return;
-		newroom->links.push_back(new Base::Room::Goto (index,pythonfile));
+		newroom->links.push_back(new BaseInterface::Room::Goto (index,pythonfile));
 		BaseLink(newroom,x,y,wid,hei,text);
-		((Base::Room::Goto*)newroom->links.back())->index=to;
+		((BaseInterface::Room::Goto*)newroom->links.back())->index=to;
 	}
 	void Launch (int room, std::string index, float x, float y, float wid, float hei, std::string text) {
 		LaunchPython (room, index,"", x, y, wid, hei, text);
 	}
 	void LaunchPython (int room, std::string index,std::string pythonfile, float x, float y, float wid, float hei, std::string text) {
-		Base::Room *newroom=CheckRoom(room);
+		BaseInterface::Room *newroom=CheckRoom(room);
 		if (!newroom) return;
-		newroom->links.push_back(new Base::Room::Launch (index,pythonfile));
+		newroom->links.push_back(new BaseInterface::Room::Launch (index,pythonfile));
 		BaseLink(newroom,x,y,wid,hei,text);
 	}
 	void Comp(int room, std::string index, float x, float y, float wid, float hei, std::string text, std::string modes) {
@@ -62,9 +62,9 @@ namespace BaseUtil {
  
 	}
 	void CompPython(int room, std::string index,std::string pythonfile, float x, float y, float wid, float hei, std::string text, std::string modes) { 
-		Base::Room *newroom=CheckRoom(room);
+		BaseInterface::Room *newroom=CheckRoom(room);
 		if (!newroom) return;
-		Base::Room::Comp *newcomp=new Base::Room::Comp (index,pythonfile);
+		BaseInterface::Room::Comp *newcomp=new BaseInterface::Room::Comp (index,pythonfile);
 		newroom->links.push_back(newcomp);
 		BaseLink(newroom,x,y,wid,hei,text);
 		static const EnumMap::Pair modelist [UpgradingInfo::MAXMODE+1] = {
@@ -107,21 +107,21 @@ namespace BaseUtil {
 	}
 	void Python(int room, std::string index, float x, float y, float wid, float hei, std::string text, std::string pythonfile) {
 		//instead of "Talk"/"Say" tags
-		Base::Room *newroom=CheckRoom(room);
+		BaseInterface::Room *newroom=CheckRoom(room);
 		if (!newroom) return;
-		newroom->links.push_back(new Base::Room::Python (index,pythonfile));
+		newroom->links.push_back(new BaseInterface::Room::Python (index,pythonfile));
 		BaseLink(newroom,x,y,wid,hei,text);
 	}
 	void Message(std::string text) {
-		if (!Base::CurrentBase) return;
-		Base::CurrentBase->rooms[Base::CurrentBase->curroom]->objs.push_back(new Base::Room::BaseTalk(text,"currentmsg",true));
+		if (!BaseInterface::CurrentBase) return;
+		BaseInterface::CurrentBase->rooms[BaseInterface::CurrentBase->curroom]->objs.push_back(new BaseInterface::Room::BaseTalk(text,"currentmsg",true));
 	}
 	void EnqueueMessage(std::string text) {
-		if (!Base::CurrentBase) return;
-		Base::CurrentBase->rooms[Base::CurrentBase->curroom]->objs.push_back(new Base::Room::BaseTalk(text,"currentmsg",false));
+		if (!BaseInterface::CurrentBase) return;
+		BaseInterface::CurrentBase->rooms[BaseInterface::CurrentBase->curroom]->objs.push_back(new BaseInterface::Room::BaseTalk(text,"currentmsg",false));
 	}
 	void EraseLink (int room, std::string index) {
-		Base::Room *newroom=CheckRoom(room);
+		BaseInterface::Room *newroom=CheckRoom(room);
 		if (!newroom) return;
 		for (int i=0;i<newroom->links.size();i++) {
 			if (newroom->links[i]) {
@@ -133,7 +133,7 @@ namespace BaseUtil {
 		}
 	}
 	void EraseObj (int room, std::string index) {
-		Base::Room *newroom=CheckRoom(room);
+		BaseInterface::Room *newroom=CheckRoom(room);
 		if (!newroom) return;
 		for (int i=0;i<newroom->objs.size();i++) {
 			if (newroom->objs[i]) {
@@ -145,11 +145,11 @@ namespace BaseUtil {
 		}
 	}
 	int GetCurRoom () {
-		if (!Base::CurrentBase) return -1;
-		return Base::CurrentBase->curroom;
+		if (!BaseInterface::CurrentBase) return -1;
+		return BaseInterface::CurrentBase->curroom;
 	}
 	int GetNumRoom () {
-		if (!Base::CurrentBase) return -1;
-		return Base::CurrentBase->rooms.size();
+		if (!BaseInterface::CurrentBase) return -1;
+		return BaseInterface::CurrentBase->rooms.size();
 	}
 }

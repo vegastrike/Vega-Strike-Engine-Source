@@ -11,7 +11,7 @@
 #include "config_xml.h"
 #include "lin_time.h"
 #include "collection.h"
-#include "unit.h"
+#include "unit_generic.h"
 #include "vs_path.h"
 #ifdef _WIN32
 #include <windows.h>
@@ -107,7 +107,7 @@ inline int randInt (int max) {
 }
 
 int Music::SelectTracks(void) {
-  if ((Base::CurrentBase||loopsleft>0)&&lastlist < playlist.size()&&lastlist>=0) {
+  if ((BaseInterface::CurrentBase||loopsleft>0)&&lastlist < (int)playlist.size()&&lastlist>=0) {
     if (loopsleft>0) {
       loopsleft--;
     }

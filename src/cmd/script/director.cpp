@@ -44,7 +44,7 @@
 #include "vegastrike.h"
 #include "vs_path.h"
 #include "lin_time.h"
-#include "cmd/unit.h"
+#include "cmd/unit_generic.h"
 #include "cmd/ai/order.h"
 
 #include "mission.h"
@@ -63,6 +63,7 @@
 #include "gldrv/winsys.h"
 #include "python/python_class.h"
 #include <boost/python/detail/extension_class.hpp>
+#include "gfx/cockpit_generic.h"
 //#include "vegastrike.h"
 
 extern bool have_yy_error;

@@ -1,7 +1,7 @@
 #include "gfx/aux_texture.h"
 #include "mission.h"
 #include "flightgroup.h"
-#include "cmd/unit.h"
+#include "cmd/unit_generic.h"
 #include <stdio.h>
 
 Flightgroup * Flightgroup::newFlightgroup (const std::string &name, 
@@ -30,7 +30,7 @@ Flightgroup * Flightgroup::newFlightgroup (const std::string &name,
   return fg;
 }
 Flightgroup::~Flightgroup() {
-  fprintf (stderr,"deleting FG 0x%x %s %s\n",this,name.c_str(),faction.c_str());
+  //fprintf (stderr,"deleting FG 0x%x %s %s\n",this,name.c_str(),faction.c_str());
   if (squadLogo){
     delete squadLogo;
   }

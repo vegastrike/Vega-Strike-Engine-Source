@@ -1,4 +1,4 @@
-#include "unit.h"
+//#include "unit.h"
 #include "unit_factory.h"
 
 #include "xml_support.h"
@@ -25,54 +25,20 @@
 #include "gfx/cockpit.h"
 #include "gfx/animation.h"
 #define VS_PI 3.1415926536
-void GameUnit::beginElement(void *userData, const XML_Char *name, const XML_Char **atts) {
-  ((GameUnit*)userData)->beginElement(name, AttributeList(atts));
+template<class UnitType>
+void GameUnit<UnitType>::beginElement(void *userData, const XML_Char *name, const XML_Char **atts) {
+  ((GameUnit<UnitType>*)userData)->beginElement(name, AttributeList(atts));
 }
 
-void GameUnit::endElement(void *userData, const XML_Char *name) {
-  ((GameUnit*)userData)->endElement(name);
-}
-using std::map;
-static std::map<std::string,Animation *> cached_ani;
-vector <std::string> tempcache;
-void cache_ani (string s) {
-  tempcache.push_back (s);
-}
-void update_ani_cache () {
-  while (tempcache.size()) {
-    string explosion_type = tempcache.back();
-    tempcache.pop_back();
-    if (cached_ani.find (explosion_type)==cached_ani.end()) {
-      cached_ani.insert (pair <std::string,Animation *>(explosion_type,new Animation (explosion_type.c_str(),false,.1,BILINEAR,false)));
-    }
-  }
-}
-std::string getRandomCachedAniString () {
-  if (cached_ani.size()) {
-    unsigned int rn = rand()%cached_ani.size();
-    map<std::string,Animation *>::iterator j=cached_ani.begin();
-    for (unsigned int i=0;i<rn;i++) {
-      j++;
-    }
-    return (*j).first;
-  }else{
-    return "";
-  }  
+extern void cache_ani (string s);
+extern void update_ani_cache ();
+extern std::string getRandomCachedAniString ();
+extern Animation* getRandomCachedAni ();
 
+template<class UnitType>
+void GameUnit<UnitType>::endElement(void *userData, const XML_Char *name) {
+  ((GameUnit<UnitType>*)userData)->endElement(name);
 }
-Animation* getRandomCachedAni () {
-  if (cached_ani.size()) {
-    unsigned int rn = rand()%cached_ani.size();
-    map<std::string,Animation *>::iterator j=cached_ani.begin();
-    for (unsigned int i=0;i<rn;i++) {
-      j++;
-    }
-    return (*j).second;
-  }else{
-    return NULL;
-  }
-}
-
 namespace GameUnitXML {
     enum Names {
       UNKNOWN,
@@ -345,19 +311,13 @@ namespace GameUnitXML {
 using XMLSupport::EnumMap;
 using XMLSupport::Attribute;
 using XMLSupport::AttributeList;
-using namespace GameUnitXML;
 extern int GetModeFromName (const char *);
-int parseMountSizes (const char * str) {
-  char tmp[13][50];
-  int ans = weapon_info::NOWEAP;
-  int num= sscanf (str,"%s %s %s %s %s %s %s %s %s %s %s %s %s",tmp[0],tmp[1],tmp[2],tmp[3],tmp[4],tmp[5],tmp[6],tmp[7],tmp[8],tmp[9],tmp[10],tmp[11],tmp[12]);
-  for (int i=0;i<num;i++) {
-    ans |= lookupMountSize (tmp[i]);
-  }
-  return ans;
-}
+extern int parseMountSizes (const char * str);
+
 static short CLAMP_SHORT(float x) {return (short)(((x)>65536)?65536:((x)<0?0:(x)));}  
-void GameUnit::beginElement(const string &name, const AttributeList &attributes) {
+template<class UnitType>
+void GameUnit<UnitType>::beginElement(const string &name, const AttributeList &attributes) {
+using namespace GameUnitXML;
   static float game_speed = XMLSupport::parse_float (vs_config->getVariable ("physics","game_speed","1"));
   static float game_accel = XMLSupport::parse_float (vs_config->getVariable ("physics","game_accel","1"));
   Cargo carg;
@@ -1311,7 +1271,7 @@ void GameUnit::beginElement(const string &name, const AttributeList &attributes)
 
   case YAW:
     ADDTAG;
-    xml->yprrestricted+=GameUnit::XML::YRESTR;
+    xml->yprrestricted+=GameUnit<UnitType>::XML::YRESTR;
     assert (xml->unitlevel==2);
     xml->unitlevel++;
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
@@ -1330,7 +1290,7 @@ void GameUnit::beginElement(const string &name, const AttributeList &attributes)
 
   case PITCH:
     ADDTAG;
-    xml->yprrestricted+=GameUnit::XML::PRESTR;
+    xml->yprrestricted+=GameUnit<UnitType>::XML::PRESTR;
     assert (xml->unitlevel==2);
     xml->unitlevel++;
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
@@ -1349,7 +1309,7 @@ void GameUnit::beginElement(const string &name, const AttributeList &attributes)
 
   case ROLL:
     ADDTAG;
-    xml->yprrestricted+=GameUnit::XML::RRESTR;
+    xml->yprrestricted+=GameUnit<UnitType>::XML::RRESTR;
     assert (xml->unitlevel==2);
     xml->unitlevel++;
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
@@ -1430,7 +1390,7 @@ void GameUnit::beginElement(const string &name, const AttributeList &attributes)
 	}
 	break;
       case REPAIRDROID:
-	image->repair_droid = parse_float ((*iter).value);
+	image->repair_droid = (unsigned char) parse_float ((*iter).value);
 	break;
       case ECM:
 
@@ -1482,7 +1442,9 @@ void GameUnit::beginElement(const string &name, const AttributeList &attributes)
 #undef ADDELEM
 }
 
-void GameUnit::endElement(const string &name) {
+template<class UnitType>
+void GameUnit<UnitType>::endElement(const string &name) {
+  using namespace GameUnitXML;
   image->unitwriter->EndTag (name);
   Names elem = (Names)element_map.lookup(name);
 
@@ -1498,7 +1460,8 @@ void GameUnit::endElement(const string &name) {
   }
 }
 
-void GameUnit::WriteUnit (const char * modifications) {
+template<class UnitType>
+void GameUnit<UnitType>::WriteUnit (const char * modifications) {
   if (image->unitwriter)
     image->unitwriter->Write(modifications);
   for (un_iter ui= getSubUnits();(*ui)!=NULL;++ui) {
@@ -1506,7 +1469,8 @@ void GameUnit::WriteUnit (const char * modifications) {
   } 
 }
 extern std::string GetReadPlayerSaveGame (int);
-void GameUnit::LoadXML(const char *filename, const char * modifications, char * xmlbuffer, int buflength)
+template<class UnitType>
+void GameUnit<UnitType>::LoadXML(const char *filename, const char * modifications, char * xmlbuffer, int buflength)
 {
   shield.number=0;
   const int chunk_size = 16384;
@@ -1660,7 +1624,7 @@ void GameUnit::LoadXML(const char *filename, const char * modifications, char * 
   xml->unitscale=1;
   XML_Parser parser = XML_ParserCreate(NULL);
   XML_SetUserData(parser, this);
-  XML_SetElementHandler(parser, &GameUnit::beginElement, &GameUnit::endElement);
+  XML_SetElementHandler(parser, &GameUnit<UnitType>::beginElement, &GameUnit<UnitType>::endElement);
   
   if( buflength!=0 && xmlbuffer!=NULL)
   {
@@ -1693,7 +1657,7 @@ void GameUnit::LoadXML(const char *filename, const char * modifications, char * 
   corner_min = Vector(FLT_MAX, FLT_MAX, FLT_MAX);
   corner_max = Vector(-FLT_MAX, -FLT_MAX, -FLT_MAX);
   *myhudim =xml->hudimage;
-  int a;
+  unsigned int a;
   if (xml->mountz.size())
   {
 	  // DO not destroy anymore, just affect address
@@ -1702,12 +1666,12 @@ void GameUnit::LoadXML(const char *filename, const char * modifications, char * 
     //mounts[a]=*xml->mountz[a];
     //delete xml->mountz[a];			//do it stealthily... no cons/destructor
   }
-  char parity=0;
+  unsigned char parity=0;
   for (a=0;a<xml->mountz.size();a++) {
     static bool half_sounds = XMLSupport::parse_bool(vs_config->getVariable ("audio","every_other_mount","false"));
     if (a%2==parity) {
       int b=a;
-      if(a % 4 == 2 && a < (GetNumMounts()-1)) 
+      if(a % 4 == 2 && (int) a < (GetNumMounts()-1)) 
 	if (mounts[a]->type->type != weapon_info::PROJECTILE&&mounts[a+1]->type->type != weapon_info::PROJECTILE)
 	  b=a+1;
       mounts[b]->sound = AUDCreateSound (mounts[b]->type->sound,mounts[b]->type->type!=weapon_info::PROJECTILE);
@@ -1720,7 +1684,7 @@ void GameUnit::LoadXML(const char *filename, const char * modifications, char * 
       }
     }
   }
-  for( a=0; a<(int)xml->units.size(); a++) {
+  for( a=0; a<xml->units.size(); a++) {
     SubUnits.prepend(xml->units[a]);
   }
   calculate_extent(false);
@@ -1731,9 +1695,9 @@ void GameUnit::LoadXML(const char *filename, const char * modifications, char * 
   string tmpname (filename);
   vector <bsp_polygon> polies;
 
-  colTrees = collideTrees::Get(collideTreeHash);
-  if (colTrees) {
-    colTrees->Inc();
+  this->colTrees = collideTrees::Get(collideTreeHash);
+  if (this->colTrees) {
+    this->colTrees->Inc();
   }
   BSPTree * bspTree=NULL;
   BSPTree * bspShield=NULL;
@@ -1741,7 +1705,7 @@ void GameUnit::LoadXML(const char *filename, const char * modifications, char * 
   csRapidCollider *colTree=NULL;
   if (xml->shieldmesh) {
     meshdata.back() = xml->shieldmesh;
-    if (!colTrees) {
+    if (!this->colTrees) {
       if (!CheckBSP ((tmpname+"_shield.bsp").c_str())) {
 	BuildBSPTree ((tmpname+"_shield.bsp").c_str(), false, meshdata.back());
       }
@@ -1756,7 +1720,7 @@ void GameUnit::LoadXML(const char *filename, const char * modifications, char * 
   }
   else {
     SphereMesh * tmp = NULL;
-    if (!colTrees) {
+    if (!this->colTrees) {
 #if 0
       tmp= new SphereMesh (rSize(),8,8,vs_config->getVariable("graphics","shield_texture","shield.bmp").c_str(), NULL, false,ONE, ONE);///shield not used right now for collisions
       tmp->GetPolys (polies);
@@ -1774,7 +1738,7 @@ void GameUnit::LoadXML(const char *filename, const char * modifications, char * 
     colShield=NULL;
   }
   meshdata.back()->EnableSpecialFX();
-  if (!colTrees) {
+  if (!this->colTrees) {
     if (xml->hasBSP) {
       tmpname += ".bsp";
       if (!CheckBSP (tmpname.c_str())) {
@@ -1799,7 +1763,7 @@ void GameUnit::LoadXML(const char *filename, const char * modifications, char * 
     }else {
       colTree=NULL;
     }
-    colTrees = new collideTrees (collideTreeHash,bspTree,bspShield,colTree,colShield);
+    this->colTrees = new collideTrees (collideTreeHash,bspTree,bspShield,colTree,colShield);
   }
   if (xml->bspmesh) {
     delete xml->bspmesh;

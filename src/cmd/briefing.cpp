@@ -1,5 +1,5 @@
 #include "briefing.h"
-#include "unit.h"
+#include "unit_generic.h"
 #include "unit_factory.h"
 #include "gfx/mesh.h"
 #include "script/mission.h"

@@ -18,6 +18,10 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
+
+#ifndef __HUD_H
+#define __HUD_H
+
 #include <string>
 #include "vec.h"
 #include "gfxlib_struct.h"
@@ -66,3 +70,5 @@ public:
 	}
 
 };
+
+#endif

@@ -24,9 +24,9 @@
 #endif
 #include <string>
 
-#include "cmd/planet.h"
+#include "cmd/planet_generic.h"
 
-class GameUnit;
+//class GameUnit;
 class Mesh;
 class Flightgroup;
 class Nebula;
@@ -63,7 +63,7 @@ public:
                                  Flightgroup* fg=NULL, 
                                  int fg_snumber=0 );
 
-    static Missile* createMissile( const char * filename,
+    static Unit* createMissile( const char * filename,
                                    int faction,
                                    const string &modifications,
                                    const float damage,

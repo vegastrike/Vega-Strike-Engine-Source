@@ -8,39 +8,19 @@ ok *
 #include <stdio.h>
 
 #include "unit.h"
+#include "planet_generic.h"
 #include "ai/order.h"
 //#include "physics.h"
 #include "collection.h"
 #include "iterator.h"
 #include <vector>
 
+
 struct GFXMaterial;
 /* Orbits in the xy plane with the given radius. Depends on a reorientation of coordinate bases */
 
 struct Texture;
 class Atmosphere;
-class Planet;
-
-class PlanetaryOrbit : public Order {
- private:
-  Unit *parent;
-  double velocity;
-  double theta;
-
-  QVector x_size;
-  QVector y_size;
-  QVector focus;
- protected:
-  ///A vector containing all lihgts currently activated on current planet
-  std::vector <int> lights;
-
- public:
-
-  PlanetaryOrbit(Unit *p, double velocity, double initpos, const QVector &x_axis, const QVector &y_axis, const QVector &Centre, Unit *target=NULL); 
-  ~PlanetaryOrbit();
-  void Execute();
-
-};
 
 struct GFXLightLocal {
   GFXLight ligh;
@@ -48,44 +28,33 @@ struct GFXLightLocal {
 };
 class ContinuousTerrain;
 class PlanetaryTransform;
-class Planet : public GameUnit {
+class GamePlanet : public GameUnit<class Planet> {
  private:
-  PlanetaryTransform * terraintrans;
-  Atmosphere * atmosphere;
-  ContinuousTerrain *terrain;
-  Vector TerrainUp;
-  Vector TerrainH;
-  bool inside;
-  bool atmospheric;//then users can go inside!
-  float radius;
-  float gravity;
-  UnitCollection insiders;
-  std::vector <int> lights;
   Animation *shine;
 protected:
     /// default constructor - only to be called by UnitFactory
-  Planet();
+  GamePlanet();
 
     /// constructor - only to be called by UnitFactory
-    Planet(QVector x,QVector y,float vely,const Vector & rotvel, float pos,float gravity,float radius,const char * filename, BLENDFUNC blendsrc, BLENDFUNC blenddst, vector<char *> dest, const QVector &orbitcent, Unit * parent, const GFXMaterial & ourmat, const std::vector <GFXLightLocal> &, int faction,string fullname, bool inside_out=false);
+    GamePlanet(QVector x,QVector y,float vely,const Vector & rotvel, float pos,float gravity,float radius,const char * filename, BLENDFUNC blendsrc, BLENDFUNC blenddst, vector<char *> dest, const QVector &orbitcent, Unit * parent, const GFXMaterial & ourmat, const std::vector <GFXLightLocal> &, int faction,string fullname, bool inside_out=false);
 
     friend class UnitFactory;
 
 public:
   UnitCollection satellites;
-  virtual ~Planet();
+  virtual ~GamePlanet();
   void AddAtmosphere (const std::string &texture, float radius, BLENDFUNC blendSrc, BLENDFUNC blendDst);
   void AddRing (const std::string &texture,float iradius,float oradius, const QVector &r,const QVector &s, int slices, int numwrapx, int numwrapy, BLENDFUNC blendSrc, BLENDFUNC blendDst);
   void AddCity (const std::string &texture,float radius,int numwrapx, int numwrapy, BLENDFUNC blendSrc, BLENDFUNC blendDst, bool inside_out=false);
   void DisableLights ();
   void EnableLights();
-  void AddSatellite (Unit * orbiter);
-  void endElement();
-  string getCargoUnitName () const {return getFullname();}
-  string getHumanReadablePlanetType () const ;
-  Unit * beginElement(QVector x,QVector y,float vely,const Vector & rotvel, float pos,float gravity,float radius,const char * filename,BLENDFUNC blendsrc, BLENDFUNC blenddst, vector<char *>dest,int level, const GFXMaterial &ourmat, const std::vector <GFXLightLocal> &ligh, bool isunit, int faction,string fullname, bool inside_out);
-  Planet * GetTopPlanet (int level);
-  virtual enum clsptr isUnit() {return PLANETPTR;}
+  //void AddSatellite (Unit * orbiter);
+  //void endElement();
+  //string getCargoUnitName () const {return getFullname();}
+  //string getHumanReadablePlanetType () const ;
+  //Unit * beginElement(QVector x,QVector y,float vely,const Vector & rotvel, float pos,float gravity,float radius,const char * filename,BLENDFUNC blendsrc, BLENDFUNC blenddst, vector<char *>dest,int level, const GFXMaterial &ourmat, const std::vector <GFXLightLocal> &ligh, bool isunit, int faction,string fullname, bool inside_out);
+  //Planet * GetTopPlanet (int level);
+  //virtual enum clsptr isUnit() {return PLANETPTR;}
   virtual void Draw(const Transformation & quat = identity_transformation, const Matrix &m = identity_matrix);
   void DrawTerrain();
   static void ProcessTerrains();
@@ -99,59 +68,18 @@ public:
   void reactToCollision(Unit * smaller, const QVector & biglocation, const Vector & bignormal, const QVector & smalllocation, const Vector & smallnormal,  float dist);
   void gravitate(UnitCollection *units);
 
-  class PlanetIterator : public Iterator {
-    UnitCollection planetStack;
-    un_iter *pos;
-  public:
-    PlanetIterator(Planet *p) : planetStack() { 
-      planetStack.append(p);
-      pos = new un_iter (planetStack.createIterator());
-    }
-    virtual ~PlanetIterator() {
-      delete pos;
-    }
-    virtual void preinsert(Unit *unit) {
-      abort();
-    }
-    virtual void postinsert(Unit *unit) {
-      abort();
-    }
-    virtual void remove() {
-      abort();
-    }
-    virtual Unit *current() {
-      return pos->current();
-    }
-    virtual void advance() {
-      if(pos->current()==NULL)
-	return;
-	
-      Unit *currentPlanet = pos->current();
-	  if (currentPlanet->isUnit()==PLANETPTR) {
-	    
-	    for(un_iter tmp (((Planet *)currentPlanet)->satellites.createIterator()); tmp.current()!=NULL; tmp.advance()) {
-			planetStack.append(tmp.current());
-		}
-	  }
-      pos->advance();
-    }
-  };
-  Iterator *createIterator() { return new PlanetIterator(this);}
   bool isAtmospheric  () {
     return hasLights()||atmospheric;
   }
-
-  bool hasLights() { return !lights.empty(); }
-  const std::vector <int> & activeLights() { return lights; }
 
   friend class Planet::PlanetIterator;
   friend class PlanetaryOrbit;
 
 private:
     /// copy constructor forbidden
-    Planet( const Planet& );
+    GamePlanet( const Planet& );
     /// assignment operator forbidden
-    Planet& operator=( const Planet& );
+    GamePlanet& operator=( const Planet& );
 };
 
 #endif

@@ -30,7 +30,7 @@ int ReadIntSpace (std::string &str) {
   std::string myint;
   bool toggle=false;
   int i=0;
-  while (i<str.length()) {
+  while (i<(int)str.length()) {
     char c[2]={0,0};
     c[0]=str[i++];
     if (c[0]!=' ') {

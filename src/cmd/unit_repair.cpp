@@ -1,10 +1,11 @@
-#include "unit.h"
+#include "unit_generic.h"
 #include "config_xml.h"
 #include "vs_globals.h"
 #include "images.h"
 #include "lin_time.h"
 extern float rand01();
-void GameUnit::Repair() {
+template <class UnitType>
+void GameUnit<UnitType>::Repair() {
   //note work slows down under time compression!
   static float repairtime =XMLSupport::parse_float(vs_config->getVariable ("physics","RepairDroidTime","1000"));
   float workunit = SIMULATION_ATOM/(repairtime*getTimeCompression());//a droid completes 1 work unit in repairtime

@@ -426,7 +426,7 @@ void bootstrap_main_loop () {
 	vector <StarSystem *> ss;
 	vector <string> starsysname;
 	vector <QVector> playerNloc;
-    for (unsigned int k=0;k<_Universe->numPlayers();k++) {
+    for (unsigned int k=0;k<(unsigned int)_Universe->numPlayers();k++) {
       bool setplayerXloc=false;
       std::string psu;
       if (k==0) {

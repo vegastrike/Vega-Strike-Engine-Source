@@ -3,7 +3,9 @@
 #include "vs_path.h"
 #include "lin_time.h"
 #include "audiolib.h"
-#include "planet.h"
+#include "gfx/camera.h"
+#include "gfx/cockpit_generic.h"
+#include "planet_generic.h"
 #include <Python.h>
 #include <algorithm>
 #include "base_util.h"
@@ -16,9 +18,9 @@
 static char makingstate=0;
 #endif
 
-bool Base::Room::BaseTalk::hastalked=false;
+bool BaseInterface::Room::BaseTalk::hastalked=false;
 
-Base::Room::~Room () {
+BaseInterface::Room::~Room () {
 	int i;
 	for (i=0;i<links.size();i++) {
 		if (links[i])
@@ -30,21 +32,21 @@ Base::Room::~Room () {
 	}
 }
 
-Base::Room::Room () {
+BaseInterface::Room::Room () {
 //		Do nothing...
 }
 
-void Base::Room::BaseObj::Draw (Base *base) {
+void BaseInterface::Room::BaseObj::Draw (BaseInterface *base) {
 //		Do nothing...
 }
 
-void Base::Room::BaseSprite::Draw (Base *base) {
+void BaseInterface::Room::BaseSprite::Draw (BaseInterface *base) {
 	GFXBlendMode(SRCALPHA,INVSRCALPHA);
 	GFXEnable(TEXTURE0);
 	spr.Draw();
 }
 
-void Base::Room::BaseShip::Draw (Base *base) {
+void BaseInterface::Room::BaseShip::Draw (BaseInterface *base) {
 	Unit *un=base->caller.GetUnit();
 	if (un) {
 		GFXHudMode (GFXFALSE);
@@ -68,22 +70,22 @@ void Base::Room::BaseShip::Draw (Base *base) {
 	}
 }
 
-void Base::Room::Draw (Base *base) {
+void BaseInterface::Room::Draw (BaseInterface *base) {
 	int i;
 	for (i=0;i<objs.size();i++) {
 		if (objs[i])
 			objs[i]->Draw(base);
 	}
 }
-static Base::Room::BaseTalk * only_one_talk=NULL;
+static BaseInterface::Room::BaseTalk * only_one_talk=NULL;
 
-Base::Room::BaseTalk::BaseTalk (std::string msg,std::string ind, bool only_one) :BaseObj(ind), curchar (0), curtime (0), message(msg) {
+BaseInterface::Room::BaseTalk::BaseTalk (std::string msg,std::string ind, bool only_one) :BaseObj(ind), curchar (0), curtime (0), message(msg) {
 	if (only_one) {
 		only_one_talk=this;
 	}
 }
 
-void Base::Room::BaseTalk::Draw (Base *base) {
+void BaseInterface::Room::BaseTalk::Draw (BaseInterface *base) {
 /*	GFXColor4f(1,1,1,1);
 	GFXBegin(GFXLINESTRIP);
 		GFXVertex3f(caller->x,caller->y,0);
@@ -124,7 +126,7 @@ void Base::Room::BaseTalk::Draw (Base *base) {
 	hastalked=true;
 }
 
-int Base::Room::MouseOver (Base *base,float x, float y) {
+int BaseInterface::Room::MouseOver (BaseInterface *base,float x, float y) {
 	for (int i=0;i<links.size();i++) {
 		if (links[i]) {
 			if (x>=links[i]->x&&
@@ -138,18 +140,18 @@ int Base::Room::MouseOver (Base *base,float x, float y) {
 	return -1;
 }
 
-Base *Base::CurrentBase=0;
-bool Base::CallComp=false;
+BaseInterface *BaseInterface::CurrentBase=0;
+bool BaseInterface::CallComp=false;
 
 bool RefreshGUI(void) {
 	bool retval=false;
 	if (_Universe->AccessCockpit()) {
-		if (Base::CurrentBase) {
-			if (_Universe->AccessCockpit()->GetParent()==Base::CurrentBase->caller.GetUnit()){
-				if (Base::CallComp) {
+		if (BaseInterface::CurrentBase) {
+			if (_Universe->AccessCockpit()->GetParent()==BaseInterface::CurrentBase->caller.GetUnit()){
+				if (BaseInterface::CallComp) {
 					return RefreshInterface ();	
 				} else {
-					Base::CurrentBase->Draw();
+					BaseInterface::CurrentBase->Draw();
 				}
 				retval=true;
 			}
@@ -158,7 +160,7 @@ bool RefreshGUI(void) {
 	return retval;
 }
 
-void Base::Room::Click (::Base* base,float x, float y, int button, int state) {
+void BaseInterface::Room::Click (BaseInterface* base,float x, float y, int button, int state) {
 	if (button==WS_LEFT_BUTTON) {
 		int linknum=MouseOver (base,x,y);
 		if (linknum>=0) {
@@ -276,7 +278,7 @@ void Base::Room::Click (::Base* base,float x, float y, int button, int state) {
 	}
 }
 
-void Base::MouseOver (float x, float y) {
+void BaseInterface::MouseOver (float x, float y) {
 	int i=rooms[curroom]->MouseOver(this,x,y);
 	Room::Link *link=0;
 	if (i<0) {
@@ -295,23 +297,23 @@ void Base::MouseOver (float x, float y) {
 	}
 }
 
-void Base::Click (float x, float y, int button, int state) {
+void BaseInterface::Click (float x, float y, int button, int state) {
 	rooms[curroom]->Click(this,x,y,button,state);
 }
 
-void Base::ClickWin (int button, int state, int x, int y) {
+void BaseInterface::ClickWin (int button, int state, int x, int y) {
 	if (CurrentBase) {
 		CurrentBase->Click((((float)(x*2))/g_game.x_resolution)-1,-(((float)(y*2))/g_game.y_resolution)+1,button,state);
 	}
 }
 
-void Base::MouseOverWin (int x, int y) {
+void BaseInterface::MouseOverWin (int x, int y) {
 	SetSoftwareMousePosition(x,y);
 	if (CurrentBase)
 		CurrentBase->MouseOver((((float)(x*2))/g_game.x_resolution)-1,-(((float)(y*2))/g_game.y_resolution)+1);
 }
 
-void Base::GotoLink (int linknum) {
+void BaseInterface::GotoLink (int linknum) {
 	othtext.SetText("");
 	if (rooms.size()>linknum&&linknum>=0) {
 		curlinkindex=0;
@@ -334,7 +336,7 @@ void Base::GotoLink (int linknum) {
 	}
 }
 
-Base::~Base () {
+BaseInterface::~BaseInterface () {
 #ifdef BASE_MAKER
 	FILE *fp=fopen("bases/NEW_BASE"BASE_EXTENSION,"wt");
 	if (fp) {
@@ -349,7 +351,7 @@ Base::~Base () {
 	}
 }
 
-void Base::InitCallbacks () {
+void BaseInterface::InitCallbacks () {
 	winsys_set_mouse_func(ClickWin);
 	winsys_set_motion_func(MouseOverWin);
 	winsys_set_passive_motion_func(MouseOverWin);
@@ -358,22 +360,8 @@ void Base::InitCallbacks () {
 	CallComp=false;
 }
 
-extern string getCargoUnitName (const char *name);
-
-void GameUnit::UpgradeInterface(Unit * baseun) {
-	if (!Base::CurrentBase) {
-	  string basename = (getCargoUnitName(baseun->getFullname().c_str()));
-	  if (baseun->isUnit()!=PLANETPTR) {
-	    basename = baseun->name;
-	  }
-	  Base *base=new Base (basename.c_str(),baseun,this);
-	  base->InitCallbacks();
-	  SetSoftwareMousePosition(0,0);
-	}
-}
-
-Base::Room::Talk::Talk (std::string ind,std::string pythonfile)
-		: Base::Room::Link(ind,pythonfile) {
+BaseInterface::Room::Talk::Talk (std::string ind,std::string pythonfile)
+		: BaseInterface::Room::Link(ind,pythonfile) {
 	index=-1;
 #ifndef BASE_MAKER
 	gameMessage * last;
@@ -396,8 +384,8 @@ Base::Room::Talk::Talk (std::string ind,std::string pythonfile)
 	}
 #endif
 }
-Base::Room::Python::Python (std::string ind,std::string pythonfile)
-		: Base::Room::Link(ind,pythonfile) {
+BaseInterface::Room::Python::Python (std::string ind,std::string pythonfile)
+		: BaseInterface::Room::Link(ind,pythonfile) {
 }
 double compute_light_dot (Unit * base,Unit *un) {
   StarSystem * ss =base->getStarSystem ();
@@ -445,7 +433,7 @@ const char * compute_time_of_day (Unit * base,Unit *un) {
     return "night";
   return "sunset";
 }
-Base::Base (const char *basefile, Unit *base, Unit*un)
+BaseInterface::BaseInterface (const char *basefile, Unit *base, Unit*un)
 		: curtext(GFXColor(0,1,0,1),GFXColor(0,0,0,1)) , othtext(GFXColor(1,1,.5,1),GFXColor(0,0,0,1)) {
 	CurrentBase=this;
 	caller=un;
@@ -475,7 +463,7 @@ Base::Base (const char *basefile, Unit *base, Unit*un)
 	GotoLink(0);
 }
 
-void Base::Room::Python::Click (Base *base,float x, float y, int button, int state) {
+void BaseInterface::Room::Python::Click (BaseInterface *base,float x, float y, int button, int state) {
 	if (state==WS_MOUSE_UP) {
 		Link::Click(base,x,y,button,state);
 //		Do nothing...
@@ -483,24 +471,24 @@ void Base::Room::Python::Click (Base *base,float x, float y, int button, int sta
 	}
 }
 
-void Base::Room::Comp::Click (Base *base,float x, float y, int button, int state) {
+void BaseInterface::Room::Comp::Click (BaseInterface *base,float x, float y, int button, int state) {
 	if (state==WS_MOUSE_UP) {
 		Link::Click(base,x,y,button,state);
 		Unit *un=base->caller.GetUnit();
 		Unit *baseun=base->baseun.GetUnit();
 		if (un&&baseun) {
-			Base::CallComp=true;
+			BaseInterface::CallComp=true;
 			UpgradeCompInterface(un,baseun,modes);
 		}
 	}
 }
-void Base::Terminate() {
-  Base::CurrentBase=NULL;
+void BaseInterface::Terminate() {
+  BaseInterface::CurrentBase=NULL;
 
   restore_main_loop();
   delete this;
 }
-void Base::Room::Launch::Click (Base *base,float x, float y, int button, int state) {
+void BaseInterface::Room::Launch::Click (BaseInterface *base,float x, float y, int button, int state) {
 	if (state==WS_MOUSE_UP) {
 	  Link::Click(base,x,y,button,state);
 	  static bool auto_undock = XMLSupport::parse_bool(vs_config->getVariable("physics","AutomaticUnDock","true"));
@@ -515,14 +503,14 @@ void Base::Room::Launch::Click (Base *base,float x, float y, int button, int sta
 	}
 }
 
-void Base::Room::Goto::Click (Base *base,float x, float y, int button, int state) {
+void BaseInterface::Room::Goto::Click (BaseInterface *base,float x, float y, int button, int state) {
 	if (state==WS_MOUSE_UP) {
 		Link::Click(base,x,y,button,state);
 		base->GotoLink(index);
 	}
 }
 
-void Base::Room::Talk::Click (Base *base,float x, float y, int button, int state) {
+void BaseInterface::Room::Talk::Click (BaseInterface *base,float x, float y, int button, int state) {
 	if (state==WS_MOUSE_UP) {
 		Link::Click(base,x,y,button,state);
 		if (index>=0) {
@@ -554,7 +542,7 @@ void Base::Room::Talk::Click (Base *base,float x, float y, int button, int state
 	}
 }
 
-void Base::Room::Link::Click (Base *base,float x, float y, int button, int state) {
+void BaseInterface::Room::Link::Click (BaseInterface *base,float x, float y, int button, int state) {
 	if (state==WS_MOUSE_UP) {
 		const char * filnam=this->pythonfile.c_str();
 		if (filnam[0]) {
@@ -571,7 +559,7 @@ void Base::Room::Link::Click (Base *base,float x, float y, int button, int state
 	}
 }
 
-void Base::Draw () {
+void BaseInterface::Draw () {
 	GFXColor(0,0,0,0);
 	StartGUIFrame(GFXTRUE);
 	Room::BaseTalk::hastalked=false;

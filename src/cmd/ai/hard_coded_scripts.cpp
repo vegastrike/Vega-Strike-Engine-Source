@@ -1,5 +1,5 @@
 #include "script.h"
-#include "cmd/unit.h"
+#include "cmd/unit_generic.h"
 #include "hard_coded_scripts.h"
 #include "flybywire.h"
 #include "navigation.h"

@@ -3,7 +3,7 @@
 #include "collection.h"
 #include <assert.h>
 #ifndef LIST_TESTING
-#include "unit.h"
+#include "unit_generic.h"
 #endif
 
 UnitCollection::UnitListNode::UnitListNode (Unit *unit):unit(unit), next(NULL){
@@ -37,7 +37,7 @@ void * UnitCollection::PushUnusedNode (UnitListNode * node) {
   static bool cachunk=true;
   if (cachunk) {
     cachunk=false;
-    fprintf (stderr,"%x %x",&dog,&cat);
+    //fprintf (stderr,"%x %x",&dog,&cat);
   }
   static std::vector <UnitCollection::UnitListNode * >dogpile;
   if (node==NULL) {

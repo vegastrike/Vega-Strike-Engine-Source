@@ -1,3 +1,6 @@
+#ifndef __PARTICLE_H
+#define __PARTICLE_H
+
 #include <list>
 #include "vec.h"
 
@@ -23,3 +26,5 @@ class ParticleTrail {
   void ChangeMax (unsigned int max);
 };
 extern ParticleTrail particleTrail;
+
+#endif

@@ -23,7 +23,7 @@ static FILE * getFullFile (std::string filename, std::string time_of_day_hint,st
   }
   return fp;
 }
-void Base::Load(const char * filename,const char * time_of_day_hint, const char * faction) {
+void BaseInterface::Load(const char * filename,const char * time_of_day_hint, const char * faction) {
 #if 0
 
   std::string full_filename = string("bases/") + filename;
@@ -31,7 +31,7 @@ void Base::Load(const char * filename,const char * time_of_day_hint, const char 
   full_filename+=BASE_EXTENSION;
   daynight_filename+=BASE_EXTENSION;
   std::string newfile=daynight_filename;
-  cout << "Base::LoadXML " << full_filename << endl;
+  cout << "BaseInterface::LoadXML " << full_filename << endl;
   FILE * inFile = fopen (daynight_filename.c_str(),"r");
   if (!inFile) {
     newfile=full_filename;

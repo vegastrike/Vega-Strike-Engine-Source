@@ -1,3 +1,6 @@
+#ifndef __UNIT_CONST_CACHE_H
+#define __UNIT_CONST_CACHE_H
+
 #include <string>
 class StringIntKey {
   std::string key;
@@ -42,3 +45,6 @@ template <class Typ,class Key> class ClassCache {
 };
 typedef ClassCache<Unit,StringIntKey> UnitConstCache;
 typedef ClassCache<Mesh,std::string> WeaponMeshCache;
+
+#endif
+

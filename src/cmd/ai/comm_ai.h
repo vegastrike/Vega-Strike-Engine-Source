@@ -1,3 +1,6 @@
+#ifndef __COMM_AI_H
+#define __COMM_AI_H
+
 #include "order.h"
 #include <map>
 #include <vector>
@@ -39,3 +42,5 @@ class CommunicatingAI:public Order{
    virtual int selectCommunicationMessageMood (CommunicationMessage &c, float mood);
    virtual void SetParent (Unit * parent1);
 };
+
+#endif

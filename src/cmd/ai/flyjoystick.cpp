@@ -6,12 +6,12 @@
 #include "vs_globals.h"
 #include "config_xml.h"
 
-static bool ab;
-static bool shelt;
+//static bool ab;
+//static bool shelt;
 
 FlyByJoystick::FlyByJoystick(unsigned int configfile): FlyByKeyboard (configfile){
   for (int i=0;i<MAX_JOYSTICKS;i++) {
-    if (joystick[i]->player==configfile)
+    if ((unsigned int)joystick[i]->player==configfile)
       whichjoystick.push_back(i);
   }
   //remember keybindings from config file?  

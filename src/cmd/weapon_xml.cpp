@@ -5,7 +5,7 @@
 #include "weapon_xml.h"
 #include <assert.h>
 #include "audiolib.h"
-#include "unit.h"
+#include "unit_generic.h"
 #include "beam.h"
 #include "unit_const_cache.h"
 #include "vs_path.h"
@@ -129,7 +129,7 @@ namespace BeamXML {
   int level=-1;
   void beginElement (void *userData, const XML_Char *name, const XML_Char **atts) {
     AttributeList attributes (atts);
-    weapon_info * debugtmp = &tmpweapon;
+    //weapon_info * debugtmp = &tmpweapon;
     enum weapon_info::WEAPON_TYPE weaptyp;
     Names elem = (Names) element_map.lookup(string (name));
 #ifdef TESTBEAMSONLY

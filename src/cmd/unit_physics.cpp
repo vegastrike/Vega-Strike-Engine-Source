@@ -20,7 +20,7 @@
  */
 
 #include "gfx/mesh.h"
-#include "unit.h"
+//#include "unit.h"
 #include "lin_time.h"
 //#include "physics.h"
 #include "beam.h"
@@ -62,7 +62,8 @@ extern unsigned short apply_float_to_short (float tmp);
 //    float max_pitch;
 //    float max_roll;
 
-void GameUnit::Thrust(const Vector &amt1,bool afterburn){
+template <class UnitType>
+void GameUnit<UnitType>::Thrust(const Vector &amt1,bool afterburn){
   Vector amt = ClampThrust(amt1,afterburn);
   ApplyLocalForce(amt);  
  if (_Universe->AccessCockpit(0)->GetParent()==this)
@@ -75,7 +76,8 @@ void GameUnit::Thrust(const Vector &amt1,bool afterburn){
   }
 }
 
-Cockpit * GameUnit::GetVelocityDifficultyMult(float &difficulty) const{
+template <class UnitType>
+Cockpit * GameUnit<UnitType>::GetVelocityDifficultyMult(float &difficulty) const{
   difficulty=1;
   Cockpit * player_cockpit=_Universe->isPlayerStarship(this);
   if ((player_cockpit)==NULL) {
@@ -85,7 +87,8 @@ Cockpit * GameUnit::GetVelocityDifficultyMult(float &difficulty) const{
   return player_cockpit;
 }
 
-void GameUnit::UpdatePhysics (const Transformation &trans, const Matrix &transmat, const Vector & cum_vel,  bool lastframe, UnitCollection *uc) {
+template <class UnitType>
+void GameUnit<UnitType>::UpdatePhysics (const Transformation &trans, const Matrix &transmat, const Vector & cum_vel,  bool lastframe, UnitCollection *uc) {
   static float VELOCITY_MAX=XMLSupport::parse_float(vs_config->getVariable ("physics","velocity_max","10000"));
 
 	Transformation old_physical_state = curr_physical_state;
@@ -128,7 +131,7 @@ void GameUnit::UpdatePhysics (const Transformation &trans, const Matrix &transma
 
 	}
 
-	cloaking-=image->cloakrate*SIMULATION_ATOM;
+	cloaking-= (short)(image->cloakrate*SIMULATION_ATOM);
 
 	if (cloaking<=cloakmin&&image->cloakrate>0) {
 
@@ -317,7 +320,7 @@ void GameUnit::UpdatePhysics (const Transformation &trans, const Matrix &transma
 
   SetPlanetHackTransformation (ct,ctm);
 
-  int i;
+  unsigned int i;
 
   if (lastframe) {
 
@@ -381,7 +384,7 @@ void GameUnit::UpdatePhysics (const Transformation &trans, const Matrix &transma
 
   bool touched=false;
 
-  for (i=0;i<GetNumMounts();i++) {
+  for (i=0;(int)i<GetNumMounts();i++) {
 
 //    if (increase_locking&&cloaking<0) {
 
@@ -597,9 +600,10 @@ void GameUnit::UpdatePhysics (const Transformation &trans, const Matrix &transma
 
 }
 
-void GameUnit::SetPlanetOrbitData (PlanetaryTransform *t) {
+template <class UnitType>
+void GameUnit<UnitType>::SetPlanetOrbitData (PlanetaryTransform *t) {
 #ifdef FIX_TERRAIN
-  if (isUnit()!=BUILDINGPTR)
+if (isUnit()!=BUILDINGPTR)
         return;
   if (!planet)
     planet = (PlanetaryOrbitData *)malloc (sizeof (PlanetaryOrbitData));
@@ -614,10 +618,10 @@ void GameUnit::SetPlanetOrbitData (PlanetaryTransform *t) {
 #endif
 }
 
-PlanetaryTransform * GameUnit::GetPlanetOrbit () const {
-
+template <class UnitType>
+PlanetaryTransform * GameUnit<UnitType>::GetPlanetOrbit () const {
 #ifdef FIX_TERRAIN
-  if (planet==NULL)
+if (planet==NULL)
     return NULL;
   return planet->trans;
 #else
@@ -625,11 +629,12 @@ PlanetaryTransform * GameUnit::GetPlanetOrbit () const {
 #endif
 }
 
-bool GameUnit::jumpReactToCollision (Unit * smalle) {
+template <class UnitType>
+bool GameUnit<UnitType>::jumpReactToCollision (Unit * smalle) {
   if (!GetDestinations().empty()) {//only allow big with small
     if ((smalle->GetJumpStatus().drive>=0||image->forcejump)) {
       smalle->DeactivateJumpDrive();
-      GameUnit * jumppoint = this;
+      GameUnit<UnitType> * jumppoint = this;
       _Universe->activeStarSystem()->JumpTo (smalle, jumppoint, std::string(GetDestinations()[smalle->GetJumpStatus().drive%GetDestinations().size()]));
       return true;
     }
@@ -647,101 +652,19 @@ bool GameUnit::jumpReactToCollision (Unit * smalle) {
   return false;
 }
 
-void GameUnit::reactToCollision(Unit * smalle, const QVector & biglocation, const Vector & bignormal, const QVector & smalllocation, const Vector & smallnormal,  float dist) {
-  clsptr smltyp = smalle->isUnit();
-  if (smltyp==ENHANCEMENTPTR||smltyp==MISSILEPTR) {
-    if (isUnit()!=ENHANCEMENTPTR&&isUnit()!=MISSILEPTR) {
-      smalle->reactToCollision (this,smalllocation,smallnormal,biglocation,bignormal,dist);
-      return;
-    }
-  }	       
-  //don't bounce if you can Juuuuuuuuuuuuuump
-  if (!jumpReactToCollision(smalle)) {
-#ifdef NOBOUNCECOLLISION
-#else
-    static float bouncepercent = XMLSupport::parse_float (vs_config->getVariable ("physics","BouncePercent",".1"));
-    smalle->ApplyForce (bignormal*.4*bouncepercent*smalle->GetMass()*fabs(bignormal.Dot (((smalle->GetVelocity()-this->GetVelocity())/SIMULATION_ATOM))+fabs (dist)/(SIMULATION_ATOM*SIMULATION_ATOM)));
-    this->ApplyForce (smallnormal*.4*bouncepercent*GetMass()*fabs(smallnormal.Dot ((smalle->GetVelocity()-this->GetVelocity()/SIMULATION_ATOM))+fabs (dist)/(SIMULATION_ATOM*SIMULATION_ATOM)));
-    float m1=smalle->GetMass(),m2=GetMass();
-    Vector Elastic_dvl = (m1-m2)/(m1+m2)*smalle->GetVelocity() + smalle->GetVelocity()*2*m2/(m1+m2);
-    Vector Elastic_dvs = (m2-m1)/(m1+m2)*smalle->GetVelocity() + smalle->GetVelocity()*2*m1/(m1+m2);
-    Vector Inelastic_vf = (m1/(m1+m2))*smalle->GetVelocity() + (m2/(m1+m2))*GetVelocity();
-    float LargeKE = (0.5)*m2*GetVelocity().MagnitudeSquared();
-    float SmallKE = (0.5)*m1*smalle->GetVelocity().MagnitudeSquared();
-    float FinalInelasticKE = Inelastic_vf.MagnitudeSquared()*(0.5)*(m1+m2);
-	float InelasticDeltaKE = LargeKE +SmallKE - FinalInelasticKE;
-    static float kilojoules_per_damage = XMLSupport::parse_float (vs_config->getVariable ("physics","kilojoules_per_unit_damage","5400"));
-    static float inelastic_scale = XMLSupport::parse_float (vs_config->getVariable ("physics","inelastic_scale","1"));
-	float large_damage=inelastic_scale*(InelasticDeltaKE *(1.0/4.0 + (0.5*m2/(m1+m2))) )/kilojoules_per_damage;
-    float small_damage=inelastic_scale*(InelasticDeltaKE *(1.0/4.0 + (0.5*m1/(m1+m2))) )/kilojoules_per_damage;
-    smalle->ApplyDamage (biglocation.Cast(),bignormal,small_damage,smalle,GFXColor(1,1,1,2),NULL);
-    this->ApplyDamage (smalllocation.Cast(),smallnormal,large_damage,this,GFXColor(1,1,1,2),NULL);
-
-    //OLDE METHODE
-    //    smalle->ApplyDamage (biglocation.Cast(),bignormal,.33*g_game.difficulty*(  .5*fabs((smalle->GetVelocity()-this->GetVelocity()).MagnitudeSquared())*this->mass*SIMULATION_ATOM),smalle,GFXColor(1,1,1,2),NULL);
-    //    this->ApplyDamage (smalllocation.Cast(),smallnormal, .33*g_game.difficulty*(.5*fabs((smalle->GetVelocity()-this->GetVelocity()).MagnitudeSquared())*smalle->mass*SIMULATION_ATOM),this,GFXColor(1,1,1,2),NULL);
-
-#endif
-  //each mesh with each mesh? naw that should be in one way collide
-  }
-}
-
-Vector GameUnit::ResolveForces (const Transformation &trans, const Matrix &transmat) {
+template <class UnitType>
+Vector GameUnit<UnitType>::ResolveForces (const Transformation &trans, const Matrix &transmat) {
 #ifndef PERFRAMESOUND
   AUDAdjustSound (sound->engine,cumulative_transformation.position, cumulative_velocity); 
 #endif
 	return Unit::ResolveForces( trans, transmat);
 }
 
-static signed char  ComputeAutoGuarantee (GameUnit * un) {
-  Cockpit * cp;
-  int cpnum=-1;
-  if ((cp =_Universe->isPlayerStarship (un))) {
-    cpnum = cp-_Universe->AccessCockpit(0);
-  }else {
-    return Mission::AUTO_ON;
-  }
-  unsigned int i;
-  for (i=0;i<active_missions.size();i++) {
-    if(active_missions[i]->player_num==cpnum&&active_missions[i]->player_autopilot!=Mission::AUTO_NORMAL) {
-      return active_missions[i]->player_autopilot;
-    }
-  }
-  for (i=0;i<active_missions.size();i++) {
-    if(active_missions[i]->global_autopilot!=Mission::AUTO_NORMAL) {
-      return active_missions[i]->global_autopilot;
-    }
-  }
-  return Mission::AUTO_NORMAL;
-}
+extern signed char  ComputeAutoGuarantee ( Unit * un);
+extern float getAutoRSize (Unit * orig,Unit * un, bool ignore_friend=false);
 
-static float getAutoRSize (Unit * orig,Unit * un, bool ignore_friend=false) {
-  static float friendly_autodist =  XMLSupport::parse_float (vs_config->getVariable ("physics","friendly_auto_radius","100"));
-  static float neutral_autodist =  XMLSupport::parse_float (vs_config->getVariable ("physics","neutral_auto_radius","1000"));
-  static float hostile_autodist =  XMLSupport::parse_float (vs_config->getVariable ("physics","hostile_auto_radius","8000"));
-  static int upgradefaction = FactionUtil::GetFaction("upgrades");
-  static int neutral = FactionUtil::GetFaction("neutral");
-
-  if (un->isUnit()==PLANETPTR||(un->getFlightgroup()==orig->getFlightgroup()&&orig->getFlightgroup())) {
-    //same flihgtgroup
-    return orig->rSize();
-  }
-  if (un->faction==upgradefaction) {
-    return ignore_friend?-FLT_MAX:(-orig->rSize()-un->rSize());
-  }
-  float rel=un->getRelation(orig);
-  if (orig == un->Target())
-	rel-=1.5;
-  if (rel>.1||un->faction==neutral) {
-	  return ignore_friend?-FLT_MAX:friendly_autodist;//min distance apart
-  }else if (rel<-.1) {
-    return hostile_autodist;
-  }else {
-	  return ignore_friend?-FLT_MAX:neutral_autodist;
-  }
-}
-
-bool GameUnit::AutoPilotTo (Unit * target, bool ignore_friendlies) {
+template <class UnitType>
+bool GameUnit<UnitType>::AutoPilotTo (Unit * target, bool ignore_friendlies) {
   signed char Guaranteed = ComputeAutoGuarantee (this);
   if (Guaranteed==Mission::AUTO_OFF) {
     return false;

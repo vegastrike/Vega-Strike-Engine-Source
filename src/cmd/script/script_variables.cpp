@@ -370,7 +370,7 @@ void Mission::doDefVar(missionNode *node,int mode,bool global_var){
 
     (*vmap)[node->script.name]=vi;
 
-    int varId=vmap->varVec.addVar(vi);
+    //int varId=vmap->varVec.addVar(vi);
 
     printRuntime();
 

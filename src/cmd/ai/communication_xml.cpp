@@ -44,15 +44,13 @@ namespace CommXML {
 
 }
 
-
-using namespace CommXML;
-
 static vector <std::string> contrabandlists;
 void FSM::beginElement(void *userData, const XML_Char *names, const XML_Char **atts) {
 	((FSM*)userData)->beginElement(names, AttributeList(atts));
 }
 
 void FSM::beginElement(const string &name, const AttributeList attributes) {
+using namespace CommXML;
 	AttributeList::const_iterator iter;
 	Names elem = (Names)element_map.lookup(name);
 	string nam;
@@ -111,6 +109,7 @@ void FSM::beginElement(const string &name, const AttributeList attributes) {
 	}
 }
 void FSM::endElement(void *userData, const XML_Char *name) {
+using namespace CommXML;
 //	((Universe::Faction*)userData)->endElement(name);
 
 //	void Universe::Faction::endElement(const string &name) {
@@ -127,7 +126,8 @@ void FSM::endElement(void *userData, const XML_Char *name) {
 }
 
 void FSM::LoadXML(const char * filename) {
-  unitlevel=0;
+ using namespace CommXML;
+ unitlevel=0;
   const int chunk_size = 16384;
   cout << "CommXML:LoadXML " << filename << endl;
   FILE * inFile = fopen (filename, "r");

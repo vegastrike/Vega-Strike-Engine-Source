@@ -2,7 +2,7 @@
 #include "cmd/click_list.h"
 #include "gfx/sprite.h"
 //#include "vegastrike.h"
-#include "cmd/unit.h"
+#include "cmd/unit_generic.h"
 #include "order.h"
 #include "gfx/coord_select.h"
 #include "vs_globals.h"

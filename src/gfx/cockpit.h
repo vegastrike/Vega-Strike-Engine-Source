@@ -11,7 +11,6 @@ class Gauge;
 class Unit;
 #include "vdu.h"
 #include "camera.h"
-#define MAXVDUS 10
 #define NUM_CAM		12
 /**
  * The Cockpit Contains all displayable information about a particular Unit *

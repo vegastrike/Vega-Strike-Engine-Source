@@ -3,9 +3,9 @@
 #include "flybywire.h"
 #include "navigation.h"
 #include "in_joystick.h"
-#include "cmd/unit.h"
+#include "cmd/unit_generic.h"
 #include "communication.h"
-#include "gfx/cockpit.h"
+#include "gfx/cockpit_generic.h"
 #include "gfx/animation.h"
 #include "audiolib.h"
 #include "config_xml.h"
@@ -514,7 +514,7 @@ void FireKeyboard::ChooseTargets (bool turret) {
   bool find=false;
   while ((un = iter.current())) {
     //how to choose a target?? "if looks particularly juicy... :-) tmp.prepend (un);
-    Vector t;
+    //Vector t;
 
     if (un==parent->Target()) {
       iter.advance();
@@ -552,7 +552,7 @@ void FireKeyboard::ChooseTargets (bool turret) {
     iter = _Universe->activeStarSystem()->getUnitList().createIterator();
     while ((un = iter.current())) {
       //how to choose a target?? "if looks particularly juicy... :-) tmp.prepend (un);
-      Vector t;
+      //Vector t;
       if (un==parent->Target()){
 	iter.advance();
 	continue;
@@ -609,7 +609,7 @@ static Unit * getAtmospheric (Unit * targ) {
 	 ++i) {
       if (un->isUnit()==PLANETPTR) {
 	if ((targ->Position()-un->Position()).Magnitude()<targ->rSize()*.5) {
-	  if (!(((Planet *)un)->isAtmospheric())) {
+	  if (!(((GamePlanet *)un)->isAtmospheric())) {
 	    return un;
 	  }
 	}
@@ -623,7 +623,7 @@ static void DoDockingOps (Unit * parent, Unit * targ,unsigned char playa, unsign
   static bool nodockwithclear = XMLSupport::parse_bool (vs_config->getVariable ("physics","dock_with_clear_planets","true"));
     if (vectorOfKeyboardInput[playa].doc) {
       if (targ->isUnit()==PLANETPTR) {
-      if (((Planet * )targ)->isAtmospheric()&&nodockwithclear) {
+      if (((GamePlanet * )targ)->isAtmospheric()&&nodockwithclear) {
 	targ = getAtmospheric (targ);
 	if (!targ) {
 	  mission->msgcenter->add("game","all","[Computer] Cannot dock with insubstantial object, target another object and retry.");
@@ -653,7 +653,7 @@ static void DoDockingOps (Unit * parent, Unit * targ,unsigned char playa, unsign
     if (vectorOfKeyboardInput[playa].req) {
       if (targ->isUnit()==PLANETPTR) {
 
-	if (((Planet * )targ)->isAtmospheric()&&nodockwithclear) {
+	if (((GamePlanet * )targ)->isAtmospheric()&&nodockwithclear) {
 	  targ = getAtmospheric (targ);
 	  if (!targ) {
 	    mission->msgcenter->add("game","all","[Computer] Cannot dock with insubstantial object, target another object and retry.");

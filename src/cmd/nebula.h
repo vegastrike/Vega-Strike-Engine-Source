@@ -1,31 +1,12 @@
 #ifndef _NEBULA_H_
 #define _NEBULA_H_
+#include "nebula_generic.h"
 #include "unit.h"
 
-class Nebula: public GameUnit {
-private:
-	static void Nebula::beginElement (void * Userdata,const XML_Char * name, const XML_Char ** atts);
-	Vector color;
-	float Density;
-	float fognear;
-	float fogfar;
-	int index;
-	float explosiontime;
-	enum FOGMODE fogmode; // 0=OFF (I won't use this), 1=EXP, 2=EXP2, 3=LINEAR
-	bool fogme;
-	void LoadXML(const char * filename);
-	void beginElem(const std::string&,const AttributeList&);
-	float lastfadein;
-	float fadeinvalue;
-public:
-	float getFade() {return fadeinvalue;}
-	void PutInsideCam(int);
-	virtual enum clsptr isUnit() {return NEBULAPTR;}
-	virtual void reactToCollision(Unit * smaller, const QVector & biglocation, const Vector & bignormal, const QVector & smalllocation, const Vector & smallnormal, float dist);
-  
+class GameNebula: public GameUnit<Nebula> {
 protected:
     /// constructor only to be called by UnitFactory
-    Nebula( const char * unitfile,
+    GameNebula( const char * unitfile,
             bool SubU,
 	    int faction,
 	    Flightgroup* fg=NULL,
@@ -36,14 +17,15 @@ protected:
 public:
 	virtual void UpdatePhysics (const Transformation &trans, const Matrix transmat, const Vector & CumulativeVelocity, bool ResolveLast, UnitCollection *uc=NULL);
 	void SetFogState();
+	void PutInsideCam(int);
 
 private:
     /// default constructor forbidden
-    Nebula( );
+    GameNebula( );
     /// copy constructor forbidden
-    Nebula( const Nebula& );
+    GameNebula( const Nebula& );
     /// assignment operator forbidden
-    Nebula& operator=( const Nebula& );
+    GameNebula& operator=( const Nebula& );
 };
 
 #endif

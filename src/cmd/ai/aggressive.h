@@ -1,3 +1,6 @@
+#ifndef __AGGRESSIVE_AI_H
+#define __AGGRESSIVE_AI_H
+
 #include "fire.h"
 class Flightgroup;
 namespace Orders {
@@ -22,3 +25,5 @@ public:
   virtual string getOrderDescription() { return "aggressive"; };
 };
 }
+
+#endif

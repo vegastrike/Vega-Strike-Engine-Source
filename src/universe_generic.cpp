@@ -83,7 +83,7 @@ Universe::Universe()
 
 Universe::~Universe()
 {
-  unsigned int i;
+  //unsigned int i;
   /*
   for (i=0;i<factions.size();i++) {
     delete factions[i];

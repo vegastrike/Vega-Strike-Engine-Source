@@ -389,9 +389,9 @@ void	quadsquare::AddHeightMapAux(const quadcornerdata& cd, const HeightMapInfo& 
 {
 	// If block is outside rectangle, then don't bother.
 	int	BlockSize = 2 << cd.Level;
-	if (cd.xorg > hm.XOrigin + ((hm.XSize + 2) << hm.Scale) ||
+	if (cd.xorg > hm.XOrigin + ((int)(hm.XSize + 2) << hm.Scale) ||
 	    cd.xorg + BlockSize < hm.XOrigin - (1 << hm.Scale) ||
-	    cd.zorg > hm.ZOrigin + ((hm.ZSize + 2) << hm.Scale) ||
+	    cd.zorg > hm.ZOrigin + ((int)(hm.ZSize + 2) << hm.Scale) ||
 	    cd.zorg + BlockSize < hm.ZOrigin - (1 << hm.Scale))
 	{
 		// This square does not touch the given height array area; no need to modify this square or descendants.
@@ -502,7 +502,7 @@ float	HeightMapInfo::Sample(int x, int z, float &texture) const
 		ix=0;
 		ixpp=0;
 	}
-	if (ix >= XSize-1) {
+	if (ix >= (int)(XSize-1)) {
 		ix=XSize-1;
 		ixpp=XSize-1;
 	}
@@ -510,7 +510,7 @@ float	HeightMapInfo::Sample(int x, int z, float &texture) const
 		iz=0;
 		izpp=0;
 	}
-	if (iz >= ZSize-1) {
+	if (iz >= (int)(ZSize-1)) {
 		iz=ZSize-1;
 		izpp=ZSize-1;
 	}

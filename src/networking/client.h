@@ -23,7 +23,6 @@
 
 #include <string.h>
 #include "gfx/quaternion.h"
-//#include "cmd/unit.h"
 #include "const.h"
 #include "netclass.h"
 #include "cubicsplines.h"

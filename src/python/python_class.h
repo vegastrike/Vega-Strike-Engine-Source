@@ -140,7 +140,7 @@ template <class SuperClass> class PythonClass:public SuperClass {
 	return LastPythonClass();
   }
   virtual ~PythonClass(){
-    fprintf (stderr,"Destruct called. If called from C++ this is death %ld (0x%x)",(unsigned long)this,(unsigned int)this);
+    fprintf (stderr,"Destruct called. If called from C++ this is death %ld (0x%lx)",(unsigned long)this,(unsigned long)this);
   }
 };
 template <class SuperClass> class PythonAI: public PythonClass <SuperClass> {

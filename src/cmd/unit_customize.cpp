@@ -1,4 +1,4 @@
-#include "unit.h"
+//#include "unit.h"
 #include "unit_factory.h"
 #include "images.h"
 #include "universe.h"
@@ -17,21 +17,17 @@
 #endif
 extern int GetModeFromName (const char *);
 
-void GameUnit::GameMount::ReplaceMounts (const Unit::Mount *other) {
-  Mount::ReplaceMounts( other);
-  sound = AUDCreateSound (sound,type->type!=weapon_info::PROJECTILE);//copy constructor basically
-}
+extern Unit * CreateGameTurret (std::string tur,int faction);
 
-Unit * CreateGameTurret (std::string tur,int faction) {
-  return UnitFactory::createUnit (tur.c_str(),true,faction);
-}
-bool GameUnit::UpgradeSubUnits (const Unit * up, int subunitoffset, bool touchme, bool downgrade, int &numave, double &percentage)  {
+template <class UnitType>
+bool GameUnit<UnitType>::UpgradeSubUnits (const Unit * up, int subunitoffset, bool touchme, bool downgrade, int &numave, double &percentage)  {
   bool bl = UpgradeSubUnitsWithFactory( up, subunitoffset, touchme, downgrade, numave, percentage,&CreateGameTurret);
   DisableTurretAI();
   return bl;
 }
 extern char * GetUnitDir (const char *);
-double GameUnit::Upgrade (const std::string &file, int mountoffset, int subunitoffset, bool force, bool loop_through_mounts) {
+template <class UnitType>
+double GameUnit<UnitType>::Upgrade (const std::string &file, int mountoffset, int subunitoffset, bool force, bool loop_through_mounts) {
 #if 0
   if (shield.number==2) {
     printf ("shields before %s %f %f",file.c_str(),shield.fb[2],shield.fb[3]);
