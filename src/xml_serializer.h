@@ -43,6 +43,10 @@ XMLHandler charStarHandler;
 XMLHandler ucharStarHandler;
 XMLHandler negationCharStarHandler;
 XMLHandler floatStarHandler;
+XMLHandler fabsFloatStarHandler;
+XMLHandler absShortStarHandler;
+XMLHandler absIntStarHandler;
+
 XMLHandler scaledFloatStarHandler;
 XMLHandler angleStarHandler;
 XMLHandler negationFloatStarHandler;

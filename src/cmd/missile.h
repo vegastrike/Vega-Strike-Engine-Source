@@ -12,7 +12,7 @@ class Missile:public Unit {
       smaller->ApplyDamage (biglocation,bignormal,damage,smaller,GFXColor(1,1,1,1),owner,phasedamage>0?phasedamage:0);
     }
     if (damage<0||phasedamage<0) {
-      smaller->leach (-damage,-phasedamage,1);
+      smaller->leach (1,-phasedamage,-damage);
     }
     Unit::reactToCollision (smaller,biglocation,bignormal,smalllocation,smallnormal,dist);
     if (!killed)
@@ -22,7 +22,7 @@ class Missile:public Unit {
   virtual void UpdatePhysics (const Transformation &trans, const Matrix transmat, const Vector & CumulativeVelocity, bool ResolveLast, UnitCollection *uc=NULL){
     Unit * targ;
     if ((targ=Target())) {
-      if (rand()/((float)RAND_MAX)<targ->GetImageInformation().ecm*SIMULATION_ATOM){
+      if (rand()/((float)RAND_MAX)<((float)targ->GetImageInformation().ecm)*SIMULATION_ATOM/32768){
 	Target (this);//go wild
       }
     }

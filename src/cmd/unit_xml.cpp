@@ -1252,7 +1252,9 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
 	image->repair_droid = parse_float ((*iter).value);
 	break;
       case ECM:
-	image->ecm = parse_float ((*iter).value);
+
+	image->ecm = (short int)(32767*parse_float ((*iter).value));
+	image->ecm = image->ecm>0?-image->ecm:image->ecm;
 	break;
       default:
 	break;
@@ -1435,7 +1437,7 @@ void Unit::LoadXML(const char *filename, const char * modifications)
     image->unitwriter->AddTag("Defense");
     image->unitwriter->AddElement("HudImage",stringStarHandler,XMLType (myhudim));
     image->unitwriter->AddElement("RepairDroid",ucharStarHandler,XMLType(&image->repair_droid));
-    image->unitwriter->AddElement("ECM",ucharStarHandler,XMLType(&image->ecm));
+    image->unitwriter->AddElement("ECM",shortToFloatHandler,XMLType(&image->ecm));
     {
       image->unitwriter->AddTag ("Cloak");
       image->unitwriter->AddElement("missing",cloakHandler,XMLType(&cloaking));

@@ -9,6 +9,7 @@
 #include "gfx/animation.h"
 #include "audiolib.h"
 #include "config_xml.h"
+#include "cmd/images.h"
 FireKeyboard::FireKeyboard (unsigned int whichplayer, unsigned int whichjoystick): Order (WEAPON){
   this->whichjoystick = whichjoystick;
   this->whichplayer=whichplayer;
@@ -34,6 +35,7 @@ struct FIREKEYBOARDTYPE {
  KBSTATE weapk;
  KBSTATE misk;
  KBSTATE cloakkey;
+ KBSTATE ECMkey;
  KBSTATE neartargetkey;
  KBSTATE threattargetkey;
  KBSTATE picktargetkey;
@@ -142,6 +144,15 @@ void FireKeyboard::CloakKey(int, KBSTATE k) {
 
     if (k==PRESS) {
       g().cloakkey = k;      
+    }
+}
+void FireKeyboard::ECMKey(int, KBSTATE k) {
+
+    if (k==PRESS) {
+      g().ECMkey = k;      
+    }
+    if (k==RELEASE) {
+      g().ECMkey = k;
     }
 }
 void FireKeyboard::FireKey(int key, KBSTATE k) {
@@ -462,6 +473,10 @@ void FireKeyboard::Execute () {
     f().cloakkey=DOWN;
     parent->Cloak(toggle);
     toggle=!toggle;
+  }
+  if (f().ECMkey==PRESS) {
+    parent->GetImageInformation().ecm=-parent->GetImageInformation().ecm;
+    
   }
   if (f().targetkey==PRESS||j().jtargetkey==PRESS) {
     f().targetkey=DOWN;

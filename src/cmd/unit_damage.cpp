@@ -253,11 +253,22 @@ float Unit::RShieldData() const{
 
 void Unit::RegenShields () {
   int rechargesh=1;
-  energy +=apply_float_to_short (recharge*SIMULATION_ATOM);
+  energy +=apply_float_to_short (recharge *SIMULATION_ATOM);
+
   float rec = shield.recharge*SIMULATION_ATOM>energy?energy:shield.recharge*SIMULATION_ATOM;
-  static float nebshields=XMLSupport::parse_float(vs_config->getVariable ("physics","nebula_shield_recharge",".5"));
-  if (GetNebula()!=NULL)
+  if ((image->ecm>0)) {
+    static float ecmadj = XMLSupport::parse_float(vs_config->getVariable ("physics","ecm_energy_cost",".05"));
+    float sim_atom_ecm = ecmadj * image->ecm*SIMULATION_ATOM;
+    if (energy-10>sim_atom_ecm) {
+      energy-=sim_atom_ecm;
+    }else {
+      energy=energy<10?energy:10;
+    }
+  }
+  if (GetNebula()!=NULL) {
+    static float nebshields=XMLSupport::parse_float(vs_config->getVariable ("physics","nebula_shield_recharge",".5"));
     rec *=nebshields;
+  }
   switch (shield.number) {
   case 2:
     shield.fb[0]+=rec;

@@ -138,7 +138,7 @@ static std::string MangleString (const char * in, float probability) {
   free (tmp);
   return retval;
 }
-static void DrawShield (float fs, float rs, float ls, float bs, float x, float y, float h, float w) { //FIXME why is this static?
+static void DrawShield (float fs, float rs, float ls, float bs, float x, float y, float w, float h) { //FIXME why is this static?
   GFXBegin (GFXLINE);
   if (fs>.2) {
     GFXVertex3f (x-w/8,y+h/2,0);
@@ -254,10 +254,10 @@ void VDU::DrawVDUShield (Unit * parent, const GFXColor &c) {
   unsigned short armor[4];
   GFXColor4f (.4,.4,1,1);
   GFXDisable (TEXTURE0);
-  DrawShield (fs,rs,ls,bs,x,y,h,w);
+  DrawShield (fs,rs,ls,bs,x,y,w,h);
   parent->ArmorData (armor);
   GFXColor4f (1,.6,0,1);
-  DrawShield (armor[0]/(float)StartArmor[0],armor[2]/(float)StartArmor[2],armor[3]/(float)StartArmor[3],armor[1]/(float)StartArmor[1],x,y,h/2,w/2);
+  DrawShield (armor[0]/(float)StartArmor[0],armor[2]/(float)StartArmor[2],armor[3]/(float)StartArmor[3],armor[1]/(float)StartArmor[1],x,y,w/2,h/2);
   GFXColor4f (1,1,1,1);
   GFXEnable (TEXTURE0);
   GFXColor4f (1-parent->GetHull()/(*maxhull),.5*parent->GetHull()/(*maxhull),0,1);
@@ -288,7 +288,7 @@ void VDU::DrawTarget(Unit * parent, Unit * target, const GFXColor &c) {
   DrawTargetSpr ((target->isUnit()!=PLANETPTR?target->getHudImage ():
 		  (target->GetDestinations().size()!=0? getJumpImage():
 		   (((Planet *)target)->hasLights()?getSunImage():
-		    getPlanetImage()))),.6,x,y,h,w);
+		    getPlanetImage()))),.6,x,y,w,h);
   GFXDisable (TEXTURE0);    
   //sprintf (t,"\n%4.1f %4.1f",target->FShieldData()*100,target->RShieldData()*100);
 
@@ -526,6 +526,10 @@ void VDU::DrawDamage(Unit * parent, const GFXColor &c) {
   float x,y,w,h;
   float th;
   char st[1024];
+  GFXColor4f (1,parent->GetHull()/ (*maxhull),parent->GetHull()/(*maxhull),1);
+  GFXEnable (TEXTURE0);
+  DrawTargetSpr (parent->getHudImage (),.6,x,y,w,h);
+  GFXDisable(TEXTURE0);
   Unit * thr = parent->Threat();
   GFXColorf (c);
   if (parent->getFgID()==parent->name.c_str()) {
@@ -535,23 +539,43 @@ void VDU::DrawDamage(Unit * parent, const GFXColor &c) {
   }
   tp->Draw (MangleString (st,_Universe->AccessCamera()->GetNebula()!=NULL?.5:0),0);  
   int k=strlen(st);
+  if (k>cols)
+    k=cols;
+  
+  for (int i=0;i<rows-3&&i+k<128;i++) {
+    st[i+k]='\n';
+    st[i+k+1]='\0';
+  }
+  char ecmstatus[256];
+  ecmstatus[0]='\0';
+  if (parent->GetImageInformation().ecm>0) {
+    GFXColor4f(0,1,0,.5);
+    strcpy (ecmstatus,"ECM Active");
+    
+  }
+  if (((parent->GetImageInformation().ecm<0))) {
+    GFXColor4f(.6,.6,.6,.5);
+    strcpy (ecmstatus,"ECM Inactive");
+  }
+  if (parent->GetImageInformation().ecm>0) {
+    static float s=0;
+    s+=.125*SIMULATION_ATOM;
+    if (s>1)
+      s=0;
+    DrawShield (0, s, s, 0, x, y, w,h);
+  }
+  char qr[256];
   if (thr) {
-
-    if (k>cols)
-      k=cols;
-
-    for (int i=0;i<rows-2&&i+k<128;i++) {
-      st[i+k]='\n';
-      st[i+k+1]='\0';
-    }
-    char qr[256];
-    sprintf (qr, "%6s\nThreat:%4.4f",thr->name.c_str(),thr->cosAngleTo (parent,th,100000000,10000000));
+    GFXColor4f (1,0,0,1);
+    sprintf (qr, "\n%s\n%6s\nThreat:%4.4lf",ecmstatus,thr->name.c_str(),thr->cosAngleTo (parent,th,100000000,10000000));
     strncat (st,qr,128);
+  }else {
+    if (parent->GetImageInformation().ecm!=0) {
+      sprintf (qr, "\n%s\n",ecmstatus);
+      strncat (st,qr,128);
+    }
   }
   tp->Draw (MangleString (st+k,_Universe->AccessCamera()->GetNebula()!=NULL?.5:0),0);  
-  GFXColor4f (1,parent->GetHull()/ (*maxhull),parent->GetHull()/(*maxhull),1);
-  GFXEnable (TEXTURE0);
-  DrawTargetSpr (parent->getHudImage (),.6,x,y,w,h);
   GFXColor4f (1,1,1,1);
   
 }

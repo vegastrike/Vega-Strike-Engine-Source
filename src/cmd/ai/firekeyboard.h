@@ -48,6 +48,7 @@ class FireKeyboard: public Order {
   static void WeapSelKey (int,KBSTATE);
   static void MisSelKey (int, KBSTATE);
   static void CloakKey (int, KBSTATE);
+  static void ECMKey (int,KBSTATE);
 protected:
   float distance;
 

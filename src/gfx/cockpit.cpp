@@ -713,13 +713,14 @@ static void DrawCrosshairs (float x, float y, float wid, float hei, const GFXCol
 		GFXVertex3f(x-.001,y-.001,0);
 	GFXEnd();
 	GFXEnable(TEXTURE0);
-	GFXEnable(LIGHTING);
 }
 
 void Cockpit::Draw() { 
   cockpit_time+=GetElapsedTime();
   GFXDisable (TEXTURE1);
   GFXLoadIdentity(MODEL);
+  GFXDisable(LIGHTING);
+  GFXColor4f(1,1,1,1);
   DrawTargetBox();
   if(draw_all_boxes){
     DrawTargetBoxes();
