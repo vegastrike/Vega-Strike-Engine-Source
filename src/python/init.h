@@ -8,7 +8,9 @@ public:
 	static void init();
 	static void initpaths();
 	static void test();
+	static void reseterrors();
 };
 #endif
 
 #endif
+

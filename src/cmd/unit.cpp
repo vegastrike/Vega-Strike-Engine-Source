@@ -60,7 +60,7 @@
 
 //#define DESTRUCTDEBUG
 #include "beam.h"
-
+#include "python/init.h"
 
 double interpolation_blend_factor;
 
@@ -982,14 +982,17 @@ void Unit::Draw(const Transformation &parent, const Matrix &parentMatrix)
 using Orders::FireAt;
 PYTHON_INIT_GLOBALS(AI,FireAt);
 PYTHON_BEGIN_MODULE(AI)
-PYTHON_INIT_CLASS(AI,FireAt,"PythonAI")
+PYTHON_BEGIN_CLASS(AI,FireAt,"PythonAI")
+PYTHON_END_CLASS(AI,FireAt)
 PYTHON_END_MODULE(AI)
  
 void Unit::LoadAIScript(const std::string & s) {
   static bool init=false;
   if (!init) {
     init=true;
+    Python::reseterrors();
     PYTHON_INIT_MODULE(AI);
+    Python::reseterrors();
   }
   //  static bool initsuccess= initPythonAI();
   if (s.find (".py")!=string::npos) {

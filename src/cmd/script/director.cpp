@@ -67,7 +67,8 @@ extern bool have_yy_error;
 /* *********************************************************** */
 PYTHON_INIT_GLOBALS(Director,missionThread);
 PYTHON_BEGIN_MODULE(Director)
-PYTHON_INIT_CLASS(Director,missionThread,"Mission")
+PYTHON_BEGIN_CLASS(Director,missionThread,"Mission")
+PYTHON_END_CLASS(Director,missionThread)
 PYTHON_END_MODULE(Director)
 
 void Mission::DirectorStart(missionNode *node){

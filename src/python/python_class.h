@@ -23,26 +23,43 @@ int main (int argc,char *argv[]) {
 }
 
 */
-
 #ifdef _WIN32
-//These two functions purposely have opening/closing braces that don't match up
+//		return from_python(p,boost::python::type<SuperClass &>());
+//	namespace boost{namespace python{
+//	}}
 #define ADD_FROM_PYTHON_FUNCTION(SuperClass) \
-	SuperClass & from_python(PyObject *p,boost::python::type<SuperClass &>) { \
-		return from_python(p,boost::python::type<SuperClass &>()); \
+	SuperClass & from_python(PyObject *obj,boost::python::type<SuperClass &>) { \
+        boost::python::detail::extension_instance* self = boost::python::detail::get_extension_instance(obj); \
+        typedef std::vector<boost::python::detail::instance_holder_base*>::const_iterator iterator; \
+        for (iterator p = self->wrapped_objects().begin(); \
+             p != self->wrapped_objects().end(); ++p) \
+        { \
+            boost::python::detail::instance_holder<SuperClass>* held = dynamic_cast<boost::python::detail::instance_holder<SuperClass>*>(*p); \
+            if (held != 0) \
+                return *held->target(); \
+            void* target = boost::python::detail::class_registry<SuperClass>::class_object()->try_class_conversions(*p); \
+            if(target)  \
+				return *boost::python::detail::check_non_null(static_cast<SuperClass*>(target)); \
+        } \
+        boost::python::detail::report_missing_instance_data(self, boost::python::detail::class_registry<SuperClass>::class_object(), typeid(SuperClass)); \
+        boost::python::throw_argument_error(); \
+        return *((SuperClass*)0); \
 	}
+//non_null_from_python
 #define PYTHON_INIT_GLOBALS(name,SuperClass) PythonClass <SuperClass> *PythonClass< SuperClass >::last_instance = NULL; \
 	ADD_FROM_PYTHON_FUNCTION(SuperClass)
 #else
 #define PYTHON_INIT_GLOBALS(name,SuperClass) PythonClass <SuperClass> *PythonClass< SuperClass >::last_instance = NULL; 
 #endif
+//These two functions purposely have opening/closing braces that don't match up
 #define PYTHON_BEGIN_MODULE(name) BOOST_PYTHON_MODULE_INIT(name) {boost::python::module_builder name(#name);
 #define PYTHON_END_MODULE(name) }
 #define PYTHON_INIT_MODULE(name) init##name()
-#define PYTHON_INIT_CLASS(name,SuperClass,myclass) { \
-    boost::python::class_builder <SuperClass,PythonClass< SuperClass > > BaseClass (name,myclass); \
-    BaseClass.def (boost::python::constructor<>()); \
-    BaseClass.def (&SuperClass::Execute,"Execute",PythonClass< SuperClass >::default_Execute); \
-}
+#define PYTHON_BEGIN_CLASS(name,SuperClass,myclass) { \
+    boost::python::class_builder <SuperClass,PythonClass< SuperClass > > Class (name,myclass); \
+    Class.def (boost::python::constructor<>()); \
+    Class.def (&SuperClass::Execute,"Execute",PythonClass< SuperClass >::default_Execute);
+#define PYTHON_END_CLASS(name,SuperClass) }
 //    BaseClass.def (&PythonClass<SuperClass>::IncRef,"IncRef"); \
 //    boost::python::class_builder <SuperClass> TempClass (name,"SuperClass"); 
 

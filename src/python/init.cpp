@@ -2,6 +2,8 @@
 #ifdef HAVE_PYTHON
 #include <stdio.h>
 #include <Python.h>
+#include <pyerrors.h>
+#include <pythonrun.h>
 #include <compile.h>
 #include <eval.h>
 #include <boost/python/class_builder.hpp>
@@ -190,7 +192,16 @@ void Python::initpaths(){
   std::string changepath ("import sys\nsys.path=sys.path + ['"+std::string(pwd)+DELIMSTR+"modules']\n");
   char * temppython = strdup(changepath.c_str());
   PyRun_SimpleString(temppython);	
+  Python::reseterrors();
   free (temppython);
+}
+
+void Python::reseterrors() {
+  if (PyErr_Occurred()) {
+    PyErr_Print();
+	fflush(stderr);
+    PyErr_Clear();
+  }
 }
 
 void Python::init() {
@@ -253,7 +264,7 @@ PyObject* Py_CompileString(char *str, char *filename, int start)
 		fclose(fp1);
 	}
 #endif
-	CompileRunPython ("simple_test.py");
+	//CompileRunPython ("simple_test.py");
     //		PyObject * arglist = CreateTuple (vector <PythonBasicType> ());
     //		PyObject * res = PyEval_CallObject(po, arglist);
     //		Py_DECREF(arglist);

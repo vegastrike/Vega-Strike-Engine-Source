@@ -4,6 +4,7 @@
 #include "config_xml.h"
 #include "vs_globals.h"
 #include "vs_path.h"
+#include "init.h"
 Hashtable <string,PyCodeObject ,char[1023]> compiled_python;
 
 
@@ -28,18 +29,22 @@ std::string getCompilingName (const std::string &name) {
    std::string compiling_name = homedir+DELIMSTR+name+"~";
    return compiling_name;
 }
+
 void InterpretPython (const std::string &name) {
   
     char * temp = strdup(getCompilingName (name).c_str());
     FILE * fp =fopen (name.c_str(),"r");
     if (fp) {
       PyRun_SimpleFile(fp,temp);
+      Python::reseterrors();
       fclose (fp);
     }
     free (temp);
 }
 PyCodeObject *CompilePython (const std::string &name) {
+  Python::reseterrors();
   PyCodeObject * retval = compiled_python.Get (name);
+  Python::reseterrors();
   if (retval) {
     return retval;
   }
@@ -61,8 +66,11 @@ PyCodeObject *CompilePython (const std::string &name) {
 
 void CompileRunPython (const std::string &filename) {
   static bool ndebug_libs = XMLSupport::parse_bool(vs_config->getVariable ("AI","compile_python","true"));
-  if (ndebug_libs) {
+//  if (ndebug_libs) {
+  if (0) {
+    Python::reseterrors();
     PyCodeObject *CompiledProgram = CompilePython (filename);
+    Python::reseterrors();
     if (CompiledProgram) {
       PyObject *m, *d;
       if ((m = PyImport_AddModule("__main__")) != NULL)
@@ -78,7 +86,9 @@ void CompileRunPython (const std::string &filename) {
 	}    
     } 
   }else {
+    Python::reseterrors();
     InterpretPython (filename);
+    Python::reseterrors();
   }
 
 
