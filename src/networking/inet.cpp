@@ -3,9 +3,6 @@
 #include <winsock.h>
 #else
 #define SOCKET_ERROR -1
-#if defined(__CYGWIN__)
-#define in_addr_t unsigned long
-#endif
 #include <sys/time.h>
 #include <sys/types.h>
 #if !defined(__APPLE__) && !defined(__CYGWIN__)
