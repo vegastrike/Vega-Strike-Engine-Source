@@ -8,22 +8,80 @@ globals {
 
 import a1;
 
-int m1;
+ int m1;
+ //int ms1;
+ float sdm2;
+
+ int m321;
+ /* int ms1;
+    float ms234;
+ */
+ float sdm2;
+
 
 bool blah=true;
 
-  int m1;
-  float m2;
+ float v,blubb,schnupf,blahs,df,a,vf,b,c;
+ 
+ void loop(){
+   if(a){
+     int blah;
+   };
 
-  int first() { 
-    three(a,b,c,d,);
+   if(a){
+     int sdhfj;
+   }
+   else {
+     int sdjk;
+   };
+
+   if(a){
+     int sdhfj;
+   }
+   else if(b) {
+     int sdjk;
+   };
+
+ };
+
+ void loop2(){
+   if(a){
+     int blah;
+   }
+
+   if(a){
+     int sdhfj;
+   }
+   else {
+     int sdjk;
+   }
+
+   if(a){
+     int sdhfj;
+   }
+   else if(b) {
+     int sdjk;
+   };
+
+ };
+
+ void gram(void d){};
+
+  float first(int a,float b) { 
+    _io.three(:s1="flubb"; :s2="blah" ;a,b,c,d);
+    _io.qu();
+    _io.js1(a);
+    _io.js2(a,b);
+    _io.js3(:s1="blah";a,b,c);
+    _io.js4(:s1="blah";:s2="fghdg";a,b,c);
+    _io.js5(:s1="fsjf";);
 
     return a;
-    blubb=four(a,);
+    blubb=four(a);
   };
 
 
-  float second(int a1;float d3;) {
+  float second(int a1,float d3) {
     int hallo;
     float fasel;
 
@@ -38,7 +96,7 @@ bool blah=true;
 		  return;
 		}
 		else{
-		};
+		}
 
 		a46=34.2 + 3.4;
 

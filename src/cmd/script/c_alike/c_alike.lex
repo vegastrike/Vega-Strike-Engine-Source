@@ -64,11 +64,15 @@ endblock	{ return(L_ENDBLOCK);		}
 
 [ \t\n]+	{ /* return(yytext[0]); */			}
 
-[a-z][a-z0-9]*		{  yylval=strdup(yytext); return(L_ID);		}
+[a-zA-Z_][a-zA-Z_0-9]*		{  yylval=strdup(yytext); return(L_ID);		}
 [0-9]+		{ yylval=strdup(yytext); return(L_INTCONST);	}
 [0-9]+\.[0-9]+	{  yylval=strdup(yytext); return(L_FLOATCONST);		}
 
 [\{\}();=]	{ return(yytext[0]); }
+\"[^\"]*\" 		{  yylval=strdup(yytext); return(L_STRINGCONST); };
+"/""*"(.|\n)*"*""/" { /* nothing */ }
+"//".*\n	{ /* nothing */ };
+
 .		{  return(yytext[0]); }
 %%
 

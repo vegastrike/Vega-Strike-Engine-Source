@@ -4,9 +4,9 @@ all:
 
 	gcc -c -o c_alike.o c_alike.tab.cpp
 	gcc -c -o lex.yy.o lex.yy.cpp
+	gcc -c -o convert_calike2xml.o convert_calike2xml.cpp
+	g++ -o convert_calike2xml convert_calike2xml.o c_alike.o lex.yy.o
 	rm *.o
-
-#	g++ -o test c_alike.o lex.yy.o
 
 
 

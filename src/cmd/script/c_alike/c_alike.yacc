@@ -7,6 +7,8 @@
 
 #define YYERROR_VERBOSE
 
+#define q(x)	("\""+x+"\"")
+
 extern int yyerror(char *);
 extern int yywrap();
 extern int yylex();
@@ -21,14 +23,14 @@ string module_string;
 %}
 
 
-%token L_ID L_FLOATCONST L_INTCONST
+%token L_ID L_FLOATCONST L_INTCONST L_STRINGCONST
 %token L_BOOLCONST_TRUE L_BOOLCONST_FALSE
 %token L_MODULE L_SCRIPT L_IMPORT L_RETURN L_GLOBALS
 %token L_IF L_THEN L_ELSE
 %token L_WHILE
 %token L_EQUAL L_NOT_EQUAL L_GREATER_OR_EQUAL L_LESSER_OR_EQUAL
 %token L_BOOL_AND L_BOOL_OR
-%token L_INT L_FLOAT L_BOOL L_OBJECT L_VOID
+%token L_INT L_FLOAT L_BOOL L_OBJECT L_VOID 
 %token L_BEGINSCRIPT L_ENDSCRIPT L_BEGINBLOCK L_ENDBLOCK
 
 %left '-' '+'
@@ -37,15 +39,15 @@ string module_string;
 %%
 
 module:		L_MODULE  L_ID '{' module_body '}'	{
-	string module="<module name="+$2+" >\n"+$4+"\n</module>\n";
-	//	printf("%s\n",module.c_str());
+	string module="<module name=" + q($2) + " >\n"+$4+"\n</module>\n";
 	module_string=module;
 };
 module_body:	/* empty */   { $$=""; }
 		| module_body module_statement ';' {
 	$$=$1+"\n"+$2;
 }		;
-module_statement:	script  { $$=$1; } | defvar {$$=$1}; | import { $$=$1 }; | globals { $$=$1; };
+module_statement:	script  { $$=$1; } | defvar {$$=$1} | import { $$=$1 } | globals { $$=$1; };
+
 globals:	L_GLOBALS '{' globals_body '}' {
 	$$="<globals>\n"+$3+"\n</globals>\n";
 };
@@ -55,47 +57,88 @@ globals_body:	/* empty */   { $$=""; }
 };
 global_statement:	defvar { $$=$1; };
 import:		L_IMPORT L_ID 	{
-	$$="<import name="+$2+"/>";
+	$$="<import name="+q($2)+"/>";
  };
-vartype:	inttype | floattype | booltype | objecttype ;
+vartype:	inttype {$$=$1;} | floattype {$$=$1;}
+		| booltype {$$=$1;} | objecttype {$$=$1}
+		| voidtype { $$=$1;};
 
 inttype:        L_INT  		{ $$="int" };
 floattype:      L_FLOAT 	  { $$="float"};
 booltype:       L_BOOL		{  $$="bool"};
 objecttype:     L_OBJECT 	 { $$="object"};
-voidtype:	L_VOID		{ $$="void";};
+voidtype:	L_VOID		{ $$="void"};
+argvar:		vartype L_ID {
+	$$="<defvar name="+q($2)+" type="+q($1)+"/>\n";
+//	printf("DEVFAR %s\n",$2.c_str());
+}
+
 defvar:		vartype L_ID '=' constant {
-	$$="<defvar name="+$2+" type="+$1+" value="+$4+" />\n";
+	$$="<defvar name="+q($2)+" type="+q($1)+" value="+q($4)+" />\n";
 }
 		| vartype L_ID	{
-	$$="<defvar name="+$2+" type="+$1+"/>\n";
+	$$="<defvar name="+q($2)+" type="+q($1)+"/>\n";
+//	printf("DEVFAR %s\n",$2.c_str());
+}
+		| vartype L_ID ',' nonnull_idlist {
+
+	string allvars="";
+
+	string list=$2+" "+$4+" ";
+	int apos=0;
+	int npos=0;
+	printf("names=%s\n",list.c_str());
+	do{
+		 npos=list.find(" ",apos);
+		string news=list.substr(apos,npos-apos);
+		printf("NEW: %s apos=%d npos=%d\n",news.c_str(),apos,npos);
+		allvars=allvars+"<defvar name="+q(news)+" type="+q($1)+" />\n";
+		apos=npos+1;
+	}while(apos<list.size()-1);
+	
+	$$=allvars;
 };
+nonnull_idlist:		L_ID { $$=$1;}
+	| L_ID ',' nonnull_idlist {
+	$$=$1+" "+$3;
+};
+
 script:		script_header '{' script_body '}'	{
 	$$=$1+"\n"+$3+"\n</script>\n";
 };
 script_header:	vartype L_ID '(' arguments ')'	{
-	$$="<script name="+$2+" return="+$1+" >\n"+"<arguments>\n"+$4+"\n</arguments>\n";
+	$$="<script name="+q($2)+" return="+q($1)+" >\n"+"<arguments>\n"+$4+"\n</arguments>\n";
 };
+var_or_voidtype:	vartype { printf("var_or_voidtype\n"); $$=$1;}
+	| voidtype {$$=$1;};
+
 arguments:	/* empty */	{ $$="\n"; }
-	| arguments  argument ';' {
-	$$=$1+"\n"+$2;
+	| nonnull_arguments  { $$=$1;}
+
+nonnull_arguments:
+	argument { $$=$1;}
+	| nonnull_arguments ',' argument {
+	$$=$1+"\n"+$3;
 };
-argument:	defvar 	{
+
+argument:	argvar 	{
 	$$=$1;
 };
+
 script_body:	/* empty */
 		{ $$=""; }
-		| script_body script_statement ';'  {
-//	$$="\nscript_body\n";
+		| script_body script_statement   {
 	$$=$1+"\n"+$2;
 };
 script_statement:	if_statement { $$=$1; }
 			| block_statement { $$=$1; }
-			| defvar  { $$=$1; }
-			| setvar { $$=$1; }
-			| call_void { $$=$1; }
+			| defvar  ';' { $$=$1; }
+			| setvar ';' { $$=$1; }
+			| call_void ';' { $$=$1; }
 			| while_statement { $$=$1; }
-			| return_statement { $$=$1; };
+			| return_statement ';' { $$=$1; }
+			| ';' { $$=" ";};
+
 return_statement: 	L_RETURN	{
 	$$="<return/>\n";
 }
@@ -106,68 +149,89 @@ return_statement: 	L_RETURN	{
 while_statement: L_WHILE expr block_statement	{
 	$$="<while>\n"+$2+"\n"+$3+"\n</while>\n";
 };
-call_void:	L_ID '.' L_ID '(' call_arglist ')'	{
+call_void:	L_ID '.' L_ID '(' attributes call_arglist ')'	{
 	if($1[0]=='_'){
-		$$="<call module="+$1+" name="+$3+" >\n"+$5+"\n</call>\n";
+		$$="<call module="+q($1)+" name="+q($3)+" "+$5+" >\n"+$6+"\n</call>\n";
 	}
 	else{	
-		$$="<exec module="+$1+" name="+$3+" >\n"+$5+"\n</exec>\n";
+		$$="<exec module="+q($1)+" name="+q($3)+" "+$5+" >\n"+$6+"\n</exec>\n";
 	}
 }
 		| L_ID '(' call_arglist ')'	{
-	$$="<exec name="+$1+" >\n"+$3+"\n</exec>\n";
+	$$="<exec name="+q($1)+" >\n"+$3+"\n</exec>\n";
 };
 call_arglist:	/* empty */	{ $$="\n"; }
-	| call_arglist  expr ',' {
-	$$=$1+"\n"+$2;
+	| nonnull_arglist  { $$=$1;}
+
+nonnull_arglist:	expr {$$=$1;}
+	| nonnull_arglist ',' expr {
+	$$=$1+"\n"+$3;
 };
+
+attributes:	/* empty */	{ $$=" "; }
+	| attributes  attribute ';' {
+	$$=$1+" "+$2;
+};
+attribute:	':' L_ID '=' string_constant 	 {
+	$$=$2+"="+$4+" ";
+};
+
+
 setvar:			L_ID '=' expr   {
-	$$="<setvar name="+$1+" >\n"+$3+"\n</setvar>\n";
+	$$="<setvar name="+q($1)+" >\n"+$3+"\n</setvar>\n";
 }
-if_statement:		L_IF '(' expr ')' block_statement L_ELSE block_statement	{
+if_statement:	L_IF '(' expr ')' block_statement L_ELSE block_statement	{
 	$$="<if>\n"+$3+"\n"+$5+"\n"+$7+"\n</if>\n";
+}
+		| L_IF '(' expr ')' block_statement L_ELSE if_statement	{
+	$$="<if>\n"+$3+"\n"+$5+"\n"+$7+"\n</if>\n";
+}
+		| L_IF '(' expr ')' block_statement	{
+	$$="<if>\n"+$3+"\n"+$5+"\n"+"<block></block>"+"\n</if>\n";
 };
 block_statement:	'{' script_body '}'	{
 	$$="<block>\n"+$2+"\n</block>\n";
 };
 constant:	number { $$=$1; } | boolconst	{ $$=$1; };
+string_constant:	L_STRINGCONST {$$=$1;};
+
 boolconst:	L_BOOLCONST_TRUE  { $$="true"; }
 		| L_BOOLCONST_FALSE { $$="false"; };
 number:			L_FLOATCONST {
-	 $$="<const type=float value="+$1+" />\n";
+	 $$="<const type=\"float\" value="+q($1)+" />\n";
  }
 			| L_INTCONST	{
-	 $$="<const type=int value="+$1+" />\n";
+	 $$="<const type=\"int\" value="+q($1)+" />\n";
 }
 expr:			constant	{ $$=$1; };
 			| L_ID {
-	$$="<var name="+$1+" />\n";
+	$$="<var name="+q($1)+" />\n";
 }
 			| L_ID '.' L_ID {
-	$$="<var module="+$1+" name="+$2+" />\n";
+	$$="<var module="+q($1)+" name="+q($2)+" />\n";
 }
 			| call_void { $$=$1; }
 			| expr L_EQUAL expr
-{ $$="<test test=eq >\n"+$1+"\n"+$3+"\n</test>\n"; }
+{ $$="<test test=\"eq\" >\n"+$1+"\n"+$3+"\n</test>\n"; }
 			| expr L_NOT_EQUAL expr
-{ $$="<test test=ne >\n"+$1+"\n"+$3+"\n</test>\n"; }
+{ $$="<test test=\"ne\" >\n"+$1+"\n"+$3+"\n</test>\n"; }
 			| expr L_LESSER_OR_EQUAL expr
-{ $$="<test test=le >\n"+$1+"\n"+$3+"\n</test>\n"; }
+{ $$="<test test=\"le\" >\n"+$1+"\n"+$3+"\n</test>\n"; }
 			| expr L_GREATER_OR_EQUAL expr
-{ $$="<test test=ge >\n"+$1+"\n"+$3+"\n</test>\n"; }
+{ $$="<test test=\"ge\" >\n"+$1+"\n"+$3+"\n</test>\n"; }
 			| expr '<' expr
-{ $$="<test test=lt >\n"+$1+"\n"+$3+"\n</test>\n"; }
+{ $$="<test test=\"lt\" >\n"+$1+"\n"+$3+"\n</test>\n"; }
 			| expr '>' expr
-{ $$="<test test=gt >\n"+$1+"\n"+$3+"\n</test>\n"; }
+{ $$="<test test=\"gt\" >\n"+$1+"\n"+$3+"\n</test>\n"; }
 
 			| expr '*' expr
-{ $$="<fmath math=* >\n"+$1+"\n"+$3+"\n</fmath>\n"; }
+{ $$="<fmath math=\"*\" >\n"+$1+"\n"+$3+"\n</fmath>\n"; }
 			| expr '/' expr
-{ $$="<fmath math=/ >\n"+$1+"\n"+$3+"\n</fmath>\n"; }
+{ $$="<fmath math=\"/\" >\n"+$1+"\n"+$3+"\n</fmath>\n"; }
 			| expr '-' expr
-{ $$="<fmath math=- >\n"+$1+"\n"+$3+"\n</fmath>\n"; }
+{ $$="<fmath math=\"-\" >\n"+$1+"\n"+$3+"\n</fmath>\n"; }
 			| expr '+' expr
-{ $$="<fmath math=+ >\n"+$1+"\n"+$3+"\n</fmath>\n"; }
+{ $$="<fmath math=\"+\" >\n"+$1+"\n"+$3+"\n</fmath>\n"; }
 			| expr L_BOOL_AND expr
 { $$="<and>\n"+$1+"\n"+$3+"\n</and>\n"; }
 			| expr L_BOOL_OR expr
@@ -183,19 +247,6 @@ expr:			constant	{ $$=$1; };
 
 
 /* extern int yydebug; */
-
-#if 0
-void main()
-{
-  extern FILE *yyin;
-  yyin=fopen("test.c","r");
-/*  yydebug=1; */
-
-
-  yyparse();
-
-}
-#endif
 
 string parseCalike(char const *filename)
 {
@@ -227,3 +278,47 @@ int yyerror(char *s){
 int yywrap(){
 	return 1;
 }
+
+
+#if 0
+
+expr:   nonnull_exprlist
+                { $$ = build_compound_expr ($1); }
+        ;
+
+exprlist:
+          /* empty */
+                { $$ = NULL_TREE; }
+        | nonnull_exprlist
+        ;
+ 
+nonnull_exprlist:
+        expr_no_commas
+                { $$ = build_tree_list (NULL_TREE, $1); }
+        | nonnull_exprlist ',' expr_no_commas
+                { chainon ($1, build_tree_list (NULL_TREE, $3)); }
+        ;
+
+expr_no_commas:
+          cast_expr
+        | expr_no_commas '+' expr_no_commas
+                { $$ = parser_build_binary_op ($2, $1, $3); }
+        | expr_no_commas '-' expr_no_commas
+                { $$ = parser_build_binary_op ($2, $1, $3); }
+        | expr_no_commas '*' expr_no_commas
+                { $$ = parser_build_binary_op ($2, $1, $3); }
+        | expr_no_commas '/' expr_no_commas
+                { $$ = parser_build_binary_op ($2, $1, $3); }
+        | expr_no_commas '%' expr_no_commas
+                { $$ = parser_build_binary_op ($2, $1, $3); }
+        | expr_no_commas LSHIFT expr_no_commas
+                { $$ = parser_build_binary_op ($2, $1, $3); }
+        | expr_no_commas RSHIFT expr_no_commas
+                { $$ = parser_build_binary_op ($2, $1, $3); }
+        | expr_no_commas ARITHCOMPARE expr_no_commas
+                { $$ = parser_build_binary_op ($2, $1, $3); }
+        | expr_no_commas EQCOMPARE expr_no_commas
+                { $$ = parser_build_binary_op ($2, $1, $3); }
+
+
+#endif
