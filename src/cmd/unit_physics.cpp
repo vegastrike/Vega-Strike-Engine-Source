@@ -112,7 +112,7 @@ void GameUnit<UnitType>::UpdatePhysics2 (const Transformation &trans, const Tran
   }
   else
   {
- 	 curr_physical_state.position = curr_physical_state.position +  (Velocity*SIMULATION_ATOM*difficulty).Cast();
+     AddVelocity(difficulty);
   }
 
 #ifdef DEPRECATEDPLANETSTUFF
