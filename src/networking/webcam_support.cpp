@@ -1,3 +1,5 @@
+#include "config.h"
+
 #if defined(NETCOMM_WEBCAM)
 
 #include <iostream>

@@ -95,7 +95,7 @@ AC_TRY_COMPILE(, , [malign=yes], [malign=no])
 CXXFLAGS="${saved_CXXFLAGS}"
 
 saved_CXXFLAGS="${CXXFLAGS}"
-CXXFLAGS="-pthread"
+CXXFLAGS="-Wall -pthread"
 AC_TRY_COMPILE(, , [bsdthread=yes], [bsdthread=no])
 CXXFLAGS="${saved_CXXFLAGS}"
 
@@ -1423,8 +1423,6 @@ if test "$TESTNETCOMM" = "1" ; then
 		fi
 
 	fi
-else
-   	AC_DEFINE(NETCOMM_NOWEBCAM,1,[disable video with NETCOMM])
 fi
 
 AM_CONDITIONAL(NETCOMM, test "$TESTNETCOMM" = "1")
