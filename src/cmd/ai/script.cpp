@@ -9,7 +9,7 @@
 #include "tactics.h"
 #include "cmd/unit_generic.h"
 #include "hard_coded_scripts.h"
-
+#include "universe_util.h"
 
 
 typedef std::map<string,CCScript *> HardCodedMap;
@@ -22,21 +22,21 @@ HardCodedMap MakeHardCodedScripts() {
   tmp.insert (MyPair ("veer away itts",&VeerAwayITTS));
   tmp.insert (MyPair ("veer and turn away",&VeerAndTurnAway));
   tmp.insert (MyPair ("match velocity",&MatchVelocity));
-  tmp.insert (MyPair ("++flystraight.xml",&FlyStraight));
-  tmp.insert (MyPair ("++flystraightafterburner.xml",&FlyStraightAfterburner));
-  tmp.insert (MyPair ("++afterburn-turntowards.xml",&AfterburnTurnTowards));  
-  tmp.insert (MyPair ("++afterburn-turntowards-itts.xml",&AfterburnTurnTowardsITTS));  
-  tmp.insert (MyPair ("++cloak.xml",&CloakForScript));  
-  tmp.insert (MyPair ("++evade.xml",&Evade));    
-  tmp.insert (MyPair ("++kickstop.xml",&Kickstop));      
-  tmp.insert (MyPair ("++moveto.xml",&MoveTo));      
-  tmp.insert (MyPair ("++shelton-slide.xml",&SheltonSlide));      
-  tmp.insert (MyPair ("++skilledabslide.xml",&SkilledABSlide));      
-  tmp.insert (MyPair ("stop.xml",&Stop));      
-  tmp.insert (MyPair ("++stop.xml",&Stop));      
-  tmp.insert (MyPair ("++turnaway.xml",&TurnAway));      
-  tmp.insert (MyPair ("++turntowards.xml",&TurnTowards));      
-  tmp.insert (MyPair ("++turntowardsitts.xml",&TurnTowardsITTS));      
+  tmp.insert (MyPair ("fly straight",&FlyStraight));
+  tmp.insert (MyPair ("fly straight afterburner",&FlyStraightAfterburner));
+  tmp.insert (MyPair ("afterburn turn towards",&AfterburnTurnTowards));  
+  tmp.insert (MyPair ("afterburn turn towards itts",&AfterburnTurnTowardsITTS));  
+  tmp.insert (MyPair ("cloak",&CloakForScript));  
+  tmp.insert (MyPair ("evade",&Evade));    
+  tmp.insert (MyPair ("kick stop",&Kickstop));      
+  tmp.insert (MyPair ("move to",&MoveTo));      
+  tmp.insert (MyPair ("shelton slide",&SheltonSlide));      
+  tmp.insert (MyPair ("skilled afterbuner slide",&SkilledABSlide));
+  tmp.insert (MyPair ("afterbuner slide",&AfterburnerSlide));        
+  tmp.insert (MyPair ("stop",&Stop));      
+  tmp.insert (MyPair ("turn away",&TurnAway));      
+  tmp.insert (MyPair ("turn towards",&TurnTowards));      
+  tmp.insert (MyPair ("turn towards itts",&TurnTowardsITTS));      
   return tmp;
 }
 
@@ -720,7 +720,29 @@ using namespace AiXml;
     //    fprintf (stderr,"hcscript %s\n",filename);
     CCScript * myscript = (*iter).second;
     (*myscript)(this, parent);
-    fprintf (stderr,"%f using hard coded script %s for %s\n",mission->getGametime(),filename, parent->name.c_str());
+    fprintf (stderr,"%f using hcs %s for %s threat %f\n",mission->getGametime(),filename, parent->name.c_str(),parent->GetComputerData().threatlevel);
+	if (_Universe->isPlayerStarship(parent->Target())){
+		float value;
+		static float game_speed=XMLSupport::parse_float(vs_config->getVariable("physics","game_speed","1"));
+		static float game_accel=XMLSupport::parse_float(vs_config->getVariable("physics","game_accel","1"));
+		    {
+      Unit * targ = parent->Target();
+      if (targ) {
+	Vector PosDifference=targ->Position().Cast()-parent->Position().Cast();
+	float pdmag = PosDifference.Magnitude();
+	value = (pdmag-parent->rSize()-targ->rSize());
+	float myvel = PosDifference.Dot(parent->GetVelocity()-targ->GetVelocity())/pdmag;
+	
+	if (myvel>0)
+	  value-=myvel*myvel/(2*(parent->Limits().retro/parent->GetMass()));
+      }else {
+	value = 10000; 
+      }
+      value/=game_speed*game_accel;
+    }
+
+		UniverseUtil::IOmessage(0,parent->name,"all",string("using script ")+string(filename)+" threat "+XMLSupport::tostring(parent->GetComputerData().threatlevel)+" dis "+XMLSupport::tostring(value));
+	}
     return;
   }else {
     fprintf (stderr,"using soft coded script %s",filename);

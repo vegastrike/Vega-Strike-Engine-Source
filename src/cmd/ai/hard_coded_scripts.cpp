@@ -101,10 +101,19 @@ void BarrelRoll (Order * aisc, Unit*un) {
 	FlyByWire * broll = new FlyByWire;
 	AddOrd(aisc,un,broll);
 	broll->RollRight(rand()>RAND_MAX/2?1:-1);
+	float per;
 	if (rand()<RAND_MAX/2) {
-		broll->Up(rand()>RAND_MAX/2?1:-1);
+		per=((float)rand())/RAND_MAX;
+		if (per<.5) {
+			per-=1;
+		}
+		broll->Up(per);
 	}else {
-		broll->Right(rand()>RAND_MAX/2?1:-1);
+		per=((float)rand())/RAND_MAX;
+		if (per<.5) {
+			per-=1;
+		}		
+		broll->Right(per);
 	}
 	broll->MatchSpeed(Vector(0,0,un->GetComputerData().max_ab_speed()));
 	broll->Afterburn(1);
@@ -112,10 +121,27 @@ void BarrelRoll (Order * aisc, Unit*un) {
 
 namespace Orders{
 class LoopAround: public Orders::FaceTargetITTS{
-	Orders::MoveToParent m;	
+	Orders::MoveToParent m;
+	float qq;
+	float rr;
 public:
 	LoopAround():FaceTargetITTS(false,3),m(false,2,false) {
+		static float loopdis=XMLSupport::parse_float (vs_config->getVariable("AI","loop_around_distance","2"));
+		qq=rr=0;
 		
+		qq = (2.0*rand())/RAND_MAX-1;
+		if (rand()<RAND_MAX/2) {
+			if (qq>0)
+				qq+=loopdis;
+			if (qq<0)
+				qq-=loopdis;
+		}else {
+			rr = (2.0*rand())/RAND_MAX-1;
+			if (rr>0)
+				rr+=loopdis;
+			if (rr<0)
+				rr-=loopdis;
+		}
 	}
 	void Execute(){
 		Unit * targ = parent->Target();
@@ -129,7 +155,7 @@ public:
 			}else {
 				done=false;
 				m.SetAfterburn (false);
-				Vector scala=targ->cumulative_transformation_matrix.getQ().Scale(2*parent->rSize()+targ->rSize());
+				Vector scala=targ->cumulative_transformation_matrix.getQ().Scale(qq*(parent->rSize()+targ->rSize()))+targ->cumulative_transformation_matrix.getP().Scale(rr*(parent->rSize()+targ->rSize()));
 				QVector dest =targ->Position()+scala;
 				SetDest(dest);
 				ChangeHeading::Execute();

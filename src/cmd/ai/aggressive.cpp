@@ -192,7 +192,7 @@ bool AggressiveAI::ProcessLogicItem (const AIEvents::AIEvresult &item) {
       }else {
 	value = 10000; 
       }
-      value/=game_speed*game_accel;
+      value/=game_speed;/*game_accel*/;
     }
     break;
   case THREAT:
@@ -511,7 +511,8 @@ void AggressiveAI::Execute () {
     }
   }
   }
-  if (!isjumpable &&interruptcurtime<=0) {
+  if ((!isjumpable) &&interruptcurtime<=0) {
+	  fprintf (stderr,"i");
 	  ProcessLogic (*interrupts, true);
   }
   //  if (parent->getAIState()->queryType (Order::FACING)==NULL&&parent->getAIState()->queryType (Order::MOVEMENT)==NULL) { 
