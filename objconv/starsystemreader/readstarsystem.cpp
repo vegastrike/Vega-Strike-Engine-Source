@@ -16,7 +16,9 @@ using std::vector;
 using std::map;
 using std::string;
 using std::pair;
+using std::set;
 
+set<string> allnames;
 std::string readfiledata(const char * name) {
 	FILE * fp = fopen (name,"r");
 	if (!fp) {
@@ -352,7 +354,10 @@ std::vector<string> readMilkyWayNames( ) {
 			if (quote!=string::npos) {
 				string newname=s.substr(0,quote);
 				if (newname!="max"&&newname!="min"&&newname!="maxlimit"&&newname!="minlimit"&&newname!="hardwicke"&&newname!="reid"&&newname!="lesnick"&&newname!="midgard"&&newname.find("blockade")==string::npos&& newname!="wolf359"&&newname.find("wolf")==string::npos)
-					retval.push_back(newname);
+					if (allnames.find(newname)==allnames.end()){
+						retval.push_back(newname);
+						allnames.insert(newname);
+					}
 			}
 		}
 	}while (where!=string::npos);
@@ -716,7 +721,7 @@ vector<System> readfile (const char * name) {
 			}
 		}
 		for (unsigned int i= 0;i<systems.size();++i) {
-			if (systems[i].name.length()==0){
+			if (systems[i].name.length()==0||(allnames.find(systems[i].name)==allnames.end())){
 				systems[i].interesting=false;
 				static int num=0;
 				num++;
@@ -796,6 +801,55 @@ void writesystems(FILE * fp, std::vector<System> s) {
 	fprintf(fp,"\t</sector>\n</systems></galaxy>\n");
 	
 }
+
+
+
+
+string getNameForFaction (std::string faction) {
+	if (faction.empty())
+		return "";
+	static map<string,vector<string> > factionnames;
+	if (factionnames.find(faction)==factionnames.end()) {
+		vector<string> factionnameslist;
+		string filename = faction+".txt";
+		FILE * fp=fopen (filename.c_str(),"r");
+		if (fp) {
+			fseek(fp,0,SEEK_END);
+			int whence=ftell(fp);
+			fseek(fp,0,SEEK_SET);
+			char * buf =(char *)malloc (whence+1);
+			buf[whence]=0;
+			while (fgets(buf,whence,fp)) {
+				factionnameslist.push_back(buf);
+			}
+			fclose(fp);
+		}
+		factionnames.insert(pair<string,vector<string> > (faction,shuffle(factionnameslist)));
+	}
+	vector<string> * temp = &factionnames[faction];
+	if (temp->size()){
+		string rez= temp->back();
+		temp->pop_back();
+		return rez;
+	}
+	return "";
+}
+
+void reName (std::vector<System>&s, System &which, std::string newname) {
+	if (newname.empty())
+		return;
+	string sector = which.sector;
+	string oldname = which.name;
+	string fullname = which.sector+"/"+which.name;
+	string newfullname = which.sector+"/"+newname;
+	which.name=newname;
+	for (unsigned int i=0;i<s.size();++i) {
+		for (unsigned int j=0;j<s[i].jumps.size();++j) {
+			if (s[i].jumps[j]==fullname)
+				s[i].jumps[j]=newfullname;
+		}
+	}
+}
 void processsystems (std::vector <System> & s){
 	vec3 min,max;
 	computeminmax(s,min,max);
@@ -865,6 +919,11 @@ void processsystems (std::vector <System> & s){
 		}
 	}
 	simulateFactionTurns(s); // Simulates the factions starting with one homeworld, and expands their territories.x
+	if (1) {
+		for (unsigned int i=0;i<s.size();++i) {
+			reName(s,s[i],getNameForFaction(s[i]["faction"]));
+		}
+	}
 }
 int main (int argc, char ** argv) {
 	if (argc<3) {
