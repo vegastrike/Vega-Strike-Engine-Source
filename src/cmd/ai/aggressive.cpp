@@ -838,11 +838,11 @@ public:
     static float mintime=XMLSupport::parse_float(vs_config->getVariable("AI","min_time_to_auto","25"));
     if (getNewTime()-creationtime>mintime) {
       if (_Universe->AccessCockpit()->autoInProgress()&&(!_Universe->AccessCockpit()->unitInAutoRegion(parent))&&(un =ChooseNearNavPoint(parent,targetlocation,0))!=NULL) {
-        WarpToP(parent,un);
+        WarpToP(parent,un,true);
       }else {
         Unit* playa=_Universe->AccessCockpit()->GetParent();
         if (playa==NULL||playa->Target()!=parent) {
-          WarpToP(parent,targetlocation,0);
+          WarpToP(parent,targetlocation,0,true);
         }
       }
     }
@@ -868,10 +868,10 @@ void AggressiveAI::ExecuteNoEnemies() {
       static float mintime=XMLSupport::parse_float(vs_config->getVariable("AI","min_time_to_auto","25"));
       if (getNewTime()-creationtime>mintime) {
         if (can_warp_to) {
-          WarpToP(parent,dest);
+          WarpToP(parent,dest,true);
         }else if (_Universe->AccessCockpit()->autoInProgress()&&!_Universe->AccessCockpit()->unitInAutoRegion(parent)) {
           
-          WarpToP(parent,dest);
+          WarpToP(parent,dest,true);
         }
       }
       Vector dir = parent->Position()-dest->Position();
@@ -1002,7 +1002,7 @@ void AggressiveAI::Execute () {
     if (target) {
     static bool can_warp_to=XMLSupport::parse_bool(vs_config->getVariable("AI","warp_to_enemies","true"));      
     if (can_warp_to||_Universe->AccessCockpit()->autoInProgress()){
-      WarpToP(parent,target);
+      WarpToP(parent,target,false);
     }
     logiccurtime-=SIMULATION_ATOM;
     interruptcurtime-=SIMULATION_ATOM;	

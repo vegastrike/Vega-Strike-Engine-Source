@@ -127,14 +127,14 @@ namespace Orders {
     const QVector loc (Transform (utdw->GetTransformation(),utdw->DockingPortLocations()[port].pos.Cast()));
     SetDest (loc);
     
-    SetAfterburn (DistanceWarrantsTravelTo(parent,(loc-parent->Position()).Magnitude()));
+    SetAfterburn (DistanceWarrantsTravelTo(parent,(loc-parent->Position()).Magnitude(),true));
     if (!facedtarget) {
       facedtarget=true;
       EnqueueOrder(new ChangeHeading(loc,4,1,true));
     }
     MoveTo::Execute();
     if (rand()%256==0){
-      WarpToP(parent,utdw);     
+      WarpToP(parent,utdw,true);     
     }
     return loc;
   }

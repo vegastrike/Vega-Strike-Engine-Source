@@ -451,7 +451,7 @@ void FormUp::Execute() {
     MoveTo::SetDest (Transform (targ->GetTransformation(),Pos));
     static bool can_warp_to=XMLSupport::parse_bool(vs_config->getVariable("AI","warp_to_wingmen","true"));   
     if (rand()%64==0&&(can_warp_to||_Universe->AccessCockpit()->autoInProgress()))
-      WarpToP(parent,targ);
+      WarpToP(parent,targ,true);
   }
   MoveTo::Execute();
 }

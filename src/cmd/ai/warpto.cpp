@@ -6,10 +6,12 @@ float max_allowable_travel_time () {
   static float mat = XMLSupport::parse_float (vs_config->getVariable ("AI","max_allowable_travel_time","15"));
   return mat;
 }
-bool DistanceWarrantsWarpTo (Unit * parent, float dist){
+bool DistanceWarrantsWarpTo (Unit * parent, float dist, bool following){
   //first let us decide whether the target is far enough to warrant using warp
   //  double dist =UnitUtil::getSignificantDistance(parent,target);
-  static float toodamnclose = XMLSupport::parse_float (vs_config->getVariable ("AI","too_close_for_warp_tactic","13000"));
+  static float tooclose = XMLSupport::parse_float (vs_config->getVariable ("AI","too_close_for_warp_tactic","13000"));
+  static float tooclosefollowing = XMLSupport::parse_float (vs_config->getVariable ("AI","too_close_for_warp_in_formation","1500"));
+  float toodamnclose=following?tooclosefollowing:tooclose;
   float diff = 1;
   parent->GetVelocityDifficultyMult(diff);
   float timetolive = dist/(diff*parent->GetComputerData().max_combat_speed);
@@ -23,7 +25,7 @@ bool DistanceWarrantsWarpTo (Unit * parent, float dist){
   }
   return false;
 }
-bool DistanceWarrantsTravelTo (Unit * parent, float dist){
+bool DistanceWarrantsTravelTo (Unit * parent, float dist, bool following){
   //first let us decide whether the target is far enough to warrant using warp
   //  double dist =UnitUtil::getSignificantDistance(parent,target);
   float diff = 1;
@@ -66,9 +68,9 @@ static void ActuallyWarpTo(Unit * parent,const QVector &tarpos, Vector tarvel, U
     parent->computer.velocity_ref.SetUnit(MatchSpeed);
   }
 }
-void WarpToP(Unit * parent, Unit * target) {
+void WarpToP(Unit * parent, Unit * target, bool following) {
   float dist =UnitUtil::getSignificantDistance(parent,target);
-  if (DistanceWarrantsWarpTo (parent,dist)) {
+  if (DistanceWarrantsWarpTo (parent,dist,following)) {
     if (TargetWorthPursuing(parent,target)){
       static bool auto_valid = XMLSupport::parse_bool (vs_config->getVariable ("physics","insystem_jump_or_timeless_auto-pilot","false"));	
       if(auto_valid){
@@ -81,9 +83,9 @@ void WarpToP(Unit * parent, Unit * target) {
 	parent->graphicOptions.InWarp=0;
   }
 }
-void WarpToP (Unit * parent, const QVector &target, float radius) {
+void WarpToP (Unit * parent, const QVector &target, float radius, bool following) {
   float dist = (parent->Position()-target).Magnitude()-radius-parent->rSize();
-  if (DistanceWarrantsWarpTo(parent,dist)) {
+  if (DistanceWarrantsWarpTo(parent,dist,following)) {
     static bool auto_valid = XMLSupport::parse_bool (vs_config->getVariable ("physics","insystem_jump_or_timeless_auto-pilot","false"));	    
     if(!auto_valid){
       ActuallyWarpTo(parent,target,QVector(0,0,.00001));
