@@ -1200,7 +1200,7 @@ void UpgradingInfo::ProcessMouse(int type, int x, int y, int button, int state) 
 			SetupCargoList();
 		      }
                     }else if (0==strcmp (buy_name,"Basic Repair")) {
-		      static string repair_price = "price: "+vs_config->getVariable("physics","repair_price","1000");
+		      static string repair_price = "Price: "+vs_config->getVariable("physics","repair_price","1000");
                       CargoInfo->ChangeTextItem ("name","Basic Repair");
 		      CargoInfo->ChangeTextItem ("price",repair_price.c_str());
 		      CargoInfo->ChangeTextItem("volume","Cargo Volume: N/A");
@@ -1324,6 +1324,11 @@ vector <CargoColor>&UpgradingInfo::MakeMissionsFromSavegame(Unit *base) {
     TempCargo.push_back (c);
   }
   std::sort(TempCargo.begin(),TempCargo.end(),CargoColorSort());
+  for (unsigned int i=0;i<TempCargo.size();i++) {
+    for (unsigned int nexti=i+1;nexti<TempCargo.size()&&TempCargo[i].cargo.content==TempCargo[nexti].cargo.content;nexti++) {
+		TempCargo[nexti].cargo.content+="_"+XMLSupport::tostring(nexti-i);
+    }
+  }
   return TempCargo;
 }
 

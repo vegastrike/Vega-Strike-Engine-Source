@@ -25,7 +25,7 @@
 #include "cmd/script/mission.h"
 #include "force_feedback.h"
 
-bool SERVER = 1;
+char SERVER = 1;
 Universe * _Universe;
 LeakVector<Mission *> active_missions;
 

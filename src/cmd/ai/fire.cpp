@@ -422,7 +422,7 @@ void FireAt::Execute () {
   }
   PossiblySwitchTarget(istargetjumpableplanet);
 
-  if (parent->GetNumMounts ()>0) {
+  if ((!istargetjumpableplanet)&&parent->GetNumMounts ()>0) {
     FireWeapons (shouldfire,missilelock);
   }
 }
