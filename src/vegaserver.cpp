@@ -34,8 +34,6 @@ int main( int argc, char **argv)
 	NetServer *Server = new NetServer;
 	// Fake forcefeedback
     forcefeedback=new ForceFeedback();
-	//mission = new Mission( "test1.mission");
-	//mission->initMission( false);
 
 	Server->start( argc, argv);
 

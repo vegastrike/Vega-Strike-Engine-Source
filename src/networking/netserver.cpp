@@ -448,6 +448,9 @@ void	NetServer::start(int argc, char **argv)
 
 	// Create the _Universe telling it we are on server side
 	_Universe = new Universe(argc,argv,vs_config->getVariable ("general","galaxy","milky_way.xml").c_str(), true);
+	string strmission = vs_config->getVariable( "server", "missionfile", "networking.mission");
+	mission = new Mission( strmission.c_str());
+	mission->initMission( false);
 
 	// Server loop
 	while( keeprun)

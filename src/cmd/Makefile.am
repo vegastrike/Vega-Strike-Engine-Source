@@ -44,6 +44,7 @@ libcmdgeneric =			\
 	beam_generic.cpp	\
 	weapon_xml.cpp			\
 	weapon_xml.h			\
+	faction_xml.cpp			\
 	role_bitmask.cpp	\
 	role_bitmask.h
 
@@ -80,7 +81,6 @@ libcmd_a_SOURCES =$(libcmdgeneric) 				\
 	click_list.h			\
 	unit_util.h			\
 	unit_util.cpp			\
-	faction_xml.cpp			\
 	music.cpp			\
 	music.h				\
 	enhancement.h			\

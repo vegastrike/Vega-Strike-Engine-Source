@@ -37,6 +37,7 @@ void UncheckUnit (class Unit * un);
 #include <string>
 #include "gfx/matrix.h"
 #include "gfx/quaternion.h"
+#include "gfxlib_struct.h"
 #include "weapon_xml.h"
 #include "linecollide.h"
 //#include "gfx/vdu.h"
@@ -44,7 +45,7 @@ void UncheckUnit (class Unit * un);
 #include "container.h"
 #include "collection.h"
 #include "script/flightgroup.h"
-#include "faction.h"
+#include "faction_generic.h"
 #include "star_system_generic.h"
 #include "networking/const.h"
 using std::string;

@@ -107,7 +107,7 @@ private:
   void Generate2( StarSystem * ss);
   virtual StarSystem * GenerateStarSystem (const char * file, const char * jumpback, Vector origin);
   ///Loads and parses factions
-  virtual void LoadFactionXML (const char * factfile) {
+  void LoadFactionXML (const char * factfile) {
     Faction::LoadXML (factfile);
   }
   //void SetupCockpits (std::vector <std::string> players);

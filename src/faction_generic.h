@@ -53,7 +53,7 @@ struct Texture;
     static void ParseAllAllies(/*Universe * thisuni*/);
     void ParseAllies(/*Universe * thisuni,*/ unsigned int whichfaction);
     
-    static void LoadXML(const char * factionfile, char * xmlbuffer=NULL, int buflength=0){}
+    static void LoadXML(const char * factionfile, char * xmlbuffer=NULL, int buflength=0);
     static void beginElement(void *userData, const XML_Char *name, const XML_Char **atts);
 	static void endElement(void *userData, const XML_Char *name);
 	Faction() {
@@ -101,6 +101,15 @@ namespace FactionUtil {
 		FSM* GetConversation (const int myfaction, const int theirfaction);
 		Texture *getForceLogo (int faction);
 		Texture *getSquadLogo (int faction);
+
+		Animation * createAnimation( const char * anim);
+		Texture * createTexture( const char * tex, const char * tmp, bool force=false);
+		Texture * createTexture( const char * tex, bool force=false);
+		std::vector <class Animation *> * GetAnimation(int faction, int n, unsigned char &sex);
+		Animation * getRandAnimation (int whichfaction,std::string&which);
+		void LoadFactionPlaylists();
+		/** Still in faction_xml.cpp because createUnit **/
+		void LoadContrabandLists();
 };
 
 extern  std::vector <Faction *> factions; //the factions

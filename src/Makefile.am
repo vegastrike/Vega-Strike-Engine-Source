@@ -54,10 +54,9 @@ libroot =		\
 	linecollide.h			\
 	in_joystick.cpp			\
 	in_joystick.h			\
-	faction.cpp				\
-	faction.h				\
 	force_feedback.cpp		\
 	force_feedback.h		\
+	faction_util.cpp		\
 	in_kb.cpp				\
 	in_kb.h					\
 	in_sdl.cpp				\
@@ -118,7 +117,7 @@ librootgeneric =			\
 	endianness.h			\
 	file_main.h				\
 	in.h					\
-	faction_util.cpp		\
+	faction_util_generic.cpp	\
 	load_mission.cpp		\
 	savegame.cpp			\
 	savegame.h				\
