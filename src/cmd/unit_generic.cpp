@@ -36,12 +36,12 @@ using namespace Orders;
 
 bool flickerDamage (Unit * un, float hullpercent) {
 	#define damagelevel hullpercent
-		  static float counter=getNewTime();
+		  static double counter=getNewTime();
 		  
 		  static float flickertime = XMLSupport::parse_float (vs_config->getVariable ("graphics","glowflicker","time","30"));
 		  static float flickerofftime = XMLSupport::parse_float (vs_config->getVariable ("graphics","glowflicker","off-time","2"));
 		  static float minflickercycle = XMLSupport::parse_float (vs_config->getVariable ("graphics","glowflicker","min-cycle","2"));		  
-		  static float flickeronprob= XMLSupport::parse_float (vs_config->getVariable ("graphics","glowflicker","num-times-per-second-on","2"));
+		  static float flickeronprob= XMLSupport::parse_float (vs_config->getVariable ("graphics","glowflicker","num-times-per-second-on",".66"));
 		  static float hullfornoflicker= XMLSupport::parse_float (vs_config->getVariable ("graphics","glowflicker","hull-for-total-dark",".04"));
 		  float diff = getNewTime()-counter;
 		  if (diff>flickertime) {
