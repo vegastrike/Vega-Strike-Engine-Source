@@ -397,6 +397,7 @@ NavigationSystem::CachedSystemIterator NavigationSystem::CachedSystemIterator::o
 float vsmax(float x, float y) {
 	return x>y?x:y;
 }
+
 void NavigationSystem::DrawGalaxy()
 {
 //	systemdrawlist mainlist;//(0, screenoccupation, factioncolours);	//	lists of items to draw that are in mouse range
@@ -438,7 +439,8 @@ void NavigationSystem::DrawGalaxy()
 	float center_nav_y = ((screenskipby4[2] + screenskipby4[3]) / 2);
 	//	**********************************
 
-
+	glEnable(GL_ALPHA);
+	GFXBlendMode(SRCALPHA,INVSRCALPHA);
 
 	if (!camera_z) {
 
@@ -461,7 +463,7 @@ void NavigationSystem::DrawGalaxy()
 				currentsystemindex=systemIter.getIndex();
 				pos=systemIter->Position();
 				ReplaceAxes(pos);
-				if(galaxy_3d){pos = dxyz(pos, 0, ry, 0);pos = dxyz(pos, rx, 0, 0);}
+//				if(galaxy_3d){pos = dxyz(pos, 0, ry, 0);pos = dxyz(pos, rx, 0, 0);}
 				
 				max_x = (float)pos.i;
 				min_x = (float)pos.i;
@@ -474,9 +476,9 @@ void NavigationSystem::DrawGalaxy()
 				//Find Centers
 				//**********************************
 				// This will use the current system as the center
-//				center_x=pos.i;
-//				center_y=pos.j;
-//				center_z=pos.k;
+				center_x=pos.i;
+				center_y=pos.j;
+				center_z=pos.k;
 				//**********************************
 
 				unsigned destsize=systemIter->GetDestinationSize();
@@ -484,7 +486,7 @@ void NavigationSystem::DrawGalaxy()
 					for (unsigned i=0;i<destsize;++i) {
 						QVector posoth=systemIter[systemIter->GetDestinationIndex(i)].Position();
 						ReplaceAxes(posoth);
-						if(galaxy_3d){posoth = dxyz(pos, 0, ry, 0);posoth = dxyz(pos, rx, 0, 0);}
+//						if(galaxy_3d){posoth = dxyz(pos, 0, ry, 0);posoth = dxyz(pos, rx, 0, 0);}
 						
 						RecordMinAndMax(posoth,min_x,max_x,min_y,max_y,min_z,max_z,themaxvalue);
 					}
@@ -508,7 +510,7 @@ void NavigationSystem::DrawGalaxy()
 						ReplaceAxes(posoth);
 						//Modify by old rotation amount
 						//*************************
-						if(galaxy_3d){posoth = dxyz(pos, 0, ry, 0);posoth = dxyz(pos, rx, 0, 0);}
+//						if(galaxy_3d){posoth = dxyz(pos, 0, ry, 0);posoth = dxyz(pos, rx, 0, 0);}
 						//*************************
 						//*************************
 						RecordMinAndMax(posoth,min_x,max_x,min_y,max_y,min_z,max_z,themaxvalue);
@@ -525,9 +527,9 @@ void NavigationSystem::DrawGalaxy()
 		//Find Centers
 		//**********************************
 		// this will make the center be the center of the displayable area.
-		center_x = (min_x + max_x)/2;
-		center_y = (min_y + max_y)/2;
-		center_z = (min_z + max_z)/2;
+//		center_x = (min_x + max_x)/2;
+//		center_y = (min_y + max_y)/2;
+//		center_z = (min_z + max_z)/2;
 		//**********************************
 		
 		
@@ -548,20 +550,20 @@ void NavigationSystem::DrawGalaxy()
 
 
 		{
-//			float half_x = vsmax(max_x-center_x,center_x-min_x);
-//			float half_y = vsmax(max_y-center_y,center_y-min_y);
-//			float half_z = vsmax(max_z-center_z,center_z-min_z);
+			float half_x = vsmax(max_x-center_x,center_x-min_x);
+			float half_y = vsmax(max_y-center_y,center_y-min_y);
+			float half_z = vsmax(max_z-center_z,center_z-min_z);
 
 //			float half_x =(0.5*(max_x - min_x));
 //			float half_y =(0.5*(max_y - min_y));
 //			float half_z =(0.5*(max_z - min_z));
 
-//			camera_z = sqrt( ( half_x * half_x ) + ( half_y * half_y ) + ( half_z * half_z ));
+			camera_z = sqrt( ( half_x * half_x ) + ( half_y * half_y ) + ( half_z * half_z ));
 		
 //			float halfmax = 0.5*themaxvalue;
 //			camera_z = sqrt( (halfmax*halfmax) + (halfmax*halfmax) + (halfmax*halfmax) );
 //			camera_z = 4.0*themaxvalue;
-			camera_z = themaxvalue;
+//			camera_z = tihemaxvalue;
 		}
 
 		//**********************************
@@ -595,10 +597,23 @@ void NavigationSystem::DrawGalaxy()
 		//*************************
 		//*************************
 
+		GFXColor col=systemIter->GetColor();
+		Vector oldpos=pos;
 		float the_x, the_y, system_item_scale_temp;
 		TranslateAndDisplay(pos, pos_flat, center_nav_x, center_nav_y, themaxvalue, zscale, zdistance, the_x, the_y,system_item_scale_temp, 0);
-
+		float alphaadd;
 		{
+			float tmp=(1-(zoom/MAXZOOM));
+			alphaadd=(tmp*tmp)-.5;
+//			if (alphaadd<=0)
+//				alphaadd=0;
+//			else
+				alphaadd*=4;
+		}
+		col.a=(system_item_scale_temp-minimumitemscaledown)/(maximumitemscaleup-minimumitemscaledown)+alphaadd;
+//		col.a=GetAlpha(oldpos,center_x,center_y,center_z,zdistance);
+
+/*		{
 			float tmp_x=(center_x-pos.i);
 			float tmp_y=(center_y-pos.j);
 			float tmp_z=(center_z-pos.k);
@@ -608,14 +623,11 @@ void NavigationSystem::DrawGalaxy()
 				continue;
 			}
 		}
+*/
 		
-		
-		GFXColor col=systemIter->GetColor();
-
-
 		//IGNORE OFF SCREEN
 		//**********************************
-		if(	!TestIfInRange(screenskipby4[0], screenskipby4[1], screenskipby4[2], screenskipby4[3], the_x, the_y))
+		if((col.a<.05)||(!TestIfInRange(screenskipby4[0], screenskipby4[1], screenskipby4[2], screenskipby4[3], the_x, the_y)))
 		{
 			unsigned destsize=systemIter->GetDestinationSize();
 			if (destsize!=0) {
@@ -624,14 +636,18 @@ void NavigationSystem::DrawGalaxy()
 					CachedSystemIterator::SystemInfo &oth=systemIter[systemIter->GetDestinationIndex(i)];
 					QVector posoth=oth.Position();
 					ReplaceAxes(posoth);
+					Vector oldposoth=posoth;
 					float the_new_x, the_new_y, new_system_item_scale_temp, the_new_x_flat, the_new_y_flat, the_clipped_x=the_x,the_clipped_y=the_y;
 					// WARNING: SOME VARIABLES FOR ORIGINAL SYSTEM MAY BE MODIFIED HERE!!!
 					TranslateCoordinates(posoth, pos_flat, center_nav_x, center_nav_y, themaxvalue, zscale, zdistance, the_new_x, the_new_y,the_new_x_flat,the_new_y_flat, new_system_item_scale_temp, 0);
+					GFXColor othcol = oth.GetColor();
+					othcol.a=(new_system_item_scale_temp-minimumitemscaledown)/(maximumitemscaleup-minimumitemscaledown)+alphaadd;
+					//GetAlpha(oldposoth,center_x,center_y,center_z,zdistance);
 					if (TestIfInRange(screenskipby4[0], screenskipby4[1], screenskipby4[2], screenskipby4[3], the_new_x, the_new_y)) {
 						IntersectBorder(the_clipped_x,the_clipped_y,the_new_x,the_new_y);
 						GFXColorf (col);
 						GFXVertex3f(the_clipped_x,the_clipped_y,0);
-						GFXColorf (oth.GetColor());
+						GFXColorf (othcol);
 						GFXVertex3f(the_new_x,the_new_y,0);
 					}
 				}
@@ -652,7 +668,7 @@ void NavigationSystem::DrawGalaxy()
 			system_item_scale_temp = (system_item_scale * 3);
 		}
 
-		insert_size *= system_item_scale_temp;
+		insert_size *= system_item_scale_temp/3;
 
 		if (currentsystem==temp)
 		{
@@ -688,13 +704,17 @@ void NavigationSystem::DrawGalaxy()
 				CachedSystemIterator::SystemInfo &oth=systemIter[systemIter->GetDestinationIndex(i)];
 				QVector posoth=oth.Position();
 				ReplaceAxes(posoth);
+				Vector oldposoth=posoth;
 				float the_new_x, the_new_y, new_system_item_scale_temp, the_new_x_flat, the_new_y_flat;
 				// WARNING: SOME VARIABLES FOR ORIGINAL SYSTEM MAY BE MODIFIED HERE!!!
 				TranslateCoordinates(posoth, pos_flat, center_nav_x, center_nav_y, themaxvalue, zscale, zdistance, the_new_x, the_new_y,the_new_x_flat,the_new_y_flat, new_system_item_scale_temp, 0);
+				GFXColor othcol = oth.GetColor();
+				othcol.a=(new_system_item_scale_temp-minimumitemscaledown)/(maximumitemscaleup-minimumitemscaledown)+alphaadd;
+				//GetAlpha(oldposoth,center_x,center_y,center_z,zdistance);
 				IntersectBorder(the_new_x,the_new_y,the_x,the_y);
 				GFXColorf (col);
 				GFXVertex3f(the_x,the_y,0);
-				GFXColorf (oth.GetColor());
+				GFXColorf (othcol);
 				GFXVertex3f(the_new_x,the_new_y,0);
 			}
 			GFXEnd();

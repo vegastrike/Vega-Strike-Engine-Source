@@ -189,15 +189,15 @@ void NavigationSystem::DrawSystem()
 	//**********************************
 
 //	{
-//		float half_x=(0.5*(max_x - min_x));
-//		float half_y=(0.5*(max_y - min_y));
-//		float half_z=(0.5*(max_z - min_z));
+		float half_x=(0.5*(max_x - min_x));
+		float half_y=(0.5*(max_y - min_y));
+		float half_z=(0.5*(max_z - min_z));
 	
-//		camera_z = sqrt( ( half_x * half_x ) + ( half_y * half_y ) + ( half_z * half_z ));
+		camera_z = sqrt( ( half_x * half_x ) + ( half_y * half_y ) + ( half_z * half_z ));
 	
 //		float halfmax = 0.5*themaxvalue;
 //		camera_z = sqrt( (halfmax*halfmax) + (halfmax*halfmax) + (halfmax*halfmax) );
-		camera_z = 4.0*themaxvalue;
+//		camera_z = 4.0*themaxvalue;
 //	}
 
 	//**********************************

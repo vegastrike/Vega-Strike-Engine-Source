@@ -651,10 +651,11 @@ void NavigationSystem::DrawMission()
 		relation = 	FactionUtil::GetIntRelation(i, ( UniverseUtil::getPlayerX(UniverseUtil::getCurrentPlayer()) )->faction );
 
 		//	draw faction name
-		drawdescription(FactionUtil::GetFactionName(i), (originx + (0.1*deltax)),(originy - (0.1*deltay)), 1, 1, 0, screenoccupation, factioncolours[i]);
+		const float *colors=FactionUtil::GetSparkColor(i);
+		drawdescription(FactionUtil::GetFactionName(i), (originx + (0.1*deltax)),(originy - (0.1*deltay)), 1, 1, 0, screenoccupation, GFXColor(colors[0],colors[1],colors[2],1.));
 
-		relation = relation * 0.5;
-		relation = relation + 0.5;
+		float relation01 = relation * 0.5 + 0.5;
+		relation = ((relation>1?1:relation)<-1?-1:relation);
 		int percent = relation * 100.0;
 		string relationtext (XMLSupport::tostring (percent));
 		if (i<killlist->size()) {
@@ -662,7 +663,7 @@ void NavigationSystem::DrawMission()
 			relationtext += XMLSupport::tostring ((int)(*killlist)[i]);
 		}
 
-		drawdescription(relationtext, (originx + (0.3*deltax)),(originy - (0.1*deltay)), 1, 1, 0, screenoccupation, GFXColor((1.0-relation),relation,(1.0-(2.0*Delta(relation, 0.5))),1));
+		drawdescription(relationtext, (originx + (0.3*deltax)),(originy - (0.1*deltay)), 1, 1, 0, screenoccupation, GFXColor((1.0-relation01),(relation01),(1.0-(2.0*Delta(relation01, 0.5))),1));
 		}
 		i+=1;
 	}
@@ -1141,6 +1142,7 @@ void NavigationSystem::DrawButton(float &x1, float &x2, float &y1, float &y2, in
 			axis = axis - 1;
 			if(axis == 0)
 				axis = 3;
+			camera_z=0;
 		}
 		//******************************************************
 
@@ -1167,6 +1169,7 @@ void NavigationSystem::DrawButton(float &x1, float &x2, float &y1, float &y2, in
 				ry_s = 0.5;
 				rz_s = 0.0;
 			}
+			camera_z=0;
 		}
 		//******************************************************
 	}
