@@ -76,7 +76,7 @@ POINT
 			die "Invalid number of vertices in face: $line";
 		}
 		for($v=0;$v<@output_vertices;$v++) {
-			$face_output{$texture} .= "	<Vertex point=\"$output_vertices[$v]\" s=\"$texcoord_list[$texcoord][0]\" t=\"$texcoord_list[$texcoord][1]\">\n"
+			$face_output{$texture} .= "	<Vertex point=\"$output_vertices[$v]\" s=\"$texcoord_list[$texcoord][0]\" t=\"$texcoord_list[$texcoord][1]\"/>\n"
 		}
 		if(@output_vertices==3) {
 			$face_output{$texture} .= "</Tri>\n"
