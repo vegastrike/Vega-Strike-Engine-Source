@@ -1,6 +1,8 @@
 #include "flykeyboard.h"
 
 struct StarShipControlKeyboard {
+  int sheltonpress;
+  int sheltonrelease;
   int uppress;//negative if not pressed last
   int uprelease;
   int downpress;
@@ -23,7 +25,7 @@ struct StarShipControlKeyboard {
   bool startpress;
   bool dirty;//it wasn't updated...
   int refcount;
-  void UnDirty() {uppress=uprelease=downpress=downrelease=leftpress=leftrelease=rightpress=rightrelease=ABpress=ABrelease=accelpress=accelrelease=decelpress=decelrelease=rollrightpress=rollrightrelease=rollleftpress=rollleftrelease=0;startpress=stoppress=dirty=false;}
+  void UnDirty() {sheltonpress=sheltonrelease=uppress=uprelease=downpress=downrelease=leftpress=leftrelease=rightpress=rightrelease=ABpress=ABrelease=accelpress=accelrelease=decelpress=decelrelease=rollrightpress=rollrightrelease=rollleftpress=rollleftrelease=0;startpress=stoppress=dirty=false;}
   StarShipControlKeyboard() {UnDirty();refcount=0;}
 } starshipcontrolkeys;
 
@@ -43,7 +45,7 @@ FlyByKeyboard::FlyByKeyboard (): FlyByWire () {
     BindKey('-',FlyByKeyboard::DecelKey);   
     BindKey('/',FlyByKeyboard::RollLeftKey);
     BindKey('*',FlyByKeyboard::RollRightKey);
-    
+    BindKey('q',FlyByKeyboard::SheltonKey);    
   }
   starshipcontrolkeys.refcount++;
 }
@@ -59,6 +61,7 @@ FlyByKeyboard::~FlyByKeyboard() {
     UnbindKey ('*');
     UnbindKey ('+');
     UnbindKey ('-');
+    UnbindKey ('~');
     UnbindKey ('\t');
   }
 }
@@ -68,6 +71,7 @@ FlyByKeyboard::~FlyByKeyboard() {
 void FlyByKeyboard::Execute () {
   desired_ang_velocity=Vector(0,0,0);
 #define SSCK starshipcontrolkeys
+
   if (SSCK.dirty) {
     //go with what's last there: no frames since last physics frame
     if (SSCK.uppress<=0&&SSCK.downpress<=0)
@@ -106,6 +110,7 @@ void FlyByKeyboard::Execute () {
     if (SSCK.uppress==0&&SSCK.downpress==0)
       Up(0);
     else {
+
       if (SSCK.uppress!=0&&SSCK.downpress==0)
 	Up(((float)FBWABS(SSCK.uppress))/(FBWABS(SSCK.uppress)+SSCK.uprelease));
       else {
@@ -158,6 +163,12 @@ void FlyByKeyboard::Execute () {
   if (SSCK.startpress) {
     Stop(1);
   }
+  if (SSCK.sheltonpress>SSCK.sheltonrelease) {
+    SheltonSlide(true);
+  } else {
+    SheltonSlide(false);
+  }
+
   SSCK.dirty=true;
 #undef SSCK
   FlyByWire::Execute();
@@ -167,6 +178,17 @@ void FlyByKeyboard::Execute () {
 
 
 
+void FlyByKeyboard::SheltonKey(int, KBSTATE k) {
+  if (starshipcontrolkeys.dirty) starshipcontrolkeys.UnDirty();
+  switch (k) {
+  case UP:
+    starshipcontrolkeys.sheltonrelease=FBWABS(starshipcontrolkeys.sheltonrelease)+1;
+    break;
+  case DOWN:starshipcontrolkeys.sheltonpress=FBWABS(starshipcontrolkeys.sheltonpress)+1;
+    break;
+  default:break;
+  }
+}
 
 void FlyByKeyboard::UpKey(int, KBSTATE k) {
   if (starshipcontrolkeys.dirty) starshipcontrolkeys.UnDirty();

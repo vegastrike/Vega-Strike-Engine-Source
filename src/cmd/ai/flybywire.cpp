@@ -4,20 +4,26 @@
 using Orders::MatchLinearVelocity;
 using Orders::MatchVelocity;
 using Orders::MatchAngularVelocity;
-void MatchLinearVelocity::Execute () {
-  Vector desired (desired_velocity);
-  if (!LocalVelocity) {
-    desired = parent->ToLocalCoordinates (desired);
-  }
+#define MATCHLINVELSETUP() \
+  Vector desired (desired_velocity); \
+  if (!LocalVelocity) { \
+    desired = parent->ToLocalCoordinates (desired); \
+  } \
   Vector velocity (parent->UpCoordinateLevel(parent->GetVelocity()));
+#define MATCHLINVELEXECUTE() \
+  parent->Thrust ( (parent->GetMass()*(desired-velocity)/SIMULATION_ATOM), desired.i>parent->GetComputerData().max_speed);
+//don't need to clamp thrust since the Thrust does it for you
+//caution might change 
+
+void MatchLinearVelocity::Execute () {
+  MATCHLINVELSETUP()
   if (willfinish) {
     if ((done = fabs(desired.i-velocity.i)<VELTHRESHOLD&&fabs(desired.j-velocity.j)<VELTHRESHOLD&&fabs(desired.k-velocity.k)<VELTHRESHOLD))
       return;
   }
-  parent->Thrust ( (parent->GetMass()*(desired-velocity)/SIMULATION_ATOM), desired.i>parent->GetComputerData().max_speed);//don't need to clamp thrust since the Thrust does it for you
-                 //caution might change 
+  MATCHLINVELEXECUTE();
 }
-
+/*  //deprecated: now inherits from MatchAngVelocity and uses LinVel macros
 #define MATCHANGVELOCITYSETUP() \
   Vector desired (desired_ang_velocity); \
   Vector angvel(parent->UpCoordinateLevel(parent->GetAngularVelocity())); \
@@ -25,33 +31,29 @@ void MatchLinearVelocity::Execute () {
     desired = parent->ToLocalCoordinates (desired);
 #define MATCHANGVELOCITYEXECUTE() \
   parent->ApplyLocalTorque (parent->GetMoment()*(desired-parent->UpCoordinateLevel(parent->GetAngularVelocity()))/SIMULATION_ATOM); 
-
+*/
 
 void MatchAngularVelocity::Execute () {
-  MATCHANGVELOCITYSETUP();
+  Vector desired (desired_ang_velocity); 
+  Vector angvel(parent->UpCoordinateLevel(parent->GetAngularVelocity())); 
+  if (!LocalAng)
+    desired = parent->ToLocalCoordinates (desired);
   if (willfinish) {
     if ((done = fabs(desired.i-angvel.i)<VELTHRESHOLD&&fabs(desired.j-angvel.j)<VELTHRESHOLD&&fabs(desired.k-angvel.k)<VELTHRESHOLD ))
       return;
   }
-  MATCHANGVELOCITYEXECUTE();
+  parent->ApplyLocalTorque (parent->GetMoment()*(desired-parent->UpCoordinateLevel(parent->GetAngularVelocity()))/SIMULATION_ATOM); 
 }
 
 void MatchVelocity::Execute () {
   
-  MatchLinearVelocity::Execute();
-  MATCHANGVELOCITYSETUP()
+  MatchAngularVelocity::Execute();
+  MATCHLINVELSETUP()
   if (willfinish) {
-    if ((done = done&&fabs(desired.i-angvel.i)<VELTHRESHOLD&&fabs(desired.j-angvel.j)<VELTHRESHOLD&&fabs(desired.k-angvel.k)<VELTHRESHOLD))
+    if ((done = done&&fabs(desired.i-velocity.i)<VELTHRESHOLD&&fabs(desired.j-velocity.j)<VELTHRESHOLD&&fabs(desired.k-velocity.k)<VELTHRESHOLD))
       return;
   }
-  MATCHANGVELOCITYEXECUTE();
-  //  Vector desired (desired_ang_velocity);
-  //  if (!LocalAng)
-  //    desired = parent->ToLocalCoordinates (desired);
-  //  //parent->GetAngularVelocity();//local coords
-  //  parent->ApplyLocalTorque (parent->GetMoment()*(desired-parent->GetAngularVelocity())/SIMULATION_ATOM);
-  
-
+  MATCHLINVELEXECUTE();
 }
 
 
@@ -60,7 +62,7 @@ void MatchVelocity::Execute () {
 
 
 
-FlyByWire::FlyByWire (): MatchVelocity(Vector(0,0,0),Vector(0,0,0),true,false){
+FlyByWire::FlyByWire (): MatchVelocity(Vector(0,0,0),Vector(0,0,0),true,false), sheltonslide(false){
 
 }
 void FlyByWire::Stop (float per) {
@@ -82,7 +84,9 @@ void FlyByWire::Afterburn (float per){
   Unit::Computer * cpu = &parent->GetComputerData();
   desired_velocity=Vector (0,0,cpu->set_speed+per*(cpu->max_ab_speed-cpu->set_speed));
 }
-
+void FlyByWire::SheltonSlide (bool onoff) {
+  sheltonslide=onoff;
+}
 void FlyByWire::Accel (float per) {
   Unit::Computer *cpu = &parent->GetComputerData(); 
   cpu->set_speed+=per*100*SIMULATION_ATOM;
@@ -95,6 +99,10 @@ void FlyByWire::Accel (float per) {
 
 #define FBWABS(m) (m>=0?m:-m)
 void FlyByWire::Execute () {
-  MatchVelocity::Execute();
+  if (sheltonslide) {
+    MatchAngularVelocity::Execute();//only match turning, keep velocity same
+  }else {
+    MatchVelocity::Execute();
+  }
 } 
 

@@ -23,20 +23,22 @@ class MatchAngularVelocity : public Order {
   void SetDesiredAngularVelocity (const Vector &desired, bool Local) {desired_ang_velocity=desired;LocalAng=Local;}
 };
 
-class MatchVelocity : public MatchLinearVelocity {
+class MatchVelocity : public MatchAngularVelocity {
  protected:
-  Vector desired_ang_velocity;//werld space... generally r*speed;
-  bool LocalAng;
+  Vector desired_velocity;//werld space... generally r*speed;
+  bool LocalVelocity;
  public:
-  MatchVelocity (const Vector &desired,const Vector &desired_ang, bool Local, bool fini=true):MatchLinearVelocity (desired,Local,fini),desired_ang_velocity(desired_ang), LocalAng(Local) {type = FACING | MOVEMENT | LOCATION;}
+  MatchVelocity (const Vector &desired,const Vector &desired_ang, const bool Local, const bool fini=true) :MatchAngularVelocity (desired_ang,Local,fini),desired_velocity(desired), LocalVelocity(Local) {type = FACING | MOVEMENT|LOCATION;}
   void Execute ();
-  void SetDesiredAngularVelocity (const Vector &desired, bool Local) {desired_ang_velocity=desired;LocalAng=Local;}
+  void SetDesiredVelocity (const Vector &desired, const bool Local) {desired_velocity=desired;LocalVelocity=Local;}
 };
 }
 class FlyByWire : public Orders::MatchVelocity {
  protected:
+  bool sheltonslide;
  public:
   FlyByWire ();
+  void SheltonSlide (bool onoff);
   void Stop (float percentage);
   void Right (float percentage);//pass in the percentage of the turn they were turnin right.  -%age indicates left
   void Up (float percentage);//pass in the percentage of the turn they were turning up
