@@ -67,9 +67,11 @@ namespace CAR {
   const int SIREN_BLINKEN =8;
   const int ON_NO_BLINKEN =16;
 
-
-  const EnumMap::Pair type_names[6] = {
-    EnumMap::Pair("RUNNINGLIGHTS,RUNNINGLIGHTS),
+  enum ALL_TYPES {
+    RUNNINGLIGHTS,HEADLIGHTS,LEFTBLINK,RIGHTBLINK,BRAKE,REVERSE,SIREN
+  };
+  const EnumMap::Pair type_names[7] = {
+    EnumMap::Pair("RUNNINGLIGHTS",RUNNINGLIGHTS),
     EnumMap::Pair("HEADLIGHTS", HEADLIGHTS),
     EnumMap::Pair("LEFTBLINK",LEFTBLINK),
     EnumMap::Pair("RIGHTBLINK",RIGHTBLINK),
@@ -77,7 +79,7 @@ namespace CAR {
     EnumMap::Pair("REVERSE",REVERSE),
     EnumMap::Pair("SIREN",SIREN)
   };
-  const EnumMap type_map (type_names,6);
+  const EnumMap type_map (type_names,7);
 }
 
 unsigned int HaloSystem::AddHalo (const char * filename, const QVector & loc, const Vector &size, const GFXColor & col, std::string type) {
@@ -126,24 +128,24 @@ void HaloSystem::Draw(const Matrix & trans, const Vector &scale, short halo_alph
 	drawnow=true;
       }
       if (typ==CAR::HEADLIGHTS) {
-	if (scale.j>=ON_NO_BLINKEN||(bitwise<8&&bitwise>0&&(bitwise&FORWARD_BLINKEN))) {
+	if (scale.j>=CAR::ON_NO_BLINKEN||(bitwise<8&&bitwise>0&&(bitwise&CAR::FORWARD_BLINKEN))) {
 	  drawnow = true;
 	}
       }
       if (typ==CAR::SIREN) {
-	if ((bitwise>0)&&((bitwise>=ON_NO_BLINKEN)||(bitwise&SIREN_BLINKEN))) {
+	if ((bitwise>0)&&((bitwise>=CAR::ON_NO_BLINKEN)||(bitwise&CAR::SIREN_BLINKEN))) {
 	  drawnow=true;
 	}
       }
       float blink_prob=.8;
       if (typ==CAR::RIGHTBLINK) {
-	if ((bitwise>0)&&(bitwise<ON_NO_BLINKEN)&&(bitwise&RIGHT_BLINKEN)) {
+	if ((bitwise>0)&&(bitwise<CAR::ON_NO_BLINKEN)&&(bitwise&CAR::RIGHT_BLINKEN)) {
 	  if (rand()<RAND_MAX*blink_prob) 
 	    drawnow=true;
 	}
       }
       if (typ==CAR::LEFTBLINK) {
-	if ((bitwise>0)&&(bitwise<ON_NO_BLINKEN)&&(bitwise&LEFT_BLINKEN)) {
+	if ((bitwise>0)&&(bitwise<CAR::ON_NO_BLINKEN)&&(bitwise&CAR::LEFT_BLINKEN)) {
 	  if (rand()<RAND_MAX*blink_prob) 
 	    drawnow=true;
 	}
