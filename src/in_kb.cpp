@@ -50,24 +50,113 @@ static void kbGetInput(int key, bool release, int x, int y){
   keyState[key] = release?UP:DOWN;
   _Universe->SetActiveCockpit(i);
 }
+int shiftup (int ch) {
+  switch (ch) {
+  case '1':
+    return '!';
+  case '2':
+    return '@';
+  case '3':
+    return '#';
+  case '4':
+    return '$';
+  case '5':
+    return '%';
+  case '6':
+    return '^';
+  case '7':
+    return '&';
+  case '8':
+    return '*';
+  case '9':
+    return '(';
+  case '0':
+    return ')';
+  case '-':
+    return '_';
+  case '=':
+    return '+';
+  case '\\':
+    return '|';
+  case '\'':
+    return '"';
+  case ';':
+    return ':';
+  case '/':
+    return '?';
+  case '.':
+    return '>';
+  case ',':
+    return '<';
+  case '`':
+    return '~';
+  }
+  return toupper(ch);
+}
+
+int shiftdown (int ch) {
+  switch (ch){
+  case '!':
+    return '1';
+  case '@':
+    return '2';
+  case '#':
+    return '3';
+  case '$':
+    return '4'; 
+  case '%':
+    return '5';
+  case '^':
+    return '6';
+  case '&':
+    return '7';
+  case '*':
+    return '8';
+  case '(':
+    return '9';
+  case ')':
+    return '0';
+  case '_':
+    return '-';
+  case '+':
+    return '=';
+  case '|':
+    return '\\';
+  case '"':
+    return '\'';
+  case ';':
+    return ':';
+  case '?':
+    return '/';
+  case '>':
+    return '.';
+  case '<':
+    return ',';
+  case '~':
+    return '`';
+  }
+  return tolower(ch);
+}
+
+
 
  void glut_keyboard_cb( unsigned int  ch,unsigned int mod, bool release, int x, int y ) 
 {
   bool shifton=false;
   //  fprintf (stderr,"keyboard  %d",ch);
   if ((WSK_MOD_LSHIFT==(mod&WSK_MOD_LSHIFT))||(WSK_MOD_RSHIFT==(mod&WSK_MOD_RSHIFT))) {
-    ch = toupper(ch);
+    ch = shiftup(ch);
     shifton=true;
   }
   kbGetInput( ch, release, x, y );
   if (release) {
     if (shifton) {
-      if (((unsigned int)tolower (ch))!=ch&&keyState[tolower(ch)]==DOWN) {
-	kbGetInput (tolower(ch),release,x,y);
+      if (((unsigned int)shiftdown (ch))!=ch&&keyState[shiftdown(ch)]==DOWN) {
+	kbGetInput (shiftdown(ch),release,x,y);
       }
     }else {
-      if (((unsigned int)toupper (ch))!=ch&&keyState[toupper(ch)]==DOWN) {
-	kbGetInput (toupper(ch),release,x,y);
+      if (((unsigned int)shiftup (ch))!=ch&&keyState[shiftup(ch)]==DOWN) {
+	kbGetInput (shiftup(ch),release,x,y);
       }
     }
   }
