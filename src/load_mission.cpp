@@ -24,10 +24,40 @@ std::string PickledDataOnlyMissionName (std::string pickled) {
   unsigned int newline = pickled.find ("\n");
   return pickled.substr (0,newline);  
 }
+int ReadIntSpace (std::string &str) {
+  std::string myint;
+  bool toggle=false;
+  int i=0;
+  while (i<str.length()) {
+    char c[2]={0,0};
+    c[0]=str[i++];
+    if (c[0]!=' ') {
+      toggle=true;
+      myint+=c;
+    }else {
+      if (toggle) {
+	break;
+      }
+    }
+  }
+  str =str.substr (i,str.length()-i);
+  return XMLSupport::parse_int (myint);
+}
 void SaveGame::ReloadPickledData () {
-  if (!last_pickled_data.empty()) {
-    if (active_missions.size()>0) {
-      active_missions[0]->UnPickle(PickledDataSansMissionName(last_pickled_data));
+  std::string lpd = last_pickled_data;
+  if (_Universe->numPlayers()==1) {
+    if (!lpd.empty()) {
+      unsigned int nummis= ReadIntSpace(lpd);
+      for (unsigned int i=0;i<nummis;i++) {
+	int len = ReadIntSpace (lpd);
+	std::string pickled = lpd.substr (0,len);
+	lpd = lpd.substr (len,lpd.length()-len);
+	if (i<active_missions.size()) {
+	  active_missions[i]->UnPickle (PickledDataSansMissionName(pickled));
+	}else {
+	  UnpickleMission(lpd);
+	}
+      }
     }
   }
 }
@@ -85,15 +115,15 @@ int ReadIntSpace (FILE * fp) {
 std::string UnpickleAllMissions (FILE * fp) {
   std::string retval;
   unsigned int nummissions = ReadIntSpace(fp);
+  retval+=XMLSupport::tostring((int)nummissions)+" ";
   for (unsigned int i=0;i<nummissions;i++) {
     unsigned int picklelength = ReadIntSpace(fp);
+    retval+=XMLSupport::tostring((int)picklelength)+" ";
     char * temp = (char *)malloc (sizeof(char)*(1+picklelength));
     temp[0]=0;
     temp[picklelength]=0;
     fread (temp,picklelength,1,fp);
-    if (i==0) {
-      retval = temp;
-    }
+    retval += temp;
     if (i<active_missions.size()) {
       active_missions[i]->UnPickle (PickledDataSansMissionName(temp));
     }else {
