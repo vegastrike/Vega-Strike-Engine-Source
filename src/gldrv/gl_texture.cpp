@@ -186,7 +186,7 @@ void /*GFXDRVAPI*/ GFXAttachPalette (unsigned char *palette, int handle)
   ConvertPalette(textures[handle].palette, palette);
   //memcpy (textures[handle].palette,palette,768);
 }
-static void DownSampleTexture (unsigned char **newbuf,const unsigned char * oldbuf, int &height, int &width, int pixsize, int handle, int maxwidth,int maxheight,float newfade) {
+static void DownSampleTexture (unsigned char **newbuf,const unsigned char * oldbuf, int &height, int &width, int pixsize, int handle, int maxheight,int maxwidth,float newfade) {
   int i,j,k,l,m;
   if (MAX_TEXTURE_SIZE<maxwidth)
     maxwidth=MAX_TEXTURE_SIZE;
