@@ -26,11 +26,13 @@ public:
     virtual bool isTcp() const { return false; }
 
     virtual int  sendbuf( PacketMem& packet, const AddressIP* to);
-    virtual int  recvbuf( void *buffer, unsigned int &len, AddressIP *from);
     virtual int  recvbuf( PacketMem& buffer, AddressIP *from);
     virtual void ack( );
 
     virtual void dump( std::ostream& ostr ) const;
+
+private:
+    virtual int  inner_recvbuf( void *buffer, unsigned int &len, AddressIP *from);
 
 private:
     VsnetUDPSocket( );

@@ -10,6 +10,7 @@
 typedef int Mix_Music;
 #endif
 
+#include <signal.h>
 #include <string>
 #ifdef _WIN32
 #include <direct.h>
@@ -149,6 +150,8 @@ int main(int argc, char **argv)
 
 	if(SDL_Init(SDL_INIT_AUDIO)<0)
 		cleanExit("SDL_Init\n");
+
+    signal( SIGSEGV, SIG_DFL );
 
 	Mix_HookMusicFinished(&music_finished); 
 #endif

@@ -112,30 +112,30 @@ void VsnetTCPSocket::ack( )
     /* meaningless, TCP is reliable */
 }
 
-int VsnetTCPSocket::recvbuf( void *buffer, unsigned int& len, AddressIP* from)
-{
-    if( _complete_packets.empty() == false )
-    {
-        Blob* b = _complete_packets.front();
-        _complete_packets.pop_front();
-        assert( b );
-        assert( b->present_len == b->expected_len );
-        if( len > b->present_len ) len = b->present_len;
-        memcpy( buffer, b->buf, len );
-        delete b;
-	    assert( len > 0 );
-        return len;
-    }
-    else
-    {
-        if( _connection_closed )
-	    {
-	        COUT << __PRETTY_FUNCTION__ << " connection is closed" << endl;
-	        return 0;
-	    }
-        return -1;
-    }
-}
+// int VsnetTCPSocket::recvbuf( void *buffer, unsigned int& len, AddressIP* from)
+// {
+//     if( _complete_packets.empty() == false )
+//     {
+//         Blob* b = _complete_packets.front();
+//         _complete_packets.pop_front();
+//         assert( b );
+//         assert( b->present_len == b->expected_len );
+//         if( len > b->present_len ) len = b->present_len;
+//         memcpy( buffer, b->buf, len );
+//         delete b;
+// 	    assert( len > 0 );
+//         return len;
+//     }
+//     else
+//     {
+//         if( _connection_closed )
+// 	    {
+// 	        COUT << __PRETTY_FUNCTION__ << " connection is closed" << endl;
+// 	        return 0;
+// 	    }
+//         return -1;
+//     }
+// }
 
 int VsnetTCPSocket::recvbuf( PacketMem& buffer, AddressIP* )
 {
@@ -203,30 +203,27 @@ bool VsnetTCPSocket::needReadAlwaysTrue( ) const
 
 bool VsnetTCPSocket::isActive( )
 {
-    COUT << "enter " << "isActive" << endl;
-
     /* True is the correct answer when the connection is closed:
      * the app must call recvbuf once after this to receive 0
      * and start close processing.
+     * We could return packets from the queue first, but that may
+     * trigger an answer packet from the application, and give
+     * us trouble because of the closed socket.
      */
+    if( _connection_closed ) return true;
+
+    if( _complete_packets.empty() == false ) return true;
+
+    return false;
+}
+
+void VsnetTCPSocket::lower_selected( )
+{
     if( _connection_closed )
     {
-        COUT << "leave " << "isActive" << endl;
-        return true;
-    }
-
-    if( VsnetSocket::isActive( ) == false )
-    {
-        if( _complete_packets.empty() == false )
-        {
-            COUT << "leave " << "isActive" << endl;
-            return true;
-        }
-        else
-        {
-            COUT << "leave " << "isActive" << endl;
-            return false;
-        }
+        /* Pretty sure that recv will return 0.
+         */
+        return;
     }
 
     bool endless   = true;
@@ -242,33 +239,25 @@ bool VsnetTCPSocket::isActive( )
 	        assert( _incomplete_packet == 0 );   // we expect a len, can not have data yet
 	        assert( _incomplete_len_field < 4 ); // len is coded in 4 bytes
 	        int len = 4 - _incomplete_len_field;
-	        int ret = recv( _fd, &_len_field[_incomplete_len_field], len, 0 );
+	        int ret = ::recv( _fd, &_len_field[_incomplete_len_field], len, 0 );
 	        assert( ret <= len );
 	        if( ret <= 0 )
 	        {
 	            if( ret == 0 )
 		        {
 		            _connection_closed = true;
-                    COUT << "leave " << "isActive" << endl;
-		            return ( _complete_packets.empty() == false );
 		        }
-                if( vsnetEWouldBlock() )
-		        {
-                    COUT << "leave " << "isActive"  << endl;
-		            return ( _complete_packets.empty() == false );
-		        }
-		        else
-		        {
-                    COUT << "leave " << "isActive" << endl;
-	                return false;
-		        }
+                else if( vsnetEWouldBlock() == false )
+                {
+                    perror( "receiving TCP packet length bytes" );
+                }
+                return;
 	        }
 	        if( ret > 0 ) _incomplete_len_field += ret;
 	        if( _incomplete_len_field == 4 )
 	        {
 	            _incomplete_len_field = 0;
 		        len = ntohl( *(unsigned int*)_len_field );
-		        COUT << "Next packet to receive has length " << len << endl;
                 _incomplete_packet = new Blob( len );
 	        }
 	    }
@@ -282,19 +271,12 @@ bool VsnetTCPSocket::isActive( )
 	            if( ret == 0 )
 		        {
 		            _connection_closed = true;
-                    COUT << "leave " << "isActive" << endl;
-		            return ( _complete_packets.empty() == false );
 		        }
-                if( vsnetEWouldBlock() )
+                else if( vsnetEWouldBlock() == false )
 		        {
-                    COUT << "leave " << "isActive" << endl;
-		            return ( _complete_packets.empty() == false );
+                    perror( "receiving TCP packet bytes" );
 		        }
-		        else
-		        {
-                    COUT << "leave " << "isActive" << endl;
-	                return false;
-		        }
+                return;
 	        }
 	        if( ret > 0 ) _incomplete_packet->present_len += len;
 	        if( ret == len )
@@ -321,9 +303,5 @@ bool VsnetTCPSocket::isActive( )
         }
     }
     while( endless );  // exit only for EWOULDBLOCK or closed socket
-
-    COUT << "leave " << "isActive" << " blocking socket" << endl;
-
-    return gotpacket;
 }
 

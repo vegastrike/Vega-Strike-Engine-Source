@@ -48,7 +48,7 @@ void VsnetUDPSocket::ack( )
     /* as soon as windows have been introduced, these ACKs will get meaning again */
 }
 
-int VsnetUDPSocket::recvbuf( void *buffer, unsigned int& len, AddressIP* from)
+int VsnetUDPSocket::inner_recvbuf( void *buffer, unsigned int& len, AddressIP* from)
 {
     COUT << " enter " << __PRETTY_FUNCTION__ << " with buffer " << buffer
          << " len=" << len << endl;
@@ -87,7 +87,7 @@ int VsnetUDPSocket::recvbuf( PacketMem& buffer, AddressIP* from)
     unsigned int len = MAXBUFFER;
     int          ret = 0;
 
-    ret = this->VsnetUDPSocket::recvbuf( buf, len, from );
+    ret = this->VsnetUDPSocket::inner_recvbuf( buf, len, from );
     if( ret > 0 )
     {
         buffer.set( buf, len, PacketMem::LeaveOwnership );

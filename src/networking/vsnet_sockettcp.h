@@ -28,7 +28,7 @@ public:
     virtual bool isTcp() const { return true; }
 
     virtual int  sendbuf( PacketMem& packet, const AddressIP* to);
-    virtual int  recvbuf( void *buffer, unsigned int &len, AddressIP *from);
+    // virtual int  recvbuf( void *buffer, unsigned int &len, AddressIP *from);
     virtual int  recvbuf( PacketMem& buffer, AddressIP *from);
     virtual void ack( );
 
@@ -37,6 +37,8 @@ public:
     virtual bool isActive( );
 
     virtual bool needReadAlwaysTrue( ) const;
+
+    virtual void lower_selected( );
 
 protected:
     virtual void child_disconnect( const char *s );

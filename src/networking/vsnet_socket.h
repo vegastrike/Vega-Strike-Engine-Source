@@ -112,7 +112,7 @@ public:
      */
     virtual int  recvbuf( PacketMem& buffer, AddressIP* from ) = 0;
 
-    virtual int  recvbuf( void *buffer, unsigned int &len, AddressIP *from) = 0;
+    // virtual int  recvbuf( void *buffer, unsigned int &len, AddressIP *from) = 0;
 
     virtual void ack( ) = 0;
 
@@ -172,9 +172,9 @@ public:
         if( !_sock.isNull() ) _sock->ack( );
     }
 
-    inline int recvbuf( void *buffer, unsigned int &len, AddressIP *from) {
-        return ( _sock.isNull() ? -1 : _sock->recvbuf( buffer, len, from ) );
-    }
+//     inline int recvbuf( void *buffer, unsigned int &len, AddressIP *from) {
+//         return ( _sock.isNull() ? -1 : _sock->recvbuf( buffer, len, from ) );
+//     }
 
     inline int recvbuf( PacketMem& buffer, AddressIP *from) {
         return ( _sock.isNull() ? -1 : _sock->recvbuf( buffer, from ) );
