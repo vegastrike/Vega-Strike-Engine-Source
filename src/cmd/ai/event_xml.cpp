@@ -4,7 +4,7 @@
 #include <vector>
 #include <list>
 #include <float.h>
-
+#include <assert.h>
 //serves to run through a XML file that nests things for "and". 
 
 
@@ -16,6 +16,8 @@ using XMLSupport::parse_float;
 using XMLSupport::parse_bool;
 using XMLSupport::parse_int;
 namespace AIEvents {
+  AIEvresult::AIEvresult (int type, float const min, const float max, const std::string &aiscript):
+      type (type), max(max), min(min), script(aiscript) {}
 
   const int  AIUNKNOWN=0;
   const int AIMIN =1;	

@@ -3,6 +3,8 @@
 #include "gfx/mesh.h"
 #include "gfx/halo.h"
 #include "gfx/bsp.h"
+#include "vegastrike.h"
+#include <float.h>
 static list<Unit*> Unitdeletequeue;
 void Unit::UnRef() {
   ucref--;
@@ -51,7 +53,7 @@ void Unit::Split (int level) {
   }else {
     subunits = (Unit **)malloc (nm*sizeof (Unit *));
   }
-  for (int i=0;i<nm;i++) {
+  for (i=0;i<nm;i++) {
     subunits[i+numsubunit] = new Unit (old+i,1);
     subunits[i+numsubunit]->mass = mass/level;
     subunits[i+numsubunit]->timeexplode=.1;

@@ -9,9 +9,8 @@ namespace AIEvents {
   struct AIEvresult {
     int type;//will never be zero...negative indicates "not"
     float max, min;//values that will cause this event
-    string script;
-    AIEvresult (int type, float const min, const float max, const string &aiscript):
-      type (type), max(max), min(min), script(aiscript) {}
+	std::string script;
+    AIEvresult (int type, float const min, const float max, const std::string &aiscript);
     bool Eval (const float eval) const {//return ((eval>=min)&&(eval<max)&&type>0)||(eval>=max&&eval<min&&type<0);
       if (eval>=min)
 	if (eval < max)

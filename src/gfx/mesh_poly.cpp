@@ -4,6 +4,7 @@
 #include <values.h>
 #endif
 #include <float.h>
+#include <assert.h>
 #define PBEHIND -1
 #define PFRONT 1
 #define PUNK 0

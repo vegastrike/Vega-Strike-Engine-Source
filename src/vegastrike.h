@@ -74,6 +74,8 @@ static const float SIMULATION_ATOM = (float)(1.0/10.0);
 
 #ifdef HAVE_FINITE
 #   define FINITE(x) (finite(x))
+#else
+#	define FINITE(x) (_finite(x))
 #endif
 
 
@@ -86,3 +88,4 @@ static const float SIMULATION_ATOM = (float)(1.0/10.0);
 } /* extern "C" */
 
 #endif
+

@@ -20,7 +20,7 @@ const EnumMap::Pair element_names[] = {
 };
 const EnumMap AggressiveAIel_map(element_names, 11);
 
-AggressiveAI::AggressiveAI (const char * filename, Unit * target=NULL):FireAt(.2,6,false), logic (AggressiveAIel_map), count (rand()%10) {
+AggressiveAI::AggressiveAI (const char * filename, Unit * target):FireAt(.2,6,false), logic (AggressiveAIel_map), count (rand()%10) {
   
   if (target !=NULL) {
     UnitCollection tmp;
