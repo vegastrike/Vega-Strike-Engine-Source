@@ -147,7 +147,7 @@ void determine_centers_and_radii (vector <asteroid> & field, const Vector &cube_
     field[i].YawPitchRoll.j = 2*M_PI*((float)rand())/RAND_MAX;
     field[i].YawPitchRoll.k = 2*M_PI*((float)rand())/RAND_MAX;
     bool insideanother=false;
-    if (field[i].center.Mag()>safety_zone) {
+    if (field[i].center.Mag()<safety_zone) {
       insideanother=true;
     } else {
       for (unsigned int j=0;j<i;j++) {
