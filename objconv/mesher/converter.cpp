@@ -10,8 +10,10 @@ float transx=0;
 float transy=0;
 float transz=0;
 static bool forcenormals=true;
+bool dims=false;
 int main (int argc, char** argv) {
-  {for (int i=0;i<argc;++i) {
+  { 
+	for (int i=0;i<argc;++i) {
     bool match=false;
     if (strcmp(argv[i],"-flip")==0) {
       match=true;
@@ -25,6 +27,11 @@ int main (int argc, char** argv) {
       match=true;
 	  forcenormals=false;
     }
+	
+	if (strncmp(argv[i],"-dims",5)==0) {
+		dims=true;
+    }
+
 	if (strncmp(argv[i],"-x",2)==0) {
 		sscanf(argv[i]+2,"%f",&transx);
 		match=true;
@@ -45,6 +52,12 @@ int main (int argc, char** argv) {
       i--;
     }
   }}
+
+  if(dims){
+	  fprintf(stderr,"Processing %s...\n",argv[2]);
+	  BFXMtoBoxDims(fopen(argv[2],"rb"), argv[2]);
+	  exit(0);
+  }
 	if (argc!=4){
 		fprintf(stderr,"wrong number of arguments %d, aborting\n",argc);
 		for(int i = 0; i<argc;i++){
