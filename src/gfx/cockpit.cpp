@@ -635,7 +635,8 @@ float Cockpit::LookupTargetStat (int stat, Unit *target) {
       numtimes = fpsmax;
       fpsval = GetElapsedTime();
     }
-    return 1./fpsval;
+	if( fpsval)
+   	 return 1./fpsval;
   }
   return 1;
 }
