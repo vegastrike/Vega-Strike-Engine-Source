@@ -928,7 +928,7 @@ static void DrawCrosshairs (float x, float y, float wid, float hei, const GFXCol
 
 void Cockpit::Draw() { 
   cockpit_time+=GetElapsedTime();
-  if (cockpit_time>=10000)
+  if (cockpit_time>=100000)
     InitStatic();
   _Universe->AccessCamera()->UpdateGFX (GFXFALSE,GFXFALSE,GFXTRUE);
   GFXDisable (TEXTURE1);

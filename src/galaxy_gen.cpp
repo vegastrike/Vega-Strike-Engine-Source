@@ -622,7 +622,7 @@ void MakePlanet(float radius, int entitytype, bool forceRS, Vector R, Vector S, 
   if (loy||thisloy) {
     fprintf (fp,"year= \"%f\" ",thisloy?thisloy:loy);
     temprandom=grand();
-    loy =8640*temprandom;
+    loy =864*temprandom;
     if (loy) {
       fprintf (fp, "day=\"%f\" ",loy);
     }
