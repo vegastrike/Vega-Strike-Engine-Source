@@ -521,6 +521,20 @@ lookuptable engineLookup() {
     r.push_back (fs(FLT_MAX,"_level_10"));
     return r;
 }
+lookuptable engineLimitLookup() {
+    lookuptable r;
+    r.push_back (fs(41,"100"));
+    r.push_back (fs(71,"300"));
+    r.push_back (fs(111,"475"));
+    r.push_back (fs(161,"675"));
+    r.push_back (fs(221,"900"));
+    r.push_back (fs(291,"1150"));
+    r.push_back (fs(371,"1425"));
+    r.push_back (fs(461,"1725"));
+    r.push_back (fs(561,"2050"));
+    r.push_back (fs(FLT_MAX,"2400"));
+    return r;
+}
 
 std::string LookUp ( const lookuptable & a, float x){
     for (unsigned int i=0;i<a.size();i++) {
@@ -829,6 +843,14 @@ void UnitEndElement(const string &name, XML * xml) {
   }  
   if (xeq (name,"energy")){
       fprintf (xml->tfp,"<Upgrade file=\"reactor%s\"/>\n<Upgrade file=\"mult_gun_cooler\"/>\n",LookUp (engineLookup (),xml->energy_recharge).c_str());
+	  float limit = xpf(LookUp (engineLimitLookup (),xml->energy_recharge));
+	  limit = xml->energy_limit-limit;
+	  if (limit>0) {
+		  int numcap = limit/100;
+		  for (int i=0;i<numcap;++i) {
+			  fprintf (xml->tfp,"	<upgrade file=\"add_reactor_capacitance\"/>\n");
+		  }
+	  }
       fprintf (xml->bfp,"<Upgrade file=\"reactor_level_0\"/>\n");
   }
 }
