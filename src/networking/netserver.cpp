@@ -176,14 +176,15 @@ void	NetServer::sendLoginAccept( Client * clt, AddressIP ipadr, int newacct)
 		cout<<"Credits = "<<credits<<endl;
 
 		// WARNING : WE DON'T SAVE FACTION NOR FLIGHTGROUP YET
-		clt->game_unit = new Unit();
-		clt->game_unit->LoadXML( "", "", xml, xml_size);
+		Unit * un = new Unit();
+		un->LoadXML( "", "", xml, xml_size);
 		string PLAYER_CALLSIGN( clt->name);
 		// We may have to determine which is the current ship of the player if we handle several ships for one player
 		string PLAYER_SHIPNAME = savedships[0];
 		// WE DON'T KNOW THE FACTION YET !!!
 		string PLAYER_FACTION_STRING( "privateer");
-		clt->game_unit->SetFg( Flightgroup::newFlightgroup (PLAYER_CALLSIGN,PLAYER_SHIPNAME,PLAYER_FACTION_STRING,"default",1,1,"","",mission), 0);
+		un->SetFg( Flightgroup::newFlightgroup (PLAYER_CALLSIGN,PLAYER_SHIPNAME,PLAYER_FACTION_STRING,"default",1,1,"","",mission), 0);
+		clt->game_unit.SetUnit( un);
 		// The Unit will be added in the addClient function
 
 		//string strname( name);

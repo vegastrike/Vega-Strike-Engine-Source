@@ -545,14 +545,14 @@ void NetClient::getZoneData( const Packet* packet )
 			Clients[nser]->current_state = cs;
 			memcpy( &Clients[nser]->current_desc, &cd, desc_size);
 			// Launch the unit in the game
-			Clients[nser]->game_unit = UniverseUtil::launch (string(""),"avenger",string(""),string( "unit"), string("default"),1,0, cs.getPosition(), string(""));
-			Clients[nser]->game_unit->PrimeOrders();
-			Clients[nser]->game_unit->SetNetworkMode( true);
+			Clients[nser]->game_unit.SetUnit( UniverseUtil::launch (string(""),"avenger",string(""),string( "unit"), string("default"),1,0, cs.getPosition(), string("")));
+			Clients[nser]->game_unit.GetUnit()->PrimeOrders();
+			Clients[nser]->game_unit.GetUnit()->SetNetworkMode( true);
 
 			// Assign new coordinates to client
-			Clients[nser]->game_unit->SetOrientation( cs.getOrientation());
-			Clients[nser]->game_unit->SetVelocity( cs.getVelocity());
-			Clients[nser]->game_unit->SetNetworkMode( true);
+			Clients[nser]->game_unit.GetUnit()->SetOrientation( cs.getOrientation());
+			Clients[nser]->game_unit.GetUnit()->SetVelocity( cs.getVelocity());
+			Clients[nser]->game_unit.GetUnit()->SetNetworkMode( true);
 			// In that case, we want cubic spline based interpolation
 			//init_interpolation( nser);
 		}
@@ -561,8 +561,8 @@ void NetClient::getZoneData( const Packet* packet )
 		{
 			Clients[nser] = new Client;
 			cout<<"IT'S ME OR ANOTHER LOCAL PLAYER ";
-			Clients[nser]->game_unit = getNetworkUnit( nser);
-			assert( Clients[nser]->game_unit != NULL);
+			Clients[nser]->game_unit.SetUnit( getNetworkUnit( nser));
+			assert( Clients[nser]->game_unit.GetUnit() != NULL);
 			cs.display();
 		}
 	}
@@ -599,23 +599,23 @@ void	NetClient::addClient( const Packet* packet )
 	if( !isLocalSerial( cltserial))
 	{
 		// CREATES THE UNIT... GET XML DATA OF UNIT FROM SERVER
-		Clients[cltserial]->game_unit = UniverseUtil::launch (string(""),"avenger",string(""),string( "unit"), string("default"),1,0, cs.getPosition(), string(""));
-		Clients[cltserial]->game_unit->PrimeOrders();
-		Clients[cltserial]->game_unit->SetNetworkMode( true);
+		Clients[cltserial]->game_unit.SetUnit( UniverseUtil::launch (string(""),"avenger",string(""),string( "unit"), string("default"),1,0, cs.getPosition(), string("")));
+		Clients[cltserial]->game_unit.GetUnit()->PrimeOrders();
+		Clients[cltserial]->game_unit.GetUnit()->SetNetworkMode( true);
 		//cout<<"Addclient 4"<<endl;
 
 		// Assign new coordinates to client
-		Clients[cltserial]->game_unit->SetOrientation( cs.getOrientation());
-		Clients[cltserial]->game_unit->SetVelocity( cs.getVelocity());
-		Clients[cltserial]->game_unit->SetNetworkMode( true);
+		Clients[cltserial]->game_unit.GetUnit()->SetOrientation( cs.getOrientation());
+		Clients[cltserial]->game_unit.GetUnit()->SetVelocity( cs.getVelocity());
+		Clients[cltserial]->game_unit.GetUnit()->SetNetworkMode( true);
 		// In that case, we want cubic spline based interpolation
 		//init_interpolation( cltserial);
 	}
 	// If this is a local player (but not the current), we must affect its Unit to Client[sernum]
 	else if( cltserial!=this->serial)
 	{
-		Clients[cltserial]->game_unit = getNetworkUnit( cltserial);
-		assert( Clients[cltserial]->game_unit != NULL);
+		Clients[cltserial]->game_unit.SetUnit( getNetworkUnit( cltserial));
+		assert( Clients[cltserial]->game_unit.GetUnit() != NULL);
 	}
 }
 
@@ -635,7 +635,7 @@ void	NetClient::removeClient( const Packet* packet )
 	}
 
 	// Removes the unit from starsystem, destroys it and delete client
-	_Universe->activeStarSystem()->RemoveUnit(Clients[cltserial]->game_unit);
+	_Universe->activeStarSystem()->RemoveUnit(Clients[cltserial]->game_unit.GetUnit());
 	nbclients--;
 	delete Clients[cltserial];
 	cout<<"Leaving client n°"<<cltserial<<" - now "<<nbclients<<" clients in system"<<endl;
@@ -699,7 +699,7 @@ void	NetClient::receivePosition( const Packet* packet )
 			sernum = cs.getSerial();
 			// Test if this is a local player
 			// Is it is, ignore position update
-			if( Clients[sernum]!=NULL && !_Universe->isPlayerStarship( Clients[sernum]->game_unit))
+			if( Clients[sernum]!=NULL && !_Universe->isPlayerStarship( Clients[sernum]->game_unit.GetUnit()))
 			{
 				// Backup old state
 				Clients[sernum]->old_state = Clients[sernum]->current_state;
@@ -709,10 +709,10 @@ void	NetClient::receivePosition( const Packet* packet )
 				// memcpy( &(Clients[sernum]->current_state), &cs, sizeof( ClientState));
 
 				// Set the orientation by extracting the matrix from quaternion
-				Clients[sernum]->game_unit->SetOrientation( cs.getOrientation());
-				Clients[sernum]->game_unit->SetVelocity( cs.getVelocity());
+				Clients[sernum]->game_unit.GetUnit()->SetOrientation( cs.getOrientation());
+				Clients[sernum]->game_unit.GetUnit()->SetVelocity( cs.getVelocity());
 				// Use SetCurPosition or SetPosAndCumPos ??
-				Clients[sernum]->game_unit->SetCurPosition( cs.getPosition());
+				Clients[sernum]->game_unit.GetUnit()->SetCurPosition( cs.getPosition());
 				// In that case, we want cubic spline based interpolation
 				//predict( sernum);
 				//init_interpolation( sernum);
@@ -727,7 +727,7 @@ void	NetClient::receivePosition( const Packet* packet )
 			sernum = ntohs( sernum);
 			cout<<"Received POSUPDATE for serial "<<sernum<<" -> ";
 			offset += sizeof( ObjSerial);
-			if( Clients[sernum]!=NULL && !_Universe->isPlayerStarship( Clients[sernum]->game_unit))
+			if( Clients[sernum]!=NULL && !_Universe->isPlayerStarship( Clients[sernum]->game_unit.GetUnit()))
 			{
 				// Backup old state
 				//memcpy( &(Clients[sernum]->old_state), &(Clients[sernum]->current_state), sizeof( ClientState));
@@ -737,7 +737,7 @@ void	NetClient::receivePosition( const Packet* packet )
 				//tmppos = (QVector) *(databuf+offset);
 				Clients[sernum]->current_state.setPosition( tmppos);
 				// Use SetCurPosition or SetPosAndCumPos ??
-				Clients[sernum]->game_unit->SetCurPosition( tmppos);
+				Clients[sernum]->game_unit.GetUnit()->SetCurPosition( tmppos);
 				Clients[sernum]->current_state.display();
 				//predict( sernum);
 			}
@@ -763,7 +763,7 @@ void	NetClient::inGame()
 {
 	Packet packet2;
 
-	ClientState cs( this->serial, this->game_unit->curr_physical_state, this->game_unit->Velocity, Vector(0,0,0), 0);
+	ClientState cs( this->serial, this->game_unit.GetUnit()->curr_physical_state, this->game_unit.GetUnit()->Velocity, Vector(0,0,0), 0);
 	// HERE SEND INITIAL CLIENTSTATE !!
 	packet2.send( CMD_ADDCLIENT, this->serial, (char *)&cs, sizeof( ClientState), SENDRELIABLE, NULL, this->clt_sock, __FILE__, __LINE__ );
 	cout<<"Sending ingame with serial n°"<<this->serial<<endl;

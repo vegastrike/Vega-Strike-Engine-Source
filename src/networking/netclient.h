@@ -27,6 +27,7 @@
 #include "const.h"
 #include "vsnet_socket.h"
 #include "gfx/quaternion.h"  // for Transformation
+#include "cmd/container.h"
 
 class Packet;
 class Unit;
@@ -43,7 +44,7 @@ extern bool isLocalSerial( ObjSerial sernum);
 
 class	NetClient
 {
-		Unit *				game_unit;		// Unit struct from the game corresponding to that client
+		UnitContainer		game_unit;		// Unit struct from the game corresponding to that client
 
 		SOCKETALT			clt_sock;		// Comm. socket
 		ObjSerial			serial;			// Serial # of client
@@ -112,8 +113,8 @@ class	NetClient
 		void	setCallsign( char * calls) { this->callsign = string( calls);}
 		void	setCallsign( string calls) { this->callsign = calls;}
 		string	getCallsign() {return this->callsign;}
-		void	setUnit( Unit * un) { game_unit = un;}
-		Unit *	getUnit() { return game_unit;}
+		void	setUnit( Unit * un) { game_unit.SetUnit( un);}
+		Unit *	getUnit() { return game_unit.GetUnit();}
 
     private:
 		void	receiveSave( const Packet* packet );

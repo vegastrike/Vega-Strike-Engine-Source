@@ -611,6 +611,7 @@ void createObjects(std::vector <std::string> &fighter0name, std::vector <StarSys
   			fighters[a] = UnitFactory::createUnit(fightername, false,tmptarget[a],modifications,fg,s);
 			if( Network!=NULL)
 			{
+				fighters[a]->SetNetworkMode();
 				Network[squadnum].setUnit( fighters[a]);
 				cout<<"Creating fighter["<<a<<"] from "<<modifications<<" on Network["<<squadnum<<"] named "<<Network[squadnum].getCallsign()<<endl;
 			}

@@ -5,7 +5,7 @@
  */
 game_data_t g_game;
 
-NetClient * Network;
+NetClient * Network=NULL;
 
 FILE * fpread=NULL;
 

@@ -173,9 +173,9 @@ public:
 
 protected:
   // Tell if networked unit
-  char networked;
+  bool networked;
 public:
-  void SetNetworkMode( bool mode) {networked = true;}
+  void SetNetworkMode( bool mode=true) {this->networked = mode;}
 
 /***************************************************************************************/
 /**** UPGRADE/CUSTOMIZE STUFF                                                       ****/

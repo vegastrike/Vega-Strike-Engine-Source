@@ -119,6 +119,7 @@ librootgeneric =			\
 	savegame.cpp			\
 	savegame.h				\
 	vegastrike.h			\
+	vs_globals.cpp			\
 	vs_path.cpp				\
 	vs_path.h
 
@@ -131,7 +132,6 @@ librootserver =					\
 
 vegaserver_SOURCES =			\
 	$(librootgeneric) $(librootserver) \
-	vs_globals.cpp			\
 	vegaserver.cpp
 
 accountserver_SOURCES =		\
@@ -144,11 +144,9 @@ accountserver_SOURCES =		\
 	xml_support.cpp			\
 	lin_time.cpp				\
 	lin_time.h					\
-	vs_globals.cpp			\
 	accountserver.cpp
 
 vegastrike_SOURCES =		\
 	$(librootgeneric) $(libroot) \
-	vs_globals.cpp			\
 	main.cpp
 

@@ -25,7 +25,6 @@
 #include <string>
 #include <vector>
 #include <stdio.h>
-#include "cmd/unit_generic.h"
 #include "const.h"
 #include <assert.h>
 
@@ -49,7 +48,6 @@ class Account
 		FILE *		fp;
 		char	name[NAMELEN];
 		char	passwd[NAMELEN];
-		Unit *		unit;
 
 		// Assume player has created ship/char -> to remove in the future
 		Account() { haschar=1; connected=false; };

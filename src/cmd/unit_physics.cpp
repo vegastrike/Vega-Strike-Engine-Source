@@ -73,7 +73,6 @@ void GameUnit<UnitType>::UpdatePhysics2 (const Transformation &trans, Transforma
   if( Network!=NULL && Network[0].isTime())
   {
 	  //cout<<"SEND UPDATE"<<endl;
-	  //this->networked=1;
 	  // Check if this is a player, because in network mode we should only send updates of our moves
 	  player= _Universe->whichPlayerStarship( this);
 	  if( player>=0 /* && this->networked */ )
@@ -93,12 +92,16 @@ void GameUnit<UnitType>::UpdatePhysics2 (const Transformation &trans, Transforma
 				Network[player].sendAlive();
 	  }
 	  else
-		  // Not the player so update the unit's position and stuff with the last received snapshot from the server
-			;
+	  {
+		  // Not a player so update the unit's position and stuff with the last received snapshot from the server
+		  // This may be be a bot or a unit controlled by the server
+		  if( !this->networked)
+			// Case it is a local unit
+ 			curr_physical_state.position = curr_physical_state.position +  (Velocity*SIMULATION_ATOM*difficulty).Cast();
+	  }
   }
   else
   {
-	  //this->networked++;
  	 curr_physical_state.position = curr_physical_state.position +  (Velocity*SIMULATION_ATOM*difficulty).Cast();
   }
 
@@ -125,10 +128,10 @@ void GameUnit<UnitType>::UpdatePhysics2 (const Transformation &trans, Transforma
     char tmp=0;
     for (i=0;i<meshdata.size();i++) {
       if (!meshdata[i])
-	continue;
+		continue;
       tmp |=meshdata[i]->HasBeenDrawn();
       if (!meshdata[i]->HasBeenDrawn()) {
-	meshdata[i]->UpdateFX(SIMULATION_ATOM);
+		meshdata[i]->UpdateFX(SIMULATION_ATOM);
       }
       meshdata[i]->UnDraw();
     }

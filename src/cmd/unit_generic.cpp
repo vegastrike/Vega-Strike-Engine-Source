@@ -1298,6 +1298,15 @@ void Unit::UpdatePhysics (const Transformation &trans, const Matrix &transmat, c
 
 void Unit::UpdatePhysics2 (const Transformation &trans, Transformation & old_physical_state, Vector & accel, float & difficulty, const Matrix &transmat, const Vector & cum_vel,  bool lastframe, UnitCollection *uc)
 {
+	// If it is not a player, it is a unit controlled by server so compute changes
+	if( !_Universe->isPlayerStarship( this))
+	{
+		curr_physical_state.position = curr_physical_state.position +  (Velocity*SIMULATION_ATOM*difficulty).Cast();
+		  cumulative_transformation = curr_physical_state;
+		  cumulative_transformation.Compose (trans,transmat);
+		  cumulative_transformation.to_matrix (cumulative_transformation_matrix);
+		  cumulative_velocity = TransformNormal (transmat,Velocity)+cum_vel;
+	}
 }
 
 bool Unit::AutoPilotTo (Unit * target, bool ignore_friendlies) {

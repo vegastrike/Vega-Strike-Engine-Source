@@ -77,7 +77,7 @@ bool	ZoneMgr::addClient( Client * clt)
 	zone_list[zone].push_back( clt);
 	zone_clients[zone]++;
 	clt->zone = zone;
-	sts->AddUnit( clt->game_unit);
+	sts->AddUnit( clt->game_unit.GetUnit());
 	if( sts)
 		return true;
 	return false;
@@ -96,7 +96,7 @@ void	ZoneMgr::removeClient( Client * clt)
 	zone_list[clt->zone].remove( clt);
 	zone_clients[clt->zone]--;
 	sts = _Universe->star_system[clt->zone];
-	sts->RemoveUnit( clt->game_unit);
+	sts->RemoveUnit( clt->game_unit.GetUnit());
 }
 
 // Broadcast a packet to a client's zone clients

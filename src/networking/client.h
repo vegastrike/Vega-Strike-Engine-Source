@@ -31,6 +31,7 @@
 #include "vsnet_address.h"
 #include "vsnet_socket.h"
 #include "cmd/unit_generic.h"
+#include "cmd/container.h"
 #include "savegame.h"
 
 extern VegaConfig *vs_config;
@@ -46,7 +47,7 @@ struct ClientDescription
 struct	Client
 {
 	/* Network and identification properties */
-	Unit	*		game_unit;
+	UnitContainer	game_unit;
 	SaveGame		save;
 	CubicSpline		spline;
 	AddressIP		cltadr;
