@@ -1893,14 +1893,29 @@ bool BaseComputer::pickerChangedSelection(const EventCommandId& command, Control
 bool UpgradeAllowed (const Cargo& item, Unit * playerUnit) {
   std::string prohibited_upgrades=UniverseUtil::LookupUnitStat(playerUnit->name,FactionUtil::GetFactionName(playerUnit->faction),"Prohibited_Upgrades");
   while (prohibited_upgrades.length()) {
-    std::string::size_type where=prohibited_upgrades.find(";");
+    std::string::size_type where=prohibited_upgrades.find(" ");
+    if (where==string::npos) where=prohibited_upgrades.find(";");
     std::string prohibited_upgrade=prohibited_upgrades;
     if (where!=string::npos) {
       prohibited_upgrade=prohibited_upgrades.substr(0,where);
       prohibited_upgrades=prohibited_upgrades.substr(where+1);
     }else prohibited_upgrades="";
-    if (prohibited_upgrade==item.content||prohibited_upgrade==item.category) {
-      return false;
+    where=prohibited_upgrade.find(":");
+    std::string content = prohibited_upgrade.substr(0,where);
+    int quantity=0;
+    if (where!=string::npos) {
+      std::string tmp = prohibited_upgrade.substr(where+1);      
+      quantity = atoi(tmp.c_str());      
+    }
+    if (content==item.content||content==item.category) {
+      if (quantity==0)
+          return false;
+      unsigned int i=0;
+      Cargo * numUpgrades = playerUnit->GetCargo(item.content,i);
+      if (numUpgrades) {
+        if (numUpgrades->quantity>=quantity)
+          return false;
+      }            
     }
   }
   return true;
