@@ -19,9 +19,9 @@
  */
 #ifndef _UNIT_FACTORY_H_
 #define _UNIT_FACTORY_H_
-
+#ifdef HAVE_CONFIG_H
 #include <config.h>
-
+#endif
 #include <string>
 
 #include "gfxlib.h"   // for GFXMaterial

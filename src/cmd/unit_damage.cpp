@@ -325,14 +325,18 @@ void Unit::DamageRandSys(float dam, const Vector &vec) {
 	}
 	if (degrees>=20&&degrees<35) {
 		//DAMAGE MOUNT
-		if (nummounts) {
+		if (randnum>=.65&&randnum<.9) {
+			image->ecm*=dam;
+		} else if (nummounts) {
 			unsigned int whichmount=rand()%nummounts;
 			if (randnum>=.9) {
 				mounts[whichmount].status=Unit::Mount::DESTROYED;
-			} else if (randnum>=.6) {
-			  image->ecm*=dam;
-			}else if (mounts[whichmount].ammo>0) {
+			}else if (mounts[whichmount].ammo>0&&randnum>=.4) {
 			  mounts[whichmount].ammo*=dam;
+			} else if (randnum>=.1) {
+				mounts[whichmount].time_to_lock+=(100-(100*dam));
+			} else {
+				mounts[whichmount].size&=(~weapon_info::AUTOTRACKING);
 			}
 		}
 		return;

@@ -58,7 +58,7 @@
 #include "hashtable.h"
 #include "gfx/animation.h"
 #include "flightgroup.h"
-#include "unit_factory.h"
+#include "cmd/unit_factory.h"
 //#include "vegastrike.h"
 extern vector <char *> ParseDestinations (const string &value);
 /* *********************************************************** */
