@@ -171,9 +171,7 @@ unsigned char * readImage (FILE *fp, int & bpp, int &color_type, unsigned long &
    fprintf (stderr,"Loading Done. Decompressing\n");
 #endif
    png_read_info(png_ptr, info_ptr);  /* read all PNG info up to image data */
-   printf( "width0: %d - height0: %d\n", info_ptr->width, info_ptr->height);
    png_get_IHDR(png_ptr, info_ptr, (png_uint_32 *)&width, (png_uint_32 *)&height, &bpp, &color_type, &interlace_type, NULL, NULL);
-   printf( "width1: %d - height1: %d\n", width, height);
 # if __BYTE_ORDER != __BIG_ENDIAN
    if (bpp==16)
      png_set_swap (png_ptr);
@@ -192,7 +190,6 @@ unsigned char * readImage (FILE *fp, int & bpp, int &color_type, unsigned long &
    png_set_expand (png_ptr);
    png_read_update_info (png_ptr,info_ptr);
    png_get_IHDR(png_ptr, info_ptr, (png_uint_32 *)&width, (png_uint_32 *)&height, &bpp, &color_type, &interlace_type, NULL, NULL);
-   printf( "width1: %d - height1: %d\n", width, height);
    row_pointers = (unsigned char **)malloc (sizeof (unsigned char *) *height);
    int numchan=1;
    if (color_type&PNG_COLOR_MASK_COLOR)
