@@ -46,11 +46,20 @@ Universe::Universe(int argc, char** argv)
 	LoadWeapons("weapon_list.xml");
 	LoadFactionXML("factions.xml");	
 }
+
+
+void Universe::LoadStarSystem(StarSystem * s) {
+  star_system.push_back (s);
+}
+void Universe::UnloadStarSystem (StarSystem * s) {
+  //not sure what to do here? serialize?
+}
 void Universe::Init (string systemfile, const Vector & centr,const string planetname) {
 
   string fullname=systemfile+".system";
   StarSystem * ss;
-  star_system.push_back (ss=new StarSystem((char *)fullname.c_str(),centr,planetname));
+  LoadStarSystem (ss=new StarSystem ("solsmall.system",centr,planetname));
+  LoadStarSystem(ss=new StarSystem((char *)fullname.c_str(),centr,planetname));
   pushActiveStarSystem (ss);
 }
 Universe::~Universe()
@@ -116,13 +125,27 @@ void Universe::StartGFX()
 void Universe::Loop(void main_loop()) {
   GFXLoop(main_loop);
 }
-
+extern void micro_sleep (unsigned int howmuch);
+extern int getmicrosleep ();
 void Universe::StartDraw()
 {
 #ifndef WIN32
 	RESETTIME();
 #endif
 	GFXBeginScene();
+
+  _Universe->activeStarSystem()->Draw();
+  UpdateTime();
+  for (int i=0;i<star_system.size();i++) {
+    star_system[i]->Update();
+  }
+  micro_sleep (getmicrosleep());//so we don't starve the audio thread  
+  GFXEndScene();
+
+
+
+
+
 }
 
 

@@ -569,16 +569,18 @@ void destroyObjects() {
   //delete fighter2;
   //delete fighter;
 }
-extern void micro_sleep (unsigned int n);
+
 
 extern double gametime;
 
 double gametime=0.0;
 int total_nr_frames=0;
-
+int getmicrosleep () {
+  static int microsleep = XMLSupport::parse_int (vs_config->getVariable ("audio","threadtime","2000"));
+}
 void main_loop() {
 
-  static int microsleep = XMLSupport::parse_int (vs_config->getVariable ("audio","threadtime","2000"));
+
 
 
   _Universe->StartDraw();
@@ -587,15 +589,6 @@ void main_loop() {
     myterrain->AdjustTerrain(_Universe->activeStarSystem());
   }
 
-  _Universe->activeStarSystem()->Draw();
-  //fighters[0]->UpdateHudMatrix();
-  //_Universe->activeStarSystem()->SetViewport();
-  UpdateTime();
-  _Universe->activeStarSystem()->Update();
-///CANNOT DO EVERY FRAME...DO EVERY PHYSICS frame  muzak->Listen();
-
-  micro_sleep (microsleep);//so we don't starve the audio thread  
-  GFXEndScene();
       
   ProcessInput();
 
