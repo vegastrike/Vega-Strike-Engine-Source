@@ -135,7 +135,7 @@ void Cockpit::LoadXML (const char * filename) {
   if(!inFile) {
     cockpit_offset=0;
     viewport_offset=0;
-    //    Crosshairs = new Sprite ("crosshairs.spr");
+    Crosshairs = new Sprite ("crosshairs.spr");
     return;
   }
   XML_Parser parser = XML_ParserCreate(NULL);
