@@ -31,6 +31,7 @@ TO LOOK AT - When receiving a packet : look at timestamp and compare it to lates
 
 *** CLIENT SIDE *********************************************************
 
+- Ask directly account server for authentication and get serverip/port to connect to
 - Check if we received position info about us -> ignore
 - Find the jump call and make it only send a jump request to server
 - Should wait for CMD_ADDEDYOU just before entering in the main game loop

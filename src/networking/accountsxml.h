@@ -50,8 +50,8 @@ class Account
 		FILE *		fp;
 		string callsign;
 		string passwd;
-		//char	name[NAMELEN];
-		//char	passwd[NAMELEN];
+		string serverip;
+		string serverport;
 
 		// Assume player has created ship/char -> to remove in the future
 		Account() { haschar=1; connected=false; };

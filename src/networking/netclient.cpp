@@ -57,6 +57,8 @@ double NETWORK_ATOM;
 vector<string> globalsaves;
 extern vector<unorigdest *> pendingjump;
 extern Hashtable<std::string, StarSystem, char[127]> star_system_table;
+string serverip;
+string serverport;
 
 /*************************************************************/
 /**** Tool funcitons                                      ****/
@@ -206,12 +208,65 @@ bool	NetClient::PacketLoop( Cmd command)
 /**** Login loop                                          ****/
 /*************************************************************/
 
+int		NetClient::checkAcctMsg( SocketSet & set)
+{
+	int len=0;
+	AddressIP	ip2;
+	Packet packeta;
+	int ret = 1;
+
+	// Watch account server socket
+	// Get the number of active clients
+	if( acct_sock.isActive( set ))
+	{
+		//COUT<<"Net activity !"<<endl;
+		// Receive packet and process according to command
+
+		PacketMem mem;
+		if( (len=acct_sock.recvbuf( mem, &ip2 ))>0 )
+		{
+			Packet p( mem );
+			packeta = p;
+			NetBuffer netbuf( packeta.getData(), packeta.getDataLength());
+			switch( packeta.getCommand())
+			{
+				case LOGIN_DATA :
+				{
+					COUT << ">>> LOGIN DATA --------------------------------------"<<endl;
+					// We received game server info (the one we should connect to)
+					serverip = netbuf.getString();
+					serverport = netbuf.getString();
+					COUT << "<<< LOGIN DATA --------------------------------------"<<endl;
+				}
+				break;
+				case LOGIN_ERROR :
+					COUT<<">>> LOGIN ERROR =( DENIED )= --------------------------------------"<<endl;
+					ret = -1;
+				break;
+				case LOGIN_ALREADY :
+					COUT<<">>> LOGIN ERROR =( ALREADY LOGGED IN )= --------------------------------------"<<endl;
+					ret = -1;
+				break;
+				default:
+					COUT<<">>> UNKNOWN COMMAND =( "<<hex<<packeta.getSerial()<<" )= --------------------------------------"<<endl;
+					ret = -1;
+			}
+		}
+		else
+		{
+			cerr<<"Connection to account server lost !!"<<endl;
+			acct_sock.disconnect( __PRETTY_FUNCTION__, false );
+			ret = -1;
+		}
+	}
+	return ret;
+}
+
 vector<string>	NetClient::loginLoop( string str_callsign, string str_passwd)
 {
 	COUT << "enter " << "NetClient::loginLoop" << endl;
 
 	Packet	packet2;
-	vector<string> savefiles;
 	NetBuffer netbuf;
 
 	//memset( buffer, 0, tmplen+1);
@@ -271,12 +326,125 @@ vector<string>	NetClient::loginLoop( string str_callsign, string str_passwd)
 		micro_sleep( 40000);
 	}
 	COUT<<"End of login loop"<<endl;
-	if( ret>0 && packet.getCommand()!=LOGIN_ERROR && packet.getCommand()!=LOGIN_UNAVAIL)
+	if( ret>0 && packet.getCommand()!=LOGIN_ERROR && packet.getCommand()!=LOGIN_ALREADY && packet.getCommand()!=LOGIN_UNAVAIL)
 	{
 		this->callsign = str_callsign;
-		savefiles = globalsaves;
+		//savefiles = globalsaves;
 	}
-	return savefiles;
+	return globalsaves;
+}
+
+int		NetClient::loginAcctLoop( string str_callsign, string str_passwd)
+{
+	COUT << "enter " << "NetClient::loginAcctLoop" << endl;
+
+	Packet	packet2;
+	NetBuffer netbuf;
+
+	//memset( buffer, 0, tmplen+1);
+	netbuf.addString( str_callsign);
+	netbuf.addString( str_passwd);
+
+	COUT << "Buffering to send with CMD_LOGIN: " << endl;
+	PacketMem m( netbuf.getData(), netbuf.getDataLength(), PacketMem::LeaveOwnership );
+	m.dump( cerr, 3 );
+
+	packet2.send( LOGIN_DATA, 0, netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, NULL, this->acct_sock, __FILE__, 
+#ifndef _WIN32
+			__LINE__
+#else
+			167
+#endif
+		);
+	COUT << "Sent ACCOUNT SERVER login for player <" << str_callsign << ">:<" << str_passwd
+		 << ">" << endl
+	     << "   - buffer length : " << packet2.getDataLength() << endl
+	     << "   - buffer: " << netbuf.getData() << endl;
+	// Now the loop
+	int timeout=0, recv=0, ret=0;
+	UpdateTime();
+
+	Packet packet;
+
+	double initial = getNewTime();
+	double newtime=0;
+	double elapsed=0;
+	SocketSet set;
+	string login_tostr = vs_config->getVariable( "network", "logintimeout", "10" );
+	int login_to = atoi( login_tostr.c_str());
+	int nb=0;
+	while( !timeout && !recv)
+	{
+		// If we have no response in "login_to" seconds -> fails
+		UpdateTime();
+		newtime = getNewTime();
+		elapsed = newtime-initial;
+		//COUT<<elapsed<<" seconds since login request"<<endl;
+		if( elapsed > login_to)
+		{
+			COUT<<"Timed out"<<endl;
+			timeout = 1;
+		}
+    	acct_sock.watch( set );
+		nb = set.select( NULL );
+		if( nb > 0 )
+			ret=this->checkAcctMsg( set);
+		if( ret>0)
+		{
+			COUT<<"Got a response"<<endl;
+			recv = 1;
+		}
+		else if( ret<0)
+		{
+			cerr<<"Error, dead connection to server"<<endl;
+			recv=-1;
+		}
+
+		micro_sleep( 40000);
+	}
+	COUT<<"End of login loop"<<endl;
+	if( ret>0 && packet.getCommand()!=LOGIN_ERROR && packet.getCommand()!=LOGIN_ALREADY)
+	{
+		//this->callsign = str_callsign;
+		//savefiles = globalsaves;
+		char * server_ip = new char[serverip.length()];
+		memcpy( server_ip, serverip.c_str(), serverip.length());
+		this->init( server_ip, atoi( serverport.c_str()));
+		delete server_ip;
+	}
+	return ret;
+}
+
+/*************************************************************/
+/**** Initialize the client network to account server     ****/
+/*************************************************************/
+
+SOCKETALT	NetClient::init_acct( char * addr, unsigned short port)
+{
+    COUT << " enter " << __PRETTY_FUNCTION__
+	     << " with " << addr << ":" << port << endl;
+
+	char srvip[256];
+	unsigned short tmpport;
+
+	cout<<"Initializing connection to account server..."<<endl;
+	if( vs_config->getVariable( "network", "accountsrvip", "")=="")
+	{
+		cout<<"Account server IP not specified, exiting"<<endl;
+		cleanup();
+	}
+	memset( srvip, 0, 256);
+	memcpy( srvip, (vs_config->getVariable( "network", "accountsrvip", "")).c_str(), 256);
+	string tport = vs_config->getVariable( "network", "accountsrvport", "ACCT_PORT");
+	tmpport = atoi( tport.c_str());
+
+	acct_sock = NetUITCP::createSocket( srvip, tmpport );
+	if( !acct_sock.valid())
+	{
+		cerr<<"Cannot connect to account server... quitting"<<endl;
+		cleanup();
+	}
+	COUT <<"accountserver on socket "<<acct_sock<<" done."<<endl;
 }
 
 /*************************************************************/

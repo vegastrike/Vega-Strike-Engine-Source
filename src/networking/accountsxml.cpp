@@ -72,7 +72,9 @@ namespace accountXML
     //attributes
     NAME,
     PASSWORD,
-	SERIAL
+	SERIAL,
+	SERVERIP,
+	SERVERPORT
   };
   const EnumMap::Pair element_names[] = {
     EnumMap::Pair ("UNKNOWN",UNKNOWN),//don't add anything until below Admin so it maps to enum ACCOUNT_TYPE
@@ -84,9 +86,11 @@ namespace accountXML
     EnumMap::Pair ("UNKNOWN",UNKNOWN),
     EnumMap::Pair ("NAME",NAME),
     EnumMap::Pair ("PASSWORD",PASSWORD),
+    EnumMap::Pair ("SERVERIP",SERVERIP),
+    EnumMap::Pair ("SERVERPORT",SERVERPORT),
   };
   const EnumMap element_map(element_names, 4);
-  const EnumMap attribute_map(attribute_names, 3);
+  const EnumMap attribute_map(attribute_names, 5);
   string curname;
   Account * tmpacct;
   Account acct;
@@ -135,12 +139,18 @@ namespace accountXML
 			case NAME:
 			  curname = (*iter).value;
 			  tmpacct->callsign = curname;
-			  //strncpy( tmpacct->name, curname.c_str(), NAMELEN);
 			  break;
 			case PASSWORD:
 			  curname = (*iter).value;
 			  tmpacct->passwd = curname;
-			  //strncpy( tmpacct->passwd, curname.c_str(), NAMELEN);
+			  break;
+			case SERVERIP:
+			  curname = (*iter).value;
+			  tmpacct->serverip = curname;
+			  break;
+			case SERVERPORT:
+			  curname = (*iter).value;
+			  tmpacct->serverport = curname;
 			  break;
 			default:
 			  assert (0);

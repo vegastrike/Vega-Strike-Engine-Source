@@ -51,6 +51,7 @@ class AccountServer
 		void		sendAuthorized( SOCKETALT sock, Account * acct);				// Send authorization and related data
 		void		sendUnauthorized( SOCKETALT sock, Account * acct);				// Send unauthorizated connection
 		void		sendAlreadyConnected(  SOCKETALT sock, Account * acct);
+		void		sendServerData(  SOCKETALT sock, Account * acct);
 
 		void		writeSave( const char * buffer);
 		void		removeDeadSockets();

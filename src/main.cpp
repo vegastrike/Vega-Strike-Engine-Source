@@ -560,7 +560,7 @@ void bootstrap_main_loop () {
 		/************* NETWORK PART ***************/
 	  if( Network!=NULL)
 	  {
-		if( Network[k].init( srvipadr, (unsigned short) port).valid() == false)
+		if( Network[k].init_acct( srvipadr, (unsigned short) port).valid() == false)
 		{
 			// If network initialization fails, exit
 			cout<<"Network initialization error - exiting"<<endl;
@@ -569,10 +569,16 @@ void bootstrap_main_loop () {
 		}
 		//sleep( 3);
 		cout<<"Waiting for player "<<(k)<<" = "<<(*it)<<":"<<(*jt)<<"login response...";
+		if( !Network[k].loginAcctLoop( (*it), (*jt)))
+		{
+			cout<<"No account server response, cannot connect, exiting"<<endl;
+			cleanexit=true;
+			winsys_exit(1);
+		}
 		savefiles.push_back( Network[k].loginLoop( (*it), (*jt)));
 		if( savefiles[k].empty())
 		{
-			cout<<"No server response, cannot connect, exiting"<<endl;
+			cout<<"No game server response, cannot connect, exiting"<<endl;
 			cleanexit=true;
 			winsys_exit(1);
 		}

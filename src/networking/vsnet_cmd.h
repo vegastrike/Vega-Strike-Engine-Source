@@ -28,6 +28,7 @@ enum Cmd
 								// Server side : remove the client from the game
     LOGIN_ERROR      = 0xF1,	// Packet sent from account server to client : a login error (mostly bad name/passwd)
     LOGIN_ACCEPT     = 0xF0,	// Packet sent from account server to client : login accepted
+	LOGIN_DATA	     = 0xFE,
     LOGIN_ALREADY    = 0xF6,	// Packet sent from account server to client to tell account is already being used
     LOGIN_NEW        = 0xF7,
 	LOGIN_UNAVAIL	 = 0xF9,	// Packet sent from game server to client : account server is unavailable -> no login

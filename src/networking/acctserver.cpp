@@ -164,6 +164,48 @@ void	AccountServer::recvMsg( SOCKETALT sock)
 		VI j;
 		switch( cmd)
 		{
+			case LOGIN_DATA :
+				// We receive a request from a client that wants to know to which game server he has to connect to
+				callsign = netbuf.getString();
+				passwd = netbuf.getString();
+				cout<<">>> SERVER REQUEST =( "<<callsign<<":"<<passwd<<" )= --------------------------------------"<<endl;
+
+				for (  j=Cltacct.begin(); j!=Cltacct.end() && !found && !connected; j++)
+				{
+					elem = *j;
+					if( !elem->compareName( callsign) && !elem->comparePass( passwd))
+					{
+						// We found the client in the account list
+						found = 1;
+						cout<<"Found player : "<<elem->callsign<<":"<<elem->passwd<<endl;
+						if( elem->isConnected())
+						{
+							// and he is connected
+							connected = 1;
+						}
+					}
+				}
+				if( !found)
+				{
+					cout<<"Login/passwd not found"<<endl;
+					Account elt(callsign, passwd);
+					this->sendUnauthorized( sock, &elt);
+				}
+				else
+				{
+					if( connected)
+					{
+						cout<<"Login already connected !"<<endl;
+						this->sendAlreadyConnected( sock, elem);
+					}
+					else
+					{
+						cout<<"Login accepted send server ip !"<<endl;
+						// Send a packet with server IP Address
+						this->sendServerData( sock, elem);
+						elem->setConnected( true);
+					}
+				}
 			case CMD_LOGIN :
 				callsign = netbuf.getString();
 				passwd = netbuf.getString();
@@ -457,6 +499,8 @@ void	AccountServer::sendAuthorized( SOCKETALT sock, Account * acct)
 		//memcpy( buf, packet.getData(), NAMELEN*2);
 		netbuf.addString( acct->callsign);
 		netbuf.addString( acct->passwd);
+		netbuf.addString( acct->serverip);
+		netbuf.addString( acct->serverport);
 		// Put the size of the first save file in the buffer to send
 		netbuf.addString( string(savebuf));
 
@@ -507,6 +551,17 @@ void	AccountServer::sendAlreadyConnected( SOCKETALT sock, Account * acct)
 	packet2.send( LOGIN_ALREADY, acct->getSerial(), packet.getData(), packet.getDataLength(), SENDRELIABLE, NULL, sock, __FILE__, __LINE__ );
 	cout<<"\tLOGIN REQUEST FAILED for <"<<acct->callsign<<">:<"<<acct->passwd<<"> -> ALREADY LOGGED IN"<<endl;
 }
+
+void	AccountServer::sendServerData( SOCKETALT sock, Account * acct)
+{
+	Packet	packet2;
+	NetBuffer netbuf;
+	netbuf.addString( acct->serverip);
+	netbuf.addString( acct->serverport);
+	packet2.send( LOGIN_DATA, 0, netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, NULL, sock, __FILE__, __LINE__ );
+	cout<<"\tLOGIN DATA SENT for <"<<acct->callsign<<">:<"<<acct->passwd<<">"<<endl;
+}
+
 
 void	AccountServer::save()
 {

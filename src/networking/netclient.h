@@ -50,6 +50,7 @@ class	NetClient
 		UnitContainer		game_unit;		// Unit struct from the game corresponding to that client
 
 		SOCKETALT			clt_sock;		// Comm. socket
+		SOCKETALT			acct_sock;				// Connection socket for account server
 		SaveGame			save;
 		ObjSerial			serial;			// Serial # of client
 		int					nbclients;		// Number of clients in the zone
@@ -74,6 +75,7 @@ class	NetClient
 		void	createChar();
 		int		recvMsg( char* netbuffer, Packet* outpacket );
 		void	disconnect();
+		int		checkAcctMsg( SocketSet & set);
 
 	public:
 		NetClient():save("")
@@ -94,7 +96,9 @@ class	NetClient
 		int		authenticate();
 		bool	PacketLoop( Cmd command);
 		vector<string>	loginLoop( string str_callsign, string str_passwd); // Loops until receiving login response
+		int		loginAcctLoop( string str_callsign, string str_passwd);
 		SOCKETALT	init( char * addr, unsigned short port);
+		SOCKETALT	init_acct( char * addr, unsigned short port);
 		void	start( char * addr, unsigned short port);
 		void	checkKey();
 

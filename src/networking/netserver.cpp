@@ -140,6 +140,8 @@ void	NetServer::sendLoginAccept( Client * clt, AddressIP ipadr, int newacct)
 	ObjSerial cltserial;
 	callsign = netbuf.getString();
 	passwd = netbuf.getString();
+	string serverip = netbuf.getString();
+	string serverport = netbuf.getString();
 
     if( clt == NULL )
 	{
@@ -448,7 +450,7 @@ void	NetServer::start(int argc, char **argv)
 			cleanup();
 		}
 		memset( srvip, 0, 256);
-		memcpy( srvip, (vs_config->getVariable( "network", "accountsrvip", "")).c_str(), vs_config->getVariable( "network", "accountsrvip", "").length());
+		memcpy( srvip, (vs_config->getVariable( "network", "accountsrvip", "")).c_str(), 256);
 		if( vs_config->getVariable( "network", "accountsrvport", "")=="")
 			tmpport = ACCT_PORT;
 		else
@@ -650,8 +652,6 @@ void	NetServer::start(int argc, char **argv)
 void	NetServer::checkKey( SocketSet & set)
 {
 	int		memory_use=0;
-	int		memvars=0, memsock=0, mempack=0;
-	int		s;
 	char	c;
 
 	if( set.is_set( 0))
@@ -754,7 +754,7 @@ void	NetServer::checkAcctMsg( SocketSet& set )
 			else
 			{
 			    ipadr = entry.u;
-			COUT << "Got response for client IP : " << ipadr << endl;
+				COUT << "Got response for client IP : " << ipadr << endl;
 			}
 			waitList.pop();
 

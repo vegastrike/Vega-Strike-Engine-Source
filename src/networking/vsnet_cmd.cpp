@@ -44,6 +44,7 @@ const char* displayCmd( Cmd cmd )
     CASE( CMD_LOCATIONS    )
     CASE( LOGIN_ERROR      )
     CASE( LOGIN_ACCEPT     )
+    CASE( LOGIN_DATA       )
     CASE( LOGIN_ALREADY    )
     CASE( LOGIN_NEW        )
 
