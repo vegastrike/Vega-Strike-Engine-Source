@@ -231,7 +231,7 @@ public:
   bool querySphere (const Vector &pnt, float err);
   float querySphere (const Vector &st, const Vector &end, float err);
   float queryBSP (const Vector &st, const Vector & end, Vector & normal);
-  bool queryBSP (const Vector &pnt, float err, Vector & normal);
+  bool queryBSP (const Vector &pnt, float err, Vector & normal, float &dist);
   bool queryFrustum (float frustum[6][4]);
 
   /**Queries the bounding box with a ray.  1 if ray hits in front... -1 if ray
@@ -249,7 +249,6 @@ public:
   void PrimeOrders();
   void SetAI(AI *newAI);
   void EnqueueAI(AI *newAI);
-  bool IntersectBSP (const Vector & pnt, float err);//BSP
   bool OneWayCollide (Unit *target);
   bool Collide(Unit * target);
   void CollideAll();//checks for collisions with all beams and other units roughly

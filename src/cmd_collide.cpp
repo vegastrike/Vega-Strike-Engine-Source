@@ -217,7 +217,8 @@ bool Unit::OneWayCollide (Unit * target) {//do each of these bubbled subunits co
   //query-sphery
   }
   Vector normal;
-  if (queryBSP(target->Position(), target->rSize(), normal))
+  float dist;
+  if (queryBSP(target->Position(), target->rSize(), normal,dist))
       return true;
   for (i=0;i<numsubunit;i++) {
     if (subunits[i]->OneWayCollide(target))

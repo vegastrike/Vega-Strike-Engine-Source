@@ -56,7 +56,7 @@ public:
 	}
 
 	float intersects(const Vector &start, const Vector &end, Vector & norm) const;
-	bool intersects(const Vector &pt,const float err, Vector & norm) const;
+	bool intersects(const Vector &pt,const float err, Vector & norm, float &dist) const;
 	bool intersects(const BSPTree *t1) const;
 };
 
@@ -71,7 +71,7 @@ public:
 
 	//point and tree clipping
 	float intersects(const Vector &start, const Vector &end, Vector & norm) const;
-	bool intersects(const Vector &pt, const float err, Vector & norm) const;
+	bool intersects(const Vector &pt, const float err, Vector & norm, float & dist) const;
 	bool intersects(const BSPTree *t1) const;
 };
 

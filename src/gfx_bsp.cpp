@@ -20,7 +20,7 @@
  */
 #include <stdio.h>
 #include "gfx_bsp.h"
-
+#include <float.h>
 //All or's are coded with the assumption that the inside of the object has a much bigger impact than the outside of the object when both need to be analyzed
 
 BSPNode::BSPNode(BSPDiskNode **input) {
@@ -91,18 +91,22 @@ float BSPNode::intersects(const Vector &start, const Vector &end, Vector & norm)
 	return 0;
 }
 
-bool BSPNode::intersects(const Vector &pt, const float err, Vector &norm) const {
+bool BSPNode::intersects(const Vector &pt, const float err, Vector &norm, float &dist) const {
   float peq = plane_eqn(pt);
+  if (fabs (peq) < fabs (dist)) {
+    dist = peq;
+    norm = n;
+  }
   if(peq>=err) { 
-    return (front!=NULL)?front->intersects(pt,err,norm):false;
+    return (front!=NULL)?front->intersects(pt,err,norm,dist):false;
   }
   else if(peq>-err&&peq<err) { // if on the plane and not virtual, then its not in the object
-    return ((back!=NULL)?back->intersects(pt,err,norm):true)
-      || ((front!=NULL)?front->intersects(pt,err,norm):false);
+    return ((back!=NULL)?back->intersects(pt,err,norm,dist):true)
+      || ((front!=NULL)?front->intersects(pt,err,norm,dist):false);
     
   }
   else {
-    return (back!=NULL)?back->intersects(pt,err,norm):true; // if behind and no back children, then there are no more subdivisions and thus this thing is in
+    return (back!=NULL)?back->intersects(pt,err,norm,dist):true; // if behind and no back children, then there are no more subdivisions and thus this thing is in
   }
 }
 
@@ -114,8 +118,9 @@ float BSPTree::intersects(const Vector &start, const Vector &end, Vector & norm)
 	return root->intersects(start, end,norm);
 }
 
-bool BSPTree::intersects(const Vector &pt, const float err, Vector & norm) const {
-	return root->intersects(pt,err, norm);
+bool BSPTree::intersects(const Vector &pt, const float err, Vector & norm, float &dist) const {
+  dist = FLT_MAX;
+  return root->intersects(pt,err, norm,dist);
 }
 
 bool BSPTree::intersects(const BSPTree *t1) const {

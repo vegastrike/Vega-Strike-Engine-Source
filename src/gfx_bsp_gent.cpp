@@ -1,7 +1,20 @@
 #include <stdio.h>
 #include <stdlib.h>
+#ifndef PROPHECY
 #include "gfx_mesh.h"
 #include "cmd_unit.h"
+#else
+#include <vector>
+using std::vector;
+struct bsp_vector {
+  float x,y,z;
+};
+
+struct bsp_polygon {
+  vector <bsp_vector> v;
+};
+
+#endif
 #define TRUE 1
 #define FALSE 0
 
@@ -83,11 +96,17 @@ static bool Cross (const bsp_polygon &x, bsp_tree &result) {
   float size =0;
   
   for (unsigned int i=2;(!size)&&i<x.v.size();i++) {
-    Vector v1 (x.v[i].x-x.v[0].x,x.v[i].y-x.v[0].y,x.v[i].z-x.v[0].z);
-    Vector v2 (x.v[1].x-x.v[0].x,x.v[1].y-x.v[0].y,x.v[1].z-x.v[0].z);
-    result.a = v1.j * v2.k - v1.k * v2.j;
-    result.b = v1.k * v2.i - v1.i * v2.k;
-    result.c = v1.i * v2.j  - v1.j * v2.i;     
+    bsp_vector v1;
+    v1.x = x.v[i].x-x.v[0].x;
+    v1.y = x.v[i].y-x.v[0].y;
+    v1.z = x.v[i].z-x.v[0].z;
+    bsp_vector v2; 
+    v2.x = x.v[1].x-x.v[0].x;
+    v2.y = x.v[1].y-x.v[0].y;
+    v2.z = x.v[1].z-x.v[0].z;
+    result.a = v1.y * v2.z - v1.z * v2.y;
+    result.b = v1.z * v2.x - v1.x * v2.z;
+    result.c = v1.x * v2.y  - v1.y * v2.z;     
     size = result.a*result.a+result.b*result.b+result.c*result.c;
   }
   if (size)
@@ -186,6 +205,7 @@ void FreeBSP (bsp_tree ** tree) {
 }
 
 static bsp_tree * buildbsp(bsp_tree * bsp,vector <bsp_polygon>&, vector <bsp_tree>&);
+#ifndef PROPHECY
 void Unit::BuildBSPTree(const char *filename) {
 
   bsp_tree * bsp=NULL;
@@ -222,6 +242,171 @@ void Unit::BuildBSPTree(const char *filename) {
  }	
  fprintf (stderr,"HighestLevel, BSP Tree %d",highestlevel);
 }
+#else
+long getsize (char * name)
+
+{
+  FILE *f;
+  long size;
+  f=fopen (name,"rb");
+  fseek (f,0L,SEEK_END);
+  size= ftell (f);
+  fclose (f);
+  return size;
+}
+
+void load (vector <bsp_polygon> &tri) {
+  FILE *f;
+  long size;
+  float x,y,z;
+  vector <bsp_vector> vec;
+  vector <int> numberof;
+  vector <int> vertexnum;
+
+  long normal_number;
+  long unknown1;
+  long texture;
+  long face_number;
+  long number_of_vertices;
+  long unknown2;
+  long end;
+  
+  long vert,light;
+  float fx,fy;
+  
+  long i;
+  // Loading VERT ...
+  
+  size = getsize ("vert.wcp");
+
+  f=fopen ("vert.wcp","rb");
+  if (f == NULL) {
+    printf ("Cannot open file\n");
+    return;
+  }
+  bsp_vector tmpvec;
+  for (i=0;i<size;i+=12) {
+    fread (&tmpvec.x,4,1,f);
+    fread (&tmpvec.y,4,1,f);
+    fread (&tmpvec.z,4,1,f);
+    vec.push_back (tmpvec);
+  }
+  fclose (f);
+  // Loading VTNM ...
+
+  size = getsize ("vtnm.wcp");
+
+  f=fopen ("vtnm.wcp","rb");
+  if (f == NULL) {
+    printf ("Cannot open file\n");
+    return;
+  }
+  for (i=0;i<size;i+=12) {
+    fread (&x,4,1,f);
+    fread (&y,4,1,f);
+    fread (&z,4,1,f);
+    //    add_to_vector_list (normals,x,y,z);
+  }
+  fclose (f);
+// Loading FACE ...
+
+  size = getsize ("face.wcp");
+
+  f=fopen ("face.wcp","rb");
+  if (f == NULL)
+    {
+      printf ("Cannot open file\n");
+      return;
+    }
+  
+  for (i=0;i<size;i+=28)
+        {
+
+        long normal_number;
+        long unknown1;
+        long texture;
+        long face_number;
+        long number_of_vertices;
+        long unknown2;
+        long end;
+
+        fread (&normal_number,4,1,f);
+        fread (&unknown1,4,1,f);
+        fread (&texture,4,1,f);
+        fread (&face_number,4,1,f);
+        fread (&number_of_vertices,4,1,f);
+        fread (&unknown2,4,1,f);
+        fread (&end,4,1,f);
+
+	numberof.push_back (number_of_vertices);
+        }
+
+fclose (f);
+// Loading FVRT ...
+
+size = getsize ("fvrt.wcp");
+
+f=fopen ("fvrt.wcp","rb");
+if (f == NULL)
+        {
+        printf ("Cannot open file\n");
+        return;
+        }
+
+for (i=0;i<size;i+=16)
+        {
+        fread (&vert,4,1,f);
+        fread (&light,4,1,f);
+        fread (&fx,4,1,f);
+        fread (&fy,4,1,f);
+	vertexnum.push_back (vert);
+        }
+
+ fclose (f);
+ bsp_vector thevec;;
+ int targetvec=0;
+ for (int i=0;i<numberof.size();i++) {
+   bsp_polygon tmppoly;
+   tmppoly.v = vector <bsp_vector>();
+   for (int j=0;j<numberof[i];j++) {
+     tmppoly.v.push_back (vec[vertexnum[targetvec]]);
+     targetvec++;
+   }
+   tri.push_back (tmppoly);
+ } 
+
+}
+int main(int argc, char * argv) {
+  printf ("Wing Commander Prophecy - TREE Builder - Version 0.1 by Mario \"HCl\" Brito, Rewritten by Daniel Horn");
+  bsp_tree * bsp=NULL;
+  unsigned int i;
+  bsp_tree temp_node;
+ vector <bsp_polygon> tri;
+ vector <bsp_tree> triplane;
+ load (tri);
+ for (i=0;i<tri.size();i++) {
+     if (!Cross (tri[i],temp_node)) {
+	 vector <bsp_polygon>::iterator ee = tri.begin();
+	 ee+=i;
+	 tri.erase(ee);
+	 i--;
+	 continue;
+     }
+     // Calculate 'd'
+     temp_node.d = (float) ((temp_node.a*tri[i].v[0].x)+(temp_node.b*tri[i].v[0].y)+(temp_node.c*tri[i].v[0].z));
+     temp_node.d*=-1.0;
+     triplane.push_back(temp_node);
+ }
+ bsp = buildbsp (bsp,tri,triplane);
+ if (bsp) {
+   o = fopen ("output.bsp", "w+b");
+   write_bsp_tree(bsp,0);
+   fclose (o);
+   bsp_stats (bsp);
+   FreeBSP (&bsp);
+ }	
+}
+#endif
 static int select_plane (const vector <bsp_polygon> &tri, const vector <bsp_tree> &triplane);
 static bsp_tree * buildbsp(bsp_tree * bsp,vector <bsp_polygon> &tri, vector <bsp_tree> &triplane) {
   assert (tri.size()==triplane.size());
