@@ -19,10 +19,10 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 #include <string.h>
+#include "gl_globals.h"
 
 #include "vegastrike.h"
 #include "gfxlib.h"
-#include "gl_globals.h"
 #include "vs_globals.h"
 extern GFXBOOL bTex0;
 extern GFXBOOL bTex1;

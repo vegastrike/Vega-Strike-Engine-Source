@@ -47,6 +47,15 @@ namespace XMLSupport {
     }
   }
 
+
+  bool parse_bool (const string &str) {
+	if (str=="true"||str=="yes"||str=="1") {
+		return true;
+	} else {
+		return false;
+	}
+  }
+
   double parse_float(const string &str) {
     double result;
     const char *dat = str.c_str();

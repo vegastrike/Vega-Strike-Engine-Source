@@ -20,7 +20,7 @@
  */
 
 #include "gl_globals.h"
-
+#include "gfxlib.h"
 //Matrix model = {0};
 //Matrix view = {0};
 

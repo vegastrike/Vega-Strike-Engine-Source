@@ -22,14 +22,17 @@
 #include "vs_globals.h"
 //#include "gl_globals.h"
 
-#   include <GL/glut.h>
 #ifndef WIN32
 #   include <GL/glx.h>
+#include <stdlib.h>
+#include "gfxlib.h"
+#else
+
 #endif
+#include <GL/gl.h>
 #   include <GL/glext.h>
 #include <stdio.h>
 #include "gl_init.h"
-#include "gfxlib.h"
 #define WINDOW_TITLE "Vega Strike "VERSION
 static int glutWindow;
 
@@ -47,6 +50,8 @@ PFNGLMULTITEXCOORD2FARBPROC glMultiTexCoord2fARB = 0;
 //PFNGLSELECTTEXTURESGISPROC glSelectTextureSGIS ;
 //PFNGLMULTITEXCOORD2FSGISPROC glMultiTexCoord2fSGIS ;
 //PFNGLMTEXCOORDPOINTERSGISPROC glMTexCoordPointerSGIS ;
+#include "gfxlib.h"
+
 #endif
 typedef void (*(*get_gl_proc_fptr_t)(const GLubyte *))(); 
 #ifdef WIN32
@@ -58,6 +63,7 @@ typedef void (*(*get_gl_proc_fptr_t)(const GLubyte *))();
 #define GET_GL_PROC glXGetProcAddressARB
     //    get_gl_proc = (get_gl_proc_fptr_t) glXGetProcAddressARB;
 #endif
+#include <GL/glut.h>
 void init_opengl_extensions()
 {
   //    get_gl_proc_fptr_t get_gl_proc;
@@ -113,10 +119,15 @@ void init_opengl_extensions()
 }
 
  static void initfov () {
+
     g_game.fov = 78;
+
     g_game.aspect = 1.33F;
+
     g_game.znear = 1.00F;
+
     g_game.zfar = 100000.00F;
+
     FILE * fp = fopen ("glsetup.txt","r");
     if (fp) {
       fscanf (fp,"fov %f\n",&g_game.fov);

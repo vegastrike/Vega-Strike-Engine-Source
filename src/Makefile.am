@@ -19,6 +19,8 @@ bin_PROGRAMS = vegastrike
 vegastrike_SOURCES =				\
 	cmd.h					\
 	cmd_ai.h				\
+	cmd_aiscript.h				\
+	cmd_aiscript.cpp			\
 	cmd_beam.h				\
 	cmd_beam.cpp				\
 	cmd_bolt.h				\

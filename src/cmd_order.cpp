@@ -125,14 +125,17 @@ bool Order::AttachOrder (Vector targetv) {
 }
 
 AI * ExecuteFor::Execute() {
-  child->SetParent(parent);
-  type = child->getType();
+  if (child) {
+    child->SetParent(parent);
+    type = child->getType();
+  }
   if (time>maxtime) {
     done = true;
     return NULL;
   }
   time +=SIMULATION_ATOM;
-  child = child->Execute();
+  if (child)
+    child = child->Execute();
   return this;
 }
 

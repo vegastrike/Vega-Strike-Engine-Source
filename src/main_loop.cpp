@@ -26,6 +26,8 @@
 #include  "gfx_halo.h"
 #include "gfx_transform_matrix.h"
 #include "in_ai.h"
+#include "cmd_aiscript.h"
+
 using namespace std;
 
 #define KEYDOWN(name,key) (name[key] & 0x80)
@@ -529,13 +531,14 @@ void createObjects() {
     v = Vector(0,.2,-1);
     v.Normalize();
     fighters[a]->SetAI(new Order());
-    fighters[a]->EnqueueAI(new Orders::ChangeHeading(v,6));
-    fighters[a]->EnqueueAI(new Orders::MoveTo(Vector (-5,-10,10),true,10));
-    fighters[a]->EnqueueAI(new Orders::ChangeHeading(-v,10));
-    fighters[a]->EnqueueAI(new MatchVelocity(Vector(0,0,-1),Vector (0,0,.4),true,true));
-    fighters[a]->EnqueueAI(new ExecuteFor(new FlyByKeyboard (),7));
-    fighters[a]->EnqueueAI(new Orders::ChangeHeading(Vector (.86,.86,0).Normalize(),20));
-    fighters[a]->EnqueueAI(new FlyByKeyboard ());
+    //fighters[a]->EnqueueAI(new Orders::ChangeHeading(v,6));
+    //fighters[a]->EnqueueAI(new Orders::MoveTo(Vector (-5,-10,10),true,10));
+    //fighters[a]->EnqueueAI(new Orders::ChangeHeading(-v,10));
+    //fighters[a]->EnqueueAI(new MatchVelocity(Vector(0,0,-1),Vector (0,0,.4),true,true));
+    //fighters[a]->EnqueueAI(new ExecuteFor(new FlyByKeyboard (),7));
+    //fighters[a]->EnqueueAI(new Orders::ChangeHeading(Vector (.86,.86,0).Normalize(),20));
+    fighters[a]->EnqueueAI(new ExecuteFor(new AIScript("aitest.xml"),10));
+	fighters[a]->EnqueueAI(new FlyByKeyboard ());
     //fighters[a]->EnqueueAI(new Orders::ChangeHeading(Vector (.86,.86,0).Normalize(), 0.04));
     //fighters[a]->SetPosition(0, 0, -2.0F);
   

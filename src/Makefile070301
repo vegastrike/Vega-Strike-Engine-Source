@@ -6,11 +6,16 @@ CFLAGS= -DUNIX -Wall -g  -DHAVE_FINITE -DHAVE_GETTIMEOFDAY
 
 INCLUDES= 
 
-LFLAGS=  -L/usr/X11R6/lib -lGL -lGLU -lglut -lexpat 
+LFLAGS=  -L/usr/X11R6/lib -lGL -lGLU -lglut -lexpat -lefence
 
 SRCS = 	cmd_beam.cpp				\
+	cmd_bolt.cpp				\
 	cmd_gun.cpp				\
+	star_system_xml.cpp			\
+	cmd_navigation_orders.cpp		\
 	cmd_collide.cpp				\
+	cmd_faction_xml.cpp			\
+	cmd_aiscript.cpp			\
 	cmd_input_dfa.cpp			\
 	cmd_flybywire.cpp			\
 	cmd_order.cpp				\
@@ -28,6 +33,7 @@ SRCS = 	cmd_beam.cpp				\
 	gfx_bsp.cpp				\
 	gfx_camera.cpp				\
 	gfx_click_list.cpp			\
+	gfx_env_map_gent.cpp			\
 	gfx_coordinate_select.cpp		\
 	gfx_halo.cpp				\
 	gfx_hud.cpp				\

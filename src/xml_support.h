@@ -35,6 +35,7 @@ namespace XMLSupport {
   };
   double parse_float(const string &str);
   int parse_int(const string &str);
+  bool parse_bool (const string &str);
 
   class EnumMap {
 

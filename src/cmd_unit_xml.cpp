@@ -66,7 +66,7 @@ namespace UnitXML {
       PITCH,
       ENGINE,
       COMPUTER,
-      ACCEL,
+      AACCEL,
       ENERGY,
       REACTOR,
       LIMIT,
@@ -134,7 +134,7 @@ namespace UnitXML {
     EnumMap::Pair ("yaw", YAW),
     EnumMap::Pair ("pitch", PITCH),
     EnumMap::Pair ("roll", ROLL),
-    EnumMap::Pair ("accel", ACCEL),
+    EnumMap::Pair ("accel", AACCEL),
     EnumMap::Pair ("recharge", RECHARGE),
     EnumMap::Pair ("limit", LIMIT),
     EnumMap::Pair ("max", MAX),
@@ -468,7 +468,7 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
 	xml->unitlevel++;
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(attribute_map.lookup((*iter).name)) {
-      case ACCEL:
+      case AACCEL:
 	accel=parse_float((*iter).value);
 	break;
       case FORWARD:

@@ -18,7 +18,6 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-#include "gfxlib.h"
 #include <queue>
 using namespace std;
 
@@ -45,14 +44,11 @@ struct GFXStats{
 #define MAX_NUM_MATERIAL 4
 #define TEXTURE_CUBE_MAP_ARB                0x8513
 
-#include <GL/glut.h>
-
 //extern Matrix model;
 //extern Matrix view;
 #ifdef WIN32
 #include <windows.h>
 #include <GL/gl.h>
-#include <GL/glaux.h>
 #include <GL/glext.h>
 #define GL_TEXTURE0_ARB 0x84C0
 #define GL_TEXTURE1_ARB 0x84C1
@@ -87,6 +83,7 @@ extern PFNGLCOLORTABLEEXTPROC glColorTable;
 //extern PFNGLMULTITEXCOORD2FSGISPROC glMultiTexCoord2fSGIS ;
 //extern PFNGLMTEXCOORDPOINTERSGISPROC glMTexCoordPointerSGIS ;
 #else
+#include <GL/glut.h>
 #include <GL/glext.h>
 //extern PFNGLLOCKARRAYSEXTPROC glLockArraysEXT_p;
 //extern PFNGLUNLOCKARRAYSEXTPROC glUnlockArraysEXT_p;
@@ -102,6 +99,8 @@ extern int Stage0TextureName;
 extern int Stage1Texture;
 extern int Stage1TextureName;
 
+
+#include <GL/glut.h>
 
 // Maximum number of things that can be returned in a pick operation
 #define MAX_PICK 2048

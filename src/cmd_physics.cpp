@@ -23,14 +23,14 @@
 #include "lin_time.h"
 #include "physics.h"
 #include "cmd_beam.h"
-#ifdef WIN32
+//#ifdef WIN32
 float copysign (float x, float y) {
 	if (y>0)
 			return x;
 	else
 			return -x;
 }
-#endif
+//#endif
 
 // the rotation should be applied in world coordinates
 void Unit:: Rotate (const Vector &axis)
@@ -119,7 +119,6 @@ Vector Unit::ClampTorque(const Vector &amt1) {
     return max;
 }
 */
-
 //FIXME 062201
 Vector Unit::ClampTorque (const Vector &amt1) {
   Vector Res=amt1;

@@ -18,10 +18,10 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
+#include "gl_globals.h"
 
 #include "gfxlib.h"
 #include "vegastrike.h"
-#include "gl_globals.h"
 #include "vs_globals.h"
 #include <assert.h>
 // Untransformed and transformed data 

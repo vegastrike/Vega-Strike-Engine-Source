@@ -56,6 +56,7 @@ void Camera::UpdateGFX(GFXBOOL updateFrustum)
 		switch(projectionType) {
 		case Camera::PERSPECTIVE:
 		  GFXPerspective (zoom*g_game.fov,g_game.aspect,g_game.znear,g_game.zfar); //set perspective to 78 degree FOV
+
 		  break;
 		case Camera::PARALLEL:
 		  ymax = g_game.znear * tanf( zoom*g_game.fov * PI / ((float)360.0) ); 
@@ -90,9 +91,11 @@ void Camera::UpdateGLCenter()
 		switch(Camera::PERSPECTIVE) {
 		case Camera::PERSPECTIVE:
 		  GFXPerspective (zoom*g_game.fov,g_game.aspect,g_game.znear,g_game.zfar); //set perspective to 78 degree FOV
+
 		  break;
 		case Camera::PARALLEL:
 		  ymax = g_game.znear * tanf( zoom*g_game.fov * PI / ((float)360.0) ); //78.0 --> 4.7046
+
 		  
 		  ymin = -ymax; //-4.7046
 		  
