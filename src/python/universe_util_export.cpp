@@ -1,3 +1,4 @@
+
 #ifndef USE_BOOST_128
 
 #include "cmd/container.h"
@@ -15,8 +16,11 @@
 #include "cmd/unit_util.h"
 #include "faction_generic.h"
 #include "cmd/ai/fire.h"
-void StarSystemExports () {
+#include "audilib.h"
 
+void StarSystemExports () {
+#define EXPORT_GLOBAL(name,aff) PYTHON_DEFINE_GLOBAL(VS,&name,#name);
+#define voidEXPORT_GLOBAL(name) EXPORT_GLOBAL(name,0)
 #define EXPORT_UTIL(name,aff) PYTHON_DEFINE_GLOBAL(VS,&UniverseUtil::name,#name);
 #define voidEXPORT_UTIL(name) EXPORT_UTIL(name,0)
 #undef EXPORT_FACTION

@@ -13,6 +13,7 @@
 #include "cmd/unit_util.h"
 #include "faction_generic.h"
 #include "cmd/ai/fire.h"
+extern void AUDStopAllSounds();
 extern void StarSystemExports();
 
 //makes to_python for both vector and qvector turn them into tuples :-)
@@ -41,6 +42,9 @@ namespace UniverseUtil {
 }
 PYTHON_INIT_INHERIT_GLOBALS(VS,FireAt);
 PYTHON_BEGIN_MODULE(VS)
+#define EXPORT_GLOBAL(name,aff) PYTHON_DEFINE_GLOBAL(VS,&name,#name);
+#define voidEXPORT_GLOBAL(name) EXPORT_GLOBAL(name,0)
+
 //#undef EXPORT_UTIL
 //#undef voidEXPORT_UTIL
 #define EXPORT_UTIL(name,aff) PYTHON_DEFINE_GLOBAL(VS,&UniverseUtil::name,#name);
