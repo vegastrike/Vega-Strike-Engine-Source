@@ -2,8 +2,13 @@
 #include "hashtable_3d.h"
 #include <assert.h>
 #include <vegastrike.h>
+#include "gl_globals.h"
 #define GFX_HARDWARE_LIGHTING
 //table to store local lights, numerical pointers to _llights (eg indices)
+const float atten0scale = 1;
+const float atten1scale = 1./GFX_SCALE;
+const float atten2scale = 1./(GFX_SCALE*GFX_SCALE);
+
 int _GLLightsEnabled=0;
 Hashtable3d <LineCollideStar, char[20],char[CTACC], char [lighthuge]> lighttable;
 
@@ -91,9 +96,9 @@ void gfx_light::SendGLPosition (const GLenum target) {
 inline void gfx_light::ContextSwitchClobberLight (const GLenum gltarg, const int original) {
   
 
-  glLightf (gltarg,GL_CONSTANT_ATTENUATION,attenuate[0]);
-  glLightf (gltarg,GL_LINEAR_ATTENUATION, attenuate[1]);
-  glLightf (gltarg,GL_QUADRATIC_ATTENUATION,attenuate[2]);
+  glLightf (gltarg,GL_CONSTANT_ATTENUATION,attenuate[0]*atten0scale);
+  glLightf (gltarg,GL_LINEAR_ATTENUATION, attenuate[1]*atten1scale);
+  glLightf (gltarg,GL_QUADRATIC_ATTENUATION,attenuate[2]*atten2scale);
 
   SendGLPosition (gltarg);
   glLightfv (gltarg,GL_DIFFUSE, diffuse);
@@ -111,15 +116,15 @@ inline void gfx_light::FinesseClobberLight (const GLenum gltarg, const int origi
   if (attenuated()) {
     if (orig->attenuated()) {
 	  if (orig->attenuate[0]!=attenuate[0])
-	    glLightf (gltarg,GL_CONSTANT_ATTENUATION,attenuate[0]);
+	    glLightf (gltarg,GL_CONSTANT_ATTENUATION,attenuate[0]*atten0scale);
 	  if  (orig->attenuate[1]!=attenuate[1])
-	    glLightf (gltarg,GL_LINEAR_ATTENUATION, attenuate[1]);
+	    glLightf (gltarg,GL_LINEAR_ATTENUATION, attenuate[1]*atten1scale);
 	  if  (orig->attenuate[2]!=attenuate[2])	  
-	    glLightf (gltarg,GL_QUADRATIC_ATTENUATION,attenuate[2]); 
+	    glLightf (gltarg,GL_QUADRATIC_ATTENUATION,attenuate[2]*atten2scale); 
       } else {
-	  glLightf (gltarg,GL_CONSTANT_ATTENUATION,attenuate[0]);
-	  glLightf (gltarg,GL_LINEAR_ATTENUATION, attenuate[1]);
-	  glLightf (gltarg,GL_QUADRATIC_ATTENUATION,attenuate[2]);
+	  glLightf (gltarg,GL_CONSTANT_ATTENUATION,attenuate[0]*atten0scale);
+	  glLightf (gltarg,GL_LINEAR_ATTENUATION, attenuate[1]*atten1scale);
+	  glLightf (gltarg,GL_QUADRATIC_ATTENUATION,attenuate[2]*atten2scale);
       }
   }
   if (vect[0]!=orig->vect[0]||vect[1]!=orig->vect[1]||vect[2]!=orig->vect[2]||attenuated()!=orig->attenuated()) {
@@ -213,9 +218,9 @@ void gfx_light::ResetProperties (const enum LIGHT_TARGET light_targ, const GFXCo
     if (target<0)
       break;
     SendGLPosition (GL_LIGHT0+target);
-    glLightf (GL_LIGHT0+target,GL_CONSTANT_ATTENUATION, attenuate[0]);
-    glLightf (GL_LIGHT0+target,GL_LINEAR_ATTENUATION, attenuate[1]);
-    glLightf (GL_LIGHT0+target,GL_QUADRATIC_ATTENUATION, attenuate[2]);
+    glLightf (GL_LIGHT0+target,GL_CONSTANT_ATTENUATION, attenuate[0]*atten0scale);
+    glLightf (GL_LIGHT0+target,GL_LINEAR_ATTENUATION, attenuate[1]*atten1scale);
+    glLightf (GL_LIGHT0+target,GL_QUADRATIC_ATTENUATION, attenuate[2]*atten2scale);
     break;
   }
 }
