@@ -26,8 +26,17 @@ void changehome(bool makehomedir) {
   pwent = getpwuid (getuid());
   vssetdir (pwent->pw_dir);
   if (makehomedir) {
-    system ("mkdir " HOMESUBDIR);
-    system ("mkdir " HOMESUBDIR "/generatedbsp");
+    if (chdir (HOMESUBDIR)==-1) {
+      system ("mkdir " HOMESUBDIR);
+
+    } else {
+      chdir ("..");
+    }
+    if (chdir (HOMESUBDIR "/generatedbsp")==-1) {
+      system ("mkdir " HOMESUBDIR "/generatedbsp");
+    }else {
+      chdir (pwent->pw_dir);
+    }
   }
   vschdir (HOMESUBDIR);
 #endif

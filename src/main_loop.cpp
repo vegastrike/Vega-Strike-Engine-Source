@@ -307,7 +307,14 @@ void InitializeInput() {
 
 //Cockpit *cockpit;
 static Texture *tmpcockpittexture;
-
+static void SetTurretAI (Unit * fighter) {
+  
+  for (int kk=0;kk<fighter->getNumSubUnits();kk++) {
+    fighter->EnqueueAI (new Orders::FireAt(.2,15),kk);
+    fighter->EnqueueAI (new Orders::FaceTarget (false,3),kk);
+    SetTurretAI (fighter->getSubUnit(kk));
+  }
+}
 void createObjects() {
   explosion= new Animation ("explosion_orange.ani",false,.1,BILINEAR,false);
   LoadWeapons("weapon_list.xml");
@@ -419,10 +426,8 @@ void createObjects() {
 	    //      printf("1 - %s  2 - %s\n",ai_agg_c,ai_int_c);
 
 	    fighters[a]->EnqueueAI( new Orders::AggressiveAI (ai_agg_c, ai_int_c));
-	    for (int kk=0;kk<fighters[a]->getNumSubUnits();kk++) {
-	      fighters[a]->EnqueueAI (new Orders::FireAt(.2,15),kk);
-	      fighters[a]->EnqueueAI (new Orders::FaceTarget (false,3),kk);
-	    }
+	    
+SetTurretAI (fighters[a]);
 	  }
 	  _Universe->activeStarSystem()->AddUnit(fighters[a]);
 	  a++;

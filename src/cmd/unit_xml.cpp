@@ -937,6 +937,8 @@ void Unit::LoadXML(const char *filename)
   for(a=0; a < nummounts; a++) {
     mounts[a]=*xml->mountz[a];
     delete xml->mountz[a];			//do it stealthily... no cons/destructor
+  }
+  for (a=0;a<nummounts;a++) {
 #define HALF_MOUNT_SOUNDS 
 #ifdef HALF_MOUNT_SOUNDS
 	if (a%2==parity) {
