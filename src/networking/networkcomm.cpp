@@ -67,7 +67,7 @@ void	NetworkCommunication::RemoveFromSession( ClientPtr clt)
 {
 	this->commClients.remove( clt);
 #ifdef NETCOMM_JVOIP
-	CheckError( this->session->AddDestination( ntohl( clt->cltadr.inaddr() ), VOIP_PORT));
+	CheckVOIPError( this->session->AddDestination( ntohl( clt->cltadr.inaddr() ), VOIP_PORT));
 #endif /* NETCOMM_JVOIP */
 }
 
