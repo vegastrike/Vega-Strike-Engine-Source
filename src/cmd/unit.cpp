@@ -406,7 +406,7 @@ void GameUnit<UnitType>::Draw(const Transformation &parent, const Matrix &parent
 	d = (TransformedPosition-_Universe->AccessCamera()->GetPosition()).Magnitude();
 	if ((lod =g_game.detaillevel*g_game.x_resolution*2*meshdata[i]->rSize()/GFXGetZPerspective((d-meshdata[i]->rSize()<g_game.znear)?g_game.znear:d-meshdata[i]->rSize()))>=g_game.detaillevel) {//if the radius is at least half a pixel (detaillevel is the scalar... so you gotta make sure it's above that
 		float currentFrame = meshdata[i]->getCurrentFrame();
-		meshdata[i]->Draw(lod,this->WarpMatrix(*ctm),d,cloak,(_Universe->AccessCamera()->GetNebula()==nebula&&nebula!=NULL)?-1:0,chardamage);//cloakign and nebula		
+		meshdata[i]->Draw(lod,this->WarpMatrix(*ctm),d,i==meshdata.size()-1?-1:cloak,(_Universe->AccessCamera()->GetNebula()==nebula&&nebula!=NULL)?-1:0,chardamage);//cloakign and nebula		
 		On_Screen=true;
 		if (meshdata[i]->getFramesPerSecond()) {
 			float currentprogress=floor(meshdata[i]->getCurrentFrame()*numKeyFrames/meshdata[i]->getNumLOD());
