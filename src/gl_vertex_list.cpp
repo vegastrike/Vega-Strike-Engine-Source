@@ -37,7 +37,7 @@ extern GFXBOOL bTex1;
 
 #define CHANGE_MUTABLE 1
 #define CHANGE_CHANGE 2
-//#define USE_DISPLAY_LISTS
+#define USE_DISPLAY_LISTS
 GFXVertexList::GFXVertexList():numVertices(0),myVertices(NULL),display_list(0), numlists(0) { }
 /*
 GFXVertexList::GFXVertexList (enum POLYTYPE poly, int numVertices, GFXVertex *vertices) {
