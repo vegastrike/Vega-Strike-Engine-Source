@@ -15,6 +15,9 @@ typedef int Mix_Music;
 #ifdef _WIN32
 #include <direct.h>
 #include <windows.h>
+#include <fcntl.h>
+#include <sys/stat.h>
+#include <io.h>
 #define sleep(sec) Sleep(sec*1000);
 #else
 #include <unistd.h>
@@ -43,7 +46,7 @@ typedef int Mix_Music;
 int fadeout=0, fadein=0;
 float volume=0;
 int bits=0,done=0;
-static bool fnet;
+static bool fnet=false;
 int my_getchar(int socket){
   if (fnet) {
     return fNET_fgetc(socket);
@@ -65,7 +68,7 @@ FILE *mystdout=stdout;
 #include <iostream>
 #include <fstream>
 
-#include "SDL_mutex.h"
+#include <SDL/SDL_mutex.h>
 /******************************************************************************/
 /* some simple exit and error routines                                        */
 char * songNames[5]={0,0,0,0,0};
@@ -172,10 +175,10 @@ std::string concat (const std::vector<std::string> &files) {
   }
   return "";
 }
-vector<string> split(string tmpstr,string splitter) {
-  string::size_type where;
-  vector<string> ret;
-  while ((where=tmpstr.find(splitter))!=string::npos) {
+std::vector<std::string> split(std::string tmpstr,std::string splitter) {
+  std::string::size_type where;
+  std::vector<std::string> ret;
+  while ((where=tmpstr.find(splitter))!=std::string::npos) {
     ret.push_back(tmpstr.substr(0,where));
     tmpstr= tmpstr.substr(where+1);
   }
@@ -220,7 +223,7 @@ static int numloops (std::string file) {
   return value;
 }
 Mix_Music * PlayMusic (std::string file, Mix_Music *oldmusic) {
-  vector <string> files = split(file,"|");
+  std::vector <std::string> files = split(file,"|");
   if (files.size()>1) {
       std::string tmp = concat(files);
       if (tmp.length())
@@ -297,11 +300,23 @@ void music_finished () {
 }
 #if defined(_WIN32)&&defined(_WINDOWS)
 typedef char FileNameCharType [65535];
+void getPipes(LPSTR cmd, int (*const pipes)[2]) {
+	ptrdiff_t len = strlen(cmd);
+	ptrdiff_t i=len-1;
+	for ( ;i>=0&&(isspace(cmd[i])||cmd[i]>='0'&&cmd[i]<='9');--i){
+	}
+	i+=1;
+	if (i<len){
+		sscanf(cmd+i,"%d %d",&(*pipes)[0],&(*pipes)[1]);
+	}
+}
 int APIENTRY WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nShowCmd) {
 	FileNameCharType argvc;
 	FileNameCharType *argv= &argvc;
 	GetModuleFileName(NULL, argvc, 65534);
 	mystdout=fopen("soundserver_stdout.txt", "w");
+	int pipes[2]={-1,-1};
+	getPipes(lpCmdLine,&pipes);
 	if (mystdout) {
 		setbuf(mystdout, NULL); /* No buffering */
 	} else {
@@ -309,6 +324,9 @@ int APIENTRY WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int 
 	}
 #else
 int main(int argc, char **argv) {
+	int pipes[2]={-1,-1};
+	if (argc>1) sscanf(argv[1],"%d",&pipes[0]);
+	if (argc>2) sscanf(argv[2],"%d",&pipes[1]);
 #endif
 	{
 	char origpath[65535];
@@ -368,7 +386,10 @@ int main(int argc, char **argv) {
         RestartSong = SDL_CreateMutex();
 	Mix_HookMusicFinished(&music_finished); 
 #endif
-        fnet=(argc==3);
+#ifndef _WIN32
+        fnet=(argc==3&&pipes[1]==-1);
+#endif
+		fnet= (fnet||pipes[1]!=-1);
         if (fnet) {
           fNET_startup();
         }else {
@@ -388,15 +409,30 @@ int main(int argc, char **argv) {
 
 	// load the song
         if (fnet) {
+			if (pipes[1]==-1||pipes[0]==-1) {
           mysocket_write = open (argv[2],O_WRONLY|O_CREAT,0xffffffff);
+#ifndef _WIN32
 		  flock(mysocket_write,LOCK_SH);
+#endif
           mysocket = open (argv[1],O_RDONLY|O_CREAT,0xffffffff);
+#ifndef _WIN32
 		  flock(mysocket,LOCK_SH);
+#endif
+			}else {
+				mysocket_write=pipes[1];
+				mysocket=pipes[0];
+			}
         }else {
           for (int i=0;i<10&&mysocket==-1;i++) {
-            int port = argc==2?atoi(argv[1]):4364;
+            int port = (pipes[0]!=-1?pipes[0]:4364);
             if (port==0) port=4364;
-            mysocket =mysocket_write= INET_AcceptFrom(port,"localhost");
+			if (pipes[1]!=-1&&pipes[0]!=-1){
+				mysocket=pipes[0];
+				mysocket_write=pipes[1];
+			}
+			else {
+				mysocket =mysocket_write= INET_AcceptFrom(port,"localhost");
+			}
           }
         }
 	if (mysocket==-1)
@@ -406,7 +442,7 @@ int main(int argc, char **argv) {
 	char ministr[2]={'\0','\0'};
 	while (!done) {
 //		if ((Mix_PlayingMusic() || Mix_PausedMusic())&&(!done)) {
-		char arg;
+		char arg='t';
 		std::string str;
 		arg=my_getchar(mysocket);
 		fprintf(STD_OUT, "%c",arg);
@@ -430,7 +466,7 @@ int main(int argc, char **argv) {
 				    ||(!Mix_PlayingMusic())
 #endif
 				    ) {
-                                  vector<string> names = split(str,"&");                                 
+                                  std::vector<std::string> names = split(str,"&");                                 
                                   char * tmpstrings[5]={NULL,NULL,NULL,NULL,NULL};
                                   for(unsigned int t=0;t<5&&t+1<names.size();++t) {
                                     tmpstrings[t]=strdup(names[t+1].c_str());
@@ -502,7 +538,7 @@ int main(int argc, char **argv) {
 					arg=my_getchar(mysocket);
 				}
 				fprintf(STD_OUT, "%s",str.c_str());
-				volume=atof(str.c_str());
+				volume=(float)atof(str.c_str());
 				fprintf(STD_OUT, "\n[SETTING VOLUME TO %f]\n",volume);
 				fflush(STD_OUT);
 #ifdef HAVE_SDL
@@ -514,11 +550,13 @@ int main(int argc, char **argv) {
 		case 't':
 		case 'T':
 		case '\0':
+
                   if (fnet) {
-                    fNET_close (mysocket);
-                    fNET_close (mysocket_write);
+	                    fNET_close (mysocket);
+	                    fNET_close (mysocket_write);
                   }else {
                     INET_close (mysocket);
+					if (mysocket!=mysocket_write) INET_close(mysocket);
                   }
 			done=true;
 			fprintf(STD_OUT, "\n[TERMINATING MUSIC SERVER]\n");
@@ -529,8 +567,10 @@ int main(int argc, char **argv) {
 	// free & close
         if (fnet) {
           fNET_cleanup();
-          unlink(argv[1]);
-          unlink(argv[2]);
+		  if (pipes[0]==-1)
+	          unlink(argv[1]);
+		  if (pipes[1]==-1)
+	          unlink(argv[2]);
 
         }else {
           INET_cleanup();
