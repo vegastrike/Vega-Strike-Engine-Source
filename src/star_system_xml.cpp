@@ -15,6 +15,7 @@
 #include "gfx/mesh.h"
 #include "cmd/building.h"
 #include "cmd/ai/aggressive.h"
+#include "cmd/ai/fire.h"
 #include "cmd/atmosphere.h"
 #include "cmd/nebula.h"
 #include "cmd/asteroid.h"
@@ -172,7 +173,7 @@ using XMLSupport::Attribute;
 using XMLSupport::AttributeList;
 using namespace StarXML;
 
-
+extern void SetTurretAI (Unit * fighter);
 static void GetLights (const vector <GFXLight> &origlights, vector <GFXLightLocal> &curlights, const char *str) {
   int tint;
   char isloc;
@@ -669,7 +670,10 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
 	    dest.pop_back();
 	  }
 	  un->SetAI(new PlanetaryOrbit (un,velocity,position,R,S, Vector (0,0,0), plan));
+
 	  //     xml->moons[xml->moons.size()-1]->Planet::beginElement(R,S,velocity,position,gravity,radius,filename,NULL,vector <char *>(),xml->unitlevel-((xml->parentterrain==NULL&&xml->ct==NULL)?1:2),ourmat,curlights,true,faction);
+	  SetTurretAI (un);
+
     } else {
       if ((elem==BUILDING||elem==VEHICLE)&&xml->ct==NULL&&xml->parentterrain!=NULL) {
 	Unit * b = new Building (xml->parentterrain,elem==VEHICLE,filename,true,false,faction);
@@ -686,6 +690,8 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
 	b->SetPlanetOrbitData ((PlanetaryTransform *)xml->parentterrain);
 	b->SetPosAndCumPos (xml->cursun+xml->systemcentroid);
 	b->EnqueueAI( new Orders::AggressiveAI ("default.agg.xml", "default.int.xml"));
+	  SetTurretAI (b);
+
 	AddUnit (b);
 	  while (!dest.empty()) {
 	    b->AddDestination (dest.back());
@@ -706,7 +712,10 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
 	      dest.pop_back();
 	    }
 	    xml->moons.back()->SetAI(new PlanetaryOrbit(xml->moons[xml->moons.size()-1],velocity,position,R,S,xml->cursun+xml->systemcentroid, NULL));
+
 	    xml->moons.back()->SetPosAndCumPos(R+S+xml->cursun+xml->systemcentroid);
+	      SetTurretAI (xml->moons.back());
+
       }
     }
     delete []filename;
