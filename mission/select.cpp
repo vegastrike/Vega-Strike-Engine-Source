@@ -53,7 +53,7 @@ int main(int argc, char *argv[]) {
 //	chdir(argv[0]);
 #endif
 #ifdef _WIN32
-//	FreeConsole();
+	FreeConsole();
 #endif
 #if defined(WITH_MACOSX_BUNDLE)
         // get the current working directory so when glut trashes it we can restore.

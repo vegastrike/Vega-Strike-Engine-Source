@@ -268,7 +268,7 @@ void Unit::EjectCargo (unsigned int index) {
 	    cargo->name=tmp->content;
 	  }
 	}
-	if (cp) {
+	if (cp&&_Universe->numPlayers()==1) {
 	  cargo->SetOwner(NULL);
 	  PrimeOrders();
 	  cargo->SetTurretAI();

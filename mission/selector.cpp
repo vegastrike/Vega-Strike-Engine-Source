@@ -32,6 +32,7 @@ char *Start(int run_vegastrike) {
 	DATA.description = NewString("");
 	DATA.briefing = NewString("");
 	DATA.path = NewString("");
+	DATA.numplayers = NewString("");
 
 	glutMouseFunc(ProcessMouseClick);
 	glutMotionFunc(ProcessMouseMoveActive);
@@ -52,11 +53,11 @@ void RunMission(void) {
 	char mypath[1500];
 	getcwd (mypath,1499);
 	sprintf (execname,"%s\\Vegastrike",mypath);
-	spawnl(P_NOWAIT,execname,execname,DATA.path,NULL);
+	spawnl(P_NOWAIT,execname,execname,DATA.path,(string("-m")+DATA.numplayers).c_str(),NULL);
 #else
     #if defined(WITH_MACOSX_BUNDLE)
         chdir(macosxExecutablePath);
     #endif
-	execlp("./vegastrike", "./vegastrike", DATA.path, NULL);
+	execlp("./vegastrike", "./vegastrike", DATA.path, (string("-m")+DATA.numplayers).c_str(), NULL);
 #endif
 }

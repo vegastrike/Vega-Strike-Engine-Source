@@ -24,8 +24,9 @@
 #if defined(WITH_MACOSX_BUNDLE)
 #import <sys/param.h>
 #endif
-
-
+#ifdef _WIN32
+#include <direct.h>
+#endif
 #include "gfxlib.h"
 #include "in_kb.h"
 #include "lin_time.h"
@@ -83,6 +84,8 @@ void cleanup(void)
   //destroyObjects();
   Unit::ProcessDeleteQueue();
 //  delete _Universe;
+    delete [] CONFIGFILE;
+
   
 }
 
@@ -99,26 +102,34 @@ void bootstrap_main_loop();
  #undef main
 #endif
 
-
 int main( int argc, char *argv[] ) 
 {
-#if defined(WITH_MACOSX_BUNDLE)
+	CONFIGFILE=0;
+	mission_name[0]='\0';
+//	char *TEST_STUFF=NULL;
+//	*TEST_STUFF='0';//MAKE IT CRASH
+#if defined(WITH_MACOSX_BUNDLE)||defined(_WIN32)
     // We need to set the path back 2 to make everything ok.
-    char parentdir[MAXPATHLEN];
+    char *parentdir;
+	int pathlen=strlen(argv[0]);
+	parentdir=new char[pathlen+1];
     char *c;
-    strncpy ( parentdir, argv[0], sizeof(parentdir) );
+    strncpy ( parentdir, argv[0], pathlen+1 );
     c = (char*) parentdir;
 
     while (*c != '\0')     /* go to end */
         c++;
     
-    while (*c != '/')      /* back up to parent */
+    while ((*c != '/')&&(*c != '\\'))      /* back up to parent */
         c--;
     
     *c++ = '\0';             /* cut off last part (binary name) */
   
     chdir (parentdir);/* chdir to the binary app's parent */
+	delete []parentdir;
+#if defined(WITH_MACOSX_BUNDLE)
     chdir ("../../../");/* chdir to the .app's parent */
+#endif
 #endif
     /* Print copyright notice */
   fprintf( stderr, "Vega Strike "  " \n"
@@ -136,11 +147,17 @@ int main( int argc, char *argv[] )
     //this sets up the vegastrike config variable
     setup_game_data(); 
     // loads the configuration file .vegastrikerc from home dir if such exists
+    ParseCommandLine(argc,argv);
+	if (CONFIGFILE==0) {
+		CONFIGFILE=new char[42];
+		sprintf(CONFIGFILE,"vegastrike.config");
+	}
+		
     initpaths();
     //can use the vegastrike config variable to read in the default mission
-    strcpy(mission_name,vs_config->getVariable ("general","default_mission","test1.mission").c_str());
+    if (mission_name[0]=='\0')
+      strcpy(mission_name,vs_config->getVariable ("general","default_mission","test1.mission").c_str());
     //might overwrite the default mission with the command line
-    ParseCommandLine(argc,argv);
 
 #ifdef HAVE_BOOST
 
@@ -378,7 +395,10 @@ void ParseCommandLine(int argc, char ** lpCmdLine) {
 	break;
       case 'M':
       case 'm':
-	g_game.music_enabled=1;
+		  if (!(lpCmdLine[i][2]=='1'&&lpCmdLine[i][3]=='\0')) {
+	  		CONFIGFILE=new char[40+strlen(lpCmdLine[i])+1];
+			sprintf(CONFIGFILE,"vegastrike.config.%splayer",lpCmdLine[i]+2);
+		  }
 	break;
       case 'S':
       case 's':

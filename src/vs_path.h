@@ -4,7 +4,7 @@
 #include <string>
 #include <vector>
 
-#define CONFIGFILE "vegastrike.config"
+extern char *CONFIGFILE;
 #define HOMESUBDIR ".vegastrike"
 #define DELIM '/'
 #define DELIMSTR "/"

@@ -13,6 +13,7 @@
 #endif
 #include "galaxy_gen.h"
 float simulation_atom_var=(float)(1.0/10.0);
+char *CONFIGFILE;
 
 std::vector <std::string> savedpwd;
 std::string sharedtextures;

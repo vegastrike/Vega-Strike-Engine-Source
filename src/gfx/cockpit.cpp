@@ -1021,7 +1021,12 @@ void Cockpit::Draw() {
     }
   }
   if (die) {
-
+	if (un) {
+		if (un->GetHull()>0) {
+			die=false;
+		}
+	}
+	if (die) {
 	static float dietime = 0;
 	if (text) {
 		GFXColor4f (1,1,1,1);
@@ -1042,7 +1047,7 @@ void Cockpit::Draw() {
 	dietime +=GetElapsedTime();
 	SetView (CP_PAN);
 	zoomfactor=dietime*10;
-
+	}
   }
   GFXAlphaTest (ALWAYS,0);  
   GFXHudMode (false);
