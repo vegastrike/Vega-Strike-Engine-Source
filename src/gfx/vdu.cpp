@@ -781,7 +781,7 @@ void UpdateViewstyle (VIEWSTYLE &vs) {
 void VDU::SwitchMode() {
   if (!posmodes)
     return;
-  if (thismode.back()==VIEW&&viewStyle!=CP_BACK&&(thismode.back()&posmodes)) {
+  if (thismode.back()==VIEW&&viewStyle!=CP_CHASE&&(thismode.back()&posmodes)) {
     UpdateViewstyle (viewStyle);
   }else {
     viewStyle = CP_TARGET;

@@ -197,23 +197,14 @@ bool cockpitfront=true;
       static bool back= XMLSupport::parse_bool (vs_config->getVariable ("graphics","background","true"));
       _Universe->activeStarSystem()->getBackground()->EnableBG(back);
     }
-  const int cockpiton=1;
-  const int backgroundoff=2;
-  const int max = 4;
-  static int tmp=(XMLSupport::parse_bool (vs_config->getVariable ("graphics","cockpit","true"))?1:0)+((!XMLSupport::parse_bool (vs_config->getVariable ("graphics","background","true")))?2:0);
+  static int tmp=(XMLSupport::parse_bool (vs_config->getVariable ("graphics","cockpit","true"))?1:0);
   if(newState==PRESS&&cockpitfront) {
-    if ((tmp&cockpiton)&&_Universe->AccessCockpit()->GetParent()) {
+    if ((tmp)&&_Universe->AccessCockpit()->GetParent()) {
       _Universe->AccessCockpit()->Init (_Universe->AccessCockpit()->GetParent()->getCockpit().c_str());	    
     }else {
       _Universe->AccessCockpit()->Init ("disabled-cockpit.cpt");
     }
-	static int i=1;
-	if (i--==1){
-	  
-	  //_Universe->activeStarSystem()->getBackground()->EnableBG(!(backgroundoff));
-	}
-    tmp--;
-    if (tmp<0) tmp=max-1;
+    tmp=(tmp+1)%2;
   }
   if(newState==PRESS||newState==DOWN) {
     cockpitfront=true;
