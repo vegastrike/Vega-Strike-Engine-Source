@@ -205,7 +205,7 @@ void StarSystem::ProcessPendingJumps() {
 	jumpdest+=23231;
       }
       DealPossibleJumpDamage (un);
-      static int jumparrive=AUDCreateSound(vs_config->getVariable ("unitaudio","jumpleave", "sfx43.wav"),false);
+      static int jumparrive=AUDCreateSound(vs_config->getVariable ("unitaudio","jumparrive", "sfx43.wav"),false);
       if (dosightandsound)
 	AUDPlay (jumparrive,un->LocalPosition(),un->GetVelocity(),1);
     } else {
