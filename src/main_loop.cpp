@@ -19,7 +19,7 @@
 #include "star_system.h"
 #include "planet.h"
 #include "gfx_sphere.h"
-
+#include "gfx_coordinate_select.h"
 #include "gfx_mesh.h"
 using namespace std;
 
@@ -314,7 +314,7 @@ Unit *fighter = NULL;
 Unit *fighter2=NULL;
 const int numf = 1;
 Unit *fighters[numf];
-LocationSelect *locSel=NULL;
+CoordinateSelect *locSel=NULL;
 Background * bg = NULL;
 SphereMesh *bg2=NULL;
 TextPlane *textplane = NULL;
@@ -444,12 +444,13 @@ void createObjects() {
   bg = new Background("cube");
   //bg2 = new SphereMesh (20.0,8,8,"sun.bmp",true,true);
   //HUDElement *t = new HUDElement("ucarrier.dat");
-  
+  /******
   locSel = new LocationSelect(Vector (0,-2,2),
 			      Vector(1,0,-1), 
 			      Vector (-1,0,-1));
 //GOOD!!
-  BindKey (1,LocationSelect::MouseMoveHandle);
+  ****/
+  BindKey (1,CoordinateSelect::MouseMoveHandle);
   //locSel = new LocationSelect (Vector (0,-1,5),
   //			       Vector (1,0,0),
   //			       Vector (0,-.35,-1));
@@ -467,7 +468,7 @@ void createObjects() {
   ////  carrier->Scale(Vector(0.2,0.2,0.2));
   //t->SetPosition(Vector(0.5, 0.5, 15.0));
   //t->Pitch(PI/2);
-  
+  locSel = new CoordinateSelect (Vector (0,0,5));
   GFXMaterial mat;
   GFXGetMaterial(0, mat);
   mat.ar = 1.0;
@@ -602,9 +603,9 @@ void main_loop() {
   _GFX->activeStarSystem()->Draw();
   _GFX->activeStarSystem()->Update();
   
-  //  GFXDisable(TEXTURE1);
+    GFXDisable(TEXTURE1);
   //  GFXBlendMode(ONE,ONE);
-  //  locSel->Draw();
+    locSel->Draw();
 
   //textplane->Draw();
   _GFX->EndDraw();

@@ -3,10 +3,8 @@
 #include "cmd_unit.h"
 
 extern Vector mouseline;
-
-bool ClickList::queryShip (int mouseX, int mouseY,Unit *ship) {   
+Vector MouseCoordinate (int mouseX, int mouseY) {
   float l, r, b, t , n, f;
-  
   GFXGetFrustumVars (true,&l,&r,&b,&t,&n,&f);
 
   //Vector mousePoint (MouseCoordinate (mouseX,mouseY,1));
@@ -14,9 +12,17 @@ bool ClickList::queryShip (int mouseX, int mouseY,Unit *ship) {
   cerr << "top - bottom " <<  t-b << endl;
   cerr << "right - left " <<  r-l << endl;
   */
-  Vector mousePoint((l + (r-l) * float(mouseX)/g_game.x_resolution),
+  return Vector ((r + (l-r) * float(mouseX)/g_game.x_resolution),
 		    (t + (b-t) * float(mouseY)/g_game.y_resolution),
 		    n);
+
+}
+
+
+bool ClickList::queryShip (int mouseX, int mouseY,Unit *ship) {   
+  
+  
+  Vector mousePoint = MouseCoordinate (mouseX, mouseY);
   mouseline =mousePoint;
   cerr << "Mousepoint: " << mousePoint << endl;
     //mousePoint.k= -mousePoint.k;

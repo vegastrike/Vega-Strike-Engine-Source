@@ -5,7 +5,8 @@
 #include "gfx_transform_matrix.h"
 #include "UnitCollection.h"
 #include "star_system.h"
-Vector MouseCoordinate (int x, int y, float zplane); //finds the vector of the location of the mouse cursor on the plane 'z' away from the camera
+Vector MouseCoordinate (int x, int y);//FIXME
+
 
 class ClickList {
  private:

@@ -51,7 +51,7 @@ public:
 	void Draw(Matrix tmatrix, const Vector &pp, const Vector &pq, const Vector &pr, const Vector &ppos);
 };
 */
-Vector MouseCoordinate (int x, int y, float zplane);
+//////OBSOLETE!!!!!! Vector MouseCoordinate (int x, int y, float zplane);
 enum Aggression{
 	LOW, MEDIUM, HIGH, DISABLE, DESTROY
 };

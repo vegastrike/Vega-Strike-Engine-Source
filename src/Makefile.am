@@ -146,4 +146,6 @@ vegastrike_SOURCES =				\
 	xml_support.cpp				\
 	cmd_unit_xml.cpp  \
 	profile.h \
+	gfx_coordinate_select.cpp		\
+	gfx_coordinate_select.h			\
 	gl_matrix.h
