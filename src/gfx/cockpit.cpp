@@ -632,6 +632,8 @@ float GameCockpit::LookupTargetStat (int stat, Unit *target) {
     }
     return ((float)armordat[stat-UnitImages::ARMORF])/StartArmor[stat-UnitImages::ARMORF];
   case UnitImages::FUEL:
+	if (target->FuelData()>maxfuel)
+		maxfuel=target->FuelData();
     if (maxfuel>0) return target->FuelData()/maxfuel;return 0;
   case UnitImages::ENERGY:
     return target->EnergyData();
@@ -1317,10 +1319,16 @@ void GameCockpit::Draw() {
 			text->GetCharSize (x,y);
 			text->SetCharSize (x*4,y*4);
 			text->SetPos (0-(x*2*14),0-(y*2));
-			mission->msgcenter->add("game","all","You Have Died!");
+			char playr[3];
+			playr[0]='p';
+			playr[1]='0'+_Universe->CurrentCockpit();
+			playr[2]='\0';
+			mission->msgcenter->add("game",playr,"#ff5555You Have Died!");
+			mission->msgcenter->add("game",playr,"Press #8080FF;#000000 (semicolon) to respawn");
+			mission->msgcenter->add("game",playr,"Or Press #8080FFEsc#000000 to quit");
 		}
 		GFXColorf (textcol);
-		text->Draw ("You Have Died!");
+		text->Draw ("#ff5555You Have Died!\n#000000Press #8080FF;#000000 (semicolon) to respawn\nOr Press #8080FFEsc#000000 to quit");
 		GFXColor4f (1,1,1,1);
 	}
 	dietime +=GetElapsedTime();
