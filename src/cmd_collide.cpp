@@ -8,6 +8,7 @@ const float COLLIDETABLEACCURACY=.005;// "1/largeness of sectors"
 #define _USE_COLLIDE_TABLE
 class CollideTable {
   vector <LineCollide*> table [COLLIDETABLESIZE][COLLIDETABLESIZE][COLLIDETABLESIZE];
+  int minaccessx,minaccessy,minaccessz,maxaccessx,maxaccessy,maxaccessz;
   inline void hash_vec (const Vector & tmp, int &x, int &y, int &z) {
     x = ((int)(tmp.i*COLLIDETABLEACCURACY));
     y = ((int)(tmp.j*COLLIDETABLEACCURACY));
@@ -34,15 +35,29 @@ class CollideTable {
     maxz = maxz%COLLIDETABLESIZE;
   }
 public:
+  CollideTable() {
+    minaccessx=COLLIDETABLESIZE-1;
+    minaccessy=COLLIDETABLESIZE-1;
+    minaccessz=COLLIDETABLESIZE-1;
+    maxaccessx=0;
+    maxaccessy=0;
+    maxaccessz=0;    
+  }
   void Clear () {
-    for (int i=0;i<COLLIDETABLESIZE;i++) {
-    for (int j=0;j<COLLIDETABLESIZE;j++) {
-    for (int k=0;k<COLLIDETABLESIZE;k++) {
+    for (int i=minaccessx;i<=maxaccessx;i++) {
+    for (int j=minaccessy;j<=maxaccessy;j++) {
+    for (int k=minaccessz;k<=maxaccessz;k++) {
       if (table[i][j][k].size())
 	table[i][j][k]=vector <LineCollide*>();
     }
     }
     }
+    minaccessx=COLLIDETABLESIZE-1;
+    minaccessy=COLLIDETABLESIZE-1;
+    minaccessz=COLLIDETABLESIZE-1;
+    maxaccessx=0;
+    maxaccessy=0;
+    maxaccessz=0;
   }
   void Get (const Vector &Min, const Vector & Max, vector <LineCollide> &retval) {    
     int minx,miny,minz,maxx,maxy,maxz;
@@ -76,6 +91,13 @@ public:
     hash_vec(target->Mini,minx,miny,minz);
     hash_vec(target->Maxi,maxx,maxy,maxz);
     get_max_min (minx,maxx,miny,maxy,minz,maxz);
+    if (maxx>maxaccessx) maxaccessx=maxx;
+    if (maxy>maxaccessy) maxaccessy=maxy;
+    if (maxz>maxaccessz) maxaccessz=maxz;
+    if (minx<minaccessx) minaccessx=minx;
+    if (miny<minaccessy) minaccessy=miny;
+    if (minz<minaccessz) minaccessz=minz;
+
     for (int i=minz;;i++) {//reverse??????????????? which is fast
       if (i==COLLIDETABLESIZE) i=0;
       for (int j=miny;;j++) {      
