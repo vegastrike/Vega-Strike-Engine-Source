@@ -1,6 +1,10 @@
 #include "audiolib.h"
 
-int AUDCreateSound (const char *, const bool LOOP=false){
+int AUDCreateSoundWAV (const char *, const bool LOOP=false){
+#ifdef HAVE_AL
+#endif
+}
+int AUDCreateSoundMP3 (const char *, const bool LOOP=false){
 #ifdef HAVE_AL
 #endif
 }

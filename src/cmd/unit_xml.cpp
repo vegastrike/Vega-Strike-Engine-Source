@@ -91,7 +91,9 @@ namespace UnitXML {
       MAXCONE,
       RANGE,
       ISCOLOR,
-      RADAR
+      RADAR,
+      ENGINEMP3,
+      ENGINEWAV
     };
 
   const EnumMap::Pair element_names[] = {
@@ -169,12 +171,14 @@ namespace UnitXML {
     EnumMap::Pair ("Engine",MAXCONE),
     EnumMap::Pair ("Error",EEERROR),
     EnumMap::Pair ("Range",RANGE),
+    EnumMap::Pair ("EngineMp3",ENGINEMP3),
+    EnumMap::Pair ("EngineWav",ENGINEWAV),
     EnumMap::Pair ("Color",ISCOLOR)
 
 };
 
   const EnumMap element_map(element_names, 25);
-  const EnumMap attribute_map(attribute_names, 48);
+  const EnumMap attribute_map(attribute_names, 50);
 }
 
 using XMLSupport::EnumMap;
@@ -419,9 +423,12 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
     xml->unitlevel++;
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(attribute_map.lookup((*iter).name)) {
-	case ENGINE:
-	  enginesound = AUDCreateSound ((*iter).name.c_str(),true);
-	  break;
+      case ENGINEWAV:
+	enginesound = AUDCreateSoundWAV ((*iter).name.c_str(),true);
+	break;
+      case ENGINEMP3:
+	enginesound = AUDCreateSoundMP3((*iter).name.c_str(),true); 
+	break;
       }
     }
     break;    

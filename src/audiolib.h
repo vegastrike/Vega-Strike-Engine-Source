@@ -7,7 +7,9 @@ void AUDListener (const Vector &pos, const Vector &vel);
 void AUDListenerOrientation (const Vector & i, const Vector &j, const Vector &k);
 void AUDListenerGain (const float gain);
 ///creates a buffer if one doesn't already exists, and then creates a source
-int AUDCreateSound (const char *, const bool LOOP=false);
+int AUDCreateSoundWAV (const char *, const bool LOOP=false);
+///creates a buffer for an mp3 sound if one doesn't already exist, then creates a source
+int AUDCreateSoundMP3 (const char *, const bool LOOP=false);
 ///copies other sound loaded through AUDCreateSound
 int AUDCreateSound (int sound,const bool LOOP=false);
 ///deletes a given sound
