@@ -13,6 +13,7 @@
 #include "hard_coded_scripts.h"
 #include "cmd/script/mission.h"
 #include "gfx/cockpit_generic.h"
+#include "lin_time.h"
 using namespace Orders;
 
 void DoSpeech (Unit * un, const string &speech) {
@@ -423,6 +424,9 @@ void AggressiveAI::Execute () {
   fprintf (stderr,"endagg");
   fflush (stderr);
 #endif    
+  if (getTimeCompression()>3) {
+    parent->SetVelocity(parent->GetVelocity()*(parent->GetComputerData().max_speed()/getTimeCompression()));
+  }
 }  
 
 
