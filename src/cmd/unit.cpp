@@ -732,6 +732,6 @@ const string Unit::getFgID()  {
       return flightgroup->name+buffer;
     }
     else{
-      return name;
+      return fullname;
     }
 };

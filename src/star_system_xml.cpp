@@ -205,6 +205,7 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
   vector <char *>dest;
   char * filename =NULL;
   char * alpha = NULL;
+  string fullname="unknw";
   float gravity=0;
   float velocity=0;
   float position=0;
@@ -461,6 +462,10 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
     alpha[0]='\0';
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(attribute_map.lookup((*iter).name)) {
+      case NAME:
+	fullname=(*iter).value;
+	cout << "\nFOUND planet/unit name " << fullname << endl;
+	break;
       case XFILE:
 	delete []filename;
 	filename = new char [strlen((*iter).value.c_str())+1];
@@ -544,9 +549,9 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
     }
     if (xml->unitlevel>2) {
       assert(xml->moons.size()!=0);
-      xml->moons[xml->moons.size()-1]->beginElement(R,S,velocity,position,gravity,radius,filename,alpha,dest,xml->unitlevel-1, ourmat,curlights,false,faction);
+      xml->moons[xml->moons.size()-1]->beginElement(R,S,velocity,position,gravity,radius,filename,alpha,dest,xml->unitlevel-1, ourmat,curlights,false,faction,fullname);
     } else {
-      xml->moons.push_back(new Planet(R,S,velocity,position,gravity,radius,filename,alpha,dest, xml->cursun+xml->systemcentroid, NULL, ourmat,curlights,faction));
+      xml->moons.push_back(new Planet(R,S,velocity,position,gravity,radius,filename,alpha,dest, xml->cursun+xml->systemcentroid, NULL, ourmat,curlights,faction,fullname));
       xml->moons[xml->moons.size()-1]->SetPosAndCumPos(R+S+xml->cursun+xml->systemcentroid);
     }
     delete []filename;
@@ -563,8 +568,13 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
     nebfile[0]='\0';
     filename = new char [1];
     filename[0]='\0';
+    fullname="unkn-unit";
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(attribute_map.lookup((*iter).name)) {
+      case NAME:
+	fullname=(*iter).value;
+	cout << "\nFOUND unit name " << fullname << endl;
+	break;
       case XFILE:
 	delete []filename;
 	filename = new char [strlen((*iter).value.c_str())+1];
@@ -624,6 +634,7 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
 	  Planet * plan =xml->moons.back()->GetTopPlanet(xml->unitlevel-1);
 	  if (elem==UNIT) {
 		  plan->AddSatellite(un=new Unit(filename,true,false,faction));
+		  un->setFullname(fullname);
 	  } else if (elem==NEBULA) {
 		  plan->AddSatellite(un=new Nebula(nebfile,filename,false,faction));			
 	  }
@@ -643,7 +654,9 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
 	AddUnit (b);
       }else {
    	    if (elem==UNIT) {
-		  xml->moons.push_back((Planet *)new Unit(filename,true ,false,faction));
+	      Unit *moon_unit=new Unit(filename,true ,false,faction);
+	      moon_unit->setFullname(fullname);
+		  xml->moons.push_back((Planet *)moon_unit);
 		}else if (elem==NEBULA){
 		  xml->moons.push_back ((Planet *)new Nebula (nebfile,filename,false,faction));
 		} else {

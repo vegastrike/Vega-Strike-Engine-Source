@@ -373,6 +373,21 @@ varInst *Mission::call_order(missionNode *node,int mode){
 
     return viret;
   }
+  else if(cmd=="newSuperiority"){
+    Order *my_order=NULL;
+
+    if(mode==SCRIPT_RUN){
+      my_order=new AISuperiority();
+    }
+
+    viret=newVarInst(VI_TEMP);
+    viret->type=VAR_OBJECT;
+    viret->objectname="order";
+    
+    viret->object=(void *)my_order;
+
+    return viret;
+  }
   else{
     varInst *ovi=getObjectArg(node,mode);
     Order *my_order=getOrderObject(node,mode,ovi);

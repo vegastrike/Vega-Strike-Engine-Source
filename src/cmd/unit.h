@@ -32,6 +32,8 @@ struct GFXColor;
 #include "xml_support.h"
 #include "container.h"
 
+using std::string;
+
 class Flightgroup;
 class Nebula;
 
@@ -603,11 +605,14 @@ public:
  private:
   Flightgroup *flightgroup;
   int flightgroup_subnumber;
+ protected:
+  string fullname;
  public:
   Flightgroup *getFlightgroup() const { return flightgroup; };
   int getFgSubnumber() const { return flightgroup_subnumber; };
   
   const string getFgID();
+  void setFullname(string name)  { fullname=name; };
   
 };
 ///Holds temporary values for inter-function XML communication Saves deprecated restr info

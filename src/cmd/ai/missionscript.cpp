@@ -112,6 +112,10 @@ AIFlyToWaypoint::AIFlyToWaypoint(Vector wp,float velo,bool afburn,float rng) : A
 
 
 
+AISuperiority::AISuperiority() : AImissionScript("ai_superiority") {
+
+}
+
 AIPatrol::AIPatrol(int mode,Vector area,float range,Unit *around_unit) : AImissionScript("ai_patrol") {
 
   varInst *vi_wp=mission->lookupClassVariable(modulename,"area",classid);

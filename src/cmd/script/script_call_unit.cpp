@@ -348,10 +348,13 @@ varInst *Mission::call_unit(missionNode *node,int mode){
     else if(cmd=="removeFromGame"){
 
       if(mode==SCRIPT_RUN){
+#if 0
 	StarSystem *ssystem=_Universe->activeStarSystem();
 
 	ssystem->RemoveUnit(my_unit);
 	delete my_unit;
+#endif
+	my_unit->Kill();
       }
 
       viret=newVarInst(VI_TEMP);
@@ -360,19 +363,13 @@ varInst *Mission::call_unit(missionNode *node,int mode){
     else if(cmd=="getFgId" || cmd=="getFgID"){
       if(mode==SCRIPT_RUN){
 	
-	Flightgroup *fg=my_unit->getFlightgroup();
-	  char buffer[100];
-	  int fgnum=0;
+	string fgname=my_unit->getFgID();
 
-	if(fg){
-	  fgnum=my_unit->getFgSubnumber();
-	  sprintf(buffer,"%s-%d",fg->name.c_str(),fgnum);
-	}
-	else{
-	  sprintf(buffer,"unknown");
+	if(fgname.empty()){
+	  fgname="-unknown";
 	}
 
-	varInst *str_vi=call_string_new(node,mode,buffer);
+	varInst *str_vi=call_string_new(node,mode,fgname);
 
 	viret=str_vi;
 	//return str_vi;

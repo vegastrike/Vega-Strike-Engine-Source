@@ -34,6 +34,7 @@ using XMLSupport::EnumMap;
 using XMLSupport::Attribute;
 using XMLSupport::AttributeList;
 
+
 easyDomNode::easyDomNode(){
 }
 
@@ -62,21 +63,6 @@ void easyDomNode::addChild(easyDomNode *child){
 }
 
 string easyDomNode::attr_value(string search_name){
-#if 0
- vector<string>::const_iterator iter;
- vector<string>::const_iterator iter2;
-
-  for(iter = att_name.begin(), iter2=att_value.begin() ; iter!=att_name.end(); iter++, iter2++) {
-    if(search_name==(*iter)){
-      return *iter2;
-    }
-  }
-
-  string dummy;
-
-  return dummy;
-#endif
-
   return attribute_map[search_name];
 }
 
@@ -104,105 +90,3 @@ void easyDomNode::printNode(ostream& out,int recurse_level,int level){
   }
 }
 
-#if 0
-template<class domNodeType> easyDomFactory<domNodeType>::easyDomFactory(){
-}
-#endif
-
-#if 0
-
-template<class domNodeType> void easyDomFactory<domNodeType>::charHandler(void *userData, const XML_Char *s,int len){
-  char buffer[2048];
-  strncpy(buffer,s,len);
-  // printf("XML-text: %s\n",buffer);
-}
-
-template<class domNodeType> void easyDomFactory<domNodeType>::beginElement(void *userData, const XML_Char *name, const XML_Char **atts) {
-  ((easyDomFactory*)userData)->beginElement(name, AttributeList(atts));
-}
-
-template<class domNodeType> void easyDomFactory<domNodeType>::endElement(void *userData, const XML_Char *name) {
-  ((easyDomFactory*)userData)->endElement(name);
-}
-
-
-template<class domNodeType> void easyDomFactory<domNodeType>::beginElement(const string &name, const AttributeList &attributes) {
-  AttributeList::const_iterator iter;
-
-  domNodeType *parent;
-
-  if(nodestack.empty()){
-    parent=NULL;
-  }
-  else{
-    parent=nodestack.top();
-  }
-
-  domNodeType *thisnode=new domNodeType();
-  thisnode->set(parent,name,(AttributeList *) &attributes);
-
-  for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
-    //cout <<  name << "::" << (*iter).name << endl;
-  }
-
-  if(parent==NULL){
-    topnode=thisnode;
-  }
-  else{
-    parent->addChild(thisnode);
-  }
-  nodestack.push(thisnode);
-
-}
-
-template<class domNodeType> void easyDomFactory<domNodeType>::endElement(const string &name) {
-
-  domNodeType *stacktop=nodestack.top();
-
-  if(stacktop->Name()!=name){
-    cout << "error: expected " << stacktop->Name() << " , got " << name << endl;
-    exit(0);
-  }
-  else{
-    nodestack.pop();
-  }
-  
-}
-
-#endif
-
-#if 0
-template<class domNodeType> easyDomNode * easyDomFactory<domNodeType>::LoadXML(const char *filename) {
-
-  const int chunk_size = 16384;
-
-  FILE * inFile = fopen (filename, "r");
-  if(!inFile) {
-    cout << "error: could not open file: " << filename << endl;
-    assert(0);
-    return NULL;
-  }
-
-  xml = new easyDomFactoryXML;
-
-  XML_Parser parser = XML_ParserCreate(NULL);
-  XML_SetUserData(parser, this);
-  XML_SetElementHandler(parser, &easyDomFactory::beginElement, &easyDomFactory::endElement);
-  XML_SetCharacterDataHandler(parser,&easyDomFactory::charHandler);
-  
-  do {
-    char *buf = (XML_Char*)XML_GetBuffer(parser, chunk_size);
-    int length;
-
-    length = fread (buf,1, chunk_size,inFile);
-    //length = inFile.gcount();
-    XML_ParseBuffer(parser, length, feof(inFile));
-  } while(!feof(inFile));
-
-  fclose (inFile);
-  XML_ParserFree (parser);
-
-  return topnode;
-}
-
-#endif

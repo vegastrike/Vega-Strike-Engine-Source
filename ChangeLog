@@ -1,3 +1,11 @@
+2002-01-29 Alexander Rawass <alexannika@users.sourceforge.net>
+	
+	* modified star_system,planet,unit
+	  to read in the 'name' of a planet or unit
+	* improved missions
+	* removed bug in easydom::parseCalike
+
+	
 2002-01-29 Daniel Aleksandrow <dandandaman@users.sourceforge.net>
 
 	* Fixed the revoker's texture
@@ -17,6 +25,7 @@
 	* Fixed ancient ~Beam bug that would cause segfault at null pointer if all beams with a certain texture were deleted.
 	* Fixed bug that caused clipping to incorrectly clip after 'host' camera starship destroyed
 
+>>>>>>> 1.107
 2002-01-28 Daniel Aleksandrow <dandandaman@users.sourceforge.net>
 
 	* New ship (the Revoker).....unit file not finished

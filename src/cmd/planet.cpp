@@ -85,24 +85,26 @@ void Planet::AddSatellite (Unit * orbiter) {
 	satellites.prepend (orbiter);
 	orbiter->SetOwner (this);
 }
-void Planet::beginElement(Vector x,Vector y,float vely,float pos,float gravity,float radius,char * filename,char * alpha,vector<char *> dest,int level,  const GFXMaterial & ourmat, const vector <GFXLightLocal>& ligh, bool isunit, int faction){
+void Planet::beginElement(Vector x,Vector y,float vely,float pos,float gravity,float radius,char * filename,char * alpha,vector<char *> dest,int level,  const GFXMaterial & ourmat, const vector <GFXLightLocal>& ligh, bool isunit, int faction,string fullname){
   UnitCollection::UnitIterator * satiterator =NULL;
   if (level>2) {
     UnitCollection::UnitIterator * satiterator = satellites.createIterator();
 	  assert(satiterator->current()!=NULL);
 	  if (satiterator->current()->isUnit()==PLANETPTR) {
-		((Planet *)satiterator->current())->beginElement(x,y,vely,pos,gravity,radius,filename,alpha,dest,level-1,ourmat,ligh, isunit, faction);
+		((Planet *)satiterator->current())->beginElement(x,y,vely,pos,gravity,radius,filename,alpha,dest,level-1,ourmat,ligh, isunit, faction,fullname);
 	  } else {
 	    fprintf (stderr,"Planets are unable to orbit around units");
 	  }
   } else {
     if (isunit==true) {
-      satellites.prepend(new Unit (filename, true, false, faction));
+      Unit *sat_unit=NULL;
+      satellites.prepend(sat_unit=new Unit (filename, true, false, faction));
+      sat_unit->setFullname(fullname);
       satiterator = satellites.createIterator();
       satiterator->current()->SetAI (new PlanetaryOrbit (satiterator->current(),vely,pos,x,y, Vector (0,0,0), this)) ;
       satiterator->current()->SetOwner (this);
     }else {
-      satellites.prepend(new Planet(x,y,vely,pos,gravity,radius,filename,alpha,dest, Vector (0,0,0), this, ourmat, ligh, faction));
+      satellites.prepend(new Planet(x,y,vely,pos,gravity,radius,filename,alpha,dest, Vector (0,0,0), this, ourmat, ligh, faction,fullname));
     }
   }
   delete satiterator;
@@ -117,7 +119,7 @@ Planet::Planet()  : Unit(),  atmosphere (NULL), terrain (NULL), radius(0.0f), sa
   SetAI(new Order()); // no behavior
 }
 
-Planet::Planet(Vector x,Vector y,float vely, float pos,float gravity,float radius,char * textname,char * alpha,vector <char *> dest, const Vector & orbitcent, Unit * parent, const GFXMaterial & ourmat, const std::vector <GFXLightLocal> &ligh, int faction) : Unit(), atmosphere(NULL), terrain(NULL), radius(0.0f),  satellites() {
+Planet::Planet(Vector x,Vector y,float vely, float pos,float gravity,float radius,char * textname,char * alpha,vector <char *> dest, const Vector & orbitcent, Unit * parent, const GFXMaterial & ourmat, const std::vector <GFXLightLocal> &ligh, int faction,string fgid) : Unit(), atmosphere(NULL), terrain(NULL), radius(0.0f),  satellites() {
   inside =false;
   for (unsigned int i=0;i<ligh.size();i++) {
     int l;
@@ -129,8 +131,10 @@ Planet::Planet(Vector x,Vector y,float vely, float pos,float gravity,float radiu
   Init();
   this->faction = faction;
   killed=false;
-  name = "Planet - ";
-  name += textname;
+  //name = "Planet - ";
+  //name += textname;
+  name=fgid;
+  fullname=fgid;
   this->radius=radius;
   this->gravity=gravity;
   hull = (4./3)*M_PI*radius*radius*radius*densityOfRock;

@@ -644,7 +644,7 @@ Unit* Mission::getUnitArg(missionNode *node,int mode,int arg_nr){
     if(unit_vi->type==VAR_OBJECT && unit_vi->objectname=="unit"){
       return getUnitObject(unit_node,mode,unit_vi);
     }
-    fatalError(node,mode,"expected unit arg - got else");
+    fatalError(node,mode,"getUnitArg: expected unit arg - got else");
     assert(0);
     return NULL; // never reach
   }

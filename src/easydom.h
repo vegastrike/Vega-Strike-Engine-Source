@@ -101,6 +101,8 @@ template<class domNodeType> class easyDomFactory {
   void getColor(char *name, float color[4]);
   char *getVariable(char *section,char *name);
 
+  void c_alike_to_xml(const char *filename);
+
   struct easyDomFactoryXML {
   } *xml;
 
@@ -145,7 +147,7 @@ template<class domNodeType> class easyDomFactory {
 ;
 
 
-    domNodeType *LoadCalike(const char *filename) {
+domNodeType *LoadCalike(const char *filename) {
 
   const int chunk_size = 16384;
 
@@ -174,20 +176,25 @@ template<class domNodeType> class easyDomFactory {
     int max_index=index+incr;
     int newlen=incr;
 
-    //printf("max_index=%d,string_size=%d\n",max_index,string_size);
+    printf("max_index=%d,string_size=%d\n",max_index,string_size);
     if(max_index>=string_size){
       newlen=module_str.size()-index;
-      //      printf("getting string from %d length %d\n",index,newlen);
+      printf("getting string from %d length %d\n",index,newlen);
       const char *strbuf=module_str.substr(index,newlen).c_str();
       strncpy (buf,strbuf,newlen);
     }
     else{
-      //printf("getting string from %d length %d\n",index,incr);
+      printf("getting string from %d length %d\n",index,incr);
       const char *strbuf=module_str.substr(index,incr).c_str();
       strncpy (buf,strbuf,incr);
+      newlen=incr;
     }
 
-    is_final=newlen!=incr;
+    index+=newlen;
+
+    if(index>=string_size){
+      is_final=true;
+    }
 
     XML_ParseBuffer(parser, newlen, is_final);
   } while(!is_final);

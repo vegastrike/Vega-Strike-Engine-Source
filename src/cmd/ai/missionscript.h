@@ -60,4 +60,9 @@ class AIPatrol : public AImissionScript {
   AIPatrol(int mode,Vector area,float range,Unit *around_unit);
 };
 
+class AISuperiority : public AImissionScript {
+ public:
+  AISuperiority();
+};
+
 #endif
