@@ -4635,7 +4635,7 @@ int Unit::ForceDock (Unit * utdw, int whichdockport) {
 		  this->RestoreGodliness();
 	//_Universe->AccessCockpit()->RestoreGodliness();
       }
-      int cockpit=UnitUtil::isPlayerStarship(un);
+      int cockpit=UnitUtil::isPlayerStarship(this);
       if (this->RefillWarpEnergy()){
         if (cockpit>=0&&cockpit<_Universe->numPlayers()) {
           static float docking_fee = XMLSupport::parse_float (vs_config->getVariable("general","fuel_docking_fee","0"));
