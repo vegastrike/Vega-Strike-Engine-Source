@@ -294,6 +294,10 @@ void Mesh::ProcessZFarMeshes () {
   GFXEnable (DEPTHWRITE);
 }
 
+const GFXMaterial &Mesh::GetMaterial () {
+   return GFXGetMaterial (myMatNum);
+}
+
 void Mesh::ProcessUndrawnMeshes(bool pushSpecialEffects) {
   static GFXColor meshcolor (getMeshColor());
   GFXLightContextAmbient(meshcolor);

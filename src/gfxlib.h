@@ -129,6 +129,7 @@ void /*GFXDRVAPI*/ GFXSetMaterial(unsigned int &number, const GFXMaterial &mater
 void /*GFXDRVAPI*/ GFXModifyMaterial (const unsigned int number, const GFXMaterial &material);
 ///Gets the statistics of the material stored in number
 GFXBOOL /*GFXDRVAPI*/ GFXGetMaterial(const unsigned int number, GFXMaterial &material);
+const GFXMaterial &GFXGetMaterial (const unsigned int number);
 ///Tells Graphics library which material to use on next polygon if lighting enabled
 void /*GFXDRVAPI*/ GFXSelectMaterialHighlights(const unsigned int number,const GFXColor &ambient,  const GFXColor  &diffuse, const GFXColor & specular, const GFXColor & emmissive);
 void /*GFXDRVAPI*/ GFXSelectMaterial(const unsigned int number);

@@ -45,6 +45,15 @@ void /*GFXDRVAPI*/ GFXSetMaterial(unsigned int &number, const GFXMaterial &mater
 void /*GFXDRVAPI*/ GFXModifyMaterial (const unsigned int number, const GFXMaterial &material) {
   materialinfo [number]=material;
 }
+
+const GFXMaterial & /*GFXDRVAPI*/ GFXGetMaterial(const unsigned int number)
+{
+	if (number>=materialinfo.size()){
+		static GFXMaterial tmp;
+		return tmp;
+	}
+	return materialinfo[number];
+}
 GFXBOOL /*GFXDRVAPI*/ GFXGetMaterial(const unsigned int number, GFXMaterial &material)
 {
   if ((number==(unsigned int)-1)||number>=materialinfo.size())

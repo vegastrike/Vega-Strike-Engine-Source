@@ -19,6 +19,11 @@ void Mesh::CreateLogos(int faction, Flightgroup * fg) {
 Texture * Mesh::TempGetTexture (int index, std::string factionname)const {
 	return NULL;    
 }
+const GFXMaterial &Mesh::GetMaterial () {
+	static GFXMaterial tmp;
+	return tmp;
+}
+
 Texture * createTexture( const char * filename, int stage=0,enum FILTER f1= MIPMAP,enum TEXTURE_TARGET t0=TEXTURE2D,enum TEXTURE_IMAGE_TARGET t=TEXTURE_2D,unsigned char c=GFXFALSE,int i=65536)
 {
 	return NULL;
