@@ -25,6 +25,8 @@
 #include "gfxlib.h"
 #include "aux_texture.h"
 #include "sphere.h"
+#include "vs_globals.h"
+#include "config_xml.h"
 #include <float.h>
 	const float size = 100;
 Background::Background(const char *file, int numstars, float spread):Enabled (true) {
@@ -39,7 +41,8 @@ Background::Background(const char *file, int numstars, float spread):Enabled (tr
 	stars= new GFXVertexList (GFXPOINT,numstars,tmpvertex, numstars, false,0);
 	up = left = down = front=right=back=NULL;
 	strcpy(temp, file);
-	up = new Texture(strcat(temp, "_up.bmp"),0,MIPMAP,TEXTURE2D,TEXTURE_2D,GFXTRUE );
+	static int max_cube_size =XMLSupport::parse_int (vs_config->getVariable("graphics","max_cubemap_size","1024"));
+	up = new Texture(strcat(temp, "_up.bmp"),0,MIPMAP,TEXTURE2D,TEXTURE_2D,GFXTRUE,max_cube_size);
 	SphereBackground = NULL;
 	
 	if (!up->LoadSuccess()) {
@@ -57,27 +60,27 @@ Background::Background(const char *file, int numstars, float spread):Enabled (tr
 	//up->Filter();
 
 	strcpy(temp, file);
-	left = new Texture(strcat(temp, "_left.bmp"),0,MIPMAP,TEXTURE2D,TEXTURE_2D,GFXTRUE );
+	left = new Texture(strcat(temp, "_left.bmp"),0,MIPMAP,TEXTURE2D,TEXTURE_2D,GFXTRUE,max_cube_size );
 	//left->Clamp();
 	//left->Filter();
 
 	strcpy(temp, file);
-	front = new Texture(strcat(temp, "_front.bmp"),0,MIPMAP,TEXTURE2D,TEXTURE_2D,GFXTRUE );
+	front = new Texture(strcat(temp, "_front.bmp"),0,MIPMAP,TEXTURE2D,TEXTURE_2D,GFXTRUE,max_cube_size );
 	//front->Clamp();
 	//front->Filter();
 
 	strcpy(temp, file);
-	right = new Texture(strcat(temp, "_right.bmp"),0,MIPMAP,TEXTURE2D,TEXTURE_2D,GFXTRUE );
+	right = new Texture(strcat(temp, "_right.bmp"),0,MIPMAP,TEXTURE2D,TEXTURE_2D,GFXTRUE,max_cube_size);
 	//right->Clamp();
 	//right->Filter();
 
 	strcpy(temp, file);
-	back = new Texture(strcat(temp, "_back.bmp"),0,MIPMAP,TEXTURE2D,TEXTURE_2D,GFXTRUE );
+	back = new Texture(strcat(temp, "_back.bmp"),0,MIPMAP,TEXTURE2D,TEXTURE_2D,GFXTRUE,max_cube_size);
 	//back->Clamp();
 	//back->Filter();
 
 	strcpy(temp, file);
-	down = new Texture(strcat(temp, "_down.bmp"),0,MIPMAP,TEXTURE2D,TEXTURE_2D,GFXTRUE );
+	down = new Texture(strcat(temp, "_down.bmp"),0,MIPMAP,TEXTURE2D,TEXTURE_2D,GFXTRUE,max_cube_size);
 	//down->Clamp();
 	//down->Filter();
 	delete [] temp;
