@@ -87,17 +87,25 @@ struct bsp_tree {
 };
 
 
-static void Cross (const bsp_polygon &x, bsp_tree &result) {
-  Vector v1 (x.v[2].x-x.v[0].x,x.v[2].y-x.v[0].y,x.v[2].z-x.v[0].z);
-  Vector v2 (x.v[1].x-x.v[0].x,x.v[1].y-x.v[0].y,x.v[1].z-x.v[0].z);
+static bool Cross (const bsp_polygon &x, bsp_tree &result) {
+  float size =0;
+  
+  for (int i=2;(!size)&&i<x.v.size();i++) {
+    Vector v1 (x.v[i].x-x.v[0].x,x.v[i].y-x.v[0].y,x.v[i].z-x.v[0].z);
+    Vector v2 (x.v[1].x-x.v[0].x,x.v[1].y-x.v[0].y,x.v[1].z-x.v[0].z);
     result.a = v1.j * v2.k - v1.k * v2.j;
     result.b = v1.k * v2.i - v1.i * v2.k;
     result.c = v1.i * v2.j  - v1.j * v2.i;     
-    float size = result.a*result.a+result.b*result.b+result.c*result.c;
-    size = ((float)1)/sqrtf (size);
-    result.a *=size;
-    result.b *=size;
-    result.c *=size;
+    size = result.a*result.a+result.b*result.b+result.c*result.c;
+  }
+  if (size)
+      size = ((float)1)/sqrtf (size);
+  else 
+    return false;
+  result.a *=size;
+  result.b *=size;
+  result.c *=size;
+  return true;
 }
 
 float Dot (const bsp_vector & A, const bsp_vector & B) {
@@ -111,8 +119,11 @@ static int highestlevel=0;
 // k = (A * n + d) / (A * n - B * n) 
 //
 bool intersectionPoint (const bsp_tree &n, const bsp_vector & A, const bsp_vector & B, bsp_vector & res) {
-    float k = A.x*n.a + A.y*n.b+A.z*n.c;
-    k = (k + n.d ) / (k - (B.x * n.a + B.y * n.b + B.z * n.c)); 
+    float inter = A.x*n.a + A.y*n.b+A.z*n.c;
+    float k=(inter - (B.x * n.a + B.y * n.b + B.z * n.c)); 
+    if (!k)
+      return false;
+    k = (inter + n.d ) / k; 
     //assume magnitude (n.a,n.b,n.c) == 1
     if (k<BSPG_THRESHOLD||k>1-BSPG_THRESHOLD) {//lies outside the segment
 	return false;
@@ -219,13 +230,16 @@ bsp_polygon temp_poly4;
  nums = 3;
  for (int kk=0;kk<2;kk++) {
      for (i=0;i<(*curs).size();i+=nums) {
+       temp_poly3.v = vector <bsp_vector>();
 	 for (int j=0;j<nums;j++) {
 	     temp_poly3.v.push_back (bsp_vector());
 	     temp_poly3.v[j].x = xml->vertices[(*curs)[i+j]].x;
 	     temp_poly3.v[j].y = xml->vertices[(*curs)[i+j]].y;
 	     temp_poly3.v[j].z = xml->vertices[(*curs)[i+j]].z;
 	 }
-	 Cross (temp_poly3,temp_node);
+	 if (!Cross (temp_poly3,temp_node)) {
+	   continue;
+	 }
 	 // Calculate 'd'
 	 temp_node.d = (float) ((temp_node.a*temp_poly3.v[0].x)+(temp_node.b*temp_poly3.v[0].y)+(temp_node.c*temp_poly3.v[0].z));
 	 temp_node.d*=-1.0;
@@ -322,7 +336,7 @@ static int select_plane (const vector <bsp_polygon> &tri, const vector <bsp_tree
   const float balance_factor = 1;
   const float  split_factor = .1;
   const unsigned int toobig=100;
-  const int RANDOM_BSP = 1;
+  const int RANDOM_BSP = 0;
   const unsigned int samplesize = 10;
   unsigned int n = RANDOM_BSP?((samplesize>tri.size())?tri.size():samplesize):tri.size();
   unsigned int jj;
@@ -350,7 +364,7 @@ static int select_plane (const vector <bsp_polygon> &tri, const vector <bsp_tree
       }    
     
     }
-    float balance_penalty = ((float)fabs (front+splits-back))/(float)n;
+    float balance_penalty = ((float)fabs (front+splits-back))/(float)(n);
     // split_penalty is 0 for a very good tree with regards to splitting
     // and 1 for a very bad one.
     float split_penalty = (float)splits/(float)n;
@@ -402,37 +416,30 @@ static unsigned int numends;
 static unsigned int numnodes;
 
 static void explore (bsp_tree * tree, unsigned int hgt) {
-  if (tree->left==NULL) {
+  numnodes++;
+  if (tree->left==NULL&&tree->right==NULL) {
+    average_height +=hgt;
+    numends +=1;
     if (hgt>maxheight) {
       maxheight = hgt;
     } else {
-      if (minheight < hgt) {
+      if (minheight > hgt) {
 	minheight = hgt;
       }else {
 	//	almost_av_height +=hgt;
       }
     }
-    average_height +=hgt;
-    numends +=1;
+  }
+
+  if (tree->left==NULL) {
   } else {
     explore (tree->left,hgt+1);
   }
   if (tree->right==NULL) {
-    if (hgt>maxheight) {
-      maxheight = hgt;
-    } else {
-      if (minheight < hgt) {
-	minheight = hgt;
-      }else {
-	//almost_av_height +=hgt;
-      }
-    }
-    average_height +=hgt;
-    numends+=1;
   } else {
     explore (tree->right,hgt+1);
   }
-  numnodes++;
+
 
 }
 
@@ -446,7 +453,7 @@ static void bsp_stats (bsp_tree * tree) {
   }
   fprintf (stderr,"Num Nodes: %d, NumEnds: %d\n", numnodes,numends);
   fprintf (stderr,"Min Height: %d, Max Height: %d\n",minheight, maxheight);
-  fprintf (stderr,"Average Height %f,  /*Average excl max Height: */\n", average_height);
+  fprintf (stderr,"Average Height %f\n", average_height);
 }
 
 static void display_bsp_tree(bsp_tree * tree)

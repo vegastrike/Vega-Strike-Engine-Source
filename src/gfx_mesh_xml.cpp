@@ -395,7 +395,6 @@ void Mesh::beginElement(const string &name, const AttributeList &attributes) {
 	    XML::P_J |
 	    XML::P_K) ) {
       if (!xml->recalc_norm) {
-	fprintf(stderr,"Invalid Normal Data for point: <%f,%f,%f>\n",xml->vertex.x,xml->vertex.y, xml->vertex.z);
 	xml->vertex.i=xml->vertex.j=xml->vertex.k=0;
 	xml->recalc_norm=true;
       }
@@ -643,7 +642,6 @@ void Mesh::beginElement(const string &name, const AttributeList &attributes) {
     xml->vertexcount[index]+=1;
     if ((!xml->vertex.i)&&(!xml->vertex.j)&&(!xml->vertex.k)) {
       if (!xml->recalc_norm) {
-	fprintf(stderr,"Invalid Normal Data for point: <%f,%f,%f>\n",xml->vertex.x,xml->vertex.y, xml->vertex.z);
 	
 	xml->recalc_norm=true;
       }
@@ -994,13 +992,13 @@ void Mesh::LoadXML(const char *filename, Mesh *oldmesh) {
 	xml->vertices[i].i/=dis;//renormalize
 	xml->vertices[i].j/=dis;
 	xml->vertices[i].k/=dis;
-	fprintf (stderr, "Vertex %d, (%f,%f,%f) <%f,%f,%f>\n",i,
+	/*	fprintf (stderr, "Vertex %d, (%f,%f,%f) <%f,%f,%f>\n",i,
 		 xml->vertices[i].x,
 		 xml->vertices[i].y,
 		 xml->vertices[i].z,
 		 xml->vertices[i].i,
 		 xml->vertices[i].j,
-		 xml->vertices[i].k);
+		 xml->vertices[i].k);*/
       }else {
 	xml->vertices[i].i=xml->vertices[i].x;
 	xml->vertices[i].j=xml->vertices[i].y;
