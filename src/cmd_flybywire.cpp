@@ -6,7 +6,7 @@ AI * MatchLinearVelocity::Execute () {
     desired = parent->ToLocalCoordinates (desired);
   }
   Vector velocity (parent->ToLocalCoordinates (parent->GetVelocity()));
-  parent->Thrust ( /*parent->ClampThrust*/(parent->GetMass()*(desired-velocity)/SIMULATION_ATOM));//don't need to clamp thrust since the Thrust does it for you
+  parent->Thrust ( /*parent->ClampThrust*/(parent->GetMass()*(desired-velocity)/SIMULATION_ATOM), desired.i>parent->GetComputerData().max_speed);//don't need to clamp thrust since the Thrust does it for you
                  //caution might change 
   return this;
 }

@@ -114,6 +114,7 @@ void Unit::Init()
   limits.lateral = 10;
   limits.vertical = 10;
   limits.forward = 10;
+  limits.afterburn=20;
   limits.retro=1;
   Target(NULL);
   computer.set_speed=0;

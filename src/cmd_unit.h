@@ -164,6 +164,7 @@ protected:
     float vertical;
     float forward;
     float retro;
+    float afterburn;
   } limits;
   Computer computer;
   bool calculatePhysics; // physics have an effect on this object (set to false for planets)
@@ -274,9 +275,9 @@ public:
   // Help out AI creation
   void ApplyLocalTorque(const Vector &torque); //convenient shortcut
 
-  Vector ClampThrust(const Vector &thrust);
+  Vector ClampThrust(const Vector &thrust, bool afterburn);
   Vector MaxThrust(const Vector &thrust);
-  void Thrust(const Vector &amt);
+  void Thrust(const Vector &amt,bool afterburn = false);
   void LateralThrust(float amt);
   void VerticalThrust(float amt);
   void LongitudinalThrust(float amt);

@@ -97,7 +97,7 @@ void Unit::ApplyLocalTorque(const Vector &torque) {
   fprintf (stderr,"P: %f,%f,%f Q: %f,%f,%f",p.i,p.j,p.k,q.i,q.j,q.k);
   NetTorque+=tmp.i*p+tmp.j*q+tmp.k*r; 
   */
-  NetLocalTorque+= torque;//ClampTorque(torque); 
+  NetLocalTorque+= ClampTorque(torque); 
 }
 
 Vector Unit::MaxTorque(const Vector &torque) {
@@ -123,7 +123,6 @@ Vector Unit::ClampTorque(const Vector &amt1) {
 //FIXME 062201
 Vector Unit::ClampTorque (const Vector &amt1) {
   Vector Res=amt1;
-  return Res;
   if (fabs(amt1.i)>limits.pitch)
     Res.i=copysign(limits.pitch,amt1.i);
   if (fabs(amt1.j)>limits.yaw)
@@ -153,22 +152,22 @@ Vector Unit::ClampThrust(const Vector &amt1){
 }
 */
 //CMD_FLYBYWIRE depends on new version of Clampthrust... don't change without resolving it
-Vector Unit::ClampThrust (const Vector &amt1) {
+Vector Unit::ClampThrust (const Vector &amt1, bool afterburn) {
   Vector Res=amt1;
   if (fabs(amt1.i)>fabs(limits.lateral))
     Res.i=copysign(limits.lateral,amt1.i);
   if (fabs(amt1.j)>fabs(limits.vertical))
     Res.j=copysign(limits.vertical,amt1.j);
-  if (amt1.k>limits.forward)
-    Res.k=limits.forward;
+  if (amt1.k>afterburn?limits.afterburn:limits.forward)
+    Res.k=afterburn?limits.afterburn:limits.forward;
   if (amt1.k<-limits.retro)
     Res.k =-limits.retro;
   return Res;
 }
 
 
-void Unit::Thrust(const Vector &amt1){
-  Vector amt = ClampThrust(amt1);
+void Unit::Thrust(const Vector &amt1,bool afterburn){
+  Vector amt = ClampThrust(amt1,afterburn);
   ApplyLocalForce(amt);
 }
 

@@ -114,7 +114,7 @@ void StarSystem::Update() {
 
       ClearCollideQueue();
       modelGravity();
-      Iterator *iter = units->createIterator();
+      Iterator *iter = drawList->createIterator();
       while((unit = iter->current())!=NULL) {
 	unit->CollideAll();
 	unit->ExecuteAI(); // must execute AI afterwards, since position might update (and ResolveLast=true saves the 2nd to last position for proper interpolation)
@@ -124,15 +124,17 @@ void StarSystem::Update() {
 
       iter = units->createIterator();
       while((unit = iter->current())!=NULL) {
-	// Do something with AI state here eventually
-	//	if(time/SIMULATION_ATOM>2.0) 
 	unit->ResolveForces(identity_transformation,identity_matrix,firstframe);
-	  //else
-	  //	  unit->ResolveLast(identity_transformation,identity_matrix);
+	iter->advance();
+      }
+      delete iter;/*
+      iter = drawList->createIterator();
+      while((unit = iter->current())!=NULL) {
+	unit->CollideAll();
 	iter->advance();
       }
       delete iter;
-      
+		  */
       time -= SIMULATION_ATOM;
       firstframe = false;
     }

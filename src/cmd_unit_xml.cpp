@@ -7,7 +7,7 @@
 //#include <values.h>
 #include <float.h>
 #include "gfx_mesh.h"
-
+#define VS_PI 3.1415926536
 void Unit::beginElement(void *userData, const XML_Char *name, const XML_Char **atts) {
   ((Unit*)userData)->beginElement(name, AttributeList(atts));
 }
@@ -36,35 +36,40 @@ namespace UnitXML {
       QK,
       MOUNTSIZE,
       WEAPON,
-	  DEFENSE,
-	  ARMOR,
-	  FRONT,
-	  BACK,
-	  LEFT,
-	  RIGHT,
-	  TOP,
-	  BOTTOM,
-	  SHIELDS,
-	  RECHARGE,
-	  HULL,
-	  STRENGTH,
-	  STATS,
-	  MASS,
-	  MOMENTOFINERTIA,
-	  FUEL,
-	  THRUST,
-	  MANEUVER,
-	  YAW,
-	  ROLL,
-	  PITCH,
-	  ENGINE,
-	  ACCEL,
-	  ENERGY,
-	  REACTOR,
-	  LIMIT,
-	  RESTRICTED,
-	  MAX,
-	  MIN
+      DEFENSE,
+      ARMOR,
+      FORWARD,
+      RETRO,
+      FRONT,
+      BACK,
+      LEFT,
+      RIGHT,
+      TOP,
+      BOTTOM,
+      SHIELDS,
+      RECHARGE,
+      HULL,
+      STRENGTH,
+      STATS,
+      MASS,
+      MOMENTOFINERTIA,
+      FUEL,
+      THRUST,
+      MANEUVER,
+      YAW,
+      ROLL,
+      PITCH,
+      ENGINE,
+      COMPUTER,
+      ACCEL,
+      ENERGY,
+      REACTOR,
+      LIMIT,
+      RESTRICTED,
+      MAX,
+      MIN,
+      MAXSPEED,
+      AFTERBURNER
     };
 
   const EnumMap::Pair element_names[] = {
@@ -80,6 +85,7 @@ namespace UnitXML {
     EnumMap::Pair ("Thrust", THRUST),
     EnumMap::Pair ("Maneuver", MANEUVER),
     EnumMap::Pair ("Engine", ENGINE),
+    EnumMap::Pair ("Computer",COMPUTER),
     EnumMap::Pair ("Energy", ENERGY),
     EnumMap::Pair ("Reactor", REACTOR),
     EnumMap::Pair ("Restricted", RESTRICTED),
@@ -101,7 +107,9 @@ namespace UnitXML {
     EnumMap::Pair ("qi", QI),     
     EnumMap::Pair ("qj", QJ),     
     EnumMap::Pair ("qk", QK),
-    EnumMap::Pair ("size", MOUNTSIZE),     
+    EnumMap::Pair ("size", MOUNTSIZE),
+    EnumMap::Pair ("forward",FORWARD),
+    EnumMap::Pair ("retro", RETRO),    
     EnumMap::Pair ("front", FRONT),
     EnumMap::Pair ("back", BACK),
     EnumMap::Pair ("left", LEFT),
@@ -121,11 +129,14 @@ namespace UnitXML {
     EnumMap::Pair ("limit", LIMIT),
     EnumMap::Pair ("max", MAX),
     EnumMap::Pair ("min", MIN),
-    EnumMap::Pair ("weapon", WEAPON)
+    EnumMap::Pair ("weapon", WEAPON),
+    EnumMap::Pair ("maxspeed", MAXSPEED),
+    EnumMap::Pair ("afterburner", AFTERBURNER)
+
 };
 
-  const EnumMap element_map(element_names, 19);
-  const EnumMap attribute_map(attribute_names, 32);
+  const EnumMap element_map(element_names, 20);
+  const EnumMap attribute_map(attribute_names, 36);
 }
 
 using XMLSupport::EnumMap;
@@ -317,8 +328,8 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
  
     break;
   case SHIELDS:
-	assert (xml->unitlevel==2);
-	xml->unitlevel++;
+    assert (xml->unitlevel==2);
+    xml->unitlevel++;
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(attribute_map.lookup((*iter).name)) {
       case FRONT:
@@ -337,22 +348,19 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
 	shield.right=parse_float((*iter).value);
 	shield.number++;
 	break;
-	  case TOP:
-		  shield.top=parse_float((*iter).value);
-		  shield.number++;
-		  break;
-	  case BOTTOM:
-		  shield.bottom=parse_float((*iter).value);
-		  shield.number++;
-		  break;
-	  case RECHARGE:
-		  shield.recharge=parse_float((*iter).value);
-		  break;
+      case TOP:
+	shield.top=parse_float((*iter).value);
+	shield.number++;
+	break;
+      case BOTTOM:
+	shield.bottom=parse_float((*iter).value);
+	shield.number++;
+	break;
+      case RECHARGE:
+	shield.recharge=parse_float((*iter).value);
+	break;
       }
     }
-	  assert(shield.number==2||shield.number==4||shield.number==6);
-
-    
     break;
   case HULL:
 	assert (xml->unitlevel==2);
@@ -389,13 +397,13 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(attribute_map.lookup((*iter).name)) {
       case YAW:
-	limits.yaw = parse_float((*iter).value);
+	limits.yaw = parse_float((*iter).value)*(VS_PI/180);
 	break;
       case PITCH:
-	limits.pitch=parse_float((*iter).value);
+	limits.pitch=parse_float((*iter).value)*(VS_PI/180);
 	break;
       case ROLL:
-	limits.roll=parse_float((*iter).value);
+	limits.roll=parse_float((*iter).value)*(VS_PI/180);
 	break;
       }
     }
@@ -412,12 +420,14 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
       case ACCEL:
 	accel=parse_float((*iter).value);
 	break;
-      case FRONT:
-	limits.forward+=parse_float((*iter).value);
+      case FORWARD:
+	limits.forward=parse_float((*iter).value);
 	break;
-      case BACK:
-	limits.retro+=parse_float((*iter).value);
-//	divby+=2;
+      case RETRO:
+	limits.retro=parse_float((*iter).value);
+	break;
+      case AFTERBURNER:
+	limits.afterburn=parse_float ((*iter).value);
 	break;
       case LEFT:
 	limits.lateral=parse_float((*iter).value);
@@ -435,6 +445,31 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
     }
 
     break;
+
+  case COMPUTER:  
+    assert (xml->unitlevel==1);
+    xml->unitlevel++;
+    for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
+      switch(attribute_map.lookup((*iter).name)) {
+      case MAXSPEED:
+	computer.max_speed=parse_float((*iter).value);
+	break;
+      case AFTERBURNER:
+	computer.max_ab_speed+=parse_float((*iter).value);
+	break;
+      case YAW:
+	computer.max_yaw=parse_float((*iter).value)*(VS_PI/180);
+	break;
+      case PITCH:
+	computer.max_pitch=parse_float((*iter).value)*(VS_PI/180);
+	break;
+      case ROLL:
+	computer.max_roll=parse_float((*iter).value)*(VS_PI/180);
+	break;
+      }
+    }
+    break;
+
 
   case REACTOR:
 	assert (xml->unitlevel==2);
@@ -458,10 +493,10 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(attribute_map.lookup((*iter).name)) {
       case MAX:
-	ymax=parse_float((*iter).value);
+	ymax=parse_float((*iter).value)*(VS_PI/180);
 	break;
       case MIN:
-	ymin=parse_float((*iter).value);
+	ymin=parse_float((*iter).value)*(VS_PI/180);
 	break;
     }
     }
@@ -474,10 +509,10 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(attribute_map.lookup((*iter).name)) {
       case MAX:
-	pmax=parse_float((*iter).value);
+	pmax=parse_float((*iter).value)*(VS_PI/180);
 	break;
       case MIN:
-	pmin=parse_float((*iter).value);
+	pmin=parse_float((*iter).value)*(VS_PI/180);
 	break;
     }
     }
@@ -490,10 +525,10 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(attribute_map.lookup((*iter).name)) {
       case MAX:
-	rmax=parse_float((*iter).value);
+	rmax=parse_float((*iter).value)*(VS_PI/180);
 	break;
       case MIN:
-	rmin=parse_float((*iter).value);
+	rmin=parse_float((*iter).value)*(VS_PI/180);
 	break;
     }
     }
