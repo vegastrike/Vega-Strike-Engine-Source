@@ -30,15 +30,23 @@ FireAt::FireAt (): CommunicatingAI (WEAPON,STARGET) {
   ReInit (reaction,aggr);
 }
 float Priority (Unit * me, Unit * targ, float gunrange,float rangetotarget, float relationship) {
-  if (relationship>=0)
+  if(relationship>=0)
     return -1;
   char rolepriority = (31-ROLES::getPriority (me->combatRole())[targ->combatRole()]);//number btw 0 and 31 higher better
-  if (rolepriority<=0)
+  if(rolepriority<=0)
     return -1;
-  if (rangetotarget<.5*gunrange)
+  if(rangetotarget <1 && rangetotarget >-1000){
+	rangetotarget=1;
+  } else {
+	  rangetotarget=fabs(rangetotarget);
+  }
+  if(rangetotarget<.5*gunrange)
     rangetotarget=.5*gunrange;
+  if(gunrange <=0){
+	gunrange= 50000;
+  }//probably a mountless capship. 50000 is chosen arbitrarily
   float role_priority01 = ((float)rolepriority)/31.;
-  float range_priority01 =.5*gunrange/rangetotarget;//number between 0 and 1  1 is best
+  float range_priority01 =.5*gunrange/rangetotarget;//number between 0 and 1 for most ships 1 is best
   return range_priority01*role_priority01;
 }
 //temporary way of choosing
@@ -74,11 +82,16 @@ struct TurretBin{
       uniter->tur->Target(NULL);
       uniter->tur->TargetTurret(NULL);
       if (finalChoice.t) {
-	if (finalChoice.range<uniter->gunrange&&ROLES::getPriority (uniter->tur->combatRole())[finalChoice.t->combatRole()]<31) {
-	  uniter->tur->Target(finalChoice.t);
-	  uniter->tur->TargetTurret(finalChoice.t);
-	  foundfinal=true;
-	}
+		/*  FIX ME FIXME missiles not accounted for yet
+		  if(uniter->gunrange<0){
+		    uniter->gunrange=FLT_MAX; // IS MISSILE TURRET (we hope)
+		  }
+		  */
+	    if (finalChoice.range<uniter->gunrange&&ROLES::getPriority (uniter->tur->combatRole())[finalChoice.t->combatRole()]<31) {
+	      uniter->tur->Target(finalChoice.t);
+	      uniter->tur->TargetTurret(finalChoice.t);
+	      foundfinal=true;
+		}
       }
       if (!foundfinal) {
 	for (char f=0;f<2&&!foundfinal;f++) {
