@@ -79,6 +79,7 @@ void Unit::Init()
 
 	NetTorque = Vector(0,0,0);
 	NetForce = Vector(0,0,0);
+	NetLocalForce=Vector(0,0,0);
 
 	calculatePhysics = true;
 	selected = false;
@@ -90,7 +91,7 @@ void Unit::Init()
 	
 	limits.lateral = 0.1;
 	limits.vertical = 0.1;
-	limits.longitudinal = 100;
+	limits.longitudinal = 5;
 }
 
 Unit::Unit()

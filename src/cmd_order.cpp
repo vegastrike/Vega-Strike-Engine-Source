@@ -24,7 +24,19 @@
 AI * Order::Execute () {
   int completed=0;
   vector<AI*>::iterator ord = suborders.begin();
+  if(suborders.size()) {
+    (*ord)->Execute();
+    if((*ord)->Done()){
+      delete (*ord);
+      ord = suborders.erase(ord);
+    }
+  }
+  /*
   for (unsigned int i=0;i<suborders.size();i++) {
+    // huh? why the mask? can't get anything to work with this thing
+    // here. i'm not going to bother to figure out what's going on
+    // here until later
+
     if (completed&(*ord)->getType()){
       (*ord)->Execute();
       completed|=(*ord)->getType();
@@ -34,8 +46,9 @@ AI * Order::Execute () {
       } else {
 	ord++;
       }
-    }
-  }
+      }
+      }
+  */
   if (suborders.size()==0) {
     delete this;
     return new AI;

@@ -94,6 +94,7 @@ protected:
   float fuel;
   float MomentOfInertia;
   Vector NetForce;
+  Vector NetLocalForce;
   Vector NetTorque;
   Vector AngularVelocity;
   Vector Velocity;
@@ -204,6 +205,7 @@ public:
 					float FuelSpeed,
 					float FMass);
   void ApplyForce(const Vector &Vforce); //applies a force for the whole gameturn upon the center of mass
+  void ApplyLocalForce(const Vector &Vforce); //applies a force for the whole gameturn upon the center of mass, using local coordinates
   void Accelerate(const Vector &Vforce); // applies a force that is multipled by the mass of the ship
   void ApplyTorque (const Vector &Vforce, const Vector &Location);
   void ApplyLocalTorque (const Vector &Vforce, const Vector &Location);
@@ -219,9 +221,11 @@ public:
   void VerticalThrust(float amt);
   void LongitudinalThrust(float amt);
 
-  void YawThrust(float amt);
-  void PitchThrust(float amt);
-  void RollThrust(float amt);
+  Vector ClampTorque(const Vector &torque);
+  Vector MaxTorque(const Vector &torque);
+  void YawTorque(float amt);
+  void PitchTorque(float amt);
+  void RollTorque(float amt);
 
   void ResolveForces ();
   void ResolveLast(); // used for lerp

@@ -30,6 +30,9 @@ void Unit:: Rotate (const Vector &axis)
 	float ootheta = 1/theta;
 	float s = cos (theta * .5);
 	Quaternion rot = Quaternion(s, axis * (sinf (theta*.5)*ootheta));
+	if(theta < 0.0001) {
+	  rot = identity_quaternion;
+	}
 	curr_physical_state.orientation *= rot;
 }
 
@@ -51,6 +54,10 @@ void Unit:: FireEngines (const Vector &Direction/*unit vector... might default t
 void Unit::ApplyForce(const Vector &Vforce) //applies a force for the whole gameturn upon the center of mass
 {
 	NetForce += Vforce;
+}
+void Unit::ApplyLocalForce(const Vector &Vforce) //applies a force for the whole gameturn upon the center of mass
+{
+	NetLocalForce += Vforce;
 }
 void Unit::Accelerate(const Vector &Vforce)
 {
@@ -77,12 +84,31 @@ void Unit::ApplyLocalTorque(const Vector &torque) {
   NetTorque += torque;
 }
 
+Vector Unit::MaxTorque(const Vector &torque) {
+  // torque is a normal
+  return torque * (Vector(copysign(limits.lateral, torque.i), 
+			  copysign(limits.vertical, torque.j),
+			  copysign(limits.longitudinal, torque.k)) * torque);
+}
+
+Vector Unit::ClampTorque(const Vector &amt1) {
+  Vector norm = amt1;
+  norm.Normalize();
+  Vector max = MaxTorque(norm);
+
+  if(max.Magnitude() > amt1.Magnitude())
+    return amt1;
+  else 
+    return max;
+}
+
 Vector Unit::MaxThrust(const Vector &amt1) {
   // amt1 is a normal
   return amt1 * (Vector(copysign(limits.lateral, amt1.i), 
 	       copysign(limits.vertical, amt1.j),
 	       copysign(limits.longitudinal, amt1.k)) * amt1);
 }
+
 Vector Unit::ClampThrust(const Vector &amt1){ 
   // Yes, this can be a lot faster with LUT
   Vector norm = amt1;
@@ -97,40 +123,40 @@ Vector Unit::ClampThrust(const Vector &amt1){
 
 void Unit::Thrust(const Vector &amt1){
   Vector amt = ClampThrust(amt1);
-  ApplyForce(amt);
+  ApplyLocalForce(amt);
 }
 
 void Unit::LateralThrust(float amt) {
   if(amt>1.0) amt = 1.0;
   if(amt<-1.0) amt = -1.0;
-  ApplyForce(amt*limits.lateral * Vector(1,0,0));
+  ApplyLocalForce(amt*limits.lateral * Vector(1,0,0));
 }
 
 void Unit::VerticalThrust(float amt) {
   if(amt>1.0) amt = 1.0;
   if(amt<-1.0) amt = -1.0;
-  ApplyForce(amt*limits.vertical * Vector(0,1,0));
+  ApplyLocalForce(amt*limits.vertical * Vector(0,1,0));
 }
 
 void Unit::LongitudinalThrust(float amt) {
   if(amt>1.0) amt = 1.0;
   if(amt<-1.0) amt = -1.0;
-  ApplyForce(amt*limits.longitudinal * Vector(0,0,1));
+  ApplyLocalForce(amt*limits.longitudinal * Vector(0,0,1));
 }
 
-void Unit::YawThrust(float amt) {
+void Unit::YawTorque(float amt) {
   if(amt>limits.yaw) amt = limits.yaw;
   else if(amt<-limits.yaw) amt = -limits.yaw;
   ApplyLocalTorque(amt * Vector(0,1,0));
 }
 
-void Unit::PitchThrust(float amt) {
+void Unit::PitchTorque(float amt) {
   if(amt>limits.pitch) amt = limits.pitch;
   else if(amt<-limits.pitch) amt = -limits.pitch;
   ApplyLocalTorque(amt * Vector(1,0,0));
 }
 
-void Unit::RollThrust(float amt) {
+void Unit::RollTorque(float amt) {
   if(amt>limits.roll) amt = limits.roll;
   else if(amt<-limits.roll) amt = -limits.roll;
   ApplyLocalTorque(amt * Vector(0,0,1));
@@ -143,7 +169,9 @@ void Unit::ResolveForces () // don't call this 2x
     Rotate (SIMULATION_ATOM*(AngularVelocity+ temp*.5));
   }
 	AngularVelocity += temp;
-	temp = NetForce * SIMULATION_ATOM/mass;//acceleration
+	Vector p, q, r;
+	GetOrientation(p,q,r);
+	temp = ((NetForce + NetLocalForce.i*p + NetLocalForce.j*q + NetLocalForce.k*r ) * SIMULATION_ATOM)/mass;//acceleration
 	//now the fuck with it... add relitivity to the picture here
 	/*
 	if (fabs (Velocity.i)+fabs(Velocity.j)+fabs(Velocity.k)> co10)
@@ -154,7 +182,7 @@ void Unit::ResolveForces () // don't call this 2x
 		}*/
 	curr_physical_state.position += (Velocity+.5*temp)*SIMULATION_ATOM;
 	Velocity += temp;
-	NetForce = Vector(0,0,0);
+	NetForce = NetLocalForce = Vector(0,0,0);
 	NetTorque = Vector(0,0,0);
 	//cerr << "new position of " << name << ": " << curr_physical_state.position << ", velocity " << Velocity << endl;
 }
