@@ -6,14 +6,36 @@ VDU::VDU (const char * file, TextPlane *textp, unsigned char modes, short rwws, 
 
 };
 
+void VDU::DrawTargetSpr (Sprite *s, float per) {
+  float w,h;
+  float nw,nh;
+  float sx, sy;
+  if (!s)
+    return;
+  GetPosition (sx,sy);
+  s->SetPosition (sx,sy);
+  GetSize (w,h);
+  s->GetSize (nw,nh);
+  h=-fabs (h*per);
+  w= fabs(nw*h/nh);
+  s->SetSize (w,h);
+  s->Draw();
+  s->SetSize (nw,nh);
+}
+
 void VDU::DrawTarget(Unit * target) {
-  tp->Draw ("\nYoDahdAhdas djsakljdlksajd");
+  char t[32];
+  sprintf (t,"\n%4.1f %4.1f",target->FShieldData()*100,target->RShieldData()*100);
+  tp->Draw (std::string("\n")+target->name+t);
+  DrawTargetSpr (target->getHudImage (),.6);
+  
 }
 
 void VDU::DrawNav (const Vector & nav) {
 
 }
 void VDU::DrawDamage(Unit * parent) {
+  DrawTargetSpr (parent->getHudImage (),.6);
 
 }
 

@@ -147,7 +147,7 @@ static void Quit(int,KBSTATE newState) {
 		exit(0);
 	}
 }
-bool cockpitfront=false;
+bool cockpitfront=true;
 static void Inside(int,KBSTATE newState) {
   const int cockpiton=1;
   const int backgroundoff=2;
