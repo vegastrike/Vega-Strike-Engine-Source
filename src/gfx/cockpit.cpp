@@ -463,6 +463,8 @@ void GameCockpit::DrawTurretTargetBoxes () {
 
   static GFXColor black_and_white=DockBoxColor ("black_and_white");
   Unit * parun = parent.GetUnit();
+  if (!parun)
+    return;
   UnitCollection::UnitIterator iter = parun->getSubUnits();
   Unit * un;
   while (NULL!=(un=iter.current())) {
@@ -472,8 +474,10 @@ void GameCockpit::DrawTurretTargetBoxes () {
 	if (un->GetNebula()!=NULL)
 	  return;
     Unit *target = un->Target();
-    if (!target)
-      return;
+    if (!target){
+      iter.advance();
+      continue;
+    }
 	Vector CamP,CamQ,CamR;
     _Universe->AccessCamera()->GetPQR(CamP,CamQ,CamR);
     //Vector Loc (un->ToLocalCoordinates(target->Position()-un->Position()));
