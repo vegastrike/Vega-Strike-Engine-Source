@@ -176,6 +176,8 @@ int TextPlane::Draw(const string & newText, int offset,bool startlower, bool for
 		     this->col.a);
 	}
 	text_it = text_it+6;
+      } else {
+        break;
       }
       text_it++;
       continue;
