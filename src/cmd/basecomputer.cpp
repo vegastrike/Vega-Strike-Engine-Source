@@ -259,10 +259,6 @@ const GFXColor BASIC_REPAIR_TEXT_COLOR() {
 }
 const string BASIC_REPAIR_DESC = "Hire starship mechanics to examine and assess any wear and tear on your craft. They will replace any damaged components on your vessel with the standard components of the vessel you initially purchased.  Further upgrades above and beyond the original will not be replaced free of charge.  The total assessment and repair cost applies if any components are damaged or need servicing (fuel, wear and tear on jump drive, etc...) If such components are damaged you may save money by repairing them on your own.";
 // Repair price is a config variable.
-static float basicRepairPrice(void) {
-    static const float price = XMLSupport::parse_float(vs_config->getVariable("physics","repair_price","1000"));
-    return price;
-}
 
 // Info about each mode.
 struct ModeInfo {
@@ -375,8 +371,13 @@ static double usedValue(double originalValue) {
 }
 
 static float RepairPrice(float operational, float price) {
-  return .75*price*(1-operational);
+  return .5*price*(1-operational)*g_game.difficulty;
 }
+static float basicRepairPrice(void) {
+    static const float price = XMLSupport::parse_float(vs_config->getVariable("physics","repair_price","5000"));
+    return price*g_game.difficulty;
+}
+
 static float SellPrice(float operational, float price) {
   return usedValue(price)-RepairPrice(operational,price);
 }
