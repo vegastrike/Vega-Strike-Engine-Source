@@ -739,6 +739,7 @@ int main (int argc, char ** argv)
 	StrWrite ("\" />\n");
 	
 	for (i=0;i<DrawDat.numengines;i++) {
+	 
 	  Tab();
 	  StrWrite ("<Light file=\"supernova.bmp\" x=");
 	  TextF (DrawDat.Engine[i].V[0].x*scl);
@@ -751,6 +752,7 @@ int main (int argc, char ** argv)
 	  StrWrite ("/>\n");
 	}
 	for (i=0;i<Stat.NumGuns;i++) {
+	  for (int j=-1;j<=1;j+=2) {
 	  Tab();
 	  StrWrite ("<Mount weapon=\"");
 	  switch (Stat.GunType[i]) {
@@ -799,58 +801,60 @@ int main (int argc, char ** argv)
 	    break;
 	  }
 	  StrWrite (" x=");
-	  TextF (Stat.GunOffset[i].i*scl);
+	  TextF (Stat.GunOffset[i].i*scl*j);
 	  StrWrite (" y=");
 	  TextF (Stat.GunOffset[i].j*scl);
 	  StrWrite (" z=");
 	  TextF (Stat.GunOffset[i].k*scl);
 	  StrWrite ("/>\n");
-
+	}
 	}
 	for (i=0;i<Stat.NumMissiles;i++) {
-	  Tab();
-	  StrWrite ("<Mount weapon=\"");
-	  switch (Stat.MissileType[i]) {
-	  case DRAGONFLY:
-	    StrWrite ("DragonFly\" size=\"Special-Missile\"");
-	    break;
-	  case DUMBFIRE:
-	    StrWrite ("Dumbfire\" size=\"Light-Missile\"");
-	    break;
-	  case HS:
-	    StrWrite ("HeatSeeker\" size=\"Medium-Missile\"");
-	    break;
-	  case FF:
-	    StrWrite ("FriendOrFoe\" size=\"Medium-Missile\"");
-	    break;
-	  case TORP:
-	    StrWrite ("Torpedo\" size=\"Heavy-Missile\"");
-	    break;
-	  case SWARM:
-	    StrWrite ("Swarm\" size=\"Special-Missile\"");
-	    break;
-	  case TRACKER:
-	    StrWrite ("Tracker\" size=\"Special-Missile\"");
-	    break;
-	  case LEECHMIS:
-	    StrWrite ("LeechMis\" size=\"Medium-Missile\"");
-	    break;
-	  case MACE:
-	    StrWrite ("Mace\" size=\"Special-Missile\"");
-	    break;
-	  case IR:
-	  default:
-	    StrWrite ("ImageRecognition\" size=\"Medium-Missile\"");
-	    break;
+	  for (int j=-1;j<=1;j+=2) {
+	    Tab();
+	    StrWrite ("<Mount weapon=\"");
+	    switch (Stat.MissileType[i]) {
+	    case DRAGONFLY:
+	      StrWrite ("DragonFly\" size=\"Special-Missile\"");
+	      break;
+	    case DUMBFIRE:
+	      StrWrite ("Dumbfire\" size=\"Light-Missile\"");
+	      break;
+	    case HS:
+	      StrWrite ("HeatSeeker\" size=\"Medium-Missile\"");
+	      break;
+	    case FF:
+	      StrWrite ("FriendOrFoe\" size=\"Medium-Missile\"");
+	      break;
+	    case TORP:
+	      StrWrite ("Torpedo\" size=\"Heavy-Missile\"");
+	      break;
+	    case SWARM:
+	      StrWrite ("Swarm\" size=\"Special-Missile\"");
+	      break;
+	    case TRACKER:
+	      StrWrite ("Tracker\" size=\"Special-Missile\"");
+	      break;
+	    case LEECHMIS:
+	      StrWrite ("LeechMis\" size=\"Medium-Missile\"");
+	      break;
+	    case MACE:
+	      StrWrite ("Mace\" size=\"Special-Missile\"");
+	      break;
+	    case IR:
+	    default:
+	      StrWrite ("ImageRecognition\" size=\"Medium-Missile\"");
+	      break;
+	    }
+
+	    StrWrite (" x=");
+	    TextF (j*Stat.MissileOffset[i].i*scl);
+	    StrWrite (" y=");
+	    TextF (Stat.MissileOffset[i].j*scl);
+	    StrWrite (" z=");
+	    TextF (Stat.MissileOffset[i].k*scl);
+	    StrWrite ("/>\n");
 	  }
-	  StrWrite (" x=");
-	  TextF (Stat.MissileOffset[i].i*scl);
-	  StrWrite (" y=");
-	  TextF (Stat.MissileOffset[i].j*scl);
-	  StrWrite (" z=");
-	  TextF (Stat.MissileOffset[i].k*scl);
-	  StrWrite ("/>\n");
-	  
 	}
 
 	ETag ("Unit");
