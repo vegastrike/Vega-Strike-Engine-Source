@@ -135,6 +135,7 @@ void JoyStick::GetMouse (float &x, float &y, float &z, int &buttons) {
   static int savey = g_game.x_resolution/2;
   static bool warp_pointer = XMLSupport::parse_bool(vs_config->getVariable ("joystick","warp_mouse","false"));
   static float mouse_sensitivity = XMLSupport::parse_float(vs_config->getVariable ("joystick","mouse_sensitivity","5"));
+  static float mouse_exp = XMLSupport::parse_float(vs_config->getVariable ("joystick","mouse_exponent","3"));
   if (warp_pointer) {
     if (warpedmouse) {
       warpedmouse=false;
@@ -149,6 +150,10 @@ void JoyStick::GetMouse (float &x, float &y, float &z, int &buttons) {
     joy_axis[0]=x = (float(mousex-g_game.x_resolution/2))/(g_game.x_resolution/mouse_sensitivity);
     joy_axis[1]=y = (float(mousey-g_game.y_resolution/2))/(g_game.y_resolution/mouse_sensitivity);
   }
+  joy_axis[0]*=mouse_exp;
+  joy_axis[1]*=mouse_exp;
+  x*=mouse_exp;
+  y*=mouse_exp;
   joy_axis[2]=z=0;
   buttons = getMouseButtonStatus();
 }

@@ -115,12 +115,14 @@ void mouseMotion(int x, int y) {
 	warpedmouse=true;
 	x= x-mousex+g_game.x_resolution/2;
 	y= y-mousey+g_game.y_resolution/2;
-	warpx=x-g_game.x_resolution/2;
-	warpy=y-g_game.y_resolution/2;
+	warpx=x-mousex;
+	warpy=y-mousey;
       }else {
 	x=x+warpx;
 	y=y+warpy;
+
       }
+
     }
    }
   }
