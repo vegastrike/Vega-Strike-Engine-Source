@@ -1,26 +1,6 @@
-/*
- * Copyright (c) 1999  Silicon Graphics, Inc.  All rights reserved.
- *
- * THE SOFTWARE IS PROVIDED "AS-IS" AND WITHOUT WARRANTY OF ANY KIND,
- * EXPRESS, IMPLIED OR OTHERWISE, INCLUDING WITHOUT LIMITATION, ANY
- * WARRANTY OF MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.
- *
- * IN NO EVENT SHALL SILICON GRAPHICS BE LIABLE FOR ANY SPECIAL, INCIDENTAL,
- * INDIRECT OR CONSEQUENTIAL DAMAGES OF ANY KIND, OR ANY DAMAGES WHATSOEVER
- * RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER OR NOT ADVISED OF THE
- * POSSIBILITY OF DAMAGE, AND ON ANY THEORY OF LIABILITY, ARISING OUT OF OR IN
- * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
- */
-
-/*  vertexArrays.c  - vertex array example. uses the same shaded
- *                    polygon seen in ~/rendering/shadeModel.c
- *
- *	SPACE key	- toggle between flat/smooth shading
- *	ESCAPE key	- exit program
- */
-
-#include <GL/glut.h>	/* includes gl.h, glu.h */
-
+#include <stdlib.h>
+#include <GL/glut.h>
+#include <vector>
 #undef GL_ARB_vertex_buffer_object
 #include <GL/glext.h>
 #include <stdio.h>
@@ -33,26 +13,173 @@ PFNGLUNMAPBUFFERARBPROC  glUnmapBufferARB_p=0;
 
 
 #ifndef _WIN32
+#define glXGetProcAddress glXGetProcAddressARB
 #include <GL/glx.h>
 #endif
 
-/*  Function Prototypes  */
 
-GLvoid  drawScene( GLvoid );
-static GLvoid redisplay (GLvoid) {
+void  DrawScene();
+static void ReDisplay () {
   glutPostRedisplay();
   
   
 }
+using namespace std;
+static GLfloat	colorArray[] = {
+  1.0f, 0.0f, 1.0f, 
+  0.0f, 0.0f, 1.0f, //Lancelot's favorite color 
+  0.0f, 0.0f, 0.0f, 
+  0.0f, 0.5f, 0.0f, 
+  1.0f, 1.0f, 1.0f
+};
 
-/* Global Definitions */
+static GLfloat  vertexArray[] = {
+  0.5f, 0.1f, 0.0f,
+  1.0f, 0.4f, 0.0f,
+  0.9f, 1.0f, 0.0f,
+  0.3f, 0.8f, 0.0f,
+  0.1f, 0.5f, 0.0f
+};
+static GLuint	indices[] = { 2, 3, 4, 0, 1 };
+#define shapesize 5
 
-#define KEY_ESC	27	/* ascii value for the escape key */
-static GLvoid 
-keyboard( GLubyte key, GLint x, GLint y )
+template <class T> vector<T> GetIndices (T size, size_t * memsize) {
+  vector<T> index(size);
+  *memsize=sizeof(T);
+  for (size_t i=0;i<size;++i) {
+    index[i]=((i/shapesize)*shapesize)+indices[i%shapesize];
+  }
+  return index;
+}
+float readbytes=0;
+class vbo {
+  GLuint vert;
+  GLuint ind;
+  size_t size;
+  void BindBuf() {
+    static GLuint cur_buffer=0;
+    if (cur_buffer!=vert) {
+      (*glBindBufferARB_p)(GL_ARRAY_BUFFER_ARB,vert);
+      cur_buffer=vert;
+    }
+  }
+  void BindInd() {
+    static GLuint cur_buffer=0;
+    if (cur_buffer!=ind) {
+      (*glBindBufferARB_p)(GL_ELEMENT_ARRAY_BUFFER_ARB,ind);
+      cur_buffer=ind;
+    }
+  }
+public:
+  vbo(size_t s, bool indexed, bool mutate){
+    vector<GLfloat> varray(s*3);
+    vert=ind=0;
+    size=s;
+    for (size_t i=0;i<s*3;++i) {
+      varray[i]=vertexArray[i%(shapesize*3)];
+    }
+    (*glGenBuffersARB_p)(1,&vert);
+    if (indexed) {
+      (*glGenBuffersARB_p)(1,&ind);      
+    }
+    BindBuf();
+    (*glBufferDataARB_p)(GL_ARRAY_BUFFER_ARB, 
+                         size*3*sizeof(GLfloat), 
+                         &varray[0], 
+                         (mutate)?GL_DYNAMIC_DRAW_ARB:GL_STATIC_DRAW_ARB);    
+    if (indexed) {
+      BindInd();
+      size_t memsize=sizeof(GLubyte);
+      if (s<256) {
+        GLubyte LSize=s;
+        vector<GLubyte> indices=GetIndices(LSize,&memsize);
+        (*glBufferDataARB_p)(GL_ELEMENT_ARRAY_BUFFER_ARB,
+                             size*sizeof(memsize),
+                             &indices[0],
+                             (mutate)?GL_DYNAMIC_DRAW_ARB:GL_STATIC_DRAW_ARB);
+      }else if (s<65536){
+        GLushort LSize=s;
+        vector<GLushort> indices=GetIndices(LSize,&memsize);
+        (*glBufferDataARB_p)(GL_ELEMENT_ARRAY_BUFFER_ARB,
+                             size*sizeof(memsize),
+                             &indices[0],
+                             (mutate)?GL_DYNAMIC_DRAW_ARB:GL_STATIC_DRAW_ARB);
+      }else {
+        GLuint LSize=s;
+        vector<GLuint> indices=GetIndices(LSize,&memsize);
+        (*glBufferDataARB_p)(GL_ELEMENT_ARRAY_BUFFER_ARB,
+                             size*sizeof(memsize),
+                             &indices[0],
+                             (mutate)?GL_DYNAMIC_DRAW_ARB:GL_STATIC_DRAW_ARB);        
+      }
+    }
+  }
+  void Draw() {
+    BindBuf();
+    if (ind){
+      BindInd();
+    }
+    glInterleavedArrays(GL_V3F,sizeof(GLfloat)*3,0);
+    if (ind) {
+      BindInd();
+      char stride = (size<256?sizeof(GLubyte):(size<65536?sizeof(GLushort):sizeof(GLuint)));
+      glDrawElements(GL_TRIANGLE_FAN,size,size<256?GL_UNSIGNED_BYTE:(size<65536?GL_UNSIGNED_SHORT:GL_UNSIGNED_INT),0);
+    }else{
+      glDrawArrays(GL_TRIANGLE_FAN,0,size);
+    }
+  }
+  void Write () {
+    if (ind) {
+      BindInd();
+      (*glMapBufferARB_p)(GL_ELEMENT_ARRAY_BUFFER_ARB,GL_READ_ONLY_ARB);//ignored
+    }
+    BindBuf();
+    GLfloat *varray = (GLfloat*)(*glMapBufferARB_p)(GL_ARRAY_BUFFER_ARB,GL_WRITE_ONLY_ARB);
+    for (size_t i=0;i<size*3;++i) {
+      varray[i]=vertexArray[i%(shapesize*3)];
+    }    
+    if (ind) {
+      BindInd();
+      (*glUnmapBufferARB_p)(GL_ELEMENT_ARRAY_BUFFER_ARB);
+    }
+    BindBuf();
+    (*glUnmapBufferARB_p)(GL_ARRAY_BUFFER_ARB);
+  }
+  void Read () {
+    char const * tmpind;
+    if (ind) {
+      BindInd();
+       tmpind=(char*)(*glMapBufferARB_p)(GL_ELEMENT_ARRAY_BUFFER_ARB,GL_READ_ONLY_ARB);
+    }
+    BindBuf();
+    GLfloat const*const tmp = (GLfloat*)(*glMapBufferARB_p)(GL_ARRAY_BUFFER_ARB,GL_READ_ONLY_ARB);
+    for (unsigned int i=0;i<size;++i) {
+      readbytes+=tmp[i*3];
+      readbytes+=tmp[i*3+1];
+      readbytes+=tmp[i*3+2];
+      if (ind)
+        readbytes+=tmpind[i];
+    }
+    if (ind) {
+      BindInd();
+      (*glUnmapBufferARB_p)(GL_ELEMENT_ARRAY_BUFFER_ARB);
+    }
+    BindBuf();
+    (*glUnmapBufferARB_p)(GL_ARRAY_BUFFER_ARB);
+  }
+  ~vbo() {
+    (*glDeleteBuffersARB_p)(1,&vert);
+    if (ind) {
+      (*glDeleteBuffersARB_p)(1,&ind);      
+    }
+  }
+};
+vector<vbo*>varrays;
+static void 
+keyboard( unsigned char key, int x, int y )
 {
 	switch (key) {
-	case KEY_ESC:	/* Exit whenever the Escape key is pressed */
+	case 27:
 		exit(0);
 	}
 }
@@ -63,10 +190,13 @@ typedef void (*(*get_gl_proc_fptr_t)(const GLubyte *))();
 
 #else
     typedef GLubyte * GET_GL_PTR_TYP;
-#define GET_GL_PROC glXGetProcAddressARB
+#define GET_GL_PROC glXGetProcAddress
 #endif
 
-void
+
+
+
+int
 main( int argc, char *argv[] )
 {
 	GLsizei width, height;
@@ -80,7 +210,7 @@ main( int argc, char *argv[] )
 	glutInitDisplayMode( GLUT_RGBA );
 	glutCreateWindow( argv[0] );
 
-	glClearColor( 0.0, 0.0, 1.0, 1.0 );
+	glClearColor( 0.0, 0, 0.2, 1.0 );
 	glOrtho( 0.0, 2.1, 0.0, 2.1, -2.0, 2.0 );
         glBindBufferARB_p=(PFNGLBINDBUFFERARBPROC)GET_GL_PROC((GET_GL_PTR_TYP)"glBindBuffer");	;
         glGenBuffersARB_p=(PFNGLGENBUFFERSARBPROC)GET_GL_PROC((GET_GL_PTR_TYP)"glGenBuffers");	;
@@ -90,61 +220,30 @@ main( int argc, char *argv[] )
         glUnmapBufferARB_p=(PFNGLUNMAPBUFFERARBPROC)GET_GL_PROC((GET_GL_PTR_TYP)"glUnmapBuffer");	
 
 	glutKeyboardFunc( keyboard );
-	glutDisplayFunc( drawScene ); 
-        glutIdleFunc( redisplay);
+	glutDisplayFunc( DrawScene ); 
+        glutIdleFunc( ReDisplay);
 
 	glutMainLoop();
+        return 0;//unreachage
 }
 
 
 
-GLvoid
-drawArrays( GLvoid )
+void
+DrawArrays()
 {
-	static GLfloat	colorArray[] = {
-		1.0f, 0.0f, 1.0f, /* purple */
-		1.0f, 0.0f, 0.0f, /* red */
-		0.0f, 0.0f, 0.0f, /* black */
-		0.0f, 0.5f, 0.0f, /* dark green */
-		1.0f, 1.0f, 1.0f  /* white */
-	};
-
-	static GLfloat  vertexArray[] = {
-		0.5f, 0.1f,
-		1.0f, 0.4f,
-		0.9f, 1.0f,
-		0.3f, 0.8f,
-		0.1f, 0.5f
-	};
-
-	static GLuint	indices[] = { 2, 3, 4, 0, 1 };
 	
-
-	/* set up the array data */
-	glColorPointer( 3, GL_FLOAT, 3*sizeof(GLfloat), colorArray );
-	glVertexPointer( 2, GL_FLOAT, 2*sizeof(GLfloat), vertexArray );
-
-	/* enable vertex arrays */
-	glEnableClientState( GL_COLOR_ARRAY );
-	glEnableClientState( GL_VERTEX_ARRAY );
-
-	/* draw a polygon using the arrays sequentially */
-	glDrawArrays( GL_POLYGON, 0, 5 );
-
-	/* draw a triangle fan using the arrays in a different order */
-			glDrawElements ( GL_TRIANGLE_FAN, 5, GL_UNSIGNED_INT, indices );
-
-	glDisableClientState( GL_COLOR_ARRAY );
-	glDisableClientState( GL_VERTEX_ARRAY );
+  static  vbo v(5,false,false);
+  v.Draw();
 
 }
 
-GLvoid drawScene( GLvoid )
+void DrawScene()
 {
 	glClear( GL_COLOR_BUFFER_BIT );
 
 	/* draw lower left polygon without vertex arrays */
-	drawArrays();
+	DrawArrays();
 
 
 	glFlush();
