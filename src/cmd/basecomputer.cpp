@@ -357,8 +357,8 @@ void BaseComputer::constructControls(void) {
 
     // Options button.
     NewButton* options = new NewButton;
-    options->setRect( Rect(.74, .85, .22, .1) );
-    options->setLabel("Options");
+    options->setRect( Rect(.64, .85, .32, .1) );
+    options->setLabel("Save/Load");
     options->setCommand("ShowOptionsMenu");
     options->setColor( GFXColor(0,1,1,.25) );
     options->setTextColor( GUI_OPAQUE_WHITE );
