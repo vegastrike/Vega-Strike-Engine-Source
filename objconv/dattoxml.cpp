@@ -247,8 +247,8 @@ int main (int argc, char ** argv)
 		DrawDat.FixP[i].Vertex.y = -readf(shp);
 		DrawDat.FixP[i].Vertex.z = readf(shp);
 		Tab(2);TextP (DrawDat.FixP[i].Vertex.x,DrawDat.FixP[i].Vertex.y,DrawDat.FixP[i].Vertex.z);
-		DrawDat.FixP[i].Normal.i = ((double)readf(shp))/10000;
-		DrawDat.FixP[i].Normal.j = ((double)readf(shp))/10000;
+		DrawDat.FixP[i].Normal.i = -((double)readf(shp))/10000;
+		DrawDat.FixP[i].Normal.j = -((double)readf(shp))/10000;
 		DrawDat.FixP[i].Normal.k = ((double)readf(shp))/10000;
 		if (writenormals){
 		  Tab(2);TextN (DrawDat.FixP[i].Normal.i,DrawDat.FixP[i].Normal.j,DrawDat.FixP[i].Normal.k);
@@ -377,7 +377,7 @@ int main (int argc, char ** argv)
 	  }
 	    Tab(2);TextP (DrawDat.FixP[i].Vertex.x,DrawDat.FixP[i].Vertex.y,DrawDat.FixP[i].Vertex.z);
 	    if (writenormals) {
-	      Tab(2);TextN (-DrawDat.FixP[i].Normal.i,-DrawDat.FixP[i].Normal.j,-DrawDat.FixP[i].Normal.k);//FIXME
+	      Tab(2);TextN (DrawDat.FixP[i].Normal.i,DrawDat.FixP[i].Normal.j,DrawDat.FixP[i].Normal.k);
 	    }
 	    Tab(1);
 	    ETag ("Point");
@@ -647,8 +647,8 @@ int main (int argc, char ** argv)
 	DrawDat.Engine = new Glow [DrawDat.numengines];
 	for (i=0; i< DrawDat.numengines; i++)
 	{
-		short tx=readf(shp);
-		short ty=readf(shp);
+		short tx=-readf(shp);
+		short ty=-readf(shp);
 		short tz=readf(shp);
 		DrawDat.Engine[i].V[0].init (tx,ty,tz); 
 		DrawDat.Engine[i].minradius = readf (shp);
@@ -867,7 +867,7 @@ int main (int argc, char ** argv)
 	if (Stat.NumShieldFacing==2) {
 	  Tab(2);fprintf (fp,"<Shields front=\"%d\" back=\"%d\" recharge=\"%d\"/>\n", 40,40,3);
 	}else {
-	  Tab(2);fprintf (fp,"<Shield front=\"%d\" back=\"%d\" left=\"%d\" right=\"%d\" recharge=\"%d\"/>\n", 40,40,40,40,3);
+	  Tab(2);fprintf (fp,"<Shields front=\"%d\" back=\"%d\" left=\"%d\" right=\"%d\" recharge=\"%d\"/>\n", 40,40,40,40,3);
 	}
 	Tab(2); fprintf (fp, "<Hull strength=\"%d\"/>\n", 5);
 	Tab();ETag("Defense");
