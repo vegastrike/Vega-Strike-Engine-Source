@@ -27,7 +27,7 @@ void LoadMissionDialog (char * Filename,int i);
 void LoadSaveDialog (char *, char *, int);
 void LoadAutoDialog (char *, char *, int);
 #define NUM_TITLES 8
-static const char * titles [NUM_TITLES] = {"Start New Pilot","Play Saved Pilot","Continue Last Game", "Game Settings", "Recover From Autosave","Change Scenerio", "Help","Exit Launcher"};
+static const char * titles [NUM_TITLES] = {"Start New Pilot","Play Saved Pilot","Continue Last Game", "Game Settings", "Recover From Autosave","Change Scenario", "Help","Exit Launcher"};
 std::string my_mission ("explore_universe.mission");
 #define NUM_HELPS 6
 static const char * helps [NUM_HELPS] = {
