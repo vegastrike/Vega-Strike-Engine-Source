@@ -34,7 +34,7 @@ class Cockpit {
   float zoomfactor;
   Cockpit (const char * file, Unit * parent);
   ~Cockpit();
-  static float LookupTargetStat (int stat, Unit *target);
+  float LookupTargetStat (int stat, Unit *target);
   void DrawGauges();
   void Init (const char * file);
   void SetParent(Unit * unit);

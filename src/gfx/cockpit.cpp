@@ -106,28 +106,28 @@ void Cockpit::DrawBlips (Unit * un) {
   delete iter;
 }
 float Cockpit::LookupTargetStat (int stat, Unit *target) {
+  unsigned short armordat[4];
   switch (stat) {
   case SHIELDF:
-    break;
+    return target->FShieldData();
   case SHIELDR:
-    break;
+    return target->RShieldData();
   case SHIELDL:
-    break;
+    return target->LShieldData();
   case SHIELDB:
-    break;
+    return target->BShieldData();
   case ARMORF:
-    break;
   case ARMORR:
-    break;
   case ARMORL:
-    break;
   case ARMORB:
-    break;
+    target->ArmorData (armordat);
+    return ((float)armordat[stat-ARMORF])/StartArmor[stat-ARMORF];
   case FUEL:
-    break;
+    return target->FuelData()/maxfuel;
   case ENERGY:
-    break;
+    return target->EnergyData();
   }
+  return 1;
 }
 void Cockpit::DrawGauges() {
   Unit * un = parent.GetUnit();

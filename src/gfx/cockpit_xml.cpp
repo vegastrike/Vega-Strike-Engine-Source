@@ -1,6 +1,6 @@
 #include "cockpit.h"
 #include "xml_support.h"
-#include "gfx/sprite.h"
+#include "gauge.h"
 #include <float.h>
 using XMLSupport::EnumMap;
 using XMLSupport::Attribute;
@@ -37,7 +37,11 @@ namespace CockpitXML {
       KSHIELDR,
       KSHIELDL,
       KSHIELDB, 
-      KENERGY
+      KENERGY,
+      G_UP,
+      G_DOWN,
+      G_LEFT,
+      G_RIGHT
     };
 
   const EnumMap::Pair element_names[] = {
@@ -71,11 +75,16 @@ namespace CockpitXML {
     EnumMap::Pair ("width", XSIZE),
     EnumMap::Pair ("height", YSIZE),
     EnumMap::Pair ("ViewOffset", VIEWOFFSET),
-    EnumMap::Pair ("CockpitOffset", COCKPITOFFSET)
+    EnumMap::Pair ("CockpitOffset", COCKPITOFFSET),
+    EnumMap::Pair ("GaugeUp",G_UP),
+    EnumMap::Pair ("GaugeDown",G_DOWN),
+    EnumMap::Pair ("GaugeLeft",G_LEFT),
+    EnumMap::Pair ("GaugeRight",G_RIGHT),
+
   };
 
   const EnumMap element_map(element_names, 17);
-  const EnumMap attribute_map(attribute_names, 12);
+  const EnumMap attribute_map(attribute_names, 16);
 }
 
 using XMLSupport::EnumMap;
@@ -93,7 +102,9 @@ void Cockpit::endElement(void *userData, const XML_Char *name) {
 
 void Cockpit::beginElement(const string &name, const AttributeList &attributes) {
   AttributeList::const_iterator iter;
+  Gauge::DIRECTION tmpdir=Gauge::GAUGE_UP;
   Sprite ** newsprite;
+  std::string gaugename ("shieldstat.spr");
   Names elem = (Names)element_map.lookup(name);
   Names attr;
   float xsize=-1,ysize=-1,xcent=FLT_MAX,ycent=FLT_MAX;
@@ -130,7 +141,44 @@ void Cockpit::beginElement(const string &name, const AttributeList &attributes) 
   case KSHIELDR:
   case KSHIELDB:
   case KENERGY:
-    
+    for(iter = attributes.begin(); iter!=attributes.end(); iter++) { 
+      switch (attribute_map.lookup((*iter).name)) {
+      case XFILE:
+	gaugename = (*iter).value;
+	break;
+      case XSIZE:
+	xsize = parse_float ((*iter).value);
+	break;
+      case YSIZE:
+	ysize = parse_float ((*iter).value);
+	break;
+      case XCENT:
+	xcent = parse_float ((*iter).value);
+	break;
+      case YCENT:
+	ycent = parse_float ((*iter).value);
+	break;
+      case G_UP:
+	tmpdir = Gauge::GAUGE_UP;
+	break;
+      case G_DOWN:
+	tmpdir = Gauge::GAUGE_DOWN;
+	break;
+      case G_LEFT:
+	tmpdir = Gauge::GAUGE_LEFT;
+	break;
+      case G_RIGHT:
+	tmpdir = Gauge::GAUGE_RIGHT;
+	break;
+      }
+    }
+    gauges[elem-KARMORF] = new Gauge ((*iter).value.c_str(), tmpdir);
+    if (xsize!=-1) {
+      gauges[elem-KARMORF]->SetSize (xsize,ysize);
+    }
+    if (xcent!=FLT_MAX) {
+      gauges[elem-KARMORF]->SetPosition (xcent,ycent);
+    }
     break;
   case CROSSHAIRS:
   case PANEL: 
