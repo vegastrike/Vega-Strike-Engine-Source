@@ -106,6 +106,7 @@ class NetServer
 		void			sendLoginAlready( Client * clt, AddressIP ipadr);
 		void			sendLoginAccept( Client * clt, AddressIP ipadr, int acctnew);
 		void			sendLoginUnavailable( Client * clt, AddressIP ipadr);
+
 	public:
 		NetServer();
 		~NetServer();

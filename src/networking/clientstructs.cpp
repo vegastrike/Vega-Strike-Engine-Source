@@ -1,8 +1,11 @@
+#include <string>
 #include <stdio.h>
 #include "endianness.h"
 #include "cmd/unit_generic.h"
 #include "packet.h"
 #include "client.h"
+
+using std::string;
 
 ClientState::ClientState()
 {
@@ -116,52 +119,52 @@ std::ostream& operator<<( std::ostream& ostr, const Client& c )
     return ostr;
 }
 
-// LoadXMLUnit on game server received from account server
-void	LoadXMLUnit( Unit * unit, const char * filename, char *buf)
+vector<string>	FileUtil::GetSaveFromBuffer( const char * buffer)
 {
-	// Load XML of unit
-	if( unit != NULL)
-	{
-		cout<<"Error : unit already allocated !"<<endl;
-		exit( 1);
-	}
-	unit = new Unit( 0);
-	unit->LoadXML( filename, NULL);
+	vector<string> saves;
+	// Extract the length of save file
+	unsigned int save_size = ntohl( *( (unsigned int *)(buffer)));
+	cout<<"\tSave size = "<<save_size<<endl;
+	// Extract the length of xml file
+	unsigned int xml_size = ntohl( *( (unsigned int *)(buffer + sizeof( unsigned int) + save_size)));
+	cout<<"\tXML size = "<<xml_size<<endl;
 
-	int maxsave = MAXBUFFER - Packet::getHeaderLength() - 2*NAMELEN, readsize=0;
-	// Read the save or default save in buf after the login info
-	if( buf!=NULL)
-	{
-		FILE *fp = fopen( filename, "r");
-		if( fp == NULL)
-		{
-			cout<<"Error opening file "<<filename<<" - THAT SHOULD NOT HAPPEN !!"<<endl;
-		}
-		readsize = fread( (buf), sizeof( char), maxsave, fp);
-		if( readsize>=maxsave)
-		{
-			cout<<"Error : save file is bigger than "<<maxsave<<" ("<<readsize<<")"<<endl;
-			exit( 1);
-		}
-	}
-	else
-		cout<<"Warning : buf was already allocated"<<endl;
+	int buflen = 2*sizeof( unsigned int)+save_size+xml_size;
+	char * savebuf = new char[buflen];
+	memcpy( savebuf, buffer, buflen);
+	savebuf[sizeof( unsigned int)+save_size]=0;
+	savebuf[2*sizeof( unsigned int)+xml_size+save_size]=0;
+	// First element is XML Unit and second element is player save
+	saves.push_back( string( savebuf+2*sizeof( unsigned int)+save_size));
+	saves.push_back( string( savebuf+sizeof( unsigned int)));
+	delete savebuf;
+
+	return saves;
 }
 
-// Used to WriteXMLUnit temp file
-void	WriteXMLUnit( string filename, char * xmlbuf, int tsize)
+void	FileUtil::WriteSaveFiles( string savestr, string xmlstr, string path, string name)
 {
-	FILE *fp = fopen( filename.c_str(), "w");
-	if( fp==NULL)
+	string savefile;
+	FILE * fp;
+
+	// Write the save file
+	savefile = path+name+".save";
+	fp = fopen( savefile.c_str(), "w");
+	if( !fp)
 	{
-		cout<<"File not found : "<<filename<<", creating"<<endl;
+		cout<<"Error opening save file "<<savefile<<endl;
+		exit(1);
 	}
-	int ret = fwrite( xmlbuf, sizeof( char), tsize, fp);
-	cout<<ret<<" bytes written to "<<filename<<endl;
-	if( ret < 0)
+	fwrite( savestr.c_str(), sizeof( char), savestr.length(), fp);
+	fclose( fp);
+	// Write the XML file
+	savefile = path+name+".xml";
+	fp = fopen( savefile.c_str(), "w");
+	if( !fp)
 	{
-		cout<<"Error writing in file : "<<filename<<endl;
-		exit( 1);
+		cout<<"Error opening save file "<<savefile<<endl;
+		exit(1);
 	}
+	fwrite( xmlstr.c_str(), sizeof( char), xmlstr.length(), fp);
 	fclose( fp);
 }

@@ -30,11 +30,11 @@ libnetgeneric =	\
 	vsnet_serversocket.cpp	\
 	vsnet_serversocket.h
 
-libnet_a_SOURCES =	$(libnetgeneric) \
+libnet_a_SOURCES =	\
 	inet.cpp		\
 	inet.h
 
-libnetclient_a_SOURCES = \
+libnetclient_a_SOURCES = $(libnetgeneric) \
 	netclient.cpp	\
 	netclient.h	\
 	cubicsplines.cpp	\
@@ -49,8 +49,8 @@ libnetserver_a_SOURCES = $(libnetgeneric) \
 	netserver.h	\
 	cubicsplines.cpp	\
 	cubicsplines.h		\
-	savenet_util.h		\
 	savenet_util.cpp	\
+	savenet_util.h		\
 	zonemgr.cpp	\
 	zonemgr.h
 

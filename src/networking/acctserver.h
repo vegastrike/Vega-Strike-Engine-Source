@@ -38,6 +38,9 @@ class AccountServer
 		ObjSerial	serial_seed;
 		Packet		packet;
 
+		double	savetime;
+		double	curtime;
+
 	public:
 		AccountServer();
 		~AccountServer();
@@ -50,6 +53,9 @@ class AccountServer
 		void		sendUnauthorized( SOCKETALT sock, Account * acct);				// Send unauthorizated connection
 		void		sendAlreadyConnected(  SOCKETALT sock, Account * acct);
 		ObjSerial	getUniqueSerial();
+
+		void		writeSave( const char * buffer);
+		void		removeDeadSockets();
 };
 
 #endif

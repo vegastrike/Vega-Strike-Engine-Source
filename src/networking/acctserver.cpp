@@ -48,8 +48,6 @@ void	AccountServer::start()
 {
 	string strperiod;
 	keeprun = 1;
-	double	savetime;
-	double	curtime;
 
 	SOCKETALT	comsock;
 
@@ -124,40 +122,10 @@ void	AccountServer::start()
 			}
 		}
 
-		VI vi;
-		for (LS j=DeadSocks.begin(); j!=DeadSocks.end(); j++)
-		{
-			int nbc_disc = 0;
-			cout<<">>>>>>> Closing socket number "<<(*j)<<endl;
-			// Disconnect all of that server clients
-			for( vi = Cltacct.begin(); vi!=Cltacct.end(); vi++)
-			{
-				// Check if the socket correspond to the one of the current account
-				// -> it was a client on the server that got disconnected
-				// We set them to disconnected in order to reactivate those in the resync list if we receive one
-
-				// We check only if it is the same address since the "fd" member of the socket should have been
-				// set to -1 because of disconnect
-				if( (*vi)->getSocket().sameAddress( (*j)))
-				{
-					(*vi)->setConnected( false);
-					nbc_disc++;
-				}
-			}
-			cout<<"\tDisconnected "<<nbc_disc<<" clients associated with that server socket"<<endl;
-			j->disconnect( "\tclosing socket", false );
-			Socks.remove( (*j));
-		}
-		DeadSocks.clear();
-
+		// Remove dead connections
+		this->removeDeadSockets();
 		// Check for automatic server status save time
 		curtime = getNewTime();
-		if( curtime - savetime > period)
-		{
-			// Not implemented
-			this->save();
-			savetime += period;
-		}
 
 		micro_sleep(40000);
 	}
@@ -321,6 +289,11 @@ void	AccountServer::recvMsg( SOCKETALT sock)
 				cout<<"<<< RESYNC'ED ACCOUNTS --------------------------------------"<<endl;
 			}
 			break;
+			case CMD_SAVEACCOUNTS :
+				cout<<">>> SAVING ACCOUNT N° "<<packet.getSerial()<<"-----------------------------"<<endl;
+				this->writeSave( packet.getData());
+				cout<<"<<< ACCOUNT SAVED --------------------------------------"<<endl;
+			break;
 			default:
 				cout<<">>> UNKNOWN command =( "<<cmd<<" )= ---------------------------------";
 		}
@@ -370,13 +343,13 @@ void	AccountServer::sendAuthorized( SOCKETALT sock, Account * acct)
 		unsigned int readsize=0, readsize2=0;
 
 		// Read the XML unit file
-		string acctfile = acctdir+acct->name+".xml";
+		string acctfile = acctdir+acct->name+".save";
 		cout<<"Trying to open : "<<acctfile<<endl;
 		FILE *fp = fopen( acctfile.c_str(), "r");
 		if( fp == NULL)
 		{
 			cout<<"Account file does not exists... sending default one to game server"<<endl;
-			acctfile = acctdir+"default.xml";
+			acctfile = acctdir+"default.save";
 			cout<<"Trying to open : "<<acctfile<<endl;
 			fp = fopen( acctfile.c_str(), "r");
 		}
@@ -396,18 +369,18 @@ void	AccountServer::sendAuthorized( SOCKETALT sock, Account * acct)
 			cleanup();
 		}
 		// Put the size of the first save file in the buffer to send
-		unsigned int xmlsize = htonl( readsize);
-		memcpy( buf+2*NAMELEN, &xmlsize, sizeof( unsigned int));
+		unsigned int savesize = htonl( readsize);
+		memcpy( buf+2*NAMELEN, &savesize, sizeof( unsigned int));
 		//unsigned int xml_size = ntohl( *( (unsigned int *)(buf+NAMELEN*2)));
 		//cout<<"XML reversed = "<<xml_size<<endl;
 
 		// Read the save file
-		string acctsave = acctdir+acct->name+".save";
+		string acctsave = acctdir+acct->name+".xml";
 		fp = fopen( acctsave.c_str(), "r");
 		if( fp == NULL)
 		{
 			cout<<"Save file does not exists... sending default one to game server"<<endl;
-			acctsave = acctdir+"default.save";
+			acctsave = acctdir+"default.xml";
 			cout<<"Trying to open : "<<acctsave<<endl;
 			fp = fopen( acctsave.c_str(), "r");
 		}
@@ -428,10 +401,10 @@ void	AccountServer::sendAuthorized( SOCKETALT sock, Account * acct)
 			cleanup();
 		}
 		// Put the size of the second save file in the buffer to send
-		unsigned int savesize = htonl( readsize2);
+		unsigned int xmlsize = htonl( readsize2);
 		//cout<<"NETWORK FORMAT : XML size = "<<xmlsize<<" --- SAVE size = "<<savesize<<endl;
 		//cout<<"HOST FORMAT : XML size = "<<ntohl(xmlsize)<<" --- SAVE size = "<<ntohl(savesize)<<endl;
-		memcpy( buf+2*NAMELEN+sizeof( unsigned int)+readsize, &savesize, sizeof( unsigned int));
+		memcpy( buf+2*NAMELEN+sizeof( unsigned int)+readsize, &xmlsize, sizeof( unsigned int));
 		cout<<"Loaded -= "<<acct->name<<" =- save files ("<<(readsize+readsize2)<<")"<<endl;
 		unsigned int total_size = readsize+readsize2+2*NAMELEN+2*sizeof( unsigned int);
 		assert( total_size <= MAXBUFFER );
@@ -440,7 +413,7 @@ void	AccountServer::sendAuthorized( SOCKETALT sock, Account * acct)
 
 		// For now saves are really limited to maxsave bytes
 		Packet	packet2;
-		if( packet2.send( LOGIN_ACCEPT, serial, buf, total_size, SENDANDFORGET, NULL, sock, __FILE__, __LINE__ ) < 0 )
+		if( packet2.send( LOGIN_ACCEPT, serial, buf, total_size, SENDRELIABLE, NULL, sock, __FILE__, __LINE__ ) < 0 )
 		{
 			cout<<"ERROR sending authorization"<<endl;
 			exit( 1);
@@ -451,17 +424,74 @@ void	AccountServer::sendAuthorized( SOCKETALT sock, Account * acct)
 void	AccountServer::sendUnauthorized( SOCKETALT sock, Account * acct)
 {
 	Packet	packet2;
-	packet2.send( LOGIN_ERROR, 0, packet.getData(), packet.getDataLength(), SENDANDFORGET, NULL, sock, __FILE__, __LINE__ );
+	packet2.send( LOGIN_ERROR, 0, packet.getData(), packet.getDataLength(), SENDRELIABLE, NULL, sock, __FILE__, __LINE__ );
 	cout<<"\tLOGIN REQUEST FAILED for <"<<acct->name<<">:<"<<acct->passwd<<">"<<endl;
 }
 
 void	AccountServer::sendAlreadyConnected( SOCKETALT sock, Account * acct)
 {
 	Packet	packet2;
-	packet2.send( LOGIN_ALREADY, acct->getSerial(), packet.getData(), packet.getDataLength(), SENDANDFORGET, NULL, sock, __FILE__, __LINE__ );
+	packet2.send( LOGIN_ALREADY, acct->getSerial(), packet.getData(), packet.getDataLength(), SENDRELIABLE, NULL, sock, __FILE__, __LINE__ );
 	cout<<"\tLOGIN REQUEST FAILED for <"<<acct->name<<">:<"<<acct->passwd<<"> -> ALREADY LOGGED IN"<<endl;
 }
 
 void	AccountServer::save()
 {
+	// Loop through all accounts and write their status
+	VI vi;
+	for( vi=Cltacct.begin(); vi!=Cltacct.end(); vi++)
+	{
+	}
+}
+
+void	AccountServer::removeDeadSockets()
+{
+	VI vi;
+	for (LS j=DeadSocks.begin(); j!=DeadSocks.end(); j++)
+	{
+		int nbc_disc = 0;
+		cout<<">>>>>>> Closing socket number "<<(*j)<<endl;
+		// Disconnect all of that server clients
+		for( vi = Cltacct.begin(); vi!=Cltacct.end(); vi++)
+		{
+			// Check if the socket correspond to the one of the current account
+			// -> it was a client on the server that got disconnected
+			// We set them to disconnected in order to reactivate those in the resync list if we receive one
+
+			// We check only if it is the same address since the "fd" member of the socket should have been
+			// set to -1 because of disconnect
+			if( (*vi)->getSocket().sameAddress( (*j)))
+			{
+				(*vi)->setConnected( false);
+				nbc_disc++;
+			}
+		}
+		cout<<"\tDisconnected "<<nbc_disc<<" clients associated with that server socket"<<endl;
+		j->disconnect( "\tclosing socket", false );
+		Socks.remove( (*j));
+	}
+	DeadSocks.clear();
+}
+
+void	AccountServer::writeSave( const char * buffer)
+{
+	vector<string> saves = FileUtil::GetSaveFromBuffer( buffer);
+	string xmlstr = saves[0];
+	string savestr = saves[1];
+
+	// Find the account associated with serial packet.getSerial();
+	VI vi;
+	bool found = false;
+	for( vi=Cltacct.begin(); vi!=Cltacct.end() && !found; vi++)
+	{
+		if( (*vi)->getSerial()==packet.getSerial())
+			found = true;
+	}
+	if( !found)
+	{
+		// Problem, we should have found it
+	}
+	else
+		// Save the files
+		FileUtil::WriteSaveFiles( savestr, xmlstr, acctdir, (*vi)->name);
 }

@@ -144,6 +144,8 @@ accountserver_SOURCES =		\
 	xml_support.cpp			\
 	lin_time.cpp				\
 	lin_time.h					\
+	endianness.cpp				\
+	endianness.h				\
 	accountserver.cpp
 
 vegastrike_SOURCES =		\

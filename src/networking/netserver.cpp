@@ -1241,7 +1241,7 @@ void	NetServer::save()
 	{
 		SaveNetUtil::GetSaveStrings( i, savestr, xmlstr);
 		// Write the save and xml unit
-		SaveNetUtil::SaveFiles( cp, savestr, xmlstr);
+		FileUtil::WriteSaveFiles( savestr, xmlstr, "./serversaves", cp->savegame->GetCallsign());
 		// SEND THE BUFFERS TO ACCOUNT SERVER
 		if( acctserver && acct_con)
 		{
@@ -1268,7 +1268,7 @@ void	NetServer::save()
 			}
 			buffer = new char[savestr.length() + xmlstr.length() + 2*sizeof( unsigned int)];
 			SaveNetUtil::GetSaveBuffer( savestr, xmlstr, buffer);
-			if( pckt.send( CMD_SAVEACCOUNTS, clt->serial, buffer, strlen( buffer), SENDANDFORGET, NULL, acct_sock, __FILE__, __LINE__ ) < 0 )
+			if( pckt.send( CMD_SAVEACCOUNTS, clt->serial, buffer, strlen( buffer), SENDRELIABLE, NULL, acct_sock, __FILE__, __LINE__ ) < 0 )
 				cout<<"ERROR sending SAVE to account server"<<endl;
 			delete buffer;
 		}

@@ -42,11 +42,12 @@ void	SaveNetUtil::GetSaveBuffer( string savestr, string xmlstr, char * buffer)
 	//return buffer;
 }
 
-void	SaveNetUtil::SaveFiles( Cockpit * cp, string savestr, string xmlstr)
+/*
+void	SaveNetUtil::SaveFiles( string savestr, string xmlstr, string path, string name)
 {
 	string savefile;
 	FILE * fp;
-	savefile = "./serversaves/"+cp->savegame->GetCallsign()+".xml";
+	savefile = path+cp->savegame->GetCallsign()+".xml";
 	fp = fopen( savefile.c_str(), "w");
 	if( !fp)
 	{
@@ -56,7 +57,7 @@ void	SaveNetUtil::SaveFiles( Cockpit * cp, string savestr, string xmlstr)
 	fwrite( xmlstr.c_str(), sizeof( char), xmlstr.length(), fp);
 	fclose( fp);
 	// Write the save file
-	savefile = "./serversaves/"+cp->savegame->GetCallsign()+".save";
+	savefile = path+cp->savegame->GetCallsign()+".save";
 	fp = fopen( savefile.c_str(), "w");
 	if( !fp)
 	{
@@ -66,3 +67,4 @@ void	SaveNetUtil::SaveFiles( Cockpit * cp, string savestr, string xmlstr)
 	fwrite( savestr.c_str(), sizeof( char), savestr.length(), fp);
 	fclose( fp);
 }
+*/

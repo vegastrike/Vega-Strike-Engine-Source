@@ -110,7 +110,11 @@ private:
 	Client& operator=( const Client& );
 };
 
-void	LoadXMLUnit( Unit * unit, const char * filename, char * buf);
-void	WriteXMLUnit( string filename, char * xmlbuf, int tsize);
+namespace FileUtil
+{
+	// Returns 2 strings -> vector[0] = xml unit, vector[1] = player save
+	vector<string>	GetSaveFromBuffer( const char * buffer);
+	void			WriteSaveFiles( string savestr, string xmlstr, string path, string name);
+}
 
 #endif

@@ -197,33 +197,13 @@ vector<string>	NetClient::loginLoop( string str_name, string str_passwd)
 		micro_sleep( 40000);
 	}
 	cout<<"End of login loop"<<endl;
-	if( ret>0 && packet.getCommand()!=LOGIN_ERROR)
+	if( ret>0 && packet.getCommand()!=LOGIN_ERROR && packet.getCommand()!=LOGIN_UNAVAIL)
 	{
 		this->callsign = str_name;
-		// Get the save parts in the buffer
-		// const char * xml = netbuf + NAMELEN*2 + sizeof( unsigned int);
-		unsigned int xml_size = ntohl( *( (unsigned int *)(netbuf+NAMELEN*2)));
-		// const char * save = netbuf + NAMELEN*2 + sizeof( unsigned int)*2 + xml_size;
-		unsigned int save_size = ntohl( *( (unsigned int *)(netbuf+ NAMELEN*2 + sizeof( unsigned int) + xml_size)));
-		cout<<"XML size = "<<xml_size<<endl;
-		cout<<"Save size = "<<save_size<<endl;
-		// Write temp save files
-		//changehome();
-		//WriteXMLUnit( homedir+"/save/"+str_name+".xml", netbuf+2*NAMELEN+sizeof( unsigned int), xml_size);
-		//WriteXMLUnit( homedir+"/save/"+str_name+".save", netbuf+2*NAMELEN+sizeof( unsigned int)*2+xml_size, save_size);
-
-		// Set the end of the string after the save content and at the end of the xml content
-		netbuf[2*NAMELEN+sizeof( unsigned int)+xml_size]=0;
-		netbuf[2*NAMELEN+2*sizeof( unsigned int)+xml_size+save_size]=0;
-		// First element is XML Unit and second element is player save
-		savefiles.push_back( string( netbuf+2*NAMELEN+sizeof( unsigned int)));
-		savefiles.push_back( string( netbuf+2*NAMELEN+2*sizeof( unsigned int)+xml_size));
+		const char * tmpbuf = netbuf + 2*NAMELEN;
+		savefiles = FileUtil::GetSaveFromBuffer( tmpbuf);
 	}
-	else
-	{
-		delete netbuf;
-		netbuf=NULL;
-	}
+	delete netbuf;
 	return savefiles;
 }
 
