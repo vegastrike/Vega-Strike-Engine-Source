@@ -46,6 +46,14 @@ namespace ROLES {
 			} while (loc!=string::npos);
 		return v;
 	}
+	unsigned char InternalGetRole (const std::string &s) {
+		map<string,int>::iterator i = rolemap.find (strtoupper (s));
+		if (i!=rolemap.end()) {
+			return (*i).second;
+		}
+		return 0;
+	}
+
 	vector < vector <char > > buildroles() {
 		vector <vector <char> >rolePriorities;
 		int count=0;
@@ -74,7 +82,7 @@ namespace ROLES {
 				temp[0]=0;
 				fgets (temp,len,fp);
 				vector <string> priority = readCSV(temp);
-				int i=getRole (priority[0]);
+				int i=InternalGetRole (priority[0]);
 				//fprintf (stderr, "role of %s is %d\n",priority[0].c_str(),i);
 				if (i<rolePriorities.size()) {
 					for (unsigned int j=0;j<rolePriorities.size();j++) {
@@ -97,11 +105,7 @@ namespace ROLES {
 	}
 	unsigned char getRole (const std::string &s) {
 		int temp = maxRoleValue();
-		map<string,int>::iterator i = rolemap.find (strtoupper (s));
-		if (i!=rolemap.end()) {
-			return (*i).second;
-		}
-		return 0;
+		return InternalGetRole(s);
 	}
 	unsigned int readBitmask (const std::string &ss){
 		string s= ss;
