@@ -24,7 +24,7 @@ void AnimatedTexture::UpdateAllFrame() {
     myvec[i]->cumtime+=GetElapsedTime();
     if (myvec[i]->timeperframe) {
       myvec[i]->active = ((int)(myvec[i]->cumtime/myvec[i]->timeperframe))%myvec[i]->numframes;
-      myvec[i]->original = myvec[i]->Decal[myvec[i]->active]->Original();
+     // myvec[i]->original = myvec[i]->Decal[myvec[i]->active]->Original();
     }
   }
 }
@@ -58,7 +58,7 @@ Texture *AnimatedTexture::Clone () {
   for (int i=0;i<numframes;i++) {
     retval->Decal[i]= Decal[i]->Clone ();
   }
-  retval->original = Original();
+  myvec.push_back (retval);
   return retval;
 }
 
@@ -112,8 +112,5 @@ void AnimatedTexture::Load(FILE * fp, int stage, enum FILTER ismipmapped) {
       Decal[i]=new Texture (file,stage,ismipmapped);
     }    
   }
-  if (numframes>=1)
-    original = Decal[0]->Original();
-  else
-    original = NULL;
+  original = NULL;
 }

@@ -654,3 +654,4 @@ void Texture::MakeActive()
     GFXSelectTexture(name,stage);
   }
 }
+
