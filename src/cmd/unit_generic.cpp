@@ -5816,7 +5816,7 @@ int Unit::RepairUpgrade () {
     int success=0;
     double pct=0;
     if (temprate->name!=string("LOAD_FAILED")) {
-        success = Upgrade(temprate,0,0,0,false,pct,NULL,false)?1:0;
+        success = Upgrade(temprate,-1,-1,0,false,pct,NULL,false)?1:0;
 	if (pct>0)
 	  success=1;
     }
