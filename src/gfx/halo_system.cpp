@@ -1,3 +1,5 @@
+#include <vector>
+#include <string>
 #include "vec.h"
 #include "matrix.h"
 #include "halo_system.h"
