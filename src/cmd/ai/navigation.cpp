@@ -427,7 +427,8 @@ void FormUp::Execute() {
   Unit * targ = group.GetUnit();
   if (targ) {
     MoveTo::SetDest (Transform (targ->GetTransformation(),Pos));
-    if (rand()%64==0)
+    static bool can_warp_to=XMLSupport::parse_bool(vs_config->getVariable("AI","warp_to_wingmen","true"));   
+    if (rand()%64==0&&(can_warp_to||_Universe->AccessCockpit()->autoInProgress()))
       WarpToP(parent,targ);
   }
   MoveTo::Execute();

@@ -963,7 +963,10 @@ void AggressiveAI::Execute () {
     }
   } else {
     if (target) {
-    WarpToP(parent,target);
+    static bool can_warp_to=XMLSupport::parse_bool(vs_config->getVariable("AI","warp_to_enemies","true"));      
+    if (can_warp_to||_Universe->AccessCockpit()->autoInProgress()){
+      WarpToP(parent,target);
+    }
     logiccurtime-=SIMULATION_ATOM;
     interruptcurtime-=SIMULATION_ATOM;	
     if (logiccurtime<=0) {
