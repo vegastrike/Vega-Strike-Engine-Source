@@ -21,10 +21,10 @@ QuadTree::QuadTree ():vertices (GFXTRI,4,InitialVertices,4,true) {
   RootCornerData.Verts[1].Y = 0;   RootCornerData.Verts[1].vertindex=1;
   RootCornerData.Verts[2].Y = 0;   RootCornerData.Verts[2].vertindex=2;
   RootCornerData.Verts[3].Y = 0;   RootCornerData.Verts[3].vertindex=3;
-  RootCornerData.Verts[0].Tex=0;
-  RootCornerData.Verts[1].Tex=0;
-  RootCornerData.Verts[2].Tex=9;
-  RootCornerData.Verts[3].Tex=9;
+  RootCornerData.Verts[0].SetTex(0);
+  RootCornerData.Verts[1].SetTex(0);
+  RootCornerData.Verts[2].SetTex(9);
+  RootCornerData.Verts[3].SetTex(9);
   
 
   VertexAllocated = VertexCount = 4;

@@ -1139,7 +1139,8 @@ void	quadsquare::SetupCornerData(quadcornerdata* q, const quadcornerdata& cd, in
 
 void VertInfo::SetTex (float t) {
   Tex = t;
-  Rem = t-Tex;
+  Rem = (t-Tex)*256;
+  assert (t-Tex<1);
 }
 unsigned short VertInfo::GetTex () const {
   return (Rem>127)?(Tex+1):Tex;
