@@ -5,6 +5,8 @@
 #include <string>
 #include <math.h>
 #include <float.h>
+#include <ctype.h>
+#include <algorithm>
 using std::vector;
 using std::map;
 using std::string;
@@ -67,7 +69,7 @@ vector <std::string> readCSV (std::string s) {
 void computeminmax(vector<System> sys ,vec3 & min, vec3 & max) {
 	min = vec3(DBL_MAX,DBL_MAX,DBL_MAX);
 	max = vec3(-DBL_MAX,-DBL_MAX,-DBL_MAX);
-	for (unsigned int i=0;<sys.size();++i) {
+	for (unsigned int i=0;i<sys.size();++i) {
 		min = min.min(sys[i].xyz);
 		max = max.max(sys[i].xyz);
 	}
@@ -78,7 +80,26 @@ std::string strtoupper (std::string s) {
 	}
 	return s;
 }
+std::string unpretty (std::string s) {
+	for (string::iterator i = s.begin() ; i!=s.end();++i ) {
+		if (isspace(*i)) {
+			*i = '_';
+		}
+	}
+	return s;
+	
+}
 
+std::string itostr(int i) {
+	char test[256];
+	sprintf (test,"%d",i);
+	return test;
+}
+std::string ftostr(double i) {
+	char test[256];
+	sprintf (test,"%lf",i);
+	return test;
+}
 vector<System> readfile (const char * name) {
 	vector<System>systems;
 	FILE * fp = fopen (name,"r");
@@ -114,13 +135,20 @@ vector<System> readfile (const char * name) {
 				in.size = atoi(content[i].c_str());
 			}else {
 				if (keys[i].find("NAME")!=string::npos) {
-					in.name = content[i];
+					in.name = unpretty(content[i]);
 				}else {
 					printf ( "error key %s not found\n",keys[i].c_str());
 					in[keys[i]] = content[i];
 				}
 			   
 			}
+			if (in.name=="") {
+				static int num=0;
+				num++;
+				in.name=string("DAN")+itostr(num);
+				
+			}
+			in.sector="nowhereland";
 		}
 		in.computeXYZ();
 		systems.push_back(in);
@@ -131,41 +159,49 @@ vector<System> readfile (const char * name) {
 }
 
 
-void writesystems(vector<System> s) {
+void writesystems(FILE * fp, vector<System> s) {
 	std::sort(s.begin(),s.end());//sort into sector categories
 	string cursector;
+	fprintf(fp,"<galaxy><systems>\n");
+	int iter=0;
 	for (vector<System>::iterator i = s.begin();i!=s.end();++i) {
 		if ((*i).sector != cursector) {
 			//start sectortag;
-			
+			if (cursector!="")
+					fprintf(fp,"\t</sector>\n");
+			fprintf (fp, "\t<sector name=\"%s\">\n",(*i).sector.c_str());
+			cursector = (*i).sector;
 		}
-		for (vector<System>::iterator j = (*i).begin();j!=(*i).end();++j) {
-			
+		fprintf(fp,"\t\t<sector name=\"%s\">\n",(*i).name.c_str());
+		for (map<string,string>::iterator j = (*i).begin();j!=(*i).end();++j) {
+			fprintf (fp, "\t\t\t<var name=\"%s\" value=\"%s\"/>\n");			
 		}
-		if ((*i).sector != cursector) {
-			//end sectortag;
+		fprintf (fp,"\t\t\t<var name=\"xyz\" value=\"%lf %lf %lf\"/>\n",(*i).xyz.x,(*i).xyz.y,(*i).xyz.z);
+		if (iter>4 && iter+4<s.size()) {
+			fprintf (fp,"\t\t\t<var name=\"jumps\" value=\"%s %s %s %s %s %s %s\"/>\n",s[iter-1].name.c_str(),s[iter-2].name.c_str(),s[iter-3].name.c_str(),s[iter-4].name.c_str(),s[iter+1].name.c_str(),s[iter+2].name.c_str(),s[iter+3].name.c_str());
 		}
-
-
-	}
-	
+		fprintf(fp,"\t\t</sector>\n");
+		iter++;
+	}	
+	fprintf(fp,"\t</sector>\n</systems></galaxy>\n");
 	
 }
+void processsystems (vector <System> & s){
+
+}
 int main (int argc, char ** argv) {
+	if (argc<3) {
+		printf ("not enough args. Usage ./a.out <input> <output>\n");
+		return 1;
+	}
+
 	vector <System> s=readfile(argv[1]);
 	processsystems(s);
-	writesystems(s);
-	
-
-
-
-
-
-
-
-
-
-
-
+	FILE * fp = fopen (argv[2],"w");
+	if (fp){
+		writesystems(fp,s);
+		fclose(fp);
+	}else
+		printf ("could not open %s for writing\n",argv[2]);
 	return 0;
 }
