@@ -118,9 +118,11 @@ public:
   void Scale(const Vector &scale) {this->scale = scale;SetOrientation();};
   BoundingBox * getBoundingBox();
   float rSize () {return radialSize;}
-  bool intersects(const Vector &start, const Vector &end);
-  bool intersects(const Vector &pt);
-  bool intersects(Mesh *mesh);
+	bool intersects(const Vector &start, const Vector &end);
+	bool intersects(const Vector &pt);
+	bool intersects(Matrix t, const Vector &pt);
+	bool intersects(Mesh *mesh);
+	bool intersects(Matrix t, Mesh *mesh);
 };
 #endif
 

@@ -546,6 +546,9 @@ Mesh:: Mesh(char * filename/*, Texture* ForceLog, Texture* SquadLog*/):Primitive
 	myMatNum = readi(fp);;
 	fclose(fp);
 
+	// Load the BSP tree
+	//bspTree = new BSPTree((filename + string(".bsp")).c_str());
+
 	this->orig = oldmesh;
 	*oldmesh = *this;
 	oldmesh->orig = NULL;
@@ -583,6 +586,8 @@ Mesh::~Mesh()
 			delete squadlogos;
 		if (forcelogos!=NULL)
 			delete forcelogos;
+		if(bspTree!=NULL)
+		  delete bspTree;
 	}
 	else
 	{
@@ -955,11 +960,24 @@ BoundingBox * Mesh::getBoundingBox() {
 }
 
 bool Mesh::intersects(const Vector &pt) {
-  if (pt.i < maxSizeX||pt.i <minSizeX||pt.j>maxSizeY||pt.j<minSizeY||pt.k>maxSizeZ||pt.k<minSizeZ)
-    return false;
-  return bspTree->intersects(pt);
+  Matrix t;
+  Identity(t);
+  return intersects(t, pt);
+}
+
+bool Mesh::intersects(Matrix mat, const Vector &pt) {
+  Matrix t, u;
+  invert(u,transformation);
+  MultMatrix(t, u, mat); // accumulate a bunch of inverse transforms; we could do this more easily by taking the transpose of rotation matrices, and doing stuff to translation matrices
+
+  Vector a = pt;
+  a = a.Transform(t);
+  //if (pt.i < maxSizeX||pt.i <minSizeX||pt.j>maxSizeY||pt.j<minSizeY||pt.k>maxSizeZ||pt.k<minSizeZ)
+  //  return false;
+  return bspTree->intersects(a);
 }
 
 bool Mesh::intersects(Mesh *mesh) {
+  // Needs to adapt coordinate systems
 	return bspTree->intersects(mesh->bspTree);
 }

@@ -64,6 +64,7 @@ class BSPTree {
 	BSPNode *root;
 public:
 	BSPTree(BSPDiskNode *input);
+	BSPTree(const char *filename);
 	~BSPTree() {
 		delete root;
 	}

@@ -18,6 +18,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
+#include <stdio.h>
 #include "gfx_bsp.h"
 
 //All or's are coded with the assumption that the inside of the object has a much bigger impact than the outside of the object when both need to be analyzed
@@ -114,4 +115,32 @@ bool BSPTree::intersects(const BSPTree *t1) const {
 
 BSPTree::BSPTree(BSPDiskNode *input) {
 	root = new BSPNode(input);
+}
+
+BSPTree::BSPTree(const char *filename) {
+  FILE *fp = fopen(filename, "rb");
+
+  fseek(fp, 0, SEEK_END);
+  int size = ftell(fp);
+  int numRecords = size / (sizeof(float)*4+2);
+  rewind(fp);
+  BSPDiskNode *nodes = new BSPDiskNode[numRecords];
+  
+  for(int a=0; a<numRecords; a++) {
+    fread(&nodes[a].x, sizeof(float), 1, fp);
+    fread(&nodes[a].y, sizeof(float), 1, fp);
+    fread(&nodes[a].z, sizeof(float), 1, fp);
+    fread(&nodes[a].d, sizeof(float), 1, fp);
+    nodes[a].isVirtual = false;
+    char byte;
+    fread(&byte, 1, 1, fp);
+    if(byte) nodes[a].hasFront = true;
+    else nodes[a].hasFront = false;
+    fread(&byte, 1, 1, fp);
+    if(byte) nodes[a].hasBack = true;
+    else nodes[a].hasBack = false;
+  }
+  root = new BSPNode(nodes);
+  delete [] nodes;
+  fclose(fp);
 }

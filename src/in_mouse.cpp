@@ -37,6 +37,7 @@ int mousex=0;
 int mousey=0;
 
 void mouseClick( int button, int state, int x, int y ) {
+  if(button>=NUM_BUTTONS) return;
   mousex = x;
   mousey = y;
   int mod =glutGetModifiers();
