@@ -473,21 +473,23 @@ void Cockpit::DrawBlips (Unit * un) {
       Vector localcoord (un->LocalCoordinates(target));
       LocalToRadar (localcoord,s,t);
       GFXColor localcol (radarl->color?unitToColor (un,target):black_and_white);
-
-      GFXColorf (localcol);
-      if (target==makeBigger) {
-	GFXEnd();
-	GFXPointSize(4);
-	GFXBegin (GFXPOINT);
-      }
-      float rerror = ((un->GetNebula()!=NULL)?.03:0)+(target->GetNebula()!=NULL?.06:0);
-      GFXVertex3f (xcent+xsize*(s-.5*rerror+(rerror*rand())/RAND_MAX),ycent+ysize*(t+-.5*rerror+(rerror*rand())/RAND_MAX),0);
-      if (target==makeBigger) {
-	GFXEnd();
-	GFXPointSize (2);
-	GFXBegin(GFXPOINT);
-      }
       
+      GFXColorf (localcol);
+      
+      float rerror = ((un->GetNebula()!=NULL)?.03:0)+(target->GetNebula()!=NULL?.06:0);
+      Vector v(xcent+xsize*(s-.5*rerror+(rerror*rand())/RAND_MAX),ycent+ysize*(t+-.5*rerror+(rerror*rand())/RAND_MAX),0);
+      if (target!=makeBigger) {
+	GFXVertexf(v);
+      }else {
+	GFXEnd();
+	GFXBegin(GFXLINE);
+	GFXVertex3f(v.i+(7.8)/g_game.x_resolution,v.j,v.k);
+	GFXVertex3f(v.i-(7.5)/g_game.x_resolution,v.j,v.k);
+	GFXVertex3f(v.i,v.j-(7.5)/g_game.y_resolution,v.k);
+	GFXVertex3f(v.i,v.j+(7.8)/g_game.y_resolution,v.k);
+	GFXEnd();
+	GFXBegin (GFXPOINT);
+      }      
     }
     iter.advance();
   }
