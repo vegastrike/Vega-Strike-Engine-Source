@@ -554,8 +554,8 @@ void UnitBeginElement(const string &name, const AttributeList &attributes, XML *
   Unit::Names top;
   if(globalfileout){
 	if(globaltab>globallasttab){
-            fprintf (xml->tfp,">\n");
-            fprintf (xml->bfp,">\n");
+            //fprintf (xml->tfp,">\n");
+            //fprintf (xml->bfp,">\n");
 	  ++globallasttab;
 	}
     for (int sc = 0; sc< globaltab;sc++){
@@ -563,18 +563,18 @@ void UnitBeginElement(const string &name, const AttributeList &attributes, XML *
         fprintf (xml->bfp,"\t");
 	}
     ++globaltab;
-      fprintf (xml->tfp,"<%s ",name.c_str());
-      fprintf (xml->bfp,"<%s ",name.c_str());
+      fprintf (xml->tfp,"<%s",name.c_str());
+      fprintf (xml->bfp,"<%s",name.c_str());
       bool shields=false;
       if (xeq(name,"shields")) {
           xml->num_shield_facings=0;
           xml->total_shield_value=0;
           shields=true;
       }else if (xeq (name,"jump") ) {
-          fprintf (xml->bfp,"missing = \"1\" ");
+          fprintf (xml->bfp," missing = \"1\"");
       }
       if (xeq (name,"energy")) {
-          fprintf (xml->bfp,"afterburnenergy = \"32767\" ");
+          fprintf (xml->bfp," afterburnenergy = \"32767\"");
       }else if (xeq (name,"reactor")) {
           for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
               if (xeq ((*iter).name,"recharge"))
@@ -583,7 +583,7 @@ void UnitBeginElement(const string &name, const AttributeList &attributes, XML *
                   xml->energy_limit = xpf (iter->value);
           }
       } else if (xeq (name,"radar")) {
-          fprintf(xml->tfp,"itts=\"false\" error=\"0\" range=\"5000\" maxcone=\".25\" color=\"false\" ");
+          fprintf(xml->tfp," itts=\"false\" error=\"0\" range=\"5000\" maxcone=\".25\" color=\"false\"");
           
       }else
 	for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
@@ -604,6 +604,11 @@ void UnitBeginElement(const string &name, const AttributeList &attributes, XML *
                 if (XMLSupport::parse_float (tval)!=0)
                     bval=tval = "0";
             }
+            if (xeq (name,"hold")) {
+                if (xeq (iter->name,"volume")) {
+                    tval = xts((float)(XMLSupport::parse_float (iter->value)*2.0));
+                }
+            }
             if (xeq (name,"mount")) {
             if (xeq (iter->name,"weapon")) {
                 bval="";
@@ -612,11 +617,14 @@ void UnitBeginElement(const string &name, const AttributeList &attributes, XML *
                     bval = RemoveAutotracking(bval);
                 }
 	    }
-            fprintf (xml->tfp,"%s = \"%s\" ",tnam.c_str(),tval.c_str());
-            fprintf (xml->bfp,"%s = \"%s\" ",bnam.c_str(),bval.c_str());
+            fprintf (xml->tfp," %s =\"%s\"",tnam.c_str(),tval.c_str());
+            fprintf (xml->bfp," %s =\"%s\"",bnam.c_str(),bval.c_str());
 	
 	}
   }
+  fprintf (xml->tfp,">\n");
+  fprintf (xml->bfp,">\n");
+
   switch(elem) {
   case Unit::UNIT:
       fprintf (xml->tfp,"\t<Upgrade file=\"godsansshields\"/>\n");
@@ -648,8 +656,6 @@ void UnitEndElement(const string &name, XML * xml) {
   --globaltab;
   if(globalfileout){
       if(globaltab==globallasttab){
-          fprintf (xml->tfp," >\n");
-          fprintf (xml->bfp," >\n");
       }else
 		globallasttab--;
     for (int sc = 0; sc< globaltab;sc++){
