@@ -890,7 +890,7 @@ void NavigationSystem::DrawSystem()
 	float max_z = (float)pos.k;
 	float min_z = (float)pos.k;
 
-	float themaxvalue = abs(pos.i);
+	float themaxvalue = fabs(pos.i);
 
 	float center_nav_x = ((screenskipby4[0] + screenskipby4[1]) / 2);
 	float center_nav_y = ((screenskipby4[2] + screenskipby4[3]) / 2);
@@ -956,8 +956,8 @@ void NavigationSystem::DrawSystem()
 			if((float)pos.i < min_x)
 				min_x = (float)pos.i;
 			
-			if( abs((float)pos.i) > themaxvalue )
-				themaxvalue = abs((float)pos.i);
+			if( fabs((float)pos.i) > themaxvalue )
+				themaxvalue = fabs((float)pos.i);
 
 
 
@@ -969,8 +969,8 @@ void NavigationSystem::DrawSystem()
 
 				min_y = (float)pos.j;
 
-			if( abs((float)pos.j) > themaxvalue )
-				themaxvalue = abs((float)pos.j);
+			if( fabs((float)pos.j) > themaxvalue )
+				themaxvalue = fabs((float)pos.j);
 
 
 
@@ -981,8 +981,8 @@ void NavigationSystem::DrawSystem()
 			if((float)pos.k < min_z)
 				min_z = (float)pos.k;
 
-			if( abs((float)pos.k) > themaxvalue )
-				themaxvalue = abs((float)pos.k);
+			if( fabs((float)pos.k) > themaxvalue )
+				themaxvalue = fabs((float)pos.k);
 
 		}
 		//**********************************

@@ -21,7 +21,7 @@
 
 #include "vegastrike.h"
 
-#include "windowController.h"
+#include "windowcontroller.h"
 
 // Make everything happen.
 void WindowController::run(void) {

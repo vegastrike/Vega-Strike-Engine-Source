@@ -25,7 +25,7 @@
 
 #include "eventmanager.h"
 #include "groupcontrol.h"
-#include "windowController.h"
+#include "windowcontroller.h"
 
 // For drawing the cursor.
 #include "gfx/aux_texture.h"

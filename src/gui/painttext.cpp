@@ -212,6 +212,9 @@ static void drawChars(const string& str, int start, int end, const Font& font, c
     }
 }
 
+static int mymin (int a, int b) {
+	return a>b?b:a;
+}
 // Draw specified lines of text.
 bool PaintText::drawLines(int start, int count) const {
     // Make sure we hav a display list.
@@ -232,7 +235,7 @@ bool PaintText::drawLines(int start, int count) const {
     float lineTop = m_rect.top();
 
     // Figure ending line index.
-    const int end = min(start + count, m_lines.size());
+    const int end = mymin(start + count, m_lines.size());
 
     // Loop through the display list lines.
     for(int i=start; i<end; i++) {

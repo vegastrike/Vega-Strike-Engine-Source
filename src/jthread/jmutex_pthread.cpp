@@ -47,16 +47,27 @@ int JMutex::Init()
 {
 	if (initialized)
 		return ERR_JMUTEX_ALREADYINIT;
-	
+/*
+#ifndef PTHREAD_MUTEX_NORMAL
+	const int PTHREAD_MUTEX_NORMAL = PTHREAD_MUTEX_TIMED_NP;
+#endif
+#ifndef PTHREAD_MUTEX_ERRORCHECK
+	const int PTHREAD_MUTEX_ERRORCHECK = PTHREAD_MUTEX_ERRORCHECK_NP;
+#endif
+*/
 #if defined(linux) || defined(_AIX)
   #if defined(JMUTEX_DEBUG)
 	::pthread_mutexattr_init(&attr);
+#ifdef __USE_UNIX98
     ::pthread_mutexattr_settype( &attr, PTHREAD_MUTEX_ERRORCHECK );
+#endif
     ::pthread_mutexattr_setpshared( &attr, PTHREAD_PROCESS_PRIVATE );
 	::pthread_mutex_init(&mutex,&attr);
   #else
 	::pthread_mutexattr_init(&attr);
+#ifdef __USE_UNIX98	
     ::pthread_mutexattr_settype( &attr, PTHREAD_MUTEX_NORMAL );
+#endif
     ::pthread_mutexattr_setpshared( &attr, PTHREAD_PROCESS_PRIVATE );
 	::pthread_mutex_init(&mutex,&attr);
   #endif
