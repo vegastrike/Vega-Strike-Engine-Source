@@ -955,6 +955,13 @@ vector <Cargo>&UpgradingInfo::GetCargoList () {
     case BUYMODE:
     case UPGRADEMODE:
     case ADDMODE:
+      relevant = base.GetUnit();
+      if (buyer.GetUnit()) {
+	if (relevant) {
+	  return buyer.GetUnit()->FilterUpgradeList(GetCargoFor (relevant));
+	}
+      }
+      break;
     case SHIPDEALERMODE:
     case MISSIONMODE://gotta transform the missions into cargo
       relevant = base.GetUnit();

@@ -78,6 +78,21 @@ vector <Cargo>& Unit::FilterDowngradeList (vector <Cargo> & mylist) {
   return mylist;
 }
 
+vector <Cargo>& Unit::FilterUpgradeList (vector <Cargo> & mylist) {
+  Cockpit * cp = _Universe->isPlayerStarship (this);
+  if (cp) {
+    for (unsigned int i=0;i<mylist.size();i++) {
+      if (mylist[i].price>cp->credits) {
+	mylist.erase (mylist.begin()+i);
+	i--;
+      }
+    }
+  }
+  return mylist;
+}
+
+
+
 UnitImages &Unit::GetImageInformation() {
   return *image;
 }

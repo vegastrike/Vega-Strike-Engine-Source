@@ -168,7 +168,7 @@ void Universe::SetActiveCockpit (Cockpit * cp) {
     }
   }
 }
-Cockpit * Universe::isPlayerStarship(Unit * un) {
+Cockpit * Universe::isPlayerStarship(const Unit * un) {
   if (!un)
     return NULL;
   for (unsigned int i=0;i<cockpit.size();i++) {

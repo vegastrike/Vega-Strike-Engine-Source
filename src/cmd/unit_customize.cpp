@@ -391,7 +391,7 @@ bool Unit::UpAndDownGrade (Unit * up, Unit * templ, int mountoffset, int subunit
   double myleak=100-shield.leak;
   double upleak=100-up->shield.leak;
   double templeak=100-(templ!=NULL?templ->shield.leak:0);
-  
+  bool ccf = cancompletefully;
   STDUPGRADE(myleak,upleak,templeak,0);
   if (touchme&&myleak<=100&&myleak>=0)shield.leak=100-myleak;
   
@@ -400,7 +400,7 @@ bool Unit::UpAndDownGrade (Unit * up, Unit * templ, int mountoffset, int subunit
   templeak=-(templ!=NULL?templ->computer.radar.maxcone:0);
   STDUPGRADE(myleak,upleak,templeak,0);
   if (touchme)computer.radar.maxcone=1-myleak;
-  
+  cancompletefully=ccf;
   //NO CLUE FOR BELOW
   if (downgrade) {
     //    STDUPGRADE(image->cargo_volume,up->image->cargo_volume,templ->image->cargo_volume,0);

@@ -119,7 +119,7 @@ private:
   
  public:
   Animation * getRandAnimation (int whichfaction,std::string&which);
-  Cockpit * isPlayerStarship (Unit* fighter);
+  Cockpit * isPlayerStarship (const Unit* fighter);
   vector <std::string> getAdjacentStarSystems(const std::string &ss);
   bool StillExists(StarSystem * ss);
   void setActiveStarSystem(StarSystem * ss) {active_star_system.back()=ss;}
