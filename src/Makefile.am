@@ -29,6 +29,8 @@ vegastrike_SOURCES =				\
 	cmd_input_dfa.cpp			\
 	cmd_flybywire.h			\
 	cmd_flybywire.cpp			\
+	cmd_navigation_orders.h			\
+	cmd_navigation_orders.cpp		\
 	cmd_order.cpp				\
 	cmd_order.h				\
 	cmd_unit.h				\
