@@ -235,13 +235,15 @@ GameUnit::GameUnit(const char *filename, bool SubU, int faction,std::string unit
 	} else {
 	  fclose (fp);
 	}
-	fp = fopen (filename,"r");
+	if (filename[0])
+    	    fp = fopen (filename,"r");
 	if (!fp) {
 	  vscdup();
 	  vscdup();
 	  doubleup=false;
 	  vschdir (my_directory);
-	  fp = fopen (filename,"r");
+	  if (filename[0])
+    	    fp = fopen (filename,"r");
 	}
 
 	if (!fp) {
@@ -253,7 +255,8 @@ GameUnit::GameUnit(const char *filename, bool SubU, int faction,std::string unit
 	  faction=FactionUtil::GetFaction("neutral");//set it to neutral
 	  doubleup=true;
 	  vschdir (my_directory);
-	  fp = fopen (filename,"r");
+	  if (filename[0])
+    	    fp = fopen (filename,"r");
 	  if (fp) fclose (fp); 
 	  else {
 	    fprintf (stderr,"Warning: Cannot locate %s",filename);	  

@@ -1519,13 +1519,16 @@ void GameUnit::LoadXML(const char *filename, const char * modifications, char * 
 		  }else {
 			vschdir (nonautosave.c_str());
 		  }
-		  inFile = fopen (filename,"r");
+		  inFile=NULL;
+		  if (filename[0])
+    		    inFile = fopen (filename,"r");
 		  vscdup();
 		  vscdup();
 		  returnfromhome();
 		}
 	  }
 	  if (inFile==NULL)
+	      if (filename[0])
 		inFile = fopen (filename, "r");
 	  if(!inFile) {
 		cout << "Unit file " << filename << " not found" << endl;

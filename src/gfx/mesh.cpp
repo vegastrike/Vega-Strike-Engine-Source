@@ -455,6 +455,7 @@ void Mesh::ProcessDrawQueue(int whichdrawqueue) {
 
   if (getLighting()) {
     GFXSelectMaterial(myMatNum);
+    GFXEnable (LIGHTING);
   }else {
     GFXDisable (LIGHTING);
     GFXColor4f(1,1,1,1);

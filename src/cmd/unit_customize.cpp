@@ -17,7 +17,7 @@
 extern int GetModeFromName (const char *);
 
 void GameUnit::GameMount::ReplaceMounts (const Unit::Mount *other) {
-  Unit::Mount::ReplaceMounts( other);
+  Mount::ReplaceMounts( other);
   sound = AUDCreateSound (sound,type->type!=weapon_info::PROJECTILE);//copy constructor basically
 }
 

@@ -1,11 +1,11 @@
 #include "unit_factory_generic.h"
 #include "unit_generic.h"
-
+#include "unit.h"
 Unit* UnitFactory::getMasterPartList( )
 {
     if( _masterPartList == NULL )
     {
-        _masterPartList = new Unit( "master_part_list",
+        _masterPartList = new GameUnit( "master_part_list",
 	                            true,
 				    FactionUtil::GetFaction("upgrades") );
     }
@@ -21,10 +21,11 @@ Unit* UnitFactory::createGenericUnit( const char *filename,
 		               Flightgroup *flightgroup,
 		               int         fg_subnumber )
 {
-    return new Unit( filename,
+    return new GameUnit( filename,
                      SubUnit,
                      faction,
                      customizedUnit,
                      flightgroup,
                      fg_subnumber );
 }
+
