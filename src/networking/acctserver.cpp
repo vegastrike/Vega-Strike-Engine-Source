@@ -313,7 +313,7 @@ void    AccountServer::recvMsg( SOCKETALT sock)
                 {
                     // Add the account at the end of accounts.xml
                     string acctpath = datadir+"/accounts.xml";
-                    FILE * fp = fopen( acctpath.c_str(), "r+");
+                    FILE * fp = fopen( acctpath.c_str(), "r+b");
                     if( fp==NULL)
                     {
                         cout<<"ERROR opening accounts file";
@@ -336,7 +336,7 @@ void    AccountServer::recvMsg( SOCKETALT sock)
                             cout<<"Read line : "<<fbuf<<endl;
                         }
                         fclose( fp);
-                        fp = fopen( acctpath.c_str(), "w");
+                        fp = fopen( acctpath.c_str(), "wb");
                         if( !fp)
                         {
                             cerr<<"!!! ERROR : opening account file in write mode !!!"<<endl;

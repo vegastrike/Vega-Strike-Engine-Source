@@ -199,7 +199,7 @@ vector<Account *> getAllAccounts() {
 void LoadAccounts(const char *filename)
 {
   const int chunk_size = 16384;
-  FILE * inFile= fopen (filename,"r");
+  FILE * inFile= fopen (filename,"rb");
   if (!inFile) {
     return;
   }

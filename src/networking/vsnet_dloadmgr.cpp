@@ -814,7 +814,7 @@ int access( const char* name, int mode )
 #ifndef HAVE_LSTAT
 int lstat( const char* name, struct stat* buf )
 {
-    FILE* f = fopen( name , "r" );
+    FILE* f = fopen( name , "rb" );
     if( f == NULL ) return -1;
 
     int retval = -1;

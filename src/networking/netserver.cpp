@@ -1690,7 +1690,7 @@ void	NetServer::save()
 
 	// Save the Dynamic Universe in the data dir for now
 	string dynuniv_path = datadir+"dynaverse.dat";
-	fp = fopen( dynuniv_path.c_str(), "w+");
+	fp = fopen( dynuniv_path.c_str(), "w+b");
 	if( !fp)
 	{
 		cerr<<"Error opening dynamic universe file"<<endl;

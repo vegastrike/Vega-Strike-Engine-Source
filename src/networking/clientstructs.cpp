@@ -56,7 +56,7 @@ int md5CheckFile( string filename, unsigned char * md5digest)
 }
 int	md5SumFile( const char * filename, unsigned char * digest)
 {
-	FILE * fp = fopen( filename, "r");
+	FILE * fp = fopen( filename, "rb");
 	if( !fp)
 	{
 		if( errno==ENOENT)
@@ -207,7 +207,7 @@ void	FileUtil::WriteSaveFiles( string savestr, string xmlstr, string path, strin
 
 	// Write the save file
 	savefile = path+name+".save";
-	fp = fopen( savefile.c_str(), "w");
+	fp = fopen( savefile.c_str(), "wb");
 	if( !fp)
 	{
 		cout<<"Error opening save file "<<savefile<<endl;
@@ -217,7 +217,7 @@ void	FileUtil::WriteSaveFiles( string savestr, string xmlstr, string path, strin
 	fclose( fp);
 	// Write the XML file
 	savefile = path+name+".xml";
-	fp = fopen( savefile.c_str(), "w");
+	fp = fopen( savefile.c_str(), "wb");
 	if( !fp)
 	{
 		cout<<"Error opening save file "<<savefile<<endl;

@@ -56,7 +56,7 @@ void	SaveNetUtil::SaveFiles( string savestr, string xmlstr, string path, string 
 	string savefile;
 	FILE * fp;
 	savefile = path+cp->savegame->GetCallsign()+".xml";
-	fp = fopen( savefile.c_str(), "w");
+	fp = fopen( savefile.c_str(), "wb");
 	if( !fp)
 	{
 		cout<<"Error opening save file "<<savefile<<endl;
@@ -66,7 +66,7 @@ void	SaveNetUtil::SaveFiles( string savestr, string xmlstr, string path, string 
 	fclose( fp);
 	// Write the save file
 	savefile = path+cp->savegame->GetCallsign()+".save";
-	fp = fopen( savefile.c_str(), "w");
+	fp = fopen( savefile.c_str(), "wb");
 	if( !fp)
 	{
 		cout<<"Error opening save file "<<savefile<<endl;

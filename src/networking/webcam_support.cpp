@@ -126,7 +126,7 @@ STDMETHODIMP SampleGrabberCallback::BufferCB( double Time, BYTE *pBuffer, long B
 			//string path = datadir+"testcam"+string( ws->nbframes)+".jpg";
 			string path = datadir+file;
 			FILE * fp;
-			fp = fopen( path.c_str(), "w");
+			fp = fopen( path.c_str(), "wb");
 			if( !fp)
 			{
 				cerr<<"opening jpeg file failed"<<endl;
@@ -214,7 +214,7 @@ pascal OSErr processFrame( SGChannel c, Ptr p, long len, long * offset, long chR
 			//string path = datadir+"testcam"+string( ws->nbframes)+".jpg";
 			string path = datadir+file;
 			FILE * fp;
-			fp = fopen( path.c_str(), "w");
+			fp = fopen( path.c_str(), "wb");
 			if( !fp)
 			{
 				cerr<<"opening jpeg file failed"<<endl;

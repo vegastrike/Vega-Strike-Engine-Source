@@ -729,7 +729,7 @@ int NetClient::recvMsg( Packet* outpacket )
 					filename = netbuf.getString();
 					file = netbuf.getString();
 					cerr<<"RECEIVING file : "<<filename<<endl;
-					fp = fopen( (datadir+filename).c_str(), "w");
+					fp = fopen( (datadir+filename).c_str(), "wb");
 					if (!fp)
 					{
 						cerr<<"!!! ERROR : opening received file !!!"<<endl;
