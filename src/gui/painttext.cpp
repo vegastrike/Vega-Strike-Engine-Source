@@ -246,10 +246,12 @@ void PaintText::drawLines(int start, int count) const {
         // Position at the start of the line.
         glLoadIdentity();
         glTranslatef(m_rect.origin.x+line.x, lineTop-line.baseLine, 0.0);
-        
-        if (!useStroke())
+        if (line.fragments.size()) {
+          GFXColorf(line.fragments[0].color);
+        }        
+        if (!useStroke()){
           glRasterPos2f(0,0);
-        else
+        }else
           glScaled(m_horizontalScaling, m_verticalScaling, 1.0);
 
         // Draw each fragment.
