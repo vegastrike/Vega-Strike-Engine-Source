@@ -28,7 +28,7 @@
 #include "hashtable.h"
 #include "vs_path.h"
 #include "png_texture.h"
-
+#include "vs_globals.h"
 #include "in_kb.h"
 #include "main_loop.h"
 
@@ -192,7 +192,7 @@ void Texture::FileNotFound(const string &texfilename) {
 	  return;
 
 }
-Texture::Texture(const char * FileName, int stage, enum FILTER mipmap, enum TEXTURE_TARGET target, enum TEXTURE_IMAGE_TARGET imagetarget)
+Texture::Texture(const char * FileName, int stage, enum FILTER mipmap, enum TEXTURE_TARGET target, enum TEXTURE_IMAGE_TARGET imagetarget, GFXBOOL force_load)
 {
 
   data = NULL;
@@ -239,6 +239,10 @@ Texture::Texture(const char * FileName, int stage, enum FILTER mipmap, enum TEXT
 	  fp = fopen (GetSharedTexturePath (FileName).c_str(),"rb");
 	}
 	free ( t);
+	if (fp&&g_game.use_textures==0&&!force_load) {
+	  fclose (fp);
+	  fp=NULL;
+	}
 	if (!fp)
 	{
 		FileNotFound(texfilename);
@@ -368,7 +372,7 @@ Texture::Texture(const char * FileName, int stage, enum FILTER mipmap, enum TEXT
 	fprintf (stderr," Load Success\n");
 }
 
-Texture::Texture (const char * FileNameRGB, const char *FileNameA, int stage, enum FILTER  mipmap, enum TEXTURE_TARGET target, enum TEXTURE_IMAGE_TARGET imagetarget, float alpha, int zeroval)
+Texture::Texture (const char * FileNameRGB, const char *FileNameA, int stage, enum FILTER  mipmap, enum TEXTURE_TARGET target, enum TEXTURE_IMAGE_TARGET imagetarget, float alpha, int zeroval, GFXBOOL force_load)
 {
   data = NULL;
   ismipmapped  = mipmap;
@@ -397,6 +401,10 @@ Texture::Texture (const char * FileNameRGB, const char *FileNameA, int stage, en
 	modold (texfilename,shared,texfilename);
 	if (shared) {
 	  fp = fopen (GetSharedTexturePath (FileNameRGB).c_str(),"rb");
+	}
+	if (fp&&g_game.use_textures==0&&(!force_load)) {
+	  fclose (fp);
+	  fp=NULL;
 	}
 	if (!fp)
 	{
@@ -704,9 +712,15 @@ void Texture::Prioritize (float priority) {
 
 void Texture::MakeActive()
 {
-  if (name==-1)
-    GFXSelectTexture(0,stage);
-  else {
+  static bool missing=false;
+  if (name==-1) {
+    missing=true;
+    GFXDisable(stage==0?TEXTURE0:TEXTURE1);
+  } else {
+    if (missing) {
+      missing=false;
+      GFXEnable(stage==0?TEXTURE0:TEXTURE1);
+    }
     assert(name!=-1);
     GFXSelectTexture(name,stage);
   }

@@ -1005,7 +1005,7 @@ void StarSystem::LoadXML(const char *filename, const Vector & centroid, const fl
   }else {
     fclose (tempo);
   }
-  LightMap[0] = new Texture(bglight.c_str(), 1);
+  LightMap[0] = new Texture(bglight.c_str(), 1,MIPMAP,TEXTURE2D,TEXTURE_2D,GFXTRUE);
 #endif
   bg = new Background(xml->backgroundname.c_str(),xml->numstars,g_game.zfar*.9);
   stars = new Stars (xml->numnearstars, xml->starsp);

@@ -117,6 +117,10 @@ void Animation::ProcessFarDrawQueue (float farval) {
   ProcessDrawQueue (far_animationdrawqueue, farval);
 }
 void Animation::ProcessDrawQueue (std::vector <Animation *> &animationdrawqueue,float limit) {
+  if (g_game.use_animations==0&&g_game.use_textures==0) {
+    return;
+  }
+
   unsigned char alphamaps=ani_alpha;
 	int i;//NOT UNSIGNED
 	for (i=animationdrawqueue.size()-1;i>=0;i--) {
@@ -164,7 +168,9 @@ void Animation::CalculateOrientation (Matrix & result) {
 }
 void Animation::DrawNow(const Matrix &final_orientation) {
  
-  if (!Done()||(options&ani_repeat)) {
+  if (g_game.use_animations==0&&g_game.use_textures==0) {
+    
+  }else if (!Done()||(options&ani_repeat)) {
     GFXLoadMatrixModel (final_orientation);
     MakeActive();
     GFXBegin (GFXQUAD);
@@ -181,30 +187,35 @@ void Animation::DrawNow(const Matrix &final_orientation) {
   }
 }
 void Animation::DrawAsSprite (Sprite * spr) {
+  if (g_game.use_animations!=0||g_game.use_textures!=0) {
   //  unsigned char alphamaps=ani_alpha;
-  GFXPushBlendMode();
-  if (options&ani_alpha)
-    GFXBlendMode (SRCALPHA,INVSRCALPHA);
-  else
-    GFXBlendMode (ONE, ZERO);
-  MakeActive();
-  GFXDisable(CULLFACE);
-  GFXBegin(GFXQUAD);
-  Vector ll,lr,ur,ul;
-  spr->DrawHere(ll,lr,ur,ul);
-  GFXTexCoord2f(0, 1);
-  GFXVertexf(ll);
-  GFXTexCoord2f(1, 1);
-  GFXVertexf(lr);
-  GFXTexCoord2f(1, 0);
-  GFXVertexf(ur);
-  GFXTexCoord2f(0, 0);
-  GFXVertexf(ul);
-  GFXEnd();
-  GFXEnable(CULLFACE);
-  GFXPopBlendMode();
+    GFXPushBlendMode();
+    if (options&ani_alpha)
+      GFXBlendMode (SRCALPHA,INVSRCALPHA);
+    else
+      GFXBlendMode (ONE, ZERO);
+    MakeActive();
+    GFXDisable(CULLFACE);
+    GFXBegin(GFXQUAD);
+    Vector ll,lr,ur,ul;
+    spr->DrawHere(ll,lr,ur,ul);
+    GFXTexCoord2f(0, 1);
+    GFXVertexf(ll);
+    GFXTexCoord2f(1, 1);
+    GFXVertexf(lr);
+    GFXTexCoord2f(1, 0);
+    GFXVertexf(ur);
+    GFXTexCoord2f(0, 0);
+    GFXVertexf(ul);
+    GFXEnd();
+    GFXEnable(CULLFACE);
+    GFXPopBlendMode();
+  }
 }
 void Animation::DrawNoTransform() {
+  if (g_game.use_animations==0&&g_game.use_textures==0) {
+    
+  }else
   if (!Done()||(options&ani_repeat)) {
     MakeActive();
     GFXBegin (GFXQUAD);
@@ -238,13 +249,15 @@ void Animation::DrawNoTransform() {
   }
 }
 void Animation:: Draw() {
-  static float HaloOffset = XMLSupport::parse_float(vs_config->getVariable ("graphics","HaloOffset",".1"));
-  QVector R (_Universe->AccessCamera()->GetR().i,_Universe->AccessCamera()->GetR().j,_Universe->AccessCamera()->GetR().k);
-  static float too_far_dist = XMLSupport::parse_float (vs_config->getVariable ("graphics","anim_far_percent",".8"));
-  if ((R.Dot (Position()-_Universe->AccessCamera()->GetPosition())-HaloOffset*(height>width?height:width))<too_far_dist*g_game.zfar   ) {
-    animationdrawqueue.push_back (this);
-  }else {
-    far_animationdrawqueue.push_back(this);
+  if (g_game.use_animations!=0||g_game.use_textures!=0) {
+    static float HaloOffset = XMLSupport::parse_float(vs_config->getVariable ("graphics","HaloOffset",".1"));
+    QVector R (_Universe->AccessCamera()->GetR().i,_Universe->AccessCamera()->GetR().j,_Universe->AccessCamera()->GetR().k);
+    static float too_far_dist = XMLSupport::parse_float (vs_config->getVariable ("graphics","anim_far_percent",".8"));
+    if ((R.Dot (Position()-_Universe->AccessCamera()->GetPosition())-HaloOffset*(height>width?height:width))<too_far_dist*g_game.zfar   ) {
+      animationdrawqueue.push_back (this);
+    }else {
+      far_animationdrawqueue.push_back(this);
+    }
   }
 }
 

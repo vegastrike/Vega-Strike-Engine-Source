@@ -377,7 +377,7 @@ void Cockpit::DrawBlips (Unit * un) {
   Radar->GetPosition (xcent,ycent);
   GFXDisable (TEXTURE0);
   GFXDisable (LIGHTING);
-  if (Radar->LoadSuccess()) {
+  if ((!g_game.use_sprites)||Radar->LoadSuccess()) {
     DrawRadarCircles (xcent,ycent,xsize,ysize,textcol);
   }
   GFXPointSize (2);

@@ -184,6 +184,11 @@ void init_opengl_extensions()
     g_game.znear = XMLSupport::parse_float (vs_config->getVariable ("graphics","znear","1"));
     g_game.zfar = XMLSupport::parse_float (vs_config->getVariable ("graphics","zfar","100000"));
     g_game.detaillevel = XMLSupport::parse_float (vs_config->getVariable ("graphics","ModelDetail","1"));
+    g_game.use_textures = XMLSupport::parse_bool (vs_config->getVariable ("graphics","UseTextures","true"));
+    g_game.use_sprites = XMLSupport::parse_bool (vs_config->getVariable ("graphics","UseSprites","true"));
+    g_game.use_animations = XMLSupport::parse_bool (vs_config->getVariable ("graphics","UseAnimations","true"));
+
+
     /*
     FILE * fp = fopen ("glsetup.txt","r");
     if (fp) {

@@ -1,10 +1,12 @@
 #include "ani_texture.h"
+
 #include <vector>
 #include <stdio.h>
 #include <stdlib.h>
 #include "lin_time.h"
 #include "vegastrike.h"
 #include "vs_path.h"
+#include "vs_globals.h"
 //extern Hashtable<string, Texture,char [127]> texHashTable;
 
 static vector <AnimatedTexture *> myvec;
@@ -118,7 +120,15 @@ void AnimatedTexture::Load(FILE * fp, int stage, enum FILTER ismipmapped) {
   char temp[512];
   char file[512];
   char alp[512];
-  for (int i=0;i<numframes;i++) {
+  int i=0;
+  bool loadall=true;
+  if (g_game.use_animations==0||(g_game.use_animations!=0&&g_game.use_textures==0)) {
+    
+    loadall=false;
+  }
+
+
+  for (;i<numframes;i++) {
     int numgets=0;
     while (numgets<=0&&!feof (fp)) {
       fgets (temp,511,fp);
@@ -128,11 +138,21 @@ void AnimatedTexture::Load(FILE * fp, int stage, enum FILTER ismipmapped) {
   
       numgets = sscanf (temp,"%s %s",file,alp);
     }
-    if (numgets==2) {
-      Decal[i]=new Texture (file,alp,stage,ismipmapped);
-    }else {
-      Decal[i]=new Texture (file,stage,ismipmapped);
-    }    
+    if (loadall||i==numframes/2) {
+      if (numgets==2) {
+	Decal[i]=new Texture (file,alp,stage,ismipmapped,TEXTURE2D,TEXTURE_2D,1,0,(g_game.use_animations)?GFXTRUE:GFXFALSE);
+      }else {
+	Decal[i]=new Texture (file,stage,ismipmapped,TEXTURE2D,TEXTURE_2D,(g_game.use_animations)?GFXTRUE:GFXFALSE);
+      }    
+    }
+  }
+  if (!loadall) {
+    Texture * dec = Decal[numframes/2];
+    timeperframe*=numframes;
+    numframes=1;
+    delete [] Decal;
+    Decal = new Texture * [1];
+    Decal[0]=dec;
   }
   original = NULL;
 }

@@ -26,6 +26,7 @@
 #include "matrix.h"
 #include "gfxlib.h"
 #include "vegastrike.h"
+#include "vs_globals.h"
 #include <assert.h>
 #include <math.h>
 #ifndef M_PI_2
@@ -56,15 +57,18 @@ Sprite::Sprite(const char *file, enum FILTER texturefilter) {
     
     widtho2/=2;
     heighto2/=-2;
-    if (texturea[0]=='0') {
-      surface = new Texture(texture,0,texturefilter);    
-    } else {
-      surface = new Texture(texture,texturea,0,texturefilter);    
-    }
-    
-    if (!surface->LoadSuccess()) {
-    delete surface;
-    surface = NULL;
+    surface=NULL;
+    if (g_game.use_sprites) {
+      if (texturea[0]=='0') {
+	surface = new Texture(texture,0,texturefilter,TEXTURE2D,TEXTURE_2D,GFXTRUE);    
+      } else {
+	surface = new Texture(texture,texturea,0,texturefilter,TEXTURE2D,TEXTURE_2D,1,0,GFXTRUE);    
+      }
+      
+      if (!surface->LoadSuccess()) {
+	delete surface;
+	surface = NULL;
+      }
     }
   }else {
     widtho2 = heighto2 = 0;

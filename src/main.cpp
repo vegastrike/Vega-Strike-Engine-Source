@@ -64,6 +64,9 @@ TextPlane *bs_tp=NULL;
 void setup_game_data ( ){ //pass in config file l8r??
   g_game.audio_frequency_mode=4;//22050/16
   g_game.sound_enabled =1;
+  g_game.use_textures =1;
+  g_game.use_sprites =1;
+  g_game.use_animations =1;
   g_game.music_enabled=1;
   g_game.sound_volume=1;
   g_game.music_volume=1;
@@ -265,15 +268,18 @@ void bootstrap_draw (const std::string &message, float x, float y, Animation * n
   GFXLoadIdentity(VIEW);
   GFXLoadMatrixModel (tmp);
   GFXBeginScene();
+
   bs_tp->SetPos (x,y);
   bs_tp->SetCharSize (.4,.8);
   ScaleMatrix (tmp,Vector (7,7,0));
   GFXLoadMatrixModel (tmp);
+  GFXHudMode (GFXTRUE);
   if (ani) {
     ani->UpdateAllFrame();
     ani->DrawNow(tmp);
   }
   bs_tp->Draw (message);  
+  GFXHudMode (GFXFALSE);
   GFXEndScene();
 
 }
