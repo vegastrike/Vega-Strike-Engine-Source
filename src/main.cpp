@@ -649,7 +649,7 @@ void bootstrap_main_loop () {
 			}
 		}
 	}
-	if (XMLSupport::parse_bool(vs_config->getVariable("AI","dockOnLoad","true"))) {
+	if (mission->getVariable("savegame","").length()!=0&&XMLSupport::parse_bool(vs_config->getVariable("AI","dockOnLoad","true"))) {
 		for (int i=0;i<_Universe->numPlayers();i++) {
 			DockToSavedBases(i);
 		}
