@@ -1,6 +1,18 @@
 #include <vector>
-#include <bastring>
-#include <string.h>
+#ifdef __APPLE__
+
+#include <bits/c++config.h>
+#include <bits/stringfwd.h>
+#include <bits/char_traits.h>
+#include <memory> 	// For allocator.
+#include <bits/type_traits.h>
+#include <iosfwd> 	// For operators >>, <<, and getline decls.
+#include <bits/stl_iterator.h>
+#include <bits/stl_function.h>  // For less
+#include <bits/basic_string.h>
+#else
+#include <std/bastring.h>
+#endif
 
 namespace std {
 
@@ -18,6 +30,13 @@ class string : public vector <char> {
     allocstr(str,len);
   }
  public:
+  string (const string &a, size_type pos, size_type n=npos) {
+    if (n==npos)
+      n=a.size()-pos;
+    if (n+pos>a.size())
+      n=a.size()-pos;
+    allocstr (str.ptr+pos,n);
+  }
   string (const char *str, const unsigned int len) {
     reallocstr(str,len);
   }
@@ -58,6 +77,9 @@ class string : public vector <char> {
   size_type find (const string& findstr, size_type loc=0)const  {
     const basic_string <char> strstr (this.c_str());
     return strstr.find(findstr,loc);
+  }
+  string substr (size_type pos = 0, size_type n = npos) const{ 
+    return string(*this,pos,n);
   }
   size_type find (const char* s, size_type pos, size_type n) const {
     const basic_string <char> strstr (this.c_str());
@@ -151,7 +173,6 @@ class string : public vector <char> {
     const basic_string <char> strstr (this.c_str());
     return strstr.find_last_not_of(c,pos);
   }
-
 };
 }
     
