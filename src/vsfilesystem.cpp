@@ -435,9 +435,9 @@ namespace VSFileSystem
 		string user_home_path( chome_path);
 		homedir = user_home_path+"/"+HOMESUBDIR;
 #else
-		homedir = datadir+"/.vegastrike";
+		homedir = datadir+"/"+HOMESUBDIR;
 #endif
-		cerr<<"USING HOMEDIR : "<<homedir<<endl;
+		cerr<<"USING HOMEDIR : "<<homedir<< " As the home directory "<<endl;
 		CreateDirectoryAbs( homedir);
 	}
 
@@ -469,7 +469,7 @@ namespace VSFileSystem
 		data_paths.push_back( "/usr/local/games/vegastrike/data4.x");
 		data_paths.push_back( "/usr/games/vegastrike/data4.x");
 		data_paths.push_back( "/opt/share/vegastrike/data4.x");
-
+		
 		// Win32 data should be "."
 		char tmppath[16384];
 		for( vector<string>::iterator vsit=data_paths.begin(); vsit!=data_paths.end(); vsit++)
@@ -497,15 +497,36 @@ namespace VSFileSystem
 			}
 		}
 		data_paths.clear();
-
+		string versionloc=datadir+"/Version.txt";
+		FILE * version = fopen (versionloc.c_str(),"r");
+		if (!version) {
+			versionloc=datadir+"Version.txt";
+			version=fopen(versionloc.c_str(),"r");
+		}
+		if (!version) {
+			version=fopen("Version.txt","r");
+		}
+		if (version) {
+			string hsd="";
+			int c;
+			while ((c=fgetc(version))!=EOF) {
+				if (isspace(c))
+					break;
+				hsd+=(char)c;
+			}
+			fclose(version);
+			if (hsd.length()) {
+				HOMESUBDIR=hsd;
+				printf ("Using %s as the home directory\n",hsd.c_str());
+			}			
+		}
+		
 		// Load default VS config file
 		char * conffile = new char[config_file.length()+1];
 		conffile[config_file.length()] = 0;
 		memcpy( conffile, config_file.c_str(), config_file.length());
-		vs_config = createVegaConfig( conffile);
-		delete []conffile;
 		// Get the mods path
-		moddir = vs_config->getVariable( "data", "modpath", datadir+"/"+string( "mods"));
+		moddir = datadir+"/"+string( "mods");
 		cout<<"Found MODDIR = "<<moddir<<endl;
 	}
 
@@ -605,8 +626,11 @@ namespace VSFileSystem
                 }
 
 		// Delete the default config in order to reallocate it with the right one (if it is a mod)
-		delete vs_config;
-                vs_config=NULL;
+		if (vs_config) {
+			fprintf (stderr,"reallocating vs_config \n");
+			delete vs_config;
+		}
+		vs_config=NULL;
 		char * conffile = new char[config_file.length()+1];
 		conffile[config_file.length()] = 0;
 		memcpy( conffile, config_file.c_str(), config_file.length());

@@ -462,7 +462,7 @@ void delfile ( GtkWidget        *w,
 		remove(newstr);
 		delete []newstr;
 		delete []remstr;
-		gtk_file_selection_set_filename (fs,"");
+		gtk_file_selection_set_filename (fs,"\0\0\0\0\0\0\0\0");
 		gtk_widget_destroy(GTK_FILE_SELECTION(fs)->fileop_dialog);
 		GTK_FILE_SELECTION(fs)->fileop_dialog=0;
 	}
@@ -536,7 +536,8 @@ void renfile ( GtkWidget        *w,
 		sprintf(rementstr,"../serialized_xml/%s/",newentstr);
 		rename(remstr,rementstr);
 		rename(newstr,newentstr);
-		gtk_file_selection_set_filename (fs,"");
+		gtk_file_selection_set_filename (fs,"\0\0\0\0\0\0\0\0");
+		// "U\0n\0i\0c\0o\0d\0e\0 \0\0\0\0\0"
 		delete []newstr;
 		delete []remstr;
 		delete []newentstr;
@@ -655,7 +656,7 @@ void copyfile ( GtkWidget        *w,
 		}
 		delete []newstr;
 		delete []remstr;
-		gtk_file_selection_set_filename (fs,"");
+		gtk_file_selection_set_filename (fs,"\0\0\0\0\0\0\0\0");
 		delete []newentstr;
 		gtk_widget_destroy(GTK_FILE_SELECTION(fs)->fileop_dialog);
 		GTK_FILE_SELECTION(fs)->fileop_dialog=0;
@@ -731,7 +732,7 @@ void copynormal ( GtkWidget        *w,
 				fclose(f1);
 			}
 		}
-		gtk_file_selection_set_filename (fs,"");
+		gtk_file_selection_set_filename (fs,"\0\0\0\0\0\0\0\0");
 		delete []newstr;
 		delete []newentstr;
 	}
@@ -785,7 +786,7 @@ void copynormal_conf ( GtkWidget        *w,
 	}
 }
 
-void LoadSaveFunction (char *Filename, char *otherstr, int i, GtkSignalFunc func,const char * default_thing="",bool usenormalbuttons=false) {
+void LoadSaveFunction (char *Filename, char *otherstr, int i, GtkSignalFunc func,const char * default_thing="\0\0\0\0\0\0\0\0",bool usenormalbuttons=false) {
      GtkWidget *filew;
     filew = gtk_file_selection_new (Filename);
 	if (!usenormalbuttons){
@@ -852,7 +853,7 @@ void LoadMissionDialog (char * Filename,int i) {
   char mypwd [1000];
   getcwd (mypwd,1000);
   //  fprintf (stderr,mypwd);
-  LoadSaveFunction (Filename,"Select the mission, then run by clicking new or load game.",i,(GtkSignalFunc) file_mission_sel,"exploration/explore_universe.mission",true);
+  LoadSaveFunction (Filename,"Select the mission, then run by clicking new or load game.",i,(GtkSignalFunc) file_mission_sel,my_mission.c_str(),true);
 }
 #define HOMESUBDIR ".vegastrike"
 void changehome() {
