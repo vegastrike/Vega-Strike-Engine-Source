@@ -36,7 +36,7 @@ struct FIREKEYBOARDTYPE {
   FIREKEYBOARDTYPE() {
     togglewarpdrive=toggleglow=toggleanimation=lockkey=ECMkey=commKeys[0]=commKeys[1]=commKeys[2]=commKeys[3]=commKeys[4]=commKeys[5]=commKeys[6]=commKeys[7]=commKeys[8]=commKeys[9]=turretaikey = saveTargetKeys[0]=saveTargetKeys[1]=saveTargetKeys[2]=saveTargetKeys[3]=saveTargetKeys[4]=saveTargetKeys[5]=saveTargetKeys[6]=saveTargetKeys[7]=saveTargetKeys[8]=saveTargetKeys[9]=turretaikey = restoreTargetKeys[0]=restoreTargetKeys[1]=restoreTargetKeys[2]=restoreTargetKeys[3]=restoreTargetKeys[4]=restoreTargetKeys[5]=restoreTargetKeys[6]=restoreTargetKeys[7]=restoreTargetKeys[8]=restoreTargetKeys[9]=turretaikey = UP;
 
-    eject=ejectcargo=firekey=missilekey=jfirekey=jtargetkey=jmissilekey=weapk=misk=rweapk=rmisk=cloakkey=
+    eject=ejectcargo=ejectnonmissioncargo=firekey=missilekey=jfirekey=jtargetkey=jmissilekey=weapk=misk=rweapk=rmisk=cloakkey=
       neartargetkey=targetskey=targetukey=threattargetkey=picktargetkey=subtargetkey=targetkey=
       rneartargetkey=rtargetskey=rtargetukey=rthreattargetkey=rpicktargetkey=rtargetkey=
       nearturrettargetkey =threatturrettargetkey= pickturrettargetkey=turrettargetkey=UP;
@@ -74,6 +74,7 @@ struct FIREKEYBOARDTYPE {
  KBSTATE eject;
  KBSTATE lockkey;
  KBSTATE ejectcargo;
+ KBSTATE ejectnonmissioncargo;
  KBSTATE cloakkey;
  KBSTATE ECMkey;
  KBSTATE neartargetkey;
@@ -345,6 +346,12 @@ void FireKeyboard::TurretAI (const KBData&,KBSTATE k) {
 void FireKeyboard::EjectCargoKey (const KBData&,KBSTATE k) {
     if (k==PRESS) {
       g().ejectcargo = k;      
+    }
+  
+}
+void FireKeyboard::EjectNonMissionCargoKey (const KBData&,KBSTATE k) {
+    if (k==PRESS) {
+      g().ejectnonmissioncargo = k;      
     }
   
 }
@@ -1639,15 +1646,26 @@ void FireKeyboard::Execute () {
       _Universe->AccessCockpit()->communication_choices="\nNo Communication\nLink\nEstablished";
     }
   }
-  if (f().ejectcargo==PRESS) {
+  if (f().ejectcargo==PRESS||f().ejectnonmissioncargo==PRESS) {
+    bool missiontoo=(f().ejectnonmissioncargo==PRESS);
     int offset = _Universe->AccessCockpit()->getScrollOffset (VDU::MANIFEST);
     if (offset<3) {
       offset=0;
     }else {
       offset-=3;
     }
-    parent->EjectCargo(offset);
-    f().ejectcargo=DOWN;
+    for(;offset<parent->numCargo();++offset) {
+      Cargo * tmp=&parent->GetCargo(offset);
+      if (tmp->category.find("upgrades")==string::npos&&(missiontoo||tmp->mission==false)) {
+        parent->EjectCargo(offset);
+        break;
+      }
+    }
+    if (missiontoo) {
+      f().ejectnonmissioncargo=DOWN;
+    }else {
+      f().ejectcargo=DOWN;
+    }
   }
   if (f().eject==PRESS) {
     f().eject=DOWN;

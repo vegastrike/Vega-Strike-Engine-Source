@@ -63,6 +63,7 @@ class FireKeyboard: public Order {
   static void UnDockKey(const KBData&,KBSTATE);
   static void EjectKey(const KBData&,KBSTATE);
   static void EjectCargoKey(const KBData&,KBSTATE);
+  static void EjectNonMissionCargoKey(const KBData&,KBSTATE);
   static void DockKey(const KBData&,KBSTATE);
   static void FireKey(const KBData&,KBSTATE);
   static void MissileKey(const KBData&,KBSTATE);
