@@ -1,3 +1,9 @@
+2002-03-08 Alexander Rawass <alexannika@users.sourceforge.net>
+	
+	* ai_orderlist now faster
+	* added scanSystem() to Unit class
+
+	
 2002-03-07 Daniel Horn <hellcatv@hotmail.com>
 	* also had to add gui to src/Makefile.am...strange
 	* added gui to configure.in

@@ -251,6 +251,8 @@ void Unit::Init()
 
   flightgroup=NULL;
   flightgroup_subnumber=0;
+
+  scanner.last_scantime=0.0;
 }
 
 void Unit::SetVisible(bool invis) {
@@ -957,4 +959,82 @@ void Unit::ReTargetFg(int which_target){
 	}
       }
 #endif
+}
+
+void Unit::scanSystem(){
+
+  double nowtime=mission->getGametime();
+
+  if(scanner.last_scantime==nowtime){
+    return;
+  }
+
+    StarSystem *ssystem=_Universe->activeStarSystem();
+    un_iter uiter(ssystem->getUnitList().createIterator());
+    
+    float min_enemy_dist=9999999.0;
+    float min_friend_dist=9999999.0;
+    float min_ship_dist=9999999.0;
+    Unit * min_enemy=NULL;
+    Unit * min_friend=NULL;
+    Unit * min_ship=NULL;
+    
+    int leader_num=getFgSubnumber(); //my own subnumber
+    Unit *my_leader=this; // say I'm the leader
+    Flightgroup *my_fg=getFlightgroup();
+    
+    Unit *unit=uiter.current();
+    while(unit!=NULL){
+      
+      if(this!=unit){
+	// won;t scan ourselves
+	
+	Vector unit_pos=unit->Position();
+	float dist=getMinDis(unit_pos);
+	float relation=getRelation(unit);
+	
+	if(relation<0.0){
+	  //we are enmies
+	  if(dist<min_enemy_dist){
+	    min_enemy_dist=dist;
+	    min_enemy=unit;
+	  }
+	}
+	if(relation>0.0){
+	//we are friends
+	  if(dist<min_friend_dist){
+	    min_friend_dist=dist;
+	  min_friend=unit;
+	  }
+	  // check for flightgroup leader
+	  if(my_fg!=NULL && my_fg==unit->getFlightgroup()){
+	    // it's a ship from our flightgroup
+	    int fgnum=unit->getFgSubnumber();
+	    if(fgnum<leader_num){
+	      //set this to be our leader
+	      my_leader=unit;
+	      leader_num=fgnum;
+	    }
+	  }
+	}
+	// for all ships
+	if(dist<min_ship_dist){
+	  min_ship_dist=dist;
+	  min_ship=unit;
+	}
+      }
+      
+      unit=++(uiter);
+  }
+    
+    scanner.nearest_enemy_dist=min_enemy_dist;
+    scanner.nearest_enemy=min_enemy;
+    
+    scanner.nearest_friend_dist=min_friend_dist;
+    scanner.nearest_friend=min_friend;
+
+    scanner.nearest_ship_dist=min_ship_dist;
+    scanner.nearest_ship=min_ship;
+    
+    scanner.leader=my_leader;
 }

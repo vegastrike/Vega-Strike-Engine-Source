@@ -298,6 +298,7 @@ void Mission::checkFlightgroup(easyDomNode *node){
 
   fg->nr_waves_left=fg->waves-1;
   fg->nr_ships_left=fg->nr_ships;
+  fg->orderlist=NULL;
 
   if(ainame[0]=='_'){
 #ifndef VS_MIS_SEL

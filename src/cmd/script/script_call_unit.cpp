@@ -175,7 +175,7 @@ varInst *Mission::call_unit(missionNode *node,int mode){
       }
       fg->nr_ships_left=fg->nr_ships;
       fg->nr_waves_left=fg->waves-1;
-
+      fg->orderlist=NULL;
 #ifdef ORDERDEBUG
   fprintf (stderr,"cunl%x",this);
   fflush (stderr);
@@ -333,6 +333,24 @@ varInst *Mission::call_unit(missionNode *node,int mode){
 	if(mode==SCRIPT_RUN){
 	  Vector p,q,r;
 	  Vector vectothem=Vector(other_unit->Position() - my_unit->Position()).Normalize();
+	  my_unit->GetOrientation(p,q,r);
+	  //angle=my_unit->cosAngleTo(other_unit,dist);
+	  angle=acos( vectothem.Dot(r) );
+	  angle=(angle/PI)*180.0;
+	  //printf("angle: %f\n",angle);
+	}
+	viret=newVarInst(VI_TEMP);
+	viret->type=VAR_FLOAT;
+	viret->float_val=angle;
+    }
+    else if(cmd=="getAngleToPos"){
+      Vector other_pos=getVec3Arg(node,mode,1);
+
+	float angle=0.0;
+	float dist=0.0;
+	if(mode==SCRIPT_RUN){
+	  Vector p,q,r;
+	  Vector vectothem=Vector(other_pos - my_unit->Position()).Normalize();
 	  my_unit->GetOrientation(p,q,r);
 	  //angle=my_unit->cosAngleTo(other_unit,dist);
 	  angle=acos( vectothem.Dot(r) );
@@ -512,6 +530,80 @@ varInst *Mission::call_unit(missionNode *node,int mode){
       viret->type=VAR_INT;
       viret->int_val=num;
     }
+    else if(cmd=="scanSystem"){
+      if(mode==SCRIPT_RUN){
+	my_unit->scanSystem();
+      }
+      viret=newVarInst(VI_TEMP);
+      viret->type=VAR_VOID;
+    }
+    else if(cmd=="scannerNearestEnemy"){
+      Unit *ret_unit=NULL;
+      if(mode==SCRIPT_RUN){
+	ret_unit=my_unit->getScanner()->nearest_enemy;
+      }
+      viret=newVarInst(VI_TEMP);
+      viret->type=VAR_OBJECT;
+      viret->objectname="unit";
+      viret->object=(void *)ret_unit;
+    }
+    else if(cmd=="scannerNearestFriend"){
+      Unit *ret_unit=NULL;
+      if(mode==SCRIPT_RUN){
+	ret_unit=my_unit->getScanner()->nearest_friend;
+      }
+      viret=newVarInst(VI_TEMP);
+      viret->type=VAR_OBJECT;
+      viret->objectname="unit";
+      viret->object=(void *)ret_unit;
+    }
+    else if(cmd=="scannerNearestShip"){
+      Unit *ret_unit=NULL;
+      if(mode==SCRIPT_RUN){
+	ret_unit=my_unit->getScanner()->nearest_ship;
+      }
+      viret=newVarInst(VI_TEMP);
+      viret->type=VAR_OBJECT;
+      viret->objectname="unit";
+      viret->object=(void *)ret_unit;
+    }
+    else if(cmd=="scannerLeader"){
+      Unit *ret_unit=NULL;
+      if(mode==SCRIPT_RUN){
+	ret_unit=my_unit->getScanner()->leader;
+      }
+      viret=newVarInst(VI_TEMP);
+      viret->type=VAR_OBJECT;
+      viret->objectname="unit";
+      viret->object=(void *)ret_unit;
+    }
+    else if(cmd=="scannerNearestEnemyDist"){
+      float ret=9999999.0;
+      if(mode==SCRIPT_RUN){
+	ret=my_unit->getScanner()->nearest_enemy_dist;
+      }
+      viret=newVarInst(VI_TEMP);
+      viret->type=VAR_FLOAT;
+      viret->float_val=ret;
+    }
+    else if(cmd=="scannerNearestFriendDist"){
+      float ret=9999999.0;
+      if(mode==SCRIPT_RUN){
+	ret=my_unit->getScanner()->nearest_friend_dist;
+      }
+      viret=newVarInst(VI_TEMP);
+      viret->type=VAR_FLOAT;
+      viret->float_val=ret;
+    }
+    else if(cmd=="scannerNearestShipDist"){
+      float ret=9999999.0;
+      if(mode==SCRIPT_RUN){
+	ret=my_unit->getScanner()->nearest_ship_dist;
+      }
+      viret=newVarInst(VI_TEMP);
+      viret->type=VAR_FLOAT;
+      viret->float_val=ret;
+    }
     else if(cmd=="getFgId" || cmd=="getFgID"){
       if(mode==SCRIPT_RUN){
 	
@@ -622,8 +714,14 @@ void Mission::call_unit_launch(Flightgroup *fg){
      }
      else{
 	      string modulename=fg->ainame.substr(1);
-	      
-	      my_unit->EnqueueAI( new AImissionScript(modulename));
+
+	      if(fg->orderlist==NULL){
+		my_unit->EnqueueAI( new AImissionScript(modulename));
+	      }
+	      else{
+		my_unit->EnqueueAI( new AIOrderList(fg->orderlist));
+		printf("LAUNCHING a new orderlist ai\n");
+	      }
 	      //fighters[a]->SetAI( new AImissionScript(modulename));
      }
 

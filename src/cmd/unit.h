@@ -71,6 +71,20 @@ class VDU;
 struct UnitImages;
 struct UnitSounds;
 struct Cargo;
+
+/// used to scan the system - faster than c_alike code
+
+struct Scanner {
+  Unit *nearest_enemy;
+  Unit *nearest_friend;
+  Unit *nearest_ship;
+  Unit *leader;
+
+  float nearest_enemy_dist,nearest_friend_dist,nearest_ship_dist;
+
+  double last_scantime;
+};
+
 /**
  * Unit contains any physical object that may collide with something
  * And may be physically affected by forces.
@@ -705,6 +719,12 @@ public:
   bool isNeutral(Unit *other){ if(_Universe->GetRelation(this->faction,other->faction)==0.0){ return true; } return false; };
   float getRelation(Unit *other){ return(_Universe->GetRelation(this->faction,other->faction)); };
 
+  // for scanning purposes
+ private:
+  struct Scanner scanner;
+ public:
+  void scanSystem();
+  struct Scanner *getScanner() { return &scanner; };
 };
 ///Holds temporary values for inter-function XML communication Saves deprecated restr info
 struct Unit::XML {

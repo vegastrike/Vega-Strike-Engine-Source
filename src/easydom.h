@@ -184,15 +184,15 @@ domNodeType *LoadCalike(const char *filename) {
     int max_index=index+incr;
     int newlen=incr;
 
-    printf("max_index=%d,string_size=%d\n",max_index,string_size);
+    //    printf("max_index=%d,string_size=%d\n",max_index,string_size);
     if(max_index>=string_size){
       newlen=module_str.size()-index;
-      printf("getting string from %d length %d\n",index,newlen);
+      //printf("getting string from %d length %d\n",index,newlen);
       const char *strbuf=module_str.c_str();
       memcpy (buf,strbuf+index,sizeof(char)*newlen);
     }
     else{
-      printf("getting string from %d length %d\n",index,incr);
+      //printf("getting string from %d length %d\n",index,incr);
       const char *strbuf=module_str.c_str();
       memcpy (buf,strbuf+index,sizeof (char )*incr);
       newlen=incr;

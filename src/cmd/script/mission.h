@@ -59,6 +59,11 @@ using XMLSupport::AttributeList;
 #define missionNode easyDomNode
 #endif
 
+class varInst;
+
+typedef vector<varInst *> olist_t;
+typedef map<string,varInst *> omap_t;
+
 class Flightgroup {
  public:
   string name; // flightgroup name
@@ -80,6 +85,7 @@ class Flightgroup {
   easyDomNode *domnode;
 
   map<string,string> ordermap;
+  olist_t *orderlist;
 };
 
 #ifndef VS_MIS_SEL
@@ -202,8 +208,6 @@ class missionNode : public tagDomNode {
 
 /* *********************************************************** */
 
-typedef vector<varInst *> olist_t;
-typedef map<string,varInst *> omap_t;
 
 #endif // VS_MIS_SEL
 

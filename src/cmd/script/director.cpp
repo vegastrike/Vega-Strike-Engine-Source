@@ -45,6 +45,7 @@
 #include "vs_path.h"
 #include "lin_time.h"
 #include "cmd/unit.h"
+#include "cmd/ai/order.h"
 
 #include "mission.h"
 #include "easydom.h"
@@ -424,6 +425,7 @@ void Mission::DirectorShipDestroyed(Unit *unit){
       // launch new wave
       fg->nr_waves_left-=1;
       fg->nr_ships_left=fg->nr_ships;
+      fg->orderlist=unit->getAIState()->getOrderList();
 
       call_unit_launch(fg);
     }

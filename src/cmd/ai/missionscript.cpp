@@ -206,4 +206,5 @@ AIOrderList::AIOrderList(olist_t *orderlist) : AImissionScript("ai_orderlist") {
   vi_unit->objectname="olist";
   vi_unit->object=orderlist;
 
+  my_orderlist=orderlist;
 }

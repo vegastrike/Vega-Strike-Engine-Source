@@ -89,6 +89,10 @@ class AISuperiority : public AImissionScript {
 class AIOrderList : public AImissionScript {
  public:
   AIOrderList(olist_t *orderlist);
+
+  virtual olist_t *getOrderList() { return my_orderlist;};
+ private:
+  olist_t *my_orderlist;
 };
 
 #endif

@@ -27,6 +27,9 @@
 #include "gfx/vec.h"
 #include "cmd/collection.h"
 #include <vector>
+
+#include <cmd/script/mission.h>
+
 /**
  * Order is the base class for all orders.  All orders inherit from Order
  * Each fighter may have an order they are currently executing. Orders naturally
@@ -84,9 +87,14 @@ public:
   ///Sets the parent of this Unit.  Any virtual functions must call this one
   virtual void SetParent(Unit *parent1) {parent = parent1;};
 
+  /// return pointer to order or NULL if not found
   Order *findOrder(Order *ord);
- void eraseOrder(Order *ord);
- Order* EnqueueOrderFirst (Order *ord);
+  /// erase that order from the list
+  void eraseOrder(Order *ord);
+  /// enqueue order as first order
+  Order* EnqueueOrderFirst (Order *ord);
+
+  virtual olist_t* getOrderList(){ return NULL;};
 };
 ///Convenience order factory for "clicking to create an order"
 class OrderFactory {
