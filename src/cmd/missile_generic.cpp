@@ -22,8 +22,8 @@ void StarSystem::UpdateMissiles() {
 }
 void MissileEffect::ApplyDamage (Unit * smaller) {
   float rad =(smaller->Position().Cast()-pos).Magnitude()-smaller->rSize();
-  float orig = rad;
   if(rad<.001) rad =.001;
+  float orig = rad;
   rad=rad*rad;
   if (smaller->isUnit()!=MISSILEPTR&&rad<radius*radius) {
 	if(rad<(radialmultiplier*radialmultiplier)){
@@ -67,7 +67,7 @@ void Missile::Kill (bool erase) {
 void Missile::reactToCollision (Unit * smaller, const QVector & biglocation, const Vector & bignormal, const QVector & smalllocation, const Vector & smallnormal, float dist) {
   static bool doesmissilebounce  = XMLSupport::parse_bool (vs_config->getVariable("physics","missile_bounce","false"));
   if (doesmissilebounce) {
-
+	fprintf(stderr,"missilebounce\n");
     Unit::reactToCollision (smaller,biglocation,bignormal,smalllocation,smallnormal,dist);
   }
   Discharge();
