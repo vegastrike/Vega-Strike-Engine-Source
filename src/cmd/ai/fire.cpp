@@ -70,8 +70,8 @@ bool CanFaceTarget (Unit * su, Unit *targ,const Matrix & matrix) {
 		QVector pos = (targ->Position()- su ->Position()).Normalize();
 		QVector pnorm = pos.Cast();
 		Vector structurelimits = su->Limits().structurelimits;
-		Vector ournorm = TransformNormal(matrix,pnorm);
-		if (ournorm.Dot (structurelimits)<limitmin) {
+		Vector worldlimit = TransformNormal(matrix,structurelimits);
+		if (pnorm.Dot (worldlimit)<limitmin) {
 			return false;
 		}
 		
