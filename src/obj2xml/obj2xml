@@ -38,7 +38,14 @@ $objname = $basename;
 $texture = $default_texture = "$basename-default";
 $in_strip = 0;
 sub finish_strip {
-		@vertices = @strip_vertices;
+	my $quad = 0;
+	if(@_ == 1) { $quad = $_[0]; }
+	@vertices = @strip_vertices;
+	if(!$quad && @vertices == 4) { # swap last two vertices if this is not a real quad
+		my $foo = $vertices[3];
+		$vertices[3] = $vertices[2];
+		$vertices[2] = $foo;
+	}
 		@output_vertices = ();
 		@output_texcoords = ();
 
@@ -138,7 +145,7 @@ while($line = <INPUT>) {
 		chomp $line;
 		@strip_vertices = split /\s/, $line;
 		shift @strip_vertices; # dump out the 'f'
-		finish_strip();
+		finish_strip(1);
 	} elsif($line =~ /^ *t/) {
 		$in_strip = 1;
 		chomp $line;
