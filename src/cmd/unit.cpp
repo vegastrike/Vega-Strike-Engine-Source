@@ -140,6 +140,7 @@ void Unit::DeactivateJumpDrive () {
 }
 void Unit::Init()
 {
+
   activeStarSystem=NULL;
   xml=NULL;
   docked=NOT_DOCKED;
@@ -238,6 +239,7 @@ void Unit::Init()
   Target(NULL);
   VelocityReference(NULL);
   computer.threat.SetUnit (NULL);
+  computer.slide_start=computer.slide_end=0;
   computer.set_speed=0;
   computer.max_speed=1;
   computer.max_ab_speed=1;

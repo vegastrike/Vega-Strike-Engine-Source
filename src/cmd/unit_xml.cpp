@@ -192,7 +192,9 @@ namespace UnitXML {
       DESCRIPTION,
       UPGRADE,
       MOUNTOFFSET,
-      SUBUNITOFFSET
+      SUBUNITOFFSET,
+      SLIDE_START,
+      SLIDE_END
     };
 
   const EnumMap::Pair element_names[35]= {
@@ -233,7 +235,7 @@ namespace UnitXML {
     EnumMap::Pair ("Upgrade",UPGRADE      )
 
   };
-  const EnumMap::Pair attribute_names[88] = {
+  const EnumMap::Pair attribute_names[90] = {
     EnumMap::Pair ("UNKNOWN", UNKNOWN),
     EnumMap::Pair ("missing",MISSING),
     EnumMap::Pair ("file", XFILE), 
@@ -321,11 +323,13 @@ namespace UnitXML {
     EnumMap::Pair ("ECM",ECM),
     EnumMap::Pair ("Description",DESCRIPTION),
     EnumMap::Pair ("MountOffset",MOUNTOFFSET),
-    EnumMap::Pair ("SubunitOffset",SUBUNITOFFSET)
+    EnumMap::Pair ("SubunitOffset",SUBUNITOFFSET),
+    EnumMap::Pair ("SlideEnd",SLIDE_START),
+    EnumMap::Pair ("SlideStart",SLIDE_END)
   };
 
   const EnumMap element_map(element_names, 35);
-  const EnumMap attribute_map(attribute_names, 88);
+  const EnumMap attribute_map(attribute_names, 90);
 }
 
 using XMLSupport::EnumMap;
@@ -1181,6 +1185,14 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
       case ROLL:
 	computer.max_roll=parse_float((*iter).value)*(VS_PI/180);
 	ADDELEM (angleStarHandler,XMLType(&computer.max_roll));
+	break;
+      case SLIDE_START:
+	computer.slide_start = parse_int ((*iter).value);
+	ADDELEM (ucharStarHandler,XMLType(&computer.slide_start));
+	break;
+      case SLIDE_END:
+	computer.slide_end = parse_int ((*iter).value);
+	ADDELEM (ucharStarHandler,XMLType(&computer.slide_end));
 	break;
       }
     }

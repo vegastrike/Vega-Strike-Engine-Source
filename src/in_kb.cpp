@@ -41,6 +41,11 @@ KBSTATE keyState [WSK_LAST];
 static void kbGetInput(int key, bool release, int x, int y){
   int i=_Universe->CurrentCockpit();
   _Universe->SetActiveCockpit(playerBindings[key]);
+
+  if (isalpha(key)&&(keyState[WSK_RSHIFT]==DOWN||keyState[WSK_LSHIFT==DOWN])) {
+    key+=('A'-'a');
+  }
+
   if ((keyState[key]==RESET||keyState[key]==UP)&&!release)
     keyBindings[key](key,PRESS);
   if ((keyState[key]==DOWN||keyState[key]==RESET)&&release)

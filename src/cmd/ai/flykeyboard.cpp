@@ -2,6 +2,9 @@
 #include "flykeyboard.h"
 #include "cmd/unit.h"
 #include "navigation.h"
+#include "config_xml.h"
+#include "xml_support.h"
+#include "vs_globals.h"
 struct StarShipControlKeyboard {
   bool setunvel;
   bool setnulvel;
@@ -45,18 +48,88 @@ static StarShipControlKeyboard &g() {
 }
 
 
-FlyByKeyboard::FlyByKeyboard (unsigned int whichplayer): FlyByWire () {
+FlyByKeyboard::FlyByKeyboard (unsigned int whichplayer): FlyByWire (),axis_key(0,0,0) {
+  
   this->whichplayer=whichplayer;
   while(starshipcontrolkeys.size()<=whichplayer) {
     starshipcontrolkeys.push_back (StarShipControlKeyboard());
   }
   autopilot=NULL;
 }
+float FlyByKeyboard::clamp_axis (float v) {
+  static int axis_scale =XMLSupport::parse_int (vs_config->getVariable ("physics","slide_start","3"));
+  int as  = parent->GetComputerData().slide_start;
+  if (as==0) {
+    as = axis_scale;
+  }
+  v/=as;
+  if (v>1){
+    return 1;
+  }
+  if (v<-1) {
+    return -1;
+  }
+  
+  return v;
+}
+float FlyByKeyboard::reduce_axis (float v) {
+  static int axis_scale =XMLSupport::parse_int (vs_config->getVariable ("physics","slide_end","2"));
+  int as  = parent->GetComputerData().slide_end;
+  if (as==0) {
+    as = axis_scale;
+  }
+  if (fabs(v)>as) {
+    if (v>0) {
+      v-=as;
+    }else {
+      v+=as;
+    }
+  } else {
+    v=0;
+  }
+  return v;
+}
 FlyByKeyboard::~FlyByKeyboard() {
   if (autopilot)
     delete autopilot;
 }
+void FlyByKeyboard::KeyboardUp (float v) {
+  if (v==0) {
+    axis_key.i=reduce_axis(axis_key.i);
+  }else {    
+    if ((v>0)==(axis_key.i>=0)) {
+      axis_key.i+=v;
+    }else {
+      axis_key.i=v;
+    }
+  }
+  Up(clamp_axis (axis_key.i));
+}
+void FlyByKeyboard::KeyboardRight (float v) {
+  if (v==0) {
+    axis_key.j=reduce_axis(axis_key.j);
+  }else {
+    if ((v>0)==(axis_key.j>=0)) {
+      axis_key.j+=v;
+    }else {
+      axis_key.j=v;
+    }
+  }
+  Right(clamp_axis (axis_key.j));
 
+}
+void FlyByKeyboard::KeyboardRollRight (float v) {
+  if (v==0) {
+    axis_key.k=reduce_axis (axis_key.k);
+  } else {
+    if ((v>0)==(axis_key.k>=0)) {
+      axis_key.k+=v;
+    }else {
+      axis_key.k=v;
+    }
+  }
+  RollRight(clamp_axis (axis_key.k));
+}
 #define FBWABS(m) (m>=0?m:-m)
 void FlyByKeyboard::Execute () {
   FlyByKeyboard::Execute (true);
@@ -87,28 +160,28 @@ void FlyByKeyboard::Execute (bool resetangvelocity) {
   if (SSCK.dirty) {
     //go with what's last there: no frames since last physics frame
     if (SSCK.uppress<=0&&SSCK.downpress<=0)
-      Up(0);
+      KeyboardUp(0);
     else {
       if (SSCK.uppress>0)
-	Up(1);
+	KeyboardUp(1);
       if (SSCK.downpress>0)
-	Up(-1);
+	KeyboardUp(-1);
     }
     if (SSCK.leftpress<=0&&SSCK.rightpress<=0)
-      Up(0);
+      KeyboardUp(0);
     else {
       if (SSCK.rightpress>0)
-	Right(1);
+	KeyboardRight(1);
       if (SSCK.leftpress>0)
-	Right(-1);
+	KeyboardRight(-1);
     }
     if (SSCK.rollrightpress<=0&&SSCK.rollleftpress<=0)
-      RollRight(0);
+      KeyboardRollRight(0);
     else {
       if (SSCK.rollrightpress>0)
-	RollRight(1);
+	KeyboardRollRight(1);
       if (SSCK.rollleftpress>0)
-	RollRight(-1);
+	KeyboardRollRight(-1);
     }
 
     //    fprintf(stderr,"AB: press %d rel %d\n",SSCK.ABpress,SSCK.ABrelease);
@@ -123,42 +196,42 @@ void FlyByKeyboard::Execute (bool resetangvelocity) {
       Accel(-1);
   }else {
     if (SSCK.uppress==0&&SSCK.downpress==0)
-      Up(0);
+      KeyboardUp(0);
     else {
 
       if (SSCK.uppress!=0&&SSCK.downpress==0)
-	Up(((float)FBWABS(SSCK.uppress))/(FBWABS(SSCK.uppress)+SSCK.uprelease));
+	KeyboardUp(((float)FBWABS(SSCK.uppress))/(FBWABS(SSCK.uppress)+SSCK.uprelease));
       else {
 	if (SSCK.downpress!=0&&SSCK.uppress==0)
-	  Up(-((float)FBWABS(SSCK.downpress))/(FBWABS(SSCK.downpress)+SSCK.downrelease));
+	  KeyboardUp(-((float)FBWABS(SSCK.downpress))/(FBWABS(SSCK.downpress)+SSCK.downrelease));
         else {
-	  Up(((float)FBWABS(SSCK.uppress)-(float)FBWABS(SSCK.downpress))/(FBWABS(SSCK.downpress)+SSCK.downrelease+FBWABS(SSCK.uppress)+SSCK.uprelease));
+	  KeyboardUp(((float)FBWABS(SSCK.uppress)-(float)FBWABS(SSCK.downpress))/(FBWABS(SSCK.downpress)+SSCK.downrelease+FBWABS(SSCK.uppress)+SSCK.uprelease));
 	}
       }
     }
     if (SSCK.rightpress==0&&SSCK.leftpress==0)
-      Right(0);
+      KeyboardRight(0);
     else {
       if (SSCK.rightpress!=0&&SSCK.leftpress==0)
-	Right(((float)FBWABS(SSCK.rightpress))/(FBWABS(SSCK.rightpress)+SSCK.rightrelease));
+	KeyboardRight(((float)FBWABS(SSCK.rightpress))/(FBWABS(SSCK.rightpress)+SSCK.rightrelease));
       else {
 	if (SSCK.leftpress!=0&&SSCK.rightpress==0)
-	  Right(-((float)FBWABS(SSCK.leftpress))/(FBWABS(SSCK.leftpress)+SSCK.leftrelease));
+	  KeyboardRight(-((float)FBWABS(SSCK.leftpress))/(FBWABS(SSCK.leftpress)+SSCK.leftrelease));
         else {
-	  Right(((float)FBWABS(SSCK.rightpress)-(float)FBWABS(SSCK.leftpress))/(FBWABS(SSCK.leftpress)+SSCK.leftrelease+FBWABS(SSCK.rightpress)+SSCK.rightrelease));
+	  KeyboardRight(((float)FBWABS(SSCK.rightpress)-(float)FBWABS(SSCK.leftpress))/(FBWABS(SSCK.leftpress)+SSCK.leftrelease+FBWABS(SSCK.rightpress)+SSCK.rightrelease));
 	}
       }
     }
     if (SSCK.rollrightpress==0&&SSCK.rollleftpress==0)
-      RollRight(0);
+      KeyboardRollRight(0);
     else {
       if (SSCK.rollrightpress!=0&&SSCK.rollleftpress==0)
-	RollRight(((float)FBWABS(SSCK.rollrightpress))/(FBWABS(SSCK.rollrightpress)+SSCK.rollrightrelease));
+	KeyboardRollRight(((float)FBWABS(SSCK.rollrightpress))/(FBWABS(SSCK.rollrightpress)+SSCK.rollrightrelease));
       else {
 	if (SSCK.rollleftpress!=0&&SSCK.rollrightpress==0)
-	  RollRight(-((float)FBWABS(SSCK.rollleftpress))/(FBWABS(SSCK.rollleftpress)+SSCK.rollleftrelease));
+	  KeyboardRollRight(-((float)FBWABS(SSCK.rollleftpress))/(FBWABS(SSCK.rollleftpress)+SSCK.rollleftrelease));
         else {
-	  RollRight(((float)FBWABS(SSCK.rollrightpress)-(float)FBWABS(SSCK.rollleftpress))/(FBWABS(SSCK.rollleftpress)+SSCK.rollleftrelease+FBWABS(SSCK.rollrightpress)+SSCK.rollrightrelease));
+	  KeyboardRollRight(((float)FBWABS(SSCK.rollrightpress)-(float)FBWABS(SSCK.rollleftpress))/(FBWABS(SSCK.rollleftpress)+SSCK.rollleftrelease+FBWABS(SSCK.rollrightpress)+SSCK.rollrightrelease));
 	}
       }
     }

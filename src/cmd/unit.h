@@ -164,6 +164,8 @@ class Unit
     ///Computer's restrictions of YPR to limit space combat maneuvers
     float max_yaw; float max_pitch; float max_roll;
     ///Whether or not an 'lead' indicator appears in front of target
+    unsigned char slide_start;
+    unsigned char slide_end;
     bool itts;
   };
 
