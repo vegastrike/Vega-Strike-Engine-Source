@@ -1483,7 +1483,7 @@ void BaseComputer::updateTransactionControlsForSelection(TransactionList* tlist)
     }else {
       if (descimage&&descriptiontexture=="") 
         descimage->setTexture("blackclear.png");
-      else
+      else if (descimage)
         descimage->setTexture(descriptiontexture);
     }
     desc->setText(descString);
