@@ -1086,8 +1086,11 @@ StarSystem * Unit::getStarSystem () {
 }
 
 void Unit::Fire (unsigned int weapon_type_bitmask, bool listen_to_owner) {
-    if (cloaking>=0||graphicOptions.InWarp)
-        return;
+  static bool can_fire_in_spec = XMLSupport::parse_bool(vs_config->getVariable("physics","can_fire_in_spec","false"));
+  static bool can_fire_in_cloak = XMLSupport::parse_bool(vs_config->getVariable("physics","can_fire_in_cloak","false"));
+  if ((cloaking>=0&&can_fire_in_cloak==false)||(graphicOptions.InWarp&&can_fire_in_spec==false)){
+    return;
+  }
 	int nm = 0;
 	vector <Mount>
 		::iterator i = mounts.begin();//note to self: if vector<Mount *> is ever changed to vector<Mount> remove the const_ from the const_iterator
