@@ -53,19 +53,27 @@ struct GFXStats{
 #define GL_EXT_color_subtable 1
 #endif
 
+#ifndef _WIN32
+#define GL_GLEXT_PROTOTYPES
+#endif
 #if defined(_WIN32) || defined(__CYGWIN__)
 #include <windows.h>
 #include <GL/gl.h>
+#endif
+
+#if defined(__APPLE__) || defined(MACOSX)
+    #include <GLUT/glut.h>
+    #include <OpenGL/glext.h>
+#else
+    #include <GL/glut.h>
+    #include <GL/glext.h>
+#endi
 
 #ifdef GL_EXT_compiled_vertex_array
 # ifndef PFNGLLOCKARRAYSEXTPROC
 #  undef GL_EXT_compiled_vertex_array
 # endif	// PFNGLLOCKARRAYSEXTPROC
 #endif // GL_EXT_compiled_vertex_array
-#ifndef _WIN32
-#define GL_GLEXT_PROTOTYPES
-#endif
-#include <GL/glext.h>
 
 #define GL_TEXTURE0_ARB 0x84C0
 #define GL_TEXTURE1_ARB 0x84C1
@@ -94,13 +102,13 @@ extern PFNGLMULTITEXCOORD2FARBPROC glMultiTexCoord2fARB;
 extern PFNGLCLIENTACTIVETEXTUREARBPROC glClientActiveTextureARB;
 extern PFNGLCLIENTACTIVETEXTUREARBPROC glActiveTextureARB;
 extern PFNGLCOLORTABLEEXTPROC glColorTable;
-
-#elif defined(IRIX)
+/*
+#if defined(IRIX)
 #include <GL/gl.h>
 typedef void (*PFNGLLOCKARRAYSEXTPROC)(GLint first, GLsizei count);
 typedef void (*PFNGLUNLOCKARRAYSEXTPROC)(void);
 
-#else // WIN32 || IRIX
+#elif (!defined (_WIN32)) // WIN32 || IRIX
     #if defined(__APPLE__) || defined(MACOSX)
         #include <GLUT/glut.h>
         typedef void (*PFNGLLOCKARRAYSEXTPROC)(GLint first, GLsizei count);
@@ -108,6 +116,7 @@ typedef void (*PFNGLUNLOCKARRAYSEXTPROC)(void);
     #else
         #include <GL/glut.h>
     #endif
+*/
 #ifdef GL_EXT_compiled_vertex_array
 # ifndef PFNGLLOCKARRAYSEXTPROC
 //Somtimes they define GL_EXT_compiled_vertex_array without
