@@ -4,7 +4,6 @@
 #include <string.h>
 #include <stdlib.h>
 #include "gfx.h"
-#include "glob.h"
 #include "lin_time.h"
 #include "cmd.h"
 #include "in.h"
@@ -111,7 +110,7 @@ static void PitchDown(KBSTATE newState) {
 		_GFX->AccessCamera()->myPhysics.ApplyBalancedLocalTorque(-Q, R,timek);
 		//a =1;
 	}
-	else if(Slew&&newState==RELEASE) {
+	else if(_Slew&&newState==RELEASE) {
 		_GFX->AccessCamera()->myPhysics.ApplyBalancedLocalTorque(Q, R,timek);
 		//a=0;
 	}
@@ -128,7 +127,7 @@ static void PitchUp(KBSTATE newState) {
 		_GFX->AccessCamera()->myPhysics.ApplyBalancedLocalTorque(Q, R,timek);
 		
 	}
-	else if(Slew&&newState==RELEASE) {
+	else if(_Slew&&newState==RELEASE) {
 		_GFX->AccessCamera()->myPhysics.ApplyBalancedLocalTorque(-Q, R,timek);
 		
 	}
@@ -145,7 +144,7 @@ static void YawLeft(KBSTATE newState) {
 		_GFX->AccessCamera()->myPhysics.ApplyBalancedLocalTorque(-P, R,timek);
 		
 	}
-	else if(Slew&&newState==RELEASE) {
+	else if(_Slew&&newState==RELEASE) {
 		_GFX->AccessCamera()->myPhysics.ApplyBalancedLocalTorque(P, R,timek);
 		
 	}
@@ -161,7 +160,7 @@ static void YawRight(KBSTATE newState) {
 		_GFX->AccessCamera()->myPhysics.ApplyBalancedLocalTorque(P, R,timek);
 	
 	}
-	else if(Slew&&newState==RELEASE) {
+	else if(_Slew&&newState==RELEASE) {
 		_GFX->AccessCamera()->myPhysics.ApplyBalancedLocalTorque(-P, R,timek);
 	       
 	}
@@ -177,7 +176,7 @@ static void RollLeft(KBSTATE newState) {
 		_GFX->AccessCamera()->myPhysics.ApplyBalancedLocalTorque(-P, Q,timek);
 		//a=1;
 	}
-	else if(Slew&&newState==RELEASE) {
+	else if(_Slew&&newState==RELEASE) {
 		_GFX->AccessCamera()->myPhysics.ApplyBalancedLocalTorque(P, Q,timek);
 		//a=0;
 		//Stop();
@@ -195,7 +194,7 @@ static void RollRight(KBSTATE newState) {
 		_GFX->AccessCamera()->myPhysics.ApplyBalancedLocalTorque(P, Q,timek);
 		
 	}
-	else if(Slew&&newState==RELEASE) {
+	else if(_Slew&&newState==RELEASE) {
 		_GFX->AccessCamera()->myPhysics.ApplyBalancedLocalTorque(-P, Q,timek);
 		//Stop();
 	}
@@ -210,7 +209,7 @@ static void SlideForward(KBSTATE newState) {
 		_GFX->AccessCamera()->myPhysics.ApplyForce (R,timek);
 	
 	}
-	else if(Slew&&newState==RELEASE) {
+	else if(_Slew&&newState==RELEASE) {
 		_GFX->AccessCamera()->myPhysics.ApplyForce (-R,timek);
 		//Stop();
 	}
@@ -224,7 +223,7 @@ static void SlideBackward(KBSTATE newState) {
 		_GFX->AccessCamera()->myPhysics.ApplyForce (-R,timek);
 		
 	}
-	else if(Slew&&newState==RELEASE) {
+	else if(_Slew&&newState==RELEASE) {
 		_GFX->AccessCamera()->myPhysics.ApplyForce (R,timek);
 		//Stop();
 	}
@@ -239,7 +238,7 @@ static void SlideUp(KBSTATE newState) {
 		//a=1;
 		//Stop();
 	}
-	else if(Slew&&newState==RELEASE){
+	else if(_Slew&&newState==RELEASE){
 		_GFX->AccessCamera()->myPhysics.ApplyForce(-Q,timek);
 		//a=0;
 		//Stop();
@@ -254,7 +253,7 @@ static void SlideDown(KBSTATE newState) {
 		_GFX->AccessCamera()->myPhysics.ApplyForce(-Q,timek);
 	
 	}
-	else if(Slew&&newState==RELEASE) {
+	else if(_Slew&&newState==RELEASE) {
 		_GFX->AccessCamera()->myPhysics.ApplyForce(Q, timek);
 		//Stop();
 	}
@@ -268,7 +267,7 @@ static void SlideLeft(KBSTATE newState) {
 		_GFX->AccessCamera()->myPhysics.ApplyForce(-P,timek);
 	
 	}
-	else if(Slew&&newState==RELEASE) {
+	else if(_Slew&&newState==RELEASE) {
 		_GFX->AccessCamera()->myPhysics.ApplyForce(P,timek);
 		//Stop();
 	}
@@ -282,7 +281,7 @@ static void SlideRight(KBSTATE newState) {
 		_GFX->AccessCamera()->myPhysics.ApplyForce(P,timek);
 		//		a=1;
 	}
-	else if(Slew&&newState==RELEASE) {
+	else if(_Slew&&newState==RELEASE) {
 		_GFX->AccessCamera()->myPhysics.ApplyForce(-P,timek);
 		//a=0;
 	}
@@ -314,10 +313,10 @@ void InitializeInput() {
 	BindKey(GLUT_KEY_RIGHT, YawRight);
 	BindKey(GLUT_KEY_F11, RollLeft);
 	BindKey(GLUT_KEY_F12, RollRight);
-	BindKey(GLUT_KEY_PAGE_DOWN, SlideForward);
+	BindKey(GLUT_KEY_PAGE_DOWN, SlideUp);
 	//BindKey(GLUT_KEY_HOME, SlideBackward);
-	BindKey(GLUT_KEY_END, SlideUp);
-	BindKey(GLUT_KEY_INSERT, SlideDown);
+	BindKey(GLUT_KEY_END, SlideBackward);
+	BindKey(GLUT_KEY_INSERT, SlideForward);
 	BindKey(GLUT_KEY_HOME, SlideLeft);
 	BindKey(GLUT_KEY_PAGE_UP, SlideRight);
 	BindKey(GLUT_KEY_F1, Quit);

@@ -20,7 +20,7 @@
  */
 //#include <gl/gl.h>
 //#include <gl/glu.h>
-#include "glob.h"
+//#include "glob.h"
 #include "wrapgfx.h"
 #include "gfx_camera.h"
 #include "gfx_aux_texture.h"

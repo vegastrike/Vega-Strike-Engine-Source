@@ -23,7 +23,7 @@
 #ifndef _3DMANIP_H_
 #define _3DMANIP_H_
 #include <math.h>
-
+#ifdef __cplusplus
 class Vector;
 void Normalize(Vector &);
 float DotProduct(const Vector &,const Vector &);
@@ -146,4 +146,5 @@ void Pitch (float rad,Vector &p, Vector &q, Vector &r);
 void Roll (float rad,Vector &p, Vector &q, Vector &r);
 void ResetVectors (Vector &p, Vector &q, Vector &r);
 void Orthogonize(Vector &p, Vector &q, Vector &r);;
+#endif
 #endif

@@ -73,7 +73,7 @@ TR_CFLAGS = -O2 -Wall -fomit-frame-pointer -ffast-math -fexpensive-optimizations
 TR_CPPFLAGS =   -DTCL_HEADER=\<tcl.h\> -DHAVE_SDL=1 -DHAVE_SDL_MIXER=1  
 TR_CXXFLAGS = -O2 -Wall -fomit-frame-pointer -ffast-math -fexpensive-optimizations -malign-loops=2 -malign-jumps=2 -malign-functions=2 -I/usr/include/SDL -D_REENTRANT
 TR_LIBS =   -ltcl8.3 -L/usr/lib -Wl,-rpath,/usr/lib -lSDL -lpthread -lSDL_mixer  -lGL -lGLU  -lglut
-VERSION = 0.0.1
+VERSION = 
 
 bin_PROGRAMS = vegastrike
 

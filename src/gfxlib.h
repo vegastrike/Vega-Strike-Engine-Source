@@ -71,7 +71,7 @@ BOOL /*GFXDRVAPI*/ GFXLoadIdentity(MATRIXMODE mode);
 BOOL /*GFXDRVAPI*/ GFXGetMatrix(MATRIXMODE mode, Matrix matrix);
 
 BOOL /*GFXDRVAPI*/ GFXPerspective(float fov, float aspect, float znear, float zfar);
-BOOL /*GFXDRVAPI*/ GFXParallel(float left, float right, float bottom, float top, float near, float far);
+BOOL /*GFXDRVAPI*/ GFXParallel(float left, float right, float bottom, float top, float znear, float zfar);
 BOOL /*GFXDRVAPI*/ GFXLookAt(Vector eye, Vector center, Vector up);
 
 //Textures

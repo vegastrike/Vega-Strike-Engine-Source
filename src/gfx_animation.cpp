@@ -22,7 +22,7 @@
 //#include "wrapgfx.h"
 #include "gfx_animation.h"
 #include "gfx_camera.h"
-#include "glob.h"
+//#include "glob.h"
 //#include "win.h"
 #include "lin_time.h"
 Animation::Animation ():Primitive()
@@ -53,7 +53,8 @@ Animation::Animation (char * FileName):Primitive()
 	height = tmp*0.5F;
 	for (int i=0; i<numframes;i++) //load all textures
 	{
-		for (int j=0; ;j++)
+		int j;
+		for (j=0; ;j++)
 		{
 			fread (&temp[j],sizeof (char), 1, fp);
 			if (!temp[j]) //ahh we have come upon a NULL
@@ -61,7 +62,7 @@ Animation::Animation (char * FileName):Primitive()
 				break;
 			}
 		}
-		for (int j=0; ;j++)
+		for (j=0; ;j++)
 		{
 			fread (&tempalp[j],sizeof (char), 1, fp);
 			if (!tempalp[j]) //ahh we have come upon a NULL

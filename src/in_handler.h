@@ -22,7 +22,7 @@
 
 #ifndef INHANDLER_H
 #define INHANDLER_H
-
+#include "in_kb.h"
 //#include "cmd_unit.h"
 class Unit;
 
@@ -32,7 +32,7 @@ class InputListener
 {
 public:
 	int *mousex, *mousey;
-	int *keystate;
+	KBSTATE *keystate;
 
 	Unit *parent;
 

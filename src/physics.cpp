@@ -160,7 +160,8 @@ void PhysicsSystem::ApplyBalancedLocalTorque (const Vector &Vforce, const Vector
 void PhysicsSystem::ApplyImpulses (float Time) {
 	Vector temptorque = Time*NetTorque;
 	Vector tempforce = Time*NetForce;
-	for (int i = 0; i<NumActiveTorques; i++)
+	int i;
+	for ( i = 0; i<NumActiveTorques; i++)
 	{
 		if (Time>=ActiveTorques[i].t)
 		{
@@ -176,7 +177,7 @@ void PhysicsSystem::ApplyImpulses (float Time) {
 			ActiveTorques[i].t -= Time;
 		}
 	}
-	for (int i=0; i<NumActiveForces; i++)
+	for (i=0; i<NumActiveForces; i++)
 	{
 		if (Time>=ActiveForces[i].t)
 		{

@@ -27,9 +27,9 @@
 #include <string>
 using namespace std;
 #include "hashtable.h"
-
-typedef unsigned int DWORD;
-typedef unsigned long  LONG;
+#ifndef WIN32
+typedef unsigned long DWORD;
+typedef long  LONG;
 typedef unsigned short WORD;
 typedef unsigned char BYTE;
 typedef struct {
@@ -53,16 +53,20 @@ typedef struct {
         WORD    bfReserved2;
         DWORD   bfOffBits;
 } BITMAPFILEHEADER;
-
-const int SIZEOF_BITMAPFILEHEADER=sizeof(WORD)+sizeof(DWORD)+sizeof(WORD)+sizeof(WORD)+sizeof(DWORD);
-const int SIZEOF_BITMAPINFOHEADER= sizeof(DWORD)+sizeof(LONG)+sizeof(LONG)+2*sizeof(WORD)+2*sizeof(DWORD)+2*sizeof(LONG)+2*sizeof(DWORD);
-
 typedef struct {
         BYTE    rgbBlue;
         BYTE    rgbGreen;
         BYTE    rgbRed;
         BYTE    rgbReserved;
 } RGBQUAD;
+#else
+#include <windows.h>
+#include <wingdi.h>
+
+
+#endif
+const int SIZEOF_BITMAPFILEHEADER=sizeof(WORD)+sizeof(DWORD)+sizeof(WORD)+sizeof(WORD)+sizeof(DWORD);
+const int SIZEOF_BITMAPINFOHEADER= sizeof(DWORD)+sizeof(LONG)+sizeof(LONG)+2*sizeof(WORD)+2*sizeof(DWORD)+2*sizeof(LONG)+2*sizeof(DWORD);
 
 static Hashtable<string, Texture> texHashTable;
 
@@ -108,9 +112,7 @@ Texture::Texture(char * FileName, int stage)
 	//long temp;
 	BITMAPINFOHEADER info;
 	fread(&info, SIZEOF_BITMAPINFOHEADER,1,fp);
-	sizeX = info.biWidth;
-	int i;
-	
+	sizeX = info.biWidth;	
 	sizeY = info.biHeight;
 	printf ("sizex%d sizey%d",sizeX,sizeY);
 

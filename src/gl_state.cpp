@@ -21,7 +21,7 @@
 #include "gfxlib.h"
 #include "vegastrike.h"
 #include "gl_globals.h"
-#include <stack.h>
+#include <stack>
 BOOL bTex0 = TRUE;
 BOOL bTex1 = TRUE;
 

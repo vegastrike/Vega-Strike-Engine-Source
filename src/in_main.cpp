@@ -18,15 +18,20 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
+#ifdef WIN32
 
+//#include "gl_globals.h"
+
+#endif
 #include <queue>
 #include <list>
+using namespace std;
 
 #include "in_kb.h"
 #include "in_mouse.h"
 #include "in_handler.h"
 
-extern int keyState[KEYMAP_SIZE];
+extern KBSTATE keyState[KEYMAP_SIZE];
 
 queue<InputListener*> activationreqqueue;
 list <InputListener*> listeners;

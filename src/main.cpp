@@ -66,7 +66,6 @@ void cleanup(void)
   destroyObjects();
   delete _GFX;
 }
-
 int main( int argc, char **argv ) 
 {
 
@@ -77,7 +76,7 @@ int main( int argc, char **argv )
     srand( time(NULL) );
     setup_game_data(); 
     //read_config_file();
-    init_debug("");
+    //init_debug("");
 
 #if defined(HAVE_SDL) && defined(HAVE_SDL_MIXER)
     sdl_init();
@@ -92,11 +91,13 @@ int main( int argc, char **argv )
     }
     //init_textures();
     //init_fonts();
+#if defined(HAVE_SDL) && defined(HAVE_SDL_MIXER)
 
     init_audio_data();
     init_audio();
     init_joystick();
 
+#endif
 
     _GFX= new WrapGFX(argc,argv);    
     //    glutSetCursor(GLUT_CURSOR_NONE); 

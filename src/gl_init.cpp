@@ -35,14 +35,15 @@ static int glutWindow;
 
 PFNGLLOCKARRAYSEXTPROC glLockArraysEXT_p;
 PFNGLUNLOCKARRAYSEXTPROC glUnlockArraysEXT_p;
-//PFNGLCLIENTACTIVETEXTUREARBPROC glClientActiveTextureARB=0;
-//PFNGLACTIVETEXTUREARBPROC glActiveTextureARB=0;
-
+#ifdef WIN32
+PFNGLCLIENTACTIVETEXTUREARBPROC glClientActiveTextureARB=0;
+PFNGLACTIVETEXTUREARBPROC glActiveTextureARB=0;
+PFNGLCOLORTABLEEXTPROC glColorTable=0;
+PFNGLMULTITEXCOORD2FARBPROC glMultiTexCoord2fARB = 0;
 //PFNGLSELECTTEXTURESGISPROC glSelectTextureSGIS ;
 //PFNGLMULTITEXCOORD2FSGISPROC glMultiTexCoord2fSGIS ;
 //PFNGLMTEXCOORDPOINTERSGISPROC glMTexCoordPointerSGIS ;
-//PFNGLCOLORTABLEEXTPROC glColorTable;
-
+#endif
 typedef void (*(*get_gl_proc_fptr_t)(const GLubyte *))(); 
 
 void init_opengl_extensions()
@@ -55,15 +56,17 @@ void init_opengl_extensions()
 #endif
 
     if ( glutExtensionSupported( "GL_EXT_compiled_vertex_array" ) ) {
-	print_debug( DEBUG_GL_EXT, "GL_EXT_compiled_vertex_array extension "
+
+	printf( "GL_EXT_compiled_vertex_array extension "
 		     "supported" );
 	glLockArraysEXT_p = (PFNGLLOCKARRAYSEXTPROC) 
 	    get_gl_proc( (GLubyte*) "glLockArraysEXT" );
 	glUnlockArraysEXT_p = (PFNGLUNLOCKARRAYSEXTPROC) 
 	    get_gl_proc( (GLubyte*) "glUnlockArraysEXT" );
     } else {
-	print_debug( DEBUG_GL_EXT, "GL_EXT_compiled_vertex_array extension "
+	printf(  "GL_EXT_compiled_vertex_array extension "
 		     "NOT supported" );
+	exit(1);
 	glLockArraysEXT_p = NULL;
 	glUnlockArraysEXT_p = NULL;
     }
@@ -75,15 +78,18 @@ void init_opengl_extensions()
     } else {
       g_game.Multitexture = 0;
     }
-
-    //glColorTable = (PFNGLCOLORTABLEEXTPROC ) get_gl_proc((GLubyte*)"glColorTableEXT");
-    //glMultiTexCoord2fARB = (PFNGLMULTITEXCOORD2FARBPROC) get_gl_proc((GLubyte*)"glMultiTexCoord2fARB");
-    //glClientActiveTextureARB = (PFNGLCLIENTACTIVETEXTUREARBPROC) get_gl_proc((GLubyte*)"glClientActiveTextureARB");
-    //glActiveTextureARB = (PFNGLACTIVETEXTUREARBPROC) get_gl_proc((GLubyte*)"glActiveTextureARB");
+#ifdef WIN32
+    glColorTable = (PFNGLCOLORTABLEEXTPROC ) get_gl_proc((GLubyte*)"glColorTableEXT");
+    glMultiTexCoord2fARB = (PFNGLMULTITEXCOORD2FARBPROC) get_gl_proc((GLubyte*)"glMultiTexCoord2fARB");
+    glClientActiveTextureARB = (PFNGLCLIENTACTIVETEXTUREARBPROC) get_gl_proc((GLubyte*)"glClientActiveTextureARB");
+    glActiveTextureARB = (PFNGLACTIVETEXTUREARBPROC) get_gl_proc((GLubyte*)"glActiveTextureARB");
+#endif
     if (glMultiTexCoord2fARB!=0) {
       g_game.Multitexture = 1;
+	  printf ("Multitexture supported");
     } else {
       g_game.Multitexture =0;
+	  printf ("Multitexture unsupported");
     }
     g_game.Multitexture=1;
 }

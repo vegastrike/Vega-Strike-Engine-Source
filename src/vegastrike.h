@@ -34,14 +34,14 @@ extern "C"
 #endif
 
 #include <math.h>
-#include <unistd.h>
+
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <errno.h>
 #include <time.h>
 #include <ctype.h>
-#include <sys/time.h>
-#include <sys/stat.h>
+
 #include <string.h>
 #include <limits.h>
 #include <stdarg.h>
@@ -50,6 +50,12 @@ extern "C"
     /* Note that this will define WIN32 for us, if it isn't defined already
      */
 #  include <windows.h>
+#include <wingdi.h>
+#include <time.h>
+#else
+#include <sys/time.h>
+#include <sys/stat.h>
+#include <unistd.h>
 #endif /* defined( WIN32 ) || defined( __CYGWIN__ ) */
 
 #include <GL/gl.h>
@@ -78,7 +84,7 @@ extern "C"
 #include "alglib.h"
 #include "debug.h"
 #include "error_util.h"
-
+#define VERSION "0.0.2"
 #define PROG_NAME "vegastrike"
 
 /* Macros and include files for non-standard math routines */
@@ -94,6 +100,8 @@ extern "C"
 #elif HAVE_ISNAN
 #   define FINITE(x) (!isnan(x))
 #elif HAVE__ISNAN
+#   define FINITE(x) (!_isnan(x))
+#elif WIN32
 #   define FINITE(x) (!_isnan(x))
 #else
 #   error "You don't have finite(), _finite(), isnan(), or _isnan() on your system!"

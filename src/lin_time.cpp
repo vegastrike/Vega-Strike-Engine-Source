@@ -22,14 +22,23 @@
 
 #include "vegastrike.h"
 #include "vs_types.h"
+#ifdef WIN32
+#include <windows.h>
+static LONGLONG ttime;
+static LONGLONG newtime = 0;
+static LONGLONG freq;
+#else
 #if defined( HAVE_SDL )
 #   include "SDL.h"
 #endif /* defined( HAVE_SDL ) */
-
-
 static scalar_t newtime;
 static scalar_t lasttime;
+#endif
 static scalar_t elapsedtime;
+
+
+
+
 
 
 
@@ -41,7 +50,9 @@ scalar_t get_clock_time()
     gettimeofday( &tv, NULL );
 
     return (scalar_t) tv.tv_sec + (scalar_t) tv.tv_usec * 1.e-6;
-
+#elif defined (WIN32)
+	return 0;
+	//We're cool
 #elif defined( HAVE_SDL ) 
 
     return SDL_GetTicks() * 1.e-3;
@@ -53,19 +64,27 @@ scalar_t get_clock_time()
 #endif /* defined( HAVE_GETTIMEOFDAY ) */
 } 
 
-
-
-
 void InitTime () {
+#ifdef WIN32
+  QueryPerformanceFrequency((LARGE_INTEGER*)&freq);
+  QueryPerformanceCounter((LARGE_INTEGER*)&ttime);
+#else
   newtime = get_clock_time();
   lasttime = newtime -.001;
+#endif
   elapsedtime = .001;
 }
 scalar_t GetElapsedTime() {
   return elapsedtime;
 }
 void UpdateTime() {
+#ifdef WIN32
+  QueryPerformanceCounter((LARGE_INTEGER*)&newtime);
+  elapsedtime = ((float)(newtime-ttime))/freq;
+  ttime = newtime;
+#else
   lasttime = newtime;
   newtime = get_clock_time();
   elapsedtime =newtime-lasttime;
+#endif
 }

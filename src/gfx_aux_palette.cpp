@@ -104,7 +104,8 @@ void HSV_To_RGB (double *r, double *g, double *b, double h, double s, double v)
 void ShiftPalette (unsigned char Palette [769],double DH, double DS, double DV, double DsH, double DsS, double DsV)
 {
 	double r, g, b, h, s, v;
-	for (int i=192; i<224;i++)
+	int i;
+	for (i=192; i<224;i++)
 	{
 		r = ((double).003921568627)*Palette[i*3];
 		g = ((double).003921568627)*Palette[i*3+1];
@@ -133,7 +134,7 @@ void ShiftPalette (unsigned char Palette [769],double DH, double DS, double DV, 
 		Palette [i*3+2] = (unsigned char)(b*255);
 
 	}
-	for (int i=224; i<256;i++)
+	for (i=224; i<256;i++)
 	{
 		r = ((double).003921568627)*Palette[i*3];
 		g = ((double).003921568627)*Palette[i*3+1];

@@ -74,7 +74,7 @@ inline void Identity(float matrix[])
 
 float Magnitude(Vector v)
 {
-	return sqrt(v.i*v.i + v.j*v.j + v.k*v.k);
+	return sqrtf(v.i*v.i + v.j*v.j + v.k*v.k);
 }
 
 Vector CrossProduct(const Vector& v1, const Vector& v2)
@@ -218,12 +218,12 @@ static void gl_Frustum(
    GLfloat x, y, a, b, c, d;
    GLfloat *m = projection;
 
-   x = (2.0*nearval) / (right-left);
-   y = (2.0*nearval) / (top-bottom);
+   x = (((float)2.0)*nearval) / (right-left);
+   y = (((float)2.0)*nearval) / (top-bottom);
    a = (right+left) / (right-left);
    b = (top+bottom) / (top-bottom);
    c = -(farval+nearval) / ( farval-nearval);
-   d = -(2.0*farval*nearval) / (farval-nearval);  /* error? */
+   d = -(((float)2.0)*farval*nearval) / (farval-nearval);  /* error? */
 
 #define M(row,col)  m[col*4+row]
    M(0,0) = x;     M(0,1) = 0.0F;  M(0,2) = a;      M(0,3) = 0.0F;
@@ -237,7 +237,7 @@ BOOL /*GFXDRVAPI*/ GFXPerspective(float fov, float aspect, float znear, float zf
 {
    float xmin, xmax, ymin, ymax;
 
-   ymax = znear * tan( fov * PI / 360.0 );
+   ymax = znear * tanf( fov * PI / ((float)360.0) );
    ymin = -ymax;
 
    xmin = ymin * aspect;
@@ -307,7 +307,7 @@ static void LookAtHelper( float eyex, float eyey, float eyez,
    z[0] = eyex - centerx;
    z[1] = eyey - centery;
    z[2] = eyez - centerz;
-   mag = sqrt( z[0]*z[0] + z[1]*z[1] + z[2]*z[2] );
+   mag = sqrtf( z[0]*z[0] + z[1]*z[1] + z[2]*z[2] );
    if (mag) {  /* mpichler, 19950515 */
       z[0] /= mag;
       z[1] /= mag;
@@ -340,14 +340,14 @@ static void LookAtHelper( float eyex, float eyey, float eyez,
     * non-perpendicular unit-length vectors; so normalize x, y here
     */
 
-   mag = sqrt( x[0]*x[0] + x[1]*x[1] + x[2]*x[2] );
+   mag = sqrtf( x[0]*x[0] + x[1]*x[1] + x[2]*x[2] );
    if (mag) {
       x[0] /= mag;
       x[1] /= mag;
       x[2] /= mag;
    }
 
-   mag = sqrt( y[0]*y[0] + y[1]*y[1] + y[2]*y[2] );
+   mag = sqrtf( y[0]*y[0] + y[1]*y[1] + y[2]*y[2] );
    if (mag) {
       y[0] /= mag;
       y[1] /= mag;

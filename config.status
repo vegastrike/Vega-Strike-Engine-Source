@@ -62,7 +62,7 @@ s%@INSTALL_PROGRAM@%${INSTALL}%g
 s%@INSTALL_SCRIPT@%${INSTALL_PROGRAM}%g
 s%@INSTALL_DATA@%${INSTALL} -m 644%g
 s%@PACKAGE@%vegastrike%g
-s%@VERSION@%0.0.1%g
+s%@VERSION@%%g
 s%@ACLOCAL@%aclocal%g
 s%@AUTOCONF@%autoconf%g
 s%@AUTOMAKE@%automake%g
@@ -217,24 +217,21 @@ for ac_file in .. $CONFIG_HEADERS; do if test "x$ac_file" != x..; then
 ${ac_dA}PACKAGE${ac_dB}PACKAGE${ac_dC}"vegastrike"${ac_dD}
 ${ac_uA}PACKAGE${ac_uB}PACKAGE${ac_uC}"vegastrike"${ac_uD}
 ${ac_eA}PACKAGE${ac_eB}PACKAGE${ac_eC}"vegastrike"${ac_eD}
-${ac_dA}VERSION${ac_dB}VERSION${ac_dC}"0.0.1"${ac_dD}
-${ac_uA}VERSION${ac_uB}VERSION${ac_uC}"0.0.1"${ac_uD}
-${ac_eA}VERSION${ac_eB}VERSION${ac_eC}"0.0.1"${ac_eD}
 ${ac_dA}STDC_HEADERS${ac_dB}STDC_HEADERS${ac_dC}1${ac_dD}
 ${ac_uA}STDC_HEADERS${ac_uB}STDC_HEADERS${ac_uC}1${ac_uD}
 ${ac_eA}STDC_HEADERS${ac_eB}STDC_HEADERS${ac_eC}1${ac_eD}
 ${ac_dA}HAVE_SYS_TIME_H${ac_dB}HAVE_SYS_TIME_H${ac_dC}1${ac_dD}
 ${ac_uA}HAVE_SYS_TIME_H${ac_uB}HAVE_SYS_TIME_H${ac_uC}1${ac_uD}
 ${ac_eA}HAVE_SYS_TIME_H${ac_eB}HAVE_SYS_TIME_H${ac_eC}1${ac_eD}
+${ac_dA}HAVE_UNISTD_H${ac_dB}HAVE_UNISTD_H${ac_dC}1${ac_dD}
+${ac_uA}HAVE_UNISTD_H${ac_uB}HAVE_UNISTD_H${ac_uC}1${ac_uD}
+${ac_eA}HAVE_UNISTD_H${ac_eB}HAVE_UNISTD_H${ac_eC}1${ac_eD}
 CEOF
   sed -f conftest.frag conftest.in > conftest.out
   rm -f conftest.in
   mv conftest.out conftest.in
 
   cat > conftest.frag <<CEOF
-${ac_dA}HAVE_UNISTD_H${ac_dB}HAVE_UNISTD_H${ac_dC}1${ac_dD}
-${ac_uA}HAVE_UNISTD_H${ac_uB}HAVE_UNISTD_H${ac_uC}1${ac_uD}
-${ac_eA}HAVE_UNISTD_H${ac_eB}HAVE_UNISTD_H${ac_eC}1${ac_eD}
 ${ac_dA}TIME_WITH_SYS_TIME${ac_dB}TIME_WITH_SYS_TIME${ac_dC}1${ac_dD}
 ${ac_uA}TIME_WITH_SYS_TIME${ac_uB}TIME_WITH_SYS_TIME${ac_uC}1${ac_uD}
 ${ac_eA}TIME_WITH_SYS_TIME${ac_eB}TIME_WITH_SYS_TIME${ac_eC}1${ac_eD}
@@ -244,15 +241,15 @@ ${ac_eA}HAVE_GETCWD${ac_eB}HAVE_GETCWD${ac_eC}1${ac_eD}
 ${ac_dA}HAVE_GETTIMEOFDAY${ac_dB}HAVE_GETTIMEOFDAY${ac_dC}1${ac_dD}
 ${ac_uA}HAVE_GETTIMEOFDAY${ac_uB}HAVE_GETTIMEOFDAY${ac_uC}1${ac_uD}
 ${ac_eA}HAVE_GETTIMEOFDAY${ac_eB}HAVE_GETTIMEOFDAY${ac_eC}1${ac_eD}
+${ac_dA}HAVE_STRDUP${ac_dB}HAVE_STRDUP${ac_dC}1${ac_dD}
+${ac_uA}HAVE_STRDUP${ac_uB}HAVE_STRDUP${ac_uC}1${ac_uD}
+${ac_eA}HAVE_STRDUP${ac_eB}HAVE_STRDUP${ac_eC}1${ac_eD}
 CEOF
   sed -f conftest.frag conftest.in > conftest.out
   rm -f conftest.in
   mv conftest.out conftest.in
 
   cat > conftest.frag <<CEOF
-${ac_dA}HAVE_STRDUP${ac_dB}HAVE_STRDUP${ac_dC}1${ac_dD}
-${ac_uA}HAVE_STRDUP${ac_uB}HAVE_STRDUP${ac_uC}1${ac_uD}
-${ac_eA}HAVE_STRDUP${ac_eB}HAVE_STRDUP${ac_eC}1${ac_eD}
 ${ac_dA}HAVE_FINITE${ac_dB}HAVE_FINITE${ac_dC}1${ac_dD}
 ${ac_uA}HAVE_FINITE${ac_uB}HAVE_FINITE${ac_uC}1${ac_uD}
 ${ac_eA}HAVE_FINITE${ac_eB}HAVE_FINITE${ac_eC}1${ac_eD}
@@ -262,15 +259,15 @@ ${ac_eA}HAVE_ISNAN${ac_eB}HAVE_ISNAN${ac_eC}1${ac_eD}
 ${ac_dA}HAVE_SDL_JOYSTICKOPEN${ac_dB}HAVE_SDL_JOYSTICKOPEN${ac_dC}1${ac_dD}
 ${ac_uA}HAVE_SDL_JOYSTICKOPEN${ac_uB}HAVE_SDL_JOYSTICKOPEN${ac_uC}1${ac_uD}
 ${ac_eA}HAVE_SDL_JOYSTICKOPEN${ac_eB}HAVE_SDL_JOYSTICKOPEN${ac_eC}1${ac_eD}
+${ac_dA}HAVE_GLXGETPROCADDRESSARB${ac_dB}HAVE_GLXGETPROCADDRESSARB${ac_dC}1${ac_dD}
+${ac_uA}HAVE_GLXGETPROCADDRESSARB${ac_uB}HAVE_GLXGETPROCADDRESSARB${ac_uC}1${ac_uD}
+${ac_eA}HAVE_GLXGETPROCADDRESSARB${ac_eB}HAVE_GLXGETPROCADDRESSARB${ac_eC}1${ac_eD}
 CEOF
   sed -f conftest.frag conftest.in > conftest.out
   rm -f conftest.in
   mv conftest.out conftest.in
 
   cat > conftest.frag <<CEOF
-${ac_dA}HAVE_GLXGETPROCADDRESSARB${ac_dB}HAVE_GLXGETPROCADDRESSARB${ac_dC}1${ac_dD}
-${ac_uA}HAVE_GLXGETPROCADDRESSARB${ac_uB}HAVE_GLXGETPROCADDRESSARB${ac_uC}1${ac_uD}
-${ac_eA}HAVE_GLXGETPROCADDRESSARB${ac_eB}HAVE_GLXGETPROCADDRESSARB${ac_eC}1${ac_eD}
 ${ac_dA}HAVE_GL_GLX_H${ac_dB}HAVE_GL_GLX_H${ac_dC}1${ac_dD}
 ${ac_uA}HAVE_GL_GLX_H${ac_uB}HAVE_GL_GLX_H${ac_uC}1${ac_uD}
 ${ac_eA}HAVE_GL_GLX_H${ac_eB}HAVE_GL_GLX_H${ac_eC}1${ac_eD}

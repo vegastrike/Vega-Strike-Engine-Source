@@ -580,11 +580,10 @@ void Mesh::Reflect()
 	Vector q = pq;
 	Vector r = pr;
 	Vector pos = ppos;
-	float theta;
 	int nt3 = 3 * numtris;
-	
+	int i;
 	vertexlist = vlist->LockUntransformed();
-	for (int i=0; i< nt3;i+=3)
+	for (i=0; i< nt3;i+=3)
 	{
 		for (int j=0; j<3;j++)
 		{
@@ -614,10 +613,9 @@ void Mesh::Reflect()
 		}
 		
 	}
-	int tempi;
 	int nq4= 4*numquads;
 	vertexlist += 3*numtris;//it moves up by 1 vertex each increment with pointer math... I think :)
-	for (int i=0; i< nq4;i+=4)
+	for (i=0; i< nq4;i+=4)
 	{
 		for (int j=0; j<4;j++)
 		{
