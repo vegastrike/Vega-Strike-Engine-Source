@@ -40,7 +40,7 @@ class UnitCollection {
     Unit *advance();
   };
 
-  friend UnitCollection::UnitIterator;
+  friend class UnitCollection::UnitIterator;
   
   UnitIterator *createIterator() { 
     return new UnitIterator(units,persist);
