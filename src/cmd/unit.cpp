@@ -502,6 +502,7 @@ void GameUnit<UnitType>::Draw(const Transformation &parent, const Matrix &parent
   unsigned char chardamage=(char)(damagelevel*255);
   chardamage=255-chardamage;
   bool On_Screen=false;
+  float minmeshradius = (_Universe->AccessCamera()->GetVelocity().Magnitude()+Velocity.Magnitude())*SIMULATION_ATOM;
   bool myparent = (this==_Universe->AccessCockpit()->GetParent());
   if ((!(invisible&INVISUNIT))&&((!(invisible&INVISCAMERA))||(!myparent))) {
     for (i=0;i<meshdata.size();i++) {//NOTE LESS THAN OR EQUALS...to cover shield mesh
@@ -527,9 +528,10 @@ void GameUnit<UnitType>::Draw(const Transformation &parent, const Matrix &parent
 	fprintf (stderr,"Mismatch for %s with Box being %d", name.c_str(),tmp);
       }
 #endif
+
       //      fprintf (stderr,"%s %d ",name.c_str(),i);
       float d = GFXSphereInFrustum(TransformedPosition,
-				   meshdata[i]->clipRadialSize()
+				   minmeshradius+meshdata[i]->clipRadialSize()
 #ifdef VARIABLE_LENGTH_PQR
 				   *SizeScaleFactor
 #endif 
