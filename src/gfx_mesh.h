@@ -228,12 +228,6 @@ protected:
   string *hash_name;
   // Support for reorganized rendering
   bool will_be_drawn;
-  struct MeshDrawContext {
-    //Transformation transformation;
-    //DrawContext(const Transformation &trans) : transformation(trans) { }
-    Matrix mat;
-    MeshDrawContext(Matrix m) { memcpy(mat, m, sizeof(Matrix)); }
-  };
   vector<MeshDrawContext> *draw_queue;
   int draw_sequence;
 public:

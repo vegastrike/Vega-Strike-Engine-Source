@@ -71,7 +71,6 @@ void Beam::Init (const Transformation & trans, const weapon_info &cln , void * o
   radialspeed = cln.RadialSpeed;
   thickness = cln.Radius;
   stability = cln.Stability;
-  energy = cln.EnergyRate;
   rangepenalty=cln.Longrange;
   damagerate = cln.Damage;
   refiretime = 0;

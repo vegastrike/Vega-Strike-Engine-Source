@@ -24,7 +24,6 @@ private:
   float lastlength;
   
   float stability;
-  float energy;
   float damagerate;
   float rangepenalty;
   float refire;
