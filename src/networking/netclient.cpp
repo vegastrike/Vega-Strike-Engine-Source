@@ -192,12 +192,17 @@ vector<string>	NetClient::loginLoop( string str_name, string str_passwd)
 
 	double initial = getNewTime();
 	double newtime=0;
+	double elapsed=0;
+	string login_tostr = vs_config->getVariable( "network", "logintimeout", "10" );
+	int login_to = atoi( login_tostr.c_str());
 	while( !timeout && !recv)
 	{
 		// If we have no response in 10 seconds -> fails
 		UpdateTime();
 		newtime = getNewTime();
-		if( newtime-initial > 10)
+		elapsed = newtime-initial;
+		//cout<<elapsed<<" seconds since login request"<<endl;
+		if( elapsed > login_to)
 		{
 			cout<<"Timed out"<<endl;
 			timeout = 1;
@@ -297,7 +302,8 @@ void	NetClient::start( char * addr, unsigned short port)
 	if( this->authenticate() == -1)
 	{
 		perror( "Error login in ");
-		cleanup();
+		QuitNow();
+		//cleanup();
 	}
 
 	cout<<"Initiating client loop"<<endl;
