@@ -411,6 +411,7 @@ void Cockpit::DrawGauges(Unit * un) {
       int tmp = (int)LookupTargetStat (i,un);
       char ourchar[32];
       sprintf (ourchar,"%d", tmp);
+      GFXColorf (textcol);
       text->Draw (string (ourchar));
     }
   }
@@ -595,6 +596,7 @@ void Cockpit::Draw() {
       }
       for (unsigned int vd=0;vd<vdu.size();vd++) {
 	if (vdu[vd]) {
+	  GFXColorf (textcol);
 	  vdu[vd]->Draw(un);
 	  //process VDU, damage VDU, targetting VDU
 	}
@@ -622,6 +624,7 @@ void Cockpit::Draw() {
 			text->SetPos (0-(x*2*14),0-(y*2));
 			mission->msgcenter->add("game","all","You Have Died!");
 		}
+		GFXColorf (textcol);
 		text->Draw ("You Have Died!");
 	}
 	dietime +=GetElapsedTime();
