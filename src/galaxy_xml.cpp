@@ -468,7 +468,10 @@ void Galaxy::setupPlanetTypeMaps() {
     for(;i!=planet_types->getHeirarchy().end();++i) {
       string name = (*i).first;
       string val = (*i).second["texture"];
-      
+      string::size_type  slash=val.rfind("/");
+	  if (slash!=string::npos) {
+		  val=val.substr(slash+1);
+	  }
       if (texture2name.find(val)!=texture2name.end()) {
         printf ("name conflict %s has texture %s and %s has texture %s\n",
                 name.c_str(),
