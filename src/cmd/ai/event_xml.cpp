@@ -53,7 +53,7 @@ namespace AIEvents {
       for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
 	switch(attr_map.lookup((*iter).name)) {
 	case TIMEIT:
-	  eam->curtime=eam->maxtime=(short)parse_float((*iter).value)/SIMULATION_ATOM;
+	  eam->curtime=eam->maxtime=(short)(parse_float((*iter).value)/SIMULATION_ATOM);
 	  break;
 	}
       }

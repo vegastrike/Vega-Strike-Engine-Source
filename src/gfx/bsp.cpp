@@ -85,13 +85,13 @@ float BSPNode::intersects(const Vector &start, const Vector &end, Vector & norm)
 	  u = t*v;//watch out for t==0,1
 	  Vector intersection = start + u;
 	  if (peq1>0) {
-	    if (temp = (back!=NULL)?back->intersects(intersection, end, norm):LITTLEVALUE)//pass in 'v' for the value of the normal, cus this one would intersect farther off.
+	    if ((temp = (back!=NULL)?back->intersects(intersection, end, norm):LITTLEVALUE))//pass in 'v' for the value of the normal, cus this one would intersect farther off.
 	      return u.Magnitude()+temp;
 	    return ((front!=NULL)?front->intersects(start, intersection,norm):false);
 	  } else {
-	    if (temp = (back!=NULL)?back->intersects(start,intersection,norm):LITTLEVALUE)
+	    if ((temp = (back!=NULL)?back->intersects(start,intersection,norm):LITTLEVALUE))
 	      return temp;
-	    if (temp = ((front!=NULL)?front->intersects(intersection,end,norm):false))
+	    if ((temp = ((front!=NULL)?front->intersects(intersection,end,norm):false)))
 	      return temp + u.Magnitude();
 	    return 0;
 	  }

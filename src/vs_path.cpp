@@ -29,12 +29,12 @@ void changehome(bool makehomedir) {
   if (makehomedir) {
     if (chdir (HOMESUBDIR)==-1) {
       //      system ("mkdir " HOMESUBDIR);
-      mkdir (HOMESUBDIR, 644);
+      mkdir (HOMESUBDIR, 0xFFFFFFFF);
     } else {
       chdir ("..");
     }
     if (chdir (HOMESUBDIR "/generatedbsp")==-1) {
-      mkdir (HOMESUBDIR "/generatedbsp", 644);
+      mkdir (HOMESUBDIR "/generatedbsp", 0xFFFFFFFF);
       //system ("mkdir " HOMESUBDIR "/generatedbsp");
     }else {
       chdir (pwent->pw_dir);

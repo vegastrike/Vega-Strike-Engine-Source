@@ -470,7 +470,7 @@ Texture::Texture (const char * FileNameRGB, const char *FileNameA, int stage, en
 		tmpclamp *=255;
 		if (tmpclamp>255)
 		  tmpclamp = 255;
-		data[4*j+itimes4width+3]= tmpclamp;
+		data[4*j+itimes4width+3]= (unsigned char)tmpclamp;
 			
 	      }
 	    }

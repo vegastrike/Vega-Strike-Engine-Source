@@ -77,8 +77,9 @@ void Camera::UpdateGFX(GFXBOOL updateFrustum)
 		}
 		GFXLookAt (Coord-R, Coord, Q);
 		if (updateFrustum) GFXCalculateFrustum();
-		Vector lastpos(view[12],view[13],view[14]);
+
 #ifdef PERFRAMESOUND		
+		Vector lastpos(view[12],view[13],view[14]);
 		AUDListener (Coord, (Coord-lastpos)/GetElapsedTime());//this pos-last pos / elapsed time
 #endif
 		GFXGetMatrix(VIEW,view);

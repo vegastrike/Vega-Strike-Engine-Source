@@ -142,7 +142,7 @@ void Cockpit::beginElement(const string &name, const AttributeList &attributes) 
   std::string myfont ("9x12.font");
   Names elem = (Names)element_map.lookup(name);
   Names attr;
-  unsigned char mymodes;
+  unsigned char mymodes=0;
   float xsize=-1,ysize=-1,xcent=FLT_MAX,ycent=FLT_MAX;
   float leftx=-10;  float rightx=-10;
   float topy=-10; float boty = -10;

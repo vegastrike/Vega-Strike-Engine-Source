@@ -50,5 +50,6 @@ vegastrike_SOURCES =				\
 	vegastrike.h				\
 	vs_globals.h 				\
 	vs_path.cpp				\
-	vs_path.h				
+	vs_path.h				\
+	audiolib.h
 
