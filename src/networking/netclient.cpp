@@ -584,6 +584,7 @@ void	NetClient::sendWebcamPicture()
 int NetClient::checkMsg( Packet* outpacket )
 {
     int ret=0;
+	string jpeg_str( "");
 
     if( clt_sock.isActive( ) )
     {
@@ -592,8 +593,15 @@ int NetClient::checkMsg( Packet* outpacket )
 #ifdef NETCOMM
 	// If we have network communications enabled and webcam support enabled we grab an image
 	if( NetComm->WebcamEnabled() && NetComm->WebcamTime())
-		NetComm->GrabImage( this->serial);
-	// And then send the string to concerned clients (to do in NetworkCommunication class)
+	{
+		jpeg_str = NetComm->GrabImage();
+		/* DO NOT SEND TO SERVER ANYMORE
+		Packet p;
+		// We don't need that to be reliable in UDP mode
+		p.send( CMD_CAMSHOT, clt->serial, netbuf.getData(), netbuf.getDataLength(), SENDANDFORGET, NULL, clt->clt_sock,
+                      __FILE__, PSEUDO__LINE__(49) );
+		*/
+	}
 #endif
 	
     return ret;

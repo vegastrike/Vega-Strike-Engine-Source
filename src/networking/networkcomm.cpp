@@ -31,10 +31,10 @@ NetworkCommunication::NetworkCommunication()
 #endif
 }
 
-int		NetworkCommunication::GrabImage( ObjSerial serial)
+string	NetworkCommunication::GrabImage()
 {
+	string jpeg_str( "");
 #ifndef NETCOMM_NOWEBCAM
-	string jpeg_str;
 	if( Webcam)
 	{
 		//cerr<<"--- Trying to grab an image..."<<endl;
@@ -44,13 +44,9 @@ int		NetworkCommunication::GrabImage( ObjSerial serial)
 		netbuf.addString( jpeg_str);
 		//cerr<<"--- grabbing finished"<<endl;
 		// We send this capture to server which will redirect it to concerned clients
-		Packet p;
-		// We don't need that to be reliable in UDP mode
-		p.send( CMD_CAMSHOT, serial, netbuf.getData(), netbuf.getDataLength(), SENDANDFORGET, NULL, this->clt_sock,
-                      __FILE__, PSEUDO__LINE__(49) );
 	}
 #endif
-	return 0;
+	return jpeg_str;
 }
 
 int		NetworkCommunication::InitSession( float frequency)

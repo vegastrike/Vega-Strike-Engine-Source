@@ -15,7 +15,8 @@ extern bool cleanexit;
 /**************************************************************************************************/
 AM_MEDIA_TYPE g_StillMediaType;
 STDMETHODIMP SampleGrabberCallback::BufferCB( double Time, BYTE *pBuffer, long BufferLen )
-	{
+{
+	cerr<<"\t\tProcessing a frame"<<endl;
 		// Check if it is time to send capture to communicating client(s)
 		//if( ws->isReady())
 		{
@@ -24,6 +25,8 @@ STDMETHODIMP SampleGrabberCallback::BufferCB( double Time, BYTE *pBuffer, long B
 				(g_StillMediaType.cbFormat < sizeof(VIDEOINFOHEADER)) ||
 				(g_StillMediaType.pbFormat == NULL))
 			{
+				cerr<<"INVALID MEDIA TYPE"<<endl;
+				exit(1);
 				return VFW_E_INVALIDMEDIATYPE;
 			}
 			long cbBitmapInfoSize = g_StillMediaType.cbFormat - SIZE_PREHEADER;
@@ -44,11 +47,38 @@ STDMETHODIMP SampleGrabberCallback::BufferCB( double Time, BYTE *pBuffer, long B
 			// - pBuffer (length BufferLen) : picture data
 			// Copy the actual jpeg in the old buffer before getting the new one
 			if( ws->old_buffer)
+			{
 				delete ws->old_buffer;
-			ws->old_size = ws->jpeg_size;
-			ws->old_buffer = ws_jpeg_buffer;
+				ws->old_buffer = NULL;
+			}
+			if( ws->jpeg_buffer)
+			{
+				ws->old_buffer = ws->jpeg_buffer;
+				ws->old_size = ws->jpeg_size;
+			}
+			
+			// Write p to a file for testing
+			char file[256];
+			memset( file, 0, 256);
+			sprintf( file, "%s%d%s", "testcam", ws->nbframes, ".jpg");
+			//string path = datadir+"testcam"+string( ws->nbframes)+".jpg";
+			string path = datadir+file;
+			FILE * fp;
+			fp = fopen( path.c_str(), "w");
+			if( !fp)
+			{
+				cerr<<"opening jpeg file failed"<<endl;
+				exit(1);
+			}
+			if( fwrite( pBuffer, 1, BufferLen, fp)!=BufferLen)
+			{
+				cerr<<"!!! ERROR : writing jpeg description to file"<<endl;
+				exit(1);
+			}
+			fclose( fp);
+
 			// JpegFromBmp should allocate the needed buffer;
-			ws->jpeg_buffer = JpegFromBmp( bfh, lpbi, pBuffer, BufferLen, &ws->jpeg_size, this->jpeg_quality, "c:\test.jpg");
+			ws->jpeg_buffer = JpegFromBmp( bfh, lpbi, pBuffer, BufferLen, &ws->jpeg_size, ws->jpeg_quality, "c:\test.jpg");
 		}
 
 		return S_OK;
@@ -120,7 +150,8 @@ void	WebcamSupport::DoError( long error, char * message)
 {
 	if( error)
 	{
-		cerr<<"!!! ERROR : "<<message<<" - code : "<<error<<endl;
+		cerr<<"!!! ERROR : "<<message<<" - code : "<<error<<" HEX : ";
+		cerr<<hex<<error<<endl;
 		this->Shutdown();
 		cleanexit = true;
 		winsys_exit(1);
@@ -172,6 +203,8 @@ WebcamSupport::WebcamSupport()
 	pEnum = NULL;
 	pMoniker = NULL;
 	pCap = NULL;
+	pControl = NULL;
+	pGraph = NULL;
 #endif
 }
 
@@ -233,49 +266,56 @@ int		WebcamSupport::Init()
 #else
 	HRESULT hr = CoInitialize( NULL );
 	if( FAILED( hr ) )
-		DoError( -1, "Failed to initialise COM");
+		DoError( hr, "Failed to initialise COM");
 
 	// Create the filter graph
-	IGraphBuilder *pGraph;
 	hr = CoCreateInstance( CLSID_FilterGraph, NULL, CLSCTX_INPROC_SERVER,
 		IID_IGraphBuilder, (void **)&pGraph );
 	if( FAILED( hr ) )
-		DoError( -1, "Failed to create filter graph");
+		DoError( hr, "Failed to create filter graph");
 
 	// Create the capture graph
-	ICaptureGraphBuilder2 *pCaptureGraph = NULL;
 	hr = CoCreateInstance( CLSID_CaptureGraphBuilder2, NULL, CLSCTX_INPROC_SERVER,
 		IID_ICaptureGraphBuilder2, (void**)&pCaptureGraph );
 	if( FAILED( hr ) )
-		DoError( -1, "Couldn't create capture graph");
+		DoError( hr, "Couldn't create capture graph");
 
-	pCaptureGraph->SetFiltergraph( pGraph );
-
+	hr = pCaptureGraph->SetFiltergraph( pGraph );
 	if( FAILED( hr ) )
-		DoError( -1, "Couldn't set filter graph");
+		DoError( hr, "Couldn't set filter graph");
 
 	// Select a capture device
-	ICreateDevEnum *pDevEnum = NULL;
-	IEnumMoniker *pEnum = NULL;
-	IMoniker *pMoniker = NULL;
-	IBaseFilter *pCap = NULL;
-
 	hr = CoCreateInstance( CLSID_SystemDeviceEnum, NULL, CLSCTX_INPROC_SERVER,
 		IID_ICreateDevEnum, reinterpret_cast<void **>( &pDevEnum ) );
+	if( FAILED( hr ) )
+		DoError( hr, "CoCreateInstance failed");
 	hr = pDevEnum->CreateClassEnumerator( CLSID_VideoInputDeviceCategory, &pEnum, 0 );
+	if( FAILED( hr ) )
+		DoError( hr, "CreateClassEnumerator failed");
 	hr = pEnum->Next( 1, &pMoniker, NULL );
+	if( FAILED( hr ) )
+		DoError( hr, "Next failed");
 	hr = pMoniker->BindToObject( 0, 0, IID_IBaseFilter, (void **)&pCap );
+	if( FAILED( hr ) )
+		DoError( hr, "BindToObject failed");
 
 	// Add input filter to graph
 	hr = pGraph->AddFilter( pCap, L"Capture Filter" );
+	if( FAILED( hr ) )
+		DoError( hr, "AddFilter failed");
 
 	// Add sample grabber filter to graph
-	IBaseFilter *pSampleGrabberF;
-	ISampleGrabber *pSampleGrabber;
+	IBaseFilter *pSampleGrabberF = NULL;
 	hr = CoCreateInstance( CLSID_SampleGrabber, NULL, CLSCTX_INPROC_SERVER,
 		IID_IBaseFilter, (void **)&pSampleGrabberF );
+	if( FAILED( hr ) )
+		DoError( hr, "CoCreateInstance2 failed");
 	hr = pGraph->AddFilter( pSampleGrabberF, L"Sample grabber" );
-	pSampleGrabberF->QueryInterface( IID_ISampleGrabber, (void **)&pSampleGrabber );
+	if( FAILED( hr ) )
+		DoError( hr, "AddFilter2 failed");
+	hr = pSampleGrabberF->QueryInterface( IID_ISampleGrabber, (void **)&pSampleGrabber );
+	if( FAILED( hr ) )
+		DoError( hr, "QueryInterface failed");
 
 	// Set some sample grabber variables
 	AM_MEDIA_TYPE mt;
@@ -283,20 +323,44 @@ int		WebcamSupport::Init()
 	mt.majortype = MEDIATYPE_Video;
 	mt.subtype = MEDIASUBTYPE_RGB24;
 	hr = pSampleGrabber->SetMediaType( &mt );
+	if( FAILED( hr ) )
+		DoError( hr, "SetMediaType failed");
 	hr = pSampleGrabber->SetOneShot( false );
+	if( FAILED( hr ) )
+		DoError( hr, "SetOneShot failed");
 	hr = pSampleGrabber->SetBufferSamples( true );
+	if( FAILED( hr ) )
+		DoError( hr, "SetBufferSamples failed");
 	// Associate the webcamsupport to the callback
 	g_SampleCB.ws = this;
 	hr = pSampleGrabber->SetCallback( &g_SampleCB, 1 );
+	if( FAILED( hr ) )
+		DoError( hr, "SetCallback failed");
 
 	// Add Null renderer
 	hr = CoCreateInstance( CLSID_NullRenderer, NULL, CLSCTX_INPROC_SERVER,
 		IID_IBaseFilter, (void **)&pNull );
+	if( FAILED( hr ) )
+		DoError( hr, "CoCreateInstance3 failed");
 	hr = pGraph->AddFilter( pNull, L"Null renderer" );
+	if( FAILED( hr ) )
+		DoError( hr, "AddFilter3 failed");
 
+	// Build video preview graph
+	hr = pCaptureGraph->RenderStream( &PIN_CATEGORY_PREVIEW, &MEDIATYPE_Video, pCap, pSampleGrabberF, NULL );
+	if( FAILED( hr ) )
+		DoError( hr, "Failed on RenderStream");
+
+	// Create media control and run graph
+	hr = pGraph->QueryInterface( IID_IMediaControl, (void **)&pControl );
+	if( FAILED( hr ) )
+		DoError( hr, "pGraph->QueryInterface failed");
+
+	/*
 	hr = pSampleGrabber->GetConnectedMediaType(&g_StillMediaType);
-	pSampleGrabber->Release();
-
+	if( FAILED( hr ) )
+		DoError( hr, "GetConnectedMediaType failed");
+	*/
 #endif
 	return 0;
 #endif
@@ -441,6 +505,9 @@ void	WebcamSupport::StartCapture()
 	//fcallback = CopyImage();
 	//capSetCallbackOnVideoStream(capvideo, CopyImage());
 #else
+	HRESULT hr = pControl->Run();
+	if( FAILED( hr))
+		DoError( hr, "pControl->Run() failed");
 #endif
 #endif
 #ifdef __APPLE__
@@ -475,6 +542,7 @@ if( grabbing)
 #ifndef DSHOW
     capDriverDisconnect (capvideo);
 #else
+	HRESULT hr = pControl->Stop();
 #endif
 #endif
 #ifdef __APPLE__
@@ -551,6 +619,12 @@ if( grabbing)
 #else
 	// DirectShow uses a callback interface so there is nothing to do here
 	// We just return the allocated buffer for jpeg file
+	if( !jpeg_buffer)
+	{
+		cerr<<"Frame #"<<nbframes<<" !!! JPEG BUFFER EMPTY !!!"<<endl;
+		return string("");
+	}
+	cerr<<"Frame #"<<nbframes<<" --== JPEG BUFFER OK ==--"<<endl;
 	return string( jpeg_buffer);
 #endif
 #endif
@@ -607,6 +681,13 @@ void	WebcamSupport::Shutdown()
 #if defined(_WIN32) && !defined(__CYGWIN__)
 #ifndef DSHOW
 #else
+	pSampleGrabber->Release();
+	pDevEnum->Release();
+	pEnum->Release();
+	pMoniker->Release();
+	pCap->Release();
+	pCaptureGraph->Release();
+	pGraph->Release();
 	//FreeMediaType(g_StillMediaType);
 	CoUninitialize();
 #endif
@@ -659,7 +740,10 @@ struct ima_error_mgr
 char * JpegFromBmp( BITMAPFILEHEADER & bfh, LPBITMAPINFOHEADER & lpbi, BYTE * bmpbuffer, long BufferLen, int * jpglength, int quality, std::string csJpeg)
 {
     if (quality < 0 || quality > 100 || bmpbuffer == NULL || (!csJpeg.size()) )
-		DoError( -1, "Bad parameters");
+	{
+		cerr<<"Bad parameters";
+		exit(1);
+	}
 
     byte *buf2 = 0;
 
@@ -675,7 +759,10 @@ char * JpegFromBmp( BITMAPFILEHEADER & bfh, LPBITMAPINFOHEADER & lpbi, BYTE * bm
     jpeg_create_compress(&cinfo);
 
     if ((pOutFile = fopen(csJpeg.c_str(), "wb")) == NULL)
-		DoError( -1, "opening of jpeg file failed.");
+	{
+		cerr<<"opening of jpeg file failed.";
+		exit(1);
+	}
 
     jpeg_stdio_dest(&cinfo, pOutFile);
 
@@ -821,7 +908,10 @@ BOOL DibToSamps2( BITMAPFILEHEADER & bfh, LPBITMAPINFOHEADER & pbBmHdr, BYTE * b
 {
    //Sanity...
    if (bmpbuffer == NULL || nSampsPerRow <= 0 ) 
-		DoError( -1, "DibToSamps failed");
+   {
+		cerr<<"DibToSamps failed"<<endl;
+		exit(1);
+   }
 
    int r=0, p=0, q=0, b=0, n=0, 
        nUnused=0, nBytesWide=0, nUsed=0, nLastBits=0, nLastNibs=0, nCTEntries=0,
@@ -846,7 +936,8 @@ BOOL DibToSamps2( BITMAPFILEHEADER & bfh, LPBITMAPINFOHEADER & pbBmHdr, BYTE * b
          break;
 
       default:
-		  DoError( -1, "Invalid bitmap bit count");
+		  cerr<<"Invalid bitmap bit count";
+		  exit(1);
    }
 
    //Point to the color table and pixels

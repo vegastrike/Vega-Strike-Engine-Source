@@ -2,7 +2,6 @@
 #define __NETWORKCOMM_H
 
 #include "client.h"
-//struct Client;
 #include <list>
 #include <config.h> // for NETCOMM_NOSOUND
 
@@ -37,7 +36,7 @@ class NetworkCommunication
 		~NetworkCommunication();
 
 		int		InitSession( float frequency);
-		int		GrabImage( ObjSerial serial);
+		string	GrabImage();
 		int		DestroySession();
 		bool	WebcamEnabled();
 		bool	WebcamTime();

@@ -99,6 +99,8 @@ class	WebcamSupport
 		IMoniker *pMoniker;
 		IBaseFilter *pCap;
 		IBaseFilter *pNull;
+		IMediaControl *pControl;
+		ISampleGrabber *pSampleGrabber;
 
 		friend class SampleGrabberCallback;
 #endif
