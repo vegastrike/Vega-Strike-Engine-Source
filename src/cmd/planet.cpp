@@ -181,12 +181,37 @@ GamePlanet::GamePlanet(QVector x,QVector y,float vely, const Vector & rotvel, fl
   }
   //  BLENDFUNC blendSrc=SRCALPHA;
   //  BLENDFUNC blendDst=INVSRCALPHA;
-  static int stacks=XMLSupport::parse_int(vs_config->getVariable ("graphics","planet_detail","24"));
-  atmospheric=!(blendSrc==ONE&&blendDst==ZERO);
-  meshdata.push_back(new SphereMesh(radius, stacks, stacks, textname, NULL,inside_out,blendSrc,blendDst));
-  meshdata.back()->setEnvMap(GFXFALSE);
-  meshdata.back()->SetMaterial (ourmat);
-  meshdata.push_back(NULL);
+  bool wormhole = dest.size()!=0;
+  if (wormhole ) {
+	  static std::string wormhole_unit = vs_config->getVariable ("graphics","wormhole","wormhole");
+	  string wormholename = wormhole_unit+".stable";
+	  
+	  Unit * jump = UnitFactory::createUnit (wormholename.c_str(),true,faction);
+	  if (jump->name=="LOAD_FAILED") {
+		  wormhole=false;
+	  }else {
+		  this->meshdata = jump->meshdata;
+		  jump->meshdata.clear();
+		  un_iter i;
+		  Unit * su;
+		  for (i=jump->getSubUnits();(su=*i)!=NULL;++i) {
+			  SubUnits.prepend (su);
+		  }
+		  for (i=jump->getSubUnits();(su=*i)!=NULL;) {
+			  i.remove();
+		  }
+	  }
+	  jump->Kill();
+  }
+  if (!wormhole) {
+	  static int stacks=XMLSupport::parse_int(vs_config->getVariable ("graphics","planet_detail","24"));
+	  atmospheric=!(blendSrc==ONE&&blendDst==ZERO);
+	  meshdata.push_back(new SphereMesh(radius, stacks, stacks, textname, NULL,inside_out,blendSrc,blendDst));
+	  meshdata.back()->setEnvMap(GFXFALSE);
+	  meshdata.back()->SetMaterial (ourmat);
+	  meshdata.push_back(NULL);
+  }
+
   calculate_extent(false);
 
   /*stupid Sphere BSP when intersection should do
