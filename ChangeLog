@@ -1,7 +1,14 @@
-2002-02-02 Daniel Horn <hellcatv@hotmail.com>
+2002-02-09 Alexander Rawass <alexannika@users.sourceforge.net>
+
+	* test mission for dana
+	* no CXXFLAGS/optimization for src/cmd/script/c_alike
+
+	
+2002-02-09 Daniel Horn <hellcatv@hotmail.com>
 	* Fixed absolutely horrible ucref 'smart pointer' bug with subunits
 	* Added some original mining bases by DMJC
 	
+
 2002-02-08 Daniel Horn <hellcatv@hotmail.com>
 	* Added Day/Year tag to system
 	* Removed velocity tag from system (besides it should have been speed...misleading)
@@ -106,10 +113,7 @@
 	* Fixed ancient ~Beam bug that would cause segfault at null pointer if all beams with a certain texture were deleted.
 	* Fixed bug that caused clipping to incorrectly clip after 'host' camera starship destroyed
 
-<<<<<<< ChangeLog
 
-=======
->>>>>>> 1.110
 2002-01-28 Daniel Aleksandrow <dandandaman@users.sourceforge.net>
 
 	* New ship (the Revoker).....unit file not finished
