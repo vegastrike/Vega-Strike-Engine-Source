@@ -491,6 +491,7 @@ void InputDFA::SetState (State st) {
 }
 
 void InputDFA::Draw () {
+  GFXBlendMode (ONE,ONE);
   switch (state) {
   case NONE:	//draw arrow
     if (Selecting) { 

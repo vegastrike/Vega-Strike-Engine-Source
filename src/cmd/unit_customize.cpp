@@ -9,7 +9,9 @@
 
 #include "gui/text_area.h"
 #include "gui/button.h"
-
+#include "vs_globals.h"
+#include "gfx/sprite.h"
+#include "gfx/aux_texture.h"
 #define UPGRADEOK 1
 #define NOTTHERE 0
 #define CAUSESDOWNGRADE -1
@@ -427,12 +429,13 @@ void RefreshGUI(void) {
 	OK->Refresh();
 	EndFrame();
 }
-
+static int mmx=0;
+static int mmy=0;
 void StartFrame(void) {
-  
-  glutSetCursor(GLUT_CURSOR_INHERIT);
+  //  glutSetCursor(GLUT_CURSOR_INHERIT);
   GFXHudMode (true);
   GFXColor4f (1,1,1,1);
+
   GFXDisable (DEPTHTEST);
   GFXDisable (DEPTHWRITE);
   GFXDisable (LIGHTING);
@@ -442,8 +445,20 @@ void StartFrame(void) {
   GFXDisable (TEXTURE1);
   GFXEnable (TEXTURE0);
 }
+void DrawMouse(int mousex, int mousey) {
+  static Sprite MouseSprite ("mouse.spr",BILINEAR);
+  GFXColor4f (1,1,1,1);
+  GFXBlendMode (ONE,ONE);
+  float sizex,sizey;
+  MouseSprite.GetSize(sizex,sizey);
+  MouseSprite.SetPosition(-1+.5*sizex+float(mousex)/(.5*g_game.x_resolution),1+.5*sizey-float(mousey)/(.5*g_game.y_resolution));
+  MouseSprite.Draw();
+}
 
 void EndFrame(void) {
+  static Texture dummy ("white.bmp");
+  dummy.MakeActive();
+  DrawMouse(mmx,mmy);
   GFXEndScene();
   GFXHudMode(false);
   GFXEnable (CULLFACE);
@@ -451,14 +466,20 @@ void EndFrame(void) {
 }
 
 void ProcessMouseClick(int button, int state, int x, int y) {
+  mmx=x;
+  mmy=y;
 	ProcessMouse(1, x, y, button, state);
 }
 
 void ProcessMouseActive(int x, int y) {
+  mmx=x;
+  mmy=y;
 	ProcessMouse(2, x, y, 0, 0);
 }
 
 void ProcessMousePassive(int x, int y) {
+  mmx=x;
+  mmy=y;
 	ProcessMouse(3, x, y, 0, 0);
 }
 
