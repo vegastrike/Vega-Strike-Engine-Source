@@ -109,7 +109,7 @@ void Unit::ProcessDeleteQueue() {
 }
 
 
-static unsigned short apply_float_to_short (float tmp) {
+unsigned short apply_float_to_short (float tmp) {
   unsigned  short ans = (unsigned short) tmp;
   tmp -=ans;//now we have decimal;
   if (((float)rand())/((float)RAND_MAX)<tmp)

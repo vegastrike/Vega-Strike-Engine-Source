@@ -706,17 +706,21 @@ void Unit::UnFire () {
     mounts[i].UnFire();//turns off beams;
   }
 }
+extern unsigned short apply_float_to_short (float tmp);
 void Unit::Fire (bool Missile) {
   for (int i=0;i<nummounts;i++) {
     if (mounts[i].type.type==weapon_info::BEAM) {
-      if (mounts[i].type.EnergyRate*SIMULATION_ATOM>energy)
+      if (mounts[i].type.EnergyRate*SIMULATION_ATOM>energy) {
+	mounts[i].UnFire();
 	continue;
+      }
     }else{ 
       if (mounts[i].type.EnergyRate>energy) 
 	continue;
     }
     if (mounts[i].Fire(cumulative_transformation,cumulative_transformation_matrix,Velocity,this,Target(),Missile)) {//FIXME turrets
-    energy -=(short)( mounts[i].type.type==weapon_info::BEAM?mounts[i].type.EnergyRate*SIMULATION_ATOM:mounts[i].type.EnergyRate);
+
+    energy -=apply_float_to_short( mounts[i].type.type==weapon_info::BEAM?mounts[i].type.EnergyRate*SIMULATION_ATOM:mounts[i].type.EnergyRate);
     }//unfortunately cumulative transformation not generated in physics atom
   }
 }
@@ -736,7 +740,7 @@ bool Unit::Mount::Fire (const Transformation &Cumulative, const float * m, const
       if (ref.gun->Ready())
 	ref.gun->Init (LocalPosition,type,owner);
       else 
-	return false;//can't fire an active beam
+	return true;//can't fire an active beam
   }else { 
     if (ref.refire>type.Refire) {
       if (ammo>0)

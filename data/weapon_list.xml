@@ -1,6 +1,6 @@
 <Weapons>
 <Bolt name="Laser" mountsize="light"> 
-<Energy rate="1" stability="4" refire=".4">
+<Energy rate="10" stability="4" refire=".4">
 </Energy>
 <Damage rate="20" damage="18" longrange="1">
 </Damage>

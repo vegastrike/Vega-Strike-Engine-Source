@@ -43,7 +43,7 @@ Sprite::Sprite(const char *file) {
   heighto2 = 0;
   rotation = 0;
   surface = NULL;
-  maxs = maxt =1;
+  maxs = maxt =0;
   FILE *fp = fopen(file, "r");
   if (fp) {
     char texture[64]={0};
@@ -100,22 +100,22 @@ void Sprite::Draw()
       const float sh = heighto2*sin(M_PI_2+rotation);
       const float wnew = cw+ch;
       const float hnew = sw+sh;
-      GFXTexCoord2f(0.00f, maxt);
+      GFXTexCoord2f(maxs, 1);
       GFXVertex3f(xcenter-wnew, ycenter+hnew, 0.00f);
-      GFXTexCoord2f(maxs, maxt);
+      GFXTexCoord2f(1, 1);
       GFXVertex3f(xcenter+wnew, ycenter+hnew, 0.00f);
-      GFXTexCoord2f(maxs, 0.00f);
+      GFXTexCoord2f(1, maxt);
       GFXVertex3f(xcenter+wnew, ycenter-hnew, 0.00f);
-      GFXTexCoord2f(0.00f, 0.00f);
+      GFXTexCoord2f(maxs, maxt);
       GFXVertex3f(xcenter-wnew, ycenter-hnew, 0.00f);
     } else {
-      GFXTexCoord2f(0.00f, maxt);
+      GFXTexCoord2f(maxs, 1);
       GFXVertex3f(xcenter-widtho2, ycenter+heighto2, 0.00f);
-      GFXTexCoord2f(maxs, maxt);
+      GFXTexCoord2f(1, 1);
       GFXVertex3f(xcenter+widtho2, ycenter+heighto2, 0.00f);
-      GFXTexCoord2f(maxs, 0.00f);
+      GFXTexCoord2f(1, maxt);
       GFXVertex3f(xcenter+widtho2, ycenter-heighto2, 0.00f);
-      GFXTexCoord2f(0.00f, 0.00f);
+      GFXTexCoord2f(maxs, maxt);
       GFXVertex3f(xcenter-widtho2, ycenter-heighto2, 0.00f);
     }
     GFXEnd();

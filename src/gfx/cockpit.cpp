@@ -11,7 +11,7 @@ static void LocalToRadar (const Vector & pos, float &s, float &t) {
   s = (pos.k>0?pos.k:0)+1;
   t = 2*sqrtf(pos.i*pos.i + pos.j*pos.j + s*s);
   s = -pos.i/t;
-  t = -pos.j/t;
+  t = pos.j/t;
 }
 
 static GFXColor relationToColor (float relation) {
@@ -73,6 +73,8 @@ void Cockpit::DrawBlips (Unit * un) {
   float s,t;
   float xsize,ysize,xcent,ycent;
   Radar->GetSize (xsize,ysize);
+  xsize = fabs (xsize);
+  ysize = fabs (ysize);
   Radar->GetPosition (xcent,ycent);
   GFXDisable (TEXTURE0);
   GFXDisable (LIGHTING);
