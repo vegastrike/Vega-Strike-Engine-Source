@@ -704,11 +704,15 @@ void	GameStarSystem::createBackground( StarSystem::StarXML * xml)
   //string bglight= VSFileSystem::sharedtextures+"/"+xml->backgroundname+"_light.bmp";
   string bglight= xml->backgroundname+"_light.bmp";
   string bgfile = xml->backgroundname+"_light.bmp";
-  LightMap[0] = new Texture(bgfile.c_str(), 1,MIPMAP,TEXTURE2D,TEXTURE_2D,GFXTRUE);
-  if (!LightMap[0]->LoadSuccess()) {
-      EnvironmentMapGeneratorMain (bglight.c_str(),bglight.c_str(), 0,xml->reflectivity,1);
-      LightMap[0] = new Texture(bgfile.c_str(), 1,MIPMAP,TEXTURE2D,TEXTURE_2D,GFXTRUE);
+  VSFile f;
+  VSError err = f.OpenReadOnly(bgfile,TextureFile);
+  if (err>Ok) {
+      EnvironmentMapGeneratorMain (xml->backgroundname.c_str(),bglight.c_str(), 0,xml->reflectivity,1);
+  }else {
+	  f.Close();
   }
+  LightMap[0] = new Texture(bgfile.c_str(), 1,MIPMAP,TEXTURE2D,TEXTURE_2D,GFXTRUE);
+  
 #endif
   bg = new Background(xml->backgroundname.c_str(),xml->numstars,g_game.zfar*.9,filename);
   stars = new Stars (xml->numnearstars, xml->starsp);

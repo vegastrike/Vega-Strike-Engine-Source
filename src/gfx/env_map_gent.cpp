@@ -178,7 +178,7 @@ using namespace VSFileSystem;
 
   unsigned char ctemp;
   VSFile f;
-  VSError err = f.OpenReadOnly( FileName, Unknown);
+  VSError err = f.OpenReadOnly( FileName, TextureFile);
 	if (err>Ok)
 	{
 		return false;
@@ -477,7 +477,7 @@ void EnvironmentMapGeneratorMain(const char * inpt, const char *outpt, float a, 
 	{
 	  memset( tmp, 0, size);
 	  strcpy( tmp, inpt);
-	  VSError err = f.OpenReadOnly( strcat (tmp,"_up.bmp"), TextureFile);
+	  err = f.OpenReadOnly( strcat (tmp,"_up.bmp"), TextureFile);
 	}
     //bool share = false;
     std::string s;
