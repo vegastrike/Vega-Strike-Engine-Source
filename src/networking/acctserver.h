@@ -1,6 +1,7 @@
 #ifndef __ACCTSERVER_H
 #define __ACCTSERVER_H
 
+#define NO_UNIT_STUFF
 #include <vector>
 
 #include "configxml.h"

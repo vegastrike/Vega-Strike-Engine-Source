@@ -2156,7 +2156,7 @@ static int applyto (unsigned short &shield, const unsigned short max, const floa
   return (shield>=max)?1:0;
 }
 
-float totalShieldVal (const Unit::Shield & shield) {
+float totalShieldVal (const Shield & shield) {
 	float maxshield=0;
 	switch (shield.number)  {
   case 2:
@@ -2171,7 +2171,7 @@ float totalShieldVal (const Unit::Shield & shield) {
 	}
 	return maxshield;
 }
-float totalShieldEnergyCapacitance (const Unit::Shield & shield) {
+float totalShieldEnergyCapacitance (const Shield & shield) {
 	static float shieldenergycap = XMLSupport::parse_float(vs_config->getVariable ("physics","shield_energy_capacitance",".2"));
 	return shieldenergycap * totalShieldVal(shield);
 }

@@ -1764,7 +1764,7 @@ void	NetServer::BroadcastFire( ObjSerial serial, int weapon_index, ObjSerial mis
 	zonemgr->broadcast( zone, serial, &p );
 }
 
-void	NetServer::sendDamages( ObjSerial serial, unsigned short zone, Unit::Shield shield, Unit::Armor armor, float ppercentage, float spercentage, float amt, Vector & pnt, Vector & normal, GFXColor & color)
+void	NetServer::sendDamages( ObjSerial serial, unsigned short zone, Shield shield, Armor armor, float ppercentage, float spercentage, float amt, Vector & pnt, Vector & normal, GFXColor & color)
 {
 	Packet p;
 	NetBuffer netbuf;

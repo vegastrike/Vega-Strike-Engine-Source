@@ -187,7 +187,7 @@ Transformation	NetBuffer::getTransformation()
 			return t;
 		}
 
-void	NetBuffer::addShield( SHIELD shield)
+void	NetBuffer::addShield( Shield shield)
 {
 	this->addChar( shield.number);
 	this->addChar( shield.leak);
@@ -222,9 +222,9 @@ void	NetBuffer::addShield( SHIELD shield)
 		break;
 	}
 }
-SHIELD	NetBuffer::getShield()
+Shield	NetBuffer::getShield()
 {
-	Unit::Shield shield;
+	Shield shield;
 	checkBuffer( sizeof( shield));
 	shield.number = this->getChar();
 	shield.leak = this->getChar();
@@ -261,16 +261,16 @@ SHIELD	NetBuffer::getShield()
 
 	return shield;
 }
-void		NetBuffer::addArmor( ARMOR armor)
+void		NetBuffer::addArmor( Armor armor)
 {
 	this->addShort( armor.front);
 	this->addShort( armor.back);
 	this->addShort( armor.right);
 	this->addShort( armor.left);
 }
-ARMOR	NetBuffer::getArmor()
+Armor	NetBuffer::getArmor()
 {
-	Unit::Armor armor;
+	Armor armor;
 	checkBuffer( sizeof( armor));
 	armor.front = this->getShort();
 	armor.back = this->getShort();

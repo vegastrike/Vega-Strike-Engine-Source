@@ -23,8 +23,8 @@ using namespace std;
     extern "C" int access( const char* name, int mode );
 #endif
 
-#ifdef _WIN32
 #include <sys/stat.h>
+#ifdef _WIN32
 #define HAVE_LSTAT
 #define lstat _stat
 #define stat _stat

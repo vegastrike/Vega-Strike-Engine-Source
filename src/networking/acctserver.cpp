@@ -77,7 +77,7 @@ void    AccountServer::start()
     if(Cltacct.size()<=0)
     {
         cout<<"No account found in accounts.xml"<<endl;
-        cleanup();
+		exit(1);
     }
     cout<<Cltacct.size()<<" accounts loaded."<<endl;
 
@@ -530,7 +530,7 @@ void    AccountServer::sendAuthorized( SOCKETALT sock, Account * acct)
         else
         {
             cout<<"Error, default save not found"<<endl;
-            cleanup();
+			exit(1);
         }
         // Put the name and passwd of the player in the packet
         netbuf.addString( acct->callsign);
@@ -555,7 +555,7 @@ void    AccountServer::sendAuthorized( SOCKETALT sock, Account * acct)
         else
         {
             cout<<"Error, default xml not found"<<endl;
-            cleanup();
+			exit(1);
         }
         netbuf.addString( string( xmlbuf));
         cout<<"Save size = "<<readsize<<" - XML size = "<<readsize2<<endl;

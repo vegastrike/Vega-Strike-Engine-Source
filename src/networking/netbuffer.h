@@ -7,11 +7,9 @@
 #include "gfx/matrix.h"
 #include "gfx/quaternion.h"
 #include "networking/vsnet_clientstate.h"
-#include "cmd/unit_generic.h"
+#include "cmd/unit_armorshield.h"
 
 struct GFXColor;
-typedef	Unit::Shield	SHIELD;
-typedef	Unit::Armor		ARMOR;
 
 class NetBuffer
 {
@@ -67,10 +65,10 @@ class NetBuffer
 			offset += wisize;
 			return tmp;
 		}
-		void		addShield( SHIELD shield);
-		SHIELD		getShield();
-		void		addArmor( ARMOR armor);
-		ARMOR		getArmor();
+		void		addShield( Shield shield);
+		Shield		getShield();
+		void		addArmor( Armor armor);
+		Armor		getArmor();
 
 		void			addSerial( ObjSerial serial);
 		ObjSerial		getSerial();
