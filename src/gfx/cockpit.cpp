@@ -519,12 +519,18 @@ float Cockpit::LookupTargetStat (int stat, Unit *target) {
   case ARMORL:
   case ARMORB:
     target->ArmorData (armordat);
+    if (armordat[stat-ARMORF]>StartArmor[stat-ARMORF]) {
+      StartArmor[stat-ARMORF]=armordat[stat-ARMORF];
+    }
     return ((float)armordat[stat-ARMORF])/StartArmor[stat-ARMORF];
   case FUEL:
     return target->FuelData()/maxfuel;
   case ENERGY:
     return target->EnergyData();
   case HULL:
+    if (maxhull<target->GetHull()) {
+      maxhull = target->GetHull();
+    }
     return target->GetHull()/maxhull;
   case EJECT:
     return (((target->GetHull()/maxhull)<.25)&&(target->BShieldData()<.25||target->FShieldData()<.25))?1:0;
