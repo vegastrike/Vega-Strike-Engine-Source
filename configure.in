@@ -45,8 +45,8 @@ dnl --------------------------------------------------------------------------
 dnl General options
 dnl --------------------------------------------------------------------------
 TR_CPPFLAGS=""
-TR_CFLAGS="-O3 -Wall -fomit-frame-pointer -ffast-math -fexpensive-optimizations"
-TR_CXXFLAGS="-O3 -Wall -fomit-frame-pointer  -ffast-math -fexpensive-optimizations"
+TR_CFLAGS="-O2 -g -Wall -ffast-math -fexpensive-optimizations"
+TR_CXXFLAGS="-O2 -g -Wall  -ffast-math -fexpensive-optimizations"
 TR_LIBS=""
 
 case "$host" in
