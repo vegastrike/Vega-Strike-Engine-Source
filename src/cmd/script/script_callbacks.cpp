@@ -606,6 +606,40 @@ string Mission::method_str(missionNode *node){
   return  node->attr_value("module")+"."+node->attr_value("name");
 }
 
+bool Mission::getBoolArg(missionNode *node,int mode,int arg_nr){
+  missionNode *val_node=getArgument(node,mode,arg_nr);
+  bool res=checkBoolExpr(val_node,mode);
+  return res;
+}
+float Mission::getFloatArg(missionNode *node,int mode,int arg_nr){
+  missionNode *val_node=getArgument(node,mode,arg_nr);
+  float res=checkFloatExpr(val_node,mode);
+  return res;
+}
+
+Unit* Mission::getUnitArg(missionNode *node,int mode,int arg_nr){
+  missionNode *unit_node=getArgument(node,mode,arg_nr);
+  varInst *unit_vi=checkObjectExpr(unit_node,mode);
+  if(unit_vi->type==VAR_OBJECT && unit_vi->objectname=="unit"){
+    return getUnitObject(unit_node,mode,unit_vi);
+  }
+  fatalError(node,mode,"expected unit arg - got else");
+  assert(0);
+  return NULL; // never reach
+}
+Vector Mission::getVec3Arg(missionNode *node,int mode,int arg_nr){
+  missionNode *pos_node=getArgument(node,mode,arg_nr);
+  varInst *pos_vi=checkObjectExpr(pos_node,mode);
+  olist_t *pos_olist=getOListObject(pos_node,mode,pos_vi);
+
+  Vector vec3;
+  if(mode==SCRIPT_RUN){
+    vec3=call_olist_tovector(pos_node,mode,pos_vi);
+  }
+
+  return vec3;
+}
+
 missionNode *Mission::getArgument(missionNode *node,int mode,int arg_nr){
       if(node->subnodes.size() < arg_nr+1){
 	char buf[200];

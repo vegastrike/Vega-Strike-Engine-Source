@@ -219,6 +219,108 @@ varInst *Mission::call_unit(missionNode *node,int mode){
 	//return viret;
       }
     }
+    else if(cmd=="getTarget"){
+      Unit *res_unit=NULL;
+      if(mode==SCRIPT_RUN){
+	res_unit=my_unit->Target();
+      }
+      viret=newVarInst(VI_TEMP);
+      viret->type=VAR_OBJECT;
+      viret->objectname="unit";
+      viret->object=res_unit;
+    }
+    else if(cmd=="getThreat"){
+      Unit *res_unit=NULL;
+      if(mode==SCRIPT_RUN){
+	res_unit=my_unit->Threat();
+      }
+      viret=newVarInst(VI_TEMP);
+      viret->type=VAR_OBJECT;
+      viret->objectname="unit";
+      viret->object=res_unit;
+    }
+    else if(cmd=="setTarget"){
+      Unit *other_unit=getUnitArg(node,mode,1);
+      if(mode==SCRIPT_RUN){
+	my_unit->Target(other_unit);
+      }
+      viret=newVarInst(VI_TEMP);
+      viret->type=VAR_VOID;
+    }
+    else if(cmd=="getFShieldData"){
+      float res=0.0;
+      if(mode==SCRIPT_RUN){
+	res=my_unit->FShieldData();
+      }
+      viret=newVarInst(VI_TEMP);
+      viret->type=VAR_FLOAT;
+      viret->float_val=res;
+    }
+    else if(cmd=="getRShieldData"){
+      float res=0.0;
+      if(mode==SCRIPT_RUN){
+	res=my_unit->RShieldData();
+      }
+      viret=newVarInst(VI_TEMP);
+      viret->type=VAR_FLOAT;
+      viret->float_val=res;
+    }
+    else if(cmd=="getLShieldData"){
+      float res=0.0;
+      if(mode==SCRIPT_RUN){
+	res=my_unit->LShieldData();
+      }
+      viret=newVarInst(VI_TEMP);
+      viret->type=VAR_FLOAT;
+      viret->float_val=res;
+    }
+    else if(cmd=="getBShieldData"){
+      float res=0.0;
+      if(mode==SCRIPT_RUN){
+	res=my_unit->BShieldData();
+      }
+      viret=newVarInst(VI_TEMP);
+      viret->type=VAR_FLOAT;
+      viret->float_val=res;
+    }
+    else if(cmd=="getEnergyData"){
+      float res=0.0;
+      if(mode==SCRIPT_RUN){
+	res=my_unit->EnergyData();
+      }
+      viret=newVarInst(VI_TEMP);
+      viret->type=VAR_FLOAT;
+      viret->float_val=res;
+    }
+    else if(cmd=="getHullData"){
+      float res=0.0;
+      if(mode==SCRIPT_RUN){
+	res=my_unit->GetHull();
+      }
+      viret=newVarInst(VI_TEMP);
+      viret->type=VAR_FLOAT;
+      viret->float_val=res;
+    }
+    else if(cmd=="getRSize"){
+      float res=0.0;
+      if(mode==SCRIPT_RUN){
+	res=my_unit->rSize();
+      }
+      viret=newVarInst(VI_TEMP);
+      viret->type=VAR_FLOAT;
+      viret->float_val=res;
+    }
+    else if(cmd=="getOrientationP"){
+#if 0
+      //TODO
+      if(mode==SCRIPT_RUN){
+	res=my_unit->FShieldData();
+      }
+      viret=newVarInst(VI_TEMP);
+      viret->type=VAR_VOID;
+      viret->float_val=res;
+#endif
+    }
     else if(cmd=="getOrder"){
       Order *my_order=NULL;
 

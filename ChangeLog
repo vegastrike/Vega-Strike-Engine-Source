@@ -1,3 +1,11 @@
+2001-12-30 Alexander Rawass <alexannika@users.sourceforge.net>
+	
+	* added more Orders to the _order callback
+	* made AImissionScript a subclass of FlyByWire
+	* added FlyByWire-Callbacks to the _order callbacks
+	* added more callbacks to _unit
+	
+
 2001-12-29 Alexander Rawass <alexannika@users.sourceforge.net>
 	
 	* 'fixed' aggressive.cpp

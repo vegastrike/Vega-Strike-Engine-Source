@@ -44,6 +44,8 @@
 #include "cmd/ai/order.h"
 #include "cmd/ai/aggressive.h"
 #include "cmd/ai/navigation.h"
+#include "cmd/ai/flybywire.h"
+#include "cmd/ai/tactics.h"
 
 #include "mission.h"
 #include "easydom.h"
@@ -106,6 +108,212 @@ varInst *Mission::call_order(missionNode *node,int mode){
 
     return viret;
   }
+  else if(cmd=="newChangeHeading"){
+    missionNode *pos_node=getArgument(node,mode,0);
+    varInst *pos_vi=checkObjectExpr(pos_node,mode);
+    olist_t *pos_olist=getOListObject(pos_node,mode,pos_vi);
+
+    missionNode *sw_node=getArgument(node,mode,1);
+    int nr_switchbacks=checkIntExpr(sw_node,mode);
+
+    Order *my_order=NULL;
+
+    if(mode==SCRIPT_RUN){
+      Vector vec3=call_olist_tovector(pos_node,mode,pos_vi);
+      
+      my_order=new Orders::ChangeHeading(vec3,nr_switchbacks);
+    }
+
+    viret=newVarInst(VI_TEMP);
+    viret->type=VAR_OBJECT;
+    viret->objectname="order";
+    
+    viret->object=(void *)my_order;
+
+    return viret;
+  }
+  else if(cmd=="newFaceTarget"){
+    missionNode *itts_node=getArgument(node,mode,0);
+    bool itts=checkBoolExpr(itts_node,mode);
+
+    missionNode *fini_node=getArgument(node,mode,1);
+    bool fini=checkBoolExpr(fini_node,mode);
+
+    missionNode *acc_node=getArgument(node,mode,2);
+    int acc=checkIntExpr(acc_node,mode);
+
+    Order *my_order=NULL;
+
+    if(mode==SCRIPT_RUN){
+      if(itts){
+	my_order=new Orders::FaceTargetITTS(fini,acc);
+      }
+      else{
+	my_order=new Orders::FaceTarget(fini,acc);
+      }
+    }
+
+    viret=newVarInst(VI_TEMP);
+    viret->type=VAR_OBJECT;
+    viret->objectname="order";
+    
+    viret->object=(void *)my_order;
+
+    return viret;
+  }
+  else if(cmd=="newFireAt"){
+    missionNode *reaction_node=getArgument(node,mode,0);
+    float reaction=checkFloatExpr(reaction_node,mode);
+
+    missionNode *aggr_node=getArgument(node,mode,1);
+    float aggr=checkFloatExpr(aggr_node,mode);
+
+    Order *my_order=NULL;
+    if(mode==SCRIPT_RUN){
+      my_order=new Orders::FireAt(reaction,aggr);
+    }
+
+    viret=newVarInst(VI_TEMP);
+    viret->type=VAR_OBJECT;
+    viret->objectname="order";
+    
+    viret->object=(void *)my_order;
+
+    return viret;
+  }
+  else if(cmd=="newExecuteFor"){
+      missionNode *enq_node=getArgument(node,mode,0);
+      varInst *enq_vi=checkObjectExpr(enq_node,mode);
+      Order *enq_order=getOrderObject(enq_node,mode,enq_vi);
+
+    missionNode *time_node=getArgument(node,mode,1);
+    float fortime=checkFloatExpr(time_node,mode);
+
+    Order *my_order=NULL;
+    if(mode==SCRIPT_RUN){
+      my_order=new ExecuteFor(enq_order,fortime);
+    }
+
+    viret=newVarInst(VI_TEMP);
+    viret->type=VAR_OBJECT;
+    viret->objectname="order";
+    
+    viret->object=(void *)my_order;
+
+    return viret;
+  }
+  else if(cmd=="newCloakFor"){
+      missionNode *val_node=getArgument(node,mode,0);
+      bool res=checkBoolExpr(val_node,mode);
+
+    missionNode *time_node=getArgument(node,mode,1);
+    float fortime=checkFloatExpr(time_node,mode);
+
+    Order *my_order=NULL;
+    if(mode==SCRIPT_RUN){
+      my_order=new CloakFor(res,fortime);
+    }
+
+    viret=newVarInst(VI_TEMP);
+    viret->type=VAR_OBJECT;
+    viret->objectname="order";
+    
+    viret->object=(void *)my_order;
+
+    return viret;
+  }
+  else if(cmd=="newMatchVelocity"){
+    missionNode *des_node=getArgument(node,mode,0);
+    varInst *des_vi=checkObjectExpr(des_node,mode);
+    olist_t *des_olist=getOListObject(des_node,mode,des_vi);
+
+    missionNode *desa_node=getArgument(node,mode,1);
+    varInst *desa_vi=checkObjectExpr(desa_node,mode);
+    olist_t *desa_olist=getOListObject(desa_node,mode,desa_vi);
+
+    missionNode *local_node=getArgument(node,mode,2);
+    bool local=checkBoolExpr(local_node,mode);
+
+    missionNode *afburn_node=getArgument(node,mode,3);
+    bool afburn=checkBoolExpr(afburn_node,mode);
+
+    missionNode *fini_node=getArgument(node,mode,4);
+    bool fini=checkBoolExpr(fini_node,mode);
+
+    Order *my_order=NULL;
+
+    if(mode==SCRIPT_RUN){
+      Vector des3=call_olist_tovector(des_node,mode,des_vi);
+      Vector desa3=call_olist_tovector(desa_node,mode,desa_vi);
+      
+      my_order=new Orders::MatchVelocity(des3,desa3,local,afburn,fini);
+    }
+
+    viret=newVarInst(VI_TEMP);
+    viret->type=VAR_OBJECT;
+    viret->objectname="order";
+    
+    viret->object=(void *)my_order;
+
+    return viret;
+  }
+  else if(cmd=="newMatchAngularVelocity"){
+    missionNode *des_node=getArgument(node,mode,0);
+    varInst *des_vi=checkObjectExpr(des_node,mode);
+    olist_t *des_olist=getOListObject(des_node,mode,des_vi);
+
+    missionNode *local_node=getArgument(node,mode,1);
+    bool local=checkBoolExpr(local_node,mode);
+
+    missionNode *fini_node=getArgument(node,mode,2);
+    bool fini=checkBoolExpr(fini_node,mode);
+
+    Order *my_order=NULL;
+
+    if(mode==SCRIPT_RUN){
+      Vector des3=call_olist_tovector(des_node,mode,des_vi);
+      
+      my_order=new Orders::MatchAngularVelocity(des3,local,fini);
+    }
+
+    viret=newVarInst(VI_TEMP);
+    viret->type=VAR_OBJECT;
+    viret->objectname="order";
+    
+    viret->object=(void *)my_order;
+
+    return viret;
+  }
+  else if(cmd=="newMatchLinearVelocity"){
+    missionNode *des_node=getArgument(node,mode,0);
+    varInst *des_vi=checkObjectExpr(des_node,mode);
+    olist_t *des_olist=getOListObject(des_node,mode,des_vi);
+
+    missionNode *local_node=getArgument(node,mode,1);
+    bool local=checkBoolExpr(local_node,mode);
+
+    missionNode *afburn_node=getArgument(node,mode,2);
+    bool afburn=checkBoolExpr(afburn_node,mode);
+
+    missionNode *fini_node=getArgument(node,mode,3);
+    bool fini=checkBoolExpr(fini_node,mode);
+
+    Order *my_order=NULL;
+
+    if(mode==SCRIPT_RUN){
+      Vector des3=call_olist_tovector(des_node,mode,des_vi);
+      
+      my_order=new Orders::MatchLinearVelocity(des3,local,afburn,fini);
+    }
+
+    viret=newVarInst(VI_TEMP);
+    viret->type=VAR_OBJECT;
+    viret->objectname="order";
+    
+    viret->object=(void *)my_order;
+
+    return viret;
+  }
   else{
     varInst *ovi=getObjectArg(node,mode);
     Order *my_order=getOrderObject(node,mode,ovi);
@@ -150,6 +358,97 @@ varInst *Mission::call_order(missionNode *node,int mode){
       viret->type=VAR_OBJECT;
       viret->objectname="order";
       viret->object=(void *)res_order;
+    }
+    else if(cmd=="SteerUp"){
+      missionNode *val_node=getArgument(node,mode,1);
+      float val=checkFloatExpr(val_node,mode);
+
+      if(mode==SCRIPT_RUN){
+	// this will crash if order is no FlyByWire
+	// is there a way to check that?
+	((FlyByWire *)my_order)->Up(val);
+      }
+
+      viret=newVarInst(VI_TEMP);
+      viret->type=VAR_VOID;
+    }
+    else if(cmd=="SteerRight"){
+      missionNode *val_node=getArgument(node,mode,1);
+      float val=checkFloatExpr(val_node,mode);
+
+      if(mode==SCRIPT_RUN){
+	// this will crash if order is no FlyByWire
+	// is there a way to check that?
+	((FlyByWire *)my_order)->Right(val);
+      }
+
+      viret=newVarInst(VI_TEMP);
+      viret->type=VAR_VOID;
+    }
+    else if(cmd=="SteerRollRight"){
+      missionNode *val_node=getArgument(node,mode,1);
+      float val=checkFloatExpr(val_node,mode);
+
+      if(mode==SCRIPT_RUN){
+	// this will crash if order is no FlyByWire
+	// is there a way to check that?
+	((FlyByWire *)my_order)->RollRight(val);
+      }
+
+      viret=newVarInst(VI_TEMP);
+      viret->type=VAR_VOID;
+    }
+    else if(cmd=="SteerStop"){
+      missionNode *val_node=getArgument(node,mode,1);
+      float val=checkFloatExpr(val_node,mode);
+
+      if(mode==SCRIPT_RUN){
+	// this will crash if order is no FlyByWire
+	// is there a way to check that?
+	((FlyByWire *)my_order)->Stop(val);
+      }
+
+      viret=newVarInst(VI_TEMP);
+      viret->type=VAR_VOID;
+    }
+    else if(cmd=="SteerAccel"){
+      missionNode *val_node=getArgument(node,mode,1);
+      float val=checkFloatExpr(val_node,mode);
+
+      if(mode==SCRIPT_RUN){
+	// this will crash if order is no FlyByWire
+	// is there a way to check that?
+	((FlyByWire *)my_order)->Accel(val);
+      }
+
+      viret=newVarInst(VI_TEMP);
+      viret->type=VAR_VOID;
+    }
+    else if(cmd=="SteerAfterburn"){
+      missionNode *val_node=getArgument(node,mode,1);
+      float val=checkFloatExpr(val_node,mode);
+
+      if(mode==SCRIPT_RUN){
+	// this will crash if order is no FlyByWire
+	// is there a way to check that?
+	((FlyByWire *)my_order)->Afterburn(val);
+      }
+
+      viret=newVarInst(VI_TEMP);
+      viret->type=VAR_VOID;
+    }
+    else if(cmd=="SteerSheltonSlide"){
+      missionNode *val_node=getArgument(node,mode,1);
+      bool res=checkBoolExpr(val_node,mode);
+
+      if(mode==SCRIPT_RUN){
+	// this will crash if order is no FlyByWire
+	// is there a way to check that?
+	((FlyByWire *)my_order)->SheltonSlide(res);
+      }
+
+      viret=newVarInst(VI_TEMP);
+      viret->type=VAR_VOID;
     }
     else if(cmd=="print"){
       if(mode==SCRIPT_RUN){

@@ -28,12 +28,13 @@
 
 #include "order.h"
 #include "navigation.h"
+#include "flybywire.h"
 
-
-class AImissionScript : public Order {
+//class AImissionScript : public Order {
+class AImissionScript : public FlyByWire {
 public:
   ///saves scriptname in the filename var
-  AImissionScript(string mdoulename);
+  AImissionScript(string modulename);
   ~AImissionScript();
   ///Loads the AI script from the hard drive, or executes if loaded
   void Execute();

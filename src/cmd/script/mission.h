@@ -408,7 +408,10 @@ void deleteVarMap(varInstMap *vmap);
 varInst * call_order(missionNode *node,int mode);
 Order * getOrderObject(missionNode *node,int mode,varInst *ovi);
 
-
+ Vector getVec3Arg(missionNode *node,int mode,int arg_nr);
+ float getFloatArg(missionNode *node,int mode,int arg_nr);
+ bool getBoolArg(missionNode *node,int mode,int arg_nr);
+Unit * getUnitArg(missionNode *node,int mode,int arg_nr);
 };
 
 #endif // _MISSION_H_
