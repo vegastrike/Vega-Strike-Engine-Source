@@ -396,7 +396,7 @@ void FormUp::SetParent(Unit * un) {
   MoveTo::SetParent(un);
 }
 
-FormUp::FormUp (const QVector & pos):MoveTo (QVector(0,0,0),false,1000), Pos(pos) { 
+FormUp::FormUp (const QVector & pos):MoveTo (QVector(0,0,0),false,1000,false), Pos(pos) { 
   subtype |= SSELF;
 }
 void FormUp::SetPos (const QVector &v) {

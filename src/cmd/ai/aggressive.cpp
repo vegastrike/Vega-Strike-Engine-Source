@@ -332,7 +332,7 @@ bool AggressiveAI::ProcessCurrentFgDirective(Flightgroup * fg) {
 	      static float esc_percent= XMLSupport::parse_float(vs_config->getVariable ("AI",
 											"Targetting",
 											"EscortDistance",
-											"4.0"));
+											"10.0"));
 	      static float turn_leader= XMLSupport::parse_float(vs_config->getVariable ("AI",
 											"Targetting",
 											"TurnLeaderDist",
