@@ -175,8 +175,10 @@ bool csRapidCollider::Collide (csRapidCollider &otherCollider,
                                const csReversibleTransform *pTransform2)
 {
   csRapidCollider *pRAPIDCollider2 = (csRapidCollider *)&otherCollider;
+#warning is comparing against self collide tree b4d??
+#if 0
   if (pRAPIDCollider2 == this) return false;
-
+#endif
   // JTY: also skip objects with m_pCollisionModel NULL. This fixes
   // a bug with bezier curves and collision detection.
   if (!m_pCollisionModel || 
