@@ -599,11 +599,12 @@ void Cockpit::Draw() {
   }
   GFXAlphaTest (ALWAYS,0);
   GFXBlendMode (SRCALPHA,INVSRCALPHA);
+  GFXColor4f(1,1,1,1);
 	bool die=true;
   if ((un = parent.GetUnit())) {
     if (view==CP_FRONT) {//only draw crosshairs for front view
       DrawGauges(un);
-
+      
       if (Radar) {
 	Radar->Draw();
 	if(radar_type=="Elite"){
@@ -613,9 +614,11 @@ void Cockpit::Draw() {
 	  DrawBlips(un);
 	}
       }
+      GFXColor4f(1,1,1,1);
       for (unsigned int j=1;j<Panel.size();j++) {
 	Panel[j]->Draw();
       }
+      GFXColor4f(1,1,1,1);
       for (unsigned int vd=0;vd<vdu.size();vd++) {
 	if (vdu[vd]) {
 	  vdu[vd]->Draw(un,textcol);
