@@ -19,7 +19,7 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
 #include <stdlib.h>
-#include <iostream.h>
+#include <iostream>
 #include "vs_path.h"
 #include "aux_texture.h"
 #include "sprite.h"

@@ -24,7 +24,7 @@
 #define _3DMANIP_H_
 #include <math.h>
 #ifndef WIN32
-#include <iostream.h>
+#include <iostream>
 #endif
 #ifdef __cplusplus
 class Vector;
@@ -85,7 +85,7 @@ class Vector {
   }
 };
 #ifndef WIN32
-inline ostream &operator<<(ostream &os, const Vector &obj) {
+inline std::ostream &operator<<(std::ostream &os, const Vector &obj) {
   return os << "(" << obj.i << "," << obj.j << "," << obj.k << ")";
 }
 #endif
