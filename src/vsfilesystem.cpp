@@ -72,8 +72,13 @@ int	selectpk3s( const struct dirent * entry)
 
 namespace VSFileSystem
 {
-	#define CASE(a) case a: cerr<<#a; break;
 	void	DisplayType( VSFileSystem::VSFileType type)
+	{
+	    DisplayType( type, std::cerr );
+	}
+
+	#define CASE(a) case a: ostr<<#a; break;
+	void	DisplayType( VSFileSystem::VSFileType type, std::ostream& ostr )
 	{
 		switch( type)
 		{
@@ -94,8 +99,10 @@ namespace VSFileSystem
 			CASE( VSFileSystem::BSPFile)
 			CASE( VSFileSystem::MusicFile)
 			CASE( VSFileSystem::Unknown)
+			default: ostr << "VSFileSystem::<undefined VSFileType>"; break;
 		}
 	}
+	#undef CASE
 
 	int		GetReadBytes( char * fmt, va_list ap)
 	{
@@ -1140,9 +1147,9 @@ namespace VSFileSystem
 		if( found<0)
 		{
 			if( !UseVolumes[type])
-				failed += "\tTRY LOADING : "+fullpath+"... NOT FOUND\n";
+				failed += "\tTRY LOADING : "+nameof(type)+" "+fullpath+"... NOT FOUND\n";
 			else
-				failed += "\tTRY LOADING in "+fullpath+" : "+file+"... NOT FOUND\n";
+				failed += "\tTRY LOADING in "+nameof(type)+" "+fullpath+" : "+file+"... NOT FOUND\n";
 		}
 		else
 		{
@@ -1297,9 +1304,13 @@ namespace VSFileSystem
 				f.SetIndex( found);
 			isin_bigvolumes = None;
 			if( shared)
+			{
 				return Shared;
+			}
 			else
+			{
 				return Ok;
+			}
 		}
 		return FileNotFound;
 	}
@@ -1316,11 +1327,12 @@ namespace VSFileSystem
 	{
 		fp = NULL;
 		size = -1;
+		pk3_file           = NULL;
 		pk3_extracted_file = NULL;
 		offset = 0;
-		valid = false;
-		file_type = alt_type = Unknown;
-		file_index = -1;
+		valid  = false;
+		file_type   = alt_type = Unknown;
+		file_index  = -1;
 		volume_type = None;
 	}
 
@@ -1402,9 +1414,7 @@ namespace VSFileSystem
 
 		VSError err = Ok;
 
-		cerr<<"Loading a ";
-		DisplayType(type);
-		cerr<<" :\n";
+		cerr<<"Loading a " << type << " :\n";
 		if( !UseVolumes[type])
 		{
 			if( type==Unknown)
@@ -1838,7 +1848,7 @@ namespace VSFileSystem
 			if( !UseVolumes[alt_type] || this->volume_type==None || file_mode!=ReadOnly)
 			{
 				struct stat st;
-				if( fstat( fileno(fp), &st)==0)
+				if( (fp!=NULL) && fstat( fileno(fp), &st)==0 )
 					return (this->size=st.st_size);
 				return -1;
 			}
@@ -2037,6 +2047,63 @@ namespace VSFileSystem
 			this->offset++;
 		}
 	}
+}
+
+#define CASE(a) case a: ostr<<#a; break;
+std::ostream& operator<<( std::ostream& ostr, VSFileSystem::VSError err )
+{
+    switch( err )
+    {
+        CASE( VSFileSystem::Shared )
+        CASE( VSFileSystem::Ok )
+        CASE( VSFileSystem::SocketError )
+        CASE( VSFileSystem::FileNotFound )
+        CASE( VSFileSystem::LocalPermissionDenied )
+        CASE( VSFileSystem::RemotePermissionDenied )
+        CASE( VSFileSystem::DownloadInterrupted )
+        CASE( VSFileSystem::IncompleteWrite )
+        CASE( VSFileSystem::IncompleteRead )
+        CASE( VSFileSystem::EndOfFile )
+        CASE( VSFileSystem::IsDirectory )
+        CASE( VSFileSystem::BadFormat )
+        CASE( VSFileSystem::Unspecified )
+	default : ostr << "VSFileSystem::<undefined VSError>"; break;
+    }
+    return ostr;
+}
+#undef CASE
+
+std::ostream& operator<<( std::ostream& ostr, VSFileSystem::VSFileType type )
+{
+    VSFileSystem::DisplayType( type, ostr );
+    return ostr;
+}
+
+std::string   nameof( VSFileSystem::VSFileType type )
+{
+#define CASE(a) case a: return #a; break;
+	switch( type)
+	{
+		CASE( VSFileSystem::UniverseFile)
+		CASE( VSFileSystem::SystemFile)
+		CASE( VSFileSystem::CockpitFile)
+		CASE( VSFileSystem::UnitFile)
+		CASE( VSFileSystem::PythonFile)
+		CASE( VSFileSystem::TextureFile)
+		CASE( VSFileSystem::SoundFile)
+		CASE( VSFileSystem::MeshFile)
+		CASE( VSFileSystem::CommFile)
+		CASE( VSFileSystem::AiFile)
+		CASE( VSFileSystem::SaveFile)
+		CASE( VSFileSystem::AnimFile)
+		CASE( VSFileSystem::SpriteFile)
+		CASE( VSFileSystem::MissionFile)
+		CASE( VSFileSystem::BSPFile)
+		CASE( VSFileSystem::MusicFile)
+		CASE( VSFileSystem::Unknown)
+		default : return "VSFileSystem::<undefined VSFileType>"; break;
+	}
+#undef CASE
 }
 
 #if defined( _WIN32) && !defined( __CYGWIN__)

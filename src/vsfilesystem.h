@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <string>
 #include <vector>
+#include <iostream>
 using std::string;
 using std::vector;
 #include <stdarg.h>
@@ -34,6 +35,7 @@ namespace VSFileSystem
 	// VSErrors that can be return by various functions
 	enum VSError	{	Shared, Ok, SocketError, FileNotFound, LocalPermissionDenied, RemotePermissionDenied, DownloadInterrupted,
 						IncompleteWrite, IncompleteRead, EndOfFile, IsDirectory, BadFormat, Unspecified };
+
 	// The mode of an opened file
 	enum VSFileMode {	ReadOnly, ReadWrite, CreateWrite };
 
@@ -60,7 +62,9 @@ namespace VSFileSystem
 
 	enum VSVolumeType { None, Split, Big };
 
-	void	DisplayType( VSFileType type);
+	void	      DisplayType( VSFileType type);
+	void	      DisplayType( VSFileType type, std::ostream& ostr );
+
 	int		GetReadBytes( char * fmt, va_list ap);
 
 	/************************************************************************************************/
@@ -515,6 +519,10 @@ namespace VSFileSystem
 			friend class VSImage;
 	};
 };
+
+std::ostream& operator<<( std::ostream& ostr, VSFileSystem::VSError err );
+std::ostream& operator<<( std::ostream& ostr, VSFileSystem::VSFileType type );
+std::string   nameof( VSFileSystem::VSFileType type );
 
 #if defined( _WIN32) && !defined( __CYGWIN__)
 // Emulation of posix scandir() call
