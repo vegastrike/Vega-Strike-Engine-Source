@@ -843,7 +843,7 @@ void BaseComputer::recalcTitle() {
 }
 
 // Scroll to a specific item in a picker, and optionally select it.
-//  Returns true if the specified item is found.
+//  Returns true if we selected an item.
 bool BaseComputer::scrollToItem(Picker* picker, const Cargo& item, bool select, bool skipFirstCategory) {
     PickerCells* cells = picker->cells();
     if(!cells) return false;
@@ -890,18 +890,41 @@ bool BaseComputer::scrollToItem(Picker* picker, const Cargo& item, bool select, 
     // We have the parent category, now we need the child itself.
     assert(cells != NULL);
     PickerCell* cell = cells->cellWithId(item.content);
+    picker->setMustRecalc();
     if(!cell) {
-        picker->scrollToCell(categoryCell);
-        picker->setMustRecalc();
         // Item is not here.
-        return false;
-    } else {
-        if(select) {
-            picker->selectCell(cell, true);
-        }
-        picker->setMustRecalc();
-        return true;
+		int count = cells->count();
+		if(count == 0) {
+			// The category is empty.
+			picker->scrollToCell(categoryCell);
+			return false;
+		}
+
+		// Try to find the place where the item used to be.
+		// We assume here that the list is sorted by id, which is the
+		//  original, un-beautified name.
+		int i = 0;
+		for(; i<count; i++) {
+			if(item.content < cells->cellAt(i)->id()) {
+				break;
+			}
+		}
+		if(i == count) i--;
+		cell = cells->cellAt(i);
+		assert(cell != NULL);
+		// Drop through to get cell handled.
     }
+
+    if(select) {
+        picker->selectCell(cell, true);
+		return true;
+	} else {
+		// Make sure we scroll it into view.
+		// Since it's not selected, we assume it's in the "other" list and scroll
+		//  it into the middle.
+		picker->scrollToCell(cell, true);
+		return false;
+	}
 
     // Shouldn't ever get here.
     assert(false);
@@ -1099,24 +1122,24 @@ bool BaseComputer::isTransactionOK(const Cargo& originalItem, TransactionType tr
             break;
         case SELL_CARGO:
             // There is a base here, and it is willing to buy the item.
-	    if(baseUnit && baseUnit->CanAddCargo(item)) {
-	        return true;
-	    }
+			if(baseUnit && baseUnit->CanAddCargo(item)) {
+				return true;
+			}
             break;
         case BUY_SHIP:
             // Either you are buying this ship for your fleet, or you already own the
             //  ship and it will be transported to you.
             if(baseUnit) {
-	        if(item.price <= cockpit->credits) {
-	            return true;
-	        }
+				if(item.price <= cockpit->credits) {
+					return true;
+				}
             }
             break;
         case ACCEPT_MISSION:
             // Make sure the player doesn't take too many missions.
-	    if(active_missions.size() < UniverseUtil::maxMissions()) {
-	        return true;
-	    }
+			if(active_missions.size() < UniverseUtil::maxMissions()) {
+				return true;
+			}
             break;
         case SELL_UPGRADE:
 			return true; // You can always sell upgrades, no matter what!
