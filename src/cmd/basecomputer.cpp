@@ -3342,7 +3342,7 @@ void BaseComputer::BuyUpgradeOperation::concludeTransaction(void) {
     double percent;
 	int numleft = basecargoassets(baseUnit,m_part.content);
 	while(numleft>0&&playerUnit->canUpgrade(m_newPart, m_selectedMount, m_selectedTurret, m_addMultMode, true, percent, m_theTemplate)){
-      const float price = m_part.price * (1-usedValue(percent));
+      const float price = m_part.price;// * (1-usedValue(percent));
       if (_Universe->AccessCockpit()->credits >= price) {
           // Have enough money.  Buy it.
           _Universe->AccessCockpit()->credits -= price;

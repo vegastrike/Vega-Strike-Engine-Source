@@ -107,29 +107,44 @@ extern float rand01 ();
 template <class UnitType>
 void GameUnit<UnitType>::ArmorDamageSound( const Vector &pnt)
 {
-	if (!AUDIsPlaying (this->sound->armor))
+  if (!_Universe->isPlayerStarship(this)) {
+    if (!AUDIsPlaying (this->sound->armor))
       AUDPlay (this->sound->armor,this->ToWorldCoordinates(pnt).Cast()+this->cumulative_transformation.position,this->Velocity,1);
     else
       AUDAdjustSound (this->sound->armor,this->ToWorldCoordinates(pnt).Cast()+this->cumulative_transformation.position,this->Velocity);
+  }else {
+    if(!AUDIsPlaying(this->sound->armor))
+       AUDPlay(this->sound->armor,QVector(0,0,0),Vector(0,0,0),1);    
+  }
 }
 
 template <class UnitType>
 void GameUnit<UnitType>::HullDamageSound( const Vector &pnt)
 {
-   if (!AUDIsPlaying (this->sound->hull))
-     AUDPlay (this->sound->hull,this->ToWorldCoordinates(pnt).Cast()+this->cumulative_transformation.position,this->Velocity,1);
-   else
-     AUDAdjustSound (this->sound->hull,this->ToWorldCoordinates(pnt).Cast()+this->cumulative_transformation.position,this->Velocity);
+  if (!_Universe->isPlayerStarship(this)) {
+    if (!AUDIsPlaying (this->sound->hull))
+      AUDPlay (this->sound->hull,this->ToWorldCoordinates(pnt).Cast()+this->cumulative_transformation.position,this->Velocity,1);
+    else
+      AUDAdjustSound (this->sound->hull,this->ToWorldCoordinates(pnt).Cast()+this->cumulative_transformation.position,this->Velocity);
+  }else {
+    if (!AUDIsPlaying (this->sound->hull))
+      AUDPlay (this->sound->hull,QVector(0,0,0),Vector(0,0,0),1);
+    
+  }
 }
 
 template <class UnitType>
 float GameUnit<UnitType>::DealDamageToShield (const Vector &pnt, float &damage) {
   float percent = UnitType::DealDamageToShield( pnt, damage);
-  if (percent&&!AUDIsPlaying (this->sound->shield))
-	AUDPlay (this->sound->shield,this->ToWorldCoordinates(pnt).Cast()+this->cumulative_transformation.position,this->Velocity,1);
-  else
-	AUDAdjustSound (this->sound->shield,this->ToWorldCoordinates(pnt).Cast()+this->cumulative_transformation.position,this->Velocity);
-
+  if (!_Universe->isPlayerStarship(this)) {
+    if (percent&&!AUDIsPlaying (this->sound->shield))
+      AUDPlay (this->sound->shield,this->ToWorldCoordinates(pnt).Cast()+this->cumulative_transformation.position,this->Velocity,1);
+    else
+      AUDAdjustSound (this->sound->shield,this->ToWorldCoordinates(pnt).Cast()+this->cumulative_transformation.position,this->Velocity);
+  }else {
+    if (!AUDIsPlaying (this->sound->shield))
+      AUDPlay (this->sound->shield,QVector(0,0,0),Vector(0,0,0),1);
+  }
   return percent;
 }
 
