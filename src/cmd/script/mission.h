@@ -100,6 +100,9 @@ enum callback_module_std_type {
   CMT_STD_playSound,
   CMT_STD_playAnimation,
   CMT_STD_getGalaxyProperty,
+  CMT_STD_musicAddList,
+  CMT_STD_musicPlaySong,
+  CMT_STD_musicPlayList,
   CMT_STD_terminateMission
 };
 enum callback_module_briefing_type {
@@ -631,6 +634,9 @@ varInst *  call_setNull(missionNode *node,int mode);
 varInst * call_isequal(missionNode *node,int mode);
 varInst * callGetCurrentAIUnit(missionNode *node,int mode);
 varInst * callGetCurrentAIOrder(missionNode *node,int mode);
+varInst * call_musicAddList(missionNode *node,int mode);
+varInst * call_musicPlaySong(missionNode *node,int mode);
+varInst * call_musicPlayList(missionNode *node,int mode);
 
  varInst *call_int_cast(missionNode *node,int mode);
  varInst *call_float_cast(missionNode *node,int mode);

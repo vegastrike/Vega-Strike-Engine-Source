@@ -20,6 +20,7 @@
 #include "missile.h"
 #include "cmd/ai/communication.h"
 #include "cmd/script/flightgroup.h"
+#include "music.h"
 //#define DESTRUCTDEBUG
 static list<Unit*> Unitdeletequeue;
 void Unit::UnRef() {
@@ -91,7 +92,10 @@ void Unit::Split (int level) {
   //FIXME...how the heck can they go spinning out of control!
 }
 
+extern Music *muzak;
+
 void Unit::Kill(bool erasefromsave) {
+
   if (colTrees)
     colTrees->Dec();//might delete
   colTrees=NULL;
@@ -137,7 +141,7 @@ void Unit::Kill(bool erasefromsave) {
   }
   aistate=NULL;
   UnitCollection::UnitIterator iter = getSubUnits();
-  Unit * un;
+  Unit *un;
   while ((un=iter.current())) {
     un->Kill();
     iter.advance();
@@ -736,8 +740,16 @@ extern Animation * getRandomCachedAni() ;
 extern std::string getRandomCachedAniString() ;
 bool Unit::Explode (bool drawit, float timeit) {
 
-
   if (image->explosion==NULL&&image->timeexplode==0) {	//no explosion in unit data file && explosions haven't started yet
+  Unit *un=_Universe->AccessCockpit()->GetParent();
+  if (un) {
+    if (un->getRelation(this)>=0)
+      muzak->SkipRandSong(Music::LOSSLIST);
+    else
+      muzak->SkipRandSong(Music::VICTORYLIST);
+  } else {
+    muzak->SkipRandSong(Music::LOSSLIST);
+  }
 
   // notify the director that a ship got destroyed
   mission->DirectorShipDestroyed(this);

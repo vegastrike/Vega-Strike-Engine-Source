@@ -110,6 +110,7 @@ Universe::~Universe()
   }
   cockpit.clear();
   GFXShutdown();
+  _Universe=NULL;
 	//delete mouse;
 }
 //sets up all the stuff... in this case the ships to be rendered

@@ -376,6 +376,8 @@ void VDU::DrawMessages(Unit *target, const GFXColor & c){
   vector <std::string> whoNOT;
   whoNOT.push_back ("briefing");
   whoNOT.push_back ("news");
+  whoNOT.push_back ("bar");
+
   vector <std::string> message_people;//should be "all", parent's name
   gameMessage *lastmsg=mc->last(0,message_people,whoNOT);
   for(int i=scrolloffset<0?-scrolloffset:0;rows_used<rows && lastmsg!=NULL;i++){

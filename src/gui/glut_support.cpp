@@ -293,10 +293,11 @@ void StartGUIFrame(GFXBOOL clr) {
   GFXColor4f (1,1,1,1);
 
   GFXDisable (DEPTHTEST);
-  GFXDisable (DEPTHWRITE);
+  GFXEnable (DEPTHWRITE);
   GFXDisable (LIGHTING);
   GFXDisable (CULLFACE);
   GFXClear (clr);
+  GFXDisable(DEPTHWRITE);
   GFXBlendMode (SRCALPHA,INVSRCALPHA);
   GFXDisable (TEXTURE1);
   GFXEnable (TEXTURE0);

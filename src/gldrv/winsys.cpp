@@ -24,6 +24,7 @@
 #include "config_xml.h"
 #include "vs_globals.h"
 #include <assert.h>
+#include <SDL/SDL_mixer.h>
 /* Windowing System Abstraction Layer */
 /* Abstracts creation of windows, handling of events, etc. */
 
@@ -229,7 +230,7 @@ static void setup_sdl_video_mode()
 void winsys_init( int *argc, char **argv, char *window_title, 
 		  char *icon_title )
 {
-	Uint32 sdl_flags = SDL_INIT_VIDEO|SDL_INIT_JOYSTICK;
+	Uint32 sdl_flags = SDL_INIT_AUDIO|SDL_INIT_VIDEO|SDL_INIT_JOYSTICK;
     g_game.x_resolution = XMLSupport::parse_int (vs_config->getVariable ("graphics","x_resolution","1024"));     
     g_game.y_resolution = XMLSupport::parse_int (vs_config->getVariable ("graphics","y_resolution","768"));     
     gl_options.fullscreen = XMLSupport::parse_bool (vs_config->getVariable ("graphics","fullscreen","false"));
@@ -325,7 +326,6 @@ void winsys_process_events()
 
 	SDL_LockAudio();
 	SDL_UnlockAudio();
-
 	while ( SDL_PollEvent( &event ) ) {
 	    
 	    switch ( event.type ) {

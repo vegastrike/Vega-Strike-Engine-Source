@@ -620,7 +620,7 @@ void StarSystem::Update(float priority , bool executeDirector) {
 	if (this==_Universe->getActiveStarSystem(0)) {
 	  _Universe->AccessCockpit(0)->AccessCamera()->UpdateCameraSounds();
 	  if (muzak)
-	    muzak->Listen();
+		  muzak->Listen();
 	}
 	if (_Universe->AccessCockpit()->activeStarSystem==this){
 	  Nebula * neb;

@@ -127,6 +127,15 @@ varInst *Mission::doCall(missionNode *node,int mode,string module,string method)
     else if(method_id==CMT_STD_getGalaxyProperty){
       vi=callGetGalaxyProperty(node,mode);
     }
+    else if(method_id==CMT_STD_musicAddList){
+      vi=call_musicAddList(node,mode);
+    }
+    else if(method_id==CMT_STD_musicPlaySong){
+      vi=call_musicPlaySong(node,mode);
+    }
+    else if(method_id==CMT_STD_musicPlayList){
+      vi=call_musicPlayList(node,mode);
+    }
     else if (method_id==CMT_STD_getDifficulty) {
       vi = newVarInst (VI_TEMP);
       vi->type=VAR_FLOAT;
@@ -755,6 +764,40 @@ varInst *Mission::call_io_printf(missionNode *node,int mode){
   return viret;
 }
 
+#include "cmd/music.h"
+extern Music *muzak;
+
+varInst * Mission::call_musicAddList(missionNode *node,int mode) {
+  varInst *vi=newVarInst(VI_TEMP);
+  vi->type=VAR_INT;
+  string str = getStringArgument (node,mode,0);
+  if(mode==SCRIPT_RUN){
+    int ret=muzak->Addlist(str.c_str());
+    vi->int_val=ret;
+  }
+  return vi;
+}
+
+varInst * Mission::call_musicPlaySong(missionNode *node,int mode) {
+  varInst *vi=newVarInst(VI_TEMP);
+  vi->type=VAR_VOID;
+  string str = getStringArgument (node,mode,0);
+  if(mode==SCRIPT_RUN){
+    muzak->GotoSong(str);
+  }
+  return vi;
+}
+
+varInst * Mission::call_musicPlayList(missionNode *node,int mode) {
+  varInst *vi=newVarInst(VI_TEMP);
+  vi->type=VAR_VOID;
+  int which= (int)getIntArg(node,mode,0);
+  if(mode==SCRIPT_RUN){
+    muzak->SkipRandSong(which);
+  }
+  return vi;
+}
+
 varInst *Mission::callPrintFloats(missionNode *node,int mode){
   string s1=node->attr_value("s1");
   string s2=node->attr_value("s2");
@@ -932,6 +975,9 @@ void Mission::initCallbackMaps(){
   module_std_map["playSound"]=CMT_STD_playSound;
   module_std_map["terminateMission"]=CMT_STD_terminateMission;
   module_std_map["playAnimation"]=CMT_STD_playAnimation ;
+  module_std_map["musicAddList"]=CMT_STD_musicAddList;
+  module_std_map["musicPlaySong"]=CMT_STD_musicPlaySong;
+  module_std_map["musicPlayList"]=CMT_STD_musicPlayList;
 
   module_order_map["newAggressiveAI"]=CMT_ORDER_newAggressiveAI ;
   module_order_map["newMoveTo"]=CMT_ORDER_newMoveTo ;

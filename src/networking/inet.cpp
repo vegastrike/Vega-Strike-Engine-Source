@@ -1,0 +1,148 @@
+#ifdef _WIN32
+#define in_addr_t unsigned long
+#include <winsock.h>
+#else
+#include <netdb.h>
+#include <string.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <unistd.h>
+#endif
+#include <stdio.h>
+#include <stdlib.h>
+unsigned long INET_BytesToRead (int socket) {
+	unsigned long datato;
+	if (0==ioctlsocket(socket,FIONREAD,&datato)) {
+		return datato;
+	}
+
+	return 0;
+	
+}
+void INET_close (int socket) {
+#ifdef _WIN32
+	closesocket (socket);
+#else
+	close (socket);
+#endif
+}
+void INET_cleanup () {
+#ifdef _WIN32
+	WSACleanup();
+#endif
+}
+
+bool INET_Read (int socket, char *data, int bytestoread) {
+	int bytes_read=0;
+	int ret;
+	while (bytes_read < bytestoread) {
+		ret = recv(socket,data+bytes_read,bytestoread-bytes_read,0);
+		if (ret==0||SOCKET_ERROR==ret) {
+			return false;
+		}
+		bytes_read +=ret;
+	}
+	return true;
+}
+
+
+int INET_Write (int socket,int bytestowrite,const char *data) {
+	return send(socket,data,bytestowrite,0);
+}
+void INET_startup() {
+#ifdef _WIN32
+  WORD wVersionRequested = MAKEWORD( 1, 1 );
+  WSADATA wsaData; 
+  WSAStartup(wVersionRequested,&wsaData);
+#endif
+}
+char INET_fgetc (int socket) {
+	char myc='\0';
+	INET_Read (socket,&myc,sizeof(char));
+	return myc;
+}
+
+bool INET_getHostByName (const char * hostname, unsigned short port, sockaddr_in & connexto) {
+  bool gotaddr=false;
+  connexto.sin_port = htons (port);
+  connexto.sin_family=AF_INET;
+  if (hostname==NULL) {
+	connexto.sin_addr.s_addr=INADDR_ANY;
+  }
+  hostent * addrs  = gethostbyname(hostname);
+  if (addrs) {
+    if (addrs->h_addr_list[0]) {
+
+      memset (&connexto.sin_addr,0,sizeof (in_addr));
+      if (addrs->h_length>sizeof (in_addr))
+		addrs->h_length=sizeof(in_addr);
+      memcpy (&connexto.sin_addr ,addrs->h_addr_list[0],addrs->h_length);
+      gotaddr=true;
+    }
+  } else {
+    in_addr_t tmp=inet_addr(hostname);
+    memcpy (&connexto.sin_addr,&tmp,sizeof(in_addr_t)<sizeof(in_addr)?sizeof(in_addr_t):sizeof(in_addr));
+    if (*((int*)&tmp) != -1) {
+      gotaddr=true;
+    }
+  }
+	return gotaddr;
+}
+
+int INET_AcceptFrom ( unsigned short port,const char * hostname) {
+  int listenqueue=5;
+  int hSocket;  int hServerSocket; // so signal can be caught;
+  struct sockaddr_in Address; //Internet socket address stuct 
+  int nAddressSize=sizeof(struct sockaddr_in);
+  hServerSocket=socket(AF_INET,SOCK_STREAM,0);
+  int sockerr = SOCKET_ERROR;
+#ifdef _WIN32
+  sockerr= INVALID_SOCKET;
+#endif
+  if(hServerSocket == sockerr) {
+	  int err = WSAGetLastError();
+        printf("\nCould not make a socket %d\n",err);
+        return -1;
+  }
+  char on =1;
+  INET_getHostByName (hostname,port,Address);
+
+  if(bind(hServerSocket,(struct sockaddr*)&Address,sizeof(Address)) 
+                        == SOCKET_ERROR) {
+        printf("\nCould not connect to host\n");
+        return -1;
+  }
+  getsockname( hServerSocket, (struct sockaddr *) &Address,&nAddressSize);
+  if(listen(hServerSocket,listenqueue) == SOCKET_ERROR) {
+    printf("\nCould not listen\n");
+        return -1;
+  }
+  // get the connected socket 
+  nAddressSize = sizeof (Address);
+  hSocket=accept(hServerSocket,(struct sockaddr*)&Address,&nAddressSize);
+  INET_close (hServerSocket);
+  return hSocket;
+}
+int INET_ConnectTo (const char * hostname, unsigned short port) {
+  bool gotaddr=false;
+  sockaddr_in connexto;
+  int aftype=AF_INET;
+#ifdef _WIN32
+  aftype = PF_INET;
+#endif
+  int retval=-1;
+  int my_socket=-1;
+  if (INET_getHostByName (hostname,port,connexto)) {
+      my_socket =  socket (aftype,SOCK_STREAM,0);
+      retval=true;
+      if (connect(my_socket,(struct sockaddr *) &connexto,sizeof(connexto))!=-1) {
+		return my_socket;
+      }else {
+		retval=-1;
+		fprintf (stderr,"Socket Error %d",WSAGetLastError());
+
+      }
+  }
+  return retval;
+}

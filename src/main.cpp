@@ -26,6 +26,7 @@
 #endif
 #ifdef _WIN32
 #include <direct.h>
+#include <process.h>
 #endif
 #include "gfxlib.h"
 #include "in_kb.h"
@@ -158,6 +159,27 @@ int main( int argc, char *argv[] )
 		
     initpaths();
     //can use the vegastrike config variable to read in the default mission
+  g_game.music_enabled = XMLSupport::parse_bool (vs_config->getVariable ("audio","Music","true"));
+  if (g_game.music_enabled) {
+#ifdef _WIN32
+    int pid=spawnl(P_NOWAIT,"./soundserver","./soundserver",NULL);
+    if (!pid) {
+      g_game.music_enabled=false;
+      fprintf(stderr,"Unable to spawn music player server\n");
+    }
+#else
+    int pid=fork();
+    if (!pid) {
+      g_game.music_enabled=false;
+      fprintf(stderr,"Unable to spawn music player server\n");
+    }
+    pid=execlp("./soundserver","./soundserver",NULL);
+    if (!pid) {
+      g_game.music_enabled=false;
+      fprintf(stderr,"Unable to spawn music player server\n");
+    }
+#endif
+  }
     if (mission_name[0]=='\0')
       strcpy(mission_name,vs_config->getVariable ("general","default_mission","test1.mission").c_str());
     //might overwrite the default mission with the command line

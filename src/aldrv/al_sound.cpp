@@ -272,8 +272,10 @@ bool AUDIsPlaying (const int sound){
 void AUDStopPlaying (const int sound){
 #ifdef HAVE_AL
   if (sound>=0&&sound<(int)sounds.size()) {
-    alSourceStop(sounds[sound].source);
-    unusedsrcs.push_back (sounds[sound].source);
+	if (sounds[sound].source!=0) {
+	  alSourceStop(sounds[sound].source);
+      unusedsrcs.push_back (sounds[sound].source);
+	}
     sounds[sound].source=(ALuint)0;
   }
 #endif
