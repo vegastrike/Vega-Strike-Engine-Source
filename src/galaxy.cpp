@@ -282,7 +282,8 @@ DWORD WINAPI DrawStartupDialog(
 
 	hWnd=CreateDialogParam(hInst, MAKEINTRESOURCE(IDD_START),NULL, (DLGPROC)DLOG_start, 0);
 	ShowWindow(hWnd, SW_SHOW);
-	for (dumbi=0;dumbi<6;dumbi++) {
+//	for (dumbi=0;dumbi<6;dumbi++) {
+	for (;;) {
 		if (PeekMessage(&msg, NULL, 0, 0, PM_NOREMOVE)) {
 
 			if(GetMessage(&msg, NULL, 0, 0)) {
@@ -290,10 +291,10 @@ DWORD WINAPI DrawStartupDialog(
 			} else {
 				break;
 			}
+			if (WaitForSingleObject(hMutex,100)==WAIT_OBJECT_0) break; // wait for ownership
 		}
 		Sleep(100);
 	}
-	WaitForSingleObject(hMutex,INFINITE); // wait for ownership
 	DestroyWindow(hWnd);
 	return 0;
 }
