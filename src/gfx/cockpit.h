@@ -8,7 +8,7 @@ class Unit;
 enum VIEWSTYLE {CP_FRONT, CP_LEFT, CP_RIGHT, CP_BACK, CP_CHASE, CP_PAN};
 class Cockpit {
   UnitContainer parent;
-  Sprite *Pit;
+  Sprite *Pit [4];
   Sprite *Crosshairs;//have a bunch of these...like radar
   float cockpit_offset;
   float viewport_offset;

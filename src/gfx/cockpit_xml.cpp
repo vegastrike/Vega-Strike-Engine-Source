@@ -19,7 +19,11 @@ namespace CockpitXML {
       XSIZE,
       YSIZE,
       COCKPITOFFSET,
-      VIEWOFFSET
+      VIEWOFFSET,
+      FRONT,
+      LEFT,
+      RIGHT,
+      BACK
     };
 
   const EnumMap::Pair element_names[] = {
@@ -30,6 +34,10 @@ namespace CockpitXML {
   const EnumMap::Pair attribute_names[] = {
     EnumMap::Pair ("UNKNOWN", UNKNOWN),
     EnumMap::Pair ("file", XFILE),
+    EnumMap::Pair ("front", FRONT),
+    EnumMap::Pair ("left", LEFT),
+    EnumMap::Pair ("right", RIGHT),
+    EnumMap::Pair ("back", BACK),
     EnumMap::Pair ("xcent", XCENT),
     EnumMap::Pair ("ycent", YCENT),
     EnumMap::Pair ("width", XSIZE),
@@ -39,7 +47,7 @@ namespace CockpitXML {
   };
 
   const EnumMap element_map(element_names, 3);
-  const EnumMap attribute_map(attribute_names, 8);
+  const EnumMap attribute_map(attribute_names, 12);
 }
 
 using XMLSupport::EnumMap;
@@ -58,11 +66,13 @@ void Cockpit::endElement(void *userData, const XML_Char *name) {
 void Cockpit::beginElement(const string &name, const AttributeList &attributes) {
   AttributeList::const_iterator iter;
   Names elem = (Names)element_map.lookup(name);
+  Names attr;
   float xsize=-1,ysize=-1,xcent=FLT_MAX,ycent=FLT_MAX;
   switch (elem) {
   case COCKPIT:
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) { 
-      switch (attribute_map.lookup((*iter).name)) {
+      attr = (Names)attribute_map.lookup((*iter).name);
+      switch (attr) {
       case VIEWOFFSET:
 	viewport_offset = parse_float ((*iter).value);
 	break;
@@ -70,7 +80,13 @@ void Cockpit::beginElement(const string &name, const AttributeList &attributes) 
 	cockpit_offset = parse_float ((*iter).value);
 	break;
       case XFILE:
-	Pit = new Sprite ((*iter).value.c_str());
+	Pit[0]= new Sprite ((*iter).value.c_str());
+	break;
+      case FRONT:
+      case BACK:
+      case LEFT:
+      case RIGHT:
+	Pit[attr-FRONT] = new Sprite ((*iter).value.c_str());
 	break;
       } 
     }

@@ -146,38 +146,71 @@ static void Quit(int,KBSTATE newState) {
 		exit(0);
 	}
 }
+bool cockpitfront=false;
 static void Inside(int,KBSTATE newState) {
+
+  static bool tmp=false;
+  if(newState==PRESS&&cockpitfront) {
+    if (tmp) {
+      _Universe->AccessCockpit()->Init ("hornet-cockpit.cpt");	    
+    }else {
+      _Universe->AccessCockpit()->Init ("");
+    }
+    tmp = !tmp;
+  }
+  if(newState==PRESS||newState==DOWN) {
+    cockpitfront=true;
+    _Universe->AccessCockpit()->SetView (CP_FRONT);
+  }
+}
+static void ZoomOut (int, KBSTATE newState) {
+  if(newState==PRESS||newState==DOWN) 
+  _Universe->AccessCockpit()->zoomfactor+=GetElapsedTime();  
+}
+
+static void ZoomIn (int, KBSTATE newState) {
+  if(newState==PRESS||newState==DOWN) 
+  _Universe->AccessCockpit()->zoomfactor-=GetElapsedTime();  
+}
+
+static void InsideLeft(int,KBSTATE newState) {
+
 	if(newState==PRESS||newState==DOWN) {
-	  _Universe->AccessCockpit()->SetView (CP_FRONT);
+	  cockpitfront=false;
+	  _Universe->AccessCockpit()->SetView (CP_LEFT);
 	}
 }
-static void Behind(int,KBSTATE newState) {
+static void InsideRight(int,KBSTATE newState) {
+
 	if(newState==PRESS||newState==DOWN) {
+	    cockpitfront=false;
+	  _Universe->AccessCockpit()->SetView (CP_RIGHT);
+	}
+}
+static void InsideBack(int,KBSTATE newState) {
+
+	if(newState==PRESS||newState==DOWN) {
+	    cockpitfront=false;
+	  _Universe->AccessCockpit()->SetView (CP_BACK);
+	}
+}
+
+
+static void Behind(int,KBSTATE newState) {
+
+	if(newState==PRESS||newState==DOWN) {
+	  cockpitfront=false;
 	  _Universe->AccessCockpit()->SetView (CP_CHASE);
 	}
 }
 static void Pan(int,KBSTATE newState) {
+
 	if(newState==PRESS||newState==DOWN) {
+	  cockpitfront=false;
 	  _Universe->AccessCockpit()->SetView (CP_PAN);
 	}
 }
 
-static void Hornet(int,KBSTATE newState) {
-  static bool tmp=false;
-	if(newState==PRESS) {
-	  if (tmp) {
-	    _Universe->AccessCockpit()->Init ("hornet-cockpit.cpt");	    
-	  }else {
-	    _Universe->AccessCockpit()->Init ("");
-	  }
-	  tmp = !tmp;
-	}
-}
-static void Blank(int,KBSTATE newState) {
-	if(newState==PRESS||newState==DOWN) {
-
-	}
-}
 
 
 Unit *carrier=NULL;
@@ -227,11 +260,18 @@ void clickhandler (KBSTATE k, int x, int y, int delx, int dely, int mod) {
 */
 
 void InitializeInput() {
-	BindKey(GLUT_KEY_F1, Inside);
-	BindKey(GLUT_KEY_F2, Hornet);
+
+  	BindKey(GLUT_KEY_F1, Inside);
+	BindKey(GLUT_KEY_F2, InsideLeft);
+	BindKey(GLUT_KEY_F3, InsideRight);
+	BindKey(GLUT_KEY_F4, InsideBack);
+
 
 	BindKey(GLUT_KEY_F5, Behind);
 	BindKey(GLUT_KEY_F6, Pan);
+
+	BindKey(GLUT_KEY_F11, ZoomIn);
+	BindKey(GLUT_KEY_F12, ZoomOut);
 
 	BindKey('w', PitchDown);
 	BindKey('z', PitchUp);
