@@ -1,3 +1,9 @@
+2002-01-29 Daniel Aleksandrow <dandandaman@users.sourceforge.net>
+
+	* Fixed the revoker's texture
+	* Added cunerpicus texture (for moon)
+	* Added asteroid textures and meshes (all the ones I could find)
+
 2002-01-28 Daniel Horn <hellcatv@hotmail.com>
 
 	* Added VDU type to cockpit file... you can select what sort of type of VDU it is by adding the type flag like so <VDU type="Message Navigation"/>
