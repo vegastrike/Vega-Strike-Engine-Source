@@ -292,8 +292,8 @@ void GameCockpit::beginElement(const string &name, const AttributeList &attribut
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) { 
       switch (attribute_map.lookup((*iter).name)) {
       case VDUTYPE:
-	mymodes=parse_vdu_type ((*iter).value.c_str());
-	break;
+		mymodes=parse_vdu_type ((*iter).value.c_str());
+	  break;
       default:
 	break;
       }

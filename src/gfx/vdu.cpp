@@ -14,6 +14,11 @@
 ///ALERT to change must change enum in class
 const std::string vdu_modes [] = {"Target","Nav","Objectives","Comm","Weapon","Damage","Shield", "Manifest", "TargetManifest","View","Message"};
 
+void VDU::SetTexture( string file)
+{
+	this->tex = new Texture( file.c_str());
+}
+
 string getUnitNameAndFgNoBase (Unit * target) {
   Flightgroup* fg = target->getFlightgroup();
   if (target->isUnit()==PLANETPTR) {
@@ -84,6 +89,8 @@ VDU::VDU (const char * file, TextPlane *textp, unsigned short modes, short rwws,
   if (_Universe->numPlayers()>1) {
     posmodes&=(~VIEW);
   }
+  tex = NULL;
+  active_texture = false;
   comm_ani=NULL;
   viewStyle = CP_TARGET;
   StartArmor = ma;
@@ -823,15 +830,27 @@ void VDU::Draw (Unit * parent, const GFXColor & color) {
 	{
 		char buf[32];
 		string str( "Netlag: ");
+		unsigned int lag = Network[0].getLag();
 		memset( buf, 0, 32);
-		sprintf( buf, "%g", Network[0].getLag());
-		str+=string( buf)+"\n";
+		sprintf( buf, "%g", lag);
+		if( lag<50)
+			str += "#00FF00";
+		else if( lag<150)
+			str += "#FFFF00";
+		else
+			str += "#FF0000";
+		str += string( buf)+"#000000\n";
 		memset( buf, 0, 32);
 		sprintf( buf, "%g", Network[0].getCurrentFrequency());
 		str += "Freq: "+string( buf)+"/";
 		memset( buf, 0, 32);
 		sprintf( buf, "%g", Network[0].getSelectedFrequency());
-		str += string( buf)+" GHz\n";
+		str += string( buf)+" GHz";
+		if( Network[0].IsNetcommActive())
+			str += " - #0000FFON";
+		else
+			str += " - #FF0000OFF";
+		str += "#000000\n";
 		str += "SD: "+_Universe->current_stardate.GetFullCurrentStarDate();
   		tp->Draw(MangleString (str.c_str(),_Universe->AccessCamera()->GetNebula()!=NULL?.4:0),0,true);
 	}

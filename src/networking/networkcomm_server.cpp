@@ -4,6 +4,14 @@ NetworkCommunication::NetworkCommunication()
 {
 }
 
+void	NetworkCommunication::AddToSession( Client * clt)
+{
+}
+
+void	NetworkCommunication::RemoveFromSession( Client * clt)
+{
+}
+
 int		NetworkCommunication::InitSession( float freq)
 {
 	return 0;
