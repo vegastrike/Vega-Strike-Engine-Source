@@ -97,6 +97,8 @@ void Cockpit::DrawTargetBoxes(){
   Unit * un = parent.GetUnit();
   if (!un)
     return;
+  if (un->Getnebula()!=NULL)
+    return;
 
   StarSystem *ssystem=_Universe->activeStarSystem();
   UnitCollection *unitlist=ssystem->getUnitList();
@@ -147,7 +149,8 @@ void Cockpit::DrawTargetBox () {
   Unit * un = parent.GetUnit();
   if (!un)
     return;
-
+  if (un->Getnebula()!=NULL)
+    return;
   Unit *target = un->Target();
   if (!target)
     return;
