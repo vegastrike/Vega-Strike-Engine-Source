@@ -50,6 +50,7 @@ PYTHON_BEGIN_MODULE(Base)
 	Base.def (&BaseUtil::Ship,"Ship");
 	Base.def (&BaseUtil::Texture,"Texture");
 	Base.def (&BaseUtil::Message,"Message");
+	Base.def (&BaseUtil::EnqueueMessage,"EnqueueMessage");
 	Base.def (&BaseUtil::EraseObj,"EraseObj");
 	Base.def (&GetRandomBarMessage,"GetRandomBarMessage");
 PYTHON_END_MODULE(Base)
