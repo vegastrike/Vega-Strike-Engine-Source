@@ -67,7 +67,11 @@ float mmax (float a, float b) {
 }
 
 int rnd(int lower, int upper) {
-  return (int)( lower+ (((float(upper-lower))*ssrand())/(float (RAND_MAX)+1.)));
+  if (upper>lower) 
+	  return lower+ ssrand()%(upper-lower); 
+	  else return lower;
+	  
+	  // ( lower+ (((float(upper-lower))*ssrand())/(float (RAND_MAX)+1.))); WE THINK THIS IS BUGGY
 }
 const char nada[1]="";
 string  getGenericName(vector<string> &s) {
