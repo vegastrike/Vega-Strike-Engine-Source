@@ -6,7 +6,9 @@ void AUDDestroy();
 void AUDListener (const Vector &pos, const Vector &vel);
 void AUDListenerOrientation (const Vector & i, const Vector &j, const Vector &k);
 void AUDListenerGain (const float gain);
+///creates a buffer if one doesn't already exists, and then creates a source
 int AUDCreateSound (const char *, const bool LOOP);
+
 void AUDAdjustSound (const Vector &pos, const Vector &vel);
 void AUDSoundGain (const int sound, const float gain);
 bool AUDIsPlaying (const int sound);
