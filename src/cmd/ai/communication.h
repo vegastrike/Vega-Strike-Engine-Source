@@ -16,6 +16,7 @@ class FSM {
   int getDefaultState (float relationship) const;
   int GetHitNode ();
   int GetRequestLandNode();
+  int GetContrabandNode();
 
 };
 class CommunicationMessage {

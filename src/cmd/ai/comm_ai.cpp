@@ -60,7 +60,7 @@ void CommunicatingAI::InitiateContrabandSearch (float playaprob, float targprob)
     contraband_searchee.SetUnit (u);
     contraband_detected=false;
     SpeedAndCourse = u->GetVelocity();
-    CommunicationMessage c(parent,u,ani);
+    CommunicationMessage c(parent,u,comm_face);
 
     
   }
