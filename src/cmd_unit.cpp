@@ -88,8 +88,8 @@ void Unit::Init()
 	limits.pitch = 5;
 	limits.roll = 5;
 	
-	limits.lateral = 10;
-	limits.vertical = 10;
+	limits.lateral = 0.1;
+	limits.vertical = 0.1;
 	limits.longitudinal = 100;
 }
 

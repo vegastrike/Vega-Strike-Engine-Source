@@ -12,7 +12,8 @@ AI *PlanetaryOrbit::Execute() {
   double radius =  sqrt((x_offset - focus).MagnitudeSquared() + (y_offset - focus).MagnitudeSquared());
   theta+=velocity/radius * SIMULATION_ATOM;
   
-  parent->SetPosition(parent->origin - focus + 
+  parent->prev_physical_state = parent->curr_physical_state;
+  parent->curr_physical_state.position = (parent->origin - focus + 
 		      x_offset + y_offset);
   return this;
 }

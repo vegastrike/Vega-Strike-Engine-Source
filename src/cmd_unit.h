@@ -182,9 +182,9 @@ public:
 
   Vector Position(){return curr_physical_state.position;};
   void SetPosition(const Vector &pos) {/*prev_physical_state.position = curr_physical_state.position;*/
-  curr_physical_state.position = pos;}
+  prev_physical_state.position = curr_physical_state.position = pos;}
   void SetPosition(float x, float y, float z) {/*prev_physical_state.position = curr_physical_state.position;*/
-  curr_physical_state.position = Vector(x,y,z);}
+  prev_physical_state.position = curr_physical_state.position = Vector(x,y,z);}
 
   void Destroy(){active = false;};
   virtual void Fire(){};
@@ -212,6 +212,9 @@ public:
   // Help out AI creation
   void ApplyLocalTorque(const Vector &torque); //convenient shortcut
 
+  Vector ClampThrust(const Vector &thrust);
+  Vector MaxThrust(const Vector &thrust);
+  void Thrust(const Vector &amt);
   void LateralThrust(float amt);
   void VerticalThrust(float amt);
   void LongitudinalThrust(float amt);
@@ -224,8 +227,11 @@ public:
   void ResolveLast(); // used for lerp
   void GetOrientation(Vector &p, Vector &q, Vector &r) const;
   Vector ToLocalCoordinates(const Vector &v) const;
-  Vector GetAngularVelocity() const;
+  const Vector &GetAngularVelocity() const { return AngularVelocity; }
+  const Vector &GetVelocity() const { return Velocity; }
+  const Vector &GetPosition() const { return curr_physical_state.position; }
   float GetMoment() const { return MomentOfInertia; }
+  float GetMass() const { return mass; }
   const Limits &Limits() const { return limits; }
 
   inline bool queryCalculatePhysics() { return calculatePhysics; }

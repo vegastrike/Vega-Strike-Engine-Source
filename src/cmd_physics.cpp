@@ -77,6 +77,28 @@ void Unit::ApplyLocalTorque(const Vector &torque) {
   NetTorque += torque;
 }
 
+Vector Unit::MaxThrust(const Vector &amt1) {
+  // amt1 is a normal
+  return amt1 * (Vector(copysign(limits.lateral, amt1.i), 
+	       copysign(limits.vertical, amt1.j),
+	       copysign(limits.longitudinal, amt1.k)) * amt1);
+}
+Vector Unit::ClampThrust(const Vector &amt1){ 
+  // Yes, this can be a lot faster with LUT
+  Vector norm = amt1;
+  norm.Normalize();
+  Vector max = MaxThrust(norm);
+
+  if(max.Magnitude() > amt1.Magnitude())
+    return amt1;
+  else 
+    return max;
+}
+
+void Unit::Thrust(const Vector &amt1){
+  Vector amt = ClampThrust(amt1);
+  ApplyForce(amt);
+}
 
 void Unit::LateralThrust(float amt) {
   if(amt>1.0) amt = 1.0;
@@ -121,7 +143,7 @@ void Unit::ResolveForces () // don't call this 2x
     Rotate (SIMULATION_ATOM*(AngularVelocity+ temp*.5));
   }
 	AngularVelocity += temp;
-	temp = NetForce * SIMULATION_ATOM*(1/mass);//acceleration
+	temp = NetForce * SIMULATION_ATOM/mass;//acceleration
 	//now the fuck with it... add relitivity to the picture here
 	/*
 	if (fabs (Velocity.i)+fabs(Velocity.j)+fabs(Velocity.k)> co10)
@@ -134,6 +156,7 @@ void Unit::ResolveForces () // don't call this 2x
 	Velocity += temp;
 	NetForce = Vector(0,0,0);
 	NetTorque = Vector(0,0,0);
+	//cerr << "new position of " << name << ": " << curr_physical_state.position << ", velocity " << Velocity << endl;
 }
 
 void Unit::ResolveLast() {
@@ -167,6 +190,3 @@ Vector Unit::ToLocalCoordinates(const Vector &v) const {
 		v.i*M(0,2)+v.j*M(1,2)+v.k*M(2,2));
 }
 
-Vector Unit::GetAngularVelocity() const {
-  return AngularVelocity;
-}

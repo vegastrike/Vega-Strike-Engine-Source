@@ -127,6 +127,8 @@ inline Vector operator+(const Vector &lval, const Vector &rval)
 */
 inline Vector operator* (const Vector &lval, const float obj) {Vector retval(lval.i * obj, lval.j * obj, lval.k * obj); return retval;}
 
+inline Vector operator/ (const Vector &lval, const float obj) {Vector retval(lval.i / obj, lval.j / obj, lval.k / obj); return retval;}
+
 inline Vector operator* (const float obj, const Vector &rval) {Vector retval(rval.i * obj, rval.j * obj, rval.k * obj); return retval;}
 
 inline Vector operator+= (Vector &lval, const Vector &obj) {lval.i += obj.i; lval.j += obj.j; lval.k += obj.k; return lval;}
