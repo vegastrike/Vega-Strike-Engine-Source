@@ -300,6 +300,7 @@ class Unit {
     ///What percentage leaks (divide by 100%)
     char leak; 
   } shield;
+  float MaxShieldVal() const;
   ///regenerates all 2,4, or 6 shields for 1 SIMULATION_ATOM
   void RegenShields();
   ///The structual integ of the current unit

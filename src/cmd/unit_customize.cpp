@@ -286,6 +286,7 @@ bool Unit::UpAndDownGrade (Unit * up, Unit * templ, int mountoffset, int subunit
   STDUPGRADE(hull,up->hull,templ->hull,0);
   STDUPGRADE(recharge,up->recharge,templ->recharge,0);
   STDUPGRADE(image->repair_droid,up->image->repair_droid,templ->image->repair_droid,0);
+  STDUPGRADE(image->cargo_volume,up->image->cargo_volume,templ->image->cargo_volume,0);
   STDUPGRADE(image->ecm,up->image->ecm,templ->image->ecm,0);
   STDUPGRADE(maxenergy,up->maxenergy,templ->maxenergy,0);
   STDUPGRADE(limits.yaw,up->limits.yaw,templ->limits.yaw,0);
@@ -349,7 +350,7 @@ bool Unit::UpAndDownGrade (Unit * up, Unit * templ, int mountoffset, int subunit
   
   //NO CLUE FOR BELOW
   if (downgrade) {
-    STDUPGRADE(image->cargo_volume,up->image->cargo_volume,templ->image->cargo_volume,0);
+    //    STDUPGRADE(image->cargo_volume,up->image->cargo_volume,templ->image->cargo_volume,0);
     if (jump.drive>=-1&&up->jump.drive>=-1) {
       if (touchme) jump.drive=-2;
       numave++;
@@ -367,14 +368,14 @@ bool Unit::UpAndDownGrade (Unit * up, Unit * templ, int mountoffset, int subunit
       percentage++;
     }
   }else {
-    if (image->cargo_volume<up->image->cargo_volume) {
+    /*    if (image->cargo_volume<up->image->cargo_volume) {
       
       if (templ!=NULL?up->image->cargo_volume+image->cargo_volume<templ->image->cargo_volume:true) {
 	if (touchme)image->cargo_volume+=up->image->cargo_volume;
 	numave++;
 	percentage++;
       }
-    }
+      }*/
     if (cloaking==-1&&up->cloaking!=-1) {
       if (touchme) {cloaking=up->cloaking;cloakmin=up->cloakmin;image->cloakrate=up->image->cloakrate; image->cloakglass=up->image->cloakglass;image->cloakenergy=up->image->cloakenergy;}
       numave++;

@@ -217,7 +217,10 @@ float Unit::FuelData () const{
   return fuel;
 }
 float Unit::EnergyData() const{
-  return ((float)energy)/maxenergy;
+  if (maxenergy<=MaxShieldVal()) {
+    return 0;
+  }
+  return ((float)energy)/(maxenergy-MaxShieldVal());
 }
 
 float Unit::BShieldData() const{

@@ -356,6 +356,15 @@ void UpgradingInfo::CommitItem (const char *inp_buf, int button, int state) {
   case DOWNGRADEMODE:    
   case SHIPDEALERMODE:
     {
+      if (mode==UPGRADEMODE) {
+	if (strlen (input_buffer)>3) {
+	  if (input_buffer[0]=='a'&&
+	      input_buffer[1]=='d'&&
+	      input_buffer[2]=='d') {
+	    mode=ADDMODE;
+	  }
+	}
+      }
       Unit * temprate= new Unit ((un->name+string(".template")).c_str(),false,un->faction);
       if (temprate->name!=string("LOAD_FAILED")) {
 	templ=temprate;
@@ -541,6 +550,9 @@ void UpgradingInfo::CompleteTransactionConfirm () {
 	Cargo * tmp = bas->GetCargo (part.content,removalindex);
 	bas->RemoveCargo(removalindex,1,false );
 	}
+      }
+      if (mode==ADDMODE) {
+	mode=UPGRADEMODE;
       }
       break;
     case DOWNGRADEMODE:
