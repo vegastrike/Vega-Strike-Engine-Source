@@ -15,17 +15,34 @@ void addBSPMesh( Unit::XML * xml, const char *filename, const float scale,int fa
 void Unit::LoadRow(CSVRow &row,string modification, string * netxml) {
   Unit::XML xml;
   csvRow = row[0];
+  //
+  image->cargo_volume = atof(row["CargoVolume"].c_str());
+
+
+  //begin the geometry
   xml.unitscale = atoi(row["Scale"].c_str());
   if (!xml.unitscale) xml.unitscale=1;
   image->unitscale=xml.unitscale;
   string meshes = row["Mesh"];
-  unsigned int where;
+  string meshStartFrame = row["MeshStartFrame"];
+  string textureStartTime = row["MeshTextureStartTime"];
+  unsigned int where,wheresf,wherest;
   while (meshes.length()) {
     where=meshes.find(":");
-    std::string mesh = meshes.substr(0,where);
-    pushMesh(&xml,mesh.c_str(),xml.unitscale,faction,getFlightgroup(),0,0);
+    wheresf = meshStartFrame.find(":");
+    wherest = textureStartTime.find(":");
+    string startf = strtoupper(meshStartFrame.substr(0,wheresf));
+    string startt = strtoupper(textureStartTime.substr(0,wherest));
+    int startframe = startf=="RANDOM"?-1:(startf=="ASYNC"?-1:atoi(startf.c_str()));
+    float starttime = startt=="RANDOM"?-1.0f:atof(startt.c_str());
+    string mesh = meshes.substr(0,where);
+    pushMesh(&xml,mesh.c_str(),xml.unitscale,faction,getFlightgroup(),startframe,starttime);
+    if (wheresf!=string::npos) 
+      meshStartFrame.substr(wheresf+1);
+    if (wherest!=string::npos) 
+      textureStartTime.substr(wherest+1);
     if (where!=string::npos)
-      meshes=meshes.substr(where);
+      meshes=meshes.substr(where+1);
     else
       break;
   }
@@ -59,8 +76,15 @@ void Unit::LoadRow(CSVRow &row,string modification, string * netxml) {
     csRapidCollider *colTree=NULL;
     string tmpname = row[0];//key
     if (!this->colTrees) {
+      string val;
       xml.hasBSP=1;
       xml.hasColTree=1;
+      if ((val=row["HasBSP"]).length()) {
+        xml.hasBSP = XMLSupport::parse_bool(val);
+      }
+      if ((val=row["HasRapid"]).length()) {
+        xml.hasColTree= XMLSupport::parse_bool(val);
+      }
       if (xml.shieldmesh) {
         if (!CheckBSP ((tmpname+"_shield.bsp").c_str())) {
           BuildBSPTree ((tmpname+"_shield.bsp").c_str(), false, meshdata.back());
@@ -176,6 +200,7 @@ void Unit::WriteUnit (const char * modifications) {
     } 
   }
 }
+using XMLSupport::tostring;
 string Unit::WriteUnitString () {
   static bool UNITTAB = XMLSupport::parse_bool(vs_config->getVariable("physics","UnitTable","false"));
   string ret="";
@@ -194,10 +219,24 @@ string Unit::WriteUnitString () {
         values.push_back(csvRow);
         keys.push_back("Directory");
         values.push_back(row["Directory"]);
+
+        // mutable things
+        keys.push_back("CargoVolume");
+        values.push_back(tostring(image->cargo_volume));
+        
+        // immutable things
         keys.push_back("Scale");
         values.push_back(row["Scale"]);
         keys.push_back("Mesh");
         values.push_back(row["Mesh"]);       
+        if ((val=row["MeshStartFrame"]).length()) {
+          keys.push_back("MeshStartFrame");
+          values.push_back(val);
+        }
+        if ((val=row["MeshTextureStartTime"]).length()) {
+          keys.push_back("MeshTextureStartTime");
+          values.push_back(val);
+        }
         if ((val=row["ShieldMesh"]).length()) {
           keys.push_back("ShieldMesh");
           values.push_back(val);
@@ -210,7 +249,14 @@ string Unit::WriteUnitString () {
           keys.push_back("BSPMesh");
           values.push_back(val);
         }
-        
+        if ((val=row["HasRapid"]).length()) {
+          keys.push_back("HasRapid");
+          values.push_back(val);
+        }        
+        if ((val=row["HasBSP"]).length()) {
+          keys.push_back("HasBSP");
+          values.push_back(val);
+        }        
         return writeCSV(keys,values);
       }
     }
