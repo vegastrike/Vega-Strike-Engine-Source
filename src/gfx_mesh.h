@@ -45,11 +45,16 @@ struct bsp_polygon {
     vector <bsp_vector> v;
 };
 
+struct MeshDrawContext {
+  float mat[16];
+  vector <GFXLight> *SpecialFX;
+  MeshDrawContext(const float m[16]) { memcpy(mat, m, sizeof(float[16])); }
+};
 using XMLSupport::EnumMap;
 using XMLSupport::AttributeList;
 
 #define NUM_MESH_SEQUENCE 4
-
+#define MESH_SPECIAL_FX_ONLY 3
 class Mesh
 {
 private:
@@ -223,10 +228,11 @@ protected:
   void InitUnit();
   friend class OrigMeshContainer;
 public:
-
+  vector <GFXLight> LocalFX;
   Mesh();
   Mesh(const char *filename, bool xml=false);
   ~Mesh();
+  void EnableSpecialFX();
   void GetPolys(vector <bsp_polygon> &);
   //  void SetPosition (const Vector&);
   Vector &Position() {return local_pos;}

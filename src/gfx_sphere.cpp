@@ -141,6 +141,10 @@ void SphereMesh::Draw(const Transformation &transform /*= identity_transformatio
 
   Mesh::Draw(transform,m);
 }
+void SphereMesh::SetBlendMode (const BLENDFUNC a, const BLENDFUNC b) {
+  blendSrc=a; 
+  blendDst=b; //one of a kind...don't need to set orig;
+}
 
 void SphereMesh::ProcessDrawQueue() {
   GFXSelectMaterial(myMatNum);
@@ -184,9 +188,22 @@ void SphereMesh::ProcessDrawQueue() {
     MultMatrix (tmp2, c.mat, tmp);
     GFXLoadIdentity(MODEL);
     GFXPickLights (Vector (tmp2[12],tmp2[13],tmp2[14]),rSize());
+    
+    if (c.SpecialFX->size())
+      GFXLoadMatrix(MODEL, c.mat);
+    vector <int> specialfxlight;
+    for (int i=0;i<c.SpecialFX->size();i++) {
+      int ligh;
+      GFXCreateLight (ligh,(*c.SpecialFX)[i],true);
+      specialfxlight.push_back(ligh);
+    }
     GFXLoadMatrix(MODEL, tmp2);
     theta+=.01;
     vlist->Draw();
+    for (int i=0;i<specialfxlight.size();i++) {
+      GFXDeleteLight (specialfxlight[i]);
+    }
+
     if(0!=forcelogos) {
       forcelogos->Draw(tmp2);
       squadlogos->Draw(tmp2);

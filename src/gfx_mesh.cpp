@@ -66,12 +66,22 @@ void Mesh::ProcessUndrawnMeshes() {
   GFXEnable(DEPTHWRITE);
   GFXEnable(DEPTHTEST);
   for(int a=0; a<NUM_MESH_SEQUENCE; a++) {
+    if (a==MESH_SPECIAL_FX_ONLY) {
+      GFXPushGlobalEffects();
+      GFXDisable(DEPTHWRITE);
+    } else {
+
+    }
     undrawn_meshes[a].sort();//sort by texture address
     while(undrawn_meshes[a].size()) {
       Mesh *m = undrawn_meshes[a].back().orig;
       undrawn_meshes[a].pop_back();
       m->ProcessDrawQueue();
       m->will_be_drawn = false;
+    }
+    if (a==MESH_SPECIAL_FX_ONLY) {
+      GFXPopGlobalEffects();
+      GFXEnable(DEPTHWRITE);
     }
   }
   while(undrawn_logos.size()) {
@@ -178,6 +188,7 @@ void Mesh::Draw(const Transformation &trans, const Matrix m)
 {
   //  Vector pos (local_pos.Transform(m));
   MeshDrawContext c(m);
+  c.SpecialFX = &LocalFX;
   //  c.mat[12]=pos.i;
   //  c.mat[13]=pos.j;
   //  c.mat[14]=pos.k;//to translate to local_pos which is now obsolete!
@@ -187,7 +198,11 @@ void Mesh::Draw(const Transformation &trans, const Matrix m)
     undrawn_meshes[draw_sequence].push_back(OrigMeshContainer(orig));
   }
 }
-
+void Mesh::EnableSpecialFX(){
+  draw_sequence=MESH_SPECIAL_FX_ONLY;
+  setEnvMap(GFXFALSE);
+  orig->envMap = GFXFALSE;
+}
 void Mesh::ProcessDrawQueue() {
   assert(draw_queue->size());
   GFXSelectMaterial(myMatNum);
@@ -214,11 +229,21 @@ void Mesh::ProcessDrawQueue() {
   while(draw_queue->size()) {
     MeshDrawContext c = draw_queue->back();
     draw_queue->pop_back();
-    GFXLoadIdentity(MODEL);
-    GFXPickLights (Vector (c.mat[12],c.mat[13],c.mat[14]),rSize());
+    if (draw_sequence!=MESH_SPECIAL_FX_ONLY) {
+      GFXLoadIdentity(MODEL);
+      GFXPickLights (Vector (c.mat[12],c.mat[13],c.mat[14]),rSize());
+    }
     GFXLoadMatrix(MODEL, c.mat);
-
+    vector <int> specialfxlight;
+    for (int i=0;i<c.SpecialFX->size();i++) {
+      int ligh;
+      GFXCreateLight (ligh,(*c.SpecialFX)[i],true);
+      specialfxlight.push_back(ligh);
+    }
     vlist->Draw();
+    for (int i=0;i<specialfxlight.size();i++) {
+      GFXDeleteLight (specialfxlight[i]);
+    }
     if(0!=forcelogos) {
       forcelogos->Draw(c.mat);
     }

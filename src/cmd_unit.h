@@ -289,7 +289,8 @@ public:
 
   // Help out AI creation
   void ApplyLocalTorque(const Vector &torque); //convenient shortcut
-
+  void ApplyLocalDamage (const Vector &pnt, const Vector & normal, float amt);
+  void ApplyDamage (const Vector & pnt, const Vector & normal, float amt);
   Vector ClampThrust(const Vector &thrust, bool afterburn);
   Vector MaxThrust(const Vector &thrust);
   void Thrust(const Vector &amt,bool afterburn = false);
@@ -324,6 +325,7 @@ struct Unit::XML {
   vector<Halo*> halos;
   vector<Unit::Mount *> mountz;
   vector<Mesh*> meshes;
+  Mesh * shieldmesh;
   vector<Unit*> units;
   int unitlevel;
 };

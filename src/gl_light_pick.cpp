@@ -47,8 +47,8 @@ static void swappicked () {
 
 void unpicklights () {
   for (list <int>::iterator i=newpicked->begin();i!=newpicked->end();i++) {
-    assert (GLLights[*i].index!=-1);
-    assert (GLLights[(*_llights)[*i].Target()].index==*i);
+    if (GLLights[*i].index==-1 || GLLights[(*_llights)[*i].Target()].index!=*i)
+      continue;//a lengthy operation... Since picked lights may have been smashed    
     int targ =(*_llights)[*i].Target(); 
     if (GLLights[targ].options&OpenGLLights::GL_ENABLED) {
       glDisable (GL_LIGHT0+targ);
@@ -99,14 +99,15 @@ void gfx_light::dopickenables () {
       oldtrav++;
     }
     if (((*traverse)==(*oldtrav))&&((*_llights)[*oldtrav].target>=0)) {
-      assert (GLLights[(*_llights)[oldpicked->front()].target].index == oldpicked->front());
+      //BOGUS ASSERT... just like this light wasn't on if it was somehow clobberedassert (GLLights[(*_llights)[oldpicked->front()].target].index == oldpicked->front());
       oldpicked->erase (oldtrav);//already taken care of. main screen turn on ;-)
     } 
     traverse++;
   }
   oldtrav = oldpicked->begin();
   while (oldtrav!=oldpicked->end()) {
-    assert (GLLights[(*_llights)[(*oldtrav)].target].index == (*oldtrav));
+    if (GLLights[(*_llights)[(*oldtrav)].target].index != (*oldtrav))
+      continue;//don't clobber what's not yours
     GLLights[(*_llights)[(*oldtrav)].target].index = -1;
     GLLights[(*_llights)[(*oldtrav)].target].options &= (OpenGLLights::GL_ENABLED&OpenGLLights::GLL_LOCAL);//set it to be desirable to kill
     oldtrav++;

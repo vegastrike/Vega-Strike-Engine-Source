@@ -120,7 +120,6 @@ bool Unit::Collide (Unit * target) {
   Vector farce = normal*smaller->GetMass()*fabs(normal.Dot ((smaller->GetVelocity()-bigger->GetVelocity()/SIMULATION_ATOM))+fabs (dist)/(SIMULATION_ATOM*SIMULATION_ATOM));
   smaller->ApplyForce (normal*smaller->GetMass()*fabs(normal.Dot ((smaller->GetVelocity()-bigger->GetVelocity()/SIMULATION_ATOM))+fabs (dist)/(SIMULATION_ATOM*SIMULATION_ATOM)));
   bigger->ApplyForce (normal*(smaller->GetMass()*smaller->GetMass()/bigger->GetMass())*-fabs(normal.Dot ((smaller->GetVelocity()-bigger->GetVelocity()/SIMULATION_ATOM))+fabs (dist)/(SIMULATION_ATOM*SIMULATION_ATOM)));
-  fprintf (stderr,"Colliison %s %s force: <%f %f %f>",name.c_str(),target->name.c_str(),farce.i,farce.j,farce.k);
   //each mesh with each mesh? naw that should be in one way collide
   return true;
 }
@@ -141,6 +140,21 @@ void Beam::CollideHuge (const LineCollide & lc) {
   }
 
 }
+
+
+void Unit::ApplyLocalDamage (const Vector & pnt, const Vector & normal, float amt) {
+    if (meshdata[nummesh])
+      meshdata[nummesh]->LocalFX.push_back (GFXLight (true,
+						      GFXColor(pnt.i+normal.i,pnt.j+normal.j,pnt.k+normal.k),
+						      GFXColor (.3,.3,.3), GFXColor (0,0,0,1), 
+						      GFXColor (.5,.5,.5),GFXColor (1,0,.01)));
+}
+void Unit::ApplyDamage (const Vector & pnt, const Vector & normal, float amt) {
+  Vector localpnt (InvTransform(cumulative_transformation_matrix,pnt));
+  Vector localnorm (ToLocalCoordinates (normal));
+  ApplyLocalDamage(localpnt, localnorm, amt);
+}
+
 bool Beam::Collide (Unit * target) {
 
   if (target==owner) 
@@ -154,8 +168,10 @@ bool Beam::Collide (Unit * target) {
 
     curlength = distance;
     impact|=IMPACT;
-    fprintf (stderr, "beam delivers damage to %s", target->name.c_str());
-    //deliver float tmp=(curlength/range)); (damagerate*SIMULATION_ATOM*curthick/thickness)*((1-tmp)+tmp*rangepenalty);
+    
+
+    float tmp=(curlength/range); 
+    target->ApplyDamage (center+direction*curlength,normal,(damagerate*SIMULATION_ATOM*curthick/thickness)*((1-tmp)+tmp*rangepenalty));
     return true;
   }
   return false;

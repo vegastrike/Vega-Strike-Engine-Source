@@ -161,6 +161,10 @@ void Unit::UnRef() {
 }
 void Unit::Kill() {
   killed = true;
+  if (CollideInfo.object) {
+    KillCollideTable (&CollideInfo);
+    CollideInfo.object=NULL;
+  }
   Target((Unit *)NULL);
   if (ucref==0)
     Unitdeletequeue.push_back(this);
@@ -187,8 +191,8 @@ Unit::Unit(const char *filename, bool xml) {
 	}
 	LoadFile(filename);
 	ReadInt(nummesh);
-	meshdata = new Mesh*[nummesh];
-
+	meshdata = new Mesh*[nummesh+1];
+	meshdata[nummesh]=0;
 	for(int meshcount = 0; meshcount < nummesh; meshcount++)
 	{
 		int meshtype;
@@ -692,7 +696,9 @@ void Unit::Draw(const Transformation &parent, const Matrix parentMatrix)
 #endif
   int i;
   if (!invisible) {
-    for (i=0;i<nummesh;i++) {
+    for (i=0;i<=nummesh;i++) {//NOTE LESS THAN OR EQUALS...to cover shield mesh
+      if (meshdata[i]==NULL)
+	continue;
       float d = GFXSphereInFrustum(Transform (cumulative_transformation_matrix,
 					      meshdata[i]->Position()),
 				   meshdata[i]->rSize()

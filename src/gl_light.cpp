@@ -37,7 +37,7 @@ vector <gfx_light> * _llights=NULL;
 //currently stored GL lights!
 OpenGLLights* GLLights=NULL;//{-1,-1,-1,-1,-1,-1,-1,-1};
 static stack <bool *> GlobalEffects;
-
+static stack <GFXColor> GlobalEffectsAmbient;
 void /*GFXDRVAPI*/ GFXPushGlobalEffects() {
   bool * tmp = new bool [GFX_MAX_LIGHTS];
   unpicklights();//costly but necessary to get rid of pesky local enables that shoudln't be tagged to get reenabled
@@ -48,6 +48,8 @@ void /*GFXDRVAPI*/ GFXPushGlobalEffects() {
     }      
   }
   GlobalEffects.push (tmp);
+  GlobalEffectsAmbient.push (_ambient_light[_currentContext]);
+  GFXLightContextAmbient (GFXColor (0,0,0,1));
 }
 GFXBOOL /*GFXDRVAPI*/ GFXPopGlobalEffects() {
   if (GlobalEffects.empty())
@@ -58,6 +60,8 @@ GFXBOOL /*GFXDRVAPI*/ GFXPopGlobalEffects() {
     }
   }
   GlobalEffects.pop();
+  GFXLightContextAmbient (GlobalEffectsAmbient.top());
+  GlobalEffectsAmbient.pop();
   return true;
 }	
 

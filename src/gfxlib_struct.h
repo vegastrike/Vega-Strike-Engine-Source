@@ -49,7 +49,7 @@ struct GFXColor
 	float g;
 	float b;
 	float a;
-  GFXColor (const Vector &v, float a=1.0) {
+ GFXColor (const Vector &v, float a=1.0) {
     this->r = v.i;
     this->g = v.j;
     this->b = v.k;
@@ -197,10 +197,6 @@ public:
   void GetPolys (GFXVertex **vert, int *numPolys, int * numTris);
   GFXBOOL SwapUntransformed();
   GFXBOOL SwapTransformed();
-};
-struct MeshDrawContext {
-  float mat[16];
-  MeshDrawContext(const float m[16]) { memcpy(mat, m, sizeof(float[16])); }
 };
 
 struct DrawContext {

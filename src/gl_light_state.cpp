@@ -63,7 +63,7 @@ bool gfx_light::Create (const GFXLight & temp, bool global) {
 	options &=(~GFX_LOCAL_LIGHT);
 	foundclobberable = enabled()?findGlobalClobberable ():findLocalClobberable();
 	if (foundclobberable!=-1) {
-	  _GLLightsEnabled++;
+	  _GLLightsEnabled+= (enabled()!=0);
 	  ClobberGLLight (foundclobberable);
 	}
     }
@@ -71,7 +71,7 @@ bool gfx_light::Create (const GFXLight & temp, bool global) {
 }
 void gfx_light::Kill() {
     Disable();//first disables it...which _will_ remove it from the light table.
-    if (target!=-1) {
+    if (target>=0) {
       TrashFromGLLights();//then if not already done, trash from GLlights;
     }
     target=-2;
@@ -164,7 +164,8 @@ void gfx_light::ClobberGLLight (const int target) {
 void gfx_light::ResetProperties (const enum LIGHT_TARGET light_targ, const GFXColor &color) {
   if (LocalLight()) {
     RemoveFromTable();
-    TrashFromGLLights();
+    if (target>=0)
+      TrashFromGLLights();
   }
   switch (light_targ) {
   case DIFFUSE:
@@ -205,7 +206,7 @@ void gfx_light::ResetProperties (const enum LIGHT_TARGET light_targ, const GFXCo
 }
 
 void gfx_light::TrashFromGLLights () {
-  assert (target>0);
+  assert (target>=0);
   assert ((GLLights[target].options&OpenGLLights::GLL_ON)==0);//better be disabled so we know it's not in the table, etc
   assert ((&(*_llights)[GLLights[target].index])==this);
   GLLights[target].index = -1;
@@ -258,13 +259,17 @@ void gfx_light::Enable() {
 void gfx_light::Disable() {
   if (enabled()) {
     disable();
-    TrashFromGLLights();
-    if (LocalLight())
+    if (target>=0) {
+      if (GLLights[target].options&OpenGLLights::GL_ENABLED) {
+	_GLLightsEnabled--;
+	glDisable (GL_LIGHT0+this->target);
+      }
+      GLLights[this->target].options&=(~(OpenGLLights::GL_ENABLED||OpenGLLights::GLL_ON));
+    }
+    if (LocalLight()) {
       RemoveFromTable();
-    else if (this->target!=-1) {
-      _GLLightsEnabled--;
-      glDisable (GL_LIGHT0+this->target);
-      GLLights[this->target].options&=(~OpenGLLights::GL_ENABLED);
+      if (target>=0)
+	TrashFromGLLights();
     }
   }
 }

@@ -7,6 +7,7 @@
 //#include <values.h>
 #include <float.h>
 #include "gfx_mesh.h"
+#include "gfx_sphere.h"
 #include "gfx_bsp.h"
 #define VS_PI 3.1415926536
 void Unit::beginElement(void *userData, const XML_Char *name, const XML_Char **atts) {
@@ -24,6 +25,7 @@ namespace UnitXML {
       UNIT,
       SUBUNIT,
       MESHFILE,
+      SHIELDMESH,
       MOUNT,
       MESHLIGHT,
       XFILE,
@@ -84,6 +86,7 @@ namespace UnitXML {
     EnumMap::Pair ("Unit", UNIT),
     EnumMap::Pair ("SubUnit", SUBUNIT),
     EnumMap::Pair ("MeshFile", MESHFILE),
+    EnumMap::Pair ("ShieldMesh",SHIELDMESH),
     EnumMap::Pair ("Light",MESHLIGHT),
     EnumMap::Pair ("Defense", DEFENSE),
     EnumMap::Pair ("Armor", ARMOR),
@@ -147,7 +150,7 @@ namespace UnitXML {
     EnumMap::Pair ("bsptree",BSPTREE)
 };
 
-  const EnumMap element_map(element_names, 21);
+  const EnumMap element_map(element_names, 22);
   const EnumMap attribute_map(attribute_names, 41);
 }
 
@@ -182,6 +185,17 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
 	xml->unitlevel++;
 
 //    cerr << "Unknown element start tag '" << name << "' detected " << endl;
+    break;
+  case SHIELDMESH:
+	assert (xml->unitlevel==1);
+	xml->unitlevel++;
+    for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
+      switch(attribute_map.lookup((*iter).name)) {
+      case XFILE:
+	xml->shieldmesh =(new Mesh((*iter).value.c_str(), true));
+	break;
+      }
+    }
     break;
   case MESHFILE:
 	assert (xml->unitlevel==1);
@@ -653,6 +667,7 @@ void Unit::LoadXML(const char *filename) {
   }
 
   xml = new XML;
+  xml->shieldmesh = NULL;
   xml->unitlevel=0;
   XML_Parser parser = XML_ParserCreate(NULL);
   XML_SetUserData(parser, this);
@@ -669,7 +684,7 @@ void Unit::LoadXML(const char *filename) {
 fclose (inFile);
   // Load meshes into subunit
   nummesh = xml->meshes.size();
-  meshdata = new Mesh*[nummesh];
+  meshdata = new Mesh*[nummesh+1];
   corner_min = Vector(FLT_MAX, FLT_MAX, FLT_MAX);
   corner_max = Vector(-FLT_MAX, -FLT_MAX, -FLT_MAX);
   int a;
@@ -703,6 +718,15 @@ fclose (inFile);
   }
 
   calculate_extent();
+  if (xml->shieldmesh) {
+    meshdata[nummesh] = xml->shieldmesh;
+  }else {
+    SphereMesh * tmp = new SphereMesh (rSize(),16,16,"shield.bmp");
+    tmp->SetBlendMode (ONE,ONE);
+    meshdata[nummesh] = tmp;
+  }
+
+  meshdata[nummesh]->EnableSpecialFX();
   if (!bspTree) {
     string tmpname (filename);
     tmpname += ".bsp";

@@ -107,10 +107,11 @@ Planet::Planet(Vector x,Vector y,float vely, float pos,float gravity,float radiu
   SetAI(new PlanetaryOrbit(this, vely, pos, x, y)); // behavior
   //cerr << "\nPlanet: " << this << endl;
 //  fclose(fp);
-  meshdata = new Mesh*[1];
+  meshdata = new Mesh*[2];
   meshdata[0] = new SphereMesh(radius, 16, 16, textname, alpha);
   meshdata[0]->setEnvMap(GFXFALSE);
   nummesh = 1;
+  meshdata[1]=NULL;
   calculate_extent();
 
 }
