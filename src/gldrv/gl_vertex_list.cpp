@@ -471,6 +471,13 @@ void GFXVertexList::EndDrawState(GFXBOOL lock) {
     GFXColor4f(1,1,1,1);
   }
 }
+
+void GFXVertexList::Draw (enum POLYTYPE poly, int numV) {
+  GLenum tmp = PolyLookup(poly);
+  INDEX index;
+  index.b = NULL;
+  Draw (&tmp,index,1,&numV);
+}
 void GFXVertexList::Draw (enum POLYTYPE poly, int numV, unsigned char *index) {
   char tmpchanged = changed;
   changed = sizeof (unsigned char) | ((~HAS_INDEX)&changed);

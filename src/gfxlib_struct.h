@@ -290,6 +290,7 @@ public:
   void BeginDrawState(GFXBOOL lock=GFXTRUE);
   ///Draws a single copy of the mass-loaded vlist
   void Draw();
+  void Draw(enum POLYTYPE poly, int numV);
   void Draw(enum POLYTYPE poly, int numV, unsigned char * index);
   void Draw(enum POLYTYPE poly, int numV, unsigned short *index);
   void Draw(enum POLYTYPE poly, int numV, unsigned int *index);

@@ -28,9 +28,9 @@ struct HeightMapInfo {
  * This has 4 lists of indices, one for "numbers of corners" a triangle may be filled 
  * If the trianlge has 0 vertices filled, it is a nonblended one with all 4 filled
  */
-const int quadsquare_num_corners =3;
 struct TextureIndex {
-  std::vector <unsigned int> q[quadsquare_num_corners];
+  std::vector <unsigned int> q;
+  std::vector <GFXColorVertex> c;
   void Clear();
 };
 
@@ -128,6 +128,7 @@ private:
 	static unsigned int * VertexAllocated;
 	static unsigned int * VertexCount;
 	static GFXVertexList *vertices;
+	static GFXVertexList *blendVertices;
 	static std::vector <unsigned int> *unusedvertices;
 	static std::vector <Texture  *> *textures;
 	static std::vector <TextureIndex> indices;

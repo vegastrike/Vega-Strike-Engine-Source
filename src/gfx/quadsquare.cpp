@@ -39,15 +39,15 @@ float IdentityTransform::TransformT (float y) {
 unsigned int * quadsquare::VertexAllocated;
 unsigned int *quadsquare::VertexCount;
 GFXVertexList *quadsquare::vertices;
+GFXVertexList *quadsquare::blendVertices=NULL;
 std::vector <TextureIndex> quadsquare::indices;
 std::vector <unsigned int> *quadsquare::unusedvertices;
 IdentityTransform *quadsquare::nonlinear_trans;
 std::vector <Texture *> *quadsquare::textures;
 
 void TextureIndex::Clear() {
-  for (int i=0;i<quadsquare_num_corners;i++) {
-    q[i].clear();
-  }
+  q.clear();
+  c.clear();
 }
 
 unsigned int quadsquare::SetVertices (GFXVertex * vertexs, const quadcornerdata &pcd) {
@@ -819,30 +819,27 @@ int	quadsquare::Render(const quadcornerdata& cd)
   RenderAux(cd, GFX_PARTIALLY_VISIBLE);
 
   vector <TextureIndex>::iterator i=indices.begin();
-  for (vector <Texture *>::iterator k=textures->begin();k!=textures->end();i++,k++) {
-
+  vector <Texture *>::iterator k;
+  for (k=textures->begin();k!=textures->end();i++,k++) {
     (*k)->MakeActive();
-    for (int j=0;j<quadsquare_num_corners;j++) {
-	unsigned int isize = i->q[j].size();
-	totsize+=isize;
-	vertices->Draw(GFXTRI,isize, i->q[j].begin());
-	vertices->EndDrawState();
-#if 0
-	unsigned int xmin = -1;
-	unsigned int xmax = 0;
-
-	for (unsigned int i=0;i<isize;i++) {
-
-	  if (indices[i]<xmin)
-	    xmin = indices[i];
-	  if (indices[i]>xmax)
-	    xmax = indices[i];
-	}
-	fprintf (stderr,"Minvertex %d, MaxVertex %d\n",xmin,xmax);
-#endif
+    unsigned int isize = i->q.size();
+    totsize+=isize;
+    vertices->Draw(GFXTRI,isize, i->q.begin());
+    if (i->c.size()>2) {
+      GFXColorVertex ** cv = (&blendVertices->BeginMutate(0)->colors);
+      GFXColorVertex *tmp = *cv;
+      *cv = i->c.begin();
+      blendVertices->EndMutate(i->c.size());
+      blendVertices->LoadDrawState(); blendVertices->BeginDrawState(GFXFALSE);
+      blendVertices->Draw(GFXTRI,i->c.size());
+      blendVertices->EndDrawState(GFXFALSE);
+      cv = (&blendVertices->BeginMutate(0)->colors);
+      *cv = tmp;
+      blendVertices->EndMutate(3);
     }
     i->Clear();
   }
+  vertices->EndDrawState();
   return totsize;
 }
 
@@ -906,7 +903,7 @@ void	quadsquare::RenderAux(const quadcornerdata& cd,  CLIPSTATE vis)
 
 	
 // Local macro to make the triangle logic shorter & hopefully clearer.
-#define tri(aa,ta,bb,tb,cc,tc) (indices[ta].q[0].push_back (aa), indices[ta].q[0].push_back (bb), indices[ta].q[0].push_back (cc))
+#define tri(aa,ta,bb,tb,cc,tc) (indices[ta].q.push_back (aa), indices[ta].q.push_back (bb), indices[ta].q.push_back (cc))
 #define V0 (Vertex[0].vertindex)
 #define T0 (Vertex[0].Tex)
 #define V1 (Vertex[1].vertindex)
@@ -1045,6 +1042,10 @@ void	quadsquare::SetupCornerData(quadcornerdata* q, const quadcornerdata& cd, in
 	}	
 }
 void quadsquare::SetCurrentTerrain (unsigned int *VertexAllocated, unsigned int *VertexCount, GFXVertexList *vertices, std::vector <unsigned int> *unvert, IdentityTransform * nlt, std::vector <Texture *> *tex ) {
+  if (quadsquare::blendVertices==NULL) {
+    GFXVertex tmp[3];
+    blendVertices = new GFXVertexList (GFXTRI,3,tmp,3,true);
+  }
   quadsquare::VertexAllocated = VertexAllocated;
   quadsquare::VertexCount = VertexCount;
   quadsquare::vertices = vertices;
