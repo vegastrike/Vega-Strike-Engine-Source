@@ -11,9 +11,6 @@ Hashtable <string,PyCodeObject ,char[1023]> compiled_python;
 char * LoadString (const char * filename) {
   FILE * fp = VSFileSystem::vs_open (filename,"r");
   if (!fp) {
-	  char parwd[4096];parwd[40955]=0;
-	  getcwd(parwd,4095);
-	  printf("failed compiled file loaded from %s named %s",parwd,filename);
     return NULL;
   }
   VSFileSystem::vs_fseek (fp,0,SEEK_END);
