@@ -57,8 +57,8 @@ protected:
   Vector targetlocation;
   ///The queue of suborders that will be executed in parallel according to bit code
   std::vector<Order*> suborders;
-  ///a bunch of communications that have not been answered
-  std::vector<Communications *>messagequeue;
+  ///a bunch of communications that have not been answered CommunicationMessages are actually containing reference to a nice Finite State Machine that can allow a player to have a reasonable conversation with an AI
+  std::vector<class CommunicationMessage *>messagequeue;
   ///changes the local relation of this unit to another...may inform superiors about "good" or bad! behavior depending on the AI
   virtual void AdjustRelationTo (Unit * un, float factor);
 public:
