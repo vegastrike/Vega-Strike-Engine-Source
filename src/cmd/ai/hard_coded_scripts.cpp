@@ -122,14 +122,45 @@ void MoveTo(Order * aisc, Unit * un) {
   Order * ord = new Orders::MoveTo(Targ,false,3);
   AddOrd (aisc,un,ord);
 }
-void Kickstop(Order * aisc, Unit * un) {
-  Vector vec (0,0,-4);
+
+void KickstopBase(Order * aisc, Unit * un, bool match) {
+  Vector vec (0,0,0);
+  if (match&&un->Target())
+    vec=un->Target()->GetVelocity();
   Order * ord = new Orders::MatchLinearVelocity(un->ClampVelocity(vec,false),true,false,true);
   AddOrd (aisc,un,ord);
   ord =       (new Orders::FaceTarget(false, 3));
   AddOrd (aisc,un,ord);  
 }
-
+void Kickstop(Order * aisc, Unit * un) {
+  KickstopBase(aisc,un,false);
+}
+void MatchVelocity(Order * aisc, Unit * un) {
+  KickstopBase(aisc,un,false);
+}
+Vector VectorThrustHelper(Order * aisc, Unit * un) {
+  Vector vec (0,0,0);
+  Vector retval(0,0,0);
+  if (un->Target()) {
+    Vector tpos=un->Target()->Position().Cast();
+    Vector relpos=tpos-un->Position().Cast();
+    CrossProduct(relpos,Vector(1,0,0),vec);
+    retval+=tpos;
+  }
+  Order * ord = new Orders::MatchLinearVelocity(un->ClampVelocity(vec,false),true,false,true);
+  AddOrd (aisc,un,ord);
+  return retval;
+}
+void VeerAway(Order * aisc, Unit * un) {
+  VectorThrustHelper (aisc,un);
+  Order *ord =       (new Orders::FaceTarget(false, 3));
+  AddOrd (aisc,un,ord);  
+}
+void VeerAndTurnAway(Order * aisc, Unit * un) {
+  Vector retval=VectorThrustHelper (aisc,un);
+  Order *ord = new Orders::ChangeHeading(retval,3,1);
+  AddOrd (aisc,un,ord);  
+}
 static void SetupVAndTargetV (QVector & targetv, QVector &targetpos, Unit* un) {
   Unit *targ;
   if ((targ = un->Target())) {

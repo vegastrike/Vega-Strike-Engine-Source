@@ -319,7 +319,7 @@ void FaceTarget::Execute() {
     done = finish;
     return;
   }
-  SetDest(target->Position());
+  SetDest(target->isSubUnit()?target->Position():target->LocalPosition());
   ChangeHeading::Execute();
   if (!finish) {
     ResetDone();

@@ -1396,6 +1396,8 @@ void Unit::RegenShields () {
   }
   static float discharge_per_second=XMLSupport::parse_float (vs_config->getVariable("physics","speeding_discharge",".95"));
   const float dischargerate = (1-(1-discharge_per_second)*SIMULATION_ATOM);//approx
+  static float min_shield_discharge=XMLSupport::parse_float (vs_config->getVariable("physics","min_shield_speeding_discharge",".1"));
+
   switch (shield.number) {
   case 2:
 
@@ -1413,29 +1415,40 @@ void Unit::RegenShields () {
       rechargesh=0;
     }
     if (velocity_discharge) {
-      shield.fb[1]*=dischargerate;
-      shield.fb[0]*=dischargerate;
+      if (shield.fb[1]>min_shield_discharge*shield.fb[3])
+	shield.fb[1]*=dischargerate;
+      if (shield.fb[0]>min_shield_discharge*shield.fb[2])
+	shield.fb[0]*=dischargerate;
     }
     break;
   case 4:
-
     rechargesh = applyto (shield.fbrl.front,shield.fbrl.frontmax,rec)*(applyto (shield.fbrl.back,shield.fbrl.backmax,rec))*applyto (shield.fbrl.right,shield.fbrl.rightmax,rec)*applyto (shield.fbrl.left,shield.fbrl.leftmax,rec);
     if (velocity_discharge) {
-      shield.fbrl.front*=dischargerate;
-      shield.fbrl.left*=dischargerate;
-      shield.fbrl.back*=dischargerate;
-      shield.fbrl.right*=dischargerate;
+      if (shield.fbrl.front>min_shield_discharge*shield.fbrl.frontmax)
+	shield.fbrl.front*=dischargerate;
+      if (shield.fbrl.left>min_shield_discharge*shield.fbrl.leftmax)
+	shield.fbrl.left*=dischargerate;
+      if (shield.fbrl.back>min_shield_discharge*shield.fbrl.backmax)
+	shield.fbrl.back*=dischargerate;
+      if (shield.fbrl.right>min_shield_discharge*shield.fbrl.rightmax)
+	shield.fbrl.right*=dischargerate;
     }
     break;
   case 6:
     rechargesh = (applyto(shield.fbrltb.v[0],shield.fbrltb.fbmax,rec))*applyto(shield.fbrltb.v[1],shield.fbrltb.fbmax,rec)*applyto(shield.fbrltb.v[2],shield.fbrltb.rltbmax,rec)*applyto(shield.fbrltb.v[3],shield.fbrltb.rltbmax,rec)*applyto(shield.fbrltb.v[4],shield.fbrltb.rltbmax,rec)*applyto(shield.fbrltb.v[5],shield.fbrltb.rltbmax,rec);
     if (velocity_discharge) {
-      shield.fbrltb.v[0]*=dischargerate;
-      shield.fbrltb.v[1]*=dischargerate;
-      shield.fbrltb.v[2]*=dischargerate;
-      shield.fbrltb.v[3]*=dischargerate;
-      shield.fbrltb.v[4]*=dischargerate;
-      shield.fbrltb.v[5]*=dischargerate;
+      if (shield.fbrltb.v[0]>min_shield_discharge*shield.fbrltb.fbmax)
+	shield.fbrltb.v[0]*=dischargerate;
+      if (shield.fbrltb.v[1]>min_shield_discharge*shield.fbrltb.fbmax)
+	shield.fbrltb.v[1]*=dischargerate;
+      if (shield.fbrltb.v[2]>min_shield_discharge*shield.fbrltb.rltbmax)
+	shield.fbrltb.v[2]*=dischargerate;
+      if (shield.fbrltb.v[3]>min_shield_discharge*shield.fbrltb.rltbmax)
+	shield.fbrltb.v[3]*=dischargerate;
+      if (shield.fbrltb.v[4]>min_shield_discharge*shield.fbrltb.rltbmax)
+	shield.fbrltb.v[4]*=dischargerate;
+      if (shield.fbrltb.v[5]>min_shield_discharge*shield.fbrltb.rltbmax)
+	shield.fbrltb.v[5]*=dischargerate;
     }
     break;
   }
