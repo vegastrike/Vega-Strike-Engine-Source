@@ -410,11 +410,27 @@ void bootstrap_main_loop () {
     SplashScreen= NULL;
     SetStarSystemLoading (false);
     _Universe->LoadContrabandLists();
-    UniverseUtil::IOmessage (0,"game","all",vs_config->getVariable ("general","intro1","Welcome to Vega Strike, Use Tab to afterburn (+,- cruise control), arrows to steer."));
-    UniverseUtil::IOmessage (0,"game","all",vs_config->getVariable ("general","intro1","the 't' key targets objects; space fires at them, and 'a' autopilots to them."));
-    UniverseUtil::IOmessage (0,"game","all",vs_config->getVariable ("general","intro1","To speed up time press F9; F10 resets."));
-    UniverseUtil::IOmessage (0,"game","all",vs_config->getVariable ("general","intro1","Target a base or planet and press '0' to request landing clearence."));
-    UniverseUtil::IOmessage (0,"game","all",vs_config->getVariable ("general","intro1","Once inside the green box, 'd' will land. When you launch, press 'u' to undock."));
+	{
+		string str=vs_config->getVariable ("general","intro1","Welcome to Vega Strike! Use #8080FFTab#000000 to afterburn (#8080FF+,-#000000 cruise control), #8080FFarrows#000000 to steer.");
+		if (!str.empty()) {
+			UniverseUtil::IOmessage (0,"game","all",str);
+			str=vs_config->getVariable ("general","intro2","The #8080FFt#000000 key targets objects; #8080FFspace#000000 fires at them & #8080FFa#000000 auto pilots there. Time");
+			if (!str.empty()) {
+				UniverseUtil::IOmessage (4,"game","all",str);
+				str=vs_config->getVariable ("general","intro3","Compression: #8080FFF9; F10#000000 resets. Buy a jump drive & fly to a blue ball & press #8080FFj#000000");
+				if (!str.empty()) {
+					UniverseUtil::IOmessage (8,"game","all",str);
+					str = vs_config->getVariable ("general","intro4","to warp to a near star. Target a base or planet & press #8080FF0#000000 to request landing");
+					if (!str.empty()) {
+						UniverseUtil::IOmessage (12,"game","all",str);
+						str=vs_config->getVariable ("general","intro5","clearence. Inside the green box #8080FFd#000000 will land. When you launch, press #8080FFu#000000 to undock.");
+						if (!str.empty())
+							UniverseUtil::IOmessage (16,"game","all",str);
+					}
+				}
+			}
+		}
+	}
     _Universe->Loop(main_loop);
     ///return to idle func which now should call main_loop mohahahah
   }

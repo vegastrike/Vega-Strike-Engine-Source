@@ -400,7 +400,7 @@ void VDU::DrawMessages(Unit *target){
 		mymsg=string(timebuf)+": "+lastmsg->message;
 	}
 	int msglen=mymsg.size();
-	int rows_needed=msglen/cols;
+	int rows_needed=msglen/(1.6*cols);
 	fullstr=mymsg+"\n"+fullstr;
 	//fullstr=fullstr+mymsg+"\n";
 
