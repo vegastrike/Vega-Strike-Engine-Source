@@ -215,7 +215,7 @@ void Mesh::ProcessDrawQueue() {
     MeshDrawContext c = draw_queue->back();
     draw_queue->pop_back();
     GFXLoadMatrix(MODEL, c.mat);
-    GFXPickLights (c.mat/*GetPosition()*/);
+    GFXPickLights (Vector (c.mat[12],c.mat[13],c.mat[14]));
     vlist->Draw();
     if(0!=forcelogos) {
       forcelogos->Draw(c.mat);

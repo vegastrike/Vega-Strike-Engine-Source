@@ -5,6 +5,14 @@
 #define COLLIDETABLESIZE sizeof(CTSIZ)
 #define COLLIDETABLEACCURACY sizeof (CTACCURACY)
 const int HUGEOBJECT=16; //objects that go over 16 sectors are considered huge and better to check against everything.
+struct LineCollide {
+  void * object;
+  enum collidables {UNIT, BEAM,BALL,BOLT,PROJECTILE} type;
+  Vector Mini;
+  Vector Maxi;
+  LineCollide (void * objec, enum collidables typ,const Vector &st, const Vector &en) {this->object=objec;this->type=typ;this->Mini=st;this->Maxi=en;}
+  LineCollide (const LineCollide &l) {object=l.object; type=l.type; Mini=l.Mini;Maxi=l.Maxi;}      
+};
 
 template <class T, class CTSIZ, class CTACCURACY> class Hashtable3d {
   int minaccessx,minaccessy,minaccessz,maxaccessx,maxaccessy,maxaccessz;

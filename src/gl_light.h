@@ -38,9 +38,10 @@ class gfx_light: public GFXLight {
   void ResetProperties (const enum LIGHT_TARGET, const GFXColor&color);//sets properties, making minimum GL state changes for global,
   //for local lights, removes it from table, trashes it from GLlights, 
   //if enabled, puts it bakc in table.
+  void AddToTable();
   void RemoveFromTable();
   void TrashFromGLLights();
-  LineCollide CalculateBounds ();//calculates bounds for the table!
+  LineCollide CalculateBounds (bool & err);//calculates bounds for the table!
 };
 struct OpenGLLights {
     int index;//-1 == unassigned
@@ -61,9 +62,15 @@ extern vector <gfx_light> * _llights;
 
 //currently stored GL lights!
 extern OpenGLLights* GLLights;
+struct LineCollideStar {
+  LineCollide* lc;
+  bool operator == (const LineCollideStar & b) {
+    return lc->object==b.lc->object;
+  }
+};
 
 //table to store local lights, numerical pointers to _llights (eg indices)
-extern Hashtable3d <LineCollide*, char[20],char[200]> lighttable;
+extern Hashtable3d <LineCollideStar, char[20],char[200]> lighttable;
 
 //optimization globals
 extern float intensity_cutoff;//something that would normally round down

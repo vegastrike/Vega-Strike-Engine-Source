@@ -211,6 +211,7 @@ void /*GFXDRVAPI*/ GFXDeleteLightContext(int con_number) {
 void /*GFXDRVAPI*/ GFXSetLightContext (int con_number) {
   int GLLindex=0;
   unsigned int i;
+  lighttable.Clear();
   _currentContext = con_number;
   _llights = &_local_lights_dat[con_number];
   glLightModelfv (GL_LIGHT_MODEL_AMBIENT,(GLfloat *) &(_ambient_light[con_number]));
@@ -218,10 +219,14 @@ void /*GFXDRVAPI*/ GFXSetLightContext (int con_number) {
   for (i=0;i<_llights->size();i++) (*_llights)[i].Target()=-1;
 
   for (i=0;i<_llights->size()&&GLLindex<GFX_MAX_LIGHTS;i++) {
-    if ((*_llights)[i].enabled()&&(!(*_llights)[i].LocalLight())) {
-      GLLights[GLLindex].index=-1;//make it clobber completley! no trace of old light.
-      (*_llights)[i].ClobberGLLight (GLLindex);
-      GLLindex++;
+    if ((*_llights)[i].enabled()) {
+      if ((*_llights)[i].LocalLight()) {
+	(*_llights)[i].AddToTable();
+      }else {
+	GLLights[GLLindex].index=-1;//make it clobber completley! no trace of old light.
+	(*_llights)[i].ClobberGLLight (GLLindex);
+	GLLindex++;
+      }
     }
   }
   for (;GLLindex<GFX_MAX_LIGHTS;GLLindex++) {

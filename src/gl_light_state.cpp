@@ -4,7 +4,8 @@
 
 #define GFX_HARDWARE_LIGHTING
 //table to store local lights, numerical pointers to _llights (eg indices)
-Hashtable3d <LineCollide*, char[20],char[200]> lighttable;
+
+Hashtable3d <LineCollideStar, char[20],char[200]> lighttable;
 
 GFXLight gfx_light::operator = (const GFXLight &tmp) {
     memcpy (this,&tmp,sizeof (GFXLight));
@@ -13,8 +14,8 @@ GFXLight gfx_light::operator = (const GFXLight &tmp) {
 
 int gfx_light::lightNum() {
   int tmp =  (this-_llights->begin());
-  if (tmp<0||tmp>(int)_llights->size())
-    return -1;
+  assert (tmp>=0&&tmp<(int)_llights->size());
+  assert (&(*_llights)[GLLights[target].index]==this);
   return tmp;
 }//which number it is in the main scheme of things
 
@@ -99,13 +100,13 @@ inline void gfx_light::ContextSwitchClobberLight (const GLenum gltarg) {
 inline void gfx_light::FinesseClobberLight (const GLenum gltarg, const int original) {
   gfx_light * orig = &((*_llights)[GLLights[original].index]);
   if (attenuated()) {
-      if (orig->attenuated()) {
+    if (orig->attenuated()) {
 	  if (orig->attenuate[0]!=attenuate[0])
-	      glLightf (gltarg,GL_CONSTANT_ATTENUATION,attenuate[0]);
+	    glLightf (gltarg,GL_CONSTANT_ATTENUATION,attenuate[0]);
 	  if  (orig->attenuate[1]!=attenuate[1])
-	      glLightf (gltarg,GL_LINEAR_ATTENUATION, attenuate[1]);		
+	    glLightf (gltarg,GL_LINEAR_ATTENUATION, attenuate[1]);
 	  if  (orig->attenuate[2]!=attenuate[2])	  
-	      glLightf (gltarg,GL_QUADRATIC_ATTENUATION,attenuate[2]);		  
+	    glLightf (gltarg,GL_QUADRATIC_ATTENUATION,attenuate[2]); 
       } else {
 	  glLightf (gltarg,GL_CONSTANT_ATTENUATION,attenuate[0]);
 	  glLightf (gltarg,GL_LINEAR_ATTENUATION, attenuate[1]);
@@ -129,6 +130,7 @@ inline void gfx_light::FinesseClobberLight (const GLenum gltarg, const int origi
 }
 
 void gfx_light::ClobberGLLight (const int target) {
+  this->target = target;
 #ifdef GFX_HARDWARE_LIGHTING
     if (GLLights[target].index==-1) {
 #endif
@@ -192,25 +194,71 @@ void gfx_light::TrashFromGLLights () {
   assert ((&(*_llights)[GLLights[target].index])==this);
   GLLights[target].index = -1;
   GLLights[target].options= OpenGLLights::GLL_LOCAL;
-  
 }
-
+void gfx_light::AddToTable() {
+  LineCollideStar tmp;
+  bool err;
+  LineCollide coltarg (CalculateBounds(err));
+  if (err)
+    return;
+  tmp.lc = &coltarg;
+  lighttable.Put (&coltarg, tmp);
+}
 void gfx_light::RemoveFromTable() {
-
+  LineCollideStar tmp;
+  bool err;
+  LineCollide coltarg (CalculateBounds(err));
+  if (err)
+    return;
+  tmp.lc = &coltarg;
+  lighttable.Remove ( &coltarg, tmp);
+  
 }
 
 
 //unimplemented
 void gfx_light::Enable() {
-
+  if (!enabled()) {
+    if (LocalLight())
+      AddToTable();
+    else {
+      if (target==-1) {
+	int newtarg =  findGlobalClobberable();
+	if (newtarg==-1)
+	  return;
+	ClobberGLLight (newtarg);
+      }
+      glEnable (GL_LIGHT0+this->target);
+    }
+    enable();
+  }
 }
 //unimplemented
 void gfx_light::Disable() {
-
+  if (enabled()) {
+    disable();
+    TrashFromGLLights();
+    if (LocalLight())
+      RemoveFromTable();
+  }
 }
+//FIXME (calculate d)
 
-LineCollide gfx_light::CalculateBounds () {
+// i =  tot/(A+B*d+C*d*d)    Ai+Bi*d+Ci*d*d = tot   
+// d= (-Bi + sqrtf (B*i*B*i - 4*Ci*(Ai-tot)))/ (2Ci)
+// d= (-B + sqrtf (B*B + 4*C*(tot/i-A)))/ (2C)
 
+LineCollide gfx_light::CalculateBounds (bool &error) {
+  float tot_intensity = ((specular[0]+specular[1]+specular[2])*specular[3]+
+			 (diffuse[0]+diffuse[1]+diffuse[2])*diffuse[3]+ 
+			 (ambient[0]+ambient[1]+ambient[2])*ambient[3])*.33;
+  float d = (-attenuate[1]+sqrtf(attenuate[1]*attenuate[1]+4*attenuate[2]*((tot_intensity/intensity_cutoff) - attenuate[0])))/(2*attenuate[2]);
+  error = d<0;
+  Vector st (vect[0]-d,vect[1]-d,vect[2]-d);
+  Vector end (vect[0]+d,vect[1]+d,vect[2]+d);
+  LineCollide retval(NULL,LineCollide::UNIT,st,end);
+  *((int *)(&retval.object)) = lightNum();//put in a lightNum
+  return retval;
 }
 
 

@@ -26,7 +26,7 @@ static bool operator < (light_key tmp1,light_key tmp2) {return tmp1.intensity_ke
 static priority_queue<light_key> lightQ;
 
 
-void GFXPickLights (const float *) {
+void GFXPickLights (const Vector & center) {
 
 }
 
