@@ -151,11 +151,12 @@ void StarSystem::Draw() {
     iter->advance();
   }
   delete iter;
-  _Universe->AccessCockpit()->SetupViewPort();///this is the final, smoothly calculated cam
+  _Universe->AccessCockpit()->SetupViewPort(true);///this is the final, smoothly calculated cam
   
   //  SetViewport();//camera wielding unit is now drawn  Note: Background is one frame behind...big fat hairy deal
   GFXColor tmpcol (0,0,0,1);
   GFXGetLightContextAmbient(tmpcol);
+  Mesh::ProcessZFarMeshes();
   Mesh::ProcessUndrawnMeshes(true);
   GFXPopGlobalEffects();
   GFXLightContextAmbient(tmpcol);

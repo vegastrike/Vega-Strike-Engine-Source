@@ -77,7 +77,7 @@ class Cockpit {
   ///Sets the current viewstyle
   void SetView (const enum VIEWSTYLE tmp);
   ///Sets up the world for rendering...call before draw
-  void SetupViewPort ();
+  void SetupViewPort (bool clip=true);
   void VDUSwitch (int vdunum);
 };
 #endif

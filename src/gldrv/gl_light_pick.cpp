@@ -47,8 +47,11 @@ static void swappicked () {
 
 void unpicklights () {
 	for (std::list <int>::iterator i=newpicked->begin();i!=newpicked->end();i++) {
-    if (GLLights[*i].index==-1 || GLLights[(*_llights)[*i].Target()].index!=*i)
-      continue;//a lengthy operation... Since picked lights may have been smashed    
+	  if (GLLights[(*_llights)[*i].Target()].index!=*i) {
+	    	    fprintf (stderr,"uh oh");
+	    (*_llights)[*i].Target()=-1;
+	    continue;//a lengthy operation... Since picked lights may have been smashed    
+	  }
     int targ =(*_llights)[*i].Target(); 
     if (GLLights[targ].options&OpenGLL::GL_ENABLED) {
       glDisable (GL_LIGHT0+targ);

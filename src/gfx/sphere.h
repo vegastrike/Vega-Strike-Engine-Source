@@ -3,7 +3,6 @@
 
 #include "mesh.h"
 #include "quaternion.h"
-
 class SphereMesh : public Mesh {
  public:
   SphereMesh () :Mesh(){}

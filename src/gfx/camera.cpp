@@ -50,8 +50,11 @@ Camera::Camera(ProjectionType proj) : projectionType(proj), myPhysics(0.1,0.075,
 
 void Camera::GetPQR (Vector &p1, Vector &q1, Vector &r1){p1.i = P.i;p1.j = P.j; p1.k = P.k;q1.i = Q.i;q1.j = Q.j; q1.k = Q.k;r1.i = R.i;r1.j = R.j; r1.k = R.k;}
 
-void Camera::UpdateGFX(GFXBOOL updateFrustum)
+
+
+void Camera::UpdateGFX(GFXBOOL clip, GFXBOOL updateFrustum)
 {
+  const float ZFARCONST= 10000;
   float xmin, xmax, ymin, ymax;
 	if(changed)
 	{
@@ -61,7 +64,7 @@ void Camera::UpdateGFX(GFXBOOL updateFrustum)
 		GFXLoadIdentity(VIEW);
 		switch(projectionType) {
 		case Camera::PERSPECTIVE:
-		  GFXPerspective (zoom*g_game.fov,g_game.aspect,g_game.znear,g_game.zfar,cockpit_offset); //set perspective to 78 degree FOV
+		  GFXPerspective (zoom*g_game.fov,g_game.aspect,g_game.znear,g_game.zfar*(clip?1:ZFARCONST),cockpit_offset); //set perspective to 78 degree FOV
 		  break;
 		case Camera::PARALLEL:
 		  ymax = g_game.znear * tanf( zoom*g_game.fov * PI / ((float)360.0) ); 
@@ -72,7 +75,7 @@ void Camera::UpdateGFX(GFXBOOL updateFrustum)
 		  xmax = ymax * g_game.aspect;//6.2571
 		  
 		  //GFXParallel(xmin,xmax,ymin,ymax,-znear,zfar);
-		  GFXParallel(g_game.aspect*-zoom,g_game.aspect*zoom,-zoom,zoom,-g_game.zfar,g_game.zfar);
+		  GFXParallel(g_game.aspect*-zoom,g_game.aspect*zoom,-zoom,zoom,-g_game.zfar*(clip?1:ZFARCONST),g_game.zfar*(clip?1:ZFARCONST));
 		  break;
 		}
 		GFXLookAt (Coord-R, Coord, Q);

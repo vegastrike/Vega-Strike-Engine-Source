@@ -1,3 +1,11 @@
+2001-11-07 Daniel Horn <hellcatv@hotmail.com>
+	
+	* made convex objects be allowed to be farther than zfar away
+	* made gl_light_pick more robust
+	* fixed gl_light_pick for >1 light
+	* now objects in the distance are sorted in order and drawn w/o zbuf (painter algorithm
+	* FIXME painters order does not respect multiple objects sharing a mesh--though planets do not share meshes so this does not affect large planets in distance
+	
 2001-11-02 Alexander Rawass <alexannika@users.sourceforge.net>
 
 	* added file src/mission_script.cpp (not yet compilable)

@@ -38,26 +38,30 @@
 #include "config_xml.h"
 #include "hashtable.h"
 #include "vegastrike.h"
-
+#include "sphere.h"
 #include <GL/gl.h>
 #include <float.h>
+#include <algorithm>
 using std::list;
 Hashtable<string, Mesh, char [127]> Mesh::meshHashTable;
 class OrigMeshContainer {
 public:
+  float d;
   Mesh * orig;
-  OrigMeshContainer (Mesh * tmp) {
+  OrigMeshContainer (Mesh * tmp, float d) {
     orig = tmp;
+    this->d = d;
   }
-  bool operator < (const OrigMeshContainer & b) {
+  bool operator < (const OrigMeshContainer & b) const {
     return ((*orig->Decal) < (*b.orig->Decal));
   }
-  bool operator == (const OrigMeshContainer &b) {
+  bool operator == (const OrigMeshContainer &b) const {
     return (*orig->Decal)==*b.orig->Decal;
   }
 
 };
-list<OrigMeshContainer> undrawn_meshes[NUM_MESH_SEQUENCE]; // lower priority means draw first
+typedef std::vector<OrigMeshContainer> OrigMeshVector;
+OrigMeshVector undrawn_meshes[NUM_MESH_SEQUENCE]; // lower priority means draw first
 extern list<Logo*> undrawn_logos;
 Vector mouseline;
 
@@ -207,13 +211,13 @@ Mesh * Mesh::getLOD (float lod) {
   }
   return retval;
 }
-void Mesh::Draw(float lod, const Transformation &trans, const Matrix m, short cloak, float nebdist)
+void Mesh::Draw(float lod, const Transformation &trans, const Matrix m, float toofar, short cloak, float nebdist)
 {
   //  Vector pos (local_pos.Transform(m));
   MeshDrawContext c(m);
   UpdateFX(GetElapsedTime());
   c.SpecialFX = &LocalFX;
-  c.mesh_seq=draw_sequence;
+  c.mesh_seq=((toofar>g_game.zfar)&&draw_sequence==0)?NUM_ZBUF_SEQ:draw_sequence;
   c.cloaked=MeshDrawContext::NONE;
   if (cloak>=0) {
     c.cloaked|=MeshDrawContext::CLOAK;
@@ -233,7 +237,7 @@ void Mesh::Draw(float lod, const Transformation &trans, const Matrix m, short cl
     c.CloakNebFX.aa=((float)cloak)/32767;
     */
     ///all else == defaults, only ambient
-  }
+  } 
   //  c.mat[12]=pos.i;
   //  c.mat[13]=pos.j;
   //  c.mat[14]=pos.k;//to translate to local_pos which is now obsolete!
@@ -241,7 +245,7 @@ void Mesh::Draw(float lod, const Transformation &trans, const Matrix m, short cl
   origmesh->draw_queue->push_back(c);
   if(!(origmesh->will_be_drawn&(1<<c.mesh_seq))) {
     origmesh->will_be_drawn |= (1<<c.mesh_seq);
-    undrawn_meshes[c.mesh_seq].push_back(OrigMeshContainer(origmesh));
+    undrawn_meshes[c.mesh_seq].push_back(OrigMeshContainer(origmesh,toofar));//FIXME will not work if many of hte same mesh are blocking each other
   }
   will_be_drawn |= (1<<c.mesh_seq);
 }
@@ -291,12 +295,39 @@ void Mesh::DrawNow(float lod,  bool centered, const Transformation &transform /*
 
 
 static GFXColor getMeshColor () {
-  float color[4];
+   float color[4];
   vs_config->getColor ("unit", "ship_ambient",color);
   GFXColor tmp (color[0],color[1],color[2],color[3]);
   return tmp;
 }
 
+class MeshCloser { 
+public:
+  MeshCloser () {}
+  ///approximate closness based on center o matrix (which is gonna be center for spheres and convex objects most likely)
+  bool operator () (const OrigMeshContainer & a, const OrigMeshContainer & b) {
+    //    return a.d+a.orig->rSize() > b.d+b.orig->rSize();//draw from outside in :-)
+    return a.d > b.d;//draw from outside in :-)
+  }
+};
+
+void Mesh::ProcessZFarMeshes () {
+  _Universe->activeStarSystem()->AccessCamera()->UpdateGFX (GFXFALSE, GFXFALSE);
+  GFXEnable(LIGHTING);
+  GFXEnable(CULLFACE);
+  GFXDisable (DEPTHTEST);
+  GFXDisable (DEPTHWRITE);
+  ///sort meshes  
+  std::sort<OrigMeshVector::iterator,MeshCloser>(undrawn_meshes[NUM_ZBUF_SEQ].begin(),undrawn_meshes[NUM_ZBUF_SEQ].end(),MeshCloser());
+  for (OrigMeshVector::iterator i=undrawn_meshes[NUM_ZBUF_SEQ].begin();i!=undrawn_meshes[NUM_ZBUF_SEQ].end();i++) {
+    i->orig->ProcessDrawQueue (NUM_ZBUF_SEQ);
+    i->orig->will_be_drawn &= (~(1<<NUM_ZBUF_SEQ));
+  }
+  undrawn_meshes[NUM_ZBUF_SEQ].clear();
+  _Universe->activeStarSystem()->AccessCamera()->UpdateGFX (GFXTRUE, GFXFALSE);
+  GFXEnable (DEPTHTEST);
+  GFXEnable (DEPTHWRITE);
+}
 void Mesh::ProcessUndrawnMeshes(bool pushSpecialEffects) {
   static GFXColor meshcolor (getMeshColor());
   GFXLightContextAmbient(meshcolor);
@@ -306,18 +337,19 @@ void Mesh::ProcessUndrawnMeshes(bool pushSpecialEffects) {
   GFXEnable(LIGHTING);
   GFXEnable(CULLFACE);
 
-  for(int a=0; a<NUM_MESH_SEQUENCE; a++) {
+  for(int a=0; a<NUM_ZBUF_SEQ; a++) {
     if (a==MESH_SPECIAL_FX_ONLY) {
+      
       GFXPushGlobalEffects();
       GFXDisable(DEPTHWRITE);
     } else {
 
     }
-    undrawn_meshes[a].sort();//sort by texture address
+    std::sort(undrawn_meshes[a].begin(),undrawn_meshes[a].end());//sort by texture address
     if (!undrawn_meshes[a].empty()) {
       undrawn_meshes[a].back().orig->vlist->LoadDrawState();
     }
-    while(undrawn_meshes[a].size()) {
+    while(!undrawn_meshes[a].empty()) {
       Mesh *m = undrawn_meshes[a].back().orig;
       undrawn_meshes[a].pop_back();
       m->ProcessDrawQueue(a);

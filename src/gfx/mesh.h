@@ -85,7 +85,8 @@ struct MeshDrawContext {
 using XMLSupport::EnumMap;
 using XMLSupport::AttributeList;
 
-#define NUM_MESH_SEQUENCE 4
+#define NUM_MESH_SEQUENCE 5
+#define NUM_ZBUF_SEQ 4
 #define MESH_SPECIAL_FX_ONLY 3
 
 /**
@@ -102,6 +103,7 @@ using XMLSupport::AttributeList;
 class Mesh
 {
 private:
+
   ///Stores all the load-time vertex info in the XML struct FIXME light calculations
   struct XML {
     enum Names {
@@ -333,11 +335,13 @@ public:
   ///Returns center of this mesh
   Vector &Position() {return local_pos;}
   ///Draws lod pixel wide mesh at Transformation LATER
-  void Draw(float lod, const Transformation &quat = identity_transformation, const Matrix = identity_matrix, short cloak=-1,float nebdist=0);
+  void Draw(float lod, const Transformation &quat = identity_transformation, const Matrix = identity_matrix, float toofar=1, short cloak=-1, float nebdist=0);
   ///Draws lod pixels wide, mesh at Transformation NOW. If centered, then will center on camera and disable cull
   void DrawNow(float lod, bool centered, const Transformation &quat = identity_transformation, const Matrix = identity_matrix, short cloak=-1,float nebdist=0);
   ///Will draw all undrawn meshes of this type
   virtual void ProcessDrawQueue(int whichdrawqueue);
+  ///Will draw all undrawn far meshes beyond the range of zbuffer (better be convex).
+  static void ProcessZFarMeshes ();
   ///Will draw all undrawn meshes in total If pushSpclFX, the last series of meshes will be drawn with other lighting off
   static void ProcessUndrawnMeshes(bool pushSpecialEffects=false);
   ///Sets whether or not this unit should be environment mapped

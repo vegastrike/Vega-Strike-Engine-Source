@@ -655,13 +655,13 @@ float /*GFXDRVAPI*/ GFXSphereInFrustum (const Vector &Cnt, float radius) {
 float /*GFXDRVAPI*/ GFXSphereInFrustum (float f [6][4],const Vector &Cnt, float radius) {
    int p;
    float d;
-   for( p = 0; p < 6; p++ )
+   for( p = 0; p < 5; p++ )//does not evaluate for yon
    {
       d = f[p][0] * Cnt.i + f[p][1] * Cnt.j + f[p][2] * Cnt.k + f[p][3];
       if( d <= -radius )
          return 0;
    }
-   return d + radius;
+   return d;
 }
 
 
@@ -758,23 +758,10 @@ void /*GFXDRVAPI*/ GFXCalculateFrustum (float frustum[6][4], float *modl,float *
    frustum[3][3] /= t;
 
    /* Extract the FAR plane */
-   frustum[4][0] = clip[ 3] - clip[ 2];
-   frustum[4][1] = clip[ 7] - clip[ 6];
-   frustum[4][2] = clip[11] - clip[10];
-   frustum[4][3] = clip[15] - clip[14];
-
-   /* Normalize the result */
-   t = sqrtf( frustum[4][0] * frustum[4][0] + frustum[4][1] * frustum[4][1] + frustum[4][2] * frustum[4][2] );
-   frustum[4][0] /= t;
-   frustum[4][1] /= t;
-   frustum[4][2] /= t;
-   frustum[4][3] /= t;
-
-   /* Extract the NEAR plane */
-   frustum[5][0] = clip[ 3] + clip[ 2];
-   frustum[5][1] = clip[ 7] + clip[ 6];
-   frustum[5][2] = clip[11] + clip[10];
-   frustum[5][3] = clip[15] + clip[14];
+   frustum[5][0] = clip[ 3] - clip[ 2];
+   frustum[5][1] = clip[ 7] - clip[ 6];
+   frustum[5][2] = clip[11] - clip[10];
+   frustum[5][3] = clip[15] - clip[14];
 
    /* Normalize the result */
    t = sqrtf( frustum[5][0] * frustum[5][0] + frustum[5][1] * frustum[5][1] + frustum[5][2] * frustum[5][2] );
@@ -782,6 +769,19 @@ void /*GFXDRVAPI*/ GFXCalculateFrustum (float frustum[6][4], float *modl,float *
    frustum[5][1] /= t;
    frustum[5][2] /= t;
    frustum[5][3] /= t;
+
+   /* Extract the NEAR plane */
+   frustum[4][0] = clip[ 3] + clip[ 2];
+   frustum[4][1] = clip[ 7] + clip[ 6];
+   frustum[4][2] = clip[11] + clip[10];
+   frustum[4][3] = clip[15] + clip[14];
+
+   /* Normalize the result */
+   t = sqrtf( frustum[4][0] * frustum[4][0] + frustum[4][1] * frustum[4][1] + frustum[4][2] * frustum[4][2] );
+   frustum[4][0] /= t;
+   frustum[4][1] /= t;
+   frustum[4][2] /= t;
+   frustum[4][3] /= t;
    
 }
 

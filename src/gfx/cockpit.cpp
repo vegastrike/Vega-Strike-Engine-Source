@@ -370,7 +370,7 @@ void Cockpit::VDUSwitch (int vdunum) {
 void Cockpit::RestoreViewPort() {
   GFXViewPort (0, 0, g_game.x_resolution,g_game.y_resolution);
 }
-void Cockpit::SetupViewPort () {
+void Cockpit::SetupViewPort (bool clip) {
     GFXViewPort (0,(int)((view<CP_CHASE?viewport_offset:0)*g_game.y_resolution), g_game.x_resolution,g_game.y_resolution);
   _Universe->activeStarSystem()->AccessCamera()->setCockpitOffset (view<CP_CHASE?cockpit_offset:0);
   Unit * un;
@@ -401,7 +401,8 @@ void Cockpit::SetupViewPort () {
     }else {
       _Universe->AccessCamera()->SetPosition (un->Position()-_Universe->AccessCamera()->GetR()*un->rSize()*zoomfactor);
     }
-    _Universe->activeStarSystem()->SetViewport();
+    _Universe->activeStarSystem()->AccessCamera()->UpdateGFX(clip?GFXTRUE:GFXFALSE);
+
     un->SetVisible(view>=CP_CHASE);
     
   }

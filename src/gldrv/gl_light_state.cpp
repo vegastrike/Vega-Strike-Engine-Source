@@ -131,7 +131,8 @@ inline void gfx_light::FinesseClobberLight (const GLenum gltarg, const int origi
   if (ambient[0]!=orig->ambient[0]||ambient[1]!=orig->ambient[1]||ambient[2]!=orig->ambient[2]||ambient[3]!=orig->ambient[3]) {
       glLightfv (gltarg, GL_AMBIENT,ambient);
   }
- 
+  orig->target = -1;
+  GLLights[original].index=-1;
 }
 
 void gfx_light::ClobberGLLight (const int target) {
@@ -155,7 +156,10 @@ void gfx_light::ClobberGLLight (const int target) {
 	FinesseClobberLight (GL_LIGHT0+target,GLLights[target].index);
     }
 #endif
+    this->target = target;
+    fprintf (stderr,"Target %d had light %d",target, GLLights[target].index);
     GLLights[target].index = lightNum();
+    fprintf (stderr," Clobbered with %d\n",lightNum());
     GLLights[target].options |= OpenGLL::GLL_ON*enabled()+OpenGLL::GLL_LOCAL*LocalLight();
 }
 
