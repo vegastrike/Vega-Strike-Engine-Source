@@ -43,7 +43,7 @@ namespace UniverseUtil {
 	void SetDifficulty (float diff);
 	void playSound(string soundName, QVector loc, Vector speed);
 	void playAnimation(string aniName, QVector loc, float size);
-	void terminateMission();
+	void terminateMission(bool term);
 	Unit *getPlayer();
 	Unit *getPlayerX(int which);
 	int getNumPlayers ();

@@ -160,7 +160,7 @@ namespace UniverseUtil {
 	void playAnimation(string aniName, QVector loc, float size) {
 		AddAnimation(loc,size,true,aniName);
 	}
-	void terminateMission(){
+	void terminateMission(bool Win){
 		mission->terminateMission();
 	}
 	Unit *getPlayer(){

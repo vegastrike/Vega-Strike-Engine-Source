@@ -289,7 +289,10 @@ void InitVS() {
 #define EXPORT_UTIL(name,aff) voidEXPORT_UTIL(name) ~    return aff
 #define Vector
 #define QVector
+
+
 import random
+import sys
 
 voidEXPORT_UTIL(pushSystem)
 voidEXPORT_UTIL(popSystem)
@@ -328,7 +331,9 @@ voidEXPORT_UTIL(setCompleteness)
 EXPORT_UTIL(getCompleteness,0)
 voidEXPORT_UTIL(setOwner)
 EXPORT_UTIL(getOwner,Unit())
-voidEXPORT_UTIL(IOmessage)
+def IOmessage(time,fr,to,message):
+   sys.stderr.write("IOmessage [printed in %f seconds; from %s to %s: '%s']\n" % (time,fr,to,message))
+
 def string ():
   return ''
 class Unit:

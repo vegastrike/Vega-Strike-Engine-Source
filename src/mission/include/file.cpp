@@ -66,7 +66,7 @@ string ClassName (string pythonfilename) {
 }
 using std::string;
 std::string PrintArg (easyDomNode *node) {
-  assert (node->Name()=="const");
+	printf ("%s\n",(node->Name()=="const")?"":"ASSERT(node->Name()==\"const\")");
   string type = node->attr_value ("type");
   string def;
   string retval= node->attr_value ("value");
@@ -86,41 +86,48 @@ std::string PrintArg (easyDomNode *node) {
     def="''";
   }
   if (retval.empty()) {
+	printf("\n[WARNING: attr_value with type \"%s\" is empty... Using default:\"%s\"\n",type,def);
     retval = def;
   }
   return retval;
 }
-void PrintArgs(FILE *fp,easyDomNode * node) {
+void PrintArgs(string &pythontxt,easyDomNode * node) {
   for (unsigned int i=0;i<node->subnodes.size();i++) {
-    string arg =PrintArg (node->subnodes[i]);
-    fprintf (fp,"%s",arg.c_str());
+    pythontxt+=PrintArg (node->subnodes[i]);
     if (i+1<node->subnodes.size()) {
-      fprintf (fp,", ");
+      pythontxt+=", ";
     }
   }
 }
-void LoadPythonModule(string fn, string pfn) {
+void LoadPythonModule(string fn,string pythn) {
   FILE * fp = fopen (fn.c_str(),"r");
   if (fp) {
     fseek (fp,0,SEEK_END);
     int size = ftell (fp)+1;
     fseek (fp,0,SEEK_SET);
     char * temp = (char *)malloc (size);
-    temp[size]='\0';
-    fread (temp,size-1,1,fp);
+    temp[fread (temp,1,size-1,fp)]='\0';
     fclose (fp);
-    fp = fopen (fn.c_str(),"w");
     string wholefile (temp);
     free (temp);
     unsigned int where;
     if (wholefile.find ("python")!=string::npos) {
       return;
     }
-    string tofind ("\"director\"");
-    while ((where =wholefile.find (tofind))!=string::npos) {
-      where += tofind.length();
+    fp = fopen (fn.c_str(),"w");
+	if (!fp) {return;}
+    string tofind ("module");
+    if ((where =wholefile.find (tofind))!=string::npos) {
+      for (;where>0&&wholefile[where]!='<';where--) {
+	  }
       fwrite (wholefile.c_str(),where,1,fp);
-      string addition (" python=\""+pfn+"\"");
+//	  string INBETTEXT;
+	  for (;where>0&&wholefile[where]!='>';where--) {
+//		  if (wholefile[where]=='\n'||wholefile[where]=='\r'||wholefile[where]==' '||wholefile[where]=='\t')
+//			  INBETTEXT+=wholefile[where];
+	  }
+	  where+=1;
+      string addition ("<python>\n"+pythn+"\n</python>");
       fwrite (addition.c_str(),addition.length(),1,fp);
       wholefile = wholefile.substr (where,wholefile.length()-(where+1));
     }
@@ -130,29 +137,22 @@ void LoadPythonModule(string fn, string pfn) {
 
   }
 }
-void PrintPython (easyDomNode * node, string filename) {
-  string pythonfilename= filename.substr(0,filename.rfind (".mission"));
- 
-    pythonfilename += ".py";
-    LoadPythonModule (filename,pythonfilename);
-  FILE * fp = fopen (pythonfilename.c_str(),"w");
-  if (fp) {
+void PrintPython (easyDomNode * node,string filename) {
+    string pythontxt;
     string module = node->attr_value ("module");
-    string classname = ClassName (module);
+    string classname = module;//ClassName (module);
     if (module.length()) {
-      fprintf (fp,"import %s\n",module.c_str());
-      fprintf (fp,"newmission = %s.%s()\n",module.c_str(),classname.c_str());
+      pythontxt=string("import ")+module
+            +"\nnewmission = "+module+"."+classname+" (";
     }else {
-      fprintf (fp,"newmission = %s()\n",classname.c_str());
+      pythontxt="newmission = "+classname+" (";
     }
     string myname =node->attr_value ("name");
-    fprintf (fp,"newmission.%s(",myname.c_str());
     if (node->subnodes.size()>0) {
-      PrintArgs (fp,node);
+      PrintArgs (pythontxt,node);
     }
-    fprintf (fp,")\nnewmission=0\n");
-    fclose (fp);
-  }
+    pythontxt+=")\nnewmission=0\n";
+    LoadPythonModule (filename,pythontxt);
 }
 void ScanNode (string *parent, easyDomNode *node, string  filename) {
 	vector<easyDomNode *>::const_iterator siter;
