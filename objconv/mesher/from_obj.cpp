@@ -2,8 +2,16 @@
 #include <map>
 using std::map;
 struct MTL:public GFXMaterial {
+  MTL() {
+    blend_src=ONE;
+    blend_dst=ZERO;
+    reflect=true;
+  }  
+  bool reflect;
+   int blend_src;int blend_dst;
    vector<textureholder> textures;
    textureholder detail;   
+  
    vector <float> detailplanei;
    vector <float> detailplanej;
    vector <float> detailplanek;
@@ -110,10 +118,39 @@ void ObjToBFXM (FILE* obj, FILE * mtl, FILE * outputFile) {
          continue;
       }
       wordtoupper(buf);
-      sscanf(buf,"KA %f %f %f\n",&cur->ar,&cur->ag,&cur->ab);
-      sscanf(buf,"KS %f %f %f\n",&cur->sr,&cur->sg,&cur->sb);
-      sscanf(buf,"KD %f %f %f\n",&cur->dr,&cur->dg,&cur->db);
-      sscanf(buf,"KE %f %f %f\n",&cur->er,&cur->eg,&cur->eb);
+      float tmpblend;
+      if (1==sscanf(buf,"BLEND %f\n",&tmpblend)) {
+        if (tmpblend==1) {
+          cur->blend_src = ONE;
+          cur->blend_dst = ONE;
+        }else if (tmpblend==.5) {
+          cur->blend_src = SRCALPHA;
+          cur->blend_dst = INVSRCALPHA;
+        }else {
+          cur->blend_src=ONE;
+          cur->blend_dst=ZERO;
+        }
+      }
+      if (3==sscanf(buf,"KA %f %f %f\n",&cur->ar,&cur->ag,&cur->ab)) {
+        cur->aa=1;
+      }
+      if (3==sscanf(buf,"KS %f %f %f\n",&cur->sr,&cur->sg,&cur->sb)) {
+        cur->sa=1;
+      }
+      if (3==sscanf(buf,"KD %f %f %f\n",&cur->dr,&cur->dg,&cur->db)) {
+        cur->da=1;
+      }
+      if (3==sscanf(buf,"KE %f %f %f\n",&cur->er,&cur->eg,&cur->eb)) {
+        cur->ea=1;
+      }
+      if (1==sscanf(buf,"MAP_REFLECTION %f\n",&tmpblend)) {
+        if (tmpblend!=0) {
+          cur->reflect=1;
+        }
+        else {
+          cur->reflect=0;
+        }
+      }
       sscanf(buf,"NS %f\n",&cur->power);
       float floate,floatf,floatg;
       if (3==sscanf(buf,"detail_plane %f %f %f\n",&floate,&floatf,&floatg)) {
@@ -169,7 +206,17 @@ void ObjToBFXM (FILE* obj, FILE * mtl, FILE * outputFile) {
          xml.material=mtls[str];
          xml.textures=mtls[str].textures;
          xml.detailtexture=mtls[str].detail;
-		 continue;
+         for (int jjjj=0;jjjj<mtls[str].detailplanei.size();++jjjj) {
+           Mesh_vec3f v;
+           v.x=mtls[str].detailplanei[jjjj];
+           v.y=mtls[str].detailplanej[jjjj];
+           v.z=mtls[str].detailplanek[jjjj];
+           xml.detailplanes.push_back(Mesh_vec3f(v));
+         }
+         xml.blend_src = mtls[str].blend_src;
+         xml.blend_dst = mtls[str].blend_dst;
+         xml.reflect=mtls[str].reflect;
+         continue;
       }
       GFXVertex v;
 

@@ -4,21 +4,27 @@ void usage();
 void usage(){
 	fprintf(stderr,"usage:\n\tmesher <inputfile> <outputfile> <command>\n\nWhere command is a 3 letter sequence of:\n\tInputfiletype:\n\t\tb:BFXM\n\t\to:OBJ\n\t\tx:xmesh\n\tOutputfiletype:\n\t\tb:BFXM\n\t\to:OBJ\n\t\tx:xmesh\n\tCommandflag:\n\t\ta: append to Outputfile\n\t\tc: create Outputfile\n");
 }
-
+bool flip=false;
+bool flop=false;
 int main (int argc, char** argv) {
-//	FILE * kk = fopen("/bleh.txt","w");
-	for (int k=0;k<argc;++k) {
-		if (argv[k]==0||argv[k][0]==0){
-			for (int i=k;i+1<argc;++i) {
-				argv[i]=argv[i+1];
-			}
-			argc--;
-			k--;
-		}
-	}
-//	for (int k=0;k<argc;++k) {
-//		fprintf(kk,"argv[%d]=(%s)\n",k,argv[k]);
-//	}
+  {for (int i=0;i<argc;++i) {
+    bool match=false;
+    if (strcmp(argv[i],"-flip")==0) {
+      match=true;
+      flip=true;
+    }
+    if (strcmp(argv[i],"-flop")==0) {
+      match=true;
+      flop=true;
+    }
+    if(match) {
+      for (int j=i;j+1<argc;++j) {
+        argv[j]=argv[j+1];
+      }
+      argc--;
+      i--;
+    }
+  }}
 	if (argc!=4){
 		fprintf(stderr,"wrong number of arguments %d, aborting\n",argc);
 //		fprintf(kk,"wrong number of arguments %d , aborting\n",argc);
