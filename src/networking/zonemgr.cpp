@@ -421,6 +421,7 @@ void	ZoneMgr::addDamage( NetBuffer & netbuf, Unit * un)
 		// Add the damage flag
 		unsigned short damages = un->damages;
 		netbuf.addShort( damages);
+		un->damages = Unit::NO_DAMAGE;
 		// Add the client serial
 		netbuf.addSerial( un->GetSerial());
 		// Put the altered stucts after the damage enum flag
