@@ -512,7 +512,7 @@ void createObjects() {
   shipList = _GFX->activeStarSystem()->getClickList();
     //BindKey (1,startselect);
     //BindKey (0,clickhandler);
-  //Mesh *foo = new Mesh("mid-20038.xml", true);
+  Mesh *foo = new Mesh("mid-20038.xml", true);
   //exit(0);
 }
 
