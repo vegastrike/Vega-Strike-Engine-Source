@@ -36,7 +36,7 @@ void VDU::DrawTarget(Unit * parent, Unit * target) {
   char st[256];
   sprintf (st,"\n%s",target->name.c_str());
   int k = strlen (st);
-  for (int i=0;i<rows-2&&i+k<128;i++) {
+  for (int i=0;i<rows-1&&i+k<128;i++) {
     st[i+k]='\n';
     st[i+k+1]='\0';
   }
