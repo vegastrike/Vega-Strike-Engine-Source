@@ -11,8 +11,6 @@ bool NavigationSystem::ParseFile(string filename)
 
 	char next = ' ';
 	int totalitems = 0;
-	bool comment = 0;
-	int commentdepth = 0;
 
 	ifstream dataset_file;
 	dataset_file.open("navdata.xml");
@@ -23,7 +21,6 @@ bool NavigationSystem::ParseFile(string filename)
 	}
 
 
-	int depth = 0;
 	while (! dataset_file.eof())
 	{
 		if(next == '<')							//	trap <*>

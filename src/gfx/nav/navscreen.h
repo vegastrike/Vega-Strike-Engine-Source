@@ -16,10 +16,49 @@ void visitSystem (class Cockpit * cp, std::string systemname) ;
 
 class NavigationSystem
 {
-private:
-	std::string currentsystem;//FIXME
-	std::string systemselection;
+public:
+	class SystemIterator {
+		vector <string> vstack;
+		unsigned int which;
+		unsigned int count;
+		unsigned int maxcount;
+		map <string,bool>visited;
+	public:
+		SystemIterator (string current_system, unsigned int max =2);
+		bool done ()const;
+		QVector Position ();
+		string operator * ();
+		SystemIterator & next ();
+		SystemIterator& operator ++ ();
+	};
 
+
+	
+	class CachedSystemIterator {
+		vector<std::pair<string, QVector> > systems;
+		unsigned currentPosition;
+	public:
+		CachedSystemIterator();
+		CachedSystemIterator (string current_system, unsigned max_systems = 2);
+		CachedSystemIterator(const CachedSystemIterator &other);
+		void init(string current_system, unsigned max_systems = 2);
+		bool seek(unsigned position=0);
+		unsigned getIndex();
+		bool done () const;
+		std::pair<string , QVector >& operator[] (unsigned pos);
+		string &operator* ();
+		QVector Position ();
+		CachedSystemIterator & next ();
+		CachedSystemIterator & operator ++ ();
+		CachedSystemIterator operator ++ (int);
+	};
+
+	
+	
+private:
+std::string currentsystem;//FIXME
+std::string systemselection;
+CachedSystemIterator systemIter;
 class navscreenoccupied* screenoccupation;
 class Mesh * mesh[NAVTOTALMESHCOUNT];
 int reverse;
@@ -79,7 +118,18 @@ int   buttonstates;	//	bit0 = button1, bit1 = button2, etc
 float system_item_scale;
 float unselectedalpha;
 
-
+// Drawing helper functions
+//*************************
+void Adjust3dTransformation();
+void ReplaceAxes(QVector &pos);
+void RecordMinAndMax (const QVector &pos, float &min_x, float &max_x, float &min_y, float &max_y, float &min_z, float &max_z, float &max_all);
+void DrawOriginOrientationTri(float center_nav_x, float center_nav_y);
+float CalculatePerspectiveAdjustment(float &zscale, float &zdistance,
+	QVector &pos, QVector &pos_flat, float &system_item_scale_temp);
+void TranslateAndDisplay (QVector &pos, QVector &pos_flat, float center_nav_x, float center_nav_y, float themaxvalue,
+	float zscale, float zdistance, float &the_x, float &the_y, float &system_item_scale_temp);
+bool CheckForSelectionQuery();
+//*************************
 
 
 
@@ -94,7 +144,7 @@ static void DrawStation(float x, float y, float size, const GFXColor &col );
 static void DrawJump(float x, float y, float size, const GFXColor &col );
 static void DrawMissile(float x, float y, float size, const GFXColor &col );
 static void DrawTargetCorners(float x, float y, float size, const GFXColor &col );
-
+void setCurrentSystem(string newSystem);
 
 void DrawButton(float &x1, float &x2, float &y1, float &y2, int button_number, bool outline);
 void DrawButtonOutline(float &x1, float &x2, float &y1, float &y2, const GFXColor &col);

@@ -160,8 +160,6 @@ void NavigationSystem::DrawCircle(float x, float y, float size, const GFXColor &
 
 	float i = 0.0;
 
-	float j = 0.0;
-
 	GFXBegin(GFXLINE);
 
 
@@ -221,8 +219,6 @@ void NavigationSystem::DrawHalfCircleTop(float x, float y, float size, const GFX
 
 
 	float i = 0.0;
-
-	float j = 0.0;
 
 	GFXBegin(GFXLINE);
 
@@ -284,8 +280,6 @@ void NavigationSystem::DrawHalfCircleBottom(float x, float y, float size, const 
 
 	float i = 0.0;
 
-	float j = 0.0;
-
 	GFXBegin(GFXLINE);
 
 
@@ -345,8 +339,6 @@ void NavigationSystem::DrawPlanet(float x, float y, float size, const GFXColor &
 
 
 	float i = 0.0;
-
-	float j = 0.0;
 
 	GFXBegin(GFXLINE);
 
@@ -495,8 +487,6 @@ void NavigationSystem::DrawJump(float x, float y, float size, const GFXColor &co
 
 
 	float i = 0.0;
-
-	float j = 0.0;
 
 	GFXBegin(GFXLINE);
 

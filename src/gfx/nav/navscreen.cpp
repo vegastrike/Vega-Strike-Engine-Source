@@ -722,867 +722,6 @@ void NavigationSystem::DrawShip()
 
 
 
-
-
-
-
-
-
-
-#if 0
-
-
-//	This is the galaxy view
-//	**********************************
-void NavigationSystem::DrawGalaxy()
-{
-	navdrawlist starlist(0, screenoccupation, factioncolours);
-	string blah0 = "This is Galaxy Mode";
-	starlist.drawdescription(blah0, 0,0, 1, 1, 0, GFXColor(1,1,1,1));
-}
-
-
-
-
-
-
-
-#endif
-
-
-
-
-
-
-
-
-
-//	Main function for drawing a CURRENT system
-//	works :
-//		scans all items, records min + max coords of the system, for relevant items
-//		rescans, and enlists the found items that it wants drawn
-//			-	items with mouse over them will go into a mouselist.
-//		draws the draw lists, with the mouse lists cycled 'n' times (according to kliks)
-//	**********************************
-void NavigationSystem::DrawSystem()
-{
-	un_iter bleh = UniverseUtil::getUnitList(); 
-	if(!(*bleh))
-		return;
-
-
-	//what's my name
-	//***************************
-	TextPlane systemname;	//	will be used to display shits names
-	string systemnamestring = "Current System : " + _Universe->activeStarSystem()->getName();
-	int length = systemnamestring.size();
-	float offset = (float(length)*0.005);
-	systemname.col = GFXColor(1, 1, .7, 1);
-	systemname.SetPos( (((screenskipby4[0]+screenskipby4[1])/2)-offset) , screenskipby4[3]);
-	systemname.SetText(systemnamestring);
-//	systemname.SetCharSize(1, 1);
-	systemname.Draw();
-	//***************************
-
-
-	QVector pos;	//	item position
-	QVector pos_flat;	//	item position flat on plane
-	navdrawlist mainlist(0, screenoccupation, factioncolours);		//	lists of items to draw
-	mainlist.unselectedalpha = unselectedalpha;
-	navdrawlist mouselist(1, screenoccupation, factioncolours);	//	lists of items to draw that are in mouse range
-
-	float zdistance = 0.0;
-	float zscale = 0.0;
-
-	//	Adjust transformation
-	//	**********************************
-	if(	(mouse_previous_state[0] == 1) && TestIfInRange(screenskipby4[0], screenskipby4[1], screenskipby4[2], screenskipby4[3], (-1+float(mousex)/(.5*g_game.x_resolution)), (1+float(-1*mousey)/(.5*g_game.y_resolution))))
-	{
-		float ndx = -1.0*( (1+float(-1*mousey)/(.5*g_game.y_resolution)) - mouse_y_previous);
-		float ndy = -4.0*( (-1+float(mousex)/(.5*g_game.x_resolution)) - mouse_x_previous);
-		float ndz = 0.0;
-
-		rx = rx+=ndx;
-		ry = ry+=ndy;
-		rz = rz+=ndz;
-
-		if(rx > 3.14/2)		rx = 3.14/2;
-		if(rx < -3.14/2)	rx = -3.14/2;
-
-		if(ry >= 6.28)		ry -= 6.28;
-		if(ry <= -6.28)		ry += 6.28;
-
-		if(rz >= 6.28)		rz -= 6.28;
-		if(rz <= -6.28)		rz += 6.28;
-	}
-	//	**********************************
-
-
-
-	//	Set the prespective zoom level
-	//	**********************************
-	if(	(mouse_previous_state[1] == 1) && TestIfInRange(screenskipby4[0], screenskipby4[1], screenskipby4[2], screenskipby4[3], (-1+float(mousex)/(.5*g_game.x_resolution)), (1+float(-1*mousey)/(.5*g_game.y_resolution))))
-	{
-		zoom = zoom * ( 1.0 + 8*( (1+float(-1*mousey)/(.5*g_game.y_resolution)) - mouse_y_previous) );
-		if(zoom < 1.0)
-			zoom = 1.0;
-
-		if(zoom > MAXZOOM)
-			zoom = MAXZOOM;
-	}
-	//	**********************************
-
-
-
-
-	//	Set up first item to compare to + centres
-	//	**********************************
-	while( (*bleh) && (_Universe->AccessCockpit()->GetParent() != (*bleh)) &&(UnitUtil::isSun(*bleh) || !UnitUtil::isSignificant (*bleh))  )	//	no sun's in initial setup
-	{
-		++bleh;
-	}
-
-	if(!(*bleh))	//	nothing there that's significant, just do it all
-		bleh = UniverseUtil::getUnitList();
-
-
-		//GET THE POSITION
-		//*************************
-		pos = (*bleh)->Position();
-			//replace axes
-			//*************************
-			if(axis != 3)	//	3 == z == default
-			{
-				if(axis == 2)
-				{
-					float old_i = pos.i;
-					float old_j = pos.j;
-					float old_k = pos.k;
-					pos.i = old_i;
-					pos.j = -old_k;
-					pos.k = old_j;
-				}
-				else	//	(axis == 1)
-				{
-					float old_i = pos.i;
-					float old_j = pos.j;
-					float old_k = pos.k;
-					pos.i = old_j;
-					pos.j = -old_k;
-					pos.k = old_i;
-				}
-			}
-			//*************************
-
-
-			//Modify by old rotation amount
-			//*************************
-			pos = dxyz(pos, 0, ry, 0);
-			pos = dxyz(pos, rx, 0, 0);
-			//*************************
-		//*************************
-
-
-	float max_x = (float)pos.i;
-	float min_x = (float)pos.i;
-	float max_y = (float)pos.j;
-	float min_y = (float)pos.j;
-	float max_z = (float)pos.k;
-	float min_z = (float)pos.k;
-
-	float themaxvalue = fabs(pos.i);
-
-	float center_nav_x = ((screenskipby4[0] + screenskipby4[1]) / 2);
-	float center_nav_y = ((screenskipby4[2] + screenskipby4[3]) / 2);
-	//	**********************************
-
-
-	//Retrieve unit data min/max
-	//**********************************
-	while (*bleh)	//	this goes through one time to get the major components locations, and scales its output appropriately
-	{
-		if(UnitUtil::isSun(*bleh))
-		{
-			++bleh;
-			continue;
-		}
-		string temp = (*bleh)->name; 
-
-
-
-		pos = (*bleh)->Position();
-		//replace axes
-		//**************************
-		if(axis != 3)	//	3 == z == default
-		{
-			if(axis == 2)
-			{
-				float old_i = pos.i;
-				float old_j = pos.j;
-				float old_k = pos.k;
-				pos.i = old_i;
-				pos.j = -old_k;
-				pos.k = old_j;
-			}
-			else	//	(axis == 1)
-			{
-				float old_i = pos.i;
-				float old_j = pos.j;
-				float old_k = pos.k;
-				pos.i = old_j;
-				pos.j = -old_k;
-				pos.k = old_i;
-			}
-		}
-		//***************************
-
-
-
-		//Modify by old rotation amount
-		//*************************
-		pos = dxyz(pos, 0, ry, 0);
-		pos = dxyz(pos, rx, 0, 0);
-		//*************************
-
-
-
-		//Record min and max
-		//**********************************
-		if( (UnitUtil::isSignificant (*bleh)) || (_Universe->AccessCockpit()->GetParent() == (*bleh)) )
-		{
-			if((float)pos.i > max_x)
-				max_x = (float)pos.i;
-
-			if((float)pos.i < min_x)
-				min_x = (float)pos.i;
-			
-			if( fabs((float)pos.i) > themaxvalue )
-				themaxvalue = fabs((float)pos.i);
-
-
-
-
-			if((float)pos.j > max_y)
-				max_y = (float)pos.j;
-
-			if((float)pos.j < min_y)
-
-				min_y = (float)pos.j;
-
-			if( fabs((float)pos.j) > themaxvalue )
-				themaxvalue = fabs((float)pos.j);
-
-
-
-
-			if((float)pos.k > max_z)
-				max_z = (float)pos.k;
-
-			if((float)pos.k < min_z)
-				min_z = (float)pos.k;
-
-			if( fabs((float)pos.k) > themaxvalue )
-				themaxvalue = fabs((float)pos.k);
-
-		}
-		//**********************************
-
-		++bleh;
-	} 
-	//**********************************
-
-
-
-	//Find Centers
-	//**********************************
-	center_x = (min_x + max_x)/2;
-	center_y = (min_y + max_y)/2;
-	center_z = (min_z + max_z)/2;
-	//**********************************
-
-
-	themaxvalue = sqrt(themaxvalue*themaxvalue + themaxvalue*themaxvalue + themaxvalue*themaxvalue);
-
-
-	//Set Camera Distance
-	//**********************************
-	camera_z = zoom * sqrt( 
-				   ( (0.5*(max_x - min_x)) * (0.5*(max_x - min_x)) ) 
-				+  ( (0.5*(max_y - min_y)) * (0.5*(max_y - min_y)) )
-				+  ( (0.5*(max_z - min_z)) * (0.5*(max_z - min_z)) )
-				);
-	//**********************************
-
-
-
-
-
-
-		//Draw Origin Orientation Tri
-		//**********************************	
-		QVector directionx;
-		QVector directiony;
-		QVector directionz;
-
-		if(axis == 2)
-		{
-			directionx.i = 0.1;
-			directionx.j = 0.0;
-			directionx.k = 0.0;
-
-			directionz.i = 0.0;
-			directionz.j = 0.1;
-			directionz.k = 0.0;
-
-			directiony.i = 0.0;
-			directiony.j = 0.0;
-			directiony.k = 0.1;
-		}
-
-		else if(axis == 1)
-		{
-			directiony.i = 0.1;
-			directiony.j = 0.0;
-			directiony.k = 0.0;
-
-			directionz.i = 0.0;
-			directionz.j = 0.1;
-			directionz.k = 0.0;
-
-			directionx.i = 0.0;
-			directionx.j = 0.0;
-			directionx.k = 0.1;
-		}
-
-		else	//	(axis == 3)
-		{
-			directionx.i = 0.1;
-			directionx.j = 0.0;
-			directionx.k = 0.0;
-
-			directiony.i = 0.0;
-			directiony.j = 0.1;
-			directiony.k = 0.0;
-
-			directionz.i = 0.0;
-			directionz.j = 0.0;
-			directionz.k = 0.1;
-		}
-
-		directionx = dxyz(directionx, 0, ry, 0);
-		directionx = dxyz(directionx, rx, 0, 0);
-
-		directiony = dxyz(directiony, 0, ry, 0);
-		directiony = dxyz(directiony, rx, 0, 0);
-
-		directionz = dxyz(directionz, 0, ry, 0);
-		directionz = dxyz(directionz, rx, 0, 0);
-
-
-		GFXDisable(TEXTURE0);
-		GFXDisable(LIGHTING);
-		GFXBlendMode(SRCALPHA,INVSRCALPHA);
-
-		float where_x = center_nav_x - 0.8*((screenskipby4[1] - screenskipby4[0])/2);
-		float where_y = center_nav_y - 0.8*((screenskipby4[3] - screenskipby4[2])/2);
-
-		GFXBegin(GFXLINE);
-
-		GFXColorf(GFXColor(1,0,0,0.5));
-		GFXVertex3f(where_x,where_y,0);
-		GFXVertex3f(	where_x+(directionx.i * (0.3/(0.3 - directionx.k)) )
-					,	where_y+(directionx.j * (0.3/(0.3 - directionx.k)) )
-					,0);
-
-		GFXColorf(GFXColor(0,1,0,0.5));
-		GFXVertex3f(where_x,where_y,0);
-		GFXVertex3f(	where_x+(directiony.i * (0.3/(0.3 - directiony.k)))
-					,	where_y+(directiony.j * (0.3/(0.3 - directiony.k)))
-					,0);
-
-		GFXColorf(GFXColor(0,0,1,0.5));
-		GFXVertex3f(where_x,where_y,0);
-		GFXVertex3f(	where_x+(directionz.i * (0.3/(0.3 - directionz.k)))
-					,	where_y+(directionz.j * (0.3/(0.3 - directionz.k)))
-					,0);
-
-		GFXEnd();
-		GFXEnable(TEXTURE0);
-		//**********************************
-
-
-
-
-
-
-/*
-	string mystr ("max x "+XMLSupport::tostring (max_x)); 
-	UniverseUtil::IOmessage (0,"game","all",mystr);
-
-
-	string mystr2 ("min x "+XMLSupport::tostring (min_x)); 
-	UniverseUtil::IOmessage (0,"game","all",mystr2);
-
-
-	string mystr3 ("max y "+XMLSupport::tostring (max_y)); 
-	UniverseUtil::IOmessage (0,"game","all",mystr3);
-
-
-	string mystr4 ("min y "+XMLSupport::tostring (min_y)); 
-	UniverseUtil::IOmessage (0,"game","all",mystr4);
-
-
-	string mystrcx ("center x "+XMLSupport::tostring (center_x)); 
-	UniverseUtil::IOmessage (0,"game","all",mystrcx);
-
-
-	string mystrcy ("center y "+XMLSupport::tostring (center_y)); 
-	UniverseUtil::IOmessage (0,"game","all",mystrcy);
-*/
-
-
-
-	Unit* ThePlayer = ( UniverseUtil::getPlayerX( UniverseUtil::getCurrentPlayer() ) );
-
-	//	Enlist the items and attributes
-	//	**********************************
-	un_iter blah = UniverseUtil::getUnitList();  
-	while (*blah)	//	this draws the points
-	{
-
-			//	Retrieve unit data
-			//	**********************************
-			string temp = (*blah)->name;
-			
-
-
-			pos = (*blah)->Position();
-			//replace axes
-			//**************************
-			if(axis != 3)	//	3 == z == default
-			{
-				if(axis == 2)
-				{
-					float old_i = pos.i;
-					float old_j = pos.j;
-					float old_k = pos.k;
-					pos.i = old_i;
-					pos.j = -old_k;
-					pos.k = old_j;
-				}
-				else	//	(axis == 1)
-				{
-					float old_i = pos.i;
-					float old_j = pos.j;
-					float old_k = pos.k;
-					pos.i = old_j;
-					pos.j = -old_k;
-					pos.k = old_i;
-				}
-			}
-			//***************************
-
-
-
-			pos_flat.i = pos.i;
-			pos_flat.j = center_y;
-//			pos_flat.j = 0.0;
-			pos_flat.k = pos.k;
-
-
-				//Modify by rotation amount
-				//*************************
-				pos = dxyz(pos, 0, ry, 0);
-				pos = dxyz(pos, rx, 0, 0);
-
-				pos_flat = dxyz(pos_flat, 0, ry, 0);
-				pos_flat = dxyz(pos_flat, rx, 0, 0);
-				//*************************
-
-				pos.i -= center_x;
-				pos.j -= center_y;
-				pos.k -= center_z;
-
-				pos_flat.i -= center_x;
-				pos_flat.j -= center_y;
-				pos_flat.k -= center_z;
-
-
-				//CALCULATE PRESPECTIVE ADJUSTMENT
-				//**********************************
-				zdistance = sqrt( (pos.i * pos.i) + (pos.j * pos.j) + ( (camera_z - pos.k) * (camera_z - pos.k) ) );
-				zscale = ( zdistance / (2.0*camera_z) ) * zshiftmultiplier;
-
-				//zscale = 1.0;
-
-				pos.i = pos.i * ( (1-(((zoom-0.5*MAXZOOM)/MAXZOOM)*(0.85))) / zscale );
-				pos.j = pos.j * ( (1-(((zoom-0.5*MAXZOOM)/MAXZOOM)*(0.85))) / zscale );
-				pos.k = pos.k * ( (1-(((zoom-0.5*MAXZOOM)/MAXZOOM)*(0.85))) / zscale );
-
-				pos_flat.i = pos_flat.i * ( (1-(((zoom-0.5*MAXZOOM)/MAXZOOM)*(0.85))) / zscale );
-				pos_flat.j = pos_flat.j * ( (1-(((zoom-0.5*MAXZOOM)/MAXZOOM)*(0.85))) / zscale );
-				pos_flat.k = pos_flat.k * ( (1-(((zoom-0.5*MAXZOOM)/MAXZOOM)*(0.85))) / zscale );
-				
-
-				float itemscale =  ( ((camera_z*item_zscalefactor)-zdistance) / (camera_z*item_zscalefactor) );	
-				
-//				if(zdistance > 2*camera_z)	//	outliers
-//					itemscale = 1;
-
-				if(itemscale < minimumitemscaledown)	//	dont shrink into nonexistance
-					itemscale = minimumitemscaledown;
-
-				if(itemscale > maximumitemscaleup)	//	dont expand too far
-					itemscale = maximumitemscaleup;
-
-				float system_item_scale_temp = system_item_scale * itemscale;
-				//**********************************
-
-
-
-
-
-				//TRANSLATE INTO SCREEN DISPLAY COORDINATES
-				//**********************************
-				float the_x = (float)pos.i;
-				float the_y = (float)pos.j;
-				float the_x_flat = (float)pos_flat.i;
-				float the_y_flat = (float)pos_flat.j;
-
-
-				the_x = (the_x / (	(themaxvalue - center_x)*2	));
-				the_y = (the_y / (	(themaxvalue - center_y)*2	));
-				the_x_flat = (the_x_flat / (	(themaxvalue - center_x)*2	));
-				the_y_flat = (the_y_flat / (	(themaxvalue - center_y)*2	));
-
-
-				the_x = (the_x * (screenskipby4[1] - screenskipby4[0]));
-				the_x = the_x + center_nav_x;
-				the_y = (the_y * (screenskipby4[3] - screenskipby4[2]));
-				the_y = the_y + center_nav_y;
-
-				the_x_flat = (the_x_flat * (screenskipby4[1] - screenskipby4[0]));
-				the_x_flat = the_x_flat + center_nav_x;
-				the_y_flat = (the_y_flat * (screenskipby4[3] - screenskipby4[2]));
-				the_y_flat = the_y_flat + center_nav_y;
-				//**********************************
-
-
-
-				//Draw orientation lines
-				//**********************************
-				GFXDisable(TEXTURE0);
-				GFXDisable(LIGHTING);
-				GFXBlendMode(SRCALPHA,INVSRCALPHA);
-
-				GFXBegin(GFXLINE);
-
-		//		GFXColorf(GFXColor(0,1,0,.5));
-		//		GFXVertex3f(center_nav_x,	center_nav_y		,0);
-		//		GFXVertex3f(the_x_flat,	the_y_flat	,0);
-
-
-				if(the_y_flat > screenskipby4[3])
-					the_y_flat = screenskipby4[3];
-
-				if(the_y_flat < screenskipby4[2])
-					the_y_flat = screenskipby4[2];
-
-
-				if(the_y > screenskipby4[3])
-					the_y = screenskipby4[3];
-
-				if(the_y < screenskipby4[2])
-					the_y = screenskipby4[2];
-
-
-				if(	(the_x_flat > screenskipby4[0]) && (the_x_flat < screenskipby4[1]) )
-				{
-					GFXColorf(GFXColor(0,1,0,.2));
-					GFXVertex3f(the_x_flat,	the_y_flat	,0);
-					GFXVertex3f(the_x,		the_y		,0);
-				}
-
-
-				if(the_x_flat < screenskipby4[0])
-					the_x_flat = screenskipby4[0];
-
-				if(the_x_flat > screenskipby4[1])
-					the_x_flat = screenskipby4[1];
-
-
-				DrawCircle(the_x_flat, the_y_flat, (.005*system_item_scale), GFXColor(1,1,1,.2));
-
-				GFXEnd();
-				GFXEnable(TEXTURE0);
-				//**********************************
-
-
-
-				//IGNORE OFF SCREEN
-				//**********************************
-				if(	!TestIfInRange(screenskipby4[0], screenskipby4[1], screenskipby4[2], screenskipby4[3], the_x, the_y))
-				{
-					++blah;
-					continue;
-				}
-				//**********************************
-
-
-			//	Now starts the test that determines the type of things and inserts
-			//	|
-			//	|
-			//	\/
-
-
-			float insert_size = 0.0;
-			int insert_type = navambiguous;
-
-			
-
-
-			if(	(*blah)->isUnit()==UNITPTR )	//	unit
-			{
-				if(UnitUtil::isPlayerStarship(*blah) > -1)	//	is a PLAYER SHIP
-				{
-					if (UnitUtil::isPlayerStarship (*blah)==UniverseUtil::getCurrentPlayer()) //	is THE PLAYER
-					{
-						insert_type = navcurrentplayer;
-						insert_size = navcurrentplayersize;
-					}
-					else	//	is A PLAYER
-					{
-						insert_type = navplayer;
-						insert_size = navplayersize;
-					}
-				}
-				else	//	is a non player ship
-				{
-					if(UnitUtil::isSignificant (*blah))	//	capship or station
-					{
-						if((*blah)->GetComputerData().max_speed()==0)		//	is this item STATIONARY?
-						{
-							insert_type = navstation;
-							insert_size = navstationsize;
-						}
-
-
-						else // it moves = capship
-						{
-							if(ThePlayer->InRange((*blah),false,true))	//	only insert if in range
-							{
-								insert_type = navcapship;
-								insert_size = navcapshipsize;
-							}
-						}
-					}
-					else	//	fighter
-					{
-						if(ThePlayer->InRange((*blah),false,true))	//	only insert if in range
-						{
-							insert_type = navfighter;
-							insert_size = navfightersize;
-						}
-					}
-				}
-			}
-
-
-			else if((*blah)->isUnit()==PLANETPTR  )	//	is it a PLANET?
-			{
-				if(UnitUtil::isSun(*blah))	//	is this a SUN?
-				{
-					insert_type = navsun;
-					insert_size = navsunsize;
-				}				
-				
-
-				else if (!((*blah)->GetDestinations().empty()))	//	is a jump point (has destinations)
-				{
-					insert_type = navjump;
-					insert_size = navjumpsize;
-				}
-
-
-				else	//	its a planet
-				{
-					insert_type = navplanet;
-					insert_size = navplanetsize;
-				}
-			}
-
-
-			else if((*blah)->isUnit()==MISSILEPTR)
-			{
-				//	a missile
-				insert_type = navmissile;
-				insert_size = navmissilesize;
-			}
-
-
-			else if((*blah)->isUnit()==ASTEROIDPTR)
-			{
-				//	a missile
-				insert_type = navasteroid;
-				insert_size = navasteroidsize;
-			}
-
-
-			else if((*blah)->isUnit()==NEBULAPTR)
-			{
-				//	a missile
-				insert_type = navnebula;
-				insert_size = navnebulasize;
-			}
-
-
-			else	//	undefined non unit
-			{
-				insert_type = navambiguous;
-				insert_size = navambiguoussize;
-			}
-
-
-
-  			if(system_item_scale_temp > (system_item_scale * 3))
-			{
-				system_item_scale_temp = (system_item_scale * 3);
-			}
-
-
-			if (_Universe->AccessCockpit()->GetParent()->Target()==(*blah))
-			{
-				DrawTargetCorners(the_x, the_y, (insert_size*system_item_scale_temp), GFXColor(1, 0.3, 0.3, 0.8));
-			}
-
-
-
-
-			if (TestIfInRangeRad(the_x, the_y, insert_size*system_item_scale_temp, (-1+float(mousex)/(.5*g_game.x_resolution)), (1+float(-1*mousey)/(.5*g_game.y_resolution))) )
-				mouselist.insert(insert_type, insert_size*system_item_scale_temp, the_x, the_y, (*blah));
-			else
-				mainlist.insert(insert_type, insert_size*system_item_scale_temp, the_x, the_y, (*blah));
-
-
-
-		++blah;
-
-	}
-
-	//	**********************************	//	done enlisting items and attributes
-
-
-
-
-
-
-
-
-
-	//	Adjust mouse list for 'n' kliks
-	//	**********************************
-	//	STANDARD	: (1 3 2) ~ [0] [2] [1]
-	//	VS			: (1 2 3) ~ [0] [1] [2]	<-- use this
-	if(mouselist.get_n_contents() > 0)	//	mouse is over a target when this is > 0
-	{
-		if(mouse_wentdown[2]== 1)	//	mouse button went down for mouse button 2(standard)
-			rotations += 1;
-	}
-
-
-	if(rotations >= mouselist.get_n_contents())	//	dont rotate more than there is
-		rotations = 0;
-
-
-	int r = 0;
-	while(r < rotations)	//	rotate whatver rotations, leaving n rotated items, tail on top
-	{
-		mouselist.rotate();
-		r+=1;
-	}
-	//	**********************************
-
-
-
-
-
-
-	//	Draw the damn shit
-	//	**********************************
-	mainlist.draw();	//	draw the items
-	mainlist.wipe();	//	whipe the list
-	//	**********************************
-
-
-
-
-
-
-	//	Check for selection query
-	//	give back the selected tail IF there is one
-	//	IF given back, undo the selection state
-	//	**********************************
-	if(1||checkbit(buttonstates, 1))	//	button #2 is down, wanting a (selection)
-	{
-		if(mouselist.get_n_contents() > 0)	//	mouse is over a target when this is > 0
-		{
-			if(mouse_wentdown[0]== 1)	//	mouse button went down for mouse button 1
-			{
-				currentselection = mouselist.gettailunit();
-				unsetbit(buttonstates, 1);
-
-				// JUST FOR NOW, target == current selection. later it'll be used for other shit, that will then set target.
-				if (currentselection.GetUnit()) {
-					( UniverseUtil::getPlayerX( UniverseUtil::getCurrentPlayer() ) )->Target(currentselection.GetUnit());
-					( UniverseUtil::getPlayerX( UniverseUtil::getCurrentPlayer() ) )->LockTarget(currentselection.GetUnit());
-				}
-			}
-		}
-	}
-	//	**********************************
-
-
-
-
-
-	//	Clear the lists
-	//	**********************************
-	mouselist.draw();	//	draw mouse over'd items
-	mouselist.wipe();	//	whipe mouse over'd list
-	//	**********************************
-}
-//	**********************************
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 //	this sets weather to draw the screen or not
 //	**********************************
 void NavigationSystem::SetDraw(bool n)
@@ -1740,7 +879,10 @@ QVector NavigationSystem::dxyz(QVector vector, double x_, double y_, double z_)
 
 
 
-
+void NavigationSystem::setCurrentSystem(string newCurrentSystem) {
+	currentsystem = newCurrentSystem;
+	systemIter.init(currentsystem);
+}
 
 
 
@@ -1830,7 +972,7 @@ void NavigationSystem::DrawButton(float &x1, float &x2, float &y1, float &y2, in
 			if(checkbit(whattodraw, 1)) // if in nav system NOT mission
 			{
 				dosetbit(whattodraw, 2);	//	draw galaxy
-				currentsystem=systemselection= UniverseUtil::getSystemFile();
+				setCurrentSystem(systemselection= UniverseUtil::getSystemFile());
 				
 			}
 			else	//	if in mission mode
@@ -2059,4 +1201,357 @@ bool NavigationSystem::CheckDraw()
 	return draw==1;
 }
 //	**********************************
+
+void NavigationSystem::Adjust3dTransformation()
+{
+	//	Adjust transformation
+	//	**********************************
+	if(	(mouse_previous_state[0] == 1) && TestIfInRange(screenskipby4[0], screenskipby4[1], screenskipby4[2], screenskipby4[3], (-1+float(mousex)/(.5*g_game.x_resolution)), (1+float(-1*mousey)/(.5*g_game.y_resolution))))
+	{
+		float ndx = -1.0*( (1+float(-1*mousey)/(.5*g_game.y_resolution)) - mouse_y_previous);
+		float ndy = -4.0*( (-1+float(mousex)/(.5*g_game.x_resolution)) - mouse_x_previous);
+		float ndz = 0.0;
+
+		rx = rx+=ndx;
+		ry = ry+=ndy;
+		rz = rz+=ndz;
+
+		if(rx > 3.14/2)		rx = 3.14/2;
+		if(rx < -3.14/2)	rx = -3.14/2;
+
+		if(ry >= 6.28)		ry -= 6.28;
+		if(ry <= -6.28)		ry += 6.28;
+
+		if(rz >= 6.28)		rz -= 6.28;
+		if(rz <= -6.28)		rz += 6.28;
+	}
+	//	**********************************
+
+
+
+	//	Set the prespective zoom level
+	//	**********************************
+	if(	(mouse_previous_state[1] == 1) && TestIfInRange(screenskipby4[0], screenskipby4[1], screenskipby4[2], screenskipby4[3], (-1+float(mousex)/(.5*g_game.x_resolution)), (1+float(-1*mousey)/(.5*g_game.y_resolution))))
+	{
+		zoom = zoom * ( 1.0 + 8*( (1+float(-1*mousey)/(.5*g_game.y_resolution)) - mouse_y_previous) );
+		if(zoom < 1.0)
+			zoom = 1.0;
+
+		if(zoom > MAXZOOM)
+			zoom = MAXZOOM;
+	}
+	//	**********************************
+}
+
+void NavigationSystem::ReplaceAxes(QVector &pos) {
+	//replace axes
+	//*************************
+	if(axis != 3)	//	3 == z == default
+	{
+		if(axis == 2)
+		{
+			float old_i = pos.i;
+			float old_j = pos.j;
+			float old_k = pos.k;
+			pos.i = old_i;
+			pos.j = -old_k;
+			pos.k = old_j;
+		}
+		else	//	(axis == 1)
+		{
+			float old_i = pos.i;
+			float old_j = pos.j;
+			float old_k = pos.k;
+			pos.i = old_j;
+			pos.j = -old_k;
+			pos.k = old_i;
+		}
+	}
+	//*************************
+
+}
+
+void NavigationSystem::RecordMinAndMax (const QVector &pos, float &min_x, float &max_x,
+		float &min_y, float &max_y, float &min_z, float &max_z, float &max_all)
+{
+	//Record min and max
+	//**********************************
+	if((float)pos.i > max_x)
+		max_x = (float)pos.i;
+
+	if((float)pos.i < min_x)
+		min_x = (float)pos.i;
+			
+	if( fabs((float)pos.i) > max_all )
+		max_all = fabs((float)pos.i);
+
+
+
+
+	if((float)pos.j > max_y)
+		max_y = (float)pos.j;
+
+	if((float)pos.j < min_y)
+
+		min_y = (float)pos.j;
+
+	if( fabs((float)pos.j) > max_all )
+		max_all = fabs((float)pos.j);
+
+
+
+
+	if((float)pos.k > max_z)
+		max_z = (float)pos.k;
+
+	if((float)pos.k < min_z)
+		min_z = (float)pos.k;
+
+	if( fabs((float)pos.k) > max_all )
+		max_all = fabs((float)pos.k);
+
+	//**********************************	
+}
+
+void NavigationSystem::DrawOriginOrientationTri(float center_nav_x, float center_nav_y)
+{
+
+
+
+	//Draw Origin Orientation Tri
+	//**********************************	
+	QVector directionx;
+	QVector directiony;
+	QVector directionz;
+
+	if(axis == 2)
+	{
+		directionx.i = 0.1;
+		directionx.j = 0.0;
+		directionx.k = 0.0;
+
+		directionz.i = 0.0;
+		directionz.j = 0.1;
+		directionz.k = 0.0;
+
+		directiony.i = 0.0;
+		directiony.j = 0.0;
+		directiony.k = 0.1;
+	}
+
+	else if(axis == 1)
+	{
+		directiony.i = 0.1;
+		directiony.j = 0.0;
+		directiony.k = 0.0;
+
+		directionz.i = 0.0;
+		directionz.j = 0.1;
+		directionz.k = 0.0;
+
+		directionx.i = 0.0;
+		directionx.j = 0.0;
+		directionx.k = 0.1;
+	}
+	else	//	(axis == 3)
+	{
+		directionx.i = 0.1;
+		directionx.j = 0.0;
+		directionx.k = 0.0;
+
+		directiony.i = 0.0;
+		directiony.j = 0.1;
+		directiony.k = 0.0;
+
+		directionz.i = 0.0;
+		directionz.j = 0.0;
+		directionz.k = 0.1;
+	}
+
+	directionx = dxyz(directionx, 0, ry, 0);
+	directionx = dxyz(directionx, rx, 0, 0);
+
+	directiony = dxyz(directiony, 0, ry, 0);
+	directiony = dxyz(directiony, rx, 0, 0);
+
+	directionz = dxyz(directionz, 0, ry, 0);
+	directionz = dxyz(directionz, rx, 0, 0);
+
+
+	GFXDisable(TEXTURE0);
+	GFXDisable(LIGHTING);
+	GFXBlendMode(SRCALPHA,INVSRCALPHA);
+
+	float where_x = center_nav_x - 0.8*((screenskipby4[1] - screenskipby4[0])/2);
+	float where_y = center_nav_y - 0.8*((screenskipby4[3] - screenskipby4[2])/2);
+
+	GFXBegin(GFXLINE);
+
+	GFXColorf(GFXColor(1,0,0,0.5));
+	GFXVertex3f(where_x,where_y,0);
+	GFXVertex3f(	where_x+(directionx.i * (0.3/(0.3 - directionx.k)) )
+				,	where_y+(directionx.j * (0.3/(0.3 - directionx.k)) )
+				,0);
+
+	GFXColorf(GFXColor(0,1,0,0.5));
+	GFXVertex3f(where_x,where_y,0);
+	GFXVertex3f(	where_x+(directiony.i * (0.3/(0.3 - directiony.k)))
+				,	where_y+(directiony.j * (0.3/(0.3 - directiony.k)))
+				,0);
+
+	GFXColorf(GFXColor(0,0,1,0.5));
+	GFXVertex3f(where_x,where_y,0);
+	GFXVertex3f(	where_x+(directionz.i * (0.3/(0.3 - directionz.k)))
+				,	where_y+(directionz.j * (0.3/(0.3 - directionz.k)))
+				,0);
+
+	GFXEnd();
+	GFXEnable(TEXTURE0);
+	//**********************************
+}
+
+float NavigationSystem::CalculatePerspectiveAdjustment(float &zscale, float &zdistance,
+		QVector &pos, QVector &pos_flat, float &system_item_scale_temp)
+{
+		
+	ReplaceAxes(pos);
+			
+			
+	pos_flat.i = pos.i;
+	pos_flat.j = center_y;
+//		pos_flat.j = 0.0;
+	pos_flat.k = pos.k;
+
+
+	//Modify by rotation amount
+	//*************************
+	pos = dxyz(pos, 0, ry, 0);
+	pos = dxyz(pos, rx, 0, 0);
+
+	pos_flat = dxyz(pos_flat, 0, ry, 0);
+	pos_flat = dxyz(pos_flat, rx, 0, 0);
+	//*************************
+
+	pos.i -= center_x;
+	pos.j -= center_y;
+	pos.k -= center_z;
+
+	pos_flat.i -= center_x;
+	pos_flat.j -= center_y;
+	pos_flat.k -= center_z;
+
+
+	//CALCULATE PRESPECTIVE ADJUSTMENT
+	//**********************************
+	zdistance = sqrt( (pos.i * pos.i) + (pos.j * pos.j) + ( (camera_z - pos.k) * (camera_z - pos.k) ) );
+	zscale = ( zdistance / (2.0*camera_z) ) * zshiftmultiplier;
+
+	//zscale = 1.0;
+
+	pos.i = pos.i * ( (1-(((zoom-0.5*MAXZOOM)/MAXZOOM)*(0.85))) / zscale );
+	pos.j = pos.j * ( (1-(((zoom-0.5*MAXZOOM)/MAXZOOM)*(0.85))) / zscale );
+	pos.k = pos.k * ( (1-(((zoom-0.5*MAXZOOM)/MAXZOOM)*(0.85))) / zscale );
+
+	pos_flat.i = pos_flat.i * ( (1-(((zoom-0.5*MAXZOOM)/MAXZOOM)*(0.85))) / zscale );
+	pos_flat.j = pos_flat.j * ( (1-(((zoom-0.5*MAXZOOM)/MAXZOOM)*(0.85))) / zscale );
+	pos_flat.k = pos_flat.k * ( (1-(((zoom-0.5*MAXZOOM)/MAXZOOM)*(0.85))) / zscale );
+				
+
+	float itemscale =  ( ((camera_z*item_zscalefactor)-zdistance) / (camera_z*item_zscalefactor) );	
+				
+//				if(zdistance > 2*camera_z)	//	outliers
+//					itemscale = 1;
+
+	if(itemscale < minimumitemscaledown)	//	dont shrink into nonexistance
+		itemscale = minimumitemscaledown;
+
+	if(itemscale > maximumitemscaleup)	//	dont expand too far
+		itemscale = maximumitemscaleup;
+
+	system_item_scale_temp = system_item_scale * itemscale;
+	//**********************************
+	return itemscale;
+}
+
+void NavigationSystem::TranslateAndDisplay (QVector &pos, QVector &pos_flat, float center_nav_x, float center_nav_y, float themaxvalue
+		, float zscale, float zdistance, float &the_x, float &the_y, float &system_item_scale_temp)
+{
+	float itemscale = CalculatePerspectiveAdjustment(zscale, zdistance, pos, pos_flat, system_item_scale_temp);
+
+	//TRANSLATE INTO SCREEN DISPLAY COORDINATES
+	//**********************************
+	the_x = (float)pos.i;
+	the_y = (float)pos.j;
+	float the_x_flat = (float)pos_flat.i;
+	float the_y_flat = (float)pos_flat.j;
+
+
+	the_x = (the_x / (	(themaxvalue - center_x)*2	));
+	the_y = (the_y / (	(themaxvalue - center_y)*2	));
+	the_x_flat = (the_x_flat / (	(themaxvalue - center_x)*2	));
+	the_y_flat = (the_y_flat / (	(themaxvalue - center_y)*2	));
+
+
+	the_x = (the_x * (screenskipby4[1] - screenskipby4[0]));
+	the_x = the_x + center_nav_x;
+	the_y = (the_y * (screenskipby4[3] - screenskipby4[2]));
+	the_y = the_y + center_nav_y;
+
+	the_x_flat = (the_x_flat * (screenskipby4[1] - screenskipby4[0]));
+	the_x_flat = the_x_flat + center_nav_x;
+	the_y_flat = (the_y_flat * (screenskipby4[3] - screenskipby4[2]));
+	the_y_flat = the_y_flat + center_nav_y;
+	//**********************************
+
+
+
+	//Draw orientation lines
+	//**********************************
+	GFXDisable(TEXTURE0);
+	GFXDisable(LIGHTING);
+	GFXBlendMode(SRCALPHA,INVSRCALPHA);
+
+	GFXBegin(GFXLINE);
+
+	//		GFXColorf(GFXColor(0,1,0,.5));
+	//		GFXVertex3f(center_nav_x,	center_nav_y		,0);
+	//		GFXVertex3f(the_x_flat,	the_y_flat	,0);
+
+
+	if(the_y_flat > screenskipby4[3])
+		the_y_flat = screenskipby4[3];
+
+	if(the_y_flat < screenskipby4[2])
+		the_y_flat = screenskipby4[2];
+
+
+	if(the_y > screenskipby4[3])
+		the_y = screenskipby4[3];
+
+	if(the_y < screenskipby4[2])
+		the_y = screenskipby4[2];
+
+
+	if(	(the_x_flat > screenskipby4[0]) && (the_x_flat < screenskipby4[1]) )
+		{
+			GFXColorf(GFXColor(0,1,0,.2));
+			GFXVertex3f(the_x_flat,	the_y_flat	,0);
+			GFXVertex3f(the_x,		the_y		,0);
+		}
+
+
+	if(the_x_flat < screenskipby4[0])
+		the_x_flat = screenskipby4[0];
+
+	if(the_x_flat > screenskipby4[1])
+		the_x_flat = screenskipby4[1];
+
+
+	DrawCircle(the_x_flat, the_y_flat, (.005*system_item_scale), GFXColor(1,1,1,.2));
+
+	GFXEnd();
+	GFXEnable(TEXTURE0);
+	//**********************************
+}
+
 
