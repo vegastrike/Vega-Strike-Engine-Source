@@ -1811,21 +1811,36 @@ void Unit::UpdatePhysics (const Transformation &trans, const Matrix &transmat, c
   }
 }
 void Unit::AddVelocity(float difficulty) {
-  Vector v=Velocity;
+   Vector v=Velocity;
+   static float fmultiplier=XMLSupport::parse_float(vs_config->getVariable("physics","hyperspace_multiplier","80000"));
+   static float autopilot_term_distance = XMLSupport::parse_float (vs_config->getVariable ("physics","auto_pilot_termination_distance","6000"));     
+   float minmultiplier=fmultiplier;
    Unit * planet;
+   if(_Universe->isPlayerStarship(this)){
+	   int useless=0;
+   }
    for (un_iter iter = _Universe->activeStarSystem()->gravitationalUnits().createIterator();(planet=*iter);++iter) {
      if (_Universe->isPlayerStarship(planet)) continue;
-     static float autopilot_term_distance = XMLSupport::parse_float (vs_config->getVariable ("physics","auto_pilot_termination_distance","6000"));     
-     float effectiverad = autopilot_term_distance+planet->rSize()*(1.0f+UniverseUtil::getPlanetRadiusPercent())+getAutoRSize(this,this)+rSize();
-
-     if ((Position()-planet->Position()).Magnitude()<effectiverad) {
-       break;
-     }
+     if(planet->rSize()<1){continue;}
+	 if(((Position()-planet->Position()).Magnitude())<1){ minmultiplier=1; break;}
+	 float multipliertemp=1;
+	 float minsizeeffect = (planet->rSize()>100000)?planet->rSize():100000.0;
+	 float effectiverad = autopilot_term_distance+minsizeeffect*(1.0f+UniverseUtil::getPlanetRadiusPercent())+getAutoRSize(this,this)+rSize();
+	 double onethird=1.0/3.0;
+	 double dist=(Position()-planet->Position()).Magnitude();
+	 double cuberoot=pow((dist-(effectiverad)-1000000),onethird);
+	 if(dist>(effectiverad+1000000)) {
+		 multipliertemp=1000+(4*cuberoot);
+	 } else if (dist>effectiverad){
+		multipliertemp=1000-(10*pow(-(dist-(effectiverad)-1000000),onethird));
+	 }else{
+		minmultiplier=1;
+	 }
+	 minmultiplier=(multipliertemp<minmultiplier)?multipliertemp:minmultiplier;
    }
-   if (!planet) {
-     static float multiplier=XMLSupport::parse_float(vs_config->getVariable("physics","hyperspace_multiplier","10000"));
-     v*=multiplier;
-   }
+   if(minmultiplier<1) {minmultiplier=1;}
+   if(minmultiplier>fmultiplier) {minmultiplier=fmultiplier;}
+   v*=minmultiplier;
    curr_physical_state.position = curr_physical_state.position +  (v*SIMULATION_ATOM*difficulty).Cast();
 }
 void Unit::UpdatePhysics2 (const Transformation &trans, const Transformation & old_physical_state, const Vector & accel, float difficulty, const Matrix &transmat, const Vector & cum_vel,  bool lastframe, UnitCollection *uc)
