@@ -425,7 +425,7 @@ void Unit::ApplyLocalDamage (const Vector & pnt, const Vector & normal, float am
   float leakamt = amt*.01*shield.leak;
   amt *= 1-.01*shield.leak;
   float percentage=0;
-  if (Getnebula()!=NULL) {
+  if (Getnebula()==NULL) {
     percentage = DealDamageToShield (pnt,amt);
     if (meshdata[nummesh]&&percentage>0&&amt==0) {//shields are up
       /*      meshdata[nummesh]->LocalFX.push_back (GFXLight (true,
