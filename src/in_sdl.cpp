@@ -108,7 +108,7 @@ void ProcessJoystick () {
     if(joystick[i]->isAvailable()){
       joystick[i]->GetJoyStick (x,y,z,buttons);
 
-#if 1
+      if(joystick[i]->debug_digital_hatswitch){
       for(int h=0;h<joystick[i]->nr_of_hats;h++){
 	Uint8 hsw=joystick[i]->digital_hat[h];
 	cout << "hsw: " << hsw << endl;
@@ -159,9 +159,7 @@ void ProcessJoystick () {
 	  (*DigHatswitchBindings[i][h][dir_index])(0,DigHatswitchState[i][h][dir_index]);
 	}
       }
-
-
-#endif
+      } // digital_hatswitch
 
       for (int j=0;j<NUMJBUTTONS;j++) {
 	if (i==0&&(buttons&(1<<j))) {

@@ -37,6 +37,7 @@ JoyStick *joystick[MAX_JOYSTICKS]; // until I know where I place it
 void InitJoystick(){
   int i;
 
+
 #ifdef HAVE_SDL
   //  SDL_EventState (SDL_KEYDOWN,SDL_ENABLE);
   //  SDL_EventState (SDL_KEYUP,SDL_ENABLE);
@@ -89,6 +90,9 @@ void DeInitJoystick() {
 }
 
 JoyStick::JoyStick(int which) {
+  debug_digital_hatswitch=XMLSupport::parse_bool(vs_config->getVariable("joystick","debug_digital_hatswitch","false"));
+
+
   deadzone=atoi(vs_config->getVariable("joystick","deadband","0.05").c_str());
 
   joy_available = 0;
@@ -169,8 +173,10 @@ void JoyStick::GetJoyStick(float &x,float &y, float &z, int &buttons)
    }
     joy_buttons = buttons;
 
-    for(int h=0;h<nr_of_hats;h++){
-      digital_hat[h]=SDL_JoystickGetHat(joy,h);
+    if(debug_digital_hatswitch){
+      for(int h=0;h<nr_of_hats;h++){
+	digital_hat[h]=SDL_JoystickGetHat(joy,h);
+      }
     }
 
     for(a=0;a<numaxes;a++){

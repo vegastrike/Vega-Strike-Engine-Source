@@ -91,6 +91,8 @@ class JoyStick {
     Uint8 digital_hat[MAX_DIGITAL_HATSWITCHES];
 #endif
 
+    bool debug_digital_hatswitch;
+
     int joy_buttons;
     bool joy_available;
     float joy_xmin,joy_xmax,joy_ymin,joy_ymax, joy_zmin, joy_zmax;
