@@ -189,7 +189,7 @@ void InputDFA::ClickSelect (KBSTATE k, int x, int y, int delx, int dely, int mod
   }
   if (k==DOWN) {
     if (delx||dely) {
-      Vector v = GFXDeviceToEye(delx, dely);
+      Vector v = GFXDeviceToEye(x-CurDFA->prevx, y-CurDFA->prevy) - GFXDeviceToEye(0,0);
       CurDFA->SelectBox.SetSize (v.i, v.j);
       CurDFA->Selecting=true;
       if (mod&ACTIVE_SHIFT) {
@@ -255,7 +255,7 @@ void InputDFA::NoneSelect (KBSTATE k,int x, int y, int delx, int dely, int mod) 
   
   if (k==DOWN) {
     if (delx||dely) {
-      Vector v = GFXDeviceToEye(delx, dely);
+      Vector v = GFXDeviceToEye(x-CurDFA->prevx, y-CurDFA->prevy) - GFXDeviceToEye(0,0);
       CurDFA->SelectBox.SetSize (v.i, v.j);
       CurDFA->Selecting=true;
     }
