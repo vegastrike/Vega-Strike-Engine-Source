@@ -220,12 +220,17 @@ varInst *Mission::call_unit(missionNode *node,int mode){
      if (mode==SCRIPT_RUN) {
        viret->float_val=_Universe->AccessCockpit()->credits;
      }
+     return viret;
    } else if (method_id==CMT_UNIT_addCredits) {
      missionNode *nr_node=getArgument(node,mode,0);
      float credits=doFloatVar(nr_node,mode);
      if (mode==SCRIPT_RUN) {
        _Universe->AccessCockpit()->credits+=credits;
      }
+     viret=newVarInst(VI_TEMP);
+     viret->type=VAR_VOID;
+     return viret;
+
    }
   else{
     varInst *ovi=getObjectArg(node,mode);
