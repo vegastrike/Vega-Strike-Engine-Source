@@ -417,7 +417,7 @@ void GameUnit<UnitType>::UpdateHudMatrix(int whichcam) {
   
   _Universe->AccessCamera(whichcam)->SetPosition (Transform (ctm,image->CockpitCenter.Cast()));
 }
-   
+extern bool flickerDamage (Unit * un, float hullpercent);   
 extern short cloakVal (short cloak, short cloakmin, short cloakrate, bool cloakglass);
 template <class UnitType>
 void GameUnit<UnitType>::DrawNow (const Matrix & mat, float lod) {
@@ -496,12 +496,21 @@ void GameUnit<UnitType>::Draw(const Transformation &parent, const Matrix &parent
     Explode(true, GetElapsedTime());
   }
   bool On_Screen=false;
-  if (!invisible||(this!=_Universe->AccessCockpit()->GetParent())) {
+  bool myparent = (this==_Universe->AccessCockpit()->GetParent());
+  if ((!(invisible&INVISUNIT))&&((!(invisible&INVISCAMERA))||(!myparent))) {
     for (i=0;i<meshdata.size();i++) {//NOTE LESS THAN OR EQUALS...to cover shield mesh
       if (meshdata[i]==NULL) 
 		continue;
 	  if ((int)i==nummesh()&&(meshdata[i]->numFX()==0||hull<0)) 
 		continue;
+	  if (meshdata[i]->getBlendDst()==ONE) {
+		  if ((invisible&INVISGLOW)!=0)
+			  continue;
+		  float damagelevel=hull/maxhull;
+		  if (damagelevel<.9)
+			  if (flickerDamage (this,damagelevel))
+				  continue;
+	  }
 	  QVector TransformedPosition = Transform (*ctm,
 					      meshdata[i]->Position().Cast());
 #if 0

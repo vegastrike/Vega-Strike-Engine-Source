@@ -49,6 +49,7 @@ void Beam::Init (const Transformation & trans, const weapon_info &cln , void * o
   rangepenalty=cln.Longrange;
   damagerate = cln.Damage;
   phasedamage= cln.PhaseDamage;
+  texturestretch=cln.TextureStretch;
   refiretime = 0;
   refire = cln.Refire;
   Col.r = cln.r;
@@ -112,7 +113,7 @@ void Beam::RecalculateVertices() {
   static float fadelocation = XMLSupport::parse_float (vs_config->getVariable ("graphics","BeamFadeoutLength",".8"));
   static float hitfadelocation=XMLSupport::parse_float (vs_config->getVariable ("graphics","BeamFadeoutHitLength",".95"));
   const float fadeinlength = 4;
-  const float texturestretch = 1;
+  
   float leftex = -texturespeed*(numframes*SIMULATION_ATOM+interpolation_blend_factor*SIMULATION_ATOM);
   float righttex = leftex+texturestretch*curlength/curthick;//how long compared to how wide!
   float len = (impact==ALIVE)?

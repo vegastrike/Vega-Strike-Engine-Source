@@ -34,6 +34,34 @@
 
 using namespace Orders;
 
+bool flickerDamage (Unit * un, float hullpercent) {
+	#define damagelevel hullpercent
+		  static float counter=getNewTime();
+		  
+		  static float flickertime = XMLSupport::parse_float (vs_config->getVariable ("graphics","glow-flicker-time","30"));
+		  static float flickerofftime = XMLSupport::parse_float (vs_config->getVariable ("graphics","glow-flicker-off-time","2"));
+		  static float flickeronprob= XMLSupport::parse_float (vs_config->getVariable ("graphics","glow-flicker-off-time",".05"));
+		  float diff = getNewTime()-counter;
+		  if (diff>flickertime) {
+			  counter=getNewTime();
+			  diff=0;
+		  }
+		  float tmpflicker=flickertime*damagelevel;
+		  if (tmpflicker<5) {
+			  tmpflicker=5;
+		  }
+		  diff = fmod (diff,tmpflicker);
+		  //we know counter is somewhere between 0 and damage level
+		  unsigned int thus = ((int)un)>>2;//cast this to an int for fun!
+		  thus = thus % ((unsigned int)tmpflicker);
+		  if (diff>thus && diff-flickerofftime<thus) {
+			  return rand()>RAND_MAX*flickeronprob;
+		  }
+	  return false;
+	  #undef damagelevel
+}
+
+
 #define INVERSEFORCEDISTANCE 5400
 
 void Unit::reactToCollision(Unit * smalle, const QVector & biglocation, const Vector & bignormal, const QVector & smalllocation, const Vector & smallnormal,  float dist) {

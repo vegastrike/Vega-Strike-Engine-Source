@@ -34,6 +34,7 @@ private:
   float rangepenalty;
   float refire;
   float refiretime;
+  float texturestretch;
   GFXColor Col;
   enum Impact{
     ALIVE=0,

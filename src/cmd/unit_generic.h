@@ -506,7 +506,8 @@ protected:
   ///Is dead already?
   bool killed;
   ///Should not be drawn
-  bool invisible;
+  enum INVIS {DEFAULTVIS=0x0,INVISGLOW=0x1,INVISUNIT=0x2,INVISCAMERA=0x4};
+  unsigned char invisible;//1 means turn off glow, 2 means turn off ship
   /// corners of object  
 
 public:
