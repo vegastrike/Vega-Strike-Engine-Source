@@ -192,6 +192,9 @@ namespace UniverseUtil {
 	void terminateMission(bool Win){
 		mission->terminateMission();
 	}
+        unsigned int getCurrentPlayer() {
+	  return _Universe->CurrentCockpit();
+        }
 	Unit *getPlayer(){
 		return _Universe->AccessCockpit()->GetParent();;
 	}
@@ -281,9 +284,9 @@ namespace UniverseUtil {
 	if (un->isUnit()==ASTEROIDPTR||un->isUnit()==NEBULAPTR) {
 	  continue;
 	}
-	double dist = (pos-un->Position()).Magnitude()-un->rSize()-def_un_size;
+	double dist = (pos-un->LocalPosition()).Magnitude()-un->rSize()-def_un_size;
 	if (dist<0) {
-	  QVector delta  = pos-un->Position();
+	  QVector delta  = pos-un->LocalPosition();
 	  double mag = delta.Magnitude();
 	  if (mag>.01){
 	    delta=delta/mag;

@@ -80,6 +80,7 @@ namespace UniverseUtil {
 	Unit *getPlayer();
 ///this gets a player number (if in splitscreen mode)
 	Unit *getPlayerX(int which);
+	unsigned int getCurrentPlayer();
 ///this gets the number of active players
 	int getNumPlayers ();
 ///this adds an objective for the cockpit to view ("go here and do this)

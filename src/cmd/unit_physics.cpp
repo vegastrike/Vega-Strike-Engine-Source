@@ -31,6 +31,7 @@
 #include "gfx/planetary_transform.h"
 #include "gfx/cockpit.h"
 #include "unit_util.h"
+#include "universe_util.h"
 #include "cmd/script/mission.h"
 float copysign (float x, float y) {
 	if (y>0)
@@ -855,6 +856,7 @@ bool Unit::AutoPilotTo (Unit * target, bool ignore_friendlies) {
 	if (other->getFlightgroup()==getFlightgroup()) {
 	  if (NULL==_Universe->isPlayerStarship (other)) {
 	    other->AutoPilotTo(this);
+	    other->SetPosition(UniverseUtil::SafeEntrancePoint (other->LocalPosition(),other->rSize()*1.5));
 	  }
 	}
       }

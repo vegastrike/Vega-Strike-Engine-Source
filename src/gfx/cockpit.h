@@ -124,6 +124,7 @@ private:
   void Init (const char * file);
   ///Sets owner of this cockpit
   //  unsigned int whichcockpit;//0 is the first player, 1 is the second and so forth
+  class Flightgroup * fg;
   class StarSystem* activeStarSystem;//used for context switch in Universe
   void SetParent(Unit * unit, const char * filename, const char * unitmodname,const QVector &startloc);
   Unit * GetParent () {return parent.GetUnit();}

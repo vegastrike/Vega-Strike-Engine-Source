@@ -716,6 +716,9 @@ Unit *  Cockpit::GetSaveParent() {
   return un;
 }
 void Cockpit::SetParent (Unit * unit, const char * filename, const char * unitmodname, const QVector & pos) {
+  if (unit->getFlightgroup()!=NULL) {
+    fg = unit->getFlightgroup();
+  }
   activeStarSystem= _Universe->activeStarSystem();//cannot switch to units in other star systems.
   parent.SetUnit (unit);
   savegame->SetPlayerLocation(pos);
@@ -798,6 +801,7 @@ void Cockpit::InitStatic () {
 Cockpit::Cockpit (const char * file, Unit * parent,const std::string &pilot_name): parent (parent),textcol (1,1,1,1),text(NULL),cockpit_offset(0), viewport_offset(0), view(CP_FRONT), zoomfactor (1.5),savegame (new SaveGame(pilot_name)) {
   static int headlag = XMLSupport::parse_int (vs_config->getVariable("graphics","head_lag","10"));
   int i;
+  fg=NULL;
   for (i=0;i<headlag;i++) {
     headtrans.push_back (Matrix());
     Identity(headtrans.back());
@@ -1355,7 +1359,13 @@ void Cockpit::Update () {
 	  saved.pop_back();
 	}
 	ss->SwapIn();
-	Unit * un = UnitFactory::createUnit (unitfilename.c_str(),false,this->unitfaction,unitmodname);
+	int fgsnumber = 0;
+	if (fg) {
+	  fgsnumber=fg->flightgroup_nr++;
+	  fg->nr_ships++;
+	  fg->nr_ships_left++;
+	}
+	Unit * un = UnitFactory::createUnit (unitfilename.c_str(),false,this->unitfaction,unitmodname,fg,fgsnumber);
 	un->SetCurPosition (UniverseUtil::SafeEntrancePoint (savegame->GetPlayerLocation()));
 	ss->AddUnit (un);
 
