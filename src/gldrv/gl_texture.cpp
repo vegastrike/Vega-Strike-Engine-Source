@@ -185,7 +185,7 @@ GFXBOOL /*GFXDRVAPI*/ GFXCreateTexture(int width, int height, TEXTUREFORMAT text
   //  GFXActiveTexture(0);
   return GFXTRUE;
 }
-void /*GFXDRVAPI*/ GFXPrioritizeTexture (GLuint handle, float priority) {
+void /*GFXDRVAPI*/ GFXPrioritizeTexture (unsigned int handle, float priority) {
   glPrioritizeTextures (1,&handle,&priority); 
 }
 void /*GFXDRVAPI*/ GFXAttachPalette (unsigned char *palette, int handle)
