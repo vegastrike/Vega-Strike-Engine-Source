@@ -55,7 +55,7 @@ void ParticleTrail::DrawAndUpdate (){
   {
 	  Vector R;
 	  _Universe->AccessCamera()->GetPQR(P,Q,R);
-  	  static float particlesize = XMLSupport::parse_float (vs_config->getVariable("graphics","sparksize","1.5"));
+  	  static float particlesize = XMLSupport::parse_float (vs_config->getVariable("graphics","sparksize",".5"));
 	  P*=particlesize;
 	  Q*=particlesize;
   }
@@ -72,8 +72,10 @@ void ParticleTrail::DrawAndUpdate (){
 #else
   GFXEnable(TEXTURE0);
   GFXDisable(TEXTURE1);
+  GFXDisable(DEPTHWRITE);
   GFXDisable(CULLFACE);
-  static Texture * t = new Texture ("flare1.png");
+  static string s = vs_config->getVariable("graphics","sparkletexture","supernova.bmp");
+  static Texture * t = new Texture (s.c_str());
   
   t->MakeActive();
 #endif
@@ -103,9 +105,14 @@ void ParticleTrail::DrawAndUpdate (){
     }
   }
   GFXEnd();
+#ifdef USE_POINTS  
   glDisable(GL_POINT_SMOOTH);
-
   GFXPointSize(1);
+#else
+  GFXDisable(DEPTHWRITE);
+  GFXDisable(CULLFACE);
+#endif
+
 }
 
 void ParticleTrail::AddParticle (const ParticlePoint &P, const Vector &V) {
