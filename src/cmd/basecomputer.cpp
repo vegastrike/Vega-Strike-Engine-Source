@@ -2173,7 +2173,7 @@ int BaseComputer::maxQuantityForPlayer(const Cargo& item, int suggestedQuantity)
 	return result;
 }
 static void eliminateZeroCargo(Unit * un) {
-  for (int i=un->numCargo();i>=0;--i) {
+  for (int i=un->numCargo()-1;i>=0;--i) {
     if (un->GetCargo(i).quantity==0)
       un->RemoveCargo(i,1,true);
   }

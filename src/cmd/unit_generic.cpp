@@ -6145,7 +6145,10 @@ void Unit::EjectCargo (unsigned int index) {
 }
 
 int Unit::RemoveCargo (unsigned int i, int quantity,bool eraseZero) {
-  assert (i<image->cargo.size());
+  if (!(i<image->cargo.size())) {
+    fprintf (stderr,"(previously) FATAL problem...removing cargo that is past the end of array bounds.");
+    return 0;
+  }
   if (quantity>image->cargo[i].quantity)
     quantity=image->cargo[i].quantity;
   static bool usemass = XMLSupport::parse_bool(vs_config->getVariable ("physics","use_cargo_mass","true"));
