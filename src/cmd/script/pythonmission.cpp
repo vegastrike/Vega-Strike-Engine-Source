@@ -12,7 +12,7 @@ void PythonMissionBaseClass::Destructor () {
 	delete this;
 }
 PythonMissionBaseClass::~PythonMissionBaseClass(){
-	fprintf (stderr,"Destruct called. If called from C++ this is death %ld (0x%x)",(unsigned long)this,(unsigned int)this);
+	fprintf (stderr,"BASE Destruct called. If called from C++ this is death %ld (0x%x)",(unsigned long)this,(unsigned int)this);
 }
 
 void PythonMissionBaseClass::Execute () {
