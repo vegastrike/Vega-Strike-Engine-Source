@@ -209,10 +209,16 @@ void DoSpeech (Unit * un, const string &speech) {
   }
   mission->msgcenter->add ("game","all",myname+string(": ")+speech);
 }
-static void LeadMe (string directive, string speech) {
-  Unit * un= _Universe->AccessCockpit()->GetParent();
+void LeadMe (Unit * un, string directive, string speech) { 
   if (un!=NULL) {
-    DoSpeech (un, speech);
+    for (int i=0;i<_Universe->numPlayers();i++) {
+      Unit * pun =_Universe->AccessCockpit(i)->GetParent();
+      if (pun) {
+	if (pun->getFlightgroup()==un->getFlightgroup()){
+	  DoSpeech (un, speech);	
+	}
+      }
+    }
     Flightgroup * fg = un->getFlightgroup();
     if (fg) {
       if (fg->leader.GetUnit()!=un) {
@@ -221,6 +227,11 @@ static void LeadMe (string directive, string speech) {
       fg->directive = directive;
     }
   }
+}
+static void LeadMe (string directive, string speech) {
+  Unit * un= _Universe->AccessCockpit()->GetParent();
+  LeadMe (un,directive,speech);
+  
 }
 extern Unit * GetThreat (Unit * par, Unit * leader);
 void HelpOut (bool crit, std::string conv) {

@@ -194,9 +194,11 @@ bool AggressiveAI::ProcessCurrentFgDirective(Flightgroup * fg) {
 	    parent->Target (targ);
 	    c.SetCurrentState (c.fsm->GetYesNode(),NULL,0);
 	  }else {
-	  c.SetCurrentState (c.fsm->GetNoNode(),NULL,0);
+	    c.SetCurrentState (c.fsm->GetNoNode(),NULL,0);
 	  }
-	leader->getAIState()->Communicate(c);
+	  if (fg->directive!=last_directive) {
+	    leader->getAIState()->Communicate(c);
+	  }
 	}
       }else if (fg->directive==string("f")) {
 	retval=true;
@@ -261,6 +263,7 @@ bool AggressiveAI::ProcessCurrentFgDirective(Flightgroup * fg) {
   }
   return retval;
 }
+extern void LeadMe (Unit * un, string directive, string speech);
 void AggressiveAI::ReCommandWing(Flightgroup * fg) {
   static float time_to_recommand_wing = XMLSupport::parse_float(vs_config->getVariable ("AI",
 											"Targetting",
@@ -271,8 +274,13 @@ void AggressiveAI::ReCommandWing(Flightgroup * fg) {
     if (NULL!=(lead=fg->leader.GetUnit())) {
       if (lead->getFgSubnumber()>=parent->getFgSubnumber()) {
 	if (float(rand())/RAND_MAX<SIMULATION_ATOM/time_to_recommand_wing) {
-	  fg->leader.SetUnit(parent);
-	  fg->directive = (parent->FShieldData()<.2||parent->RShieldData()<.2)?string("h"):string("b");
+	  if ((parent->FShieldData()<.2||parent->RShieldData()<.2)){
+	    fg->directive = string("h");
+	    LeadMe (parent,"h","I need help here!");
+	  }else {
+	    fg->directive = string("b");
+	    LeadMe (parent,"h","I'm taking over this wing. Break and attack");
+	  }
 	}
       }
     }
