@@ -1553,14 +1553,23 @@ void SwitchUnits2( Unit *nw)
 	nw->DisableTurretAI();	
 	
     static bool LoadNewCockpit = XMLSupport::parse_bool (vs_config->getVariable("graphics","UnitSwitchCockpitChange","false"));
+    static bool DisCockpit = XMLSupport::parse_bool (vs_config->getVariable("graphics","SwitchCockpitToDefaultOnUnitSwitch","false"));
+	
+    if (nw->getCockpit().length()>0 || DisCockpit) {
+      _Universe->AccessCockpit()->Init (nw->getCockpit().c_str(), LoadNewCockpit==false);
+    }
+	
+	/* Here is the old code:
+	   
     if (nw->getCockpit().length()>0&&LoadNewCockpit) {
       _Universe->AccessCockpit()->Init (nw->getCockpit().c_str());
     }else {
-      static bool DisCockpit = XMLSupport::parse_bool (vs_config->getVariable("graphics","SwitchCockpitToDefaultOnUnitSwitch","false"));
       if (DisCockpit) {
 	_Universe->AccessCockpit()->Init ("disabled-cockpit.cpt");
       }
     }
+	
+	*/
   }
 }
 

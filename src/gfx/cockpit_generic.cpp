@@ -64,12 +64,30 @@ void Cockpit::Eject() {
   ejecting=true;
 }
 
-void Cockpit::Init (const char * file) {
+void Cockpit::Init (const char * file, bool isDisabled) {
   shakin=0;
   autopilot_time=0;
-  if (strlen(file)==0) {
-    Init ("disabled-cockpit.cpt");
+  if (file == NULL || strlen(file)==0) {
+    Init("disabled-cockpit.cpt");
     return;
+  }
+  if (isDisabled==true) {
+    Init ((std::string("disabled-") + file).c_str());
+    return;
+  }
+  vschdir (file);
+  FILE *tempfp = fopen(file, "rb");
+  vscdup();
+  if (tempfp) {
+	  fclose(tempfp);
+  } else {
+	  // File not found...
+	  if (isDisabled==false) {
+	    Init(file, true);
+	  } else {
+	    Init(NULL);
+	  }
+	  return;
   }
   Delete();
   string cpdir=vs_config->getVariable("data","cockpits","");

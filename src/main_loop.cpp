@@ -264,11 +264,7 @@ bool cockpitfront=true;
       PitchUp(0,RELEASE);
       PitchDown (0,RELEASE);
 
-    if ((tmp)&&_Universe->AccessCockpit()->GetParent()) {
-      _Universe->AccessCockpit()->Init (_Universe->AccessCockpit()->GetParent()->getCockpit().c_str());	    
-    }else {
-      _Universe->AccessCockpit()->Init ("disabled-cockpit.cpt");
-    }
+	  _Universe->AccessCockpit()->Init (_Universe->AccessCockpit()->GetParent()->getCockpit().c_str(), ((tmp)&&_Universe->AccessCockpit()->GetParent())==false);	    
     tmp=(tmp+1)%2;
   }
   if(newState==PRESS||newState==DOWN) {
