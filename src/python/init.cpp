@@ -234,6 +234,8 @@ void Python::init() {
   isinit=true;
 // initialize python library
   Py_Initialize();
+	InitBriefing ();
+	InitVS ();
 //  initVegastrike();
 }
 void Python::test() {
