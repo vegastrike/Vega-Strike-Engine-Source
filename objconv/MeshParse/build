@@ -1,0 +1,1 @@
+g++ mesh_xml.cpp xml_support.cpp -I/sw/include -L/sw/lib -lexpat
