@@ -13,11 +13,12 @@ struct LineCollide {
   void * object;
   Vector Mini;
   Vector Maxi;
+  void * lastchecked;//to prevent duplicate selection
   enum collidables {UNIT, BEAM,BALL,BOLT,PROJECTILE} type;
   bool hhuge;
-  LineCollide():  object(NULL),Mini(0,0,0), Maxi(0,0,0), type(UNIT){hhuge=false;}
-  LineCollide (void * objec, enum collidables typ,const Vector &st, const Vector &en) {this->object=objec;this->type=typ;this->Mini=st;this->Maxi=en;hhuge=false;}
-  LineCollide (const LineCollide &l) {object=l.object; type=l.type; Mini=l.Mini;Maxi=l.Maxi;hhuge=l.hhuge;}      
+  LineCollide():  object(NULL),Mini(0,0,0), Maxi(0,0,0), type(UNIT){hhuge=false;lastchecked=NULL;}
+  LineCollide (void * objec, enum collidables typ,const Vector &st, const Vector &en) {this->object=objec;this->type=typ;this->Mini=st;this->Maxi=en;hhuge=false; lastchecked=NULL;}
+  LineCollide (const LineCollide &l) {object=l.object; type=l.type; Mini=l.Mini;Maxi=l.Maxi;hhuge=l.hhuge; lastchecked=NULL;}      
 };
 
 
@@ -96,7 +97,7 @@ public:
 	}
       }
     }
-    std::sort (retval.begin()+hugeobjects.size(),retval.end());
+    //    std::sort (retval.begin()+hugeobjects.size(),retval.end());
   }
   void Put(LineCollide* target,const T objectToPut) {
     int x,y,z;

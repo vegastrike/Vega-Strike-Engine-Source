@@ -6,7 +6,7 @@
 #include "physics.h"
 #include "hashtable_3d.h"
 
-Hashtable3d <const LineCollide*, char[20],char[200]> collidetable;
+Hashtable3d <LineCollide*, char[20],char[200]> collidetable;
 
 bool TableLocationChanged (const Vector & Mini,const Vector & minz) { 
   return (collidetable.hash_int (Mini.i)!=collidetable.hash_int (minz.i) ||
@@ -29,6 +29,7 @@ void Unit::SetCollisionParent (Unit * name) {
     }
 }
 void Unit::UpdateCollideQueue () {
+  CollideInfo.lastchecked =NULL;//reset who checked it last in case only one thing keeps crashing with it;
   Vector Puffmin (Position().i-radial_size,Position().j-radial_size,Position().k-radial_size);
   Vector Puffmax (Position().i+radial_size,Position().j+radial_size,Position().k+radial_size);
   if (CollideInfo.object == NULL||TableLocationChanged(CollideInfo,Puffmin,Puffmax)) {//assume not mutable
@@ -47,12 +48,12 @@ void Unit::UpdateCollideQueue () {
 
 void Unit::CollideAll() {
   unsigned int i;
-  vector <const LineCollide*> colQ;
+  vector <LineCollide*> colQ;
   collidetable.Get (&CollideInfo,colQ);
   for (i=0;i<colQ.size();i++) {
-    if (i<colQ.size()-1)
-      if (colQ[i]==colQ[i+1])
-	continue;//ignore duplicates
+    if (colQ[i]->lastchecked==this)
+      continue;//ignore duplicates
+    colQ[i]->lastchecked = this;//now we're the last checked.
     //    if (colQ[i]->object > this||)//only compare against stuff bigger than you
     if ((!CollideInfo.hhuge||(CollideInfo.hhuge&&colQ[i]->type==LineCollide::UNIT))&&((colQ[i]->object>this||(!CollideInfo.hhuge&&i<collidetable.GetHuge().size()))))//the first stuffs are in the huge array
       if (
@@ -139,7 +140,7 @@ bool Unit::Collide (Unit * target) {
 }
 
 void Beam::CollideHuge (const LineCollide & lc) {
-  vector <const LineCollide *> tmp = collidetable.GetHuge();
+  vector <LineCollide *> tmp = collidetable.GetHuge();
   for (unsigned int i=0;i<tmp.size();i++) {
     if (tmp[i]->type==LineCollide::UNIT) {
       if (lc.Mini.i< tmp[i]->Maxi.i&&

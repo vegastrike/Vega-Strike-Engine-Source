@@ -80,9 +80,7 @@ void GFXPickLights (const Vector & center, const float radius) {
 	lighttable.Get (&tmpcollide, tmppickt); 
     }
     for (unsigned int i=0;i<tmppickt.size();i++){
-      if (i<tmppickt.size()-1)
-	if (tmppickt[i]==tmppickt[i+1]) 
-	  continue;//sorted, ignore duplicates
+      //warning::duplicates may Exist
       if (picklight (*tmppickt[i].lc,center,radius,lightsenabled)) {
 	newpicked->push_back (tmppickt[i].GetIndex());
 	lightsenabled++;
