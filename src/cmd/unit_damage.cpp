@@ -113,7 +113,7 @@ void GameUnit<UnitType>::ArmorDamageSound( const Vector &pnt)
     else
       AUDAdjustSound (this->sound->armor,this->ToWorldCoordinates(pnt).Cast()+this->cumulative_transformation.position,this->Velocity);
   }else {
-    static int playerarmorsound = AUDCreateSoundWAV(vs_config->getVariable("audio","player_armor_hit","bigarmor.wav"));
+    static int playerarmorsound = AUDCreateSoundWAV(vs_config->getVariable("unitaudio","player_armor_hit","bigarmor.wav"));
     int sound = playerarmorsound!=-1?playerarmorsound:this->sound->armor;
     if(!AUDIsPlaying(sound))
        AUDPlay(sound,QVector(0,0,0),Vector(0,0,0),1);    
@@ -129,7 +129,7 @@ void GameUnit<UnitType>::HullDamageSound( const Vector &pnt)
     else
       AUDAdjustSound (this->sound->hull,this->ToWorldCoordinates(pnt).Cast()+this->cumulative_transformation.position,this->Velocity);
   }else {
-    static int playerhullsound = AUDCreateSoundWAV(vs_config->getVariable("audio","player_hull_hit","bigarmor.wav"));
+    static int playerhullsound = AUDCreateSoundWAV(vs_config->getVariable("unitaudio","player_hull_hit","bigarmor.wav"));
     int sound = playerhullsound!=-1?playerhullsound:this->sound->hull;
     if (!AUDIsPlaying (sound))
       AUDPlay(sound,QVector(0,0,0),Vector(0,0,0),1);
@@ -146,7 +146,7 @@ float GameUnit<UnitType>::DealDamageToShield (const Vector &pnt, float &damage) 
     else
       AUDAdjustSound (this->sound->shield,this->ToWorldCoordinates(pnt).Cast()+this->cumulative_transformation.position,this->Velocity);
   }else {
-    static int playerhullsound = AUDCreateSoundWAV(vs_config->getVariable("audio","player_shield_hit","shieldhit.wav"));
+    static int playerhullsound = AUDCreateSoundWAV(vs_config->getVariable("unitaudio","player_shield_hit","shieldhit.wav"));
     int sound = playerhullsound!=-1?playerhullsound:this->sound->hull;
 
     if (!AUDIsPlaying (sound))
