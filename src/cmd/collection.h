@@ -7,7 +7,7 @@
 #define _UNITCOLLECTION_H_
 
 #include "iterator.h"
-
+#include <stdlib.h>
 class Unit;
 
 class UnitCollection {
