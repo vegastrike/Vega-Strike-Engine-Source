@@ -707,7 +707,7 @@ void AIScript::endElement(const string &name) {
 
 
 void AIScript::LoadXML() {
-  
+  string full_filename;
   HardCodedMap::const_iterator iter =  hard_coded_scripts.find (filename);
   if (iter!=hard_coded_scripts.end()) {
     //    fprintf (stderr,"hcscript %s\n",filename);
@@ -722,16 +722,13 @@ void AIScript::LoadXML() {
   fprintf (stderr,"chd");
 #endif
 
-  vschdir ("ai");
-  vschdir ("script");
 #ifdef AIDBG
   fprintf (stderr,"echd");
 #endif
 
   const int chunk_size = 16384;
-  FILE * inFile = fopen (filename, "r");
-  vscdup();
-  vscdup();
+  full_filename = string("ai/script/") + filename;
+  FILE * inFile = fopen (full_filename.c_str(), "r");
 #ifdef AIDBG
   fprintf (stderr,"backup ");
 #endif
