@@ -1111,9 +1111,14 @@ if test "$NETCOMM" = "1" ; then
 	CHECK_FOR_OSS_H
 
 	if test "x$have_oss_h" = "xno" ; then
-	    echo "*** OSS headers not found : networking communication system disabled."
-		NETCOMM="0"
+	    echo "*** OSS headers not found : webcam support only."
+		TR_CPPFLAGS="$TR_CPPFLAGS -DNETCOMM_NOSOUND -DNETCOMM"
+		NETCOMM_NOSOUND="1"
+		if test "$is_macosx" = "yes" ; then
+    	 	TR_CPPFLAGS="$TR_CPPFLAGS -I/System/Library/Frameworks/QuickTime.framework/Headers"
+		fi
 	else
+		NETCOMM_NOSOUND="0"
 		TR_CPPFLAGS="$TR_CPPFLAGS -DNETCOMM"
 	fi
 fi
@@ -1160,6 +1165,7 @@ AC_SUBST([BOOST_LIBS])
 AC_SUBST([BOOST_CPPFLAGS])
 AM_CONDITIONAL(USEBOOST128, test "$TESTUSEBOOST129" = "0")
 AM_CONDITIONAL(NETCOMM, test "$NETCOMM" = "1")
+AM_CONDITIONAL(NETCOMM_NOSOUND, test "$NETCOMM_NOSOUND" = "1")
 AM_CONDITIONAL(WIN32, test "$WIN32" = "1")
 AM_CONDITIONAL(LINUX, test "$LINUX" = "1")
 

@@ -17,10 +17,15 @@ WebcamSupport::WebcamSupport()
 	period = 1000000./(double)this->fps;
 
 #ifdef __APPLE__
-#if 0
-	this->gQuicktimeInitialized = false;
+	OSErr				iErr = noErr;
+	iErr = InitializeQuicktime();
+	if( iErr)
+	{
+		cerr<<"!!! ERROR initialising Quicktime... please check it is installed !!!"<<endl;
+		exit(1);
+	}
+	this->gQuicktimeInitialized = true;
 	this->video = NULL;
-#endif
 #endif
 }
 
@@ -70,7 +75,6 @@ int		WebcamSupport::Init()
 	return 0;
 #endif
 #ifdef __APPLE__
-#if 0
 	video = new videoRec;
 	video->video_width = this->width;
 	video->video_height = this->height;
@@ -271,7 +275,6 @@ bail:
 			}
 */
 #endif
-#endif
 }
 
 bool	WebcamSupport::isReady()
@@ -339,9 +342,7 @@ void	WebcamSupport::EndCapture()
     capDriverDisconnect (capvideo);
 #endif
 #ifdef __APPLE__
-#if 0
 	CloseComponent( video->sg_component);
-#endif
 #endif
 }
 
@@ -363,7 +364,6 @@ char *	WebcamSupport::CaptureImage()
 	return 0;
 #endif
 #ifdef __APPLE__
-#if 0
 	// Get Buffer Info and see...
 	component_error = SGIdle(video -> sg_channel);
 	if (component_error)
@@ -380,7 +380,6 @@ char *	WebcamSupport::CaptureImage()
 		}
 	*/
 	return NULL;
-#endif
 #endif
 }
 
@@ -407,9 +406,7 @@ void	WebcamSupport::Shutdown()
 		exit(-1);
 #endif
 #ifdef __APPLE__
-#if 0
 	delete video;
-#endif
 #endif
 }
 

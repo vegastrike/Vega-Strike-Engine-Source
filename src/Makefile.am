@@ -9,6 +9,7 @@ endif
 bin_PROGRAMS = vegastrike vegaserver accountserver
 
 if NETCOMM
+if !NETCOMM_NOSOUND
 SUBDIRS = jvoiplib jthread jrtplib cmd gfx gldrv aldrv python gui networking boost common boost129
 ld_add = \
 jvoiplib/libjvoip.a jvoiplib/libgsm.a jvoiplib/liblpc.a \
@@ -16,6 +17,7 @@ jrtplib/libjrtp.a
 else
 SUBDIRS = jthread cmd gfx gldrv aldrv python gui networking boost common boost129
 ld_add =
+endif
 endif
 
 vegastrike_LDADD =  				\

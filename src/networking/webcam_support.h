@@ -9,7 +9,7 @@
 #include <vfw.h>
 #endif
 #ifdef __APPLE__
-//#include <quicktimeincludes_whatever.h>
+#include <QuickTimeComponents.h>
 #endif
 #define DEFAULT_CAPTURE_DRIVER 0
 
@@ -44,6 +44,13 @@ class	WebcamSupport
 		CAPTUREPARMS	capparam;
 #endif
 #ifdef __APPLE__
+		typedef struct
+		{
+			SeqGrabComponent	sg_component;
+			SGChannel			sg_channel;
+			GWorldPtr			sg_world;
+			short				video_width, video_height;
+		} videoRec;
 		Boolean				gQuicktimeInitialised;
 		// Sequence Grabber info
 		videoRec *			video;

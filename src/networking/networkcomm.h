@@ -5,9 +5,11 @@
 #include "client.h"
 
 class WebcamSupport;
+#ifndef NETCOMM_NOSOUND
 class JVOIPSession;
 class JVOIPSessionParams;
 class JVOIPRTPTransmissionParams;
+#endif
 
 class NetworkCommunication
 {
@@ -16,9 +18,11 @@ class NetworkCommunication
 		list<Client *>	commClients;
 		// Webcam support
 		WebcamSupport *		Webcam;
+#ifndef NETCOMM_NOSOUND
 		JVOIPSession *				session;
 		JVOIPSessionParams *		params;
 		JVOIPRTPTransmissionParams* rtpparams;
+#endif
 
 	public:
 		NetworkCommunication();

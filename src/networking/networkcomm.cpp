@@ -17,9 +17,11 @@ int		NetworkCommunication::GrabImage()
 int		NetworkCommunication::InitSession( float frequency)
 {
 	// Init the VoIP session
+#ifndef NETCOMM_NOSOUND
 	this->session = new JVOIPSession;
 	this->params = new JVOIPSessionParams;
 	this->rtpparams = new JVOIPRTPTransmissionParams;
+#endif
 
 	// Init the webcam part
 	int	ret = 0;
@@ -35,12 +37,14 @@ int		NetworkCommunication::InitSession( float frequency)
 
 int		NetworkCommunication::DestroySession()
 {
+#ifndef NETCOMM_NOSOUND
 	if( this->session)
 		delete this->session;
 	if( this->params)
 		delete this->params;
 	if( this->rtpparams)
 		delete this->rtpparams;
+#endif
 	if( this->Webcam)
 	{
 		this->Webcam->EndCapture();
@@ -53,12 +57,14 @@ int		NetworkCommunication::DestroySession()
 
 NetworkCommunication::~NetworkCommunication()
 {
+#ifndef NETCOMM_NOSOUND
 	if( this->session)
 		delete this->session;
 	if( this->params)
 		delete this->params;
 	if( this->rtpparams)
 		delete this->rtpparams;
+#endif
 	if( this->Webcam)
 		delete this->Webcam;
 }
