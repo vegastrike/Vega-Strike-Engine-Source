@@ -289,7 +289,7 @@ bool cockpitfront=true;
       _Universe->activeStarSystem()->getBackground()->EnableBG(back);
     }
   static int tmp=(XMLSupport::parse_bool (vs_config->getVariable ("graphics","cockpit","true"))?1:0);
-  if(newState==PRESS&&cockpitfront) {
+  if(newState==PRESS&&(_Universe->AccessCockpit()->GetView()==CP_FRONT)) {
       YawLeft (KBData(),RELEASE);
       YawRight (KBData(),RELEASE);
       PitchUp(KBData(),RELEASE);

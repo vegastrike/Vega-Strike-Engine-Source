@@ -1609,7 +1609,7 @@ string GameCockpit::getsoundfile(string sound) {
 		return "";
 	}
 }
-
+void	SetStartupView(Cockpit*);
 void GameCockpit::UpdAutoPilot()
 {
   static bool autopan = XMLSupport::parse_bool (vs_config->getVariable ("graphics","pan_on_auto","true"));
@@ -1648,7 +1648,7 @@ void GameCockpit::UpdAutoPilot()
       disableautosound.playsound();
       if (autopan) {
 	AccessCamera(CP_PAN)->myPhysics.SetAngularVelocity(Vector(0,0,0));
-	SetView(CP_FRONT);
+	SetStartupView(this);
       }
       autopilot_time=0;
       Unit * par = GetParent();

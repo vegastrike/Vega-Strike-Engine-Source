@@ -455,6 +455,10 @@ void bootstrap_first_loop() {
     _Universe->Loop(bootstrap_main_loop);
   }
 }
+void SetStartupView(Cockpit * cp) {
+      static std::string startupview = vs_config->getVariable("graphics","startup_cockpit_view","front");
+      cp->SetView(startupview=="view_target"?CP_VIEWTARGET:(startupview=="back"?CP_BACK:(startupview=="chase"?CP_CHASE:CP_FRONT)));
+}
 void bootstrap_main_loop () {
 
   static bool LoadMission=true;
@@ -572,12 +576,14 @@ void bootstrap_main_loop () {
 	}
 
     _Universe->SetupCockpits(playername);
-
+    
 	/************************* NETWORK INIT ***************************/
-	vector<std::string>::iterator it, jt;
-	unsigned int k=0;
+    vector<std::string>::iterator it, jt;
+    unsigned int k=0;
     for (k=0, it=playername.begin(), jt=playerpasswd.begin();k<(unsigned int)_Universe->numPlayers();k++, it++, jt++) {
-	  bool setplayerXloc=false;
+      Cockpit *cp = _Universe->AccessCockpit(k);
+      SetStartupView(cp);
+      bool setplayerXloc=false;
       std::string psu;
       if (k==0) {
 		QVector myVec;
