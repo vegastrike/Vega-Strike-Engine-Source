@@ -3427,7 +3427,7 @@ void showUnitStats(Unit * playerUnit,string &text,int subunitlevel, int mode, Ca
 	//and policy of upgrades to fuel
 	
 	if(!mode){
-		PRETTY_ADDU(statcolor+"Fuel Capacity: #-c",playerUnit->FuelData()/1000.0f,0,"Standard Fuel Units");
+		PRETTY_ADDU(statcolor+"Fuel Capacity: #-c",playerUnit->FuelData(),2,"Metric Tons of Deuterium");
 	}else{
 		if(blankUnit->FuelData()!=playerUnit->FuelData()){
 			switch(replacement_mode){
@@ -3435,7 +3435,7 @@ void showUnitStats(Unit * playerUnit,string &text,int subunitlevel, int mode, Ca
 				//PRETTY_ADDU(statcolor+"Changes Fuel Capacity to: #-c",playerUnit->FuelData()/1000.0f,0,"Standard Fuel Units");
 				break;
 			case 1: // Additive
-				PRETTY_ADDU(statcolor+"Adds #-c",playerUnit->FuelData()/1000.0f,0,"Standard Fuel Units "/*+statcolor+"to Fuel Capacity #-c"*/);
+				PRETTY_ADDU(statcolor+"Adds #-c",playerUnit->FuelData(),2,"Metric Tons of Deuterium "/*+statcolor+"to Fuel Capacity #-c"*/);
 				break;
 			case 2: // multiplicative
 				//PRETTY_ADDU(statcolor+"Increases Fuel Capacity by #-c",100.0*(playerUnit->FuelData -1),0,"%");
