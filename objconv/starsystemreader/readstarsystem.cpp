@@ -428,7 +428,7 @@ vector<System> readfile (const char * name) {
 			}
 		}
 	}
-	fprintf (stderr,"Habitable count %d Barren count %d\n Interesting count %d Uninteresting count %d Empty count %d",hc,bc,ic,uc,ec);
+	fprintf (stderr,"\n\nParsing has been completed.\nHabitable count: %d\nBarren count: %d\n\nInteresting count: %d\nUninteresting count: %d\nEmpty count: %d\n\nGenerating data...\n\n",hc,bc,ic,uc,ec);
 	return systems;
 }
 	
@@ -519,7 +519,8 @@ void computeCoord (vec3 &lo, vec3 &hi, int wid, int hei, int x, int y) {
 }
 
 std::vector<SectorInfo> readSectors(vec3 min, vec3 max) {
-	printf("\n\n--MINIMUM-- <%f,%f,%f>\n--MAXIMUM-- <%f,%f,%f>\n\n",min.x,min.y,min.z,max.x,max.y,max.z);
+	// Uncomment if you have problems.
+//	printf("\n\n--MINIMUM-- <%f,%f,%f>\n--MAXIMUM-- <%f,%f,%f>\n\n",min.x,min.y,min.z,max.x,max.y,max.z);
 	std::vector<SectorInfo> ret;
 	std::string file = readfiledata("sectors.txt");
 	std::vector<std::vector<std::string> >vec;
@@ -567,8 +568,11 @@ double sqr (double x){
 void processsystems (std::vector <System> & s){
 	vec3 min,max;
 	computeminmax(s,min,max);
-	for (unsigned int i=0;i<s.size();++i) {
+	unsigned int i;
+	for (i=0;i<s.size();++i) {
 		s[i].sector=getSector(s[i],min,max);
+	}
+	for (i=0;i<s.size();++i) {
 		std::map <double,string> jumps;
 		if (s[i].habitable)
 		for (unsigned int j=0;j<s.size();++j) {
