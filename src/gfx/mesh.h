@@ -267,7 +267,7 @@ private:
     int faction;
   } *xml;
   ///Loads XML data into this mesh.
-  void LoadXML(const char *filename, const Vector & scale, int faction, class Flightgroup * fg);
+  void LoadXML(const char *filename, const Vector & scale, int faction, class Flightgroup * fg, bool orig=false);
   ///loads binary data into this mesh
   void LoadBinary (const char * filename, int faction);
   ///Creates all logos with given XML data info

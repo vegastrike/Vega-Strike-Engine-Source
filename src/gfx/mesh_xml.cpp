@@ -829,11 +829,13 @@ void Mesh::beginElement(const string &name, const AttributeList &attributes) {
     xml->logos[xml->logos.size()-1].offset = offset;
     break;
   case XML::REF:
+    {
     assert (top==XML::LOGO);
     //assert (xml->load_stage==5);
     xml->load_stage=6;
-    unsigned int ind;
-    float indweight;
+    unsigned int ind=0;
+    float indweight=1;
+    bool foundindex=false;
     int ttttttt;
     ttttttt=0;
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
@@ -845,6 +847,7 @@ void Mesh::beginElement(const string &name, const AttributeList &attributes) {
 	assert (ttttttt<2);
 	xml->vertex_state |= XML::V_POINT;
 	ind = XMLSupport::parse_int((*iter).value);
+	foundindex=true;
 	ttttttt+=2;
 	break;
       case XML::WEIGHT:
@@ -858,9 +861,13 @@ void Mesh::beginElement(const string &name, const AttributeList &attributes) {
      }
     }
     assert (ttttttt==3);
+    if (!foundindex) {
+      fprintf (stderr,"mesh with uninitalized logo");
+    }
     xml->logos[xml->logos.size()-1].refpnt.push_back(ind);
     xml->logos[xml->logos.size()-1].refweight.push_back(indweight);
     xml->vertex_state+=XML::V_REF;
+    }
     break;
   default:
     assert(0);
@@ -1061,7 +1068,7 @@ void updateMax (Vector &mn, Vector & mx, const GFXVertex &ver) {
 }
 const bool USE_RECALC_NORM=true;
 const bool FLAT_SHADE=true;
-void Mesh::LoadXML(const char *filename,const Vector& scale, int faction, Flightgroup * fg) {
+void Mesh::LoadXML(const char *filename,const Vector& scale, int faction, Flightgroup * fg, bool origthis) {
   const int chunk_size = 16384;
   std::vector <unsigned int> ind;  
   FILE* inFile = fopen (filename, "r");
@@ -1335,7 +1342,8 @@ void Mesh::LoadXML(const char *filename,const Vector& scale, int faction, Flight
   vector <enum POLYTYPE> polytypes;
   polytypes.insert(polytypes.begin(),totalvertexsize,GFXTRI);
   //  enum POLYTYPE * polytypes= new enum POLYTYPE[totalvertexsize];//overkill but what the hell
-  int *poly_offsets  = new int [totalvertexsize];
+  vector <int> poly_offsets;
+  poly_offsets.insert (poly_offsets.begin(),totalvertexsize,0);
   int o_index=0;
   if (xml->tris.size()) {
     polytypes[o_index]= GFXTRI;
@@ -1458,7 +1466,7 @@ void Mesh::LoadXML(const char *filename,const Vector& scale, int faction, Flight
  	 radialSize = .5*(mx-mn).Magnitude();
 
   if (xml->sharevert) {
-    vlist = new GFXVertexList (&polytypes[0], xml->vertices.size(),&xml->vertices[0],o_index,poly_offsets,false,&ind[0]);
+    vlist = new GFXVertexList (&polytypes[0], xml->vertices.size(),&xml->vertices[0],o_index,&poly_offsets[0],false,&ind[0]);
   }else {
     static bool usopttmp=(XMLSupport::parse_bool (vs_config->getVariable ("graphics","OptimizeVertexArrays","true")));
     static float optvertexlimit= (XMLSupport::parse_float (vs_config->getVariable ("graphics", "OptimizeVertexCondition","1.0")));
@@ -1469,14 +1477,14 @@ void Mesh::LoadXML(const char *filename,const Vector& scale, int faction, Flight
       unsigned int * ind;
       GFXOptimizeList (vertexlist,totalvertexsize,&newv,&numopt,&ind);
       if (numopt < totalvertexsize*optvertexlimit) {
-	vlist = new GFXVertexList (&polytypes[0], numopt,newv,o_index,poly_offsets,false,ind);
+	vlist = new GFXVertexList (&polytypes[0], numopt,newv,o_index,&poly_offsets[0],false,ind);
 	cachunk = true;
       }
       free (ind);
       free (newv);
     }
     if (!cachunk) {
-      vlist= new GFXVertexList(&polytypes[0],totalvertexsize,vertexlist,o_index,poly_offsets); 
+      vlist= new GFXVertexList(&polytypes[0],totalvertexsize,vertexlist,o_index,&poly_offsets[0]); 
     }
   }
   /*
@@ -1509,14 +1517,16 @@ void Mesh::LoadXML(const char *filename,const Vector& scale, int faction, Flight
   GFXSetMaterial (myMatNum,xml->material);
 
   delete [] vertexlist;
-  delete []poly_offsets;
   numlods=xml->lod.size()+1;
-  orig = new Mesh [numlods];
-  for (i=0;i<xml->lod.size();i++) {
-    orig[i+1] = *xml->lod[i];
-    orig[i+1].lodsize=xml->lodsize[i];
+  if (origthis) {
+    orig=NULL;
+  }else {
+    orig = new Mesh [numlods];
+    for (i=0;i<xml->lod.size();i++) {
+      orig[i+1] = *xml->lod[i];
+      orig[i+1].lodsize=xml->lodsize[i];
+    } 
   }
-
   delete xml;
 }
 

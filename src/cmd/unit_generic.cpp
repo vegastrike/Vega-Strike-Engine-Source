@@ -272,7 +272,7 @@ Unit::Unit( int /*dummy*/ ) {
   sound = new UnitSounds;
   aistate=NULL;
   image->cockpit_damage=NULL;
-  SetAI (new Order());
+  //SetAI (new Order());
   Init();
 }
 Unit::Unit() {
@@ -280,7 +280,7 @@ Unit::Unit() {
   sound = new UnitSounds;
   aistate=NULL;
   image->cockpit_damage=NULL;
-  SetAI (new Order());
+  //SetAI (new Order());
   Init();
 }
 
@@ -289,7 +289,7 @@ Unit::Unit (std::vector <Mesh *> & meshes, bool SubU, int fact) {
   sound = new UnitSounds;
   aistate=NULL;
   image->cockpit_damage=NULL;
-  SetAI (new Order());
+  //SetAI (new Order());
   Init();
   hull=1000;
   maxhull=100000;
@@ -307,7 +307,7 @@ Unit::Unit(const char *filename, bool SubU, int faction,std::string unitModifica
   sound = new UnitSounds;
   aistate=NULL;
   image->cockpit_damage=NULL;
-  SetAI (new Order());
+  //SetAI (new Order());
   Init( filename, SubU, faction, unitModifications, flightgrp, fg_subnumber, netxml); 
 }
 

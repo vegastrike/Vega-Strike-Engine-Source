@@ -151,7 +151,7 @@ Mesh:: Mesh(const char * filename,const Vector & scale, int faction, Flightgroup
   }
   bool xml=true;
   if(xml) {
-    LoadXML(shared?GetSharedMeshPath(filename).c_str():filename,scale,faction,fg);
+    LoadXML(shared?GetSharedMeshPath(filename).c_str():filename,scale,faction,fg,orig);
     oldmesh = this->orig;
   } else {
     this->xml= NULL;
