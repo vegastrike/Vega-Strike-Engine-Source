@@ -637,7 +637,7 @@ void Unit::Draw(const Transformation &parent, const Matrix parentMatrix)
     }
   }
   for (i=0;i<numhalos;i++) {
-        halos[i]->Draw();
+        halos[i]->Draw(cumulative_transformation,cumulative_transformation_matrix);
   }
 }
 

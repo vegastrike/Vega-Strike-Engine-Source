@@ -195,7 +195,9 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
   case MESHLIGHT:
     assert (xml->unitlevel==1);
     xml->unitlevel++;
-    
+    P=Vector (1,1,1);
+    Q=Vector (1,1,1);
+    pos=Vector(0,0,0);
     for (iter = attributes.begin();iter!=attributes.end();iter++) {
       switch(attribute_map.lookup((*iter).name)) {
       case X:

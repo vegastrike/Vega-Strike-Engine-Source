@@ -66,7 +66,7 @@ void Halo::SetColor (const GFXColor &col){
 void Halo::ProcessDrawQueue() {
   GFXDisable (LIGHTING);
   GFXDisable (CULLFACE);//don't want lighting on this baby
-  GFXDisable (DEPTHWRITE);
+  GFXEnable (DEPTHWRITE);
   GFXPushBlendMode();
   GFXBlendMode(SRCALPHA,INVSRCALPHA);
   GFXEnable (TEXTURE0);

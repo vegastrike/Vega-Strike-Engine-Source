@@ -10,6 +10,7 @@
 #include "cmd_beam.h"
 #include "gfx_sphere.h"
 #include "cmd_collide.h"
+#include "gfx_halo.h"
 extern Vector mouseline;
 
 vector<Vector> perplines;
@@ -95,6 +96,7 @@ void StarSystem::Draw() {
   delete iter;
   GFXDisable(LIGHTING);
   Mesh::ProcessUndrawnMeshes();
+  Halo::ProcessDrawQueue();
   systemInputDFA->Draw();
 }
 
