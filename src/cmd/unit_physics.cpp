@@ -560,10 +560,24 @@ Vector Unit::ToWorldCoordinates(const Vector &v) const {
 #undef M
 
 }
-static float getAutoRSize (Unit * un) {
-  return 0;
+static float getAutoRSize (Unit * orig,Unit * un) {
+  static float friendly_autodist =  XMLSupport::parse_float (vs_config->getVariable ("physics","friendly_auto_radius","100"));
+  static float neutral_autodist =  XMLSupport::parse_float (vs_config->getVariable ("physics","neutral_auto_radius","1000"));
+  static float hostile_autodist =  XMLSupport::parse_float (vs_config->getVariable ("physics","hostile_auto_radius","8000"));
+  if (un->isUnit()==PLANETPTR) {
+    return orig->rSize();
+  }
+  float rel=_Universe->GetRelation(orig->faction,un->faction);
+  if (rel>.1) {
+    return friendly_autodist;//min distance apart
+  }else if (rel<.1) {
+    return hostile_autodist;
+  }else {
+    return neutral_autodist;
+  }
 }
 bool Unit::AutoPilotTo (Unit * target) {
+  static float autopilot_term_distance = XMLSupport::parse_float (vs_config->getVariable ("physics","auto_pilot_termination_distance","6000"));
   if (SubUnit) {
     return false;//we can't auto here;
   }
@@ -572,7 +586,7 @@ bool Unit::AutoPilotTo (Unit * target) {
   Vector end (target->Position());
   float totallength = (start-end).Magnitude();
   if (totallength>1) {
-    float percent = (getAutoRSize(this)+rSize()+target->rSize()+getAutoRSize (target))/totallength;
+    float percent = (getAutoRSize(this,this)+rSize()+target->rSize()+autopilot_term_distance)/totallength;
     if (percent>1) {
       end=start;
     }else {
@@ -583,15 +597,18 @@ bool Unit::AutoPilotTo (Unit * target) {
   for (un_iter i=_Universe->activeStarSystem()->getUnitList().createIterator();
        (un=*i)!=NULL; 
        ++i) {
+    if (un->isUnit()!=NEBULAPTR) {
+     
     if (un!=this&&un!=target) {
-      if ((start-un->Position()).Magnitude()-rSize()-un->rSize()-getAutoRSize(un)<=0) {
+      if ((start-un->Position()).Magnitude()-getAutoRSize (this,this)-rSize()-un->rSize()-getAutoRSize(this,un)<=0) {
 	return false;
       }
-      float intersection = un->querySphere (start,end,getAutoRSize (un));
+      float intersection = un->querySphere (start,end,getAutoRSize (this,un));
       if (intersection>0) {
 	end = start+ (end-start)*intersection;
 	ok=false;
       }
+    }
     }
   }
   if (this!=target) {
