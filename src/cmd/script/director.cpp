@@ -173,7 +173,7 @@ void Mission::BriefingLoop() {
   if (briefing) {
     RunDirectorScript ("loopbriefing");
   }
-  briefing.Update();
+  briefing->Update();
 }
 void Mission::BriefingRender() {
   if (briefing) {
