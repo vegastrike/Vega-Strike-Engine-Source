@@ -184,6 +184,7 @@ namespace VSFileSystem
 	string sharedsectors;
 	string sharedcockpits;
 	string shareduniverse;
+        string aidir;
 	string sharedanims;
 	string sharedsprites;
 	string savedunitpath;
@@ -736,6 +737,7 @@ namespace VSFileSystem
 		sharedsounds = vs_config->getVariable ("data","sharedsounds","sounds");
 		sharedmeshes = vs_config->getVariable ("data","sharedmeshes","meshes");
 		sharedunits = vs_config->getVariable ("data","sharedunits","units");
+		aidir = vs_config->getVariable ("data","ai_directory","ai");
 		universe_name = vs_config->getVariable( "general", "galaxy", "milky_way.xml");
 
 		// Setup the directory lists we know about - note these are relative paths to datadir or homedir
@@ -774,7 +776,7 @@ namespace VSFileSystem
 		Directories[AnimFile] = sharedanims;
 		Directories[VSSpriteFile] = sharedsprites;
 
-		Directories[AiFile] = "ai";
+		Directories[AiFile] = aidir;
 		SubDirectories[AiFile].push_back( "events");
 		SubDirectories[AiFile].push_back( "script");
 
