@@ -48,7 +48,9 @@ VSImage::VSImage()
 {
   this->img_depth=8;
   this->img_color_type=8;
-	this->Init();
+  this->sizeY=1;
+  this->sizeX=1;
+  this->Init();
 }
 
 void	VSImage::Init()
@@ -277,7 +279,7 @@ unsigned char *	VSImage::ReadPNG()
 	   VSFileSystem::vs_fprintf (stderr,"Loading Done. Decompressing\n");
 #endif
 	png_read_info(png_ptr, info_ptr);  /* read all PNG info up to image data */
-	png_get_IHDR(png_ptr, info_ptr, (png_uint_32 *)&this->sizeX, (png_uint_32 *)&this->sizeY, &this->img_depth, &this->img_color_type, &interlace_type, NULL, NULL);
+	this->sizeX=1;this->sizeY=1;this->img_depth=8;png_get_IHDR(png_ptr, info_ptr, (png_uint_32 *)&this->sizeX, (png_uint_32 *)&this->sizeY, &this->img_depth, &this->img_color_type, &interlace_type, NULL, NULL);
 #ifdef VSIMAGE_DEBUG
 	cerr<<"1. Loading a PNG file : width="<<sizeX<<", height="<<sizeY<<", depth="<<img_depth<<", img_color="<<img_color_type<<", interlace="<<interlace_type<<endl;
 #endif
@@ -296,7 +298,7 @@ unsigned char *	VSImage::ReadPNG()
 
 	png_set_expand (png_ptr);
 	png_read_update_info (png_ptr,info_ptr);
-	png_get_IHDR(png_ptr, info_ptr, (png_uint_32 *)&this->sizeX, (png_uint_32 *)&this->sizeY, &this->img_depth, &this->img_color_type, &interlace_type, NULL, NULL);
+	this->sizeX=1;this->sizeY=1;this->img_depth=8;png_get_IHDR(png_ptr, info_ptr, (png_uint_32 *)&this->sizeX, (png_uint_32 *)&this->sizeY, &this->img_depth, &this->img_color_type, &interlace_type, NULL, NULL);
 #ifdef VSIMAGE_DEBUG
 	cerr<<"2. Loading a PNG file : width="<<sizeX<<", height="<<sizeY<<", depth="<<img_depth<<", img_color="<<img_color_type<<", interlace="<<interlace_type<<endl;
 #endif
