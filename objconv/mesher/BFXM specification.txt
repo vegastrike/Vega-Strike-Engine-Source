@@ -1,0 +1,24 @@
+Format for version 0.0625 (current version not only doesn't support all features - it's x86 only!)
+---Header---
+Version number: float
+Scale: float
+Reverse: integer
+Forcetexture: integer
+Sharevert: integer
+Polygonoffset:float;
+Blendmode:<bsrc:integer,bdest:integer>
+Material<Power:float,Ambient.RGBA:4 floats,Diffuse.RGBA:4 floats,Emissive.RGBA:4 floats,Specular.RGBA:4 floats,Cullface:integer,lighting:integer,reflect:integer,usenormals:integer>
+Detailplane<x:float,y:float,z:float>
+---End Header---
+Number of vertices: integer
+       for each vertex:
+       <x:float,y:float,z:float,i:float,j:float,k:float,s:float,t:float>
+Number of Lines: integer
+       for each line:
+       <flatshade:integer,index:integer[2],s:float[2],t:float[2]>
+Number of Triangles: integer
+       for each triangle:
+       <flatshade:integer,index:integer[3],s:float[3],t:float[3]>
+Number of Quads: integer
+       for each Quad:
+       <flatshade:integer,index:integer[4],s:float[4],t:float[4]>
