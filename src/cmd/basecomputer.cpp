@@ -112,13 +112,22 @@ static float basicRepairPrice(void) {
 }
 
 // Info about each mode.
-static const struct{ string title; string button; string command; string groupId; } modeInfo[] = {
-    { "Cargo Dealer  ", "Cargo", "CargoMode", "CargoGroup" },
-    { "Ship Upgrades  ", "Upgrades", "UpgradeMode", "UpgradeGroup" },
-    { "New Ships  ", "Ships", "ShipDealerMode", "ShipDealerGroup" },
-    { "Missions BBS  ", "Missions", "MissionsMode", "MissionsGroup" },
-    { "GNN News  ", "News", "NewsMode", "NewsGroup" },
-    { "Player Info  ", "Info", "PlayerInfoMode", "PlayerInfoGroup" }
+struct ModeInfo {
+	string title;
+	string button;
+	string command;
+	string groupId;
+	ModeInfo(string t="", string b="", string c="", string g="")
+		: title(t), command(c), button(b), groupId(g) {
+	}
+};
+static const ModeInfo modeInfo[] = {
+    ModeInfo ( "Cargo Dealer  ", "Cargo", "CargoMode", "CargoGroup" ),
+    ModeInfo ( "Ship Upgrades  ", "Upgrades", "UpgradeMode", "UpgradeGroup" ),
+    ModeInfo ( "New Ships  ", "Ships", "ShipDealerMode", "ShipDealerGroup" ),
+    ModeInfo ( "Missions BBS  ", "Missions", "MissionsMode", "MissionsGroup" ),
+    ModeInfo ( "GNN News  ", "News", "NewsMode", "NewsGroup" ),
+    ModeInfo ( "Player Info  ", "Info", "PlayerInfoMode", "PlayerInfoGroup" )
 };
 
 
@@ -128,24 +137,24 @@ static const struct{ string title; string button; string command; string groupId
 //  some commands. Basically, you can make an entry for a particular control, and then
 //  later have an entry with an empty control id to cover the other cases.
 const BaseComputer::WctlTableEntry BaseComputer::WctlCommandTable[] = {
-    { "Picker::NewSelection", "NewsPicker", BaseComputer::newsPickerChangedSelection },
-    { "Picker::NewSelection", "", BaseComputer::pickerChangedSelection },
-    { modeInfo[CARGO].command, "", BaseComputer::changeToCargoMode },
-    { modeInfo[UPGRADE].command, "", BaseComputer::changeToUpgradeMode },
-    { modeInfo[SHIP_DEALER].command, "", BaseComputer::changeToShipDealerMode },
-    { modeInfo[NEWS].command, "", BaseComputer::changeToNewsMode },
-    { modeInfo[MISSIONS].command, "", BaseComputer::changeToMissionsMode },
-    { modeInfo[PLAYER_INFO].command, "", BaseComputer::changeToPlayerInfoMode },
-    { "BuyCargo", "", BaseComputer::buyCargo },
-    { "SellCargo", "", BaseComputer::sellCargo },
-    { "BuyUpgrade", "", BaseComputer::buyUpgrade },
-    { "SellUpgrade", "", BaseComputer::sellUpgrade },
-    { "BuyShip", "", BaseComputer::buyShip },
-    { "AcceptMission", "", BaseComputer::acceptMission },
-    { "ShowPlayerInfo", "", BaseComputer::showPlayerInfo },
-    { "ShowShipStats", "", BaseComputer::showShipStats },
-    { "ShowOptionsMenu", "", BaseComputer::showOptionsMenu },
-    { "", "", NULL }
+    BaseComputer::WctlTableEntry ( "Picker::NewSelection", "NewsPicker", BaseComputer::newsPickerChangedSelection ),
+    BaseComputer::WctlTableEntry ( "Picker::NewSelection", "", BaseComputer::pickerChangedSelection ),
+    BaseComputer::WctlTableEntry ( modeInfo[CARGO].command, "", BaseComputer::changeToCargoMode ),
+    BaseComputer::WctlTableEntry ( modeInfo[UPGRADE].command, "", BaseComputer::changeToUpgradeMode ),
+    BaseComputer::WctlTableEntry ( modeInfo[SHIP_DEALER].command, "", BaseComputer::changeToShipDealerMode ),
+    BaseComputer::WctlTableEntry ( modeInfo[NEWS].command, "", BaseComputer::changeToNewsMode ),
+    BaseComputer::WctlTableEntry ( modeInfo[MISSIONS].command, "", BaseComputer::changeToMissionsMode ),
+    BaseComputer::WctlTableEntry ( modeInfo[PLAYER_INFO].command, "", BaseComputer::changeToPlayerInfoMode ),
+    BaseComputer::WctlTableEntry ( "BuyCargo", "", BaseComputer::buyCargo ),
+    BaseComputer::WctlTableEntry ( "SellCargo", "", BaseComputer::sellCargo ),
+    BaseComputer::WctlTableEntry ( "BuyUpgrade", "", BaseComputer::buyUpgrade ),
+    BaseComputer::WctlTableEntry ( "SellUpgrade", "", BaseComputer::sellUpgrade ),
+    BaseComputer::WctlTableEntry ( "BuyShip", "", BaseComputer::buyShip ),
+    BaseComputer::WctlTableEntry ( "AcceptMission", "", BaseComputer::acceptMission ),
+    BaseComputer::WctlTableEntry ( "ShowPlayerInfo", "", BaseComputer::showPlayerInfo ),
+    BaseComputer::WctlTableEntry ( "ShowShipStats", "", BaseComputer::showShipStats ),
+    BaseComputer::WctlTableEntry ( "ShowOptionsMenu", "", BaseComputer::showOptionsMenu ),
+    BaseComputer::WctlTableEntry ( "", "", NULL )
 };
 
 // Process a command from the window.
@@ -897,14 +906,14 @@ bool BaseComputer::scrollToItem(Picker* picker, const Cargo& item, bool select, 
 }
 
 // Update the controls when the selection for a transaction changes.
-void BaseComputer::updateTransactionControlsForSelection(TransactionList* list, const Cargo& item) {
+void BaseComputer::updateTransactionControlsForSelection(TransactionList* tlist, const Cargo& item) {
     // Get the controls we need.
     NewButton* commitButton = dynamic_cast<NewButton*>( window()->findControlById("Commit") );
     assert(commitButton != NULL);
     StaticDisplay* desc = dynamic_cast<StaticDisplay*>( window()->findControlById("Description") );
     assert(desc != NULL);
 
-    if(!list) {
+    if(!tlist) {
         // We have no selection.  Turn off UI that commits a transaction.
         m_selectedList = NULL;
         commitButton->setHidden(true);
@@ -918,20 +927,20 @@ void BaseComputer::updateTransactionControlsForSelection(TransactionList* list, 
     // We have a selection of some sort.
 
     // Set the button state.
-    m_selectedList = list;
+    m_selectedList = tlist;
 
     // Clear selection from other list.
     TransactionList& otherList = ( (&m_transList1==m_selectedList)? m_transList2 : m_transList1 );
     if(otherList.picker) otherList.picker->selectCell(NULL);
 
-    if(!isTransactionOK(item, list->transaction)) {
+    if(!isTransactionOK(item, tlist->transaction)) {
         // We can't do the transaction. so hide the transaction button.
         // This is an odd state.  We have a selection, but no transaction is possible.
         commitButton->setHidden(true);
     } else {
         // We can do the transaction.
         commitButton->setHidden(false);
-        switch(list->transaction) {
+        switch(tlist->transaction) {
             case BUY_CARGO:
                 commitButton->setLabel("Buy");
                 commitButton->setCommand("BuyCargo");
@@ -967,11 +976,11 @@ void BaseComputer::updateTransactionControlsForSelection(TransactionList* list, 
     char tempString[256];
     Unit* baseUnit = m_base.GetUnit();
 
-    if(list->transaction == ACCEPT_MISSION) {
+    if(tlist->transaction == ACCEPT_MISSION) {
         descString = item.description;
     } else {
         // Do the money.
-        switch(list->transaction) {
+        switch(tlist->transaction) {
             case BUY_CARGO:
                 if(item.category.find("My_Fleet") != string::npos) {
                     // This ship is in my fleet -- the price is just the transport cost to get it to
@@ -1039,12 +1048,12 @@ bool BaseComputer::pickerChangedSelection(const EventCommandId& command, Control
 
     // Figure out which transaction list we are using.
     assert(picker == m_transList1.picker || picker == m_transList2.picker);
-    TransactionList* list = ((picker==m_transList1.picker)? &m_transList1 : &m_transList2);
+    TransactionList* tlist = ((picker==m_transList1.picker)? &m_transList1 : &m_transList2);
 
     if(m_base.GetUnit()) {
         if(!cell) {
             // The selection just got cleared.
-            TransactionList& otherList = ( (&m_transList1==list)? m_transList2 : m_transList1 );
+            TransactionList& otherList = ( (&m_transList1==tlist)? m_transList2 : m_transList1 );
             if(otherList.picker && otherList.picker->selectedCell()) {
                 // Special case.  The other picker has a selection -- we are seeing the selection
                 //  cleared in this picker as result.  Do nothing.
@@ -1057,9 +1066,9 @@ bool BaseComputer::pickerChangedSelection(const EventCommandId& command, Control
         } else {
             // They selected a cell that has a description.
             // The selected item.
-            Cargo& item = list->masterList[cell->tag()].cargo;
+            Cargo& item = tlist->masterList[cell->tag()].cargo;
             // Make the controls right for this item.
-            updateTransactionControlsForSelection(list, item);
+            updateTransactionControlsForSelection(tlist, item);
         }
     }
 
@@ -1130,7 +1139,7 @@ SimplePickerCell* BaseComputer::createCategoryCell(SimplePickerCells& cells, con
         const int sepLoc = category.find(CATEGORY_SEP);
         if(sepLoc == string::npos) {
             // No category separator.  At most one category.
-            category.clear();
+            category.erase(0, category.size());
         } else {
             // Skip the first piece.
             category = origCategory.substr(sepLoc+1);
@@ -1151,7 +1160,7 @@ SimplePickerCell* BaseComputer::createCategoryCell(SimplePickerCells& cells, con
         cells.addCell(SimplePickerCell(beautify(currentCategory), currentCategory, CATEGORY_TEXT_COLOR, CATEGORY_TAG));
     }
 
-    SimplePickerCell* parentCell = cells.cellAt(cells.count()-1);   // Last cell in list.
+    SimplePickerCell* parentCell = dynamic_cast<SimplePickerCell*>(cells.cellAt(cells.count()-1));   // Last cell in list.
     if(loc == string::npos) {
         // This is a simple category -- we are done.
         return parentCell;
@@ -1172,11 +1181,11 @@ SimplePickerCell* BaseComputer::createCategoryCell(SimplePickerCells& cells, con
 }
 
 // Load a picker with a list of items.
-void BaseComputer::loadListPicker(TransactionList& list, SimplePicker& picker, TransactionType transType,
+void BaseComputer::loadListPicker(TransactionList& tlist, SimplePicker& picker, TransactionType transType,
                               bool skipFirstCategory) {
     // Make sure the transactionList has the correct info.
-    list.picker = &picker;
-    list.transaction = transType;
+    tlist.picker = &picker;
+    tlist.transaction = transType;
 
     // Make sure there is nothing old lying around in the picker.
     picker.clear();
@@ -1184,11 +1193,11 @@ void BaseComputer::loadListPicker(TransactionList& list, SimplePicker& picker, T
     // Iterate through the list and load the picker from it.
     string currentCategory = "--ILLEGAL CATEGORY--";    // Current category we are adding cells to.
     SimplePickerCell* parentCell = NULL;                // Place to add new items.  NULL = Add to picker.
-    for(int i=0; i<list.masterList.size(); i++) {
-        Cargo& item = list.masterList[i].cargo;
+    for(int i=0; i<tlist.masterList.size(); i++) {
+        Cargo& item = tlist.masterList[i].cargo;
         if(item.category != currentCategory) {
             // Create new cell(s) for the new category.
-            parentCell = createCategoryCell(*picker.cells(), item.category, skipFirstCategory);
+            parentCell = createCategoryCell(*dynamic_cast<SimplePickerCells*>(picker.cells()), item.category, skipFirstCategory);
             currentCategory = item.category;
         }
 
@@ -1235,8 +1244,8 @@ void BaseComputer::loadCargoControls(void) {
 
 
 // Get a filtered list of items from a unit.
-void BaseComputer::loadMasterList(Unit *un, const string& filterthis, bool inv, bool removezero, TransactionList& list){
-    vector<CargoColor>& items = list.masterList;
+void BaseComputer::loadMasterList(Unit *un, const string& filterthis, bool inv, bool removezero, TransactionList& tlist){
+    vector<CargoColor>& items = tlist.masterList;
     items.clear();
     for (unsigned int i=0;i<un->numCargo();i++) {
         unsigned int len = un->GetCargo(i).category.length();
@@ -1424,9 +1433,9 @@ public:
 };
 
 // Load a master list with missions.
-void BaseComputer::loadMissionsMasterList(TransactionList& list) {
+void BaseComputer::loadMissionsMasterList(TransactionList& tlist) {
     // Make sure the list is clear.
-    list.masterList.clear();
+    tlist.masterList.clear();
 
     Unit* unit = _Universe->AccessCockpit()->GetParent();
     int playerNum = UnitUtil::isPlayerStarship(unit);
@@ -1476,11 +1485,11 @@ void BaseComputer::loadMissionsMasterList(TransactionList& list) {
         c.cargo.description = "#b4#" + beautify(c.cargo.content) + ":#-b#n1.75#" + 
             getSaveString(playerNum, MISSION_DESC_LABEL, i);
 
-        list.masterList.push_back(c);
+        tlist.masterList.push_back(c);
     }
 
     // Sort the list.  Better for display, easier to compile into categories, etc.
-    std::sort(list.masterList.begin(), list.masterList.end(), CargoColorSort());
+    std::sort(tlist.masterList.begin(), tlist.masterList.end(), CargoColorSort());
 }
 
 // Load the controls for the MISSIONS display.
@@ -1569,17 +1578,17 @@ void BaseComputer::loadBuyUpgradeControls(void) {
     Unit* playerUnit = m_player.GetUnit();
     Unit* baseUnit = m_base.GetUnit();
 
-    TransactionList& list = m_transList1;
+    TransactionList& tlist = m_transList1;
 
     // Get all the upgrades.
     assert( equalColors(CargoColor().color, DEFAULT_UPGRADE_COLOR) );
-    loadMasterList(baseUnit, "upgrades", true, true, list);
-    playerUnit->FilterUpgradeList(list.masterList);
+    loadMasterList(baseUnit, "upgrades", true, true, tlist);
+    playerUnit->FilterUpgradeList(tlist.masterList);
 
     // Mark all the upgrades that we can't do.
     // cargo.mission == true means we can't upgrade this.
     vector<CargoColor>::iterator iter;
-    for(iter=list.masterList.begin(); iter!=list.masterList.end(); iter++) {
+    for(iter=tlist.masterList.begin(); iter!=tlist.masterList.end(); iter++) {
         iter->cargo.mission = ( !equalColors(iter->color, DEFAULT_UPGRADE_COLOR) );
     }
 
@@ -1588,16 +1597,16 @@ void BaseComputer::loadBuyUpgradeControls(void) {
     repair.cargo.content = BASIC_REPAIR_NAME;
     repair.cargo.price = basicRepairPrice();
     repair.cargo.description = BASIC_REPAIR_DESC;
-    list.masterList.push_back(repair);
+    tlist.masterList.push_back(repair);
 
-    // Load the upgrade picker from the master list.
+    // Load the upgrade picker from the master tlist.
     SimplePicker* basePicker = dynamic_cast<SimplePicker*>( window()->findControlById("BaseUpgrades") );
     assert(basePicker != NULL);
-    loadListPicker(list, *basePicker, BUY_UPGRADE, true);
+    loadListPicker(tlist, *basePicker, BUY_UPGRADE, true);
 
     // Fix the Basic Repair color.
-    SimplePickerCells* baseCells = basePicker->cells();
-    SimplePickerCell* repairCell = baseCells->cellAt(baseCells->count()-1);
+    SimplePickerCells* baseCells = dynamic_cast<SimplePickerCells*>(basePicker->cells());
+    SimplePickerCell* repairCell = dynamic_cast<SimplePickerCell*>(baseCells->cellAt(baseCells->count()-1));
     assert(repairCell->text() == BASIC_REPAIR_NAME);
     if(isClear(repairCell->textColor())) {
         // Have repair cell, and its color is normal.
@@ -1613,19 +1622,19 @@ void BaseComputer::loadSellUpgradeControls(void) {
         return;
     }
 
-    TransactionList& list = m_transList2;
+    TransactionList& tlist = m_transList2;
 
     // Get a list of upgrades on our ship we could sell.
     Unit* partListUnit = &GetUnitMasterPartList();
-    loadMasterList(partListUnit, "upgrades", true, false, list);
+    loadMasterList(partListUnit, "upgrades", true, false, tlist);
     ClearDowngradeMap();
-    playerUnit->FilterDowngradeList(list.masterList);
+    playerUnit->FilterDowngradeList(tlist.masterList);
     static const bool clearDowngrades = XMLSupport::parse_bool(vs_config->getVariable("physics","only_show_best_downgrade","true"));
     if (clearDowngrades) {
         std::set<std::string> downgradeMap = GetListOfDowngrades();
-        for (unsigned int i=0;i<list.masterList.size();++i) {
-            if (downgradeMap.find(list.masterList[i].cargo.content)==downgradeMap.end()) {
-                list.masterList.erase(list.masterList.begin()+i);
+        for (unsigned int i=0;i<tlist.masterList.size();++i) {
+            if (downgradeMap.find(tlist.masterList[i].cargo.content)==downgradeMap.end()) {
+                tlist.masterList.erase(tlist.masterList.begin()+i);
                 i--;
             }
         }
@@ -1634,17 +1643,17 @@ void BaseComputer::loadSellUpgradeControls(void) {
     // Mark all the upgrades that we can't do.
     // cargo.mission == true means we can't upgrade this.
     vector<CargoColor>::iterator iter;
-    for(iter=list.masterList.begin(); iter!=list.masterList.end(); iter++) {
+    for(iter=tlist.masterList.begin(); iter!=tlist.masterList.end(); iter++) {
         iter->cargo.mission = ( !equalColors(iter->color, DEFAULT_UPGRADE_COLOR) );
     }
 
-    // Sort the list.  Better for display, easier to compile into categories, etc.
-    std::sort(list.masterList.begin(), list.masterList.end(), CargoColorSort());
+    // Sort the tlist.  Better for display, easier to compile into categories, etc.
+    std::sort(tlist.masterList.begin(), tlist.masterList.end(), CargoColorSort());
 
     // Load the upgrade picker form the master list.
     SimplePicker* basePicker = dynamic_cast<SimplePicker*>( window()->findControlById("PlayerUpgrades") );
     assert(basePicker != NULL);
-    loadListPicker(list, *basePicker, SELL_UPGRADE, true);
+    loadListPicker(tlist, *basePicker, SELL_UPGRADE, true);
 }
 
 
@@ -2337,7 +2346,7 @@ bool BaseComputer::showShipStats(const EventCommandId& command, Control* control
                 // Delete these, so do nothing.
                 break;
             default:
-                text.push_back(*i);
+                text+=(*i);
                 break;
         }
     }
@@ -2431,6 +2440,10 @@ void BaseComputer::OptionsMenu::init(void) {
     CreateOptionsMenuControls(window);
 
     window->setModal(true);
+}
+
+namespace CockpitKeys {
+	void QuitNow();
 }
 
 // Process a command event from the Options Menu window.

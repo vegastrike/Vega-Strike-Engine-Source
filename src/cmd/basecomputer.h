@@ -64,8 +64,6 @@ public:
     BaseComputer(Unit* player, Unit* base, const vector<DisplayMode>& modes);
     virtual ~BaseComputer(void);
 
-protected:
-
     // These are the transactions that can happen using this object.
     // Transactions are operations that modify the player's state.  Reading news isn't
     //  a transaction.
@@ -78,6 +76,8 @@ protected:
         ACCEPT_MISSION,         // Accept a mission.
         NULL_TRANSACTION,       // Not initialized yet.
     };
+
+protected:
 
     // Association between CargoColor list, picker, and transaction type.
     struct TransactionList {
@@ -194,6 +194,9 @@ protected:
         EventCommandId command;
         std::string controlId;
         WCtlHandler function;
+		WctlTableEntry(EventCommandId cmd, std::string cid, WCtlHandler func)
+			:command(cmd), controlId(cid), function(func) {
+		}
     };
     static const WctlTableEntry WctlCommandTable[];
 

@@ -75,10 +75,10 @@ public:
     // Number of cells in this list.
     virtual int count(void) const { return m_cells.size(); };
     // Get a particular cell.
-    virtual SimplePickerCell* cellAt(int index) { return &m_cells[index]; };
+    virtual PickerCell* cellAt(int index) { return &m_cells[index]; };
 
     // Add a new cell to this list.
-    void addCell(const SimplePickerCell& c) { m_cells.push_back(c); };
+    void addCell(const PickerCell& c) { m_cells.push_back(*(dynamic_cast<const SimplePickerCell*>(&c))); };
 
     // Clear out all the cells.
     void clear(void) { m_cells.clear(); };
@@ -105,7 +105,7 @@ public:
     void clear(void);
 
     // Get cell collection.
-    SimplePickerCells* cells(void) { return &m_realCells; };
+    PickerCells* cells(void) { return &m_realCells; };
 
     // CONSTRUCTION
 public:

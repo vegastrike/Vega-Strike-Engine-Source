@@ -113,7 +113,7 @@ public:
     virtual int layoutVersion(void) const;
 
     // Draw the text.
-    static const int END_LINE = 1000000;           // Draw to the end.
+	static const int END_LINE;
     virtual bool drawLines(int start, int count = END_LINE) const;
     bool draw(void) const { return drawLines(0); };
 

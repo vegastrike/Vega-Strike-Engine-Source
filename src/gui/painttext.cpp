@@ -25,6 +25,7 @@
 
 #include "vs_globals.h"
 
+const int PaintText::END_LINE = 1000000;           // Draw to the end.
 
 // This function allows a number of formatting characters.  Here are the rules:
 //  -- The formatting char is "#".
@@ -110,7 +111,7 @@ void PaintText::setText(const std::string& text) {
             if(*i == OLD_FORMAT_NEWLINE) {
                 conversionResult.append("#n#");
             } else {
-                conversionResult.push_back(*i);
+                conversionResult+=(*i);
             }
         }
         finalText = &conversionResult;

@@ -24,10 +24,10 @@ static char makingstate=0;
 extern const char *mission_key; //defined in main.cpp
 bool BaseInterface::Room::BaseTalk::hastalked=false;
 
-//#define NEW_GUI
+#define NEW_GUI
 
 #ifdef NEW_GUI
-#include "gui/basecomputer.h"
+#include "basecomputer.h"
 #endif
 
 static void CalculateRealXAndY (int xbeforecalc, int ybeforecalc, float *x, float *y) {

@@ -92,7 +92,7 @@ void drawFilledPolygon(const std::vector<Point>& coords, const GFXColor& color) 
 
     glBegin(GL_POLYGON);
     glColor4f(color.r, color.g, color.b, color.a);
-    for(vector<Point>::const_iterator i=coords.begin(); i!=coords.end(); i++) {
+    for(std::vector<Point>::const_iterator i=coords.begin(); i!=coords.end(); i++) {
         glVertex2f(i->x, i->y);
     }
     glEnd();
