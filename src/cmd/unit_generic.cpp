@@ -402,6 +402,9 @@ void Unit::Init()
     m[this]=1;
     }*/
 	this->networked=0;
+
+	damages = NO_DAMAGE;
+
 	RecurseIntoSubUnitsOnCollision=false;
 	this->combat_role=ROLES::getRole("INERT");
 	this->computer.combat_mode=true;
@@ -2382,8 +2385,8 @@ float Unit::ApplyLocalDamage (const Vector & pnt, const Vector & normal, float a
   float spercentage = 0;
   // If not a nebula or if shields recharge in nebula => WE COMPUTE SHIELDS DAMAGE AND APPLY
   if (GetNebula()==NULL||(nebshields>0)) {
-	// Only in non-networking or on server side
-	if( Network==NULL || SERVER)
+	// Compute spercentage even in networking because doesn't apply damage on client side
+	//if( Network==NULL || SERVER)
 		spercentage = DealDamageToShield (pnt,absamt);
     //percentage = DealDamageToShield (pnt,absamt);
 	amt = amt>=0?absamt:-absamt;
@@ -2400,7 +2403,8 @@ float Unit::ApplyLocalDamage (const Vector & pnt, const Vector & normal, float a
   // If shields failing or... => WE COMPUTE DAMAGE TO HULL
   if (shield.leak>0||!meshdata.back()||spercentage==0||absamt>0||phasedamage) {
 	// ONLY in server or in non-networking
-	if( Network==NULL || SERVER)
+	// Compute spercentage even in networking because doesn't apply damage on client side
+	//if( Network==NULL || SERVER)
 		ppercentage = DealDamageToHull (pnt, leakamt+amt);
 	if (ppercentage!=-1) {//returns -1 on death--could delete
 	  for (int i=0;i<nummesh();i++) {
@@ -2412,6 +2416,8 @@ float Unit::ApplyLocalDamage (const Vector & pnt, const Vector & normal, float a
   // If server and there is damage to shields or if unit is not killed (ppercentage>0)
   if( SERVER && (ppercentage>0 || spercentage>0))
   {
+#ifdef NET_SHIELD_SYSTEM_1
+	  // FIRST METHOD : send each time a unit is hit all the damage info to all clients in the current zone
 	  // If server side, we send the unit serial + serialized shields + shield recharge + shield leak + ...
 	  Vector netpnt = pnt;
 	  Vector netnormal = normal;
@@ -2419,7 +2425,15 @@ float Unit::ApplyLocalDamage (const Vector & pnt, const Vector & normal, float a
 	  Server->sendDamages( this->serial, this->zone, shield, armor, ppercentage, spercentage, amt, netpnt, netnormal, col);
 	  // This way the client computes damages based on what we send to him => less reliable
 	  //Server->sendDamages( this->serial, pnt, normal, amt, col, phasedamage);
+#else
+		// SECOND METHOD : we just put a flag on the unit telling its shield/armor data has changed
+		if( spercentage)
+			this->damages &= SHIELD_DAMAGED;
+		if( ppercentage)
+			this->damages &= ARMOR_DAMAGED;
+#endif
   }
+
   return 1;
 }
 
@@ -2476,10 +2490,12 @@ void Unit::ApplyDamage (const Vector & pnt, const Vector & normal, float amt, Un
 }
 
 // NUMGAUGES has been moved to images.h in UnitImages
-void Unit::DamageRandSys(float dam, const Vector &vec) {
+void Unit::DamageRandSys(float dam, const Vector &vec, float randnum, float degrees) {
 	float deg = fabs(180*atan2 (vec.i,vec.k)/M_PI);
-	float randnum=rand01();
-	float degrees=deg;
+	//float randnum=rand01();
+	//float degrees=deg;
+	randnum=rand01();
+	degrees=deg;
 	if (degrees>180) {
 		degrees=360-degrees;
 	}
@@ -2492,6 +2508,7 @@ void Unit::DamageRandSys(float dam, const Vector &vec) {
 		} else if (randnum>=.7) {
 			computer.radar.color=false; //set the radar to not have color
 		} else if (randnum>=.5) {
+			// THIS IS NOT YET SUPPORTED IN NETWORKING
 			computer.target=NULL; //set the target to NULL
 		} else if (randnum>=.4) {
 			limits.retro*=dam;
@@ -2516,6 +2533,7 @@ void Unit::DamageRandSys(float dam, const Vector &vec) {
 		    image->cockpit_damage[which]=0;
 		  }
 		}
+		damages &= COMPUTER_DAMAGED;
 		return;
 	}
 	if (degrees>=20&&degrees<35) {
@@ -2534,6 +2552,7 @@ void Unit::DamageRandSys(float dam, const Vector &vec) {
 				mounts[whichmount].size&=(~weapon_info::AUTOTRACKING);
 			}
 		}
+		damages &= MOUNT_DAMAGED;
 		return;
 	}
 	if (degrees>=35&&degrees<60) {
@@ -2554,6 +2573,7 @@ void Unit::DamageRandSys(float dam, const Vector &vec) {
 				image->cargo[cargorand].quantity*=dam;
 			}
 		}
+		damages &= CARGOFUEL_DAMAGED;
 		return;
 	}
 	if (degrees>=60&&degrees<90) {
@@ -2573,6 +2593,7 @@ void Unit::DamageRandSys(float dam, const Vector &vec) {
 		} else {
 			limits.lateral*=dam;
 		}
+		damages &= LIMITS_DAMAGED;
 		return;
 	}
 	if (degrees>=90&&degrees<120) {
@@ -2612,6 +2633,7 @@ void Unit::DamageRandSys(float dam, const Vector &vec) {
 			}
 			break;
 		}
+		damages &= CLOAK_DAMAGED;
 		return;
 	}
 	if (degrees>=120&&degrees<150) {
@@ -2638,6 +2660,7 @@ void Unit::DamageRandSys(float dam, const Vector &vec) {
 		    image->repair_droid--;
 		  }
 		}
+		damages &= JUMP_DAMAGED;
 		return;
 	}
 	if (degrees>=150&&degrees<=180) {
@@ -2653,6 +2676,7 @@ void Unit::DamageRandSys(float dam, const Vector &vec) {
 		} else {
 			limits.forward*=dam;
 		}
+		damages &= LIMITS_DAMAGED;
 		return;
 	}
 }
@@ -2881,62 +2905,66 @@ float Unit::DealDamageToHullReturnArmor (const Vector & pnt, float damage, unsig
   float absdamage = damage>=0?damage:-damage;
   percent = absdamage/(*targ+hull);
 
-  if( percent == -1)
-	  return -1;
-  if (absdamage<((float)*targ)) {
-	ArmorDamageSound( pnt);
-    *targ -= apply_float_to_short (absdamage);
-  }else {
-	HullDamageSound( pnt);
-    absdamage -= ((float)*targ);
-	damage= damage>=0?absdamage:-absdamage;
-    *targ= 0;
-    if (_Universe->AccessCockpit()->GetParent()!=this||_Universe->AccessCockpit()->godliness<=0||hull>damage) {//hull > damage is similar to hull>absdamage|| damage<0
-      static float system_failure=XMLSupport::parse_float(vs_config->getVariable ("physics","indiscriminate_system_destruction",".25"));
-      DamageRandSys(system_failure*rand01()+(1-system_failure)*(1-(absdamage/hull)),pnt);
-	  if (damage>0) {
-		  hull -=damage;//FIXME
-	  }else {
-		  recharge+=damage;
-		  shield.recharge+=damage;
-		  if (recharge<0)
-			  recharge=0;
-		  if (shield.recharge<0)
-			  shield.recharge=0;
-	  }
-    }else {
-      _Universe->AccessCockpit()->godliness-=absdamage;
-      DamageRandSys(rand01()*.5+.2,pnt);//get system damage...but live!
-    }
-  }
-  if (*targ>biggerthan)
-	  fprintf (stderr,"errore fatale mit den armorn");
-  if (hull <0) {
-      static float hulldamtoeject = XMLSupport::parse_float(vs_config->getVariable ("physics","hull_damage_to_eject","100"));
-    if (!SubUnit&&hull>-hulldamtoeject) {
-      static float autoejectpercent = XMLSupport::parse_float(vs_config->getVariable ("physics","autoeject_percent",".5"));
+  // ONLY APLY DAMAGE ON SERVER SIDE
+  if( Network==NULL || SERVER)
+  {
+		  if( percent == -1)
+			  return -1;
+		  if (absdamage<((float)*targ)) {
+			ArmorDamageSound( pnt);
+			*targ -= apply_float_to_short (absdamage);
+		  }else {
+			HullDamageSound( pnt);
+			absdamage -= ((float)*targ);
+			damage= damage>=0?absdamage:-absdamage;
+			*targ= 0;
+			if (_Universe->AccessCockpit()->GetParent()!=this||_Universe->AccessCockpit()->godliness<=0||hull>damage) {//hull > damage is similar to hull>absdamage|| damage<0
+			  static float system_failure=XMLSupport::parse_float(vs_config->getVariable ("physics","indiscriminate_system_destruction",".25"));
+			  DamageRandSys(system_failure*rand01()+(1-system_failure)*(1-(absdamage/hull)),pnt);
+			  if (damage>0) {
+				  hull -=damage;//FIXME
+			  }else {
+				  recharge+=damage;
+				  shield.recharge+=damage;
+				  if (recharge<0)
+					  recharge=0;
+				  if (shield.recharge<0)
+					  shield.recharge=0;
+			  }
+			}else {
+			  _Universe->AccessCockpit()->godliness-=absdamage;
+			  DamageRandSys(rand01()*.5+.2,pnt);//get system damage...but live!
+			}
+		  }
+		  if (*targ>biggerthan)
+			  fprintf (stderr,"errore fatale mit den armorn");
+		  if (hull <0) {
+			  static float hulldamtoeject = XMLSupport::parse_float(vs_config->getVariable ("physics","hull_damage_to_eject","100"));
+			if (!SubUnit&&hull>-hulldamtoeject) {
+			  static float autoejectpercent = XMLSupport::parse_float(vs_config->getVariable ("physics","autoeject_percent",".5"));
 
-      static float cargoejectpercent = XMLSupport::parse_float(vs_config->getVariable ("physics","eject_cargo_percent",".25"));
-      if (rand()<(RAND_MAX*autoejectpercent)&&isUnit()==UNITPTR) {
-	EjectCargo ((unsigned int)-1);
-      }
-      for (unsigned int i=0;i<numCargo();i++) {
-	if (rand()<(RAND_MAX*cargoejectpercent)) {
-	  EjectCargo(i);
-	}
-      }
-    }
-#ifdef ISUCK
-    Destroy();
-#endif
-    PrimeOrders();
-    maxenergy=energy=0;
+			  static float cargoejectpercent = XMLSupport::parse_float(vs_config->getVariable ("physics","eject_cargo_percent",".25"));
+			  if (rand()<(RAND_MAX*autoejectpercent)&&isUnit()==UNITPTR) {
+			EjectCargo ((unsigned int)-1);
+			  }
+			  for (unsigned int i=0;i<numCargo();i++) {
+			if (rand()<(RAND_MAX*cargoejectpercent)) {
+			  EjectCargo(i);
+			}
+			  }
+			}
+		#ifdef ISUCK
+			Destroy();
+		#endif
+			PrimeOrders();
+			maxenergy=energy=0;
 
-    Split (rand()%3+1);
-#ifndef ISUCK
-    Destroy();
-    return -1;
-#endif
+			Split (rand()%3+1);
+		#ifndef ISUCK
+			Destroy();
+			return -1;
+		#endif
+  		  }
   }
   /////////////////////////////
   if (!FINITE (percent))
@@ -2948,6 +2976,8 @@ float Unit::DealDamageToShield (const Vector &pnt, float &damage) {
   int index;
   float percent=0;
   unsigned short * targ=NULL;
+  
+  // ONLY APPLY DAMAGES IN NON-NETWORKING OR ON SERVER SIDE
   switch (shield.number){
   case 2:
     index = (pnt.k>0)?0:1;
@@ -2955,12 +2985,15 @@ float Unit::DealDamageToShield (const Vector &pnt, float &damage) {
 	    percent = damage/shield.fb[index+2];//comparing with max
 	else
 		percent = 0;
-    shield.fb[index]-=damage;
-    damage =0;
-    if (shield.fb[index]<0) {
-      damage = -shield.fb[index];
-      shield.fb[index]=0;
-    }
+	if( Network==NULL || SERVER)
+	{
+   	  shield.fb[index]-=damage;
+      damage =0;
+      if (shield.fb[index]<0) {
+        damage = -shield.fb[index];
+        shield.fb[index]=0;
+      }
+	}
     break;
   case 6:
     percent = damage/shield.fbrltb.rltbmax;
@@ -2984,13 +3017,16 @@ float Unit::DealDamageToShield (const Vector &pnt, float &damage) {
 	index = 1;
       }
     }
-    if (damage>shield.fbrltb.v[index]) {
-      damage -= shield.fbrltb.v[index];
-      shield.fbrltb.v[index]=0;
-    } else {
-      shield.fbrltb.v[index]-=apply_float_to_short (damage);
-      damage = 0;
-    }
+	if( Network==NULL || SERVER)
+	{
+      if (damage>shield.fbrltb.v[index]) {
+        damage -= shield.fbrltb.v[index];
+          shield.fbrltb.v[index]=0;
+      } else {
+          shield.fbrltb.v[index]-=apply_float_to_short (damage);
+        damage = 0;
+      }
+	}
     break;
   case 4:
   default:
@@ -3011,13 +3047,16 @@ float Unit::DealDamageToShield (const Vector &pnt, float &damage) {
 	percent = damage/shield.fbrl.rightmax;
       }
     }
-    if (damage>*targ) {
-      damage-=*targ;
-      *targ=0;
-    } else {
-      *targ -= apply_float_to_short (damage);	
-      damage=0;
-    }
+	if( Network==NULL || SERVER)
+	{
+      if (damage>*targ) {
+        damage-=*targ;
+          *targ=0;
+      } else {
+          *targ -= apply_float_to_short (damage);	
+        damage=0;
+      }
+	}
     break;
   }
   if (!FINITE (percent))

@@ -19,6 +19,10 @@ ZoneMgr::ZoneMgr()
 {
 }
 
+/************************************************************************************************/
+/**** addZone                                                                               *****/
+/************************************************************************************************/
+
 StarSystem *	ZoneMgr::addZone( string starsys)
 {
 	cout<<">>> ADDING A NEW ZONE = "<<starsys<<" - # OF ZONES = "<<_Universe->star_system.size()<<endl;
@@ -38,6 +42,10 @@ StarSystem *	ZoneMgr::addZone( string starsys)
 	return sts;
 }
 
+/************************************************************************************************/
+/**** GetZone                                                                               *****/
+/************************************************************************************************/
+
 // Return the client list that are in the zone n° serial
 list<Client *>	ZoneMgr::GetZone( int serial)
 {
@@ -56,11 +64,19 @@ void	ZoneMgr::addClient( Client * clt, int zone)
 }
 */
 
+/************************************************************************************************/
+/**** addUnit                                                                               *****/
+/************************************************************************************************/
+
 void	ZoneMgr::addUnit( Unit * un, int zone)
 {
 	zone_unitlist[zone].push_back( un);
 	zone_units[zone]++;
 }
+
+/************************************************************************************************/
+/**** removeUnit                                                                            *****/
+/************************************************************************************************/
 
 void	ZoneMgr::removeUnit( Unit * un, int zone)
 {
@@ -86,6 +102,10 @@ Unit *	ZoneMgr::getUnit( ObjSerial unserial, unsigned short zone)
 
 	return un;
 }
+
+/************************************************************************************************/
+/**** addClient                                                                             *****/
+/************************************************************************************************/
 
 StarSystem *	ZoneMgr::addClient( Client * clt, string starsys, unsigned short & num_zone)
 {
@@ -136,6 +156,10 @@ StarSystem *	ZoneMgr::addClient( Client * clt, string starsys, unsigned short & 
 	return ret;
 }
 
+/************************************************************************************************/
+/**** removeClient                                                                          *****/
+/************************************************************************************************/
+
 // Remove a client from its zone
 void	ZoneMgr::removeClient( Client * clt)
 {
@@ -154,6 +178,10 @@ void	ZoneMgr::removeClient( Client * clt)
 	// SHIP MAY NOT HAVE BEEN KILLED BUT JUST CHANGED TO ANOTHER STAR SYSTEM -> NO KILL
 	//un->Kill();
 }
+
+/************************************************************************************************/
+/**** broadcast : broadcast a packet in a zone                                              *****/
+/************************************************************************************************/
 
 // Broadcast a packet to a client's zone clients
 void	ZoneMgr::broadcast( Client * clt, Packet * pckt )
@@ -183,6 +211,10 @@ void	ZoneMgr::broadcast( Client * clt, Packet * pckt )
 	}
 }
 
+/************************************************************************************************/
+/**** broadcast : broadcast a packet in a zone                                              *****/
+/************************************************************************************************/
+
 // Broadcast a packet to a zone clients with its serial as argument
 void	ZoneMgr::broadcast( int zone, ObjSerial serial, Packet * pckt )
 {
@@ -199,6 +231,10 @@ void	ZoneMgr::broadcast( int zone, ObjSerial serial, Packet * pckt )
 		//}
 	}
 }
+
+/************************************************************************************************/
+/**** broadcastSnapshots                                                                    *****/
+/************************************************************************************************/
 
 // Broadcast all positions
 void	ZoneMgr::broadcastSnapshots( )
@@ -218,25 +254,6 @@ void	ZoneMgr::broadcastSnapshots( )
 		// Check if system is non-empty
 		if( zone_clients[i]>0)
 		{
-			//buffer = new char[zone_clients[i]*sizeof( ClientState)+h_length];
-
-			/************* First method : build a snapshot buffer ***************/
-			// It just look if positions or orientations have changed
-			/*
-			for( j=0, k=zone_list[i].begin(); k!=zone_list[i].end(); k++, j++)
-			{
-				// Check if position has changed
-				memcpy( buffer+h_length+(j*sizeof( ClientState)), &(*k)->current_state, sizeof( ClientState));
-			}
-			// Then send all clients the snapshot
-			Packet pckt;
-			pckt.create( CMD_SNAPSHOT, zone_clients[i], buffer, zone_clients[j]*sizeof(ClientState), 0);
-			for( j=0, k=zone_list[i].begin(); k!=zone_list[i].end(); k++, j++)
-			{
-				net->sendbuf( (*k)->sock, (char *) &pckt, pckt.getLength(), &(*k)->cltadr);
-			}
-			*/
-			/************* Second method : send independently to each client a buffer of its zone  ***************/
 			// It allows to check (for a given client) if other clients are far away (so we can only
 			// send position, not orientation and stuff) and if other clients are visible to the given
 			// client.
@@ -334,10 +351,10 @@ void	ZoneMgr::broadcastSnapshots( )
 				}
 			/************************* END UNITS BROADCAST ***************************/
 				// Send snapshot to client k
-				if( j+p > 0)
+				if(netbuf.getDataLength()>0)
 				{
 					//cout<<"\tsend update for "<<(p+j)<<" clients"<<endl;
-					pckt.send( CMD_SNAPSHOT, nbclients, netbuf.getData(), netbuf.getDataLength(), SENDANDFORGET, &((*k)->cltadr), (*k)->sock, __FILE__,	
+					pckt.send( CMD_SNAPSHOT, nbclients+nbunits, netbuf.getData(), netbuf.getDataLength(), SENDANDFORGET, &((*k)->cltadr), (*k)->sock, __FILE__,	
 #ifndef _WIN32
 					__LINE__
 #else
@@ -349,6 +366,157 @@ void	ZoneMgr::broadcastSnapshots( )
 		}
 	}
 }
+
+/************************************************************************************************/
+/**** broadcastDamage                                                                       *****/
+/************************************************************************************************/
+
+// Broadcast all damages
+void	ZoneMgr::broadcastDamage( )
+{
+	int i=0, j=0, p=0, it=0;
+	LI k, l;
+	LUI m;
+	NetBuffer netbuf;
+
+	//cout<<"Sending snapshot for ";
+	//int h_length = Packet::getHeaderLength();
+	// Loop for all systems/zones
+	for( i=0; i<zone_list.size(); i++)
+	{
+		// Check if system is non-empty
+		if( zone_clients[i]>0)
+		{
+			/************* Second method : send independently to each client a buffer of its zone  ***************/
+			// It allows to check (for a given client) if other clients are far away (so we can only
+			// send position, not orientation and stuff) and if other clients are visible to the given
+			// client.
+			int	offset = 0, nbclients = 0, nbunits=0, damsize=0;
+			ObjSerial sertmp;
+			Packet pckt;
+			Unit * un;
+
+			// Loop for all the zone's clients
+			for( k=zone_list[i].begin(); k!=zone_list[i].end(); k++)
+			{
+			/************************* START CLIENTS BROADCAST ***************************/
+				nbclients = zone_clients[i];
+				netbuf.Reset();
+				for( j=0, p=0, l=zone_list[i].begin(); l!=zone_list[i].end(); l++)
+				{
+					// Check if there is damages on that client
+					un = (*l)->game_unit.GetUnit();
+					unsigned short damages = un->damages;
+					if( damages)
+					{
+						// Add the client serial
+						netbuf.addSerial( (*l)->serial);
+						// Add the damage flag
+						damsize = sizeof( damages);
+						if( damsize==sizeof( char))
+							netbuf.addChar( damages);
+						else if( damsize == sizeof( unsigned short))
+							netbuf.addShort( damages);
+						else if( damsize == sizeof( unsigned int))
+							netbuf.addInt32( damages);
+						// Put the altered stucts after the damage enum flag
+						if( damages & Unit::SHIELD_DAMAGED)
+						{
+							// Add needed vectors here and in ARMOR_DAMAGE !!!!!!!
+							netbuf.addShield( un->shield);
+						}
+						if( damages & Unit::COMPUTER_DAMAGED)
+						{
+							netbuf.addChar( un->computer.itts);
+							netbuf.addChar( un->computer.radar.color);
+							netbuf.addFloat( un->limits.retro);
+							netbuf.addFloat( un->computer.radar.maxcone);
+							netbuf.addFloat( un->computer.radar.lockcone);
+							netbuf.addFloat( un->computer.radar.trackingcone);
+							netbuf.addFloat( un->computer.radar.maxrange);
+							for( it = 0; it<1+UnitImages::NUMGAUGES+MAXVDUS; it++)
+								netbuf.addFloat( un->image->cockpit_damage[it]);
+						}
+						if( damages & Unit::MOUNT_DAMAGED)
+						{
+							netbuf.addShort( un->image->ecm);
+							for( it=0; it<un->mounts.size(); it++)
+							{
+								if( sizeof( Mount::STATUS) == sizeof( char))
+									netbuf.addChar( un->mounts[it].status);
+								else if( sizeof( Mount::STATUS) == sizeof( unsigned short))
+									netbuf.addShort( un->mounts[it].status);
+								else if( sizeof( Mount::STATUS) == sizeof( unsigned int))
+									netbuf.addInt32( un->mounts[it].status);
+
+								netbuf.addShort( un->mounts[it].ammo);
+								netbuf.addFloat( un->mounts[it].time_to_lock);
+								netbuf.addShort( un->mounts[it].size);
+							}
+						}
+						if( damages & Unit::CARGOFUEL_DAMAGED)
+						{
+							netbuf.addFloat( un->FuelData());
+							netbuf.addShort( un->AfterburnData());
+							netbuf.addFloat( un->image->cargo_volume);
+							for( it=0; it<un->image->cargo.size(); it++)
+								netbuf.addInt32( un->image->cargo[it].quantity);
+						}
+						if( damages & Unit::JUMP_DAMAGED)
+						{
+							netbuf.addChar( un->shield.leak);
+							netbuf.addFloat( un->shield.recharge);
+							netbuf.addFloat( un->EnergyRechargeData());
+							netbuf.addShort( un->MaxEnergyData());
+							netbuf.addShort( un->jump.energy);
+							netbuf.addChar( un->jump.damage);
+							netbuf.addChar( un->image->repair_droid);
+						}
+						if( damages & Unit::CLOAK_DAMAGED)
+						{
+							netbuf.addShort( un->cloaking);
+							netbuf.addFloat( un->image->cloakenergy);
+							netbuf.addShort( un->cloakmin);
+							netbuf.addShield( un->shield);
+						}
+						if( damages & Unit::LIMITS_DAMAGED)
+						{
+							netbuf.addFloat( un->computer.max_pitch);
+							netbuf.addFloat( un->computer.max_yaw);
+							netbuf.addFloat( un->computer.max_roll);
+							netbuf.addFloat( un->limits.roll);
+							netbuf.addFloat( un->limits.yaw);
+							netbuf.addFloat( un->limits.pitch);
+							netbuf.addFloat( un->limits.lateral);
+						}
+					}
+				}
+			/************************* END CLIENTS BROADCAST ***************************/
+			/************************* START UNITS BROADCAST ***************************/
+				nbunits = zone_units[i];
+				//netbuf.Reset();
+				for( j=0, p=0, m=zone_unitlist[i].begin(); m!=zone_unitlist[i].end(); m++)
+				{
+				}
+				// Send snapshot to client k
+				if( netbuf.getDataLength() > 0)
+				{
+					pckt.send( CMD_SNAPDAMAGE, nbclients+nbunits, netbuf.getData(), netbuf.getDataLength(), SENDANDFORGET, &((*k)->cltadr), (*k)->sock, __FILE__,	
+#ifndef _WIN32
+					__LINE__
+#else
+					302
+#endif
+					);
+				}
+			}
+		}
+	}
+}
+
+/************************************************************************************************/
+/**** sendZoneClients                                                                       *****/
+/************************************************************************************************/
 
 // Send one by one a CMD_ADDLCIENT to the client for every ship in the star system we enter
 void	ZoneMgr::sendZoneClients( Client * clt)
@@ -386,6 +554,10 @@ void	ZoneMgr::sendZoneClients( Client * clt)
 	cout<<"\t>>> SENT INFO ABOUT "<<nbclients<<" OTHER SHIPS TO CLIENT SERIAL "<<clt->serial<<endl;
 }
 
+/************************************************************************************************/
+/**** getZoneClients                                                                        *****/
+/************************************************************************************************/
+
 // Fills buffer with descriptions of clients in the same zone as our client
 // Called after the client has been added in the zone so that it can get his
 // own information/save from the server
@@ -409,6 +581,10 @@ int		ZoneMgr::getZoneClients( Client * clt, char * bufzone)
 
 	return state_size*nbt;
 }
+
+/************************************************************************************************/
+/****  isVisible                                                                            *****/
+/************************************************************************************************/
 
 double	ZoneMgr::isVisible( Quaternion orient, QVector src_pos, QVector tar_pos)
 {

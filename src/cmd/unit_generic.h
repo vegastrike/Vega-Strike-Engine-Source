@@ -122,7 +122,7 @@ class Mount {
     ///The data behind this weapon. May be accordingly damaged as time goes on
     enum MOUNTSTATUS{REQUESTED,ACCEPTED,PROCESSED,UNFIRED,FIRED} processed;
     ///Status of the selection of this weapon. Does it fire when we hit space
-    enum {ACTIVE, INACTIVE, DESTROYED, UNCHOSEN} status;
+    enum STATUS{ACTIVE, INACTIVE, DESTROYED, UNCHOSEN} status;
     ///The sound this mount makes when fired
     const weapon_info *type;
     int sound;
@@ -265,6 +265,9 @@ protected:
   ObjSerial	serial;
   unsigned short	zone;
 public:
+  enum DAMAGES { NO_DAMAGE=0x00, SHIELD_DAMAGED=0x01, COMPUTER_DAMAGED=0x02, MOUNT_DAMAGED=0x04, CARGOFUEL_DAMAGED=0x08, JUMP_DAMAGED=0x10, CLOAK_DAMAGED=0x20, LIMITS_DAMAGED=0x40, ARMOR_DAMAGED=0x80};
+  unsigned short damages;
+
   void SetNetworkMode( bool mode=true) {this->networked = mode;}
   ObjSerial GetSerial() { return this->serial;}
   void		SetSerial( ObjSerial ser) { this->serial = ser;}
@@ -341,8 +344,8 @@ protected:
   friend class VDU;
   friend class UpgradingInfo;//needed to actually upgrade unit through interface
  public:
-// Uses a static member of Cockpit class -- TO CHECK
-  void DamageRandSys (float dam,const Vector &vec);
+  // Have to pass the randnum and degrees in networking and client side since they must not be random in that case
+  void DamageRandSys (float dam,const Vector &vec, float randum=1, float degrees=1);
   void SetNebula (Nebula *neb) {
     nebula = neb;
     if (!SubUnits.empty()) {
@@ -590,11 +593,11 @@ public:
 public:
   ///-1 is not available... ranges between 0 32767 for "how invisible" unit currently is (32768... -32768) being visible)
   short cloaking;
+  ///the minimum cloaking value...
+  short cloakmin;
   ///How big is this unit
   float radial_size;
 protected:
-  ///the minimum cloaking value...
-  short cloakmin;
   ///Is dead already?
   bool killed;
   ///Should not be drawn
@@ -621,9 +624,11 @@ public:
   ///Is dead yet?
   inline bool Killed() const {return killed;}
   ///returns the current ammt of armor left
+  unsigned short AfterburnData() const{ return afterburnenergy;}
   float FuelData() const;
   ///Returns the current ammt of energy left
   float EnergyRechargeData() const{return recharge;}
+  unsigned short MaxEnergyData() const{return maxenergy;}
   float ShieldRechargeData() const{return shield.recharge;}
   float EnergyData() const;
   float WarpEnergyData() const;

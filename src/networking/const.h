@@ -45,6 +45,7 @@ typedef unsigned short ObjSerial;
 typedef unsigned int InstSerial;
 
 extern double NETWORK_ATOM;
+extern double DAMAGE_ATOM;
 
 #ifndef COUT
 #if defined(_WIN32) && defined(_MSC_VER) && defined(USE_BOOST_129) //wierd error in MSVC

@@ -48,9 +48,9 @@
 
 double	clienttimeout;
 double	logintimeout;
-extern double	NETWORK_ATOM;
 int		acct_con;
 string	tmpdir;
+double  DAMAGE_ATOM;
 
 /**************************************************************/
 /**** Constructor / Destructor                             ****/
@@ -359,6 +359,7 @@ void	NetServer::start(int argc, char **argv)
 	double  reconnect_time = 0;
 	double	curtime=0;
 	double	snaptime=0;
+	double	damagetime=0;
 	acct_con = 1;
 	Packet p2;
 
@@ -372,34 +373,23 @@ void	NetServer::start(int argc, char **argv)
 	run_only_player_starsystem=false;
 	//vs_config = new VegaConfig( SERVERCONFIGFILE);
 	cout<<" config loaded"<<endl;
-	strperiod = vs_config->getVariable( "server", "saveperiod", "");
-	if( strperiod=="")
-		period = 7200;
-	else
-		period = atoi( strperiod.c_str());
-	string strperiodrecon = vs_config->getVariable( "server", "reconnectperiod", "");
-	if( strperiodrecon=="")
-		periodrecon = 60;
-	else
-		periodrecon = atoi( strperiodrecon.c_str());
+	strperiod = vs_config->getVariable( "server", "saveperiod", "7200");
+	period = atoi( strperiod.c_str());
+	string strperiodrecon = vs_config->getVariable( "server", "reconnectperiod", "60");
+	periodrecon = atoi( strperiodrecon.c_str());
 	tmpdir = datadir + vs_config->getVariable( "server", "tmpdir", "");
 	if( strperiod=="")
 		tmpdir = datadir + "/tmp/";
-	strtimeout = vs_config->getVariable( "server", "clienttimeout", "");
-	if( strtimeout=="")
-		clienttimeout = 20;
-	else
-		clienttimeout = atoi( strtimeout.c_str());
-	strlogintimeout = vs_config->getVariable( "server", "logintimeout", "");
-	if( strlogintimeout=="")
-		logintimeout = 60;
-	else
-		logintimeout = atoi( strlogintimeout.c_str());
-	strnetatom = vs_config->getVariable( "network", "network_atom", "");
-	if( strnetatom=="")
-		NETWORK_ATOM = 0.2;
-	else
-		NETWORK_ATOM = (double) atoi( strnetatom.c_str());
+	strtimeout = vs_config->getVariable( "server", "clienttimeout", "20");
+	clienttimeout = atoi( strtimeout.c_str());
+	strlogintimeout = vs_config->getVariable( "server", "logintimeout", "60");
+	logintimeout = atoi( strlogintimeout.c_str());
+
+	strnetatom = vs_config->getVariable( "network", "network_atom", "0.2");
+	NETWORK_ATOM = (double) atoi( strnetatom.c_str());
+	strnetatom = vs_config->getVariable( "network", "damage_atom", "1");
+	DAMAGE_ATOM = (double) atoi( strnetatom.c_str());
+
 	InitTime();
 	UpdateTime();
 	savetime = getNewTime()+period;
@@ -564,7 +554,16 @@ void	NetServer::start(int argc, char **argv)
 			//cout<<"SENDING SNAPSHOT ----------"<<end;
 			zonemgr->broadcastSnapshots( ); // &NetworkToClient );
 			snapchanged = 0;
+			snaptime = 0;
 		}
+#ifndef NET_SHIELD_SYSTEM_1
+		damagetime += GetElapsedTime();
+		if( damagetime>DAMAGE_ATOM)
+		{
+			zonemgr->broadcastDamage();
+			damagetime = 0;
+		}
+#endif
 
 		// Check for automatic server status save time (in seconds)
 		//curtime = getNewTime();

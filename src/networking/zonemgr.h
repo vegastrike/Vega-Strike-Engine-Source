@@ -62,6 +62,7 @@ class ZoneMgr
         void    broadcast( Client * clt, Packet * pckt );
         void    broadcast( int zone, ObjSerial serial, Packet * pckt );
         void    broadcastSnapshots();
+		void	broadcastDamage();
 		int		getZoneClients( Client * clt, char * bufzone);
 		double	isVisible( Quaternion orient, QVector src_pos, QVector tar_pos);
 		void	sendZoneClients( Client * clt);

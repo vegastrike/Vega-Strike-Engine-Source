@@ -69,6 +69,7 @@ enum Cmd
 	CMD_SCAN         = 0x97,		// Receive a scan request (server side) or receive target info (client side)
 	CMD_DAMAGE       = 0x98,		// Send damages to apply
 	CMD_DAMAGE1      = 0x99,		// Send damages to apply
+	CMD_SNAPDAMAGE   = 0x82,		// A snapshot of damages
 
 	CMD_KILL         = 0x80,		// Send a kill to clients
 	CMD_JUMP         = 0x81,		// Send a jump request
