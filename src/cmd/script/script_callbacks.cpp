@@ -667,7 +667,7 @@ varInst *Mission::call_io_printf(missionNode *node,int mode){
   varInst *viret=newVarInst(VI_TEMP);
   viret->type=VAR_VOID;
   deleteVarInst(str_vi);
-
+  fflush(stdout);
   return viret;
 }
 
@@ -719,7 +719,7 @@ varInst *Mission::callGetCurrentAIOrder(missionNode *node,int mode){
 varInst *Mission::callRnd(missionNode *node,int mode){
   varInst *vi=newVarInst(VI_TEMP);
   vi->type=VAR_FLOAT;
-  vi->float_val=((float)rand())/(float)RAND_MAX;
+  vi->float_val=((float)rand())/(((float)RAND_MAX)+1);
 
   char buffer[100];
   sprintf(buffer,"rnd returning %f", (vi->float_val));

@@ -350,8 +350,11 @@ StarSystem * Universe::GenerateStarSystem (const char * file, const char * jumpb
       fprintf (stderr,"\n\tNext To %s",adj[j].c_str()); 
     }
   }
-  mission->DirectorStartStarSystem(ss);
-
+  static bool first=true;
+  if (!first) {
+    mission->DirectorStartStarSystem(ss);
+  }
+  first=false;
   script_system=old_script_system;
   popActiveStarSystem();
   if (active_star_system.empty()) {
