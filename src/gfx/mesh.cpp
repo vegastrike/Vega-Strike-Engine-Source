@@ -166,7 +166,6 @@ Mesh::Mesh(const char * filename,const Vector & scale, int faction, Flightgroup 
     LoadXML(f,scale,faction,fg,orig);
     oldmesh = this->orig;
   } else {
-    this->xml= NULL;
 	// This must be changed someday
     LoadBinary(shared?(VSFileSystem::sharedmeshes+"/"+(filename)).c_str():filename,faction);
     oldmesh = new Mesh[1];

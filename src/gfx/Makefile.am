@@ -27,6 +27,9 @@ libgfxgeneric =  		\
 	mesh_fx.cpp			\
 	mesh_poly.cpp		\
 	mesh_xml.cpp		\
+	mesh_xml.h		\
+	mesh_bxm.cpp		\
+	mesh_bxm.h		\
 	sphere_generic.cpp	\
 	bsp.cpp				\
 	bsp.h				\

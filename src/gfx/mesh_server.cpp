@@ -25,13 +25,13 @@ void Mesh::RestoreCullFace (int whichdrawqueue) {
 }
 void Mesh::SelectCullFace (int whichdrawqueue) {
 }
-void Mesh::CreateLogos(int faction, Flightgroup * fg) {
+void Mesh::CreateLogos(struct MeshXML *, int faction, Flightgroup * fg) {
 }
-Texture * Mesh::TempGetTexture(std::string filename, std::string factionname, GFXBOOL detail )const {
+Texture * Mesh::TempGetTexture(struct MeshXML *, std::string filename, std::string factionname, GFXBOOL detail )const {
 	return NULL;
 }
    
-Texture * Mesh::TempGetTexture (int index, std::string factionname)const {
+Texture * Mesh::TempGetTexture (struct MeshXML*, int index, std::string factionname)const {
 	return NULL;    
 }
 const GFXMaterial &Mesh::GetMaterial () {

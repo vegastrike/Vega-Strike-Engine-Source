@@ -8,7 +8,7 @@
 #include "cmd/nebula_generic.h"
 #include "gfx/camera.h"
 #include "gfx/animation.h"
-
+#include "mesh_xml.h"
 #if defined(CG_SUPPORT)
 #include "gldrv/gl_light.h"
 #include "cg_global.h"
@@ -59,7 +59,7 @@ typedef std::vector<OrigMeshContainer> OrigMeshVector;
 #define DAMAGE_PASS 2
 const int UNDRAWN_MESHES_SIZE= NUM_MESH_SEQUENCE*NUM_PASSES;
 OrigMeshVector undrawn_meshes[NUM_MESH_SEQUENCE][NUM_PASSES]; // lower priority means draw first
-Texture * Mesh::TempGetTexture(std::string filename, std::string factionname, GFXBOOL detail) const{
+Texture * Mesh::TempGetTexture(MeshXML * xml, std::string filename, std::string factionname, GFXBOOL detail) const{
 	static FILTER fil = XMLSupport::parse_bool(vs_config->getVariable("graphics","detail_texture_trilinear","true"))?TRILINEAR:MIPMAP;
 	Texture * ret=NULL;
 	string facplus = factionname+"_"+filename;
@@ -112,10 +112,10 @@ void Mesh::setTextureCumulativeTime(double d) {
 			Decal[i]->setTime(d);
 	}
 }
-Texture * Mesh::TempGetTexture (int index, std::string factionname)const {
+Texture * Mesh::TempGetTexture (MeshXML * xml, int index, std::string factionname)const {
     Texture *tex=NULL;
     assert (index<(int)xml->decals.size());
-    XML::ZeTexture * zt = &(xml->decals[index]);
+    MeshXML::ZeTexture * zt = &(xml->decals[index]);
     if (zt->animated_name.length()) {
         string tempani = factionname+"_"+zt->animated_name;
         tex = new AnimatedTexture (tempani.c_str(),0,BILINEAR);
@@ -812,7 +812,7 @@ void Mesh::ProcessDrawQueue(int whichpass,int whichdrawqueue) {
 	  *draw_queue=tmp_draw_queue;
   }
 }
-void Mesh::CreateLogos(int faction, Flightgroup * fg) {
+void Mesh::CreateLogos(MeshXML * xml , int faction, Flightgroup * fg) {
   numforcelogo=numsquadlogo =0;
   unsigned int index;
   for (index=0;index<xml->logos.size();index++) {

@@ -437,19 +437,47 @@ std::vector <Mesh *> MakeMesh(unsigned int mysize) {
 
 void addShieldMesh( Unit::XML * xml, const char *filename, const float scale,int faction,class Flightgroup * fg)
 {
-	xml->shieldmesh = new Mesh(filename, Vector(scale,scale,scale), faction,fg);
+  vector<Mesh *> m (Mesh::LoadMeshes(filename, Vector(scale,scale,scale),faction,fg));
+  if (m.size()>1) {
+    fprintf (stderr,"Too many textures for shield mesh. Maximum 1 texture for shield %s",filename);
+  }
+  if (!m.empty()) {
+    xml->shieldmesh = m[0];//new Mesh(filename, Vector(scale,scale,scale), faction,fg);
+    for (unsigned int i=1;i<m.size();++i)
+      delete m[i];
+  }
 }
 void addRapidMesh( Unit::XML * xml, const char *filename, const float scale,int faction,class Flightgroup * fg)
 {
-	xml->rapidmesh = new Mesh(filename, Vector(scale,scale,scale), faction,fg);
+  vector<Mesh *> m (Mesh::LoadMeshes(filename, Vector(scale,scale,scale),faction,fg));
+  if (m.size()>1) {
+    fprintf (stderr,"Too many textures for shield mesh. Maximum 1 texture for shield %s",filename);
+  }
+  if (!m.empty()) {
+    xml->rapidmesh = m[0];//new Mesh(filename, Vector(scale,scale,scale), faction,fg);
+    for (unsigned int i=1;i<m.size();++i)
+      delete m[i];
+  }
 }
 void addBSPMesh( Unit::XML * xml, const char *filename, const float scale,int faction,class Flightgroup * fg)
 {
-	xml->bspmesh = new Mesh(filename, Vector(scale,scale,scale), faction,fg);
+
+  vector<Mesh *> m (Mesh::LoadMeshes(filename, Vector(scale,scale,scale),faction,fg));
+  if (m.size()>1) {
+    fprintf (stderr,"Too many textures for shield mesh. Maximum 1 texture for shield %s",filename);
+  }
+  if (!m.empty()) {
+    xml->bspmesh = m[0];//new Mesh(filename, Vector(scale,scale,scale), faction,fg);
+    for (unsigned int i=1;i<m.size();++i)
+      delete m[i];
+  }
+	
 }
 void pushMesh( Unit::XML * xml, const char *filename, const float scale,int faction,class Flightgroup * fg, int startframe, double texturestarttime)
 {
-	xml->meshes.push_back(new Mesh(filename, Vector(scale,scale,scale), faction,fg));
+  vector<Mesh*> m = Mesh::LoadMeshes(filename, Vector(scale,scale,scale), faction,fg);
+  for (unsigned int i=0;i<m.size();++i) {
+        xml->meshes.push_back(m[i]);
 	if (startframe>=0) {
 		xml->meshes.back()->setCurrentFrame(startframe);
 	}else if (startframe==-2){
@@ -478,6 +506,7 @@ void pushMesh( Unit::XML * xml, const char *filename, const float scale,int fact
 		xml->meshes.back()->setTextureCumulativeTime(ran);
 
 	}
+  }
 }
 
 Mount * createMount(const std::string& name, short int ammo, short int volume, float xyscale, float zscale)
