@@ -1,0 +1,24 @@
+<Unit>
+	<Meshfile file="hornet.xmesh" />
+	<Light file="supernova.bmp" x="-1.200000" y="0.300000" z="-4.300000" size="1.750000"/>
+	<Light file="supernova.bmp" x="1.200000" y="0.300000" z="-4.300000" size="1.750000"/>
+	<Mount weapon="Laser" size="Light" x="-6.300000" y="0.500000" z="9.200000"/>
+	<Mount weapon="Laser" size="Light" x="6.300000" y="0.500000" z="9.200000"/>
+	<Mount weapon="Dumbfire" size="Light-Missile" x="-3.100000" y="0.000000" z="-1.300000" ammo="1"/>
+	<Mount weapon="Dumbfire" size="Light-Missile" x="3.100000" y="0.000000" z="-1.300000" ammo="1"/>
+	<Mount weapon="HeatSeeker" size="Medium-Missile" x="-0.000000" y="-1.300000" z="-0.600000" ammo="1"/>
+		<Thrust>
+		<Engine Afterburner="1200.000000" Forward="336.000000" Retro="294.000000" Left="168.000000" Right="168.000000" Top="168.000000" Bottom="168.000000"/>
+		<Maneuver yaw="3643.200050" pitch="4098.600151" roll="3643.200050"/>
+	</Thrust>
+	<Defense HudImage="hornet-top.spr">
+		<Armor front="300000" right="300000" left="3000000" back="3000000"/>
+		<Shields front="3000" back="3000" recharge="40.333333"/>
+		<Hull strength="500000"/>
+	</Defense>
+	<Stats mass="6" momentofinertia="6" fuel="20000"></Stats>
+	<Computer yaw="110.400002" pitch="124.200005" roll="110.400002" afterburner="120.000000" maxspeed="42.000000"/>
+	<Energy>
+		<Reactor recharge="10" limit="100"/>
+	</Energy>
+</Unit>
