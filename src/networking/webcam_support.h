@@ -2,7 +2,7 @@
 #define __WEBCAM_SUPPORT_H
 
 #include <string>
-#if defined( _WIN32) && !defined( __CYGWIN__)
+#if defined( _WIN32) && !defined( __CYGWIN__) && defined( NETCOMM_WEBCAM)
 #include <dshow.h>
 #include <qedit.h>
 class WebcamSupport;
@@ -221,7 +221,7 @@ class	WebcamSupport
 		int		oldchannel;
 		char	channeltext[128];
 #endif
-#if defined( _WIN32) && !defined( __CYGWIN__)
+#if defined( _WIN32) && !defined( __CYGWIN__) && defined( NETCOMM_WEBCAM)
 		SampleGrabberCallback g_SampleCB;
 		IGraphBuilder *pGraph;
 		ICaptureGraphBuilder2 *pCaptureGraph;

@@ -1,10 +1,9 @@
 
 *** GENERAL ************************************************************
 
-- Add a test in the process of downloading webcam from other client to ensure we are in WEBCAM mode on left VDU
 - Replace the string from Systems map with a string *
 - Wait for the client to ask to be added after a jump so he can have the time to load its data
-- Add a ranking system for each faction in factions.xml
+LOPRI - Add a ranking system for each faction in factions.xml
 LOPRI - Add a cargo to the netcomm upgrade units and then in UpAndDowngrade stuff look for that
         Have a device (maybe in upgrade list) for networking communications and prevent usage of device if not present on ship
 
@@ -62,6 +61,7 @@ MAYBE NOT - Make webcam capture size part of config file (and later part of serv
 
 === GENERAL STUFF =======================================================
 
+DONE - Add a test in the process of downloading webcam from other client to ensure we are in WEBCAM mode on left VDU
 DONE through VSFileSystem - Vsnet_dloadmgr -> save starsystems in homedir !!!
 DONE - Implement NetClient::downloadZoneInfo() but need a buffer to buffer download
 TO TEST - Possibility of specifying a mod

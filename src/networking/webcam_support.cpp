@@ -1,4 +1,4 @@
-#if !defined(NETCOMM_NOWEBCAM)
+#if defined(NETCOMM_WEBCAM)
 
 #include <iostream>
 #include "webcam_support.h"
@@ -16,7 +16,7 @@ extern bool cleanexit;
 
 typedef void* (*VoidVoidFuncType)( void* );
 
-#ifdef DSHOW
+#if defined(_WIN32) && !defined( __CYGWIN__)
 /**************************************************************************************************/
 /**** DirectShow Callback : SampleGrabberCallback                                              ****/
 /**************************************************************************************************/
@@ -297,7 +297,7 @@ WebcamSupport::WebcamSupport()
 	this->gQuicktimeInitialized = true;
 	this->video = NULL;
 #endif
-#ifdef DSHOW
+#if defined( _WIN32) && !defined(__CYGWIN__)
 	pCaptureGraph = NULL;
 	pDevEnum = NULL;
 	pEnum = NULL;
@@ -342,28 +342,6 @@ int		WebcamSupport::Init()
 	fg_set_fps_interval(&fg,this->fps);
 #endif
 #if defined(_WIN32) && !defined(__CYGWIN__)
-#ifndef DSHOW
-	//capCaptureGetSetup(capvideo, &capparam, sizeof(CAPTUREPARMS));
-
-	// Should put the params in gCapParams here
-
-	//GetDesktopWindow()->GetSafeHwnd()
-	HWND hWnd=capCreateCaptureWindow( "WebCam_Hidden_Window",
-        							WS_CHILD|WS_CLIPSIBLINGS, 0, 0, this->width, this->height, 
-									GetDesktopWindow(), 0xffff);
-	if(!hWnd)
-		DoError( -1, " creating capture window");
-
-	if( !capDriverConnect(hWnd, DEFAULT_CAPTURE_DRIVER))
-		DoError( -1, " connecting to capture device");
-    //capDriverGetCaps(hwndCap, &gCapDriverCaps, sizeof(CAPDRIVERCAPS));
-    //capGetStatus(hwndCap, &gCapStatus , sizeof(gCapStatus));
-
-	capCaptureGetSetup(capvideo,&capparam,sizeof(capparam));
-	int period = (int) (1000000 / fps);
-	capparam.dwRequestMicroSecPerFrame = period;
-	capCaptureSetSetup(capvideo,&capparam,sizeof(capparam)) ;
-#else
 	HRESULT hr = CoInitialize( NULL );
 	if( FAILED( hr ) )
 		DoError( hr, "Failed to initialise COM");
@@ -470,7 +448,6 @@ int		WebcamSupport::Init()
 	if( FAILED( hr ) )
 		DoError( hr, "GetConnectedMediaType failed");
 	*/
-#endif
 	return 0;
 #endif
 #ifdef __APPLE__
@@ -607,16 +584,9 @@ void	WebcamSupport::StartCapture()
 		DoError( -1, "starting grabbing image failed");
 #endif
 #if defined(_WIN32) && !defined(__CYGWIN__)
-#ifndef DSHOW
-	capCaptureSequenceNoFile(capvideo) ;
-	//int (*fcallback) ();
-	//fcallback = CopyImage();
-	//capSetCallbackOnVideoStream(capvideo, CopyImage());
-#else
 	HRESULT hr = pControl->Run();
 	if( FAILED( hr))
 		DoError( hr, "pControl->Run() failed");
-#endif
 #endif
 #ifdef __APPLE__
 	ComponentResult		component_error = noErr;
@@ -647,11 +617,7 @@ if( grabbing)
 		exit(-1);
 #endif
 #if defined(_WIN32) && !defined(__CYGWIN__)
-#ifndef DSHOW
-    capDriverDisconnect (capvideo);
-#else
 	HRESULT hr = pControl->Stop();
-#endif
 #endif
 #ifdef __APPLE__
 	ComponentResult		component_error = noErr;
@@ -675,56 +641,6 @@ if( grabbing)
 	return string( strptr);
 #endif
 #if defined(_WIN32) && !defined(__CYGWIN__)
-#ifndef DSHOW
-	// Open and empty the clipboard
-	if ( !OpenClipboard(NULL) )
-		DoError( 0, "!!! ERROR opening windows clipboard !!!");
-	if ( !EmptyClipboard() )
-		DoError( 0, "!!! ERROR emptying the clipboard !!!");
-
-	// Test to see supported clipboard formats
-	UINT format = 0;
-	bool t = false;
-	while( !t && format != 0)
-	{
-		t = true;
-		format = EnumClipboardFormats( format);
-	}
-
-	// Copy the webcam frame in the clipboard
-	capEditCopy( hwndCap);
-
-	// Get the bitmap from clipboard
-	//HGLOBAL img_buffer = GetClipboardData( CF_BITMAP);
-	//HGLOBAL pal_buffer = GetClipboardData( CF_PALETTE);
-    
-	HANDLE  hDib = GetClipboardData( CF_DIB);
-	/*
-	HANDLE  hDib = DDBToDIB((HBITMAP)img_buffer,
-                             BI_RGB,
-                             NULL);  //Use default palette
-	*/
-    //Turn DIB into JPEG file
-    if (hDib != NULL)
-    {
-		std::string  csMsg = "";
-        if (!JpegFromDib(hDib, 70/*Quality*/, "c:\temp\vstest.jpg", &csMsg))
-        {
-            cerr<<csMsg.c_str()<<endl;
-        }
-
-        else
-            cerr<<"jpeg file created"<<endl;
-
-        ::GlobalFree(hDib);
-    }
-
-    else
-        cerr<<"Failed to load IDB_TEST"<<endl;
-
-	// Close the clipboard
-	CloseClipboard();
-#else
 	// DirectShow uses a callback interface so there is nothing to do here
 	// We just return the allocated buffer for jpeg file
 	if( !jpeg_buffer)
@@ -734,7 +650,6 @@ if( grabbing)
 	}
 	cerr<<"Frame #"<<nbframes<<" --== JPEG BUFFER OK ==--"<<endl;
 	return string( jpeg_buffer);
-#endif
 #endif
 #ifdef __APPLE__
 	ComponentResult		component_error = noErr;
@@ -787,8 +702,6 @@ void	WebcamSupport::Shutdown()
 		exit(-1);
 #endif
 #if defined(_WIN32) && !defined(__CYGWIN__)
-#ifndef DSHOW
-#else
 	pSampleGrabber->Release();
 	pDevEnum->Release();
 	pEnum->Release();
@@ -798,7 +711,6 @@ void	WebcamSupport::Shutdown()
 	pGraph->Release();
 	//FreeMediaType(g_StillMediaType);
 	CoUninitialize();
-#endif
 #endif
 #ifdef __APPLE__
 	SGDisposeChannel( video->sg_component, video->sg_channel);
