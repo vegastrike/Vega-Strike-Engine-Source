@@ -204,6 +204,7 @@ protected:
   friend class Mount;
   ///no collision table presence.
   bool SubUnit;
+  bool RecurseIntoSubUnitsOnCollision;
 public:
   bool isSubUnit() {return SubUnit;}
   bool UpAndDownGrade (const Unit * up, const Unit * templ, int mountoffset, int subunitoffset, bool touchme, bool downgrade, int additive, bool forcetransaction, double &percentage, const Unit * downgrade_min);

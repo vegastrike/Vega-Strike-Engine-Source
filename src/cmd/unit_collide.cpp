@@ -382,6 +382,7 @@ bool Unit::Collide (Unit * target) {
 
 Unit * Unit::queryBSP (const QVector &pt, float err, Vector & norm, float &dist, bool ShieldBSP) {
   int i;
+  if (RecurseIntoSubUnitsOnCollision)
   if (!SubUnits.empty()) {
     un_fiter i = SubUnits.fastIterator();
     for (Unit * un;(un=i.current())!=NULL;i.advance()) {
@@ -423,6 +424,7 @@ Unit * Unit::queryBSP (const QVector &pt, float err, Vector & norm, float &dist,
 Unit * Unit::queryBSP (const QVector &start, const QVector & end, Vector & norm, float &distance, bool ShieldBSP) {
   int i;
   Unit * tmp;
+  if (RecurseIntoSubUnitsOnCollision)
   if (!SubUnits.empty()) {
     un_fiter i(SubUnits.fastIterator());
     for (Unit * un;(un=i.current())!=NULL;i.advance()) {
@@ -432,39 +434,42 @@ Unit * Unit::queryBSP (const QVector &start, const QVector & end, Vector & norm,
     }
   }
   BSPTree *myNull=NULL;
-  QVector st (InvTransform (cumulative_transformation_matrix,start));
   BSPTree *const* tmpBsp = &myNull;
+#ifdef OLDSHITWHERESHIELDSUSEDTOMATTER
   if (this->colTrees) {
     tmpBsp=ShieldUp(st.Cast())?&this->colTrees->bspShield:&this->colTrees->bspTree;
     if (this->colTrees->bspTree&&!ShieldBSP) {
       tmpBsp= &this->colTrees->bspTree;
     }
+    tmpBsp = &this->colTrees->bspTree;
   }
-  for (;tmpBsp!=NULL;tmpBsp=((ShieldUp(st.Cast())&&(tmpBsp!=((this->colTrees?&this->colTrees->bspTree:&myNull))))?((this->colTrees?&this->colTrees->bspTree:&myNull)):NULL)) {
-    if (!(*tmpBsp)) {
-      distance = querySphereNoRecurse (start,end);
-      norm = (distance * (start-end)).Cast();
-      distance = norm.Magnitude();
-      norm= (norm.Cast()+start).Cast();
-      norm.Normalize();//normal points out from center
-      if (distance)
+#endif
+  //for (;tmpBsp!=NULL;tmpBsp=((ShieldUp(st.Cast())&&(tmpBsp!=((this->colTrees?&this->colTrees->bspTree:&myNull))))?((this->colTrees?&this->colTrees->bspTree:&myNull)):NULL)) {
+    distance = querySphereNoRecurse (start,end);
+    if (distance) {
+      if (!(*tmpBsp)) {
+	norm = (distance * (start-end)).Cast();
+	distance = norm.Magnitude();
+	norm= (norm.Cast()+start).Cast();
+	norm.Normalize();//normal points out from center
 	return this;
-      else
-	continue;
-    }
+      }
+    }else
+      return NULL;
+    QVector st (InvTransform (cumulative_transformation_matrix,start));
     QVector ed (InvTransform (cumulative_transformation_matrix,end));
     bool temp=false;
-    for (i=0;i<nummesh()&&!temp;i++) {
+    /*    for (i=0;i<nummesh()&&!temp;i++) {
       temp = (1==meshdata[i]->queryBoundingBox (st,ed,0));
     }
     if (!temp) {
-      continue;
-    }
+      return NULL;
+    }*/
     if ((distance = (*tmpBsp)->intersects (st.Cast(),ed.Cast(),norm))!=0) {
       norm = ToWorldCoordinates (norm);
       return this;
     }
-  }
+    //}
   return NULL;
 }
 
@@ -494,6 +499,7 @@ bool Unit::querySphere (const QVector &pnt, float err) const{
 	)
       return true;
   }
+  if (RecurseIntoSubUnitsOnCollision) 
   if (!SubUnits.empty()) {
     un_fkiter i=SubUnits.constFastIterator();
     for (const Unit * un;(un=i.current())!=NULL;i.advance()) {

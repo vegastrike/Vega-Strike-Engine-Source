@@ -258,6 +258,7 @@ Unit::Unit (std::vector <string> & meshes, bool SubU, int fact) {
   Init();
   this->faction = fact;
   SubUnit = SubU;
+  RecurseIntoSubUnitsOnCollision=!isSubUnit();
   meshdata_string = meshes;
   meshes.clear();
   meshdata_string.push_back(NULL);
@@ -270,6 +271,7 @@ Unit::Unit(const char *filename, bool SubU, int faction,std::string unitModifica
 	//if (!SubU)
 	//  _Universe->AccessCockpit()->savegame->AddUnitToSave(filename,UNITPTR,GetFaction(faction),(long)this);
 	SubUnit = SubU;
+	RecurseIntoSubUnitsOnCollision=!isSubUnit();
 	this->faction = faction;
 	SetFg (flightgrp,fg_subnumber);
 	bool doubleup=false;

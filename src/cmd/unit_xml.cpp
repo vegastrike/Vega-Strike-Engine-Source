@@ -176,7 +176,8 @@ namespace UnitXML {
       MISSIONCARGO,
       MAXIMUM,
       LIGHTTYPE,
-	  COMBATROLE
+      COMBATROLE,
+      RECURSESUBUNITCOLLISION
     };
 
   const EnumMap::Pair element_names[37]= {
@@ -216,10 +217,10 @@ namespace UnitXML {
     EnumMap::Pair ("Import",IMPORT),
     EnumMap::Pair ("CockpitDamage",COCKPITDAMAGE),
     EnumMap::Pair ("Upgrade",UPGRADE      ),
-	EnumMap::Pair ("Description",DESCRIPTION)
-
+    EnumMap::Pair ("Description",DESCRIPTION)
+    
   };
-  const EnumMap::Pair attribute_names[95] = {
+  const EnumMap::Pair attribute_names[96] = {
     EnumMap::Pair ("UNKNOWN", UNKNOWN),
     EnumMap::Pair ("missing",MISSING),
     EnumMap::Pair ("file", XFILE), 
@@ -314,11 +315,12 @@ namespace UnitXML {
     EnumMap::Pair ("MissionCargo",MISSIONCARGO),
     EnumMap::Pair ("Maximum",MAXIMUM),
     EnumMap::Pair ("LightType",LIGHTTYPE),
-	EnumMap::Pair ("CombatRole",COMBATROLE)
+    EnumMap::Pair ("CombatRole",COMBATROLE),
+    EnumMap::Pair ("RecurseSubunitCollision",RECURSESUBUNITCOLLISION)
   };
 
   const EnumMap element_map(element_names, 37);
-  const EnumMap attribute_map(attribute_names, 95);
+  const EnumMap attribute_map(attribute_names, 96);
 }
 
 using XMLSupport::EnumMap;
@@ -1325,6 +1327,10 @@ using namespace UnitXML;
       xml->unitlevel++;
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(attribute_map.lookup((*iter).name)) {
+      case RECURSESUBUNITCOLLISION:
+	ADDDEFAULT;
+	RecurseIntoSubUnitsOnCollision= XMLSupport::parse_bool (iter->value);
+	break;
       case COMBATROLE:
 		  ADDDEFAULT;
 		  xml->calculated_role=true;
@@ -1505,6 +1511,7 @@ extern std::string GetReadPlayerSaveGame (int);
 void Unit::LoadXML(const char *filename, const char * modifications, char * xmlbuffer, int buflength)
 {
   shield.number=0;
+  RecurseIntoSubUnitsOnCollision=!isSubUnit();
   const int chunk_size = 16384;
  // rrestricted=yrestricted=prestricted=false;
   FILE * inFile=NULL;
