@@ -644,7 +644,7 @@ void NavigationSystem::DrawMission()
 
 //	This is the mission info screen
 //	**********************************
-extern string MakeUnitXMLPretty(string str);
+extern string MakeUnitXMLPretty(string str, Unit * un);
 void NavigationSystem::DrawShip()
 {
 	GFXDisable(TEXTURE0);
@@ -664,7 +664,7 @@ void NavigationSystem::DrawShip()
 	int foundpos=0;
 	
 	if ((par = _Universe->AccessCockpit()->GetParent())) {
-		writethis= MakeUnitXMLPretty ( par->WriteUnitString());
+		writethis= MakeUnitXMLPretty ( par->WriteUnitString(),par);
 
 	}
 	

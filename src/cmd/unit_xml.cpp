@@ -24,8 +24,18 @@
 #include "role_bitmask.h"
 #include "cmd/collide/rapcol.h"
 #define VS_PI 3.1415926536
-string MakeUnitXMLPretty (string str) {
+string MakeUnitXMLPretty (string str, Unit * un) {
 	string writestr;
+		
+	if (un) {
+		writestr+= "Name: "+un->name;
+		writestr+= " " + un->getFullname();
+		Flightgroup *fg = un->getFlightgroup();
+		if (fg) {
+			writestr+= " Designation " +fg->name+ " "+ XMLSupport::tostring (un->getFgSubnumber());
+		}
+		writestr+="\n";
+	}
 	static std::set <string> lookfor;
 	if (lookfor.empty()) {
 		lookfor.insert ("Shie");
