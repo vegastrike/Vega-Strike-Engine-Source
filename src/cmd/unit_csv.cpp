@@ -473,7 +473,7 @@ void Unit::LoadRow(CSVRow &row,string modification, string * netxml) {
   AddMounts(this,xml,row["Mounts"]);
   this->image->cargo_volume=stof(row["Hold_Volume"]);
   this->image->equipment_volume=stof(row["Equipment_Space"]);
-  ImportCargo(this,row["Cargo_Imports"]);
+  ImportCargo(this,row["Cargo_Import"]);
   AddCarg(this,row["Cargo"]);
   AddSounds(this,row["Sounds"]);
   LoadCockpit(this,row["Cockpit"],row["CockpitDamage"]);
