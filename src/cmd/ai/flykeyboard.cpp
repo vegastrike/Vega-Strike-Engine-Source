@@ -145,7 +145,10 @@ void FlyByKeyboard::Execute (bool resetangvelocity) {
     parent->VelocityReference( NULL);
   }
   if (SSCK.realauto) {
-    _Universe->AccessCockpit()->Autopilot (parent->Target());
+    Cockpit * cp = _Universe->isPlayerStarship(parent);
+    if (cp) {
+      cp->Autopilot (parent->Target());
+    }
     SSCK.realauto=false;
   }
   if (autopilot) {

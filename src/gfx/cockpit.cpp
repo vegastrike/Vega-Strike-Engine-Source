@@ -822,7 +822,8 @@ void Cockpit::Autopilot (Unit * target) {
     Unit * un=NULL;
     if ((un=GetParent())) {
       if (un->AutoPilotTo(un)) {//can he even start to autopilot
-	CockpitKeys::Pan(0,PRESS);
+	SetView (CP_PAN);
+
 	static bool face_target_on_auto = XMLSupport::parse_bool (vs_config->getVariable ( "physics","face_on_auto", "false"));
 	if (face_target_on_auto) {
 	  FaceTarget(un);
