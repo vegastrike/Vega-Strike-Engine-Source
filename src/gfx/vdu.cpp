@@ -35,7 +35,7 @@ string getUnitNameAndFgNoBase (Unit * target) {
     }
   }
   if (string("neutral")!=_Universe->GetFaction(target->faction)) {
-    return string(_Universe->GetFaction(target->faction))+" "+target->name;
+    return /*string(_Universe->GetFaction(target->faction))+" "+*/target->name;
   }
   return target->name;
 }
@@ -322,10 +322,20 @@ void VDU::DrawTarget(Unit * parent, Unit * target) {
 		    getPlanetImage()))),.6,x,y,w,h);
   GFXDisable (TEXTURE0);    
   //sprintf (t,"\n%4.1f %4.1f",target->FShieldData()*100,target->RShieldData()*100);
-
-  tp->Draw (MangleString (getUnitNameAndFgNoBase(target).c_str(),_Universe->AccessCamera()->GetNebula()!=NULL?.4:0),0,true);  
   double mm=0;
-  if (parent->InRange(target,mm,true,false,false)) {  
+  string unitandfg=getUnitNameAndFgNoBase(target).c_str();
+  bool inrange=parent->InRange(target,mm,true,false,false);
+  if (inrange) {
+    static int neut= _Universe->GetFaction("neutral");
+    static int upgr= _Universe->GetFaction("upgrades");
+    if (target->faction != neut&&target->faction!=upgr) {
+      unitandfg+=std::string("\n")+_Universe->GetFaction(target->faction);
+    }
+    
+  }
+  tp->Draw (MangleString (unitandfg.c_str(),_Universe->AccessCamera()->GetNebula()!=NULL?.4:0),0,true);  
+
+  if (inrange) {  
   int i=0;
   char st[1024];
   for (i=0;i<rows-1&&i<128;i++) {
@@ -364,7 +374,8 @@ void VDU::DrawMessages(Unit *target){
 
     int nowtime_mins=(int)(nowtime/60.0);
     int nowtime_secs=(int)(nowtime - nowtime_mins*60);
-    sprintf (st,"%s:%s:%2d.%02d",getUnitNameAndFgNoBase(target).c_str(),ainame.c_str(),nowtime_mins,nowtime_secs);
+    std::string blah=getUnitNameAndFgNoBase(target);
+    sprintf (st,"%s:%s:%2d.%02d",blah.c_str(),ainame.c_str(),nowtime_mins,nowtime_secs);
   }
   else{
     sprintf(st,"no target");
@@ -566,7 +577,8 @@ void VDU::DrawDamage(Unit * parent) {
   DrawTargetSpr (parent->getHudImage (),.6,x,y,w,h);
   GFXDisable(TEXTURE0);
   Unit * thr = parent->Threat();
-  sprintf (st,"%s\nHull: %.3f",getUnitNameAndFgNoBase(parent).c_str(),parent->GetHull());
+  std::string blah (getUnitNameAndFgNoBase(parent));
+  sprintf (st,"%s\nHull: %.3f",blah.c_str(),parent->GetHull());
   tp->Draw (MangleString (st,_Universe->AccessCamera()->GetNebula()!=NULL?.5:0),0,true);  
   int k=strlen(st);
   if (k>cols)
@@ -640,7 +652,8 @@ void VDU::DrawStarSystemAgain (float x,float y,float w,float h, VIEWSTYLE viewSt
 
   char buf[1024];
   if (target) {
-    sprintf(buf,"%s\n",getUnitNameAndFgNoBase(target).c_str());
+    std::string blah(getUnitNameAndFgNoBase(target));
+    sprintf(buf,"%s\n",blah.c_str());
   } else {
     sprintf (buf,"This is a test of the emergencyBroadcastSystem\n");
   }
