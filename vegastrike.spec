@@ -34,8 +34,6 @@ cp vssetup $RPM_BUILD_ROOT/usr/local/bin/
 cp vslauncher $RPM_BUILD_ROOT/usr/local/bin/
 cp src/networking/soundserver $RPM_BUILD_ROOT/usr/local/bin/
 cp src/vegastrike $RPM_BUILD_ROOT/usr/local/bin/
-mkdir -p $RPM_BUILD_ROOT/usr/local/games/vegastrike/data
-cp $RPM_BUILD_ROOT/usr/local/bin/soundserver $RPM_BUILD_ROOT/usr/local/games/vegastrike/data/
 mkdir -p $RPM_BUILD_ROOT/usr/local/doc/vegastrike/
 cp README $RPM_BUILD_ROOT/usr/local/doc/vegastrike/
 
