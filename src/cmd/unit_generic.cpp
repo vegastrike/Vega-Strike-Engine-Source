@@ -1130,8 +1130,8 @@ void Unit::SwitchCombatFlightMode() {
   else
     computer.combat_mode=true;
 }
-bool CombatMode() {
-  return combat_mode;
+bool Unit::CombatMode() {
+  return computer.combat_mode;
 }
 Vector Unit::ClampVelocity (const Vector & velocity, const bool afterburn) {
   static float staticfuelclamp = XMLSupport::parse_float (vs_config->getVariable ("physics","NoFuelThrust",".9"));
