@@ -399,7 +399,8 @@ enum STATE {
 	DEPTHWRITE,
 	TEXTURE0,
 	TEXTURE1,
-	CULLFACE
+	CULLFACE,
+	SMOOTH
 };
 
 enum CLIPSTATE {
@@ -475,3 +476,4 @@ struct PickData {
 };
 
 #endif
+

@@ -20,15 +20,28 @@
  */
 #include <string.h>
 #include "gl_globals.h"
-
 #include "vegastrike.h"
 #include "gfxlib.h"
 #include "vs_globals.h"
 #include "gl_light.h"
+#include "config_xml.h"
 extern GFXBOOL bTex0;
 extern GFXBOOL bTex1;
 
 
+void GFXCircle (float x, float y, float wid, float hei) {
+	static float aaccuracy=XMLSupport::parse_float(vs_config->getVariable("graphics","circle_accuracy","100"));
+	int accuracy = aaccuracy*(wid>hei?wid:hei);
+	if (accuracy<8)
+		accuracy=8;
+	//	const int accuracy=((wid*g_game.x_resolution)+(hei*g_game.y_resolution))*M_PI;
+	GFXBegin (GFXLINESTRIP);
+	for (int i=0;i<=accuracy;i++) {
+		GFXVertex3f (x+wid*cos (i*2.*M_PI/accuracy),y+hei*sin (i*2.*M_PI/accuracy),0);
+	}
+	GFXEnd ();
+
+}
 
 void /*GFXDRVAPI*/ GFXBeginScene()
 {

@@ -3,6 +3,7 @@
 #include "in.h"
 #include "order.h"
 #include "event_xml.h"
+#include "communication.h"
 //all unified AI's should inherit from FireAt, so they can choose targets together.
 
 

@@ -1,5 +1,5 @@
 #include "communication.h"
-
+#include <assert.h>
 FSM::FSM (const char * filename) {
     //loads a conversation finite state machine with deltaRelation weight transition from an XML?
   if (strlen(filename)==0) {
@@ -92,6 +92,7 @@ void CommunicationMessage::SetAnimation (std::vector <Animation *>*ani) {
 void CommunicationMessage::SetCurrentState (int msg,std::vector <Animation *>*ani) {
   curstate = msg;
   SetAnimation(ani);
+  assert (this->curstate>=0);
 }
 
 CommunicationMessage::CommunicationMessage (Unit * send, Unit * recv, int messagechoice, std::vector <Animation *>* ani) {
@@ -101,16 +102,22 @@ CommunicationMessage::CommunicationMessage (Unit * send, Unit * recv, int messag
     curstate = fsm->nodes[prevstate].edges[messagechoice%fsm->nodes[prevstate].edges.size()];
   }
   SetAnimation(ani);
+  assert (this->curstate>=0);
+
 }
 CommunicationMessage::CommunicationMessage (Unit * send, Unit * recv, int laststate, int thisstate, std::vector <Animation *>* ani) {
   Init (send,recv);
   prevstate=laststate;
   curstate = thisstate;
   SetAnimation(ani);
+    assert (this->curstate>=0);
+
 }
 CommunicationMessage::CommunicationMessage (Unit * send, Unit * recv,std::vector<Animation *>* ani) {
   Init (send,recv);
   SetAnimation(ani);
+  assert (this->curstate>=0);
+
 }
 CommunicationMessage::CommunicationMessage (Unit * send, Unit * recv, const CommunicationMessage &prevstate, int curstate, std::vector<Animation *>* ani) {
   Init (send,recv);
@@ -119,4 +126,6 @@ CommunicationMessage::CommunicationMessage (Unit * send, Unit * recv, const Comm
     this->curstate = fsm->nodes[this->prevstate].edges[curstate%fsm->nodes[this->prevstate].edges.size()];
   }
   SetAnimation(ani);
+  assert (this->curstate>=0);
+
 }

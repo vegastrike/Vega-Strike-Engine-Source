@@ -24,7 +24,25 @@
 #include <assert.h>	// needed for assert() calls
 #include "savegame.h"
 
-
+void DrawRadarCircles (float x, float y, float wid, float hei, const GFXColor &col) {
+	GFXColorf(col);
+	GFXEnable(SMOOTH);
+	GFXCircle (x,y,wid/2,hei/2);
+	GFXCircle (x,y,wid/2.4,hei/2.4);
+	GFXCircle (x,y,wid/6,hei/6);
+	const float sqrt2=sqrt(2)/2;
+	GFXBegin(GFXLINE);
+		GFXVertex3f(x+(wid/6)*sqrt2,y+(hei/6)*sqrt2,0);
+		GFXVertex3f(x+(wid/2.4)*sqrt2,y+(hei/2.4)*sqrt2,0);
+		GFXVertex3f(x-(wid/6)*sqrt2,y+(hei/6)*sqrt2,0);
+		GFXVertex3f(x-(wid/2.4)*sqrt2,y+(hei/2.4)*sqrt2,0);
+		GFXVertex3f(x-(wid/6)*sqrt2,y-(hei/6)*sqrt2,0);
+		GFXVertex3f(x-(wid/2.4)*sqrt2,y-(hei/2.4)*sqrt2,0);
+		GFXVertex3f(x+(wid/6)*sqrt2,y-(hei/6)*sqrt2,0);
+		GFXVertex3f(x+(wid/2.4)*sqrt2,y-(hei/2.4)*sqrt2,0);
+	GFXEnd();
+	GFXDisable(SMOOTH);
+}
  void Cockpit::LocalToRadar (const Vector & pos, float &s, float &t) {
   s = (pos.k>0?pos.k:0)+1;
   t = 2*sqrtf(pos.i*pos.i + pos.j*pos.j + s*s);
@@ -254,6 +272,8 @@ void Cockpit::DrawBlips (Unit * un) {
   Radar->GetPosition (xcent,ycent);
   GFXDisable (TEXTURE0);
   GFXDisable (LIGHTING);
+  DrawRadarCircles (xcent,ycent,xsize,ysize,textcol);
+
   GFXPointSize (2);
   GFXBegin(GFXPOINT);
   while ((target = iter.current())!=NULL) {
@@ -306,6 +326,7 @@ void Cockpit::DrawEliteBlips (Unit * un) {
   Radar->GetPosition (xcent,ycent);
   GFXDisable (TEXTURE0);
   GFXDisable (LIGHTING);
+  DrawRadarCircles (xcent,ycent,xsize,ysize,textcol);
 
   while ((target = iter.current())!=NULL) {
     if (target!=un) {
@@ -599,6 +620,36 @@ static void SwitchUnitsTurret (Unit *ol, Unit *nw) {
 }
 
 extern void reset_time_compression(int i, KBSTATE a);
+
+
+static void DrawCrosshairs (float x, float y, float wid, float hei, const GFXColor &col) {
+	GFXColorf(col);
+	GFXDisable(TEXTURE0);
+	GFXDisable(LIGHTING);
+	GFXBlendMode(SRCALPHA,INVSRCALPHA);
+	GFXEnable(SMOOTH);
+	GFXCircle(x,y,wid/4,hei/4);
+	GFXCircle(x,y,wid/7,hei/7);
+	GFXDisable(SMOOTH);
+	GFXBegin(GFXLINE);
+		GFXVertex3f(x-(wid/2),y,0);
+		GFXVertex3f(x-(wid/6),y,0);
+		GFXVertex3f(x+(wid/2),y,0);
+		GFXVertex3f(x+(wid/6),y,0);
+		GFXVertex3f(x,y-(hei/2),0);
+		GFXVertex3f(x,y-(hei/6),0);
+		GFXVertex3f(x,y+(hei/2),0);
+		GFXVertex3f(x,y+(hei/6),0);
+		GFXVertex3f(x-.001,y+.001,0);
+		GFXVertex3f(x+.001,y-.001,0);
+		GFXVertex3f(x+.001,y+.001,0);
+		GFXVertex3f(x-.001,y-.001,0);
+	GFXEnd();
+	GFXEnable(TEXTURE0);
+	GFXEnable(LIGHTING);
+}
+
+
 void Cockpit::Draw() { 
   GFXDisable (TEXTURE1);
   GFXLoadIdentity(MODEL);
@@ -612,7 +663,15 @@ void Cockpit::Draw() {
   Unit * un;
   if (view==CP_FRONT) {
     if (Panel.size()>0) {
-      Panel.front()->Draw();//draw crosshairs
+      static bool drawCrosshairs=parse_bool(vs_config->getVariable("graphics","draw_rendered_crosshairs","true"));
+      if (drawCrosshairs) {
+        float x,y,wid,hei;
+        Panel.front()->GetSize(wid,hei);
+        Panel.front()->GetPosition(x,y);
+        DrawCrosshairs(x,y,wid,hei,textcol);
+      } else {
+        Panel.front()->Draw();//draw crosshairs
+      }
     }
   }
   RestoreViewPort();
@@ -629,7 +688,7 @@ void Cockpit::Draw() {
   if ((un = parent.GetUnit())) {
     if (view==CP_FRONT) {//only draw crosshairs for front view
       if (Radar) {
-	Radar->Draw();
+	//Radar->Draw();
 	if(radar_type=="Elite"){
 	  DrawEliteBlips(un);
 	}

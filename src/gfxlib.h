@@ -311,7 +311,7 @@ void /*GFXDRVAPI*/ GFXVertexf (const Vector &v);
 
 ///Ends the current set of polytypes
 void /*GFXDRVAPI*/ GFXEnd();
-
+void /*GFXDRVAPI*/ GFXCircle (float x, float y, float r1,float r2);
 ///Optimizes a list to reuse repeated vertices! 
 void GFXOptimizeList (GFXVertex *old, int numV, GFXVertex **newlist, int *numnewVertices, unsigned int ** indices);
 
@@ -345,3 +345,4 @@ void /*GFXDRVAPI*/ GFXSubwindow(int x, int y, int xsize, int ysize);           v
 Vector /*GFXDRVAPI*/ GFXDeviceToEye(int x, int y);
 
 #endif
+

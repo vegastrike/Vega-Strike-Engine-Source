@@ -64,6 +64,9 @@ void /*GFXDRVAPI*/ GFXEnable (const STATE state)
 	case CULLFACE:
 	  glEnable(GL_CULL_FACE);
 	  break;
+	case SMOOTH:
+		glEnable (GL_LINE_SMOOTH);
+		break;
 	}
 }
 
@@ -103,6 +106,10 @@ void /*GFXDRVAPI*/ GFXDisable (const STATE state)
 	case CULLFACE:
 	  glDisable(GL_CULL_FACE);
 	  break;
+	case SMOOTH:
+		glDisable (GL_LINE_SMOOTH);
+		break;
+
 	}
 
 }
@@ -372,4 +379,5 @@ GFXBOOL GFXSetTexFunc(int stage, int texset)
 	
 	return GFXTRUE;
 }
+
 
