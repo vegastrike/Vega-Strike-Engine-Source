@@ -856,7 +856,7 @@ void VDU::Draw (Unit * parent, const GFXColor & color) {
 		string str( "Netlag: ");
 		unsigned int lag = Network[0].getLag();
 		memset( buf, 0, 32);
-		sprintf( buf, "%.1f", lag);
+		sprintf( buf, "%.1Lf", (long double)lag);
 		if( lag<50)
 			str += "#00FF00";
 		else if( lag<150)
