@@ -117,7 +117,7 @@ void FlyByWire::Afterburn (float per){
 
   if(parent==_Universe->AccessCockpit()->GetParent()){
     //printf("afterburn is %d\n",afterburn);
-    forcefeedback->playDurationEffect(2,afterburn);
+    forcefeedback->playAfterburner(afterburn);
   }
 }
 void FlyByWire::SheltonSlide (bool onoff) {

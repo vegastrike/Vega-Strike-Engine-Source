@@ -1,3 +1,10 @@
+2002-03-16 Alexander Rawass <alexannika@users.sourceforge.net>
+
+	* added data/force_feedback/vegastrike.ifr
+	  (Immersion Studio Effects file)
+	* exchanged/improved the effects
+	
+	
 2002-03-14 Alexander Rawass <alexannika@users.sourceforge.net>
 
 	* very basic force feedback support

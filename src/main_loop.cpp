@@ -47,6 +47,9 @@
 #include "cmd/ai/missionscript.h"
 #include "cmd/enhancement.h"
 #include "cmd/cont_terrain.h"
+
+#include "force_feedback.h"
+
 using namespace std;
 
  Music * muzak=NULL;
@@ -181,6 +184,7 @@ namespace CockpitKeys {
 	      active_missions[i]->DirectorEnd();
 	    }
 	  }
+	  delete forcefeedback;
 	  exit(0);
 	}
    

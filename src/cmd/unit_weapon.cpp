@@ -230,7 +230,7 @@ bool Unit::Mount::Fire (Unit * owner, bool Missile) {
 
       if(owner==_Universe->AccessCockpit()->GetParent()){
 	//printf("player has fired a bolt\n");
-	forcefeedback->playShortEffect(0);
+	forcefeedback->playLaser();
       };
 
       return true;
