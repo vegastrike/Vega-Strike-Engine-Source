@@ -57,7 +57,7 @@ void cleanExit(char *str,...)
 
 /******************************************************************************/
 /* The main function                                                          */
-void changehome (bool to) {
+void changehome (bool to, bool linuxhome=true) {
 	static std::vector <std::string> paths;
   if (to) {
 	 char mycurpath[8192];
@@ -65,9 +65,11 @@ void changehome (bool to) {
 	 mycurpath[8191]='\0';
 	 paths.push_back (mycurpath);
 #ifndef _WIN32
-	struct passwd *pwent;
-	pwent = getpwuid (getuid());
-	chdir (pwent->pw_dir);
+	 if (linuxhome) {
+	   struct passwd *pwent;
+	   pwent = getpwuid (getuid());
+	   chdir (pwent->pw_dir);
+	 }
 #endif
 	chdir (".vegastrike");
   }else {
@@ -84,16 +86,20 @@ bool sende=true;
 std::string curmus;
 Mix_Music * PlayMusic (const char * file, Mix_Music *oldmusic) {
 #ifdef HAVE_SDL
-	Mix_Music *music;
-	if((music=Mix_LoadMUS(file))==NULL){
-		changehome (true);
-		if((music=Mix_LoadMUS(file))==NULL){
-			changehome(false);
-			return oldmusic;
-		}
-		changehome(false);
+	Mix_Music *music=Mix_LoadMUS(file);
+	if(music==NULL){
+	  changehome (true,false);
+	  music=Mix_LoadMUS(file);
+	  changehome (false);
+	  if(music==NULL){
+	    changehome (true,true);
+	    music=Mix_LoadMUS(file);
+	    changehome(false);
+	    if (music==NULL) {
+	      return oldmusic;
+	    }
+	  }
 	}
-
 	sende=false;
 	if (Mix_FadeOutMusic(fadeout)) {
 	}
