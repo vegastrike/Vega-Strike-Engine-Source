@@ -3335,7 +3335,11 @@ void Unit::Cloak (bool loak) {
 
 void Unit::SelectAllWeapon (bool Missile) {
   for (int i=0;i<GetNumMounts();i++) {
-    mounts[i].Activate (Missile);
+	  if (mounts[i].status<Mount::DESTROYED) {
+		  if (mounts[i].type->size!=weapon_info::SPECIAL) {
+			  mounts[i].Activate (Missile);
+		  }
+	  }
   }
 }
 
@@ -3370,9 +3374,54 @@ void Unit::ToggleWeapon (bool Missile) {
   if (GetNumMounts()<1)
     return;
   sz = mounts[0].type;
+  if (Missile) {
+	  int whichmissile=-2;//-2 means not choosen -1 means all
+	  int lastmissile=-2;
+	  int count=0;
+	  for (int i=0;i<GetNumMounts();++i) {
+		  if (mounts[i].type->type==weapon_info::PROJECTILE&&mounts[i].status<Mount::DESTROYED) {
+			  if( mounts[i].status==Mount::ACTIVE) {
+				  if (whichmissile==-2) {
+					  whichmissile=count;
+				  }else {
+					  whichmissile=-1;
+				  }
+			  }
+			  lastmissile=count;
+			  count++;
+		  }
+	  }
+	  if (lastmissile!=-2) {
+		  bool found=false;
+		  
+		  if (whichmissile==-1||whichmissile!=lastmissile){
+			  whichmissile++;
+			  //activate whichmissile
+			  int count=0;
+			  for (unsigned int i=0;i<GetNumMounts();++i) {
+				  if (mounts[i].type->type==weapon_info::PROJECTILE&&mounts[i].status<Mount::DESTROYED) {
+					  if (count==whichmissile) {
+						  mounts[i].status = Mount::ACTIVE;
+						  found=true;
+					  }else {
+						  mounts[i].status = Mount::INACTIVE;
+					  }
+					  count++;
+				  }
+			  }
+		  }
+		  
+		  if (!found||whichmissile==lastmissile||whichmissile==-2) {
+			  //activate all
+			  SelectAllWeapon(true);
+		  }
+					   
+	  }	  
+  }else {
   for (int i=0;i<GetNumMounts();i++) {
 	  if ((mounts[i].type->type==weapon_info::PROJECTILE)==Missile&&!Missile&&mounts[i].status<Mount::DESTROYED) {
-      totalcount++;
+		  if (mounts[i].type->size!=weapon_info::SPECIAL)			  
+			  totalcount++;
       lasttotal=false;
       if (mounts[i].status==Mount::ACTIVE) {
 	activecount++;
@@ -3425,6 +3474,7 @@ void Unit::ToggleWeapon (bool Missile) {
     }else {
       ActivateGuns (sz,Missile);
     }
+  }
   }
 }
 
