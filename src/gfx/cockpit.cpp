@@ -39,17 +39,24 @@ void Cockpit::DrawBlips (Unit * un) {
     if (target!=un) {
       LocalToRadar (un->ToLocalCoordinates(target->Position()-un->Position()),s,t);
       GFXColorf (relationToColor (_Universe->GetRelation(un->faction,target->faction)));
-      GFXVertex3f (xcent+xsize*s,ycent+ysize*t,0);
+
       
       if (target==makeBigger) {
+	GFXEnd();
 	GFXPointSize(4);
+	GFXBegin (GFXPOINT);
+      }
+      GFXVertex3f (xcent+xsize*s,ycent+ysize*t,0);
 	/*
 	      GFXVertex3f (xcent+4./g_game.x_resolution+xsize*s,ycent+ysize*t,0);
 	      GFXVertex3f (xcent-4./g_game.x_resolution+xsize*s,ycent+ysize*t,0);
 	      GFXVertex3f (xcent+xsize*s,ycent+4./g_game.y_resolution+ysize*t,0);
 	      GFXVertex3f (xcent+xsize*s,ycent-4./g_game.y_resolution+ysize*t,0);
 	*/
+      if (target==makeBigger) {
+	GFXEnd();
 	GFXPointSize (2);
+	GFXBegin(GFXPOINT);
       }
       
     }
