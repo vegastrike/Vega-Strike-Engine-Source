@@ -96,6 +96,7 @@ void Bolt::Draw () {
   }
   if (boltmesh) {
     boltmesh->LoadDrawState();
+    boltmesh->BeginDrawState();
     int decal=0;
     for (i=bolts.begin();i!=bolts.end();decal++,i++) {
       Texture * dec = boltdecals.GetTexture(decal);
@@ -109,6 +110,7 @@ void Bolt::Draw () {
 	}
       }
     }
+    boltmesh->EndDrawState();
   }
   GFXEnable  (LIGHTING);
   GFXEnable  (CULLFACE);

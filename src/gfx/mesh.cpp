@@ -214,7 +214,7 @@ void Mesh::Draw(float lod, const Transformation &trans, const Matrix m)
 }
 void Mesh::DrawNow(float lod,  bool centered, const Transformation &transform /*= identity_transformation*/, const Matrix m) {
   Mesh *o = getLOD (lod);
-  o->vlist->LoadDrawState();
+
   if (centered) {
     float m1[16];
     memcpy (m1,m,sizeof (float)*16);
@@ -245,10 +245,11 @@ void Mesh::DrawNow(float lod,  bool centered, const Transformation &transform /*
   GFXBlendMode(blendSrc, blendDst);
   if (o->Decal)
     o->Decal->MakeActive();
-  o->vlist->Draw();
+  o->vlist->DrawOnce();
   for ( i=0;i<specialfxlight.size();i++) {
     GFXDeleteLight (specialfxlight[i]);
   }
+
 }
 
 
@@ -267,6 +268,9 @@ void Mesh::ProcessUndrawnMeshes(bool pushSpecialEffects) {
 
     }
     undrawn_meshes[a].sort();//sort by texture address
+    if (!undrawn_meshes[a].empty()) {
+      undrawn_meshes[a].back().orig->vlist->LoadDrawState();
+    }
     while(undrawn_meshes[a].size()) {
       Mesh *m = undrawn_meshes[a].back().orig;
       undrawn_meshes[a].pop_back();
@@ -307,7 +311,7 @@ void Mesh::ProcessDrawQueue() {
     GFXDisable(TEXTURE1);
   }
 
-  vlist->LoadDrawState();	
+  vlist->BeginDrawState();	
   while(draw_queue->size()) {
     MeshDrawContext c = draw_queue->back();
     draw_queue->pop_back();
@@ -336,6 +340,7 @@ void Mesh::ProcessDrawQueue() {
       squadlogos->Draw(c.mat);
     }
   }
+  vlist->EndDrawState();
   if (blendSrc!=SRCALPHA&&blendDst!=ZERO) 
     GFXEnable(DEPTHWRITE);//risky--for instance logos might be fubar!
 

@@ -46,6 +46,7 @@ struct GFXStats{
 
 //extern Matrix model;
 //extern Matrix view;
+
 #ifdef WIN32
 #include <windows.h>
 #include <GL/gl.h>
@@ -73,8 +74,6 @@ struct GFXStats{
 #define GL_PROXY_TEXTURE_CUBE_MAP_EXT     0x851B
 #define GL_MAX_CUBE_MAP_TEXTURE_SIZE_EXT  0x851C
 
-//extern PFNGLLOCKARRAYSEXTPROC glLockArraysEXT_p;
-//extern PFNGLUNLOCKARRAYSEXTPROC glUnlockArraysEXT_p;
 extern PFNGLMULTITEXCOORD2FARBPROC glMultiTexCoord2fARB;
 extern PFNGLCLIENTACTIVETEXTUREARBPROC glClientActiveTextureARB;
 extern PFNGLCLIENTACTIVETEXTUREARBPROC glActiveTextureARB;
@@ -85,6 +84,9 @@ extern PFNGLCOLORTABLEEXTPROC glColorTable;
 #else
 #include <GL/glut.h>
 #include <GL/glext.h>
+extern PFNGLLOCKARRAYSEXTPROC glLockArraysEXT_p;
+extern PFNGLUNLOCKARRAYSEXTPROC glUnlockArraysEXT_p;
+
 //extern PFNGLLOCKARRAYSEXTPROC glLockArraysEXT_p;
 //extern PFNGLUNLOCKARRAYSEXTPROC glUnlockArraysEXT_p;
 #endif

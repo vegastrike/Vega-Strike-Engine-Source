@@ -38,10 +38,7 @@ static int glutWindow;
 
 
 
-#ifdef PFNGLLOCKARRAYSEXTPROC
-PFNGLLOCKARRAYSEXTPROC glLockArraysEXT_p;
-PFNGLUNLOCKARRAYSEXTPROC glUnlockArraysEXT_p;
-#endif
+
 #ifdef WIN32
 PFNGLCLIENTACTIVETEXTUREARBPROC glClientActiveTextureARB=0;
 PFNGLCLIENTACTIVETEXTUREARBPROC glActiveTextureARB=0;
@@ -51,6 +48,9 @@ PFNGLMULTITEXCOORD2FARBPROC glMultiTexCoord2fARB = 0;
 //PFNGLMULTITEXCOORD2FSGISPROC glMultiTexCoord2fSGIS ;
 //PFNGLMTEXCOORDPOINTERSGISPROC glMTexCoordPointerSGIS ;
 #include "gfxlib.h"
+#else
+PFNGLLOCKARRAYSEXTPROC glLockArraysEXT_p;
+PFNGLUNLOCKARRAYSEXTPROC glUnlockArraysEXT_p;
 
 #endif
 typedef void (*(*get_gl_proc_fptr_t)(const GLubyte *))(); 
@@ -68,7 +68,7 @@ void init_opengl_extensions()
 {
 	const unsigned char * extensions = glGetString(GL_EXTENSIONS);
 	fprintf (stderr,"OpenGL Extensions supported: %s\n",extensions);
-#ifdef PFNGLLOCKARRAYSEXTPROC
+
     if ( glutExtensionSupported( "GL_EXT_compiled_vertex_array" ) ) {
 
 	printf( "GL_EXT_compiled_vertex_array extension "
@@ -86,7 +86,6 @@ void init_opengl_extensions()
 	glUnlockArraysEXT_p = NULL;
 
     }
-#endif
     g_game.mipmap = 2;
 #ifdef WIN32
     glColorTable = (PFNGLCOLORTABLEEXTPROC ) GET_GL_PROC((GET_GL_PTR_TYP)"glColorTableEXT");
@@ -116,7 +115,7 @@ void init_opengl_extensions()
     g_game.znear = 1.00F;
 
     g_game.zfar = 100000.00F;
-
+    g_game.display_lists=1;
     FILE * fp = fopen ("glsetup.txt","r");
     if (fp) {
       fscanf (fp,"fov %f\n",&g_game.fov);

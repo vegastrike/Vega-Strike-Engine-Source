@@ -1,10 +1,10 @@
-4
+15
 hornet.xunit 4000 0 -1000  0
-rapier.xunit 8100 0 -1200  1
-rapier.xunit 8400 0 -1200  1
-hornet.xunit 7550 0 -1200  1
+rapier.xunit 8100 0 -1200  0
+rapier.xunit 8400 0 -1200  0
+hornet.xunit 7550 0 -1200  0
 hornet.xunit 7300 200 -1200  0
-jalthi.xunit 7000 400 -1200  1
+jalthi.xunit 7000 400 -1200  0
 jalthi.xunit 7200 200 -1200  1
 dralthi.xunit 8000 -200 -0200  1
 dralthi.xunit 9000 -400 -0200 1

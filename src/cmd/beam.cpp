@@ -199,12 +199,14 @@ void Beam::ProcessDrawQueue() {
     beamdecals.GetTexture(decal)->MakeActive();
     if (beamdrawqueue[decal].size()) {
       beamdrawqueue[decal].back().vlist->LoadDrawState();//loads clarity+color
-    }
-    while (beamdrawqueue[decal].size()) {
-      c= beamdrawqueue[decal].back();
-      beamdrawqueue[decal].pop_back();
-      GFXLoadMatrix (MODEL, c.m);
-      c.vlist->Draw();
+      while (beamdrawqueue[decal].size()) {
+	c= beamdrawqueue[decal].back();
+	beamdrawqueue[decal].pop_back();
+	GFXLoadMatrix (MODEL, c.m);
+	c.vlist->BeginDrawState(GFXFALSE);
+	c.vlist->Draw();
+	c.vlist->EndDrawState(GFXFALSE);
+      }
     }
   }
   //  GFXEnable (TEXTURE1);

@@ -150,8 +150,11 @@ void Logo::ProcessDrawQueue() {
 	  c = draw_queue->back();
 	  draw_queue->pop_back();
 	  GFXLoadMatrix(MODEL, c.m);
+	  c.vlist->BeginDrawState(GFXFALSE);
 	  c.vlist->Draw();
+	  c.vlist->EndDrawState(GFXFALSE);
 	}
+
 }
 
 Logo::~Logo ()

@@ -91,42 +91,23 @@ void GFXVertexList::Init (enum POLYTYPE *poly, int numVertices, const GFXVertex 
   memcpy(this->offsets, offsets, sizeof(int)*numlists);
   
   display_list = 0;
-  this->tessellation = tess;
   if (Mutable)
     changed = CHANGE_MUTABLE;
   else
     changed = CHANGE_CHANGE;
-  if (tess) 
-    Tess (tess);
-  else {
-    tesslist = NULL;
+  //  if (tess) 
+  //    Tess (tess);
+  //  else {
+  //    tesslist = NULL;
     RefreshDisplayList();
-  }
+    //  }
   if (Mutable)
     changed = CHANGE_MUTABLE;//for display lists
   else
     changed = 0;
 
 }
-void GFXVertexList::Tess (int tess) {
-  if (tessellation ==tess)
-    return;
-  if (tesslist) {
-    delete tesslist;
-    tesslist = NULL;
-  }
-  if (tess==0) {
-    RefreshDisplayList();
-    tessellation = 0;
-    return;
-  }
 
-  for(;tess>0;tess--) {
-    
-
-
-  }
-}
 int GFXVertexList::numTris () {
     int tot=0;
     for (int i=0;i<numlists;i++) {
@@ -161,13 +142,30 @@ int GFXVertexList::numQuads () {
     }
     return tot;
 }
+  ///Returns the array of vertices to be mutated
+GFXVertex * GFXVertexList::BeginMutate (int offset) {
+  return &myVertices[offset];
+}
+///Ends mutation and refreshes display list
+void GFXVertexList::EndMutate () {
+  if (changed!=CHANGE_MUTABLE) {
+    changed = CHANGE_CHANGE;
+  }
+  RefreshDisplayList();
+  if (changed==CHANGE_CHANGE) {
+    changed=0;
+  }
+}
 
 
 
 void GFXVertexList::RefreshDisplayList () {
 #ifdef USE_DISPLAY_LISTS
-  if ((display_list&&!(changed&CHANGE_CHANGE))||(changed&CHANGE_MUTABLE)) {
+  if ((!g_game.display_lists)||(display_list&&!(changed&CHANGE_CHANGE))||(changed&CHANGE_MUTABLE)) {
     return;//don't used lists if they're mutable
+  }
+  if (display_list) {
+    GFXDeleteList (display_list);
   }
 	int a;
 	int offset =0;
@@ -207,8 +205,6 @@ GFXVertexList::~GFXVertexList()
 {
   if (display_list)
     GFXDeleteList (display_list); //delete dis
-  if (tessellation)
-    delete tesslist;
   if (offsets)
     delete [] offsets;
   if(myVertices)
@@ -287,18 +283,6 @@ void GFXVertexList::GetPolys (GFXVertex **vert, int *numpolys, int *numtris) {
 }
 
 
-GFXVertex *GFXVertexList::Lock()
-{
-  if (tessellation)
-    tesslist->Lock();
-  return myVertices;
-}// Stuff to support environment mapping
-
-void GFXVertexList::Unlock()
-{
-  if (tessellation)
-    tesslist->Unlock();
-}
 
 
 void GFXVertexList::LoadDrawState() {
@@ -332,18 +316,13 @@ void GFXVertexList::LoadDrawState() {
       glEnableClientState(GL_NORMAL_ARRAY);
     }
 }
-void GFXVertexList::Draw()
-{
-  if (tessellation&&tesslist) {
-    tesslist->Draw();
-    return;
-  }
+void GFXVertexList::BeginDrawState(GFXBOOL lock) {
 #ifdef USE_DISPLAY_LISTS
   if(display_list!=0) {
-    GFXCallList(display_list);
+    
   } else 
 #endif
-    {
+    {      
       if (myColors!=NULL) {
 	glColorPointer (4,GL_FLOAT, sizeof (GFXColor), &myColors[0].r);
       }
@@ -351,16 +330,38 @@ void GFXVertexList::Draw()
       glNormalPointer(GL_FLOAT, sizeof(GFXVertex), &myVertices[0].i);
       glEnableClientState(GL_TEXTURE_COORD_ARRAY);
       glTexCoordPointer(2, GL_FLOAT, sizeof(GFXVertex), &myVertices[0].s+GFXStage0*2);
-
+      if (lock&&glLockArraysEXT_p)
+	(*glLockArraysEXT_p) (0,numVertices);
+  }
+}
+void GFXVertexList::EndDrawState(GFXBOOL lock) {
+#ifdef USE_DISPLAY_LISTS
+  if(display_list!=0) {
+    
+  } else
+#endif
+    {
+      if (lock&&glUnlockArraysEXT_p)
+	(*glUnlockArraysEXT_p) ();
+    }
+  if (myColors!=NULL) {
+    GFXColor4f(1,1,1,1);
+  }
+}
+void GFXVertexList::Draw()
+{
+#ifdef USE_DISPLAY_LISTS
+  if(display_list!=0) {
+    GFXCallList(display_list);
+  } else 
+#endif
+    {
       int totoffset=0;
       for (int i=0;i<numlists;i++) {
 	  glDrawArrays(mode[i], totoffset, offsets[i]);
 	  totoffset += offsets[i];
       }
     }
-  if (myColors!=NULL) {
-    GFXColor4f(1,1,1,1);
-  }
 }
 
 

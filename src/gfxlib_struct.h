@@ -181,8 +181,6 @@ class /*GFXDRVAPI*/ GFXVertexList {
   int numVertices;
   ///Vertices and colors stored 
   GFXVertex *myVertices;  GFXColor *myColors;
-  ///Tesselations of current vertex list (deprecated)
-  GFXVertexList * tesslist;
   ///Array of modes that vertices will be drawn with
   GLenum *mode;
   ///Display list number if list is indeed active. 0 otherwise
@@ -194,8 +192,6 @@ class /*GFXDRVAPI*/ GFXVertexList {
    * 2 triangles 3 quads and 2 lines would be {6,12,4} as the offsets
    */
   int *offsets;
-  ///Tesselation level (FIXME, Deprecated);
-  int tessellation;
   ///If vertex list has been mutated since last draw
   int changed;
   ///Returns number of Triangles in vertex list (counts tri strips)
@@ -208,8 +204,6 @@ class /*GFXDRVAPI*/ GFXVertexList {
   void RefreshDisplayList();
 public:
   GFXVertexList();
-  ///Tesselates to a certain extent.
-  void Tess (int );
   ///creates a vertex list with 1 polytype and a given number of vertices
   inline GFXVertexList(enum POLYTYPE poly, int numVertices, const GFXVertex *vertices,bool Mutable=false, int tess =0){Init (&poly, numVertices, vertices, NULL, 1, &numVertices,Mutable,tess);}
   ///Creates a vertex list with an arbitrary number of poly types and given vertices, num list and offsets (see above)
@@ -224,18 +218,19 @@ public:
   }
   ~GFXVertexList();
 
-  ///Deprecated. Should use with glLockArrays
-  GFXVertex *Lock();   void Unlock();
   ///Returns the array of vertices to be mutated
-  GFXVertex * BeginMutate (int offset) {return &myVertices[offset];}
+  GFXVertex * BeginMutate (int offset);
   ///Ends mutation and refreshes display list
-  void EndMutate () {RefreshDisplayList();}
-  ///Loads the draw state of a given vlist for mass drawing
+  void EndMutate ();
+  ///Loads the draw state (what is active) of a given vlist for mass drawing
   void LoadDrawState();
+  ///Specifies array pointers and loads the draw state of a given vlist for mass drawing
+  void BeginDrawState(GFXBOOL lock=GFXTRUE);
   ///Draws a single copy of the mass-loaded vlist
   void Draw();
   ///Loads draw state and prepares to draw only once
-  void DrawOnce (){LoadDrawState();Draw();}
+  void DrawOnce (){LoadDrawState();BeginDrawState(GFXFALSE);Draw();EndDrawState(GFXFALSE);}
+  void EndDrawState(GFXBOOL lock=GFXTRUE);
   ///returns a packed vertex list with number of polys and number of tries to passed in arguments. Useful for getting vertex info from a mesh
   void GetPolys (GFXVertex **vert, int *numPolys, int * numTris);
 };
