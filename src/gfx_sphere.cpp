@@ -8,10 +8,14 @@
 
 using XMLSupport::tostring;
 
-SphereMesh::SphereMesh(float radius, int stacks, int slices, char *texture, char *alpha, bool Insideout,bool centeredOnShip) : Mesh() {
+SphereMesh::SphereMesh(float radius, int stacks, int slices, char *texture, char *alpha, bool Insideout,bool centeredOnShip, const BLENDFUNC a, const BLENDFUNC b) : Mesh() {
 
   SphereMesh *oldmesh;
-  hash_name = string("@@Sphere") + "#" + tostring(radius) + "#" + texture + "#" + tostring(stacks) + "#" + tostring(slices) + "#" + (Insideout?"yes":"no");
+  char ab[3];
+  ab[2]='\0';
+  ab[1]=a+'0';
+  ab[2]=a+'0';
+  hash_name = string("@@Sphere") + "#" + tostring(radius) + "#" + texture + "#" + tostring(stacks) + "#" + tostring(slices) + "#" + (Insideout?"i":"o")+ ab;
   if (LoadExistant (hash_name.c_str())) {
     return;
   }
@@ -111,10 +115,11 @@ SphereMesh::SphereMesh(float radius, int stacks, int slices, char *texture, char
 	   blendDst = INVSRCALPHA;
 	   Decal = new Texture(texture, alpha);
    }else {
-		blendSrc = ONE;
-		blendDst = ZERO;
+		blendSrc = a;
+		blendDst = b;
 		Decal = new Texture (texture);
    }
+   
    centered?envMap = FALSE:envMap=TRUE;
    
    if(centered) {
@@ -139,10 +144,6 @@ void SphereMesh::Draw(const Transformation &transform /*= identity_transformatio
   } else {	
     Mesh::Draw(transform,m);
   } 
-}
-void SphereMesh::SetBlendMode (const BLENDFUNC a, const BLENDFUNC b) {
-  blendSrc=a; 
-  blendDst=b; //one of a kind...don't need to set orig;
 }
 
 void SphereMesh::ProcessDrawQueue() {

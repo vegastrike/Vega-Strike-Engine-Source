@@ -768,8 +768,7 @@ fclose (inFile);
   if (xml->shieldmesh) {
     meshdata[nummesh] = xml->shieldmesh;
   }else {
-    SphereMesh * tmp = new SphereMesh (rSize(),16,16,"shield.bmp");
-    tmp->SetBlendMode (ONE,ONE);
+    SphereMesh * tmp = new SphereMesh (rSize(),16,16,"shield.bmp", NULL, false,false,ONE, ONE);
     meshdata[nummesh] = tmp;
   }
 
