@@ -371,6 +371,7 @@ class FactionInfo {
 	
 	unsigned turn;
 	unsigned numsystems;
+	unsigned startingyear;
 	std::vector<System*> borderSystems;
 	std::vector<System*> developingSystems;
 	std::set<System*> systems; // for quick access.
@@ -410,7 +411,8 @@ public:
 	FactionInfo(vector<string> stuff, vector<System> &s)
 			: turn(0), numsystems(1), name(stuff[0]), takeoverprob(atof(stuff[1].c_str())),
 			  takeneutralprob(1-takeoverprob), maxsystems(atoi(stuff[2].c_str())),
-			  homeworld(System::findSystem(s,stuff[3])) {
+			  startingyear(atoi(stuff[3].c_str())),
+			  homeworld(System::findSystem(s,stuff[4])) {
 		if (!homeworld) {
 			fprintf(stderr,"Fatal error: homeworld \"%s\" not found!!!\n",stuff[3].c_str());
 		} else if (homeworld->jumps.empty()) {
@@ -441,6 +443,9 @@ public:
 	*/
 	void simulateTurn (unsigned int totalturn, bool allowTakeover, vector<System> &s) {
 		++turn;
+		if (turn<startingyear) {
+			return;
+		}
 		vector<System*> systemsToAdd;
 		if (borderSystems.empty()) {
 			numsystems=maxsystems;
@@ -943,7 +948,7 @@ void processsystems (std::vector <System> & s){
 	simulateFactionTurns(s); // Simulates the factions starting with one homeworld, and expands their territories.x
 	if (1) {
 		for (unsigned int i=0;i<s.size();++i) {
-			if (s[i]["faction"]!="aera"&&s[i]["faction"]!="rlaan") {
+			if (s[i]["faction"]!="aera"&&s[i]["faction"]!="rlaan"&&s[i].jumps.size()) {
 				float mult = 1;
 				if (!s[i].habitable) {
 					mult=20;
