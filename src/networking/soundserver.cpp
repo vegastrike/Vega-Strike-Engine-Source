@@ -137,24 +137,7 @@ std::string alphanum(std::string s) {
   }
   return ret;
 }
-std::string concat (const std::vector<std::string> &files) {
-  std::string ret =
-#ifdef _WIN32
-    "c:/temp/"
-#else
-    "/tmp/"
-#endif
-    ;
-  {
-    for (unsigned int i=0;i<files.size();++i) 
-      ret+=alphanum(files[i]);
-  }
-  FILE * checker = fopen(ret.c_str(),"rb");
-  if (checker) {
-    fclose(checker);
-    return ret;
-  }
-  std::ofstream o (ret.c_str(),std::ios::binary);
+void concat_ostream(std::ofstream &o, const std::vector<std::string> &files) {
   if (o.is_open()) {
     for (unsigned int i=0;i<files.size();++i) {
       std::ifstream as;
@@ -173,8 +156,61 @@ std::string concat (const std::vector<std::string> &files) {
 
     }
     o.close();
+  }
+}
+std::string concat (const std::vector<std::string> &files) {
+  std::string ret =
+#ifdef _WIN32
+    "c:/temp/"
+#else
+    "/tmp/"
+#endif
+    ;
+  std::string alphan;
+  {
+    for (unsigned int i=0;i<files.size();++i) 
+      alphan+=alphanum(files[i]);
+  }
+  ret+=alphan;
+  FILE * checker = fopen(ret.c_str(),"rb");
+  if (checker) {
+    fclose(checker);
     return ret;
   }
+  std::ofstream o (ret.c_str(),std::ios::binary);
+  if (!o.is_open()){
+	 ret="music/"+alphan;//current dir
+     checker = fopen(ret.c_str(),"rb");
+     if (checker) {
+        fclose(checker);
+        return ret;
+      }
+	 std::ofstream o1(ret.c_str(),std::ios::binary);	  
+      if (o1.is_open()) {
+		  concat_ostream(o1,files);
+		  return ret;
+	  }else {
+
+#ifdef _WIN32
+			  ret=tempnam("c:\tmp",alphan.c_str());
+			  ret+=".ogg";
+              checker = fopen(ret.c_str(),"rb");
+              if (checker) {
+                 fclose(checker);
+                 return ret;
+              }
+			  std::ofstream of(ret.c_str(),std::ios::binary);
+			  fprintf(STD_OUT, "\nTrying to Open %s\n", ret.c_str());
+			  if (of.is_open()) {
+				  concat_ostream(of,files);
+				  return ret;
+			  }
+#endif
+	  }
+	}else {
+	  concat_ostream(o,files);
+	  return ret;
+    }
   return "";
 }
 std::vector<std::string> split(std::string tmpstr,std::string splitter) {
