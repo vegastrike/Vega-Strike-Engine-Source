@@ -15,10 +15,13 @@ class UnitContainer {
     unit =0;
     SetUnit (un.unit);
   }
+  
   const UnitContainer & operator = (const UnitContainer &a) {
     SetUnit (a.unit);
     return a;
   }
+  bool operator== (const Unit * oth) const {return unit==oth;}
+  bool operator!= (const Unit * oth) const {return unit!=oth;}
   bool operator== (const UnitContainer oth) const {return unit==oth.unit;}
   bool operator!= (const UnitContainer oth) const {return unit!=oth.unit;}
   ~UnitContainer();

@@ -13,6 +13,7 @@
 #include "cmd/planet.h"
 #include "cmd/script/flightgroup.h"
 FireKeyboard::FireKeyboard (unsigned int whichplayer, unsigned int whichjoystick): Order (WEAPON,0){
+  this->cloaktoggle=false;
   this->whichjoystick = whichjoystick;
   this->whichplayer=whichplayer;
   gunspeed = gunrange = .0001;
@@ -38,6 +39,7 @@ struct FIREKEYBOARDTYPE {
  KBSTATE weapk;
  KBSTATE misk;
  KBSTATE eject;
+ KBSTATE lockkey;
  KBSTATE ejectcargo;
  KBSTATE cloakkey;
  KBSTATE ECMkey;
@@ -175,6 +177,12 @@ void FireKeyboard::CloakKey(int, KBSTATE k) {
 
     if (k==PRESS) {
       g().cloakkey = k;      
+    }
+}
+void FireKeyboard::LockKey(int, KBSTATE k) {
+
+    if (k==PRESS) {
+      g().lockkey = k;      
     }
 }
 void FireKeyboard::ECMKey(int, KBSTATE k) {
@@ -716,11 +724,15 @@ void FireKeyboard::Execute () {
     j().jfirekey=UP;
     parent->UnFire();
   }
-  if (f().cloakkey==PRESS) {
-    static bool toggle=true;
+  if (f().lockkey==PRESS) {
+
     f().cloakkey=DOWN;
-    parent->Cloak(toggle);
-    toggle=!toggle;
+    parent->Cloak(cloaktoggle);
+    cloaktoggle=!cloaktoggle;
+  }
+  if (f().lockkey==PRESS) {
+    f().lockkey=DOWN;
+    parent->LockTarget(!parent->TargetLocked());
   }
   if (f().ECMkey==PRESS) {
     parent->GetImageInformation().ecm=-parent->GetImageInformation().ecm;

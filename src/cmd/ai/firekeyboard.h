@@ -10,6 +10,7 @@
 class FireKeyboard: public Order {
   unsigned char sex;
   bool itts;
+  bool cloaktoggle;
   bool refresh_target;
   float gunspeed;
   float gunrange;
@@ -51,6 +52,7 @@ class FireKeyboard: public Order {
   static void WeapSelKey (int,KBSTATE);
   static void MisSelKey (int, KBSTATE);
   static void CloakKey (int, KBSTATE);
+  static void LockKey (int, KBSTATE);
   static void ECMKey (int,KBSTATE);
   static void HelpMeOut (int,KBSTATE);
   static void HelpMeOutFaction (int,KBSTATE);

@@ -271,6 +271,7 @@ void VegaConfig::initCommandMap(){
   command_map["FireKey"]=FireKeyboard::FireKey ;
   command_map["MissileKey"]=FireKeyboard::MissileKey ;
   command_map["TargetKey"]=FireKeyboard::TargetKey ;
+  command_map["LockTargetKey"]=FireKeyboard::LockKey ;
   command_map["ReverseTargetKey"]=FireKeyboard::ReverseTargetKey ;
   command_map["PickTargetKey"]=FireKeyboard::PickTargetKey ;
   command_map["NearestTargetKey"]=FireKeyboard::NearestTargetKey ;

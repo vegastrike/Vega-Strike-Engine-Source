@@ -543,22 +543,24 @@ public:
   Vector LocalCoordinates (Unit * un) const {
     return ToLocalCoordinates ((un->Position()-Position()).Cast());
   }
-  bool InRange (Unit *target, bool cone=true, bool cap=true, bool lock=true) const{
+  bool InRange (Unit *target, bool cone=true, bool cap=true) const{
     double mm;
-    return InRange( target,mm,cone,cap,lock);
+    return InRange( target,mm,cone,cap,true);
   }
   bool InRange (Unit *target, double & mm, bool cone, bool cap, bool lock) const{
     if (this==target||target->CloakVisible()<.8)
       return false;
-    if ((cone&&computer.radar.maxcone>-.98)&&((!lock)||(!TargetLocked()))) {
-	QVector delta( target->Position()-Position());
-	mm = delta.Magnitude();
+    if (cone&&computer.radar.maxcone>-.98){
+      QVector delta( target->Position()-Position());
+      mm = delta.Magnitude();
+      if ((!lock)||(!(TargetLocked()&&computer.target==target))) {
 	double tempmm =mm-target->rSize();
 	if (tempmm>0.0001) {
 	  if ((ToLocalCoordinates (Vector(delta.i,delta.j,delta.k)).k/tempmm)<computer.radar.maxcone&&cone) {
 	    return false;
 	  }
 	}
+      }
     }else {
       mm = (target->Position()-Position()).Magnitude();
     }

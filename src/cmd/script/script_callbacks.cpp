@@ -601,7 +601,7 @@ varInst *Mission::call_io_sprintf(missionNode *node,int mode){
     //    printf("**");
     if(breakstring[1]=='f'){
       missionNode *anode=getArgument(node,mode,current_arg);
-      float res=checkFloatExpr(anode,mode);
+      double res=checkFloatExpr(anode,mode);
       
       if(mode==SCRIPT_RUN){
 	sprintf(outbuffer,beforestring.c_str());
@@ -707,7 +707,7 @@ varInst *Mission::call_io_printf(missionNode *node,int mode){
     //    printf("**");
     if(breakstring[1]=='f'){
       missionNode *anode=getArgument(node,mode,current_arg);
-      float res=checkFloatExpr(anode,mode);
+      double res=checkFloatExpr(anode,mode);
       
       if(mode==SCRIPT_RUN){
 	printf(beforestring.c_str());
@@ -820,7 +820,7 @@ varInst *Mission::callPrintFloats(missionNode *node,int mode){
   int len=node->subnodes.size();
 
   for(int i=0; i<len;i++){
-    float res=checkFloatExpr((missionNode *)node->subnodes[i],mode);
+    double res=checkFloatExpr((missionNode *)node->subnodes[i],mode);
     if(mode==SCRIPT_RUN){
       cout << " " << res << " ," ;
     }

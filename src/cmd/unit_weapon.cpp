@@ -334,6 +334,7 @@ void Unit::Target (Unit *targ) {
   	  mounts[i].time_to_lock = mounts[i].type->LockTime;
         }
         computer.target.SetUnit(targ);
+	LockTarget(false);
       }
     }else {
       if (jump.drive!=-1) {

@@ -385,7 +385,7 @@ void Cockpit::DrawBlips (Unit * un) {
   while ((target = iter.current())!=NULL) {
     if (target!=un) {
       double dist;
-      if (!un->InRange (target,dist,makeBigger==target,true)) {
+      if (!un->InRange (target,dist,makeBigger==target,true,true)) {
 	if (makeBigger==target) {
 	  un->Target(NULL);
 	}
@@ -441,7 +441,7 @@ void Cockpit::DrawEliteBlips (Unit * un) {
     if (target!=un) {
       double mm;
 
-      if (!un->InRange (target,mm,(makeBigger==target),true)) {
+      if (!un->InRange (target,mm,(makeBigger==target),true,true)) {
 	if (makeBigger==target) {
 	  un->Target(NULL);
 	}

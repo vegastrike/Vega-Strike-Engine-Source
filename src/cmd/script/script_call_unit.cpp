@@ -1037,7 +1037,7 @@ varInst *Mission::call_unit(missionNode *node,int mode){
       
     }
     else if(method_id==CMT_UNIT_incrementCargo){
-      float percentagechange= getFloatArg(node,mode,1);
+      double percentagechange= getFloatArg(node,mode,1);
       int quantity= getIntArg(node,mode,2);
       if(mode==SCRIPT_RUN){
 	if (my_unit->numCargo()>0) {

@@ -44,7 +44,7 @@ void FireAt::ChooseTargets (int numtargs, bool force) {
   while ((un = iter.current())) {
     //how to choose a target?? "if looks particularly juicy... :-) tmp.prepend (un);
     relation = GetEffectiveRelationship (un);
-    bool tmp = parent->InRange (un,dist,false,false);
+    bool tmp = parent->InRange (un,dist,false,false,true);
     if (tmp&&((relation<worstrelation||(relation==worstrelation&&dist<range)))) {
       worstrelation = relation;
       range = dist;
