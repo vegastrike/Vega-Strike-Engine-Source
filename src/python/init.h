@@ -36,6 +36,7 @@ BOOST_PYTHON_END_CONVERSION_NAMESPACE
 void InitBriefing ();
 void InitDirector ();
 void InitVS ();
+void InitBase ();
 
 #endif
 

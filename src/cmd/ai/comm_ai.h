@@ -23,7 +23,7 @@ class CommunicatingAI:public Order{
   void GetMadAt (Unit * which, int howMad);
  protected:
   float getAnger (const Unit * un)const;
-  virtual vector <Animation *> *getCommFaces(unsigned char &sex);
+  virtual std::vector <Animation *> *getCommFaces(unsigned char &sex);
  public:
   virtual float GetEffectiveRelationship (const Unit * target) const;
   Unit * GetRandomUnit (float PlayerProbability, float TargetProbability);

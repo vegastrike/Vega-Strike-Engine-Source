@@ -8,18 +8,23 @@
 
 //#define BASE_MAKER
 
-
+#define BASE_EXTENSION ".py"
 
 class Base {
+	int curlinkindex;
+	bool drawlinkcursor;
+	TextPlane curtext;
+public:
 	class Room {
 	public:
 		class Link {
 		public:
 			float x,y,wid,hei;
 			std::string text;
-		        virtual void Click (::Base* base,float x, float y, int button, int state);
-		        virtual ~Link(){} 
-	  
+			const std::string index;
+			virtual void Click (::Base* base,float x, float y, int button, int state);
+			explicit Link (std::string ind) : index(ind) {}
+			virtual ~Link(){} 
 #ifdef BASE_MAKER
 			virtual void EndXML(FILE *fp);
 #endif
@@ -28,7 +33,8 @@ class Base {
 		public:
 			int index;
 			virtual void Click (::Base* base,float x, float y, int button, int state);
-		        virtual ~Goto () {}
+			virtual ~Goto () {}
+			explicit Goto (std::string ind) : Link(ind) {}
 #ifdef BASE_MAKER
 			virtual void EndXML(FILE *fp);
 #endif
@@ -37,7 +43,8 @@ class Base {
 		public:
 			vector <UpgradingInfo::BaseMode> modes;
 			virtual void Click (::Base* base,float x, float y, int button, int state);
-		        virtual ~Comp () {}
+			virtual ~Comp () {}
+			explicit Comp (std::string ind) : Link(ind) {}
 #ifdef BASE_MAKER
 			virtual void EndXML(FILE *fp);
 #endif
@@ -45,32 +52,42 @@ class Base {
 		class Launch : public Link {
 		public:
 			virtual void Click (::Base* base,float x, float y, int button, int state);
-		        virtual ~Launch () {}
+			virtual ~Launch () {}
+			explicit Launch (std::string ind) : Link(ind) {}
 #ifdef BASE_MAKER
 			virtual void EndXML(FILE *fp);
 #endif
 		};
 		class Talk : public Link {
 		public:
+			//At the moment, the Base::Room::Talk class is unused... but I may find a use for it later...
 			std::vector <std::string> say;
 			std::vector <std::string> soundfiles;
 			int index;
 			int curroom;
 			virtual void Click (::Base* base,float x, float y, int button, int state);
-			Talk ();
+			explicit Talk (std::string ind);
 			virtual ~Talk () {}
 #ifdef BASE_MAKER
 			virtual void EndXML(FILE *fp);
 #endif
 		};
+		class Python : public Link {
+		public:
+			std::string file;
+			virtual void Click (::Base* base,float x, float y, int button, int state);
+			Python(std::string pythonfile,std::string ind);
+			virtual ~Python () {}
+		};
 		class BaseObj {
 		public:
+			const std::string index;
 			virtual void Draw (::Base *base);
 #ifdef BASE_MAKER
 			virtual void EndXML(FILE *fp);
 #endif
 			virtual ~BaseObj () {}
-			BaseObj () {}
+			explicit BaseObj (std::string ind) : index(ind) {}
 		};
 		class BaseShip : public BaseObj {
 		public:
@@ -80,9 +97,9 @@ class Base {
 #ifdef BASE_MAKER
 			virtual void EndXML(FILE *fp);
 #endif
-			BaseShip () {}
-			BaseShip (float r0, float r1, float r2, float r3, float r4, float r5, float r6, float r7, float r8, QVector pos)
-				:mat (r0,r1,r2,r3,r4,r5,r6,r7,r8,pos) {}
+			explicit BaseShip (std::string ind) : BaseObj (ind) {}
+			BaseShip (float r0, float r1, float r2, float r3, float r4, float r5, float r6, float r7, float r8, QVector pos, std::string ind)
+				:mat (r0,r1,r2,r3,r4,r5,r6,r7,r8,pos) , BaseObj (ind) {}
 		};
 		class BaseSprite : public BaseObj {
 		public:
@@ -93,18 +110,21 @@ class Base {
 			virtual void EndXML(FILE *fp);
 #endif
 			virtual ~BaseSprite () {}
-			BaseSprite (const char *spritefile) 
-				:spr(spritefile,BILINEAR,GFXTRUE) {}
+			BaseSprite (const char *spritefile, std::string ind) 
+				:spr(spritefile,BILINEAR,GFXTRUE), BaseObj(ind) {}
 		};
 		class BaseTalk : public BaseObj {
 		public:
+			static bool hastalked;
 			virtual void Draw (::Base *base);
-			Talk * caller;
-			int sayindex;
+//			Talk * caller;
+//			int sayindex;
 			int curchar;
 			float curtime;
 			virtual ~BaseTalk () {}
-			BaseTalk (Talk *caller) : caller (caller),  sayindex (0),curchar(0) {}
+			std::string message;
+//			BaseTalk (Talk *caller) : caller (caller),  sayindex (0),curchar(0) {}
+			BaseTalk (std::string msg,std::string ind) : curchar (0), curtime (0), message(msg), BaseObj(ind) {}
 #ifdef BASE_MAKER
 			virtual void EndXML(FILE *fp) {}
 #endif
@@ -124,16 +144,9 @@ class Base {
 	};
 	friend class Room;
 	friend class Room::BaseTalk;
-	int curlinkindex;
-	bool drawlinkcursor;
-	TextPlane curtext;
-
-	int unitlevel;
-public:
 	int curroom;
 	std::vector <Room*> rooms;
 	TextPlane othtext;
-
 	static Base *CurrentBase;
 	static bool CallComp;
 	UnitContainer caller;
@@ -145,10 +158,10 @@ public:
 	void GotoLink(int linknum);
 	void InitCallbacks ();
 	void CallCommonLinks (std::string name, std::string value);
-	static void Base::beginElement(void *userData, const XML_Char *names, const XML_Char **atts);
-	void Base::beginElement(const string &name, const AttributeList attributes);
-	static void Base::endElement(void *userData, const XML_Char *name);
-	void Base::LoadXML(const char * filename, const char * time_of_day);
+//	static void Base::beginElement(void *userData, const XML_Char *names, const XML_Char **atts);
+//	void Base::beginElement(const string &name, const AttributeList attributes);
+//	static void Base::endElement(void *userData, const XML_Char *name);
+	void Base::Load(const char * filename, const char * time_of_day);
 	static void ClickWin (int x, int y, int button, int state);
 	void Click (float x, float y, int button, int state);
 	static void MouseOverWin (int x, int y);

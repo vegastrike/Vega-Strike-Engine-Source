@@ -483,10 +483,10 @@ void Cockpit::DrawBlips (Unit * un) {
       }else {
 	GFXEnd();
 	GFXBegin(GFXLINE);
-	GFXVertex3f(v.i+(7.8)/g_game.x_resolution,v.j,v.k);
-	GFXVertex3f(v.i-(7.5)/g_game.x_resolution,v.j,v.k);
-	GFXVertex3f(v.i,v.j-(7.5)/g_game.y_resolution,v.k);
-	GFXVertex3f(v.i,v.j+(7.8)/g_game.y_resolution,v.k);
+	GFXVertex3f((float)(v.i+(7.8)/g_game.x_resolution),v.j,v.k); //I need to tell it to use floats...
+	GFXVertex3f((float)(v.i-(7.5)/g_game.x_resolution),v.j,v.k); //otherwise, it gives an error about
+	GFXVertex3f((float)(v.i,v.j-(7.5)/g_game.y_resolution),v.k); //not knowning whether to use floats
+	GFXVertex3f((float)(v.i,v.j+(7.8)/g_game.y_resolution),v.k); //or doubles.
 	GFXEnd();
 	GFXBegin (GFXPOINT);
       }      

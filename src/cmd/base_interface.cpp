@@ -4,6 +4,8 @@
 #include "lin_time.h"
 #include "audiolib.h"
 #include "planet.h"
+#include <python.h>
+#include <algorithm>
 #ifdef BASE_MAKER
  #include <stdio.h>
  #ifdef _WIN32
@@ -12,14 +14,17 @@
 static char makingstate=0;
 #endif
 
+bool Base::Room::BaseTalk::hastalked=false;
 
 Base::Room::~Room () {
 	int i;
 	for (i=0;i<links.size();i++) {
-		delete links[i];
+		if (links[i])
+			delete links[i];
 	}
 	for (i=0;i<objs.size();i++) {
-		delete objs[i];
+		if (objs[i])
+			delete objs[i];
 	}
 }
 
@@ -65,7 +70,8 @@ void Base::Room::BaseShip::Draw (Base *base) {
 void Base::Room::Draw (Base *base) {
 	int i;
 	for (i=0;i<objs.size();i++) {
-		objs[i]->Draw(base);
+		if (objs[i])
+			objs[i]->Draw(base);
 	}
 }
 
@@ -78,28 +84,41 @@ void Base::Room::BaseTalk::Draw (Base *base) {
 		GFXVertex3f(caller->x,caller->y+caller->hei,0);
 		GFXVertex3f(caller->x,caller->y,0);
 	GFXEnd();*/
-	if (curchar<caller->say[sayindex].size()) {
+	if (hastalked) return;
+	if (curchar<message.size()) {
 		curtime+=GetElapsedTime();
 		if (curtime>.025) {
-			base->othtext.SetText(caller->say[sayindex].substr(0,++curchar));
+			base->othtext.SetText(message.substr(0,++curchar));
 			curtime=0;
 		}
 	} else {
 		curtime+=GetElapsedTime();
-		if (curtime>.01*caller->say[sayindex].size()) {
+		if (curtime>.01*message.size()) {
 			curtime=0;
-			caller->Click(base,0,0,WS_LEFT_BUTTON,WS_MOUSE_UP);
+			BaseObj * self=this;
+			std::vector<BaseObj *>::iterator ind=std::find(base->rooms[base->curroom]->objs.begin(),
+					base->rooms[base->curroom]->objs.end(),
+					this);
+			if (ind<base->rooms[base->curroom]->objs.end()) {
+				*ind=NULL;
+				base->othtext.SetText("");
+				delete this;
+				return; //do not do ANYTHING with 'this' after the previous statement...
+			}
 		}
 	}
+	hastalked=true;
 }
 
 int Base::Room::MouseOver (Base *base,float x, float y) {
 	for (int i=0;i<links.size();i++) {
-		if (x>=links[i]->x&&
-				x<=(links[i]->x+links[i]->wid)&&
-				y>=links[i]->y&&
-				y<=(links[i]->y+links[i]->hei)) {
-			return i;
+		if (links[i]) {
+			if (x>=links[i]->x&&
+					x<=(links[i]->x+links[i]->wid)&&
+					y>=links[i]->y&&
+					y<=(links[i]->y+links[i]->hei)) {
+				return i;
+			}
 		}
 	}
 	return -1;
@@ -219,12 +238,16 @@ void Base::Room::Click (::Base* base,float x, float y, int button, int state) {
 		}
 #else
 		if (state==WS_MOUSE_UP) {
-			Link *curlink=links[base->curlinkindex%links.size()];
-			base->curlinkindex++;
-			int x=(((curlink->x+(curlink->wid/2))+1)/2)*g_game.x_resolution;
-			int y=-(((curlink->y+(curlink->hei/2))-1)/2)*g_game.y_resolution;
-			winsys_warp_pointer(x,y);
-			MouseOverWin(x,y);
+			for (int begind=base->curlinkindex;begind%links.size()!=base->curlinkindex;begind++) {
+				Link *curlink=links[base->curlinkindex++%links.size()];
+				if (curlink) {
+					int x=(((curlink->x+(curlink->wid/2))+1)/2)*g_game.x_resolution;
+					int y=-(((curlink->y+(curlink->hei/2))-1)/2)*g_game.y_resolution;
+					winsys_warp_pointer(x,y);
+					MouseOverWin(x,y);
+					break;
+				}
+			}
 		}
 #endif
 	}
@@ -265,7 +288,7 @@ void Base::MouseOverWin (int x, int y) {
 
 void Base::GotoLink (int linknum) {
 	othtext.SetText("");
-	if (rooms.size()>linknum) {
+	if (rooms.size()>linknum&&linknum>=0) {
 		curlinkindex=0;
 		curroom=linknum;
 		curtext.SetText(rooms[curroom]->deftext);
@@ -324,7 +347,8 @@ void Unit::UpgradeInterface(Unit * baseun) {
 	}
 }
 
-Base::Room::Talk::Talk () {
+Base::Room::Talk::Talk (std::string ind)
+		: Base::Room::Link(ind) {
 	index=-1;
 #ifndef BASE_MAKER
 	gameMessage * last;
@@ -346,6 +370,9 @@ Base::Room::Talk::Talk () {
 		this->soundfiles.push_back(newsound);
 	}
 #endif
+}
+Base::Room::Python::Python (std::string pythonfile,std::string ind)
+		: Base::Room::Link(ind), file (pythonfile) {
 }
 double compute_light_dot (Unit * base,Unit *un) {
   StarSystem * ss =base->getStarSystem ();
@@ -390,13 +417,13 @@ Base::Base (const char *basefile, Unit *base, Unit*un) {
 	othtext.GetCharSize(x,y);
 	othtext.SetCharSize(x*2,y*2);
 	othtext.SetSize(.75,-.75);
-	LoadXML(basefile, compute_time_of_day(base,un));
+	Load(basefile, compute_time_of_day(base,un));
 	if (!rooms.size()) {
 		fprintf(stderr,"\nERROR: there are no rooms...");
 		assert(0);
 		rooms.push_back(new Room ());
-		rooms.back()->objs.push_back(new Room::BaseShip (-1,0,0,0,0,-1,0,1,0,QVector(0,0,75)));
-		rooms.back()->links.push_back(new Room::Launch ());
+		rooms.back()->objs.push_back(new Room::BaseShip (-1,0,0,0,0,-1,0,1,0,QVector(0,0,75),"default room"));
+		rooms.back()->links.push_back(new Room::Launch ("default room"));
 		rooms.back()->links.back()->x=rooms.back()->links.back()->y=-1;
 		rooms.back()->links.back()->wid=rooms.back()->links.back()->hei=2;
 		rooms.back()->deftext="ERROR: No rooms specified...";
@@ -443,16 +470,16 @@ void Base::Room::Talk::Click (Base *base,float x, float y, int button, int state
 	if (state==WS_MOUSE_UP) {
 		if (index>=0) {
 			delete base->rooms[curroom]->objs[index];
-			base->rooms[curroom]->objs.erase(base->rooms[curroom]->objs.begin()+index);
+			base->rooms[curroom]->objs[index]=NULL;
 			index=-1;
 			base->othtext.SetText("");
 		} else if (say.size()) {
 			curroom=base->curroom;
-			index=base->rooms[curroom]->objs.size();
-			base->rooms[curroom]->objs.push_back(new Room::BaseTalk(this));
+//			index=base->rooms[curroom]->objs.size();
 			int sayindex=rand()%say.size();
-			((Room::BaseTalk*)(base->rooms[curroom]->objs.back()))->sayindex=(sayindex);
-			((Room::BaseTalk*)(base->rooms[curroom]->objs.back()))->curtime=0;
+			base->rooms[curroom]->objs.push_back(new Room::BaseTalk(say[sayindex],"currentmsg"));
+//			((Room::BaseTalk*)(base->rooms[curroom]->objs.back()))->sayindex=(sayindex);
+//			((Room::BaseTalk*)(base->rooms[curroom]->objs.back()))->curtime=0;
 			if (soundfiles[sayindex].size()>0) {
 				int sound = AUDCreateSoundWAV (soundfiles[sayindex],false);
 				if (sound==-1) {
@@ -470,9 +497,27 @@ void Base::Room::Talk::Click (Base *base,float x, float y, int button, int state
 	}
 }
 
+void Base::Room::Python::Click (Base *base,float x, float y, int button, int state) {
+	if (state==WS_MOUSE_UP) {
+		const char * filnam=this->file.c_str();
+		if (filnam[0]) {
+			FILE *fp=fopen(filnam,"r");
+			if (fp) {
+				int length=strlen(filnam);
+				char *newfile=new char[length+1];
+				strncpy(newfile,filnam,length);
+				newfile[length]='\0';
+				PyRun_SimpleFile(fp,newfile);
+				fclose(fp);
+			}
+		}
+	}
+}
+
 void Base::Draw () {
 	GFXColor(0,0,0,0);
 	StartGUIFrame(GFXTRUE);
+	Room::BaseTalk::hastalked=false;
 	rooms[curroom]->Draw(this);
 	float x,y;
 	curtext.GetCharSize(x,y);

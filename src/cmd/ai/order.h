@@ -67,7 +67,7 @@
  */
 //#define ORDERDEBUG
 class Animation;
-typedef vector<class varInst *> olist_t;
+typedef std::vector<class varInst *> olist_t;
 class Order {
  private:
 
@@ -151,13 +151,13 @@ class Order {
 
   ///searches the suborders recursively for the first order that has an orderlist
   Order *findOrderList();
-  string createFullOrderDescription(int level=0);
-  void setActionString(string astring) { actionstring=astring; };
-  string getActionString() { return actionstring; };
+  std::string createFullOrderDescription(int level=0);
+  void setActionString(std::string astring) { actionstring=astring; };
+  std::string getActionString() { return actionstring; };
   Animation * getCommFace(float mood, unsigned char & sex);
  protected:
   virtual std::vector <Animation *>* getCommFaces(unsigned char &sex);
-  string  actionstring;
+  std::string  actionstring;
 };
 ///Convenience order factory for "clicking to create an order"
 class OrderFactory {

@@ -4,9 +4,11 @@
 #include <assert.h>
 #include "config_xml.h"
 #include "vs_globals.h"
-
+#include <sys/stat.h>
 #include "xml_support.h"
 #include "gfx/mesh.h"
+#undef BOOST_NO_CWCHAR
+
 namespace NebulaXML {
 	FOGMODE parse_fogmode (string val) {
 		if (val=="exp") {

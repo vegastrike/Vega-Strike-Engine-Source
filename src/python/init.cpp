@@ -244,7 +244,8 @@ void Python::init() {
 	InitBriefing ();
 	InitVS ();
 	InitDirector ();
-//  initVegastrike();
+	InitBase ();
+//  InitVegastrike();
 }
 void Python::test() {
 
