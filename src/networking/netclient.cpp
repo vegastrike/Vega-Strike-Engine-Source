@@ -439,12 +439,8 @@ SOCKETALT	NetClient::init_acct( char * addr, unsigned short port)
 	tmpport = atoi( tport.c_str());
 
 	acct_sock = NetUITCP::createSocket( srvip, tmpport );
-	if( !acct_sock.valid())
-	{
-		cerr<<"Cannot connect to account server... quitting"<<endl;
-		cleanup();
-	}
 	COUT <<"accountserver on socket "<<acct_sock<<" done."<<endl;
+	return acct_sock;
 }
 
 /*************************************************************/
