@@ -68,6 +68,7 @@ public:
   boost::python::tuple InsideCollideTree (UnitWrapper smaller) {{CHECKME boost::python::tuple(QVector(0,0,0),Vector(0,0,0),QVector(0,0,0),Vector(0,0,0));}QVector bigpos, smallpos; Vector bigNormal, smallNormal; if(!unit->InsideCollideTree(smaller,bigpos,bigNormal,smallpos,smallNormal)){bigpos=smallpos=QVector(0,0,0);} boost::python::tuple tup (bigpos,bigNormal,smallpos,smallNormal); return tup;}
 //  UnitWrapper getSubUnit(int which) {{CHECKME 0;}un_iter it=unit->getSubUnits(); for (int i=0;i<which;i++) {it.advance();}return it.current();}
   UnitWrapper getFlightgroupLeader () {{CHECKME 0;}Flightgroup *group=unit->getFlightgroup();if (group) return group->leader; else return 0;}
+  void setFlightgroupLeader (Unit * un) {{CHECKME;}Flightgroup *group=unit->getFlightgroup();if (group) group->leader.SetUnit(un);}
   float GetVelocityDifficultyMult() {{CHECKME 0;}float diff=1;unit->GetVelocityDifficultyMult(diff);return diff;}
   int GetJumpStatus(){{CHECKME -1;} return unit->GetJumpStatus().drive;}
   void ApplyDamage (Vector pnt,Vector normal, float amt, UnitWrapper dealer, float phasedamage, float r, float g, float b, float a) {
@@ -220,6 +221,7 @@ PYTHON_END_CLASS(VS,Cargo)
   Class.def(&UnitWrapper::getAverageGunSpeed,"getAverageGunSpeed");
   Class.def(&UnitWrapper::InsideCollideTree,"InsideCollideTree");
   Class.def(&UnitWrapper::getFlightgroupLeader,"getFlightgroupLeader");
+  Class.def(&UnitWrapper::setFlightgroupLeader,"setFlightgroupLeader");
   Class.def(&UnitWrapper::GetVelocityDifficultyMult,"GetVelocityDifficultyMult");
   Class.def(&UnitWrapper::GetJumpStatus,"GetJumpStatus");
   Class.def(&UnitWrapper::ApplyDamage,"ApplyDamage");
