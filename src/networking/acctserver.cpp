@@ -12,7 +12,7 @@
 
 using namespace VSFileSystem;
 
-VegaConfig * vs_config;
+VegaConfig * vs_config = NULL;
 string acctdir;
 
 void	getZoneInfoBuffer( unsigned short zoneid, NetBuffer & netbuf)
