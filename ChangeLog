@@ -1,3 +1,11 @@
+2001-11-19 Daniel Horn <hellcatv@hotmail.com>
+	* added terrain config file
+	* added texturemap .png image to specify which texture to use
+	* added heightmap .png image
+	* added png support (soon to port to aux_texture once the cwd stuff is in)
+	
+	
+
 2001-11-17 Alexander Rawass <alexannika@users.sourceforge.net>
 	
 	* modified vegastrike.h to have SIMULATION_ATOM as a define
