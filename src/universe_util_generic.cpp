@@ -20,6 +20,7 @@
 #include "vsfilesystem.h"
 #include "cmd/unit_util.h"
 #include "networking/netserver.h"
+
 //extern class Music *muzak;
 //extern unsigned int AddAnimation (const QVector & pos, const float size, bool mvolatile, const std::string &name, float percentgrow );
 extern Unit&GetUnitMasterPartList();
@@ -189,6 +190,7 @@ namespace UniverseUtil {
 			UnitUtil::setFgDirective (en,"h");//help me out here!
 		}
 	}
+
 	///tells the respective flightgroups in this system to stop killing each other urgently...they may still attack--just not warping and stuff
 	void StopTargettingEachOther(string fgname, string faction, string enfgname, string enfaction){
 		int fac = FactionUtil::GetFaction(faction.c_str());

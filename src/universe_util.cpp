@@ -48,9 +48,6 @@ namespace UniverseUtil {
 	  static string newssong=vs_config->getVariable("audio","missionvictorysong","../music/victory.ogg");
 	  muzak->GotoSong(newssong);
 	}
-	void StopAllSounds(void) {
-          AUDStopAllSounds();
-        }
 	int musicAddList(string str) {
 		return muzak->Addlist(str.c_str());
 	}
@@ -73,6 +70,9 @@ namespace UniverseUtil {
 		AUDStartPlaying (sound);
 		AUDDeleteSound(sound);
 	}
+	void StopAllSounds(void) {
+          AUDStopAllSounds();
+        }
         void cacheAnimation(string aniName) {
 	  static vector <Animation *> anis;
 	  anis.push_back (new Animation(aniName.c_str()));

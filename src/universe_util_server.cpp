@@ -44,5 +44,8 @@ namespace UniverseUtil {
 		return 0;
         }
 	void musicSkip() {}
+	void StopAllSounds(void) {
+        }
+
 }
 #undef activeSys
