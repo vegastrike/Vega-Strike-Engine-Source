@@ -2,6 +2,7 @@
 #include "vs_globals.h"
 #include "turretai.h"
 #include "cmd/unit_generic.h"
+#include "cmd/role_bitmask.h"
 using namespace Orders;
 TurretAI::TurretAI ():FaceTarget (false) {
   type|=WEAPON;
@@ -25,25 +26,16 @@ void TurretAI::Execute () {
       double mag = Pos.Magnitude();
       Pos=Pos/mag;
       float dot = R.Dot (Pos.Cast());
-	  if (missile_prob*RAND_MAX>rand()) {
-		int locked = parent->LockMissile();
-		if (locked==1){
-		  parent->Fire(true);
-		  parent->ToggleWeapon(true);//change missiles to only fire 1
-		}
-	  }
-      if (mag-targ->rSize()-parent->rSize()<1.2*range&&dot>dot_cutoff) {
-		parent->Fire(false);
-		if (missile_prob*RAND_MAX>rand()) {
-		  int locked = parent->LockMissile();
-		  if (locked==-1){
-		    parent->Fire(true);
-		    parent->ToggleWeapon(true);//change missiles to only fire 1
-		  }
-		}
-	  }else {
-		parent->UnFire();
-      }
-    }    
+      bool shouldfire = (mag-targ->rSize()-parent->rSize()<1.2*range&&dot>dot_cutoff);
+      unsigned int firebitm = ((1 << parent->combatRole()) |
+			       ROLES::FIRE_GUNS|
+			       (shouldfire?0:ROLES::FIRE_ONLY_AUTOTRACKERS)|
+			       (((float)rand())/
+				((float)RAND_MAX)<missile_prob)?ROLES::FIRE_MISSILES:0);
+      parent->Fire(firebitm);
+      if (!shouldfire)
+	parent->UnFire();
+      
+    }   
   }
 }
