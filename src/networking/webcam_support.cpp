@@ -21,7 +21,9 @@ using std::endl;
 using std::hex;
 
 #ifdef __APPLE__
-#include <Quickdraw.h>
+//#include <Quickdraw.h>
+//#include <ApplicationServices/ApplicationServices.h>
+//#include <Carbon.h>
 OSErr	ExhaustiveError(void)
 {
 	OSErr iErr;
@@ -183,7 +185,7 @@ int		WebcamSupport::Init()
 		DoError(iErr, "NewGWorld failed.\rTrying giving me more memory or use a sensible video size");
 		exit(1);
 	}
-	LockPixels(video -> sg_world -> portPixMap);
+	LockPixels( GetGWorldPixMap( video -> sg_world));
 
 	//	open default sequence grabber
 	video -> sg_component = OpenDefaultComponent('barg', 0);
@@ -499,8 +501,30 @@ char *	WebcamSupport::CaptureImage()
 		DoError(component_error, "SGIdle failed");
 		exit(1);
 		}
-	Ptr pixmap_base = GetPixBaseAddr(video->sg_world->portPixMap);
-	cerr<<"\t\tCaptured "<<video->sg_world->portPixMap.bounds.right<<"x"<<video->sg_world->portPixMap.bounds.bottom<<" size with "<<hex<<video->sg_world->portPixMap.rowBytes<<" row bytes"<<endl;
+	Ptr pixmap_base = GetPixBaseAddr( GetGWorldPixMap( video->sg_world));
+	// Writes the image to a test jpeg file
+	Rect r;
+	r.top = r.left = 0;
+	r.right = this->width;
+	r.bottom = this->height;
+	Ptr	jpeg_data;
+	ImageDescriptionHandle desc;
+	OSErr iErr = CompressImage( GetGWorldPixMap( video->sg_world), &r, codecNormalQuality, kJPEGCodecType, desc, jpeg_data);
+	FSSpec spec;
+	short fp;
+	long nbwritten;
+	// Open for writing
+	iErr = FSpOpenDF( &spec, fsWrPerm, &fp);
+	// Write the jpeg data
+	iErr = FSWrite( fp, &nbwritten, jpeg_data);
+	// Close the file
+	FSClose( fp);
+	/*
+	int x = GetGWorldPixMap( video->sg_world)->bounds.right;
+	int y = GetGWorldPixMap( video->sg_world)->bounds.bottom;
+	int rowb = GetGWorldPixMap( video->sg_world)->rowBytes;
+	cerr<<"\t\tCaptured "<<x<<"x"<<y<<" size with "<<hex<<rowb<<" row bytes"<<endl;
+	*/
 	/*
 	component_error = SGUpdate(video -> sg_component, ??????? );
 	if (component_error)
@@ -522,11 +546,10 @@ int		WebcamSupport::GetCapturedSize()
 	}
 	else
 		cerr<<"!!! WARNING Webcam not grabbing !!!"<<endl;
-	return NULL;
 #endif
 #if defined(_WIN32) && !defined(__CYGWIN__)
-	return 0;
 #endif
+	return 0;
 }
 
 void	WebcamSupport::Shutdown()

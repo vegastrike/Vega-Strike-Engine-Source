@@ -10,7 +10,7 @@
 //#include <afx.h>
 #endif
 #ifdef __APPLE__
-#include <QuickTimeComponents.h>
+#include <FlatCarbon/QuickTimeComponents.h>
 #endif
 #define DEFAULT_CAPTURE_DRIVER 0
 

@@ -17,6 +17,9 @@
 - Handle a timeout between the time the player logged in and the time he really enters the game
 - Turn mount_num into a char ?
 - Add options to server keyboard control : KILL A SERVER UNIT, KICK A PLAYER, SEND A PLAYER TO JAIL SYSTEM, SEND ADMIN MESSAGE TO PLAYERS...
+- Sometimes in the future : make server settings with :
+							- no AI wingmen for players
+							- do not allow players' capships
 
 - Think about transfering config data such as difficulty, physics...
 - Find all the used vars in Unit stuff and integrate them in the serverconfig
