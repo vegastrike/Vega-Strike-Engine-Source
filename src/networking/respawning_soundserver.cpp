@@ -157,7 +157,7 @@ void changehome (bool to, bool linuxhome=true) {
       chdir (pwent->pw_dir);
     }
 #endif
-    mkdir (".vegastrike");
+    mkdir (".vegastrike",0xffffffff);
     chdir (".vegastrike");
   }else {
     if (!paths.empty()) {
