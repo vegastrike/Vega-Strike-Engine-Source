@@ -13,13 +13,14 @@
 #include "config_xml.h"
 #include "vs_globals.h"
 #include "xml_support.h"
+#define DESTRUCTDEBUG
 static list<Unit*> Unitdeletequeue;
 void Unit::UnRef() {
   ucref--;
-  if (killed&&ucref==0) {
+  if (killed&&ucref==0&&!SubUnit) {
     Unitdeletequeue.push_back(this);//delete
 #ifdef DESTRUCTDEBUG
-    fprintf (stderr,"0x%x - %d\n",this,Unitdeletequeue.size());
+    fprintf (stderr,"%s 0x%x - %d\n",name.c_str(),this,Unitdeletequeue.size());
 #endif
   }
 }
@@ -127,10 +128,16 @@ void Unit::Kill() {
   if(aistate)
     delete aistate;
   aistate=NULL;
+  if(subunits) {
+    for(int subcount = 0; subcount < numsubunit; subcount++) {
+      subunits[subcount]->Kill();
+    }
+  }
   if (ucref==0&&!SubUnit) {
     Unitdeletequeue.push_back(this);
+
 #ifdef DESTRUCTDEBUG
-    fprintf (stderr,"0x%x - %d\n",this,Unitdeletequeue.size());
+    fprintf (stderr,"%s 0x%x - %d\n",name.c_str(),this,Unitdeletequeue.size());
 #endif
   }
 }
@@ -139,6 +146,7 @@ void Unit::ProcessDeleteQueue() {
 #ifdef DESTRUCTDEBUG
     fprintf (stderr,"Eliminatin' 0x%x - %d",Unitdeletequeue.back(),Unitdeletequeue.size());
     fflush (stderr);
+    fprintf (stderr,"Eliminatin' %s\n",Unitdeletequeue.back()->name.c_str());
 #endif
     if (Unitdeletequeue.back()->SubUnit) {
       fprintf (stderr,"Double deleting (related to double dipping)");
@@ -146,7 +154,7 @@ void Unit::ProcessDeleteQueue() {
       delete Unitdeletequeue.back();
     }
 #ifdef DESTRUCTDEBUG
-    fprintf (stderr,"Completed\n",Unitdeletequeue.back(),Unitdeletequeue.size());
+    fprintf (stderr,"Completed %d\n",Unitdeletequeue.size());
     fflush (stderr);
 #endif
     Unitdeletequeue.pop_back();

@@ -1,3 +1,7 @@
+2002-02-02 Daniel Horn <hellcatv@hotmail.com>
+	* Fixed absolutely horrible ucref 'smart pointer' bug with subunits
+	* Added some original mining bases by DMJC
+	
 2002-02-08 Daniel Horn <hellcatv@hotmail.com>
 	* Added Day/Year tag to system
 	* Removed velocity tag from system (besides it should have been speed...misleading)

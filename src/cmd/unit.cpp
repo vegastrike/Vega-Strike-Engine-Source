@@ -47,7 +47,7 @@
 //if the PQR of the unit may be variable...for radius size computation
 //#define VARIABLE_LENGTH_PQR
 
-
+#define DESTRUCTDEBUG
 
 
 
@@ -363,8 +363,11 @@ Unit::~Unit()
   if ((!killed)&&(!SubUnit)) {
     fprintf (stderr,"Assumed exit on unit %s(if not quitting, report error)\n",name.c_str());
   }
+  if (ucref) {
+    fprintf (stderr,"DISASTER AREA!!!!");
+  }
 #ifdef DESTRUCTDEBUG
-  fprintf (stderr,"stage %d", 0);
+  fprintf (stderr,"stage %d %x %d\n", 0,this,ucref);
   fflush (stderr);
 #endif
   //  fprintf (stderr,"Freeing Unit %s\n",name.c_str());
@@ -387,13 +390,13 @@ Unit::~Unit()
     AUDDeleteSound (sound->cloak);
   }
 #ifdef DESTRUCTDEBUG
-  fprintf (stderr,"%d", 1);
+  fprintf (stderr,"%d %x ", 1,planet);
   fflush (stderr);
 #endif
   if (planet)
     delete planet;
 #ifdef DESTRUCTDEBUG
-  fprintf (stderr,"%d", 2);
+  fprintf (stderr,"%d %x\n", 2,image->hudImage);
   fflush (stderr);
 #endif
   if (image->hudImage )
@@ -404,13 +407,13 @@ Unit::~Unit()
   }
 
 #ifdef DESTRUCTDEBUG
-  fprintf (stderr,"%d", 3);
+  fprintf (stderr,"%d %x", 3,image);
   fflush (stderr);
 #endif
   delete image;
   delete sound;
 #ifdef DESTRUCTDEBUG
-  fprintf (stderr,"%d", 4);
+  fprintf (stderr,"%d %x %x", 4,bspTree, bspShield);
   fflush (stderr);
 #endif
   if (bspTree)
@@ -426,7 +429,7 @@ Unit::~Unit()
   if (colShield)
     delete colShield;
 #ifdef DESTRUCTDEBUG
-  fprintf (stderr,"%d", 6);
+  fprintf (stderr,"%d %x", 6,mounts);
   fflush (stderr);
 #endif
   for (int beamcount=0;beamcount<nummounts;beamcount++) {
@@ -435,7 +438,7 @@ Unit::~Unit()
       delete mounts[beamcount].ref.gun;//hope we're not killin' em twice...they don't go in gunqueue
   }
 #ifdef DESTRUCTDEBUG
-  fprintf (stderr,"%d", 7);
+  fprintf (stderr,"%d %x ", 7,meshdata);
   fflush (stderr);
 #endif
 	if(meshdata&&nummesh>0)
@@ -445,17 +448,23 @@ Unit::~Unit()
 		delete [] meshdata;
 	}
 #ifdef DESTRUCTDEBUG
-  fprintf (stderr,"%d", 8);
+  fprintf (stderr,"%d %x ", 8, subunits);
   fflush (stderr);
 #endif
 	if(subunits)
 	{
-		for(int subcount = 0; subcount < numsubunit; subcount++)
-			delete subunits[subcount];
-		delete [] subunits;
+	  for(int subcount = 0; subcount < numsubunit; subcount++) {
+	    if (subunits[subcount]->ucref!=0){
+	      subunits[subcount]->SubUnit=false;
+	      fprintf (stderr,"subunits referencing something");
+       	    }else {
+	      delete subunits[subcount];
+	    }
+	  }
+	  delete [] subunits;
 	}
 #ifdef DESTRUCTDEBUG
-  fprintf (stderr,"%d", 9);
+  fprintf (stderr,"%d %x ", 9, halos);
   fflush (stderr);
 #endif
 	if (halos) {
@@ -465,7 +474,7 @@ Unit::~Unit()
 	  delete [] halos;
 	}
 #ifdef DESTRUCTDEBUG
-  fprintf (stderr,"%d", 1);
+  fprintf (stderr,"%d %x ", 1,mounts);
   fflush (stderr);
 #endif
 	if (mounts) {
