@@ -43,11 +43,13 @@
 double interpolation_blend_factor;
 
 
-#define PARANOIA .8
+#define PARANOIA .4
 void Unit::Threaten (Unit * targ, float danger) {
-  if (danger>PARANOIA) {
+  if (danger>PARANOIA&&danger>computer.threatlevel) {
     computer.threat.SetUnit(targ);
+    computer.threatlevel = danger;
   }
+
 }
 void Unit::calculate_extent() {  
   int a;
@@ -71,6 +73,7 @@ void Unit::SetResolveForces (bool ys) {
 
 void Unit::Init()
 {
+  faction =0;
   resolveforces=true;
   CollideInfo.object = NULL;
   CollideInfo.type = LineCollide::UNIT;

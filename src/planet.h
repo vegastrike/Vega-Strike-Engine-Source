@@ -12,7 +12,7 @@ ok *
 #include "physics.h"
 #include "UnitCollection.h"
 #include "iterator.h"
-
+struct GFXMaterial;
 /* Orbits in the xy plane with the given radius. Depends on a reorientation of coordinate bases */
 
 struct Texture;
@@ -47,8 +47,8 @@ class Planet : public Unit {
  public:
   Planet();
   void endElement();
-  void beginElement(Vector x,Vector y,float vely,float velx,float gravity,float radius,char * filename,char * alpha,vector<char *>dest,int level,bool isunit=false);
-  Planet(Vector x,Vector y,float vely,float velx,float gravity,float radius,char * filename,char *alpha,vector<char *> dest, const Vector &orbitcent, Unit * parent);
+  void beginElement(Vector x,Vector y,float vely,float velx,float gravity,float radius,char * filename,char * alpha,vector<char *>dest,int level, const GFXMaterial &ourmat, bool isunit=false);
+  Planet(Vector x,Vector y,float vely,float velx,float gravity,float radius,char * filename,char *alpha,vector<char *> dest, const Vector &orbitcent, Unit * parent, const GFXMaterial & ourmat);
   ~Planet();
   virtual enum clsptr isUnit() {return PLANETPTR;}
 

@@ -6,7 +6,7 @@
 #include "UnitCollection.h"
 #include "gfx_bsp.h"
 #include "cmd_order.h"
-
+#include "gfxlib_struct.h"
 PlanetaryOrbit:: PlanetaryOrbit(Unit *p, double velocity, double initpos, const Vector &x_axis, const Vector &y_axis, const Vector & centre, Unit * targetunit) : Order(MOVEMENT), parent(p), velocity(velocity), theta(initpos), x_size(x_axis), y_size(y_axis) { 
   parent->SetResolveForces(false);
     double delta = x_size.Magnitude() - y_size.Magnitude();
@@ -59,13 +59,13 @@ void PlanetaryOrbit::Execute() {
 void Planet::endElement() {  
 }
 
-void Planet::beginElement(Vector x,Vector y,float vely,float pos,float gravity,float radius,char * filename,char * alpha,vector<char *> dest,int level,bool isunit){
+void Planet::beginElement(Vector x,Vector y,float vely,float pos,float gravity,float radius,char * filename,char * alpha,vector<char *> dest,int level,  const GFXMaterial & ourmat,bool isunit){
   UnitCollection::UnitIterator * satiterator =NULL;
   if (level>2) {
     UnitCollection::UnitIterator * satiterator = satellites.createIterator();
 	  assert(satiterator->current()!=NULL);
 	  if (satiterator->current()->isUnit()==PLANETPTR) {
-		((Planet *)satiterator->current())->beginElement(x,y,vely,pos,gravity,radius,filename,alpha,dest,level-1,isunit);
+		((Planet *)satiterator->current())->beginElement(x,y,vely,pos,gravity,radius,filename,alpha,dest,level-1,ourmat,isunit);
 	  } else {
 	    fprintf (stderr,"Planets are unable to orbit around units");
 	  }
@@ -75,7 +75,7 @@ void Planet::beginElement(Vector x,Vector y,float vely,float pos,float gravity,f
       satiterator = satellites.createIterator();
       satiterator->current()->SetAI (new PlanetaryOrbit (satiterator->current(),vely,pos,x,y, Vector (0,0,0), this)) ;
     }else {
-      satellites.prepend(new Planet(x,y,vely,pos,gravity,radius,filename,alpha,dest, Vector (0,0,0), this));
+      satellites.prepend(new Planet(x,y,vely,pos,gravity,radius,filename,alpha,dest, Vector (0,0,0), this, ourmat));
     }
   }
   delete satiterator;
@@ -88,7 +88,7 @@ Planet::Planet()  : Unit(), radius(0.0f), satellites() {
   SetAI(new Order()); // no behavior
 }
 
-Planet::Planet(Vector x,Vector y,float vely, float pos,float gravity,float radius,char * textname,char * alpha,vector <char *> dest, const Vector & orbitcent, Unit * parent) : Unit(), radius(0.0f),  satellites() {
+Planet::Planet(Vector x,Vector y,float vely, float pos,float gravity,float radius,char * textname,char * alpha,vector <char *> dest, const Vector & orbitcent, Unit * parent, const GFXMaterial & ourmat) : Unit(), radius(0.0f),  satellites() {
   destination=dest;
   Init();
   killed=false;
@@ -102,6 +102,7 @@ Planet::Planet(Vector x,Vector y,float vely, float pos,float gravity,float radiu
   meshdata = new Mesh*[2];
   meshdata[0] = new SphereMesh(radius, 16, 16, textname, alpha);
   meshdata[0]->setEnvMap(GFXFALSE);
+  meshdata[0]->SetMaterial (ourmat);
   nummesh = 1;
 
   calculate_extent();

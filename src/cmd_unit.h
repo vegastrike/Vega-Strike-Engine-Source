@@ -61,6 +61,7 @@ friend class PlanetaryOrbit;
     Vector NavPoint;
     UnitContainer target;//...and check it each frame    
     UnitContainer threat;
+    float threatlevel;
     float set_speed;
     float max_speed;
     float max_ab_speed;
@@ -182,7 +183,6 @@ friend class PlanetaryOrbit;
     float retro;
     float afterburn;
   } limits;
-  int faction;
   Computer computer;
   char resolveforces;
   bool selected;
@@ -199,13 +199,13 @@ friend class PlanetaryOrbit;
   void SetCollisionParent (Unit *name);
   void BuildBSPTree (const char *filename, bool vplane=false, Mesh * hull=NULL);//if hull==NULL, then use meshdata **
 public:
-  int getFaction() {return faction;}
   void getAverageGunSpeed (float & speed, float & range);
   Vector PositionITTS (const Vector & local_posit, float speed);
   float cosAngleTo (Unit * target, float & distance, float speed= 0.001, float range=0.001);
   float cosAngleFromMountTo (Unit * target, float & distance);
   void UpdateCollideQueue();
   string name;
+  int faction;
   float rSize () {return radial_size;}
   //no default constructor; dymanically allocated arrays are evil, gotta do it java style to make it more sane
 
@@ -227,10 +227,12 @@ public:
   Unit *Threat(){return computer.threat.GetUnit();}
   void Target (Unit * targ) {computer.target.SetUnit(targ);}
   void Threaten (Unit * targ, float danger);
+  void ResetThreatLevel() {computer.threatlevel=0;}
   void Fire();
   void UnFire();
   Computer & GetComputerData () {return computer;}
-
+  float FShieldData();  float RShieldData();  float LShieldData();  float BShieldData();
+  float GetHull() {return hull;}
   void UpdateHudMatrix();
   Order *getAIState() {return aistate;}
 

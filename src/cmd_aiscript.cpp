@@ -3,7 +3,22 @@
 #include "xml_support.h"
 #include "cmd_flybywire.h"
 #include <stdio.h>
+#include <vector>
+#include <stack>
 
+struct AIScriptXML {
+  int unitlevel;
+  int acc;
+  int executefor;
+  bool itts;
+  bool afterburn;
+  char lin;
+  Vector defaultvec;
+  float defaultf;
+  std::stack <Vector> vectors;
+  std::stack <float> floats;
+  std::vector <Order *> orders;
+};
 float& AIScript::topf(){
 	if (!xml->floats.size()) {
 		xml->floats.push(xml->defaultf);
@@ -556,7 +571,7 @@ void AIScript::LoadXML() {
     return;
   }
 
-  xml = new AIXML;
+  xml = new AIScriptXML;
   xml->unitlevel=0;
   xml->executefor=0;
   xml->acc=2;

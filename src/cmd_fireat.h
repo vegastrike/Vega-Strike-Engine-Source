@@ -1,7 +1,7 @@
 #ifndef _CMD_TARGET_AI_H_
 #define _CMD_TARGET_AI_H_
 #include "cmd_order.h"
-
+#include "cmd_ai_event_xml.h"
 //all unified AI's should inherit from FireAt, so they can choose targets together.
 namespace Orders {
 
@@ -18,19 +18,7 @@ public:
   virtual void Execute();
 };
 
-  struct AIEvent {
 
-    
-  };
-
-class AggressiveAI: public FireAt {
-protected:	
-  bool threatened;
-public:
-  enum types {UNKNOWN, DISTANCE, THREAT, FSHIELD, LSHIELD, RSHIELD, BSHIELD, FARMOR, BARMOR, LARMOR, RARMOR, HULL, FACING, MOVEMENT};
-  AggressiveAI (Unit * target=NULL);
-  void Execute ();
-};
 
 }
 #endif

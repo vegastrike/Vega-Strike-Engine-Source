@@ -5,6 +5,10 @@ vegastrike_LDADD = gldrv/libgldrv.a
 
 vegastrike_SOURCES =				\
 	cmd.h					\
+	cmd_aggressive_ai.cpp			\
+	cmd_aggressive_ai.h			\
+	cmd_ai_event_xml.h			\
+	cmd_ai_event_xml.cpp			\
 	cmd_aiscript.h				\
 	cmd_aiscript.cpp			\
 	cmd_beam.h				\
@@ -22,8 +26,8 @@ vegastrike_SOURCES =				\
 	cmd_navigation_orders.cpp		\
 	cmd_order.cpp				\
 	cmd_order.h				\
-	cmd_target_ai.cpp			\
-	cmd_target_ai.h				\
+	cmd_fireat.cpp				\
+	cmd_fireat.h				\
 	cmd_unit.h				\
 	cmd_unit.cpp				\
 	cmd_unit_damage.cpp			\

@@ -166,6 +166,12 @@ float const ooPI = 1.00F/3.1415926535F;
 
 //#include "d3d_internal.h"
 
+void Mesh::SetMaterial (const GFXMaterial & mat) {
+  GFXSetMaterial (myMatNum,mat);
+  if (orig)
+    orig->myMatNum = myMatNum;
+}
+
 void Mesh::Draw(const Transformation &trans, const Matrix m)
 {
   //  Vector pos (local_pos.Transform(m));

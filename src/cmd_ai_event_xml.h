@@ -1,22 +1,26 @@
+#ifndef _CMD_AI_EVENT_XML_H_
+#define _CMD_AI_EVENT_XML_H_
+#include "xml_support.h"
 #include <string>
 #include <vector>
 #include <list>
-namespace AIEvent {
+
+namespace AIEvents {
   struct AIEvresult {
-    int type;
+    int type;//will never be zero...negative indicates "not"
     float max, min;//values that will cause this event
     string script;
     AIEvresult (int type, float const min, const float max, const string &aiscript):
       type (type), max(max), min(min), script(aiscript) {}
-    
-  }
+    inline bool Eval (float eval) const {return ((eval>=min)&&(eval<=max)&&type>0)||(eval>max&&eval<min&&type<0);} 
+  };
   struct ElemAttrMap {
-    int numelem;
-    EnumMap element_map;
+    XMLSupport::EnumMap element_map;
     int level;
     std::vector <std::list <AIEvresult> >result;
-    ElemAttrMap (int nelem, int nattr, const EnumMap &el, const EnumMap &at):
-      numelem(nelem), element_map (el), level(0) { } 
+    ElemAttrMap (const XMLSupport::EnumMap &el):
+      element_map (el), level(0) { } 
   };
   void LoadAI (const char * filename, ElemAttrMap &result);
 }
+#endif

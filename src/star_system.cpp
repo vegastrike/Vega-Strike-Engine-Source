@@ -168,6 +168,7 @@ void StarSystem::Update() {
       Iterator *iter = drawList->createIterator();
       while((unit = iter->current())!=NULL) {
 	unit->ExecuteAI(); // must execute AI afterwards, since position might update (and ResolveLast=true saves the 2nd to last position for proper interpolation)
+	unit->ResetThreatLevel();
 	iter->advance();
       }
       delete iter;

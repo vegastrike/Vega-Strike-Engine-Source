@@ -245,6 +245,7 @@ public:
   unsigned int numFX () {return LocalFX.size();}
   void EnableSpecialFX();
   void GetPolys(vector <bsp_polygon> &);
+  void SetMaterial (const GFXMaterial & mat);
   //  void SetPosition (const Vector&);
   Vector &Position() {return local_pos;}
   //  const char *get_name(){return name}

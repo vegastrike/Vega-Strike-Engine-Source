@@ -119,6 +119,36 @@ static void applyto (unsigned short &shield, const unsigned short max, const flo
   if (shield>max)
     shield=max;
 }
+
+float Unit::FShieldData() {
+  switch (shield.number) {
+  case 2: return shield.fb[0]/shield.fb[2];
+  case 4: return ((float)shield.fbrl.front)/shield.fbrl.frontmax;
+  case 6: return ((float)shield.fbrltb.v[0])/shield.fbrltb.fbmax;
+  }
+}
+float Unit::BShieldData() {
+  switch (shield.number) {
+  case 2: return shield.fb[1]/shield.fb[3];
+  case 4: return ((float)shield.fbrl.back)/shield.fbrl.backmax;
+  case 6: return ((float)shield.fbrltb.v[1])/shield.fbrltb.fbmax;
+  }
+}
+float Unit::LShieldData() {
+  switch (shield.number) {
+  case 2: return 1;//no data, captain
+  case 4: return ((float)shield.fbrl.left)/shield.fbrl.leftmax;
+  case 6: return ((float)shield.fbrltb.v[3])/shield.fbrltb.rltbmax;
+  }
+}
+float Unit::RShieldData() {
+  switch (shield.number) {
+  case 2: return 1;//don't react to stuff we have no data on
+  case 4: return ((float)shield.fbrl.right)/shield.fbrl.rightmax;
+  case 6: return ((float)shield.fbrltb.v[2])/shield.fbrltb.rltbmax;
+  }
+}
+
 void Unit::RegenShields () {
   energy +=apply_float_to_short (recharge);
   if (energy>maxenergy)

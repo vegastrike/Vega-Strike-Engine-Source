@@ -2,23 +2,11 @@
 #define _CMD_AISCRIPT_H_
 #include "cmd_order.h"
 #include "cmd_navigation_orders.h"
-#include <stack>
-using std::stack;
+
+struct AIScriptXML;
 class AIScript : public Order {
   char * filename;
-  struct AIXML {
-	  int unitlevel;
-	  int acc;
-	  int executefor;
-          bool itts;
-	  bool afterburn;
-	  char lin;
-	  Vector defaultvec;
-	  float defaultf;
-	  stack <Vector> vectors;
-	  stack <float> floats;
-	  vector <Order *> orders;
-  } *xml;
+  AIScriptXML * xml;
   void LoadXML(); //load the xml
   static void beginElement(void *userData, const XML_Char *name, const XML_Char **atts);
   static void endElement(void *userData, const XML_Char *name);
@@ -33,4 +21,5 @@ public:
   ~AIScript();
   void Execute();
 };
+
 #endif

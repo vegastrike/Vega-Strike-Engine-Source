@@ -14,7 +14,6 @@
 #include "gfxlib.h"
 #include "gfx_location_select.h"
 #include <string>
-#include "cmd_target_ai.h"
 #include "cmd_input_dfa.h"
 #include "UnitCollection.h"
 #include "star_system.h"
@@ -22,7 +21,8 @@
 #include "gfx_sphere.h"
 #include "gfx_coordinate_select.h"
 #include "gfx_mesh.h"
-#include "cmd_target_ai.h"
+#include "cmd_fireat.h"
+#include "cmd_aggressive_ai.h"
 #include "cmd_navigation_orders.h"
 #include "cmd_beam.h"
 #include  "gfx_halo.h"
@@ -466,7 +466,7 @@ void createObjects() {
     
     fighters[a]->SetAI(new Order());
     if (a!=0) {
-      fighters[a]->EnqueueAI( new Orders::AggressiveAI ());
+      fighters[a]->EnqueueAI( new Orders::AggressiveAI ("default.agg.xml"));
       fighters[a]->Target (fighters[targetnum]);
     }
     _Universe->activeStarSystem()->AddUnit(fighters[a]);
