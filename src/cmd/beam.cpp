@@ -12,10 +12,11 @@ using std::vector;
 static DecalQueue beamdecals;
 static vector <GFXQuadList *> quadlists;
 extern double interpolation_blend_factor;
-Beam::Beam (const Transformation & trans, const weapon_info & clne, void * own) :vlist(-1), Col(clne.r,clne.g,clne.b,clne.a){
+Beam::Beam (const Transformation & trans, const weapon_info & clne, void * own): Col(clne.r,clne.g,clne.b,clne.a){
+  vlist[0]=-1;
   decal = beamdecals.AddTexture (clne.file.c_str(),TRILINEAR);
   if (decal>=quadlists.size()) {
-    quadlists.push_back (new GFXQuadList());
+    quadlists.push_back (new GFXQuadList(GFXTRUE));
   }
   Init(trans,clne,own);
 }
@@ -101,20 +102,18 @@ void Beam::Init (const Transformation & trans, const weapon_info &cln , void * o
 
 
   memcpy (&calah[16],&calah[0],sizeof(GFXColor)*16);    
-  if (vlist==-1) {
-    vlist = quadlists[decal]->AddQuad (beam,calah);
-    quadlists[decal]->AddQuad (beam+4,calah+4);
-    quadlists[decal]->AddQuad (beam+8,calah+8);
-    quadlists[decal]->AddQuad (beam+12,calah+12);
-    quadlists[decal]->AddQuad (beam+16,calah+16);
-    quadlists[decal]->AddQuad (beam+20,calah+20);
-    quadlists[decal]->AddQuad (beam+24,calah+24);
-    quadlists[decal]->AddQuad (beam+28,calah+28);
-  }else {
-    for (int i=0;i<8;i++) {
-      quadlists[decal]->ModQuad (vlist+i,beam+i*4,calah+i*4);
-    }
-  }
+  for (int i=0;i<8;i++) {
+    vlist[i] = quadlists[decal]->AddQuad (beam+i*4,calah+i*4);
+  }/*
+  assert (vlist%8==0);
+  quadlists[decal]->AddQuad (beam+4,calah+4);
+  quadlists[decal]->AddQuad (beam+8,calah+8);
+  quadlists[decal]->AddQuad (beam+12,calah+12);
+  quadlists[decal]->AddQuad (beam+16,calah+16);
+  quadlists[decal]->AddQuad (beam+20,calah+20);
+  quadlists[decal]->AddQuad (beam+24,calah+24);
+  quadlists[decal]->AddQuad (beam+28,calah+28);
+   */
   //  vlist = new GFXVertexList (GFXQUAD,32,beam,calah,true);//mutable color contained list
   free (calah);
 }
@@ -124,7 +123,7 @@ Beam::~Beam () {
     KillCollideTable (&CollideInfo);
   }
   for (int i=0;i<8;i++) {
-    quadlists[decal]->DelQuad (vlist+i);
+    quadlists[decal]->DelQuad (vlist[i]);
   }
   beamdecals.DelTexture(decal);
 }
@@ -139,7 +138,7 @@ void Beam::RecalculateVertices(Matrix t) {
   float thick = curthick!=thickness?curthick-radialspeed*SIMULATION_ATOM*(1-interpolation_blend_factor):thickness;
   int a=0;
   Vector tmp;
-#define V(xx,yy,zz,ss,tt) { tmp = Transform (t,Vector (xx,yy,zz)); beam[a].x = tmp.i; beam[a].y = tmp.j; beam[a].z = tmp.k; beam[a].s=ss; beam[a].t=tt;a++; }
+#define V(xx,yy,zz,ss,tt) { beam[a].SetVertex (Transform (t,Vector (xx,yy,zz)));beam[a].SetTexCoord(ss,tt);a++;}
   
   V(0,thick,0,leftex,1);
   V(0,thick,fadelen,fadetex,1);
@@ -186,15 +185,22 @@ void Beam::RecalculateVertices(Matrix t) {
 
 #undef V
   for (int i=0;i<8;i++) {
-    quadlists[decal]->ModQuad (i+vlist,beam+4*i,NULL);
+    quadlists[decal]->ModQuad (vlist[i],beam+4*i,NULL);
   }
   //  vlist->EndMutate();
 }
 
 
 void Beam::Draw (const Transformation &trans, const float* m) {//hope that the correct transformation is on teh stack
-  if (curthick==0)
+  if (curthick==0) {
+    if (vlist[0]!=-1) {
+      for (int i=0;i<8;i++) {
+	quadlists[decal]->DelQuad(vlist[i]);
+      }
+      vlist[0] = -1;
+    }
     return;
+  }
   Matrix cumulative_transformation_matrix;
   local_transformation.to_matrix(cumulative_transformation_matrix);
   Transformation cumulative_transformation = local_transformation;

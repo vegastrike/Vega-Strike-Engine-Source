@@ -70,41 +70,48 @@ void GFXQuadList::Draw() {
 
 int GFXQuadList::AddQuad (const GFXVertex *vertices, const GFXColor * color) {
   int cur= numQuads*4;
-  if (Dirty)
-    for (int i=0;i<numQuads;i++) {
-      if (quadassignments[i]==-1) {
-	quadassignments[i]=numQuads;
-	if (vertices) 
-	  memcpy (myVertices+(i*4),vertices,4*sizeof(GFXVertex));
-	if (isColor&&color) 
-	  memcpy (myColors+(i*4),color,4*sizeof(GFXColor));      
-	numQuads++;
-	Dirty--;
-	return i;
-      }
-    }
   if (cur+3>=numVertices) {
-
     if (!numVertices) {
       numVertices = 16;
       myVertices = (GFXVertex *)malloc (numVertices*sizeof (GFXVertex));
       myColors = (GFXColor *)malloc (numVertices*sizeof(GFXColor));
       quadassignments = (int *)malloc (numVertices*sizeof(int)/4);
+      for (int i=0;i<numVertices/8;i++) {
+	quadassignments[i]=-1;
+      }
     }else {
       numVertices *=2;    
       myVertices = (GFXVertex *)realloc (myVertices,numVertices*sizeof(GFXVertex));
       myColors = (GFXColor *)realloc (myColors,numVertices*sizeof(GFXColor));    
       quadassignments = (int *)realloc (quadassignments,numVertices*sizeof(int)/4);
     }
+    for (int i=numVertices/8;i<numVertices/4;i++) {
+      quadassignments[i]=-1;
+    }
+    Dirty = numVertices/8;
+    quadassignments[numQuads]=numQuads;
+    numQuads++;
+    if (vertices) 
+      memcpy (myVertices+cur,vertices,4*sizeof(GFXVertex));
+    if (isColor&&myColors) 
+      memcpy (myColors+cur,color,4*sizeof(GFXColor));
+    
+    return numQuads-1;
   }
-  quadassignments[numQuads]=numQuads;
-  numQuads++;
-  if (vertices) 
-    memcpy (myVertices+cur,vertices,4*sizeof(GFXVertex));
-  if (isColor&&myColors) 
-    memcpy (myColors+cur,color,4*sizeof(GFXColor));
-  
-  return numQuads-1;
+    for (int i=0;i<numVertices/4;i++) {
+      if (quadassignments[i]==-1) {
+	quadassignments[i]=numQuads;
+	if (vertices) 
+	  memcpy (myVertices+(quadassignments[i]*4),vertices,4*sizeof(GFXVertex));
+	if (isColor&&color) 
+	  memcpy (myColors+(quadassignments[i]*4),color,4*sizeof(GFXColor));      
+	numQuads++;
+	Dirty--;
+	return i;
+      }
+    }
+
+  fprintf (stderr,"Error adding quads");
 }
 void GFXQuadList::DelQuad (int which ) {
   if (which <0||which>=numVertices/4||quadassignments[which]==-1)
@@ -121,6 +128,7 @@ void GFXQuadList::DelQuad (int which ) {
       return;
     }
   }
+
   fprintf (stderr," error deleting engine flame\n");
 }
 void GFXQuadList::ModQuad (int which, const GFXVertex * vertices, const GFXColor * colors) {

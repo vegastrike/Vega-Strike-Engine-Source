@@ -16,7 +16,7 @@ private:
   Transformation local_transformation;
   unsigned int decal;
   ///Assumption that QuadLists will only be Added/Removed in groups of 8 and thus willb e in seq
-  int vlist;
+  int vlist[8];
   //  GFXVertexList *vlist;
   LineCollide CollideInfo;
   unsigned int numframes;
