@@ -31,6 +31,7 @@ struct GFXColor;
 #include "gfx/vdu.h"
 #include "xml_support.h"
 #include "container.h"
+
 class Flightgroup;
 class Nebula;
 
@@ -48,7 +49,7 @@ class Halo;
 class BSPTree;
 class PlanetaryOrbit;
 class UnitCollection;
-
+class csRapidCollider;
 /**
  * Currently the only inheriting function is planet
  * Needed by star system to determine whether current unit
@@ -330,8 +331,10 @@ class Unit {
   Vector corner_min, corner_max; 
   ///The bsp tree of this unit (used when shields down/unit-unit collisions)
   BSPTree *bspTree;
+  csRapidCollider *colTree;
   ///The bsp tree of the shields of this unit (used for beams)
   BSPTree *bspShield;
+  csRapidCollider *colShield;
   ///fils in corner_min,corner_max and radial_size
   void calculate_extent();
   ///applies damage from the given pnt to the shield, and returns % damage applied and applies lighitn

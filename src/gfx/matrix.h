@@ -328,7 +328,7 @@ inline Vector InvScaleTransform (Matrix trans,  Vector pos) {
 #undef h
 #undef i
 }
-inline void InvertMatrix (Matrix o, Matrix trans) {
+inline void InvertMatrix (Matrix o, const Matrix trans) {
 #define a (trans[0])
 #define b (trans[4])
 #define c (trans[8])

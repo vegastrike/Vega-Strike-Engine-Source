@@ -1,0 +1,15 @@
+noinst_LIBRARIES = libcollide.a
+INCLUDES = -I ../ -I ../../
+SUBDIRS = csgeom 
+libcollide_a_SOURCES =				\
+	prapid.cpp			\
+	cs_compat.h			\
+	qsqrt.h				\
+	pbuild.cpp			\
+	peigen.cpp			\
+	prapid.h			\
+	rapcol.h			\
+	box.cpp				\
+	matrix3.cpp			\
+	vector3.cpp			
+

@@ -43,6 +43,7 @@
 #include "gfx/planetary_transform.h"
 
 #include "script/mission.h"
+#include "collide/rapcol.h"
 //if the PQR of the unit may be variable...for radius size computation
 //#define VARIABLE_LENGTH_PQR
 
@@ -118,7 +119,7 @@ void Unit::Init()
   CollideInfo.Maxi.Set (0,0,0);
   
   bspShield = bspTree = NULL;
-
+  colTree = colShield = NULL;
   invisible=false;
   //origin.Set(0,0,0);
   corner_min.Set (FLT_MAX,FLT_MAX,FLT_MAX);
@@ -346,6 +347,12 @@ Unit::~Unit()
     KillCollideTable (&CollideInfo);
   if (bspTree)
     delete bspTree;
+  if (bspShield)
+    delete bspShield;
+  if (colTree)
+    delete colTree;
+  if (colShield)
+    delete colShield;
   for (int beamcount=0;beamcount<nummounts;beamcount++) {
     AUDDeleteSound(mounts[beamcount].sound);
     if (mounts[beamcount].ref.gun&&mounts[beamcount].type.type==weapon_info::BEAM)

@@ -9,8 +9,8 @@
 #else
 #include <vector>
 using std::vector;
-struct bsp_vector {
-  double x,y,z;
+struct Vector {
+  double i,j,k;
 };
 
 struct bsp_polygon {
@@ -85,7 +85,7 @@ enum INTERSECT_TYPE {
 
 
 
-typedef struct bsp_vector VECTOR;
+typedef struct Vector VECTOR;
 
 
 struct bsp_tree {
@@ -102,17 +102,17 @@ static bool Cross (const bsp_polygon &x, bsp_tree &result) {
   double size =0;
   
   for (unsigned int i=2;(!size)&&i<x.v.size();i++) {
-    bsp_vector v1;
-    v1.x = x.v[i].x-x.v[0].x;
-    v1.y = x.v[i].y-x.v[0].y;
-    v1.z = x.v[i].z-x.v[0].z;
-    bsp_vector v2; 
-    v2.x = x.v[1].x-x.v[0].x;
-    v2.y = x.v[1].y-x.v[0].y;
-    v2.z = x.v[1].z-x.v[0].z;
-    result.a = v1.y * v2.z - v1.z * v2.y;
-    result.b = v1.z * v2.x - v1.x * v2.z;
-    result.c = v1.x * v2.y  - v1.y * v2.x;     
+    Vector v1;
+    v1.i = x.v[i].i-x.v[0].i;
+    v1.j = x.v[i].j-x.v[0].j;
+    v1.k = x.v[i].k-x.v[0].k;
+    Vector v2; 
+    v2.i = x.v[1].i-x.v[0].i;
+    v2.j = x.v[1].j-x.v[0].j;
+    v2.k = x.v[1].k-x.v[0].k;
+    result.a = v1.j * v2.k - v1.k * v2.j;
+    result.b = v1.k * v2.i - v1.i * v2.k;
+    result.c = v1.i * v2.j  - v1.j * v2.i;     
     size = result.a*result.a+result.b*result.b+result.c*result.c;
   }
   if (size)
@@ -124,31 +124,31 @@ static bool Cross (const bsp_polygon &x, bsp_tree &result) {
   result.c *=RIGHT_HANDED*(size);
   return true;
 }
-
+/*
 double Dot (const bsp_vector & A, const bsp_vector & B) {
-    return A.x *B.x + A.y*B.y+A.z*B.z;
+    return A.i *B.i + A.j*B.j+A.k*B.k;
 }
-
+*/
 static FILE * o;
-//ax + by + cz =0;  A.x + (B.x - A.x)k = x;A.y + (B.y - A.y)k = y;A.z + (B.z - A.z)k = z;
-// x*A.x + b*B.y + c*C.z + d + k*(a*B.x - a*A.x + b*B.y - b&A.y + c*B.z - c*A.z) = 0;
+//ax + by + cz =0;  A.i + (B.i - A.i)k = x;A.j + (B.j - A.j)k = y;A.k + (B.k - A.k)k = z;
+// x*A.i + b*B.j + c*C.k + d + k*(a*B.i - a*A.i + b*B.j - b&A.j + c*B.k - c*A.k) = 0;
 // k = (A * n + d) / (A * n - B * n) 
 //
-bool intersectionPoint (const bsp_tree &n, const bsp_vector & A, const bsp_vector & B, bsp_vector & res) {
-    double inter = A.x*n.a + A.y*n.b+A.z*n.c;
-    double k=(inter - (B.x * n.a + B.y * n.b + B.z * n.c)); 
+bool intersectionPoint (const bsp_tree &n, const Vector & A, const Vector & B, Vector & res) {
+    double inter = A.i*n.a + A.j*n.b+A.k*n.c;
+    double k=(inter - (B.i * n.a + B.j * n.b + B.k * n.c)); 
     if (!k)
       return false;
     k = (inter + n.d ) / k; 
     //assume magnitude (n.a,n.b,n.c) == 1
-    res.x = A.x + k*(B.x - A.x);
-    res.y = A.y + k*(B.y - A.y);
-    res.z = A.z + k*(B.z - A.z);
+    res.i = A.i + k*(B.i - A.i);
+    res.j = A.j + k*(B.j - A.j);
+    res.k = A.k + k*(B.k - A.k);
     return true;
 }
 
 enum INTERSECT_TYPE whereIs (const VECTOR & v, const bsp_tree & temp_node) {
-     double tmp = ((temp_node.a)*(v.x))+((temp_node.b)*(v.y))+((temp_node.c)*(v.z))+(temp_node.d);
+     double tmp = ((temp_node.a)*(v.i))+((temp_node.b)*(v.j))+((temp_node.c)*(v.k))+(temp_node.d);
      if (tmp < 0) {
 	 return BSPG_BACK;
      }else if (tmp >0) {
@@ -165,7 +165,7 @@ static void write_bsp_tree (bsp_tree *tree,int level=0);//assume open file
 void dividePlane (const bsp_polygon & tri, const bsp_tree &unificator, bsp_polygon &back, bsp_polygon &front) {
     enum INTERSECT_TYPE oldflag;
     enum INTERSECT_TYPE flag;
-    bsp_vector int_point;
+    Vector int_point;
     front.v = vector <VECTOR> ();
     back.v = vector <VECTOR> ();
     for (unsigned int i=0;i<tri.v.size();i++) {
@@ -231,7 +231,7 @@ void Unit::BuildBSPTree(const char *filename, bool vplane, Mesh * hull) {
       continue;
     }	
     // Calculate 'd'
-    temp_node.d = (double) ((temp_node.a*tri[i].v[0].x)+(temp_node.b*tri[i].v[0].y)+(temp_node.c*tri[i].v[0].z));
+    temp_node.d = (double) ((temp_node.a*tri[i].v[0].i)+(temp_node.b*tri[i].v[0].j)+(temp_node.c*tri[i].v[0].k));
     temp_node.d*=-1.0;
     triplane.push_back(temp_node);
     //                bsp=put_plane_in_tree3(bsp,&temp_node,&temp_poly3); 
@@ -270,7 +270,7 @@ void load (vector <bsp_polygon> &tri) {
   FILE *f;
   long size;
   double x,y,z;
-  vector <bsp_vector> vec;
+  vector <Vector> vec;
   vector <int> numberof;
   vector <int> vertexnum;
 
@@ -295,11 +295,11 @@ void load (vector <bsp_polygon> &tri) {
     printf ("Cannot open file\n");
     return;
   }
-  bsp_vector tmpvec;
+  Vector tmpvec;
   for (i=0;i<size;i+=12) {
-    fread (&tmpvec.x,4,1,f);
-    fread (&tmpvec.y,4,1,f);
-    fread (&tmpvec.z,4,1,f);
+    fread (&tmpvec.i,4,1,f);
+    fread (&tmpvec.j,4,1,f);
+    fread (&tmpvec.k,4,1,f);
     vec.push_back (tmpvec);
   }
   fclose (f);
@@ -374,11 +374,11 @@ for (i=0;i<size;i+=16)
         }
 
  fclose (f);
- bsp_vector thevec;;
+ Vector thevec;;
  int targetvec=0;
  for (int i=0;i<numberof.size();i++) {
    bsp_polygon tmppoly;
-   tmppoly.v = vector <bsp_vector>();
+   tmppoly.v = vector <Vector>();
    for (int j=0;j<numberof[i];j++) {
      tmppoly.v.push_back (vec[vertexnum[targetvec]]);
      targetvec++;
@@ -404,7 +404,7 @@ int main(int argc, char * argv) {
 	 continue;
      }
      // Calculate 'd'
-     temp_node.d = (double) ((temp_node.a*tri[i].v[0].x)+(temp_node.b*tri[i].v[0].y)+(temp_node.c*tri[i].v[0].z));
+     temp_node.d = (double) ((temp_node.a*tri[i].v[0].i)+(temp_node.b*tri[i].v[0].j)+(temp_node.c*tri[i].v[0].k));
      temp_node.d*=-1.0;
      triplane.push_back(temp_node);
  }
@@ -576,7 +576,7 @@ enum INTERSECT_TYPE where_is_poly(const bsp_tree & temp_node,const bsp_polygon &
     double cur;
     INTERSECT_TYPE icur;
     for (unsigned int i=0;i<temp_poly3.v.size();i++) {
-	cur = ((temp_node.a)*(temp_poly3.v[i].x))+((temp_node.b)*(temp_poly3.v[i].y))+((temp_node.c)*(temp_poly3.v[i].z))+(temp_node.d);
+	cur = ((temp_node.a)*(temp_poly3.v[i].i))+((temp_node.b)*(temp_poly3.v[i].j))+((temp_node.c)*(temp_poly3.v[i].k))+(temp_node.d);
 	if (cur>0)//??
 	    icur = BSPG_FRONT;
 	else if (cur <0) 

@@ -40,12 +40,9 @@ class GFXQuadstrip;
 struct GFXMaterial;
 class BoundingBox;
 ///Struct vertex format returned by GetPolys
-struct bsp_vector {
-        float x,y,z;
-};
 ///Struct polygon format returned by GetPolys
 struct bsp_polygon {
-    vector <bsp_vector> v;
+    std::vector <Vector> v;
 };
 /**
  * Mesh FX stores various lights that light up shield or hull for damage

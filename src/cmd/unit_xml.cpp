@@ -17,6 +17,7 @@
 #include "vegastrike.h"
 #include <assert.h>
 #include "images.h"
+#include "collide/rapcol.h"
 #define VS_PI 3.1415926536
 void Unit::beginElement(void *userData, const XML_Char *name, const XML_Char **atts) {
   ((Unit*)userData)->beginElement(name, AttributeList(atts));
@@ -1010,19 +1011,33 @@ void Unit::LoadXML(const char *filename)
     UpdateCollideQueue();
   }
   string tmpname (filename);
+  vector <bsp_polygon> polies;
   if (xml->shieldmesh) {
     meshdata[nummesh] = xml->shieldmesh;
+    
     if (!CheckBSP ((tmpname+"_shield.bsp").c_str())) {
       BuildBSPTree ((tmpname+"_shield.bsp").c_str(), false, meshdata[nummesh]);
     }
     if (CheckBSP ((tmpname+"_shield.bsp").c_str())) {
       bspShield = new BSPTree ((tmpname+"_shield.bsp").c_str());
     }
+    if (meshdata[nummesh]) {
+      meshdata[nummesh]->GetPolys(polies);
+      colShield = new csRapidCollider (polies);
+    }
   }
   else {
-    SphereMesh * tmp = new SphereMesh (rSize(),16,16,"shield.bmp", NULL, false,ONE, ONE);
+    SphereMesh * tmp = new SphereMesh (rSize(),8,8,"shield.bmp", NULL, false,ONE, ONE);
+    tmp->GetPolys (polies);
+    colShield = new csRapidCollider (polies);
+    static int shieldstacks = XMLSupport::parse_int (vs_config->getVariable ("graphics","shield_detail","16"));
+    if (shieldstacks!=8) {
+      delete tmp;
+      tmp = new SphereMesh (rSize(),shieldstacks,shieldstacks,"shield.bmp", NULL, false,ONE, ONE);
+    }
     meshdata[nummesh] = tmp;
     bspShield=NULL;
+    colShield=NULL;
   }
   meshdata[nummesh]->EnableSpecialFX();
   if (xml->hasBSP) {
@@ -1033,7 +1048,19 @@ void Unit::LoadXML(const char *filename)
     if (CheckBSP (tmpname.c_str())) {
       bspTree = new BSPTree (tmpname.c_str());
     }	
+  } else {
+    bspTree = NULL;
+    colTree = NULL;
   }
+  polies.clear();
+  if (!xml->bspmesh) {
+    for (int j=0;j<nummesh;j++) {
+      meshdata[j]->GetPolys(polies);
+    }
+  }else {
+    xml->bspmesh->GetPolys (polies);
+  }
+  colTree = new csRapidCollider (polies);
   
   if (xml->bspmesh) {
     delete xml->bspmesh;

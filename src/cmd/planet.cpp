@@ -13,6 +13,7 @@
 #include "cont_terrain.h"
 #include "atmosphere.h"
 #include "gfx/planetary_transform.h"
+#include "collide/rapcol.h"
 PlanetaryOrbit:: PlanetaryOrbit(Unit *p, double velocity, double initpos, const Vector &x_axis, const Vector &y_axis, const Vector & centre, Unit * targetunit) : Order(MOVEMENT), parent(p), velocity(velocity), theta(initpos), x_size(x_axis), y_size(y_axis) { 
   parent->SetResolveForces(false);
     double delta = x_size.Magnitude() - y_size.Magnitude();
@@ -143,6 +144,7 @@ Planet::Planet(Vector x,Vector y,float vely, float pos,float gravity,float radiu
   nummesh = 1;
 
   calculate_extent();
+
   /*stupid Sphere BSP when intersection should do
   string tmpname ("sphere");
   char temp [64];
@@ -152,13 +154,18 @@ Planet::Planet(Vector x,Vector y,float vely, float pos,float gravity,float radiu
   
   FILE * fp = fopen (tmpname.c_str(), "rb");
   if (!fp) {
-    meshdata[1]= new SphereMesh (radius,8,8,textname, alpha);
-    BuildBSPTree (tmpname.c_str(),true,meshdata[1]);
-    delete meshdata[1];
-  } else {
-    fclose (fp);
-  }
-  bspTree = new BSPTree (tmpname.c_str());
+  */
+  meshdata[1]= new SphereMesh (radius,8,8,textname, alpha);
+  std::vector <bsp_polygon> spherepolys;
+  meshdata[1]->GetPolys (spherepolys);
+  colTree = new csRapidCollider (spherepolys);
+  //BuildBSPTree (tmpname.c_str(),true,meshdata[1]);
+  delete meshdata[1];
+    /*
+      } else {
+      fclose (fp);
+      }
+      bspTree = new BSPTree (tmpname.c_str());
   */
   meshdata[1]=NULL;
 }

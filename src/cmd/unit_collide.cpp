@@ -7,7 +7,7 @@
 #include "physics.h"
 #include "hashtable_3d.h"
 #include "gfx/bsp.h"
-
+#include "collide/rapcol.h"
 
 
 bool TableLocationChanged (const Vector & Mini,const Vector & minz) { 
@@ -114,6 +114,17 @@ bool Unit::Inside (const Vector &target, const float radius, Vector & normal, fl
 bool Unit::Collide (Unit * target) {
   if (target==this||owner==target||target->owner==this||(owner!=NULL&&target->owner==owner)) 
     return false;
+  if (colTree&&target->colTree) {
+    csRapidCollider::CollideReset();
+    const csReversibleTransform bigtransform (cumulative_transformation_matrix);
+    const csReversibleTransform smalltransform (target->cumulative_transformation_matrix);
+    if (colTree->Collide (*target->colTree,
+				  &bigtransform,
+				  &smalltransform)) {
+      static int crashcount=0;
+      fprintf (stderr,"%s Crashez to %s %d\n", this->name.c_str(), target->name.c_str(),crashcount++);
+    }
+  }
 
   //unit v unit? use point sampling?
   //now first make sure they're within bubbles of each other...
@@ -133,7 +144,7 @@ bool Unit::Collide (Unit * target) {
   }
   if (!bigger->Inside(smaller->Position(),smaller->rSize(),normal,dist))
     return false;
-  //UNUSED BUT GOOD  float elast = .5*(smaller->GetElasticity()+bigger->GetElasticity());
+  //UNUSED BUT GOOD  float elast = .5*(smallcsReversibleTransform (cumulative_transformation_matrix),er->GetElasticity()+bigger->GetElasticity());
   //BAD  float speedagainst = (normal.Dot (smaller->GetVelocity()-bigger->GetVelocity()));
   //BADF  smaller->ApplyForce (normal * fabs(elast*speedagainst)/SIMULATION_ATOM);
   //BAD  bigger->ApplyForce (normal * -fabs((elast+1)*speedagainst*smaller->GetMass()/bigger->GetMass())/SIMULATION_ATOM);
@@ -147,11 +158,17 @@ bool Unit::Collide (Unit * target) {
   //NOT USED BUT GOOD  Vector farce = normal*smaller->GetMass()*fabs(normal.Dot ((smaller->GetVelocity()-bigger->GetVelocity()/SIMULATION_ATOM))+fabs (dist)/(SIMULATION_ATOM*SIMULATION_ATOM));
   return true;
 }
+#define NOBOUNCECOLLISION
 void Unit::reactToCollision(Unit * smalle, const Vector & normal, float dist) {
+
+#ifdef NOBOUNCECOLLISION
+#else
   smalle->ApplyForce (normal*.4*smalle->GetMass()*fabs(normal.Dot (((smalle->GetVelocity()-this->GetVelocity())/SIMULATION_ATOM))+fabs (dist)/(SIMULATION_ATOM*SIMULATION_ATOM)));
   this->ApplyForce (normal*.4*(smalle->GetMass()*smalle->GetMass()/this->GetMass())*-fabs(normal.Dot ((smalle->GetVelocity()-this->GetVelocity()/SIMULATION_ATOM))+fabs (dist)/(SIMULATION_ATOM*SIMULATION_ATOM)));
+
   smalle->ApplyDamage (this->Position(),-normal,  .5*fabs(normal.Dot(smalle->GetVelocity()-this->GetVelocity()))*this->mass*SIMULATION_ATOM,GFXColor(1,1,1,1));
   this->ApplyDamage (smalle->Position(),normal, .5*fabs(normal.Dot(smalle->GetVelocity()-this->GetVelocity()))*smalle->mass*SIMULATION_ATOM,GFXColor(1,1,1,1));
+#endif
   //each mesh with each mesh? naw that should be in one way collide
 
 }
