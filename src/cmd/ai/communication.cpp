@@ -167,7 +167,8 @@ int FSM::getCommMessageMood (int curstate, float mood, float randomresponse,floa
 	return choice;
 }
 int FSM::getDefaultState (float relationship) const{
-
+  if (relationship<-1)relationship=-1;
+  if (relationship>1) relationship=1;//clamp it
   float mood=relationship;
   float randomresponse=.01;
   int curstate=0;
@@ -176,7 +177,7 @@ int FSM::getDefaultState (float relationship) const{
   mood+=-randomresponse+2*randomresponse*((float)rand())/RAND_MAX;
   
   int choice=0;
-  float bestchoice=4;
+  float bestchoice=16;
   bool fitmood=false;
   for (unsigned i=0;i<n->edges.size();i++) {
     float md = nodes[n->edges[i]].messagedelta;
