@@ -9,7 +9,8 @@
 	* Saved units (with upgrades) are loaded if a mission has a saved game
 	* Fixed many font issues
 	* Fixed calculation in navigation.cpp to calculate proper velocity with fixed time intervals of SIMULATION_ATOM instead of continuous time
-
+	* Added "Import" option in units...now you can import whole categories at different price from the master part list
+	
 2002-03-01 Corey O'Connor <oconnorc@dogheadbone.com>
         * Additions and fixes to make a double clickable app.
           - The big problem was the os x glut was setting the working dir to Resources in the bundle. Ack.
