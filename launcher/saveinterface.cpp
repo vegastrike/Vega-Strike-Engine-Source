@@ -27,7 +27,7 @@ void LoadSaveDialog (char *, char *, int);
 void LoadAutoDialog (char *, char *, int);
 #define NUM_TITLES 9
 static const char * titles [NUM_TITLES] = {"Select Mission", "New Game","Load Saved Game","Recover From Autosave","Launch Last Savegame", "Launch No Savegame","Options","Help","Exit Launcher"};
-std::string my_mission ("mission/explore_universe.mission");
+std::string my_mission ("explore_universe.mission");
 #define NUM_HELPS 7
 static const char * helps [NUM_HELPS] = {
   "|SELECT MISSION BUTTON|\nThis allows you to select which mission vegastrike\nwill start the next time you press one\nof the keys below it. Most missions do not involve\nsave games and will ignore those options,\nhowever the default, in the mission/exploration folder will\nindeed ustilize the save games you specify.\nIf you ignore this option you begin in the standard\ntrading/bounty hunting mission.",
@@ -237,11 +237,31 @@ void launch_mission () {
 #endif
   }
 }
+using std::string;
 void file_mission_sel (GtkWidget *w, GtkFileSelection *fs) {
   std::string tmp = gtk_file_selection_get_filename (GTK_FILE_SELECTION (fs));
   FILE * fp =(fopen (tmp.c_str(),"r"));
   if (fp!=NULL) {
     fclose (fp);
+	int where=tmp.find ("/mission/");
+	if (where==string::npos) {
+		where = tmp.find ("\\mission\\");
+		if (where==string::npos) {
+			where = tmp.find("mission/");
+			if (where==string::npos) {
+				where=  tmp.find("mission\\");
+				if (where==string::npos) {
+					where = tmp.find ("mission");
+				}
+			}
+		}
+	}
+	if (where!=string::npos){
+		tmp = tmp.substr(where+strlen("mission/"));
+		if (*tmp.begin()=='\\'||*tmp.begin()=='/') {
+			tmp = tmp.substr(1);
+		}
+	}
     my_mission=tmp;
   }
   GdkWindow * ww=gtk_widget_get_parent_window(w);
