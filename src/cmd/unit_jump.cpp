@@ -82,7 +82,7 @@ void GameUnit<UnitType>::TransferUnitToSystem (unsigned int kk, StarSystem * &sa
       if (this==_Universe->AccessCockpit()->GetParent()) {
 	VSFileSystem::vs_fprintf (stderr,"Unit is the active player character...changing scene graph\n");
 	savedStarSystem->SwapOut();
-	
+	AUDStopAllSounds();
 	savedStarSystem = pendingjump[kk]->dest;
 	pendingjump[kk]->dest->SwapIn();
 

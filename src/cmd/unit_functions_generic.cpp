@@ -85,7 +85,7 @@ void ScoreKill (Cockpit * cp, Unit * un, Unit * killedUnit) {
       (*killlist)[faction]++;
     }
     killlist->back()++;
-  }else {
+  }else if (FactionUtil::GetIntRelation(un->faction,faction)<0) {
     int whichcp= rand()%_Universe->numPlayers();
     Unit * whichrecv = _Universe->AccessCockpit(whichcp)->GetParent();
     if (whichrecv!=NULL) {
