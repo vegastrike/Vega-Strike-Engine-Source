@@ -2001,7 +2001,7 @@ void BaseComputer::updateTransactionControlsForSelection(TransactionList* tlist)
                 descString += tempString;
               }
                 if (damaged_mode) {
-                  descString+="#c1:0:0#b#Warning: Because pieces of your ship are damaged, you will not be able to sell this item until you fix those damaged items in this column and allow the mechanics to remove this item. Your starship must hence be fully operational.#-c#-b#n1.5#";
+                  descString+="#c1:0:0Warning: #b#Because pieces of your ship are damaged, you will not be able to sell this item until you fix those damaged items in this column in order to allow the mechanics to remove this item.#-c#-b#n1.5#";
                 }
 //********************************************************************************************
                 
