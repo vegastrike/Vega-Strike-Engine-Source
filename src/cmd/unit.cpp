@@ -838,20 +838,23 @@ void Unit::Mount::UnFire () {
 }
 bool Unit::Mount::Fire (const Transformation &Cumulative, const float * m, const Vector & velocity, Unit * owner, Unit *target, bool Missile) {
   Unit * temp;
-  if (status!=ACTIVE||(Missile&&type.type!=weapon_info::PROJECTILE)||ammo==0)
+  if (status!=ACTIVE||(Missile!=(type.type==weapon_info::PROJECTILE))||ammo==0)
     return false;
   if (type.type==weapon_info::BEAM) {
-    if (ref.gun==NULL) {
-      if (ammo>0)
-	ammo--;
-      ref.gun = new Beam (LocalPosition,type,owner);
-    } else 
-      if (ref.gun->Ready()) {
+    if (!Missile){
+      if (ref.gun==NULL) {
 	if (ammo>0)
 	  ammo--;
-	ref.gun->Init (LocalPosition,type,owner);
-      } else 
-	return true;//can't fire an active beam
+	ref.gun = new Beam (LocalPosition,type,owner);
+      } else {
+	if (ref.gun->Ready()) {
+	  if (ammo>0)
+	    ammo--;
+	  ref.gun->Init (LocalPosition,type,owner);
+	} else 
+	  return true;//can't fire an active beam
+      }
+    }
   }else { 
     if (ref.refire>type.Refire) {
       ref.refire =0;
@@ -871,7 +874,6 @@ bool Unit::Mount::Fire (const Transformation &Cumulative, const float * m, const
 	new Bolt (type,mat, velocity,  owner);//FIXME:turrets won't work
 	break;
       case weapon_info::PROJECTILE:
-	if (Missile) {
 	  if (ammo>0)
 	    ammo--;
 	  temp = new Unit (type.file.c_str(),true,false,owner->faction);
@@ -886,7 +888,7 @@ bool Unit::Mount::Fire (const Transformation &Cumulative, const float * m, const
 	  temp->curr_physical_state = temp->prev_physical_state= temp->cumulative_transformation = tmp;
 	  CopyMatrix (temp->cumulative_transformation_matrix,m);
 	  _Universe->activeStarSystem()->AddUnit(temp);
-	}
+	
 	break;
       default: 
 	break;
