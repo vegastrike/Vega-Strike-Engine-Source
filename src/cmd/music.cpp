@@ -10,15 +10,18 @@
 #include "unit.h"
 #include "vs_globals.h"
 #include "config_xml.h"
+#include "vs_path.h"
 Music::Music (Unit *parent):random(false), p(parent),song(-1) {
   if (parent) {
     maxhull = parent->GetHull();
   }else {
     maxhull=1;
   }
+  changehome();
   LoadMusic(0,vs_config->getVariable ("audio","battleplaylist","battle.m3u").c_str());
   LoadMusic(1,vs_config->getVariable ("audio","peaceplaylist","peace.m3u").c_str());
   LoadMusic(2,vs_config->getVariable ("audio","panicplaylist","panic.m3u").c_str());
+  returnfromhome();
 }
 
 void Music::LoadMusic (int which, const char *file) {
