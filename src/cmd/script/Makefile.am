@@ -1,6 +1,6 @@
 noinst_LIBRARIES = libscript.a
 SUBDIRS = c_alike
-INCLUDES = -I../ -I../..
+INCLUDES = -I../ -I../.. -I../../boost/
 
 libscript_a_SOURCES =				\
 	flightgroup.cpp				\

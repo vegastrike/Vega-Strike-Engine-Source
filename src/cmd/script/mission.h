@@ -363,11 +363,22 @@ class contextStack {
 
 class missionNode;
 
-class missionThread {
+class NopeNadaNothingYoureLettingYourImaginationRunWild {
  public:
+  int i;
+};
+class missionThread {
+
+
+ protected:
+  virtual void Destructor () {delete this;}
+ public:
+  virtual ~missionThread(){}//call me and DIE
   vector<contextStack *> exec_stack;
   vector<missionNode *> module_stack;
   vector<unsigned int>  classid_stack;
+  virtual void Execute() {}
+  virtual void Destroy () {Destructor();}
 };
 
 /* *********************************************************** */

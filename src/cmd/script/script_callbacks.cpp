@@ -336,7 +336,10 @@ varInst *Mission::terminateMission(missionNode *node,int mode){
   }
   varInst *viret=newVarInst(VI_TEMP);
   viret->type=VAR_VOID;
-
+  if (!runtime.threads.empty()) {
+    runtime.threads[0]->Destroy();
+    runtime.threads[0]= new missionThread();
+  }
   return viret;
 }
 

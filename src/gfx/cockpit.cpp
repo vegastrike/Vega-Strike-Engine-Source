@@ -1222,10 +1222,15 @@ void Cockpit::Update () {
 	    parentturret.SetUnit(par);
 	    un_iter uj= un->getSubUnits();
 	    Unit * tur;
+	    bool switchedsuccess=false;
 	    while ((tur=uj.current())) {
+	      switchedsuccess=true;
 	      SwitchUnits (NULL,tur);
 	      this->SetParent(tur,this->unitfilename.c_str(),this->unitmodname.c_str(),savegame->GetPlayerLocation());
 	      ++uj;
+	    }
+	    if (!switchedsuccess) {
+	      this->SetParent(un,this->unitfilename.c_str(),this->unitmodname.c_str(),savegame->GetPlayerLocation());
 	    }
 	    break;
 	  }

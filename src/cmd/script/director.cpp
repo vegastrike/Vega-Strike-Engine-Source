@@ -60,15 +60,18 @@
 #endif
 #include "flightgroup.h"
 #include "gldrv/winsys.h"
+#include "python/python_class.h"
 //#include "vegastrike.h"
 
 extern bool have_yy_error;
-
 /* *********************************************************** */
-
+PYTHON_INIT_GLOBALS(Director,missionThread);
+PYTHON_BEGIN_MODULE(Director)
+PYTHON_INIT_CLASS(Director,missionThread,"Mission")
+PYTHON_END_MODULE(Director)
 
 void Mission::DirectorStart(missionNode *node){
-
+ static bool init=false;
   cout << "DIRECTOR START" << endl;
 
   debuglevel=atoi(vs_config->getVariable("interpreter","debuglevel","0").c_str());
@@ -84,16 +87,35 @@ void Mission::DirectorStart(missionNode *node){
 
   string_counter=0;
   old_string_counter=0;
-
-  missionThread *main_thread=new missionThread;
+  bool returnnow=true;
+  missionThread *main_thread=NULL;
+  std::string python = node->attr_value ("python");
+  if (!python.empty()) {
+    static bool init=false;
+    if (!init) {
+      init=true;
+      PYTHON_INIT_MODULE(Director);
+    }
+    main_thread = PythonClass <missionThread>::Factory (python);
+  }
+  if (main_thread==NULL) {
+    returnnow=false;
+    main_thread= new missionThread;
+  }
   runtime.thread_nr=0;
   runtime.threads.push_back(main_thread);
   runtime.cur_thread=main_thread;
 
   director=NULL;
-
+  if (returnnow)
+      return;
   //  msgcenter->add("game","all","parsing programmed mission");
-
+  std::string doparse = node->attr_value ("do_parse");
+  if (!doparse.empty()) {
+    if (XMLSupport::parse_bool (doparse)==false) {
+      return;
+    }
+  }
   cout << "parsing declarations for director" << endl;
 
   parsemode=PARSE_DECL;
@@ -126,20 +148,15 @@ void Mission::DirectorInitgame(){
   if(director==NULL){
     return;
   }
-#ifdef HAVE_PYTHON
-  Py_Initialize();
-  PyRun_SimpleString("import test1");  //  PyRun_SimpleString("director=VSdirector()");
-#endif
   RunDirectorScript("initgame");
 }
 
 void Mission::DirectorLoop(){
+  if (!runtime.threads.empty())
+    runtime.threads[0]->Execute();  
   if(director==NULL){
     return;
   }
-#ifdef HAVE_PYTHON
-  PyRun_SimpleString("test1.director.gameloop()");
-#endif
 
   if(vi_counter!=old_vi_counter){
     char buf[200];
