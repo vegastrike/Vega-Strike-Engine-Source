@@ -89,12 +89,11 @@ static void DrawNodeDescription(string text, float x_, float y_, float size_x, f
 
 static char GetSystemColor(string source) {
 	//FIXME: update me!!!
-	vector<string> *v = &_Universe->AccessCockpit()->savegame->getMissionStringData ("visited_"+source);
+	vector<float> *v = &_Universe->AccessCockpit()->savegame->getMissionData ("visited_"+source);
 	if (v->size()){
-		string k = (*v)[0];
-		if (k.length())
-			return k[0];
-		
+		float k = (*v)[0];
+		if(k>=2)
+			return (k==2?'m':'?');
 	}
 	return 'v';
 }
@@ -125,7 +124,6 @@ static void DrawNode(int type,float size,float x, float y, std::string source,na
 
 	if (color=='m') {
 		race=GrayColor;
-				
 	}
 	if (mouseover) {
 		if (willclick) {
@@ -248,7 +246,7 @@ NavigationSystem::SystemIterator & NavigationSystem::SystemIterator::operator ++
 				if (!testandset(visited[n],true)) {
 					string key (string("visited_")+n);
 					static bool dontbothervisiting = !XMLSupport::parse_bool (vs_config->getVariable ("graphics","explore_for_map","false"));
-					vector <string> * v = &_Universe->AccessCockpit()->savegame->getMissionStringData(key);
+					vector <float> * v = &_Universe->AccessCockpit()->savegame->getMissionData(key);
 					if (dontbothervisiting||v->size()>0) {
 						newsys.push_back(n);
 					}

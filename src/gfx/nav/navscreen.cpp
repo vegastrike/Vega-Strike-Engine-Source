@@ -375,17 +375,21 @@ void NavigationSystem::Setup()
 
 
 
-void visitSystemHelp (Cockpit * cp, string systemname) {
+void visitSystemHelp (Cockpit * cp, string systemname,float num) {
 	string key (string("visited_")+systemname);
-	vector<string> *v = &_Universe->AccessCockpit()->savegame->getMissionStringData(key);
-	if (v->empty())v->push_back ("v"); else (*v)[0]="v";
+	vector<float> *v = &_Universe->AccessCockpit()->savegame->getMissionData(key);
+	if (v->empty()){
+		v->push_back (num);
+	} else if ((*v)[0]!=1.0) {
+		(*v)[0]=num;
+	}
 	
 }
 void visitSystem (Cockpit * cp , string systemname ) {
-	visitSystemHelp (cp,systemname);
+	visitSystemHelp (cp,systemname,1.0);
 	int adj = UniverseUtil::GetNumAdjacentSystems(systemname);
 	for (int i=0;i<adj;++i) {
-		visitSystemHelp (cp,UniverseUtil::GetAdjacentSystem(systemname,i));
+		visitSystemHelp (cp,UniverseUtil::GetAdjacentSystem(systemname,i),0.0);
 	}
 
 }
