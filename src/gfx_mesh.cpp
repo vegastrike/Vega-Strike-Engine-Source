@@ -741,7 +741,7 @@ void Mesh::Draw(const Transformation &trans, const Matrix m)
 void Mesh::ProcessDrawQueue() {
   assert(draw_queue->size());
   	GFXSelectMaterial(myMatNum);
-	GFXEnable (LIGHTING);
+	GFXDisable(LIGHTING);
 
 	//static float rot = 0;
 	GFXColor(1.0, 1.0, 1.0, 1.0);
@@ -750,7 +750,7 @@ void Mesh::ProcessDrawQueue() {
 	GFXEnable(CULLFACE);
 	if(envMap) {
 	  Reflect();
-	  GFXEnable(TEXTURE1);
+	  //GFXEnable(TEXTURE1);
 	} else {
 	  GFXDisable(TEXTURE1);
 	}

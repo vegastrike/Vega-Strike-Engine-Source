@@ -314,7 +314,7 @@ static void Quit(int,KBSTATE newState) {
 Unit *carrier=NULL;
 Unit *fighter = NULL;
 Unit *fighter2=NULL;
-const int numf = 10;
+const int numf = 1;
 Unit *fighters[numf];
 CoordinateSelect *locSel=NULL;
 Background * bg = NULL;

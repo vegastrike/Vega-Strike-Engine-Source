@@ -23,7 +23,7 @@
 #include "lin_time.h"
 #include "physics.h"
 
-
+// the rotation should be applied in world coordinates
 void Unit:: Rotate (const Vector &axis)
 {
 	float theta = axis.Magnitude();
@@ -164,14 +164,17 @@ void Unit::RollTorque(float amt) {
 
 void Unit::ResolveForces () // don't call this 2x
 {
-  Vector temp = NetTorque *SIMULATION_ATOM*(1.0/MomentOfInertia);//assume force is constant throughout the time
+  // Torque is modeled as a perfect impulse at the beginning of a game
+  // turn, for simplicity
+  Vector temp = NetTorque *SIMULATION_ATOM*(1.0/MomentOfInertia);
+  AngularVelocity += temp;
   if(AngularVelocity.Magnitude() > 0) {
-    Rotate (SIMULATION_ATOM*(AngularVelocity+ temp*.5));
+    Rotate (SIMULATION_ATOM*(AngularVelocity));
   }
-	AngularVelocity += temp;
 	Vector p, q, r;
 	GetOrientation(p,q,r);
-	temp = ((NetForce + NetLocalForce.i*p + NetLocalForce.j*q + NetLocalForce.k*r ) * SIMULATION_ATOM)/mass;//acceleration
+	temp = ((NetForce + NetLocalForce.i*p + NetLocalForce.j*q + NetLocalForce.k*r ) * SIMULATION_ATOM)/mass; //acceleration
+	Velocity += temp; // modelled as an impulse
 	//now the fuck with it... add relitivity to the picture here
 	/*
 	if (fabs (Velocity.i)+fabs(Velocity.j)+fabs(Velocity.k)> co10)
@@ -180,8 +183,7 @@ void Unit::ResolveForces () // don't call this 2x
 		float y = (1-magvel*magvel*oocc);
 		temp = temp * powf (y,1.5);
 		}*/
-	curr_physical_state.position += (Velocity+.5*temp)*SIMULATION_ATOM;
-	Velocity += temp;
+	curr_physical_state.position += Velocity*SIMULATION_ATOM;
 	NetForce = NetLocalForce = Vector(0,0,0);
 	NetTorque = Vector(0,0,0);
 	//cerr << "new position of " << name << ": " << curr_physical_state.position << ", velocity " << Velocity << endl;

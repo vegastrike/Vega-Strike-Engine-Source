@@ -23,8 +23,8 @@
 #include "UnitCollection.h"
 AI * Order::Execute () {
   int completed=0;
-  vector<AI*>::iterator ord = suborders.begin();
   if(suborders.size()) {
+    vector<AI*>::iterator ord = suborders.begin();
     (*ord)->Execute();
     if((*ord)->Done()){
       delete (*ord);

@@ -7,6 +7,7 @@
 namespace Orders {
   // This moveto always attempts to move in a straight line (unaware of strafing)
   const float bleed_threshold = 0.0001;
+  const float THRESHOLD = 0.001;
 
 class MoveTo : public Order {
   int state; // 0 = accel, 1 = glide, 2 = brake; there should not be a braking phase if this is an active intercept
@@ -162,149 +163,64 @@ class ChangeHeading : public Order {
   ChangeHeading(const Vector &final_heading, float limit) : state(0), final_heading(final_heading), optimal_speed(limit), braking(false) { type = 1;}
   AI *Execute() {
     Vector local_heading = parent->ToLocalCoordinates(final_heading);
-    float angle = acos(local_heading * Vector(0,0,1));
+    Vector ang_vel = parent->ToLocalCoordinates(parent->GetAngularVelocity());
+    Vector torque(0,0,0);
     
-    Vector ang_vel = parent->GetAngularVelocity();
+    cerr << "local heading: " << local_heading << endl;
+
     Vector ang_vel_norm = ang_vel;
     float ang_speed = ang_vel.Magnitude();
-    ang_vel_norm = ang_vel_norm / ang_speed;
+    // Algorithm: at each step do a greedy course correction to:
+    // 1. convert angular momentum into the r axis. This will cause
+    // the spin to precess
 
-    Vector torque_norm;
-    float torque_start;
-    float torque_maxaccel;
-    float torque_end;
-    float a,b,c;
+    // 2. apply impulse that will reorient r towards the destination
+    // if this does not contradict #1, ie must thrust at less than 90
+    // degrees off of the original direction
 
-    // Calculate the 2 candidate arcs
-    // 1. The cross product of the current heading and the final heading
-    // 2. The average of the current heading and the final heading
-    // The angle of 1 will be the arcsin of the length
-    // Angle of 2 is 180 degrees
+    if(ang_speed > THRESHOLD) {
+      ang_vel_norm = ang_vel_norm / ang_speed;
+      ang_vel = ang_vel - local_heading * (ang_vel * local_heading);
+      torque = parent->ClampTorque(-ang_vel * parent->GetMoment()/SIMULATION_ATOM);
+      
+      cerr << "Torque for converting to pure roll " << torque << endl;
+    }
+    
+    Vector turning;
+    CrossProduct(local_heading, Vector(0,0,1), turning);
+    cerr << "turning: " << turning << endl;
+    float angle = asin(turning.Magnitude());
+    if(angle < THRESHOLD) {
+      Vector turning_norm = turning;
+      turning_norm.Normalize();
+      /*
+	Vector temp = NetTorque *SIMULATION_ATOM*(1.0/MomentOfInertia);
+	AngularVelocity += temp;
+      */
 
-    Vector cand1 = Vector(0,0,1).Cross(local_heading);
-    float cand1_angle = asin(cand1.Magnitude());
-    cand1 = cand1 / cand1.Magnitude();
-    float max_cand1_accel = parent->MaxTorque(cand1).Magnitude()/parent->GetMoment();
-    Vector cand2 = ( Vector(0,0,1) + local_heading )/ 2.0;
-    cand2.Normalize();
-    float max_cand2_accel = parent->MaxTorque(cand2).Magnitude()/parent->GetMoment();
+      // should write some routines to factor out calculation of how
+      // much impulse is actually needed
 
-    float a1 = 0.5 * max_cand1_accel;
-    float b1 = ang_vel * cand1;
-    float c1 = cand1_angle;
+      Vector angular_velocity = parent->GetAngularVelocity();
+      angular_velocity = angular_velocity - torque / parent->GetMoment() * SIMULATION_ATOM;
 
-    float a2 = 0.5 * max_cand2_accel;
-    float b2 = ang_vel * cand2;
-    float c2 = PI;
+      float angular_speed = angular_velocity * turning_norm;
+      angular_velocity = turning_norm * (angular_speed);
+      angle = angle - angular_speed * SIMULATION_ATOM;
+      angle /= SIMULATION_ATOM * SIMULATION_ATOM; // get the angular velocity
+      Vector more_torque = turning_norm * (angle * parent->GetMoment());
+      cerr << "Torque for turning towards target " << torque << endl;
+      torque += more_torque;
+    }
 
-    // figure out which one is better.  
-
-    // 1. how long it takes to stop; what position to aim for (first
-    // repetition of the target vector)
-
-    // 2. figure out starting position, assuming max constant
-    // acceleration up to this point
-
-    // 3. find turnaround point of journey, calculate time to reach
-    // from current state, add to braking time. this is the total
-    // time.
-
-    // for now, do something simple
-    /*
-      if(fabs(b1/max_cand1_accel) < fabs(b2/max_cand2_accel)) { */
-      torque_norm = cand1;
-      torque_start = 0;
-      torque_maxaccel = max_cand1_accel;
-      torque_end = cand1_angle;
-      a = a1;
-      b = b1;
-      c = c1;
-      /*    } else {
-      torque_norm = cand2;
-      torque_start = 0;
-      torque_maxaccel = max_cand2_accel;
-      torque_end = PI;
-      a = a1;
-      b = b1;
-      c = c1;
-      }*/
-      clog << "target: " << local_heading << "\n";
-      clog << "angle: " << angle << "\n";
-    if(angle < bleed_threshold*30) {
-      clog << "almost there, bleeding off speed\n";
-      Vector orth_vel = ang_vel - ang_vel_norm * (ang_vel * local_heading);
-      clog << "orth_vel: " << orth_vel << "\n";
-      if(orth_vel.Magnitude() < bleed_threshold*30 || ang_speed < bleed_threshold*30) {
-	clog << "done\n";
-	state = 2;
-	done = true;
-	return NULL;
-      } else {
-	// bleed off angular velocity
-	parent->ApplyLocalTorque(-orth_vel / (SIMULATION_ATOM) * parent->GetMoment());
-      }
-    } else {
-      switch(state) {
-      case 0: 
-	{
-	  /*
-	    float soln_1 = (-b + sqrt (b*b - 4 * a * c)) / (2 * a);
-	    float soln_2 = (-b - sqrt (b*b - 4 * a * c)) / (2 * a);
-	  */
-	  // Find out where we'll be when all speed is bled off
-	  float vel = ang_vel * torque_norm;
-	  float end_time = vel / torque_maxaccel;
-	  float end_position = vel * end_time + 0.5 * copysign(torque_maxaccel,-vel) * end_time * end_time;
-	  end_position = copysign(fabs(end_position) - fabs(floor(end_position/(2*PI))) * 2 * PI, end_position);
-	  if(end_position < 0) end_position += 2 * PI;
-	  if(end_position > PI/2) end_position -= PI/2;
-	  clog << "end_position: " << end_position << "\ntorque_end: " << torque_end << "\nprojected torque_end: " << torque_end + vel * SIMULATION_ATOM << "\n";
-	  if((end_position - torque_end) * (end_position - (torque_end + vel * SIMULATION_ATOM)) <= 0||braking) { // not quite right, should inculde contribution from current decision; possible issue if angular velocity is exactly 2pi
-	    vel = 0 - vel;
-	    if(true) { // apply burst to make sure that we land on the right position
-	      braking = true;
-	      if((end_position - torque_end) * vel < 0) { // stopped before, apply a positive adjustment
-		float d = torque_end - end_position;
-		float a = -(((vel/SIMULATION_ATOM)>torque_maxaccel)?torque_maxaccel:vel/SIMULATION_ATOM);
-		//float accel = -(vel * SIMULATION_ATOM + 0.5 * a * SIMULATION_ATOM * SIMULATION_ATOM - d)/(SIMULATION_ATOM * SIMULATION_ATOM); // not exact; 6am approximation
-		//float accel = 2.0 * (d + 0.5 * a * SIMULATION_ATOM * SIMULATION_ATOM) / (SIMULATION_ATOM * SIMULATION_ATOM);
-		float fraction = fabs(d/vel)/SIMULATION_ATOM;
-		clog << "fraction: " << fraction<< "\n";
-		parent->ApplyLocalTorque(torque_norm * vel * parent->GetMoment() * fraction / SIMULATION_ATOM); 
-		clog << "applying momentum (braking, not full): " << torque_norm * vel * fraction / SIMULATION_ATOM << "\n";
-	      } else {
-		clog << "warning: will overshoot\n";
-	      }
-	    } else {
-	      //parent->ApplyLocalTorque(torque_norm * vel * parent->GetMoment() / SIMULATION_ATOM);
-	      //clog << "applying momentum (braking): " << torque_norm * vel / SIMULATION_ATOM << "\n";
-	    }
-	    if((torque_norm * vel * parent->GetMoment() / SIMULATION_ATOM).Magnitude() < parent->MaxTorque(torque_norm).Magnitude()) {
-	      state = 3; // stopped
-	    }
-	  } else {
-	    vel = optimal_speed - vel;
-	    parent->ApplyLocalTorque(torque_norm * vel * parent->GetMoment() / SIMULATION_ATOM );
-	    clog << "applying momentum: " << torque_norm * vel / SIMULATION_ATOM << "\n";
-	  }
-	}
-	break;
-      case 2:
-	break;
-      case 3:
-	break;
-      }
-      if(state!=2) {
-	// Bleed off momentum in other directions to stabilize ship
-	if(!isnan(ang_speed) && ang_speed > bleed_threshold) {
-	  Vector orth_vel = ang_vel - ang_vel_norm * (ang_vel * torque_norm);
-	  parent->ApplyLocalTorque(-orth_vel / (SIMULATION_ATOM) * parent->GetMoment());
-	  clog << "Momentum bled off: " << -orth_vel / (SIMULATION_ATOM) << "\n";
-	}
-      }
-      return this;
+    if(ang_vel.Magnitude() < THRESHOLD && (local_heading * Vector(0,0,1)) > 1-THRESHOLD) {
+      done = false;
+    }
+    else {
+      parent->ApplyLocalTorque(torque);
     }
   }
 };
 }
 #endif
+
