@@ -42,7 +42,7 @@ class NetworkCommunication
 	private:
 		// Text message
 		std::deque<std::string>	message_history;		// Text message history
-		int				max_messages;					// Maximum number of text messages recorded
+		unsigned short			max_messages;			// Maximum number of text messages recorded
 		list<ClientPtr>	commClients;					// List of client communicating on the same frequency
 		ClientPtr		webcamClient;					// The client we are watching the webcam
 

@@ -1,6 +1,5 @@
 #ifdef NETCOMM
 
-#include "netbuffer.h"
 #include <config.h>
 
 #include "vsnet_dloadmgr.h"
@@ -18,6 +17,7 @@ extern bool cleanexit;
 #include "gldrv/winsys.h"
 #include "networkcomm.h"
 #include "packet.h"
+#include <assert.h>
 
 #ifdef NETCOMM_JVOIP
 void	CheckVOIPError( int val)
@@ -102,7 +102,7 @@ int	Pa_PlayCallback( void * inputBuffer, void * outputBuffer, unsigned long fram
 
 	// Copy the last received sound buffer if not yet played (would be NULL) and if PA CPU load is low enough
 	if( Pa_GetCPULoad(netcomm->outstream)<MAX_PA_CPU_LOAD && netcomm->audio_outbuffer)
-		memcpy( outputBuffer, netcomm->audio_outbuffer, sizeof( unsigned short)*framesPerBuffer);
+		memcpy( out, netcomm->audio_outbuffer, sizeof( unsigned short)*framesPerBuffer);
 
 	return 0;
 }
@@ -188,6 +188,7 @@ char	NetworkCommunication::HasPortaudio()
 NetworkCommunication::NetworkCommunication( int nb)
 {
 	NetworkCommunication::NetworkCommunication();
+	assert( nb<65536);
 	this->max_messages = nb;
 }
 
@@ -223,12 +224,13 @@ void	NetworkCommunication::SendMessage( SOCKETALT & send_sock, ObjSerial serial,
 	this->message_history.push_back( message);
 
 	// Send the text message according to the chosen method
-	NetBuffer netbuf;
-	netbuf.addString( message);
+	char * msg = new char[message.length()+1];
+	memcpy( msg, message.c_str(), message.length());
+	msg[message.length()] = 0;
 	if( method==ServerUnicast)
 	{
 		// SEND STRNIG PARAMETER TO SERVER SO THAT HE BROADCASTS IT TO CONCERNED PLAYERS
-		p.send( CMD_TXTMESSAGE, serial, netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, NULL, send_sock,
+		p.send( CMD_TXTMESSAGE, serial, msg, message.length(), SENDRELIABLE, NULL, send_sock,
     	        __FILE__, PSEUDO__LINE__(229) );
 	}
 	else if( method==ClientBroadcast)
@@ -237,10 +239,11 @@ void	NetworkCommunication::SendMessage( SOCKETALT & send_sock, ObjSerial serial,
 		CltPtrIterator it;
 		for( it = commClients.begin(); it!=commClients.end(); it++)
 		{
-			p.send( CMD_TXTMESSAGE, serial, netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, NULL, (*it)->sock,
+			p.send( CMD_TXTMESSAGE, serial, msg, message.length(), SENDRELIABLE, NULL, (*it)->sock,
 						__FILE__, PSEUDO__LINE__(244) );
 		}
 	}
+	delete msg;
 }
 
 /***************************************************************************************/
@@ -250,7 +253,6 @@ void	NetworkCommunication::SendMessage( SOCKETALT & send_sock, ObjSerial serial,
 void	NetworkCommunication::SendSound( SOCKETALT & sock, ObjSerial serial)
 {
 #ifdef USE_PORTAUDIO
-	Netbuffer netbuf( this->audio_inbuffer, this->audio_inlength);
 	Packet p;
 	if( method==ServerUnicast)
 	{
@@ -258,7 +260,7 @@ void	NetworkCommunication::SendSound( SOCKETALT & sock, ObjSerial serial)
 
 		Packet p;
 		// We don't need that to be reliable in UDP mode
-		p.send( CMD_SOUNDSAMPLE, serial, netbuf.getData(), netbuf.getDataLength(), SENDANDFORGET, NULL, sock,
+		p.send( CMD_SOUNDSAMPLE, serial, this->audio_inbuffer, this->audio_inlength, SENDANDFORGET, NULL, sock,
     	        __FILE__, PSEUDO__LINE__(229) );
 	}
 	else if( method==ClientBroadcast)
@@ -269,7 +271,7 @@ void	NetworkCommunication::SendSound( SOCKETALT & sock, ObjSerial serial)
 		{
 			if( (*it)->portaudio)
 			{
-				p.send( CMD_SOUNDSAMPLE, serial, netbuf.getData(), netbuf.getDataLength(), SENDANDFORGET, NULL, (*it)->sock,
+				p.send( CMD_SOUNDSAMPLE, serial, this->audio_inbuffer, this->audio_inlength, SENDANDFORGET, NULL, (*it)->sock,
 						__FILE__, PSEUDO__LINE__(244) );
 			}
 		}
