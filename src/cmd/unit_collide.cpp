@@ -11,6 +11,8 @@
 #include "collide/collider.h"
 #include "hashtable.h"
 #include <string>
+#include "vs_globals.h"
+#include "config_xml.h"
 static Hashtable <std::string,collideTrees,char[127]> unitColliders;
 collideTrees::collideTrees (const std::string &hk, BSPTree *bT, BSPTree *bS, csRapidCollider *cT, csRapidCollider *cS): hash_key(hk),bspTree(bT), colTree(cT), bspShield(bS), colShield(cS) {
   refcount=1;
@@ -228,9 +230,13 @@ bool Unit::InsideCollideTree (Unit * smaller, QVector & bigpos, Vector &bigNorma
       }
     }
     UnitCollection::UnitIterator i;
+    static float rsizelim = XMLSupport::parse_float (vs_config->getVariable ("physics","smallest_subunit_to_collide",".2"));
     if (!bigger->SubUnits.empty()) {
       i=bigger->getSubUnits();
       for (Unit * un;(un=i.current())!=NULL;i.advance()) {
+	if ((!bigger->isUnit()==ASTEROIDPTR)&&un->rSize()/bigger->rSize()<rsizelim) {
+	  break;
+	}
 	if ((un->InsideCollideTree(smaller,bigpos, bigNormal,smallpos,smallNormal))) {
 	  return true;
 	}
@@ -239,6 +245,9 @@ bool Unit::InsideCollideTree (Unit * smaller, QVector & bigpos, Vector &bigNorma
     if (!smaller->SubUnits.empty()) {
       i=smaller->getSubUnits();
       for (Unit * un;(un=i.current())!=NULL;i.advance()) {
+	if ((!smaller->isUnit()==ASTEROIDPTR)&&un->rSize()/smaller->rSize()<rsizelim) {
+	  break;
+	}
 	if ((bigger->InsideCollideTree(un,bigpos, bigNormal,smallpos,smallNormal))) {
 	  return true;
 	}
