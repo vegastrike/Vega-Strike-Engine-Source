@@ -384,6 +384,32 @@ static void AddCarg (Unit *thus, string cargos) {
     }
   }
 }
+void HudDamage(float * dam, string damages) {
+  if (dam) {
+    for (int i=0;i<1+MAXVDUS+UnitImages::NUMGAUGES;++i) {
+      dam[i] = stof(nextElement(damages),0);
+    }
+  }
+}
+string WriteHudDamage (Unit * un) {
+  string ret;
+  if (un->image->cockpit_damage) {
+    for (int i=0;i<1+MAXVDUS+UnitImages::NUMGAUGES;++i) {
+      ret=XMLSupport::tostring(un->image->cockpit_damage[i]);
+    }
+  }
+  return ret;
+}
+string WriteHudDamageFunc (Unit * un) {
+  string ret;
+  if (un->image->cockpit_damage) {
+    int numg=1+MAXVDUS+UnitImages::NUMGAUGES;
+    for (int i=numg;i<2*numg;++i) {
+      ret=XMLSupport::tostring(un->image->cockpit_damage[i]);
+    }
+  }
+  return ret;
+}
 void AddSounds(Unit * thus, string sounds) {
   if (sounds.length()!=0) {
     thus->sound->shield=AUDCreateSoundWAV(nextElement(sounds),false);
@@ -417,13 +443,14 @@ void AddSounds(Unit * thus, string sounds) {
       thus->sound->jump=AUDCreateSound (vs_config->getVariable ("unitaudio","explode","sfx43.wav"),false);
     }
 }
-void LoadCockpit(Unit * thus, string cockpit, string cockpitdamage) {
+void LoadCockpit(Unit * thus, string cockpit) {
+  /*
   int i=0;
   while (cockpitdamage!=""&&i<2*(UnitImages::NUMGAUGES+1+MAXVDUS)) {    
     thus->image->cockpit_damage[i]=stof(nextElement(cockpitdamage));   
     thus->image->cockpit_damage[i+1]=stof(nextElement(cockpitdamage));
     i+=2;
-  }
+    }*/
   thus->image->cockpitImage=nextElement(cockpit);
   thus->image->CockpitCenter.i=stof(nextElement(cockpit));   
   thus->image->CockpitCenter.j=stof(nextElement(cockpit));   
@@ -482,7 +509,8 @@ void Unit::LoadRow(CSVRow &row,string modification, string * netxml) {
   ImportCargo(this,row["Cargo_Import"]);
   AddCarg(this,row["Cargo"]);
   AddSounds(this,row["Sounds"]);
-  LoadCockpit(this,row["Cockpit"],row["CockpitDamage"]);
+  
+  LoadCockpit(this,row["Cockpit"]);
   image->CockpitCenter.i=stof(row["CockpitX"])*xml.unitscale;
   image->CockpitCenter.j=stof(row["CockpitY"])*xml.unitscale;
   image->CockpitCenter.k=stof(row["CockpitZ"])*xml.unitscale;
@@ -593,6 +621,10 @@ void Unit::LoadRow(CSVRow &row,string modification, string * netxml) {
   image->repair_droid=stoi(row["Repair_Droid"]);
   image->ecm = stoi(row["ECM_Rating"]);
   if (image->ecm<0) image->ecm*=-1;
+  if (image->cockpit_damage){
+    HudDamage(image->cockpit_damage,row["Hud_Functionality"]);
+    HudDamage(image->cockpit_damage+1+MAXVDUS+UnitImages::NUMGAUGES,row["Max_Hud_Functionality"]);
+  }
   image->LifeSupportFunctionality=stof(row["Lifesupport_Functionality"]);
   image->LifeSupportFunctionalityMax=stof(row["Max_Lifesupport_Functionality"]);
   image->CommFunctionality=stof(row["Comm_Functionality"]);
@@ -898,14 +930,14 @@ string Unit::WriteUnitString () {
         unit["Moment_Of_Inertia"]=tos(Momentofinertia);
         unit["Fuel_Capacity"]=tos(fuel);
         unit["Hull"]=tos(hull);
-        row["Armor_Front_Top_Left"]=tos(armor.frontlefttop);
-        row["Armor_Front_Top_Right"]=tos(armor.frontrighttop);
-        row["Armor_Back_Top_Left"]=tos(armor.backlefttop);
-        row["Armor_Back_Top_Right"]=tos(armor.backrighttop);
-        row["Armor_Front_Bottom_Left"]=tos(armor.frontleftbottom);
-        row["Armor_Front_Bottom_Right"]=tos(armor.frontrightbottom);
-        row["Armor_Back_Bottom_Left"]=tos(armor.backleftbottom);
-        row["Armor_Back_Bottom_Right"]=tos(armor.backrightbottom);        
+        unit["Armor_Front_Top_Left"]=tos(armor.frontlefttop);
+        unit["Armor_Front_Top_Right"]=tos(armor.frontrighttop);
+        unit["Armor_Back_Top_Left"]=tos(armor.backlefttop);
+        unit["Armor_Back_Top_Right"]=tos(armor.backrighttop);
+        unit["Armor_Front_Bottom_Left"]=tos(armor.frontleftbottom);
+        unit["Armor_Front_Bottom_Right"]=tos(armor.frontrightbottom);
+        unit["Armor_Back_Bottom_Left"]=tos(armor.backleftbottom);
+        unit["Armor_Back_Bottom_Right"]=tos(armor.backrightbottom);        
         {
           unit["Shield_Front_Top_Right"]="";
           unit["Shield_Front_Top_Left"]="";
@@ -981,18 +1013,21 @@ string Unit::WriteUnitString () {
         unit["Cloak_Glass"]=tos(image->cloakglass);
         unit["Repair_Droid"]=tos(image->repair_droid);
         unit["ECM"]=tos(image->ecm>0?image->ecm:-image->ecm);
-        row["Lifesupport_Functionality"]=tos(image->LifeSupportFunctionality);
-        row["Max_Lifesupport_Functionality"]=tos(image->LifeSupportFunctionalityMax);
-        row["Comm_Functionality"]=tos(image->CommFunctionality);
-        row["Max_Comm_Functionality"]=tos(image->CommFunctionalityMax);        
-        row["Comm_Functionality"]=tos(image->CommFunctionality);
-        row["Max_Comm_Functionality"]=tos(image->CommFunctionalityMax);
-        row["FireControl_Functionality"]=tos(image->fireControlFunctionality);
-        row["Max_FireControl_Functionality"]=tos(image->fireControlFunctionalityMax);
-        row["SPECDrive_Functionality"]=tos(image->SPECDriveFunctionality);
-        row["Max_SPECDrive_Functionality"]=tos(image->SPECDriveFunctionalityMax);
-        row["Slide_Start"]=tos(computer.slide_start);
-        row["Slide_End"]=tos(computer.slide_end);
+        unit["Hud_Functionality"]=WriteHudDamage(this);
+        unit["Max_Hud_Functionality"]=WriteHudDamageFunc(this);
+
+        unit["Lifesupport_Functionality"]=tos(image->LifeSupportFunctionality);       
+        unit["Max_Lifesupport_Functionality"]=tos(image->LifeSupportFunctionalityMax);
+        unit["Comm_Functionality"]=tos(image->CommFunctionality);
+        unit["Max_Comm_Functionality"]=tos(image->CommFunctionalityMax);        
+        unit["Comm_Functionality"]=tos(image->CommFunctionality);
+        unit["Max_Comm_Functionality"]=tos(image->CommFunctionalityMax);
+        unit["FireControl_Functionality"]=tos(image->fireControlFunctionality);
+        unit["Max_FireControl_Functionality"]=tos(image->fireControlFunctionalityMax);
+        unit["SPECDrive_Functionality"]=tos(image->SPECDriveFunctionality);
+        unit["Max_SPECDrive_Functionality"]=tos(image->SPECDriveFunctionalityMax);
+        unit["Slide_Start"]=tos(computer.slide_start);
+        unit["Slide_End"]=tos(computer.slide_end);
         unit["Cargo_Import"]=unit["Upgrades"]="";//make sure those are empty        
         vector<string>keys,values;
         keys.push_back("Key");

@@ -5260,8 +5260,8 @@ bool Unit::UpAndDownGrade (const Unit * up, const Unit * templ, int mountoffset,
   }
   STDUPGRADE(recharge,up->recharge,templ->recharge,0);
   STDUPGRADE(image->repair_droid,up->image->repair_droid,templ->image->repair_droid,0);
-  static bool bleh=XMLSupport::parse_bool(vs_config->getVariable("physics","UnitTable","false"));
-  if (bleh){
+  static bool unittable=XMLSupport::parse_bool(vs_config->getVariable("physics","UnitTable","false"));
+  if (unittable){
   STDUPGRADE(image->fireControlFunctionality,up->image->fireControlFunctionality,templ->image->fireControlFunctionality,0);
   STDUPGRADE(image->fireControlFunctionalityMax,up->image->fireControlFunctionalityMax,templ->image->fireControlFunctionalityMax,0);
   STDUPGRADE(image->SPECDriveFunctionality,up->image->SPECDriveFunctionality,templ->image->SPECDriveFunctionality,0);
@@ -5295,10 +5295,11 @@ bool Unit::UpAndDownGrade (const Unit * up, const Unit * templ, int mountoffset,
   STDUPGRADE(computer.max_pitch,tmax_pitch,templ->computer.max_pitch,0);
   STDUPGRADE(computer.max_roll,tmax_roll,templ->computer.max_roll,0);
   STDUPGRADE(fuel,up->fuel,templ->fuel,0);
+
   static bool UpgradeCockpitDamage = XMLSupport::parse_bool (vs_config->getVariable("physics","upgrade_cockpit_damage","false"));
-  if (UpgradeCockpitDamage){
+  if (unittable||UpgradeCockpitDamage) {
 	  for (unsigned int upgr=0;upgr<(UnitImages::NUMGAUGES+1+MAXVDUS)*2;upgr++) {
-		  STDUPGRADE(image->cockpit_damage[upgr],up->image->cockpit_damage[upgr],templ->image->cockpit_damage[upgr],1);
+		  STDUPGRADE(image->cockpit_damage[upgr],up->image->cockpit_damage[upgr],templ->image->cockpit_damage[upgr],(unittable?0:1));
 		  if (image->cockpit_damage[upgr]>1) {
 			  image->cockpit_damage[upgr]=1;//keep it real
 		  }
