@@ -264,9 +264,10 @@ void ShowText(float x, float y, float wid, int size, const char *str, int no_end
         for (cur = 0; str[cur] != '\0'; cur++) {
 		cur_width = glutStrokeWidth(GLUT_STROKE_ROMAN, str[cur]);
 		cur_width /= 2500;
-		//width += cur_width;
+		
 		if ((width+end+word_length(str+cur) > page_wid|| str[cur]=='\\' )&& str[cur+1] != '\0' ) {
 		  if (no_end==0) {
+		    width += cur_width;
 		    for (int i = 1; i <= 3; i++) { glutStrokeCharacter(GLUT_STROKE_ROMAN, '.'); }
 		    break;
 		  }else {
@@ -277,8 +278,10 @@ void ShowText(float x, float y, float wid, int size, const char *str, int no_end
 		    glTranslatef(x,y-(++h)*font_size_float,0);
 		    glScalef(font_size,font_size,1);
 		  }
+		}else {
+		  width += cur_width;
 		}
-		if (str[cur]!='\\')
+		if (str[cur]!='\\') 
 		  glutStrokeCharacter(GLUT_STROKE_ROMAN, str[cur]);
         }
 	glLoadIdentity();
