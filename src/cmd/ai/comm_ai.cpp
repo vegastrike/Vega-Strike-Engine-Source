@@ -152,6 +152,9 @@ void CommunicatingAI::UpdateContrabandSearch () {
 void CommunicatingAI::InitiateContrabandSearch (float playaprob, float targprob) {
   Unit *u= GetRandomUnit (playaprob,targprob);
   if (u) {
+    Unit * un =_Universe->GetContraband (parent->faction);
+    if (un) {
+    if (un->numCargo()>0) {
     Unit * v;
     if ((v=contraband_searchee.GetUnit())) {
       if (v==u) {
@@ -165,6 +168,8 @@ void CommunicatingAI::InitiateContrabandSearch (float playaprob, float targprob)
     c.SetCurrentState(c.fsm->GetContrabandInitiateNode(),comm_face,sex);
     u->getAIState()->Communicate (c);
     which_cargo_item = 0;
+    }
+    }
   }
 }
 

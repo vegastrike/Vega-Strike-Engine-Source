@@ -745,16 +745,23 @@ static float getAutoRSize (Unit * orig,Unit * un, bool ignore_friend=false) {
   static float friendly_autodist =  XMLSupport::parse_float (vs_config->getVariable ("physics","friendly_auto_radius","100"));
   static float neutral_autodist =  XMLSupport::parse_float (vs_config->getVariable ("physics","neutral_auto_radius","1000"));
   static float hostile_autodist =  XMLSupport::parse_float (vs_config->getVariable ("physics","hostile_auto_radius","8000"));
-  if (un->isUnit()==PLANETPTR||(un->getFlightgroup()==orig->getFlightgroup()&&orig->getFlightgroup())) {
+  static int upgradefaction = _Universe->GetFaction("upgrades");
+  static int neutral = _Universe->GetFaction("neutral");
+
+  if (un->isUnit()==PLANETPTR) {
     //same flihgtgroup
     return orig->rSize();
+  }
+  if (un->faction==upgradefaction||(un->getFlightgroup()==orig->getFlightgroup()&&orig->getFlightgroup())) {
+    return ignore_friend?-FLT_MAX:(-orig->rSize()-un->rSize());
   }
   float rel=_Universe->GetRelation(un->faction,orig->faction);
   if (orig == un->Target())
 	rel-=1.5;
-  if (rel>.1) {
+  if (rel>.1||un->faction==neutral) {
 	  return ignore_friend?-FLT_MAX:friendly_autodist;//min distance apart
   }else if (rel<-.1) {
+    
     return hostile_autodist;
   }else {
 	  return ignore_friend?-FLT_MAX:neutral_autodist;

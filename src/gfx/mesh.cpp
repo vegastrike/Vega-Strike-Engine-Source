@@ -372,6 +372,8 @@ public:
   }
 };
 void Mesh::ProcessZFarMeshes () {
+  static GFXColor meshcolor (getMeshColor());
+  GFXLightContextAmbient(meshcolor);
   _Universe->AccessCamera()->UpdateGFX (GFXFALSE, GFXFALSE);
   GFXEnable(LIGHTING);
   GFXEnable(CULLFACE);
