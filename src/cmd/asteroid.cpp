@@ -3,6 +3,7 @@ void Asteroid::reactToCollision(Unit * smaller, const Vector & biglocation, cons
   Unit * t=this;
   switch (smaller->isUnit()) {
   case ASTEROIDPTR:
+  case ENHANCEMENTPTR:
     break;
   case NEBULAPTR:
     smaller->reactToCollision(t,smalllocation,smallnormal,biglocation,bignormal,dist);

@@ -38,10 +38,10 @@ void Unit::Upgrade (Unit * up) {
 	t.position=(t.position+q.position)*.5;
 	mounts[i%up->nummounts].SetMountPosition(t);
       }
+      int tmp = nummounts;
+      nummounts = up->nummounts;
+      up->nummounts=tmp;
     }
-    int tmp = nummounts;
-    nummounts = up->nummounts;
-    up->nummounts=tmp;
   }else for (int i=0;i<up->nummounts&&i<nummounts;i++) {
     Mount * mnt = (Mount *) malloc (sizeof (Mount));
     memcpy (mnt,&mounts[i],sizeof (Mount));
