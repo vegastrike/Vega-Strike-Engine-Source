@@ -16,7 +16,7 @@
 #include "vs_globals.h"
 
 FireKeyboard::FireKeyboard (unsigned int whichplayer, unsigned int whichjoystick): Order (WEAPON,0){
-  this->cloaktoggle=false;
+  this->cloaktoggle=true;
   this->whichjoystick = whichjoystick;
   this->whichplayer=whichplayer;
   gunspeed = gunrange = .0001;
@@ -732,7 +732,7 @@ void FireKeyboard::Execute () {
     j().jfirekey=UP;
     parent->UnFire();
   }
-  if (f().lockkey==PRESS) {
+  if (f().cloakkey==PRESS) {
 
     f().cloakkey=DOWN;
     parent->Cloak(cloaktoggle);

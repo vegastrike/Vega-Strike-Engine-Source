@@ -825,7 +825,7 @@ bool Unit::AutoPilotTo (Unit * target, bool ignore_friendlies) {
     }
   }
   bool ok=true;
-  if (Guaranteed==Mission::AUTO_NORMAL) {
+  if (Guaranteed==Mission::AUTO_NORMAL&&CloakVisible()>.5) {
     for (un_iter i=ss->getUnitList().createIterator();
 	 (un=*i)!=NULL; 
 	 ++i) {
