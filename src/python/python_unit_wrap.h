@@ -43,7 +43,7 @@
   voidWRAPPED1( TargetTurret ,UnitWrapper,targ)
   voidWRAPPED2( Threaten ,UnitWrapper,targ, float,danger)
   voidWRAPPED0( ResetThreatLevel)
-  voidWRAPPED2( Fire,bool,Missile,bool,OnlyCollideWithTarget)
+  voidWRAPPED2( Fire,unsigned int,Missile,bool,OnlyCollideWithTarget)
   voidWRAPPED0( UnFire)
   WRAPPED0(float, computeLockingPercent,0)//how locked are we
   WRAPPED0(float, FShieldData,0)
