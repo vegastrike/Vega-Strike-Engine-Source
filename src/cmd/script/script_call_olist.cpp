@@ -231,6 +231,26 @@ void Mission::call_olist_toxml(missionNode *node,int mode,varInst *ovi){
 
 }
 
+Vector Mission::call_olist_tovector(missionNode *node,int mode,varInst *ovi){
+  olist_t *my_olist=getOListObject(NULL,0,ovi);
+
+  varInst *x_vi=call_olist_at(node,mode,ovi,0);
+  varInst *y_vi=call_olist_at(node,mode,ovi,1);
+  varInst *z_vi=call_olist_at(node,mode,ovi,2);
+
+  if(x_vi->type!=VAR_FLOAT || y_vi->type!=VAR_FLOAT || z_vi->type!=VAR_FLOAT){
+    fatalError(node,mode,"that's not a vec3 object");
+    assert(0);
+  }
+
+  Vector pos;
+  pos.i=x_vi->float_val;
+  pos.j=y_vi->float_val;
+  pos.k=z_vi->float_val;
+
+  return pos;
+}
+
 varInst *Mission::call_olist_new(missionNode *node,int mode){
   varInst *viret=newVarInst(VI_TEMP);
 

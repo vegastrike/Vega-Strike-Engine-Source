@@ -40,6 +40,7 @@ using std::string;
 using XMLSupport::AttributeList;
 
 class Unit;
+class Order;
 class MessageCenter;
 
 #define qu(x)	("\""+x+"\"")
@@ -209,11 +210,14 @@ class Mission {
 void addModule(string modulename);
 void runScript(string modulename,string scriptname,uint classid=0);
 uint  createClassInstance(string modulename);
-
+ void setCurrentAIUnit(Unit *unit) { current_ai_unit=unit; };
+ 
   MessageCenter *msgcenter;
 
  private:
   //  string getVariable(easyDomNode *section,string name,string defaultval);
+
+  Unit *current_ai_unit;
 
   int debuglevel;
 
@@ -347,6 +351,7 @@ void printNode(missionNode *node,int mode);
  varInst * callGetGameTime(missionNode *node,int mode);
 varInst *  call_isNull(missionNode *node,int mode);
 varInst * call_isequal(missionNode *node,int mode);
+varInst * callGetCurrentAIUnit(missionNode *node,int mode);
 
  varInst *call_int_cast(missionNode *node,int mode);
  varInst *call_float_cast(missionNode *node,int mode);
@@ -368,6 +373,7 @@ string method_str(missionNode *node);
 varInst * call_olist_at(missionNode *node,int mode,varInst *ovi,int index);
 varInst * call_olist_back(missionNode *node,int mode,varInst *ovi);
 void  call_olist_toxml(missionNode *node,int mode,varInst *ovi);
+ Vector call_olist_tovector(missionNode *node,int mode,varInst *ovi);
 
  varInst *getObjectArg(missionNode *node,int mode);
 
@@ -383,6 +389,7 @@ void  call_string_print(missionNode *node,int mode,varInst *ovi);
 varInst * call_string_new(missionNode *node,int mode,string initstring);
  string *getStringObject(missionNode *node,int mode,varInst *ovi);
 string call_string_getstring(missionNode *node,int mode,varInst *ovi);
+ string getStringArgument(missionNode *node,int mode,int arg_nr);
 
  void findNextEnemyTarget(Unit *my_unit);
 
@@ -394,6 +401,8 @@ void  deleteVarInst(varInst *vi,bool del_local=false);
  int  vi_counter,old_vi_counter; 
 void deleteVarMap(varInstMap *vmap);
 
+varInst * call_order(missionNode *node,int mode);
+Order * getOrderObject(missionNode *node,int mode,varInst *ovi);
 
 
 };

@@ -492,7 +492,8 @@ void createObjects() {
 	    else{
 	      string modulename=ainame.substr(1);
 	      
-	      fighters[a]->EnqueueAI( new AImissionScript(modulename));
+	      //fighters[a]->EnqueueAI( new AImissionScript(modulename));
+	      fighters[a]->SetAI( new AImissionScript(modulename));
 	    }
 	    SetTurretAI (fighters[a]);
 	  }

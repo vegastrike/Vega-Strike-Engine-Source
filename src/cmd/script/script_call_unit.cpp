@@ -219,7 +219,19 @@ varInst *Mission::call_unit(missionNode *node,int mode){
 	//return viret;
       }
     }
-    else if(cmd=="getFgId"){
+    else if(cmd=="getOrder"){
+      Order *my_order=NULL;
+
+      if(mode==SCRIPT_RUN){
+	my_order=my_unit->getAIState();
+      }
+
+      viret=newVarInst(VI_TEMP);
+      viret->type=VAR_OBJECT;
+      viret->objectname="order";
+      viret->object=(void *)my_order;
+    }
+    else if(cmd=="getFgId" || cmd=="getFgID"){
       if(mode==SCRIPT_RUN){
 	
 	Flightgroup *fg=my_unit->getFlightgroup();

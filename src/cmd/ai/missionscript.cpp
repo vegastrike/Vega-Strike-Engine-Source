@@ -38,6 +38,7 @@
 
 AImissionScript::AImissionScript (string modname):Order (Order::MOVEMENT|Order::FACING){
   cout << "AImissionScript " << modname << endl;
+  printf("addr %x\n",(int)this);
   //  mission->addModule(modname);
 
   modulename=modname;
@@ -53,8 +54,12 @@ AImissionScript::~AImissionScript () {
 
 void AImissionScript::Execute () {
 
+  mission->setCurrentAIUnit(parent);
   mission->runScript(modulename,"executeai",classid);
 
+  if(suborders.size()!=0){
+    printf("suborders: %d\n",suborders.size());
+  }
   Order::Execute();
   done=false;
 }

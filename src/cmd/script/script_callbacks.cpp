@@ -90,6 +90,9 @@ varInst *Mission::doCall(missionNode *node,int mode,string module,string method)
     else if(method=="getGameTime"){
       vi=callGetGameTime(node,mode);
     }
+    else if(method=="getCurrentAIUnit"){
+      vi=callGetCurrentAIUnit(node,mode);
+    }
     else if(method=="isNull"){
       vi=call_isNull(node,mode);
     }
@@ -105,6 +108,9 @@ varInst *Mission::doCall(missionNode *node,int mode,string module,string method)
   }
   else if(module=="_olist"){
     vi=call_olist(node,mode);
+  }
+  else if(module=="_order"){
+    vi=call_order(node,mode);
   }
   else if(module=="_unit"){
     vi=call_unit(node,mode);
@@ -427,6 +433,15 @@ varInst *Mission::callPrintFloats(missionNode *node,int mode){
 
   varInst *vi=newVarInst(VI_TEMP);
   vi->type=VAR_VOID;
+
+  return vi;
+}
+
+varInst *Mission::callGetCurrentAIUnit(missionNode *node,int mode){
+  varInst *vi=newVarInst(VI_TEMP);
+  vi->type=VAR_OBJECT;
+  vi->objectname="unit";
+  vi->object=(void *)current_ai_unit;
 
   return vi;
 }
