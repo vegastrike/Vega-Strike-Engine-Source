@@ -499,7 +499,7 @@ void Unit::LoadRow(CSVRow &row,string modification, string * netxml) {
   graphicOptions.NumAnimationPoints=stoi(row["Num_Animation_Stages"],0);
   if (graphicOptions.NumAnimationPoints>0)
     graphicOptions.Animating=0;
-  xml.unitscale = stoi(row["Unit_Scale"],1);
+  xml.unitscale = stof(row["Unit_Scale"],1);
   if (!xml.unitscale) xml.unitscale=1;
   image->unitscale=xml.unitscale;
   AddMeshes(xml,row["Mesh"],faction,getFlightgroup());
