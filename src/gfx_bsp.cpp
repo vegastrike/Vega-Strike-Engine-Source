@@ -49,7 +49,7 @@ BSPNode::BSPNode(BSPDiskNode **input) {
     back = NULL;
   }
 }
-#define LITTLEVALUE .0000001
+#define LITTLEVALUE .001
 
 float BSPNode::intersects(const Vector &start, const Vector &end, Vector & norm) const {
 	float peq1 = plane_eqn(start);
@@ -62,10 +62,12 @@ float BSPNode::intersects(const Vector &start, const Vector &end, Vector & norm)
 	      ((back!=NULL)?back->intersects(start, end,norm):LITTLEVALUE);		
 	}
 
-	if(peq1<=0 && peq2<=0) {
+	if((peq1<=-LITTLEVALUE && peq2<=LITTLEVALUE) ||
+	   (peq1<=LITTLEVALUE&&peq2<=-LITTLEVALUE)) {
 		return (back!=NULL)?back->intersects(start, end, norm):(start-end).Magnitude()+LITTLEVALUE; // if lies completely within a back leaf, then its inside the object
 	}
-	else if(peq1>=0 && peq2>=0) {
+	else if((peq1>=-LITTLEVALUE && peq2>=LITTLEVALUE)||
+		(peq1>=LITTLEVALUE &&peq2>=-LITTLEVALUE)) {
 		return (front!=NULL)?front->intersects(start, end, norm):false; // if lies completely on the outside of a front leaf, then outside object
 	}
 	else {

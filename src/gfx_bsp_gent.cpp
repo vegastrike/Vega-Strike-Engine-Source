@@ -539,7 +539,7 @@ enum INTERSECT_TYPE where_is_poly(const bsp_tree & temp_node,const bsp_polygon &
     INTERSECT_TYPE icur;
     for (unsigned int i=0;i<temp_poly3.v.size();i++) {
 	cur = ((temp_node.a)*(temp_poly3.v[i].x))+((temp_node.b)*(temp_poly3.v[i].y))+((temp_node.c)*(temp_poly3.v[i].z))+(temp_node.d);
-	if (cur>BSPG_THRESHOLD)
+	if (cur>BSPG_THRESHOLD)//??
 	    icur = BSPG_FRONT;
 	else if (cur <BSPG_THRESHOLD) 
 	    icur = BSPG_BACK;
