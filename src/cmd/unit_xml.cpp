@@ -418,6 +418,7 @@ void addBSPMesh( Unit::XML * xml, const char *filename, const float scale,int fa
 void pushMesh( Unit::XML * xml, const char *filename, const float scale,int faction,class Flightgroup * fg)
 {
 	xml->meshes.push_back(new Mesh(filename, Vector(scale,scale,scale), faction,fg));
+	xml->meshes.back()->setCurrentFrame(0);
 }
 
 Mount * createMount(const std::string& name, short int ammo, short int volume, float xyscale, float zscale)
