@@ -7,18 +7,7 @@
 
 FireKeyboard::FireKeyboard (int whichjoystick, const char *): Order (WEAPON){
   gunspeed = gunrange = .0001;
-#if 0
-  BindJoyKey (whichjoystick,0,FireKeyboard::JFireKey);
-  BindJoyKey (whichjoystick,1,FireKeyboard::JMissileKey);
-  BindJoyKey (whichjoystick,3,FireKeyboard::JTargetKey);
 
-  BindKey(' ',FireKeyboard::FireKey);
-  BindKey(13,FireKeyboard::MissileKey);
-  BindKey('t',FireKeyboard::TargetKey);
-  BindKey('g',FireKeyboard::WeapSelKey);
-  BindKey('m',FireKeyboard::MisSelKey);
-
-#endif
 }
 static KBSTATE firekey=UP;
 static KBSTATE targetkey=UP;
@@ -48,13 +37,6 @@ void FireKeyboard::FireKey(int key, KBSTATE k) {
   }
 }
 
-void FireKeyboard::JFireKey(KBSTATE k, float, float,int i) {
-  if (k==UP&&jfirekey==RELEASE) {
-
-  } else {
-    jfirekey = k;
-  }
-} 
 void FireKeyboard::TargetKey(int, KBSTATE k) {
   if (targetkey!=PRESS)
     targetkey = k;
@@ -62,10 +44,7 @@ void FireKeyboard::TargetKey(int, KBSTATE k) {
     targetkey=PRESS;
   }
 }
-void FireKeyboard::JTargetKey(KBSTATE k, float, float,int i) {
-  if (jtargetkey!=PRESS)
-    jtargetkey = k;
-} 
+
 void FireKeyboard::WeapSelKey(int, KBSTATE k) {
   if (weapk!=PRESS)
     weapk = k;
@@ -78,10 +57,6 @@ void FireKeyboard::MisSelKey(int, KBSTATE k) {
 void FireKeyboard::MissileKey(int, KBSTATE k) {
   missilekey = k;
 }
-void FireKeyboard::JMissileKey(KBSTATE k, float, float,int i) {
-  jmissilekey = k;
-} 
-
 
 void FireKeyboard::ChooseTargets () {
   UnitCollection::UnitIterator *iter = _Universe->activeStarSystem()->getUnitList()->createIterator();

@@ -1,3 +1,18 @@
+2001-10-24 Alexander Rawass <alexannika@users.sourceforge.net>
+
+	* new command-line argument: vegastrike <mission-name>
+	* removed old un-needed code (old key-bindings)
+	* removed debugging output from my routines
+	* removed old data dir from vegastrike/Makefile.am
+	* removed data/Makefile from configure.in
+
+	
+2001-10-24 Alexander Rawass <alexannika@users.sourceforge.net>
+	
+	* added support for analogue hatswitch, should work now
+	* ABKey can now be used on two or more bindings
+
+
 2001-10-23 Daniel Horn <hellcatv@hotmail.com>
 
 	* added cloaking as a feature

@@ -77,6 +77,8 @@ void cleanup(void)
 VegaConfig *vs_config;
 Mission *mission;
 
+char mission_name[1024];
+
 int main( int argc, char **argv ) 
 {
 
@@ -91,8 +93,6 @@ int main( int argc, char **argv )
     // loads the configuration file .vegastrikerc from home dir if such exists
     initpaths();
     
-    mission=new Mission("test1.mission");
-
     //            exit(0);
 
     //read_vs_config_file();
@@ -109,7 +109,13 @@ int main( int argc, char **argv )
 
     InitTime();
     UpdateTime();
+
+    strcpy(mission_name,"test1.mission");
+
     ParseCommandLine(argc,argv);
+
+    mission=new Mission(mission_name);
+
     AUDInit();
 
     /* Set up a function to clean up when program exits */
@@ -205,6 +211,10 @@ void ParseCommandLine(int argc, char ** lpCmdLine) {
 	//viddrv = "GLDRV.DLL";
 	break;
       }
+    }
+    else{
+      // no "-" before it - it's the mission name
+      strcpy (mission_name,lpCmdLine[i]);
     }
   }
   //FILE *fp = fopen("vid.cfg", "rb");

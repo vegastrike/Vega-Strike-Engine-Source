@@ -638,5 +638,4 @@ CXXFLAGS="$CXXFLAGS $TR_CXXFLAGS"
 LIBS="$LIBS $TR_LIBS"
 
 AC_OUTPUT(Makefile src/Makefile src/gldrv/Makefile src/aldrv/Makefile src/gfx/Makefile src/cmd/Makefile src/cmd/ai/Makefile \
-	data/Makefile \
 	objconv/Makefile )

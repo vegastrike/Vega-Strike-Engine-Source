@@ -448,7 +448,7 @@ void VegaConfig::checkBind(easyDomNode *node){
       BindKey(glut_key,handler);
     }
 
-    cout << "bound key " << keystr << " to " << cmdstr << endl;
+    //    cout << "bound key " << keystr << " to " << cmdstr << endl;
 
   }
   else if(!(node->attr_value("button").empty())){
@@ -469,7 +469,7 @@ void VegaConfig::checkBind(easyDomNode *node){
 
 	BindHatswitchKey(hatswitch_nr,button_nr,handler);
 	
-	cout << "Bound hatswitch nr " << hatswitch_nr << " button: " << button_nr << " to " << cmdstr << endl;
+	//	cout << "Bound hatswitch nr " << hatswitch_nr << " button: " << button_nr << " to " << cmdstr << endl;
       }
       else{
 	// joystick button
@@ -482,7 +482,7 @@ void VegaConfig::checkBind(easyDomNode *node){
 
 	BindJoyKey(joystick_nr,button_nr,handler);
 
-	cout << "Bound joy= " << joystick_nr << " button= " << button_nr << "to " << cmdstr << endl;
+	//cout << "Bound joy= " << joystick_nr << " button= " << button_nr << "to " << cmdstr << endl;
       }
     }
     else{

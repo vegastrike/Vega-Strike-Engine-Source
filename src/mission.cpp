@@ -149,11 +149,8 @@ void Mission::checkFlightgroup(easyDomNode *node){
 
   vector<easyDomNode *>::const_iterator siter;
 
-      printf("before checking pos\n");
-  
   for(siter= node->subnodes.begin() ; siter!=node->subnodes.end() ; siter++){
     if((*siter)->Name()=="pos"){
-      printf("checking pos\n");
       have_pos=doPosition(*siter,pos);
     }
     else if((*siter)->Name()=="rot"){
@@ -198,7 +195,7 @@ bool Mission::doPosition(easyDomNode *node,float pos[3]){
   string z=node->attr_value("z");
   string offset=node->attr_value("offset");
 
-  cout << "POS: x=" << x << " y=" << y << " z=" << z << endl;
+  //  cout << "POS: x=" << x << " y=" << y << " z=" << z << endl;
 
   if(x.empty() || y.empty() || z.empty() ){
     cout << "no valid position" << endl;

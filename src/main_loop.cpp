@@ -302,27 +302,6 @@ void clickhandler (KBSTATE k, int x, int y, int delx, int dely, int mod) {
 
 void InitializeInput() {
 
-#if 0
-  	BindKey(KEY_SPECIAL_OFFSET+GLUT_KEY_F1, Inside);
-	BindKey(KEY_SPECIAL_OFFSET+GLUT_KEY_F2, InsideLeft);
-	BindKey(KEY_SPECIAL_OFFSET+GLUT_KEY_F3, InsideRight);
-	BindKey(KEY_SPECIAL_OFFSET+GLUT_KEY_F4, InsideBack);
-
-	BindKey('W', SwitchLVDU);
-	BindKey('T', SwitchRVDU);
-
-
-	BindKey(KEY_SPECIAL_OFFSET+GLUT_KEY_F5, Behind);
-	BindKey(KEY_SPECIAL_OFFSET+GLUT_KEY_F6, Pan);
-
-	BindKey(KEY_SPECIAL_OFFSET+GLUT_KEY_F11, ZoomIn);
-	BindKey(KEY_SPECIAL_OFFSET+GLUT_KEY_F12, ZoomOut);
-
-	BindKey('w', PitchDown);
-	BindKey('z', PitchUp);
-	BindKey('a', YawLeft);
-	BindKey('s', YawRight);
-#endif
 	BindKey(27, Quit); // always have quit on esc
 }
 
@@ -341,67 +320,6 @@ void createObjects() {
 //GOOD!!
   ****/
   BindKey (1,CoordinateSelect::MouseMoveHandle);
-
-#if 0
-  FILE * fp = fopen ("testmission.txt", "r");
-  if (fp) {
-    fscanf (fp, "%d\n", &numf);
-  }	
-  fighters = new Unit * [numf];
-  int * tmptarget = new int [numf];
-
-  GFXEnable(TEXTURE0);
-  GFXEnable(TEXTURE1);
-    
-
-  
-  char fightername [1024]="hornet.xunit";
-  int a;
-  for(a = 0; a < numf; a++) {
-
-    Vector pox (1000+150*a,100*a,100);
-    if (fp) {      
-      if (!feof(fp))
-	fscanf (fp, "%s %f %f %f %d\n",fightername,&pox.i, &pox.j, &pox.k,&tmptarget[a]);
-      if (pox.i==pox.j&&pox.j==pox.k&&pox.k==0) {
-	pox.i=rand()*10000./RAND_MAX-5000;
-	pox.j=rand()*10000./RAND_MAX-5000;
-	pox.k=rand()*10000./RAND_MAX-5000;
-      }
-    }
-    //    if (tmptarget[a]<0||tmptarget[a]>numf)
-    //      tmptarget[a]=0;
-    fighters[a] = new Unit(fightername, true, false,tmptarget[a]);
-    fighters[a]->SetPosition (pox);
-    
-    //    fighters[a]->SetAI(new Order());
-    if (a!=0) {
-      fighters[a]->EnqueueAI( new Orders::AggressiveAI ("default.agg.xml", "default.int.xml"));
-
-    }
-    _Universe->activeStarSystem()->AddUnit(fighters[a]);
-  }
-  //  for (a=0;a<numf;a++) {
-  //      fighters[a]->Target (fighters[tmptarget[a]]);
-  //  }//now it just sets their faction :-D
-  delete [] tmptarget;
-  if (fp)
-      fclose (fp);
- 
-  fighters[0]->EnqueueAI(new AIScript("aitest.xml"));
-  fighters[0]->EnqueueAI(new FlyByJoystick (0,"player1.kbconf"));
-  fighters[0]->EnqueueAI(new FireKeyboard (0,""));
-  vschdir ("hornet-cockpit.cpt");
-  tmpcockpittexture = new Texture ("hornet-cockpit.bmp","hornet-cockpitalp.bmp",0,NEAREST);
-  vscdup();
-  muzak = new Music (fighters[0]);
-  AUDListenerSize (fighters[0]->rSize()*4);
-  _Universe->AccessCockpit()->Init ("hornet-cockpit.cpt");
-  _Universe->AccessCockpit()->SetParent(fighters[0]);
-  shipList = _Universe->activeStarSystem()->getClickList();
-  locSel = new CoordinateSelect (Vector (0,0,5));
-  UpdateTime();
-#endif
 
   int numf=mission->number_of_flightgroups;
 
@@ -455,7 +373,7 @@ void createObjects() {
       char ai_int_c[1024];
       strcpy(ai_agg_c,ai_agg.c_str());
       strcpy(ai_int_c,ai_int.c_str());
-      printf("1 - %s  2 - %s\n",ai_agg_c,ai_int_c);
+      //      printf("1 - %s  2 - %s\n",ai_agg_c,ai_int_c);
 
       fighters[a]->EnqueueAI( new Orders::AggressiveAI (ai_agg_c, ai_int_c));
 

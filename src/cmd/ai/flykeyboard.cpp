@@ -35,23 +35,7 @@ struct StarShipControlKeyboard {
 FlyByKeyboard::FlyByKeyboard (const char * configfile): FlyByWire () {
   //FIXME:: change hard coded keybindings
   if (starshipcontrolkeys.refcount==0) {
-#if 0
-    BindKey(8,FlyByKeyboard::StopKey);
-    BindKey(92,FlyByKeyboard::StartKey);
-    BindKey(KEY_SPECIAL_OFFSET+GLUT_KEY_UP,FlyByKeyboard::UpKey);
-    BindKey(KEY_SPECIAL_OFFSET+GLUT_KEY_DOWN,FlyByKeyboard::DownKey);
-    BindKey(KEY_SPECIAL_OFFSET+GLUT_KEY_LEFT,FlyByKeyboard::RightKey);
-    BindKey(KEY_SPECIAL_OFFSET+GLUT_KEY_RIGHT,FlyByKeyboard::LeftKey);
-    BindKey('\t',FlyByKeyboard::ABKey);
-    BindKey('+',FlyByKeyboard::AccelKey);
-    BindKey('=',FlyByKeyboard::AccelKey);
-    BindKey('-',FlyByKeyboard::DecelKey);   
-    BindKey('/',FlyByKeyboard::RollLeftKey);
-    BindKey(KEY_SPECIAL_OFFSET+GLUT_KEY_INSERT,FlyByKeyboard::RollLeftKey);
-    BindKey('*',FlyByKeyboard::RollRightKey);
-    BindKey(127,FlyByKeyboard::RollRightKey);
-    BindKey(96,FlyByKeyboard::SheltonKey);    
-#endif
+    // keys are bound in config_xml now
   }
   starshipcontrolkeys.refcount++;
 }
@@ -114,7 +98,7 @@ void FlyByKeyboard::Execute (bool resetangvelocity) {
 	RollRight(-1);
     }
 
-    fprintf(stderr,"AB: press %d rel %d\n",SSCK.ABpress,SSCK.ABrelease);
+    //    fprintf(stderr,"AB: press %d rel %d\n",SSCK.ABpress,SSCK.ABrelease);
     if (SSCK.ABpress>=0)
       Afterburn(0);
     else

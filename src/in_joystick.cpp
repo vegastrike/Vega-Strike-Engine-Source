@@ -75,49 +75,12 @@ void DeInitJoystick() {
   }
 #endif
 }
-/*
-void BindButton(int button,KBHandler handler){
-// have to check if button>allowed
-joyBindings[button]=handler;
-handler(button,RESET);
-}
 
-static void DefaultJoyHandler(int button,KBSTATE state){
-// do nothing
-return;
-}
-
-void UnbindButton(int button) {
-joyBindings[button] = DefaultJoyHandler;
-}
-*/
-
-// we don't need code here cause we don't queue events
-/*
-// not needed, this is done in FlyByJoystick
-int num_joysticks=SDL_NumJoysticks() ;
-for(int i=0; i < num_joysticks; i++ )  {
-if(joystick[i]->isAvailable()){
-float x,y;
-int buttons;
-joystick[i]->GetJoyStick(x,y,buttons);
-}
-}
-
-}
-
-#endif
-*/
 JoyStick::JoyStick(int which) {
   deadzone=0.01;
 
   joy_available = 0;
-    joy_xmin = (float) -1;
-    joy_xmax = (float) 1;
-    joy_ymin = (float) -1;
-    joy_ymax = (float) 1;
-    joy_zmin = (float) -1;
-    joy_zmax = (float) 1;
+
     joy_x=joy_y=joy_z=0;
 #if !defined(HAVE_SDL)
   return;
