@@ -126,11 +126,11 @@ class LoopAround: public Orders::FaceTargetITTS{
 	float rr;
 public:
 	LoopAround():FaceTargetITTS(false,3),m(false,2,false) {
-		static float loopdis=XMLSupport::parse_float (vs_config->getVariable("AI","loop_around_distance","2"));
+		static float loopdis=XMLSupport::parse_float (vs_config->getVariable("AI","loop_around_distance","1"));
 		qq=rr=0;
 		
-		qq = (2.0*rand())/RAND_MAX-1;
 		if (rand()<RAND_MAX/2) {
+			qq = (2.0*rand())/RAND_MAX-1;			
 			if (qq>0)
 				qq+=loopdis;
 			if (qq<0)
@@ -154,7 +154,7 @@ public:
 				m.Execute(parent,targ->Position()-r.Scale(2*parent->rSize()+targ->rSize()));
 			}else {
 				done=false;
-				m.SetAfterburn (false);
+				m.SetAfterburn (targ->GetVelocity().MagnitudeSquared()>parent->GetComputerData().max_speed());
 				Vector scala=targ->cumulative_transformation_matrix.getQ().Scale(qq*(parent->rSize()+targ->rSize()))+targ->cumulative_transformation_matrix.getP().Scale(rr*(parent->rSize()+targ->rSize()));
 				QVector dest =targ->Position()+scala;
 				SetDest(dest);
