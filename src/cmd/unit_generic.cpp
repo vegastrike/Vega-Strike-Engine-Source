@@ -79,7 +79,7 @@ void Unit::BuildBSPTree(const char *filename, bool vplane, Mesh * hull) {
  
  bsp = buildbsp (bsp,tri,triplane, vplane?VPLANE_ALL:0);
  if (bsp) {
-   VSError err = fo.OpenReadOnly( filename, BSPFile);
+   VSError err = fo.OpenCreateWrite( filename, BSPFile);
    if (err<=Ok) {
      write_bsp_tree(bsp,0);
      fo.Close();
