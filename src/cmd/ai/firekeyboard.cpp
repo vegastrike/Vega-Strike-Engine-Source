@@ -18,6 +18,8 @@ static KBSTATE jmissilekey = UP;
 static KBSTATE weapk=UP;
 static KBSTATE misk=UP;
 static KBSTATE cloakkey=UP;
+static KBSTATE neartargetkey=UP;
+static KBSTATE threattargetkey=UP;
 
 void FireKeyboard::CloakKey(int, KBSTATE k) {
 
@@ -46,6 +48,16 @@ void FireKeyboard::TargetKey(int, KBSTATE k) {
   }
 }
 
+void FireKeyboard::NearestTargetKey(int, KBSTATE k) {
+  if (neartargetkey!=PRESS)
+    neartargetkey = k;
+
+}
+void FireKeyboard::ThreatTargetKey(int, KBSTATE k) {
+  if (threattargetkey!=PRESS)
+    threattargetkey = k;
+}
+
 void FireKeyboard::WeapSelKey(int, KBSTATE k) {
   if (weapk!=PRESS)
     weapk = k;
@@ -59,7 +71,26 @@ void FireKeyboard::MissileKey(int, KBSTATE k) {
   if (missilekey!=PRESS)
    missilekey = k;
 }
-
+void FireKeyboard::ChooseNearTargets() {
+  UnitCollection::UnitIterator *iter = _Universe->activeStarSystem()->getUnitList()->createIterator();
+  Unit * un;
+  float range=FLT_MAX;
+  while ((un = iter->current())) {
+    Vector t;
+    bool tmp = parent->InRange (un,t);
+    if (tmp&&t.Dot(t)<range&&t.k>0&&_Universe->GetRelation(parent->faction,un->faction)<0) {
+      range = t.Dot(t);
+      parent->Target (un);
+    }
+    iter->advance();
+  }
+  delete iter;
+}
+void FireKeyboard::ChooseThreatTargets() {
+  Unit * threat = parent->Threat();
+  if (threat) 
+    parent->Target(threat);
+}
 void FireKeyboard::ChooseTargets () {
   UnitCollection::UnitIterator *iter = _Universe->activeStarSystem()->getUnitList()->createIterator();
   Unit * un ;
@@ -154,6 +185,14 @@ void FireKeyboard::Execute () {
     targetkey=DOWN;
     jtargetkey=DOWN;
     ChooseTargets();
+  }
+  if (neartargetkey==PRESS) {
+    ChooseNearTargets ();
+    neartargetkey=DOWN;
+  }
+  if (threattargetkey==PRESS) {
+    ChooseThreatTargets ();
+    threattargetkey=DOWN;
   }
   if (weapk==PRESS) {
     weapk=DOWN;

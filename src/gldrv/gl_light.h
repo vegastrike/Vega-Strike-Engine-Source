@@ -137,7 +137,7 @@ struct LineCollideStar {
 ///Finds the local lights that are clobberable for new lights (permanent perhaps)
 int findLocalClobberable();
 
-#define CTACC 4000
+#define CTACC 40000
 ///table to store local lights, numerical pointers to _llights (eg indices)
 extern Hashtable3d <LineCollideStar, char[20],char[CTACC], char [lighthuge]> lighttable;
 

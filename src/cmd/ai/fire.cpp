@@ -16,13 +16,16 @@ void FireAt::ChooseTargets (int ) {
   UnitCollection::UnitIterator *iter = _Universe->activeStarSystem()->getUnitList()->createIterator();
   Unit * un ;
   float relation=1;
-  float worstrelation=1;
+  float range=0;
+  float worstrelation=0;
   while ((un = iter->current())) {
     //how to choose a target?? "if looks particularly juicy... :-) tmp.prepend (un);
     relation = _Universe->GetRelation (parent->faction, un->faction);
     Vector t;
-    if (relation<worstrelation&&parent->InRange (un,t)) {
+    bool tmp = parent->InRange (un,t);
+    if (tmp&&((relation<worstrelation||(relation==worstrelation&&t.Dot(t)<range)))) {
       worstrelation = relation;
+      range = t.Dot(t);
       parent->Target (un);
     }
     iter->advance();
@@ -92,6 +95,9 @@ void FireAt::Execute () {
       ChooseTargets(1);
     }
   } else {
+    ChooseTargets(1);
+  }
+  if ((float(rand())/RAND_MAX)<.5*missileprobability*SIMULATION_ATOM) {
     ChooseTargets(1);
   }
   if (shouldfire) {
