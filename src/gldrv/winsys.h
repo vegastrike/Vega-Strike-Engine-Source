@@ -23,7 +23,11 @@
 #define UCHAR_MAX 255
 #endif
 #define HAVE_GLUT
-#if defined( HAVE_SDL )
+#ifndef HAVE_SDL
+#undef SDL_WINDOWING
+#endif
+
+#if defined( SDL_WINDOWING ) && defined (HAVE_SDL)
 #   include "SDL.h"
 #elif defined( HAVE_GLUT )
 #if defined(__APPLE__) || defined(MACOSX)
@@ -42,7 +46,7 @@ extern "C"
 
 /* Keysyms */
 
-#if defined( HAVE_SDL ) 
+#if defined( SDL_WINDOWING ) && defined (HAVE_SDL) 
 /*---------------------------------------------------------------------------*/
 /*---------------------------------------------------------------------------*/
 /* SDL version */
@@ -215,7 +219,7 @@ typedef enum {
     WS_MOUSE_UP = GLUT_UP
 } winsys_button_state_t;
 
-#endif /* defined( HAVE_SDL ) */
+#endif /* defined( SDL_WINDOWING ) */
 
 
 typedef void (*winsys_display_func_t)();

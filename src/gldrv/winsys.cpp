@@ -26,7 +26,7 @@
 /* Windowing System Abstraction Layer */
 /* Abstracts creation of windows, handling of events, etc. */
 
-#if defined( HAVE_SDL )
+#if defined( SDL_WINDOWING ) && defined (HAVE_SDL)
 
 #if defined( HAVE_SDL_MIXER )
 #   include "SDL_mixer.h"
@@ -771,6 +771,6 @@ void winsys_exit( int code )
     exit(code);
 }
 
-#endif /* defined( HAVE_SDL ) */
+#endif /* defined( SDL_WINDOWING ) */
 
 /* EOF */
