@@ -725,7 +725,7 @@ void ChooseTargets(Unit * me, bool (*typeofunit)(Unit *,Unit *), bool reverse) {
 	int cur=0;
 	while (1) {
 		while (veciter!=vec.end()) {
-			if (((*veciter)!=me)&&typeofunit(me,(*veciter))) {
+			if (((*veciter)!=me)&&((*veciter)->GetHull()>=0)&&typeofunit(me,(*veciter))) {
 				me->Target(*veciter);
 				if ((*veciter)!=NULL) {
 					if (reverse) {
