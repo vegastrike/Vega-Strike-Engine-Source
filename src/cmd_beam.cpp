@@ -129,7 +129,7 @@ void Beam::Init (const Transformation & trans, const weapon_info &cln , void * o
 }
 
 Beam::~Beam () {
-  if (CollideInfo.object) {
+  if (CollideInfo.object!=NULL) {
     KillCollideTable (&CollideInfo);
   }
   delete vlist;
@@ -264,14 +264,21 @@ void Beam::UpdatePhysics(const Transformation &trans, const Matrix m) {
   curthick+=(impact&UNSTABLE)?-radialspeed*SIMULATION_ATOM:radialspeed*SIMULATION_ATOM;
   if (curthick > thickness)
     curthick = thickness;
-  if (curthick <0)
+  if (curthick<=0) {
     curthick =0;//die die die
+    if (CollideInfo.object!=NULL) {
+      KillCollideTable (&CollideInfo);
+    }
+   
+  } else {
+    CollideHuge(CollideInfo);
+  }
   center = cumulative_transformation.position;
   direction = TransformNormal (cumulative_transformation_matrix,Vector(0,0,1));
   Vector tmpvec (center + direction*curlength);
   Vector tmpMini = center.Min(tmpvec);
   tmpvec = center.Max (tmpvec);
-  if (TableLocationChanged (CollideInfo,tmpMini,tmpvec)||CollideInfo.object==NULL) {
+  if (TableLocationChanged (CollideInfo,tmpMini,tmpvec)||(curthick>0&&CollideInfo.object==NULL)) {
     if (CollideInfo.object !=NULL) {
       KillCollideTable (&CollideInfo);
     }
@@ -279,7 +286,6 @@ void Beam::UpdatePhysics(const Transformation &trans, const Matrix m) {
     CollideInfo.Mini= tmpMini;
     CollideInfo.Maxi= tmpvec;
     AddCollideQueue (CollideInfo);
-  }	
-  CollideHuge(CollideInfo);
+  }
   //Check if collide...that'll change max beam length REAL quick
 }

@@ -221,17 +221,34 @@ bool MeshFX::Update() {
   if (TTL <0) {
     TTL = 0;
     TTD -= GetElapsedTime();
+    attenuate[2]*=1+.4*GetElapsedTime();
+    attenuate[1]*=1+.4*GetElapsedTime();
+  } else {
+    attenuate[2]*=1- .2*GetElapsedTime();
+    attenuate[1]*=1- .2*GetElapsedTime();
   }
-  
-
   return TTD>0;
 }
-void Mesh::AddDamageFX(const Vector &, const Vector &, const float, const GFXColor &) {
-  
+void Mesh::AddDamageFX(const Vector & pnt, const Vector &norm, const float damage, const GFXColor &col) {
+  Vector loc (pnt+(rSize()*rSize()-pnt.Dot(pnt))*norm);
+  GFXColor tmp (col.r*.5*damage,col.g*.5*damage,col.b*.5*damage,col.a*.5*damage);
+  MeshFX newFX (2*damage,true,GFXColor(loc.i,loc.j,loc.k,1),tmp,GFXColor (0,0,0,1),tmp,GFXColor (1,0,4*damage/(rSize()*rSize())));
+  if (LocalFX.size()>2) {
+    LocalFX[LocalFX.size()-1].MergeLights (newFX);
+  } else {
+    LocalFX.push_back (newFX);
+  }
 }
 void Mesh::UpdateFX() {
   //adjusts lights by TTL, eventually removing them
-
+  for (int i=0;i<LocalFX.size();i++) {
+    if (!LocalFX[i].Update()) {
+      vector <MeshFX>::iterator er = LocalFX.begin();
+      er+=i;
+      LocalFX.erase (er);
+      i--;
+    }
+  }
 }
 
 //#include "d3d_internal.h"

@@ -129,17 +129,16 @@ void StarSystem::Draw() {
   //primaries->Draw();
   //    systemInputDFA->Draw(); return;
   currentcamera=0;
-
+  SetViewport();//camera wielding unit is now drawn
+  GFXDisable (LIGHTING);
+  bg->Draw();
+  Mesh::ProcessUndrawnMeshes();//background must be processed...dumb but necessary--otherwise might collide with other mehses
   Iterator *iter = drawList->createIterator();
   Unit *unit;
   while((unit = iter->current())!=NULL) {
     unit->Draw();
     iter->advance();
   }
-  SetViewport();//camera wielding unit is now drawn
-  GFXDisable (LIGHTING);
-  bg->Draw();
-
   delete iter;
   GFXDisable(LIGHTING);
   Mesh::ProcessUndrawnMeshes();
