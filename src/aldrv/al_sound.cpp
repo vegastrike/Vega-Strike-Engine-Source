@@ -10,6 +10,25 @@
 #include <al.h>
 #include <alc.h>
 #include <alut.h>
+#include <fcntl.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+//their LoadWav is b0rken seriously!!!!!!
+bool MacFixedLoadWAVFile(const char * fname,ALenum *format,ALvoid **data,ALsizei *size,ALsizei *freq){
+    int fp = open (fname, O_RDONLY);
+    if (fp <0) {
+        return false;
+    }
+    struct stat sb;
+    fstat (fp,&sb);
+    char * buf = (char *) malloc (sb.st_size);
+    read (fp,buf,sb.st_size);
+    close (fp);
+    alutLoadWAVMemory(buf,format,data,size,freq);
+    free(buf);
+    return true;
+}
+
 #else
 #include <AL/al.h>
 #include <AL/alc.h>
@@ -80,7 +99,7 @@ int AUDCreateSoundWAV (const std::string &s, const bool music, const bool LOOP){
 #ifndef WIN32
 #ifdef __APPLE__
 ALint format;
-	  alutLoadWAVFile((char *)filename, &format, &wave, &size, &freq);
+	err=MacFixedLoadWAVFile((char *)filename, &format, &wave, &size, &freq);
 #else
 	
       ALsizei format;
