@@ -73,16 +73,6 @@ public:
         object=l.object;
     }      
 
-    LineCollide( )
-    {
-        object.u    = NULL;
-        type        = UNIT;
-        Mini        = QVector(-1,-1,-1);
-        Maxi        = QVector(-1,-1,-1);
-        hhuge       = false;
-        lastchecked = NULL;
-    }
-
     LineCollide& operator=( const LineCollide& l )
     {
         object=l.object;
