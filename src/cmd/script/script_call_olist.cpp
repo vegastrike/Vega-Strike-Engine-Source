@@ -62,8 +62,11 @@ varInst *Mission::call_olist(missionNode *node,int mode){
   else{
     varInst *ovi=getObjectArg(node,mode);
     olist_t *my_object=getOListObject(node,mode,ovi);
-    
-    if(cmd=="push_back"){
+
+    if(cmd=="delete"){
+      delete my_object;
+    }
+    else if(cmd=="push_back"){
       missionNode *snode=getArgument(node,mode,1);
       //varInst *vi=doVariable(snode,mode); // should be getObjExpr
       varInst *vi=checkExpression(snode,mode); // should be getObjExpr
@@ -228,6 +231,32 @@ void Mission::call_olist_toxml(missionNode *node,int mode,varInst *ovi){
 	  saveVarInst(vi,var_out);
 	  var_out << "</olist>" << endl;
 	}
+
+}
+
+void Mission::call_vector_into_olist(varInst *vec_vi,Vector vec3){
+
+  olist_t *my_object=new olist_t;
+  vec_vi->type=VAR_OBJECT;
+  vec_vi->objectname="olist";
+  vec_vi->object=(void *)my_object;
+
+  varInst *push_vi;
+
+  push_vi=newVarInst(VI_IN_OBJECT);
+  push_vi->type=VAR_FLOAT;
+  push_vi->float_val=vec3.i;
+  my_object->push_back(push_vi);
+
+  push_vi=newVarInst(VI_IN_OBJECT);
+  push_vi->type=VAR_FLOAT;
+  push_vi->float_val=vec3.j;
+  my_object->push_back(push_vi);
+
+  push_vi=newVarInst(VI_IN_OBJECT);
+  push_vi->type=VAR_FLOAT;
+  push_vi->float_val=vec3.k;
+  my_object->push_back(push_vi);
 
 }
 

@@ -39,10 +39,19 @@ public:
   ///Loads the AI script from the hard drive, or executes if loaded
   void Execute();
 
- private:
+ protected:
   string modulename;
   unsigned int classid;
   bool first_run;
+};
+
+class AIFlyToWaypoint : public AImissionScript {
+ public:
+  AIFlyToWaypoint(Vector waypoint,float vel,float range);
+
+  Vector waypoint;
+  float vel;
+  float range;
 };
 
 #endif

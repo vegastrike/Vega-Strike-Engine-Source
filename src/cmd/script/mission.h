@@ -217,6 +217,8 @@ varInst* lookupClassVariable(string modulename,string varname,unsigned int class
 
   MessageCenter *msgcenter;
 
+void call_vector_into_olist(varInst *vec_vi,Vector vec3);
+
  private:
   //  string getVariable(easyDomNode *section,string name,string defaultval);
 
@@ -355,6 +357,7 @@ void printNode(missionNode *node,int mode);
  varInst * callPrintFloats(missionNode *node,int mode);
  varInst * callGetGameTime(missionNode *node,int mode);
 varInst *  call_isNull(missionNode *node,int mode);
+varInst *  call_setNull(missionNode *node,int mode);
 varInst * call_isequal(missionNode *node,int mode);
 varInst * callGetCurrentAIUnit(missionNode *node,int mode);
 varInst * callGetCurrentAIOrder(missionNode *node,int mode);

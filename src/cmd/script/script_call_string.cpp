@@ -80,7 +80,7 @@ varInst *Mission::call_string(missionNode *node,int mode){
       bool res=false;
       if(mode==SCRIPT_RUN){
 	string s1=call_string_getstring(node,mode,ovi);
-	string s2=call_string_getstring(node,mode,ovi);
+	string s2=call_string_getstring(node,mode,other_vi);
 
 	if(s1==s2){
 	  res=true;

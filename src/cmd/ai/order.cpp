@@ -88,6 +88,13 @@ Order* Order::EnqueueOrder (Order *ord) {
   suborders.push_back (ord);
   return this;
 }
+Order* Order::EnqueueOrderFirst (Order *ord) {
+  ord->SetParent(parent);
+
+  vector<Order*>::iterator first_elem = suborders.begin();
+  suborders.insert (first_elem,ord);
+  return this;
+}
 Order* Order::ReplaceOrder (Order *ord) {
   int completed=0;
   vector<Order*>::iterator ordd = suborders.begin();

@@ -46,6 +46,7 @@
 #include "cmd/ai/navigation.h"
 #include "cmd/ai/flybywire.h"
 #include "cmd/ai/tactics.h"
+#include "cmd/ai/missionscript.h"
 
 #include "mission.h"
 #include "easydom.h"
@@ -314,6 +315,27 @@ varInst *Mission::call_order(missionNode *node,int mode){
 
     return viret;
   }
+  else if(cmd=="newFlyToWaypoint"){
+    missionNode *des_node=getArgument(node,mode,0);
+    varInst *des_vi=checkObjectExpr(des_node,mode);
+    olist_t *des_olist=getOListObject(des_node,mode,des_vi);
+
+    Order *my_order=NULL;
+
+    if(mode==SCRIPT_RUN){
+      Vector des3=call_olist_tovector(des_node,mode,des_vi);
+      
+      my_order=new AIFlyToWaypoint(des3,1.0,100.0);
+    }
+
+    viret=newVarInst(VI_TEMP);
+    viret->type=VAR_OBJECT;
+    viret->objectname="order";
+    
+    viret->object=(void *)my_order;
+
+    return viret;
+  }
   else{
     varInst *ovi=getObjectArg(node,mode);
     Order *my_order=getOrderObject(node,mode,ovi);
@@ -326,6 +348,19 @@ varInst *Mission::call_order(missionNode *node,int mode){
       if(mode==SCRIPT_RUN){
 	Order *res_order=my_order->EnqueueOrder(enq_order);
 	debug(3,node,mode,"enqueueing order");
+      }
+
+      viret=newVarInst(VI_TEMP);
+      viret->type=VAR_VOID;
+    }
+    else if(cmd=="enqueueOrderFirst"){
+      missionNode *enq_node=getArgument(node,mode,1);
+      varInst *enq_vi=checkObjectExpr(enq_node,mode);
+      Order *enq_order=getOrderObject(enq_node,mode,enq_vi);
+
+      if(mode==SCRIPT_RUN){
+	Order *res_order=my_order->EnqueueOrderFirst(enq_order);
+	debug(3,node,mode,"enqueueing order as first");
       }
 
       viret=newVarInst(VI_TEMP);

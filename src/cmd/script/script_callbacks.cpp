@@ -102,6 +102,9 @@ varInst *Mission::doCall(missionNode *node,int mode,string module,string method)
     else if(method=="isNull"){
       vi=call_isNull(node,mode);
     }
+    else if(method=="setNull"){
+      vi=call_setNull(node,mode);
+    }
     else if(method=="equal"){
       vi=call_isequal(node,mode);
     }
@@ -194,6 +197,18 @@ varInst *Mission::call_isNull(missionNode *node,int mode){
   
   viret->type=VAR_BOOL;
   viret->bool_val=(ovi->object==NULL);
+
+  deleteVarInst(ovi);
+  return viret;
+}
+
+varInst *Mission::call_setNull(missionNode *node,int mode){
+  varInst *ovi=getObjectArg(node,mode);
+
+  ovi->object=NULL;
+
+  varInst *viret=newVarInst(VI_TEMP);
+  viret->type=VAR_VOID;
 
   deleteVarInst(ovi);
   return viret;

@@ -84,6 +84,7 @@ public:
 
   Order *findOrder(Order *ord);
  void eraseOrder(Order *ord);
+ Order* EnqueueOrderFirst (Order *ord);
 };
 ///Convenience order factory for "clicking to create an order"
 class OrderFactory {
