@@ -58,7 +58,7 @@
 #define EXT_MISSION "*.mission"
 #define EXT_CAMPAIGN "*.campaign"
 
-#define DIR_MISSION "./mission/"
+#define DIR_MISSION "mission"
 char *Start(int run_vegastrike);
 void RunMission(void);
 

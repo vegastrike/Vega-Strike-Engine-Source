@@ -418,7 +418,7 @@ int isdir(const char *file) {
 		if (file[length-2] == '.' || file[length-2] == SEPERATOR || file[length-2] == '\\') { return -1; }
 	}
 
-	if (-1 == chdir((string(file)+SEPERATOR).c_str())) { return 0; }
+	if (-1 == chdir(file)) { return 0; }
 	else {
 		chdir("..");
 		return 1;
@@ -431,34 +431,43 @@ int isdir(const char *file) {
 glob_t *FindPath(char *path, int type) {
 	glob_t *FILES = new glob_t;
 	string mypath(path);
-	char thispath[800000];
+	char thispath[800000], *curpath = 0;
 	DIR *dir;
 	vector <string> result;
+	vector <string> pathlist;
 	dirent *entry;
 	unsigned int cur;
+	char *newpath = 0;
 
 	getcwd(thispath, 790000);
-	chdir(path);
-	dir = opendir(".");
-	chdir(thispath);
-	if (dir) {
+	pathlist.push_back((string(thispath)+SEPERATOR+mypath).c_str());
+	for (cur = 0; cur < pathlist.size(); cur++) {
+		curpath = strdup(pathlist[cur].c_str());
+		dir = opendir(curpath);
+		chdir(curpath);
+		if (dir == 0) { continue; }
 		entry = 0;
 		while ((entry = readdir(dir)) != NULL) {
-			if (isdir((string(thispath)+SEPERATOR+mypath+SEPERATOR+entry->d_name).c_str()) == type) {
-				result.push_back(mypath+entry->d_name);
+			newpath = strdup((string(thispath)+SEPERATOR+mypath+SEPERATOR+entry->d_name).c_str());
+			if (isdir(newpath) == 1) {
+				pathlist.push_back(newpath);
+				if (type == 1) { result.push_back(newpath); }
 			}
-			chdir(thispath);
+			else if (type == 0) { result.push_back(newpath); }
 		}
 		closedir(dir);
 	}
+	chdir(thispath);
 
 	FILES->gl_pathc = result.size();
-#ifdef __cplusplus
+
+	#ifdef __cplusplus
 	FILES->gl_pathv = new char*[FILES->gl_pathc];
-#else
+	#else
 	FILES->gl_pathv = (char *)malloc(sizof(char *) * FILES->gl_pathc);
 	if (FILES->gl_pathv == 0) { ShowError("Out of memory", "G04", 1); return NULL; }
-#endif
+	#endif
+
 	for (cur = 0; cur < FILES->gl_pathc; cur++) {
 		FILES->gl_pathv[cur] = strdup(result[cur].c_str());
 	}
