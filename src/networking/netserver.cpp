@@ -232,7 +232,7 @@ void	NetServer::start(int argc, char **argv)
 	mission->initMission( false);
 
 	// Loads dynamic universe
-	string dynpath = VSFileSystem::datadir+"/dynaverse.dat";
+	string dynpath = "dynaverse.dat";
 	VSFile f;
 	VSError err = f.OpenReadOnly( dynpath, Unknown);
 	if( err>Ok)
@@ -244,7 +244,6 @@ void	NetServer::start(int argc, char **argv)
 		string dynaverse = f.ReadFull();
 		char * dynchar = strdup( dynaverse.c_str());
 		globalsave->ReadSavedPackets( dynchar);
-		free( dynchar);
 		f.Close();
 	}
 
