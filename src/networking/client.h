@@ -35,7 +35,9 @@
 #include "savegame.h"
 
 extern VegaConfig *vs_config;
-int		md5sum_file( const char * filename, unsigned char * digest);
+int		md5SumFile( const char * filename, unsigned char * digest);
+int		md5CheckFile( string filename, unsigned char * md5digest);
+int		md5Compute( string filename, unsigned char * md5digest);
 
 // Network part of a client description
 struct	Client

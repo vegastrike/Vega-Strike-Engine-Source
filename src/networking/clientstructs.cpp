@@ -4,10 +4,39 @@
 #include "endianness.h"
 #include "cmd/unit_generic.h"
 #include "packet.h"
+#include "netbuffer.h"
 #include "client.h"
 #include "md5.h"
+#include "vs_path.h"
 
-int	md5sum_file( const char * filename, unsigned char * digest)
+int	md5Compute( string filename, unsigned char * md5digest)
+{
+	// Add the galaxy md5sum in the netbuffer (as we should be at the end of it) in order to control on client side
+	string fulluniv = datadir+filename;
+	int ret;
+	if( (ret=md5SumFile( fulluniv.c_str(),
+							md5digest))<0 || ret)
+	{
+		cout<<"!!! ERROR = couldn't get universe file md5sum (not found or error) !!!"<<endl;
+	}
+
+	return ret;
+}
+
+int md5CheckFile( string filename, unsigned char * md5digest)
+{
+	string full_univ_path = datadir+filename;
+	unsigned char * local_digest = new unsigned char[MD5_DIGEST_SIZE];
+	int ret;
+	if( (ret=md5SumFile( full_univ_path.c_str(), local_digest))<0)
+		cout<<"!!! ERROR = couldn't compute md5 digest on universe file !!!"<<endl;
+	delete local_digest;
+	// If the file does not exist or if md5sum are !=
+	if( ret || memcmp( md5digest, local_digest, MD5_DIGEST_SIZE))
+		return 0;
+	return 1;
+}
+int	md5SumFile( const char * filename, unsigned char * digest)
 {
 	FILE * fp = fopen( filename, "r");
 	if( !fp)
@@ -16,7 +45,11 @@ int	md5sum_file( const char * filename, unsigned char * digest)
 			// Return 1 if file does not exists
 			return 1;
 		else
-			return -1;
+		{
+			cout<<"!!! ERROR = couldn't compute md5 digest on universe file !!!"<<endl;
+			exit(1);
+			//return -1;
+		}
 	}
 
 	unsigned char buffer[1024];

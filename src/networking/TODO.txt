@@ -32,8 +32,6 @@ TO LOOK AT - When receiving a packet : look at timestamp and compare it to lates
 *** CLIENT SIDE *********************************************************
 
 - Check if we received position info about us -> ignore
-- Do not maintain ClientStates anymore -> maintain Unit members directly
-- Write the function that receive damage snapshot
 - Find the jump call and make it only send a jump request to server
 - Should wait for CMD_ADDEDYOU just before entering in the main game loop
 - Find a way not to use MAXOBJECTS in netclient.h
@@ -93,6 +91,8 @@ DONE - forsee account server unavailability and in that case, deny new logins + 
 
 === CLIENT SIDE =========================================================
 
+DONE - Write the function that receive damage snapshot
+DONE - Do not maintain ClientStates anymore -> maintain Unit members directly
 DONE - When receiving position update, test if local player
 DONE - When receiving a packet : look at timestamp and compare it to latest receive timestamp from the server
 DONE - when one exits from VS -> send a quit msg

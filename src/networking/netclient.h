@@ -74,7 +74,6 @@ class	NetClient
 		void	createChar();
 		int		recvMsg( char* netbuffer, Packet* outpacket );
 		void	disconnect();
-		void	checkFile( string filename, unsigned char * md5digest);
 
 	public:
 		NetClient():save("")
@@ -139,6 +138,8 @@ class	NetClient
 		void	scanRequest( Unit * target);
 		void	fireRequest( ObjSerial serial, int mount_index, char mis);
 		void	unfireRequest( ObjSerial serial, int mount_index);
+
+		void	jumpRequest( string newsystem);
 
     private:
 		void	receiveSave( const Packet* packet );

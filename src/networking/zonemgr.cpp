@@ -474,7 +474,7 @@ void	ZoneMgr::addDamage( NetBuffer & netbuf, Unit * un)
 			netbuf.addChar( un->shield.leak);
 			netbuf.addFloat( un->shield.recharge);
 			netbuf.addFloat( un->EnergyRechargeData());
-			netbuf.addShort( un->MaxEnergyData());
+			netbuf.addFloat( un->MaxEnergyData());
 			netbuf.addShort( un->jump.energy);
 			netbuf.addChar( un->jump.damage);
 			netbuf.addChar( un->image->repair_droid);

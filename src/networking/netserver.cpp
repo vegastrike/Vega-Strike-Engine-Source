@@ -221,7 +221,7 @@ void	NetServer::sendLoginAccept( Client * clt, AddressIP ipadr, int newacct)
         Packet packet2;
 		unsigned char * mdigest = new unsigned char[MD5_DIGEST_SIZE];
 		string reluniv = "/universe/"+universe_file;
-		this->getMD5( reluniv, mdigest);
+		md5Compute( reluniv, mdigest);
 		// Add the galaxy filename with relative path to datadir
 		netbuf.addString( reluniv);
 		netbuf.addBuffer( mdigest, MD5_DIGEST_SIZE);
@@ -229,7 +229,7 @@ void	NetServer::sendLoginAccept( Client * clt, AddressIP ipadr, int newacct)
 		// Add the initial star system filename + md5 too
 		static string sys = vs_config->getVariable("data","sectors","sectors");
 		string relsys = sys+"/"+cp->savegame->GetStarSystem()+".system";
-		this->getMD5( relsys, mdigest);
+		md5Compute( relsys, mdigest);
 		netbuf.addString( relsys);
 		netbuf.addBuffer( mdigest, MD5_DIGEST_SIZE);
 		delete mdigest;
@@ -241,19 +241,6 @@ void	NetServer::sendLoginAccept( Client * clt, AddressIP ipadr, int newacct)
 #endif
 			);
 		cout<<"<<< SENT LOGIN ACCEPT -----------------------------------------------------------------------"<<endl;
-	}
-}
-
-void	NetServer::getMD5( string filename, unsigned char * md5digest)
-{
-	// Add the galaxy md5sum in the netbuffer (as we should be at the end of it) in order to control on client side
-	string fulluniv = datadir+filename;
-	int ret;
-	if( (ret=md5sum_file( fulluniv.c_str(),
-							md5digest))<0 || ret)
-	{
-		cout<<"!!! ERROR = couldn't get universe file md5sum (not found or error) !!!"<<endl;
-		cleanup();
 	}
 }
 
@@ -1169,6 +1156,9 @@ void	NetServer::processPacket( Client * clt, unsigned char cmd, const AddressIP&
 		case CMD_JUMP :
 		{
 			string newsystem = netbuf.getString();
+			unsigned char * client_md5;
+			unsigned char * md5 = new unsigned char[MD5_DIGEST_SIZE];
+
 			StarSystem * sts;
 			Cockpit * cp;
 			
@@ -1177,9 +1167,34 @@ void	NetServer::processPacket( Client * clt, unsigned char cmd, const AddressIP&
 				cout<<"ERROR --> Received a jump request for non-existing UNIT"<<endl;
 			else
 			{
-				// Create the new star system if it isn't loaded yet
+				// Verify if there really is a jump point to the new starsystem
+				// Then activate jump drive to say we want to jump
+				un->ActivateJumpDrive();
+				// The jump reply will be sent in StarSystem::JumpTo()
+				// In the meantime we create the star system if it isn't loaded yet
 				if( !(sts = _Universe->getStarSystem( newsystem+".system")))
 					zonemgr->addZone( newsystem+".system");
+				// And remove the player from its old starsystem and set it out of game
+				zonemgr->removeClient( clt);
+				clt->ingame = false;
+
+				client_md5 = netbuf.getBuffer( MD5_DIGEST_SIZE);
+				if( md5CheckFile( newsystem, client_md5))
+				{
+					// Send an ASKFILE packet with serial == 0 to say file is ok
+					p2.send( CMD_ASKFILE, 0, NULL, 0, SENDRELIABLE, &clt->cltadr, clt->sock, __FILE__,
+#ifndef _WIN32
+						__LINE__
+#else
+						1186
+#endif
+						);
+				}
+				else
+				{
+					// Add that file to download queue with client serial !!
+				}
+				/*
 				if( UnitUtil::JumpTo( un, newsystem))
 				{
 					// Remove unit/client from its old system
@@ -1196,11 +1211,13 @@ void	NetServer::processPacket( Client * clt, unsigned char cmd, const AddressIP&
 #ifndef _WIN32
 						__LINE__
 #else
-						1076
+						1195
 #endif
 						);
 				}
+				*/
 			}	
+			delete md5;
 		}
 		break;
 		case CMD_SCAN :

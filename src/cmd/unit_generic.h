@@ -631,8 +631,8 @@ public:
   ///Returns the current ammt of energy left
   float EnergyRechargeData() const{return recharge;}
   void  SetEnergyRecharge( float enrech) { recharge = enrech;}
-  void  SetMaxEnergy( unsigned short maxen) { maxenergy = maxen;}
-  unsigned short MaxEnergyData() const{return maxenergy;}
+  void  SetMaxEnergy( float maxen) { maxenergy = maxen;}
+  float MaxEnergyData() const{return maxenergy;}
   float ShieldRechargeData() const{return shield.recharge;}
   float EnergyData() const;
   float WarpEnergyData() const;
