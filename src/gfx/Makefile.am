@@ -1,6 +1,6 @@
 noinst_LIBRARIES = libgfx.a libgfxserver.a
 INCLUDES = -I ../ 
-
+SUBDIRS = nav
 libgfxgeneric =  \
 	cockpit_generic.h	\
 	cockpit_generic.cpp	\
@@ -36,6 +36,8 @@ libgfx_a_SOURCES =	$(libgfxgeneric)\
 	animation.h	\
 	aux_logo.cpp	\
 	aux_logo.h	\
+	masks.h		\
+	masks.cpp	\
 	aux_palette.cpp	\
 	aux_palette.h	\
 	aux_texture.cpp	\

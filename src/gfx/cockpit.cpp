@@ -897,6 +897,24 @@ void DoCockpitKeys()
 	CockpitKeys::Pan(0,PRESS);
 	CockpitKeys::Inside(0,PRESS);
 }
+void GameCockpit::NavScreen (int, KBSTATE k) // scheherazade
+{
+   if (k==PRESS)
+     {
+      UniverseUtil::IOmessage(0,"game","all","hit key");
+ 
+    if(((GameCockpit *)_Universe->AccessCockpit())->ThisNav.CheckDraw())
+      {
+       ((GameCockpit *)_Universe->AccessCockpit())->ThisNav.SetDraw(0);
+       UniverseUtil::IOmessage(0,"game","all","DRAWNAV - OFF");
+      }
+  else
+    {
+     ((GameCockpit *)_Universe->AccessCockpit())->ThisNav.SetDraw(1);
+     UniverseUtil::IOmessage(0,"game","all","DRAWNAV - ON");
+    }
+  }
+}
 
 void RespawnNow (Cockpit * cp) {
   while (respawnunit.size()<=_Universe->numPlayers())
@@ -1301,6 +1319,7 @@ void GameCockpit::Draw() {
 	zoomfactor=dietime*10;
 	}
   }
+  ThisNav.Draw();
   GFXAlphaTest (ALWAYS,0);  
   GFXHudMode (false);
   GFXEnable (DEPTHWRITE);

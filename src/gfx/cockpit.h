@@ -12,6 +12,7 @@ class Gauge;
 class Unit;
 #include "vdu.h"
 #include "camera.h"
+#include "nav/navscreen.h"
 #define NUM_CAM		12
 /**
  * The Cockpit Contains all displayable information about a particular Unit *
@@ -100,7 +101,9 @@ private:
   void DrawEliteBlips(Unit * un);
   ///Draws gauges
   void DrawGauges(Unit * un);
+  NavigationSystem ThisNav;
  public:
+  static void NavScreen (int, KBSTATE k); // scheherazade
   static string getsoundending(int which=0);
   static string getsoundfile(string filename);
   void InitStatic ();
