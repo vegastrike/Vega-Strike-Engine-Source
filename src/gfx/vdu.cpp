@@ -508,7 +508,7 @@ void VDU::Draw (Unit * parent) {
   case VIEW:
     GetPosition (x,y);
     GetSize (h,w);
-    DrawStarSystemAgain (x,y,fabs(h/2),fabs(w/2),viewStyle);
+    DrawStarSystemAgain (.5*(x+1),.5*(y+1)-fabs(h/2),fabs(h/2),fabs(w/2),viewStyle);
     break;
   case NAV:
     DrawNav(parent->ToLocalCoordinates (parent->GetComputerData().NavPoint-parent->Position()));
