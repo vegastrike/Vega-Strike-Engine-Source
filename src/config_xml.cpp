@@ -157,8 +157,9 @@ void VegaConfig::initKeyMap(){
   key_map["keypad-7"]=WSK_KP7;
   key_map["keypad-8"]=WSK_KP8;
   key_map["keypad-9"]=WSK_KP9;
-
+  key_map["keypad-numlock"]=WSK_NUMLOCK;
   key_map["keypad-period"]=WSK_KP_PERIOD;
+  key_map["keypad-delete"]=WSK_KP_PERIOD;
   key_map["keypad-divide"]=WSK_KP_DIVIDE;
   key_map["keypad-multiply"]=WSK_KP_MULTIPLY;
   key_map["keypad-minus"]=WSK_KP_MINUS;
