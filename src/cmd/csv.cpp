@@ -1,37 +1,119 @@
 #include "csv.h"
 #include "vsfilesystem.h"
 using namespace std;
-vector <std::string> readCSV (std::string s) {
-	vector <std::string> v;
+
+
+static string::size_type findQuot(string s,string chr, int offset=0){
+	if (offset>=s.length())
+          return string::npos;
+	string::size_type quot=s.substr(offset).find(chr);
+	if (quot!=string::npos)
+          return quot+offset;
+	return quot;//string::npos
+}
+static string elimiQuote(string s, string delim="\"\"\""){
+  string ret;
+  string::size_type where=findQuot(s,delim);
+  bool even = true;
+  if (where==string::npos && delim!="\""){
+    s=elimiQuote(s,"\"");
+  }
+  while(where!=string::npos){
+    string tmp=s.substr(0,where);
+    if (even && delim!="\""){
+      tmp=elimiQuote(tmp,"\"");
+    }
+    ret=ret+tmp;
+    even = !even;
+    s=s.substr(where+delim.length());
+    where=findQuot(s,delim);
+  }
+  ret=ret+s;
+  return ret;
+}
+vector <std::string> readCSV (std::string s,std::string delim) {
+	vector <std::string> l;
 	std::string::size_type loc;
 	int sub1=s.find ("\r");
 	s=s.substr(0,sub1);
 	int sub2=s.find("\n");
 	s=s.substr(0,sub2);
-		do {
-			loc=s.find (",");
-			string t =s.substr (0,loc);
-				if (v.size() >=32) {
-					VSFileSystem::vs_fprintf (stderr,"ERROR with bitmasking. Only 32 ship types allowed");
-				}
-				v.push_back(t);
-			if (loc!=string::npos)
-				s = s.substr (loc+1);
-		} while (loc!=string::npos);
-	return v;
+	int trip=1;
+        string::size_type quot3 = findQuot(s,"\"\"\"");
+        string::size_type quot1 = findQuot(s,"\"");
+        string::size_type quot;
+        string::size_type sem=string::npos;
+        if (quot3==string::npos || (quot1!=string::npos && quot1<quot3)){
+          trip=0;
+            quot=quot1;
+        }else{
+          quot=quot3;
+        }
+	sem = s.find(delim);	
+	while (sem!=string::npos){
+          string::size_type equot=0;
+          while (quot<sem && quot!=-1){
+            if (trip){
+              equot=findQuot(s,"\"\"\"",quot+1);
+            }else{
+              equot=findQuot(s,"\"",quot+1);
+            }
+            quot3=findQuot(s,"\"\"\"",equot+1);
+            quot1 = findQuot(s,"\"",equot+1);
+            trip=1;
+            quot=quot3;
+            if (quot3==string::npos || (quot1!=string::npos && quot1<quot3)){
+              quot=quot1;
+              trip=0;
+            }
+          }
+          sem = s.substr(equot).find(delim);
+          if (sem!=string::npos){
+            sem=sem+equot;
+          }else{
+            break;
+          }
+          l.push_back(elimiQuote(s.substr(0,sem)));
+          s=s.substr(sem+delim.length());
+          sem = s.find(delim);
+          quot3=findQuot(s,"\"\"\"");
+          quot1 = findQuot(s,"\"");
+          quot=quot3;
+          trip=1;
+          if (quot3==-1 || (quot1!=-1 && quot1<quot3)){
+            quot=quot1;
+            trip=0;
+          }
+        }
+        s=elimiQuote(s);
+	if (s.length()){
+          l.push_back(s);
+        }
+	return l;
+}
+static std::string addQuote(std::string s, string delim=",") {
+  if (s.find(delim)!=string::npos) {
+    if (s.find("\"")!=string::npos) {
+      return string("\"\"\"")+s+string("\"\"\"");
+    }else {
+      return string("\"")+s+"\"";
+    }
+  }else {
+    return s;
+  }
 }
 std::string writeCSV(const vector<string> &key, const vector<string> &table){
   unsigned int i;
   unsigned int wid = key.size();
   std::string ret;
   for (i=0;i<wid;++i) {
-    ret+=key[i];
+    ret+=addQuote(key[i]);
     if (i+1<wid)
       ret+=',';
   }
   ret+='\n';
   for (i=0;i<table.size();++i) {
-    ret+=table[i];
+    ret+=addQuote(table[i]);
     if (i+1%wid==0)
       ret+='\n';
     else
