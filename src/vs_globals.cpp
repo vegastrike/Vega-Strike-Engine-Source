@@ -5,8 +5,8 @@
  * Globals 
  */
 game_data_t g_game;
-ForceFeedback *forcefeedback;
-VegaConfig * vs_config;
+ForceFeedback *forcefeedback = NULL;
+VegaConfig * vs_config = NULL;
 bool cleanexit=false;
 bool run_only_player_starsystem=true;
 
