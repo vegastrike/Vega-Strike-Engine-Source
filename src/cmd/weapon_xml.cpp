@@ -16,13 +16,13 @@ weapon_info& weapon_info::operator = (const weapon_info &tmp){
   type = tmp.type;
   file = tmp.file;
   r = tmp.r;g=tmp.g;b=tmp.b;a=tmp.a;
-  Speed=tmp.Speed;PulseSpeed=tmp.PulseSpeed;RadialSpeed=tmp.RadialSpeed;Range=tmp.Range;Radius=tmp.Radius;Length=tmp.Length;
+  Speed=tmp.Speed;PulseSpeed=tmp.PulseSpeed;RadialSpeed=tmp.RadialSpeed;Range=tmp.Range;Radius=tmp.Radius;Length=tmp.Length;volume = tmp.volume;
   Damage=tmp.Damage;Stability=tmp.Stability;Longrange=tmp.Longrange;
   EnergyRate=tmp.EnergyRate;EnergyConsumption=tmp.EnergyConsumption;Refire=tmp.Refire;
   return *this;
 }
 */
-void weapon_info::init() {size=NOWEAP;r=g=b=a=127;Length=5;Speed=10;PulseSpeed=15;RadialSpeed=1;Range=100;Radius=.5;Damage=1.8;PhaseDamage=0;Stability=60;Longrange=.5;EnergyRate=18;Refire=.2;sound=-1;}
+void weapon_info::init() {size=NOWEAP;r=g=b=a=127;Length=5;Speed=10;PulseSpeed=15;RadialSpeed=1;Range=100;Radius=.5;Damage=1.8;PhaseDamage=0;Stability=60;Longrange=.5;EnergyRate=18;Refire=.2;sound=-1;volume=0;}
 void weapon_info::Type (enum WEAPON_TYPE typ) {type=typ;switch(typ) {case BOLT:file=string("");break;case BEAM:file=string("beamtexture.bmp");break;case BALL:file=string("ball.ani");break;case PROJECTILE:file=string("missile.xmesh");break;default:break;}}
 
 
@@ -72,7 +72,8 @@ namespace BeamXML {
     CONSUMPTION,
     REFIRE,
     LENGTH,
-    PHASEDAMAGE
+    PHASEDAMAGE,
+    VOLUME
     //YAW,
     //PITCH,
     //ROLL
@@ -113,13 +114,14 @@ namespace BeamXML {
     EnumMap::Pair ("Longrange",LONGRANGE),
     EnumMap::Pair ("Consumption",CONSUMPTION),
     EnumMap::Pair ("Refire",REFIRE),
-    EnumMap::Pair ("Length", LENGTH)//,
+    EnumMap::Pair ("Length", LENGTH),//,
+    EnumMap::Pair ("Volume", VOLUME)//,
     //EnumMap::Pair ("Yaw",YAW),
     // EnumMap::Pair ("Pitch",PITCH),
     // EnumMap::Pair ("Roll",ROLL)
   };
   const EnumMap element_map(element_names, 10);
-  const EnumMap attribute_map(attribute_names, 23);
+  const EnumMap attribute_map(attribute_names, 24);
   Hashtable <string, weapon_info,char[257]> lookuptable;
   string curname;
   weapon_info tmpweapon(weapon_info::BEAM);
@@ -283,6 +285,9 @@ namespace BeamXML {
 	switch (attribute_map.lookup ((*iter).name)) {
 	case UNKNOWN:
 	  fprintf (stderr,"Unknown Weapon Element %s",(*iter).name.c_str());
+	  break;
+	case VOLUME:
+	  tmpweapon.volume = XMLSupport::parse_float ((*iter).value);
 	  break;
 	case SPEED:
 	  tmpweapon.Speed = XMLSupport::parse_float ((*iter).value);

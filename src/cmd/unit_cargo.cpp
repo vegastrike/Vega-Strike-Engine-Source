@@ -37,6 +37,7 @@ void Unit::ImportPartList (const std::string& category, float price, float price
 extern int GetModeFromName (const char *);
 vector <Cargo>& Unit::FilterDowngradeList (vector <Cargo> & mylist) {
   static bool staticrem =XMLSupport::parse_bool (vs_config->getVariable ("general","remove_impossible_downgrades","true"));
+  static float MyPercentMin = XMLSupport::parse_float (vs_config->getVariable("general","remove_downgrades_less_than_percent",".9"));
   for (unsigned int i=0;i<mylist.size();i++) {
     bool removethis=staticrem;
     if (GetModeFromName(mylist[i].content.c_str())!=2) {
@@ -53,7 +54,7 @@ vector <Cargo>& Unit::FilterDowngradeList (vector <Cargo> & mylist) {
 	  for (un_iter ui=getSubUnits();s==0||((*ui)!=NULL);++ui,++s) {
 	    double percent=1;
 	    if (canDowngrade (NewPart,m,s,percent)) {
-	      if (percent>.9) {
+	      if (percent>MyPercentMin) {
 		removethis=false;
 		break;
 	      }

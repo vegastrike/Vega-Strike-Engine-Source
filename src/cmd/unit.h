@@ -240,6 +240,7 @@ class Unit {
     short size;
     ///-1 is infinite
     short ammo;
+    short volume;//-1 is infinite
     ///The data behind this weapon. May be accordingly damaged as time goes on
     weapon_info type;
     enum MOUNTSTATUS{PROCESSED,UNFIRED,FIRED} processed;
@@ -248,7 +249,7 @@ class Unit {
     ///The sound this mount makes when fired
     int sound;
     Mount():type(weapon_info::BEAM) {size=weapon_info::NOWEAP; ammo=-1;status= UNCHOSEN; ref.gun=NULL; sound=-1;}
-    Mount(const std::string& name, short int ammo=-1);
+    Mount(const std::string& name, short int ammo=-1, short int volume=-1);
     ///Sets this gun to active, unless unchosen or destroyed
     void Activate (bool Missile);
     ///Sets this gun to inactive, unless unchosen or destroyed

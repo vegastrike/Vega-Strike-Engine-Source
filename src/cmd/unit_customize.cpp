@@ -114,18 +114,48 @@ bool Unit::UpgradeMounts (Unit *up, int mountoffset, bool touchme, bool downgrad
       int jmod=j%nummounts;//make sure since we're offsetting the starting we don't overrun the mounts
       if (!downgrade) {//if we wish to add guns instead of remove
 	if (up->mounts[i].type.size==(up->mounts[i].type.size&mounts[jmod].size)) {//only look at this mount if it can fit in the rack
-	  numave++;//ok now we can compute percentage of used parts
-	  if (templ) {
-	    if (templ->nummounts>i) {
-	      int maxammo = templ->mounts[i].ammo;
-	      if ((up->mounts[i].ammo>maxammo||up->mounts[i].ammo==-1)&&maxammo!=-1) {
-		up->mounts[i].ammo = maxammo;
+	  if (up->mounts[i].type.weapon_name!=mounts[i].type.weapon_name) {
+	    numave++;//ok now we can compute percentage of used parts
+	    if (templ) {
+	      if (templ->nummounts>jmod) {
+		int maxammo = templ->mounts[jmod].ammo;
+		if ((up->mounts[i].ammo>maxammo||up->mounts[i].ammo==-1)&&maxammo!=-1) {
+		  up->mounts[i].ammo = maxammo;
+		}
+		if (templ->mounts[jmod].volume!=-1) {
+		  if (up->mounts[i].ammo*up->mounts[i].type.volume>templ->mounts[jmod].volume) {
+		    up->mounts[i].ammo = templ->mounts[jmod].volume/up->mounts[i].type.volume;
+		  }
+		}
 	      }
 	    }
-	  }
-	  percentage+=mounts[jmod].Percentage(up->mounts[i]);//compute here
-	  if (touchme) {//if we wish to modify the mounts
-	    mounts[jmod].SwapMounts (up->mounts[i]);//switch this mount with the upgrador mount
+	    percentage+=mounts[jmod].Percentage(up->mounts[i]);//compute here
+	    if (touchme) {//if we wish to modify the mounts
+	      mounts[jmod].SwapMounts (up->mounts[i]);//switch this mount with the upgrador mount
+	    }
+	  }else {
+	    if (mounts[jmod].ammo!=-1&&up->mounts[i].ammo!=-1) {
+	      mounts [jmod].ammo+=up->mounts[i].ammo;
+	      if (templ) {
+		if (templ->nummounts>jmod) {
+		  if (templ->mounts[jmod].ammo!=-1) {
+		    if (templ->mounts[jmod].ammo>mounts[jmod].ammo) {
+		      mounts[jmod].ammo=templ->mounts[jmod].ammo;
+		    }
+		  }
+		  if (templ->mounts[jmod].volume!=-1) {
+		    if (templ->mounts[jmod].volume>mounts[jmod].type.volume*mounts[jmod].ammo) {
+		      mounts[jmod].ammo=templ->mounts[jmod].volume/mounts[jmod].type.volume;
+		    }
+		  }
+		  
+		}
+	      } 
+	      if (mounts[jmod].ammo*mounts[jmod].type.volume>mounts[jmod].volume) {
+		mounts[jmod].ammo = mounts[jmod].volume/mounts[jmod].type.volume;
+	      }
+	    }
+	    
 	  }
 	} else {
 	  cancompletefully=false;//since we cannot fit the mount in the slot we cannot complete fully

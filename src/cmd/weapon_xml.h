@@ -22,7 +22,7 @@ struct weapon_info {
   float r,g,b,a;
   float Speed,PulseSpeed,RadialSpeed,Range,Radius, Length;
   float Damage,PhaseDamage,Stability,Longrange;
-  float EnergyRate,Refire;
+  float EnergyRate,Refire,volume;
   weapon_info(enum WEAPON_TYPE typ) {init();Type(typ);}
   weapon_info(const weapon_info&);
   //  weapon_info& operator = (const weapon_info &tmp);

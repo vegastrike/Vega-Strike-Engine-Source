@@ -240,7 +240,8 @@ bool Unit::Mount::Fire (Unit * owner, bool Missile) {
   }
   return false;
 }
-Unit::Mount::Mount(const string& filename, short ammo): size(weapon_info::NOWEAP),ammo(ammo),type(weapon_info::BEAM),sound(-1){
+Unit::Mount::Mount(const string& filename, short ammo,short volume): size(weapon_info::NOWEAP),ammo(ammo),type(weapon_info::BEAM),sound(-1){
+  this->volume=volume;
   ref.gun = NULL;
   status=(UNCHOSEN);
   weapon_info * temp = getTemplate (filename);  

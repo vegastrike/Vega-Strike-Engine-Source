@@ -294,6 +294,7 @@ int parseMountSizes (const char * str) {
 static short CLAMP_SHORT(float x) {return (short)(((x)>65536)?65536:((x)<0?0:(x)));}  
 void Unit::beginElement(const string &name, const AttributeList &attributes) {
   Cargo carg;
+  short volume=-1;
   string filename;
   Vector P;
   int indx;
@@ -574,11 +575,14 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
     ADDELEMNAME("size",Unit::mountSerializer,XMLType(XMLSupport::tostring(xml->unitscale),(int)xml->mountz.size()));
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(attribute_map.lookup((*iter).name)) {
+      case VOLUME:
+	volume=XMLSupport::parse_int ((*iter).value);
+	break;
       case WEAPON:
 	filename = (*iter).value;
 	break;
       case AMMO:
-	ammo = parse_int ((*iter).value);
+	ammo = XMLSupport::parse_int ((*iter).value);
 	break;
       case MOUNTSIZE:
 	tempbool=true;
@@ -627,7 +631,7 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
     Q.Normalize();
     //Transformation(Quaternion (from_vectors (P,Q,R),pos);
     indx = xml->mountz.size();
-    xml->mountz.push_back(new Mount (filename.c_str(), ammo));
+    xml->mountz.push_back(new Mount (filename.c_str(), ammo,volume));
     xml->mountz[indx]->SetMountPosition(Transformation(Quaternion::from_vectors(P,Q,R),pos));
     //xml->mountz[indx]->Activate();
     if (tempbool)
@@ -1342,7 +1346,9 @@ std::string Unit::mountSerializer (const XMLType &input, void * mythis) {
       result+=string("\" weapon=\"")+(un->mounts[i].type.weapon_name);
     if (un->mounts[i].ammo!=-1)
       result+=string("\" ammo=\"")+XMLSupport::tostring(un->mounts[i].ammo);
-    
+    if (un->mounts[i].volume!=-1) {
+      result+=string("\" volume=\"")+XMLSupport::tostring(un->mounts[i].volume);
+    }
     Matrix m;
     un->mounts[i].GetMountLocation().to_matrix(m);
     result+=string ("\" x=\"")+tostring((float)(m[12]/parse_float(input.str)));
