@@ -363,6 +363,8 @@ void Mesh::ProcessDrawQueue(int whichdrawqueue) {
       if (c.cloaked) {
 	GFXDisable (TEXTURE1);
 	GFXPushBlendMode ();
+	//	GFXColor4f (1,1,1,.25);
+	//	GFXBlendMode (CONSTALPHA,INVCONSTALPHA);
 	GFXBlendMode (ONE,ONE);
       }
     }
@@ -386,6 +388,7 @@ void Mesh::ProcessDrawQueue(int whichdrawqueue) {
     }
     if (whichdrawqueue==MESH_SPECIAL_FX_ONLY) {
       if (c.cloaked) {
+	//	GFXColor4f (1,1,1,1);
 	if (envMap)
 	  GFXEnable (TEXTURE1);
 	GFXPopBlendMode ();
