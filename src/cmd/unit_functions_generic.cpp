@@ -193,10 +193,35 @@ void DealPossibleJumpDamage (Unit *un) {
 }
 void RecomputeUnitUpgrades (Unit * un) {
 	un->ReduceToTemplate();
-	for (unsigned int i=0;i<un->numCargo();++i) {
+	unsigned int i;
+	for (i=0;i<un->numCargo();++i) {
 		Cargo * c = &un->GetCargo(i);
 		if (c->category.find("upgrades"==0)) {
-			un->Upgrade(c->content,0,0,true,false);
+			if (c->content.find("mult_")!=0 &&
+				c->content.find("add_")!=0 ) {
+				un->Upgrade(c->content,0,0,true,false);
+			}
 		}
 	}
+	for (i=0;i<un->numCargo();++i) {
+		Cargo * c = &un->GetCargo(i);
+		if (c->category.find("upgrades"==0)) {
+			if (c->content.find("add_")==0 ) {
+				for (int j=0;j<c->quantity;++j) {
+					un->Upgrade(c->content,0,0,true,false);
+				}
+			}
+		}
+	}
+	for (i=0;i<un->numCargo();++i) {
+		Cargo * c = &un->GetCargo(i);
+		if (c->category.find("upgrades"==0)) {
+			if (c->content.find("mult_")==0) {
+				for (int j=0;j<c->quantity;++j) {
+					un->Upgrade(c->content,0,0,true,false);
+				}
+			}
+		}
+	}
+
 }
