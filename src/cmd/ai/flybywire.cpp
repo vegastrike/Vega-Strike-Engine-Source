@@ -61,6 +61,7 @@ FlyByWire::FlyByWire (): MatchVelocity(Vector(0,0,0),Vector(0,0,0),true,false), 
 }
 void FlyByWire::Stop (float per) {
   SetDesiredVelocity (Vector (0,0,per*parent->GetComputerData().max_speed),true);
+  parent->GetComputerData().set_speed =per*parent->GetComputerData().max_speed;
 }
 void FlyByWire::Right (float per) {
   desired_ang_velocity += (-per*parent->GetComputerData().max_yaw)*Vector (0,1,0);

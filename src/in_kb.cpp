@@ -26,12 +26,12 @@
 #include "in_kb.h"
 #include "in_handler.h"
 //#include "cmd_unit.h"
-
+/*
 extern queue<InputListener*> activationreqqueue;
 extern list<InputListener*> listeners;
 
 extern InputListener* activelistener;
-
+*/
 
 static KBHandler keyBindings [KEYMAP_SIZE];
 KBSTATE keyState [KEYMAP_SIZE];
@@ -46,22 +46,26 @@ static void kbGetInput(int key, int special, int release, int x, int y){
 
  void glut_keyboard_cb( unsigned char ch, int x, int y ) 
 {
+  //  fprintf (stderr,"keyboard  %d",ch);
     kbGetInput( ch, 0, 0, x, y );
 }
 
 static void glut_special_cb( int key, int x, int y ) 
 {
-    kbGetInput( key, 1, 0, x, y );
+  //  fprintf (stderr,"keyboard s %d",key);
+    kbGetInput( 128+key, 1, 0, x, y );
 }
 
 static void glut_keyboard_up_cb( unsigned char ch, int x, int y ) 
 {
+  //  fprintf (stderr,"keyboard up %d",ch);
     kbGetInput( ch, 0, 1, x, y );
 }
 
 static void glut_special_up_cb( int key, int x, int y ) 
 {
-    kbGetInput( key, 1, 1, x, y );
+  //  fprintf (stderr,"keyboard s up %d",key);
+    kbGetInput( 128+key, 1, 1, x, y );
 }
 
 

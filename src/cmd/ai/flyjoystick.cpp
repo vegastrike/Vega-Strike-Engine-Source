@@ -16,24 +16,30 @@ FlyByJoystick::FlyByJoystick(int whichjoystick, const char * configfile): FlyByK
   BindButton(1,FireKeyboard::MissileKey);
 #endif
   BindJoyKey(whichjoystick,2,FlyByJoystick::JAB);
-  BindJoyKey(whichjoystick,3,FlyByJoystick::JShelt);
+  BindJoyKey(whichjoystick,5,FlyByJoystick::JShelt);
   
 }
 void FlyByJoystick::JShelt (KBSTATE k, float, float, int) {
-  if (k==PRESS) {
-    shelt=true;
+  if (k==DOWN) {
+    FlyByKeyboard::SheltonKey (0,DOWN);
+    FlyByKeyboard::SheltonKey (0,DOWN);
+    FlyByKeyboard::SheltonKey (0,DOWN);
   }
-  if (k==RELEASE)
-    shelt=false;
+  if (k==UP) {
+
+  }
+
 
 }
 void FlyByJoystick::JAB (KBSTATE k, float, float, int) {
   if (k==PRESS) {
-    ab=true;
-  }
-  if (k==RELEASE)
-    ab=false;
+    FlyByKeyboard::ABKey (0,PRESS);
+    FlyByKeyboard::ABKey (0,DOWN);
 
+  }
+  if (k==DOWN) {
+    FlyByKeyboard::ABKey (0,DOWN);
+  }
 }
 
 void FlyByJoystick::JAccelKey (KBSTATE k, float, float, int) {
@@ -52,13 +58,7 @@ void FlyByJoystick::Execute() {
     //    joy->GetJoyStick(x,y,z,buttons);//don't want state updates in ai function
     Up(-joy->joy_y);   // pretty easy
     Right(-joy->joy_x);
-    RollRight (-joy->joy_z);
-    if (ab)
-      Afterburn (1);
-    if (shelt)
-      SheltonSlide(true);
-    else
-      SheltonSlide(false);
+    Accel (-joy->joy_z);
   }
   
   FlyByKeyboard::Execute(false);

@@ -21,12 +21,14 @@
 
 #ifndef INKB_H
 #define INKB_H
-#ifdef HAVE_SDL
-#include <SDL/SDL_keysym.h>
-const int KEYMAP_SIZE =SDLK_LAST;
-#else
+//#ifdef HAVE_SDL
+//#include <SDL/SDL_keysym.h>
+//const int KEYMAP_SIZE =SDLK_LAST;
+//const int KEY_SPECIAL_OFFSET=0;
+//#else
 const int KEYMAP_SIZE =256;
-#endif
+const int KEY_SPECIAL_OFFSET=128;
+//#endif
 
 enum KBSTATE {
 	UP,

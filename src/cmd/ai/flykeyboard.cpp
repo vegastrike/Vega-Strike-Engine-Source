@@ -35,36 +35,42 @@ struct StarShipControlKeyboard {
 FlyByKeyboard::FlyByKeyboard (const char * configfile): FlyByWire () {
   //FIXME:: change hard coded keybindings
   if (starshipcontrolkeys.refcount==0) {
-    BindKey(';',FlyByKeyboard::StopKey);
-    BindKey('[',FlyByKeyboard::StartKey);
-    BindKey(GLUT_KEY_UP,FlyByKeyboard::UpKey);
-    BindKey(GLUT_KEY_DOWN,FlyByKeyboard::DownKey);
-    BindKey(GLUT_KEY_LEFT,FlyByKeyboard::RightKey);
-    BindKey(GLUT_KEY_RIGHT,FlyByKeyboard::LeftKey);
+    BindKey(8,FlyByKeyboard::StopKey);
+    BindKey(92,FlyByKeyboard::StartKey);
+    BindKey(KEY_SPECIAL_OFFSET+GLUT_KEY_UP,FlyByKeyboard::UpKey);
+    BindKey(KEY_SPECIAL_OFFSET+GLUT_KEY_DOWN,FlyByKeyboard::DownKey);
+    BindKey(KEY_SPECIAL_OFFSET+GLUT_KEY_LEFT,FlyByKeyboard::RightKey);
+    BindKey(KEY_SPECIAL_OFFSET+GLUT_KEY_RIGHT,FlyByKeyboard::LeftKey);
     BindKey('\t',FlyByKeyboard::ABKey);
     BindKey('+',FlyByKeyboard::AccelKey);
     BindKey('=',FlyByKeyboard::AccelKey);
     BindKey('-',FlyByKeyboard::DecelKey);   
     BindKey('/',FlyByKeyboard::RollLeftKey);
+    BindKey(KEY_SPECIAL_OFFSET+GLUT_KEY_INSERT,FlyByKeyboard::RollLeftKey);
     BindKey('*',FlyByKeyboard::RollRightKey);
-    BindKey('q',FlyByKeyboard::SheltonKey);    
+    BindKey(127,FlyByKeyboard::RollRightKey);
+    BindKey(96,FlyByKeyboard::SheltonKey);    
   }
   starshipcontrolkeys.refcount++;
 }
 FlyByKeyboard::~FlyByKeyboard() {
   starshipcontrolkeys.refcount--;
   if (starshipcontrolkeys.refcount==0) {
-    UnbindKey (';');
-    UnbindKey (GLUT_KEY_UP);
-    UnbindKey (GLUT_KEY_DOWN);
-    UnbindKey (GLUT_KEY_LEFT);
-    UnbindKey (GLUT_KEY_RIGHT);
-    UnbindKey ('/');
-    UnbindKey ('*');
-    UnbindKey ('+');
-    UnbindKey ('-');
-    UnbindKey ('~');
-    UnbindKey ('\t');
+    UnbindKey(8);
+    UnbindKey(92);
+    UnbindKey(KEY_SPECIAL_OFFSET+GLUT_KEY_UP);
+    UnbindKey(KEY_SPECIAL_OFFSET+GLUT_KEY_DOWN);
+    UnbindKey(KEY_SPECIAL_OFFSET+GLUT_KEY_LEFT);
+    UnbindKey(KEY_SPECIAL_OFFSET+GLUT_KEY_RIGHT);
+    UnbindKey('\t');
+    UnbindKey('+');
+    UnbindKey('=');
+    UnbindKey('-');   
+    UnbindKey('/');
+    UnbindKey(KEY_SPECIAL_OFFSET+GLUT_KEY_INSERT);
+    UnbindKey('*');
+    UnbindKey(127);
+    UnbindKey(96);    
   }
 }
 

@@ -9,10 +9,10 @@ FireKeyboard::FireKeyboard (int whichjoystick, const char *): Order (WEAPON){
   gunspeed = gunrange = .0001;
   BindJoyKey (whichjoystick,0,FireKeyboard::JFireKey);
   BindJoyKey (whichjoystick,1,FireKeyboard::JMissileKey);
-  BindJoyKey (whichjoystick,5,FireKeyboard::JTargetKey);
+  BindJoyKey (whichjoystick,3,FireKeyboard::JTargetKey);
 
   BindKey(' ',FireKeyboard::FireKey);
-  BindKey(';',FireKeyboard::MissileKey);
+  BindKey(13,FireKeyboard::MissileKey);
   BindKey('t',FireKeyboard::TargetKey);
   
 }
