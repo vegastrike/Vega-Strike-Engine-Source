@@ -20,17 +20,10 @@ GLenum PolyLookup (POLYTYPE poly) {
   }
 }
 static void BindBuf(unsigned int vbo_data) {
-  static GLuint cur_buffer=0;
-  if (cur_buffer!=vbo_data)
     (*glBindBufferARB_p)(GL_ARRAY_BUFFER_ARB,vbo_data);  
-  cur_buffer=vbo_data;
 }
 static void BindInd(unsigned int element_data) {
-  static GLuint cur_index=0;
-  if (cur_index!=element_data){
     (*glBindBufferARB_p)(GL_ELEMENT_ARRAY_BUFFER_ARB,element_data);
-  }
-  cur_index=element_data;
 }
 void GFXVertexList::RefreshDisplayList () {
   static bool use_vbo=XMLSupport::parse_bool(vs_config->getVariable("graphics","vbo","false"));

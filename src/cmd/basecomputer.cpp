@@ -3275,8 +3275,21 @@ bool BaseComputer::showPlayerInfo(const EventCommandId& command, Control* contro
 
 //does not work with negative numbers!!
 void prettyPrintFloat(char * buffer,float f, int digitsBefore, int digitsAfter) {
+	
 	float dbgval=f;
 	int bufferPos=0;
+	if (!finite(f)) {
+		buffer[0]='n';
+		buffer[1]='/';
+		buffer[2]='a';
+		buffer[3]='\0';
+		return;
+	}
+	if (f<0) {
+		buffer[0]='-';
+		bufferPos=1;
+		f=(-f);
+	}
 	float temp=f;
 	int before=0;
 	while (temp>=1.0f) {
@@ -3359,7 +3372,7 @@ void showUnitStats(Unit * playerUnit,string &text,int subunitlevel, int mode, Ca
     static bool shields_require_power=XMLSupport::parse_bool(vs_config->getVariable ("physics","shields_require_passive_recharge_maintenance","true"));
 	static float shieldenergycap = XMLSupport::parse_float(vs_config->getVariable ("physics","shield_energy_capacitance",".2"));
 
-	float Wconv= (1.0/warpenratio); // converts from reactor to warp energy scales
+	float Wconv= warpenratio==0.0?0.0:(1.0/warpenratio); // converts from reactor to warp energy scales
 	char conversionBuffer[2048];
 	string prefix="";
 	for (int i=0;i<subunitlevel;i++) prefix+="   ";
