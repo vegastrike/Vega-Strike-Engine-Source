@@ -24,8 +24,8 @@ class NetworkCommunication
 		NetworkCommunication();
 		~NetworkCommunication();
 
-		int		InitWebcam();
 		int		InitSession( float frequency);
+		int		GrabImage();
 		int		DestroySession();
 };
 

@@ -101,7 +101,6 @@ Unit * getNetworkUnit( ObjSerial cserial)
 NetClient::NetClient()
     : save("")
 {
-	webcam_support = false;
     game_unit = NULL;
     old_timestamp = 0;
     current_timestamp = 0;
@@ -575,10 +574,6 @@ int		NetClient::isTime()
 
 void	NetClient::sendWebcamPicture()
 {
-	// Check if time for webcam
-	if( webcam_support)
-	{
-	}
 }
 
 /**************************************************************/
@@ -1551,9 +1546,12 @@ bool	NetClient::jumpRequest( string newsystem)
 
 void	NetClient::startCommunication( float freq)
 {
+	NetComm->InitSession( freq);
+	NetComm->GrabImage();
 }
 
 void	NetClient::stopCommunication( float freq)
 {
+	NetComm->DestroySession();
 }
 

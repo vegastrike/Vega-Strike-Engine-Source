@@ -1,5 +1,5 @@
 #include "networking/webcam_support.h"
-#include "networking/networkcomm.h"
+#include "networkcomm.h"
 #include "jvoipsession.h"
 #include "jvoiprtptransmission.h"
 
@@ -7,8 +7,10 @@ NetworkCommunication::NetworkCommunication()
 {
 }
 
-int		NetworkCommunication::InitWebcam()
+int		NetworkCommunication::GrabImage()
 {
+	if( Webcam)
+		Webcam->CaptureImage();
 	return 0;
 }
 
@@ -25,6 +27,8 @@ int		NetworkCommunication::InitSession( float frequency)
 	Webcam = new WebcamSupport();
 	if( (ret=Webcam->Init()) == -1)
 		delete Webcam;
+	else
+		this->Webcam->StartCapture();
 
 	return ret;
 }
@@ -38,7 +42,11 @@ int		NetworkCommunication::DestroySession()
 	if( this->rtpparams)
 		delete this->rtpparams;
 	if( this->Webcam)
+	{
+		this->Webcam->EndCapture();
+		this->Webcam->Shutdown();
 		delete this->Webcam;
+	}
 
 	return 0;
 }

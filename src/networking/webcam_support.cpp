@@ -1,5 +1,5 @@
 #include <iostream>
-#include "networking/webcam_support.h"
+#include "webcam_support.h"
 #include "lin_time.h"
 
 using std::cerr;
@@ -358,7 +358,8 @@ char *	WebcamSupport::CaptureImage()
 	return NULL;
 #endif
 #if defined(_WIN32) && !defined(__CYGWIN__)
-	// Should just return the image buffer since it should have been copied in CopyImage
+	// Should call the capture func and just return the image buffer since it should have been copied in CopyImage
+	capCaptureSingleFrame( hwndCap);
 	return 0;
 #endif
 #ifdef __APPLE__

@@ -76,7 +76,6 @@ class	NetClient
 		unsigned int		deltatime;
 		bool				jumpok;
 		bool				ingame;
-		bool				webcam_support;
 
 		void	receiveData();
 		void	readDatafiles();
