@@ -1977,6 +1977,13 @@ void NavigationSystem::TranslateAndDisplay (QVector &pos, QVector &pos_flat, flo
 		TranslateCoordinates(pos, pos_flat, center_nav_x, center_nav_y, themaxvalue, zscale, zdistance,
 			the_x, the_y, the_x_flat, the_y_flat, system_item_scale_temp, system_not_galaxy);
 	}
+	DisplayOrientationLines (the_x, the_y, the_x_flat, the_y_flat, system_not_galaxy);
+}
+
+
+void NavigationSystem::DisplayOrientationLines (float the_x, float the_y, float the_x_flat, float the_y_flat, bool system_not_galaxy) { 
+	if ((system_not_galaxy?system_view:galaxy_view)==VIEW_ORTHO)
+		return;
 
 	//Draw orientation lines
 	//**********************************
@@ -1986,73 +1993,28 @@ void NavigationSystem::TranslateAndDisplay (QVector &pos, QVector &pos_flat, flo
 
 	GFXBegin(GFXLINE);
 
-	//		GFXColorf(GFXColor(0,1,0,.5));
-	//		GFXVertex3f(center_nav_x,	center_nav_y		,0);
-	//		GFXVertex3f(the_x_flat,	the_y_flat	,0);
-
-
 	GFXColorf(GFXColor(0,1,0,.3));
 
-	bool display_flat_circle=true;
-		
-	if(the_y_flat > screenskipby4[3])
+	bool display_flat_circle=true;	
+	if((the_y_flat > screenskipby4[3]) ||
+	   (the_y_flat < screenskipby4[2]) ||
+	   (the_x_flat > screenskipby4[1]) ||
+	   (the_x_flat < screenskipby4[0]))
 	{
-//		the_y_flat = screenskipby4[3];
 		GFXColorf(GFXColor(0,1,1,.05));
 		display_flat_circle=false;
 	}
 
-	if(the_y_flat < screenskipby4[2])
+	bool display_flat=true;	
+	if((the_x > screenskipby4[1]) || 
+	   (the_x < screenskipby4[0]) ||
+	   (the_y > screenskipby4[3]) ||
+	   (the_y < screenskipby4[2]))
 	{
-//		the_y_flat = screenskipby4[2];
-		GFXColorf(GFXColor(0,1,1,.05));
-		display_flat_circle=false;
-	}
-	
-	if(the_x_flat > screenskipby4[1])
-	{
-//		the_x_flat = screenskipby4[1];
-		GFXColorf(GFXColor(0,1,1,.05));
-		display_flat_circle=false;
-	}
-
-	if(the_x_flat < screenskipby4[0])
-	{
-//		the_x_flat = screenskipby4[0];
-		GFXColorf(GFXColor(0,1,1,.05));
-		display_flat_circle=false;
-	}
-
-	bool display_flat=true;
-		
-	if(the_x > screenskipby4[1])
-	{
-//		the_x = screenskipby4[1];
 		GFXColorf(GFXColor(1,1,0,.05));
 		display_flat=false;
 	}
 
-	if(the_x < screenskipby4[0])
-	{
-//		the_x = screenskipby4[0];
-		GFXColorf(GFXColor(1,1,0,.05));
-		display_flat=false;
-	}
-
-	if(the_y > screenskipby4[3])
-	{
-//		the_y = screenskipby4[3];
-		GFXColorf(GFXColor(1,1,0,.05));
-		display_flat=false;
-	}
-
-	if(the_y < screenskipby4[2])
-	{
-//		the_y = screenskipby4[2];
-		GFXColorf(GFXColor(1,1,0,.05));
-		display_flat=false;
-	}
-	
 	if (display_flat) {
 		IntersectBorder(the_x_flat,the_y_flat,the_x,the_y);
 		GFXVertex3f(the_x_flat,	the_y_flat	,0);
@@ -2061,10 +2023,9 @@ void NavigationSystem::TranslateAndDisplay (QVector &pos, QVector &pos_flat, flo
 			DrawCircle(the_x_flat, the_y_flat, (.005*system_item_scale), GFXColor(1,1,1,.2));
 		}
 	}
-	
+
 	GFXEnd();
 	GFXEnable(TEXTURE0);
 	//**********************************
 }
-
 

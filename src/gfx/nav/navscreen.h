@@ -186,6 +186,8 @@ void TranslateCoordinates(QVector &pos, QVector &pos_flat, float center_nav_x, f
 void TranslateAndDisplay (QVector &pos, QVector &pos_flat, float center_nav_x, float center_nav_y, float themaxvalue,
 	float &zscale, float &zdistance, float &the_x, float &the_y, float &system_item_scale_temp, bool system_not_galaxy);
 
+void DisplayOrientationLines (float the_x, float the_y, float the_x_flat, float the_y_flat, bool system_not_galaxy);
+
 bool CheckForSelectionQuery();
 //*************************
 

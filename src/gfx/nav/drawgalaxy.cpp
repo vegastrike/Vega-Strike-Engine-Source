@@ -624,8 +624,8 @@ void NavigationSystem::DrawGalaxy()
 
 		GFXColor col=systemIter->GetColor();
 		Vector oldpos=pos;
-		float the_x, the_y, system_item_scale_temp;
-		TranslateAndDisplay(pos, pos_flat, center_nav_x, center_nav_y, themaxvalue, zscale, zdistance, the_x, the_y,system_item_scale_temp, 0);
+		float the_x, the_y, the_x_flat, the_y_flat, system_item_scale_temp;
+		TranslateCoordinates(pos, pos_flat, center_nav_x, center_nav_y, themaxvalue, zscale, zdistance, the_x, the_y, the_x_flat, the_y_flat, system_item_scale_temp, 0);
 		float alphaadd;
 		{
 			float tmp=(1-(zoom/MAXZOOM));
@@ -722,6 +722,7 @@ void NavigationSystem::DrawGalaxy()
 
 
 		DrawNode(insert_type, insert_size, the_x, the_y, (*systemIter).GetName(),screenoccupation,moused,col);
+		DisplayOrientationLines(the_x, the_y, the_x_flat, the_y_flat, 0);
 //		string sys = it.source;
 //
 		unsigned destsize=systemIter->GetDestinationSize();
