@@ -174,16 +174,10 @@ void	NetServer::sendLoginAccept( Client * clt, AddressIP ipadr, int newacct)
 		//cout<<"Login recv packet size = "<<packeta.getLength()<<endl;
 		// Get the save parts in a string array
 		vector<string> saves;
-		saves[0] = netbuf.getString();
-		saves[1] = netbuf.getString();
+		saves.push_back( netbuf.getString());
+		saves.push_back( netbuf.getString());
 		// Put the save parts in buffers in order to load them properly
-		char * savebuf = new char[saves[1].length()+1];
-		memcpy( savebuf, saves[1].c_str(), saves[1].length());
-		savebuf[saves[1].length()] = 0;
-		char * xmlbuf = new char[saves[0].length()+1];
-		memcpy( xmlbuf, saves[0].c_str(), saves[0].length());
-		xmlbuf[saves[0].length()] = 0;
-		cout<<"XML="<<saves[0].length()<<" bytes - SAVE="<<saves[1].length()<<" bytes"<<endl;
+		cout<<"SAVE="<<saves[0].length()<<" bytes - XML="<<saves[1].length()<<" bytes"<<endl;
 
 		string PLAYER_CALLSIGN( clt->name);
 		QVector tmpvec( 0, 0, 0), safevec;
@@ -195,7 +189,7 @@ void	NetServer::sendLoginAccept( Client * clt, AddressIP ipadr, int newacct)
 		Cockpit * cp = _Universe->createCockpit( PLAYER_CALLSIGN);
 		cp->Init ("");
 		cout<<"-> LOADING SAVE FROM NETWORK"<<endl;
-		cp->savegame->ParseSaveGame( "", str, "", tmpvec, update, credits, savedships, clt->serial, savebuf, false);
+		cp->savegame->ParseSaveGame( "", str, "", tmpvec, update, credits, savedships, clt->serial, saves[0], false);
 		// Generate the system we enter in if needed and add the client in it
 		this->addClient( clt, cp->savegame->GetStarSystem());
 
@@ -216,7 +210,7 @@ void	NetServer::sendLoginAccept( Client * clt, AddressIP ipadr, int newacct)
                              FactionUtil::GetFaction( PLAYER_FACTION_STRING.c_str()),
                              string(""),
                              Flightgroup::newFlightgroup (PLAYER_CALLSIGN,PLAYER_SHIPNAME,PLAYER_FACTION_STRING,"default",1,1,"","",mission),
-                             0, xmlbuf);
+                             0, saves[1]);
 		cout<<"\tAFTER UNIT FACTORY WITH XML"<<endl;
 		clt->game_unit.SetUnit( un);
 		// Setup the clientstates
@@ -232,7 +226,6 @@ void	NetServer::sendLoginAccept( Client * clt, AddressIP ipadr, int newacct)
 
         Packet packet2;
 		packet2.send( LOGIN_ACCEPT, clt->serial, packeta.getData(), packeta.getDataLength(), SENDRELIABLE, &clt->cltadr, clt->sock, __FILE__, __LINE__ );
-		delete savebuf, xmlbuf;
 		cout<<"<<< SENT LOGIN ACCEPT -----------------------------------------------------------------------"<<endl;
 	}
 }
@@ -485,6 +478,7 @@ void	NetServer::start(int argc, char **argv)
 		curtime = getNewTime();
 		if( acctserver && !acct_con && (curtime - reconnect_time)>periodrecon)
 		{
+			NetBuffer netbuf;
 			reconnect_time += periodrecon;
 			// We previously lost connection to account server
 			// We try to reconnect
@@ -501,22 +495,20 @@ void	NetServer::start(int argc, char **argv)
 				char * buflist = new char[listlen];
 				ObjSerial sertmp;
 				// Put first the number of clients
-				memcpy( buflist, &nbclients, sizeof( unsigned short));
+				//netbuf.addShort( nbclients);
 				for( j=0, i = tcpClients.begin(); i!=tcpClients.end(); i++, j++)
 				{
 					// Add the current client's serial to the buffer
-					sertmp = htons( (*i)->serial);
-					memcpy( buflist+j*sizeof( ObjSerial), &sertmp, sizeof( ObjSerial));
+					netbuf.addSerial((*i)->serial);
 				}
 				for( i = udpClients.begin(); i!=udpClients.end(); i++, j++)
 				{
 					// Add the current client's serial to the buffer
-					sertmp = htons( (*i)->serial);
-					memcpy( buflist+j*sizeof( ObjSerial), &sertmp, sizeof( ObjSerial));
+					netbuf.addSerial((*i)->serial);
 				}
 				// Passing NULL to AddressIP arg because between servers -> only TCP
 				// Use the serial packet's field to send the number of clients
-				if( p2.send( CMD_RESYNCACCOUNTS, nbclients_here, buflist, listlen, SENDRELIABLE, NULL, acct_sock, __FILE__, __LINE__ ) < 0 )
+				if( p2.send( CMD_RESYNCACCOUNTS, nbclients_here, netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, NULL, acct_sock, __FILE__, __LINE__ ) < 0 )
 				{
 					perror( "ERROR sending redirected login request to ACCOUNT SERVER : ");
 					cout<<"SOCKET was : "<<acct_sock<<endl;

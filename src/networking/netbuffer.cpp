@@ -249,9 +249,10 @@ void	NetBuffer::addBuffer( const char * buf, int bufsize)
 void	NetBuffer::addString( string str)
 		{
 			int length = str.length();
+			int netlength = 0;
 			resizeBuffer( offset+length+sizeof( int));
-			length = VSSwapHostIntToLittle( length);
-			memcpy( buffer+offset, &length, sizeof( int));
+			netlength = VSSwapHostIntToLittle( length);
+			memcpy( buffer+offset, &netlength, sizeof( int));
 			offset += sizeof(int);
 			memcpy( buffer+offset, str.c_str(), length);
 			offset += length;
@@ -260,8 +261,8 @@ string	NetBuffer::getString()
 		{
 			int s;
 			memcpy( &s, buffer+offset, sizeof( s));
-			offset+=sizeof(s);
 			s = VSSwapHostIntToLittle( s);
+			offset+=sizeof(s);
 			char c = buffer[offset+s];
 			buffer[offset+s]=0;
 			string str( buffer+offset);

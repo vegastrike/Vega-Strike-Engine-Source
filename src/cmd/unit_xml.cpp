@@ -1561,7 +1561,7 @@ string Unit::WriteUnitString () {
 
 extern std::string GetReadPlayerSaveGame (int);
 
-void Unit::LoadXML(const char *filename, const char * modifications, char * xmlbuffer, int buflength)
+void Unit::LoadXML(const char *filename, const char * modifications, string xmlbuffer)
 {
   shield.number=0;
   RecurseIntoSubUnitsOnCollision=!isSubUnit();
@@ -1569,7 +1569,7 @@ void Unit::LoadXML(const char *filename, const char * modifications, char * xmlb
  // rrestricted=yrestricted=prestricted=false;
   FILE * inFile=NULL;
   std::string collideTreeHash = GetHashName(string(modifications)+"#"+string(filename));
-  if( buflength==0 || xmlbuffer==NULL)
+  if( xmlbuffer=="")
   {
 	  if (modifications) {
 		if (strlen(modifications)!=0) {
@@ -1741,9 +1741,9 @@ void Unit::LoadXML(const char *filename, const char * modifications, char * xmlb
   XML_SetUserData(parser, this);
   XML_SetElementHandler(parser, &Unit::beginElement, &Unit::endElement);
   
-  if( buflength!=0 && xmlbuffer!=NULL)
+  if( xmlbuffer!="")
   {
-	XML_Parse (parser,xmlbuffer,buflength,1);
+	XML_Parse (parser,xmlbuffer.c_str(),xmlbuffer.length(),1);
   }
   else
   {

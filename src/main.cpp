@@ -583,11 +583,7 @@ void bootstrap_main_loop () {
 		/************* NETWORK PART ***************/
 	  if( Network!=NULL)
 	  {
-	    char * buf = new char[savefiles[k][1].length()+1];
-		buf[savefiles[k][1].length()]=0;
-		memcpy( buf, savefiles[k][1].c_str(), savefiles[k][1].length());
-		_Universe->AccessCockpit(k)->savegame->ParseSaveGame ("",mysystem,mysystem,pos,setplayerXloc,credits,_Universe->AccessCockpit()->unitfilename,k, buf);
-		delete buf;
+		_Universe->AccessCockpit(k)->savegame->ParseSaveGame ("",mysystem,mysystem,pos,setplayerXloc,credits,_Universe->AccessCockpit()->unitfilename,k, savefiles[k][0]);
 	  }
 	  else
 		_Universe->AccessCockpit(k)->savegame->ParseSaveGame (savegamefile,mysystem,mysystem,pos,setplayerXloc,credits,_Universe->AccessCockpit()->unitfilename,k);

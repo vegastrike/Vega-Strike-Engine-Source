@@ -586,7 +586,7 @@ void SaveGame::SetSavedCredits (float c) {
   savedcredits = c;
 }
 
-void SaveGame::ParseSaveGame (string filename, string &FSS, string originalstarsystem, QVector &PP, bool & shouldupdatepos,float &credits, vector <string> &savedstarship, int player_num, char * buf, bool read) {
+void SaveGame::ParseSaveGame (string filename, string &FSS, string originalstarsystem, QVector &PP, bool & shouldupdatepos,float &credits, vector <string> &savedstarship, int player_num, string str, bool read) {
   char *tempfullbuf=0;
   int tempfulllength=2048;
   int readlen=0;
@@ -615,15 +615,17 @@ void SaveGame::ParseSaveGame (string filename, string &FSS, string originalstars
 	    tempfullbuf = (char *)malloc (tempfulllength+1);
 	    tempfullbuf[tempfulllength]=0;
 	    fread( tempfullbuf, sizeof( char), tempfulllength, fp);
-	    buf = tempfullbuf;
+	    savestring = string( tempfullbuf);
 	  }
   }
   vscdup();
   returnfromhome();
-  if( fp || (!read && buf))
+  if( fp || (!read && str!=""))
   {
-	  savestring = string( buf);
+	  savestring = str;
 	  if ( savestring.length()>0) {
+	    char * buf = new char[str.length()];
+		memcpy( buf, str.c_str(), str.length());
 		char *tmp2= (char *)malloc(savestring.length()+2);
 		QVector tmppos;
 		if (4==sscanf (buf,"%s %lf %lf %lf\n",tmp2,&tmppos.i,&tmppos.j,&tmppos.k)) {
@@ -654,6 +656,7 @@ void SaveGame::ParseSaveGame (string filename, string &FSS, string originalstars
 		  ReadSavedPackets (buf);
 		}
 		free(tmp2);tmp2=NULL;
+		delete buf;
 	  }
 	  if( read)
 	  	fclose (fp);

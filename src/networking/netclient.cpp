@@ -604,16 +604,10 @@ void	NetClient::addClient( const Packet* packet )
 	{
 		// The save buffer and XML buffer come after the ClientState
 		vector<string> saves;
-		saves[0] = netbuf.getString();
-		saves[1] = netbuf.getString();
+		saves.push_back( netbuf.getString());
+		saves.push_back( netbuf.getString());
 		//saves = FileUtil::GetSaveFromBuffer( packet->getData()+sizeof( ClientState));
-		char * savebuf = new char[saves[1].length()+1];
-		memcpy( savebuf, saves[1].c_str(), saves[1].length());
-		savebuf[saves[1].length()] = 0;
-		char * xmlbuf = new char[saves[0].length()+1];
-		memcpy( xmlbuf, saves[0].c_str(), saves[0].length());
-		xmlbuf[saves[0].length()] = 0;
-		cout<<"XML="<<saves[0].length()<<" bytes - SAVE="<<saves[1].length()<<" bytes"<<endl;
+		cout<<"SAVE="<<saves[0].length()<<" bytes - XML="<<saves[1].length()<<" bytes"<<endl;
 
 		// We will ignore - starsys as if a client enters he is in the same system
 		//                - pos since we received a ClientState
@@ -624,7 +618,7 @@ void	NetClient::addClient( const Packet* packet )
 		bool update=true;
 		vector<string> savedships;
 		// Parse the save buffer
-		save.ParseSaveGame( "", starsys, "", pos, update, creds, savedships, 0, savebuf, false);
+		save.ParseSaveGame( "", starsys, "", pos, update, creds, savedships, 0, saves[0], false);
 
 		// WE DON'T STORE FACTION IN SAVE YET
 		string PLAYER_FACTION_STRING( "privateer");
@@ -637,7 +631,7 @@ void	NetClient::addClient( const Packet* packet )
 							 FactionUtil::GetFaction( PLAYER_FACTION_STRING.c_str()),
 							 string(""),
 							 Flightgroup::newFlightgroup ( callsign,savedships[0],PLAYER_FACTION_STRING,"default",1,1,"","",mission),
-							 0, xmlbuf);
+							 0, saves[1]);
 		clt->game_unit.SetUnit( un);
 		//Clients[cltserial]->game_unit.GetUnit()->PrimeOrders();
 		clt->game_unit.GetUnit()->SetNetworkMode( true);
@@ -655,8 +649,6 @@ void	NetClient::addClient( const Packet* packet )
 
 		// In that case, we want cubic spline based interpolation
 		//init_interpolation( cltserial);
-		delete savebuf;
-		delete xmlbuf;
 	}
 	// If this is a local player (but not the current), we must affect its Unit to Client[sernum]
 	else if( cltserial!=this->serial)
@@ -923,7 +915,7 @@ void	NetClient::predict( ObjSerial clientid)
 	QVector A3( B + VB*delay + AB*delay*delay*0.5);
 	//QVector A2( A3 - (VB + AB*delay));
 
-	memcpy( &Clients[clientid]->old_state, &Clients[clientid]->current_state, sizeof( ClientState));
+	Clients[clientid]->old_state = Clients[clientid]->current_state;
 	Clients[clientid]->current_state.setPosition( A3);
 }
 
