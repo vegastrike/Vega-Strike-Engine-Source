@@ -12,6 +12,11 @@ KBSTATE JoystickState [MAX_JOYSTICKS][NUMJBUTTONS];
 KBHandler HatswitchBindings [MAX_HATSWITCHES][MAX_VALUES];
 KBSTATE HatswitchState [MAX_HATSWITCHES][MAX_VALUES];
 
+#define MAX_DIGITAL_VALUES 9
+
+KBHandler DigHatswitchBindings [MAX_JOYSTICKS][MAX_DIGITAL_HATSWITCHES][MAX_DIGITAL_VALUES];
+KBSTATE DigHatswitchState [MAX_JOYSTICKS][MAX_DIGITAL_HATSWITCHES][MAX_DIGITAL_VALUES];
+
 void DefaultJoyHandler (int key, KBSTATE newState) {
   //  fprintf (stderr,"STATE: %d", st);
 }
@@ -37,6 +42,12 @@ void UnbindHatswitchKey (int hatswitch, int val_index) {
 void BindHatswitchKey (int hatswitch, int val_index, KBHandler handler) {
   assert (hatswitch<MAX_HATSWITCHES && val_index<MAX_VALUES);
   HatswitchBindings[hatswitch][val_index]=handler;
+  handler (0,RESET);
+}
+
+void BindDigitalHatswitchKey (int joy_nr,int hatswitch, int dir_index, KBHandler handler) {
+  assert (hatswitch<MAX_HATSWITCHES && dir_index<MAX_VALUES);
+  DigHatswitchBindings[joy_nr][hatswitch][dir_index]=handler;
   handler (0,RESET);
 }
 
@@ -91,6 +102,92 @@ void ProcessJoystick () {
     if(joystick[i]->isAvailable()){
       joystick[i]->GetJoyStick (x,y,z,buttons);
 
+#if 1
+      for(int h=0;h<joystick[i]->nr_of_hats;h++){
+	Uint8 hsw=joystick[i]->digital_hat[h];
+	cout << "hsw: " << hsw << endl;
+
+	for(int dir_index=0;dir_index<MAX_DIGITAL_VALUES;dir_index++){
+	  bool press=false;
+	  if(dir_index==VS_HAT_CENTERED && (hsw & SDL_HAT_CENTERED)){
+	    press=true;
+	  }
+	  if(dir_index==VS_HAT_LEFT && (hsw & SDL_HAT_LEFT)){
+	    press=true;
+	  }
+	  if(dir_index==VS_HAT_RIGHT && (hsw & SDL_HAT_RIGHT)){
+	    press=true;
+	  }
+	  if(dir_index==VS_HAT_DOWN && (hsw & SDL_HAT_DOWN)){
+	    press=true;
+	  }
+	  if(dir_index==VS_HAT_UP && (hsw & SDL_HAT_UP)){
+	    press=true;
+	  }
+	  if(dir_index==VS_HAT_RIGHTUP && (hsw & SDL_HAT_RIGHTUP)){
+	    press=true;
+	  }
+	  if(dir_index==VS_HAT_RIGHTDOWN && (hsw & SDL_HAT_RIGHTDOWN)){
+	    press=true;
+	  }
+	  if(dir_index==VS_HAT_LEFTUP && (hsw & SDL_HAT_LEFTUP)){
+	    press=true;
+	  }
+	  if(dir_index==VS_HAT_LEFTDOWN && (hsw & SDL_HAT_LEFTDOWN)){
+	    press=true;
+	  }
+
+
+#if 0
+	  else if(hsw & SDL_HAT_LEFT){
+	    dir_index=VS_HAT_LEFT;
+	  }
+	  else if(hsw & SDL_HAT_RIGHT){
+	    dir_index=VS_HAT_RIGHT;
+	  }
+	  else if(hsw & SDL_HAT_UP){
+	    dir_index=VS_HAT_UP;
+	  }
+	  else if(hsw & SDL_HAT_DOWN){
+	    dir_index=VS_HAT_DOWN;
+	  }
+	  else if(hsw & SDL_HAT_RIGHTUP){
+	    dir_index=VS_HAT_RIGHTUP;
+	  }
+	  else if(hsw & SDL_HAT_RIGHTDOWN){
+	    dir_index=VS_HAT_RIGHTDOWN;
+	  }
+	  else if(hsw & SDL_HAT_LEFTUP){
+	    dir_index=VS_HAT_LEFTUP;
+	  }
+	  else if(hsw & SDL_HAT_LEFTDOWN){
+	    dir_index=VS_HAT_LEFTDOWN;
+	  }
+	  else{
+	    cout << "unknown hatswitch thingy" << endl;
+	    //dir_index=VS_HAT_CENTERED;
+	  }
+#endif
+
+	  if(press==true){
+	    if(DigHatswitchState[i][h][dir_index]==UP){
+	      (*DigHatswitchBindings[i][h][dir_index])(0,PRESS);
+	      DigHatswitchState[i][h][dir_index]=DOWN;
+	    }
+	  }
+	  else{
+	    if(DigHatswitchState[i][h][dir_index]==DOWN){
+	      (*DigHatswitchBindings[i][h][dir_index])(0,RELEASE);
+	    }
+	    DigHatswitchState[i][h][dir_index]=UP;
+	  }
+	  (*DigHatswitchBindings[i][h][dir_index])(0,DigHatswitchState[i][h][dir_index]);
+	}
+      }
+
+
+#endif
+
       for (int j=0;j<NUMJBUTTONS;j++) {
 	if (i==0&&(buttons&(1<<j))) {
 	  //	fprintf (stderr,"Button success %d",j);
@@ -108,6 +205,8 @@ void ProcessJoystick () {
       }
     } // is available
   } // for nr joysticks
+
+  //  for(int h=0;h<
 
   // do the analogue hatswitches
 

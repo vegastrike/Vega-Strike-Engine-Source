@@ -45,6 +45,20 @@
 //#include "vs_globals.h"
 //#include "vegastrike.h"
 
+
+void Mission::DirectorStart(missionNode *node){
+
+  missionThread *main_thread=new missionThread;
+  runtime.thread_nr=0;
+  runtime.threads.push_back(main_thread);
+
+  doModule(node,SCRIPT_PARSE);
+}
+
+void Mission::DirectorLoop(){
+}
+
+
 /* *********************************************************** */
 
 void Mission::fatalError(string message){
@@ -339,6 +353,30 @@ void Mission::doDefVar(missionNode *node,int mode){
 
 
 void Mission::doSetVar(missionNode *node,int mode){
+
+  if(SCRIPT_PARSE){
+    node->script.name=node->attr_value("name");
+    if(node->script.name.empty()){
+      fatalError("you have to give a variable name");
+    }
+  }
+
+    varInst *var_expr=checkExpression((missionNode *)node->subnodes[0],mode);
+
+    if(SCRIPT_RUN){
+      varInst *var_inst=doVariable(node,mode); // lookup variable instance
+
+      if(var_expr->type != var_inst->type){
+	runtimeFatal("variable "+node->script.name+" is not of the correct type
+");
+	assert(0);
+      }
+
+      assignVariable(var_inst,var_expr);
+      
+      delete var_expr; // only temporary
+    }
+  
 }
 
 void Mission::doExec(missionNode *node,int mode){
@@ -347,3 +385,49 @@ void Mission::doExec(missionNode *node,int mode){
 void Mission::doCall(missionNode *node,int mode){
 }
 
+void Mission::initTagMap(){
+  tagmap["module"]=DTAG_MODULE;
+  tagmap["script"]=DTAG_SCRIPT;
+  tagmap["if"]=DTAG_IF;
+  tagmap["block"]=DTAG_BLOCK;
+  tagmap["setvar"]=DTAG_SETVAR;
+  tagmap["exec"]=DTAG_EXEC;
+  tagmap["call"]=DTAG_CALL;
+  tagmap["while"]=DTAG_WHILE;
+  tagmap["and"]=DTAG_AND_EXPR;
+  tagmap["or"]=DTAG_OR_EXPR;
+  tagmap["not"]=DTAG_NOT_EXPR;
+  tagmap["test"]=DTAG_TEST_EXPR;
+  tagmap["fmath"]=DTAG_FMATH;
+  tagmap["vmath"]=DTAG_VMATH;
+  tagmap["var"]=DTAG_VAR_EXPR;
+  tagmap["defvar"]=DTAG_DEFVAR;
+
+}
+
+void Mission::assignVariable(varInst *v1,varInst *v2){
+  v1->float_val=v2->float_val;
+  v1->bool_val=v2->bool_val;
+}
+
+varInst *Mission::checkExpression(missionNode *node,int mode){
+
+  varInst *ret=NULL;
+
+  switch(node->tag){
+  case DTAG_AND_EXPR:
+  case DTAG_OR_EXPR:
+  case DTAG_NOT_EXPR:
+  case DTAG_TEST_EXPR:
+    checkBoolExpr(node,mode);
+    break;
+
+  case DTAG_VAR_EXPR:
+    ret=doVariable(node,mode);
+  case DTAG_FMATH:
+    
+  default:
+    break;
+  }
+
+}

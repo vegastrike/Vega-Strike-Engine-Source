@@ -46,11 +46,14 @@
 //#include "vegastrike.h"
 
 float Mission::checkFloatExpr(missionNode *node,int mode){
+  // dummy
   return 0.0;
 }
 
 bool Mission::checkBoolExpr(missionNode *node,int mode){
   bool ok;
+
+  // no difference between parse/run
 
     if(node->tag==DTAG_AND_EXPR){
       ok=doAndOr(node,mode);
@@ -77,6 +80,9 @@ bool Mission::checkBoolExpr(missionNode *node,int mode){
 
 bool Mission::doAndOr(missionNode *node,int mode){
   bool ok;
+
+  // no difference between parse/run
+
   if(node->tag==DTAG_AND_EXPR){
     ok=true;
   }
@@ -110,6 +116,8 @@ bool Mission::doAndOr(missionNode *node,int mode){
 
 bool Mission::doNot(missionNode *node,int mode){
   bool ok;
+
+  // no difference between parse/run
 
   missionNode *snode=(missionNode *)node->subnodes[0];
   
@@ -169,7 +177,7 @@ bool Mission::doTest(missionNode *node,int mode){
       assert(0);
     }
 
-  }
+  } // end of parse
 
     float arg1=checkFloatExpr(node->script.test_arg[0],mode);
     float arg2=checkFloatExpr(node->script.test_arg[1],mode);
@@ -196,7 +204,8 @@ bool Mission::doTest(missionNode *node,int mode){
 	fatalError("no valid tester");
 	assert(0);
       }
-
-      return res;
     }
+
+    return res;
+
 }

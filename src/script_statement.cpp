@@ -46,6 +46,8 @@
 //#include "vegastrike.h"
 
 void Mission::checkStatement(missionNode *node,int mode){
+  // no difference
+
     if(node->tag==DTAG_IF){
       doIf(node,mode);
     }

@@ -50,6 +50,11 @@ extern void UnbindButton(int button) ;
 
 const int MAX_JOYSTICKS=10;
 const int MAX_BUTTONS=32;
+const int MAX_DIGITAL_HATSWITCHES=4;
+
+enum { VS_HAT_CENTERED=0,VS_HAT_LEFT,VS_HAT_RIGHT,VS_HAT_DOWN,VS_HAT_UP,VS_HAT_RIGHTUP,VS_HAT_RIGHTDOWN,VS_HAT_LEFTUP,VS_HAT_LEFTDOWN };
+
+
 /*
 static KBHandler joyBindings[MAX_BUTTONS];
 extern KBSTATE buttonState[MAX_BUTTONS];
@@ -79,6 +84,8 @@ class JoyStick {
 
     float joy_axis[MAX_AXES];
 
+    Uint8 digital_hat[MAX_DIGITAL_HATSWITCHES];
+
     int joy_buttons;
     bool joy_available;
     float joy_xmin,joy_xmax,joy_ymin,joy_ymax, joy_zmin, joy_zmax;
@@ -95,6 +102,9 @@ void UnbindJoyKey (int joystick, int key);
 
 void UnbindHatswitchKey (int hatswitch, int val_index);
 void BindHatswitchKey (int hatswitch, int val_index, KBHandler handler);
+
+void BindDigitalHatswitchKey (int joystick,int hatswitch, int dir_index, KBHandler handler);
+
 
 #endif // _JOYSTICK_H_
 

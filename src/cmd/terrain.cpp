@@ -56,7 +56,7 @@ void Terrain::Collide () {
 }
 static GFXColor getTerrainColor() {
   float col[4];
-  vs_config->getColor ("terrain", "terrain_ambient",col,0x000000ff);
+  vs_config->gethColor ("terrain", "terrain_ambient",col,0x000000ff);
   return GFXColor (col[0],col[1],col[2],col[3]);
 }
 void Terrain::CollideAll () {

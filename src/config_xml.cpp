@@ -560,12 +560,18 @@ void VegaConfig::checkBind(configNode *node){
     cout << "No such command: " << cmdstr << endl;
     return;
   }
+  
+  string joy_str=node->attr_value("joystick");
+  string keystr=node->attr_value("key");
+  string buttonstr=node->attr_value("button");
+  string hat_str=node->attr_value("hatswitch");
+  string dighswitch=node->attr_value("digital-hatswitch");
+  string direction=node->attr_value("direction");
 
-  if(!(node->attr_value("key").empty())){
+  if(!keystr.empty()){
+    // normal keyboard key
       // now map the command to a callback function and bind it
     
-    string keystr=node->attr_value("key");
-
     if(keystr.length()==1){
       BindKey(keystr[0],handler);
     }
@@ -581,17 +587,14 @@ void VegaConfig::checkBind(configNode *node){
     //    cout << "bound key " << keystr << " to " << cmdstr << endl;
 
   }
-  else if(!(node->attr_value("button").empty())){
-    if(!(node->attr_value("button").empty())){
-      int button_nr=atoi(node->attr_value("button").data());
-
-      string joy_str=node->attr_value("joystick");
-      string hat_str=node->attr_value("hatswitch");
+  else if(!buttonstr.empty()){
+    // maps a joystick button or analogue hatswitch button
+      int button_nr=atoi(buttonstr.c_str());
 
       if(joy_str.empty()){
-	// it has to be the hatswitch
+	// it has to be the analogue hatswitch
 	if(hat_str.empty()){
-	  cout << "you got to give a hatswitch number" << endl ;
+	  cout << "you got to give a analogue hatswitch number" << endl ;
 	  return;
 	}
 
@@ -605,25 +608,75 @@ void VegaConfig::checkBind(configNode *node){
 	// joystick button
 	int joystick_nr=atoi(joy_str.c_str());
 
-	// now map the command to a callback function and bind it
+	if(joystick[joystick_nr]->isAvailable()){
+	  // now map the command to a callback function and bind it
 
-	// yet to check for correct buttons/joy-nr
+	  // yet to check for correct buttons/joy-nr
 
 
-	BindJoyKey(joystick_nr,button_nr,handler);
+	  BindJoyKey(joystick_nr,button_nr,handler);
 
 	//cout << "Bound joy= " << joystick_nr << " button= " << button_nr << "to " << cmdstr << endl;
+	}
+	else{
+	  cout << "refusing to bind command to joystick (joy-nr too high)" << endl;
+	}
       }
     }
-    else{
-      cout << "you must specify the joystick nr. to use" << endl;
-      return;
+    else if(!(dighswitch.empty() || direction.empty() || joy_str.empty())){
+      // digital hatswitch or ...
+
+      if(dighswitch.empty() || direction.empty() || joy_str.empty()){
+	cout << "you have to specify joystick,digital-hatswitch,direction" << endl;
+	return;
+      }
+
+      int hsw_nr=atoi(dighswitch.c_str());
+      int joy_nr=atoi(joy_str.c_str());
+
+      if(!(joystick[joy_nr]->isAvailable() && hsw_nr<joystick[joy_nr]->nr_of_hats)){
+	cout << "refusing to bind digital hatswitch: no such hatswitch" << endl;
+	return;
+      }
+      int dir_index;
+
+      if(direction=="center"){
+	dir_index=VS_HAT_CENTERED;
+      }
+      else if(direction=="up"){
+	dir_index=VS_HAT_UP;
+      }
+      else if(direction=="right"){
+	dir_index=VS_HAT_RIGHT;
+      }      else if(direction=="left"){
+	dir_index=VS_HAT_LEFT;
+      }      else if(direction=="down"){
+	dir_index=VS_HAT_DOWN;
+      }      else if(direction=="rightup"){
+	dir_index=VS_HAT_RIGHTUP;
+      }      else if(direction=="rightdown"){
+	dir_index=VS_HAT_RIGHTDOWN;
+      }      else if(direction=="leftup"){
+	dir_index=VS_HAT_LEFTUP;
+      }      else if(direction=="leftdown"){
+	dir_index=VS_HAT_LEFTDOWN;
+      }
+      else{
+	cout << "no valid direction string" << endl;
+	return;
+      }
+
+      BindDigitalHatswitchKey(joy_nr,hsw_nr,dir_index,handler);
+
+      cout << "Bound joy " << joy_nr << " hatswitch " << hsw_nr << " dir_index " << dir_index << " to command " << cmdstr << endl;
+
     }
-  }
+#if 1
   else{
-    cout << "no key or joystick binding found" << endl;
+    cout << "no correct key or joystick binding" << endl;
     return;
   }
+#endif
 }
 
 /* *********************************************************** */
@@ -682,18 +735,18 @@ string VegaConfig::getVariable(configNode *section,string name,string defaultval
 
 /* *********************************************************** */
 
-void VegaConfig::getColor(string section, string name, float color[4],int hexcolor){
-  color[2]=((float)(hexcolor & 0xff))/256.0;
-  color[1]=((float)((hexcolor & 0xff00)>>8))/256.0;
-  color[0]=((float)((hexcolor & 0xff0000)>>16))/256.0;
-  color[3]=1.0;
+void VegaConfig::gethColor(string section, string name, float color[4],int hexcolor){
+  color[3]=((float)(hexcolor & 0xff))/256.0;
+  color[2]=((float)((hexcolor & 0xff00)>>8))/256.0;
+  color[1]=((float)((hexcolor & 0xff0000)>>16))/256.0;
+  color[0]=((float)((hexcolor & 0xff000000)>>24))/256.0;
   
-  getColor(section,name,color);
+  getColor(section,name,color,true);
 }
 
 /* *********************************************************** */
 
-void VegaConfig::getColor(string section, string name, float color[4]){
+void VegaConfig::getColor(string section, string name, float color[4],bool have_color){
    vector<easyDomNode *>::const_iterator siter;
   
   for(siter= colors->subnodes.begin() ; siter!=colors->subnodes.end() ; siter++){
@@ -702,7 +755,7 @@ void VegaConfig::getColor(string section, string name, float color[4]){
     //          cout << "scanning section " << scan_name << endl;
 
     if(scan_name==section){
-      getColor(cnode,name,color);
+      getColor(cnode,name,color,have_color);
       return;
     }
   }
@@ -715,7 +768,7 @@ void VegaConfig::getColor(string section, string name, float color[4]){
 
 /* *********************************************************** */
 
-void VegaConfig::getColor(configNode *node,string name,float color[4]){
+void VegaConfig::getColor(configNode *node,string name,float color[4],bool have_color){
   vector<easyDomNode *>::const_iterator siter;
   
   for(siter= node->subnodes.begin() ; siter!=node->subnodes.end() ; siter++){
@@ -730,12 +783,18 @@ void VegaConfig::getColor(configNode *node,string name,float color[4]){
     }
   }
 
-  color[0]=1.0;
-  color[1]=1.0;
-  color[2]=1.0;
-  color[3]=1.0;
+  if(have_color==false){
+    color[0]=1.0;
+    color[1]=1.0;
+    color[2]=1.0;
+    color[3]=1.0;
 
-  cout << "WARNING: color " << name << " not defined, using default (white)" << endl;
+    cout << "WARNING: color " << name << " not defined, using default (white)" << endl;
+  }
+  else{
+    cout << "WARNING: color " << name << " not defined, using default (hexcolor)" << endl;
+  }
+
 }
 
 /* *********************************************************** */

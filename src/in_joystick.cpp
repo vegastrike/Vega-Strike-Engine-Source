@@ -160,6 +160,10 @@ void JoyStick::GetJoyStick(float &x,float &y, float &z, int &buttons)
    }
     joy_buttons = buttons;
 
+    for(int h=0;h<nr_of_hats;h++){
+      digital_hat[h]=SDL_JoystickGetHat(joy,h);
+    }
+
     for(a=0;a<numaxes;a++){
       joy_axis[a]=((float)axi[a]/32768.0);
       if(fabs(joy_axis[a])<=deadzone){

@@ -293,7 +293,7 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
     }
     break;
   case MESHLIGHT:
-    vs_config->getColor ("unit","engine",halocolor,0xffffffff);
+    vs_config->gethColor ("unit","engine",halocolor,0xffffffff);
     assert (xml->unitlevel==1);
     xml->unitlevel++;
     P=Vector (1,1,1);

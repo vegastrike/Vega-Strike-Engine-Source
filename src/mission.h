@@ -67,7 +67,7 @@ enum tag_type {
   DTAG_SETVAR, DTAG_EXEC, DTAG_CALL, DTAG_WHILE,
   DTAG_AND_EXPR,DTAG_OR_EXPR,DTAG_NOT_EXPR,DTAG_TEST_EXPR,
   DTAG_FMATH,DTAG_VMATH,
-  DTAG_VAR_EXPR
+  DTAG_VAR_EXPR, DTAG_DEFVAR
 };
 
 enum var_type { VAR_BOOL,VAR_FLOAT,VAR_VECTOR,VAR_OBJECT,VAR_STRING,VAR_VOID };
@@ -157,6 +157,8 @@ class Mission {
 
   tagDomNode *director;
 
+  tagMap tagmap;
+
   struct Runtime {
     vector<missionThread *> threads;
     map<string,missionNode *> modules;
@@ -167,6 +169,10 @@ class Mission {
 
   // used only for parsing
   stack<missionNode *> scope_stack;
+
+  void initTagMap();
+  void DirectorStart(missionNode *node);
+  void DirectorLoop();
 
   bool checkMission(easyDomNode *node);
   void doVariables(easyDomNode *node);
@@ -203,6 +209,10 @@ bool  doTest(missionNode *node,int mode);
  void doSetVar(missionNode *node,int mode);
  void doCall(missionNode *node,int mode);
  void doExec(missionNode *node,int mode);
+
+ varInst *checkExpression(missionNode *node,int mode);
+
+ void assignVariable(varInst *v1,varInst *v2);
 
 scriptContext *makeContext(missionNode *node);
  bool checkVarType(varInst *var,enum var_type check_type);

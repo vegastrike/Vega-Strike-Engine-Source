@@ -104,8 +104,8 @@ int main( int argc, char *argv[] )
 #endif
 
     float col[4];
-    vs_config->getColor("default","testcolor",col,0xff00ff);
-    printf("hexcol: %f %f %f\n",col[0],col[1],col[2]);
+    vs_config->gethColor("default","testcolor",col,0xff00ff00);
+    printf("hexcol: %f %f %f %f\n",col[0],col[1],col[2],col[3]);
 
     string olds=vs_config->getVariable("general","testvar","def-value");
     vs_config->setVariable("general","testvar","foobar");

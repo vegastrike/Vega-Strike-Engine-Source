@@ -61,9 +61,9 @@ class VegaConfig {
  public:
   VegaConfig(char *configfile);
 
-  void getColor(configNode *node,string name, float color[4]);
-  void getColor(string section, string name, float color[4]);
-  void getColor(string section,string name,float color[4],int hexcolor);
+  void getColor(configNode *node,string name, float color[4],bool have_color=false);
+  void getColor(string section, string name, float color[4],bool have_color=false);
+  void gethColor(string section,string name,float color[4],int hexcolor);
   void getColor(string name, float color[4]) { getColor("default",name,color); };
 
   string getVariable(string section,string name,string defaultvalue);
@@ -91,7 +91,7 @@ class VegaConfig {
   int axis_joy[MAX_AXIS];
 
 #define MAX_HATSWITCHES 4
-#define MAX_VALUES 8
+#define MAX_VALUES 12
 
   float hatswitch[MAX_HATSWITCHES][MAX_VALUES];
   float hatswitch_margin[MAX_HATSWITCHES];

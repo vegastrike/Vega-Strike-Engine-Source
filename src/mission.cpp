@@ -50,11 +50,16 @@
 Mission::Mission(char *configfile){
   number_of_flightgroups=0;
   number_of_ships=0;
-
+#if 0
   easyDomFactory<easyDomNode> *domf= new easyDomFactory<easyDomNode>();
 
   easyDomNode *top=domf->LoadXML(configfile);
+#else
+  easyDomFactory<missionNode> *domf= new easyDomFactory<missionNode>();
 
+  missionNode *top=domf->LoadXML(configfile);
+
+#endif
   if(top==NULL){
     cout << "Panic exit - mission file not found" << endl;
     exit(0);
@@ -63,6 +68,10 @@ Mission::Mission(char *configfile){
 
   variables=NULL;
   origin_node=NULL;
+
+  initTagMap();
+
+  top->Tag(&tagmap);
 
   checkMission(top);
 }
@@ -89,6 +98,7 @@ bool Mission::checkMission(easyDomNode *node){
     }
     else if(((*siter)->Name()=="module")){
       //      doModule(*siter);
+      DirectorStart((missionNode *)*siter);
     }
     else{
       cout << "Unknown tag: " << (*siter)->Name() << endl;
