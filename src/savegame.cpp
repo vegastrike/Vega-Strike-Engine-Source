@@ -321,8 +321,24 @@ std::vector<float> &SaveGame::getMissionData(const std::string &magic_number) {
 std::vector<string> &SaveGame::getMissionStringData(const std::string &magic_number) {
   return missionstringdata->m[magic_number];
 }
+template <class MContainerType> void RemoveEmpty (MContainerType &t) {
+	bool done=false;
+	while (!done) {
+		done=true;
+		typename MContainerType::iterator i;
+		for (i=t.begin();i!=t.end();++i) {
+			if ((*i).second.empty()) {
+				t.erase(i);
+				done=false;
+				break;
+			}
+		}
+	}
+	
+}
 string SaveGame::WriteMissionData () {
   string ret(" ");
+  RemoveEmpty<MissionFloatDat::MFD> (missiondata->m);
   ret+=XMLSupport::tostring ((int)missiondata->m.size());
   for( MissionFloatDat::MFD::iterator i=missiondata->m.begin();i!=missiondata->m.end();i++) {
     unsigned int siz = (*i).second.size();
@@ -421,6 +437,7 @@ void SaveGame::ReadMissionStringData (char * &buf) {
 
 string SaveGame::WriteMissionStringData () {
   string ret(" ");
+  RemoveEmpty<MissionStringDat::MSD> (missionstringdata->m);
   ret+=XMLSupport::tostring ((int)missionstringdata->m.size());
   for( MissionStringDat::MSD::iterator i=missionstringdata->m.begin();i!=missionstringdata->m.end();i++) {
     unsigned int siz = (*i).second.size();
