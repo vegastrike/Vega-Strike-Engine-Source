@@ -3,7 +3,7 @@
 #ifndef PY_INIT_H_
 #define PY_INIT_H_
 #include "gfx/vec.h"
-#ifdef USE_BOOST_129
+#ifndef USE_BOOST_128
 #include <boost/python.hpp>
 #else
 #include <boost/python/detail/extension_class.hpp>
@@ -17,7 +17,7 @@ public:
 };
 
 BOOST_PYTHON_BEGIN_CONVERSION_NAMESPACE
-#ifdef USE_BOOST_129
+#ifndef USE_BOOST_128
 /*
 typedef boost::tuples::tuple<double,double,double> python_wector;
 struct to_python <Vector> {

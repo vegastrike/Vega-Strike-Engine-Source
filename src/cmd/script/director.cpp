@@ -62,7 +62,7 @@
 #include "flightgroup.h"
 #include "gldrv/winsys.h"
 #include "python/python_class.h"
-#ifdef USE_BOOST_129
+#ifndef USE_BOOST_128
 #include <boost/python/class.hpp>
 #else
 #include <boost/python/detail/extension_class.hpp>
@@ -73,9 +73,19 @@
 /* *********************************************************** */
 //ADD_FROM_PYTHON_FUNCTION(pythonMission)
 void Mission::DirectorLoop(){
-  if (runtime.pymissions)
-    runtime.pymissions->Execute();
-  BriefingLoop();
+   try {
+      if (runtime.pymissions)
+         runtime.pymissions->Execute();
+      BriefingLoop();
+   }catch (...) {
+      if (PyErr_Occurred()) {
+         PyErr_Print();
+         PyErr_Clear();
+         fflush(stderr);         
+         fflush(stdout);
+      }
+      throw;
+   }
   if(director==NULL){
     return;
   }

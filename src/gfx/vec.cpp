@@ -23,7 +23,7 @@
 #include "vegastrike.h"
 #include <math.h>
 #include "vec.h"
-#ifdef USE_BOOST_129
+#ifndef USE_BOOST_128
 #include <boost/python/class.hpp>
 #include <boost/python/to_python_converter.hpp>
 #include <boost/python/to_python_indirect.hpp>

@@ -4,7 +4,7 @@
 #include "gfx/vec.h"
 #include "cmd/unit_generic.h"
 #include "python_class.h"
-#ifdef USE_BOOST_129
+#ifndef USE_BOOST_128
 #include <boost/python.hpp>
 #else
 #include <boost/python/objects.hpp>
@@ -63,7 +63,7 @@ EXPORT_UTIL(getPlayerX,Unit())
 EXPORT_UTIL(GetMasterPartList,Unit())
 voidEXPORT_UTIL(setOwner)
 EXPORT_UTIL(getOwner,Unit())
-#ifdef USE_BOOST_129
+#ifndef USE_BOOST_128
 StarSystemExports();
 #else
 #include "star_system_exports.h"
@@ -73,7 +73,7 @@ StarSystemExports();
 #undef EXPORT_FACTION
 #undef voidEXPORT_FACTION
 PYTHON_BASE_BEGIN_CLASS(VS,Cargo,"Cargo")
-#ifdef USE_BOOST_129
+#ifndef USE_BOOST_128
 , boost::python::init<std::string,std::string,float,int,float,float>());
 #else
 Class.def(boost::python::constructor<std::string,std::string,float,int,float,float>());
@@ -101,7 +101,7 @@ ExportUnit (Class);
 
 
 //End of Macro City 2
-//#ifdef USE_BOOST_129
+//#ifndef USE_BOOST_128
   PYTHON_DEFINE_METHOD(Class,&UnitWrapper::equal,"__eq__");
   PYTHON_DEFINE_METHOD(Class,&UnitWrapper::notequal,"__ne__");
 //#else

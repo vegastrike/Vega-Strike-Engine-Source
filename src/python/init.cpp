@@ -7,7 +7,7 @@
 #include <pythonrun.h>
 #include <compile.h>
 #include <eval.h>
-#ifdef USE_BOOST_129
+#ifndef USE_BOOST_128
 #include <boost/python.hpp>
 #include <boost/python/converter/from_python.hpp>
 #else
@@ -226,6 +226,11 @@ void Python::initpaths(){
 	  if( i+1<VSFileSystem::Rootdir.size())
 		  modpaths+= ",";
   }
+  /*
+  unsigned int backslash;
+  while ((backslash=modpaths.find("\\"))!=std::string::npos) {
+     modpaths[backslash]='/';
+     }*/
    std::string changepath ("import sys\nprint sys.path\nsys.path = ["+modpaths+"]\n");
   /*
    std::string changepath ("import sys\nprint sys.path\nsys.path = ["
@@ -268,7 +273,7 @@ PYTHON_END_CLASS(VS,Unit)
 PYTHON_END_MODULE(VS)
 TO_PYTHON_SMART_POINTER(Unit) 
 */
-#ifdef USE_BOOST_129
+#ifndef USE_BOOST_128
 static void* Vector_convertible(PyObject* p) {
 	return PyTuple_Check(p)?p:0;
 }
@@ -303,7 +308,7 @@ void Python::init() {
 // initialize python library
   Py_Initialize();
   initpaths();
-#ifdef USE_BOOST_129
+#ifndef USE_BOOST_128
   boost::python::converter::registry::insert(Vector_convertible, QVector_construct, boost::python::type_id<QVector>());
 	boost::python::converter::registry::insert(Vector_convertible, Vector_construct, boost::python::type_id<Vector>());
 #endif

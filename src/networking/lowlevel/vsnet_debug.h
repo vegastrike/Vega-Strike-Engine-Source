@@ -18,7 +18,7 @@
 extern std::ostream& vsnetDbgOut( const char* file, int line );
 
 #if !defined( COUT)
-	#if defined(_WIN32) && defined(_MSC_VER) && defined(USE_BOOST_129) //wierd error in MSVC
+	#if defined(_WIN32) && defined(_MSC_VER) && !defined(USE_BOOST_128) //wierd error in MSVC
 	    #define COUT vsnetDbgOut(__FILE__,0)
 	#else
 	    #define COUT vsnetDbgOut(__FILE__,__LINE__)
@@ -94,7 +94,7 @@ extern std::ostream& vsnetDbgOut( const char* file, int line );
     #define __FUNCTION__ "<Unknown>"
   #endif
 
-  #if (defined(_WIN32)&&defined(_MSC_VER)&&(_MSC_VER<1300)&&defined(_DEBUG)&&defined(USE_BOOST_129))
+  #if (defined(_WIN32)&&defined(_MSC_VER)&&(_MSC_VER<1300)&&defined(_DEBUG)&&!defined(USE_BOOST_128))
     #define PSEUDO__LINE__(x) x
   #else
     #define PSEUDO__LINE__(x) __LINE__

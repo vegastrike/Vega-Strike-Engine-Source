@@ -36,7 +36,7 @@
 #include "Python.h"
 #endif
 #include "python/python_class.h"
-#ifdef USE_BOOST_129
+#ifndef USE_BOOST_128
 #include <boost/python/class.hpp>
 #else
 #include <boost/python/detail/extension_class.hpp>

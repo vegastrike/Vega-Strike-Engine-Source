@@ -1,6 +1,6 @@
 #ifndef _UNIT_FROM_TO_PYTHON_H_
 #define _UNIT_FROM_TO_PYTHON_H_
-#ifdef USE_BOOST_129
+#ifndef USE_BOOST_128
 #include <boost/python/converter/arg_from_python.hpp>
 BOOST_PYTHON_BEGIN_CONVERSION_NAMESPACE
 

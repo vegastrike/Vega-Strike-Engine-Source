@@ -37,6 +37,11 @@
 #include "cmd/unit_collide.h"
 #include "savegame.h"
 #include "networking/netclient.h"
+#ifndef USE_BOOST_128
+#include <boost/python.hpp>
+#else
+#include <boost/python/detail/extension_class.hpp>
+#endif
 vector<Vector> perplines;
 //static SphereMesh *foo;
 //static Unit *earth;
@@ -283,13 +288,24 @@ bool StarSystem::RemoveUnit(Unit *un) {
 }
 
 void StarSystem::ExecuteUnitAI () {
-  un_iter iter = this->getUnitList().createIterator();
-  Unit * unit=NULL;
-	while((unit = iter.current())!=NULL) {
+   try {
+      un_iter iter = this->getUnitList().createIterator();
+      Unit * unit=NULL;
+      while((unit = iter.current())!=NULL) {
 	  unit->ExecuteAI(); 
 	  unit->ResetThreatLevel();
 	  iter.advance();
-	}
+      }
+   }catch (const boost::python::error_already_set) {
+      if (PyErr_Occurred()) {
+         PyErr_Print();
+         PyErr_Clear();
+         fflush(stderr);         
+         fflush(stdout);
+      }
+      throw;
+   }
+
 }
 //sorry boyz...I'm just a tourist with a frag nav console--could you tell me where I am?
 Unit * getTopLevelOwner( ) {//returns terrible memory--don't dereference...ever...not even aligned

@@ -5,7 +5,7 @@
 #include <string>
 #include "pythonmission.h"
 #include "python/init.h"
-#ifndef USE_BOOST_129
+#ifdef USE_BOOST_128
 #include <boost/python/reference.hpp>
 #include <boost/python/callback.hpp>
 #endif
