@@ -45,9 +45,10 @@ namespace VSFileSystem
 		pwent = getpwuid (getuid());
 		chome_path = pwent->pw_dir;
 #else
-		chome_path = new char[1024];
-		memset( home_path, 0, 1024);
-		getcwd( home_path, 1023);
+		char chome_path_buf[1024];
+		chome_path = chome_path_buf;
+		memset( chome_path, 0, 1024);
+		getcwd( chome_path, 1023);
 #endif
 		if( !FileExists( chome_path))
 		{
