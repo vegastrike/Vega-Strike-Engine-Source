@@ -1,5 +1,6 @@
 #include "unit.h"
 #include "unit_factory.h"
+#include "universe_util.h"
 #include "gui/text_area.h"
 #include "gui/button.h"
 #include "vs_globals.h"
@@ -397,16 +398,27 @@ void UpgradingInfo::SetupCargoList () {
 			  int tmpquan=(*CurrentList)[i].cargo.quantity;
 			  (*CurrentList)[i].cargo.quantity=1;
 			  Unit *bas;
+			  bas=base.GetUnit();
 			  if (mode==UPGRADEMODE||mode==BUYMODE) {
 				  if (((*CurrentList)[i].cargo.price>cpt->credits)||(!(un->CanAddCargo((*CurrentList)[i].cargo)))) {
 					  (*CurrentList)[i].color=nomoney;
 				  }
-			  } else if (mode==SHIPDEALERMODE&&(bas=base.GetUnit())) {
+			  } else if (mode==SHIPDEALERMODE&&bas) {
 				  if ((((*CurrentList)[i].cargo.price-(usedPrice(bas->PriceCargo (un->name))))>cpt->credits)) {
 					  (*CurrentList)[i].color=nomoney;
 				  }
+			  } else if ((mode==SELLMODE)&&bas) {
+				  if (!(bas->CanAddCargo((*CurrentList)[i].cargo))) {
+					  (*CurrentList)[i].color=nomoney;
+				  }
+//			  } else if ((mode==DOWNGRADEMODE||mode==BRIEFINGMODE||mode==SAVEMODE||mode==NEWSMODE) {
+				  //do nothing
+			  } else if (mode==MISSIONMODE) {
+				  if (active_missions.size()>=UniverseUtil::maxMissions()) {
+					  (*CurrentList)[i].color=nomoney;
+				  }
+				  (*CurrentList)[i].cargo.quantity=tmpquan;
 			  }
-			  (*CurrentList)[i].cargo.quantity=tmpquan;
 		  } else {
 			  (*CurrentList)[i].color=nomoney;
 		  }

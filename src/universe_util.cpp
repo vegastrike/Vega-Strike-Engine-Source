@@ -55,5 +55,9 @@ namespace UniverseUtil {
         unsigned int getCurrentPlayer() {
 	  return _Universe->CurrentCockpit();
         }
+	int maxMissions () {
+	static const int max_missions = XMLSupport::parse_int (vs_config->getVariable ("physics","max_missions","4"));
+		return max_missions;
+	}
 }
 #undef activeSys

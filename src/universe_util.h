@@ -2,6 +2,7 @@
 #define _UNIVERSE_UTILGENERIC_H__
 #include "cmd/collection.h"
 #include "cmd/images.h"
+
 #include <string>
 
 using std::string;
@@ -148,6 +149,7 @@ namespace UniverseUtil {
 	unsigned int getCurrentPlayer();
 ///this gets the number of active players
 	int getNumPlayers ();
+	int maxMissions ();
 }
 
 #undef activeSys
