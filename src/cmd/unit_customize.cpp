@@ -641,19 +641,17 @@ bool Unit::UpAndDownGrade (Unit * up, Unit * templ, int mountoffset, int subunit
     if (cloaking==-1&&up->cloaking!=-1) {
       if (touchme) {cloaking=up->cloaking;cloakmin=up->cloakmin;image->cloakrate=up->image->cloakrate; image->cloakglass=up->image->cloakglass;image->cloakenergy=up->image->cloakenergy;}
       numave++;
-      percentage++;
+
     }
     
     if (afterburnenergy>up->afterburnenergy&&up->afterburnenergy>0) {
       numave++;
-      percentage++;
       afterburnenergy=up->afterburnenergy;
     }
     
     if (jump.drive==-2&&up->jump.drive>=-1) {
       if (touchme) {jump.drive = up->jump.drive;jump.energy=up->jump.energy;jump.delay=up->jump.delay; jump.damage=0;}
       numave++;
-      percentage++;
     }
   }
   if (numave)

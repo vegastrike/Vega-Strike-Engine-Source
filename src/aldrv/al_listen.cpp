@@ -47,12 +47,13 @@ char AUDQueryAudability (const int sound, const Vector &pos, const Vector & vel,
     t = sounds[target1].pos-mylistener.pos;
       //steal sound!
     if (sounds[target1].buffer==sounds[sound].buffer) {
-      if (t.Dot(t)>mag) {	
+      if (t.Dot(t)>2*mag) {	
 	ALuint tmpsrc = sounds[target1].source;
 	//	fprintf (stderr,"stole sound %d %f\n", target1,mag);
 	sounds[target1].source = sounds[sound].source;
 	sounds[sound].source = tmpsrc;
 	playingbuffers[hashed][target].soundname = sound;
+	fprintf (stderr,"stole %d",tmpsrc);
 	return 2;
       }
     }

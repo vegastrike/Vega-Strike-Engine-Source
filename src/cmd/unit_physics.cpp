@@ -243,6 +243,7 @@ Vector Unit::ClampThrust (const Vector &amt1, bool afterburn) {
 void Unit::Thrust(const Vector &amt1,bool afterburn){
   Vector amt = ClampThrust(amt1,afterburn);
   ApplyLocalForce(amt);
+  if (_Universe->AccessCockpit(0)->GetParent()==this)
   if (afterburn!=AUDIsPlaying (sound->engine)) {
     if (afterburn)
       AUDPlay (sound->engine,cumulative_transformation.position,cumulative_velocity,1);

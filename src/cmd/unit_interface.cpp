@@ -553,9 +553,9 @@ bool UpgradingInfo::SelectItem (const char *item, int button, int buttonstate) {
         if (mode==DOWNGRADEMODE) {
 	  oldprice =usedPrice(oldprice);
 	}
-        if ((*CurrentList)[cargonumber].content=="jump_drive") {
-          oldprice/=3.0;
-        }
+	//        if ((*CurrentList)[cargonumber].content=="jump_drive") {
+	//          oldprice/=3.0;
+	//        }
 	sprintf(floatprice,"Price: %.2f",oldprice);
 	if (mode==SELLMODE) {
 	  sprintf (floatprice,"Price %.2f Purchase@ %.2f",oldprice,(*CurrentList)[cargonumber].price);
@@ -908,9 +908,9 @@ void UpgradingInfo::CompleteTransactionConfirm () {
       break;
     case DOWNGRADEMODE:
       canupgrade = un->canDowngrade (NewPart,mountoffset,subunitoffset,percentage);
-      if (part.content=="jump_drive") {
-        part.price/=3;
-      }
+      //      if (part.content=="jump_drive") {
+      //        part.price/=3;
+      //      }
       price =part.price*usedPrice(percentage);
       _Universe->AccessCockpit()->credits+=price;
       if (un->Downgrade (NewPart,mountoffset,subunitoffset,percentage)) {
