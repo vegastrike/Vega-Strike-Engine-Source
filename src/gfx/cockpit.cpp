@@ -92,7 +92,6 @@ void Cockpit::DrawNavigationSymbol (const Vector &Loc, const Vector & P, const V
 }
 
 void Cockpit::DrawTargetBoxes(){
-  float speed,range;
   
   Unit * un = parent.GetUnit();
   if (!un)
@@ -103,7 +102,7 @@ void Cockpit::DrawTargetBoxes(){
   StarSystem *ssystem=_Universe->activeStarSystem();
   UnitCollection *unitlist=ssystem->getUnitList();
   //UnitCollection::UnitIterator *uiter=unitlist->createIterator();
-  Iterator *uiter=unitlist->createIterator();
+  un_iter uiter=unitlist->createIterator();
   
   Vector CamP,CamQ,CamR;
   _Universe->AccessCamera()->GetPQR(CamP,CamQ,CamR);
@@ -115,7 +114,7 @@ void Cockpit::DrawTargetBoxes(){
   GFXBlendMode (SRCALPHA,INVSRCALPHA);
   GFXDisable (LIGHTING);
 
-  Unit *target=uiter->current();
+  Unit *target=uiter.current();
   while(target!=NULL){
     if(target!=un){
         Vector Loc(target->Position());
@@ -133,7 +132,7 @@ void Cockpit::DrawTargetBoxes(){
 	  GFXEnd();
 	}
     }
-    target=uiter->advance();
+    target=(++uiter);
   }
 
   GFXEnable (TEXTURE0);
@@ -215,7 +214,7 @@ void Cockpit::DrawTargetBox () {
 void Cockpit::DrawBlips (Unit * un) {
   Unit::Computer::RADARLIM * radarl = &un->GetComputerData().radar;
   UnitCollection * drawlist = _Universe->activeStarSystem()->getUnitList();
-  Iterator * iter = drawlist->createIterator();
+  un_iter iter = drawlist->createIterator();
   Unit * target;
   Unit * makeBigger = un->Target();
   float s,t;
@@ -228,14 +227,14 @@ void Cockpit::DrawBlips (Unit * un) {
   GFXDisable (LIGHTING);
   GFXPointSize (2);
   GFXBegin(GFXPOINT);
-  while ((target = iter->current())!=NULL) {
+  while ((target = iter.current())!=NULL) {
     if (target!=un) {
       Vector localcoord;
       if (!un->InRange (target,localcoord)) {
 	if (makeBigger==target) {
 	  un->Target(NULL);
 	}
-	iter->advance();	
+	iter.advance();	
 	continue;
       }
       LocalToRadar (localcoord,s,t);
@@ -255,19 +254,18 @@ void Cockpit::DrawBlips (Unit * un) {
       }
       
     }
-    iter->advance();
+    iter.advance();
   }
   GFXEnd();
   GFXPointSize (1);
   GFXColor4f (1,1,1,1);
   GFXEnable (TEXTURE0);
-  delete iter;
 }
 
 void Cockpit::DrawEliteBlips (Unit * un) {
   Unit::Computer::RADARLIM * radarl = &un->GetComputerData().radar;
   UnitCollection * drawlist = _Universe->activeStarSystem()->getUnitList();
-  Iterator * iter = drawlist->createIterator();
+  un_iter iter = drawlist->createIterator();
   Unit * target;
   Unit * makeBigger = un->Target();
   float s,t,es,et,eh;
@@ -279,14 +277,14 @@ void Cockpit::DrawEliteBlips (Unit * un) {
   GFXDisable (TEXTURE0);
   GFXDisable (LIGHTING);
 
-  while ((target = iter->current())!=NULL) {
+  while ((target = iter.current())!=NULL) {
     if (target!=un) {
       Vector localcoord;
       if (!un->InRange (target,localcoord)) {
 	if (makeBigger==target) {
 	  un->Target(NULL);
 	}
-	iter->advance();	
+	iter.advance();	
 	continue;
       }
 
@@ -333,12 +331,11 @@ void Cockpit::DrawEliteBlips (Unit * un) {
 
       GFXPointSize(1);
     }
-    iter->advance();
+    iter.advance();
   }
   GFXPointSize (1);
   GFXColor4f (1,1,1,1);
   GFXEnable (TEXTURE0);
-  delete iter;
 }
 float Cockpit::LookupTargetStat (int stat, Unit *target) {
   static float fpsval=0;

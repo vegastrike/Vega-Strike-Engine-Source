@@ -342,8 +342,8 @@ bool Beam::Collide (Unit * target) {
     return false;
   
 
-  
-  if ((distance = target->queryBSP(center,end,normal))) { 
+  Unit * colidee;
+  if ((colidee = target->queryBSP(center,end,normal,distance))) { 
     
     curlength = distance;
     impact|=IMPACT;
@@ -358,7 +358,7 @@ bool Beam::Collide (Unit * target) {
     if (coltmp.b>1)coltmp.b=1;
     */
     float tmp=(curlength/range); 
-    target->ApplyDamage (center+direction*curlength,normal,(damagerate*SIMULATION_ATOM*curthick/thickness)*((1-tmp)+tmp*rangepenalty),coltmp);
+    target->ApplyDamage (center+direction*curlength,normal,(damagerate*SIMULATION_ATOM*curthick/thickness)*((1-tmp)+tmp*rangepenalty),colidee,coltmp);
     return true;
     
   }

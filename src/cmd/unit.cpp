@@ -29,7 +29,8 @@
 #include "lin_time.h"
 
 
-#include "ai/order.h"
+#include "ai/navigation.h"
+#include "ai/fire.h"
 #include "ai/script.h"
 #include "ai/flybywire.h"
 #include "gfx/vsbox.h"
@@ -47,7 +48,7 @@
 //if the PQR of the unit may be variable...for radius size computation
 //#define VARIABLE_LENGTH_PQR
 
-#define DESTRUCTDEBUG
+//#define DESTRUCTDEBUG
 
 
 
@@ -69,9 +70,12 @@ void Unit::calculate_extent() {
     corner_min = corner_min.Min(meshdata[a]->corner_min());
     corner_max = corner_max.Max(meshdata[a]->corner_max());
   }/* have subunits now in table*/
-  for(a=0; a<numsubunit; a++) {
-    corner_min = corner_min.Min(subunits[a]->LocalPosition()+subunits[a]->corner_min);
-    corner_max = corner_max.Max(subunits[a]->LocalPosition()+subunits[a]->corner_max);
+  un_kiter iter =SubUnits.constIterator();
+  const Unit * un;
+  while ((un = iter.current())) {
+    corner_min = corner_min.Min(un->LocalPosition()+un->corner_min);
+    corner_max = corner_max.Max(un->LocalPosition()+un->corner_max);
+    iter.advance();
   }
   image->selectionBox = new Box(corner_min, corner_max);
   if (corner_min.i==-FLT_MAX||corner_max.i==FLT_MAX) {
@@ -119,8 +123,11 @@ void Unit::DeactivateJumpDrive () {
 }
 void Unit::SetNebula (Nebula * neb) {
   nebula = neb;
-  for (int i=0;i<numsubunit;i++) {
-    subunits[i]->SetNebula (neb);
+  un_fiter iter =SubUnits.fastIterator();
+  Unit * un;
+  while ((un = iter.current())) {
+    un->SetNebula (neb);
+    iter.advance();
   }
 }
 void Unit::Init()
@@ -172,8 +179,8 @@ void Unit::Init()
   image->timeexplode=0;
   killed=false;
   ucref=0;
-  numhalos = nummounts= nummesh = numsubunit = 0;
-  halos = NULL; mounts = NULL;meshdata = NULL;subunits = NULL;
+  numhalos = nummounts= nummesh=0;
+  halos = NULL; mounts = NULL;meshdata = NULL;
   aistate = NULL;
   SetAI (new Order());
   Identity(cumulative_transformation_matrix);
@@ -303,7 +310,7 @@ Unit::Unit(const char *filename, bool xml, bool SubU, int faction,Flightgroup *f
 
 		//		meshdata[meshcount]->SetPosition(Vector (x,y,z));
 	}
-
+	int numsubunit;
 	ReadInt(numsubunit);
 	for(int unitcount = 0; unitcount < numsubunit; unitcount++)
 	{
@@ -311,12 +318,14 @@ Unit::Unit(const char *filename, bool xml, bool SubU, int faction,Flightgroup *f
 		float x,y,z;
 		int type;
 		ReadUnit(unitfilename, type, x,y,z);
+		Unit *un;
 		switch(type)
 		{
 		default:
-		  subunits[unitcount] = new Unit (unitfilename,false,true,faction,flightgroup,flightgroup_subnumber);
+		  SubUnits.prepend (un=new Unit (unitfilename,false,true,faction,flightgroup,flightgroup_subnumber));
+
 		}
-		subunits[unitcount]->SetPosition(Vector(x,y,z));
+		un->SetPosition(Vector(x,y,z));
 	}
 
 	int restricted;
@@ -360,7 +369,7 @@ void Unit::AddDestination (const char * dest) {
 
 Unit::~Unit()
 {
-  if ((!killed)&&(!SubUnit)) {
+  if ((!killed)) {
     fprintf (stderr,"Assumed exit on unit %s(if not quitting, report error)\n",name.c_str());
   }
   if (ucref) {
@@ -441,57 +450,33 @@ Unit::~Unit()
   fprintf (stderr,"%d %x ", 7,meshdata);
   fflush (stderr);
 #endif
-	if(meshdata&&nummesh>0)
-	{
-		for(int meshcount = 0; meshcount < nummesh; meshcount++)
-			delete meshdata[meshcount];
-		delete [] meshdata;
-	}
-#ifdef DESTRUCTDEBUG
-  fprintf (stderr,"%d %x ", 8, subunits);
-  fflush (stderr);
-#endif
-	if(subunits)
-	{
-	  for(int subcount = 0; subcount < numsubunit; subcount++) {
-	    if (subunits[subcount]->ucref!=0){
-	      subunits[subcount]->SubUnit=false;
-	      fprintf (stderr,"subunits referencing something");
-       	    }else {
-	      delete subunits[subcount];
-	    }
-	  }
-	  delete [] subunits;
-	}
+  if(meshdata&&nummesh>0) {
+    for(int meshcount = 0; meshcount < nummesh; meshcount++)
+      delete meshdata[meshcount];
+    delete [] meshdata;
+  }
+
 #ifdef DESTRUCTDEBUG
   fprintf (stderr,"%d %x ", 9, halos);
   fflush (stderr);
 #endif
-	if (halos) {
-	  for (int hc=0;hc<numhalos;hc++) {
-	    delete halos[hc];
-	  }
-	  delete [] halos;
-	}
+  if (halos) {
+    for (int hc=0;hc<numhalos;hc++) {
+      delete halos[hc];
+    }
+    delete [] halos;
+  }
 #ifdef DESTRUCTDEBUG
   fprintf (stderr,"%d %x ", 1,mounts);
   fflush (stderr);
 #endif
-	if (mounts) {
-	  delete []mounts;
-	}
+  if (mounts) {
+    delete []mounts;
+  }
 #ifdef DESTRUCTDEBUG
   fprintf (stderr,"%d", 0);
   fflush (stderr);
 #endif
-/*
-	if(weapons)
-	{
-		for(int weapcount = 0; weapcount < numweap; subcount++)
-			delete subsidiary[subcount];
-		delete [] subsidiary;
-	}
-*/
 }
 void Unit::getAverageGunSpeed(float & speed, float &range) const {
    if (nummounts) {
@@ -593,10 +578,13 @@ bool Unit::queryFrustum(float frustum [6][4]) const{
 	  return true;
 	}
   }	
-  
-  for (i=0;i<numsubunit;i++) {
-    if (subunits[i]->queryFrustum(frustum))
+  un_fkiter iter =SubUnits.constFastIterator();
+  const Unit * un;
+  while ((un = iter.current())) {
+    if (un->queryFrustum (frustum)) {
       return true;
+    }
+    iter.advance();
   }
   return false;
 }
@@ -709,10 +697,13 @@ void Unit::Draw(const Transformation &parent, const Matrix parentMatrix)
 	}
       }
     }
-    
-    for(int subcount = 0; subcount < numsubunit; subcount++) {
-      subunits[subcount]->Draw(*ct, ctm);
+    un_fiter iter =SubUnits.fastIterator();
+    Unit * un;
+    while ((un = iter.current())) {
+      un->Draw (*ct,ctm);
+      iter.advance();
     }
+  
     if(selected) {
       static bool doInputDFA=XMLSupport::parse_bool (vs_config->getVariable ("graphics","MouseCursor","false"));
       if (doInputDFA)
@@ -752,15 +743,6 @@ void Unit::Draw(const Transformation &parent, const Matrix parentMatrix)
     halos[i]->Draw(*ct,ctm,haloalpha);
   }
 }
-void Unit::PrimeOrders (int i) {
-  subunits[i]->PrimeOrders();
-}
-void Unit::SetAI (Order *newAI, int i) {
-  subunits[i]->SetAI (newAI);
-}
-void Unit::EnqueueAI(Order *newAI, int i) { 
-  subunits[i]->EnqueueAI(newAI);
-}
 void Unit::PrimeOrders () {
   if (aistate) {
     aistate->ReplaceOrder (new Order);
@@ -768,6 +750,19 @@ void Unit::PrimeOrders () {
     aistate = new Order; //get 'er ready for enqueueing
   }
 }
+
+
+void Unit::SetTurretAI () {
+  UnitCollection::UnitIterator iter = getSubUnits();
+  Unit * un;
+  while (NULL!=(un=iter.current())) {
+    un->EnqueueAI (new Orders::FireAt(.2,15));
+    un->EnqueueAI (new Orders::FaceTarget (false,3));
+    un->SetTurretAI ();
+    iter.advance();
+  }
+}
+
 void Unit::SetAI(Order *newAI)
 {
   newAI->SetParent(this);
@@ -800,9 +795,13 @@ void Unit::ExecuteAI() {
 #endif
 
   if(aistate) aistate->Execute();
-  for(int a=0; a<numsubunit; a++) {
-    subunits[a]->ExecuteAI();//like dubya
+  un_iter iter =getSubUnits();
+  Unit * un;
+  while ((un = iter.current())) {
+    un->ExecuteAI();//like dubya
+    iter.advance();
   }
+
 #ifdef ORDERDEBUG
   fprintf (stderr,"ux");
   fflush (stderr);
@@ -821,6 +820,12 @@ bool Unit::InRange (Unit *target, Vector &localcoord) const {
     return false;
   }
   return true;
+}
+un_iter Unit::getSubUnits () {
+  return SubUnits.createIterator();
+}
+un_kiter Unit::viewSubUnits() const{
+  return SubUnits.constIterator();
 }
 
 const string Unit::getFgID()  {
@@ -846,9 +851,9 @@ void Unit::ReTargetFg(int which_target){
 #if 0
       StarSystem *ssystem=_Universe->activeStarSystem();
       UnitCollection *unitlist=ssystem->getUnitList();
-      Iterator *uiter=unitlist->createIterator();
+      Iterator uiter=unitlist->createIterator();
 
-      Unit *other_unit=uiter->current();
+      Unit *other_unit=uiter.current();
       Unit *found_target=NULL;
       int found_attackers=1000;
 
@@ -866,7 +871,7 @@ void Unit::ReTargetFg(int which_target){
 	  }
 	}
 
-	other_unit=uiter->advance();
+	other_unit=uiter.advance();
       }
 
       if(found_target==NULL){

@@ -72,23 +72,23 @@ void FireKeyboard::MissileKey(int, KBSTATE k) {
    missilekey = k;
 }
 void FireKeyboard::ChooseNearTargets() {
-  UnitCollection::UnitIterator *iter = _Universe->activeStarSystem()->getUnitList()->createIterator();
+  UnitCollection::UnitIterator iter = _Universe->activeStarSystem()->getUnitList()->createIterator();
   Unit * un;
   float range=FLT_MAX;
-  while ((un = iter->current())) {
+  while ((un = iter.current())) {
     Vector t;
     bool tmp = parent->InRange (un,t);
     if (tmp&&t.Dot(t)<range&&t.k>0&&_Universe->GetRelation(parent->faction,un->faction)<0) {
       range = t.Dot(t);
       parent->Target (un);
     }
-    iter->advance();
+    iter.advance();
   }
 #ifdef ORDERDEBUG
   fprintf (stderr,"i4%x",iter);
   fflush (stderr);
 #endif
-  delete iter;
+
 #ifdef ORDERDEBUG
   fprintf (stderr,"i4\n");
   fflush (stderr);
@@ -101,24 +101,24 @@ void FireKeyboard::ChooseThreatTargets() {
     parent->Target(threat);
 }
 void FireKeyboard::ChooseTargets () {
-  UnitCollection::UnitIterator *iter = _Universe->activeStarSystem()->getUnitList()->createIterator();
+  UnitCollection::UnitIterator iter = _Universe->activeStarSystem()->getUnitList()->createIterator();
   Unit * un ;
   bool found=false;
   bool find=false;
-  while ((un = iter->current())) {
+  while ((un = iter.current())) {
     //how to choose a target?? "if looks particularly juicy... :-) tmp.prepend (un);
     Vector t;
 
     if (un==parent->Target()) {
-      iter->advance();
+      iter.advance();
       found=true;
       continue;
     }
     if (!parent->InRange(un,t)) {
-      iter->advance();
+      iter.advance();
       continue;
     }
-    iter->advance();
+    iter.advance();
     if (found) {
       find=true;
       parent->Target (un);
@@ -133,37 +133,28 @@ void FireKeyboard::ChooseTargets () {
   fprintf (stderr,"i5%x",iter);
   fflush (stderr);
 #endif
-  delete iter;
+
+  
 #ifdef ORDERDEBUG
   fprintf (stderr,"i5\n");
   fflush (stderr);
 #endif
   if (!find) {
     iter = _Universe->activeStarSystem()->getUnitList()->createIterator();
-    while ((un = iter->current())) {
+    while ((un = iter.current())) {
       //how to choose a target?? "if looks particularly juicy... :-) tmp.prepend (un);
       Vector t;
       if (un==parent->Target()){
-	iter->advance();
+	iter.advance();
 	continue;
       }
       if (!parent->InRange(un,t)) {
-	iter->advance();
+	iter.advance();
 	continue;
       }
       parent->Target(un);
       break;
     }
-#ifdef ORDERDEBUG
-  fprintf (stderr,"i6%x",iter);
-  fflush (stderr);
-#endif
-  delete iter;
-#ifdef ORDERDEBUG
-  fprintf (stderr,"i6\n");
-  fflush (stderr);
-#endif
-
   }
 }
 FireKeyboard::~FireKeyboard () {

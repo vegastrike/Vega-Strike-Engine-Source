@@ -55,18 +55,17 @@ int Music::SelectTracks(int &whichlist) {
   bool perfect=true;
   float goodness=0;
   UnitCollection * drawlist = _Universe->activeStarSystem()->getUnitList();
-  Iterator * iter = drawlist->createIterator();
+  un_iter iter = drawlist->createIterator();
   Unit *target;
-  while ((target = iter->current())!=NULL) {
+  while ((target = iter.current())!=NULL) {
     float ftmp;
     ftmp = 2*_Universe->GetRelation (un->faction,target->faction);
     if (ftmp<0)
       perfect=false;
     if (FINITE (ftmp))
       goodness += ftmp;
-    iter->advance();
+    iter.advance();
   }
-  delete iter;
   if (perfect||playlist[0].empty()) {
     whichlist=1;
     if (playlist[1].empty())

@@ -56,7 +56,6 @@
 
 /* *********************************************************** */
 
-extern void SetTurretAI (Unit * fighter);
 
 extern Unit *player_unit;
 
@@ -79,17 +78,17 @@ varInst *Mission::call_unit(missionNode *node,int mode){
       StarSystem *ssystem=_Universe->activeStarSystem();
       UnitCollection *unitlist=ssystem->getUnitList();
       //UnitCollection::UnitIterator *uiter=unitlist->createIterator();
-      Iterator *uiter=unitlist->createIterator();
+      un_iter uiter=unitlist->createIterator();
 
       int i=0;
-      Unit *unit=uiter->current();
+      Unit *unit=uiter.current();
       while(unit!=NULL){
 	if(i==unit_nr){
-	  my_unit=uiter->current();
+	  my_unit=uiter.current();
 	  unit=NULL;
 	}
 	else{
-	  unit=uiter->advance();
+	  unit=++(uiter);
 	  i++;
 	}
       }
@@ -503,7 +502,7 @@ void Mission::call_unit_launch(Flightgroup *fg){
 	      //fighters[a]->SetAI( new AImissionScript(modulename));
      }
 
-     SetTurretAI (my_unit);
+     my_unit->SetTurretAI ();
 
      //     cout << fg->name << endl;
 
@@ -522,10 +521,10 @@ void Mission::findNextEnemyTarget(Unit *my_unit){
       StarSystem *ssystem=_Universe->activeStarSystem();
       UnitCollection *unitlist=ssystem->getUnitList();
       //UnitCollection::UnitIterator *uiter=unitlist->createIterator();
-      Iterator *uiter=unitlist->createIterator();
+      un_iter uiter(unitlist->createIterator());
 
       int i=0;
-      Unit *unit=uiter->current();
+      Unit *unit=uiter.current();
       Unit *target_unit=NULL;
       //      int my_faction=_Universe->GetFaction(my_unit->getFlightgroup()->faction.c_str());
       int my_faction=my_unit->faction;
@@ -534,12 +533,12 @@ void Mission::findNextEnemyTarget(Unit *my_unit){
 	int other_faction=unit->faction;
 
 	if(_Universe->GetRelation(my_faction,other_faction)<0.0){
-	  target_unit=uiter->current();
+	  target_unit=uiter.current();
 	  unit=NULL;
 	}
 	else{
 	  //	  printf("relation was: %f %d %d\n",_Universe->GetRelation(my_faction,other_faction),my_faction,other_faction);
-	  unit=uiter->advance();
+	  unit=++(uiter);
 	  i++;
 	}
       }

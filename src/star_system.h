@@ -31,7 +31,7 @@ class StarSystem {
   enum PHYSICS_STAGE {PHY_AI,TERRAIN_BOLT_COLLIDE,PHY_COLLIDE, PHY_TERRAIN, PHY_RESOLV,PHY_NUM} current_stage;
   
   ///Stars, planets, etc. Orbital mechanics precalculated 
-  int numprimaries; Unit **primaries; 
+
   ///Starsystem XML Struct For use with XML loading
   struct StarXML {
     Terrain * parentterrain;

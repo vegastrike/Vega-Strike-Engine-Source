@@ -46,8 +46,8 @@ UnitCollection * ClickList::requestIterator (int minX,int minY, int maxX, int ma
   UnitCollection * uc = new UnitCollection();///arrgh dumb last collection thing to cycel through ships
     if (minX==maxX||minY==maxY)
       return uc;//nothing in it
-    UnitCollection::UnitIterator * UAye = uc->createIterator();
-    UnitCollection::UnitIterator * myParent = parentIter->createIterator();
+    UnitCollection::UnitIterator * UAye = new un_iter(uc->createIterator());
+    UnitCollection::UnitIterator * myParent = new un_iter(parentIter->createIterator());
     float view[16];
     float frustmat [16];
     float l, r, b, t , n, f;
@@ -58,7 +58,7 @@ UnitCollection * ClickList::requestIterator (int minX,int minY, int maxX, int ma
     float frustum [6][4];
     GFXCalculateFrustum(frustum,view,frustmat);
     Unit * un;
-    while (un=myParent->current()) {
+    while ((un=myParent->current())) {
       if (un->queryFrustum(frustum)) {
 	UAye->insert (un);
       }
@@ -73,10 +73,10 @@ UnitCollection * ClickList::requestIterator (int minX,int minY, int maxX, int ma
 UnitCollection * ClickList::requestIterator (int mouseX, int mouseY) {
   perplines = vector<Vector>();
     UnitCollection * uc = new UnitCollection ();
-    UnitCollection::UnitIterator * UAye = uc->createIterator();
-    UnitCollection::UnitIterator * myParent = parentIter->createIterator();
+    UnitCollection::UnitIterator * UAye = new un_iter (uc->createIterator());
+    UnitCollection::UnitIterator * myParent = new un_iter (parentIter->createIterator());
     Unit * un;
-    while (un = myParent->current()) {
+    while ((un = myParent->current())) {
 	if (queryShip(mouseX,mouseY,un))
 	  UAye->insert (un);
 	myParent->advance();
@@ -94,8 +94,8 @@ Unit * ClickList::requestShip (int mouseX, int mouseY) {
   Unit *un;
   if (lastCollection!=NULL) {
     equalCheck=true;
-    UAye=uc->createIterator();
-    UnitCollection::UnitIterator *lastiter = lastCollection->createIterator();
+    UAye=new un_iter(uc->createIterator());
+    UnitCollection::UnitIterator *lastiter = new un_iter(lastCollection->createIterator());
     Unit *lastun;
     while (equalCheck&& (un = UAye->current())&&(lastun=lastiter->current())) {
       if (un !=lastun) {
@@ -113,8 +113,8 @@ Unit * ClickList::requestShip (int mouseX, int mouseY) {
   Unit * targetUnit=NULL;
   if (equalCheck&&lastSelected) {//the person clicked the same place and wishes to cycle through units from front to back
     float morethan = lastSelected->getMinDis(parentSystem->AccessCamera()->GetPosition());
-    UAye = uc->createIterator();
-    while (un=UAye->current()) {
+    UAye = new un_iter (uc->createIterator());
+    while ((un=UAye->current())) {
       tmpdis = un->getMinDis (parentSystem->AccessCamera()->GetPosition());
       if (tmpdis>morethan&&tmpdis<minDistance) {
 	minDistance=tmpdis;
@@ -126,8 +126,8 @@ Unit * ClickList::requestShip (int mouseX, int mouseY) {
   }
   if (targetUnit==NULL) {//ok the click location is either different, or 
     //he clicked on the back of the list and wishes to start over
-    UAye = uc->createIterator();
-    while (un=UAye->current()) {
+    UAye = new un_iter (uc->createIterator());
+    while ((un=UAye->current())) {
       tmpdis = un->getMinDis (parentSystem->AccessCamera()->GetPosition());
       if (tmpdis<minDistance) {
 	minDistance=tmpdis;

@@ -35,7 +35,7 @@ void Building::UpdatePhysics (const Transformation &trans, const Matrix transmat
   }
   if (vehicle) {
     Normalize(p);
-    float k = p.Dot (q);
+    //    float k = p.Dot (q);
     Vector tmp1;
 #if 0
     if (k<=0) {

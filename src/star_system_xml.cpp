@@ -187,7 +187,7 @@ static Vector ComputeRotVel (float rotvel, const Vector &r, const Vector & s) {
 }
 
 
-extern void SetTurretAI (Unit * fighter);
+
 static void GetLights (const vector <GFXLight> &origlights, vector <GFXLightLocal> &curlights, const char *str) {
   int tint;
   char isloc;
@@ -693,7 +693,7 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
 	  un->SetAI(new PlanetaryOrbit (un,velocity,position,R,S, Vector (0,0,0), plan));
 
 	  //     xml->moons[xml->moons.size()-1]->Planet::beginElement(R,S,velocity,position,gravity,radius,filename,NULL,vector <char *>(),xml->unitlevel-((xml->parentterrain==NULL&&xml->ct==NULL)?1:2),ourmat,curlights,true,faction);
-	  SetTurretAI (un);
+	  un->SetTurretAI ();
 	  un->SetAngularVelocity (ComputeRotVel (rotvel,R,S));
     } else {
       if ((elem==BUILDING||elem==VEHICLE)&&xml->ct==NULL&&xml->parentterrain!=NULL) {
@@ -711,7 +711,7 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
 	b->SetPlanetOrbitData ((PlanetaryTransform *)xml->parentterrain);
 	b->SetPosAndCumPos (xml->cursun+xml->systemcentroid);
 	b->EnqueueAI( new Orders::AggressiveAI ("default.agg.xml", "default.int.xml"));
-	  SetTurretAI (b);
+	  b->SetTurretAI ();
 
 	AddUnit (b);
 	  while (!dest.empty()) {
@@ -735,7 +735,7 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
 	    xml->moons.back()->SetAI(new PlanetaryOrbit(xml->moons[xml->moons.size()-1],velocity,position,R,S,xml->cursun+xml->systemcentroid, NULL));
 
 	    xml->moons.back()->SetPosAndCumPos(R+S+xml->cursun+xml->systemcentroid);
-	      SetTurretAI (xml->moons.back());
+	      xml->moons.back()->SetTurretAI ();
 
       }
     }
@@ -811,11 +811,19 @@ void StarSystem::LoadXML(const char *filename, const Vector & centroid, const fl
   } while(!feof(inFile));
   fclose (inFile);
   XML_ParserFree (parser);
-  numprimaries = xml->moons.size();
-  this->primaries=new Unit * [xml->moons.size()];
-  for(unsigned int i=0;i<xml->moons.size();i++) {
-    primaries[i]=xml->moons[i];
+  Iterator * iter;
+  unsigned int i;
+  for (i =0;i<xml->moons.size();i++) {
+    if (xml->moons[i]->isUnit()==PLANETPTR) {
+      iter = ((Planet*)xml->moons[i])->createIterator();
+      drawList->prepend(iter);
+      delete iter;
+    } else {
+      drawList->prepend (xml->moons[i]);
+    }
   }
+  
+    
 #ifdef NV_CUBE_MAP
   printf("using NV_CUBE_MAP\n");
   LightMap[0]=new Texture ((xml->backgroundname+"_right_light.bmp").c_str(),1,BILINEAR,CUBEMAP,CUBEMAP_POSITIVE_X);

@@ -88,7 +88,7 @@ static std::string MangleString (const char * in, float probability) {
 
   
   
-  int j=0;
+
   for (int i=0;in[i]!='\0';i++) {
     if (in[i]!='\n') {
       str.push_back (in[i]);

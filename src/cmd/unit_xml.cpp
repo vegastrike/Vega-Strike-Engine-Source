@@ -1111,13 +1111,8 @@ void Unit::LoadXML(const char *filename)
     }
 #endif
   }
-  numsubunit = xml->units.size();
-  if (numsubunit)
-    subunits = new Unit*[numsubunit];
-  else
-    subunits=NULL;
-  for( a=0; a<numsubunit; a++) {
-    subunits[a] = xml->units[a];
+  for( a=0; a<xml->units.size(); a++) {
+    SubUnits.prepend(xml->units[a]);
   }
   if (!SubUnit) {
     calculate_extent();

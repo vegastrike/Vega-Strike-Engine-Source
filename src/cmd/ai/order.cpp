@@ -150,7 +150,6 @@ Order* Order::ReplaceOrder (Order *ord) {
   fflush (stderr);
 #endif
 
-  int completed=0;
   vector<Order*>::iterator ordd = suborders.begin();
   for (unsigned int i=0;i<suborders.size();i++) {
     if (!(ord->getType()&(*ordd)->getType()&(FACING|WEAPON|MOVEMENT))){
@@ -195,23 +194,9 @@ bool Order::AttachOrder (UnitCollection *targets1) {
   
   }
   targets = new UnitCollection();
-  UnitCollection::UnitIterator *iter = targets1->createIterator();
-  Unit *u;
-  while(0!=(u = iter->current())) {
-    targets->prepend (u);
-    iter->advance();
-  }
-#ifdef ORDERDEBUG
-  fprintf (stderr,"deliterxx%x",iter);
-  fflush (stderr);
-#endif
-  delete iter;
+  UnitCollection::UnitIterator iter = targets1->createIterator();
+  targets->prepend (&iter);
   return true;
-#ifdef ORDERDEBUG
-  fprintf (stderr,"\\atachord");
-  fflush (stderr);
-#endif
-
 }
 bool Order::AttachSelfOrder (UnitCollection *targets1) {
   if (!(type&SELF))
@@ -222,13 +207,12 @@ bool Order::AttachSelfOrder (UnitCollection *targets1) {
     group = NULL;
   } else {
     group = new UnitCollection();
-    UnitCollection::UnitIterator *iter = targets1->createIterator();
+    UnitCollection::UnitIterator iter = targets1->createIterator();
     Unit *u;
-    while(0!=(u = iter->current())) {
+    while(0!=(u = iter.current())) {
       group->prepend (u);
-      iter->advance();
+      iter.advance();
     }
-    delete iter;
   }
   return true;
 }

@@ -13,12 +13,16 @@ void Asteroid::reactToCollision(Unit * smaller, const Vector & biglocation, cons
   }
 }
 Asteroid::Asteroid(const char * filename, int faction, Flightgroup* fg, int fg_snumber, float difficulty):Unit (filename,true, false, faction,fg,fg_snumber) {
-  for (int i=0;i<numsubunit;i++) {
+  UnitCollection::UnitIterator iter = getSubUnits();
+  Unit *unit;
+  while((unit = iter.current())!=NULL) {
     float x=2*difficulty*((float)rand())/RAND_MAX -difficulty;
     float y=2*difficulty*((float)rand())/RAND_MAX-difficulty;
     float z=2*difficulty*((float)rand())/RAND_MAX-difficulty;
-    subunits[i]->SetAngularVelocity(Vector(x,y,z));
+    unit->SetAngularVelocity(Vector(x,y,z));
+    iter.advance();
   }
+
 }
 void Asteroid::UpdatePhysics (const Transformation &trans, const Matrix transmat, const Vector & CumulativeVelocity, bool ResolveLast, UnitCollection *uc) {
   Unit::UpdatePhysics (trans,transmat, CumulativeVelocity,ResolveLast,uc);

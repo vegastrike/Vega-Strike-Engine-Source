@@ -31,7 +31,7 @@ struct GFXColor;
 #include "gfx/vdu.h"
 #include "xml_support.h"
 #include "container.h"
-
+#include "collection.h"
 using std::string;
 
 class Flightgroup;
@@ -169,10 +169,8 @@ class Unit {
   Mesh **meshdata;
   ///are shields tight to the hull.  zero means bubble
   float shieldtight;
-  ///Number of "children": turrets and other tight subunits
-  int numsubunit;
-  /// the new children fun fun stuff
-  Unit **subunits; 
+  /// the turrets and spinning parts fun fun stuff
+  UnitCollection SubUnits; 
   ///glowing halo effects on this unit
   int numhalos;  Halo **halos;
   ///NUmber of weapons on this unit
@@ -371,7 +369,7 @@ public:
   bool Dock (Unit * unitToDockWith);
   bool UnDock (Unit * unitToDockWith);
   ///Does a one way collision between smaller target and this
-  bool Inside (const Vector &position, const float radius, Vector & normal, float &dist) const;
+  bool Inside (const Vector &position, const float radius, Vector & normal, float &dist);
   void SetPlanetOrbitData (PlanetaryTransform *trans);
   PlanetaryTransform *GetPlanetOrbit () const;
   ///Updates the collide Queue with any possible change in sectors
@@ -474,12 +472,13 @@ public:
   bool querySphere (const Vector &pnt, float err) const;
   ///queries the sphere for beams (world space start,end)
   float querySphere (const Vector &start, const Vector & end) const;
+  float querySphereNoRecurse (const Vector &start, const Vector &end) const ;
   ///queries the ship with a directed ray
   float querySphere (const Vector &st, const Vector &dir, float err) const;//for click list
   ///Queries the BSP tree with a world space st and end point. Returns the normal and distance on the line of the intersection
-  float queryBSP (const Vector &st, const Vector & end, Vector & normal, bool ShieldBSP=true) const;
-  ///queries the BSP with a world space pnt, radius err.  Returns the normal and distance of the plane to the shield
-  bool queryBSP (const Vector &pnt, float err, Vector & normal, float &dist, bool ShieldBSP) const;
+  Unit * queryBSP (const Vector &st, const Vector & end, Vector & normal, float &distance, bool ShieldBSP=true);
+  ///queries the BSP with a world space pnt, radius err.  Returns the normal and distance of the plane to the shield. If Unit returned not NULL, that subunit hit
+  Unit * queryBSP (const Vector &pnt, float err, Vector & normal, float &dist,  bool ShieldBSP);
   ///Queries if this unit is within a given frustum
   bool queryFrustum (float frustum[6][4]) const;
 
@@ -509,14 +508,9 @@ public:
   ///EnqueuesAI first
   void EnqueueAIFirst (Order * newAI);
   ///num subunits
-  int getNumSubUnits () {return numsubunit;}
-  Unit *getSubUnit(int i) {return subunits[i];}
-  ///Sets up a null queue for orders
-  void PrimeOrders(int subun);
-  ///Sets the AI to be a specific order
-  void SetAI(Order *newAI, int subun);
-  ///Enqueues an order to the unit's order queue
-  void EnqueueAI(Order *newAI, int subun);
+
+  un_iter getSubUnits();
+  un_kiter viewSubUnits() const;
   bool InsideCollideTree (Unit * smaller, Vector & bigpos, Vector & bigNormal, Vector & smallpos, Vector & smallNormal);
   virtual void reactToCollision(Unit * smaller, const Vector & biglocation, const Vector & bignormal, const Vector & smalllocation, const Vector & smallnormal, float dist);
   ///returns true if jump possible even if not taken
@@ -563,9 +557,9 @@ public:
   ///convenient shortcut to applying torques with vector and position
   void ApplyLocalTorque(const Vector &torque); 
   ///Applies damage to the local area given by pnt
-  void ApplyLocalDamage (const Vector &pnt, const Vector & normal, float amt, const GFXColor &);
+  void ApplyLocalDamage (const Vector &pnt, const Vector & normal, float amt, Unit * affectedSubUnit, const GFXColor &);
   ///Applies damage to the pre-transformed area of the ship
-  void ApplyDamage (const Vector & pnt, const Vector & normal, float amt, const GFXColor & );
+  void ApplyDamage (const Vector & pnt, const Vector & normal, float amt, Unit * affectedSubUnit, const GFXColor & );
   ///Clamps thrust to the limits struct
   Vector ClampThrust(const Vector &thrust, bool afterburn);
   ///Takes a unit vector for direction of thrust and scales to limits
@@ -631,6 +625,7 @@ public:
  protected:
   string fullname;
  public:
+  void SetTurretAI ();
   Flightgroup *getFlightgroup() const { return flightgroup; };
   int getFgSubnumber() const { return flightgroup_subnumber; };
   

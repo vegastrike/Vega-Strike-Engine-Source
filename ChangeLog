@@ -1,3 +1,13 @@
+2002-02-10 Daniel Horn <hellcatv@hotmail.com>
+	* Removed special case for subunits (eg pseudo 1 xtra refcount)
+	* Streamlined UnitIterator
+	* Added useful functions for unit iterators
+	* Change BSP's to return a (nonconst) unit so subunits may be directly damaged
+	* Added constant iterators and fast iterators
+	* un_iter is standard un_fiter is the fast iterattor that doesn't check the Killed() value
+	* un_kiter is the standard constant iterator and un_fkiter is the fast constant iterator to go down unit queues
+	* If you get odd segfaults please tell me backtrace
+	
 2002-02-09 Alexander Rawass <alexannika@users.sourceforge.net>
 
 	* test mission for dana

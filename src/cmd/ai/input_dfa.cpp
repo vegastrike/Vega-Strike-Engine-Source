@@ -44,7 +44,7 @@ void InputDFA::NewLocationSelect(){
   Unit * un;
   int cnt=0;
   Vector RunningTotal(0,0,0);
-  UnitCollection::UnitIterator * ui = selected->createIterator();
+  UnitCollection::UnitIterator * ui = new un_iter(selected->createIterator());
   while ((un=ui->current())) {
     RunningTotal+=un->Position();
     cnt++;
@@ -83,7 +83,7 @@ void InputDFA::TargetSelect (KBSTATE k,int x,int y, int delx, int dely, int mod)
   if (CurDFA->state==TARGET_SELECT) {
     //executeOrders from selected->target;
     if (k==RELEASE&&CurDFA->targetted!=NULL) {
-      UnitCollection::UnitIterator * tmp = CurDFA->selected->createIterator();
+      un_iter * tmp = new un_iter(CurDFA->selected->createIterator());
       Unit * un;
       while ((un = tmp->current())) {
 	Order * nAI = CurDFA->orderfac->newOrder();
@@ -112,7 +112,7 @@ void InputDFA::LocSelect (KBSTATE k, int x, int y, int delx, int dely, int mod) 
 
   if (k==PRESS) {
     
-      UnitCollection::UnitIterator * tmp = CurDFA->selected->createIterator();
+      UnitCollection::UnitIterator * tmp = new un_iter(CurDFA->selected->createIterator());
       Unit * un;
       Vector tmplocselvec = CurDFA->locsel->GetVector();
       while ((un = tmp->current())) {
@@ -225,7 +225,7 @@ void InputDFA::ClickSelect (KBSTATE k, int x, int y, int delx, int dely, int mod
     UnitCollection *tmpcol = CurDFA->clickList->requestIterator(CurDFA->prevx,CurDFA->prevy,x,y);
     if (!(kmod&ACTIVE_SHIFT)){
       CurDFA->replaceCollection(tmpcol);
-      UnitCollection::UnitIterator * tmp2 = tmpcol->createIterator();
+      UnitCollection::UnitIterator * tmp2 = new un_iter(tmpcol->createIterator());
       if (!tmp2->current()) {
 	CurDFA->SetStateNone();
 	fprintf (stderr,"SelectBoxMissed\n");
@@ -291,7 +291,7 @@ void InputDFA::NoneSelect (KBSTATE k,int x, int y, int delx, int dely, int mod) 
     CurDFA->Selecting=false;
     UnitCollection *tmpcol = CurDFA->clickList->requestIterator(CurDFA->prevx,CurDFA->prevy,x,y);
     CurDFA->replaceCollection(tmpcol);
-    UnitCollection::UnitIterator * tmp2 = tmpcol->createIterator();
+    UnitCollection::UnitIterator * tmp2 = new un_iter(tmpcol->createIterator());
     if (tmp2->current()) {
       fprintf (stderr,"None::replacing SelectBox Units");if (CurDFA->state==TARGET_SELECT) fprintf (stderr," to target");else fprintf (stderr," to select");
       while(tmp2->current()) {
@@ -366,7 +366,7 @@ void InputDFA::UnselectAll() {
   case UNITS_SELECTED:
   case NONE:   
     if (selected) {
-      UnitCollection::UnitIterator *it = selected->createIterator();
+      UnitCollection::UnitIterator *it = new un_iter(selected->createIterator());
       while(it->current()) {
 	it->current()->Deselect();
 	it->advance();
@@ -393,7 +393,7 @@ void InputDFA::replaceCollection (UnitCollection *newcol) {
     UnselectAll();
     selected = newcol;
     UnitCollection::UnitIterator *it;
-    for(it = selected->createIterator();
+    for(it = new un_iter(selected->createIterator());
 	it->current();
 	it->advance()) {
       it->current()->Select();
@@ -414,14 +414,14 @@ void InputDFA::appendCollection (UnitCollection *newcol) {
   case NONE:
     if (selected) {
       UnitCollection::UnitIterator *it;
-      for(it = newcol->createIterator();
+      for(it = new un_iter(newcol->createIterator());
 	  it->current();
 	  it->advance()) {
 	it->current()->Select();
       }
       delete it;
     
-      UnitCollection::UnitIterator *tmpit =newcol->createIterator();
+      UnitCollection::UnitIterator *tmpit =new un_iter(newcol->createIterator());
       selected->append (tmpit);
       delete tmpit;
       delete newcol;
@@ -432,7 +432,7 @@ void InputDFA::appendCollection (UnitCollection *newcol) {
     break;
   case TARGET_SELECT:
     if (targetted) {
-      UnitCollection::UnitIterator * tmpit = newcol->createIterator();
+      UnitCollection::UnitIterator * tmpit = new un_iter(newcol->createIterator());
       targetted->append (tmpit);
       delete tmpit;
       delete newcol;

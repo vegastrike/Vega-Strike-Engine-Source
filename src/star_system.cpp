@@ -45,7 +45,7 @@ Atmosphere *theAtmosphere;
 
 StarSystem::StarSystem(const char * filename, const Vector & centr,const float timeofyear) : 
   //  primaries(primaries), 
-  drawList(new UnitCollection),//what the hell is this...maybe FALSE FIXME
+  drawList(new UnitCollection),
   units(new UnitCollection) {
 
   no_collision_time=(int)(1+2.000/SIMULATION_ATOM);
@@ -60,23 +60,13 @@ StarSystem::StarSystem(const char * filename, const Vector & centr,const float t
   current_stage=PHY_AI;
   currentcamera = 0;	
   systemInputDFA = new InputDFA (this);
-  numprimaries=0;
+
   LoadXML(filename,centr,timeofyear);
   if (!name)
     name =strdup (filename);
   AddStarsystemToUniverse(filename);
 //  primaries[0]->SetPosition(0,0,0);
-  int i;
-  Iterator * iter;
-  for (i =0;i<numprimaries;i++) {
-	  if (primaries[i]->isUnit()==PLANETPTR) {
-		iter = ((Planet*)primaries[i])->createIterator();
-		drawList->prepend(iter);
-		delete iter;
-	  } else {
-		drawList->prepend (primaries[i]);
-	  }
-  }
+
   //iter = primaries->createIterator();
   //iter->advance();
   //earth=iter->current();
@@ -182,13 +172,18 @@ StarSystem::~StarSystem() {
   delete stars;
   delete [] name;
   delete systemInputDFA;
+  /* //FIXME  after doign so much debugging I think you shouldn't delete this
   for (int i=0;i<numprimaries;i++) {
 	delete primaries[i];
-  }
-  delete [] primaries;
+	}
+	delete [] primaries;
+
+  */
+
   delete bolts;
   delete collidetable;
   GFXDeleteLightContext (lightcontext);
+  delete drawList;
 }
 
 UnitCollection * StarSystem::getUnitList () {
@@ -213,32 +208,30 @@ void StarSystem::AddUnit(Unit *unit) {
 
 bool StarSystem::RemoveUnit(Unit *un) {
   bool removed2=false;
-  Iterator *iter = units->createIterator();
+  UnitCollection::UnitIterator iter = units->createIterator();
   Unit *unit;
-  while((unit = iter->current())!=NULL) {
+  while((unit = iter.current())!=NULL) {
     if (unit==un) {
-      iter->remove();
+      iter.remove();
       removed2 =true;
       break;
     } else {
-      iter->advance();
+      iter.advance();
     }
   }
-  delete iter;  
   bool removed =false;
   if (removed2) {
-    Iterator *iter = drawList->createIterator();
+    UnitCollection::UnitIterator iter = drawList->createIterator();
     Unit *unit;
-    while((unit = iter->current())!=NULL) {
+    while((unit = iter.current())!=NULL) {
       if (unit==un) {
-	iter->remove();
+	iter.remove();
 	removed =true;
 	break;
       }else {
-	iter->advance();
+	iter.advance();
       }
     }
-    delete iter;  
   }
   return removed;
 }
@@ -313,7 +306,7 @@ void StarSystem::Draw(bool DrawCockpit) {
 #endif
   bg->Draw();
 
-  Iterator *iter = drawList->createIterator();
+  UnitCollection::UnitIterator iter = drawList->createIterator();
   Unit *unit;
   //  fprintf (stderr,"|t%f i%lf|",GetElapsedTime(),interpolation_blend_factor);
 #ifdef UPDATEDEBUG
@@ -331,11 +324,10 @@ void StarSystem::Draw(bool DrawCockpit) {
   fprintf (stderr,">un<");
   fflush (stderr);
 #endif
-  while((unit = iter->current())!=NULL) {
+  while((unit = iter.current())!=NULL) {
     unit->Draw();
-    iter->advance();
+    iter.advance();
   }
-  delete iter;
 #ifdef UPDATEDEBUG
   fprintf (stderr,"fog");
   fflush (stderr);
@@ -466,7 +458,7 @@ void StarSystem::Update() {
   _Universe->pushActiveStarSystem(this);
   if(time/SIMULATION_ATOM>=(1./PHY_NUM)) {
     while(time/SIMULATION_ATOM >= (1./PHY_NUM)) { // Chew up all SIMULATION_ATOMs that have elapsed since last update
-      Iterator *iter;
+      UnitCollection::UnitIterator iter;
       if (current_stage==PHY_AI) {
 	iter = drawList->createIterator();
 	if (firstframe&&rand()%2) {
@@ -482,12 +474,11 @@ void StarSystem::Update() {
   fprintf (stderr,"AI");
   fflush (stderr);
 #endif
-	while((unit = iter->current())!=NULL) {
+	while((unit = iter.current())!=NULL) {
 	  unit->ExecuteAI(); 
 	  unit->ResetThreatLevel();
-	  iter->advance();
+	  iter.advance();
 	}
-	delete iter;
 	current_stage=TERRAIN_BOLT_COLLIDE;
       } else if (current_stage==TERRAIN_BOLT_COLLIDE) {
 #ifdef UPDATEDEBUG
@@ -503,11 +494,10 @@ void StarSystem::Update() {
 	AnimatedTexture::UpdateAllPhysics();
 	///Do gravitation!
 	iter = units->createIterator();
-	  while((unit = iter->current())!=NULL) {
+	  while((unit = iter.current())!=NULL) {
 	    //gravitate //FIXME
-	    iter->advance();
+	    iter.advance();
 	  }
-	  delete iter;	
 	  //FIXME somehow only works if called once per frame
 #ifdef UPDATEDEBUG
   fprintf (stderr,"DelQ");
@@ -523,21 +513,20 @@ void StarSystem::Update() {
   fflush (stderr);
 #endif
 	  iter = drawList->createIterator();
-	  while((unit = iter->current())!=NULL) {
+	  while((unit = iter.current())!=NULL) {
 		unit->SetNebula(NULL); 
-		iter->advance();
+		iter.advance();
 	  }
-	  delete iter;
 	  iter = drawList->createIterator();
 #ifdef UPDATEDEBUG
   fprintf (stderr,"Coll");
   fflush (stderr);
 #endif
-	  while((unit = iter->current())!=NULL) {
+	  while((unit = iter.current())!=NULL) {
 	    unit->CollideAll();
-	    iter->advance();
+	    iter.advance();
 	  }
-	  delete iter;
+
 	}
 	current_stage=PHY_TERRAIN;
       } else if (current_stage==PHY_TERRAIN) {
@@ -563,11 +552,10 @@ void StarSystem::Update() {
   fprintf (stderr,"unphi");
   fflush (stderr);
 #endif
-	while((unit = iter->current())!=NULL) {
+	while((unit = iter.current())!=NULL) {
 	  unit->UpdatePhysics(identity_transformation,identity_matrix,Vector (0,0,0),firstframe,units);
-	  iter->advance();
+	  iter.advance();
 	}
-	delete iter;
 #ifdef UPDATEDEBUG
   fprintf (stderr,"boltphi");
   fflush (stderr);

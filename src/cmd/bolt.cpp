@@ -231,7 +231,8 @@ bool Bolt::Collide (Unit * target) {
     return false;
   Vector normal;
   float distance;
-  if ((distance =target->queryBSP (prev_position,cur_position,normal))) {//ignore return
+  Unit * affectedSubUnit;
+  if ((affectedSubUnit =target->queryBSP (prev_position,cur_position,normal,distance))) {//ignore return
     Vector tmp = (cur_position-prev_position).Normalize();
     tmp = tmp*distance;
     distance = curdist/range;
@@ -242,7 +243,7 @@ bool Bolt::Collide (Unit * target) {
     if (coltmp.r>1)coltmp.r=1;
     if (coltmp.g>1)coltmp.g=1;
     if (coltmp.b>1)coltmp.b=1;*/
-    target->ApplyDamage (prev_position+tmp,normal, damage* ((1-distance)+distance*longrange),coltmp);
+    target->ApplyDamage (prev_position+tmp,normal, damage* ((1-distance)+distance*longrange),affectedSubUnit,coltmp);
     return true;
   }
   return false;

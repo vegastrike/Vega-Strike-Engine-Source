@@ -99,7 +99,6 @@ namespace CockpitKeys {
 
 
  void SkipMusicTrack(int,KBSTATE newState) {
-   static bool flag=false;
    if(newState==PRESS){
      printf("skipping\n");
     muzak->Skip();
@@ -380,16 +379,6 @@ void InitializeInput() {
 //Cockpit *cockpit;
 static Texture *tmpcockpittexture;
 
-extern void SetTurretAI (Unit * fighter);
-
- void SetTurretAI (Unit * fighter) {
-  
-  for (int kk=0;kk<fighter->getNumSubUnits();kk++) {
-    fighter->EnqueueAI (new Orders::FireAt(.2,15),kk);
-    fighter->EnqueueAI (new Orders::FaceTarget (false,3),kk);
-    SetTurretAI (fighter->getSubUnit(kk));
-  }
-}
 
 Unit *player_unit;
 
@@ -466,7 +455,7 @@ void createObjects() {
 	//	strcat(fightername,".xunit");
 
     string ainame=fg->ainame;
-    easyDomNode *dom=fg->domnode;
+    //    easyDomNode *dom=fg->domnode;
 
 #if 0
 	string strtarget=fg->ordermap["tmptarget"];
@@ -555,7 +544,7 @@ void createObjects() {
 	      fighters[a]->EnqueueAI( new AImissionScript(modulename));
 	      //fighters[a]->SetAI( new AImissionScript(modulename));
 	    }
-	    SetTurretAI (fighters[a]);
+	    fighters[a]->SetTurretAI ();
 	  }
 	  _Universe->activeStarSystem()->AddUnit(fighters[a]);
 	  a++;
@@ -596,7 +585,7 @@ void createObjects() {
   _Universe->AccessCockpit()->SetParent(fighters[0]->getSubUnit(0));
 #else
   _Universe->AccessCockpit()->SetParent(fighters[0]);
-  SetTurretAI (fighters[0]);
+  fighters[0]->SetTurretAI ();
 #endif
 
   player_unit=fighters[0];

@@ -30,7 +30,7 @@ Atmosphere::Atmosphere(const Parameters &params) : user_params(params) {
 }
 
 Atmosphere::~Atmosphere() {
-	int a;
+	unsigned int a;
 
 	for(a=0; a<sunboxes.size(); a++) {
 		delete sunboxes[a];
@@ -59,9 +59,12 @@ void Atmosphere::Update(const Vector &position, const Matrix tmatrix)
 	sunboxes.clear();
 	Vector localDir;
 	float rho1;
-	for(a=0;a<system->numprimaries;a++) {
-		if(system->primaries[a]->isUnit()==PLANETPTR && 
-			(currPlanet = (Planet*)system->primaries[a])->hasLights()) {
+	UnitCollection::UnitIterator iter (system->drawList->createIterator());
+	Unit * primary;
+
+	for(;NULL!=(primary=iter.current());iter.advance()) {
+		if(primary->isUnit()==PLANETPTR && 
+			(currPlanet = (Planet*)primary)->hasLights()) {
 			const std::vector <int> & lights = currPlanet->activeLights();
 			/* for now just assume all planets with lights are really bright */
 			Vector direction = (currPlanet->Position()-position);

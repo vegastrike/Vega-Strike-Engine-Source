@@ -23,6 +23,7 @@ inline std::vector <Unit *> ComparePrimaries (Unit * primary, StarSystem *origin
   std::vector <Unit *> myvec;
   if (CompareDest (primary, origin))
     myvec.push_back (primary);
+  /*
   if (primary->isUnit()==PLANETPTR) {
     Iterator *iter = ((Planet *)primary)->createIterator();
     Unit * unit;
@@ -35,6 +36,7 @@ inline std::vector <Unit *> ComparePrimaries (Unit * primary, StarSystem *origin
     }
     delete iter;
   }
+  */
   return myvec;
 }
 
@@ -83,6 +85,7 @@ void DealPossibleJumpDamage (Unit *un) {
     un->ApplyDamage (un->Position()+un->GetVelocity(),
 		     un->GetVelocity(), 
 		     dam,
+		     un,
 		     GFXColor (((float)(rand()%100))/100,
 			       ((float)(rand()%100))/100,
 			       ((float)(rand()%100))/100));
@@ -171,16 +174,15 @@ void StarSystem::ProcessPendingJumps() {
       un->RemoveFromSystem();
       pendingjump[kk]->dest->AddUnit (un);
       un->Target(NULL);
-      Iterator * iter = pendingjump[kk]->orig->drawList->createIterator();
+      UnitCollection::UnitIterator iter = pendingjump[kk]->orig->drawList->createIterator();
       Unit * unit;
-      while((unit = iter->current())!=NULL) {
+      while((unit = iter.current())!=NULL) {
 	if (unit->Target()==un) {
 	  unit->Target (pendingjump[kk]->jumppoint.GetUnit());
 	  unit->ActivateJumpDrive (0);
 	}
-	iter->advance();
+	iter.advance();
       }
-      delete iter;
       if (un==_Universe->AccessCockpit()->GetParent()) {//originally fighters[0] not sure if hti sis the right solution
 #ifdef JUMP_DEBUG
       fprintf (stderr,"Unit is a player character...changing scene graph\n");
@@ -191,12 +193,15 @@ void StarSystem::ProcessPendingJumps() {
       }
       _Universe->setActiveStarSystem(pendingjump[kk]->dest);
       vector <Unit *> possibilities;
-      for (int i=0;i<pendingjump[kk]->dest->numprimaries;i++) {
+      iter = pendingjump[kk]->dest->drawList->createIterator();
+      Unit * primary;
+      while ((primary = iter.current())!=NULL) {
 	vector <Unit *> tmp;
-	tmp = ComparePrimaries (pendingjump[kk]->dest->primaries[i],pendingjump[kk]->orig);
+	tmp = ComparePrimaries (primary,pendingjump[kk]->orig);
 	if (!tmp.empty()) {
 	  possibilities.insert (possibilities.end(),tmp.begin(), tmp.end());
 	}
+	iter.advance();
       }
       if (!possibilities.empty()) {
 	static int jumpdest=235034;

@@ -13,11 +13,11 @@
 #include "config_xml.h"
 #include "vs_globals.h"
 #include "xml_support.h"
-#define DESTRUCTDEBUG
+//#define DESTRUCTDEBUG
 static list<Unit*> Unitdeletequeue;
 void Unit::UnRef() {
   ucref--;
-  if (killed&&ucref==0&&!SubUnit) {
+  if (killed&&ucref==0) {
     Unitdeletequeue.push_back(this);//delete
 #ifdef DESTRUCTDEBUG
     fprintf (stderr,"%s 0x%x - %d\n",name.c_str(),this,Unitdeletequeue.size());
@@ -69,24 +69,19 @@ void Unit::Split (int level) {
   if (old[nm])
     delete old[nm];
   old[nm]=NULL;
-  if (subunits&&numsubunit) {
-    subunits = (Unit **)realloc (subunits, (numsubunit+nm)*sizeof (Unit *));
-  }else {
-    subunits = (Unit **)malloc (nm*sizeof (Unit *));
-  }
   for (i=0;i<nm;i++) {
-    subunits[i+numsubunit] = new Unit (old+i,1,true,faction);
-    subunits[i+numsubunit]->mass = mass/level;
-    subunits[i+numsubunit]->image->timeexplode=.1;
-    if (subunits[i+numsubunit]->meshdata[0]) {
-      Vector loc = subunits[i+numsubunit]->meshdata[0]->Position();
-      subunits[i+numsubunit]->ApplyForce(subunits[i+numsubunit]->meshdata[0]->rSize()*10*mass*loc/loc.Magnitude());
+    Unit * splitsub;
+    SubUnits.prepend(splitsub = new Unit (old+i,1,true,faction));
+    splitsub->mass = mass/level;
+    splitsub->image->timeexplode=.1;
+    if (splitsub->meshdata[0]) {
+      Vector loc = splitsub->meshdata[0]->Position();
+      splitsub->ApplyForce(splitsub->meshdata[0]->rSize()*10*mass*loc/loc.Magnitude());
       loc.Set (rand(),rand(),rand());
       loc.Normalize();
-      subunits[i+numsubunit]->ApplyLocalTorque(loc*mass*rSize()*(1+rand()%(int)(1+rSize())));
+      splitsub->ApplyLocalTorque(loc*mass*rSize()*(1+rand()%(int)(1+rSize())));
     }
   }
-  numsubunit = numsubunit+nm;
   if (bspTree) {
     delete bspTree;
     bspTree=NULL;
@@ -128,12 +123,13 @@ void Unit::Kill() {
   if(aistate)
     delete aistate;
   aistate=NULL;
-  if(subunits) {
-    for(int subcount = 0; subcount < numsubunit; subcount++) {
-      subunits[subcount]->Kill();
-    }
+  UnitCollection::UnitIterator iter = getSubUnits();
+  Unit * un;
+  while ((un=iter.current())) {
+    un->Kill();
+    iter.advance();
   }
-  if (ucref==0&&!SubUnit) {
+  if (ucref==0) {
     Unitdeletequeue.push_back(this);
 
 #ifdef DESTRUCTDEBUG
@@ -148,16 +144,22 @@ void Unit::ProcessDeleteQueue() {
     fflush (stderr);
     fprintf (stderr,"Eliminatin' %s\n",Unitdeletequeue.back()->name.c_str());
 #endif
+#ifdef DESTRUCTDEBUG
     if (Unitdeletequeue.back()->SubUnit) {
-      fprintf (stderr,"Double deleting (related to double dipping)");
-    }else {
-      delete Unitdeletequeue.back();
+
+      fprintf (stderr,"Subunit Deleting (related to double dipping)");
+
     }
+#endif
+    Unit * mydeleter = Unitdeletequeue.back();
+    Unitdeletequeue.pop_back();
+    delete mydeleter;///might modify unitdeletequeue
+    
 #ifdef DESTRUCTDEBUG
     fprintf (stderr,"Completed %d\n",Unitdeletequeue.size());
     fflush (stderr);
 #endif
-    Unitdeletequeue.pop_back();
+
   }
 }
 
@@ -436,8 +438,11 @@ float Unit::DealDamageToShield (const Vector &pnt, float &damage) {
 
   return percent;
 }
-void Unit::ApplyLocalDamage (const Vector & pnt, const Vector & normal, float amt, const GFXColor &color) {
+void Unit::ApplyLocalDamage (const Vector & pnt, const Vector & normal, float amt, Unit * affectedUnit,const GFXColor &color) {
   static float nebshields=XMLSupport::parse_float(vs_config->getVariable ("physics","nebula_shield_recharge",".5"));
+  if (affectedUnit!=this) {
+    return affectedUnit->ApplyLocalDamage (pnt,normal,amt,affectedUnit,color);
+  }
   float leakamt = amt*.01*shield.leak;
   amt *= 1-.01*shield.leak;
   float percentage=0;
@@ -463,25 +468,21 @@ void Unit::ApplyLocalDamage (const Vector & pnt, const Vector & normal, float am
 }
 
 
-void Unit::ApplyDamage (const Vector & pnt, const Vector & normal, float amt, const GFXColor & color) {
+void Unit::ApplyDamage (const Vector & pnt, const Vector & normal, float amt, Unit * affectedUnit, const GFXColor & color) {
   Vector localpnt (InvTransform(cumulative_transformation_matrix,pnt));
   Vector localnorm (ToLocalCoordinates (normal));
-  ApplyLocalDamage(localpnt, localnorm, amt,color);
+  ApplyLocalDamage(localpnt, localnorm, amt,affectedUnit,color);
 }
 
 
 
 bool Unit::Explode (bool drawit, float timeit) {
-  int i;
   if (image->explosion==NULL&&image->timeexplode==0) {	//no explosion in unit data file && explosions haven't started yet
     image->timeexplode=0;
     image->explosion= new Animation ("explosion_orange.ani",false,.1,BILINEAR,false);
     image->explosion->SetDimensions(3*rSize(),3*rSize());
     AUDPlay (sound->explode,cumulative_transformation.position,Velocity,1);
   }
-  float tmp[16];
-  
-  float tmp2[16];
   if (image->explosion) {
       image->timeexplode+=timeit;
       //Translate (tmp,meshdata[i]->Position());
@@ -500,8 +501,13 @@ bool Unit::Explode (bool drawit, float timeit) {
       
   }
   bool alldone = image->explosion?!image->explosion->Done():false;
-  for (i=0;i<numsubunit;i++) {
-    alldone |=subunits[i]->Explode(drawit,timeit);
+  if (!SubUnits.empty()) {
+    UnitCollection::UnitIterator ui = getSubUnits();
+    Unit * su;
+    while ((su=ui.current())) {
+      alldone |=su->Explode(drawit,timeit);
+      ui.advance();
+    }
   }
   return alldone;
 }

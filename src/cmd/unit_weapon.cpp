@@ -243,15 +243,26 @@ Unit::Mount::Mount(const string& filename, short ammo): size(weapon_info::NOWEAP
 
 void Unit::Target (Unit *targ) {
   computer.target.SetUnit(targ);
-  for (int i=0;i<numsubunit;i++) {
-    subunits[i]->Target (targ);
+  if (!SubUnits.empty()) {
+    un_iter iter = getSubUnits();
+    Unit * su;
+
+    while ((su=iter.current())) {
+      su->Target (targ);
+      iter.advance();
+    }
   }
 }
 void Unit::SetOwner(Unit *target) {
   owner=target;
-  for (int i=0;i<numsubunit;i++) {
-    subunits[i]->SetOwner (target);
-  }  
+  if (!SubUnits.empty()) {
+    UnitCollection::UnitIterator iter = getSubUnits();
+    Unit * su;
+    while ((su=iter.current())) {
+      su->SetOwner (target);
+      iter.advance();
+    }
+  }
 }
 
 void Unit::Cloak (bool loak) {

@@ -92,7 +92,7 @@ class Planet : public Unit {
   public:
     PlanetIterator(Planet *p) : planetStack() { 
       planetStack.append(p);
-      pos = planetStack.createIterator();
+      pos = new un_iter (planetStack.createIterator());
     }
     virtual ~PlanetIterator() {
       delete pos;
@@ -109,19 +109,18 @@ class Planet : public Unit {
     virtual Unit *current() {
       return pos->current();
     }
-    virtual Unit *advance() {
+    virtual void advance() {
       if(pos->current()==NULL)
-	return NULL;
+	return;
 	
       Unit *currentPlanet = pos->current();
 	  if (currentPlanet->isUnit()==PLANETPTR) {
-	    UnitCollection::UnitIterator * tmp;
-	    for(tmp = ((Planet *)currentPlanet)->satellites.createIterator(); tmp->current()!=NULL; tmp->advance()) {
-			planetStack.append(tmp->current());
+	    
+	    for(un_iter tmp (((Planet *)currentPlanet)->satellites.createIterator()); tmp.current()!=NULL; tmp.advance()) {
+			planetStack.append(tmp.current());
 		}
-	    delete tmp;
 	  }
-      return pos->advance();
+      pos->advance();
     }
   };
   Iterator *createIterator() { return new PlanetIterator(this);}

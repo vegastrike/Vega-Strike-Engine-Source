@@ -46,21 +46,19 @@ void PlanetaryOrbit::Execute() {
   Vector origin (targetlocation);
   if (type&TARGET) {
     if (targets) {
-      UnitCollection::UnitIterator * tmp = targets->createIterator();
-      if (tmp->current()) {
-	origin = tmp->current()->Position();
-	delete tmp;
+      UnitCollection::UnitIterator tmp = targets->createIterator();
+      if (tmp.current()) {
+	origin = tmp.current()->Position();
       }else {
-	delete tmp;
 	done = true;
 	return;
       }
     }
   }
-  double radius =  sqrt((x_offset - focus).MagnitudeSquared() + (y_offset - focus).MagnitudeSquared());
+  //unuseddouble radius =  sqrt((x_offset - focus).MagnitudeSquared() + (y_offset - focus).MagnitudeSquared());
   theta+=velocity*SIMULATION_ATOM;
   parent->Velocity = (origin - focus + x_offset+y_offset-parent->LocalPosition())/SIMULATION_ATOM;
-  const int Unreasonable_value=100000/SIMULATION_ATOM;
+  const int Unreasonable_value=(int)(100000/SIMULATION_ATOM);
   if (parent->Velocity.Dot (parent->Velocity)>Unreasonable_value*Unreasonable_value) {
     parent->Velocity.Set (0,0,0);
     parent->SetCurPosition (origin-focus+x_offset+y_offset);
@@ -72,10 +70,10 @@ void Planet::endElement() {
 }
 Planet * Planet::GetTopPlanet (int level) {
   if (level>2) {
-    UnitCollection::UnitIterator * satiterator = satellites.createIterator();
-	  assert(satiterator->current()!=NULL);
-	  if (satiterator->current()->isUnit()==PLANETPTR) {
-	    return ((Planet *)satiterator->current())->GetTopPlanet (level-1);
+    UnitCollection::UnitIterator satiterator = satellites.createIterator();
+	  assert(satiterator.current()!=NULL);
+	  if (satiterator.current()->isUnit()==PLANETPTR) {
+	    return ((Planet *)satiterator.current())->GetTopPlanet (level-1);
 	  } else {
 	    fprintf (stderr,"Planets are unable to orbit around units");
 	    return NULL;
@@ -91,12 +89,12 @@ void Planet::AddSatellite (Unit * orbiter) {
 	orbiter->SetOwner (this);
 }
 void Planet::beginElement(Vector x,Vector y,float vely, const Vector & rotvel, float pos,float gravity,float radius,char * filename,char * alpha,vector<char *> dest,int level,  const GFXMaterial & ourmat, const vector <GFXLightLocal>& ligh, bool isunit, int faction,string fullname){
-  UnitCollection::UnitIterator * satiterator =NULL;
+
   if (level>2) {
-    UnitCollection::UnitIterator * satiterator = satellites.createIterator();
-	  assert(satiterator->current()!=NULL);
-	  if (satiterator->current()->isUnit()==PLANETPTR) {
-		((Planet *)satiterator->current())->beginElement(x,y,vely,rotvel, pos,gravity,radius,filename,alpha,dest,level-1,ourmat,ligh, isunit, faction,fullname);
+    UnitCollection::UnitIterator satiterator = satellites.createIterator();
+	  assert(satiterator.current()!=NULL);
+	  if (satiterator.current()->isUnit()==PLANETPTR) {
+		((Planet *)satiterator.current())->beginElement(x,y,vely,rotvel, pos,gravity,radius,filename,alpha,dest,level-1,ourmat,ligh, isunit, faction,fullname);
 	  } else {
 	    fprintf (stderr,"Planets are unable to orbit around units");
 	  }
@@ -105,14 +103,13 @@ void Planet::beginElement(Vector x,Vector y,float vely, const Vector & rotvel, f
       Unit *sat_unit=NULL;
       satellites.prepend(sat_unit=new Unit (filename, true, false, faction));
       sat_unit->setFullname(fullname);
-      satiterator = satellites.createIterator();
-      satiterator->current()->SetAI (new PlanetaryOrbit (satiterator->current(),vely,pos,x,y, Vector (0,0,0), this)) ;
-      satiterator->current()->SetOwner (this);
+      un_iter satiterator (satellites.createIterator());
+      satiterator.current()->SetAI (new PlanetaryOrbit (satiterator.current(),vely,pos,x,y, Vector (0,0,0), this)) ;
+      satiterator.current()->SetOwner (this);
     }else {
       satellites.prepend(new Planet(x,y,vely,rotvel,pos,gravity,radius,filename,alpha,dest, Vector (0,0,0), this, ourmat, ligh, faction,fullname));
     }
   }
-  delete satiterator;
 }
 
 const float densityOfRock = .01; // 1 cm of durasteel equiv per cubic meter
@@ -351,7 +348,6 @@ Planet::~Planet() {
   if (atmosphere){
      delete atmosphere;
   }
-	unsigned int i;
 	if (bspTree)
 	  delete bspTree;
 	if (terraintrans) {
@@ -378,14 +374,13 @@ void Planet::setAtmosphere (Atmosphere *t) {
 
 
 void Planet::Kill() {
-	UnitCollection::UnitIterator * iter;
+	UnitCollection::UnitIterator iter;
 	Unit *tmp;
 	for (iter = satellites.createIterator();
-	     (tmp = iter->current())!=NULL;
-	     iter->advance()) {
+	     (tmp = iter.current())!=NULL;
+	     iter.advance()) {
 	  tmp->SetAI (new Order);
 	}
-	delete iter;
 	for (unsigned int i=0;i<this->lights.size();i++) {
 	  GFXDeleteLight (lights[i]);
 	}

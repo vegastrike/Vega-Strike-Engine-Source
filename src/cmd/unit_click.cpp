@@ -26,11 +26,14 @@ float Unit::getMinDis (const Vector &pnt) {
       minsofar = tmpvar;
     }
   }
-  for (i=0;i<numsubunit;i++) {
-    tmpvar = subunits[i]->getMinDis (pnt);
+  un_fiter ui = SubUnits.fastIterator();
+  Unit * su;
+  while ((su=ui.current())) {
+    tmpvar = su->getMinDis (pnt);
     if (tmpvar<minsofar) {
       minsofar=tmpvar;
-    }			       
+    }			
+    ui.advance();
   }
   return minsofar;
 }
@@ -94,9 +97,14 @@ float Unit::querySphere (const Vector &st, const Vector &dir, float err) const{
 	}
     }
   }
-  for (i=0;i<numsubunit;i++) {
-    float tmp = (subunits[i]->querySphere (st,dir,err));
-    if (tmp==0) continue;
+  un_kiter ui = viewSubUnits();
+  const Unit * su;
+  while ((su=ui.current())) {
+    float tmp=su->querySphere (st,dir,err);
+    if (tmp==0) {
+      ui.advance();
+      continue;
+    }
     if (retval==0) {
       retval = tmp;
     }else{
@@ -109,7 +117,9 @@ float Unit::querySphere (const Vector &st, const Vector &dir, float err) const{
 			adjretval=tmp;
 		}
     }
+    ui.advance();
   }
+
   return adjretval;
 }
 
@@ -127,9 +137,13 @@ bool Unit::queryBoundingBox (const Vector &pnt, float err) {
     }
     delete bbox;
   }
-  for (i=0;i<numsubunit;i++) {
-    if (subunits[i]->queryBoundingBox (pnt,err)) 
+  Unit * su;
+  UnitCollection::UnitIterator ui=getSubUnits();
+  while ((su=ui.current())) {
+    if (su->queryBoundingBox (pnt,err)) {
       return true;
+    }
+    ui.advance();
   }
   return false;
 }
@@ -151,13 +165,19 @@ int Unit::queryBoundingBox (const Vector &origin, const Vector &direction, float
       break;
     }
   }
-  for (i=0;i<numsubunit;i++) {
-    switch (subunits[i]->queryBoundingBox (origin,direction,err)) {
-    case 1: return 1;
-    case -1: retval= -1;
+  UnitCollection::UnitIterator ui = getSubUnits();
+  Unit  * su;
+  while ((su=ui.current())) {
+    switch (su->queryBoundingBox (origin,direction,err)) {
+    case 1: 
+      return 1;
+    case -1: 
+      retval= -1;
       break;
-    case 0: break;
+    case 0: 
+      break;
     }
+    ui.advance();
   }
   return retval;
 }
@@ -208,9 +228,13 @@ bool Unit::querySphere (int mouseX, int mouseY, float err, Camera * activeCam) {
 	)
       return true;
   }
-  for (i=0;i<numsubunit;i++) {
-    if (subunits[i]->querySphere (mouseX,mouseY,err,activeCam))
+  UnitCollection::UnitIterator ui = getSubUnits();
+  Unit * su;
+  while ((su=ui.current())) {
+    if (su->querySphere (mouseX,mouseY,err,activeCam)) {
       return true;
+    }
+    ui.advance();
   }
   return false;
 }

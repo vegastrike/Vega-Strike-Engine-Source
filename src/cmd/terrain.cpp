@@ -41,7 +41,7 @@ void Terrain::SetTransformation(Matrix Mat ) {
 void Terrain::ApplyForce (Unit * un, const Vector & normal, float dist) {
   //  fprintf (stderr,"Unit %s has collided at <%f %f %f>", un->name.c_str(),vec.i,vec.j,vec.k);
   un->ApplyForce (normal*.4*un->GetMass()*fabs(normal.Dot ((un->GetVelocity()/SIMULATION_ATOM))+fabs (dist)/(SIMULATION_ATOM)));
-  un->ApplyDamage (un->Position()-normal*un->rSize(),-normal,  .5*fabs(normal.Dot(un->GetVelocity()))*mass*SIMULATION_ATOM,GFXColor(1,1,1,1));
+  un->ApplyDamage (un->Position()-normal*un->rSize(),-normal,  .5*fabs(normal.Dot(un->GetVelocity()))*mass*SIMULATION_ATOM,un,GFXColor(1,1,1,1));
 }
 void Terrain::Collide (Unit *un, Matrix t) {
   Vector norm;
@@ -70,14 +70,13 @@ void Terrain::EnableDraw() {
   draw|=(TERRAINRENDER);
 }
 void Terrain::Collide () {
-  Iterator *iter;
+  un_iter iter;
   iter = _Universe->activeStarSystem()->getUnitList()->createIterator();
   Unit *unit;
-  while((unit = iter->current())!=NULL) {
+  while((unit = iter.current())!=NULL) {
     Collide (unit);
-    iter->advance();
+    iter.advance();
   }
-  delete iter;
 }
 static GFXColor getTerrainColor() {
   float col[4];

@@ -241,8 +241,17 @@ Texture::Texture(const char * FileName, int stage, enum FILTER mipmap, enum TEXT
 	data = readImage (fp,bpp,format,sizeX,sizeY,palette,NULL/*texTransform*/,true);
 	if (data) {
 	  //FIXME deal with palettes and grayscale with alpha
-	  if (!format&PNG_HAS_COLOR||(format&PNG_HAS_PALETTE)) {
+	  if (!(format&PNG_HAS_COLOR)||(format&PNG_HAS_PALETTE)) {
 	    mode=_8BIT;
+	    if (!(format&PNG_HAS_COLOR)){
+	      palette = new unsigned char [256*4+1];
+	      for (unsigned int i =0;i<256;i++) {
+		palette[i*4]=i;
+		palette[i*4+1]=i;
+		palette[i*4+2]=i;
+		palette[i*4+3]=255;
+	      }
+	    }
 	  } 
 	  if (format&PNG_HAS_COLOR) {
 	    if (format&PNG_HAS_ALPHA) {
@@ -377,8 +386,18 @@ Texture::Texture (const char * FileNameRGB, const char *FileNameA, int stage, en
 	data = readImage (fp,bpp,format,sizeX,sizeY,palette,NULL/*texTransform*/,true);
 	if (data) {
 	  //FIXME deal with palettes and grayscale with alpha
-	  if (!format&PNG_HAS_COLOR||(format&PNG_HAS_PALETTE)) {
+	  if (!(format&PNG_HAS_COLOR)||(format&PNG_HAS_PALETTE)) {
 	    mode=_8BIT;
+	    if (!(format&PNG_HAS_COLOR)){
+	      palette = new unsigned char [256*4+1];
+	      for (unsigned int i =0;i<256;i++) {
+		palette[i*4]=i;
+		palette[i*4+1]=i;
+		palette[i*4+2]=i;
+		palette[i*4+3]=255;
+	      }
+	    }
+
 	  } 
 	  if (format&PNG_HAS_COLOR) {
 	    if (format&PNG_HAS_ALPHA) {

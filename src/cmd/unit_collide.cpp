@@ -29,10 +29,13 @@ void AddCollideQueue (LineCollide &tmp) {
   _Universe->activeStarSystem()->collidetable->c.Put (&tmp,&tmp);
 }
 void Unit::SetCollisionParent (Unit * name) {
+  assert (0); //deprecated... many less collisions with subunits out of the table
+#if 0
     for (int i=0;i<numsubunit;i++) {
       subunits[i]->CollideInfo.object.u = name;
       subunits[i]->SetCollisionParent (name);
     }
+#endif
 }
 void Unit::RemoveFromSystem() {
 #if (defined SAFE_COLLIDE_DEBUG) || (defined  UNSAFE_COLLIDE_RELEASE) 
@@ -129,18 +132,19 @@ void Unit::CollideAll() {
 #undef COLQ
 }
 
-bool Unit::Inside (const Vector &target, const float radius, Vector & normal, float &dist) const {//do each of these bubbled subunits collide with the other unit?
-  int i;
+bool Unit::Inside (const Vector &target, const float radius, Vector & normal, float &dist) {//do each of these bubbled subunits collide with the other unit?
   if (!querySphere(target,radius)) {
     return false;;
   }
-  if (queryBSP(target, radius, normal,dist,false)) {
-    return true;
-  }
+  /* seems redudnant
   for (i=0;i<numsubunit;i++) {
     if (subunits[i]->Inside(target,radius,normal,dist)) {
       return true;
     }
+  }
+  */
+  if (queryBSP(target, radius, normal,dist,false)) {
+    return true;
   }
 
   return false;
@@ -181,11 +185,25 @@ bool Unit::InsideCollideTree (Unit * smaller, Vector & bigpos, Vector &bigNormal
 	return true;
       }
     }
-    for (int i=0;i<bigger->numsubunit;i++) {
-      if (bigger->subunits[i]->InsideCollideTree (smaller,bigpos,bigNormal,smallpos,smallNormal)) {
-	return true;
+    UnitCollection::UnitIterator i;
+    if (!bigger->SubUnits.empty()) {
+      i=bigger->getSubUnits();
+      for (Unit * un;(un=i.current())!=NULL;i.advance()) {
+	if ((un->InsideCollideTree(smaller,bigpos, bigNormal,smallpos,smallNormal))) {
+	  return true;
+	}
       }
     }
+    if (!smaller->SubUnits.empty()) {
+      i=smaller->getSubUnits();
+      for (Unit * un;(un=i.current())!=NULL;i.advance()) {
+	if ((bigger->InsideCollideTree(un,bigpos, bigNormal,smallpos,smallNormal))) {
+	  return true;
+	}
+      }
+    }
+    //FIXME
+    //doesn't check all i*j options of subunits vs subunits
     return false;
 }
 bool Unit::Collide (Unit * target) {
@@ -238,11 +256,16 @@ bool Unit::Collide (Unit * target) {
 
 
 
-bool Unit::queryBSP (const Vector &pt, float err, Vector & norm, float &dist, bool ShieldBSP) const{
+Unit * Unit::queryBSP (const Vector &pt, float err, Vector & norm, float &dist, bool ShieldBSP) {
   int i;
-  for (i=0;i<numsubunit;i++) {
-    if ((subunits[i]->queryBSP(pt,err, norm,dist,ShieldBSP)))
-      return true;
+  if (!SubUnits.empty()) {
+    un_fiter i = SubUnits.fastIterator();
+    for (Unit * un;(un=i.current())!=NULL;i.advance()) {
+      Unit * retval;
+      if ((retval=un->queryBSP(pt,err, norm,dist,ShieldBSP))) {
+	return retval;
+      }
+    }
   }
   Vector st (InvTransform (cumulative_transformation_matrix,pt));
   bool temp=false;
@@ -251,29 +274,32 @@ bool Unit::queryBSP (const Vector &pt, float err, Vector & norm, float &dist, bo
      
   }
   if (!temp)
-    return false;
+    return NULL;
   BSPTree *const* tmpBsp = ShieldUp(st)?&bspShield:&bspTree;
   if (bspTree&&!ShieldBSP) {
     tmpBsp= &bspTree;
   }
   if (!(*tmpBsp)) {
     dist = (st - meshdata[i-1]->Position()).Magnitude()-err-meshdata[i-1]->rSize();
-    return true;
+    return this;
   }
   if ((*tmpBsp)->intersects (st,err,norm,dist)) {
     norm = ToWorldCoordinates (norm);
-    return true;
+    return this;
   }
-  return false;
+  return NULL;
 }
 
-float Unit::queryBSP (const Vector &start, const Vector & end, Vector & norm, bool ShieldBSP) const{
+Unit * Unit::queryBSP (const Vector &start, const Vector & end, Vector & norm, float &distance, bool ShieldBSP) {
   int i;
-  float tmp;
-
-  for (i=0;i<numsubunit;i++) {
-    if ((tmp = subunits[i]->queryBSP(start,end,norm,ShieldBSP))!=0)
-      return tmp;
+  Unit * tmp;
+  if (!SubUnits.empty()) {
+    un_fiter i(SubUnits.fastIterator());
+    for (Unit * un;(un=i.current())!=NULL;i.advance()) {
+      if ((tmp=un->queryBSP(start,end, norm,distance,ShieldBSP))!=0) {
+	return tmp;
+      }
+    }
   }
   Vector st (InvTransform (cumulative_transformation_matrix,start));
   BSPTree *const* tmpBsp = ShieldUp(st)?&bspShield:&bspTree;
@@ -282,13 +308,13 @@ float Unit::queryBSP (const Vector &start, const Vector & end, Vector & norm, bo
   }
   for (;tmpBsp!=NULL;tmpBsp=((ShieldUp(st)&&(tmpBsp!=(&bspTree)))?(&bspTree):NULL)) {
     if (!(*tmpBsp)) {
-      tmp = querySphere (start,end);
-      norm = (tmp * (start-end));
-      tmp = norm.Magnitude();
+      distance = querySphereNoRecurse (start,end);
+      norm = (distance * (start-end));
+      distance = norm.Magnitude();
       norm +=start;
       norm.Normalize();//normal points out from center
-      if (tmp)
-	return tmp;
+      if (distance)
+	return this;
       else
 	continue;
     }
@@ -300,12 +326,12 @@ float Unit::queryBSP (const Vector &start, const Vector & end, Vector & norm, bo
     if (!temp) {
       continue;
     }
-    if ((tmp = (*tmpBsp)->intersects (st,ed,norm))!=0) {
+    if ((distance = (*tmpBsp)->intersects (st,ed,norm))!=0) {
       norm = ToWorldCoordinates (norm);
-      return tmp;
+      return this;
     }
   }
-  return 0;
+  return NULL;
 }
 
 
@@ -333,9 +359,13 @@ bool Unit::querySphere (const Vector &pnt, float err) const{
 	)
       return true;
   }
-  for (i=0;i<numsubunit;i++) {
-    if (subunits[i]->querySphere (pnt,err))
-      return true;
+  if (!SubUnits.empty()) {
+    un_fkiter i=SubUnits.constFastIterator();
+    for (const Unit * un;(un=i.current())!=NULL;i.advance()) {
+      if (un->querySphere (pnt,err)) {
+	return true;
+      }
+    }
   }
   return false;
 }
@@ -343,6 +373,20 @@ bool Unit::querySphere (const Vector &pnt, float err) const{
 
 
 float Unit::querySphere (const Vector &start, const Vector &end) const{
+  if (!SubUnits.empty()) {
+    un_fkiter i=SubUnits.constFastIterator();
+    for (const Unit * un;(un=i.current())!=NULL;i.advance()) {
+      float tmp;
+      if ((tmp=un->querySphere (start,end))!=0) {
+	return tmp;
+      }
+    }
+  }
+ 
+  return querySphereNoRecurse (start,end);
+}
+
+float Unit::querySphereNoRecurse (const Vector & start, const Vector & end) const {
   int i;
   float tmp;
   Vector st,dir;
@@ -371,11 +415,6 @@ float Unit::querySphere (const Vector &start, const Vector &end) const{
       return (c>0&&c<tmp) ? c : tmp;
     } else if (c>0&&c<=1) {
 	return c;
-    }
-  }
-  for (i=0;i<numsubunit;i++) {
-    if ((tmp = subunits[i]->querySphere (start,end))!=0) {
-      return tmp;
     }
   }
   return 0;
