@@ -1,5 +1,7 @@
 #include "vsimage.h"
 
+#include <png.h>
+
 unsigned char * texTransform (int &bpp, int &color_type, unsigned long &width, unsigned long &height, unsigned char ** rp){
   unsigned char * data;
   unsigned int row_size;

@@ -1,6 +1,30 @@
 #include "vsimage.h"
 #include "vsfilesystem.h"
 #include "vs_globals.h"
+
+#include <png.h>
+#ifndef png_jmpbuf
+#  define png_jmpbuf(png_ptr) ((png_ptr)->jmpbuf)
+#endif
+
+#if defined( _WIN32) && !defined( __CYGWIN__)
+#ifndef HAVE_BOOLEAN
+#define HAVE_BOOLEAN
+#define FALSE 0
+#define TRUE 1
+typedef unsigned char boolean;
+#endif
+#ifndef XMD_H
+#define XMD_H
+typedef int INT32;
+#endif
+#endif
+
+extern "C" {
+#include <jpeglib.h>
+}
+#include "gfx/jpeg_memory.h"
+
 using namespace VSFileSystem;
 
 #undef VSIMAGE_DEBUG

@@ -76,12 +76,19 @@ libnet_a_SOURCES =	\
 	inet.cpp		\
 	inet.h
 
+libnetclient = $(libnetclientserver) \
+	networkcomm.cpp		\
+	networkcomm.h		\
+	webcam_suport.h		\
+	webcam_support.cpp
 
-libnetclient_a_SOURCES = $(libnetclientserver)
+libnetclient_a_SOURCES = $(libnetclient)
 
 libnetacct_a_SOURCES = $(libacctserver) $(liblowlevel) \
 	acctserver.cpp \
 	acctserver.h
 
+libnetserver = $(libnetclientserver) \
+	networkcomm_server.cpp
 
-libnetserver_a_SOURCES = $(libnetclientserver)
+libnetserver_a_SOURCES = $(libnetserver)

@@ -70,7 +70,6 @@
 #include "gfx/cockpit_generic.h"
 //#include "vegastrike.h"
 
-extern bool have_yy_error;
 /* *********************************************************** */
 //ADD_FROM_PYTHON_FUNCTION(pythonMission)
 void Mission::DirectorLoop(){
