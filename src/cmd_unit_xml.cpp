@@ -289,7 +289,7 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
     R.Normalize();
     
     CrossProduct (Q,R,P);
-    CrossProduct (P,R,Q);
+    CrossProduct (R,P,Q);
     Q.Normalize();
     //Transformation(Quaternion (from_vectors (P,Q,R),pos);
     indx = xml->mountz.size();

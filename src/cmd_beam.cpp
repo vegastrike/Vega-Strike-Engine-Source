@@ -191,6 +191,7 @@ void Beam::Draw (const Transformation &trans, const float* m) {//hope that the c
   if (curthick==0)
     return;
   Matrix cumulative_transformation_matrix;
+  local_transformation.to_matrix(cumulative_transformation_matrix);
   Transformation cumulative_transformation = local_transformation;
   cumulative_transformation.Compose(trans, m);
   cumulative_transformation.to_matrix(cumulative_transformation_matrix);
