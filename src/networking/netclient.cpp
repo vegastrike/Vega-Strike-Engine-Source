@@ -571,7 +571,9 @@ int		NetClient::isTime()
 
 char *	NetClient::getWebcamCapture()
 {
+#ifdef NETCOMM
 	return NetComm->GetWebcamCapture();
+#endif
 }
 
 /**************************************************************/
