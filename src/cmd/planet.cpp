@@ -193,6 +193,8 @@ Planet::Planet(Vector x,Vector y,float vely, float pos,float gravity,float radiu
   meshdata[1]=NULL;
 }
 extern bool shouldfog;
+
+vector <Planet *> PlanetTerrainDrawQueue;
 void Planet::Draw(const Transformation & quat, const Matrix m) {
   //Do lighting fx
   // if cam inside don't draw?
@@ -201,7 +203,7 @@ void Planet::Draw(const Transformation & quat, const Matrix m) {
   //  }
 
   int k;
-  //  for (k=0;k<NUM_CAM;k++) {
+
     Vector t (_Universe->AccessCamera()->GetPosition()-Position());
     static int counter=0;
     if (counter ++>100)
@@ -230,7 +232,22 @@ void Planet::Draw(const Transformation & quat, const Matrix m) {
 
 	}
       }
-    //}
+ GFXLoadIdentity (MODEL);
+ for (unsigned int i=0;i<lights.size();i++) {
+   GFXSetLight (lights[i], POSITION,GFXColor (cumulative_transformation.position));
+ }
+ if (inside&&terrain) {
+   PlanetTerrainDrawQueue.push_back (this);
+ }
+}
+void Planet::ProcessTerrains () {
+  while (!PlanetTerrainDrawQueue.empty()) {
+    PlanetTerrainDrawQueue.back()->DrawTerrain();
+    PlanetTerrainDrawQueue.pop_back();
+  }
+}
+
+void Planet::DrawTerrain() {
   if (inside&&terrain) {
     _Universe->AccessCamera()->UpdatePlanetGFX();
     //    Camera * cc = _Universe->AccessCamera();
@@ -257,10 +274,6 @@ void Planet::Draw(const Transformation & quat, const Matrix m) {
 #endif
   }
     
-  GFXLoadIdentity (MODEL);
-  for (unsigned int i=0;i<lights.size();i++) {
-    GFXSetLight (lights[i], POSITION,GFXColor (cumulative_transformation.position));
-  }
   
 }
 

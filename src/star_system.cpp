@@ -301,10 +301,11 @@ void StarSystem::Draw(bool DrawCockpit) {
 #endif
   if (DrawCockpit) {
     AnimatedTexture::UpdateAllFrame();
-    for (unsigned int i=0;i<contterrains.size();i++) {
-      contterrains[i]->AdjustTerrain(this);
-    }
   }
+  for (unsigned int i=0;i<contterrains.size();i++) {
+    contterrains[i]->AdjustTerrain(this);
+  }
+
   GFXDisable (LIGHTING);
 #ifdef UPDATEDEBUG
   fprintf (stderr,"bg");
@@ -359,6 +360,8 @@ void StarSystem::Draw(bool DrawCockpit) {
   fprintf (stderr,"terr");
   fflush (stderr);
 #endif
+  //need to wait for lights to finish
+  Planet::ProcessTerrains();
   Terrain::RenderAll();
 #ifdef UPDATEDEBUG
   fprintf (stderr,"nearmsh");

@@ -75,6 +75,8 @@ class Planet : public Unit {
   ~Planet();
   virtual enum clsptr isUnit() {return PLANETPTR;}
   virtual void Draw(const Transformation & quat = identity_transformation, const Matrix m = identity_matrix);
+  void DrawTerrain();
+  static void ProcessTerrains();
 //  void InitPlanet(FILE *fp);
   virtual void Kill();
   const vector <char *> &GetDestinations () {return destination;}
