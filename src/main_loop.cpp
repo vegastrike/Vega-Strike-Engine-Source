@@ -407,7 +407,7 @@ void createObjects() {
 	//	  cout << "before unit" << endl;
 	
 	  fighters[a] = new Unit(fightername, true, false,tmptarget[a],fg);
-	  fighters[a]->SetPosition (pox);
+	  fighters[a]->SetPosAndCumPos (pox);
 	  
 	  fg_radius=fighters[a]->rSize();
 

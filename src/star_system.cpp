@@ -182,7 +182,9 @@ void StarSystem::Draw() {
 extern double interpolation_blend_factor;
 
 void StarSystem::Update() {
+  static int numframes;
   Unit *unit;
+  
   UpdateTime();
   time += GetElapsedTime();
   //clog << "time: " << time << "\n";
@@ -208,13 +210,16 @@ void StarSystem::Update() {
       current_stage=PHY_COLLIDE;
       } else
       if (current_stage==PHY_COLLIDE) {
-      iter = drawList->createIterator();
-      while((unit = iter->current())!=NULL) {
-	unit->CollideAll();
-	iter->advance();
-      }
-      delete iter;
-      current_stage=PHY_RESOLV;
+	numframes++;//don't resolve physics until 2 seconds
+	if (numframes>2/(SIMULATION_ATOM)) {
+	  iter = drawList->createIterator();
+	  while((unit = iter->current())!=NULL) {
+	    unit->CollideAll();
+	    iter->advance();
+	  }
+	  delete iter;
+	}
+	current_stage=PHY_RESOLV;
       } else
       if (current_stage==PHY_RESOLV) {
       iter = drawList->createIterator();

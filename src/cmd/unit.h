@@ -360,7 +360,7 @@ public:
   ///Creates aa mesh with meshes as submeshes (number of them) as either as subunit with faction faction)
   Unit (Mesh ** meshes  , int num, bool Subunit, int faction);
   ///Creates a mesh from an XML file
-  Unit(const char *filename, bool SubUnit, bool xml, int faction, Flightgroup *flightgroup=NULL);
+  Unit(const char *filename, bool xml, bool SubUnit, int faction, Flightgroup *flightgroup=NULL);
   virtual ~Unit();
   ///Changes currently selected weapon
   void ToggleWeapon (bool Missile);
@@ -494,6 +494,9 @@ public:
   Vector LocalPosition(){return curr_physical_state.position;};
   ///Sets the unit-space position
   void SetPosition(const Vector &pos) {prev_physical_state.position = curr_physical_state.position = pos;}
+  ///Sets the cumulative transformation matrix's position...for setting up to be out in the middle of nowhere
+  void SetPosAndCumPos (const Vector &pos) {SetPosition (pos);cumulative_transformation_matrix[12]=pos.i;cumulative_transformation_matrix[13]=pos.j;cumulative_transformation_matrix[14]=pos.k;cumulative_transformation.position=pos;}
+
   ///Sets the unit-space position
   void SetPosition(float x, float y, float z) {SetPosition (Vector (x,y,z));}
   ///Sets the state of drawing

@@ -360,8 +360,11 @@ void /*GFXDRVAPI*/ GFXLoadIdentity(const MATRIXMODE mode)
 		//		Identity (transview);
 		glMatrixMode(GL_MODELVIEW);
 		glPopMatrix();
-		glLoadMatrixf(model);
+		//FIXME!!
+		glLoadIdentity();
 		glPushMatrix();
+		glLoadMatrixf(model);
+		//		glPushMatrix();
 		glMatrixMode(GL_PROJECTION);
 		glLoadMatrixf(projection);
 		break;

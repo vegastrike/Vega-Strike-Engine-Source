@@ -61,7 +61,7 @@ void Camera::UpdateGFX(GFXBOOL clip, GFXBOOL updateFrustum)
 
 		myPhysics.Update();
 		GFXLoadIdentity(PROJECTION);
-		GFXLoadIdentity(VIEW);
+		//FIXMEGFXLoadIdentity(VIEW);
 		switch(projectionType) {
 		case Camera::PERSPECTIVE:
 		  GFXPerspective (zoom*g_game.fov,g_game.aspect,g_game.znear,g_game.zfar*(clip?1:ZFARCONST),cockpit_offset); //set perspective to 78 degree FOV

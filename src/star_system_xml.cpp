@@ -381,7 +381,7 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
       xml->moons[xml->moons.size()-1]->beginElement(R,S,velocity,position,gravity,radius,filename,alpha,dest,xml->unitlevel-1, ourmat,curlights,false,faction);
     } else {
       xml->moons.push_back(new Planet(R,S,velocity,position,gravity,radius,filename,alpha,dest, xml->cursun+xml->systemcentroid, NULL, ourmat,curlights,faction));
-      xml->moons[xml->moons.size()-1]->SetPosition(xml->cursun+xml->systemcentroid);
+      xml->moons[xml->moons.size()-1]->SetPosAndCumPos(R+S+xml->cursun+xml->systemcentroid);
     }
     delete []filename;
     break;
@@ -454,7 +454,7 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
     } else {
       xml->moons.push_back((Planet *)new Unit(filename,true ,false,faction));
       xml->moons[xml->moons.size()-1]->SetAI(new PlanetaryOrbit(xml->moons[xml->moons.size()-1],velocity,position,R,S,xml->cursun+xml->systemcentroid, NULL));
-      xml->moons[xml->moons.size()-1]->SetPosition(xml->cursun+xml->systemcentroid);
+      xml->moons[xml->moons.size()-1]->SetPosAndCumPos(R+S+xml->cursun+xml->systemcentroid);
     }
     delete []filename;
     break;
