@@ -52,7 +52,6 @@ def CollapseList(lis):
 			found=1
 	if (0==found):
 		r=r[0:len(r)-1]
-	print r
 	for i in r:
 		s+='{'
 		for j in range(len(i)):
@@ -60,7 +59,6 @@ def CollapseList(lis):
 				s+=";"
 			s+=i[j]
 		s+='}'
-	print s
 	return s;
 
 
@@ -99,4 +97,5 @@ while (line!=""):
 o.close();
 u.close()
 f.close()
-
+import os
+os.rename (units+".tmp",units);
