@@ -114,10 +114,10 @@ void mouseMotion(int x, int y) {
       y= y-mousey+g_game.y_resolution/2;
     }
    }
-   mousex = x;
-   mousey = y;
-
   }
+ mousex = x;
+ mousey = y;
+
 }
 
 
