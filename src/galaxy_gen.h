@@ -2,6 +2,8 @@
 #define _STARSYSGEN_H_
 #include <vector>
 #include <string>
+using std::string;
+using std::vector;
 
 /// All the properties from the galaxy in a system.
 struct SystemInfo {

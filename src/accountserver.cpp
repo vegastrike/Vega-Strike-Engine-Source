@@ -21,12 +21,14 @@
 #include <iostream>
 #include <stdlib.h>
 #include <string>
+using std::string;
 #include "networking/acctserver.h"
 
-using std::string;
 
 void	VSExit( int code)
 { exit( code); }
+
+string getStarSystemSector (string in) { return string( ""); }
 
 string GetUnitDir( string filename)
 { return string( ""); }

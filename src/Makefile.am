@@ -169,9 +169,10 @@ accountserver_SOURCES =		\
 	lin_time.h				\
 	endianness.cpp			\
 	endianness.h			\
-	galaxy_gen.cpp			\
-	galaxy_gen.h			\
 	accountserver.cpp
+	
+#	galaxy_gen.cpp
+#	galaxy_gen.h
 
 vegastrike_SOURCES =		\
 	$(librootgeneric) $(libroot) \
