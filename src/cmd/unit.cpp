@@ -808,6 +808,60 @@ void Unit::SetPlanetHackTransformation (Transformation *&ct,Matrix *&ctm) {
     }
   }  
 }
+short cloakVal (short cloak, short cloakmin, short cloakrate, bool cloakglass) {
+    if (cloak<0&&cloakrate<0) {
+      cloak=(unsigned short)32768;//intended warning should be -32768 :-) leave it be
+    }
+    if ((cloak&0x1)&&!cloakglass) {
+      cloak-=1;
+    }
+    if ((cloak&0x1)==0&&cloakglass) {
+      cloak+=1;
+    }
+    if (cloak<cloakmin&&cloakrate>0)
+      cloak=cloakmin;
+    return cloak;
+    
+}
+
+void Unit::DrawNow (const Matrix & mat, float lod) {
+  unsigned int i;
+  short cloak=cloaking;
+  if (cloaking>cloakmin) {
+    cloak = cloakVal (cloak,cloakmin,image->cloakrate, image->cloakglass);
+  }
+  for (i=0;i<nummesh;i++) {//NOTE LESS THAN OR EQUALS...to cover shield mesh
+    if (meshdata[i]==NULL) 
+      continue;
+    Vector TransformedPosition = Transform (mat,
+					    meshdata[i]->Position());
+      float d = GFXSphereInFrustum(TransformedPosition,
+				   meshdata[i]->rSize()
+#ifdef VARIABLE_LENGTH_PQR
+				   *SizeScaleFactor
+#endif 
+				   );
+      if (d) {  //d can be used for level of detail 
+	meshdata[i]->DrawNow(lod,false,mat,cloak);//cloakign and nebula
+      }
+    }
+    un_fiter iter =SubUnits.fastIterator();
+    Unit * un;
+    while ((un = iter.current())) {
+      Matrix temp;
+      un->curr_physical_state.to_matrix (temp);
+      Matrix submat;
+      MultMatrix (submat,mat,temp);
+      un->DrawNow (submat,lod);
+      iter.advance();
+    }
+    float haloalpha=1;
+    if (cloak>=0) {
+      haloalpha=((float)cloak)/32767;
+    }
+    Vector Scale (1,1,GetVelocity().MagnitudeSquared()/(computer.max_ab_speed*computer.max_ab_speed));
+    halos.Draw(mat,Scale,cloak,0);
+}
 void Unit::Draw(const Transformation &parent, const Matrix &parentMatrix)
 {
 
@@ -826,19 +880,7 @@ void Unit::Draw(const Transformation &parent, const Matrix &parentMatrix)
   short cloak=cloaking;
   if (cloaking>cloakmin) {
     cloak = (short)(cloaking-interpolation_blend_factor*image->cloakrate*SIMULATION_ATOM);
-    if (cloak<0&&image->cloakrate<0) {
-      cloak=(unsigned short)32768;//intended warning should be -32768 :-) leave it be
-    }
-    if ((cloak&0x1)&&!image->cloakglass) {
-      cloak-=1;
-    }
-    if ((cloak&0x1)==0&&image->cloakglass) {
-      cloak+=1;
-    }
-    if (cloak<cloakmin&&image->cloakrate>0)
-      cloak=cloakmin;
-
-
+    cloak = cloakVal ( cloak,cloakmin,image->cloakrate,image->cloakglass);
   }
   
   int i;

@@ -632,6 +632,7 @@ public:
   std::string getCockpit ()const;
   ///Draws this unit with the transformation and matrix (should be equiv) separately
   virtual void Draw(const Transformation & quat = identity_transformation, const Matrix &m = identity_matrix);
+  virtual void DrawNow(const Matrix &m = identity_matrix, float lod=1000000000);
   ///Deprecated
   //virtual void ProcessDrawQueue();
   ///Gets the minimum distance away from the point in 3space
