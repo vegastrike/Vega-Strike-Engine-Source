@@ -167,8 +167,8 @@ void SphereMesh::ProcessDrawQueue() {
     theta+=.01;
     vlist->Draw();
     if(0!=forcelogos) {
-      forcelogos->Draw();
-      squadlogos->Draw();
+      forcelogos->Draw(tmp2);
+      squadlogos->Draw(tmp2);
     }
   }
 

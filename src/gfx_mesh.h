@@ -54,7 +54,6 @@ private:
   // Display list hack
   static int dlist_count;
   int dlist;
-
   struct XML {
     enum Names {
       //elements
@@ -73,6 +72,8 @@ private:
       TRIFAN,
       QUADSTRIP,
       VERTEX,
+      LOGO,
+      REF,
       //attributes
       FLATSHADE,
       TEXTURE,
@@ -83,7 +84,12 @@ private:
       J,
       K,
       S,
-      T
+      T,
+      TYPE,
+      ROTATE,
+      WEIGHT,
+      SIZE,
+      OFFSET
     };
     enum PointState {
       P_X = 0x1,
@@ -98,12 +104,27 @@ private:
       V_S = 0x2,
       V_T = 0x4
     };
+    enum LogoState {
+      V_TYPE = 0x1,
+      V_ROTATE = 0x2,
+      V_SIZE=0x4,
+      V_OFFSET=0x8,
+      V_REF=0x10
+    };
+    struct ZeLogo {
+      int type;
+      float rotate;
+      float size;
+      float offset;
+      vector <int> refpnt;
+      vector <float> refweight;
+    };
 
     static const EnumMap::Pair element_names[];
     static const EnumMap::Pair attribute_names[];
     static const EnumMap element_map;
     static const EnumMap attribute_map;
-
+    vector <ZeLogo> logos;
     vector<Names> state_stack;
     int load_stage;
     int point_state;

@@ -32,7 +32,7 @@ Logo::Logo(int numberlogos,  Vector* center,Vector* normal, float* size, float* 
 {
   refcount = -1;
 	draw_queue = NULL;
-	SetDecal(Dec);
+
 	numlogos = numberlogos;
 	GFXVertex *vertices = new GFXVertex[numlogos*4];
 	GFXVertex *LogoCorner = vertices;
@@ -85,6 +85,7 @@ Logo::Logo(int numberlogos,  Vector* center,Vector* normal, float* size, float* 
 	}
 	vlist = new GFXVertexList(GFXQUAD,4*numlogos, vertices);
 	delete [] vertices;
+	SetDecal(Dec);
 }
 
 void Logo::SetDecal(Texture *decal)
@@ -120,12 +121,12 @@ void Logo::SetDecal(Texture *decal)
 
 
 }*/
-void Logo::Draw()
+void Logo::Draw(Matrix m)
 {
 	if (!numlogos)
 		return;
-	Matrix m;
-	GFXGetMatrix(MODEL, m);
+	//	Matrix m;
+	//	GFXGetMatrix(MODEL, m);
 	draw_queue->push_back(DrawContext(m, vlist));
 	if(!owner_of_draw_queue->will_be_drawn) {
 	  undrawn_logos.push_back(owner_of_draw_queue);
@@ -140,6 +141,7 @@ void Logo::ProcessDrawQueue() {
 	GFXSelectTexcoordSet(0, 0);
 	GFXSelectTexcoordSet(1, 1);
 	GFXBlendMode(SRCALPHA,INVSRCALPHA);
+	//GFXBlendMode(ONE,ZERO);
 
 	while(draw_queue->size()) {
 	  DrawContext c = draw_queue->back();

@@ -700,8 +700,8 @@ void Mesh::ProcessDrawQueue() {
     GFXPickLights (c.mat/*GetPosition()*/);
     vlist->Draw();
     if(0!=forcelogos) {
-      forcelogos->Draw();
-      squadlogos->Draw();
+      forcelogos->Draw(c.mat);
+      squadlogos->Draw(c.mat);
     }
   }
 }

@@ -59,7 +59,7 @@ public:
 	~Logo ();
 
 	void SetDecal(Texture *decal);
-	void Draw();
+	void Draw(Matrix m);
 
 };
 #endif

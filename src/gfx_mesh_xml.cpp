@@ -1,5 +1,5 @@
 #include "gfx_mesh.h"
-
+#include "vegastrike.h"
 #include <iostream>
 #include <fstream>
 #include <expat.h>
@@ -52,7 +52,9 @@ const EnumMap::Pair Mesh::XML::element_names[] = {
   EnumMap::Pair("Tristrip", XML::TRISTRIP),
   EnumMap::Pair("Trifan", XML::TRIFAN),
   EnumMap::Pair("Quadstrip", XML::QUADSTRIP),
-  EnumMap::Pair("Vertex", XML::VERTEX)
+  EnumMap::Pair("Vertex", XML::VERTEX),
+  EnumMap::Pair("Logo", XML::LOGO),
+  EnumMap::Pair("Ref",XML::REF)
 };
 
 const EnumMap::Pair Mesh::XML::attribute_names[] = {
@@ -67,11 +69,17 @@ const EnumMap::Pair Mesh::XML::attribute_names[] = {
   EnumMap::Pair("Shade", XML::FLATSHADE),
   EnumMap::Pair("point", XML::POINT),
   EnumMap::Pair("s", XML::S),
-  EnumMap::Pair("t", XML::T)
+  EnumMap::Pair("t", XML::T),
+  //Logo stuffs
+  EnumMap::Pair("Type",XML::TYPE),
+  EnumMap::Pair("Rotate", XML::ROTATE),
+  EnumMap::Pair("Weight", XML::WEIGHT),
+  EnumMap::Pair("Size", XML::SIZE),
+  EnumMap::Pair("Offset",XML::OFFSET)
 };
 
-const EnumMap Mesh::XML::element_map(XML::element_names, 15);
-const EnumMap Mesh::XML::attribute_map(XML::attribute_names, 12);
+const EnumMap Mesh::XML::element_map(XML::element_names, 17);
+const EnumMap Mesh::XML::attribute_map(XML::attribute_names, 17);
 
 void Mesh::beginElement(void *userData, const XML_Char *name, const XML_Char **atts) {
   ((Mesh*)userData)->beginElement(name, AttributeList(atts));
@@ -460,14 +468,101 @@ void Mesh::beginElement(const string &name, const AttributeList &attributes) {
 	xml->recalc_norm=true;
       }
     }
-    xml->vertex.x *= scale;
-    xml->vertex.y *= scale;
-    xml->vertex.z *= scale;
+    //    xml->vertex.x*=scale;
+    //    xml->vertex.y*=scale;
+    //    xml->vertex.z*=scale;
     xml->vertex.s = s;
     xml->vertex.t = t;
     xml->active_list->push_back(xml->vertex);
     xml->active_ind->push_back(index);
     xml->num_vertices--;
+    break;
+  case XML::LOGO: 
+    assert (top==XML::MESH);
+    assert (xml->load_stage==4);
+    xml->load_stage=5;
+    xml->vertex_state=0;
+    unsigned int typ;
+    float rot, siz,offset;
+    for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
+      switch(XML::attribute_map.lookup((*iter).name)) {
+      case XML::UNKNOWN:
+	fprintf (stderr,"Unknown attribute '%s' encountered in Vertex tag\n",(*iter).name.c_str() );
+	break;
+      case XML::TYPE:
+	assert (!(xml->vertex_state&XML::V_TYPE));
+	xml->vertex_state|=XML::V_TYPE;
+	typ = parse_int((*iter).value);
+	
+	break;
+      case XML::ROTATE:
+	assert (!(xml->vertex_state&XML::V_ROTATE));
+	xml->vertex_state|=XML::V_ROTATE;
+	rot = parse_float((*iter).value);
+
+	break;
+      case XML::SIZE:
+	assert (!(xml->vertex_state&XML::V_SIZE));
+	xml->vertex_state|=XML::V_SIZE;
+	siz = parse_float((*iter).value);
+	break;
+      case XML::OFFSET:
+	assert (!(xml->vertex_state&XML::V_OFFSET));
+	xml->vertex_state|=XML::V_OFFSET;
+	offset = parse_float ((*iter).value);
+	break;
+      default:
+	assert(0);
+     }
+    }
+
+    assert(xml->vertex_state & (XML::V_TYPE|
+				XML::V_ROTATE|
+				XML::V_SIZE|
+				XML::V_OFFSET) == 
+	   (XML::V_TYPE|
+	    XML::V_ROTATE|
+	    XML::V_SIZE|
+	    XML::V_OFFSET) );
+    xml->logos.push_back(XML::ZeLogo());
+    xml->logos[xml->logos.size()-1].type = typ;
+    xml->logos[xml->logos.size()-1].rotate = rot;
+    xml->logos[xml->logos.size()-1].size = siz;
+    xml->logos[xml->logos.size()-1].offset = offset;
+    break;
+  case XML::REF:
+    assert (top==XML::LOGO);
+    assert (xml->load_stage==5);
+    xml->load_stage=6;
+    unsigned int ind;
+    float indweight;
+    int ttttttt;
+    ttttttt=0;
+    for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
+      switch(XML::attribute_map.lookup((*iter).name)) {
+      case XML::UNKNOWN:
+	fprintf (stderr,"Unknown attribute '%s' encountered in Vertex tag\n",(*iter).name.c_str() );
+	break;
+      case XML::POINT:
+	assert (ttttttt<2);
+	xml->vertex_state |= XML::V_POINT;
+	ind = parse_int((*iter).value);
+	ttttttt+=2;
+	break;
+      case XML::WEIGHT:
+	assert ((ttttttt&1)==0);
+	ttttttt+=1;
+	xml->vertex_state |= XML::V_S;
+	indweight = parse_float((*iter).value);
+	break;
+      default:
+	assert(0);
+     }
+    }
+    assert (ttttttt==3);
+    xml->logos[xml->logos.size()-1].refpnt.push_back(ind);
+    xml->logos[xml->logos.size()-1].refweight.push_back(indweight);
+    xml->vertex_state+=XML::V_REF;
     break;
   default:
     assert(0);
@@ -564,28 +659,18 @@ void Mesh::endElement(const string &name) {
   case XML::POLYGONS:
     assert(xml->tris.size()%3==0);
     assert(xml->quads.size()%4==0);
-    
-    /*
-    cerr << xml->tris.size()/3 << " triangles\n";
-    cerr << xml->quads.size()/4 << " quadrilaterals\n";
-    for(int a=0; a<xml->tris.size(); a++) {
-      if(a%3==0) {
-	clog << "Triangle\n";
-      }
-      clog << "    (" << xml->tris[a].x << ", " << xml->tris[a].y << ", " << xml->tris[a].z << ") (" << xml->tris[a].i << ", " << xml->tris[a].j << ", " << xml->tris[a].k << ") (" << xml->tris[a].s << ", " << xml->tris[a].t << ")\n";
-    }
-    clog << "** ** ** Quadrilaterals ** ** **\n";
-    for(int a=0; a<xml->quads.size(); a++) {
-      if(a%4==0) {
-	clog << "Quadrilateral\n";
-      }
-      clog << "    (" << xml->quads[a].x << ", " << xml->quads[a].y << ", " << xml->quads[a].z << ") (" << xml->quads[a].i << ", " << xml->quads[a].j << ", " << xml->quads[a].k << ") (" << xml->quads[a].s << ", " << xml->quads[a].t << ")\n";
-    }
-    clog << endl;
-*/
+    break;
+  case XML::REF:
+    assert (xml->load_stage==6);
+    xml->load_stage=5;
+    break;
+  case XML::LOGO:
+    assert (xml->load_stage==5);
+    assert (xml->vertex_state>=XML::V_REF*3);//make sure there are at least 3 reference points
+    xml->load_stage=4;
     break;
   case XML::MESH:
-    assert(xml->load_stage==4);
+    assert(xml->load_stage==4);//4 is done with poly, 5 is done with Logos
 
     xml->load_stage=5;
     break;
@@ -936,6 +1021,10 @@ void Mesh::LoadXML(const char *filename, Mesh *oldmesh) {
     vertexlist[a].x -= x_center;
     vertexlist[a].y -= y_center;
     vertexlist[a].z -= z_center;
+    vertexlist[a].x*=scale;
+    vertexlist[a].y*=scale;
+    vertexlist[a].z*=scale;
+
   }
 
   minSizeX -= x_center;
@@ -949,6 +1038,7 @@ void Mesh::LoadXML(const char *filename, Mesh *oldmesh) {
 
 
   vlist= new GFXVertexList(polytypes,totalvertexsize,vertexlist,o_index,poly_offsets); 
+
   /*
   vlist[GFXQUAD]= new GFXVertexList(GFXQUAD,xml->quads.size(),vertexlist+xml->tris.size());
   index = xml->tris.size()+xml->quads.size();
@@ -971,10 +1061,80 @@ void Mesh::LoadXML(const char *filename, Mesh *oldmesh) {
 
   
   //TODO: add force handling
+  //Add Logos in:
+  numforcelogo=numsquadlogo =0;
 
+  for (index=0;index<xml->logos.size();index++) {
+    if (xml->logos[index].type==0)
+      numforcelogo++;
+    if (xml->logos[index].type==1)
+      numsquadlogo++;
+  }
+  unsigned int nfl=numforcelogo;
+  Logo ** tmplogo;
+  Texture * Dec;
+  for (index=0,nfl=numforcelogo,tmplogo=&forcelogos,Dec=_GFX->getForceLogo();index<2;index++,nfl+=numsquadlogo,tmplogo=&squadlogos,Dec=_GFX->getSquadLogo()) {
+    Vector *PolyNormal = new Vector [nfl];
+    Vector *center = new Vector [nfl];
+    float *sizes = new float [nfl];
+    float *rotations = new float [nfl];
+    float *offset = new float [nfl];
+    Vector *Ref = new Vector [nfl];
+    Vector norm1,norm2,norm;
+    int ri=0;
+    for (unsigned int ind=0;ind<xml->logos.size();ind++) {
+      if (xml->logos[ind].type==index) {
+	float weight=0;
+	norm1=Vector (xml->vertices[xml->logos[ind].refpnt[1]].x-
+		      xml->vertices[xml->logos[ind].refpnt[0]].x,
+		      xml->vertices[xml->logos[ind].refpnt[1]].y-
+		      xml->vertices[xml->logos[ind].refpnt[0]].y,
+		      xml->vertices[xml->logos[ind].refpnt[1]].z-
+		      xml->vertices[xml->logos[ind].refpnt[0]].z);
+	norm2=Vector (xml->vertices[xml->logos[ind].refpnt[2]].x-
+		      xml->vertices[xml->logos[ind].refpnt[0]].x,
+		      xml->vertices[xml->logos[ind].refpnt[2]].y-
+		      xml->vertices[xml->logos[ind].refpnt[0]].y,
+		      xml->vertices[xml->logos[ind].refpnt[2]].z-
+		      xml->vertices[xml->logos[ind].refpnt[0]].z);
+	CrossProduct (norm2,norm1,norm);
+	
+	Normalize(norm);//norm is our normal vect, norm1 is our reference vect
+	Vector Cent(0,0,0);
+	for (unsigned int rj=0;rj<xml->logos[ind].refpnt.size();rj++) {
+	  weight+=xml->logos[ind].refweight[rj];
+	  Cent += Vector (xml->vertices[xml->logos[ind].refpnt[rj]].x*xml->logos[ind].refweight[rj],
+			  xml->vertices[xml->logos[ind].refpnt[rj]].y*xml->logos[ind].refweight[rj],
+			  xml->vertices[xml->logos[ind].refpnt[rj]].z*xml->logos[ind].refweight[rj]);
+	}	
+	if (weight!=0) {
+	  Cent.i/=weight;
+	  Cent.j/=weight;
+	  Cent.k/=weight;
+	}
+	Cent.i-=x_center;
+	Cent.j-=y_center;
+	Cent.k-=z_center;
+	Ref[ri]=norm1;
+	PolyNormal[ri]=norm;
+	center[ri] = Cent*scale;
+	sizes[ri]=xml->logos[ind].size*scale;
+	rotations[ri]=xml->logos[ind].rotate;
+	offset[ri]=xml->logos[ind].offset;
+	ri++;
+      }
+    }
+    *tmplogo= new Logo (nfl,center,PolyNormal,sizes,rotations, (float)0.01,Dec,Ref);
+    delete [] Ref;
+    delete []PolyNormal;
+    delete []center;
+    delete [] sizes;
+    delete [] rotations;
+    delete [] offset;
+  }
 
   // Calculate bounding sphere
-
+  
   this->orig = oldmesh;
   *oldmesh=*this;
   oldmesh->orig = NULL;
@@ -982,10 +1142,7 @@ void Mesh::LoadXML(const char *filename, Mesh *oldmesh) {
   if (minSizeX==FLT_MAX) {
     minSizeX = minSizeY = minSizeZ = 0;
     maxSizeX = maxSizeY = maxSizeZ = 0;
-    fprintf (stderr, "uhoh");
   }
-
-  fprintf (stderr, "Minx %f maxx %f, miny %f maxy %fminz %fmaxz %f, radsiz %f\n",minSizeX, maxSizeX,  minSizeY, maxSizeY,  minSizeZ, maxSizeZ,radialSize);  
   delete [] vertexlist;
   delete []poly_offsets;
   delete xml;
