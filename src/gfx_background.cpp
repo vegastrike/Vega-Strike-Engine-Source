@@ -32,14 +32,15 @@ Background::Background(char *file)
 {
 	char temp[80]; 
 	up = left = down = front=right=back=NULL;
- 
+	strcpy(temp, file);
 	up = new Texture(strcat(temp, "_up.bmp"), 0);
 	SphereBackground = NULL;
-
+	
 	if (!up->LoadSuccess()) {
 	strcpy(temp, file);
 	  strcpy (temp,file);
 	  SphereBackground = new SphereMesh (20,8,8,strcat (temp,"_sphere.bmp"),true,true);
+	  SphereBackground->Pitch(PI*.5);//that's the way prophecy's textures are set up
 	  delete up;
 	  up = NULL;
 	}else {

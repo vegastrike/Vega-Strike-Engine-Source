@@ -20,8 +20,8 @@ SphereMesh::SphereMesh(float radius, int stacks, int slices, char *texture, bool
    int i, j, imin, imax;
    centered = centeredOnShip; 
   float nsign = Insideout?-1.0:1.0;
-  int fir=Insideout?1:0;
-  int sec=Insideout?0:1;
+  int fir=0;//Insideout?1:0;
+    int sec=1;//Insideout?0:1;
   vlist = new GFXVertexList();
   /* Code below adapted from gluSphere */
 
@@ -57,7 +57,7 @@ SphereMesh::SphereMesh(float radius, int stacks, int slices, char *texture, bool
 	  vertexlist[j*2+fir].i = x * nsign;
 	  vertexlist[j*2+fir].j = y * nsign;
 	  vertexlist[j*2+fir].k = z * nsign;
-	  vertexlist[j*2+fir].s = s;
+	  vertexlist[j*2+fir].s = insideout?1-s:s;
 	  vertexlist[j*2+fir].t = t;
 	  vertexlist[j*2+fir].x = x * radius;
 	  vertexlist[j*2+fir].y = y * radius;
@@ -71,7 +71,7 @@ SphereMesh::SphereMesh(float radius, int stacks, int slices, char *texture, bool
 	  vertexlist[j*2+sec].i = x * nsign;
 	  vertexlist[j*2+sec].j = y * nsign;
 	  vertexlist[j*2+sec].k = z * nsign;
-	  vertexlist[j*2+sec].s = s;
+	  vertexlist[j*2+sec].s = insideout?1-s:s;
 	  vertexlist[j*2+sec].t = t - dt;
 	  vertexlist[j*2+sec].x = x * radius;
 	  vertexlist[j*2+sec].y = y * radius;
@@ -84,7 +84,7 @@ SphereMesh::SphereMesh(float radius, int stacks, int slices, char *texture, bool
 	quadstrips[i] = new GFXQuadstrip((slices+1) * 2, vertexlist);
       }
       Decal = new Texture(texture, 0);
-      envMap = FALSE;
+      centered?envMap = FALSE:envMap=TRUE;
 }
 void SphereMesh::Draw() {
   if (insideout) 

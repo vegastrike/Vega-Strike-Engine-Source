@@ -46,6 +46,9 @@ typedef struct {
 #define NumLights 1
 char InputName [256]="cube";
 char OutputName[256]="light";
+  float affine=0;
+  float multiplicitive=1;
+  float power=1;
 
 struct Vector {
 	float i;
@@ -181,7 +184,7 @@ void gluSphereMap (CubeCoord &Tex, Vector Normal, float Theta) {
   Tex.TexMap=0;
   float vert = Normal.j;
   Tex.t = vert*128+128;
-  Tex.s = 256-Theta;//((int)((int)Theta+128)%256);
+  Tex.s = Theta;//((int)((int)Theta+128)%256);
   /*  float horiz;
   if (Normal.i>0)
     horiz = 1- (Normal.k+1)*.5;
@@ -573,11 +576,27 @@ void Spherize (CubeCoord Tex [256][256],CubeCoord gluSph [256][256],unsigned cha
 				g /= avg;
 				b/= avg;
 			}
-			
+			/** pre031001 <SPHERE_MAP extention>			
 			Col[3*256*(255-t)+3*(255-s)] = r;
 			Col[3*256*(255-t)+3*(255-s)+1] = g;
 			Col[3*256*(255-t)+3*(255-s)+2] = b;
+			*/
+			unsigned int rr=r;
+			unsigned int gg=g;
+			unsigned int bb=b;
+			if (affine!=0||multiplicitive!=1||power!=1) {
+			  rr = affine + ((pow ((float)r,power)) * multiplicitive);
+			  gg = affine + ((pow ((float)g,power)) * multiplicitive);
+			  bb = affine + ((pow ((float)b,power)) * multiplicitive);
+			}
+			if (rr>255) rr= 255;
+			if (gg>255) gg=255;
+			if (bb>255) bb=255;
 
+			Col[3*256*(t)+3*(255-s)] = rr;
+			Col[3*256*(t)+3*(255-s)+1] = gg;
+			Col[3*256*(t)+3*(255-s)+2] = bb;
+			
 		}
 	}
 
@@ -711,16 +730,35 @@ void GenerateTexMap ()
 
 void main(int argc, char **argv)
 {
-  
-  for (int i=0;i<argc;i++) {
-    if (i==1) {
-      strcpy (InputName,argv[i]);
+  int tmp =0;
+  for (int i=1;i<argc;i++) {
+    if (argv[i][0]=='-'&&argv[i][1]=='a') {//affine
+      i++;
+      sscanf (argv[i],"%f",&affine);
+      continue;
     }
-    if (i==2) {
+    if (argv[i][0]=='-'&&argv[i][1]=='m') {//affine
+      i++;
+      sscanf (argv[i],"%f",&multiplicitive);
+      continue;
+    }
+    if (argv[i][0]=='-'&&argv[i][1]=='p') {//affine
+      i++;
+      sscanf (argv[i],"%f",&power);
+      continue;
+    }
+    if (tmp==1&&argv[i][0]!='-') {
       strcpy (OutputName,argv[i]);
+      tmp=2;
+      continue;
+    }
+    if (tmp==0&&argv[i][0]!='-') {
+      strcpy (InputName,argv[i]);
+      tmp=1;
+      continue;
     }
   }
-  fprintf (stderr, "input name %s, output name %s",InputName, OutputName);
+  fprintf (stderr, "input name %s, output name %s\nAffine %f Mult %f Pow %f\n",InputName, OutputName, affine, multiplicitive, power);
   GenerateSphereMap();
 
 }
