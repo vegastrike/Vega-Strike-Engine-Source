@@ -158,6 +158,7 @@ void GameUnit<UnitType>::UpdatePhysics2 (const Transformation &trans, const Tran
 template <class UnitType>
 void GameUnit<UnitType>::Thrust(const Vector &amt1,bool afterburn){
   Unit::Thrust( amt1, afterburn);
+  static bool must_afterburn_to_buzz=XMLSupport::parse_bool(vs_config->getVariable("audio","buzzing_needs_afterburner","false"));
   if (_Universe->isPlayerStarship(this)!=NULL) {
     static int playerengine = AUDCreateSound (vs_config->getVariable ("unitaudio","player_afterburner","sfx10.wav"),true);
     static float enginegain=XMLSupport::parse_float(vs_config->getVariable("audio","afterburner_gain",".5"));
@@ -167,14 +168,14 @@ void GameUnit<UnitType>::Thrust(const Vector &amt1,bool afterburn){
       else
         AUDStopPlaying (playerengine);
     }
-  }else if (afterburn) {
+  }else if (afterburn||!must_afterburn_to_buzz) {
     static float buzzingtime=XMLSupport::parse_float(vs_config->getVariable("audio","buzzing_time","5"));
-    static float buzzingdistance=XMLSupport::parse_float(vs_config->getVariable("audio","buzzing_distance","10"));
+    static float buzzingdistance=XMLSupport::parse_float(vs_config->getVariable("audio","buzzing_distance","5"));
     static float lastbuzz=getNewTime();
     Unit * playa = _Universe->AccessCockpit()->GetParent();
     if (playa) {
       Vector diff=Position()-playa->Position();
-      if (diff.MagnitudeSquared()-rSize()*rSize()-playa->rSize()*playa->rSize()<buzzingdistance*buzzingdistance) {
+      if (UnitUtil::getDistance(this,playa)<buzzingdistance) {
         float ttime=getNewTime();
         if (ttime-lastbuzz>buzzingtime) {
           Vector pvel=playa->GetVelocity();
@@ -182,10 +183,13 @@ void GameUnit<UnitType>::Thrust(const Vector &amt1,bool afterburn){
           pvel.Normalize();
           vel.Normalize();
           float dotprod=vel.Dot(pvel);
-          if (dotprod<.75) {
+          if (dotprod<.86) {
+            
             lastbuzz=ttime;
             AUDPlay(sound->engine,Position(),GetVelocity(),1);
-          }          
+          } else {
+
+          }         
         }
       }
     }
