@@ -213,8 +213,8 @@ BOOL /*GFXDRVAPI*/ GFXMultMatrix(MATRIXMODE mode, const Matrix matrix)
 	  MultMatrix(t, model, matrix);
 	  CopyMatrix(model, t);
 		glMatrixMode(GL_MODELVIEW);
-		glLoadIdentity();
-		glTranslatef(-centerx, -centery, -centerz);
+		glPopMatrix();
+		glPushMatrix();
 		glMultMatrixf(matrix);
 		break;
 	case VIEW:
@@ -224,9 +224,12 @@ BOOL /*GFXDRVAPI*/ GFXMultMatrix(MATRIXMODE mode, const Matrix matrix)
 		MultMatrix(t, projection,rotview);
 		glMatrixMode(GL_PROJECTION);
 		glLoadMatrixf(t);
+
 		glMatrixMode(GL_MODELVIEW);
+		glPopMatrix();
 		glLoadIdentity();
 		glTranslatef(-centerx,-centery,-centerz);
+		glPushMatrix();
 		glMultMatrixf(model);
 		break;
 	case PROJECTION:
@@ -248,8 +251,8 @@ BOOL /*GFXDRVAPI*/ GFXLoadMatrix(MATRIXMODE mode, const Matrix matrix)
 	case MODEL:
 	  CopyMatrix(model, matrix);
 		glMatrixMode(GL_MODELVIEW);
-		glLoadIdentity();
-		glTranslatef(-centerx,-centery,-centerz);
+		glPopMatrix();
+		glPushMatrix();
 		glMultMatrixf(model);
 		break;
 	case VIEW:
@@ -257,8 +260,11 @@ BOOL /*GFXDRVAPI*/ GFXLoadMatrix(MATRIXMODE mode, const Matrix matrix)
 		evaluateViews();
 		//		MultMatrix(t, transview, model);
 		glMatrixMode(GL_MODELVIEW);
+		glPopMatrix();
 		glLoadIdentity();
 		glTranslatef(-centerx,-centery,-centerz);
+		glPushMatrix();
+
 		glMultMatrixf(model);
 		glMatrixMode(GL_PROJECTION);
 		MultMatrix (t,projection,rotview);
@@ -282,15 +288,17 @@ BOOL /*GFXDRVAPI*/ GFXLoadIdentity(MATRIXMODE mode)
 		Identity(model);
 		glMatrixMode(GL_MODELVIEW);
 		//		glLoadMatrixf(transview);
-		glLoadIdentity();
-		glTranslatef (-centerx,-centery,-centerz);
+		glPopMatrix();
+		glPushMatrix();
 		break;
 	case VIEW:
 		Identity(view);
 		Identity (rotview);
 		//		Identity (transview);
 		glMatrixMode(GL_MODELVIEW);
+		glPopMatrix();
 		glLoadMatrixf(model);
+		glPushMatrix();
 		glMatrixMode(GL_PROJECTION);
 		glLoadMatrixf(projection);
 		break;
