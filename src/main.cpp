@@ -231,7 +231,7 @@ void bootstrap_main_loop () {
     string savegamefile = mission->getVariable ("savegame","");
     vector <SavedUnits> savedun;
     string playersaveunit;
-    savedun=ParseSaveGame (vs_config->getVariable ("player","callsign","")+savegamefile,mysystem,mysystem,pos,setplayerloc,credits,playersaveunit);
+    savedun=ParseSaveGame (savegamefile.length>0?(vs_config->getVariable ("player","callsign","")+savegamefile):string(""),mysystem,mysystem,pos,setplayerloc,credits,playersaveunit);
    
     _Universe->Init (mysystem,pos,planetname);
     createObjects(playersaveunit);

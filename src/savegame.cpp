@@ -92,7 +92,7 @@ vector<SavedUnits> ParseSaveGame (const string filename, string &FSS, string ori
   changehome();
   vschdir ("save");
   FILE * fp = NULL;
-  if (filename!=vs_config->getVariable ("player","callsign",""))
+  if (filename.length()>0)
 	  fp = fopen (filename.c_str(),"r");
   vscdup();
   returnfromhome();
