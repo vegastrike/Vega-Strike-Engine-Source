@@ -48,8 +48,9 @@ void MissileEffect::ApplyDamage (Unit * smaller) {
   }
 }
 
-float Missile::ExplosionRadius() {
-  return radial_effect;
+float Missile::ExplosionRadius() {  
+	static float missile_multiplier = XMLSupport::parse_float (vs_config->getVariable ("graphics","missile_explosion_radius_mult","1"));   
+	return radial_effect*(missile_multiplier); 
 }
 
 void StarSystem::AddMissileToQueue(MissileEffect * me) {
