@@ -9,11 +9,17 @@ float max_allowable_travel_time () {
 bool DistanceWarrantsWarpTo (Unit * parent, float dist){
   //first let us decide whether the target is far enough to warrant using warp
   //  double dist =UnitUtil::getSignificantDistance(parent,target);
+  static float toodamnclose = XMLSupport::parse_float (vs_config->getVariable ("AI","too_close_for_warp_tactic","13000"));
   float diff = g_game.difficulty;
   if (diff>1)diff=1;
   float timetolive = dist/(diff*parent->GetComputerData().max_combat_speed);
-  if (timetolive>max_allowable_travel_time()) {
+  if (timetolive>(5*max_allowable_travel_time())) {
     return true;
+  } else if(timetolive>(max_allowable_travel_time())){
+	  if(dist<toodamnclose){
+		  return false; // avoid nasty jitter-jumping behavior should eventually have "running away check"
+	  }
+	  return true;
   }
   return false;
 }
