@@ -1937,8 +1937,11 @@ void Unit::AddVelocity(float difficulty) {
            }
 	   minmultiplier*=rampmult;
 	   if(minmultiplier<warpMultiplier) {
-	     if(graphicOptions.InWarp==1|graphicOptions.RampCounter!=0){
-		   minmultiplier=warpMultiplier;
+		 if(graphicOptions.InWarp==1) {
+		   minmultiplier=warpMultiplier*(1-graphicOptions.RampCounter);
+//		   printf("RAMP: %f\n",graphicOptions.RampCounter);
+		 } else if (graphicOptions.RampCounter!=0) {
+		   minmultiplier=warpMultiplier*graphicOptions.RampCounter;
 		 } else {
 		   minmultiplier=1;
 		 }
