@@ -9,6 +9,7 @@ int GetMaxVolume();
 extern "C" {
 #include "../fmod.h"
 }
+bool e_already_sent=false;
 void music_finished();
 signed char endcallback (FSOUND_STREAM * stream, void * buf, int len, int param) {
     if (!buf) {
@@ -60,23 +61,35 @@ struct Music {
      */
     void Play(float fadeout, float fadein, Music &oldmusic){
         if (!m) return;
+        if (fadeout) {
         FSOUND_Stream_SetEndCallback(m,endcallback,0);
         FSOUND_Stream_SetSynchCallback(m, endcallback, 0);
         channel = FSOUND_Stream_Play(FSOUND_FREE, m);
-        SetVolume(0);      
-        if (fadeout*10>1) {
-            for (unsigned int i=0;i<fadeout*10;i++) {
-                float ratio = ((float)i)/(fadeout*10.);
-                SetVolume(ratio);
-                oldmusic.SetVolume(1-ratio);
-                micro_sleep (10000);
+        if (!e_already_sent) {
+            SetVolume(0);
+            if (fadeout*10>1) {
+                for (unsigned int i=0;i<fadeout*10;i++) {
+                    float ratio = ((float)i)/(fadeout*10.);
+                    SetVolume(ratio);
+                    if (!e_already_sent)
+                        oldmusic.SetVolume(1-ratio);
+                    micro_sleep (10000);
+                }
             }
+            if (!e_already_sent)//race condition I know  I know--not much we can do bout it..besides this ole girl crashes when she wishes.
+                oldmusic.Stop();
         }
-        oldmusic.Stop();
+        }else {
+            if (!e_already_sent)
+                oldmusic.Stop();
+        }
         oldmusic.Free();
-
+        if (!fadeout) {
+            channel = FSOUND_Stream_Play(FSOUND_FREE, m);
+        }	
   
         SetVolume(1);
+        e_already_sent=false;
     }
     void SetVolume(float vol) {
         if (m) {
@@ -251,6 +264,7 @@ int mysocket_write=-1;
 void music_finished () {
 	if (sende) {
 		char data='e';
+                e_already_sent=true;
 		INET_Write(mysocket_write,sizeof(char),&data);	
 		printf("\ne\n[SONG DONE]\n");
                 invalid_string=true;
@@ -302,7 +316,7 @@ int main(int argc, char **argv)
 	if (mysocket_write==-1)
 		return 1;
         }else {
-            mysocket_write = open (argv[1],O_WRONLY|O_SHLOCK|O_CREAT,0xffffffff);
+            mysocket_write = open (argv[2],O_WRONLY|O_SHLOCK|O_CREAT,0xffffffff);
             mysocket_read = open (argv[1],O_RDONLY|O_SHLOCK|O_CREAT,0xffffffff);
         }
 	printf("\n[CONNECTED]\n");
