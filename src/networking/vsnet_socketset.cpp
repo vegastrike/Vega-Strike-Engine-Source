@@ -1,4 +1,5 @@
 #include <config.h>
+#include <sstream>
 
 #include "vsnet_socket.h"
 #include "vsnet_socketset.h"
@@ -63,10 +64,6 @@ int SocketSet::select( long sec, long usec )
 
 int SocketSet::select( timeval* timeout )
 {
-#ifdef VSNET_DEBUG
-    COUT << "enter " << __PRETTY_FUNCTION__ << " fds=";
-#endif
-
     for( set<VsnetSocketBase*>::iterator it = _autoset.begin(); it != _autoset.end(); it++ )
     {
         int fd = (*it)->get_fd();
@@ -81,15 +78,12 @@ int SocketSet::select( timeval* timeout )
     }
 
 #ifdef VSNET_DEBUG
+    std::ostringstream ostr;
+    ostr << "calling select with fds=";
     for( int i=0; i<_max_sock_select; i++ )
     {
-        if( FD_ISSET(i,&_read_set_select) ) cout << i << " ";
+        if( FD_ISSET(i,&_read_set_select) ) ostr << i << " ";
     }
-    if( timeout )
-        cout << " t=" << timeout->tv_sec << ":"
-                  << timeout->tv_usec << endl;
-    else
-        cout << " t=NULL (blocking)" << endl;
 #endif
 
     if( _max_sock_always_true > 0 )
@@ -102,10 +96,27 @@ int SocketSet::select( timeval* timeout )
         dontwait.tv_sec  = 0;
         dontwait.tv_usec = 0;
 	    timeout = &dontwait;
-#ifdef FIND_WIN_NBIO
-        COUT << "Pending data in read queue: don't block" << endl;
+#ifdef VSNET_DEBUG
+        ostr << " t=0:0 (packet pending on";
+        for( int i=0; i<_max_sock_always_true; i++ )
+        {
+            if( FD_ISSET(i,&_read_set_always_true) ) ostr << " " << i;
+        }
+        ostr << ")";
 #endif
     }
+    else
+    {
+        if( timeout )
+            ostr << " t=" << timeout->tv_sec << ":"
+                        << timeout->tv_usec;
+        else
+            ostr << " t=NULL (blocking)";
+    }
+#ifdef VSNET_DEBUG
+    ostr << ends;
+    COUT << ostr.str() << endl;
+#endif
 
     int ret = ::select( _max_sock_select, &_read_set_select, 0, 0, timeout );
     if( ret == -1 )
@@ -117,6 +128,22 @@ int SocketSet::select( timeval* timeout )
         perror( "Select failed : ");
 #endif
     }
+#ifdef VSNET_DEBUG
+    else if( ret == 0 )
+    {
+        COUT << "select timed out" << endl;
+    }
+    else
+    {
+        std::ostringstream ostr;
+        for( int i=0; i<_max_sock_select; i++ )
+        {
+            if( FD_ISSET(i,&_read_set_select) ) ostr << i << " ";
+        }
+        ostr << ends;
+        COUT << "select saw activity on fds=" << ostr.str() << endl;
+    }
+#endif
     return ret;
 }
 

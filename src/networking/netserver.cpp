@@ -320,7 +320,9 @@ Client* NetServer::newConnection_tcp( SocketSet& sets )
     // Get new connections if there are - do nothing in standard UDP mode
     if( tcpNetwork->isActive( sets ) )
     {
-        COUT << " enter " << "newConnection_tcp" << endl;
+#ifdef VSNET_DEBUG
+        COUT << "Checking activity on TCP server socket: " << tcpNetwork->get_fd() << "+" << endl;
+#endif
         sock = tcpNetwork->acceptNewConn( sets, true );
         if( sock.valid() )
         {
@@ -328,6 +330,12 @@ Client* NetServer::newConnection_tcp( SocketSet& sets )
             nbclients++;
         }
     }
+#ifdef VSNET_DEBUG
+    else
+    {
+        COUT << "Checking activity on TCP server socket: " << tcpNetwork->get_fd() << "-" << endl;
+    }
+#endif
     return ret;
 }
 
@@ -790,17 +798,41 @@ void	NetServer::prepareCheckMsg( SocketSet& sets )
 
 void	NetServer::checkMsg( SocketSet& sets )
 {
+#ifdef VSNET_DEBUG
+    ostringstream ostr;
+    ostr << "Checking activity on sockets, TCP=";
+#endif
 	for( LI i=tcpClients.begin(); i!=tcpClients.end(); i++)
 	{
 		if( (*i)->sock.isActive( sets ) )
 		{
+#ifdef VSNET_DEBUG
+            ostr << (*i)->sock.get_fd() << "+ ";
+#endif
 			this->recvMsg_tcp( (*i));
 		}
+#ifdef VSNET_DEBUG
+        else
+        {
+            ostr << (*i)->sock.get_fd() << "- ";
+        }
+#endif
 	}
 	if( udpNetwork->isActive( sets ) )
 	{
+#ifdef VSNET_DEBUG
+        ostr << "UDP=" << udpNetwork->get_fd() << "+" << ends;
+#endif
 	    recvMsg_udp( );
 	}
+#ifdef VSNET_DEBUG
+    else
+    {
+        ostr << "UDP=" << udpNetwork->get_fd() << "-" << ends;
+    }
+    ostr << ends;
+    COUT << ostr.str() << endl;
+#endif
 }
 
 /**************************************************************/
@@ -839,7 +871,7 @@ void	NetServer::checkTimedoutClients_udp()
 /**** Receive a message from a client                      ****/
 /**************************************************************/
 
-void	NetServer::recvMsg_tcp( Client * clt)
+void	NetServer::recvMsg_tcp( Client * clt )
 {
     char	command;
     AddressIP	ipadr;
@@ -852,10 +884,14 @@ void	NetServer::recvMsg_tcp( Client * clt)
 
     int recvbytes = sockclt.recvbuf( mem, &ipadr );
 
-    if( recvbytes <= 0 )
+    if( recvbytes < 0 )
     {
-	//COUT << "received " << recvbytes << " bytes from " << sockclt;
-	  cerr << ", disconnecting" << endl;
+	    cerr << ", disconnecting(error)" << endl;
+        discList.push_back( clt);
+    }
+    else if( recvbytes == 0 )
+    {
+	    cerr << ", disconnecting(eof)" << endl;
         discList.push_back( clt);
     }
     else
