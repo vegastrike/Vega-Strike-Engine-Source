@@ -287,7 +287,9 @@ void FlyByWire::Execute () {
       stolen_setspeed=false;
     }
   }
-  if ((sheltonslide||!controltype)&&(!desireThrust)) {
+  static double collidepanic = XMLSupport::parse_float (vs_config->getVariable("physics","collision_inertial_time","1.25"));
+  Cockpit * tempcp = _Universe->isPlayerStarship (parent);
+  if (((sheltonslide||!controltype)&&(!desireThrust))||(tempcp&&((getNewTime()-tempcp->TimeOfLastCollision)<collidepanic))) {
     MatchAngularVelocity::Execute();//only match turning, keep velocity same
   }else {
     MatchVelocity::Execute();

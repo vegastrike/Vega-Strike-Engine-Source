@@ -156,14 +156,21 @@ void Unit::reactToCollision(Unit * smalle, const QVector & biglocation, const Ve
 	Vector SmallerElastic_vf = (smalle->GetVelocity()*(m1-m2)/(m1+m2)+(2*m2/(m1+m2))*GetVelocity());
 	Vector ThisElastic_vf = (GetVelocity()*(m2-m1)/(m1+m2)+(2*m1/(m1+m2))*smalle->GetVelocity());
 	// Make bounce along opposite normals
-	ThisElastic_vf=(ThisElastic_vf.Magnitude())*smallnormal;
-	SmallerElastic_vf=(SmallerElastic_vf.Magnitude())*bignormal;
+	// HACK ALERT: FOLLOWING LINES are the victims of A HACK
+	Cockpit * thcp = _Universe->isPlayerStarship (this);
+	Cockpit * smcp = _Universe->isPlayerStarship (smalle);
+	static float mintime = XMLSupport::parse_float (vs_config->getVariable ("physics","minimum_time_between_recorded_player_collisions","0.1"));
+	bool isnotplayerorhasbeenmintime=true;
+	static float minvel = XMLSupport::parse_float (vs_config->getVariable ("physics","minimum_collision_velocity","5"));
+	ThisElastic_vf=((ThisElastic_vf.Magnitude()>minvel||!thcp)?ThisElastic_vf.Magnitude():minvel)*smallnormal;
+	SmallerElastic_vf=((SmallerElastic_vf.Magnitude()>minvel||!smcp)?SmallerElastic_vf.Magnitude():minvel)*bignormal;
 
     float LargeKE = (0.5)*m2*GetVelocity().MagnitudeSquared();
     float SmallKE = (0.5)*m1*smalle->GetVelocity().MagnitudeSquared();
     float FinalInelasticKE = Inelastic_vf.MagnitudeSquared()*(0.5)*(m1+m2);
 	float InelasticDeltaKE = LargeKE +SmallKE - FinalInelasticKE;
     static float kilojoules_per_damage = XMLSupport::parse_float (vs_config->getVariable ("physics","kilojoules_per_unit_damage","5400"));
+	
     static float inelastic_scale = XMLSupport::parse_float (vs_config->getVariable ("physics","inelastic_scale",".5"));
 	float large_damage=inelastic_scale*(InelasticDeltaKE *(1.0/4.0 + (0.5*m2/(m1+m2))) )/kilojoules_per_damage;
     float small_damage=inelastic_scale*(InelasticDeltaKE *(1.0/4.0 + (0.5*m1/(m1+m2))) )/kilojoules_per_damage;
@@ -186,11 +193,31 @@ void Unit::reactToCollision(Unit * smalle, const QVector & biglocation, const Ve
 	
 	
 	//UniverseUtil::IOmessage(0,"game","all",string("damaging collision ")+XMLSupport::tostring(smforce.i)+string(",")+XMLSupport::tostring(smforce.j)+string(",")+XMLSupport::tostring(smforce.k)+string(" resultantkinetic ")+XMLSupport::tostring(FinalInelasticKE)+string(" resultant damages ")+XMLSupport::tostring(small_damage)+string(" ")+XMLSupport::tostring(large_damage)+string(" bouncepercent ")+XMLSupport::tostring(bouncepercent)); 
+
+	if(thcp){
+		if((getNewTime()-thcp->TimeOfLastCollision)>mintime){
+			if(ThisDesiredVelocity.Magnitude()>minvel){
+				thcp->TimeOfLastCollision=getNewTime();
+			}
+		}else{
+			isnotplayerorhasbeenmintime=false;
+		}
+	}
     
-	if(smalle->isUnit()!=MISSILEPTR){ 
+	if(smcp){
+		if((getNewTime()-smcp->TimeOfLastCollision)>mintime){
+			if(SmallerDesiredVelocity.Magnitude()>minvel){
+				smcp->TimeOfLastCollision=getNewTime();
+			}
+		}else{
+			isnotplayerorhasbeenmintime=false;
+		}
+	}
+
+	if((smalle->isUnit()!=MISSILEPTR)&&isnotplayerorhasbeenmintime){ 
 	  smalle->ApplyForce (smforce);
 	}
-    if(this->isUnit()!=MISSILEPTR) {
+    if((this->isUnit()!=MISSILEPTR)&&isnotplayerorhasbeenmintime) {
 	  this->ApplyForce (thisforce);
 	}
 /*    smalle->curr_physical_state = smalle->prev_physical_state;

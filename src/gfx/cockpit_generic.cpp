@@ -153,6 +153,7 @@ Cockpit::Cockpit (const char * file, Unit * parent,const std::string &pilot_name
   //int i;
   fg=NULL;
   jumpok = 0;
+  TimeOfLastCollision=-200;
   /*
   for (i=0;i<headlag;i++) {
     headtrans.push_back (Matrix());

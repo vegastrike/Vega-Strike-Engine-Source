@@ -81,6 +81,7 @@ protected:
   float cockpit_time;
   bool ejecting;
  public:
+  double TimeOfLastCollision;
   char jumpok;
   virtual void	ReceivedTargetInfo() {}
   std::vector<std::string> unitfilename;

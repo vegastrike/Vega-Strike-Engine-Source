@@ -788,7 +788,8 @@ float GameCockpit::LookupTargetStat (int stat, Unit *target) {
 		  return 1;
 	  return 0;
   case UnitImages::COLLISION:
-	  return rand ()%2;
+	  static double collidepanic = XMLSupport::parse_float (vs_config->getVariable("physics","collision_inertial_time","1.25"));
+	  return (getNewTime()-TimeOfLastCollision)<collidepanic;
 	  break;
   case UnitImages::ECM:
 	  return target->GetImageInformation().ecm>0?1:0;
