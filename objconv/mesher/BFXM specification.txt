@@ -10,12 +10,12 @@ Per record visual layout:
 ---SuperHeader---
 Type String:'BFXM'
 Version number*100:integer
+Superheader Length: Integer
 Number of fields per vertex:integer (8)
 Number of fields per polygon structure: integer (3)
 Number of fields per referenced vertex: integer (3)
 Number of fields per referenced animation: integer (1)
 Number of records: integer
-256 bytes of 0: reserved for future superheader parametrization use.
 ---End SuperHeader
 ---Record Header---
 for each record:
