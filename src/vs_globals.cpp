@@ -14,7 +14,7 @@ Mission *mission=NULL;
 
 /* for speed test */
 int loop_count=0;
-int avg_loop=0;
-int nb_checks=0;
+double avg_loop=0;
+int nb_checks=1;
 double last_check=1;
 double cur_check=1;

@@ -12,7 +12,7 @@
 #endif
 
 extern int	loop_count;
-extern int	avg_loop;
+extern double	avg_loop;
 extern int	nb_checks;
 extern double last_check;
 extern double cur_check;

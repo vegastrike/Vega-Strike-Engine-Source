@@ -26,6 +26,7 @@
 static LONGLONG ttime;
 static LONGLONG newtime = 0;
 static LONGLONG freq;
+static double dblnewtime;
 #else
 #if defined( HAVE_SDL )
 #   include <SDL/SDL.h>
@@ -38,7 +39,11 @@ static double lasttime;
 static double elapsedtime=.1;
 static double timecompression=1;
 double getNewTime() {
-  return newtime;
+#ifdef _WIN32
+	return dblnewtime;
+#else
+	return newtime;
+#endif
 }
 
 void inc_time_compression (int i, KBSTATE a) {
@@ -137,9 +142,9 @@ void UpdateTime() {
   elapsedtime = ((double)(newtime-ttime))/freq;
   ttime = newtime;
   if( freq==0)
-	  newtime = 0;
+	  dblnewtime = 0.;
   else
-	  newtime = newtime/freq;
+	  dblnewtime = ((double)newtime)/((double)freq);
 
 #elif defined(HAVE_GETTIMEOFDAY)
   struct timeval tv;

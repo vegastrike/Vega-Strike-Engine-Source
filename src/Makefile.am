@@ -1,11 +1,16 @@
 bin_PROGRAMS = vegastrike vegaserver accountserver
 SUBDIRS = cmd gfx gldrv aldrv python gui networking boost common
 vegastrike_LDADD = cmd/script/libscript.a cmd/libcmd.a cmd/ai/libai.a cmd/script/c_alike/libc_alike.a gfx/libgfx.a gldrv/libgldrv.a aldrv/libaldrv.a python/libpython.a cmd/collide/libcollide.a gui/libgui.a networking/libnet.a boost/libboost_python.a common/libvscommon.a networking/libnetclient.a -lpthread \
-cmd/unit_util.o
+cmd/unit_util.o vs_globals.o
 
-vegaserver_LDADD = networking/libnetserver.a cmd/libcmdserver.a cmd/ai/libaiserver.a cmd/script/libscriptserver.a python/libpython.a
+vegaserver_LDADD = networking/libnetserver.a cmd/libcmdserver.a cmd/ai/libaiserver.a cmd/script/libscriptserver.a python/libpython.a vs_globals_server.o
 accountserver_LDADD = networking/libnetserver.a
 INCLUDES = -Iboost/
+
+vs_globals.o : vs_globals.cpp vs_globals.h
+	$(COMPILE) -c vs_globals.cpp -o vs_globals.o
+vs_globals_server.o : vs_globals.cpp vs_globals.h
+	$(COMPILE) -c vs_globals.cpp -o vs_globals_server.o
 
 vegaserver_SOURCES =			\
 	star_system_generic.cpp 	\
@@ -22,7 +27,6 @@ vegaserver_SOURCES =			\
 	faction_generic.cpp			\
 	faction_generic.h			\
 	xml_serializer.cpp			\
-	vs_globals.cpp				\
 	vs_globals.h				\
 	hashtable.h					\
 	hashtable.cpp				\
@@ -120,7 +124,6 @@ vegastrike_SOURCES =		\
 	easydom.h				\
 	profile.h 				\
 	vegastrike.h			\
-	vs_globals.cpp 			\
 	vs_globals.h 			\
 	vs_path.cpp				\
 	vs_path.h				\

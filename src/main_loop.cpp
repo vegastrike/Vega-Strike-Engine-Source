@@ -718,17 +718,22 @@ void restore_main_loop() {
 
 }
 void main_loop() {
-  // Don't forget to initialize cur_check to getNewTime just before entering main_loop() --> done !
-  // Evaluate number of loops per second each 200 loops
-  if( loop_count==200 && last_check!=1)
+  // Evaluate number of loops per second each XX loops
+  if( loop_count==500)
   {
-	// Time to update test
-	cur_check = getNewTime();
 	last_check = cur_check;
-	nb_checks++;
-	avg_loop = ((nb_checks-1)*avg_loop+(loop_count/(cur_check-last_check)))/nb_checks;
-	loop_count=0;
-  }
+	cur_check = getNewTime();
+	//cout<<"Checkpoint at "<<cur_check<<" - last check at "<<last_check<<endl;
+	if( last_check!=1)
+	{
+		// Time to update test
+		avg_loop = ( (nb_checks-1)*avg_loop + (loop_count/(cur_check-last_check)) )/(nb_checks);
+		//cout<<"Nb checks : "<<nb_checks<<" -- loop_count : "<<loop_count<<endl;
+		//cout<<"Time elasped : "<<(cur_check - last_check)<<" -- Loop average : "<<avg_loop<<" -- Ratio : "<<(loop_count/(cur_check-last_check))<<endl;
+		nb_checks=nb_checks+1;
+	}
+ 	loop_count=-1;
+ }
   loop_count++;
   //  SuicideKey (0,PRESS);
 
