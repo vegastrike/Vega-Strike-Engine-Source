@@ -125,7 +125,8 @@ namespace UnitXML {
       DOCKINTERNAL,
       WORMHOLE,
       RAPID,
-      USEBSP
+      USEBSP,
+      AFTERBURNENERGY
     };
 
   const EnumMap::Pair element_names[] = {
@@ -226,6 +227,7 @@ namespace UnitXML {
     EnumMap::Pair ("Color",ISCOLOR),
     EnumMap::Pair ("Restricted", RESTRICTED),
     EnumMap::Pair ("Delay", DELAY),
+    EnumMap::Pair ("AfterburnEnergy", AFTERBURNENERGY),
     EnumMap::Pair ("JumpEnergy", JUMPENERGY),
     EnumMap::Pair ("JumpWav", JUMPWAV),
     EnumMap::Pair ("DockInternal", DOCKINTERNAL),
@@ -235,7 +237,7 @@ namespace UnitXML {
 };
 
   const EnumMap element_map(element_names, 29);
-  const EnumMap attribute_map(attribute_names, 72);
+  const EnumMap attribute_map(attribute_names, 73);
 }
 
 using XMLSupport::EnumMap;
@@ -818,6 +820,9 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
 	break;
       case AFTERBURNER:
 	limits.afterburn=parse_float ((*iter).value);
+	break;
+      case AFTERBURNENERGY:
+	afterburnenergy =CLAMP_SHORT(parse_float((*iter).value)); 
 	break;
       case LEFT:
 	limits.lateral=parse_float((*iter).value);

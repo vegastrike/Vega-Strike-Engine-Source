@@ -137,6 +137,7 @@ void Unit::Init()
   jump.delay=5;
   jump.damage=0;
   jump.drive=-2;// disabled
+  afterburnenergy=0;
   planet=NULL;
   nebula=NULL;
   image = new UnitImages;

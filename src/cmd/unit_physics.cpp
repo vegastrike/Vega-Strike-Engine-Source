@@ -26,6 +26,8 @@
 #include "planet.h"
 #include "audiolib.h"
 #include "images.h"
+#include "config_xml.h"
+#include "vs_globals.h"
 //#ifdef WIN32
 #include "gfx/planetary_transform.h"
 float copysign (float x, float y) {
@@ -131,14 +133,18 @@ Vector Unit::ClampTorque(const Vector &amt1) {
 }
 */
 //FIXME 062201
+extern unsigned short apply_float_to_short (float tmp);
 Vector Unit::ClampTorque (const Vector &amt1) {
   Vector Res=amt1;
-  if (fabs(amt1.i)>limits.pitch)
-    Res.i=copysign(limits.pitch,amt1.i);
-  if (fabs(amt1.j)>limits.yaw)
-    Res.j=copysign(limits.yaw,amt1.j);
-  if (fabs(amt1.k)>limits.roll)
-    Res.k=copysign(limits.roll,amt1.k);
+  static float staticfuelclamp = XMLSupport::parse_float (vs_config->getVariable ("physics","NoFuelThrust",".4"));
+  float fuelclamp=(fuel<=0)?staticfuelclamp:1;
+  if (fabs(amt1.i)>fuelclamp*limits.pitch)
+    Res.i=copysign(fuelclamp*limits.pitch,amt1.i);
+  if (fabs(amt1.j)>fuelclamp*limits.yaw)
+    Res.j=copysign(fuelclamp*limits.yaw,amt1.j);
+  if (fabs(amt1.k)>fuelclamp*limits.roll)
+    Res.k=copysign(fuelclamp*limits.roll,amt1.k);
+  fuel-=Res.Magnitude()*SIMULATION_ATOM;
   return Res;
 }
 //    float max_speed;
@@ -148,7 +154,11 @@ Vector Unit::ClampTorque (const Vector &amt1) {
 //    float max_roll;
 
 Vector Unit::ClampVelocity (const Vector & velocity, const bool afterburn) {
-  float limit = afterburn?computer.max_ab_speed:computer.max_speed;
+  static float staticfuelclamp = XMLSupport::parse_float (vs_config->getVariable ("physics","NoFuelThrust",".4"));
+  static float staticabfuelclamp = XMLSupport::parse_float (vs_config->getVariable ("physics","NoFuelAfterburn","0"));
+  float fuelclamp=(fuel<=0)?staticfuelclamp:1;
+  float abfuelclamp= (fuel<=0)?staticabfuelclamp:1;
+  float limit = afterburn?(abfuelclamp*(computer.max_ab_speed-computer.max_speed)+(fuelclamp*computer.max_speed)):fuelclamp*computer.max_speed;
   float tmp = velocity.Magnitude();
   if (tmp>fabs(limit)) {
     return velocity * (limit/tmp);
@@ -192,16 +202,31 @@ Vector Unit::ClampThrust(const Vector &amt1){
 }
 */
 //CMD_FLYBYWIRE depends on new version of Clampthrust... don't change without resolving it
+
 Vector Unit::ClampThrust (const Vector &amt1, bool afterburn) {
   Vector Res=amt1;
-  if (fabs(amt1.i)>fabs(limits.lateral))
-    Res.i=copysign(limits.lateral,amt1.i);
-  if (fabs(amt1.j)>fabs(limits.vertical))
-    Res.j=copysign(limits.vertical,amt1.j);
-  if (amt1.k>(afterburn?limits.afterburn:limits.forward))
-    Res.k=afterburn?limits.afterburn:limits.forward;
+  static float staticfuelclamp = XMLSupport::parse_float (vs_config->getVariable ("physics","NoFuelThrust",".4"));
+  static float staticabfuelclamp = XMLSupport::parse_float (vs_config->getVariable ("physics","NoFuelAfterburn","0"));
+  static float abfuelusage = XMLSupport::parse_float (vs_config->getVariable ("physics","AfterburnerFuelUsage","4"));
+  float fuelclamp=(fuel<=0)?staticfuelclamp:1;
+  float abfuelclamp= (fuel<=0)?staticabfuelclamp:1;
+  if (fabs(amt1.i)>fabs(fuelclamp*limits.lateral))
+    Res.i=copysign(fuelclamp*limits.lateral,amt1.i);
+  if (fabs(amt1.j)>fabs(fuelclamp*limits.vertical))
+    Res.j=copysign(fuelclamp*limits.vertical,amt1.j);
+  float ablimit =       
+    afterburn
+    ?((limits.afterburn-limits.forward)*abfuelclamp+limits.forward*fuelclamp)
+    :limits.forward;
+
+  if (amt1.k>ablimit)
+    Res.k=ablimit;
   if (amt1.k<-limits.retro)
     Res.k =-limits.retro;
+  if (afterburn) {
+    energy -=apply_float_to_short( afterburnenergy);
+  }
+  fuel-=(afterburn?abfuelusage:1)*Res.Magnitude();
   return Res;
 }
 
@@ -257,12 +282,14 @@ void Unit::RollTorque(float amt) {
 
 const float VELOCITY_MAX=1000;
 void Unit::UpdatePhysics (const Transformation &trans, const Matrix transmat, const Vector & cum_vel,  bool lastframe, UnitCollection *uc) {
+  if (fuel<0)
+    fuel=0;
   if (cloaking>=cloakmin) {
     if (image->cloakenergy*SIMULATION_ATOM>energy) {
       Cloak(false);//Decloak
     } else {
       if (image->cloakrate>0||cloaking==cloakmin) {
-	energy-=SIMULATION_ATOM*image->cloakenergy;
+	energy-=apply_float_to_short(SIMULATION_ATOM*image->cloakenergy);
       }
       if (cloaking>cloakmin) {
 	AUDAdjustSound (sound->cloak, cumulative_transformation.position,cumulative_velocity);

@@ -11,7 +11,7 @@ using Orders::MatchAngularVelocity;
 //#define MATCHLINVELEXECUTE()  if(!(desired.i==-2 && desired.j==0 && desired.k==0)){ parent->Thrust ( (parent->GetMass()*(desired-velocity)/SIMULATION_ATOM), afterburn); }
 
 #define MATCHLINVELSETUP()   Vector desired (desired_velocity);  if (!LocalVelocity) {     desired = parent->ToLocalCoordinates (desired);   }   Vector velocity (parent->UpCoordinateLevel(parent->GetVelocity()));
-#define MATCHLINVELEXECUTE()  { parent->Thrust ( (parent->GetMass()*(desired-velocity)/SIMULATION_ATOM), afterburn); }
+#define MATCHLINVELEXECUTE()  { parent->Thrust ( (parent->GetMass()*(parent->ClampVelocity(desired,afterburn)-velocity)/SIMULATION_ATOM), afterburn); }
 /**
  * don't need to clamp thrust since the Thrust does it for you
  * caution might change 
@@ -116,7 +116,7 @@ void FlyByWire::SheltonSlide (bool onoff) {
 
 void FlyByWire::MatchSpeed (const Vector & vec) {
   Unit::Computer *cpu = &parent->GetComputerData(); 
-  cpu->set_speed = vec.Magnitude();
+  cpu->set_speed = (vec).Magnitude();
   if (cpu->set_speed>cpu->max_speed)
     cpu->set_speed=cpu->max_speed;
 }

@@ -272,6 +272,7 @@ class Unit {
   float mass;
   ///fuel of this unit
   float fuel;
+  unsigned short afterburnenergy;
   ///-1 means it is off. -2 means it doesn't exist. otherwise it's engaged to destination (positive number)
   struct UnitJump {
     char drive;
