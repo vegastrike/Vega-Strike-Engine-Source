@@ -36,12 +36,14 @@ struct UpgradingInfo {
     std::sort (CurrentList->begin(),CurrentList->end());
     CargoList->ClearList();
     if (curcategory.length()!=0) {
+      CargoList->AddTextItem ("[Back To Categories]","[Back To Categories]");
       for (int i=0;i<CurrentList->size();i++) {
 	if ((*CurrentList)[i].category==curcategory)
 	  CargoList->AddTextItem ((tostring(i)+ string(" ")+(*CurrentList)[i].content).c_str() ,(*CurrentList)[i].content.c_str());
       }
     } else {
       string curcat=("");
+      CargoList->AddTextItem ("","");
       for (int i=0;i<CurrentList->size();i++) {
 	if ((*CurrentList)[i].category!=curcat) {
 	  CargoList->AddTextItem ((*CurrentList)[i].category.c_str(),(*CurrentList)[i].category.c_str());
@@ -51,6 +53,7 @@ struct UpgradingInfo {
     }
   }
   void SetMode (enum BaseMode mod) {
+    curcategory="";
     string ButtonText;
     switch (mod) {
     case BUYMODE:
@@ -187,13 +190,22 @@ void UpgradingInfo::ProcessMouse(int type, int x, int y, int button, int state) 
 	ours = CargoList->DoMouse(type, cur_x, cur_y, button, state);
 	if (ours == 1 && type == 1) {
 		buy_name = CargoList->GetSelectedItemName();
-		if (curcategory.length()!=0) {
-		  if (buy_name != 0 && buy_name[0] != '\0') { CargoInfo->ChangeTextItem("name", (string("name: ")+buy_name).c_str()); }
-		  else { CargoInfo->ChangeTextItem("name",""); }
-		  CargoInfo->ChangeTextItem("price", "Price: Random. Hah.");
-		}else {
-		  curcategory=buy_name;
-		  SetupCargoList();
+		if (buy_name) {
+		  if (buy_name[0]!='\0') {
+		    if (0==strcmp(buy_name,"[Back To Categories]")) {
+		      curcategory=string("");
+		      SetupCargoList();
+		    }else {
+		      if (curcategory.length()!=0) {
+			if (buy_name != 0 && buy_name[0] != '\0') { CargoInfo->ChangeTextItem("name", (string("name: ")+buy_name).c_str()); }
+			else { CargoInfo->ChangeTextItem("name",""); }
+			CargoInfo->ChangeTextItem("price", "Price: Random. Hah.");
+		      }else {
+			curcategory=buy_name;
+			SetupCargoList();
+		      }
+		    }
+		  }
 		}
 	}
 	// Commented out because they don't need to use the mouse with CargoInfo
@@ -414,6 +426,7 @@ void Unit::UpgradeInterface (Unit * base) {
 
 
 vector <Cargo>&UpgradingInfo::FilterCargo(Unit *un, const string filterthis, bool inv){
+  TempCargo.clear();
     for (unsigned int i=0;i<un->numCargo();i++) {
       
       if ((un->GetCargo(i).category==filterthis)==inv) {
@@ -427,7 +440,6 @@ vector <Cargo>&UpgradingInfo::GetCargoFor(Unit *un) {//un !=NULL
     switch (mode) {
     case BUYMODE:
     case SELLMODE:
-      curcategory=string("");
       return FilterCargo (un,"missions",false);//anything but a mission
     case UPGRADEMODE:
     case DOWNGRADEMODE:
