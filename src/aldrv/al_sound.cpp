@@ -368,7 +368,7 @@ static bool AUDReclaimSource (const int sound, bool high_priority=false) {
         bool found=false;
         for (i=0;i<sounds.size();++i) {
           if (sounds[i].source!=0) {
-            if (sounds[i].pos!=Vector(0,0,0)) {
+            if (sounds[i].pos.i!=0||sounds[i].pos.j!=0||sounds[i].pos.k!=0) {
               if (found) {
                 if (AUDDistanceSquared(candidate)<AUDDistanceSquared(i)) {
                   candidate=i;
