@@ -1360,13 +1360,15 @@ void GameCockpit::Draw() {
   GFXDisable (DEPTHWRITE);
 
   Unit * un;
+  float crosscenx=0,crossceny=0;
   if (view==CP_FRONT) {
     if (Panel.size()>0) {
       static bool drawCrosshairs=parse_bool(vs_config->getVariable("graphics","draw_rendered_crosshairs","true"));
+      Panel.front()->GetPosition(crosscenx,crossceny);
       if (drawCrosshairs) {
         float x,y,wid,hei;
         Panel.front()->GetSize(wid,hei);
-        Panel.front()->GetPosition(x,y);
+        x=crosscenx;y=crossceny;
         DrawCrosshairs(x,y,wid,hei,textcol);
       } else {
         GFXBlendMode(SRCALPHA,INVSRCALPHA);
@@ -1384,8 +1386,9 @@ void GameCockpit::Draw() {
     //    GFXDisable(TEXTURE1);
     static int revspr = XMLSupport::parse_bool (vs_config->getVariable ("joystick","reverse_mouse_spr","true"))?1:-1;
     static string blah = vs_config->getVariable("joystick","mouse_crosshair","crosshairs.spr");
+    static int num=printf ("CROSS %f\n",crossceny);
     static VSSprite MouseVSSprite (blah.c_str(),BILINEAR,GFXTRUE);
-    MouseVSSprite.SetPosition (-1+float(mousex)/(.5*g_game.x_resolution),-revspr+float(revspr*mousey)/(.5*g_game.y_resolution));
+    MouseVSSprite.SetPosition ((-1+float(mousex)/(.5*g_game.x_resolution))*(1-fabs(crosscenx))+crosscenx,(-revspr+float(revspr*mousey)/(.5*g_game.y_resolution))*(1-fabs(crossceny))+crossceny);
     
     MouseVSSprite.Draw();
     //    DrawGlutMouse(mousex,mousey,&MouseVSSprite);
