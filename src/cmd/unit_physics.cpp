@@ -902,8 +902,9 @@ bool Unit::AutoPilotTo (Unit * target, bool ignore_friendlies) {
 	}
 	if (leadah) {
 	  if (NULL==_Universe->isPlayerStarship (other)) {
-	    other->AutoPilotTo(this);
-	    other->SetPosition(UniverseUtil::SafeEntrancePoint (other->LocalPosition(),other->rSize()*1.5));
+	    //	    other->AutoPilotTo(this);
+
+	    other->SetPosition(UniverseUtil::SafeEntrancePoint (LocalPosition(),other->rSize()*1.5));
 	  }
 	}
       }
