@@ -389,9 +389,12 @@ public:
   ///below function returns NULL if not found
   Cargo * GetCargo (const std::string &s, unsigned int &i);
   unsigned int numCargo ()const;
+  std::string GetManifest (unsigned int i, Unit * scanningUnit) const;
   bool SellCargo (unsigned int i, int quantity, float &creds, Cargo & carg, Unit *buyer);
   bool SellCargo (const std::string &s, int quantity, float & creds, Cargo &carg, Unit *buyer);
   bool BuyCargo (const Cargo &carg, float & creds);
+  bool IsCleared (Unit * dockignunit);
+  const vector <class DockingPorts> &DockingPortLocations();
 
   bool RequestClearance (Unit * dockingunit);
   bool Dock (Unit * unitToDockWith);

@@ -13,6 +13,7 @@
 #include "lin_time.h"//for fps
 #include "config_xml.h"
 #include "lin_time.h"
+#include "cmd/images.h"
 #include "cmd/script/mission.h"
 #include "cmd/script/msgcenter.h"
 #include "cmd/ai/flyjoystick.h"
@@ -92,6 +93,32 @@ void Cockpit::DrawNavigationSymbol (const Vector &Loc, const Vector & P, const V
 
   GFXEnd();
 }
+inline void DrawOneTargetBox (const Vector & Loc, const float rSize, const Vector &CamP, const Vector & CamQ, const Vector & CamR) {
+  GFXBegin (GFXLINESTRIP); 
+  GFXVertexf (Loc+(CamP+CamQ)*rSize);
+  GFXVertexf (Loc+(CamP-CamQ)*rSize);
+  GFXVertexf (Loc+(-CamP-CamQ)*rSize);
+  GFXVertexf (Loc+(CamQ-CamP)*rSize);
+  GFXVertexf (Loc+(CamP+CamQ)*rSize);
+  GFXEnd();
+}
+
+static GFXColor DockBoxColor (const string& name) {
+  GFXColor dockbox;
+  vs_config->getColor(name,&dockbox.r);    
+  return dockbox;
+}
+inline void DrawDockingBoxes(Unit * un,Unit *target, const Vector & CamP, const Vector & CamQ, const Vector & CamR) {
+  if (target->IsCleared (un)) {
+    static GFXColor dockbox = DockBoxColor("docking_box");
+    GFXColorf (dockbox);
+    const vector <DockingPorts> d = target->DockingPortLocations();
+    for (unsigned int i=0;i<d.size();i++) {
+      float rad = d[i].radius/sqrt(2.0);
+      DrawOneTargetBox (Transform (target->GetTransformation(),d[i].pos),rad ,CamP, CamQ, CamR);
+    }
+  }
+}
 
 void Cockpit::DrawTargetBoxes(){
   
@@ -125,13 +152,10 @@ void Cockpit::DrawTargetBoxes(){
 	GFXColorf(drawcolor);
 
 	if(target->isUnit()==UNITPTR){
-	  GFXBegin (GFXLINESTRIP); 
-	  GFXVertexf (Loc+(CamP+CamQ)*target->rSize());
-	  GFXVertexf (Loc+(CamP-CamQ)*target->rSize());
-	  GFXVertexf (Loc+(-CamP-CamQ)*target->rSize());
-	  GFXVertexf (Loc+(CamQ-CamP)*target->rSize());
-	  GFXVertexf (Loc+(CamP+CamQ)*target->rSize());
-	  GFXEnd();
+	  DrawOneTargetBox (Loc, target->rSize(), CamP, CamQ, CamR);
+	  if (un->Target()==target) {
+	    DrawDockingBoxes(un,target,CamP,CamQ, CamR);
+	  }
 	}
     }
     target=(++uiter);
@@ -173,7 +197,7 @@ void Cockpit::DrawTargetBox () {
     GFXBegin(GFXLINESTRIP);
     GFXVertexf(my_loc);
     GFXVertexf(Loc);
-
+    
     Unit *targets_target=target->Target();
     if(draw_line_to_targets_target && targets_target!=NULL){
       Vector ttLoc(targets_target->Position());
@@ -181,14 +205,8 @@ void Cockpit::DrawTargetBox () {
     }
     GFXEnd();
   }
-
-  GFXBegin (GFXLINESTRIP); 
-  GFXVertexf (Loc+(CamP+CamQ)*target->rSize());
-  GFXVertexf (Loc+(CamP-CamQ)*target->rSize());
-  GFXVertexf (Loc+(-CamP-CamQ)*target->rSize());
-  GFXVertexf (Loc+(CamQ-CamP)*target->rSize());
-  GFXVertexf (Loc+(CamP+CamQ)*target->rSize());
-  GFXEnd();
+  DrawOneTargetBox (Loc, target->rSize(), CamP, CamQ, CamR);
+  DrawDockingBoxes(un,target,CamP,CamQ,CamR);
   if (always_itts || un->GetComputerData().itts) {
     un->getAverageGunSpeed (speed,range);
     float err = (.01*(1-un->CloakVisible()));

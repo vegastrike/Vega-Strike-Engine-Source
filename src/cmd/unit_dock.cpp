@@ -93,6 +93,13 @@ static Transformation HoldPositionWithRespectTo (Transformation holder, const Tr
   holder.position=holder.position+changenew.position;
   return holder;
 }
+const vector <DockingPorts>& Unit::DockingPortLocations() {
+  return image->dockingports;
+}
+
+bool Unit::IsCleared (Unit * DockingUnit) {
+  return (std::find (image->clearedunits.begin(),image->clearedunits.end(),DockingUnit)!=image->clearedunits.end());
+}
 void Unit::PerformDockingOperations () {
   for (unsigned int i=0;i<image->dockedunits.size();i++) {
     Unit * un;
