@@ -1006,6 +1006,9 @@ static int pushDownTowardsMean (int mean, int val) {
   return delta + pushDown (val-delta);
 }
 static int pushTowardsMean (int mean, int val) {
+	static bool dopushingtomean = XMLSupport::parse_bool (vs_config->getVariable("galaxy","PushValuesToMean","true"));
+	if (!dopushingtomean)
+		return val;
   if (val < mean) {
     return -pushDownTowardsMean (-mean,-val);
   }
