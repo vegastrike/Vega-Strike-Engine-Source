@@ -18,6 +18,9 @@ QVector LaunchUnitNear (QVector pos) {
     Unit * un;
     bool collision=false;
     for (un_iter i=_Universe->activeStarSystem()->getUnitList().createIterator();(un=*i)!=NULL;++i) {
+      if (un->isUnit()==ASTEROIDPTR||un->isUnit()==NEBULAPTR) {
+	continue;
+      }
       double dist = (pos-un->Position()).Magnitude()-un->rSize()-def_un_size;
       if (dist<0) {
 	QVector delta  = pos-un->Position();
