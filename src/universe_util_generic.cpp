@@ -20,6 +20,7 @@
 #include "vsfilesystem.h"
 #include "cmd/unit_util.h"
 #include "networking/netserver.h"
+#include "cmd/csv.h"
 
 //extern class Music *muzak;
 //extern unsigned int AddAnimation (const QVector & pos, const float size, bool mvolatile, const std::string &name, float percentgrow );
@@ -548,6 +549,23 @@ namespace UniverseUtil {
 				Unit* launch (string name_string,string type_string,string faction_string,string unittype, string ai_string,int nr_of_ships,int nr_of_waves, QVector pos, string sqadlogo){
 						return launchJumppoint(name_string,faction_string,type_string,unittype,ai_string,nr_of_ships,nr_of_waves,pos,sqadlogo,"");
 				}
+
+	string LookupUnitStat(string unitname, string faction, string statname){
+		string hashname=unitname+"__"+faction;
+		unsigned int where; //gets munged
+		for (vector<CSVTable*>::reverse_iterator i=unitTables.rbegin();i!=unitTables.rend();++i) {
+			unsigned int where;
+			if ((*i)->RowExists(hashname,where)) {
+				return CSVRow((*i),where)[statname]; 
+			}else if ((*i)->RowExists(unitname,where)) {
+				return CSVRow((*i),where)[statname];
+			}
+		} 
+		return "";
+	}
+
+
+	
                                 static std::vector <Unit *> cachedUnits;
 				void precacheUnit (string type_string,string faction_string){
                                   cachedUnits.push_back(UnitFactory::createUnit(type_string.c_str(),true,FactionUtil::GetFactionIndex(faction_string)));
@@ -674,8 +692,8 @@ namespace UniverseUtil {
 						}
 				  }
 
-void	ComputeGalaxySerials( std::vector<std::string> & stak)
-{
+	void	ComputeGalaxySerials( std::vector<std::string> & stak)
+	{
 	cout<<"Going through "<<stak.size()<<" sectors"<<endl;
 	cout<<"Generating random serial numbers :"<<endl;
 	static string sysdir = vs_config->getVariable("data","sectors","sectors");
@@ -692,7 +710,7 @@ void	ComputeGalaxySerials( std::vector<std::string> & stak)
 		ComputeSystemSerials( sys);
 	}
 	cout<<"Computing done."<<endl;
-}
+	}
 }
 
 #undef activeSys

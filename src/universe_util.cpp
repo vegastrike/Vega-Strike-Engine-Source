@@ -30,20 +30,6 @@ using std::string;
 
 namespace UniverseUtil {
 
-	string LookupUnitStat(string unitname, string faction, string statname){
-	  string hashname=unitname+"__"+faction;
-	  unsigned int where; //gets munged
-	  for (vector<CSVTable*>::reverse_iterator i=unitTables.rbegin();i!=unitTables.rend();++i) {
-		unsigned int where;
-		if ((*i)->RowExists(hashname,where)) {
-          return CSVRow((*i),where)[statname]; 
-		}else if ((*i)->RowExists(unitname,where)) {
-          return CSVRow((*i),where)[statname];
-		}
-	  } 
-	  return "";
-	}
-
 	void playVictoryTune () {
 	  static string newssong=vs_config->getVariable("audio","missionvictorysong","../music/victory.ogg");
 	  muzak->GotoSong(newssong);
