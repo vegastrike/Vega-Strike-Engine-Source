@@ -686,9 +686,19 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
     }else {
       char *s=strdup (alpha);
       char *d=strdup (alpha);
-      sscanf (alpha,"%s %s",s,d);
-      blendSrc = parse_alpha (s);
-      blendSrc = parse_alpha (d);
+      if (2==sscanf (alpha,"%s %s",s,d)) {
+	if (strcmp(s,"true")==0) {
+	  blendSrc=SRCALPHA;
+	  blendDst=INVSRCALPHA;
+	}else {
+	  blendSrc = parse_alpha (s);
+
+	  blendDst = parse_alpha (d);
+	}
+      }else {
+	blendSrc=SRCALPHA;
+	blendDst=INVSRCALPHA;
+      }
       free (s);
       free (d);
     }

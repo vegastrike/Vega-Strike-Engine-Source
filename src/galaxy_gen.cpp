@@ -595,7 +595,14 @@ void MakePlanet(float radius, int entitytype, bool forceRS, Vector R, Vector S, 
     }
   }
   Tab();
-  fprintf (fp,"<Planet name=\"%s\" file=\"%s\" ",thisname.c_str(),entitytype==JUMP?"jump.png":s.c_str());
+  int pos = s.find ("^");
+  if (pos==string::npos||entitytype==JUMP) {
+    fprintf (fp,"<Planet name=\"%s\" file=\"%s\" ",thisname.c_str(),entitytype==JUMP?"jump.png":s.c_str());
+  }else {
+    string pname= s.substr (0,pos);
+    string cname= s.substr (pos+1,s.length());
+    fprintf (fp,"<Planet name=\"%s\" file=\"%s\" citylights=\"%s\" ",thisname.c_str(),pname.c_str(),cname.c_str());
+  }
   fprintf (fp,"ri=\"%f\" rj=\"%f\" rk=\"%f\" si=\"%f\" sj=\"%f\" sk=\"%f\" ",r.i,r.j,r.k,SS.i,SS.j,SS.k);
   fprintf (fp,"radius=\"%f\" ",radius);
   fprintf (fp,"x=\"%f\" y=\"%f\" z=\"%f\" ",center.i,center.j,center.k);
