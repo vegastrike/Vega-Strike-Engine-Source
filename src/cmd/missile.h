@@ -52,7 +52,7 @@ protected:
         , detonation_radius(detonation_radius)
         , discharged(false)
         , retarget (-1)
-    { }
+    {maxhull*=10; }
 
   friend class UnitFactory;
 

@@ -33,6 +33,7 @@
 #include "in_kb.h"
 #include "cmd/script/flightgroup.h"
 #include "load_mission.h"
+#include "gfx/particle.h"
 extern Music *muzak;
 extern Vector mouseline;
 
@@ -454,6 +455,7 @@ void StarSystem::Draw(bool DrawCockpit) {
   GFXFogMode (FOG_OFF);
   Animation::ProcessDrawQueue();
   Halo::ProcessDrawQueue();
+  particleTrail.DrawAndUpdate();
   stars->Draw();
   StarSystem::DrawJumpStars();
 

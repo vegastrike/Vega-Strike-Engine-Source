@@ -18,6 +18,10 @@ static void DoParticles (QVector pos, float percent, const Vector & velocity, fl
 								       "sparklescale",
 								       
 								       "8"));
+  static float sspeed = XMLSupport::parse_float (vs_config->getVariable("graphics",
+								       "sparklespeed",
+								       
+								       ".5"));
   if (i<(RAND_MAX*percent)*(GetElapsedTime()*scale)) {
       ParticlePoint pp;
       float r1 = rand()/((float)RAND_MAX*.5)-1;
@@ -26,7 +30,7 @@ static void DoParticles (QVector pos, float percent, const Vector & velocity, fl
       pp.col.i=.6;
       pp.col.j=.6;
       pp.col.k=1;
-      particleTrail.AddParticle(pp,velocity*.9);
+      particleTrail.AddParticle(pp,velocity*sspeed);
     }
 }
   
@@ -70,7 +74,7 @@ void HaloSystem::Draw(const Matrix & trans, const Vector &scale, short halo_alph
       m.p = Transform (trans,i->loc);
       mesh->Draw(50000000000000.0,m,1,halo_alpha,nebdist);    
       if (hullpercent<.99) {
-	DoParticles(m.p,hullpercent,velocity,.5*mesh->rSize()*scale.i);
+	DoParticles(m.p,hullpercent,velocity,mesh->rSize()*scale.i);
       }
     }
   }
