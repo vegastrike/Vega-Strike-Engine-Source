@@ -76,7 +76,7 @@ std::string ParentDir () {
 }
 void GoToParentDir () {
   string par = ParentDir ();
-  fprintf (stderr,"changing to %s",par.c_str());
+  //  fprintf (stderr,"changing to %s",par.c_str());
   chdir (par.c_str());
 }
 int win_close( GtkWidget *w, void *)
@@ -99,7 +99,7 @@ void Help (const char *title, const char *text) {
 void save_stuff(char *filename) {
     FILE *file=fopen("../save.txt","wt");
     if (file) {
-      fprintf (file, "%s%c", filename,0);
+      //      fprintf (file, "%s%c", filename,0);
       fclose(file);
     } else {
       Help("Error","ERROR: Unable to open ../save.txt");
@@ -131,10 +131,13 @@ void launch_mission () {
   int player = my_mission.find ("player");
   if (player>0&&player!=string::npos) {
    char  num [4]={'-','m',(*(my_mission.begin()+(player-1))),'\0'};
-   fprintf (stderr,"./vegastrike %s %s",num,my_mission.c_str());
-   execlp ("./vegastrike",num,my_mission.c_str(),NULL);   
+   printf ("./vegastrike %s %s",num,my_mission.c_str());
+   fflush (stdout);
+   execlp ("./vegastrike","./vegastrike",num,my_mission.c_str(),NULL);   
   } else {
-    execlp ("./vegastrike",my_mission.c_str(),NULL);
+   printf ("./vegastrike %s",my_mission.c_str());
+   fflush (stdout);
+    execlp ("./vegastrike","./vegastrike",my_mission.c_str(),NULL);
   }
 }
 void file_mission_sel (GtkWidget *w, GtkFileSelection *fs) {
@@ -279,7 +282,7 @@ void LoadMissionDialog (char * Filename,int i) {
   chdir ("mission");
   char mypwd [1000];
   getcwd (mypwd,1000);
-  fprintf (stderr,mypwd);
+  //  fprintf (stderr,mypwd);
   LoadSaveFunction (Filename,i,(GtkSignalFunc) file_mission_sel,/*my_mission.c_str()*/""/*(ParentDir()+"/mission").c_str()*/);
 }
 #define HOMESUBDIR ".vegastrike"
