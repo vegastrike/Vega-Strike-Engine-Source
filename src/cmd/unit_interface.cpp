@@ -6,10 +6,15 @@
 #include "main_loop.h"
 #include "images.h"
 #include <algorithm>
+#include "gfx/cockpit.h"
+#include "savegame.h"
 #ifdef _WIN32
 #define strcasecmp stricmp
 #endif
 
+static float usedPrice (float percentage) {
+  return .66*percentage;
+}
 
 
 extern void SwitchUnits (Unit * ol, Unit * nw);
@@ -20,10 +25,18 @@ struct UpgradingInfo {
   Button *OK, *COMMIT;
   UnitContainer base;
   UnitContainer buyer;
+  //below are state variables while the user is selecting mounts
+  Unit * NewPart;
+  Unit * templ;
+  Cargo part;
+  int selectedmount;
+  int selectedturret;
+  //end it
   void ProcessMouse(int type, int x, int y, int button, int state);
-  int level;
+
   vector <Cargo> TempCargo;//used to store cargo list
   vector <Cargo> * CurrentList;
+  enum SubMode {NORMAL,MOUNT_MODE,SUBUNIT_MODE, CONFIRM_MODE}submode;
   enum BaseMode {BUYMODE,SELLMODE,MISSIONMODE,UPGRADEMODE,ADDMODE,DOWNGRADEMODE,SHIPDEALERMODE, MAXMODE} mode;
   Button *Modes[MAXMODE];
   string title;
@@ -35,25 +48,51 @@ struct UpgradingInfo {
     CurrentList = &GetCargoList();
     std::sort (CurrentList->begin(),CurrentList->end());
     CargoList->ClearList();
-    if (curcategory.length()!=0) {
-      if (mode==BUYMODE||mode==SELLMODE) 
-	CargoList->AddTextItem ("[Back To Categories]","[Back To Categories]");
-      for (int i=0;i<CurrentList->size();i++) {
-	if ((*CurrentList)[i].category==curcategory)
-	  CargoList->AddTextItem ((tostring(i)+ string(" ")+(*CurrentList)[i].content).c_str() ,(*CurrentList)[i].content.c_str());
-      }
-    } else {
-      string curcat=("");
-      CargoList->AddTextItem ("","");
-      for (int i=0;i<CurrentList->size();i++) {
-	if ((*CurrentList)[i].category!=curcat) {
-	  CargoList->AddTextItem ((*CurrentList)[i].category.c_str(),(*CurrentList)[i].category.c_str());
-	  curcat =((*CurrentList)[i].category);
+    if (submode==NORMAL) {
+      if (curcategory.length()!=0) {
+	if (mode==BUYMODE||mode==SELLMODE) 
+	  CargoList->AddTextItem ("[Back To Categories]","[Back To Categories]");
+	for (unsigned int i=0;i<CurrentList->size();i++) {
+	  if ((*CurrentList)[i].category==curcategory)
+	    CargoList->AddTextItem ((tostring((int)i)+ string(" ")+(*CurrentList)[i].content).c_str() ,(*CurrentList)[i].content.c_str());
 	}
-      }      
+      } else {
+	string curcat=("");
+	CargoList->AddTextItem ("","");
+	for (unsigned int i=0;i<CurrentList->size();i++) {
+	  if ((*CurrentList)[i].category!=curcat) {
+	    CargoList->AddTextItem ((*CurrentList)[i].category.c_str(),(*CurrentList)[i].category.c_str());
+	    curcat =((*CurrentList)[i].category);
+	  }
+	}      
+      }
+    }else {
+      Unit * un = buyer.GetUnit();
+      int i=0;
+      un_iter ui;
+      if (un) {
+	switch (submode) {
+	case MOUNT_MODE:
+	  for (;i<un->nummounts;i++) {
+	    CargoList->AddTextItem ((tostring(i)+un->mounts[i].type.weapon_name).c_str(),un->mounts[i].type.weapon_name.c_str());
+	  }
+	  break;
+	case SUBUNIT_MODE:
+	  for (ui=un->getSubUnits();(*ui)!=NULL;++ui,++i) {
+	    CargoList->AddTextItem ((tostring(i)+(*ui)->name).c_str(),(*ui)->name.c_str());
+	  }
+	  break;
+	case CONFIRM_MODE:
+	  CargoList->AddTextItem ("Yes","Yes");
+	  CargoList->AddTextItem ("No","No");
+	  break;
+	}
+      }else {
+	submode=NORMAL;
+      }
     }
   }
-  void SetMode (enum BaseMode mod) {
+  void SetMode (enum BaseMode mod, enum SubMode smod) {
     curcategory="";
     string ButtonText;
     switch (mod) {
@@ -86,13 +125,28 @@ struct UpgradingInfo {
       ButtonText="BuyShip";
       break;
     }
+    if (smod!=NORMAL) {
+      switch (smod) {
+      case MOUNT_MODE:
+	title="Select On Which Mount To Place Your Weapon";
+	break;
+      case SUBUNIT_MODE:
+	title="Select On Which Turret Mount To Place Your Turret";
+	break;
+      case CONFIRM_MODE:
+	break;
+      }
+    }
     COMMIT->ModifyName (ButtonText.c_str());
     mode = mod;
+    submode = smod;
     SetupCargoList();
   }
   UpgradingInfo(Unit * un, Unit * base):base(base),buyer(un),mode(BUYMODE),title("Buy Cargo"){
+    
 	CargoList = new TextArea(-1, 0.9, 1, 1.7, 1);
 	CargoInfo = new TextArea(0, 0.9, 1, 1.7, 0);
+	NewPart=NULL;
 	//	CargoList->AddTextItem("a","Just a test item");
 	//	CargoList->AddTextItem("b","And another just to be sure");
 	CargoInfo->AddTextItem("name", "");
@@ -120,9 +174,17 @@ struct UpgradingInfo {
 	}
 	CargoList->RenderText();
 	CargoInfo->RenderText();	
-	SetMode (BUYMODE);
+	SetMode (BUYMODE,NORMAL);
   }
   ~UpgradingInfo() {
+    if (templ){
+      templ->Kill();
+      templ=NULL;
+    }
+    if (NewPart) {
+      NewPart->Kill();
+      NewPart=NULL;
+    }
     base.SetUnit(NULL);
     buyer.SetUnit(NULL);
     delete CargoList;
@@ -146,6 +208,13 @@ struct UpgradingInfo {
 	}
 	EndGUIFrame();
   }
+  void SelectItem (const char * str);
+  void CommitItem (const char * str, int button, int state);
+  //this function is called after the mount is selected and stored in selected mount
+  void CompleteTransactionAfterMountSelect();
+  //this function is called after the turret is selected and stored in selected turret
+  void CompleteTransactionAfterTurretSelect();
+  void CompleteTransactionConfirm();
 } *upgr=NULL;
 
 
@@ -176,7 +245,192 @@ void Unit::UpgradeInterface(Unit * base) {
   upgr = new UpgradingInfo (this,base);
   GFXLoop (RefreshGUI);
 }
+void UpgradingInfo::SelectItem (const char *item) {
 
+
+}
+void UpgradingInfo::CommitItem (const char *input_buffer, int button, int state) {
+  Unit * un;
+  Unit * base;
+  unsigned int offset;
+  int quantity=(button==0)?1:(button==1?10000:10);
+  if (templ!=NULL) {
+    templ->Kill();
+    templ=NULL;
+  }
+  if (state==GLUT_DOWN&&(un=buyer.GetUnit())&&(base=this->base.GetUnit())) {
+  Unit * temprate= new Unit ((un->name+string(".template")).c_str(),false,un->faction);
+  if (temprate->name!=string("LOAD_FAILED")) {
+    templ=temprate;
+  }else {
+    templ=NULL;
+    temprate->Kill();
+  }
+  
+  switch (mode) {
+  case UPGRADEMODE:
+  case ADDMODE:
+  case DOWNGRADEMODE:    
+  case SHIPDEALERMODE:
+    switch(submode) {
+    case NORMAL:
+      {
+	Cargo *part = base->GetCargo (string(input_buffer), offset);
+       	if ((part?part->quantity:0) ||
+	    (mode==DOWNGRADEMODE&&(part=GetMasterPartList(input_buffer))!=NULL)) {
+	  this->part = *part;
+	  if (NewPart)
+	    NewPart->Kill();
+	  NewPart = new Unit (input_buffer,false,_Universe->GetFaction("upgrades"));
+	  NewPart->SetFaction(un->faction);
+	  if (NewPart->name==string("LOAD_FAILED")) {
+	    NewPart->Kill();
+	    NewPart = new Unit (input_buffer,false,un->faction);
+	  }
+	  if (NewPart->name!=string("LOAD_FAILED")) {
+	    if (mode==SHIPDEALERMODE&&part->price<=_Universe->AccessCockpit()->credits) {
+	      if (NewPart->nummesh>0) {
+		_Universe->AccessCockpit()->credits-=part->price;
+		NewPart->curr_physical_state=un->curr_physical_state;
+		NewPart->prev_physical_state=un->prev_physical_state;
+		_Universe->activeStarSystem()->AddUnit (NewPart);
+		_Universe->AccessCockpit()->SetParent(NewPart,input_buffer,"",un->curr_physical_state.position);//absolutely NO NO NO modifications...you got this baby clean off the slate
+		SwitchUnits (NULL,NewPart);
+		base->RequestClearance(NewPart);
+		NewPart->Dock(base);
+		buyer.SetUnit(NewPart);
+		SetSavedCredits (_Universe->AccessCockpit()->credits);
+		NewPart=NULL;
+		un->Kill();
+		return;
+	      }
+	    }
+	    if (mode!=SHIPDEALERMODE) {
+	      selectedmount=0;
+	      selectedturret=0;
+	      if (NewPart->nummounts) {
+		SetMode(mode,MOUNT_MODE);
+	      }else {
+		CompleteTransactionAfterMountSelect();
+	      }
+	    }
+	  } else {
+	    NewPart->Kill();
+	    NewPart=NULL;
+	  }
+	} else {
+	  if (NewPart->name==string("LOAD_FAILED")) {
+	    NewPart->Kill();
+	    NewPart=NULL;
+	  }
+	}
+      }
+      break;
+    case MOUNT_MODE:
+      sscanf (input_buffer,"%d",&selectedmount);
+      CompleteTransactionAfterMountSelect();
+      break;
+    case SUBUNIT_MODE:
+      sscanf (input_buffer,"%d",&selectedturret);
+      CompleteTransactionAfterTurretSelect();
+      break;
+    case CONFIRM_MODE:
+      if (0==strcmp ("Yes",input_buffer)) {
+	CompleteTransactionConfirm();
+      }else {
+	SetMode(mode,NORMAL);
+      }
+    }
+    break;
+  case BUYMODE:
+    if ((un=this->buyer.GetUnit())) {
+      if ((base=this->base.GetUnit())) {
+	un->BuyCargo (input_buffer,quantity,base,_Universe->AccessCockpit()->credits);
+      }
+    }
+    break;
+  case SELLMODE:
+    if ((un=this->buyer.GetUnit())) {
+      if ((base=this->base.GetUnit())) {
+	Cargo sold;
+	un->SellCargo (input_buffer,quantity,_Universe->AccessCockpit()->credits,sold,base);
+      }
+    }  
+    break;
+  case MISSIONMODE:
+
+    break;
+
+  }
+  }
+}
+
+
+void UpgradingInfo::CompleteTransactionAfterMountSelect() {
+    if (NewPart->getSubUnits().current()!=NULL) {
+      SetMode (mode,SUBUNIT_MODE);
+    }else {
+      selectedturret=0;
+      CompleteTransactionAfterTurretSelect();
+    }
+}
+
+void UpgradingInfo::CompleteTransactionAfterTurretSelect() {
+  int mountoffset = selectedmount;
+  int subunitoffset = selectedturret;
+  bool canupgrade=false;
+  double percentage;
+  Unit * un;
+  if ((un=buyer.GetUnit())) {
+    switch (mode) {
+    case UPGRADEMODE:
+    case ADDMODE:
+      canupgrade = un->canUpgrade (NewPart,mountoffset,subunitoffset,mode==ADDMODE,false,percentage,templ);
+      break;
+    case DOWNGRADEMODE:
+      canupgrade = un->canDowngrade (NewPart,mountoffset,subunitoffset,percentage);
+      break;
+    }
+    if (!canupgrade) {
+      title=(mode==DOWNGRADEMODE)?string ("You do not have exactly what you wish to sell. Continue?"):string("The upgrade cannot fit the frame of your starship. Continue?");
+      SetMode(mode,CONFIRM_MODE);
+    }else {
+      CompleteTransactionConfirm();
+    }
+  }
+}
+void UpgradingInfo::CompleteTransactionConfirm () {
+  double percentage;
+  int mountoffset = selectedmount;
+  int subunitoffset = selectedturret;
+  bool canupgrade;
+  float price;
+  Unit * un;
+  Unit * bas;
+  if ((un=buyer.GetUnit())) {
+    switch (mode) {
+    case UPGRADEMODE:
+    case ADDMODE:
+      canupgrade =un->canUpgrade (NewPart,mountoffset,subunitoffset,mode==ADDMODE,true,percentage,templ);
+      price =(float)(part.price*(1-usedPrice(percentage)));
+      if ((_Universe->AccessCockpit()->credits>price)) {
+	_Universe->AccessCockpit()->credits-=price;
+	un->Upgrade (NewPart,mountoffset,subunitoffset,mode==ADDMODE,true,percentage,templ);
+      }
+      break;
+    case DOWNGRADEMODE:
+      canupgrade = un->canDowngrade (NewPart,mountoffset,subunitoffset,percentage);
+      price =part.price*usedPrice(percentage);
+      _Universe->AccessCockpit()->credits+=price;
+      un->Downgrade (NewPart,mountoffset,subunitoffset,percentage);
+      if ((bas=base.GetUnit())) {
+	bas->AddCargo (part);
+      }
+      break;
+    }
+  }
+  SetMode (mode,NORMAL);
+}
 // type=1 is mouse click
 // type=2 is mouse drag
 // type=3 is mouse movement
@@ -198,9 +452,9 @@ void UpgradingInfo::ProcessMouse(int type, int x, int y, int button, int state) 
 		      SetupCargoList();
 		    }else {
 		      if (curcategory.length()!=0) {
-			if (buy_name != 0 && buy_name[0] != '\0') { CargoInfo->ChangeTextItem("name", (string("name: ")+buy_name).c_str()); }
-			else { CargoInfo->ChangeTextItem("name",""); }
-			CargoInfo->ChangeTextItem("price", "Price: Random. Hah.");
+			SelectItem (buy_name);//changes state/side bar price depedning on submode
+			//CargoInfo->ChangeTextItem("name", (string("name: ")+buy_name).c_str()); 
+			//CargoInfo->ChangeTextItem("price", "Price: Random. Hah.");
 		      }else {
 			curcategory=buy_name;
 			SetupCargoList();
@@ -214,24 +468,27 @@ void UpgradingInfo::ProcessMouse(int type, int x, int y, int button, int state) 
 	if (ours == 0) {
 		ours = OK->DoMouse(type, cur_x, cur_y, button, state);
 		if (ours == 1 && type == 1) {
-			restore_main_loop();
-			cout << "You clicked done\n";
+			printf ( "You clicked done\n");
 			delete upgr;
 			upgr=NULL;
+			restore_main_loop();
 		}
 	}	
 	if (ours == 0) {
 		ours = COMMIT->DoMouse(type, cur_x, cur_y, button, state);
 		if (ours == 1 && type == 1) {
 			buy_name = CargoList->GetSelectedItemName();
-			cout << "You are buying the " << buy_name << endl;
+			if (buy_name) {
+			  if (buy_name[0]) {
+			    CommitItem (buy_name,button,state);
+			  }
+			}
 		}
 	}
 	for (int i=0;i<UpgradingInfo::MAXMODE&&ours==0;i++) {
 	  ours = Modes[i]->DoMouse(type,cur_x,cur_y,button,state);
 	  if (ours==1&&type==1) {
-
-	    SetMode ((UpgradingInfo::BaseMode)i);
+	    SetMode ((UpgradingInfo::BaseMode)i,NORMAL);
 	  }
 
 	}

@@ -240,9 +240,6 @@ bool Unit::canDowngrade (Unit *downgradeor, int mountoffset, int subunitoffset, 
 bool Unit::Downgrade (Unit * downgradeor, int mountoffset, int subunitoffset,  double & percentage){
   return UpAndDownGrade(downgradeor,NULL,mountoffset,subunitoffset,true,true,false,true,percentage);
 }
-static float usedPrice (float percentage) {
-  return .66*percentage;
-}
 bool Unit::UpAndDownGrade (Unit * up, Unit * templ, int mountoffset, int subunitoffset, bool touchme, bool downgrade, bool additive, bool forcetransaction, double &percentage) {
   percentage=0;
   int numave=0;

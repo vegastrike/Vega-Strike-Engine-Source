@@ -106,7 +106,7 @@ class Unit {
   friend class ContinuousTerrain;
   ///VDU needs mount data to draw weapon displays
   friend class VDU;
-
+  friend class UpgradingInfo;//needed to actually upgrade unit through interface
  public:
   void SetNebula (Nebula *neb);
   inline Nebula * GetNebula () const{return nebula;}
