@@ -138,7 +138,16 @@ Planet::Planet(Vector x,Vector y,float vely, float pos,float gravity,float radiu
   terraintrans=NULL;
   meshdata = new Mesh*[2];
   static int stacks=XMLSupport::parse_int(vs_config->getVariable ("graphics","planet_detail","24"));
-  meshdata[0] = new SphereMesh(radius, stacks, stacks, textname, alpha,false,alpha!=NULL?SRCALPHA:ONE,alpha!=NULL?INVSRCALPHA:ZERO);
+  BLENDFUNC blendSrc=SRCALPHA;
+  BLENDFUNC blendDst=INVSRCALPHA;
+  if (!alpha) {
+    blendSrc=ONE;
+    blendDst=ZERO;
+  }else if (0==strcmp ("ONE ONE",alpha)) {
+    blendSrc = ONE;
+    blendDst = ONE;
+  }
+  meshdata[0] = new SphereMesh(radius, stacks, stacks, textname, alpha,false,blendSrc,blendDst);
   meshdata[0]->setEnvMap(GFXFALSE);
   meshdata[0]->SetMaterial (ourmat);
   nummesh = 1;
