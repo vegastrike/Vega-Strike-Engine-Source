@@ -27,6 +27,8 @@
 #include "animation.h"
 #include "mesh.h"
 #include "universe_util.h"
+#include "in_mouse.h"
+#include "gui/glut_support.h"
 extern float rand01();
 #define SWITCH_CONST .9
 
@@ -1138,6 +1140,23 @@ void Cockpit::Draw() {
         Panel.front()->Draw();//draw crosshairs
       }
     }
+  }
+  static bool mouseCursor = XMLSupport::parse_bool (vs_config->getVariable ("joystick","mouse_cursor","false"));
+  if (mouseCursor) {  
+    GFXBlendMode (SRCALPHA,INVSRCALPHA);
+    GFXColor4f (1,1,1,1);
+    
+    //    GFXEnable(TEXTURE0);
+    //    GFXDisable (DEPTHTEST);
+    //    GFXDisable(TEXTURE1);
+    static int revspr = XMLSupport::parse_bool (vs_config->getVariable ("joystick","reverse_mouse_spr","true"))?1:-1;
+    static string blah = vs_config->getVariable("joystick","mouse_crosshair","crosshairs.spr");
+    static Sprite MouseSprite (blah.c_str(),BILINEAR,GFXTRUE);
+    MouseSprite.SetPosition (-1+float(mousex)/(.5*g_game.x_resolution),-revspr+float(revspr*mousey)/(.5*g_game.y_resolution));
+    
+    MouseSprite.Draw();
+    //    DrawGlutMouse(mousex,mousey,&MouseSprite);
+    //    DrawGlutMouse(mousex,mousey,&MouseSprite);
   }
   RestoreViewPort();
   GFXBlendMode (ONE,ZERO);

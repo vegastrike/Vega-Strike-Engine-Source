@@ -72,7 +72,7 @@ VegaConfig::VegaConfig(char *configfile){
     }
   }
 
-  for(int i=0;i<=3;i++){
+  for(int i=0;i<=MAX_AXES;i++){
     axis_axis[i]=-1;
     axis_joy[i]=-1;
   }
@@ -558,16 +558,20 @@ void VegaConfig::doBindings(configNode *node){
 void VegaConfig::doAxis(configNode *node){
 
   string name=node->attr_value("name");
-  string joystick=node->attr_value("joystick");
+  string myjoystick=node->attr_value("joystick");
   string axis=node->attr_value("axis");
   string invertstr=node->attr_value("inverse");
+  string mouse_str=node->attr_value("mouse");
 
-  if(name.empty() || joystick.empty() || axis.empty()){
+  if(name.empty() || (mouse_str.empty()&&myjoystick.empty()) || axis.empty()){
     cout << "no correct axis desription given " << endl;
     return;
   }
 
-  int joy_nr=atoi(joystick.c_str());
+  int joy_nr=atoi(myjoystick.c_str());
+  if (!mouse_str.empty()) {
+    joy_nr = MOUSE_JOYSTICK;
+  }
   int axis_nr=atoi(axis.c_str());
 
   // no checks for correct number yet 
@@ -578,24 +582,25 @@ void VegaConfig::doAxis(configNode *node){
   }
 
   if(name=="x"){
-    axis_axis[0]=axis_nr;
     axis_joy[0]=joy_nr;
-    axis_inverse[0]=inverse;
+    joystick[joy_nr]->axis_axis[0]=axis_nr;
+    joystick[joy_nr]->axis_inverse[0]=inverse;
   }
   else if(name=="y"){
-    axis_axis[1]=axis_nr;
     axis_joy[1]=joy_nr;
-    axis_inverse[1]=inverse;
+    joystick[joy_nr]->axis_axis[1]=axis_nr;
+    joystick[joy_nr]->axis_inverse[1]=inverse;
   }
   else if(name=="z"){
-    axis_axis[2]=axis_nr;
     axis_joy[2]=joy_nr;
-    axis_inverse[2]=inverse;
+    joystick[joy_nr]->axis_axis[2]=axis_nr;
+    joystick[joy_nr]->axis_inverse[2]=inverse;
   }
   else if(name=="throttle"){
-    axis_axis[3]=axis_nr;
     axis_joy[3]=joy_nr;
-    axis_inverse[3]=inverse;
+    joystick[joy_nr]->axis_axis[3]=axis_nr;
+    joystick[joy_nr]->axis_inverse[3]=inverse;
+
   }
   else if(name=="hatswitch"){
     string nr_str=node->attr_value("nr");

@@ -938,9 +938,9 @@ void Unit::Draw(const Transformation &parent, const Matrix &parentMatrix)
     }
   
     if(selected) {
-      static bool doInputDFA=XMLSupport::parse_bool (vs_config->getVariable ("graphics","MouseCursor","false"));
-      if (doInputDFA)
-	image->selectionBox->Draw(g_game.x_resolution,*ctm);
+      //      static bool doInputDFA=XMLSupport::parse_bool (vs_config->getVariable ("graphics","MouseCursor","false"));
+      //      if (doInputDFA)
+      //	image->selectionBox->Draw(g_game.x_resolution,*ctm);
     }
   } else {
 	  _Universe->AccessCockpit()->SetupViewPort();///this is the final, smoothly calculated cam

@@ -316,32 +316,25 @@ void StartGUIFrame(GFXBOOL clr) {
   GFXDisable (TEXTURE1);
   GFXEnable (TEXTURE0);
 }
-static void DrawMouse(int mousex, int mousey, bool drawmouseover) {
-  static Sprite MouseOverSprite ("mouseover.spr",BILINEAR,GFXTRUE);
+void DrawGlutMouse(int mousex, int mousey, Sprite * spr) {
   GFXBlendMode (SRCALPHA,INVSRCALPHA);
   GFXColor4f (1,1,1,1);
 
   GFXEnable(TEXTURE0);
   GFXDisable (DEPTHTEST);
   GFXDisable(TEXTURE1);
-  float sizex,sizey;
-  if (drawmouseover) {
-    static Sprite MouseOverSprite ("mouseover.spr",BILINEAR,GFXTRUE);
-    MouseOverSprite.GetSize(sizex,sizey);
-    MouseOverSprite.SetPosition(-1+.5*sizex+float(mousex)/(.5*g_game.x_resolution),1+.5*sizey-float(mousey)/(.5*g_game.y_resolution));
-    MouseOverSprite.Draw();
-  } else {
-    static Sprite MouseSprite ("mouse.spr",BILINEAR,GFXTRUE);
-    MouseSprite.GetSize(sizex,sizey);
-    MouseSprite.SetPosition(-1+.5*sizex+float(mousex)/(.5*g_game.x_resolution),1+.5*sizey-float(mousey)/(.5*g_game.y_resolution));
-    MouseSprite.Draw();
-  }
+  float sizex=0,sizey=0;
+  spr->GetSize(sizex,sizey);
+  spr->SetPosition(-1+.5*sizex+float(mousex)/(.5*g_game.x_resolution),1+.5*sizey-float(mousey)/(.5*g_game.y_resolution));
+  spr->Draw();
 }
 
 void EndGUIFrame(bool drawmouseover) {
+  static Sprite MouseOverSprite ("mouseover.spr",BILINEAR,GFXTRUE);
+  static Sprite MouseSprite ("mouse.spr",BILINEAR,GFXTRUE);
   static Texture dummy ("white.bmp",0,NEAREST,TEXTURE2D,TEXTURE_2D,GFXTRUE);
   dummy.MakeActive();
-  DrawMouse(mmx,mmy,drawmouseover);
+  DrawGlutMouse(mmx,mmy,drawmouseover?&MouseOverSprite:&MouseSprite);
   //  GFXEndScene();bad things...only call this once
   GFXHudMode(false);
   GFXEnable (CULLFACE);

@@ -33,6 +33,12 @@
 #include "config_xml.h"
 #include "in_mouse.h"
 JoyStick *joystick[MAX_JOYSTICKS]; // until I know where I place it
+JoyStick::JoyStick () {
+  for (int j=0;j<MAX_AXES;++j) {
+    axis_axis[j]=-1;
+    axis_inverse[j]=false;
+  }
+}
 
 void InitJoystick(){
   int i;
@@ -48,6 +54,7 @@ void InitJoystick(){
     }
   }
   for(int j=0;j<MAX_JOYSTICKS;j++){
+
     for(int h=0;h<MAX_DIGITAL_HATSWITCHES;h++){
       for(int v=0;v<MAX_DIGITAL_VALUES;v++){
 	UnbindDigitalHatswitchKey(j,h,v);
@@ -71,6 +78,8 @@ void InitJoystick(){
     }
 #endif
     joystick[i]=new JoyStick(i); // SDL_Init is done in main.cpp
+    
+
   }
 }
 

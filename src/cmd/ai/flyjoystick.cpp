@@ -75,12 +75,14 @@ void FlyByJoystick::Execute() {
       joy_nr = which_joystick;
     }
     if( joy_nr!= -1 && joystick[joy_nr]->isAvailable()){
-      int config_axis=vs_config->axis_axis[AXIS_Y];
-      bool inverse=vs_config->axis_inverse[AXIS_Y];
+      int config_axis=joystick[joy_nr]->axis_axis[AXIS_Y];
+      if (config_axis!=-1) {
+      bool inverse=joystick[joy_nr]->axis_inverse[AXIS_Y];
       float axis_value=- joystick[joy_nr]->joy_axis[config_axis];
       if(inverse) { axis_value= - axis_value; }
 
       Up( axis_value);
+      }
     }
 
     joy_nr=vs_config->axis_joy[AXIS_X];
@@ -89,12 +91,14 @@ void FlyByJoystick::Execute() {
     }
 
     if( joy_nr != -1 && joystick[joy_nr]->isAvailable() ){
-      int config_axis=vs_config->axis_axis[AXIS_X];
-      bool inverse=vs_config->axis_inverse[AXIS_X];
+      int config_axis=joystick[joy_nr]->axis_axis[AXIS_X];
+      if (config_axis!=-1) {
+      bool inverse=joystick[joy_nr]->axis_inverse[AXIS_X];
       float axis_value=- joystick[joy_nr]->joy_axis[config_axis];
       if(inverse) { axis_value= - axis_value; }
 
       Right( axis_value);
+      }
     }
 
     joy_nr=vs_config->axis_joy[AXIS_Z];
@@ -103,12 +107,15 @@ void FlyByJoystick::Execute() {
     }
 
     if( joy_nr!= -1 && joystick[joy_nr]->isAvailable()){
-      int config_axis=vs_config->axis_axis[AXIS_Z];
-      bool inverse=vs_config->axis_inverse[AXIS_Z];
+      int config_axis=joystick[joy_nr]->axis_axis[AXIS_Z];
+      if (config_axis!=-1) {
+      bool inverse=joystick[joy_nr]->axis_inverse[AXIS_Z];
       float axis_value=- joystick[joy_nr]->joy_axis[config_axis];
       if(inverse) { axis_value= - axis_value; }
 
+
       RollRight( axis_value );
+      }
     }
 
     joy_nr=vs_config->axis_joy[AXIS_THROTTLE];
@@ -117,12 +124,14 @@ void FlyByJoystick::Execute() {
     }
 
     if( joy_nr != -1 &&  joystick[joy_nr]->isAvailable()){
-      int config_axis=vs_config->axis_axis[AXIS_THROTTLE];
-      bool inverse=vs_config->axis_inverse[AXIS_THROTTLE];
+      int config_axis=joystick[joy_nr]->axis_axis[AXIS_THROTTLE];
+      if (config_axis!=-1) {
+      bool inverse=joystick[joy_nr]->axis_inverse[AXIS_THROTTLE];
       float axis_value=- joystick[joy_nr]->joy_axis[config_axis];
       if(inverse) { axis_value= - axis_value; }
 
       Accel( axis_value );
+      }
     }
 
   }

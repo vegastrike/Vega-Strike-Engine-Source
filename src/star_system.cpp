@@ -457,18 +457,18 @@ void StarSystem::Draw(bool DrawCockpit) {
   stars->Draw();
   StarSystem::DrawJumpStars();
 
-  static bool doInputDFA = XMLSupport::parse_bool (vs_config->getVariable ("graphics","MouseCursor","false"));
+  //  static bool doInputDFA = XMLSupport::parse_bool (vs_config->getVariable ("graphics","MouseCursor","false"));
 #ifdef UPDATEDEBUG
   fprintf (stderr,"cpDraw");
   fflush (stderr);
 #endif
   if (DrawCockpit) {
     _Universe->AccessCockpit()->Draw();
-    if (doInputDFA) {
-      GFXHudMode (true);
-      systemInputDFA->Draw();
-      GFXHudMode (false);
-    }
+    //    if (doInputDFA) {
+    //      GFXHudMode (true);
+    //      systemInputDFA->Draw();
+    //      GFXHudMode (false);
+    //    }
   }
 #ifdef UPDATEDEBUG
   fprintf (stderr,"end Draw\n");

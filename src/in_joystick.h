@@ -81,9 +81,10 @@ class JoyStick {
     int hat_margin;
     int player;
 #define MAX_AXES 8
-
+    bool axis_inverse[MAX_AXES];
+    int axis_axis[MAX_AXES];
     float joy_axis[MAX_AXES];
-
+    JoyStick();
 #if defined(IRIX)	// could be POSIX type uchar_t?
 	uchar_t digital_hat[MAX_DIGITAL_HATSWITCHES];
 #else
