@@ -65,7 +65,7 @@ class SocketSet : public VSThread
 #endif
 
     bool    _blockmain;
-    size_t  _blockmain_pending;
+    int     _blockmain_pending;
     fd_set  _blockmain_set;
     VSMutex _blockmain_mx;
     VSCond  _blockmain_cond;

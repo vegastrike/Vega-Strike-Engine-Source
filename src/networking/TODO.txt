@@ -59,7 +59,7 @@ DONE - Move the GetUniqueSerial use from accountserver to vegaserver
 DONE - In NetBuffer : turn string size into a u_short instead of int (and assert no string length > 0xFFFF
 DONE - Take a look at RegenShield() and RegenArmor and network enable them
 DONE - Add the player faction to SaveGame
-DONE ? Carsten - Compress sent data in Packet (_packetmem member)
+DONE - Carsten - Compress sent data in Packet (_packetmem member)
 DONE - Consider handle damages to docked ships if they can be hit
 DONE - split asteroids, enhancement, building, nebula into 2 classes
 DANIEL DONE in endianness.cpp - add htond and htond for doubles : they are completely reversed

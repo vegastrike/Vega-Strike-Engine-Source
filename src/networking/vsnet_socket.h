@@ -110,6 +110,12 @@ public:
     bool lt( const VsnetSocket& r ) const;
     bool sameAddress( const VsnetSocket& r ) const;
 
+    void allowCompress( bool allow );
+
+    inline bool isCompressAllowed( ) const {
+        return _allow_compress;
+    }
+
     virtual int  sendbuf( PacketMem& packet, const AddressIP* to, int pcktflags ) = 0;
 
     /** This function copies or moves data into the given PacketMem variable.
@@ -126,6 +132,7 @@ public:
 
 protected:
     AddressIP  _remote_ip; // IP address structure of remote server
+    bool       _allow_compress;
 
 private:
     VsnetSocket( );
@@ -196,6 +203,14 @@ public:
 
 	bool sameAddress( const SOCKETALT& l) const;
 	bool lowerAddress( const SOCKETALT& l) const;
+
+    inline void allowCompress( bool allow ) {
+        if( !_sock.isNull() ) _sock->allowCompress( allow );
+    }
+
+    inline bool isCompressAllowed( ) const {
+        return ( _sock.isNull() ? false : _sock->isCompressAllowed( ) );
+    }
 
     friend std::ostream& operator<<( std::ostream& ostr, const SOCKETALT& s );
     friend bool operator==( const SOCKETALT& l, const SOCKETALT& r );

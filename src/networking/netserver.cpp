@@ -65,6 +65,11 @@ int		nbchars;
 
 string	universe_file;
 
+const char* NetServer::_downloadSearchDirs[] = {
+    "/tmp/vs-server-data",
+    NULL
+};
+
 /**************************************************************/
 /**** Constructor / Destructor                             ****/
 /**************************************************************/
@@ -84,6 +89,9 @@ NetServer::NetServer()
 	// Here 500 could be something else between 1 and 0xFFFF
 	serial_seed = (ObjSerial) (rand()*(500./(((double)(RAND_MAX))+1)));
 	globalsave = new SaveGame("");
+
+    _downloadManagerServer.reset( new VsnetDownload::Server::Manager( _sock_set, _downloadSearchDirs ) );
+    _sock_set.addDownloadManager( _downloadManagerServer );
 }
 
 NetServer::~NetServer()
@@ -1123,7 +1131,7 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
 			// Add the client to the game
 			COUT<<">>> ADD REQUEST =( serial n°"<<packet.getSerial()<<" )= --------------------------------------"<<endl;
 			//COUT<<"Received ADDCLIENT request"<<endl;
-			this->addClient( clt );
+			this->addClient( clt, netbuf.getChar() );
 			COUT<<"<<< ADD REQUEST --------------------------------------------------------------"<<endl;
 			break;
 		case CMD_POSUPDATE:
@@ -1172,10 +1180,12 @@ void	NetServer::processPacket( ClientPtr clt, unsigned char cmd, const AddressIP
 		}
 		break;
         case CMD_DOWNLOAD :
+			COUT<<">>> CMD DOWNLOAD =( serial n°"<<packet.getSerial()<<" )= --------------------------------------"<<endl;
             if( _downloadManagerServer )
             {
                 _downloadManagerServer->addCmdDownload( clt->sock, netbuf );
             }
+			COUT<<"<<< CMD DOWNLOAD --------------------------------------------------------------"<<endl;
             break;
 		case CMD_FIREREQUEST :
 			// Here should put a flag on the concerned mount of the concerned Unit to say we want to fire
@@ -1382,7 +1392,7 @@ void	NetServer::checkSystem( ClientPtr clt)
 /**** Add a client in the game                             ****/
 /**************************************************************/
 
-void	NetServer::addClient( ClientPtr clt)
+void	NetServer::addClient( ClientPtr clt, char flags )
 {
 	Unit * un = clt->game_unit.GetUnit();
 	COUT<<">>> SEND ENTERCLIENT =( serial n°"<<un->GetSerial()<<" )= --------------------------------------"<<endl;
@@ -1429,9 +1439,19 @@ void	NetServer::addClient( ClientPtr clt)
 	// In all case set the zone and send the client the zone which it is in
 	COUT<<">>> SEND ADDED YOU =( serial n°"<<un->GetSerial()<<" )= --------------------------------------"<<endl;
 	un->SetZone( zoneid);
-	clt->ingame = true;
+	clt->ingame   = true;
+    clt->sock.allowCompress( false );
+    if( canCompress() && ( flags & CMD_CAN_COMPRESS ) )
+    {
+        clt->sock.allowCompress( true );
+    }
+    else
+    {
+        flags &= ~CMD_CAN_COMPRESS;
+    }
 	Packet pp;
 	netbuf.Reset();
+    netbuf.addChar( flags );
 	netbuf.addShort( zoneid);
 	netbuf.addString( _Universe->current_stardate.GetFullCurrentStarDate());
 	pp.send( CMD_ADDEDYOU, un->GetSerial(), netbuf.getData(), netbuf.getDataLength(), SENDRELIABLE, &clt->cltadr, clt->sock, __FILE__, PSEUDO__LINE__(1325) );

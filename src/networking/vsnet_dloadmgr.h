@@ -2,12 +2,15 @@
 #define VSNET_DLOADMGR_H
 
 #include <config.h>
+
 #include <string>
 #include <vector>
 #include <list>
 #include <queue>
+#include <iostream>
 
 #include "boost/shared_ptr.hpp"
+#include "boost/shared_array.hpp"
 
 #include "vsnet_headers.h"
 #include "vsnet_debug.h"
@@ -35,8 +38,12 @@ enum Subcommand
     UnexpectedSubcommand
 };
 
+std::ostream& operator<<( std::ostream& ostr, Subcommand e );
+
 namespace Client
 {
+
+class Manager;
 
 /*------------------------------------------------------------*
  * declaration VsnetDownload::Client::State
@@ -49,9 +56,11 @@ enum State
     Resolving,
     Resolved,
     Requested,
-    Acknowledged,
+    FragmentReceived,
     Completed
 };
+
+std::ostream& operator<<( std::ostream& ostr, State s );
 
 /*------------------------------------------------------------*
  * declaration VsnetDownload::Client::Error
@@ -63,8 +72,11 @@ enum Error
     SocketError,
     FileNotFound,
     LocalPermissionDenied,
-    RemotePermissionDenied
+    RemotePermissionDenied,
+    DownloadInterrupted
 };
+
+std::ostream& operator<<( std::ostream& ostr, Error e );
 
 /*------------------------------------------------------------*
  * declaration VsnetDownload::Client::Notify
@@ -76,6 +88,8 @@ public:
     virtual void notify( State s, Error e ) = 0;
 };
 
+typedef boost::shared_ptr<Notify> NotifyPtr;
+
 /*------------------------------------------------------------*
  * declaration VsnetDownload::Client::Item
  *------------------------------------------------------------*/
@@ -83,13 +97,17 @@ public:
 class Item
 {
 public:
-    Item( SOCKETALT sock, const std::string& filename, Notify* notify = NULL);
+    Item( SOCKETALT sock, const std::string& filename, NotifyPtr notify = NotifyPtr() );
+    virtual ~Item( );
 
     State state( ) const;
     Error error( ) const;
 
     void changeState( State s );
     void changeState( State s, Error e );
+
+    virtual void setSize( int len ) = 0;
+    virtual void append( unsigned char* buffer, int bufsize ) = 0;
 
     const std::string& getFilename( ) const;
     SOCKETALT          getSock() const;
@@ -102,12 +120,8 @@ private:
     mutable VSMutex _mx;
     State           _state;
     Error           _error;
-    Notify*         _notify;
+    NotifyPtr       _notify;
 };
-
-/* Introduce typedef boost::shared_ptr<Item> ItemPtr when it is
- * better understood.
- */
 
 /*------------------------------------------------------------*
  * declaration VsnetDownload::Client::File
@@ -119,10 +133,18 @@ public:
     File( SOCKETALT          sock,
           const std::string& filename,
           std::string        localbasepath,
-          Notify*            notify = NULL);
+          NotifyPtr          notify = NotifyPtr() );
+
+    virtual ~File( );
+
+    virtual void setSize( int len );
+    virtual void append( unsigned char* buffer, int bufsize );
 
 private:
-    std::string _localbasepath;
+    std::string    _localbasepath;
+    std::ofstream* _of;
+    int            _len;
+    int            _offset;
 };
 
 /*------------------------------------------------------------*
@@ -131,10 +153,46 @@ private:
 
 class Buffer : public Item
 {
+    typedef unsigned char uchar;
+
 public:
     Buffer( SOCKETALT          sock,
             const std::string& filename,
-            Notify*            notify = NULL );
+            NotifyPtr          notify = NotifyPtr() );
+
+    virtual ~Buffer( );
+
+    boost::shared_array<uchar> getBuffer( ) const;
+
+    virtual void setSize( int len );
+    virtual void append( unsigned char* buffer, int bufsize );
+
+private:
+    boost::shared_array<uchar> _buf;
+    int                        _len;
+    int                        _offset;
+};
+
+/*------------------------------------------------------------*
+ * declaration VsnetDownload::Client::TestItem
+ *------------------------------------------------------------*/
+
+class TestItem : public Item, public Notify
+{
+public:
+    TestItem( SOCKETALT sock,
+              const std::string& filename );
+
+    virtual ~TestItem( ) { }
+
+    virtual void setSize( int len );
+    virtual void append( unsigned char* buffer, int bufsize );
+
+    virtual void notify( State s, Error e );
+
+private:
+    int _len;
+    int _offset;
 };
 
 /*------------------------------------------------------------*
@@ -166,6 +224,11 @@ public:
     void lower_check_queues( );
 
 private:
+    /** process a ResolveResponse */
+    void private_eval_resolve_response( SOCKETALT sock, NetBuffer& buffer );
+    void private_eval_download_error( SOCKETALT sock, NetBuffer& respbuffer );
+    void private_eval_download( SOCKETALT sock, NetBuffer& buffer, Subcommand sc );
+
     /** lower - called only in the network thread
      */
     void private_lower_poll( );
@@ -173,13 +236,23 @@ private:
     /** lower   - called only in the network thread
      *  private - called only internally.
      */
-    bool lower_private_test_access( Item* i );
+    bool private_lower_test_access( Item* i );
 
 private:
     typedef std::list<Item*>                                  ItemList;
+    typedef std::map<SOCKETALT,ItemList,SOCKETALT::CompareLt> ItemListMap;
+    typedef std::map<string,Item*>                            ItemMap;
+    typedef std::map<SOCKETALT,ItemMap,SOCKETALT::CompareLt>  ItemMapMap;
+    typedef std::map<SOCKETALT,Item*,SOCKETALT::CompareLt>    ItemSockMap;
+
+    typedef std::pair<string,Item*>                           ItemPair;
+    typedef std::pair<SOCKETALT,Item*>                        ItemSockPair;
+
     typedef ItemList::iterator                                ItemList_I;
-    typedef std::map<SOCKETALT,ItemList,SOCKETALT::CompareLt> ItemMap;
+    typedef ItemListMap::iterator                             ItemListMap_I;
     typedef ItemMap::iterator                                 ItemMap_I;
+    typedef ItemMapMap::iterator                              ItemMapMap_I;
+    typedef ItemSockMap::iterator                             ItemSockMap_I;
 
 private:
     SocketSet&               _set;
@@ -187,7 +260,47 @@ private:
 
     VSMutex           _pending_mx;
     std::queue<Item*> _pending;
-    ItemMap           _asked;
+    ItemMapMap        _asked;
+    ItemSockMap       _currentItems;
+};
+
+/*------------------------------------------------------------*
+ * declaration VsnetDownload::Client::FileSet
+ *------------------------------------------------------------*/
+
+/** We can't really support blocking until a set of files has been
+ *  downloaded inside this class. The problem is that the variables
+ *  that we must wait for exist in netserver, netclient and
+ *  accountserver, and they are called in several places and potentially
+ *  several threads.
+ *  Therefore the waiting itself should be handled in those classes.
+ *  This helper class allows a simple check.
+ *
+ *  Create a FileSet with the appropriate Manager, the socket to the
+ *  remote side that you want to use, the list of filenames as string,
+ *  and the existing(!) directory where you want to store the files.
+ *  Then call isDone() a couple of times. If it returns true, the downloads
+ *  are all completed (but they may have failed - if you need to check that,
+ *  add a function for reading the int values from the member variable
+ *  _files, 1 success, 0 failure).
+ */
+class FileSet
+{
+public:
+    FileSet( boost::shared_ptr<Manager> mgr,
+             SOCKETALT                  sock,
+             std::list<std::string>     filesnames,
+             std::string                localbasepath );
+
+    bool isDone( ) const;
+    void update( std::string s, bool v );
+
+private:
+    std::map<std::string,int> _files;
+    int                       _to_go;
+
+private:
+    class NotifyConclusion;
 };
 
 }; // namespace Client
@@ -261,7 +374,7 @@ private:
     bool           private_test_access( const std::string& s );
     std::ifstream* private_access( std::string& file );
     size_t         private_file_size( const std::string& file );
-    void           private_lower_try_push_queue( SOCKETALT sock, ItemQueuePtr q );
+    bool           private_lower_try_push_queue( SOCKETALT sock, ItemQueuePtr q );
 
 private:
     LOCALCONST_DECL(int,_packetWorkahead,5)

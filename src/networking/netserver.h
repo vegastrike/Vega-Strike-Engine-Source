@@ -21,6 +21,8 @@
 #ifndef __NETSERVER_H
 #define __NETSERVER_H
 
+#include <config.h> // for HAVE_ZLIB
+
 #include <vector>
 #include <list>
 #include <queue>
@@ -90,12 +92,13 @@ class NetServer
         queue<WaitListEntry> waitList;
 
         boost::shared_ptr<VsnetDownload::Server::Manager> _downloadManagerServer;
+        static const char*                                _downloadSearchDirs[];
 
 		bool			updateTimestamps( ClientPtr clt, Packet & p);
 		//void			loadConfig();					// Loads configuration from server.xml
 		void			authenticate( ClientPtr clt, AddressIP sernum, Packet& packet );	// Authenticate a connected client
 		void			posUpdate( ClientPtr clt);		// Update a client position
-		void			addClient( ClientPtr clt);		// Add the client in the game
+		void			addClient( ClientPtr clt, char flags );		// Add the client in the game
 		void			removeClient( ClientPtr clt);		// Remove the client from the game
 		void			checkSystem( ClientPtr clt);		// Check if the client has the good system file
 		ClientPtr       newConnection_udp( const AddressIP& ipadr);
@@ -139,6 +142,14 @@ class NetServer
 		void	sendJump( ObjSerial serial, bool ok);
 
 		friend class ZoneMgr;
+
+private:
+#ifdef HAVE_ZLIB_H
+        inline bool canCompress() const { return true; }
+#else
+        inline bool canCompress() const { return false; }
+#endif
+
 };
 
 //void	str_cat( char *res, char c, char *s);

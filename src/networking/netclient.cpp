@@ -70,6 +70,11 @@ string serverip;
 string serverport;
 typedef vector<Client *>::iterator VC;
 
+const char* NetClient::_downloadSearchPaths[] = {
+    "/tmp/vs-client-data",
+    NULL
+};
+
 /*************************************************************/
 /**** Tool functions                                      ****/
 /*************************************************************/
@@ -118,6 +123,10 @@ NetClient::NetClient()
 #ifdef NETCOMM
 	NetComm = new NetworkCommunication();
 #endif
+
+    _downloadManagerClient.reset( new VsnetDownload::Client::Manager( _sock_set, _downloadSearchPaths ) );
+    _sock_set.addDownloadManager( _downloadManagerClient );
+
 }
 
 NetClient::~NetClient()
@@ -680,6 +689,10 @@ int NetClient::recvMsg( Packet* outpacket )
 					this->PacketLoop( CMD_ASKFILE);
 				}
 				//globalsaves = FileUtil::GetSaveFromBuffer( p1.getData()+2*NAMELEN);
+
+                VsnetDownload::Client::TestItem* t;
+                t = new VsnetDownload::Client::TestItem( clt_sock, "TESTFILE" );
+                _downloadManagerClient->addItem( t );
 			}
             break;
 			case CMD_ASKFILE :
@@ -714,10 +727,12 @@ int NetClient::recvMsg( Packet* outpacket )
 			}
 			break;
             case CMD_DOWNLOAD :
+				COUT << endl;
                 if( _downloadManagerClient )
                 {
                     _downloadManagerClient->processCmdDownload( clt_sock, netbuf );
                 }
+                break;
             // Login failed
             case LOGIN_ERROR :
                 COUT<<">>> LOGIN ERROR =( DENIED )= ------------------------------------------------"<<endl;
@@ -765,13 +780,19 @@ int NetClient::recvMsg( Packet* outpacket )
                 this->removeClient( &p1 );
                 break;
             case CMD_ADDEDYOU :
-                COUT << ">>> " << local_serial << " >>> ADDED IN GAME =( serial n°"
-                     << packet_serial << " )= --------------------------------------" << endl;
-				// Get the zone id in the packet
-				this->zone = netbuf.getShort();
-				_Universe->current_stardate.Init( netbuf.getString());
-				cout<<"WE ARE ON STARDATE "<<_Universe->current_stardate.GetFullCurrentStarDate()<<endl;
-                //this->getZoneData( &p1 );
+                {
+                    COUT << ">>> " << local_serial << " >>> ADDED IN GAME =( serial n°"
+                         << packet_serial << " )= --------------------------------------" << endl;
+				    // Get the zone id in the packet
+                    char flags = netbuf.getChar( );
+                    if( flags & CMD_CAN_COMPRESS ) clt_sock.allowCompress( true );
+				    this->zone = netbuf.getShort();
+				    _Universe->current_stardate.Init( netbuf.getString());
+				    cout << "WE ARE ON STARDATE "
+                         <<_Universe->current_stardate.GetFullCurrentStarDate() << endl;
+                    COUT << "Compression: " << ( (flags & CMD_CAN_COMPRESS) ? "yes" : "no" ) << endl;
+                    //this->getZoneData( &p1 );
+                }
                 break;
             case CMD_DISCONNECT :
                 /*** TO REDO IN A CLEAN WAY ***/
@@ -1330,18 +1351,22 @@ void	NetClient::receivePosition( const Packet* packet )
 
 void	NetClient::inGame()
 {
-	Packet packet2;
-	//NetBuffer netbuf;
+	Packet    packet2;
+	NetBuffer netbuf;
+    char      flags = 0;
+    if( canCompress() ) flags |= CMD_CAN_COMPRESS;
+    netbuf.addChar( flags );
 
 	//ClientState cs( this->serial, this->game_unit.GetUnit()->curr_physical_state, this->game_unit.GetUnit()->Velocity, Vector(0,0,0), 0);
 	// HERE SEND INITIAL CLIENTSTATE !! NOT NEEDED ANYMORE -> THE SERVER ALREADY KNOWS
 	//netbuf.addClientState( cs);
 	packet2.send( CMD_ADDCLIENT, this->serial,
-                  NULL, 0,
+                  netbuf.getData(), netbuf.getDataLength(),
                   SENDRELIABLE, NULL, this->clt_sock,
                   __FILE__, PSEUDO__LINE__(1307) );
 	this->game_unit.GetUnit()->SetSerial( this->serial);
-	COUT<<"Sending ingame with serial n°"<<this->serial<<endl;
+	COUT << "Sending ingame with serial n°" << this->serial
+         << " " << (canCompress() ? "(compress)" : "(no compress)") <<endl;
 	this->ingame = true;
 }
 

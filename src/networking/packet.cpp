@@ -56,28 +56,28 @@ bool Packet::packet_uncompress( PacketMem& outpacket, const unsigned char* src, 
     zlib_errcode = ::uncompress( dest, &ulen_l, src, sz );
     if( zlib_errcode != Z_OK )
     {
-	COUT << "Compressed packet not correctly received, "
-	     << "decompression failed" << endl;
+        COUT << "Compressed packet not correctly received, "
+             << "decompression failed" << endl;
         return false;
     }
     else if( ulen_l != ulen_s )
     {
-	COUT << "Compressed packet not correctly received, "
-	     << "expected len " << ulen_s << ", "
-	     << "received len " << ulen_l << endl;
+        COUT << "Compressed packet not correctly received, "
+             << "expected len " << ulen_s << ", "
+             << "received len " << ulen_l << endl;
         return false;
     }
     else
     {
-	outpacket = mem;
-	header.data_length = ulen_s;
+	    outpacket = mem;
+	    header.data_length = ulen_s;
 
-	COUT << "Parsed a compressed packet with"
-	     << " cmd=" << Cmd(header.command) << "(" << (int)header.command << ")"
-	     << " ser=" << header.serial
-	     << " ts=" << header.timestamp
-	     << " len=" << header.data_length
-	     << endl;
+	    COUT << "Parsed a compressed packet with"
+	         << " cmd=" << Cmd(header.command) << "(" << (int)header.command << ")"
+	         << " ser=" << header.serial
+	         << " ts=" << header.timestamp
+	         << " len=" << header.data_length
+	         << endl;
         return true;
     }
 }
@@ -92,7 +92,7 @@ Packet::Packet( const void* buffer, size_t sz )
 {
     if( sz >= header_length )
     {
-	h.ntoh( buffer );
+	    h.ntoh( buffer );
 
         sz -= header_length;
         if( h.data_length > sz )
@@ -100,35 +100,35 @@ Packet::Packet( const void* buffer, size_t sz )
             COUT << "Packet not correctly received, not enough data for buffer" << endl
 	         << "    should be still " << h.data_length
                  << " but buffer has only " << sz << endl;
-	    display( __FILE__, __LINE__NOMSC );
+	        display( __FILE__, __LINE__NOMSC );
         }
-	else if( h.flags & COMPRESSED )
-	{
-#ifdef HAVE_ZLIB_H
-	    if( packet_uncompress( _packet,
-	                           (const unsigned char*)buffer,
-			           h.data_length,
-			           h ) == false )
+	    else if( h.flags & COMPRESSED )
 	    {
-		    display( __FILE__, __LINE__NOMSC );
-	    }
+#ifdef HAVE_ZLIB_H
+	        if( packet_uncompress( _packet,
+	                               (const unsigned char*)buffer,
+			                       h.data_length,
+			                       h ) == false )
+	        {
+		        display( __FILE__, __LINE__NOMSC );
+	        }
 #else /* HAVE_ZLIB_H */
             COUT << "Received compressed packet, but compiled without zlib" << endl;
-	    display( __FILE__, __LINE__NOMSC );
+	        display( __FILE__, __LINE__NOMSC );
 #endif /* HAVE_ZLIB_H */
-	}
-	else
-	{
+	    }
+	    else
+	    {
             PacketMem mem( buffer, sz );
             _packet = mem;
 
-	    COUT << "Parsed a packet with"
-	         << " cmd=" << Cmd(h.command) << "(" << (int)h.command << ")"
-	         << " ser=" << h.serial
-	         << " ts=" << h.timestamp
-	         << " len=" << h.data_length
-	         << endl;
-	}
+	        COUT << "Parsed a packet with"
+	             << " cmd=" << Cmd(h.command) << "(" << (int)h.command << ")"
+	             << " ser=" << h.serial
+	             << " ts=" << h.timestamp
+	             << " len=" << h.data_length
+	             << endl;
+	    }
     }
     else
     {
@@ -142,42 +142,43 @@ Packet::Packet( PacketMem& buffer )
 {
     if( buffer.len() >= header_length )
     {
-	h.ntoh( buffer.getConstBuf() );
-	size_t sz = buffer.len();
+	    h.ntoh( buffer.getConstBuf() );
+	    size_t sz = buffer.len();
         sz -= header_length;
 
         if( h.data_length > sz )
         {
             COUT << "Packet not correctly received, not enough data for buffer" << endl
-	         << "    should be still " << h.data_length << " but buffer has only " << sz << endl;
-	    display( __FILE__, __LINE__NOMSC );
-        }
-	else if( h.flags & COMPRESSED )
-	{
-#ifdef HAVE_ZLIB_H
-	    if( packet_uncompress( _packet,
-	                           (const unsigned char*)buffer.getConstBuf(),
-			           h.data_length,
-			           h ) == false )
-	    {
+	             << "    should be still " << h.data_length
+                 << " but buffer has only " << sz << endl;
 	        display( __FILE__, __LINE__NOMSC );
-	    }
+        }
+	    else if( h.flags & COMPRESSED )
+	    {
+#ifdef HAVE_ZLIB_H
+	        if( packet_uncompress( _packet,
+	                               (const unsigned char*)buffer.getConstBuf(),
+			                       h.data_length,
+			                       h ) == false )
+	        {
+	            display( __FILE__, __LINE__NOMSC );
+	        }
 #else /* HAVE_ZLIB_H */
             COUT << "Received compressed packet, but compiled without zlib" << endl;
             display( __FILE__, __LINE__NOMSC );
 #endif /* HAVE_ZLIB_H */
-	}
-	else
-	{
+	    }
+	    else
+	    {
             _packet = buffer;
 
-	    COUT << "Parsed a packet with"
-	         << " cmd=" << Cmd(h.command) << "(" << (int)h.command << ")"
-	         << " ser=" << h.serial
-	         << " ts=" << h.timestamp
-	         << " len=" << h.data_length
-	         << endl;
-	}
+	        COUT << "Parsed a packet with"
+	             << " cmd=" << Cmd(h.command) << "(" << (int)h.command << ")"
+	             << " ser=" << h.serial
+	             << " ts=" << h.timestamp
+	             << " len=" << h.data_length
+	             << endl;
+	    }
     }
     else
     {
@@ -248,8 +249,8 @@ void    Packet::setNetwork( const AddressIP * dst, SOCKETALT sock)
 
 int Packet::send( Cmd cmd, ObjSerial nserial, char * buf, unsigned int length,
                   int prio, const AddressIP* dst,
-		  const SOCKETALT& sock, const char* caller_file,
-		  int caller_line )
+		          const SOCKETALT& sock, const char* caller_file,
+		          int caller_line )
 {
     create( cmd, nserial, buf, length, prio, dst, sock, caller_file, caller_line );
     return send( );
@@ -261,7 +262,7 @@ void Packet::create( Cmd cmd, ObjSerial nserial, char * buf,
                      const char* caller_file, int caller_line )
 {
     COUT << "enter " << __PRETTY_FUNCTION__ << endl
-	 << "*** from " << caller_file << ":" << caller_line << endl
+	     << "*** from " << caller_file << ":" << caller_line << endl
          << "*** send " << cmd << " ser=" << nserial << ", "
          << length << " bytes to socket " << sock << endl;
 
@@ -278,7 +279,7 @@ void Packet::create( Cmd cmd, ObjSerial nserial, char * buf,
 #ifdef HAVE_ZLIB_H
     bool packet_filled = false;
 
-    if( prio & COMPRESSED )
+    if( ( prio & COMPRESSED ) && sock.isCompressAllowed() )
     {
         size_t sz;   // complicated zlib rules for safety reasons
         sz = length + ( length/10 ) + 15 + header_length;

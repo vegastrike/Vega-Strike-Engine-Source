@@ -21,7 +21,7 @@
 #ifndef __NetClient_H
 #define __NetClient_H
 
-#include <config.h> // for NETCOMM
+#include <config.h> // for NETCOMM & ZLIB
 
 #include <string>
 #include <vector>
@@ -127,6 +127,7 @@ class	NetClient
 		float				selected_freq;
 
         boost::shared_ptr<VsnetDownload::Client::Manager> _downloadManagerClient;
+        static const char*                                _downloadSearchPaths[];
 
 		void	receiveData();
 		void	readDatafiles();
@@ -206,6 +207,13 @@ class	NetClient
 		float	getCurrentFrequency();
 
 		void	sendTextMessage( string message);
+
+    private:
+#ifdef HAVE_ZLIB_H
+        inline bool canCompress() const { return true; }
+#else
+        inline bool canCompress() const { return false; }
+#endif
 };
 
 #endif

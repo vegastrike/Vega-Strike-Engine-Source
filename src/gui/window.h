@@ -112,7 +112,7 @@ protected:
 class WindowManager
 {
 public:
-    friend Window;                  // Most operations here are done only by windows.
+    friend class Window;                  // Most operations here are done only by windows.
 
     // Draw all visible windows.  Return true if anything is drawn.
     bool draw();

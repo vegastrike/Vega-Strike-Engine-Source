@@ -217,9 +217,9 @@ protected:
     class SellUpgradeOperation;
     class OptionsMenu;
 
-    friend UpgradeOperation;
-    friend BuyUpgradeOperation;
-    friend SellUpgradeOperation;
+    friend class UpgradeOperation;
+    friend class BuyUpgradeOperation;
+    friend class SellUpgradeOperation;
 };
 
 #endif   // __BASECOMPUTER_H__

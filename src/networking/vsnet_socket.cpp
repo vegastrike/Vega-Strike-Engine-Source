@@ -141,6 +141,7 @@ bool SOCKETALT::lowerAddress( const SOCKETALT& right ) const
 VsnetSocket::VsnetSocket( int sock, const AddressIP& remote_ip, SocketSet& sets )
     : VsnetSocketBase( sock, sets )
     , _remote_ip( remote_ip )
+    , _allow_compress( false )
 {
 }
 
@@ -150,6 +151,11 @@ VsnetSocket::VsnetSocket( int sock, const AddressIP& remote_ip, SocketSet& sets 
     // _remote_ip = orig._remote_ip;
     // return *this;
 // }
+
+void VsnetSocket::allowCompress( bool allow )
+{
+    _allow_compress = allow;
+}
 
 bool VsnetSocket::eq( const VsnetSocket& r ) const
 {
