@@ -166,9 +166,9 @@ void AnimatedTexture::Load(FILE * fp, int stage, enum FILTER ismipmapped, bool d
 
   active=0;
   Decal = new Texture * [numframes];
-  char temp[512];
-  char file[512];
-  char alp[512];
+  char temp[512]="white.bmp";
+  char file[512]="white.bmp";
+  char alp[512]="white.bmp";
   int i=0;
   bool loadall=true;
   if (g_game.use_animations==0||(g_game.use_animations!=0&&g_game.use_textures==0)) {

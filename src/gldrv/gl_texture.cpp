@@ -186,7 +186,7 @@ void /*GFXDRVAPI*/ GFXAttachPalette (unsigned char *palette, int handle)
   ConvertPalette(textures[handle].palette, palette);
   //memcpy (textures[handle].palette,palette,768);
 }
-static void DownSampleTexture (unsigned char **newbuf,const unsigned char * oldbuf, int height, int width, int pixsize, int handle, int maxwidth,int maxheight,float newfade) {
+static void DownSampleTexture (unsigned char **newbuf,const unsigned char * oldbuf, int &height, int &width, int pixsize, int handle, int maxwidth,int maxheight,float newfade) {
   int i,j,k,l,m;
   if (MAX_TEXTURE_SIZE<maxwidth)
     maxwidth=MAX_TEXTURE_SIZE;
@@ -216,8 +216,8 @@ static void DownSampleTexture (unsigned char **newbuf,const unsigned char * oldb
     }
   }
   free (temp);
-  textures[handle].width=newwidth;
-  textures[handle].height=newheight;
+  width = newwidth;
+  height= newheight;
 } 
 
 
@@ -366,8 +366,6 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture (unsigned char *buffer, int handle,  TE
 			if (detailscale<0)
 				detailscale=0;
 			buffer=tempbuf;
-			width=newwidth;
-			height=newheight;
 		}
     }else {
       glTexImage2D(image2D, 0, internalformat, textures[handle].width, textures[handle].height, 0, textures[handle].textureformat, GL_UNSIGNED_BYTE, buffer);
