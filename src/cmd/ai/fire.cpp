@@ -130,7 +130,8 @@ bool FireAt::ShouldFire(Unit * targ, bool &missilelock) {
   if (targ==parent->Target()) {
     distance = dist;
   }
-  return (dist<agg&&angle>1/agg)||(parent->TrackingGuns(missilelock)&&dist<agg&&angle>0);
+  static float firewhen = XMLSupport::parse_float (vs_config->getVariable ("AI","Firing","InWeaponRange","1.2"));
+  return (dist<agg&&angle>1/agg)||(parent->TrackingGuns(missilelock)&&dist<firewhen&&angle>0);
 }
 
 FireAt::~FireAt() {
