@@ -233,7 +233,7 @@ void winsys_init( int *argc, char **argv, char *window_title,
     g_game.x_resolution = XMLSupport::parse_int (vs_config->getVariable ("graphics","x_resolution","1024"));     
     g_game.y_resolution = XMLSupport::parse_int (vs_config->getVariable ("graphics","y_resolution","768"));     
     gl_options.fullscreen = XMLSupport::parse_bool (vs_config->getVariable ("graphics","fullscreen","false"));
-    gl_options.color_depth = XMLSupport::parse_int (vs_config->getVariable ("graphics","colordepth","16"));
+    gl_options.color_depth = XMLSupport::parse_int (vs_config->getVariable ("graphics","colordepth","32"));
     /*
      * Initialize SDL
      */
@@ -653,7 +653,7 @@ void winsys_init( int *argc, char **argv, char *window_title,
     g_game.x_resolution = XMLSupport::parse_int (vs_config->getVariable ("graphics","x_resolution","1024"));     
     g_game.y_resolution = XMLSupport::parse_int (vs_config->getVariable ("graphics","y_resolution","768"));     
     gl_options.fullscreen = XMLSupport::parse_bool (vs_config->getVariable ("graphics","fullscreen","false"));
-    gl_options.color_depth = XMLSupport::parse_int (vs_config->getVariable ("graphics","colordepth","16"));
+    gl_options.color_depth = XMLSupport::parse_int (vs_config->getVariable ("graphics","colordepth","32"));
     glutInit( argc, argv );
 
 #ifdef USE_STENCIL_BUFFER
