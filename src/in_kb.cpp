@@ -182,6 +182,12 @@ static void glut_special_up_cb( int key, int x, int y )
 }
 */
 void RestoreKB() {
+  for(int a=0; a<KEYMAP_SIZE; a++) {
+    if (keyState[a]==DOWN) {
+      keyBindings[a](a,RELEASE);      
+      keyState[a] = UP;
+    }
+  }
   winsys_set_keyboard_func( glut_keyboard_cb );
 }
 
