@@ -37,7 +37,9 @@
 class EventManager
 {
 public:
-
+	// Use this instead of deleting, because other events that happen at the
+	// same time may delete the same object.
+	static void addToDeleteQueue (EventResponder *controlToDelete);
     // STATIC: Initialize the event manager.  This starts the event loop, etc.
     // This may be called more than once -- it does nothing after the
     //  first call.
@@ -72,15 +74,15 @@ protected:
     std::vector<EventResponder*> m_responders;  // Stack of responders for events.
     Point m_mouseLoc;                           // Current mouse point.
 
-
     // HACKS FOR WORKING WITH CURRENT EVENT SYSTEM
-protected:
     void checkForShutDownEventManager(void);     // Called to revert to old event management.
     void takeOverEventManagement(void);          // Called to grab event management from old system.
-
+public:
+	
     static void ProcessMouseClick(int button, int state, int x, int y);
     static void ProcessMouseActive(int x, int y);
     static void ProcessMousePassive(int x, int y);
+	
 };
 
 // Get the global instance of the event manager

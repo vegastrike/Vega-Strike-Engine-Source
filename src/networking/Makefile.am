@@ -31,46 +31,65 @@ soundserver_LDADD = -L/usr/local/lib -lSDL -lSDL_mixer
 soundserver_SOURCES = inet.cpp inet.h soundserver.cpp
 
 libnetgeneric = \
-	accountsxml.cpp			\
-	accountsxml.h			\
-	client.h				\
-	clientptr.h				\
+	accountsxml.cpp		\
+	accountsxml.h		\
+	acctserver.h		\
+	client.h		\
 	clientstructs.cpp		\
-	const.h					\
-	netui.cpp				\
-	netui.h					\
-	netbuffer.h				\
-	netbuffer.cpp			\
-	packetmem.cpp			\
-	packetmem.h				\
-	packet.cpp				\
-	packet.h				\
-	vsnet_debug.h			\
+	const.h		\
+	cubicsplines.cpp		\
+	cubicsplines.h		\
+	GCPtr.h		\
+	inet.cpp		\
+	inet.h		\
+	inet_file.cpp		\
+	inet_file.h		\
+	mangle.cpp		\
+	mangle.h		\
+	netbuffer.cpp		\
+	netbuffer.h		\
+	netclass.h		\
+	netclient.cpp		\
+	netclient.h		\
+	netserver.cpp		\
+	netserver.h		\
+	netui.cpp		\
+	netui.h		\
+	packet.cpp		\
+	packet.h		\
+	packetmem.cpp		\
+	packetmem.h		\
+	savenet_util.cpp		\
+	savenet_util.h		\
 	vsnet_address.cpp		\
-	vsnet_address.h			\
+	vsnet_address.h		\
+	vsnet_clientstate.h		\
+	vsnet_cmd.cpp		\
+	vsnet_cmd.h		\
+	vsnet_dloadmgr.cpp		\
+	vsnet_dloadmgr.h		\
+	vsnet_err.h		\
+	vsnet_pipe.cpp		\
+	vsnet_pipe.h		\
+	vsnet_queue.h		\
+	vsnet_serversocket.cpp		\
+	vsnet_serversocket.h		\
 	vsnet_socket.cpp		\
-	vsnet_socket.h			\
-	vsnet_socketudp.cpp		\
-	vsnet_socketudp.h		\
-	vsnet_sockettcp.cpp		\
-	vsnet_sockettcp.h		\
+	vsnet_socket.h		\
 	vsnet_socketset.cpp		\
 	vsnet_socketset.h		\
-	vsnet_cmd.cpp			\
-	vsnet_cmd.h				\
-	vsnet_clientstate.h		\
-	vsnet_serversocket.cpp	\
-	vsnet_serversocket.h	\
-    vsnet_thread_non.cpp    \
-    vsnet_thread_p.cpp      \
-    vsnet_thread_sdl.cpp    \
-    vsnet_thread.h          \
-    vsnet_pipe.cpp          \
-    vsnet_pipe.h            \
-    vsnet_dloadmgr.cpp      \
-    vsnet_dloadmgr.h        \
-	savenet_util.cpp		\
-	savenet_util.h
+	vsnet_sockettcp.cpp		\
+	vsnet_sockettcp.h		\
+	vsnet_socketudp.cpp		\
+	vsnet_socketudp.h		\
+	vsnet_thread.h		\
+	vsnet_thread_non.cpp		\
+	vsnet_thread_p.cpp		\
+	vsnet_thread_sdl.cpp		\
+	webcam_support.cpp		\
+	webcam_support.h		\
+	zonemgr.cpp		\
+	zonemgr.h
 
 libnetclientserver =	$(libnetgeneric) \
 	netserver.cpp		\

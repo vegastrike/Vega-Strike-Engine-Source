@@ -20,7 +20,10 @@
  */
 
 #include "vegastrike.h"
+#ifdef _WIN32
+// For WIN32 debugging.
 #include <crtdbg.h>
+#endif
 
 #include "basecomputer.h"
 
@@ -137,23 +140,23 @@ static const ModeInfo modeInfo[] = {
 //  some commands. Basically, you can make an entry for a particular control, and then
 //  later have an entry with an empty control id to cover the other cases.
 const BaseComputer::WctlTableEntry BaseComputer::WctlCommandTable[] = {
-    BaseComputer::WctlTableEntry ( "Picker::NewSelection", "NewsPicker", BaseComputer::newsPickerChangedSelection ),
-    BaseComputer::WctlTableEntry ( "Picker::NewSelection", "", BaseComputer::pickerChangedSelection ),
-    BaseComputer::WctlTableEntry ( modeInfo[CARGO].command, "", BaseComputer::changeToCargoMode ),
-    BaseComputer::WctlTableEntry ( modeInfo[UPGRADE].command, "", BaseComputer::changeToUpgradeMode ),
-    BaseComputer::WctlTableEntry ( modeInfo[SHIP_DEALER].command, "", BaseComputer::changeToShipDealerMode ),
-    BaseComputer::WctlTableEntry ( modeInfo[NEWS].command, "", BaseComputer::changeToNewsMode ),
-    BaseComputer::WctlTableEntry ( modeInfo[MISSIONS].command, "", BaseComputer::changeToMissionsMode ),
-    BaseComputer::WctlTableEntry ( modeInfo[PLAYER_INFO].command, "", BaseComputer::changeToPlayerInfoMode ),
-    BaseComputer::WctlTableEntry ( "BuyCargo", "", BaseComputer::buyCargo ),
-    BaseComputer::WctlTableEntry ( "SellCargo", "", BaseComputer::sellCargo ),
-    BaseComputer::WctlTableEntry ( "BuyUpgrade", "", BaseComputer::buyUpgrade ),
-    BaseComputer::WctlTableEntry ( "SellUpgrade", "", BaseComputer::sellUpgrade ),
-    BaseComputer::WctlTableEntry ( "BuyShip", "", BaseComputer::buyShip ),
-    BaseComputer::WctlTableEntry ( "AcceptMission", "", BaseComputer::acceptMission ),
-    BaseComputer::WctlTableEntry ( "ShowPlayerInfo", "", BaseComputer::showPlayerInfo ),
-    BaseComputer::WctlTableEntry ( "ShowShipStats", "", BaseComputer::showShipStats ),
-    BaseComputer::WctlTableEntry ( "ShowOptionsMenu", "", BaseComputer::showOptionsMenu ),
+    BaseComputer::WctlTableEntry ( "Picker::NewSelection", "NewsPicker", &BaseComputer::newsPickerChangedSelection ),
+    BaseComputer::WctlTableEntry ( "Picker::NewSelection", "", &BaseComputer::pickerChangedSelection ),
+    BaseComputer::WctlTableEntry ( modeInfo[CARGO].command, "", &BaseComputer::changeToCargoMode ),
+    BaseComputer::WctlTableEntry ( modeInfo[UPGRADE].command, "", &BaseComputer::changeToUpgradeMode ),
+    BaseComputer::WctlTableEntry ( modeInfo[SHIP_DEALER].command, "", &BaseComputer::changeToShipDealerMode ),
+    BaseComputer::WctlTableEntry ( modeInfo[NEWS].command, "", &BaseComputer::changeToNewsMode ),
+    BaseComputer::WctlTableEntry ( modeInfo[MISSIONS].command, "", &BaseComputer::changeToMissionsMode ),
+    BaseComputer::WctlTableEntry ( modeInfo[PLAYER_INFO].command, "", &BaseComputer::changeToPlayerInfoMode ),
+    BaseComputer::WctlTableEntry ( "BuyCargo", "", &BaseComputer::buyCargo ),
+    BaseComputer::WctlTableEntry ( "SellCargo", "", &BaseComputer::sellCargo ),
+    BaseComputer::WctlTableEntry ( "BuyUpgrade", "", &BaseComputer::buyUpgrade ),
+    BaseComputer::WctlTableEntry ( "SellUpgrade", "", &BaseComputer::sellUpgrade ),
+    BaseComputer::WctlTableEntry ( "BuyShip", "", &BaseComputer::buyShip ),
+    BaseComputer::WctlTableEntry ( "AcceptMission", "", &BaseComputer::acceptMission ),
+    BaseComputer::WctlTableEntry ( "ShowPlayerInfo", "", &BaseComputer::showPlayerInfo ),
+    BaseComputer::WctlTableEntry ( "ShowShipStats", "", &BaseComputer::showShipStats ),
+    BaseComputer::WctlTableEntry ( "ShowOptionsMenu", "", &BaseComputer::showOptionsMenu ),
     BaseComputer::WctlTableEntry ( "", "", NULL )
 };
 

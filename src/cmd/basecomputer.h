@@ -194,7 +194,7 @@ protected:
         EventCommandId command;
         std::string controlId;
         WCtlHandler function;
-		WctlTableEntry(EventCommandId cmd, std::string cid, WCtlHandler func)
+		WctlTableEntry(const EventCommandId& cmd, const std::string &cid, const WCtlHandler& func)
 			:command(cmd), controlId(cid), function(func) {
 		}
     };

@@ -21,6 +21,8 @@
 
 #include "vegastrike.h"
 
+#include "eventmanager.h"
+
 #include "windowcontroller.h"
 
 // Make everything happen.
@@ -31,7 +33,7 @@ void WindowController::run(void) {
         m_window->open();
     } else {
         // We have no window.  Close down.
-        delete this;
+		delete this;
     }
 }
 
@@ -40,7 +42,7 @@ bool WindowController::processWindowCommand(const EventCommandId& command, Contr
     if(command == "Window::Close") {
         // Our window is closing.
         if(m_deleteOnWindowClose) {
-            delete this;
+			delete this;
             // We return false so that the window itself can see this command.
             return false;
         }

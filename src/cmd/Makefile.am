@@ -76,6 +76,7 @@ libcmd_a_SOURCES =$(libcmdgeneric) 				\
 	base_util.h			\
 	base_write_xml.cpp		\
 	base_write_python.cpp		\
+	basecomputer.cpp		\
 	beam.cpp				\
 	briefing.h			\
 	briefing.cpp			\

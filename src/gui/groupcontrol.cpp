@@ -23,6 +23,8 @@
 
 #include "groupcontrol.h"
 
+#include "eventmanager.h"
+
 #include "window.h"
 
 // Add a new control to this collection.
@@ -39,7 +41,7 @@ bool GroupControl::deleteControl(Control* c) {
         if(c == currentControl) {
             // Found it in this group.
             m_controls.erase(iter);
-            delete currentControl;
+			EventManager::addToDeleteQueue(currentControl);
             return true;
         }
         if(currentControl->hasGroupChildren()) {
@@ -216,6 +218,6 @@ bool GroupControl::processMouseDrag(const InputEvent& event) {
 
 GroupControl::~GroupControl() {
     for(int i=0; i < m_controls.size(); i++) {
-        delete m_controls[i];
+		EventManager::addToDeleteQueue(m_controls[i]);
     }
 }

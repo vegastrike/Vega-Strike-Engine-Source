@@ -27,6 +27,8 @@
 #include "groupcontrol.h"
 #include "windowcontroller.h"
 
+#include "eventmanager.h"
+
 // For drawing the cursor.
 #include "gfx/aux_texture.h"
 #include "gfx/sprite.h"
@@ -160,7 +162,7 @@ m_controller(NULL)
 }
 
 Window::~Window(void) {
-    delete m_controls;
+	EventManager::addToDeleteQueue(m_controls);
 }
 
 
@@ -239,7 +241,7 @@ void WindowManager::closeWindow(
         if((*iter) == w) {
             m_windows.erase(iter);
             if(deleteWindow) {
-                delete w;
+				EventManager::addToDeleteQueue(w);
             }
             break;
         }
@@ -250,6 +252,7 @@ void WindowManager::closeWindow(
 void WindowManager::shutDown(void) {
     while(m_windows.size() > 0) {
         (*m_windows.begin())->close();
+		m_windows.erase(m_windows.begin());
     }
 }
 

@@ -57,8 +57,8 @@ m_children(NULL)
 SimplePickerCell::~SimplePickerCell(void)
 {
     if(m_children != NULL) {
-        delete m_children;
-    }
+		delete m_children;
+    }	
 }
 
 SimplePickerCell& SimplePickerCell::operator=(const SimplePickerCell& cell) {

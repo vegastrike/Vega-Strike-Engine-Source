@@ -23,6 +23,8 @@
 
 #include "eventmanager.h"
 
+#include <algorithm>
+
 using namespace std;
 
 /* The EventManager class contains the basic event loop and the code
@@ -54,6 +56,34 @@ void EventManager::initializeEventManager(void) {
     globalEventManagerPtr->takeOverEventManagement();              // FIXME -- EVENT HACK
 }
 
+static std::vector<EventResponder *> deleteQueue;
+void EventManager::addToDeleteQueue(EventResponder *controlToDelete) {
+	if (controlToDelete == NULL || find(deleteQueue.begin(), deleteQueue.end(), controlToDelete)!=deleteQueue.end()) {
+		bool DUPLICATE_DELETE_OF_OBJECT = true;
+		char tempstr[254];
+		sprintf(tempstr, "\nERROR: duplicate delete of object %X.\n\n", (int)controlToDelete);
+		fputs(tempstr, stderr);
+#if defined (_MSC_VER) && defined(_DEBUG)
+		if (DEBUG_ERROR_IN_MY_CODE) {
+			_RPT0(_CRT_ERROR, tempstr);
+		}
+#endif
+		printf("Attach a debugger now!");
+		while (DUPLICATE_DELETE_OF_OBJECT) {}
+	} else {
+		deleteQueue.push_back(controlToDelete);
+	}
+}
+
+static void clearDeleteQueue () {
+	while (deleteQueue.size()) {
+		std::vector<EventResponder *> queue (deleteQueue);
+		deleteQueue.clear();
+		for (int i=0; i<queue.size();i++) {
+			delete queue[i];
+		}
+	}
+}
 
 // Add a new event responder to the top of the chain.
 // This responder will get events *first*.
@@ -209,17 +239,20 @@ void EventManager::ProcessMouseClick(int button, int state, int x, int y) {
         InputEvent event(MOUSE_UP_EVENT, button, 0, Point(MouseXTo2dX(x), MouseYTo2dY(y)));
         globalEventManager().sendInputEvent((event));
     }
+	clearDeleteQueue();
 }
 
 void EventManager::ProcessMouseActive(int x, int y) {
     // FIXME mbyron -- Should provide info about which buttons are down.
     InputEvent event(MOUSE_DRAG_EVENT, 0, 0, Point(MouseXTo2dX(x), MouseYTo2dY(y)));
     globalEventManager().sendInputEvent((event));
+	clearDeleteQueue();
 }
 
 void EventManager::ProcessMousePassive(int x, int y) {
     InputEvent event(MOUSE_MOVE_EVENT, 0, 0, Point(MouseXTo2dX(x), MouseYTo2dY(y)));
     globalEventManager().sendInputEvent((event));
+	clearDeleteQueue();
 }
 
 

@@ -28,6 +28,7 @@ bool BaseInterface::Room::BaseTalk::hastalked=false;
 
 #ifdef NEW_GUI
 #include "basecomputer.h"
+#include "../gui/eventmanager.h"
 #endif
 
 static void CalculateRealXAndY (int xbeforecalc, int ybeforecalc, float *x, float *y) {
@@ -170,7 +171,7 @@ bool RefreshGUI(void) {
 			if (_Universe->AccessCockpit()->GetParent()==BaseInterface::CurrentBase->caller.GetUnit()){
 				if (BaseInterface::CurrentBase->CallComp) {
 #ifdef NEW_GUI
-                                        return globalWindowManager().draw();
+					return globalWindowManager().draw();
 #else
 					return RefreshInterface ();
 #endif
@@ -332,7 +333,12 @@ void BaseInterface::Click (int xint, int yint, int button, int state) {
 void BaseInterface::ClickWin (int button, int state, int x, int y) {
 	if (CurrentBase) {
 		if (CurrentBase->CallComp) {
-			UpgradingInfo::ProcessMouseClick(button,state,x,y);
+#ifdef NEW_GUI
+			EventManager ::
+#else
+			UpgradingInfo::
+#endif
+			               ProcessMouseClick(button,state,x,y);
 		} else {
 			CurrentBase->Click(x,y,button,state);
 		}
@@ -346,7 +352,12 @@ void BaseInterface::PassiveMouseOverWin (int x, int y) {
 	SetSoftwareMousePosition(x,y);
 	if (CurrentBase) {
 		if (CurrentBase->CallComp) {
-			UpgradingInfo::ProcessMousePassive(x,y);
+#ifdef NEW_GUI
+			EventManager ::
+#else
+			UpgradingInfo::
+#endif
+			               ProcessMousePassive(x,y);
 	 	} else {
 			CurrentBase->MouseOver(x,y);
 		}
@@ -359,7 +370,12 @@ void BaseInterface::ActiveMouseOverWin (int x, int y) {
 	SetSoftwareMousePosition(x,y);
 	if (CurrentBase) {
 		if (CurrentBase->CallComp) {
-			UpgradingInfo::ProcessMouseActive(x,y);
+#ifdef NEW_GUI
+			EventManager ::
+#else
+			UpgradingInfo::
+#endif
+			               ProcessMouseActive(x,y);
 		} else {
 			CurrentBase->MouseOver(x,y);
 		}
