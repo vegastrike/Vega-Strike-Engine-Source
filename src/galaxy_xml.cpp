@@ -215,7 +215,7 @@ void Galaxy::writeSector(VSFileSystem::VSFile & f, int tabs, string sectorType) 
 		f.Fprintf ("<var name=\"%s\" value=\"%s\"/>\n",(*dat).first.c_str(),(*dat).second.c_str());
           }
 	}
-        dat = data.find("jumps");
+        dat = data.find(std::string("jumps"));
         if (dat!=data.end()) {
           dotabs(f,tabs);
           f.Fprintf("<var name=\"jumps\" value=\"%s\"/>\n",(*dat).second.c_str());
@@ -271,6 +271,15 @@ Galaxy::Galaxy(const char *configfile){
 	  f.Close();
 
 	  XML_ParserFree(parser);
+        if (subheirarchy) {
+          SubHeirarchy::iterator iter=subheirarchy->find("<planets>");
+          if (iter==subheirarchy->end()) {
+            planet_types = NULL;
+          } else {
+            planet_types = &(*iter).second;
+          }
+        }
+
   }
   else
   {
