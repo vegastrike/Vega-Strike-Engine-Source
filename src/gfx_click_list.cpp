@@ -4,17 +4,18 @@
 
 
 bool ClickList::queryShip (int mouseX, int mouseY,Unit *ship) {   
-  if (ship->querySphere(mouseX,mouseY,0,_GFX->AccessCamera())){
-    Vector mousePoint (MouseCoordinate (mouseX,mouseY,1));
+
+  Vector mousePoint (MouseCoordinate (mouseX,mouseY,1));
     //mousePoint.k= -mousePoint.k;
-    Vector CamP,CamQ,CamR;
-    _GFX->AccessCamera()->GetPQR(CamP,CamQ,CamR);
-    mousePoint = Transform (CamP,CamQ,CamR,mousePoint);	
-    _GFX->AccessCamera()->GetPosition(CamP);    
-     if (ship->queryBoundingBox(CamP,mousePoint,0)) {
+  Vector CamP,CamQ,CamR;
+  _GFX->AccessCamera()->GetPQR(CamP,CamQ,CamR);
+  mousePoint = Transform (CamP,CamQ,CamR,mousePoint);	
+  _GFX->AccessCamera()->GetPosition(CamP);    
+  //if (ship->querySphere(CamP,mousePoint,0)){  FIXME  bounding spheres seem to be broken
+    if (ship->queryBoundingBox(CamP,mousePoint,0)) {
       return true;
     }
-  }
+    //}
   return false;
 }
 

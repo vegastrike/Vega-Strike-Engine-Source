@@ -136,6 +136,8 @@ public:
   float getMinDis(const Vector &pnt);
   float getMinDis(Matrix t, const Vector &pnt);
   bool querySphere (const Vector &pnt, float err);
+  bool querySphere (const Vector &st, const Vector &end, float err);
+  bool querySphere (Matrix,const Vector &st, const Vector &end, float err);
   bool querySphere (Matrix,const Vector &pnt, float err);
   bool queryBoundingBox(const Vector &pnt, float err);
   bool queryBoundingBox(Matrix,const Vector &, float);

@@ -300,6 +300,58 @@ bool Unit::querySphere (float * t,const Vector &pnt, float err) {
   return false;
 }
 
+
+bool Unit::querySphere (const Vector &start, const Vector &end, float err) {
+  Matrix mat;
+  //  Identity (mat);
+  return querySphere(NULL, start, end, err);
+}
+
+bool Unit::querySphere (float * t,const Vector &st, const Vector &end, float err) {
+  UpdateMatrix();
+  int i;
+  float * tmpo = transformation;
+  if (t!=NULL) { 
+    MultMatrix (tmpo,t,transformation);
+  }
+  
+  Vector TargetPoint (tmpo[0],tmpo[1],tmpo[2]);
+#ifdef VARIABLE_LENGTH_PQR
+  float SizeScaleFactor = sqrtf(TargetPoint.Dot(TargetPoint));//adjust the ship radius by the scale of local coordinates
+#endif
+  for (i=0;i<nummesh;i++) {
+    TargetPoint = Transform (tmpo,meshdata[i]->Position());
+    //find distance away from the line now :-)
+    //find scale factor of end on start to get line.
+    Vector tst (TargetPoint-st);
+    float k = tst.Dot (end)/ (end).Dot (end);
+    TargetPoint = tst - k*(end/*location on line*/);//this is distance 
+      fprintf (stderr, "i%f,j%f,k%f end %f,%f,%f>, k %f distance %f, rSize %f\n", st.i,st.j,st.k,end.i,end.j,end.k,k,TargetPoint.Dot(TargetPoint), meshdata[i]->rSize());    
+    if (TargetPoint.Dot (TargetPoint)< 
+	err*err+
+	meshdata[i]->rSize()*meshdata[i]->rSize()
+#ifdef VARIABLE_LENGTH_PQR
+	*SizeScaleFactor*SizeScaleFactor
+#endif
+	+
+#ifdef VARIABLE_LENGTH_PQR
+	SizeScaleFactor*
+#endif
+	2*err*meshdata[i]->rSize()
+	)
+      return true;
+    
+
+  }
+  for (i=0;i<numsubunit;i++) {
+    if (subunits[i]->querySphere (tmpo,st,end,err))
+      return true;
+  }
+  return false;
+}
+
+
+
 bool Unit::queryBoundingBox (const Vector &pnt, float err) {
   UpdateMatrix();
   int i;
