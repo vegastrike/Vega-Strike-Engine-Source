@@ -47,7 +47,7 @@ static std::vector <unorigdest> pendingjump;
 static std::vector <Animation *>JumpAnimations;
 static void AddJumpAnimation (const Vector & pos, const float size ) {
   JumpAnimations.push_back (new Animation ("explosion_orange.ani",false,.1,MIPMAP,true));
-  JumpAnimations.back()->SetDimensions(size,size);
+  JumpAnimations.back()->SetDimensions(10*size,10*size);
   JumpAnimations.back()->SetPosition (pos);
 
 }
