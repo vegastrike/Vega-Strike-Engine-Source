@@ -72,7 +72,6 @@ void TextPlane::Draw(const string & newText, int offset)
   GFXDisable (LIGHTING);
   GFXDisable (TEXTURE0);
   glPushMatrix();
-
   int entercount=0;
   for (;entercount<offset&&text_it!=newText.end();text_it++) {
     if (*text_it=='\n')

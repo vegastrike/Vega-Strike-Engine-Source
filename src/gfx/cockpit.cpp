@@ -598,6 +598,7 @@ void Cockpit::Draw() {
 	if (vdu[vd]) {
 	  GFXColorf (textcol);
 	  vdu[vd]->Draw(un);
+	  GFXColor4f (1,1,1,1);
 	  //process VDU, damage VDU, targetting VDU
 	}
       }
@@ -626,6 +627,7 @@ void Cockpit::Draw() {
 		}
 		GFXColorf (textcol);
 		text->Draw ("You Have Died!");
+		GFXColor4f (1,1,1,1);
 	}
 	dietime +=GetElapsedTime();
 	SetView (CP_PAN);
