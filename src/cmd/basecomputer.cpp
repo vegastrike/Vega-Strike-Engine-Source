@@ -545,7 +545,11 @@ void BaseComputer::constructControls(void) {
 
         // Description box.
         StaticDisplay* ms = new StaticDisplay;
-        ms->setRect( Rect(-96+.48*.75, -.95, 1.9-.47*.666, .5) );
+        StaticImageDisplay * picture = new StaticImageDisplay;
+        picture->setRect(Rect(-.96,-.45,.46*.75,-.47));
+        picture->setTexture("blackclear.png");
+        picture->setId("DescriptionImage");
+        ms->setRect( Rect(-.6, -.95, 1.56, .5) );
         ms->setColor( GFXColor(color.r,color.g,color.b,.1) );
 		ms->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY);
         ms->setFont( Font(.06) );
@@ -554,10 +558,6 @@ void BaseComputer::constructControls(void) {
         ms->setTextMargins(Size(.02,.01));
         ms->setId("Description");
         ms->setScroller(descScroller);
-        StaticImageDisplay * picture = new StaticImageDisplay;
-        picture->setRect(Rect(-.96,-.45,.46*.75,-.47));
-        picture->setTexture("blackclear.png");
-        picture->setId("DescriptionImage");
         cargoGroup->addChild(ms);
 
         cargoGroup->addChild(descScroller);		// Want this "over" the description.
@@ -666,7 +666,12 @@ void BaseComputer::constructControls(void) {
 
         // Description box.
         StaticDisplay* ms = new StaticDisplay;
-        ms->setRect( Rect(-.96, -.95, 1.87, .5) );
+        StaticImageDisplay * picture = new StaticImageDisplay;
+        picture->setRect(Rect(-.96,-.45,.46*.75,-.47));
+        picture->setTexture("blackclear.png");
+        picture->setId("DescriptionImage");
+        ms->setRect( Rect(-.6, -.95, 1.56, .5) );
+
         ms->setColor( GFXColor(color.r,color.g,color.b,.1) );
 		ms->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY);
         ms->setFont( Font(.06) );
@@ -678,6 +683,7 @@ void BaseComputer::constructControls(void) {
         upgradeGroup->addChild(ms);
 
         upgradeGroup->addChild(descScroller);	// Want this "over" description box.
+        upgradeGroup->addChild(picture);
     }
 
     {
@@ -853,7 +859,11 @@ void BaseComputer::constructControls(void) {
 
         // Description box.
         StaticDisplay* ms = new StaticDisplay;
-        ms->setRect( Rect(-.10, -.8, 1.01, 1.45) );
+        StaticImageDisplay * picture = new StaticImageDisplay;
+        picture->setRect(Rect(-.96,-.45,.46*.75,-.47));
+        picture->setTexture("blackclear.png");
+        picture->setId("DescriptionImage");
+        ms->setRect( Rect(-.6, -.95, 1.56, .5) );
         ms->setColor( GFXColor(color.r,color.g,color.b,.1) );
 		ms->setOutlineColor(GUI_OPAQUE_MEDIUM_GRAY);
         ms->setFont( Font(.06) );
@@ -865,7 +875,7 @@ void BaseComputer::constructControls(void) {
         shipDealerGroup->addChild(ms);
 
         shipDealerGroup->addChild(descScroller);	// Want scroller "over" description box.
-
+        shipDealerGroup->addChild(picture);
         // Buy button.
         NewButton* buy = new NewButton;
         buy->setRect( Rect(-.23, -.95, .22, .11) );
