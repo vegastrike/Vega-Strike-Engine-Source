@@ -47,7 +47,7 @@ class BSPNode {
 	}
 
 public:
-	BSPNode(BSPDiskNode *input);
+	BSPNode(BSPDiskNode **input);
 	~BSPNode() {
 		if(front!=NULL)
 			delete front;

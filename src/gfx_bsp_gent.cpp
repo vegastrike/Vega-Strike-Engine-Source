@@ -54,7 +54,7 @@ understand, e-mail me back and i'll try to explain things a bit better:)
 
 Seeya!:)
 */
-
+#define RIGHT_HANDED -1
 #define BSPG_THRESHOLD .00001
 enum INTERSECT_TYPE {
     BSPG_BACK =-1,
@@ -102,9 +102,9 @@ static bool Cross (const bsp_polygon &x, bsp_tree &result) {
       size = ((float)1)/sqrtf (size);
   else 
     return false;
-  result.a *=size;
-  result.b *=size;
-  result.c *=size;
+  result.a *=RIGHT_HANDED*(size);
+  result.b *=RIGHT_HANDED*(size);
+  result.c *=RIGHT_HANDED*(size);
   return true;
 }
 

@@ -23,27 +23,29 @@
 
 //All or's are coded with the assumption that the inside of the object has a much bigger impact than the outside of the object when both need to be analyzed
 
-BSPNode::BSPNode(BSPDiskNode *input) {
-	BSPDiskNode *s_input = input; // keep track of current position to allow changes in the read position to propagate up the tree
-
-	isVirtual = input->isVirtual;
-	n.i = input->x;
-	n.j = input->y;
-	n.k = input->z;
-	if(input->hasFront) {
-		front = new BSPNode(input+1);
-	}
-	else {
-		front = NULL;
-	}
-	input = s_input;
-	if(input->hasBack) {
-		back = new BSPNode(input+1);
-	}
-	else {
-		back = NULL;
-	}
-	s_input++;
+BSPNode::BSPNode(BSPDiskNode **input) {
+  
+  isVirtual = (*input)->isVirtual;
+  n.i = (*input)->x;
+  n.j = (*input)->y;
+  n.k = (*input)->z;
+  d = (*input)->d;
+  bool hasFront = (*input)->hasFront;
+  bool hasBack = (*input)->hasBack;
+  (*input)++;
+  if(hasFront) {
+    front = new BSPNode(input);
+  }
+  else {
+    front = NULL;
+  }
+  (*input)++;
+  if(hasBack) {
+    back = new BSPNode(input);
+  }
+  else {
+    back = NULL;
+  }
 }
 
 float BSPNode::intersects(const Vector &start, const Vector &end) const {
@@ -109,7 +111,8 @@ bool BSPTree::intersects(const BSPTree *t1) const {
 }
 
 BSPTree::BSPTree(BSPDiskNode *input) {
-	root = new BSPNode(input);
+  BSPDiskNode * inp = input;
+  root = new BSPNode(&inp);
 }
 
 BSPTree::BSPTree(const char *filename) {
@@ -120,7 +123,7 @@ BSPTree::BSPTree(const char *filename) {
   int numRecords = size / (sizeof(float)*4+2);
   rewind(fp);
   BSPDiskNode *nodes = new BSPDiskNode[numRecords];
-  
+  BSPDiskNode * tmpnode;
   for(int a=0; a<numRecords; a++) {
     fread(&nodes[a].x, sizeof(float), 1, fp);
     fread(&nodes[a].y, sizeof(float), 1, fp);
@@ -135,7 +138,8 @@ BSPTree::BSPTree(const char *filename) {
     if(byte) nodes[a].hasBack = true;
     else nodes[a].hasBack = false;
   }
-  root = new BSPNode(nodes);
+  tmpnode = nodes;
+  root = new BSPNode(&tmpnode);
   delete [] nodes;
   fclose(fp);
 }

@@ -1239,7 +1239,16 @@ void Mesh::LoadXML(const char *filename, Mesh *oldmesh) {
     vertexlist[a].z -= z_center;
 
   }
+  for (a=0;a<xml->vertices.size();a++) {
+    xml->vertices[a].x*=scale;//FIXME
+    xml->vertices[a].y*=scale;
+    xml->vertices[a].z*=scale;
 
+    xml->vertices[a].x -= x_center;
+    xml->vertices[a].y -= y_center;
+    xml->vertices[a].z -= z_center;
+ 
+  }
   minSizeX -= x_center;
   maxSizeX -= x_center;
   minSizeY -= y_center;

@@ -231,11 +231,11 @@ bool Unit::Collide (Unit * target) {
   if ((Position()-target->Position()).Magnitude()>radial_size+target->radial_size)
     return false;
   //now do some serious checks
-  if (radial_size>target->radial_size) {
-    if ((!target->OneWayCollide(this))||(!OneWayCollide(target)))
+  if (radial_size<target->radial_size) {
+    if ((!target->OneWayCollide(this))/*||(!OneWayCollide(target))*/)
       return false;
   }else {
-    if ((!OneWayCollide(target))||(!target->OneWayCollide(this)))
+    if ((!OneWayCollide(target))/*||(!target->OneWayCollide(this))*/)
       return false;
   }
   //deal damage similarly to beam damage!!  Apply some sort of repel force
