@@ -155,8 +155,9 @@ class Unit {
  protected:
   bool CanAddCargo (const Cargo &carg) const;
   void AddCargo (const Cargo &carg);
-  void RemoveCargo (unsigned int i, int quantity);
-
+  int RemoveCargo (unsigned int i, int quantity, bool eraseZero=true);
+  bool BuyCargo (unsigned int i, unsigned int quantity, Unit * buyer, float &creds);
+  bool BuyCargo (const std::string &cargo,unsigned int quantity, Unit * buyer, float & creds);
 
   void SetPlanetHackTransformation (Transformation *&ct, float *&ctm);
 
@@ -386,7 +387,7 @@ public:
   float PriceCargo (const std::string &s);
   Cargo & GetCargo (unsigned int i);
   ///below function returns NULL if not found
-  Cargo * GetCargo (const std::string &s);
+  Cargo * GetCargo (const std::string &s, unsigned int &i);
   unsigned int numCargo ()const;
   bool SellCargo (unsigned int i, int quantity, float &creds, Cargo & carg, Unit *buyer);
   bool SellCargo (const std::string &s, int quantity, float & creds, Cargo &carg, Unit *buyer);

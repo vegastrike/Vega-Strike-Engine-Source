@@ -87,6 +87,8 @@ class Cockpit {
   ///Draws gauges
   void DrawGauges(Unit * un);
  public:
+
+  float credits;//how much money player has
   ///How far away chasecam and pan cam is
   float zoomfactor;
   Cockpit (const char * file, Unit * parent);

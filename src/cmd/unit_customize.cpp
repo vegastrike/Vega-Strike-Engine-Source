@@ -238,7 +238,9 @@ bool Unit::canDowngrade (Unit *downgradeor, int mountoffset, int subunitoffset, 
 bool Unit::Downgrade (Unit * downgradeor, int mountoffset, int subunitoffset,  double & percentage){
   return UpAndDownGrade(downgradeor,NULL,mountoffset,subunitoffset,true,true,false,true,percentage);
 }
-
+static float usedPrice (float percentage) {
+  return .66*percentage;
+}
 bool Unit::UpAndDownGrade (Unit * up, Unit * templ, int mountoffset, int subunitoffset, bool touchme, bool downgrade, bool additive, bool forcetransaction, double &percentage) {
   percentage=0;
   int numave=0;
@@ -386,6 +388,9 @@ bool Quit (const char *input_buffer) {
 	return false;
 }
 extern void SwitchUnits (Unit * ol, Unit * nw);
+extern Cargo * GetMasterPartList(const char *input_buffer);
+
+
 void Unit::UpgradeInterface (Unit * base) {
   Unit * temprate = new Unit ((name+string(".template")).c_str(),false,faction);
   Unit * templ=NULL;
@@ -400,16 +405,21 @@ void Unit::UpgradeInterface (Unit * base) {
     bool additive=false;
     bool downgrade=false;
     bool purchase=false;
+    bool buycommod=false;
+    bool sellcommod=false;
     while (!(upgrade||downgrade||purchase)) {
-      printf ("\nDo you wish to upgrade add or remove or buy a part? Type exit to quit.\n");
+      printf ("\nDo you wish to upgrade add or remove a part? Do you wish to trade-in a ship? Do you wish to buy or sell comodities? Type exit to quit.\n");
       fflush(stdout);
       fgets (input_buffer,4095,stdin);
       YoinkNewlines (input_buffer);
       downgrade = (strcasecmp (input_buffer,"remove")==0);
-      purchase = (strcasecmp (input_buffer,"buy")==0);
+      purchase = (strcasecmp (input_buffer,"trade-in")==0);
       upgrade = (strcasecmp (input_buffer,"add")==0);
       additive=upgrade;
       upgrade|=(strcasecmp (input_buffer,"upgrade")==0);
+      buycommod = (strcasecmp (input_buffer,"buy")==0);
+      sellcommod = (strcasecmp (input_buffer,"sell")==0);
+      
       if (Quit(input_buffer)) {
 	break;
       }
@@ -424,92 +434,124 @@ void Unit::UpgradeInterface (Unit * base) {
     if (Quit(input_buffer)) {
       break;
     }
-    Unit * NewPart = new Unit (input_buffer,false,_Universe->GetFaction("upgrades"));
-    NewPart->SetFaction(faction);
-    if (NewPart->name==string("LOAD_FAILED")) {
-      NewPart->Kill();
-      NewPart = new Unit (input_buffer, false, faction);
-    }
-    if (NewPart->name!=string("LOAD_FAILED")) {
-      if (purchase) {
-	if (NewPart->nummesh>0) {
-	  NewPart->curr_physical_state=curr_physical_state;
-	  NewPart->prev_physical_state=prev_physical_state;
-	  _Universe->activeStarSystem()->AddUnit (NewPart);
-	  _Universe->AccessCockpit()->SetParent(NewPart,input_buffer,curr_physical_state.position);
-	  SwitchUnits (NULL,NewPart);
-	  base->RequestClearance(NewPart);
-	  NewPart->Dock(base);
-	  NewPart=this;
-
-	  break;
-	}
+    if (buycommod||sellcommod) {
+      fprintf (stdout,"Enter the quantity you wish to trade at %f price\n",base->PriceCargo(input_buffer));      	
+      int quantity=-1;
+      while (quantity==-1) {
+	fgets (input_buffer,4095,stdin);	  
+	sscanf (input_buffer,"%d",&quantity);
       }
-      bool canupgrade=false;
-      int mountoffset=0;
-      int subunitoffset=0;
-      double percentage;
-      if (upgrade||downgrade) {
-	if (NewPart->nummounts) {
-	  printf ("You are adding %d mounts. Your ship has %d mounts. Which mount would you like to add the new mounts to?\n",NewPart->nummounts, nummounts);
-	  fgets (input_buffer,4095,stdin);	  
-	  sscanf (input_buffer,"%d",&mountoffset);
+      if (buycommod) {
+	if(BuyCargo (input_buffer,quantity,base,_Universe->AccessCockpit()->credits)) {
+	  printf ("Cargo Purchased\n");
+	}else {
+	  printf ("Cargo Not Bought\n");
 	}
-	if (NewPart->getSubUnits().current()!=NULL) {
-	  printf ("You are adding a turret. Which turret would you like to upgrade?\n");
-	  fgets (input_buffer,4095,stdin);	  
-	  sscanf (input_buffer,"%d",&subunitoffset);	  
-	}
-      }
-      
-      if (upgrade) {
-	canupgrade = canUpgrade (NewPart,mountoffset,subunitoffset,additive,false,percentage,templ);
-	if (!canupgrade) {
-	  printf ("The frame of your starship cannot support the entire upgrade.\nDo you wish to continue with the purchase?\nYou do so at your own risk...\n");
-	  fgets (input_buffer,4095,stdin);	  
-	  YoinkNewlines (input_buffer);
-	  if (Quit(input_buffer)||input_buffer[0]=='n'||input_buffer[0]=='N') {
-	    canupgrade=false;
-	  } else {
-	    canUpgrade (NewPart,mountoffset,subunitoffset,additive,true,percentage,templ);
-	    canupgrade=true;
-	  }
-	}
-	if (canupgrade) {
-	  printf ("This purchase will cost you %lf percent of the price of this unit. Do you wish to continue",percentage);
-	  fgets (input_buffer,4095,stdin);	  
-	  YoinkNewlines (input_buffer);
-	  if (Quit(input_buffer)||input_buffer[0]=='n'||input_buffer[0]=='N') {
-
-	  } else {
-	    printf ("This purchase costed you %lf percent of the price of this unit.",percentage);
-	    ///deduct money
-	    Upgrade (NewPart,mountoffset,subunitoffset,additive,true,percentage,templ);
-	  }
-	}
-      }
-      if (downgrade) {
-	canupgrade = canDowngrade (NewPart,mountoffset,subunitoffset,percentage);
 	
-	if (!canupgrade) {
-	  printf ("Warning, the part is not in pristine condition, do you wish to continue?");
-	  if (Quit(input_buffer)||input_buffer[0]=='n'||input_buffer[0]=='N') {
-	    canupgrade=false;
-	  } else {
-	    canupgrade=true;
-	    percentage*=percentage;
-	  }	  
+      }else if (sellcommod) {
+	Cargo sold;
+	if (SellCargo(input_buffer,quantity,_Universe->AccessCockpit()->credits,sold,base)) {
+	  printf ("%d %s Sold! You have %f credits\n", sold.quantity,sold.content.c_str(),_Universe->AccessCockpit()->credits);
+	} else {
+	  printf ("Cargo Not Sold\n");
 	}
-	if (canupgrade) {
-	  printf ("This purchase costed you %lf percent of the price of this unit.",percentage);	  
-	  //deduct money
-	  Downgrade (NewPart,mountoffset,subunitoffset,percentage);
-	}
+
       }
-    } else {
-      printf ("Failed to load part or unit. Please try again :-)\n");
+    }else if (purchase||upgrade||downgrade) {
+      unsigned int i;
+      Cargo * part = base->GetCargo (input_buffer, i);
+      if ((part?part->quantity:0) ||
+	  (downgrade&&(part=GetMasterPartList(input_buffer))!=NULL)) {
+	Unit * NewPart = new Unit (input_buffer,false,_Universe->GetFaction("upgrades"));
+	NewPart->SetFaction(faction);
+	if (NewPart->name==string("LOAD_FAILED")) {
+	  NewPart->Kill();
+	  NewPart = new Unit (input_buffer, false, faction);
+	}
+	if (NewPart->name!=string("LOAD_FAILED")) {
+	  if (purchase&&part->price<=_Universe->AccessCockpit()->credits) {
+	    if (NewPart->nummesh>0) {
+	      _Universe->AccessCockpit()->credits-=part->price;
+	      NewPart->curr_physical_state=curr_physical_state;
+	      NewPart->prev_physical_state=prev_physical_state;
+	      _Universe->activeStarSystem()->AddUnit (NewPart);
+	      _Universe->AccessCockpit()->SetParent(NewPart,input_buffer,curr_physical_state.position);
+	      SwitchUnits (NULL,NewPart);
+	      base->RequestClearance(NewPart);
+	      NewPart->Dock(base);
+	      NewPart->Kill();
+	      return;
+	    }
+	  }
+	  bool canupgrade=false;
+	  int mountoffset=0;
+	  int subunitoffset=0;
+	  double percentage;
+	  if (upgrade||downgrade) {
+	    if (NewPart->nummounts) {
+	      printf ("You are adding %d mounts. Your ship has %d mounts. Which mount would you like to add the new mounts to?\n",NewPart->nummounts, nummounts);
+	      fgets (input_buffer,4095,stdin);	  
+	      sscanf (input_buffer,"%d",&mountoffset);
+	    }
+	    if (NewPart->getSubUnits().current()!=NULL) {
+	      printf ("You are adding a turret. Which turret would you like to upgrade?\n");
+	      fgets (input_buffer,4095,stdin);	  
+	      sscanf (input_buffer,"%d",&subunitoffset);	  
+	    }
+	  }
+	  
+	  if (upgrade) {
+	    canupgrade = canUpgrade (NewPart,mountoffset,subunitoffset,additive,false,percentage,templ);
+	    if (!canupgrade) {
+	      printf ("The frame of your starship cannot support the entire upgrade.\nDo you wish to continue with the purchase?\nYou do so at your own risk...\n");
+	      fgets (input_buffer,4095,stdin);	  
+	      YoinkNewlines (input_buffer);
+	      if (Quit(input_buffer)||input_buffer[0]=='n'||input_buffer[0]=='N') {
+		canupgrade=false;
+	      } else {
+		canUpgrade (NewPart,mountoffset,subunitoffset,additive,true,percentage,templ);
+		canupgrade=true;
+	      }
+	    }
+	    float upgradeprice =(float)(part->price*(1-usedPrice(percentage)));
+
+	    if (canupgrade&&(_Universe->AccessCockpit()->credits>upgradeprice)) {
+	      printf ("This purchase will cost you %f. You have %f. Do you wish to continue",upgradeprice,_Universe->AccessCockpit()->credits);
+	      fgets (input_buffer,4095,stdin);	  
+	      YoinkNewlines (input_buffer);
+	      if (Quit(input_buffer)||input_buffer[0]=='n'||input_buffer[0]=='N') {
+		
+	      } else {
+		printf ("This purchase costed you %f percent of the price of this unit.",upgradeprice);
+		_Universe->AccessCockpit()->credits-=upgradeprice;
+		Upgrade (NewPart,mountoffset,subunitoffset,additive,true,percentage,templ);
+	      }
+	    }
+	  }
+	  if (downgrade) {
+	    canupgrade = canDowngrade (NewPart,mountoffset,subunitoffset,percentage);
+	    
+	    if (!canupgrade) {
+	      printf ("Warning, the part is not in pristine condition, do you wish to continue?");
+	      if (Quit(input_buffer)||input_buffer[0]=='n'||input_buffer[0]=='N') {
+		canupgrade=false;
+	      } else {
+		canupgrade=true;
+	    }	  
+	    }
+	    if (canupgrade) {
+	      float sellprice =part->price*usedPrice(percentage);
+	      printf ("This sale earned you %f credits.",sellprice);	  
+	      _Universe->AccessCockpit()->credits+=sellprice;
+	      Downgrade (NewPart,mountoffset,subunitoffset,percentage);
+	    }
+	  }
+	} else {
+	  printf ("Failed to load part or unit. Please try again :-)\n");
+	}
+	NewPart->Kill();
+      }
     }
-    NewPart->Kill();
   }
   temprate->Kill();
   

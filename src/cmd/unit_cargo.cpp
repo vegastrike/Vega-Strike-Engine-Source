@@ -5,6 +5,14 @@
 #include "vs_globals.h"
 #include "config_xml.h"
 #include <assert.h>
+
+Cargo * GetMasterPartList(const char *input_buffer){
+  static Unit MasterPartList ("master_part_list",false,_Universe->GetFaction("upgrades"));
+  unsigned int i;
+  return MasterPartList.GetCargo (input_buffer,i);
+}
+
+
 using XMLSupport::tostring;
 using namespace std;
 std::string CargoToString (const Cargo& cargo) {
@@ -52,14 +60,15 @@ void Unit::AddCargo (const Cargo &carg) {
   mass+=carg.quantity*carg.mass;
   image->cargo.push_back (carg);
 }
-void Unit::RemoveCargo (unsigned int i, int quantity) {
+int Unit::RemoveCargo (unsigned int i, int quantity,bool eraseZero) {
   assert (i<image->cargo.size());
   if (quantity>image->cargo[i].quantity)
     quantity=image->cargo[i].quantity;
   mass-=quantity*image->cargo[i].mass;
   image->cargo[i].quantity-=quantity;
-  if (image->cargo[i].quantity<=0)
+  if (image->cargo[i].quantity<=0&&eraseZero)
     image->cargo.erase (image->cargo.begin()+i);
+  return quantity;
 }
 
 float Unit::PriceCargo (const std::string &s) {
@@ -68,8 +77,13 @@ float Unit::PriceCargo (const std::string &s) {
   vector <Cargo>::iterator mycargo = std::find (image->cargo.begin(),image->cargo.end(),tmp);
   float price;
   if (mycargo==image->cargo.end()) {
-    static float spacejunk=parse_float (vs_config->getVariable ("cargo","space_junk_price","10"));
-    price = spacejunk;
+    Cargo * masterlist;
+    if ((masterlist=GetMasterPartList (s.c_str()))!=NULL) {
+      price =masterlist->price;
+    } else {
+      static float spacejunk=parse_float (vs_config->getVariable ("cargo","space_junk_price","10"));
+      price = spacejunk;
+    }
   } else {
     price = (*mycargo).price;
   }
@@ -82,6 +96,10 @@ bool Unit::SellCargo (unsigned int i, int quantity, float &creds, Cargo & carg, 
     quantity=image->cargo[i].quantity;
   carg = image->cargo[i];
   creds+=quantity*buyer->PriceCargo (image->cargo[i].content);
+  Cargo soldcargo(image->cargo[i]);
+  soldcargo.quantity=quantity;
+  buyer->AddCargo (image->cargo[i]);
+  
   RemoveCargo (i,quantity);
   return true;
 }
@@ -100,12 +118,13 @@ unsigned int Unit::numCargo ()const {
 Cargo& Unit::GetCargo (unsigned int i) {
   return image->cargo[i];
 }
-Cargo* Unit::GetCargo (const std::string &s) {
+Cargo* Unit::GetCargo (const std::string &s, unsigned int &i) {
   Cargo searchfor;
   searchfor.content=s;
   vector<Cargo>::iterator tmp =(std::find(image->cargo.begin(),image->cargo.end(),searchfor));
   if (tmp==image->cargo.end())
     return NULL;
+  i= (tmp-image->cargo.begin());
   return &(*tmp);
 }
 bool Unit::BuyCargo (const Cargo &carg, float & creds){
@@ -116,4 +135,24 @@ bool Unit::BuyCargo (const Cargo &carg, float & creds){
   creds-=carg.quantity*carg.price;
   mass+=carg.quantity*carg.mass;
   return true;
+}
+bool Unit::BuyCargo (unsigned int i, unsigned int quantity, Unit * seller, float&creds) {
+  Cargo soldcargo= seller->image->cargo[i];
+  if (quantity>(unsigned int)soldcargo.quantity)
+    quantity=soldcargo.quantity;
+  if (quantity==0)
+    return false;
+  soldcargo.quantity=quantity;
+  if (BuyCargo (soldcargo,creds)) {
+    seller->RemoveCargo (i,quantity,false);
+    return true;
+  }
+  return false;
+}
+bool Unit::BuyCargo (const std::string &cargo,unsigned int quantity, Unit * seller, float & creds) {
+  unsigned int i;
+  if (seller->GetCargo(cargo,i)) {
+    return BuyCargo (i,quantity,seller,creds);
+  }
+  return false;
 }

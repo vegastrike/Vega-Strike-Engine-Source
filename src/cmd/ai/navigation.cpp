@@ -6,6 +6,11 @@
 #endif
 #include "cmd/unit.h"
 using namespace Orders;
+#define CONTINUOUS_TIME
+#ifdef CONTINUOUS_TIME
+
+
+
 /**
  * the time we need to start slowing down from now calculation (if it's in this frame we'll only accelerate for partial
  * vslowdown - decel * t = 0               t = vslowdown/decel
@@ -18,7 +23,11 @@ using namespace Orders;
  * Length = accel * t^2 +  2*t*v0 + .5*v0^2/accel
  * t = ( -2v0 (+/-) sqrtf (4*v0^2 - 4*(.5*v0^2 - accel*Length) ) / (2*accel)) 
  * t = -v0/accel (+/-) sqrtf (.5*v0^2 + Length*accel)/accel;
+ *
+ * 3/2/02  Patched CalculateBalancedDecel time with the fact that length should be more by a
+ * quantity of .5*initialVelocity*SIMULATION_ATOM
  */
+
 static float CalculateBalancedDecelTime (float l, float v, float &F, float mass) {
 
   float accel = F/mass;
@@ -27,7 +36,7 @@ static float CalculateBalancedDecelTime (float l, float v, float &F, float mass)
     v=-v;
     F=-F;
   }
-  return (-v+sqrtf(.5*v*v+l*accel))/accel;
+  return (-v+sqrtf(.5*v*v+(l+v*SIMULATION_ATOM*(.5))*accel))/accel;
 } 
 /**
  * the time we need to start slowing down from now calculation (if it's in this frame we'll only accelerate for partial
@@ -42,7 +51,8 @@ static float CalculateBalancedDecelTime (float l, float v, float &F, float mass)
  * t = ( -v0*(1+accel/decel) (+/-) sqrtf (v0^2*(1+accel/decel)^2 - 2*(accel+accel*accel/decel)*(.5*v0^2/decel-Length)))/2*.5*(accel+accel*accel/decel);
  * t = (-v0 (+/-) sqrtf (v0^2 - 2*(accel/(1+accel/decel))*(.5*v0^2/decel-Length)))/accel
  */
-static float CalculateDecelTime (float l, float v, float &F, float D,  float mass) {
+
+ static float CalculateDecelTime (float l, float v, float &F, float D,  float mass) {
   float accel = F/mass;
   float decel = D/mass;
   if (l<0) {
@@ -52,9 +62,43 @@ static float CalculateDecelTime (float l, float v, float &F, float D,  float mas
     decel = F/mass;
     F=-D;
   }
-  return (-v + sqrtf (v*v - 2*accel*((.5*v*v/decel) - l)/(1+accel/decel)))/accel;
+  return (-v + sqrtf (v*v - 2*accel*((.5*v*v/decel) - v*SIMULATION_ATOM*.5- l)/(1+accel/decel)))/accel;
 } 
+#else
 
+/**
+ * The Time We need to start slowing down from the now calculation.
+ * k = num simulation atoms before we slow down. m = num sim atoms till we stop
+ * R = P = 1    We know  v + S*k*a-S*m*d=0  (stopped at end)  m = v/(d*S)+k*a/d
+ * L = a*S^2 (k*(k+R)*.5) -  d*S^2 (m*(m+P)*.5) + v*(k+m)*S
+ * L = .5*a*k^2*S^2+.5*a*k*R*s^2 - .5*d*S^2 (k*a/d + v/(d*S))*(k*a/d+v/(d*S)+P) + S*v*(v/(d*S) + k*a/d + k)
+ * L = k^2 (.5*a*S^2) +.5*a*k*R*S^2 - .5*d*S^2 (k^2 a^2 / d^2 + 2*(k*a/d)*v/(dS) + v^2/(d^2 s^2) + Pk*a/d + P * v/(d*S)) + v^2/d + S*v*k (a/d + 1)
+ * 0 = k^2 (.5*a*S*S*(1-a/d)) + k*S*( .5*R*a*S - .5*P*a*S- .5*2*a*v/d+v(1+a/d)) + v*v/d-.5*v*v/d- P*v*S*.5 - L
+ * 0 = (k*S)^2 *(.5*a*(1-a/d)) + k*S*v + v^2/(2d) - vS/2 -L
+ * kS = -v (+/-) sqrtf (v*v-a*(1-a/d)*(v*v/d-vS-L))/(a*(1-a/d))
+ */
+static float CalculateDecelTime (float l, float v, float &F, float D, float mass) {
+  const float broken=0;
+  assert (broken);
+  const float epsilon=.001;
+
+  if (fabs(1-F/D)<epsilon)
+    return CalculateBalancedDecelTime (l,v,F,mass);
+  float accel = F/mass;
+  float decel = D/mass;
+  if (l<0) {
+    l=-l;
+    v=-v;
+    accel = decel;
+    decel = F/mass;
+    F=-D;
+  }
+  float atumaod = accel*(1-accel/decel);
+  return (-v + sqrtf (v*v - atumaod*(v*v-v*SIMULATION_ATOM-l)))/atumaod;
+}
+
+
+#endif
 void MoveTo::SetDest (const Vector &target) {
     targetlocation = target;
     done = false;
