@@ -65,7 +65,7 @@ void Halo::SetColor (const GFXColor &col){
 
 void Halo::ProcessDrawQueue() {
   GFXDisable (LIGHTING);
-  GFXEnable (DEPTHWRITE);
+  GFXDisable (DEPTHWRITE);
   GFXPushBlendMode();
   GFXBlendMode(ONE,ONE);
   GFXEnable (TEXTURE0);
@@ -73,7 +73,6 @@ void Halo::ProcessDrawQueue() {
   GFXLoadIdentity(MODEL);
   for (unsigned int decal = 0;decal < halodrawqueue.size();decal++) {	
     HaloDecal[decal]->MakeActive();
-    
     halodrawqueue[decal]->Draw();    
   }
 
