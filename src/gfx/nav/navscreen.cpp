@@ -632,11 +632,11 @@ void NavigationSystem::DrawMission()
 		
 	}
 	
-	factionlist.drawdescription(relationskills, (originx + (0.1*deltax)),(originy - (0.1*deltay)), 1, 1, 0, GFXColor(.3,1,.3,1));
-	factionlist.drawdescription(" ", (originx + (0.1*deltax)),(originy - (0.1*deltay)), 1, 1, 0, GFXColor(.3,1,.3,1));
+	drawdescription(relationskills, (originx + (0.1*deltax)),(originy - (0.1*deltay)), 1, 1, 0, screenoccupation, GFXColor(.3,1,.3,1));
+	drawdescription(" ", (originx + (0.1*deltax)),(originy - (0.1*deltay)), 1, 1, 0, screenoccupation, GFXColor(.3,1,.3,1));
 
-	factionlist.drawdescription(" ", (originx + (0.3*deltax)),(originy - (0.1*deltay)), 1, 1, 0, GFXColor(.3,1,.3,1));
-	factionlist.drawdescription(" ", (originx + (0.3*deltax)),(originy - (0.1*deltay)), 1, 1, 0, GFXColor(.3,1,.3,1));
+	drawdescription(" ", (originx + (0.3*deltax)),(originy - (0.1*deltay)), 1, 1, 0, screenoccupation, GFXColor(.3,1,.3,1));
+	drawdescription(" ", (originx + (0.3*deltax)),(originy - (0.1*deltay)), 1, 1, 0, screenoccupation, GFXColor(.3,1,.3,1));
 
 
 	int numfactions = FactionUtil::GetNumFactions();
@@ -651,7 +651,7 @@ void NavigationSystem::DrawMission()
 		relation = 	FactionUtil::GetIntRelation(i, ( UniverseUtil::getPlayerX(UniverseUtil::getCurrentPlayer()) )->faction );
 
 		//	draw faction name
-		factionlist.drawdescription(FactionUtil::GetFactionName(i), (originx + (0.1*deltax)),(originy - (0.1*deltay)), 1, 1, 0, factioncolours[i]);
+		drawdescription(FactionUtil::GetFactionName(i), (originx + (0.1*deltax)),(originy - (0.1*deltay)), 1, 1, 0, screenoccupation, factioncolours[i]);
 
 		relation = relation * 0.5;
 		relation = relation + 0.5;
@@ -662,7 +662,7 @@ void NavigationSystem::DrawMission()
 			relationtext += XMLSupport::tostring ((int)(*killlist)[i]);
 		}
 
-		factionlist.drawdescription(relationtext, (originx + (0.3*deltax)),(originy - (0.1*deltay)), 1, 1, 0, GFXColor((1.0-relation),relation,(1.0-(2.0*Delta(relation, 0.5))),1));
+		drawdescription(relationtext, (originx + (0.3*deltax)),(originy - (0.1*deltay)), 1, 1, 0, screenoccupation, GFXColor((1.0-relation),relation,(1.0-(2.0*Delta(relation, 0.5))),1));
 		}
 		i+=1;
 	}
@@ -671,13 +671,13 @@ void NavigationSystem::DrawMission()
 		relation=1;
 		
 		relationtext += XMLSupport::tostring ((int)(*killlist)[i]);
-		factionlist.drawdescription(relationtext, (originx + (0.3*deltax)),(originy - (0.1*deltay)), 1, 1, 0, GFXColor((1.0-relation),relation,(1.0-(2.0*Delta(relation, 0.5))),1));
+		drawdescription(relationtext, (originx + (0.3*deltax)),(originy - (0.1*deltay)), 1, 1, 0, screenoccupation, GFXColor((1.0-relation),relation,(1.0-(2.0*Delta(relation, 0.5))),1));
 							
 	}
    
-//	factionlist.drawdescription(" Terran : ", (originx + (0.1*deltax)),(originy - (0.1*deltay)), 1, 1, 0, GFXColor(.3,1,.3,1));
-//	factionlist.drawdescription(" Rlaan : ", (originx + (0.1*deltax)),(originy - (0.1*deltay)), 1, 1, 0, GFXColor(1,.3,.3,1));
-//	factionlist.drawdescription(" Aera : ", (originx + (0.1*deltax)),(originy - (0.1*deltay)), 1, 1, 0, GFXColor(.3,.3,1,1));
+//	drawdescription(" Terran : ", (originx + (0.1*deltax)),(originy - (0.1*deltay)), 1, 1, 0, screenoccupation, GFXColor(.3,1,.3,1));
+//	drawdescription(" Rlaan : ", (originx + (0.1*deltax)),(originy - (0.1*deltay)), 1, 1, 0, screenoccupation, GFXColor(1,.3,.3,1));
+//	drawdescription(" Aera : ", (originx + (0.1*deltax)),(originy - (0.1*deltay)), 1, 1, 0, screenoccupation, GFXColor(.3,.3,1,1));
 
 
 //	float love_from_terran = FactionUtil::getRelation(1);
@@ -936,6 +936,8 @@ QVector NavigationSystem::dxyz(QVector vector, double x_, double y_, double z_)
 
 void NavigationSystem::setCurrentSystem(string newCurrentSystem) {
 	currentsystem = newCurrentSystem;
+	themaxvalue=0;
+	camera_z=0; // calculate camera distance again... it may have changed.
 //	systemIter.init(currentsystem);
 }
 
@@ -1845,16 +1847,22 @@ float NavigationSystem::CalculatePerspectiveAdjustment(float &zscale, float &zdi
 
 	double real_zoom = 0.0;
 	double real_zoom_flat = 0.0;
-	float _l2 = log(2.0f);
+//	float _l2 = log(2.0f);
 	if(system_not_galaxy)
 	{
-		real_zoom = (log(zoom_s)/_l2)*zscale;
-		real_zoom_flat = (log(zoom_s)/_l2)*zscale_flat;
+		real_zoom = zoom_s*zoom_s*zscale;
+		real_zoom_flat = zoom_s*zoom_s*zscale_flat;
+//		real_zoom = zoom_s*zscale;
+//		real_zoom_flat = zoom_s*zscale_flat;
+///		real_zoom = (log(zoom_s)/_l2)*zscale;
+///		real_zoom_flat = (log(zoom_s)/_l2)*zscale_flat;
 	}
 	else
 	{
-		real_zoom = (log(zoom)/_l2)*zscale;
-		real_zoom_flat = (log(zoom)/_l2)*zscale_flat;
+		real_zoom = zoom*zoom*zscale;
+		real_zoom_flat = zoom*zoom*zscale_flat;
+//		real_zoom = (log(zoom)/_l2)*zscale;
+//		real_zoom_flat = (log(zoom)/_l2)*zscale_flat;
 	}
 
 	pos.i *= real_zoom;
@@ -1883,8 +1891,8 @@ float NavigationSystem::CalculatePerspectiveAdjustment(float &zscale, float &zdi
 
 
 
-void NavigationSystem::TranslateCoordinates(QVector &pos, QVector &pos_flat, float center_nav_x, float center_nav_y, float themaxvalue, float zscale,
-	float zdistance, float &the_x, float &the_y, float &the_x_flat, float &the_y_flat, float &system_item_scale_temp, bool system_not_galaxy)
+void NavigationSystem::TranslateCoordinates(QVector &pos, QVector &pos_flat, float center_nav_x, float center_nav_y, float themaxvalue, float &zscale,
+	float &zdistance, float &the_x, float &the_y, float &the_x_flat, float &the_y_flat, float &system_item_scale_temp, bool system_not_galaxy)
 {
 	float itemscale = CalculatePerspectiveAdjustment(zscale, zdistance, pos, pos_flat, system_item_scale_temp, system_not_galaxy);
 
@@ -1920,8 +1928,8 @@ void NavigationSystem::TranslateCoordinates(QVector &pos, QVector &pos_flat, flo
 
 
 void NavigationSystem::TranslateAndDisplay (QVector &pos, QVector &pos_flat, float center_nav_x, float center_nav_y, float themaxvalue
-		, float zscale, float zdistance, float &the_x, float &the_y, float &system_item_scale_temp, bool system_not_galaxy)
-{
+		, float &zscale, float &zdistance, float &the_x, float &the_y, float &system_item_scale_temp, bool system_not_galaxy)
+{ 
 	float the_x_flat;
 	float the_y_flat;
 	TranslateCoordinates(pos, pos_flat, center_nav_x, center_nav_y, themaxvalue, zscale, zdistance,

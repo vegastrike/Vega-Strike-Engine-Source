@@ -399,16 +399,13 @@ float vsmax(float x, float y) {
 }
 void NavigationSystem::DrawGalaxy()
 {
-	systemdrawlist mainlist;//(0, screenoccupation, factioncolours);	//	lists of items to draw that are in mouse range
+//	systemdrawlist mainlist;//(0, screenoccupation, factioncolours);	//	lists of items to draw that are in mouse range
 	
 	systemdrawlist mouselist;//(1, screenoccupation, factioncolours);	//	lists of items to draw that are in mouse range
 
 	if (currentsystem.empty()) {
 		setCurrentSystem(UniverseUtil::getSystemFile());
-	} else {
-		systemIter.seek();
 	}
-	
 	string csector,csystem;
 
 	Beautify (currentsystem,csector,csystem);
@@ -437,154 +434,143 @@ void NavigationSystem::DrawGalaxy()
 
 	Adjust3dTransformation(galaxy_3d, 0);
 
-	pos = systemIter->Position();
-	ReplaceAxes(pos);
-
-	//Modify by old rotation amount
-	//*************************
-//	if(galaxy_3d)
-//	{
-//		pos = dxyz(pos, 0, ry, 0);
-//		pos = dxyz(pos, rx, 0, 0);
-//	}
-	//*************************
-
-	float max_x = (float)pos.i;
-	float min_x = (float)pos.i;
-	float max_y = (float)pos.j;
-	float min_y = (float)pos.j;
-	float max_z = (float)pos.k;
-	float min_z = (float)pos.k;
-
-//	float themaxvalue = fabs(pos.i);
-	float themaxvalue = 10.0;
-
-
 	float center_nav_x = ((screenskipby4[0] + screenskipby4[1]) / 2);
 	float center_nav_y = ((screenskipby4[2] + screenskipby4[3]) / 2);
 	//	**********************************
 
 
-	
-	//Find Centers
-	//**********************************
-	// This will use the current system as the center
-//	center_x=pos.i;
-//	center_y=pos.j;
-//	center_z=pos.k;
-	//**********************************
 
-	
-	//Retrieve system data min/max
-	//**********************************
-	while (!systemIter.done())	//	this goes through one time to get the major components locations, and scales its output appropriately
-	{
-		pos = systemIter->Position();
-		ReplaceAxes(pos);
+	if (!camera_z) {
 
+		float max_x=0.0;
+		float min_x=0.0;
+		float max_y=0.0;
+		float min_y=0.0;
+		float max_z=0.0;
+		float min_z=0.0;
+				
+				
+		int currentsystemindex=-1;
+		
+//		themaxvalue = fabs(pos.i);
+		themaxvalue = 0.0;
 
-		//Modify by old rotation amount
-		//*************************
-		if(galaxy_3d)
-		{
-			pos = dxyz(pos, 0, ry, 0);
-			pos = dxyz(pos, rx, 0, 0);
+		systemIter.seek();
+		while (!systemIter.done()) {
+			if (systemIter->GetName()==currentsystem) {
+				currentsystemindex=systemIter.getIndex();
+				pos=systemIter->Position();
+				ReplaceAxes(pos);
+				if(galaxy_3d){pos = dxyz(pos, 0, ry, 0);pos = dxyz(pos, rx, 0, 0);}
+				
+				max_x = (float)pos.i;
+				min_x = (float)pos.i;
+				max_y = (float)pos.j;
+				min_y = (float)pos.j;
+				max_z = (float)pos.k;
+				min_z = (float)pos.k;
+				
+				
+				//Find Centers
+				//**********************************
+				// This will use the current system as the center
+//				center_x=pos.i;
+//				center_y=pos.j;
+//				center_z=pos.k;
+				//**********************************
+
+				unsigned destsize=systemIter->GetDestinationSize();
+				if (destsize!=0) {
+					for (unsigned i=0;i<destsize;++i) {
+						QVector posoth=systemIter[systemIter->GetDestinationIndex(i)].Position();
+						ReplaceAxes(posoth);
+						if(galaxy_3d){posoth = dxyz(pos, 0, ry, 0);posoth = dxyz(pos, rx, 0, 0);}
+						
+						RecordMinAndMax(posoth,min_x,max_x,min_y,max_y,min_z,max_z,themaxvalue);
+					}
+				}
+				break;
+			}
+			++systemIter;
 		}
-		//*************************
-		//*************************
-
-
-		RecordMinAndMax(pos,min_x,max_x,min_y,max_y,min_z,max_z,themaxvalue);
-			
-		++systemIter;
-	}
-	
-	//**********************************
-
-
-	//Find Centers
-	//**********************************
-	// this will make the center be the center of the displayable area.
-	center_x = (min_x + max_x)/2;
-	center_y = (min_y + max_y)/2;
-	center_z = (min_z + max_z)/2;
-	//**********************************
-
-
-/*	min_x = (min_x+center_x)/2;
-	min_y = (min_y+center_y)/2;
-	min_z = (min_z+center_z)/2;
-	max_x = (max_x+center_x)/2;
-	max_y = (max_y+center_y)/2;
-	max_z = (max_z+center_z)/2;*/
-	//Set Camera Distance
-	//**********************************
+		
+		//Retrieve system data min/max
+		//**********************************
+		
+		systemIter.seek();
+		while (!systemIter.done())	//	this goes through one time to get the major components locations, and scales its output appropriately
+		{
+			unsigned destsize=systemIter->GetDestinationSize();
+			if (destsize!=0) {
+				for (unsigned i=0;i<destsize;++i) {
+					if (systemIter->GetDestinationIndex(i)==currentsystemindex) {
+						QVector posoth = systemIter->Position();
+						ReplaceAxes(posoth);
+						//Modify by old rotation amount
+						//*************************
+						if(galaxy_3d){posoth = dxyz(pos, 0, ry, 0);posoth = dxyz(pos, rx, 0, 0);}
+						//*************************
+						//*************************
+						RecordMinAndMax(posoth,min_x,max_x,min_y,max_y,min_z,max_z,themaxvalue);
+						break;
+					}
+				}
+			}
+			++systemIter;
+		}
+		
+		//**********************************
+		
+		
+		//Find Centers
+		//**********************************
+		// this will make the center be the center of the displayable area.
+		center_x = (min_x + max_x)/2;
+		center_y = (min_y + max_y)/2;
+		center_z = (min_z + max_z)/2;
+		//**********************************
+		
+		
+/*	   	min_x = (min_x+center_x)/2;
+		min_y = (min_y+center_y)/2;
+		min_z = (min_z+center_z)/2;
+		max_x = (max_x+center_x)/2;
+		max_y = (max_y+center_y)/2;
+		max_z = (max_z+center_z)/2;
+*/
+		//Set Camera Distance
+		//**********************************
 
 #define SQRT3 1.7320508
-	themaxvalue = sqrt(themaxvalue*themaxvalue + themaxvalue*themaxvalue + themaxvalue*themaxvalue);
-	themaxvalue = SQRT3*themaxvalue;
+		themaxvalue = sqrt(themaxvalue*themaxvalue + themaxvalue*themaxvalue + themaxvalue*themaxvalue);
+		themaxvalue = SQRT3*themaxvalue;
 
 
 
-	{
-		float half_x;//=(0.5*(max_x - min_x));
-		float half_y;//=(0.5*(max_y - min_y));
-		float half_z;//=(0.5*(max_z - min_z));
-		half_x = vsmax(max_x-center_x,center_x-min_x);
-		half_y = vsmax(max_y-center_y,center_y-min_y);
-		half_z = vsmax(max_z-center_z,center_z-min_z);
+		{
+//			float half_x = vsmax(max_x-center_x,center_x-min_x);
+//			float half_y = vsmax(max_y-center_y,center_y-min_y);
+//			float half_z = vsmax(max_z-center_z,center_z-min_z);
 
-//		float half_x =(0.5*(max_x - min_x));
-//		float half_y =(0.5*(max_y - min_y));
-//		float half_z =(0.5*(max_z - min_z));
+//			float half_x =(0.5*(max_x - min_x));
+//			float half_y =(0.5*(max_y - min_y));
+//			float half_z =(0.5*(max_z - min_z));
 
-		camera_z = sqrt( ( half_x * half_x ) + ( half_y * half_y ) + ( half_z * half_z ));
+//			camera_z = sqrt( ( half_x * half_x ) + ( half_y * half_y ) + ( half_z * half_z ));
 		
-		float halfmax = 0.5*themaxvalue;
-		camera_z = sqrt( (halfmax*halfmax) + (halfmax*halfmax) + (halfmax*halfmax) );
-		camera_z = 4.0*themaxvalue;
+//			float halfmax = 0.5*themaxvalue;
+//			camera_z = sqrt( (halfmax*halfmax) + (halfmax*halfmax) + (halfmax*halfmax) );
+//			camera_z = 4.0*themaxvalue;
+			camera_z = themaxvalue;
+		}
+
+		//**********************************
+	
 	}
 
-	camera_z = themaxvalue;
-
-	//**********************************
-
+	
 	DrawOriginOrientationTri(center_nav_x, center_nav_y, 0);
-
-
-
-
-
-
-
-
-
-	//	Adjust mouse list for 'n' kliks
-	//	**********************************
-	//	STANDARD	: (1 3 2) ~ [0] [2] [1]
-	//	VS			: (1 2 3) ~ [0] [1] [2]	<-- use this
-	if(mouselist.size() > 0)	//	mouse is over a target when this is > 0
-	{
-		if(mouse_wentdown[2]== 1)	//	mouse button went down for mouse button 2(standard)
-			rotations += 1;
-	}
-
-
-	if(rotations >= mouselist.size())	//	dont rotate more than there is
-		rotations = 0;
-
-
-	systemdrawlist tmpv;
-	int siz = mouselist.size();
-	for (l=0;l<siz;++l) {
-		tmpv.push_back(mouselist[((unsigned int)(l+rotations))%((unsigned int)siz)]);
-	}
-	mouselist.swap(tmpv);
-	//	**********************************
-
-
-
-
+	
 	//	Enlist the items and attributes
 	//	**********************************
 	systemIter.seek();
@@ -603,8 +589,27 @@ void NavigationSystem::DrawGalaxy()
 	
 		ReplaceAxes(pos);	//	poop
 
+		//Modify by old rotation amount
+		//*************************
+//		if(galaxy_3d){pos = dxyz(pos, 0, ry, 0);pos = dxyz(pos, rx, 0, 0);}
+		//*************************
+		//*************************
+
 		float the_x, the_y, system_item_scale_temp;
 		TranslateAndDisplay(pos, pos_flat, center_nav_x, center_nav_y, themaxvalue, zscale, zdistance, the_x, the_y,system_item_scale_temp, 0);
+
+		{
+			float tmp_x=(center_x-pos.i);
+			float tmp_y=(center_y-pos.j);
+			float tmp_z=(center_z-pos.k);
+			if (sqrt((pos.i*pos.i)+(pos.j*pos.j)+(pos.k*pos.k))>zdistance) {
+				// If stuff is outside camera gange then continue.
+				++systemIter;
+				continue;
+			}
+		}
+		
+		
 		GFXColor col=systemIter->GetColor();
 
 
@@ -700,6 +705,35 @@ void NavigationSystem::DrawGalaxy()
 		++systemIter;
 	}
 	//	**********************************
+
+
+
+
+
+
+	//	Adjust mouse list for 'n' kliks
+	//	**********************************
+	//	STANDARD	: (1 3 2) ~ [0] [2] [1]
+	//	VS			: (1 2 3) ~ [0] [1] [2]	<-- use this
+	if(mouselist.size() > 0)	//	mouse is over a target when this is > 0
+	{
+		if(mouse_wentdown[2]== 1)	//	mouse button went down for mouse button 2(standard)
+			rotations += 1;
+	}
+
+
+	if(rotations >= mouselist.size())	//	dont rotate more than there is
+		rotations = 0;
+
+
+	systemdrawlist tmpv;
+	int siz = mouselist.size();
+	for (l=0;l<siz;++l) {
+		tmpv.push_back(mouselist[((unsigned int)(l+rotations))%((unsigned int)siz)]);
+	}
+	mouselist.swap(tmpv);
+	//	**********************************
+
 
 
 

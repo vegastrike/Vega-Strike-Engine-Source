@@ -75,8 +75,8 @@ void NavigationSystem::DrawSystem()
 	//***************************
 
 
-	navdrawlist mainlist(0, screenoccupation, factioncolours);		//	lists of items to draw
-	mainlist.unselectedalpha = unselectedalpha;
+//	navdrawlist mainlist(0, screenoccupation, factioncolours);		//	lists of items to draw
+//	mainlist.unselectedalpha = unselectedalpha;
 	navdrawlist mouselist(1, screenoccupation, factioncolours);	//	lists of items to draw that are in mouse range
 
 	
@@ -126,7 +126,7 @@ void NavigationSystem::DrawSystem()
 	float min_z = (float)pos.k;
 
 //	float themaxvalue = fabs(pos.i);
-	float themaxvalue = 0.0;
+	themaxvalue = 0.0;
 
 	float center_nav_x = ((screenskipby4[0] + screenskipby4[1]) / 2);
 	float center_nav_y = ((screenskipby4[2] + screenskipby4[3]) / 2);
@@ -401,14 +401,16 @@ void NavigationSystem::DrawSystem()
 		else 
 			tests_in_range = TestIfInRangeRad(the_x, the_y, insert_size, mouse_x_current, mouse_y_current);
 
-		if(tests_in_range)
-			mouselist.insert(insert_type, insert_size, the_x, the_y, (*blah));
-		else
-			mainlist.insert(insert_type, insert_size, the_x, the_y, (*blah));
-
-
-
+		Unit * myunit=(*blah);
+		
 		++blah;
+		
+		if(tests_in_range)
+			mouselist.insert(insert_type, insert_size, the_x, the_y, myunit);
+		else
+			drawlistitem(insert_type, insert_size, the_x, the_y, myunit, screenoccupation, false, (*blah)?true:false, unselectedalpha, factioncolours);
+
+
 
 	}
 
@@ -452,8 +454,8 @@ void NavigationSystem::DrawSystem()
 
 	//	Draw the damn shit
 	//	**********************************
-	mainlist.draw();	//	draw the items
-	mainlist.wipe();	//	whipe the list
+//	mainlist.draw();	//	draw the items
+//	mainlist.wipe();	//	whipe the list
 	//	**********************************
 	
 	
