@@ -674,9 +674,12 @@ int NetClient::recvMsg( Packet* outpacket )
 					}
 					if( damages & Unit::LIMITS_DAMAGED)
 					{
-						un->computer.max_pitch = netbuf.getFloat( );
-						un->computer.max_yaw = netbuf.getFloat( );
-						un->computer.max_roll = netbuf.getFloat( );
+						un->computer.max_pitch_down = netbuf.getFloat( );
+						un->computer.max_pitch_up = netbuf.getFloat( );
+						un->computer.max_yaw_left = netbuf.getFloat( );
+						un->computer.max_yaw_right = netbuf.getFloat( );
+						un->computer.max_roll_left = netbuf.getFloat( );
+						un->computer.max_roll_right = netbuf.getFloat( );
 						un->limits.roll = netbuf.getFloat( );
 						un->limits.yaw = netbuf.getFloat( );
 						un->limits.pitch = netbuf.getFloat( );

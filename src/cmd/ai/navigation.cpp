@@ -299,15 +299,15 @@ void ChangeHeading::Execute() {
     torque= (-parent->GetMoment()/SIMULATION_ATOM)*local_velocity;
   } else {
     TurnToward (atan2(local_heading.j, local_heading.k),local_velocity.i,torque.i);// find angle away from axis 0,0,1 in yz plane
-    OptimizeAngSpeed(turningspeed*parent->GetComputerData().max_pitch_up,
-                     turningspeed*parent->GetComputerData().max_pitch_down,
+    OptimizeAngSpeed(turningspeed*parent->GetComputerData().max_pitch_down,
+                     turningspeed*parent->GetComputerData().max_pitch_up,
                      local_velocity.i,
                      torque.i);
     
     TurnToward (atan2 (local_heading.i, local_heading.k), -local_velocity.j, torque.j);
     torque.j=-torque.j;
-    OptimizeAngSpeed(turningspeed*parent->GetComputerData().max_yaw_right,
-                     turningspeed*parent->GetComputerData().max_yaw_left,
+    OptimizeAngSpeed(turningspeed*parent->GetComputerData().max_yaw_left,
+                     turningspeed*parent->GetComputerData().max_yaw_right,
                      local_velocity.j,
                      torque.j);
     torque.k  =-parent->GetMoment()*local_velocity.k/SIMULATION_ATOM;//try to counteract roll;

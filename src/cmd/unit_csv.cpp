@@ -602,20 +602,20 @@ void Unit::LoadRow(CSVRow &row,string modification, string * netxml) {
   {
     std::string t,tn,tp;
     t=row["Yaw_Governor"];
-    tn=row["Yaw_Governor_Left"];
-    tp=row["Yaw_Governor_Right"];
-    computer.max_yaw_left=stof(tn.length()>0?tn:t)*VS_PI/180.;
-    computer.max_yaw_right=stof(tp.length()>0?tp:t)*VS_PI/180.;
+    tn=row["Yaw_Governor_Right"];
+    tp=row["Yaw_Governor_Left"];
+    computer.max_yaw_right=stof(tn.length()>0?tn:t)*VS_PI/180.;
+    computer.max_yaw_left=stof(tp.length()>0?tp:t)*VS_PI/180.;
     t=row["Pitch_Governor"];
-    tn=row["Pitch_Governor_Down"];
-    tp=row["Pitgh_Governor_Up"];
-    computer.max_pitch_down=stof(tn.length()>0?tn:t)*VS_PI/180.;
-    computer.max_pitch_up=stof(tp.length()>0?tp:t)*VS_PI/180.;
+    tn=row["Pitch_Governor_Up"];
+    tp=row["Pitgh_Governor_Down"];
+    computer.max_pitch_up=stof(tn.length()>0?tn:t)*VS_PI/180.;
+    computer.max_pitch_down=stof(tp.length()>0?tp:t)*VS_PI/180.;
     t=row["Roll_Governor"];
-    tn=row["Roll_Governor_Left"];
-    tp=row["Roll_Governor_Right"];
-    computer.max_roll_left=stof(tn.length()>0?tn:t)*VS_PI/180.;
-    computer.max_roll_right=stof(tp.length()>0?tp:t)*VS_PI/180.;
+    tn=row["Roll_Governor_Right"];
+    tp=row["Roll_Governor_Left"];
+    computer.max_roll_right=stof(tn.length()>0?tn:t)*VS_PI/180.;
+    computer.max_roll_left=stof(tp.length()>0?tp:t)*VS_PI/180.;
   }
   static float game_accel=XMLSupport::parse_float(vs_config->getVariable("physics","game_accel","1"));
   static float game_speed=XMLSupport::parse_float(vs_config->getVariable("physics","game_speed","1"));
@@ -1019,12 +1019,12 @@ string Unit::WriteUnitString () {
         unit["Maneuver_Yaw"]=tos(limits.yaw*180/(VS_PI));
         unit["Maneuver_Pitch"]=tos(limits.pitch*180/(VS_PI));
         unit["Maneuver_Roll"]=tos(limits.roll*180/(VS_PI));
-        unit["Yaw_Governor_Left"]=tos(computer.max_yaw_left*180/VS_PI);
         unit["Yaw_Governor_Right"]=tos(computer.max_yaw_right*180/VS_PI);
-        unit["Pitch_Governor_Down"]=tos(computer.max_pitch_down*180/VS_PI);
+        unit["Yaw_Governor_Left"]=tos(computer.max_yaw_left*180/VS_PI);
         unit["Pitch_Governor_Up"]=tos(computer.max_pitch_up*180/VS_PI);
-        unit["Roll_Governor_Left"]=tos(computer.max_roll_left*180/VS_PI);
+        unit["Pitch_Governor_Down"]=tos(computer.max_pitch_down*180/VS_PI);
         unit["Roll_Governor_Right"]=tos(computer.max_roll_right*180/VS_PI);
+        unit["Roll_Governor_Left"]=tos(computer.max_roll_left*180/VS_PI);
         static float game_accel=XMLSupport::parse_float(vs_config->getVariable("physics","game_accel","1"));
         static float game_speed=XMLSupport::parse_float(vs_config->getVariable("physics","game_speed","1"));
         unit["Afterburner_Accel"]=tos(limits.afterburn/(game_accel*game_speed));

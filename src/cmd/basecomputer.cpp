@@ -4160,41 +4160,41 @@ void showUnitStats(Unit * playerUnit,string &text,int subunitlevel, int mode, Ca
 	}
 
 	if(!mode){
-		if (uc.max_yaw_left==uc.max_pitch_down &&uc.max_yaw_left==uc.max_roll_left) {
-			PRETTY_ADD(statcolor+"Max turn rate: #-c",uc.max_yaw_left,2);
+		if (uc.max_yaw_right==uc.max_pitch_up &&uc.max_yaw_right==uc.max_roll_right) {
+			PRETTY_ADD(statcolor+"Max turn rate: #-c",uc.max_yaw_right,2);
 			text+=" Radians/second "+statcolor+"(yaw, pitch, roll)#-c";
 			}
 		else {
 			text+=("#n#"+prefix+statcolor+"Max turn rates:#-c ");
-			PRETTY_ADDN(statcolor+"  yaw #-c",uc.max_yaw_left,2);
-			PRETTY_ADDN(statcolor+"  pitch #-c",uc.max_pitch_down,2);
-			PRETTY_ADDN(statcolor+"  roll #-c",uc.max_roll_left,2);
+			PRETTY_ADDN(statcolor+"  yaw #-c",uc.max_yaw_right,2);
+			PRETTY_ADDN(statcolor+"  pitch #-c",uc.max_pitch_up,2);
+			PRETTY_ADDN(statcolor+"  roll #-c",uc.max_roll_right,2);
 			text+=" Radians/second";
 		}
 
 		text+="#n##n##c0:1:.5#"+prefix+"[TARGETTING SUBSYSTEM]#n##-c";
 	} else {
-		if(uc.max_yaw_left!=buc.max_yaw_left||uc.max_pitch_down!=buc.max_pitch_down||uc.max_roll_left!=buc.max_roll_left){
+		if(uc.max_yaw_right!=buc.max_yaw_right||uc.max_pitch_up!=buc.max_pitch_up||uc.max_roll_right!=buc.max_roll_right){
 			switch(replacement_mode){
 				case 0: // Replacement or new Module
 					text+=("#n#"+prefix+"Governor settings for maximum turn rates set to: ");
-					PRETTY_ADDN(statcolor+"  yaw #-c",uc.max_yaw_left,2);
-					PRETTY_ADDN(statcolor+"  pitch #-c",uc.max_pitch_down,2);
-					PRETTY_ADDN(statcolor+"  roll #-c",uc.max_roll_left,2);
+					PRETTY_ADDN(statcolor+"  yaw #-c",uc.max_yaw_right,2);
+					PRETTY_ADDN(statcolor+"  pitch #-c",uc.max_pitch_up,2);
+					PRETTY_ADDN(statcolor+"  roll #-c",uc.max_roll_right,2);
 					text+=" Radians/second";
 					break;
 				case 1: // Additive
 					text+=("#n#"+prefix+"Governor settings for maximum turn rates increased by: ");
-					PRETTY_ADDN(statcolor+"  yaw #-c",uc.max_yaw_left,2);
-					PRETTY_ADDN(statcolor+"  pitch #-c",uc.max_pitch_down,2);
-					PRETTY_ADDN(statcolor+"  roll #-c",uc.max_roll_left,2);
+					PRETTY_ADDN(statcolor+"  yaw #-c",uc.max_yaw_right,2);
+					PRETTY_ADDN(statcolor+"  pitch #-c",uc.max_pitch_up,2);
+					PRETTY_ADDN(statcolor+"  roll #-c",uc.max_roll_right,2);
 					text+=" Radians/second";
 					break;
 				case 2: // multiplicative
 					text+=("#n#"+statcolor+"Increases governor settings for maximum turn rates by: #-c");
-					PRETTY_ADDN(statcolor+"  yaw #-c",100.0*((uc.max_yaw_left*180/PI)-1),0);
-					PRETTY_ADDN(statcolor+"  pitch #-c",100.0*((uc.max_pitch_down*180/PI)-1),0);
-					PRETTY_ADDN(statcolor+"  roll #-c",100.0*((uc.max_roll_left*180/PI)-1),0);
+					PRETTY_ADDN(statcolor+"  yaw #-c",100.0*((uc.max_yaw_right*180/PI)-1),0);
+					PRETTY_ADDN(statcolor+"  pitch #-c",100.0*((uc.max_pitch_up*180/PI)-1),0);
+					PRETTY_ADDN(statcolor+"  roll #-c",100.0*((uc.max_roll_right*180/PI)-1),0);
 					text+=" %";
 					break;
 				default: // Failure 
