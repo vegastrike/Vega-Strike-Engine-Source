@@ -382,7 +382,7 @@ bool Beam::Collide (Unit * target) {
     float tmp=(curlength/range); 
     float appldam = (damagerate*SIMULATION_ATOM*curthick/thickness)*((1-tmp)+tmp*rangepenalty);
     float phasdam = (phasedamage*SIMULATION_ATOM*curthick/thickness)*((1-tmp)+tmp*rangepenalty);
-    if ((appldam<0&&phasdam>0)||(appldam>0&&phasedam<0) {
+    if ((appldam<0&&phasdam>0)||(appldam>0&&phasdam<0) {
       //tractor beam!
       target->ApplyForce (direction*appldam);
       if ((center-target->Position()).Magnitude()<fabs(phasdam)) {
