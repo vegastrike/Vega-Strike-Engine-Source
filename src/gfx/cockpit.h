@@ -48,10 +48,20 @@ class Cockpit {
   enum VIEWSTYLE view;
   ///flag to decide whether to draw all target boxes
   bool draw_all_boxes;
+  bool draw_line_to_target,draw_line_to_targets_target;
+  bool draw_line_to_itts;
+  ///flag to tell wheter to draw the itts, even if the ship has none
   bool always_itts;
+  // colors of blips/targetting boxes
   GFXColor friendly,enemy,neutral,targeted,targetting,planet;
+  // gets the color by relation
   GFXColor relationToColor (float relation);
+  // gets the color by looking closer at the unit
   GFXColor unitToColor (Unit *un,Unit *target);
+  // the style of the radar (WC|Elite)
+  string radar_type;
+  void LocalToEliteRadar (const Vector & pos, float &s, float &t,float &h);
+  void LocalToRadar (const Vector & pos, float &s, float &t);
 
   void LoadXML (const char *file);
   static void beginElement(void *userData, const XML_Char *name, const XML_Char **atts);
@@ -66,8 +76,10 @@ class Cockpit {
   void DrawTargetBox ();
   ///draws the target box around all units
   void DrawTargetBoxes ();
-  ///Draws all teh blips on the radar. No color info (yet)
+  ///Draws all teh blips on the radar.
   void DrawBlips(Unit * un);
+  ///Draws all teh blips on the radar in Elite-style
+  void DrawEliteBlips(Unit * un);
   ///Draws gauges
   void DrawGauges(Unit * un);
  public:

@@ -20,12 +20,19 @@
 
 
 
-static void LocalToRadar (const Vector & pos, float &s, float &t) {
+ void Cockpit::LocalToRadar (const Vector & pos, float &s, float &t) {
   s = (pos.k>0?pos.k:0)+1;
   t = 2*sqrtf(pos.i*pos.i + pos.j*pos.j + s*s);
   s = -pos.i/t;
   t = pos.j/t;
 }
+
+void Cockpit::LocalToEliteRadar (const Vector & pos, float &s, float &t,float &h){
+  s=-pos.i/1000.0;
+  t=pos.k/1000.0;
+  h=pos.j/1000.0;
+}
+
 
 GFXColor Cockpit::unitToColor (Unit *un,Unit *target) {
  	if(target->isUnit()==PLANETPTR){
@@ -157,22 +164,19 @@ void Cockpit::DrawTargetBox () {
   DrawNavigationSymbol (un->GetComputerData().NavPoint,CamP,CamQ, CamR.Dot(un->GetComputerData().NavPoint-un->Position()));
   GFXColorf (un->GetComputerData().radar.color?unitToColor(un,target):GFXColor(1,1,1,1));
 
-#if 0
-  Vector my_loc(un->Position());
-  Unit *targets_target=target->Target();
-  if(targets_target!=NULL){
-    Vector ttLoc(targets_target->Position());
+  if(draw_line_to_target){
+    Vector my_loc(un->Position());
     GFXBegin(GFXLINESTRIP);
+    GFXVertexf(my_loc);
     GFXVertexf(Loc);
-    GFXVertexf(ttLoc);
+
+    Unit *targets_target=target->Target();
+    if(draw_line_to_targets_target && targets_target!=NULL){
+      Vector ttLoc(targets_target->Position());
+      GFXVertexf(ttLoc);
+    }
     GFXEnd();
   }
-
-  GFXBegin (GFXLINESTRIP);
-  GFXVertexf(my_loc);
-  GFXVertexf(Loc);
-  GFXEnd();
-#endif
 
   GFXBegin (GFXLINESTRIP); 
   GFXVertexf (Loc+(CamP+CamQ)*target->rSize());
@@ -187,10 +191,10 @@ void Cockpit::DrawTargetBox () {
    Vector iLoc = target->PositionITTS (un->Position(),speed)+10*err*Vector (-.5*.25*un->rSize()+rand()*.25*un->rSize()/RAND_MAX,-.5*.25*un->rSize()+rand()*.25*un->rSize()/RAND_MAX,-.5*.25*un->rSize()+rand()*.25*un->rSize()/RAND_MAX);
     
     GFXBegin (GFXLINESTRIP);
-#if 0
-    GFXVertexf(Loc);
-    GFXVertexf(iLoc);
-#endif
+    if(draw_line_to_itts){
+      GFXVertexf(Loc);
+      GFXVertexf(iLoc);
+    }
     GFXVertexf (iLoc+(CamP)*.25*un->rSize());
     GFXVertexf (iLoc+(-CamQ)*.25*un->rSize());
     GFXVertexf (iLoc+(-CamP)*.25*un->rSize());
@@ -203,6 +207,8 @@ void Cockpit::DrawTargetBox () {
   GFXEnable (DEPTHWRITE);
 
 }
+
+
 void Cockpit::DrawBlips (Unit * un) {
   Unit::Computer::RADARLIM * radarl = &un->GetComputerData().radar;
   UnitCollection * drawlist = _Universe->activeStarSystem()->getUnitList();
@@ -248,6 +254,82 @@ void Cockpit::DrawBlips (Unit * un) {
     iter->advance();
   }
   GFXEnd();
+  GFXPointSize (1);
+  GFXColor4f (1,1,1,1);
+  GFXEnable (TEXTURE0);
+  delete iter;
+}
+
+void Cockpit::DrawEliteBlips (Unit * un) {
+  Unit::Computer::RADARLIM * radarl = &un->GetComputerData().radar;
+  UnitCollection * drawlist = _Universe->activeStarSystem()->getUnitList();
+  Iterator * iter = drawlist->createIterator();
+  Unit * target;
+  Unit * makeBigger = un->Target();
+  float s,t,es,et,eh;
+  float xsize,ysize,xcent,ycent;
+  Radar->GetSize (xsize,ysize);
+  xsize = fabs (xsize);
+  ysize = fabs (ysize);
+  Radar->GetPosition (xcent,ycent);
+  GFXDisable (TEXTURE0);
+  GFXDisable (LIGHTING);
+
+  while ((target = iter->current())!=NULL) {
+    if (target!=un) {
+      Vector localcoord;
+      if (!un->InRange (target,localcoord)) {
+	if (makeBigger==target) {
+	  un->Target(NULL);
+	}
+	iter->advance();	
+	continue;
+      }
+
+
+	LocalToRadar (localcoord,s,t);
+	LocalToEliteRadar(localcoord,es,et,eh);
+
+
+      GFXColor localcol (radarl->color?unitToColor (un,target):GFXColor(1,1,1,1));
+      GFXColorf (localcol);
+      int headsize=4;
+#if 1
+      if (target==makeBigger) {
+	headsize=6;
+	//cout << "localcoord" << localcoord << " s=" << s << " t=" << t << endl;
+      }
+#endif
+      float xerr,yerr,y2,x2;
+      xerr=xcent+xsize*(es-.5*radarl->error+(radarl->error*rand())/RAND_MAX);
+      yerr=ycent+ysize*(et+-.5*radarl->error+(radarl->error*rand())/RAND_MAX);
+      x2=xcent+xsize*((es+0)-.5*radarl->error+(radarl->error*rand())/RAND_MAX);
+      y2=ycent+ysize*((et+t)-.5*radarl->error+(radarl->error*rand())/RAND_MAX);
+
+      //      printf("xerr,yerr: %f %f xcent %f xsize %f\n",xerr,yerr,xcent,xsize);
+
+      ///draw the foot
+      GFXPointSize(2);
+      GFXBegin(GFXPOINT);
+      GFXVertex3f (xerr,yerr,0);
+      GFXEnd();
+
+      ///draw the leg
+      GFXBegin(GFXLINESTRIP);
+      GFXVertex3f(x2,yerr,0);
+      GFXVertex3f(x2,y2,0);
+      GFXEnd();
+
+      ///draw the head
+      GFXPointSize(headsize);
+      GFXBegin(GFXPOINT);
+      GFXVertex3f(xerr,y2,0);
+      GFXEnd();
+
+      GFXPointSize(1);
+    }
+    iter->advance();
+  }
   GFXPointSize (1);
   GFXColor4f (1,1,1,1);
   GFXEnable (TEXTURE0);
@@ -397,8 +479,13 @@ Cockpit::Cockpit (const char * file, Unit * parent): parent (parent),textcol (1,
     gauges[i]=NULL;
   }
 
-  draw_all_boxes=XMLSupport::parse_bool(vs_config->getVariable("graphics","drawAllTargetBoxes","false"));
-  always_itts=XMLSupport::parse_bool(vs_config->getVariable("graphics","drawAlwaysITTS","false"));
+  draw_all_boxes=XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","drawAllTargetBoxes","false"));
+  draw_line_to_target=XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","drawLineToTarget","false"));
+  draw_line_to_targets_target=XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","drawLineToTargetsTarget","false"));
+  draw_line_to_itts=XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","drawLineToITTS","false"));
+  always_itts=XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","drawAlwaysITTS","false"));
+  radar_type=vs_config->getVariable("graphics","hud","radarType","WC");
+
   friendly=GFXColor(-1,-1,-1,-1);
   enemy=GFXColor(-1,-1,-1,-1);
   neutral=GFXColor(-1,-1,-1,-1);
@@ -455,7 +542,12 @@ void Cockpit::Draw() {
       }
       if (Radar) {
 	Radar->Draw();
-	DrawBlips(un);
+	if(radar_type=="Elite"){
+	  DrawEliteBlips(un);
+	}
+	else{
+	  DrawBlips(un);
+	}
       }
     }
     if (view==CP_FRONT) {
