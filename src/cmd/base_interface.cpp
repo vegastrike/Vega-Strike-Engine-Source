@@ -18,6 +18,7 @@
 #include "music.h"
 #include "lin_time.h"
 #include "load_mission.h"
+#include "universe_util.h"
 #ifdef RENDER_FROM_TEXTURE
 #include "gfx/stream_texture.h"
 #endif
@@ -812,7 +813,11 @@ BaseInterface::BaseInterface (const char *basefile, Unit *base, Unit*un)
 	othtext.SetCharSize(x*2,y*2);
 	//	othtext.SetSize(2-(x*4),-.75);
 	othtext.SetSize(1-.01,-.75);
-	Load(basefile, compute_time_of_day(base,un),FactionUtil::GetFaction(base->faction));
+
+        std::string fac=FactionUtil::GetFaction(base->faction);
+        if (fac=="neutral")
+          fac  = UniverseUtil::GetGalaxyFaction(UnitUtil::getUnitSystemFile(base));
+	Load(basefile, compute_time_of_day(base,un),fac.c_str());
 	vector <string> vec;
 	vec.push_back(base->name);
 	if (un) {
