@@ -354,10 +354,7 @@ std::vector<string> readMilkyWayNames( ) {
 			if (quote!=string::npos) {
 				string newname=s.substr(0,quote);
 				if (newname!="max"&&newname!="min"&&newname!="maxlimit"&&newname!="minlimit"&&newname!="hardwicke"&&newname!="reid"&&newname!="lesnick"&&newname!="midgard"&&newname.find("blockade")==string::npos&& newname!="wolf359"&&newname.find("wolf")==string::npos)
-					if (allnames.find(newname)==allnames.end()){
-						retval.push_back(newname);
-						allnames.insert(newname);
-					}
+					retval.push_back(newname);
 			}
 		}
 	}while (where!=string::npos);
@@ -629,8 +626,13 @@ vector<string> shuffle (const vector<string> & inp) {
 string recomputeName(){
 	static int which=-1;
 	static std::vector<string> genericnames=shuffle(readMilkyWayNames());
-	which++;
-	return genericnames[(which)%genericnames.size()]+dodad(which/genericnames.size());
+	string newname;
+	do {
+		which++;
+		newname = genericnames[(which)%genericnames.size()]+dodad(which/genericnames.size());
+	}while (allnames.find(newname)!=allnames.end());
+	allnames.insert(newname);
+	return newname;
 }
 
 vector<System> readfile (const char * name) {
@@ -721,7 +723,7 @@ vector<System> readfile (const char * name) {
 			}
 		}
 		for (unsigned int i= 0;i<systems.size();++i) {
-			if (systems[i].name.length()==0||(allnames.find(systems[i].name)==allnames.end())){
+			if (systems[i].name.length()==0||(allnames.find(systems[i].name)!=allnames.end())){
 				systems[i].interesting=false;
 				static int num=0;
 				num++;
@@ -744,7 +746,7 @@ vector<System> readfile (const char * name) {
 					systems[i].interesting=true;
 				}
 			}
-			
+			allnames.insert(systems[i].name);
 			if (systems[i].interesting) {
 				ic++;
 				//printf("%s interesting\n",systems[i].name.c_str());
@@ -820,17 +822,23 @@ string getNameForFaction (std::string faction) {
 			char * buf =(char *)malloc (whence+1);
 			buf[whence]=0;
 			while (fgets(buf,whence,fp)) {
-				factionnameslist.push_back(buf);
+				string ner = buf;
+				ner = ner.substr(0,ner.find("\n"));
+				ner = ner.substr(0,ner.find("\r"));
+				factionnameslist.push_back(ner);
 			}
 			fclose(fp);
 		}
 		factionnames.insert(pair<string,vector<string> > (faction,shuffle(factionnameslist)));
 	}
 	vector<string> * temp = &factionnames[faction];
-	if (temp->size()){
+	while (temp->size()){
 		string rez= temp->back();
 		temp->pop_back();
-		return rez;
+		if (allnames.find (rez)==allnames.end()) {
+			allnames.insert(rez);
+			return rez;
+		}
 	}
 	return "";
 }
