@@ -22,6 +22,8 @@ namespace UniverseUtil {
 	un_iter getUnitList();
 ///This function gets a unit given a number (how many iterations to go down in the iterator)
 	Unit *getUnit(int index);
+	int getNumUnits();
+	void cacheAnimation (string anim);
 ///this function launches a wormhole or ajump point.
 	Unit *launchJumppoint(string name_string,
 			string faction_string,

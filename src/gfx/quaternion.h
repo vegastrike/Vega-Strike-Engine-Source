@@ -18,6 +18,9 @@ struct Quaternion {
   inline Quaternion operator*=(const Quaternion &rval) {
     return *this = *this * rval;
   }
+  inline bool operator == (const Quaternion &rval) const {
+    return s==rval.s&&v.i==rval.v.i&&v.j==rval.v.j&&v.k==rval.v.k;
+  }
   Quaternion Normalize() { v = v * (((float)1.0)/Magnitude()); s /= Magnitude(); return *this;}
 
 

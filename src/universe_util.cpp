@@ -8,6 +8,7 @@
 #include <string>
 #include "cmd/music.h"
 #include "audiolib.h"
+#include "gfx/animation.h"
 #include "lin_time.h"
 #include "load_mission.h"
 #include "config_xml.h"
@@ -50,6 +51,15 @@ namespace UniverseUtil {
 			iter.advance();
 		}
 		return iter.current();
+	}
+        int getNumUnits() {
+	  int count=0;
+	  un_iter iter=activeSys->getUnitList().createIterator();
+	  while (iter.current()){
+	    iter.advance();
+	    count++;
+	  }
+	  return count;
 	}
 	Unit *launchJumppoint(string name_string,
 			string faction_string,
@@ -169,6 +179,10 @@ namespace UniverseUtil {
 		AUDStartPlaying (sound);
 		AUDDeleteSound(sound);
 	}
+        void cacheAnimation(string aniName) {
+	  static vector <Animation *> anis;
+	  anis.push_back (new Animation(aniName.c_str()));
+        }
 	void playAnimation(string aniName, QVector loc, float size) {
 		AddAnimation(loc,size,true,aniName);
 	}
