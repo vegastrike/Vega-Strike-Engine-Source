@@ -28,7 +28,9 @@
 
 #include "galaxy_xml.h"
 #include "galaxy_gen.h"
+#ifdef WRITEGALAXYCOORDS
 #include "gfx/nav/navscreen.h"
+#endif
 #include <float.h>
 using namespace XMLSupport;
 namespace GalaxyXML {
@@ -171,13 +173,14 @@ void Galaxy::processSystem(string sys,const QVector &coords){
 	}
 }
 void Galaxy::processGalaxy(string sys) {
+#ifdef WRITEGALAXYCOORDS
 	NavigationSystem::SystemIterator si(sys,256000);
 	while (!si.done()) {
 		string sys = *si;
 		processSystem(sys,si.Position());
 		++si;
 	}
-	
+#endif
 }
 void dotabs (FILE* fp, unsigned int tabs) {
 	for (unsigned int i=0;i<tabs;++i) {
@@ -305,7 +308,14 @@ string Galaxy::getRandSystem (string sect, string def) {
 	return def;
 }
 string Galaxy::getVariable(string section,string subsection,string name,string defaultvalue){
-
+#ifdef WRITEGALAXYCOORDS
+	static bool  blah = false;
+	if (!blah) {
+		processGalaxy("sol_sector/sol");
+		writeGalaxy("/tmp/outputgalaxy");
+		blah = true;
+	}
+#endif
 	SubHeirarchy * s = subheirarchy;
 	SubHeirarchy::iterator i;
 	if (s) {

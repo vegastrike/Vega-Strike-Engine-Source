@@ -338,14 +338,6 @@ void GameUniverse::WriteSaveGame (bool auto_save)
 extern StarSystem *GetLoadedStarSystem(const char * system);
 
 StarSystem * GameUniverse::GenerateStarSystem (const char * file, const char * jumpback, Vector center) {
-#ifdef WRITEGALAXYCOORDS
-	static bool  blah = false;
-	if (!blah) {
-		this->galaxy->processGalaxy("sol_sector/sol");
-		this->galaxy->writeGalaxy("/tmp/outputgalaxy");
-		blah = true;
-	}
-#endif
   StarSystem *tmpcache;
   if ((tmpcache =GetLoadedStarSystem(file))) {
     return tmpcache;
