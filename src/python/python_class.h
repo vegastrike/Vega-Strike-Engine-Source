@@ -86,8 +86,8 @@ BOOST_PYTHON_END_CONVERSION_NAMESPACE
 #define PYTHON_BEGIN_CLASS(name,CLASS,myclass) PYTHON_BASE_BEGIN_CLASS(name,CLASS,myclass) \
     Class.def (boost::python::constructor<>());
 #define PYTHON_END_CLASS(name,SuperClass) }
-//    BaseClass.def (&PythonClass<SuperClass>::IncRef,"IncRef"); \
-//    boost::python::class_builder <SuperClass> TempClass (name,"SuperClass"); 
+/*    BaseClass.def (&PythonClass<SuperClass>::IncRef,"IncRef"); \
+      boost::python::class_builder <SuperClass> TempClass (name,"SuperClass"); */
 
 
 template <class SuperClass> class PythonClass:public SuperClass {

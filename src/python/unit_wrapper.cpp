@@ -34,16 +34,17 @@ public:
 ///////////////////////////////MANUAL WRAP//////
   void Kill () {{CHECKME;}unit->Kill(true);}
   UnitWrapper GetTarget () {{CHECKME 0;}return unit->Target();}
+  UnitWrapper GetVelocityReference() {{CHECKME 0;}return unit->VelocityReference();}
+  void SetVelocityReference(UnitWrapper targ) {{CHECKME;}unit->VelocityReference(targ);}
   void SetTarget (UnitWrapper targ) {{CHECKME;}unit->Target(targ);}
-  voidWRAPPED1( SetTarget ,UnitWrapper, targ)
   boost::python::tuple GetOrientation() {{CHECKME boost::python::tuple();}Vector p,q,r; unit->GetOrientation(p,q,r); return boost::python::tuple(p,q,r);}
   boost::python::tuple queryBSP (bool ShieldBSP) {{CHECKME boost::python::tuple();}float dist; UnitWrapper un; QVector st,en; Vector nml; un=unit->queryBSP(st,en,nml,dist,ShieldBSP); boost::python::tuple ret (un,st,en,nml); ret.set_item(4,dist); return ret;}
   boost::python::tuple cosAngleTo (UnitWrapper target, float speed, float range) {{CHECKME boost::python::tuple();}float dist; float ret=unit->cosAngleTo(target,dist,speed,range);return boost::python::tuple (ret,dist);}
   boost::python::tuple cosAngleFromMountTo (UnitWrapper target) {{CHECKME boost::python::tuple();}float dist; float ret=unit->cosAngleFromMountTo(target,dist);return boost::python::tuple (ret,dist);}
   boost::python::tuple getAverageGunSpeed () {{CHECKME boost::python::tuple();}float speed, range;unit->getAverageGunSpeed(speed,range);return boost::python::tuple(speed,range);}
-  boost::python::tuple InsideCollideTree (UnitWrapper smaller) {{CHECKME boost::python::tuple();}QVector bigpos, smallpos; Vector bigNormal, smallNormal; bool ret=unit->InsideCollideTree(smaller,bigpos,bigNormal,smallpos,smallNormal); boost::python::tuple tup (bigpos,bigNormal,smallpos,smallNormal); tup.set_item(4,ret); return ret;}
+  boost::python::tuple InsideCollideTree (UnitWrapper smaller) {{CHECKME boost::python::tuple();}QVector bigpos, smallpos; Vector bigNormal, smallNormal; bool ret=unit->InsideCollideTree(smaller,bigpos,bigNormal,smallpos,smallNormal); boost::python::tuple tup (bigpos,bigNormal,smallpos,smallNormal); tup.set_item(4,ret); return tup;}
   UnitWrapper getSubUnit(int which) {{CHECKME 0;}un_iter it=unit->getSubUnits(); for (int i=0;i<which;i++) {it.advance();}return it.current();}
-  UnitWrapper getFlightgroupLeader () {{CHECKME 0;}Flightgroup *group=unit->getFlightgroup();if (group) return group->leader;}
+  UnitWrapper getFlightgroupLeader () {{CHECKME 0;}Flightgroup *group=unit->getFlightgroup();if (group) return group->leader; else return 0;}
   float GetVelocityDifficultyMult() {{CHECKME 0;}float diff=1;unit->GetVelocityDifficultyMult(diff);return diff;}
   int GetJumpStatus(){{CHECKME -1;} return unit->GetJumpStatus().drive;}
   void ApplyDamage (const Vector & pnt, const Vector & normal, float amt, UnitWrapper dealer, float phasedamage, float r, float g, float b, float a) {
@@ -94,6 +95,8 @@ PYTHON_BEGIN_CLASS(Unit,UnitWrapper,"Unit")
   Class.def(&UnitWrapper::Kill,"Kill");
   Class.def(&UnitWrapper::SetTarget,"SetTarget");
   Class.def(&UnitWrapper::GetTarget,"GetTarget");
+  Class.def(&UnitWrapper::SetVelocityReference,"SetVelocityReference");
+  Class.def(&UnitWrapper::GetVelocityReference,"GetVelocityReference");
   Class.def(&UnitWrapper::GetOrientation,"GetOrientation");
   Class.def(&UnitWrapper::queryBSP,"queryBSP");
   Class.def(&UnitWrapper::cosAngleTo,"cosAngleTo");

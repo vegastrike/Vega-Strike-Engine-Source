@@ -9,6 +9,7 @@ libpython_a_SOURCES =				\
 	init.h	\
 	python_class.h	\
 	python_compile.h	\
-	python_compile.cpp
+	python_compile.cpp	\
+	unit_wrapper.cpp	
 
 
