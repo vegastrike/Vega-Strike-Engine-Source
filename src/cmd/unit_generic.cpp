@@ -635,6 +635,7 @@ void Unit::Init()
   image->CargoVolume=0;
   image->UpgradeVolume=0;
   this->HeatSink=0;
+
   image->unitwriter=NULL;
   cloakmin=image->cloakglass?1:0;
   image->equipment_volume=0;
@@ -669,6 +670,7 @@ void Unit::Init()
   maxwarpenergy=0;
   recharge = 1;
   shield.recharge=shield.leak=0;
+  this->shield.efficiency=1;
   shield.shield2fb.front=shield.shield2fb.back=shield.shield2fb.frontmax=shield.shield2fb.backmax=armor.frontrighttop=armor.backrighttop=armor.frontlefttop=armor.backlefttop=armor.frontrightbottom=armor.backrightbottom=armor.frontleftbottom=armor.backleftbottom=0;
   hull=10;
   maxhull=10;
@@ -2708,7 +2710,7 @@ void Unit::RegenShields () {
   }
 // GAHHH reactor in units of 100MJ, shields in units of VSD=5.4MJ to make 1MJ of shield use 1/shieldenergycap MJ
   if(!graphicOptions.InWarp){
-    energy-=shield.recharge*VSD/(100*shield.efficiency)/shieldenergycap*shield.number*shield_maintenance_cost*SIMULATION_ATOM*((apply_difficulty_shields)?g_game.difficulty:1);
+    energy-=shield.recharge*VSD/(100*(shield.efficiency?shield.efficiency:1))/shieldenergycap*shield.number*shield_maintenance_cost*SIMULATION_ATOM*((apply_difficulty_shields)?g_game.difficulty:1);
 	if(energy<0){
 		velocity_discharge=true;
 		energy=0;
@@ -2813,7 +2815,7 @@ void Unit::RegenShields () {
 	maxshield=0;
   }
   if (max_shield_lowers_recharge) {
-     energy-=max_shield_lowers_recharge*SIMULATION_ATOM*maxshield*VSD/(100*shield.efficiency);
+     energy-=max_shield_lowers_recharge*SIMULATION_ATOM*maxshield*VSD/(100*(shield.efficiency?shield.efficiency:1));
   }
   if (!max_shield_lowers_capacitance) {
     maxshield=0;
