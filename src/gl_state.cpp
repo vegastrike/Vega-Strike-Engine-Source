@@ -34,23 +34,24 @@ void /*GFXDRVAPI*/ GFXEnable (STATE state)
 	switch(state)
 	{
 	case LIGHTING:
-		glEnable(GL_LIGHTING);
-		GFXLIGHTING = TRUE;
-		break;
+	  glEnable(GL_LIGHTING);
+	  GFXLIGHTING = TRUE;
+	  break;
 	case DEPTHTEST:
-		glEnable(GL_DEPTH_TEST);
-		glDepthFunc (GL_LEQUAL);
-		//glDepthFunc (GL_ALWAYS);
-		break;
+	  glEnable(GL_DEPTH_TEST);
+	  glDepthFunc (GL_LEQUAL);
+	  //glDepthFunc (GL_ALWAYS);
+	  break;
 	case DEPTHWRITE:
-		glDepthMask(1);
-		break;
+	  glDepthMask(1);
+	  break;
 	case TEXTURE0:
-		bTex0 = TRUE;
-		GFXActiveTexture(0);	
-		glEnable (GL_TEXTURE_2D);		
-		break;
+	  bTex0 = TRUE;
+	  GFXActiveTexture(0);	
+	  glEnable (GL_TEXTURE_2D);		
+	  break;
 	case TEXTURE1:
+	  if (g_game.Multitexture) {
 		bTex1 = TRUE;
 		GFXActiveTexture (1);
 #ifdef NV_CUBE_MAP
@@ -58,8 +59,8 @@ void /*GFXDRVAPI*/ GFXEnable (STATE state)
 #else
 		glEnable (GL_TEXTURE_2D);		
 #endif
-		//		GFXActiveTexture(GL_TEXTURE0_ARB);
-		break;
+	  }
+	  break;
 	case CULLFACE:
 	  glEnable(GL_CULL_FACE);
 	  break;
@@ -72,21 +73,22 @@ void /*GFXDRVAPI*/ GFXDisable (STATE state)
 	switch(state)
 	{
 	case LIGHTING:
-		glDisable(GL_LIGHTING);
-		GFXLIGHTING = FALSE;
-		break;
+	  glDisable(GL_LIGHTING);
+	  GFXLIGHTING = FALSE;
+	  break;
 	case DEPTHTEST:
-		glDisable(GL_DEPTH_TEST);
-		break;
+	  glDisable(GL_DEPTH_TEST);
+	  break;
 	case DEPTHWRITE:
-		glDepthMask(0);
-		break;
+	  glDepthMask(0);
+	  break;
 	case TEXTURE0:
-		bTex0 = FALSE;
-		GFXActiveTexture(0);	
-		glDisable (GL_TEXTURE_2D);		
-		break;
+	  bTex0 = FALSE;
+	  GFXActiveTexture(0);	
+	  glDisable (GL_TEXTURE_2D);		
+	  break;
 	case TEXTURE1:
+	  if (g_game.Multitexture) {
 		bTex1 = FALSE;
 		bTex1 = TRUE;
 		GFXActiveTexture (1);
@@ -96,8 +98,8 @@ void /*GFXDRVAPI*/ GFXDisable (STATE state)
 		glDisable (GL_TEXTURE_2D);		
 #endif
 		//		GFXActiveTexture(GL_TEXTURE0_ARB);
-		
-		break;
+	  }
+	  break;
 	case CULLFACE:
 	  glDisable(GL_CULL_FACE);
 	  break;
