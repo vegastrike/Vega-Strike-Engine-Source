@@ -424,7 +424,7 @@ void createObjects() {
   explosion= new Animation ("explosion_orange.ani",false,.1,BILINEAR,false);
   LoadWeapons("weapon_list.xml");
   Crosshairs = new Sprite ("crosshairs.spr");
-  Crosshairs->SetPosition (-.1,.1);
+  Crosshairs->SetPosition (-.15,.15);
   Crosshairs->SetSize (.2,.2);
   //SetPriorityClass(GetCurrentProcess(), REALTIME_PRIORITY_CLASS);
   //SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_IDLE);
