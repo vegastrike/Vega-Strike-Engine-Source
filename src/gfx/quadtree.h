@@ -12,7 +12,7 @@ struct Texture;
 struct TerraXML;
 class QuadTree {
   float detail;
-  SphericalTransform nonlinear_transform;
+  IdentityTransform *nonlinear_transform;
   Matrix transformation;
   quadcornerdata RootCornerData;
   quadsquare *root;
@@ -22,10 +22,10 @@ class QuadTree {
   unsigned int VertexAllocated;
   unsigned int VertexCount;
   void LoadData();
-  void LoadXML (const char * filename);
+  void LoadXML (const char * filename, const Vector & scales, const float radius);
   TerraXML * xml;
  public:
-  QuadTree (const char * filename, const Vector & scales);
+  QuadTree (const char * filename, const Vector & scales, const float Radius);
   ~QuadTree();
   void Render();
   void Update(unsigned short numstages, unsigned short whichstage);

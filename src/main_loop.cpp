@@ -332,7 +332,7 @@ void createObjects() {
 
   std::string stdstr= mission->getVariable("terrain","");
   if (stdstr.length()>0) {
-    Terrain * terr = new Terrain (stdstr.c_str(), TerrainScale);
+    Terrain * terr = new Terrain (stdstr.c_str(), TerrainScale,XMLSupport::parse_float (vs_config->getVariable ("terrain","mass","100")), XMLSupport::parse_float (vs_config->getVariable ("terrain", "radius", "10000")));
     Matrix tmp;
     Identity (tmp);
     tmp[0]=TerrainScale.i;tmp[5]=TerrainScale.j;tmp[10]=TerrainScale.k;

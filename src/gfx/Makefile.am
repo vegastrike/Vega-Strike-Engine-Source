@@ -49,7 +49,9 @@ libgfx_a_SOURCES =	\
 	png_texture.h	\
 	png_texture.cpp	\
 	quadtree.cpp	\
+	quadtree.h	\
 	quadsquare.cpp	\
+	quadsquare.h	\
 	quadsquare_render.cpp	\
 	quadsquare_update.cpp	\
 	quadsquare_cull.cpp	\

@@ -6,7 +6,7 @@ class Terrain : public QuadTree {
   int whichstage;
   void ApplyForce (Unit * un, const Vector &norm, float distance);
  public:
-  Terrain (const char * filename, const Vector & Scales);
+  Terrain (const char * filename, const Vector & Scales, const float mass, const float radius);
   ~Terrain();
   void Collide (Unit * un);
   void Collide();

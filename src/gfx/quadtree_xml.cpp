@@ -20,6 +20,8 @@ struct TerraXML {
   float scalet;
   float radius;
   float detail;
+  float SphereSizeX;
+  float SphereSizeZ;
   std::vector <std::string> alpha;
   std::vector <GFXMaterial> mat;
   std::vector <TerrainData> data;
@@ -56,6 +58,8 @@ namespace TerrainXML {
 		SCALES,
 		ORIGINY,
 		SCALET,
+		SPHERESIZEX,
+		SPHERESIZEZ,
 		TERRAINAMBIENT,
 		TERRAINDIFFUSE,
 		TERRAINSPECULAR,
@@ -99,10 +103,13 @@ namespace TerrainXML {
 		EnumMap::Pair ("blue", BLUE),
 		EnumMap::Pair ("alpha", ALPHA),
 		EnumMap::Pair ("power", POWER),
-		EnumMap::Pair ("radius", RADIUS)
+		EnumMap::Pair ("radius", RADIUS),
+		EnumMap::Pair ("SphereWidth", SPHERESIZEX),
+		EnumMap::Pair ("SphereHeight", SPHERESIZEZ)
+		
 	};
 	const EnumMap element_map(element_names,9);
-	const EnumMap attribute_map(attribute_names,21);
+	const EnumMap attribute_map(attribute_names,23);
 }
 using XMLSupport::EnumMap;
 using XMLSupport::Attribute;
@@ -140,6 +147,12 @@ void QuadTree::beginElement(const string &name, const AttributeList &attributes)
 			  break;
 			case RADIUS:
 			  xml->radius = parse_float ((*iter).value);
+			  break;
+			case SPHERESIZEX:
+			  xml->SphereSizeX=parse_float ((*iter).value);
+			  break;
+			case SPHERESIZEZ:
+			  xml->SphereSizeZ=parse_float ((*iter).value);
 			  break;
 			}
 		}
@@ -286,7 +299,7 @@ void QuadTree::beginElement(const string &name, const AttributeList &attributes)
 void QuadTree::endElement(const string &name) {
 }
 
-void QuadTree::LoadXML (const char *filename) {
+void QuadTree::LoadXML (const char *filename, const Vector & Scales, const float Radius) {
   const int chunk_size = 16384;
   std::vector <unsigned int> ind;  
   FILE* inFile = fopen (filename, "r");
@@ -295,6 +308,8 @@ void QuadTree::LoadXML (const char *filename) {
     return;
   }
   xml = new TerraXML;
+  xml->SphereSizeX = -1;
+  xml->SphereSizeZ = -1;
   xml->scales = .001;
   xml->scalet = .001;
   xml->radius = 10000;
@@ -331,8 +346,9 @@ void QuadTree::LoadXML (const char *filename) {
     }
 
   } 
-  root = new quadsquare (&RootCornerData);
+
   bool biggest=true;
+
   for (i=0;i<xml->data.size();i++) {
     HeightMapInfo hm;
     hm.XOrigin =(int)xml->data[i].OriginX;
@@ -358,9 +374,14 @@ void QuadTree::LoadXML (const char *filename) {
       hm.RowWidth = hm.XSize;
       if (biggest){
 	biggest = false;
-	nonlinear_transform.SetR (xml->radius);
-	//	transformation[12]-=xml->radius;
-	nonlinear_transform.SetXZ (hm.XSize<<hm.Scale,hm.ZSize<<hm.Scale);
+	if (Radius!=0&&xml->radius!=0) {
+	  nonlinear_transform=new SphericalTransform (xml->SphereSizeX<0?hm.XSize<<hm.Scale:xml->SphereSizeX,Radius<0?xml->radius:Radius,xml->SphereSizeZ<0?hm.ZSize<<hm.Scale:xml->SphereSizeZ);
+	}else {
+	  nonlinear_transform = new IdentityTransform();
+	}
+	//only happens the first time!
+	quadsquare::SetCurrentTerrain (&VertexAllocated, &VertexCount, &vertices, &unusedvertices, nonlinear_transform, &textures,Vector (1.0F/Scales.i,1.0F/Scales.j,1.0F/Scales.k));
+	root = new quadsquare (&RootCornerData);
       }
       root->AddHeightMap (RootCornerData,hm);
       free (hm.Data);
