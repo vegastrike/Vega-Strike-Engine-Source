@@ -204,7 +204,7 @@ void Unit::Thrust(const Vector &amt1,bool afterburn){
     if (!AUDIsPlaying (sound.engine)) {
       AUDPlay (sound.engine,cumulative_transformation.position,Velocity,1);
     } else {
-      AUDAdjustSound (sound.engine,cumulative_transformation.position,Velocity);
+
     }
   }
 }

@@ -621,7 +621,7 @@ void Unit::Draw(const Transformation &parent, const Matrix parentMatrix)
   /*Transformation*/ cumulative_transformation = linear_interpolate(prev_physical_state, curr_physical_state, interpolation_blend_factor);
   cumulative_transformation.Compose(parent, parentMatrix);
   cumulative_transformation.to_matrix(cumulative_transformation_matrix);
-
+  AUDAdjustSound (sound.engine,cumulative_transformation.position,Velocity);
 
   int i;
   if (hull <0) {

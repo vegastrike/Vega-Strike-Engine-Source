@@ -5,7 +5,7 @@ using Orders::MatchLinearVelocity;
 using Orders::MatchVelocity;
 using Orders::MatchAngularVelocity;
 #define MATCHLINVELSETUP()   Vector desired (desired_velocity);   if (!LocalVelocity) {     desired = parent->ToLocalCoordinates (desired);   }   Vector velocity (parent->UpCoordinateLevel(parent->GetVelocity()));
-#define MATCHLINVELEXECUTE()   parent->Thrust ( (parent->GetMass()*(desired-velocity)/SIMULATION_ATOM), desired.i>parent->GetComputerData().max_speed);
+#define MATCHLINVELEXECUTE()   parent->Thrust ( (parent->GetMass()*(desired-velocity)/SIMULATION_ATOM), afterburn);
 //don't need to clamp thrust since the Thrust does it for you
 //caution might change 
 
@@ -56,7 +56,7 @@ void MatchVelocity::Execute () {
 
 
 
-FlyByWire::FlyByWire (): MatchVelocity(Vector(0,0,0),Vector(0,0,0),true,false), sheltonslide(false){
+FlyByWire::FlyByWire (): MatchVelocity(Vector(0,0,0),Vector(0,0,0),true,false,false), sheltonslide(false){
 
 }
 void FlyByWire::Stop (float per) {
@@ -77,6 +77,7 @@ void FlyByWire::RollRight (float per) {
 
 void FlyByWire::Afterburn (float per){
   Unit::Computer * cpu = &parent->GetComputerData();
+  afterburn=(per>.1);
   desired_velocity=Vector (0,0,cpu->set_speed+per*(cpu->max_ab_speed-cpu->set_speed));
 }
 void FlyByWire::SheltonSlide (bool onoff) {
@@ -89,6 +90,7 @@ void FlyByWire::Accel (float per) {
     cpu->set_speed=cpu->max_speed;
   if (cpu->set_speed<-cpu->max_speed*parent->Limits().retro/parent->Limits().forward)
     cpu->set_speed = -cpu->max_speed*parent->Limits().retro/parent->Limits().forward;
+  afterburn =false;
   desired_velocity= Vector (0,0,cpu->set_speed);
 }
 

@@ -7,8 +7,9 @@ class MatchLinearVelocity : public Order {
   Vector desired_velocity;//werld space... generally r*speed;
   bool LocalVelocity;//specified in Local or World coordinates
   bool willfinish;
+  bool afterburn;
  public:
-  MatchLinearVelocity (const Vector &desired, bool Local, bool fini=true):Order (MOVEMENT|LOCATION), desired_velocity(desired),LocalVelocity(Local),willfinish(fini) {done = false;}
+  MatchLinearVelocity (const Vector &desired, bool Local, bool afterburner, bool fini=true):Order (MOVEMENT|LOCATION), desired_velocity(desired),LocalVelocity(Local),willfinish(fini),afterburn(afterburner) {done = false;}
   void Execute ();
   void SetDesiredVelocity (const Vector &desired, bool Local) {desired_velocity=desired;LocalVelocity=Local;}
 };
@@ -27,8 +28,9 @@ class MatchVelocity : public MatchAngularVelocity {
  protected:
   Vector desired_velocity;//werld space... generally r*speed;
   bool LocalVelocity;
+  bool afterburn;
  public:
-  MatchVelocity (const Vector &desired,const Vector &desired_ang, const bool Local, const bool fini=true) :MatchAngularVelocity (desired_ang,Local,fini),desired_velocity(desired), LocalVelocity(Local) {type = FACING | MOVEMENT|LOCATION;}
+  MatchVelocity (const Vector &desired,const Vector &desired_ang, const bool Local, const bool afterburner, const bool fini=true) :MatchAngularVelocity (desired_ang,Local,fini),desired_velocity(desired), LocalVelocity(Local), afterburn(afterburner) {type = FACING | MOVEMENT|LOCATION;}
   void Execute ();
   void SetDesiredVelocity (const Vector &desired, const bool Local) {desired_velocity=desired;LocalVelocity=Local;}
 };

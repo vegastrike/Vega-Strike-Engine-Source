@@ -589,7 +589,7 @@ void AIScript::endElement(const string &name) {
     break;
   case MATCHLIN:
     xml->unitlevel--;
-    xml->orders.push_back(new Orders::MatchLinearVelocity(parent->ClampVelocity(topv(),xml->afterburn),((bool)xml->acc),xml->terminate));
+    xml->orders.push_back(new Orders::MatchLinearVelocity(parent->ClampVelocity(topv(),xml->afterburn),((bool)xml->acc),xml->afterburn,xml->terminate));
     popv();
     break;
   case MATCHVEL:
@@ -597,9 +597,9 @@ void AIScript::endElement(const string &name) {
     temp=topv();
     popv();
     if (xml->lin==1) {
-      xml->orders.push_back(new Orders::MatchVelocity(parent->ClampVelocity(topv(),xml->afterburn),parent->ClampAngVel(temp),((bool)xml->acc),xml->terminate));
+      xml->orders.push_back(new Orders::MatchVelocity(parent->ClampVelocity(topv(),xml->afterburn),parent->ClampAngVel(temp),((bool)xml->acc),xml->afterburn,xml->terminate));
     } else {
-      xml->orders.push_back(new Orders::MatchVelocity(parent->ClampVelocity(temp,xml->afterburn),parent->ClampAngVel(topv()),((bool)xml->acc),xml->terminate));
+      xml->orders.push_back(new Orders::MatchVelocity(parent->ClampVelocity(temp,xml->afterburn),parent->ClampAngVel(topv()),((bool)xml->acc),xml->afterburn,xml->terminate));
     }
     xml->lin=0;
     popv();
