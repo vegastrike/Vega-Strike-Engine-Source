@@ -21,7 +21,12 @@ namespace BaseUtil {
 #ifdef BASE_MAKER
 		((BaseInterface::Room::BaseVSSprite*)newroom->objs.back())->texfile=file;
 #endif
-		((BaseInterface::Room::BaseVSSprite*)newroom->objs.back())->spr.SetPosition(x,y);
+                float tx=0, ty=0;
+                static bool addspritepos = XMLSupport::parse_bool(vs_config->getVariable("graphics","offset_sprites_by_pos","true"));
+                if (addspritepos)
+                  ((BaseInterface::Room::BaseVSSprite*)newroom->objs.back())->spr.GetPosition(tx,ty);
+                
+		((BaseInterface::Room::BaseVSSprite*)newroom->objs.back())->spr.SetPosition(x+tx,y+ty);
 	}
 	void Ship (int room, std::string index,QVector pos,Vector Q, Vector R) {
 		BaseInterface::Room *newroom=CheckRoom(room);
