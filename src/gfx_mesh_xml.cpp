@@ -373,7 +373,8 @@ void Mesh::LoadXML(const char *filename, Mesh *oldmesh) {
   maxSizeX = maxSizeY = maxSizeZ = -FLT_MAX;
   if (xml->tris.size()==0&&xml->quads.size()==0) {
     minSizeX = minSizeY = minSizeZ = 0;
-    maxSizeX = maxSizeY = maxSizeZ = 0;    
+    maxSizeX = maxSizeY = maxSizeZ = 0;
+    fprintf (stderr, "uhoh");
   }
   radialSize = 0;
   for(int a=0; a<xml->tris.size(); a++, index++) {
