@@ -1,6 +1,6 @@
 noinst_LIBRARIES = libai.a libaiserver.a
 
-INCLUDES = -I ../../ -I../../boost/
+INCLUDES = -I ../../ 
 
 libaigeneric =	\
 	comm_ai.h			\
