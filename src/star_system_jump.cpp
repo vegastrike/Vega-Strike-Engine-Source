@@ -120,7 +120,7 @@ void Unit::TransferUnitToSystem (unsigned int kk, StarSystem * &savedStarSystem,
       this->RemoveFromSystem();
       pendingjump[kk]->dest->AddUnit (this);
       this->Target(NULL);
-      UnitCollection::UnitIterator iter = pendingjump[kk]->orig->getUnitList()->createIterator();
+      UnitCollection::UnitIterator iter = pendingjump[kk]->orig->getUnitList().createIterator();
       Unit * unit;
       while((unit = iter.current())!=NULL) {
 	if (unit->Target()==this) {
@@ -143,7 +143,7 @@ void Unit::TransferUnitToSystem (unsigned int kk, StarSystem * &savedStarSystem,
 	for (float tume=0;tume<=4*SIMULATION_ATOM;tume+=GetElapsedTime()) {
 	  pendingjump[kk]->dest->Update(1);
 	}
-      iter = pendingjump[kk]->dest->getUnitList()->createIterator();
+      iter = pendingjump[kk]->dest->getUnitList().createIterator();
       Unit * primary;
       while ((primary = iter.current())!=NULL) {
 	vector <Unit *> tmp;

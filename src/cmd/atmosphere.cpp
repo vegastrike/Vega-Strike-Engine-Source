@@ -59,7 +59,7 @@ void Atmosphere::Update(const Vector &position, const Matrix tmatrix)
 	sunboxes.clear();
 	Vector localDir;
 	float rho1;
-	UnitCollection::UnitIterator iter (system->drawList->createIterator());
+	UnitCollection::UnitIterator iter (system->getUnitList().createIterator());
 	Unit * primary;
 
 	for(;NULL!=(primary=iter.current());iter.advance()) {

@@ -76,9 +76,8 @@ varInst *Mission::call_unit(missionNode *node,int mode){
 
     if(mode==SCRIPT_RUN){
       StarSystem *ssystem=_Universe->scriptStarSystem();
-      UnitCollection *unitlist=ssystem->getUnitList();
       //UnitCollection::UnitIterator *uiter=unitlist->createIterator();
-      un_iter uiter=unitlist->createIterator();
+      un_iter uiter=ssystem->getUnitList().createIterator();
 
       int i=0;
       Unit *unit=uiter.current();
@@ -645,9 +644,8 @@ void Mission::call_unit_launch(Flightgroup *fg){
 
 void Mission::findNextEnemyTarget(Unit *my_unit){
       StarSystem *ssystem=_Universe->scriptStarSystem();
-      UnitCollection *unitlist=ssystem->getUnitList();
-      //UnitCollection::UnitIterator *uiter=unitlist->createIterator();
-      un_iter uiter(unitlist->createIterator());
+
+      un_iter uiter(ssystem->getUnitList().createIterator());
 
       int i=0;
       Unit *unit=uiter.current();

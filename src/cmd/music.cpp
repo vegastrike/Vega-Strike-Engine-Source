@@ -59,8 +59,7 @@ int Music::SelectTracks(int &whichlist) {
   }
   bool perfect=true;
   float goodness=0;
-  UnitCollection * drawlist = _Universe->activeStarSystem()->getUnitList();
-  un_iter iter = drawlist->createIterator();
+  un_iter iter = _Universe->activeStarSystem()->getUnitList().createIterator();
   Unit *target;
   while ((target = iter.current())!=NULL) {
     float ftmp;

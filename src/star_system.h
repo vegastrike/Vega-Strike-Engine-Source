@@ -6,9 +6,9 @@
 #include "xml_support.h"
 using std::string;
 #include "gfx/camera.h"
+#include "cmd/collection.h"
 class Stars;
 class Planet;
-class UnitCollection;
 class ClickList;
 class Unit;
 class TextPlane;
@@ -52,9 +52,9 @@ class StarSystem {
   std::vector <Terrain *> terrains;
   std::vector <ContinuousTerrain *>contterrains;
   /// Everything to be drawn. Folded missiles in here oneday
-  UnitCollection *drawList; 
+  UnitCollection drawList; 
   /// Objects subject to global gravitron physics (disabled)   
-  UnitCollection *units;    
+  UnitCollection units;    
   unsigned char no_collision_time;
   ///system name             
   char * name; 
@@ -106,7 +106,7 @@ class StarSystem {
   ///Loads the star system from an XML file
   StarSystem(const char * filename, const Vector & centroid=Vector (0,0,0), const float timeofyear=0);
   ~StarSystem();
-  UnitCollection * getUnitList();
+  UnitCollection& getUnitList() {return drawList;}
   /// returns xy sorted bounding spheres of all units in current view
   ClickList *getClickList(); 
   ///Adds to draw list

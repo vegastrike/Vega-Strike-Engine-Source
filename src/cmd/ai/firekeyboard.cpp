@@ -145,7 +145,7 @@ void FireKeyboard::MissileKey(int, KBSTATE k) {
    missilekey = k;
 }
 void FireKeyboard::ChooseNearTargets(bool turret) {
-  UnitCollection::UnitIterator iter = _Universe->activeStarSystem()->getUnitList()->createIterator();
+  UnitCollection::UnitIterator iter = _Universe->activeStarSystem()->getUnitList().createIterator();
   Unit * un;
   float range=FLT_MAX;
   while ((un = iter.current())) {
@@ -179,7 +179,7 @@ void FireKeyboard::ChooseThreatTargets(bool turret) {
 }
 
 void FireKeyboard::PickTargets(bool Turrets){
-  UnitCollection::UnitIterator uiter = _Universe->activeStarSystem()->getUnitList()->createIterator();
+  UnitCollection::UnitIterator uiter = _Universe->activeStarSystem()->getUnitList().createIterator();
 
   float smallest_angle=PI;
 
@@ -209,7 +209,7 @@ void FireKeyboard::PickTargets(bool Turrets){
 }
 
 void FireKeyboard::ChooseTargets (bool turret) {
-  UnitCollection::UnitIterator iter = _Universe->activeStarSystem()->getUnitList()->createIterator();
+  UnitCollection::UnitIterator iter = _Universe->activeStarSystem()->getUnitList().createIterator();
   Unit * un ;
   bool found=false;
   bool find=false;
@@ -250,7 +250,7 @@ void FireKeyboard::ChooseTargets (bool turret) {
   fflush (stderr);
 #endif
   if (!find) {
-    iter = _Universe->activeStarSystem()->getUnitList()->createIterator();
+    iter = _Universe->activeStarSystem()->getUnitList().createIterator();
     while ((un = iter.current())) {
       //how to choose a target?? "if looks particularly juicy... :-) tmp.prepend (un);
       Vector t;

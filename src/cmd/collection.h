@@ -105,6 +105,7 @@ class UnitCollection {
   void append(Iterator *iter);
   void clear () {destr();init();}
   UnitCollection (const UnitCollection &c);
+  const UnitCollection & operator = (const UnitCollection &c);
 };
 typedef UnitCollection::UnitIterator un_iter;
 typedef UnitCollection::ConstIterator un_kiter;

@@ -132,7 +132,7 @@ void Cockpit::DrawTargetBoxes(){
     return;
 
   StarSystem *ssystem=_Universe->activeStarSystem();
-  UnitCollection *unitlist=ssystem->getUnitList();
+  UnitCollection *unitlist=&ssystem->getUnitList();
   //UnitCollection::UnitIterator *uiter=unitlist->createIterator();
   un_iter uiter=unitlist->createIterator();
   
@@ -236,7 +236,7 @@ void Cockpit::DrawTargetBox () {
 
 void Cockpit::DrawBlips (Unit * un) {
   Unit::Computer::RADARLIM * radarl = &un->GetComputerData().radar;
-  UnitCollection * drawlist = _Universe->activeStarSystem()->getUnitList();
+  UnitCollection * drawlist = &_Universe->activeStarSystem()->getUnitList();
   un_iter iter = drawlist->createIterator();
   Unit * target;
   Unit * makeBigger = un->Target();
@@ -288,7 +288,7 @@ void Cockpit::DrawBlips (Unit * un) {
 
 void Cockpit::DrawEliteBlips (Unit * un) {
   Unit::Computer::RADARLIM * radarl = &un->GetComputerData().radar;
-  UnitCollection * drawlist = _Universe->activeStarSystem()->getUnitList();
+  UnitCollection * drawlist = &_Universe->activeStarSystem()->getUnitList();
   un_iter iter = drawlist->createIterator();
   Unit * target;
   Unit * makeBigger = un->Target();
@@ -712,7 +712,7 @@ void Cockpit::Draw() {
     zoomfactor=1;
     static int index=0;
     switchunit=0;
-    un_iter ui= _Universe->activeStarSystem()->getUnitList()->createIterator();
+    un_iter ui= _Universe->activeStarSystem()->getUnitList().createIterator();
     Unit * un;
     bool found=false;
     int i=0;

@@ -49,10 +49,7 @@ string StarSystem::getName () {
   return string(name);
 }
 
-StarSystem::StarSystem(const char * filename, const Vector & centr,const float timeofyear) : 
-  //  primaries(primaries), 
-  drawList(new UnitCollection),
-  units(new UnitCollection) {
+StarSystem::StarSystem(const char * filename, const Vector & centr,const float timeofyear) {
 
   no_collision_time=(int)(1+2.000/SIMULATION_ATOM);
   ///adds to jumping table;
@@ -189,24 +186,19 @@ StarSystem::~StarSystem() {
   delete bolts;
   delete collidetable;
   GFXDeleteLightContext (lightcontext);
-  UnitCollection::UnitIterator iter = drawList->createIterator();
+  UnitCollection::UnitIterator iter = drawList.createIterator();
   Unit *unit;
   //  fprintf (stderr,"|t%f i%lf|",GetElapsedTime(),interpolation_blend_factor);
   while((unit = iter.current())!=NULL) {
     unit->Kill(false);
     iter.advance();
   }
-  delete drawList;
-  delete units;
   RemoveStarsystemFromUniverse();
 }
 
-UnitCollection * StarSystem::getUnitList () {
-  return drawList;
-}
 
 ClickList *StarSystem::getClickList() {
-  return new ClickList (this, drawList);
+  return new ClickList (this, &drawList);
 
 }
 /**OBSOLETE!
@@ -217,13 +209,13 @@ void StarSystem::modelGravity(bool lastframe) {
 }	
 */
 void StarSystem::AddUnit(Unit *unit) {
-  units->prepend(unit);
-  drawList->prepend(unit);
+  units.prepend(unit);
+  drawList.prepend(unit);
 }
 
 bool StarSystem::RemoveUnit(Unit *un) {
   bool removed2=false;
-  UnitCollection::UnitIterator iter = units->createIterator();
+  UnitCollection::UnitIterator iter = units.createIterator();
   Unit *unit;
   while((unit = iter.current())!=NULL) {
     if (unit==un) {
@@ -236,7 +228,7 @@ bool StarSystem::RemoveUnit(Unit *un) {
   }
   bool removed =false;
   if (removed2) {
-    UnitCollection::UnitIterator iter = drawList->createIterator();
+    UnitCollection::UnitIterator iter = drawList.createIterator();
     Unit *unit;
     while((unit = iter.current())!=NULL) {
       if (unit==un) {
@@ -253,7 +245,7 @@ bool StarSystem::RemoveUnit(Unit *un) {
 void StarSystem::SwapIn () {
   GFXSetLightContext (lightcontext);
   Unit * un;
-  for (un_iter i=drawList->createIterator();NULL!= (un=*i);++i) {
+  for (un_iter i=drawList.createIterator();NULL!= (un=*i);++i) {
     un->SwapInHalos();
 
   }
@@ -280,7 +272,7 @@ void StarSystem::SwapIn () {
 
 void StarSystem::SwapOut () {
   Unit * un;
-  for (un_iter i=drawList->createIterator();NULL!= (un=*i);++i) {
+  for (un_iter i=drawList.createIterator();NULL!= (un=*i);++i) {
     un->SwapOutHalos();
     Halo::ProcessDrawQueue();
 
@@ -333,7 +325,7 @@ void StarSystem::Draw(bool DrawCockpit) {
 #endif
   bg->Draw();
 
-  UnitCollection::UnitIterator iter = drawList->createIterator();
+  UnitCollection::UnitIterator iter = drawList.createIterator();
   Unit *unit;
   //  fprintf (stderr,"|t%f i%lf|",GetElapsedTime(),interpolation_blend_factor);
 #ifdef UPDATEDEBUG
@@ -490,7 +482,7 @@ void StarSystem::Update(float priority ) {
     while(time/SIMULATION_ATOM >= (1./PHY_NUM)) { // Chew up all SIMULATION_ATOMs that have elapsed since last update
       UnitCollection::UnitIterator iter;
       if (current_stage==PHY_AI) {
-	iter = drawList->createIterator();
+	iter = drawList.createIterator();
 	if (firstframe&&rand()%2) {
 	  if (this==_Universe->getActiveStarSystem(0)) {
 #ifdef UPDATEDEBUG
@@ -523,7 +515,7 @@ void StarSystem::Update(float priority ) {
 #endif
 	AnimatedTexture::UpdateAllPhysics();
 	///Do gravitation!
-	iter = units->createIterator();
+	iter = units.createIterator();
 	  while((unit = iter.current())!=NULL) {
 	    //gravitate //FIXME
 	    iter.advance();
@@ -542,12 +534,12 @@ void StarSystem::Update(float priority ) {
   fprintf (stderr,"neb");
   fflush (stderr);
 #endif
-	  iter = drawList->createIterator();
+	  iter = drawList.createIterator();
 	  while((unit = iter.current())!=NULL) {
 		unit->SetNebula(NULL); 
 		iter.advance();
 	  }
-	  iter = drawList->createIterator();
+	  iter = drawList.createIterator();
 #ifdef UPDATEDEBUG
   fprintf (stderr,"Coll");
   fflush (stderr);
@@ -568,7 +560,7 @@ void StarSystem::Update(float priority ) {
 
 	current_stage=PHY_RESOLV;
       } else if (current_stage==PHY_RESOLV) {
-	iter = drawList->createIterator();
+	iter = drawList.createIterator();
 #ifdef UPDATEDEBUG
   fprintf (stderr,"muzak");
   fflush (stderr);
@@ -592,7 +584,7 @@ void StarSystem::Update(float priority ) {
 	      reset_time_compression(0,PRESS);
 	    }
 	  }
-	  unit->UpdatePhysics(identity_transformation,identity_matrix,Vector (0,0,0),firstframe,units);
+	  unit->UpdatePhysics(identity_transformation,identity_matrix,Vector (0,0,0),firstframe,&units);
 	  iter.advance();
 	}
 #ifdef UPDATEDEBUG

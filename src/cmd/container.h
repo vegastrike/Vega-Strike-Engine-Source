@@ -9,8 +9,13 @@ class UnitContainer {
  public:
   UnitContainer ();
   UnitContainer (Unit *);
-  UnitContainer (const UnitContainer &un):unit(NULL) {
-    SetUnit(un.unit);
+  UnitContainer (const UnitContainer &un) {
+    unit =NULL;
+    SetUnit (un.unit);
+  }
+  const UnitContainer & operator = (const UnitContainer &a) {
+    SetUnit (a.unit);
+    return a;
   }
   ~UnitContainer();
   void SetUnit (Unit *);
