@@ -401,7 +401,10 @@ void StarSystem::Update() {
 	    iter->advance();
 	  }
 	  delete iter;	
-	  Unit::ProcessDeleteQueue();
+	  if (firstframe) {
+	    //FIXME somehow only works if called once per frame
+	    Unit::ProcessDeleteQueue();
+	  }
       } else if (current_stage==PHY_COLLIDE) {
 	static int numframes=0;
 	numframes++;//don't resolve physics until 2 seconds

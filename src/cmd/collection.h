@@ -27,6 +27,7 @@ class UnitCollection {
   class UnitIterator : public Iterator {
   private:
     UnitListNode *pos;
+    void GetNextValidUnit();
   public:
     UnitIterator(UnitListNode *start);
     ~UnitIterator() { }

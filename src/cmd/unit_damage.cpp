@@ -126,7 +126,11 @@ void Unit::Kill() {
 void Unit::ProcessDeleteQueue() {
 #ifndef DISABLE_DELETE
   if (!Unitdeletequeue.empty()) {
-    delete Unitdeletequeue.back();
+    if (Unitdeletequeue.back()->SubUnit) {
+      fprintf (stderr,"Double deleting (related to double dipping)");
+    }else {
+      delete Unitdeletequeue.back();
+    }
     Unitdeletequeue.pop_back();
   }
 #endif

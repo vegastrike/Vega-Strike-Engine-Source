@@ -100,21 +100,19 @@ Unit *UnitCollection::UnitIterator::current() {
   return pos->next?pos->next->unit:NULL;//if pos->next return that unit, otherwise NULL;
   */
 }
-UnitCollection::UnitIterator::UnitIterator(UnitListNode *start) : pos(start) {
-  if (pos->next!=NULL) {
-    if (pos->next->unit->Killed())
-      advance();
+
+void UnitCollection::UnitIterator::GetNextValidUnit () {
+  while (pos->next?pos->next->unit->Killed():false) {
+    remove();
   }
+}
+
+UnitCollection::UnitIterator::UnitIterator(UnitListNode *start) : pos(start) {
+  GetNextValidUnit();
 }
 Unit *UnitCollection::UnitIterator::advance() {
   pos = pos->next;
-  while(pos->next!=NULL) {
-    if (pos->next->unit->Killed()) {
-      remove();
-    } else {
-      return pos->next->unit;
-    }
-  }
-  return NULL;
+  GetNextValidUnit();
+  return pos->next?pos->next->unit:NULL;
 }
 
