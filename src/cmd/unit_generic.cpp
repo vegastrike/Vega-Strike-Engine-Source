@@ -6615,7 +6615,8 @@ void Unit::Repair() {
           }else {
             repaired=true;
             double percentage=0;
-            this->Upgrade(up,0,0,0,true,percentage,makeTemplateUpgrade(this->name,this->faction));
+            if (up->SubUnits.empty()&&up->GetNumMounts()==0)//don't want to repair these things
+              this->Upgrade(up,0,0,0,true,percentage,makeTemplateUpgrade(this->name,this->faction));
           }
         }        
       }
