@@ -186,8 +186,15 @@ void Mission::removeContext()
 
   scriptContext *old=stack->contexts[lastelem];
   stack->contexts.pop_back();
-
- 
+#if 0
+  map<string,varInst *>::const_iterator iter;
+  for(iter=old->varinsts->begin();iter!=old->varinsts->end();iter++){
+    varInst *vi=(*iter).second;
+    deleteVarInst(vi);
+  }
+#endif
+  deleteVarMap(old->varinsts);
+  delete old->varinsts;
   delete old;
 }
 
@@ -366,7 +373,7 @@ void Mission::doReturn(missionNode *node,int mode){
     
 }
   int len=node->subnodes.size();
-  varInst *vi=new varInst;
+  varInst *vi=newVarInst(VI_LOCAL);
 
   missionNode *script=node->script.exec_node;
 
@@ -514,7 +521,7 @@ varInst *Mission::doExec(missionNode *node,int mode){
     missionNode *defnode=(missionNode *)arg_node->subnodes[i];
     missionNode *callnode=(missionNode *)node->subnodes[i];
 
-    varInst *vi=new varInst;
+    varInst *vi=newVarInst(VI_LOCAL);
     vi->type=defnode->script.vartype;
 
 
@@ -540,6 +547,7 @@ varInst *Mission::doExec(missionNode *node,int mode){
       if(mode==SCRIPT_RUN){
 	assignVariable(vi,ovi);
       }
+      deleteVarInst(ovi);
     }
     else{
       fatalError(node,mode,"unsupported vartype in doExec");
@@ -564,13 +572,16 @@ varInst *Mission::doExec(missionNode *node,int mode){
 
     runtime.cur_thread->module_stack.pop_back();
 
-    delete varmap;
+    if(varmap){
+      deleteVarMap(varmap);
+      delete varmap;
+    }
     return vi;
   }
 
   // SCRIPT_PARSE
 
-  varInst *vi=new varInst;
+  varInst *vi=newVarInst(VI_TEMP);
 
   vi->type=node->script.exec_node->script.vartype;
 
@@ -578,3 +589,44 @@ varInst *Mission::doExec(missionNode *node,int mode){
 }
 
 
+varInst *Mission::newVarInst(scope_type scopetype){
+  varInst *vi=new varInst(scopetype);
+  vi_counter++;
+
+  return vi;
+}
+
+void Mission::deleteVarInst(varInst *vi,bool del_local){
+  if(vi->scopetype==VI_GLOBAL || vi->scopetype==VI_MODULE){
+    debug(2,NULL,0,"reqested to delete global/module vi\n");
+  }
+  else if(vi->scopetype==VI_ERROR){
+    debug(2,NULL,0,"reqested to delete vi_error\n");
+  }
+  else if(vi->scopetype==VI_IN_OBJECT){
+    debug(2,NULL,0,"reqested to delete vi in object\n");
+  }
+  else if(vi->scopetype==VI_CONST){
+    debug(2,NULL,0,"reqested to delete const vi\n");
+  }
+  else if(del_local==false && vi->scopetype==VI_LOCAL){
+    debug(2,NULL,0,"reqested to delete local vi\n");
+  }
+  else{
+    delete vi;
+    vi_counter--;
+  }
+}
+
+void Mission::deleteVarMap(varInstMap *vmap){
+    map<string,varInst *>::const_iterator iter;
+    for(iter=vmap->begin();iter!=vmap->end();iter++){
+      varInst *vi=(*iter).second;
+      if(vi==NULL){
+	debug(2,NULL,0,"NULLVAR "+ (*iter).first+"\n");
+      }
+      else{
+	deleteVarInst(vi,true);
+      }
+    }
+}

@@ -1,5 +1,11 @@
 2001-12-22 Alexander Rawass <alexannika@users.sourceforge.net>
 	
+	* interpreter:
+	  - I'm starting to free memory/varInsts
+	
+
+2001-12-22 Alexander Rawass <alexannika@users.sourceforge.net>
+	
 	* modified Cockpit:
 	  - Elite-Style radar
 	  - config var graphics/hud/radarType, can be WC or Elite

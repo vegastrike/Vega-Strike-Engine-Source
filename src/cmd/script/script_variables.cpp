@@ -70,6 +70,8 @@ bool Mission::doBooleanVar(missionNode *node,int mode){
     assert(0);
   }
 
+  deleteVarInst(var);
+
   return var->bool_val;
 }
 /* *********************************************************** */
@@ -83,7 +85,7 @@ float Mission::doFloatVar(missionNode *node,int mode){
     fatalError(node,mode,"expected a float variable - got a different type");
     assert(0);
   }
-
+  deleteVarInst(var);
   return var->float_val;
 }
 
@@ -99,6 +101,7 @@ int Mission::doIntVar(missionNode *node,int mode){
     assert(0);
   }
 
+  deleteVarInst(var);
   return var->int_val;
 }
 
@@ -286,7 +289,7 @@ void Mission::doDefVar(missionNode *node,int mode,bool global_var){
 
     varInstMap *vmap=context->varinsts;
 
-    varInst *vi=new varInst;
+    varInst *vi=newVarInst(VI_LOCAL);
     vi->defvar_node=node;
     vi->block_node=scope;
     vi->type=node->script.vartype;
@@ -322,7 +325,18 @@ void Mission::doDefVar(missionNode *node,int mode,bool global_var){
       scope=scope_stack.back();
     }
     
-  varInst *vi=new varInst;
+  varInst *vi=NULL;
+
+  if(global_var){
+    vi=newVarInst(VI_GLOBAL);
+  }
+  else if(scope->tag==DTAG_MODULE){
+    vi=newVarInst(VI_MODULE);
+  }
+  else{
+    vi=newVarInst(VI_LOCAL);
+  }
+
   vi->defvar_node=node;
   vi->block_node=scope;
   vi->type=node->script.vartype;
@@ -427,6 +441,7 @@ void Mission::doSetVar(missionNode *node,int mode){
     else if(vi->type==VAR_OBJECT){
       debug(3,node,mode,"setvar object");
       varInst *ovi=checkObjectExpr(expr,mode);
+      deleteVarInst(ovi);
     }
     else{
       fatalError(node,mode,"unsupported type in setvar");
@@ -461,22 +476,13 @@ void Mission::doSetVar(missionNode *node,int mode){
       debug(3,node,mode,"setvar object left,right");
       printVarInst(3,var_inst);
       printVarInst(3,ovi);
+      deleteVarInst(ovi);
     }
     else{
       fatalError(node,mode,"unsupported datatype");
       assert(0);
     }
 
-#if 0
-      if(var_expr->type != var_inst->type){
-	runtimeFatal("variable "+node->script.name+" is not of the correct type\n");
-	assert(0);
-      }
-
-      assignVariable(var_inst,var_expr);
-      
-      delete var_expr; // only temporary
-#endif
     }
   
 }
@@ -496,7 +502,7 @@ varInst *Mission::doConst(missionNode *node,int mode){
     
     debug(5,node,mode,"parsed const value "+valuestr);
 
-    varInst *vi=new varInst;
+    varInst *vi=newVarInst(VI_CONST);
     if(typestr=="float"){
       node->script.vartype=VAR_FLOAT;
       vi->float_val=atof(valuestr.c_str());
@@ -526,6 +532,7 @@ varInst *Mission::doConst(missionNode *node,int mode){
 	assignVariable(vi,svi);
 	vi->type=VAR_OBJECT;
 	node->script.vartype=VAR_OBJECT;
+	deleteVarInst(svi);
       }
       else{
 	fatalError(node,mode,"you cant have a const object");

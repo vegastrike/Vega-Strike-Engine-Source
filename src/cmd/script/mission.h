@@ -33,6 +33,7 @@
 
 #include "xml_support.h"
 #include "easydom.h"
+#include "vs_globals.h"
 
 using std::string;
 
@@ -99,11 +100,17 @@ enum tester_type { TEST_GT,TEST_LT,TEST_EQ,TEST_NE,TEST_GE,TEST_LE };
 
 class missionNode;
 
+enum scope_type { VI_GLOBAL,VI_MODULE,VI_LOCAL,VI_TEMP, VI_IN_OBJECT,VI_ERROR,VI_CONST };
+
 class varInst {
  public:
+  varInst(scope_type sctype) { scopetype=sctype; };
+  varInst() { scopetype=VI_ERROR; };
+
   string name;
   var_type type;
 
+  scope_type scopetype;
   float  float_val;
   bool   bool_val;
   int    int_val;
@@ -119,6 +126,8 @@ class varInst {
 /* *********************************************************** */
 
 class varInstMap : public map<string,varInst *> {
+ public:
+
 };
 
 /* *********************************************************** */
@@ -369,6 +378,11 @@ string call_string_getstring(missionNode *node,int mode,varInst *ovi);
 
  varInst *doCall(missionNode *node,int mode,string module,string method);
  void doCall_toxml(string module,varInst *ovi);
+
+varInst *newVarInst(scope_type scopetype);
+void  deleteVarInst(varInst *vi,bool del_local=false);
+ int  vi_counter; 
+void deleteVarMap(varInstMap *vmap);
 };
 
 #endif // _MISSION_H_

@@ -68,6 +68,8 @@ void Mission::DirectorStart(missionNode *node){
   debuglevel=atoi(vs_config->getVariable("interpreter","debuglevel","0").c_str());
   bool start_game=XMLSupport::parse_bool(vs_config->getVariable("interpreter","startgame","true"));
 
+  vi_counter=0;
+
   missionThread *main_thread=new missionThread;
   runtime.thread_nr=0;
   runtime.threads.push_back(main_thread);
@@ -206,6 +208,11 @@ void Mission::DirectorLoop(){
     return;
   }
   else{
+
+    char buf[200];
+    sprintf(buf,"VI_COUNTER %d\n",vi_counter);
+    debug(2,NULL,0,buf);
+
     runtime.cur_thread->module_stack.push_back(director);
 
     varInst *vi=doScript(gameloop,SCRIPT_RUN);
