@@ -10,8 +10,8 @@ const int HUGEOBJECT=16; //objects that go over 16 sectors are considered huge a
 
 template <class T, class CTSIZ, class CTACCURACY> class Hashtable3d {
   int minaccessx,minaccessy,minaccessz,maxaccessx,maxaccessy,maxaccessz;
-  vector <T> hugeobjects;
-  vector <T> table [COLLIDETABLESIZE][COLLIDETABLESIZE][COLLIDETABLESIZE];
+  std::vector <T> hugeobjects;
+  std::vector <T> table [COLLIDETABLESIZE][COLLIDETABLESIZE][COLLIDETABLESIZE];
   void hash_vec (float i, float j, float k, int &x, int &y, int &z) {
     x = hash_int(i);
     y = hash_int(j);
@@ -59,16 +59,16 @@ public:
 
       }*/
   }
-  void Get (const Vector &Exact, vector <T> &retval) {
+  void Get (const Vector &Exact, std::vector <T> &retval) {
     retval = table[hash_int(Exact.i)][hash_int(Exact.j)][hash_int(Exact.k)];
     //retval+=hugeobjects;
     //blah = blooh;
     retval.insert (retval.end(),hugeobjects.begin(),hugeobjects.end());
   }
-  vector <T>& GetHuge () {
+  std::vector <T>& GetHuge () {
     return hugeobjects;
   }
-  bool Get (const Vector &Min, const Vector & Max, vector <T> &retval) {    
+  bool Get (const Vector &Min, const Vector & Max, std::vector <T> &retval) {    
     //int minx,miny,minz,maxx,maxy,maxz;
     //    hash_vec(Min,minx,miny,minz);
     //    hash_vec(Max,maxx,maxy,maxz);
@@ -144,7 +144,7 @@ public:
     //    hash_vec(target->Mini,minx,miny,minz);
     //    hash_vec(target->Maxi,maxx,maxy,maxz);
     T retval;
-    vector <T>::iterator removal= hugeobjects.begin();
+    std::vector <T>::iterator removal= hugeobjects.begin();
     int x,y,z;
     float maxx= (ceil(target->Maxi.i/COLLIDETABLEACCURACY))*COLLIDETABLEACCURACY;
     float maxy= (ceil(target->Maxi.j/COLLIDETABLEACCURACY))*COLLIDETABLEACCURACY;
@@ -155,7 +155,7 @@ public:
 
     if (fabs((maxx-target->Mini.i)*(maxy-target->Mini.j)*(maxz-target->Mini.k))>COLLIDETABLEACCURACY*COLLIDETABLEACCURACY*COLLIDETABLEACCURACY*HUGEOBJECT) {
       while (removal!=hugeobjects.end()) {
-	removal = find (hugeobjects.begin(),hugeobjects.end(),objectToKill);
+		  removal = std::find (hugeobjects.begin(),hugeobjects.end(),objectToKill);
 	if (removal!=hugeobjects.end()) {
 	  retval = *removal;
 	  hugeobjects.erase(removal);
@@ -171,7 +171,7 @@ public:
 	  z = hash_int(k);
 	  removal = table[x][y][z].begin();
 	  while (removal!=table[x][y][z].end()) {
-	    removal = find (table[x][y][z].begin(),table[x][y][z].end(),objectToKill);
+		  removal = std::find (table[x][y][z].begin(),table[x][y][z].end(),objectToKill);
 	    if (removal!=table[x][y][z].end()) {
 	      retval = *removal;
 	      table[x][y][z].erase(removal);

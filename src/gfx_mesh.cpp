@@ -233,14 +233,15 @@ void Mesh::ProcessDrawQueue() {
     }
     GFXLoadMatrix(MODEL, c.mat);
     vector <int> specialfxlight;
-    for (int i=0;i<c.SpecialFX->size();i++) {
+		int i;
+    for ( i=0;i<c.SpecialFX->size();i++) {
       int ligh;
       GFXCreateLight (ligh,(*c.SpecialFX)[i],true);
       specialfxlight.push_back(ligh);
     }
     vlist->Draw();
 
-    for (int i=0;i<specialfxlight.size();i++) {
+    for ( i=0;i<specialfxlight.size();i++) {
       GFXDeleteLight (specialfxlight[i]);
     }
 

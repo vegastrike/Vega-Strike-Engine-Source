@@ -65,7 +65,7 @@ bool MeshFX::Update() {
   return TTD>0;
 }
 
-void Mesh::AddDamageFX(const Vector & pnt, const Vector &norm, const float damage, const GFXColor &col) {
+void Mesh::AddDamageFX(const Vector & pnt, const Vector &norm,  const float damage, const GFXColor &col) {
 
   Vector loc(pnt+norm);
   if (!(norm.i||norm.j||norm.k)) {

@@ -44,12 +44,14 @@ class gfx_light: public GFXLight {
   static void dopickenables();
   LineCollide CalculateBounds (bool & err);//calculates bounds for the table!
 };
+namespace OpenGLL {
+const  char GLL_OFF=0;
+const      char GLL_ON=1;
+const      char GLL_LOCAL=2;
+const      char GL_ENABLED= 4;
+}
 struct OpenGLLights {
     int index;//-1 == unassigned
-    const static char GLL_OFF=0;
-    const static char GLL_ON=1;
-    const static char GLL_LOCAL=2;
-    const static char GL_ENABLED= 4;
     char options;
 };
 

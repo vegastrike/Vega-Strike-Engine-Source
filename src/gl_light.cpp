@@ -24,7 +24,7 @@
 #include "gl_light.h"
 #include <stack>
 using std::stack;
-
+#include <assert.h>
 int GFX_MAX_LIGHTS=8;
 int GFX_OPTIMAL_LIGHTS=4;
 GFXBOOL GFXLIGHTING=GFXFALSE;
@@ -42,8 +42,8 @@ void /*GFXDRVAPI*/ GFXPushGlobalEffects() {
   bool * tmp = new bool [GFX_MAX_LIGHTS];
   unpicklights();//costly but necessary to get rid of pesky local enables that shoudln't be tagged to get reenabled
   for (int i=0;i<GFX_MAX_LIGHTS;i++) {
-    tmp[i]=  (0!=(GLLights[i].options&OpenGLLights::GL_ENABLED));
-    if (GLLights[i].options&OpenGLLights::GL_ENABLED) {
+    tmp[i]=  (0!=(GLLights[i].options&OpenGLL::GL_ENABLED));
+    if (GLLights[i].options&OpenGLL::GL_ENABLED) {
       glDisable (GL_LIGHT0+i);
     }      
   }
@@ -259,7 +259,7 @@ void /*GFXDRVAPI*/ GFXSetLightContext (int con_number) {
   }
   for (;GLLindex<GFX_MAX_LIGHTS;GLLindex++) {
     GLLights[GLLindex].index=-1;
-    GLLights[GLLindex].options=OpenGLLights::GLL_OFF;
+    GLLights[GLLindex].options=OpenGLL::GLL_OFF;
     glDisable (GL_LIGHT0+GLLindex);
   }
 }

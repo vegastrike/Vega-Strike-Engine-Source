@@ -21,6 +21,8 @@
 #ifndef _UNIT_H_
 #define _UNIT_H_
 #include <time.h>
+
+struct GFXColor;
 #include "gfx_transform_matrix.h"
 #include "quaternion.h"
 #include "gfx_lerp.h"
@@ -50,7 +52,6 @@ class Camera;
 class Halo;
 class BSPTree;
 class PlanetaryOrbit;
-class GFXColor;
 //////OBSOLETE!!!!!! Vector MouseCoordinate (int x, int y, float zplane);
 enum clsptr {
 	UNITPTR,

@@ -1,7 +1,7 @@
 #include "gl_light.h"
 #include "hashtable_3d.h"
 #include "cmd_collide.h"
-
+#include <assert.h>
 #define GFX_HARDWARE_LIGHTING
 //table to store local lights, numerical pointers to _llights (eg indices)
 int _GLLightsEnabled=0;
@@ -25,7 +25,7 @@ int findLocalClobberable() {
   for (int i=0;i<GFX_MAX_LIGHTS;i++) {
     if (GLLights[i].index==-1) 
       return i;
-    if (!(GLLights[i].options&OpenGLLights::GLL_ON)) {
+    if (!(GLLights[i].options&OpenGLL::GLL_ON)) {
       clobberdisabled = i;
     }
   }
@@ -39,10 +39,10 @@ static int findGlobalClobberable () {//searches through the GLlights and sees wh
       if (GLLights[i].index==-1) {
 	  return i;
       }
-      if (GLLights[i].options&OpenGLLights::GLL_LOCAL) {
+      if (GLLights[i].options&OpenGLL::GLL_LOCAL) {
 	  clobberlocal = i;
       }
-      if (!(GLLights[i].options&OpenGLLights::GLL_ON)) {
+      if (!(GLLights[i].options&OpenGLL::GLL_ON)) {
 	  if (clobberlocal==i||clobberdisabled==-1) {
 	      clobberdisabled = i;
 	  }
@@ -137,16 +137,16 @@ inline void gfx_light::FinesseClobberLight (const GLenum gltarg, const int origi
 
 void gfx_light::ClobberGLLight (const int target) {
   this->target = target;
-  if (enabled()!=(GLLights[target].options&OpenGLLights::GL_ENABLED)) {
+  if (enabled()!=(GLLights[target].options&OpenGLL::GL_ENABLED)) {
     if (enabled()) {
       glEnable (GL_LIGHT0+target);
-      GLLights[target].options|=OpenGLLights::GL_ENABLED;
+      GLLights[target].options|=OpenGLL::GL_ENABLED;
     } else {
-      GLLights[target].options&=(~OpenGLLights::GL_ENABLED);
+      GLLights[target].options&=(~OpenGLL::GL_ENABLED);
       glDisable (GL_LIGHT0+target);
     }
   }
-  GLLights[target].options&=(OpenGLLights::GL_ENABLED);//turn off options
+  GLLights[target].options&=(OpenGLL::GL_ENABLED);//turn off options
 #ifdef GFX_HARDWARE_LIGHTING
     if (GLLights[target].index==-1) {
 #endif
@@ -157,7 +157,7 @@ void gfx_light::ClobberGLLight (const int target) {
     }
 #endif
     GLLights[target].index = lightNum();
-    GLLights[target].options |= OpenGLLights::GLL_ON*enabled()+OpenGLLights::GLL_LOCAL*LocalLight();
+    GLLights[target].options |= OpenGLL::GLL_ON*enabled()+OpenGLL::GLL_LOCAL*LocalLight();
 }
 
 
@@ -207,10 +207,10 @@ void gfx_light::ResetProperties (const enum LIGHT_TARGET light_targ, const GFXCo
 
 void gfx_light::TrashFromGLLights () {
   assert (target>=0);
-  assert ((GLLights[target].options&OpenGLLights::GLL_ON)==0);//better be disabled so we know it's not in the table, etc
+  assert ((GLLights[target].options&OpenGLL::GLL_ON)==0);//better be disabled so we know it's not in the table, etc
   assert ((&(*_llights)[GLLights[target].index])==this);
   GLLights[target].index = -1;
-  GLLights[target].options= OpenGLLights::GLL_LOCAL;
+  GLLights[target].options= OpenGLL::GLL_LOCAL;
 }
 void gfx_light::AddToTable() {
   LineCollideStar tmp;
@@ -250,7 +250,7 @@ void gfx_light::Enable() {
 	ClobberGLLight (newtarg);
       }
       glEnable (GL_LIGHT0+this->target);
-      GLLights[this->target].options|=OpenGLLights::GL_ENABLED;
+      GLLights[this->target].options|=OpenGLL::GL_ENABLED;
     }
     enable();
   }
@@ -260,11 +260,11 @@ void gfx_light::Disable() {
   if (enabled()) {
     disable();
     if (target>=0) {
-      if (GLLights[target].options&OpenGLLights::GL_ENABLED) {
+      if (GLLights[target].options&OpenGLL::GL_ENABLED) {
 	_GLLightsEnabled--;
 	glDisable (GL_LIGHT0+this->target);
       }
-      GLLights[this->target].options&=(~(OpenGLLights::GL_ENABLED||OpenGLLights::GLL_ON));
+      GLLights[this->target].options&=(~(OpenGLL::GL_ENABLED||OpenGLL::GLL_ON));
     }
     if (LocalLight()) {
       RemoveFromTable();
@@ -294,13 +294,13 @@ LineCollide gfx_light::CalculateBounds (bool &error) {
 void light_rekey_frame() {
   unpicklights();//picks doubtless changed position
     for (int i=0;i<GFX_MAX_LIGHTS;i++) {
-	if (GLLights[i].options & OpenGLLights::GL_ENABLED) {
+	if (GLLights[i].options & OpenGLL::GL_ENABLED) {
 	    if (GLLights[i].index>=0) {
 		(*_llights)[GLLights[i].index].SendGLPosition(GL_LIGHT0+i);//send position transformed by current cam matrix
 		assert ((*_llights)[GLLights[i].index].Target() == i);
 	    }else {
 		glDisable (GL_LIGHT0+i);
-		GLLights[i].options&=(~OpenGLLights::GL_ENABLED);
+		GLLights[i].options&=(~OpenGLL::GL_ENABLED);
 	    }
 	}
     }

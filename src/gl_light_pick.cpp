@@ -46,13 +46,13 @@ static void swappicked () {
 }
 
 void unpicklights () {
-  for (list <int>::iterator i=newpicked->begin();i!=newpicked->end();i++) {
+	for (std::list <int>::iterator i=newpicked->begin();i!=newpicked->end();i++) {
     if (GLLights[*i].index==-1 || GLLights[(*_llights)[*i].Target()].index!=*i)
       continue;//a lengthy operation... Since picked lights may have been smashed    
     int targ =(*_llights)[*i].Target(); 
-    if (GLLights[targ].options&OpenGLLights::GL_ENABLED) {
+    if (GLLights[targ].options&OpenGLL::GL_ENABLED) {
       glDisable (GL_LIGHT0+targ);
-      GLLights[targ].options=OpenGLLights::GLL_LOCAL;
+      GLLights[targ].options=OpenGLL::GLL_LOCAL;
       GLLights[targ].index=-1;
       (*_llights)[*i].Target() =-1;//unref
     }
@@ -91,8 +91,8 @@ static inline bool picklight (const LineCollide& light, const Vector & center, c
 
 void gfx_light::dopickenables () {
   newpicked->sort();//sort it to find minimum num lights changed from last time.
-  list<int>::iterator traverse= newpicked->begin();
-  list<int>::iterator oldtrav;
+  std::list<int>::iterator traverse= newpicked->begin();
+  std::list<int>::iterator oldtrav;
   while (traverse!=newpicked->end()&&(!oldpicked->empty())) {
     oldtrav = oldpicked->begin();
     while (oldtrav!=oldpicked->end()&& *oldtrav < *traverse) {
@@ -109,7 +109,7 @@ void gfx_light::dopickenables () {
     if (GLLights[(*_llights)[(*oldtrav)].target].index != (*oldtrav))
       continue;//don't clobber what's not yours
     GLLights[(*_llights)[(*oldtrav)].target].index = -1;
-    GLLights[(*_llights)[(*oldtrav)].target].options &= (OpenGLLights::GL_ENABLED&OpenGLLights::GLL_LOCAL);//set it to be desirable to kill
+    GLLights[(*_llights)[(*oldtrav)].target].options &= (OpenGLL::GL_ENABLED&OpenGLL::GLL_LOCAL);//set it to be desirable to kill
     oldtrav++;
   }
   traverse= newpicked->begin();
@@ -127,9 +127,9 @@ void gfx_light::dopickenables () {
   
   while (!oldpicked->empty()) {
     int glind=(*_llights)[(*oldtrav)].target;
-    if ((GLLights[glind].options&OpenGLLights::GL_ENABLED)&&GLLights[glind].index==-1) {//if hasn't been duly clobbered
+    if ((GLLights[glind].options&OpenGLL::GL_ENABLED)&&GLLights[glind].index==-1) {//if hasn't been duly clobbered
       glDisable (GL_LIGHT0+glind);
-      GLLights[glind].options &= (~OpenGLLights::GL_ENABLED);
+      GLLights[glind].options &= (~OpenGLL::GL_ENABLED);
     }
     (*_llights)[(*oldtrav)].target=-1;//make sure it doesn't think it owns any gl lights!
     oldpicked->pop_front();

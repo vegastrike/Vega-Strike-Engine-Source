@@ -6,8 +6,12 @@ static vector <Texture *> HaloDecal;
 static vector <int> HaloDecalRef;
 static vector <GFXQuadList *> halodrawqueue;
 
-Halo::Halo (const char * txtr, const GFXColor &col, const Vector &pos,float sizx,float sizy):position(pos),sizex(sizx),sizey(sizy){
-  string texname (txtr);
+Halo::  Halo (const char * texture, const GFXColor &col, const Vector & pos, float sizx, float sizy ){
+  string texname (texture);
+  position = pos;
+	sizex = sizx;
+	sizey = sizy;
+
   Texture * tmpDecal = Texture::Exists(texname);
   unsigned int i=0;
   int nullio=-1;
@@ -38,6 +42,7 @@ Halo::Halo (const char * txtr, const GFXColor &col, const Vector &pos,float sizx
   GFXColor coltmp [4] = {GFXColor(col),GFXColor(col),GFXColor(col),GFXColor(col)};
   quadnum = halodrawqueue[decal]->AddQuad (NULL,coltmp);  
 }
+
 Halo::~Halo () {
   halodrawqueue[decal]->DelQuad (quadnum);
   HaloDecalRef[decal]--;

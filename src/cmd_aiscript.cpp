@@ -45,7 +45,7 @@ namespace AiXml {
       SCRIPT,
       MOVETO,
       VECTOR,
-	  FLOAT,
+	  FFLOAT,
       X,
       Y,
       Z,
@@ -84,7 +84,7 @@ namespace AiXml {
 
   const EnumMap::Pair element_names[] = {
     EnumMap::Pair ("UNKNOWN", UNKNOWN),
-    EnumMap::Pair ("Float", FLOAT),
+    EnumMap::Pair ("Float", FFLOAT),
     EnumMap::Pair ("Script", SCRIPT),
     EnumMap::Pair ("Vector", VECTOR),
 	EnumMap::Pair ("Moveto", MOVETO),
@@ -252,7 +252,7 @@ void AIScript::beginElement(const string &name, const AttributeList &attributes)
 	xml->unitlevel++;
 	break;
 
-  case FLOAT:
+  case FFLOAT:
 	assert(xml->unitlevel>=2);
 	xml->unitlevel++;
 	xml->floats.push(0);

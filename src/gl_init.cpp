@@ -44,7 +44,7 @@ PFNGLUNLOCKARRAYSEXTPROC glUnlockArraysEXT_p;
 #endif
 #ifdef WIN32
 PFNGLCLIENTACTIVETEXTUREARBPROC glClientActiveTextureARB=0;
-PFNGLACTIVETEXTUREARBPROC glActiveTextureARB=0;
+PFNGLCLIENTACTIVETEXTUREARBPROC glActiveTextureARB=0;
 PFNGLCOLORTABLEEXTPROC glColorTable=0;
 PFNGLMULTITEXCOORD2FARBPROC glMultiTexCoord2fARB = 0;
 //PFNGLSELECTTEXTURESGISPROC glSelectTextureSGIS ;
@@ -102,7 +102,7 @@ void init_opengl_extensions()
     glColorTable = (PFNGLCOLORTABLEEXTPROC ) GET_GL_PROC((GET_GL_PTR_TYP)"glColorTableEXT");
     glMultiTexCoord2fARB = (PFNGLMULTITEXCOORD2FARBPROC) GET_GL_PROC((GET_GL_PTR_TYP)"glMultiTexCoord2fARB");
     glClientActiveTextureARB = (PFNGLCLIENTACTIVETEXTUREARBPROC) GET_GL_PROC((GET_GL_PTR_TYP)"glClientActiveTextureARB");
-    glActiveTextureARB = (PFNGLACTIVETEXTUREARBPROC) GET_GL_PROC((GET_GL_PTR_TYP)"glActiveTextureARB");
+    glActiveTextureARB = (PFNGLCLIENTACTIVETEXTUREARBPROC) GET_GL_PROC((GET_GL_PTR_TYP)"glActiveTextureARB");
 #endif
     if (glutExtensionSupported ("GL_ARB_multitexture")) {
       g_game.Multitexture = 1;

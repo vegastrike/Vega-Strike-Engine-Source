@@ -38,10 +38,10 @@ void Unit::CollideAll() {
   unsigned int i;
 #define COLQ colQ
   vector <const LineCollide*> colQ;
-  bool huge = collidetable.Get (CollideInfo.Mini,CollideInfo.Maxi,colQ);
+  bool hhuge = collidetable.Get (CollideInfo.Mini,CollideInfo.Maxi,colQ);
   for (i=0;i<COLQ.size();i++) {
     //    if (colQ[i]->object > this||)//only compare against stuff bigger than you
-    if ((!huge||(huge&&COLQ[i]->type==LineCollide::UNIT))&&((COLQ[i]->object>this||(!huge&&i<collidetable.GetHuge().size()))))//the first stuffs are in the huge array
+    if ((!hhuge||(hhuge&&COLQ[i]->type==LineCollide::UNIT))&&((COLQ[i]->object>this||(!hhuge&&i<collidetable.GetHuge().size()))))//the first stuffs are in the huge array
       if (
 	  Position().i+radial_size>COLQ[i]->Mini.i&&
 	  Position().i-radial_size<COLQ[i]->Maxi.i&&
@@ -150,10 +150,10 @@ void Unit::ApplyLocalDamage (const Vector & pnt, const Vector & normal, float am
 						      GFXColor (.3,.3,.3), GFXColor (0,0,0,1), 
 						      GFXColor (.5,.5,.5),GFXColor (1,0,.01)));*/
     //calculate percentage
-    meshdata[nummesh]->AddDamageFX(pnt,shieldtight?shieldtight*normal:Vector(0,0,0),percentage,color);
+meshdata[nummesh]->AddDamageFX(pnt,shieldtight?shieldtight*normal:Vector(0,0,0),percentage,color);
   } else {
     for (int i=0;i<nummesh;i++) {
-      meshdata[i]->AddDamageFX(pnt,shieldtight?shieldtight*normal:Vector (0,0,0),percentage,color);
+meshdata[i]->AddDamageFX(pnt,shieldtight?shieldtight*normal:Vector (0,0,0),percentage,color);
     }
   }
 }

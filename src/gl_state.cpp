@@ -161,6 +161,7 @@ void GFXBlendMode(enum BLENDFUNC src, enum BLENDFUNC dst)
 	break;
 	case SRCALPHASAT:	sfactor = GL_SRC_ALPHA_SATURATE;
 	break;
+#ifndef _WIN32
 	case CONSTALPHA:   	sfactor=GL_CONSTANT_ALPHA;
 	  break;
 	case INVCONSTALPHA:	sfactor=GL_ONE_MINUS_CONSTANT_ALPHA;
@@ -169,6 +170,7 @@ void GFXBlendMode(enum BLENDFUNC src, enum BLENDFUNC dst)
 	  break;
 	case INVCONSTCOLOR:	sfactor=GL_ONE_MINUS_CONSTANT_COLOR;
 	  break;
+#endif
 	case SRCCOLOR:
 	case INVSRCCOLOR:	
 	default:	
@@ -194,6 +196,8 @@ void GFXBlendMode(enum BLENDFUNC src, enum BLENDFUNC dst)
 	  break;
 	case INVDESTALPHA:	dfactor = GL_ONE_MINUS_DST_ALPHA;
 	  break;
+	  #ifndef _WIN32
+
 	case CONSTALPHA:   	sfactor=GL_CONSTANT_ALPHA;
 	  break;
 	case INVCONSTALPHA:	sfactor=GL_ONE_MINUS_CONSTANT_ALPHA;
@@ -206,7 +210,7 @@ void GFXBlendMode(enum BLENDFUNC src, enum BLENDFUNC dst)
 	case DESTCOLOR:		
 	case INVDESTCOLOR:	
 	case SRCALPHASAT:	
-
+#endif
 		default:		
 		return ;
 	}

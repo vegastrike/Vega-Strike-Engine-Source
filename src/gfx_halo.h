@@ -2,7 +2,6 @@
 #include "gfx_transform_vector.h"
 #include "quaternion.h"
 
-
 class Halo {
   Vector position;
   float sizex;

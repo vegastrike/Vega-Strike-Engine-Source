@@ -251,7 +251,7 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
 	break;
       }
     }
-    xml->halos.push_back(new Halo(filename.c_str(),GFXColor(Q.i,Q.j,Q.k,P.k),pos,P.i,P.j));
+   xml->halos.push_back(new Halo(filename.c_str(),GFXColor(Q.i,Q.j,Q.k,P.k),pos,P.i,P.j));
     break;
   case MOUNT:
 	assert (xml->unitlevel==1);
