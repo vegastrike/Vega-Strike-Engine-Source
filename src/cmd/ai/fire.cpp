@@ -372,7 +372,7 @@ unsigned int FireBitmask (Unit * parent,bool shouldfire, bool firemissile) {
    unsigned int firebitm = ROLES::EVERYTHING_ELSE;
     Unit * un=parent->Target();
     if (un) {
-      firebitm = (1 << parent->combatRole());
+      firebitm = (1 << un->combatRole());
       firebitm |= ROLES::FIRE_GUNS;
       if (!shouldfire) 
 	firebitm |= ROLES::FIRE_ONLY_AUTOTRACKERS;
