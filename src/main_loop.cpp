@@ -310,7 +310,7 @@ static void Quit(KBSTATE newState) {
 Unit *carrier=NULL;
 Unit *fighter = NULL;
 Unit *fighter2=NULL;
-const int numf = 256;
+const int numf = 100;
 Unit *fighters[numf];
 LocationSelect *locSel=NULL;
 
@@ -492,7 +492,7 @@ void createObjects() {
     fighters[a]->SetPosition((a%8)/8.0 - 2.0, (a/8)/8.0 - 2.0,5.0);
     fighters[a]->SetPosition((a%16)*5 - 40.0F, (a/16)*5 - 40.0F,25.0F);
     fighters[a]->Pitch(PI/2);
-    //_GFX->activeStarSystem()->AddUnit(fighters[a]);
+    _GFX->activeStarSystem()->AddUnit(fighters[a]);
   }
 
 

@@ -59,7 +59,7 @@ void StarSystem::Update() {
   Iterator *iter = units->createIterator();
   Unit *unit;
   while((unit = iter->current())!=NULL) {
-    ///    unit->ResolveForces();
+    unit->ResolveForces();
     // Do something with AI state here eventually
     unit->ExecuteAI();
     iter->advance();
