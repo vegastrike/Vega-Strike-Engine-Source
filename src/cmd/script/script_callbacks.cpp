@@ -657,9 +657,8 @@ Unit* Mission::getUnitArg(missionNode *node,int mode,int arg_nr){
       ret=getUnitObject(unit_node,mode,unit_vi);
     }
     else{
-      fatalError(node,mode,"getUnitArg: expected unit arg - got else");
-      assert(0);
-      return NULL; // never reach
+		printf ("Error: Unit died prematurely\n");
+		return NULL; // never reach
     }
   }
   deleteVarInst(unit_vi);

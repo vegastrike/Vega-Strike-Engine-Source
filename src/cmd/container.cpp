@@ -14,12 +14,14 @@ UnitContainer::~UnitContainer() {
 void UnitContainer::SetUnit (Unit * un) {
   if (unit)
     unit->UnRef();
-  if (un==NULL||un->Killed()) {
+  // if the unit is null then go here otherwise if the unit is killed then go here
+  if (un!=NULL?un->Killed()==true:true) {
     unit = NULL;
     return;
   }
   unit = un;
   unit->Ref();
 }
+
 
 

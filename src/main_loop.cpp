@@ -188,8 +188,8 @@ bool cockpitfront=true;
   const int max = 4;
   static int tmp=(XMLSupport::parse_bool (vs_config->getVariable ("graphics","cockpit","true"))?1:0)+((!XMLSupport::parse_bool (vs_config->getVariable ("graphics","background","true")))?2:0);
   if(newState==PRESS&&cockpitfront) {
-    if (tmp&cockpiton) {
-      _Universe->AccessCockpit()->Init (fighters[0]->getCockpit().c_str());	    
+    if ((tmp&cockpiton)&&_Universe->AccessCockpit()->GetParent()) {
+      _Universe->AccessCockpit()->Init (_Universe->AccessCockpit()->GetParent()->getCockpit().c_str());	    
     }else {
       _Universe->AccessCockpit()->Init ("disabled-cockpit.cpt");
     }
