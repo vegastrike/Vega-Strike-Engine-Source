@@ -75,6 +75,7 @@ JoyStick::JoyStick () {
     axis_inverse[j]=false;
     joy_axis[j]=axis_axis[j]=0;
   }
+    joy_buttons=0;
 }
 int JoystickPollingRate () {
     static int i=XMLSupport::parse_int (vs_config->getVariable("joystick",
@@ -84,6 +85,7 @@ int JoystickPollingRate () {
 }
 void InitJoystick(){
   int i;
+  
 
   for (i=0;i<NUMJBUTTONS;i++) {
     for (int j=0;j<MAX_JOYSTICKS;j++) {
@@ -158,6 +160,8 @@ JoyStick::JoyStick(int which): mouse(which==MOUSE_JOYSTICK) {
     axis_inverse[j]=false;
     joy_axis[j]=0;
   }
+  joy_buttons=0;
+
   player=which;//by default bind players to whichever joystick it is
   debug_digital_hatswitch=XMLSupport::parse_bool(vs_config->getVariable("joystick","debug_digital_hatswitch","false"));
   if (which!=MOUSE_JOYSTICK)
