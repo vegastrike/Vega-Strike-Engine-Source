@@ -174,9 +174,8 @@ void FlyByKeyboard::Execute () {
   SSCK.dirty=true;
 #undef SSCK
 
-  if(!(joystick[0]!=NULL && joystick[0]->isAvailable())){ // how do I get the wanted joystick at this point (global configuration file/class)
-    FlyByWire::Execute();
-  }
+  FlyByWire::Execute();
+
 }
 
 

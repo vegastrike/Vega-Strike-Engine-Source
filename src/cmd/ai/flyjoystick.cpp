@@ -26,7 +26,6 @@ void FlyByJoystick::JDecelKey (KBSTATE k, float, float, int) {
 }
 
 void FlyByJoystick::Execute() {
-    FlyByKeyboard::Execute();
   if (joystick[which_joystick]->isAvailable()) {
     JoyStick *joy=joystick[which_joystick];
 
@@ -58,8 +57,7 @@ void FlyByJoystick::Execute() {
     }
 #endif
     */
-
-    FlyByWire::Execute(); // has to be done here instead of FlyByKeyboard to avoid strange wobbling effects
+    FlyByKeyboard::Execute();
   }
 }
 FlyByJoystick::~FlyByJoystick() {
