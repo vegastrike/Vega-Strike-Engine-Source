@@ -206,7 +206,7 @@ GameStarSystem::~GameStarSystem() {
     iter.advance();
   }
   */
-  delete collidetable;
+  //  delete collidetable;//BAD BAD BAD we need this later!
   _Universe->activeStarSystem()->SwapOut();
   //  GFXDeleteLightContext (lightcontext);
   //_Universe->popActiveStarSystem();

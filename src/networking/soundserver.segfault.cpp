@@ -8,7 +8,23 @@ int GetMaxVolume();
 #include <fcntl.h>
 extern "C" {
 #include "../fmod.h"
+#include <mach/thread_policy.h>
+#include <mach/mach_init.h>
+
+#ifdef __MACH__
+
+  kern_return_t    thread_policy_set(
+				     thread_act_t                thread,
+				     natural_t                    flavor,
+				     thread_policy_t                policy_info,
+				     natural_t                    count);
+  mach_port_t mach_thread_self(void);
+
+
+#endif
 }
+
+
 #include <queue>
 #include <list>
 using std::list;
@@ -292,8 +308,42 @@ void music_finished () {
                 invalid_string=true;
 	}
 }
-int main(int argc, char **argv)
-{
+void TakeLotsOfPriority() {
+#ifdef __MACH__
+// Disable timesharing
+  {
+    kern_return_t error;
+    thread_extended_policy_data_t extendedPolicy;
+    thread_precedence_policy_data_t precedencePolicy;
+    
+    extendedPolicy.timeshare = 0;
+    error = thread_policy_set(mach_thread_self(),
+			      THREAD_EXTENDED_POLICY,
+			      (thread_policy_t)&extendedPolicy,
+			      THREAD_EXTENDED_POLICY_COUNT);
+    if (error != KERN_SUCCESS) {
+#if DEBUG
+      mach_error("Couldn't set feeder thread's extended policy",
+		 error);
+#endif
+    }
+    
+    precedencePolicy.importance = 1;
+    error = thread_policy_set(mach_thread_self(),
+			      THREAD_PRECEDENCE_POLICY,
+			      (thread_policy_t)&precedencePolicy,
+			      THREAD_PRECEDENCE_POLICY_COUNT);
+    if (error != KERN_SUCCESS) {
+#if DEBUG
+      mach_error("Couldn't set feeder thread's precedence policy",
+		 error);
+#endif
+    }
+  }
+#endif
+}
+int main(int argc, char **argv) {
+  TakeLotsOfPriority();
 	Music music;
 	int audio_rate,audio_channels,
 		// set this to any of 512,1024,2048,4096
