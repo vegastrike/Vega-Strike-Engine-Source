@@ -140,7 +140,7 @@ string getCargoUnitName (const char * textname) {
   char * tmp2 = strdup (textname);
   char * tmp = getnoslash(tmp2);
   unsigned int i;
-  for (i=0;tmp[i]!='\0'&&isalpha(tmp[i]);i++) {
+  for (i=0;tmp[i]!='\0'&&(isalpha(tmp[i])||tmp[i]=='_');i++) {
     
   }
   if (tmp[i]!='\0') {

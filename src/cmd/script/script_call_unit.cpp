@@ -394,12 +394,24 @@ varInst *Mission::call_unit(missionNode *node,int mode){
       viret=newVarInst(VI_TEMP);
       viret->type=VAR_VOID;
     }
+    else if(method_id==CMT_UNIT_getDistance){
+      float dist=0.0;
+      Unit * un= getUnitArg(node,mode,1);
+      if(mode==SCRIPT_RUN){
+	dist = (my_unit->Position()-un->Position()).Magnitude()-my_unit->rSize()-un->rSize();
+	//	  dist=my_unit->getMinDis(vec3);
+      }
+      viret=newVarInst(VI_TEMP);
+      viret->type=VAR_FLOAT;
+      viret->float_val=dist;
+    }
     else if(method_id==CMT_UNIT_getMinDis){
       Vector vec3=getVec3Arg(node,mode,1);
 
 	float dist=0.0;
 	if(mode==SCRIPT_RUN){
-	  dist=my_unit->getMinDis(vec3);
+	  dist = (my_unit->Position()-vec3).Magnitude()-my_unit->rSize();
+	  //	  dist=my_unit->getMinDis(vec3);
 	}
 	viret=newVarInst(VI_TEMP);
 	viret->type=VAR_FLOAT;
