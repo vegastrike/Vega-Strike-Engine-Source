@@ -307,7 +307,7 @@ void AddDocks (Unit* thus, Unit::XML &xml, string docks) {
       pos.k=stof(nextElement(dock));
       double size=stof(nextElement(dock));
       double minsize=stof(nextElement(dock));
-      thus->image->dockingports.push_back (DockingPorts(pos.Cast()*xml.unitscale,size,minsize,internal));      
+      thus->image->dockingports.push_back (DockingPorts(pos.Cast()*xml.unitscale,size*xml.unitscale,minsize*xml.unitscale,internal));      
     }
   }
 }
