@@ -40,12 +40,12 @@ static double elapsedtime;
 static double timecompression=1;
 void inc_time_compression (int i, KBSTATE a) {
   if (a==DOWN) {
-    timecompression+=elapsedtime;
+    timecompression+=elapsedtime/timecompression;
   }
 }
 void dec_time_compression (int i, KBSTATE a) {
   if (a==DOWN) {
-    timecompression-=elapsedtime;
+    timecompression-=elapsedtime/timecompression;
   }
 }
 void reset_time_compression (int i, KBSTATE a) {
