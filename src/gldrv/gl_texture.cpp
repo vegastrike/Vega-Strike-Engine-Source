@@ -324,7 +324,6 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture (unsigned char *buffer, int handle,  TE
   }
   int error;
   unsigned char * tempbuf = NULL;
-  unsigned char * tbuf =NULL;
   GLenum internalformat;
   GLenum image2D=GetImageTarget (imagetarget);
   glBindTexture(textures[handle].targets, textures[handle].name);
@@ -351,22 +350,28 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture (unsigned char *buffer, int handle,  TE
 		static int fullout = XMLSupport::parse_int(vs_config->getVariable("graphics","detail_texture_full_color","1"))-1;
 		float numdivisors = logsize>fullout+blankout?(1./(logsize-fullout-blankout)):1;
 		float detailscale=1;
+                glTexImage2D(image2D,count,internalformat,width,height,0,textures[handle].textureformat,GL_UNSIGNED_BYTE,buffer);
+                
 		while(1){
-			glTexImage2D(image2D,count,internalformat,width,height,0,textures[handle].textureformat,GL_UNSIGNED_BYTE,buffer);
 			if (width==1&&height==1)
 				break;
 			int newwidth = width>2?width/2:1;
 			int newheight = height>2?height/2:1;
 			tempbuf=NULL;
-			count++;			
-			DownSampleTexture(&tempbuf,buffer,height,width,(internformat==PALETTE8?1:(internformat==RGBA32?4:3))* sizeof(unsigned char ),handle,newheight,newwidth,detail_texture?detailscale:1);
+			count++;
+			unsigned char * tbuf = NULL;
+			DownSampleTexture(&tbuf,tempbuf?tempbuf:buffer,height,width,(internformat==PALETTE8?1:(internformat==RGBA32?4:3))* sizeof(unsigned char ),handle,newheight,newwidth,detail_texture?detailscale:1);
+                        if (tempbuf) free(tempbuf);
+                        tempbuf = tbuf;
 			if (count>fullout) {
 				detailscale-=numdivisors;
 			}
 			if (detailscale<0)
 				detailscale=0;
-			buffer=tempbuf;
+			glTexImage2D(image2D,count,internalformat,width,height,0,textures[handle].textureformat,GL_UNSIGNED_BYTE,tempbuf);
 		}
+                if (tempbuf) free(tempbuf);
+                tempbuf=NULL;
     }else {
       glTexImage2D(image2D, 0, internalformat, textures[handle].width, textures[handle].height, 0, textures[handle].textureformat, GL_UNSIGNED_BYTE, buffer);
 	}
@@ -398,7 +403,7 @@ GFXBOOL /*GFXDRVAPI*/ GFXTransferTexture (unsigned char *buffer, int handle,  TE
 #endif
     {
       int nsize = 4*textures[handle].height*textures[handle].width;
-      tbuf =(unsigned char *) malloc (sizeof(unsigned char)*nsize);
+      unsigned char * tbuf =(unsigned char *) malloc (sizeof(unsigned char)*nsize);
       //      textures[handle].texture = tbuf;
       int j =0;
       for (int i=0; i< nsize; i+=4)
