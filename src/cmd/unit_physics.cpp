@@ -174,19 +174,19 @@ void GameUnit<UnitType>::Thrust(const Vector &amt1,bool afterburn){
     static float lastbuzz=getNewTime();
     Unit * playa = _Universe->AccessCockpit()->GetParent();
     if (playa) {
-      Vector diff=Position()-playa->Position();
+      Vector diff=this->Position()-playa->Position();
       if (UnitUtil::getDistance(this,playa)<buzzingdistance) {
         float ttime=getNewTime();
         if (ttime-lastbuzz>buzzingtime) {
           Vector pvel=playa->GetVelocity();
-          Vector vel=GetVelocity();
+          Vector vel=this->GetVelocity();
           pvel.Normalize();
           vel.Normalize();
           float dotprod=vel.Dot(pvel);
           if (dotprod<.86) {
             
             lastbuzz=ttime;
-            AUDPlay(sound->engine,Position(),GetVelocity(),1);
+            AUDPlay(this->sound->engine,this->Position(),this->GetVelocity(),1);
           } else {
 
           }         
