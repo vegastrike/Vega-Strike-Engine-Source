@@ -43,6 +43,7 @@
 #include "cmd/unit.h"
 #include "cmd/ai/order.h"
 #include "cmd/ai/aggressive.h"
+#include "cmd/ai/missionscript.h"
 
 #include "mission.h"
 #include "easydom.h"
@@ -247,6 +248,17 @@ varInst *Mission::call_unit(missionNode *node,int mode){
       viret=newVarInst(VI_TEMP);
       viret->type=VAR_VOID;
     }
+    else if(cmd=="getMinDis"){
+      Vector vec3=getVec3Arg(node,mode,1);
+
+	float dist=0.0;
+	if(mode==SCRIPT_RUN){
+	  dist=my_unit->getMinDis(vec3);
+	}
+	viret=newVarInst(VI_TEMP);
+	viret->type=VAR_FLOAT;
+	viret->float_val=dist;
+    }
     else if(cmd=="getFShieldData"){
       float res=0.0;
       if(mode==SCRIPT_RUN){
@@ -420,17 +432,25 @@ void Mission::call_unit_launch(Flightgroup *fg){
 
      my_unit->SetPosAndCumPos(pox);
 
-     string ai_agg=fg->ainame+".agg.xml";
-     string ai_int=fg->ainame+".int.xml";
+     if(fg->ainame[0]!='_'){
+       string ai_agg=fg->ainame+".agg.xml";
+       string ai_int=fg->ainame+".int.xml";
 
-     char ai_agg_c[1024];
-     char ai_int_c[1024];
-     strcpy(ai_agg_c,ai_agg.c_str());
-     strcpy(ai_int_c,ai_int.c_str());
-     //      printf("1 - %s  2 - %s\n",ai_agg_c,ai_int_c);
+       char ai_agg_c[1024];
+       char ai_int_c[1024];
+       strcpy(ai_agg_c,ai_agg.c_str());
+       strcpy(ai_int_c,ai_int.c_str());
+       //      printf("1 - %s  2 - %s\n",ai_agg_c,ai_int_c);
 
-     my_unit->EnqueueAI( new Orders::AggressiveAI (ai_agg_c, ai_int_c));
-	    
+       my_unit->EnqueueAI( new Orders::AggressiveAI (ai_agg_c, ai_int_c));
+     }
+     else{
+	      string modulename=fg->ainame.substr(1);
+	      
+	      my_unit->EnqueueAI( new AImissionScript(modulename));
+	      //fighters[a]->SetAI( new AImissionScript(modulename));
+     }
+
      SetTurretAI (my_unit);
 
      //     cout << fg->name << endl;

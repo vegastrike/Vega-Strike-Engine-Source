@@ -1,3 +1,10 @@
+2002-01-01 Alexander Rawass <alexannika@users.sourceforge.net>
+	
+	* wrote some dumb ai's in TuxFleet-style
+	  ai_rolling,ai_stationary,ai_circling
+	* wrote ai that can flyto a waypoint ai_flyto*
+	
+
 2001-12-30 Alexander Rawass <alexannika@users.sourceforge.net>
 	
 	* added more Orders to the _order callback

@@ -55,6 +55,8 @@ AImissionScript::~AImissionScript () {
 }
 
 void AImissionScript::Execute () {
+  desired_ang_velocity=Vector(0,0,0);
+  desired_velocity=Vector(0,0,0);
 
   mission->setCurrentAIUnit(parent);
   mission->setCurrentAIOrder(this);
@@ -66,9 +68,17 @@ void AImissionScript::Execute () {
 
   mission->runScript(modulename,"executeai",classid);
 
-  if(suborders.size()!=0){
-    printf("suborders: %d\n",suborders.size());
+  varInst *vi=mission->lookupClassVariable(modulename,"aistyle",classid);
+  if(vi==NULL || vi->type!=VAR_INT){
+    Order::Execute();
   }
-  Order::Execute();
+  else{
+    if(vi->int_val==0){
+      Order::Execute();
+    }
+    else if(vi->int_val==1){
+      FlyByWire::Execute();
+    }
+  }
   done=false;
 }

@@ -175,6 +175,31 @@ varInst *Mission::lookupModuleVariable(string mname,missionNode *asknode){
 
 /* *********************************************************** */
 
+varInst *Mission::lookupClassVariable(string modulename,string varname,uint classid){
+  missionNode *module=runtime.modules[modulename];
+  string mname=module->script.name;
+
+  if(classid==0){
+    // no class instance
+    return NULL;
+  }
+
+  //  printf("lookup classvar %s id=%d\n",varname.c_str(),classid);
+
+  if(classid >= module->script.classvars.size()){
+    fatalError(module,SCRIPT_RUN,"illegal classvar nr.");
+    assert(0);
+  }
+  varInstMap *cvmap=module->script.classvars[classid];
+  
+  varInst *var=(*cvmap)[varname];
+  
+  if(var==NULL){
+    //    printf("var not found as classvar\n");
+  }
+  return var;
+}
+
 varInst *Mission::lookupClassVariable(missionNode *asknode){
   missionNode *module=runtime.cur_thread->module_stack.back();
   uint classid=runtime.cur_thread->classid_stack.back();

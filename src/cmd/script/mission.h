@@ -204,6 +204,7 @@ class Mission {
 
   void DirectorLoop();
   void DirectorStart(missionNode *node);
+  void DirectorInitgame();
   void DirectorEnd();
   void  loadMissionModules();
  void  loadModule(string modulename);
@@ -212,7 +213,8 @@ void runScript(string modulename,string scriptname,uint classid=0);
 uint  createClassInstance(string modulename);
  void setCurrentAIUnit(Unit *unit) { current_ai_unit=unit; };
  void setCurrentAIOrder(Order *order) { current_ai_order=order; };
- 
+varInst* lookupClassVariable(string modulename,string varname,uint classid);
+
   MessageCenter *msgcenter;
 
  private:
@@ -222,6 +224,7 @@ uint  createClassInstance(string modulename);
   Order *current_ai_order;
 
   int debuglevel;
+  bool start_game;
 
   ofstream var_out;
 

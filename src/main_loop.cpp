@@ -547,6 +547,7 @@ void createObjects() {
   UpdateTime();
 //  _Universe->activeStarSystem()->AddUnit(new Nebula ("mynebula.xml","nebula",false,0,NULL,0));
 
+  mission->DirectorInitgame();
 }
 
 void destroyObjects() {  

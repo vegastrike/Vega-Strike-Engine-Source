@@ -1,11 +1,17 @@
 #include "flybywire.h"
 #include "vegastrike.h"
+#include <math.h>
+
 #define VELTHRESHOLD .1
 using Orders::MatchLinearVelocity;
 using Orders::MatchVelocity;
 using Orders::MatchAngularVelocity;
-#define MATCHLINVELSETUP()   Vector desired (desired_velocity);   if (!LocalVelocity) {     desired = parent->ToLocalCoordinates (desired);   }   Vector velocity (parent->UpCoordinateLevel(parent->GetVelocity()));
-#define MATCHLINVELEXECUTE()   parent->Thrust ( (parent->GetMass()*(desired-velocity)/SIMULATION_ATOM), afterburn);
+//#define MATCHLINVELSETUP()   Vector desired (desired_velocity);  /* cout << "desired= " << desired << endl; */ if (!(desired.i==-2 && desired.j==0 && desired.k==0) && !LocalVelocity) {     desired = parent->ToLocalCoordinates (desired);   }   Vector velocity (parent->UpCoordinateLevel(parent->GetVelocity()));
+//#define MATCHLINVELEXECUTE()  if(!(desired.i==-2 && desired.j==0 && desired.k==0)){ parent->Thrust ( (parent->GetMass()*(desired-velocity)/SIMULATION_ATOM), afterburn); }
+
+#define MATCHLINVELSETUP()   Vector desired (desired_velocity);  if (!LocalVelocity) {     desired = parent->ToLocalCoordinates (desired);   }   Vector velocity (parent->UpCoordinateLevel(parent->GetVelocity()));
+#define MATCHLINVELEXECUTE()  { parent->Thrust ( (parent->GetMass()*(desired-velocity)/SIMULATION_ATOM), afterburn); }
+
 /**
  * don't need to clamp thrust since the Thrust does it for you
  * caution might change 

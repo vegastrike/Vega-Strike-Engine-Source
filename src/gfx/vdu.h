@@ -31,7 +31,7 @@ class VDU: public Sprite {
   ///Draws the target display of Unit *target (only call with nonNULL)
   void DrawTarget(Unit * parent, Unit *target);
   ///Draws the message from the messagecenter
-  void DrawMessages();
+  void DrawMessages(Unit *target);
   ///Draws the nav point this unit is heading to
   void DrawNav(const Vector &navPoint);
   ///Draws the damage this unit has sustained

@@ -393,6 +393,7 @@ varInst *Mission::call_order(missionNode *node,int mode){
 	// this will crash if order is no FlyByWire
 	// is there a way to check that?
 	((FlyByWire *)my_order)->RollRight(val);
+	//printf("rolling right\n");
       }
 
       viret=newVarInst(VI_TEMP);

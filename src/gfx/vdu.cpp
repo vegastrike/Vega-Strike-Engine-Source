@@ -192,12 +192,31 @@ void VDU::DrawTarget(Unit * parent, Unit * target) {
   GFXColor4f (1,1,1,1);
 }
 
-void VDU::DrawMessages(){
+void VDU::DrawMessages(Unit *target){
   string fullstr;
+
+  char st[256];
+  //  sprintf (st,"\n%s",target->name.c_str());
+  if(target){
+    string ainame;
+    if(target->getFlightgroup()){
+      ainame=target->getFlightgroup()->ainame;
+    }
+    else{
+      ainame="unknown";
+    }
+    sprintf (st,"%s:%s:%s",target->getFgID().c_str(),target->name.c_str(),ainame.c_str());
+  }
+  else{
+    sprintf(st,"no target");
+  }
+  string targetstr=string(st)+"\n";
+  int msglen=targetstr.size();
+  int rows_needed=msglen/cols;
 
   MessageCenter *mc=mission->msgcenter;
   
-  int rows_used=0;
+  int rows_used=rows_needed+1;
 
   gameMessage *lastmsg=mc->last(0);
   for(int i=0;rows_used<=rows && lastmsg!=NULL;i++){
@@ -215,6 +234,8 @@ void VDU::DrawMessages(){
       //      cout << "nav  " << mymsg << " rows " << rows_needed << endl;
     }
   }
+
+  fullstr=targetstr+fullstr;
 
   tp->Draw(fullstr);
 }
@@ -380,9 +401,9 @@ void VDU::Draw (Unit * parent) {
   h=fabs(h/2);  w=fabs (w/2);
   tp->SetPos (x-w,y+h);
   tp->SetSize (x+w,y-h-.9*fabs(w/cols));
+  targ = parent->GetComputerData().target.GetUnit();
   switch (thismode) {
   case TARGET:
-    targ = parent->GetComputerData().target.GetUnit();
     if (targ)
       DrawTarget(parent,targ);
     break;
@@ -390,7 +411,7 @@ void VDU::Draw (Unit * parent) {
     DrawNav(parent->ToLocalCoordinates (parent->GetComputerData().NavPoint-parent->Position()));
     break;
   case MSG:
-    DrawMessages();
+    DrawMessages(targ);
     break;
   case DAMAGE:
     DrawDamage(parent);

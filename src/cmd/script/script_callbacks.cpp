@@ -620,12 +620,15 @@ float Mission::getFloatArg(missionNode *node,int mode,int arg_nr){
 Unit* Mission::getUnitArg(missionNode *node,int mode,int arg_nr){
   missionNode *unit_node=getArgument(node,mode,arg_nr);
   varInst *unit_vi=checkObjectExpr(unit_node,mode);
-  if(unit_vi->type==VAR_OBJECT && unit_vi->objectname=="unit"){
-    return getUnitObject(unit_node,mode,unit_vi);
+  if(mode==SCRIPT_RUN){
+    if(unit_vi->type==VAR_OBJECT && unit_vi->objectname=="unit"){
+      return getUnitObject(unit_node,mode,unit_vi);
+    }
+    fatalError(node,mode,"expected unit arg - got else");
+    assert(0);
+    return NULL; // never reach
   }
-  fatalError(node,mode,"expected unit arg - got else");
-  assert(0);
-  return NULL; // never reach
+  return NULL;
 }
 Vector Mission::getVec3Arg(missionNode *node,int mode,int arg_nr){
   missionNode *pos_node=getArgument(node,mode,arg_nr);
