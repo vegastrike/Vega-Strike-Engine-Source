@@ -198,7 +198,7 @@ void Python::initpaths(){
 	  if (pwd[i]=='\\')
 		  pwd[i]=DELIM;
   }
-  std::string changepath ("import sys\nsys.path += ["
+  std::string changepath ("import sys\nsys.path = ["
          "\""+std::string(pwd)+DELIMSTR"modules\""
          ",\""+std::string(pwd)+DELIMSTR"bases\""
 	 ",\""+std::string(pwd)+DELIMSTR"modules"DELIMSTR"builtin\""
