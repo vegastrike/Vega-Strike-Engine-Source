@@ -11,6 +11,8 @@ static bool shelt;
 
 FlyByJoystick::FlyByJoystick(int whichjoystick, const char * configfile): FlyByKeyboard (configfile), which_joystick(whichjoystick) {
   //remember keybindings from config file?  
+
+  // this below is outdated
   if (whichjoystick>=MAX_JOYSTICKS)
     whichjoystick=0;
 
@@ -71,18 +73,26 @@ void FlyByJoystick::Execute() {
     Accel (-joy->joy_z);
 #endif
 
-    if(vs_config->axis_joy[AXIS_Y] != -1 ){
-      Up(- joystick[vs_config->axis_joy[AXIS_Y]]->joy_axis[vs_config->axis_axis[AXIS_Y]] );
+    int joy_nr;
+
+    joy_nr=vs_config->axis_joy[AXIS_Y];
+    if( joy_nr!= -1 && joystick[joy_nr]->isAvailable()){
+      Up(- joystick[joy_nr]->joy_axis[vs_config->axis_axis[AXIS_Y]] );
     }
 
-    if(vs_config->axis_joy[AXIS_X] != -1 ){
-      Right(- joystick[vs_config->axis_joy[AXIS_X]]->joy_axis[vs_config->axis_axis[AXIS_X]] );
+    joy_nr=vs_config->axis_joy[AXIS_X];
+    if( joy_nr != -1 && joystick[joy_nr]->isAvailable() ){
+      Right(- joystick[joy_nr]->joy_axis[vs_config->axis_axis[AXIS_X]] );
     }
-    if(vs_config->axis_joy[AXIS_Z] != -1 ){
-      RollRight(- joystick[vs_config->axis_joy[AXIS_Z]]->joy_axis[vs_config->axis_axis[AXIS_Z]] );
+
+    joy_nr=vs_config->axis_joy[AXIS_Z];
+    if( joy_nr!= -1 && joystick[joy_nr]->isAvailable()){
+      RollRight(- joystick[joy_nr]->joy_axis[vs_config->axis_axis[AXIS_Z]] );
     }
-    if(vs_config->axis_joy[AXIS_THROTTLE] != -1 ){
-      Accel(- joystick[vs_config->axis_joy[AXIS_THROTTLE]]->joy_axis[vs_config->axis_axis[AXIS_THROTTLE]] );
+
+    joy_nr=vs_config->axis_joy[AXIS_THROTTLE];
+    if( joy_nr != -1 &&  joystick[joy_nr]->isAvailable()){
+      Accel(- joystick[joy_nr]->joy_axis[vs_config->axis_axis[AXIS_THROTTLE]] );
     }
   }
   

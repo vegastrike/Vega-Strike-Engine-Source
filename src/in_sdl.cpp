@@ -82,29 +82,32 @@ void ProcessJoystick () {
     }
   }
 #endif
+
   float x,y,z;
   int buttons;
   SDL_JoystickUpdate();//FIXME isn't this supposed to be called already by SDL?
   for (int i=0;i<MAX_JOYSTICKS;i++) {
     buttons=0;
-    joystick[i]->GetJoyStick (x,y,z,buttons);
+    if(joystick[i]->isAvailable()){
+      joystick[i]->GetJoyStick (x,y,z,buttons);
 
-    for (int j=0;j<NUMJBUTTONS;j++) {
-      if (i==0&&(buttons&(1<<j))) {
-	//	fprintf (stderr,"Button success %d",j);
-	if (JoystickState[i][j]==UP) {
-	  (*JoystickBindings [i][j])(0,PRESS);
-	  JoystickState[i][j]=DOWN;
+      for (int j=0;j<NUMJBUTTONS;j++) {
+	if (i==0&&(buttons&(1<<j))) {
+	  //	fprintf (stderr,"Button success %d",j);
+	  if (JoystickState[i][j]==UP) {
+	    (*JoystickBindings [i][j])(0,PRESS);
+	    JoystickState[i][j]=DOWN;
+	  }
+	}else {
+	  if (JoystickState[i][j]==DOWN) {
+	    (*JoystickBindings [i][j])(0,RELEASE);
+	  }
+	  JoystickState[i][j]=UP;
 	}
-      }else {
-	if (JoystickState[i][j]==DOWN) {
-	  (*JoystickBindings [i][j])(0,RELEASE);
-	}
-	JoystickState[i][j]=UP;
+	(*JoystickBindings [i][j])(0,JoystickState[i][j]);
       }
-      (*JoystickBindings [i][j])(0,JoystickState[i][j]);
-    }
-  }
+    } // is available
+  } // for nr joysticks
 
   // do the analogue hatswitches
 
@@ -115,8 +118,9 @@ void ProcessJoystick () {
 	int hs_axis=vs_config->hatswitch_axis[h];
 	int hs_joy=vs_config->hatswitch_joystick[h];
 
-	float axevalue=joystick[hs_joy]->joy_axis[hs_axis];
-
+	if(joystick[hs_joy]->isAvailable()){
+	  float axevalue=joystick[hs_joy]->joy_axis[hs_axis];
+	  
 	  for(int v=0;v<MAX_VALUES;v++){
 	    float hs_val=vs_config->hatswitch[h][v];
 	    if(fabs(hs_val)<=1.0){
@@ -125,7 +129,7 @@ void ProcessJoystick () {
 	      if(hs_val-margin<=axevalue && axevalue<=hs_val+margin){
 		// hatswitch pressed
 		//		printf("hatswitch: %d %d %f %f %f\n",hs_joy,hs_axis,axevalue,margin,hs_val);
-
+		
 		if(HatswitchState[h][v]==UP){
 		  handler(0,PRESS);
 		  HatswitchState[h][v]=DOWN;
@@ -140,7 +144,8 @@ void ProcessJoystick () {
 	      }
 	      handler(0,HatswitchState[h][v]);
 	    }
-	  }
+	  } // for all values
+	} // is available
       }
   }
 

@@ -120,9 +120,10 @@ void JoyStick::GetJoyStick(float &x,float &y, float &z, int &buttons)
     int status;
     
     if(joy_available==false){
-        joy_axis[0]= x=0;
-        joy_axis[1]=y=0;
-	joy_axis[2]=z=0;
+      for(int a=0;a<MAX_AXES;a++){
+        joy_axis[a]=0;
+      }
+        x=y=z=0;
         joy_buttons=buttons=0;
         return;
     }

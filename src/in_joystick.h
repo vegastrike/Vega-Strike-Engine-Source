@@ -75,7 +75,9 @@ class JoyStick {
     int nr_of_axes,nr_of_buttons,nr_of_hats;
     int hat_margin;
 
-    float joy_axis[16];
+#define MAX_AXES 8
+
+    float joy_axis[MAX_AXES];
 
     int joy_buttons;
     bool joy_available;

@@ -1,3 +1,9 @@
+2001-10-25 Alexander Rawass <alexannika@users.sourceforge.net>
+	
+	* fixed bug in joystick routines that caused it to fly wildly around
+	   on win32 when having no joystick
+
+
 2001-10-25 Daniel Horn <hellcatv@hotmail.com>
 	* added ability to delete playing sounds
 	* added ability to have explosions without alpha (GL_ONE,GL_ONE)
