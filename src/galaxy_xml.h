@@ -4,8 +4,9 @@
 #include <string>
 #include <map>
 namespace GalaxyXML {
+	class SubHeirarchy;
 class Galaxy {
-  class std::map <std::string,class Galaxy> * subheirarchy;
+  class SubHeirarchy * subheirarchy;
   class std::map <std::string,std::string> data;
 	Galaxy & operator = (const Galaxy & a);
  public:
@@ -24,6 +25,6 @@ class Galaxy {
   void setVariable (std::vector<string> section, string name, string value);
   std::map <std::string, class Galaxy> & getHeirarchy();
 };
-
+class SubHeirarchy : public std::map <std::string,class Galaxy> {};
 }
 #endif

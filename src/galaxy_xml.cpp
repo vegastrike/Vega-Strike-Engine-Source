@@ -140,7 +140,7 @@ Galaxy::~Galaxy() {
 }
 Galaxy & Galaxy::operator = (const Galaxy & g) {
 	if (g.subheirarchy) {
-		map<std::string, class Galaxy> *temp = new map<std::string,class Galaxy> (*g.subheirarchy);
+		SubHeirarchy *temp = new SubHeirarchy (*g.subheirarchy);
 		if (subheirarchy)
 			delete subheirarchy;
 		subheirarchy = temp;
@@ -155,7 +155,7 @@ Galaxy & Galaxy::operator = (const Galaxy & g) {
 }
 Galaxy::Galaxy (const Galaxy & g):data(g.data) {
 	if (g.subheirarchy) {
-		subheirarchy = new map <std::string, class Galaxy> (*g.subheirarchy);
+		subheirarchy = new SubHeirarchy (*g.subheirarchy);
 	}else
 		subheirarchy = NULL;
 }
@@ -189,7 +189,7 @@ Galaxy::Galaxy(const char *configfile){
 }
 std::map<std::string, class Galaxy > & Galaxy::getHeirarchy() {
 	if (!subheirarchy) {
-		subheirarchy = new std::map<std::string, class Galaxy >();
+		subheirarchy = new SubHeirarchy;
 	}
 	return *subheirarchy;
 }
