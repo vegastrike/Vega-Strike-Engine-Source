@@ -79,7 +79,7 @@ inline int randInt (int max) {
 
 int Music::SelectTracks(int &whichlist) {
   if (Base::CurrentBase&&lastlist < playlist.size()&&lastlist>=0) {
-    if (!playlist[whichlist].empty()) {
+    if (!playlist[lastlist].empty()) {
       whichlist=lastlist;
       return rand()%playlist[whichlist].size();
     }
