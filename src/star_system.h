@@ -31,6 +31,7 @@ class StarSystem {
     vector<Planet *> moons;
     string backgroundname;
     Vector cursun;
+    float reflectivity;
   } *xml;
   UnitCollection *drawList;    // Everything to be drawn. Fold missiles in here someday
   UnitCollection *units;    // Objects subject to global physics

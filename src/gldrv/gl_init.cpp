@@ -125,7 +125,12 @@ void init_opengl_extensions()
       fclose (fp);
     }
  }
-
+static void Reshape (int x, int y) {
+  g_game.x_resolution = x;
+  g_game.y_resolution = y;
+  glViewport (0, 0, g_game.x_resolution,g_game.y_resolution);
+  
+}
 extern void GFXInitTextureManager();
 void GFXInit (int argc, char ** argv){
     glutInit( &argc, argv );
@@ -158,6 +163,7 @@ void GFXInit (int argc, char ** argv){
     glutIgnoreKeyRepeat(1);
     glViewport (0, 0, g_game.x_resolution,g_game.y_resolution);
     glClearColor ((float)0.0, (float)0.0, (float)1.0, (float)0);
+    glutReshapeFunc (Reshape);
     initfov();
     glShadeModel (GL_SMOOTH);
     glEnable (GL_CULL_FACE);
@@ -197,7 +203,7 @@ void GFXInit (int argc, char ** argv){
       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 #endif
 
-      glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+      glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_ADD);
       glPixelStorei(GL_UNPACK_SKIP_ROWS, 0);
       glPixelStorei(GL_UNPACK_SKIP_PIXELS, 0);
       glPixelStorei(GL_UNPACK_ALIGNMENT, 1);

@@ -298,7 +298,7 @@ GFXBOOL GFXSetTexFunc(int stage, int texset)
 	    glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 	  }
 	  if (stage==1) {
-	    glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+	    glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_ADD);
 	  }
 	  GFXActiveTexture(stage);
 		

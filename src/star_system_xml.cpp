@@ -58,6 +58,7 @@ namespace StarXML {
       EMMISIVB,
       EMMISIVA,
       BACKGROUND,
+      REFLECTIVITY,
       ALPHA,
       DESTINATION,
       JUMP
@@ -73,6 +74,7 @@ namespace StarXML {
   const EnumMap::Pair attribute_names[] = {
     EnumMap::Pair ("UNKNOWN", UNKNOWN),
     EnumMap::Pair ("background", BACKGROUND), 
+    EnumMap::Pair ("reflectivity", REFLECTIVITY), 
     EnumMap::Pair ("file", XFILE),
     EnumMap::Pair ("alpha", ALPHA),
     EnumMap::Pair ("destination", DESTINATION), 
@@ -136,6 +138,9 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
     pos = Vector (0,0,0);
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
       switch(attribute_map.lookup((*iter).name)) {
+  case REFLECTIVITY:
+    xml->reflectivity=parse_float ((*iter).value);
+    break;
   case BACKGROUND:
 	xml->backgroundname=(*iter).value;
 	break;
@@ -373,6 +378,7 @@ void StarSystem::LoadXML(const char *filename) {
 
   xml = new StarXML;
   xml->backgroundname = string("cube");
+  xml->reflectivity=.5;
   xml->unitlevel=0;
   XML_Parser parser = XML_ParserCreate(NULL);
   XML_SetUserData(parser, this);
@@ -397,7 +403,7 @@ void StarSystem::LoadXML(const char *filename) {
 #else
 	FILE * tempo = fopen ((xml->backgroundname+"_light.bmp").c_str(),"r+b");
 	if (!tempo) {
-		EnvironmentMapGeneratorMain (xml->backgroundname.c_str(),(xml->backgroundname+"_light").c_str());
+		EnvironmentMapGeneratorMain (xml->backgroundname.c_str(),(xml->backgroundname+"_light").c_str(), 0,xml->reflectivity,1);
 	}else {
 		fclose (tempo);
 	}
