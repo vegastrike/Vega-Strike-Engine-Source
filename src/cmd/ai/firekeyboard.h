@@ -16,7 +16,6 @@ class FireKeyboard: public Order {
   float gunrange;
   float rxntime;
   float delay;
-  float agg;
   bool ShouldFire(Unit * targ);
   std::list <CommunicationMessage> resp;
  public:

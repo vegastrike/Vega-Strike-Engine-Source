@@ -80,7 +80,7 @@ Background::Background(const char *file, int numstars, float spread):Enabled (tr
 	down = new Texture(strcat(temp, "_down.bmp"),0,MIPMAP,TEXTURE2D,TEXTURE_2D,GFXTRUE );
 	//down->Clamp();
 	//down->Filter();
-	delete temp;
+	delete [] temp;
 	}
 }
 void Background::EnableBG(bool tf) {

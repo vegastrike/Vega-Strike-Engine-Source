@@ -26,7 +26,7 @@ FireKeyboard::FireKeyboard (unsigned int whichplayer, unsigned int whichjoystick
 const unsigned int NUMCOMMKEYS=10;
 struct FIREKEYBOARDTYPE {
   FIREKEYBOARDTYPE() {
-    commKeys[0]=commKeys[1]=commKeys[2]=commKeys[3]=commKeys[4]=commKeys[5]=commKeys[6]=commKeys[7]=commKeys[8]=commKeys[9]=turretaikey = UP;
+    lockkey=ECMkey=commKeys[0]=commKeys[1]=commKeys[2]=commKeys[3]=commKeys[4]=commKeys[5]=commKeys[6]=commKeys[7]=commKeys[8]=commKeys[9]=turretaikey = UP;
     eject=ejectcargo=firekey=missilekey=jfirekey=rtargetkey=jtargetkey=jmissilekey=weapk=misk=cloakkey=neartargetkey=threattargetkey=picktargetkey=targetkey=nearturrettargetkey =threatturrettargetkey= pickturrettargetkey=turrettargetkey=UP;
     doc=und=req=0;
   }
@@ -557,7 +557,7 @@ FireKeyboard::~FireKeyboard () {
 
 }
 bool FireKeyboard::ShouldFire(Unit * targ) {
-  float dist;
+  float dist=FLT_MAX;
   if (gunspeed==.0001) {
     parent->getAverageGunSpeed (gunspeed,gunrange);
   }
@@ -566,7 +566,7 @@ bool FireKeyboard::ShouldFire(Unit * targ) {
   if (targ==parent->Target()) {
     distance = dist;
   }
-  return (dist<.8*agg&&angle>1/agg);
+  return (dist<.8&&angle>1);
 }
 static bool UnDockNow (Unit* me, Unit * targ) {
   bool ret=false;

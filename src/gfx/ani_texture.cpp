@@ -36,7 +36,7 @@ bool AnimatedTexture::Done() {
 }
 
 AnimatedTexture::AnimatedTexture (const char *file,int stage, enum FILTER imm){
-  Decal=NULL;
+  AniInit();
   FILE * fp = fopen (file,"r");
   bool setdir=false;
   if (!fp) {
@@ -57,36 +57,46 @@ if (setdir) {
     vsresetdir();
 }
 }
-
-AnimatedTexture::AnimatedTexture (FILE * fp, int stage, enum FILTER imm){
+void AnimatedTexture::AniInit() {
   Decal=NULL;
+  physicsactive=0;
+  name=-1;
+  active=0;
+  original = NULL;
+}
+AnimatedTexture::AnimatedTexture (FILE * fp, int stage, enum FILTER imm){
+  AniInit();
   if (fp)
     Load (fp,stage,imm);
 }
 
 Texture *AnimatedTexture::Original(){
-  return Decal[active]->Original();
+  return Decal?Decal[active]->Original():this;
 }
 
 Texture *AnimatedTexture::Clone () {
-  AnimatedTexture * retval = new AnimatedTexture ();
-  *retval = *this;
-  retval->Decal = new Texture * [numframes];
-  for (int i=0;i<numframes;i++) {
-    retval->Decal[i]= Decal[i]->Clone ();
+  if (Decal) {
+    AnimatedTexture * retval = new AnimatedTexture ();
+    *retval = *this;
+    retval->Decal = new Texture * [numframes];
+    for (int i=0;i<numframes;i++) {
+      retval->Decal[i]= Decal[i]->Clone ();
+    }
+    myvec.push_back (retval);
+    return retval;
+  }else {
+    return new AnimatedTexture();
   }
-  myvec.push_back (retval);
-  return retval;
 }
 
 AnimatedTexture::~AnimatedTexture () {
   Destroy();
   data= NULL;
+  active=0;
   palette=NULL;
 }
 AnimatedTexture::AnimatedTexture () {
-  Decal=NULL;
-  original = NULL;
+  AniInit();
 }
 
 void AnimatedTexture::Destroy() {
@@ -100,7 +110,7 @@ void AnimatedTexture::Destroy() {
     for (i=0;i<numframes;i++) {
       delete Decal[i];
     }
-    delete Decal;
+    delete []Decal;
     Decal=NULL;
   }
 }

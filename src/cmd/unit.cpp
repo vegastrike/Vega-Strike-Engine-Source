@@ -182,6 +182,7 @@ void Unit::Init()
   xml=NULL;
   docked=NOT_DOCKED;
   SubUnit =0;
+
   jump.energy = 100;
   jump.delay=5;
   jump.damage=0;
@@ -255,7 +256,7 @@ void Unit::Init()
   MomentOfInertia = .01;
   static Vector myang(XMLSupport::parse_float (vs_config->getVariable ("general","pitch","0")),XMLSupport::parse_float (vs_config->getVariable ("general","yaw","0")),XMLSupport::parse_float (vs_config->getVariable ("general","roll","0")));
   AngularVelocity = myang;
-  Velocity = Vector(0,0,0);
+  cumulative_velocity=Velocity = Vector(0,0,0);
   
   NetTorque =NetLocalTorque = Vector(0,0,0);
   NetForce = Vector(0,0,0);
@@ -276,6 +277,7 @@ void Unit::Init()
   Target(NULL);
   VelocityReference(NULL);
   computer.threat.SetUnit (NULL);
+  computer.threatlevel=0;
   computer.slide_start=computer.slide_end=0;
   computer.set_speed=0;
   computer.max_speed=1;

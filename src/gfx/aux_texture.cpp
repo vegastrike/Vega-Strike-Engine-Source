@@ -185,7 +185,7 @@ void Texture::FileNotFound(const string &texfilename) {
 	  name=-1;
 	  data = NULL;
 	  original->name=-1;
-	  free(original);
+	  delete original;
 	  original=NULL;
 	  palette=NULL;
 	  

@@ -800,7 +800,7 @@ Cockpit::Cockpit (const char * file, Unit * parent,const std::string &pilot_name
   for (i=0;i<NUMGAUGES;i++) {
     gauges[i]=NULL;
   }
-
+  activeStarSystem=NULL;
   InitStatic();
   mesh=NULL;
   ejecting=false;

@@ -281,13 +281,14 @@ bool Unit::Mount::Fire (Unit * owner, bool Missile) {
   }
   return false;
 }
-Unit::Mount::Mount (){static weapon_info wi(weapon_info::BEAM); type=&wi; size=weapon_info::NOWEAP; ammo=-1;status= UNCHOSEN; ref.gun=NULL; sound=-1;}
+Unit::Mount::Mount (){static weapon_info wi(weapon_info::BEAM); type=&wi; size=weapon_info::NOWEAP; ammo=-1;status= UNCHOSEN; processed=Mount::PROCESSED;ref.gun=NULL; sound=-1;}
 Unit::Mount::Mount(const string& filename, short ammo,short volume): size(weapon_info::NOWEAP),ammo(ammo),sound(-1){
   static weapon_info wi(weapon_info::BEAM);
   type = &wi;
   this->volume=volume;
   ref.gun = NULL;
   status=(UNCHOSEN);
+  processed=Mount::PROCESSED;
   weapon_info * temp = getTemplate (filename);  
   if (temp==NULL) {
     status=UNCHOSEN;

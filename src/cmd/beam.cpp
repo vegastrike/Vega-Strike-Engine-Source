@@ -67,6 +67,7 @@ void Beam::Init (const Transformation & trans, const weapon_info &cln , void * o
   lastthick=0;
   curthick = SIMULATION_ATOM*radialspeed;
   GFXColorVertex beam[32];
+  memset(beam,0,sizeof(GFXColorVertex)*32);
   GFXColorVertex * calah=beam;
   calah[0].r=0;calah[0].g=0;calah[0].b=0;calah[0].a=0;
   calah[1].r=calah[1].g=calah[1].b=calah[1].a=0;

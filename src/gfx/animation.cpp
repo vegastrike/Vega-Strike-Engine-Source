@@ -46,6 +46,7 @@ Animation::Animation ()
 }
 Animation::Animation (const char * FileName, bool Rep,  float priority,enum FILTER ismipmapped,  bool camorient, bool appear_near_by_radius, const GFXColor &c) : mycolor(c)
 {	
+  Identity(local_transformation);
   VSCONSTRUCT2('a')
   vschdir ("animations");
   vschdir (FileName);

@@ -53,7 +53,7 @@
 #include "cmd/container.h"
 #include <list>
 #include <vector>
-
+#include <string>
 //#include <cmd/script/mission.h>
 
 /**
@@ -147,7 +147,7 @@ class Order {
   /// returns the orderlist (NULL for orders that haven't got any)
   virtual olist_t* getOrderList(){ return NULL;};
 
-  virtual string getOrderDescription() { return "empty"; };
+  virtual std::string getOrderDescription() { return "empty"; };
 
   ///searches the suborders recursively for the first order that has an orderlist
   Order *findOrderList();
