@@ -184,7 +184,7 @@ bool AggressiveAI::ProcessCurrentFgDirective(Flightgroup * fg) {
       }
     }
     if (obedient) {
-      if (fg->directive==string("a")) {
+      if (fg->directive==string("a")||fg->directive==string("A")) {
 	Unit * targ = fg->leader.GetUnit();
 	targ = targ!=NULL?targ->Target():NULL;
 	if (targ) {
@@ -200,7 +200,7 @@ bool AggressiveAI::ProcessCurrentFgDirective(Flightgroup * fg) {
 	    leader->getAIState()->Communicate(c);
 	  }
 	}
-      }else if (fg->directive==string("f")) {
+      }else if (fg->directive==string("f")||fg->directive==string("F")) {
 	retval=true;
 	if (leader!=NULL) {
 	  if (fg->directive!=last_directive) {
@@ -233,7 +233,7 @@ bool AggressiveAI::ProcessCurrentFgDirective(Flightgroup * fg) {
 	for (unsigned int i=0;i<suborders.size();i++) {
 	  suborders[i]->AttachSelfOrder (leader);
 	}
-      }else if (fg->directive==string("h")) {
+      }else if (fg->directive==string("h")||fg->directive==string("H")) {
 	//	fprintf (stderr,"he wnats to help out");
 	if (fg->directive!=last_directive&&leader) {
 	  //fprintf (stderr,"%s he wnats to help out and hasn't died\n", parent->name.c_str());
@@ -277,6 +277,11 @@ bool AggressiveAI::ProcessCurrentFgDirective(Flightgroup * fg) {
   }
   return retval;
 }
+static bool overridable (const std::string &s) {
+  if (s.empty())
+    return true;
+  return (*s.begin())!=toupper(*s.begin());
+}
 extern void LeadMe (Unit * un, string directive, string speech);
 void AggressiveAI::ReCommandWing(Flightgroup * fg) {
   static float time_to_recommand_wing = XMLSupport::parse_float(vs_config->getVariable ("AI",
@@ -285,15 +290,17 @@ void AggressiveAI::ReCommandWing(Flightgroup * fg) {
 											"100"));
   if (fg!=NULL) {
     Unit* lead;
-    if (NULL!=(lead=fg->leader.GetUnit())) {
-      if (lead->getFgSubnumber()>=parent->getFgSubnumber()) {
-	if (float(rand())/RAND_MAX<SIMULATION_ATOM/time_to_recommand_wing) {
-	  if ((parent->FShieldData()<.2||parent->RShieldData()<.2)){
-	    fg->directive = string("h");
-	    LeadMe (parent,"h","I need help here!");
-	  }else {
-	    fg->directive = string("b");
-	    LeadMe (parent,"h","I'm taking over this wing. Break and attack");
+    if (overridable (fg->directive)) {//computer won't override capital orders
+      if (NULL!=(lead=fg->leader.GetUnit())) {
+	if (lead->getFgSubnumber()>=parent->getFgSubnumber()) {
+	  if (float(rand())/RAND_MAX<SIMULATION_ATOM/time_to_recommand_wing) {
+	    if ((parent->FShieldData()<.2||parent->RShieldData()<.2)){
+	      fg->directive = string("h");
+	      LeadMe (parent,"h","I need help here!");
+	    }else {
+	      fg->directive = string("b");
+	      LeadMe (parent,"h","I'm taking over this wing. Break and attack");
+	    }
 	  }
 	}
       }
