@@ -29,6 +29,19 @@ using namespace std;
       }
     }
     fclose (fp);
+    if (!res->empty()) {
+      if (*res->begin()=='~') {
+	fp = fopen (("save.txt"),"w");
+	if (fp) {
+	  for (unsigned int i=1;i<res->length();i++) {
+	    fputc (*(res->begin()+i),fp);
+	  }
+	  fputc ('\0',fp);
+	  fclose (fp);
+	}
+      }
+    }
+
     }
 #if 0
     fp = fopen (("save.txt"),"w");
@@ -43,7 +56,7 @@ using namespace std;
     return (*res);  
   }
   return (*res)+XMLSupport::tostring(num);
-}
+ }
 
 std::string GetWritePlayerSaveGame(int num) {
   string ret = GetHelperPlayerSaveGame(num);
