@@ -262,7 +262,9 @@ void Cockpit::DrawTargetBox () {
 
 }
 
-
+void Cockpit::Eject() {
+  ejecting=true;
+}
 void Cockpit::DrawBlips (Unit * un) {
   Unit::Computer::RADARLIM * radarl = &un->GetComputerData().radar;
   UnitCollection * drawlist = &_Universe->activeStarSystem()->getUnitList();
@@ -576,6 +578,7 @@ void Cockpit::RestoreGodliness() {
     godliness=maxgodliness;
 }
 Cockpit::Cockpit (const char * file, Unit * parent,const std::string &pilot_name): parent (parent),textcol (1,1,1,1),text(NULL),cockpit_offset(0), viewport_offset(0), view(CP_FRONT), zoomfactor (1.5),savegame (new SaveGame(pilot_name)) {
+  ejecting=false;
   currentcamera = 0;	
   Radar=Pit[0]=Pit[1]=Pit[2]=Pit[3]=NULL;
   RestoreGodliness();
@@ -1000,7 +1003,13 @@ void Cockpit::Update () {
     if (!found)
       index=0;
   }
-
+  if (ejecting) {
+    ejecting=false;
+    Unit * un = GetParent();
+    if (un) {
+      un->EjectCargo((unsigned int)-1);
+    }
+  }
 
 }
 Cockpit::~Cockpit () {

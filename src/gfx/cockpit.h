@@ -98,6 +98,7 @@ private:
   ///Draws gauges
   void DrawGauges(Unit * un);
   float cockpit_time;
+  bool ejecting;
  public:
   float godliness;
   void Autopilot (Unit * target);
@@ -134,6 +135,7 @@ private:
   void ScrollAllVDU (int howmuch);
   int getScrollOffset (unsigned int whichtype);
   void SelectProperCamera ();
+  void Eject ();
   static void Respawn (int,KBSTATE);
   static void SwitchControl (int,KBSTATE);
   static void TurretControl (int, KBSTATE);

@@ -600,7 +600,9 @@ void FireKeyboard::Execute () {
   }
   if (f().eject==PRESS) {
     f().eject=DOWN;
-    parent->EjectCargo((unsigned int )-1);
-    return;
+    Cockpit * cp;
+    if ((cp=_Universe->isPlayerStarship (parent))) {
+      cp->Eject();
+    }
   }
 }
