@@ -24,6 +24,8 @@
 #include "in_kb.h"
 
 extern int mousex, mousey;
+int getMouseButtonStatus ();//returns button status that are bitwise anded (i.e. 1,3 down  the number looks like 0x1|(0x1<<2)
+void warpMousePointer (int x,int y);
 void InitMouse();
 void RestoreMouse();
 void ProcessMouse();

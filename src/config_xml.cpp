@@ -619,13 +619,24 @@ void VegaConfig::checkBind(configNode *node){
     cout << "No such command: " << cmdstr << endl;
     return;
   }
-  
+  string player_str=node->attr_value("player");
   string joy_str=node->attr_value("joystick");
+  string mouse_str=node->attr_value("mouse");
   string keystr=node->attr_value("key");
   string buttonstr=node->attr_value("button");
   string hat_str=node->attr_value("hatswitch");
   string dighswitch=node->attr_value("digital-hatswitch");
   string direction=node->attr_value("direction");
+  if (!player_str.empty()) {
+    if (!joy_str.empty()) {
+      int jn = atoi(joy_str.c_str());
+      if (jn<MAX_JOYSTICKS) {
+	joystick[jn]->player=atoi(player_str.c_str());
+      }
+    }else if (!mouse_str.empty()) {
+      joystick[MOUSE_JOYSTICK]->player=atoi(player_str.c_str());
+    }
+  }
 
   if(!keystr.empty()){
     // normal keyboard key
@@ -649,7 +660,7 @@ void VegaConfig::checkBind(configNode *node){
     // maps a joystick button or analogue hatswitch button
       int button_nr=atoi(buttonstr.c_str());
 
-      if(joy_str.empty()){
+      if(joy_str.empty()&&mouse_str.empty()){
 	// it has to be the analogue hatswitch
 	if(hat_str.empty()){
 	  cout << "you got to give a analogue hatswitch number" << endl ;
@@ -664,8 +675,11 @@ void VegaConfig::checkBind(configNode *node){
       }
       else{
 	// joystick button
-	int joystick_nr=atoi(joy_str.c_str());
-
+	int joystick_nr;
+	if (mouse_str.empty())
+	  joystick_nr=atoi(joy_str.c_str());
+	else
+	  joystick_nr=(MOUSE_JOYSTICK);
 	if(joystick[joystick_nr]->isAvailable()){
 	  // now map the command to a callback function and bind it
 
@@ -681,17 +695,22 @@ void VegaConfig::checkBind(configNode *node){
 	}
       }
     }
-    else if(!(dighswitch.empty() || direction.empty() || joy_str.empty())){
+    else if(!(dighswitch.empty() || direction.empty() || (mouse_str.empty()&&joy_str.empty()))){
       // digital hatswitch or ...
 
-      if(dighswitch.empty() || direction.empty() || joy_str.empty()){
+      if(dighswitch.empty() || direction.empty() || (mouse_str.empty()&&joy_str.empty())){
 	cout << "you have to specify joystick,digital-hatswitch,direction" << endl;
 	return;
       }
 
       int hsw_nr=atoi(dighswitch.c_str());
-      int joy_nr=atoi(joy_str.c_str());
 
+      int joy_nr;
+      if (mouse_str.empty()) {
+	joy_nr=atoi(joy_str.c_str());
+      } else {
+	joy_nr=MOUSE_JOYSTICK;
+      }
       if(!(joystick[joy_nr]->isAvailable() && hsw_nr<joystick[joy_nr]->nr_of_hats)){
 	cout << "refusing to bind digital hatswitch: no such hatswitch" << endl;
 	return;

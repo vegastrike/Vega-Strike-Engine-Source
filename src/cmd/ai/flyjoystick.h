@@ -1,10 +1,10 @@
 #include "flykeyboard.h"
 
 class FlyByJoystick: public FlyByKeyboard {
-  int which_joystick;
+  vector <int> whichjoystick;//which joysticks are bound to this
   bool keyboard;
  public:
-  FlyByJoystick(int which, unsigned int whichplayer);
+  FlyByJoystick(unsigned int whichplayer);
   static void JAccelKey (KBSTATE,float,float,int);
   static void JDecelKey (KBSTATE,float,float,int);
   static void JShelt (KBSTATE,float,float,int);

@@ -9,7 +9,11 @@
 static bool ab;
 static bool shelt;
 
-FlyByJoystick::FlyByJoystick(int whichjoystick, unsigned int configfile): FlyByKeyboard (configfile), which_joystick(whichjoystick) {
+FlyByJoystick::FlyByJoystick(unsigned int configfile): FlyByKeyboard (configfile){
+  for (int i=0;i<MAX_JOYSTICKS;i++) {
+    if (joystick[i]->player==configfile)
+      whichjoystick.push_back(i);
+  }
   //remember keybindings from config file?  
 
   // this below is outdated
@@ -59,25 +63,15 @@ void FlyByJoystick::JDecelKey (KBSTATE k, float, float, int) {
 
 void FlyByJoystick::Execute() {
   desired_ang_velocity=Vector(0,0,0); 
-
+  for (unsigned int i=0;i<this->whichjoystick.size();i++) {
+  int which_joystick = this->whichjoystick[i];
   if (which_joystick<MAX_JOYSTICKS) {
-
-  if (1 ){ //joystick[which_joystick]->isAvailable()) {
-    JoyStick *joy=joystick[which_joystick];
-
-
-    //    joy->GetJoyStick(x,y,z,buttons);//don't want state updates in ai function
-#if 0
-    Up(-joy->joy_y);   // pretty easy
-    Right(-joy->joy_x);
-    Accel (-joy->joy_z);
-#endif
 
     int joy_nr;
 
     joy_nr=vs_config->axis_joy[AXIS_Y];
 
-    if (joy_nr!=-1&&_Universe->numPlayers()>1) {
+    if (joy_nr!=-1) {
       joy_nr = which_joystick;
     }
     if( joy_nr!= -1 && joystick[joy_nr]->isAvailable()){
@@ -90,7 +84,7 @@ void FlyByJoystick::Execute() {
     }
 
     joy_nr=vs_config->axis_joy[AXIS_X];
-    if (joy_nr!=-1&&_Universe->numPlayers()>1) {
+    if (joy_nr!=-1) {
       joy_nr = which_joystick;
     }
 
@@ -104,7 +98,7 @@ void FlyByJoystick::Execute() {
     }
 
     joy_nr=vs_config->axis_joy[AXIS_Z];
-    if (joy_nr!=-1&&_Universe->numPlayers()>1) {
+    if (joy_nr!=-1) {
       joy_nr = which_joystick;
     }
 
@@ -118,7 +112,7 @@ void FlyByJoystick::Execute() {
     }
 
     joy_nr=vs_config->axis_joy[AXIS_THROTTLE];
-    if (joy_nr!=-1&&_Universe->numPlayers()>1) {
+    if (joy_nr!=-1) {
       joy_nr = which_joystick;
     }
 
@@ -130,6 +124,7 @@ void FlyByJoystick::Execute() {
 
       Accel( axis_value );
     }
+
   }
   }
   FlyByKeyboard::Execute(false);

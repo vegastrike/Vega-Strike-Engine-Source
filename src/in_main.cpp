@@ -62,7 +62,10 @@ void RemoveListener(InputListener *il) {
 void ProcessInput(int whichplayer) {
   ProcessKB(whichplayer);
   ProcessMouse();
-  ProcessJoystick(whichplayer);
+  for (unsigned int i=0;i<MAX_JOYSTICKS;i++) {
+    if (joystick[i]->player==whichplayer)
+      ProcessJoystick(i);
+  }
 }
 
 void InitInput()

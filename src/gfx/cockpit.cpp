@@ -662,7 +662,7 @@ void SwitchUnits (Unit * ol, Unit * nw) {
   if (nw) {
     nw->PrimeOrders();
     nw->EnqueueAI (new FireKeyboard (_Universe->CurrentCockpit(),_Universe->CurrentCockpit()));
-    nw->EnqueueAI (new FlyByJoystick (_Universe->CurrentCockpit(),_Universe->CurrentCockpit()));
+    nw->EnqueueAI (new FlyByJoystick (_Universe->CurrentCockpit()));
     static bool LoadNewCockpit = XMLSupport::parse_bool (vs_config->getVariable("graphics","UnitSwitchCockpitChange","false"));
     if (nw->getCockpit().length()>0&&LoadNewCockpit) {
       _Universe->AccessCockpit()->Init (nw->getCockpit().c_str());

@@ -107,10 +107,10 @@ void FlyByKeyboard::Execute (bool resetangvelocity) {
     }
 
     //    fprintf(stderr,"AB: press %d rel %d\n",SSCK.ABpress,SSCK.ABrelease);
-    if (SSCK.ABpress>=0)
-      Afterburn(0);
+    if (SSCK.ABpress>=1)
+      Afterburn(1);
     else
-      Afterburn (1);
+      Afterburn (0);
 
     if (SSCK.accelpress>0)
       Accel(1);
@@ -165,7 +165,7 @@ void FlyByKeyboard::Execute (bool resetangvelocity) {
     }
     if (SSCK.ABpress||SSCK.ABrelease) {
       //fprintf(stderr,"AB: press %d rel %d\n",SSCK.ABpress,SSCK.ABrelease);
-      Afterburn ((SSCK.ABpress>=SSCK.ABrelease)?1:0);
+      Afterburn ((SSCK.ABpress>=1)?1:0);
     }
   }
   if (SSCK.stoppress) {

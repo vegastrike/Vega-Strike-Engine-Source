@@ -577,7 +577,7 @@ void createObjects(std::vector <std::string> &fighter0name, std::vector <StarSys
   AUDListenerSize (fighters[0]->rSize()*4);
   for (unsigned int cnum=0;cnum<fighter0indices.size();cnum++) {
     if(benchmark==-1){
-      fighters[fighter0indices[cnum]]->EnqueueAI(new FlyByJoystick (cnum,cnum));
+      fighters[fighter0indices[cnum]]->EnqueueAI(new FlyByJoystick (cnum));
       fighters[fighter0indices[cnum]]->EnqueueAI(new FireKeyboard (cnum,cnum));
     }
     fighters[fighter0indices[cnum]]->SetTurretAI ();

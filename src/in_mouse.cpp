@@ -26,7 +26,7 @@
 #include "in_mouse.h"
 #include <deque>
 using std::deque;
-#define NUM_BUTTONS 3
+#define NUM_BUTTONS 15
 
 /** Gets the button number of the function used to draw the mouse*/
 int getMouseDrawFunc() {
@@ -34,8 +34,16 @@ int getMouseDrawFunc() {
 }
 KBSTATE MouseState [NUM_BUTTONS+1]= {RELEASE};
 static MouseHandler mouseBindings [NUM_BUTTONS+1];
+
 int mousex=0;
 int mousey=0;
+int getMouseButtonStatus() {
+  int ret=0;
+  for (int i=0;i<NUM_BUTTONS;i++) {
+    ret |= (MouseState[i]&(PRESS|DOWN))?(1<<i):0;
+  }
+  return ret;
+}
 
 struct MouseEvent {
   enum EventType { CLICK, DRAG, MOTION } type;
@@ -114,6 +122,9 @@ static void DefaultMouseHandler (KBSTATE, int x, int y, int delx, int dely,int m
 void UnbindMouse (int key) {
   mouseBindings[key]=DefaultMouseHandler;
 
+}
+void warpMousePointer(int x, int y) {
+  glutWarpPointer(x-mousex,y-mousey);
 }
 void BindKey (int key, MouseHandler handler) {
   mouseBindings[key]=handler;

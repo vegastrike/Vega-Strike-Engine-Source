@@ -31,16 +31,12 @@
 #include "in_handler.h"
 #include "in_joystick.h"
 #include "config_xml.h"
-
+#include "in_mouse.h"
 JoyStick *joystick[MAX_JOYSTICKS]; // until I know where I place it
 
 void InitJoystick(){
   int i;
 
-
-#ifdef HAVE_SDL
-  //  SDL_EventState (SDL_KEYDOWN,SDL_ENABLE);
-  //  SDL_EventState (SDL_KEYUP,SDL_ENABLE);
   for (i=0;i<NUMJBUTTONS;i++) {
     for (int j=0;j<MAX_JOYSTICKS;j++) {
       UnbindJoyKey (j,i);
@@ -59,8 +55,6 @@ void InitJoystick(){
     }
   }
 
-
-#endif
 
 #ifdef HAVE_SDL
   int num_joysticks=SDL_NumJoysticks() ;
@@ -81,23 +75,21 @@ void InitJoystick(){
 }
 
 void DeInitJoystick() {
-#ifdef HAVE_SDL
-  int num_joysticks = SDL_NumJoysticks();
   for (int i=0;i<MAX_JOYSTICKS;i++) {
     delete joystick[i];
   }
-#endif
 }
-
-JoyStick::JoyStick(int which) {
+JoyStick::JoyStick(int which): mouse(which==MOUSE_JOYSTICK) {
+  player=which;//by default bind players to whichever joystick it is
   debug_digital_hatswitch=XMLSupport::parse_bool(vs_config->getVariable("joystick","debug_digital_hatswitch","false"));
-
 
   deadzone=atoi(vs_config->getVariable("joystick","deadband","0.05").c_str());
 
   joy_available = 0;
-
-    joy_x=joy_y=joy_z=0;
+  joy_x=joy_y=joy_z=0;
+  if (which==MOUSE_JOYSTICK) {
+    InitMouse(which);
+  }
 #if !defined(HAVE_SDL)
   return;
 #else
@@ -125,11 +117,28 @@ JoyStick::JoyStick(int which) {
 
 #endif // we have SDL
 }
-
-bool JoyStick::isAvailable(){
-return joy_available;
+void JoyStick::InitMouse (int which) {
+  player=0;//default to first player
+  joy_available=true;
+  nr_of_axes=2;//x and y for mouse
+  nr_of_buttons=15;
+  nr_of_hats=0;
 }
 
+bool JoyStick::isAvailable(){
+  return joy_available;
+}
+void JoyStick::GetMouse (float &x, float &y, float &z, int &buttons) {
+  static bool warp_pointer = XMLSupport::parse_bool(vs_config->getVariable ("joystick","warp_mouse","false"));
+  static float mouse_sensitivity = XMLSupport::parse_float(vs_config->getVariable ("joystick","mouse_sensitivity","5"));
+  joy_axis[0]=x = (float(mousex-g_game.x_resolution/2))/(g_game.x_resolution/mouse_sensitivity);
+  joy_axis[1]=y = (float(mousey-g_game.y_resolution/2))/(g_game.y_resolution/mouse_sensitivity);
+  joy_axis[2]=z=0;
+  buttons = getMouseButtonStatus();
+  if (warp_pointer) {
+    warpMousePointer(g_game.x_resolution/2,g_game.y_resolution/2);
+  }
+}
 void JoyStick::GetJoyStick(float &x,float &y, float &z, int &buttons)
 {
 
@@ -142,6 +151,9 @@ void JoyStick::GetJoyStick(float &x,float &y, float &z, int &buttons)
         x=y=z=0;
         joy_buttons=buttons=0;
         return;
+    } else if (mouse) {
+      GetMouse (x,y,z,buttons);
+      return;
     }
 #if defined(HAVE_SDL)
 
@@ -152,15 +164,6 @@ void JoyStick::GetJoyStick(float &x,float &y, float &z, int &buttons)
     for(a=0;a<numaxes;a++){
       axi[a] = SDL_JoystickGetAxis(joy,a);
     }
-#if 0
-    Sint16 xi =  SDL_JoystickGetAxis(joy,0);
-    Sint16 yi =  SDL_JoystickGetAxis(joy,1);
-    Sint16 zi=0;
-    Sint16 q
-    if (numaxes>2) {
-      zi = SDL_JoystickGetAxis(joy,2);
-    }
-#endif
 
     buttons=0;
     nr_of_buttons=SDL_JoystickNumButtons(joy);
@@ -185,26 +188,6 @@ void JoyStick::GetJoyStick(float &x,float &y, float &z, int &buttons)
 	joy_axis[a]=0.0;
       }
     }
-#if 0
-    joy_axis[0]=x=((float)xi/32768.0);
-    joy_axis[1]=y=((float)yi/32768.0);
-    joy_axis[2]=z=((float)zi/32768.0);
-#endif
-
-
-    //    printf("x=%f   y=%f buttons=%d\n",x,y,buttons);
-#if 0
-    if(fabs(x)<=deadzone){
-        joy_axis[0] =x=0;
-    }
-    if(fabs(y)<=deadzone){
-        joy_axis[1] = y=0;
-    }
-    if(fabs(z)<=deadzone){
-        joy_axis[2] = z=0;
-    }
-#endif
-
     x=joy_axis[0];
     y=joy_axis[1];
     z=joy_axis[2];

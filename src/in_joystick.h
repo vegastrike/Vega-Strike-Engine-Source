@@ -48,7 +48,8 @@ extern void DeInitJoystick();
 extern void BindButton(int button,KBHandler handler);
 extern void UnbindButton(int button) ;
 
-const int MAX_JOYSTICKS=10;
+const int MAX_JOYSTICKS=11;
+const int MOUSE_JOYSTICK = MAX_JOYSTICKS-1;
 const int MAX_BUTTONS=32;
 const int MAX_DIGITAL_HATSWITCHES=4;
 const int MAX_DIGITAL_VALUES=9;
@@ -56,14 +57,12 @@ const int MAX_DIGITAL_VALUES=9;
 enum { VS_HAT_CENTERED=0,VS_HAT_LEFT,VS_HAT_RIGHT,VS_HAT_DOWN,VS_HAT_UP,VS_HAT_RIGHTUP,VS_HAT_RIGHTDOWN,VS_HAT_LEFTUP,VS_HAT_LEFTDOWN };
 
 
-/*
-static KBHandler joyBindings[MAX_BUTTONS];
-extern KBSTATE buttonState[MAX_BUTTONS];
-*/
-
 extern JoyStick *joystick[MAX_JOYSTICKS];
 
 class JoyStick {
+  bool mouse;
+  void InitMouse (int i);
+  void GetMouse (float &x,float &y, float &z, int &buttons);
     public:
     // initializes the joystick
     JoyStick(int);
@@ -80,7 +79,7 @@ class JoyStick {
 #endif
     int nr_of_axes,nr_of_buttons,nr_of_hats;
     int hat_margin;
-
+    int player;
 #define MAX_AXES 8
 
     float joy_axis[MAX_AXES];

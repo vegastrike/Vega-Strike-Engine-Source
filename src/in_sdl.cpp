@@ -4,8 +4,6 @@
 
 #include <assert.h>	/// needed for assert() calls.
 
-//static KBHandler keyBindings [SDLK_LAST];
-//KBSTATE keyState [SDLK_LAST];
 KBHandler JoystickBindings [MAX_JOYSTICKS][NUMJBUTTONS];
 KBSTATE JoystickState [MAX_JOYSTICKS][NUMJBUTTONS];
 
@@ -58,51 +56,11 @@ void UnbindDigitalHatswitchKey (int joy_nr,int hatswitch, int dir_index) {
 
 
 void ProcessJoystick (int whichplayer) {
-#ifdef HAVE_SDL
-
-#ifdef SDLEVENTSNOW
-  SDL_Event event;
-  while(SDL_PollEvent(&event)){
-    switch(event.type){
-    case SDL_JOYBUTTONDOWN:
-      if (event.jbutton.which<NUMJBUTTONS) {
-	if (joystick[event.jbutton.which]->isAvailable()) {
-	  joystick[event.jbutton.which]->GetJoyStick (x,y,z,buttons);
-	}
-	JoystickBindings[event.jbutton.which][event.jbutton.button](PRESS,x,y,buttons);
-	JoystickState[event.jbutton.which][event.jbutton.button]=DOWN;
-      }
-      break;
-    case SDL_JOYBUTTONUP:
-      if (event.jbutton.which<NUMJBUTTONS) {
-	if (joystick[event.jbutton.which]->isAvailable()) {
-	  joystick[event.jbutton.which]->GetJoyStick (x,y,z,buttons);
-	}
-	JoystickBindings[event.jbutton.which][event.jbutton.button](RELEASE,x,y,buttons);
-	JoystickState[event.jbutton.which][event.jbutton.button]=UP;
-      }
-      break;
-    case SDL_KEYDOWN:
-      /*soon...soooooonn
-      keyState[event.key.keysym.sym]=PRESS;
-      keyBindings[event.key.keysym.sym](event.key.keysym.sym,PRESS);
-      keyState[event.key.keysym.sym]=DOWN;
-      */
-      break;
-    case SDL_KEYUP:
-      /*
-      keyState[event.key.keysym.sym]=RELEASE;
-      keyBindings[event.key.keysym.sym](event.key.keysym.sym,RELEASE);
-      keyState[event.key.keysym.sym]=UP;
-      */
-      break;
-    }
-  }
-#endif
-
   float x,y,z;
   int buttons;
+#ifdef HAVE_SDL
   SDL_JoystickUpdate();//FIXME isn't this supposed to be called already by SDL?
+#endif
   for (int i=whichplayer;i<whichplayer+1&&i<MAX_JOYSTICKS;i++) {
     buttons=0;
     if(joystick[i]->isAvailable()){
@@ -117,6 +75,7 @@ void ProcessJoystick (int whichplayer) {
 
 	for(int dir_index=0;dir_index<MAX_DIGITAL_VALUES;dir_index++){
 	  bool press=false;
+#ifdef HAVE_SDL
 	  if(dir_index==VS_HAT_CENTERED && (hsw & SDL_HAT_CENTERED)){
 	    cout << "center" << endl;
 	    press=true;
@@ -145,7 +104,7 @@ void ProcessJoystick (int whichplayer) {
 	  if(dir_index==VS_HAT_LEFTDOWN && (hsw & SDL_HAT_LEFTDOWN)){
 	    press=true;
 	  }
-
+#endif
 
 	  if(press==true){
 	    if(DigHatswitchState[i][h][dir_index]==UP){
@@ -165,8 +124,7 @@ void ProcessJoystick (int whichplayer) {
       } // digital_hatswitch
 
       for (int j=0;j<NUMJBUTTONS;j++) {
-	if (/* i==0&& */ (buttons&(1<<j))) {
-	  //	fprintf (stderr,"Button success %d",j);
+	if ((buttons&(1<<j))) {
 	  if (JoystickState[i][j]==UP) {
 	    (*JoystickBindings [i][j])(0,PRESS);
 	    JoystickState[i][j]=DOWN;
@@ -182,9 +140,6 @@ void ProcessJoystick (int whichplayer) {
     } // is available
   } // for nr joysticks
 
-  //  for(int h=0;h<
-
-  // do the analogue hatswitches
 
   for(int h=0;h<MAX_HATSWITCHES;h++){
     float margin=fabs(vs_config->hatswitch_margin[h]);
@@ -203,7 +158,6 @@ void ProcessJoystick (int whichplayer) {
 	      KBHandler handler=(*HatswitchBindings[h][v]);
 	      if(hs_val-margin<=axevalue && axevalue<=hs_val+margin){
 		// hatswitch pressed
-		//		printf("hatswitch: %d %d %f %f %f\n",hs_joy,hs_axis,axevalue,margin,hs_val);
 		
 		if(HatswitchState[h][v]==UP){
 		  handler(0,PRESS);
@@ -224,6 +178,6 @@ void ProcessJoystick (int whichplayer) {
       }
   }
 
-#endif
+
 }
 
