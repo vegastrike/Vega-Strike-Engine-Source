@@ -68,7 +68,12 @@ void ProcessJoystick (int whichplayer) {
 
       if(joystick[i]->debug_digital_hatswitch){
       for(int h=0;h<joystick[i]->nr_of_hats;h++){
-	Uint8 hsw=joystick[i]->digital_hat[h];
+#ifdef HAVE_SDL
+	Uint8 
+#else
+	  unsigned char
+#endif
+	  hsw=joystick[i]->digital_hat[h];
 	char buf[100];
 	sprintf(buf,"hsw: %d",hsw);
 	cout << buf << endl;
