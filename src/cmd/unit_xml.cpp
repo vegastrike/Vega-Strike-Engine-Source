@@ -1339,7 +1339,7 @@ void Unit::WriteUnit (const char * modifications) {
     image->unitwriter->Write(modifications);
   for (un_iter ui= getSubUnits();(*ui)!=NULL;++ui) {
     (*ui)->WriteUnit(modifications);
-  }
+  } 
 }
 
 void Unit::LoadXML(const char *filename, const char * modifications)

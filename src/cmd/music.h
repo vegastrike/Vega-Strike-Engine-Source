@@ -6,6 +6,8 @@
 
 class Music {
   bool random;
+  float curtime;
+  float lastsonglength;
   float maxhull;
   std::vector <std::string> playlist [3];
   UnitContainer p;

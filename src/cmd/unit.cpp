@@ -830,8 +830,8 @@ void Unit::SetTurretAI () {
   UnitCollection::UnitIterator iter = getSubUnits();
   Unit * un;
   while (NULL!=(un=iter.current())) {
-    un->EnqueueAI (new Orders::FireAt(.2,15));
-    un->EnqueueAI (new Orders::FaceTarget (false,3));
+    un->SetAI (new Orders::FireAt(.2,15));
+    un->SetAI (new Orders::FaceTarget (false,3));
     un->SetTurretAI ();
     iter.advance();
   }

@@ -721,6 +721,7 @@ void Cockpit::Draw() {
 	
 	if ((i++)>=index&&(un!=GetParent())) {
 	  found=true;
+	  index++;
 	  Unit * k=GetParent(); 
 	  SwitchUnits (k,un);
 	  this->SetParent(un,this->unitfilename.c_str(),this->unitmodname.c_str(),unitlocation);

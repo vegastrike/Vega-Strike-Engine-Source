@@ -8,10 +8,13 @@
 #include "star_system.h"
 #include "vs_globals.h"
 #include "config_xml.h"
-
+#include "lin_time.h"
 #include "collection.h"
 #include "unit.h"
 #include "vs_path.h"
+#ifdef _WIN32
+#include <process.h>
+#endif
 #include "music.h"
 Music::Music (Unit *parent):random(false), p(parent),song(-1) {
   if (parent) {
@@ -19,6 +22,8 @@ Music::Music (Unit *parent):random(false), p(parent),song(-1) {
   }else {
     maxhull=1;
   }
+  lastsonglength=0;
+  curtime=0;
   changehome();
   LoadMusic(0,vs_config->getVariable ("audio","battleplaylist","battle.m3u").c_str());
   LoadMusic(1,vs_config->getVariable ("audio","peaceplaylist","peace.m3u").c_str());
@@ -105,23 +110,90 @@ int Music::SelectTracks(int &whichlist) {
   return (int)goodness;
 }
 
-
+float HowLong (std::string &song) {
+	unsigned long sze=0;
+	FILE * fp = fopen (song.c_str(),"rb");
+	if (fp) {
+		fseek (fp,0,SEEK_END);
+		sze = ftell (fp);
+		fclose (fp);
+	}
+	return ((float)sze)/((128.*1024/8.));
+}
 void Music::Listen() {
+	static bool use_external = XMLSupport::parse_bool(vs_config->getVariable("audio","use_external_player","true"));
   if (g_game.music_enabled ) {
-	  if ((!AUDIsPlaying (song))) {
-    AUDDeleteSound (song,true);//delete buffer too;
-    int whichlist;
-    int songnum = SelectTracks(whichlist);
-    if (!playlist[whichlist].empty ()) {
-      song = AUDCreateMusic (playlist[whichlist][songnum],false);
-      AUDStartPlaying (song);
-	  AUDAdjustSound (song,_Universe->AccessCamera()->GetPosition(),_Universe->AccessCamera()->GetVelocity());
+	  if (use_external) {
+		static int firstseconds=0;
+		static float avg_time=XMLSupport::parse_float (vs_config->getVariable("audio","avg_song_time","60"));
+		//lastsonglength=0;
+		curtime+=SIMULATION_ATOM/getTimeCompression();
+		if (curtime>lastsonglength) {
+			curtime=0;
+			int whichlist;
+			int song = SelectTracks (whichlist);
+			if (!playlist[whichlist].empty()) {
+				lastsonglength= HowLong (playlist[whichlist][song]);
+				if (lastsonglength>0.1) {
+					static bool replace=true;
+#ifdef _WIN32
+					static std::string plyr=vs_config->getVariable("audio","external_player","C:\\Program Files\\Winamp\\Winamp.exe");
+					static std::string play=vs_config->getVariable("audio","external_play_option","/PLAY");
+					static std::string enq=vs_config->getVariable("audio","external_enqueue_option","/ADD");
+					if (replace) {
+						if (play.empty()) {
+							spawnl(P_NOWAIT,plyr.c_str(),(string ("\"")+playlist[whichlist][song]+string ("\"")).c_str(),NULL);
+						} else {
+							spawnl(P_NOWAIT,plyr.c_str(),play.c_str(),(string ("\"")+playlist[whichlist][song]+string ("\"")).c_str(),NULL);
+						}
+					}else {
+						if (enq.empty()) {
+							spawnl(P_NOWAIT,plyr.c_str(),(string ("\"")+playlist[whichlist][song]+string ("\"")).c_str(),NULL);
+						} else {
+							spawnl(P_NOWAIT,plyr.c_str(),enq.c_str(),(string ("\"")+playlist[whichlist][song]+string ("\"")).c_str(),NULL);
+						}
+					}
+#else	
+					static std::string plyr=vs_config->getVariable("audio","external_player","/usr/bin/xmms");
+					static std::string play=vs_config->getVariable("audio","external_play_option","");
+					static std::string enq=vs_config->getVariable("audio","external_enqueue_option","-e");
+					if (replace) {
+						if (play.empty()) {
+							execlp(plyr.c_str(),(string ("\"")+playlist[whichlist][song]+string ("\"")).c_str(),NULL);
+						} else {
+							execlp(plyr.c_str(),play.c_str(),(string ("\"")+playlist[whichlist][song]+string ("\"")).c_str(),NULL);
+						}
+					}else {
+						if (enq.empty()) {
+							execlp(plyr.c_str(),(string ("\"")+playlist[whichlist][song]+string ("\"")).c_str(),NULL);
+						} else {
+							execlp(plyr.c_str(),enq.c_str(),(string ("\"")+playlist[whichlist][song]+string ("\"")).c_str(),NULL);
+						}
+					}
+#endif
+					replace=false;
+				} else {
+					lastsonglength=0;
+				}
+//				execlp(plyr.c_str(),plyr.c_str(),"-e",(playlist[whichlist][song]).c_str(),NULL);
+			} 
+		}
+	  }else {
+	    if ((!AUDIsPlaying (song))) {
+	     AUDDeleteSound (song,true);//delete buffer too;
+	     int whichlist;
+	     int songnum = SelectTracks(whichlist);
+	     if (!playlist[whichlist].empty ()) {
+	       song = AUDCreateMusic (playlist[whichlist][songnum],false);
+	       AUDStartPlaying (song); 
+	   	   AUDAdjustSound (song,_Universe->AccessCamera()->GetPosition(),_Universe->AccessCamera()->GetVelocity());
 
-    }    
-	  } else {
-	    AUDAdjustSound (song,_Universe->AccessCamera()->GetPosition(),_Universe->AccessCamera()->GetVelocity());
+		 }    
+		} else {
+		 AUDAdjustSound (song,_Universe->AccessCamera()->GetPosition(),_Universe->AccessCamera()->GetVelocity());
+		}
 	  }
-  }
+	}
 }
 
 void Music::Skip() {
