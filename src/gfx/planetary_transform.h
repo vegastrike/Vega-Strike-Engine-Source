@@ -1,8 +1,8 @@
 #include "nonlinear_transform.h"
 #include "matrix.h"
 #include "quaternion.h"
-#include "config_xml.h"
-#include "vs_globals.h"
+//#include "config_xml.h"
+//#include "vs_globals.h"
 
 inline Vector SwizzleIt (const Vector &v) {return Vector(-v.i,-v.j,v.k);}//return Vector (v.i,v.k,v.j);}
 
@@ -13,9 +13,9 @@ class PlanetaryTransform: public SphericalTransform{
  public:
   Vector ReverseReverseX (const Vector & v) const {return Vector (v.i,scaleheight*v.j,v.k);}
   Vector ReverseX (const Vector & v) const {return Vector (v.i,v.j/scaleheight,v.k);}
-  PlanetaryTransform (float radius, float xsize, float ysize, int ratio): SphericalTransform (xsize*ratio,radius,ysize*ratio) {
-    static float sh =XMLSupport::parse_float(vs_config->getVariable ("physics","atmosphereheight","10"));
-    scaleheight=sh;
+  PlanetaryTransform (float radius, float xsize, float ysize, int ratio, float scaleatmos): SphericalTransform (xsize*ratio,radius,ysize*ratio) {
+    //    static float sh =XMLSupport::parse_float(vs_config->getVariable ("physics","atmosphereheight","10"));
+    scaleheight=scaleatmos;
     xform=NULL;
   }
   void SetTransformation (float * t) {xform = t;}

@@ -79,7 +79,7 @@ class Planet : public Unit {
 //  void InitPlanet(FILE *fp);
   virtual void Kill(bool erasefromsave=false);
 
-  PlanetaryTransform*  setTerrain (ContinuousTerrain *, float ratiox, int numwraps); 
+  PlanetaryTransform*  setTerrain (ContinuousTerrain *, float ratiox, int numwraps, float scaleatmos); 
   ContinuousTerrain * getTerrain(PlanetaryTransform *&t) {t = terraintrans;return terrain;}
   void setAtmosphere (Atmosphere *);
   Atmosphere * getAtmosphere () {return atmosphere;}

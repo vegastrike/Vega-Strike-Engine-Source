@@ -361,12 +361,12 @@ Planet::~Planet() {
 	}
 }
 
-PlanetaryTransform *Planet::setTerrain (ContinuousTerrain * t, float ratiox, int numwraps) {
+PlanetaryTransform *Planet::setTerrain (ContinuousTerrain * t, float ratiox, int numwraps,float scaleatmos) {
   terrain = t;
   terrain->DisableDraw();
   float x,z;
   t->GetTotalSize (x,z);
-  terraintrans = new PlanetaryTransform (.8*corner_max.i,x*ratiox,z,numwraps);
+  terraintrans = new PlanetaryTransform (.8*corner_max.i,x*ratiox,z,numwraps,scaleatmos);
   terraintrans->SetTransformation (cumulative_transformation_matrix);
   return terraintrans;
 }

@@ -105,7 +105,8 @@ namespace StarXML {
     NUMWRAPS,
     DIFFICULTY,
     REFLECTNOLIGHT,
-    ENHANCEMENT
+    ENHANCEMENT,
+    SCALEATMOS
   };
 
   const EnumMap::Pair element_names[] = {
@@ -167,11 +168,12 @@ namespace StarXML {
     EnumMap::Pair ("Mass", MASS),
     EnumMap::Pair ("ScaleX", SCALEX),
     EnumMap::Pair ("NumWraps", NUMWRAPS),
-    EnumMap::Pair ("Difficulty", DIFFICULTY)
+    EnumMap::Pair ("Difficulty", DIFFICULTY),
+    EnumMap::Pair ("ScaleAtmosphereHeight", SCALEATMOS)
   };
 
   const EnumMap element_map(element_names, 18);
-  const EnumMap attribute_map(attribute_names, 39);
+  const EnumMap attribute_map(attribute_names, 40);
 }
 
 using XMLSupport::EnumMap;
@@ -221,6 +223,7 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
   GFXColor tmpcol(0,0,0,1);
   LIGHT_TARGET tmptarg= POSITION;
   xml->cursun.j=0;
+  float scaleatmos=10;
   char * nebfile;
   int faction=0;
   xml->cursun.k=0;	
@@ -362,6 +365,9 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
       case SCALEX:
 	scalex = parse_float((*iter).value);
 	break;
+      case SCALEATMOS:
+	scaleatmos = parse_float((*iter).value);
+	break;
       case XFILE:
 	myfile = (*iter).value;
 	break;
@@ -441,7 +447,7 @@ void StarSystem::beginElement(const string &name, const AttributeList &attribute
 	    Planet * p =xml->moons.back()->GetTopPlanet(xml->unitlevel-1);
 	    if (p) {
 	      xml->ct->DisableDraw();
-	      p->setTerrain (xml->ct,scalex,numwraps);
+	      p->setTerrain (xml->ct,scalex,numwraps,scaleatmos);
 		  PlanetaryTransform ** tmpp = (PlanetaryTransform**) &xml->parentterrain;
 	      p->getTerrain(*tmpp);
 	    }
