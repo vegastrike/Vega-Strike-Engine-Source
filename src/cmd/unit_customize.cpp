@@ -399,6 +399,7 @@ void Unit::UpgradeInterface (Unit * base) {
     templ=temprate;
   }
   char input_buffer[4096];
+  char input_buffer2[4096];
   input_buffer[4095]='\0';
 
   while (1) {
@@ -439,8 +440,8 @@ void Unit::UpgradeInterface (Unit * base) {
       fprintf (stdout,"Enter the quantity you wish to trade at %f price\n",base->PriceCargo(input_buffer));      	
       int quantity=-1;
       while (quantity==-1) {
-	fgets (input_buffer,4095,stdin);	  
-	sscanf (input_buffer,"%d",&quantity);
+	fgets (input_buffer2,4095,stdin);	  
+	sscanf (input_buffer2,"%d",&quantity);
       }
       if (buycommod) {
 	if(BuyCargo (input_buffer,quantity,base,_Universe->AccessCockpit()->credits)) {

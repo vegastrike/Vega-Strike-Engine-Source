@@ -498,9 +498,13 @@ void createObjects() {
 
 	//	  cout << "before unit" << endl;
 	if (fg_terrain==-1||(fg_terrain==-2&&myterrain==NULL)) {
-	  if (a==0)
+	  string modifications ("");
+	  if (a==0) {
 	    fighter0name=string(fightername);
-	  fighters[a] = new Unit(fightername, false,tmptarget[a],string(""),fg,s);
+	    if (mission->getVariable ("savegame","").length>0) 
+	      modifications =vs_config->getVariable ("player","callsign","Hellcat");
+	  }
+	  fighters[a] = new Unit(fightername, false,tmptarget[a],modifications,fg,s);
 	}else {
 	  if (fg_terrain==-2) {
 	    fighters[a]= new Building (myterrain,isvehicle,fightername,false,tmptarget[a],string(""),fg);
