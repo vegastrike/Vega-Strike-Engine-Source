@@ -456,6 +456,9 @@ void GFXDestroyAllTextures () {
 }
 
 void GFXTextureCoordGenMode(GFXTEXTURECOORDMODE tex, const float params[4],const float paramt[4]) {
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
 	switch (tex) {
 	case NO_GEN:
 		glDisable(GL_TEXTURE_GEN_S);
