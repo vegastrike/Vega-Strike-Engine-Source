@@ -10,6 +10,7 @@ class CommunicatingAI:public Order{
   float moodswingyness;
   float randomresponse;
   float mood;
+  float rank;
   std::vector <class Animation *> *comm_face;
   UnitContainer contraband_searchee;
   Vector SpeedAndCourse;
@@ -23,7 +24,7 @@ class CommunicatingAI:public Order{
   void TerminateContrabandSearch(bool foundcontraband);
   void InitiateContrabandSearch(float PlayerProbability, float TargetProbability);
   void UpdateContrabandSearch();
-  CommunicatingAI (int ttype, float mood=0, float anger=-666/*-.5*/, float moodswingyness=666/*.2*/, float randomnessresponse=666/*.8*/);
+  CommunicatingAI (int ttype, float rank=666, float mood=0, float anger=-666/*-.5*/, float moodswingyness=666/*.2*/, float randomnessresponse=666/*.8*/);
    virtual void ProcessCommMessage (class CommunicationMessage &c); 
    virtual void AdjustRelationTo (Unit * un, float factor);
    virtual ~CommunicatingAI ();

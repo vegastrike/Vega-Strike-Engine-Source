@@ -140,6 +140,8 @@ private:
    * -1 is mad. <0 will attack
    */
   float GetRelation (const int myfaction, const int theirfaction);
+
+  void AdjustRelation (const int myfaction, const int theirfaction, const float factor, const float rank);
   //Returns a conversation that a myfaction might have with a theirfaction
   FSM* GetConversation (const int myfaction, const int theirfaction);
   void activateLightMap();

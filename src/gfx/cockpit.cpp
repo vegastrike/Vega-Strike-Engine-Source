@@ -54,8 +54,12 @@ GFXColor Cockpit::unitToColor (Unit *un,Unit *target) {
 	}
 
 	// other spaceships
-	return relationToColor(_Universe->GetRelation(un->faction,target->faction));
-	
+	static bool reltocolor=XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","DrawTheirRelationColor","true"));
+	if (reltocolor) {
+	  return relationToColor(_Universe->GetRelation(target->faction,un->faction));
+	}else {
+	  return relationToColor(_Universe->GetRelation(un->faction,target->faction));
+	}
 }
 
 GFXColor Cockpit::relationToColor (float relation) {

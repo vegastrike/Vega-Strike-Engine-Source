@@ -5,8 +5,12 @@
 #include "cmd/images.h"
 #include "config_xml.h"
 #include "vs_globals.h"
-CommunicatingAI::CommunicatingAI (int ttype, float mood, float anger, float moodswingyness, float randomresp) :Order (ttype),anger(anger),moodswingyness(moodswingyness),randomresponse (randomresp),mood(mood) {
+CommunicatingAI::CommunicatingAI (int ttype, float rank, float mood, float anger, float moodswingyness, float randomresp) :Order (ttype),rank(rank),anger(anger),moodswingyness(moodswingyness),randomresponse (randomresp),mood(mood) {
   comm_face=NULL;
+  if (rank==666) {
+    static float ran = XMLSupport::parse_float(vs_config->getVariable ("AI","DefaultRank",".01"));
+    this->rank = ran;
+  }
   if (anger==666) {
     static float ang = XMLSupport::parse_float(vs_config->getVariable ("AI","EaseToAnger","-.5"));
     this->anger = ang;
@@ -19,7 +23,6 @@ CommunicatingAI::CommunicatingAI (int ttype, float mood, float anger, float mood
     static float ang2 = XMLSupport::parse_float(vs_config->getVariable ("AI","RandomResponseRange",".8"));
     this->randomresponse = ang2;
   }
-
 }
 void CommunicatingAI::SetParent (Unit * par) {
   Order::SetParent(par);
@@ -144,6 +147,7 @@ void CommunicatingAI::InitiateContrabandSearch (float playaprob, float targprob)
 
 void CommunicatingAI::AdjustRelationTo (Unit * un, float factor) {
   Order::AdjustRelationTo(un,factor);
+
   //now we do our magik  insert 0 if nothing's there... and add on our faction
   relationmap::iterator i = effective_relationship.insert (pair<const Unit*,float>(un,0)).first;
   bool abovezero=(*i).second+_Universe->GetRelation (parent->faction,un->faction)>=0;
@@ -151,7 +155,7 @@ void CommunicatingAI::AdjustRelationTo (Unit * un, float factor) {
     static float slowrel=XMLSupport::parse_float (vs_config->getVariable ("AI","SlowDiplomacyForEnemies",".25"));
     factor *=slowrel;
   }
-  
+  _Universe->AdjustRelation (parent->faction,un->faction,factor,rank);  
   (*i).second+=factor;
   if ((*i).second<anger) {
     parent->Target(un);//he'll target you--even if he's friendly

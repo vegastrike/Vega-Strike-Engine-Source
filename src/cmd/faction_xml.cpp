@@ -243,7 +243,10 @@ FSM* Universe::GetConversation(int Myfaction, int TheirFaction) {
   assert (factions[Myfaction]->faction[TheirFaction].stats.index == TheirFaction);
   return factions[Myfaction]->faction[TheirFaction].conversation;
 }
-
+void Universe::AdjustRelation(const int Myfaction, const int TheirFaction, float factor, float rank) {
+  assert (factions[Myfaction]->faction[TheirFaction].stats.index == TheirFaction);
+  factions[Myfaction]->faction[TheirFaction].relationship+=factor*rank;  
+}
 float Universe::GetRelation (const int Myfaction, const int TheirFaction) {
   if (Myfaction==TheirFaction)
     return 1;
