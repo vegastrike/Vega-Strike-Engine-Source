@@ -48,6 +48,9 @@ namespace UniverseUtil {
 	  static string newssong=vs_config->getVariable("audio","missionvictorysong","../music/victory.ogg");
 	  muzak->GotoSong(newssong);
 	}
+	void StopAllSounds(void) {
+          AUDStopAllSounds();
+        }
 	int musicAddList(string str) {
 		return muzak->Addlist(str.c_str());
 	}

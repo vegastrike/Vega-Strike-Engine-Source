@@ -1,4 +1,4 @@
-voidEXPORT_GLOBAL(AUDStopAllSounds)
+voidEXPORT_UTIL(StopAllSounds)
 EXPORT_UTIL(getNumUnits,0)
 EXPORT_FACTION(GetFactionName,"")
 EXPORT_FACTION(GetFactionIndex,-1)

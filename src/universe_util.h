@@ -184,6 +184,7 @@ public:
 	Unit *getPlayer();
 ///this gets a player number (if in splitscreen mode)
 	Unit *getPlayerX(int which);
+	void StopAllSounds(void);
 	unsigned int getCurrentPlayer();
 ///this gets the number of active players
 	int getNumPlayers ();
