@@ -54,7 +54,7 @@ struct UpgradingInfo {
   vector <Cargo> TempCargo;//used to store cargo list
   vector <Cargo> * CurrentList;
   enum SubMode {NORMAL,MOUNT_MODE,SUBUNIT_MODE, CONFIRM_MODE}submode;
-  enum BaseMode {BUYMODE,SELLMODE,MISSIONMODE,UPGRADEMODE,ADDMODE,DOWNGRADEMODE,SHIPDEALERMODE, NEWSMODE,MAXMODE} mode;
+  enum BaseMode {BUYMODE,SELLMODE,MISSIONMODE,NEWSMODE,SHIPDEALERMODE,UPGRADEMODE,ADDMODE,DOWNGRADEMODE, MAXMODE} mode;
   bool multiplicitive;
   Button *Modes[MAXMODE];
   string title;
@@ -201,7 +201,7 @@ struct UpgradingInfo {
 	CargoInfo->AddTextItem("description", "");
 	OK = new Button(-0.94, -0.85, 0.15, 0.1, "Done");
 	COMMIT = new Button(-0.75, -0.85, 0.25, 0.1, "Buy");
-	const char  MyButtonModes[][128] = {"BuyMode","SellMode","MissionBBS","UpgradeShip","Unimplemented","Downgrade", "ShipDealer","GNN News"};
+	const char  MyButtonModes[][128] = {"BuyMode","SellMode","MissionBBS","GNN News", "ShipDealer","UpgradeShip","Unimplemented","Downgrade"};
 	float beginx = -.4;
 	float lastx = beginx;
 	float size=.32;
