@@ -292,7 +292,7 @@ protected:
   ///the position of the center of this mesh for collision detection
   Vector local_pos; 
   ///The hash table of all meshes
-  static Hashtable<string, Mesh,char[127]> meshHashTable;
+  static Hashtable<string, Mesh, 127> meshHashTable;
   ///The refcount:: how many meshes are referencing the appropriate original
   int refcount;
   ///bounding box

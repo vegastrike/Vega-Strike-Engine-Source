@@ -183,7 +183,7 @@ public:
 
 typedef set <systemdrawnode> systemdrawset;
 typedef vector <systemdrawnode> systemdrawlist;
-typedef Hashtable <std::string, const systemdrawnode, char [127]> systemdrawhashtable;
+typedef Hashtable <std::string, const systemdrawnode, 127> systemdrawhashtable;
 
 bool testandset (bool &b,bool val) {
 	bool tmp = b;

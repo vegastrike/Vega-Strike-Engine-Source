@@ -41,8 +41,8 @@ namespace XMLSupport {
   class EnumMap {
 
     //    static inline double parse_float (const string &str) {return ::parse_float (str)};
-    Hashtable<string,const int,char [1001]> forward;
-    Hashtable<string,const string, char [1001]> reverse;
+    Hashtable<string,const int, 1001> forward;
+    Hashtable<string,const string, 1001> reverse;
   public:
 
     struct Pair {

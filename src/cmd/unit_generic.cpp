@@ -298,7 +298,7 @@ std::string speedStarHandler (const XMLType &input,void *mythis) {
 }
 
 static list<Unit*> Unitdeletequeue;
-static Hashtable <long, Unit, char[2095]> deletedUn;
+static Hashtable <long, Unit, 2095> deletedUn;
 int deathofvs=1;
 void CheckUnit(Unit * un) {
   if (deletedUn.Get ((long)un)!=NULL) {

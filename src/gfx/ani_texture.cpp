@@ -7,7 +7,6 @@
 #include "vegastrike.h"
 #include "vsfilesystem.h"
 #include "vs_globals.h"
-//extern Hashtable<string, Texture,char [127]> texHashTable;
 
 static vector <AnimatedTexture *> myvec;
 

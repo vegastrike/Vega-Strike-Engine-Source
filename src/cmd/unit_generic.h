@@ -29,7 +29,6 @@
 class Unit;
 void CheckUnit(class Unit *);
 void UncheckUnit (class Unit * un);
-//extern Hashtable <long, Unit, char[2095]> deletedUn;
 #endif
 #include "vegastrike.h"
 #include "vs_globals.h"

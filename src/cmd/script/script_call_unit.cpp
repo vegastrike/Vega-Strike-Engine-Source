@@ -6,7 +6,7 @@
 
 void	AddAnimation( Cockpit * cp, std::string anim)
 {
-	  Hashtable <std::string, Animation, char [63]> AniHashTable;
+	  Hashtable <std::string, Animation, 63> AniHashTable;
 	  Animation * ani= AniHashTable.Get(anim);
 	  if (NULL==ani) {
 	    ani = new Animation (anim.c_str());

@@ -98,7 +98,7 @@ namespace accountXML
   Account * tmpacct;
   Account acct;
   int level=-1;
-  Hashtable <string, Account,char[257]> accounttable;
+  Hashtable <string, Account, 257> accounttable;
   int nbaccounts = 0;
  
   void beginElement (void *userData, const XML_Char *name, const XML_Char **atts)

@@ -69,7 +69,7 @@ using std::cin;
 double NETWORK_ATOM;
 extern vector<string> globalsaves;
 extern vector<unorigdest *> pendingjump;
-extern Hashtable<std::string, StarSystem, char[127]> star_system_table;
+extern Hashtable<std::string, StarSystem, 127> star_system_table;
 typedef vector<Client *>::iterator VC;
 typedef vector<ObjSerial>::iterator ObjI;
 

@@ -36,8 +36,8 @@ using std::string;
 using namespace VSFileSystem;
 
 ///holds all the textures in a huge hash table
-Hashtable<string, Texture,char [511]> texHashTable;
-Hashtable<string, bool, char [511]> badtexHashTable;
+Hashtable<string, Texture, 511> texHashTable;
+Hashtable<string, bool, 511> badtexHashTable;
 ///returns if a texture exists
 Texture * Texture::Exists (string s, string a) {
   return Texture::Exists (s+a);

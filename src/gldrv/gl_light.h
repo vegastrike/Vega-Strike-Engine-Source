@@ -139,7 +139,7 @@ int findLocalClobberable();
 
 #define CTACC 40000
 ///table to store local lights, numerical pointers to _llights (eg indices)
-extern Hashtable3d <LineCollideStar, char[20],char[CTACC], char [lighthuge]> lighttable;
+extern Hashtable3d <LineCollideStar, 20, CTACC, lighthuge> lighttable;
 
 
 ///something that would normally round down

@@ -50,7 +50,7 @@
 #include <float.h>
 #include <algorithm>
 using std::list;
-Hashtable<string, Mesh, char [127]> Mesh::meshHashTable;
+Hashtable<string, Mesh, 127> Mesh::meshHashTable;
 Vector mouseline;
 
 

@@ -10,7 +10,7 @@ const float atten1scale = 1./GFX_SCALE;
 const float atten2scale = 1./(GFX_SCALE*GFX_SCALE);
 
 int _GLLightsEnabled=0;
-Hashtable3d <LineCollideStar, char[20],char[CTACC], char [lighthuge]> lighttable;
+Hashtable3d <LineCollideStar, 20, CTACC, lighthuge> lighttable;
 
 GFXLight gfx_light::operator = (const GFXLight &tmp) {
     memcpy (this,&tmp,sizeof (GFXLight));

@@ -5,7 +5,7 @@
 #include "vs_globals.h"
 #include "vsfilesystem.h"
 #include "init.h"
-Hashtable <string,PyCodeObject ,char[1023]> compiled_python;
+Hashtable <string,PyCodeObject,1023> compiled_python;
 
 
 char * LoadString (const char * filename) {

@@ -223,7 +223,7 @@ namespace BeamXML {
   };
   const EnumMap element_map(element_names, 10);
   const EnumMap attribute_map(attribute_names, 31);
-  Hashtable <string, weapon_info,char[257]> lookuptable;
+  Hashtable <string, weapon_info, 257> lookuptable;
   string curname;
   weapon_info tmpweapon(weapon_info::BEAM);
   int level=-1;

@@ -14,7 +14,7 @@
 #include <string>
 #include "vs_globals.h"
 #include "configxml.h"
-static Hashtable <std::string,collideTrees,char[127]> unitColliders;
+static Hashtable <std::string,collideTrees,127> unitColliders;
 collideTrees::collideTrees (const std::string &hk, BSPTree *bT, BSPTree *bS, csRapidCollider *cT, csRapidCollider *cS): hash_key(hk),bspTree(bT), bspShield(bS), colShield(cS) {
 	for (int i=0;i<collideTreesMaxTrees;++i) {
 		rapidColliders[i]=NULL;
