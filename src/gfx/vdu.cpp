@@ -289,7 +289,11 @@ void VDU::DrawTarget(Unit * parent, Unit * target, const GFXColor &c) {
 
   char st[256];
   //  sprintf (st,"\n%s",target->name.c_str());
-  sprintf (st,"\n%s:%s",target->getFgID().c_str(),target->name.c_str());
+  if (target->getFgID()==target->name.c_str()) {
+	sprintf (st,"\n%s",target->name.c_str());
+  }else {
+	sprintf (st,"\n%s:%s",target->getFgID().c_str(),target->name.c_str());
+  }
   GFXColorf (c);
   tp->Draw (MangleString (st,_Universe->AccessCamera()->GetNebula()!=NULL?.4:0),0);  
   int i=0;

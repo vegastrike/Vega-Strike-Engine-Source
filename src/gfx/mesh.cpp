@@ -67,7 +67,6 @@ public:
   bool operator == (const OrigMeshContainer &b) const {
     return (*orig->Decal)==*b.orig->Decal;
   }
-
 };
 typedef std::vector<OrigMeshContainer> OrigMeshVector;
 OrigMeshVector undrawn_meshes[NUM_MESH_SEQUENCE]; // lower priority means draw first
@@ -76,15 +75,11 @@ Vector mouseline;
 
 
 
-
-
-
 void Mesh::InitUnit() {
   numlods=1;
   lodsize=FLT_MAX;
 	forcelogos = NULL;
 	squadlogos = NULL;
-
 	local_pos = Vector (0,0,0);
 	blendSrc=ONE;
 	blendDst=ZERO;
@@ -93,7 +88,6 @@ void Mesh::InitUnit() {
 	mx = Vector (0,0,0);
 	radialSize=0;
 	GFXVertex *alphalist;
-
 	Decal = NULL;
 	
 	alphalist = NULL;
@@ -112,16 +106,13 @@ void Mesh::InitUnit() {
 	will_be_drawn = GFXFALSE;
 	draw_sequence = 0;
 }
-
 Mesh::Mesh()
 {
 	InitUnit();
 }
-
 bool Mesh::LoadExistant (const char * filehash, float scale) {
   Mesh * oldmesh;
   oldmesh = meshHashTable.Get(GetHashName(filehash,scale));
-
   if (oldmesh==0) {
     oldmesh = meshHashTable.Get(GetSharedMeshHashName(filehash,scale));  
   }
@@ -132,10 +123,8 @@ bool Mesh::LoadExistant (const char * filehash, float scale) {
     return true;
   }
   //  fprintf (stderr,"cannot cache %s",GetSharedMeshHashName(filehash,scale).c_str());
-
   return false;
 }
-
 Mesh:: Mesh(const char * filename,const float scale, int faction, bool orig):hash_name(filename)
 {
   this->orig=NULL;
@@ -151,7 +140,6 @@ Mesh:: Mesh(const char * filename,const float scale, int faction, bool orig):has
   }else {
     fclose (fp);
   }
-
   bool xml=true;
   if(xml) {
     LoadXML(shared?GetSharedMeshPath(filename).c_str():filename,scale,faction);
@@ -173,7 +161,6 @@ Mesh:: Mesh(const char * filename,const float scale, int faction, bool orig):has
     this->orig=NULL;
   }
 }
-
 Mesh::~Mesh()
 {
 	if(!orig||orig==this)
@@ -205,9 +192,7 @@ Mesh::~Mesh()
 	}
 }
 float const ooPI = 1.00F/3.1415926535F;
-
 //#include "d3d_internal.h"
-
 void Mesh::SetMaterial (const GFXMaterial & mat) {
   GFXSetMaterial (myMatNum,mat);
   if (orig) {
@@ -232,17 +217,13 @@ Mesh * Mesh::getLOD (float lod) {
 
 
 
-
-
-
 void Mesh::Draw(float lod, const Matrix m, float toofar, short cloak, float nebdist)
 {
-
   //  Vector pos (local_pos.Transform(m));
   MeshDrawContext c(m);
   UpdateFX(GetElapsedTime());
   c.SpecialFX = &LocalFX;
-  c.mesh_seq=((toofar+rSize()>g_game.zfar)/*&&draw_sequence==0*/)?NUM_ZBUF_SEQ:draw_sequence;
+  c.mesh_seq=((toofar+rSize()>.8*g_game.zfar)/*&&draw_sequence==0*/)?NUM_ZBUF_SEQ:draw_sequence;
   c.cloaked=MeshDrawContext::NONE;
   if (nebdist<0) {
     c.cloaked|=MeshDrawContext::FOG;
@@ -317,12 +298,10 @@ void Mesh::DrawNow(float lod,  bool centered, const Matrix m, short cloak, float
     GFXCreateLight (ligh,(LocalFX)[i],true);
     specialfxlight.push_back(ligh);
   }
-
   GFXSelectMaterial(o->myMatNum);
   if (blendSrc!=SRCALPHA&&blendDst!=ZERO) 
     GFXDisable(DEPTHWRITE);
   GFXBlendMode(blendSrc, blendDst);
-
   if (o->Decal)
     o->Decal->MakeActive();
   o->vlist->DrawOnce();
@@ -336,7 +315,6 @@ void Mesh::DrawNow(float lod,  bool centered, const Matrix m, short cloak, float
     GFXEnable (TEXTURE1);
   }
 }
-
 void Mesh::SetBlendMode (BLENDFUNC src, BLENDFUNC dst) {
   blendSrc = src;
   blendDst = dst;
@@ -358,7 +336,6 @@ static GFXColor getMeshColor () {
   GFXColor tmp (color[0],color[1],color[2],color[3]);
   return tmp;
 }
-
 class MeshCloser { 
 public:
   MeshCloser () {}
@@ -368,7 +345,6 @@ public:
     return a.d > b.d;//draw from outside in :-)
   }
 };
-
 void Mesh::ProcessZFarMeshes () {
   _Universe->activeStarSystem()->AccessCamera()->UpdateGFX (GFXFALSE, GFXFALSE);
   GFXEnable(LIGHTING);
@@ -389,23 +365,19 @@ void Mesh::ProcessZFarMeshes () {
   GFXEnable (DEPTHWRITE);
 }
 
-
 void Mesh::ProcessUndrawnMeshes(bool pushSpecialEffects) {
   static GFXColor meshcolor (getMeshColor());
   GFXLightContextAmbient(meshcolor);
-
   GFXEnable(DEPTHWRITE);
   GFXEnable(DEPTHTEST);
   GFXEnable(LIGHTING);
   GFXEnable(CULLFACE);
-
   for(int a=0; a<NUM_ZBUF_SEQ; a++) {
     if (a==MESH_SPECIAL_FX_ONLY) {
       
       GFXPushGlobalEffects();
       GFXDisable(DEPTHWRITE);
     } else {
-
     }
     if (!undrawn_meshes[a].empty()) {
       // shouldn't the sort - if any - be placed here??
@@ -431,9 +403,7 @@ void Mesh::ProcessUndrawnMeshes(bool pushSpecialEffects) {
     l->ProcessDrawQueue();
     l->will_be_drawn = false;
     }
-
 }
-
 void Mesh::ProcessDrawQueue(int whichdrawqueue) {
   //  assert(draw_queue->size());
   if (draw_queue->empty()) {
@@ -453,7 +423,6 @@ void Mesh::ProcessDrawQueue(int whichdrawqueue) {
     }
   }
   GFXBlendMode(blendSrc, blendDst);
-
   GFXEnable(TEXTURE0);
   if(Decal)
     Decal->MakeActive();
@@ -465,7 +434,6 @@ void Mesh::ProcessDrawQueue(int whichdrawqueue) {
   } else {
     GFXDisable(TEXTURE1);
   }
-
   vlist->BeginDrawState();	
   vector<MeshDrawContext> tmp_draw_queue;
   while(draw_queue->size()) {
@@ -506,7 +474,6 @@ void Mesh::ProcessDrawQueue(int whichdrawqueue) {
 #endif
     }
 
-
     unsigned int i;
     for ( i=0;i<c.SpecialFX->size();i++) {
       int ligh;
@@ -522,7 +489,6 @@ void Mesh::ProcessDrawQueue(int whichdrawqueue) {
       GFXFogMode (FOG_OFF);
     }
     vlist->Draw();
-
     for ( i=0;i<specialfxlight.size();i++) {
       GFXDeleteLight (specialfxlight[i]);
     }
@@ -590,7 +556,6 @@ bool Mesh::queryBoundingBox (const Vector & eye, const Vector & end, const float
     if (OpenWithin (IntersectXYZ,mn,mx,err,EX_Y))
       return true;
   }
-
   k=((mx.j-eye.j)/slope.j);
   if (k>=0) {
     IntersectXYZ = eye + k*slope;
@@ -616,7 +581,6 @@ bool Mesh::queryBoundingBox (const Vector & start,const float err) {
   return start.i>=mn.i-err&&start.j>=mn.j-err&&start.k>=mn.k-err&&
          start.i<=mx.i+err&&start.j<=mx.j+err&&start.k<=mx.k+err;
 }
-
 BoundingBox * Mesh::getBoundingBox() {
   
   BoundingBox * tbox = new BoundingBox (Vector (mn.i,0,0),Vector (mx.i,0,0),
@@ -624,3 +588,4 @@ BoundingBox * Mesh::getBoundingBox() {
 					Vector (0,0,mn.k),Vector (0,0,mx.k));
   return tbox;
 }
+
