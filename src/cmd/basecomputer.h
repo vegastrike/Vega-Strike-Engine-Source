@@ -201,6 +201,8 @@ protected:
     // Contruct the controls in code.
     void constructControls(void);
 
+	GFXColor getColorForGroup(std::string id);
+	
     // Get a filtered list of items from a unit.
     void loadMasterList(Unit *un, const vector<string>& filterthis,const vector<string>& invfilterthis, bool removezero, TransactionList& list);
 
