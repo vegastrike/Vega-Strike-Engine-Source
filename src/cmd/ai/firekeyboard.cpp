@@ -883,7 +883,7 @@ bool TargAll (Unit *me,Unit *target) {
 	return me->InRange(target,true,false)||me->InRange(target,true,true);
 }
 bool TargUn (Unit *me,Unit *target) {
-	return me->InRange(target,true,false)&&(target->isUnit()==UNITPTR||target->isUnit()==MISSILEPTR||target->isUnit()==ENHANCEMENTPTR);
+	return me->InRange(target,true,false)&&(target->isUnit()==UNITPTR||target->isUnit()==ENHANCEMENTPTR);
 }
 bool TargSig (Unit *me,Unit *target) {
 	return me->InRange(target,true,true)&&UnitUtil::isSignificant(target);
