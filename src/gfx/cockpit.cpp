@@ -688,21 +688,9 @@ void Cockpit::RestoreGodliness() {
   if (godliness>maxgodliness)
     godliness=maxgodliness;
 }
-Cockpit::Cockpit (const char * file, Unit * parent,const std::string &pilot_name): parent (parent),textcol (1,1,1,1),text(NULL),cockpit_offset(0), viewport_offset(0), view(CP_FRONT), zoomfactor (1.5),savegame (new SaveGame(pilot_name)) {
-  static int headlag = XMLSupport::parse_int (vs_config->getVariable("graphics","head_lag","10"));
+
+void Cockpit::InitStatic () {  
   int i;
-  for (i=0;i<headlag;i++) {
-    headtrans.push_back (MyMat());
-    Identity(headtrans.back().m);
-  }
-  mesh=NULL;
-  ejecting=false;
-  currentcamera = 0;	
-  Radar=Pit[0]=Pit[1]=Pit[2]=Pit[3]=NULL;
-  RestoreGodliness();
-
-
-  
   for (i=0;i<NUMGAUGES;i++) {
     gauges[i]=NULL;
   }
@@ -714,6 +702,23 @@ Cockpit::Cockpit (const char * file, Unit * parent,const std::string &pilot_name
   }
   radar_time=0;
   cockpit_time=0;
+}
+
+Cockpit::Cockpit (const char * file, Unit * parent,const std::string &pilot_name): parent (parent),textcol (1,1,1,1),text(NULL),cockpit_offset(0), viewport_offset(0), view(CP_FRONT), zoomfactor (1.5),savegame (new SaveGame(pilot_name)) {
+  static int headlag = XMLSupport::parse_int (vs_config->getVariable("graphics","head_lag","10"));
+  int i;
+  for (i=0;i<headlag;i++) {
+    headtrans.push_back (MyMat());
+    Identity(headtrans.back().m);
+  }
+  InitStatic();
+  mesh=NULL;
+  ejecting=false;
+  currentcamera = 0;	
+  Radar=Pit[0]=Pit[1]=Pit[2]=Pit[3]=NULL;
+  RestoreGodliness();
+
+
   draw_all_boxes=XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","drawAllTargetBoxes","false"));
   draw_line_to_target=XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","drawLineToTarget","false"));
   draw_line_to_targets_target=XMLSupport::parse_bool(vs_config->getVariable("graphics","hud","drawLineToTargetsTarget","false"));
@@ -884,6 +889,8 @@ static void DrawCrosshairs (float x, float y, float wid, float hei, const GFXCol
 
 void Cockpit::Draw() { 
   cockpit_time+=GetElapsedTime();
+  if (cockpit_time>=10000)
+    InitStatic();
   GFXDisable (TEXTURE1);
   GFXLoadIdentity(MODEL);
   GFXDisable(LIGHTING);

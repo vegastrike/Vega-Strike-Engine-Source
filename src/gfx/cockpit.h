@@ -106,6 +106,7 @@ private:
   float cockpit_time;
   bool ejecting;
  public:
+  void InitStatic ();
   void Shake (float amt);
   float godliness;
   void Autopilot (Unit * target);

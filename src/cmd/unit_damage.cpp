@@ -493,7 +493,7 @@ float Unit::DealDamageToHull (const Vector & pnt, float damage ) {
       hull -=damage;
     }else {
       _Universe->AccessCockpit()->godliness-=damage;
-      DamageRandSys(rand01(),pnt);//get system damage...but live!
+      DamageRandSys(rand01()*.5+.2,pnt);//get system damage...but live!
     }
 
   }
