@@ -891,6 +891,8 @@ struct Unit::XML {
   vector<Mesh*> meshes;
   Mesh * shieldmesh;
   Mesh * bspmesh;
+  Mesh * rapidmesh;
+  void * data;
   vector<Unit*> units;
   int unitlevel;
   bool hasBSP;

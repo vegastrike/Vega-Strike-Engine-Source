@@ -81,6 +81,7 @@ namespace UnitXML {
       MESHFILE,
       SHIELDMESH,
       BSPMESH,
+      RAPIDMESH,
       MOUNT,
       MESHLIGHT,
       DOCK,
@@ -200,7 +201,7 @@ namespace UnitXML {
       MAXIMUM
     };
 
-  const EnumMap::Pair element_names[35]= {
+  const EnumMap::Pair element_names[36]= {
     EnumMap::Pair ("UNKNOWN", UNKNOWN),
     EnumMap::Pair ("Unit", UNIT),
     EnumMap::Pair ("SubUnit", SUBUNIT),
@@ -208,6 +209,7 @@ namespace UnitXML {
     EnumMap::Pair ("MeshFile", MESHFILE),
     EnumMap::Pair ("ShieldMesh",SHIELDMESH),
     EnumMap::Pair ("BspMesh",BSPMESH),
+    EnumMap::Pair ("RapidMesh",RAPIDMESH),
     EnumMap::Pair ("Light",MESHLIGHT),
     EnumMap::Pair ("Defense", DEFENSE),
     EnumMap::Pair ("Armor", ARMOR),
@@ -334,7 +336,7 @@ namespace UnitXML {
     EnumMap::Pair ("Maximum",MAXIMUM),
   };
 
-  const EnumMap element_map(element_names, 35);
+  const EnumMap element_map(element_names, 36);
   const EnumMap attribute_map(attribute_names, 93);
 }
 
@@ -405,6 +407,24 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
       }
     }
     break;
+  case RAPIDMESH:
+    ADDTAG;
+    assert (xml->unitlevel==1);
+    xml->unitlevel++;
+    for(iter = attributes.begin(); iter!=attributes.end(); iter++) {
+      switch(attribute_map.lookup((*iter).name)) {
+      case XFILE:
+	ADDDEFAULT;
+	xml->rapidmesh =(new Mesh((*iter).value.c_str(), xml->unitscale, faction,NULL));
+	xml->hasColTree = true;	
+	break;
+      case    RAPID:
+	ADDDEFAULT;
+	xml->hasColTree=parse_bool ((*iter).value);
+	break;
+      }
+    }
+    break;
   case BSPMESH:
     ADDTAG;
     assert (xml->unitlevel==1);
@@ -416,10 +436,6 @@ void Unit::beginElement(const string &name, const AttributeList &attributes) {
 	ADDDEFAULT;
 	xml->bspmesh =(new Mesh((*iter).value.c_str(), xml->unitscale, faction,NULL));
 	xml->hasBSP = true;	
-	break;
-      case RAPID:
-	ADDDEFAULT;
-	xml->hasColTree=parse_bool ((*iter).value);
 	break;
       case USEBSP:
 	ADDDEFAULT;
@@ -1684,7 +1700,8 @@ void Unit::LoadXML(const char *filename, const char * modifications)
   xml->unitModifications = modifications;
   xml->shieldmesh = NULL;
   xml->bspmesh = NULL;
-  xml->hasBSP = true;
+  xml->rapidmesh = NULL;
+  xml->hasBSP = true;            ;
   xml->hasColTree=true;
   xml->unitlevel=0;
   xml->unitscale=1;
@@ -1799,10 +1816,10 @@ void Unit::LoadXML(const char *filename, const char * modifications)
   }
   meshdata.back()->EnableSpecialFX();
   if (!colTrees) {
-    if (xml->hasBSP) {
+    if (xml->hasBSP          ) {
       tmpname += ".bsp";
       if (!CheckBSP (tmpname.c_str())) {
-	BuildBSPTree (tmpname.c_str(), false, xml->bspmesh);
+	BuildBSPTree (tmpname.c_str(), false,            xml->bspmesh );
       }
       if (CheckBSP (tmpname.c_str())) {
 	bspTree = new BSPTree (tmpname.c_str());
@@ -1811,12 +1828,12 @@ void Unit::LoadXML(const char *filename, const char * modifications)
       bspTree = NULL;
     }
     polies.clear();  
-    if (!xml->bspmesh) {
+    if (!xml->rapidmesh) {
       for (int j=0;j<nummesh();j++) {
 	meshdata[j]->GetPolys(polies);
       }
     }else {
-      xml->bspmesh->GetPolys (polies);
+      xml->rapidmesh->GetPolys (polies);
     }
     if (xml->hasColTree ) {
       colTree = new csRapidCollider (polies);    
@@ -1827,6 +1844,9 @@ void Unit::LoadXML(const char *filename, const char * modifications)
   }
   if (xml->bspmesh) {
     delete xml->bspmesh;
+  }
+  if (xml->rapidmesh) {
+    delete xml->rapidmesh;
   }
   delete xml;
 }
