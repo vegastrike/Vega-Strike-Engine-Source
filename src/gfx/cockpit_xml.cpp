@@ -270,7 +270,7 @@ void Cockpit::beginElement(const string &name, const AttributeList &attributes) 
     goto loadsprite;
   case RADAR: newsprite = &Radar;goto loadsprite;
   case LVDU: vdu.push_back(NULL);newvdu = &vdu.back();mymodes=VDU::WEAPON|VDU::DAMAGE|VDU::SHIELD;goto loadsprite;
-  case RVDU: vdu.push_back(NULL);newvdu = &vdu.back();mymodes=VDU::NAV|VDU::TARGET|VDU::MSG;goto loadsprite;
+  case RVDU: vdu.push_back(NULL);newvdu = &vdu.back();mymodes=VDU::NAV|VDU::TARGET;goto loadsprite;
   case AVDU:vdu.push_back(NULL);newvdu = &vdu.back();mymodes=VDU::MSG;
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) { 
       switch (attribute_map.lookup((*iter).name)) {
