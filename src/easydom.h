@@ -30,6 +30,7 @@
 #include <string>
 #include <vector>
 #include <stack>
+#include <map>
 #include "xml_support.h"
 
 using std::string;
@@ -49,6 +50,8 @@ class easyDomNode {
 
   string Name() { return name ; }
 
+  void set_attribute(string name,string value) { attribute_map[name]=value; };
+
   string attr_value(string attr_name);
   vector<easyDomNode *> subnodes;
 
@@ -56,8 +59,10 @@ class easyDomNode {
   easyDomNode *parent;
   AttributeList *attributes;
 
-  vector<string> att_name;
-  vector<string> att_value;
+  map<string,string> attribute_map;
+
+  //vector<string> att_name;
+  //vector<string> att_value;
 
   string name;
 };

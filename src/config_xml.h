@@ -64,7 +64,14 @@ class VegaConfig {
   void getColor(configNode *node,string name, float color[4]);
   string getVariable(string section,string name,string defaultvalue);
   void getColor(string section, string name, float color[4]);
+  void getColor(string section,string name,float color[4],int hexcolor);
   void getColor(string name, float color[4]) { getColor("default",name,color); };
+
+  void setVariable(configNode *entry,string value);
+
+  bool setVariable(string section,string name,string value);
+  configNode *findSection(string section,configNode *startnode);
+  configNode *findEntry(string name,configNode *startnode);
 
   void bindKeys();
 

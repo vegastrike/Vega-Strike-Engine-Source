@@ -890,6 +890,7 @@ void Unit::LoadXML(const char *filename)
  // rrestricted=yrestricted=prestricted=false;
   FILE * inFile = fopen (filename, "r");
   if(!inFile) {
+    cout << "Unit file " << filename << " not found" << endl;
     assert(0);
     return;
   }

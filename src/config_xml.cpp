@@ -600,6 +600,16 @@ string VegaConfig::getVariable(configNode *section,string name,string defaultval
  
 }
 
+void VegaConfig::getColor(string section, string name, float color[4],int hexcolor){
+  color[2]=((float)(hexcolor & 0xff))/256.0;
+  color[1]=((float)((hexcolor & 0xff00)>>8))/256.0;
+  color[0]=((float)((hexcolor & 0xff0000)>>16))/256.0;
+  color[3]=1.0;
+  
+  getColor(section,name,color);
+}
+
+
 void VegaConfig::getColor(string section, string name, float color[4]){
    vector<easyDomNode *>::const_iterator siter;
   
@@ -645,4 +655,47 @@ void VegaConfig::getColor(configNode *node,string name,float color[4]){
 
 void VegaConfig::bindKeys(){
   doBindings(bindings);
+}
+
+
+configNode *VegaConfig::findEntry(string name,configNode *startnode){
+  return findSection(name,startnode);
+}
+
+configNode *VegaConfig::findSection(string section,configNode *startnode){
+   vector<easyDomNode *>::const_iterator siter;
+  
+  for(siter= startnode->subnodes.begin() ; siter!=startnode->subnodes.end() ; siter++){
+    configNode *cnode=(configNode *)(*siter);
+    string scan_name=(cnode)->attr_value("name");
+    //    cout << "scanning section " << scan_name << endl;
+
+    if(scan_name==section){
+      return cnode;
+    }
+  }
+
+  cout << "WARNING: no section/variable/color named " << section << endl;
+
+  return NULL;
+ 
+  
+}
+
+void VegaConfig::setVariable(configNode *entry,string value){
+      entry->set_attribute("value",value);
+}
+
+bool VegaConfig::setVariable(string section,string name,string value){
+  configNode *sectionnode=findSection(section,variables);
+  if(sectionnode!=NULL){
+    configNode *varnode=findEntry(name,sectionnode);
+
+    if(varnode!=NULL){
+      // now set the thing
+      setVariable(varnode,value);
+      return true;
+    }
+  }
+  return false;
 }

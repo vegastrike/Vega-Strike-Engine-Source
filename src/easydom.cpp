@@ -45,8 +45,11 @@ void easyDomNode::set(easyDomNode *_parent,string _name, AttributeList  *_attrib
     //    cout <<  _name << "::" << (*iter).name << endl;
     //    printf("iter=%x *iter=%x\n",iter,*iter);
     //cout << " " << (*iter).name << "=\"" << (*iter).value << "\"" << endl;
+#if 0
     att_name.push_back((*iter).name);
     att_value.push_back((*iter).value);
+#endif
+    attribute_map[(*iter).name]=(*iter).value;
   }
 
   name=_name;
@@ -57,6 +60,7 @@ void easyDomNode::addChild(easyDomNode *child){
 }
 
 string easyDomNode::attr_value(string search_name){
+#if 0
  vector<string>::const_iterator iter;
  vector<string>::const_iterator iter2;
 
@@ -69,16 +73,19 @@ string easyDomNode::attr_value(string search_name){
   string dummy;
 
   return dummy;
+#endif
+
+  return attribute_map[search_name];
 }
 
 void easyDomNode::walk(int level){
- vector<string>::const_iterator iter;
- vector<string>::const_iterator iter2;
+ map<string,string>::const_iterator iter;
+ //vector<string>::const_iterator iter2;
 
  cout << "<" << name ;
 
-  for(iter = att_name.begin(), iter2=att_value.begin() ; iter!=att_name.end(); iter++, iter2++) {
-       cout << " " << (*iter) << "=\"" << (*iter2) << "\"" ;
+ for(iter = attribute_map.begin(); iter!=attribute_map.end(); iter++){
+       cout << " " << (*iter).first << "=\"" << (*iter).second << "\"" ;
   }
   cout << ">" << endl;
 

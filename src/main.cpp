@@ -92,7 +92,16 @@ int main( int argc, char *argv[] )
 
     // loads the configuration file .vegastrikerc from home dir if such exists
     initpaths();
-    
+
+    float col[4];
+    vs_config->getColor("default","testcolor",col,0xff00ff);
+    printf("hexcol: %f %f %f\n",col[0],col[1],col[2]);
+
+    string olds=vs_config->getVariable("general","testvar","def-value");
+    vs_config->setVariable("general","testvar","foobar");
+    string news=vs_config->getVariable("general","testvar","new-def-value");
+
+    cout << "old " << olds << " new " << news << endl;
     //            exit(0);
 
     //read_vs_config_file();
