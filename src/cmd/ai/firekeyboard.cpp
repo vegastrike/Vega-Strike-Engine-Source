@@ -20,6 +20,7 @@ static KBSTATE misk=UP;
 static KBSTATE cloakkey=UP;
 static KBSTATE neartargetkey=UP;
 static KBSTATE threattargetkey=UP;
+static KBSTATE picktargetkey=UP;
 
 void FireKeyboard::CloakKey(int, KBSTATE k) {
 
@@ -45,6 +46,13 @@ void FireKeyboard::TargetKey(int, KBSTATE k) {
     targetkey = k;
   if (k==RESET) {
     targetkey=PRESS;
+  }
+}
+void FireKeyboard::PickTargetKey(int, KBSTATE k) {
+  if (picktargetkey!=PRESS)
+    picktargetkey = k;
+  if (k==RESET) {
+    picktargetkey=PRESS;
   }
 }
 
@@ -100,6 +108,36 @@ void FireKeyboard::ChooseThreatTargets() {
   if (threat) 
     parent->Target(threat);
 }
+
+void FireKeyboard::PickTargets(){
+  UnitCollection::UnitIterator uiter = _Universe->activeStarSystem()->getUnitList()->createIterator();
+
+  float smallest_angle=PI;
+
+  Unit *other=uiter.current();
+  Unit *found_unit=NULL;
+
+  while(other){
+    Vector t;
+    if(other!=parent && parent->InRange(other,t)){
+      Vector p,q,r;
+      Vector vectothem=Vector(other->Position() - parent->Position()).Normalize();
+      parent->GetOrientation(p,q,r);
+      float angle=acos( vectothem.Dot(r) );
+      
+      if(angle<smallest_angle){
+	found_unit=other;
+	smallest_angle=angle;
+      }
+    }
+    uiter.advance();
+    other=uiter.current();
+  }
+
+  parent->Target(found_unit);
+
+}
+
 void FireKeyboard::ChooseTargets () {
   UnitCollection::UnitIterator iter = _Universe->activeStarSystem()->getUnitList()->createIterator();
   Unit * un ;
@@ -209,6 +247,10 @@ void FireKeyboard::Execute () {
     targetkey=DOWN;
     jtargetkey=DOWN;
     ChooseTargets();
+  }
+  if(picktargetkey==PRESS){
+    picktargetkey=DOWN;
+    PickTargets();
   }
   if (neartargetkey==PRESS) {
     ChooseNearTargets ();

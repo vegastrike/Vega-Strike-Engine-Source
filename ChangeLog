@@ -1,3 +1,13 @@
+2002-02-12 Alexander Rawass <alexannika@users.sourceforge.net>
+
+	* updated the homepage/doc directory:
+	  - changed the menu from java to simple text-links
+	  - added Sabarok to the credits page (and removed James T. Richardson)
+	  - updated playing/installing/download page
+	* added PickTargetKey to FireKeyboard
+	* started to write tutorial mission (not working yet)
+	
+
 2002-02-10 Daniel Horn <hellcatv@hotmail.com>
 	* Removed special case for subunits (eg pseudo 1 xtra refcount)
 	* Streamlined UnitIterator

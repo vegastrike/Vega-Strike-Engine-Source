@@ -20,6 +20,7 @@ class FireKeyboard: public Order {
   static void NearestTargetKey (int, KBSTATE);
   static void ThreatTargetKey (int, KBSTATE);
   static void TargetKey(int, KBSTATE);
+  static void PickTargetKey(int, KBSTATE);
   static void JFireKey(KBSTATE,float,float,int);  
   static void JMissileKey(KBSTATE,float,float,int);  
   static void JTargetKey(KBSTATE,float,float,int);  
@@ -31,6 +32,7 @@ protected:
   void ChooseTargets();//chooses n targets and puts the best to attack in unit's target container
   void ChooseNearTargets();//chooses n targets and puts the best to attack in unit's target container
   void ChooseThreatTargets();//chooses n targets and puts the best to attack in unit's target container
+  void PickTargets(); // chooses the target which is nearest to the center of the screen
 public:
   FireKeyboard (int whichjoystick, const char * configfile);//weapon prefs?
   virtual void Execute();

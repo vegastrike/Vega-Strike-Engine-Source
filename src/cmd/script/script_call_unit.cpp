@@ -279,8 +279,13 @@ varInst *Mission::call_unit(missionNode *node,int mode){
 	float angle=0.0;
 	float dist=0.0;
 	if(mode==SCRIPT_RUN){
-	  angle=my_unit->cosAngleTo(other_unit,dist);
-	  printf("angle: %f\n",angle);
+	  Vector p,q,r;
+	  Vector vectothem=Vector(other_unit->Position() - my_unit->Position()).Normalize();
+	  my_unit->GetOrientation(p,q,r);
+	  //angle=my_unit->cosAngleTo(other_unit,dist);
+	  angle=acos( vectothem.Dot(r) );
+	  angle=(angle/PI)*180.0;
+	  //printf("angle: %f\n",angle);
 	}
 	viret=newVarInst(VI_TEMP);
 	viret->type=VAR_FLOAT;
