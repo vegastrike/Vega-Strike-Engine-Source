@@ -101,8 +101,8 @@ Buffer::Buffer( const string& filename, Notify* notify )
  * definition VsnetDownload::Client::Manager
  *------------------------------------------------------------*/
 
-Manager::Manager( SocketSet& set, SOCKETALT sock, const char** local_search_paths )
-    : _set( set )
+Manager::Manager( SocketSet& sets, SOCKETALT sock, const char** local_search_paths )
+    : _set( sets )
     , _sock( sock )
 {
     const char** c = local_search_paths;
