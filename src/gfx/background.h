@@ -25,7 +25,7 @@ class SphereMesh;
 class Texture;
 class Background {
   bool Enabled;
-  StarVlist stars;
+  StarVlist *stars;
   Texture *up;
   Texture *left;
   Texture *front;

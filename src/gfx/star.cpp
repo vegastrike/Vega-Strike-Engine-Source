@@ -1,4 +1,5 @@
 #include "star.h"
+#include "ani_texture.h"
 #include <assert.h>
 #include "vegastrike.h"
 #include "vs_globals.h"
@@ -116,14 +117,14 @@ bool computeStarColor (float &r, float &g, float &b, Vector luminmax, float dist
 namespace StarSystemGent {
 extern GFXColor getStarColorFromRadius(float radius);
 }
-StarVlist::StarVlist (int num ,float spread,const std::string &sysnam) {
-	std::string our_system_name(sysnam);
+StarVlist::StarVlist(float spread) {
 	lasttime=0;
 	_Universe->AccessCamera()->GetPQR(newcamr,camq,camr);
 	newcamr=camr;
 	newcamq=camq;
-	
-	this->spread=spread;
+        this->spread=spread;
+}
+static GFXColorVertex * AllocVerticesForSystem(std::string our_system_name, float spread,int *num, int repetition) {
 	static float staroverlap = XMLSupport::parse_float(vs_config->getVariable("graphics","star_overlap","1"));
 	float xyzspread = spread*2*staroverlap;
 	static string allowedSectors = vs_config->getVariable("graphics","star_allowable_sectors","Vega Sol");
@@ -145,10 +146,10 @@ StarVlist::StarVlist (int num ,float spread,const std::string &sysnam) {
 	}
 	
 	if (!our_system_name.empty())
-		num =NumStarsInGalaxy();
+		*num =NumStarsInGalaxy();
 	
-	GFXColorVertex * tmpvertex = new GFXColorVertex[num*2];
-	memset (tmpvertex,0,sizeof(GFXVertex)*num*2);
+	GFXColorVertex * tmpvertex = new GFXColorVertex[(*num)*repetition];
+	memset (tmpvertex,0,sizeof(GFXVertex)*(*num)*repetition);
 	StarIter si;
 	int starcount=0;
 	int j=0;
@@ -202,21 +203,21 @@ StarVlist::StarVlist (int num ,float spread,const std::string &sysnam) {
 		maxdistance=mindistance;
 	VSFileSystem::vs_fprintf (stderr,"Min (%f, %f, %f) Max(%f, %f, %f) MinLumin %f, MaxLumin %f",
 			 starmin.i,starmin.j,starmin.k,starmax.i,starmax.j,starmax.k,minlumin,maxlumin);
-			 
-	for (int y=0;y<num;++y) {
+
+	for (int y=0;y<*num;++y) {
 		
-		tmpvertex[j+1].x = -.5*xyzspread+rand()*((float)xyzspread/RAND_MAX);
-		tmpvertex[j+1].y = -.5*xyzspread+rand()*((float)xyzspread/RAND_MAX);
-		tmpvertex[j+1].z = -.5*xyzspread+rand()*((float)xyzspread/RAND_MAX);
+		tmpvertex[j+repetition-1].x = -.5*xyzspread+rand()*((float)xyzspread/RAND_MAX);
+		tmpvertex[j+repetition-1].y = -.5*xyzspread+rand()*((float)xyzspread/RAND_MAX);
+		tmpvertex[j+repetition-1].z = -.5*xyzspread+rand()*((float)xyzspread/RAND_MAX);
 		float brightness = .1+.9*((float)rand())/RAND_MAX;
-		tmpvertex[j+1].r=brightness;
-		tmpvertex[j+1].g=brightness;
-		tmpvertex[j+1].b=brightness;
-		tmpvertex[j+1].a=1;
-		tmpvertex[j+1].i=.57735;
-		tmpvertex[j+1].j=.57735;
-		tmpvertex[j+1].k=.57735;
-		int incj=2;
+		tmpvertex[j+repetition-1].r=brightness;
+		tmpvertex[j+repetition-1].g=brightness;
+		tmpvertex[j+repetition-1].b=brightness;
+		tmpvertex[j+repetition-1].a=1;
+		tmpvertex[j+repetition-1].i=.57735;
+		tmpvertex[j+repetition-1].j=.57735;
+		tmpvertex[j+repetition-1].k=.57735;
+		int incj=repetition;
 		if (our_system_name.size()>0&&!si.Done()) {
 
 			starcount++;
@@ -227,63 +228,69 @@ StarVlist::StarVlist (int num ,float spread,const std::string &sysnam) {
 						   &yorig,
 						   &zorig)) {
 				if (xcent!=xorig) {				
-					tmpvertex[j+1].x=xorig-xcent;
+					tmpvertex[j+repetition-1].x=xorig-xcent;
 				}
 				if (ycent!=yorig) {
-					tmpvertex[j+1].y=yorig-ycent;
+					tmpvertex[j+repetition-1].y=yorig-ycent;
 				}
 				if (zcent!=zorig) {
-					tmpvertex[j+1].z=zorig-zcent;
+					tmpvertex[j+repetition-1].z=zorig-zcent;
 				}
 			}
 			std::string radstr=(*si.Get())["sun_radius"];
 			if (radstr.size()){
 				float rad = XMLSupport::parse_float(radstr);
 				GFXColor suncolor (StarSystemGent::getStarColorFromRadius(rad));
-				tmpvertex[j+1].r=suncolor.r;
-				tmpvertex[j+1].g=suncolor.g;
-				tmpvertex[j+1].b=suncolor.b;
+				tmpvertex[j+repetition-1].r=suncolor.r;
+				tmpvertex[j+repetition-1].g=suncolor.g;
+				tmpvertex[j+repetition-1].b=suncolor.b;
 			}
 			float lumin=1;
 			sscanf((*si.Get())["luminosity"].c_str(),"%f",&lumin);
 			
-			float distance = Vector(tmpvertex[j+1].x,
-									tmpvertex[j+1].y,
-									tmpvertex[j+1].z).Magnitude();
-			if (!computeStarColor(tmpvertex[j+1].r,
-								  tmpvertex[j+1].g,
-								  tmpvertex[j+1].b,
-								  Vector(lumin,minlumin,maxlumin),
-								  distance,maxdistance)) {
+			float distance = Vector(tmpvertex[j+repetition-1].x,
+                                                tmpvertex[j+repetition-1].y,
+                                                tmpvertex[j+repetition-1].z).Magnitude();
+			if (!computeStarColor(tmpvertex[j+repetition-1].r,
+                                              tmpvertex[j+repetition-1].g,
+                                              tmpvertex[j+repetition-1].b,
+                                              Vector(lumin,minlumin,maxlumin),
+                                              distance,maxdistance)) {
 				incj=0;
 			}
 			++si;
 		}
-		
-   		tmpvertex[j].i=tmpvertex[j+1].i;
-		tmpvertex[j].j=tmpvertex[j+1].j;
-		tmpvertex[j].k=tmpvertex[j+1].k;
-		tmpvertex[j].x =tmpvertex[j+1].x;//+spread*.01;
-		tmpvertex[j].y =tmpvertex[j+1].y;//;+spread*.01;
-		tmpvertex[j].z =tmpvertex[j+1].z;		
-		tmpvertex[j].r=0;
-		tmpvertex[j].g=0;
-		tmpvertex[j].b=0;
-		tmpvertex[j].a=0;
+		for (int LC=repetition-2;LC>=0;--LC) {
+                  tmpvertex[j+LC].i=tmpvertex[j+repetition-1].i;
+                  tmpvertex[j+LC].j=tmpvertex[j+repetition-1].j;
+                  tmpvertex[j+LC].k=tmpvertex[j+repetition-1].k;
+                  tmpvertex[j+LC].x =tmpvertex[j+repetition-1].x;//+spread*.01;
+                  tmpvertex[j+LC].y =tmpvertex[j+repetition-1].y;//;+spread*.01;
+                  tmpvertex[j+LC].z =tmpvertex[j+repetition-1].z;		
+                  tmpvertex[j+LC].r=0;
+                  tmpvertex[j+LC].g=0;
+                  tmpvertex[j+LC].b=0;
+                  tmpvertex[j+LC].a=0;
+                }
 		if (incj) {
-			//printf ("%f %f %f\n",tmpvertex[j+1].r,tmpvertex[j+1].g,tmpvertex[j+1].b);
+			//printf ("%f %f %f\n",tmpvertex[j+repetition-1].r,tmpvertex[j+repetition-1].g,tmpvertex[j+repetition-1].b);
 		}
 		j+=incj;
 	}
 	VSFileSystem::vs_fprintf (stderr,"Read In Star Count %d used: %d\n",starcount,j/2);
+        *num=j;
+        return tmpvertex;
+}
+PointStarVlist::PointStarVlist (int num ,float spread,const std::string &sysnam):StarVlist(spread) {
 	//static bool StarStreaks=XMLSupport::parse_bool(vs_config->getVariable("graphics","star_streaks","false"));
+        GFXColorVertex * tmpvertex = AllocVerticesForSystem(sysnam,this->spread,&num,2);
 	//if(StarStreaks) {
-		vlist= new GFXVertexList (GFXLINE,j,tmpvertex, j, true,0);
+        vlist= new GFXVertexList (GFXLINE,num,tmpvertex, num, true,0);
 	//}else {
-		for (unsigned int i=0;i<j/2;++i) {
+		for (unsigned int i=0;i<num/2;++i) {
 			tmpvertex[i]=tmpvertex[i*2+1];
 		}
-		nonstretchvlist= new GFXVertexList (GFXPOINT,j/2,tmpvertex, j/2, false,0);
+		nonstretchvlist= new GFXVertexList (GFXPOINT,num/2,tmpvertex, num/2, false,0);
 	//}
 	delete []tmpvertex;
 }
@@ -297,7 +304,7 @@ void StarVlist::UpdateGraphics() {
 		lasttime=time;
 	}
 }
-bool StarVlist::BeginDrawState (const QVector &center, const Vector & velocity, const Vector & torque, bool roll, bool yawpitch) {
+bool PointStarVlist::BeginDrawState (const QVector &center, const Vector & velocity, const Vector & torque, bool roll, bool yawpitch) {
 	UpdateGraphics();
 	static bool StarStreaks=XMLSupport::parse_bool(vs_config->getVariable("graphics","star_streaks","false"));
 	GFXColorMaterial(AMBIENT|DIFFUSE);
@@ -349,22 +356,33 @@ bool StarVlist::BeginDrawState (const QVector &center, const Vector & velocity, 
 	}
 	return ret;
 }
-void StarVlist::Draw(bool stretch) {
+void PointStarVlist::Draw(bool stretch) {
 	if (stretch) {
 		vlist->Draw();
 		vlist->Draw(GFXPOINT,vlist->GetNumVertices());
 	}else
 		nonstretchvlist->Draw();
 }
-void StarVlist::EndDrawState(bool stretch) {
+void PointStarVlist::EndDrawState(bool stretch) {
 	if (stretch)
 		vlist->EndDrawState();
 	else
 		nonstretchvlist->EndDrawState();
 	GFXColorMaterial(0);
 }
-Stars::Stars(int num, float spread): vlist((num/STARnumvlist)+1,spread,""),spread(spread){
+PointStarVlist::~PointStarVlist () {
+  delete vlist;
+  delete nonstretchvlist;
 
+}
+Stars::Stars(int num, float spread): vlist(NULL),spread(spread){
+  static string starspritetextures = vs_config->getVariable("graphics","near_stars_sprite_texture","");
+  static float starspritesize = XMLSupport::parse_float(vs_config->getVariable("graphics","near_stars_sprite_size","2"));
+  if (starspritetextures.length()==0) {
+    vlist = new PointStarVlist((num/STARnumvlist)+1,spread,"");
+  }else {
+    vlist = new SpriteStarVlist((num/STARnumvlist)+1,spread,"",starspritetextures,starspritesize);
+  }
   int curnum = num/STARnumvlist+1;
   fade = blend=true;
   ResetPosition(QVector(0,0,0));
@@ -402,7 +420,7 @@ void Stars::Draw() {
     GFXDisable (LIGHTING);
   }
   
-  bool stretch=vlist.BeginDrawState(_Universe->AccessCamera()->GetR().Scale(-spread).Cast(),_Universe->AccessCamera()->GetVelocity(),_Universe->AccessCamera()->GetAngularVelocity(),false,false);
+  bool stretch=vlist->BeginDrawState(_Universe->AccessCamera()->GetR().Scale(-spread).Cast(),_Universe->AccessCamera()->GetVelocity(),_Universe->AccessCamera()->GetAngularVelocity(),false,false);
   _Universe->AccessCamera()->UpdateGFX(GFXFALSE,GFXFALSE,GFXFALSE);
 	
   for (int i=0;i<STARnumvlist;i++) {
@@ -410,9 +428,9 @@ void Stars::Draw() {
       GFXTranslateModel (pos[i]-pos[i-1]);
     else
       GFXTranslateModel (pos[i]);
-    vlist.Draw(stretch);
+    vlist->Draw(stretch);
   }
-  vlist.EndDrawState(stretch);
+  vlist->EndDrawState(stretch);
 _Universe->AccessCamera()->UpdateGFX(GFXTRUE,GFXFALSE,GFXFALSE)	  ;
 
   GFXEnable (TEXTURE0);
@@ -480,9 +498,110 @@ void Stars::UpdatePosition(const QVector & cp) {
   upd (pos[2].k,pos[5].k,pos[8].k, pos[11].k,pos[14].k,pos[17].k,pos[20].k, pos[23].k,pos[26].k, cp.k, spread);
 
 }
-
-StarVlist::~StarVlist () {
+Stars::~Stars() {
   delete vlist;
-  delete nonstretchvlist;
-
+  
 }
+
+SpriteStarVlist::SpriteStarVlist(int num, float spread, std::string sysnam, std::string texturename,float size):StarVlist(spread) {
+  if (texturename.find(".ani")!=string::npos) {
+    decal= new AnimatedTexture(texturename.c_str(),0,MIPMAP);
+  }else{
+    decal = new Texture(texturename.c_str());
+  }
+  GFXColorVertex * tmpvertex = AllocVerticesForSystem(sysnam,this->spread,&num,12);
+  
+  for (int LC=0;LC<num;LC+=12) {
+    int LAST=LC+11;
+    for (int i=LC;i<=LAST;++i) {
+      tmpvertex[i].r=tmpvertex[LAST].r;
+      tmpvertex[i].g=tmpvertex[LAST].g;
+      tmpvertex[i].b=tmpvertex[LAST].b;
+      tmpvertex[i].a=tmpvertex[LAST].a;
+    }
+    tmpvertex[LC+0].x-=size;
+    tmpvertex[LC+0].y+=size;
+    tmpvertex[LC+0].s=0;    
+    tmpvertex[LC+0].t=1;    
+    tmpvertex[LC+1].x+=size;
+    tmpvertex[LC+1].y+=size;
+    tmpvertex[LC+1].s=1;    
+    tmpvertex[LC+1].t=1;    
+    tmpvertex[LC+2].x+=size;
+    tmpvertex[LC+2].y-=size;
+    tmpvertex[LC+2].s=1;    
+    tmpvertex[LC+2].t=0;    
+    tmpvertex[LC+3].x-=size;
+    tmpvertex[LC+3].y-=size;
+    tmpvertex[LC+3].s=0;    
+    tmpvertex[LC+3].t=0;    
+    
+    tmpvertex[LC+4].x-=size;
+    tmpvertex[LC+4].z+=size;
+    tmpvertex[LC+4].s=0;
+    tmpvertex[LC+4].t=1;
+    tmpvertex[LC+5].x+=size;
+    tmpvertex[LC+5].z+=size;
+    tmpvertex[LC+5].s=1;
+    tmpvertex[LC+5].t=1;
+    tmpvertex[LC+6].x+=size;
+    tmpvertex[LC+6].z-=size;
+    tmpvertex[LC+6].s=1;
+    tmpvertex[LC+6].t=0;
+    tmpvertex[LC+7].x-=size;
+    tmpvertex[LC+7].z-=size;
+    tmpvertex[LC+7].s=0;
+    tmpvertex[LC+7].t=0;
+
+    tmpvertex[LC+8].y-=size;
+    tmpvertex[LC+8].z+=size;
+    tmpvertex[LC+8].s=0;
+    tmpvertex[LC+8].t=1;
+    tmpvertex[LC+9].y+=size;
+    tmpvertex[LC+9].z+=size;
+    tmpvertex[LC+9].s=1;
+    tmpvertex[LC+9].t=1;
+    tmpvertex[LC+10].y+=size;
+    tmpvertex[LC+10].z-=size;
+    tmpvertex[LC+10].s=1;
+    tmpvertex[LC+10].t=0;
+    tmpvertex[LC+11].y-=size;
+    tmpvertex[LC+11].z-=size;
+    tmpvertex[LC+11].s=0;
+    tmpvertex[LC+11].t=0;
+    
+  }
+  vlist= new GFXVertexList (GFXQUAD,num,tmpvertex, num, true,0);
+  delete []tmpvertex;
+  
+}
+
+bool SpriteStarVlist::BeginDrawState(const QVector &center, const Vector &velocity, const Vector & torque, bool roll, bool yawpitch) {
+  UpdateGraphics();
+  GFXEnable(TEXTURE0);
+  GFXDisable(CULLFACE);
+  decal->MakeActive();
+  GFXColorMaterial(AMBIENT|DIFFUSE);
+  vlist->LoadDrawState();
+  vlist->BeginDrawState();
+  return false;  
+}
+
+void SpriteStarVlist::EndDrawState(bool stretch) {
+  vlist->EndDrawState();
+  GFXDisable(TEXTURE0);
+  GFXEnable(CULLFACE);
+  GFXColorMaterial(0);
+}
+
+void SpriteStarVlist::Draw(bool strertch) {
+  vlist->Draw();
+}
+
+SpriteStarVlist::~SpriteStarVlist() {
+  if (decal)
+    delete decal;
+  if (vlist)
+    delete vlist;
+}
+

@@ -29,8 +29,16 @@
 #include "config_xml.h"
 #include <float.h>
 	const float size = 100;
-Background::Background(const char *file, int numstars, float spread,std::string filename):Enabled (true),stars(numstars,200/*spread*/,XMLSupport::parse_bool (vs_config->getVariable("graphics","use_star_coords","true"))?filename:"") {
+Background::Background(const char *file, int numstars, float spread,std::string filename):Enabled (true),stars(NULL) {
 	string temp;
+        static string starspritetextures = vs_config->getVariable("graphics","far_stars_sprite_texture","");
+        static float starspritesize = XMLSupport::parse_float(vs_config->getVariable("graphics","far_stars_sprite_size","2"));
+
+        if(starspritetextures.length()==0) {
+          stars= new PointStarVlist(numstars,200/*spread*/,XMLSupport::parse_bool (vs_config->getVariable("graphics","use_star_coords","true"))?filename:"");
+        }else {
+          stars= new SpriteStarVlist(numstars,200/*spread*/,XMLSupport::parse_bool (vs_config->getVariable("graphics","use_star_coords","true"))?filename:"",starspritetextures,starspritesize);
+        }
 	up = left = down = front=right=back=NULL;
 	static int max_cube_size =XMLSupport::parse_int (vs_config->getVariable("graphics","max_cubemap_size","1024"));
 	temp = string(file)+"_up.bmp";
@@ -96,6 +104,8 @@ Background::~Background()
     delete down;
   if (SphereBackground)
     delete SphereBackground;
+  if (stars)
+    delete stars;
 }
 
 void Background::Draw()
@@ -245,9 +255,9 @@ void Background::Draw()
   GFXDisable(DEPTHWRITE);
   GFXBlendMode(ONE,ONE);
   static float background_velocity_scale = XMLSupport::parse_float (vs_config->getVariable("graphics","background_star_streak_velocity_scale","0"));
-  bool stretch=stars.BeginDrawState(QVector(0,0,0), _Universe->AccessCamera()->GetVelocity().Scale(background_velocity_scale),_Universe->AccessCamera()->GetAngularVelocity(),true,true);
-  stars.Draw(stretch);
-  stars.EndDrawState(stretch);
+  bool stretch=stars->BeginDrawState(QVector(0,0,0), _Universe->AccessCamera()->GetVelocity().Scale(background_velocity_scale),_Universe->AccessCamera()->GetAngularVelocity(),true,true);
+  stars->Draw(stretch);
+  stars->EndDrawState(stretch);
   GFXBlendMode(ONE,ZERO);
   GFXEnable (DEPTHTEST);
   GFXEnable(DEPTHWRITE);
