@@ -87,22 +87,27 @@ FlyByWire::~FlyByWire() {
 }
 
 void FlyByWire::Right (float per) {
+  desired_ang_velocity += (per*parent->Limits().yaw)*Vector (0,1,0);
   fprintf (stderr,"r %f\n",per);
 }
 
 void FlyByWire::Up (float per) {
+  desired_ang_velocity += (per*parent->Limits().pitch)*Vector (1,0,0);
   fprintf (stderr,"u %f\n",per);
 }
 
 void FlyByWire::RollRight (float per) {
+  desired_ang_velocity += (per*parent->Limits().roll)*Vector (0,0,1);
   fprintf (stderr,"rr %f\n",per);
 }
 
 void FlyByWire::Afterburn (float per){
+  dream_speed=per*max_ab_speed;
   fprintf (stderr,"ab %f\n",per);
 }
 
 void FlyByWire::Accel (float per) {
+  set_speed+=per*100*SIMULATION_ATOM;
   fprintf (stderr,"ac %f\n",per);
 }
 
@@ -116,7 +121,7 @@ void FlyByWire::Accel (float per) {
 
 #define FBWABS(m) (m>=0?m:-m)
 AI * FlyByWire::Execute () {
-
+  desired_ang_velocity=Vector();
 #define SSCK starshipcontrolkeys
   if (SSCK.dirty) {
     //go with what's last there: no frames since last physics frame

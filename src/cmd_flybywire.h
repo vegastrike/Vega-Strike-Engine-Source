@@ -17,6 +17,7 @@ class MatchAngularVelocity : public Order {
 };
 
 class FlyByWire : public Order {
+  Vector desired_ang_velocity;
   float set_speed;
   float dream_speed;
   float max_speed;
