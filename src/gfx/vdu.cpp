@@ -625,6 +625,9 @@ void VDU::SetViewingStyle(VIEWSTYLE vs) {
   viewStyle = vs;
 }
 void VDU::DrawStarSystemAgain (float x,float y,float w,float h, VIEWSTYLE viewStyle,Unit *parent,Unit *target) {
+#ifdef CAR_SIM
+  viewStyle=CP_BACK;
+#endif
 
   GFXEnable (DEPTHTEST);
   GFXEnable (DEPTHWRITE);
@@ -649,7 +652,7 @@ void VDU::DrawStarSystemAgain (float x,float y,float w,float h, VIEWSTYLE viewSt
   GFXDisable(TEXTURE0);
   GFXDisable(DEPTHTEST);   
   GFXDisable(DEPTHWRITE);   
-
+#ifndef CAR_SIM
   char buf[1024];
   if (target) {
     std::string blah(getUnitNameAndFgNoBase(target));
@@ -657,7 +660,9 @@ void VDU::DrawStarSystemAgain (float x,float y,float w,float h, VIEWSTYLE viewSt
   } else {
     sprintf (buf,"This is a test of the emergencyBroadcastSystem\n");
   }
+
   tp->Draw(buf,0,true);
+#endif
   // _Universe->AccessCockpit()->RestoreViewPort();
 }
 

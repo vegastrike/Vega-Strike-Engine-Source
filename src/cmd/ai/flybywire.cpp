@@ -266,6 +266,7 @@ void FlyByWire::ThrustFront (float percent) {
 }
 void FlyByWire::Execute () {
   bool desireThrust=false;
+  Vector des_vel_bak (desired_velocity);
   if (DesiredThrust.i||DesiredThrust.j||DesiredThrust.k) {
     desired_velocity = parent->UpCoordinateLevel(parent->GetVelocity())+(SIMULATION_ATOM*DesiredThrust);
     parent->GetComputerData().set_speed = desired_velocity.Magnitude();
@@ -279,12 +280,13 @@ void FlyByWire::Execute () {
   
     }
   }
-  if (sheltonslide&&(!desireThrust)) {
+  if (sheltonslide&&(!desireThrust)&&controltype) {
     MatchAngularVelocity::Execute();//only match turning, keep velocity same
   }else {
     MatchVelocity::Execute();
   }
   DesiredThrust.Set(0,0,0);
+  desired_velocity=des_vel_bak;
 } 
 
 
