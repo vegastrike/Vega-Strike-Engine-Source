@@ -56,30 +56,24 @@ void BaseInterface::Room::Comp::EndXML (FILE *fp) {
 	for (int i=0;i<modes.size();i++) {
 		char *mode=NULL;
 		switch(modes[i]) {
-		case UpgradingInfo::NEWSMODE:
-			mode="NewsMode";
-			break;
-		case UpgradingInfo::SHIPDEALERMODE:
-			mode="ShipMode";
-			break;
-		case UpgradingInfo::UPGRADEMODE:
-			mode="UpgradeMode";
-			break;
-		case UpgradingInfo::DOWNGRADEMODE:
-			mode="DowngradeMode";
-			break;
-		case UpgradingInfo::BRIEFINGMODE:
-			mode="BriefingMode";
-			break;
-		case UpgradingInfo::MISSIONMODE:
-			mode="MissionMode";
-			break;
-		case UpgradingInfo::SELLMODE:
-			mode="SellMode";
-			break;
-		case UpgradingInfo::BUYMODE:
-			mode="BuyMode";
-			break;
+			case BaseComputer::CARGO:
+				mode="Cargo";
+				break;
+			case BaseComputer::UPGRADE:
+				mode="Upgrade";
+				break;
+			case BaseComputer::SHIP_DEALER:
+				mode="ShipDealer";
+				break;
+			case BaseComputer::MISSIONS:
+				mode="Missions";
+				break;
+			case BaseComputer::NEWS:
+				mode="News";
+				break;
+			case BaseComputer::INFO:
+				mode="Info";
+				break;
 		}
 		if (mode)
 			fprintf(fp,"%s ",mode);

@@ -14,6 +14,7 @@
 #include "save_util.h"
 #include "unit_util.h"
 #include "gfx/cockpit.h"
+#include "main_loop.h"
 #ifdef BASE_MAKER
  #include <stdio.h>
  #ifdef _WIN32
@@ -246,7 +247,7 @@ void BaseInterface::Room::Click (BaseInterface* base,float x, float y, int butto
 						fscanf(fp,"%d",&index);
 						for (i=0;i<index&&(!feof(fp));i++) {
 							fscanf(fp,"%d",&ret);
-							((Comp*)links.back())->modes.push_back((UpgradingInfo::BaseMode)ret);
+							((Comp*)links.back())->modes.push_back((BaseComputer::DisplayMode)ret);
 						}
 						break;
 					default:
@@ -578,44 +579,9 @@ void BaseInterface::Room::Comp::Click (BaseInterface *base,float x, float y, int
 		if (un&&baseun) {
 			base->CallComp=true;
 #ifdef NEW_GUI
-                        // Map old modes to new modes.
-                        typedef std::pair<UpgradingInfo::BaseMode,BaseComputer::DisplayMode> ModePair;
-                        static std::map<UpgradingInfo::BaseMode,BaseComputer::DisplayMode> modeMap;
-                        static bool mapLoaded = false;
-                        if(!mapLoaded) {
-                            modeMap.insert(ModePair(UpgradingInfo::BUYMODE,BaseComputer::CARGO));
-                            modeMap.insert(ModePair(UpgradingInfo::SELLMODE,BaseComputer::CARGO));
-                            modeMap.insert(ModePair(UpgradingInfo::MISSIONMODE,BaseComputer::MISSIONS));
-                            modeMap.insert(ModePair(UpgradingInfo::NEWSMODE,BaseComputer::NEWS));
-                            modeMap.insert(ModePair(UpgradingInfo::SHIPDEALERMODE,BaseComputer::SHIP_DEALER));
-                            modeMap.insert(ModePair(UpgradingInfo::UPGRADEMODE,BaseComputer::UPGRADE));
-                            modeMap.insert(ModePair(UpgradingInfo::ADDMODE,BaseComputer::UPGRADE));
-                            modeMap.insert(ModePair(UpgradingInfo::DOWNGRADEMODE,BaseComputer::UPGRADE));
-                            modeMap.insert(ModePair(UpgradingInfo::BRIEFINGMODE,BaseComputer::PLAYER_INFO));
-                            mapLoaded = true;
-                        }
-
-                        std::vector<BaseComputer::DisplayMode> displayModes;
-                        for(int i=0; i<modes.size(); i++) {
-                            std::map<UpgradingInfo::BaseMode,BaseComputer::DisplayMode>::iterator iter = modeMap.find(modes[i]);
-                            if(iter != modeMap.end()) {
-                                // Put the mapped display mode into our vector.
-                                BaseComputer::DisplayMode currentMode = iter->second;
-                                int d;
-                                // Make sure we don't get duplicates.
-                                for(d=0; d<displayModes.size(); d++) {
-                                    if(displayModes[d] == currentMode) {
-                                        break;
-                                    }
-                                }
-                                if(d == displayModes.size()) {
-                                    displayModes.push_back(currentMode);
-                                }
-                            }
-                        }
-                        BaseComputer* bc = new BaseComputer(un, baseun, displayModes);
-                        bc->init();
-                        bc->run();
+            BaseComputer* bc = new BaseComputer(un, baseun, modes);
+            bc->init();
+            bc->run();
 #else
 			UpgradeCompInterface(un,baseun,modes);
 #endif // NEW_GUI

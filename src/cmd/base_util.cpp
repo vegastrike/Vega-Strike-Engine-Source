@@ -73,22 +73,15 @@ namespace BaseUtil {
 		BaseInterface::Room::Comp *newcomp=new BaseInterface::Room::Comp (index,pythonfile);
 		newroom->links.push_back(newcomp);
 		BaseLink(newroom,x,y,wid,hei,text);
-		static const EnumMap::Pair modelist [UpgradingInfo::MAXMODE+1] = {
-			EnumMap::Pair ("NewsMode", UpgradingInfo::NEWSMODE), 
-			EnumMap::Pair ("ShipMode", UpgradingInfo::SHIPDEALERMODE), 
-			EnumMap::Pair ("UpgradeMode", UpgradingInfo::UPGRADEMODE), 
-			EnumMap::Pair ("DowngradeMode", UpgradingInfo::DOWNGRADEMODE),
-//			BriefingMode may be enabled at a future time.  For now we use InfoMode.
-//			EnumMap::Pair ("BriefingMode", UpgradingInfo::BRIEFINGMODE), 
-			EnumMap::Pair ("InfoMode", UpgradingInfo::BRIEFINGMODE), 
-			EnumMap::Pair ("MissionMode", UpgradingInfo::MISSIONMODE), 
-			EnumMap::Pair ("SellMode", UpgradingInfo::SELLMODE), 
-			EnumMap::Pair ("BuyMode", UpgradingInfo::BUYMODE),
-			EnumMap::Pair (" SaveMode", UpgradingInfo::SAVEMODE), //for these two strings, I am not sure if we
-			EnumMap::Pair (" AddMode", UpgradingInfo::ADDMODE), //should allow them (the ' ' at the beginning)...
-			EnumMap::Pair ("UNKNOWN", UpgradingInfo::MAXMODE)
+		static const EnumMap::Pair modelist [BaseComputer::DISPLAY_MODE_COUNT] = {
+			EnumMap::Pair ("Cargo", BaseComputer::CARGO), 
+			EnumMap::Pair ("Upgrade", BaseComputer::UPGRADE), 
+			EnumMap::Pair ("ShipDealer", BaseComputer::SHIP_DEALER), 
+			EnumMap::Pair ("Missions", BaseComputer::MISSIONS),
+			EnumMap::Pair ("News", BaseComputer::NEWS), 
+			EnumMap::Pair ("Info", BaseComputer::INFO), 
 		};
-		static const EnumMap modemap (modelist,UpgradingInfo::MAXMODE+1);
+		static const EnumMap modemap (modelist,BaseComputer::DISPLAY_MODE_COUNT);
 		const char *newmode=modes.c_str();
 		int newlen=modes.size();
 		char *curmode=new char [newlen+1];
@@ -105,12 +98,10 @@ namespace BaseUtil {
 			//EnumMap crashes if the string is empty.
 			curmode[j]='\0';
 			int modearg = modemap.lookup(curmode);
-			if (modearg<UpgradingInfo::MAXMODE) {
-				newcomp->modes.push_back((UpgradingInfo::BaseMode)(modearg));
+			if (modearg<BaseComputer::DISPLAY_MODE_COUNT) {
+				newcomp->modes.push_back((BaseComputer::DisplayMode)(modearg));
 			} else {
-				if (curmode!="BriefingMode") { // Deprecated modes
-					fprintf(stderr,"WARNING: Unknown computer mode %s found in python script...\n",curmode);
-				}
+				fprintf(stderr,"WARNING: Unknown computer mode %s found in python script...\n",curmode);
 			}
 		}
 		delete [] curmode;

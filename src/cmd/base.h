@@ -2,7 +2,7 @@
 #define __BASE_H__
 #include <vector>
 #include <string>
-#include "unit_interface.h"
+#include "basecomputer.h"
 #include "gfx/hud.h"
 #include "gfx/sprite.h"
 #include <stdio.h>
@@ -44,7 +44,7 @@ public:
 		};
 		class Comp : public Link {
 		public:
-			vector <UpgradingInfo::BaseMode> modes;
+			vector <BaseComputer::DisplayMode> modes;
 			virtual void Click (::BaseInterface* base,float x, float y, int button, int state);
 			virtual ~Comp () {}
 			explicit Comp (std::string ind, std::string pythonfile) : Link(ind,pythonfile) {}

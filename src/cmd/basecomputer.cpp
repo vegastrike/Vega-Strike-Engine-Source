@@ -140,7 +140,7 @@ static const ModeInfo modeInfo[] = {
     ModeInfo ( "New Ships  ", "Ships", "ShipDealerMode", "ShipDealerGroup" ),
     ModeInfo ( "Missions BBS  ", "Missions", "MissionsMode", "MissionsGroup" ),
     ModeInfo ( "GNN News  ", "News", "NewsMode", "NewsGroup" ),
-    ModeInfo ( "Info/Stats  ", "Info", "PlayerInfoMode", "PlayerInfoGroup" )
+    ModeInfo ( "Info/Stats  ", "Info", "InfoMode", "InfoGroup" )
 };
 
 
@@ -157,7 +157,7 @@ const BaseComputer::WctlTableEntry BaseComputer::WctlCommandTable[] = {
     BaseComputer::WctlTableEntry ( modeInfo[SHIP_DEALER].command, "", &BaseComputer::changeToShipDealerMode ),
     BaseComputer::WctlTableEntry ( modeInfo[NEWS].command, "", &BaseComputer::changeToNewsMode ),
     BaseComputer::WctlTableEntry ( modeInfo[MISSIONS].command, "", &BaseComputer::changeToMissionsMode ),
-    BaseComputer::WctlTableEntry ( modeInfo[PLAYER_INFO].command, "", &BaseComputer::changeToPlayerInfoMode ),
+    BaseComputer::WctlTableEntry ( modeInfo[INFO].command, "", &BaseComputer::changeToInfoMode ),
     BaseComputer::WctlTableEntry ( "BuyCargo", "", &BaseComputer::buyCargo ),
     BaseComputer::WctlTableEntry ( "Buy10Cargo", "", &BaseComputer::buy10Cargo ),
     BaseComputer::WctlTableEntry ( "BuyAllCargo", "", &BaseComputer::buyAllCargo ),
@@ -305,7 +305,7 @@ GFXColor BaseComputer::getColorForGroup(std::string id) {
 			return GFXColor(1,0,1);
 		} else if (id=="UpgradeGroup") {
 			return GFXColor(0,1,0);
-		} else if (id=="PlayerInfoGroup") {
+		} else if (id=="InfoGroup") {
 			return GFXColor(0,1,1);
 		} else if (id=="MissionsGroup") {
 			return GFXColor(1,0,0);
@@ -867,11 +867,11 @@ void BaseComputer::constructControls(void) {
     }
 
     {
-        // PLAYER_INFO group control.
+        // INFO group control.
         GroupControl* infoGroup = new GroupControl;
-        infoGroup->setId("PlayerInfoGroup");
+        infoGroup->setId("InfoGroup");
         window()->addControl(infoGroup);
-		GFXColor color=getColorForGroup("PlayerInfoGroup");
+		GFXColor color=getColorForGroup("InfoGroup");
 
         // Player Info button.
         NewButton* playerInfo = new NewButton;
@@ -2965,10 +2965,10 @@ bool BaseComputer::buyShip(const EventCommandId& command, Control* control) {
 
 
 
-// Change controls to PLAYER_INFO mode.
-bool BaseComputer::changeToPlayerInfoMode(const EventCommandId& command, Control* control) {
-    if(m_currentDisplay != PLAYER_INFO) {
-        switchToControls(PLAYER_INFO);
+// Change controls to INFO mode.
+bool BaseComputer::changeToInfoMode(const EventCommandId& command, Control* control) {
+    if(m_currentDisplay != INFO) {
+        switchToControls(INFO);
         // Initialize description with player info.
         window()->sendCommand("ShowPlayerInfo", NULL);
 		recalcTitle();

@@ -46,7 +46,7 @@ public:
         SHIP_DEALER,        // Replace current ship.
         MISSIONS,           // Show available missions.
         NEWS,               // Show news items.
-        PLAYER_INFO,        // Show info about player.
+        INFO,				// Show basic info.
         DISPLAY_MODE_COUNT, // Number of display modes.
         NULL_DISPLAY = DISPLAY_MODE_COUNT,   // No display.
     };
@@ -128,8 +128,8 @@ protected:
     bool changeToNewsMode(const EventCommandId& command, Control* control);
     // Change display mode to MISSIONS.
     bool changeToMissionsMode(const EventCommandId& command, Control* control);
-    // Change display mode to PLAYER_INFO.
-    bool changeToPlayerInfoMode(const EventCommandId& command, Control* control);
+    // Change display mode to INFO.
+    bool changeToInfoMode(const EventCommandId& command, Control* control);
 
     // Redo the title string.
     void recalcTitle(void);
