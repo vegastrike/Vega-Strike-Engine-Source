@@ -700,6 +700,8 @@ void ChooseTargets(Unit * me, bool (*typeofunit)(Unit *,Unit *), bool reverse) {
 		std::reverse (vec.begin(),vec.end());
 	}
 	std::vector <Unit *>::const_iterator veciter=std::find(vec.begin(),vec.end(),me->Target());
+	if (veciter!=vec.end())
+		veciter++;
 	int cur=0;
 	while (1) {
 		while (veciter!=vec.end()) {
