@@ -596,13 +596,13 @@ namespace UniverseUtil {
 								{
 									//cerr<<"\t\tSearch position = "<<curpos<<endl;
 									ObjSerial new_serial = getUniqueSerial();
-									std::string serial_str( (*ti)+"serial=\""+XMLSupport::tostring5( new_serial)+"\"");
+									std::string serial_str( (*ti)+"serial=\""+XMLSupport::tostring5( new_serial)+"\" ");
 									// If there are already serial in the file we replace that kind of string : <planet serial="XXXXX"
 									// of length search_length + 14 (length of serial="XXXXX")
 									if( newserials)
 										system.replace( curpos, search_length, serial_str);
 									else
-										system.replace( curpos, search_length+14, serial_str);
+										system.replace( curpos, search_length+15, serial_str);
 									nboc++;
 									curpos += search_length;
 								}

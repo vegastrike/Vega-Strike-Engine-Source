@@ -1686,7 +1686,6 @@ namespace VSFileSystem
 				{
 					if( pk3_extracted_file[offset]=='\n' || pk3_extracted_file[offset]=='\r')
 					{
-						offset++;
 						nl_found = true;
 						if( pk3_extracted_file[offset]=='\n')
 							cerr<<"\\n ";
