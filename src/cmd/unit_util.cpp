@@ -31,7 +31,7 @@ namespace UnitUtil {
 		bool res=false;
 		clsptr typ = my_unit->isUnit();
 		string s=getFlightgroupName(my_unit);
-		res=((typ==PLANETPTR&&!((Planet *)my_unit)->hasLights())||typ==ASTEROIDPTR||typ==NEBULAPTR||s=="Base");
+		res=((typ==PLANETPTR&&(!((Planet *)my_unit)->hasLights())&&(!((Planet*)my_unit)->isAtmospheric()))||typ==ASTEROIDPTR||typ==NEBULAPTR||s=="Base");
 		return res;
 	}
 	bool isSun(Unit *my_unit){
@@ -40,6 +40,7 @@ namespace UnitUtil {
 		res=my_unit->isPlanet();
 		if (res) {
 			res = ((Planet *)my_unit)->hasLights();
+
 		}
 		return res;
 	}	int communicateTo(Unit *my_unit,Unit *other_unit,float mood){
