@@ -442,10 +442,10 @@ namespace UniverseUtil {
 						return FactionUtil::GetContraband(FactionUtil::GetFaction(faction.c_str()));
 				}
 				void LoadMission (string missionname) {
-						delayLoadMission (missionname);
+					::LoadMission (missionname.c_str(),"",false);
 				}
 				void LoadMissionScript (string missionscript) {
-						delayLoadMission ("nothing.mission",missionscript);
+					::LoadMission ("nothing.mission",missionscript,false);
 				}
 
 				void SetAutoStatus (int global_auto, int player_auto) {
