@@ -2,6 +2,10 @@
 #include "cmd/unit.h"
 #include "hud.h"
 #include "vs_globals.h"
+
+#include "cmd/script/mission.h"
+#include "cmd/script/msgcenter.h"
+
 VDU::VDU (const char * file, TextPlane *textp, unsigned char modes, short rwws, short clls, unsigned short *ma, float *mh) :Sprite (file),tp(textp),posmodes(modes),thismode(VIEW), rows(rwws), cols(clls){
   StartArmor = ma;
   maxhull = mh;
@@ -30,7 +34,7 @@ void VDU::DrawTargetSpr (Sprite *s, float per, float &sx, float &sy, float &w, f
 }
 
 
-static void DrawShield (float fs, float rs, float ls, float bs, float x, float y, float h, float w) { 
+static void DrawShield (float fs, float rs, float ls, float bs, float x, float y, float h, float w) { //FIXME why is this static?
   GFXBegin (GFXLINE);
   if (fs>.2) {
     GFXVertex3f (x-w/8,y+h/2,0);
@@ -164,7 +168,9 @@ void VDU::DrawTarget(Unit * parent, Unit * target) {
 
 
   char st[256];
-  sprintf (st,"\n%s",target->name.c_str());
+  //  sprintf (st,"\n%s",target->name.c_str());
+  sprintf (st,"\n%s:%s",target->getFgID().c_str(),target->name.c_str());
+
   int k = strlen (st);
   if (k>cols)
     k=cols;
@@ -184,11 +190,31 @@ void VDU::DrawTarget(Unit * parent, Unit * target) {
   GFXColor4f (1,1,1,1);
 }
 
+void VDU::DrawMessages(){
+  string fullstr;
+
+  MessageCenter *mc=mission->msgcenter;
+  
+  for(int i=0;i<11;i++){
+    gameMessage *lastmsg=mc->last(i);
+    if(lastmsg!=NULL){
+      char timebuf[100];
+      sprintf(timebuf,"%d ",i);
+      fullstr=lastmsg->message+"\n"+fullstr;
+      //cout << "nav " << fullstr << endl;
+    }
+  }
+
+  tp->Draw(fullstr);
+}
 
 void VDU::DrawNav (const Vector & nav) {
+
   char navdata[256];
   sprintf (navdata,"\nNavigation\n----------\nRelativeLocation\nx: %.4f\ny:%.4f\nz:%.4f\nDistance:\n%f",nav.i,nav.j,nav.k,10*nav.Magnitude());
   tp->Draw (std::string(navdata));  
+
+
 }
 static void DrawGun (Vector  pos, float w, float h, weapon_info::MOUNT_SIZE sz) {
   w=fabs (w);
@@ -351,6 +377,9 @@ void VDU::Draw (Unit * parent) {
     break;
   case NAV:
     DrawNav(parent->ToLocalCoordinates (parent->GetComputerData().NavPoint-parent->Position()));
+    break;
+  case MSG:
+    DrawMessages();
     break;
   case DAMAGE:
     DrawDamage(parent);

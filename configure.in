@@ -683,7 +683,7 @@ AC_DEFUN( CHECK_FOR_PYTHON_LIB, [
 
 saved_LIBS="$RRLIBS"
 
-PYTHON_LIB_LIST="python2.1 python2.2"
+PYTHON_LIB_LIST="python1.5 python2.1 python2.2"
 
 for PYTHON_LIB_NAME in $PYTHON_LIB_LIST ; do
     CHECK_FOR_PYTHON_LIB
@@ -719,7 +719,7 @@ BOOST_LIB_LIST="boost_python"
 for BOOST_LIB_NAME in $BOOST_LIB_LIST ; do
     CHECK_FOR_BOOST_LIB
 
-    if test "x$have_python_lib" = "xyes" ; then
+    if test "x$have_boost_lib" = "xyes" ; then
 	LIBS="$saved_LIBS"
 	TR_LIBS="$TR_LIBS $PYTHON_LDOPTS -l$BOOST_LIB_NAME"
         break;

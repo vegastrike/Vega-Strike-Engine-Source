@@ -30,6 +30,8 @@ class VDU: public Sprite {
   void DrawVDUShield (Unit * parent);
   ///Draws the target display of Unit *target (only call with nonNULL)
   void DrawTarget(Unit * parent, Unit *target);
+  ///Draws the message from the messagecenter
+  void DrawMessages();
   ///Draws the nav point this unit is heading to
   void DrawNav(const Vector &navPoint);
   ///Draws the damage this unit has sustained
@@ -39,7 +41,7 @@ class VDU: public Sprite {
   ///Draws the sprite representing the current starship. Returns proper location and size for future use (with weaps and damage display)
   void DrawTargetSpr(Sprite * s,float percent, float &x, float &y, float &w, float &h);
 public:
-  enum VDU_MODE {TARGET=0x1,NAV=0x2,WEAPON=0x4, DAMAGE=0x8, SHIELD=0x10, VIEW=0x20};
+  enum VDU_MODE {TARGET=0x1,NAV=0x2,WEAPON=0x4, DAMAGE=0x8, SHIELD=0x10, VIEW=0x20, MSG=0x40};
   VDU(const char *file, TextPlane *textp,unsigned char modes, short rows, short cols, unsigned short *MaxArmor, float * maxhull);
   ///Draws the entire VDU, all data, etc
   void Draw(Unit * parent);

@@ -1,3 +1,13 @@
+2001-12-21 Alexander Rawass <alexannika@users.sourceforge.net>
+	
+	* modified configure.in
+	  - added python1.5 to search for python libs
+	  - fixed setting of have_boost_lib
+	* modified gfx/vdu.{h,cpp} cockpit_xml.cpp
+	  - messages are now displayed in the right VDU
+	  - the target-vdu now displays also the FgID
+
+	
 2001-12-20 Alexander Rawass <alexannika@users.sourceforge.net>
 	
 	* callbacks use now ints instead of floats

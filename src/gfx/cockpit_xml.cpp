@@ -266,7 +266,7 @@ void Cockpit::beginElement(const string &name, const AttributeList &attributes) 
     goto loadsprite;
   case RADAR: newsprite = &Radar;goto loadsprite;
   case LVDU: newvdu = &vdu[0];mymodes=VDU::WEAPON|VDU::DAMAGE|VDU::SHIELD;goto loadsprite;
-  case RVDU: newvdu = &vdu[1];mymodes=VDU::NAV|VDU::TARGET;goto loadsprite;
+  case RVDU: newvdu = &vdu[1];mymodes=VDU::NAV|VDU::TARGET|VDU::MSG;goto loadsprite;
   loadsprite:
     for(iter = attributes.begin(); iter!=attributes.end(); iter++) { 
       switch (attribute_map.lookup((*iter).name)) {

@@ -703,6 +703,6 @@ const string Unit::getFgID()  {
       return flightgroup->name+buffer;
     }
     else{
-      return "unknown";
+      return name;
     }
 };
