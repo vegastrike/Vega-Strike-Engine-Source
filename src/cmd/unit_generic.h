@@ -697,7 +697,7 @@ public:
   ///Updates physics given unit space transformations and if this is the last physics frame in the current gfx frame
 // Not needed here, so only in NetUnit and Unit classes
   void UpdatePhysics (const Transformation &trans, const Matrix &transmat, const Vector & CumulativeVelocity, bool ResolveLast, UnitCollection *uc=NULL);
-  virtual void UpdatePhysics2 (const Transformation &trans, const Transformation & old_physical_state, Vector & accel, float & difficulty, const Matrix &transmat, const Vector & CumulativeVelocity, bool ResolveLast, UnitCollection *uc=NULL);
+  virtual void UpdatePhysics2 (const Transformation &trans, const Transformation & old_physical_state, const Vector & accel, float difficulty, const Matrix &transmat, const Vector & CumulativeVelocity, bool ResolveLast, UnitCollection *uc=NULL);
   ///Resolves forces of given unit on a physics frame
   virtual Vector ResolveForces (const Transformation &, const Matrix&);
   ///Returns the pqr oritnattion of the unit in world space

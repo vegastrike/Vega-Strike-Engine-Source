@@ -65,7 +65,7 @@ extern unsigned short apply_float_to_short (float tmp);
 //    float max_roll;
 
 template <class UnitType>
-void GameUnit<UnitType>::UpdatePhysics2 (const Transformation &trans, const Transformation & old_physical_state, Vector & accel, float & difficulty, const Matrix &transmat, const Vector & cum_vel,  bool lastframe, UnitCollection *uc) {
+void GameUnit<UnitType>::UpdatePhysics2 (const Transformation &trans, const Transformation & old_physical_state, const Vector & accel, float difficulty, const Matrix &transmat, const Vector & cum_vel,  bool lastframe, UnitCollection *uc) {
 	int player = -1;
 
   // Here send (new position + direction = curr_physical_state.position and .orientation)

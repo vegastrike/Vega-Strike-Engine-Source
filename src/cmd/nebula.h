@@ -15,7 +15,7 @@ protected:
     friend class UnitFactory;
 
 public:
-	virtual void UpdatePhysics2 (const Transformation &trans, Transformation& transmat, const Vector & CumulativeVelocity, bool ResolveLast, UnitCollection *uc=NULL);
+	virtual void UpdatePhysics2 (const Transformation &trans,const  Transformation& transmat, const Matrix & m, float diff, const Vector & CumulativeVelocity, bool ResolveLast, UnitCollection *uc=NULL);
 	void SetFogState();
 	void PutInsideCam(int);
 
