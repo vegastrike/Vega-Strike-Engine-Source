@@ -1718,7 +1718,11 @@ void BaseComputer::updateTransactionControlsForSelection(TransactionList* tlist)
                 commitButton->setCommand("SellUpgrade");
                 break;
              case ACCEPT_MISSION:
-                commitButton->setLabel("Accept");
+               if (item.category.find("Active_Missions")!=string::npos) {
+                 commitButton->setLabel("Abort");
+               }else {
+                 commitButton->setLabel("Accept");
+               }
                 commitButton->setCommand("AcceptMission");
                 break;
            default:
@@ -1960,7 +1964,7 @@ bool BaseComputer::isTransactionOK(const Cargo& originalItem, TransactionType tr
             break;
         case ACCEPT_MISSION:
             // Make sure the player doesn't take too many missions.
-			if(active_missions.size() < UniverseUtil::maxMissions()) {
+			if(item.category.find("Active_Missions")!=string::npos||active_missions.size() < UniverseUtil::maxMissions()) {
 				return true;
 			}
             break;
@@ -2547,10 +2551,10 @@ void BaseComputer::loadMissionsMasterList(TransactionList& tlist) {
         CargoColor c;
 
         // Take any categories out of the name and put them in the cargo.category.
-	    const string finalScript = getSaveString(playerNum, MISSION_SCRIPTS_LABEL, i);
-		if (finalScript[0]=='#') {
-			continue; // Ignore any missions with comments. (those are fixer missions.)
-		}
+        const string finalScript = getSaveString(playerNum, MISSION_SCRIPTS_LABEL, i);
+        if (finalScript[0]=='#') {
+          continue; // Ignore any missions with comments. (those are fixer missions.)
+        }
 		
         const string originalName = getSaveString(playerNum, MISSION_NAMES_LABEL, i);
         const string::size_type lastCategorySep = originalName.rfind(CATEGORY_SEP);
@@ -2563,7 +2567,7 @@ void BaseComputer::loadMissionsMasterList(TransactionList& tlist) {
             c.cargo.content = originalName;
             c.cargo.category = "";
         }
-
+        c.cargo.content=c.cargo.content;
         // Description gets name at the top.
         c.cargo.description = "#b#" + beautify(c.cargo.content) + ":#-b#n1.75#" + 
             getSaveString(playerNum, MISSION_DESC_LABEL, i);
@@ -2573,6 +2577,21 @@ void BaseComputer::loadMissionsMasterList(TransactionList& tlist) {
 
     // Sort the list.  Better for display, easier to compile into categories, etc.
     std::sort(tlist.masterList.begin(), tlist.masterList.end(), CargoColorSort());
+    if (active_missions.size()) {
+      for (unsigned int i=1;i<active_missions.size();++i){
+        CargoColor amission;
+        amission.cargo.content=XMLSupport::tostring(i)+" "+active_missions[i]->mission_name;
+        amission.cargo.price=0;
+        amission.cargo.quantity=1;
+        amission.cargo.category="Active_Missions";
+        amission.cargo.description="Objectives\\";
+        for (unsigned int j=0;j<active_missions[i]->objectives.size();++j) {
+          amission.cargo.description+=active_missions[i]->objectives[j].objective+": "+XMLSupport::tostring((int)(100*active_missions[i]->objectives[j].completeness))+"%\\";          
+        }
+        amission.color=DEFAULT_UPGRADE_COLOR;
+        tlist.masterList.push_back(amission);
+      }
+    }
 }
 
 // Load the controls for the MISSIONS display.
@@ -2604,7 +2623,20 @@ bool BaseComputer::acceptMission(const EventCommandId& command, Control* control
         updateTransactionControlsForSelection(NULL);
         return true;
     }
-
+    if (item->category.find("Active_Missions")!=string::npos) {
+      unsigned int whichmission=atoi(item->content.c_str());
+      if (whichmission>0&&whichmission<active_missions.size()) {
+        Mission * tmp=active_missions[whichmission];
+        active_missions[whichmission]->terminateMission();        
+        if (tmp==mission)
+          mission=active_missions[0];
+        Cargo itemCopy = *item;
+        loadMissionsControls();
+        updateTransactionControls(itemCopy);
+        return true;
+      }      
+      return false;
+    }
     const int playernum = UnitUtil::isPlayerStarship(playerUnit);
     const int stringCount = getSaveStringLength(playernum, MISSION_NAMES_LABEL);
     assert(stringCount == getSaveStringLength(playernum, MISSION_SCRIPTS_LABEL));
@@ -2625,7 +2657,7 @@ bool BaseComputer::acceptMission(const EventCommandId& command, Control* control
 	}
     }
     if(finalScript.empty()) {
-        assert(false);       // FIXME mbyron.  Shouldn't this be an alert?
+      return false;
     } else {
         LoadMission("", finalScript, false);
 	if(active_missions.size() > 0) {

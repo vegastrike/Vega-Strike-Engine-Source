@@ -717,7 +717,19 @@ void NavigationSystem::DrawMission()
 	displayname.col = GFXColor(1,1,1,1);
 	displayname.SetSize (.6,-.8);
 	displayname.SetPos(originx+ (.1*deltax)+.37,   originy/*+(1*deltay)*/);
-	displayname.SetText ("*******#00a6FFVega Strike 0.4#000000*********\nUse #8080FFTab#000000 to afterburn\n#8080FF+,-#000000 act as cruise controll\nYour ship undocks stopped;\nhit #8080FF+ or /#000000 to go to full speed,\n#8080FFarrows#000000 steer your ship. The #8080FFt#000000 key\ntargets objects; #8080FFspace#000000 fires at them\nThe #8080FFa#000000 key activates insystem warp\nto cross vast distances to your target.\nTime Compression: #8080FFF9; F10#000000 resets.\nBuy a jump drive for 10000\nFly into a green jump wireframe; hit #8080FFj#000000\nto warp to a system. Target a base.\nWhen you get close a green box shows.\nInside the box, #8080FFd#000000 will land.\nBe sure to click Options at the base,\nand select the Save option.\nPress #8080FFshift-M#000000 to toggle help.\n#FF0000If Vega Strike halts or acts oddly,#000000\n#FFFF00immediately#000000 post stderr.txt & stdout.txt\nto http://vegastrike.sourceforge.net/forums\nbefore you restart Vega Strike.\nPress #8080FFshift-M#000000 to get back here.\nRight buttons access the galaxy maps.");
+        if (active_missions.size()<=1) {
+          displayname.SetText ("*******#00a6FFVega Strike 0.4#000000*********\nUse #8080FFTab#000000 to afterburn\n#8080FF+,-#000000 act as cruise controll\nYour ship undocks stopped;\nhit #8080FF+ or /#000000 to go to full speed,\n#8080FFarrows#000000 steer your ship. The #8080FFt#000000 key\ntargets objects; #8080FFspace#000000 fires at them\nThe #8080FFa#000000 key activates insystem warp\nto cross vast distances to your target.\nTime Compression: #8080FFF9; F10#000000 resets.\nBuy a jump drive for 10000\nFly into a green jump wireframe; hit #8080FFj#000000\nto warp to a system. Target a base.\nWhen you get close a green box shows.\nInside the box, #8080FFd#000000 will land.\nBe sure to click Options at the base,\nand select the Save option.\nPress #8080FFshift-M#000000 to toggle help.\n#FF0000If Vega Strike halts or acts oddly,#000000\n#FFFF00immediately#000000 post stderr.txt & stdout.txt\nto http://vegastrike.sourceforge.net/forums\nbefore you restart Vega Strike.\nPress #8080FFshift-M#000000 to get back here.\nRight buttons access the galaxy maps.");
+        }else {
+          std::string text="";
+          for (unsigned int i=1;i<active_missions.size();++i){
+            text+=active_missions[i]->mission_name+":\n";
+            for (unsigned int j=0;j<active_missions[i]->objectives.size();++j) {
+              text+=active_missions[i]->objectives[j].objective+": "+XMLSupport::tostring((int)(active_missions[i]->objectives[j].completeness*100))+"%\n";          
+            }
+          }
+          text+="\n";
+          displayname.SetText(text);
+        }
 	displayname.SetCharSize (1,1);
 	displayname.Draw();
 /*
