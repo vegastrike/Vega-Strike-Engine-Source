@@ -61,7 +61,7 @@ namespace UnitUtil {
 		return ret_unit;
 	}
 	bool setFlightgroupLeader (Unit *my_unit, Unit *un) {
-		if (!my_unit)return false;
+		if (!my_unit||!un)return false;		 
 		if (my_unit->getFlightgroup()) {
 			my_unit->getFlightgroup()->leader.SetUnit(un);
 			return true;
@@ -187,6 +187,7 @@ namespace UnitUtil {
 	  return carg.quantity; 
 	}
 	int hasCargo (Unit * my_unit, string mycarg) {
+	  if (!my_unit) return 0;
 		unsigned int i;
 		Cargo * c = my_unit->GetCargo (mycarg,i);
 		if (c==NULL)
@@ -260,7 +261,9 @@ namespace UnitUtil {
 		return ret;
 	}
 	float getDistance(Unit *my_unit,Unit *un){
-		return (my_unit->Position()-un->Position()).Magnitude()-my_unit->rSize()-un->rSize();
+	  if (my_unit==NULL||un==NULL)
+	    return FLT_MAX;
+	  return (my_unit->Position()-un->Position()).Magnitude()-my_unit->rSize()-un->rSize();
 	}
 	float getPlanetRadiusPercent () {
 		static float planet_rad_percent =  XMLSupport::parse_float (vs_config->getVariable ("physics","auto_pilot_planet_radius_percent",".75"));

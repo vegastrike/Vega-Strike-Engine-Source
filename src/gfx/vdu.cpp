@@ -287,9 +287,9 @@ void VDU::DrawVDUShield (Unit * parent) {
   parent->ArmorData (armor);
   GFXColor4f (1,.6,0,1);
   DrawShield (armor[0]/(float)StartArmor[0],armor[2]/(float)StartArmor[2],armor[3]/(float)StartArmor[3],armor[1]/(float)StartArmor[1],x,y,w/2,h/2);
-  GFXColor4f (1,1,1,1);
+  GFXColor4f (1,parent->GetHullPercent(),parent->GetHullPercent(),1);
   GFXEnable (TEXTURE0);
-  GFXColor4f (1-parent->GetHull()/(*maxhull),.5*parent->GetHull()/(*maxhull),0,1);
+  GFXColor4f (1,parent->GetHullPercent(),parent->GetHullPercent(),1);
   DrawTargetSpr (parent->getHudImage (),.25,x,y,w,h);
 
 }
@@ -314,7 +314,8 @@ void VDU::DrawTarget(Unit * parent, Unit * target) {
   float ls = target->LShieldData();
   float bs = target->BShieldData();
   GFXEnable (TEXTURE0);
-  GFXColor4f(1,1,1,1);
+  GFXColor4f (1,target->GetHullPercent(),target->GetHullPercent(),1);
+
   DrawTargetSpr ((target->isUnit()!=PLANETPTR?target->getHudImage ():
 		  (target->GetDestinations().size()!=0? getJumpImage():
 		   (((Planet *)target)->hasLights()?getSunImage():
