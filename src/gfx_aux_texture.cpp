@@ -115,6 +115,7 @@ Texture::Texture(const char * FileName, int stage, enum TEXTURE_TARGET target, e
 		data = NULL;
 		return;
 	}
+	strcpy(filename, FileName);
 	fseek (fp,SIZEOF_BITMAPFILEHEADER,SEEK_SET);
 	//long temp;
 	BITMAPINFOHEADER info;
@@ -420,5 +421,6 @@ void Texture::Prioritize (float priority) {
 
 void Texture::MakeActive(int stage)
 {
+  assert(name!=-1);
 	GFXSelectTexture(name, this->stage);
 }

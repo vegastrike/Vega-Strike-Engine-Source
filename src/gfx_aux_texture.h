@@ -31,6 +31,7 @@
 using namespace std;
 
 struct Texture{
+  char filename[64];
 	unsigned int sizeX;
 	unsigned int sizeY;
 	unsigned char *data;
@@ -50,6 +51,7 @@ struct Texture{
   void InitTexture() {
     original = 0;
     refcount = 0;
+    name = -1;
   }
 public:
 

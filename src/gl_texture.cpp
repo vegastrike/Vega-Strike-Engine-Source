@@ -204,19 +204,26 @@ BOOL /*GFXDRVAPI*/ GFXTransferTexture (unsigned char *buffer, int handle,  enum 
 	case PALETTE8:
 		if (g_game.PaletteExt)
 		{
+			glEnable(GL_SHARED_TEXTURE_PALETTE_EXT);
+			error = glGetError();
+			if(!error) {
 			glColorTable(GL_SHARED_TEXTURE_PALETTE_EXT, 
 				     GL_RGBA, 
 				     256, 
 				     GL_RGBA, 
 				     GL_UNSIGNED_BYTE, 
 				     textures[handle].palette);//shit on TNT
-			error = glGetError();
-			glEnable(GL_SHARED_TEXTURE_PALETTE_EXT);
-			if (error) 
+			}
+			else 
 			{
 			  textures[handle].shared_palette = false;
 			  cerr << "texture error 0\n";
-				glColorTable(targets[handle], GL_RGBA, 256, GL_RGBA, GL_UNSIGNED_BYTE, textures[handle].palette);
+				glColorTable(targets[handle], 
+					     GL_RGBA, 
+					     256, 
+					     GL_RGBA, 
+					     GL_UNSIGNED_BYTE, 
+					     textures[handle].palette);
 				error = glGetError();
 				if (error)
 					return FALSE;
@@ -292,6 +299,7 @@ BOOL /*GFXDRVAPI*/ GFXSelectTexture(int handle, int stage)
 		if(g_game.PaletteExt&&textures[handle].textureformat == PALETTE8) {
 		  //memset(textures[handle].palette, 255, 1024);
 		  if(textures[handle].shared_palette) {
+		    cerr << "selecttexture: loading shared palette\n";
 		    glColorTable(GL_SHARED_TEXTURE_PALETTE_EXT, 
 				 GL_RGBA, 
 				 256, 
