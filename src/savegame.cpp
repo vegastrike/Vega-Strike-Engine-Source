@@ -615,7 +615,7 @@ void SaveGame::ParseSaveGame (string filename, string &FSS, string originalstars
 	    tempfullbuf = (char *)malloc (tempfulllength+1);
 	    tempfullbuf[tempfulllength]=0;
 	    fread( tempfullbuf, sizeof( char), tempfulllength, fp);
-	    savestring = string( tempfullbuf);
+	    str = savestring = string( tempfullbuf);
 	  }
   }
   vscdup();
