@@ -66,12 +66,11 @@ GFXBOOL /*GFXDRVAPI*/ GFXSetCutoff (float cutoff);
 void /*GFXDRVAPI*/ GFXSetOptimalIntensity (float newint, float saturatevalue);
 GFXBOOL /*GFXDRVAPI*/ GFXSetOptimalNumLights (int numlights);
 
-void /*GFXDRVAPI*/ GFXCreateLight (int &light);
-void /*GFXDRVAPI*/ GFXDeleteLight (int light);
-GFXBOOL /*GFXDRVAPI*/ GFXEnableLight(int light);
-GFXBOOL /*GFXDRVAPI*/ GFXDisableLight(int light);
+GFXBOOL /*GFXDRVAPI*/ GFXCreateLight (int &light, const GFXLight &, const bool global);
+void /*GFXDRVAPI*/ GFXDeleteLight (const int light);
+GFXBOOL /*GFXDRVAPI*/ GFXEnableLight(const int light);
+GFXBOOL /*GFXDRVAPI*/ GFXDisableLight(const int light);
 
-GFXBOOL /*GFXDRVAPI*/ GFXSetPower(int light, float power);
 GFXBOOL /*GFXDRVAPI*/ GFXSetLight(int light, enum LIGHT_TARGET, const GFXColor &color);
 
 

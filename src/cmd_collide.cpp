@@ -15,7 +15,7 @@ void AddCollideQueue (const LineCollide &tmp, bool hhuge) {
   int size = collidequeue.size();
   collidequeue.push_back (new LineCollide(tmp));
 #ifdef _USE_COLLIDE_TABLE
-  collidetable.Put (collidequeue[size],collidequeue[size],hhuge);
+  collidetable.Put (collidequeue[size],collidequeue[size]);
 #endif
 
   

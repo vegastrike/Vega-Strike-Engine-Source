@@ -1,5 +1,7 @@
-#include "gfx_transform_vector.h"
 #include "cmd_collide.h"
+#include <algorithm>
+#ifndef _HASHTABLE_3D_H_
+#define _HASHTABLE_3D_H_
 #define COLLIDETABLESIZE sizeof(CTSIZ)
 #define COLLIDETABLEACCURACY sizeof (CTACCURACY)
 const int HUGEOBJECT=16; //objects that go over 16 sectors are considered huge and better to check against everything.
@@ -54,7 +56,13 @@ public:
       }
 
       }*/
-}
+  }
+  void Get (const Vector &Exact, vector <T> &retval) {
+    retval = table[hash_int(Exact.i)][hash_int(Exact.j)][hash_int(Exact.k)];
+    //retval+=hugeobjects;
+    //blah = blooh;
+    retval.insert (retval.end(),hugeobjects.begin(),hugeobjects.end());
+  }
   bool Get (const Vector &Min, const Vector & Max, vector <T> &retval) {    
     //int minx,miny,minz,maxx,maxy,maxz;
     //    hash_vec(Min,minx,miny,minz);
@@ -94,14 +102,10 @@ public:
     }
     return false;
   }
-  void Put(const LineCollide* target,const T objectToPut , bool hhuge) {
+  void Put(const LineCollide* target,const T objectToPut) {
     //    int minx,miny,minz,maxx,maxy,maxz;
     //    hash_vec(target->Mini,minx,miny,minz);
     //    hash_vec(target->Maxi,maxx,maxy,maxz);
-    if (hhuge) {
-      hugeobjects.push_back(objectToPut);
-      return;
-    }
     int x,y,z;
     float maxx= (ceil(target->Maxi.i/COLLIDETABLEACCURACY))*COLLIDETABLEACCURACY;
     float maxy= (ceil(target->Maxi.j/COLLIDETABLEACCURACY))*COLLIDETABLEACCURACY;
@@ -109,6 +113,10 @@ public:
     if (target->Mini.i==maxx) maxx+=COLLIDETABLEACCURACY/2;
     if (target->Mini.j==maxy) maxy+=COLLIDETABLEACCURACY/2;
     if (target->Mini.k==maxz) maxz+=COLLIDETABLEACCURACY/2;
+    if (fabs((maxx-target->Mini.i)*(maxy-target->Mini.j)*(maxz-target->Mini.k))>COLLIDETABLEACCURACY*COLLIDETABLEACCURACY*COLLIDETABLEACCURACY*HUGEOBJECT) {
+      hugeobjects.push_back(objectToPut);
+      return;
+    }
     for (float i=target->Mini.i;i<maxx;i+=COLLIDETABLEACCURACY) {
       x = hash_int(i);
       if (x<minaccessx) minaccessx=x;
@@ -125,8 +133,46 @@ public:
 	}
       }
     }
+  }
+  void Remove(const LineCollide* target,const T objectToKill) {
+    //    int minx,miny,minz,maxx,maxy,maxz;
+    //    hash_vec(target->Mini,minx,miny,minz);
+    //    hash_vec(target->Maxi,maxx,maxy,maxz);
+    vector <T>::iterator removal= hugeobjects.begin();
+    int x,y,z;
+    float maxx= (ceil(target->Maxi.i/COLLIDETABLEACCURACY))*COLLIDETABLEACCURACY;
+    float maxy= (ceil(target->Maxi.j/COLLIDETABLEACCURACY))*COLLIDETABLEACCURACY;
+    float maxz= (ceil(target->Maxi.k/COLLIDETABLEACCURACY))*COLLIDETABLEACCURACY;
+    if (target->Mini.i==maxx) maxx+=COLLIDETABLEACCURACY/2;
+    if (target->Mini.j==maxy) maxy+=COLLIDETABLEACCURACY/2;
+    if (target->Mini.k==maxz) maxz+=COLLIDETABLEACCURACY/2;
 
-}
-
+    if (fabs((maxx-target->Mini.i)*(maxy-target->Mini.j)*(maxz-target->Mini.k))>COLLIDETABLEACCURACY*COLLIDETABLEACCURACY*COLLIDETABLEACCURACY*HUGEOBJECT) {
+      while (removal!=hugeobjects.end()) {
+	removal = find (hugeobjects.begin(),hugeobjects.end(),objectToKill);
+	if (removal!=hugeobjects.end()) {
+	  hugeobjects.erase(removal);
+	}
+      }
+      return;
+    }
+    for (float i=target->Mini.i;i<maxx;i+=COLLIDETABLEACCURACY) {
+      x = hash_int(i);
+      for (float j=target->Mini.j;j<maxy;j+=COLLIDETABLEACCURACY) {    
+	y = hash_int(j);
+	for (float k=target->Mini.k;k<maxz;k+=COLLIDETABLEACCURACY) {
+	  z = hash_int(k);
+	  removal = table[x][y][z].begin();
+	  while (removal!=table[x][y][z].end()) {
+	    removal = find (table[x][y][z].begin(),table[x][y][z].end(),objectToKill);
+	    if (removal!=table[x][y][z].end()) {
+	      table[x][y][z].erase(removal);
+	    }
+	  }
+	}
+      }
+    }
+  }
 };
 
+#endif

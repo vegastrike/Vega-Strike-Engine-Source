@@ -129,11 +129,7 @@ void Universe::StartGFX()
 	//	GFXSetSeparateSpecularColor (TRUE);
 	GFXCreateLightContext(ligh);
 	GFXSetLightContext (ligh);
-	GFXCreateLight (ligh);
-	GFXSetLight (ligh, POSITION, GFXColor (0,0,0));
-	//GFXSetLight (ligh, ATTENUATE, GFXColor (1,0,.1));
-	GFXSetLight (ligh, DIFFUSE, GFXColor (1,0,0,1));
-	GFXSetLight (ligh, SPECULAR, GFXColor (1,1,1,1));
+	GFXCreateLight (ligh, GFXLight(true,GFXColor (0,0,0),GFXColor (1,0,0),GFXColor(1,1,1)),true);
 	GFXEnableLight (ligh);
 	//GFXLoadIdentity(VIEW);
 	//GFXLookAt(Vector(0,0,0), Vector(0,0,1), Vector(0,-1,0)); // optimization: cache this friggin' matrix

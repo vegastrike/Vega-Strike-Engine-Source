@@ -70,6 +70,39 @@ struct GFXColor
   }
 };
 
+enum LIGHT_TARGET {
+  DIFFUSE=1,
+  SPECULAR=2,
+  AMBIENT=4,
+  POSITION=8,
+  ATTENUATE=16
+};
+
+class GFXLight {
+ protected:
+  int target;
+  char options;
+  char changed;
+  float vect[4];//last is w for positional, otherwise 3 for spec
+  float diffuse [4];
+  float specular[4];
+  float ambient[4];
+  float attenuate[3];
+ public:
+  GFXLight() {
+   vect[0]=vect[1]=vect[2]=vect[3]=0;
+    attenuate[0]=attenuate[1]=attenuate[2]=0;
+    diffuse[0]=diffuse[1]=diffuse[2]=0;//openGL defaults
+    specular[0]=specular[1]=specular[2]=0;//openGL defaults
+    ambient[0]=ambient[1]=ambient[2]=changed=options=0;
+    diffuse[3]=specular[3]=ambient[3]=1;
+    target =-1;//physical GL light its saved in
+  }
+  GFXLight::GFXLight (const bool enabled, const GFXColor &vect, const GFXColor &diffuse= GFXColor (0,0,0,1), const GFXColor &specular=GFXColor (0,0,0,1), const GFXColor &ambient=GFXColor(0,0,0,1), const GFXColor&attenuate=GFXColor(1,0,0));
+  void SetProperties (enum LIGHT_TARGET, const GFXColor & color);
+  void disable ();
+  void enable ();
+};
 struct GFXTVertex // transformed vertex
 {
 	float x;
@@ -199,14 +232,6 @@ struct GFXMaterial
 };
 
 
-enum LIGHT_TARGET {
-  DIFFUSE=1,
-  SPECULAR=2,
-  AMBIENT=4,
-  POSITION=8,
-  DIRECTION=16,
-  ATTENUATE=32
-};
 typedef float Matrix[16];
 
 enum TEXTURE_TARGET {
