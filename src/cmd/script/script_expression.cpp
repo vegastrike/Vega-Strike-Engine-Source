@@ -116,12 +116,16 @@ varInst * Mission::doMath(missionNode *node,int mode){
 
     varInst* res1_vi=checkExpression((missionNode *)node->subnodes[0],mode);
 
-    if(res1_vi->type!=VAR_INT && res1_vi->type!=VAR_FLOAT){
+    if(res1_vi->type!=VAR_INT && res1_vi->type!=VAR_FLOAT && res1_vi->type!=VAR_ANY){
+      printf("res1_vi=%d\n",res1_vi->type);
       fatalError(node,mode,"only int or float expr allowed for math");
       assert(0);
     }
     res_vi->type=res1_vi->type;
     assignVariable(res_vi,res1_vi);
+    if(res_vi->type==VAR_ANY){
+      res_vi->type=VAR_FLOAT;
+    }
 
     //    char buffer[200];
     //sprintf(buffer,"fmath: 1st expr returns %f",res);
@@ -224,6 +228,18 @@ float res=res1;
 /* *********************************************************** */
 
 float Mission::doFMath(missionNode *node,int mode){
+
+  //debug(0,node,mode,"deprecated Fmath");
+  varInst *math_vi=doMath(node,mode);
+
+  if(math_vi->type!=VAR_FLOAT){
+    fatalError(node,mode,"fmath expected float");
+    assert(0);
+  }
+
+  return math_vi->float_val;
+
+
   //  if(mode==SCRIPT_PARSE){
     string mathname=node->attr_value("math");
 
@@ -270,6 +286,19 @@ float Mission::doFMath(missionNode *node,int mode){
 /* *********************************************************** */
 
 int Mission::doIMath(missionNode *node,int mode){
+
+  //  debug(0,node,mode,"deprecated Imath");
+  varInst *math_vi=doMath(node,mode);
+
+  if(math_vi->type!=VAR_INT){
+    fatalError(node,mode,"fmath expected int");
+    assert(0);
+  }
+
+  return math_vi->int_val;
+
+
+
   //  if(mode==SCRIPT_PARSE){
     string mathname=node->attr_value("math");
 
@@ -620,7 +649,7 @@ bool Mission::doTest(missionNode *node,int mode){
     varInst * arg2_vi=checkExpression(node->script.test_arg[1],mode);
     bool res=false;
 
-      if(arg1_vi->type!=arg1_vi->type){
+      if(arg1_vi->type!=arg2_vi->type){
 	fatalError(node,mode,"test is getting not the same types");
 	assert(0);
       }
@@ -730,6 +759,18 @@ varInst *Mission::checkExpression(missionNode *node,int mode){
   case DTAG_FMATH:
     {
     ret=doMath(node,mode);
+    return ret;
+    }
+    break;
+  case DTAG_CALL:
+    {
+    ret=doCall(node,mode);
+    return ret;
+    }
+    break;
+  case DTAG_EXEC:
+    {
+    ret=doExec(node,mode);
     return ret;
     }
     break;

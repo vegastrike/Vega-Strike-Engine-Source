@@ -329,7 +329,11 @@ void printNode(missionNode *node,int mode);
 varInst *  call_isNull(missionNode *node,int mode);
 varInst * call_isequal(missionNode *node,int mode);
 
+ varInst *call_int_cast(missionNode *node,int mode);
+ varInst *call_float_cast(missionNode *node,int mode);
+
 varInst * call_io_printf(missionNode *node,int mode);
+string  replaceNewline(string origstr);
 
 varInst * call_io_message(missionNode *node,int mode);
 varInst * call_io_printmsglist(missionNode *node,int mode);

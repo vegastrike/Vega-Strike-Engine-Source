@@ -11,6 +11,15 @@ import a1;
  int arss=4.3;
  int aty:=34.3;
 
+ void t0(){
+   float x=a*b+c*d+e;
+   float y=a*b+c+d*e/f-g*q;
+
+   float x2=b+!a*b+!c-d;
+   float x3=!a+b==!b;
+
+ };
+
  void t1(){
    int blah="whatever";
    a="whatever"+"nothing"+_io.print("never","ever");

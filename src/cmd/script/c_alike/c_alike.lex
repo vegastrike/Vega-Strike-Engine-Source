@@ -28,6 +28,8 @@
 
 #include "c_alike.h"
 
+  string replaceNewline(string origstr);
+
 %}
 
 %option yylineno
@@ -85,3 +87,5 @@ void		{ return(L_VOID);		}
 %%
 
 /* nothing */
+
+

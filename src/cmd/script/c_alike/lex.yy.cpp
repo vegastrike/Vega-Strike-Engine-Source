@@ -494,7 +494,9 @@ char *yytext;
 
 #include "c_alike.h"
 
-#line 498 "lex.yy.cpp"
+  string replaceNewline(string origstr);
+
+#line 500 "lex.yy.cpp"
 
 /* Macros after this point can all be overridden by user definitions in
  * section 1.
@@ -645,9 +647,9 @@ YY_DECL
 	register char *yy_cp = NULL, *yy_bp = NULL;
 	register int yy_act;
 
-#line 41 "c_alike.lex"
+#line 43 "c_alike.lex"
 
-#line 651 "lex.yy.cpp"
+#line 653 "lex.yy.cpp"
 
 	if ( yy_init )
 		{
@@ -740,175 +742,175 @@ do_action:	/* This label is used only to access EOF actions. */
 	{ /* beginning of action switch */
 case 1:
 YY_RULE_SETUP
-#line 42 "c_alike.lex"
+#line 44 "c_alike.lex"
 { return(L_MODULE);		}
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 43 "c_alike.lex"
+#line 45 "c_alike.lex"
 {  return(L_SCRIPT);	}
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 44 "c_alike.lex"
+#line 46 "c_alike.lex"
 {  return(L_IMPORT); 		}
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 45 "c_alike.lex"
+#line 47 "c_alike.lex"
 { return(L_RETURN);	}
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 46 "c_alike.lex"
+#line 48 "c_alike.lex"
 { return(L_GLOBALS);	}
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 48 "c_alike.lex"
+#line 50 "c_alike.lex"
 { return(L_IF);			}
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 49 "c_alike.lex"
+#line 51 "c_alike.lex"
 { return(L_THEN);			}
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 50 "c_alike.lex"
+#line 52 "c_alike.lex"
 { return(L_ELSE);			}
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 52 "c_alike.lex"
+#line 54 "c_alike.lex"
 { return(L_EQUAL);			}
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 53 "c_alike.lex"
+#line 55 "c_alike.lex"
 { return(L_NOT_EQUAL);			}
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 54 "c_alike.lex"
+#line 56 "c_alike.lex"
 { return(L_GREATER_OR_EQUAL);			}
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 55 "c_alike.lex"
+#line 57 "c_alike.lex"
 { return(L_LESSER_OR_EQUAL);			}
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 57 "c_alike.lex"
+#line 59 "c_alike.lex"
 { return(L_BOOL_AND);			}
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 58 "c_alike.lex"
+#line 60 "c_alike.lex"
 { return(L_BOOL_OR);			}
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 60 "c_alike.lex"
+#line 62 "c_alike.lex"
 { return(L_BOOLCONST_TRUE); }
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 61 "c_alike.lex"
+#line 63 "c_alike.lex"
 { return(L_BOOLCONST_FALSE);	}
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 63 "c_alike.lex"
+#line 65 "c_alike.lex"
 { return(L_WHILE);		}
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 65 "c_alike.lex"
+#line 67 "c_alike.lex"
 { 	 return(L_INT);		}
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 66 "c_alike.lex"
+#line 68 "c_alike.lex"
 { return(L_FLOAT);			}
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 67 "c_alike.lex"
+#line 69 "c_alike.lex"
 { return(L_BOOL);			}
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 68 "c_alike.lex"
+#line 70 "c_alike.lex"
 { return(L_OBJECT);			}
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 69 "c_alike.lex"
+#line 71 "c_alike.lex"
 { return(L_VOID);		}
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 70 "c_alike.lex"
+#line 72 "c_alike.lex"
 { return(L_METHODCALL);		}
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
-#line 71 "c_alike.lex"
+#line 73 "c_alike.lex"
 { return(L_INITVALUE);		}
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
-#line 73 "c_alike.lex"
+#line 75 "c_alike.lex"
 { /* return(yytext[0]); */			}
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
-#line 75 "c_alike.lex"
+#line 77 "c_alike.lex"
 {  yylval=strdup(yytext); return(L_ID);		}
 	YY_BREAK
 case 27:
 YY_RULE_SETUP
-#line 76 "c_alike.lex"
+#line 78 "c_alike.lex"
 { yylval=strdup(yytext); return(L_INTCONST);	}
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
-#line 77 "c_alike.lex"
+#line 79 "c_alike.lex"
 {  yylval=strdup(yytext); return(L_FLOATCONST);		}
 	YY_BREAK
 case 29:
 YY_RULE_SETUP
-#line 79 "c_alike.lex"
+#line 81 "c_alike.lex"
 { return(yytext[0]); }
 	YY_BREAK
 case 30:
 YY_RULE_SETUP
-#line 80 "c_alike.lex"
+#line 82 "c_alike.lex"
 {  yylval=strdup(yytext); return(L_STRINGCONST); };
 	YY_BREAK
 case 31:
 YY_RULE_SETUP
-#line 81 "c_alike.lex"
+#line 83 "c_alike.lex"
 { /* nothing */ }
 	YY_BREAK
 case 32:
 YY_RULE_SETUP
-#line 82 "c_alike.lex"
+#line 84 "c_alike.lex"
 { /* nothing */ };
 	YY_BREAK
 case 33:
 YY_RULE_SETUP
-#line 84 "c_alike.lex"
+#line 86 "c_alike.lex"
 {  return(yytext[0]); }
 	YY_BREAK
 case 34:
 YY_RULE_SETUP
-#line 85 "c_alike.lex"
+#line 87 "c_alike.lex"
 ECHO;
 	YY_BREAK
-#line 912 "lex.yy.cpp"
+#line 914 "lex.yy.cpp"
 			case YY_STATE_EOF(INITIAL):
 				yyterminate();
 
@@ -1787,7 +1789,9 @@ int main()
 	return 0;
 	}
 #endif
-#line 85 "c_alike.lex"
+#line 87 "c_alike.lex"
 
 
 /* nothing */
+
+

@@ -105,7 +105,7 @@ void Mission::debug(missionNode *node,int mode,string message){
 
 void Mission::printNode(missionNode *node,int mode){
   if(node){
-    node->printNode(cout,0,0);
+    node->printNode(cout,1,0);
   }
 }
 

@@ -94,6 +94,12 @@ varInst *Mission::doCall(missionNode *node,int mode,string module,string method)
     else if(method=="equal"){
       vi=call_isequal(node,mode);
     }
+    else if(method=="Float"){
+      vi=call_float_cast(node,mode);
+    }
+    else if(method=="Int"){
+      vi=call_int_cast(node,mode);
+    }
   }
   else if(module=="_olist"){
     vi=call_olist(node,mode);
@@ -177,6 +183,29 @@ varInst *Mission::call_isNull(missionNode *node,int mode){
   return viret;
 }
 
+varInst *Mission::call_float_cast(missionNode *node,int mode){
+  missionNode *snode=getArgument(node,mode,0);
+  int intval=checkIntExpr(snode,mode);
+
+  varInst *viret=new varInst;
+  
+  viret->type=VAR_FLOAT;
+  viret->float_val=(float)intval;
+
+  return viret;
+}
+varInst *Mission::call_int_cast(missionNode *node,int mode){
+  missionNode *snode=getArgument(node,mode,0);
+  float floatval=checkFloatExpr(snode,mode);
+
+  varInst *viret=new varInst;
+  
+  viret->type=VAR_INT;
+  viret->int_val=(int)floatval;
+
+  return viret;
+}
+
 varInst *Mission::call_isequal(missionNode *node,int mode){
   varInst *ovi=getObjectArg(node,mode);
   missionNode *other_node=getArgument(node,mode,1);
@@ -253,11 +282,33 @@ varInst *Mission::call_io_message(missionNode *node,int mode){
   return viret;
 
 }
+#if 1
+string Mission::replaceNewline(string origstr){
+  string ostr=origstr;
+  
+  int breakpos=ostr.find("\\n",0);
+  
+  if(breakpos>=0){
+    //printf("breakpos=%d\n",breakpos);
+
+    string newstr=ostr.replace(breakpos,2,"\n");
+
+    return replaceNewline(newstr);
+  }
+  else{
+    return ostr;
+  }
+}
+#endif
 
 varInst *Mission::call_io_printf(missionNode *node,int mode){
-  return NULL;
-#if 0
+  //  return NULL;
+#if 1
   missionNode *stringnode=getArgument(node,mode,0);
+  if(stringnode->tag!=DTAG_CONST){
+    fatalError(node,mode,"only const string allowed for first arg of printf");
+    assert(0);
+  }
   varInst *str_vi=checkObjectExpr(stringnode,mode);
   if(str_vi->type!=VAR_OBJECT || (str_vi->type==VAR_OBJECT && str_vi->objectname!="string")){
     fatalError(node,mode,"io.printf needs string object as first arg");
@@ -269,46 +320,78 @@ varInst *Mission::call_io_printf(missionNode *node,int mode){
   string * fullstringptr;
   string fullstring;
 
-  if(mode==SCRIPT_RUN){
-    fullstringptr=(string *)str_vi->object;
-    fullstring=*fullstringptr;
+  fullstringptr=(string *)str_vi->object;
+  fullstring=*fullstringptr;
+
+    fullstring=replaceNewline(fullstring);
+
+  //cout << "printf string-" << fullstring << "-" << endl;
+
+  //  if(mode==SCRIPT_RUN){
 
   string endstring=fullstring;
 
   while(current_arg<nr_of_args){
 
-  int breakpos=endstring.find("%",0);
+    int breakpos=endstring.find("%",0);
 
-  string beforestring=endstring.substr(0,breakpos);
+    string beforestring=endstring.substr(0,breakpos);
 
-  printf("-%s-",beforestring.c_str());
+    //printf("beforestr=-%s-",beforestring.c_str());
 
-  string breakstring=endstring.substr(breakpos,breakpos+1);
+    string breakstring=endstring.substr(breakpos,2);
 
-  if(breakstring[1]=='f'){
-    missionNode *anode=getArgument(node,mode,current_arg);
-    float res=checkFloatExpr(anode,mode);
+    //printf("breakstr=-%s-\n",breakstring.c_str());
 
-    printf("%f",res);
-  }
-  else if(breakstring[1]=='s'){
-    missionNode *anode=getArgument(node,mode,current_arg);
-    varInst *res_vi=doObjectVar(anode,mode);
-    if(res_vi->type!=VAR_OBJECT || (res_vi->type==VAR_OBJECT && res_vi->objectname!="string")){
-      fatalError(node,mode,"io.printf needs string object as some arg");
-      assert(0);
+    //    printf("**");
+    if(breakstring[1]=='f'){
+      missionNode *anode=getArgument(node,mode,current_arg);
+      float res=checkFloatExpr(anode,mode);
+      
+      if(mode==SCRIPT_RUN){
+	printf(beforestring.c_str());
+	printf("%f",res);
+      }
     }
-    
-    string * strptr=(string *)res_vi->object;
+    else if(breakstring[1]=='d'){
+      missionNode *anode=getArgument(node,mode,current_arg);
+      int res=checkIntExpr(anode,mode);
 
-    printf("%s",strptr->c_str());
+      if(mode==SCRIPT_RUN){
+	printf(beforestring.c_str());
+	printf("%d",res);
+      }
+    }
+    else if(breakstring[1]=='s'){
+      missionNode *anode=getArgument(node,mode,current_arg);
+      varInst *res_vi=doObjectVar(anode,mode);
+
+      if(mode==SCRIPT_RUN){
+	if(res_vi->type!=VAR_OBJECT || (res_vi->type==VAR_OBJECT && res_vi->objectname!="string")){
+	  fatalError(node,mode,"io.printf needs string object as some arg");
+	  assert(0);
+	}
+
+	string * strptr=(string *)res_vi->object;
+
+	printf(beforestring.c_str());
+	printf("%s",strptr->c_str());
+      }
+    }
+    //printf("++");
+
+    endstring=endstring.substr(breakpos+2,endstring.size()-(breakpos+2));
+    //        printf("endstr=-%s-\n",endstring.c_str());
+
+
+    current_arg++;
   }
 
-  endstring=endstring.substr(breakpos+2,endstring.size()-1);
-  current_arg++;
-  }
+  if(mode==SCRIPT_RUN){
+    printf(endstring.c_str());
   }
 
+  //  printf("--end==\n");
   varInst *viret=new varInst;
   viret->type=VAR_VOID;
   return viret;

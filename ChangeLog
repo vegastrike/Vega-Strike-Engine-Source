@@ -1,3 +1,9 @@
+2001-12-19 Alexander Rawass <alexannika@users.sourceforge.net>
+	
+	* added _io.printf
+	* datatype int working
+	
+
 2001-12-18 Alexander Rawass <alexannika@users.sourceforge.net>
 	
 	* datatype int implemented (untested)
