@@ -83,9 +83,9 @@ bool MoveTo::Done(const Vector & ang_vel) {
 void MoveTo::Execute(){
   Vector local_location (parent->UpCoordinateLevel(parent->GetVelocity()));
   //local location is ued for storing the last velocity;
-  terminatingX += (copysign(1.0,local_location.i)!=copysign(1.0,last_velocity.i)||(!local_location.i));
-  terminatingY += (copysign(1.0,local_location.j)!=copysign(1.0,last_velocity.j)||(!local_location.j));
-  terminatingZ += (copysign(1.0,local_location.k)!=copysign(1.0,last_velocity.k)||(!local_location.k));
+  terminatingX += (copysign(1.0F,local_location.i)!=copysign(1.0F,last_velocity.i)||(!local_location.i));
+  terminatingY += (copysign(1.0F,local_location.j)!=copysign(1.0F,last_velocity.j)||(!local_location.j));
+  terminatingZ += (copysign(1.0F,local_location.k)!=copysign(1.0F,last_velocity.k)||(!local_location.k));
 
   last_velocity = local_location;
   local_location = targetlocation - parent->Position();
@@ -179,8 +179,8 @@ bool ChangeHeading::Done(const Vector & ang_vel) {
 }
 void ChangeHeading::Execute() {
   Vector local_heading (parent->UpCoordinateLevel(parent->GetAngularVelocity()));
-  terminatingX += (copysign(1.0,local_heading.i)!=copysign(1.0,last_velocity.i)||(!local_heading.i));
-  terminatingY += (copysign(1.0,local_heading.j)!=copysign(1.0,last_velocity.j)||(!local_heading.j));
+  terminatingX += (copysign(1.0F,local_heading.i)!=copysign(1.0F,last_velocity.i)||(!local_heading.i));
+  terminatingY += (copysign(1.0F,local_heading.j)!=copysign(1.0F,last_velocity.j)||(!local_heading.j));
   last_velocity = local_heading;
   local_heading = parent->ToLocalCoordinates (final_heading-parent->Position());
   if (done) return ;
