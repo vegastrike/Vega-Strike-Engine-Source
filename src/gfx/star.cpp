@@ -311,7 +311,7 @@ void Stars::Draw() {
   //  GFXLightContextAmbient(GFXColor(0,0,0,1));
   GFXColor (1,1,1,1);
   GFXLoadIdentity(MODEL);
-  GFXEnable(DEPTHWRITE);
+  GFXDisable(DEPTHWRITE);
   GFXDisable (TEXTURE0);
   GFXDisable (TEXTURE1);
   GFXEnable (DEPTHTEST);
