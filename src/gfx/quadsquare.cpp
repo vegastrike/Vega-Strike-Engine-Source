@@ -43,13 +43,21 @@ unsigned int * quadsquare::VertexAllocated;
 unsigned int *quadsquare::VertexCount;
 GFXVertexList *quadsquare::vertices;
 GFXVertexList *quadsquare::blendVertices=NULL;
-std::vector <TextureIndex> quadsquare::indices;
+std::vector <TextureIndex *> quadsquare::indices;
 std::vector <unsigned int> *quadsquare::unusedvertices;
 IdentityTransform *quadsquare::nonlinear_trans;
 std::vector <TerrainTexture> *quadsquare::textures;
+
+void quadsquare::FreeSquares() {
+  for (unsigned int i=0;i<indices.size();i++) {
+    delete indices[i];
+  }
+  indices.clear();
+}
+
 void TextureIndex::Clear() {
-  q.clear();
-  c.clear();
+  numq=0;
+  numc=0;
 }
 
 unsigned int quadsquare::SetVertices (GFXVertex * vertexs, const quadcornerdata &pcd) {
@@ -357,7 +365,7 @@ void quadsquare::SetCurrentTerrain (unsigned int *VertexAllocated, unsigned int 
 
   if (indices.size()<tex->size()) {
     while (indices.size()<tex->size()) {
-      indices.push_back (TextureIndex ());
+      indices.push_back (new TextureIndex ());
     }
   }
 }
