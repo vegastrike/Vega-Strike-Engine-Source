@@ -2,7 +2,10 @@
 #include <vector>
 ///Stores all the load-time vertex info in the XML struct FIXME light calculations
 #include <expat.h>
-
+#include <map>
+#include <stdio.h>
+#include <stdlib.h>
+#include <float.h>
 using std::vector;
 using std::string;
 #include "xml_support.h"
@@ -483,31 +486,39 @@ typedef pair <float, std::string> fs;
 typedef vector < fs> lookuptable;
 lookuptable shieldLookup() {
     lookuptable r;
-    r.push_back (fs(20,""));    
-    r.push_back (fs(50,"_Level1"));
-    r.push_back (fs(100,"_Level2"));
-    r.push_back (fs(200,"_Level3"));
-    r.push_back (fs(300,"_Level4"));
-    r.push_back (fs(400,"_Level5"));
+    r.push_back (fs(5,""));    
+    r.push_back (fs(100,"_Level1"));
+    r.push_back (fs(200,"_Level2"));
+    r.push_back (fs(300,"_Level3"));
+    r.push_back (fs(400,"_Level4"));
+    r.push_back (fs(550,"_Level5"));
+    r.push_back (fs(650,"_Level6"));    
+    r.push_back (fs(800,"_Level7"));
+    r.push_back (fs(900,"_Level8"));
+    r.push_back (fs(1000,"_Level9"));
+    r.push_back (fs(FLT_MAX,"_Level10"));
     return r;
 }
 lookuptable hullLookup () {
     lookuptable r;
-    r.push_back (fs(120,"coated_hull"));
-    r.push_back (fs(200,"plated_hull"));
+    r.push_back (fs(120,"hull"));
+    r.push_back (fs(200,"polymer_hull"));
     r.push_back (fs(360,"reinforced_hull"));
-    r.push_back (fs(500,"double_plated_hull"));
-    r.push_back (fs(700,"micro_shielded_hull"));
     return r;
     
 }
 lookuptable engineLookup() {
     lookuptable r;
-    r.push_back (fs(100,"_level_1"));
-    r.push_back (fs(200,"_level_2"));
-    r.push_back (fs(350,"_level_3"));
-    r.push_back (fs(500,"_level_4"));
-    r.push_back (fs(1000,"_level_5"));
+    r.push_back (fs(41,"_level_1"));
+    r.push_back (fs(71,"_level_2"));
+    r.push_back (fs(111,"_level_3"));
+    r.push_back (fs(161,"_level_4"));
+    r.push_back (fs(221,"_level_5"));
+    r.push_back (fs(291,"_level_6"));
+    r.push_back (fs(371,"_level_7"));
+    r.push_back (fs(461,"_level_8"));
+    r.push_back (fs(561,"_level_9"));
+    r.push_back (fs(FLT_MAX,"_level_10"));
     return r;
 }
 
@@ -547,6 +558,100 @@ std::string RemoveAutotracking (std::string s) {
     return s;    
 }
 
+void Tokenize(const string& str,
+                      vector<string>& tokens,
+                      const string& delimiters = " ")
+{
+    // Skip delimiters at beginning.
+    string::size_type lastPos = str.find_first_not_of(delimiters, 0);
+    // Find first "non-delimiter".
+    string::size_type pos     = str.find_first_of(delimiters, lastPos);
+
+    while (string::npos != pos || string::npos != lastPos) {
+        // Found a token, add it to the vector.
+        tokens.push_back(str.substr(lastPos, pos - lastPos));
+        // Skip delimiters.  Note the "not_of"
+        lastPos = str.find_first_not_of(delimiters, pos);
+        // Find next "non-delimiter"
+        pos = str.find_first_of(delimiters, lastPos);
+    }
+}
+std::string CheckBasicSizes (const std::string tokens) {
+  if (tokens.find ("small")!=string::npos) {
+    return "small";
+  }
+  if (tokens.find ("medium")!=string::npos) {
+    return "medium";
+  }
+  if (tokens.find ("large")!=string::npos) {
+    return "large";
+  }
+  if (tokens.find ("cargo")!=string::npos) {
+    return "cargo";
+  }
+  if (tokens.find ("LR")!=string::npos||tokens.find ("massive")!=string::npos) {
+    return "massive";
+  }
+  return "";
+}
+
+class VCString : public std::string {
+public:
+	VCString(){}
+	VCString(const string & s): string(s){}
+};
+
+std::map<VCString,VCString> parseTurretSizes () {
+	std::map<VCString,VCString> t;
+	FILE * fp = fopen ("turretsize.txt","r");
+	if (fp) {
+		fseek (fp,0,SEEK_END);
+		int siz = ftell (fp);
+		fseek (fp,0,SEEK_SET);
+		char * filedata= (char *)malloc (siz+1);
+		filedata[siz]=0;
+		while (fgets (filedata,siz,fp)) {
+
+			std::string x(filedata);
+			int len= x.find (",");
+			if (len!=std::string::npos) {
+				std::string y = x.substr (len+1);
+				x = x.substr(0,len);				
+				len = y.find(",");
+				y = y.substr(0,len);
+				sscanf (y.c_str(),"%s",filedata);
+				y = filedata;
+				VCString key (x);
+				VCString value (y);
+				t[key]=value;
+			}
+		}
+		free(filedata);
+		fclose (fp);
+	}
+	return t;
+}
+std::string getTurretSize (const std::string &size) {
+  static std::map <VCString,VCString> turretmap = parseTurretSizes();
+  std::map<VCString,VCString>::iterator i= turretmap.find(size);
+  if (i!=turretmap.end()) {
+	  return (*i).second;
+  }
+  vector <string> tokens;
+  Tokenize (size,tokens,"_");
+  for (unsigned int i=0;i<tokens.size();i++) {
+    if (tokens[i].find ("turret")!=string::npos) {
+      string temp = CheckBasicSizes (tokens[i]);
+      if (!temp.empty()) {
+	return temp;
+      }
+    } else {
+      return tokens[i];
+    }
+  }
+  return "capitol";
+}
+
 void UnitBeginElement(const string &name, const AttributeList &attributes, XML * xml) {
   
   AttributeList::const_iterator iter;
@@ -581,6 +686,10 @@ void UnitBeginElement(const string &name, const AttributeList &attributes, XML *
                   xml->energy_recharge = xpf (iter->value);
               else if (xeq (iter->name,"limit"))
                   xml->energy_limit = xpf (iter->value);
+			  else if (xeq (iter->name,"warpenergy")) {
+				  fprintf (xml->tfp," %s =\"%s\"",iter->name.c_str(),iter->value.c_str());
+				  fprintf (xml->bfp," %s =\"%s\"",iter->name.c_str(),iter->value.c_str());
+			  }
           }
       } else if (xeq (name,"radar")) {
           fprintf(xml->tfp," itts=\"false\" error=\"0\" range=\"5000\" maxcone=\".25\" color=\"false\"");
@@ -606,9 +715,14 @@ void UnitBeginElement(const string &name, const AttributeList &attributes, XML *
             }
             if (xeq (name,"hold")) {
                 if (xeq (iter->name,"volume")) {
-                    tval = xts((float)(XMLSupport::parse_float (iter->value)*2.0));
+                    tval = xts((float)(XMLSupport::parse_float (iter->value)*1.2));
                 }
             }
+			if (xeq (name,"subunit")) {
+				if (xeq (iter->name,"file")) {
+					bval = getTurretSize(iter->value)+"_blank";
+				}
+			}
             if (xeq (name,"mount")) {
             if (xeq (iter->name,"weapon")) {
                 bval="";
@@ -672,10 +786,10 @@ void UnitEndElement(const string &name, XML * xml) {
       if (xml->num_shield_facings)
           s =LookUp(shieldLookup(),xml->total_shield_value/xml->num_shield_facings);
       fprintf (xml->tfp,"<Upgrade file=\"shield_%d%s\"/>\n<Upgrade file=\"mult_shield_regenerator\"/>\n<Upgrade file=\"isometal\"/>\n",(xml->num_shield_facings), s.c_str());
-
-      s = LookUp (hullLookup(),xml->maxhull);
-      fprintf (xml->tfp,"<Upgrade file=\"%s\"/>\n",s.c_str());
-      fprintf (xml->bfp,"<Upgrade file=\"hull\"/>\n<Upgrade file=\"shield_%d\"/>\n",xml->num_shield_facings);
+      //s = LookUp (hullLookup(),xml->maxhull);
+      //fprintf (xml->tfp,"<Upgrade file=\"%s\"/>\n",s.c_str());
+      //fprintf (xml->bfp,"<Upgrade file=\"hull\"/>\n");
+	  fprintf (xml->bfp,"<Upgrade file=\"shield_%d\"/>\n",xml->num_shield_facings);
   }  
   if (xeq (name,"energy")){
       fprintf (xml->tfp,"<Upgrade file=\"engine%s\"/>\n<Upgrade file=\"mult_gun_cooler\"/>\n",LookUp (engineLookup (),xml->energy_recharge).c_str());
